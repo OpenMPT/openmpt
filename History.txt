@@ -1,5 +1,5 @@
-Predicted FAQ 19/11/2004:
--------------------------
+09/01/2005:
+-----------
 
 1. What is this?
 ----------------
@@ -209,4 +209,4 @@ NOTES:
 
 3. I have questions/comments/bug reports.
 -----------------------------------------
-Visit http://www.modplug.com/forums or write to robin@soal.org.
+Visit http://www.modplug.com/forums, or write to robin@soal.org or contact@ericus.org.
