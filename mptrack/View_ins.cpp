@@ -108,7 +108,13 @@ CViewInstrument::CViewInstrument()
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
 	memset(m_baPlayingNote, 0, sizeof(bool)*120);  //rewbs.customKeys
 	m_nPlayingChannel =-1;						   //rewbs.customKeys
-	m_bGrid=true;								   //rewbs.envRowGrid
+	//rewbs.envRowGrid
+	m_bGrid=true;								  
+	m_bGridForceRedraw=false;
+	m_GridSpeed = -1;
+	m_GridScrollPos = -1;
+	//end rewbs.envRowGrid
+
 }
 
 
@@ -182,6 +188,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			if (pState->cbStruct == sizeof(INSTRUMENTVIEWSTATE))
 			{
 				SetCurrentInstrument(m_nInstrument, pState->nEnv);
+				m_bGrid = pState->bGrid;
 			}
 		}
 		break;
@@ -192,6 +199,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			INSTRUMENTVIEWSTATE *pState = (INSTRUMENTVIEWSTATE *)lParam;
 			pState->cbStruct = sizeof(INSTRUMENTVIEWSTATE);
 			pState->nEnv = m_nEnv;
+			pState->bGrid = m_bGrid;
 		}
 		break;
 
@@ -1015,7 +1023,6 @@ int CViewInstrument::TickToScreen(int nTick) const
 	return ((nTick+1) * ENV_ZOOM) - GetScrollPos(SB_HORZ);
 }
 
-
 int CViewInstrument::PointToScreen(int nPoint) const
 //--------------------------------------------------
 {
@@ -1029,6 +1036,12 @@ int CViewInstrument::ScreenToTick(int x) const
 	return (GetScrollPos(SB_HORZ) + x + 1 - ENV_ZOOM) / ENV_ZOOM;
 }
 
+
+int CViewInstrument::QuickScreenToTick(int x, int cachedScrollPos) const
+//----------------------------------------------------------------------
+{
+	return (cachedScrollPos + x + 1 - ENV_ZOOM) / ENV_ZOOM;
+}
 
 int CViewInstrument::ScreenToValue(int y) const
 //---------------------------------------------
@@ -1161,45 +1174,59 @@ void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 }
 
 //rewbs.envRowGrid
-void CViewInstrument::DrawGrid(CDC *memDC, UINT speed)
-//----------------------------------------------------
+void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
+//--------------------------------------------------------------------
 {
-/*	
+	int cachedScrollPos = GetScrollPos(SB_HORZ);
+	bool windowResized = false;
+
 	if (m_dcGrid.GetSafeHdc())
 	{
-		m_dcGrid.SelectObject(m_pbOldGrid) ;
-		m_dcGrid.DeleteDC() ;
+		m_dcGrid.SelectObject(m_pbmpOldGrid);
+		m_dcGrid.DeleteDC();
+		m_bmpGrid.DeleteObject();
+		windowResized = true;
 	}
 
-	// create a memory based dc for drawing the grid
-	m_dcGrid.CreateCompatibleDC(pDC);
-	m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.Width(), m_rcClient.Height());
-	m_pbmpOldGrid = m_dcGrid.SelectObject(&m_bmpGrid);
-*/
-	//do draw
-	int width=m_rcClient.right-m_rcClient.left;
-	int nPrevTick=-1;
-	int nTick, nRow;
-    for (int x=3; x<width; x++)
-	{
-		nTick = ScreenToTick(x);
-		if (nTick != nPrevTick && !(nTick%speed))
+
+	if (windowResized || m_bGridForceRedraw || (cachedScrollPos != m_GridScrollPos) || (speed != m_GridSpeed)) {
+
+		m_GridSpeed = speed;
+		m_GridScrollPos = cachedScrollPos;
+		m_bGridForceRedraw = false;
+
+		// create a memory based dc for drawing the grid
+		m_dcGrid.CreateCompatibleDC(pDC);
+		m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top);
+		m_pbmpOldGrid = m_dcGrid.SelectObject(&m_bmpGrid);
+
+		//do draw
+		int width=m_rcClient.right-m_rcClient.left;
+		int nPrevTick=-1;
+		int nTick, nRow;
+		for (int x=3; x<width; x++)
 		{
-			nPrevTick=nTick;
-			nRow=nTick/speed;
+			nTick = QuickScreenToTick(x, cachedScrollPos);
+			if (nTick != nPrevTick && !(nTick%speed))
+			{
+				nPrevTick=nTick;
+				nRow=nTick/speed;
 
-			if (nRow % CMainFrame::m_nRowSpacing == 0)
-				memDC->SelectObject(CMainFrame::penGray80);
-			else if (nRow % CMainFrame::m_nRowSpacing2 == 0)
-				memDC->SelectObject(CMainFrame::penGray55);
-			else
-				memDC->SelectObject(CMainFrame::penGray33);
+				if (nRow % CMainFrame::m_nRowSpacing == 0)
+					m_dcGrid.SelectObject(CMainFrame::penGray80);
+				else if (nRow % CMainFrame::m_nRowSpacing2 == 0)
+					m_dcGrid.SelectObject(CMainFrame::penGray55);
+				else
+					m_dcGrid.SelectObject(CMainFrame::penGray33);
 
-			memDC->MoveTo(x+1, 0);
-			memDC->LineTo(x+1, m_rcClient.bottom);
-			
+				m_dcGrid.MoveTo(x+1, 0);
+				m_dcGrid.LineTo(x+1, m_rcClient.bottom);
+				
+			}
 		}
 	}
+
+	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top, &m_dcGrid, 0, 0, SRCCOPY);
 }
 //end rewbs.envRowGrid
 
@@ -1218,64 +1245,69 @@ void CViewInstrument::OnDraw(CDC *pDC)
 //rewbs.envRowGrid
 	// to avoid flicker, establish a memory dc, draw to it 
 	// and then BitBlt it to the destination "pDC"
-	CDC memDC ;
-	CBitmap memBitmap ;
-	CBitmap* oldBitmap ; // bitmap originally found in CMemDC
+	
+	//check foe window resize
+	if (m_dcMemMain.GetSafeHdc()) {
+		m_dcMemMain.SelectObject(oldBitmap);
+		m_dcMemMain.DeleteDC();
+		m_bmpMemMain.DeleteObject();
+	}
 
-	memDC.CreateCompatibleDC(pDC);
-	if (!memDC)
+	m_dcMemMain.CreateCompatibleDC(pDC);
+	if (!m_dcMemMain)
 		return;
-	memBitmap.CreateCompatibleBitmap(pDC, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top);
-	oldBitmap = (CBitmap *)memDC.SelectObject(&memBitmap) ;
+	m_bmpMemMain.CreateCompatibleBitmap(pDC, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top);
+	oldBitmap = (CBitmap *)m_dcMemMain.SelectObject(&m_bmpMemMain);
+
 //end rewbs.envRowGrid
 
 	if ((!pModDoc) || (!pDC)) return;
 	pSndFile = pModDoc->GetSoundFile();
 	//hdc = pDC->m_hDC;
-	oldpen = memDC.SelectObject(CMainFrame::penDarkGray);
-	memDC.FillRect(&m_rcClient, CMainFrame::pbrushBlack);
+	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
+	m_dcMemMain.FillRect(&m_rcClient, CMainFrame::pbrushBlack);
 	if (m_nEnv != ENV_VOLUME)
 	{
-		memDC.MoveTo(0, ymed);
-		memDC.LineTo(m_rcClient.right, ymed);
+		m_dcMemMain.MoveTo(0, ymed);
+		m_dcMemMain.LineTo(m_rcClient.right, ymed);
 	}
 	if (m_bGrid)
 	{
-		DrawGrid(&memDC, pSndFile->m_nMusicSpeed);
+		DrawGrid(&m_dcMemMain, pSndFile->m_nMusicSpeed);
 	}
-	memDC.SelectObject(CMainFrame::penDarkGray);
+	m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 	// Drawing Loop Start/End
 	if (EnvGetLoop())
 	{
 		int x1 = PointToScreen(EnvGetLoopStart()) - (ENV_ZOOM/2);
-		memDC.MoveTo(x1, 0);
-		memDC.LineTo(x1, m_rcClient.bottom);
+		m_dcMemMain.MoveTo(x1, 0);
+		m_dcMemMain.LineTo(x1, m_rcClient.bottom);
 		int x2 = PointToScreen(EnvGetLoopEnd()) + (ENV_ZOOM/2);
-		memDC.MoveTo(x2, 0);
-		memDC.LineTo(x2, m_rcClient.bottom);
+		m_dcMemMain.MoveTo(x2, 0);
+		m_dcMemMain.LineTo(x2, m_rcClient.bottom);
 	}
 	// Drawing Sustain Start/End
 	if (EnvGetSustain())
 	{
-		memDC.SelectObject(CMainFrame::penHalfDarkGray);
+		m_dcMemMain.SelectObject(CMainFrame::penHalfDarkGray);
 		int nspace = m_rcClient.bottom/4;
 		int n1 = EnvGetSustainStart();
 		int x1 = PointToScreen(n1) - (ENV_ZOOM/2);
 		int y1 = ValueToScreen(EnvGetValue(n1));
-		memDC.MoveTo(x1, y1 - nspace);
-		memDC.LineTo(x1, y1+nspace);
+		m_dcMemMain.MoveTo(x1, y1 - nspace);
+		m_dcMemMain.LineTo(x1, y1+nspace);
 		int n2 = EnvGetSustainEnd();
 		int x2 = PointToScreen(n2) + (ENV_ZOOM/2);
 		int y2 = ValueToScreen(EnvGetValue(n2));
-		memDC.MoveTo(x2, y2-nspace);
-		memDC.LineTo(x2, y2+nspace);
+		m_dcMemMain.MoveTo(x2, y2-nspace);
+		m_dcMemMain.LineTo(x2, y2+nspace);
 	}
 	maxpoint = EnvGetNumPoints();
 	// Drawing Envelope
 	if (maxpoint)
 	{
 		maxpoint--;
-		memDC.SelectObject(CMainFrame::penEnvelope);
+		m_dcMemMain.SelectObject(CMainFrame::penEnvelope);
 		for (UINT i=0; i<=maxpoint; i++)
 		{
 			int x = (EnvGetTick(i) + 1) * ENV_ZOOM - nScrollPos;
@@ -1284,18 +1316,18 @@ void CViewInstrument::OnDraw(CDC *pDC)
 			rect.top = y - 3;
 			rect.right = x + 4;
 			rect.bottom = y + 4;
-			memDC.FrameRect(&rect, CMainFrame::pbrushWhite);
+			m_dcMemMain.FrameRect(&rect, CMainFrame::pbrushWhite);
 			if (i)
-				memDC.LineTo(x, y);
+				m_dcMemMain.LineTo(x, y);
 			else
-				memDC.MoveTo(x, y);
+				m_dcMemMain.MoveTo(x, y);
 		}
 	}
-	DrawPositionMarks(memDC.m_hDC);
-	if (oldpen) memDC.SelectObject(oldpen);
+	DrawPositionMarks(m_dcMemMain.m_hDC);
+	if (oldpen) m_dcMemMain.SelectObject(oldpen);
 	
 	//rewbs.envRowGrid
-	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top, &memDC, 0, 0, SRCCOPY) ;
+	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top, &m_dcMemMain, 0, 0, SRCCOPY);
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -1304,6 +1336,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 
 	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
+
 // -! NEW_FEATURE#0015
 }
 
@@ -1668,7 +1701,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			}
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
-			UpdateWindow();
+			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
 		}
 	} else
 	{
@@ -1971,10 +2004,12 @@ void CViewInstrument::OnEnvToggleGrid()
 //----------------------------------------
 {
 	m_bGrid = !m_bGrid;
-	
+	if (m_bGrid)
+		m_bGridForceRedraw;
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+	
 }
 //end rewbs.envRowGrid
 
@@ -2532,4 +2567,6 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		pModDoc->NoteOff(note, FALSE, m_nInstrument);
 		return wParam;
 	}
+
+	return NULL;
 }

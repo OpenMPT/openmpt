@@ -818,11 +818,10 @@ VOID CASIODevice::Start()
 	if (m_pAsioDrv)
 	{
 		m_bMixRunning = TRUE;
-		__try {
+		try {
 		m_pAsioDrv->start();
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-			Log("ASIO crash in start()\n");
+		} catch(...) {
+			CASIODevice::ReportASIOException("ASIO crash in start()\n");
 		}
 	}
 }
@@ -836,24 +835,21 @@ BOOL CASIODevice::Close()
 		if (m_bMixRunning)
 		{
 			m_bMixRunning = FALSE;
-			__try {
-			m_pAsioDrv->stop();
-			} __except(EXCEPTION_EXECUTE_HANDLER)
-			{
-				Log("ASIO crash in stop()\n");
+			try {
+				m_pAsioDrv->stop();
+			} catch(...) {
+				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 			}
 		}
-		__try {
-		m_pAsioDrv->disposeBuffers();
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-			Log("ASIO crash in disposeBuffers()\n");
+		try {
+			m_pAsioDrv->disposeBuffers();
+		} catch(...) {
+			CASIODevice::ReportASIOException("ASIO crash in disposeBuffers()\n");
 		}
-		__try {
-		m_pAsioDrv->Release();
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-			Log("ASIO crash in Release()\n");
+		try {
+			m_pAsioDrv->Release();
+		} catch(...) {
+			CASIODevice::ReportASIOException("ASIO crash in Release()\n");
 		}
 		m_pAsioDrv = NULL;
 	}
@@ -871,11 +867,10 @@ VOID CASIODevice::Reset()
 	if (m_pAsioDrv)
 	{
 		m_bMixRunning = FALSE;
-		__try {
-		m_pAsioDrv->stop();
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-			Log("ASIO crash in stop()\n");
+		try {
+			m_pAsioDrv->stop();
+		} catch(...) {
+			CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 		}
 	}
 }
@@ -1260,6 +1255,20 @@ cvtloop:
 	mov word ptr [edi-2], ax
 	jnz cvtloop
 	}
+}
+
+BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
+//-------------------------------------------------------
+{
+	CHAR cBuf[1024];
+	va_list va;
+	va_start(va, format);
+	wvsprintf(cBuf, format, va);
+	AfxMessageBox(cBuf);
+	Log(cBuf);
+	va_end(va);
+	
+	return TRUE;
 }
 
 #endif // NO_ASIO

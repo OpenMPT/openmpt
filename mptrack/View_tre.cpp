@@ -2838,6 +2838,8 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	{	
 		return wParam;
 	}
+
+	return NULL;
 }
 
 void CModTree::OnKillFocus(CWnd* pNewWnd)

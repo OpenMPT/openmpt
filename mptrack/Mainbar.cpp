@@ -960,5 +960,7 @@ BOOL CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
 		return m_pModTree->PostMessage(cmdID, wParam, lParam);
 	if (::GetFocus() == m_pModTreeData->m_hWnd)
 		return m_pModTreeData->PostMessage(cmdID, wParam, lParam);
+
+	return 0;
 }
 //end rewbs.customKeys

@@ -106,6 +106,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
 	ON_WM_KILLFOCUS() //rewbs.fix3116
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 // Static
@@ -905,55 +906,26 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 {
 	if (code>=0)
 	{
-		if (m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
+		//Check if textbox has focus
+		bool textboxHasFocus = false;
+		//CWnd *pWnd = ::GetFocus();
+		//ASSERT(pWnd != NULL);
+		HWND hWnd = ::GetFocus(); //pWnd->GetSafeHwnd();*/
+		if (hWnd != NULL) {
+			TCHAR szClassName[512];
+			textboxHasFocus = GetClassName(hWnd, szClassName, 6) && _tcsicmp(szClassName, _T("Edit")) == 0;		
+		}
+
+		if (!textboxHasFocus && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
 		{
 			
-			if ((wParam != VK_ESCAPE) &&
-				!(wParam == 'C' && m_InputHandler->CtrlPressed()) && 
-				!(wParam == 'X' && m_InputHandler->CtrlPressed()) && 
-				!(wParam == 'V' && m_InputHandler->CtrlPressed()))
+			if (wParam != VK_ESCAPE)
 				return -1;	// We've handled the keypress. No need to take it further.
 							// Unless it was esc, in which case we need it to close Windows
-							// (there might be other special cases.. will have to see..)
+							// (there might be other special cases, we'll see.. )
 		}
 	}
-	//TODO: get rid of this. As we wittle out hardcoded keys we won't need this.
-/*	static BOOL sbPostKeyPending = FALSE;
-	if (code == HC_ACTION)
-	{
-		DWORD scancode = lParam >> 16;
-		BOOL bUp = ((scancode & 0xC000) == 0xC000);
-		BOOL bDn = ((scancode & 0xC000) == 0x0000);
 
-		if ((bUp) || (bDn))
-		{
-			UINT hkmask = 0;
-			switch(wParam)
-			{
-			case VK_LCONTROL:
-			case VK_RCONTROL:
-			case VK_CONTROL:
-				hkmask = HOTKEYF_CONTROL;
-				break;
-			case VK_LMENU:
-			case VK_RMENU:
-			case VK_MENU:
-				hkmask = HOTKEYF_ALT;
-				break;
-			case VK_LSHIFT:
-			case VK_RSHIFT:
-			case VK_SHIFT:
-				hkmask = HOTKEYF_SHIFT;
-				break;
-			}
-			if (hkmask)
-			{
-				if (bUp) gnHotKeyMask &= ~hkmask;
-				if (bDn) gnHotKeyMask |= hkmask;
-			}
-		}
-	}
-*/
 	return CallNextHookEx(ghKbdHook, code, wParam, lParam);
 }	
 
@@ -1044,6 +1016,19 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 	return bOk;
 }
 
+
+void Terminate_AudioThread()
+//----------------------------------------------
+{	
+	//TODO: Why does this not get called.
+	AfxMessageBox("Audio thread terminated unexpectedly. Attempting to shut down audio device");
+	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+	if (pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
+	pMainFrame->audioCloseDevice();
+	exit(-1);
+}
+
+
 // Audio thread
 DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 //------------------------------------------
@@ -1051,6 +1036,8 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 	CMainFrame *pMainFrm;
 	BOOL bWait;
 	UINT nSleep;
+
+	set_terminate(Terminate_AudioThread);
 
 // -> CODE#0021
 // -> DESC="use multimedia timer instead of Sleep() in audio thread"
@@ -1123,11 +1110,24 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 }
 
 
-// Audio thread
+void Terminate_NotifyThread()
+//----------------------------------------------
+{	
+	//TODO: Why does this not get called.
+	AfxMessageBox("Notify thread terminated unexpectedly. Attempting to shut down audio device");
+	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+	if (pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
+	pMainFrame->audioCloseDevice();
+	exit(-1);
+}
+
+// Notify thread
 DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 //-------------------------------------------
 {
 	CMainFrame *pMainFrm;
+
+	set_terminate(Terminate_NotifyThread);
 
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
 	for (;;)
@@ -1165,6 +1165,8 @@ DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 	ExitThread(0);
 	return 0;
 }
+
+
 
 
 ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG cbSize)
@@ -2367,7 +2369,7 @@ void CMainFrame::OnTimer(UINT)
 			m_dwLastPluginIdleCall = dwTime;
 		}
 	}
-	if (m_pAutoSaver) {
+	if (m_pAutoSaver && m_pAutoSaver->IsEnabled()) {
 		m_pAutoSaver->DoSave(curTime);
 	}
 

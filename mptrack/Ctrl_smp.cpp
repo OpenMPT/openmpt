@@ -199,6 +199,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboZoom.AddString("1:16");
 	m_ComboZoom.AddString("1:32");
 	m_ComboZoom.AddString("1:64");
+	m_ComboZoom.AddString("1:128");
 	m_ComboZoom.SetCurSel(0);
 	// File ToolBar
 	m_ToolBar1.Init();

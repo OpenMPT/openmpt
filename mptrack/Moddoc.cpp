@@ -1329,7 +1329,8 @@ void CModDoc::OnFileWaveConvert()
 	bplaying = TRUE;
 	pMainFrm->PauseMod();
 
-	m_SndFile.SetCurrentPos(0);
+// rewbs.fix3239: moved position definition into loop below
+/*  m_SndFile.SetCurrentPos(0);
 	if (wsdlg.m_bSelectPlay)
 	{
 		m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
@@ -1337,6 +1338,8 @@ void CModDoc::OnFileWaveConvert()
 		m_SndFile.GetLength(TRUE, FALSE);
 		m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
 	}
+*/
+//end rewbs.fix3239: moved position definition into loop below
 	// Saving file
 
 // -> CODE#0024
@@ -1368,7 +1371,15 @@ void CModDoc::OnFileWaveConvert()
 
 		// Render song (or current channel if channel mode and channel not initially disabled)
 		if(!wsdlg.m_bChannelMode || !(flags[i] & CHN_MUTE)){
+			// rewbs.fix3239
 			m_SndFile.SetCurrentPos(0);
+			if (wsdlg.m_bSelectPlay) {
+				m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
+				m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
+				m_SndFile.GetLength(TRUE, FALSE);
+				m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
+			}
+			//end rewbs.fix3239
 			if( dwcdlg.DoModal() != IDOK ) break;	// UPDATE#03
 		}
 

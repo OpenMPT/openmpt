@@ -56,7 +56,6 @@ CInputHandler::~CInputHandler(void)
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam)
 
 {
-	int scancode;
 	CommandID executeCommand = kcNull;	
 	KeyEventType keyEventType;
 

@@ -18,6 +18,7 @@
 #ifdef ENABLE_BUZZ
 #define STATIC_BUILD
 #include <machineinterface.h>	// Buzz
+#include ".\vstplug.h"
 AEffect *Buzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzInfo);
 #endif // ENABLE_BUZZ
 
@@ -222,10 +223,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 	HINSTANCE hLib = NULL;
 
 
-	#ifndef _DEBUG
-	__try {
-		__try {
-	#endif
+	try {
 			hLib = LoadLibrary(pszDllPath);
 	//rewbs.VSTcompliance
 #ifdef _DEBUG
@@ -241,15 +239,10 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 	}
 #endif //_DEBUG	
 	//end rewbs.VSTcompliance
-	#ifndef _DEBUG
-		} __finally {}
-	} __except(EXCEPTION_EXECUTE_HANDLER)
+	} catch(...)
 	{
-	#ifdef VST_LOG
-		Log("Exception in LoadLibrary(\"%s\")!\n", pszDllPath);
-	#endif
+		CVstPluginManager::ReportPlugException("Exception caught in LoadLibrary (%s)", pszDllPath);
 	}
-	#endif
 	if ((hLib) && (hLib != INVALID_HANDLE_VALUE))
 	{
 		BOOL bOk = FALSE;
@@ -272,10 +265,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 			p->pPrev = NULL;
 			if (m_pVstHead) m_pVstHead->pPrev = p;
 			m_pVstHead = p;
-		#ifndef _DEBUG
-			__try {
-			__try {
-		#endif
+
+			try {
 				AEffect *pEffect = pMainProc(MasterCallBack);
 				if ((pEffect) && (pEffect->magic == kEffectMagic)
 				 && (pEffect->dispatcher))
@@ -296,15 +287,10 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 					pEffect->dispatcher(pEffect, effClose, 0,0,0,0);
 					bOk = TRUE;
 				}
-			#ifndef _DEBUG
-				} __finally {}
-			} __except(EXCEPTION_EXECUTE_HANDLER)
-			{
-			#ifdef VST_LOG
-				Log("Exception while trying to load plugin \"%s\"!\n", p->szLibraryName);
-			#endif
+			} catch(...) {
+				CVstPluginManager::ReportPlugException("Exception while trying to load plugin \"%s\"!\n", p->szLibraryName);
 			}
-			#endif
+
 			// If OK, write the information in PluginCache
 			if (bOk)
 			{
@@ -331,29 +317,20 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 			p->pPrev = NULL;
 			if (m_pVstHead) m_pVstHead->pPrev = p;
 			m_pVstHead = p;
-		#ifndef _DEBUG
-			__try {
-			__try {
-		#endif
-			const CMachineInfo *pInfo = pBuzzGetInfo();
-			if (pInfo)
-			{
-				p->dwPluginId2 = pInfo->Version;
-				if (pInfo->Name)
+			try {
+				const CMachineInfo *pInfo = pBuzzGetInfo();
+				if (pInfo)
 				{
-					lstrcpyn(p->szLibraryName, pInfo->Name, sizeof(p->szLibraryName));
+					p->dwPluginId2 = pInfo->Version;
+					if (pInfo->Name)
+					{
+						lstrcpyn(p->szLibraryName, pInfo->Name, sizeof(p->szLibraryName));
+					}
+					bOk = TRUE;
 				}
-				bOk = TRUE;
+			} catch (...) {
+				CVstPluginManager::ReportPlugException("Exception while trying to load buzz plugin \"%s\"!\n", p->szLibraryName);
 			}
-		#ifndef _DEBUG
-				} __finally {}
-			} __except(EXCEPTION_EXECUTE_HANDLER)
-			{
-			#ifdef VST_LOG
-				Log("Exception while trying to load buzz plugin \"%s\"!\n", p->szLibraryName);
-			#endif
-			}
-		#endif
 		} else
 	#endif // ENABLE_BUZZ
 		{
@@ -361,20 +338,13 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 			Log("Entry point not found!\n");
 		#endif
 		}
-		#ifndef _DEBUG
-		__try {
-			__try {
-		#endif
+
+		try {
 			FreeLibrary(hLib);
-		#ifndef _DEBUG
-			} __finally {}
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-		#ifdef VST_LOG
-			Log("Exception in FreeLibrary(\"%s\")!\n", pszDllPath);
-		#endif
+		} catch (...) {
+			CVstPluginManager::ReportPlugException("Exception in FreeLibrary(\"%s\")!\n", pszDllPath);
 		}
-		#endif
+
 		return (bOk) ? m_pVstHead : NULL;
 	} else
 	{
@@ -400,18 +370,17 @@ BOOL CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
 			if (p->pNext) p->pNext->pPrev = p->pPrev;
 			p->pPrev = p->pNext = NULL;
 			BEGIN_CRITICAL();
-			__try {
+
+			try {
 				while ((volatile void *)(p->pPluginsList) != NULL)
 				{
 					p->pPluginsList->Release();
 				}
 				delete p;
-			} __except(EXCEPTION_EXECUTE_HANDLER)
-			{
-			#ifdef VST_LOG
-				Log("Exception while trying to release plugin \"%s\"!\n", pFactory->szLibraryName);
-			#endif
+			} catch (...) {
+				CVstPluginManager::ReportPlugException("Exception while trying to release plugin \"%s\"!\n", pFactory->szLibraryName);
 			}
+
 			END_CRITICAL();
 			return TRUE;
 		}
@@ -510,72 +479,66 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin)
 		BOOL bOk = FALSE;
 
 		BEGIN_CRITICAL();
-		#ifndef _DEBUG
-		__try { __try {
-		#endif
-		hLibrary = LoadLibrary(pFound->szDllPath);
-		if (hLibrary != NULL)
-		{
-			AEffect *pEffect = NULL;
-			PVSTPLUGENTRY pEntryPoint = (PVSTPLUGENTRY)GetProcAddress(hLibrary, "main");
-		#ifdef ENABLE_BUZZ
-			GET_INFO pBuzzGetInfo = (GET_INFO)GetProcAddress(hLibrary, "GetInfo");
-			CREATE_MACHINE pBuzzCreateMachine = (CREATE_MACHINE)GetProcAddress(hLibrary, "CreateMachine");
-		#endif
-			if (pEntryPoint)
+		
+		try {
+			hLibrary = LoadLibrary(pFound->szDllPath);
+			if (hLibrary != NULL)
 			{
-				pEffect = pEntryPoint(MasterCallBack);
-			} else
-		#ifdef ENABLE_BUZZ
-			if ((pBuzzCreateMachine) && (pBuzzGetInfo))
-			{
-				CMachineInterface *pBuzzMachine = pBuzzCreateMachine();
-				const CMachineInfo *pBuzzInfo = pBuzzGetInfo();
-				if ((pBuzzMachine) && (pBuzzInfo) && (pBuzzInfo->Type == MT_EFFECT))
+				AEffect *pEffect = NULL;
+				PVSTPLUGENTRY pEntryPoint = (PVSTPLUGENTRY)GetProcAddress(hLibrary, "main");
+			#ifdef ENABLE_BUZZ
+				GET_INFO pBuzzGetInfo = (GET_INFO)GetProcAddress(hLibrary, "GetInfo");
+				CREATE_MACHINE pBuzzCreateMachine = (CREATE_MACHINE)GetProcAddress(hLibrary, "CreateMachine");
+			#endif
+				if (pEntryPoint)
 				{
-					pEffect = Buzz2Vst(pBuzzMachine, pBuzzInfo);
+					pEffect = pEntryPoint(MasterCallBack);
+				} else
+			#ifdef ENABLE_BUZZ
+				if ((pBuzzCreateMachine) && (pBuzzGetInfo))
+				{
+					CMachineInterface *pBuzzMachine = pBuzzCreateMachine();
+					const CMachineInfo *pBuzzInfo = pBuzzGetInfo();
+					if ((pBuzzMachine) && (pBuzzInfo) && (pBuzzInfo->Type == MT_EFFECT))
+					{
+						pEffect = Buzz2Vst(pBuzzMachine, pBuzzInfo);
+					}
+				} else
+			#endif
+				{
+				#ifdef VST_LOG
+					Log("Entry point not found! (handle=%08X)\n", hLibrary);
+				#endif
+				}
+				if ((pEffect) && (pEffect->dispatcher)
+				&& ((pEffect->magic == kEffectMagic) || (pEffect->magic == kBuzzMagic)))
+				{
+					bOk = TRUE;
+					if ((pEffect->flags & effFlagsIsSynth) || (!pEffect->numInputs))
+					{
+						if (!pFound->bIsInstrument)
+						{
+							LPCSTR pszSection = "PluginCache";
+							CHAR s[64];
+							pFound->bIsInstrument = TRUE;
+							wsprintf(s, "%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
+							theApp.WriteProfileInt(pszSection, s, 1);
+						}
+					}
+					CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, pFound, pMixPlugin, pEffect);
+					if (pVstPlug) pVstPlug->Initialize();
 				}
 			} else
-		#endif
 			{
 			#ifdef VST_LOG
-				Log("Entry point not found! (handle=%08X)\n", hLibrary);
+				Log("LoadLibrary(\"%s\") failed!\n", pFound->szDllPath);
 			#endif
 			}
-			if ((pEffect) && (pEffect->dispatcher)
-			 && ((pEffect->magic == kEffectMagic) || (pEffect->magic == kBuzzMagic)))
-			{
-				bOk = TRUE;
-				if ((pEffect->flags & effFlagsIsSynth) || (!pEffect->numInputs))
-				{
-					if (!pFound->bIsInstrument)
-					{
-						LPCSTR pszSection = "PluginCache";
-						CHAR s[64];
-						pFound->bIsInstrument = TRUE;
-						wsprintf(s, "%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
-						theApp.WriteProfileInt(pszSection, s, 1);
-					}
-				}
-				CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, pFound, pMixPlugin, pEffect);
-				if (pVstPlug) pVstPlug->Initialize();
-			}
-		} else
-		{
-		#ifdef VST_LOG
-			Log("LoadLibrary(\"%s\") failed!\n", pFound->szDllPath);
-		#endif
+			if ((!bOk) && (hLibrary)) FreeLibrary(hLibrary);
+		} catch(...) {
+			CVstPluginManager::ReportPlugException("Exception while trying to create plugin \"%s\"!\n", pFound->szLibraryName);
 		}
-		if ((!bOk) && (hLibrary)) FreeLibrary(hLibrary);
-		#ifndef _DEBUG
-		} __finally {}
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-		#ifdef VST_LOG
-			Log("Exception while trying to create plugin \"%s\"!\n", pFound->szLibraryName);
-		#endif
-		}
-		#endif
+
 		END_CRITICAL();
 		return bOk;
 	} else
@@ -937,6 +900,27 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 }
 //end rewbs. VSTCompliance:
 
+
+void CVstPluginManager::ReportPlugException(LPCSTR format,...)
+//-----------------------------------------------------------
+{
+	CHAR cBuf[1024];
+	va_list va;
+	va_start(va, format);
+	wvsprintf(cBuf, format, va);
+	AfxMessageBox(cBuf);
+#ifdef VST_LOG
+	Log(cBuf);
+#endif
+
+	//Stop song - TODO: figure out why this causes a kernel hang from IASIO->release();
+/*	END_CRITICAL();
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+		if (pMainFrm) pMainFrm->StopMod();
+*/
+	va_end(va);
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 //
 // CSelectPluginDlg
@@ -947,6 +931,8 @@ BEGIN_MESSAGE_MAP(CSelectPluginDlg, CDialog)
 	ON_NOTIFY(NM_DBLCLK,		IDC_TREE1, OnSelDblClk)
 	ON_COMMAND(IDC_BUTTON1,		OnAddPlugin)
 	ON_COMMAND(IDC_BUTTON2,		OnRemovePlugin)
+	ON_WM_SIZE()
+	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
 
 void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
@@ -1286,6 +1272,30 @@ VOID CSelectPluginDlg::OnRemovePlugin()
 }
 
 
+void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialog::OnSize(nType, cx, cy);
+
+	if (m_treePlugins) {
+		m_treePlugins.MoveWindow(11,11, cx-105, cy-40, FALSE);
+		::MoveWindow(GetDlgItem(IDC_TEXT1)->m_hWnd, 11,cy-25, cx-22, 25, FALSE);   
+		::MoveWindow(GetDlgItem(IDOK)->m_hWnd,         cx-85, 11,    75, 23, FALSE);
+		::MoveWindow(GetDlgItem(IDCANCEL)->m_hWnd,     cx-85, 39,    75, 23, FALSE);
+		::MoveWindow(GetDlgItem(IDC_BUTTON1)->m_hWnd , cx-85, cy-80, 75, 23, FALSE);	
+		::MoveWindow(GetDlgItem(IDC_BUTTON2)->m_hWnd,  cx-85, cy-52, 75, 23, FALSE);
+		Invalidate();
+	}
+}
+
+void CSelectPluginDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
+{
+	lpMMI->ptMinTrackSize.x=300;
+	lpMMI->ptMinTrackSize.y=270;
+	CDialog::OnGetMinMaxInfo(lpMMI);
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // CVstPlugin
@@ -1308,6 +1318,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_nEditorX = m_nEditorY = -1;
 	m_pEvList = NULL;
 	m_nPreviousMidiChan = -1; //rewbs.VSTCompliance
+	m_pProcessFP = NULL;
 
 	// Insert ourselves in the beginning of the list
 	if (m_pFactory)
@@ -1364,20 +1375,20 @@ void CVstPlugin::Initialize()
 	
 
 		Dispatch(effConnectInput, 0, 1, NULL, 0);
-		if (m_pEffect->numInputs > 1) Dispatch(effConnectInput, 1, 1, NULL, 0);
+		if (m_pEffect->numInputs > 1) Dispatch(effConnectInput, 1, 1, NULL, 0.0f);
 		Dispatch(effConnectOutput, 0, 1, NULL, 0);
-		if (m_pEffect->numOutputs > 1) Dispatch(effConnectOutput, 1, 1, NULL, 0);
+		if (m_pEffect->numOutputs > 1) Dispatch(effConnectOutput, 1, 1, NULL, 0.0f);
 		//rewbs.VSTCompliance: disable all inputs and outputs beyond stereo left and right:
 		for (int i=2; i<m_pEffect->numInputs; i++)
-			Dispatch(effConnectInput, i, 0, NULL, 0);
+			Dispatch(effConnectInput, i, 0, NULL, 0.0f);
 		for (int i=2; i<m_pEffect->numOutputs; i++)
-			Dispatch(effConnectOutput, i, 0, NULL, 0);
+			Dispatch(effConnectOutput, i, 0, NULL, 0.0f);
 		//end rewbs.VSTCompliance
 
 	}
 	
 	Dispatch(effSetSampleRate, 0, 0, NULL, CSoundFile::gdwMixingFreq);
-	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0);
+	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0.0f);
 	if (m_pEffect->numPrograms > 0)	{
 		Dispatch(effSetProgram, 0, 0, NULL, 0);
 	}
@@ -1407,6 +1418,9 @@ void CVstPlugin::Initialize()
 		m_pMixStruct->pMixPlugin = this;
 		m_pMixStruct->pMixState = &m_MixState;
 	}
+
+	//rewbs.VSTcompliance
+	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ?  m_pEffect->processReplacing : m_pEffect->process;
 
 	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
@@ -1487,15 +1501,12 @@ int CVstPlugin::Release()
 {
 	if (!(--m_nRefCount))
 	{
-	__try { __try{
-		delete this;
-		} __finally {}
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-		#ifdef VST_LOG
-			Log("Exception while destroying plugin!\n");
-		#endif
+		try {
+			delete this;
+		} catch (...) {
+			CVstPluginManager::ReportPlugException("Exception while destroying plugin!\n");
 		}
+
 		return 0;
 	}
 	return m_nRefCount;
@@ -1678,21 +1689,18 @@ long CVstPlugin::Dispatch(long opCode, long index, long value, void *ptr, float 
 {
 	long lresult = 0;
 
-	__try { __try {
-	if ((m_pEffect) && (m_pEffect->dispatcher))
-	{
-		#ifdef VST_LOG
-		Log("About to Dispatch(%d) (Plugin=\"%s\"), index: %d, value: %d, value: %h, value: %f!\n", opCode, m_pFactory->szLibraryName, index, value, ptr, opt);
-		#endif
-		lresult = m_pEffect->dispatcher(m_pEffect, opCode, index, value, ptr, opt);
+	try {
+		if ((m_pEffect) && (m_pEffect->dispatcher))
+		{
+			#ifdef VST_LOG
+			Log("About to Dispatch(%d) (Plugin=\"%s\"), index: %d, value: %d, value: %h, value: %f!\n", opCode, m_pFactory->szLibraryName, index, value, ptr, opt);
+			#endif
+			lresult = m_pEffect->dispatcher(m_pEffect, opCode, index, value, ptr, opt);
+		}
+	} catch (...) {
+		CVstPluginManager::ReportPlugException("Exception in Dispatch(%d) (Plugin=\"%s\")!\n", opCode, m_pFactory->szLibraryName);
 	}
-	} __finally {}
-	} __except(EXCEPTION_EXECUTE_HANDLER)
-	{
-	#ifdef VST_LOG
-		Log("Exception Dispatch(%d) (Plugin=\"%s\")!\n", opCode, m_pFactory->szLibraryName);
-	#endif
-	}
+
 	return lresult;
 }
 
@@ -1737,10 +1745,11 @@ FLOAT CVstPlugin::GetParameter(UINT nIndex)
 	FLOAT fResult = 0;
 	if ((m_pEffect) && ((long)nIndex < m_pEffect->numParams) && (m_pEffect->getParameter))
 	{
-		__try { __try {
+		try {
 			fResult = m_pEffect->getParameter(m_pEffect, nIndex);
-		} __finally {}
-		} __except(EXCEPTION_EXECUTE_HANDLER) {}
+		} catch (...) {
+			//CVstPluginManager::ReportPlugException("Exception in getParameter (Plugin=\"%s\")!\n", m_pFactory->szLibraryName);
+		}
 	}
 	//rewbs.VSTcompliance
 	if (fResult<0.0f)
@@ -1756,19 +1765,14 @@ FLOAT CVstPlugin::GetParameter(UINT nIndex)
 VOID CVstPlugin::SetParameter(UINT nIndex, FLOAT fValue)
 //------------------------------------------------------
 {
-	__try { __try {
-	if ((m_pEffect) && ((long)nIndex < m_pEffect->numParams) && (m_pEffect->setParameter))
-	{
-		if ((fValue >= 0.0f) && (fValue <= 1.0f))
-			m_pEffect->setParameter(m_pEffect, nIndex, fValue);
-	}
-	} __finally {}
-	} __except(EXCEPTION_EXECUTE_HANDLER)
-	{
-	#ifdef VST_LOG
-		Log("GPF in SetParameter(%d, 0.%03d) (Plugin=%s)\n", 
-			nIndex, (int)(fValue*1000), m_pFactory->szLibraryName);
-	#endif
+	try {
+		if ((m_pEffect) && ((long)nIndex < m_pEffect->numParams) && (m_pEffect->setParameter))
+		{
+			if ((fValue >= 0.0f) && (fValue <= 1.0f))
+				m_pEffect->setParameter(m_pEffect, nIndex, fValue);
+		}
+	} catch (...) {
+		CVstPluginManager::ReportPlugException("Exception in SetParameter(%d, 0.%03d) (Plugin=%s)\n", nIndex, (int)(fValue*1000), m_pFactory->szLibraryName);
 	}
 }
 
@@ -1855,7 +1859,7 @@ void CVstPlugin::Resume()
 {
 	long sampleRate = CSoundFile::gdwMixingFreq;
 
-	__try { __try {
+	try {
 		//reset some stuff	
 		m_MixState.nVolDecayL = 0;
 		m_MixState.nVolDecayR = 0;
@@ -1870,27 +1874,19 @@ void CVstPlugin::Resume()
 		Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);	// calls plugin's resume
 		Dispatch(effStartProcess, 0, 0, NULL, 0.0f);
 		m_bPlugResumed = true;
-	} __finally {}
-	} __except(EXCEPTION_EXECUTE_HANDLER)
-	{
-	#ifdef VST_LOG
-		Log("GPF in Resume() (Plugin=%s)\n", m_pFactory->szLibraryName);
-	#endif
+	} catch (...) {
+		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
 }
 
 void CVstPlugin::Suspend() 
 {
-	__try { __try {
+	try {
 		Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
 		Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls plugin's suspend
 		m_bPlugResumed=false;
-	} __finally {}
-	} __except(EXCEPTION_EXECUTE_HANDLER)
-	{
-	#ifdef VST_LOG
-		Log("GPF in Suspend() (Plugin=%s)\n", m_pFactory->szLibraryName);
-	#endif
+	} catch (...) {
+		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
 }
 
@@ -1900,7 +1896,11 @@ void CVstPlugin::ProcessVSTEvents()
 	// Process VST events
 	if ((m_pEffect) && (m_pEffect->dispatcher) && (m_pEvList) && (m_pEvList->numEvents > 0))
 	{
-		m_pEffect->dispatcher(m_pEffect, effProcessEvents, 0, 0, m_pEvList, 0);
+		try {
+			m_pEffect->dispatcher(m_pEffect, effProcessEvents, 0, 0, m_pEvList, 0);
+		} catch (...) {
+			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s)\n", m_pFactory->szLibraryName);
+		}
 	}
 }
 
@@ -1936,7 +1936,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 // -! NEW_FEATURE#0028
 
 	//If the plug is found & ok, continue
-	if ((m_pEffect) && (m_pEffect->process) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
+	if ((m_pEffect) && (m_pProcessFP) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
 		isInstrument = (m_pEffect->numInputs < 1); // rewbs.dryRatio
 		if(isInstrument && !(CSoundFile::gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) ){
@@ -1963,19 +1963,11 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		//Do the VST processing magic
 		try {
 			ASSERT(nSamples<=MIXBUFFERSIZE);
-			m_pEffect->process(m_pEffect, m_pInputs, m_pOutputs, nSamples);
-		} catch (char * str) {
-			char s[512];
-			wsprintf(s, "Plugin %s threw an exception in process(): %s",  m_pMixStruct->Info.szName, str);
-			AfxMessageBox(s);
-		}  catch (int i) {
-			char s[512];
-			wsprintf(s, "Plugin %s threw an exception in process(): %d",  m_pMixStruct->Info.szName, i);
-			AfxMessageBox(s);
+			m_pProcessFP(m_pEffect, m_pInputs, m_pOutputs, nSamples);
 		} catch (...) {
-			char s[512];
-			wsprintf(s, "Plugin %s threw an exception in process().", m_pMixStruct->Info.szName);
-			AfxMessageBox(s);
+			m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
+			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
+			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->Info.szName, processMethod);
 		}
 
 		//mix outputs of multi-output VSTs:
@@ -2261,7 +2253,11 @@ void CVstPlugin::HardAllNotesOff()
 			UINT nCh = mc & 0x0f;
 			DWORD dwMidiCode = 0x80|nCh; //command|channel|velocity
 			PVSTINSTCH pCh = &m_MidiCh[nCh];
-	
+
+			//MidiSend(0xB0|mc|(0x79<<8));   // reset all controllers
+			MidiSend(0xB0|mc|(0x7b<<8));   // all notes off 
+			MidiSend(0xB0|mc|(0x78<<8));   // all sounds off 
+
 			for (UINT i=0; i<128; i++)	//all notes
 			{
 				for (UINT c=0; c<MAX_CHANNELS; c++)
@@ -2276,10 +2272,6 @@ void CVstPlugin::HardAllNotesOff()
 				if (overflow) break;	//yuck
 			}
 			if (overflow) break;	//yuck
-
-			//MidiSend(0xB0|mc|(0x79<<8));   // reset all controllers
-			MidiSend(0xB0|mc|(0x7b<<8));   // all notes off 
-			MidiSend(0xB0|mc|(0x78<<8));   // all sounds off 
 		}
 		// let plug process events
 		// TODO: wait for notification from audio thread that process has been called,
@@ -2611,39 +2603,33 @@ VOID CVstPlugin::ToggleEditor()
 //-----------------------------
 {
 	if (!m_pEffect) return;
-	#ifndef _DEBUG
-	__try {
-	#endif
-	if ((m_pEditor) && (!m_pEditor->m_hWnd))
-	{
-		delete m_pEditor;
-		m_pEditor = NULL;
-	}
-	if (m_pEditor)
-	{
-		if (m_pEditor->m_hWnd) m_pEditor->DoClose();
-		if ((volatile void *)m_pEditor) delete m_pEditor;
-		m_pEditor = NULL;
-	} else
-	{
-		//rewbs.defaultPlugGui
-		if (HasEditor())
-			m_pEditor =  new COwnerVstEditor(this);
-		else
-			m_pEditor = new CDefaultVstEditor(this);
-		//end rewbs.defaultPlugGui
 
+	try {
+		if ((m_pEditor) && (!m_pEditor->m_hWnd))
+		{
+			delete m_pEditor;
+			m_pEditor = NULL;
+		}
 		if (m_pEditor)
-			m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
+		{
+			if (m_pEditor->m_hWnd) m_pEditor->DoClose();
+			if ((volatile void *)m_pEditor) delete m_pEditor;
+			m_pEditor = NULL;
+		} else
+		{
+			//rewbs.defaultPlugGui
+			if (HasEditor())
+				m_pEditor =  new COwnerVstEditor(this);
+			else
+				m_pEditor = new CDefaultVstEditor(this);
+			//end rewbs.defaultPlugGui
+
+			if (m_pEditor)
+				m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
+		}
+	} catch (...) {
+		CVstPluginManager::ReportPlugException("Exception in ToggleEditor() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
-	#ifndef _DEBUG
-	} __except(EXCEPTION_EXECUTE_HANDLER)
-	{
-	#ifdef VST_LOG
-		Log("GPF in ToggleEditor() (Plugin=%s)\n", m_pFactory->szLibraryName);
-	#endif
-	}
-	#endif
 }
 
 
@@ -2715,14 +2701,15 @@ void CVstPlugin::NotifySongPlaying(bool playing) {
 
 BOOL CVstPlugin::isInstrument() // ericus 18/02/2005
 {
-	if(m_pEffect) return (m_pEffect->numInputs < 1); // rewbs.dryRatio
+	if(m_pEffect) return ((m_pEffect->flags & effFlagsIsSynth) || (!m_pEffect->numInputs)); // rewbs.dryRatio
 	return FALSE;
 }
 
 BOOL CVstPlugin::CanRecieveMidiEvents() {
 	CString s = "receiveVstMidiEvent";
-	return CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0);
+	return (CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0));
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3625,7 +3612,3 @@ AEffect *DmoToVst(PVSTPLUGINLIB pLib)
 	}
 	return NULL;
 }
-
-
-
-

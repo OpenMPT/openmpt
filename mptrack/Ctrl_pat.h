@@ -185,6 +185,8 @@ protected:
 private:
 	void TogglePluginEditor(bool); //rewbs.instroVST
 	bool HasValidPlug(UINT instr);
+public:
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 };
 
 

@@ -142,6 +142,7 @@ protected:
 	static void Cvt32To32msb(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples, UINT nShift);
 	static void Cvt32To32f(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
 	static void Cvt32To64f(void *pdst, void *psrc, UINT nSampleSize, UINT nSamples);
+	static BOOL ReportASIOException(LPCSTR format,...);
 };
 
 #endif // NO_ASIO

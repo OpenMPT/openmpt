@@ -753,6 +753,11 @@ int CTrackApp::ExitInstance()
 	if (glpMidiLibrary)
 	{
 		if (m_szConfigFileName[0]) ExportMidiConfig(m_szConfigFileName);
+		for (UINT iMidi=0; iMidi<256; iMidi++) {
+			if (glpMidiLibrary->MidiMap[iMidi]) {
+				delete[] glpMidiLibrary->MidiMap[iMidi];
+			}
+		}
 		delete glpMidiLibrary;
 		glpMidiLibrary = NULL;
 	}
@@ -2043,23 +2048,19 @@ BOOL CTrackApp::InitializeACM(BOOL bNoAcm)
 	BOOL bOk = FALSE;
 
 	fuErrorMode = SetErrorMode(SEM_NOOPENFILEERRORBOX);
-	__try {
-	m_hBladeEnc = LoadLibrary(TEXT("BLADEENC.DLL"));
-	m_hLameEnc = LoadLibrary(TEXT("LAME_ENC.DLL"));
-	} __except(EXCEPTION_EXECUTE_HANDLER) {}
+	try {
+		m_hBladeEnc = LoadLibrary(TEXT("BLADEENC.DLL"));
+		m_hLameEnc = LoadLibrary(TEXT("LAME_ENC.DLL"));
+	} catch(...) {}
 	if (!bNoAcm)
 	{
-#ifdef TRAP_ACM_FAULTS
-	__try { __try {
-#endif
-		m_hACMInst = LoadLibrary(TEXT("MSACM32.DLL"));
-#ifdef TRAP_ACM_FAULTS
-		} __finally
-		{
-			goto acmok;
-		} } __except(AcmExceptionHandler(), EXCEPTION_EXECUTE_HANDLER) {}
-	acmok:;
-#endif
+	#ifdef TRAP_ACM_FAULTS
+		try {
+	#endif
+			m_hACMInst = LoadLibrary(TEXT("MSACM32.DLL"));
+	#ifdef TRAP_ACM_FAULTS
+		} catch(...) {}
+	#endif
 	}
 	SetErrorMode(fuErrorMode);
 	if (m_hBladeEnc != NULL)
@@ -2094,46 +2095,42 @@ BOOL CTrackApp::InitializeACM(BOOL bNoAcm)
 		return bOk;
 	}
 #ifdef TRAP_ACM_FAULTS
-	__try { __try {
+	try {
 #endif
-	*(FARPROC *)&pfnAcmGetVersion = GetProcAddress(m_hACMInst, "acmGetVersion");
-	dwVersion = 0;
-	if (pfnAcmGetVersion) dwVersion = pfnAcmGetVersion();
-	if (HIWORD(dwVersion) < 0x0200)
-	{
-		FreeLibrary(m_hACMInst);
-		m_hACMInst = NULL;
-		return bOk;
-	}
-	// Load Function Pointers
-	m_pfnAcmFormatEnum = (PFNACMFORMATENUM)GetProcAddress(m_hACMInst, "acmFormatEnumA");
-	// Enumerate formats
-	if (m_pfnAcmFormatEnum)
-	{
-		ACMFORMATDETAILS afd;
-		BYTE wfx[256];
-		WAVEFORMATEX *pwfx = (WAVEFORMATEX *)&wfx;
+		*(FARPROC *)&pfnAcmGetVersion = GetProcAddress(m_hACMInst, "acmGetVersion");
+		dwVersion = 0;
+		if (pfnAcmGetVersion) dwVersion = pfnAcmGetVersion();
+		if (HIWORD(dwVersion) < 0x0200)
+		{
+			FreeLibrary(m_hACMInst);
+			m_hACMInst = NULL;
+			return bOk;
+		}
+		// Load Function Pointers
+		m_pfnAcmFormatEnum = (PFNACMFORMATENUM)GetProcAddress(m_hACMInst, "acmFormatEnumA");
+		// Enumerate formats
+		if (m_pfnAcmFormatEnum)
+		{
+			ACMFORMATDETAILS afd;
+			BYTE wfx[256];
+			WAVEFORMATEX *pwfx = (WAVEFORMATEX *)&wfx;
 
-		memset(&afd, 0, sizeof(afd));
-		memset(pwfx, 0, sizeof(wfx));
-		afd.cbStruct = sizeof(ACMFORMATDETAILS);
-		afd.dwFormatTag = WAVE_FORMAT_PCM;
-		afd.pwfx = pwfx;
-		afd.cbwfx = sizeof(wfx);
-		pwfx->wFormatTag = WAVE_FORMAT_PCM;
-		pwfx->nChannels = 2;
-		pwfx->nSamplesPerSec = 44100;
-		pwfx->wBitsPerSample = 16;
-		pwfx->nBlockAlign = (WORD)((pwfx->nChannels * pwfx->wBitsPerSample) / 8);
-		pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
-		m_pfnAcmFormatEnum(NULL, &afd, AcmFormatEnumCB, NULL, ACM_FORMATENUMF_CONVERT);
-	}
+			memset(&afd, 0, sizeof(afd));
+			memset(pwfx, 0, sizeof(wfx));
+			afd.cbStruct = sizeof(ACMFORMATDETAILS);
+			afd.dwFormatTag = WAVE_FORMAT_PCM;
+			afd.pwfx = pwfx;
+			afd.cbwfx = sizeof(wfx);
+			pwfx->wFormatTag = WAVE_FORMAT_PCM;
+			pwfx->nChannels = 2;
+			pwfx->nSamplesPerSec = 44100;
+			pwfx->wBitsPerSample = 16;
+			pwfx->nBlockAlign = (WORD)((pwfx->nChannels * pwfx->wBitsPerSample) / 8);
+			pwfx->nAvgBytesPerSec = pwfx->nSamplesPerSec * pwfx->nBlockAlign;
+			m_pfnAcmFormatEnum(NULL, &afd, AcmFormatEnumCB, NULL, ACM_FORMATENUMF_CONVERT);
+		}
 #ifdef TRAP_ACM_FAULTS
-	} __finally
-	{
-		goto acmscrewed;
-	} } __except(AcmExceptionHandler(), EXCEPTION_EXECUTE_HANDLER) {}
-	acmscrewed:;
+	} catch(...){}
 #endif
 	return TRUE;
 }
@@ -2630,17 +2627,14 @@ void Log(LPCSTR format,...)
 	va_start(va, format);
 	wvsprintf(cBuf, format, va);
 	OutputDebugString(cBuf);
-	//if (theApp.IsDebug())
-	//{
-	#ifdef _DEBUG
+	#ifdef LOG_TO_FILE
 		FILE *f = fopen("c:\\mptrack.log", "a");
 		if (f)
 		{
 			fwrite(cBuf, 1, strlen(cBuf), f);
 			fclose(f);
 		}
-	#endif //_DEBUG
-	//}
+	#endif //LOG_TO_FILE
 	va_end(va);
 }
 

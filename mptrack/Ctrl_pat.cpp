@@ -88,6 +88,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		OnPatternNameChanged)
 	ON_UPDATE_COMMAND_UI(IDC_PATTERN_RECORD,OnUpdateRecord)
 	//}}AFX_MSG_MAP
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 void CCtrlPatterns::DoDataExchange(CDataExchange* pDX)
@@ -2333,3 +2334,13 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 }
 
 // -! NEW_FEATURE#0015
+
+BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	if (nFlags==0) {
+		PostViewMessage(VIEWMSG_DOSCROLL, zDelta);
+	}
+	return CModControlDlg::OnMouseWheel(nFlags, zDelta, pt);
+}

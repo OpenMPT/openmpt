@@ -397,7 +397,6 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 		m_bKeyUp.EnableWindow(TRUE);
 		
 		m_nCurHotKey = nCmd;
-		WORD code, mod=0;
 		BOOL bEnable = FALSE;
 		char s[20];
 			
@@ -530,7 +529,6 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 
 void COptionsKeyboard::OnDeleteKeyChoice()
 {
-	KeyCombination kc;
 	CommandID cmd = (CommandID)m_nCurHotKey;
 
 	//Do nothing if there's no key defined for this slot.

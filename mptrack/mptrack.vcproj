@@ -21,7 +21,7 @@
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GX-"
+				AdditionalOptions="/EHsc"
 				Optimization="0"
 				OptimizeForProcessor="1"
 				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
@@ -93,7 +93,7 @@
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GX-"
+				AdditionalOptions="/EHsc"
 				InlineFunctionExpansion="1"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
@@ -161,7 +161,7 @@
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GX-"
+				AdditionalOptions="/EHsc"
 				InlineFunctionExpansion="1"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
@@ -230,7 +230,7 @@
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GX-"
+				AdditionalOptions="/EHsc"
 				InlineFunctionExpansion="1"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
@@ -301,7 +301,7 @@
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GX-"
+				AdditionalOptions="/EHsc"
 				InlineFunctionExpansion="1"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="TRUE"
@@ -372,7 +372,7 @@
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GX-"
+				AdditionalOptions="/EHsc"
 				InlineFunctionExpansion="1"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="TRUE"
