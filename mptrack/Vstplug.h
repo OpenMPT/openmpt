@@ -37,6 +37,7 @@ typedef struct _VSTINSTCH
 	//BYTE uNoteOnMap[128/8];			rewbs.deMystifyMidiNoteMap
 	BYTE uNoteOnMap[128][MAX_CHANNELS];
 	UINT nProgram;
+	WORD wMidiBank; //rewbs.MidiBank
 } VSTINSTCH, *PVSTINSTCH;
 
 
@@ -72,6 +73,7 @@ protected:
 	float m_FloatBuffer[MIXBUFFERSIZE*32+31];	// 2ch separated + up to 32 VSTi outputs...
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
 	CModDoc* m_pModDoc;	//rewbs.macroGUI: we need a reference to the document which holds this plug.
+	UINT m_nPreviousMidiChan; //rewbs.VSTCompliance
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN pMixPlugin, AEffect *pEffect);
@@ -127,7 +129,7 @@ public: // IMixPlugin interface
 	void Process(float *pOutL, float *pOutR, unsigned long nSamples);
 	void Init(unsigned long nFreq, int bReset);
 	bool MidiSend(DWORD dwMidiCode);
-	void MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, UINT trackChan);
+	void MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChan);
 	void HardAllNotesOff(); //rewbs.VSTiNoteHoldonStopFix
 	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST
 	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn); //rewbs.instroVST
@@ -183,6 +185,7 @@ public:
 	CSelectPluginDlg(PSNDMIXPLUGIN, CWnd *parent);
 	VOID DoClose();
 	VOID UpdatePluginsList();
+	bool VerifyPlug(PVSTPLUGINLIB plug);
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual VOID OnOK();

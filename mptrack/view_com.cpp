@@ -152,7 +152,8 @@ void CViewComments::OnDestroy()
 void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 //-------------------------------------------------------------------
 {
-	CHAR s[256], stmp[256];
+	//CHAR s[256], stmp[256];
+	CHAR s[512], stmp[256]; //rewbs.fix3082
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
 	LV_COLUMN lvc;

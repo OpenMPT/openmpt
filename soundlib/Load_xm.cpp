@@ -540,6 +540,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			memcpy(&m_MidiCfg, lpStream+dwMemPos, len);
 			m_dwSongFlags |= SONG_EMBEDMIDICFG;
+			dwMemPos += len;	//rewbs.fix36946
 		}
 	}
 	// Read pattern names: "PNAM"
@@ -1005,6 +1006,48 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 		// write nMidiProgram field for each instrument
 		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nMidiProgram, 1, size, f);
 		//end rewbs.instroVSTi
+
+		// write wMidiBank field code
+		code = 'MB..';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write wMidiBank field size
+		size = sizeof(Headers[1]->wMidiBank);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write wMidiBank field for each instrument
+		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->wMidiBank, 1, size, f);
+		//end rewbs.instroVSTi
+
+		//rewbs.fix36944: write full precision panning, volume and fade.
+
+		// write nPan field code
+		code = 'P...';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nPan field size
+		size = sizeof(Headers[1]->nPan);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nPan field for each instrument
+		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nPan, 1, size, f);
+
+		// write nGlobalVol field code
+		code = 'GV..';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nGlobalVol field size
+		size = sizeof(Headers[1]->nGlobalVol);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nGlobalVol field for each instrument
+		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nGlobalVol, 1, size, f);
+
+		// write nFadeOut field code
+		code = 'FO..';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nFadeOut field size
+		size = sizeof(Headers[1]->nFadeOut);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nFadeOut field for each instrument
+		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nFadeOut, 1, size, f);
+
+		//end rewbs.fix36944
+
 	}
 // -! NEW_FEATURE#0027
 

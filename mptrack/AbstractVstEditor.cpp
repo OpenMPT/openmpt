@@ -118,7 +118,7 @@ VOID CAbstractVstEditor::SetupMenu()
 				wsprintf(s, "%02X - %s",p,&sname[k]);
 			}
 
-			if (p==m_nCurProg)
+			if (p==curProg)
 				m_pPresetMenu->AppendMenu(MF_STRING|MF_CHECKED, ID_PRESET_SET+p, (LPCTSTR)s);
 			else
 				m_pPresetMenu->AppendMenu(MF_STRING, ID_PRESET_SET+p, (LPCTSTR)s);

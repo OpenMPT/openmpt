@@ -1295,14 +1295,14 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02X.%04da",		//remove 'a' when ready for wide usage.
+	wsprintf(s, "%s version %X.%02X.%04da (revision 1.11)",		//remove 'a' when ready for wide usage.
 				MAINFRAME_TITLE,
 				(MPTRACK_VERSION>>24)&0xFF,
 				(MPTRACK_VERSION>>16)&0xFF,
 				(MPTRACK_VERSION & 0xFFFF));
 	SetDlgItemText(IDC_TEXT2, s);
 
-	SetDlgItemText(IDC_EDIT1, "Contact:\r\nRobin Fernandes: modplug@soal.org\r\nEric Chavanon: contact@ericus.org\r\nMPC forums: http://www.modplug.com/forums\r\n\r\nGet the latest updates at:\r\n http://sourceforge.net/projects/modplug");
+	SetDlgItemText(IDC_EDIT1, "Contact:\r\nMPC forums: http://www.modplug.com/forums\r\nEric Chavanon: contact@ericus.org\r\nRobin Fernandes: modplug@soal.org\r\n\r\nGet the latest updates at:\r\n http://sourceforge.net/projects/modplug");
 
 	char *pArrCredit = { 
 		"Modplug Tracker|"

@@ -603,6 +603,7 @@ void CNoteMapWnd::StopNote(int note = -1)
 
 //end rewbs.customKeys
 
+
 /////////////////////////////////////////////////////////////////////////
 // CCtrlInstruments
 
@@ -634,6 +635,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT8,				OnGlobalVolChanged)
 	ON_EN_CHANGE(IDC_EDIT9,				OnPanningChanged)
 	ON_EN_CHANGE(IDC_EDIT10,			OnMPRChanged)
+	ON_EN_CHANGE(IDC_EDIT11,			OnMBKChanged)	//rewbs.MidiBank
 	ON_EN_CHANGE(IDC_EDIT15,			OnPPSChanged)
 
 // -> CODE#0027
@@ -671,6 +673,7 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN8,					m_SpinGlobalVol);
 	DDX_Control(pDX, IDC_SPIN9,					m_SpinPanning);
 	DDX_Control(pDX, IDC_SPIN10,				m_SpinMidiPR);
+	DDX_Control(pDX, IDC_SPIN11,				m_SpinMidiBK);	//rewbs.MidiBank
 	DDX_Control(pDX, IDC_SPIN12,				m_SpinPPS);
 	DDX_Control(pDX, IDC_EDIT1,					m_EditCutOff);
 	DDX_Control(pDX, IDC_EDIT8,					m_EditGlobalVol);
@@ -752,7 +755,9 @@ BOOL CCtrlInstruments::OnInitDialog()
 	// Panning
 	m_SpinPanning.SetRange(0, 256);
 	// Midi Program
-	m_SpinMidiPR.SetRange(0, 255);
+	m_SpinMidiPR.SetRange(0, 128);
+	// rewbs.MidiBank
+	m_SpinMidiBK.SetRange(0, 128);
 	// Midi Channel
 	//rewbs.instroVSTi: we no longer combine midi chan and FX in same cbbox
 	for (UINT ich=0; ich<17; ich++)
@@ -977,6 +982,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		//rewbs.instroVSTi
 		BOOL b2 = (((m_pSndFile->m_nType == MOD_TYPE_IT) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), b2);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), b2);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), b2);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), b2);
 		m_SliderAttack.EnableWindow(b2);
@@ -985,6 +991,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_CbnMidiCh.EnableWindow(b2);
 		m_CbnMixPlug.EnableWindow(b2);
 		m_SpinMidiPR.EnableWindow(b2);
+		m_SpinMidiBK.EnableWindow(b2);	//rewbs.MidiBank
 		m_SpinFadeOut.EnableWindow(b2);
 		m_NoteMap.EnableWindow(b);
 		m_SliderVolSwing.EnableWindow(b);
@@ -1031,7 +1038,14 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			SetDlgItemInt(IDC_EDIT9, penv->nPan);
 			m_CheckPanning.SetCheck((penv->dwFlags & ENV_SETPANNING) ? TRUE : FALSE);
 			// Midi
-			SetDlgItemInt(IDC_EDIT10, penv->nMidiProgram);
+			if (penv->nMidiProgram)
+				SetDlgItemInt(IDC_EDIT10, penv->nMidiProgram);
+			else
+				SetDlgItemText(IDC_EDIT10, "---");
+			if (penv->wMidiBank)
+				SetDlgItemInt(IDC_EDIT11, penv->wMidiBank);
+			else
+				SetDlgItemText(IDC_EDIT11, "---");
 			//rewbs.instroVSTi
 			//was:
 			//if (penv->nMidiChannel < 17) m_CbnMidiCh.SetCurSel(penv->nMidiChannel); else
@@ -1656,6 +1670,15 @@ void CCtrlInstruments::OnMPRChanged()
 	{
 		int n = GetDlgItemInt(IDC_EDIT10);
 		if ((n >= 0) && (n <= 255)) penv->nMidiProgram = n;
+		//rewbs.MidiBank: we will not set the midi bank/program if it is 0
+		if (n==0)
+		{	
+			LockControls();
+			SetDlgItemText(IDC_EDIT10, "---");
+			UnlockControls();
+		}
+		//end rewbs.MidiBank
+
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
@@ -1664,6 +1687,29 @@ void CCtrlInstruments::OnMPRChanged()
 	}
 }
 
+//rewbs.MidiBank
+void CCtrlInstruments::OnMBKChanged()
+//-----------------------------------
+{
+	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
+	if ((!IsLocked()) && (penv))
+	{
+		WORD w = GetDlgItemInt(IDC_EDIT11);
+		if ((w >= 0) && (w <= 255)) penv->wMidiBank = w;
+		//rewbs.MidiBank: we will not set the midi bank/program if it is 0
+		if (w==0)
+		{	
+			LockControls();
+			SetDlgItemText(IDC_EDIT11, "---");
+			UnlockControls();
+		}
+		//end rewbs.MidiBank
+
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+	}
+}
+//end rewbs.MidiBank
 
 void CCtrlInstruments::OnMCHChanged()
 //-----------------------------------

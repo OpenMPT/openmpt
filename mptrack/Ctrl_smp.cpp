@@ -219,7 +219,10 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_EditFileName.SetLimitText(22);
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
-	m_SpinPanning.SetRange(0, 256);
+	//rewbs.fix36944
+	//m_SpinPanning.SetRange(0, 256);
+	m_SpinPanning.SetRange(0, 64);
+	//end rewbs.fix36944
 	m_ComboAutoVib.AddString("Sine");
 	m_ComboAutoVib.AddString("Square");
 	m_ComboAutoVib.AddString("Ramp Up");
@@ -593,9 +596,12 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		SetDlgItemInt(IDC_EDIT8, pins->nGlobalVol);
 		// Panning
 		CheckDlgButton(IDC_CHECK1, (pins->uFlags & CHN_PANNING) ? MF_CHECKED : 0);
-		SetDlgItemInt(IDC_EDIT9, pins->nPan);
+		//rewbs.fix36944
+		//SetDlgItemInt(IDC_EDIT9, pins->nPan);
+		SetDlgItemInt(IDC_EDIT9, pins->nPan>>2);
+		//end rewbs.fix36944
 		// FineTune / C-4 Speed / BaseNote
-		int transp = 0;
+        int transp = 0;
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
 		{
 			wsprintf(s, "%lu", pins->nC4Speed);
@@ -2220,7 +2226,11 @@ void CCtrlSamples::OnPanningChanged()
 	if (IsLocked()) return;
 	int nPan = GetDlgItemInt(IDC_EDIT9);
 	if (nPan < 0) nPan = 0;
-	if (nPan > 256) nPan = 256;
+	//rewbs.fix36944: sample pan range to 0-64.
+	//if (nPan > 256) nPan = 256;
+	if (nPan > 64) nPan = 64;		
+	nPan = nPan << 2;
+	//end rewbs.fix36944
 	if (nPan != m_pSndFile->Ins[m_nSample].nPan)
 	{
 		m_pSndFile->Ins[m_nSample].nPan = nPan;

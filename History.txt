@@ -21,6 +21,21 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+
+   . <rewbs> Checked  preset in VST dialog menu is updated when preset is changed from inside the plug's on GUI.
+   + <rewbs> Assign a MIDI bank to an instrument, for plugs that support it (e.g. Edirol Orchestral) (tx ganja)
+   / <rewbs> Changes/clarifications to custom keys GUI  (tx lpchip)
+   + <rewbs> Improvements to note recording with record select (from midi-in as well as normal keyboard): 
+       . If note off recording is enabled, note offs appear in the channel in which the note was played, even if the cursor has moved to another channel.
+       . Channels in which a note is still being played is "locked", so no new notes can interrupt it, unless there are no other unlocked record select channels.
+   . <rewbs> Minor VST compliancy improvements (fixes elusive stuck notes with synthedit plugs on song loop)
+   / <rewbs> On adding a plugin to a song, MPT checks it against a list of known problematic plugins and warns you if necessary.
+   . <rewbs> MIDI-in fixes
+   . <rewbs> Save full precision instrument panning and fadeout values in IT and XM, sample panning range limited to 0-64 at GUI level, to correlate with the range that gets saved. 
+   . <rewbs> Fix to IT loading algorithm when last sample is empty (MPTX data was ignored)
+   . <rewbs> Fix to XM loading algorithm when macro definitions embedded in file
+   . <rewbs> Zxx Macro window fixes
+
 . v 1.16.0215a
    . <rewbs> Various minor fixes (registry, VST, GUI)
    + <rewbs> "Overwrite effect type" mode in effect param visualiser

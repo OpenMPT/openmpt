@@ -76,8 +76,8 @@ protected:
 	
 // -> CODE#0012
 // -> DESC="midi keyboard split"
-	BYTE noteoffchannel[120];
-	BYTE splitnoteoffchannel[120];
+	BYTE activeNoteChannel[120];
+	BYTE splitActiveNoteChannel[120];
 	int oldrow,oldchn,oldsplitchn;
 // -! NEW_FEATURE#0012
 

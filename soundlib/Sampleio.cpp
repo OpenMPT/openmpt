@@ -1890,6 +1890,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	memcpy(iti->name, penv->name, 26);
 	iti->mpr = penv->nMidiProgram;
 	iti->mch = penv->nMidiChannel;
+	iti->mbank = penv->wMidiBank; //rewbs.MidiBank
 	iti->nna = penv->nNNA;
 	iti->dct = penv->nDCT;
 	iti->dca = penv->nDNA;
