@@ -21,7 +21,19 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
-. v 1.16.0214a
+. v 1.16.0215a
+   . <rewbs> Various minor fixes (registry, VST, GUI)
+   + <rewbs> "Overwrite effect type" mode in effect param visualiser
+   / <rewbs> Zxx macro GUI total revamp
+   / <rewbs> Time stretcher GUI changes, stretch loop points
+   + <rewbs> new custom keys: 
+		. Toggle focus between pattern editor<->order list
+		. Open/Save/New instrument/sample (focus must be in bottom part
+		. Pattern editor copy and lose selection
+   / <ericus> GUI Cleanup
+   . <ericus> Plugin 32bit float conversion and mixing fixes
+   + <ericus> Plugin gain control
+   + <ericus> Pitch shifer / time stretcher in sample view! (non real-time :)
    + <rewbs> added key command to insert new pattern from pattern editor.
    . <rewbs> XM saving changes/fixes.
    . <rewbs> Added support for VSTs which change their window size. (tx goor00)
@@ -31,6 +43,8 @@ NOTES:
              [Work in progress - some VSTis don't stop notes, not sure why yet]
    . <rewbs> fixes to chunk-based FXP loading/saving. (tx Diamond)
    . <rewbs> fix to allow VST synchronisation when rendering to wav. Added fix for MP3 export too.
+
+. v 1.16.0214a
    . <rewbs> fix to note playback when pattern record is disabled (tx ganja).
    . <rewbs> fix for VST plugs with >2 outputs, though it is currently assumed they are stereo. (tx Muox, ganja, ericus for further fixes)
    / <rewbs> added button on wave writer dialog to open player settings rather than checkbox to enable "HQ resampling".
