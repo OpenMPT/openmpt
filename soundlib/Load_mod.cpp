@@ -54,6 +54,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 'X' - 55:	command = CMD_XFINEPORTAUPDOWN;	break;
 	case 'Y' - 55:	command = CMD_PANBRELLO; break;
 	case 'Z' - 55:	command = CMD_MIDI;	break;
+	case '\\' - 55:	command = CMD_SMOOTHMIDI;	break;	//rewbs.smoothVST
 	default:	command = 0;
 	}
 	m->command = command;
@@ -125,6 +126,7 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 	case CMD_XFINEPORTAUPDOWN:	command = 'X' - 55; break;
 	case CMD_PANBRELLO:			command = 'Y' - 55; break;
 	case CMD_MIDI:				command = 'Z' - 55; break;
+	case CMD_SMOOTHMIDI:		command = '\\' - 55; break; //rewbs.smoothVST
 	case CMD_S3MCMDEX:
 		switch(param & 0xF0)
 		{

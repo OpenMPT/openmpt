@@ -1298,7 +1298,7 @@ void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLeng
 UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 //----------------------------------------------------
 {
-	DWORD chinfo[MAX_MIXPLUGINS];
+	DWORD chinfo[64];
 	CHAR s[32];
 	DWORD nPluginSize;
 	UINT nTotalSize = 0;
@@ -1318,13 +1318,24 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 			{
 				nPluginSize += p->nPluginDataSize;
 			}
+			
+			// rewbs.modularPlugData
+			DWORD MPTxPlugDataSize = 4 + (sizeof(m_MixPlugins[i].fDryRatio)); //4 for ID and size of dryRatio
+			 					// for each extra entity, add 4 for ID, plus size of entity, plus optionally 4 for size of entity.
+
+			nPluginSize += MPTxPlugDataSize+4; //+4 is for size itself: sizeof(DWORD) is 4	
+			// rewbs.modularPlugData
+
 			if (f)
 			{
+				// write plugin ID
 				s[0] = 'F';
 				s[1] = 'X';
 				s[2] = '0' + (i/10);
 				s[3] = '0' + (i%10);
 				fwrite(s, 1, 4, f);
+				
+				// write plugin size:
 				fwrite(&nPluginSize, 1, 4, f);
 				fwrite(&p->Info, 1, sizeof(SNDMIXPLUGININFO), f);
 				fwrite(&m_MixPlugins[i].nPluginDataSize, 1, 4, f);
@@ -1332,13 +1343,32 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 				{
 					fwrite(m_MixPlugins[i].pPluginData, 1, m_MixPlugins[i].nPluginDataSize, f);
 				}
+				
+				//rewbs.dryRatio
+				if (true /*(m_dwSongFlags & SONG_SAVE_XPLGDATA)*/) //worth using up a song flag?
+				{
+					fwrite(&MPTxPlugDataSize, 1, 4, f);
+
+					//write ID for this xPlugData chunk:
+					s[0] = 'D';
+					s[1] = 'W';
+					s[2] = 'R';
+					s[3] = 'T';
+					fwrite(s, 1, 4, f);
+
+					//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
+					fwrite(&(m_MixPlugins[i].fDryRatio), 1, sizeof(float), f);
+				}
+				//end rewbs.dryRatio
+
+
 			}
 			nTotalSize += nPluginSize + 8;
 		}
 	}
 	for (UINT j=0; j<m_nChannels; j++)
 	{
-		if (j < MAX_CHANNELS)  // hmm this was 64, so should check on this!
+		if (j < 64)
 		{
 			if ((chinfo[j] = ChnSettings[j].nMixPlugin) != 0)
 			{
@@ -1381,37 +1411,45 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 	const BYTE *p = (const BYTE *)pData;
 	UINT nPos = 0;
 
-	while (nPos+8 < nLen)
+	while (nPos+8 < nLen)	// so plugin data chunks must be multiples of 8 bytes?
 	{
 		DWORD nPluginSize;
 		UINT nPlugin;
 
-		nPluginSize = *(DWORD *)(p+nPos+4);
+		nPluginSize = *(DWORD *)(p+nPos+4);		// why +4?
 		if (nPluginSize > nLen-nPos-8) break;;
 		if ((*(DWORD *)(p+nPos)) == 'XFHC')
 		{
-			for (UINT ch=0; ch<MAX_CHANNELS; ch++) if (ch*4 < nPluginSize)
+			for (UINT ch=0; ch<64; ch++) if (ch*4 < nPluginSize)
 			{
 				ChnSettings[ch].nMixPlugin = *(DWORD *)(p+nPos+8+ch*4);
 			}
-		} else
-		if ((*(DWORD *)(p+nPos)) == 'XFQE')
+		}
+
+		else if ((*(DWORD *)(p+nPos)) == 'XFQE')
 		{
 			m_SongEQ.nEQBands = nPluginSize/4;
 			if (m_SongEQ.nEQBands > MAX_EQ_BANDS) m_SongEQ.nEQBands = MAX_EQ_BANDS;
 			memcpy(m_SongEQ.EQFreq_Gains, p+nPos+8, m_SongEQ.nEQBands * 4);
-		} else
+		} 
+
+		//Load plugin Data
+		else
 		{
-			if ((p[nPos] != 'F') || (p[nPos+1] != 'X')
-			 || (p[nPos+2] < '0') || (p[nPos+3] < '0'))
+			if ((p[nPos] != 'F') || (p[nPos+1] != 'X') || (p[nPos+2] < '0') || (p[nPos+3] < '0'))
 			{
 				break;
 			}
-			nPlugin = (p[nPos+2]-'0')*10 + (p[nPos+3]-'0');
+			nPlugin = (p[nPos+2]-'0')*10 + (p[nPos+3]-'0');			//calculate plug-in number.
+
 			if ((nPlugin < MAX_MIXPLUGINS) && (nPluginSize >= sizeof(SNDMIXPLUGININFO)+4))
 			{
-				DWORD dwExtra = *(DWORD *)(p+nPos+8+sizeof(SNDMIXPLUGININFO));
+				//MPT's standard plugin data. Size hard not specified in file.. grrr..
 				m_MixPlugins[nPlugin].Info = *(const SNDMIXPLUGININFO *)(p+nPos+8);
+
+				//data for VST setchunk? size lies just after standard plugin data.
+				DWORD dwExtra = *(DWORD *)(p+nPos+8+sizeof(SNDMIXPLUGININFO));
+				
 				if ((dwExtra) && (dwExtra <= nPluginSize-sizeof(SNDMIXPLUGININFO)-4))
 				{
 					m_MixPlugins[nPlugin].nPluginDataSize = 0;
@@ -1422,6 +1460,39 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 						memcpy(m_MixPlugins[nPlugin].pPluginData, p+nPos+8+sizeof(SNDMIXPLUGININFO)+4, dwExtra);
 					}
 				}
+
+				//rewbs.modularPlugData
+				DWORD dwXPlugData = *(DWORD *)(p+nPos+8+sizeof(SNDMIXPLUGININFO)+dwExtra+4); //read next DWORD into dwMPTExtra
+				
+				//if dwMPTExtra is positive and there are dwMPTExtra bytes left in nPluginSize, we have some more data!
+				if ((dwXPlugData) && ((int)dwXPlugData <= (int)nPluginSize-(int)(sizeof(SNDMIXPLUGININFO)+dwExtra+8)))
+				{
+					DWORD startPos = nPos+8+sizeof(SNDMIXPLUGININFO)+dwExtra+8; // start of extra data for this plug
+					DWORD endPos = startPos + dwXPlugData;						// end of extra data for this plug
+					DWORD currPos = startPos;
+
+					while (currPos < endPos) //cycle through all the 
+					{
+						// do we recognize this chunk?
+						//rewbs.dryRatio
+						if ((p[currPos] == 'D') && (p[currPos+1] == 'W') && (p[currPos+2] == 'R') && (p[currPos+3] == 'T'))
+						{	
+							currPos+=4;// move past ID
+							m_MixPlugins[nPlugin].fDryRatio = *(float*) (p+currPos);
+							currPos+= sizeof(float); //move past data
+						}
+						//end rewbs.dryRatio
+                        //else if.. (add extra attemps to recognize chunks here)
+						else // otherwise move forward a byte.
+						{
+							currPos++;
+						}
+
+					}
+
+				}
+				//end rewbs.modularPlugData
+
 			}
 		}
 		nPos += nPluginSize + 8;
