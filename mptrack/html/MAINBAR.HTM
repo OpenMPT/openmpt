@@ -1,0 +1,67 @@
+<HTML>
+<HEAD><TITLE>Main Window Controls</TITLE></HEAD>
+
+<BODY>
+<p><b><a name="top">Main Window controls</a></b></p>
+
+<ul>
+<li><a href="mainbar.htm#baseoctave">Base Octave</a></li>
+<li><a href="mainbar.htm#tempo">Tempo</a></li>
+<li><a href="mainbar.htm#speed">Speed</a></li>
+<li><a href="mainbar.htm#tree">Tree View</a></li>
+</ul>
+
+<HR><p><b><a name="baseoctave">Base Octave</a></b></p>
+This number represent the base octave used for editing notes.
+The dialog in the <a href="setup.htm#keyboard">View-Setup</a> menu
+allows you to customize your keyboard, so that the keys are mapped
+on up to 3 octaves: Base_Octave-1, Base_Octave, and Base_Octave+1.
+The initial Base Octave is 5, which means that if you type the D# key
+for Base_Octave+1, the note played will be a D#6.
+You can set the Base Octave from 1 to 8.<BR>
+
+
+<HR><p><b><a name="tempo">Tempo</a></b></p>
+This number represents the current tempo (in BPMs) of the song currently
+playing. You can change the tempo, but it will be overridden by any tempo
+effects present in the song. The BPM displayed is accurate for a speed of 6.
+<br>
+
+<HR><p><b><a name="speed">Speed</a></b></p>
+This number represents the current speed of the song, which is a tempo
+divider: higher number means slower tempo. It is the number of beats (ticks)
+for each row of the song. Like the tempo, you can change the speed of the
+current song being played, but it will be overridden by any speed effects
+present in the song.
+<br>
+
+<HR><p><b><a name="tree">Tree View</a></b></p>
+The tree view on left of the screen displays the installed sound banks,
+the midi library (used when importing midi files), the instrument library
+(a simple instrument/sample browser), and all the songs currently opened.
+<br>
+You can right-click on any item, which will bring a menu with different
+operation you can perform on it. The hilighted operation is the default
+operation that will be performed if you double-click on the item.<br>
+You can drag and drop items from and to the tree:
+<ul>
+<li>You can drag a file from the instrument library to an instrument in the
+midi library, which will assign a specific midi instrument to this file.</li>
+<li>You can drag and drop pattern numbers in the sequence list, to easily
+reorder the pattern sequence</li>
+<li>You can drag patterns, samples and instruments from the tree to the
+pattern, sample, or instrument screen to edit them (also with double-click)</li>
+<li>You can browse songs as if it was a folder with samples and instruments,
+simply drag and drop a sample to the sample editor to open it</li>
+</ul>
+<br>
+You can also use the keyboard in the tree:
+<ul>
+<li>Pressing Enter is equivalent to a mouse double-click</li>
+<li>Pressing Space will play the selected item (samples and instruments only)</li>
+<li>Pressing Delete will remove the item (Files from the instrument library will be sent to the Recycle Bin).</li>
+</ul>
+<br>
+
+</BODY>
+</HTML>

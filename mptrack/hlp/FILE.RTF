@@ -1,0 +1,169 @@
+{\rtf1 \ansi
+\deff0
+{\fonttbl
+{\f0\froman Times New Roman;}{\f1\fmodern LinePrinter;}
+{\f2\froman Symbol;}
+}
+{\colortbl
+\red0\green0\blue0;
+\red0\green0\blue255;
+\red0\green255\blue255;
+\red0\green255\blue0;
+\red255\green0\blue255;
+\red255\green0\blue0;
+\red255\green255\blue0;
+\red255\green255\blue255;
+\red0\green0\blue128;
+\red0\green128\blue128;
+\red0\green128\blue0;
+\red128\green0\blue128;
+\red128\green0\blue0;
+\red128\green128\blue0;
+\red128\green128\blue128;
+\red192\green192\blue192;
+}
+#{\footnote html_file.htm_top_of_file_label}
+\fs24
+
+${\footnote File menu commands}
+
+K{\footnote File menu commands}
+{\b #{\footnote html_file.htm_top}File menu commands}\sa240\par\pard\plain
+The File menu offers the following commands: 
+ 
+\par\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb New}{\v html_file.htm_new} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Open}{\v html_file.htm_open} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Close}{\v html_file.htm_close} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Save}{\v html_file.htm_save} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Save As}{\v html_file.htm_saveas} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Save as Wave}{\v html_file.htm_saveaswave} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Save as MP3}{\v html_file.htm_saveasmp3} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Export as Midi}{\v html_file.htm_saveasmid} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Import Midi Library}{\v html_file.htm_importlib} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Add Sound Bank}{\v html_file.htm_importdls} \par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab {\uldb Exit}{\v html_file.htm_exit} \par\pard\plain
+
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_new}New command}\sa240\par\pard\plain
+Use this command to create a new module in ModPlug Tracker, and select 
+the type of song you want to create: MOD, S3M, XM or IT (Note that you can 
+also change the module type later). If you want to use instruments, volume 
+envelopes, and NNAs, you have to manually add an instrument. 
+It is not recommended to convert a S3M/IT/XM module to a MOD 
+module, since a lot of features are not supported in the MOD file format. 
+For more details, see also the {\uldb Music Module File Formats}{\v html_formats.htm_top_of_file_label} section. 
+ 
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_open}Open command}\sa240\par\pard\plain
+Opens an existing song. The song will be converted to a MOD, S3M, 
+XM, or IT module. The following file formats are supported: 
+\par\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.669: UNIS 669, 669 Composer modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.AMF: Asylum / DSMI modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.AMS: Velvet Studio v1.x modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.DBM: DigiBooster Pro modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.DSM: DSIK music modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.FAR: Farandole Composer modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.IT:  Impulse Tracker modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.MDL: DigiTracker 1.x modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.MED: OctaMed modules (Only MMD0/MMD1 modules will play correctly).\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.MID: Midi Files (The samples will be taken from the midi library).\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.MOD: ProTracker modules (4-32 channels, 15/31 samples).\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.MTM: MultiTracker modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.NST: NoiseTracker modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.OKT: Oktalyzer modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.S3M: ScreamTracker III modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.STM: ScreamTracker II modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.ULT: UltraTracker modules (buggy).\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.WOW: Grave Composer modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.WAV: Loads WAV files, separating the left and right channels as 2 samples.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab *.XM:  FastTracker II modules.\par\pard\plain
+\fi-380\li380\tx380 {\f2\'b7}\tab All the above when zipped (*.MDZ, *.S3Z, *.XMZ, *.ITZ, *.ZIP).\par\pard\plain
+
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_save}Save command}\sa240\par\pard\plain
+Saves an opened song using the same file name. 
+You can save the song as a MOD, S3M, XM or IT module. 
+See also the {\uldb Music Module File Formats}{\v html_formats.htm_top_of_file_label} section 
+for more details about the limitations of each file format. 
+ 
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_saveas}Save As command}\sa240\par\pard\plain
+Saves an opened song to a specified file name. 
+ 
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_saveaswave}Save as Wave command}\sa240\par\pard\plain
+Saves an opened song as a Wave file (Direct-to-disk recording). 
+The wave file will be saved with the same attributes than the ones 
+defined in the Player/Soundcard Setup dialog. (Using the same mixing 
+rate, and player options). The "Advanced Soundcard Setup" options 
+have no effect on the wave file quality. Note that the wave writer 
+has a slightly better quality resampler, and if you select the 
+'Normalize' option, the saved wave file will probably have a better 
+Signal/Noise ratio (SNR).\line
+If you want to put your song on a CD, make sure you select 44100Hz, 
+stereo, 16-bit in the soundcard setup. 
+ 
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_saveasmp3}Save as MP3 command}\sa240\par\pard\plain
+Saves the current song as a MPEG Layer3 file (MP3 or WAV Layer3).\line
+Note that this option will be available only if you have a MPEG Layer3 
+encoder installed. This function will NOT normalize the output of the file, 
+and the AGC may be active, so make sure you select an appropriate volume 
+level, or use the Save As Wave function to save the song as a normalized 
+WAV file, and then use an external MPEG Layer3 encoder to convert the file. 
+ 
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_saveasmid}Export as Midi command}\sa240\par\pard\plain
+Saves the current song as a MID or RMI file.\line
+You will need to manually assign each instrument to a midi program or percussion  
+number. Only the basic notation will be saved, since most tracker effects do not 
+have midi equivalents. 
+ 
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_close}Close command}\sa240\par\pard\plain
+This will close the current opened window. 
+ 
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_importlib}Import Midi Library}\sa240\par\pard\plain
+This command will import the instrument definition file used when importing 
+midi files (saved in mptrack.ini). This allows you to keep different midi 
+configurations. If the file you choose is a DLS or SF2 sound bank, all midi 
+instruments will be mapped to this bank.\line
+When you import the midi from a sound bank, you will be asked if you want 
+to replace only the missing instruments. Choosing YES will replace only 
+the midi instruments that are not yet mapped to a sound bank. Choosing NO 
+will map all midi instruments to the selected sound bank (if they are present). 
+The midi libary's instruments are used when importing midi files. 
+\line
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_importdls}Add Sound Bank}\sa240\par\pard\plain
+This command allows you to add a new sound bank (displayed in the tree view 
+after the midi library) to import instruments from. If you have DirectX 6.1, 
+you should also have a file called GM.DLS in your windows\\system folder 
+(Windows95), or in windows\\system32\\drivers (Windows98). 
+DLS stands for DownLoadable Sounds. 
+Each sound bank contains a large set of melodic instruments and drum kits. 
+Note that you can't install more than 10 different DLS/SF2 sound banks. 
+You can double-click on an instrument in the sound bank to hear it. If you want to 
+use the instrument in your song, just drag it and drop it into the instrument 
+editor window (or sample editor if you only want to load the raw sample data). 
+ 
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\b #{\footnote html_file.htm_exit}Exit command}\sa240\par\pard\plain
+Exits ModPlug Tracker. 
+ 
+\sa240\par\pard\plain
+\sa240{\qc\f0 ____________________________________________________________________________}\par\pard\plain
+{\uldb Other File menu commands}{\v html_file.htm_top} \sa240\par\pard\plain
+}

@@ -1,0 +1,92 @@
+<HTML>
+<HEAD><TITLE>Edit menu commands</TITLE></HEAD>
+
+<BODY>
+<p><b><a name="top">Edit menu commands</a></b></p>
+The Edit menu offers the following commands:
+
+<ul>
+<li><a href="edit.htm#undo">Undo</a></li>
+<li><a href="edit.htm#redo">Redo</a></li>
+<li><a href="edit.htm#cut">Cut</a></li>
+<li><a href="edit.htm#copy">Copy</a></li>
+<li><a href="edit.htm#paste">Paste</a></li>
+<li><a href="edit.htm#selectall">Select All</a></li>
+<li><a href="edit.htm#reorderpatterns">Rearrange Patterns</a></li>
+<li><a href="edit.htm#cleanins">Cleanup Instruments</a></li>
+<li><a href="edit.htm#cleansmp">Cleanup Samples</a></li>
+<li><a href="edit.htm#cleanpat">Cleanup Patterns</a></li>
+<li><a href="edit.htm#cleansong">Cleanup Song</a></li>
+<li><a href="edit.htm#removeallins">Remove All Instruments</a></li>
+<li><a href="edit.htm#find">Find</a></li>
+<li><a href="edit.htm#findnext">Find Next</a></li>
+</ul>
+
+<HR><p><b><a name="undo">Undo command</a></b></p>
+Use this command to reverse the last block editing action, if possible.
+NOTE: This command currently only works in the pattern editor.<br>
+Shortcut Key: Alt+Back
+<br>
+
+<HR><p><b><a name="redo">Redo command</a></b></p>
+Use this command to cancel the last undo command.
+
+<HR><p><b><a name="cut">Cut command</a></b></p>
+Use this command to delete the currently selected data.
+In the pattern screen, this will clear the current selection.
+In the sample screen this will cut the selection in the sample.
+If there is no selection, or if everything is selected, the sample
+will be removed.
+
+<HR><p><b><a name="copy">Copy command</a></b></p>
+Use this command to copy selected data onto the clipboard. This command
+is unavailable if there is no data currently selected.<BR>
+Copying data to the clipboard replaces the contents previously stored there.
+
+<HR><p><b><a name="paste">Paste command</a></b></p>
+Use this command to insert a copy of the clipboard contents at the insertion
+point. This command is unavailable if the clipboard is empty.
+
+<HR><p><b><a name="selectall">Select All command</a></b></p>
+Use this command to select the entire pattern, or sample.<br>
+Keyboard shortcut: Ctrl+keypad 5
+
+<HR><p><b><a name="reorderpatterns">Rearrange Patterns</a></b></p>
+This command will reorder the sequence list, so that all patterns
+are ordered, ie 0,1,2,2,3 etc. It will also remove all empty patterns
+that are not used in the song.
+
+<HR><p><b><a name="cleanins">Cleanup Instruments</a></b></p>
+This command will remove all unused instruments.
+
+<HR><p><b><a name="cleansmp">Cleanup Samples</a></b></p>
+This command will remove all unused samples, ie samples that are
+not referenced by any instruments, or samples part of a multisample
+instrument that are not used in the song.
+
+<HR><p><b><a name="cleanpat">Cleanup Patterns</a></b></p>
+This command will remove all patterns that are not used in the song,
+even if they are not empty. It will also reorder the sequence list.
+
+<HR><p><b><a name="cleansong">Cleanup Song</a></b></p>
+This command is equivalent to Cleanup Patterns, Cleanup Instruments,
+and Cleanup Samples. For each of the cleanup commands, a window is
+displayed showing what was removed by the cleanup operation.
+
+<HR><p><b><a name="removeallins">Remove All Instruments</a></b></p>
+This command, only useful for IT songs, will remove all instruments,
+and convert the current song to a sample-mode song (no instruments).
+
+<HR><p><b><a name="find">Find</a></b></p>
+This command will search for a specific note, instrument, volume or
+effect in the patterns of the song. You can search in the whole song,
+or only in the current pattern.
+
+<HR><p><b><a name="findnext">Find Next</a></b></p>
+This command continues the search previously started by the
+<a href="edit.htm#find">Find</a> command.
+
+<HR><p><a href="edit.htm#top">Other Edit menu commands</a></p>
+
+</BODY>
+</HTML>

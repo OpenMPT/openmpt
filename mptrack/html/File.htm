@@ -1,0 +1,126 @@
+<HTML>
+<HEAD><TITLE>File menu commands</TITLE></HEAD>
+
+<BODY>
+<p><b><a name="top">File menu commands</a></b></p>
+The File menu offers the following commands:
+
+<ul>
+<li><a href="file.htm#new">New</a></li>
+<li><a href="file.htm#open">Open</a></li>
+<li><a href="file.htm#close">Close</a></li>
+<li><a href="file.htm#save">Save</a></li>
+<li><a href="file.htm#saveas">Save As</a></li>
+<li><a href="file.htm#saveaswave">Save as Wave</a></li>
+<li><a href="file.htm#saveasmp3">Save as MP3</a></li>
+<li><a href="file.htm#saveasmid">Export as Midi</a></li>
+<li><a href="file.htm#importlib">Import Midi Library</a></li>
+<li><a href="file.htm#importdls">Add Sound Bank</a></li>
+<li><a href="file.htm#exit">Exit</a></li>
+</ul>
+
+<HR><p><b><a name="new">New command</a></b></p>
+Use this command to create a new module in ModPlug Tracker, and select
+the type of song you want to create: MOD, S3M, XM or IT (Note that you can
+also change the module type later). If you want to use instruments, volume
+envelopes, and NNAs, you have to manually add an instrument.
+It is not recommended to convert a S3M/IT/XM module to a MOD
+module, since a lot of features are not supported in the MOD file format.
+For more details, see also the <a href="formats.htm">Music Module File Formats</a> section.
+
+<HR><p><b><a name="open">Open command</a></b></p>
+Opens an existing song. The song will be converted to a MOD, S3M,
+XM, or IT module. The following file formats are supported:
+<ul>
+<li>*.669: UNIS 669, 669 Composer modules.</li>
+<li>*.AMF: Asylum / DSMI modules.</li>
+<li>*.AMS: Velvet Studio v1.x modules.</li>
+<li>*.DBM: DigiBooster Pro modules.</li>
+<li>*.DSM: DSIK music modules.</li>
+<li>*.FAR: Farandole Composer modules.</li>
+<li>*.IT:  Impulse Tracker modules.</li>
+<li>*.MDL: DigiTracker 1.x modules.</li>
+<li>*.MED: OctaMed modules (Only MMD0/MMD1 modules will play correctly).</li>
+<li>*.MID: Midi Files (The samples will be taken from the midi library).</li>
+<li>*.MOD: ProTracker modules (4-32 channels, 15/31 samples).</li>
+<li>*.MTM: MultiTracker modules.</li>
+<li>*.NST: NoiseTracker modules.</li>
+<li>*.OKT: Oktalyzer modules.</li>
+<li>*.S3M: ScreamTracker III modules.</li>
+<li>*.STM: ScreamTracker II modules.</li>
+<li>*.ULT: UltraTracker modules (buggy).</li>
+<li>*.WOW: Grave Composer modules.</li>
+<li>*.WAV: Loads WAV files, separating the left and right channels as 2 samples.</li>
+<li>*.XM:  FastTracker II modules.</li>
+<li>All the above when zipped (*.MDZ, *.S3Z, *.XMZ, *.ITZ, *.ZIP).</li>
+</ul>
+
+<HR><p><b><a name="save">Save command</a></b></p>
+Saves an opened song using the same file name.
+You can save the song as a MOD, S3M, XM or IT module.
+See also the <a href="formats.htm">Music Module File Formats</a> section
+for more details about the limitations of each file format.
+
+<HR><p><b><a name="saveas">Save As command</a></b></p>
+Saves an opened song to a specified file name.
+
+<HR><p><b><a name="saveaswave">Save as Wave command</a></b></p>
+Saves an opened song as a Wave file (Direct-to-disk recording).
+The wave file will be saved with the same attributes than the ones
+defined in the Player/Soundcard Setup dialog. (Using the same mixing
+rate, and player options). The "Advanced Soundcard Setup" options
+have no effect on the wave file quality. Note that the wave writer
+has a slightly better quality resampler, and if you select the
+'Normalize' option, the saved wave file will probably have a better
+Signal/Noise ratio (SNR).<br>
+If you want to put your song on a CD, make sure you select 44100Hz,
+stereo, 16-bit in the soundcard setup.
+
+<HR><p><b><a name="saveasmp3">Save as MP3 command</a></b></p>
+Saves the current song as a MPEG Layer3 file (MP3 or WAV Layer3).<br>
+Note that this option will be available only if you have a MPEG Layer3
+encoder installed. This function will NOT normalize the output of the file,
+and the AGC may be active, so make sure you select an appropriate volume
+level, or use the Save As Wave function to save the song as a normalized
+WAV file, and then use an external MPEG Layer3 encoder to convert the file.
+
+<HR><p><b><a name="saveasmid">Export as Midi command</a></b></p>
+Saves the current song as a MID or RMI file.<br>
+You will need to manually assign each instrument to a midi program or percussion 
+number. Only the basic notation will be saved, since most tracker effects do not
+have midi equivalents.
+
+<HR><p><b><a name="close">Close command</a></b></p>
+This will close the current opened window.
+
+<HR><p><b><a name="importlib">Import Midi Library</a></b></p>
+This command will import the instrument definition file used when importing
+midi files (saved in mptrack.ini). This allows you to keep different midi
+configurations. If the file you choose is a DLS or SF2 sound bank, all midi
+instruments will be mapped to this bank.<br>
+When you import the midi from a sound bank, you will be asked if you want
+to replace only the missing instruments. Choosing YES will replace only
+the midi instruments that are not yet mapped to a sound bank. Choosing NO
+will map all midi instruments to the selected sound bank (if they are present).
+The midi libary's instruments are used when importing midi files.
+<br>
+
+<HR><p><b><a name="importdls">Add Sound Bank</a></b></p>
+This command allows you to add a new sound bank (displayed in the tree view
+after the midi library) to import instruments from. If you have DirectX 6.1,
+you should also have a file called GM.DLS in your windows\system folder
+(Windows95), or in windows\system32\drivers (Windows98).
+DLS stands for DownLoadable Sounds.
+Each sound bank contains a large set of melodic instruments and drum kits.
+Note that you can't install more than 10 different DLS/SF2 sound banks.
+You can double-click on an instrument in the sound bank to hear it. If you want to
+use the instrument in your song, just drag it and drop it into the instrument
+editor window (or sample editor if you only want to load the raw sample data).
+
+<HR><p><b><a name="exit">Exit command</a></b></p>
+Exits ModPlug Tracker.
+
+<HR><p><a href="file.htm#top">Other File menu commands</a></p>
+
+</BODY>
+</HTML>
