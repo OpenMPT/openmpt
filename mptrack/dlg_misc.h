@@ -337,16 +337,16 @@ public:
 	BOOL m_bEmbed;
 	MODMIDICFG m_MidiCfg;
 
+
 protected:
 	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam;
 	CEdit m_EditSFx, m_EditZxx;
 	CEdit m_EditMacro[NMACROS], m_EditMacroValue[NMACROS], m_EditMacroType[NMACROS]; //rewbs.macroGUI
 	CButton m_BtnMacro[NMACROS];
 	CSoundFile *m_pSndFile;
+	CModDoc *m_pModDoc;
 
 	void UpdateMacroList(int macro=-1);
-	int GetMacroType(CString value);
-	int MacroToPlugParam(CString value);
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	afx_msg void UpdateDialog();

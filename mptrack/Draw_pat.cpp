@@ -1312,7 +1312,7 @@ void CViewPattern::UpdateIndicator()
 	if ((pMainFrm) && (pModDoc))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CHAR s[256];
+		CHAR s[512];
 		UINT nChn;
 		wsprintf(s, "Row %d, Col %d", GetCurrentRow(), GetCurrentChannel()+1);
 		pMainFrm->SetUserText(s);
@@ -1320,7 +1320,7 @@ void CViewPattern::UpdateIndicator()
 		{
 			nChn = (m_dwCursor & 0xFFFF) >> 3;
 			s[0] = 0;
-			if ((!(m_dwStatus & (PATSTATUS_KEYDRAGSEL|PATSTATUS_MOUSEDRAGSEL)))
+			if ((!(m_dwStatus & (PATSTATUS_KEYDRAGSEL/*|PATSTATUS_MOUSEDRAGSEL*/))) //rewbs.xinfo: update indicator even when dragging
 			 && (m_dwBeginSel == m_dwEndSel) && (pSndFile->Patterns[m_nPattern])
 			 && (m_nRow < pSndFile->PatternSize[m_nPattern]) && (nChn < pSndFile->m_nChannels))
 			{
@@ -1369,15 +1369,43 @@ void CViewPattern::UpdateIndicator()
 					break;
 				case 3:
 				case 4:
-					if (!pModDoc->GetEffectName(s, m->command, m->param)) s[0] = 0;
+					if (!pModDoc->GetEffectName(s, m->command, m->param, FALSE, nChn)) s[0] = 0;
 					break;
 				}
 			}
 			pMainFrm->SetInfoText(s);
+			UpdateXInfoText();		//rewbs.xinfo
 		}
 	}
 
 }
+
+//rewbs.xinfo
+void CViewPattern::UpdateXInfoText()
+{
+	UINT nChn = GetCurrentChannel();
+	CString xtraInfo;
+
+	CModDoc *pModDoc = GetDocument();
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if ((pMainFrm) && (pModDoc))
+	{
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		if (!pSndFile) return;
+		
+		xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
+						nChn+1,
+						pSndFile->Chn[nChn].nActiveMacro,
+                        pSndFile->Chn[nChn].nCutOff,
+                        pSndFile->Chn[nChn].nResonance,
+                        pSndFile->Chn[nChn].nPan);
+
+		pMainFrm->SetXInfoText(xtraInfo);
+	}
+
+	return;
+}
+//end rewbs.xinfo
 
 
 void CViewPattern::UpdateAllVUMeters(MPTNOTIFICATION *pnotify)

@@ -96,6 +96,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME,	OnUpdateTime)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_USER,	OnUpdateUser)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_INFO,	OnUpdateInfo)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,OnUpdateXInfo) //rewbs.xinfo
 	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		OnUpdateControlBarMenu)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
@@ -260,6 +261,7 @@ CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
 static UINT indicators[] =
 {
 	ID_SEPARATOR,           // status line indicator
+	ID_INDICATOR_XINFO,		//rewbs.xinfo
 	ID_INDICATOR_INFO,
 	ID_INDICATOR_USER,
 	ID_INDICATOR_TIME
@@ -294,6 +296,7 @@ CMainFrame::CMainFrame()
 	m_nAvgMixChn = m_nMixChn = 0;
 	m_szUserText[0] = 0;
 	m_szInfoText[0] = 0;
+	m_szXInfoText[0]= 0;	//rewbs.xinfo
 	m_szPluginsDir[0] = 0;
 	m_szExportDir[0] = 0;
 	memset(gpenVuMeter, 0, sizeof(gpenVuMeter));
@@ -2091,6 +2094,17 @@ VOID CMainFrame::SetInfoText(LPCSTR lpszText)
 	}
 }
 
+//rewbs.xinfo
+VOID CMainFrame::SetXInfoText(LPCSTR lpszText)
+//-------------------------------------------
+{
+	if (lpszText[0] | m_szXInfoText[0])
+	{
+		strcpy(m_szXInfoText, lpszText);
+		OnUpdateInfo(NULL);
+	}
+}
+//end rewbs.xinfo
 
 VOID CMainFrame::SetHelpText(LPCSTR lpszText)
 //-------------------------------------------
@@ -2367,6 +2381,13 @@ void CMainFrame::OnUpdateInfo(CCmdUI *)
 	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_INFO), m_szInfoText, TRUE);
 }
 
+//rewbs.xinfo
+void CMainFrame::OnUpdateXInfo(CCmdUI *)
+//-------------------------------------
+{
+	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_XINFO), m_szXInfoText, TRUE);
+}
+//end rewbs.xinfo
 
 void CMainFrame::OnPlayerPause()
 //------------------------------

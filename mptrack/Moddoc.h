@@ -62,6 +62,18 @@ typedef struct PATTERNUNDOBUFFER
 } PATTERNUNDOBUFFER, *PPATTERNUNDOBUFFER;
 
 
+//parametered macro presets:
+enum
+{
+	sfx_unused=0,
+	sfx_cutoff,
+	sfx_reso,
+	sfx_mode,
+	sfx_plug,
+	sfx_custom
+};
+
+
 //=============================
 class CModDoc: public CDocument
 //=============================
@@ -106,7 +118,7 @@ public:
 	HWND GetFollowWnd() const { return m_hWndFollow; }
 	void SetFollowWnd(HWND hwnd, DWORD dwType);
 	// Effects Description
-	BOOL GetEffectName(LPSTR s, UINT command, UINT param, BOOL bXX=FALSE); // bXX: Nxx: ...
+	BOOL GetEffectName(LPSTR s, UINT command, UINT param, BOOL bXX=FALSE, int nChn=-1); // bXX: Nxx: ...
 	UINT GetNumEffects() const;
 	BOOL GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX=FALSE, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
 	LONG GetIndexFromEffect(UINT command, UINT param);
@@ -120,6 +132,8 @@ public:
 	LONG GetIndexFromVolCmd(UINT volcmd);
 	UINT GetVolCmdFromIndex(UINT ndx);
 	BOOL GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
+	int GetMacroType(CString value); //rewbs.xinfo
+	int MacroToPlugParam(CString value); //rewbs.xinfo
 
 // operations
 public:

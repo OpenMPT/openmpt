@@ -854,6 +854,8 @@
 #define ID_INDICATOR_TIME               59143
 #define ID_INDICATOR_USER               59144
 #define ID_INDICATOR_INFO               59145
+#define IDS_STRING59146                 59146
+#define ID_INDICATOR_XINFO              59147
 
 // Next default values for new objects
 // 

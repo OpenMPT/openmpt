@@ -22,6 +22,7 @@ CCommandSet::CCommandSet(void)
 	enforceRule[krAutoSelectOff]				= true;
 	enforceRule[krAutoSpacing]					= true;
 	enforceRule[krCheckModifiers]				= true;
+	enforceRule[krPropagateSampleManipulation]  = true;
 	
 	commands.SetSize(kcNumCommands);
 	SetupCommands();

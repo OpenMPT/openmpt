@@ -1321,24 +1321,13 @@ BEGIN_MESSAGE_MAP(CMidiMacroSetup, CDialog)
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+NMACROS, OnViewAllParams) //rewbs.patPlugName
 END_MESSAGE_MAP()
 
-//parametered macro presets:
-enum
-{
-	sfx_unused=0,
-	sfx_cutoff,
-	sfx_reso,
-	sfx_mode,
-	sfx_plug,
-	sfx_custom
-};
-
-
 CMidiMacroSetup::CMidiMacroSetup(MODMIDICFG *pcfg, BOOL bEmbed, CWnd *parent):CDialog(IDD_MIDIMACRO, parent)
 //----------------------------------------------------------------------------------------------------------
 {
 	m_bEmbed = bEmbed;
 	if (pcfg) m_MidiCfg = *pcfg;
 	m_pSndFile = NULL;
+	m_pModDoc = NULL;
 }
 
 
@@ -1420,8 +1409,8 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	}
 	UpdateMacroList();
 
-	if (CMainFrame::GetMainFrame()->GetActiveDoc())
-		m_pSndFile = CMainFrame::GetMainFrame()->GetActiveDoc()->GetSoundFile();
+	m_pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
+	if (m_pModDoc) m_pSndFile = CMainFrame::GetMainFrame()->GetActiveDoc()->GetSoundFile();
 	if (!m_pSndFile)
 		return FALSE;
 	for (UINT plug=0; plug<MAX_MIXPLUGINS; plug++)
@@ -1469,7 +1458,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 		m_EditMacroValue[m].SetWindowText(macroText);
 
 		//Macro Type:
-		macroType = GetMacroType(macroText);
+		macroType = m_pModDoc->GetMacroType(macroText);
 		switch (macroType)
 		{
 			case sfx_unused: s = "Unused"; break;
@@ -1477,7 +1466,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 			case sfx_reso: s = "Set Filter Resonance"; break;
 			case sfx_mode: s = "Set Filter Mode"; break;
 			case sfx_plug: 
-				s.Format("Control Plugin Param %d", MacroToPlugParam(macroText)); 
+				s.Format("Control Plugin Param %d", m_pModDoc->MacroToPlugParam(macroText)); 
 				break;
 			case sfx_custom: 
 			default: s = "Custom";
@@ -1492,29 +1481,6 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 	}
 }
 
-int CMidiMacroSetup::GetMacroType(CString value)
-{
-	if (value.Compare("")==0) return sfx_unused;
-	if (value.Compare("F0F000z")==0) return sfx_cutoff;
-	if (value.Compare("F0F001z")==0) return sfx_reso;
-	if (value.Compare("F0F002z")==0) return sfx_mode;
-	if (value.Compare("F0F079z")>0 && value.Compare("F0F0G")<0 && value.GetLength()==7) //can be fooled :)
-		return sfx_plug; 
-	return sfx_custom; //custom/unknown
-}
-
-int CMidiMacroSetup::MacroToPlugParam(CString macro)
-{
-	char* param = (char *) (LPCTSTR) macro;
-	param +=4;
-	int code = -256;
-	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
-	if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
-	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
-	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
-
-	return code&0x7F;
-}
 
 void CMidiMacroSetup::UpdateDialog()
 //----------------------------------
@@ -1530,7 +1496,7 @@ void CMidiMacroSetup::UpdateDialog()
 		{
 			m_CbnMacroPlug.EnableWindow(TRUE);
 			m_CbnMacroParam.EnableWindow(TRUE);
-			m_CbnMacroParam.SetCurSel(MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[sfx*32])));
+			m_CbnMacroParam.SetCurSel(m_pModDoc->MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[sfx*32])));
 		}
 		else
 		{
@@ -1589,7 +1555,7 @@ void CMidiMacroSetup::OnSFxChanged()
 	{
 		CString macroText;
 		memcpy(macroText.GetBuffer(32), &m_MidiCfg.szMidiSFXExt[sfx*32], 32);
-		int preset = GetMacroType(macroText);
+		int preset = m_pModDoc->GetMacroType(macroText);
 		m_CbnSFxPreset.SetCurSel(preset);
 	}
 	UpdateDialog();
@@ -1678,8 +1644,8 @@ void CMidiMacroSetup::OnSFxEditChanged()
 		if (zocc) zocc[0]='z';	
 
 		memcpy(&m_MidiCfg.szMidiSFXExt[sfx*32], s, 32);
-		int sfx_preset = GetMacroType(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
-		int param = MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
+		int sfx_preset = m_pModDoc->GetMacroType(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
+		int param = m_pModDoc->MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
 		
 		m_CbnSFxPreset.SetCurSel(sfx_preset);
 
@@ -1721,7 +1687,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 
 	CString message, plugName, paramName, line;
 	int sfx = id-ID_PLUGSELECT;
-	int param = MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
+	int param = m_pModDoc->MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
 	CVstPlugin *pVstPlugin; 
 	char s[256];
 	message.Format("These are the parameters that can be conrolled by macro SF%X:\n\n",sfx);
@@ -1774,7 +1740,7 @@ void CMidiMacroSetup::OnPlugChanged()
 		}
 		m_CbnMacroParam.SetRedraw(TRUE);
 		
-		int param = MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[m_CbnSFx.GetCurSel()*32]));
+		int param = m_pModDoc->MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[m_CbnSFx.GetCurSel()*32]));
 		m_CbnMacroParam.SetCurSel(param);
 	}
 	//OnPlugParamChanged();

@@ -700,6 +700,8 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	}
 	if (!penv) return;
 	MODCHANNEL *p = pChn;
+	if (pChn->dwFlags & CHN_MUTE) return;
+
 	bool applyDNAtoPlug;	//rewbs.VSTiNNA
 	for (UINT i=nChn; i<MAX_CHANNELS; p++, i++)
 	if ((i >= m_nChannels) || (p == pChn))
@@ -781,7 +783,6 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			}
 		}
 	}
-	if (pChn->dwFlags & CHN_MUTE) return;
 	
 	//rewbs.VSTiNNA
 	// Do we need to apply New/Duplicate Note Action to a VSTi?

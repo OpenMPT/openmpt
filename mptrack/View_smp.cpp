@@ -101,7 +101,11 @@ void CViewSample::OnInitialUpdate()
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 	CModScrollView::OnInitialUpdate();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->SetInfoText("");
+	if (pMainFrm) 
+	{
+		pMainFrm->SetInfoText("");
+		pMainFrm->SetXInfoText(""); //rewbs.xinfo
+	}
 	UpdateScrollSize();
 }
 

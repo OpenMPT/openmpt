@@ -2220,7 +2220,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	bool bankChanged = pCh->wMidiBank != --wMidiBank;
 	bool progChanged = pCh->nProgram != --nMidiProg;
 	bool chanChanged = nCh != m_nPreviousMidiChan;
-	if (vol == 0) vol=64;
+	if (vol > 64) vol=64;
 
 	// Note: Some VSTis update bank/prog on midi channel change, others don't.
 	//       For those that don't, we do it for them.

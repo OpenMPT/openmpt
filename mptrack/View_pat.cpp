@@ -1390,7 +1390,6 @@ void CViewPattern::ProcessChar(UINT nChar, UINT nFlags)
 */
 }
 
-
 void CViewPattern::OnLButtonDown(UINT, CPoint point)
 //--------------------------------------------------
 {
@@ -1486,6 +1485,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			DWORD dwPos = m_dwBeginSel;
 			SetCurrentRow(dwPos >> 16);
 			SetCurrentColumn(dwPos & 0xFFFF);
+			//UpdateIndicator();
 		}
 	}
 	if ((!bItemSelected) || (!m_nDragItem)) return;
@@ -3374,13 +3374,13 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			SetPlayCursor(nPat, nRow);
 		}
 
-
-
 	}
 	if ((pnotify->dwType & (MPTNOTIFY_VUMETERS|MPTNOTIFY_STOP)) && (m_dwStatus & PATSTATUS_VUMETERS))
 	{
 		UpdateAllVUMeters(pnotify);
 	}
+	
+	UpdateIndicator();
 
 	return 0;
 
