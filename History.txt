@@ -21,6 +21,26 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17RC1 (revision 1.13.2.9)
+  . <rewbs> In autosave dialog, will check backup path exists (if it is to be used). Also Autosave should issue a warning if save fails for whatever reason.
+  . <rewbs> File marked as modified on all sample/intrument/general tab changes (some had been missed).
+  . <rewbs> Change to command handling when textbox has focus
+  . <rewbs> Idle time dished out to plugs at 100Hz rather than 10Hz and from TrackApp::OnIdle rather than MainFrame::OnTimer
+  . <rewbs> Internal: Edit & Continue debugging enabled in debug build settings.
+  . <rewbs> Cxx no longer ignored after 255 loops
+  . <rewbs> Autosaver will now save is autsaver is disabled. :)
+  . <rewbs> Samplemap and instrument name should be accessible with XM files now.
+  . <rewbs> Mousewheel should scroll pattern even if focus is in some elements above the pattern editor.
+(I believe winME and maybe win98 users might still have trouble with the mousewheel. I'm not sure why this is. If anyone has any ideas, let me know.)
+  . <rewbs> No MPT commands will be executed if a texbox has focus, i.e. textboxes will work again now.
+  . <rewbs> Minor optimisations to instrument view envelope drawing
+  . <rewbs> Internal: a couple of code cleanups to remove a few compilation warnings.
+  / <rewbs> processReplacing() is now favoured over process() in VST plugs
+  . <rewbs> Plugin automatically bypassed if an exception is thrown in process()/processReplacing()
+  . <rewbs> Switched to C++ exceptions handlers throughout, which will actually get compiled into the release builds.
+  + <rewbs> Select plugin dialog is now resizable. :D
+  . <rewbs> Other minor fixes (Options dialog now remembers if autosave tab was selected, zoom level cycling in sample view fixed...)
+
 . v 1.17RC1 (revision 1.13.2.8) 
    / <rewbs> If a plug identifies itself as willing to recieve midi events, midi channel 1 will automatically be selected when it is assigned to an instrument
    + <rewbs> Option to emulate some old mixing bugs, in case your old track sounds too different in this version  (could happen with some distortion plugins for example) and you aren't able to recover the sound by adjusting the levels
