@@ -2600,6 +2600,20 @@ double CMainFrame::GetApproxBPM()
 	double bpm = 60000/msPerBeat;
 	return bpm;
 }
+
+BOOL CMainFrame::InitRenderer(CModDoc* modDoc)
+{
+	m_dwStatus |= MODSTATUS_RENDERING;
+	m_pModPlaying = modDoc ;
+	return true;
+}
+
+BOOL CMainFrame::StopRenderer()
+{
+	m_dwStatus &= ~MODSTATUS_RENDERING;
+	m_pModPlaying = NULL;
+	return true;
+}
 //end rewbs.VSTTimeInfo
 
 //rewbs.customKeys

@@ -121,6 +121,7 @@ enum {
 
 #define MODSTATUS_PLAYING		0x01
 #define MODSTATUS_BUSY			0x02
+#define MODSTATUS_RENDERING     0x04 //rewbs.VSTTimeInfo
 
 #define SOUNDSETUP_ENABLEMMX	0x08
 #define SOUNDSETUP_SOFTPANNING	0x10
@@ -507,10 +508,14 @@ public:
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn);
 	BOOL StopSoundFile(CSoundFile *);
 	BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); 	}
+	BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); 	} //rewbs.VSTTimeInfo
 	DWORD GetElapsedTime() const { return m_dwElapsedTime; }
 	void ResetElapsedTime() { m_dwElapsedTime = 0; }
-	CModDoc *GetModPlaying() const { return (IsPlaying()) ? m_pModPlaying : NULL; }
-	CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()) ? m_pSndFile : NULL; } 
+	CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
+	//CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()) ? m_pSndFile : NULL; } 
+	CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
+	BOOL InitRenderer(CModDoc*);  //rewbs.VSTTimeInfo
+	BOOL StopRenderer();  //rewbs.VSTTimeInfo
 	void SwitchToActiveView();
 	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT bufsize, LONG wd);
 	BOOL SetupDirectories(LPCSTR s, LPCSTR s2, LPCSTR s3);
