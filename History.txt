@@ -24,6 +24,11 @@ NOTE:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.16.0213a
+   . Added live VSTi playback on channel 1 bugfix by ericus.
+   / Set Instrument command no longer requires instrument column to be selected.
+   / Cosmetic changes in instrument pane (tx LPChip)
+   . Another attempt at getting rid of beeps with alt- combo keys that do not open menu items and are assigned to commands without screwing everything up. (tx LPChip)
 
 . v 1.16.0212a
    - Can no longer select "Normalize" when writing to wave, as this can produce incorrect output with certain VSTs.
