@@ -462,7 +462,8 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 // -> CODE#0002
 // -> DESC="VST plugins presets"
 			CHAR s2[32];
-			UINT k = 0, nProg = pVstPlugin->GetNumPrograms();
+			//UINT k = 0, nProg = min(pVstPlugin->GetNumPrograms(), 256);  //Limit number of progs to 256 because of insane plugs like synth1
+			UINT k = 0, nProg = pVstPlugin->GetNumPrograms(); 
 			m_CbnPreset.SetRedraw(FALSE);
 			m_CbnPreset.ResetContent();
 			wsprintf(s2, "current");

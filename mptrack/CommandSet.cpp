@@ -2836,7 +2836,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 		::MessageBox(NULL, "Can't open file for writing.", "", MB_ICONEXCLAMATION|MB_OK);
 		return false;
 	}
-	fprintf(outStream, "//-------- Modplug Tracker key binding definition file prototype -------\n"); 
+	fprintf(outStream, "//-------- Modplug Tracker key binding definition file  -------\n"); 
 	fprintf(outStream, "//-Format is:                                                          -\n"); 	
 	fprintf(outStream, "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n"); 
 	fprintf(outStream, "//----------------------------------------------------------------------\n"); 

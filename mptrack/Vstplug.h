@@ -122,6 +122,7 @@ public:
 	BOOL GetSpeakerArrangement(); //rewbs.VSTCompliance
 
 	BOOL isInstrument(); // ericus 18/02/2005
+	BOOL CanRecieveMidiEvents();
 
 public: // IMixPlugin interface
 	int AddRef() { return ++m_nRefCount; }

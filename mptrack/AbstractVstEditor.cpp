@@ -90,6 +90,7 @@ VOID CAbstractVstEditor::SetupMenu()
 {
 	if (m_pVstPlugin)
 	{
+		//long numProgs = min(m_pVstPlugin->GetNumPrograms(), 256); //Limit number of progs to 256 because of insane plugs like synth1
 		long numProgs = m_pVstPlugin->GetNumPrograms();
 		long curProg  = m_pVstPlugin->GetCurrentProgram();
 		char s[256];

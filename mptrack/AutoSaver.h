@@ -78,4 +78,6 @@ public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBnClickedAutosaveEnable();
 	afx_msg void OnBnClickedAutosaveUseorigdir();
+	void OnSettingsChanged();
+	
 };

@@ -35,6 +35,21 @@ extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
 extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
 #endif
 
+
+//rewbs.emulateMixBugs
+extern void X86_OldStereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
+extern void X86_OldFloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
+extern void X86_OldMonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
+extern void X86_OldFloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+#ifdef ENABLE_SSE
+extern void SSE_OldMonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
+#endif
+#ifdef ENABLE_AMD
+extern void AMD_OldMonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
+extern void AMD_OldFloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+#endif
+//end rewbs.emulateMixBugs
+
 #pragma pack(4)
 typedef struct _EQBANDSTRUCT
 {
@@ -360,7 +375,11 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 	if ((gdwSysInfo & SYSMIX_SSE) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
     {
 		int sse_state, sse_eqstate;
-		SSE_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2);
+		if (gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) {
+			SSE_OldMonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2);
+		} else {
+			SSE_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2);
+		}
 		_asm stmxcsr sse_state;
 		sse_eqstate = sse_state | 0xFF80;
 		_asm ldmxcsr sse_eqstate;
@@ -370,7 +389,13 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 				SSE_StereoEQ(&gEQ[b], &gEQ[b+MAX_EQ_BANDS], MixFloatBuffer, nCount);
 		}
 		_asm ldmxcsr sse_state;
-		X86_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
+
+		if (gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) {
+			X86_OldFloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
+		} else {
+			X86_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
+		}
+
 	} else
 
 #endif // ENABLE_SSE
@@ -382,20 +407,34 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 
 	if ((gdwSysInfo & SYSMIX_3DNOW) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
 	{ 
-		AMD_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2);
+		if (gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) {
+			AMD_OldMonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2);
+		} else {
+			AMD_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2);
+		}		
 		for (UINT b=0; b<MAX_EQ_BANDS; b++)
 		{
 			if (((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f))
 			 || ((gEQ[b+MAX_EQ_BANDS].bEnable) && (gEQ[b+MAX_EQ_BANDS].Gain != 1.0f)))
 				AMD_StereoEQ(&gEQ[b], &gEQ[b+MAX_EQ_BANDS], MixFloatBuffer, nCount);
 		}
-		AMD_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
+
+		if (gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) {
+			AMD_OldFloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
+		} else {
+			AMD_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
+		}
+		
 	} else
 #endif // ENABLE_AMD
 
 	{	
-
-		X86_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount);
+		if (gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) {
+			X86_OldStereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount);
+		} else {
+			X86_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount);
+		}
+		
 		for (UINT bl=0; bl<MAX_EQ_BANDS; bl++)
 		{
 			if ((gEQ[bl].bEnable) && (gEQ[bl].Gain != 1.0f)) EQFilter(&gEQ[bl], MixFloatBuffer, nCount);
@@ -404,7 +443,11 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 		{
 			if ((gEQ[br].bEnable) && (gEQ[br].Gain != 1.0f)) EQFilter(&gEQ[br], MixFloatBuffer+MIXBUFFERSIZE, nCount);
 		}
-		X86_FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount);
+		if (gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) {
+			X86_OldFloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount);
+		} else {
+			X86_FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount);
+		}
 	}
 }
 

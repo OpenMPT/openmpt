@@ -23,7 +23,7 @@ class ISoundSource;
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define KEYBOARDMAP_LENGTH			(3*12+2)
 #define MAINFRAME_TITLE				"Modplug Tracker"
-#define MPTRACK_FINALRELEASEVERSION	0x01090000
+#define MPTRACK_FINALRELEASEVERSION	0x011700D7
 #define MPTRACK_VERSION				0x011700D7
 
 
@@ -477,7 +477,7 @@ public:
 	static const DWORD *GetKeyboardMap();
 	static VOID GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
-	static CAutoSaver *m_pAutoSaver; 	//rewbs.customKeys
+	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
 
 // Misc functions
 public:

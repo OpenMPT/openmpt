@@ -1784,8 +1784,14 @@ void CModDoc::OnApproximateBPM()
 	//Convert BPM to string:
 	CString Message;
 	double bpm = CMainFrame::GetMainFrame()->GetApproxBPM();
-	Message.Format("Assuming:\n. A tick factor of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
-		m_SndFile.m_nTempoFactor, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+
+	if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
+		Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+		m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+	} else {
+		Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+		m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+	}
 	CMainFrame::GetMainFrame()->MessageBox(Message, NULL, MB_OK|MB_ICONINFORMATION);
 }
 

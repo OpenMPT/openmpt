@@ -4530,7 +4530,7 @@ void CViewPattern::TempEnterChord(int note)
 		oldcmd = *p;
 
 		// -- establish note data
-		HandleSplit(p, note);
+		isSplit = HandleSplit(p, note);
 	
 		PMPTCHORD pChords = pMainFrm->GetChords();
 		UINT baseoctave = pMainFrm->GetBaseOctave();
@@ -4540,9 +4540,9 @@ void CViewPattern::TempEnterChord(int note)
 		{
 			UINT nchordnote;
             if (isSplit)
-				pChords[nchord].key + (p->note%12) + 1;
+				nchordnote = pChords[nchord].key + baseoctave*(p->note%12) + 1;
 			else
-				pChords[nchord].key + baseoctave*12 + 1;
+				nchordnote = pChords[nchord].key + baseoctave*12 + 1;
 			if (nchordnote <= 120)
 			{
 				UINT nchordch = nChn, nchno = 0;

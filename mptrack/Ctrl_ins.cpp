@@ -1746,8 +1746,18 @@ void CCtrlInstruments::OnMixPlugChanged()
 				if (pPlug && pPlug->pMixPlugin)
 				{
 					::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), true);
+					
+					// if this plug can recieve MIDI events and we have no MIDI channel
+					// selected for this instrument, automatically select MIDI channel 1.
+					if (pPlug->pMixPlugin->CanRecieveMidiEvents() && penv->nMidiChannel==0) {
+						penv->nMidiChannel=1;
+						m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+						UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT, NULL);
+					}
 					return;
 				}
+				
+				
 			}
 		}
 	}
