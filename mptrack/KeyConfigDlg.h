@@ -97,7 +97,7 @@ protected:
 	CButton m_bKeyDown, m_bKeyHold, m_bKeyUp;
 	CButton m_bnReset;
 	CCustEdit m_eCustHotKey;
-	CEdit m_eReport, m_eKeyFile;
+	CEdit m_eReport, m_eKeyFile, m_eChordWaitTime;
 	DWORD KeyboardMap[KEYBOARDMAP_LENGTH];
 	DWORD CustomKeys[MAX_MPTHOTKEYS];
 	UINT m_nKeyboardCfg;
@@ -133,8 +133,8 @@ protected:
 	afx_msg void OnKeyChoiceSelect();
 	afx_msg void OnCommandKeySelChanged();
 	afx_msg void OnCategorySelChanged();
+	afx_msg void OnChordWaitTimeChanged(); //rewbs.autochord
 	afx_msg void OnHotKeyChanged();
-	afx_msg void OnHotKeyReset();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnCheck() { OnSetKeyChoice(); };
 	afx_msg void OnNotesRepeat();

@@ -134,6 +134,7 @@ long CMainFrame::glVolumeRampSamples = 42;
 double CMainFrame::gdWFIRCutoff = 0.5;
 BYTE  CMainFrame::gbWFIRType = 7; //WFIR_KAISER4T;
 //end rewbs.resamplerConf
+UINT CMainFrame::gnAutoChordWaitTime = 60;
 
 CRITICAL_SECTION CMainFrame::m_csAudio;
 HANDLE CMainFrame::m_hPlayThread = NULL;
@@ -406,6 +407,11 @@ CMainFrame::CMainFrame()
 		dwSZSIZE = sizeof(glVolumeRampSamples);
 		RegQueryValueEx(key, "VolumeRampSamples", NULL, &dwREG_DWORD, (LPBYTE)&glVolumeRampSamples, &dwDWORDSize);
 		//end rewbs.resamplerConf
+		//rewbs.autochord
+		dwSZSIZE = sizeof(gnAutoChordWaitTime);
+		RegQueryValueEx(key, "AutoChordWaitTime", NULL, &dwREG_DWORD, (LPBYTE)&gnAutoChordWaitTime, &dwDWORDSize);
+		//end rewbs.autochord
+
 		RegCloseKey(key);
 	}
 	// Read more registry settings
@@ -800,6 +806,7 @@ void CMainFrame::OnClose()
 		RegSetValueEx(key, "ResamplerWFIRCutoff", NULL, REG_DWORD, (LPBYTE)&gdWFIRCutoff, sizeof(gdWFIRCutoff));
 		RegSetValueEx(key, "VolumeRampSamples", NULL, REG_DWORD, (LPBYTE)&glVolumeRampSamples, sizeof(glVolumeRampSamples));		
 		//end rewbs.resamplerConf
+		RegSetValueEx(key, "AutoChordWaitTime", NULL, REG_DWORD, (LPBYTE)&gnAutoChordWaitTime, sizeof(gnAutoChordWaitTime)); //rewbs.autochord
 
 		RegCloseKey(key);
 	}
