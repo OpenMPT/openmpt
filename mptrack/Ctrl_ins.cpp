@@ -1926,83 +1926,104 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 
 		if (penv)
 		{
+		//Various optimisations by rewbs
+			CSliderCtrl* pSlider = (CSliderCtrl*) pSB;
 			short int n;
+			bool filterChanger = false;
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 			// Volume ramping (attack)
-			n = m_SliderAttack.GetPos();
-			int newRamp = n ? MAX_ATTACK_LENGTH - n : 0;
-
+			if (pSlider==&m_SliderAttack) {
+				n = m_SliderAttack.GetPos();
+				int newRamp = n ? MAX_ATTACK_LENGTH - n : 0;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-			if(penv->nVolRamp != newRamp){
-				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
-				m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
-			}
+				if(penv->nVolRamp != newRamp){
+					m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+					m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+					penv->nVolRamp = newRamp;
+					SetDlgItemInt(IDC_EDIT2,n);
+					m_pModDoc->SetModified();
+				}
 // -! NEW_FEATURE#0023
-
-			penv->nVolRamp = n;
-			SetDlgItemInt(IDC_EDIT2,n);
-			m_pModDoc->SetModified();
 // -! NEW_FEATURE#0027
-
+			} 
 			// Volume Swing
-			n = m_SliderVolSwing.GetPos();
-			if ((n >= 0) && (n <= 64) && (n != (int)penv->nVolSwing))
+			else if (pSlider==&m_SliderVolSwing) 
 			{
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
-// -! NEW_FEATURE#0023
-				penv->nVolSwing = (BYTE)n;
-				m_pModDoc->SetModified();
-			}
-			// Pan Swing
-			n = m_SliderPanSwing.GetPos();
-			if ((n >= 0) && (n <= 64) && (n != (int)penv->nPanSwing))
-			{
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
-// -! NEW_FEATURE#0023
-				penv->nPanSwing = (BYTE)n;
-				m_pModDoc->SetModified();
-			}
-			// Filter CutOff
-			n = m_SliderCutOff.GetPos();
-			if ((n >= 0) && (n < 0x80) && (n != (int)(penv->nIFC & 0x7F)))
-			{
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
-// -! NEW_FEATURE#0023
-				penv->nIFC &= 0x80;
-				penv->nIFC |= (BYTE)n;
-				m_pModDoc->SetModified();
-				UpdateFilterText();
-			}
-			// Filter Resonance
-			n = m_SliderResonance.GetPos();
-			if ((n >= 0) && (n < 0x80) && (n != (int)(penv->nIFR & 0x7F)))
-			{
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
-// -! NEW_FEATURE#0023
-				penv->nIFR &= 0x80;
-				penv->nIFR |= (BYTE)n;
-				m_pModDoc->SetModified();
-			}
-			// Update channels
-			for (UINT i=0; i<MAX_CHANNELS; i++)
-			{
-				if (pSndFile->Chn[i].pHeader == penv)
+				n = m_SliderVolSwing.GetPos();
+				if ((n >= 0) && (n <= 64) && (n != (int)penv->nVolSwing))
 				{
-					if (penv->nIFC & 0x80) pSndFile->Chn[i].nCutOff = penv->nIFC & 0x7F;
-					if (penv->nIFR & 0x80) pSndFile->Chn[i].nResonance = penv->nIFR & 0x7F;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+					m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+// -! NEW_FEATURE#0023
+					penv->nVolSwing = (BYTE)n;
+					m_pModDoc->SetModified();
 				}
 			}
+			// Pan Swing
+			else if (pSlider==&m_SliderPanSwing) 
+			{
+				n = m_SliderPanSwing.GetPos();
+				if ((n >= 0) && (n <= 64) && (n != (int)penv->nPanSwing))
+				{
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+					m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+// -! NEW_FEATURE#0023
+					penv->nPanSwing = (BYTE)n;
+					m_pModDoc->SetModified();
+				}
+			}
+			// Filter CutOff
+			else if (pSlider==&m_SliderCutOff)
+			{
+				n = m_SliderCutOff.GetPos();
+				if ((n >= 0) && (n < 0x80) && (n != (int)(penv->nIFC & 0x7F)))
+				{
+	// -> CODE#0023
+	// -> DESC="IT project files (.itp)"
+					m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+	// -! NEW_FEATURE#0023
+					penv->nIFC &= 0x80;
+					penv->nIFC |= (BYTE)n;
+					m_pModDoc->SetModified();
+					UpdateFilterText();
+					filterChanger = true;
+				}
+			}
+			else if (pSlider==&m_SliderResonance)
+			{
+				// Filter Resonance
+				n = m_SliderResonance.GetPos();
+				if ((n >= 0) && (n < 0x80) && (n != (int)(penv->nIFR & 0x7F)))
+				{
+	// -> CODE#0023
+	// -> DESC="IT project files (.itp)"
+					m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+	// -! NEW_FEATURE#0023
+					penv->nIFR &= 0x80;
+					penv->nIFR |= (BYTE)n;
+					m_pModDoc->SetModified();
+					filterChanger = true;
+				}
+			}
+			
+			// Update channels
+			if (filterChanger==true)
+			{
+				for (UINT i=0; i<MAX_CHANNELS; i++)
+				{
+					if (pSndFile->Chn[i].pHeader == penv)
+					{
+						if (penv->nIFC & 0x80) pSndFile->Chn[i].nCutOff = penv->nIFC & 0x7F;
+						if (penv->nIFR & 0x80) pSndFile->Chn[i].nResonance = penv->nIFR & 0x7F;
+					}
+				}
+			}
+		
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
@@ -2013,6 +2034,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 	{
 		SwitchToView();
 	}
+	
 }
 
 

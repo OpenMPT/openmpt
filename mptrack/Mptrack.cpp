@@ -1333,9 +1333,9 @@ BOOL CAboutDlg::OnInitDialog()
     m_static.SubclassDlgItem(IDC_CREDITS,this);
     m_static.SetCredits(pArrCredit);
     m_static.SetSpeed(DISPLAY_SLOW);
-    m_static.SetColor(BACKGROUND_COLOR, RGB(0, 0, 128)); // Background Colour
+    m_static.SetColor(BACKGROUND_COLOR, RGB(138, 165, 219)); // Background Colour
     m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent
-    m_static.SetGradient(GRADIENT_RIGHT_DARK);  // Background goes from blue to black from left to right
+    m_static.SetGradient(GRADIENT_LEFT_DARK);  // Background goes from blue to black from left to right
     // m_static.SetBkImage(IDB_BITMAP1); // Background image
     m_static.StartScrolling();
     return TRUE;  // return TRUE unless you set the focus to a control

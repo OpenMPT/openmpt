@@ -775,8 +775,13 @@ void CDoWaveConvert::OnButton1()
 		}
 	}
 	CMainFrame::UpdateAudioParameters(TRUE);
+//rewbs: reduce to normal priority during debug for easier hang debugging
+#ifdef NDEBUG
 	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-
+#endif 
+#ifdef _DEBUG
+	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+#endif 
 // -> CODE#0024	UPDATE#03
 // -> DESC="wav export update"
 //	EndDialog(IDOK);
@@ -1093,7 +1098,13 @@ OnError:
 	if (had != NULL) theApp.AcmDriverClose(had, 0L);
 	if (pcmBuffer) GlobalFreePtr(pcmBuffer);
 	if (dstBuffer) GlobalFreePtr(dstBuffer);
+//rewbs: reduce to normal priority during debug for easier hang debugging
+#ifdef NDEBUG
 	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+#endif 
+#ifdef _DEBUG
+	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+#endif 
 	EndDialog(retval);
 }
 

@@ -72,7 +72,6 @@ protected:
 	int m_MixBuffer[MIXBUFFERSIZE*2+2];		// Stereo interleaved
 	float m_FloatBuffer[MIXBUFFERSIZE*32+31];	// 2ch separated + up to 32 VSTi outputs...
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
-	CModDoc* m_pModDoc;	//rewbs.macroGUI: we need a reference to the document which holds this plug.
 	UINT m_nPreviousMidiChan; //rewbs.VSTCompliance
 
 public:
