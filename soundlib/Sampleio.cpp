@@ -1718,8 +1718,7 @@ UINT CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 	if (pis->flags & 2)
 	{
 		flags += 5;
-		if (pis->flags & 4) flags |= RSF_STEREO;
-		{
+		if (pis->flags & 4) {
 			flags |= RSF_STEREO;
 // -> CODE#0001
 // -> DESC="enable saving stereo ITI"
