@@ -1223,7 +1223,7 @@ void CViewGlobals::OnParamChanged()
 			SetDlgItemText(IDC_TEXT5, s);
 			float fValue = pVstPlugin->GetParameter(m_nCurrentParam);
 			int nValue = (int)(fValue * 100.0f + 0.5f);
-			wsprintf(s, "%d.%02d", nValue/100, nValue%100);
+			sprintf(s, "%f", fValue); //wsprintf(s, "%d.%02d", nValue/100, nValue%100); // ericus 25/01/2005
 			SetDlgItemText(IDC_EDIT14, s);
 			m_sbValue.SetPos(nValue);
 			return;
