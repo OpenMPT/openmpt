@@ -606,6 +606,12 @@ void CNoteMapWnd::StopNote(int note = -1)
 /////////////////////////////////////////////////////////////////////////
 // CCtrlInstruments
 
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+#define MAX_ATTACK_LENGTH	2001
+#define MAX_ATTACK_VALUE	(MAX_ATTACK_LENGTH - 1)  // 16 bit unsigned max
+// -! NEW_FEATURE#0027
+
 BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlInstruments)
 	ON_WM_VSCROLL()
@@ -629,6 +635,12 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT9,				OnPanningChanged)
 	ON_EN_CHANGE(IDC_EDIT10,			OnMPRChanged)
 	ON_EN_CHANGE(IDC_EDIT15,			OnPPSChanged)
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	ON_EN_CHANGE(IDC_EDIT2,				OnAttackChanged)
+// -! NEW_FEATURE#0027
+
 	ON_CBN_SELCHANGE(IDC_COMBO1,		OnNNAChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,		OnDCTChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3,		OnDCAChanged)
@@ -671,6 +683,11 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER2,				m_SliderPanSwing);
 	DDX_Control(pDX, IDC_SLIDER3,				m_SliderCutOff);
 	DDX_Control(pDX, IDC_SLIDER4,				m_SliderResonance);
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	DDX_Control(pDX, IDC_SLIDER5,				m_SliderAttack);
+	DDX_Control(pDX, IDC_SPIN1,					m_SpinAttack);
+// -! NEW_FEATURE#0027
 	//}}AFX_DATA_MAP
 }
 
@@ -761,6 +778,14 @@ BOOL CCtrlInstruments::OnInitDialog()
 		wsprintf(s, "%s%d", szNoteNames[n % 12], n/12);
 		m_ComboPPC.SetItemData(m_ComboPPC.AddString(s), n);
 	}
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	// Volume ramping (attack)
+	m_SliderAttack.SetRange(0,MAX_ATTACK_VALUE);
+	m_SpinAttack.SetRange(0,MAX_ATTACK_VALUE);
+// -! NEW_FEATURE#0027
+
 	m_SpinInstrument.SetFocus();
 	return FALSE;
 }
@@ -797,6 +822,11 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 		// Is this a bug ?
 		m_SliderCutOff.InvalidateRect(NULL, FALSE);
 		m_SliderResonance.InvalidateRect(NULL, FALSE);
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+		// Volume ramping (attack)
+		m_SliderAttack.InvalidateRect(NULL, FALSE);
+// -! NEW_FEATURE#0027
 	}
 	PostViewMessage(VIEWMSG_SETCURRENTINSTRUMENT, m_nInstrument);
 	UnlockControls();
@@ -1020,6 +1050,14 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 				m_SliderResonance.SetPos(penv->nIFR & 0x7F);
 				UpdateFilterText();
 			}
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+			// Volume ramping (attack)
+			int n = penv->nVolRamp ? MAX_ATTACK_LENGTH - penv->nVolRamp : 0;
+			m_SliderAttack.SetPos(n);
+			if(n == 0) SetDlgItemText(IDC_EDIT2,"default");
+			else SetDlgItemInt(IDC_EDIT2,n);
+// -! NEW_FEATURE#0027
 		} else
 		{
 			m_EditName.SetWindowText("");
@@ -1089,8 +1127,10 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 		int n = strlen(lpszFileName);
-		if(n > _MAX_PATH) n = _MAX_PATH;
+		if(n >= _MAX_PATH) n = _MAX_PATH-1;
 		strncpy(&m_pSndFile->m_szInstrumentPath[m_nInstrument-1][0],lpszFileName,n);
+		m_pSndFile->m_szInstrumentPath[m_nInstrument-1][n] = '\0';
+		m_pSndFile->instrumentModified[m_nInstrument-1] = FALSE;
 // -! NEW_FEATURE#0023
 		bOk = TRUE;
 	}
@@ -1374,6 +1414,7 @@ void CCtrlInstruments::OnInstrumentSave()
 	int n = strlen(dlg.GetPathName());
 	if(n > _MAX_PATH) n = _MAX_PATH;
 	strncpy(&m_pSndFile->m_szInstrumentPath[m_nInstrument-1][0],dlg.GetPathName(),n);
+	m_pSndFile->instrumentModified[m_nInstrument-1] = FALSE;
 // -! NEW_FEATURE#0023
 
 	EndWaitCursor();
@@ -1420,6 +1461,10 @@ void CCtrlInstruments::OnNameChanged()
 		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
 		if ((penv) && (strncmp(s, penv->name, 32)))
 		{
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+// -! NEW_FEATURE#0023
 			memcpy(penv->name, s, 32);
 			m_pModDoc->SetModified();
 			m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSNAMES, this);
@@ -1442,6 +1487,11 @@ void CCtrlInstruments::OnFileNameChanged()
 		{
 			memcpy(penv->filename, s, 12);
 			m_pModDoc->SetModified();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 		}
 	}
 }
@@ -1460,6 +1510,11 @@ void CCtrlInstruments::OnFadeOutVolChanged()
 		{
 			penv->nFadeOut = nVol;
 			m_pModDoc->SetModified();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 		}
 	}
 }
@@ -1478,6 +1533,11 @@ void CCtrlInstruments::OnGlobalVolChanged()
 		{
 			penv->nGlobalVol = nVol;
 			if (m_pSndFile->m_nType == MOD_TYPE_IT) m_pModDoc->SetModified();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 		}
 	}
 }
@@ -1492,6 +1552,11 @@ void CCtrlInstruments::OnSetPanningChanged()
 		BOOL b = m_CheckPanning.GetCheck();
 		if (b) penv->dwFlags |= ENV_SETPANNING;
 		else penv->dwFlags &= ~ENV_SETPANNING;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 	}
 }
 
@@ -1509,6 +1574,11 @@ void CCtrlInstruments::OnPanningChanged()
 		{
 			penv->nPan = nPan;
 			if (m_pSndFile->m_nType == MOD_TYPE_IT) m_pModDoc->SetModified();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 		}
 	}
 }
@@ -1521,6 +1591,11 @@ void CCtrlInstruments::OnNNAChanged()
 	if ((!IsLocked()) && (penv))
 	{
 		penv->nNNA = m_ComboNNA.GetCurSel();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 	}
 }
 	
@@ -1532,6 +1607,11 @@ void CCtrlInstruments::OnDCTChanged()
 	if ((!IsLocked()) && (penv))
 	{
 		penv->nDCT = m_ComboDCT.GetCurSel();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 	}
 }
 	
@@ -1543,6 +1623,11 @@ void CCtrlInstruments::OnDCAChanged()
 	if ((!IsLocked()) && (penv))
 	{
 		penv->nDNA = m_ComboDCA.GetCurSel();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 	}
 }
 
@@ -1555,6 +1640,11 @@ void CCtrlInstruments::OnMPRChanged()
 	{
 		int n = GetDlgItemInt(IDC_EDIT10);
 		if ((n >= 0) && (n <= 255)) penv->nMidiProgram = n;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 	}
 }
 
@@ -1567,6 +1657,11 @@ void CCtrlInstruments::OnMCHChanged()
 	{
 		int n = m_CbnMidiCh.GetItemData(m_CbnMidiCh.GetCurSel());
 		penv->nMidiChannel = (BYTE)(n & 0xff);
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 	}
 }
 
@@ -1608,8 +1703,43 @@ void CCtrlInstruments::OnPPSChanged()
 	{
 		int n = GetDlgItemInt(IDC_EDIT15);
 		if ((n >= -32) && (n <= 32)) penv->nPPS = (signed char)n;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 	}
 }
+
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+void CCtrlInstruments::OnAttackChanged()
+{
+	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
+	if(!IsLocked() && penv){
+		int n = GetDlgItemInt(IDC_EDIT2);
+		if(n < 0) n = 0;
+		if(n > MAX_ATTACK_VALUE) n = MAX_ATTACK_VALUE;
+		int newRamp = n ? MAX_ATTACK_LENGTH - n : 0;
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		if(penv->nVolRamp != newRamp){
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+		}
+// -! NEW_FEATURE#0023
+
+		penv->nVolRamp = newRamp;
+		m_SliderAttack.SetPos(n);
+		if( CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1) ) spin->SetPos(n);
+		if(n == 0) SetDlgItemText(IDC_EDIT2,"default");
+
+		m_pModDoc->SetModified();
+	}
+}
+// -! NEW_FEATURE#0027
 
 
 void CCtrlInstruments::OnPPCChanged()
@@ -1620,6 +1750,11 @@ void CCtrlInstruments::OnPPCChanged()
 	{
 		int n = m_ComboPPC.GetCurSel();
 		if ((n >= 0) && (n <= 119)) penv->nPPC = n;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 	}
 }
 
@@ -1656,6 +1791,11 @@ void CCtrlInstruments::OnEnableCutOff()
 				}
 			}
 		}
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 		m_pModDoc->SetModified();
 		SwitchToView();
 	}
@@ -1694,6 +1834,11 @@ void CCtrlInstruments::OnEnableResonance()
 				}
 			}
 		}
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 		m_pModDoc->SetModified();
 		SwitchToView();
 	}
@@ -1721,10 +1866,33 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 		{
 			short int n;
 
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+			// Volume ramping (attack)
+			n = m_SliderAttack.GetPos();
+			int newRamp = n ? MAX_ATTACK_LENGTH - n : 0;
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+			if(penv->nVolRamp != newRamp){
+				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+				m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+			}
+// -! NEW_FEATURE#0023
+
+			penv->nVolRamp = n;
+			SetDlgItemInt(IDC_EDIT2,n);
+			m_pModDoc->SetModified();
+// -! NEW_FEATURE#0027
+
 			// Volume Swing
 			n = m_SliderVolSwing.GetPos();
 			if ((n >= 0) && (n <= 64) && (n != (int)penv->nVolSwing))
 			{
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+// -! NEW_FEATURE#0023
 				penv->nVolSwing = (BYTE)n;
 				m_pModDoc->SetModified();
 			}
@@ -1732,6 +1900,10 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			n = m_SliderPanSwing.GetPos();
 			if ((n >= 0) && (n <= 64) && (n != (int)penv->nPanSwing))
 			{
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+// -! NEW_FEATURE#0023
 				penv->nPanSwing = (BYTE)n;
 				m_pModDoc->SetModified();
 			}
@@ -1739,6 +1911,10 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			n = m_SliderCutOff.GetPos();
 			if ((n >= 0) && (n < 0x80) && (n != (int)(penv->nIFC & 0x7F)))
 			{
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+// -! NEW_FEATURE#0023
 				penv->nIFC &= 0x80;
 				penv->nIFC |= (BYTE)n;
 				m_pModDoc->SetModified();
@@ -1748,6 +1924,10 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			n = m_SliderResonance.GetPos();
 			if ((n >= 0) && (n < 0x80) && (n != (int)(penv->nIFR & 0x7F)))
 			{
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+				m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+// -! NEW_FEATURE#0023
 				penv->nIFR &= 0x80;
 				penv->nIFR |= (BYTE)n;
 				m_pModDoc->SetModified();
@@ -1761,6 +1941,10 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 					if (penv->nIFR & 0x80) pSndFile->Chn[i].nResonance = penv->nIFR & 0x7F;
 				}
 			}
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
 		}
 	}
 	if ((nCode == SB_ENDSCROLL) || (nCode == SB_THUMBPOSITION))

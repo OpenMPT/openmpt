@@ -31,6 +31,11 @@ protected:
 	UINT m_nCurrentPreset;
 // -! NEW_FEATURE#0002
 
+// -> CODE#0027
+// -> DESC="VST substract mix check box"
+	CComboBox m_CbnSpecialMixProcessing;
+// -! BEHAVIOUR_CHANGE#0027
+
 protected:
 	CViewGlobals():CFormView(IDD_VIEW_GLOBALS) { m_nLockCount = 1; }
 	DECLARE_SERIAL(CViewGlobals)
@@ -104,6 +109,13 @@ protected:
 	afx_msg void OnMixModeChanged();
 	afx_msg void OnBypassChanged();
 	afx_msg void OnDryMixChanged();
+
+// -> CODE#0027
+// -> DESC="VST substract mix check box"
+	afx_msg void OnWetDryExpandChanged();
+	afx_msg void OnSpecialMixProcessingChanged();
+// -! BEHAVIOUR_CHANGE#0027
+
 	afx_msg void OnOutputRoutingChanged();
 	afx_msg void OnPrevPlugin();
 	afx_msg void OnNextPlugin();

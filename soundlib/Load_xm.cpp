@@ -579,6 +579,57 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		dwMemPos += LoadMixPlugins(lpStream+dwMemPos, dwMemLength-dwMemPos);
 	}
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
+	// Leave if no extra instrument settings are available (end of file reached)
+	if(dwMemPos >= dwMemLength) return TRUE;
+
+	// Get file pointer to match the first byte of extra settings informations
+	BYTE * ptr = (BYTE *)(lpStream + dwMemPos);
+
+	// Seek for supported extended settings header
+	if( (*((__int32 *)ptr)) == 'MPTX' && m_nInstruments ){
+
+		__int16 size;
+		__int32 code;
+
+		// jump extension header code
+		ptr += sizeof(__int32);
+
+		while( (DWORD)(ptr - lpStream) < dwMemLength ){
+
+			// read field code
+			code = (*((__int32 *)ptr));
+			// jump field code
+			ptr += sizeof(__int32);
+
+			// nVolRamp
+			if(code == 'VR..'){
+				// read field size
+				size = (*((__int16 *)ptr));
+				// jump field size
+				ptr += sizeof(__int16);
+				// read ramping values
+				for(UINT nins=1; nins<=m_nInstruments; nins++){
+					if(Headers[nins]){
+						Headers[nins]->nVolRamp = (*((USHORT *)ptr));
+						ptr += size;
+					}
+				}
+			}
+
+			if(code == 'SEP@' || code == 'MPTX'){
+				// this case induce more extra infos but not related to _INSTRUMENTHEADER
+				// for now, as nothing more is supported, we just leave normally.........
+				return TRUE;
+			}
+		}
+	}
+
+// -! NEW_FEATURE#0027
+
 	return TRUE;
 }
 
@@ -891,6 +942,27 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	}
 	// Save mix plugins information
 	SaveMixPlugins(f);
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
+	if(Headers[1]){
+		__int16 size;
+		__int32 code = 'MPTX';
+		// write extension header code
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nVolRamp field code
+		code = 'VR..';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nVolRamp field size
+		size = sizeof(Headers[1]->nVolRamp);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nVolRamp field for each instrument
+		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nVolRamp, 1, sizeof(USHORT), f);
+	}
+
+// -! NEW_FEATURE#0027
+
 	fclose(f);
 	return TRUE;
 }

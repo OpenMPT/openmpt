@@ -67,6 +67,253 @@ static char UnpackTable[MAX_PACK_TABLES][16] =
 	-1, -2, -3, -5, -7, -12, -19, -31,
 };
 
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
+/*---------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------
+MODULAR (in/out) INSTRUMENTHEADER :
+-----------------------------------------------------------------------------------------------
+
+* to update:
+------------
+
+- both following functions need to be updated when adding a new member in INSTRUMENTHEADER :
+
+void WriteInstrumentHeaderStruct(INSTRUMENTHEADER * input, FILE * file);
+BYTE * GetInstrumentHeaderFieldPointer(INSTRUMENTHEADER * input, __int32 fcode, __int16 fsize);
+
+- see below for body declaration.
+
+
+* members:
+----------
+
+- 32bit identification CODE tag (must be unique)
+- 16bit content SIZE in byte(s)
+- member field
+
+
+* CODE tag naming convention:
+-----------------------------
+
+- have a look below in current tag dictionnary
+- take the initial ones of the field name
+- 4 caracters code (not more, not less)
+- must be filled with '.' caracters if code has less than 4 caracters
+- for arrays, must include a '[' caracter following significant caracters ('.' not significant!!!)
+- use only caracters used in full member name, ordered as they appear in it
+- match caracter attribute (small,capital)
+
+Exemple with "nPanLoopEnd" , "nPitchLoopEnd" & "VolEnv[MAX_ENVPOINTS]" members : 
+- use 'PLE.' for nPanLoopEnd
+- use 'PiLE' for nPitchLoopEnd
+- use 'VE[.' for VolEnv[MAX_ENVPOINTS]
+
+
+* In use CODE tag dictionnary (alphabetical order): [ see in Sndfile.cpp ]
+--------------------------------------------------------------------------
+
+						!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+						!!! SECTION TO BE UPDATED !!!
+						!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+		[EXT]	means external (not related) to INSTRUMENTHEADER content
+
+DCT.			nDCT;
+dF..			dwFlags;
+DNA.			nDNA;
+EBIH	[EXT]	embeded instrument header tag (ITP file format)
+fn[.			filename[12];
+FO..			nFadeOut;
+GV..			nGlobalVol;
+IFC.			nIFC;
+IFR.			nIFR;
+K[.				Keyboard[128];
+MB..			wMidiBank;
+MC..			nMidiChannel;
+MDK.			nMidiDrumKey;
+MiP.			nMixPlug;
+MP..			nMidiProgram;
+MPTX	[EXT]									EXTRA INFO tag
+n[..			name[32];
+NNA.			nNNA;
+NM[.			NoteMap[128];
+P...			nPan;
+PE..			nPanEnv;
+PE[.			PanEnv[MAX_ENVPOINTS];
+PiE.			nPitchEnv;
+PiE[			PitchEnv[MAX_ENVPOINTS];
+PiLE			nPitchLoopEnd;
+PiLS			nPitchLoopStart;
+PiP[			PitchPoints[MAX_ENVPOINTS];
+PiSB			nPitchSustainBegin;
+PiSE			nPitchSustainEnd;
+PLE.			nPanLoopEnd;
+PLS.			nPanLoopStart;
+PP[.			PanPoints[MAX_ENVPOINTS];
+PPC.			nPPC;
+PPS.			nPPS;
+PS..			nPanSwing;
+PSB.			nPanSustainBegin;
+PSE.			nPanSustainEnd;
+SEP@	[EXT]									chunk SEPARATOR tag
+VE..			nVolEnv;
+VE[.			VolEnv[MAX_ENVPOINTS];
+VLE.			nVolLoopEnd;
+VLS.			nVolLoopStart;
+VP[.			VolPoints[MAX_ENVPOINTS];
+VR..			nVolRamp;
+VS..			nVolSwing;
+VSB.			nVolSustainBegin;
+VSE.			nVolSustainEnd;
+-----------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------*/
+
+// --------------------------------------------------------------------------------------------
+// Convenient macro to help WRITE_HEADER declaration for single type members ONLY (non-array)
+// --------------------------------------------------------------------------------------------
+#define WRITE_MPTHEADER_sized_member(name,type,code) \
+fcode = #@code;\
+fwrite(& fcode , 1 , sizeof( __int32 ) , file);\
+fsize = sizeof( type );\
+fwrite(& fsize , 1 , sizeof( __int16 ) , file);\
+fwrite(&input-> name , 1 , fsize , file);
+
+// --------------------------------------------------------------------------------------------
+// Convenient macro to help WRITE_HEADER declaration for array members ONLY
+// --------------------------------------------------------------------------------------------
+#define WRITE_MPTHEADER_array_member(name,type,code,arraysize) \
+fcode = #@code;\
+fwrite(& fcode , 1 , sizeof( __int32 ) , file);\
+fsize = sizeof( type ) * arraysize;\
+fwrite(& fsize , 1 , sizeof( __int16 ) , file);\
+fwrite(&input-> name , 1 , fsize , file);
+
+// Write (in 'file') 'input' INSTRUMENTHEADER with 'code' & 'size' extra field infos for each member
+void WriteInstrumentHeaderStruct(INSTRUMENTHEADER * input, FILE * file)
+{
+__int32 fcode;
+__int16 fsize;
+WRITE_MPTHEADER_sized_member(	nFadeOut			, UINT			, FO..							)
+WRITE_MPTHEADER_sized_member(	dwFlags				, DWORD			, dF..							)
+WRITE_MPTHEADER_sized_member(	nGlobalVol			, UINT			, GV..							)
+WRITE_MPTHEADER_sized_member(	nPan				, UINT			, P...							)
+WRITE_MPTHEADER_sized_member(	nVolEnv				, UINT			, VE..							)
+WRITE_MPTHEADER_sized_member(	nPanEnv				, UINT			, PE..							)
+WRITE_MPTHEADER_sized_member(	nPitchEnv			, UINT			, PiE.							)
+WRITE_MPTHEADER_sized_member(	nVolLoopStart		, BYTE			, VLS.							)
+WRITE_MPTHEADER_sized_member(	nVolLoopEnd			, BYTE			, VLE.							)
+WRITE_MPTHEADER_sized_member(	nVolSustainBegin	, BYTE			, VSB.							)
+WRITE_MPTHEADER_sized_member(	nVolSustainEnd		, BYTE			, VSE.							)
+WRITE_MPTHEADER_sized_member(	nPanLoopStart		, BYTE			, PLS.							)
+WRITE_MPTHEADER_sized_member(	nPanLoopEnd			, BYTE			, PLE.							)
+WRITE_MPTHEADER_sized_member(	nPanSustainBegin	, BYTE			, PSB.							)
+WRITE_MPTHEADER_sized_member(	nPanSustainEnd		, BYTE			, PSE.							)
+WRITE_MPTHEADER_sized_member(	nPitchLoopStart		, BYTE			, PiLS							)
+WRITE_MPTHEADER_sized_member(	nPitchLoopEnd		, BYTE			, PiLE							)
+WRITE_MPTHEADER_sized_member(	nPitchSustainBegin	, BYTE			, PiSB							)
+WRITE_MPTHEADER_sized_member(	nPitchSustainEnd	, BYTE			, PiSE							)
+WRITE_MPTHEADER_sized_member(	nNNA				, BYTE			, NNA.							)
+WRITE_MPTHEADER_sized_member(	nDCT				, BYTE			, DCT.							)
+WRITE_MPTHEADER_sized_member(	nDNA				, BYTE			, DNA.							)
+WRITE_MPTHEADER_sized_member(	nPanSwing			, BYTE			, PS..							)
+WRITE_MPTHEADER_sized_member(	nVolSwing			, BYTE			, VS..							)
+WRITE_MPTHEADER_sized_member(	nIFC				, BYTE			, IFC.							)
+WRITE_MPTHEADER_sized_member(	nIFR				, BYTE			, IFR.							)
+WRITE_MPTHEADER_sized_member(	wMidiBank			, WORD			, MB..							)
+WRITE_MPTHEADER_sized_member(	nMidiProgram		, BYTE			, MP..							)
+WRITE_MPTHEADER_sized_member(	nMidiChannel		, BYTE			, MC..							)
+WRITE_MPTHEADER_sized_member(	nMidiDrumKey		, BYTE			, MDK.							)
+WRITE_MPTHEADER_sized_member(	nPPS				, signed char	, PPS.							)
+WRITE_MPTHEADER_sized_member(	nPPC				, unsigned char	, PPC.							)
+WRITE_MPTHEADER_array_member(	VolPoints			, WORD			, VP[.		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	PanPoints			, WORD			, PP[.		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	PitchPoints			, WORD			, PiP[		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	VolEnv				, BYTE			, VE[.		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	PanEnv				, BYTE			, PE[.		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	PitchEnv			, BYTE			, PiE[		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	NoteMap				, BYTE			, NM[.		, 128				)
+WRITE_MPTHEADER_array_member(	Keyboard			, WORD			, K[..		, 128				)
+WRITE_MPTHEADER_array_member(	name				, CHAR			, n[..		, 32				)
+WRITE_MPTHEADER_array_member(	filename			, CHAR			, fn[.		, 12				)
+WRITE_MPTHEADER_sized_member(	nMixPlug			, BYTE			, MiP.							)
+WRITE_MPTHEADER_sized_member(	nVolRamp			, USHORT		, VR..							)
+}
+
+// --------------------------------------------------------------------------------------------
+// Convenient macro to help GET_HEADER declaration for single type members ONLY (non-array)
+// --------------------------------------------------------------------------------------------
+#define GET_MPTHEADER_sized_member(name,type,code) \
+case( #@code ):\
+if( fsize <= sizeof( type ) ) pointer = (BYTE *)&input-> name ;\
+break;
+
+// --------------------------------------------------------------------------------------------
+// Convenient macro to help GET_HEADER declaration for array members ONLY
+// --------------------------------------------------------------------------------------------
+#define GET_MPTHEADER_array_member(name,type,code,arraysize) \
+case( #@code ):\
+if( fsize <= sizeof( type ) * arraysize ) pointer = (BYTE *)&input-> name ;\
+break;
+
+// Return a pointer on the wanted field in 'input' INSTRUMENTHEADER given field code & size
+BYTE * GetInstrumentHeaderFieldPointer(INSTRUMENTHEADER * input, __int32 fcode, __int16 fsize)
+{
+if(input == NULL) return NULL;
+BYTE * pointer = NULL;
+
+switch(fcode){
+GET_MPTHEADER_sized_member(	nFadeOut			, UINT			, FO..							)
+GET_MPTHEADER_sized_member(	dwFlags				, DWORD			, dF..							)
+GET_MPTHEADER_sized_member(	nGlobalVol			, UINT			, GV..							)
+GET_MPTHEADER_sized_member(	nPan				, UINT			, P...							)
+GET_MPTHEADER_sized_member(	nVolEnv				, UINT			, VE..							)
+GET_MPTHEADER_sized_member(	nPanEnv				, UINT			, PE..							)
+GET_MPTHEADER_sized_member(	nPitchEnv			, UINT			, PiE.							)
+GET_MPTHEADER_sized_member(	nVolLoopStart		, BYTE			, VLS.							)
+GET_MPTHEADER_sized_member(	nVolLoopEnd			, BYTE			, VLE.							)
+GET_MPTHEADER_sized_member(	nVolSustainBegin	, BYTE			, VSB.							)
+GET_MPTHEADER_sized_member(	nVolSustainEnd		, BYTE			, VSE.							)
+GET_MPTHEADER_sized_member(	nPanLoopStart		, BYTE			, PLS.							)
+GET_MPTHEADER_sized_member(	nPanLoopEnd			, BYTE			, PLE.							)
+GET_MPTHEADER_sized_member(	nPanSustainBegin	, BYTE			, PSB.							)
+GET_MPTHEADER_sized_member(	nPanSustainEnd		, BYTE			, PSE.							)
+GET_MPTHEADER_sized_member(	nPitchLoopStart		, BYTE			, PiLS							)
+GET_MPTHEADER_sized_member(	nPitchLoopEnd		, BYTE			, PiLE							)
+GET_MPTHEADER_sized_member(	nPitchSustainBegin	, BYTE			, PiSB							)
+GET_MPTHEADER_sized_member(	nPitchSustainEnd	, BYTE			, PiSE							)
+GET_MPTHEADER_sized_member(	nNNA				, BYTE			, NNA.							)
+GET_MPTHEADER_sized_member(	nDCT				, BYTE			, DCT.							)
+GET_MPTHEADER_sized_member(	nDNA				, BYTE			, DNA.							)
+GET_MPTHEADER_sized_member(	nPanSwing			, BYTE			, PS..							)
+GET_MPTHEADER_sized_member(	nVolSwing			, BYTE			, VS..							)
+GET_MPTHEADER_sized_member(	nIFC				, BYTE			, IFC.							)
+GET_MPTHEADER_sized_member(	nIFR				, BYTE			, IFR.							)
+GET_MPTHEADER_sized_member(	wMidiBank			, WORD			, MB..							)
+GET_MPTHEADER_sized_member(	nMidiProgram		, BYTE			, MP..							)
+GET_MPTHEADER_sized_member(	nMidiChannel		, BYTE			, MC..							)
+GET_MPTHEADER_sized_member(	nMidiDrumKey		, BYTE			, MDK.							)
+GET_MPTHEADER_sized_member(	nPPS				, signed char	, PPS.							)
+GET_MPTHEADER_sized_member(	nPPC				, unsigned char	, PPC.							)
+GET_MPTHEADER_array_member(	VolPoints			, WORD			, VP[.		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	PanPoints			, WORD			, PP[.		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	PitchPoints			, WORD			, PiP[		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	VolEnv				, BYTE			, VE[.		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	PanEnv				, BYTE			, PE[.		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	PitchEnv			, BYTE			, PiE[		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	NoteMap				, BYTE			, NM[.		, 128				)
+GET_MPTHEADER_array_member(	Keyboard			, WORD			, K[..		, 128				)
+GET_MPTHEADER_array_member(	name				, CHAR			, n[..		, 32				)
+GET_MPTHEADER_array_member(	filename			, CHAR			, fn[.		, 12				)
+GET_MPTHEADER_sized_member(	nMixPlug			, BYTE			, MiP.							)
+GET_MPTHEADER_sized_member(	nVolRamp			, USHORT		, VR..							)
+}
+
+return pointer;
+}
+
+// -! NEW_FEATURE#0027
 
 //////////////////////////////////////////////////////////
 // CSoundFile
@@ -92,7 +339,10 @@ CSoundFile::CSoundFile()
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	for(UINT i = 0 ; i < MAX_INSTRUMENTS ; i++) m_szInstrumentPath[i][0] = '\0';
+	for(UINT i = 0 ; i < MAX_INSTRUMENTS ; i++){
+		m_szInstrumentPath[i][0] = '\0';
+		instrumentModified[i] = FALSE;
+	}
 // -! NEW_FEATURE#0023
 
 	memset(Chn, 0, sizeof(Chn));

@@ -225,6 +225,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	UINT i,n,nsmp;
 	DWORD id,len,size;
 	DWORD streamPos = 0;
+	DWORD version;
 
 // Check file ID
 
@@ -233,7 +234,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
-	if(id != 0x00000100) return FALSE;	// v1.00
+	version = id;
 	streamPos += sizeof(DWORD);
 
 // Song name
@@ -521,6 +522,54 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 		f.Close();	
 	}
 
+// Extra info data
+
+	__int32 fcode;
+	__int16 fsize;
+	BYTE * ptr = (BYTE *)(lpStream + streamPos);
+
+// Embed instruments' header [v1.01]
+
+	if(version >= 0x00000101 && m_dwSongFlags & SONG_ITPEMBEDIH && streamPos < dwMemLength && (*((__int32 *)ptr)) == 'EBIH'){
+
+		// jump embeded instrument header tag
+		ptr += sizeof(__int32);
+
+		// set first instrument's header as current
+		i = 1;
+
+		// parse file
+		while( ptr < (BYTE *)(lpStream + dwMemLength) && i <= m_nInstruments ){
+
+			// read field code
+			fcode = (*((__int32 *)ptr));
+
+			switch( fcode ){
+				case 'SEP@': case 'MPTX':
+					// jump code
+					ptr += sizeof(__int32);
+					// switch to next instrument
+					i++;
+				break;
+
+				default:
+					// jump field code
+					ptr += sizeof(__int32);
+					// read field size
+					fsize = (*((__int16 *)ptr));
+					// jump field size
+					ptr += sizeof(__int16);
+					// get field's adress in instrument's header
+					BYTE * fadr = GetInstrumentHeaderFieldPointer(Headers[i], fcode, fsize);
+					// copy field data in instrument's header (except for keyboard mapping)
+					if(fadr && fcode != 'K[..') memcpy(fadr,ptr,fsize);
+					// jump field
+					ptr += fsize;
+				break;
+			}
+		}
+	}
+
 // Leave
 
 	m_nType = MOD_TYPE_IT;
@@ -530,8 +579,6 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	return TRUE;
 }
 // -! NEW_FEATURE#0023
-
-
 
 BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 //--------------------------------------------------------------
@@ -561,11 +608,6 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATMODE;
 	if (pifh->flags & 0x80) m_dwSongFlags |= SONG_EMBEDMIDICFG;
 	if (pifh->flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	if (pifh->flags & 0x2000) m_dwSongFlags |= SONG_ITPROJECT;
-// -! NEW_FEATURE#0023
-
 	memcpy(m_szNames[0], pifh->songname, 26);
 	m_szNames[0][26] = 0;
 	// Global Volume
@@ -771,6 +813,15 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 			ITInstrToMPT(lpStream + inspos[nins], penv, pifh->cmwt);
 		}
 	}
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	// In order to properly compute the position, in file, of eventual extended settings
+	// such as "attack" we need to keep the "real" size of the last sample as those extra
+	// setting will follow this sample in the file
+	UINT lastSampleSize;
+// -! NEW_FEATURE#0027
+
 	// Reading Samples
 	m_nSamples = pifh->smpnum;
 	if (m_nSamples >= MAX_SAMPLES) m_nSamples = MAX_SAMPLES-1;
@@ -824,7 +875,11 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 					// IT 2.14 8-bit packed sample ?
 					if (pis->flags & 8)	flags =	((pifh->cmwt >= 0x215) && (pis->cvt & 4)) ? RS_IT2158 : RS_IT2148;
 				}
-				ReadSample(&Ins[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+//				ReadSample(&Ins[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
+				lastSampleSize = ReadSample(&Ins[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
+// -! NEW_FEATURE#0027
 			}
 		}
 		memcpy(m_szNames[nsmp+1], pis->name, 26);
@@ -984,6 +1039,61 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	m_nMinPeriod = 8;
 	m_nMaxPeriod = 0xF000;
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
+	// Compute extra instruments settings position
+	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[pifh->smpnum-1]);
+	dwMemPos = pis->samplepointer + lastSampleSize;
+
+	// Leave if no extra instrument settings are available (end of file reached)
+	if(dwMemPos >= dwMemLength) return TRUE;
+
+	// Get file pointer to match the first byte of extra settings informations
+	BYTE * ptr = (BYTE *)(lpStream + dwMemPos);
+
+	// Seek for supported extended settings header
+	if( (*((__int32 *)ptr)) == 'MPTX' && m_nInstruments ){
+
+		__int16 size;
+		__int32 code;
+
+		// jump extension header code
+		ptr += sizeof(__int32);
+
+		while( (DWORD)(ptr - lpStream) < dwMemLength ){
+
+			// read field code
+			code = (*((__int32 *)ptr));
+			// jump field code
+			ptr += sizeof(__int32);
+
+			// nVolRamp
+			if(code == 'VR..'){
+				// read field size
+				size = (*((__int16 *)ptr));
+				// jump field size
+				ptr += sizeof(__int16);
+				// read ramping values
+				for(UINT nins=1; nins<=m_nInstruments; nins++){
+					if(Headers[nins]){
+						Headers[nins]->nVolRamp = (*((USHORT *)ptr));
+						ptr += size;
+					}
+				}
+			}
+
+			if(code == 'SEP@' || code == 'MPTX'){
+				// this case induce more extra infos but not related to _INSTRUMENTHEADER
+				// for now, as nothing more is supported, we just leave normally.........
+				return TRUE;
+			}
+		}
+	}
+
+// -! NEW_FEATURE#0027
+
 	return TRUE;
 }
 //end plastiq: code readability improvements
@@ -1014,7 +1124,7 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	DWORD id = 0x2e697470; // .itp ASCII
 	fwrite(&id, 1, sizeof(id), f);
 
-	id = 0x00000100; // v1.00
+	id = 0x00000101; // v1.01
 	fwrite(&id, 1, sizeof(id), f);
 
 // Song name
@@ -1097,7 +1207,7 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	id = _MAX_PATH;
 	fwrite(&id, 1, sizeof(id), f);
 
-	// instruments path
+	// instruments' path
 	for(i=0; i<m_nInstruments; i++) fwrite(&m_szInstrumentPath[i][0], 1, _MAX_PATH, f);
 
 // Song Orders
@@ -1175,10 +1285,10 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			itss.gvl = (BYTE)psmp->nGlobalVol;
 			itss.flags = 0x00;
 
-			if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
-			if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
-			if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
-			if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
+			if(psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
+			if(psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
+			if(psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
+			if(psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
 			itss.C5Speed = psmp->nC4Speed;
 			if (!itss.C5Speed) itss.C5Speed = 8363;
 			itss.length = psmp->nLength;
@@ -1196,11 +1306,11 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
 			UINT flags = RS_PCM8S;
 
-			if (psmp->uFlags & CHN_STEREO){
+			if(psmp->uFlags & CHN_STEREO){
 				flags = RS_STPCM8S;
 				itss.flags |= 0x04;
 			}
-			if (psmp->uFlags & CHN_16BIT){
+			if(psmp->uFlags & CHN_16BIT){
 				itss.flags |= 0x02;
 				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
 			}
@@ -1217,12 +1327,29 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 		}
 	}
 
+// Embed instruments' header [v1.01]
+
+	if(m_dwSongFlags & SONG_ITPEMBEDIH){
+		// embeded instrument header tag
+		__int32 code = 'EBIH';
+		fwrite(&code, 1, sizeof(__int32), f);
+
+		// instruments' header
+		for(i=0; i<m_nInstruments; i++){
+			if(Headers[i+1]) WriteInstrumentHeaderStruct(Headers[i+1], f);
+			// write separator tag
+			code = 'SEP@';
+			fwrite(&code, 1, sizeof(__int32), f);
+		}
+	}
+
 // Close file
 
 	fclose(f);
 	return TRUE;
 }
 // -! NEW_FEATURE#0023
+
 BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 //---------------------------------------------------------
 {
@@ -1283,10 +1410,6 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
 	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	if (m_dwSongFlags & SONG_ITPROJECT) header.flags |= 0x2000;
-// -! NEW_FEATURE#0023
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
 	header.mv = m_nSongPreAmp;
 	if (header.mv < 0x20) header.mv = 0x20;
@@ -1786,6 +1909,27 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			dwPos += WriteSample(f, psmp, flags);
 		}
 	}
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
+	if(Headers[1]){
+		__int16 size;
+		__int32 code = 'MPTX';
+		// write extension header code
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nVolRamp field code
+		code = 'VR..';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nVolRamp field size
+		size = sizeof(Headers[1]->nVolRamp);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nVolRamp field for each instrument
+		for(UINT nins=1; nins<=header.insnum; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nVolRamp, 1, sizeof(USHORT), f);
+	}
+
+// -! NEW_FEATURE#0027
+
 	// Updating offsets
 	fseek(f, dwHdrPos, SEEK_SET);
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);

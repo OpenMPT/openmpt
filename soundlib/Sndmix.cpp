@@ -1481,12 +1481,24 @@ BOOL CSoundFile::ReadNote()
 			 && ((pChn->nRightVol != pChn->nNewRightVol) || (pChn->nLeftVol != pChn->nNewLeftVol)))
 			{
 				LONG nRampLength = gnVolumeRampSamples;
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+				BOOL enableCustomRamp = pChn->pHeader && (m_nType & (MOD_TYPE_IT | MOD_TYPE_XM));
+				if(enableCustomRamp) nRampLength = pChn->pHeader->nVolRamp ? (gdwMixingFreq * pChn->pHeader->nVolRamp / 100000) : gnVolumeRampSamples;
+				if(!nRampLength) nRampLength = 1;
+// -! NEW_FEATURE#0027
 				LONG nRightDelta = ((pChn->nNewRightVol - pChn->nRightVol) << VOLUMERAMPPRECISION);
 				LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
 #ifndef FASTSOUNDLIB
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+//				if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
+//				 || ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
+//				  && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50)))
 				if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
 				 || ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
-				  && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50)))
+				  && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50) && !(enableCustomRamp && pChn->pHeader->nVolRamp)))
+// -! NEW_FEATURE#0027
 				{
 					if ((pChn->nRightVol|pChn->nLeftVol) && (pChn->nNewRightVol|pChn->nNewLeftVol) && (!(pChn->dwFlags & CHN_FASTVOLRAMP)))
 					{

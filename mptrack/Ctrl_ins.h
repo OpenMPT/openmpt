@@ -71,6 +71,12 @@ protected:
 	CNoteMapWnd m_NoteMap;
 	UINT m_nInstrument;
 
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	CSliderCtrl m_SliderAttack;
+	CSpinButtonCtrl m_SpinAttack;
+// -! NEW_FEATURE#0027
+
 public:
 	CCtrlInstruments();
 	virtual ~CCtrlInstruments();
@@ -121,6 +127,12 @@ protected:
 	afx_msg void OnMixPlugChanged();  //rewbs.instroVSTi
 	afx_msg void OnPPSChanged();
 	afx_msg void OnPPCChanged();
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	afx_msg void OnAttackChanged();
+// -! NEW_FEATURE#0027
+
 	afx_msg void OnEnableCutOff();
 	afx_msg void OnEnableResonance();
 	afx_msg void OnEditSampleMap();

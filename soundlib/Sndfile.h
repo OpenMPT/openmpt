@@ -302,6 +302,7 @@ typedef const BYTE * LPCBYTE;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 #define SONG_ITPROJECT		0x20000
+#define SONG_ITPEMBEDIH		0x40000
 // -! NEW_FEATURE#0023
 
 // Global Options (Renderer)
@@ -355,6 +356,17 @@ typedef struct _MODINSTRUMENT
 } MODINSTRUMENT;
 
 
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
+/*---------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------
+MODULAR STRUCT DECLARATIONS :
+-----------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------*/
+
 // Instrument Struct
 typedef struct _INSTRUMENTHEADER
 {
@@ -401,7 +413,27 @@ typedef struct _INSTRUMENTHEADER
 	CHAR name[32];
 	CHAR filename[12];
 	BYTE nMixPlug;							//rewbs.instroVSTi
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	USHORT nVolRamp;
+// -! NEW_FEATURE#0027
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 } INSTRUMENTHEADER;
+
+// -----------------------------------------------------------------------------------------
+// MODULAR INSTRUMENTHEADER FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
+// -----------------------------------------------------------------------------------------
+extern void WriteInstrumentHeaderStruct(INSTRUMENTHEADER * input, FILE * file);
+extern BYTE * GetInstrumentHeaderFieldPointer(INSTRUMENTHEADER * input, __int32 fcode, __int16 fsize);
+
+// -! NEW_FEATURE#0027
+
+// --------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------
 
 
 // Channel Struct
@@ -512,9 +544,17 @@ public:
 };
 
 
-#define MIXPLUG_INPUTF_MASTEREFFECT		0x01	// Apply to master mix
-#define MIXPLUG_INPUTF_BYPASS			0x02	// Bypass effect
-#define MIXPLUG_INPUTF_WETMIX			0x04	// Wet Mix (dry added)
+												///////////////////////////////////////////////////
+												// !!! bits 8 -> 15 reserved for mixing mode !!! //
+												///////////////////////////////////////////////////
+#define MIXPLUG_INPUTF_MASTEREFFECT				0x01	// Apply to master mix
+#define MIXPLUG_INPUTF_BYPASS					0x02	// Bypass effect
+#define MIXPLUG_INPUTF_WETMIX					0x04	// Wet Mix (dry added)
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
+#define MIXPLUG_INPUTF_MIXEXPAND				0x08	// [0%,100%] -> [-200%,200%]
+// -! BEHAVIOUR_CHANGE#0028
+
 
 typedef struct _SNDMIXPLUGINSTATE
 {
@@ -656,6 +696,7 @@ public:	// for Editing
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	CHAR m_szInstrumentPath[MAX_INSTRUMENTS][_MAX_PATH];
+	BOOL instrumentModified[MAX_INSTRUMENTS];
 // -! NEW_FEATURE#0023
 
 public:
@@ -738,6 +779,7 @@ public:
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	BOOL SaveITProject(LPCSTR lpszFileName);
+// -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
 #endif // MODPLUG_NO_FILESAVE
 	// MOD Convert function
@@ -880,7 +922,13 @@ public:
 	BOOL ReadS3ISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength);
 	BOOL ReadAIFFSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength);
 	BOOL ReadXISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength);
-	BOOL ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+//	BOOL ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
+	UINT ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset=0);
+// -! NEW_FEATURE#0027
+
 	BOOL ReadITISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength);
 	BOOL Read8SVXSample(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
 	BOOL SaveWAVSample(UINT nSample, LPCSTR lpszFileName);

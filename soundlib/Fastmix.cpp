@@ -215,10 +215,16 @@ extern short int gDownsample2x[]; // 2x downsampling
 	pvol[1] += vol * pChn->nLeftVol;\
 	pvol += 2;
 
+// -> CODE#0027
+//#define SNDMIX_STORESTEREOVOL\
+//	pvol[0] += vol_l * pChn->nRightVol;\
+//	pvol[1] += vol_r * pChn->nLeftVol;\
+//	pvol += 2;
 #define SNDMIX_STORESTEREOVOL\
-	pvol[0] += vol_l * pChn->nRightVol;\
-	pvol[1] += vol_r * pChn->nLeftVol;\
+	pvol[0] += vol_r * pChn->nRightVol;\
+	pvol[1] += vol_l * pChn->nLeftVol;\
 	pvol += 2;
+// -! NEW_FEATURE#0027
 
 #define SNDMIX_STOREFASTMONOVOL\
 	int v = vol * pChn->nRightVol;\
@@ -240,12 +246,20 @@ extern short int gDownsample2x[]; // 2x downsampling
 	pvol[1] += fastvol;\
 	pvol += 2;
 
+// -> CODE#0027
+//#define SNDMIX_RAMPSTEREOVOL\
+//	nRampLeftVol += pChn->nLeftRamp;\
+//	nRampRightVol += pChn->nRightRamp;\
+//	pvol[0] += vol_l * (nRampRightVol >> VOLUMERAMPPRECISION);\
+//	pvol[1] += vol_r * (nRampLeftVol >> VOLUMERAMPPRECISION);\
+//	pvol += 2;
 #define SNDMIX_RAMPSTEREOVOL\
 	nRampLeftVol += pChn->nLeftRamp;\
 	nRampRightVol += pChn->nRightRamp;\
-	pvol[0] += vol_l * (nRampRightVol >> VOLUMERAMPPRECISION);\
-	pvol[1] += vol_r * (nRampLeftVol >> VOLUMERAMPPRECISION);\
+	pvol[0] += vol_r * (nRampRightVol >> VOLUMERAMPPRECISION);\
+	pvol[1] += vol_l * (nRampLeftVol >> VOLUMERAMPPRECISION);\
 	pvol += 2;
+// -! NEW_FEATURE#0027
 
 
 ///////////////////////////////////////////////////

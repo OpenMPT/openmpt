@@ -78,6 +78,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	ON_COMMAND(ID_MODTREE_SETPATH,		OnSetItemPath)
+	ON_COMMAND(ID_MODTREE_SAVEITEM,		OnSaveItem)
 // -! NEW_FEATURE#0023
 
 	ON_COMMAND(ID_ADD_SOUNDBANK,		OnAddDlsBank)
@@ -870,7 +871,8 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 // -> DESC="IT project files (.itp)"
 //				wsprintf(s, "%3d: %s", iSmp, pSndFile->Headers[iSmp]->name);
 				BOOL pathOk = pSndFile->m_szInstrumentPath[iSmp-1][0] != '\0';
-				wsprintf(s, pathOk ? "%3d: %s" : "%3d: * %s", iSmp, pSndFile->Headers[iSmp]->name);
+				BOOL instOk = pSndFile->instrumentModified[iSmp-1] == FALSE;
+				wsprintf(s, pathOk ? (instOk ? "%3d: %s" : "%3d: * %s") : "%3d: ? %s", iSmp, pSndFile->Headers[iSmp]->name);
 // -! NEW_FEATURE#0023
 				if (!pInfo->tiInstruments[iSmp])
 				{
@@ -2127,6 +2129,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 // -> DESC="IT project files (.itp)"
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SETPATH, "&Set path");
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SAVEITEM, "&Save");
 // -! NEW_FEATURE#0023
 					}
 				}
@@ -2582,6 +2585,57 @@ void CModTree::OnSetItemPath()
 
 		dlg.m_ofn.lpstrFile = NULL;
 		dlg.m_ofn.nMaxFile = 0;
+	}
+}
+
+void CModTree::OnSaveItem()
+{
+	HTREEITEM hItem = GetSelectedItem();
+	DWORD dwItemType = GetModItem(hItem);
+	DWORD dwItem = dwItemType >> 16;
+	dwItemType &= 0xFFFF;
+	CModDoc *pModDoc = GetDocumentFromItem(hItem);
+	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+
+	if(pSndFile && dwItem){
+
+		if(pSndFile->m_szInstrumentPath[dwItem-1][0] == '\0'){
+			CHAR pszFileNames[_MAX_PATH];
+
+			CFileDialog dlg(FALSE, (pSndFile->m_nType & MOD_TYPE_IT) ? "iti" : "xi", NULL, 
+							OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+							( pSndFile->m_nType & MOD_TYPE_IT ? "Impulse Tracker Instruments (*.iti)|*.iti|"
+																"FastTracker II Instruments (*.xi)|*.xi||"
+															  : "FastTracker II Instruments (*.xi)|*.xi|"
+																"Impulse Tracker Instruments (*.iti)|*.iti||" ),
+							this);
+
+			pszFileNames[0] = 0;
+			pszFileNames[1] = 0;
+			dlg.m_ofn.lpstrFile = pszFileNames;
+			dlg.m_ofn.nMaxFile = _MAX_PATH;
+
+			if(dlg.DoModal() == IDOK) strcpy(&pSndFile->m_szInstrumentPath[dwItem-1][0],pszFileNames);
+
+			dlg.m_ofn.lpstrFile = NULL;
+			dlg.m_ofn.nMaxFile = 0;
+		}
+
+		if(pSndFile->m_szInstrumentPath[dwItem-1][0] != '\0'){
+			int size = strlen(pSndFile->m_szInstrumentPath[dwItem-1]);
+			BOOL iti = stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-3],"iti") == 0;
+			BOOL xi  = stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-2],"xi") == 0;
+
+			if(iti || (!iti && !xi  && pSndFile->m_nType == MOD_TYPE_IT))
+				pSndFile->SaveITIInstrument(dwItem, pSndFile->m_szInstrumentPath[dwItem-1]);
+			if(xi  || (!xi  && !iti && pSndFile->m_nType == MOD_TYPE_XM))
+				pSndFile->SaveXIInstrument(dwItem, pSndFile->m_szInstrumentPath[dwItem-1]);
+
+			pSndFile->instrumentModified[dwItem-1] = FALSE;
+		}
+
+		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
+		OnRefreshTree();
 	}
 }
 // -! NEW_FEATURE#0023

@@ -151,14 +151,9 @@ BOOL COptionsSoundcard::OnInitDialog()
 	}
 	// Stereo Separation
 	{
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//		m_SliderStereoSep.SetRange(0, 4);
-		m_SliderStereoSep.SetRange(0, 8);
+		m_SliderStereoSep.SetRange(0, 4);
 		m_SliderStereoSep.SetPos(2);
-//		for (int n=0; n<=4; n++)
-		for (int n=0; n<=8; n++)
-// -! BEHAVIOUR_CHANGE#0006
+		for (int n=0; n<=4; n++)
 		{
 			if ((int)CSoundFile::m_nStereoSeparation <= (int)(32 << n))
 			{
