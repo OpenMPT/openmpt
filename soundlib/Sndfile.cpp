@@ -243,6 +243,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT iSmp=0; iSmp<MAX_SAMPLES; iSmp++)
 	{
 		LPSTR p = m_szNames[iSmp];
+		if(!p)
+			ASSERT(p);
+
+
 		int j = 31;
 		p[j] = 0;
 		while ((j>=0) && (p[j]<=' ')) p[j--] = 0;

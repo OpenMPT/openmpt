@@ -641,6 +641,11 @@ BOOL CSoundFile::ProcessRow()
 				if ((m_nPattern < MAX_PATTERNS) && (!Patterns[m_nPattern])) m_nPattern = 0xFE;
 			}
 			m_nNextPattern = m_nCurrentPattern;
+
+	#ifdef MODPLUG_TRACKER
+//		if (m_nInstruments) ProcessMidiOut(); //rewbs.VSTnoteDelay
+		if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition)) return FALSE;
+	#endif // MODPLUG_TRACKER
 		}
 #ifdef MODPLUG_TRACKER
 		if (m_dwSongFlags & SONG_STEP)
@@ -682,10 +687,7 @@ BOOL CSoundFile::ProcessRow()
 			pChn->dwFlags &= ~(CHN_PORTAMENTO | CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
 			pChn->nCommand = 0;
 		}
-#ifdef MODPLUG_TRACKER
-		if (m_nInstruments) ProcessMidiOut();
-		if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition)) return FALSE;
-#endif // MODPLUG_TRACKER
+
 	}
 	// Should we process tick0 effects?
 	if (!m_nMusicSpeed) m_nMusicSpeed = 1;
@@ -699,6 +701,8 @@ BOOL CSoundFile::ProcessRow()
 		}
 	}
 	// Update Effects
+
+
 	return ProcessEffects();
 }
 
@@ -1541,18 +1545,17 @@ done:
 
 #ifdef MODPLUG_TRACKER
 
-VOID CSoundFile::ProcessMidiOut()
+VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
 //-------------------------------
 {
-	MODCHANNEL *pChn;
 	MODCOMMAND *m;
 
 	if ((!m_nInstruments) || (m_nPattern >= MAX_PATTERNS)
 	 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
-	pChn = Chn;
-	m = Patterns[m_nPattern] + m_nRow * m_nChannels;
-	for (UINT nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
-	{
+	//pChn = Chn;
+	m = Patterns[m_nPattern] + m_nRow * m_nChannels + nChn;	
+//	for (UINT nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
+//	{
 		if (m->note)
 		{
 			INSTRUMENTHEADER *penv = pChn->pHeader;
@@ -1568,7 +1571,7 @@ VOID CSoundFile::ProcessMidiOut()
 				}
 			}
 		}
-	}
+//	}
 }
 
 

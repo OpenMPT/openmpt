@@ -330,7 +330,7 @@ void ErrorBox(UINT nStringID, CWnd*p=NULL);
 
 ///////////////////////////////////////////////////
 // Tables
-#define MAX_EFFECTS		32
+#define MAX_EFFECTS		33	//rewbs.smoothVST: increased from 32. Wonder what this will break...
 #define MAX_VOLCMDS		14
 
 extern BYTE gEffectColors[MAX_EFFECTS];

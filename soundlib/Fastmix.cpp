@@ -356,6 +356,14 @@ typedef VOID (MPPASMCALL * LPMIXINTERFACE)(MODCHANNEL *, int *, int *);
 
 /////////////////////////////////////////////////////
 //
+extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
+extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
+extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
+extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+
+void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
+void MPPASMCALL X86_EndChannelOfs(MODCHANNEL *pChannel, int *pBuffer, UINT nSamples);
+void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
 
 #ifdef ENABLE_MMX
 extern VOID MMX_EndMix();
@@ -379,22 +387,18 @@ extern VOID MMX_FilterMono16BitLinearRampMix(MODCHANNEL *, int *, int *);
 #define MMX_FilterMono16BitLinearMix	MMX_FilterMono16BitLinearRampMix
 #endif
 
-extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
-extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
-extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
-extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
 
+#ifdef ENABLE_AMD
 extern void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
 extern void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
 extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
 extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+#endif
 
+#ifdef ENABLE_SSE
 extern void SSE_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
 extern void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
-
-void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
-void MPPASMCALL X86_EndChannelOfs(MODCHANNEL *pChannel, int *pBuffer, UINT nSamples);
-void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+#endif
 
 /////////////////////////////////////////////////////
 // Mono samples functions
@@ -1072,7 +1076,12 @@ UINT CSoundFile::CreateStereoMix(int count)
 		pbuffer = (gdwSoundSetup & SNDMIX_REVERB) ? MixReverbBuffer : MixSoundBuffer;
 		if ((pChannel->dwFlags & CHN_SURROUND) && (gnChannels > 2)) pbuffer = MixRearBuffer;
 		if (pChannel->dwFlags & CHN_NOREVERB) pbuffer = MixSoundBuffer;
-		if ((pChannel->dwFlags & CHN_REVERB) && (gdwSysInfo & SYSMIX_ENABLEMMX)) pbuffer = MixReverbBuffer;
+
+	#ifdef ENABLE_MMX
+		if ((pChannel->dwFlags & CHN_REVERB) && (gdwSysInfo & SYSMIX_ENABLEMMX))
+			pbuffer = MixReverbBuffer;
+	#endif
+
 		UINT nMixPlugin = 0;
 		if ((nMasterCh > 0) && (nMasterCh <= m_nChannels))
 		{
@@ -1311,20 +1320,27 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
 //-----------------------------------------------------------------------------------------
 {
+#ifdef ENABLE_MMX
 	if (gdwSoundSetup & SNDMIX_ENABLEMMX)
 	{
 		if (gdwSysInfo & SYSMIX_SSE)
 		{
-			SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
+#ifdef ENABLE_SSE
+		SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
+#endif
 			return;
 		}
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
-			AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
+#ifdef ENABLE_AMD
+		AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
+#endif
 			return;
 		}
 	}
-	X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
+#endif
+
+ X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
 }
 
 
@@ -1335,7 +1351,9 @@ VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOu
 	{
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
+#ifdef ENABLE_AMDNOW
 			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount);
+#endif
 			return;
 		}
 	}
@@ -1350,12 +1368,16 @@ VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 	{
 		if (gdwSysInfo & SYSMIX_SSE)
 		{
-			SSE_MonoMixToFloat(pSrc, pOut, nCount);
+#ifdef ENABLE_SSE
+ 		SSE_MonoMixToFloat(pSrc, pOut, nCount);
+#endif
 			return;
 		}
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
+#ifdef ENABLE_AMDNOW
 			AMD_MonoMixToFloat(pSrc, pOut, nCount);
+#endif
 			return;
 		}
 	}
@@ -1370,7 +1392,9 @@ VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
 	{
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
+#ifdef ENABLE_AMDNOW
 			AMD_FloatToMonoMix(pIn, pOut, nCount);
+#endif
 			return;
 		}
 	}

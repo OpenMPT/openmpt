@@ -148,8 +148,8 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_SpinSpacing.SetPos(gnPatternSpacing);
 	m_EditPatName.SetLimitText(MAX_PATTERNNAME);
 	SetDlgItemInt(IDC_EDIT_SPACING, gnPatternSpacing);
-	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, MF_CHECKED);
-	m_OrderList.SetFocus();
+	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
+	m_OrderList.SetFocus(); 
 	UpdateView(HINT_MODTYPE|HINT_PATNAMES, NULL);
 	RecalcLayout();
 	m_bInitialized = TRUE;

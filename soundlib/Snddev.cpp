@@ -10,6 +10,7 @@
 #include "snddev.h"
 #include "snddevx.h"
 
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // ISoundDevice base class
@@ -235,6 +236,7 @@ BOOL CWaveDevice::EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSiz
 		gnNumWaveDevs = waveOutGetNumDevs();
 	}
 	if (nIndex > gnNumWaveDevs) return FALSE;
+
 	if (nIndex)
 	{
 		RtlZeroMemory(&woc, sizeof(woc));
@@ -1260,6 +1262,10 @@ cvtloop:
 
 #endif // NO_ASIO
 
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // Global Functions
@@ -1330,5 +1336,6 @@ BOOL SndDevUninitialize()
 	gnDSoundDevices = 0;
 	return TRUE;
 }
+
 
 

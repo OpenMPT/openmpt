@@ -167,8 +167,8 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	DWORD inspos[MAX_INSTRUMENTS];
 	DWORD smppos[MAX_SAMPLES];
 	DWORD patpos[MAX_PATTERNS];
-	BYTE chnmask[64], channels_used[64];
-	MODCOMMAND lastvalue[64];
+	BYTE chnmask[MAX_CHANNELS], channels_used[MAX_CHANNELS];  // changed 64 to MAX_CHANNELS
+	MODCOMMAND lastvalue[MAX_CHANNELS];
 
 	if ((!lpStream) || (dwMemLength < 0x100)) return FALSE;
 	if ((pifh->id != 0x4D504D49) || (pifh->insnum > 0xFF)
@@ -279,7 +279,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
-		if ((dwMemPos + len <= dwMemLength) && (len <= 64*MAX_CHANNELNAME))
+		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_CHANNELS*MAX_CHANNELNAME)) // MAX_CHANNELS was 64
 		{
 			UINT n = len / MAX_CHANNELNAME;
 			if (n > m_nChannels) m_nChannels = n;
@@ -298,40 +298,56 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	// Checking for unused channels
 	UINT npatterns = pifh->patnum;
-	if (npatterns > MAX_PATTERNS) npatterns = MAX_PATTERNS;
+
+	if (npatterns > MAX_PATTERNS)
+		npatterns = MAX_PATTERNS;
+
 	for (UINT patchk=0; patchk<npatterns; patchk++)
 	{
 		memset(chnmask, 0, sizeof(chnmask));
-		if ((!patpos[patchk]) || ((DWORD)patpos[patchk] + 4 >= dwMemLength)) continue;
+
+		if ((!patpos[patchk]) || ((DWORD)patpos[patchk] + 4 >= dwMemLength)) 
+			continue;
+
 		UINT len = *((WORD *)(lpStream+patpos[patchk]));
 		UINT rows = *((WORD *)(lpStream+patpos[patchk]+2));
-		if ((rows < 4) || (rows > 256)) continue;
-		if (patpos[patchk]+8+len > dwMemLength) continue;
+
+		if ((rows < 4) || (rows > 256)) 
+			continue;
+
+		if (patpos[patchk]+8+len > dwMemLength) 
+			continue;
+
 		UINT i = 0;
 		const BYTE *p = lpStream+patpos[patchk]+8;
 		UINT nrow = 0;
+
 		while (nrow<rows)
 		{
 			if (i >= len) break;
-			BYTE b = p[i++];
+			BYTE b = p[i++]; // p is the bytestream offset at current pattern_position
 			if (!b)
 			{
 				nrow++;
 				continue;
 			}
-			UINT ch = b & 0x7F;
-			if (ch) ch = (ch - 1) & 0x3F;
-			if (b & 0x80)
+
+			UINT ch = b & IT_bitmask_patternChanField_c;   // 0x7f We have some data grab a byte keeping only 127 bits
+			if (ch) 
+				ch = (ch - 1) & IT_bitmask_patternChanMask_c;   // 0x3f mask of the byte again, keeping only 64 bits
+			if (b & IT_bitmask_patternChanEnabled_c)            // 0x80 check if the upper bit is enabled.
 			{
-				if (i >= len) break;
-				chnmask[ch] = p[i++];
+				if (i >= len)               
+				    break;        
+				chnmask[ch] = p[i++];       // set the channel mask for this channel.
 			}
 			// Channel used
-			if (chnmask[ch] & 0x0F)
+			if (chnmask[ch] & 0x0F)         // if this channel is used set m_nChannels
 			{
-				if ((ch >= m_nChannels) && (ch < 64)) m_nChannels = ch+1;
+				if ((ch >= m_nChannels) && (ch < MAX_CHANNELS)) m_nChannels = ch+1; // MAX_CHANNELS was 64
 			}
-			// Note
+			// Now we actually update the pattern-row entry the note,instrument etc.
+			// Note          
 			if (chnmask[ch] & 1) i++;
 			// Instrument
 			if (chnmask[ch] & 2) i++;
@@ -446,13 +462,21 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				m+=m_nChannels;
 				continue;
 			}
-			UINT ch = b & 0x7F;
-			if (ch) ch = (ch - 1) & 0x3F;
-			if (b & 0x80)
+		
+			UINT ch = b & IT_bitmask_patternChanField_c; // 0x7f
+			
+			if (ch)
+				ch = (ch - 1) & IT_bitmask_patternChanMask_c; // 0x3f
+		
+			if (b & IT_bitmask_patternChanEnabled_c)  // 0x80
 			{
-				if (i >= len) break;
+				if (i >= len) 
+					break;
 				chnmask[ch] = p[i++];
 			}
+
+			// Now we grab the data for this particular row/channel.
+			
 			if ((chnmask[ch] & 0x10) && (ch < m_nChannels))
 			{
 				m[ch].note = lastvalue[ch].note;
@@ -574,9 +598,9 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	DWORD smppos[MAX_SAMPLES];
 	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2;
 	WORD patinfo[4];
-	BYTE chnmask[64];
+	BYTE chnmask[MAX_CHANNELS];
 	BYTE buf[512];
-	MODCOMMAND lastvalue[64];
+	MODCOMMAND lastvalue[MAX_CHANNELS];
 	FILE *f;
 
 
@@ -1274,7 +1298,7 @@ void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLeng
 UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 //----------------------------------------------------
 {
-	DWORD chinfo[64];
+	DWORD chinfo[MAX_MIXPLUGINS];
 	CHAR s[32];
 	DWORD nPluginSize;
 	UINT nTotalSize = 0;
@@ -1314,7 +1338,7 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 	}
 	for (UINT j=0; j<m_nChannels; j++)
 	{
-		if (j < 64)
+		if (j < MAX_CHANNELS)  // hmm this was 64, so should check on this!
 		{
 			if ((chinfo[j] = ChnSettings[j].nMixPlugin) != 0)
 			{
@@ -1366,7 +1390,7 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 		if (nPluginSize > nLen-nPos-8) break;;
 		if ((*(DWORD *)(p+nPos)) == 'XFHC')
 		{
-			for (UINT ch=0; ch<64; ch++) if (ch*4 < nPluginSize)
+			for (UINT ch=0; ch<MAX_CHANNELS; ch++) if (ch*4 < nPluginSize)
 			{
 				ChnSettings[ch].nMixPlugin = *(DWORD *)(p+nPos+8+ch*4);
 			}

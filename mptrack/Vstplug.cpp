@@ -965,7 +965,12 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_MixState.pMixBuffer = (int *)((((DWORD)m_MixBuffer)+7)&~7);
 	m_MixState.pOutBufferL = (float *)((((DWORD)&m_FloatBuffer[0])+7)&~7);
 	m_MixState.pOutBufferR = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE])+7)&~7);
-	m_pTempBuffer = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*2])+7)&~7);
+	
+	//rewbs.dryRatio: we now initialise this in CVstPlugin::Initialize(). 
+	//m_pTempBuffer = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*2])+7)&~7);
+
+
+
 	m_nSampleRate = CSoundFile::gdwMixingFreq;
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
 }
@@ -1002,8 +1007,12 @@ void CVstPlugin::Initialize()
 	m_nOutputs = (m_pEffect->numOutputs > 1) ? m_pEffect->numOutputs : 2;
 	m_pInputs = (float **)new char[m_nInputs*sizeof(float *)];
 	m_pOutputs = (float **)new char[m_nOutputs*sizeof(float *)];
+	m_pTempBuffer = (float **)new char[m_nInputs*sizeof(float *)];	//rewbs.dryRatio
+		
+	
 	for (UINT iIn=0; iIn<m_nInputs; iIn++)
 	{
+		m_pTempBuffer[iIn]=(float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*(2+iIn)])+7)&~7); //rewbs.dryRatio
 		m_pInputs[iIn] = (iIn & 1) ? m_MixState.pOutBufferR : m_MixState.pOutBufferL;
 	}
 #ifdef VST_LOG
@@ -1064,6 +1073,13 @@ CVstPlugin::~CVstPlugin()
 		delete m_pOutputs;
 		m_pOutputs = NULL;
 	}
+	
+	if (m_pTempBuffer)	//rewbs.dryRatio
+	{
+		delete m_pTempBuffer;
+		m_pTempBuffer = NULL;
+	}
+
 	if (m_pEvList)
 	{
 		delete (char *)m_pEvList;
@@ -1305,12 +1321,21 @@ void CVstPlugin::Init(unsigned long nFreq, int bReset)
 void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 //--------------------------------------------------------------------------
 {
+	float wetRatio, dryRatio; // rewbs.dryRatio [20040123]
+	bool isInstrument;
+
+	// Process VST events
 	if ((m_pEffect) && (m_pEffect->dispatcher) && (m_pEvList) && (m_pEvList->numEvents > 0))
 	{
 		m_pEffect->dispatcher(m_pEffect, effProcessEvents, 0, 0, m_pEvList, 0);
 	}
+	
+	//If the plug is found & ok, contiue
 	if ((m_pEffect) && (m_pEffect->process) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
+		isInstrument = (m_pEffect->numInputs < 1); // rewbs.dryRatio
+
+		//Merge stereo before sending to the plug if it is mono
 		if (m_pEffect->numInputs == 1)
 		{
 			for (UINT i=0; i<nSamples; i++)
@@ -1318,35 +1343,63 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				m_MixState.pOutBufferL[i] = 0.5f*m_MixState.pOutBufferL[i] + 0.5f*m_MixState.pOutBufferR[i];
 			}
 		}
-		if (m_pEffect->numOutputs == 1)
+
+		for (UINT iOut=0; iOut<m_nOutputs; iOut++)
 		{
-			memset(m_pTempBuffer, 0, nSamples*sizeof(float));
-			m_pOutputs[0] = m_pTempBuffer;
-		} else
-		{
-			for (UINT iOut=0; iOut<m_nOutputs; iOut++)
-			{
-				m_pOutputs[iOut] = (iOut & 1) ? pOutR : pOutL;
-			}
+			memset(m_pTempBuffer[iOut], 0, nSamples*sizeof(float));
+			m_pOutputs[iOut] = m_pTempBuffer[iOut];
 		}
+
+		//Do the VST processing magic
 		m_pEffect->process(m_pEffect, m_pInputs, m_pOutputs, nSamples);
+		
+		// If there was just the one plugin output we copy it into our 2 outputs
 		if (m_pEffect->numOutputs == 1)
 		{
+			wetRatio = 1-m_pMixStruct->fDryRatio;  //rewbs.dryRatio
+			dryRatio = isInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
+			
 			for (UINT i=0; i<nSamples; i++)
 			{
-				pOutL[i] += m_pTempBuffer[i];
-				pOutR[i] += m_pTempBuffer[i];
+				//rewbs.wetratio - added the factors. [20040123]
+				pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+				pOutR[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
+
+				//If dry mix is ticked we add the unprocessed buffer,
+				//except if this is an instrument since this it already been done:
+				if ((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument)
+				{
+					pOutL[i] += m_MixState.pOutBufferL[i];
+					pOutR[i] += m_MixState.pOutBufferR[i];				
+				}		
 			}
 		}
-		if ((m_pEffect->numInputs < 1) || (m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX))
+		//Otherwise we actually only cater for two outputs max.
+		else if (m_pEffect->numOutputs > 1)
 		{
+			wetRatio = 1-m_pMixStruct->fDryRatio;  //rewbs.dryRatio
+			dryRatio = isInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
+
 			for (UINT i=0; i<nSamples; i++)
 			{
-				pOutL[i] += m_MixState.pOutBufferL[i];
-				pOutR[i] += m_MixState.pOutBufferR[i];
+
+				//rewbs.wetratio - added the factors. [20040123]
+				
+				pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+				pOutR[i] += m_pTempBuffer[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
+
+				//If dry mix is ticked, we add the unprocessed buffer,
+				//except if this is an instrument since it has already been done:
+				if ((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument)
+				{
+					pOutL[i] += m_MixState.pOutBufferL[i];
+					pOutR[i] += m_MixState.pOutBufferR[i];				
+				}		
 			}
 		}
+
 	}
+
 	// Clear VST events
 	if ((m_pEvList) && (m_pEvList->numEvents > 0))
 	{
@@ -1430,6 +1483,13 @@ void CVstPlugin::SetZxxParameter(UINT nParam, UINT nValue)
 	SetParameter(nParam, fValue);
 }
 
+//rewbs.smoothVST
+UINT CVstPlugin::GetZxxParameter(UINT nParam)
+//--------------------------------------------------------
+{
+	return (UINT) (GetParameter(nParam) * 127.0f);
+}
+//end rewbs.smoothVST
 
 void CVstPlugin::SaveAllParameters()
 //----------------------------------
@@ -2484,6 +2544,7 @@ void X86_Stereo16AddMixToFloat(const short int *pIn, float *pOut1, float *pOut2,
 }
 
 
+#ifdef ENABLE_SSE
 void SSE_FloatToStereo16Mix(const float *pIn1, const float *pIn2, short int *pOut, int sampleframes)
 //--------------------------------------------------------------------------------------------------
 {
@@ -2561,22 +2622,33 @@ mainloop:
 	}
 }
 
+#endif
 
 void CDmo2Vst::Process(float **inputs, float **outputs, long sampleframes)
 //------------------------------------------------------------------------
 {
-	if ((!m_pMixBuffer) || (sampleframes <= 0)) return;
+	if ((!m_pMixBuffer) || (sampleframes <= 0)) 
+		return;
+
+#ifdef ENABLE_MMX
+#ifdef ENABLE_SSE
 	if ((CSoundFile::gdwSysInfo & SYSMIX_SSE) && (CSoundFile::gdwSoundSetup & SNDMIX_ENABLEMMX))
 	{
 		SSE_FloatToStereo16Mix(inputs[0], inputs[1], m_pMixBuffer, sampleframes);
 		m_pMediaProcess->Process(sampleframes*4, (LPBYTE)m_pMixBuffer, m_DataTime, DMO_INPLACE_NORMAL);
 		SSE_Stereo16AddMixToFloat(m_pMixBuffer, outputs[0], outputs[1], sampleframes);
-	} else
-	{
+	}
+#endif
+#endif
+
+#ifndef ENABLE_MMX
+#ifndef ENABLE_SSE
 		X86_FloatToStereo16Mix(inputs[0], inputs[1], m_pMixBuffer, sampleframes);
 		m_pMediaProcess->Process(sampleframes*4, (LPBYTE)m_pMixBuffer, m_DataTime, DMO_INPLACE_NORMAL);
 		X86_Stereo16AddMixToFloat(m_pMixBuffer, outputs[0], outputs[1], sampleframes);
-	}
+#endif
+#endif
+
 	m_DataTime += _muldiv(sampleframes, 10000000, m_nSamplesPerSec);
 }
 

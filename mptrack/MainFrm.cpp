@@ -167,6 +167,7 @@ HFONT CMainFrame::m_hGUIFont = NULL;
 HFONT CMainFrame::m_hFixedFont = NULL;
 HFONT CMainFrame::m_hLargeFixedFont = NULL;
 HPEN CMainFrame::penDarkGray = NULL;
+HPEN CMainFrame::penScratch = NULL;
 HPEN CMainFrame::penLightGray = NULL;
 HPEN CMainFrame::penBlack = NULL;
 HPEN CMainFrame::penWhite = NULL;
@@ -187,6 +188,7 @@ HCURSOR CMainFrame::curVSplit = NULL;
 LPMODPLUGDIB CMainFrame::bmpPatterns = NULL;
 LPMODPLUGDIB CMainFrame::bmpNotes = NULL;
 LPMODPLUGDIB CMainFrame::bmpVUMeters = NULL;
+LPMODPLUGDIB CMainFrame::bmpVisNode = NULL;  //rewbs.fxVis
 HPEN CMainFrame::gpenVuMeter[NUM_VUMETER_PENS*2];
 COLORREF CMainFrame::rgbCustomColors[MAX_MODCOLORS] = 
 	{
@@ -442,6 +444,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	brushGray = ::CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 	penLightGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNHIGHLIGHT));
 	penDarkGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
+	penScratch = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
 	penHalfDarkGray = ::CreatePen(PS_DOT, 0, GetSysColor(COLOR_BTNSHADOW));
 	penBlack = (HPEN)::GetStockObject(BLACK_PEN);
 	penWhite = (HPEN)::GetStockObject(WHITE_PEN);
@@ -455,6 +458,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	bmpPatterns = LoadDib(MAKEINTRESOURCE(IDB_PATTERNS));
 	bmpNotes = LoadDib(MAKEINTRESOURCE(IDB_PATTERNVIEW));
 	bmpVUMeters = LoadDib(MAKEINTRESOURCE(IDB_VUMETERS));
+	bmpVisNode = LoadDib(MAKEINTRESOURCE(IDB_VISNODE));		//rewbs.fxVis
 	UpdateColors();
 	// Toolbars
 	EnableDocking(CBRS_ALIGN_ANY);
@@ -554,6 +558,14 @@ BOOL CMainFrame::DestroyWindow()
 		delete bmpVUMeters;
 		bmpVUMeters = NULL;
 	}
+	//rewbs.fxvis
+	if (bmpVisNode)
+	{
+		delete bmpVisNode;
+		bmpVisNode = NULL;
+	}
+	//end rewbs.fxvis
+
 	// Kill GDI Objects
 	DeleteGDIObject(brushGray);
 	DeleteGDIObject(penLightGray);
@@ -561,6 +573,7 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penSample);
 	DeleteGDIObject(penEnvelope);
 	DeleteGDIObject(m_hFixedFont);
+	DeleteGDIObject(penScratch);
 	for (UINT i=0; i<NUM_VUMETER_PENS*2; i++)
 	{
 		if (gpenVuMeter[i])

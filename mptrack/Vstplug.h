@@ -61,12 +61,12 @@ protected:
 	UINT m_nInputs, m_nOutputs;
 	VstEvents *m_pEvList;
 	VSTINSTCH m_MidiCh[16];
-	float *m_pTempBuffer;
+	float **m_pTempBuffer;					//rewbs.dryRatio: changed from * to **
 	float **m_pInputs;
 	float **m_pOutputs;
 	int m_nEditorX, m_nEditorY;
 	int m_MixBuffer[MIXBUFFERSIZE*2+2];		// Stereo interleaved
-	float m_FloatBuffer[MIXBUFFERSIZE*3+2];	// 2ch separated
+	float m_FloatBuffer[MIXBUFFERSIZE*4+3];	// 2ch separated		//rewbs.dryRatio: *3+2 became *4+3
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
 
 public:
@@ -104,6 +104,7 @@ public: // IMixPlugin interface
 	void MidiSend(DWORD dwMidiCode);
 	void MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol);
 	void SetZxxParameter(UINT nParam, UINT nValue);
+	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST
 };
 
 

@@ -21,9 +21,9 @@ class ISoundSource;
 #define MIN_AUDIO_BUFFERSIZE		1024
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define KEYBOARDMAP_LENGTH			(3*12+2)
-#define MAINFRAME_TITLE				"Modplug Tracker"
+#define MAINFRAME_TITLE				"Modplug Tracker.wild.001"
 #define MPTRACK_FINALRELEASEVERSION	0x01090000
-#define MPTRACK_VERSION				0x011600CE
+#define MPTRACK_VERSION				0x002000001  // based on 0x011600CE it's version 2.00.001
 
 
 enum {
@@ -189,6 +189,7 @@ enum
 #define PATTERN_SHOWPREVIOUS	0x10000
 #define PATTERN_CONTSCROLL		0x20000
 #define PATTERN_KBDNOTEOFF		0x40000
+#define PATTERN_FOLLOWSONGOFF	0x80000 //rewbs.noFollow
 
 // Keyboard Setup
 enum {
@@ -253,6 +254,7 @@ enum {
 	MPTHOTKEY_REPLACEINSTRUMENT,
 	MPTHOTKEY_INTERPOLATEVOLUME,
 	MPTHOTKEY_INTERPOLATEEFFECT,
+	MPTHOTKEY_VISUALIZEEFFECT,		//rewbs.fxvis
 	MAX_MPTHOTKEYS
 };
 
@@ -353,10 +355,10 @@ public:
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;
 	static HBRUSH brushGray, brushBlack, brushWhite, brushHighLight, brushWindow;
-	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penSeparator;
+	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penSeparator, penScratch;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
 	static COLORREF rgbCustomColors[MAX_MODCOLORS];
-	static LPMODPLUGDIB bmpPatterns, bmpNotes, bmpVUMeters;
+	static LPMODPLUGDIB bmpPatterns, bmpNotes, bmpVUMeters, bmpVisNode;
 	static HPEN gpenVuMeter[NUM_VUMETER_PENS*2];
 	// Arrays
 	static CHAR m_szModDir[_MAX_PATH], m_szSmpDir[_MAX_PATH], m_szInsDir[_MAX_PATH];

@@ -1625,6 +1625,176 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
 	return TRUE;
 }
 
+//end rewbs.mixPaste
+BOOL CModDoc::MixPastePattern(UINT nPattern, DWORD dwBeginSel)
+//---------------------------------------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if ((!pMainFrm) || (nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern])) return FALSE;
+	BeginWaitCursor();
+	if (pMainFrm->OpenClipboard())
+	{
+		HGLOBAL hCpy = ::GetClipboardData(CF_TEXT);
+		LPSTR p;
+
+		if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
+		{
+			PrepareUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+			BYTE spdmax = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 0x20 : 0x1F;
+			DWORD dwMemSize = GlobalSize(hCpy);
+			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
+			UINT nrow = dwBeginSel >> 16;
+			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
+			UINT col;
+			BOOL bS3M = FALSE, bOk = FALSE;
+			UINT len = 0;
+
+			if ((nrow >= m_SndFile.PatternSize[nPattern]) || (ncol >= m_SndFile.m_nChannels)) goto PasteDone;
+			m += nrow * m_SndFile.m_nChannels;
+			// Search for signature
+			for (;;)
+			{
+				if (len + 11 >= dwMemSize) goto PasteDone;
+				char c = p[len++];
+				if (!c) goto PasteDone;
+				if ((c == 0x0D) && (len > 3))
+				{
+					if ((p[len-3] == 'I') || (p[len-4] == 'S')) bS3M = TRUE;
+					break;
+				}
+			}
+			bOk = TRUE;
+			while ((nrow < m_SndFile.PatternSize[nPattern]) && (len + 11 < dwMemSize))
+			{
+				// Search for column separator
+				while (p[len] != '|')
+				{
+					if (len + 11 >= dwMemSize) goto PasteDone;
+					if (!p[len]) goto PasteDone;
+					len++;
+				}
+				col = ncol;
+				// Paste columns
+				while ((p[len] == '|') && (len + 11 < dwMemSize))
+				{
+					LPSTR s = p+len+1;
+					if (col < m_SndFile.m_nChannels)
+					{
+						// Note
+						if (s[0] > ' ' && m[col].note==0)
+						{
+							m[col].note = 0;
+							if (s[0] == '=') m[col].note = 0xFF; else
+							if (s[0] == '^') m[col].note = 0xFE; else
+							if (s[0] != '.')
+							{
+								for (UINT i=0; i<12; i++)
+								{
+									if ((s[0] == szNoteNames[i][0])
+									 && (s[1] == szNoteNames[i][1])) m[col].note = i+1;
+								}
+								if (m[col].note) m[col].note += (s[2] - '0') * 12;
+							}
+						}
+						// Instrument
+						if (s[3] > ' ' && m[col].instr==0)
+						{
+							if ((s[3] >= '0') && (s[3] <= ('0'+(MAX_SAMPLES/10))))
+							{
+								m[col].instr = (s[3]-'0') * 10 + (s[4]-'0');
+							} else m[col].instr = 0;
+						}
+						// Volume
+						if (s[5] > ' ' && m[col].volcmd==0)
+						{
+							if (s[5] != '.')
+							{
+								m[col].volcmd = 0;
+								for (UINT i=1; i<MAX_VOLCMDS; i++)
+								{
+									if (s[5] == gszVolCommands[i])
+									{
+										m[col].volcmd = i;
+										break;
+									}
+								}
+								m[col].vol = (s[6]-'0')*10 + (s[7]-'0');
+							} else m[col].volcmd = m[col].vol = 0;
+						}
+						// Effect
+						if (s[8] > ' ' && m[col].command==0)
+						{
+							m[col].command = 0;
+							if (s[8] != '.')
+							{
+								LPCSTR psc = (bS3M) ? gszS3mCommands : gszModCommands;
+								for (UINT i=1; i<MAX_EFFECTS; i++)
+								{
+									if ((s[8] == psc[i]) && (psc[i] != '?')) m[col].command = i;
+								}
+							}
+						}
+						// Effect value
+						if (s[9] > ' ' && m[col].param==0)
+						{
+							m[col].param = 0;
+							if (s[9] != '.')
+							{
+								for (UINT i=0; i<16; i++)
+								{
+									if (s[9] == szHexChar[i]) m[col].param |= (i<<4);
+									if (s[10] == szHexChar[i]) m[col].param |= i;
+								}
+							}
+						}
+						// Checking command
+						if (m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+						{
+							switch (m[col].command)
+							{
+							case CMD_SPEED:
+							case CMD_TEMPO:
+								if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
+								else
+								{
+									if ((m[col].command == CMD_SPEED) && (m[col].param > spdmax)) m[col].param = CMD_TEMPO; else
+									if ((m[col].command == CMD_TEMPO) && (m[col].param <= spdmax)) m[col].param = CMD_SPEED;
+								}
+								break;
+							}
+						} else
+						{
+							switch (m[col].command)
+							{
+							case CMD_SPEED:
+							case CMD_TEMPO:
+								if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
+								break;
+							}
+						}
+					}
+					len += 12;
+					col++;
+				}
+				// Next row
+				m += m_SndFile.m_nChannels;
+				nrow++;
+			}
+		PasteDone:
+			GlobalUnlock(hCpy);
+			if (bOk)
+			{
+				SetModified();
+				UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << 24), NULL);
+			}
+		}
+		CloseClipboard();
+	}
+	EndWaitCursor();
+	return TRUE;
+}
+//end rewbs.mixPaste
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Copy/Paste envelope

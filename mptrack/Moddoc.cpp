@@ -365,6 +365,8 @@ void CModDoc::OnCloseDocument()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->OnDocumentClosed(this);
 	CDocument::OnCloseDocument();
+
+
 }
 
 
@@ -1452,7 +1454,7 @@ typedef struct MPTEFFECTINFO
 #define MOD_TYPE_S3MIT	(MOD_TYPE_S3M|MOD_TYPE_IT)
 #define MOD_TYPE_NOMOD	(MOD_TYPE_S3M|MOD_TYPE_XM|MOD_TYPE_IT)
 #define MOD_TYPE_XMIT	(MOD_TYPE_XM|MOD_TYPE_IT)
-#define MAX_FXINFO		64
+#define MAX_FXINFO		65					//rewbs.smoothVST, increased from 64... I wonder what this will break?
 
 const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 {
@@ -1484,6 +1486,7 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_PANNINGSLIDE,	0,0,		0,	MOD_TYPE_NOMOD,	"Panning slide"},
 	{CMD_SETENVPOSITION,0,0,		0,	MOD_TYPE_XM,	"Envelope position"},
 	{CMD_MIDI,			0,0,		0,	MOD_TYPE_NOMOD,	"Midi macro"},
+	{CMD_SMOOTHMIDI,	0,0,		0,	MOD_TYPE_NOMOD,	"Smooth Midi macro"},	//rewbs.smoothVST
 	// Extended MOD/XM effects
 	{CMD_MODCMDEX,		0xF0,0x10,	0,	MOD_TYPE_MODXM,	"Fine porta up"},
 	{CMD_MODCMDEX,		0xF0,0x20,	0,	MOD_TYPE_MODXM,	"Fine porta down"},
@@ -1845,6 +1848,18 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		}
 		break;
 	
+	//rewbs.smoothVST
+	case CMD_SMOOTHMIDI:
+		if (param < 0x80)
+		{
+			wsprintf(pszName, "SFx macro: z=%02X (%d)", param, param);
+		} else
+		{
+			wsprintf(pszName, "Fixed Macro Z%02X", param);
+		}
+		break;
+	//end rewbs.smoothVST
+
 	default:
 		if (gFXInfo[ndx].dwParamMask == 0xF0)
 		{

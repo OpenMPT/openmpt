@@ -8,6 +8,7 @@
 #include "view_pat.h"
 #include "ctrl_pat.h"
 #include "dlsbank.h"
+#include "EffectVis.h"		//rewbs.fxvis
 
 #define MAX_SPACING		16
 
@@ -45,6 +46,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_CUT,			OnEditCut)
 	ON_COMMAND(ID_EDIT_COPY,		OnEditCopy)
 	ON_COMMAND(ID_EDIT_PASTE,		OnEditPaste)
+	ON_COMMAND(ID_EDIT_MIXPASTE,	OnEditMixPaste)		//rewbs.mixPaste
 	ON_COMMAND(ID_EDIT_SELECT_ALL,	OnEditSelectAll)
 	ON_COMMAND(ID_EDIT_SELECTCOLUMN,OnEditSelectColumn)
 	ON_COMMAND(ID_EDIT_SELECTCOLUMN2,OnSelectCurrentColumn)
@@ -75,6 +77,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_PROPERTIES,			OnPatternProperties)
 	ON_COMMAND(ID_PATTERN_INTERPOLATE_VOLUME,	OnInterpolateVolume)
 	ON_COMMAND(ID_PATTERN_INTERPOLATE_EFFECT,	OnInterpolateEffect)
+	ON_COMMAND(ID_PATTERN_VISUALIZE_EFFECT,		OnVisualizeEffect)		//rewbs.fxvis
 	ON_COMMAND(ID_PATTERN_SETINSTRUMENT,		OnSetSelInstrument)
 	ON_COMMAND(ID_CURSORCOPY,					OnCursorCopy)
 	ON_COMMAND(ID_CURSORPASTE,					OnCursorPaste)
@@ -87,12 +90,15 @@ END_MESSAGE_MAP()
 CViewPattern::CViewPattern()
 //--------------------------
 {
+	m_pEffectVis = NULL; //rewbs.fxvis
+
 	m_nPattern = 0;
 	m_nDetailLevel = 4;
 	m_pEditWnd = NULL;
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 }
+
 
 
 void CViewPattern::OnInitialUpdate()
@@ -599,8 +605,19 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 void CViewPattern::OnDestroy()
 //----------------------------
 {
+
+	//rewbs.fxVis
+	if (m_pEffectVis)
+	{
+		m_pEffectVis->DoClose(); 
+		delete m_pEffectVis;
+		m_pEffectVis = NULL;
+	}
+	//end rewbs.fxVis
+
 	if (m_pEditWnd)
 	{
+		m_pEditWnd->DestroyWindow();
 		delete m_pEditWnd;
 		m_pEditWnd = NULL;
 	}
@@ -707,6 +724,22 @@ void CViewPattern::OnEditPaste()
 		SetFocus();
 	}
 }
+
+//rewbs.mixPaste
+void CViewPattern::OnEditMixPaste()
+//------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	
+	if (pModDoc)
+	{
+		pModDoc->MixPastePattern(m_nPattern, m_dwBeginSel);
+		InvalidatePattern(FALSE);
+		SetFocus();
+	}
+}
+//end rewbs.mixPaste
+
 
 
 BOOL CViewPattern::CheckCustomKeys(UINT nChar, DWORD dwFlags)
@@ -1020,6 +1053,7 @@ void CViewPattern::ProcessChar(UINT nChar, UINT nFlags)
 			*p = oldcmd;
 		}
 	}
+
 }
 
 
@@ -1261,6 +1295,13 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 						AppendMenu(hMenu, MF_STRING, ID_PATTERN_INTERPOLATE_EFFECT, "Interpolate Effect\tCtrl+K");
 						bSep = TRUE;
 					}
+
+					//rewbs.fxvis - OK to vissualize?
+					if  (ncc1 >= 3)
+					{
+						AppendMenu(hMenu, MF_STRING, ID_PATTERN_VISUALIZE_EFFECT, "Visualize Effect\tCtrl+B");
+						bSep = TRUE;
+					}
 				}
 			}
 			// Change Instrument
@@ -1293,6 +1334,7 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 			AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\tCtrl+X");
 			AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\tCtrl+C");
 			AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\tCtrl+V");
+			AppendMenu(hMenu, MF_STRING, ID_EDIT_MIXPASTE, "Mix Paste\tCtrl+M");
 			if (pModDoc->CanUndo()) AppendMenu(hMenu, MF_STRING, ID_EDIT_UNDO, "Undo\tCtrl+Z");
 			bSep = TRUE;
 		}
@@ -2171,6 +2213,44 @@ void CViewPattern::OnInterpolateVolume()
 	}
 }
 
+//begin rewbs.fxvis
+void CViewPattern::OnVisualizeEffect()
+//--------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc)
+	{
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		UINT row0 = m_dwBeginSel >> 16, row1 = m_dwEndSel >> 16, nchn = (m_dwBeginSel & 0xFFFF) >> 3;
+		if (m_pEffectVis)
+		{
+			//window already there, update data
+			m_pEffectVis->UpdateSelection(row0, row1, nchn, pModDoc, m_nPattern);
+		}
+		else
+		{
+			//Open window & send data
+			m_pEffectVis = new CEffectVis(this, row0, row1, nchn, pModDoc, m_nPattern);
+			if (m_pEffectVis)
+			{
+				m_pEffectVis->OpenEditor(CMainFrame::GetMainFrame());
+				// HACK: to get status window set up; must create clear destinction between 
+				// construction, 1st draw code and all draw code.
+				m_pEffectVis->OnSize(0,0,0);
+
+			}	
+		}
+
+
+		/*
+		CHAR s[64];
+		wsprintf(s, "Effect Visualiser to be implemented");
+		::MessageBox(NULL, s, NULL, MB_OK|MB_ICONEXCLAMATION);
+		*/
+	}
+}
+//end rewbs.fxvis
+
 
 void CViewPattern::OnInterpolateEffect()
 //--------------------------------------
@@ -2629,6 +2709,13 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		{
 			nPat = pSndFile->Order[nOrd];
 		}
+		//rewbs.fxVis: HACK. we should get teh effectvis implemented as a view so we don't need to
+		//			   go through the pattern for this kind of notification.
+		if (m_pEffectVis && m_pEffectVis->m_hWnd)
+		{	
+			m_pEffectVis->SetPlayCursor(nPat, nRow);
+		}
+
 		if ((m_dwStatus & (PATSTATUS_FOLLOWSONG|PATSTATUS_DRAGVSCROLL|PATSTATUS_DRAGHSCROLL|PATSTATUS_MOUSEDRAGSEL)) == PATSTATUS_FOLLOWSONG)
 		{
 			if (nPat < MAX_PATTERNS)
@@ -2642,12 +2729,18 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		{
 			SetPlayCursor(nPat, nRow);
 		}
+
+
+
 	}
 	if ((pnotify->dwType & (MPTNOTIFY_VUMETERS|MPTNOTIFY_STOP)) && (m_dwStatus & PATSTATUS_VUMETERS))
 	{
 		UpdateAllVUMeters(pnotify);
 	}
+
 	return 0;
+
+
 }
 
 
@@ -2884,5 +2977,3 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	}
 	return 0;
 }
-
-

@@ -56,7 +56,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(3); break;
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
-	for (int i=4; i<=64; i++)
+	for (int i=4; i<=MAX_BASECHANNELS; i++)
 	{
 		wsprintf(s, "%d Channels", i);
 		m_ChannelsBox.SetItemData(m_ChannelsBox.AddString(s), i);
