@@ -1317,8 +1317,8 @@ void CVstPlugin::Initialize()
 	{
 		m_pTempBuffer[iOut]=(float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*(2+iOut)])+7)&~7); //rewbs.dryRatio
 	}	
-	m_pInputs[0] = m_MixState.pOutBufferR;
-	m_pInputs[1] = m_MixState.pOutBufferL;
+	m_pInputs[0] = m_MixState.pOutBufferL;
+	m_pInputs[1] = m_MixState.pOutBufferR;
 
 #ifdef VST_LOG
 	Log("%s: vst ver %d.0, flags=%04X, %d programs, %d parameters\n",
@@ -1809,9 +1809,26 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 		//mix outputs of multi-output VSTs:
 		if(m_nOutputs>2){
-			for(UINT iOut=2; iOut<m_nOutputs; iOut++){
+			// first, mix extra outputs on a stereo basis
+			UINT nOuts = m_nOutputs;
+			// so if nOuts is not even, let process the last output later
+			if((nOuts % 2) == 1) nOuts--;
+
+			// mix extra stereo outputs
+			for(UINT iOut=3; iOut<nOuts; iOut++){
+				UINT channel = (iOut-1)%2;
 				for(UINT i=0; i<nSamples; i++)
-					m_pTempBuffer[iOut%2][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
+					m_pTempBuffer[channel][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
+			}
+
+			// if m_nOutputs is odd, mix half the signal of last output to each channel
+			if(nOuts != m_nOutputs){
+				// trick : if we are here, nOuts = m_nOutputs-1 !!!
+				for(UINT i=0; i<nSamples; i++){
+					float v = 0.5f * m_pTempBuffer[nOuts][i];
+					m_pTempBuffer[0][i] += v;
+					m_pTempBuffer[1][i] += v;
+				}
 			}
 		}
 
