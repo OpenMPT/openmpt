@@ -15,6 +15,7 @@
 #include "samplerate.h"
 
 #define FLOAT_ERROR 1.0e-20f
+
 // Float point comparison
 bool EqualTof(const float a, const float b)
 {
@@ -1401,12 +1402,13 @@ void CCtrlSamples::OnEstimateSampleSize()
 	// Show sample length estimate
 	int i,decpoint,sign;
 	char * str = _fcvt(ratio, 2, &decpoint, &sign);
-	CHAR fstr[64];
+	CHAR fstr[128];
 	for(i = 0 ; i < decpoint ; i++) fstr[i] = str[i];
 	fstr[i++] = '.';
 	fstr[i++] = '\0';
 	strcat(fstr,&str[decpoint]);
-	strcat(fstr,ratio > 1.0 ? " pattern rows" : " pattern row");
+	strcat(fstr,ratio > 1.0 ? " rows" : " pattern row");
+	wsprintf(&fstr[strlen(fstr)],"\nStretch range [ %d , %d ]",(int)Round(0.5 * ratio + 0.5,0),(int)(2.0 * ratio));
 	::MessageBox(NULL,fstr,"Estimated sample length",MB_OK);
 }
 
