@@ -568,7 +568,7 @@ enum {
 static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 {
 	{"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
-	{"Always center active row",		"Turn on this option to have the active row always centered in the pattern editor."},
+	{"Always center active row",		"Turn on this option to have the active row always centered in the pattern editor (requires \"Always center active row\")."},
 	{"Use large font for comments",		"With this option enabled, the song message editor will use a larger font."},
 	{"Display rows in hex",				"With this option enabled, row numbers and sequence numbers will be displayed in hexadecimal."},
 	{"Cursor wrap in pattern editor",	"When this option is active, going past the end of a pattern will move the cursor to the beginning."},

@@ -258,6 +258,14 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap)
 			}
 		}
 	}
+
+	//rewbs.fix3168
+	if ( (static_cast<int>(row)<0) && !(CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL))
+		row = 0;
+	if (row >= pSndFile->PatternSize[m_nPattern] && !(CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL))
+		row = pSndFile->PatternSize[m_nPattern]-1;
+	//end rewbs.fix3168
+
 	if ((row >= pSndFile->PatternSize[m_nPattern]) || (!m_szCell.cy)) return FALSE;
 	GetClientRect(&rect);
 	rect.top += m_szHeader.cy;

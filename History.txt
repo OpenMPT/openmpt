@@ -21,6 +21,7 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
   
+   / <rewbs> When wrap and continuous scroll are off, cursor jump/snap now goes to row 0 or last row when it should go beyond, rather than doing nothing.
    . <rewbs> modifier keys are no longer reset on pattern editor focus loss
    . <rewbs> fixed scrollpos jumping to row 0 on change pattern
    . <rewbs> if the full pattern can be visible in window, pattern is moved down so row 0 is visible and scrollbar is not needed. (tx lpchip)
