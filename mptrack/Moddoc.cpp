@@ -631,7 +631,7 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 }
 
 
-BOOL CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend)
+BOOL CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, UINT nCurrentChn) //rewbs.vstiLive: added current chan param
 //-----------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -739,6 +739,19 @@ BOOL CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			if ((!(CMainFrame::m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp)) pChn->dwFlags |= CHN_EXTRALOUD;
 		} else pChn->dwFlags &= ~CHN_EXTRALOUD;
 		END_CRITICAL();
+		//rewbs.vstiLive
+		INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
+		MODINSTRUMENT *psmp = &(m_SndFile.Ins[nins]);
+		if (nCurrentChn >=0 && penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
+		{
+			UINT nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;
+			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+			{
+				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
+				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64);
+			}
+		}
+		//end rewbs.vstiLive
 		if (pMainFrm->GetModPlaying() != this)
 		{
 			m_SndFile.m_dwSongFlags |= SONG_PAUSED;

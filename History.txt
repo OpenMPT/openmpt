@@ -11,14 +11,15 @@ then please provide feedback at:
 web:   http://sourceforge.net/projects/modplug 
 
 email: modplug@plastikskouser.com    Developer, Admin
-email: rf99@doc.ic.ac.uk.            Developer, Admin
+email: modplug@soal.org	             Developer, Admin
 
 
 
-v2004.02.24   Author: Rewbs  Contact: rf99@doc.ic.ac.uk
+v2004.02.24   Author: Rewbs  Contact: modplug@soal.org
 -------------------------------------------------------
 1. Each individual view (general/pattern/samples/intruments/comments) remembers its own horizontal splitter position.
-
+2. If you enter notes in a channel to which a VSTi has been assigned, and you're using an instrument with a midi channel send, you should hear the VSTi play as you enter the notes.
+3. Minor cosmetic changes, including about dialog image by Snu & Shableep. :)
 
 v2004.02.22   Author: Trevor Nunes Contact: modplug@plastikskouser.com
 -----------------------------------------------------------------------
@@ -32,7 +33,7 @@ Experimental features in this version:
   >64 channel modules.
 
 
-v2004.02.16   Author: Rewbs  Contact: rf99@.doc.ic.ac.uk
+v2004.02.16   Author: Rewbs  Contact: modplug@soal.org
 -------------------------------------------------------
 Experimental features in this version:
 
@@ -52,6 +53,4 @@ Experimental features in this version:
 5. Option to have "follow song" disabled by default under general settings.
 
 6. SDx works on VSTis.
-
-Send bugs or any other complaints to rf99@doc.ic.ac.uk.
 

@@ -269,7 +269,7 @@ void CEffectVis::ShowVisImage(CDC *pDC)
 		// draw the grid
 		memDC.BitBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcGrid, 0, 0, SRCCOPY) ;
 #ifndef HAVE_DOT_NET
-		// merge the nodes image with the grid
+		
 		// VC6 TransparentBlit...
 		// WINGDIAPI BOOL  WINAPI TransparentBlt(HDC,int,int,int,int,HDC,int,int,int,int,UINT);
         // hDestDC, xDest, yDest, nDestWidth,nDestHeight,xSrc,ySrc,nSrcWidth,nSrcHeight, crTransparent
@@ -283,6 +283,7 @@ void CEffectVis::ShowVisImage(CDC *pDC)
 #endif
 
 #ifdef HAVE_DOT_NET
+		// merge the nodes image with the grid
 		memDC.TransparentBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcNodes, 0, 0, m_rcDraw.Width(), m_rcDraw.Height(), 0x00000000) ;
 		// further merge the playpos 
 		memDC.TransparentBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcPlayPos, 0, 0, m_rcDraw.Width(), m_rcDraw.Height(), 0x00000000) ;
