@@ -1587,6 +1587,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 //-------------------------------
 {
 	MODCOMMAND *m;
+	if (pChn->dwFlags & CHN_MUTE) return;
 
 	if ((!m_nInstruments) || (m_nPattern >= MAX_PATTERNS)
 	 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;

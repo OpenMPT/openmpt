@@ -97,6 +97,7 @@ public:
 	void UpdateScrollSize();
 	void UpdateScrollPos();
 	void UpdateIndicator();
+	void UpdateXInfoText(); //rewbs.xinfo
 	void UpdateColors();
 	int GetXScrollPos() const { return m_nXScroll; }
 	int GetYScrollPos() const { return m_nYScroll; }
@@ -186,9 +187,9 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDestroy();
 	afx_msg void OnMouseMove(UINT, CPoint);
+	afx_msg void OnLButtonUp(UINT, CPoint);
 	afx_msg void OnLButtonDown(UINT, CPoint);
 	afx_msg void OnLButtonDblClk(UINT, CPoint);
-	afx_msg void OnLButtonUp(UINT, CPoint);
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 

@@ -1885,8 +1885,8 @@ BOOL CModDoc::IsExtendedEffect(UINT ndx) const
 }
 
 
-BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL bXX)
-//-----------------------------------------------------------------------------------
+BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL bXX, int nChn) //rewbs.xinfo: added chan arg
+//---------------------------------------------------------------------------------------------
 {
 	BOOL bSupported;
 	int fxndx = -1;
@@ -1913,6 +1913,72 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 			if ((gFXInfo[fxndx].dwParamMask & 0x0F) == 0x0F) pszDescription[2] = szHexChar[gFXInfo[i].dwParamValue & 0x0F];
 		}
 		strcat(pszDescription, gFXInfo[fxndx].pszName);
+		//rewbs.xinfo
+		//Get channel specific info
+		if (nChn>=0 && nChn<m_SndFile.m_nChannels)
+		{
+			CString chanSpec = "";
+			CString macroText= "_no macro_";
+			switch (command)
+			{
+			case CMD_MODCMDEX:
+			case CMD_S3MCMDEX:
+				if ((param&0xF0) == 0xF0)	//Set Macro
+				{
+					macroText = &m_SndFile.m_MidiCfg.szMidiSFXExt[(param&0x0F)*32];
+					chanSpec.Format(" to %d: ", param&0x0F);
+				}
+				break;
+			case CMD_MIDI:
+			case CMD_SMOOTHMIDI:
+				if (param<0x80)
+				{
+					macroText = &m_SndFile.m_MidiCfg.szMidiSFXExt[m_SndFile.Chn[nChn].nActiveMacro*32];
+					chanSpec.Format(": currently %d: ", m_SndFile.Chn[nChn].nActiveMacro);
+				}
+				else
+				{
+					chanSpec = " (Fixed)";
+				}
+				break;
+			}
+			
+			if (macroText != "_no macro_")
+			{
+				switch (GetMacroType(macroText))
+				{
+				case sfx_unused: chanSpec.Append("Unused"); break;
+				case sfx_cutoff: chanSpec.Append("Cutoff"); break;
+				case sfx_reso: chanSpec.Append("Resonance"); break;
+				case sfx_mode: chanSpec.Append("Filter Mode"); break;
+				case sfx_plug: {
+					int nParam = MacroToPlugParam(macroText);
+					char paramName[128];
+					memset(paramName, 0, sizeof(paramName));
+					UINT nPlug = m_SndFile.ChnSettings[nChn].nMixPlugin;
+					if (nPlug)
+					{
+						CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
+						if (pPlug)
+							pPlug->GetParamName(nParam, paramName, sizeof(paramName));
+						if (paramName[0] == 0)
+							strcpy(paramName, "N/A");
+					}
+					if (paramName[0] == 0)
+						strcpy(paramName, "N/A - no plug");
+					CString temp; 
+					temp.Format("param %d (%s)", nParam, paramName);
+					chanSpec.Append(temp); 
+					break; }
+				case sfx_custom: 
+				default: chanSpec.Append("Custom");
+				}
+			}
+			if (chanSpec != "")
+				strcat(pszDescription, chanSpec);
+
+		}
+		//end rewbs.xinfo
 	}
 	return bSupported;
 }
@@ -2616,3 +2682,28 @@ void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 
 	return;
 }
+//rewbs.xinfo
+int CModDoc::GetMacroType(CString value)
+{
+	if (value.Compare("")==0) return sfx_unused;
+	if (value.Compare("F0F000z")==0) return sfx_cutoff;
+	if (value.Compare("F0F001z")==0) return sfx_reso;
+	if (value.Compare("F0F002z")==0) return sfx_mode;
+	if (value.Compare("F0F079z")>0 && value.Compare("F0F0G")<0 && value.GetLength()==7) //can be fooled :)
+		return sfx_plug; 
+	return sfx_custom; //custom/unknown
+}
+
+int CModDoc::MacroToPlugParam(CString macro)
+{
+	char* param = (char *) (LPCTSTR) macro;
+	param +=4;
+	int code = -256;
+	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
+	if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
+	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
+	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
+
+	return code&0x7F;
+}
+//end rewbs.xinfo

@@ -1461,7 +1461,7 @@ VOID CModTree::FillInstrumentLibrary()
 		if (m_pDataTree)
 		{
 			strcpy(s, "?:\\");
-			for (UINT iDrive='A'; iDrive<'Z'; iDrive++)
+			for (UINT iDrive='A'; iDrive<='Z'; iDrive++)  //rewbs.fix3112: < became <= 
 			{
 				s[0] = (CHAR)iDrive;
 				UINT nDriveType = GetDriveType(s);

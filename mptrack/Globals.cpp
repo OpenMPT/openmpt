@@ -336,6 +336,7 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 	RecalcLayout();
 	pMainFrm->SetUserText("");
 	pMainFrm->SetInfoText("");
+	pMainFrm->SetXInfoText(""); //rewbs.xinfo
 	pDlg->ShowWindow(SW_SHOW);
 	((CChildFrame *)GetParentFrame())->SetSplitterHeight(*(pDlg->GetSplitPosRef()));	//rewbs.varWindowSize	
 	if (m_hWndMDI) ::PostMessage(m_hWndMDI, WM_MOD_CHANGEVIEWCLASS, (WPARAM)lParam, (LPARAM)pDlg);

@@ -415,7 +415,7 @@ protected:
 	HWND m_hFollowSong, m_hWndMidi;
 	DWORD m_dwStatus, m_dwElapsedTime, m_dwTimeSec, m_dwNotifyType, m_dwLastPluginIdleCall;
 	UINT m_nTimer, m_nAvgMixChn, m_nMixChn;
-	CHAR m_szUserText[80], m_szInfoText[80];
+	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
 	// Chords
 	MPTCHORD Chords[3*12]; // 3 octaves
 	// Notification Buffer
@@ -481,6 +481,7 @@ public:
 public:
 	VOID SetUserText(LPCSTR lpszText);
 	VOID SetInfoText(LPCSTR lpszText);
+	VOID SetXInfoText(LPCSTR lpszText); //rewbs.xinfo
 	VOID SetHelpText(LPCSTR lpszText);
 	UINT GetBaseOctave();
 	UINT GetCurrentInstrument();
@@ -572,6 +573,7 @@ protected:
 	afx_msg void OnUpdateTime(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateUser(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateInfo(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateXInfo(CCmdUI *pCmdUI); //rewbs.xinfo
 	afx_msg void OnUpdateMidiRecord(CCmdUI *pCmdUI);
 	afx_msg void OnPlayerPause();
 	afx_msg void OnMidiRecord();

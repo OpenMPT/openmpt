@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="mptrack"
+	RootNamespace="mptrack"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">
@@ -45,7 +46,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib"
-				OutputFile=".\Debug/mptrack2.exe"
+				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
