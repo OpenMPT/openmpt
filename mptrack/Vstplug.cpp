@@ -1804,29 +1804,19 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			m_pOutputs[iOut] = m_pTempBuffer[iOut];
 		}
 
-
 		//Do the VST processing magic
 		m_pEffect->process(m_pEffect, m_pInputs, m_pOutputs, nSamples);
 
 		//mix outputs of multi-output VSTs:
-		if (m_nOutputs>1)
-		{
-			for (int iOut=1; iOut<m_nOutputs; iOut++)
-			{
-			  for (UINT i=0; i<nSamples; i++)
-			  {
-			    //stereo
-				  if (iOut==1) iOut++; //if stereo, output 1 is left channel, so we don't want to mix down.
-			      m_pTempBuffer[iOut%2][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
-			    //mono:
-			      //m_pTempBuffer[0][i] += m_pTempBuffer[iOut][i]; 
-			      //m_pTempBuffer[1][i] += m_pTempBuffer[iOut][i];
-			  }
+		if(m_nOutputs>2){
+			for(UINT iOut=2; iOut<m_nOutputs; iOut++){
+				for(UINT i=0; i<nSamples; i++)
+					m_pTempBuffer[iOut%2][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
 			}
 		}
 
 		// If there was just the one plugin output we copy it into our 2 outputs
-		if (m_pEffect->numOutputs == 1)
+		if(m_pEffect->numOutputs == 1)
 		{
 			wetRatio = 1-m_pMixStruct->fDryRatio;  //rewbs.dryRatio
 			dryRatio = isInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
@@ -1861,19 +1851,19 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				// Default mix
 				case 0:
 					if(wetRatio == 0.0f){
-						for (UINT i=0; i<nSamples; i++){
+						for(UINT i=0; i<nSamples; i++){
 							pOutL[i] += m_MixState.pOutBufferL[i];
 							pOutR[i] += m_MixState.pOutBufferR[i];
 						}
 					}
 					else if(dryRatio == 0.0f){
-						for (UINT i=0; i<nSamples; i++){
+						for(UINT i=0; i<nSamples; i++){
 							pOutL[i] += m_pTempBuffer[0][i];
 							pOutR[i] += m_pTempBuffer[0][i];
 						}
 					}
 					else{
-						for (UINT i=0; i<nSamples; i++){
+						for(UINT i=0; i<nSamples; i++){
 							//rewbs.wetratio - added the factors. [20040123]			
 							pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
 							pOutR[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
@@ -1883,7 +1873,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Wet subtract
 				case 1:
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						pOutL[i] += m_MixState.pOutBufferL[i] - m_pTempBuffer[0][i]*wetRatio;
 						pOutR[i] += m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]*wetRatio;
 					}
@@ -1891,7 +1881,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Dry subtract
 				case 2:
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						pOutL[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
 						pOutR[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferR[i]*dryRatio;
 					}
@@ -1899,7 +1889,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Mix subtract
 				case 3:
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						pOutL[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
 						pOutR[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferR[i]*wetRatio;
 					}
@@ -1907,7 +1897,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Middle subtract
 				case 4:
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						float middle = ( pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i] )/2.0f;
 						pOutL[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
 						pOutR[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
@@ -1920,7 +1910,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 						wetRatio /= 2.0f;
 						dryRatio /= 2.0f;
 					}
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						pOutL[i] += wetRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]);
 						pOutR[i] += dryRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]);
 					}
@@ -1929,7 +1919,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 			//If dry mix is ticked we add the unprocessed buffer,
 			//except if this is an instrument since this it has already been done:
-			if ((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument){
+			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument){
 				for (UINT i=0; i<nSamples; i++){
 					pOutL[i] += m_MixState.pOutBufferL[i];
 					pOutR[i] += m_MixState.pOutBufferR[i];
@@ -1976,19 +1966,19 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				// Default mix
 				case 0:
 					if(wetRatio == 0.0f){
-						for (UINT i=0; i<nSamples; i++){
+						for(UINT i=0; i<nSamples; i++){
 							pOutL[i] += m_MixState.pOutBufferL[i];
 							pOutR[i] += m_MixState.pOutBufferR[i];
 						}
 					}
 					else if(dryRatio == 0.0f){
-						for (UINT i=0; i<nSamples; i++){
+						for(UINT i=0; i<nSamples; i++){
 							pOutL[i] += m_pTempBuffer[0][i];
 							pOutR[i] += m_pTempBuffer[1][i];
 						}
 					}
 					else{
-						for (UINT i=0; i<nSamples; i++){
+						for(UINT i=0; i<nSamples; i++){
 							//rewbs.wetratio - added the factors. [20040123]			
 							pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
 							pOutR[i] += m_pTempBuffer[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
@@ -1998,7 +1988,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Wet subtract
 				case 1:
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						pOutL[i] += m_MixState.pOutBufferL[i] - m_pTempBuffer[0][i]*wetRatio;
 						pOutR[i] += m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]*wetRatio;
 					}
@@ -2006,7 +1996,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Dry subtract
 				case 2:
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						pOutL[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
 						pOutR[i] += m_pTempBuffer[1][i] - m_MixState.pOutBufferR[i]*dryRatio;
 					}
@@ -2014,7 +2004,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Mix subtract
 				case 3:
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						pOutL[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
 						pOutR[i] -= m_pTempBuffer[1][i] - m_MixState.pOutBufferR[i]*wetRatio;
 					}
@@ -2022,7 +2012,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 				// Middle subtract
 				case 4:
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						float middle = ( pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i] )/2.0f;
 						pOutL[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
 						pOutR[i] -= middle - m_pTempBuffer[1][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
@@ -2035,7 +2025,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 						wetRatio /= 2.0f;
 						dryRatio /= 2.0f;
 					}
-					for (UINT i=0; i<nSamples; i++){
+					for(UINT i=0; i<nSamples; i++){
 						pOutL[i] += wetRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]);
 						pOutR[i] += dryRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]);
 					}
@@ -2044,7 +2034,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 			//If dry mix is ticked we add the unprocessed buffer,
 			//except if this is an instrument since this it has already been done:
-			if ((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument){
+			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument){
 				for (UINT i=0; i<nSamples; i++){
 					pOutL[i] += m_MixState.pOutBufferL[i];
 					pOutR[i] += m_MixState.pOutBufferR[i];
