@@ -228,7 +228,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 	#endif
 			hLib = LoadLibrary(pszDllPath);
 	//rewbs.VSTcompliance
-	/*if (!hLib)
+#ifdef _DEBUG
+	if (!hLib)
 	{
 		TCHAR szBuf[80]; 
 		LPVOID lpMsgBuf;
@@ -237,7 +238,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 		wsprintf(szBuf, "Failed to load plugin dll with error %d: %s", dw, lpMsgBuf); 
 	 	MessageBox(NULL, szBuf, "Error", MB_OK); 
 		LocalFree(lpMsgBuf);
-	}*/
+	}
+#endif //_DEBUG	
 	//end rewbs.VSTcompliance
 	#ifndef _DEBUG
 		} __finally {}
@@ -706,9 +708,10 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 				timeInfo.ppqPos =0;
 		}
 		if (value & kVstTempoValid)
-		{
-			timeInfo.flags |= kVstTempoValid;
+		{	
 			timeInfo.tempo = CMainFrame::GetMainFrame()->GetApproxBPM();
+			if (timeInfo.tempo)
+				timeInfo.flags |= kVstTempoValid;
 		}
 		if (value & kVstTimeSigValid)
 		{	//Send a fake time sig until we get this sorted.
@@ -781,8 +784,10 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		Log("VST plugin to host: Get Input Latency\n");
 		break;
 	case audioMasterGetOutputLatency:
-		Log("VST plugin to host: Get Output Latency\n");
-		break;
+		{
+			long latency = CMainFrame::GetMainFrame()->m_nBufferLength*(CMainFrame::GetMainFrame()->GetSampleRate()/1000L);
+			return latency;
+		}
 	// input pin in <value> (-1: first to come), returns cEffect*
 	case audioMasterGetPreviousPlug:
 		Log("VST plugin to host: Get Previous Plug\n");
@@ -1305,7 +1310,6 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_nInputs = m_nOutputs = 0;
 	m_nEditorX = m_nEditorY = -1;
 	m_pEvList = NULL;
-	m_pModDoc = NULL;
 	m_nPreviousMidiChan = -1; //rewbs.VSTCompliance
 
 	// Insert ourselves in the beginning of the list
@@ -1436,16 +1440,23 @@ CVstPlugin::~CVstPlugin()
 	CVstPlugin::Dispatch(effMainsChanged, 0,0, NULL, 0);
 	CVstPlugin::Dispatch(effClose, 0, 0, NULL, 0);
 	m_pFactory = NULL;
+	if (m_hLibrary)
+	{
+		FreeLibrary(m_hLibrary);
+		m_hLibrary = NULL;
+	}
 	if (m_pTempBuffer)	//rewbs.dryRatio
 	{
 		delete[] m_pTempBuffer;
 		m_pTempBuffer = NULL;
 	}
-	if (m_nInputs && m_pInputs) //if m_nInputs == 0, then m_pInputs will have been
+	//Deleting inputs causes crashes on some plugs
+	//TODO: figure out what to do here.. :)
+	/*if (m_nInputs && m_pInputs) //if m_nInputs == 0, then m_pInputs will have been
 	{							//initilised at 0 size, so we'll crash on delete.
 		delete[] m_pInputs;
 		m_pInputs = NULL;
-	}
+	}*/
 	if (m_pOutputs)
 	{
 		delete[] m_pOutputs;
@@ -1455,11 +1466,6 @@ CVstPlugin::~CVstPlugin()
 	{
 		delete (char *)m_pEvList;
 		m_pEvList = NULL;
-	}
-	if (m_hLibrary)
-	{
-		FreeLibrary(m_hLibrary);
-		m_hLibrary = NULL;
 	}
 }
 
@@ -2170,7 +2176,7 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 void CVstPlugin::HardAllNotesOff()
 {
 	bool overflow=false;
-	float in[2][16], out[2][16]; // scratch buffers
+	float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
 
 	do {
 		for (int mc=0; mc<16; mc++)		//all midi chans
@@ -2199,7 +2205,7 @@ void CVstPlugin::HardAllNotesOff()
 			MidiSend(0xB0|mc|(0x78<<8));   // all sounds off 
 		}
 
-		Process((float*)in, (float*)out, 16);   // let plug process events
+		Process((float*)in, (float*)out, SCRATCH_BUFFER_SIZE);   // let plug process events
 
 		//If we had hit an overflow, we need to loop around and start again.
 	} while (overflow);
