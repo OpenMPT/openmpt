@@ -155,7 +155,7 @@ protected:
 	afx_msg void OnItemReturn(LPNMHDR, LRESULT *pResult);
 	afx_msg void OnItemLeftClick(LPNMHDR pNMHDR, LRESULT *pResult);
 	afx_msg void OnItemRightClick(LPNMHDR, LRESULT *pResult);
-	afx_msg void OnItemExpanded(LPNMTREEVIEW pnm, LRESULT *pResult);
+	afx_msg void OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnRefreshTree();
 	afx_msg void OnExecuteItem();

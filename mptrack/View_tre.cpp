@@ -1901,9 +1901,10 @@ void CModTree::OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint)
 }
 
 
-void CModTree::OnItemExpanded(LPNMTREEVIEW pnm, LRESULT *pResult)
-//---------------------------------------------------------------
+void CModTree::OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult)
+//-------------------------------------------------------------
 {
+	LPNMTREEVIEW pnm = (LPNMTREEVIEW)pnmhdr;
 	if ((pnm->itemNew.iImage == IMAGE_FOLDER) || (pnm->itemNew.iImage == IMAGE_OPENFOLDER))
 	{
 		UINT iNewImage = (pnm->itemNew.state & TVIS_EXPANDED) ? IMAGE_OPENFOLDER : IMAGE_FOLDER;
