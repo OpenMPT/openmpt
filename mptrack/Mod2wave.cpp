@@ -51,7 +51,7 @@ extern LPCSTR gszChnCfgNames[3];
 static void __cdecl M2W_32ToFloat(void *pBuffer, long nCount)
 {
 	//const float _ki2f = 1.0f / (FLOAT)(ULONG)0x80000000;  
-	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x7fffffff>>2); //ericus' 32bit fix
+	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x7fffffff); //ericus' 32bit fix
 	_asm {
 	mov esi, pBuffer
 	mov ecx, nCount

@@ -86,8 +86,8 @@ extern int SpectrumSinusTable[256*2];
 // -> DESC="wav export update"
 //const float _f2ic = (float)(1 << 28);
 //const float _i2fc = (float)(1.0 / (1 << 28));
-const float _f2ic = (float)(0x7fffffff>>2);
-const float _i2fc = (float)(1.0 / (0x7fffffff>>2));
+const float _f2ic = (float)0x7fffffff;
+const float _i2fc = (float)(1.0 / 0x7fffffff);
 // -! NEW_FEATURE#0024
 
 static unsigned int QueryProcessorExtensions()
