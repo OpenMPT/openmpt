@@ -1747,7 +1747,9 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 		} else
 		{
 			pModDoc->SetPause(FALSE);
-			if (pSndFile->GetCurrentPos() + 2 >= pSndFile->GetMaxPosition()) pSndFile->SetCurrentPos(0);
+			//rewbs.fix3185: removed this check so play position stays on last pattern if song ends and loop is off.
+			//Otherwise play from cursor screws up.
+			//if (pSndFile->GetCurrentPos() + 2 >= pSndFile->GetMaxPosition()) pSndFile->SetCurrentPos(0);
 			pSndFile->SetRepeatCount((gbLoopSong) ? -1 : 0);
 		}
 	}

@@ -542,7 +542,7 @@ public:
 	virtual int AddRef() = 0;
 	virtual int Release() = 0;
 	virtual void SaveAllParameters() = 0;
-	virtual void RestoreAllParameters() = 0;
+	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
 	virtual void Process(float *pOutL, float *pOutR, unsigned long nSamples) = 0;
 	virtual void Init(unsigned long nFreq, int bReset) = 0;
 	virtual bool MidiSend(DWORD dwMidiCode) = 0;
@@ -603,6 +603,7 @@ typedef struct _SNDMIXPLUGIN
 	PVOID pPluginData;
 	SNDMIXPLUGININFO Info;
 	float fDryRatio;		    // rewbs.dryRatio [20040123]
+	long defaultProgram;		// rewbs.plugDefaultProgram
 } SNDMIXPLUGIN, *PSNDMIXPLUGIN; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
 
 typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN);

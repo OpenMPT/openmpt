@@ -226,17 +226,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 	__try {
 		__try {
 	#endif
-		
-		//#ifndef _DEBUG
 			hLib = LoadLibrary(pszDllPath);
-		/*#else
-			if (!hLib)
-				hLib = LoadLibraryEx(pszDllPath, NULL, LOAD_IGNORE_CODE_AUTHZ_LEVEL);
-			if (!hLib)
-                hLib = LoadLibraryEx(pszDllPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-			if (!hLib)
-				hLib = LoadLibraryEx(pszDllPath, NULL, LOAD_LIBRARY_AS_DATAFILE);
-		#endif*/
 	//rewbs.VSTcompliance
 #ifdef _DEBUG
 	if (!hLib)
@@ -614,7 +604,6 @@ VOID CVstPluginManager::OnIdle()
 				if (!(p->Dispatch(effIdle, 0,0, NULL, 0)))
 					p->m_bNeedIdle=false;
 			}
-			
 			//We need to update all open editors
 			if ((p->m_pEditor) && (p->m_pEditor->m_hWnd))
 			{
@@ -636,19 +625,19 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	#ifdef VST_LOG
 	Log("VST plugin to host: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n",(int)effect, opcode,index,value,(int)ptr,opt);
 	#endif
-	
+
 	switch(opcode)
 	{
 	// Called when plugin param is changed via gui
 	case audioMasterAutomate:	
-		if (effect->resvd1)
+		if (effect && effect->resvd1)
 		{
 			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
 			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
-			if (pVstEditor)
-			{
+			if (pVstEditor) {
 				pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);
 			}
+			//pVstPlugin->m_bModified=true;
 		}
 		return 0; 
 	// Called when plugin asks for VST version supported by host
@@ -692,7 +681,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		memset(&timeInfo, 0, sizeof(timeInfo));
 		timeInfo.sampleRate = CMainFrame::GetMainFrame()->GetSampleRate();
 
-		if (pVstPlugin->IsSongPlaying())
+		if (pVstPlugin && pVstPlugin->IsSongPlaying())
 		{
 			timeInfo.flags |= kVstTransportPlaying;
 			timeInfo.samplePos = CMainFrame::GetMainFrame()->GetTotalSampleCount();
@@ -704,7 +693,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 			timeInfo.flags |= kVstTransportChanged; //just stopped.
 			timeInfo.samplePos = 0;
 		}
-		if (value & kVstNanosValid)
+		if (pVstPlugin &&  (value & kVstNanosValid))
 		{
 			timeInfo.flags |= kVstNanosValid;
 			timeInfo.nanoSeconds = pVstPlugin->GetTimeAtStartOfProcess();
@@ -726,8 +715,8 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		if (value & kVstTimeSigValid)
 		{	//Send a fake time sig until we get this sorted.
 			timeInfo.flags |= 	kVstTimeSigValid;
-			timeInfo.timeSigNumerator = 4;
-			timeInfo.timeSigDenominator = 16;
+			timeInfo.timeSigNumerator = CMainFrame::m_nRowSpacing2;
+			timeInfo.timeSigDenominator = CMainFrame::m_nRowSpacing;
 		}
 		return (long)&timeInfo;
 	}
@@ -757,7 +746,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		break;	
 	// plug needs idle calls (outside its editor window)
 	case audioMasterNeedIdle:
-		if (effect->resvd1)
+		if (effect && effect->resvd1)
 		{
 			CVstPlugin* pVstPlugin = (CVstPlugin*)effect->resvd1;
 			pVstPlugin->m_bNeedIdle=true;
@@ -1344,6 +1333,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 
 	m_bSongPlaying = false; //rewbs.VSTCompliance
 	m_bPlugResumed = false;
+	m_bModified = false;
 	m_dwTimeAtStartOfProcess=0;
 	m_nSampleRate = -1; //rewbs.VSTCompliance: gets set on Resume()
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
@@ -1412,7 +1402,8 @@ void CVstPlugin::Initialize()
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	//Assuming 32bit address space...
     m_pEffect->resvd1=(long)this;
-
+	CVstPlugin::Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0);
+	CVstPlugin::Dispatch(effSetSampleRate, 0, 0, NULL, CSoundFile::gdwMixingFreq);
 	//TODO:
 	//GetSpeakerArrangement();
 }
@@ -1681,6 +1672,9 @@ long CVstPlugin::Dispatch(long opCode, long index, long value, void *ptr, float 
 	__try { __try {
 	if ((m_pEffect) && (m_pEffect->dispatcher))
 	{
+		#ifdef VST_LOG
+		Log("About to Dispatch(%d) (Plugin=\"%s\"), index: %d, value: %d, value: %h, value: %f!\n", opCode, m_pFactory->szLibraryName, index, value, ptr, opt);
+		#endif
 		lresult = m_pEffect->dispatcher(m_pEffect, opCode, index, value, ptr, opt);
 	}
 	} __finally {}
@@ -1862,6 +1856,7 @@ void CVstPlugin::Resume()
 			m_nSampleRate=sampleRate;
 			Dispatch(effSetSampleRate, 0, 0, NULL, m_nSampleRate);
 		}
+		
 		//start off some stuff
 		Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);	// calls plugin's resume
 		Dispatch(effStartProcess, 0, 0, NULL, 0.0f);
@@ -1959,7 +1954,16 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		//Do the VST processing magic
 		try {
 			m_pEffect->process(m_pEffect, m_pInputs, m_pOutputs, nSamples);
+		} catch (char * str) {
+			char s[512];
+			wsprintf(s, "Plugin %s threw an exception in process(): %s",  m_pMixStruct->Info.szName, str);
+			AfxMessageBox(s);
+		}  catch (int i) {
+			char s[512];
+			wsprintf(s, "Plugin %s threw an exception in process(): %d",  m_pMixStruct->Info.szName, i);
+			AfxMessageBox(s);
 		} catch (...) {
+			AfxMessageBox("Plugin %s threw an exception in process().");
 		}
 
 		//mix outputs of multi-output VSTs:
@@ -2486,12 +2490,23 @@ void CVstPlugin::SaveAllParameters()
 {
 	if ((m_pEffect) && (m_pMixStruct))
 	{
+		m_pMixStruct->defaultProgram = -1;
+		m_bModified = false;
+
 		if ((m_pEffect->flags & effFlagsProgramChunks)
 		 && (Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf'))
 		{
 			PVOID p = NULL;
-			LONG nByteSize = Dispatch(effGetChunk, 0,0, &p, 0);
-			if ((nByteSize > 8) && (p)) //If chunk is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
+			LONG nByteSize; 
+			
+			nByteSize = Dispatch(effGetChunk, 0,0, &p, 0); 		// Try to get whole bank
+			
+			if ((nByteSize < 8) || !p) {
+				nByteSize = Dispatch(effGetChunk, 1,0, &p, 0); 	// That failed, try to get get just preset
+			} else {
+				m_pMixStruct->defaultProgram = GetCurrentProgram();	//we managed to get the bank, now we need to remember which program we're on.
+			}
+			if ((nByteSize >= 8) && (p)) //If chunk is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
 			{
 				if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= (UINT)(nByteSize+4)))
 				{
@@ -2543,11 +2558,12 @@ void CVstPlugin::SaveAllParameters()
 			}
 		}
 	}
+	return;
 }
 
 
-void CVstPlugin::RestoreAllParameters()
-//-------------------------------------
+void CVstPlugin::RestoreAllParameters(long nProgram)
+//--------------------------------------------------
 {
 	if ((m_pEffect) && (m_pMixStruct) && (m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= 4))
 	{
@@ -2560,6 +2576,9 @@ void CVstPlugin::RestoreAllParameters()
 			PVOID p = NULL;
 			Dispatch(effGetChunk, 0,0, &p, 0);
 			Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize-4, ((BYTE *)m_pMixStruct->pPluginData)+4, 0);
+			if ((nProgram>=0) && (nProgram < m_pEffect->numPrograms)) {
+				SetCurrentProgram(nProgram);
+			}
 		} else
 		{
 			FLOAT *p = (FLOAT *)m_pMixStruct->pPluginData;

@@ -585,7 +585,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, DWORD dwMemLength)
 				gpMixPluginCreateProc(&m_MixPlugins[iPlug]);
 				if (m_MixPlugins[iPlug].pMixPlugin)
 				{
-					m_MixPlugins[iPlug].pMixPlugin->RestoreAllParameters();
+					m_MixPlugins[iPlug].pMixPlugin->RestoreAllParameters(m_MixPlugins[iPlug].defaultProgram); //rewbs.plugDefaultProgram: added param
 				}
 			}
 		}

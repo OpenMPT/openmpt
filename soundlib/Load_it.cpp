@@ -2220,12 +2220,12 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 			}
 			
 			// rewbs.modularPlugData
-			DWORD MPTxPlugDataSize = 4 + (sizeof(m_MixPlugins[i].fDryRatio)); //4 for ID and size of dryRatio
+			DWORD MPTxPlugDataSize = 4 + (sizeof(m_MixPlugins[i].fDryRatio)) +     //4 for ID and size of dryRatio
+									 4 + (sizeof(m_MixPlugins[i].defaultProgram)); //rewbs.plugDefaultProgram
 			 					// for each extra entity, add 4 for ID, plus size of entity, plus optionally 4 for size of entity.
 
 			nPluginSize += MPTxPlugDataSize+4; //+4 is for size itself: sizeof(DWORD) is 4	
 			// rewbs.modularPlugData
-
 			if (f)
 			{
 				// write plugin ID
@@ -2239,26 +2239,28 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 				fwrite(&nPluginSize, 1, 4, f);
 				fwrite(&p->Info, 1, sizeof(SNDMIXPLUGININFO), f);
 				fwrite(&m_MixPlugins[i].nPluginDataSize, 1, 4, f);
-				if (m_MixPlugins[i].pPluginData)
-				{
+				if (m_MixPlugins[i].pPluginData) {
 					fwrite(m_MixPlugins[i].pPluginData, 1, m_MixPlugins[i].nPluginDataSize, f);
 				}
 				
 				//rewbs.dryRatio
-				if (true /*(m_dwSongFlags & SONG_SAVE_XPLGDATA)*/) //worth using up a song flag?
-				{
-					fwrite(&MPTxPlugDataSize, 1, 4, f);
+				fwrite(&MPTxPlugDataSize, 1, 4, f);
 
-					//TODO: tidy this up like for modular instrument data
-					//write ID for this xPlugData chunk:
-					s[0] = 'D'; s[1] = 'W';	s[2] = 'R'; s[3] = 'T';
-					fwrite(s, 1, 4, f);
-
-					//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
-					fwrite(&(m_MixPlugins[i].fDryRatio), 1, sizeof(float), f);
-				}
+				//write ID for this xPlugData chunk:
+				s[0] = 'D'; s[1] = 'W';	s[2] = 'R'; s[3] = 'T';
+				fwrite(s, 1, 4, f);
+				//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
+				fwrite(&(m_MixPlugins[i].fDryRatio), 1, sizeof(float), f);
 				//end rewbs.dryRatio
 
+				//rewbs.plugDefaultProgram
+				//if (nProgram>=0) {
+					s[0] = 'P'; s[1] = 'R';	s[2] = 'O'; s[3] = 'G';
+					fwrite(s, 1, 4, f);
+					//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
+					fwrite(&(m_MixPlugins[i].defaultProgram), 1, sizeof(float), f);
+				//}
+				//end rewbs.plugDefaultProgram
 
 			}
 			nTotalSize += nPluginSize + 8;
@@ -2389,6 +2391,15 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 							currPos+= sizeof(float); //move past data
 						}
 						//end rewbs.dryRatio
+						
+						//rewbs.plugDefaultProgram
+						else if ((p[currPos] == 'P') && (p[currPos+1] == 'R') && (p[currPos+2] == 'O') && (p[currPos+3] == 'G'))
+						{	
+							currPos+=4;// move past ID
+							m_MixPlugins[nPlugin].defaultProgram = *(long*) (p+currPos);
+							currPos+= sizeof(long); //move past data
+						}
+						//end rewbs.plugDefaultProgram
                         //else if.. (add extra attempts to recognize chunks here)
 						else // otherwise move forward a byte.
 						{
