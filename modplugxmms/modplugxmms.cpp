@@ -212,7 +212,7 @@ bool CModplugXMMS::CanPlayFile(const string& aFilename)
 	uint32 lPos;
 
 	lPos = aFilename.find_last_of('.');
-	if(lPos < 0)
+	if((int)lPos == -1)
 		return false;
 	lExt = aFilename.substr(lPos);
 	for(uint32 i = 0; i < lExt.length(); i++)
@@ -252,7 +252,7 @@ bool CModplugXMMS::CanPlayFile(const string& aFilename)
 		return true;
 	if (lExt == ".ult")
 		return true;
-	if (lExt == ".umx")
+	if (lExt == ".umx")      //Unreal rocks!
 		return true;
 	if (lExt == ".xm")
 		return true;
@@ -263,6 +263,31 @@ bool CModplugXMMS::CanPlayFile(const string& aFilename)
 		return true;
 	if (lExt == ".mdgz")
 		return true;
+	if (lExt == ".s3z")
+		return true;
+	if (lExt == ".s3r")
+		return true;
+	if (lExt == ".s3gz")
+		return true;
+	if (lExt == ".xmz")
+		return true;
+	if (lExt == ".xmr")
+		return true;
+	if (lExt == ".xmgz")
+		return true;
+	if (lExt == ".itz")
+		return true;
+	if (lExt == ".itr")
+		return true;
+	if (lExt == ".itgz")
+		return true;
+	
+	if (lExt == ".zip")
+		return ContainsMod(aFilename);
+	if (lExt == ".rar")
+		return ContainsMod(aFilename);
+	if (lExt == ".gz")
+		return ContainsMod(aFilename);
 
 	return false;
 }
@@ -270,52 +295,42 @@ bool CModplugXMMS::CanPlayFile(const string& aFilename)
 static void* CModplugXMMS_PlayLoop(void* arg)
 {
 	uint32 lLength;
-	int lOutBufFree;
 	//the user might change the number of channels while playing.
 	// we don't want this to take effect until we are done!
 	uint8 lChannels = CModplugXMMS::State::mModProps.mChannels;
 
-	//Figure out how large the buffer is so we can keep pre-buffering
-	// to a minimum.  This way, equalizer changes happen more quickly.
-	lOutBufFree = (uint32)CModplugXMMS::State::mOutPlug->buffer_free();
-	lOutBufFree -= CModplugXMMS::State::mBufSize * 2;
-
 	while(!CModplugXMMS::State::mStopped)
 	{
-		if(!CModplugXMMS::State::mPaused)
-		{
-			if(!(lLength = CModplugXMMS::State::mSoundFile.Read(
-					CModplugXMMS::State::mBuffer,
-					CModplugXMMS::State::mBufSize)))
-			{
-				while(CModplugXMMS::State::mOutPlug->buffer_playing())
-					usleep(10000);
-				break;
-			}
-			
-			while(CModplugXMMS::State::mOutPlug->buffer_free()
-			      < lOutBufFree)
-//			      < (int)CModplugXMMS::State::mBufSize)
-				usleep(10000);
-
-			CModplugXMMS::State::mOutPlug->write_audio
-			(
+		if(!(lLength = CModplugXMMS::State::mSoundFile.Read(
 				CModplugXMMS::State::mBuffer,
-				CModplugXMMS::State::mBufSize
-			);
-			CModplugXMMS::State::mInPlug->add_vis_pcm
-			(
-				CModplugXMMS::State::mPlayed,
-				CModplugXMMS::State::mFormat,
-				lChannels,
-				CModplugXMMS::State::mBufSize,
-				CModplugXMMS::State::mBuffer
-			);
-
-			CModplugXMMS::State::mPlayed += CModplugXMMS::State::mBufTime;
+				CModplugXMMS::State::mBufSize)))
+		{
+			//no more to play.  Wait for output to finish and then stop.
+			while(CModplugXMMS::State::mOutPlug->buffer_playing())
+				usleep(10000);
+			break;
 		}
-		else
+	
+		//wait for buffer space to free up.
+		while(CModplugXMMS::State::mOutPlug->buffer_free()
+		      < (int)CModplugXMMS::State::mBufSize)
 			usleep(10000);
+			
+		CModplugXMMS::State::mOutPlug->write_audio
+		(
+			CModplugXMMS::State::mBuffer,
+			CModplugXMMS::State::mBufSize
+		);
+		CModplugXMMS::State::mInPlug->add_vis_pcm
+		(
+			CModplugXMMS::State::mPlayed,
+			CModplugXMMS::State::mFormat,
+			lChannels,
+			CModplugXMMS::State::mBufSize,
+			CModplugXMMS::State::mBuffer
+		);
+
+		CModplugXMMS::State::mPlayed += CModplugXMMS::State::mBufTime;
 	}
 
 	CModplugXMMS::State::mOutPlug->flush(0);
@@ -346,7 +361,6 @@ void CModplugXMMS::PlayFile(const string& aFilename)
 
 	//open and mmap the file
 	State::mArchive = OpenArchive(aFilename);
-	cout << State::mArchive->Size() << endl;
 	if(State::mArchive->Size() == 0)
 	{
 		delete State::mArchive;
@@ -478,6 +492,8 @@ void CModplugXMMS::Pause(bool aPaused)
 		State::mPaused = true;
 	else
 		State::mPaused = false;
+	
+	State::mOutPlug->pause(aPaused);
 }
 
 void CModplugXMMS::Seek(float32 aTime)
@@ -501,23 +517,40 @@ float32 CModplugXMMS::GetTime(void)
 {
 	if(State::mStopped)
 		return -1;
-	return (float32)State::mOutPlug->output_time();
+	return (float32)State::mOutPlug->output_time() / 1000;
 }
 
 void CModplugXMMS::GetSongInfo(const string& aFilename, char*& aTitle, int32& aLength)
 {
 	aLength = -1;
+	fstream lTestFile;
+	string lError;
+	bool lDone;
+	
+	lTestFile.open(aFilename.c_str(), ios::in);
+	if(!lTestFile)
+	{
+		lError = "**no such file: ";
+		lError += strrchr(aFilename.c_str(), '/') + 1;
+		aTitle = new char[lError.length() + 1];
+		strcpy(aTitle, lError.c_str());
+		return;
+	}
+	
+	lTestFile.close();
 
 	if(State::mModProps.mFastinfo)
 	{
 		fstream lModFile;
-	  string lExt;
+		string lExt;
 		uint32 lPos;
+		
+		lDone = true;
 
 		lModFile.open(aFilename.c_str(), ios::in | ios::nocreate);
 
 		lPos = aFilename.find_last_of('.');
-		if(lPos < 0)
+		if((int)lPos == 0)
 			return;
 		lExt = aFilename.substr(lPos);
 		for(uint32 i = 0; i < lExt.length(); i++)
@@ -546,41 +579,48 @@ void CModplugXMMS::GetSongInfo(const string& aFilename, char*& aTitle, int32& aL
 			State::mModName[28] = 0;
 		}
 		else
-			return;
+			lDone = false;     //fall back to slow info
 
 		lModFile.close();
 
-		aTitle = new char[strlen(State::mModName) + 1];
-		strcpy(aTitle, State::mModName);
-	}
-	else
-	{
-		Archive* lArchive;
-		CSoundFile* lSoundFile;
-		const char* lTitle;
-
-		//open and mmap the file
-		lArchive = OpenArchive(aFilename);
-		if(lArchive->Size() == 0)
+		if(lDone)
 		{
-			delete lArchive;
+			aTitle = new char[strlen(State::mModName) + 1];
+			strcpy(aTitle, State::mModName);
+			
 			return;
 		}
-
-		lSoundFile = new CSoundFile;
-		lSoundFile->Create((uchar*)lArchive->Map(), lArchive->Size());
-
-		lTitle = lSoundFile->GetTitle();
-		aTitle = new char[strlen(lTitle) + 1];
-
-		strcpy(aTitle, lTitle);
-		aLength = lSoundFile->GetSongTime() * 1000;                   //It wants milliseconds!?!
-
-		//unload the file
-		lSoundFile->Destroy();
-		delete lSoundFile;
-		delete lArchive;
 	}
+		
+	Archive* lArchive;
+	CSoundFile* lSoundFile;
+	const char* lTitle;
+
+	//open and mmap the file
+	lArchive = OpenArchive(aFilename);
+	if(lArchive->Size() == 0)
+	{
+		lError = "**bad mod file: ";
+		lError += strrchr(aFilename.c_str(), '/') + 1;
+		aTitle = new char[lError.length() + 1];
+		strcpy(aTitle, lError.c_str());
+		delete lArchive;
+		return;
+	}
+
+	lSoundFile = new CSoundFile;
+	lSoundFile->Create((uchar*)lArchive->Map(), lArchive->Size());
+
+	lTitle = lSoundFile->GetTitle();
+	aTitle = new char[strlen(lTitle) + 1];
+
+	strcpy(aTitle, lTitle);
+	aLength = lSoundFile->GetSongTime() * 1000;                   //It wants milliseconds!?!
+
+	//unload the file
+	lSoundFile->Destroy();
+	delete lSoundFile;
+	delete lArchive;
 }
 
 void CModplugXMMS::SetInputPlugin(InputPlugin& aInPlugin)

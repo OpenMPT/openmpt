@@ -3,13 +3,16 @@ AC_INIT(Makefile.am)
 
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(modplugxmms,1.1.1)
+AM_INIT_AUTOMAKE(modplugxmms, 1.2)
 
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
 AM_PROG_LIBTOOL
+
+CXXFLAGS="-fno-exceptions -O2 -Wall -ffast-math -D_REENTRANT `glib-config --cflags`"
+# CXXFLAGS="-fno-exceptions -g -Wall -ffast-math -D_REENTRANT `glib-config --cflags`"
 
 dnl find install dir
 

@@ -26,6 +26,7 @@
 #include"modplugxmms/stddefs.h"
 #include"modplugxmms/soundfile/stdafx.h"
 #include"modplugxmms/soundfile/sndfile.h"
+#include"modplugxmms/archive/open.h"
 
 GtkWidget *AboutWin    = NULL;
 GtkWidget *ConfigWin   = NULL;
@@ -121,12 +122,9 @@ void ShowInfoWindow(const string& aFilename)
 	char lBuffer[33];
 	strstream lStrStream(lBuffer, 33);   //C++ replacement for sprintf()
 
-	int lFileDesc;
-	uchar* lFileMap;
-	uint32 lFileSize;
-	struct stat lStat;
 	CSoundFile* lSoundFile;
 
+	Archive* lArchive;
 	string lShortFN;
 	uint32 lPos;
 
@@ -134,21 +132,15 @@ void ShowInfoWindow(const string& aFilename)
 	lShortFN = aFilename.substr(lPos);
 
 	//open and mmap the file
-	lFileDesc = open(aFilename.c_str(), O_RDONLY);
-	if(lFileDesc == -1)
-		return;
-	fstat(lFileDesc, &lStat);
-	lFileMap =
-		(uchar*)mmap(0, lStat.st_size, PROT_READ,
-		MAP_PRIVATE, lFileDesc, 0);
-	if(!lFileMap)
+	lArchive = OpenArchive(aFilename);
+	if(lArchive->Size() == 0)
 	{
-		close(lFileDesc);
+		delete lArchive;
 		return;
 	}
-	lFileSize = lStat.st_size;
+
 	lSoundFile = new CSoundFile;
-	lSoundFile->Create(lFileMap, lFileSize);
+	lSoundFile->Create((uchar*)lArchive->Map(), lArchive->Size());
 
 	lInfo = lShortFN;
 	lInfo += '\n';
@@ -169,8 +161,56 @@ void ShowInfoWindow(const string& aFilename)
 	case MOD_TYPE_IT:
 		lInfo+= "Impulse Tracker";
 		break;
+	case MOD_TYPE_MED:
+		lInfo+= "OctaMed";
+		break;
+	case MOD_TYPE_MTM:
+		lInfo+= "MTM";
+		break;
+	case MOD_TYPE_669:
+		lInfo+= "669 Composer / UNIS 669";
+		break;
+	case MOD_TYPE_ULT:
+		lInfo+= "ULT";
+		break;
+	case MOD_TYPE_STM:
+		lInfo+= "Scream Tracker";
+		break;
+	case MOD_TYPE_FAR:
+		lInfo+= "Farandole";
+		break;
+	case MOD_TYPE_AMF:
+		lInfo+= "ASYLUM Music Format";
+		break;
+	case MOD_TYPE_AMS:
+		lInfo+= "AMS module";
+		break;
+	case MOD_TYPE_DSM:
+		lInfo+= "DSIK Internal Format";
+		break;
+	case MOD_TYPE_MDL:
+		lInfo+= "DigiTracker";
+		break;
+	case MOD_TYPE_OKT:
+		lInfo+= "Oktalyzer";
+		break;
+	case MOD_TYPE_DMF:
+		lInfo+= "Delusion Digital Music Fileformat (X-Tracker)";
+		break;
+	case MOD_TYPE_PTM:
+		lInfo+= "PolyTracker";
+		break;
+	case MOD_TYPE_DBM:
+		lInfo+= "DigiBooster Pro";
+		break;
+	case MOD_TYPE_MT2:
+		lInfo+= "MT2";
+		break;
+	case MOD_TYPE_AMF0:
+		lInfo+= "AMF0";
+		break;
 	default:
-		lInfo+= "Oddball";  //one of them wierdo types...
+		lInfo+= "Unknown";
 		break;
 	}
 	lInfo += '\n';
@@ -237,8 +277,7 @@ void ShowInfoWindow(const string& aFilename)
 	//unload the file
 	lSoundFile->Destroy();
 	delete lSoundFile;
-	munmap(lFileMap, lFileSize);
-	close(lFileDesc);
+	delete lArchive;
 
 	gtk_widget_show(InfoWin);
 }

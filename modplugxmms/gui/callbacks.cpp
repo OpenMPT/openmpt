@@ -13,6 +13,15 @@
 #include "modplugxmms/modplugxmms.h"
 
 
+gboolean
+hide_window                            (GtkWidget       *widget,
+                                        GdkEvent        *event,
+                                        gpointer         user_data)
+{
+	gtk_widget_hide(widget);
+	return TRUE;
+}
+
 void
 on_about_close_clicked                 (GtkButton       *button,
                                         gpointer         user_data)
@@ -145,4 +154,3 @@ on_info_close_clicked                  (GtkButton       *button,
 	else
 		gtk_widget_hide(lInfoWindow);
 }
-

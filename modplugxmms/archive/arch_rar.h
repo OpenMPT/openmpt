@@ -27,6 +27,8 @@ class arch_Rar: public Archive
 public:
 	arch_Rar(const string& aFileName);
 	virtual ~arch_Rar();
+	
+	static bool ContainsMod(const string& aFileName);
 };
 
 #endif

@@ -20,12 +20,16 @@
 #define __MODPLUG_ARCHIVE_H__INCLUDED__
 
 #include "modplugxmms/stddefs.h"
+#include <string>
 
 class Archive
 {
 protected:
 	uint32 mSize;
 	void* mMap;
+	
+	//This version of IsOurFile is slightly different...
+	static bool IsOurFile(const string& aFileName);
 
 public:
 	virtual ~Archive();

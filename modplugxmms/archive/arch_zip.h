@@ -27,6 +27,8 @@ class arch_Zip: public Archive
 public:
 	arch_Zip(const string& aFileName);
 	virtual ~arch_Zip();
+	
+	static bool ContainsMod(const string& aFileName);
 };
 
 #endif

@@ -1,4 +1,4 @@
-CXXFLAGS = -ffast-math -D_REENTRANT -O2 `gtk-config --cflags` `glib-config --cflags`
+INCLUDES = `gtk-config --cflags`
 
 noinst_LTLIBRARIES = libgui.la
 libgui_la_LDFLAGS = -module -avoid-version

@@ -17,19 +17,26 @@
  */
 
 //open()
-#include<sys/types.h>
-#include<sys/stat.h>
-#include<fcntl.h>
-#include<unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 #include "arch_zip.h"
 #include <iostream>
 #include <procbuf.h>
+#include <vector>
 	
 arch_Zip::arch_Zip(const string& aFileName)
 {
 	//check if file exists
 	int lFileDesc = open(aFileName.c_str(), O_RDONLY);
+	uint32 lFileNum = 0;
+	vector<uint32> lSizes;
+	string lName;
+	char lBuffer[257];
+	bool bFound = false;
 
 	if(lFileDesc == -1)
 	{
@@ -40,7 +47,7 @@ arch_Zip::arch_Zip(const string& aFileName)
 	close(lFileDesc);
 	
 	procbuf lPipeBuf;
-	string lCommand = "unzip -l " + aFileName;   //get info
+	string lCommand = "unzip -l \"" + aFileName + '\"';   //get info
 	iostream lPipe(&lPipeBuf);
 	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
 	{
@@ -51,26 +58,51 @@ arch_Zip::arch_Zip(const string& aFileName)
 	lPipe.ignore(80, '\n'); //ignore a line.
 	lPipe.ignore(80, '\n'); //ignore a line.
 	lPipe.ignore(80, '\n'); //ignore a line.
-	lPipe >> mSize;         //this is our size.
 	
-	lPipeBuf.close();
-	
-	mMap = new char[mSize];
-	if(mMap == NULL)
+	while(lPipe)
+	{
+		//damnit, procbufs throw exceptions.  NO!  Exceptions are EVIL!
+		lPipe >> lBuffer;             //this is our size.
+		if(lBuffer[0] == '-')
+			break;                     //no more files
+		mSize = strtol(lBuffer, NULL, 10);
+		lPipe >> lName;               //ignore date.
+		lPipe >> lName;               //ignore time.
+		lPipe.getline(lBuffer, 257);  //this is the name.
+		lName = lBuffer;
+		
+		if(IsOurFile(lName))    //is it a mod?
+		{
+			bFound = true;
+			break;
+		}
+		
+		lSizes.insert(lSizes.end(), mSize);
+		lFileNum++;
+	}
+	if(!bFound)
 	{
 		mSize = 0;
 		return;
 	}
 	
-	lCommand = "unzip -p " + aFileName;  //decompress to stdout
+	lPipeBuf.close();
+	
+	mMap = new char[mSize];
+	
+	lCommand = "unzip -p \"" + aFileName + '\"';  //decompress to stdout
 	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
 	{
 		mSize = 0;
 		return;
 	}
 	
-	lPipe.read(mMap, mSize);
+	for(uint32 i = 0; i < lFileNum; i++)
+	{
+		lPipe.ignore(lSizes[i]);
+	}
 	
+	lPipe.read(mMap, mSize);
 	lPipeBuf.close();
 }
 
@@ -78,4 +110,42 @@ arch_Zip::~arch_Zip()
 {
 	if(mSize != 0)
 		delete [] mMap;
+}
+	
+bool arch_Zip::ContainsMod(const string& aFileName)
+{
+	int lFileDesc = open(aFileName.c_str(), O_RDONLY);
+	string lName;
+	char lBuffer[257];
+
+	if(lFileDesc == -1)
+		return false;
+	
+	close(lFileDesc);
+	
+	procbuf lPipeBuf;
+	string lCommand = "unzip -l \"" + aFileName + '\"';   //get info
+	iostream lPipe(&lPipeBuf);
+	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
+		return false;
+	
+	lPipe.ignore(80, '\n'); //ignore a line.
+	lPipe.ignore(80, '\n'); //ignore a line.
+	lPipe.ignore(80, '\n'); //ignore a line.
+	
+	while(lPipe)
+	{
+		lPipe >> lName;               //ignore size
+		if(lName[0] == '-')
+			return false;              //no more files
+		lPipe >> lName;               //ignore date.
+		lPipe >> lName;               //ignore time.
+		lPipe.getline(lBuffer, 257);  //this is the name.
+		lName = lBuffer;
+		
+		if(IsOurFile(lName))    //is it a mod?
+			return true;
+	}
+	
+	return false;
 }

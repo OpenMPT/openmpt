@@ -1,5 +1,3 @@
-CXXFLAGS = -ffast-math -D_REENTRANT -O2 `glib-config --cflags`
-
 libdir = $(plugindir)
 
 lib_LTLIBRARIES        = libmodplug.la

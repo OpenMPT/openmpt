@@ -60,3 +60,8 @@ arch_Raw::~arch_Raw()
 		close(mFileDesc);
 	}
 }
+
+bool arch_Raw::ContainsMod(const string& aFileName)
+{
+	return IsOurFile(aFileName);
+}

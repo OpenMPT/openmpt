@@ -86,7 +86,7 @@ XMMS_VERSION = @XMMS_VERSION@
 XMMS_VISUALIZATION_PLUGIN_DIR = @XMMS_VISUALIZATION_PLUGIN_DIR@
 plugindir = @plugindir@
 
-CXXFLAGS = -ffast-math -D_REENTRANT -O2 `gtk-config --cflags` `glib-config --cflags`
+INCLUDES = `gtk-config --cflags`
 
 noinst_LTLIBRARIES = libgui.la
 libgui_la_LDFLAGS = -module -avoid-version
@@ -105,6 +105,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libgui_la_LIBADD = 
 libgui_la_OBJECTS =  main.lo support.lo interface.lo callbacks.lo
+CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -237,7 +238,9 @@ interface.lo interface.o : interface.cpp ../../config.h callbacks.h \
 main.lo main.o : main.cpp ../../config.h interface.h support.h main.h \
 	../../modplugxmms/modprops.h ../../modplugxmms/stddefs.h \
 	../../modplugxmms/soundfile/stdafx.h \
-	../../modplugxmms/soundfile/sndfile.h
+	../../modplugxmms/soundfile/sndfile.h \
+	../../modplugxmms/archive/open.h \
+	../../modplugxmms/archive/archive.h
 support.lo support.o : support.cpp ../../config.h support.h
 
 info-am:

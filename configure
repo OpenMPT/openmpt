@@ -710,7 +710,7 @@ fi
 
 PACKAGE=modplugxmms
 
-VERSION=1.1.1
+VERSION=1.2
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
@@ -1615,6 +1615,9 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 exec 5>>./config.log
 
 
+CXXFLAGS="-fno-exceptions -O2 -Wall -ffast-math -D_REENTRANT `glib-config --cflags`"
+# CXXFLAGS="-fno-exceptions -g -Wall -ffast-math -D_REENTRANT `glib-config --cflags`"
+
 
 
 # Check whether --with-xmms-prefix or --without-xmms-prefix was given.
@@ -1651,7 +1654,7 @@ fi
 # Extract the first word of "xmms-config", so it can be a program name with args.
 set dummy xmms-config; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1655: checking for $ac_word" >&5
+echo "configure:1658: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_XMMS_CONFIG'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1715,7 +1718,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1719: checking for $ac_word" >&5
+echo "configure:1722: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_AWK'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1781,7 +1784,7 @@ function vercmp(ver1, ver2,    ver1arr, ver2arr,			\
 fi
 
 echo $ac_n "checking for XMMS - version >= $min_xmms_version""... $ac_c" 1>&6
-echo "configure:1785: checking for XMMS - version >= $min_xmms_version" >&5
+echo "configure:1788: checking for XMMS - version >= $min_xmms_version" >&5
 
 if test "x$no_xmms" = x; then
     echo "$ac_t""yes" 1>&6

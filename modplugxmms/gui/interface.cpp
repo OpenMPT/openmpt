@@ -70,6 +70,9 @@ create_About ()
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), about_close);
   GTK_WIDGET_SET_FLAGS (about_close, GTK_CAN_DEFAULT);
 
+  gtk_signal_connect (GTK_OBJECT (About), "delete_event",
+                      GTK_SIGNAL_FUNC (hide_window),
+                      NULL);
   gtk_signal_connect (GTK_OBJECT (about_close), "clicked",
                       GTK_SIGNAL_FUNC (on_about_close_clicked),
                       NULL);
@@ -666,6 +669,9 @@ create_Config ()
   gtk_container_add (GTK_CONTAINER (hbuttonbox2), config_cancel);
   GTK_WIDGET_SET_FLAGS (config_cancel, GTK_CAN_DEFAULT);
 
+  gtk_signal_connect (GTK_OBJECT (Config), "delete_event",
+                      GTK_SIGNAL_FUNC (hide_window),
+                      NULL);
   gtk_signal_connect (GTK_OBJECT (config_ok), "clicked",
                       GTK_SIGNAL_FUNC (on_config_ok_clicked),
                       NULL);
@@ -830,6 +836,9 @@ create_Info ()
   gtk_container_add (GTK_CONTAINER (hbuttonbox3), info_close);
   GTK_WIDGET_SET_FLAGS (info_close, GTK_CAN_DEFAULT);
 
+  gtk_signal_connect (GTK_OBJECT (Info), "delete_event",
+                      GTK_SIGNAL_FUNC (hide_window),
+                      NULL);
   gtk_signal_connect (GTK_OBJECT (info_close), "clicked",
                       GTK_SIGNAL_FUNC (on_info_close_clicked),
                       NULL);

@@ -41,7 +41,7 @@ arch_Gzip::arch_Gzip(const string& aFileName)
 	
 	//ok, continue
 	procbuf lPipeBuf;
-	string lCommand = "gunzip -l " + aFileName;   //get info
+	string lCommand = "gunzip -l \"" + aFileName + '\"';   //get info
 	iostream lPipe(&lPipeBuf);
 	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
 	{
@@ -62,7 +62,7 @@ arch_Gzip::arch_Gzip(const string& aFileName)
 		return;
 	}
 	
-	lCommand = "gunzip -c " + aFileName;  //decompress to stdout
+	lCommand = "gunzip -c \"" + aFileName + '\"';  //decompress to stdout
 	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
 	{
 		mSize = 0;
@@ -78,4 +78,31 @@ arch_Gzip::~arch_Gzip()
 {
 	if(mSize != 0)
 		delete [] mMap;
+}
+
+bool arch_Gzip::ContainsMod(const string& aFileName)
+{
+	string lName;
+	int lFileDesc = open(aFileName.c_str(), O_RDONLY);
+	char lBuffer[257];
+
+	if(lFileDesc == -1)
+		return false;
+	
+	close(lFileDesc);
+	
+	procbuf lPipeBuf;
+	string lCommand = "gunzip -l \"" + aFileName + '\"';   //get info
+	iostream lPipe(&lPipeBuf);
+	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
+		return false;
+	
+	lPipe.ignore(80, '\n'); //ignore a line.
+	lPipe >> lName;         //ignore a number.
+	lPipe >> lName;         //ignore size.
+	lPipe >> lName;         //ignore ratio.
+	lPipe.getline(lBuffer, 257);
+	lName = lBuffer;
+	
+	return IsOurFile(lName);
 }

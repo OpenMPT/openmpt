@@ -86,8 +86,6 @@ XMMS_VERSION = @XMMS_VERSION@
 XMMS_VISUALIZATION_PLUGIN_DIR = @XMMS_VISUALIZATION_PLUGIN_DIR@
 plugindir = @plugindir@
 
-CXXFLAGS = -ffast-math -D_REENTRANT -O2
-
 noinst_LTLIBRARIES = libarchive.la
 libarchive_la_LDFLAGS = -module -avoid-version
 libarchive_la_SOURCES = archive.cpp open.cpp arch_raw.cpp arch_gzip.cpp arch_zip.cpp arch_rar.cpp
@@ -106,6 +104,7 @@ LIBS = @LIBS@
 libarchive_la_LIBADD = 
 libarchive_la_OBJECTS =  archive.lo open.lo arch_raw.lo arch_gzip.lo \
 arch_zip.lo arch_rar.lo
+CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)

@@ -85,8 +85,6 @@ XMMS_VERSION = @XMMS_VERSION@
 XMMS_VISUALIZATION_PLUGIN_DIR = @XMMS_VISUALIZATION_PLUGIN_DIR@
 plugindir = @plugindir@
 
-CXXFLAGS = -ffast-math -D_REENTRANT -O2 `glib-config --cflags`
-
 libdir = $(plugindir)
 
 lib_LTLIBRARIES = libmodplug.la
@@ -111,6 +109,7 @@ LIBS = @LIBS@
 libmodplug_la_DEPENDENCIES =  ./archive/libarchive.la ./gui/libgui.la \
 ./soundfile/libsoundfile.la
 libmodplug_la_OBJECTS =  plugin.lo modplugxmms.lo
+CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)

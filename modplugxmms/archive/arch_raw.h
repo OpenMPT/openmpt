@@ -29,6 +29,8 @@ class arch_Raw: public Archive
 public:
 	arch_Raw(const string& aFileName);
 	virtual ~arch_Raw();
+	
+	static bool ContainsMod(const string& aFileName);
 };
 
 #endif

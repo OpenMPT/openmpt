@@ -44,7 +44,13 @@ static void Seek(int aTime)
 }
 static int GetTime(void)
 {
-	return (int)CModplugXMMS::GetTime();
+	float32 lTime;
+	
+	lTime = CModplugXMMS::GetTime();
+	if(lTime == -1)
+		return -1;
+	else
+		return (int)(lTime * 1000);
 }
 
 static void GetSongInfo(char* aFilename, char** aTitle, int* aLength)

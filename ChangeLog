@@ -1,3 +1,23 @@
+ModPlug-XMMS v1.2, Apr. 10, 2000
++ New file formats recognised:
+    S3Z, S3R, S3GZ, XMZ, XMR, XMGZ, ITZ, ITR, ITGZ
+  These are all compressed file formats.  Note that the compression
+  format of a compressed mod is determined by extension, but the mod
+  format is NOT.  So, you could zip an XM and give it the extension
+  MDZ and it would work.
++ If you try to load a ZIP, RAR, or GZ file that happens to contain a
+  mod, it will be played.
+
+* Multi-file archives work.  Only the first mod found in the archive
+  will be played, but non-mods will be ignored as they should be.
+* Buffering fix.  If you were experiencing choppy sound before, try
+  this version.
+* File info for compressed mods works.
+* Trying to close a window using the window manager's close button
+  no longer causes crashes.
+* Compressed mods with spaces either in the internal filename or in
+  the archive's filename work fine.
+
 ModPlug-XMMS v1.1.1, Feb. 28, 2000
 * Fixed minor installation bug that could have affected a few systems.
 

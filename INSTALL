@@ -1,3 +1,8 @@
 (1) ./configure
 (2) make
 (3) su -c "make install"
+(4) Open XMMS, go to options->preferences->I/O plugins.  If "MikMod Player"
+    is listed under "Input Plugins", click on it and UNcheck "Enable Plugin".
+    (If you don't disable MikMod, it will play mods instead of ModPlug.)
+
+ModPlug-XMMS has been known to take some time to compile.  Please be patient.

@@ -9,15 +9,21 @@ MOD-playing software available, has sent me the latest version (dated
 plugin is based on that code.
 
 Features:
-- Plays MOD, S3M, XM, IT, and 15 other oddball formats.
-- Plays compressed mods in three flavors:
-   - .MDZ: Standard zipped mod.
-   - .MDR: Rar compressed mod.
-   - .MDGZ: Gzipped mod.  (not available on Windoze! :)
+- Plays 20 different mod formats, including:
+    MOD, S3M, XM, IT, 669, AMF (both of them), AMS, DBM, DMF, DSM, FAR,
+    MDL, MED, MTM, OKT, PTM, STM, ULT, and Unreal's UMX
+- Plays zip, rar, and gzip compressed mods.  The following extensions are
+   recognized:
+    zip:  MDZ,  S3Z,  XMZ,  ITZ
+    rar:  MDR,  S3R,  XMR,  ITR
+    gzip: MDGZ, S3GZ, XMGZ, ITGZ
+   You can also load plain old ZIP, RAR, and GZ files.  If ModPlug finds
+   a mod in them, it will play it.
    Note: To play these formats, you need to have the associated
-   decompression utilities (unzip, gunzip, unrar) installed.  To see
-   if you have them installed, try typing the commands at the command
-   line.
+    decompression utilities (unzip, gunzip, unrar) installed.
+   Note(2): The format of the mod is NOT determined from the extension on
+    compressed mods.  For example, if you zipped a UMX mod and gave it the
+    extension MDZ, it would work fine.
 - Slightly better sound quality than Mikmod.  Vastly superior quality
    over Winamp.
 - All XMMS calls are supported exept for the band gains on the

@@ -86,8 +86,6 @@ XMMS_VERSION = @XMMS_VERSION@
 XMMS_VISUALIZATION_PLUGIN_DIR = @XMMS_VISUALIZATION_PLUGIN_DIR@
 plugindir = @plugindir@
 
-CXXFLAGS = -ffast-math -D_REENTRANT -O2
-
 noinst_LTLIBRARIES = libsoundfile.la
 libsoundfile_la_LDFLAGS = -module -avoid-version
 libsoundfile_la_SOURCES = waveform.cpp tables.cpp sndmix.cpp sndfile.cpp snd_fx.cpp snd_flt.cpp snd_dsp.cpp mmcmp.cpp load_xm.cpp load_wav.cpp load_umx.cpp load_ult.cpp load_stm.cpp load_s3m.cpp load_ptm.cpp load_okt.cpp load_mtm.cpp load_mod.cpp load_med.cpp load_mdl.cpp load_it.cpp load_far.cpp load_dsm.cpp load_dmf.cpp load_dbm.cpp load_ams.cpp load_amf.cpp load_669.cpp fastmix.cpp
@@ -110,6 +108,7 @@ load_umx.lo load_ult.lo load_stm.lo load_s3m.lo load_ptm.lo load_okt.lo \
 load_mtm.lo load_mod.lo load_med.lo load_mdl.lo load_it.lo load_far.lo \
 load_dsm.lo load_dmf.lo load_dbm.lo load_ams.lo load_amf.lo load_669.lo \
 fastmix.lo
+CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)

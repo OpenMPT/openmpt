@@ -23,5 +23,6 @@
 #include <string>
 
 Archive* OpenArchive(const string& aFileName);
+bool ContainsMod(const string& aFileName);
 
 #endif
