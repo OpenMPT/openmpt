@@ -1,6 +1,17 @@
 
 OpenMPT - Modplug Tracker Open Source Project
 
+This is the 'Wild' version of Modplug, almost anything
+goes in this release, so if you are reading this then please
+be aware this is an experimental branch of the Modplug software.
+New features and content are tried out in this branch and if they're
+useful will make they're way to the main development branch "Olivier"
+
+Okay have fun!
+
+Trevor Nunes http://sourceforge.net/projects/modplug
+
+
 //+++++++++++++++++++++++++++++++++++++++++++++++\\
 
 Source code copyright 1997-2004 Olivier Lapicque
@@ -20,6 +31,7 @@ Source code copyright 1997-2004 Olivier Lapicque
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 \\+++++++++++++++++++++++++++++++++++++++++++++++//
+
 
 --===============++++++++++++++++===============--
 
