@@ -604,11 +604,6 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			// jump field code
 			ptr += sizeof(__int32);
 
-			// read field size
-			size = (*((__int16 *)ptr));
-			// jump field size
-			ptr += sizeof(__int16);
-
 			//rewbs.instroVSTi: changed to use generic instrument header code loader,
 			//                  so as to pick up extra plugin info as well as ramping.
 			// OLD: 
@@ -627,6 +622,10 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				}
 			}*/
 			//NEW:		
+			// read field size
+			size = (*((__int16 *)ptr));
+			// jump field size
+			ptr += sizeof(__int16);
 			for(UINT nins=1; nins<=m_nInstruments; nins++){
 				if(Headers[nins]){
 					// get field's adress in instrument's header
