@@ -1295,7 +1295,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02XRC0 (revision 1.13.2.7)",		//remove 'a' when ready for wide usage.
+	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.8)",		//remove 'a' when ready for wide usage.
 				MAINFRAME_TITLE,
 				(MPTRACK_VERSION>>24)&0xFF,
 				(MPTRACK_VERSION>>16)&0xFF,
@@ -1400,7 +1400,7 @@ BOOL CSplashScreen::OnInitDialog()
 	
 	CDialog::OnInitDialog();
 	m_Bmp.SubclassDlgItem(IDC_SPLASH, this);
-	m_Bmp.LoadBitmap(MAKEINTRESOURCE(IDB_SPLASHNOFOLD));
+	m_Bmp.LoadBitmap(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
 	GetWindowRect(&rect);
 	cx = rect.Width();
 	cy = rect.Height();
@@ -2630,15 +2630,17 @@ void Log(LPCSTR format,...)
 	va_start(va, format);
 	wvsprintf(cBuf, format, va);
 	OutputDebugString(cBuf);
-	if (theApp.IsDebug())
-	{
+	//if (theApp.IsDebug())
+	//{
+	#ifdef _DEBUG
 		FILE *f = fopen("c:\\mptrack.log", "a");
 		if (f)
 		{
 			fwrite(cBuf, 1, strlen(cBuf), f);
 			fclose(f);
 		}
-	}
+	#endif //_DEBUG
+	//}
 	va_end(va);
 }
 

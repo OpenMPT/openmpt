@@ -776,8 +776,6 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	case audioMasterGetSampleRate:		
 		return CMainFrame::GetMainFrame()->GetSampleRate();
 	case audioMasterGetBlockSize:		
-		//I don't know what MPT's max block size is... will have to look into this.
-		//I'm guessing it's this:
 		return MIXBUFFERSIZE;
 	case audioMasterGetInputLatency:
 		Log("VST plugin to host: Get Input Latency\n");
@@ -989,11 +987,12 @@ typedef struct _PROBLEMATIC_PLUG
 	LPCSTR problem;
 } _PROBLEMATIC_PLUG, *PPROBLEMATIC_PLUG;
 
-#define NUM_PROBLEMPLUGS 2
+#define NUM_PROBLEMPLUGS 3
 static _PROBLEMATIC_PLUG gProblemPlugs[NUM_PROBLEMPLUGS] =
 {
 	{'VstP', 'Sytr', 1, "Image Line Sytrus", "*v1.2 does not save parameters correctly.*"},
 	{'VstP', 'CLAW', 1, "ReFX Claw", "*v1.0 causes random crashes.*"},
+	{'VstP', 'Ni4S', 1, "Native Instruments B4", "*v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5.*"},
 };
 
 bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug) 
@@ -1004,7 +1003,7 @@ bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug)
 		if ( (gProblemPlugs[p].id2 == plug->dwPluginId2) /*&&
 			(gProblemPlugs[p].id1 == plug->dwPluginId1)*/)
 		{
-			s.Format("WARNING: This plugin has been (loosely) identified as %s,\r\n which is known to have the following problem with MPT:\r\n\r\n%s\r\n(see here for more information: http://www.modplug.com/forum/viewtopic.php?p=36930#36930)\r\n\r\nDo you want to continue to load?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
+			s.Format("WARNING: This plugin has been identified as %s,\r\n which is known to have the following problem with MPT:\r\n\r\n%s\r\n\r\n(see here for more information: http://www.modplug.com/forum/viewtopic.php?p=36930#36930)\r\n\r\nDo you want to continue to load?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
 			return (AfxMessageBox(s, MB_YESNO)  == IDYES);
 		}
 	}
@@ -1355,8 +1354,15 @@ void CVstPlugin::Initialize()
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
 	Dispatch(effOpen, 0, 0, NULL, 0);
 	m_bIsVst2 = (CVstPlugin::Dispatch(effGetVstVersion, 0,0, NULL, 0) >= 2) ? TRUE : FALSE;
-	if (m_bIsVst2)
+    if (m_bIsVst2)
 	{
+		// Dummy pin properies collection. 
+		// We don't use them but some plugs might do inits in here.
+		VstPinProperties tempPinProperties;
+		Dispatch(effGetInputProperties, 0, 0, &tempPinProperties, 0);
+		Dispatch(effGetOutputProperties, 0, 0, &tempPinProperties, 0);
+	
+
 		Dispatch(effConnectInput, 0, 1, NULL, 0);
 		if (m_pEffect->numInputs > 1) Dispatch(effConnectInput, 1, 1, NULL, 0);
 		Dispatch(effConnectOutput, 0, 1, NULL, 0);
@@ -1369,10 +1375,14 @@ void CVstPlugin::Initialize()
 		//end rewbs.VSTCompliance
 
 	}
-	if (m_pEffect->numPrograms > 0)
-	{
+	
+	Dispatch(effSetSampleRate, 0, 0, NULL, CSoundFile::gdwMixingFreq);
+	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0);
+	if (m_pEffect->numPrograms > 0)	{
 		Dispatch(effSetProgram, 0, 0, NULL, 0);
 	}
+	Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);
+
 	m_nInputs = (m_pEffect->numInputs < 16) ? m_pEffect->numInputs : 16;
 	m_nOutputs = (m_pEffect->numOutputs < 16) ? m_pEffect->numOutputs : 16;
 	m_pInputs = (float **)new char[m_nInputs*sizeof(float *)];
@@ -1402,8 +1412,7 @@ void CVstPlugin::Initialize()
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	//Assuming 32bit address space...
     m_pEffect->resvd1=(long)this;
-	CVstPlugin::Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0);
-	CVstPlugin::Dispatch(effSetSampleRate, 0, 0, NULL, CSoundFile::gdwMixingFreq);
+	
 	//TODO:
 	//GetSpeakerArrangement();
 }
@@ -1856,7 +1865,7 @@ void CVstPlugin::Resume()
 			m_nSampleRate=sampleRate;
 			Dispatch(effSetSampleRate, 0, 0, NULL, m_nSampleRate);
 		}
-		
+		Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0);
 		//start off some stuff
 		Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);	// calls plugin's resume
 		Dispatch(effStartProcess, 0, 0, NULL, 0.0f);
@@ -1930,7 +1939,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	if ((m_pEffect) && (m_pEffect->process) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
 		isInstrument = (m_pEffect->numInputs < 1); // rewbs.dryRatio
-		if(isInstrument){
+		if(isInstrument && !(CSoundFile::gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) ){
 			gain /= 32.0f;	// ericus 25/01/2005 restore VSTi level from previous release + reduce VSTi level
 			mixop = 0;		// + force disable mix mode
 		}
@@ -1953,6 +1962,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		m_dwTimeAtStartOfProcess = timeGetTime();
 		//Do the VST processing magic
 		try {
+			ASSERT(nSamples<=MIXBUFFERSIZE);
 			m_pEffect->process(m_pEffect, m_pInputs, m_pOutputs, nSamples);
 		} catch (char * str) {
 			char s[512];
@@ -1963,7 +1973,9 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			wsprintf(s, "Plugin %s threw an exception in process(): %d",  m_pMixStruct->Info.szName, i);
 			AfxMessageBox(s);
 		} catch (...) {
-			AfxMessageBox("Plugin %s threw an exception in process().");
+			char s[512];
+			wsprintf(s, "Plugin %s threw an exception in process().", m_pMixStruct->Info.szName);
+			AfxMessageBox(s);
 		}
 
 		//mix outputs of multi-output VSTs:
@@ -2705,6 +2717,11 @@ BOOL CVstPlugin::isInstrument() // ericus 18/02/2005
 {
 	if(m_pEffect) return (m_pEffect->numInputs < 1); // rewbs.dryRatio
 	return FALSE;
+}
+
+BOOL CVstPlugin::CanRecieveMidiEvents() {
+	CString s = "receiveVstMidiEvent";
+	return CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

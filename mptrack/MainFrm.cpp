@@ -120,10 +120,10 @@ UINT CMainFrame::m_nLastOptionsPage = 0;
 BOOL CMainFrame::gbMdiMaximize = FALSE;
 //rewbs.varWindowSize
 LONG CMainFrame::glCtrlWindowHeight = 188; //obsolete, for backwards compat only
-LONG CMainFrame::glGeneralWindowHeight = 188;
-LONG CMainFrame::glPatternWindowHeight = 159;
+LONG CMainFrame::glGeneralWindowHeight = 178;
+LONG CMainFrame::glPatternWindowHeight = 232;
 LONG CMainFrame::glSampleWindowHeight = 188;
-LONG CMainFrame::glInstrumentWindowHeight = 188;
+LONG CMainFrame::glInstrumentWindowHeight = 300;
 LONG CMainFrame::glCommentsWindowHeight = 288;
 //end rewbs.varWindowSize
 LONG CMainFrame::glTreeWindowWidth = 160;
@@ -134,7 +134,7 @@ DWORD CMainFrame::gnHotKeyMask = 0;
 // Audio Setup
 //rewbs.resamplerConf
 long CMainFrame::glVolumeRampSamples = 42;
-double CMainFrame::gdWFIRCutoff = 0.5;
+double CMainFrame::gdWFIRCutoff = 0.97;
 BYTE  CMainFrame::gbWFIRType = 7; //WFIR_KAISER4T;
 //end rewbs.resamplerConf
 UINT CMainFrame::gnAutoChordWaitTime = 60;
@@ -170,7 +170,8 @@ DWORD CMainFrame::m_dwMidiSetup = MIDISETUP_RECORDVELOCITY|MIDISETUP_RECORDNOTEO
 // Pattern Setup
 DWORD CMainFrame::m_dwPatternSetup = PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
 								   | PATTERN_SMALLFONT | PATTERN_CENTERROW | PATTERN_AUTOSPACEBAR
-								   | PATTERN_DRAGNDROPEDIT | PATTERN_FLATBUTTONS;
+								   | PATTERN_DRAGNDROPEDIT | PATTERN_FLATBUTTONS 
+								   | PATTERN_2NDHIGHLIGHT | PATTERN_STDHIGHLIGHT;
 DWORD CMainFrame::m_nRowSpacing = 16;
 DWORD CMainFrame::m_nRowSpacing2 = 4;
 DWORD CMainFrame::m_nKeyboardCfg = KEYBOARD_MPT;
@@ -458,7 +459,7 @@ CMainFrame::CMainFrame()
 		RegQueryValueEx(key, "Version", NULL, &dwREG_DWORD, (LPBYTE)&gdwPreviousVersion, &dwDWORDSize);
 		RegCloseKey(key);
 	}
-	if (gdwPreviousVersion < MPTRACK_FINALRELEASEVERSION)
+/*	if (gdwPreviousVersion < MPTRACK_FINALRELEASEVERSION)
 	{
 		m_dwPatternSetup |= (PATTERN_EFFECTHILIGHT | PATTERN_SMALLFONT | PATTERN_CENTERROW | PATTERN_DRAGNDROPEDIT);
 	}
@@ -466,7 +467,7 @@ CMainFrame::CMainFrame()
 	{
 		m_dwPatternSetup |= PATTERN_SHOWPREVIOUS|PATTERN_CONTSCROLL;
 	}
-
+*/
 	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
 }
 
@@ -1062,7 +1063,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 // -> DESC="use multimedia timer instead of Sleep() in audio thread"
 //rewbs: reduce to normal priority during debug for easier hang debugging
 #ifdef NDEBUG
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
 #endif 
 #ifdef _DEBUG
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
@@ -2533,7 +2534,8 @@ void CMainFrame::OnOctaveChanged()
 //rewbs.reportBug
 void CMainFrame::OnReportBug()
 {
-	CTrackApp::OpenURL("http://www.modplug.com/forum/viewforum.php?f=22");
+	//CTrackApp::OpenURL("http://www.modplug.com/forum/viewforum.php?f=22");
+	CTrackApp::OpenURL("http://www.modplug.com/forum/");
 	return;
 }
 //end rewbs.reportBug

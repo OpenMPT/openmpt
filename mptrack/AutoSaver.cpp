@@ -264,6 +264,9 @@ BEGIN_MESSAGE_MAP(CAutoSaverGUI, CPropertyPage)
 	ON_BN_CLICKED(IDC_AUTOSAVE_BROWSE, OnBnClickedAutosaveBrowse)
 	ON_BN_CLICKED(IDC_AUTOSAVE_ENABLE, OnBnClickedAutosaveEnable)
 	ON_BN_CLICKED(IDC_AUTOSAVE_USEORIGDIR, OnBnClickedAutosaveUseorigdir)
+	ON_EN_UPDATE(IDC_AUTOSAVE_PATH, OnSettingsChanged)
+	ON_EN_UPDATE(IDC_AUTOSAVE_HISTORY, OnSettingsChanged)
+	ON_EN_UPDATE(IDC_AUTOSAVE_INTERVAL, OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -319,6 +322,7 @@ void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 	{
 		SHGetPathFromIDList(pid, szPath);
 		SetDlgItemText(IDC_AUTOSAVE_PATH, szPath);
+		OnSettingsChanged();
 	}
 }
 
@@ -331,6 +335,7 @@ void CAutoSaverGUI::OnBnClickedAutosaveEnable()
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_USEORIGDIR), enabled);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH), enabled);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_BROWSE), enabled);
+	OnSettingsChanged();
 	return;
 }
 
@@ -340,6 +345,11 @@ void CAutoSaverGUI::OnBnClickedAutosaveUseorigdir()
 		bool enabled = IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH), !enabled);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_BROWSE), !enabled);
+		OnSettingsChanged();
 	}
 	return;
+}
+
+void CAutoSaverGUI::OnSettingsChanged() {
+	SetModified(TRUE);
 }

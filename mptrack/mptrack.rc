@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -79,7 +79,6 @@ IDB_PATTERNS            BITMAP                  "res\\patterns.bmp"
 IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
 IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
 IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
-IDB_SPLASHSCREENOLD     BITMAP                  "RES\\splash.bmp"
 IDB_ENVTOOLBAR          BITMAP                  "res\\envbar.bmp"
 IDB_SMPTOOLBAR          BITMAP                  "res\\smptoolb.bmp"
 IDB_VISNODE             BITMAP                  "res\\bitmap1.bmp"
@@ -253,44 +252,42 @@ FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Sound Quality",IDC_STATIC,1,155,256,97
     CONTROL         "Automatic Gain Control",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,17,97,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,9,20,97,10
     CONTROL         "Noise reduction",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,29,82,10
-    CONTROL         "Enable Graphic Equalizer",IDC_CHECK3,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,41,107,10
+                    WS_TABSTOP,9,32,82,10
     LTEXT           "Resampling:",IDC_STATIC,7,169,41,8
     COMBOBOX        IDC_COMBO1,50,167,120,56,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "Bass Expansion",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,59,81,10
-    LTEXT           "Low",IDC_STATIC,12,73,14,8
+                    WS_TABSTOP,9,53,81,10
+    LTEXT           "Low",IDC_STATIC,12,67,14,8
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,27,71,62,15
-    LTEXT           "High",IDC_STATIC,90,73,16,8
-    LTEXT           "10Hz",IDC_STATIC,126,73,18,8
-    LTEXT           "Range:",IDC_STATIC,163,59,24,8
+                    TBS_NOTICKS | WS_TABSTOP,27,65,62,15
+    LTEXT           "High",IDC_STATIC,90,67,16,8
+    LTEXT           "10Hz",IDC_STATIC,126,67,18,8
+    LTEXT           "Range:",IDC_STATIC,163,53,24,8
     CONTROL         "Slider2",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,143,70,62,15
-    LTEXT           "100Hz",IDC_STATIC,205,72,23,8
+                    TBS_NOTICKS | WS_TABSTOP,143,64,62,15
+    LTEXT           "100Hz",IDC_STATIC,205,66,23,8
     CONTROL         "Reverb",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,90,62,10
-    LTEXT           "Low",IDC_STATIC,12,106,14,8
+                    WS_TABSTOP,9,84,62,10
+    LTEXT           "Low",IDC_STATIC,12,100,14,8
     CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,27,102,62,15
-    LTEXT           "High",IDC_STATIC,90,106,16,8
+                    TBS_NOTICKS | WS_TABSTOP,27,96,62,15
+    LTEXT           "High",IDC_STATIC,90,100,16,8
     CTEXT           "Reverb Preset:",IDC_STATIC,143,90,62,8
     CONTROL         "Pro-Logic Surround",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,122,99,10
-    LTEXT           "Low",IDC_STATIC,12,138,14,8
+                    WS_TABSTOP,9,116,99,10
+    LTEXT           "Low",IDC_STATIC,12,132,14,8
     CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,27,135,62,15
-    LTEXT           "High",IDC_STATIC,90,138,16,8
-    LTEXT           "5ms",IDC_STATIC,126,137,18,8
-    CTEXT           "Front/Rear Delay:",IDC_STATIC,142,124,65,8
+                    TBS_NOTICKS | WS_TABSTOP,27,129,62,15
+    LTEXT           "High",IDC_STATIC,90,132,16,8
+    LTEXT           "5ms",IDC_STATIC,126,131,18,8
+    CTEXT           "Front/Rear Delay:",IDC_STATIC,142,118,65,8
     CONTROL         "Slider2",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,143,134,62,15
-    LTEXT           "50ms",IDC_STATIC,205,137,23,8
-    COMBOBOX        IDC_COMBO2,130,103,100,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    TBS_NOTICKS | WS_TABSTOP,143,128,62,15
+    LTEXT           "50ms",IDC_STATIC,205,131,23,8
+    COMBOBOX        IDC_COMBO2,130,97,100,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     GROUPBOX        "Control",IDC_STATIC,0,5,257,150
     EDITTEXT        IDC_WFIRCUTOFF,150,205,19,14,ES_AUTOHSCROLL | ES_NUMBER
@@ -305,6 +302,10 @@ BEGIN
     LTEXT           "Samples",IDC_STATIC,172,228,29,8
     LTEXT           "(overridden by instrument setting)",IDC_STATIC,9,238,
                     104,8
+    CONTROL         "Emulate Old Mix Bugs",IDC_CHECK7,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,130,32,97,10
+    CONTROL         "Enable Graphic Equalizer",IDC_CHECK3,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,130,20,107,10
 END
 
 IDD_WAVECONVERT DIALOGEX 0, 0, 211, 151
@@ -823,7 +824,6 @@ BEGIN
     CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
                     UDS_NOTHOUSANDS,119,150,8,12
-    GROUPBOX        "Attack",IDC_STATIC,3,138,123,30
     CTEXT           "Action",IDC_STATIC,246,36,59,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     GROUPBOX        "New Note Action",IDC_STATIC,240,25,123,63
@@ -835,6 +835,7 @@ BEGIN
     CONTROL         "",IDC_SPIN11,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,351,153,
                     8,11
+    GROUPBOX        "Attack",IDC_STATIC,3,138,123,30
 END
 
 IDD_MODDOC_MODTYPE DIALOGEX 0, 0, 237, 118
@@ -1291,7 +1292,7 @@ BEGIN
                     WS_TABSTOP
 END
 
-IDD_OPTIONS_SOUNDCARD DIALOGEX 0, 0, 240, 156
+IDD_OPTIONS_SOUNDCARD DIALOGEX 0, 0, 266, 274
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Sound Card"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
@@ -1304,7 +1305,7 @@ BEGIN
     COMBOBOX        IDC_COMBO2,71,41,54,83,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Mixing Quality:",IDC_STATIC,11,62,57,8
-    COMBOBOX        IDC_COMBO3,71,59,54,90,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO3,71,60,54,90,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Max. Polyphony:",IDC_STATIC,11,78,57,8
     COMBOBOX        IDC_COMBO4,71,76,54,88,CBS_DROPDOWNLIST | WS_TABSTOP
@@ -1322,7 +1323,7 @@ BEGIN
     CONTROL         "Slider2",IDC_SLIDER_PREAMP,"msctls_trackbar32",
                     TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,200,87,
                     27,62
-    COMBOBOX        IDC_COMBO5,131,59,64,80,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO5,131,60,64,80,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "Reverse Stereo",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,131,78,62,10
@@ -1330,42 +1331,43 @@ BEGIN
                     WS_TABSTOP,131,90,64,10
 END
 
-IDD_MIDIMACRO DIALOGEX 0, 0, 349, 332
+IDD_MIDIMACRO DIALOGEX 0, 0, 349, 345
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Zxx Macros Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Parametered Macro (Z00-Z7F)",IDC_STATIC,4,4,288,259
-    COMBOBOX        IDC_COMBO1,13,229,48,103,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    GROUPBOX        "Parametered Macro (Z00-Z7F)",IDC_STATIC,4,4,288,272
+    COMBOBOX        IDC_COMBO1,11,229,48,103,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    COMBOBOX        IDC_COMBO2,64,229,111,79,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO2,62,229,111,79,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Modify macro:",IDC_STATIC,13,219,47,8
-    GROUPBOX        "Fixed Macros (Z80-ZFF)",IDC_STATIC,4,269,288,46
-    COMBOBOX        IDC_COMBO3,48,283,173,65,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "Modify macro:",IDC_STATIC,11,219,47,8
+    GROUPBOX        "Fixed Macros (Z80-ZFF)",IDC_STATIC,4,278,288,46
+    COMBOBOX        IDC_COMBO3,48,292,173,65,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Customize:",IDC_STATIC,10,301,47,8
-    COMBOBOX        IDC_COMBO4,47,299,48,101,CBS_DROPDOWNLIST | CBS_SORT | 
+    LTEXT           "Customize:",IDC_STATIC,10,310,47,8
+    COMBOBOX        IDC_COMBO4,47,308,48,101,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Value:",IDC_STATIC,115,301,47,8
-    EDITTEXT        IDC_EDIT2,137,299,116,12,ES_AUTOHSCROLL
+    LTEXT           "Value:",IDC_STATIC,115,310,47,8
+    EDITTEXT        IDC_EDIT2,137,308,116,12,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK",IDOK,295,7,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,295,24,50,14
     CONTROL         "Embed macro configuration in file when saving",
                     IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,4,317,288,10
+                    WS_TABSTOP,4,330,288,10
     PUSHBUTTON      "Set as default",IDC_BUTTON1,295,43,50,14
     PUSHBUTTON      "Reset",IDC_BUTTON2,295,62,50,14
-    COMBOBOX        IDC_MACROPLUG,64,246,110,111,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_MACROPLUG,62,255,111,111,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Plug / param:",IDC_STATIC,13,248,44,8
+    LTEXT           "Plug/param:",IDC_STATIC,17,257,40,8
     LTEXT           "Current Macros:",IDC_STATIC,11,16,54,8
-    COMBOBOX        IDC_MACROPARAM,177,246,111,126,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_MACROPARAM,175,255,106,126,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Type:",IDC_STATIC,64,219,47,8
-    EDITTEXT        IDC_EDIT1,177,229,110,12,ES_AUTOHSCROLL
-    LTEXT           "Value:",IDC_STATIC,177,219,47,8
-    LTEXT           "Preset:",IDC_STATIC,10,286,37,8
+    LTEXT           "Type:",IDC_STATIC,62,219,47,8
+    EDITTEXT        IDC_EDIT1,175,229,110,12,ES_AUTOHSCROLL
+    LTEXT           "Value:",IDC_STATIC,175,219,47,8
+    LTEXT           "Preset:",IDC_STATIC,10,295,37,8
+    GROUPBOX        "Generate Macro:",IDC_STATIC,11,245,274,28
 END
 
 IDD_CHORDEDIT DIALOGEX 0, 0, 245, 148
@@ -1578,7 +1580,7 @@ END
 IDD_EFFECTVISUALIZER DIALOGEX 0, 0, 385, 108
 STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
-CAPTION "Param Editor [prototype]"
+CAPTION "Param Editor"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_VISSTATUS,4,91,162,12,ES_AUTOHSCROLL | ES_READONLY | 
@@ -1816,12 +1818,18 @@ BEGIN
         BOTTOMMARGIN, 275
     END
 
+    IDD_OPTIONS_SOUNDCARD, DIALOG
+    BEGIN
+        RIGHTMARGIN, 240
+        BOTTOMMARGIN, 156
+    END
+
     IDD_MIDIMACRO, DIALOG
     BEGIN
         LEFTMARGIN, 4
         RIGHTMARGIN, 345
         TOPMARGIN, 4
-        BOTTOMMARGIN, 327
+        BOTTOMMARGIN, 340
     END
 
     IDD_CHORDEDIT, DIALOG
@@ -2208,12 +2216,12 @@ BEGIN
     ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (Royaume-Uni) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2226,7 +2234,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 // Bitmap
 //
 
-IDB_SPLASHNOFOLD        BITMAP                  "res\\modplthingmorecontrast.bmp"
 IDB_SPLASHNOFOLDFIN     BITMAP                  "res\\splashno.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2320,7 +2327,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Anglais (Royaume-Uni) resources
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

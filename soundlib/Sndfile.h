@@ -332,9 +332,9 @@ typedef const BYTE * LPCBYTE;
 #define SNDMIX_DIRECTTODISK		0x10000
 #define SNDMIX_ENABLEMMX		0x20000
 #define SNDMIX_NOBACKWARDJUMPS	0x40000
-#define SNDMIX_MAXDEFAULTPAN	0x80000	// Used by the MOD loader
-#define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
-
+#define SNDMIX_MAXDEFAULTPAN	0x80000	 // Used by the MOD loader
+#define SNDMIX_MUTECHNMODE		0x100000 // Notes are not played on muted channels
+#define SNDMIX_EMULATE_MIX_BUGS 0x200000 // rewbs.emulateMixBugs
 
 // Resampling modes
 enum {
@@ -558,6 +558,7 @@ public:
 	virtual bool IsResumed()=0;
 	virtual void Resume()=0;
 	virtual void Suspend()=0;
+	virtual BOOL CanRecieveMidiEvents()=0;
 
 };
 

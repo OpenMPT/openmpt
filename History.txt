@@ -21,6 +21,11 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17RC1 (revision 1.13.2.8) 
+   / <rewbs> If a plug identifies itself as willing to recieve midi events, midi channel 1 will automatically be selected when it is assigned to an instrument
+   + <rewbs> Option to emulate some old mixing bugs, in case your old track sounds too different in this version  (could happen with some distortion plugins for example) and you aren't able to recover the sound by adjusting the levels
+   . <rewbs> Minor GUI fixes
+
 . v 1.17RC0 (revision 1.13.2.7) 
    . <rewbs> Fixed crash in instrument view in win 98. 
    / <rewbs> Set octave keys are now customisable. Not that they will no longer be automatically assigned to freed number keys.

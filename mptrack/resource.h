@@ -54,7 +54,6 @@
 #define IDC_NODRAG                      352
 #define ID_ENVELOPE_VIEWGRID            353
 #define ID_REPORT_BUG                   354
-#define IDB_SPLASHSCREENOLD             355
 #define IDD_SOUNDBANK_INFO              401
 #define IDD_OPTIONS_GENERAL             402
 #define IDD_OPTIONS_SOUNDCARD           403
@@ -73,7 +72,6 @@
 #define IDD_EFFECTVISUALIZER            426
 #define IDB_VISNODE                     427
 #define IDB_SPLASHTEST                  432
-#define IDB_SPLASHNOFOLD                434
 #define IDB_SPLASHNOFOLDFIN             435
 #define IDR_VSTMENU                     436
 #define IDD_DEFAULTPLUGINEDITOR         438

@@ -577,7 +577,6 @@ enum {
 // -> DESC="alternative BPM/Speed interpretation method"
 	OPTGEN_ALTERNTIVEBPMSPEED,
 // -! NEW_FEATURE#0022
-
 	OPTGEN_MAXOPTIONS
 };
 
@@ -715,8 +714,8 @@ void COptionsGeneral::OnOK()
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
 		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
-// -! NEW_FEATURE#0022
-		}
+// -! NEW_FEATURE#0022		
+		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}

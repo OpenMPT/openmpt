@@ -1588,3 +1588,308 @@ I2R_Loop:
 	fstp st(0)
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+//rewbs.emulateMixBugs
+///////////////////////////////////////////////////////////////////////////////////////
+
+const float _oldf2ic = (float)(1 << 28);
+const float _oldi2fc = (float)(1.0 / (1 << 28));
+
+#ifdef ENABLE_AMDNOW
+
+// Convert integer mix to floating-point
+void AMD_OldStereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
+//---------------------------------------------------------------------------------
+{
+	_asm {
+	movd mm0, _oldi2fc
+	mov edx, pSrc
+	mov edi, pOut1
+	mov ebx, pOut2
+	mov ecx, nCount
+	punpckldq mm0, mm0
+	inc ecx
+	shr ecx, 1
+mainloop:
+	movq mm1, qword ptr [edx]
+	movq mm2, qword ptr [edx+8]
+	add edi, 8
+	pi2fd mm1, mm1
+	pi2fd mm2, mm2
+	add ebx, 8
+	pfmul mm1, mm0
+	pfmul mm2, mm0
+	add edx, 16
+	movq mm3, mm1
+	punpckldq mm3, mm2
+	punpckhdq mm1, mm2
+	dec ecx
+	movq qword ptr [edi-8], mm3
+	movq qword ptr [ebx-8], mm1
+	jnz mainloop
+	emms
+	}
+}
+
+void AMD_OldFloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
+//-------------------------------------------------------------------------------------
+{
+	_asm {
+    movd mm0, _oldf2ic
+	mov eax, pIn1
+	mov ebx, pIn2
+	mov edx, pOut
+	mov ecx, nCount
+	punpckldq mm0, mm0
+	inc ecx
+	shr ecx, 1
+	sub edx, 16
+mainloop:
+	movq mm1, [eax]
+	movq mm2, [ebx]
+	add edx, 16
+	movq mm3, mm1
+	punpckldq mm1, mm2
+	punpckhdq mm3, mm2
+	add eax, 8
+	pfmul mm1, mm0
+	pfmul mm3, mm0
+	add ebx, 8
+	pf2id mm1, mm1
+	pf2id mm3, mm3
+	dec ecx
+	movq qword ptr [edx], mm1
+	movq qword ptr [edx+8], mm3
+	jnz mainloop
+	emms
+	}
+}
+
+
+void AMD_OldFloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
+//---------------------------------------------------------------
+{
+	_asm {
+	movd mm0, _oldf2ic
+	mov eax, pIn
+	mov edx, pOut
+	mov ecx, nCount
+	punpckldq mm0, mm0
+	add ecx, 3
+	shr ecx, 2
+	sub edx, 16
+mainloop:
+	movq mm1, [eax]
+	movq mm2, [eax+8]
+	add edx, 16
+	pfmul mm1, mm0
+	pfmul mm2, mm0
+	add eax, 16
+	pf2id mm1, mm1
+	pf2id mm2, mm2
+	dec ecx
+	movq qword ptr [edx], mm1
+	movq qword ptr [edx+8], mm2
+	jnz mainloop
+	emms
+	}
+}
+
+
+void AMD_OldMonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
+//----------------------------------------------------------------
+{
+	_asm {
+	movd mm0, _oldi2fc
+	mov eax, pSrc
+	mov edx, pOut
+	mov ecx, nCount
+	punpckldq mm0, mm0
+	add ecx, 3
+	shr ecx, 2
+	sub edx, 16
+mainloop:
+	movq mm1, qword ptr [eax]
+	movq mm2, qword ptr [eax+8]
+	add edx, 16
+	pi2fd mm1, mm1
+	pi2fd mm2, mm2
+	add eax, 16
+	pfmul mm1, mm0
+	pfmul mm2, mm0
+	dec ecx
+	movq qword ptr [edx], mm1
+	movq qword ptr [edx+8], mm2
+	jnz mainloop
+	emms
+	}
+}
+
+#endif
+
+///////////////////////////////////////////////////////////////////////////////////////
+// SSE Optimizations
+
+#ifdef ENABLE_SSE
+
+void SSE_OldStereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
+//---------------------------------------------------------------------------------
+{
+	_asm {
+	movss xmm0, _oldi2fc
+	mov edx, pSrc
+	mov eax, pOut1
+	mov ebx, pOut2
+	mov ecx, nCount
+	shufps xmm0, xmm0, 0x00
+	xorps xmm1, xmm1
+	xorps xmm2, xmm2
+	inc ecx
+	shr ecx, 1
+mainloop:
+	cvtpi2ps xmm1, [edx]
+	cvtpi2ps xmm2, [edx+8]
+	add eax, 8
+	add ebx, 8
+	movlhps xmm1, xmm2
+	mulps xmm1, xmm0
+	add edx, 16
+	shufps xmm1, xmm1, 0xD8
+	dec ecx
+	movlps qword ptr [eax-8], xmm1
+	movhps qword ptr [ebx-8], xmm1
+	jnz mainloop
+	}
+}
+
+
+void SSE_OldMonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
+//----------------------------------------------------------------
+{
+	_asm {
+	movss xmm0, _oldi2fc
+	mov edx, pSrc
+	mov eax, pOut
+	mov ecx, nCount
+	shufps xmm0, xmm0, 0x00
+	xorps xmm1, xmm1
+	xorps xmm2, xmm2
+	add ecx, 3
+	shr ecx, 2
+mainloop:
+	cvtpi2ps xmm1, [edx]
+	cvtpi2ps xmm2, [edx+8]
+	add eax, 16
+	movlhps xmm1, xmm2
+	mulps xmm1, xmm0
+	add edx, 16
+	dec ecx
+	movups [eax-16], xmm1
+	jnz mainloop
+	}
+}
+
+#endif
+
+
+
+
+
+// Convert floating-point mix to integer
+void X86_OldFloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
+//-------------------------------------------------------------------------------------
+{
+	_asm {
+	mov esi, pIn1
+	mov ebx, pIn2
+	mov edi, pOut
+	mov ecx, nCount
+	fld _oldf2ic
+mainloop:
+	fld dword ptr [ebx]
+	add edi, 8
+	fld dword ptr [esi]
+	add ebx, 4
+	add esi, 4
+	fmul st(0), st(2)
+	fistp dword ptr [edi-8]
+	fmul st(0), st(1)
+	fistp dword ptr [edi-4]
+	dec ecx
+	jnz mainloop
+	fstp st(0)
+	}
+}
+
+// Convert integer mix to floating-point
+void X86_OldStereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
+//---------------------------------------------------------------------------------
+{
+	_asm {
+	mov esi, pSrc
+	mov edi, pOut1
+	mov ebx, pOut2
+	mov ecx, nCount
+	fld _oldi2fc
+mainloop:
+	fild dword ptr [esi]
+	fild dword ptr [esi+4]
+	add ebx, 4
+	add edi, 4
+	fmul st(0), st(2)
+	add esi, 8
+	fstp dword ptr [ebx-4]
+	fmul st(0), st(1)
+	fstp dword ptr [edi-4]
+	dec ecx
+	jnz mainloop
+	fstp st(0)
+	}
+}
+
+
+void X86_OldFloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
+//---------------------------------------------------------------
+{
+	_asm {
+	mov edx, pIn
+	mov eax, pOut
+	mov ecx, nCount
+	fld _oldf2ic
+	sub eax, 4
+R2I_Loop:
+	fld DWORD PTR [edx]
+	add eax, 4
+	fmul ST(0), ST(1)
+	dec ecx
+	lea edx, [edx+4]
+	fistp DWORD PTR [eax]
+	jnz R2I_Loop
+	fstp st(0)
+	}
+}
+
+
+void X86_OldMonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
+//----------------------------------------------------------------
+{
+	_asm {
+	mov edx, pOut
+	mov eax, pSrc
+	mov ecx, nCount
+	fld _oldi2fc
+	sub edx, 4
+I2R_Loop:
+	fild DWORD PTR [eax]
+	add edx, 4
+	fmul ST(0), ST(1)
+	dec ecx
+	lea eax, [eax+4]
+	fstp DWORD PTR [edx]
+	jnz I2R_Loop
+	fstp st(0)
+	}
+}
+
+//end rewbs.emulateMixBugs
