@@ -19,6 +19,7 @@
 #define SMP_LEFTBAR_CXBTN		24
 #define SMP_LEFTBAR_CYBTN		22
 
+#define MIN_ZOOM	0
 #define MAX_ZOOM	8
 
 const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] = 
@@ -2227,15 +2228,15 @@ void CViewSample::OnSetSustainEnd()
 void CViewSample::OnZoomUp()
 //--------------------------
 {
-	if (m_nZoom > 1) SendCtrlMessage(CTRLMSG_SMP_SETZOOM, m_nZoom - 1);
+	if (m_nZoom >= MIN_ZOOM)
+		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, (m_nZoom>MIN_ZOOM) ? m_nZoom-1 : MAX_ZOOM);
 }
 
 
 void CViewSample::OnZoomDown()
 //----------------------------
 {
-	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, (m_nZoom < MAX_ZOOM) ? m_nZoom+1 : 0);
-
+	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, (m_nZoom<MAX_ZOOM) ? m_nZoom+1 : MIN_ZOOM);
 }
 
 
@@ -2343,4 +2344,6 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		m_dwStatus &= ~SMPSTATUS_KEYDOWN;
 		return wParam;
 	}
+
+	return NULL;
 }

@@ -558,6 +558,7 @@ public:
 	virtual bool IsResumed()=0;
 	virtual void Resume()=0;
 	virtual void Suspend()=0;
+	virtual BOOL isInstrument()=0;
 	virtual BOOL CanRecieveMidiEvents()=0;
 
 };

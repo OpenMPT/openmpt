@@ -3671,6 +3671,13 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			InvalidatePattern(TRUE);
 		}
 		break;
+	case VIEWMSG_DOSCROLL: 
+		{
+			CPoint p(0,0);  //dummy point;
+			CModScrollView::OnMouseWheel(0, lParam, p);
+		}
+		break;
+
 
 	default:
 		return CModScrollView::OnModViewMsg(wParam, lParam);
@@ -3924,6 +3931,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		return wParam;
 	}
 
+	return NULL;
 }
 
 void CViewPattern::TempEnterVol(int v)
@@ -4359,7 +4367,6 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 	UINT nPlayChord = 0;
-	BYTE chordplaylist[3];
 	bool isSplit;
 
 	if ((pModDoc) && (pMainFrm))
@@ -4777,7 +4784,6 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 		p->note = note;	
 		return true;
 	}
-	return false;
 }
 //end rewbs.merge
 

@@ -58,6 +58,7 @@ protected:
 	PVSTPLUGINLIB m_pFactory;
 	PSNDMIXPLUGIN m_pMixStruct;
 	AEffect *m_pEffect;
+	void (*m_pProcessFP)(AEffect*, float**, float**, long); //Function pointer to AEffect processReplacing if supported, else process.
 	CAbstractVstEditor *m_pEditor;		//rewbs.defaultPlugGUI
 	UINT m_nSampleRate;
 	BOOL m_bIsVst2;
@@ -124,6 +125,7 @@ public:
 	BOOL isInstrument(); // ericus 18/02/2005
 	BOOL CanRecieveMidiEvents();
 
+
 public: // IMixPlugin interface
 	int AddRef() { return ++m_nRefCount; }
 	int Release();
@@ -172,6 +174,7 @@ public:
 	BOOL RemovePlugin(PVSTPLUGINLIB);
 	BOOL CreateMixPlugin(PSNDMIXPLUGIN);
 	VOID OnIdle();
+	static void ReportPlugException(LPCSTR format,...);
 
 protected:
 	VOID EnumerateDirectXDMOs();
@@ -205,6 +208,8 @@ public:
 	afx_msg void OnSelChanged(NMHDR *pNotifyStruct, LRESULT * result);
 	afx_msg void OnSelDblClk(NMHDR *pNotifyStruct, LRESULT * result);
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 };
 
 

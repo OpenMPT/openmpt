@@ -1061,7 +1061,6 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 void CSoundFile::SuspendPlugins()	
 //------------------------------
 {
-	float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; //temp scratch buffers for final call to process.
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
 		if (!m_MixPlugins[iPlug].pMixPlugin)	

@@ -434,6 +434,8 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		StopNote(m_nPlayingNote);
 		return wParam;
 	}
+	
+	return NULL;
 }
 
 void CNoteMapWnd::EnterNote(UINT note)
@@ -986,14 +988,14 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), b2);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), b2);
 		m_SliderAttack.EnableWindow(b2);
-		m_EditName.EnableWindow(b);
+		m_EditName.EnableWindow(b2);
 		m_EditFileName.EnableWindow(b);
 		m_CbnMidiCh.EnableWindow(b2);
 		m_CbnMixPlug.EnableWindow(b2);
 		m_SpinMidiPR.EnableWindow(b2);
 		m_SpinMidiBK.EnableWindow(b2);	//rewbs.MidiBank
 		m_SpinFadeOut.EnableWindow(b2);
-		m_NoteMap.EnableWindow(b);
+		m_NoteMap.EnableWindow(b2);
 		m_SliderVolSwing.EnableWindow(b);
 		m_SliderPanSwing.EnableWindow(b);
 		//end rewbs.instroVSTi
@@ -1749,7 +1751,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 					
 					// if this plug can recieve MIDI events and we have no MIDI channel
 					// selected for this instrument, automatically select MIDI channel 1.
-					if (pPlug->pMixPlugin->CanRecieveMidiEvents() && penv->nMidiChannel==0) {
+					if (pPlug->pMixPlugin->isInstrument() && penv->nMidiChannel==0) {
 						penv->nMidiChannel=1;
 						m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
 						UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT, NULL);

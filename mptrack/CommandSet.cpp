@@ -2271,7 +2271,6 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	bool removing = !adding; //for attempt to salvage readability.. 
 	KeyCombination curKc;	// for looping through key combinations
 	KeyCombination newKc;	// for adding new key combinations
-	KeyCombination newKc2;	// for adding new key combinations
 	CString report="";
 
 	if (enforceRule[krAllowNavigationWithSelection])
@@ -2542,7 +2541,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	//# Reassign freed number keys to octaves
 	if (enforceRule[krReassignDigitsToOctaves] && !adding)
 	{  
-		  if ( (inKc.mod = 0) &&	//no modifier
+		  if ( (inKc.mod == 0) &&	//no modifier
 			 ( (inKc.ctx == kCtxViewPatternsNote) || (inKc.ctx == kCtxViewPatterns) ) && //note scope or pattern scope
 			 ( ('0'<=inKc.code && inKc.code<='9') || (VK_NUMPAD0<=inKc.code && inKc.code<=VK_NUMPAD9) ) ) {  //is number key 
 				newKc.ctx=kCtxViewPatternsNote;
@@ -2800,8 +2799,6 @@ void CCommandSet::Copy(CCommandSet *source)
 KeyCombination CCommandSet::GetKey(CommandID cmd, UINT key)
 {
 	return commands[cmd].kcList[key];
-	KeyCombination kc;
-	return kc;
 }
 
 
@@ -2809,7 +2806,6 @@ KeyCombination CCommandSet::GetKey(CommandID cmd, UINT key)
 int CCommandSet::GetKeyListSize(CommandID cmd)
 {
 	return  commands[cmd].kcList.GetSize();
-
 }
 
 CString CCommandSet::GetCommandText(CommandID cmd)
@@ -3052,12 +3048,10 @@ CString CCommandSet::GetKeyText(UINT mod, UINT code)
 
 CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
 {
-	CString keyText;
 	if (key < commands[c].kcList.GetSize())
 		return GetKeyText(commands[c].kcList[0].mod, commands[c].kcList[0].code);
 	else 
 		return "";
-	return keyText;
 }
 
 bool CCommandSet::isHidden(UINT c)

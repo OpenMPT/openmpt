@@ -6,6 +6,7 @@
 #include "sndfile.h"
 #include "moddoc.h"
 #include "AutoSaver.h"
+#include "moptions.h"
 #include <algorithm>
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +122,13 @@ CString CAutoSaver::GetFilenameTemplate()
 
 void CAutoSaver::SetHistoryDepth(int history)
 {
-	m_nBackupHistory=history<1?1:history;
+	if (history<1) {
+		m_nBackupHistory=1;
+	} else if (history>100) {
+		m_nBackupHistory=100;
+	} else {
+		m_nBackupHistory=history;
+	}
 }
 
 int CAutoSaver::GetHistoryDepth()
@@ -131,7 +138,13 @@ int CAutoSaver::GetHistoryDepth()
 
 void CAutoSaver::SetSaveInterval(int minutes)
 {
-	m_nSaveInterval=(minutes<1?1:minutes)*60*1000; //minutes to milliseconds
+	if (minutes<1) {
+		minutes=1;
+	} else if (minutes>10000) {
+		minutes=10000;
+	}
+	
+	m_nSaveInterval=minutes*60*1000; //minutes to milliseconds
 }
 
 int CAutoSaver::GetSaveInterval()
@@ -259,7 +272,6 @@ void CAutoSaverGUI::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 }
 
-
 BEGIN_MESSAGE_MAP(CAutoSaverGUI, CPropertyPage)
 	ON_BN_CLICKED(IDC_AUTOSAVE_BROWSE, OnBnClickedAutosaveBrowse)
 	ON_BN_CLICKED(IDC_AUTOSAVE_ENABLE, OnBnClickedAutosaveEnable)
@@ -352,4 +364,11 @@ void CAutoSaverGUI::OnBnClickedAutosaveUseorigdir()
 
 void CAutoSaverGUI::OnSettingsChanged() {
 	SetModified(TRUE);
+}
+
+BOOL CAutoSaverGUI::OnSetActive()
+//--------------------------------
+{
+	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_AUTOSAVE;
+	return CPropertyPage::OnSetActive();
 }

@@ -49,6 +49,7 @@ typedef struct INSTRUMENTVIEWSTATE
 {
 	DWORD cbStruct;
 	DWORD nEnv;
+	bool bGrid;
 } INSTRUMENTVIEWSTATE;
 
 typedef struct COMMENTVIEWSTATE
