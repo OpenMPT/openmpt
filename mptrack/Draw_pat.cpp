@@ -1069,10 +1069,12 @@ void CViewPattern::UpdateScrollSize()
 		if (m_nMidRow) sizeTotal.cy += m_nMidRow * m_szCell.cy * 2;
 		SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
 		//UpdateScrollPos(); //rewbs.FixLPsOddScrollingIssue
-		if (rect.Height() >= sizeTotal.cy)
+		if (rect.Height() >= sizeTotal.cy) {
 			m_bWholePatternFitsOnScreen=true;
-		else
+			m_nYScroll = 0;  //rewbs.fix2977
+		} else {
 			m_bWholePatternFitsOnScreen=false;
+		}
 	}
 }
 

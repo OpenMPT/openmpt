@@ -104,6 +104,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
+	ON_WM_KILLFOCUS() //rewbs.fix3116
 END_MESSAGE_MAP()
 
 // Static
@@ -2674,3 +2675,13 @@ bool CMainFrame::UpdateEffectKeys(void)
 //end rewbs.customKeys
 
 
+//rewbs.fix3116
+void CMainFrame::OnKillFocus(CWnd* pNewWnd)
+{
+	CMDIFrameWnd::OnKillFocus(pNewWnd);
+	
+	//rewbs: ensure modifiers are reset when we leave the window (e.g. alt-tab)
+	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
+	//end rewbs
+}
+//end rewbs.fix3116

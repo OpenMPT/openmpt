@@ -2540,7 +2540,7 @@ void CModDoc::OnPatternRestart()
 		if (pMainFrm->GetModPlaying() != this)
 		{
 			pSndFile->ResumePlugins();
-			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION);
+			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
 		}
 		else
 		{
@@ -2578,7 +2578,7 @@ void CModDoc::OnPatternPlay()
 		if (pMainFrm->GetModPlaying() != this)
 		{
 			pSndFile->ResumePlugins();
-			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION);
+			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
 		else
 		{
@@ -2623,7 +2623,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		if (pMainFrm->GetModPlaying() != this)
 		{
 			pSndFile->ResumePlugins();
-			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION);
+			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
 		else
 		{

@@ -235,11 +235,11 @@ FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_BITMAP1,"Static",SS_BLACKRECT | SS_NOTIFY | 
                     SS_CENTERIMAGE,5,3,256,81,WS_EX_CLIENTEDGE
-    CTEXT           "Modplug Tracker version",IDC_TEXT2,47,86,171,8,
+    CTEXT           "Modplug Tracker version",IDC_TEXT2,26,86,212,8,
                     SS_NOPREFIX
     CTEXT           "",IDC_CREDITS,5,110,256,51,0,WS_EX_STATICEDGE
     DEFPUSHBUTTON   "OK",IDOK,228,214,32,14,WS_GROUP
-    CTEXT           "",IDC_TEXT1,49,98,167,8
+    CTEXT           "",IDC_TEXT1,16,98,233,8
     EDITTEXT        IDC_EDIT1,47,169,171,61,ES_CENTER | ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER,
                     WS_EX_STATICEDGE
