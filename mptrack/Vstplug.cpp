@@ -2487,6 +2487,7 @@ void X86_Stereo16AddMixToFloat(const short int *pIn, float *pOut1, float *pOut2,
 void SSE_FloatToStereo16Mix(const float *pIn1, const float *pIn2, short int *pOut, int sampleframes)
 //--------------------------------------------------------------------------------------------------
 {
+#ifdef INTEL_SPECIFIC
 	_asm {
 	mov eax, pIn1
 	mov edx, pIn2
@@ -2516,12 +2517,14 @@ mainloop:
 	jnz mainloop
 	emms
 	}
+#endif
 }
 
 
 void SSE_Stereo16AddMixToFloat(const short int *pIn, float *pOut1, float *pOut2, int sampleframes)
 //------------------------------------------------------------------------------------------------
 {
+#ifdef INTEL_SPECIFIC
 	_asm {
 	mov ebx, pIn
 	mov eax, pOut1
@@ -2559,6 +2562,7 @@ mainloop:
 	jnz mainloop
 	emms
 	}
+#endif
 }
 
 

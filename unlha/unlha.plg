@@ -1,0 +1,111 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: unlha - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\WIN\TEMP\RSPB2E0.TMP" with contents
+[
+/nologo /MTd /W4 /GX /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\code\modplug\unlha\unlha.cpp"
+]
+Creating command line "cl.exe @C:\WIN\TEMP\RSPB2E0.TMP" 
+Creating command line "link.exe -lib /nologo /out:"Debug\unlha.lib"  .\Debug\unlha.obj "
+<h3>Output Window</h3>
+Compiling...
+unlha.cpp
+D:\code\modplug\unlha\unlha32.h(83) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\header.cpp(36) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\header.cpp(46) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\header.cpp(54) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\header.cpp(56) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\header.cpp(85) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\header.cpp(107) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\header.cpp(184) : warning C4244: '+=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\slide.cpp(31) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\slide.cpp(35) : warning C4244: '=' : conversion from 'const int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\slide.cpp(73) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\slide.cpp(99) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\maketbl.cpp(20) : warning C4244: '=' : conversion from 'const int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\maketbl.cpp(30) : warning C4244: '+=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\maketbl.cpp(60) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\maketbl.cpp(70) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\maketbl.cpp(76) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\maketbl.cpp(78) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(35) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(41) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(42) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(46) : warning C4244: '=' : conversion from 'unsigned int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(49) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(50) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(51) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(53) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(55) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(90) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(91) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(95) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(112) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(112) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(118) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(119) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(121) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(123) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(136) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(136) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(137) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(138) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(139) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(140) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(149) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(152) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(193) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(194) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(195) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(203) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(204) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(229) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(257) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\huf.cpp(41) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\huf.cpp(46) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\huf.cpp(81) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\huf.cpp(82) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\unlha\huf.cpp(84) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\huf.cpp(118) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\huf.cpp(135) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\huf.cpp(137) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\shuf.cpp(45) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\shuf.cpp(46) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\shuf.cpp(58) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\shuf.cpp(63) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\shuf.cpp(81) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\shuf.cpp(122) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\shuf.cpp(126) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\shuf.cpp(143) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\shuf.cpp(145) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\larc.cpp(15) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\larc.cpp(21) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\larc.cpp(47) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\larc.cpp(52) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\larc.cpp(61) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\larc.cpp(62) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\unlha.cpp(61) : warning C4100: 'lpszExtensions' : unreferenced formal parameter
+D:\code\modplug\unlha\unlha.cpp(174) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\unlha.cpp(182) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\unlha.cpp(216) : warning C4244: '-=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\unlha.cpp(217) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\unlha.cpp(226) : warning C4244: '-=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\unlha.cpp(227) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\unlha.cpp(245) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\unlha\unlha.cpp(245) : warning C4244: 'argument' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
+D:\code\modplug\unlha\dhuf.cpp(121) : warning C4701: local variable 'b' may be used without having been initialized
+Creating library...
+
+
+
+<h3>Results</h3>
+unlha.lib - 0 error(s), 84 warning(s)
+</pre>
+</body>
+</html>

@@ -1,0 +1,224 @@
+# Project: mptrack
+# Makefile created by Dev-C++ 4.9.8.4
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = 
+OBJ  = ChildFrm.o ctrl_com.o ctrl_gen.o ctrl_ins.o ctrl_pat.o ctrl_seq.o ctrl_smp.o dlg_misc.o ../soundlib/dlsbank.o draw_pat.o ../soundlib/Fastmix.o globals.o ../soundlib/Load_669.o ../Soundlib/load_amf.o ../soundlib/Load_ams.o ../soundlib/load_dbm.o ../soundlib/load_dmf.o ../soundlib/Load_dsm.o ../soundlib/Load_far.o ../soundlib/Load_it.o ../soundlib/Load_mdl.o ../soundlib/Load_med.o ../soundlib/load_mid.o ../soundlib/Load_mod.o ../Soundlib/load_mt2.o ../soundlib/Load_mtm.o ../soundlib/Load_okt.o ../Soundlib/load_psm.o ../soundlib/load_ptm.o ../soundlib/Load_s3m.o ../soundlib/Load_stm.o ../soundlib/Load_ult.o ../Soundlib/Load_umx.o ../soundlib/Load_wav.o ../soundlib/Load_xm.o mainbar.o MainFrm.o ../soundlib/mmcmp.o ../soundlib/Mmx_mix.o mod2midi.o mod2wave.o moddoc.o modedit.o Moptions.o Mpdlgs.o mpt_midi.o mptrack.o ../soundlib/Sampleio.o ../soundlib/snd_dsp.o ../soundlib/snd_eq.o ../soundlib/snd_flt.o ../soundlib/Snd_fx.o ../Soundlib/Snd_rvb.o ../Soundlib/snddev.o ../soundlib/Sndfile.o ../soundlib/Sndmix.o StdAfx.o ../soundlib/Tables.o view_com.o view_gen.o view_ins.o view_pat.o view_smp.o view_tre.o vstplug.o ../soundlib/Waveform.o $(RES)
+LINKOBJ  = ChildFrm.o ctrl_com.o ctrl_gen.o ctrl_ins.o ctrl_pat.o ctrl_seq.o ctrl_smp.o dlg_misc.o ../soundlib/dlsbank.o draw_pat.o ../soundlib/Fastmix.o globals.o ../soundlib/Load_669.o ../Soundlib/load_amf.o ../soundlib/Load_ams.o ../soundlib/load_dbm.o ../soundlib/load_dmf.o ../soundlib/Load_dsm.o ../soundlib/Load_far.o ../soundlib/Load_it.o ../soundlib/Load_mdl.o ../soundlib/Load_med.o ../soundlib/load_mid.o ../soundlib/Load_mod.o ../Soundlib/load_mt2.o ../soundlib/Load_mtm.o ../soundlib/Load_okt.o ../Soundlib/load_psm.o ../soundlib/load_ptm.o ../soundlib/Load_s3m.o ../soundlib/Load_stm.o ../soundlib/Load_ult.o ../Soundlib/Load_umx.o ../soundlib/Load_wav.o ../soundlib/Load_xm.o mainbar.o MainFrm.o ../soundlib/mmcmp.o ../soundlib/Mmx_mix.o mod2midi.o mod2wave.o moddoc.o modedit.o Moptions.o Mpdlgs.o mpt_midi.o mptrack.o ../soundlib/Sampleio.o ../soundlib/snd_dsp.o ../soundlib/snd_eq.o ../soundlib/snd_flt.o ../soundlib/Snd_fx.o ../Soundlib/Snd_rvb.o ../Soundlib/snddev.o ../soundlib/Sndfile.o ../soundlib/Sndmix.o StdAfx.o ../soundlib/Tables.o view_com.o view_gen.o view_ins.o view_pat.o view_smp.o view_tre.o vstplug.o ../soundlib/Waveform.o $(RES)
+LIBS =  -L"C:/DEV-CPP/lib" -mwindows -lwinmm -lstrmiids -ldmoguids
+INCS =  -I"C:/DEV-CPP/include"  -I"../unlha"  -I"../unzip"  -I"../unrar"  -I"../soundlib"  -I"../include" 
+CXXINCS =  -I"C:/DEV-CPP/include/c++"  -I"C:/DEV-CPP/include/c++/mingw32"  -I"C:/DEV-CPP/include/c++/backward"  -I"C:/DEV-CPP/include"  -I"../unlha"  -I"../unzip"  -I"../unrar"  -I"../soundlib"  -I"../include" 
+BIN  = mptrack.exe
+CXXFLAGS = $(CXXINCS)-D__GNUWIN32__ -W -DNDEBUG -DWIN32 -D_WINDOWS -DENABLE_MMX -DENABLE_EQ -DMODPLUG_TRACKER -DNO_PACKING 
+CFLAGS = $(INCS)-D__GNUWIN32__ -W -DNDEBUG -DWIN32 -D_WINDOWS -DENABLE_MMX -DENABLE_EQ -DMODPLUG_TRACKER -DNO_PACKING 
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before mptrack.exe all-after
+
+
+clean: clean-custom
+	rm -f $(OBJ) $(BIN)
+
+$(BIN): $(LINKOBJ)
+	$(CPP) $(LINKOBJ) -o "mptrack.exe" $(LIBS)
+
+ChildFrm.o: ChildFrm.cpp
+	$(CPP) -c ChildFrm.cpp -o ChildFrm.o $(CXXFLAGS)
+
+ctrl_com.o: ctrl_com.cpp
+	$(CPP) -c ctrl_com.cpp -o ctrl_com.o $(CXXFLAGS)
+
+ctrl_gen.o: ctrl_gen.cpp
+	$(CPP) -c ctrl_gen.cpp -o ctrl_gen.o $(CXXFLAGS)
+
+ctrl_ins.o: ctrl_ins.cpp
+	$(CPP) -c ctrl_ins.cpp -o ctrl_ins.o $(CXXFLAGS)
+
+ctrl_pat.o: ctrl_pat.cpp
+	$(CPP) -c ctrl_pat.cpp -o ctrl_pat.o $(CXXFLAGS)
+
+ctrl_seq.o: ctrl_seq.cpp
+	$(CPP) -c ctrl_seq.cpp -o ctrl_seq.o $(CXXFLAGS)
+
+ctrl_smp.o: ctrl_smp.cpp
+	$(CPP) -c ctrl_smp.cpp -o ctrl_smp.o $(CXXFLAGS)
+
+dlg_misc.o: dlg_misc.cpp
+	$(CPP) -c dlg_misc.cpp -o dlg_misc.o $(CXXFLAGS)
+
+../soundlib/dlsbank.o: ../soundlib/dlsbank.cpp
+	$(CPP) -c ../soundlib/dlsbank.cpp -o ../soundlib/dlsbank.o $(CXXFLAGS)
+
+draw_pat.o: draw_pat.cpp
+	$(CPP) -c draw_pat.cpp -o draw_pat.o $(CXXFLAGS)
+
+../soundlib/Fastmix.o: ../soundlib/Fastmix.cpp
+	$(CPP) -c ../soundlib/Fastmix.cpp -o ../soundlib/Fastmix.o $(CXXFLAGS)
+
+globals.o: globals.cpp
+	$(CPP) -c globals.cpp -o globals.o $(CXXFLAGS)
+
+../soundlib/Load_669.o: ../soundlib/Load_669.cpp
+	$(CPP) -c ../soundlib/Load_669.cpp -o ../soundlib/Load_669.o $(CXXFLAGS)
+
+../Soundlib/load_amf.o: ../Soundlib/load_amf.cpp
+	$(CPP) -c ../Soundlib/load_amf.cpp -o ../Soundlib/load_amf.o $(CXXFLAGS)
+
+../soundlib/Load_ams.o: ../soundlib/Load_ams.cpp
+	$(CPP) -c ../soundlib/Load_ams.cpp -o ../soundlib/Load_ams.o $(CXXFLAGS)
+
+../soundlib/load_dbm.o: ../soundlib/load_dbm.cpp
+	$(CPP) -c ../soundlib/load_dbm.cpp -o ../soundlib/load_dbm.o $(CXXFLAGS)
+
+../soundlib/load_dmf.o: ../soundlib/load_dmf.cpp
+	$(CPP) -c ../soundlib/load_dmf.cpp -o ../soundlib/load_dmf.o $(CXXFLAGS)
+
+../soundlib/Load_dsm.o: ../soundlib/Load_dsm.cpp
+	$(CPP) -c ../soundlib/Load_dsm.cpp -o ../soundlib/Load_dsm.o $(CXXFLAGS)
+
+../soundlib/Load_far.o: ../soundlib/Load_far.cpp
+	$(CPP) -c ../soundlib/Load_far.cpp -o ../soundlib/Load_far.o $(CXXFLAGS)
+
+../soundlib/Load_it.o: ../soundlib/Load_it.cpp
+	$(CPP) -c ../soundlib/Load_it.cpp -o ../soundlib/Load_it.o $(CXXFLAGS)
+
+../soundlib/Load_mdl.o: ../soundlib/Load_mdl.cpp
+	$(CPP) -c ../soundlib/Load_mdl.cpp -o ../soundlib/Load_mdl.o $(CXXFLAGS)
+
+../soundlib/Load_med.o: ../soundlib/Load_med.cpp
+	$(CPP) -c ../soundlib/Load_med.cpp -o ../soundlib/Load_med.o $(CXXFLAGS)
+
+../soundlib/load_mid.o: ../soundlib/load_mid.cpp
+	$(CPP) -c ../soundlib/load_mid.cpp -o ../soundlib/load_mid.o $(CXXFLAGS)
+
+../soundlib/Load_mod.o: ../soundlib/Load_mod.cpp
+	$(CPP) -c ../soundlib/Load_mod.cpp -o ../soundlib/Load_mod.o $(CXXFLAGS)
+
+../Soundlib/load_mt2.o: ../Soundlib/load_mt2.cpp
+	$(CPP) -c ../Soundlib/load_mt2.cpp -o ../Soundlib/load_mt2.o $(CXXFLAGS)
+
+../soundlib/Load_mtm.o: ../soundlib/Load_mtm.cpp
+	$(CPP) -c ../soundlib/Load_mtm.cpp -o ../soundlib/Load_mtm.o $(CXXFLAGS)
+
+../soundlib/Load_okt.o: ../soundlib/Load_okt.cpp
+	$(CPP) -c ../soundlib/Load_okt.cpp -o ../soundlib/Load_okt.o $(CXXFLAGS)
+
+../Soundlib/load_psm.o: ../Soundlib/load_psm.cpp
+	$(CPP) -c ../Soundlib/load_psm.cpp -o ../Soundlib/load_psm.o $(CXXFLAGS)
+
+../soundlib/load_ptm.o: ../soundlib/load_ptm.cpp
+	$(CPP) -c ../soundlib/load_ptm.cpp -o ../soundlib/load_ptm.o $(CXXFLAGS)
+
+../soundlib/Load_s3m.o: ../soundlib/Load_s3m.cpp
+	$(CPP) -c ../soundlib/Load_s3m.cpp -o ../soundlib/Load_s3m.o $(CXXFLAGS)
+
+../soundlib/Load_stm.o: ../soundlib/Load_stm.cpp
+	$(CPP) -c ../soundlib/Load_stm.cpp -o ../soundlib/Load_stm.o $(CXXFLAGS)
+
+../soundlib/Load_ult.o: ../soundlib/Load_ult.cpp
+	$(CPP) -c ../soundlib/Load_ult.cpp -o ../soundlib/Load_ult.o $(CXXFLAGS)
+
+../Soundlib/Load_umx.o: ../Soundlib/Load_umx.cpp
+	$(CPP) -c ../Soundlib/Load_umx.cpp -o ../Soundlib/Load_umx.o $(CXXFLAGS)
+
+../soundlib/Load_wav.o: ../soundlib/Load_wav.cpp
+	$(CPP) -c ../soundlib/Load_wav.cpp -o ../soundlib/Load_wav.o $(CXXFLAGS)
+
+../soundlib/Load_xm.o: ../soundlib/Load_xm.cpp
+	$(CPP) -c ../soundlib/Load_xm.cpp -o ../soundlib/Load_xm.o $(CXXFLAGS)
+
+mainbar.o: mainbar.cpp
+	$(CPP) -c mainbar.cpp -o mainbar.o $(CXXFLAGS)
+
+MainFrm.o: MainFrm.cpp
+	$(CPP) -c MainFrm.cpp -o MainFrm.o $(CXXFLAGS)
+
+../soundlib/mmcmp.o: ../soundlib/mmcmp.cpp
+	$(CPP) -c ../soundlib/mmcmp.cpp -o ../soundlib/mmcmp.o $(CXXFLAGS)
+
+../soundlib/Mmx_mix.o: ../soundlib/Mmx_mix.cpp
+	$(CPP) -c ../soundlib/Mmx_mix.cpp -o ../soundlib/Mmx_mix.o $(CXXFLAGS)
+
+mod2midi.o: mod2midi.cpp
+	$(CPP) -c mod2midi.cpp -o mod2midi.o $(CXXFLAGS)
+
+mod2wave.o: mod2wave.cpp
+	$(CPP) -c mod2wave.cpp -o mod2wave.o $(CXXFLAGS)
+
+moddoc.o: moddoc.cpp
+	$(CPP) -c moddoc.cpp -o moddoc.o $(CXXFLAGS)
+
+modedit.o: modedit.cpp
+	$(CPP) -c modedit.cpp -o modedit.o $(CXXFLAGS)
+
+Moptions.o: Moptions.cpp
+	$(CPP) -c Moptions.cpp -o Moptions.o $(CXXFLAGS)
+
+Mpdlgs.o: Mpdlgs.cpp
+	$(CPP) -c Mpdlgs.cpp -o Mpdlgs.o $(CXXFLAGS)
+
+mpt_midi.o: mpt_midi.cpp
+	$(CPP) -c mpt_midi.cpp -o mpt_midi.o $(CXXFLAGS)
+
+mptrack.o: mptrack.cpp
+	$(CPP) -c mptrack.cpp -o mptrack.o $(CXXFLAGS)
+
+../soundlib/Sampleio.o: ../soundlib/Sampleio.cpp
+	$(CPP) -c ../soundlib/Sampleio.cpp -o ../soundlib/Sampleio.o $(CXXFLAGS)
+
+../soundlib/snd_dsp.o: ../soundlib/snd_dsp.cpp
+	$(CPP) -c ../soundlib/snd_dsp.cpp -o ../soundlib/snd_dsp.o $(CXXFLAGS)
+
+../soundlib/snd_eq.o: ../soundlib/snd_eq.cpp
+	$(CPP) -c ../soundlib/snd_eq.cpp -o ../soundlib/snd_eq.o $(CXXFLAGS)
+
+../soundlib/snd_flt.o: ../soundlib/snd_flt.cpp
+	$(CPP) -c ../soundlib/snd_flt.cpp -o ../soundlib/snd_flt.o $(CXXFLAGS)
+
+../soundlib/Snd_fx.o: ../soundlib/Snd_fx.cpp
+	$(CPP) -c ../soundlib/Snd_fx.cpp -o ../soundlib/Snd_fx.o $(CXXFLAGS)
+
+../Soundlib/Snd_rvb.o: ../Soundlib/Snd_rvb.cpp
+	$(CPP) -c ../Soundlib/Snd_rvb.cpp -o ../Soundlib/Snd_rvb.o $(CXXFLAGS)
+
+../Soundlib/snddev.o: ../Soundlib/snddev.cpp
+	$(CPP) -c ../Soundlib/snddev.cpp -o ../Soundlib/snddev.o $(CXXFLAGS)
+
+../soundlib/Sndfile.o: ../soundlib/Sndfile.cpp
+	$(CPP) -c ../soundlib/Sndfile.cpp -o ../soundlib/Sndfile.o $(CXXFLAGS)
+
+../soundlib/Sndmix.o: ../soundlib/Sndmix.cpp
+	$(CPP) -c ../soundlib/Sndmix.cpp -o ../soundlib/Sndmix.o $(CXXFLAGS)
+
+StdAfx.o: StdAfx.cpp
+	$(CPP) -c StdAfx.cpp -o StdAfx.o $(CXXFLAGS)
+
+../soundlib/Tables.o: ../soundlib/Tables.cpp
+	$(CPP) -c ../soundlib/Tables.cpp -o ../soundlib/Tables.o $(CXXFLAGS)
+
+view_com.o: view_com.cpp
+	$(CPP) -c view_com.cpp -o view_com.o $(CXXFLAGS)
+
+view_gen.o: view_gen.cpp
+	$(CPP) -c view_gen.cpp -o view_gen.o $(CXXFLAGS)
+
+view_ins.o: view_ins.cpp
+	$(CPP) -c view_ins.cpp -o view_ins.o $(CXXFLAGS)
+
+view_pat.o: view_pat.cpp
+	$(CPP) -c view_pat.cpp -o view_pat.o $(CXXFLAGS)
+
+view_smp.o: view_smp.cpp
+	$(CPP) -c view_smp.cpp -o view_smp.o $(CXXFLAGS)
+
+view_tre.o: view_tre.cpp
+	$(CPP) -c view_tre.cpp -o view_tre.o $(CXXFLAGS)
+
+vstplug.o: vstplug.cpp
+	$(CPP) -c vstplug.cpp -o vstplug.o $(CXXFLAGS)
+
+../soundlib/Waveform.o: ../soundlib/Waveform.cpp
+	$(CPP) -c ../soundlib/Waveform.cpp -o ../soundlib/Waveform.o $(CXXFLAGS)

@@ -1,0 +1,62 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: unrar - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\WIN\TEMP\RSPB384.TMP" with contents
+[
+/nologo /MTd /W4 /GX /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"D:\code\modplug\UNRAR\Unrar.cpp"
+]
+Creating command line "cl.exe @C:\WIN\TEMP\RSPB384.TMP" 
+Creating command line "link.exe -lib /nologo /out:"Debug\UNRAR.lib"  .\Debug\Unrar.obj "
+<h3>Output Window</h3>
+Compiling...
+Unrar.cpp
+D:\code\modplug\UNRAR\block.cpp(32) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(36) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(37) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(44) : warning C4127: conditional expression is constant
+D:\code\modplug\UNRAR\block.cpp(74) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(110) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(115) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(117) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(118) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(119) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(130) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(131) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(141) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(143) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(144) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(152) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(159) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(161) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\block.cpp(162) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\extract.cpp(22) : warning C4127: conditional expression is constant
+D:\code\modplug\UNRAR\unpack.cpp(310) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNRAR\crccrypt.cpp(39) : warning C4244: '+=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\unpold.cpp(344) : warning C4127: conditional expression is constant
+D:\code\modplug\UNRAR\unpold.cpp(452) : warning C4127: conditional expression is constant
+D:\code\modplug\UNRAR\unpold.cpp(474) : warning C4127: conditional expression is constant
+D:\code\modplug\UNRAR\Unrar.cpp(61) : warning C4100: 'lpszExtensions' : unreferenced formal parameter
+D:\code\modplug\UNRAR\Unrar.cpp(123) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNRAR\Unrar.cpp(145) : warning C4127: conditional expression is constant
+D:\code\modplug\UNRAR\block.cpp(72) : warning C4701: local variable 'Size' may be used without having been initialized
+D:\code\modplug\UNRAR\unpold.cpp(355) : warning C4701: local variable 'Distance' may be used without having been initialized
+D:\code\modplug\UNRAR\unpold.cpp(354) : warning C4701: local variable 'NewDistancePlace' may be used without having been initialized
+D:\code\modplug\UNRAR\unpold.cpp(463) : warning C4701: local variable 'CurByte' may be used without having been initialized
+D:\code\modplug\UNRAR\unpold.cpp(462) : warning C4701: local variable 'NewBytePlace' may be used without having been initialized
+D:\code\modplug\UNRAR\unpold.cpp(486) : warning C4701: local variable 'Flags' may be used without having been initialized
+D:\code\modplug\UNRAR\unpold.cpp(485) : warning C4701: local variable 'NewFlagsPlace' may be used without having been initialized
+Creating library...
+
+
+
+<h3>Results</h3>
+UNRAR.lib - 0 error(s), 35 warning(s)
+</pre>
+</body>
+</html>

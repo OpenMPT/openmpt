@@ -436,6 +436,7 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, in
 static void mmxex_findminmax16(void *p, int scanlen, int smplsize, int *smin, int *smax)
 //--------------------------------------------------------------------------------------
 {
+#ifdef INTEL_SPECIFIC
 	_asm {
 	mov ebx, p
 	mov ecx, scanlen
@@ -492,12 +493,14 @@ done1x:
 	mov [edi], edx
 	emms
 	}
+#endif INTEL_SPECIFIC
 }
 
 
 static void mmxex_findminmax8(void *p, int scanlen, int smplsize, int *smin, int *smax)
 //-------------------------------------------------------------------------------------
 {
+#ifdef INTEL_SPECIFIC
 	_asm {
 	mov ebx, p
 	mov ecx, scanlen
@@ -569,6 +572,7 @@ done1x:
 	mov [edi], edx
 	emms
 	}
+#endif
 }
 
 

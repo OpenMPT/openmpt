@@ -394,7 +394,13 @@ VOID ProcessReverb(UINT nSamples)
 	}
 	// Main reverb processing: split into small chunks (needed for short reverb delays)
 	// Reverb Input + Low-Pass stage #2 + Pre-diffusion
-	if (nIn > 0) MMX_ProcessPreDelay(&g_RefDelay, MixReverbBuffer, nIn);
+
+#ifdef ENABLE_MMX
+
+	if (nIn > 0)
+		MMX_ProcessPreDelay(&g_RefDelay, MixReverbBuffer, nIn);
+#endif
+
 	// Process Reverb Reflections and Late Reverberation
 	int *pRvbOut = MixReverbBuffer;
 	UINT nRvbSamples = nOut, nCount = 0;
@@ -409,9 +415,12 @@ VOID ProcessReverb(UINT nSamples)
 		if (n > nmax1) n = nmax1;
 		if (n > 64) n = 64;
 		// Reflections output + late reverb delay
+#ifdef ENABLE_MMX
+
 		MMX_ProcessReflections(&g_RefDelay, &g_RefDelay.RefOut[nPosRef*2], pRvbOut, n);
 		// Late Reverberation
 		MMX_ProcessLateReverb(&g_LateReverb, &g_RefDelay.RefOut[nPosRvb*2], pRvbOut, n);
+#endif
 		// Update delay positions
 		g_RefDelay.nRefOutPos = (g_RefDelay.nRefOutPos + n) & SNDMIX_REVERB_DELAY_MASK;
 		g_RefDelay.nDelayPos = (g_RefDelay.nDelayPos + n) & SNDMIX_REFLECTIONS_DELAY_MASK;
@@ -424,11 +433,15 @@ VOID ProcessReverb(UINT nSamples)
 	// Upsample 2x
 	if (g_bRvbDownsample2x)
 	{
+#ifdef ENABLE_MMX
 		MMX_ReverbDCRemoval(MixReverbBuffer, nOut);
+#endif
 		X86_ReverbProcessPostFiltering2x(MixReverbBuffer, MixSoundBuffer, nSamples);
 	} else
 	{
+#ifdef ENABLE_MMX
 		MMX_ReverbProcessPostFiltering1x(MixReverbBuffer, MixSoundBuffer, nSamples);
+#endif
 	}
 	// Automatically shut down if needed
 	if (gnReverbSend) gnReverbSamples = gnReverbDecaySamples;
@@ -565,6 +578,9 @@ VOID X86_ReverbProcessPostFiltering2x(const int *pRvb, int *pDry, UINT nSamples)
 #define DCR_AMOUNT		9
 
 // Stereo Add + DC removal
+
+#ifdef ENABLE_MMX
+
 VOID MMX_ReverbProcessPostFiltering1x(const int *pRvb, int *pDry, UINT nSamples)
 //------------------------------------------------------------------------------
 {
@@ -596,6 +612,7 @@ stereodcr:
 	movq gnDCRRvb_X1, mm5
 	emms
 	}
+
 }
 
 
@@ -685,6 +702,7 @@ rvbloop:
 	emms
 	}
 }
+
 
 
 ////////////////////////////////////////////////////////////////////
@@ -945,6 +963,7 @@ rvbloop:
 	}
 }
 
+#endif // ENABLE_MMX
 
 // (1-gcos(w)-sqrt(2g(1-cos w) - g2(1-(cos w)^2))) / (1-g)
 LONG OnePoleLowPassCoef(LONG scale, FLOAT g, FLOAT F_c, FLOAT F_s)
