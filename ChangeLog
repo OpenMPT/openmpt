@@ -1,4 +1,10 @@
-ModPlug-XMMS v1.5a, Jan. 24, 2001
+ModPlug-XMMS v2.0 / libmodplug v0.7, Oct. 27, 2001
++ ModPlug rendering engine moved into a separate library --
+  libmodplug created.
+
+* Endianness bugs fixed by Adam Goode.  Should work on PPC now.
+
+ModPlug-XMMS v1.5a
 - Due to a misunderstanging between Olivier (creator of ModPlug) and
   myself, I incorrectly reported that version 1.5 had polyphase and
   spline resampling when this was not the case.

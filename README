@@ -1,12 +1,19 @@
-Modplug Plugin for XMMS v1.1
+Modplug Plugin for XMMS v2.0 / libmodplug v0.7
  Based on the ModPlug sound engine by Olivier Lapicque <olivierl@jps.net>
- XMMS port by Kenton Varda <temporal@gauge3d.org>
- (C) 2000 Olivier Lapicque and Kenton Varda
+ XMMS plugin by Kenton Varda <temporal@gauge3d.org>
+ Placed in the public domain in October, 2001
 
 Olivier Lapicque, author of Modplug, which is arguably the best quality
-MOD-playing software available, has sent me the latest version (dated
-2/2000) of his sound rendering code liscensed under the GPL.  This
-plugin is based on that code.
+MOD-playing software available, has placed his sound rendering code in the
+public domain.  This library and plugin is based on that code.
+
+For more information on libmodplug, the library for decoding mod-like music
+formats, see libmodplug/README.
+
+NOTE TO FELLOW OPEN SOURCE PROGRAMMERS:
+  I (Kenton Varda) no longer have the time or desire to maintain this library.
+  If anyone would like to take over for me, please e-mail me at
+  <temporal@gauge3d.org>.  Thanks.
 
 Contents
 --------
@@ -21,12 +28,12 @@ Contents
 - XMMS 1.0.0 or higher
 - POSIX OS (Linux or other unix*)
 
-* This plugin is only guaranteed to work on Linux.  I have received
+* This library is only guaranteed to work on Linux.  I have received
   conflicting reports on whether or not it will work on Solaris x86.
   One person reported that the plugin compiled fine with the
   "-fpermissive" compiler flag, which I have added.  Others had far
-  more trouble.  Also, I have heard that this plugin works on Linux
-  PPC, but I have not tested it myself.
+  more trouble.  Note that a recent change to the library should allow
+  it to work on PPC and other big-endian systems.
 
 -----------
 2. Features

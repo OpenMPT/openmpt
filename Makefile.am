@@ -1,5 +1,5 @@
-SUBDIRS = modplugxmms glade
+SUBDIRS = libmodplug modplugxmms glade
 
-EXTRA_DIST = modplugxmms.kdevprj AUTHORS COPYING ChangeLog INSTALL README TODO 
+EXTRA_DIST = AUTHORS COPYING ChangeLog INSTALL README TODO
 
 AUTOMAKE_OPTIONS = foreign

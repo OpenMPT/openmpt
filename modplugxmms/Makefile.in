@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -63,12 +63,16 @@ AWK = @AWK@
 CC = @CC@
 CXX = @CXX@
 DLLTOOL = @DLLTOOL@
+ECHO = @ECHO@
+EXEEXT = @EXEEXT@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 OBJDUMP = @OBJDUMP@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+STRIP = @STRIP@
 VERSION = @VERSION@
 XMMS_CFLAGS = @XMMS_CFLAGS@
 XMMS_CONFIG = @XMMS_CONFIG@
@@ -85,13 +89,13 @@ plugindir = @plugindir@
 
 libdir = $(plugindir)
 
-lib_LTLIBRARIES = libmodplug.la
+lib_LTLIBRARIES = libmodplugxmms.la
 
-libmodplug_la_LDFLAGS = -module -avoid-version -lstdc++
-libmodplug_la_SOURCES = plugin.cpp modplugxmms.cpp
-libmodplug_la_LIBADD = ./archive/libarchive.la ./gui/libgui.la ./soundfile/libsoundfile.la
+libmodplugxmms_la_LDFLAGS = -module -avoid-version -lstdc++
+libmodplugxmms_la_SOURCES = plugin.cpp modplugxmms.cpp
+libmodplugxmms_la_LIBADD = ./archive/libarchive.la ./gui/libgui.la ../libmodplug/libmodplug.la
 
-SUBDIRS = archive gui soundfile
+SUBDIRS = archive gui
 
 noinst_HEADERS = modplugxmms.h plugin.h stddefs.h
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -104,9 +108,9 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-libmodplug_la_DEPENDENCIES =  ./archive/libarchive.la ./gui/libgui.la \
-./soundfile/libsoundfile.la
-libmodplug_la_OBJECTS =  plugin.lo modplugxmms.lo
+libmodplugxmms_la_DEPENDENCIES =  ./archive/libarchive.la \
+./gui/libgui.la ../libmodplug/libmodplug.la
+libmodplugxmms_la_OBJECTS =  plugin.lo modplugxmms.lo
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -119,14 +123,14 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
-SOURCES = $(libmodplug_la_SOURCES)
-OBJECTS = $(libmodplug_la_OBJECTS)
+SOURCES = $(libmodplugxmms_la_SOURCES)
+OBJECTS = $(libmodplugxmms_la_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .cpp .lo .o .s
+.SUFFIXES: .S .c .cpp .lo .o .obj .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps modplugxmms/Makefile
 
@@ -163,6 +167,11 @@ uninstall-libLTLIBRARIES:
 .c.o:
 	$(COMPILE) -c $<
 
+# FIXME: We should only use cygpath when building on Windows,
+# and only if it is available.
+.c.obj:
+	$(COMPILE) -c `cygpath -w $<`
+
 .s.o:
 	$(COMPILE) -c $<
 
@@ -171,6 +180,7 @@ uninstall-libLTLIBRARIES:
 
 mostlyclean-compile:
 	-rm -f *.o core *.core
+	-rm -f *.$(OBJEXT)
 
 clean-compile:
 
@@ -198,10 +208,12 @@ distclean-libtool:
 
 maintainer-clean-libtool:
 
-libmodplug.la: $(libmodplug_la_OBJECTS) $(libmodplug_la_DEPENDENCIES)
-	$(CXXLINK) -rpath $(libdir) $(libmodplug_la_LDFLAGS) $(libmodplug_la_OBJECTS) $(libmodplug_la_LIBADD) $(LIBS)
+libmodplugxmms.la: $(libmodplugxmms_la_OBJECTS) $(libmodplugxmms_la_DEPENDENCIES)
+	$(CXXLINK) -rpath $(libdir) $(libmodplugxmms_la_LDFLAGS) $(libmodplugxmms_la_OBJECTS) $(libmodplugxmms_la_LIBADD) $(LIBS)
 .cpp.o:
 	$(CXXCOMPILE) -c $<
+.cpp.obj:
+	$(CXXCOMPILE) -c `cygpath -w $<`
 .cpp.lo:
 	$(LTCXXCOMPILE) -c $<
 
@@ -241,7 +253,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -319,11 +331,6 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
-modplugxmms.lo modplugxmms.o : modplugxmms.cpp modplugxmms.h stddefs.h \
-	plugin.h soundfile/stdafx.h soundfile/sndfile.h archive/open.h \
-	archive/archive.h stddefs.h
-plugin.lo plugin.o : plugin.cpp plugin.h modplugxmms.h stddefs.h \
-	gui/main.h modplugxmms.h
 
 info-am:
 info: info-recursive

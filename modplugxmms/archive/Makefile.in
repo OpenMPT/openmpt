@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -64,12 +64,16 @@ AWK = @AWK@
 CC = @CC@
 CXX = @CXX@
 DLLTOOL = @DLLTOOL@
+ECHO = @ECHO@
+EXEEXT = @EXEEXT@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 OBJDUMP = @OBJDUMP@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+STRIP = @STRIP@
 VERSION = @VERSION@
 XMMS_CFLAGS = @XMMS_CFLAGS@
 XMMS_CONFIG = @XMMS_CONFIG@
@@ -86,10 +90,22 @@ plugindir = @plugindir@
 
 noinst_LTLIBRARIES = libarchive.la
 libarchive_la_LDFLAGS = -module -avoid-version
-libarchive_la_SOURCES = archive.cpp                             open.cpp                                arch_raw.cpp                            arch_gzip.cpp                           arch_zip.cpp                            arch_rar.cpp                            arch_bz2.cpp
+libarchive_la_SOURCES = archive.cpp     \
+                        open.cpp        \
+                        arch_raw.cpp    \
+                        arch_gzip.cpp   \
+                        arch_zip.cpp    \
+                        arch_rar.cpp    \
+                        arch_bz2.cpp
 
 
-noinst_HEADERS = archive.h                               open.h                                  arch_raw.h                              arch_gzip.h                             arch_zip.h                              arch_rar.h                              arch_bz2.h
+noinst_HEADERS = archive.h       \
+                        open.h          \
+                        arch_raw.h      \
+                        arch_gzip.h     \
+                        arch_zip.h      \
+                        arch_rar.h      \
+                        arch_bz2.h
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
@@ -116,14 +132,14 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(libarchive_la_SOURCES)
 OBJECTS = $(libarchive_la_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .cpp .lo .o .s
+.SUFFIXES: .S .c .cpp .lo .o .obj .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps modplugxmms/archive/Makefile
 
@@ -144,6 +160,11 @@ maintainer-clean-noinstLTLIBRARIES:
 .c.o:
 	$(COMPILE) -c $<
 
+# FIXME: We should only use cygpath when building on Windows,
+# and only if it is available.
+.c.obj:
+	$(COMPILE) -c `cygpath -w $<`
+
 .s.o:
 	$(COMPILE) -c $<
 
@@ -152,6 +173,7 @@ maintainer-clean-noinstLTLIBRARIES:
 
 mostlyclean-compile:
 	-rm -f *.o core *.core
+	-rm -f *.$(OBJEXT)
 
 clean-compile:
 
@@ -183,6 +205,8 @@ libarchive.la: $(libarchive_la_OBJECTS) $(libarchive_la_DEPENDENCIES)
 	$(CXXLINK)  $(libarchive_la_LDFLAGS) $(libarchive_la_OBJECTS) $(libarchive_la_LIBADD) $(LIBS)
 .cpp.o:
 	$(CXXCOMPILE) -c $<
+.cpp.obj:
+	$(CXXCOMPILE) -c `cygpath -w $<`
 .cpp.lo:
 	$(LTCXXCOMPILE) -c $<
 
@@ -230,19 +254,6 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
-arch_bz2.lo arch_bz2.o : arch_bz2.cpp arch_bz2.h archive.h \
-	../../modplugxmms/stddefs.h
-arch_gzip.lo arch_gzip.o : arch_gzip.cpp arch_gzip.h archive.h \
-	../../modplugxmms/stddefs.h
-arch_rar.lo arch_rar.o : arch_rar.cpp arch_rar.h archive.h \
-	../../modplugxmms/stddefs.h
-arch_raw.lo arch_raw.o : arch_raw.cpp arch_raw.h archive.h \
-	../../modplugxmms/stddefs.h
-arch_zip.lo arch_zip.o : arch_zip.cpp arch_zip.h archive.h \
-	../../modplugxmms/stddefs.h
-archive.lo archive.o : archive.cpp archive.h ../../modplugxmms/stddefs.h
-open.lo open.o : open.cpp open.h archive.h ../../modplugxmms/stddefs.h \
-	arch_raw.h arch_gzip.h arch_zip.h arch_rar.h arch_bz2.h
 
 info-am:
 info: info-am

@@ -1,19 +1,7 @@
 /* Modplug XMMS Plugin
- * Copyright (C) 1999 Kenton Varda and Olivier Lapicque
+ * Authors: Kenton Varda <temporal@gauge3d.org>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * This source code is public domain.
  */
 
 #ifndef __MODPLUGXMMS_CMODPLUGXMMS_H_INCLUDED__
@@ -65,17 +53,17 @@ public:
 	ModplugXMMS();
 	~ModplugXMMS();
 	
-	void Init(void);                      // Called when the plugin is loaded
+	void Init();                      // Called when the plugin is loaded
 	bool CanPlayFile(const string& aFilename);// Return true if the plugin can handle the file
 
-	void CloseConfigureBox(void);
+	void CloseConfigureBox();
 
 	void PlayFile(const string& aFilename);// Play the file.
-	void Stop(void);                       // Stop playing.
+	void Stop();                       // Stop playing.
 	void Pause(bool aPaused);              // Pause or unpause.
 
 	void Seek(float32 aTime);                // Seek to the specified time.
-	float32 GetTime(void);                   // Get the current play time.
+	float32 GetTime();                   // Get the current play time.
 
 	void GetSongInfo(const string& aFilename, char*& aTitle, int32& aLength); // Function to grab the title string
 

@@ -24,8 +24,8 @@
 #include<fstream>
 
 #include"modplugxmms/stddefs.h"
-#include"modplugxmms/soundfile/stdafx.h"
-#include"modplugxmms/soundfile/sndfile.h"
+#include"libmodplug/stdafx.h"
+#include"libmodplug/sndfile.h"
 #include"modplugxmms/archive/open.h"
 
 #define MAX_MESSAGE_LENGTH 4000

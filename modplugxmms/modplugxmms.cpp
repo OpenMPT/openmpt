@@ -1,19 +1,7 @@
 /* Modplug XMMS Plugin
- * Copyright (C) 1999 Kenton Varda and Olivier Lapicque
+ * Authors: Kenton Varda <temporal@gauge3d.org>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * This source code is public domain.
  */
 
 #include<pthread.h>
@@ -22,8 +10,8 @@
 #include<math.h>
 
 #include"modplugxmms.h"
-#include"soundfile/stdafx.h"
-#include"soundfile/sndfile.h"
+#include"libmodplug/stdafx.h"
+#include"libmodplug/sndfile.h"
 #include"stddefs.h"
 #include"archive/open.h"
 
@@ -686,7 +674,7 @@ void ModplugXMMS::GetSongInfo(const string& aFilename, char*& aTitle, int32& aLe
 	strcpy(aTitle, strrchr(aFilename.c_str(), '/') + 1);
 	*strrchr(aTitle, '.') = '\0';
 
-therest:	
+therest:
 	aLength = lSoundFile->GetSongTime() * 1000;                   //It wants milliseconds!?!
 
 	//unload the file

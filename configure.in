@@ -3,13 +3,18 @@ AC_INIT(Makefile.am)
 
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(modplugxmms, 1.5a)
+AM_INIT_AUTOMAKE(modplugxmms, 2.0)
 
 dnl Checks for programs.
+dnl  I am disabling static libraries here because otherwise libtool insists on
+dnl  compiling everything twice -- once with and once without -fPIC.  Pisses me
+dnl  off.  Just do everything with -fPIC, damnit!  Compiling everything twice
+dnl  probably wastes more cycles than not using -fPIC saves.
 AC_DISABLE_STATIC
 AM_DISABLE_STATIC
 AC_PROG_CC
 AC_PROG_CXX
+AC_C_BIGENDIAN     #this will cause problems when cross-compiling...
 AC_PROG_RANLIB
 AM_PROG_LIBTOOL
 
@@ -29,9 +34,12 @@ plugindir=$XMMS_INPUT_PLUGIN_DIR
 AC_SUBST(plugindir)
 
 AC_OUTPUT(Makefile
+          libmodplug/Makefile
           modplugxmms/Makefile
-          modplugxmms/soundfile/Makefile
           modplugxmms/gui/Makefile
           modplugxmms/archive/Makefile
           glade/Makefile
          )
+
+echo "If you have a version of ModPlug-XMMS previous to version 2.0 installed,"
+echo "please remove it before you continue."

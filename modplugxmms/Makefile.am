@@ -1,11 +1,11 @@
 libdir = $(plugindir)
 
-lib_LTLIBRARIES        = libmodplug.la
+lib_LTLIBRARIES        = libmodplugxmms.la
 
-libmodplug_la_LDFLAGS  = -module -avoid-version -lstdc++
-libmodplug_la_SOURCES  = plugin.cpp modplugxmms.cpp
-libmodplug_la_LIBADD   = ./archive/libarchive.la ./gui/libgui.la ./soundfile/libsoundfile.la
+libmodplugxmms_la_LDFLAGS  = -module -avoid-version -lstdc++
+libmodplugxmms_la_SOURCES  = plugin.cpp modplugxmms.cpp
+libmodplugxmms_la_LIBADD   = ./archive/libarchive.la ./gui/libgui.la ../libmodplug/libmodplug.la
 
-SUBDIRS = archive gui soundfile
+SUBDIRS = archive gui
 
 noinst_HEADERS = modplugxmms.h plugin.h stddefs.h

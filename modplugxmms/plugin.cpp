@@ -1,26 +1,21 @@
 /* Modplug XMMS Plugin
- * Copyright (C) 1999 Kenton Varda and Olivier Lapicque
+ * Authors: Kenton Varda <temporal@gauge3d.org>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * This source code is public domain.
  */
 
-#include"plugin.h"                  //XMMS plugin structs
-#include"modplugxmms.h"             //the plugin
-#include"gui/main.h"                //gui stuff
+#include "plugin.h"
+#include "libmodplug/modplug.h"
+#include "gui/main.h"
 
-static void Init(void);
+extern InputPlugin gModPlug;
+
+static void Init(void)
+{
+	gModplugXMMS.SetInputPlugin(gModPlug);
+	gModplugXMMS.Init();
+}
+
 static int CanPlayFile(char* aFilename)
 {
 	if(gModplugXMMS.CanPlayFile(aFilename))
@@ -28,11 +23,17 @@ static int CanPlayFile(char* aFilename)
 	return 0;
 }
 
-static void PlayFile(char* aFilename);
+static void PlayFile(char* aFilename)
+{
+	gModplugXMMS.SetOutputPlugin(*gModPlug.output);
+	gModplugXMMS.PlayFile(aFilename);
+}
+
 static void Stop(void)
 {
 	gModplugXMMS.Stop();
 }
+
 static void Pause(short aPaused)
 {
 	gModplugXMMS.Pause((bool)aPaused);
@@ -73,7 +74,6 @@ void ShowFileInfoBox(char* aFilename)
 	ShowInfoWindow(aFilename);
 }
 
-extern InputPlugin gModPlug;
 InputPlugin gModPlug =
 {
 	NULL,
@@ -101,17 +101,6 @@ InputPlugin gModPlug =
 	ShowFileInfoBox,
 	NULL
 };
-
-static void Init(void)
-{
-	gModplugXMMS.SetInputPlugin(gModPlug);
-	gModplugXMMS.Init();
-}
-static void PlayFile(char* aFilename)
-{
-	gModplugXMMS.SetOutputPlugin(*gModPlug.output);
-	gModplugXMMS.PlayFile(aFilename);
-}
 
 extern "C"
 {
