@@ -669,28 +669,6 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 			return (index < 2) ? 0 : 1;		//2 outputs max too
 
 	//---from here VST 2.0 extension opcodes------------------------------------------------------
-/*
-VstTimeInfo* VTI= getTimeInfo(kVstTempoValid);
-if (((VTI->flags)&kVstTempoValid)==0) tempo=120.0f;		//can't get tempo, set default
-else tempo=(float)(VTI->tempo);							//can get tempo
-if (tempo<60.0f) tempo=60.0f;							//tempo too low
-if (((VTI->flags)&kVstPpqPosValid)==0) {
-	offset=0.0f;											//can't get offset
-}
-else {
-	offset=(float)VTI->ppqPos;								//can get offset
-	offset-=(float)floor(offset); // 0..1 extrahieren		//only keep decimal part
-	if (offset<0.0f;
-		offset=0.0f;
-}
-if (((VTI->flags)&kVstTransportPlaying)==0)					//
-	running=false;
-else { 
-	if (!running) 
-		started=true;
-	running=true;                                                             
-}*/
-
 
 	// <value> is a filter which is currently ignored
 	// Herman Seib only processes Midi events for plugs that call this. Keep in mind.
@@ -1317,22 +1295,30 @@ void CVstPlugin::Initialize()
 		if (m_pEffect->numInputs > 1) Dispatch(effConnectInput, 1, 1, NULL, 0);
 		Dispatch(effConnectOutput, 0, 1, NULL, 0);
 		if (m_pEffect->numOutputs > 1) Dispatch(effConnectOutput, 1, 1, NULL, 0);
+		//rewbs.VSTCompliance: disable all inputs and outputs beyond stereo left and right:
+		for (int i=2; i<m_pEffect->numInputs; i++)
+			Dispatch(effConnectInput, i, 0, NULL, 0);
+		for (int i=2; i<m_pEffect->numOutputs; i++)
+			Dispatch(effConnectOutput, i, 0, NULL, 0);
+		//end rewbs.VSTCompliance
+
 	}
 	if (m_pEffect->numPrograms > 0)
 	{
 		Dispatch(effSetProgram, 0, 0, NULL, 0);
 	}
-	m_nInputs = (m_pEffect->numInputs > 1) ? m_pEffect->numInputs : 2;
-	m_nOutputs = (m_pEffect->numOutputs > 1) ? m_pEffect->numOutputs : 2;
+	m_nInputs = (m_pEffect->numInputs < 16) ? m_pEffect->numInputs : 16;
+	m_nOutputs = (m_pEffect->numOutputs < 16) ? m_pEffect->numOutputs : 16;
 	m_pInputs = (float **)new char[m_nInputs*sizeof(float *)];
 	m_pOutputs = (float **)new char[m_nOutputs*sizeof(float *)];
-	m_pTempBuffer = (float **)new char[m_nInputs*sizeof(float *)];	//rewbs.dryRatio
+	m_pTempBuffer = (float **)new char[m_nOutputs*sizeof(float *)];	//rewbs.dryRatio
 
-	for (UINT iIn=0; iIn<m_nInputs; iIn++)
+	for (UINT iOut=0; iOut<m_nOutputs; iOut++)
 	{
-		m_pTempBuffer[iIn]=(float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*(2+iIn)])+7)&~7); //rewbs.dryRatio
-		m_pInputs[iIn] = (iIn & 1) ? m_MixState.pOutBufferR : m_MixState.pOutBufferL;
-	}
+		m_pTempBuffer[iOut]=(float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*(2+iOut)])+7)&~7); //rewbs.dryRatio
+	}	
+	m_pInputs[0] = m_MixState.pOutBufferR;
+	m_pInputs[1] = m_MixState.pOutBufferL;
 
 #ifdef VST_LOG
 	Log("%s: vst ver %d.0, flags=%04X, %d programs, %d parameters\n",
@@ -1350,6 +1336,7 @@ void CVstPlugin::Initialize()
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	//Assuming 32bit address space...
     m_pEffect->resvd1=(long)this;
+	GetSpeakerArrangement();
 }
 
 
@@ -1817,9 +1804,27 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			m_pOutputs[iOut] = m_pTempBuffer[iOut];
 		}
 
+
 		//Do the VST processing magic
 		m_pEffect->process(m_pEffect, m_pInputs, m_pOutputs, nSamples);
-		
+
+		//mix outputs of multi-output VSTs:
+		if (m_nOutputs>1)
+		{
+			for (int iOut=1; iOut<m_nOutputs; iOut++)
+			{
+			  for (UINT i=0; i<nSamples; i++)
+			  {
+			    //stereo
+				  if (iOut==1) iOut++; //if stereo, output 1 is left channel, so we don't want to mix down.
+			      m_pTempBuffer[iOut%2][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
+			    //mono:
+			      //m_pTempBuffer[0][i] += m_pTempBuffer[iOut][i]; 
+			      //m_pTempBuffer[1][i] += m_pTempBuffer[iOut][i];
+			  }
+			}
+		}
+
 		// If there was just the one plugin output we copy it into our 2 outputs
 		if (m_pEffect->numOutputs == 1)
 		{
@@ -2307,7 +2312,7 @@ BOOL CVstPlugin::LoadPreset(LPCSTR lpszFileName)
 	CHAR name[256];
 	CHAR ename[256];
 
-	fread(&nLen, 1, sizeof(DWORD), f);	// name string length
+	fread(&nLen, 1, sizeof(DWORD), f);	// name string length 
 	fread(&name[0], 1, nLen, f);		// name string
 	fread(&nLen, 1, sizeof(DWORD), f);	// number of params
 
@@ -2509,6 +2514,19 @@ CAbstractVstEditor* CVstPlugin::GetEditor()
 //end rewbs.defaultPlugGui
 //rewbs.defaultPlugGui: CVstEditor now COwnerVstEditor
 
+
+//rewbs.VSTcompliance
+BOOL CVstPlugin::GetSpeakerArrangement()
+{
+	VstSpeakerArrangement **pSA = NULL;
+	Dispatch(effGetSpeakerArrangement, 0,0,pSA,0);
+	//Dispatch(effGetSpeakerArrangement, 0,(long)pSA,NULL,0);
+	if (pSA)
+		memcpy((void*)(&speakerArrangement), (void*)(pSA[0]), sizeof(VstSpeakerArrangement));
+
+	return true;
+}
+//end rewbs.VSTcompliance
 //////////////////////////////////////////////////////////////////////////////////////
 //
 // BUZZ -> VST converter
