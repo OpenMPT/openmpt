@@ -820,8 +820,8 @@
 #define ID_PLUGIN_SETUP                 33918
 #define ID_PRESET_SET                   33920
 #define ID_PLUGSELECT                   35000
-#define ID_GROW_SELECTION               35001
-#define ID_SHRINK_SELECTION             35002
+#define ID_GROW_SELECTION               40001
+#define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
 #define IDS_ERR_FILETYPE                55002
 #define IDS_ERR_SAVEINS                 55003
