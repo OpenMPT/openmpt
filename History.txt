@@ -25,12 +25,13 @@ NOTE:
 (tx XYZ): thanks to XYZ for telling me about the bug
 
 . v 1.16.0214a
+   . <rewbs> fix for VST plugs with >2 outputs, though it is currently assumed they are stereo.
    / <rewbs> added button on wave writer dialog to open player settings rather than checkbox to enable "HQ resampling".
    + <rewbs> GUI for resampler & default ramping configuration
    . <ericus> fixed wav export at >44.1kHz and >24bit.
    + <ericus> added per-instrument sample ramping
    + <ericus> Channel manager updates
-   + <ericus> Multiple mix modes 
+   + <ericus> Multiple mix modes for plugins
    / <ericus> new internal instrument format
    + <ericus> polyphase resampler tuning and fixes (enabled polyphase on filtered samples...)
    + <rewbs> Added "copy and lose selection" command as a general pattern command, for those who like the cursor to be restored when they copy.
