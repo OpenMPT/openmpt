@@ -748,15 +748,22 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		return 1;
 	// index: width, value: height
 	case audioMasterSizeWindow:
-		/*if (effect->resvd1)
+		if (effect->resvd1)
 		{
-			CAbstractVstEditor *pVstPlugin = ((CVstPlugin*)effect->resvd1);
-			CVstEditor *pVstEditor = pVstPlugin->GetEditor();
+			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
+			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor(); 
 			if (pVstEditor)
 			{
-				pVstEditor->SetWindowPos(
+			CRect rcWnd, rcClient;
+			pVstEditor->GetWindowRect(rcWnd);
+			pVstEditor->GetClientRect(rcClient);
+
+			rcWnd.right  = rcWnd.left + (rcWnd.right-rcWnd.left) - (rcClient.right-rcClient.left) + index;
+			rcWnd.bottom = rcWnd.top + (rcWnd.bottom-rcWnd.top) - (rcClient.bottom-rcClient.top) + value;
+
+			pVstEditor->SetWindowPos(NULL, rcWnd.left, rcWnd.top, rcWnd.Width(), rcWnd.Height(), SWP_NOMOVE | SWP_NOZORDER);
 			}
-		}*/
+		}
 		Log("VST plugin to host: Size Window\n");
 		return 1;
 	case audioMasterGetSampleRate:		
@@ -841,14 +848,14 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		//"receiveVstTimeInfo",
 		//"reportConnectionChanges",
 		//"acceptIOChanges",
-		//"sizeWindow",						<----- TODO
 		//"asyncProcessing",
 		//"offline",
 		//"supportShell"
 		if (!(strcmp((char*)ptr,"sendVstEvents")==0		||
 				strcmp((char*)ptr,"sendVstMidiEvent")==0	||
 				strcmp((char*)ptr,"sendVstTimeInfo")==0	||
-				strcmp((char*)ptr,"supplyIdle")==0))
+				strcmp((char*)ptr,"supplyIdle")==0 || 
+				strcmp((char*)ptr,"sizeWindow")==0))
 			return 1;
 		else
 			return -1;
@@ -2128,12 +2135,12 @@ void CVstPlugin::HardAllNotesOff()
 	do {
 		for (int mc=0; mc<16; mc++)		//all midi chans
 		{	
-			MidiSend(0xB0|mc|(0x79<<8));   // reset all controllers
+			//MidiSend(0xB0|mc|(0x79<<8));   // reset all controllers
 			MidiSend(0xB0|mc|(0x7b<<8));   // all notes off 
 			MidiSend(0xB0|mc|(0x78<<8));   // all sounds off 
 			
 			UINT nCh = mc & 0x0f;
-			DWORD dwMidiCode = 0x90|nCh;
+			DWORD dwMidiCode = 0x80|nCh|0x400000; //command|channel|velocity
 			PVSTINSTCH pCh = &m_MidiCh[nCh];
 
 			for (UINT i=0; i<128; i++)	//all notes
@@ -2161,7 +2168,7 @@ void CVstPlugin::HardAllNotesOff()
 		//If we had hit an overflow, we need to loop around and start again.
 	} while (overflow);
 
-	Dispatch(effStopProcess, 0, 0, NULL, 0);
+	//Dispatch(effStopProcess, 0, 0, NULL, 0);
 	
 	
 }
@@ -2198,7 +2205,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, 
 	} 
 	
 	// "Hard core" All Sounds Off on this midi and tracker channel
-	// This one doesn't check the note mask, and senes
+	// This one doesn't check the note mask - just one note off per note.
 	// Also less likely to cause a VST event buffer overflow.
 	else if (note == 0xFE)	// ^^
 	{
@@ -2211,8 +2218,6 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, 
 		{
 			pCh->uNoteOnMap[i][trackChannel]=0;
 			MidiSend(dwMidiCode|(i<<8));
-			//All Notes Off
-			//All Sounds Off
 		}
 	} 
 

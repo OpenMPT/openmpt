@@ -900,7 +900,7 @@ void CDoAcmConvert::OnButton1()
 	oldrepeat = m_pSndFile->GetRepeatCount();
 	CSoundFile::gdwMixingFreq = wfxSrc.nSamplesPerSec;
 	CSoundFile::gnBitsPerSample = 16;
-	CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
+//	CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE); //rewbs.resamplerConf - we don't want this anymore.
 	CSoundFile::gnChannels = wfxSrc.nChannels;
 	m_pSndFile->SetRepeatCount(0);
 	m_pSndFile->ResetChannels();

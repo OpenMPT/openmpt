@@ -498,9 +498,6 @@
 				RelativePath=".\StdAfx.h">
 			</File>
 			<File
-				RelativePath=".\VersionNo.h">
-			</File>
-			<File
 				RelativePath=".\view_com.h">
 			</File>
 			<File
