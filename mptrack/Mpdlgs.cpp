@@ -74,6 +74,8 @@ UINT nMixingRates[NUMMIXRATE] =
 	40000,
 	44100,
 	48000,
+	64000,
+	88200,
 	96000
 };
 
@@ -131,18 +133,32 @@ BOOL COptionsSoundcard::OnInitDialog()
 	{
 		wsprintf(s, "%d ms", m_nBufferLength);
 		m_CbnBufferLength.SetWindowText(s);
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+		m_CbnBufferLength.AddString("10 ms");
+		m_CbnBufferLength.AddString("20 ms");
+// -! BEHAVIOUR_CHANGE#0006
 		m_CbnBufferLength.AddString("30 ms");
 		m_CbnBufferLength.AddString("50 ms");
 		m_CbnBufferLength.AddString("75 ms");
 		m_CbnBufferLength.AddString("100 ms");
 		m_CbnBufferLength.AddString("125 ms");
 		m_CbnBufferLength.AddString("150 ms");
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+		m_CbnBufferLength.AddString("200 ms");
+// -! BEHAVIOUR_CHANGE#0006
 	}
 	// Stereo Separation
 	{
-		m_SliderStereoSep.SetRange(0, 4);
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//		m_SliderStereoSep.SetRange(0, 4);
+		m_SliderStereoSep.SetRange(0, 8);
 		m_SliderStereoSep.SetPos(2);
-		for (int n=0; n<=4; n++)
+//		for (int n=0; n<=4; n++)
+		for (int n=0; n<=8; n++)
+// -! BEHAVIOUR_CHANGE#0006
 		{
 			if ((int)CSoundFile::m_nStereoSeparation <= (int)(32 << n))
 			{

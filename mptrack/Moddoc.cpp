@@ -51,6 +51,10 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_CLEANUP_SONG,			OnCleanupSong)
 	ON_COMMAND(ID_CLEANUP_REARRANGE,	OnRearrangePatterns)
 	ON_COMMAND(ID_INSTRUMENTS_REMOVEALL,OnRemoveAllInstruments)
+// -> CODE#0020
+// -> DESC="rearrange sample list"
+	ON_COMMAND(ID_REARRANGE_SAMPLES,	RearrangeSampleList)
+// -! NEW_FEATURE#0020
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
 	ON_COMMAND(ID_PATTERN_PLAY,			OnPatternPlay)				//rewbs.patPlayAllViews
 	ON_COMMAND(ID_PATTERN_PLAYNOLOOP,	OnPatternPlayNoLoop)		//rewbs.patPlayAllViews
@@ -91,11 +95,16 @@ CModDoc::CModDoc()
 	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
 	memset(PatternUndo, 0, sizeof(PatternUndo));
-	memset(OrderUndo, 0, sizeof(OrderUndo));
+	memset(OrderUndo, 0, sizeof(OrderUndo));	 //rewbs.orderListUndo
 #ifdef _DEBUG
 	MODCHANNEL *p = m_SndFile.Chn;
 	if (((DWORD)p) & 7) Log("MODCHANNEL is not aligned (0x%08X)\n", p);
 #endif
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	ReinitRecordState();
+// -! NEW_FEATURE#0015
 }
 
 
@@ -122,8 +131,18 @@ BOOL CModDoc::OnNewDocument()
 	if (!CDocument::OnNewDocument()) return FALSE;
 	m_SndFile.Create(NULL, 0);
 	m_SndFile.m_nType = CTrackApp::GetDefaultDocType();
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	if(CTrackApp::IsProject()) m_SndFile.m_dwSongFlags |= SONG_ITPROJECT;
+// -! NEW_FEATURE#0023
+
 	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
 	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	ReinitRecordState();
+// -! NEW_FEATURE#0015
 	InitializeMod();
 	SetModifiedFlag(FALSE);
 	return TRUE;
@@ -319,6 +338,12 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	default:
 		m_SndFile.m_nType = MOD_TYPE_IT;
 	}
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	ReinitRecordState();
+// -! NEW_FEATURE#0015
+
 	SetModifiedFlag(FALSE); // (bModified);
 	return TRUE;
 }
@@ -337,7 +362,11 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	if (!lstrcmpi(fext, ".mod")) nType = MOD_TYPE_MOD; else
 	if (!lstrcmpi(fext, ".s3m")) nType = MOD_TYPE_S3M; else
 	if (!lstrcmpi(fext, ".xm")) nType = MOD_TYPE_XM; else
-	if (!lstrcmpi(fext, ".it")) nType = MOD_TYPE_IT; else
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//	if (!lstrcmpi(fext, ".it")) nType = MOD_TYPE_IT; else
+	if (!lstrcmpi(fext, ".it") || !lstrcmpi(fext, ".itp")) nType = MOD_TYPE_IT; else
+// -! NEW_FEATURE#0023
 	if (!greccount)
 	{
 		greccount++;
@@ -351,7 +380,11 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(lpszPathName, dwPacking); break;
 	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(lpszPathName, dwPacking); break;
 	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(lpszPathName, dwPacking); break;
-	case MOD_TYPE_IT:	bOk = m_SndFile.SaveIT(lpszPathName, dwPacking); break;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//	case MOD_TYPE_IT:	bOk = m_SndFile.SaveIT(lpszPathName, dwPacking); break;
+	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT || !lstrcmpi(fext, ".itp")) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName, dwPacking); break;
+// -! NEW_FEATURE#0023
 	}
 	EndWaitCursor();
 	if (bOk)
@@ -371,8 +404,6 @@ void CModDoc::OnCloseDocument()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->OnDocumentClosed(this);
 	CDocument::OnCloseDocument();
-
-
 }
 
 
@@ -382,6 +413,10 @@ void CModDoc::DeleteContents()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->StopMod(this);
 	m_SndFile.Destroy();
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	ReinitRecordState();
+// -! NEW_FEATURE#0015
 }
 
 
@@ -411,9 +446,22 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		strcpy(fext, ".xm");
 		break;
 	case MOD_TYPE_IT:
-		lpszDefExt = "it";
-		lpszFilter = "Impulse Tracker Modules (*.it)|*.it||";
-		strcpy(fext, ".it");
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//		lpszDefExt = "it";
+//		lpszFilter = "Impulse Tracker Modules (*.it)|*.it||";
+//		strcpy(fext, ".it");
+		if(m_SndFile.m_dwSongFlags & SONG_ITPROJECT){
+			lpszDefExt = "itp";
+			lpszFilter = "Impulse Tracker Projects (*.itp)|*.itp||";
+			strcpy(fext, ".itp");
+		}
+		else{
+			lpszDefExt = "it";
+			lpszFilter = "Impulse Tracker Modules (*.it)|*.it||";
+			strcpy(fext, ".it");
+		}
+// -! NEW_FEATURE#0023
 		break;
 	default:	
 		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
@@ -473,7 +521,10 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		return TRUE;
 	} else
 	{
-		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());	// done in OnSaveDocument()
+// -! NEW_FEATURE#0023
 		return FALSE;
 	}
 }
@@ -492,7 +543,11 @@ BOOL CModDoc::InitializeMod()
 	// New module ?
 	if (!m_SndFile.m_nChannels)
 	{
-		m_SndFile.m_nChannels = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 8 : 16;
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//		m_SndFile.m_nChannels = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 8 : 16;
+		m_SndFile.m_nChannels = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 8 : 32;
+// -! BEHAVIOUR_CHANGE#0006
 		if (m_SndFile.Order[0] >= MAX_PATTERNS)	m_SndFile.Order[0] = 0;
 		if (!m_SndFile.Patterns[0])
 		{
@@ -636,7 +691,6 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 	return IDCANCEL;
 }
 
-//static gdwLastMixActiveTime = 0;
 UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, UINT nCurrentChn) //rewbs.vstiLive: added current chan param
 //-----------------------------------------------------------------------------------------------------------
 {
@@ -867,6 +921,102 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL bMute)
 	}
 	return TRUE;
 }
+
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+BOOL CModDoc::IsChannelSolo(UINT nChn) const
+{
+	if (nChn >= m_SndFile.m_nChannels) return TRUE;
+	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SOLO) ? TRUE : FALSE;
+}
+
+BOOL CModDoc::SoloChannel(UINT nChn, BOOL bSolo)
+{
+	if (nChn >= m_SndFile.m_nChannels) return FALSE;
+	if (m_SndFile.m_nType == MOD_TYPE_IT) SetModified();
+	if (bSolo)	m_SndFile.ChnSettings[nChn].dwFlags |= CHN_SOLO;
+	else		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SOLO;
+	return TRUE;
+}
+// -! NEW_FEATURE#0012
+
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+BOOL CModDoc::IsChannelNoFx(UINT nChn) const
+{
+	if (nChn >= m_SndFile.m_nChannels) return TRUE;
+	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_NOFX) ? TRUE : FALSE;
+}
+
+BOOL CModDoc::NoFxChannel(UINT nChn, BOOL bNoFx, BOOL updateMix)
+{
+	if (nChn >= m_SndFile.m_nChannels) return FALSE;
+	if (m_SndFile.m_nType == MOD_TYPE_IT) SetModified();
+	if (bNoFx){
+		m_SndFile.ChnSettings[nChn].dwFlags |= CHN_NOFX;
+		if(updateMix) m_SndFile.Chn[nChn].dwFlags |= CHN_NOFX;
+	}
+	else{
+		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_NOFX;
+		if(updateMix) m_SndFile.Chn[nChn].dwFlags &= ~CHN_NOFX;
+	}
+	return TRUE;
+}
+
+BOOL CModDoc::IsChannelRecord1(UINT channel)
+{
+	UINT m = 1 << (channel&7);
+	return (MultiRecordMask[channel>>3] & m) ? TRUE : FALSE;
+}
+
+BOOL CModDoc::IsChannelRecord2(UINT channel)
+{
+	UINT m = 1 << (channel&7);
+	return (MultiSplitRecordMask[channel>>3] & m) ? TRUE : FALSE;
+}
+
+BYTE CModDoc::IsChannelRecord(UINT channel)
+{
+	if(IsChannelRecord1(channel)) return 1;
+	if(IsChannelRecord2(channel)) return 2;
+	return 0;
+}
+
+void CModDoc::Record1Channel(UINT channel, BOOL select)
+{
+	UINT m = 1 << (channel&7);
+
+	if(!select){
+		if(MultiRecordMask[channel>>3] & m) MultiRecordMask[channel>>3] ^= m;
+		if(MultiSplitRecordMask[channel>>3] & m) MultiSplitRecordMask[channel>>3] ^= m;
+	}
+	else{
+		MultiRecordMask[channel>>3] ^= m;
+		if(MultiSplitRecordMask[channel>>3] & m) MultiSplitRecordMask[channel>>3] ^= m;
+	}
+}
+
+void CModDoc::Record2Channel(UINT channel, BOOL select)
+{
+	UINT m = 1 << (channel&7);
+
+	if(!select){
+		if(MultiRecordMask[channel>>3] & m) MultiRecordMask[channel>>3] ^= m;
+		if(MultiSplitRecordMask[channel>>3] & m) MultiSplitRecordMask[channel>>3] ^= m;
+	}
+	else{
+		MultiSplitRecordMask[channel>>3] ^= m;
+		if(MultiRecordMask[channel>>3] & m) MultiRecordMask[channel>>3] ^= m;
+	}
+}
+
+void CModDoc::ReinitRecordState(BOOL unselect)
+{
+	memset(MultiRecordMask, unselect ? 0 : 0xff, sizeof(MultiRecordMask));
+	memset(MultiSplitRecordMask, unselect ? 0 : 0xff, sizeof(MultiSplitRecordMask));
+}
+// -! NEW_FEATURE#0015
 
 
 BOOL CModDoc::MuteSample(UINT nSample, BOOL bMute)
@@ -1102,6 +1252,33 @@ void CModDoc::OnFileWaveConvert()
 		CWaveConvert wsdlg(pMainFrm);
 		if (wsdlg.DoModal() != IDOK) return;
 		// Saving as wave file
+
+// -> CODE#0024
+// -> DESC="wav export update"
+		UINT p,n = 1;
+		DWORD flags[MAX_BASECHANNELS];
+		CHAR channel[MAX_CHANNELNAME+2];
+
+		// Channel mode : save song in multiple wav files (one for each enabled channels)
+		if(wsdlg.m_bChannelMode){
+			n = m_SndFile.m_nChannels;
+			for(UINT i = 0 ; i < n ; i++){
+				// Save channels' flags
+				flags[i] = m_SndFile.ChnSettings[i].dwFlags;
+				// Mute each channel
+				m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
+			}
+			// Keep position of the carater just before ".wav" in path string
+			p = strlen(s) - 4;
+		}
+
+		CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
+		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
+		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
+		dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
+		if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
+// -! NEW_FEATURE#0024
+
 		BOOL bplaying = FALSE;
 		UINT pos = m_SndFile.GetCurrentPos();
 		bplaying = TRUE;
@@ -1115,15 +1292,50 @@ void CModDoc::OnFileWaveConvert()
 			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
 		}
 		// Saving file
-		CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
-		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
-		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
-		dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
-		if (wsdlg.m_bHighQuality)
-		{
-			CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
+
+// -> CODE#0024
+// -> DESC="wav export update"
+//		CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
+//		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
+//		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
+//		dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
+//		if (wsdlg.m_bHighQuality)
+//		{
+//			CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
+//		}
+//		dwcdlg.DoModal();
+
+		for(UINT i = 0 ; i < n ; i++){
+
+			// Channel mode
+			if(wsdlg.m_bChannelMode){
+				// Add channel number & name (if available) to path string
+				if(m_SndFile.ChnSettings[i].szName[0] > 0x20)
+					wsprintf(channel, "-%03d_%s.wav", i+1,m_SndFile.ChnSettings[i].szName);
+				else
+					wsprintf(channel, "-%03d.wav", i+1);
+				s[p] = '\0';
+				strcat(s,channel);
+				// Unmute channel to process
+				m_SndFile.ChnSettings[i].dwFlags &= ~CHN_MUTE;
+			}
+
+			// Render song (or current channel if channel mode and channel not initially disabled)
+			if(!wsdlg.m_bChannelMode || !(flags[i] & CHN_MUTE)){
+				m_SndFile.SetCurrentPos(0);
+				dwcdlg.DoModal();
+			}
+
+			// Re-mute processed channel
+			if(wsdlg.m_bChannelMode) m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
 		}
-		dwcdlg.DoModal();
+
+		// Restore channels' flags
+		if(wsdlg.m_bChannelMode){
+			for(UINT i = 0 ; i < n ; i++) m_SndFile.ChnSettings[i].dwFlags = flags[i];
+		}
+// -! NEW_FEATURE#0024
+
 		m_SndFile.SetCurrentPos(pos);
 		m_SndFile.GetLength(TRUE);
 		CMainFrame::UpdateAudioParameters(TRUE);
@@ -1188,7 +1400,7 @@ void CModDoc::OnFileMP3Convert()
 	}
 }
 
- 
+
 void CModDoc::OnFileMidiConvert()
 //-------------------------------
 {
@@ -1353,7 +1565,8 @@ void CModDoc::OnEditSamples()
 void CModDoc::OnEditInstruments()
 //-------------------------------
 {
-	if (m_SndFile.m_nInstruments) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_INSTRUMENTS);
+	//if (m_SndFile.m_nInstruments) rewbs.cosmetic: allow keyboard access to instruments even with no instruments
+	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_INSTRUMENTS);
 }
 
 
@@ -1482,9 +1695,20 @@ void CModDoc::OnRemoveAllInstruments()
 	{
 		ConvertInstrumentsToSamples();
 	}
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+	char removeSamples = 0;
+	//rewbs: changed message
+	if(::MessageBox(NULL, "Remove associated samples if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) removeSamples = 1;
+	else removeSamples = -1;
+// -! BEHAVIOUR_CHANGE#0003
 	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
 	{
-		m_SndFile.DestroyInstrument(i);
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+//		m_SndFile.DestroyInstrument(i);
+		m_SndFile.DestroyInstrument(i,removeSamples);
+// -! BEHAVIOUR_CHANGE#0003
 	}
 	m_SndFile.m_nInstruments = 0;
 	SetModified();
@@ -1519,7 +1743,7 @@ typedef struct MPTEFFECTINFO
 #define MOD_TYPE_S3MIT	(MOD_TYPE_S3M|MOD_TYPE_IT)
 #define MOD_TYPE_NOMOD	(MOD_TYPE_S3M|MOD_TYPE_XM|MOD_TYPE_IT)
 #define MOD_TYPE_XMIT	(MOD_TYPE_XM|MOD_TYPE_IT)
-#define MAX_FXINFO		65					//rewbs.smoothVST, increased from 64... I wonder what this will break?
+#define MAX_FXINFO		66					//rewbs.smoothVST, increased from 64... I wonder what this will break?
 
 const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 {
@@ -1592,6 +1816,10 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	// MPT IT extensions and special effects
 	{CMD_S3MCMDEX,		0xF0,0x90,	0,	MOD_TYPE_S3MIT,	"Sound control"},
 	{CMD_S3MCMDEX,		0xF0,0x70,	0,	MOD_TYPE_IT,	"Instr. control"},
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMIT,	"X param"}
+// -! NEW_FEATURE#0010
 };
 
 
@@ -1668,12 +1896,12 @@ UINT CModDoc::GetEffectFromIndex(UINT ndx, int *pParam)
 	}
 	if ((pParam) && (gFXInfo[ndx].dwParamMask))
 	{
-//		if ((*pParam < gFXInfo[ndx].dwParamValue) || (*pParam > gFXInfo[ndx].dwParamValue+15))
-//			*pParam = gFXInfo[ndx].dwParamValue + ((*pParam)/16);
+		//rewbs.fxVis - correct parameter to match FX if necessary.
 		if (*pParam < gFXInfo[ndx].dwParamValue)
 			*pParam = gFXInfo[ndx].dwParamValue;
 		else if (*pParam > gFXInfo[ndx].dwParamValue+15)
 			*pParam = gFXInfo[ndx].dwParamValue+15;
+		//end rewbs.fxVis
 	}
 
 
@@ -1714,7 +1942,11 @@ BOOL CModDoc::GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX, DWORD *prangeMin, DWORD
 		case CMD_TEMPO:
 			nmin = 0x20;
 			if (nType & MOD_TYPE_MOD) nmin = 0x21; else
-			if (nType & MOD_TYPE_S3MIT) nmin = 1;
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+//			if (nType & MOD_TYPE_S3MIT) nmin = 1;
+			if (nType & MOD_TYPE_S3MIT) nmin = 0;
+// -! NEW_FEATURE#0010
 			break;
 		case CMD_VOLUMESLIDE:
 		case CMD_TONEPORTAVOL:
@@ -1908,7 +2140,11 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 
 	case CMD_OFFSET:
 		if (param)
-			wsprintf(pszName, "Set Offset to %u", param << 8);
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+//			wsprintf(pszName, "Set Offset to %u", param << 8);
+			wsprintf(pszName, "Set Offset to %u", param);
+// -! NEW_FEATURE#0010
 		else
 			strcpy(s, "continue");
 		break;
@@ -2094,6 +2330,7 @@ BOOL CModDoc::GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin, DWORD *prangeMa
 }
 
 
+//rewbs.customKeys
 void* CModDoc::GetChildFrame()
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -2312,46 +2549,17 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	return wParam;
 }
-
+//end rewbs.customKeys
 
 void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 {
 	PSNDMIXPLUGIN pPlugin;
 
 	pPlugin = &m_SndFile.m_MixPlugins[m_nCurrentPlugin];
-	if (pPlugin && pPlugin->pMixPlugin)
+	if (m_nCurrentPlugin<MAX_MIXPLUGINS && pPlugin && pPlugin->pMixPlugin)
 	{
 		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-//		if (pVstPlugin->HasEditor())
-//		{
-			pVstPlugin->ToggleEditor();
-/*		} else
-		{
-			UINT nCommands = pVstPlugin->GetNumCommands();
-			if (nCommands > 10) nCommands = 10;
-			if (nCommands)
-			{
-				CHAR s[32];
-				HMENU hMenu = ::CreatePopupMenu();
-				
-				if (!hMenu)	return;
-				for (UINT i=0; i<nCommands; i++)
-				{
-					s[0] = 0;
-					pVstPlugin->GetCommandName(i, s);
-					if (s[0])
-					{
-						::AppendMenu(hMenu, MF_STRING, ID_FXCOMMANDS_BASE+i, s);
-					}
-				}
-				CPoint pt;
-				GetCursorPos(&pt);
-				::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
-				::DestroyMenu(hMenu);
-			}
-
-		}
-*/
+		pVstPlugin->ToggleEditor();
 	}
 
 	return;

@@ -57,17 +57,16 @@ Cfxp::~Cfxp(void)
 
 bool Cfxp::Load(CString fileName)
 {
+	//char s[256];	
 	CFile inStream;
 	CFileException e;
-	
 	if ( !inStream.Open(fileName, CFile::modeRead, &e) )
 	{
 		//TODO: exception
 		return false; 
-		//TRACE( "Can't open file %s, error = %u\n", pszFileName, e.m_cause );
 	}
 
-	//TODO: make ReadLE OO (override CFILE);
+	//TODO: make ReadLE OO (extend CFILE);
 	//TODO: exceptions
 	if (!(ReadLE(inStream, ChunkMagic)	&&
 		  ReadLE(inStream, byteSize)	&&
@@ -79,18 +78,24 @@ bool Cfxp::Load(CString fileName)
 		  ReadLE(inStream, prgName, 28) &&
 		  ChunkMagic == 'CcnK'			&&  
 		  fxMagic == 'FxCk'))
+	{
+		inStream.Close();
 		return false;
+	}
 
 	params = new float[numParams];
 
 	for (int p=0; p<numParams; p++)
 	{
 		if (!ReadLE(inStream, params[p]))
-			//TODO: exception
+		{
+			inStream.Close();
 			return false;
+		}
 	}
 
 	inStream.Close();
+	return true;
 }
 
 bool Cfxp::Save(CString fileName)
@@ -102,7 +107,6 @@ bool Cfxp::Save(CString fileName)
 	{
 		//TODO: exception
 		return false; 
-		//TRACE( "Can't open file %s, error = %u\n", pszFileName, e.m_cause );
 	}
 
 	//TODO: make ReadLE OO (override CFILE);
@@ -115,23 +119,30 @@ bool Cfxp::Save(CString fileName)
 		  WriteLE(outStream, fxVersion)	&&
 		  WriteLE(outStream, numParams)	&&
 		  WriteLE(outStream, prgName, 28)))
+	{
+		outStream.Close();
 		return false;
+	}
 
 	for (int p=0; p<numParams; p++)
 	{
 		if (!WriteLE(outStream, params[p]))
+		{
 			//TODO: exception
+			outStream.Close();
 			return false;
+		}
 	}
 
 	outStream.Close();
+	return true;
 }
 
 /************************************
 *	Util	
 *************************************/
 
-bool Cfxp::ReadLE(CFile in, long &l)
+bool Cfxp::ReadLE(CFile &in, long &l)
 {
 	int size=sizeof(long);
 	if (in.Read(&l, size) < size)
@@ -142,11 +153,21 @@ bool Cfxp::ReadLE(CFile in, long &l)
 	return true;
 }
 
-bool Cfxp::ReadLE(CFile in, float &f)
+bool Cfxp::ReadLE(CFile &in, float &f)
 {
 	int size=sizeof(float);
-	if (in.Read(&f, size) < size)
-		return false;
+
+	try {
+		if (in.Read(&f, size) < size)
+			return false;
+	} catch (CFileException *e)
+	{
+		::AfxMessageBox(e->m_strFileName);
+		char s[256];
+		wsprintf(s, "%lx: %d; %d; %s;", e, e->m_cause, e->m_lOsError,  e->m_strFileName);
+		::AfxMessageBox(s);
+		e->Delete();
+	}
 
 	if (NeedSwap())
 		SwapBytes(f);
@@ -154,34 +175,36 @@ bool Cfxp::ReadLE(CFile in, float &f)
 
 }
 
-bool Cfxp::ReadLE(CFile in, char *c, UINT length)
+bool Cfxp::ReadLE(CFile &in, char *c, UINT length)
 {
 	int size=sizeof(char)*length;
-	return (in.Read(&c, size) >= size);
+	return (in.Read(c, size) >= size);
 }
 
-bool Cfxp::WriteLE(CFile out, long l)
+bool Cfxp::WriteLE(CFile &out, const long &l)
 {
 	int size=sizeof(long);
+	long l2 = l; // maybe I should have made that arg a const..
 	if (NeedSwap())
-		SwapBytes(l);
-	out.Write(&l, size);
+		SwapBytes(l2);
+	out.Write(&l2, size);
 	return true;
 }
 
-bool Cfxp::WriteLE(CFile out, float f)
+bool Cfxp::WriteLE(CFile &out, const float &f)
 {
 	int size=sizeof(float);
+	float f2 = f; // maybe I should have made that arg a const..
 	if (NeedSwap())
-		SwapBytes(f);
-	out.Write(&f, size);
+		SwapBytes(f2);
+	out.Write(&f2, size);
 	return true;
 }
 
-bool Cfxp::WriteLE(CFile out, char *c, UINT length)
+bool Cfxp::WriteLE(CFile &out, const char *c, UINT length)
 {
 	int size=sizeof(char)*length;
-	out.Write(&c, size);
+	out.Write(c, size);
 	return true;
 }
 

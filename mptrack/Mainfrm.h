@@ -1,7 +1,6 @@
 // MainFrm.h : interface of the CMainFrame class
 //
 /////////////////////////////////////////////////////////////////////////////
-//#include "VersionNo.h"
 #if !defined(AFX_MAINFRM_H__AE144DC8_DD0B_11D1_AF24_444553540000__INCLUDED_)
 #define AFX_MAINFRM_H__AE144DC8_DD0B_11D1_AF24_444553540000__INCLUDED_
 
@@ -22,9 +21,9 @@ class ISoundSource;
 #define MIN_AUDIO_BUFFERSIZE		1024
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define KEYBOARDMAP_LENGTH			(3*12+2)
-#define MAINFRAME_TITLE				PRODUCT_VERSION_STR
+#define MAINFRAME_TITLE				"Modplug Tracker"
 #define MPTRACK_FINALRELEASEVERSION	0x01090000
-#define MPTRACK_VERSION				0x011600D4
+#define MPTRACK_VERSION				0x011600D5
 
 
 enum {
@@ -41,9 +40,19 @@ enum {
 	CTRLMSG_PAT_PREVINSTRUMENT,
 	CTRLMSG_PAT_NEXTINSTRUMENT,
 	CTRLMSG_PAT_SETINSTRUMENT,
-	CTRLMSG_PAT_FOLLOWSONG,
+	CTRLMSG_PAT_FOLLOWSONG,		//rewbs.customKeys
 	CTRLMSG_GETCURRENTINSTRUMENT,
 	CTRLMSG_SETCURRENTINSTRUMENT,
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+// rewbs.merged: swapped message direction
+/*	CTRLMSG_GETCURRENTSPLITINSTRUMENT,
+	CTRLMSG_GETCURRENTSPLITNOTE,
+	CTRLMSG_GETCURRENTOCTAVEMODIFIER,
+	CTRLMSG_GETCURRENTOCTAVELINK,
+	CTRLMSG_GETCURRENTSPLITVOLUME,
+*/
+// !- CODE#0012
 	CTRLMSG_PLAYPATTERN,
 	CTRLMSG_GETSPACING,
 	CTRLMSG_SETSPACING,
@@ -84,7 +93,7 @@ enum {
 	VIEWMSG_SETSPACING,
 	VIEWMSG_PATTERNPROPERTIES,
 	VIEWMSG_SETVUMETERS,
-	VIEWMSG_SETPLUGINNAMES,
+	VIEWMSG_SETPLUGINNAMES,	//rewbs.patPlugNames
 	VIEWMSG_DOMIDISPACING,
 	VIEWMSG_EXPANDPATTERN,
 	VIEWMSG_SHRINKPATTERN,
@@ -96,6 +105,17 @@ enum {
 	VIEWMSG_SETCURRENTSAMPLE,
 	// Instrument-Specific
 	VIEWMSG_SETCURRENTINSTRUMENT,
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+// rewbs.merge: swapped message direction
+	VIEWMSG_SETSPLITINSTRUMENT,
+	VIEWMSG_SETSPLITNOTE,
+	VIEWMSG_SETOCTAVEMODIFIER,
+	VIEWMSG_SETOCTAVELINK,
+	VIEWMSG_SETSPLITVOLUME,
+// -! CODE#0012
+
+
 };
 
 
@@ -171,6 +191,16 @@ enum
 #define PATTERN_CONTSCROLL		0x20000
 #define PATTERN_KBDNOTEOFF		0x40000
 #define PATTERN_FOLLOWSONGOFF	0x80000 //rewbs.noFollow
+
+// -> CODE#0017
+// -> DESC="midi in record mode setup option"
+#define PATTERN_MIDIRECORD		0x100000
+// -! BEHAVIOUR_CHANGE#0017
+
+// -> CODE#0022
+// -> DESC="alternative BPM/Speed interpretation method"
+#define	PATTERN_ALTERNTIVEBPMSPEED	0x200000
+// -! NEW_FEATURE#0022
 
 // Keyboard Setup
 enum {
@@ -366,8 +396,8 @@ public:
 
 
 protected:
-	CModTreeBar m_wndTree;
 	CSoundFile m_WaveFile;
+	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
 	CImageList m_ImageList;
@@ -384,7 +414,7 @@ protected:
 	// Misc
 	CHAR m_szPluginsDir[_MAX_PATH];
 	CHAR m_szExportDir[_MAX_PATH];
-	bool m_bOptionsLocked;
+	bool m_bOptionsLocked; 	 	//rewbs.customKeys
 
 public:
 	CMainFrame();
@@ -436,7 +466,7 @@ public:
 	static UINT IsHotKey(DWORD dwKey);
 	static const DWORD *GetKeyboardMap();
 	static VOID GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize);
-	static CInputHandler *m_InputHandler;
+	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 
 // Misc functions
 public:
@@ -446,18 +476,18 @@ public:
 	UINT GetBaseOctave();
 	UINT GetCurrentInstrument();
 	CModDoc *GetActiveDoc();
-	CView *GetActiveView();
+	CView *GetActiveView();  	//rewbs.customKeys
 	CImageList *GetImageList() { return &m_ImageList; }
 	PMPTCHORD GetChords() { return Chords; }
 	VOID OnDocumentCreated(CModDoc *pModDoc);
 	VOID OnDocumentClosed(CModDoc *pModDoc);
 	VOID UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
-	static CInputHandler* GetInputHandler() { return m_InputHandler; }
-	bool m_bModTreeHasFocus;
-	CWnd *m_pNoteMapHasFocus;
-	long GetSampleRate();
-	long GetTotalSampleCount();
-	double GetApproxBPM();
+	static CInputHandler* GetInputHandler() { return m_InputHandler; }  	//rewbs.customKeys
+	bool m_bModTreeHasFocus;  	//rewbs.customKeys
+	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
+	long GetSampleRate();  		//rewbs.VSTTimeInfo
+	long GetTotalSampleCount(); //rewbs.VSTTimeInfo
+	double GetApproxBPM();		//rewbs.VSTTimeInfo
 
 // Player functions
 public:
@@ -469,7 +499,7 @@ public:
 	BOOL PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample, UINT nNote=0);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn);
 	BOOL StopSoundFile(CSoundFile *);
-	BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); }
+	BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); 	}
 	DWORD GetElapsedTime() const { return m_dwElapsedTime; }
 	void ResetElapsedTime() { m_dwElapsedTime = 0; }
 	CModDoc *GetModPlaying() const { return (IsPlaying()) ? m_pModPlaying : NULL; }
@@ -507,7 +537,7 @@ public:
 public:
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();
-	afx_msg void SetLastMixActiveTime();
+	afx_msg void SetLastMixActiveTime(); //rewbs.VSTCompliance
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -515,6 +545,17 @@ protected:
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT);
 	afx_msg void OnViewOptions();
+
+// -> CODE#0002
+// -> DESC="list box to choose VST plugin presets (programs)"
+	afx_msg void OnPluginSetup();
+// -! NEW_FEATURE#0002
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	afx_msg void OnChannelManager();
+// -! NEW_FEATURE#0015
+
 	afx_msg void OnUpdateTime(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateUser(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateInfo(CCmdUI *pCmdUI);
@@ -524,7 +565,7 @@ protected:
 	afx_msg void OnPrevOctave();
 	afx_msg void OnNextOctave();
 	afx_msg void OnOctaveChanged();
-	afx_msg void OnReportBug();
+	afx_msg void OnReportBug();	//rewbs.customKeys
 	afx_msg BOOL OnInternetLink(UINT nID);
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM lParam);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
@@ -534,12 +575,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
-	// We have swicthed focus to a new module - might need to update effect keys to reflect module type
-	bool UpdateEffectKeys(void);
+	//rewbs.customKeys - We have swicthed focus to a new module - might need to update effect keys to reflect module type
+	bool UpdateEffectKeys(void); 
 };
 
 const CHAR gszBuildDate[] = __TIMESTAMP__;
-const int gszBuildNumber = __COUNTER__;
 
 /////////////////////////////////////////////////////////////////////////////
 

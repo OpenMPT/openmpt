@@ -1,3 +1,5 @@
+//rewbs.customKeys
+
 #include "stdafx.h"
 #include ".\commandset.h"
 #include <stdio.h>
@@ -354,7 +356,7 @@ void CCommandSet::SetupCommands()
 	commands[kcShowEditMenu].UID = 1063;
 	commands[kcShowEditMenu].isHidden = false;
 	commands[kcShowEditMenu].isDummy = false;
-	commands[kcShowEditMenu].Message = "Show edit menu";
+	commands[kcShowEditMenu].Message = "Show context (right-click) menu";
 
 	commands[kcVPNoteC_0].UID = 1064;
 	commands[kcVPNoteC_0].isHidden = false;
@@ -2029,6 +2031,33 @@ void CCommandSet::SetupCommands()
 	commands[kcClearFieldStepITStyle].isDummy = false;
 	commands[kcClearFieldStepITStyle].Message = "Clear field and step (IT Style)";
 
+	commands[kcSetFXextension].UID = 1666;
+	commands[kcSetFXextension].isHidden = false;
+	commands[kcSetFXextension].isDummy = false;
+	commands[kcSetFXextension].Message = "FX parameter extension command";
+	
+
+	commands[kcNoteCutOld].UID = 1667;
+	commands[kcNoteCutOld].isHidden = false;
+	commands[kcNoteCutOld].isDummy = false;
+	commands[kcNoteCutOld].Message = "Note cut (don't remember instrument)";
+
+	commands[kcNoteOffOld].UID = 1668;
+	commands[kcNoteOffOld].isHidden = false;
+	commands[kcNoteOffOld].isDummy = false;
+	commands[kcNoteOffOld].Message = "Note off (don't remember instrument)";
+
+	commands[kcViewAddPlugin].UID = 1669;
+	commands[kcViewAddPlugin].Message = "View 'Add Plugin' Window";
+	commands[kcViewAddPlugin].isHidden = false;
+	commands[kcViewAddPlugin].isDummy = false;
+
+	commands[kcViewChannelManager].UID = 1670;
+	commands[kcViewChannelManager].Message = "View Channel Manager";
+	commands[kcViewChannelManager].isHidden = false;
+	commands[kcViewChannelManager].isDummy = false;
+
+
 	//DEBUG: check for duplicate UIDs:
 	for (int i=0; i<kcNumCommands; i++)
 	{
@@ -2110,11 +2139,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 bool CCommandSet::IsDummyCommand(CommandID cmd)
 {	// e.g. Chord modifier is a dummy command, which serves only to automatically 
     // generate a set of keycombinations for chords (I'm not proud of this design).
-	switch(cmd)
-	{
-		case kcChordModifier:  return true;
-		default:			   return false;
-	}
+	return commands[cmd].isDummy;
 }
 
 
@@ -3053,3 +3078,5 @@ bool CCommandSet::IsExtended(UINT code)
 
 	return false;
 }
+
+//end rewbs.customKeys

@@ -178,6 +178,35 @@ extern short int gDownsample2x[]; // 2x downsampling
 		 + gFastSinc[poslo+2]*p[poshi*2+3] + gFastSinc[poslo+3]*p[poshi*2+5]) >> 14;\
 
 
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+
+// 8-taps polyphase
+#define SNDMIX_GETSTEREOVOL8KAISER\
+	int poshi = nPos >> 16;\
+	const short int *poslo = (const short int *)(sinc+(nPos&0xfff0));\
+	int vol_l = (poslo[0]*p[poshi*2-6] + poslo[1]*p[poshi*2-4]\
+		 + poslo[2]*p[poshi*2-2] + poslo[3]*p[poshi*2]\
+		 + poslo[4]*p[poshi*2+2] + poslo[5]*p[poshi*2+4]\
+		 + poslo[6]*p[poshi*2+6] + poslo[7]*p[poshi*2+8]) >> 6;\
+	int vol_r = (poslo[0]*p[poshi*2-5] + poslo[1]*p[poshi*2-3]\
+		 + poslo[2]*p[poshi*2-1] + poslo[3]*p[poshi*2+1]\
+		 + poslo[4]*p[poshi*2+3] + poslo[5]*p[poshi*2+5]\
+		 + poslo[6]*p[poshi*2+7] + poslo[7]*p[poshi*2+9]) >> 6;\
+
+#define SNDMIX_GETSTEREOVOL16KAISER\
+	int poshi = nPos >> 16;\
+	const short int *poslo = (const short int *)(sinc+(nPos&0xfff0));\
+	int vol_l = (poslo[0]*p[poshi*2-6] + poslo[1]*p[poshi*2-4]\
+		 + poslo[2]*p[poshi*2-2] + poslo[3]*p[poshi*2]\
+		 + poslo[4]*p[poshi*2+2] + poslo[5]*p[poshi*2+4]\
+		 + poslo[6]*p[poshi*2+6] + poslo[7]*p[poshi*2+8]) >> 14;\
+	int vol_r = (poslo[0]*p[poshi*2-5] + poslo[1]*p[poshi*2-3]\
+		 + poslo[2]*p[poshi*2-1] + poslo[3]*p[poshi*2+1]\
+		 + poslo[4]*p[poshi*2+3] + poslo[5]*p[poshi*2+5]\
+		 + poslo[6]*p[poshi*2+7] + poslo[7]*p[poshi*2+9]) >> 14;\
+// -! BEHAVIOUR_CHANGE#0025
+
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -658,6 +687,44 @@ BEGIN_RAMPMIX_INTERFACE(Stereo16BitHQRampMix)
 	SNDMIX_RAMPSTEREOVOL
 END_RAMPMIX_INTERFACE()
 
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+
+//////////////////////////////////////////////////////
+// Stereo 8-taps polyphase resampling filter
+
+BEGIN_MIX_INTERFACE(Stereo8BitKaiserMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8KAISER
+	SNDMIX_STORESTEREOVOL
+END_MIX_INTERFACE()
+
+BEGIN_MIX_INTERFACE(Stereo16BitKaiserMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16KAISER
+	SNDMIX_STORESTEREOVOL
+END_MIX_INTERFACE()
+
+// Ramp
+BEGIN_RAMPMIX_INTERFACE(Stereo8BitKaiserRampMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8KAISER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_INTERFACE()
+
+BEGIN_RAMPMIX_INTERFACE(Stereo16BitKaiserRampMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16KAISER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_INTERFACE()
+
+// -! BEHAVIOUR_CHANGE#0025
+
+
 
 //////////////////////////////////////////////////////
 // Resonant Filter Mix
@@ -844,9 +911,16 @@ const LPMIXINTERFACE gpMixFunctionTable[4*16] =
 	// HQ SRC, Filter
 	FilterMono8BitLinearMix,	FilterMono16BitLinearMix,	FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
 	FilterMono8BitLinearRampMix,FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
+
 	// Kaiser SRC
-	Mono8BitKaiserMix,			Mono16BitKaiserMix,			Stereo8BitHQMix,		Stereo16BitHQMix,
-	Mono8BitKaiserRampMix,		Mono16BitKaiserRampMix,		Stereo8BitHQRampMix,	Stereo16BitHQRampMix,
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+//	Mono8BitKaiserMix,			Mono16BitKaiserMix,			Stereo8BitHQMix,		Stereo16BitHQMix,
+//	Mono8BitKaiserRampMix,		Mono16BitKaiserRampMix,		Stereo8BitHQRampMix,	Stereo16BitHQRampMix,
+	Mono8BitKaiserMix,			Mono16BitKaiserMix,			Stereo8BitKaiserMix,	Stereo16BitKaiserMix,
+	Mono8BitKaiserRampMix,		Mono16BitKaiserRampMix,		Stereo8BitKaiserRampMix,Stereo16BitKaiserRampMix,
+// -! BEHAVIOUR_CHANGE#0025
+
 	// Kaiser SRC, Filter
 	FilterMono8BitLinearMix,	FilterMono16BitLinearMix,	FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
 	FilterMono8BitLinearRampMix,FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
@@ -890,10 +964,17 @@ const LPMIXINTERFACE gpMMXFunctionTable[4*16] =
 	// HQ SRC, Filter
 	MMX_FilterMono8BitLinearMix,MMX_FilterMono16BitLinearMix,FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
 	MMX_FilterMono8BitLinearRampMix,MMX_FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
+
 	// Kaiser SRC
-	MMX_Mono8BitKaiserMix,		MMX_Mono16BitKaiserMix,		Stereo8BitHQMix,		Stereo16BitHQMix,
-	MMX_Mono8BitKaiserRampMix,	MMX_Mono16BitKaiserRampMix,	Stereo8BitHQRampMix,	Stereo16BitHQRampMix,
-	// Kaiser SRC, Filter
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+//	MMX_Mono8BitKaiserMix,		MMX_Mono16BitKaiserMix,		Stereo8BitHQMix,		Stereo16BitHQMix,
+//	MMX_Mono8BitKaiserRampMix,	MMX_Mono16BitKaiserRampMix,	Stereo8BitHQRampMix,	Stereo16BitHQRampMix,
+	MMX_Mono8BitKaiserMix,		MMX_Mono16BitKaiserMix,		Stereo8BitKaiserMix,	Stereo16BitKaiserMix,
+	MMX_Mono8BitKaiserRampMix,	MMX_Mono16BitKaiserRampMix,	Stereo8BitKaiserRampMix,Stereo16BitKaiserRampMix,
+// -! BEHAVIOUR_CHANGE#0025
+
+// Kaiser SRC, Filter
 	MMX_FilterMono8BitLinearMix,MMX_FilterMono16BitLinearMix,FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
 	MMX_FilterMono8BitLinearRampMix,MMX_FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
 };
@@ -1084,11 +1165,16 @@ UINT CSoundFile::CreateStereoMix(int count)
 
 		UINT nMixPlugin = 0;
 
+		//rewbs.instroVSTi
 		if (pChannel->pHeader)												// first try intrument VST
 			nMixPlugin = pChannel->pHeader->nMixPlug;
 		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) 	// Then try Channel VST
-			nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
-		
+// -> CODE#0015
+// -> DESC="channels management dlg"
+//			nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
+			if(!(pChannel->dwFlags & CHN_NOFX)) nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
+// -! NEW_FEATURE#0015
+		//end rewbs.instroVSTi		
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
 			PSNDMIXPLUGINSTATE pPlugin = m_MixPlugins[nMixPlugin-1].pMixState;
@@ -1338,7 +1424,7 @@ VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, U
 	}
 #endif
 
- X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
+ 	X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
 }
 
 

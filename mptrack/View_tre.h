@@ -121,7 +121,6 @@ public:
 	VOID OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
 	BOOL CanDrop(HTREEITEM hItem, BOOL bDoDrop);
 	VOID UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify);
-	void PlayItemProxy(UINT note);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -166,6 +165,12 @@ protected:
 	afx_msg void OnMuteTreeItem();
 	afx_msg void OnSoloTreeItem();
 	afx_msg void OnUnmuteAllTreeItem();
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	afx_msg void OnSetItemPath();
+// -! NEW_FEATURE#0023
+
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();
 	afx_msg void OnExportMidiLib();
@@ -173,14 +178,13 @@ protected:
 	afx_msg void OnRefreshInstrLib();
 	afx_msg void OnShowAllFiles();
 	afx_msg void OnShowSoundFiles();
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);	//rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnKillFocus(CWnd* pNewWnd);
-	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);	//rewbs.customKeys
+	afx_msg void OnSetFocus(CWnd* pOldWnd);		//rewbs.customKeys
 };
 
 
 #endif
-

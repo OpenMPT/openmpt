@@ -5,10 +5,10 @@
 #include "mptrack.h"
 #include "mainfrm.h"
 #include "vstplug.h"
-#include "fxp.h"
-#include "AbstractVstEditor.h"
-#include "VstEditor.h"
-#include "defaultvsteditor.h"
+#include "fxp.h"					//rewbs.VSTpresets
+#include "AbstractVstEditor.h"		//rewbs.defaultPlugGUI
+#include "VstEditor.h"				//rewbs.defaultPlugGUI
+#include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
 
 
 //#define VST_LOG
@@ -22,6 +22,7 @@ AEffect *Buzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzInfo
 #endif // ENABLE_BUZZ
 
 AEffect *DmoToVst(PVSTPLUGINLIB pLib);
+
 
 long VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect,	long opcode, long index, long value, void *ptr, float opt)
 //----------------------------------------------------------------------------------------------------------------------------
@@ -51,8 +52,7 @@ CVstPluginManager::CVstPluginManager()
 //------------------------------------
 {
 	m_pVstHead = NULL;
-	m_bSomePlugNeedsIdle = FALSE;
-	m_bAllPlugsNeedEditorIdle = FALSE;
+	//m_bNeedIdle = FALSE; //rewbs.VSTCompliance - now member of plugin class
 	CSoundFile::gpMixPluginCreateProc = CreateMixPluginProc;
 	EnumerateDirectXDMOs();
 }
@@ -227,7 +227,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 		__try {
 	#endif
 			hLib = LoadLibrary(pszDllPath);
-	if (!hLib)
+	//rewbs.VSTcompliance
+	/*if (!hLib)
 	{
 		TCHAR szBuf[80]; 
 		LPVOID lpMsgBuf;
@@ -236,7 +237,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 		wsprintf(szBuf, "Failed to load plugin dll with error %d: %s", dw, lpMsgBuf); 
 	 	MessageBox(NULL, szBuf, "Error", MB_OK); 
 		LocalFree(lpMsgBuf);
-	}
+	}*/
+	//end rewbs.VSTcompliance
 	#ifndef _DEBUG
 		} __finally {}
 	} __except(EXCEPTION_EXECUTE_HANDLER)
@@ -584,7 +586,7 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin)
 }
 
 
-VOID CVstPluginManager::OnIdle()	//should be a low priority thread..
+VOID CVstPluginManager::OnIdle()
 //------------------------------
 {
 	PVSTPLUGINLIB pFactory = m_pVstHead;
@@ -594,7 +596,7 @@ VOID CVstPluginManager::OnIdle()	//should be a low priority thread..
 		CVstPlugin *p = pFactory->pPluginsList;
 		while (p)
 		{
-			//A specific plug has requested indefinite periodic processing time.
+			//rewbs. VSTCompliance: A specific plug has requested indefinite periodic processing time.
 			if (p->m_bNeedIdle)
 			{
 				if (!(p->Dispatch(effIdle, 0,0, NULL, 0)))
@@ -604,25 +606,18 @@ VOID CVstPluginManager::OnIdle()	//should be a low priority thread..
 			//We need to update all open editors
 			if ((p->m_pEditor) && (p->m_pEditor->m_hWnd))
 			{
-				p->Dispatch(effEditIdle, 0,0, NULL, 0); //Plugins with Owner GUI
-				p->m_pEditor->UpdateAll(); //Plugins with default GUI
+				p->m_pEditor->UpdateAll();
 			}
+			//end rewbs. VSTCompliance:
 
 			p = p->m_pNext;
 		}
 		pFactory = pFactory->pNext;
 	}
 	
-	//Once a plug has stated that it needs idle editor time, all plugs always get it.
-	//So we don't reset this flag.
-	//m_bAllPlugsNeedEditorIdle = FALSE;
-
-	//Don't know this for sure
-	//m_bSomePlugNeedsIdle = FALSE;
-
 }
 
-
+//rewbs.VSTCompliance: Added support for lots of opcodes
 long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt)
 //-------------------------------------------------------------------------------------------------------------
 {
@@ -942,7 +937,7 @@ else {
 
 	return 0;
 }
-
+//end rewbs. VSTCompliance:
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -988,6 +983,11 @@ BOOL CSelectPluginDlg::OnInitDialog()
 VOID CSelectPluginDlg::OnOK()
 //---------------------------
 {
+// -> CODE#0002
+// -> DESC="list box to choose VST plugin presets (programs)"
+	if(m_pPlugin == NULL) { CDialog::OnOK(); return; }
+// -! NEW_FEATURE#0002
+
 	BOOL bChanged = FALSE;
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	PVSTPLUGINLIB pNewPlug = (PVSTPLUGINLIB)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
@@ -1144,6 +1144,11 @@ VOID CSelectPluginDlg::UpdatePluginsList()
 VOID CSelectPluginDlg::OnSelDblClk(NMHDR *, LRESULT *result)
 //----------------------------------------------------------
 {
+// -> CODE#0002
+// -> DESC="list box to choose VST plugin presets (programs)"
+	if(m_pPlugin == NULL) return;
+// -! NEW_FEATURE#0002
+
 	HTREEITEM hSel = m_treePlugins.GetSelectedItem();
 	int nImage, nSelectedImage;
 	m_treePlugins.GetItemImage(hSel, nImage, nSelectedImage);
@@ -1322,12 +1327,7 @@ void CVstPlugin::Initialize()
 	m_pInputs = (float **)new char[m_nInputs*sizeof(float *)];
 	m_pOutputs = (float **)new char[m_nOutputs*sizeof(float *)];
 	m_pTempBuffer = (float **)new char[m_nInputs*sizeof(float *)];	//rewbs.dryRatio
-/*		
-	for (UINT iTemp=0; iTemp<10; iTemp++)	//TEMP HACK
-	{
-		m_pTempBuffer[iTemp]=(float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*(2+iTemp)])+7)&~7); //rewbs.dryRatio
-	}
-*/
+
 	for (UINT iIn=0; iIn<m_nInputs; iIn++)
 	{
 		m_pTempBuffer[iIn]=(float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*(2+iIn)])+7)&~7); //rewbs.dryRatio
@@ -1346,6 +1346,7 @@ void CVstPlugin::Initialize()
 		m_pMixStruct->pMixState = &m_MixState;
 	}
 
+	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	//Assuming 32bit address space...
     m_pEffect->resvd1=(long)this;
@@ -1395,14 +1396,12 @@ CVstPlugin::~CVstPlugin()
 	{
 		delete m_pOutputs;
 		m_pOutputs = NULL;
-	}
-	
+	}	
 	if (m_pTempBuffer)	//rewbs.dryRatio
 	{
 		delete m_pTempBuffer;
 		m_pTempBuffer = NULL;
 	}
-
 	if (m_pEvList)
 	{
 		delete (char *)m_pEvList;
@@ -1463,7 +1462,7 @@ BOOL CVstPlugin::HasEditor()
 	return FALSE;
 }
 
-
+//rewbs.VSTcompliance: changed from BOOL to long
 long CVstPlugin::GetNumPrograms()
 //-------------------------------
 {
@@ -1474,7 +1473,7 @@ long CVstPlugin::GetNumPrograms()
 	return 0;
 }
 
-
+//rewbs.VSTcompliance: changed from BOOL to long
 long CVstPlugin::GetNumParameters()
 //---------------------------------
 {
@@ -1485,6 +1484,7 @@ long CVstPlugin::GetNumParameters()
 	return 0;
 }
 
+//rewbs.VSTpresets
 long CVstPlugin::GetUID()
 //-----------------------
 {
@@ -1541,25 +1541,45 @@ bool CVstPlugin::RandomizeParams(long minParam, long maxParam)
 	return true;	
 }
 
-
-
-
-bool CVstPlugin::LoadProgram(Cfxp *fxp)
+bool CVstPlugin::SaveProgram(CString fileName)
 //------------------------------------
 {
 	if (!(m_pEffect))
 		return false;
-	if (m_pEffect->uniqueID != fxp->fxID)
-		return false;
-	if (m_pEffect->numParams != fxp->numParams)
+
+	//Collect required data
+	long numParams = GetNumParameters();
+	long ID = GetUID();
+	long plugVersion = GetVersion();
+	float *params = new float[numParams]; 
+	GetParams(params, 0, numParams);
+
+	//Construct & save fxp
+	Cfxp fxp(ID, plugVersion, numParams, params);
+	return fxp.Save(fileName);
+}
+
+bool CVstPlugin::LoadProgram(CString fileName)
+//------------------------------------
+{
+	if (!(m_pEffect))
 		return false;
 
-	for (int p=0; p<fxp->numParams; p++)
-		SetParameter(p, fxp->params[p]);
+	Cfxp fxp(fileName);	//load from file
+
+	//Verify
+	if (m_pEffect->uniqueID != fxp.fxID)
+		return false;
+	if (m_pEffect->numParams != fxp.numParams)
+		return false;
+
+	//Load
+	for (int p=0; p<fxp.numParams; p++)
+		SetParameter(p, fxp.params[p]);
 
 	return true;
 }
-
+//end rewbs.VSTpresets
 
 long CVstPlugin::Dispatch(long opCode, long index, long value, void *ptr, float opt)
 //----------------------------------------------------------------------------------
@@ -1627,11 +1647,13 @@ FLOAT CVstPlugin::GetParameter(UINT nIndex)
 		} __finally {}
 		} __except(EXCEPTION_EXECUTE_HANDLER) {}
 	}
+	//rewbs.VSTcompliance
 	if (fResult<0.0f)
 		return 0.0f;
 	else if (fResult>1.0f)
 		return 1.0f;
 	else
+	//end rewbs.VSTcompliance
 		return fResult;
 }
 
@@ -1773,8 +1795,6 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 		for (UINT iOut=0; iOut<m_nOutputs; iOut++)
 		{
-			//if (iOut>1)		//hack to avoir crash on plugs with numOutput>2
-			//	break;
 			memset(m_pTempBuffer[iOut], 0, nSamples*sizeof(float));
 			m_pOutputs[iOut] = m_pTempBuffer[iOut];
 		}
@@ -1833,7 +1853,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 }
 
 
-void CVstPlugin::MidiSend(DWORD dwMidiCode)
+bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 //-----------------------------------------
 {
 	if ((m_pEvList) && (m_pEvList->numEvents < VSTEVENT_QUEUE_LEN-1))
@@ -1855,14 +1875,155 @@ void CVstPlugin::MidiSend(DWORD dwMidiCode)
 	#ifdef VST_LOG
 		Log("Sending Midi %02X.%02X.%02X\n", pev->midiData[0]&0xff, pev->midiData[1]&0xff, pev->midiData[2]&0xff);
 	#endif
+		
+		return true; //rewbs.instroVST
 	}
-#ifdef VST_LOG
 	else 
 	{
 		Log("VST Event queue overflow!\n");
 		m_pEvList->numEvents = VSTEVENT_QUEUE_LEN-1;
+
+		return false; //rewbs.instroVST
 	}
-#endif
+}
+
+//rewbs.VSTiNoteHoldonStopFix
+void CVstPlugin::HardAllNotesOff()
+{
+	bool overflow=false;
+
+	do {
+		for (int mc=0; mc<16; mc++)		//all midi chans
+		{	
+			MidiSend(0xB0|mc|(0x79<<8));   // reset all controllers
+			MidiSend(0xB0|mc|(0x7b<<8));   // all notes off 
+			MidiSend(0xB0|mc|(0x78<<8));   // all sounds off 
+			
+			UINT nCh = mc & 0x0f;
+			DWORD dwMidiCode = 0x90|nCh;
+			PVSTINSTCH pCh = &m_MidiCh[nCh];
+
+			for (UINT i=0; i<128; i++)	//all notes
+			{
+				
+				for (UINT c=0; c<MAX_CHANNELS; c++)
+				{
+					while (pCh->uNoteOnMap[i][c] && !overflow)
+					{
+						overflow=!(MidiSend(dwMidiCode|(i<<8)));
+						pCh->uNoteOnMap[i][c]--;
+					}
+					if (overflow) break;	//yuck
+				}
+				
+				if (overflow) break;	//yuck
+			}
+
+			if (overflow) break;	//yuck
+		}
+		
+		ProcessVSTEvents();
+		ClearVSTEvents();
+
+		//If we had hit an overflow, we need to loop around and start again.
+	} while (overflow);
+
+	Dispatch(effStopProcess, 0, 0, NULL, 0);
+	
+	
+}
+//end rewbs.VSTiNoteHoldonStopFix
+
+//rewbs.introVST - many changes to MidiCommand, still to be refined.
+void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, UINT trackChannel)
+//------------------------------------------------------------------------------------------------
+{
+	UINT nCh = (nMidiCh-1) & 0x0f;
+	PVSTINSTCH pCh = &m_MidiCh[nCh];
+	DWORD dwMidiCode = 0;
+
+	if (vol == 0) vol=64;
+
+	// Program change ?
+	if ((pCh->nProgram != nMidiProg) && (nMidiCh != 10) && (nMidiProg < 0x80))
+	{
+		pCh->nProgram = nMidiProg;
+		MidiSend((nMidiProg<<8)|(0xC0|nCh));
+	}
+	// Specific Note Off - don't really use this one any more, but it might be useful.
+	if (note > 0xFF)			//rewbs.vstiLive
+	{
+		dwMidiCode = 0x80|nCh; //note off, on chan nCh
+
+		note--;
+		UINT i = note - 0xFF;
+		if (pCh->uNoteOnMap[i][trackChannel])
+		{
+			pCh->uNoteOnMap[i][trackChannel]--;
+			MidiSend(dwMidiCode|(i<<8));
+		}
+	} 
+	
+	// "Hard core" All Sounds Off on this midi and tracker channel
+	// This one doesn't check the note mask, and senes
+	// Also less likely to cause a VST event buffer overflow.
+	else if (note == 0xFE)	// ^^
+	{
+		//MidiSend(0xB0|nCh|(0x79<<8)); // reset all controllers
+		MidiSend(0xB0|nCh|(0x7b<<8));   // all notes off 
+		MidiSend(0xB0|nCh|(0x78<<8));   // all sounds off 
+
+		dwMidiCode = 0x80|nCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
+		for (UINT i=0; i<128; i++)	//all notes
+		{
+			pCh->uNoteOnMap[i][trackChannel]=0;
+			MidiSend(dwMidiCode|(i<<8));
+			//All Notes Off
+			//All Sounds Off
+		}
+	} 
+
+	// All "active" notes off on this midi and tracker channel
+	// using note mask.
+	else if (note > 0x80) // ==
+	{
+		dwMidiCode = 0x80|nCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
+
+		for (UINT i=0; i<128; i++)
+		{
+			// Some VSTis need a note off for each instance of a note on, e.g. fabfilter.
+			// But this can cause a VST event overflow if we have many active notes...
+			while (pCh->uNoteOnMap[i][trackChannel])
+			{
+				if (MidiSend(dwMidiCode|(i<<8)))
+					pCh->uNoteOnMap[i][trackChannel]--;
+				else //VST event queue overflow, no point in submitting more note offs.
+                    break; //todo: overflow buffer?
+			}
+		}
+	}
+
+	// Note On
+	else if (note > 0)
+	{
+		dwMidiCode = 0x90|nCh; //note on, on chan nCh
+
+		note--;
+		vol *= 2;
+		if (vol < 1) vol = 1;
+		if (vol > 0x7f) vol = 0x7f;
+		
+		// count instances of active notes.
+		// This is to send a note off for each instance of a note, for plugs like Fabfilter.
+		// Problem: if a note dies out naturally and we never send a note off, this counter 
+		// will block at max until note off. Is this a problem?
+		// Safe to assume we won't need more than 16 note offs max on a given note?
+		if (pCh->uNoteOnMap[note][trackChannel]<17) 
+			pCh->uNoteOnMap[note][trackChannel]++;
+		MidiSend(dwMidiCode|(note<<8)|(vol<<16));
+	}
+
+	
 }
 
 bool CVstPlugin::isPlaying(UINT note, UINT midiChn, UINT trackerChn)
@@ -1884,114 +2045,7 @@ bool CVstPlugin::MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT d
 	pMidiCh->uNoteOnMap[note][destTrackerChn]++;
 	return true;
 }
-
-//rewbs.VSTiNoteHoldonStopFix
-void CVstPlugin::HardAllNotesOff()
-{
-	for (int mc=0; mc<16; mc++)		//all midi chans
-	{	
-		UINT nCh = mc & 0x0f;
-		DWORD dwMidiCode = 0x90|nCh;
-		PVSTINSTCH pCh = &m_MidiCh[nCh];
-
-		for (UINT i=0; i<128; i++)	//all notes
-		{
-// The commented out nested loops appear to have too much of a perf impact.... 
-//			for (UINT c=0; c<MAX_CHANNELS; c++)	//all tracker chans
-//			{
-//				while (pCh->uNoteOnMap[i][c])
-//				{
-//					pCh->uNoteOnMap[i][c]--;
-					MidiSend(dwMidiCode|(i<<8));
-//				}
-//			}
-		}
-
-		memset(pCh->uNoteOnMap, 0, sizeof(pCh->uNoteOnMap));
-	}
-	
-	
-	Dispatch(effStopProcess, 0, 0, NULL, 0);
-	ProcessVSTEvents();
-	ClearVSTEvents();
-
-}
-//end rewbs.VSTiNoteHoldonStopFix
-
-void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, UINT trackChannel)
-//------------------------------------------------------------------------------------------------
-{
-	UINT nCh = (nMidiCh-1) & 0x0f;
-	PVSTINSTCH pCh = &m_MidiCh[nCh];
-	DWORD dwMidiCode = 0x90|nCh;
-
-	// Program change ?
-	if ((pCh->nProgram != nMidiProg) && (nMidiCh != 10) && (nMidiProg < 0x80))
-	{
-		pCh->nProgram = nMidiProg;
-		MidiSend((nMidiProg<<8)|(0xC0|nCh));
-	}
-	// Specific Note Off
-	if (note > 0xFF)			//rewbs.vstiLive
-	{
-		note--;
-		UINT i = note - 0xFF;
-		//UINT mask = 1<<(i&7);
-		//if (pCh->uNoteOnMap[i>>3] & mask)		//rewbs.deMystifyMidiNoteMap
-		if (pCh->uNoteOnMap[i][trackChannel])
-		{
-			//pCh->uNoteOnMap[i>>3] &= ~mask;	//rewbs.deMystifyMidiNoteMap
-			pCh->uNoteOnMap[i][trackChannel]--;
-			MidiSend(dwMidiCode|(i<<8));
-		}
-	} 
-	// Hardcore All Note Off on this midi channel
-	else if (note == 0xFE)	// ^^
-	{
-/*		for (int mc=0; mc<17; mc++)		//all midi chans
-		{	
-			nCh = mc & 0x0f;
-			dwMidiCode = 0x90|nCh;
-			pCh = &m_MidiCh[nCh];
-*/
-			for (UINT i=0; i<128; i++)	//all notes
-			{
-				for (UINT c=0; c<MAX_CHANNELS; c++)	//all tracker chans
-				{
-					while (pCh->uNoteOnMap[i][c])
-					{
-						pCh->uNoteOnMap[i][c]--;
-						MidiSend(dwMidiCode|(i<<8));
-					}
-				}
-			}
-//		}
-	} 
-	// All Note off on this midi and tracker channel
-	else if (note > 0x80) // ==
-	{
-		for (UINT i=0; i<128; i++)
-		{
-			while (pCh->uNoteOnMap[i][trackChannel])		
-			{
-				pCh->uNoteOnMap[i][trackChannel]--;
-				MidiSend(dwMidiCode|(i<<8));
-			}
-		}
-	} else
-	// Note On
-	if (note > 0)
-	{
-		note--;
-		vol *= 2;
-		if (vol < 1) vol = 1;
-		if (vol > 0x7f) vol = 0x7f;
-		//pCh->uNoteOnMap[note>>3] |= 1<<(note&7);	//rewbs.deMystifyMidiNoteMap
-		pCh->uNoteOnMap[note][trackChannel]++;	
-		MidiSend(dwMidiCode|(note<<8)|(vol<<16));
-	}
-	
-}
+//end rewbs.introVST
 
 
 void CVstPlugin::SetZxxParameter(UINT nParam, UINT nValue)
@@ -2008,6 +2062,67 @@ UINT CVstPlugin::GetZxxParameter(UINT nParam)
 	return (UINT) (GetParameter(nParam) * 127.0f);
 }
 //end rewbs.smoothVST
+
+
+//rewbs.VSTCompliance: not keeping Eric's preset load/save
+// code as he is not using the standard fxp format.
+/*
+// -> CODE#0002
+// -> DESC="VST plugins presets"
+BOOL CVstPlugin::SavePreset(LPCSTR lpszFileName)
+{
+	FILE *f;
+	UINT nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
+
+	if((!lpszFileName) || (!nParams) || ((f = fopen(lpszFileName, "wb")) == NULL)) return FALSE;
+
+	CHAR name[256];
+	if(!GetDefaultEffectName(&name[0])) wsprintf(&name[0],"unknown");
+
+	DWORD nLen = strlen(name) + 1;
+	fwrite(&nLen, 1, sizeof(DWORD), f);		// name string length
+	fwrite(&name[0], 1, nLen, f);			// name string
+	nLen = nParams;
+	fwrite(&nLen, 1, sizeof(DWORD), f);		// number of params
+
+	for(UINT i=0; i<nParams; i++){
+		FLOAT p = GetParameter(i);
+		fwrite(&p, 1, sizeof(FLOAT), f);	// i'th param
+	}
+
+	fclose(f);
+	return TRUE;
+}
+
+BOOL CVstPlugin::LoadPreset(LPCSTR lpszFileName)
+{
+	FILE *f;
+	UINT nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
+
+	if((!lpszFileName) || ((f = fopen(lpszFileName, "r")) == NULL)) return FALSE;
+
+	FLOAT p;
+	DWORD nLen;
+	CHAR name[256];
+	CHAR ename[256];
+
+	fread(&nLen, 1, sizeof(DWORD), f);	// name string length
+	fread(&name[0], 1, nLen, f);		// name string
+	fread(&nLen, 1, sizeof(DWORD), f);	// number of params
+
+	if(!GetDefaultEffectName(&ename[0])) wsprintf(&ename[0],"unknown");
+	if(strcmp(name,ename) != 0 || nLen != nParams) { fclose(f); return FALSE; }
+
+	for(UINT i=0; i<nParams; i++){
+		fread(&p, 1, sizeof(FLOAT), f);	// i'th param
+		SetParameter(i, p);
+	}
+
+	fclose(f);
+	return TRUE;
+}
+// -! NEW_FEATURE#0002
+*/
 
 void CVstPlugin::SaveAllParameters()
 //----------------------------------
@@ -2123,10 +2238,12 @@ VOID CVstPlugin::ToggleEditor()
 		m_pEditor = NULL;
 	} else
 	{
+		//rewbs.defaultPlugGui
 		if (HasEditor())
 			m_pEditor =  new COwnerVstEditor(this);
 		else
 			m_pEditor = new CDefaultVstEditor(this);
+		//end rewbs.defaultPlugGui
 
 		if (m_pEditor)
 			m_pEditor->OpenEditor(CMainFrame::GetMainFrame());
@@ -2182,12 +2299,14 @@ BOOL CVstPlugin::ExecuteCommand(UINT nIndex)
 	return 0;
 }
 
+//rewbs.defaultPlugGui
 CAbstractVstEditor* CVstPlugin::GetEditor()
+
 {
 	return m_pEditor;
 }
-
-
+//end rewbs.defaultPlugGui
+//rewbs.defaultPlugGui: CVstEditor now COwnerVstEditor
 
 //////////////////////////////////////////////////////////////////////////////////////
 //

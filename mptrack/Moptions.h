@@ -37,6 +37,8 @@ protected:
 	afx_msg void OnBrowseSongs()	{ BrowseForFolder(IDC_EDIT1); }
 	afx_msg void OnBrowseSamples()	{ BrowseForFolder(IDC_EDIT2); }
 	afx_msg void OnBrowseInstruments() { BrowseForFolder(IDC_EDIT3); }
+
+//rewbs.customkeys: COptionsKeyboard moved to separate file
 	DECLARE_MESSAGE_MAP();
 };
 

@@ -8,6 +8,10 @@
 */
 
 #include "stdafx.h"
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+#include "../mptrack/mptrack.h"
+// -! NEW_FEATURE#0023
 #include "sndfile.h"
 #include "it_defs.h"
 
@@ -30,7 +34,8 @@ static inline UINT ConvertVolParam(UINT value)
 }
 
 
-long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers)
+//BOOL CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers)
+long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers) //rewbs.modularInstData
 //--------------------------------------------------------------------------------
 {	
 	long returnVal=0;
@@ -76,10 +81,11 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		memcpy(penv->filename, pis->filename, 12);
 		penv->nMidiProgram = pis->mpr;
 		penv->nMidiChannel = pis->mch;
-		if (penv->nMidiChannel > 16)
-		{
-			penv->nMidiChannel = 0;
+		if (penv->nMidiChannel > 16)	//rewbs.instroVSTi
+		{								//(handle old format where midichan
+										// and mixplug are 1 value)
 			penv->nMixPlug = penv->nMidiChannel-128;
+			penv->nMidiChannel = 0;		
 		}
 		penv->wMidiBank = pis->mbank;
 		penv->nFadeOut = pis->fadeout << 5;
@@ -102,7 +108,6 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 				penv->Keyboard[k] |= ((UINT)pisex->keyboardhi[k] << 8);
 			}
 		}
-			
 		//rewbs.modularInstData  
 		//find end of standard header
 		BYTE* pEndInstHeader;
@@ -210,8 +215,322 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 	if ((penv->nVolLoopStart >= 25) || (penv->nVolLoopEnd >= 25)) penv->dwFlags &= ~ENV_VOLLOOP;
 	if ((penv->nVolSustainBegin >= 25) || (penv->nVolSustainEnd >= 25)) penv->dwFlags &= ~ENV_VOLSUSTAIN;
 
-	return returnVal;
+	return returnVal; //return offset
 }
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
+{
+	UINT i,n,nsmp;
+	DWORD id,len,size;
+	DWORD streamPos = 0;
+
+// Check file ID
+
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	if(id != 0x2e697470) return FALSE;	// .itp
+	streamPos += sizeof(DWORD);
+
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	if(id != 0x00000100) return FALSE;	// v1.00
+	streamPos += sizeof(DWORD);
+
+// Song name
+
+	// name string length
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	len = id;
+	streamPos += sizeof(DWORD);
+
+	// name string
+	memcpy(&m_szNames[0],lpStream+streamPos,len);
+	streamPos += len;
+
+// Song comments
+
+	// comment string length
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	streamPos += sizeof(DWORD);
+
+	// allocate comment string
+	if(m_lpszSongComments) delete m_lpszSongComments;
+	m_lpszSongComments = new char[id];
+
+	// m_lpszSongComments
+	if(id) memcpy(&m_lpszSongComments[0],lpStream+streamPos,id);
+	streamPos += id;
+
+// Song global config
+
+	// m_dwSongFlags
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	m_dwSongFlags = id;
+	streamPos += sizeof(DWORD);
+
+	if(!(m_dwSongFlags & SONG_ITPROJECT)) return FALSE;
+
+	// m_nDefaultGlobalVolume
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	m_nDefaultGlobalVolume = id;
+	streamPos += sizeof(DWORD);
+
+	// m_nSongPreAmp
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	m_nSongPreAmp = id;
+	streamPos += sizeof(DWORD);
+
+	// m_nDefaultSpeed
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	m_nDefaultSpeed = id;
+	streamPos += sizeof(DWORD);
+
+	// m_nDefaultTempo
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	m_nDefaultTempo = id;
+	streamPos += sizeof(DWORD);
+
+// Song channels data
+
+	// m_nChannels
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	m_nChannels = id;
+	streamPos += sizeof(DWORD);
+
+	// channel name string length (=MAX_CHANNELNAME)
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	len = id;
+	streamPos += sizeof(DWORD);
+
+	// Channels' data
+	for(i=0; i<m_nChannels; i++){
+
+		// ChnSettings[i].nPan
+		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+		ChnSettings[i].nPan = id;
+		streamPos += sizeof(DWORD);
+
+		// ChnSettings[i].dwFlags
+		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+		ChnSettings[i].dwFlags = id;
+		streamPos += sizeof(DWORD);
+
+		// ChnSettings[i].nVolume
+		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+		ChnSettings[i].nVolume = id;
+		streamPos += sizeof(DWORD);
+
+		// ChnSettings[i].szName
+		memcpy(&ChnSettings[i].szName[0],lpStream+streamPos,len);
+		streamPos += len;
+	}
+
+// Song mix plugins
+
+	// size of mix plugins data
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	streamPos += sizeof(DWORD);
+
+	// mix plugins
+	streamPos += LoadMixPlugins(lpStream+streamPos, id);
+
+// Song midi config
+
+	// midi cfg data length
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	streamPos += sizeof(DWORD);
+
+	// midi cfg
+	memcpy(&m_MidiCfg,lpStream+streamPos,id);
+	streamPos += id;
+
+// Song Instruments
+
+	// m_nInstruments
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	m_nInstruments = id;
+	streamPos += sizeof(DWORD);
+
+	// path string length (=_MAX_PATH)
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	len = id;
+	streamPos += sizeof(DWORD);
+
+	// instruments' paths
+	for(i=0; i<m_nInstruments; i++){
+		memcpy(&m_szInstrumentPath[i][0],lpStream+streamPos,len);
+		streamPos += len;
+	}
+
+// Song Orders
+
+	// size of order array (=MAX_ORDERS)
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	size = id;
+	streamPos += sizeof(DWORD);
+
+	// order data
+	memcpy(&Order[0],lpStream+streamPos,size);
+	streamPos += size;
+
+// Song Patterns
+
+	// number of patterns (=MAX_PATTERNS)
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	size = id;
+	streamPos += sizeof(DWORD);
+
+	// m_nPatternNames
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	m_nPatternNames = id;
+	streamPos += sizeof(DWORD);
+
+	// pattern name string length (=MAX_PATTERNNAME)
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	len = id;
+	streamPos += sizeof(DWORD);
+
+	// m_lpszPatternNames
+	memcpy(&m_lpszPatternNames[0],lpStream+streamPos,m_nPatternNames * len);
+	streamPos += m_nPatternNames * len;
+
+	// modcommand data length
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	n = id;
+	streamPos += sizeof(DWORD);
+
+	for(UINT npat=0; npat<size; npat++){
+
+		// PatternSize[npat]
+		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+		PatternSize[npat] = id;
+		streamPos += sizeof(DWORD);
+
+		// Free pattern if not empty
+		if(Patterns[npat]) { FreePattern(Patterns[npat]); Patterns[npat] = NULL; }
+
+		// Try to allocate & read only sized patterns
+		if(PatternSize[npat]){
+
+			// Allocate pattern
+			if( (Patterns[npat] = AllocatePattern(PatternSize[npat], m_nChannels)) == NULL ){
+				streamPos += m_nChannels * PatternSize[npat] * n;
+				continue;
+			}
+
+			// Pattern data
+			memcpy(Patterns[npat],lpStream+streamPos,m_nChannels * PatternSize[npat] * n);
+			streamPos += m_nChannels * PatternSize[npat] * n;
+		}
+	}
+
+// Load embeded samples
+
+	ITSAMPLESTRUCT pis;
+
+	// Read original number of samples
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	m_nSamples = id;
+	streamPos += sizeof(DWORD);
+
+	// Read number of embeded samples
+	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+	n = id;
+	streamPos += sizeof(DWORD);
+
+	// Read samples
+	for(i=0; i<n; i++){
+
+		// Sample id number
+		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+		nsmp = id;
+		streamPos += sizeof(DWORD);
+
+		// Sample struct
+		memcpy(&pis,lpStream+streamPos,sizeof(ITSAMPLESTRUCT));
+		streamPos += sizeof(ITSAMPLESTRUCT);
+
+		// Sample length
+		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+		len = id;
+		streamPos += sizeof(DWORD);
+
+		// Copy sample struct data
+		if(pis.id == 0x53504D49){
+			MODINSTRUMENT *pins = &Ins[nsmp];
+			memcpy(pins->name, pis.filename, 12);
+			pins->uFlags = 0;
+			pins->nLength = 0;
+			pins->nLoopStart = pis.loopbegin;
+			pins->nLoopEnd = pis.loopend;
+			pins->nSustainStart = pis.susloopbegin;
+			pins->nSustainEnd = pis.susloopend;
+			pins->nC4Speed = pis.C5Speed;
+			if(!pins->nC4Speed) pins->nC4Speed = 8363;
+			if(pis.C5Speed < 256) pins->nC4Speed = 256;
+			pins->nVolume = pis.vol << 2;
+			if(pins->nVolume > 256) pins->nVolume = 256;
+			pins->nGlobalVol = pis.gvl;
+			if(pins->nGlobalVol > 64) pins->nGlobalVol = 64;
+			if(pis.flags & 0x10) pins->uFlags |= CHN_LOOP;
+			if(pis.flags & 0x20) pins->uFlags |= CHN_SUSTAINLOOP;
+			if(pis.flags & 0x40) pins->uFlags |= CHN_PINGPONGLOOP;
+			if(pis.flags & 0x80) pins->uFlags |= CHN_PINGPONGSUSTAIN;
+			pins->nPan = (pis.dfp & 0x7F) << 2;
+			if(pins->nPan > 256) pins->nPan = 256;
+			if(pis.dfp & 0x80) pins->uFlags |= CHN_PANNING;
+			pins->nVibType = autovibit2xm[pis.vit & 7];
+			pins->nVibRate = pis.vis;
+			pins->nVibDepth = pis.vid & 0x7F;
+			pins->nVibSweep = (pis.vir + 3) / 4;
+			if(pis.length){
+				pins->nLength = pis.length;
+				if (pins->nLength > MAX_SAMPLE_LENGTH) pins->nLength = MAX_SAMPLE_LENGTH;
+				UINT flags = (pis.cvt & 1) ? RS_PCM8S : RS_PCM8U;
+				if (pis.flags & 2){
+					flags += 5;
+					if (pis.flags & 4) flags |= RSF_STEREO;
+					pins->uFlags |= CHN_16BIT;
+				} 
+				else{
+					if (pis.flags & 4) flags |= RSF_STEREO;
+				}
+				// Read sample data
+				ReadSample(&Ins[nsmp], flags, (LPSTR)(lpStream+streamPos), len);
+				streamPos += len;
+				memcpy(m_szNames[nsmp], pis.name, 26);
+			}
+		}
+	}
+
+// Load instruments
+
+	CMappedFile f;
+	LPBYTE lpFile;
+
+	for(i=0; i<m_nInstruments; i++){
+
+		if(m_szInstrumentPath[i][0] == '\0' || !f.Open(m_szInstrumentPath[i])) continue;
+
+		len = f.GetLength();
+		lpFile = f.Lock(len);
+		if(!lpFile) { f.Close(); continue; }
+
+		ReadInstrumentFromFile(i+1, lpFile, len);
+		f.Unlock();
+		f.Close();	
+	}
+
+// Leave
+
+	m_nType = MOD_TYPE_IT;
+	m_nMaxPeriod = 0xF000;
+	m_nMinPeriod = 8;
+
+	return TRUE;
+}
+// -! NEW_FEATURE#0023
+
 
 
 BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
@@ -222,8 +541,14 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	DWORD inspos[MAX_INSTRUMENTS];
 	DWORD smppos[MAX_SAMPLES];
 	DWORD patpos[MAX_PATTERNS];
-	BYTE chnmask[MAX_CHANNELS], channels_used[MAX_CHANNELS];  // changed 64 to MAX_CHANNELS
-	MODCOMMAND lastvalue[MAX_CHANNELS];
+// Using eric's code here to take care of NNAs etc..
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//	BYTE chnmask[64], channels_used[64];
+//	MODCOMMAND lastvalue[64];
+	BYTE chnmask[MAX_BASECHANNELS], channels_used[MAX_BASECHANNELS];
+	MODCOMMAND lastvalue[MAX_BASECHANNELS];
+// -! BEHAVIOUR_CHANGE#0006
 
 	if ((!lpStream) || (dwMemLength < 0x100)) return FALSE;
 	if ((pifh->id != 0x4D504D49) || (pifh->insnum > 0xFF)
@@ -236,6 +561,11 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATMODE;
 	if (pifh->flags & 0x80) m_dwSongFlags |= SONG_EMBEDMIDICFG;
 	if (pifh->flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	if (pifh->flags & 0x2000) m_dwSongFlags |= SONG_ITPROJECT;
+// -! NEW_FEATURE#0023
+
 	memcpy(m_szNames[0], pifh->songname, 26);
 	m_szNames[0][26] = 0;
 	// Global Volume
@@ -249,7 +579,11 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	if (pifh->tempo) m_nDefaultTempo = pifh->tempo;
 	m_nSongPreAmp = pifh->mv & 0x7F;
 	// Reading Channels Pan Positions
-	for (int ipan=0; ipan<64; ipan++) if (pifh->chnpan[ipan] != 0xFF)
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//	for (int ipan=0; ipan<64; ipan++) if (pifh->chnpan[ipan] != 0xFF)
+	for (int ipan=0; ipan<MAX_BASECHANNELS; ipan++) if (pifh->chnpan[ipan] != 0xFF)
+// -! BEHAVIOUR_CHANGE#0006
 	{
 		ChnSettings[ipan].nVolume = pifh->chnvol[ipan];
 		ChnSettings[ipan].nPan = 128;
@@ -334,7 +668,11 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
-		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_CHANNELS*MAX_CHANNELNAME)) // MAX_CHANNELS was 64
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//		if ((dwMemPos + len <= dwMemLength) && (len <= 64*MAX_CHANNELNAME))
+		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_BASECHANNELS*MAX_CHANNELNAME))
+// -! BEHAVIOUR_CHANGE#0006
 		{
 			UINT n = len / MAX_CHANNELNAME;
 			if (n > m_nChannels) m_nChannels = n;
@@ -353,8 +691,9 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	// Checking for unused channels
 	UINT npatterns = pifh->patnum;
-
-	if (npatterns > MAX_PATTERNS)
+	
+	//plastiq: code readability improvements
+	if (npatterns > MAX_PATTERNS) 
 		npatterns = MAX_PATTERNS;
 
 	for (UINT patchk=0; patchk<npatterns; patchk++)
@@ -376,7 +715,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 		UINT i = 0;
 		const BYTE *p = lpStream+patpos[patchk]+8;
 		UINT nrow = 0;
-
+		
 		while (nrow<rows)
 		{
 			if (i >= len) break;
@@ -399,7 +738,11 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 			// Channel used
 			if (chnmask[ch] & 0x0F)         // if this channel is used set m_nChannels
 			{
-				if ((ch >= m_nChannels) && (ch < MAX_CHANNELS)) m_nChannels = ch+1; // MAX_CHANNELS was 64
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//				if ((ch >= m_nChannels) && (ch < 64)) m_nChannels = ch+1;
+				if ((ch >= m_nChannels) && (ch < MAX_BASECHANNELS)) m_nChannels = ch+1;
+// -! BEHAVIOUR_CHANGE#0006
 			}
 			// Now we actually update the pattern-row entry the note,instrument etc.
 			// Note          
@@ -498,6 +841,11 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 		UINT len = *((WORD *)(lpStream+patpos[npat]));
 		UINT rows = *((WORD *)(lpStream+patpos[npat]+2));
 		if ((rows < 4) || (rows > 256)) continue;
+// -> CODE#0008
+// -> DESC="#define to set pattern size"
+//		if ((rows < 4) || (rows > 256)) continue;
+		if ((rows < 4) || (rows > MAX_PATTERN_ROWS)) continue;
+// -> BEHAVIOUR_CHANGE#0008
 		if (patpos[npat]+8+len > dwMemLength) continue;
 		PatternSize[npat] = rows;
 		if ((Patterns[npat] = AllocatePattern(rows, m_nChannels)) == NULL) continue;
@@ -598,9 +946,9 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 					if ((vol >= 193) && (vol <= 202)) { m[ch].volcmd = VOLCMD_TONEPORTAMENTO; m[ch].vol = vol - 193; } else
 					// 203-212: Vibrato
 					if ((vol >= 203) && (vol <= 212)) { m[ch].volcmd = VOLCMD_VIBRATOSPEED; m[ch].vol = vol - 203; } else
-					// 213-222: Velocity
+					// 213-222: Velocity //rewbs.velocity
 					if ((vol >= 213) && (vol <= 222)) { m[ch].volcmd = VOLCMD_VELOCITY; m[ch].vol = vol - 213; } else	//rewbs.velocity
-					// 223-232: Offset
+					// 223-232: Offset //rewbs.VolOffset
 					if ((vol >= 223) && (vol <= 232)) { m[ch].volcmd = VOLCMD_OFFSET; m[ch].vol = vol - 223; } //rewbs.volOff
 					lastvalue[ch].volcmd = m[ch].volcmd;
 					lastvalue[ch].vol = m[ch].vol;
@@ -638,12 +986,243 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	m_nMaxPeriod = 0xF000;
 	return TRUE;
 }
-
+//end plastiq: code readability improvements
 
 #ifndef MODPLUG_NO_FILESAVE
 //#define SAVEITTIMESTAMP
 #pragma warning(disable:4100)
 
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
+{
+// Check song type
+
+	if(!(m_dwSongFlags & SONG_ITPROJECT)) return FALSE;
+
+	UINT i,j = 0;
+	for(i = 0 ; i < m_nInstruments ; i++) { if(m_szInstrumentPath[i][0] != '\0' || !Headers[i+1]) j++; }
+	if(m_nInstruments && j != m_nInstruments) return FALSE;
+
+// Open file
+
+	FILE *f;
+	if((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return FALSE;
+
+// File ID
+
+	DWORD id = 0x2e697470; // .itp ASCII
+	fwrite(&id, 1, sizeof(id), f);
+
+	id = 0x00000100; // v1.00
+	fwrite(&id, 1, sizeof(id), f);
+
+// Song name
+
+	// name string length
+	id = 27;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// song name
+	fwrite(&m_szNames[0], 1, 27, f);
+
+// Song comments
+
+	// comment string length
+	id = m_lpszSongComments ? strlen(m_lpszSongComments)+1 : 0;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// comment string
+	if(m_lpszSongComments) fwrite(&m_lpszSongComments[0], 1, strlen(m_lpszSongComments)+1, f);
+
+// Song global config
+
+	id = m_dwSongFlags;
+	fwrite(&id, 1, sizeof(id), f);
+	id = m_nDefaultGlobalVolume;
+	fwrite(&id, 1, sizeof(id), f);
+	id = m_nSongPreAmp;
+	fwrite(&id, 1, sizeof(id), f);
+	id = m_nDefaultSpeed;
+	fwrite(&id, 1, sizeof(id), f);
+	id = m_nDefaultTempo;
+	fwrite(&id, 1, sizeof(id), f);
+	
+// Song channels data
+
+	// number of channels
+	id = m_nChannels;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// channel name string length
+	id = MAX_CHANNELNAME;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// channel config data
+	for(i=0; i<m_nChannels; i++){
+		id = ChnSettings[i].nPan;
+		fwrite(&id, 1, sizeof(id), f);
+		id = ChnSettings[i].dwFlags;
+		fwrite(&id, 1, sizeof(id), f);
+		id = ChnSettings[i].nVolume;
+		fwrite(&id, 1, sizeof(id), f);
+		fwrite(&ChnSettings[i].szName[0], 1, MAX_CHANNELNAME, f);
+	}
+
+// Song mix plugins
+
+	// mix plugins data length
+	id = SaveMixPlugins(NULL, TRUE);
+	fwrite(&id, 1, sizeof(id), f);
+
+	// mix plugins data
+	SaveMixPlugins(f, FALSE);
+
+// Song midi config
+
+	// midi cfg data length
+	id = sizeof(MODMIDICFG);
+	fwrite(&id, 1, sizeof(id), f);
+
+	// midi cfg
+	fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
+
+// Song Instruments
+
+	// number of instruments
+	id = m_nInstruments;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// path name string length
+	id = _MAX_PATH;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// instruments path
+	for(i=0; i<m_nInstruments; i++) fwrite(&m_szInstrumentPath[i][0], 1, _MAX_PATH, f);
+
+// Song Orders
+
+	// order array size
+	id = MAX_ORDERS;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// order array
+	fwrite(&Order[0], 1, MAX_ORDERS, f);
+
+// Song Patterns
+
+	// number of patterns
+	id = MAX_PATTERNS;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// number of pattern name strings
+	id = m_nPatternNames;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// length of a pattern name string
+	id = MAX_PATTERNNAME;
+	fwrite(&id, 1, sizeof(id), f);
+	fwrite(&m_lpszPatternNames[0], 1, m_nPatternNames * MAX_PATTERNNAME, f);
+
+	// modcommand data length
+	id = sizeof(MODCOMMAND);
+	fwrite(&id, 1, sizeof(id), f);
+
+	// patterns data content
+	for(UINT npat=0; npat<MAX_PATTERNS; npat++){
+		// pattern size (number of rows)
+		id = Patterns[npat] ? PatternSize[npat] : 0;
+		fwrite(&id, 1, sizeof(id), f);
+		// pattern data
+		if(Patterns[npat] && PatternSize[npat]) fwrite(Patterns[npat], 1, m_nChannels * PatternSize[npat] * sizeof(MODCOMMAND), f);
+	}
+
+// Song lonely (instrument-less) samples
+
+	// Write original number of samples
+	id = m_nSamples;
+	fwrite(&id, 1, sizeof(id), f);
+
+	BOOL sampleUsed[MAX_SAMPLES];
+	memset(&sampleUsed,0,MAX_SAMPLES * sizeof(BOOL));
+
+	// Mark samples used in instruments
+	for(i=0; i<m_nInstruments; i++){
+		if(Headers[i+1]){
+			INSTRUMENTHEADER *p = Headers[i+1];
+			for(j=0; j<128; j++) if(p->Keyboard[j]) sampleUsed[p->Keyboard[j]] = TRUE;
+		}
+	}
+
+	// Count samples not used in any instrument
+	i = 0;
+	for(j=1; j<=m_nSamples; j++) if(!sampleUsed[j] && Ins[j].pSample) i++;
+
+	id = i;
+	fwrite(&id, 1, sizeof(id), f);
+
+	// Write samples not used in any instrument
+	ITSAMPLESTRUCT itss;
+	for(UINT nsmp=1; nsmp<=m_nSamples; nsmp++){
+		if(!sampleUsed[nsmp] && Ins[nsmp].pSample){
+
+			MODINSTRUMENT *psmp = &Ins[nsmp];
+			memset(&itss, 0, sizeof(itss));
+			memcpy(itss.filename, psmp->name, 12);
+			memcpy(itss.name, m_szNames[nsmp], 26);
+
+			itss.id = 0x53504D49;
+			itss.gvl = (BYTE)psmp->nGlobalVol;
+			itss.flags = 0x00;
+
+			if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
+			if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
+			if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
+			if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
+			itss.C5Speed = psmp->nC4Speed;
+			if (!itss.C5Speed) itss.C5Speed = 8363;
+			itss.length = psmp->nLength;
+			itss.loopbegin = psmp->nLoopStart;
+			itss.loopend = psmp->nLoopEnd;
+			itss.susloopbegin = psmp->nSustainStart;
+			itss.susloopend = psmp->nSustainEnd;
+			itss.vol = psmp->nVolume >> 2;
+			itss.dfp = psmp->nPan >> 2;
+			itss.vit = autovibxm2it[psmp->nVibType & 7];
+			itss.vis = psmp->nVibRate;
+			itss.vid = psmp->nVibDepth;
+			itss.vir = (psmp->nVibSweep < 64) ? psmp->nVibSweep * 4 : 255;
+			if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
+			if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
+			UINT flags = RS_PCM8S;
+
+			if (psmp->uFlags & CHN_STEREO){
+				flags = RS_STPCM8S;
+				itss.flags |= 0x04;
+			}
+			if (psmp->uFlags & CHN_16BIT){
+				itss.flags |= 0x02;
+				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
+			}
+
+			id = nsmp;
+			fwrite(&id, 1, sizeof(id), f);
+
+			itss.samplepointer = NULL;
+			fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
+
+			id = WriteSample(NULL, psmp, flags);
+			fwrite(&id, 1, sizeof(id), f);
+			WriteSample(f, psmp, flags);
+		}
+	}
+
+// Close file
+
+	fclose(f);
+	return TRUE;
+}
+// -! NEW_FEATURE#0023
 BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 //---------------------------------------------------------
 {
@@ -657,9 +1236,14 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	DWORD smppos[MAX_SAMPLES];
 	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2;
 	WORD patinfo[4];
-	BYTE chnmask[MAX_CHANNELS];
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//	BYTE chnmask[64];
+//	MODCOMMAND lastvalue[64];
+	BYTE chnmask[MAX_BASECHANNELS];
+	MODCOMMAND lastvalue[MAX_BASECHANNELS];
+// -! BEHAVIOUR_CHANGE#0006
 	BYTE buf[512];
-	MODCOMMAND lastvalue[MAX_CHANNELS];
 	FILE *f;
 
 
@@ -675,8 +1259,17 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	lstrcpyn(header.songname, m_szNames[0], 27);
 	header.reserved1 = 0x1004;
 	header.ordnum = 0;
-	while ((header.ordnum < MAX_ORDERS) /*&& (Order[header.ordnum] < 0xFF)*/) header.ordnum++; //rewbs.AllowSaveHiddenPatterns
-	if (header.ordnum < MAX_ORDERS) Order[header.ordnum++] = 0xFF;
+	//while ((header.ordnum < MAX_ORDERS) /*&& (Order[header.ordnum] < 0xFF)*/) header.ordnum++; //rewbs.AllowSaveHiddenPatterns
+	//if (header.ordnum < MAX_ORDERS) Order[header.ordnum++] = 0xFF;
+	//Ericus' implementation is better.
+// -> CODE#0013
+// -> DESC="load/save the whole pattern order list"
+//	while ((header.ordnum < MAX_ORDERS) && (Order[header.ordnum] < 0xFF)) header.ordnum++;
+//	if (header.ordnum < MAX_ORDERS) Order[header.ordnum++] = 0xFF;
+	header.ordnum = MAX_ORDERS;
+	Order[MAX_ORDERS-1] = 0xFF;
+// -! CODE#0013
+
 	header.insnum = m_nInstruments;
 	header.smpnum = m_nSamples;
 	header.patnum = MAX_PATTERNS;
@@ -690,6 +1283,10 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
 	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	if (m_dwSongFlags & SONG_ITPROJECT) header.flags |= 0x2000;
+// -! NEW_FEATURE#0023
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
 	header.mv = m_nSongPreAmp;
 	if (header.mv < 0x20) header.mv = 0x20;
@@ -805,7 +1402,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 
 		memset(&iti, 0, sizeof(iti));
 		iti.id = 0x49504D49;	// "IMPI"
-		iti.trkvers = 0x220;	//0x211
+		//iti.trkvers = 0x211;
+		iti.trkvers = 0x220;	//rewbs.itVersion
 		if (Headers[nins])
 		{
 			INSTRUMENTHEADER *penv = Headers[nins];
@@ -816,8 +1414,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			iti.mpr = penv->nMidiProgram;
 			iti.mch = penv->nMidiChannel;
 			iti.nna = penv->nNNA;
-			//if (penv->nDCT<DCT_PLUGIN) iti.dct = penv->nDCT; else iti.dct =0;
-			iti.dct = penv->nDCT; //will other apps barf if they get an unknown DCT?
+			//if (penv->nDCT<DCT_PLUGIN) iti.dct = penv->nDCT; else iti.dct =0;	
+			iti.dct = penv->nDCT; //rewbs.instroVSTi: will other apps barf if they get an unknown DCT?
 			iti.dca = penv->nDNA;
 			iti.fadeout = penv->nFadeOut >> 5;
 			iti.pps = penv->nPPS;
@@ -1412,7 +2010,11 @@ void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLeng
 UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 //----------------------------------------------------
 {
-	DWORD chinfo[64];
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//	DWORD chinfo[64];
+	DWORD chinfo[MAX_BASECHANNELS];
+// -! BEHAVIOUR_CHANGE#0006
 	CHAR s[32];
 	DWORD nPluginSize;
 	UINT nTotalSize = 0;
@@ -1480,7 +2082,11 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 	}
 	for (UINT j=0; j<m_nChannels; j++)
 	{
-		if (j < 64)
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//		if (j < 64)
+		if (j < MAX_BASECHANNELS)
+// -! BEHAVIOUR_CHANGE#0006
 		{
 			if ((chinfo[j] = ChnSettings[j].nMixPlugin) != 0)
 			{
@@ -1532,7 +2138,11 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 		if (nPluginSize > nLen-nPos-8) break;;
 		if ((*(DWORD *)(p+nPos)) == 'XFHC')
 		{
-			for (UINT ch=0; ch<64; ch++) if (ch*4 < nPluginSize)
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//			for (UINT ch=0; ch<64; ch++) if (ch*4 < nPluginSize)
+			for (UINT ch=0; ch<MAX_BASECHANNELS; ch++) if (ch*4 < nPluginSize)
+// -! BEHAVIOUR_CHANGE#0006
 			{
 				ChnSettings[ch].nMixPlugin = *(DWORD *)(p+nPos+8+ch*4);
 			}

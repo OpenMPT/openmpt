@@ -24,7 +24,7 @@ public:
 	afx_msg void OnRandomizePreset();
 
 	//Overridden:
-	void UpdateAll() {};
+	void UpdateAll() {m_pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0); };
 	afx_msg void OnClose();
 	BOOL OpenEditor(CWnd *parent);
 	VOID DoClose();

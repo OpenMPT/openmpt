@@ -58,115 +58,32 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 				return true; // Mapped to a command, no need to pass message on.
 		}
 	}
+	
+	//The key was not handled by a command, but it might still be useful
+	if ((pMsg->message == WM_CHAR) && (m_pModDoc)) //key is a character
+	{
+		UINT nFlags = HIWORD(pMsg->lParam);
+		KeyEventType kT = (CMainFrame::GetMainFrame())->GetInputHandler()->GetKeyEventType(nFlags);
 
-	if ((pMsg->message == WM_CHAR) && (m_pModDoc))
+		if (kT == kKeyEventDown)
+			if (HandleChar(wParam))
+				return true;
+	} 
+	else if (pMsg->message == WM_KEYDOWN) //key is not a character
 	{
-		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
-		if ((penv) && (m_nNote < 120))
-		{
-			if ((m_bIns) && (((wParam >= '0') && (wParam <= '9')) || (wParam == ' ')))
-			{
-				UINT n = m_nOldIns;
-				if (wParam != ' ')
-				{
-					n = (10*penv->Keyboard[m_nNote] + (wParam - '0')) % 10000;
-					if ((n >= MAX_SAMPLES) || ((pSndFile->m_nSamples < 1000) && (n >= 1000))) n = (n % 1000);
-					if ((n >= MAX_SAMPLES) || ((pSndFile->m_nSamples < 100) && (n >= 100))) n = (n % 100); else
-					if ((n > 31) && (pSndFile->m_nSamples < 32) && (n % 10)) n = (n % 10);
-				}
-				if (n != penv->Keyboard[m_nNote])
-				{
-					penv->Keyboard[m_nNote] = n;
-					m_pModDoc->SetModified();
-					InvalidateRect(NULL, FALSE);
-				}
-				if (wParam == ' ')
-				{
-					if (m_nNote < 119) m_nNote++;
-					InvalidateRect(NULL, FALSE);
-				}
-				return TRUE;
-			} else
-			if ((!m_bIns) || (pSndFile->m_nType & MOD_TYPE_IT))
-			{
-//				UINT note = CMainFrame::GetNoteFromKey(wParam, HIWORD(pMsg->lParam));
-				UINT n = penv->NoteMap[m_nNote];
-				BOOL bOk = FALSE;
-/*				if ((note > 0) && (note <= 120))
-				{
-					n = note;
-					bOk = TRUE;
-				} else*/
-				if ((wParam >= '0') && (wParam <= '9'))
-				{
-					if (n)
-					{
-						n = ((n-1) % 12) + (wParam-'0')*12 + 1;
-					} else
-					{
-						n = (m_nNote % 12) + (wParam-'0')*12 + 1;
-					}
-				} else
-				if (wParam == ' ')
-				{
-					n = (m_nOldNote) ? m_nOldNote : m_nNote+1;
-				}
-				if (n != penv->NoteMap[m_nNote])
-				{
-					penv->NoteMap[m_nNote] = n;
-					m_pModDoc->SetModified();
-					InvalidateRect(NULL, FALSE);
-				}
-				if (bOk) SetCurrentNote(m_nNote+1);
-				//return TRUE;
-			}
-			//return TRUE;
-		}
-	} else
-	if (pMsg->message == WM_KEYDOWN)
-	{
-		BOOL bRedraw = FALSE, bOk = TRUE;
-		switch(wParam)
-		{
-		case VK_RIGHT:
-			if (!m_bIns) { m_bIns = TRUE; bRedraw = TRUE; } else
-			if (m_nNote < 119) { m_nNote++; m_bIns = FALSE; bRedraw = TRUE; }
-			break;
-		case VK_LEFT:
-			if (m_bIns) { m_bIns = FALSE; bRedraw = TRUE; } else
-			if (m_nNote) { m_nNote--; m_bIns = TRUE; bRedraw = TRUE; }
-			break;
-		case VK_UP:
-			if (m_nNote > 0) { m_nNote--; bRedraw = TRUE; }
-			break;
-		case VK_DOWN:
-			if (m_nNote < 119) { m_nNote++; bRedraw = TRUE; }
-			break;
-		case VK_PRIOR:
-			if (m_nNote > 3) { m_nNote-=3; bRedraw = TRUE; } else
-			if (m_nNote > 0) { m_nNote = 0; bRedraw = TRUE; }
-			break;
-		case VK_NEXT:
-			if (m_nNote+3 < 120) { m_nNote+=3; bRedraw = TRUE; } else
-			if (m_nNote < 119) { m_nNote = 119; bRedraw = TRUE; }
-			break;
-		case VK_TAB:
-			return TRUE;
-		case VK_RETURN:
-			if (m_pModDoc)
-			{
-				INSTRUMENTHEADER *penv = m_pModDoc->GetSoundFile()->Headers[m_nInstrument];
-				if (m_bIns) m_nOldIns = penv->Keyboard[m_nNote];
-				else m_nOldNote = penv->NoteMap[m_nNote];
-			}
-			return TRUE;
-		default:
-			bOk = FALSE;
-		}
-		if (bRedraw) InvalidateRect(NULL, FALSE);
-		if (bOk) return TRUE;
+		if (HandleNav(wParam))
+			return true;
 	}
+	else if (pMsg->message == WM_KEYUP) //stop notes on key release
+	{
+		if (((pMsg->wParam >= '0') && (pMsg->wParam <= '9')) || (pMsg->wParam == ' ') ||
+			((pMsg->wParam >= VK_NUMPAD0) && (pMsg->wParam <= VK_NUMPAD9)))
+		{
+			StopNote(m_nPlayingNote);
+			return true;
+		}
+	}
+
 	return CStatic::PreTranslateMessage(pMsg);
 }
 
@@ -298,7 +215,7 @@ void CNoteMapWnd::OnSetFocus(CWnd *pOldWnd)
 {
 	CWnd::OnSetFocus(pOldWnd);
 	InvalidateRect(NULL, FALSE);
-	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus= (CWnd*) this;
+	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus= (CWnd*) this; //rewbs.customKeys
 }
 
 
@@ -307,7 +224,7 @@ void CNoteMapWnd::OnKillFocus(CWnd *pNewWnd)
 {
 	CWnd::OnKillFocus(pNewWnd);
 	InvalidateRect(NULL, FALSE);
-	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus=NULL;
+	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus=NULL;	//rewbs.customKeys
 }
 
 
@@ -488,6 +405,7 @@ void CNoteMapWnd::OnInstrumentDuplicate()
 	if (m_pParent) m_pParent->PostMessage(WM_COMMAND, ID_INSTRUMENT_DUPLICATE);
 }
 
+//rewbs.customKeys
 LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------------------
 {
@@ -496,14 +414,30 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
+	//Handle notes
+
+	
+
 	if (wParam>=kcInsNoteMapStartNotes && wParam<=kcInsNoteMapEndNotes)
 	{
-		EnterNote(wParam-kcInsNoteMapStartNotes+1+pMainFrm->GetBaseOctave()*12);
+		//Special case: number keys override notes if we're in the sample # column.
+		if ((m_bIns) && (((lParam >= '0') && (lParam <= '9')) || (lParam == ' ')))
+			HandleChar(lParam);
+		else
+			EnterNote(wParam-kcInsNoteMapStartNotes+1+pMainFrm->GetBaseOctave()*12);
+		
+		return wParam;
+	}
+	
+	if (wParam>=kcInsNoteMapStartNoteStops && wParam<=kcInsNoteMapEndNoteStops)
+	{
+		StopNote(m_nPlayingNote);
 		return wParam;
 	}
 }
 
 void CNoteMapWnd::EnterNote(UINT note)
+//------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
@@ -524,10 +458,150 @@ void CNoteMapWnd::EnterNote(UINT note)
 				m_pModDoc->SetModified();
 				InvalidateRect(NULL, FALSE);
 			}
-			if (bOk) SetCurrentNote(m_nNote+1);
+			if (bOk) 
+			{
+				SetCurrentNote(m_nNote+1);
+				PlayNote(m_nNote);
+			}
+			
 		}
 	}
 }
+
+bool CNoteMapWnd::HandleChar(WPARAM c)
+//------------------------------------
+{
+	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
+	if ((penv) && (m_nNote < 120))
+	{
+		if ((m_bIns) && (((c >= '0') && (c <= '9')) || (c == ' ')))	//in sample # column
+		{
+			UINT n = m_nOldIns;
+			if (c != ' ')
+			{
+				n = (10*penv->Keyboard[m_nNote] + (c - '0')) % 10000;
+				if ((n >= MAX_SAMPLES) || ((pSndFile->m_nSamples < 1000) && (n >= 1000))) n = (n % 1000);
+				if ((n >= MAX_SAMPLES) || ((pSndFile->m_nSamples < 100) && (n >= 100))) n = (n % 100); else
+				if ((n > 31) && (pSndFile->m_nSamples < 32) && (n % 10)) n = (n % 10);
+			}
+			if (n != penv->Keyboard[m_nNote])
+			{
+				penv->Keyboard[m_nNote] = n;
+				m_pModDoc->SetModified();
+				InvalidateRect(NULL, FALSE);
+				PlayNote(m_nNote+1);
+			}
+			if (c == ' ')
+			{
+				if (m_nNote < 119) m_nNote++;
+				InvalidateRect(NULL, FALSE);
+				PlayNote(m_nNote);
+			}
+			return true;
+		} 
+		else if ((!m_bIns) || (pSndFile->m_nType & MOD_TYPE_IT)) //in note column
+		{
+			UINT n = penv->NoteMap[m_nNote];
+
+			if ((c >= '0') && (c <= '9'))
+			{
+				if (n)
+				{
+					n = ((n-1) % 12) + (c-'0')*12 + 1;
+				} else
+				{
+					n = (m_nNote % 12) + (c-'0')*12 + 1;
+				}
+			} else
+			if (c == ' ')
+			{
+				n = (m_nOldNote) ? m_nOldNote : m_nNote+1;
+			}
+			if (n != penv->NoteMap[m_nNote])
+			{
+				penv->NoteMap[m_nNote] = n;
+				m_pModDoc->SetModified();
+				InvalidateRect(NULL, FALSE);
+			}
+			SetCurrentNote(m_nNote+1);
+			PlayNote(m_nNote);
+
+			return true;
+		}
+	}
+	return false;
+}
+
+bool CNoteMapWnd::HandleNav(WPARAM k)
+//------------------------------------
+{
+	BOOL bRedraw = FALSE;
+
+	//HACK: handle numpad (convert numpad number key to normal number key)
+	if ((k >= VK_NUMPAD0) && (k <= VK_NUMPAD9)) return HandleChar(k-VK_NUMPAD0+'0');
+
+	switch(k)
+	{
+	case VK_RIGHT:
+		if (!m_bIns) { m_bIns = TRUE; bRedraw = TRUE; } else
+		if (m_nNote < 119) { m_nNote++; m_bIns = FALSE; bRedraw = TRUE; }
+		break;
+	case VK_LEFT:
+		if (m_bIns) { m_bIns = FALSE; bRedraw = TRUE; } else
+		if (m_nNote) { m_nNote--; m_bIns = TRUE; bRedraw = TRUE; }
+		break;
+	case VK_UP:
+		if (m_nNote > 0) { m_nNote--; bRedraw = TRUE; }
+		break;
+	case VK_DOWN:
+		if (m_nNote < 119) { m_nNote++; bRedraw = TRUE; }
+		break;
+	case VK_PRIOR:
+		if (m_nNote > 3) { m_nNote-=3; bRedraw = TRUE; } else
+		if (m_nNote > 0) { m_nNote = 0; bRedraw = TRUE; }
+		break;
+	case VK_NEXT:
+		if (m_nNote+3 < 120) { m_nNote+=3; bRedraw = TRUE; } else
+		if (m_nNote < 119) { m_nNote = 119; bRedraw = TRUE; }
+		break;
+	case VK_TAB:
+		return true;
+	case VK_RETURN:
+		if (m_pModDoc)
+		{
+			INSTRUMENTHEADER *penv = m_pModDoc->GetSoundFile()->Headers[m_nInstrument];
+			if (m_bIns) m_nOldIns = penv->Keyboard[m_nNote];
+			else m_nOldNote = penv->NoteMap[m_nNote];
+		}
+		return true;
+	}
+	if (bRedraw) 
+	{
+		InvalidateRect(NULL, FALSE);
+		return true;
+	}
+
+	return false;
+}
+
+void CNoteMapWnd::PlayNote(int note)
+{
+	if (m_nPlayingNote >=0) return; //no polyphony in notemap window
+	m_pModDoc->PlayNote(note, m_nInstrument, 0, TRUE);
+	m_nPlayingNote=note;
+}
+
+void CNoteMapWnd::StopNote(int note = -1)
+{
+	if (note<0) note = m_nPlayingNote;
+	if (note<0) return;
+
+	m_pModDoc->NoteOff(note, TRUE, m_nInstrument);
+	m_nPlayingNote=-1;
+}
+
+//end rewbs.customKeys
 
 /////////////////////////////////////////////////////////////////////////
 // CCtrlInstruments
@@ -546,7 +620,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(IDC_CHECK2,				OnEnableCutOff)
 	ON_COMMAND(IDC_CHECK3,				OnEnableResonance)
-	ON_COMMAND(IDC_INSVIEWPLG,			TogglePluginEditor)
+	ON_COMMAND(IDC_INSVIEWPLG,			TogglePluginEditor)		//rewbs.instroVSTi
 	ON_EN_CHANGE(IDC_EDIT_INSTRUMENT,	OnInstrumentChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_FILENAME,	OnFileNameChanged)
@@ -560,7 +634,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_CBN_SELCHANGE(IDC_COMBO3,		OnDCAChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4,		OnPPCChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5,		OnMCHChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)	//rewbs.instroVSTi
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, OnEditSampleMap)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -580,7 +654,7 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO3,				m_ComboDCA);
 	DDX_Control(pDX, IDC_COMBO4,				m_ComboPPC);
 	DDX_Control(pDX, IDC_COMBO5,				m_CbnMidiCh);
-	DDX_Control(pDX, IDC_COMBO6,				m_CbnMixPlug);
+	DDX_Control(pDX, IDC_COMBO6,				m_CbnMixPlug);	//rewbs.instroVSTi
 	DDX_Control(pDX, IDC_SPIN7,					m_SpinFadeOut);
 	DDX_Control(pDX, IDC_SPIN8,					m_SpinGlobalVol);
 	DDX_Control(pDX, IDC_SPIN9,					m_SpinPanning);
@@ -649,7 +723,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_ComboDCT.AddString("Note");
 	m_ComboDCT.AddString("Sample");
 	m_ComboDCT.AddString("Instrument");
-	m_ComboDCT.AddString("Plugin");
+	m_ComboDCT.AddString("Plugin");	//rewbs.instroVSTi
 	// DCA
 	m_ComboDCA.AddString("Note Cut");
 	m_ComboDCA.AddString("Note Off");
@@ -663,6 +737,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	// Midi Program
 	m_SpinMidiPR.SetRange(0, 255);
 	// Midi Channel
+	//rewbs.instroVSTi: we no longer combine midi chan and FX in same cbbox
 	for (UINT ich=0; ich<17; ich++)
 	{
 		UINT n = 0;
@@ -671,37 +746,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 		else { wsprintf(s, "%d", ich); n=ich; }
 		if (s[0]) m_CbnMidiCh.SetItemData(m_CbnMidiCh.AddString(s), n);
 	}
-/*	for (UINT plug=0; plug<=MAX_MIXPLUGINS; plug++)
-	{
-		UINT n = 0;
-		s[0] = 0;
-		if (!plug) { strcpy(s, "Default"); n=0; } 
-		else { wsprintf(s, "FX%d", plug); n=plug; }
-		if (s[0]) m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(s), n);
-	}
-
-	for (UINT plug=0; plug<=MAX_MIXPLUGINS; plug++)
-	{
-		UINT n = 0;
-		s[0] = 0;
-		if (!plug) 
-		{ 
-			strcpy(s, "No plugin"); n=0; 
-		} 
-		else
-		{
-			PSNDMIXPLUGIN p = &(m_pSndFile->m_MixPlugins[plug-1]);
-			p->Info.szLibraryName[63] = 0;
-			if (p->Info.szLibraryName[0])
-				wsprintf(s, "FX%d: %s", plug, p->Info.szLibraryName);
-			else
-				wsprintf(s, "FX%d: undefined", plug);
-		}
-
-		m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(s), n);
-	}
-*/
-
+	//end rewbs.instroVSTi:
 	// Vol/Pan Swing
 	m_SliderVolSwing.SetRange(0, 64);
 	m_SliderPanSwing.SetRange(0, 64);
@@ -777,6 +822,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 		}
 	}
 
+	//rewbs.instroVSTi
 	//Update plugin list
 	m_CbnMixPlug.Clear();
 	m_CbnMixPlug.ResetContent();
@@ -802,6 +848,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 	}
 	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
 	if ((penv) && (penv->nMixPlug < MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(penv->nMixPlug);
+	//end rewbs.instroVSTi
 
 	SetCurrentInstrument((lParam > 0) ? lParam : m_nInstrument);
 
@@ -877,6 +924,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	{
 		m_ToolBar.UpdateStyle();
 	}
+	if (dwHintMask & HINT_MIXPLUGINS) OnMixPlugChanged();
 	if (!(dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE|HINT_MODTYPE))) return;
 	if (((dwHintMask >> 24) != m_nInstrument) && (dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE)) && (!(dwHintMask & HINT_MODTYPE))) return;
 	LockControls();
@@ -884,7 +932,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	if (dwHintMask & HINT_MODTYPE)
 	{
 		BOOL b = ((m_pSndFile->m_nType == MOD_TYPE_IT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), b);
+		OnMixPlugChanged();
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), b);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), b);
 		m_EditName.EnableWindow(b);
@@ -896,6 +944,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_NoteMap.EnableWindow(b);
 		m_SliderVolSwing.EnableWindow(b);
 		m_SliderPanSwing.EnableWindow(b);
+		//end rewbs.instroVSTi
 		m_ComboNNA.EnableWindow(b);
 		m_ComboDCT.EnableWindow(b);
 		m_ComboDCA.EnableWindow(b);
@@ -938,10 +987,21 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_CheckPanning.SetCheck((penv->dwFlags & ENV_SETPANNING) ? TRUE : FALSE);
 			// Midi
 			SetDlgItemInt(IDC_EDIT10, penv->nMidiProgram);
-			if (penv->nMidiChannel < 17) m_CbnMidiCh.SetCurSel(penv->nMidiChannel); 
-			else m_CbnMidiCh.SetCurSel(0);
-			if (penv->nMixPlug < MAX_MIXPLUGINS) m_CbnMixPlug.SetCurSel(penv->nMixPlug);
-			else m_CbnMixPlug.SetCurSel(0);
+			//rewbs.instroVSTi
+			//was:
+			//if (penv->nMidiChannel < 17) m_CbnMidiCh.SetCurSel(penv->nMidiChannel); else
+			//if (penv->nMidiChannel & 0x80) m_CbnMidiCh.SetCurSel((penv->nMidiChannel&0x7f)+16); else
+			//	m_CbnMidiCh.SetCurSel(0);
+			//now:
+			if (penv->nMidiChannel < 17) 
+				m_CbnMidiCh.SetCurSel(penv->nMidiChannel); 
+			else 
+				m_CbnMidiCh.SetCurSel(0);
+			if (penv->nMixPlug < MAX_MIXPLUGINS) 
+				m_CbnMixPlug.SetCurSel(penv->nMixPlug);
+			else 
+				m_CbnMixPlug.SetCurSel(0);
+			//end rewbs.instroVSTi
 			// NNA, DCT, DCA
 			m_ComboNNA.SetCurSel(penv->nNNA);
 			m_ComboDCT.SetCurSel(penv->nDCT);
@@ -1026,6 +1086,12 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	if (!m_nInstrument) m_nInstrument = 1;
 	if (m_pSndFile->ReadInstrumentFromFile(m_nInstrument, lpFile, len))
 	{
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		int n = strlen(lpszFileName);
+		if(n > _MAX_PATH) n = _MAX_PATH;
+		strncpy(&m_pSndFile->m_szInstrumentPath[m_nInstrument-1][0],lpszFileName,n);
+// -! NEW_FEATURE#0023
 		bOk = TRUE;
 	}
 	END_CRITICAL();
@@ -1190,7 +1256,7 @@ void CCtrlInstruments::OnInstrumentNew()
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		if ((pSndFile->m_nType & MOD_TYPE_IT)
 		 && (pSndFile->m_nInstruments > 0)
-		 && (CMainFrame::GetInputHandler()->ShiftPressed()))
+		 && (CMainFrame::GetInputHandler()->ShiftPressed())) //rewbs.customKeys
 		{
 			OnInstrumentDuplicate();
 			return;
@@ -1272,12 +1338,24 @@ void CCtrlInstruments::OnInstrumentSave()
 		memcpy(szFileName, penv->name, 22);
 		szFileName[22] = 0;
 	}
+// -> CODE#0019
+// -> DESC="correctly load ITI & XI instruments sample note map"
+//	CFileDialog dlg(FALSE, (m_pSndFile->m_nType & MOD_TYPE_IT) ? "iti" : "xi",
+//			szFileName,
+//			OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+//			"FastTracker II Instruments (*.xi)|*.xi|"
+//			"Impulse Tracker Instruments (*.iti)|*.iti||",
+//			this);
 	CFileDialog dlg(FALSE, (m_pSndFile->m_nType & MOD_TYPE_IT) ? "iti" : "xi",
 			szFileName,
 			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-			"FastTracker II Instruments (*.xi)|*.xi|"
-			"Impulse Tracker Instruments (*.iti)|*.iti||",
+			( m_pSndFile->m_nType & MOD_TYPE_IT ? "Impulse Tracker Instruments (*.iti)|*.iti|"
+												  "FastTracker II Instruments (*.xi)|*.xi||"
+												: "FastTracker II Instruments (*.xi)|*.xi|"
+												  "Impulse Tracker Instruments (*.iti)|*.iti||" ),
 			this);
+// -! BUG_FIX#0019
+
 	if (CMainFrame::m_szCurInsDir[0])
 	{
 		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurInsDir;
@@ -1290,12 +1368,24 @@ void CCtrlInstruments::OnInstrumentSave()
 		bOk = m_pSndFile->SaveITIInstrument(m_nInstrument, dlg.GetPathName());
 	else
 		bOk = m_pSndFile->SaveXIInstrument(m_nInstrument, dlg.GetPathName());
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	int n = strlen(dlg.GetPathName());
+	if(n > _MAX_PATH) n = _MAX_PATH;
+	strncpy(&m_pSndFile->m_szInstrumentPath[m_nInstrument-1][0],dlg.GetPathName(),n);
+// -! NEW_FEATURE#0023
+
 	EndWaitCursor();
 	if (!bOk) ErrorBox(IDS_ERR_SAVEINS, this); else
 	{
 		strcpy(CMainFrame::m_szCurInsDir, drive);
 		strcat(CMainFrame::m_szCurInsDir, path);
-		m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSTRUMENT);
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//		m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSTRUMENT);
+		m_pModDoc->UpdateAllViews(NULL, HINT_MODTYPE | HINT_INSNAMES | HINT_SMPNAMES);
+// -! NEW_FEATURE#0023
 	}
 	SwitchToView();
 }
@@ -1308,7 +1398,7 @@ void CCtrlInstruments::OnInstrumentPlay()
 	{
 		if (m_pModDoc->IsNotePlaying(NOTE_MIDDLEC, 0, m_nInstrument))
 		{
-			m_pModDoc->NoteOff(NOTE_MIDDLEC, TRUE);
+			m_pModDoc->NoteOff(NOTE_MIDDLEC, TRUE, m_nInstrument);
 		} else
 		{
 			m_pModDoc->PlayNote(NOTE_MIDDLEC, m_nInstrument, 0, TRUE);
@@ -1480,16 +1570,33 @@ void CCtrlInstruments::OnMCHChanged()
 	}
 }
 
+//rewbs.instroVSTi
 void CCtrlInstruments::OnMixPlugChanged()
-//-----------------------------------
+//---------------------------------------
 {
 	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
-	if ((!IsLocked()) && (penv))
+	if (/*(!IsLocked()) &&*/ (penv))
 	{
-		int n = m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel());
-		penv->nMixPlug = (BYTE)(n & 0xff);
+		BYTE nPlug = static_cast<BYTE>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()) & 0xff);
+		if (nPlug>=0 && nPlug<MAX_MIXPLUGINS+1)
+		{
+            penv->nMixPlug = nPlug;
+			m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, this);
+			
+			if (nPlug)	//if we have not just set to no plugin
+			{
+				PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[nPlug-1]);
+				if (pPlug && pPlug->pMixPlugin)
+				{
+					::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), true);
+					return;
+				}
+			}
+		}
 	}
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), false);
 }
+//end rewbs.instroVSTi
 
 
 
@@ -1683,6 +1790,7 @@ void CCtrlInstruments::OnEditSampleMap()
 	}
 }
 
+//rewbs.instroVSTi
 void CCtrlInstruments::TogglePluginEditor()
 //----------------------------------------
 {
@@ -1691,4 +1799,5 @@ void CCtrlInstruments::TogglePluginEditor()
 		m_pModDoc->TogglePluginEditor(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel())-1);
 	}
 }
+//end rewbs.instroVSTi
 

@@ -89,6 +89,12 @@ CSoundFile::CSoundFile()
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
 	m_nSeqOverride = 0;
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	for(UINT i = 0 ; i < MAX_INSTRUMENTS ; i++) m_szInstrumentPath[i][0] = '\0';
+// -! NEW_FEATURE#0023
+
 	memset(Chn, 0, sizeof(Chn));
 	memset(ChnMix, 0, sizeof(ChnMix));
 	memset(Ins, 0, sizeof(Ins));
@@ -199,6 +205,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, DWORD dwMemLength)
 		BOOL bMMCmp = MMCMP_Unpack(&lpStream, &dwMemLength);
 #endif
 		if ((!ReadXM(lpStream, dwMemLength))
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+		 && (!ReadITProject(lpStream, dwMemLength))
+// -! NEW_FEATURE#0023
 		 && (!ReadIT(lpStream, dwMemLength))
 		 && (!ReadS3M(lpStream, dwMemLength))
 		 && (!ReadWav(lpStream, dwMemLength))
@@ -245,10 +255,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT iSmp=0; iSmp<MAX_SAMPLES; iSmp++)
 	{
 		LPSTR p = m_szNames[iSmp];
-		if(!p)
-			ASSERT(p);
-
-
 		int j = 31;
 		p[j] = 0;
 		while ((j>=0) && (p[j]<=' ')) p[j--] = 0;
@@ -761,23 +767,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	m_nSeqOverride = 0;
 }
 
-int CSoundFile::FindOrder(BYTE pat)
-{
-	int order = -1;
 
-	for (UINT p=0; p<MAX_ORDERS; p++)
-	{
-		if (Order[p] == pat)
-		{
-			order = p;
-			break;
-		}
-//		if (Order[nPos] == 0xFE)
-//			break;
-	}
-
-	return order;
-}
 
 void CSoundFile::SetCurrentOrder(UINT nPos)
 //-----------------------------------------
@@ -811,7 +801,7 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 	m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
 }
 
-//rewbs.VSTiNoteHoldonStopFix
+//rewbs.VSTCompliance
 void CSoundFile::SuspendPlugins()	
 //------------------------------
 {
@@ -850,7 +840,7 @@ void CSoundFile::ResumePlugins()
 
 }
 
-//end rewbs.VSTiNoteHoldonStopFix
+//end rewbs.VSTCompliance
 
 void CSoundFile::ResetChannels()
 //------------------------------
@@ -883,7 +873,7 @@ void CSoundFile::LoopPattern(int nPat, int nRow)
 		m_nSeqOverride = 0;
 	}
 }
-
+//rewbs.playSongFromCursor
 void CSoundFile::DontLoopPattern(int nPat, int nRow)
 //----------------------------------------------
 {
@@ -899,6 +889,22 @@ void CSoundFile::DontLoopPattern(int nPat, int nRow)
 	m_nSeqOverride = 0;
 }
 
+int CSoundFile::FindOrder(BYTE pat)
+{
+	int order = -1;
+
+	for (UINT p=0; p<MAX_ORDERS; p++)
+	{
+		if (Order[p] == pat)
+		{
+			order = p;
+			break;
+		}
+	}
+
+	return order;
+}
+//end rewbs.playSongFromCursor
 
 
 UINT CSoundFile::GetBestSaveFormat() const
@@ -1035,7 +1041,12 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 	UINT nLen = pins->nLength;
 	
 	if ((nMaxLen) && (nLen > nMaxLen)) nLen = nMaxLen;
-	if ((!pSample) || (f == NULL) || (!nLen)) return 0;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//	if ((!pSample) || (f == NULL) || (!nLen)) return 0;
+	if ((!pSample) || (!nLen)) return 0;
+// NOTE : also added all needed 'if(f)' in this function
+// -! NEW_FEATURE#0023
 	switch(nFlags)
 	{
 #ifndef NO_PACKING
@@ -1044,7 +1055,7 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 		{
 			int pos; 
 			len = (nLen + 1) / 2;
-			fwrite(CompressionTable, 16, 1, f);
+			if(f) fwrite(CompressionTable, 16, 1, f);
 			bufcount = 0;
 			pos = 0;
 			for (UINT j=0; j<len; j++)
@@ -1057,11 +1068,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 				buffer[bufcount++] = (char)b;
 				if (bufcount >= sizeof(buffer))
 				{
-					fwrite(buffer, 1, bufcount, f);
+					if(f) fwrite(buffer, 1, bufcount, f);
 					bufcount = 0;
 				}
 			}
-			if (bufcount) fwrite(buffer, 1, bufcount, f);
+			if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
 			len += 16;
 		}
 		break;
@@ -1097,11 +1108,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 				bufcount += 2;
 				if (bufcount >= sizeof(buffer) - 1)
 				{
-					fwrite(buffer, 1, bufcount, f);
+					if(f) fwrite(buffer, 1, bufcount, f);
 					bufcount = 0;
 				}
 			}
-			if (bufcount) fwrite(buffer, 1, bufcount, f);
+			if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
 		}
 		break;
 
@@ -1131,11 +1142,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 					}
 					if (bufcount >= sizeof(buffer))
 					{
-						fwrite(buffer, 1, bufcount, f);
+						if(f) fwrite(buffer, 1, bufcount, f);
 						bufcount = 0;
 					}
 				}
-				if (bufcount) fwrite(buffer, 1, bufcount, f);
+				if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
 			}
 		}
 		len = nLen * 2;
@@ -1168,11 +1179,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 					bufcount += 2;
 					if (bufcount >= sizeof(buffer))
 					{
-						fwrite(buffer, 1, bufcount, f);
+						if(f) fwrite(buffer, 1, bufcount, f);
 						bufcount = 0;
 					}
 				}
-				if (bufcount) fwrite(buffer, 1, bufcount, f);
+				if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
 			}
 		}
 		len = nLen*4;
@@ -1183,7 +1194,7 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 	case RS_STIPCM16S:
 		len = nLen * 2;
 		if (nFlags == RS_STIPCM16S) len *= 2;
-		fwrite(pSample, 1, len, f);
+		if(f) fwrite(pSample, 1, len, f);
 		break;
 
 	// Default: assume 8-bit PCM data
@@ -1214,11 +1225,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 				}
 				if (bufcount >= sizeof(buffer))
 				{
-					fwrite(buffer, 1, bufcount, f);
+					if(f) fwrite(buffer, 1, bufcount, f);
 					bufcount = 0;
 				}
 			}
-			if (bufcount) fwrite(buffer, 1, bufcount, f);
+			if (bufcount) if(f) fwrite(buffer, 1, bufcount, f);
 		}
 	}
 	return len;
@@ -2025,6 +2036,25 @@ BOOL CSoundFile::DestroySample(UINT nSample)
 	return TRUE;
 }
 
+// -> CODE#0020
+// -> DESC="rearrange sample list"
+BOOL CSoundFile::MoveSample(UINT from, UINT to)
+{
+	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return FALSE;
+	if (!Ins[from].pSample || Ins[to].pSample) return TRUE;
+
+	MODINSTRUMENT *pinsf = &Ins[from];
+	MODINSTRUMENT *pinst = &Ins[to];
+
+	memcpy(pinst,pinsf,sizeof(MODINSTRUMENT));
+
+	pinsf->pSample = NULL;
+	pinsf->nLength = 0;
+	pinsf->uFlags &= ~(CHN_16BIT);
+
+	return TRUE;
+}
+// -! NEW_FEATURE#0020
 #endif // FASTSOUNDLIB
 
 

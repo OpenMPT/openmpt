@@ -1,7 +1,7 @@
 #ifndef _MODPLUGDLGS_
 #define _MODPLUGDLGS_
 
-#define NUMMIXRATE	12
+#define NUMMIXRATE	14
 
 class CSoundFile;
 class CMainFrame;

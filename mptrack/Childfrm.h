@@ -32,7 +32,7 @@ typedef struct PATTERNVIEWSTATE
 	DWORD dwBeginSel;
 	DWORD dwEndSel;
 	UINT nDetailLevel;
-	UINT nOrder;
+	UINT nOrder;		//rewbs.playSongFromCursor
 } PATTERNVIEWSTATE;
 
 typedef struct SAMPLEVIEWSTATE
@@ -101,7 +101,7 @@ protected:
 public:
 	BOOL ChangeViewClass(CRuntimeClass* pNewViewClass, CCreateContext* pContext=NULL);
 	void SavePosition(BOOL bExit=FALSE);
-	CHAR* GetCurrentViewClassName();
+	CHAR* GetCurrentViewClassName();	//rewbs.varWindowSize
 	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam=0) const;
 	LRESULT ActivateView(UINT nId, LPARAM lParam) { return ::SendMessage(m_hWndCtrl, WM_MOD_ACTIVATEVIEW, nId, lParam); }
 	HWND GetHwndCtrl() const { return m_hWndCtrl; }
@@ -138,15 +138,13 @@ protected:
 	//{{AFX_MSG(CChildFrame)
 	afx_msg void OnClose();
 	afx_msg BOOL OnNcActivate(BOOL bActivate);
-//	afx_msg void OnMDIActivate(BOOL bActivate, CWnd* pActivateWnd, CWnd* pDeactivateWnd);
 	afx_msg LRESULT OnChangeViewClass(WPARAM, LPARAM lParam);
 	afx_msg LRESULT OnInstrumentSelected(WPARAM, LPARAM lParam);
 	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
-//	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
-	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnSetFocus(CWnd* pOldWnd); //rewbs.customKeysAutoEffects
 };
 
 /////////////////////////////////////////////////////////////////////////////

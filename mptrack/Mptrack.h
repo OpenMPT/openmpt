@@ -1,6 +1,6 @@
 // mptrack.h : main header file for the MPTRACK application
 //
-#include "versionNo.h"
+
 #if !defined(AFX_MPTRACK_H__AE144DC4_DD0B_11D1_AF24_444553540000__INCLUDED_)
 #define AFX_MPTRACK_H__AE144DC4_DD0B_11D1_AF24_444553540000__INCLUDED_
 
@@ -108,6 +108,10 @@ class CTrackApp: public CWinApp
 protected:
 	static UINT m_nDefaultDocType;
 	static LPMIDILIBSTRUCT glpMidiLibrary;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	static BOOL m_nProject;
+// -! NEW_FEATURE#0023
 
 public:
 	static MEMORYSTATUS gMemStatus;
@@ -128,6 +132,13 @@ public:
 	CTrackApp();
 
 public:
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	static BOOL IsProject() { return m_nProject; }
+	static VOID SetAsProject(BOOL n) { m_nProject = n; }
+// -! NEW_FEATURE#0023
+
 	static UINT GetDefaultDocType() { return m_nDefaultDocType; }
 	static VOID SetDefaultDocType(UINT n) { m_nDefaultDocType = n; }
 	static LPMIDILIBSTRUCT GetMidiLibrary() { return glpMidiLibrary; }
@@ -206,6 +217,11 @@ public:
 	afx_msg void OnFileNewS3M();
 	afx_msg void OnFileNewXM();
 	afx_msg void OnFileNewIT();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	afx_msg void OnFileNewITProject();
+// -! NEW_FEATURE#0023
+
 	afx_msg void OnFileOpen();
 	afx_msg void OnAppAbout();
 	afx_msg void OnHelpSearch();
@@ -331,7 +347,8 @@ void ErrorBox(UINT nStringID, CWnd*p=NULL);
 
 ///////////////////////////////////////////////////
 // Tables
-#define MAX_EFFECTS		34	//rewbs.smoothVST & rewbs.velocity: increased from 32. Wonder what this will break...
+#define MAX_EFFECTS		35	//rewbs.smoothVST & rewbs.velocity: increased from 32. Wonder what this will break...
+							//+1 for eric's multiplier
 #define MAX_VOLCMDS		16	//rewbs.voloff & rewbs.velocity: increased from 14
 
 extern BYTE gEffectColors[MAX_EFFECTS];

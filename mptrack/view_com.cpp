@@ -6,6 +6,10 @@
 #include "globals.h"
 #include "ctrl_com.h"
 #include "view_com.h"
+// -> CODE#0015
+// -> DESC="channels management dlg"
+#include "ctrl_pat.h"
+// -! NEW_FEATURE#0015
 
 #define DETAILS_TOOLBAR_CY	28
 
@@ -474,6 +478,21 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 
 ///////////////////////////////////////////////////////////////
 // CViewComments messages
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+void CViewComments::OnDraw(CDC* pDC)
+{
+	CView::OnDraw(pDC);
+
+	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
+	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
+
+	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
+		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
+}
+// -! NEW_FEATURE#0015
+
 
 void CViewComments::OnSize(UINT nType, int cx, int cy)
 //----------------------------------------------------

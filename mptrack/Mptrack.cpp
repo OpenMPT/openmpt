@@ -168,8 +168,8 @@ LPCSTR szNoteNames[12] =
 };
 
 LPCSTR szHexChar = "0123456789ABCDEF";
-LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ??"; //rewbs.smoothVST: added last ?; rewbs.velocity: added last ?
-LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
+LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ???"; //rewbs.smoothVST: added last ?; rewbs.velocity: added last ?
+LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
 LPCSTR gszVolCommands = " vpcdabuhlrgfe:o";	//rewbs.velocity: added last : ; rewbs.volOff added last o
 
 
@@ -483,6 +483,11 @@ BOOL CTrackApp::AddDLSBank(LPCSTR lpszFileName)
 UINT CTrackApp::m_nDefaultDocType = MOD_TYPE_IT;
 MEMORYSTATUS CTrackApp::gMemStatus;
 
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+BOOL CTrackApp::m_nProject = FALSE;
+// -! NEW_FEATURE#0023
+
 BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 	//{{AFX_MSG_MAP(CTrackApp)
 	ON_COMMAND(ID_FILE_NEW,		OnFileNew)
@@ -490,6 +495,10 @@ BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 	ON_COMMAND(ID_FILE_NEWS3M,	OnFileNewS3M)
 	ON_COMMAND(ID_FILE_NEWXM,	OnFileNewXM)
 	ON_COMMAND(ID_FILE_NEWIT,	OnFileNewIT)
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	ON_COMMAND(ID_NEW_ITPROJECT,OnFileNewITProject)	
+// -! NEW_FEATURE#0023
 	ON_COMMAND(ID_FILE_OPEN,	OnFileOpen)
 	ON_COMMAND(ID_APP_ABOUT,	OnAppAbout)
 	ON_COMMAND(ID_HELP_INDEX,	CWinApp::OnHelpIndex)
@@ -592,7 +601,7 @@ BOOL CTrackApp::InitInstance()
 
 #ifdef _DEBUG
 	//	ASSERT((sizeof(MODCHANNEL)&7) == 0);
-	// Disabled by rewbs for smoothVST. Not sure why this is necessary - MODCHANNEL doesn't get saved or anything.
+	// Disabled by rewbs for smoothVST. Might cause minor perf issues due to increased cache misses?
 #endif
 
 	m_szConfigFileName[0] = 0;
@@ -729,7 +738,7 @@ BOOL CTrackApp::InitInstance()
 		Log("Modplug Tracker v%X.%02X.%04d started\n", (MPTRACK_VERSION>>24)&0xFF, (MPTRACK_VERSION>>16)&0xFF, (MPTRACK_VERSION & 0xFFFF));
 	}
 
-	pMainFrame->m_InputHandler->UpdateMainMenu();
+	pMainFrame->m_InputHandler->UpdateMainMenu();	//rewbs.customKeys
 	EndWaitCursor();
 
 	return TRUE;
@@ -834,13 +843,22 @@ void CTrackApp::SaveChords(PMPTCHORD pChords)
 void CTrackApp::OnFileNew()
 //-------------------------
 {
-	if (m_bInitialized) OnFileNewIT();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//	if (m_bInitialized) OnFileNewIT();
+	if (m_bInitialized) OnFileNewITProject();
+// -! NEW_FEATURE#0023
 }
 
 
 void CTrackApp::OnFileNewMOD()
 //----------------------------
 {
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	SetAsProject(FALSE);
+// -! NEW_FEATURE#0023
+
 	SetDefaultDocType(MOD_TYPE_MOD);
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
 }
@@ -849,6 +867,11 @@ void CTrackApp::OnFileNewMOD()
 void CTrackApp::OnFileNewS3M()
 //----------------------------
 {
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	SetAsProject(FALSE);
+// -! NEW_FEATURE#0023
+
 	SetDefaultDocType(MOD_TYPE_S3M);
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
 }
@@ -857,6 +880,11 @@ void CTrackApp::OnFileNewS3M()
 void CTrackApp::OnFileNewXM()
 //---------------------------
 {
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	SetAsProject(FALSE);
+// -! NEW_FEATURE#0023
+
 	SetDefaultDocType(MOD_TYPE_XM);
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
 }
@@ -865,9 +893,25 @@ void CTrackApp::OnFileNewXM()
 void CTrackApp::OnFileNewIT()
 //---------------------------
 {
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	SetAsProject(FALSE);
+// -! NEW_FEATURE#0023
+
 	SetDefaultDocType(MOD_TYPE_IT);
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
 }
+
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+void CTrackApp::OnFileNewITProject()
+{
+	SetAsProject(TRUE);
+	SetDefaultDocType(MOD_TYPE_IT);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+}
+// -! NEW_FEATURE#0023
 
 
 void CTrackApp::OnFileOpen()
@@ -877,12 +921,20 @@ void CTrackApp::OnFileOpen()
 					NULL,
 					NULL,
 					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_FORCESHOWHIDDEN,
-					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
+					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
+// -! NEW_FEATURE#0023
 					"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha|"
 					"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
 					"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
 					"FastTracker Modules (*.xm)|*.xm;*.xmz|"
 					"Impulse Tracker Modules (*.it)|*.it;*.itz|"
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+					"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
+// -! NEW_FEATURE#0023
 					"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.dsm;*.umx;*.amf;*.psm;*.mt2|"
 					"Wave Files (*.wav)|*.wav|"
 					"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
@@ -1146,14 +1198,14 @@ const int __SinusTable[256] =
 #define PI	3.14159265358979323f
 BOOL CPaletteBitmap::Animate()
 //----------------------------
-{
+{	
+	//included random hacking by rewbs to get funny animation.
 	LPBYTE dest, src;
 	DWORD t = (timeGetTime() - m_dwStartTime) / 10;
 	LONG Dist, Phi, srcx, srcy, spdx, spdy, sizex, sizey;
 	bool dir;
 
 	if ((!m_lpRotoZoom) || (!m_lpBmp) || (!m_nRotoWidth) || (!m_nRotoHeight)) return FALSE;
-
 	Sleep(2); 	//give away some CPU
 
 	if (t > 256)
@@ -1245,7 +1297,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02X.%04da",
+	wsprintf(s, "%s version %X.%02X.%04da",		//remove 'a' when ready for wide usage.
 				MAINFRAME_TITLE,
 				(MPTRACK_VERSION>>24)&0xFF,
 				(MPTRACK_VERSION>>16)&0xFF,
@@ -1393,7 +1445,8 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 	{
 		if (gpRotoZoom->Animate()) return TRUE;
 	}
-	if (m_pPluginManager)
+	//if ((m_pPluginManager) && (m_pPluginManager->NeedIdle()))
+	if (m_pPluginManager)	//rewbs.VSTCompliance
 	{
 		m_pPluginManager->OnIdle();
 	}
@@ -1848,7 +1901,7 @@ void CMappedFile::Close()
 DWORD CMappedFile::GetLength()
 //----------------------------
 {
-	return m_File.GetLength();
+	return static_cast<DWORD>(m_File.GetLength());
 }
 
 
@@ -2580,7 +2633,7 @@ BOOL CTrackApp::GetLocalizedString(LPCSTR pszName, LPSTR pszStr, UINT cbSize)
 	return FALSE;
 }
 
-
+//rewbs.crashHandler
 LRESULT CTrackApp::ProcessWndProcException(CException* e, const MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
@@ -2592,3 +2645,4 @@ LRESULT CTrackApp::ProcessWndProcException(CException* e, const MSG* pMsg)
 
 	return CWinApp::ProcessWndProcException(e, pMsg);
 }
+//end rewbs.crashHandler

@@ -28,6 +28,11 @@ public:
 	CComboBox m_CbnSampleRate, m_CbnSampleFormat;
 	CEdit m_EditMinOrder, m_EditMaxOrder;
 
+// -> CODE#0024
+// -> DESC="wav export update"
+	BOOL m_bChannelMode;
+// -! NEW_FEATURE#0024
+
 public:
 	CWaveConvert(CWnd *parent);
 

@@ -13,6 +13,11 @@
 #include "vstplug.h"
 #include "KeyConfigDlg.h"
 #include ".\mainfrm.h"
+// -> CODE#0015
+// -> DESC="channels management dlg"
+#include "globals.h"
+#include "ctrl_pat.h"
+// -! NEW_FEATURE#0015
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -58,9 +63,19 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
 	ON_COMMAND(ID_VIEW_OPTIONS,				OnViewOptions)
-	//ON_COMMAND(ID_HELP,						CMDIFrameWnd::OnHelp)
+
+// -> CODE#0002
+// -> DESC="list box to choose VST plugin presets (programs)"
+	ON_COMMAND(ID_PLUGIN_SETUP,				OnPluginSetup)
+// -! NEW_FEATURE#0002
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	ON_COMMAND(ID_CHANNEL_MANAGER,			OnChannelManager)
+// -! NEW_FEATURE#0015
+	//ON_COMMAND(ID_HELP,					CMDIFrameWnd::OnHelp)
 	ON_COMMAND(ID_HELP_FINDER,				CMDIFrameWnd::OnHelpFinder)
-	ON_COMMAND(ID_REPORT_BUG,				OnReportBug)
+	ON_COMMAND(ID_REPORT_BUG,				OnReportBug)	//rewbs.reportBug
 	ON_COMMAND(ID_CONTEXT_HELP,				CMDIFrameWnd::OnContextHelp)
 	ON_COMMAND(ID_DEFAULT_HELP,				CMDIFrameWnd::OnHelpFinder)
 	ON_COMMAND(ID_NEXTOCTAVE,				OnNextOctave)
@@ -72,7 +87,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND_EX(IDD_TREEVIEW,				OnBarCheck)
 	ON_COMMAND_EX(ID_NETLINK_MODPLUG,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_UT,			OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_OSMUSIC,	OnInternetLink)
+	ON_COMMAND_EX(ID_NETLINK_OSMUSIC,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_HANDBOOK,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_FORUMS,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_PLUGINS,		OnInternetLink)
@@ -85,7 +100,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
 	ON_MESSAGE(WM_MOD_SPECIALKEY,			OnSpecialKey)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
 END_MESSAGE_MAP()
@@ -179,7 +194,7 @@ HFONT CMainFrame::m_hGUIFont = NULL;
 HFONT CMainFrame::m_hFixedFont = NULL;
 HFONT CMainFrame::m_hLargeFixedFont = NULL;
 HPEN CMainFrame::penDarkGray = NULL;
-HPEN CMainFrame::penScratch = NULL;
+HPEN CMainFrame::penScratch = NULL; //rewbs.fxVis
 HPEN CMainFrame::penGray00 = NULL;
 HPEN CMainFrame::penGray33 = NULL;
 HPEN CMainFrame::penGray40 = NULL;
@@ -187,7 +202,7 @@ HPEN CMainFrame::penGray55 = NULL;
 HPEN CMainFrame::penGray80 = NULL;
 HPEN CMainFrame::penGray99 = NULL;
 HPEN CMainFrame::penGraycc = NULL;
-HPEN CMainFrame::penGrayff = NULL;
+HPEN CMainFrame::penGrayff = NULL; //end rewbs.fxVis
 HPEN CMainFrame::penLightGray = NULL;
 HPEN CMainFrame::penBlack = NULL;
 HPEN CMainFrame::penWhite = NULL;
@@ -198,8 +213,8 @@ HPEN CMainFrame::penSeparator = NULL;
 HBRUSH CMainFrame::brushGray = NULL;
 HBRUSH CMainFrame::brushBlack = NULL;
 HBRUSH CMainFrame::brushWhite = NULL;
-CBrush *CMainFrame::pbrushBlack = NULL;
-CBrush *CMainFrame::pbrushWhite = NULL;
+CBrush *CMainFrame::pbrushBlack = NULL;//rewbs.envRowGrid
+CBrush *CMainFrame::pbrushWhite = NULL;//rewbs.envRowGrid
 
 HBRUSH CMainFrame::brushHighLight = NULL;
 HBRUSH CMainFrame::brushWindow = NULL;
@@ -231,9 +246,9 @@ CHAR CMainFrame::m_szKbdFile[_MAX_PATH] = "";		//rewbs.customKeys
 CHAR CMainFrame::m_szCurModDir[_MAX_PATH] = "";
 CHAR CMainFrame::m_szCurSmpDir[_MAX_PATH] = "";
 CHAR CMainFrame::m_szCurInsDir[_MAX_PATH] = "";
-//CHAR CMainFrame::m_szCurKbdFile[_MAX_PATH] = "";		//rewbs.customKeys
+//CHAR CMainFrame::m_szCurKbdFile[_MAX_PATH] = "";	//rewbs.customKeys
 
-CInputHandler *CMainFrame::m_InputHandler = NULL;
+CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
 
 static UINT indicators[] =
 {
@@ -255,9 +270,9 @@ CMainFrame::CMainFrame()
 	DWORD dwSZSIZE = sizeof(m_szModDir);
 	DWORD dwCRSIZE = sizeof(COLORREF);
 	HKEY key;
-	m_bModTreeHasFocus = false;
-	m_pNoteMapHasFocus = NULL;
-	m_bOptionsLocked = false;
+	m_bModTreeHasFocus = false;	//rewbs.customKeys
+	m_pNoteMapHasFocus = NULL;	//rewbs.customKeys
+	m_bOptionsLocked = false;	//rewbs.customKeys
 
 	m_pModPlaying = NULL;
 	m_hFollowSong = NULL;
@@ -266,7 +281,7 @@ CMainFrame::CMainFrame()
 	m_dwStatus = 0;
 	m_dwElapsedTime = 0;
 	m_dwTimeSec = 0;
-	m_dwLastPluginIdleCall=0;
+	m_dwLastPluginIdleCall=0;	//rewbs.VSTCompliance
 	m_dwNotifyType = 0;
 	m_nTimer = 0;
 	m_nAvgMixChn = m_nMixChn = 0;
@@ -348,7 +363,7 @@ CMainFrame::CMainFrame()
 		RegQueryValueEx(key, "Instruments_Directory", NULL, &dwREG_SZ, (LPBYTE)m_szInsDir, &dwSZSIZE);
 		dwSZSIZE = sizeof(m_szPluginsDir);
 		RegQueryValueEx(key, "Plugins_Directory", NULL, &dwREG_SZ, (LPBYTE)m_szPluginsDir, &dwSZSIZE);
-		dwSZSIZE = sizeof(m_szKbdFile);																	//rewbs.custKeys
+		dwSZSIZE = sizeof(m_szKbdFile);	//rewbs.customKeys																//rewbs.custKeys
 		RegQueryValueEx(key, "Key_Config_File", NULL, &dwREG_SZ, (LPBYTE)m_szKbdFile, &dwSZSIZE);	//rewbs.custKeys
 		RegQueryValueEx(key, "XBassDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nXBassDepth, &dwDWORDSize);
 		RegQueryValueEx(key, "XBassRange", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nXBassRange, &dwDWORDSize);
@@ -395,11 +410,7 @@ CMainFrame::CMainFrame()
 		m_dwPatternSetup |= PATTERN_SHOWPREVIOUS|PATTERN_CONTSCROLL;
 	}
 
-	m_InputHandler = new CInputHandler(this);
-
-	CHAR s[1024];
-	wsprintf(s, "WARNING!\nYou're insane enough to have a very experimental build.\nThis build is for testing purposes only.\n\nPlease read the Readme.txt.\n\n\n If you're reading this you know where to send bug reports! :)\n -Rewbs");
-	//::MessageBox(NULL, s, "Warning - experimental build", MB_OK|MB_ICONEXCLAMATION);
+	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
 }
 
 
@@ -407,8 +418,6 @@ VOID CMainFrame::Initialize()
 //---------------------------
 {
 	CHAR s[256];
-	
-
 
 	// Load Chords
 	theApp.LoadChords(Chords);
@@ -425,7 +434,7 @@ VOID CMainFrame::Initialize()
 	strcpy(m_szCurModDir, m_szModDir);
 	strcpy(m_szCurSmpDir, m_szSmpDir);
 	strcpy(m_szCurInsDir, m_szInsDir);
-//	strcpy(m_szCurKbdFile, m_szKbdFile);		//rewbs.custKeys
+//	strcpy(m_szCurKbdFile, m_szKbdFile);		//rewbs.customKeys
 	if (m_szModDir[0]) SetCurrentDirectory(m_szModDir);
 	// Create Audio Thread
 	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -435,7 +444,10 @@ VOID CMainFrame::Initialize()
 	// Setup timer
 	OnUpdateUser(NULL);
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
-	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+	
+	//rewbs.perf: eric suggested removing this:
+	//SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+	
 	// Setup Keyboard Hook
 	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());
 	// Initialize Audio Mixer
@@ -466,7 +478,7 @@ CMainFrame::~CMainFrame()
 //-----------------------
 {
 	DeleteCriticalSection(&m_csAudio);
-	delete m_InputHandler;
+	delete m_InputHandler; 	//rewbs.customKeys
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -531,6 +543,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
 	m_wndToolBar.Init(this);
 	m_wndTree.RecalcLayout();
+
+// -> CODE#0017
+// -> DESC="midi in record mode setup option"
+	if(m_dwPatternSetup & PATTERN_MIDIRECORD) OnMidiRecord();
+// -! BEHAVIOUR_CHANGE#0017
+
 	// Restore toobar positions
 	if (gdwPreviousVersion == MPTRACK_VERSION)
 	{
@@ -597,13 +615,15 @@ BOOL CMainFrame::DestroyWindow()
 	if (shMidiIn) midiCloseDevice();
 	if (m_hPlayThread != NULL)
 	{
-		TerminateThread(m_hPlayThread, 0);
-		m_hPlayThread = NULL;
+		//TerminateThread(m_hPlayThread, 0);
+		//m_hPlayThread = NULL;
+		if(TerminateThread(m_hPlayThread, 0)) m_hPlayThread = NULL;
 	}
 	if (m_hNotifyThread != NULL)
 	{
-		TerminateThread(m_hNotifyThread, 0);
-		m_hNotifyThread = NULL;
+		//TerminateThread(m_hNotifyThread, 0);
+		//m_hNotifyThread = NULL;
+		if(TerminateThread(m_hNotifyThread, 0)) m_hNotifyThread = NULL;
 	}
 	// Delete bitmaps
 	if (bmpPatterns)
@@ -733,7 +753,7 @@ void CMainFrame::OnClose()
 		RegSetValueEx(key, "Samples_Directory", NULL, REG_SZ, (LPBYTE)m_szSmpDir, strlen(m_szSmpDir)+1);
 		RegSetValueEx(key, "Instruments_Directory", NULL, REG_SZ, (LPBYTE)m_szInsDir, strlen(m_szInsDir)+1);
 		RegSetValueEx(key, "Plugins_Directory", NULL, REG_SZ, (LPBYTE)m_szPluginsDir, strlen(m_szPluginsDir)+1);
-		RegSetValueEx(key, "Key_Config_File", NULL, REG_SZ, (LPBYTE)m_szKbdFile, strlen(m_szKbdFile)+1);
+		RegSetValueEx(key, "Key_Config_File", NULL, REG_SZ, (LPBYTE)m_szKbdFile, strlen(m_szKbdFile)+1); 	//rewbs.customKeys
 		RegSetValueEx(key, "PreAmp", NULL, REG_DWORD, (LPBYTE)&m_nPreAmp, sizeof(DWORD));
 		RegSetValueEx(key, "StereoSeparation", NULL, REG_DWORD, (LPBYTE)&CSoundFile::m_nStereoSeparation, sizeof(DWORD));
 		RegSetValueEx(key, "MidiSetup", NULL, REG_DWORD, (LPBYTE)&m_dwMidiSetup, sizeof(DWORD));
@@ -942,9 +962,18 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 	BOOL bWait;
 	UINT nSleep;
 
+// -> CODE#0021
+// -> DESC="use multimedia timer instead of Sleep() in audio thread"
+	HANDLE sleepEvent = CreateEvent(NULL,TRUE,FALSE,NULL);
+// -! BEHAVIOUR_CHANGE#0021
+
 	bWait = TRUE;
 	nSleep = 50;
+// -> CODE#0021
+// -> DESC="use multimedia timer instead of Sleep() in audio thread"
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+//	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+// -! BEHAVIOUR_CHANGE#0021
 	for (;;)
 	{
 		if (bWait)
@@ -952,7 +981,13 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 			WaitForSingleObject(CMainFrame::m_hAudioWakeUp, 250);
 		} else
 		{
-			Sleep(nSleep);
+// -> CODE#0021
+// -> DESC="use multimedia timer instead of Sleep() in audio thread"
+//			Sleep(nSleep);
+			timeSetEvent(nSleep,1,(LPTIMECALLBACK)sleepEvent,NULL,TIME_ONESHOT | TIME_CALLBACK_EVENT_SET);
+			WaitForSingleObject(sleepEvent,nSleep);
+			ResetEvent(sleepEvent);
+// -! BEHAVIOUR_CHANGE#0021
 		}
 		bWait = TRUE;
 		pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
@@ -981,6 +1016,12 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 		}
 		END_CRITICAL();
 	}
+
+// -> CODE#0021
+// -> DESC="use multimedia timer instead of Sleep() in audio thread"
+	CloseHandle(sleepEvent);
+// -! BEHAVIOUR_CHANGE#0021
+
 	ExitThread(0);
 	return 0;
 }
@@ -1652,7 +1693,7 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	}
 	if (m_pSndFile)
 	{
-		m_pSndFile->SuspendPlugins();
+		m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
 		m_pSndFile->LoopPattern(-1);
 		m_pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
 		if (m_pSndFile == &m_WaveFile)
@@ -2057,7 +2098,7 @@ VOID CMainFrame::UpdateTree(CModDoc *pModDoc, DWORD lHint, CObject *pHint)
 void CMainFrame::OnViewOptions()
 //------------------------------
 {
-	if (m_bOptionsLocked)
+	if (m_bOptionsLocked)	//rewbs.customKeys
 		return;
 		
 	CPropertySheet dlg("Modplug Tracker Setup", this, m_nLastOptionsPage);
@@ -2075,13 +2116,37 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&keyboard);
 	dlg.AddPage(&colors);
 	dlg.AddPage(&mididlg);
-	m_bOptionsLocked=true;
+	m_bOptionsLocked=true;	//rewbs.customKeys
 	dlg.DoModal();
-	m_bOptionsLocked=false;
+	m_bOptionsLocked=false;	//rewbs.customKeys
 	m_wndTree.OnOptionsChanged();
 }
 
 
+// -> CODE#0002
+// -> DESC="list box to choose VST plugin presets (programs)"
+void CMainFrame::OnPluginSetup()
+{
+	CSelectPluginDlg dlg(NULL, this);
+	dlg.DoModal();
+}
+// -! NEW_FEATURE#0002
+
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+void CMainFrame::OnChannelManager()
+{
+	if(GetActiveDoc() && CChannelManagerDlg::sharedInstance()){
+		if(CChannelManagerDlg::sharedInstance()->IsDisplayed())
+			CChannelManagerDlg::sharedInstance()->Hide();
+		else{
+			CChannelManagerDlg::sharedInstance()->SetDocument(NULL);
+			CChannelManagerDlg::sharedInstance()->Show();
+		}
+	}
+}
+// -! NEW_FEATURE#0015
 void CMainFrame::OnAddDlsBank()
 //-----------------------------
 {
@@ -2156,10 +2221,11 @@ void CMainFrame::OnTimer(UINT)
 		}
 		if ((m_pSndFile) && (m_pSndFile->IsPaused()) && (!m_pSndFile->m_nMixChannels))
 		{
-			Log("%d (%d)\n", dwTime - gdwLastMixActiveTime, gdwLastMixActiveTime);
+			//Log("%d (%d)\n", dwTime - gdwLastMixActiveTime, gdwLastMixActiveTime);
 			if (dwTime - gdwLastMixActiveTime > 5000)
 			{
-				PauseMod();
+				//rewbs.instroVSTi: testing without shutting down audio device after 5s of idle time.
+				//PauseMod();
 			}
 		} else
 		{
@@ -2181,7 +2247,7 @@ void CMainFrame::OnTimer(UINT)
 	CVstPluginManager *pPluginManager = theApp.GetPluginManager();
 	if (pPluginManager)
 	{
-		//call @ 10Hz
+		////rewbs.vstCompliance: call @ 10Hz
 		DWORD curTime = timeGetTime();
 		if (curTime - m_dwLastPluginIdleCall > 100)
 		{
@@ -2204,6 +2270,7 @@ CModDoc *CMainFrame::GetActiveDoc()
 	return NULL;
 }
 
+//rewbs.customKeys
 CView *CMainFrame::GetActiveView()
 //---------------------------------
 {
@@ -2215,7 +2282,7 @@ CView *CMainFrame::GetActiveView()
 
 	return NULL;
 }
-
+//end rewbs.customKeys
 
 void CMainFrame::SwitchToActiveView()
 //-----------------------------------
@@ -2316,7 +2383,10 @@ void CMainFrame::OnPrevOctave()
 {
 	UINT n = GetBaseOctave();
 	if (n > MIN_BASEOCTAVE) m_wndToolBar.SetBaseOctave(n-1);
-	SwitchToActiveView();
+// -> CODE#0009
+// -> DESC="instrument editor note play & octave change"
+//	SwitchToActiveView();
+// -! BEHAVIOUR_CHANGE#0009
 }
 
 
@@ -2325,7 +2395,10 @@ void CMainFrame::OnNextOctave()
 {
 	UINT n = GetBaseOctave();
 	if (n < MAX_BASEOCTAVE) m_wndToolBar.SetBaseOctave(n+1);
-	SwitchToActiveView();
+// -> CODE#0009
+// -> DESC="instrument editor note play & octave change"
+//	SwitchToActiveView();
+// -! BEHAVIOUR_CHANGE#0009
 }
 
 
@@ -2335,12 +2408,13 @@ void CMainFrame::OnOctaveChanged()
 	SwitchToActiveView();
 }
 
-
+//rewbs.reportBug
 void CMainFrame::OnReportBug()
 {
 	CTrackApp::OpenURL("http://www.modplug.com/forum/viewforum.php?f=22");
 	return;
 }
+//end rewbs.reportBug
 
 BOOL CMainFrame::OnInternetLink(UINT nID)
 //---------------------------------------
@@ -2394,6 +2468,7 @@ LRESULT CMainFrame::OnSpecialKey(WPARAM vKey, LPARAM)
 	return 0;
 }
 
+//rewbs.customKeys
 LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == kcNull)
@@ -2406,13 +2481,16 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewMain: OnBarCheck(59392); break;
 	 	case kcFileImportMidiLib: OnImportMidiLib(); break;
 		case kcFileAddSoundBank: OnAddDlsBank(); break;
-		case kcPauseSong: OnPlayerPause(); break;
-		case kcPrevOctave: OnPrevOctave(); break;
-		case kcNextOctave: OnNextOctave(); break;
-		case kcFileNew:	theApp.OnFileNew(); break;
-		case kcFileOpen: theApp.OnFileOpen(); break;
+		case kcPauseSong:	OnPlayerPause(); break;
+		case kcPrevOctave:	OnPrevOctave(); break;
+		case kcNextOctave:	OnNextOctave(); break;
+		case kcFileNew:		theApp.OnFileNew(); break;
+		case kcFileOpen:	theApp.OnFileOpen(); break;
 		case kcMidiRecord:	OnMidiRecord(); break;
 		case kcHelp: 		CMDIFrameWnd::OnHelp(); break;
+		case kcViewAddPlugin: OnPluginSetup(); break;
+		case kcViewChannelManager: OnChannelManager(); break;
+
 		//D'oh!! moddoc isn't a CWnd so we have to handle its messages and pass them on.
 
 		case kcFileSaveAs:
@@ -2454,6 +2532,8 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	return wParam;
 }
+//end rewbs.customKeys
+
 void CMainFrame::OnInitMenu(CMenu* pMenu)
 {
 	m_InputHandler->SetModifierMask(0);
@@ -2464,6 +2544,7 @@ void CMainFrame::OnInitMenu(CMenu* pMenu)
 	
 }
 
+//end rewbs.VSTTimeInfo
 long CMainFrame::GetSampleRate()
 {
 	if (GetModPlaying())
@@ -2491,6 +2572,9 @@ double CMainFrame::GetApproxBPM()
 	double bpm = 60000/msPerBeat;
 	return bpm;
 }
+//end rewbs.VSTTimeInfo
+
+//rewbs.customKeys
 // We have swicthed focus to a new module - might need to update effect keys to reflect module type
 bool CMainFrame::UpdateEffectKeys(void)
 {
@@ -2509,5 +2593,6 @@ bool CMainFrame::UpdateEffectKeys(void)
 	
 	return false;
 }
+//end rewbs.customKeys
 
 

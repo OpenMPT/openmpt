@@ -29,7 +29,7 @@ public:
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlComments)
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);	//rewbs.customKeys
 	afx_msg void OnCommentsChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

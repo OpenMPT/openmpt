@@ -6,6 +6,11 @@
 #include "globals.h"
 #include "view_pat.h"
 #include "EffectVis.h"		//rewbs.fxvis
+// -> CODE#0015
+// -> DESC="channels management dlg"
+#include "ctrl_pat.h"
+// -! NEW_FEATURE#0015
+
 // Headers
 #define ROWHDR_WIDTH		32	// Row header
 #define COLHDR_HEIGHT		16	// Column header
@@ -182,7 +187,11 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 	} else
 	if (dwHintMask & HINT_PATTERNROW)
 	{
-		InvalidateRow(dwHintMask >> 24);
+// -> CODE#0008
+// -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
+//		InvalidateRow(dwHintMask >> 24);
+		InvalidateRow(dwHintMask >> 22);
+// -! BEHAVIOUR_CHANGE#0008
 	}
 
 }
@@ -395,23 +404,54 @@ void CViewPattern::OnDraw(CDC *pDC)
 			rect.SetRect(xpaint, ypaint, xpaint+nColumnWidth, ypaint + m_szHeader.cy);
 			if (ncolhdr < ncols)
 			{
-				const char *pszfmt = "Channel %d";
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+//				const char *pszfmt = "Channel %d";
+				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
+// -! NEW_FEATURE#0012
 				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] > 0x20))
 					pszfmt = "%d: %s";
 				else if (m_nDetailLevel < 2) pszfmt = "Ch%d";
 				else if (m_nDetailLevel < 3) pszfmt = "Chn %d";
 				wsprintf(s, pszfmt, ncolhdr+1, pSndFile->ChnSettings[ncolhdr].szName);
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+//				DrawButtonRect(hdc, &rect, s,
+//					(pSndFile->ChnSettings[ncolhdr].dwFlags & CHN_MUTE) ? TRUE : FALSE,
+//					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
+//				rect.bottom = rect.top + COLHDR_HEIGHT;
 				DrawButtonRect(hdc, &rect, s,
 					(pSndFile->ChnSettings[ncolhdr].dwFlags & CHN_MUTE) ? TRUE : FALSE,
-					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
-				
+					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE,
+					pModDoc->IsChannelRecord(ncolhdr) ? DT_RIGHT : DT_CENTER);
 				rect.bottom = rect.top + COLHDR_HEIGHT;
-				if (MultiRecordMask[ncolhdr>>3] & (1 << (ncolhdr&7)))
+
+				CRect insRect;
+				insRect.SetRect(xpaint, ypaint, xpaint+nColumnWidth / 8 + 3, ypaint + 16);
+//				if (MultiRecordMask[ncolhdr>>3] & (1 << (ncolhdr&7)))
+				if (pModDoc->IsChannelRecord1(ncolhdr))
 				{
-					rect.DeflateRect(1, 1);
+//					rect.DeflateRect(1, 1);
+//					InvertRect(hdc, &rect);
+//					rect.InflateRect(1, 1);
+					FrameRect(hdc,&rect,CMainFrame::brushGray);
 					InvertRect(hdc, &rect);
-					rect.InflateRect(1, 1);
+					s[0] = '1';
+					s[1] = '\0';
+					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
+					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
 				}
+				else if (pModDoc->IsChannelRecord2(ncolhdr))
+				{
+					FrameRect(hdc,&rect,CMainFrame::brushGray);
+					InvertRect(hdc, &rect);
+					s[0] = '2';
+					s[1] = '\0';
+					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
+					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
+				}
+// -! NEW_FEATURE#0012
+
 				if (m_dwStatus & PATSTATUS_VUMETERS)
 				{
 					OldVUMeters[ncolhdr] = 0;
@@ -539,6 +579,14 @@ void CViewPattern::OnDraw(CDC *pDC)
 		if (m_pEffectVis->m_hWnd) m_pEffectVis->Update();
 	}
 
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
+
+	if(activeDoc && CChannelManagerDlg::sharedInstance() && CChannelManagerDlg::sharedInstance()->IsDisplayed())
+		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
+// -! NEW_FEATURE#0015
 }
 
 

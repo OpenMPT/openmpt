@@ -228,7 +228,6 @@ UINT COrderList::GetCurrentPattern() const
 BOOL COrderList::ProcessKeyDown(UINT nChar)
 //-----------------------------------------
 {
-	//Todo: Handle these with commands
 	switch(nChar)
 	{
 	case VK_UP:
@@ -249,6 +248,7 @@ BOOL COrderList::ProcessKeyDown(UINT nChar)
 	case VK_TAB:	OnSwitchToView(); break;
 	case VK_RETURN:	OnLButtonDblClk(0, CPoint(0,0)); OnSwitchToView(); break;
 
+	//rewbs.customKeys: these are now global commands handled via the inputInhandler
 /*	case VK_F5:		OnPlayerPlay(); break;
 	case VK_F6:		OnPlayerPlayFromStart(); break;
 	case VK_F7:		OnPatternPlayFromStart(); break;

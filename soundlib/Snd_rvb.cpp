@@ -38,12 +38,10 @@ static __int64 gnDCRRvb_X1 = 0;
 
 
 // Misc functions
-
 LONG OnePoleLowPassCoef(LONG scale, FLOAT g, FLOAT F_c, FLOAT F_s);
 LONG mBToLinear(LONG scale, LONG value_mB);
 FLOAT mBToLinear(LONG value_mB);
-FLOAT powMPT(FLOAT a, FLOAT b);
-
+FLOAT pow(FLOAT a, FLOAT b);
 
 typedef struct _SNDMIX_RVBPRESET
 {
@@ -200,12 +198,12 @@ static VOID I3dl2_to_Generic(
 	// Late reverb decay time
 	if (lTankLength < 10) lTankLength = 10;
 	flDelayFactor = (lReverbDecayTime <= lTankLength) ? 1.0f : ((FLOAT)lTankLength / (FLOAT)lReverbDecayTime);
-	pRvb->ReverbDecay = ftol(powMPT(0.001f, flDelayFactor) * 32768.0f);
+	pRvb->ReverbDecay = ftol(pow(0.001f, flDelayFactor) * 32768.0f);
 
 	// Late Reverb Decay HF
 	flDecayTimeHF = (FLOAT)lReverbDecayTime * pReverb->flDecayHFRatio;
 	flDelayFactorHF = (flDecayTimeHF <= (FLOAT)lTankLength) ? 1.0f : ((FLOAT)lTankLength / flDecayTimeHF);
-	pRvb->flReverbDamping = powMPT(0.001f, flDelayFactorHF);
+	pRvb->flReverbDamping = pow(0.001f, flDelayFactorHF);
 }
 
 
@@ -1058,12 +1056,14 @@ FLOAT mBToLinear(LONG value_mB)
 }
 
 
-// pow(a,b) returns a^^b -> 2^^(b.log2(a))
+//#define _ASM_MATH
+#ifdef _ASM_MATH
 
-FLOAT powMPT(FLOAT a, FLOAT b)
+// pow(a,b) returns a^^b -> 2^^(b.log2(a))
+static float pow(float a, float b)
 {
-	LONG tmpint;
-	FLOAT result;
+	long tmpint;
+	float result;
 	_asm {
 	fld b				// Load b
 	fld a				// Load a
@@ -1081,4 +1081,6 @@ FLOAT powMPT(FLOAT a, FLOAT b)
 	}
 	return result;
 }
-
+#else
+#include <math.h>
+#endif // _ASM_MATH

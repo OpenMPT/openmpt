@@ -8,6 +8,13 @@
 */
 
 #include "stdafx.h"
+
+// -> CODE#0022
+// -> DESC="alternative BPM/Speed interpretation method"
+#include "../mptrack/mptrack.h"
+#include "../mptrack/moddoc.h"
+#include "../mptrack/MainFrm.h"
+// -! NEW_FEATURE#0022
 #include "sndfile.h"
 
 #ifdef MODPLUG_TRACKER
@@ -15,7 +22,7 @@
 #endif
 
 // Volume ramp length, in 1/10 ms
-#define VOLUMERAMPLEN	0	// 1.46ms = 64 samples at 44.1kHz		//rewbs soundq exp - was 146
+#define VOLUMERAMPLEN	0	// 1.46ms = 64 samples at 44.1kHz		//rewbs.soundQ exp - was 146
 
 // VU-Meter
 #define VUMETER_DECAY		4
@@ -32,7 +39,7 @@ DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
 UINT CSoundFile::gnAGC = AGC_UNITY;
-UINT CSoundFile::gnVolumeRampSamples = 0;
+UINT CSoundFile::gnVolumeRampSamples = 0;		//rewbs.soundQ exp - was 64
 UINT CSoundFile::gnCPUUsage = 0;
 LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
@@ -268,7 +275,8 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 	lMax = cbBuffer / lSampleSize;
 	if ((!lMax) || (!lpBuffer) || (!m_nChannels)) return 0;
 	lRead = lMax;
-	if (m_dwSongFlags & SONG_ENDREACHED) goto MixDone;
+	if (m_dwSongFlags & SONG_ENDREACHED) 
+		goto MixDone;
 	while (lRead > 0)
 	{
 		// Update Channel Data
@@ -295,7 +303,8 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 #endif
 				{
 					m_dwSongFlags |= SONG_ENDREACHED;
-					if (lRead == lMax) goto MixDone;
+					if (lRead == lMax) 
+						goto MixDone;
 					m_nBufferCount = lRead;
 				}
 			}
@@ -303,7 +312,8 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		lCount = m_nBufferCount;
 		if (lCount > MIXBUFFERSIZE) lCount = MIXBUFFERSIZE;
 		if (lCount > lRead) lCount = lRead;
-		if (!lCount) break;
+		if (!lCount) 
+			break;
 		lSampleCount = lCount;
 	#ifndef NO_REVERB
 		gnReverbSend = 0;
@@ -603,6 +613,10 @@ BOOL CSoundFile::ProcessRow()
 					if (!m_nRepeatCount) return FALSE;
 					if (!m_nRestartPos)
 					{
+						//rewbs.instroVSTi: kill & revive all plugins at end of song, if looping.
+						SuspendPlugins();
+						ResumePlugins();
+
 						m_nMusicSpeed = m_nDefaultSpeed;
 						m_nMusicTempo = m_nDefaultTempo;
 						m_nGlobalVolume = m_nDefaultGlobalVolume;
@@ -724,12 +738,17 @@ BOOL CSoundFile::ReadNote()
 	} else
 #endif // MODPLUG_TRACKER
 	{
-		if (!ProcessRow()) return FALSE;
+		if (!ProcessRow()) 
+			return FALSE;
 	}
 	////////////////////////////////////////////////////////////////////////////////////
 	m_nTotalCount++;
 	if (!m_nMusicTempo) return FALSE;
-	m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+// -> CODE#0022
+// -> DESC="alternative BPM/Speed interpretation method"
+	if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
+	else m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+// -! NEW_FEATURE#0022
 #ifdef MODPLUG_TRACKER
 	if (m_dwSongFlags & SONG_PAUSED)
 	{
@@ -1565,7 +1584,13 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 			{
 				UINT nPlugin = penv->nMixPlug;				// first try intrument VST
 				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
-                    nPlugin = ChnSettings[nChn].nMixPlugin; // Then try Channel VST
+				{
+					nPlugin = ChnSettings[nChn].nMixPlugin; // Then try Channel VST
+// -> CODE#0015.rewbs
+// -> DESC="channels management dlg"
+					if(pChn->dwFlags & CHN_NOFX) nPlugin = 0;
+// -! NEW_FEATURE#0015.rewbs
+				}
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;

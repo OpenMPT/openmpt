@@ -57,7 +57,11 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD, DWORD dwParam1, DWORD dw
 							note += nTranspose*12;
 							if (note < 0) note = 0;
 							if (note > 119) note = 119;
-							dwParam1 &= 0xffffff00;
+// -> CODE#0011
+// -> DESC="bug fix about transpose midi keyboard option"
+//							dwParam1 &= 0xffffff00;
+							dwParam1 &= 0xffff00ff;
+// -! BUG_FIX#0011
 							dwParam1 |= (note<<8);
 						}
 					}

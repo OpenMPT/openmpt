@@ -36,6 +36,9 @@ public:
 	CEdit m_EditTempo, m_EditSpeed, m_EditGlobalVol, m_EditRestartPos;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinGlobalVol, m_SpinRestartPos;
 	CSliderCtrl m_SliderPreAmp;
+// -> CODE#0016
+// -> DESC="default tempo update"
+	CSliderCtrl m_SliderTempo;
 	CComboBox m_ComboResampling;
 	CVuMeter m_VuMeterLeft, m_VuMeterRight;
 	//}}AFX_DATA

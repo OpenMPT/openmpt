@@ -9,6 +9,8 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#include <math.h>
+
 
 // Bass Expansion
 #define DEFAULT_XBASS_RANGE		14	// (x+2)*20 Hz (320Hz)
@@ -144,12 +146,14 @@ VOID ShelfEQ(LONG scale,
 	if (quad != 0)
 	{
 		FLOAT lambda = (gainPI2 - gainDC2) / quad;
-		alpha  = (FLOAT)(lambda - Sgn(lambda)*sqrtMPT(lambda*lambda - 1.0f));
+	//	alpha  = (FLOAT)(lambda - Sgn(lambda)*sqrtMPT(lambda*lambda - 1.0f));
+	alpha  = (FLOAT)(lambda - Sgn(lambda)*sqrt(lambda*lambda - 1.0f));
 	}
  
 	beta0 = 0.5f * ((gainDC + gainPI) + (gainDC - gainPI) * alpha);
 	beta1 = 0.5f * ((gainDC - gainPI) + (gainDC + gainPI) * alpha);
-	rho   = (FLOAT)((sinMPT((wT*0.5f) - (PI/4.0f))) / (sinMPT((wT*0.5f) + (PI/4.0f))));
+	//rho   = (FLOAT)((sinMPT((wT*0.5f) - (PI/4.0f))) / (sinMPT((wT*0.5f) + (PI/4.0f))));
+	rho   = (FLOAT)((sin((wT*0.5f) - (PI/4.0f))) / (sin((wT*0.5f) + (PI/4.0f))));
  
 	quad  = 1.0f / (1.0f + rho*alpha);
     

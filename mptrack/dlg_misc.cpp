@@ -9,6 +9,79 @@
 
 #pragma warning(disable:4244)
 
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+void getXParam(BYTE command, UINT nPat, UINT nRow, UINT nChannel, CSoundFile *pSndFile, UINT * xparam, UINT * multiplier)
+{
+	if(xparam == NULL || multiplier == NULL) return;
+
+	MODCOMMAND mca;
+	UINT i,xp = 0, ml = 1;
+	int nCmdRow = (int)nRow;
+
+	// If the current command is a parameter extension command
+	if(command == CMD_XPARAM){
+
+		nCmdRow--;
+
+		// Try to find previous command parameter to be extended
+		while(nCmdRow >= 0){
+			i = nCmdRow * pSndFile->m_nChannels + nChannel;
+			mca = pSndFile->Patterns[nPat][i];
+			if(mca.command == CMD_OFFSET || mca.command == CMD_PATTERNBREAK || mca.command == CMD_PATTERNBREAK)
+				break;
+			if(mca.command != CMD_XPARAM){
+				nCmdRow = -1;
+				break;
+			}
+			nCmdRow--;
+		}
+	}
+	// Else if current row do not own any satisfying command parameter to extend, set return state
+	else if(command != CMD_OFFSET && command != CMD_PATTERNBREAK && command != CMD_TEMPO) nCmdRow = -1;
+
+	// If an 'extendable' command parameter has been found,
+	if(nCmdRow >= 0){
+		i = nCmdRow * pSndFile->m_nChannels + nChannel;
+		mca = pSndFile->Patterns[nPat][i];
+
+		// Find extension resolution (8 to 24 bits)
+		UINT n = 1;
+		while(n < 4 && nCmdRow+n < pSndFile->PatternSize[nPat]){
+			i = (nCmdRow+n) * pSndFile->m_nChannels + nChannel;
+			if(pSndFile->Patterns[nPat][i].command != CMD_XPARAM) break;
+			n++;
+		}
+
+		// Parameter extension found (above 8 bits non-standard parameters)
+		if(n > 1){
+			// Limit offset command to 24 bits, other commands to 16 bits
+			n = mca.command == CMD_OFFSET ? n : (n > 2 ? 2 : n);
+
+			// Compute extended value WITHOUT current row parameter value : this parameter
+			// is being currently edited (this is why this function is being called) so we
+			// only need to compute a multiplier so that we can add its contribution while
+			// its value is changed by user
+			for(UINT j = 0 ; j < n ; j++){
+				i = (nCmdRow+j) * pSndFile->m_nChannels + nChannel;
+				mca = pSndFile->Patterns[nPat][i];
+
+				UINT k = 8*(n-j-1);
+				if(nCmdRow+j == nRow) ml = 1<<k;
+				else xp += (mca.param<<k);
+			}
+		}
+		// No parameter extension to perform (8 bits standard parameter),
+		// just care about offset command special case (16 bits, fake)
+		else if(mca.command == CMD_OFFSET) ml <<= 8;
+	}
+
+	// Return x-parameter
+	*multiplier = ml;
+	*xparam = xp;
+}
+// -! NEW_FEATURE#0010
+
 ///////////////////////////////////////////////////////////////////////
 // CModTypeDlg
 
@@ -51,14 +124,26 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_TypeBox.SetItemData(m_TypeBox.AddString("ScreamTracker S3M"), MOD_TYPE_S3M);
 	m_TypeBox.SetItemData(m_TypeBox.AddString("FastTracker XM"), MOD_TYPE_XM);
 	m_TypeBox.SetItemData(m_TypeBox.AddString("Impulse Tracker IT"), MOD_TYPE_IT);
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	m_TypeBox.SetItemData(m_TypeBox.AddString("Impulse Tracker Project ITP"), MOD_TYPE_IT);
+// -! NEW_FEATURE#0023
 	switch(m_nType)
 	{
 	case MOD_TYPE_S3M:	m_TypeBox.SetCurSel(1); break;
 	case MOD_TYPE_XM:	m_TypeBox.SetCurSel(2); break;
-	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(3); break;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(3); break;
+	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT ? 4 : 3); break;
+// -! NEW_FEATURE#0023
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//	for (int i=4; i<=64; i++)
 	for (int i=4; i<=MAX_BASECHANNELS; i++)
+// -! BEHAVIOUR_CHANGE#0006
 	{
 		wsprintf(s, "%d Channels", i);
 		m_ChannelsBox.SetItemData(m_ChannelsBox.AddString(s), i);
@@ -142,6 +227,11 @@ void CModTypeDlg::OnOK()
 	if (sel >= 0)
 	{
 		m_nType = m_TypeBox.GetItemData(sel);
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	if(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT && sel != 4) m_pSndFile->m_dwSongFlags &= ~SONG_ITPROJECT;
+	if(sel == 4) m_pSndFile->m_dwSongFlags |= SONG_ITPROJECT;
+// -! NEW_FEATURE#0023
 	}
 	sel = m_ChannelsBox.GetCurSel();
 	if (sel >= 0)
@@ -198,7 +288,7 @@ UINT CShowLogDlg::ShowLog(LPCSTR pszLog, LPCSTR lpszTitle)
 ///////////////////////////////////////////////////////////
 // CRemoveChannelsDlg
 
-
+//rewbs.removeChansDlgCleanup
 void CRemoveChannelsDlg::DoDataExchange(CDataExchange* pDX)
 //--------------------------------------------------
 {
@@ -217,58 +307,18 @@ BEGIN_MESSAGE_MAP(CRemoveChannelsDlg, CDialog)
 END_MESSAGE_MAP()
 
 
+
 BOOL CRemoveChannelsDlg::OnInitDialog()
 //-------------------------------------
 {
 	CHAR label[128];
 	CDialog::OnInitDialog();
-/*	CRect rect(0,0,0,0);
-	CFont *f;
-	f = new CFont();
-	f->CreateStockObject(DEFAULT_GUI_FONT);
-
-	int vOffset=35;
-	int vLabelHeight=15;
-	int vTopPadding=2;
-	int vButtonHeight=15;
-	int vBottomPadding=15;
-	int hOffset=10;
-	int hLabelWidth=17;
-	int hButtonWidth=15;
-	int hRightPadding=15;
-	int checkboxesPerRow=20;
-	int col, row;*/
-
 	for (UINT n=0; n<m_nChannels; n++)
 	{
-/*		row = n/checkboxesPerRow;
-		col = n%checkboxesPerRow;
-	
-		//Label position
-		wsprintf(label,"%d", n+1);
-		rect.left=hOffset+col*(hButtonWidth+hRightPadding);
-		rect.right=rect.left+hLabelWidth;
-		rect.top=vOffset+row*(vLabelHeight+vTopPadding+vButtonHeight+vBottomPadding);
-		rect.bottom=rect.top+vLabelHeight;
-		m_Label[n].Create(label, WS_CHILD|WS_VISIBLE|SS_CENTER, rect, this, n);
-		m_Label[n].SetFont(f, true);
-
-		//Checkbox position
-		rect.left=hOffset+col*(hButtonWidth+hRightPadding);
-		rect.right=rect.left+hButtonWidth;
-		rect.top=vOffset+vTopPadding+(row+1)*(vTopPadding+vLabelHeight)+row*(vButtonHeight+vBottomPadding);
-		rect.bottom=rect.top+vButtonHeight;
-		m_ButChan[n].Create("", WS_CHILD|WS_VISIBLE|BS_AUTOCHECKBOX, rect, this, n);
-		if (m_bChnMask[n]) m_ButChan[n].SetCheck(BST_CHECKED);
-
-		m_ButChan[n].ShowWindow(SW_SHOW);
-		m_Label[n].ShowWindow(SW_SHOW);
-*/	
 		wsprintf(label,"Channel %d", n+1);
 		m_RemChansList.SetItemData(m_RemChansList.AddString(label), n);
 		if (m_bChnMask[n]) m_RemChansList.SetSel(n);
 	}
-
 	wsprintf(label, "Select %d channels to remove:", m_nRemove);
 	SetDlgItemText(IDC_QUESTION1, label);
 
@@ -282,8 +332,6 @@ void CRemoveChannelsDlg::OnOK()
 {
 	UINT nr = 0;
 	memset(m_bChnMask, 0, sizeof(m_bChnMask));
-	//for (UINT n=0; n<m_nChannels; n++) if (m_ButChan[n].GetCheck())
-
 	int nCount = m_RemChansList.GetSelCount();
 	CArray<int,int> aryListBoxSel;
 	aryListBoxSel.SetSize(nCount);
@@ -307,7 +355,7 @@ void CRemoveChannelsDlg::OnChannelChanged()
 	nr = m_RemChansList.GetSelCount();
 	GetDlgItem(IDOK)->EnableWindow((nr == m_nRemove) ? TRUE : FALSE);
 }
-
+//end rewbs.removeChansDlgCleanup
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Find/Replace Dialog
@@ -582,7 +630,11 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		CHAR s[256];
 		UINT nrows = pSndFile->PatternSize[m_nPattern];
 
-		for (UINT irow=4; irow<=256; irow++)
+// -> CODE#0008
+// -> DESC="#define to set pattern size"
+//		for (UINT irow=32; irow<=256; irow++)
+		for (UINT irow=32; irow<=MAX_PATTERN_ROWS; irow++)
+// -! BEHAVIOUR_CHANGE#0008
 		{
 			wsprintf(s, "%d", irow);
 			combo->AddString(s);
@@ -606,7 +658,11 @@ void CPatternPropertiesDlg::OnOK()
 //--------------------------------
 {
 	int n = GetDlgItemInt(IDC_COMBO1);
-	if ((n >= 4) && (n <= 256) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
+// -> CODE#0008
+// -> DESC="#define to set pattern size"
+//	if ((n >= 2) && (n <= 256) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
+	if ((n >= 2) && (n <= MAX_PATTERN_ROWS) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
+// -! BEHAVIOUR_CHANGE#0008
 	CDialog::OnOK();
 }
 
@@ -686,7 +742,18 @@ BOOL CEditCommand::ShowEditWindow(UINT nPat, DWORD dwCursor)
 	// Init Pages
 	if (m_pageNote) m_pageNote->Init(m_Command);
 	if (m_pageVolume) m_pageVolume->Init(m_Command);
-	if (m_pageEffect) m_pageEffect->Init(m_Command);
+
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+//	if (m_pageEffect) m_pageEffect->Init(m_Command);
+	if (m_pageEffect){
+		UINT xp = 0, ml = 1;
+		getXParam(m_Command.command,nPat,nRow,nChannel,pSndFile,&xp,&ml);
+		m_pageEffect->Init(m_Command);
+		m_pageEffect->XInit(xp,ml);
+	}
+// -! NEW_FEATURE#0010
+
 	// Update Window Title
 	wsprintf(s, "Note Properties - Row %d, Channel %d", m_nRow, m_nChannel+1);
 	SetTitle(s);
@@ -699,7 +766,8 @@ BOOL CEditCommand::ShowEditWindow(UINT nPat, DWORD dwCursor)
 	if (m_pageNote) m_pageNote->UpdateDialog();
 	if (m_pageVolume) m_pageVolume->UpdateDialog();
 	if (m_pageEffect) m_pageEffect->UpdateDialog();
-	ShowWindow(SW_SHOW);
+	//ShowWindow(SW_SHOW);
+	ShowWindow(SW_RESTORE);
 	return TRUE;
 }
 
@@ -719,7 +787,11 @@ void CEditCommand::UpdateNote(UINT note, UINT instr)
 		m->instr = instr;
 		m_Command = *m;
 		m_pModDoc->SetModified();
-		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
+// -> CODE#0008
+// -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
+//		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 22) | HINT_PATTERNROW, NULL);
+// -! BEHAVIOUR_CHANGE#0008
 	}
 }
 
@@ -738,7 +810,11 @@ void CEditCommand::UpdateVolume(UINT volcmd, UINT vol)
 		m->volcmd = volcmd;
 		m->vol = vol;
 		m_pModDoc->SetModified();
-		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
+// -> CODE#0008
+// -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
+//		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 22) | HINT_PATTERNROW, NULL);
+// -! BEHAVIOUR_CHANGE#0008
 	}
 }
 
@@ -752,12 +828,27 @@ void CEditCommand::UpdateEffect(UINT command, UINT param)
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
 	MODCOMMAND *m = pSndFile->Patterns[m_nPattern]+m_nRow*pSndFile->m_nChannels+m_nChannel;
+
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+	if(command == CMD_OFFSET || command == CMD_PATTERNBREAK || command == CMD_TEMPO || command == CMD_XPARAM){
+		UINT xp = 0, ml = 1;
+		getXParam(command,m_nPattern,m_nRow,m_nChannel,pSndFile,&xp,&ml);
+		m_pageEffect->XInit(xp,ml);
+		m_pageEffect->UpdateDialog();
+	}
+// -! NEW_FEATURE#0010
+
 	if ((m->command != command) || (m->param != param))
 	{
 		m->command = command;
 		m->param = param;
 		m_pModDoc->SetModified();
-		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
+// -> CODE#0008
+// -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
+//		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 22) | HINT_PATTERNROW, NULL);
+// -! BEHAVIOUR_CHANGE#0008
 	}
 }
 
@@ -1052,7 +1143,11 @@ void CPageEditEffect::UpdateValue(BOOL bSet)
 	{
 		CHAR s[128] = "";
 		LONG fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
-		if (fxndx >= 0) m_pModDoc->GetEffectNameEx(s, fxndx, m_nParam);
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+//		if (fxndx >= 0) m_pModDoc->GetEffectNameEx(s, fxndx, m_nParam);
+		if (fxndx >= 0) m_pModDoc->GetEffectNameEx(s, fxndx, m_nParam * m_nMultiplier + m_nXParam);
+// -! NEW_FEATURE#0010
 		SetDlgItemText(IDC_TEXT1, s);
 	}
 	if ((m_pParent) && (bSet)) m_pParent->UpdateEffect(m_nCommand, m_nParam);
@@ -2015,6 +2110,19 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 			{
 				KeyboardMap[iNote] = (BYTE)nSample;
 			}
+/* rewbs.note: I don't think we need this with cust keys.
+// -> CODE#0009
+// -> DESC="instrument editor note play & octave change"
+			CMDIChildWnd *pMDIActive = CMainFrame::GetMainFrame() ? CMainFrame::GetMainFrame()->MDIGetActive() : NULL;
+			CView *pView = pMDIActive ? pMDIActive->GetActiveView() : NULL;
+
+			if(pView){
+				CModDoc *pModDoc = (CModDoc *)pView->GetDocument();
+				BOOL bNotPlaying = ((CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc) && (CMainFrame::GetMainFrame()->IsPlaying())) ? FALSE : TRUE;
+				pModDoc->PlayNote(iNote+1, m_nInstrument, 0, bNotPlaying);
+			}
+// -! BEHAVIOUR_CHANGE#0009
+*/
 			OnUpdateKeyboard();
 		}
 	}

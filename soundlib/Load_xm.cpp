@@ -81,7 +81,11 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	WORD norders=0, restartpos=0, channels=0, patterns=0, instruments=0;
 	WORD xmflags=0, deftempo=125, defspeed=6;
 	BYTE InstUsed[256];
-	BYTE channels_used[MAX_CHANNELS];
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//	BYTE channels_used[MAX_CHANNELS];
+	BYTE channels_used[MAX_BASECHANNELS];
+// -! BEHAVIOUR_CHANGE#0006
 	BYTE pattern_map[256];
 	BYTE samples_used[(MAX_SAMPLES+7)/8];
 	UINT unused_samples;
@@ -95,7 +99,11 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if ((!norders) || (norders > MAX_ORDERS)) return FALSE;
 	restartpos = *((WORD *)(lpStream+66));
 	channels = *((WORD *)(lpStream+68));
-	if ((!channels) || (channels > 64)) return FALSE;
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//	if ((!channels) || (channels > 64)) return FALSE;
+	if ((!channels) || (channels > MAX_BASECHANNELS)) return FALSE;
+// -! BEHAVIOUR_CHANGE#0006
 	m_nType = MOD_TYPE_XM;
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
@@ -112,8 +120,12 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if (xmflags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
 	defspeed = *((WORD *)(lpStream+76));
 	deftempo = *((WORD *)(lpStream+78));
-	if ((deftempo >= 32) && (deftempo < 256)) m_nDefaultTempo = deftempo;
+// -> CODE#0016
+// -> DESC="default tempo update"
+//	if ((deftempo >= 32) && (deftempo < 256)) m_nDefaultTempo = deftempo;
+	if ((deftempo >= 32) && (deftempo <= 512)) m_nDefaultTempo = deftempo;
 	if ((defspeed > 0) && (defspeed < 40)) m_nDefaultSpeed = defspeed;
+// -! BEHAVIOUR_CHANGE#0016
 	memcpy(Order, lpStream+80, norders);
 	memset(InstUsed, 0, sizeof(InstUsed));
 	if (patterns > MAX_PATTERNS)
@@ -162,7 +174,11 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			dwSize = *((DWORD *)(lpStream+dwMemPos));
 		}
 		rows = *((WORD *)(lpStream+dwMemPos+5));
-		if ((!rows) || (rows > 256)) rows = 64;
+// -> CODE#0008
+// -> DESC="#define to set pattern size"
+//		if ((!rows) || (rows > 256)) rows = 64;
+		if ((!rows) || (rows > MAX_PATTERN_ROWS)) rows = 64;
+// -> BEHAVIOUR_CHANGE#0008
 		packsize = *((WORD *)(lpStream+dwMemPos+7));
 		if (dwMemPos + dwSize + 4 > dwMemLength) return TRUE;
 		dwMemPos += dwSize;
@@ -600,7 +616,10 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	header.patterns = 0;
 	for (i=0; i<MAX_ORDERS; i++)
 	{
-		if (Order[i] == 0xFF) break;
+// -> CODE#0013
+// -> DESC="load/save the whole pattern order list"
+//		if (Order[i] == 0xFF) break;
+// -! CODE#0013
 		header.norder++;
 		if ((Order[i] >= header.patterns) && (Order[i] < MAX_PATTERNS)) header.patterns = Order[i]+1;
 	}
