@@ -23,7 +23,7 @@ class ISoundSource;
 #define KEYBOARDMAP_LENGTH			(3*12+2)
 #define MAINFRAME_TITLE				"Modplug Tracker"
 #define MPTRACK_FINALRELEASEVERSION	0x01090000
-#define MPTRACK_VERSION				0x011600D6
+#define MPTRACK_VERSION				0x011600D7
 
 
 enum {

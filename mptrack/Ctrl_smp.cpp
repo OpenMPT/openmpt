@@ -7,6 +7,7 @@
 #include "ctrl_smp.h"
 #include "view_smp.h"
 #include "dlg_misc.h"
+#include "PSRatioCalc.h" //rewbs.timeStretchMods
 #include "mpdlgs.h"
 
 // -> CODE#0029
@@ -144,6 +145,7 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO4,				m_ComboPitch);
 	DDX_Control(pDX, IDC_COMBO5,				m_ComboQuality);
 	DDX_Control(pDX, IDC_COMBO6,				m_ComboFFT);
+	DDX_Text(pDX,	 IDC_EDIT6,					m_dTimeStretchRatio); //rewbs.timeStretchMods
 // -! TEST#0029
 
 	//}}AFX_DATA_MAP
@@ -280,8 +282,8 @@ BOOL CCtrlSamples::OnInitDialog()
 	((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_HIDE);
 	((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_HIDE);
 
-	// Stretch to size number of row selection
-	SetDlgItemInt(IDC_EDIT6,0,FALSE);
+	// Stretch ratio
+	SetDlgItemInt(IDC_EDIT6,100,FALSE);
 
 	// Processing state text label
 	SetDlgItemText(IDC_STATIC1,"");
@@ -1383,12 +1385,14 @@ void CCtrlSamples::OnEnableStretchToSize()
 	if(IsDlgButtonChecked(IDC_CHECK3)){
 		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(FALSE);
 		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(TRUE);
+		((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(TRUE); //rewbs.timeStretchMods
 		SetDlgItemText(IDC_BUTTON1, "Time Stretch");
 	}
 	// Enable pitch-shifting / disable unused time-stretching UI elements
 	else{
 		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(TRUE);
 		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(FALSE);
+		((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(FALSE); //rewbs.timeStretchMods
 		SetDlgItemText(IDC_BUTTON1, "Pitch Shift");
 	}
 }
@@ -1399,37 +1403,29 @@ void CCtrlSamples::OnEstimateSampleSize()
 	MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
 	if(!pins) return;
 
-	// Get original sample rate
-	double lSampleRate = pins->nC4Speed;
-	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) lSampleRate = (double)CSoundFile::TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
-	if(lSampleRate <= 0) lSampleRate = 8363.0;
+	//rewbs.timeStretchMods
+	//Ensure m_dTimeStretchRatio is up-to-date with textbox content
+	UpdateData(TRUE);
 
-	// Compute sample length (ms)
-	double lSampleLength = (double)pins->nLength;
-	lSampleLength = 1000.0 * (lSampleLength / lSampleRate);
+	//Calculate/verify samplerate at C4.
+	long lSampleRate = pins->nC4Speed;
+	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+		lSampleRate = (double)CSoundFile::TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
+	if(lSampleRate <= 0) 
+		lSampleRate = 8363.0;
 
-	// Compute length (ms) of a pattern row using current tempo & speed settings
-	double rowTime;
-	if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED)
-		rowTime = 60000.0 / (1.65625 * (double)(m_pSndFile->m_nMusicSpeed * m_pSndFile->m_nMusicTempo));
-	else
-		rowTime = 2500.0 * (double)m_pSndFile->m_nMusicSpeed / (double)m_pSndFile->m_nMusicTempo;
-
-	// Estimate sample length (in pattern row(s) unit)
-	double ratio = lSampleLength / rowTime;
-
-	// Show sample length estimate
-	int i,decpoint,sign;
-	char * str = _fcvt(ratio, 2, &decpoint, &sign);
-	CHAR fstr[128];
-	for(i = 0 ; i < decpoint ; i++) fstr[i] = str[i];
-	fstr[i++] = '.';
-	fstr[i++] = '\0';
-	strcat(fstr,&str[decpoint]);
-	strcat(fstr,ratio > 1.0 ? " rows" : " pattern row");
-	wsprintf(&fstr[strlen(fstr)],"\nStretch range [ %d , %d ]",(int)Round(0.5 * ratio + 0.5,0),(int)(2.0 * ratio));
-	::MessageBox(NULL,fstr,"Estimated sample length",MB_OK);
+	//Open dialog
+	CPSRatioCalc dlg(pins->nLength, lSampleRate, 
+					 m_pSndFile->m_nMusicSpeed, m_pSndFile->m_nMusicTempo, 
+					 m_dTimeStretchRatio, this);
+	if (dlg.DoModal() != IDOK) return;
+	
+    //Update ratio value&textbox
+	m_dTimeStretchRatio = dlg.m_dRatio;
+	UpdateData(FALSE);
+	//end rewbs.timeStretchMods
 }
+
 
 void CCtrlSamples::OnPitchShiftTimeStretch()
 {
@@ -1461,29 +1457,17 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 
 	// Time stretching
 	if(IsDlgButtonChecked(IDC_CHECK3)){
-		// Get original sample rate
-		double lSampleRate = pins->nC4Speed;
-		if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) lSampleRate = (double)CSoundFile::TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
-		if(lSampleRate <= 0) lSampleRate = 8363.0;
+		//rewbs.timeStretchMods
+		UpdateData(TRUE); //Ensure m_dTimeStretchRatio is up-to-date with textbox content
+		errorcode = TimeStretch(m_dTimeStretchRatio/100.0);
 
-		// Compute sample length (ms)
-		double lSampleLength = (double)pins->nLength;
-		lSampleLength = 1000.0 * (lSampleLength / lSampleRate);
-
-		// Compute length (ms) of a pattern row using current tempo & speed settings
-		double rowTime;
-		if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED)
-			rowTime = 60000.0 / (1.65625 * (double)(m_pSndFile->m_nMusicSpeed * m_pSndFile->m_nMusicTempo));
-		else
-			rowTime = 2500.0 * (double)m_pSndFile->m_nMusicSpeed / (double)m_pSndFile->m_nMusicTempo;
-
-		// Multiply row time by the selected number of rows
-		if(GetDlgItemInt(IDC_EDIT6) < 1) goto error;
-		rowTime *= (double)GetDlgItemInt(IDC_EDIT6);
-		if(rowTime < 0.0) goto error;
-
-		// Apply time stretching
-		errorcode = TimeStretch(rowTime / lSampleLength);
+		//Update loop points
+		pins->nLoopStart *= m_dTimeStretchRatio/100.0;
+		pins->nLoopEnd *= m_dTimeStretchRatio/100.0;
+		pins->nSustainStart *= m_dTimeStretchRatio/100.0;
+		pins->nSustainEnd *= m_dTimeStretchRatio/100.0;
+		//end rewbs.timeStretchMods
+		
 	}
 	// Pitch shifting
 	else{
@@ -1508,6 +1492,16 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 		((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_SHOW);
 		((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_SHOW);
 		SetDlgItemText(IDC_STATIC1,"Preview...");
+		
+		//rewbs.timeStretchMods
+		//Disable all pitch shift / timestrech buttons until accepted or restored:
+		GetDlgItem(IDC_COMBO5)->EnableWindow(FALSE);
+		GetDlgItem(IDC_COMBO6)->EnableWindow(FALSE);
+		GetDlgItem(IDC_CHECK3)->EnableWindow(FALSE);
+		GetDlgItem(IDC_COMBO4)->EnableWindow(FALSE);
+		GetDlgItem(IDC_EDIT6)->EnableWindow(FALSE);
+		GetDlgItem(IDC_BUTTON2)->EnableWindow(FALSE);
+		//end rewbs.timeStretchMods
 	}
 
 	// Error management
@@ -1518,14 +1512,14 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 		switch(errorcode & 0xff){
 			case 1 : wsprintf(str,"Pitch %s...",(errorcode>>8) == 1 ? "< 0.5" : "> 2.0");
 				break;
-			case 2 : wsprintf(str,"Size is too %s...",(errorcode>>8) == 1 ? "small" : "large");
+			case 2 : wsprintf(str,"Stretch ratio is too %s. Must be between 50% and 200%.",(errorcode>>8) == 1 ? "low" : "high");
 				break;
 			case 3 : wsprintf(str,"Not enough memory...");
 				break;
 			default: wsprintf(str,"Unknown Error...");
 				break;
 		}
-		::MessageBox(NULL,str,NULL,MB_ICONERROR);
+		::MessageBox(NULL,str,"Error",MB_ICONERROR);
 	}
 
 	// Update sample view
@@ -1545,6 +1539,21 @@ void CCtrlSamples::OnPitchShiftTimeStretchAccept()
 	((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_HIDE);
 	((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_HIDE);
 	SetDlgItemText(IDC_STATIC1,"");
+	//rewbs.timeStretchMods
+	//Disable all pitch shift / timestrech buttons until accepted or restored:
+	GetDlgItem(IDC_COMBO5)->EnableWindow(TRUE);
+	GetDlgItem(IDC_COMBO6)->EnableWindow(TRUE);
+	GetDlgItem(IDC_CHECK3)->EnableWindow(TRUE);
+	if (IsDlgButtonChecked(IDC_CHECK3))
+	{
+		GetDlgItem(IDC_EDIT6)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BUTTON2)->EnableWindow(TRUE);
+	}
+	else
+	{
+		GetDlgItem(IDC_COMBO4)->EnableWindow(TRUE);
+	}
+	//end rewbs.timeStretchMods
 }
 
 void CCtrlSamples::OnPitchShiftTimeStretchCancel()
@@ -1569,6 +1578,19 @@ void CCtrlSamples::OnPitchShiftTimeStretchCancel()
 	}
 	pins->pSample = (LPSTR)pSampleUndoBuffer;
 	pins->nLength = UndoBufferSize / (smpsize * nChn);
+	
+	//rewbs.timeStretchMods
+	// Restore loop points, if they were time stretched:
+	// Note: m_dTimeStretchRatio will not have changed since we disable  
+	//       GUI controls until preview is accepted/restored.
+	if(IsDlgButtonChecked(IDC_CHECK3)) {
+		pins->nLoopStart /= m_dTimeStretchRatio/100.0;
+		pins->nLoopEnd /= m_dTimeStretchRatio/100.0;
+		pins->nSustainStart /= m_dTimeStretchRatio/100.0;
+		pins->nSustainEnd /= m_dTimeStretchRatio/100.0;
+	}
+	//end rewbs.timeStretchMods
+
 	END_CRITICAL();
 
 	// Set processed sample buffer pointer as undo sample buffer pointer

@@ -400,15 +400,16 @@ CMainFrame::CMainFrame()
 		CEQSetupDlg::LoadEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
 
 		//rewbs.resamplerConf
+		dwDWORDSize = sizeof(gbWFIRType);
 		RegQueryValueEx(key, "XMMSModplugResamplerWFIRType", NULL, &dwREG_DWORD, (LPBYTE)&gbWFIRType, &dwDWORDSize);
-		int myerror = RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&gdWFIRCutoff, &dwDWORDSize);
-		//returns error 234, ERROR_MORE_DATA: "buffer specified by lpData parameter is not large 
-		// enough to hold the data" (MSDN), but it is!! :)
+		dwDWORDSize = sizeof(gdWFIRCutoff);
+		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&gdWFIRCutoff, &dwDWORDSize);
+		dwDWORDSize = sizeof(glVolumeRampSamples);
 		RegQueryValueEx(key, "VolumeRampSamples", NULL, &dwREG_DWORD, (LPBYTE)&glVolumeRampSamples, &dwDWORDSize);
 		
 		//end rewbs.resamplerConf
 		//rewbs.autochord
-		dwSZSIZE = sizeof(gnAutoChordWaitTime);
+		dwDWORDSize = sizeof(gnAutoChordWaitTime);
 		RegQueryValueEx(key, "AutoChordWaitTime", NULL, &dwREG_DWORD, (LPBYTE)&gnAutoChordWaitTime, &dwDWORDSize);
 		//end rewbs.autochord
 

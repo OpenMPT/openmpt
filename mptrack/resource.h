@@ -78,7 +78,9 @@
 #define IDR_VSTMENU                     436
 #define IDD_DEFAULTPLUGINEDITOR         438
 #define IDD_CHANNELMANAGER              440
+#define IDD_SOUNDBANK_INFO1             441
 #define IDR_PLUGINMENU                  442
+#define IDD_PITCHSHIFT                  442
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -648,6 +650,7 @@
 #define IDC_CHECK158                    2116
 #define IDC_TEXT70                      2116
 #define IDC_VISEFFECTLIST               2116
+#define IDC_VISACTION                   2117
 #define IDC_COMBO8                      2121
 #define IDC_COMBO_SPLITNOTE             2122
 #define IDC_COMBO_OCTAVEMODIFIER        2123
@@ -667,6 +670,19 @@
 #define IDC_CHORDDETECTWAITTIME         2206
 #define IDC_STATIC2                     2207
 #define IDC_STATIC1                     2208
+#define IDC_MACROPLUG                   2209
+#define IDC_MACROPARAM                  2210
+#define IDC_SAMPLE_LENGTH_NEW           2211
+#define IDC_SAMPLE_LENGTH_ORIGINAL      2212
+#define IDC_ROW_LENGTH_NEW2             2213
+#define IDC_ROW_LENGTH_ORIGINAL         2214
+#define IDC_PSRATIO                     2215
+#define IDC_MS_LENGTH_NEW               2216
+#define IDC_TEMPO                       2217
+#define IDC_SPEED                       2218
+#define IDC_CREDITS                     2218
+#define IDC_MS_LENGTH_ORIGINAL2         2219
+#define IDC_RICHEDIT21                  2219
 #define IDC_TEXT_BPM                    2300
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
@@ -822,6 +838,8 @@
 #define ID_PLUGIN_SETUP                 33918
 #define ID_PRESET_SET                   33920
 #define ID_PLUGSELECT                   35000
+#define ID_VSTMACRO_INFO                36002
+#define ID_VSTINPUT_INFO                36003
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
@@ -843,8 +861,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        500
-#define _APS_NEXT_COMMAND_VALUE         36000
-#define _APS_NEXT_CONTROL_VALUE         2209
+#define _APS_NEXT_COMMAND_VALUE         36004
+#define _APS_NEXT_CONTROL_VALUE         2220
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

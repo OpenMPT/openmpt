@@ -16,6 +16,8 @@ public:
 	afx_msg void OnSavePreset();
 	afx_msg void OnRandomizePreset();
 	afx_msg void OnSetPreset(UINT nID);
+	afx_msg void OnMacroInfo();
+	afx_msg void OnInputInfo();
 
 	//Overridden methods:
 	virtual VOID OnOK()=0;

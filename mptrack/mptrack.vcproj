@@ -168,6 +168,9 @@
 				RelativePath=".\CommandSet.cpp">
 			</File>
 			<File
+				RelativePath=".\CreditStatic.cpp">
+			</File>
+			<File
 				RelativePath=".\ctrl_com.cpp">
 			</File>
 			<File
@@ -324,6 +327,9 @@
 				RelativePath=".\mptrack.rc">
 			</File>
 			<File
+				RelativePath=".\PSRatioCalc.cpp">
+			</File>
+			<File
 				RelativePath="..\soundlib\Sampleio.cpp">
 			</File>
 			<File
@@ -418,6 +424,9 @@
 				RelativePath=".\CommandSet.h">
 			</File>
 			<File
+				RelativePath=".\CreditStatic.h">
+			</File>
+			<File
 				RelativePath=".\ctrl_com.h">
 			</File>
 			<File
@@ -482,6 +491,9 @@
 			</File>
 			<File
 				RelativePath=".\mptrack.h">
+			</File>
+			<File
+				RelativePath=".\PSRatioCalc.h">
 			</File>
 			<File
 				RelativePath=".\Resource.h">

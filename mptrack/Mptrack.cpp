@@ -10,6 +10,7 @@
 #include "dlsbank.h"
 #include "snddev.h"
 #include "vstplug.h"
+#include "CreditStatic.h"
 #include "bladedll.h"
 
 // rewbs.memLeak
@@ -1246,6 +1247,7 @@ class CAboutDlg: public CDialog
 {
 protected:
 	CPaletteBitmap m_bmp;
+	CCreditStatic m_static;
 
 public:
 	CAboutDlg() {}
@@ -1299,7 +1301,42 @@ BOOL CAboutDlg::OnInitDialog()
 				(MPTRACK_VERSION>>16)&0xFF,
 				(MPTRACK_VERSION & 0xFFFF));
 	SetDlgItemText(IDC_TEXT2, s);
-	return TRUE;
+
+	SetDlgItemText(IDC_EDIT1, "Contact:\r\nRobin Fernandes: modplug@soal.org\r\nEric Chavanon: contact@ericus.org\r\nMPC forums: http://www.modplug.com/forums\r\n\r\nGet the latest updates at:\r\n http://sourceforge.net/projects/modplug");
+
+	char *pArrCredit = { 
+		"Modplug Tracker|"
+		"Copyright © 2004-2005 GPL|"
+		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
+		"|"
+		"Development:|"
+		"Robin Fernandes:  modplug@soal.org|"
+		"Eric Chavanon:  contact@ericus.org|"
+		"Trevor Nunes:  modplug@plastikskouser.com|"
+		"|"
+		"|"
+		"Thanks to:||"
+		"Konstanty for the XMMS-Modplug resampling implementation |"
+		"Erik de Castro Lopo for his pitch shifting / time stretching library|"
+		"Hermann Seib for his example VST Host implementation|"
+		"Pel K. Txnder for the scrolling credits control :)||"
+		"...and to the following for ideas, testing and support:|"
+		"LPChip, Ganja, Diamond, Nofold,|"
+		"Goor00, Georg, Squirrel Havoc,|"
+		"all at the MPC forums.|"
+		"||||||" 
+	};
+
+    m_static.SubclassDlgItem(IDC_CREDITS,this);
+    m_static.SetCredits(pArrCredit);
+    m_static.SetSpeed(DISPLAY_SLOW);
+    m_static.SetColor(BACKGROUND_COLOR, RGB(0, 0, 128)); // Background Colour
+    m_static.SetTransparent(); // Set parts of bitmaps with RGB(192,192,192) transparent
+    m_static.SetGradient(GRADIENT_RIGHT_DARK);  // Background goes from blue to black from left to right
+    // m_static.SetBkImage(IDB_BITMAP1); // Background image
+    m_static.StartScrolling();
+    return TRUE;  // return TRUE unless you set the focus to a control
+                    // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 

@@ -38,6 +38,7 @@ CEffectVis::CEffectVis(CViewPattern *pViewPattern, UINT startRow, UINT endRow, U
 	m_nLastDrawnRow	= -1;
 	m_nOldPlayPos = -1;
 	m_nFillEffect=0;
+	m_nAction=kAction_Overwrite;	//Overwrite
 
 	UpdateSelection(startRow, endRow, nchn, pModDoc, pat);
 }
@@ -60,6 +61,7 @@ BEGIN_MESSAGE_MAP(CEffectVis, CDialog)
 //ON_STN_CLICKED(IDC_VISSTATUS, OnStnClickedVisstatus)
 //ON_EN_CHANGE(IDC_VISSTATUS, OnEnChangeVisstatus)
 	ON_COMMAND(IDC_VISFILLBLANKS,		OnFillBlanksCheck)
+	ON_CBN_SELCHANGE(IDC_VISACTION,		OnActionChanged)
 	ON_CBN_SELCHANGE(IDC_VISEFFECTLIST,	OnEffectChanged)
 END_MESSAGE_MAP()
 
@@ -68,12 +70,24 @@ void CEffectVis::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_VISSTATUS, m_edVisStatus);
 	DDX_Control(pDX, IDC_VISEFFECTLIST, m_cmbEffectList);
+	DDX_Control(pDX, IDC_VISACTION, m_cmbActionList);
 	DDX_Control(pDX, IDC_VISFILLBLANKS, m_btnFillCheck);
 }
 
 void CEffectVis::OnFillBlanksCheck()
 {
 	m_bFillCheck = IsDlgButtonChecked(IDC_VISFILLBLANKS);
+}
+
+
+void CEffectVis::OnActionChanged()
+{
+	m_nAction = m_cmbActionList.GetItemData(m_cmbActionList.GetCurSel());
+	if (m_nAction == (UINT)kAction_Preserve)
+		m_cmbEffectList.EnableWindow(FALSE);
+	else
+		m_cmbEffectList.EnableWindow(TRUE);
+
 }
 
 void CEffectVis::OnEffectChanged()
@@ -457,12 +471,15 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 
 #define INFOWIDTH 200
 #define CHECKBOXWIDTH 100
+#define ACTIONLISTWIDTH 150
 #define COMMANDLISTWIDTH 130
 
 	if (IsWindow(m_edVisStatus.m_hWnd))
 		m_edVisStatus.SetWindowPos(this, m_rcFullWin.left, m_rcDraw.bottom, INFOWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);	
-	if (IsWindow(m_btnFillCheck))
-		m_btnFillCheck.SetWindowPos(this, m_rcFullWin.right-COMMANDLISTWIDTH-CHECKBOXWIDTH, m_rcDraw.bottom, CHECKBOXWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
+//	if (IsWindow(m_btnFillCheck))
+//		m_btnFillCheck.SetWindowPos(this, m_rcFullWin.right-COMMANDLISTWIDTH-CHECKBOXWIDTH, m_rcDraw.bottom, CHECKBOXWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
+	if (IsWindow(m_cmbActionList))
+		m_cmbActionList.SetWindowPos(this,  m_rcFullWin.right-COMMANDLISTWIDTH-ACTIONLISTWIDTH, m_rcDraw.bottom, ACTIONLISTWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
 	if (IsWindow(m_cmbEffectList))
 		m_cmbEffectList.SetWindowPos(this,  m_rcFullWin.right-COMMANDLISTWIDTH, m_rcDraw.bottom, COMMANDLISTWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
 
@@ -604,7 +621,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	}
 	else if ((m_dwStatus & FXVSTATUS_LDRAGGING))
 	{		
-		//Interpolate if gap in rows, but with no right mouse release.		
+		//Interpolate if there's a gap, but with no release of left mouse button.
 		if ((m_nLastDrawnRow>(int)m_startRow) && (row != m_nLastDrawnRow) && (row != m_nLastDrawnRow+1) &&   (row != m_nLastDrawnRow-1))
 		{
 			int diff = abs((long)row-(long)m_nLastDrawnRow);
@@ -737,9 +754,6 @@ BOOL CEffectVis::OnInitDialog()
 	CHAR s[128];
 	UINT numfx = m_pModDoc->GetNumEffects();
 	m_cmbEffectList.ResetContent();
-	//m_cmbEffectList->SetItemData(combo->AddString(" None"), (DWORD)-1);
-	//if (!m_nFillEffect) 
-	//	combo->SetCurSel(0);
 	int k;
 	for (UINT i=0; i<numfx; i++)
 	{
@@ -751,6 +765,12 @@ BOOL CEffectVis::OnInitDialog()
 				m_cmbEffectList.SetCurSel(k);
 		}
 	}
+
+	m_cmbActionList.ResetContent();
+	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Overwrite FX type with:"), kAction_Overwrite);
+	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Fill blanks with:"),kAction_Fill);
+	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Keep FX type."),kAction_Preserve);
+	m_cmbActionList.SetCurSel(m_nAction);
 	return true;
 }
 
@@ -758,15 +778,33 @@ void CEffectVis::MakeChange(int currentRow, int newParam)
 {
 	int currentCommand=GetCommand(currentRow);
 
-	if (currentCommand)
+	switch (m_nAction)
 	{
-		m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), &newParam);
-		SetParam(currentRow, newParam);
+		case kAction_Preserve:
+			if (currentCommand)	{ //Only set param if we have an effect type here
+				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), &newParam);
+				SetParam(currentRow, newParam);
+			}
+			break;
+
+		case kAction_Fill:
+			if (currentCommand)	{  //If we have an effect type here, just set param
+				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), &newParam);
+				SetParam(currentRow, newParam);
+			}
+			else //Else set command and param
+			{
+				SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, &newParam));
+				SetParam(currentRow, newParam);
+			}
+			break;
+
+		case kAction_Overwrite: 
+			//Always set command and param
+			SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, &newParam));
+			SetParam(currentRow, newParam);
 	}
-	else if (!currentCommand && m_bFillCheck)
-	{
-		SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, &newParam));
-		SetParam(currentRow, newParam);
-	}
+	
+	return;
 }
 

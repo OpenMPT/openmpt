@@ -8,6 +8,13 @@ class CViewPattern;
 //#define FXVSTATUS_NCLBTNDOWN	0x02
 //#define INSSTATUS_SPLITCURSOR	0x04
 
+enum 
+{
+	kAction_Overwrite=0,
+	kAction_Fill,
+	kAction_Preserve
+};
+
 // EffectVis dialog
 class CEffectVis : public CModControlDlg
 {
@@ -57,7 +64,7 @@ public:
 	UINT m_nRows;
 	UINT m_nChan;
 	UINT m_nPattern;
-	long m_nFillEffect;
+	long m_nFillEffect, m_nAction;
 
     int m_nDragItem;
 	UINT m_nBtnMouseOver;
@@ -82,7 +89,7 @@ public:
 	CRect m_rcDraw;
 	CRect m_rcFullWin;
 
-	CComboBox m_cmbEffectList;
+	CComboBox m_cmbEffectList, m_cmbActionList;
 	CButton m_btnFillCheck;
 	bool m_bFillCheck;
 	CEdit m_edVisStatus;
@@ -111,6 +118,7 @@ protected:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnFillBlanksCheck();
 	afx_msg void OnEffectChanged();
+	afx_msg void OnActionChanged();
 //	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 //	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 //	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);

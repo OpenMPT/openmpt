@@ -326,20 +326,27 @@ public:
 ////////////////////////////////////////////////////////////////////////
 // Midi Macros (Zxx)
 
+#define NMACROS 16
+
 //===================================
 class CMidiMacroSetup: public CDialog
 //===================================
 {
 public:
-	MODMIDICFG m_MidiCfg;
-	BOOL m_bEmbed;
-	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset;
-	CEdit m_EditSFx, m_EditZxx;
-
-public:
 	CMidiMacroSetup(MODMIDICFG *pcfg, BOOL bEmbed, CWnd *parent=NULL);
+	BOOL m_bEmbed;
+	MODMIDICFG m_MidiCfg;
 
 protected:
+	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam;
+	CEdit m_EditSFx, m_EditZxx;
+	CEdit m_EditMacro[NMACROS], m_EditMacroValue[NMACROS], m_EditMacroType[NMACROS]; //rewbs.macroGUI
+	CButton m_BtnMacro[NMACROS];
+	CSoundFile *m_pSndFile;
+
+	void UpdateMacroList(int macro=-1);
+	int GetMacroType(CString value);
+	int MacroToPlugParam(CString value);
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	afx_msg void UpdateDialog();
@@ -351,6 +358,9 @@ protected:
 	afx_msg void OnZxxPresetChanged();
 	afx_msg void OnSFxEditChanged();
 	afx_msg void OnZxxEditChanged();
+	afx_msg void OnPlugChanged();
+	afx_msg void OnPlugParamChanged();
+	afx_msg void OnViewAllParams(UINT id);
 	DECLARE_MESSAGE_MAP()
 };
 

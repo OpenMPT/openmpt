@@ -138,6 +138,9 @@ BOOL CModDoc::OnNewDocument()
 // -! NEW_FEATURE#0023
 
 	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
+	 //rewbs.MacroGUI: enable embedded macros by default.
+	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) m_SndFile.m_dwSongFlags |= SONG_EMBEDMIDICFG;
+
 	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -1819,8 +1822,8 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_PANBRELLO,		0,0,		0,	MOD_TYPE_NOMOD,	"Panbrello"},
 	{CMD_PANNINGSLIDE,	0,0,		0,	MOD_TYPE_NOMOD,	"Panning slide"},
 	{CMD_SETENVPOSITION,0,0,		0,	MOD_TYPE_XM,	"Envelope position"},
-	{CMD_MIDI,			0,0,		0,	MOD_TYPE_NOMOD,	"Midi macro"},
-	{CMD_SMOOTHMIDI,	0,0,		0,	MOD_TYPE_NOMOD,	"Smooth Midi macro"},	//rewbs.smoothVST
+	{CMD_MIDI,			0,0,		0x7F,	MOD_TYPE_NOMOD,	"Midi macro"},
+	{CMD_SMOOTHMIDI,	0,0,		0x7F,	MOD_TYPE_NOMOD,	"Smooth Midi macro"},	//rewbs.smoothVST
 	// Extended MOD/XM effects
 	{CMD_MODCMDEX,		0xF0,0x10,	0,	MOD_TYPE_MODXM,	"Fine porta up"},
 	{CMD_MODCMDEX,		0xF0,0x20,	0,	MOD_TYPE_MODXM,	"Fine porta down"},
@@ -1948,7 +1951,14 @@ UINT CModDoc::GetEffectFromIndex(UINT ndx, int *pParam)
 			*pParam = gFXInfo[ndx].dwParamValue+15;
 		//end rewbs.fxVis
 	}
-
+	//rewbs.fxVis
+	if ((pParam) && (gFXInfo[ndx].dwFlags))
+	{
+		//correct parameter to match FX max if necessary.
+		if (*pParam > gFXInfo[ndx].dwFlags)
+			*pParam = gFXInfo[ndx].dwFlags;
+	}
+	//end rewbs.fxVis
 
 	return gFXInfo[ndx].dwEffect;
 }
