@@ -1061,16 +1061,18 @@ void CSoundFile::SuspendPlugins()
 {
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
+		if (!m_MixPlugins[iPlug].pMixPlugin)	
+			continue;  //most common branch
+
 		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if ((pPlugin) && (m_MixPlugins[iPlug].pMixState))
+		if (m_MixPlugins[iPlug].pMixState)
 		{
-			pPlugin->HardAllNotesOff(); // I'm concerned these note offs won't get processed since we turn the plug off
+			pPlugin->HardAllNotesOff();
 			pPlugin->Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
 			pPlugin->Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls suspend
 		}
 	}
 	m_lTotalSampleCount=0;
-
 }
 
 void CSoundFile::ResumePlugins()	
@@ -1078,8 +1080,11 @@ void CSoundFile::ResumePlugins()
 {
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
+		if (!m_MixPlugins[iPlug].pMixPlugin)	
+			continue;  //most common branch
+
 		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if ((pPlugin) && (m_MixPlugins[iPlug].pMixState))
+		if (m_MixPlugins[iPlug].pMixState)
 		{
 			//reset some stuff
 			pPlugin->Dispatch(effStopProcess, 0, 0, NULL, 0.0f);	
@@ -1087,12 +1092,30 @@ void CSoundFile::ResumePlugins()
 			//start off some stuff
 			pPlugin->Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);
 			pPlugin->Dispatch(effStartProcess, 0, 0, NULL, 0.0f);	// calls resume
-			//pPlugin->HardAllNotesOff(); // In case the call in SuspendPlugins aren't good enough.
 		}
-		m_lTotalSampleCount=0;
 	}
+	m_lTotalSampleCount=0;   //Already done in suspend.
 
 }
+
+
+void CSoundFile::StopAllVsti()
+{
+	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	{
+		if (!m_MixPlugins[iPlug].pMixPlugin)	
+			continue;  //most common branch
+		
+		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
+		if (m_MixPlugins[iPlug].pMixState)
+		{
+			pPlugin->HardAllNotesOff();
+		}
+	}
+	m_lTotalSampleCount=0;   //Already done in suspend.
+}
+
+
 
 //end rewbs.VSTCompliance
 

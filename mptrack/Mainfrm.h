@@ -515,7 +515,7 @@ public:
 	//CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()) ? m_pSndFile : NULL; } 
 	CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
 	BOOL InitRenderer(CModDoc*);  //rewbs.VSTTimeInfo
-	BOOL StopRenderer();  //rewbs.VSTTimeInfo
+	BOOL StopRenderer(CModDoc*);  //rewbs.VSTTimeInfo
 	void SwitchToActiveView();
 	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT bufsize, LONG wd);
 	BOOL SetupDirectories(LPCSTR s, LPCSTR s2, LPCSTR s3);

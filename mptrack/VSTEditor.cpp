@@ -80,17 +80,6 @@ BOOL COwnerVstEditor::OpenEditor(CWnd *parent)
 	}
 
 	ShowWindow(SW_SHOW);
-
-		//MF_POPUP, (UINT) m_pPresetMenu->m_hMenu, "&File");
-
-
-	//m_pPresetMenu->AppendMenu(MF_STRING, 0, "Test");
-	
-	//m_pMenu->InsertMenu(ID_PRESET_LIST, MF_BYCOMMAND|MF_POPUP, m_pPresetMenu);
-	
-
-
-	
 	return TRUE;
 }
 

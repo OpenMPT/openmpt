@@ -617,9 +617,12 @@ BOOL CSoundFile::ProcessRow()
 					if (!m_nRestartPos)
 					{
 						//rewbs.instroVSTi: kill & revive all plugins at end of song, if looping.
-						SuspendPlugins();
-						ResumePlugins();
-
+						//SuspendPlugins();
+						
+						//ResumePlugins();
+						StopAllVsti();
+						
+						
 						m_nMusicSpeed = m_nDefaultSpeed;
 						m_nMusicTempo = m_nDefaultTempo;
 						m_nGlobalVolume = m_nDefaultGlobalVolume;

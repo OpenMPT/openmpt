@@ -22,10 +22,15 @@ NOTES:
 (tx XYZ): thanks to XYZ for telling me about the bug
 
 . v 1.16.0214a
-   . <rewbs> fixes to chunk-based FXP loading/saving.
-   . <rewbs> fix to allow VST synchronisation when rendering to wav.
+   . <rewbs> Added support for VSTs which change their window size. (tx goor00)
+   . <rewbs> Minor GUI fixes.
+   / <rewbs> Changed behaviour of calls to VST plugs on loop song or on replay song without stopping. No longer do suspend/resume, just kill all notes. 
+             This avoids pause caused by plugs with a heavy "resume" method, but means buffers are no longer cleared.
+             [Work in progress - some VSTis don't stop notes, not sure why yet]
+   . <rewbs> fixes to chunk-based FXP loading/saving. (tx Diamond)
+   . <rewbs> fix to allow VST synchronisation when rendering to wav. Added fix for MP3 export too.
    . <rewbs> fix to note playback when pattern record is disabled (tx ganja).
-   . <rewbs> fix for VST plugs with >2 outputs, though it is currently assumed they are stereo. (tx Muox, ganja)
+   . <rewbs> fix for VST plugs with >2 outputs, though it is currently assumed they are stereo. (tx Muox, ganja, ericus for further fixes)
    / <rewbs> added button on wave writer dialog to open player settings rather than checkbox to enable "HQ resampling".
    + <rewbs> GUI for resampler & default ramping configuration
    . <ericus> fixed wav export at >44.1kHz and >24bit.

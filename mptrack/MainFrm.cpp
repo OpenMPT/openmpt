@@ -2603,15 +2603,18 @@ double CMainFrame::GetApproxBPM()
 
 BOOL CMainFrame::InitRenderer(CModDoc* modDoc)
 {
+	modDoc->GetSoundFile()->SuspendPlugins();
+	modDoc->GetSoundFile()->ResumePlugins();
 	m_dwStatus |= MODSTATUS_RENDERING;
-	m_pModPlaying = modDoc ;
+	m_pModPlaying = modDoc;
 	return true;
 }
 
-BOOL CMainFrame::StopRenderer()
+BOOL CMainFrame::StopRenderer(CModDoc* modDoc)
 {
 	m_dwStatus &= ~MODSTATUS_RENDERING;
 	m_pModPlaying = NULL;
+	modDoc->GetSoundFile()->SuspendPlugins();
 	return true;
 }
 //end rewbs.VSTTimeInfo

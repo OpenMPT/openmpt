@@ -805,7 +805,8 @@ public:
 public:
 	// Real-time sound functions
 	VOID SuspendPlugins(); //rewbs.VSTCompliance
-	VOID ResumePlugins(); //rewbs.VSTCompliance
+	VOID ResumePlugins();  //rewbs.VSTCompliance
+	VOID StopAllVsti();    //rewbs.VSTCompliance
 	VOID ResetChannels();
 	UINT Read(LPVOID lpBuffer, UINT cbBuffer);
 	UINT ReadMix(LPVOID lpBuffer, UINT cbBuffer, CSoundFile *, DWORD *, LPBYTE ps=NULL);

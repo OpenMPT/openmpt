@@ -1378,7 +1378,7 @@ void CModDoc::OnFileWaveConvert()
 		for(UINT i = 0 ; i < n ; i++) m_SndFile.ChnSettings[i].dwFlags = flags[i];
 	}
 // -! NEW_FEATURE#0024
-	CMainFrame::GetMainFrame()->StopRenderer();	//rewbs.VSTTimeInfo
+	CMainFrame::GetMainFrame()->StopRenderer(this);	//rewbs.VSTTimeInfo
 
 	m_SndFile.SetCurrentPos(pos);
 	m_SndFile.GetLength(TRUE);
@@ -1430,6 +1430,7 @@ void CModDoc::OnFileMP3Convert()
 		UINT pos = m_SndFile.GetCurrentPos();
 		bplaying = TRUE;
 		pMainFrm->PauseMod();
+		CMainFrame::GetMainFrame()->InitRenderer(this);	//rewbs.VSTTimeInfo
 		m_SndFile.SetCurrentPos(0);
 		// Saving file
 		PTAGID3INFO pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_id3tag : NULL;
@@ -1437,6 +1438,7 @@ void CModDoc::OnFileMP3Convert()
 		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 		dwcdlg.DoModal();
+		CMainFrame::GetMainFrame()->StopRenderer(this);	//rewbs.VSTTimeInfo
 		m_SndFile.SetCurrentPos(pos);
 		m_SndFile.GetLength(TRUE);
 		CMainFrame::UpdateAudioParameters(TRUE);
@@ -2466,8 +2468,9 @@ void CModDoc::OnPatternRestart()
 		}
 		else
 		{
-			pSndFile->SuspendPlugins();
-			pSndFile->ResumePlugins();
+			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
+			/*pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();*/
 		}
 	}
 	//SwitchToView();
@@ -2505,8 +2508,9 @@ void CModDoc::OnPatternPlay()
 		}
 		else
 		{
-			pSndFile->SuspendPlugins();
-			pSndFile->ResumePlugins();
+			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
+			/*pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();*/
 		}
 		
 	}
@@ -2551,8 +2555,9 @@ void CModDoc::OnPatternPlayNoLoop()
 		}
 		else
 		{
-			pSndFile->SuspendPlugins();
-			pSndFile->ResumePlugins();
+			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
+			/*pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();*/
 		}
 	}
 	//SwitchToView();

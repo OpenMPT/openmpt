@@ -872,8 +872,9 @@ void CCtrlPatterns::OnPatternPlay()
 		}
 		else
 		{
-			pSndFile->SuspendPlugins();		//rewbs.VSTcompliance
-			pSndFile->ResumePlugins();		//rewbs.VSTcompliance
+			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
+			/*pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();*/
 		}
 	}
 	SwitchToView();
@@ -912,8 +913,10 @@ void CCtrlPatterns::OnPatternPlayNoLoop()
 		}
 		else
 		{
-			pSndFile->SuspendPlugins();
-			pSndFile->ResumePlugins();
+			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
+			/*pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();*/
+
 		}
 	}
 	SwitchToView();
@@ -954,8 +957,9 @@ void CCtrlPatterns::OnPatternPlayFromStart()
 		}
 		else
 		{
-			pSndFile->SuspendPlugins();	//rewbs.VSTcompliance
-			pSndFile->ResumePlugins();	//rewbs.VSTcompliance
+			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
+			/*pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();*/
 		}
 	}
 	SwitchToView();
