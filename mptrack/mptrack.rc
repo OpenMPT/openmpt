@@ -1002,8 +1002,8 @@ BEGIN
                     WS_TABSTOP
     LTEXT           "Mix mode:",IDC_STATIC,376,189,34,8
     CONTROL         "",IDC_SPIN10,"msctls_updown32",UDS_ALIGNRIGHT | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,401,217,8,11
-    LTEXT           "Gain: x 1.0",IDC_STATIC2,364,219,34,13
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,400,217,8,11
+    LTEXT           "Gain: x 1.0",IDC_STATIC2,362,219,34,13
 END
 
 IDD_EDIT_FIND DIALOG  0, 0, 182, 145
