@@ -712,7 +712,7 @@ fi
 
 PACKAGE=modplugxmms
 
-VERSION=1.3
+VERSION=1.3a
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
