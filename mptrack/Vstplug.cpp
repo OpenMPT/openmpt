@@ -1781,7 +1781,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 // -> mixop == 4 : MIX -= middle - WET * wetRatio + middle - DRY
 // -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
 //				   MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
-	int mixop = m_pMixStruct->Info.dwInputRouting>>8;
+	int mixop = m_pMixStruct ? m_pMixStruct->Info.dwInputRouting>>8 : 0;
 // -! NEW_FEATURE#0028
 
 	//If the plug is found & ok, contiue
