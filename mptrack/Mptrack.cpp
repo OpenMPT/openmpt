@@ -1295,7 +1295,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02X.%04da (revision 1.13.2.2)",		//remove 'a' when ready for wide usage.
+	wsprintf(s, "%s version %X.%02X.%04da (revision 1.13.2.3)",		//remove 'a' when ready for wide usage.
 				MAINFRAME_TITLE,
 				(MPTRACK_VERSION>>24)&0xFF,
 				(MPTRACK_VERSION>>16)&0xFF,
@@ -1317,15 +1317,18 @@ BOOL CAboutDlg::OnInitDialog()
 		"|"
 		"Thanks to:||"
 		"Konstanty for the XMMS-Modplug resampling implementation |"
+		"http://modplug-xmms.sourceforge.net/|"
 		"Stephan M. Bernsee for pitch shifting source code|"
 		"http://www.dspdimension.com|"
-		"Erik de Castro Lopo for his resampling library|"
-		"http://www.mega-nerd.com/SRC/|"
+//		"Erik de Castro Lopo for his resampling library|"
+//		"http://www.mega-nerd.com/SRC/|"
 		"Hermann Seib for his example VST Host implementation|"
-		"Pel K. Txnder for the scrolling credits control :)||"
+		"http://www.hermannseib.com/english/vsthost.htm|"
+		"Pel K. Txnder for the scrolling credits control :)|"
+		"http://tinyurl.com/4yze8||"
 		"...and to the following for ideas, testing and support:|"
 		"LPChip, Ganja, Diamond, Nofold,|"
-		"Goor00, Georg, Squirrel Havoc,|"
+		"Goor00, Georg, Squirrel Havoc, 33,|"
 		"all at the MPC forums.|"
 		"||||||" 
 	};
