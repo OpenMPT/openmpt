@@ -1548,10 +1548,10 @@ bool CVstPlugin::SaveProgram(CString fileName)
 	if(m_pEffect->flags & effFlagsProgramChunks)
 	{ // try chunk-based preset:
 		void *chunk = NULL;
-		long chunkSize = Dispatch(effGetChunk, 0,0, &chunk, 0);
+		long chunkSize = Dispatch(effGetChunk, 1,0, &chunk, 0);
 		
 		if ((chunkSize > 0) && (chunk))
-			fxp = new Cfxp(ID, plugVersion, 0, chunkSize, chunk);
+			fxp = new Cfxp(ID, plugVersion, 1, chunkSize, chunk);
 	}
 	if (fxp == NULL)
 	{ // fall back on parameter based preset:
@@ -1587,7 +1587,7 @@ bool CVstPlugin::LoadProgram(CString fileName)
 	}
 	else if (fxp.fxMagic == 'FPCh')
 	{	
-		Dispatch(effSetChunk, 0, fxp.numParams, (BYTE*)fxp.chunk, 0);
+		Dispatch(effSetChunk, 1, fxp.chunkSize, (BYTE*)fxp.chunk, 0);
 	}
 
 	return true;

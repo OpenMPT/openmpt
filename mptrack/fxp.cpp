@@ -45,7 +45,7 @@ Cfxp::Cfxp(long ID, long version, long nParams, float *ps)
 	memset(prgName, 0, 28);
 }
 
-Cfxp::Cfxp(long ID, long version, long nPrograms, long inChunkSize, void *inChunk)
+Cfxp::Cfxp(long ID, long plugVersion, long nPrograms, long inChunkSize, void *inChunk)
 //--------------------------------------------------------------------------------
 {
 	//Cfxp();
@@ -55,14 +55,13 @@ Cfxp::Cfxp(long ID, long version, long nPrograms, long inChunkSize, void *inChun
 	
 	ChunkMagic='CcnK';	// 'KncC';
 	fxMagic='FPCh';
-	byteSize=0;
+	byteSize = inChunkSize + 52; //52 is: header without byteSize and fxMagic.
 	version=2;
 	fxID=ID;
-	fxVersion=version;
+	fxVersion=plugVersion;
 	numParams=nPrograms;
 	chunkSize=inChunkSize;
 	chunk = new char[chunkSize];
-	
 	memcpy(chunk, inChunk, sizeof(char)*chunkSize);
 	memset(prgName, 0, 28);
 }
