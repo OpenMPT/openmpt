@@ -9,6 +9,34 @@
 #include "dlg_misc.h"
 #include "mpdlgs.h"
 
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+#include "smbPitchShift.h"
+#include "samplerate.h"
+
+#define FLOAT_ERROR 1.0e-20f
+// Float point comparison
+bool EqualTof(const float a, const float b)
+{
+    return (fabs(a - b) <= FLOAT_ERROR);
+}
+
+// Round floating point value to "digit" number of digits
+float Round(const float value, const int digit)
+{
+	float v = 0.1f * (value * powf(10.0f, (float)(digit + 1)) + (value < 0.0f ? -5.0f : 5.0f));
+    modff(v, &v);    
+    return v / powf(10.0f, (float)digit);
+}
+
+// Deduce exponent from equation : v = 2^exponent
+int PowerOf2Exponent(const unsigned int v)
+{
+	float v2f = (float)v;
+	return ( (*(int *)&v2f >> 23) & 0xff ) - 127;
+}
+// -! TEST#0029
+
 #define	BASENOTE_MIN	(1*12)	// C-1
 #define	BASENOTE_MAX	(9*12)	// C-9
 
@@ -30,6 +58,16 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(ID_PREVINSTRUMENT,		OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+	ON_COMMAND(IDC_BUTTON1,				OnPitchShiftTimeStretch)
+	ON_COMMAND(IDC_BUTTON2,				OnEstimateSampleSize)
+	ON_COMMAND(IDC_BUTTON3,				OnPitchShiftTimeStretchAccept)
+	ON_COMMAND(IDC_BUTTON4,				OnPitchShiftTimeStretchCancel)
+	ON_COMMAND(IDC_CHECK3,				OnEnableStretchToSize)
+// -! TEST#0029
+
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_FILENAME,	OnFileNameChanged)
 	ON_EN_CHANGE(IDC_EDIT_SAMPLE,		OnSampleChanged)
@@ -94,6 +132,14 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT14,				m_EditVibSweep);
 	DDX_Control(pDX, IDC_EDIT15,				m_EditVibDepth);
 	DDX_Control(pDX, IDC_EDIT16,				m_EditVibRate);
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+	DDX_Control(pDX, IDC_COMBO4,				m_ComboPitch);
+	DDX_Control(pDX, IDC_COMBO5,				m_ComboQuality);
+	DDX_Control(pDX, IDC_COMBO6,				m_ComboFFT);
+// -! TEST#0029
+
 	//}}AFX_DATA_MAP
 }
 
@@ -103,7 +149,24 @@ CCtrlSamples::CCtrlSamples()
 {
 	m_nSample = 1;
 	m_nLockCount = 1;
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+	pSampleUndoBuffer = NULL;
+	UndoBufferSize = 0;
+// -! TEST#0029
 }
+
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+CCtrlSamples::~CCtrlSamples()
+{
+	if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
+	pSampleUndoBuffer = NULL;
+	UndoBufferSize = 0;
+}
+// -! TEST#0029
 
 
 CRuntimeClass *CCtrlSamples::GetAssociatedViewClass()
@@ -163,6 +226,64 @@ BOOL CCtrlSamples::OnInitDialog()
 		wsprintf(s, "%s%d", szNoteNames[i%12], i/12);
 		m_CbnBaseNote.AddString(s);
 	}
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+	CHAR str[16];
+
+	// Pitch selection
+	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO4);
+	if(combo){
+		// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
+		for(int i = -12 ; i <= 12 ; i++){
+			if(i == 0) wsprintf(str,"none");
+			else wsprintf(str,i < 0 ? " %d" : "+%d",i);
+			combo->SetItemData(combo->AddString(str), i+12);
+		}
+		// Set "none" as default pitch
+		combo->SetCurSel(12);
+	}
+
+	// Quality selection
+	combo = (CComboBox *)GetDlgItem(IDC_COMBO5);
+	if(combo){
+		// Allow quality from 4 to 256
+		for(int i = 4 ; i <= 256 ; i++){
+			wsprintf(str,"%d",i);
+			combo->SetItemData(combo->AddString(str), i-4);
+		}
+		// Set 4 as default quality
+		combo->SetCurSel(0);
+	}
+
+	// FFT size selection
+	combo = (CComboBox *)GetDlgItem(IDC_COMBO6);
+	if(combo){
+		// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
+		int exponent = PowerOf2Exponent(MAX_FRAME_LENGTH);
+		// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
+		for(int i = 8 ; i <= exponent ; i++){
+			wsprintf(str,"%d",1<<i);
+			combo->SetItemData(combo->AddString(str), i-8);
+		}
+		// Set 2048 as default FFT size
+		combo->SetCurSel(3);
+	}
+
+	//Disable preview buttons
+	((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_HIDE);
+	((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_HIDE);
+
+	// Stretch to size number of row selection
+	SetDlgItemInt(IDC_EDIT6,0,FALSE);
+
+	// Processing state text label
+	SetDlgItemText(IDC_STATIC1,"");
+
+	// Stretch to size check box
+	OnEnableStretchToSize();
+// -! TEST#0029
+
 	return TRUE;
 }
 
@@ -182,11 +303,18 @@ BOOL CCtrlSamples::SetCurrentSample(UINT nSmp, LONG lZoom, BOOL bUpdNum)
 	pSndFile = pModDoc->GetSoundFile();
 	if (pSndFile->m_nSamples < 1) pSndFile->m_nSamples = 1;
 	if ((nSmp < 1) || (nSmp > pSndFile->m_nSamples)) return FALSE;
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
+// -! TEST#0029
+
 	LockControls();
 	if (m_nSample != nSmp)
 	{
 		m_nSample = nSmp;
-		UpdateView((m_nSample << 24) | HINT_SAMPLEINFO, NULL);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		UpdateView((m_nSample << 20) | HINT_SAMPLEINFO, NULL);
 	}
 	if (bUpdNum)
 	{
@@ -244,7 +372,8 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 	}
 	SetCurrentSample((lParam > 0) ? lParam : m_nSample);
 	// Initial Update
-	if (!m_bInitialized) UpdateView((m_nSample << 24) | HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
+	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+	if (!m_bInitialized) UpdateView((m_nSample << 20) | HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if ((pFrame) && (m_hWndView)) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetSampleViewState());
 	SwitchToView();
@@ -354,7 +483,8 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ToolBar2.UpdateStyle();
 	}
 	if (!(dwHintMask & (HINT_SAMPLEINFO|HINT_MODTYPE))) return;
-	if (((dwHintMask >> 24) != (m_nSample&0xff)) && (!(dwHintMask & HINT_MODTYPE))) return;
+	// 05/01/05 : ericus replaced ">> 24" by ">> 20" : 4000 samples -> 12bits [see Moddoc.h]
+	if (((dwHintMask >> 20) != (m_nSample&0xff)) && (!(dwHintMask & HINT_MODTYPE))) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	// Updating Ranges
@@ -501,7 +631,12 @@ BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	LPBYTE lpFile;
 	DWORD len;
 	BOOL bOk;
-	
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
+// -! TEST#0029
+
 	BeginWaitCursor();
 	if ((!lpszFileName) || (!f.Open(lpszFileName)))
 	{
@@ -604,7 +739,8 @@ OpenError:
 			pins->nPan = 128;
 			pins->uFlags |= CHN_PANNING;
 		}
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
 		m_pModDoc->SetModified();
 	}
 	return TRUE;
@@ -615,6 +751,12 @@ BOOL CCtrlSamples::OpenSample(CSoundFile *pSndFile, UINT nSample)
 //---------------------------------------------------------------
 {
 	if ((!pSndFile) || (!nSample) || (nSample > pSndFile->m_nSamples)) return FALSE;
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
+// -! TEST#0029
+
 	BeginWaitCursor();
 	BEGIN_CRITICAL();
 	m_pSndFile->DestroySample(m_nSample);
@@ -626,7 +768,8 @@ BOOL CCtrlSamples::OpenSample(CSoundFile *pSndFile, UINT nSample)
 		pins->uFlags |= CHN_PANNING;
 	}
 	END_CRITICAL();
-	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
+	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
 	m_pModDoc->SetModified();
 	EndWaitCursor();
 	return TRUE;
@@ -641,6 +784,12 @@ void CCtrlSamples::OnSampleChanged()
 {
 	if ((!IsLocked()) && (m_pSndFile))
 	{
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+		if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
+// -! TEST#0029
+
 		UINT n = GetDlgItemInt(IDC_EDIT_SAMPLE);
 		if ((n > 0) && (n <= m_pSndFile->m_nSamples) && (n != m_nSample))
 		{
@@ -679,9 +828,16 @@ void CCtrlSamples::OnSampleNew()
 	LONG smp = m_pModDoc->InsertSample(TRUE);
 	if (smp > 0)
 	{
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+		if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
+// -! TEST#0029
+
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		SetCurrentSample(smp);
-		m_pModDoc->UpdateAllViews(NULL, (smp << 24) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (smp << 20) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
 		if ((pSndFile->m_nInstruments) && (!m_pModDoc->FindSampleParent(smp)))
 		{
 			if (MessageBox("This sample is not used by any instrument. Do you want to create a new instrument using this sample ?",
@@ -846,7 +1002,8 @@ void CCtrlSamples::OnNormalize()
 		if (bOk)
 		{
 			m_pModDoc->AdjustEndOfSample(m_nSample);
-			m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA, NULL);
+			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+			m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, NULL);
 			m_pModDoc->SetModified();
 		}
 	}
@@ -912,7 +1069,8 @@ void CCtrlSamples::OnAmplify()
 		}
 	}
 	m_pModDoc->AdjustEndOfSample(m_nSample);
-	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA, NULL);
+	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, NULL);
 	m_pModDoc->SetModified();
 	EndWaitCursor();
 	SwitchToView();
@@ -1061,7 +1219,8 @@ void CCtrlSamples::OnUpsample()
 			viewstate.dwEndSel = dwEnd + (dwEnd-dwStart);
 			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
 		}
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		m_pModDoc->SetModified();
 	}
 	EndWaitCursor();
@@ -1185,12 +1344,576 @@ void CCtrlSamples::OnDownsample()
 			viewstate.dwEndSel = dwStart + dwRemove;
 			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
 		}
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		m_pModDoc->SetModified();
 	}
 	EndWaitCursor();
 	SwitchToView();
 }
+
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+
+#define MAX_BUFFER_LENGTH	8192
+#define CLIP_SOUND(v)		v = v < -1.0f ? -1.0f : v > 1.0f ? 1.0f : v
+
+void CCtrlSamples::OnEnableStretchToSize()
+{
+	// Enable time-stretching / disable unused pitch-shifting UI elements
+	if(IsDlgButtonChecked(IDC_CHECK3)){
+		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(FALSE);
+		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(TRUE);
+	}
+	// Enable pitch-shifting / disable unused time-stretching UI elements
+	else{
+		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(TRUE);
+		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(FALSE);
+	}
+}
+
+void CCtrlSamples::OnEstimateSampleSize()
+{
+	if((!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return;
+	MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
+	if(!pins) return;
+
+	// Get original sample rate
+	double lSampleRate = pins->nC4Speed;
+	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) lSampleRate = (double)CSoundFile::TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
+	if(lSampleRate <= 0) lSampleRate = 8363.0;
+
+	// Compute sample length (ms)
+	double lSampleLength = (double)pins->nLength;
+	lSampleLength = 1000.0 * (lSampleLength / lSampleRate);
+
+	// Compute length (ms) of a pattern row using current tempo & speed settings
+	double rowTime;
+	if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED)
+		rowTime = 60000.0 / (1.65625 * (double)(m_pSndFile->m_nMusicSpeed * m_pSndFile->m_nMusicTempo));
+	else
+		rowTime = 2500.0 * (double)m_pSndFile->m_nMusicSpeed / (double)m_pSndFile->m_nMusicTempo;
+
+	// Estimate sample length (in pattern row(s) unit)
+	double ratio = lSampleLength / rowTime;
+
+	// Show sample length estimate
+	int i,decpoint,sign;
+	char * str = _fcvt(ratio, 2, &decpoint, &sign);
+	CHAR fstr[64];
+	for(i = 0 ; i < decpoint ; i++) fstr[i] = str[i];
+	fstr[i++] = '.';
+	fstr[i++] = '\0';
+	strcat(fstr,&str[decpoint]);
+	strcat(fstr,ratio > 1.0 ? " pattern rows" : " pattern row");
+	::MessageBox(NULL,fstr,"Estimated sample length",MB_OK);
+}
+
+void CCtrlSamples::OnPitchShiftTimeStretch()
+{
+	// Error management
+	int errorcode = -1;
+
+	if((!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) goto error;
+	MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
+	if(!pins || pins->nLength == 0) goto error;
+
+	// Preview management
+	if(IsDlgButtonChecked(IDC_CHECK2)){
+		// Free previous undo buffer
+		if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
+		// Allocate sample undo buffer
+		BYTE smpsize  = (pins->uFlags & CHN_16BIT)  ? 2 : 1;
+		UINT nChn = (pins->uFlags & CHN_STEREO) ? 2 : 1;
+		UndoBufferSize = pins->nLength * nChn * smpsize;
+		pSampleUndoBuffer = CSoundFile::AllocateSample(UndoBufferSize);
+		// Not enough memory...
+		if(pSampleUndoBuffer == NULL){
+			UndoBufferSize = 0;
+			errorcode = 3;
+			goto error;
+		}
+		// Copy sample to sample undo buffer
+		memcpy(pSampleUndoBuffer,pins->pSample,UndoBufferSize);
+	}
+
+	// Time stretching
+	if(IsDlgButtonChecked(IDC_CHECK3)){
+		// Get original sample rate
+		double lSampleRate = pins->nC4Speed;
+		if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) lSampleRate = (double)CSoundFile::TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
+		if(lSampleRate <= 0) lSampleRate = 8363.0;
+
+		// Compute sample length (ms)
+		double lSampleLength = (double)pins->nLength;
+		lSampleLength = 1000.0 * (lSampleLength / lSampleRate);
+
+		// Compute length (ms) of a pattern row using current tempo & speed settings
+		double rowTime;
+		if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED)
+			rowTime = 60000.0 / (1.65625 * (double)(m_pSndFile->m_nMusicSpeed * m_pSndFile->m_nMusicTempo));
+		else
+			rowTime = 2500.0 * (double)m_pSndFile->m_nMusicSpeed / (double)m_pSndFile->m_nMusicTempo;
+
+		// Multiply row time by the selected number of rows
+		if(GetDlgItemInt(IDC_EDIT6) < 1) goto error;
+		rowTime *= (double)GetDlgItemInt(IDC_EDIT6);
+		if(rowTime < 0.0) goto error;
+
+		// Apply time stretching
+		errorcode = TimeStretch(rowTime / lSampleLength);
+	}
+	// Pitch shifting
+	else{
+		// Get selected pitch modifier [-12,+12]
+		CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO4);
+		short pm = combo->GetCurSel() - 12;
+		if(pm == 0) goto error;
+
+		// Compute pitch ratio in range [0.5f ; 2.0f] (1.0f means output == input)
+		// * pitch up -> 1.0f + n / 12.0f -> (12.0f + n) / 12.0f , considering n : pitch modifier > 0
+		// * pitch dn -> 1.0f - n / 24.0f -> (24.0f - n) / 24.0f , considering n : pitch modifier > 0
+		float pitch = pm < 0 ? ((24.0f + pm) / 24.0f) : ((12.0f + pm) / 12.0f);
+		pitch = Round(pitch, 4);
+
+		// Apply pitch modifier
+		errorcode = PitchShift(pitch);
+	}
+
+	// Preview management
+	if(errorcode == 0 && IsDlgButtonChecked(IDC_CHECK2)){
+		((CButton *)GetDlgItem(IDC_BUTTON1))->ShowWindow(SW_HIDE);
+		((CButton *)GetDlgItem(IDC_BUTTON2))->ShowWindow(SW_HIDE);
+		((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_SHOW);
+		((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_SHOW);
+		SetDlgItemText(IDC_STATIC1,"Preview...");
+	}
+
+	// Error management
+	error:
+
+	if(errorcode > 0){
+		CHAR str[64];
+		switch(errorcode & 0xff){
+			case 1 : wsprintf(str,"Pitch %s...",(errorcode>>8) == 1 ? "< 0.5" : "> 2.0");
+				break;
+			case 2 : wsprintf(str,"Size is too %s...",(errorcode>>8) == 1 ? "small" : "large");
+				break;
+			case 3 : wsprintf(str,"Not enough memory...");
+				break;
+			default: wsprintf(str,"Unknown Error...");
+				break;
+		}
+		::MessageBox(NULL,str,NULL,MB_ICONERROR);
+	}
+
+	// Update sample view
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL); // !!!! see CODE#0006, update#3
+	m_pModDoc->SetModified();
+}
+
+void CCtrlSamples::OnPitchShiftTimeStretchAccept()
+{
+	// Free sample undo buffer
+	if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
+	pSampleUndoBuffer = NULL;
+	UndoBufferSize = 0;
+
+	// Restore UI buttons
+	((CButton *)GetDlgItem(IDC_BUTTON1))->ShowWindow(SW_SHOW);
+	((CButton *)GetDlgItem(IDC_BUTTON2))->ShowWindow(SW_SHOW);
+	((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_HIDE);
+	((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_HIDE);
+	SetDlgItemText(IDC_STATIC1,"");
+}
+
+void CCtrlSamples::OnPitchShiftTimeStretchCancel()
+{
+	if((!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return;
+	MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
+	if(!pins) return;
+
+	// Save processed sample buffer pointer
+	PVOID oldbuffer = pins->pSample;
+	BYTE smpsize  = (pins->uFlags & CHN_16BIT)  ? 2 : 1;
+	UINT nChn = (pins->uFlags & CHN_STEREO) ? 2 : 1;
+
+	// Restore undo buffer pointer & update song data
+	BEGIN_CRITICAL();
+	for(UINT i=0 ; i < MAX_CHANNELS ; i++){
+		if((PVOID)m_pSndFile->Chn[i].pSample == oldbuffer){
+			m_pSndFile->Chn[i].pSample = (LPSTR)pSampleUndoBuffer;
+			m_pSndFile->Chn[i].pCurrentSample = (LPSTR)pSampleUndoBuffer;
+			m_pSndFile->Chn[i].nLength = 0;
+		}
+	}
+	pins->pSample = (LPSTR)pSampleUndoBuffer;
+	pins->nLength = UndoBufferSize / (smpsize * nChn);
+	END_CRITICAL();
+
+	// Set processed sample buffer pointer as undo sample buffer pointer
+	pSampleUndoBuffer = oldbuffer;
+
+	// Free sample undo buffer & restore UI buttons
+	OnPitchShiftTimeStretchAccept();
+
+	// Update sample view
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL); // !!!! see CODE#0006, update#3
+	m_pModDoc->SetModified();
+}
+
+int CCtrlSamples::TimeStretch(double ratio)
+{
+	if((!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return -1;
+	MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
+	if(!pins) return -1;
+
+	// Refuse processing when ratio is negative, equal to zero or equal to 1.0
+	if(ratio <= 0.0 || ratio == 1.0) return -1;
+
+	// Convert to pitch factor
+	float pitch = Round((float)ratio, 4);
+	if(pitch < 0.5f) return 2 + (1<<8);
+	if(pitch > 2.0f) return 2 + (2<<8);
+
+	// Get number of channels & sample size
+	BYTE smpsize  = (pins->uFlags & CHN_16BIT)  ? 2 : 1;
+	UINT nChn = (pins->uFlags & CHN_STEREO) ? 2 : 1;
+
+	// Allocate new sample
+	DWORD newsize = (DWORD)(0.5 + ratio * (double)pins->nLength);
+	PVOID pSample = pins->pSample;
+	PVOID pNewSample = CSoundFile::AllocateSample(newsize * nChn * smpsize);
+	if(pNewSample == NULL) return 3;
+
+	// Apply pitch-shifting step
+	PitchShift(pitch);
+
+	// Allocate working buffers
+	UINT outputsize = (UINT)(0.5 + ratio * (double)MAX_BUFFER_LENGTH);
+	if( (outputsize & 1) && (smpsize == 2 || nChn == 2) ) outputsize++;
+
+	float * buffer = new float[MAX_BUFFER_LENGTH * nChn];
+	float * outbuf = new float[outputsize * nChn];
+
+	// Create resampler
+	int error;
+	SRC_STATE * resampler = src_new(SRC_SINC_BEST_QUALITY, nChn, &error) ;
+
+	// Fill in resampler data struct
+	SRC_DATA data;
+	data.data_in = &buffer[0];
+	data.input_frames = MAX_BUFFER_LENGTH;
+	data.data_out = &outbuf[0];
+	data.output_frames = outputsize;
+	data.src_ratio = ratio;
+	data.end_of_input = 0;
+
+	// Deduce max sample value (float conversion step)
+	float maxSampleValue = ( 1 << (smpsize * 8 - 1) ) - 1;
+
+	// Save process button text (to be used as "progress bar" indicator while processing)
+	CHAR oldText[255];
+	GetDlgItemText(IDC_BUTTON1, oldText, 255);
+
+	// Get process button device context & client rect
+	RECT progressBarRECT, processButtonRect;
+	HDC processButtonDC = ::GetDC(((CButton*)GetDlgItem(IDC_BUTTON1))->m_hWnd);
+	::GetClientRect(((CButton*)GetDlgItem(IDC_BUTTON1))->m_hWnd,&processButtonRect);
+	processButtonRect.top += 1;
+	processButtonRect.left += 1;
+	processButtonRect.right -= 1;
+	processButtonRect.bottom -= 2;
+	progressBarRECT = processButtonRect;
+
+	// Progress bar brushes
+	HBRUSH green = CreateSolidBrush(RGB(96,192,96));
+	HBRUSH red = CreateSolidBrush(RGB(192,96,96));
+
+	// Show wait mouse cursor
+	BeginWaitCursor();
+	SetDlgItemText(IDC_STATIC1,"Resampling...");
+
+	// Apply stretching (resampling) step
+	UINT pos = 0, posnew = 0;
+	UINT len = MAX_BUFFER_LENGTH;
+
+	// Process sample buffer using MAX_BUFFER_LENGTH (max) sized chunk steps (in order to allow
+	// the processing of BIG samples...)
+	while(pos < pins->nLength){
+
+		// Current chunk size limit test
+		if(pos + len >= pins->nLength) len = pins->nLength - pos;
+
+		// Show progress bar using process button painting & text label
+		CHAR progress[16];
+		float percent = 100.0f * (pos + len) / pins->nLength;
+		progressBarRECT.right = processButtonRect.left + (int)percent * (processButtonRect.right - processButtonRect.left) / 100;
+		wsprintf(progress,"%d%%",(UINT)percent);
+
+		::FillRect(processButtonDC,&processButtonRect,red);
+		::FrameRect(processButtonDC,&processButtonRect,CMainFrame::brushBlack);
+		::FillRect(processButtonDC,&progressBarRECT,green);
+		::SelectObject(processButtonDC,(HBRUSH)HOLLOW_BRUSH);
+		::SetBkMode(processButtonDC,TRANSPARENT);
+		::DrawText(processButtonDC,progress,strlen(progress),&processButtonRect,DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		::GdiFlush();
+
+		// Convert current channel's data chunk to float
+		BYTE * ptr = (BYTE *)pSample + pos * smpsize * nChn;
+
+		for(UINT j = 0 ; j < len ; j++){
+			switch(smpsize){
+				case 2:
+					buffer[j*nChn] = ((float)(*(SHORT *)ptr)) / maxSampleValue;
+					if(nChn == 2) { ptr += 2; buffer[j*nChn+1] = ((float)(*(SHORT *)ptr)) / maxSampleValue; }
+					break;
+				case 1:
+					buffer[j*nChn] = ((float)*ptr) / maxSampleValue;
+					if(nChn == 2) { ptr++; buffer[j*nChn+1] = ((float)*ptr) / maxSampleValue; }
+					break;
+			}
+			ptr += smpsize;
+		}
+
+		// Wake up resampler...
+		if(pos + MAX_BUFFER_LENGTH >= pins->nLength) data.end_of_input = 1;
+		src_process(resampler, &data);
+
+		// New buffer limit test (seems like, whatever the size of the last chunk, the resampler return buffer size instead of processed size)
+		if(data.end_of_input && posnew + (UINT)data.output_frames_gen >= newsize) data.output_frames_gen = newsize - posnew;
+
+		// Convert resampled float buffer into new sample buffer
+		ptr = (BYTE *)pNewSample + posnew * smpsize * nChn;
+
+		for(UINT j = 0 ; j < (UINT)data.output_frames_gen ; j++){
+			// Just perform a little bit of clipping...
+			float v = outbuf[j*nChn]; CLIP_SOUND(v);
+			// ...before converting back to buffer
+			switch(smpsize){
+				case 2:
+					*(SHORT *)ptr = (SHORT)(v * maxSampleValue);
+					if(nChn == 2) { ptr += 2; v = outbuf[j*nChn+1]; CLIP_SOUND(v); *(SHORT *)ptr = (SHORT)(v * maxSampleValue); }
+					break;
+				case 1:
+					*ptr = (BYTE)(v * maxSampleValue);
+					if(nChn == 2) { ptr++; v = outbuf[j*nChn+1]; CLIP_SOUND(v); *ptr = (BYTE)(v * maxSampleValue); }
+					break;
+			}
+			ptr += smpsize;
+		}
+
+		// Next buffer chunk
+		posnew += data.output_frames_gen;
+		pos += MAX_BUFFER_LENGTH;
+	}
+
+	// Update newsize with generated size
+	newsize = posnew;
+
+	// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
+	BEGIN_CRITICAL();
+	for(UINT i=0 ; i < MAX_CHANNELS ; i++){
+		if((PVOID)m_pSndFile->Chn[i].pSample == pSample){
+			m_pSndFile->Chn[i].pSample = (LPSTR)pNewSample;
+			m_pSndFile->Chn[i].pCurrentSample = (LPSTR)pNewSample;
+			m_pSndFile->Chn[i].nLength = 0;
+		}
+	}
+	pins->pSample = (LPSTR)pNewSample;
+	CSoundFile::FreeSample(pSample);
+	pins->nLength = newsize;
+	END_CRITICAL();
+
+	// Free working buffers
+	data.data_in = data.data_out = NULL;
+	if(buffer) delete [] buffer;
+	if(outbuf) delete [] outbuf;
+
+	// Free resampler
+	if(resampler) src_delete(resampler);
+
+	// Free progress bar brushes
+	DeleteObject((HBRUSH)green);
+	DeleteObject((HBRUSH)red);
+
+	// Restore process button text
+	SetDlgItemText(IDC_BUTTON1, oldText);
+
+	// Restore mouse cursor
+	SetDlgItemText(IDC_STATIC1,"");
+	EndWaitCursor();
+
+	return 0;
+}
+
+int CCtrlSamples::PitchShift(float pitch)
+{
+	if((!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return -1;
+	if(pitch < 0.5f) return 1 + (1<<8);
+	if(pitch > 2.0f) return 1 + (2<<8);
+
+	// Get sample struct pointer
+	MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
+	if(!pins) return 2;
+
+	// Get number of channels & sample size
+	BYTE smpsize  = (pins->uFlags & CHN_16BIT)  ? 2 : 1;
+	UINT nChn = (pins->uFlags & CHN_STEREO) ? 2 : 1;
+
+	// Get selected oversampling - quality - (also refered as FFT overlapping) factor
+	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO5);
+	short ovs = combo->GetCurSel() + 4;
+
+	// Get selected FFT size (power of 2 ; should not exceed MAX_BUFFER_LENGTH - see smbPitchShift.h)
+	combo = (CComboBox *)GetDlgItem(IDC_COMBO6);
+	UINT fft = 1 << (combo->GetCurSel() + 8);
+	while(fft > MAX_BUFFER_LENGTH) fft >>= 1;
+
+	// Get original sample rate
+	long lSampleRate = pins->nC4Speed;
+	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) lSampleRate = CSoundFile::TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
+	if(lSampleRate <= 0) lSampleRate = 8363;
+
+	// Deduce max sample value (float conversion step)
+	float maxSampleValue = ( 1 << (smpsize * 8 - 1) ) - 1;
+
+	// Save process button text (to be used as "progress bar" indicator while processing)
+	CHAR oldText[255];
+	GetDlgItemText(IDC_BUTTON1, oldText, 255);
+
+	// Get process button device context & client rect
+	RECT progressBarRECT, processButtonRect;
+	HDC processButtonDC = ::GetDC(((CButton*)GetDlgItem(IDC_BUTTON1))->m_hWnd);
+	::GetClientRect(((CButton*)GetDlgItem(IDC_BUTTON1))->m_hWnd,&processButtonRect);
+	processButtonRect.top += 1;
+	processButtonRect.left += 1;
+	processButtonRect.right -= 1;
+	processButtonRect.bottom -= 2;
+	progressBarRECT = processButtonRect;
+
+	// Progress bar brushes
+	HBRUSH green = CreateSolidBrush(RGB(96,192,96));
+	HBRUSH red = CreateSolidBrush(RGB(192,96,96));
+
+	// Show wait mouse cursor
+	BeginWaitCursor();
+	SetDlgItemText(IDC_STATIC1,"Pitch shifting...");
+
+	// Allocate working buffers
+	float * buffer = new float[MAX_BUFFER_LENGTH + fft];
+	float * outbuf = new float[MAX_BUFFER_LENGTH + fft];
+
+	// Process each channel separately
+	for(UINT i = 0 ; i < nChn ; i++){
+
+		UINT pos = 0;
+		UINT len = MAX_BUFFER_LENGTH;
+
+		// Process sample buffer using MAX_BUFFER_LENGTH (max) sized chunk steps (in order to allow
+		// the processing of BIG samples...)
+		while(pos < pins->nLength){
+
+			// Current chunk size limit test
+			if(pos + len >= pins->nLength) len = pins->nLength - pos;
+
+			// TRICK : output buffer offset management
+			// as the pitch-shifter adds  some blank signal in head of output  buffer (matching FFT
+			// length - in short it needs a certain amount of data before being able to output some
+			// meaningfull  processed samples) , in order  to avoid this behaviour , we will ignore  
+			// the  first FFT_length  samples and process  the same  amount of extra  blank samples
+			// (all 0.0f) at the end of the buffer (those extra samples will benefit from  internal
+			// FFT data  computed during the previous  steps resulting in a  correct and consistent
+			// signal output).
+			bool bufstart = ( pos == 0 );
+			bool bufend   = ( pos + MAX_BUFFER_LENGTH >= pins->nLength );
+			UINT startoffset = ( bufstart ? fft : 0 );
+			UINT inneroffset = ( bufstart ? 0 : fft );
+			UINT finaloffset = ( bufend   ? fft : 0 );
+
+			// Show progress bar using process button painting & text label
+			CHAR progress[16];
+			float percent = (float)i * 50.0f + (100.0f / nChn) * (pos + len) / pins->nLength;
+			progressBarRECT.right = processButtonRect.left + (int)percent * (processButtonRect.right - processButtonRect.left) / 100;
+			wsprintf(progress,"%d%%",(UINT)percent);
+
+			::FillRect(processButtonDC,&processButtonRect,red);
+			::FrameRect(processButtonDC,&processButtonRect,CMainFrame::brushBlack);
+			::FillRect(processButtonDC,&progressBarRECT,green);
+			::SelectObject(processButtonDC,(HBRUSH)HOLLOW_BRUSH);
+			::SetBkMode(processButtonDC,TRANSPARENT);
+			::DrawText(processButtonDC,progress,strlen(progress),&processButtonRect,DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+			::GdiFlush();
+
+			// Re-initialize pitch-shifter with blank FFT before processing 1st chunk of current channel
+			if(bufstart){
+				for(UINT j = 0 ; j < fft ; j++) buffer[j] = 0.0f;
+				smbPitchShift(pitch, fft, fft, ovs, (float)lSampleRate, buffer, outbuf, true);
+			}
+
+			// Convert current channel's data chunk to float
+			BYTE * ptr = (BYTE *)pins->pSample + pos * smpsize * nChn + i * smpsize;
+
+			for(UINT j = 0 ; j < len ; j++){
+				switch(smpsize){
+					case 2:
+						buffer[j] = ((float)(*(SHORT *)ptr)) / maxSampleValue;
+						break;
+					case 1:
+						buffer[j] = ((float)*ptr) / maxSampleValue;
+						break;
+				}
+				ptr += smpsize * nChn;
+			}
+
+			// Fills extra blank samples (read TRICK description comment above)
+			if(bufend) for(UINT j = len ; j < len + finaloffset ; j++) buffer[j] = 0.0f;
+
+			// Apply pitch shifting
+			smbPitchShift(pitch, len + finaloffset, fft, ovs, (float)lSampleRate, buffer, outbuf, false);
+
+			// Restore pitched-shifted float sample into original sample buffer
+			ptr = (BYTE *)pins->pSample + (pos - inneroffset) * smpsize * nChn + i * smpsize;
+
+			for(UINT j = startoffset ; j < len + finaloffset ; j++){
+				// Just perform a little bit of clipping...
+				float v = outbuf[j]; CLIP_SOUND(v);
+				// ...before converting back to buffer
+				switch(smpsize){
+					case 2:
+						*(SHORT *)ptr = (SHORT)(v * maxSampleValue);
+						break;
+					case 1:
+						*ptr = (BYTE)(v * maxSampleValue);
+						break;
+				}
+				ptr += smpsize * nChn;
+			}
+
+			// Next buffer chunk
+			pos += MAX_BUFFER_LENGTH;
+		}
+	}
+
+	// Free working buffers
+	delete [] buffer;
+	delete [] outbuf;
+
+	// Free progress bar brushes
+	DeleteObject((HBRUSH)green);
+	DeleteObject((HBRUSH)red);
+
+	// Restore process button text
+	SetDlgItemText(IDC_BUTTON1, oldText);
+
+	// Restore mouse cursor
+	SetDlgItemText(IDC_STATIC1,"");
+	EndWaitCursor();
+
+	return 0;
+}
+// -! TEST#0029
 
 
 void CCtrlSamples::OnReverse()
@@ -1260,7 +1983,8 @@ void CCtrlSamples::OnReverse()
 			}
 		}
 		m_pModDoc->AdjustEndOfSample(m_nSample);
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA, NULL);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, NULL);
 		m_pModDoc->SetModified();
 	}
 	EndWaitCursor();
@@ -1316,7 +2040,8 @@ void CCtrlSamples::OnSilence()
 			}
 		}
 		m_pModDoc->AdjustEndOfSample(m_nSample);
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA, NULL);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, NULL);
 		m_pModDoc->SetModified();
 	}
 	EndWaitCursor();
@@ -1363,7 +2088,8 @@ void CCtrlSamples::OnNameChanged()
 	if (strncmp(s, m_pSndFile->m_szNames[m_nSample], 32))
 	{
 		memcpy(m_pSndFile->m_szNames[m_nSample], s, 32);
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 		m_pModDoc->SetModified();
 	}
 }
@@ -1382,7 +2108,8 @@ void CCtrlSamples::OnFileNameChanged()
 	if (strncmp(s, m_pSndFile->Ins[m_nSample].name, 22))
 	{
 		memcpy(m_pSndFile->Ins[m_nSample].name, s, 22);
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEINFO, this);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEINFO, this);
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT)) m_pModDoc->SetModified();
 	}
 }
@@ -1597,7 +2324,8 @@ void CCtrlSamples::OnLoopStartChanged()
 	{
 		pins->nLoopStart = n;
 		m_pModDoc->AdjustEndOfSample(m_nSample);
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA, this);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
 	}
 }
 
@@ -1612,7 +2340,8 @@ void CCtrlSamples::OnLoopEndChanged()
 	{
 		pins->nLoopEnd = n;
 		m_pModDoc->AdjustEndOfSample(m_nSample);
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA, this);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
 	}
 }
 
@@ -1649,7 +2378,8 @@ void CCtrlSamples::OnSustainStartChanged()
 	 && ((n < (LONG)pins->nSustainEnd) || (!(pins->uFlags & CHN_SUSTAINLOOP))))
 	{
 		pins->nSustainStart = n;
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA, this);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
 	}
 }
 
@@ -1664,7 +2394,8 @@ void CCtrlSamples::OnSustainEndChanged()
 	 && ((n > (LONG)pins->nSustainStart) || (!(pins->uFlags & CHN_SUSTAINLOOP))))
 	{
 		pins->nSustainEnd = n;
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA, this);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
 	}
 }
 
@@ -1942,7 +2673,8 @@ NoSample:
 	if ((nCode == SB_ENDSCROLL) || (nCode == SB_THUMBPOSITION)) SwitchToView();
 	if (bRedraw)
 	{
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 24) | HINT_SAMPLEDATA, this);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
 	}
 	UnlockControls();
 }

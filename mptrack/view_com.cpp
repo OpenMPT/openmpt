@@ -473,7 +473,8 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 			{
 				s[31] = 0;
 				memcpy(pSndFile->m_szNames[iItem+1], s, 32);
-				pModDoc->UpdateAllViews(this, ((iItem+1) << 24) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
+				// 05/01/05 : ericus replaced "<< 24" by "<< 20" : 4000 samples -> 12bits [see Moddoc.h]
+				pModDoc->UpdateAllViews(this, ((iItem+1) << 20) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 			}
 		} else
 		if (m_nListId == IDC_LIST_INSTRUMENTS)

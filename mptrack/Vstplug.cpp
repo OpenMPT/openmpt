@@ -1799,7 +1799,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 	ProcessVSTEvents();
 
-// -> CODE#0028
+// -> CODE#0028 + update#02
 // -> DESC="effect plugin mixing mode combo"
 // -> mixop == 0 : normal processing
 // -> mixop == 1 : MIX += DRY - WET * wetRatio
@@ -1808,7 +1808,9 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 // -> mixop == 4 : MIX -= middle - WET * wetRatio + middle - DRY
 // -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
 //				   MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
-	int mixop = m_pMixStruct ? m_pMixStruct->Info.dwInputRouting>>8 : 0;
+	int mixop = m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>8) & 0xff : 0;
+	float gain = 0.1f * (float)( m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>16) & 0xff : 10 );
+	if(gain < 0.1f) gain = 1.0f;
 // -! NEW_FEATURE#0028
 
 	//If the plug is found & ok, contiue
@@ -1882,35 +1884,24 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				}		
 			}
 */
-			// Wet/Dry range expansion [0,1] -> [-2,2]
+			// Wet/Dry range expansion [0,1] -> [-1,1]	update#02
 			if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
-				wetRatio = 4.0f * wetRatio - 2.0f;
+				wetRatio = 2.0f * wetRatio - 1.0f;
 				dryRatio = -wetRatio;
 			}
+
+			wetRatio *= gain;	// update#02
+			dryRatio *= gain;	// update#02
 
 			// Mix operation
 			switch(mixop){
 
-				// Default mix
+				// Default mix (update#02)
 				case 0:
-					if(wetRatio == 0.0f){
-						for(UINT i=0; i<nSamples; i++){
-							pOutL[i] += m_MixState.pOutBufferL[i];
-							pOutR[i] += m_MixState.pOutBufferR[i];
-						}
-					}
-					else if(dryRatio == 0.0f){
-						for(UINT i=0; i<nSamples; i++){
-							pOutL[i] += m_pTempBuffer[0][i];
-							pOutR[i] += m_pTempBuffer[0][i];
-						}
-					}
-					else{
-						for(UINT i=0; i<nSamples; i++){
-							//rewbs.wetratio - added the factors. [20040123]			
-							pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
-							pOutR[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
-						}
+					for(UINT i=0; i<nSamples; i++){
+						//rewbs.wetratio - added the factors. [20040123]			
+						pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+						pOutR[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
 					}
 					break;
 
@@ -1997,35 +1988,24 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				}		
 			}
 */
-			// Wet/Dry range expansion [0,1] -> [-2,2]
+			// Wet/Dry range expansion [0,1] -> [-1,1]	update#02
 			if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
-				wetRatio = 4.0f * wetRatio - 2.0f;
+				wetRatio = 2.0f * wetRatio - 1.0f;
 				dryRatio = -wetRatio;
 			}
+
+			wetRatio *= gain;	// update#02
+			dryRatio *= gain;	// update#02
 
 			// Mix operation
 			switch(mixop){
 
-				// Default mix
+				// Default mix (update#02)
 				case 0:
-					if(wetRatio == 0.0f){
-						for(UINT i=0; i<nSamples; i++){
-							pOutL[i] += m_MixState.pOutBufferL[i];
-							pOutR[i] += m_MixState.pOutBufferR[i];
-						}
-					}
-					else if(dryRatio == 0.0f){
-						for(UINT i=0; i<nSamples; i++){
-							pOutL[i] += m_pTempBuffer[0][i];
-							pOutR[i] += m_pTempBuffer[1][i];
-						}
-					}
-					else{
-						for(UINT i=0; i<nSamples; i++){
-							//rewbs.wetratio - added the factors. [20040123]			
-							pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
-							pOutR[i] += m_pTempBuffer[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
-						}
+					for(UINT i=0; i<nSamples; i++){
+						//rewbs.wetratio - added the factors. [20040123]			
+						pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+						pOutR[i] += m_pTempBuffer[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
 					}
 					break;
 

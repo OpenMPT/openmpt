@@ -19,8 +19,23 @@ protected:
 	CButton m_CheckPanning;
 	UINT m_nSample;
 
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
+	PVOID pSampleUndoBuffer;
+	UINT UndoBufferSize;
+
+	int PitchShift(float pitch);
+	int TimeStretch(double ratio);
+// -! TEST#0029
+
 public:
 	CCtrlSamples();
+
+// -> CODE#0029
+// -> DESC="pitch shifting - time stretching"
+	~CCtrlSamples();
+// -! TEST#0029
 
 public:
 	BOOL SetCurrentSample(UINT n, LONG lZoom=-1, BOOL bUpdNum=TRUE);
@@ -75,6 +90,16 @@ protected:
 	afx_msg void OnVibSweepChanged();
 	afx_msg void OnVibRateChanged();
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
+
+// -> CODE#0029
+// -> DESC=""
+	afx_msg void OnPitchShiftTimeStretch();
+	afx_msg void OnEnableStretchToSize();
+	afx_msg void OnEstimateSampleSize();
+	afx_msg void OnPitchShiftTimeStretchAccept();
+	afx_msg void OnPitchShiftTimeStretchCancel();
+// -! TEST#0029
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

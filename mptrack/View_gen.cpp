@@ -118,6 +118,7 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 // -> CODE#0028
 // -> DESC="effect plugin mixing mode combo"
 	DDX_Control(pDX, IDC_COMBO9,	m_CbnSpecialMixProcessing);
+	DDX_Control(pDX, IDC_SPIN10,	m_SpinMixGain);					// update#02
 // -! BEHAVIOUR_CHANGE#0028
 
 	DDX_Control(pDX, IDC_SLIDER1,	m_sbVolume[0]);
@@ -200,6 +201,9 @@ void CViewGlobals::OnInitialUpdate()
 	m_CbnSpecialMixProcessing.AddString("Mix subtract");
 	m_CbnSpecialMixProcessing.AddString("Middle subtract");
 	m_CbnSpecialMixProcessing.AddString("LR balance");
+	m_SpinMixGain.SetRange(0,80);		// update#02
+	m_SpinMixGain.SetPos(10);			// update#02
+	SetDlgItemText(IDC_STATIC2, "Gain: x 1.0");	// update#02
 // -! BEHAVIOUR_CHANGE#0028
 
 	UpdateView(HINT_MODTYPE);
@@ -416,8 +420,15 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		
 // -> CODE#0028
 // -> DESC="effect plugin mixing mode combo"
-		m_CbnSpecialMixProcessing.SetCurSel(pPlugin->Info.dwInputRouting>>8);
+		m_CbnSpecialMixProcessing.SetCurSel( (pPlugin->Info.dwInputRouting>>8) & 0xff ); // update#02 (fix)
 		CheckDlgButton(IDC_CHECK12, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND) ? TRUE : FALSE);
+		// update#02
+		DWORD gain = (pPlugin->Info.dwInputRouting>>16) & 0xff;
+		if(gain == 0) gain = 10;
+		float value = 0.1f * (float)gain;
+		sprintf(s,"Gain: x %1.1f",value);
+		SetDlgItemText(IDC_STATIC2, s);
+		m_SpinMixGain.SetPos(gain);
 // -! BEHAVIOUR_CHANGE#0028
 
 		if (pVstPlugin)
@@ -872,6 +883,33 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //---------------------------------------------------------------------------
 {
+// -> CODE#0028	update#02
+// -> DESC="effect plugin mixing mode combo"
+	CModDoc *pModDoc = GetDocument();
+	PSNDMIXPLUGIN pPlugin;
+	CSoundFile *pSndFile;
+	CHAR s[32];
+
+	if((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
+
+	if(nSBCode != SB_ENDSCROLL && pScrollBar && pScrollBar == (CScrollBar*)&m_SpinMixGain){
+
+		pSndFile = pModDoc->GetSoundFile();
+		pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
+
+		if(pPlugin->pMixPlugin){
+			DWORD gain = nPos;
+			if(gain == 0) gain = 1;
+
+			pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0xff00ffff) | (gain<<16);
+
+			float fValue = 0.1f * (float)gain;
+			sprintf(s,"Gain: x %1.1f",fValue);
+			SetDlgItemText(IDC_STATIC2, s);
+		}
+	}
+// -! BEHAVIOUR_CHANGE#0028
+
 	CFormView::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
@@ -1405,7 +1443,7 @@ VOID CViewGlobals::OnSpecialMixProcessingChanged()
 	PSNDMIXPLUGIN pPlugin = m_nCurrentPlugin < MAX_MIXPLUGINS && pSndFile ? &pSndFile->m_MixPlugins[m_nCurrentPlugin] : NULL;
 
 	if(!pPlugin) return;
-	pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0x00ff) | (m_CbnSpecialMixProcessing.GetCurSel()<<8);
+	pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0xffff00ff) | (m_CbnSpecialMixProcessing.GetCurSel()<<8);	// update#02 (fix)
 }
 // -! BEHAVIOUR_CHANGE#0028
 
