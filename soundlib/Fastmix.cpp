@@ -1087,9 +1087,9 @@ UINT CSoundFile::CreateStereoMix(int count)
 		{
 			nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
 		}
-		if ((pChannel->pHeader) && (pChannel->pHeader->nMidiChannel & 0x80))
+		if ((pChannel->pHeader)/* && (pChannel->pHeader->nMidiChannel & 0x80)*/)
 		{
-			nMixPlugin = pChannel->pHeader->nMidiChannel & 0x7f;
+			nMixPlugin = pChannel->pHeader->nMixPlug;
 		}
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
