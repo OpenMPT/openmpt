@@ -1,4 +1,4 @@
-09/01/2005:
+23/02/2005:
 -----------
 
 1. What is this?
@@ -20,7 +20,21 @@ NOTES:
 /: change
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
-  
+
+   - <rewbs> Xlutop Chainer (and maybe others) hangs when loading a preset during playback...
+   + <rewbs> Autosave function. Be sure to configure it to your taste.
+   / <rewbs> Minor GUI changes
+   . <rewbs> Minor wave rendering fixes
+   . <rewbs> Some VST threading & initialisation improvements, might prevent some hangs/crashes.
+   / <rewbs> Various internal cleanups
+   + <rewbs> Option to show estimated "real BPM", just as it is communicated to plugins.
+   . <rewbs> cursor dependant play commands now play from start of song even before cursor position is initialised.
+   + <rewbs> Added IT style mix paste command, for those of you who just weren't ready for *real* mixpasting ;)
+   . <ericus> Mastervolume calculation fixes
+   . <ericus> VSTi mixing & volume fixes
+   . <ericus> Float conversion fixes
+   
+. v 1.17RC0 (revision 1.13.2.3) 
    / <rewbs> When wrap and continuous scroll are off, cursor jump/snap now goes to row 0 or last row when it should go beyond, rather than doing nothing.
    . <rewbs> modifier keys are no longer reset on pattern editor focus loss
    . <rewbs> fixed scrollpos jumping to row 0 on change pattern
@@ -49,6 +63,8 @@ NOTES:
    . <rewbs> Fix to IT loading algorithm when last sample is empty (MPTX data was ignored)
    . <rewbs> Fix to XM loading algorithm when macro definitions embedded in file
    . <rewbs> Zxx Macro window fixes
+
+
 
 . v 1.16.0215a
    . <rewbs> Various minor fixes (registry, VST, GUI)

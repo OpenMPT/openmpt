@@ -163,6 +163,9 @@
 				RelativePath=".\AbstractVstEditor.cpp">
 			</File>
 			<File
+				RelativePath=".\AutoSaver.cpp">
+			</File>
+			<File
 				RelativePath=".\ChildFrm.cpp">
 			</File>
 			<File
@@ -417,6 +420,9 @@
 			Filter="h;hpp;hxx;hm;inl">
 			<File
 				RelativePath=".\AbstractVstEditor.h">
+			</File>
+			<File
+				RelativePath=".\AutoSaver.h">
 			</File>
 			<File
 				RelativePath=".\ChildFrm.h">

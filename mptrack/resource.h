@@ -81,6 +81,7 @@
 #define IDD_SOUNDBANK_INFO1             441
 #define IDR_PLUGINMENU                  442
 #define IDD_PITCHSHIFT                  442
+#define IDD_OPTIONS_AUTOSAVE            443
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -683,6 +684,13 @@
 #define IDC_CREDITS                     2218
 #define IDC_MS_LENGTH_ORIGINAL2         2219
 #define IDC_RICHEDIT21                  2219
+#define IDC_AUTOSAVE_LOCATION           2220
+#define IDC_AUTOSAVE_PATH               2220
+#define IDC_AUTOSAVE_BROWSE             2221
+#define IDC_AUTOSAVE_INTERVAL           2222
+#define IDC_AUTOSAVE_ENABLE             2223
+#define IDC_AUTOSAVE_HISTORY            2224
+#define IDC_AUTOSAVE_USEORIGDIR         2225
 #define IDC_TEXT_BPM                    2300
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
@@ -840,6 +848,9 @@
 #define ID_PLUGSELECT                   35000
 #define ID_VSTMACRO_INFO                36002
 #define ID_VSTINPUT_INFO                36003
+#define ID_PLAYER_APPROXI               36004
+#define ID_Menu36005                    36005
+#define ID_APPROX_BPM                   36007
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
@@ -862,9 +873,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        500
-#define _APS_NEXT_COMMAND_VALUE         36004
-#define _APS_NEXT_CONTROL_VALUE         2220
+#define _APS_NEXT_RESOURCE_VALUE        501
+#define _APS_NEXT_COMMAND_VALUE         36008
+#define _APS_NEXT_CONTROL_VALUE         2226
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

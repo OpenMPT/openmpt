@@ -12,6 +12,7 @@
 #include "moptions.h"
 #include "vstplug.h"
 #include "KeyConfigDlg.h"
+#include "AutoSaver.h"
 #include ".\mainfrm.h"
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -258,6 +259,7 @@ CHAR CMainFrame::m_szCurInsDir[_MAX_PATH] = "";
 //CHAR CMainFrame::m_szCurKbdFile[_MAX_PATH] = "";	//rewbs.customKeys
 
 CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
+CAutoSaver *CMainFrame::m_pAutoSaver = NULL; //rewbs.autosave
 
 static UINT indicators[] =
 {
@@ -417,6 +419,35 @@ CMainFrame::CMainFrame()
 		RegQueryValueEx(key, "AutoChordWaitTime", NULL, &dwREG_DWORD, (LPBYTE)&gnAutoChordWaitTime, &dwDWORDSize);
 		//end rewbs.autochord
 
+		//rewbs.autoSave
+		bool asEnabled=true;
+		int asInterval=10;
+		int asBackupHistory=3;
+		bool asUseOriginalPath=true;
+		CString asPath ="";
+		CString asFileNameTemplate="";
+
+		dwDWORDSize = sizeof(asEnabled);
+		RegQueryValueEx(key, "AutoSave_Enabled", NULL, &dwREG_DWORD, (LPBYTE)&asEnabled, &dwDWORDSize);
+		dwDWORDSize = sizeof(asInterval);
+		RegQueryValueEx(key, "AutoSave_IntervalMinutes", NULL, &dwREG_DWORD, (LPBYTE)&asInterval, &dwDWORDSize);
+		dwDWORDSize = sizeof(asBackupHistory);
+		RegQueryValueEx(key, "AutoSave_BackupHistory", NULL, &dwREG_DWORD, (LPBYTE)&asBackupHistory, &dwDWORDSize);		
+		dwDWORDSize = sizeof(asUseOriginalPath);
+		RegQueryValueEx(key, "AutoSave_UseOriginalPath", NULL, &dwREG_DWORD, (LPBYTE)&asUseOriginalPath, &dwDWORDSize);		
+
+		dwDWORDSize = MAX_PATH;
+		RegQueryValueEx(key, "AutoSave_Path", NULL, &dwREG_DWORD, (LPBYTE)asPath.GetBuffer(dwDWORDSize/sizeof(TCHAR)), &dwDWORDSize);
+		asPath.ReleaseBuffer();
+
+		dwDWORDSize = MAX_PATH;
+		RegQueryValueEx(key, "AutoSave_FileNameTemplate", NULL, &dwREG_DWORD, (LPBYTE)asFileNameTemplate.GetBuffer(dwDWORDSize/sizeof(TCHAR)), &dwDWORDSize);
+		asFileNameTemplate.ReleaseBuffer();
+
+		m_pAutoSaver = new CAutoSaver(asEnabled, asInterval, asBackupHistory, 
+			                          asUseOriginalPath, asPath, asFileNameTemplate);
+		//end rewbs.autoSave
+
 		RegCloseKey(key);
 	}
 	// Read more registry settings
@@ -510,6 +541,7 @@ CMainFrame::~CMainFrame()
 {
 	DeleteCriticalSection(&m_csAudio);
 	delete m_InputHandler; 	//rewbs.customKeys
+	delete m_pAutoSaver; //rewbs.autosaver
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -819,6 +851,23 @@ void CMainFrame::OnClose()
 		RegSetValueEx(key, "VolumeRampSamples", NULL, REG_QWORD, (LPBYTE)&glVolumeRampSamples, sizeof(glVolumeRampSamples));		
 		//end rewbs.resamplerConf
 		RegSetValueEx(key, "AutoChordWaitTime", NULL, REG_DWORD, (LPBYTE)&gnAutoChordWaitTime, sizeof(gnAutoChordWaitTime)); //rewbs.autochord
+
+		//rewbs.autoSave
+		bool asEnabled=m_pAutoSaver->IsEnabled();
+		int asInterval=m_pAutoSaver->GetSaveInterval();
+		int asBackupHistory=m_pAutoSaver->GetHistoryDepth();
+		bool asUseOriginalPath=m_pAutoSaver->GetUseOriginalPath();
+		CString asPath = m_pAutoSaver->GetPath();
+		CString asFileNameTemplate= m_pAutoSaver->GetFilenameTemplate();
+
+		RegSetValueEx(key, "AutoSave_Enabled", NULL, REG_BINARY, (LPBYTE)&asEnabled, sizeof(asEnabled));
+		RegSetValueEx(key, "AutoSave_IntervalMinutes", NULL, REG_DWORD, (LPBYTE)&asInterval, sizeof(asInterval));
+		RegSetValueEx(key, "AutoSave_BackupHistory", NULL, REG_DWORD, (LPBYTE)&asBackupHistory, sizeof(asBackupHistory));
+		RegSetValueEx(key, "AutoSave_UseOriginalPath", NULL, REG_BINARY, (LPBYTE)&asUseOriginalPath, sizeof(asUseOriginalPath));		
+		RegSetValueEx(key, "AutoSave_Path", NULL, REG_SZ, (CONST BYTE *) (LPCTSTR)asPath, MAX_PATH);
+		RegSetValueEx(key, "AutoSave_FileNameTemplate", NULL, REG_SZ, (CONST BYTE *) (LPCTSTR)asFileNameTemplate, MAX_PATH);
+
+		//end rewbs.autoSave
 
 		RegCloseKey(key);
 	}
@@ -1731,6 +1780,9 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 			mn.dwType = MPTNOTIFY_STOP;
 			::SendMessage(m_hFollowSong, WM_MOD_UPDATEPOSITION, 0, (LPARAM)&mn);
 		}
+		BEGIN_CRITICAL();
+		m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
+		END_CRITICAL();
 	}
 	if (m_pModPlaying)
 	{
@@ -1739,7 +1791,6 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	}
 	if (m_pSndFile)
 	{
-		m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
 		m_pSndFile->LoopPattern(-1);
 		m_pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
 		if (m_pSndFile == &m_WaveFile)
@@ -2166,6 +2217,7 @@ void CMainFrame::OnViewOptions()
 	COptionsPlayer playerdlg;
 	CMidiSetupDlg mididlg(m_dwMidiSetup, m_nMidiDevice);
 	CEQSetupDlg eqdlg(&m_EqSettings);
+	CAutoSaverGUI autosavedlg(m_pAutoSaver); //rewbs.AutoSaver
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
 	dlg.AddPage(&playerdlg);
@@ -2173,6 +2225,7 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&keyboard);
 	dlg.AddPage(&colors);
 	dlg.AddPage(&mididlg);
+	dlg.AddPage(&autosavedlg);
 	m_bOptionsLocked=true;	//rewbs.customKeys
 	dlg.DoModal();
 	m_bOptionsLocked=false;	//rewbs.customKeys
@@ -2268,25 +2321,25 @@ void CMainFrame::OnTimer(UINT)
 		OnUpdateTime(NULL);
 	}
 	// Idle Time Check
+	DWORD curTime = timeGetTime();
 	if (IsPlaying())
 	{
-		DWORD dwTime = timeGetTime();
 		gdwIdleTime = 0;
-		if (dwTime - gdwLastLowLatencyTime > 15000)
+		if (curTime - gdwLastLowLatencyTime > 15000)
 		{
 			gdwPlayLatency = 0;
 		}
 		if ((m_pSndFile) && (m_pSndFile->IsPaused()) && (!m_pSndFile->m_nMixChannels))
 		{
 			//Log("%d (%d)\n", dwTime - gdwLastMixActiveTime, gdwLastMixActiveTime);
-			if (dwTime - gdwLastMixActiveTime > 5000)
+			if (curTime - gdwLastMixActiveTime > 5000)
 			{
 				//rewbs.instroVSTi: testing without shutting down audio device after 5s of idle time.
 				//PauseMod();
 			}
 		} else
 		{
-			gdwLastMixActiveTime = dwTime;
+			gdwLastMixActiveTime = curTime;
 		}
 	} else
 	{
@@ -2304,14 +2357,17 @@ void CMainFrame::OnTimer(UINT)
 	CVstPluginManager *pPluginManager = theApp.GetPluginManager();
 	if (pPluginManager)
 	{
-		////rewbs.vstCompliance: call @ 10Hz
-		DWORD curTime = timeGetTime();
+		//rewbs.vstCompliance: call @ 10Hz
 		if (curTime - m_dwLastPluginIdleCall > 100)
 		{
 			pPluginManager->OnIdle();
-			m_dwLastPluginIdleCall = curTime;
+			m_dwLastPluginIdleCall = dwTime;
 		}
 	}
+	if (m_pAutoSaver) {
+		m_pAutoSaver->DoSave(curTime);
+	}
+
 }
 
 
@@ -2492,7 +2548,7 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
 	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
 	case ID_NETLINK_FORUMS:		pszURL = "http://www.modplug.com/forums"; break;
-	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvr-vst.com"; break;
+	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com"; break;
 	}
 	if (pszURL) return CTrackApp::OpenURL(pszURL);
 	return FALSE;
@@ -2574,6 +2630,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcPlayPauseSong:
 		case kcStopSong:
 		case kcEstimateSongLength:
+		case kcApproxRealBPM:
 			{	CModDoc* pModDoc = GetActiveDoc();
 				if (pModDoc)
 					return GetActiveDoc()->OnCustomKeyMsg(wParam, lParam);
@@ -2623,32 +2680,43 @@ long CMainFrame::GetTotalSampleCount()
 
 double CMainFrame::GetApproxBPM()
 {
-	if (!GetModPlaying())
-		return 0;
-    
-	CSoundFile *pSndFile = GetModPlaying()->GetSoundFile();
+	CModDoc *pPlayingModDoc = GetModPlaying();
+	CSoundFile *pSndFile = NULL;
 
-	// Assumes Highlight1 rows per beat.
-	double ticksPerBeat = pSndFile->m_nMusicSpeed *m_nRowSpacing2;
-	double msPerBeat = (5000.0*pSndFile->m_nTempoFactor)/(pSndFile->m_nMusicTempo*256.0) * ticksPerBeat;
-	double bpm = 60000/msPerBeat;
-	return bpm;
+	if (pPlayingModDoc) {
+		pSndFile = pPlayingModDoc->GetSoundFile();
+	} else if (GetActiveDoc()) {
+		pSndFile = GetActiveDoc()->GetSoundFile();
+	}
+	if (pSndFile) {
+		// Assumes Highlight2 is rows per beat.
+		double ticksPerBeat = pSndFile->m_nMusicSpeed*m_nRowSpacing2;
+		double samplesPerBeat = pSndFile->m_nSamplesPerTick*ticksPerBeat;
+		double bpm = pSndFile->GetSampleRate()/samplesPerBeat*60;
+		return bpm;
+	}
+
+	return 0;
 }
 
-BOOL CMainFrame::InitRenderer(CModDoc* modDoc)
+BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 {
-	modDoc->GetSoundFile()->SuspendPlugins();
-	modDoc->GetSoundFile()->ResumePlugins();
+	BEGIN_CRITICAL();
+	pSndFile->SuspendPlugins();
+	pSndFile->ResumePlugins();
+	END_CRITICAL();
 	m_dwStatus |= MODSTATUS_RENDERING;
-	m_pModPlaying = modDoc;
+	m_pModPlaying = GetActiveDoc();
 	return true;
 }
 
-BOOL CMainFrame::StopRenderer(CModDoc* modDoc)
+BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 {
 	m_dwStatus &= ~MODSTATUS_RENDERING;
 	m_pModPlaying = NULL;
-	modDoc->GetSoundFile()->SuspendPlugins();
+	BEGIN_CRITICAL();
+	pSndFile->SuspendPlugins();
+	END_CRITICAL();
 	return true;
 }
 //end rewbs.VSTTimeInfo

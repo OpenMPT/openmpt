@@ -1066,6 +1066,20 @@ void CViewPattern::OnEditMixPaste()
 		SetFocus();
 	}
 }
+
+void CViewPattern::OnEditMixPasteITStyle()
+//----------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	
+	if (pModDoc)
+	{
+		pModDoc->PastePattern(m_nPattern, m_dwBeginSel, true, true);
+		InvalidatePattern(FALSE);
+		SetFocus();
+	}
+}
+
 //end rewbs.mixPaste
 
 
@@ -3841,6 +3855,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 								}
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcEditMixPaste:	OnEditMixPaste(); return wParam;
+		case kcEditMixPasteITStyle:	OnEditMixPasteITStyle(); return wParam;
 		case kcEditSelectAll:	OnEditSelectAll(); return wParam;
 		case kcTogglePluginEditor: TogglePluginEditor((m_dwCursor & 0xFFFF) >> 3); return wParam;
 		case kcToggleFollowSong: SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG); return wParam;
@@ -4152,28 +4167,26 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 		p=prowbase+nChn;
 
 	//don't overwrite:
-	if (p->note)
-	{
+	if (p->note || p->instr || p->volcmd) {
 		//if there's a note in the current location and the song is playing and following,
-		//the user probably just tapped the key - let's try the nex row down.
-		if (p->note==note && (m_dwStatus&PATSTATUS_FOLLOWSONG) && !(pSndFile->IsPaused()))
-		{
+		//the user probably just tapped the key - let's try the next row down.
+		if (p->note==note && (m_dwStatus&PATSTATUS_FOLLOWSONG) && !(pSndFile->IsPaused())) {
 			p=pSndFile->Patterns[m_nPattern]+(m_nRow+1)*pSndFile->m_nChannels+releaseChan;
-			if (p->note)
+			if (p->note || p->instr || p->volcmd) {
 				return;
-		}
-		else
-		{
+			}
+		} else {
 			return;	
 		}
-
 	}		
+
+	//Enter note off
 	p->note		= 0xFF;
     p->instr	= 0;
 	p->volcmd	= 0;
 	p->vol		= 0;
-	p->command	= 0;
-	p->param	= 0;
+//	p->command	= 0;
+//	p->param	= 0;
 
 	pModDoc->SetModified();
 	DWORD sel = (m_nRow << 16) | (releaseChan << 3);

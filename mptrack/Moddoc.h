@@ -196,7 +196,7 @@ public:
 	BOOL ExpandPattern(UINT nPattern);
 	BOOL ShrinkPattern(UINT nPattern);
 	BOOL CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel);
-	BOOL PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix);	//rewbs.mixpaste
+	BOOL PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix=FALSE);	//rewbs.mixpaste
 
 	BOOL CopyEnvelope(UINT nIns, UINT nEnv);
 	BOOL PasteEnvelope(UINT nIns, UINT nEnv);
@@ -267,6 +267,7 @@ public:
 	afx_msg void OnRearrangePatterns();
 	afx_msg void OnRemoveAllInstruments();
 	afx_msg void OnEstimateSongLength();
+	afx_msg void OnApproximateBPM();
 	afx_msg void OnUpdateXMITOnly(CCmdUI *p);
 	afx_msg void OnUpdateInstrumentOnly(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMP3Encode(CCmdUI *pCmdUI);

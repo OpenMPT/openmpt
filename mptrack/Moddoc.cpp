@@ -56,6 +56,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_REARRANGE_SAMPLES,	RearrangeSampleList)
 // -! NEW_FEATURE#0020
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
+	ON_COMMAND(ID_APPROX_BPM,	OnApproximateBPM)
 	ON_COMMAND(ID_PATTERN_PLAY,			OnPatternPlay)				//rewbs.patPlayAllViews
 	ON_COMMAND(ID_PATTERN_PLAYNOLOOP,	OnPatternPlayNoLoop)		//rewbs.patPlayAllViews
 	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)		//rewbs.patPlayAllViews
@@ -1328,7 +1329,6 @@ void CModDoc::OnFileWaveConvert()
 	bplaying = TRUE;
 	pMainFrm->PauseMod();
 
-	CMainFrame::GetMainFrame()->InitRenderer(this);	//rewbs.VSTTimeInfo
 	m_SndFile.SetCurrentPos(0);
 	if (wsdlg.m_bSelectPlay)
 	{
@@ -1381,7 +1381,6 @@ void CModDoc::OnFileWaveConvert()
 		for(UINT i = 0 ; i < n ; i++) m_SndFile.ChnSettings[i].dwFlags = flags[i];
 	}
 // -! NEW_FEATURE#0024
-	CMainFrame::GetMainFrame()->StopRenderer(this);	//rewbs.VSTTimeInfo
 
 	m_SndFile.SetCurrentPos(pos);
 	m_SndFile.GetLength(TRUE);
@@ -1433,7 +1432,6 @@ void CModDoc::OnFileMP3Convert()
 		UINT pos = m_SndFile.GetCurrentPos();
 		bplaying = TRUE;
 		pMainFrm->PauseMod();
-		CMainFrame::GetMainFrame()->InitRenderer(this);	//rewbs.VSTTimeInfo
 		m_SndFile.SetCurrentPos(0);
 		// Saving file
 		PTAGID3INFO pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_id3tag : NULL;
@@ -1441,7 +1439,6 @@ void CModDoc::OnFileMP3Convert()
 		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 		dwcdlg.DoModal();
-		CMainFrame::GetMainFrame()->StopRenderer(this);	//rewbs.VSTTimeInfo
 		m_SndFile.SetCurrentPos(pos);
 		m_SndFile.GetLength(TRUE);
 		CMainFrame::UpdateAudioParameters(TRUE);
@@ -1496,6 +1493,11 @@ void CModDoc::OnPlayerPlay()
 		{
 			m_SndFile.Chn[i].dwFlags |= (CHN_NOTEFADE|CHN_KEYOFF);
 			if (!bPlaying) m_SndFile.Chn[i].nLength = 0;
+		}
+		if (bPlaying) {
+			m_SndFile.StopAllVsti();
+		} else {
+			m_SndFile.ResumePlugins();
 		}
 		END_CRITICAL();
 		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED);
@@ -1568,6 +1570,9 @@ void CModDoc::OnPlayerPlayFromStart()
 		m_SndFile.m_dwSongFlags &= ~SONG_STEP;
 		m_SndFile.SetCurrentPos(0);
 		pMainFrm->ResetElapsedTime();
+		BEGIN_CRITICAL();
+		m_SndFile.ResumePlugins();
+		END_CRITICAL();
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
 		CMainFrame::EnableLowLatencyMode(FALSE);
 	}
@@ -1772,6 +1777,18 @@ void CModDoc::OnEstimateSongLength()
 	wsprintf(s, "Approximate song length: %dmn%02ds", dwSongLength/60, dwSongLength%60);
 	CMainFrame::GetMainFrame()->MessageBox(s, NULL, MB_OK|MB_ICONINFORMATION);
 }
+
+void CModDoc::OnApproximateBPM()
+//----------------------------------
+{
+	//Convert BPM to string:
+	CString Message;
+	double bpm = CMainFrame::GetMainFrame()->GetApproxBPM();
+	Message.Format("Assuming:\n. A tick factor of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+		m_SndFile.m_nTempoFactor, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+	CMainFrame::GetMainFrame()->MessageBox(Message, NULL, MB_OK|MB_ICONINFORMATION);
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2479,6 +2496,7 @@ HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
 	HWND followSonghWnd;
 	PATTERNVIEWSTATE *patternViewState;
 	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+	CSoundFile *pSndFile = GetSoundFile();
 
 	if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
 	{
@@ -2501,10 +2519,52 @@ HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
 		row = patternViewState->nRow;
 		ord = patternViewState->nOrder;
 	}
+	//rewbs.fix3185: if position is invalid, go to start of song.
+	if (ord > MAX_ORDERS) {
+		ord = 0;
+		pat = pSndFile->Order[ord];
+	}
+	if (pat > MAX_PATTERNS) {
+		pat=0;
+	}
+	if (row > pSndFile->PatternSize[pat]) {
+		row=0;
+	}
+	//end rewbs.fix3185
 
 	return followSonghWnd;
 
 }
+
+//rewbs.xinfo
+int CModDoc::GetMacroType(CString value)
+{
+	if (value.Compare("")==0) return sfx_unused;
+	if (value.Compare("F0F000z")==0) return sfx_cutoff;
+	if (value.Compare("F0F001z")==0) return sfx_reso;
+	if (value.Compare("F0F002z")==0) return sfx_mode;
+	if (value.Compare("F0F079z")>0 && value.Compare("F0F0G")<0 && value.GetLength()==7) //can be fooled :)
+		return sfx_plug; 
+	return sfx_custom; //custom/unknown
+}
+
+int CModDoc::MacroToPlugParam(CString macro)
+{
+	char* param = (char *) (LPCTSTR) macro;
+	param +=4;
+	int code = -256;
+	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
+	if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
+	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
+	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
+
+	return code&0x7F;
+}
+//end rewbs.xinfo
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Playback
 
 
 void CModDoc::OnPatternRestart()
@@ -2519,6 +2579,7 @@ void CModDoc::OnPatternRestart()
 		HWND followSonghWnd;
 
 		followSonghWnd = GetEditPosition(nRow, nPat, nOrd);
+		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 		
 		BEGIN_CRITICAL();
 		// Cut instruments/samples
@@ -2534,17 +2595,18 @@ void CModDoc::OnPatternRestart()
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = 0;
 		pSndFile->ResetTotalTickCount();
-		END_CRITICAL();
-
-		pMainFrm->ResetElapsedTime();
-		if (pMainFrm->GetModPlaying() != this)
-		{
+		//rewbs.vstCompliance
+		if (pModPlaying == this) {
+			pSndFile->StopAllVsti();
+		} else {
 			pSndFile->ResumePlugins();
-			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
 		}
-		else
-		{
-			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
+		//end rewbs.vstCompliance
+		END_CRITICAL();
+		
+		pMainFrm->ResetElapsedTime();
+		if (pModPlaying != this) {
+			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
 		}
 	}
 	//SwitchToView();
@@ -2562,6 +2624,7 @@ void CModDoc::OnPatternPlay()
 		HWND followSonghWnd;
 
 		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
+		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 	
 		BEGIN_CRITICAL();
 		// Cut instruments/samples
@@ -2572,19 +2635,19 @@ void CModDoc::OnPatternPlay()
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
+		//rewbs.VSTCompliance		
+		if (pModPlaying == this) {
+			pSndFile->StopAllVsti();
+		} else {
+			pSndFile->ResumePlugins();
+		}
+		//end rewbs.VSTCompliance
 		END_CRITICAL();
 
 		pMainFrm->ResetElapsedTime();
-		if (pMainFrm->GetModPlaying() != this)
-		{
-			pSndFile->ResumePlugins();
+		if (pModPlaying != this) {
 			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
-		else
-		{
-			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
-		}
-		
 	}
 	//SwitchToView();
 
@@ -2602,6 +2665,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		HWND followSonghWnd;
 
 		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
+		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 
 		BEGIN_CRITICAL();
 		// Cut instruments/samples
@@ -2616,18 +2680,19 @@ void CModDoc::OnPatternPlayNoLoop()
 		else
 			pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
+		//end rewbs.VSTCompliance
+		if (pModPlaying == this) {
+			pSndFile->StopAllVsti();	
+		} else {
+			pSndFile->ResumePlugins();
+		}
+		//rewbs.VSTCompliance
 		END_CRITICAL();
 
 		pMainFrm->ResetElapsedTime();
 		
-		if (pMainFrm->GetModPlaying() != this)
-		{
-			pSndFile->ResumePlugins();
+		if (pModPlaying != this)	{
 			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
-		}
-		else
-		{
-			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
 		}
 	}
 	//SwitchToView();
@@ -2650,6 +2715,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcFileSaveAsMP3:	OnFileMP3Convert(); break;
 		case kcFileSaveMidi: OnFileMidiConvert(); break;
 		case kcEstimateSongLength: OnEstimateSongLength(); break;
+		case kcApproxRealBPM:	OnApproximateBPM(); break;
 		case kcFileSave:	DoSave(m_strPathName, 0); break;
 		case kcFileSaveAs:	DoSave(NULL, 1); break;
 		case kcFileClose:	OnCloseDocument(); break;
@@ -2682,28 +2748,4 @@ void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 
 	return;
 }
-//rewbs.xinfo
-int CModDoc::GetMacroType(CString value)
-{
-	if (value.Compare("")==0) return sfx_unused;
-	if (value.Compare("F0F000z")==0) return sfx_cutoff;
-	if (value.Compare("F0F001z")==0) return sfx_reso;
-	if (value.Compare("F0F002z")==0) return sfx_mode;
-	if (value.Compare("F0F079z")>0 && value.Compare("F0F0G")<0 && value.GetLength()==7) //can be fooled :)
-		return sfx_plug; 
-	return sfx_custom; //custom/unknown
-}
 
-int CModDoc::MacroToPlugParam(CString macro)
-{
-	char* param = (char *) (LPCTSTR) macro;
-	param +=4;
-	int code = -256;
-	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
-	if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
-	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
-	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
-
-	return code&0x7F;
-}
-//end rewbs.xinfo

@@ -1571,7 +1571,7 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
-BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
+BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix)
 // -! NEW_FEATURE#0014
 //---------------------------------------------------------
 {
@@ -1594,6 +1594,7 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 			UINT col;
 			BOOL bS3M = FALSE, bOk = FALSE;
 			UINT len = 0;
+			MODCOMMAND origModCmd;
 
 			if ((nrow >= m_SndFile.PatternSize[nPattern]) || (ncol >= m_SndFile.m_nChannels)) goto PasteDone;
 			m += nrow * m_SndFile.m_nChannels;
@@ -1623,6 +1624,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 				// Paste columns
 				while ((p[len] == '|') && (len + 11 < dwMemSize))
 				{
+					origModCmd = m[col]; // ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
+					                     // so that we can refer back to check if there was anything in e.g. the note column before we pasted.
 					LPSTR s = p+len+1;
 					if (col < m_SndFile.m_nChannels)
 					{
@@ -1630,7 +1633,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //						if (s[0] > ' ')
-						if (s[0] > ' ' && (m[col].note==0 || !mix))
+						if (s[0] > ' ' && (!mix || ((!ITStyleMix && origModCmd.note==0) || 
+												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
 // -! NEW_FEATURE#0014
 						{
 							m[col].note = 0;
@@ -1650,7 +1654,9 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //						if (s[3] > ' ')
-						if (s[3] > ' ' && (m[col].instr==0 || !mix))
+						if (s[3] > ' ' && (!mix || ( (!ITStyleMix && origModCmd.instr==0) || 
+												     (ITStyleMix  && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0) ) ))
+
 // -! NEW_FEATURE#0014
 						{
 							if ((s[3] >= '0') && (s[3] <= ('0'+(MAX_SAMPLES/10))))
@@ -1662,7 +1668,10 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //						if (s[5] > ' ')
-						if (s[5] > ' ' && (m[col].volcmd==0 || !mix))
+						if (s[5] > ' ' && (!mix || ((!ITStyleMix && origModCmd.volcmd==0) || 
+//												     (ITStyleMix && notePasted))))
+												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
+
 // -! NEW_FEATURE#0014
 						{
 							if (s[5] != '.')
@@ -1683,7 +1692,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //						if (s[8] > ' ')
-						if (s[8] > ' ' && (m[col].command==0 || !mix))
+						if (s[8] > ' ' && (!mix || ((!ITStyleMix && origModCmd.command==0) || 
+												     (ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
 // -! NEW_FEATURE#0014
 						{
 							m[col].command = 0;
@@ -1700,7 +1710,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //						if (s[9] > ' ')
-						if (s[9] > ' ' && (m[col].param==0 || !mix))
+						if (s[9] > ' ' && (!mix || ((!ITStyleMix && origModCmd.param==0) || 
+													(ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
 // -! NEW_FEATURE#0014
 						{
 							m[col].param = 0;

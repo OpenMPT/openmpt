@@ -755,6 +755,9 @@ BOOL CSoundFile::ReadNote()
 	if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
 	else m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
 // -! NEW_FEATURE#0022
+	
+	m_nSamplesPerTick = m_nBufferCount; //rewbs.flu
+
 #ifdef MODPLUG_TRACKER
 	if (m_dwSongFlags & SONG_PAUSED)
 	{
@@ -1611,7 +1614,7 @@ done:
 #ifdef MODPLUG_TRACKER
 
 VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
-//-------------------------------
+//----------------------------------------------------------
 {
 	MODCOMMAND *m;
 	if (pChn->dwFlags & CHN_MUTE) return;

@@ -73,6 +73,9 @@ protected:
 	float m_FloatBuffer[MIXBUFFERSIZE*32+31];	// 2ch separated + up to 32 VSTi outputs...
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
 	UINT m_nPreviousMidiChan; //rewbs.VSTCompliance
+	bool m_bSongPlaying; //rewbs.VSTCompliance
+	bool m_bPlugResumed; //rewbs.VSTCompliance
+	DWORD m_dwTimeAtStartOfProcess;
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN pMixPlugin, AEffect *pEffect);
@@ -134,6 +137,12 @@ public: // IMixPlugin interface
 	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST
 	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn); //rewbs.instroVST
 	bool m_bNeedIdle; //rewbs.VSTCompliance
+	void NotifySongPlaying(bool playing);	//rewbs.VSTCompliance
+	bool IsSongPlaying() {return m_bSongPlaying;}	//rewbs.VSTCompliance
+	bool IsResumed() {return m_bPlugResumed;}
+	void Resume();
+	void Suspend();
+	DWORD GetTimeAtStartOfProcess() {return m_dwTimeAtStartOfProcess;}
 	
 
 	void SetZxxParameter(UINT nParam, UINT nValue);

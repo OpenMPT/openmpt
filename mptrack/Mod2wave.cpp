@@ -576,7 +576,7 @@ BOOL CDoWaveConvert::OnInitDialog()
 // -> CODE#0024
 // -> DESC="wav export update"
 //#define WAVECONVERTBUFSIZE	2048
-#define WAVECONVERTBUFSIZE	MIXBUFFERSIZE*4
+#define WAVECONVERTBUFSIZE	MIXBUFFERSIZE //Going over MIXBUFFERSIZE can kill VSTPlugs 
 // -! NEW_FEATURE#0024
 
 
@@ -597,6 +597,7 @@ void CDoWaveConvert::OnButton1()
 
 	if ((!m_pSndFile) || (!m_lpszFileName) || ((f = fopen(m_lpszFileName, "w+b")) == NULL))
 	{
+		::AfxMessageBox("Could not open file for writing. Is it open in another application?");
 		EndDialog(IDCANCEL);
 		return;
 	}
@@ -667,10 +668,12 @@ void CDoWaveConvert::OnButton1()
 	}
 	// Process the conversion
 	UINT nBytesPerSample = (CSoundFile::gnBitsPerSample * CSoundFile::gnChannels) / 8;
+	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n=0; ; n++)
 	{
 		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer));
-		if (!lRead) break;
+		if (!lRead) 
+			break;
 		ullSamples += lRead;
 		if (m_bNormalize)
 		{
@@ -688,17 +691,21 @@ void CDoWaveConvert::OnButton1()
 			M2W_32ToFloat(buffer, lRead*(nBytesPerSample>>2));
 		}
 		UINT lWrite = fwrite(buffer, 1, lRead*nBytesPerSample, f);
-		if (!lWrite) break;
+		if (!lWrite) 
+			break;
 		datahdr.length += lWrite;
 		if (m_bNormalize)
 		{
 			ULONGLONG d = ((ULONGLONG)datahdr.length * m_pWaveFormat->wBitsPerSample) / 24;
-			if (d >= m_dwFileLimit) break;
+			if (d >= m_dwFileLimit) 
+				break;
 		} else
 		{
-			if (datahdr.length >= m_dwFileLimit) break;
+			if (datahdr.length >= m_dwFileLimit) 
+				break;
 		}
-		if (ullSamples >= ullMaxSamples) break;
+		if (ullSamples >= ullMaxSamples) 
+			break;
 		if (!(n % 10))
 		{
 			DWORD l = (DWORD)(ullSamples / CSoundFile::gdwMixingFreq);
@@ -721,6 +728,7 @@ void CDoWaveConvert::OnButton1()
 			break;
 		}
 	}
+	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	if (m_bNormalize)
 	{
 		DWORD dwLength = datahdr.length;
@@ -887,7 +895,10 @@ void CDoAcmConvert::OnButton1()
 	if (theApp.AcmStreamPrepareHeader(has, &ash, 0L) != MMSYSERR_NOERROR) goto OnError;
 	bPrepared = TRUE;
 	// Creating the output file
-	if ((f = fopen(m_lpszFileName, "wb")) == NULL) goto OnError;
+	if ((f = fopen(m_lpszFileName, "wb")) == NULL) {
+		::AfxMessageBox("Could not open file for writing. Is it open in another application?");
+		goto OnError;
+	}
 	wfh.id_RIFF = IFFID_RIFF;
 	wfh.id_WAVE = IFFID_WAVE;
 	wfh.filesize = 0;
@@ -938,6 +949,7 @@ void CDoAcmConvert::OnButton1()
 	pcmBufSize = WAVECONVERTBUFSIZE;
 	bFinished = FALSE;
 	// Writing File
+	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (n=0; ; n++)
 	{
 		UINT lRead = 0;
@@ -986,6 +998,7 @@ void CDoAcmConvert::OnButton1()
 		}
 		if (m_bAbort) break;
 	}
+	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	// Done
 	CSoundFile::gdwSoundSetup = oldsndcfg;
 	CSoundFile::gdwSoundSetup &= ~(SNDMIX_DIRECTTODISK|SNDMIX_NOBACKWARDJUMPS);
