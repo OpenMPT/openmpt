@@ -1868,10 +1868,11 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	if(gain < 0.1f) gain = 1.0f;
 // -! NEW_FEATURE#0028
 
-	//If the plug is found & ok, contiue
+	//If the plug is found & ok, continue
 	if ((m_pEffect) && (m_pEffect->process) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
 		isInstrument = (m_pEffect->numInputs < 1); // rewbs.dryRatio
+		if(isInstrument) gain /= 4.0f; // ericus 25/01/2005 restore VSTi level from previous release
 
 		//Merge stereo before sending to the plug if it is mono
 		if (m_pEffect->numInputs == 1)

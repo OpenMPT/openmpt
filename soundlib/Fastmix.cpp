@@ -1740,13 +1740,6 @@ extern int gbInitPlugins;
 VOID CSoundFile::ProcessPlugins(UINT nCount)
 //------------------------------------------
 {
-	// ericus 09/01/2005  : parallel routing feature
-	float parallelOutputL[MIXPLUG_PROUTING_MAXBRANCH][MIXBUFFERSIZE];
-	float parallelOutputR[MIXPLUG_PROUTING_MAXBRANCH][MIXBUFFERSIZE];
-	float * pParallelInputL, * pParallelInputR;
-	bool parallelRouting = false, newBranch = false;
-	UINT nMixBranch = 0;
-
 	// Setup float inputs
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
@@ -1804,65 +1797,15 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 			FLOAT *pOutL = pMixL;
 			FLOAT *pOutR = pMixR;
 
-			// ericus 09/01/2005  : parallel routing feature
-			if( !parallelRouting && (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_PARALLELROUTING) ){
-				// Set parallel routing flag
-				parallelRouting = true;
-				// Set first mix branch as current
-				nMixBranch = 0;
-				// Set new branch flag
-				newBranch = true;
-			}
-
-			// ericus 09/01/2005  : parallel routing feature
-			if( parallelRouting ){
-				// Reset branch output buffer
-				if( newBranch ){
-					memset(&parallelOutputL[nMixBranch][0], 0, nCount*sizeof(FLOAT));
-					memset(&parallelOutputR[nMixBranch][0], 0, nCount*sizeof(FLOAT));
-				}
-				// Save main input buffer pointer
-				if( newBranch && nMixBranch == 0 ){
-					pParallelInputL = pState->pOutBufferL;
-					pParallelInputR = pState->pOutBufferR;
-				}
-				// Fill input buffer for a new branch or a non-serial (sub-parallel) branch mix...
-				else if( newBranch || (!newBranch && pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_PARALLELROUTING) ){
-					memcpy(pState->pOutBufferL, pParallelInputL, nCount*sizeof(FLOAT));
-					memcpy(pState->pOutBufferR, pParallelInputR, nCount*sizeof(FLOAT));
-				}
-				// ...else fill input buffer with previous output buffer
-				else{
-					memcpy(pState->pOutBufferL, &parallelOutputL[nMixBranch][0], nCount*sizeof(FLOAT));
-					memcpy(pState->pOutBufferR, &parallelOutputR[nMixBranch][0], nCount*sizeof(FLOAT));
-				}
-				// Set branch output buffer as current
-				pOutL = &parallelOutputL[nMixBranch][0];
-				pOutR = &parallelOutputR[nMixBranch][0];
-				// Reset new branch flag
-				newBranch = false;
-			}
-
-			// ericus 09/01/2005  : parallel routing feature
-			// need output plug below in order to manage parallel routing
-			PSNDMIXPLUGIN pRouteOutPlugin = NULL;
-			PSNDMIXPLUGINSTATE pOutState = NULL;
-
 			if (pPlugin->Info.dwOutputRouting & 0x80)
 			{
 				UINT nOutput = pPlugin->Info.dwOutputRouting & 0x7f;
 				if ((nOutput > iDoPlug) && (nOutput < MAX_MIXPLUGINS)
 				 && (m_MixPlugins[nOutput].pMixState))
 				{
-					// ericus 09/01/2005  : parallel routing feature
-					// see pOutState declaration comment above
-					//PSNDMIXPLUGINSTATE pOutState = m_MixPlugins[nOutput].pMixState;
-					pRouteOutPlugin = &m_MixPlugins[nOutput];
-					pOutState = pRouteOutPlugin->pMixState;
+					PSNDMIXPLUGINSTATE pOutState = m_MixPlugins[nOutput].pMixState;
 
-					// ericus 09/01/2005  : parallel routing feature
-					// don't chain if we are processing a parallel branch
-					if( (pOutState->pOutBufferL) && (pOutState->pOutBufferR) && !parallelRouting )
+					if( (pOutState->pOutBufferL) && (pOutState->pOutBufferR) )
 					{
 						pOutL = pOutState->pOutBufferL;
 						pOutR = pOutState->pOutBufferR;
@@ -1900,45 +1843,6 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 			} else
 			{
 				pObject->Process(pOutL, pOutR, nCount);
-			}
-
-			// ericus 09/01/2005  : parallel routing feature
-			if( parallelRouting ){
-
-				// Check the end of parallel mix
-				bool serialOutputLk	= pRouteOutPlugin && pOutState && (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_TERMINATECHAIN) && !(pRouteOutPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_PARALLELROUTING);
-				bool endParallelMix = pRouteOutPlugin == NULL || pOutState == NULL || (nMixBranch >= MIXPLUG_PROUTING_MAXBRANCH - 1) || serialOutputLk;
-
-				if( endParallelMix ){
-					// Mix to channel buffer...
-					pOutL = pMixL;
-					pOutR = pMixR;
-					// Except if the signal must be routed to another plugin in serial mode
-					if( serialOutputLk ){
-						pOutL = pOutState->pOutBufferL;
-						pOutR = pOutState->pOutBufferR;
-					}
-					// Mix out processed branches
-					nMixBranch++;
-					float ratio = 1.0f / (float)nMixBranch;
-
-					for(UINT i = 0 ; i < nCount ; i++){
-						for(UINT n = 0 ; n < nMixBranch ; n++){
-							pOutL[i] += ratio * parallelOutputL[n][i];
-							pOutR[i] += ratio * parallelOutputR[n][i];
-						}
-					}
-					// STOP parallel routing
-					parallelRouting = false;
-				}
-			}
-
-			// ericus 09/01/2005  : parallel routing feature
-			if( parallelRouting && (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_TERMINATECHAIN) ){
-				// Activate next branch
-				nMixBranch++;
-				// Set new branch flag
-				newBranch = true;
 			}
 		}
 	}
