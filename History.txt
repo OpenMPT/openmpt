@@ -7,11 +7,9 @@ This is a test build of Modplug Tracker.
 It is unfinished, do not expect to be able to compose with this version safely. But by all means try, and let me know what goes wrong. 
 Please try to only distribute to sensible testers. :)
 
-NOTE: 
+NOTES: 
  . Your old key settings from your previous official version of MPT will not load in this version, you *have* to re-configure the keys.
- . The "report bug" button only works if you are a member of the Beta Testers group on the MPT forums. Register on the modplug forums and PM LPChip for access.
- . The "wild" branch name is no more, since we only have one active development branch. Might aswell keep linear version numbers to minimise confusion.
- . I'm sure there's other desperately important stuff I should put here.. will see...
+ . The "report bug" button only works if you are a member of the Beta Testers group on the MPT forums. Register on the modplug forums and PM Rewbs for access.
 
 
 
@@ -25,7 +23,8 @@ NOTE:
 (tx XYZ): thanks to XYZ for telling me about the bug
 
 . v 1.16.0214a
-   . <rewbs> fix for VST plugs with >2 outputs, though it is currently assumed they are stereo.
+   . <rewbs> fix to note playback when pattern record is disabled (tx ganja).
+   . <rewbs> fix for VST plugs with >2 outputs, though it is currently assumed they are stereo. (tx Muox, ganja)
    / <rewbs> added button on wave writer dialog to open player settings rather than checkbox to enable "HQ resampling".
    + <rewbs> GUI for resampler & default ramping configuration
    . <ericus> fixed wav export at >44.1kHz and >24bit.
@@ -36,7 +35,7 @@ NOTE:
    + <ericus> polyphase resampler tuning and fixes (enabled polyphase on filtered samples...)
    + <rewbs> Added "copy and lose selection" command as a general pattern command, for those who like the cursor to be restored when they copy.
      You obviously don't have to map a key to this command if you don't want to use it.
-   + <rewbs> Automatic chord detection, a la Ericus: if you're in a channel with recording enabled, and you hit several note keys at the same time, MPT should put the notes on the same row.
+   + <rewbs> Automatic chord detection, a la Ericus: Assuming you're in a channel with note recording enabled and you have other channels with note recording enabled, if you hit two note keys within a given time, MPT should put the notes on the same row. You can set the interval time in keyboard config dialog.
    . <rewbs> Fixed velocity recording from midi in. (tx Squirrel Havoc)
    . <rewbs> Fixed stuck notes when playing VSTis from pattern in record enabled channels.
    . <rewbs> Fixed file corruption bug on saving after deleting an instrument (tx LPChip)
