@@ -227,7 +227,7 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 182, 206
+IDD_ABOUTBOX DIALOGEX 0, 0, 182, 215
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
 CAPTION "About ModPlug Tracker"
@@ -237,14 +237,14 @@ BEGIN
                     SS_CENTERIMAGE,4,3,171,81,WS_EX_CLIENTEDGE
     CTEXT           "Modplug Tracker version",IDC_TEXT2,5,86,167,8,
                     SS_NOPREFIX
-    CTEXT           "Copyright © 2004 GPL\n\nRobin Fernandes: modplug@soal.org\nTrevor Nunes: modplug@plastikskouser.com",
-                    IDC_STATIC,5,110,170,45,0,WS_EX_STATICEDGE
-    DEFPUSHBUTTON   "OK",IDOK,140,185,32,14,WS_GROUP
+    CTEXT           "Copyright © 2004 GPL\n\nRobin Fernandes: modplug@soal.org\nTrevor Nunes: modplug@plastikskouser.com\nEric Chavanon: contact@ericus.org",
+                    IDC_STATIC,5,110,170,51,0,WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "OK",IDOK,142,196,32,14,WS_GROUP
     CTEXT           "Get the latest updates at:\nhttp://sourceforge.net/projects/modplug",
-                    IDC_STATIC,0,180,134,18
+                    IDC_STATIC,1,194,133,18
     CTEXT           "",IDC_TEXT1,6,98,167,8
     CTEXT           "Copyright © 1997-2002 Olivier Lapicque:\nolivier@modplug.com",
-                    IDC_STATIC,5,160,168,18
+                    IDC_STATIC,5,169,168,18
 END
 
 IDD_OPTIONS_PLAYER DIALOGEX 0, 0, 266, 278
