@@ -5,7 +5,6 @@ Predicted FAQ 19/11/2004:
 ----------------
 This is a test build of Modplug Tracker. 
 It is unfinished, do not expect to be able to compose with this version safely. But by all means try, and let me know what goes wrong. 
-Please try to only distribute to sensible testers. :)
 
 NOTES: 
  . Your old key settings from your previous official version of MPT will not load in this version, you *have* to re-configure the keys.
