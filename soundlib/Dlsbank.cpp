@@ -368,7 +368,7 @@ LONG __cdecl CDLSBank::DLS32BitTimeCentsToMilliseconds(LONG lTimeCents)
 	// tc = log2(time[secs]) * 1200*65536
 	// time[secs] = 2^(tc/(1200*65536))
 	if ((DWORD)lTimeCents == 0x80000000) return 0;
-	double fmsecs = 1000.0 * pow(2.0, ((double)lTimeCents)/(1200.0*65536.0));
+	double fmsecs = 1000.0 * pow(2.0, (double)(lTimeCents)/(1200.0*65536.0));
 	if (fmsecs < -32767) return -32767;
 	if (fmsecs > 32767) return 32767;
 	return (LONG)fmsecs;
