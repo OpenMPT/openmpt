@@ -4207,15 +4207,13 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 
 
 		// -- Chord autodetection: step back if we just entered a note
-		
-		DWORD gdwChordAutoDetectLatency = 60; //TODO: make user accessible option
 		if ((m_dwStatus & PATSTATUS_RECORD) && (recordGroup) &&
 			((pMainFrm->GetFollowSong(pModDoc) != m_hWnd) || (pSndFile->IsPaused())  
 			                                              || (!(m_dwStatus & PATSTATUS_FOLLOWSONG))))
 		{
 			if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
 			{
-				if ((timeGetTime() - m_dwLastNoteEntryTime < gdwChordAutoDetectLatency) && (nRow>=m_nSpacing))
+				if ((timeGetTime() - m_dwLastNoteEntryTime < CMainFrame::gnAutoChordWaitTime) && (nRow>=m_nSpacing))
 					nRow -= m_nSpacing;
 			}
 		}
@@ -4261,21 +4259,6 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 				DWORD sel = m_dwCursor | (m_nRow << 16);
 				SetCurSel(sel, sel);
 			}
-
-			
-
-
-//			SetCurrentRow(m_nRow + m_nSpacing);
-/*
-			if (((m_nSpacing) && (!(m_dwStatus & PATSTATUS_MIDISPACINGPENDING)))
-				&& ((!(m_dwStatus & PATSTATUS_FOLLOWSONG))
-				|| (pMainFrm->GetFollowSong(pModDoc) != m_hWnd)
-				|| (pModDoc->GetSoundFile()->IsPaused())))
-			{
-				m_dwStatus |= PATSTATUS_MIDISPACINGPENDING;
-				PostMessage(WM_MOD_VIEWMSG, VIEWMSG_DOMIDISPACING, timeGetTime());
-			}
-*/
 			
 			if (recordGroup)
 			{
@@ -4290,9 +4273,6 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 					}
 				}
 			}
-		} else
-		{	// recording disabled
-			*p = oldcmd;
 		}
 
 		// -- play note
@@ -4326,6 +4306,11 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 					m_dwStatus |= PATSTATUS_CHORDPLAYING;
 				}
 			}
+		}
+
+		if (!(m_dwStatus & PATSTATUS_RECORD))
+		{	// recording disabled, restore old command.
+			*p = oldcmd;
 		}
 	}
 

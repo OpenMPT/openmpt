@@ -394,6 +394,7 @@ public:
 	static BYTE gbWFIRType;
 	static long glVolumeRampSamples;
 	//end rewbs.resamplerConf
+	static UINT gnAutoChordWaitTime;
 
 
 	// Midi Input

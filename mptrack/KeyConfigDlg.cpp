@@ -82,6 +82,7 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_LBN_SELCHANGE(IDC_CHOICECOMBO,	OnKeyChoiceSelect)
 	ON_LBN_SELCHANGE(IDC_COMMAND_LIST,	OnCommandKeySelChanged)
 	ON_LBN_SELCHANGE(IDC_KEYCATEGORY,	OnCategorySelChanged)
+	ON_EN_UPDATE(IDC_CHORDDETECTWAITTIME, OnChordWaitTimeChanged) //rewbs.autochord
 	ON_COMMAND(IDC_SET, OnSetKeyChoice)
 	ON_COMMAND(IDC_DELETE, OnDeleteKeyChoice)
 	ON_COMMAND(IDC_RESTORE, OnRestoreKeyChoice)
@@ -105,7 +106,7 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_KEYCATEGORY,	m_cmbCategory);
 	DDX_Control(pDX, IDC_COMMAND_LIST,	m_lbnCommandKeys); 
 	DDX_Control(pDX, IDC_CHOICECOMBO,	m_cmbKeyChoice);
-
+	DDX_Control(pDX, IDC_CHORDDETECTWAITTIME, m_eChordWaitTime);//rewbs.autochord
 	DDX_Control(pDX, IDC_KEYREPORT,		m_eReport);
 	DDX_Control(pDX, IDC_CUSTHOTKEY,	m_eCustHotKey);
 	DDX_Control(pDX, IDC_CHECKKEYDOWN,	m_bKeyDown);
@@ -157,6 +158,9 @@ BOOL COptionsKeyboard::OnInitDialog()
 
 	m_bAutoSave.SetCheck(CMainFrame::GetInputHandler()->m_bAutoSave);
 	
+	CString s;
+	s.Format("%d", CMainFrame::gnAutoChordWaitTime);
+	m_eChordWaitTime.SetWindowText(s);
 	return TRUE;
 }
 
@@ -443,6 +447,20 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 	}
 }
 
+//rewbs.autochord
+void COptionsKeyboard::OnChordWaitTimeChanged()
+{
+	CString s;
+	UINT val;
+	m_eChordWaitTime.GetWindowText(s);
+	val = atoi(s);
+	if (val>5000) 
+	{
+		val = 5000;
+		m_eChordWaitTime.SetWindowText("5000");
+	}
+}
+//end rewbs.autochord
 
 //-----------------------------------------------------------
 // Change handling
@@ -574,76 +592,28 @@ void COptionsKeyboard::OnSetKeyChoice()
 	return;
 }
 
-
-
-void COptionsKeyboard::OnHotKeyReset()
-//------------------------------------
-{
-/*	if ((m_nCurKeyboard == KEYBOARD_CUSTOM) && (m_nCurHotKey >= 0) && (m_nCurHotKey < MAX_MPTHOTKEYS))
-	{
-		DWORD dwHk = gDefaultHotKeys[m_nCurHotKey].nMPTHotKey;
-		if (dwHk != CustomKeys[m_nCurHotKey])
-		{
-			CustomKeys[m_nCurHotKey] = dwHk;
-			OnSettingsChanged();
-			m_nCurHotKey = -1;
-            UpdateDialog();
-		}
-	}
-*/
-}
-
-
 void COptionsKeyboard::OnOK()
 //---------------------------
-{/*
-	m_nKeyboardCfg = KEYBOARD_MPT;
-	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
-	if (combo) m_nKeyboardCfg = combo->GetCurSel();
-	memcpy(CMainFrame::CustomKeys, CustomKeys, sizeof(CMainFrame::CustomKeys));
-	memcpy(CMainFrame::KeyboardMap, KeyboardMap, sizeof(CMainFrame::KeyboardMap));
-	// Keyboard options
-	if (IsDlgButtonChecked(IDC_CHECK1)) m_nKeyboardCfg |= KEYBOARD_FT2KEYS;
-	CMainFrame::m_nKeyboardCfg = m_nKeyboardCfg;
-*/
+{
 	CString cs;
 	m_eKeyFile.GetWindowText(cs);
 	strcpy(CMainFrame::m_szKbdFile, cs);
 	CMainFrame::GetInputHandler()->SetNewCommandSet(plocalCmdSet);
+
+	m_eChordWaitTime.GetWindowText(cs);
+	CMainFrame::gnAutoChordWaitTime = atoi(cs);
 
 	if (m_bAutoSave.GetCheck())
 		plocalCmdSet->SaveFile(CMainFrame::m_szKbdFile, m_bDebugSave.GetCheck());
 
 	CMainFrame::GetInputHandler()->m_bAutoSave = m_bAutoSave.GetCheck();
 
+
+
 	CPropertyPage::OnOK();
-
 }
 
 
-
-
-/*BOOL COptionsKeyboard::SetKey(UINT nId, UINT nChar, UINT nFlags)
-//--------------------------------------------------------------
-{
-	nFlags &= 0x1FF;
-	if (nFlags & 0x100) return FALSE;
-	if ((nId < 3*12+2) && (nFlags))
-	{
-		if (nChar == VK_SPACE) nFlags = 0;
-		if (m_nCurKeyboard == KEYBOARD_CUSTOM)
-		{
-			if (nFlags != (UINT)KeyboardMap[nId])
-			{
-				KeyboardMap[nId] = nFlags;
-				OnSettingsChanged();
-			}
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-*/
 void COptionsKeyboard::OnDestroy()
 {
 	CPropertyPage::OnDestroy();
