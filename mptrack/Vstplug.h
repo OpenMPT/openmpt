@@ -69,7 +69,7 @@ protected:
 	float **m_pOutputs;
 	int m_nEditorX, m_nEditorY;
 	int m_MixBuffer[MIXBUFFERSIZE*2+2];		// Stereo interleaved
-	float m_FloatBuffer[MIXBUFFERSIZE*32+31];	// 2ch separated		//rewbs.dryRatio: *3+2 became *4+3
+	float m_FloatBuffer[MIXBUFFERSIZE*32+31];	// 2ch separated + up to 32 VSTi outputs...
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
 
 public:

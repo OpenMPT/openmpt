@@ -1374,20 +1374,20 @@ CVstPlugin::~CVstPlugin()
 	CVstPlugin::Dispatch(effMainsChanged, 0,0, NULL, 0);
 	CVstPlugin::Dispatch(effClose, 0, 0, NULL, 0);
 	m_pFactory = NULL;
-	if (m_pInputs)
+	if (m_pTempBuffer)	//rewbs.dryRatio
 	{
-		delete m_pInputs;
+		delete[] m_pTempBuffer;
+		m_pTempBuffer = NULL;
+	}
+	if (m_nInputs && m_pInputs) //if m_nInputs == 0, then m_pInputs will have been
+	{							//initilised at 0 size, so will crash on delete.
+		delete[] m_pInputs;
 		m_pInputs = NULL;
 	}
 	if (m_pOutputs)
 	{
-		delete m_pOutputs;
+		delete[] m_pOutputs;
 		m_pOutputs = NULL;
-	}	
-	if (m_pTempBuffer)	//rewbs.dryRatio
-	{
-		delete m_pTempBuffer;
-		m_pTempBuffer = NULL;
 	}
 	if (m_pEvList)
 	{
@@ -1533,7 +1533,8 @@ bool CVstPlugin::SaveProgram(CString fileName)
 {
 	if (!(m_pEffect))
 		return false;
-
+    
+	bool success;
 	//Collect required data
 	long numParams = GetNumParameters();
 	long ID = GetUID();
@@ -1541,9 +1542,28 @@ bool CVstPlugin::SaveProgram(CString fileName)
 	float *params = new float[numParams]; 
 	GetParams(params, 0, numParams);
 
+	Cfxp* fxp = NULL;
+
 	//Construct & save fxp
-	Cfxp fxp(ID, plugVersion, numParams, params);
-	return fxp.Save(fileName);
+	if(m_pEffect->flags & effFlagsProgramChunks)
+	{ // try chunk-based preset:
+		void *chunk = NULL;
+		long chunkSize = Dispatch(effGetChunk, 0,0, &chunk, 0);
+		
+		if ((chunkSize > 0) && (chunk))
+			fxp = new Cfxp(ID, plugVersion, 0, chunkSize, chunk);
+	}
+	if (fxp == NULL)
+	{ // fall back on parameter based preset:
+		fxp = new Cfxp(ID, plugVersion, numParams, params);
+	}
+	
+	success = fxp->Save(fileName);
+	if (fxp)
+		delete fxp;
+
+	return success;
+	
 }
 
 bool CVstPlugin::LoadProgram(CString fileName)
@@ -1815,10 +1835,9 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			if((nOuts % 2) == 1) nOuts--;
 
 			// mix extra stereo outputs
-			for(UINT iOut=3; iOut<nOuts; iOut++){
-				UINT channel = (iOut-1)%2;
+			for(UINT iOut=2; iOut<nOuts; iOut++){
 				for(UINT i=0; i<nSamples; i++)
-					m_pTempBuffer[channel][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
+					m_pTempBuffer[iOut%2][i] += m_pTempBuffer[iOut][i]; //assumed stereo.
 			}
 
 			// if m_nOutputs is odd, mix half the signal of last output to each channel
@@ -2063,6 +2082,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	}
 
 	ClearVSTEvents();
+
 }
 
 

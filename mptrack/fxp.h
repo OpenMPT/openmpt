@@ -1,19 +1,5 @@
 #pragma once
-
-
-// struct FxProgram
-// {
-//	long ChunkMagic;	// "CcnK"
-//	long byteSize;		// size of this chunk, excluding ChunkMagic and byteSize
-//
-//	long fxMagic;		// "FxCk"
-//	long version;
-//	long fxID;			// Fx ID
-//	long fxVersion;
-//	long numParams;
-//	char prgName[28];
-//	float *params		 //variable no. of params
-// }
+//See vstfxstore.h in VST SDK2.3 for an overview of the fxp file structure.
 
 class Cfxp
 {
@@ -21,6 +7,7 @@ public:
 	Cfxp(void);
 	Cfxp(CString fileName);
 	Cfxp(long fxID, long fxVersion, long numParams, float *params);
+	Cfxp(long ID, long version, long nPrograms, long inChunkSize, void *inChunk);
 	~Cfxp(void);
 	
 	long ChunkMagic;	// "CcnK"
@@ -29,9 +16,11 @@ public:
 	long version;		// VST version - ignore
 	long fxID;			// Plugin unique ID 
 	long fxVersion;		// plugin version - ignore?
+	
 	long numParams;
 	char prgName[30];
 	float *params;
+	long chunkSize;
 	void *chunk;
 
 	bool Save(CString fileName);
