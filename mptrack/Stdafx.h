@@ -1,0 +1,53 @@
+// stdafx.h : include file for standard system include files,
+//  or project specific include files that are used frequently, but
+//      are changed infrequently
+//
+
+#if !defined(AFX_STDAFX_H__AE144DC6_DD0B_11D1_AF24_444553540000__INCLUDED_)
+#define AFX_STDAFX_H__AE144DC6_DD0B_11D1_AF24_444553540000__INCLUDED_
+
+#if _MSC_VER >= 1000
+#pragma once
+#endif // _MSC_VER >= 1000
+
+#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#define WINVER	0x0401
+
+// windows excludes
+#define NOMCX
+// mmreg excludes
+#define NOMMIDS
+#define NOJPEGDIB
+#define NONEWIC
+#define NOBITMAP
+// mmsystem excludes
+#define MMNODRV
+#define MMNOMCI
+
+// No ATL crap
+#define __ATLCONV_H__
+
+#include <afxwin.h>         // MFC core and standard components
+#include <afxext.h>         // MFC extensions
+#include <afxcmn.h>			// MFC support for Windows Common Controls
+#include <afxcview.h>
+#include <afxole.h>
+#include <winreg.h>
+#include <windowsx.h>
+
+#pragma warning(disable:4201)
+#include <mmsystem.h>
+#include <mmreg.h>
+#include <msacm.h>
+#pragma warning(default:4201)
+
+#ifndef OFN_FORCESHOWHIDDEN
+#define OFN_FORCESHOWHIDDEN		0x10000000
+#endif
+
+void Log(LPCSTR format,...);
+
+//{{AFX_INSERT_LOCATION}}
+// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+
+#endif // !defined(AFX_STDAFX_H__AE144DC6_DD0B_11D1_AF24_444553540000__INCLUDED_)

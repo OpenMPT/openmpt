@@ -1,0 +1,240 @@
+<HTML>
+<HEAD><TITLE>Introduction</TITLE></HEAD>
+
+<BODY>
+<p><b><a name="top">Introduction</a></b></p>
+<ul>
+<li><a href="intro.htm#software">Software Information</a></li>
+<li><a href="intro.htm#system">System Requirements</a></li>
+<li><a href="intro.htm#contact">Contact / Technical Support</a></li>
+<li><a href="intro.htm#cmdline">Command Line Switches</a></li>
+<li><a href="intro.htm#techinfo">Technical Information</a></li>
+<li><a href="intro.htm#mptintl">International Versions</a></li>
+<li><a href="intro.htm#features">Tracker features</a></li>
+<li><a href="intro.htm#credits">Credits</a></li>
+<li><a href="intro.htm#history">History</a></li>
+</ul>
+
+<HR><p><b><a name="software">Software Information</a></b></p>
+ModPlug Tracker is freeware and may be freely distributed.
+As it is a freeware, I am not responsible for any
+problems that could be caused by the usage of this program.<br>
+THIS PROGRAM IS ONLY INTENDED FOR NON-COMMERCIAL USE.<BR>
+(FAQ: Yes, you can release your songs created with MPT commercially
+without paying anything to anybody)
+<br>
+My only goal for writing ModPlug Tracker is to try to spread out tracked
+music, taking it out of DOS-World, and try to keep it free.<BR>
+
+<hr><p><b><a name="system">System Requirements</a></b></p>
+* Minimum Requirements:<br>
+  - Pentium 133MHz<br>
+  - 32MB of memory<br>
+  - Windows 95/98, Windows NT 3.51 or higher.<br>
+  - A 16-bit soundcard with 32-bit drivers.<br>
+  - 800x600x8 screen resolution<br>
+<br>
+* Recommended configuration:<br>
+  - Pentium II 233MHz or above<br>
+  - 64MB of memory<br>
+  - Windows 98/ME or Windows 2000
+  - DirectX 6 or higher<br>
+  - 1024x768x16bpp screen resolution<br>
+<BR>
+* Optimal configuration:<br>
+  - Pentium III 600MHz<br>
+  - 128MB of memory<br>
+  - AGP Graphics Accelerator<br>
+  - DirectX 8 or higher<br>
+<BR>
+
+<hr><p><b><a name="contact">Contact / Technical Support</a></b></p>
+For any technical questions, or bug report, you can contact me at
+"olivier@modplug.com". Also check often the ModPlug Central web site
+for the latest releases: "http://www.modplug.com".
+(I usually also have beta versions on my home page at
+"http://pweb.jps.net/~olivierl", but it might be buggy, and the
+site is not as fast).
+Do not hesitate to post your questions on internet, there is a quick link
+in the help menu to go to the Modplug Central bulletin boards, where other
+users may be able to answer your questions<br>
+<BR>
+
+Please try to be precise when sending bug reports (I don't really have
+the time for 'This song doesn't play right.'. If possible, try to localise
+the problem by creating a short song with a couple of patterns reproducing
+the bug. Try including a quick description of your system (processor, operating
+system, sound card, and amount of memory)<BR>
+
+<hr><p><b><a name="cmdline">Command Line Switches</a></b></p>
+The following switches are available when launching Modplug Tracker:
+<ul>
+<li><b>-nologo</b> : Do not display the splash screen when starting</li>
+<li><b>-nomp3</b> : Disable MPEG Layer3 encoding</li>
+<li><b>-noacm</b> : Do not use ACM codecs for encoding</li>
+<li><b>-nodls</b> : Do not load sound banks</li>
+<li><b>-wavex</b> : Enable multichannel audio support</li>
+<li><b>-noplugs</b> : Disable support for external plugins</li>
+</ul>
+<br>You can use these switches if you experience problems when loading Modplug Tracker.<br>
+Example: mptrack -nologo -nomp3
+<BR>
+
+<hr><p><b><a name="techinfo">Technical Information</a></b></p>
+ModPlug Tracker is a 32-bit Win32 application, featuring a lot of
+options to create the best possible output (Up to 48KHz, 16-bit, stereo):<br>
+- 32-bit internal precision for mixing, dithered to 16-bit.<br>
+- Very high quality resampling filter.<br>
+- Support for MMX/3DNow!/SSE instructions<br>
+- Automatic click removal<br>
+- Digital Bass Expansion filter (filter range and depth customizable in Advanced Player Options)<br>
+- Dolby Pro-Logic Surround support with custom delay.<br>
+- Reverberator engine, with environment presets.
+- HF Noise Reduction: attenuation of the background noise by filtering very high
+  frequencies in the sound.<br>
+- Stereo Separation option (25%-400%), useful for headphones.<br>
+- 6-bands Graphic Equalizer (requires fast floating point support).<br>
+- DirectSound support for low-latency mixing on hardware-accelerated soundcards<br>
+<BR>
+
+<hr><p><b><a name="mptintl">International Versions</a></b></p>
+Modplug Tracker is written with a default page code of 0409 (English - US)<br>
+You can freely edit the resources to make a localized version of Modplug Tracker,
+although some strings are hardcoded in the code (not as resources).<br>
+I am trying to improve the support for easier localization, but it is a lot of work.<br>
+However, starting from v1.15.0154, MPT supports localized strings in the file MPT_INTL.INI<br>
+This file contains string sections for a specific language id. For example, in Australia, MPT will
+look for strings in the [Strings.0C09] (0C09=Australian English language id). If it isn't found, then it
+will look in the [Strings.0009] section (generic english), if not found, it will look in the
+[Strings] section (no language id), and if still not found, it will use the default value for the string.<br>
+For example, to set the option names in the setup general tab, the strings would be<br>
+<i>Setup.Gen.Opt1.Name=Play new notes while recording</i><br>
+<i>Setup.Gen.Opt1.Desc=When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode).</i><br>
+Feel free to email me if you have specific questions about this.<br>
+<BR>
+
+<hr><p><b><a name="features">Tracker Features</a></b></p>
+- Up to 64 channels supported for editing (up to 200 virtual channels)<br>
+- The following formats are supported for import:<br>
+    - *.669: UNIS 669, 669 Composer modules.<br>
+	- *.AMF: Asylum / DSMI modules.<br>
+    - *.AMS: Velvet Studio AMS 1.x modules.<br>
+    - *.DBM: DigiBooster Pro modules.<br>
+	- *.DMF: X-Tracker modules.<br>
+    - *.DSM: DSIK modules.<br>
+    - *.FAR: Farandole Composer modules.<br>
+    - *.IT:  Impulse Tracker modules.<br>
+    - *.MDL: DigiTracker 1.x modules.<br>
+    - *.MED: OctaMed modules (buggy).<br>
+    - *.MID: Midi Files.<br>
+    - *.MOD: ProTracker modules (4-32 channels, 15/31 samples).<br>
+    - *.MTM: MultiTracker modules.<br>
+    - *.NST: NoiseTracker modules.<br>
+    - *.OKT: Oktalyzer Modules.<br>
+    - *.PTM: PolyTracker modules.<br>
+    - *.S3M: ScreamTracker III modules.<br>
+    - *.STM: ScreamTracker II modules.<br>
+    - *.ULT: UltraTracker modules (buggy).<br>
+    - *.UMX: Musics from Unreal and Unreal Tournament<br>
+    - *.WOW: Grave Composer modules.<br>
+    - *.XM:  FastTracker II modules.<br>
+    - All the above when zipped (*.MDZ, *.S3Z, *.XMZ, *.ITZ, *.ZIP).<br>
+<br>
+- ModPlug Tracker can save in the following formats:<br>
+    - IT:  Impulse Tracker modules.<br>
+    - MOD: ProTracker modules (4-32 channels, 15/31 samples).<br>
+    - S3M: ScreamTracker III modules.<br>
+    - XM:  FastTracker II modules.<br>
+    - WAV: Wave Files (Direct-to-disk recording 8/16/32-bit, mono/stereo/quad)<br>
+<br>
+- There is two display modes, to respect FT2/IT notation: MOD/XM (commands
+  are displayed from 0 to X) and S3M/IT (commands are displayed from A to Z)<br>
+- You can edit multiple songs at the same time.<br>
+- The following sample formats are supported in the current version:<br>
+    - *.WAV: Uncompressed Windows Wave File (PCM 8/16bit, mono/stereo).<br>
+    - *.XI: Samples from XI instruments.<br>
+    - *.PAT: UltraSound GF1 Patches (8/16-bit mono)<br>
+    - *.S3I/*.SMP: ScreamTracker 3 / DigiTracker Samples<br>
+    - *.ITS: Impulse Tracker Samples<br>
+    - *.RAW: Support for importing any file as RAW sample data.<br>
+    - *.AIF/*.AIFF/*.8SVX/*.8SV: Apple AIFF and 8SVX Audio Files<br>
+- Modplug Tracker also supports the following sound banks formats:<br>
+    - *.DLS: Downloadable Sounds Banks<br>
+    - *.SF2: SoundFont 2.0 Sound Banks<br>
+- FastTracker II XI and Impulse Tracker ITI instruments are supported for
+  import/export.<br>
+- Copy/Paste between different songs. It also allows you to use a windows-based
+  sample editor, and paste the samples directly into your song.<br>
+<BR>
+
+<hr><p><b><a name="credits">Credits</a></b></p>
+This list should be much longer, but thanks to everybody who contributed
+with feedback, bug reports, and suggestions to the development of Modplug Tracker.<br>
+Special thanks to<br>
+Mister X AKA Kim: Modplug Central (most poeple wouldn't even know about Modplug without him)<br>
+Maz: Always a great software source for mod-related tools.<br>
+Static Lab (about box logo), Zola, Wolfe Bowers, Martin DobSchmi, Cantaloup,
+SiDEWiNDER, Chris and the Clones, Rani Assaf (linux-gmodplay-port),
+Steve Gilmore, Carsten Mussig, John Steel, Olaf Grebe, Claymore, Skaven
+
+<BR>
+
+<hr><p><b><a name="history">History</a></b></p>
+<ul>
+
+<br><li><b>1.16 - (November 2001)</b></li><br>
+- Support for DirectX Media Audio Effects<br>
+
+<br><li><b>1.12 - (August 2000)</b></li><br>
+- Support for VST Effect Plugins (Up to 8 effects per song)!<br>
+
+<br><li><b>1.11 - (July 2000)</b></li><br>
+- Stereo samples support!<br>
+- Fixes glitches with the original 1.10 release<br>
+- Improved sound engine with some compatibility fixes for high octaves<br>
+
+<br><li><b>1.10 - (June 2000)</b></li><br>
+- Includes all the bug fixes and patches released since the original 1.09.<br>
+- You can now export a song as a standard Midi file<br>
+- When encoding as MP3, you can set the full ID3 tag information (author, genre...)<br>
+
+<br><li><b>1.09 - (August 1999)</b></li><br>
+- Undo button in the pattern editor<br>
+- New reverberator engine (much better)<br>
+- Major improvements in the instrument library: you can now browse
+  samples inside a song, and drag and drop samples between different songs.<br>
+
+<br><li><b>1.08 - (July 1999)</b></li><br>
+- Minor improvements, VU-Meters, pattern undo, etc<br>
+
+<br><li><b>1.04 - Modplug Tracker Final Release (February 1999)</b></li><br>
+- Lots of improvements and new features. Midi-Out and help update will be for a future release (1.1?)<br>
+- Chord Editor<br>
+- Drag and Drop editing<br>
+- MPEG Layer3 encoding (if an external encoder is present)<br>
+
+<br><li><b>1.00b3 - beta 3</b></li><br>
+- Lots of bug fixes, and improvements<br>
+- The sample library is working: you can drag files from the sample library
+  to the sample/instrument editor.<br>
+- Support for standard sound banks: You can now install  DLS and SF2 sound banks.<br>
+
+<br><li><b>1.00b - beta</b></li><br>
+This is the first public release of ModPlug Tracker Beta (June 18, 1998).
+The help file is still quite small, but the interface has been completely
+redesigned, so it's MUCH easier to use. Drawing in the pattern editor needs
+to be optimized. This release also include basic Midi support (no sync on
+midi clock yet) and low-latency DirectSound buffers.<br>
+
+<br><li><b>1.00a - alpha</b></li><br>
+This is the first alpha release of ModPlug Tracker (October 15, 1997).
+A lot of features are still missing, but the copy/cut/paste, and support
+for XI instruments makes ModPlug Tracker good enough for an alpha version.
+I have to work on the help too.<br>
+
+<br><li><b>0.0xa - pre-alpha:</b></li><br>
+This is the first public release of ModPlug Tracker (09/19/97).<br>
+</ul><BR>
+
+</BODY>
+</HTML>

@@ -1,0 +1,4 @@
+// Microsoft Developer Studio generated Help ID include file.
+// Used by mptrack.rc
+//
+#define HIDC_TREEVIEW                   0x819d0821    // IDD_TREEVIEW
