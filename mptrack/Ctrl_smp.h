@@ -18,6 +18,7 @@ protected:
 	CComboBox m_ComboAutoVib, m_ComboLoopType, m_ComboSustainType, m_ComboZoom, m_CbnBaseNote;
 	CButton m_CheckPanning;
 	UINT m_nSample;
+	double m_dTimeStretchRatio; //rewbs.timeStretchMods
 	
 
 // -> CODE#0029

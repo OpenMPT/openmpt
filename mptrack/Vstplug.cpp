@@ -688,6 +688,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		}
 		else
 		{
+			timeInfo.flags |= kVstTransportChanged; //just stopped.
 			timeInfo.samplePos = 0;
 		}
 		if (value & kVstNanosValid)
@@ -699,7 +700,10 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		if (value & kVstPpqPosValid)
 		{
 			timeInfo.flags |= kVstPpqPosValid;
-			timeInfo.ppqPos = (timeInfo.samplePos/timeInfo.sampleRate)*(CMainFrame::GetMainFrame()->GetApproxBPM()/60.0);
+			if (timeInfo.flags & kVstTransportPlaying)
+				timeInfo.ppqPos = (timeInfo.samplePos/timeInfo.sampleRate)*(CMainFrame::GetMainFrame()->GetApproxBPM()/60.0);
+			else
+				timeInfo.ppqPos =0;
 		}
 		if (value & kVstTempoValid)
 		{
@@ -1253,6 +1257,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_nInputs = m_nOutputs = 0;
 	m_nEditorX = m_nEditorY = -1;
 	m_pEvList = NULL;
+	m_pModDoc = NULL;
 	// Insert ourselves in the beginning of the list
 	if (m_pFactory)
 	{

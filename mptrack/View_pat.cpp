@@ -1526,6 +1526,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 		break;
 	case DRAGITEM_PATTERNHEADER:
 		OnPatternProperties();
+		break;
 	case DRAGITEM_PLUGNAME:			//rewbs.patPlugNames
 		if (nItemNo < MAX_CHANNELS)
 		{
@@ -2771,7 +2772,7 @@ void CViewPattern::OnCursorPaste()
  	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 	
-	if ((pModDoc) && (pMainFrm))
+  	if ((pModDoc) && (pMainFrm))
 	{
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
@@ -2788,17 +2789,17 @@ void CViewPattern::OnCursorPaste()
 			case 3:																//Effect
 			case 4:	p->command = m_cmdOld.command; p->param = m_cmdOld.param; break;
 		}
+		pModDoc->SetModified();
 
 		if (((pMainFrm->GetFollowSong(pModDoc) != m_hWnd) || (pSndFile->IsPaused()) || (!(m_dwStatus & PATSTATUS_FOLLOWSONG))))
 		{
-			//if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) 
-			SetCurrentRow(m_nRow+m_nSpacing);
 			DWORD sel = m_dwCursor | (m_nRow << 16);
+			InvalidateArea(sel, sel+5); //rewbs.fix3010 (no refresh under on last row)
+			SetCurrentRow(m_nRow+m_nSpacing);
+			sel = m_dwCursor | (m_nRow << 16);
 			SetCurSel(sel, sel);
 		}
 	}
-	
-	//	ProcessChar(' ', 0);
 	//end rewbs.customKeys
 }
 

@@ -681,7 +681,7 @@ public:	// for Editing
 	DWORD m_dwSongFlags;							// Song flags SONG_XXXX
 	UINT m_nMixChannels, m_nMixStat, m_nBufferCount;
 	UINT m_nTickCount, m_nTotalCount, m_nPatternDelay, m_nFrameDelay;
-	long m_lTotalSampleCount;	// rewbs.VSTTimeInfo
+	ULONG m_lTotalSampleCount;	// rewbs.VSTTimeInfo
 	UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;

@@ -5,6 +5,7 @@
 #include "mainfrm.h"
 #include "vstplug.h"
 #include "fxp.h"
+#include "dlg_misc.h"
 #include "AbstractVstEditor.h"
 
 BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
@@ -12,6 +13,8 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
 	ON_COMMAND(ID_PRESET_SAVE,			OnSavePreset)
 	ON_COMMAND(ID_PRESET_RANDOM,		OnRandomizePreset)
+	ON_COMMAND(ID_VSTMACRO_INFO,		OnMacroInfo)
+	ON_COMMAND(ID_VSTINPUT_INFO,		OnInputInfo)
 	ON_COMMAND_RANGE(ID_PRESET_SET, ID_PRESET_SET+MAX_PLUGPRESETS, OnSetPreset)
 END_MESSAGE_MAP()
 
@@ -139,4 +142,16 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 	}
 }
 
+void CAbstractVstEditor::OnMacroInfo()
+{ //TODO	
+/*
+	for (UINT m=0; m<NMACROS; m++)
+	{
+	}
+*/
+}
+
+void CAbstractVstEditor::OnInputInfo()
+{ //TODO
+}
 //end rewbs.defaultPlugGUI
