@@ -1486,7 +1486,6 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	// Preview management
 	if(errorcode == 0 && IsDlgButtonChecked(IDC_CHECK2)){
 		((CButton *)GetDlgItem(IDC_BUTTON1))->ShowWindow(SW_HIDE);
-		((CButton *)GetDlgItem(IDC_BUTTON2))->ShowWindow(SW_HIDE);
 		((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_SHOW);
 		((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_SHOW);
 		SetDlgItemText(IDC_STATIC1,"Preview...");
@@ -1524,7 +1523,6 @@ void CCtrlSamples::OnPitchShiftTimeStretchAccept()
 
 	// Restore UI buttons
 	((CButton *)GetDlgItem(IDC_BUTTON1))->ShowWindow(SW_SHOW);
-	((CButton *)GetDlgItem(IDC_BUTTON2))->ShowWindow(SW_SHOW);
 	((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_HIDE);
 	((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_HIDE);
 	SetDlgItemText(IDC_STATIC1,"");
