@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -756,7 +756,7 @@ BEGIN
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,112,40,
                     8,10
     CONTROL         "Pan",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,55,74,33,10
+                    WS_TABSTOP,55,74,29,10
     EDITTEXT        IDC_EDIT9,87,73,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN9,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,112,74,
@@ -863,7 +863,7 @@ BEGIN
     CONTROL         "Extended filter range",IDC_CHECK5,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,8,88,96,10
     CONTROL         "Embed instrument parameters",IDC_CHECK6,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,8,100,96,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,100,124,10
 END
 
 IDD_SHOWLOG DIALOG  0, 0, 300, 106
@@ -2208,12 +2208,12 @@ BEGIN
     ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
 END
 
-#endif    // English (U.S.) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
+// Anglais (Royaume-Uni) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2320,7 +2320,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (U.K.) resources
+#endif    // Anglais (Royaume-Uni) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
