@@ -1,0 +1,53 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: unzip - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\WIN\TEMP\RSPB1.TMP" with contents
+[
+/nologo /MTd /W4 /GX /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fo".\Debug/" /Fd".\Debug/" /FD /c 
+"D:\code\modplug\UNZIP\Unzip.cpp"
+]
+Creating command line "cl.exe @C:\WIN\TEMP\RSPB1.TMP" 
+Creating command line "link.exe -lib /nologo /out:".\Debug\unzip.lib"  .\Debug\Unzip.obj "
+<h3>Output Window</h3>
+Compiling...
+Unzip.cpp
+D:\code\modplug\UNZIP\inflate.cpp(249) : warning C4127: conditional expression is constant
+D:\code\modplug\UNZIP\mapname.cpp(38) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
+D:\code\modplug\UNZIP\mapname.cpp(76) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
+D:\code\modplug\UNZIP\mapname.cpp(88) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
+D:\code\modplug\UNZIP\mapname.cpp(92) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
+D:\code\modplug\UNZIP\misc.cpp(181) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNZIP\misc.cpp(188) : warning C4244: '-=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNZIP\misc.cpp(207) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNZIP\unimplod.cpp(188) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNZIP\unimplod.cpp(189) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNZIP\unimplod.cpp(277) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNZIP\unimplod.cpp(278) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNZIP\unimplod.cpp(287) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNZIP\unimplod.cpp(288) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNZIP\unimplod.cpp(313) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNZIP\unreduce.cpp(173) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNZIP\unreduce.cpp(176) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNZIP\unshrink.cpp(52) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNZIP\unshrink.cpp(97) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNZIP\unshrink.cpp(103) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNZIP\unshrink.cpp(112) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNZIP\unshrink.cpp(131) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\modplug\UNZIP\unshrink.cpp(132) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\modplug\UNZIP\Unzip.cpp(427) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\modplug\UNZIP\unreduce.cpp(121) : warning C4701: local variable 'V' may be used without having been initialized
+D:\code\modplug\UNZIP\unreduce.cpp(119) : warning C4701: local variable 'Len' may be used without having been initialized
+Creating library...
+
+
+
+<h3>Results</h3>
+unzip.lib - 0 error(s), 26 warning(s)
+</pre>
+</body>
+</html>

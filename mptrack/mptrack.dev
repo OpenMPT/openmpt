@@ -1,0 +1,917 @@
+[Project]
+FileName=D:\code\modplug\mptrack\mptrack.dev
+Name=mptrack
+Ver=1
+IsCpp=1
+Type=0
+Compiler=-D__GNUWIN32__ -W -DNDEBUG -DWIN32 -D_WINDOWS -DENABLE_MMX -DENABLE_EQ -DMODPLUG_TRACKER -DNO_PACKING
+CppCompiler=-D__GNUWIN32__ -W -DNDEBUG -DWIN32 -D_WINDOWS -DENABLE_MMX -DENABLE_EQ -DMODPLUG_TRACKER -DNO_PACKING
+Includes=..\unlha;..\unzip;..\unrar;..\soundlib;..\include
+Linker=-lwinmm -lstrmiids -ldmoguids
+Libs=
+UnitCount=113
+Folders="Source Files","Header Files","Resource Files"
+
+[Unit1]
+FileName=./ChildFrm.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit2]
+FileName=./ctrl_com.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit3]
+FileName=./ctrl_gen.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit4]
+FileName=./ctrl_ins.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit5]
+FileName=./ctrl_pat.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit6]
+FileName=./ctrl_seq.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit7]
+FileName=./ctrl_smp.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit8]
+FileName=./dlg_misc.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit9]
+FileName=../soundlib/dlsbank.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit10]
+FileName=./draw_pat.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit11]
+FileName=../soundlib/Fastmix.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit12]
+FileName=./globals.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit13]
+FileName=../soundlib/Load_669.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit14]
+FileName=../Soundlib/load_amf.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit15]
+FileName=../soundlib/Load_ams.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit16]
+FileName=../soundlib/load_dbm.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit17]
+FileName=../soundlib/load_dmf.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit18]
+FileName=../soundlib/Load_dsm.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit19]
+FileName=../soundlib/Load_far.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit20]
+FileName=../soundlib/Load_it.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit21]
+FileName=../soundlib/Load_mdl.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit22]
+FileName=../soundlib/Load_med.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit23]
+FileName=../soundlib/load_mid.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit24]
+FileName=../soundlib/Load_mod.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit25]
+FileName=../Soundlib/load_mt2.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit26]
+FileName=../soundlib/Load_mtm.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit27]
+FileName=../soundlib/Load_okt.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit28]
+FileName=../Soundlib/load_psm.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit29]
+FileName=../soundlib/load_ptm.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit30]
+FileName=../soundlib/Load_s3m.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit31]
+FileName=../soundlib/Load_stm.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit32]
+FileName=../soundlib/Load_ult.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit33]
+FileName=../Soundlib/Load_umx.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit34]
+FileName=../soundlib/Load_wav.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit35]
+FileName=../soundlib/Load_xm.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit36]
+FileName=./mainbar.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit37]
+FileName=./MainFrm.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit38]
+FileName=../soundlib/mmcmp.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit39]
+FileName=../soundlib/Mmx_mix.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit40]
+FileName=./mod2midi.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit41]
+FileName=./mod2wave.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit42]
+FileName=./moddoc.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit43]
+FileName=./modedit.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit44]
+FileName=./Moptions.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit45]
+FileName=./Mpdlgs.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit46]
+FileName=./mpt_midi.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit47]
+FileName=./mptrack.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit48]
+FileName=./mptrack.rc
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=0
+Priority=1000
+
+[Unit49]
+FileName=../soundlib/Sampleio.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit50]
+FileName=../soundlib/snd_dsp.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit51]
+FileName=../soundlib/snd_eq.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit52]
+FileName=../soundlib/snd_flt.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit53]
+FileName=../soundlib/Snd_fx.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit54]
+FileName=../Soundlib/Snd_rvb.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit55]
+FileName=../Soundlib/snddev.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit56]
+FileName=../soundlib/Sndfile.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit57]
+FileName=../soundlib/Sndmix.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit58]
+FileName=./StdAfx.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit59]
+FileName=../soundlib/Tables.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit60]
+FileName=./view_com.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit61]
+FileName=./view_gen.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit62]
+FileName=./view_ins.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit63]
+FileName=./view_pat.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit64]
+FileName=./view_smp.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit65]
+FileName=./view_tre.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit66]
+FileName=./vstplug.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit67]
+FileName=../soundlib/Waveform.cpp
+Folder="Source Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit68]
+FileName=./ChildFrm.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit69]
+FileName=./ctrl_com.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit70]
+FileName=./ctrl_gen.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit71]
+FileName=./ctrl_ins.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit72]
+FileName=./ctrl_pat.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit73]
+FileName=./ctrl_smp.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit74]
+FileName=./dlg_misc.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit75]
+FileName=../Soundlib/Dlsbank.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit76]
+FileName=./globals.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit77]
+FileName=./mainbar.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit78]
+FileName=./MainFrm.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit79]
+FileName=./mod2midi.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit80]
+FileName=./mod2wave.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit81]
+FileName=./moddoc.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit82]
+FileName=./Moptions.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit83]
+FileName=./Mpdlgs.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit84]
+FileName=./mptrack.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit85]
+FileName=./Resource.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit86]
+FileName=../Soundlib/snddev.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit87]
+FileName=../Soundlib/snddevx.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit88]
+FileName=../Soundlib/Sndfile.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit89]
+FileName=./StdAfx.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit90]
+FileName=./view_com.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit91]
+FileName=./view_gen.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit92]
+FileName=./view_ins.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit93]
+FileName=./view_pat.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit94]
+FileName=./view_smp.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit95]
+FileName=./view_tre.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit96]
+FileName=./vstplug.h
+Folder="Header Files"
+Compile=1
+CompileCpp=1
+Link=1
+Priority=1000
+
+[Unit97]
+FileName=./res/colors.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit98]
+FileName=./res/dragging.cur
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit99]
+FileName=./Res/envbar.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit100]
+FileName=./res/img_list.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit101]
+FileName=./res/mainbar.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit102]
+FileName=./res/moddoc.ico
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit103]
+FileName=./res/MPTRACK.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit104]
+FileName=./res/mptrack.ico
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit105]
+FileName=./res/mptrack.rc2
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit106]
+FileName=./Res/nodrag.cur
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit107]
+FileName=./res/nodrop.cur
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit108]
+FileName=./res/patterns.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit109]
+FileName=./Res/smptoolb.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit110]
+FileName=./Res/splash.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit111]
+FileName=./res/view_pat.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit112]
+FileName=./res/vumeters.bmp
+Folder="Resource Files"
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000
+
+[Unit113]
+FileName=./mptrack.reg
+Folder=
+Compile=0
+CompileCpp=0
+Link=0
+Priority=1000

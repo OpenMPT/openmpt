@@ -1,0 +1,442 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: unlha - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\WIN\TEMP\RSP2273.TMP" with contents
+[
+/nologo /MTd /W4 /GX /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\code\Audio_Projects\modplug\unlha\unlha.cpp"
+]
+Creating command line "cl.exe @C:\WIN\TEMP\RSP2273.TMP" 
+Creating command line "link.exe -lib /nologo /out:"Debug\unlha.lib"  .\Debug\unlha.obj "
+<h3>Output Window</h3>
+Compiling...
+unlha.cpp
+D:\code\Audio_Projects\modplug\unlha\unlha32.h(83) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\header.cpp(36) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\header.cpp(46) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\header.cpp(54) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\header.cpp(56) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\header.cpp(85) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\header.cpp(107) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\header.cpp(184) : warning C4244: '+=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\slide.cpp(31) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\slide.cpp(35) : warning C4244: '=' : conversion from 'const int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\slide.cpp(73) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\slide.cpp(99) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\maketbl.cpp(20) : warning C4244: '=' : conversion from 'const int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\maketbl.cpp(30) : warning C4244: '+=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\maketbl.cpp(60) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\maketbl.cpp(70) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\maketbl.cpp(76) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\maketbl.cpp(78) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(35) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(41) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(42) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(46) : warning C4244: '=' : conversion from 'unsigned int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(49) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(50) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(51) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(53) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(55) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(90) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(91) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(95) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(112) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(112) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(118) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(119) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(121) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(123) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(136) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(136) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(137) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(138) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(139) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(140) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(149) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(152) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(193) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(194) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(195) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(203) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(204) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(229) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(257) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\huf.cpp(41) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\huf.cpp(46) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\huf.cpp(81) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\huf.cpp(82) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\huf.cpp(84) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\huf.cpp(118) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\huf.cpp(135) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\huf.cpp(137) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\shuf.cpp(45) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\shuf.cpp(46) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\shuf.cpp(58) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\shuf.cpp(63) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\shuf.cpp(81) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\shuf.cpp(122) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\shuf.cpp(126) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\shuf.cpp(143) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\shuf.cpp(145) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\larc.cpp(15) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\larc.cpp(21) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\larc.cpp(47) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\larc.cpp(52) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\larc.cpp(61) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\larc.cpp(62) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\unlha.cpp(61) : warning C4100: 'lpszExtensions' : unreferenced formal parameter
+D:\code\Audio_Projects\modplug\unlha\unlha.cpp(174) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\unlha.cpp(182) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\unlha.cpp(216) : warning C4244: '-=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\unlha.cpp(217) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\unlha.cpp(226) : warning C4244: '-=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\unlha.cpp(227) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\unlha.cpp(245) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\unlha.cpp(245) : warning C4244: 'argument' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\unlha\dhuf.cpp(121) : warning C4701: local variable 'b' may be used without having been initialized
+Creating library...
+<h3>
+--------------------Configuration: unrar - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\WIN\TEMP\RSP2280.TMP" with contents
+[
+/nologo /MTd /W4 /GX /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"D:\code\Audio_Projects\modplug\UNRAR\Unrar.cpp"
+]
+Creating command line "cl.exe @C:\WIN\TEMP\RSP2280.TMP" 
+Creating command line "link.exe -lib /nologo /out:"Debug\UNRAR.lib"  .\Debug\Unrar.obj "
+<h3>Output Window</h3>
+Compiling...
+Unrar.cpp
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(32) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(36) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(37) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(44) : warning C4127: conditional expression is constant
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(74) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(110) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(115) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(117) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(118) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(119) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(130) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(131) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(141) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(143) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(144) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(152) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(159) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(161) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(162) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\extract.cpp(22) : warning C4127: conditional expression is constant
+D:\code\Audio_Projects\modplug\UNRAR\unpack.cpp(310) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\crccrypt.cpp(39) : warning C4244: '+=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\unpold.cpp(344) : warning C4127: conditional expression is constant
+D:\code\Audio_Projects\modplug\UNRAR\unpold.cpp(452) : warning C4127: conditional expression is constant
+D:\code\Audio_Projects\modplug\UNRAR\unpold.cpp(474) : warning C4127: conditional expression is constant
+D:\code\Audio_Projects\modplug\UNRAR\Unrar.cpp(61) : warning C4100: 'lpszExtensions' : unreferenced formal parameter
+D:\code\Audio_Projects\modplug\UNRAR\Unrar.cpp(123) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNRAR\Unrar.cpp(145) : warning C4127: conditional expression is constant
+D:\code\Audio_Projects\modplug\UNRAR\block.cpp(72) : warning C4701: local variable 'Size' may be used without having been initialized
+D:\code\Audio_Projects\modplug\UNRAR\unpold.cpp(355) : warning C4701: local variable 'Distance' may be used without having been initialized
+D:\code\Audio_Projects\modplug\UNRAR\unpold.cpp(354) : warning C4701: local variable 'NewDistancePlace' may be used without having been initialized
+D:\code\Audio_Projects\modplug\UNRAR\unpold.cpp(463) : warning C4701: local variable 'CurByte' may be used without having been initialized
+D:\code\Audio_Projects\modplug\UNRAR\unpold.cpp(462) : warning C4701: local variable 'NewBytePlace' may be used without having been initialized
+D:\code\Audio_Projects\modplug\UNRAR\unpold.cpp(486) : warning C4701: local variable 'Flags' may be used without having been initialized
+D:\code\Audio_Projects\modplug\UNRAR\unpold.cpp(485) : warning C4701: local variable 'NewFlagsPlace' may be used without having been initialized
+Creating library...
+<h3>
+--------------------Configuration: unzip - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\WIN\TEMP\RSP2282.TMP" with contents
+[
+/nologo /MTd /W4 /GX /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fo".\Debug/" /Fd".\Debug/" /FD /c 
+"D:\code\Audio_Projects\modplug\UNZIP\Unzip.cpp"
+]
+Creating command line "cl.exe @C:\WIN\TEMP\RSP2282.TMP" 
+Creating command line "link.exe -lib /nologo /out:".\Debug\unzip.lib"  .\Debug\Unzip.obj "
+<h3>Output Window</h3>
+Compiling...
+Unzip.cpp
+D:\code\Audio_Projects\modplug\UNZIP\inflate.cpp(249) : warning C4127: conditional expression is constant
+D:\code\Audio_Projects\modplug\UNZIP\mapname.cpp(38) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\mapname.cpp(76) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\mapname.cpp(88) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\mapname.cpp(92) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\misc.cpp(181) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\misc.cpp(188) : warning C4244: '-=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\misc.cpp(207) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unimplod.cpp(188) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unimplod.cpp(189) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unimplod.cpp(277) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unimplod.cpp(278) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unimplod.cpp(287) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unimplod.cpp(288) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unimplod.cpp(313) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unreduce.cpp(173) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unreduce.cpp(176) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unshrink.cpp(52) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unshrink.cpp(97) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unshrink.cpp(103) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unshrink.cpp(112) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unshrink.cpp(131) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unshrink.cpp(132) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\Unzip.cpp(427) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
+D:\code\Audio_Projects\modplug\UNZIP\unreduce.cpp(121) : warning C4701: local variable 'V' may be used without having been initialized
+D:\code\Audio_Projects\modplug\UNZIP\unreduce.cpp(119) : warning C4701: local variable 'Len' may be used without having been initialized
+Creating library...
+<h3>
+--------------------Configuration: mptrack - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"Debug/mptrack.res" /d "_DEBUG" "D:\code\Audio_Projects\modplug\mptrack\mptrack.rc"" 
+Creating temporary file "C:\WIN\TEMP\RSP2285.TMP" with contents
+[
+/nologo /G5 /MTd /w /W0 /GX /Zi /Od /Gf /Gy /I "..\unzip" /I "..\unrar" /I "..\unlha" /I "..\soundlib" /I "..\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "ENABLE_EQ" /D "MODPLUG_TRACKER" /D "NO_PACKING" /Fp"Debug/mptrack.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"D:\code\Audio_Projects\modplug\mptrack\ChildFrm.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\ctrl_com.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\ctrl_gen.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\ctrl_ins.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\ctrl_pat.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\ctrl_seq.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\ctrl_smp.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\dlg_misc.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\dlsbank.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\draw_pat.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Fastmix.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\globals.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_669.cpp"
+"D:\code\Audio_Projects\modplug\Soundlib\load_amf.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_ams.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\load_dbm.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\load_dmf.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_dsm.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_far.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_it.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_mdl.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_med.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\load_mid.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_mod.cpp"
+"D:\code\Audio_Projects\modplug\Soundlib\load_mt2.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_mtm.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_okt.cpp"
+"D:\code\Audio_Projects\modplug\Soundlib\load_psm.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\load_ptm.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_s3m.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_stm.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_ult.cpp"
+"D:\code\Audio_Projects\modplug\Soundlib\Load_umx.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_wav.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Load_xm.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\mainbar.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\MainFrm.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\mmcmp.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Mmx_mix.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\mod2midi.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\mod2wave.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\moddoc.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\modedit.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\Moptions.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\Mpdlgs.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\mpt_midi.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\mptrack.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Sampleio.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\snd_dsp.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\snd_flt.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Snd_fx.cpp"
+"D:\code\Audio_Projects\modplug\Soundlib\Snd_rvb.cpp"
+"D:\code\Audio_Projects\modplug\Soundlib\snddev.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Sndfile.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Sndmix.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Tables.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\view_com.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\view_gen.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\view_ins.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\view_pat.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\view_smp.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\view_tre.cpp"
+"D:\code\Audio_Projects\modplug\mptrack\vstplug.cpp"
+"D:\code\Audio_Projects\modplug\soundlib\Waveform.cpp"
+]
+Creating command line "cl.exe @C:\WIN\TEMP\RSP2285.TMP" 
+Creating temporary file "C:\WIN\TEMP\RSP2286.TMP" with contents
+[
+/nologo /G5 /MTd /W1 /GX /Zi /Od /Gf /Gy /I "..\unzip" /I "..\unrar" /I "..\unlha" /I "..\soundlib" /I "..\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "ENABLE_EQ" /D "MODPLUG_TRACKER" /D "NO_PACKING" /Fp"Debug/mptrack.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"D:\code\Audio_Projects\modplug\soundlib\snd_eq.cpp"
+]
+Creating command line "cl.exe @C:\WIN\TEMP\RSP2286.TMP" 
+Creating temporary file "C:\WIN\TEMP\RSP2287.TMP" with contents
+[
+/nologo /G5 /MTd /w /W0 /GX /Zi /Od /Gf /Gy /I "..\unzip" /I "..\unrar" /I "..\unlha" /I "..\soundlib" /I "..\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "ENABLE_EQ" /D "MODPLUG_TRACKER" /D "NO_PACKING" /Fp"Debug/mptrack.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"D:\code\Audio_Projects\modplug\mptrack\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\WIN\TEMP\RSP2287.TMP" 
+Creating temporary file "C:\WIN\TEMP\RSP2288.TMP" with contents
+[
+winmm.lib strmiids.lib dmoguids.lib /nologo /version:5.0 /subsystem:windows /incremental:no /pdb:"Debug/mptrack.pdb" /map:"Debug/mptrack.map" /debug /machine:I386 /out:"Debug/mptrack.exe" /libpath:"..\unzip\bin" /libpath:"..\unrar\bin" /libpath:"..\unlha\bin" 
+.\Debug\ChildFrm.obj
+.\Debug\ctrl_com.obj
+.\Debug\ctrl_gen.obj
+.\Debug\ctrl_ins.obj
+.\Debug\ctrl_pat.obj
+.\Debug\ctrl_seq.obj
+.\Debug\ctrl_smp.obj
+.\Debug\dlg_misc.obj
+.\Debug\dlsbank.obj
+.\Debug\draw_pat.obj
+.\Debug\Fastmix.obj
+.\Debug\globals.obj
+.\Debug\Load_669.obj
+.\Debug\load_amf.obj
+.\Debug\Load_ams.obj
+.\Debug\load_dbm.obj
+.\Debug\load_dmf.obj
+.\Debug\Load_dsm.obj
+.\Debug\Load_far.obj
+.\Debug\Load_it.obj
+.\Debug\Load_mdl.obj
+.\Debug\Load_med.obj
+.\Debug\load_mid.obj
+.\Debug\Load_mod.obj
+.\Debug\load_mt2.obj
+.\Debug\Load_mtm.obj
+.\Debug\Load_okt.obj
+.\Debug\load_psm.obj
+.\Debug\load_ptm.obj
+.\Debug\Load_s3m.obj
+.\Debug\Load_stm.obj
+.\Debug\Load_ult.obj
+.\Debug\Load_umx.obj
+.\Debug\Load_wav.obj
+.\Debug\Load_xm.obj
+.\Debug\mainbar.obj
+.\Debug\MainFrm.obj
+.\Debug\mmcmp.obj
+.\Debug\Mmx_mix.obj
+.\Debug\mod2midi.obj
+.\Debug\mod2wave.obj
+.\Debug\moddoc.obj
+.\Debug\modedit.obj
+.\Debug\Moptions.obj
+.\Debug\Mpdlgs.obj
+.\Debug\mpt_midi.obj
+.\Debug\mptrack.obj
+.\Debug\Sampleio.obj
+.\Debug\snd_dsp.obj
+.\Debug\snd_eq.obj
+.\Debug\snd_flt.obj
+.\Debug\Snd_fx.obj
+.\Debug\Snd_rvb.obj
+.\Debug\snddev.obj
+.\Debug\Sndfile.obj
+.\Debug\Sndmix.obj
+.\Debug\StdAfx.obj
+.\Debug\Tables.obj
+.\Debug\view_com.obj
+.\Debug\view_gen.obj
+.\Debug\view_ins.obj
+.\Debug\view_pat.obj
+.\Debug\view_smp.obj
+.\Debug\view_tre.obj
+.\Debug\vstplug.obj
+.\Debug\Waveform.obj
+.\Debug\mptrack.res
+\code\Audio_Projects\modplug\unlha\Debug\unlha.lib
+\code\Audio_Projects\modplug\UNRAR\Debug\UNRAR.lib
+\code\Audio_Projects\modplug\UNZIP\Debug\unzip.lib
+]
+Creating command line "link.exe @C:\WIN\TEMP\RSP2288.TMP"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+StdAfx.cpp
+Compiling...
+ChildFrm.cpp
+ctrl_com.cpp
+ctrl_gen.cpp
+ctrl_ins.cpp
+ctrl_pat.cpp
+ctrl_seq.cpp
+ctrl_smp.cpp
+dlg_misc.cpp
+dlsbank.cpp
+draw_pat.cpp
+Fastmix.cpp
+globals.cpp
+Load_669.cpp
+load_amf.cpp
+Load_ams.cpp
+load_dbm.cpp
+load_dmf.cpp
+Load_dsm.cpp
+Load_far.cpp
+Load_it.cpp
+Generating Code...
+Compiling...
+Load_mdl.cpp
+Load_med.cpp
+load_mid.cpp
+Load_mod.cpp
+load_mt2.cpp
+Load_mtm.cpp
+Load_okt.cpp
+load_psm.cpp
+load_ptm.cpp
+Load_s3m.cpp
+Load_stm.cpp
+Load_ult.cpp
+Load_umx.cpp
+Load_wav.cpp
+Load_xm.cpp
+mainbar.cpp
+MainFrm.cpp
+mmcmp.cpp
+Mmx_mix.cpp
+mod2midi.cpp
+Generating Code...
+Compiling...
+mod2wave.cpp
+moddoc.cpp
+modedit.cpp
+Moptions.cpp
+Mpdlgs.cpp
+mpt_midi.cpp
+mptrack.cpp
+Sampleio.cpp
+snd_dsp.cpp
+snd_flt.cpp
+Snd_fx.cpp
+Snd_rvb.cpp
+snddev.cpp
+Sndfile.cpp
+Sndmix.cpp
+Tables.cpp
+view_com.cpp
+view_gen.cpp
+view_ins.cpp
+view_pat.cpp
+Generating Code...
+Compiling...
+view_smp.cpp
+view_tre.cpp
+vstplug.cpp
+Waveform.cpp
+Generating Code...
+Compiling...
+snd_eq.cpp
+Linking...
+
+
+
+<h3>Results</h3>
+mptrack.exe - 0 error(s), 145 warning(s)
+</pre>
+</body>
+</html>

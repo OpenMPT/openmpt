@@ -5,11 +5,17 @@
  * option) any later version.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *
+ * Name              Date       Description:
+ * Olivier Lapicque  --/--/--   Creator
+ * Trevor Nunes      26/01/04   Removed __declspec directive, portability issue.
 */
 
 #include "stdafx.h"
 #include <math.h>
 #include "sndfile.h"
+
+
 
 ///////////////////////////////////////////////////////////////////////
 #ifndef FASTSOUNDLIB
@@ -44,7 +50,6 @@ MODFORMATINFO gModFormatInfo[MAX_MODTYPE] =
 #endif
 
 ///////////////////////////////////////////////////////////////////////
-
 #ifndef FASTSOUNDLIB
 #pragma data_seg(".tables")
 #pragma bss_seg(".modplug")
@@ -341,6 +346,7 @@ DWORD LinearSlideUpTable[256] =
 };
 
 
+
 DWORD LinearSlideDownTable[256] = 
 {
 	65536, 65299, 65064, 64830, 64596, 64363, 64131, 63900, 
@@ -415,9 +421,14 @@ int SpectrumSinusTable[256*2] =
 };
 
 
+
 #ifndef FASTSOUNDLIB
 // Reversed sinc coefficients
-__declspec(align(8)) short int gFastSinc[256*4] =
+
+// we should avoid all compiler directives like this. It will cause errors in vanilla VC6.
+//__declspec(align(8)) short int gFastSinc[256*4] =
+
+short int gFastSinc[256*4] =
 { // Cubic Spline
     0, 16384,     0,     0,   -31, 16383,    32,     0,   -63, 16381,    65,     0,   -93, 16378,   100,    -1, 
  -124, 16374,   135,    -1,  -153, 16368,   172,    -3,  -183, 16361,   209,    -4,  -211, 16353,   247,    -5, 
@@ -485,6 +496,9 @@ __declspec(align(8)) short int gFastSinc[256*4] =
    -1,   135, 16374,  -124,    -1,   100, 16378,   -93,     0,    65, 16381,   -63,     0,    32, 16383,   -31, 
 };
 
+
+
+
 #define SINC_PHASES		4096
 short int gKaiserSinc[SINC_PHASES*8];		// Upsampling
 short int gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
@@ -492,8 +506,10 @@ short int gDownsample2x[SINC_PHASES*8];		// Downsample 2x
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+//#ifdef INTEL_SPECIFIC
 #pragma bss_seg()
 #pragma data_seg()
+//#endif
 
 // Compute Bessel function Izero(y) using a series approximation
 static double izero(double y)
@@ -560,12 +576,16 @@ static void getdownsample2x(short int *psinc)
 }
 
 
+
 VOID SndMixInitializeTables()
 {
+
 	getsinc(gKaiserSinc, 9.6377, 1);
-	getsinc(gDownsample13x, 8.5, 3.0/4.0);
+ 	getsinc(gDownsample13x, 8.5, 3.0/4.0);
 	getdownsample2x(gDownsample2x);
+
 }
+
 
 #endif // FASTSOUNDLIB
 
