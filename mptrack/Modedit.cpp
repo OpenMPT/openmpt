@@ -1683,7 +1683,7 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //						if (s[8] > ' ')
-						if (s[8] > ' ' && (m[col].volcmd==0 || !mix))
+						if (s[8] > ' ' && (m[col].command==0 || !mix))
 // -! NEW_FEATURE#0014
 						{
 							m[col].command = 0;

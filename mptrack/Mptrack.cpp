@@ -169,7 +169,7 @@ LPCSTR szNoteNames[12] =
 };
 
 LPCSTR szHexChar = "0123456789ABCDEF";
-LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ???"; //rewbs.smoothVST: added last ?; rewbs.velocity: added last ?
+LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ\\:#"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
 LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
 LPCSTR gszVolCommands = " vpcdabuhlrgfe:o";	//rewbs.velocity: added last : ; rewbs.volOff added last o
 

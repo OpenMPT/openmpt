@@ -151,7 +151,7 @@ public:
 	BOOL ExecuteCommand(CommandID command);
 	void CursorJump(DWORD distance, bool direction, bool snap);
 	void TempEnterNote(int n, bool oldStyle = false, int vol = -1);
-	void TempStopNote(int note);
+	void TempStopNote(int note, bool fromMidi=false);
 	void TempEnterChord(int n);
 	void TempStopChord(int note);
 	void TempEnterIns(int val);
