@@ -108,6 +108,14 @@ typedef struct _ITINSTRUMENTEX
 	BYTE keyboardhi[120];
 } ITINSTRUMENTEX, *PITINSTRUMENTEX;
 
+// MPT IT Instrument Module Extension
+/*typedef struct _ITINSTRUMENTEXMMOD			//rewbs.modularInst
+{
+	ITINSTRUMENT iti;
+	BYTE keyboardhi[120];
+	long modularDataSize;
+} ITINSTRUMENTEXMMOD, *PITINSTRUMENTEXMMOD;*/
+
 
 // IT Sample Format
 typedef struct ITSAMPLESTRUCT
