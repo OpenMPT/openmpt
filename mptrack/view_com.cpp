@@ -459,7 +459,7 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 	LV_DISPINFO *plvDispInfo = (LV_DISPINFO *)pnmhdr;
 	LV_ITEM *plvItem = &plvDispInfo->item;
 	CModDoc *pModDoc = GetDocument();
-	CHAR s[256];
+	CHAR s[512]; //rewbs.fix3082
 
 	if ((plvItem->pszText != NULL) && (!plvItem->iSubItem) && (pModDoc))
 	{

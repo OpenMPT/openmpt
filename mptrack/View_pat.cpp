@@ -3396,7 +3396,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 	CModDoc *pModDoc = GetDocument();
 	DWORD dwMidiByte1 = (dwMidiData >> 8) & 0xFF;
 	DWORD dwMidiByte2 = (dwMidiData >> 16) & 0xFF;
-	UINT nVol, nNote = 0;
+	UINT nVol, nNote = -1;
 
 	if ((!pModDoc) || (!pMainFrm)) return 0;
 	
@@ -3404,26 +3404,29 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 	switch(dwMidiData & 0xF0)
 	{
 	case 0x80: // Note Off
-		if (!(CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF)) 
-			return 0;
-		dwMidiByte2 = 0;
-		nNote = 255;
+		dwMidiByte1 &= 0x7F;
+		nNote = dwMidiByte1+1;
+		nNote = dwMidiByte1+1;
+		TempStopNote(nNote, CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF);
 		break;
+
 	case 0x90: // Note On
 		dwMidiByte1 &= 0x7F;
 		dwMidiByte2 &= 0x7F;
-		nNote = dwMidiByte1;
+		nNote = dwMidiByte1+1;
 		if (CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
 		{
-			nVol = (CDLSBank::DLSMidiVolumeToLinear(dwMidiByte2)+255) >> 8;
+			nVol = (CDLSBank::DLSMidiVolumeToLinear(dwMidiByte2)+1023) >> 10;
 			if (CMainFrame::m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) nVol *= 2;
 			if (nVol < 1) nVol = 1;
-			if (nVol > 256) nVol = 256;
+			if (nVol > 64) nVol = 64;
 		}
+
+		TempEnterNote(nNote, true, nVol);
 		break;
 	}
 
-	TempEnterNote(nNote, true, nVol<<2);
+	
 	return 0;
 }
 
@@ -4065,44 +4068,18 @@ void CViewPattern::TempEnterFXparam(int v)
 		}
 	}
 }
-void CViewPattern::TempStopNote(int note)
-//---------------------------------------------
+void CViewPattern::TempStopNote(int note, bool fromMidi)
+//------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-/*		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
-		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
-		UINT nPlayIns = 0;
-
-		// -- Work out which instrument to stop
-		prowbase = p + m_nRow * pSndFile->m_nChannels;
-		p = prowbase + nChn;
-		oldcmd = *p;
-
-		if (p->instr) nPlayIns = p->instr;
-		else if ((!p->instr) && (note < 128))
-		{
-			MODCOMMAND *search = p;
-			UINT srow = m_nRow;
-			while (srow > 0)
-			{
-				srow--;
-				search -= pSndFile->m_nChannels;
-				if (search->instr)
-				{
-					nPlayIns = search->instr;
-					break;
-				}
-			}
-		}
-*/
 		UINT ins = GetCurrentInstrument();
 		if (!ins) ins=m_nFoundInstrument;
 		pModDoc->NoteOff(note, TRUE, ins, (m_dwCursor & 0xFFFF) >> 3);
 	}
-	if ((CMainFrame::m_dwPatternSetup & PATTERN_KBDNOTEOFF) && (note) && (note < 120)/* && (nChar != m_nAccelChar)*/)
+	if ( ((CMainFrame::m_dwPatternSetup & PATTERN_KBDNOTEOFF) || fromMidi) 
+		&& (note) && (note < 120))
 	{
 		if ((m_dwCursor & 7) < 2) EnterNote(note|0x80, 0, TRUE, -1, TRUE); //TODO: use TempEnterNote
 	}
@@ -4241,7 +4218,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		isSplit = HandleSplit(p, note);
 
 		// -- establish vol data
-		if (!isSplit && vol>=0)
+		if (!isSplit && vol>=0 && vol<=64)
 		{
 			p->volcmd=VOLCMD_VOLUME;
 			p->vol = vol;
