@@ -1380,7 +1380,7 @@ CVstPlugin::~CVstPlugin()
 		m_pTempBuffer = NULL;
 	}
 	if (m_nInputs && m_pInputs) //if m_nInputs == 0, then m_pInputs will have been
-	{							//initilised at 0 size, so will crash on delete.
+	{							//initilised at 0 size, so we'll crash on delete.
 		delete[] m_pInputs;
 		m_pInputs = NULL;
 	}
