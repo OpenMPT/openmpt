@@ -89,7 +89,10 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_ComboResampling.AddString("No Resampling");
 	m_ComboResampling.AddString("Linear");
 	m_ComboResampling.AddString("Cubic spline");
-	m_ComboResampling.AddString("High quality");
+	//rewbs.resamplerConf
+	m_ComboResampling.AddString("Polyphase");
+	m_ComboResampling.AddString("XMMS-Modplug");	
+	//end rewbs.resamplerConf
 	UpdateView(HINT_MODGENERAL|HINT_MODTYPE|HINT_MODSEQUENCE|HINT_MPTSETUP, NULL);
 	OnActivatePage(0);
 	m_bInitialized = TRUE;

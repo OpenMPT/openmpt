@@ -4207,6 +4207,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 
 
 		// -- Chord autodetection: step back if we just entered a note
+		
 		DWORD gdwChordAutoDetectLatency = 60; //TODO: make user accessible option
 		if ((m_dwStatus & PATSTATUS_RECORD) && (recordGroup) &&
 			((pMainFrm->GetFollowSong(pModDoc) != m_hWnd) || (pSndFile->IsPaused())  
@@ -4214,8 +4215,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		{
 			if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
 			{
-				if ((timeGetTime() - m_dwLastNoteEntryTime < gdwChordAutoDetectLatency) &&
-					 (nRow>=m_nSpacing))
+				if ((timeGetTime() - m_dwLastNoteEntryTime < gdwChordAutoDetectLatency) && (nRow>=m_nSpacing))
 					nRow -= m_nSpacing;
 			}
 		}

@@ -347,8 +347,13 @@ void COptionsSoundcard::OnOK()
 
 BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 	ON_WM_HSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO1,OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,OnResamplerChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,OnSettingsChanged)
+	//rewbs.resamplerConf
+	ON_CBN_SELCHANGE(IDC_WFIRTYPE,OnWFIRTypeChanged)
+	ON_EN_UPDATE(IDC_WFIRCUTOFF,OnSettingsChanged)
+	ON_EN_UPDATE(IDC_RAMPING,	OnSettingsChanged)
+	//end rewbs.resamplerConf
 	ON_COMMAND(IDC_CHECK1,		OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK2,		OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK3,		OnSettingsChanged)
@@ -365,6 +370,11 @@ void COptionsPlayer::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsPlayer)
 	DDX_Control(pDX, IDC_COMBO1,		m_CbnResampling);
+	//rewbs.resamplerConf
+	DDX_Control(pDX, IDC_WFIRTYPE,		m_CbnWFIRType);
+	DDX_Control(pDX, IDC_WFIRCUTOFF,	m_CEditWFIRCutoff);
+	DDX_Control(pDX, IDC_RAMPING,		m_CEditRamping);
+	//end rewbs.resamplerConf
 	DDX_Control(pDX, IDC_COMBO2,		m_CbnReverbPreset);
 	DDX_Control(pDX, IDC_SLIDER1,		m_SbXBassDepth);
 	DDX_Control(pDX, IDC_SLIDER2,		m_SbXBassRange);
@@ -387,7 +397,10 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnResampling.AddString("No Resampling");
 		m_CbnResampling.AddString("Linear");
 		m_CbnResampling.AddString("Cubic spline");
-		m_CbnResampling.AddString("High quality");
+		//rewbs.resamplerConf
+		m_CbnResampling.AddString("Polyphase");
+		m_CbnResampling.AddString("XMMS-Modplug");
+		//end rewbs.resamplerConf
 		m_CbnResampling.SetCurSel(CMainFrame::m_nSrcMode);
 	}
 	// Effects
@@ -437,6 +450,12 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_SbSurroundDelay.SetRange(0, 8);
 		m_SbSurroundDelay.SetPos((CSoundFile::m_nProLogicDelay-5)/5);
 	}
+	//rewbs.resamplerConf
+	OnResamplerChanged();
+	char s[20] = "";
+	ltoa(CMainFrame::glVolumeRampSamples,s, 10);
+	m_CEditRamping.SetWindowText(s);
+	//end rewbs.resamplerConf
 	return TRUE;
 }
 
@@ -466,7 +485,54 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 	}
 }
 
+//rewbs.resamplerConf
+void COptionsPlayer::OnWFIRTypeChanged()
+{
+	CMainFrame::gbWFIRType = m_CbnWFIRType.GetCurSel();
+	OnSettingsChanged();
+}
 
+void COptionsPlayer::OnResamplerChanged()
+{
+	DWORD dwSrcMode = m_CbnResampling.GetCurSel();
+	m_CbnWFIRType.ResetContent();
+
+	char s[10] = "";
+	switch (dwSrcMode)
+	{
+		case SRCMODE_POLYPHASE:
+		m_CbnWFIRType.AddString("Kaiser 8 Tap");
+		m_CbnWFIRType.SetCurSel(0);
+		m_CbnWFIRType.EnableWindow(FALSE);
+		m_CEditWFIRCutoff.EnableWindow(TRUE);
+		wsprintf(s, "%d", static_cast<int>((CMainFrame::gdWFIRCutoff*100)));
+		break;
+	case SRCMODE_FIRFILTER:
+		m_CbnWFIRType.AddString("Hann");
+		m_CbnWFIRType.AddString("Hamming");
+		m_CbnWFIRType.AddString("Blackman Exact");
+		m_CbnWFIRType.AddString("Blackman 3 Tap 61");
+		m_CbnWFIRType.AddString("Blackman 3 Tap 67");
+		m_CbnWFIRType.AddString("Blackman 4 Tap 92");
+		m_CbnWFIRType.AddString("Blackman 4 Tap 74");
+		m_CbnWFIRType.AddString("Kaiser 4 Tap");
+		m_CbnWFIRType.SetCurSel(CMainFrame::gbWFIRType);
+		m_CbnWFIRType.EnableWindow(TRUE);
+		m_CEditWFIRCutoff.EnableWindow(TRUE);
+		wsprintf(s, "%d", static_cast<int>((CMainFrame::gdWFIRCutoff*100)));
+		break;
+	default: 
+		m_CbnWFIRType.AddString("None");
+		m_CEditWFIRCutoff.EnableWindow(FALSE);
+		m_CbnWFIRType.EnableWindow(FALSE);
+	}
+	
+	m_CEditWFIRCutoff.SetWindowText(s);
+	OnSettingsChanged();
+}
+
+extern VOID SndMixInitializeTables();
+//end rewbs.resamplerConf
 void COptionsPlayer::OnOK()
 //-------------------------
 {
@@ -480,6 +546,7 @@ void COptionsPlayer::OnOK()
 	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= QUALITY_NOISEREDUCTION;
 	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= QUALITY_REVERB;
 	dwSrcMode = m_CbnResampling.GetCurSel();
+
 	// Bass Expansion
 	{
 		UINT nXBassDepth = 8-m_SbXBassDepth.GetPos();
@@ -506,6 +573,16 @@ void COptionsPlayer::OnOK()
 	}
 	// Notify CMainFrame
 	CMainFrame *pParent = CMainFrame::GetMainFrame();
+	//rewbs.resamplerConf
+	CString s;
+	m_CEditWFIRCutoff.GetWindowText(s);
+	if (s != "")
+		CMainFrame::gdWFIRCutoff = atoi(s)/100.0;
+	//CMainFrame::gbWFIRType set in OnWFIRTypeChange
+	m_CEditRamping.GetWindowText(s);
+	CMainFrame::glVolumeRampSamples = atol(s);
+	SndMixInitializeTables(); //regenerate resampling tables
+	//end rewbs.resamplerConf
 	if (pParent) pParent->SetupPlayer(dwQuality, dwSrcMode, TRUE);
 	CPropertyPage::OnOK();
 }

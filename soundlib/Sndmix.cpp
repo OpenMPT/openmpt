@@ -39,7 +39,7 @@ DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
 UINT CSoundFile::gnAGC = AGC_UNITY;
-UINT CSoundFile::gnVolumeRampSamples = 0;		//rewbs.soundQ exp - was 64
+UINT CSoundFile::gnVolumeRampSamples = 42;		//default value
 UINT CSoundFile::gnCPUUsage = 0;
 LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
@@ -202,8 +202,11 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 	if (m_nMaxMixChannels > MAX_CHANNELS) m_nMaxMixChannels = MAX_CHANNELS;
 	if (gdwMixingFreq < 4000) gdwMixingFreq = 4000;
 	if (gdwMixingFreq > MAX_SAMPLE_RATE) gdwMixingFreq = MAX_SAMPLE_RATE;
-	gnVolumeRampSamples = (gdwMixingFreq * VOLUMERAMPLEN) / 100000;
-	if (gnVolumeRampSamples < 8) gnVolumeRampSamples = 8;
+	//rewbs.resamplerConf
+	//gnVolumeRampSamples = (gdwMixingFreq * VOLUMERAMPLEN) / 100000;	
+	//if (gnVolumeRampSamples < 8) gnVolumeRampSamples = 8; //
+	gnVolumeRampSamples = CMainFrame::glVolumeRampSamples;
+	//end rewbs.resamplerConf
 	gnDryROfsVol = gnDryLOfsVol = 0;
 #ifndef NO_REVERB
 	gnRvbROfsVol = gnRvbLOfsVol = 0;
@@ -1477,7 +1480,7 @@ BOOL CSoundFile::ReadNote()
 			// Checking Ping-Pong Loops
 			if (pChn->dwFlags & CHN_PINGPONGFLAG) pChn->nInc = -pChn->nInc;
 			// Setting up volume ramp
-			if ((pChn->dwFlags & CHN_VOLUMERAMP)
+			if ((pChn->dwFlags & CHN_VOLUMERAMP) // && gnVolumeRampSamples //rewbs: this allows us to use non ramping mix functions if ramping is 0
 			 && ((pChn->nRightVol != pChn->nNewRightVol) || (pChn->nLeftVol != pChn->nNewLeftVol)))
 			{
 				LONG nRampLength = gnVolumeRampSamples;

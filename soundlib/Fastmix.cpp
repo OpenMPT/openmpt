@@ -9,6 +9,15 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#ifdef _DEBUG
+#include <math.h>
+#endif
+
+// rewbs.resamplerConf
+#include "../mptrack/mptrack.h"
+#include "../mptrack/MainFrm.h"
+#include "WindowedFIR.h"
+// end  rewbs.resamplerConf
 
 #pragma bss_seg(".modplug")
 
@@ -72,6 +81,7 @@ extern short int gDownsample2x[]; // 2x downsampling
 #define SNDMIX_ENDSAMPLELOOP8	SNDMIX_ENDSAMPLELOOP
 #define SNDMIX_ENDSAMPLELOOP16	SNDMIX_ENDSAMPLELOOP
 
+signed short CWindowedFIR::lut[WFIR_LUTLEN*WFIR_WIDTH]; // rewbs.resamplerConf
 //////////////////////////////////////////////////////////////////////////////
 // Mono
 
@@ -126,7 +136,37 @@ extern short int gDownsample2x[]; // 2x downsampling
 		 + poslo[2]*p[poshi-1] + poslo[3]*p[poshi]\
 		 + poslo[4]*p[poshi+1] + poslo[5]*p[poshi+2]\
 		 + poslo[6]*p[poshi+3] + poslo[7]*p[poshi+4]) >> 14;\
+// rewbs.resamplerConf
+#define SNDMIX_GETMONOVOL8FIRFILTER \
+	int poshi  = nPos >> 16;\
+	int poslo  = (nPos & 0xFFFF);\
+	int firidx = ((poslo+WFIR_FRACHALVE)>>WFIR_FRACSHIFT) & WFIR_FRACMASK; \
+	int vol    = (CWindowedFIR::lut[firidx+0]*(int)p[poshi+1-4]);	\
+        vol   += (CWindowedFIR::lut[firidx+1]*(int)p[poshi+2-4]);	\
+        vol   += (CWindowedFIR::lut[firidx+2]*(int)p[poshi+3-4]);	\
+        vol   += (CWindowedFIR::lut[firidx+3]*(int)p[poshi+4-4]);	\
+        vol   += (CWindowedFIR::lut[firidx+4]*(int)p[poshi+5-4]);	\
+        vol   += (CWindowedFIR::lut[firidx+5]*(int)p[poshi+6-4]);	\
+        vol   += (CWindowedFIR::lut[firidx+6]*(int)p[poshi+7-4]);	\
+        vol   += (CWindowedFIR::lut[firidx+7]*(int)p[poshi+8-4]);	\
+        vol  >>= WFIR_8SHIFT;
 
+#define SNDMIX_GETMONOVOL16FIRFILTER \
+    int poshi  = nPos >> 16;\
+    int poslo  = (nPos & 0xFFFF);\
+    int firidx = ((poslo+WFIR_FRACHALVE)>>WFIR_FRACSHIFT) & WFIR_FRACMASK; \
+    int vol1   = (CWindowedFIR::lut[firidx+0]*(int)p[poshi+1-4]);	\
+        vol1  += (CWindowedFIR::lut[firidx+1]*(int)p[poshi+2-4]);	\
+        vol1  += (CWindowedFIR::lut[firidx+2]*(int)p[poshi+3-4]);	\
+        vol1  += (CWindowedFIR::lut[firidx+3]*(int)p[poshi+4-4]);	\
+    int vol2   = (CWindowedFIR::lut[firidx+4]*(int)p[poshi+5-4]);	\
+		vol2  += (CWindowedFIR::lut[firidx+5]*(int)p[poshi+6-4]);	\
+		vol2  += (CWindowedFIR::lut[firidx+6]*(int)p[poshi+7-4]);	\
+		vol2  += (CWindowedFIR::lut[firidx+7]*(int)p[poshi+8-4]);	\
+    int vol    = ((vol1>>1)+(vol2>>1)) >> (WFIR_16BITSHIFT-1);
+
+
+// end rewbs.resamplerConf
 #define SNDMIX_INITSINCTABLE\
 	const char * const sinc = (const char *)(((pChannel->nInc > 0x13000) || (pChannel->nInc < -0x13000)) ?\
 		(((pChannel->nInc > 0x18000) || (pChannel->nInc < -0x18000)) ? gDownsample2x : gDownsample13x) : gKaiserSinc);
@@ -177,10 +217,8 @@ extern short int gDownsample2x[]; // 2x downsampling
 	int vol_r = (gFastSinc[poslo]*p[poshi*2-1] + gFastSinc[poslo+1]*p[poshi*2+1]\
 		 + gFastSinc[poslo+2]*p[poshi*2+3] + gFastSinc[poslo+3]*p[poshi*2+5]) >> 14;\
 
-
 // -> CODE#0025
 // -> DESC="enable polyphase resampling on stereo samples"
-
 // 8-taps polyphase
 #define SNDMIX_GETSTEREOVOL8KAISER\
 	int poshi = nPos >> 16;\
@@ -205,6 +243,54 @@ extern short int gDownsample2x[]; // 2x downsampling
 		 + poslo[2]*p[poshi*2-1] + poslo[3]*p[poshi*2+1]\
 		 + poslo[4]*p[poshi*2+3] + poslo[5]*p[poshi*2+5]\
 		 + poslo[6]*p[poshi*2+7] + poslo[7]*p[poshi*2+9]) >> 14;\
+// rewbs.resamplerConf
+// fir interpolation
+#define SNDMIX_GETSTEREOVOL8FIRFILTER \
+    int poshi   = nPos >> 16;\
+    int poslo   = (nPos & 0xFFFF);\
+    int firidx  = ((poslo+WFIR_FRACHALVE)>>WFIR_FRACSHIFT) & WFIR_FRACMASK; \
+    int vol_l   = (CWindowedFIR::lut[firidx+0]*(int)p[(poshi+1-4)*2  ]);   \
+		vol_l  += (CWindowedFIR::lut[firidx+1]*(int)p[(poshi+2-4)*2  ]);   \
+		vol_l  += (CWindowedFIR::lut[firidx+2]*(int)p[(poshi+3-4)*2  ]);   \
+        vol_l  += (CWindowedFIR::lut[firidx+3]*(int)p[(poshi+4-4)*2  ]);   \
+        vol_l  += (CWindowedFIR::lut[firidx+4]*(int)p[(poshi+5-4)*2  ]);   \
+		vol_l  += (CWindowedFIR::lut[firidx+5]*(int)p[(poshi+6-4)*2  ]);   \
+		vol_l  += (CWindowedFIR::lut[firidx+6]*(int)p[(poshi+7-4)*2  ]);   \
+        vol_l  += (CWindowedFIR::lut[firidx+7]*(int)p[(poshi+8-4)*2  ]);   \
+		vol_l >>= WFIR_8SHIFT; \
+    int vol_r   = (CWindowedFIR::lut[firidx+0]*(int)p[(poshi+1-4)*2+1]);   \
+		vol_r  += (CWindowedFIR::lut[firidx+1]*(int)p[(poshi+2-4)*2+1]);   \
+		vol_r  += (CWindowedFIR::lut[firidx+2]*(int)p[(poshi+3-4)*2+1]);   \
+		vol_r  += (CWindowedFIR::lut[firidx+3]*(int)p[(poshi+4-4)*2+1]);   \
+		vol_r  += (CWindowedFIR::lut[firidx+4]*(int)p[(poshi+5-4)*2+1]);   \
+        vol_r  += (CWindowedFIR::lut[firidx+5]*(int)p[(poshi+6-4)*2+1]);   \
+        vol_r  += (CWindowedFIR::lut[firidx+6]*(int)p[(poshi+7-4)*2+1]);   \
+        vol_r  += (CWindowedFIR::lut[firidx+7]*(int)p[(poshi+8-4)*2+1]);   \
+        vol_r >>= WFIR_8SHIFT;
+
+#define SNDMIX_GETSTEREOVOL16FIRFILTER \
+    int poshi   = nPos >> 16;\
+    int poslo   = (nPos & 0xFFFF);\
+    int firidx  = ((poslo+WFIR_FRACHALVE)>>WFIR_FRACSHIFT) & WFIR_FRACMASK; \
+    int vol1_l  = (CWindowedFIR::lut[firidx+0]*(int)p[(poshi+1-4)*2  ]);   \
+		vol1_l += (CWindowedFIR::lut[firidx+1]*(int)p[(poshi+2-4)*2  ]);   \
+        vol1_l += (CWindowedFIR::lut[firidx+2]*(int)p[(poshi+3-4)*2  ]);   \
+		vol1_l += (CWindowedFIR::lut[firidx+3]*(int)p[(poshi+4-4)*2  ]);   \
+	int vol2_l  = (CWindowedFIR::lut[firidx+4]*(int)p[(poshi+5-4)*2  ]);   \
+		vol2_l += (CWindowedFIR::lut[firidx+5]*(int)p[(poshi+6-4)*2  ]);   \
+		vol2_l += (CWindowedFIR::lut[firidx+6]*(int)p[(poshi+7-4)*2  ]);   \
+		vol2_l += (CWindowedFIR::lut[firidx+7]*(int)p[(poshi+8-4)*2  ]);   \
+	int vol_l   = ((vol1_l>>1)+(vol2_l>>1)) >> (WFIR_16BITSHIFT-1); \
+	int vol1_r  = (CWindowedFIR::lut[firidx+0]*(int)p[(poshi+1-4)*2+1]);   \
+		vol1_r += (CWindowedFIR::lut[firidx+1]*(int)p[(poshi+2-4)*2+1]);   \
+		vol1_r += (CWindowedFIR::lut[firidx+2]*(int)p[(poshi+3-4)*2+1]);   \
+		vol1_r += (CWindowedFIR::lut[firidx+3]*(int)p[(poshi+4-4)*2+1]);   \
+	int vol2_r  = (CWindowedFIR::lut[firidx+4]*(int)p[(poshi+5-4)*2+1]);   \
+		vol2_r += (CWindowedFIR::lut[firidx+5]*(int)p[(poshi+6-4)*2+1]);   \
+		vol2_r += (CWindowedFIR::lut[firidx+6]*(int)p[(poshi+7-4)*2+1]);   \
+		vol2_r += (CWindowedFIR::lut[firidx+7]*(int)p[(poshi+8-4)*2+1]);   \
+	int vol_r   = ((vol1_r>>1)+(vol2_r>>1)) >> (WFIR_16BITSHIFT-1);
+//end rewbs.resamplerConf
 // -! BEHAVIOUR_CHANGE#0025
 
 
@@ -565,12 +651,61 @@ BEGIN_RAMPMIX_INTERFACE(Mono16BitKaiserRampMix)
 	SNDMIX_RAMPMONOVOL
 END_RAMPMIX_INTERFACE()
 
+
 #else
 #define Mono8BitKaiserMix		Mono8BitHQMix
 #define Mono16BitKaiserMix		Mono16BitHQMix
 #define Mono8BitKaiserRampMix	Mono8BitHQRampMix
 #define Mono16BitKaiserRampMix	Mono16BitHQRampMix
 #endif
+
+// -> BEHAVIOUR_CHANGE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+// rewbs.resamplerConf
+//////////////////////////////////////////////////////
+// FIR filter
+
+#ifndef FASTSOUNDLIB
+
+// Normal
+BEGIN_MIX_INTERFACE(Mono8BitFIRFilterMix)
+	//SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8FIRFILTER
+	SNDMIX_STOREMONOVOL
+END_MIX_INTERFACE()
+
+BEGIN_MIX_INTERFACE(Mono16BitFIRFilterMix)
+	//SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16FIRFILTER
+	SNDMIX_STOREMONOVOL
+END_MIX_INTERFACE()
+
+// Ramp
+BEGIN_RAMPMIX_INTERFACE(Mono8BitFIRFilterRampMix)
+	//SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8FIRFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_INTERFACE()
+
+BEGIN_RAMPMIX_INTERFACE(Mono16BitFIRFilterRampMix)
+	//SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16FIRFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_INTERFACE()
+
+
+#else
+#define Mono8BitFIRFilterMix		Mono8BitHQMix
+#define Mono16BitFIRFilterMix		Mono16BitHQMix
+#define Mono8BitFIRFilterRampMix	Mono8BitHQRampMix
+#define Mono16BitFIRFilterRampMix	Mono16BitHQRampMix
+#endif
+//end rewbs.resamplerConf
+// -! BEHAVIOUR_CHANGE#0025
 
 //////////////////////////////////////////////////////
 // Fast mono mix for leftvol=rightvol (1 less imul)
@@ -736,6 +871,40 @@ BEGIN_RAMPMIX_INTERFACE(Stereo16BitKaiserRampMix)
 	SNDMIX_RAMPSTEREOVOL
 END_RAMPMIX_INTERFACE()
 
+// rewbs.resamplerConf
+//////////////////////////////////////////////////////
+// Stereo FIR Filter
+
+BEGIN_MIX_INTERFACE(Stereo8BitFIRFilterMix)
+	//SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8FIRFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_INTERFACE()
+
+BEGIN_MIX_INTERFACE(Stereo16BitFIRFilterMix)
+	//SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16FIRFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_INTERFACE()
+
+// Ramp
+BEGIN_RAMPMIX_INTERFACE(Stereo8BitFIRFilterRampMix)
+	//SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8FIRFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_INTERFACE()
+
+BEGIN_RAMPMIX_INTERFACE(Stereo16BitFIRFilterRampMix)
+	//SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16FIRFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_INTERFACE()
+
+// end rewbs.resamplerConf
 // -! BEHAVIOUR_CHANGE#0025
 
 
@@ -774,6 +943,59 @@ BEGIN_MIX_FLT_INTERFACE(FilterMono16BitLinearMix)
 	SNDMIX_STOREMONOVOL
 END_MIX_FLT_INTERFACE()
 
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+// rewbs.resamplerConf
+//Cubic + reso filter:
+BEGIN_MIX_FLT_INTERFACE(FilterMono8BitHQMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8HQSRC
+	SNDMIX_PROCESSFILTER
+	SNDMIX_STOREMONOVOL
+END_MIX_FLT_INTERFACE()
+
+BEGIN_MIX_FLT_INTERFACE(FilterMono16BitHQMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16HQSRC
+	SNDMIX_PROCESSFILTER
+	SNDMIX_STOREMONOVOL
+END_MIX_FLT_INTERFACE()
+
+//Polyphase + reso filter:
+BEGIN_MIX_FLT_INTERFACE(FilterMono8BitKaiserMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8KAISER
+	SNDMIX_PROCESSFILTER
+	SNDMIX_STOREMONOVOL
+END_MIX_FLT_INTERFACE()
+
+BEGIN_MIX_FLT_INTERFACE(FilterMono16BitKaiserMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16KAISER
+	SNDMIX_PROCESSFILTER
+	SNDMIX_STOREMONOVOL
+END_MIX_FLT_INTERFACE()
+
+// Enable FIR Filter with resonant filters
+
+BEGIN_MIX_FLT_INTERFACE(FilterMono8BitFIRFilterMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8FIRFILTER
+	SNDMIX_PROCESSFILTER
+	SNDMIX_STOREMONOVOL
+END_MIX_FLT_INTERFACE()
+
+BEGIN_MIX_FLT_INTERFACE(FilterMono16BitFIRFilterMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16FIRFILTER
+	SNDMIX_PROCESSFILTER
+	SNDMIX_STOREMONOVOL
+END_MIX_FLT_INTERFACE()
+// end rewbs.resamplerConf
+// -! BEHAVIOUR_CHANGE#0025
+
 // Filter + Ramp
 BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono8BitRampMix)
 	SNDMIX_BEGINSAMPLELOOP8
@@ -803,6 +1025,58 @@ BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono16BitLinearRampMix)
 	SNDMIX_RAMPMONOVOL
 END_RAMPMIX_FLT_INTERFACE()
 
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+// rewbs.resamplerConf
+//Cubic + reso filter + ramp:
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono8BitHQRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8HQSRC
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
+
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono16BitHQRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16HQSRC
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
+
+//Polyphase + reso filter + ramp:
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono8BitKaiserRampMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8KAISER
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
+
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono16BitKaiserRampMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16KAISER
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
+
+//FIR Filter + reso filter + ramp
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono8BitFIRFilterRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8FIRFILTER
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
+
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono16BitFIRFilterRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16FIRFILTER
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
+
+// end rewbs.resamplerConf
+// -! BEHAVIOUR_CHANGE#0025
 
 // Stereo Filter Mix
 BEGIN_MIX_STFLT_INTERFACE(FilterStereo8BitMix)
@@ -833,6 +1107,60 @@ BEGIN_MIX_STFLT_INTERFACE(FilterStereo16BitLinearMix)
 	SNDMIX_STORESTEREOVOL
 END_MIX_STFLT_INTERFACE()
 
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+// rewbs.resamplerConf
+//Cubic stereo + reso filter
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo8BitHQMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8HQSRC
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo16BitHQMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16HQSRC
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+//Polyphase stereo + reso filter
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo8BitKaiserMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8KAISER
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo16BitKaiserMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16KAISER
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+//FIR filter stereo + reso filter
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo8BitFIRFilterMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8FIRFILTER
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo16BitFIRFilterMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16FIRFILTER
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+
+//end rewbs.resamplerConf
+// -! BEHAVIOUR_CHANGE#0025
+
 // Stereo Filter + Ramp
 BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo8BitRampMix)
 	SNDMIX_BEGINSAMPLELOOP8
@@ -862,6 +1190,59 @@ BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo16BitLinearRampMix)
 	SNDMIX_RAMPSTEREOVOL
 END_RAMPMIX_STFLT_INTERFACE()
 
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+// rewbs.resamplerConf
+//Cubic stereo + ramp + reso filter
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo8BitHQRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8HQSRC
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo16BitHQRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16HQSRC
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+//Polyphase stereo + ramp + reso filter
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo8BitKaiserRampMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8KAISER
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo16BitKaiserRampMix)
+	SNDMIX_INITSINCTABLE
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16KAISER
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+//FIR filter stereo + ramp + reso filter
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo8BitFIRFilterRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8FIRFILTER
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo16BitFIRFilterRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16FIRFILTER
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+// end rewbs.resamplerConf
+// -! BEHAVIOUR_CHANGE#0025
+
 #else
 // Mono
 #define FilterMono8BitMix				Mono8BitMix
@@ -872,6 +1253,20 @@ END_RAMPMIX_STFLT_INTERFACE()
 #define FilterMono16BitRampMix			Mono16BitRampMix
 #define FilterMono8BitLinearRampMix		Mono8BitLinearRampMix
 #define FilterMono16BitLinearRampMix	Mono16BitLinearRampMix
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+#define FilterMono8BitHQMix				Mono8BitHQMix
+#define FilterMono16BitHQMix			Mono16BitHQMix
+#define FilterMono8BitKaiserMix			Mono8BitKaiserMix
+#define FilterMono16BitKaiserMix		Mono16BitKaiserMix
+#define FilterMono8BitHQRampMix			Mono8BitHQRampMix
+#define FilterMono16BitHQRampMix		Mono16BitHQRampMix
+#define FilterMono8BitKaiserRampMix		Mono8BitKaiserRampMix
+#define FilterMono16BitKaiserRampMix	Mono16BitKaiserRampMix
+#define FilterMono8BitFIRFilterRampMix		Mono8BitFIRFilterRampMix
+#define FilterMono16BitFIRFilterRampMix	Mono16BitFIRFilterRampMix
+// -! BEHAVIOUR_CHANGE#0025
+
 // Stereo
 #define FilterStereo8BitMix				Stereo8BitMix
 #define FilterStereo16BitMix			Stereo16BitMix
@@ -881,6 +1276,19 @@ END_RAMPMIX_STFLT_INTERFACE()
 #define FilterStereo16BitRampMix		Stereo16BitRampMix
 #define FilterStereo8BitLinearRampMix	Stereo8BitLinearRampMix
 #define FilterStereo16BitLinearRampMix	Stereo16BitLinearRampMix
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+#define FilterStereo8BitHQMix			Stereo8BitHQMix
+#define FilterStereo16BitHQMix			Stereo16BitHQMix
+#define FilterStereo8BitKaiserMix		Stereo8BitKaiserMix
+#define FilterStereo16BitKaiserMix		Stereo16BitKaiserMix
+#define FilterStereo8BitHQRampMix		Stereo8BitHQRampMix
+#define FilterStereo16BitHQRampMix		Stereo16BitHQRampMix
+#define FilterStereo8BitKaiserRampMix	Stereo8BitKaiserRampMix
+#define FilterStereo16BitKaiserRampMix	Stereo16BitKaiserRampMix
+#define FilterStereo8BitFIRFilterRampMix	Stereo8BitFIRFilterRampMix
+#define FilterStereo16BitFIRFilterRampMix	Stereo16BitFIRFilterRampMix
+// -! BEHAVIOUR_CHANGE#0025
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -903,9 +1311,11 @@ END_RAMPMIX_STFLT_INTERFACE()
 #define MIXNDX_LINEARSRC	0x10
 #define MIXNDX_HQSRC		0x20
 #define MIXNDX_KAISERSRC	0x30
+#define MIXNDX_FIRFILTERSRC	0x40 // rewbs.resamplerConf
 
 
-const LPMIXINTERFACE gpMixFunctionTable[4*16] =
+//const LPMIXINTERFACE gpMixFunctionTable[4*16] =
+const LPMIXINTERFACE gpMixFunctionTable[5*16] =    //rewbs.resamplerConf: increased to 5 to cope with FIR
 {
 	// No SRC
 	Mono8BitMix,				Mono16BitMix,				Stereo8BitMix,			Stereo16BitMix,
@@ -923,8 +1333,14 @@ const LPMIXINTERFACE gpMixFunctionTable[4*16] =
 	Mono8BitHQMix,				Mono16BitHQMix,				Stereo8BitHQMix,		Stereo16BitHQMix,
 	Mono8BitHQRampMix,			Mono16BitHQRampMix,			Stereo8BitHQRampMix,	Stereo16BitHQRampMix,
 	// HQ SRC, Filter
-	FilterMono8BitLinearMix,	FilterMono16BitLinearMix,	FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
-	FilterMono8BitLinearRampMix,FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
+
+// -> CODE#0025
+// -> DESC="enable polyphase resampling on stereo samples"
+//	FilterMono8BitLinearMix,	FilterMono16BitLinearMix,	FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
+//	FilterMono8BitLinearRampMix,FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
+	FilterMono8BitHQMix,		FilterMono16BitHQMix,		FilterStereo8BitHQMix,		FilterStereo16BitHQMix,
+	FilterMono8BitHQRampMix,	FilterMono16BitHQRampMix,	FilterStereo8BitHQRampMix,	FilterStereo16BitHQRampMix,
+// -! BEHAVIOUR_CHANGE#0025
 
 	// Kaiser SRC
 // -> CODE#0025
@@ -936,8 +1352,22 @@ const LPMIXINTERFACE gpMixFunctionTable[4*16] =
 // -! BEHAVIOUR_CHANGE#0025
 
 	// Kaiser SRC, Filter
-	FilterMono8BitLinearMix,	FilterMono16BitLinearMix,	FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
-	FilterMono8BitLinearRampMix,FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
+//	FilterMono8BitLinearMix,	FilterMono16BitLinearMix,	FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
+//	FilterMono8BitLinearRampMix,FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
+	FilterMono8BitKaiserMix,	FilterMono16BitKaiserMix,	FilterStereo8BitKaiserMix,	FilterStereo16BitKaiserMix,
+	FilterMono8BitKaiserRampMix,FilterMono16BitKaiserRampMix,FilterStereo8BitKaiserRampMix,FilterStereo16BitKaiserRampMix,
+
+	// FIR Filter SRC
+	Mono8BitFIRFilterMix,			Mono16BitFIRFilterMix,			Stereo8BitFIRFilterMix,	Stereo16BitFIRFilterMix,
+	Mono8BitFIRFilterRampMix,		Mono16BitFIRFilterRampMix,		Stereo8BitFIRFilterRampMix,Stereo16BitFIRFilterRampMix,
+
+	// FIR Filter SRC, Filter
+	FilterMono8BitFIRFilterMix,	FilterMono16BitFIRFilterMix,	FilterStereo8BitFIRFilterMix,	FilterStereo16BitFIRFilterMix,
+	FilterMono8BitFIRFilterRampMix,FilterMono16BitFIRFilterRampMix,FilterStereo8BitFIRFilterRampMix,FilterStereo16BitFIRFilterRampMix,
+
+// -! BEHAVIOUR_CHANGE#0025
+
+
 };
 
 const LPMIXINTERFACE gpFastMixFunctionTable[2*16] =
@@ -958,7 +1388,8 @@ const LPMIXINTERFACE gpFastMixFunctionTable[2*16] =
 
 
 #ifdef ENABLE_MMX
-const LPMIXINTERFACE gpMMXFunctionTable[4*16] =
+//const LPMIXINTERFACE gpMMXFunctionTable[4*16] =
+const LPMIXINTERFACE gpMMXFunctionTable[5*16] =     //rewbs.resamplerConf: increased to 5 to cope with FIR
 {
 	// No SRC
 	MMX_Mono8BitMix,			MMX_Mono16BitMix,			Stereo8BitMix,			Stereo16BitMix,
@@ -986,11 +1417,21 @@ const LPMIXINTERFACE gpMMXFunctionTable[4*16] =
 //	MMX_Mono8BitKaiserRampMix,	MMX_Mono16BitKaiserRampMix,	Stereo8BitHQRampMix,	Stereo16BitHQRampMix,
 	MMX_Mono8BitKaiserMix,		MMX_Mono16BitKaiserMix,		Stereo8BitKaiserMix,	Stereo16BitKaiserMix,
 	MMX_Mono8BitKaiserRampMix,	MMX_Mono16BitKaiserRampMix,	Stereo8BitKaiserRampMix,Stereo16BitKaiserRampMix,
-// -! BEHAVIOUR_CHANGE#0025
 
-// Kaiser SRC, Filter
-	MMX_FilterMono8BitLinearMix,MMX_FilterMono16BitLinearMix,FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
-	MMX_FilterMono8BitLinearRampMix,MMX_FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
+	// Kaiser SRC, Filter - no ASM routines written for this yet.
+	FilterMono8BitKaiserMix, FilterMono16BitKaiserMix,FilterStereo8BitKaiserMix,	FilterStereo16BitKaiserMix,
+	FilterMono8BitKaiserRampMix, FilterMono16BitKaiserRampMix,FilterStereo8BitKaiserRampMix,FilterStereo16BitKaiserRampMix,
+
+	// FIRFilter SRC - no ASM routines written for this yet.
+	Mono8BitFIRFilterMix,		Mono16BitFIRFilterMix,		Stereo8BitFIRFilterMix,	Stereo16BitFIRFilterMix,
+	Mono8BitFIRFilterRampMix,	Mono16BitFIRFilterRampMix,	Stereo8BitFIRFilterRampMix,Stereo16BitFIRFilterRampMix,
+
+	// FIRFilter SRC, Filter - no ASM routines written for this yet.
+	FilterMono8BitFIRFilterMix, FilterMono16BitFIRFilterMix,FilterStereo8BitFIRFilterMix,	FilterStereo16BitFIRFilterMix,
+	FilterMono8BitFIRFilterRampMix, FilterMono16BitFIRFilterRampMix,FilterStereo8BitFIRFilterRampMix,FilterStereo16BitFIRFilterRampMix,
+
+
+// -! BEHAVIOUR_CHANGE#0025
 };
 #endif
 
@@ -1150,7 +1591,16 @@ UINT CSoundFile::CreateStereoMix(int count)
 	#endif
 		if (!(pChannel->dwFlags & CHN_NOIDO))
 		{
-			nFlags += (pChannel->dwFlags & CHN_HQSRC) ? ((gdwSoundSetup & SNDMIX_ULTRAHQSRCMODE) ? MIXNDX_KAISERSRC : MIXNDX_HQSRC) : MIXNDX_LINEARSRC;
+			//rewbs.resamplerConf
+			//nFlags += (pChannel->dwFlags & CHN_HQSRC) ? ((gdwSoundSetup & SNDMIX_ULTRAHQSRCMODE) ? MIXNDX_KAISERSRC : MIXNDX_HQSRC) : MIXNDX_LINEARSRC;
+			if (pChannel->dwFlags & CHN_HQSRC)
+			{
+				if (gdwSoundSetup & SNDMIX_SPLINESRCMODE) nFlags += MIXNDX_HQSRC;
+				else if (gdwSoundSetup & SNDMIX_POLYPHASESRCMODE) nFlags += MIXNDX_KAISERSRC;
+				else if (gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE) nFlags += MIXNDX_FIRFILTERSRC;				
+			}
+			else nFlags += MIXNDX_LINEARSRC;
+			//end rewbs.resamplerConf
 		}
 	#ifdef ENABLE_MMX
 		if ((gdwSysInfo & SYSMIX_ENABLEMMX) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
@@ -1592,7 +2042,8 @@ DWORD MPPASMCALL X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount
 cliploop:
 	mov eax, dword ptr [edx]
 	add ebx, 3
-	add eax, (7-MIXING_ATTENUATION)
+	//add eax, (7-MIXING_ATTENUATION)
+	add eax, (1<<(7-MIXING_ATTENUATION))  //ericus' 24bit fix
 	add edx, 4
 	cmp eax, MIXING_CLIPMIN
 	jl cliplow

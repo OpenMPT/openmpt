@@ -44,6 +44,7 @@ public:
 	afx_msg void OnCheck1();
 	afx_msg void OnCheck2();
 	afx_msg void OnFormatChanged();
+	afx_msg void OnPlayerOptions(); //rewbs.resamplerConf
 	DECLARE_MESSAGE_MAP()
 };
 

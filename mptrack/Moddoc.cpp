@@ -1283,56 +1283,57 @@ void CModDoc::OnFileWaveConvert()
 					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					"Wave Files (*.wav)|*.wav||", pMainFrm);
 	dlg.m_ofn.lpstrInitialDir = pMainFrm->GetExportDir();
-	if (dlg.DoModal() == IDOK)
-	{
-		s[0] = 0;
-		_splitpath(dlg.GetPathName(), s, path, NULL, NULL);
-		strcat(s, path);
-		pMainFrm->SetExportDir(s);
-		strcpy(s, dlg.GetPathName());
-		CWaveConvert wsdlg(pMainFrm);
-		if (wsdlg.DoModal() != IDOK) return;
-		// Saving as wave file
+
+	CWaveConvert wsdlg(pMainFrm);
+	if (wsdlg.DoModal() != IDOK) return;
+	if (dlg.DoModal() != IDOK) return; //rewbs: made filename dialog appear after wav settings dialog
+	s[0] = 0;
+	_splitpath(dlg.GetPathName(), s, path, NULL, NULL);
+	strcat(s, path);
+	pMainFrm->SetExportDir(s);
+	strcpy(s, dlg.GetPathName());
+
+	// Saving as wave file
 
 // -> CODE#0024
 // -> DESC="wav export update"
-		UINT p,n = 1;
-		DWORD flags[MAX_BASECHANNELS];
-		CHAR channel[MAX_CHANNELNAME+2];
+	UINT p,n = 1;
+	DWORD flags[MAX_BASECHANNELS];
+	CHAR channel[MAX_CHANNELNAME+2];
 
-		// Channel mode : save song in multiple wav files (one for each enabled channels)
-		if(wsdlg.m_bChannelMode){
-			n = m_SndFile.m_nChannels;
-			for(UINT i = 0 ; i < n ; i++){
-				// Save channels' flags
-				flags[i] = m_SndFile.ChnSettings[i].dwFlags;
-				// Mute each channel
-				m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
-			}
-			// Keep position of the carater just before ".wav" in path string
-			p = strlen(s) - 4;
+	// Channel mode : save song in multiple wav files (one for each enabled channels)
+	if(wsdlg.m_bChannelMode){
+		n = m_SndFile.m_nChannels;
+		for(UINT i = 0 ; i < n ; i++){
+			// Save channels' flags
+			flags[i] = m_SndFile.ChnSettings[i].dwFlags;
+			// Mute each channel
+			m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
 		}
+		// Keep position of the caracter just before ".wav" in path string
+		p = strlen(s) - 4;
+	}
 
-		CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
-		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
-		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
-		dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
-		if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
+	CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
+	dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
+	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
+	dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
+	//if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
 // -! NEW_FEATURE#0024
 
-		BOOL bplaying = FALSE;
-		UINT pos = m_SndFile.GetCurrentPos();
-		bplaying = TRUE;
-		pMainFrm->PauseMod();
-		m_SndFile.SetCurrentPos(0);
-		if (wsdlg.m_bSelectPlay)
-		{
-			m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
-			m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
-			m_SndFile.GetLength(TRUE, FALSE);
-			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
-		}
-		// Saving file
+	BOOL bplaying = FALSE;
+	UINT pos = m_SndFile.GetCurrentPos();
+	bplaying = TRUE;
+	pMainFrm->PauseMod();
+	m_SndFile.SetCurrentPos(0);
+	if (wsdlg.m_bSelectPlay)
+	{
+		m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
+		m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
+		m_SndFile.GetLength(TRUE, FALSE);
+		m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
+	}
+	// Saving file
 
 // -> CODE#0024
 // -> DESC="wav export update"
@@ -1346,41 +1347,40 @@ void CModDoc::OnFileWaveConvert()
 //		}
 //		dwcdlg.DoModal();
 
-		for(UINT i = 0 ; i < n ; i++){
+	for(UINT i = 0 ; i < n ; i++){
 
-			// Channel mode
-			if(wsdlg.m_bChannelMode){
-				// Add channel number & name (if available) to path string
-				if(m_SndFile.ChnSettings[i].szName[0] > 0x20)
-					wsprintf(channel, "-%03d_%s.wav", i+1,m_SndFile.ChnSettings[i].szName);
-				else
-					wsprintf(channel, "-%03d.wav", i+1);
-				s[p] = '\0';
-				strcat(s,channel);
-				// Unmute channel to process
-				m_SndFile.ChnSettings[i].dwFlags &= ~CHN_MUTE;
-			}
-
-			// Render song (or current channel if channel mode and channel not initially disabled)
-			if(!wsdlg.m_bChannelMode || !(flags[i] & CHN_MUTE)){
-				m_SndFile.SetCurrentPos(0);
-				dwcdlg.DoModal();
-			}
-
-			// Re-mute processed channel
-			if(wsdlg.m_bChannelMode) m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
-		}
-
-		// Restore channels' flags
+		// Channel mode
 		if(wsdlg.m_bChannelMode){
-			for(UINT i = 0 ; i < n ; i++) m_SndFile.ChnSettings[i].dwFlags = flags[i];
+			// Add channel number & name (if available) to path string
+			if(m_SndFile.ChnSettings[i].szName[0] > 0x20)
+				wsprintf(channel, "-%03d_%s.wav", i+1,m_SndFile.ChnSettings[i].szName);
+			else
+				wsprintf(channel, "-%03d.wav", i+1);
+			s[p] = '\0';
+			strcat(s,channel);
+			// Unmute channel to process
+			m_SndFile.ChnSettings[i].dwFlags &= ~CHN_MUTE;
 		}
+
+		// Render song (or current channel if channel mode and channel not initially disabled)
+		if(!wsdlg.m_bChannelMode || !(flags[i] & CHN_MUTE)){
+			m_SndFile.SetCurrentPos(0);
+			dwcdlg.DoModal();
+		}
+
+		// Re-mute processed channel
+		if(wsdlg.m_bChannelMode) m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
+	}
+
+	// Restore channels' flags
+	if(wsdlg.m_bChannelMode){
+		for(UINT i = 0 ; i < n ; i++) m_SndFile.ChnSettings[i].dwFlags = flags[i];
+	}
 // -! NEW_FEATURE#0024
 
-		m_SndFile.SetCurrentPos(pos);
-		m_SndFile.GetLength(TRUE);
-		CMainFrame::UpdateAudioParameters(TRUE);
-	}
+	m_SndFile.SetCurrentPos(pos);
+	m_SndFile.GetLength(TRUE);
+	CMainFrame::UpdateAudioParameters(TRUE);
 }
 
 
