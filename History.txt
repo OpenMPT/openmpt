@@ -1,4 +1,4 @@
-26/02/2005:
+27/02/2005:
 -----------
 
 1. What is this?
@@ -20,6 +20,14 @@ NOTES:
 /: change
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
+
+. v 1.17RC0 (revision 1.13.2.7) 
+   . <rewbs> Fixed crash in instrument view in win 98. 
+   / <rewbs> Set octave keys are now customisable. Not that they will no longer be automatically assigned to freed number keys.
+             So if you map a note to key 8 then unmap it, you'll have to explicitly set Set Octave 8 back to key 8 again.
+
+. v 1.17RC0 (revision 1.13.2.6) 
+   . <rewbs> Minor GUI fixes
 
 . v 1.17RC0 (revision 1.13.2.5) 
    . <rewbs> Fixed ridiculous mono ITI loading bug.
