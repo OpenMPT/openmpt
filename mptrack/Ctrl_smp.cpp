@@ -248,8 +248,8 @@ BOOL CCtrlSamples::OnInitDialog()
 	// Quality selection
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO5);
 	if(combo){
-		// Allow quality from 4 to 256
-		for(int i = 4 ; i <= 256 ; i++){
+		// Allow quality from 4 to 128
+		for(int i = 4 ; i <= 128 ; i++){
 			wsprintf(str,"%d",i);
 			combo->SetItemData(combo->AddString(str), i-4);
 		}
