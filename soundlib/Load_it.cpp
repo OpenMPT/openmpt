@@ -748,7 +748,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 		UINT len = *((WORD *)(lpStream+patpos[patchk]));
 		UINT rows = *((WORD *)(lpStream+patpos[patchk]+2));
 
-		if ((rows < 4) || (rows > 256)) 
+		if ((rows < 4) || (rows > MAX_PATTERN_ROWS)) 
 			continue;
 
 		if (patpos[patchk]+8+len > dwMemLength) 
@@ -895,7 +895,6 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		UINT len = *((WORD *)(lpStream+patpos[npat]));
 		UINT rows = *((WORD *)(lpStream+patpos[npat]+2));
-		if ((rows < 4) || (rows > 256)) continue;
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
 //		if ((rows < 4) || (rows > 256)) continue;

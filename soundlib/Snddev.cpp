@@ -746,13 +746,17 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 		if (m_nAsioBufferLen > (UINT)maxSize) m_nAsioBufferLen = maxSize; else
 		if (granularity < 0)
 		{
-			UINT n = (minSize < 32) ? 32 : minSize;
+			//rewbs.ASIOfix:
+			/*UINT n = (minSize < 32) ? 32 : minSize;
 			if (n % granularity) n = (n + granularity - 1) - (n % granularity);
 			while ((n+(n>>1) < m_nAsioBufferLen) && (n*2 <= (UINT)maxSize))
 			{
 				n *= 2;
 			}
-			m_nAsioBufferLen = n;
+			m_nAsioBufferLen = n;*/
+			//end rewbs.ASIOfix
+			m_nAsioBufferLen = preferredSize;
+
 		} else
 		if (granularity > 0)
 		{
