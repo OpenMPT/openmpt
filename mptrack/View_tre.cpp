@@ -1540,7 +1540,7 @@ VOID CModTree::FillInstrumentLibrary()
 					 || (!lstrcmpi(s, ".it"))
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-					 || (!lstrcmpi(s, ".itp"))
+//					 || (!lstrcmpi(s, ".itp"))	ericus 03/03/2005 : temporarily deactivated 03/03/2005
 // -! NEW_FEATURE#0023
 					 || ((m_bShowAllFiles)
 					  && ((!lstrcmpi(s, ".mdz"))

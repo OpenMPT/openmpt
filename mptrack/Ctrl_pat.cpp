@@ -1847,6 +1847,7 @@ void CChannelManagerDlg::OnPaint()
 		return;
 	}
 
+	CHAR s[256];
 	UINT i,ii,c=0,l=0;
 	UINT nColns = CM_NB_COLS;
 	UINT nChannels = m_pSndFile->m_nChannels;
@@ -1875,7 +1876,25 @@ void CChannelManagerDlg::OnPaint()
 		::BitBlt(pDC.hdc,client.left,client.top,client.Width(),client.Height(),bdc,0,0,SRCCOPY);
 		::SelectObject(bdc,(HBITMAP)NULL);
 		::DeleteDC(bdc);
-
+/*
+		UINT n;
+		POINT p;
+		CRect r;
+		p.x = mx;
+		p.y = my;
+		BOOL hit = ButtonHit(p,&n,&r);
+		if(hit && !select[n]){
+			r.top += 3;
+			r.left += 3;
+			FrameRect(pDC.hdc,&r,CMainFrame::brushBlack);
+			r.top += 3;
+			r.left += 3;
+			r.bottom -= 3;
+			r.right = r.left + chnSizeX / 7 - 6;
+			FillRect(pDC.hdc,&r,CMainFrame::brushWhite);
+			FrameRect(pDC.hdc,&r,CMainFrame::brushBlack);
+		}
+*/
 		for(i = 0 ; i < nChannels ; i++){
 			ii = pattern[i];
 			if(select[ii]){
@@ -1909,8 +1928,6 @@ void CChannelManagerDlg::OnPaint()
 
 	HBRUSH red = CreateSolidBrush(RGB(192,96,96));
 	HBRUSH green = CreateSolidBrush(RGB(96,192,96));
-
-	CHAR s[256];
 
 	for(i = 0 ; i < nChannels ; i++){
 
