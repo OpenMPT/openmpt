@@ -96,6 +96,7 @@ public:
 	long GetVersion();		//rewbs.VSTpresets
 	bool GetParams(float* param, long min, long max); 	//rewbs.VSTpresets
 	bool RandomizeParams(long minParam=0, long maxParam=0); 	//rewbs.VSTpresets
+	bool m_bModified;
 
 	VOID SetCurrentProgram(UINT nIndex);
 //rewbs.VSTCompliance: Eric's non standard preset stuff:
@@ -126,7 +127,7 @@ public: // IMixPlugin interface
 	int AddRef() { return ++m_nRefCount; }
 	int Release();
 	void SaveAllParameters();
-	void RestoreAllParameters();
+	void RestoreAllParameters(long nProg=-1); //rewbs.plugDefaultProgram - added param 
 	void ProcessVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
 	void ClearVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
 	void Process(float *pOutL, float *pOutR, unsigned long nSamples);
