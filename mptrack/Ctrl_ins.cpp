@@ -962,17 +962,18 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	if (dwHintMask & HINT_MODTYPE)
 	{
 		BOOL b = ((m_pSndFile->m_nType == MOD_TYPE_IT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		BOOL b2 = (((m_pSndFile->m_nType == MOD_TYPE_IT) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		OnMixPlugChanged();
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), b);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), b);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), b);
-		m_SliderAttack.EnableWindow(b);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), b2);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), b2);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), b2);
+		m_SliderAttack.EnableWindow(b2);
 		m_EditName.EnableWindow(b);
 		m_EditFileName.EnableWindow(b);
-		m_CbnMidiCh.EnableWindow(b);
-		m_CbnMixPlug.EnableWindow(b);
-		m_SpinMidiPR.EnableWindow(b);
-		m_SpinFadeOut.EnableWindow(b);
+		m_CbnMidiCh.EnableWindow(b2);
+		m_CbnMixPlug.EnableWindow(b2);
+		m_SpinMidiPR.EnableWindow(b2);
+		m_SpinFadeOut.EnableWindow(b2);
 		m_NoteMap.EnableWindow(b);
 		m_SliderVolSwing.EnableWindow(b);
 		m_SliderPanSwing.EnableWindow(b);
