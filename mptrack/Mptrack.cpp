@@ -843,11 +843,7 @@ void CTrackApp::SaveChords(PMPTCHORD pChords)
 void CTrackApp::OnFileNew()
 //-------------------------
 {
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//	if (m_bInitialized) OnFileNewIT();
-	if (m_bInitialized) OnFileNewITProject();
-// -! NEW_FEATURE#0023
+	if (m_bInitialized) OnFileNewIT();
 }
 
 

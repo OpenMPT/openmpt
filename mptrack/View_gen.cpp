@@ -82,6 +82,13 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 // -> DESC="VST plugins presets"
 	ON_CBN_SELCHANGE(IDC_COMBO8, OnProgramChanged)
 // -! NEW_FEATURE#0002
+
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
+	ON_COMMAND(IDC_CHECK12,		 OnWetDryExpandChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO9, OnSpecialMixProcessingChanged)
+// -! BEHAVIOUR_CHANGE#0028
+
 	ON_COMMAND_RANGE(ID_FXCOMMANDS_BASE, ID_FXCOMMANDS_BASE+10, OnFxCommands)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	OnTabSelchange)
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		OnUnlockControls)
@@ -102,10 +109,17 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO5,	m_CbnPlugin);
 	DDX_Control(pDX, IDC_COMBO6,	m_CbnParam);
 	DDX_Control(pDX, IDC_COMBO7,	m_CbnOutput);
+
 // -> CODE#0002
 // -> DESC="VST plugins presets"
 	DDX_Control(pDX, IDC_COMBO8,	m_CbnPreset);
 // -! NEW_FEATURE#0002
+
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
+	DDX_Control(pDX, IDC_COMBO9,	m_CbnSpecialMixProcessing);
+// -! BEHAVIOUR_CHANGE#0028
+
 	DDX_Control(pDX, IDC_SLIDER1,	m_sbVolume[0]);
 	DDX_Control(pDX, IDC_SLIDER2,	m_sbPan[0]);
 	DDX_Control(pDX, IDC_SLIDER3,	m_sbVolume[1]);
@@ -177,6 +191,16 @@ void CViewGlobals::OnInitialUpdate()
 
 	m_sbValue.SetPos(0);			// rewbs.dryRatio 20040122
 	m_sbValue.SetRange(0, 100);		// rewbs.dryRatio 20040122
+
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
+	m_CbnSpecialMixProcessing.AddString("Default");
+	m_CbnSpecialMixProcessing.AddString("Wet subtract");
+	m_CbnSpecialMixProcessing.AddString("Dry subtract");
+	m_CbnSpecialMixProcessing.AddString("Mix subtract");
+	m_CbnSpecialMixProcessing.AddString("Middle subtract");
+	m_CbnSpecialMixProcessing.AddString("LR balance");
+// -! BEHAVIOUR_CHANGE#0028
 
 	UpdateView(HINT_MODTYPE);
 	OnParamChanged();
@@ -390,6 +414,11 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_sbDryRatio.SetPos(n);
 		//end rewbs.DryRatio
 		
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
+		m_CbnSpecialMixProcessing.SetCurSel(pPlugin->Info.dwInputRouting>>8);
+		CheckDlgButton(IDC_CHECK12, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND) ? TRUE : FALSE);
+// -! BEHAVIOUR_CHANGE#0028
 
 		if (pVstPlugin)
 		{
@@ -1346,6 +1375,39 @@ VOID CViewGlobals::OnBypassChanged()
 		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
 	}
 }
+
+
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
+void CViewGlobals::OnWetDryExpandChanged()
+{
+	CModDoc *pModDoc = GetDocument();
+	PSNDMIXPLUGIN pPlugin;
+	CSoundFile *pSndFile;
+
+	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
+	pSndFile = pModDoc->GetSoundFile();
+	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
+	if (IsDlgButtonChecked(IDC_CHECK12))
+	{
+		pPlugin->Info.dwInputRouting |= MIXPLUG_INPUTF_MIXEXPAND;
+	} else
+	{
+		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_MIXEXPAND;
+	}
+
+}
+
+VOID CViewGlobals::OnSpecialMixProcessingChanged()
+{
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+	PSNDMIXPLUGIN pPlugin = m_nCurrentPlugin < MAX_MIXPLUGINS && pSndFile ? &pSndFile->m_MixPlugins[m_nCurrentPlugin] : NULL;
+
+	if(!pPlugin) return;
+	pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0x00ff) | (m_CbnSpecialMixProcessing.GetCurSel()<<8);
+}
+// -! BEHAVIOUR_CHANGE#0028
 
 
 VOID CViewGlobals::OnDryMixChanged()

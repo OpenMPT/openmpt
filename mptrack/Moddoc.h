@@ -197,6 +197,12 @@ protected:
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
 	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName);
 	virtual void OnCloseDocument();
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	virtual BOOL SaveModified();
+// -! NEW_FEATURE#0023
+
 	virtual BOOL DoSave(LPCSTR lpszPathName, BOOL bSaveAs=TRUE);
 	virtual void DeleteContents();
 	virtual void SetModifiedFlag(BOOL bModified=TRUE);

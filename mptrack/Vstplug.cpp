@@ -1784,7 +1784,19 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	bool isInstrument;
 
 	ProcessVSTEvents();
-	
+
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
+// -> mixop == 0 : normal processing
+// -> mixop == 1 : MIX += DRY - WET * wetRatio
+// -> mixop == 2 : MIX += WET - DRY * wetRatio
+// -> mixop == 3 : MIX -= WET - DRY * wetRatio
+// -> mixop == 4 : MIX -= middle - WET * wetRatio + middle - DRY
+// -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
+//				   MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
+	int mixop = m_pMixStruct->Info.dwInputRouting>>8;
+// -! NEW_FEATURE#0028
+
 	//If the plug is found & ok, contiue
 	if ((m_pEffect) && (m_pEffect->process) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
@@ -1813,7 +1825,10 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		{
 			wetRatio = 1-m_pMixStruct->fDryRatio;  //rewbs.dryRatio
 			dryRatio = isInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
-			
+
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
+/*
 			for (UINT i=0; i<nSamples; i++)
 			{
 				//rewbs.wetratio - added the factors. [20040123]
@@ -1828,6 +1843,95 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 					pOutR[i] += m_MixState.pOutBufferR[i];				
 				}		
 			}
+*/
+			// Wet/Dry range expansion [0,1] -> [-2,2]
+			if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+				wetRatio = 4.0f * wetRatio - 2.0f;
+				dryRatio = -wetRatio;
+			}
+
+			// Mix operation
+			switch(mixop){
+
+				// Default mix
+				case 0:
+					if(wetRatio == 0.0f){
+						for (UINT i=0; i<nSamples; i++){
+							pOutL[i] += m_MixState.pOutBufferL[i];
+							pOutR[i] += m_MixState.pOutBufferR[i];
+						}
+					}
+					else if(dryRatio == 0.0f){
+						for (UINT i=0; i<nSamples; i++){
+							pOutL[i] += m_pTempBuffer[0][i];
+							pOutR[i] += m_pTempBuffer[0][i];
+						}
+					}
+					else{
+						for (UINT i=0; i<nSamples; i++){
+							//rewbs.wetratio - added the factors. [20040123]			
+							pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+							pOutR[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
+						}
+					}
+					break;
+
+				// Wet subtract
+				case 1:
+					for (UINT i=0; i<nSamples; i++){
+						pOutL[i] += m_MixState.pOutBufferL[i] - m_pTempBuffer[0][i]*wetRatio;
+						pOutR[i] += m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]*wetRatio;
+					}
+					break;
+
+				// Dry subtract
+				case 2:
+					for (UINT i=0; i<nSamples; i++){
+						pOutL[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
+						pOutR[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferR[i]*dryRatio;
+					}
+					break;
+
+				// Mix subtract
+				case 3:
+					for (UINT i=0; i<nSamples; i++){
+						pOutL[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
+						pOutR[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferR[i]*wetRatio;
+					}
+					break;
+
+				// Middle subtract
+				case 4:
+					for (UINT i=0; i<nSamples; i++){
+						float middle = ( pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i] )/2.0f;
+						pOutL[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
+						pOutR[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
+					}
+					break;
+
+				// Left/Right balance
+				case 5:
+					if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+						wetRatio /= 2.0f;
+						dryRatio /= 2.0f;
+					}
+					for (UINT i=0; i<nSamples; i++){
+						pOutL[i] += wetRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]);
+						pOutR[i] += dryRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[0][i]);
+					}
+					break;
+			}
+
+			//If dry mix is ticked we add the unprocessed buffer,
+			//except if this is an instrument since this it has already been done:
+			if ((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument){
+				for (UINT i=0; i<nSamples; i++){
+					pOutL[i] += m_MixState.pOutBufferL[i];
+					pOutR[i] += m_MixState.pOutBufferR[i];
+				}
+			}		
+// -! BEHAVIOUR_CHANGE#0028
+
 		}
 		//Otherwise we actually only cater for two outputs max.
 		else if (m_pEffect->numOutputs > 1)
@@ -1835,6 +1939,9 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			wetRatio = 1-m_pMixStruct->fDryRatio;  //rewbs.dryRatio
 			dryRatio = isInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
 
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
+/*
 			for (UINT i=0; i<nSamples; i++)
 			{
 
@@ -1851,6 +1958,94 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 					pOutR[i] += m_MixState.pOutBufferR[i];				
 				}		
 			}
+*/
+			// Wet/Dry range expansion [0,1] -> [-2,2]
+			if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+				wetRatio = 4.0f * wetRatio - 2.0f;
+				dryRatio = -wetRatio;
+			}
+
+			// Mix operation
+			switch(mixop){
+
+				// Default mix
+				case 0:
+					if(wetRatio == 0.0f){
+						for (UINT i=0; i<nSamples; i++){
+							pOutL[i] += m_MixState.pOutBufferL[i];
+							pOutR[i] += m_MixState.pOutBufferR[i];
+						}
+					}
+					else if(dryRatio == 0.0f){
+						for (UINT i=0; i<nSamples; i++){
+							pOutL[i] += m_pTempBuffer[0][i];
+							pOutR[i] += m_pTempBuffer[1][i];
+						}
+					}
+					else{
+						for (UINT i=0; i<nSamples; i++){
+							//rewbs.wetratio - added the factors. [20040123]			
+							pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
+							pOutR[i] += m_pTempBuffer[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
+						}
+					}
+					break;
+
+				// Wet subtract
+				case 1:
+					for (UINT i=0; i<nSamples; i++){
+						pOutL[i] += m_MixState.pOutBufferL[i] - m_pTempBuffer[0][i]*wetRatio;
+						pOutR[i] += m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]*wetRatio;
+					}
+					break;
+
+				// Dry subtract
+				case 2:
+					for (UINT i=0; i<nSamples; i++){
+						pOutL[i] += m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*dryRatio;
+						pOutR[i] += m_pTempBuffer[1][i] - m_MixState.pOutBufferR[i]*dryRatio;
+					}
+					break;
+
+				// Mix subtract
+				case 3:
+					for (UINT i=0; i<nSamples; i++){
+						pOutL[i] -= m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]*wetRatio;
+						pOutR[i] -= m_pTempBuffer[1][i] - m_MixState.pOutBufferR[i]*wetRatio;
+					}
+					break;
+
+				// Middle subtract
+				case 4:
+					for (UINT i=0; i<nSamples; i++){
+						float middle = ( pOutL[i] + m_MixState.pOutBufferL[i] + pOutR[i] + m_MixState.pOutBufferR[i] )/2.0f;
+						pOutL[i] -= middle - m_pTempBuffer[0][i]*wetRatio + middle - m_MixState.pOutBufferL[i];
+						pOutR[i] -= middle - m_pTempBuffer[1][i]*wetRatio + middle - m_MixState.pOutBufferR[i];
+					}
+					break;
+
+				// Left/Right balance
+				case 5:
+					if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+						wetRatio /= 2.0f;
+						dryRatio /= 2.0f;
+					}
+					for (UINT i=0; i<nSamples; i++){
+						pOutL[i] += wetRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + dryRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]);
+						pOutR[i] += dryRatio * (m_pTempBuffer[0][i] - m_MixState.pOutBufferL[i]) + wetRatio * (m_MixState.pOutBufferR[i] - m_pTempBuffer[1][i]);
+					}
+					break;
+			}
+
+			//If dry mix is ticked we add the unprocessed buffer,
+			//except if this is an instrument since this it has already been done:
+			if ((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument){
+				for (UINT i=0; i<nSamples; i++){
+					pOutL[i] += m_MixState.pOutBufferL[i];
+					pOutR[i] += m_MixState.pOutBufferR[i];
+				}
+			}		
+// -! BEHAVIOUR_CHANGE#0028
 		}
 
 	}

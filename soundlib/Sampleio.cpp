@@ -114,6 +114,7 @@ BOOL CSoundFile::DestroyInstrument(UINT nInstr, char removeSamples)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	m_szInstrumentPath[nInstr-1][0] = '\0';
+	instrumentModified[nInstr-1] = FALSE;
 // -! NEW_FEATURE#0023
 
 	INSTRUMENTHEADER *penv = Headers[nInstr];
@@ -1257,6 +1258,54 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 			ReadSample(&Ins[samplemap[dsmp]], sampleflags[dsmp], (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
 		dwMemPos += samplesize[dsmp];
 	}
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
+	// Leave if no extra instrument settings are available (end of file reached)
+	if(dwMemPos >= dwFileLength) return TRUE;
+
+	// Compute current file pointer position
+	BYTE * ptr = (BYTE *)(lpMemFile+dwMemPos);
+
+	// Seek for supported extended settings header
+	if( (*((__int32 *)ptr)) == 'MPTX' && penv ){
+
+		__int16 size;
+		__int32 code;
+
+		// jump extension header code
+		ptr += sizeof(__int32);
+
+		while( (DWORD)(ptr - lpMemFile) < dwFileLength ){
+
+			// read field code
+			code = (*((__int32 *)ptr));
+			// jump field code
+			ptr += sizeof(__int32);
+
+			// nVolRamp
+			if(code == 'VR..'){
+				// read field size
+				size = (*((__int16 *)ptr));
+				// jump field size
+				ptr += sizeof(__int16);
+				// read ramping value
+				penv->nVolRamp = (*((USHORT *)ptr));
+				// jump ramping value
+				ptr += size;
+			}
+
+			if(code == 'SEP@' || code == 'MPTX'){
+				// this case induce more extra infos but not related to _INSTRUMENTHEADER
+				// for now, as nothing more is supported, we just leave normally.........
+				return TRUE;
+			}
+		}
+	}
+
+// -! NEW_FEATURE#0027
+
 	return TRUE;
 }
 
@@ -1379,6 +1428,24 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 		if (pins->uFlags & CHN_STEREO) smpflags = (pins->uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
 		WriteSample(f, pins, smpflags);
 	}
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	__int16 size;
+	__int32 code = 'MPTX';
+
+	// Write extension tag
+	fwrite(&code, 1, sizeof(__int32), f);
+	// Write nVolRamp field code
+	code = 'VR..';
+	fwrite(&code, 1, sizeof(__int32), f);
+	// Write nVolRamp field size
+	size = sizeof(penv->nVolRamp);
+	fwrite(&size, 1, sizeof(__int16), f);
+	// Write field value
+	fwrite(&penv->nVolRamp, 1, sizeof(USHORT), f);
+// -! NEW_FEATURE#0027
+
 	fclose(f);
 	return TRUE;
 }
@@ -1597,16 +1664,24 @@ BOOL CSoundFile::ReadAIFFSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 /////////////////////////////////////////////////////////////////////////////////////////
 // ITS Samples
 
-
-BOOL CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset)
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+//BOOL CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset)
+UINT CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset)
+// -! NEW_FEATURE#0027
 //------------------------------------------------------------------------------------------------
 {
 	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)lpMemFile;
 	MODINSTRUMENT *pins = &Ins[nSample];
 	DWORD dwMemPos;
 
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+//	if ((!lpMemFile) || (dwFileLength < sizeof(ITSAMPLESTRUCT))
+//	 || (pis->id != 0x53504D49) || (((DWORD)pis->samplepointer) >= dwFileLength + dwOffset)) return FALSE;
 	if ((!lpMemFile) || (dwFileLength < sizeof(ITSAMPLESTRUCT))
-	 || (pis->id != 0x53504D49) || (((DWORD)pis->samplepointer) >= dwFileLength + dwOffset)) return FALSE;
+	 || (pis->id != 0x53504D49) || (((DWORD)pis->samplepointer) >= dwFileLength + dwOffset)) return 0;
+// -! NEW_FEATURE#0027
 	DestroySample(nSample);
 	dwMemPos = pis->samplepointer - dwOffset;
 	memcpy(pins->name, pis->filename, 12);
@@ -1661,8 +1736,12 @@ BOOL CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 		// IT 2.14 8-bit packed sample ?
 		if (pis->flags & 8)	flags =	RS_IT2148;
 	}
-	ReadSample(pins, flags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength + dwOffset - dwMemPos);
-	return TRUE;
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+//	ReadSample(pins, flags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength + dwOffset - dwMemPos);
+//	return TRUE;
+	return ReadSample(pins, flags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength + dwOffset - dwMemPos);
+// -! NEW_FEATURE#0027
 }
 
 
@@ -1695,15 +1774,27 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 //	if (nsamples >= 64) nsamples = 64;
 // -! BUG_FIX#0019
 	nsmp = 1;
-	// Reading Samples
 
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	// In order to properly compute the position, in file, of eventual extended settings
+	// such as "attack" we need to keep the "real" size of the last sample as those extra
+	// setting will follow this sample in the file
+	UINT lastSampleSize;
+// -! NEW_FEATURE#0027
+
+	// Reading Samples
 	for (UINT i=0; i<nsamples; i++)
 	{
 		while ((nsmp < MAX_SAMPLES) && ((Ins[nsmp].pSample) || (m_szNames[nsmp][0]))) nsmp++;
 		if (nsmp >= MAX_SAMPLES) break;
 		if (m_nSamples < nsmp) m_nSamples = nsmp;
 		samplemap[i] = nsmp;
-		ReadITSSample(nsmp, lpMemFile+dwMemPos, dwFileLength-dwMemPos, dwMemPos);
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+//		ReadITSSample(nsmp, lpMemFile+dwMemPos, dwFileLength-dwMemPos, dwMemPos);
+		lastSampleSize = ReadITSSample(nsmp, lpMemFile+dwMemPos, dwFileLength-dwMemPos, dwMemPos);
+// -! NEW_FEATURE#0027
 		dwMemPos += sizeof(ITSAMPLESTRUCT);
 		nsmp++;
 	}
@@ -1718,6 +1809,61 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 			penv->Keyboard[j] = samplemap[penv->Keyboard[j]-1];
 		}
 	}
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
+	// Rewind file pointer offset (dwMemPos) to last sample header position
+	dwMemPos -= sizeof(ITSAMPLESTRUCT);
+	BYTE * ptr = (BYTE *)(lpMemFile+dwMemPos);
+
+	// Update file pointer offset (dwMemPos) to match the end of the sample datas
+	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)ptr;
+	dwMemPos += pis->samplepointer - dwMemPos + lastSampleSize;
+	// Leave if no extra instrument settings are available (end of file reached)
+	if(dwMemPos >= dwFileLength) return TRUE;
+
+	// Get file pointer to match the first byte of extra settings informations
+	ptr = (BYTE *)(lpMemFile+dwMemPos);
+
+	// Seek for supported extended settings header
+	if( (*((__int32 *)ptr)) == 'MPTX' && penv ){
+
+		__int16 size;
+		__int32 code;
+
+		// jump extension header code
+		ptr += sizeof(__int32);
+
+		while( (DWORD)(ptr - lpMemFile) < dwFileLength ){
+
+			// read field code
+			code = (*((__int32 *)ptr));
+			// jump field code
+			ptr += sizeof(__int32);
+
+			// nVolRamp
+			if(code == 'VR..'){
+				// read field size
+				size = (*((__int16 *)ptr));
+				// jump field size
+				ptr += sizeof(__int16);
+				// read ramping value
+				penv->nVolRamp = (*((USHORT *)ptr));
+				// jump ramping value
+				ptr += size;
+			}
+
+			if(code == 'SEP@' || code == 'MPTX'){
+				// this case induce more extra infos but not related to _INSTRUMENTHEADER
+				// for now, as nothing more is supported, we just leave normally.........
+				return TRUE;
+			}
+		}
+	}
+
+// -! NEW_FEATURE#0027
+
 	return TRUE;
 }
 
@@ -1939,6 +2085,23 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	dwPos+=sizeof(ModInstID)+sizeof(modularInstSize)+modularInstSize;
 	//------------ end rewbs.modularInstData
 */
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	__int16 size;
+	__int32 code = 'MPTX';
+
+	// Write extension tag
+	fwrite(&code, 1, sizeof(__int32), f);
+	// Write nVolRamp field code
+	code = 'VR..';
+	fwrite(&code, 1, sizeof(__int32), f);
+	// Write nVolRamp field size
+	size = sizeof(penv->nVolRamp);
+	fwrite(&size, 1, sizeof(__int16), f);
+	// Write field value
+	fwrite(&penv->nVolRamp, 1, sizeof(USHORT), f);
+// -! NEW_FEATURE#0027
 
 	fclose(f);
 	return TRUE;

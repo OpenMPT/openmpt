@@ -460,7 +460,10 @@ BOOL CLayer3Convert::FormatEnumCB(HACMDRIVERID hdid, LPACMFORMATDETAILS pafd, DW
 	 && (pafd->pwfx->wFormatTag == WAVE_FORMAT_MPEGLAYER3)
 	 && (pafd->pwfx->cbSize == sizeof(MPEGLAYER3WAVEFORMAT)-sizeof(WAVEFORMATEX))
 	 && (pafd->pwfx->nSamplesPerSec >= 11025)
-	 && (pafd->pwfx->nSamplesPerSec <= 48000)
+// -> CODE#0024
+// -> DESC="wav export update"
+//	 && (pafd->pwfx->nSamplesPerSec <= 48000)
+// -! NEW_FEATURE#0024
 	 && (pafd->pwfx->nChannels >= 1)
 	 && (pafd->pwfx->nChannels <= 2)
 	 && (m_nNumFormats < MAX_FORMATS))
@@ -560,7 +563,11 @@ BOOL CDoWaveConvert::OnInitDialog()
 	return TRUE;
 }
 
-#define WAVECONVERTBUFSIZE		2048
+// -> CODE#0024
+// -> DESC="wav export update"
+//#define WAVECONVERTBUFSIZE	2048
+#define WAVECONVERTBUFSIZE	MIXBUFFERSIZE*4
+// -! NEW_FEATURE#0024
 
 
 void CDoWaveConvert::OnButton1()
@@ -687,10 +694,6 @@ void CDoWaveConvert::OnButton1()
 			DWORD l = (DWORD)(ullSamples / CSoundFile::gdwMixingFreq);
 			wsprintf(s, "Writing file... (%uKB, %umn%02us)", datahdr.length >> 10, l / 60, l % 60);
 			SetDlgItemText(IDC_TEXT1, s);
-// -> CODE#0024
-// -> DESC="wav export update"
-			Sleep(40);
-// -! NEW_FEATURE#0024
 		}
 		if ((progress != NULL) && ((DWORD)(ullSamples >> 14) != pos))
 		{

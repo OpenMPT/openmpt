@@ -200,7 +200,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 		m_CbnSplitNote.SetItemData(n, i);
 	}
 	m_nSplitInstrument = 0;
-	m_nSplitNote = 0;
+	m_nSplitNote = 60;
 	m_CbnSplitNote.SetCurSel(m_nSplitNote);
 
 	
@@ -1237,7 +1237,6 @@ BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_WM_MOVE()
 	ON_WM_SIZE()
-	ON_WM_CLOSE()
 	ON_WM_ACTIVATE()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
@@ -1254,7 +1253,7 @@ BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
 	ON_COMMAND(IDC_BUTTON5,	OnAction1)
 	ON_COMMAND(IDC_BUTTON6,	OnAction2)
 	ON_COMMAND(IDC_BUTTON7,	OnStore)
-	ON_COMMAND(IDC_BUTTON9,	OnRestore)
+	ON_COMMAND(IDC_BUTTON8,	OnRestore)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1,	OnTabSelchange)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -2321,11 +2320,11 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 			switch(currentTab){
 				case 0:
 					if(button == CM_BT_LEFT){
-						if(pModDoc->IsChannelMuted(n)) pModDoc->MuteChannel(n,FALSE);
-						if(!pModDoc->IsChannelSolo(n)){
+						if(!pModDoc->IsChannelSolo(n) || pModDoc->IsChannelMuted(n)){
 							GetClientRect(&client);
+							pModDoc->MuteChannel(n,FALSE);
 							pModDoc->SoloChannel(n,TRUE);
-							for(UINT i = 0 ; i < m_pSndFile->m_nChannels ; i++) if(!pModDoc->IsChannelSolo(i)) pModDoc->MuteChannel(i,TRUE);
+							for(UINT i = 0 ; i < m_pSndFile->m_nChannels ; i++) if(i != n) pModDoc->MuteChannel(i,TRUE);
 							client.SetRect(client.left + 10,client.top + 38,client.right - 8,client.bottom - 30);
 							invalidate = client;
 						}

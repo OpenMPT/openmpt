@@ -392,10 +392,49 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		if (nType == m_SndFile.m_nType) SetPathName(lpszPathName);
 	} else
 	{
-		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
+		if(nType == MOD_TYPE_IT && m_SndFile.m_dwSongFlags & SONG_ITPROJECT) ::MessageBox(NULL,"ITP projects need to have a path set for each instrument...",NULL,MB_ICONERROR | MB_OK);
+		else ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
+// -! NEW_FEATURE#0023
 	}
 	return bOk;
 }
+
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+BOOL CModDoc::SaveModified()
+{
+	if(m_SndFile.m_nType == MOD_TYPE_IT && m_SndFile.m_dwSongFlags & SONG_ITPROJECT && !(m_SndFile.m_dwSongFlags & SONG_ITPEMBEDIH)){
+
+		BOOL unsavedInstrument = FALSE;
+
+		for(UINT i = 0 ; i < m_SndFile.m_nInstruments ; i++){
+			if(m_SndFile.instrumentModified[i]) { unsavedInstrument = TRUE; break; }
+		}
+
+		if(unsavedInstrument && ::MessageBox(NULL,"Do you want to save modified instruments ?",NULL,MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES){
+
+			for(UINT i = 0 ; i < m_SndFile.m_nInstruments ; i++){
+				if(m_SndFile.m_szInstrumentPath[i][0] != '\0'){
+					int size = strlen(m_SndFile.m_szInstrumentPath[i]);
+					BOOL iti = stricmp(&m_SndFile.m_szInstrumentPath[i][size-3],"iti") == 0;
+					BOOL xi  = stricmp(&m_SndFile.m_szInstrumentPath[i][size-2],"xi") == 0;
+
+					if(iti || (!iti && !xi  && m_SndFile.m_nType == MOD_TYPE_IT))
+						m_SndFile.SaveITIInstrument(i+1, m_SndFile.m_szInstrumentPath[i]);
+					if(xi  || (!xi  && !iti && m_SndFile.m_nType == MOD_TYPE_XM))
+						m_SndFile.SaveXIInstrument(i+1, m_SndFile.m_szInstrumentPath[i]);
+				}
+			}
+		}
+	}
+
+	return CDocument::SaveModified();
+}
+// -! NEW_FEATURE#0023
 
 
 void CModDoc::OnCloseDocument()

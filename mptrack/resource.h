@@ -37,6 +37,7 @@
 #define IDR_MAINFRAME                   200
 #define IDR_MODULETYPE                  201
 #define IDR_TOOLBARS                    202
+#define ID_PATTERN_CHANNELMANAGER       202
 #define IDR_ENVELOPES                   203
 #define IDB_MAINBAR                     300
 #define IDB_IMAGELIST                   301
@@ -77,7 +78,6 @@
 #define IDR_VSTMENU                     436
 #define IDD_DEFAULTPLUGINEDITOR         438
 #define IDD_CHANNELMANAGER              440
-#define ID_PATTERN_CHANNELMANAGER       441
 #define IDR_PLUGINMENU                  442
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
@@ -141,6 +141,7 @@
 #define IDC_COMBO4                      1204
 #define IDC_COMBO5                      1205
 #define IDC_COMBO6                      1206
+#define IDC_COMBO9                      1207
 #define IDC_NOTEMAP                     1213
 #define IDC_TEXT1                       1301
 #define IDC_TEXT2                       1302
@@ -810,12 +811,12 @@
 #define ID_FACTORYPRESET                33914
 #define ID_FACTORYPRESET_DEFAULT        33915
 #define ID_MODTREE_SETPATH              33916
+#define ID_MODTREE_SAVEITEM             33917
 #define ID_PLUGIN_SETUP                 33918
 #define ID_PRESET_SET                   33920
 #define ID_PLUGSELECT                   35000
-#define ID_GROW_SELECTION				35001
+#define ID_GROW_SELECTION               35001
 #define ID_SHRINK_SELECTION             35002
-
 #define IDS_ERR_FILEOPEN                55001
 #define IDS_ERR_FILETYPE                55002
 #define IDS_ERR_SAVEINS                 55003

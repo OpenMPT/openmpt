@@ -15,6 +15,11 @@ public:
 	CSoundFile *m_pSndFile;
 	UINT m_nChannels, m_nType;
 
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	CButton m_CheckBox6;
+// -! NEW_FEATURE#0023
+
 public:
 	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = m_nChannels = 0; }
 	void UpdateDialog();
@@ -31,6 +36,10 @@ protected:
 	afx_msg void OnCheck3();
 	afx_msg void OnCheck4();
 	afx_msg void OnCheck5();
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	afx_msg void OnCheck6();
+// -! NEW_FEATURE#0023
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

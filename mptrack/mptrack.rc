@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -762,37 +762,46 @@ BEGIN
     LTEXT           "Sample Map:",IDC_STATIC,176,53,48,8
     LTEXT           "Sample Filename:",IDC_STATIC,7,50,57,12,SS_CENTERIMAGE
     GROUPBOX        "General",IDC_STATIC,6,62,79,56
-    GROUPBOX        "Pitch/Pan",IDC_STATIC,88,63,83,41
+    GROUPBOX        "Pitch/Pan",IDC_STATIC,88,63,83,38
     LTEXT           "(required for VSTis)",IDC_STATIC,253,98,72,12,
                     SS_CENTERIMAGE
     PUSHBUTTON      "Open Editor...",IDC_INSVIEWPLG,291,65,50,14
+    LTEXT           "Attack:",IDC_STATIC,90,101,48,8
+    CONTROL         "",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS,86,109,45,10
+    EDITTEXT        IDC_EDIT2,132,105,38,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,161,106,8,11
 END
 
-IDD_MODDOC_MODTYPE DIALOG  0, 0, 237, 106
+IDD_MODDOC_MODTYPE DIALOGEX 0, 0, 237, 118
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Module Type"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,183,8,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,183,26,50,14
-    GROUPBOX        "",IDC_STATIC,4,4,174,98
-    COMBOBOX        IDC_COMBO1,10,22,93,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    GROUPBOX        "",IDC_STATIC,4,4,174,111
+    COMBOBOX        IDC_COMBO1,8,22,101,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    COMBOBOX        IDC_COMBO2,109,22,60,77,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO2,114,22,60,77,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Module Type:",IDC_STATIC,10,12,52,8
-    LTEXT           "Channels:",IDC_STATIC,109,12,32,8
+    LTEXT           "Module Type:",IDC_STATIC,8,12,52,8
+    LTEXT           "Channels:",IDC_STATIC,114,12,32,8
     CONTROL         "Linear Frequency Slides",IDC_CHECK1,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,40,93,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,40,93,10
     CONTROL         "Fast Volume Slides",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,52,75,10
+                    WS_TABSTOP,8,52,75,10
     CONTROL         "IT Old Effects",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,64,76,10
+                    WS_TABSTOP,8,64,76,10
     CONTROL         "IT Compatible Gxx",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,76,76,10
+                    WS_TABSTOP,8,76,76,10
     CONTROL         "Extended filter range",IDC_CHECK5,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,88,96,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,88,96,10
+    CONTROL         "Embed instrument parameters",IDC_CHECK6,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,100,96,10
 END
 
 IDD_SHOWLOG DIALOG  0, 0, 300, 106
@@ -923,9 +932,9 @@ BEGIN
                     WS_TABSTOP
     CONTROL         "ValSld",IDC_SLIDER9,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,212,228,85,12
-    EDITTEXT        IDC_EDIT14,299,228,39,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT14,299,233,39,12,ES_AUTOHSCROLL
     LTEXT           "Value:",IDC_TEXT5,216,219,81,8
-    PUSHBUTTON      "Set",IDC_BUTTON3,341,228,17,12
+    PUSHBUTTON      "Set",IDC_BUTTON3,341,233,17,12
     LTEXT           "Output to:",IDC_STATIC,215,192,34,8
     COMBOBOX        IDC_COMBO7,215,202,77,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
@@ -934,11 +943,11 @@ BEGIN
     PUSHBUTTON      ">>",IDC_BUTTON4,97,187,16,12,NOT WS_TABSTOP
     PUSHBUTTON      "<<",IDC_BUTTON5,78,187,16,12,NOT WS_TABSTOP
     CONTROL         "Apply to final mix",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,299,190,69,10
+                    WS_TABSTOP,299,188,69,10
     CONTROL         "Bypass",IDC_CHECK10,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,299,202,40,10
+                    WS_TABSTOP,299,198,40,10
     CONTROL         "Dry mix",IDC_CHECK11,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,299,214,37,10
+                    WS_TABSTOP,299,218,37,10
     COMBOBOX        IDC_COMBO8,12,256,102,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "",IDC_SLIDER10,"msctls_trackbar32",TBS_BOTH | 
@@ -947,7 +956,12 @@ BEGIN
     PUSHBUTTON      "Save",IDC_BUTTON8,168,256,42,12
     LTEXT           "Factory preset:",IDC_STATIC,12,244,48,8
     LTEXT           "Wet / dry",IDC_STATIC,216,244,44,8
-    LTEXT           "",IDC_STATIC8,299,256,113,8
+    LTEXT           "Wet Dry Ratio",IDC_STATIC8,299,256,102,8
+    CONTROL         "Expand",IDC_CHECK12,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,299,208,37,10
+    COMBOBOX        IDC_COMBO9,347,214,62,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Mix mode:",IDC_STATIC,376,203,34,8
 END
 
 IDD_EDIT_FIND DIALOG  0, 0, 182, 145
@@ -1726,6 +1740,8 @@ STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "Modplug Tracker"
     IDR_MODULETYPE          "\nModule\nuntitled\nMusic Modules (*.mod;*.s3m;*.it;*.xm)\n.mod\nModplugTracker.Document\nMusic Module"
+    ID_PATTERN_CHANNELMANAGER 
+                            "Display channel manager window\nChannel manager"
 END
 
 STRINGTABLE 
@@ -2014,12 +2030,12 @@ BEGIN
     ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
 END
 
-#endif    // English (U.S.) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
+// Anglais (Royaume-Uni) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2086,6 +2102,8 @@ BEGIN
                     WS_EX_STATICEDGE
     PUSHBUTTON      "Solo",IDC_BUTTON5,198,218,60,12,0,WS_EX_STATICEDGE
     PUSHBUTTON      "Mute",IDC_BUTTON6,264,218,60,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Store",IDC_BUTTON7,438,2,41,11,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Restore",IDC_BUTTON8,480,2,42,11,0,WS_EX_STATICEDGE
 END
 
 IDD_DEFAULTPLUGINEDITOR DIALOGEX 0, 0, 151, 227
@@ -2124,7 +2142,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (U.K.) resources
+#endif    // Anglais (Royaume-Uni) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

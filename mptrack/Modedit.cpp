@@ -26,7 +26,28 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	CHAR s[256];
 	UINT b64 = 0;
 	
-	if (nNewType == m_SndFile.m_nType) return TRUE;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//	if (nNewType == m_SndFile.m_nType) return TRUE;
+	if (nNewType == m_SndFile.m_nType){
+		// Changing doc name
+		CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME];
+		_splitpath(GetPathName(), drive, path, fname, NULL);
+		strcat(drive, path);
+		strcat(drive, fname);
+		switch(nNewType)
+		{
+		case MOD_TYPE_XM:	strcat(drive, ".xm"); break;
+		case MOD_TYPE_IT:	m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? strcat(drive, ".itp") : strcat(drive, ".it"); break;
+		case MOD_TYPE_S3M:	strcat(drive, ".s3m"); break;
+		default:			strcat(drive, ".mod"); break;
+		}
+		SetPathName(drive, FALSE);
+		UpdateAllViews(NULL, HINT_MODTYPE);
+		return TRUE;
+	}
+// -! NEW_FEATURE#0023
+
 	// Check if conversion to 64 rows is necessary
 	for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++)
 	{
@@ -298,7 +319,11 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		switch(nNewType)
 		{
 		case MOD_TYPE_XM:	strcat(drive, ".xm"); break;
-		case MOD_TYPE_IT:	strcat(drive, ".it"); break;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//		case MOD_TYPE_IT:	strcat(drive, ".it"); break;
+		case MOD_TYPE_IT:	m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? strcat(drive, ".itp") : strcat(drive, ".it"); break;
+// -! NEW_FEATURE#0023
 		case MOD_TYPE_S3M:	strcat(drive, ".s3m"); break;
 		default:			strcat(drive, ".mod"); break;
 		}
@@ -1154,6 +1179,11 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 		if (pDup)
 		{
 			*penv = *pDup;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+			strcpy(m_SndFile.m_szInstrumentPath[newins-1],m_SndFile.m_szInstrumentPath[lDuplicate-1]);
+			m_SndFile.instrumentModified[newins-1] = FALSE;
+// -! NEW_FEATURE#0023
 		} else
 		{
 			InitializeInstrument(penv, newsmp);

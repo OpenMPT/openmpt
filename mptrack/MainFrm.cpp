@@ -445,8 +445,7 @@ VOID CMainFrame::Initialize()
 	OnUpdateUser(NULL);
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
 	
-	//rewbs.perf: eric suggested removing this:
-	//SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	
 	// Setup Keyboard Hook
 	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());

@@ -45,6 +45,11 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD, DWORD dwParam1, DWORD dw
 		case 0x80:	// Note Off
 		case 0x90:	// Note On
 			{
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+				// Note OFF !!!
+				if( !((dwParam1>>16) & 0x64) && !(CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) ) break;
+// -! NEW_FEATURE#0012
 				if ((CMainFrame::m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
 				 && ((dwParam1 & 0x0f) != 9))
 				{

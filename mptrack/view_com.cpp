@@ -38,6 +38,10 @@ enum {
 	INSLIST_SAMPLES,
 	INSLIST_ENVELOPES,
 	INSLIST_FILENAME,
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	INSLIST_PATH,
+// -! NEW_FEATURE#0023
 	INSLIST_COLUMNS
 };
 
@@ -67,6 +71,10 @@ LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
 	{"Samples", 64},
 	{"Envelopes", 128},
 	{"File Name", 128},
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	{"Path", 128},
+// -! NEW_FEATURE#0023
 };
 
 
@@ -370,6 +378,16 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 							s[sizeof(penv->filename)] = 0;
 						}
 						break;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+					case INSLIST_PATH:
+						if (penv)
+						{
+							memcpy(s, pSndFile->m_szInstrumentPath[iIns], _MAX_PATH);
+							s[_MAX_PATH] = 0;
+						}
+						break;
+// -! NEW_FEATURE#0023
 					}
 					lvi.mask = LVIF_TEXT;
 					lvi.iItem = iIns;

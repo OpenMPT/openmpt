@@ -584,7 +584,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 // -> DESC="channels management dlg"
 	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
 
-	if(activeDoc && CChannelManagerDlg::sharedInstance() && CChannelManagerDlg::sharedInstance()->IsDisplayed())
+	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
 // -! NEW_FEATURE#0015
 }

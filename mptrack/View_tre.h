@@ -169,6 +169,7 @@ protected:
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	afx_msg void OnSetItemPath();
+	afx_msg void OnSaveItem();
 // -! NEW_FEATURE#0023
 
 	afx_msg void OnAddDlsBank();

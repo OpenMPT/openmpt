@@ -177,7 +177,11 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		{
 		case MOD_TYPE_S3M:	pszModType = "S3M (ScreamTracker)"; break;
 		case MOD_TYPE_XM:	pszModType = "XM (FastTracker 2)"; break;
-		case MOD_TYPE_IT:	pszModType = "IT (Impulse Tracker)"; break;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//		case MOD_TYPE_IT:	pszModType = "IT (Impulse Tracker)"; break;
+		case MOD_TYPE_IT:	pszModType = m_pSndFile->m_dwSongFlags & SONG_ITPROJECT ? "ITP (IT Project)" : "IT (Impulse Tracker)"; break;
+// -! NEW_FEATURE#0023
 		}
 		wsprintf(s, "%s, %d channels", pszModType, m_pSndFile->m_nChannels);
 		m_EditModType.SetWindowText(s);
@@ -379,7 +383,12 @@ void CCtrlGeneral::OnChangeModType()
 	{
 		BOOL bShowLog = FALSE;
 		m_pModDoc->ClearLog();
-		if ((dlg.m_nType) && (dlg.m_nType != m_pSndFile->m_nType))
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//		if ((dlg.m_nType) && (dlg.m_nType != m_pSndFile->m_nType))
+//		if(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT) m_pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
+		if(dlg.m_nType)
+// -! NEW_FEATURE#0023
 		{
 			if (!m_pModDoc->ChangeModType(dlg.m_nType)) return;
 			bShowLog = TRUE;

@@ -93,6 +93,11 @@ BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 	ON_COMMAND(IDC_CHECK3,		OnCheck3)
 	ON_COMMAND(IDC_CHECK4,		OnCheck4)
 	ON_COMMAND(IDC_CHECK5,		OnCheck5)
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	ON_COMMAND(IDC_CHECK6,		OnCheck6)
+	ON_CBN_SELCHANGE(IDC_COMBO1,UpdateDialog)
+// -! NEW_FEATURE#0023
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -109,6 +114,10 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK3,		m_CheckBox3);
 	DDX_Control(pDX, IDC_CHECK4,		m_CheckBox4);
 	DDX_Control(pDX, IDC_CHECK5,		m_CheckBox5);
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
+// -! NEW_FEATURE#0023
 	//}}AFX_DATA_MAP
 }
 
@@ -162,11 +171,22 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox3.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITOLDEFFECTS) ? MF_CHECKED : 0);
 	m_CheckBox4.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITCOMPATMODE) ? MF_CHECKED : 0);
 	m_CheckBox5.SetCheck((m_pSndFile->m_dwSongFlags & SONG_EXFILTERRANGE) ? MF_CHECKED : 0);
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	m_CheckBox6.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITPEMBEDIH) ? MF_CHECKED : 0);
+// -! NEW_FEATURE#0023
+
 	m_CheckBox1.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
 	m_CheckBox2.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_S3M) ? TRUE : FALSE);
 	m_CheckBox3.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_IT) ? TRUE : FALSE);
 	m_CheckBox4.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_IT) ? TRUE : FALSE);
 	m_CheckBox5.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	m_CheckBox6.EnableWindow(m_TypeBox.GetCurSel() == 4 ? TRUE : FALSE);
+// -! NEW_FEATURE#0023
 }
 
 
@@ -220,6 +240,18 @@ void CModTypeDlg::OnCheck5()
 }
 
 
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+void CModTypeDlg::OnCheck6()
+{
+	if (m_CheckBox6.GetCheck())
+		m_pSndFile->m_dwSongFlags |= SONG_ITPEMBEDIH;
+	else
+		m_pSndFile->m_dwSongFlags &= ~SONG_ITPEMBEDIH;
+}
+// -! NEW_FEATURE#0023
+
+
 void CModTypeDlg::OnOK()
 //----------------------
 {
@@ -229,8 +261,11 @@ void CModTypeDlg::OnOK()
 		m_nType = m_TypeBox.GetItemData(sel);
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	if(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT && sel != 4) m_pSndFile->m_dwSongFlags &= ~SONG_ITPROJECT;
-	if(sel == 4) m_pSndFile->m_dwSongFlags |= SONG_ITPROJECT;
+		if(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT && sel != 4){
+			m_pSndFile->m_dwSongFlags &= ~SONG_ITPROJECT;
+			m_pSndFile->m_dwSongFlags &= ~SONG_ITPEMBEDIH;
+		}
+		if(sel == 4) m_pSndFile->m_dwSongFlags |= SONG_ITPROJECT;
 // -! NEW_FEATURE#0023
 	}
 	sel = m_ChannelsBox.GetCurSel();
