@@ -6,7 +6,7 @@
 #define INSSTATUS_SPLITCURSOR	0x04
 
 // Non-Client toolbar buttons
-#define ENV_LEFTBAR_BUTTONS		15
+#define ENV_LEFTBAR_BUTTONS		17
 
 //==========================================
 class CViewInstrument: public CModScrollView
@@ -16,10 +16,14 @@ protected:
 	CImageList m_bmpEnvBar;
 	POINT m_ptMenu;
 	RECT m_rcClient;
-	UINT m_nInstrument, m_nEnv, m_nDragItem, m_nBtnMouseOver;
+	bool m_baPlayingNote[128]; //rewbs.instViewNNA
+	UINT m_nInstrument, m_nEnv, m_nDragItem, m_nBtnMouseOver, m_nPlayingChannel;
 	DWORD m_dwStatus;
 	DWORD m_NcButtonState[ENV_LEFTBAR_BUTTONS];
 	DWORD m_dwNotifyPos[MAX_CHANNELS];
+	bool m_bGrid;
+
+
 
 public:
 	CViewInstrument();
@@ -66,6 +70,8 @@ public:
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
+	void PlayNote(UINT note);
+	void DrawGrid(CDC *memDC, UINT speed);
 
 public:
 	//{{AFX_VIRTUAL(CViewInstrument)
@@ -108,11 +114,14 @@ protected:
 	afx_msg void OnEnvPanChanged();
 	afx_msg void OnEnvPitchChanged();
 	afx_msg void OnEnvFilterChanged();
+	afx_msg void OnEnvToggleGrid();
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditSampleMap();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
+	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

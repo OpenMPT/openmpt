@@ -1083,14 +1083,12 @@ UINT CSoundFile::CreateStereoMix(int count)
 	#endif
 
 		UINT nMixPlugin = 0;
-		if ((nMasterCh > 0) && (nMasterCh <= m_nChannels))
-		{
-			nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
-		}
-		if ((pChannel->pHeader)/* && (pChannel->pHeader->nMidiChannel & 0x80)*/)
-		{
+
+		if (pChannel->pHeader)												// first try intrument VST
 			nMixPlugin = pChannel->pHeader->nMixPlug;
-		}
+		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) 	// Then try Channel VST
+			nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
+		
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
 			PSNDMIXPLUGINSTATE pPlugin = m_MixPlugins[nMixPlugin-1].pMixState;

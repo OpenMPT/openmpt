@@ -9,6 +9,7 @@
 #include "moddoc.h"
 #include "globals.h"
 #include "view_gen.h"
+#include ".\childfrm.h"
 
 
 #ifdef _DEBUG
@@ -22,10 +23,12 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CViewExSplitWnd, CSplitterWnd)
 
-CWnd* CViewExSplitWnd::GetActivePane(int*, int*)	// pRow, pCol
+CWnd* CViewExSplitWnd::GetActivePane(int* row, int* col)	// pRow, pCol
 //----------------------------------------------
 {
 	// attempt to use active view of frame window
+//	if (row) (*row)=0;	//rewbs: fix minor bug in debug mode
+//	if (col) (*col)=0;   //rewbs: fix minor bug in debug mode
 	CWnd* pView = NULL;
  	CFrameWnd* pFrameWnd = GetParentFrame();
 	ASSERT_VALID(pFrameWnd);
@@ -55,6 +58,8 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
 	//}}AFX_MSG_MAP
+	ON_WM_ACTIVATE()
+	ON_WM_SETFOCUS()
 END_MESSAGE_MAP()
 
 LONG CChildFrame::glMdiOpenCount = 0;
@@ -378,4 +383,20 @@ BOOL CChildFrame::OnNcActivate(BOOL bActivate)
 	return CMDIChildWnd::OnNcActivate(bActivate);
 }
 
+CHAR* CChildFrame::GetCurrentViewClassName()
+{
+	return m_szCurrentViewClassName;
+}
 
+
+void CChildFrame::OnSetFocus(CWnd* pOldWnd)
+{
+	CMDIChildWnd::OnSetFocus(pOldWnd);
+	// TODO: Add your message handler code here
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if (pMainFrm)
+	{
+		pMainFrm->UpdateEffectKeys();
+	}
+
+}

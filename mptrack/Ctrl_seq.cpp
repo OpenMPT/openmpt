@@ -48,6 +48,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_PLAYER_PAUSE,			OnPlayerPause)
 	ON_COMMAND(ID_PLAYER_PLAYFROMSTART,	OnPlayerPlayFromStart)
 	ON_COMMAND(IDC_PATTERN_PLAYFROMSTART,OnPatternPlayFromStart)
+	//ON_COMMAND(ID_PATTERN_RESTART,		OnPatternPlayFromStart)
 	ON_COMMAND(ID_ORDERLIST_NEW,		OnCreateNewPattern)
 	ON_COMMAND(ID_ORDERLIST_COPY,		OnDuplicatePattern)
 	ON_COMMAND(ID_PATTERNCOPY,			OnPatternCopy)
@@ -227,6 +228,7 @@ UINT COrderList::GetCurrentPattern() const
 BOOL COrderList::ProcessKeyDown(UINT nChar)
 //-----------------------------------------
 {
+	//Todo: Handle these with commands
 	switch(nChar)
 	{
 	case VK_UP:
@@ -246,15 +248,19 @@ BOOL COrderList::ProcessKeyDown(UINT nChar)
 	case VK_INSERT: OnInsertOrder(); break;
 	case VK_TAB:	OnSwitchToView(); break;
 	case VK_RETURN:	OnLButtonDblClk(0, CPoint(0,0)); OnSwitchToView(); break;
-	case VK_F5:		OnPlayerPlay(); break;
+
+/*	case VK_F5:		OnPlayerPlay(); break;
 	case VK_F6:		OnPlayerPlayFromStart(); break;
 	case VK_F7:		OnPatternPlayFromStart(); break;
 	case VK_ESCAPE:
 	case VK_F8:		OnPlayerPause(); break;
+*/
 	default:
 		return FALSE;
 	}
+
 	return TRUE;
+
 }
 
 

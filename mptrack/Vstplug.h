@@ -9,6 +9,7 @@
 class CVstPluginManager;
 class CVstPlugin;
 class CVstEditor;
+class Cfxp;
 
 enum {
 	effBuzzGetNumCommands=0x1000,
@@ -33,7 +34,8 @@ typedef struct _VSTPLUGINLIB
 
 typedef struct _VSTINSTCH
 {
-	BYTE uNoteOnMap[128/8];
+	//BYTE uNoteOnMap[128/8];			rewbs.deMystifyMidiNoteMap
+	BYTE uNoteOnMap[128][MAX_CHANNELS];
 	UINT nProgram;
 } VSTINSTCH, *PVSTINSTCH;
 
@@ -42,19 +44,21 @@ typedef struct _VSTINSTCH
 class CVstPlugin: public IMixPlugin
 //=================================
 {
-	friend class CVstEditor;
+	friend class CAbstractVstEditor;
+	friend class COwnerVstEditor;
 	friend class CVstPluginManager;
 public:
 	enum {VSTEVENT_QUEUE_LEN=128}; 
 
 protected:
+	BOOL m_bSomePlugNeedsIdle;
 	ULONG m_nRefCount;
 	CVstPlugin *m_pNext, *m_pPrev;
 	HINSTANCE m_hLibrary;
 	PVSTPLUGINLIB m_pFactory;
 	PSNDMIXPLUGIN m_pMixStruct;
 	AEffect *m_pEffect;
-	CVstEditor *m_pEditor;
+	CAbstractVstEditor *m_pEditor;
 	UINT m_nSampleRate;
 	BOOL m_bIsVst2;
 	SNDMIXPLUGINSTATE m_MixState;
@@ -77,9 +81,12 @@ public:
 public:
 	PVSTPLUGINLIB GetPluginFactory() const { return m_pFactory; }
 	BOOL HasEditor();
-	UINT GetNumPrograms();
-	UINT GetNumParameters();
-	UINT GetCurrentProgram();
+	long GetNumPrograms();
+	long GetNumParameters();
+	long GetCurrentProgram();
+	long GetNumProgramCategories();
+	long GetProgramNameIndexed(long index, long category, char *text);
+	//long GetProgramName();
 	VOID SetCurrentProgram(UINT nIndex);
 	FLOAT GetParameter(UINT nIndex);
 	VOID SetParameter(UINT nIndex, FLOAT fValue);
@@ -93,16 +100,30 @@ public:
 	UINT GetNumCommands();
 	BOOL GetCommandName(UINT index, LPSTR pszName);
 	BOOL ExecuteCommand(UINT nIndex);
+	CAbstractVstEditor* GetEditor();
+	bool LoadProgram(Cfxp *fxp);
+	long GetUID();
+	long GetVersion();
+	bool GetParams(float* param, long min, long max);
+	bool RandomizeParams(long minParam=0, long maxParam=0);
 
 public: // IMixPlugin interface
 	int AddRef() { return ++m_nRefCount; }
 	int Release();
 	void SaveAllParameters();
 	void RestoreAllParameters();
+	void ProcessVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
+	void ClearVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
 	void Process(float *pOutL, float *pOutR, unsigned long nSamples);
 	void Init(unsigned long nFreq, int bReset);
 	void MidiSend(DWORD dwMidiCode);
-	void MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol);
+	void MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, UINT trackChan);
+	void HardAllNotesOff(); //rewbs.VSTiNoteHoldonStopFix
+	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);
+	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn);
+	bool m_bNeedIdle;
+	
+
 	void SetZxxParameter(UINT nParam, UINT nValue);
 	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST
 };
@@ -114,7 +135,7 @@ class CVstPluginManager
 {
 protected:
 	PVSTPLUGINLIB m_pVstHead;
-	BOOL m_bNeedIdle;
+	BOOL m_bSomePlugNeedsIdle, m_bAllPlugsNeedEditorIdle;
 
 public:
 	CVstPluginManager();
@@ -127,7 +148,6 @@ public:
 	BOOL RemovePlugin(PVSTPLUGINLIB);
 	BOOL CreateMixPlugin(PSNDMIXPLUGIN);
 	VOID OnIdle();
-	BOOL NeedIdle() const { return m_bNeedIdle; }
 
 protected:
 	VOID EnumerateDirectXDMOs();
@@ -136,25 +156,7 @@ protected:
 	long VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 	static long VSTCALLBACK MasterCallBack(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN);
-};
-
-
-//==============================
-class CVstEditor: public CDialog
-//==============================
-{
-protected:
-	CVstPlugin *m_pVstPlugin;
-
-public:
-	CVstEditor(CVstPlugin *pPlugin);
-	virtual ~CVstEditor();
-	virtual VOID OnOK();
-	virtual VOID OnCancel();
-	BOOL OpenEditor(CWnd *parent);
-	VOID DoClose();
-	afx_msg void OnClose();
-	DECLARE_MESSAGE_MAP()
+	VstTimeInfo timeInfo;
 };
 
 

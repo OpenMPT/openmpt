@@ -121,6 +121,7 @@ public:
 	VOID OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
 	BOOL CanDrop(HTREEITEM hItem, BOOL bDoDrop);
 	VOID UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify);
+	void PlayItemProxy(UINT note);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -172,8 +173,12 @@ protected:
 	afx_msg void OnRefreshInstrLib();
 	afx_msg void OnShowAllFiles();
 	afx_msg void OnShowSoundFiles();
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
 };
 
 

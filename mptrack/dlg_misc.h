@@ -65,13 +65,20 @@ public:
 	CSoundFile *m_pSndFile;
 	BOOL m_bChnMask[MAX_CHANNELS];
 	UINT m_nChannels, m_nRemove;
+	//CButton m_ButChan[MAX_CHANNELS];	
+	//CStatic m_Label[MAX_CHANNELS];	
+	CListBox m_RemChansList;
 
 public:
 	CRemoveChannelsDlg(CSoundFile *pSndFile, UINT nChns, CWnd *parent=NULL):CDialog(IDD_REMOVECHANNELS, parent)
-		{ m_pSndFile = pSndFile; m_nChannels = m_pSndFile->m_nChannels; m_nRemove = nChns; memset(m_bChnMask, 0, sizeof(m_bChnMask)); }
+		{ m_pSndFile = pSndFile; 
+		  m_nChannels = m_pSndFile->m_nChannels; 
+		  m_nRemove = nChns; 
+		  memset(m_bChnMask, 0, sizeof(m_bChnMask)); }
 
 protected:
 	//{{AFX_VIRTUAL(CRemoveChannelsDlg)
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	//}}AFX_VIRTUAL
@@ -79,6 +86,8 @@ protected:
 	afx_msg void OnChannelChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP();
+public:
+//	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 

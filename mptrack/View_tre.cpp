@@ -6,6 +6,7 @@
 #include "dlsbank.h"
 #include "dlg_misc.h"
 #include "vstplug.h"
+#include ".\view_tre.h"
 
 #ifndef TVS_SINGLEEXPAND
 #define TVS_SINGLEEXPAND	0x400
@@ -79,7 +80,10 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_SOUNDBANK_PROPERTIES,	OnSoundBankProperties)
 	ON_COMMAND(ID_MODTREE_SHOWALLFILES, OnShowAllFiles)
 	ON_COMMAND(ID_MODTREE_SOUNDFILESONLY,OnShowSoundFiles)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)
 	//}}AFX_MSG_MAP
+	ON_WM_KILLFOCUS()
+	ON_WM_SETFOCUS()
 END_MESSAGE_MAP()
 
 
@@ -186,7 +190,7 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 				}
 			}
 			return TRUE;
-		} else
+		} /*else
 		{
 			UINT nChar = pMsg->wParam;
 			DWORD nFlags = HIWORD(pMsg->lParam);
@@ -196,14 +200,32 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 				PlayItem(GetSelectedItem(), nNote);
 				return TRUE;
 			}
-		}
-	} else
+		}*/
+	} /*else
 	if (pMsg->message == WM_KEYUP)
 	{
 		UINT nChar = pMsg->wParam;
 		DWORD nFlags = HIWORD(pMsg->lParam);
 		if (CMainFrame::GetNoteFromKey(nChar, nFlags)) return TRUE;
+	}*/
+
+	//We handle keypresses before Windows has a chance to handle them (for alt etc..)
+	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
+		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
+	{
+		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+		
+		//Translate message manually
+		UINT nChar = pMsg->wParam;
+		UINT nRepCnt = LOWORD(pMsg->lParam);
+		UINT nFlags = HIWORD(pMsg->lParam);
+		KeyEventType kT = ih->GetKeyEventType(nFlags);
+		InputTargetContext ctx = (InputTargetContext)(kCtxViewTree);
+		
+		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			return true; // Mapped to a command, no need to pass message on.
 	}
+
 	return CTreeCtrl::PreTranslateMessage(pMsg);
 }
 
@@ -1110,10 +1132,10 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				if (pPlugin->pMixPlugin)
 				{
 					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-					if (pVstPlugin->HasEditor())
-					{
+//					if (pVstPlugin->HasEditor())
+//					{
 						pVstPlugin->ToggleEditor();
-					}
+//					}
 				}
 			}
 			return TRUE;
@@ -1327,7 +1349,7 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 	CFileDialog dlg(TRUE,
 					NULL,
 					NULL,
-					OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
 					"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls|"
 					"FastTracker II Instruments (*.xi)|*.xi|"
 					"GF1 Patches (*.pat)|*.pat|"
@@ -2415,8 +2437,9 @@ void CModTree::OnDeleteTreeItem()
 
 void CModTree::OnPlayTreeItem()
 //-----------------------------
-{
-	PlayItem(GetSelectedItem());
+{	
+	HTREEITEM hItem = GetSelectedItem();
+	PlayItem(hItem);
 }
 
 
@@ -2536,7 +2559,7 @@ void CModTree::OnExportMidiLib()
 	CFileDialog dlg(FALSE,
 					"ini",
 					szFileName,
-					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+					OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					"Text and INI files (*.txt,*.ini)|*.txt;*.ini|"
 					"All Files (*.*)|*.*||",
 					this);
@@ -2694,4 +2717,33 @@ void CModTree::OnSoundBankProperties()
 }
 
 
+LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == kcNull)
+		return NULL;
+	
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
+	if (wParam>=kcTreeViewStartNotes && wParam<=kcTreeViewEndNotes)
+	{
+		PlayItem(GetSelectedItem(), wParam-kcTreeViewStartNotes+1+pMainFrm->GetBaseOctave()*12);
+		return wParam;
+	}
+	if (wParam>=kcTreeViewStartNoteStops && wParam<=kcTreeViewEndNoteStops)
+	{	
+		return wParam;
+	}
+}
+
+void CModTree::OnKillFocus(CWnd* pNewWnd)
+{
+	CTreeCtrl::OnKillFocus(pNewWnd);
+	CMainFrame::GetMainFrame()->m_bModTreeHasFocus=false;
+	
+}
+
+void CModTree::OnSetFocus(CWnd* pOldWnd)
+{
+	CTreeCtrl::OnSetFocus(pOldWnd);
+	CMainFrame::GetMainFrame()->m_bModTreeHasFocus=true;
+}

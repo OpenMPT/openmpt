@@ -16,6 +16,7 @@
 #define CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
+#include ".\mptrack.h"
 //end  rewbs.memLeak
 
 #ifdef _DEBUG
@@ -167,9 +168,9 @@ LPCSTR szNoteNames[12] =
 };
 
 LPCSTR szHexChar = "0123456789ABCDEF";
-LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ?"; //rewbs.smoothVST: added last ?
-LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\"; //rewbs.smoothVST: added last \ (written as \\)
-LPCSTR gszVolCommands = " vpcdabuhlrgfe";
+LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ??"; //rewbs.smoothVST: added last ?; rewbs.velocity: added last ?
+LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
+LPCSTR gszVolCommands = " vpcdabuhlrgfe:o";	//rewbs.velocity: added last : ; rewbs.volOff added last o
 
 
 BYTE gEffectColors[MAX_EFFECTS] =
@@ -182,7 +183,7 @@ BYTE gEffectColors[MAX_EFFECTS] =
 	0,					MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_GLOBALS,	
 	MODCOLOR_GLOBALS,	0,					MODCOLOR_PITCH,		MODCOLOR_PANNING,
 	MODCOLOR_PITCH,		MODCOLOR_PANNING,	0,					0,
-	0 //rewbs.smoothVST
+	//0,/*rewbs.smoothVST*/ ,0/*rewbs.velocity*/,
 };
 
 
@@ -728,15 +729,16 @@ BOOL CTrackApp::InitInstance()
 		Log("Modplug Tracker v%X.%02X.%04d started\n", (MPTRACK_VERSION>>24)&0xFF, (MPTRACK_VERSION>>16)&0xFF, (MPTRACK_VERSION & 0xFFFF));
 	}
 
+	pMainFrame->m_InputHandler->UpdateMainMenu();
 	EndWaitCursor();
 
 	return TRUE;
 }
 
-
 int CTrackApp::ExitInstance()
 //---------------------------
 {
+	//::MessageBox("Exiting/Crashing");
 	SndDevUninitialize();
 	if (glpMidiLibrary)
 	{
@@ -874,7 +876,7 @@ void CTrackApp::OnFileOpen()
 	CFileDialog dlg(TRUE,
 					NULL,
 					NULL,
-					OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_FORCESHOWHIDDEN,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_FORCESHOWHIDDEN,
 					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
 					"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha|"
 					"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
@@ -1141,37 +1143,37 @@ const int __SinusTable[256] =
 #define Sinus(x)	__SinusTable[x&0xFF]
 #define Cosinus(x)	__SinusTable[(x+0x40)&0xFF]
 
-
+#define PI	3.14159265358979323f
 BOOL CPaletteBitmap::Animate()
 //----------------------------
 {
 	LPBYTE dest, src;
 	DWORD t = (timeGetTime() - m_dwStartTime) / 10;
 	LONG Dist, Phi, srcx, srcy, spdx, spdy, sizex, sizey;
+	bool dir;
 
 	if ((!m_lpRotoZoom) || (!m_lpBmp) || (!m_nRotoWidth) || (!m_nRotoHeight)) return FALSE;
+
+	Sleep(2); 	//give away some CPU
+
 	if (t > 256)
-	{
 		m_bFirst = FALSE;
-		t = 256;
-	}
-	if (t == m_dwFrameTime)
-	{
-		Sleep(1);
-		return TRUE;
-	}
+
+	dir = (t/256) % 2; //change dir every 256 t
+	t = t%256;
+	if (!dir) t = (256-t);
+	
 	sizex = m_nRotoWidth;
 	sizey = m_nRotoHeight;
 	m_dwFrameTime = t;
 	src = (LPBYTE)&m_lpBmp->bmiColors[256];
 	dest = m_lpRotoZoom;
-	Dist = (m_bFirst) ? t : 256;
-	if (Dist > 256) Dist = 256;
+	Dist = t;
 	Phi = t;
-	spdx = (Cosinus(Phi) * Dist << 8) / sizex;
-	spdy = (Sinus(Phi) * Dist << 7) / sizey;
-	srcx = 0x800000 - ((spdx * sizex) >> 1) + (spdy * sizey);	// X0 = X' - ( Xm*spdx - Ym*spdy )
-	srcy = 0x800000 - ((spdy * sizex) >> 1) - (spdx * sizey);	// Y0 = Y' - ( Xm*spdy + Ym*spdx )
+	spdx =(Cosinus(Phi)+Sinus(Phi<<2))*(Dist<<9)/sizex;
+	spdy =(Sinus(Phi)+Cosinus(Phi>>2))*(Dist<<9)/sizey;
+	srcx = 0x800000 - ((spdx * sizex) >> 1) + (spdy * sizey);	
+	srcy = 0x800000 - ((spdy * sizex) >> 1) + (spdx * sizey);	
 	for (UINT y=sizey; y; y--)
 	{
 		UINT oldx = srcx, oldy = srcy;
@@ -1243,7 +1245,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02X.%04d",
+	wsprintf(s, "%s version %X.%02X.%04da",
 				MAINFRAME_TITLE,
 				(MPTRACK_VERSION>>24)&0xFF,
 				(MPTRACK_VERSION>>16)&0xFF,
@@ -1307,7 +1309,7 @@ BOOL CSplashScreen::OnInitDialog()
 	
 	CDialog::OnInitDialog();
 	m_Bmp.SubclassDlgItem(IDC_SPLASH, this);
-	m_Bmp.LoadBitmap(MAKEINTRESOURCE(IDB_SPLASHSCREEN));
+	m_Bmp.LoadBitmap(MAKEINTRESOURCE(IDB_SPLASHNOFOLD));
 	GetWindowRect(&rect);
 	cx = rect.Width();
 	cy = rect.Height();
@@ -1382,7 +1384,7 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 	BOOL b = CWinApp::OnIdle(lCount);
 	if ((gpSplashScreen) && (m_bInitialized))
 	{
-		if (timeGetTime() - m_dwTimeStarted > 500)
+		if (timeGetTime() - m_dwTimeStarted > 1000)		//Set splash screen duration here -rewbs
 		{
 			StopSplashScreen();
 		}
@@ -1391,7 +1393,7 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 	{
 		if (gpRotoZoom->Animate()) return TRUE;
 	}
-	if ((m_pPluginManager) && (m_pPluginManager->NeedIdle()))
+	if (m_pPluginManager)
 	{
 		m_pPluginManager->OnIdle();
 	}
@@ -2578,3 +2580,15 @@ BOOL CTrackApp::GetLocalizedString(LPCSTR pszName, LPSTR pszStr, UINT cbSize)
 	return FALSE;
 }
 
+
+LRESULT CTrackApp::ProcessWndProcException(CException* e, const MSG* pMsg)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	Log("Unhandled Exception\n");
+	Log("Attempting to close sound device\n");
+	
+	CMainFrame::gpSoundDevice->Reset(); 
+	CMainFrame::gpSoundDevice->Close();
+
+	return CWinApp::ProcessWndProcException(e, pMsg);
+}

@@ -275,7 +275,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			// Channel effect
 			m_CbnEffects[ichn].SetRedraw(FALSE);
 			m_CbnEffects[ichn].ResetContent();
-			m_CbnEffects[ichn].SetItemData(m_CbnEffects[ichn].AddString("No effect"), 0);
+			m_CbnEffects[ichn].SetItemData(m_CbnEffects[ichn].AddString("No plugin"), 0);
 			int fxsel = 0;
 			for (UINT ifx=0; ifx<MAX_MIXPLUGINS; ifx++)
 			{
@@ -1130,44 +1130,9 @@ VOID CViewGlobals::OnEditPlugin()
 //-------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	PSNDMIXPLUGIN pPlugin;
-	CSoundFile *pSndFile;
-	
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pSndFile = pModDoc->GetSoundFile();
-	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-	if (pPlugin->pMixPlugin)
-	{
-		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-		if (pVstPlugin->HasEditor())
-		{
-			pVstPlugin->ToggleEditor();
-		} else
-		{
-			UINT nCommands = pVstPlugin->GetNumCommands();
-			if (nCommands > 10) nCommands = 10;
-			if (nCommands)
-			{
-				CHAR s[32];
-				HMENU hMenu = ::CreatePopupMenu();
-				
-				if (!hMenu)	return;
-				for (UINT i=0; i<nCommands; i++)
-				{
-					s[0] = 0;
-					pVstPlugin->GetCommandName(i, s);
-					if (s[0])
-					{
-						::AppendMenu(hMenu, MF_STRING, ID_FXCOMMANDS_BASE+i, s);
-					}
-				}
-				CPoint pt;
-				GetCursorPos(&pt);
-				::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
-				::DestroyMenu(hMenu);
-			}
-		}
-	}
+	pModDoc->TogglePluginEditor(m_nCurrentPlugin);
+	return;	
 }
 
 
@@ -1204,6 +1169,4 @@ VOID CViewGlobals::OnOutputRoutingChanged()
 	nroute = m_CbnOutput.GetItemData(m_CbnOutput.GetCurSel());
 	pPlugin->Info.dwOutputRouting = nroute;
 }
-
-
 

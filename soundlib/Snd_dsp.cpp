@@ -83,7 +83,7 @@ extern VOID MPPASMCALL X86_MonoDCRemoval(int *, UINT count);
 //
 
 // returns sqrt(x)
-__inline float sqrt(FLOAT x)
+__inline float sqrtMPT(FLOAT x)
 {
 	float result;
 	_asm {
@@ -95,7 +95,7 @@ __inline float sqrt(FLOAT x)
 }
 
 // sin(x) - sine of x (radians)
-__inline float sin(float x)
+__inline float sinMPT(float x)
 {
 	__asm {
 	fld x
@@ -144,12 +144,12 @@ VOID ShelfEQ(LONG scale,
 	if (quad != 0)
 	{
 		FLOAT lambda = (gainPI2 - gainDC2) / quad;
-		alpha  = (FLOAT)(lambda - Sgn(lambda)*sqrt(lambda*lambda - 1.0f));
+		alpha  = (FLOAT)(lambda - Sgn(lambda)*sqrtMPT(lambda*lambda - 1.0f));
 	}
  
 	beta0 = 0.5f * ((gainDC + gainPI) + (gainDC - gainPI) * alpha);
 	beta1 = 0.5f * ((gainDC - gainPI) + (gainDC + gainPI) * alpha);
-	rho   = (FLOAT)((sin((wT*0.5f) - (PI/4.0f))) / (sin((wT*0.5f) + (PI/4.0f))));
+	rho   = (FLOAT)((sinMPT((wT*0.5f) - (PI/4.0f))) / (sinMPT((wT*0.5f) + (PI/4.0f))));
  
 	quad  = 1.0f / (1.0f + rho*alpha);
     

@@ -67,6 +67,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_ZOOMUP,			OnZoomUp)
 	ON_COMMAND(ID_SAMPLE_ZOOMDOWN,			OnZoomDown)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -1260,6 +1261,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODINSTRUMENT *pins = &pSndFile->Ins[m_nSample];
 		HMENU hMenu = ::CreatePopupMenu();
+		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 		if (!hMenu)	return;
 		if (pins->nLength)
 		{
@@ -1309,11 +1311,12 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				if (pins->uFlags & CHN_16BIT) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, "Convert to 8-bit");
 				if (pins->uFlags & CHN_STEREO) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, "Convert to mono");
 			}
-			::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_TRIM, "Trim\tCtrl+T");
-			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\tCtrl+X");
-			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\tCtrl+C");
+			
+			::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_TRIM, "Trim\t" + ih->GetKeyTextFromCommand(kcSampleTrim));
+			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\t" + ih->GetKeyTextFromCommand(kcEditCut));
+			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
-		::AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\tCtrl+V");
+		::AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 		::DestroyMenu(hMenu);
@@ -1846,7 +1849,7 @@ void CViewSample::OnSampleTrim()
 
 void CViewSample::OnChar(UINT nChar, UINT, UINT nFlags)
 //-----------------------------------------------------
-{
+{/*
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (pMainFrm) && (!(nFlags & 0x4000)))
@@ -1881,12 +1884,44 @@ void CViewSample::OnChar(UINT nChar, UINT, UINT nFlags)
 			OnZoomUp();
 		}
 	}
+	*/
+}
+
+void CViewSample::PlayNote(UINT note)
+//-----------------------------------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CModDoc *pModDoc = GetDocument();
+	if ((pModDoc) && (pMainFrm))
+	{
+		if (note >= 0xFE)
+		{
+			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE);
+		} 
+		else
+		{
+			CHAR s[64];
+			if (m_dwStatus & SMPSTATUS_KEYDOWN)
+				pModDoc->NoteOff(note, TRUE);
+			else
+				pModDoc->NoteOff(0, TRUE);
+			DWORD loopstart = m_dwBeginSel, loopend = m_dwEndSel;
+			if (loopend - loopstart < (UINT)(4 << m_nZoom)) loopend = loopstart = 0;
+			pModDoc->PlayNote(note, 0, m_nSample, TRUE, -1, loopstart, loopend);
+			m_dwStatus |= SMPSTATUS_KEYDOWN;
+			s[0] = 0;
+			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
+			pMainFrm->SetInfoText(s);
+		}
+	}
+
 }
 
 
 void CViewSample::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 //----------------------------------------------------------------
 {
+	/*
 	switch(nChar)
 	{
 	case VK_DELETE:
@@ -1895,14 +1930,17 @@ void CViewSample::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	default:
 		CModScrollView::OnKeyDown(nChar, nRepCnt, nFlags);
 	}
+	*/
 }
 
 
 void CViewSample::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 //--------------------------------------------------------------
 {
+	/*
 	m_dwStatus &= ~SMPSTATUS_KEYDOWN;
 	CModScrollView::OnKeyUp(nChar, nRepCnt, nFlags);
+	*/
 }
 
 
@@ -2196,4 +2234,76 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 		}
 	}
 	return 0;
+}
+
+BOOL CViewSample::PreTranslateMessage(MSG *pMsg)
+//-----------------------------------------------
+{
+	if (pMsg)
+	{
+		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
+		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
+			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
+		{
+			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			
+			//Translate message manually
+			UINT nChar = pMsg->wParam;
+			UINT nRepCnt = LOWORD(pMsg->lParam);
+			UINT nFlags = HIWORD(pMsg->lParam);
+			KeyEventType kT = ih->GetKeyEventType(nFlags);
+			InputTargetContext ctx = (InputTargetContext)(kCtxViewSamples);
+			
+			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+				return true; // Mapped to a command, no need to pass message on.
+		}
+
+	}
+	
+	return CModScrollView::PreTranslateMessage(pMsg);
+}
+
+LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == kcNull)
+		return NULL;
+	
+	CModDoc *pModDoc = GetDocument();	
+	if (!pModDoc) return NULL;
+	
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();	
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+
+	switch(wParam)
+	{
+		case kcSampleTrim:		OnSampleTrim() ; return wParam;
+		case kcSampleZoomUp:	OnZoomUp(); return wParam;
+		case kcSampleZoomDown:	OnZoomDown(); return wParam;
+		case kcPrevInstrument:	OnPrevInstrument(); return wParam;
+		case kcNextInstrument:	OnNextInstrument(); return wParam;
+		case kcEditSelectAll:	OnEditSelectAll(); return wParam;
+		case kcSampleDelete:	OnEditDelete(); return wParam;
+		case kcEditCut:			OnEditCut(); return wParam;
+		case kcEditCopy:		OnEditCopy(); return wParam;
+		case kcEditPaste:		OnEditPaste(); return wParam;
+								
+		case kcSampleReverse:	PostCtrlMessage(IDC_SAMPLE_REVERSE); return wParam;
+		case kcSampleSilence:	PostCtrlMessage(IDC_SAMPLE_SILENCE); return wParam;
+		case kcSampleNormalize:	PostCtrlMessage(IDC_SAMPLE_NORMALIZE); return wParam;
+		case kcSampleAmplify:	PostCtrlMessage(IDC_SAMPLE_AMPLIFY); return wParam;
+
+		case kcNoteOff:			PlayNote(255); return wParam;
+		case kcNoteCut:			PlayNote(254); return wParam;
+
+	}
+	if (wParam>=kcSampStartNotes && wParam<=kcSampEndNotes)
+	{
+		PlayNote(wParam-kcSampStartNotes+1+pMainFrm->GetBaseOctave()*12);
+		return wParam;
+	}
+	if (wParam>=kcSampStartNoteStops && wParam<=kcSampEndNoteStops)
+	{
+		m_dwStatus &= ~SMPSTATUS_KEYDOWN;
+		return wParam;
+	}
 }

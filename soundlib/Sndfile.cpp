@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#include "aeffectx.h"
 
 #ifndef NO_COPYRIGHT
 #ifndef NO_MMCMP_SUPPORT
@@ -98,6 +99,7 @@ CSoundFile::CSoundFile()
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
+	m_lTotalSampleCount=0;
 }
 
 
@@ -759,6 +761,23 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	m_nSeqOverride = 0;
 }
 
+int CSoundFile::FindOrder(BYTE pat)
+{
+	int order = -1;
+
+	for (UINT p=0; p<MAX_ORDERS; p++)
+	{
+		if (Order[p] == pat)
+		{
+			order = p;
+			break;
+		}
+//		if (Order[nPos] == 0xFE)
+//			break;
+	}
+
+	return order;
+}
 
 void CSoundFile::SetCurrentOrder(UINT nPos)
 //-----------------------------------------
@@ -792,6 +811,46 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 	m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
 }
 
+//rewbs.VSTiNoteHoldonStopFix
+void CSoundFile::SuspendPlugins()	
+//------------------------------
+{
+	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	{
+		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
+		if ((pPlugin) && (m_MixPlugins[iPlug].pMixState))
+		{
+			pPlugin->HardAllNotesOff(); // I'm concerned these note offs won't get processed since we turn the plug off
+			pPlugin->Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
+			pPlugin->Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls suspend
+		}
+	}
+	m_lTotalSampleCount=0;
+
+}
+
+void CSoundFile::ResumePlugins()	
+//------------------------------
+{
+	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	{
+		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
+		if ((pPlugin) && (m_MixPlugins[iPlug].pMixState))
+		{
+			//reset some stuff
+			pPlugin->Dispatch(effStopProcess, 0, 0, NULL, 0.0f);	
+			pPlugin->Dispatch(effMainsChanged, 0, 0, NULL, 0.0f);	// calls suspend
+			//start off some stuff
+			pPlugin->Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);
+			pPlugin->Dispatch(effStartProcess, 0, 0, NULL, 0.0f);	// calls resume
+			//pPlugin->HardAllNotesOff(); // In case the call in SuspendPlugins aren't good enough.
+		}
+		m_lTotalSampleCount=0;
+	}
+
+}
+
+//end rewbs.VSTiNoteHoldonStopFix
 
 void CSoundFile::ResetChannels()
 //------------------------------
@@ -824,6 +883,22 @@ void CSoundFile::LoopPattern(int nPat, int nRow)
 		m_nSeqOverride = 0;
 	}
 }
+
+void CSoundFile::DontLoopPattern(int nPat, int nRow)
+//----------------------------------------------
+{
+	if ((nPat < 0) || (nPat >= MAX_PATTERNS) || (!Patterns[nPat])) nPat = 0;
+	if ((nRow < 0) || (nRow >= (int)PatternSize[nPat])) nRow = 0;
+	m_nPattern = nPat;
+	m_nRow = m_nNextRow = nRow;
+	m_nTickCount = m_nMusicSpeed;
+	m_nPatternDelay = 0;
+	m_nFrameDelay = 0;
+	m_nBufferCount = 0;
+	m_dwSongFlags &= ~SONG_PATTERNLOOP;
+	m_nSeqOverride = 0;
+}
+
 
 
 UINT CSoundFile::GetBestSaveFormat() const
@@ -1951,5 +2026,6 @@ BOOL CSoundFile::DestroySample(UINT nSample)
 }
 
 #endif // FASTSOUNDLIB
+
 
 

@@ -11,6 +11,7 @@
 #define COLHDR_HEIGHT		16	// Column header
 #define COLUMN_HEIGHT		13
 #define	VUMETERS_HEIGHT		13	// Height of vu-meters
+#define	PLUGNAME_HEIGHT		16	// Height of vu-meters
 #define VUMETERS_BMPWIDTH		32
 #define VUMETERS_BMPHEIGHT		10
 #define VUMETERS_MEDWIDTH		24
@@ -137,6 +138,7 @@ BOOL CViewPattern::UpdateSizes()
 	m_szHeader.cx = ROWHDR_WIDTH;
 	m_szHeader.cy = COLHDR_HEIGHT;
 	if (m_dwStatus & PATSTATUS_VUMETERS) m_szHeader.cy += VUMETERS_HEIGHT;
+	if (m_dwStatus & PATSTATUS_PLUGNAMESINHEADERS) m_szHeader.cy += PLUGNAME_HEIGHT;
 	m_szCell.cx = 4 + pfnt->nEltWidths[0];
 	if (m_nDetailLevel > 0) m_szCell.cx += pfnt->nEltWidths[1];
 	if (m_nDetailLevel > 1) m_szCell.cx += pfnt->nEltWidths[2];
@@ -269,6 +271,12 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcy = pfnt->nAlphaNZ_Y + 14 * COLUMN_HEIGHT;
 		break;
 	//end rewbs.smoothVST
+	//rewbs.velocity
+	case ':':
+		srcx = pfnt->nAlphaNZ_X;
+		srcy = pfnt->nAlphaNZ_Y + 15 * COLUMN_HEIGHT;
+		break;
+	//end rewbs.velocity
 
 	}
 	m_Dib.TextBlt(x, y, sizex, COLUMN_HEIGHT, srcx+ofsx, srcy);
@@ -357,7 +365,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	CSoundFile *pSndFile;
 	HDC hdc;
 	UINT xofs, yofs, nColumnWidth, ncols, nrows, ncolhdr;
-	int xpaint, ypaint;
+	int xpaint, ypaint, mixPlug;
 
 	ASSERT(pDC);
 	UpdateSizes();
@@ -396,6 +404,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				DrawButtonRect(hdc, &rect, s,
 					(pSndFile->ChnSettings[ncolhdr].dwFlags & CHN_MUTE) ? TRUE : FALSE,
 					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
+				
 				rect.bottom = rect.top + COLHDR_HEIGHT;
 				if (MultiRecordMask[ncolhdr>>3] & (1 << (ncolhdr&7)))
 				{
@@ -407,6 +416,20 @@ void CViewPattern::OnDraw(CDC *pDC)
 				{
 					OldVUMeters[ncolhdr] = 0;
 					DrawChannelVUMeter(hdc, rect.left + 1, rect.bottom, ncolhdr);
+					rect.top+=VUMETERS_HEIGHT;
+					rect.bottom+=VUMETERS_HEIGHT;
+				}
+				if (m_dwStatus & PATSTATUS_PLUGNAMESINHEADERS)
+				{
+					rect.top+=PLUGNAME_HEIGHT;
+					rect.bottom+=PLUGNAME_HEIGHT;
+					mixPlug=pSndFile->ChnSettings[ncolhdr].nMixPlugin;
+					if (mixPlug)
+						wsprintf(s, "%d: %s", mixPlug, (pSndFile->m_MixPlugins[mixPlug-1]).Info.szName);
+					else
+						wsprintf(s, "---");
+					DrawButtonRect(hdc, &rect, s, FALSE, 
+						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 				}
 			} else break;
 			ncolhdr++;
@@ -701,7 +724,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 					{
 						tx_col = MODCOLOR_INSTRUMENT;
 					}
-					if (col_sel & 0x02)
+					if (col_sel & 0x02 /*|| col_sel & 0x01*/) //LP Style select
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
@@ -745,6 +768,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 						case VOLCMD_TONEPORTAMENTO:
 						case VOLCMD_PORTAUP:
 						case VOLCMD_PORTADOWN:
+						case VOLCMD_VELOCITY:	//rewbs.velocity
+						case VOLCMD_OFFSET:		//rewbs.volOff
 							tx_col = MODCOLOR_PITCH;
 							break;
 						}
@@ -995,6 +1020,11 @@ void CViewPattern::UpdateScrollSize()
 		if (CMainFrame::m_dwPatternSetup & PATTERN_CENTERROW) m_nMidRow = (rect.Height() - m_szHeader.cy) / (m_szCell.cy << 1);
 		if (m_nMidRow) sizeTotal.cy += m_nMidRow * m_szCell.cy * 2;
 		SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
+		//UpdateScrollPos(); //rewbs.FixLPsOddScrollingIssue
+		if (rect.Height() >= sizeTotal.cy)
+			m_bWholePatternFitsOnScreen=true;
+		else
+			m_bWholePatternFitsOnScreen=false;
 	}
 }
 
@@ -1002,12 +1032,16 @@ void CViewPattern::UpdateScrollSize()
 void CViewPattern::UpdateScrollPos()
 //----------------------------------
 {
+	CRect rect;
+	GetClientRect(&rect);
+	
 	int x = GetScrollPos(SB_HORZ);
 	if (x < 0) x = 0;
 	m_nXScroll = (x + m_szCell.cx - 1) / m_szCell.cx;
 	int y = GetScrollPos(SB_VERT);
 	if (y < 0) y = 0;
 	m_nYScroll = (y + m_szCell.cy - 1) / m_szCell.cy;
+
 }
 
 
@@ -1294,6 +1328,7 @@ void CViewPattern::UpdateIndicator()
 			pMainFrm->SetInfoText(s);
 		}
 	}
+
 }
 
 

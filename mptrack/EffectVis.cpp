@@ -13,7 +13,7 @@
 
 #define NODESIZE 7
 #define NODEHALF 3
-#define BOTTOMBORDER 15
+#define BOTTOMBORDER 20
 #define TOPBORDER 0
 #define LEFTBORDER 0
 #define RIGHTBORDER 0
@@ -37,15 +37,48 @@ CEffectVis::CEffectVis(CViewPattern *pViewPattern, UINT startRow, UINT endRow, U
 	m_nParamToErase = -1;
 	m_nLastDrawnRow	= -1;
 	m_nOldPlayPos = -1;
+	m_nFillEffect=0;
 
 	UpdateSelection(startRow, endRow, nchn, pModDoc, pat);
 }
 
+BEGIN_MESSAGE_MAP(CEffectVis, CDialog)
+	ON_WM_PAINT()
+	ON_WM_SIZE()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONUP()
+//	ON_WM_CHAR()
+//	ON_WM_KEYDOWN()
+//	ON_WM_KEYUP()
+//	ON_WM_MBUTTONDOWN()
+//{{AFX_MSG_MAP(CEffectVis)
+	ON_COMMAND(ID_EDIT_UNDO,		OnEditUndo)
+//}}AFX_MSG_MAP
+//ON_STN_CLICKED(IDC_VISSTATUS, OnStnClickedVisstatus)
+//ON_EN_CHANGE(IDC_VISSTATUS, OnEnChangeVisstatus)
+	ON_COMMAND(IDC_VISFILLBLANKS,		OnFillBlanksCheck)
+	ON_CBN_SELCHANGE(IDC_VISEFFECTLIST,	OnEffectChanged)
+END_MESSAGE_MAP()
 
 void CEffectVis::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_VISSTATUS, m_edVisStatus);
+	DDX_Control(pDX, IDC_VISEFFECTLIST, m_cmbEffectList);
+	DDX_Control(pDX, IDC_VISFILLBLANKS, m_btnFillCheck);
+}
+
+void CEffectVis::OnFillBlanksCheck()
+{
+	m_bFillCheck = IsDlgButtonChecked(IDC_VISFILLBLANKS);
+}
+
+void CEffectVis::OnEffectChanged()
+{
+	m_nFillEffect = m_cmbEffectList.GetItemData(m_cmbEffectList.GetCurSel());
 }
 
 void CEffectVis::OnPaint()
@@ -84,6 +117,15 @@ BYTE CEffectVis::GetCommand(UINT row)
 		return pcmd[row*m_pSndFile->m_nChannels + m_nChan].command;
 	else
 		return 0;
+}
+
+void CEffectVis::SetCommand(UINT row, BYTE cmd)
+{
+	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
+	BEGIN_CRITICAL();
+	if (pcmd)
+		pcmd[row*m_pSndFile->m_nChannels + m_nChan].command = cmd;
+	END_CRITICAL();
 }
 
 int CEffectVis::RowToScreenX(UINT row)
@@ -139,29 +181,35 @@ void CEffectVis::DrawGrid()
 	for (UINT row=m_startRow; row<=m_endRow; row++)
 	{
 		if (row % CMainFrame::m_nRowSpacing == 0)
-			CMainFrame::penScratch = ::CreatePen(PS_SOLID,0, RGB(0xff, 0xff, 0xff));
+			CMainFrame::penScratch = CMainFrame::penGrayff;
 		else if (row % CMainFrame::m_nRowSpacing2 == 0)
-			CMainFrame::penScratch = ::CreatePen(PS_SOLID,0, RGB(0x99, 0x99, 0x99));
+			CMainFrame::penScratch = CMainFrame::penGray99;
 		else
-			CMainFrame::penScratch = ::CreatePen(PS_SOLID,0, RGB(0x55, 0x55, 0x55));
+			CMainFrame::penScratch = CMainFrame::penGray55;
 		m_dcGrid.SelectObject(CMainFrame::penScratch);
 		int x1 = RowToScreenX(row);
 		m_dcGrid.MoveTo(x1, m_rcDraw.top);
 		m_dcGrid.LineTo(x1, m_rcDraw.bottom);
-		::DeletePen(CMainFrame::penScratch);
+		//::DeletePen(CMainFrame::penScratch);
 	}
 	
 
 	for (UINT i=0; i<256; i+=64)
 	{
-		UINT val = (BYTE) i;
-		CMainFrame::penScratch = ::CreatePen(PS_SOLID,0, RGB(val, val, val));
+		switch (i)
+		{
+			case 0: CMainFrame::penScratch = CMainFrame::penGray00; break;
+			case 64: CMainFrame::penScratch = CMainFrame::penGray40; break;
+			case 128: CMainFrame::penScratch = CMainFrame::penGray80; break;
+			case 192: CMainFrame::penScratch = CMainFrame::penGraycc; break;
+		}
+		
 		m_dcGrid.SelectObject(CMainFrame::penScratch);
 
-		int y1 = ParamToScreenY(val);
+		int y1 = ParamToScreenY((BYTE)i);
 		m_dcGrid.MoveTo(m_rcDraw.left+INNERLEFTBORDER, y1);
 		m_dcGrid.LineTo(m_rcDraw.right-INNERRIGHTBORDER, y1);
-		::DeletePen(CMainFrame::penScratch);
+		//::DeletePen(CMainFrame::penScratch);
 	}
 
 } 
@@ -395,26 +443,7 @@ VOID CEffectVis::DoClose()
 }
 
 
-BEGIN_MESSAGE_MAP(CEffectVis, CDialog)
-	ON_WM_PAINT()
-	ON_WM_SIZE()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_RBUTTONUP()
-//	ON_WM_CHAR()
-//	ON_WM_KEYDOWN()
-//	ON_WM_KEYUP()
-//	ON_WM_MBUTTONDOWN()
-//{{AFX_MSG_MAP(CEffectVis)
-	ON_COMMAND(ID_EDIT_UNDO,		OnEditUndo)
-//}}AFX_MSG_MAP
-//ON_STN_CLICKED(IDC_VISSTATUS, OnStnClickedVisstatus)
-//ON_EN_CHANGE(IDC_VISSTATUS, OnEnChangeVisstatus)
-END_MESSAGE_MAP()
 
-// EffectVis message handlers
 
 
 
@@ -426,8 +455,18 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 	m_rcDraw.SetRect( m_rcFullWin.left  + LEFTBORDER,  m_rcFullWin.top    + TOPBORDER,
 				      m_rcFullWin.right - RIGHTBORDER, m_rcFullWin.bottom - BOTTOMBORDER);
 
+#define INFOWIDTH 200
+#define CHECKBOXWIDTH 100
+#define COMMANDLISTWIDTH 130
+
 	if (IsWindow(m_edVisStatus.m_hWnd))
-		m_edVisStatus.SetWindowPos(this, m_rcFullWin.left, m_rcDraw.bottom, m_rcFullWin.right, m_rcFullWin.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);	
+		m_edVisStatus.SetWindowPos(this, m_rcFullWin.left, m_rcDraw.bottom, INFOWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);	
+	if (IsWindow(m_btnFillCheck))
+		m_btnFillCheck.SetWindowPos(this, m_rcFullWin.right-COMMANDLISTWIDTH-CHECKBOXWIDTH, m_rcDraw.bottom, CHECKBOXWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
+	if (IsWindow(m_cmbEffectList))
+		m_cmbEffectList.SetWindowPos(this,  m_rcFullWin.right-COMMANDLISTWIDTH, m_rcDraw.bottom, COMMANDLISTWIDTH, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
+
+
 	m_pixelsPerRow   = (float)(m_rcDraw.Width()-INNERLEFTBORDER-INNERRIGHTBORDER)/(float)m_nRows;
 	m_pixelsPerParam = (float)(m_rcDraw.Height())/(float)0xFF;
 	m_boolForceRedraw = TRUE;
@@ -504,7 +543,7 @@ void CEffectVis::UpdateSelection(UINT startRow, UINT endRow, UINT nchn, CModDoc*
 
 }
 
-void CEffectVis::OnLButtonDown(UINT nFlags, CPoint point)
+void CEffectVis::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	if (!(m_dwStatus & FXVSTATUS_LDRAGGING))
@@ -526,13 +565,13 @@ void CEffectVis::OnLButtonDown(UINT nFlags, CPoint point)
 				m_nDragItem = row;
 			}
 		}		
-		m_dwStatus |= FXVSTATUS_LDRAGGING;
+		m_dwStatus |= FXVSTATUS_RDRAGGING;
 	}
 
-	CDialog::OnLButtonDown(nFlags, point);
+	CDialog::OnRButtonDown(nFlags, point);
 }
 
-void CEffectVis::OnLButtonUp(UINT nFlags, CPoint point)
+void CEffectVis::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	ReleaseCapture();
@@ -554,21 +593,21 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	UINT row= ScreenXToRow(point.x);
 	BYTE paramValue=ScreenYToParam(point.y);
 
-	if ((m_dwStatus & FXVSTATUS_LDRAGGING) && (m_nDragItem>=0) )
+	if ((m_dwStatus & FXVSTATUS_RDRAGGING) && (m_nDragItem>=0) )
 	{
 		m_nRowToErase = m_nDragItem;
 		m_nParamToErase = GetParam(m_nDragItem);
 
-		SetParam(m_nDragItem, paramValue);
+		MakeChange(m_nDragItem, paramValue);
 		m_pModDoc->SetModified();
 		m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
 	}
-	else if ((m_dwStatus & FXVSTATUS_RDRAGGING))
+	else if ((m_dwStatus & FXVSTATUS_LDRAGGING))
 	{		
 		//Interpolate if gap in rows, but with no right mouse release.		
 		if ((m_nLastDrawnRow>(int)m_startRow) && (row != m_nLastDrawnRow) && (row != m_nLastDrawnRow+1) &&   (row != m_nLastDrawnRow-1))
 		{
-			int diff = abs(row-m_nLastDrawnRow);
+			int diff = abs((long)row-(long)m_nLastDrawnRow);
 			ASSERT(diff!=0);
 			int sign = ((int)(row-m_nLastDrawnRow) > 0) ? 1 : -1;
 			float factor = (float)(paramValue-GetParam(m_nLastDrawnRow))/(float)diff + 0.5f;
@@ -582,25 +621,27 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 				m_nParamToErase = GetParam(currentRow);
 				int newParam = GetParam(m_nLastDrawnRow)+((float)i*factor+0.5f);
 				if (newParam>0xFF) newParam = 0xFF; if (newParam<0x00) newParam = 0x00;
-				SetParam(currentRow, newParam);
+				MakeChange(currentRow, newParam);
 			}
 		
 			m_nRowToErase = -1;		//Don't use single value update 
 			m_nParamToErase = -1;
-
-			m_nLastDrawnRow = row;
-			m_pModDoc->SetModified();
-			m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
 		}
 		else 
 		{
-			m_nLastDrawnRow = row;
+			//m_nLastDrawnRow = row;
 			m_nRowToErase = row;
 			m_nParamToErase = GetParam(row);
-			SetParam(row, paramValue);
-			m_pModDoc->SetModified();
-			m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+			MakeChange(row, paramValue);
+
+			//m_pModDoc->SetModified();
+			//m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
 		}
+
+		m_nLastDrawnRow = row;
+		m_pModDoc->SetModified();
+		m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+
 	}
 	//update status bar
 	CHAR s[256];
@@ -608,7 +649,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	m_edVisStatus.SetWindowText(s);
 }
 
-void CEffectVis::OnRButtonDown(UINT nFlags, CPoint point)
+void CEffectVis::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	if (!(m_dwStatus & FXVSTATUS_RDRAGGING))
@@ -617,18 +658,18 @@ void CEffectVis::OnRButtonDown(UINT nFlags, CPoint point)
 		SetCapture();
 
 		m_pModDoc->PrepareUndo(m_nPattern, m_nChan, m_startRow, m_nChan+1, m_endRow);
-		m_dwStatus |= FXVSTATUS_RDRAGGING;
+		m_dwStatus |= FXVSTATUS_LDRAGGING;
 	}
 
-	CModControlDlg::OnRButtonDown(nFlags, point);
+	CModControlDlg::OnLButtonDown(nFlags, point);
 }
 
-void CEffectVis::OnRButtonUp(UINT nFlags, CPoint point)
+void CEffectVis::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	ReleaseCapture();
 	m_dwStatus = 0x00;
-	CModControlDlg::OnRButtonUp(nFlags, point);
+	CModControlDlg::OnLButtonUp(nFlags, point);
 	m_nLastDrawnRow = -1;
 }
 
@@ -682,3 +723,50 @@ void CEffectVis::OnEditUndo()
 //
 //	// TODO:  Add your control notification handler code here
 //}
+
+BOOL CEffectVis::OnInitDialog()
+//--------------------------------
+{
+	CModControlDlg::OnInitDialog();
+	m_bFillCheck=true;
+	m_btnFillCheck.SetCheck(m_bFillCheck);
+	m_nFillEffect=m_pModDoc->GetIndexFromEffect(GetCommand(m_startRow), GetParam(m_startRow));
+	if (m_nFillEffect<0)
+		m_nFillEffect=28;
+
+	CHAR s[128];
+	UINT numfx = m_pModDoc->GetNumEffects();
+	m_cmbEffectList.ResetContent();
+	//m_cmbEffectList->SetItemData(combo->AddString(" None"), (DWORD)-1);
+	//if (!m_nFillEffect) 
+	//	combo->SetCurSel(0);
+	int k;
+	for (UINT i=0; i<numfx; i++)
+	{
+		if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+		{
+			k =m_cmbEffectList.AddString(s);
+			m_cmbEffectList.SetItemData(k, i);
+			if (i==m_nFillEffect)
+				m_cmbEffectList.SetCurSel(k);
+		}
+	}
+	return true;
+}
+
+void CEffectVis::MakeChange(int currentRow, int newParam)
+{
+	int currentCommand=GetCommand(currentRow);
+
+	if (currentCommand)
+	{
+		m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), &newParam);
+		SetParam(currentRow, newParam);
+	}
+	else if (!currentCommand && m_bFillCheck)
+	{
+		SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, &newParam));
+		SetParam(currentRow, newParam);
+	}
+}
+

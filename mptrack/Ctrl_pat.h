@@ -100,7 +100,7 @@ protected:
 	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing;
 	CModControlBar m_ToolBar;
 	UINT m_nInstrument, m_nDetailLevel;
-	BOOL m_bRecord, m_bVUMeters;
+	BOOL m_bRecord, m_bVUMeters, m_bPluginNames;
 
 public:
 	CCtrlPatterns();
@@ -131,10 +131,12 @@ protected:
 	afx_msg void OnPatternDuplicate();
 	afx_msg void OnPatternStop();
 	afx_msg void OnPatternPlay();
+	afx_msg void OnPatternPlayNoLoop();
 	afx_msg void OnPatternPlayRow();
 	afx_msg void OnPatternPlayFromStart();
 	afx_msg void OnPatternRecord();
 	afx_msg void OnPatternVUMeters();
+	afx_msg void OnPatternViewPlugNames();
 	afx_msg void OnPatternProperties();
 	afx_msg void OnPatternExpand();
 	afx_msg void OnPatternShrink();

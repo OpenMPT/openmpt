@@ -1,56 +1,137 @@
-** Warning this is the 'WILD' MODPLUG RELEASE **
+Predicted FAQ 19/11/2004:
+-------------------------
 
-This release of Modplug contains experimental content. It has
-not been extensively tested and it's likely it can cause problems
-on your system. If you are prepared to accept that errors can occur
-and you might lose your music or worse the system crashes then you
-can enjoy some of the new features on offer. To be safe stick with the
-stable release of Modplug. If you do use this version of the software 
-then please provide feedback at:
+1. What is this?
+----------------
+This is a test build of Modplug Tracker. 
+It is unfinished, do not expect to be able to compose with this version safely. But by all means try, and let me know what goes wrong. 
+Please try to only distribute to sensible testers. :)
 
-web:   http://sourceforge.net/projects/modplug 
-
-email: modplug@plastikskouser.com    Developer, Admin
-email: modplug@soal.org	             Developer, Admin
-
+NOTE: 
+ . Your old key settings from your previous official version of MPT will not load in this version, you *have* to re-configure the keys.
+ . The "report bug" button only works if you are a member of the Beta Testers group on the MPT forums. Register on the modplug forums and PM LPChip for access.
+ . The "wild" branch name is no more, since we only have one active development branch. Might aswell keep linear version numbers to minimise confusion.
+ . I'm sure there's other desperately important stuff I should put here.. will see...
 
 
-v2004.02.24   Author: Rewbs  Contact: modplug@soal.org
--------------------------------------------------------
-1. Each individual view (general/pattern/samples/intruments/comments) remembers its own horizontal splitter position.
-2. If you enter notes in a channel to which a VSTi has been assigned, and you're using an instrument with a midi channel send, you should hear the VSTi play as you enter the notes.
-3. Minor cosmetic changes, including about dialog image by Snu & Shableep. :)
 
-v2004.02.22   Author: Trevor Nunes Contact: modplug@plastikskouser.com
------------------------------------------------------------------------
-Experimental features in this version:
+2. What's new in this build?
+----------------------------
+.: bug fix
++: new feature
+-: known issue / regression
+/: change
+?: other
+(tx XYZ): thanks to XYZ for telling me about the bug
 
-1 Conditional compilation for MMX,SSE,AMD assembly routines
-  This should allow compilation on Vanilla VC6 compilers.
 
-2 255 channel support with updated IT loader/saver. It should not
-  impact existing .it modules and allows for safe loading and saving of
+. v 1.16.0212a
+   - Can no longer select "Normalize" when writing to wave, as this can produce incorrect output with certain VSTs.
+     For now, use an external editor to normalize you wavs.
+   . Extra safety checks for plugins that don't return parameters between 0 and 1 exactly.
+   . Tentative fix to silent dx plugins on non SSE enabled cpus.
+   + Added "IT Style" clear field commands. Using this, clearing the note field automatically clears the instrument field. 
+   / Swapped left and right mouse button action in effect visualiser (now use left button to "paint" nodes, right to move a specific node).
+   + "Fill gaps" mode in effect visualiser, to automatically enter effects in blank spaces.
+   
+
+. v 1.16.0211a
+   . Fixed crashes/bugs in instrument view when playing high notes. (tx LP)
+   . Fixed (tx LP)
+   / Removed "Unused?" text under Midi Prog listbox - hehe Ganja, does it actually work?! :)
+
+   
+. v 1.16.0210a
+   . Fixed warnings if no keyboard map file is found in registry (on first run)
+   + Shortcut key to toggle "follow song".
+   + Can change/access plugins froms pattern editor. Can also open editor via shortcut key.
+   . Custom keys fixes
+   + Default plugin GUI.
+   . Fixed some more stuck note cases.
+   . Fix scrolling bug when toggling follow song with whole pattern visible on screen. (tx LPChip)
+   + Load/Save VST preset
+   + Randomize VST parameters
+   / Porta slides occur on tick 0 iff speed is 1 tick per row. (tx felineki)
+   + "Report bug" button on the GUI takes you to beta tester's forum :)
+   + Optional "row guidelines" in instrument envelope editor.
+   / Optimised instrument envelope GUI to avoid flickering on resize. Various other cosmetic changes.
+   . Fixed "Remove channels" window
+   . Fixed beeps with certain alt-combo keys
+   . Offset in the volume column now works with retrigs.   
+   / Effect Keys are updated automatically when you change module type. You cannot customise them anymore.
+   . Improved VST idle time handling. Should fix the bug by which CPU usage would jump to 100% with certain combinations of plugs.
+   . (internal) Improved VSTGui compliancy
+
+. 20041012
+   . (internal) some VST compliancy improvements on start/stop
+   + VSTTimeInfo data sent 
+   - Cutter offset still does not restart with multilens; other plugs also have some sync issues...
+     > Modulation sync seems OK with FabFilter but not with Multilens.
+       ---> could be that transport is never reset.
+   + VSTi can be assigned to an instrument, not just a channel 
+       (I would encourage this method from now on - consider assigning VSTis to channels deprecated)
+   / Started re-styling the instrument view to reflect this.
+   + More sensible VSTi polyphony, should behave more like ample-based normal instruments:
+      Two subsequent notes sent to a same VSTi on a same Midi channel from a same tracker channel will cause the first note to be NoteOff'ed just before the second plays... EXCEPT if NNA is set to continue. 
+      Got it? :) In other words, NNAs are kinda working for VSTis (but Note Off, Cut and Fade all do the same thing)
+   + Same with DNAs.
+   . Fixed some issues with VSTi playback on note entry. Should now stop note on key release, like with sample-based normal instrs.     
+   - Bugs with Xlutop Chainer and some other plugs (more f'ing stuck notes) - working on it.
+   - Increased memory footprint, possible performance regressions
+   + Can now enable/disable all notes on key hold with a single click in the key config dialog
+   / No longer need to press 'set' in key config dialog: changes are recorded automatically.
+   . Loading patterns of less than 4 rows screws up. We now prevent users from setting pattern size to less than 4. Just use a pattern break command. (tx Ganja) (bug introduced before opensourcing)
+
+. 20041009
+   . Tempo slides now behave as specified in it.txt. (tx ManaSmack) (bug introduced before opensourcing)
+   + Can now save stereo ITIs 
+   + Removed 64 sample limit on ITIs (can now load/save instruments with up to 120 samples, i.e. one separate sample for each note)
+   . Fixed bug which allowed entering notes higher than B-9 (even though they didn't play) (bug introduced 20040910)
+   . Fixed graphical parameter editor key. (tx LPChip) (bug introduced 20040910)
+   . Fixed transpose octave down key (bug introduced 20040910)
+   . Fixed note fade on key release in instrument view. (tx Ganja) bug introduced 20040910 
+   . Prevented multiple note playback in sample view, except on chord playback. (tx LPChip) (bug introduced 20040910)
+   . Finished custom note handling for instrument notemapper and treeview (tx Ganja) (bug introduced 20040910)
+   . This version shouldn't corrupt the custom key registry setting used by previous versions of MPT. (bug introduced 20040910)
+   + Can now save orders past blank order, a la IT2. (tx Nofold)
+   + Some pattern undo improvements (still far from perfect!)
+   + Stretch/Shrink selection (a la IT2)
+
+  
+. 20040910
+   + Fully customisable keys, with profile loading and saving, multiple keys for same command, etc..
+   + Some new commands (e.g. Snap to highlight...)
+   / Enhanced some old commands (e.g. homing vertically twice homes horizontally...)
+   / Changed scope of some commands (e.g. play pattern should work from anywhere...)
+   - Lots of keypress related bugs, please help me isolate them
+   . Some minor VSTi fixes
+   + Oxx (offset) kind of works in the volume command
+   ? Half-finished "velocity" command (Ask LPChip about this).
+   / Wicked new splash by Nofold!
+   ? Internal changes.
+   ? Various other minor bits n bobs
+
+. --------- Wild Prebeta: 2004.02.24 ----------------
+   + Each individual view (general/pattern/samples/intruments/comments) remembers its own horizontal splitter position. 
+   + If you enter notes in a channel to which a VSTi has been assigned, and you're using an instrument with a midi channel send, you should hear the VSTi play as you enter the notes.
+   / Minor cosmetic changes, including about dialog image by Snu & Shableep. :)
+
+. v2004.02.22
+   + Conditional compilation for MMX,SSE,AMD assembly routines. This should allow compilation on Vanilla VC6 compilers.
+   + 255 channel support with updated IT loader/saver. It should not impact existing .it modules and allows for safe loading and saving of
   >64 channel modules.
 
 
-v2004.02.16   Author: Rewbs  Contact: modplug@soal.org
--------------------------------------------------------
-Experimental features in this version:
-
-1. A Dry/wet slider for each plugin - values should save and load in this version, and be cleanly ignored by older versions.
-   Should also work properly now. :)
-
-2. Tick resolution midi macro slide. Use \xx command instead of Zxx if you want your plugin param to slide to xx over the course of that row rather than brutally jumping there. Should also work on built-in cutoff+resonance. For an example of what this effect does, download: http://www.soal.org/expMPT/paramSlideDemo.zip .
-
-3. Effect param graphical editor prototype. Left click modifies a single node, right click & drag to "draw".
+. v2004.02.16
+   + A Dry/wet slider for each plugin - values should save and load in this version, and be cleanly ignored by older versions.
+   + Tick resolution midi macro slide. Use \xx command instead of Zxx if you want your plugin param to slide to xx over the course of that row rather than brutally jumping there. Should also work on built-in cutoff+resonance. For an example of what this effect does, download: http://www.soal.org/expMPT/paramSlideDemo.zip .
+   + Effect param graphical editor prototype. Left click modifies a single node, right click & drag to "draw".
    Warning, things get quite sluggish if you're visualizing many rows and make the window quite large.
-   Known bugs:
-    . Occasional visual glitches: nodes sometimes don't get erased with large window size; resize the window to clear it up.
-    . you have to move the focus back to the pattern to undo
+   + Mixpaste, just like in IT2
+   + Option to have "follow song" disabled by default under general settings.
+   + SDx works on VSTis.
 
-4. Mixpaste, just like in IT2
 
-5. Option to have "follow song" disabled by default under general settings.
-
-6. SDx works on VSTis.
-
+3. I have questions/comments/bug reports.
+-----------------------------------------
+Visit http://www.modplug.com/forums or write to robin@soal.org.

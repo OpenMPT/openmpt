@@ -39,6 +39,8 @@ const UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
 		ID_SEPARATOR,
 	ID_INSTRUMENT_SAMPLEMAP,
 		ID_SEPARATOR,
+	ID_ENVELOPE_VIEWGRID,
+		ID_SEPARATOR,
 };
 
 
@@ -73,6 +75,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_ENVELOPE_PANNING,			OnEnvPanChanged)
 	ON_COMMAND(ID_ENVELOPE_PITCH,			OnEnvPitchChanged)
 	ON_COMMAND(ID_ENVELOPE_FILTER,			OnEnvFilterChanged)
+	ON_COMMAND(ID_ENVELOPE_VIEWGRID,		OnEnvToggleGrid)
 	ON_COMMAND(ID_ENVSEL_VOLUME,			OnSelectVolumeEnv)
 	ON_COMMAND(ID_ENVSEL_PANNING,			OnSelectPanningEnv)
 	ON_COMMAND(ID_ENVSEL_PITCH,				OnSelectPitchEnv)
@@ -80,6 +83,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_EDIT_PASTE,				OnEditPaste)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP,		OnEditSampleMap)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -98,6 +102,9 @@ CViewInstrument::CViewInstrument()
 	memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
 	memset(m_NcButtonState, 0, sizeof(m_NcButtonState));
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
+	memset(m_baPlayingNote, 0, sizeof(bool)*120); 
+	m_nPlayingChannel =-1;
+	m_bGrid=true;
 }
 
 
@@ -1115,6 +1122,7 @@ void CViewInstrument::UpdateNcButtonState()
 									if (EnvGetPitchEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_FILTER:	if (!(pSndFile->m_nType & MOD_TYPE_IT)) dwStyle |= NCBTNS_DISABLED; else
 									if (EnvGetFilterEnv()) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_VIEWGRID:	if (m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
 		}
 		if (m_nBtnMouseOver == i)
 		{
@@ -1139,7 +1147,8 @@ void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 //-----------------------------------------------------------
 {
 	if ((dwHintMask & (HINT_MPTOPTIONS|HINT_MODTYPE))
-	 || ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == (dwHintMask >> 24))) )
+	 || ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == (dwHintMask >> 24)))
+	 || ((dwHintMask & HINT_SPEEDCHANGE)))
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();
@@ -1147,6 +1156,46 @@ void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 	}
 }
 
+void CViewInstrument::DrawGrid(CDC *memDC, UINT speed)
+//----------------------------------------------------
+{
+/*	
+	if (m_dcGrid.GetSafeHdc())
+	{
+		m_dcGrid.SelectObject(m_pbOldGrid) ;
+		m_dcGrid.DeleteDC() ;
+	}
+
+	// create a memory based dc for drawing the grid
+	m_dcGrid.CreateCompatibleDC(pDC);
+	m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.Width(), m_rcClient.Height());
+	m_pbmpOldGrid = m_dcGrid.SelectObject(&m_bmpGrid);
+*/
+	//do draw
+	int width=m_rcClient.right-m_rcClient.left;
+	int nPrevTick=-1;
+	int nTick, nRow;
+    for (int x=3; x<width; x++)
+	{
+		nTick = ScreenToTick(x);
+		if (nTick != nPrevTick && !(nTick%speed))
+		{
+			nPrevTick=nTick;
+			nRow=nTick/speed;
+
+			if (nRow % CMainFrame::m_nRowSpacing == 0)
+				memDC->SelectObject(CMainFrame::penGray80);
+			else if (nRow % CMainFrame::m_nRowSpacing2 == 0)
+				memDC->SelectObject(CMainFrame::penGray55);
+			else
+				memDC->SelectObject(CMainFrame::penGray33);
+
+			memDC->MoveTo(x+1, 0);
+			memDC->LineTo(x+1, m_rcClient.bottom);
+			
+		}
+	}
+}
 
 void CViewInstrument::OnDraw(CDC *pDC)
 //------------------------------------
@@ -1156,52 +1205,69 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
 	HGDIOBJ oldpen;
-	HDC hdc;
+	//HDC hdc;
 	UINT maxpoint;
 	int ymed = (m_rcClient.bottom - 1) / 2;
-	
+
+	// to avoid flicker, establish a memory dc, draw to it 
+	// and then BitBlt it to the destination "pDC"
+	CDC memDC ;
+	CBitmap memBitmap ;
+	CBitmap* oldBitmap ; // bitmap originally found in CMemDC
+
+	memDC.CreateCompatibleDC(pDC);
+	if (!memDC)
+		return;
+	memBitmap.CreateCompatibleBitmap(pDC, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top);
+	oldBitmap = (CBitmap *)memDC.SelectObject(&memBitmap) ;
+
 	if ((!pModDoc) || (!pDC)) return;
 	pSndFile = pModDoc->GetSoundFile();
-	hdc = pDC->m_hDC;
-	oldpen = ::SelectObject(hdc, CMainFrame::penDarkGray);
-	::FillRect(hdc, &m_rcClient, CMainFrame::brushBlack);
+	//hdc = pDC->m_hDC;
+	oldpen = memDC.SelectObject(CMainFrame::penDarkGray);
+	memDC.FillRect(&m_rcClient, CMainFrame::pbrushBlack);
 	if (m_nEnv != ENV_VOLUME)
 	{
-		::MoveToEx(hdc, 0, ymed, NULL);
-		::LineTo(hdc, m_rcClient.right, ymed);
+		memDC.MoveTo(0, ymed);
+		memDC.LineTo(m_rcClient.right, ymed);
 	}
+	if (m_bGrid)
+	{
+		DrawGrid(&memDC, pSndFile->m_nMusicSpeed);
+	}
+	memDC.SelectObject(CMainFrame::penDarkGray);
 	// Drawing Loop Start/End
 	if (EnvGetLoop())
 	{
 		int x1 = PointToScreen(EnvGetLoopStart()) - (ENV_ZOOM/2);
-		::MoveToEx(hdc, x1, 0, NULL);
-		::LineTo(hdc, x1, m_rcClient.bottom);
+		memDC.MoveTo(x1, 0);
+		memDC.LineTo(x1, m_rcClient.bottom);
 		int x2 = PointToScreen(EnvGetLoopEnd()) + (ENV_ZOOM/2);
-		::MoveToEx(hdc, x2, 0, NULL);
-		::LineTo(hdc, x2, m_rcClient.bottom);
+		memDC.MoveTo(x2, 0);
+		memDC.LineTo(x2, m_rcClient.bottom);
 	}
 	// Drawing Sustain Start/End
 	if (EnvGetSustain())
 	{
-		::SelectObject(hdc, CMainFrame::penHalfDarkGray);
+		memDC.SelectObject(CMainFrame::penHalfDarkGray);
 		int nspace = m_rcClient.bottom/4;
 		int n1 = EnvGetSustainStart();
 		int x1 = PointToScreen(n1) - (ENV_ZOOM/2);
 		int y1 = ValueToScreen(EnvGetValue(n1));
-		::MoveToEx(hdc, x1, y1 - nspace, NULL);
-		::LineTo(hdc, x1, y1+nspace);
+		memDC.MoveTo(x1, y1 - nspace);
+		memDC.LineTo(x1, y1+nspace);
 		int n2 = EnvGetSustainEnd();
 		int x2 = PointToScreen(n2) + (ENV_ZOOM/2);
 		int y2 = ValueToScreen(EnvGetValue(n2));
-		::MoveToEx(hdc, x2, y2-nspace, NULL);
-		::LineTo(hdc, x2, y2+nspace);
+		memDC.MoveTo(x2, y2-nspace);
+		memDC.LineTo(x2, y2+nspace);
 	}
 	maxpoint = EnvGetNumPoints();
 	// Drawing Envelope
 	if (maxpoint)
 	{
 		maxpoint--;
-		::SelectObject(hdc, CMainFrame::penEnvelope);
+		memDC.SelectObject(CMainFrame::penEnvelope);
 		for (UINT i=0; i<=maxpoint; i++)
 		{
 			int x = (EnvGetTick(i) + 1) * ENV_ZOOM - nScrollPos;
@@ -1210,15 +1276,16 @@ void CViewInstrument::OnDraw(CDC *pDC)
 			rect.top = y - 3;
 			rect.right = x + 4;
 			rect.bottom = y + 4;
-			::FrameRect(hdc, &rect, CMainFrame::brushWhite);
+			memDC.FrameRect(&rect, CMainFrame::pbrushWhite);
 			if (i)
-				::LineTo(hdc, x, y);
+				memDC.LineTo(x, y);
 			else
-				::MoveToEx(hdc, x, y, NULL);
+				memDC.MoveTo(x, y);
 		}
 	}
-	DrawPositionMarks(hdc);
-	if (oldpen) ::SelectObject(hdc, oldpen);
+	DrawPositionMarks(memDC.m_hDC);
+	if (oldpen) memDC.SelectObject(oldpen);
+	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top, &memDC, 0, 0, SRCCOPY) ;
 }
 
 
@@ -1259,6 +1326,8 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 				InvalidateEnvelope();
 				break;
 			}
+			memset(m_baPlayingNote, 0, sizeof(bool)*120); 	//rewbs.instViewNNA
+			m_nPlayingChannel=-1;							//rewbs.instViewNNA
 		}
 	} else
 	if ((pnotify->dwType & dwType) && ((pnotify->dwType & 0xFFFF) == m_nInstrument))
@@ -1342,6 +1411,7 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		case ID_ENVELOPE_PITCH:		nImage = (dwStyle & NCBTNS_DISABLED) ? 13 : 11; break;
 		case ID_ENVELOPE_FILTER:	nImage = (dwStyle & NCBTNS_DISABLED) ? 14 : 12; break;
 		case ID_INSTRUMENT_SAMPLEMAP: nImage = 15; break;
+		case ID_ENVELOPE_VIEWGRID:	nImage = 16; break;
 		}
 		pDC->Draw3dRect(rect.left-1, rect.top-1, ENV_LEFTBAR_CXBTN+2, ENV_LEFTBAR_CYBTN+2, c3, c4);
 		pDC->Draw3dRect(rect.left, rect.top, ENV_LEFTBAR_CXBTN, ENV_LEFTBAR_CYBTN, c1, c2);
@@ -1877,6 +1947,16 @@ void CViewInstrument::OnEnvFilterChanged()
 	}
 }
 
+void CViewInstrument::OnEnvToggleGrid()
+//----------------------------------------
+{
+	m_bGrid = !m_bGrid;
+	
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc)
+		pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+}
+
 
 void CViewInstrument::OnEnvRemovePoint()
 //--------------------------------------
@@ -2080,10 +2160,50 @@ static DWORD nLastNotePlayed = 0;
 static DWORD nLastScanCode = 0;
 
 
-void CViewInstrument::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+void CViewInstrument::PlayNote(UINT note)
 //-----------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CModDoc *pModDoc = GetDocument();
+	if ((pModDoc) && (pMainFrm) && (note<128))
+	{
+		CHAR s[64];
+		if (note >= 0xFE)
+		{
+			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE);
+			pMainFrm->SetInfoText("");
+		} else
+		if (m_nInstrument && !m_baPlayingNote[note])
+		{
+			//rewbs.instViewNNA
+		/*	CSoundFile *pSoundFile = pModDoc->GetSoundFile();
+			if (pSoundFile && m_baPlayingNote>0 && m_nPlayingChannel>=0)
+			{
+				MODCHANNEL *pChn = &(pSoundFile->Chn[m_nPlayingChannel]); //Get pointer to channel playing last note.
+				if (pChn->pHeader)	//is it valid?
+				{
+					DWORD tempflags = pChn->dwFlags;
+					pChn->dwFlags = 0;
+					pModDoc->GetSoundFile()->CheckNNA(m_nPlayingChannel, m_nInstrument, note, FALSE); //if so, apply NNA
+					pChn->dwFlags = tempflags;
+				}
+			}
+		*/
+			INSTRUMENTHEADER *penv = pModDoc->GetSoundFile()->Headers[m_nInstrument];
+			if ((!penv) || (!penv->Keyboard[note])) return;
+			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
+			m_nPlayingChannel= pModDoc->PlayNote(note, m_nInstrument, 0, TRUE); //rewbs.instViewNNA
+			s[0] = 0;
+			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
+			pMainFrm->SetInfoText(s);
+		}
+	}
+}
+
+void CViewInstrument::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+//-----------------------------------------------------------------
+{
+/*	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (pMainFrm) && (!(nFlags & 0x4000)))
 	{
@@ -2113,13 +2233,15 @@ void CViewInstrument::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 			CModScrollView::OnChar(nChar, nRepCnt, nFlags);
 		}
 	}
+*/
+	CModScrollView::OnChar(nChar, nRepCnt, nFlags);
 }
 
 
 void CViewInstrument::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 //------------------------------------------------------------------
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+/*	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (pMainFrm))
 	{
@@ -2145,7 +2267,7 @@ void CViewInstrument::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 			pMainFrm->SetInfoText("");
 			return;
 		}
-	}
+	}*/
 	CModScrollView::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
@@ -2324,4 +2446,65 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 		}
 	}
 	return 0;
+}
+
+BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
+//-----------------------------------------------
+{
+	if (pMsg)
+	{
+		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
+		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
+			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
+		{
+			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			
+			//Translate message manually
+			UINT nChar = pMsg->wParam;
+			UINT nRepCnt = LOWORD(pMsg->lParam);
+			UINT nFlags = HIWORD(pMsg->lParam);
+			KeyEventType kT = ih->GetKeyEventType(nFlags);
+			InputTargetContext ctx = (InputTargetContext)(kCtxViewInstruments);
+			
+			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+				return true; // Mapped to a command, no need to pass message on.
+		}
+
+	}
+	
+	return CModScrollView::PreTranslateMessage(pMsg);
+}
+
+LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == kcNull)
+		return NULL;
+	
+	CModDoc *pModDoc = GetDocument();	
+	if (!pModDoc) return NULL;
+	
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();	
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+
+	switch(wParam)
+	{
+		case kcPrevInstrument:	OnPrevInstrument(); return wParam;
+		case kcNextInstrument:	OnNextInstrument(); return wParam;
+		case kcEditCopy:		OnEditCopy(); return wParam;
+		case kcEditPaste:		OnEditPaste(); return wParam;
+		case kcNoteOff:			PlayNote(255); return wParam;
+		case kcNoteCut:			PlayNote(254); return wParam;
+	}
+	if (wParam>=kcInstrumentStartNotes && wParam<=kcInstrumentEndNotes)
+	{
+		PlayNote(wParam-kcInstrumentStartNotes+1+pMainFrm->GetBaseOctave()*12);
+		return wParam;
+	}
+	if (wParam>=kcInstrumentStartNoteStops && wParam<=kcInstrumentEndNoteStops)
+	{	
+		int note =wParam-kcInstrumentStartNoteStops+1+pMainFrm->GetBaseOctave()*12;
+		m_baPlayingNote[note]=false; 
+		pModDoc->NoteOff(note, FALSE);
+		return wParam;
+	}
 }
