@@ -70,7 +70,8 @@ public:
 	LRESULT SwitchToView() const { return SendViewMessage(VIEWMSG_SETACTIVE); }
 	void LockControls() { m_nLockCount++; }
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
-	BOOL IsLocked() const { return (m_nLockCount > 0); }
+    BOOL IsLocked() const { return (m_nLockCount > 0); }
+	virtual LONG* GetSplitPosRef() = 0; 	//rewbs.varWindowSize
 
 protected:
 	//{{AFX_VIRTUAL(CModControlDlg)

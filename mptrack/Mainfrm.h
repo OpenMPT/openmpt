@@ -339,7 +339,9 @@ public:
 	static UINT m_nLastOptionsPage, m_nFilterIndex;
 	static BOOL gbMdiMaximize;
 	static LONG glCtrlWindowHeight, glTreeWindowWidth, glTreeSplitRatio;
-	static HHOOK ghKbdHook;
+	static LONG glGeneralWindowHeight, glPatternWindowHeight, glSampleWindowHeight, 
+		        glInstrumentWindowHeight, glCommentsWindowHeight; //rewbs.varWindowSize
+    static HHOOK ghKbdHook;
 	static DWORD gdwNotificationType, gdwPreviousVersion;
 	// Audio Setup
 	static DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;

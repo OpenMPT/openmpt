@@ -280,6 +280,11 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 	
 	if (nIndex == -1) nIndex = m_TabCtrl.GetCurSel();
 	if ((nIndex < 0) || (nIndex >= MAX_PAGES) || (!pMainFrm)) return FALSE;
+
+	//rewbs.varWindowSize
+	if (m_Pages[m_nActiveDlg])
+		*(m_Pages[m_nActiveDlg]->GetSplitPosRef()) = ((CChildFrame *)GetParentFrame())->GetSplitterHeight();
+
 	if (nIndex == m_nActiveDlg)
 	{
 		pDlg = m_Pages[m_nActiveDlg];
@@ -333,6 +338,7 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 	pMainFrm->SetUserText("");
 	pMainFrm->SetInfoText("");
 	pDlg->ShowWindow(SW_SHOW);
+	((CChildFrame *)GetParentFrame())->SetSplitterHeight(*(pDlg->GetSplitPosRef()));	//rewbs.varWindowSize	
 	if (m_hWndMDI) ::PostMessage(m_hWndMDI, WM_MOD_CHANGEVIEWCLASS, (WPARAM)lParam, (LPARAM)pDlg);
 	return TRUE;
 }

@@ -110,6 +110,9 @@ public:
 	INSTRUMENTVIEWSTATE *GetInstrumentViewState() { return &m_ViewInstruments; }
 	COMMENTVIEWSTATE *GetCommentViewState() { return &m_ViewComments; }
 
+	void SetSplitterHeight(int x);		//rewbs.varWindowSize
+	int GetSplitterHeight();	 	    //rewbs.varWindowSize
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CChildFrame)

@@ -95,7 +95,14 @@ DWORD CMainFrame::gdwNotificationType = MPTNOTIFY_DEFAULT;
 UINT CMainFrame::m_nFilterIndex = 0;
 UINT CMainFrame::m_nLastOptionsPage = 0;
 BOOL CMainFrame::gbMdiMaximize = FALSE;
-LONG CMainFrame::glCtrlWindowHeight = 188;
+//rewbs.varWindowSize
+LONG CMainFrame::glCtrlWindowHeight = 188; //obsolete, for backwards compat only
+LONG CMainFrame::glGeneralWindowHeight = 188;
+LONG CMainFrame::glPatternWindowHeight = 159;
+LONG CMainFrame::glSampleWindowHeight = 188;
+LONG CMainFrame::glInstrumentWindowHeight = 188;
+LONG CMainFrame::glCommentsWindowHeight = 288;
+//end rewbs.varWindowSize
 LONG CMainFrame::glTreeWindowWidth = 160;
 LONG CMainFrame::glTreeSplitRatio = 128;
 HHOOK CMainFrame::ghKbdHook = NULL;
@@ -279,7 +286,14 @@ CMainFrame::CMainFrame()
 		if (d) theApp.m_nCmdShow = SW_SHOWMAXIMIZED;
 		RegQueryValueEx(key, "MDIMaximize", NULL, &dwREG_DWORD, (LPBYTE)&gbMdiMaximize, &dwDWORDSize);
 		RegQueryValueEx(key, "MDITreeWidth", NULL, &dwREG_DWORD, (LPBYTE)&glTreeWindowWidth, &dwDWORDSize);
-		RegQueryValueEx(key, "MDICtrlHeight", NULL, &dwREG_DWORD, (LPBYTE)&glCtrlWindowHeight, &dwDWORDSize);
+		//rewbs.varWindowSize
+		RegQueryValueEx(key, "MDICtrlHeight", NULL, &dwREG_DWORD, (LPBYTE)&glCtrlWindowHeight, &dwDWORDSize); //obsolete, for backwards compat only
+		RegQueryValueEx(key, "MDIGeneralHeight", NULL, &dwREG_DWORD, (LPBYTE)&glGeneralWindowHeight, &dwDWORDSize);
+		RegQueryValueEx(key, "MDIPatternHeight", NULL, &dwREG_DWORD, (LPBYTE)&glPatternWindowHeight, &dwDWORDSize);
+		RegQueryValueEx(key, "MDISampleHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glSampleWindowHeight, &dwDWORDSize);
+		RegQueryValueEx(key, "MDIInstrumentHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glInstrumentWindowHeight, &dwDWORDSize);
+		RegQueryValueEx(key, "MDICommentsHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glCommentsWindowHeight, &dwDWORDSize);
+		//end rewbs.varWindowSize
 		RegQueryValueEx(key, "MDITreeRatio", NULL, &dwREG_DWORD, (LPBYTE)&glTreeSplitRatio, &dwDWORDSize);
 		// Colors
 		for (int ncol=0; ncol<MAX_MODCOLORS; ncol++)
@@ -621,7 +635,14 @@ void CMainFrame::OnClose()
 		RegSetValueEx(key, "Maximized", NULL, REG_DWORD, (LPBYTE)&d, sizeof(DWORD));
 		RegSetValueEx(key, "MDIMaximize", NULL, REG_DWORD, (LPBYTE)&gbMdiMaximize, sizeof(BOOL));
 		RegSetValueEx(key, "MDITreeWidth", NULL, REG_DWORD, (LPBYTE)&glTreeWindowWidth, sizeof(DWORD));
-		RegSetValueEx(key, "MDICtrlHeight", NULL, REG_DWORD, (LPBYTE)&glCtrlWindowHeight, sizeof(DWORD));
+
+		//rewbs.varWindowSize
+		RegSetValueEx(key, "MDICtrlHeight", NULL, REG_DWORD, (LPBYTE)&glCtrlWindowHeight, sizeof(DWORD));	//obsolete, for backwards compat only
+		RegSetValueEx(key, "MDIGeneralHeight", NULL, REG_DWORD, (LPBYTE)&glGeneralWindowHeight, sizeof(DWORD));
+		RegSetValueEx(key, "MDIPatternHeight", NULL, REG_DWORD, (LPBYTE)&glPatternWindowHeight, sizeof(DWORD));
+		RegSetValueEx(key, "MDISampleHeight", NULL, REG_DWORD,  (LPBYTE)&glSampleWindowHeight, sizeof(DWORD));
+		RegSetValueEx(key, "MDIInstrumentHeight", NULL, REG_DWORD,  (LPBYTE)&glInstrumentWindowHeight, sizeof(DWORD));
+		RegSetValueEx(key, "MDICommentsHeight", NULL, REG_DWORD,  (LPBYTE)&glCommentsWindowHeight, sizeof(DWORD));
 		RegSetValueEx(key, "MDITreeRatio", NULL, REG_DWORD, (LPBYTE)&glTreeSplitRatio, sizeof(DWORD));
 		// Colors
 		for (int ncol=0; ncol<MAX_MODCOLORS; ncol++)

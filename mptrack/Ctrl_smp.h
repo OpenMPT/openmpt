@@ -26,6 +26,7 @@ public:
 	BOOL SetCurrentSample(UINT n, LONG lZoom=-1, BOOL bUpdNum=TRUE);
 	BOOL OpenSample(LPCSTR lpszFileName);
 	BOOL OpenSample(CSoundFile *pSndFile, UINT nSample);
+	LONG* GetSplitPosRef() {return &CMainFrame::glSampleWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_VIRTUAL(CCtrlSamples)
