@@ -16,27 +16,6 @@ enum {
 
 
 
-//==========================
-class CEditKey: public CEdit
-//==========================
-{
-protected:
-	UINT m_nId;
-	COptionsKeyboard *m_pParent;
-
-public:
-	CEditKey() { m_pParent = NULL; }
-	void SetParent(COptionsKeyboard *parent, UINT id) { m_pParent = parent; m_nId = id; }
-	void SetId(UINT id) { m_nId = id; }
-	UINT GetId() const { return m_nId; }
-
-protected:
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
-	afx_msg void OnKeyDown(UINT nChar, UINT, UINT);
-	DECLARE_MESSAGE_MAP()
-};
-
-
 //=========================================
 class COptionsGeneral: public CPropertyPage
 //=========================================
@@ -58,56 +37,6 @@ protected:
 	afx_msg void OnBrowseSongs()	{ BrowseForFolder(IDC_EDIT1); }
 	afx_msg void OnBrowseSamples()	{ BrowseForFolder(IDC_EDIT2); }
 	afx_msg void OnBrowseInstruments() { BrowseForFolder(IDC_EDIT3); }
-	DECLARE_MESSAGE_MAP();
-};
-
-
-//=====================================
-class CNotifyHotKey: public CHotKeyCtrl
-//=====================================
-{
-protected:
-	HWND m_hParent;
-	UINT m_nCtrlId;
-
-public:
-	CNotifyHotKey() { m_hParent = NULL; }
-	VOID SetParent(HWND h, UINT nID) { m_hParent = h; m_nCtrlId = nID; }
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
-};
-
-
-//==========================================
-class COptionsKeyboard: public CPropertyPage
-//==========================================
-{
-protected:
-	CNotifyHotKey m_HotKey;
-	CListBox m_lbnHotKeys;
-	CButton m_bnReset;
-	DWORD KeyboardMap[KEYBOARDMAP_LENGTH];
-	CEditKey edits[12+2];
-	DWORD CustomKeys[MAX_MPTHOTKEYS];
-	UINT m_nKeyboardCfg;
-	int m_nCurHotKey, m_nCurKeyboard;
-
-public:
-	COptionsKeyboard():CPropertyPage(IDD_OPTIONS_KEYBOARD) { m_nKeyboardCfg = 0; }
-	BOOL SetKey(UINT nId, UINT nChar, UINT nFlags);
-	BOOL ActivateEdit(UINT nId);
-
-protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
-	afx_msg void UpdateDialog();
-	afx_msg void OnKeyboardChanged();
-	afx_msg void OnOctaveChanged();
-	afx_msg void OnHotKeySelChanged();
-	afx_msg void OnHotKeyChanged();
-	afx_msg void OnHotKeyReset();
-	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	DECLARE_MESSAGE_MAP();
 };
 

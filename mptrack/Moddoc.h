@@ -36,9 +36,10 @@
 #define HINT_INSNAMES		0x08000
 #define HINT_UNDO			0x10000
 #define HINT_MIXPLUGINS		0x20000
+#define HINT_SPEEDCHANGE	0x40000
 
 // Undo
-#define MAX_UNDO_LEVEL		10
+#define MAX_UNDO_LEVEL		100
 
 typedef struct PATTERNUNDOBUFFER
 {
@@ -60,6 +61,7 @@ protected:
 	HWND m_hWndFollow;
 	DWORD m_dwNotifyType;
 	PATTERNUNDOBUFFER PatternUndo[MAX_UNDO_LEVEL];
+	BYTE OrderUndo[MAX_UNDO_LEVEL][MAX_ORDERS];
 
 protected: // create from serialization only
 	CModDoc();
@@ -118,8 +120,8 @@ public:
 	BOOL RemovePattern(UINT n);
 	BOOL RemoveSample(UINT n);
 	BOOL RemoveInstrument(UINT n);
-	BOOL PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, UINT nCurrentChn=-1); //rewbs.vstiLive: added current chan param
-	BOOL NoteOff(UINT note, BOOL bFade=FALSE);
+	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, UINT nCurrentChn=-1); //rewbs.vstiLive: added current chan param
+	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, UINT nCurrentChn=-1);
 	BOOL IsNotePlaying(UINT note, UINT nsmp=0, UINT nins=0);
 	BOOL MuteChannel(UINT nChn, BOOL bMute);
 	BOOL MuteSample(UINT nSample, BOOL bMute);
@@ -150,10 +152,14 @@ public:
 	BOOL CanUndo();
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
 	void UpdateAllViews(CView *pSender, LPARAM lHint=0L, CObject *pHint=NULL);
+	HWND GetEditPosition(UINT &row, UINT &pat, UINT &ord);
+	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	void TogglePluginEditor(UINT m_nCurrentPlugin);
 
 // protected members
 protected:
 	BOOL InitializeMod();
+	void* GetChildFrame();
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -204,6 +210,9 @@ public:
 	afx_msg void OnUpdateXMITOnly(CCmdUI *p);
 	afx_msg void OnUpdateInstrumentOnly(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMP3Encode(CCmdUI *pCmdUI);
+	afx_msg void OnPatternRestart();
+	afx_msg void OnPatternPlay();
+	afx_msg void OnPatternPlayNoLoop();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

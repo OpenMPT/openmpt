@@ -30,9 +30,10 @@ static inline UINT ConvertVolParam(UINT value)
 }
 
 
-BOOL CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers)
+long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers)
 //--------------------------------------------------------------------------------
-{
+{	
+	long returnVal=0;
 	if (trkvers < 0x0200)
 	{
 		const ITOLDINSTRUMENT *pis = (const ITOLDINSTRUMENT *)p;
@@ -75,6 +76,11 @@ BOOL CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		memcpy(penv->filename, pis->filename, 12);
 		penv->nMidiProgram = pis->mpr;
 		penv->nMidiChannel = pis->mch;
+		if (penv->nMidiChannel > 16)
+		{
+			penv->nMidiChannel = 0;
+			penv->nMixPlug = penv->nMidiChannel-128;
+		}
 		penv->wMidiBank = pis->mbank;
 		penv->nFadeOut = pis->fadeout << 5;
 		penv->nGlobalVol = pis->gbv >> 1;
@@ -87,7 +93,7 @@ BOOL CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 			if (note < 128) penv->NoteMap[j] = note+1;
 			else if (note >= 0xFE) penv->NoteMap[j] = note;
 		}
-		// MPT Instrument Extension
+		// Olivier's MPT Instrument Extension
 		if (*((int *)pis->dummy) == 'MPTX')
 		{
 			const ITINSTRUMENTEX *pisex = (const ITINSTRUMENTEX *)pis;
@@ -96,6 +102,54 @@ BOOL CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 				penv->Keyboard[k] |= ((UINT)pisex->keyboardhi[k] << 8);
 			}
 		}
+			
+		//rewbs.modularInstData  
+		//find end of standard header
+		BYTE* pEndInstHeader;
+		if (*((int *)pis->dummy) == 'MPTX')
+			pEndInstHeader=(BYTE*)pis+sizeof(ITINSTRUMENTEX);
+		else
+			pEndInstHeader=(BYTE*)pis+sizeof(ITINSTRUMENT);
+
+		//If the next piece of data is 'INSM' we have modular extensions to our instrument and...
+		if ( *( (UINT*)pEndInstHeader ) == 'INSM' )
+		{
+			//...the next piece of data must be the total size of the modular data
+			long modularInstSize = *((long *)(pEndInstHeader+4));
+			
+			//handle chunks
+			BYTE* pModularInst = (BYTE*)(pEndInstHeader+4+sizeof(modularInstSize)); //4 is for 'INSM'
+			pEndInstHeader+=4+sizeof(modularInstSize)+modularInstSize;
+			while  (pModularInst<pEndInstHeader) //4 is for 'INSM'
+			{
+				UINT chunkID = *((int *)pModularInst);
+				pModularInst+=4;
+				switch (chunkID)
+				{
+					/*case 'DMMY':
+						MessageBox(NULL, "Dummy chunk identified", NULL, MB_OK|MB_ICONEXCLAMATION);
+						pModularInst+=1024;
+						break;*/
+					case 'PLUG':
+						penv->nMixPlug = *(pModularInst);
+						pModularInst+=sizeof(penv->nMixPlug);
+						break;
+					/*How to load more chunks?  -- see also how to save chunks
+					case: 'MYID':
+						// handle chunk data, as pointed to by pModularInst
+						// move pModularInst as appropriate
+						break;
+					*/
+
+					default: pModularInst++; //move forward one byte and try to recognize again.
+
+				}
+			}
+			returnVal = 4+sizeof(modularInstSize)+modularInstSize;
+		}
+		//end rewbs.modularInstData
+
+			
 		// Volume Envelope 
 		if (pis->volenv.flags & 1) penv->dwFlags |= ENV_VOLUME;
 		if (pis->volenv.flags & 2) penv->dwFlags |= ENV_VOLLOOP;
@@ -155,7 +209,8 @@ BOOL CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 	}
 	if ((penv->nVolLoopStart >= 25) || (penv->nVolLoopEnd >= 25)) penv->dwFlags &= ~ENV_VOLLOOP;
 	if ((penv->nVolSustainBegin >= 25) || (penv->nVolSustainEnd >= 25)) penv->dwFlags &= ~ENV_VOLSUSTAIN;
-	return TRUE;
+
+	return returnVal;
 }
 
 
@@ -542,7 +597,11 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 					// 193-202: Portamento To
 					if ((vol >= 193) && (vol <= 202)) { m[ch].volcmd = VOLCMD_TONEPORTAMENTO; m[ch].vol = vol - 193; } else
 					// 203-212: Vibrato
-					if ((vol >= 203) && (vol <= 212)) { m[ch].volcmd = VOLCMD_VIBRATOSPEED; m[ch].vol = vol - 203; }
+					if ((vol >= 203) && (vol <= 212)) { m[ch].volcmd = VOLCMD_VIBRATOSPEED; m[ch].vol = vol - 203; } else
+					// 213-222: Velocity
+					if ((vol >= 213) && (vol <= 222)) { m[ch].volcmd = VOLCMD_VELOCITY; m[ch].vol = vol - 213; } else	//rewbs.velocity
+					// 223-232: Offset
+					if ((vol >= 223) && (vol <= 232)) { m[ch].volcmd = VOLCMD_OFFSET; m[ch].vol = vol - 223; } //rewbs.volOff
 					lastvalue[ch].volcmd = m[ch].volcmd;
 					lastvalue[ch].vol = m[ch].vol;
 				}
@@ -616,7 +675,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	lstrcpyn(header.songname, m_szNames[0], 27);
 	header.reserved1 = 0x1004;
 	header.ordnum = 0;
-	while ((header.ordnum < MAX_ORDERS) && (Order[header.ordnum] < 0xFF)) header.ordnum++;
+	while ((header.ordnum < MAX_ORDERS) /*&& (Order[header.ordnum] < 0xFF)*/) header.ordnum++; //rewbs.AllowSaveHiddenPatterns
 	if (header.ordnum < MAX_ORDERS) Order[header.ordnum++] = 0xFF;
 	header.insnum = m_nInstruments;
 	header.smpnum = m_nSamples;
@@ -746,7 +805,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 
 		memset(&iti, 0, sizeof(iti));
 		iti.id = 0x49504D49;	// "IMPI"
-		iti.trkvers = 0x211;
+		iti.trkvers = 0x220;	//0x211
 		if (Headers[nins])
 		{
 			INSTRUMENTHEADER *penv = Headers[nins];
@@ -757,7 +816,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			iti.mpr = penv->nMidiProgram;
 			iti.mch = penv->nMidiChannel;
 			iti.nna = penv->nNNA;
-			iti.dct = penv->nDCT;
+			//if (penv->nDCT<DCT_PLUGIN) iti.dct = penv->nDCT; else iti.dct =0;
+			iti.dct = penv->nDCT; //will other apps barf if they get an unknown DCT?
 			iti.dca = penv->nDNA;
 			iti.fadeout = penv->nFadeOut >> 5;
 			iti.pps = penv->nPPS;
@@ -847,6 +907,58 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			dwPos += 120;
 			fwrite(keyboardex, 1, 120, f);
 		}
+
+		//------------ rewbs.modularInstData
+		//WARNING!! this code is duplicated in SaveITIInstrument
+		//          TODO: sort this out.
+
+		long modularInstSize = 0;
+		UINT ModInstID = 'INSM';
+		fwrite(&ModInstID, 1, sizeof(ModInstID), f);	// mark this as an instrument with modular extensions
+		long sizePos = ftell(f);				// we will want to write the modular data's total size here
+		fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
+		
+		//Write chunks
+		UINT ID;
+		/*{	//Dummy chunk:
+			ID='DMMY';
+			BYTE dummyData[1024];
+			memset(dummyData, 0x99, 1024);
+
+			fwrite(&ID, 1, sizeof(int), f);
+			fwrite(dummyData, 1, 1024*sizeof(BYTE), f);
+			modularInstSize += sizeof(int)+1024*sizeof(BYTE);
+		}*/
+		{	//VST Slot chunk:
+			ID='PLUG';
+			fwrite(&ID, 1, sizeof(int), f);
+			if (Headers[nins])
+			{
+				INSTRUMENTHEADER *penv = Headers[nins];
+				fwrite(&(penv->nMixPlug), 1, sizeof(BYTE), f);
+			}
+			modularInstSize += sizeof(int)+sizeof(BYTE);
+		}
+		//How to save your own modular instrument chunk:
+/*		{
+			ID='MYID';
+			fwrite(&ID, 1, sizeof(int), f);
+			instModularDataSize+=sizeof(int);
+			
+			//You can save your chunk size somwhere here if you need variable chunk size.
+			fwrite(myData, 1, myDataSize, f);
+			instModularDataSize+=myDataSize;
+		}
+*/
+		//write modular data's total size
+		long curPos = ftell(f);			// remember current pos
+		fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
+		fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
+		fseek(f, curPos, SEEK_SET);		// go back to where we were.
+		
+		//move forward 
+		dwPos+=sizeof(ModInstID)+sizeof(modularInstSize)+modularInstSize;
+		//------------ end rewbs.modularInstData
 	}
 	// Writing sample headers
 	memset(&itss, 0, sizeof(itss));
@@ -917,6 +1029,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m->vol); break;
+					case VOLCMD_VELOCITY:		vol = 213 + ConvertVolParam(m->vol); break; //rewbs.velocity
+					case VOLCMD_OFFSET:			vol = 223 + ConvertVolParam(m->vol); break; //rewbs.volOff
 					default:					vol = 0xFF;
 					}
 				}
@@ -1349,11 +1463,9 @@ UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 				{
 					fwrite(&MPTxPlugDataSize, 1, 4, f);
 
+					//TODO: tidy this up like for modular instrument data
 					//write ID for this xPlugData chunk:
-					s[0] = 'D';
-					s[1] = 'W';
-					s[2] = 'R';
-					s[3] = 'T';
+					s[0] = 'D'; s[1] = 'W';	s[2] = 'R'; s[3] = 'T';
 					fwrite(s, 1, 4, f);
 
 					//Write chunk data itself (Could include size if you want variable size. Not necessary here.)
@@ -1444,7 +1556,7 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 
 			if ((nPlugin < MAX_MIXPLUGINS) && (nPluginSize >= sizeof(SNDMIXPLUGININFO)+4))
 			{
-				//MPT's standard plugin data. Size hard not specified in file.. grrr..
+				//MPT's standard plugin data. Size not specified in file.. grrr..
 				m_MixPlugins[nPlugin].Info = *(const SNDMIXPLUGININFO *)(p+nPos+8);
 
 				//data for VST setchunk? size lies just after standard plugin data.
@@ -1471,10 +1583,11 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 					DWORD endPos = startPos + dwXPlugData;						// end of extra data for this plug
 					DWORD currPos = startPos;
 
-					while (currPos < endPos) //cycle through all the 
+					while (currPos < endPos) //cycle through all the bytes
 					{
 						// do we recognize this chunk?
 						//rewbs.dryRatio
+						//TODO: turn this into a switch statement like for modular instrument data
 						if ((p[currPos] == 'D') && (p[currPos+1] == 'W') && (p[currPos+2] == 'R') && (p[currPos+3] == 'T'))
 						{	
 							currPos+=4;// move past ID
@@ -1482,7 +1595,7 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 							currPos+= sizeof(float); //move past data
 						}
 						//end rewbs.dryRatio
-                        //else if.. (add extra attemps to recognize chunks here)
+                        //else if.. (add extra attempts to recognize chunks here)
 						else // otherwise move forward a byte.
 						{
 							currPos++;

@@ -9,6 +9,7 @@
 
 BEGIN_MESSAGE_MAP(CCtrlComments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlComments)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)
 	ON_EN_CHANGE(IDC_EDIT_COMMENTS,		OnCommentsChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -205,4 +206,13 @@ void CCtrlComments::OnCommentsChanged()
 	}
 }
 
-
+LRESULT CCtrlComments::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == kcNull)
+		return NULL;
+/*
+	switch(wParam)
+	{
+		case kcEditCut:	if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); break;
+	}*/
+}

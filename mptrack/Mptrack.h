@@ -1,6 +1,6 @@
 // mptrack.h : main header file for the MPTRACK application
 //
-
+#include "versionNo.h"
 #if !defined(AFX_MPTRACK_H__AE144DC4_DD0B_11D1_AF24_444553540000__INCLUDED_)
 #define AFX_MPTRACK_H__AE144DC4_DD0B_11D1_AF24_444553540000__INCLUDED_
 
@@ -211,6 +211,7 @@ public:
 	afx_msg void OnHelpSearch();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
 };
 
 
@@ -330,8 +331,8 @@ void ErrorBox(UINT nStringID, CWnd*p=NULL);
 
 ///////////////////////////////////////////////////
 // Tables
-#define MAX_EFFECTS		33	//rewbs.smoothVST: increased from 32. Wonder what this will break...
-#define MAX_VOLCMDS		14
+#define MAX_EFFECTS		34	//rewbs.smoothVST & rewbs.velocity: increased from 32. Wonder what this will break...
+#define MAX_VOLCMDS		16	//rewbs.voloff & rewbs.velocity: increased from 14
 
 extern BYTE gEffectColors[MAX_EFFECTS];
 extern LPCSTR szNoteNames[12];

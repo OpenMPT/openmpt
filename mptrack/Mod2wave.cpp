@@ -133,7 +133,7 @@ BOOL CWaveConvert::OnInitDialog()
 	else
 		CheckDlgButton(IDC_RADIO1, MF_CHECKED);
 	CheckDlgButton(IDC_CHECK3, MF_CHECKED); // HQ resampling
-	CheckDlgButton(IDC_CHECK5, MF_CHECKED);	// Normalize
+	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// Normalize
 	SetDlgItemInt(IDC_EDIT3, m_nMinOrder);
 	SetDlgItemInt(IDC_EDIT4, m_nMaxOrder);
 	for (UINT i=0; i<NUMMIXRATE; i++)

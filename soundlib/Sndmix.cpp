@@ -15,7 +15,7 @@
 #endif
 
 // Volume ramp length, in 1/10 ms
-#define VOLUMERAMPLEN	146	// 1.46ms = 64 samples at 44.1kHz
+#define VOLUMERAMPLEN	0	// 1.46ms = 64 samples at 44.1kHz		//rewbs soundq exp - was 146
 
 // VU-Meter
 #define VUMETER_DECAY		4
@@ -32,7 +32,7 @@ DWORD CSoundFile::gdwMixingFreq = 44100;
 DWORD CSoundFile::gnBitsPerSample = 16;
 // Mixing data initialized in
 UINT CSoundFile::gnAGC = AGC_UNITY;
-UINT CSoundFile::gnVolumeRampSamples = 64;
+UINT CSoundFile::gnVolumeRampSamples = 0;
 UINT CSoundFile::gnCPUUsage = 0;
 LPSNDMIXHOOKPROC CSoundFile::gpSndMixHook = NULL;
 PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
@@ -310,6 +310,8 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 	#endif
 		// Resetting sound buffer
 		X86_StereoFill(MixSoundBuffer, lSampleCount, &gnDryROfsVol, &gnDryLOfsVol);
+		
+		ASSERT(lCount<=MIXBUFFERSIZE);		// ensure MIXBUFFERSIZE really is our max buffer size
 		if (gnChannels >= 2)
 		{
 			lSampleCount *= 2;
@@ -370,6 +372,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		// Buffer ready
 		lRead -= lCount;
 		m_nBufferCount -= lCount;
+		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
 	}
 MixDone:
 	if (lRead) memset(lpBuffer, (gnBitsPerSample == 8) ? 0x80 : 0, lRead * lSampleSize);
@@ -701,8 +704,6 @@ BOOL CSoundFile::ProcessRow()
 		}
 	}
 	// Update Effects
-
-
 	return ProcessEffects();
 }
 
@@ -1562,12 +1563,14 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 			if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) penv = Headers[m->instr];
 			if ((penv) && (penv->nMidiChannel >= 1) && (penv->nMidiChannel <= 16))
 			{
-				UINT nPlugin = ChnSettings[nChn].nMixPlugin;
+				UINT nPlugin = penv->nMixPlug;				// first try intrument VST
+				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
+                    nPlugin = ChnSettings[nChn].nMixPlugin; // Then try Channel VST
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
 					IMixPlugin *pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64);
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
 				}
 			}
 		}

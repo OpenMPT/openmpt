@@ -149,6 +149,7 @@ typedef const BYTE * LPCBYTE;
 #define CMD_SETENVPOSITION		30
 #define CMD_MIDI				31
 #define CMD_SMOOTHMIDI			32 //rewbs.smoothVST
+#define CMD_VELOCITY			33 //rewbs.velocity
 
 // Filter Modes
 #define FLTMODE_LOWPASS			0
@@ -169,6 +170,8 @@ typedef const BYTE * LPCBYTE;
 #define VOLCMD_TONEPORTAMENTO	11
 #define VOLCMD_PORTAUP			12
 #define VOLCMD_PORTADOWN		13
+#define VOLCMD_VELOCITY			14 //rewbs.velocity
+#define VOLCMD_OFFSET			15 //rewbs.volOff
 
 #define RSF_16BIT		0x04
 #define RSF_STEREO		0x08
@@ -226,6 +229,7 @@ typedef const BYTE * LPCBYTE;
 #define DCT_NOTE		1
 #define DCT_SAMPLE		2
 #define DCT_INSTRUMENT	3
+#define DCT_PLUGIN		4
 
 // DNA types
 #define DNA_NOTECUT		0
@@ -355,6 +359,7 @@ typedef struct _INSTRUMENTHEADER
 	WORD Keyboard[128];
 	CHAR name[32];
 	CHAR filename[12];
+	BYTE nMixPlug;							//rewbs.ins2VSTi
 } INSTRUMENTHEADER;
 
 
@@ -456,9 +461,13 @@ public:
 	virtual void Process(float *pOutL, float *pOutR, unsigned long nSamples) = 0;
 	virtual void Init(unsigned long nFreq, int bReset) = 0;
 	virtual void MidiSend(DWORD dwMidiCode) = 0;
-	virtual void MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol) = 0;
+	virtual void MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, UINT trackChan) = 0;
+	virtual void HardAllNotesOff() = 0;		//rewbs.VSTiNoteHoldonStopFix
+	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0;
+	virtual bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn) = 0;
 	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
 	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST
+	virtual long Dispatch(long opCode, long index, long value, void *ptr, float opt) =0;
 };
 
 
@@ -579,6 +588,7 @@ public:	// for Editing
 	DWORD m_dwSongFlags;							// Song flags SONG_XXXX
 	UINT m_nMixChannels, m_nMixStat, m_nBufferCount;
 	UINT m_nTickCount, m_nTotalCount, m_nPatternDelay, m_nFrameDelay;
+	long m_lTotalSampleCount;	// for VSTTimeInfo
 	UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
@@ -623,6 +633,8 @@ public:
 	UINT GetSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;
+	
+	int FindOrder(BYTE pat);
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(UINT nOrder);
 	void GetTitle(LPSTR s) const { lstrcpyn(s,m_szNames[0],32); }
@@ -637,6 +649,7 @@ public:
 	int GetRepeatCount() const { return m_nRepeatCount; }
 	BOOL IsPaused() const {	return (m_dwSongFlags & SONG_PAUSED) ? TRUE : FALSE; }
 	void LoopPattern(int nPat, int nRow=0);
+	void DontLoopPattern(int nPat, int nRow=0);
 	void CheckCPUUsage(UINT nCPU);
 	BOOL SetPatternName(UINT nPat, LPCSTR lpszName);
 	BOOL GetPatternName(UINT nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
@@ -685,6 +698,8 @@ public:
 	
 public:
 	// Real-time sound functions
+	VOID SuspendPlugins(); //rewbs.VSTcompliancy
+	VOID ResumePlugins(); //rewbs.VSTcompliancy
 	VOID ResetChannels();
 	UINT Read(LPVOID lpBuffer, UINT cbBuffer);
 	UINT ReadMix(LPVOID lpBuffer, UINT cbBuffer, CSoundFile *, DWORD *, LPBYTE ps=NULL);
@@ -692,7 +707,7 @@ public:
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
 	UINT GetTotalTickCount() const { return m_nTotalCount; }
-	VOID ResetTotalTickCount() { m_nTotalCount = 0; }
+	VOID ResetTotalTickCount() { m_nTotalCount = 0;}
 	VOID ProcessPlugins(UINT nCount);
 
 public:
@@ -764,7 +779,8 @@ public:
 	void FineVolumeDown(MODCHANNEL *pChn, UINT param);
 	void Tremolo(MODCHANNEL *pChn, UINT param);
 	void Panbrello(MODCHANNEL *pChn, UINT param);
-	void RetrigNote(UINT nChn, UINT param);
+	void RetrigNote(UINT nChn, UINT param, UINT offset=0);  //rewbs.volOffset: added last param
+	void SampleOffset(UINT nChn, UINT param, bool bPorta);	//rewbs.volOffset: moved offset code to own method
 	void NoteCut(UINT nChn, UINT nTick);
 	void KeyOff(UINT nChn);
 	int PatternLoop(MODCHANNEL *, UINT param);
@@ -825,7 +841,7 @@ public:
 	MODINSTRUMENT *GetSample(UINT n) { return Ins+n; }
 	void ResetMidiCfg();
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
-	BOOL ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers);
+	long ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers);
 	UINT LoadMixPlugins(const void *pData, UINT nLen);
 #ifndef NO_FILTER
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-255] => [1-10KHz]
@@ -992,7 +1008,7 @@ typedef struct WAVEEXTRAHEADER
 #define MIXING_ATTENUATION	4
 #define MIXING_CLIPMIN		(-0x08000000)
 #define MIXING_CLIPMAX		(0x07FFFFFF)
-#define VOLUMERAMPPRECISION	12
+#define VOLUMERAMPPRECISION	12				//Sound q test -rewbs - was 12
 #define FADESONGDELAY		100
 #define EQ_BUFFERSIZE		(MIXBUFFERSIZE)
 #define AGC_PRECISION		10

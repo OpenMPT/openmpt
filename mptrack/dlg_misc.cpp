@@ -4,6 +4,8 @@
 #include "mainfrm.h"
 #include "dlg_misc.h"
 #include "dlsbank.h"
+#include "ChildFrm.h"
+#include ".\dlg_misc.h"
 
 #pragma warning(disable:4244)
 
@@ -196,132 +198,80 @@ UINT CShowLogDlg::ShowLog(LPCSTR pszLog, LPCSTR lpszTitle)
 ///////////////////////////////////////////////////////////
 // CRemoveChannelsDlg
 
-const WORD nCheckControls[64] =
+
+void CRemoveChannelsDlg::DoDataExchange(CDataExchange* pDX)
+//--------------------------------------------------
 {
-	IDC_CHECK1,  IDC_CHECK2,  IDC_CHECK3,  IDC_CHECK4,
-	IDC_CHECK5,  IDC_CHECK6,  IDC_CHECK7,  IDC_CHECK8,
-	IDC_CHECK9,  IDC_CHECK10, IDC_CHECK11, IDC_CHECK12,
-	IDC_CHECK13, IDC_CHECK14, IDC_CHECK15, IDC_CHECK16,
-	IDC_CHECK17, IDC_CHECK18, IDC_CHECK19, IDC_CHECK20,
-	IDC_CHECK21, IDC_CHECK22, IDC_CHECK23, IDC_CHECK24,
-	IDC_CHECK25, IDC_CHECK26, IDC_CHECK27, IDC_CHECK28,
-	IDC_CHECK29, IDC_CHECK30, IDC_CHECK31, IDC_CHECK32,
-	IDC_CHECK33, IDC_CHECK34, IDC_CHECK35, IDC_CHECK36,
-	IDC_CHECK37, IDC_CHECK38, IDC_CHECK39, IDC_CHECK40,
-	IDC_CHECK41, IDC_CHECK42, IDC_CHECK43, IDC_CHECK44,
-	IDC_CHECK45, IDC_CHECK46, IDC_CHECK47, IDC_CHECK48,
-	IDC_CHECK49, IDC_CHECK50, IDC_CHECK51, IDC_CHECK52,
-	IDC_CHECK53, IDC_CHECK54, IDC_CHECK55, IDC_CHECK56,
-	IDC_CHECK57, IDC_CHECK58, IDC_CHECK59, IDC_CHECK60,
-	IDC_CHECK61, IDC_CHECK62, IDC_CHECK63, IDC_CHECK64
-};
-
-
-const WORD nTextControls[64] =
-{
-	NULL,		NULL,		NULL,		NULL,
-	IDC_TEXT5,	IDC_TEXT6,	IDC_TEXT7,	IDC_TEXT8,
-	IDC_TEXT9,	IDC_TEXT10,	IDC_TEXT11,	IDC_TEXT12,
-	IDC_TEXT13,	IDC_TEXT14,	IDC_TEXT15,	IDC_TEXT16,
-	IDC_TEXT17,	IDC_TEXT18,	IDC_TEXT19,	IDC_TEXT20,
-	IDC_TEXT21,	IDC_TEXT22,	IDC_TEXT23,	IDC_TEXT24,
-	IDC_TEXT25,	IDC_TEXT26,	IDC_TEXT27,	IDC_TEXT28,
-	IDC_TEXT29,	IDC_TEXT30,	IDC_TEXT31,	IDC_TEXT32,
-	IDC_TEXT61,	IDC_TEXT62,	IDC_TEXT63,	IDC_TEXT64,
-	IDC_TEXT33,	IDC_TEXT34,	IDC_TEXT35,	IDC_TEXT36,
-	IDC_TEXT37,	IDC_TEXT38,	IDC_TEXT39,	IDC_TEXT40,
-	IDC_TEXT41,	IDC_TEXT42,	IDC_TEXT43,	IDC_TEXT44,
-	IDC_TEXT45,	IDC_TEXT46,	IDC_TEXT47,	IDC_TEXT48,
-	IDC_TEXT49,	IDC_TEXT50,	IDC_TEXT51,	IDC_TEXT52,
-	IDC_TEXT53,	IDC_TEXT54,	IDC_TEXT55,	IDC_TEXT56,
-	IDC_TEXT57,	IDC_TEXT58,	IDC_TEXT59,	IDC_TEXT60
-};
-
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CShowLogDlg)
+	DDX_Control(pDX, IDC_REMCHANSLIST,		m_RemChansList);
+    //}}AFX_DATA_MAP
+}
 
 
 BEGIN_MESSAGE_MAP(CRemoveChannelsDlg, CDialog)
 	//{{AFX_MSG_MAP(CRemoveChannelsDlg)
-	ON_COMMAND(IDC_CHECK1,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK2,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK3,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK4,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK5,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK6,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK7,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK8,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK9,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK10,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK11,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK12,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK13,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK14,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK15,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK16,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK17,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK18,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK19,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK20,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK21,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK22,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK23,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK24,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK25,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK26,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK27,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK28,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK29,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK30,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK31,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK32,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK33,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK34,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK35,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK36,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK37,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK38,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK39,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK40,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK41,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK42,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK43,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK44,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK45,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK46,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK47,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK48,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK49,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK50,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK51,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK52,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK53,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK54,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK55,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK56,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK57,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK58,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK59,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK60,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK61,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK62,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK63,	OnChannelChanged)
-	ON_COMMAND(IDC_CHECK64,	OnChannelChanged)
+	ON_LBN_SELCHANGE(IDC_REMCHANSLIST,		OnChannelChanged)
 	//}}AFX_MSG_MAP
+//	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
 BOOL CRemoveChannelsDlg::OnInitDialog()
 //-------------------------------------
 {
-	CHAR s[128];
+	CHAR label[128];
 	CDialog::OnInitDialog();
-	for (UINT n=0; n<64; n++)
+/*	CRect rect(0,0,0,0);
+	CFont *f;
+	f = new CFont();
+	f->CreateStockObject(DEFAULT_GUI_FONT);
+
+	int vOffset=35;
+	int vLabelHeight=15;
+	int vTopPadding=2;
+	int vButtonHeight=15;
+	int vBottomPadding=15;
+	int hOffset=10;
+	int hLabelWidth=17;
+	int hButtonWidth=15;
+	int hRightPadding=15;
+	int checkboxesPerRow=20;
+	int col, row;*/
+
+	for (UINT n=0; n<m_nChannels; n++)
 	{
-		if (m_bChnMask[n]) CheckDlgButton(nCheckControls[n], MF_CHECKED);
-		::ShowWindow(::GetDlgItem(m_hWnd, nCheckControls[n]), (n < m_nChannels) ? SW_SHOW : SW_HIDE);
-		::ShowWindow(::GetDlgItem(m_hWnd, nTextControls[n]), (n < m_nChannels) ? SW_SHOW : SW_HIDE);
+/*		row = n/checkboxesPerRow;
+		col = n%checkboxesPerRow;
+	
+		//Label position
+		wsprintf(label,"%d", n+1);
+		rect.left=hOffset+col*(hButtonWidth+hRightPadding);
+		rect.right=rect.left+hLabelWidth;
+		rect.top=vOffset+row*(vLabelHeight+vTopPadding+vButtonHeight+vBottomPadding);
+		rect.bottom=rect.top+vLabelHeight;
+		m_Label[n].Create(label, WS_CHILD|WS_VISIBLE|SS_CENTER, rect, this, n);
+		m_Label[n].SetFont(f, true);
+
+		//Checkbox position
+		rect.left=hOffset+col*(hButtonWidth+hRightPadding);
+		rect.right=rect.left+hButtonWidth;
+		rect.top=vOffset+vTopPadding+(row+1)*(vTopPadding+vLabelHeight)+row*(vButtonHeight+vBottomPadding);
+		rect.bottom=rect.top+vButtonHeight;
+		m_ButChan[n].Create("", WS_CHILD|WS_VISIBLE|BS_AUTOCHECKBOX, rect, this, n);
+		if (m_bChnMask[n]) m_ButChan[n].SetCheck(BST_CHECKED);
+
+		m_ButChan[n].ShowWindow(SW_SHOW);
+		m_Label[n].ShowWindow(SW_SHOW);
+*/	
+		wsprintf(label,"Channel %d", n+1);
+		m_RemChansList.SetItemData(m_RemChansList.AddString(label), n);
+		if (m_bChnMask[n]) m_RemChansList.SetSel(n);
 	}
-	wsprintf(s, "Select %d channels to remove:", m_nRemove);
-	SetDlgItemText(IDC_QUESTION1, s);
+
+	wsprintf(label, "Select %d channels to remove:", m_nRemove);
+	SetDlgItemText(IDC_QUESTION1, label);
+
 	OnChannelChanged();
 	return TRUE;
 }
@@ -332,12 +282,18 @@ void CRemoveChannelsDlg::OnOK()
 {
 	UINT nr = 0;
 	memset(m_bChnMask, 0, sizeof(m_bChnMask));
-	for (UINT n=0; n<m_nChannels; n++) if (IsDlgButtonChecked(nCheckControls[n]))
+	//for (UINT n=0; n<m_nChannels; n++) if (m_ButChan[n].GetCheck())
+
+	int nCount = m_RemChansList.GetSelCount();
+	CArray<int,int> aryListBoxSel;
+	aryListBoxSel.SetSize(nCount);
+	m_RemChansList.GetSelItems(nCount, aryListBoxSel.GetData()); 
+
+	for (int n=0; n<nCount; n++)
 	{
-		nr++;
-		m_bChnMask[n]++;
+		m_bChnMask[aryListBoxSel[n]]++;
 	}
-	if (nr == m_nRemove)
+	if (nCount == m_nRemove)
 		CDialog::OnOK();
 	else
 		CDialog::OnCancel();
@@ -348,7 +304,7 @@ void CRemoveChannelsDlg::OnChannelChanged()
 //-----------------------------------------
 {
 	UINT nr = 0;
-	for (UINT n=0; n<m_nChannels; n++) if (IsDlgButtonChecked(nCheckControls[n])) nr++;
+	nr = m_RemChansList.GetSelCount();
 	GetDlgItem(IDOK)->EnableWindow((nr == m_nRemove) ? TRUE : FALSE);
 }
 
@@ -626,7 +582,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		CHAR s[256];
 		UINT nrows = pSndFile->PatternSize[m_nPattern];
 
-		for (UINT irow=32; irow<=256; irow++)
+		for (UINT irow=4; irow<=256; irow++)
 		{
 			wsprintf(s, "%d", irow);
 			combo->AddString(s);
@@ -650,7 +606,7 @@ void CPatternPropertiesDlg::OnOK()
 //--------------------------------
 {
 	int n = GetDlgItemInt(IDC_COMBO1);
-	if ((n >= 2) && (n <= 256) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
+	if ((n >= 4) && (n <= 256) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
 	CDialog::OnOK();
 }
 
@@ -2093,4 +2049,3 @@ VOID CSampleMapDlg::OnOK()
 	}
 	CDialog::OnCancel();
 }
-

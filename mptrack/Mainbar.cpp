@@ -2,7 +2,7 @@
 #include "mptrack.h"
 #include "mainfrm.h"
 #include "view_tre.h"
-
+#include "moddoc.h"
 
 /////////////////////////////////////////////////////////////////////
 // CToolBarEx: custom toolbar base class
@@ -128,7 +128,7 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 // Play Command
 #define PLAYCMD_INDEX		10
 #define TOOLBAR_IMAGE_PAUSE	8
-#define TOOLBAR_IMAGE_PLAY	13
+#define TOOLBAR_IMAGE_PLAY	16
 // Base octave
 #define EDITOCTAVE_INDEX	13
 #define EDITOCTAVE_WIDTH	64
@@ -192,6 +192,8 @@ static UINT BASED_CODE MainButtons[] =
 	ID_VIEW_OPTIONS,
 	ID_APP_ABOUT,
 	ID_CONTEXT_HELP,
+		ID_SEPARATOR,
+	ID_REPORT_BUG,
 };
 
 
@@ -241,6 +243,12 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	rect.SetRect(-SPINSPEED_WIDTH, -SPINSPEED_HEIGHT, 0, 0);
 	m_SpinSpeed.Create(WS_CHILD|UDS_ALIGNRIGHT, rect, this, IDC_SPIN_CURRENTSPEED);
 
+	// ApproxBPM
+	//rect.SetRect(-EDITSPEED_WIDTH, -EDITSPEED_HEIGHT, 0, 0);
+	//if (!m_StaticBPM.Create("(---)", WS_CHILD|SS_CENTER|SS_CENTERIMAGE, rect, this, IDC_TEXT_BPM)) return FALSE;
+
+
+
 	// Adjust control styles
 	HFONT hFont = CMainFrame::GetGUIFont();
   	m_EditOctave.SendMessage(WM_SETFONT, (WPARAM)hFont);
@@ -287,6 +295,7 @@ BOOL CMainToolBar::SetHorizontal()
 	SetButtonInfo(SPEEDTEXT_INDEX, IDC_TEXT_CURRENTSPEED, TBBS_SEPARATOR, SPEEDTEXT_WIDTH);
 	SetButtonInfo(EDITSPEED_INDEX, IDC_EDIT_CURRENTSPEED, TBBS_SEPARATOR, EDITSPEED_WIDTH);
 	SetButtonInfo(SPINSPEED_INDEX, IDC_SPIN_CURRENTSPEED, TBBS_SEPARATOR, SPINSPEED_WIDTH);
+	SetButtonInfo(SPINSPEED_INDEX+1, IDC_TEXT_BPM, TBBS_SEPARATOR, SPEEDTEXT_WIDTH);
 	// Octave Box
 	EnableControl(m_EditOctave, EDITOCTAVE_INDEX);
 	EnableControl(m_SpinOctave, SPINOCTAVE_INDEX);
@@ -324,6 +333,7 @@ BOOL CMainToolBar::SetVertical()
 	if (m_StaticSpeed.m_hWnd != NULL) m_StaticSpeed.ShowWindow(SW_HIDE);
 	if (m_EditSpeed.m_hWnd != NULL) m_EditSpeed.ShowWindow(SW_HIDE);
 	if (m_SpinSpeed.m_hWnd != NULL) m_SpinSpeed.ShowWindow(SW_HIDE);
+	//if (m_StaticBPM.m_hWnd != NULL) m_StaticBPM.ShowWindow(SW_HIDE);
 	return TRUE;
 }
 
@@ -366,10 +376,16 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		int nSpeed = pSndFile->m_nMusicSpeed;
 		if (nSpeed != nCurrentSpeed)
 		{
+			CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
+            if (pModDoc)
+				pModDoc->UpdateAllViews(NULL, HINT_SPEEDCHANGE);
+				
 			if (nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
 			nCurrentSpeed = nSpeed;
 			wsprintf(s, "%d", nCurrentSpeed);
 			m_EditSpeed.SetWindowText(s);
+			//wsprintf(s, "(%f)", CMainFrame::GetMainFrame()->GetApproxBPM());
+			//m_StaticBPM.SetWindowText(s);
 		}
 		int nTempo = pSndFile->m_nMusicTempo;
 		if (nTempo != nCurrentTempo)
@@ -378,6 +394,8 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			nCurrentTempo = nTempo;
 			wsprintf(s, "%d", nCurrentTempo);
 			m_EditTempo.SetWindowText(s);
+			//wsprintf(s, "(%f)", CMainFrame::GetMainFrame()->GetApproxBPM());
+			//m_StaticBPM.SetWindowText(s);
 		}
 	} else
 	{
@@ -386,6 +404,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			nCurrentTempo = -1;
 			m_EditTempo.SetWindowText("---");
 			m_SpinTempo.EnableWindow(FALSE);
+			//m_StaticBPM.SetWindowText("(---)");
 			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PLAY, TBBS_BUTTON, TOOLBAR_IMAGE_PLAY);
 		}
 		if (nCurrentSpeed != -1)
@@ -393,6 +412,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			nCurrentSpeed = -1;
 			m_EditSpeed.SetWindowText("---");
 			m_SpinSpeed.EnableWindow(FALSE);
+			//m_StaticBPM.SetWindowText("(---)");
 		}
 	}
 	return TRUE;
@@ -926,3 +946,15 @@ void CModTreeBar::OnLButtonUp(UINT, CPoint)
 	DoLButtonUp();
 }
 
+HWND CModTreeBar::GetModTreeHWND()
+{
+	return m_pModTree->m_hWnd;
+}
+
+BOOL CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
+{
+	if (::GetFocus() == m_pModTree->m_hWnd)
+		return m_pModTree->PostMessage(cmdID, wParam, lParam);
+	if (::GetFocus() == m_pModTreeData->m_hWnd)
+		return m_pModTreeData->PostMessage(cmdID, wParam, lParam);
+}

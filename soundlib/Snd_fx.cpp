@@ -158,11 +158,11 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 				// Tempo Slide
 				if ((param & 0xF0) == 0x10)
 				{
-					nMusicTempo += param & 0x0F;
+					nMusicTempo += (param & 0x0F)  * (nMusicSpeed-1);  //rewbs.tempoSlideFix
 					if (nMusicTempo > 255) nMusicTempo = 255;
 				} else
 				{
-					nMusicTempo -= param & 0x0F;
+					nMusicTempo -= (param & 0x0F) * (nMusicSpeed-1); //rewbs.tempoSlideFix
 					if (nMusicTempo < 32) nMusicTempo = 32;
 				}
 				break;
@@ -331,13 +331,16 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	}
 	// Instrument adjust
 	pChn->nNewIns = 0;
+	
+	if (penv && (penv->nMixPlug || psmp))		//rewbs.VSTiNNA
+		pChn->nNNA = penv->nNNA;
+
 	if (psmp)
 	{
 		if (penv)
 		{
 			pChn->nInsVol = (psmp->nGlobalVol * penv->nGlobalVol) >> 6;
 			if (penv->dwFlags & ENV_SETPANNING) pChn->nPan = penv->nPan;
-			pChn->nNNA = penv->nNNA;
 		} else
 		{
 			pChn->nInsVol = psmp->nGlobalVol;
@@ -449,16 +452,19 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		}
 		return;
 	}
+	if (note < 1) note = 1;			//rewbs.VSTiDCT: moved to before return
+	if (note > 132) note = 132;		//
+	pChn->nNote = note;				//
+
 	if (!pins) return;
 	if ((!bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MT2)))
 	{
 		pChn->nTranspose = pins->RelativeTone;
 		pChn->nFineTune = pins->nFineTune;
 	}
+	//rewbs.VSTiDCT	[moved from here]
 	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose;
-	if (note < 1) note = 1;
-	if (note > 132) note = 132;
-	pChn->nNote = note;
+
 	if ((!bPorta) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))) pChn->nNewIns = 0;
 	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC4Speed);
 	if (period)
@@ -664,9 +670,11 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	}
 	if (!penv) return;
 	MODCHANNEL *p = pChn;
+	bool applyDNAtoPlug;
 	for (UINT i=nChn; i<MAX_CHANNELS; p++, i++)
 	if ((i >= m_nChannels) || (p == pChn))
 	{
+		applyDNAtoPlug = false;
 		if (((p->nMasterChn == nChn+1) || (p == pChn)) && (p->pHeader))
 		{
 			BOOL bOk = FALSE;
@@ -676,6 +684,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			// Note
 			case DCT_NOTE:
 				if ((note) && (p->nNote == note) && (pHeader == p->pHeader)) bOk = TRUE;
+				if (pHeader->nMixPlug) applyDNAtoPlug = true;
 				break;
 			// Sample
 			case DCT_SAMPLE:
@@ -684,11 +693,36 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			// Instrument
 			case DCT_INSTRUMENT:
 				if (pHeader == p->pHeader) bOk = TRUE;
+				if (pHeader->nMixPlug) applyDNAtoPlug = true;
 				break;
+			// Plugin
+			case DCT_PLUGIN:
+				if ((pHeader->nMixPlug) && (pHeader->nMixPlug == p->pHeader->nMixPlug))
+				{
+					applyDNAtoPlug = true;
+					bOk = TRUE;
+				}
+				break;
+
 			}
 			// Duplicate Note Action
 			if (bOk)
 			{
+				if (applyDNAtoPlug)
+				{
+					switch(p->pHeader->nDNA)
+					{
+					case DNA_NOTECUT:
+					case DNA_NOTEOFF:
+					case DNA_NOTEFADE:	
+						//switch off duplicated note played on this plugin 
+						IMixPlugin *pPlugin =  m_MixPlugins[pHeader->nMixPlug-1].pMixPlugin;
+						if (pPlugin && p->nNote)
+							pPlugin->MidiCommand(p->pHeader->nMidiChannel, p->pHeader->nMidiProgram, p->nNote+0xFF, 0, i);
+						break;
+					}
+				}
+
 				switch(p->pHeader->nDNA)
 				{
 				// Cut
@@ -714,8 +748,31 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 		}
 	}
 	if (pChn->dwFlags & CHN_MUTE) return;
+	
+		
+	// Do we need to apply New/Duplicate Note Action to a VSTi?
+	bool applyNNAtoPlug = false;
+	IMixPlugin *pPlugin = NULL;
+	if (pChn->pHeader && pChn->pHeader->nMidiChannel > 0 && pChn->pHeader->nMidiChannel < 17 && pChn->nNote>0 && pChn->nNote<128) // instro sends to a midi chan
+	{
+		UINT nPlugin = 0;
+		nPlugin = pChn->pHeader->nMixPlug;  		   // first try intrument VST
+		if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))  // Then try Channel VST
+			nPlugin = ChnSettings[nChn].nMixPlugin;			
+		if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+		{ 
+			pPlugin =  m_MixPlugins[nPlugin-1].pMixPlugin;
+			if (pPlugin) 
+			{
+				// applyNAtoPlug iff this plug is currently playing a note on this tracking chan)
+				// (and if it is playing a note, we know that would be the last note played on this chan).
+				applyNNAtoPlug = pPlugin->isPlaying(pChn->nNote, pChn->pHeader->nMidiChannel, nChn);
+			}
+		}
+	}	
+
 	// New Note Action
-	if ((pChn->nVolume) && (pChn->nLength))
+	if (((pChn->nVolume) && (pChn->nLength)) || applyNNAtoPlug)
 	{
 		UINT n = GetNNAChannel(nChn);
 		if (n)
@@ -726,6 +783,24 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			p->dwFlags &= ~(CHN_VIBRATO|CHN_TREMOLO|CHN_PANBRELLO|CHN_MUTE|CHN_PORTAMENTO);
 			p->nMasterChn = nChn+1;
 			p->nCommand = 0;
+
+			if (applyNNAtoPlug && pPlugin)
+			{
+				//Move note to the NNA channel (odd, but makes sense with DNA stuff).
+				//Actually a bad idea since it then become very hard to kill some notes.
+				//pPlugin->MoveNote(pChn->nNote, pChn->pHeader->nMidiChannel, nChn, n);
+				switch(pChn->nNNA)
+				{
+				case NNA_NOTEOFF:
+				case NNA_NOTECUT:
+				case NNA_NOTEFADE:	
+					//switch off note played on this plugin 
+					//pPlugin->MidiCommand(pChn->pHeader->nMidiChannel, pChn->pHeader->nMidiProgram, pChn->nNote+0xFF, 0, n);
+					pPlugin->MidiCommand(pChn->pHeader->nMidiChannel, pChn->pHeader->nMidiProgram, pChn->nNote+0xFF, 0, nChn);
+					break;
+				}
+			}
+
 			// Key Off the note
 			switch(pChn->nNNA)
 			{
@@ -794,9 +869,9 @@ BOOL CSoundFile::ProcessEffects()
 		{
 		
 		//rewbs.VSTnoteDelay
-		#ifdef MODPLUG_TRACKER
-			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
-		#endif // MODPLUG_TRACKER
+//		#ifdef MODPLUG_TRACKER
+//			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
+//		#endif // MODPLUG_TRACKER
 		//end rewbs.VSTnoteDelay
 
 			UINT note = pChn->nRowNote;
@@ -843,6 +918,13 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				CheckNNA(nChn, instr, note, FALSE);
 			}
+
+		//rewbs.VSTnoteDelay
+		#ifdef MODPLUG_TRACKER
+			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
+		#endif // MODPLUG_TRACKER
+		//end rewbs.VSTnoteDelay
+
 			// Instrument Change ?
 			if (instr)
 			{
@@ -951,6 +1033,18 @@ BOOL CSoundFile::ProcessEffects()
 				case VOLCMD_PORTADOWN:
 					PortamentoDown(pChn, vol << 2);
 					break;
+				
+				case VOLCMD_VELOCITY:					//rewbs.velocity	TEMP algorithm (crappy :)
+					pChn->nVolume = vol * 28;			//Max nVolume is 255; max vol is 9; 255/9=28
+					pChn->dwFlags |= CHN_FASTVOLRAMP;
+					if (m_nTickCount == nStartTick) SampleOffset(nChn, 48-(vol << 3), bPorta); //Max vol is 9; 9 << 3 = 48
+					
+					break;
+							
+				case VOLCMD_OFFSET:					//rewbs.volOff
+					if (m_nTickCount == nStartTick) 
+						SampleOffset(nChn, vol<<3, bPorta);
+					break;
 				}
 			}
 		}
@@ -1013,20 +1107,24 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Set Tempo
 		case CMD_TEMPO:
-			if (!m_nTickCount)
+			//if (!m_nTickCount)   //commented out for rewbs.tempoSlideFix
+			//{
+			if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
 			{
-				if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
-				{
-					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
-				}
-				SetTempo(param);
+				if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
 			}
+			SetTempo(param);
+			//}
 			break;
 
 		// Set Offset
 		case CMD_OFFSET:
 			if (m_nTickCount) break;
-			if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
+			//rewbs.volOffset: moved sample offset code to own method
+			SampleOffset(nChn, param, bPorta);
+
+
+/*			if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
 			param <<= 8;
 			param |= (UINT)(pChn->nOldHiOffset) << 16;
 			if ((pChn->nRowNote) && (pChn->nRowNote < 0x80))
@@ -1051,6 +1149,7 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				pChn->nPos = param;
 			}
+*/
 			break;
 
 		// Arpeggio
@@ -1070,7 +1169,12 @@ BOOL CSoundFile::ProcessEffects()
 				param |= 0x100; // increment retrig count on first row
 			}
 			if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF); else param = pChn->nRetrigParam;
-			RetrigNote(nChn, param);
+			if (volcmd == VOLCMD_OFFSET)
+				RetrigNote(nChn, param, vol<<3);
+			else if (volcmd == VOLCMD_VELOCITY)
+				RetrigNote(nChn, param, 48-(vol << 3));
+			else
+				RetrigNote(nChn, param);
 			break;
 
 		// Tremor
@@ -1229,6 +1333,11 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			break;
 		//rewbs.smoothVST end 
+		
+		//rewbs.velocity
+		case CMD_VELOCITY:
+			break;
+		//end rewbs.velocity
 		}
 
 
@@ -1311,7 +1420,7 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param)
 		return;
 	}
 	// Regular Slide
-	if (!(m_dwSongFlags & SONG_FIRSTTICK)) 
+	if (!(m_dwSongFlags & SONG_FIRSTTICK) || (m_nMusicSpeed == 1)) 
 	{
 		DoFreqSlide(pChn, -(int)(param * 4));
 	}
@@ -1337,7 +1446,8 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param)
 		}
 		return;
 	}
-	if (!(m_dwSongFlags & SONG_FIRSTTICK)) DoFreqSlide(pChn, (int)(param << 2));
+	if (!(m_dwSongFlags & SONG_FIRSTTICK)  || (m_nMusicSpeed == 1)) 
+		DoFreqSlide(pChn, (int)(param << 2));
 }
 
 
@@ -1443,7 +1553,7 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 {
 	if (param) pChn->nPortamentoSlide = param * 4;
 	pChn->dwFlags |= CHN_PORTAMENTO;
-	if ((pChn->nPeriod) && (pChn->nPortamentoDest) && (!(m_dwSongFlags & SONG_FIRSTTICK)))
+	if ((pChn->nPeriod) && (pChn->nPortamentoDest) && ((m_nMusicSpeed == 1) || !(m_dwSongFlags & SONG_FIRSTTICK)))
 	{
 		if (pChn->nPeriod < pChn->nPortamentoDest)
 		{
@@ -2113,8 +2223,43 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 }
 //end rewbs.smoothVST
 
-void CSoundFile::RetrigNote(UINT nChn, UINT param)
-//------------------------------------------------
+//rewbs.volOffset: moved offset code to own method as it will be used in several places now
+void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
+{
+	MODCHANNEL *pChn = &Chn[nChn];
+
+	if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
+	param <<= 8;
+	param |= (UINT)(pChn->nOldHiOffset) << 16;
+	if ((pChn->nRowNote) && (pChn->nRowNote < 0x80))
+	{
+		if (bPorta)
+			pChn->nPos = param;
+		else
+			pChn->nPos += param;
+		if (pChn->nPos >= pChn->nLength)
+		{
+			if (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
+			{
+				pChn->nPos = pChn->nLoopStart;
+				if ((m_dwSongFlags & SONG_ITOLDEFFECTS) && (pChn->nLength > 4))
+				{
+					pChn->nPos = pChn->nLength - 2;
+				}
+			}
+		}
+	} else
+	if ((param < pChn->nLength) && (m_nType & (MOD_TYPE_MTM|MOD_TYPE_DMF)))
+	{
+		pChn->nPos = param;
+	}
+
+	return;
+}
+//end rewbs.volOffset:
+
+void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)
+//-------------------------------------------------------------
 {
 	// Retrig: bit 8 is set if it's the new XM retrig
 	MODCHANNEL *pChn = &Chn[nChn];
@@ -2169,6 +2314,13 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param)
 		NoteChange(nChn, nNote, FALSE, bResetEnv);
 		if ((m_nType & MOD_TYPE_IT) && (!pChn->nRowNote) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
 		if (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))) nRetrigCount = 0;
+
+		if (offset)									//rewbs.volOffset: apply offset on retrig
+		{
+			if (pChn->pInstrument)
+				pChn->nLength = pChn->pInstrument->nLength;
+			SampleOffset(nChn, offset, false);
+		}
 	}
 	pChn->nRetrigCount = (BYTE)nRetrigCount;
 }
@@ -2300,21 +2452,22 @@ void CSoundFile::SetSpeed(UINT param)
 void CSoundFile::SetTempo(UINT param)
 //-----------------------------------
 {
-	if (param < 0x20)
+	if (param >= 0x20 && !m_nTickCount) //rewbs.tempoSlideFix: only set if not (T0x or T1x) and tick is 0
 	{
-		// Tempo Slide
+		m_nMusicTempo = param;
+	}
+	// Tempo Slide
+	else if (param < 0x20 && m_nTickCount) //rewbs.tempoSlideFix: only slide if (T0x or T1x) and tick is not 0
+	{
 		if ((param & 0xF0) == 0x10)
 		{
-			m_nMusicTempo += (param & 0x0F) * 2;
+			m_nMusicTempo += (param & 0x0F);
 			if (m_nMusicTempo > 255) m_nMusicTempo = 255;
 		} else
 		{
-			m_nMusicTempo -= (param & 0x0F) * 2;
+			m_nMusicTempo -= (param & 0x0F);
 			if ((LONG)m_nMusicTempo < 32) m_nMusicTempo = 32;
 		}
-	} else
-	{
-		m_nMusicTempo = param;
 	}
 }
 
@@ -2560,6 +2713,8 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) cons
 			return (ProTrackerPeriodTable[note-36] << 2);
 	}
 }
+
+
 
 
 UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC4Speed, int nPeriodFrac) const

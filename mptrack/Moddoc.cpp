@@ -11,6 +11,8 @@
 #include "dlsbank.h"
 #include "mod2wave.h"
 #include "mod2midi.h"
+#include "vstplug.h"
+
 
 #pragma warning(disable:4244)
 
@@ -50,6 +52,9 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_CLEANUP_REARRANGE,	OnRearrangePatterns)
 	ON_COMMAND(ID_INSTRUMENTS_REMOVEALL,OnRemoveAllInstruments)
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
+	ON_COMMAND(ID_PATTERN_PLAY,			OnPatternPlay)				//rewbs.patPlayAllViews
+	ON_COMMAND(ID_PATTERN_PLAYNOLOOP,	OnPatternPlayNoLoop)		//rewbs.patPlayAllViews
+	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)		//rewbs.patPlayAllViews
 	ON_UPDATE_COMMAND_UI(ID_INSERT_INSTRUMENT,		OnUpdateXMITOnly)
 	ON_UPDATE_COMMAND_UI(ID_INSTRUMENTS_REMOVEALL,	OnUpdateInstrumentOnly)
 	ON_UPDATE_COMMAND_UI(ID_CLEANUP_INSTRUMENTS,	OnUpdateInstrumentOnly)
@@ -86,6 +91,7 @@ CModDoc::CModDoc()
 	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
 	memset(PatternUndo, 0, sizeof(PatternUndo));
+	memset(OrderUndo, 0, sizeof(OrderUndo));
 #ifdef _DEBUG
 	MODCHANNEL *p = m_SndFile.Chn;
 	if (((DWORD)p) & 7) Log("MODCHANNEL is not aligned (0x%08X)\n", p);
@@ -422,7 +428,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		strcat(s, fname);
 		strcat(s, fext);
 		CFileDialog dlg(FALSE, lpszDefExt, s,
-			OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 			lpszFilter,
 			theApp.m_pMainWnd);
 		if (CMainFrame::m_szCurModDir[0])
@@ -630,8 +636,8 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 	return IDCANCEL;
 }
 
-
-BOOL CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, UINT nCurrentChn) //rewbs.vstiLive: added current chan param
+//static gdwLastMixActiveTime = 0;
+UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, UINT nCurrentChn) //rewbs.vstiLive: added current chan param
 //-----------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -644,6 +650,7 @@ BOOL CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		BEGIN_CRITICAL();
 		if ((bpause) || (m_SndFile.IsPaused()))
 		{
+			pMainFrm->SetLastMixActiveTime();
 			BOOL bFound = FALSE;
 			// All notes off
 			for (UINT i=0; i<MAX_CHANNELS; i++)
@@ -725,7 +732,7 @@ BOOL CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		if (nVol > 0) pChn->nVolume = nVol;
 		pChn->nMasterChn = 0;
 		if (bpause)
-		{
+		{   
 			if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength))
 			{
 				pChn->nPos = loopstart;
@@ -740,15 +747,22 @@ BOOL CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		} else pChn->dwFlags &= ~CHN_EXTRALOUD;
 		END_CRITICAL();
 		//rewbs.vstiLive
-		INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
-		MODINSTRUMENT *psmp = &(m_SndFile.Ins[nins]);
-		if (nCurrentChn >=0 && penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
+		if (nins <= m_SndFile.m_nInstruments)
 		{
-			UINT nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;
-			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+			INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
+			//MODINSTRUMENT *psmp = &(m_SndFile.Ins[nins]);
+			if (nCurrentChn >=0 && penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
 			{
-				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64);
+				UINT nPlugin = 0;
+				if (pChn->pHeader) 
+					nPlugin = pChn->pHeader->nMixPlug;  					// first try intrument VST
+				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
+					nPlugin = m_SndFile.ChnSettings[nCurrentChn+1].nMixPlugin; // Then try Channel VST                    
+   				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+				{
+					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64, nCurrentChn);
+				}
 			}
 		}
 		//end rewbs.vstiLive
@@ -765,18 +779,41 @@ BOOL CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		if (bpause) m_SndFile.m_dwSongFlags |= SONG_PAUSED;
 		END_CRITICAL();
 	}
-	return TRUE;
+	return nChn;
 }
 
 
-BOOL CModDoc::NoteOff(UINT note, BOOL bFade)
-//------------------------------------------
+BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewbs.vstiLive: added chan and nins
+//--------------------------------------------------------------------------
 {
 	BEGIN_CRITICAL();
 	MODCHANNEL *pChn = &m_SndFile.Chn[m_SndFile.m_nChannels];
 	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
 		DWORD mask = (bFade) ? CHN_NOTEFADE : (CHN_NOTEFADE|CHN_KEYOFF);
+
+		//rewbs.vstiLive
+		if (nins>0 && nins<=m_SndFile.m_nInstruments)
+		{
+			INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
+//			MODINSTRUMENT *psmp = &(m_SndFile.Ins[nins]);
+			if (nCurrentChn >=0 && penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
+			{
+				UINT nPlugin = 0;
+				if (pChn->pHeader) 
+					nPlugin = pChn->pHeader->nMixPlug;  		// first try intrument VST
+				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
+					nPlugin = m_SndFile.ChnSettings[nCurrentChn+1].nMixPlugin;// Then try Channel VST
+				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+				{
+					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note+0xFF, 0, nCurrentChn);
+
+				}
+			}
+		}
+		//end rewbs.vstiLive
+
 		if ((!(pChn->dwFlags & mask)) && (pChn->nLength) && ((note == pChn->nNewNote) || (!note)))
 		{
 			m_SndFile.KeyOff(i);
@@ -1052,7 +1089,7 @@ void CModDoc::OnFileWaveConvert()
 	strcpy(s, fname);
 	strcat(s, ".wav");
 	CFileDialog dlg(FALSE, "wav", s,
-					OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					"Wave Files (*.wav)|*.wav||", pMainFrm);
 	dlg.m_ofn.lpstrInitialDir = pMainFrm->GetExportDir();
 	if (dlg.DoModal() == IDOK)
@@ -1107,7 +1144,7 @@ void CModDoc::OnFileMP3Convert()
 	strcat(s, path);
 	strcat(s, fname);
 	CFileDialog dlg(FALSE, "mp3", s,
-					OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					"MPEG Layer III Files (*.mp3)|*.mp3|Layer3 Wave Files (*.wav)|*.wav||", pMainFrm);
 	dlg.m_ofn.nFilterIndex = 0;
 	dlg.m_ofn.lpstrInitialDir = pMainFrm->GetExportDir();
@@ -1151,7 +1188,7 @@ void CModDoc::OnFileMP3Convert()
 	}
 }
 
-
+ 
 void CModDoc::OnFileMidiConvert()
 //-------------------------------
 {
@@ -1166,7 +1203,7 @@ void CModDoc::OnFileMidiConvert()
 	strcat(s, fname);
 	strcat(s, ".mid");
 	CFileDialog dlg(FALSE, "mid", s,
-					OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					"Midi Files (*.mid,*.rmi)|*.mid;*.rmi||", pMainFrm);
 	dlg.m_ofn.nFilterIndex = 0;
 	if (dlg.DoModal() == IDOK)
@@ -1189,7 +1226,7 @@ void CModDoc::OnPlayerPlay()
 	if (pMainFrm)
 	{
 		BOOL bPlaying = (pMainFrm->GetModPlaying() == this) ? TRUE : FALSE;
-		if ((bPlaying) && (!(m_SndFile.m_dwSongFlags & (SONG_PAUSED|SONG_STEP|SONG_PATTERNLOOP))))
+		if ((bPlaying) && (!(m_SndFile.m_dwSongFlags & (SONG_PAUSED|SONG_STEP/*|SONG_PATTERNLOOP*/))))
 		{
 			OnPlayerPause();
 			return;
@@ -1275,7 +1312,22 @@ void CModDoc::OnPlayerPlayFromStart()
 		CMainFrame::EnableLowLatencyMode(FALSE);
 	}
 }
-
+/*
+void CModDoc::OnPlayerPlayFromPos(UINT pos)
+//-----------------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if (pMainFrm)
+	{
+		pMainFrm->PauseMod();
+		m_SndFile.m_dwSongFlags &= ~SONG_STEP;
+		m_SndFile.SetCurrentPos(pos);
+		pMainFrm->ResetElapsedTime();
+		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
+		CMainFrame::EnableLowLatencyMode(FALSE);
+	}
+}
+*/
 
 void CModDoc::OnEditGlobals()
 //---------------------------
@@ -1608,13 +1660,23 @@ LONG CModDoc::GetIndexFromEffect(UINT command, UINT param)
 UINT CModDoc::GetEffectFromIndex(UINT ndx, int *pParam)
 //-----------------------------------------------------
 {
-	if (pParam) *pParam = -1;
+	//if (pParam) *pParam = -1;
 	if (ndx >= MAX_FXINFO)
 	{
 		if (pParam) *pParam = 0;
 		return 0;
 	}
-	if ((pParam) && (gFXInfo[ndx].dwParamMask)) *pParam = gFXInfo[ndx].dwParamValue;
+	if ((pParam) && (gFXInfo[ndx].dwParamMask))
+	{
+//		if ((*pParam < gFXInfo[ndx].dwParamValue) || (*pParam > gFXInfo[ndx].dwParamValue+15))
+//			*pParam = gFXInfo[ndx].dwParamValue + ((*pParam)/16);
+		if (*pParam < gFXInfo[ndx].dwParamValue)
+			*pParam = gFXInfo[ndx].dwParamValue;
+		else if (*pParam > gFXInfo[ndx].dwParamValue+15)
+			*pParam = gFXInfo[ndx].dwParamValue+15;
+	}
+
+
 	return gFXInfo[ndx].dwEffect;
 }
 
@@ -1951,7 +2013,7 @@ typedef struct MPTVOLCMDINFO
 	LPCSTR pszName;		// ie "Set Volume"
 } MPTVOLCMDINFO;
 
-#define MAX_VOLINFO		13
+#define MAX_VOLINFO		15			//rewbs.volOff & rewbs.velocity: increased from 13
 
 
 const MPTVOLCMDINFO gVolCmdInfo[MAX_VOLINFO] =
@@ -1969,6 +2031,8 @@ const MPTVOLCMDINFO gVolCmdInfo[MAX_VOLINFO] =
 	{VOLCMD_TONEPORTAMENTO,	MOD_TYPE_XMIT,		"g: Tone portamento"},
 	{VOLCMD_PORTAUP,		MOD_TYPE_IT,		"f: Portamento up"},
 	{VOLCMD_PORTADOWN,		MOD_TYPE_IT,		"e: Portamento down"},
+	{VOLCMD_VELOCITY,		MOD_TYPE_IT,		":: velocity"},		//rewbs.velocity
+	{VOLCMD_OFFSET,		MOD_TYPE_IT,		"o: offset"},		//rewbs.volOff
 };
 
 
@@ -2030,3 +2094,265 @@ BOOL CModDoc::GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin, DWORD *prangeMa
 }
 
 
+void* CModDoc::GetChildFrame()
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if (!pMainFrm) return 0;
+	CMDIChildWnd *pMDIActive = pMainFrm->MDIGetActive();
+	if (pMDIActive)
+	{
+		CView *pView = pMDIActive->GetActiveView();
+		if ((pView) && (pView->GetDocument() == this))
+			return ((CChildFrame *)pMDIActive);
+	}
+	POSITION pos = GetFirstViewPosition();
+	while (pos != NULL)
+	{
+		CView *pView = GetNextView(pos);
+		if ((pView) && (pView->GetDocument() == this))
+			return (CChildFrame *)pView->GetParentFrame();
+	}
+
+	return NULL;
+}
+
+HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
+{
+	HWND followSonghWnd;
+	PATTERNVIEWSTATE *patternViewState;
+	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+
+	if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
+	{
+		followSonghWnd = pChildFrm->GetHwndView();
+		patternViewState = new PATTERNVIEWSTATE;
+		pChildFrm->SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)patternViewState);
+		
+		pat = patternViewState->nPattern;
+		row = patternViewState->nRow;
+		ord = patternViewState->nOrder;
+		
+		delete patternViewState;
+	}
+	else	//patern editor object does not exist (i.e. is not active)  - use saved state.
+	{
+		followSonghWnd = NULL;
+		patternViewState = pChildFrm->GetPatternViewState();
+
+		pat = patternViewState->nPattern;
+		row = patternViewState->nRow;
+		ord = patternViewState->nOrder;
+	}
+
+	return followSonghWnd;
+
+}
+
+
+void CModDoc::OnPatternRestart()
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+
+	if ((pMainFrm) && (pChildFrm))
+	{
+		CSoundFile *pSndFile = GetSoundFile();
+		UINT nPat,nOrd,nRow;
+		HWND followSonghWnd;
+
+		followSonghWnd = GetEditPosition(nRow, nPat, nOrd);
+		
+		BEGIN_CRITICAL();
+		// Cut instruments/samples
+		for (UINT i=0; i<MAX_CHANNELS; i++)
+		{
+			pSndFile->Chn[i].nPatternLoopCount = 0;
+			pSndFile->Chn[i].nPatternLoop = 0;
+			pSndFile->Chn[i].nFadeOutVol = 0;
+			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
+		}
+		if ((nOrd < MAX_PATTERNS) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = nOrd;
+		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
+		pSndFile->LoopPattern(nPat);
+		pSndFile->m_nNextRow = 0;
+		pSndFile->ResetTotalTickCount();
+		END_CRITICAL();
+
+		pMainFrm->ResetElapsedTime();
+		if (pMainFrm->GetModPlaying() != this)
+		{
+			pSndFile->ResumePlugins();
+			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION);
+		}
+		else
+		{
+			pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();
+		}
+	}
+	//SwitchToView();
+}
+
+void CModDoc::OnPatternPlay()
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+
+	if ((pMainFrm) && (pChildFrm))
+	{
+		CSoundFile *pSndFile = GetSoundFile();
+		UINT nRow,nPat,nOrd;
+		HWND followSonghWnd;
+
+		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
+	
+		BEGIN_CRITICAL();
+		// Cut instruments/samples
+		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
+		{
+			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
+		}
+		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
+		pSndFile->LoopPattern(nPat);
+		pSndFile->m_nNextRow = nRow;
+		END_CRITICAL();
+
+		pMainFrm->ResetElapsedTime();
+		if (pMainFrm->GetModPlaying() != this)
+		{
+			pSndFile->ResumePlugins();
+			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION);
+		}
+		else
+		{
+			pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();
+		}
+		
+	}
+	//SwitchToView();
+
+}
+
+void CModDoc::OnPatternPlayNoLoop()
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+
+	if ((pMainFrm) && (pChildFrm))
+	{
+		CSoundFile *pSndFile = GetSoundFile();
+		UINT nPat,nOrd,nRow;
+		HWND followSonghWnd;
+
+		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
+
+		BEGIN_CRITICAL();
+		// Cut instruments/samples
+		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
+		{
+			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
+		}
+		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
+		pSndFile->SetCurrentOrder(nOrd);
+		if (pSndFile->Order[nOrd] == nPat)
+			pSndFile->DontLoopPattern(nPat, nRow);
+		else
+			pSndFile->LoopPattern(nPat);
+		pSndFile->m_nNextRow = nRow;
+		END_CRITICAL();
+
+		pMainFrm->ResetElapsedTime();
+		
+		if (pMainFrm->GetModPlaying() != this)
+		{
+			pSndFile->ResumePlugins();
+			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION);
+		}
+		else
+		{
+			pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();
+		}
+	}
+	//SwitchToView();
+}
+
+LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == kcNull)
+		return NULL;
+
+	switch(wParam)
+	{
+		case kcViewGeneral: OnEditGlobals(); break;
+		case kcViewPattern: OnEditPatterns(); break;
+		case kcViewSamples: OnEditSamples(); break;
+		case kcViewInstruments: OnEditInstruments(); break;
+		case kcViewComments: OnEditComments(); break;
+
+		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
+		case kcFileSaveAsMP3:	OnFileMP3Convert(); break;
+		case kcFileSaveMidi: OnFileMidiConvert(); break;
+		case kcEstimateSongLength: OnEstimateSongLength(); break;
+		case kcFileSave:	DoSave(m_strPathName, 0); break;
+		case kcFileSaveAs:	DoSave(NULL, 1); break;
+		case kcFileClose:	OnCloseDocument(); break;
+
+		case kcPlayPatternFromCursor: OnPatternPlay(); break;
+		case kcPlayPatternFromStart: OnPatternRestart(); break;
+		case kcPlaySongFromCursor: OnPatternPlayNoLoop(); break;
+		case kcPlaySongFromStart: OnPlayerPlayFromStart(); break;
+		case kcPlayPauseSong: OnPlayerPlay(); break;
+		case kcStopSong: OnPlayerStop(); break;
+//		case kcPauseSong: OnPlayerPause(); break;
+			
+
+	}
+
+	return wParam;
+}
+
+
+void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
+{
+	PSNDMIXPLUGIN pPlugin;
+
+	pPlugin = &m_SndFile.m_MixPlugins[m_nCurrentPlugin];
+	if (pPlugin && pPlugin->pMixPlugin)
+	{
+		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+//		if (pVstPlugin->HasEditor())
+//		{
+			pVstPlugin->ToggleEditor();
+/*		} else
+		{
+			UINT nCommands = pVstPlugin->GetNumCommands();
+			if (nCommands > 10) nCommands = 10;
+			if (nCommands)
+			{
+				CHAR s[32];
+				HMENU hMenu = ::CreatePopupMenu();
+				
+				if (!hMenu)	return;
+				for (UINT i=0; i<nCommands; i++)
+				{
+					s[0] = 0;
+					pVstPlugin->GetCommandName(i, s);
+					if (s[0])
+					{
+						::AppendMenu(hMenu, MF_STRING, ID_FXCOMMANDS_BASE+i, s);
+					}
+				}
+				CPoint pt;
+				GetCursorPos(&pt);
+				::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
+				::DestroyMenu(hMenu);
+			}
+
+		}
+*/
+	}
+
+	return;
+}

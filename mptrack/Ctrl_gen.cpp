@@ -129,6 +129,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_EditTempo.SetWindowText(s);
 		wsprintf(s, "%d", m_pSndFile->m_nDefaultSpeed);
 		m_EditSpeed.SetWindowText(s);
+
 		wsprintf(s, "%d", m_pSndFile->m_nDefaultGlobalVolume / 2);
 		m_EditGlobalVol.SetWindowText(s);
 		wsprintf(s, "%d", m_pSndFile->m_nRestartPos);

@@ -57,8 +57,9 @@ public:
 	UINT m_nRows;
 	UINT m_nChan;
 	UINT m_nPattern;
+	long m_nFillEffect;
 
-	int m_nDragItem;
+    int m_nDragItem;
 	UINT m_nBtnMouseOver;
 	DWORD m_dwStatus;
 
@@ -71,6 +72,7 @@ public:
 	BYTE GetParam(UINT row);
 	BYTE GetCommand(UINT row);
 	void SetParam(UINT row, BYTE param);
+	void SetCommand(UINT row, BYTE cmd);
 	BYTE ScreenYToParam(int y);
 	UINT ScreenXToRow(int x);
 	void SetPlayCursor(UINT nPat, UINT nRow);
@@ -79,6 +81,11 @@ public:
 	CModDoc* m_pModDoc;
 	CRect m_rcDraw;
 	CRect m_rcFullWin;
+
+	CComboBox m_cmbEffectList;
+	CButton m_btnFillCheck;
+	bool m_bFillCheck;
+	CEdit m_edVisStatus;
 
 	virtual VOID OnOK();
 	virtual VOID OnCancel();
@@ -89,8 +96,11 @@ public:
 
 	CViewPattern *m_pViewPattern;
 	
+
 	DECLARE_MESSAGE_MAP()
+	BOOL OnInitDialog();
 	afx_msg void OnPaint();
+	
 public: //HACK for first window repos
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 protected:
@@ -99,6 +109,8 @@ protected:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnFillBlanksCheck();
+	afx_msg void OnEffectChanged();
 //	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 //	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 //	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -106,5 +118,8 @@ protected:
 	//{{AFX_MSG(CEffectVis)
 	afx_msg void OnEditUndo();
 	//}}AFX_MSG
-	CEdit m_edVisStatus;
+
+private:
+
+	void MakeChange(int currentRow, int newParam);
 };

@@ -1634,7 +1634,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 //-----------------------------------------------------------------------------------
 {
 	ITINSTRUMENT *pinstr = (ITINSTRUMENT *)lpMemFile;
-	WORD samplemap[64];
+	WORD samplemap[120];	//rewbs.noSamplePerInstroLimit (120 was 64)
 	DWORD dwMemPos;
 	UINT nsmp, nsamples;
 
@@ -1648,10 +1648,11 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	if (!penv) return FALSE;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
 	memset(samplemap, 0, sizeof(samplemap));
-	ITInstrToMPT(pinstr, penv, pinstr->trkvers);
 	dwMemPos = 554;
+	dwMemPos += ITInstrToMPT(pinstr, penv, pinstr->trkvers);
 	nsamples = pinstr->nos;
-	if (nsamples >= 64) nsamples = 64;
+	//if (nsamples >= 64) nsamples = 64;		//rewbs.noSamplePerInstroLimit
+	if (nsamples >= 120) nsamples = 120;		//120 is  max cos of 10 octaves
 	// Reading Samples
 	nsmp = 1;
 	for (UINT i=0; i<nsamples; i++)
@@ -1666,7 +1667,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	}
 	for (UINT j=0; j<128; j++)
 	{
-		if ((penv->Keyboard[j]) && (penv->Keyboard[j] <= 64))
+		if ((penv->Keyboard[j]) && (penv->Keyboard[j] <= 120)) //rewbs.noSamplePerInstroLimit (120 was 64)
 		{
 			penv->Keyboard[j] = samplemap[penv->Keyboard[j]-1];
 		}
@@ -1710,7 +1711,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	iti->rp = penv->nPanSwing;
 	iti->ifc = penv->nIFC;
 	iti->ifr = penv->nIFR;
-	iti->trkvers = 0x202;
+	iti->trkvers =	0x220;	 //0x202
 	iti->nos = 0;
 	for (UINT i=0; i<120; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
 	{
@@ -1772,6 +1773,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	dwPos = 554;
 	fwrite(buffer, 1, dwPos, f);
 	dwPos += iti->nos * sizeof(ITSAMPLESTRUCT);
+
 	// Writing sample headers
 	for (UINT j=0; j<iti->nos; j++) if (smptable[j])
 	{
@@ -1806,20 +1808,77 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 		smpsize = psmp->nLength;
 		if (psmp->uFlags & CHN_16BIT)
 		{
-			itss.flags |= 0x02;
+			itss.flags |= 0x02; 
 			smpsize <<= 1;
+		} else
+		{
+			itss.flags &= ~(0x02);
 		}
+		if (psmp->uFlags & CHN_STEREO)
+		{
+			itss.flags |= 0x04;
+			smpsize <<= 1; 
+		} else
+		{
+			itss.flags &= ~(0x04);
+		}
+
 		itss.samplepointer = dwPos;
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 		dwPos += smpsize;
 	}
 	// Writing Sample Data
+	WORD sampleType=0;
+	if (itss.flags | 0x02) sampleType=RS_PCM16S; else sampleType=RS_PCM8S;	//8 or 16 bit signed
+	if (itss.flags | 0x04) sampleType |= RSF_STEREO;						//mono or stereo
 	for (UINT k=0; k<iti->nos; k++)
 	{
 		UINT nsmp = smptable[k];
 		MODINSTRUMENT *psmp = &Ins[nsmp];
-		WriteSample(f, psmp, (psmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S);
+		WriteSample(f, psmp, sampleType);
 	}
+
+
+	//------------ rewbs.modularInstData
+	//WARNING!! this code is duplicated in SaveIT
+	//          TODO: sort this out.
+/*
+    long modularInstSize = 0;
+	UINT ModInstID = 'INSM';
+	fwrite(&ModInstID, 1, sizeof(ModInstID), f);	// mark this as an instrument with modular extensions
+	long sizePos = ftell(f);				// we will want to write the modular data's total size here
+	fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
+	
+	//Write chunks
+	UINT ID;
+		{	//VST Slot chunk:
+			ID='PLUG';
+			fwrite(&ID, 1, sizeof(int), f);
+			fwrite(&(penv->nMixPlug), 1, sizeof(BYTE), f);
+			modularInstSize += sizeof(int)+sizeof(BYTE);
+		}
+	//How to save your own modular instrument chunk:
+		//{
+		//ID='MYID';
+		//fwrite(&ID, 1, sizeof(int), f);
+		//instModularDataSize+=sizeof(int);
+		//
+		////You can save your chunk size somwhere here if you need variable chunk size.
+		//fwrite(myData, 1, myDataSize, f);
+		//instModularDataSize+=myDataSize;
+	}
+
+	//write modular data's total size
+	long curPos = ftell(f);			// remember current pos
+	fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
+	fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
+	fseek(f, curPos, SEEK_SET);		// go back to where we were.
+	
+	//move forward 
+	dwPos+=sizeof(ModInstID)+sizeof(modularInstSize)+modularInstSize;
+	//------------ end rewbs.modularInstData
+*/
+
 	fclose(f);
 	return TRUE;
 }
@@ -1931,6 +1990,7 @@ BOOL CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 	}
 	return TRUE;
 }
+
 
 
 

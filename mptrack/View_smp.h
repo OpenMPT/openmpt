@@ -31,6 +31,7 @@ public:
 	BOOL SetZoom(UINT nZoom);
 	LONG SampleToScreen(LONG n) const;
 	DWORD ScreenToSample(LONG x) const;
+	void PlayNote(UINT note);
 	void InvalidateSample();
 	void SetCurSel(DWORD nBegin, DWORD nEnd);
 	void ScrollToPosition(int x);
@@ -50,6 +51,7 @@ public:
 	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll=TRUE);
 	virtual BOOL OnDragonDrop(BOOL, LPDRAGONDROP);
 	virtual LRESULT OnPlayerNotify(MPTNOTIFICATION *);
+	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	//}}AFX_VIRTUAL
 
 protected:
@@ -93,6 +95,7 @@ protected:
 	afx_msg void OnZoomUp();
 	afx_msg void OnZoomDown();
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

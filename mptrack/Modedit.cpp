@@ -304,6 +304,14 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		}
 		SetPathName(drive, FALSE);
 	}
+
+	//update effect key commands
+	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	if	(nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+		ih->SetXMEffects();
+	else
+		ih->SetITEffects();
+
 	SetModified();
 	ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE);
@@ -324,7 +332,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 
 		// Checking for unused channels
 		UINT nFound = nChnToRemove;
-		for (int iRst=m_SndFile.m_nChannels; iRst>=0; iRst--)
+		for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--)
 		{
 			rem.m_bChnMask[iRst] = TRUE;
 			for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++) if (m_SndFile.Patterns[ipat])

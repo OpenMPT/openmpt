@@ -79,7 +79,7 @@ IDB_PATTERNS            BITMAP                  "res\\patterns.bmp"
 IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
 IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
 IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
-IDB_SPLASHSCREEN        BITMAP                  "RES\\splash.bmp"
+IDB_SPLASHSCREENOLD     BITMAP                  "RES\\splash.bmp"
 IDB_ENVTOOLBAR          BITMAP                  "res\\envbar.bmp"
 IDB_SMPTOOLBAR          BITMAP                  "res\\smptoolb.bmp"
 IDB_VISNODE             BITMAP                  "res\\bitmap1.bmp"
@@ -100,7 +100,7 @@ BEGIN
             MENUITEM "&S3M",                        ID_FILE_NEWS3M
             MENUITEM "&MOD",                        ID_FILE_NEWMOD
         END
-        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Open...\tCtrl+O",            57601
         MENUITEM "&Close",                      ID_FILE_CLOSE
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
@@ -151,14 +151,14 @@ BEGIN
     POPUP "&View"
     BEGIN
         MENUITEM "&Globals\tAlt+G",             ID_VIEW_GLOBALS
-        MENUITEM "&Patterns\tAlt+P",            ID_VIEW_PATTERNS
+        MENUITEM "&Patterns\tAlt+P",            32902
         MENUITEM "&Samples\tAlt+S",             ID_VIEW_SAMPLES
         MENUITEM "&Instruments\tAlt+N",         ID_VIEW_INSTRUMENTS
         MENUITEM "&Comments\tShift+F9",         ID_VIEW_COMMENTS
         MENUITEM SEPARATOR
         POPUP "&Toolbars"
         BEGIN
-            MENUITEM "&Main",                       ID_VIEW_TOOLBAR
+            MENUITEM "&Main",                       59392
             MENUITEM "&Tree",                       IDD_TREEVIEW
         END
         MENUITEM SEPARATOR
@@ -171,20 +171,19 @@ BEGIN
         MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
         MENUITEM "&Tile Horizontal",            ID_WINDOW_TILE_HORZ
         MENUITEM "Tile &Vertical",              ID_WINDOW_TILE_VERT
-        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
-        MENUITEM "S&plit",                      ID_WINDOW_SPLIT
     END
     POPUP "&Help"
     BEGIN
         MENUITEM "&Contents",                   ID_HELP_FINDER
         MENUITEM "&Search...",                  ID_HELP_SEARCH
+        MENUITEM "&Report a bug",               ID_REPORT_BUG
         MENUITEM SEPARATOR
         POPUP "&Internet"
         BEGIN
             MENUITEM "&Modplug Central",            ID_NETLINK_MODPLUG
             MENUITEM "Modplug Central &Forums",     ID_NETLINK_FORUMS
-            MENUITEM "Effect &Plugins",             ID_NETLINK_PLUGINS
-            MENUITEM "&Trax In Space",              ID_NETLINK_TRAXINSPACE
+            MENUITEM "&Kvr-VST (plugins)",          ID_NETLINK_PLUGINS
+            MENUITEM "&OSMusic.net",                ID_NETLINK_TRAXINSPACE
             MENUITEM "The Tracker's &Handbook",     ID_NETLINK_HANDBOOK
         END
         MENUITEM SEPARATOR
@@ -214,61 +213,6 @@ BEGIN
         MENUITEM "&Copy envelope",              ID_EDIT_COPY
         MENUITEM "&Paste envelope",             ID_EDIT_PASTE
     END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Accelerator
-//
-
-IDR_MAINFRAME ACCELERATORS 
-BEGIN
-    "5",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
-    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
-    "F",            ID_EDIT_FIND,           VIRTKEY, CONTROL, NOINVERT
-    "G",            ID_VIEW_GLOBALS,        VIRTKEY, ALT, NOINVERT
-    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
-    "N",            ID_VIEW_INSTRUMENTS,    VIRTKEY, ALT, NOINVERT
-    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
-    "P",            ID_VIEW_PATTERNS,       VIRTKEY, ALT, NOINVERT
-    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
-    "S",            ID_VIEW_SAMPLES,        VIRTKEY, ALT, NOINVERT
-    "T",            ID_SAMPLE_TRIM,         VIRTKEY, CONTROL, NOINVERT
-    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
-    "M",            ID_EDIT_PASTE_SPECIAL,  VIRTKEY, CONTROL, NOINVERT
-    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
-    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
-    VK_DELETE,      ID_PATTERN_DELETEROW,   VIRTKEY, SHIFT, NOINVERT
-    VK_DELETE,      ID_PATTERN_DELETEALLROW, VIRTKEY, SHIFT, CONTROL, 
-                                                    NOINVERT
-    VK_DIVIDE,      ID_PREVOCTAVE,          VIRTKEY, NOINVERT
-    VK_DIVIDE,      ID_PREVINSTRUMENT,      VIRTKEY, CONTROL, NOINVERT
-    VK_DOWN,        ID_NEXTINSTRUMENT,      VIRTKEY, CONTROL, NOINVERT
-    VK_ESCAPE,      ID_PLAYER_PAUSE,        VIRTKEY, NOINVERT
-    VK_F3,          ID_EDIT_FINDNEXT,       VIRTKEY, NOINVERT
-    VK_F5,          ID_PLAYER_PLAY,         VIRTKEY, NOINVERT
-    VK_F6,          ID_PLAYER_PLAYFROMSTART, VIRTKEY, NOINVERT
-    VK_F7,          ID_PATTERN_RESTART,     VIRTKEY, NOINVERT
-    VK_F7,          ID_PATTERN_PLAY,        VIRTKEY, CONTROL, NOINVERT
-    VK_F8,          ID_PLAYER_PAUSE,        VIRTKEY, NOINVERT
-    VK_F9,          ID_MIDI_RECORD,         VIRTKEY, NOINVERT
-    VK_F9,          ID_VIEW_COMMENTS,       VIRTKEY, SHIFT, NOINVERT
-    VK_INSERT,      ID_PATTERN_INSERTROW,   VIRTKEY, NOINVERT
-    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
-    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
-    VK_INSERT,      ID_PATTERN_INSERTALLROW, VIRTKEY, SHIFT, CONTROL, 
-                                                    NOINVERT
-    VK_LEFT,        ID_PREVORDER,           VIRTKEY, CONTROL, NOINVERT
-    VK_MULTIPLY,    ID_NEXTOCTAVE,          VIRTKEY, NOINVERT
-    VK_MULTIPLY,    ID_NEXTINSTRUMENT,      VIRTKEY, CONTROL, NOINVERT
-    VK_NUMPAD5,     ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
-    VK_RETURN,      ID_CONTROLENTER,        VIRTKEY, CONTROL, NOINVERT
-    VK_RIGHT,       ID_NEXTORDER,           VIRTKEY, CONTROL, NOINVERT
-    VK_TAB,         ID_CONTROLTAB,          VIRTKEY, CONTROL, NOINVERT
-    VK_UP,          ID_PREVINSTRUMENT,      VIRTKEY, CONTROL, NOINVERT
-    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
-    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -345,11 +289,11 @@ BEGIN
                     WS_TABSTOP
 END
 
-IDD_WAVECONVERT DIALOG  0, 0, 211, 151
+IDD_WAVECONVERT DIALOGEX 0, 0, 211, 151
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
 CAPTION "Wave Convert"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,155,8,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,155,28,50,14
@@ -366,7 +310,7 @@ BEGIN
     CONTROL         "From position",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,
                     15,91,58,10
     CONTROL         "Normalize Output",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,134,73,10
+                    NOT WS_VISIBLE | WS_TABSTOP,10,134,73,10
     COMBOBOX        IDC_COMBO1,10,106,54,82,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     COMBOBOX        IDC_COMBO2,70,106,73,75,CBS_DROPDOWNLIST | WS_VSCROLL | 
@@ -390,56 +334,59 @@ BEGIN
     CTEXT           "Writing file...",IDC_TEXT1,4,4,178,9
 END
 
-IDD_OPTIONS_KEYBOARD DIALOG  0, 0, 240, 156
+IDD_OPTIONS_KEYBOARD DIALOGEX 0, 0, 266, 278
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Keyboard"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,4,3,232,150
-    LTEXT           "Keyboard Preset:",IDC_STATIC,11,14,64,8
-    COMBOBOX        IDC_COMBO1,10,24,78,53,CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Note Cut:",IDC_STATIC,101,26,30,8
-    EDITTEXT        IDC_EDIT14,135,25,20,12,ES_READONLY
-    LTEXT           "Key Off:",IDC_STATIC,167,26,29,8
-    EDITTEXT        IDC_EDIT15,198,25,20,12,ES_READONLY
-    COMBOBOX        IDC_COMBO2,10,42,78,53,CBS_DROPDOWNLIST | WS_TABSTOP
-    CTEXT           "C",IDC_STATIC,10,58,15,8,NOT WS_GROUP
-    CTEXT           "C#",IDC_STATIC,28,58,15,8,NOT WS_GROUP
-    CTEXT           "D",IDC_STATIC,46,58,15,8,NOT WS_GROUP
-    CTEXT           "D#",IDC_STATIC,64,58,15,8,NOT WS_GROUP
-    CTEXT           "E",IDC_STATIC,82,58,15,8,NOT WS_GROUP
-    CTEXT           "F",IDC_STATIC,100,58,15,8,NOT WS_GROUP
-    CTEXT           "F#",IDC_STATIC,118,58,15,8,NOT WS_GROUP
-    CTEXT           "G",IDC_STATIC,136,58,15,8,NOT WS_GROUP
-    CTEXT           "G#",IDC_STATIC,154,58,15,8,NOT WS_GROUP
-    CTEXT           "A",IDC_STATIC,172,58,15,8,NOT WS_GROUP
-    CTEXT           "A#",IDC_STATIC,190,58,15,8,NOT WS_GROUP
-    CTEXT           "B",IDC_STATIC,208,58,15,8,NOT WS_GROUP
-    EDITTEXT        IDC_EDIT1,10,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT2,28,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT3,46,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT4,64,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT5,82,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT6,100,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT7,118,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT8,136,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT9,154,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT10,172,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT12,190,68,15,25,ES_READONLY
-    EDITTEXT        IDC_EDIT13,208,68,15,25,ES_READONLY
-    LISTBOX         IDC_LIST1,9,100,109,46,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+    LISTBOX         IDC_COMMAND_LIST,0,32,130,242,LBS_NOINTEGRALHEIGHT | 
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         "HotKey1",IDC_HOTKEY1,"msctls_hotkey32",WS_BORDER | 
-                    WS_TABSTOP,123,100,71,13
-    CONTROL         "Enable FT2 Ctrl/Alt shortcuts",IDC_CHECK1,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,123,136,107,10
-    PUSHBUTTON      "Reset",IDC_BUTTON1,197,100,23,13
+    COMBOBOX        IDC_CHOICECOMBO,141,16,79,51,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      "Set",IDC_SET,222,46,43,13,NOT WS_VISIBLE
+    PUSHBUTTON      "Delete",IDC_DELETE,212,64,43,13
+    GROUPBOX        "Key setup for this command ",IDC_STATIC,134,5,127,75
+    CONTROL         "On Key Down",IDC_CHECKKEYDOWN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,141,44,66,14
+    CONTROL         "On Key Hold",IDC_CHECKKEYHOLD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,141,57,66,10
+    CONTROL         "On Key Up",IDC_CHECKKEYUP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,141,68,66,8
+    LTEXT           "Key:",IDC_STATIC,141,33,16,8
+    COMBOBOX        IDC_KEYCATEGORY,0,16,130,204,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Restore",IDC_RESTORE,212,46,43,13
+    GROUPBOX        "Quick Changes",IDC_STATIC,134,146,126,52
+    EDITTEXT        IDC_CUSTHOTKEY,157,31,98,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_KEYREPORT,135,84,125,60,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
+                    WS_VSCROLL
+    GROUPBOX        "Key Config to load on startup",IDC_STATIC,134,240,126,
+                    27
+    EDITTEXT        IDC_KEYMAPFILE,139,249,99,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BROWSEKEYCONF,241,249,15,13
+    CONTROL         "Save to this file on OK",IDC_AUTOSAVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,173,263,84,10
+    PUSHBUTTON      "Save Keys",IDC_SAVE,200,213,54,13
+    GROUPBOX        "Multi Config Handling",IDC_STATIC,134,200,126,32
+    PUSHBUTTON      "Load Keys",IDC_LOAD,140,213,54,13
+    CONTROL         "Debug Save",IDC_DEBUGSAVE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,200,228,56,10
+    LTEXT           "Repeat notes on hold?",IDC_STATIC,138,155,74,11
+    PUSHBUTTON      "Y",IDC_NOTESREPEAT,230,154,12,9
+    PUSHBUTTON      "N",IDC_NONOTESREPEAT,245,154,12,9
+    LTEXT           "Effect letters like:",IDC_STATIC,138,165,73,11,NOT 
+                    WS_VISIBLE
+    PUSHBUTTON      "it",IDC_EFFECTLETTERSIT,230,164,12,9,NOT WS_VISIBLE
+    PUSHBUTTON      "xm",IDC_EFFECTLETTERSXM,245,164,12,9,NOT WS_VISIBLE
+    LTEXT           "Select category:",IDC_STATIC,1,5,74,11
+    LTEXT           "More to come...",IDC_STATIC,145,175,74,11
 END
 
-IDD_OPTIONS_COLORS DIALOG  0, 0, 240, 156
+IDD_OPTIONS_COLORS DIALOGEX 0, 0, 240, 156
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Colors"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "",IDC_STATIC,4,3,232,150
     LTEXT           "Background:",IDC_TEXT1,149,58,60,8
@@ -602,24 +549,24 @@ IDD_CONTROL_PATTERNS DIALOGEX 0, 0, 440, 107
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    CONTROL         "Follow Song",IDC_PATTERN_FOLLOWSONG,"Button",
-                    BS_AUTOCHECKBOX,340,38,55,10
-    LTEXT           "Instrument:",IDC_STATIC,5,26,76,8
-    COMBOBOX        IDC_COMBO_INSTRUMENT,17,36,129,137,CBS_DROPDOWNLIST | 
+    CONTROL         "Follow Song:",IDC_PATTERN_FOLLOWSONG,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT,319,26,57,10
+    LTEXT           "Instr.:",IDC_STATIC,4,26,18,8
+    COMBOBOX        IDC_COMBO_INSTRUMENT,35,25,95,137,CBS_DROPDOWNLIST | 
                     WS_VSCROLL
-    LTEXT           "Spacing:",IDC_STATIC,155,26,29,8
-    EDITTEXT        IDC_EDIT_SPACING,155,36,28,12,ES_AUTOHSCROLL | ES_NUMBER | 
+    LTEXT           "Spacing:",IDC_STATIC,138,26,29,8
+    EDITTEXT        IDC_EDIT_SPACING,167,25,28,12,ES_AUTOHSCROLL | ES_NUMBER | 
                     NOT WS_TABSTOP
     CONTROL         "Spin1",IDC_SPIN_SPACING,"msctls_updown32",UDS_WRAP | 
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_NOTHOUSANDS,183,35,11,14
-    PUSHBUTTON      "<<",IDC_BUTTON2,5,55,17,15,NOT WS_TABSTOP
-    PUSHBUTTON      ">>",IDC_BUTTON1,24,55,17,15,NOT WS_TABSTOP
-    LTEXT           "Pattern name:",IDC_STATIC,204,26,45,8
-    EDITTEXT        IDC_EDIT_PATTERNNAME,203,36,127,12,ES_AUTOHSCROLL
+                    UDS_NOTHOUSANDS,184,25,11,12
+    PUSHBUTTON      "<<",IDC_BUTTON2,5,41,17,15,NOT WS_TABSTOP
+    PUSHBUTTON      ">>",IDC_BUTTON1,24,41,17,15,NOT WS_TABSTOP
+    LTEXT           "Pat. name:",IDC_STATIC,205,26,35,8
+    EDITTEXT        IDC_EDIT_PATTERNNAME,241,25,68,12,ES_AUTOHSCROLL
     CONTROL         "Toolbar1",IDC_TOOLBAR1,"ToolbarWindow32",WS_GROUP | 
                     0x4d,4,4,326,18
-    CONTROL         "Spin1",IDC_SPIN_INSTRUMENT,"msctls_updown32",0x0,6,36,
+    CONTROL         "Spin1",IDC_SPIN_INSTRUMENT,"msctls_updown32",0x0,23,25,
                     11,12
 END
 
@@ -709,9 +656,9 @@ BEGIN
     LTEXT           "Auto-Vibrato",IDC_STATIC,275,46,41,8
 END
 
-IDD_CONTROL_INSTRUMENTS DIALOG  0, 0, 403, 101
+IDD_CONTROL_INSTRUMENTS DIALOGEX 0, 0, 492, 212
 STYLE DS_SETFONT | WS_CHILD
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     CONTROL         "Toolbar1",IDC_TOOLBAR1,"ToolbarWindow32",WS_GROUP | 
                     0x4d,4,3,76,17
@@ -720,65 +667,80 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN_INSTRUMENT,"msctls_updown32",UDS_WRAP | 
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
                     UDS_NOTHOUSANDS,110,4,11,14
-    EDITTEXT        IDC_SAMPLE_NAME,118,5,90,12,ES_AUTOHSCROLL
-    GROUPBOX        "",IDC_STATIC,3,19,83,78
-    LTEXT           "FadeOut:",IDC_STATIC,8,27,30,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT7,47,27,34,12,ES_NUMBER
+    EDITTEXT        IDC_SAMPLE_NAME,4,23,118,12,ES_AUTOHSCROLL
+    LTEXT           "FadeOut:",IDC_STATIC,8,85,30,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT7,46,85,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN7,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,75,28,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,71,86,
                     11,11
-    LTEXT           "Global Vol",IDC_STATIC,8,40,35,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT8,47,40,34,12,ES_NUMBER
+    LTEXT           "Global Vol:",IDC_STATIC,8,71,35,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT8,46,71,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN8,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,77,41,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,70,71,
                     11,11
     CONTROL         "Pan:",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    8,55,33,10
-    EDITTEXT        IDC_EDIT9,47,53,34,12,ES_NUMBER
+                    8,100,33,10
+    EDITTEXT        IDC_EDIT9,46,99,33,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN9,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,75,54,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,71,100,
                     11,11
-    LTEXT           "Midi PRG:",IDC_STATIC,7,68,35,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT10,47,67,34,12,ES_NUMBER
+    LTEXT           "Midi PRG:",IDC_STATIC,253,112,35,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT10,291,112,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN10,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,77,71,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,315,115,
                     11,11
-    LTEXT           "Output:",IDC_STATIC,7,82,25,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO5,34,81,47,127,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "Midi Chan:",IDC_STATIC,253,86,38,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO5,291,85,36,169,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    GROUPBOX        "New Note Action",IDC_STATIC,90,19,67,78
-    COMBOBOX        IDC_COMBO1,95,29,56,54,CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Duplicate Check",IDC_STATIC,95,44,55,8
-    COMBOBOX        IDC_COMBO2,95,54,56,54,CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Duplicate Action:",IDC_STATIC,95,71,58,8
-    COMBOBOX        IDC_COMBO3,95,81,56,54,CBS_DROPDOWNLIST | WS_TABSTOP
-    EDITTEXT        IDC_SAMPLE_FILENAME,162,22,46,13,ES_AUTOHSCROLL
-    LTEXT           "Pitch/Pan\nSeparation:",IDC_STATIC,162,39,42,18
-    EDITTEXT        IDC_EDIT15,162,57,41,12,ES_NUMBER
+    GROUPBOX        "New Note Action:",IDC_STATIC,169,2,200,34
+    COMBOBOX        IDC_COMBO1,175,13,56,54,CBS_DROPDOWNLIST | WS_TABSTOP
+    COMBOBOX        IDC_COMBO2,241,13,56,69,CBS_DROPDOWNLIST | WS_TABSTOP
+    COMBOBOX        IDC_COMBO3,306,13,56,54,CBS_DROPDOWNLIST | WS_TABSTOP
+    EDITTEXT        IDC_SAMPLE_FILENAME,66,49,105,13,ES_AUTOHSCROLL
+    LTEXT           "Separation:",IDC_STATIC,91,72,38,11
+    EDITTEXT        IDC_EDIT15,130,70,33,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN12,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,197,60,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,156,71,
                     11,11
-    LTEXT           "Center:",IDC_STATIC,162,73,41,8
-    COMBOBOX        IDC_COMBO4,162,84,41,91,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "Centre:",IDC_STATIC,92,86,27,8
+    COMBOBOX        IDC_COMBO4,129,84,34,91,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "",IDC_NOTEMAP,"Static",SS_GRAYRECT | SS_NOTIFY | 
-                    SS_SUNKEN | WS_TABSTOP,211,4,62,93
-    GROUPBOX        "Random Variation",IDC_STATIC,277,1,121,37
-    CTEXT           "Volume:",IDC_STATIC,282,13,48,8
+                    SS_SUNKEN | WS_TABSTOP,175,65,62,117
+    GROUPBOX        "Random Variation",IDC_STATIC,102,120,69,62
+    LTEXT           "Volume:",IDC_STATIC,106,134,48,8
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,282,24,50,10
-    CTEXT           "Panning:",IDC_STATIC,343,13,50,8
+                    TBS_NOTICKS,103,144,65,10
+    LTEXT           "Panning:",IDC_STATIC,106,157,50,8
     CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,344,24,50,10
-    CONTROL         "CutOff Frequency:",IDC_CHECK2,"Button",BS_AUTOCHECKBOX,
-                    277,43,73,10
-    EDITTEXT        IDC_EDIT1,353,42,45,12,ES_READONLY | NOT WS_TABSTOP
+                    TBS_NOTICKS,104,168,65,10
+    CONTROL         "Cutoff:",IDC_CHECK2,"Button",BS_AUTOCHECKBOX,8,131,37,
+                    10
+    EDITTEXT        IDC_EDIT1,44,129,45,12,ES_READONLY | NOT WS_TABSTOP
     CONTROL         "Slider2",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_DISABLED,276,56,125,12
-    CONTROL         "Resonance (Filter Q-factor):",IDC_CHECK3,"Button",
-                    BS_AUTOCHECKBOX,277,69,103,10
+                    TBS_NOTICKS | WS_DISABLED,7,144,83,10
+    CONTROL         "Resonance:",IDC_CHECK3,"Button",BS_AUTOCHECKBOX,8,156,
+                    55,10
     CONTROL         "Slider2",IDC_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_DISABLED,276,82,125,12
+                    TBS_NOTICKS | WS_DISABLED,6,169,83,10
+    COMBOBOX        IDC_COMBO6,291,48,71,127,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Plugin:",IDC_STATIC,253,48,24,12,SS_CENTERIMAGE
+    GROUPBOX        "Instrument's Sample Properties",IDC_STATIC,2,37,240,152
+    GROUPBOX        "Instrument's Plugin/MIDI Properties",IDC_STATIC,246,37,
+                    123,152
+    LTEXT           "More stuff to come here.",IDC_STATIC,261,148,88,19,
+                    SS_CENTERIMAGE
+    LTEXT           "Duplicate Action:",IDC_STATIC,307,2,58,8
+    LTEXT           "Duplicate Check:",IDC_STATIC,241,2,55,8
+    GROUPBOX        "Filter",IDC_STATIC,6,120,92,62
+    LTEXT           "Sample Map:",IDC_STATIC,176,53,48,8
+    LTEXT           "Sample Filename:",IDC_STATIC,7,50,57,12,SS_CENTERIMAGE
+    GROUPBOX        "General",IDC_STATIC,6,62,79,56
+    GROUPBOX        "Pitch/Pan",IDC_STATIC,88,63,83,41
+    LTEXT           "(required for VSTis)",IDC_STATIC,253,98,72,12,
+                    SS_CENTERIMAGE
+    PUSHBUTTON      "Open Editor...",IDC_INSVIEWPLG,291,65,50,14
 END
 
 IDD_MODDOC_MODTYPE DIALOG  0, 0, 237, 106
@@ -820,208 +782,18 @@ BEGIN
                     ES_READONLY | WS_VSCROLL
 END
 
-IDD_REMOVECHANNELS DIALOG  0, 0, 255, 119
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_REMOVECHANNELS DIALOGEX 0, 0, 171, 158
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Remove Channels"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,201,7,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,201,24,50,14
+    DEFPUSHBUTTON   "OK",IDOK,113,123,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,113,139,50,14
     LTEXT           "Channels:",IDC_QUESTION1,4,7,102,8
-    CONTROL         "",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,30,
-                    10,8
-    CONTROL         "",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,
-                    30,10,8
-    CTEXT           "1",IDC_STATIC,4,22,10,8
-    CTEXT           "2",IDC_STATIC,16,22,10,8
-    CONTROL         "",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,29,
-                    30,10,8
-    CTEXT           "3",IDC_STATIC,28,22,10,8
-    CONTROL         "",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,41,
-                    30,10,8
-    CTEXT           "4",IDC_STATIC,40,22,10,8
-    CONTROL         "",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,53,
-                    30,10,8
-    CTEXT           "5",IDC_TEXT5,52,22,10,8
-    CONTROL         "",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,65,
-                    30,10,8
-    CTEXT           "6",IDC_TEXT6,64,22,10,8
-    CONTROL         "",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,
-                    30,10,8
-    CTEXT           "7",IDC_TEXT7,76,22,10,8
-    CONTROL         "",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,89,
-                    30,10,8
-    CTEXT           "8",IDC_TEXT8,88,22,10,8
-    CONTROL         "",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,101,
-                    30,10,8
-    CTEXT           "9",IDC_TEXT9,100,22,10,8
-    CONTROL         "",IDC_CHECK10,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,113,
-                    30,10,8
-    CTEXT           "10",IDC_TEXT10,112,22,10,8
-    CONTROL         "",IDC_CHECK11,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,125,
-                    30,10,8
-    CTEXT           "11",IDC_TEXT11,124,22,10,8
-    CONTROL         "",IDC_CHECK12,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,137,
-                    30,10,8
-    CTEXT           "12",IDC_TEXT12,136,22,10,8
-    CONTROL         "",IDC_CHECK13,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,149,
-                    30,10,8
-    CTEXT           "13",IDC_TEXT13,148,22,10,8
-    CONTROL         "",IDC_CHECK14,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,161,
-                    30,10,8
-    CTEXT           "14",IDC_TEXT14,160,22,10,8
-    CONTROL         "",IDC_CHECK15,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,173,
-                    30,10,8
-    CTEXT           "15",IDC_TEXT15,172,22,10,8
-    CONTROL         "",IDC_CHECK16,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,
-                    30,10,8
-    CTEXT           "16",IDC_TEXT16,184,22,10,8
-    CONTROL         "",IDC_CHECK17,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,
-                    50,10,8
-    CONTROL         "",IDC_CHECK18,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,
-                    50,10,8
-    CTEXT           "17",IDC_TEXT17,4,42,10,8
-    CTEXT           "18",IDC_TEXT18,16,42,10,8
-    CONTROL         "",IDC_CHECK19,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,29,
-                    50,10,8
-    CTEXT           "19",IDC_TEXT19,28,42,10,8
-    CONTROL         "",IDC_CHECK20,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,41,
-                    50,10,8
-    CTEXT           "20",IDC_TEXT20,40,42,10,8
-    CONTROL         "",IDC_CHECK21,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,53,
-                    50,10,8
-    CTEXT           "21",IDC_TEXT21,52,42,10,8
-    CONTROL         "",IDC_CHECK22,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,65,
-                    50,10,8
-    CTEXT           "22",IDC_TEXT22,64,42,10,8
-    CONTROL         "",IDC_CHECK23,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,
-                    50,10,8
-    CTEXT           "23",IDC_TEXT23,76,42,10,8
-    CONTROL         "",IDC_CHECK24,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,89,
-                    50,10,8
-    CTEXT           "24",IDC_TEXT24,88,42,10,8
-    CONTROL         "",IDC_CHECK25,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,101,
-                    50,10,8
-    CTEXT           "25",IDC_TEXT25,100,42,10,8
-    CONTROL         "",IDC_CHECK26,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,113,
-                    50,10,8
-    CTEXT           "26",IDC_TEXT26,112,42,10,8
-    CONTROL         "",IDC_CHECK27,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,125,
-                    50,10,8
-    CTEXT           "27",IDC_TEXT27,124,42,10,8
-    CONTROL         "",IDC_CHECK28,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,137,
-                    50,10,8
-    CTEXT           "28",IDC_TEXT28,136,42,10,8
-    CONTROL         "",IDC_CHECK29,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,149,
-                    50,10,8
-    CTEXT           "29",IDC_TEXT29,148,42,10,8
-    CONTROL         "",IDC_CHECK30,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,161,
-                    50,10,8
-    CTEXT           "30",IDC_TEXT30,160,42,10,8
-    CONTROL         "",IDC_CHECK31,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,173,
-                    50,10,8
-    CTEXT           "31",IDC_TEXT31,172,42,10,8
-    CONTROL         "",IDC_CHECK32,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,
-                    50,10,8
-    CTEXT           "32",IDC_TEXT32,184,42,10,8
-    CONTROL         "",IDC_CHECK33,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,
-                    72,10,8
-    CONTROL         "",IDC_CHECK34,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,
-                    72,10,8
-    CTEXT           "33",IDC_TEXT61,4,64,10,8
-    CTEXT           "34",IDC_TEXT62,16,64,10,8
-    CONTROL         "",IDC_CHECK35,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,29,
-                    72,10,8
-    CTEXT           "35",IDC_TEXT63,28,64,10,8
-    CONTROL         "",IDC_CHECK36,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,41,
-                    72,10,8
-    CTEXT           "36",IDC_TEXT64,40,64,10,8
-    CONTROL         "",IDC_CHECK37,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,53,
-                    72,10,8
-    CTEXT           "37",IDC_TEXT33,52,64,10,8
-    CONTROL         "",IDC_CHECK38,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,65,
-                    72,10,8
-    CTEXT           "38",IDC_TEXT34,64,64,10,8
-    CONTROL         "",IDC_CHECK39,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,
-                    72,10,8
-    CTEXT           "39",IDC_TEXT35,76,64,10,8
-    CONTROL         "",IDC_CHECK40,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,89,
-                    72,10,8
-    CTEXT           "40",IDC_TEXT36,88,64,10,8
-    CONTROL         "",IDC_CHECK41,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,101,
-                    72,10,8
-    CTEXT           "41",IDC_TEXT37,100,64,10,8
-    CONTROL         "",IDC_CHECK42,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,113,
-                    72,10,8
-    CTEXT           "42",IDC_TEXT38,112,64,10,8
-    CONTROL         "",IDC_CHECK43,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,125,
-                    72,10,8
-    CTEXT           "43",IDC_TEXT39,124,64,10,8
-    CONTROL         "",IDC_CHECK44,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,137,
-                    72,10,8
-    CTEXT           "44",IDC_TEXT40,136,64,10,8
-    CONTROL         "",IDC_CHECK45,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,149,
-                    72,10,8
-    CTEXT           "45",IDC_TEXT41,148,64,10,8
-    CONTROL         "",IDC_CHECK46,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,161,
-                    72,10,8
-    CTEXT           "46",IDC_TEXT42,160,64,10,8
-    CONTROL         "",IDC_CHECK47,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,173,
-                    72,10,8
-    CTEXT           "47",IDC_TEXT43,172,64,10,8
-    CONTROL         "",IDC_CHECK48,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,
-                    72,10,8
-    CTEXT           "48",IDC_TEXT44,184,64,10,8
-    CONTROL         "",IDC_CHECK49,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,
-                    92,10,8
-    CONTROL         "",IDC_CHECK50,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,
-                    92,10,8
-    CTEXT           "49",IDC_TEXT45,4,84,10,8
-    CTEXT           "50",IDC_TEXT46,16,84,10,8
-    CONTROL         "",IDC_CHECK51,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,29,
-                    92,10,8
-    CTEXT           "51",IDC_TEXT47,28,84,10,8
-    CONTROL         "",IDC_CHECK52,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,41,
-                    92,10,8
-    CTEXT           "52",IDC_TEXT48,40,84,10,8
-    CONTROL         "",IDC_CHECK53,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,53,
-                    92,10,8
-    CTEXT           "53",IDC_TEXT49,52,84,10,8
-    CONTROL         "",IDC_CHECK54,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,65,
-                    92,10,8
-    CTEXT           "54",IDC_TEXT50,64,84,10,8
-    CONTROL         "",IDC_CHECK55,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,
-                    92,10,8
-    CTEXT           "55",IDC_TEXT51,76,84,10,8
-    CONTROL         "",IDC_CHECK56,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,89,
-                    92,10,8
-    CTEXT           "56",IDC_TEXT52,88,84,10,8
-    CONTROL         "",IDC_CHECK57,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,101,
-                    92,10,8
-    CTEXT           "57",IDC_TEXT53,100,84,10,8
-    CONTROL         "",IDC_CHECK58,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,113,
-                    92,10,8
-    CTEXT           "58",IDC_TEXT54,112,84,10,8
-    CONTROL         "",IDC_CHECK59,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,125,
-                    92,10,8
-    CTEXT           "59",IDC_TEXT55,124,84,10,8
-    CONTROL         "",IDC_CHECK60,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,137,
-                    92,10,8
-    CTEXT           "60",IDC_TEXT56,136,84,10,8
-    CONTROL         "",IDC_CHECK61,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,149,
-                    92,10,8
-    CTEXT           "61",IDC_TEXT57,148,84,10,8
-    CONTROL         "",IDC_CHECK62,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,161,
-                    92,10,8
-    CTEXT           "62",IDC_TEXT58,160,84,10,8
-    CONTROL         "",IDC_CHECK63,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,173,
-                    92,10,8
-    CTEXT           "63",IDC_TEXT59,172,84,10,8
-    CONTROL         "",IDC_CHECK64,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,
-                    92,10,8
-    CTEXT           "64",IDC_TEXT60,184,84,10,8
-    LTEXT           "(Detected unused channels are already checked)",
-                    IDC_STATIC,5,106,189,8
+    LTEXT           "(Detected unused channels are already selected)",
+                    IDC_STATIC,4,16,159,10
+    LISTBOX         IDC_REMCHANSLIST,9,31,77,123,LBS_NOINTEGRALHEIGHT | 
+                    LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_VIEW_GLOBALS DIALOGEX 0, 0, 419, 255
@@ -1382,32 +1154,32 @@ BEGIN
                     WS_TABSTOP,WS_EX_STATICEDGE
 END
 
-IDD_OPTIONS_GENERAL DIALOG  0, 0, 240, 156
+IDD_OPTIONS_GENERAL DIALOGEX 0, 0, 265, 278
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Directories",IDC_STATIC,4,3,232,67
+    GROUPBOX        "Directories",IDC_STATIC,4,3,248,67
     LTEXT           "Songs:",IDC_STATIC,11,17,36,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT1,55,17,156,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BUTTON1,217,18,12,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT1,55,17,174,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON1,234,18,12,11,NOT WS_TABSTOP
     LTEXT           "Samples:",IDC_STATIC,11,34,41,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT2,55,34,156,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BUTTON2,217,34,12,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT2,55,34,174,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON2,234,34,12,11,NOT WS_TABSTOP
     LTEXT           "Instruments:",IDC_STATIC,11,50,40,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT3,55,50,156,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BUTTON3,217,51,12,11,NOT WS_TABSTOP
-    GROUPBOX        "Options",IDC_STATIC,4,75,232,78
-    LTEXT           "Description",IDC_TEXT1,144,88,85,59
-    LISTBOX         IDC_LIST1,9,86,129,62,LBS_OWNERDRAWFIXED | 
+    EDITTEXT        IDC_EDIT3,55,50,174,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON3,234,51,12,11,NOT WS_TABSTOP
+    GROUPBOX        "Options",IDC_STATIC,4,75,247,200
+    LTEXT           "Description",IDC_TEXT1,144,86,101,175
+    LISTBOX         IDC_LIST1,9,86,129,181,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_TABSTOP
 END
 
-IDD_OPTIONS_SOUNDCARD DIALOG  0, 0, 240, 156
+IDD_OPTIONS_SOUNDCARD DIALOGEX 0, 0, 240, 156
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Sound Card"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "",IDC_STATIC,4,3,232,150
     LTEXT           "Sound Device:",IDC_STATIC,9,12,79,8
@@ -1443,10 +1215,10 @@ BEGIN
                     WS_TABSTOP,131,90,64,10
 END
 
-IDD_MIDIMACRO DIALOG  0, 0, 247, 141
+IDD_MIDIMACRO DIALOGEX 0, 0, 247, 141
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Zxx Macros Configuration"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Parametered Macro (Z00-Z7F)",IDC_STATIC,4,4,185,49
     COMBOBOX        IDC_COMBO1,11,17,48,103,CBS_DROPDOWNLIST | WS_VSCROLL | 
@@ -1684,51 +1456,12 @@ EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
 CAPTION "Param Editor [prototype]"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    EDITTEXT        IDC_VISSTATUS,4,91,377,12,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_VISSTATUS,4,91,162,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,10,1,1
- PRODUCTVERSION 4,10,1,1
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x29L
-#else
- FILEFLAGS 0x28L
-#endif
- FILEOS 0x4L
- FILETYPE 0x1L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"
-        BEGIN
-            VALUE "Comments", "Modplug Tracker 'wild' experimental release be careful!"
-            VALUE "CompanyName", "Olivier Lapicque"
-            VALUE "FileDescription", "ModPlug Tracker 'wild' "
-            VALUE "FileVersion", "1.16 ( w0.01 )"
-            VALUE "InternalName", "Modplug Tracker"
-            VALUE "LegalCopyright", "Copyright © 1997-2002 Olivier Lapicque.  Copyright 2004  GPL."
-            VALUE "LegalTrademarks", "M.O.D.P.L.U.G"
-            VALUE "OriginalFilename", "mptrack.exe"
-            VALUE "PrivateBuild", "February 23 2004"
-            VALUE "ProductName", "ModPlug Tracker 'wild'"
-            VALUE "ProductVersion", "1.16  (w0.01)"
-            VALUE "SpecialBuild", "Rewbs, PlastikSkouser "
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
-    END
+    CONTROL         "Fill blanks with:",IDC_VISFILLBLANKS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,188,92,63,10
+    COMBOBOX        IDC_VISEFFECTLIST,249,89,76,158,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
 
 
@@ -1740,11 +1473,41 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO 
 BEGIN
+    IDD_OPTIONS_KEYBOARD, DIALOG
+    BEGIN
+        RIGHTMARGIN, 260
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 274
+    END
+
     IDD_CONTROL_SAMPLES, DIALOG
     BEGIN
         LEFTMARGIN, 2
         RIGHTMARGIN, 404
         BOTTOMMARGIN, 101
+    END
+
+    IDD_CONTROL_INSTRUMENTS, DIALOG
+    BEGIN
+        RIGHTMARGIN, 369
+        VERTGUIDE, 7
+        VERTGUIDE, 16
+        VERTGUIDE, 107
+        VERTGUIDE, 171
+        VERTGUIDE, 253
+        VERTGUIDE, 291
+        VERTGUIDE, 362
+        VERTGUIDE, 367
+        BOTTOMMARGIN, 189
+        HORZGUIDE, 65
+        HORZGUIDE, 97
+        HORZGUIDE, 104
+        HORZGUIDE, 118
+        HORZGUIDE, 148
+        HORZGUIDE, 163
+        HORZGUIDE, 172
+        HORZGUIDE, 182
+        HORZGUIDE, 189
     END
 
     IDD_SHOWLOG, DIALOG
@@ -1753,6 +1516,11 @@ BEGIN
         RIGHTMARGIN, 293
         TOPMARGIN, 7
         BOTTOMMARGIN, 99
+    END
+
+    IDD_REMOVECHANNELS, DIALOG
+    BEGIN
+        RIGHTMARGIN, 163
     END
 
     IDD_PATTERN_PROPERTIES, DIALOG
@@ -1769,6 +1537,12 @@ BEGIN
         RIGHTMARGIN, 264
         TOPMARGIN, 7
         BOTTOMMARGIN, 163
+    END
+
+    IDD_OPTIONS_GENERAL, DIALOG
+    BEGIN
+        RIGHTMARGIN, 259
+        BOTTOMMARGIN, 275
     END
 
     IDD_MIDIMACRO, DIALOG
@@ -1858,6 +1632,8 @@ STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "Modplug Tracker"
     IDR_MODULETYPE          "\nModule\nuntitled\nMusic Modules (*.mod;*.s3m;*.it;*.xm)\n.mod\nModplugTracker.Document\nMusic Module"
+    ID_ENVELOPE_VIEWGRID    "Show/hide row guidelines"
+    ID_REPORT_BUG           "Report a bug!\nReport a bug!"
 END
 
 STRINGTABLE 
@@ -1999,10 +1775,10 @@ BEGIN
     ID_FILE_NEWS3M          "Create a new ScreamTracker (S3M) music module\nNew S3M"
     ID_FILE_NEWIT           "Create a new Impulse Tracker (IT) music module\nNew IT"
     ID_FILE_SAVEASWAVE      "Records the current file as a high-quality wave file (.WAV)"
-    ID_PLAYER_PLAY          "Resume playing, or play the song from the selected position\nPlay (F5)"
-    ID_PLAYER_PLAYFROMSTART "Play the song from the begining\nPlay from start (F6)"
-    ID_PLAYER_STOP          "Stop Playing\nStop (ESC)"
-    ID_PLAYER_PAUSE         "Pause\nPause (F8)"
+    ID_PLAYER_PLAY          "Resume playing, or play the song from the selected position\nPlay"
+    ID_PLAYER_PLAYFROMSTART "Play the song from the begining\nPlay from start"
+    ID_PLAYER_STOP          "Stop Playing\nStop"
+    ID_PLAYER_PAUSE         "Pause\nPause"
     ID_PLAYER_SETUP         "Configure the sound device and player options"
 END
 
@@ -2045,11 +1821,11 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_PATTERN_PLAY        "Play the curent pattern from the current position\nPlay Pattern (Ctrl+F7)"
+    IDC_PATTERN_PLAY        "Play the curent pattern from the current position\nPlay Pattern"
     IDC_PATTERN_PLAYFROMSTART 
-                            "Play the current pattern from the begining\nReplay Pattern (F7)"
-    IDC_PATTERN_STOP        "Stop playing\nStop (F8)"
-    IDC_PATTERN_RECORD      "Enables the recording of notes\nRecord (Ctrl+Space)"
+                            "Play the current pattern from the begining\nReplay Pattern"
+    IDC_PATTERN_STOP        "Stop playing\nStop"
+    IDC_PATTERN_RECORD      "Enables the recording of notes\nRecord"
     IDC_PATTERN_NEW         "Create a new pattern\nInsert Pattern"
 END
 
@@ -2073,7 +1849,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_PATTERN_PLAYROW      "Play current row\nPlay Row (Ctrl+Enter)"
+    ID_PATTERN_PLAYROW      "Play current row\nPlay Row"
     ID_IMPORT_MIDILIB       "Defines the default midi library used when importing midi files"
     ID_CLEANUP_REARRANGE    "Rearrange all patterns so that they are sorted in the order list\nRearrange Patterns"
 END
@@ -2111,7 +1887,7 @@ BEGIN
     ID_HELP_SEARCH          "Displays the help index\nHelp Index"
     ID_NETLINK_MODPLUG      "Go to Modplug Central (www.modplug.com)"
     ID_NETLINK_UT           "Go to United Trackers (www.united-trackers.org)"
-    ID_NETLINK_TRAXINSPACE  "Go to Trax In Space (www.traxinspace.com)"
+    ID_NETLINK_OSMUSIC      "Go to OSMusic.net"
     ID_NETLINK_HANDBOOK     "Go to the Tracker's Handbook"
 END
 
@@ -2126,7 +1902,7 @@ BEGIN
     ID_FILE_SAVEMIDI        "Convert the current song to a standard midi file"
     ID_NETLINK_FORUMS       "Go to the Modplug Central Music Forums"
     ID_INSTRUMENT_SAMPLEMAP "Edit the sample map"
-    ID_NETLINK_PLUGINS      "Information about effect plugins for Modplug Tracker"
+    ID_NETLINK_PLUGINS      "Go to KVR-VST to download plugins!"
     ID_PATTERN_AMPLIFY      "Amplify selection\nAmplify"
 END
 
@@ -2135,7 +1911,91 @@ BEGIN
     ID_ESTIMATESONGLENGTH   "Displays the approximate song length"
 END
 
+STRINGTABLE 
+BEGIN
+    ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
+END
+
 #endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_SPLASHNOFOLD        BITMAP                  "res\\modplthingmorecontrast.bmp"
+IDB_SPLASHNOFOLDFIN     BITMAP                  "res\\splashno.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_VSTMENU MENU 
+BEGIN
+    POPUP "Presets"
+    BEGIN
+        MENUITEM "&Load...",                    ID_PRESET_LOAD
+        MENUITEM "&Save As...",                 ID_PRESET_SAVE
+        MENUITEM SEPARATOR
+        MENUITEM "&Randomize",                  ID_PRESET_RANDOM
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DEFAULTPLUGINEDITOR DIALOGEX 0, 0, 151, 227
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
+CAPTION "Editor"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LISTBOX         IDC_PARAMLIST,7,17,100,194,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_PARAMVALUESLIDE,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,115,18,18,177
+    EDITTEXT        IDC_PARAMVALUETEXT,109,197,25,14,ES_RIGHT | 
+                    ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Static",IDC_PARAMLABEL,112,8,32,8
+    LTEXT           "Parameters:",IDC_STATIC,7,7,38,8
+    LTEXT           "%",IDC_PARAMLABEL2,136,200,8,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_DEFAULTPLUGINEDITOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 144
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 220
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

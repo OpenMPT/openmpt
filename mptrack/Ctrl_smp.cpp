@@ -295,6 +295,22 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		SetCurrentSample(lParam, -1, TRUE);
 		break;
 
+	case IDC_SAMPLE_REVERSE:
+		OnReverse();
+		break;
+
+	case IDC_SAMPLE_SILENCE:
+		OnSilence();
+		break;
+
+	case IDC_SAMPLE_NORMALIZE:
+		OnNormalize();
+		break;
+
+	case IDC_SAMPLE_AMPLIFY:
+		OnAmplify();
+		break;
+
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);
 	}
@@ -686,7 +702,7 @@ void CCtrlSamples::OnSampleOpen()
 	CFileDialog dlg(TRUE,
 					NULL,
 					NULL,
-					OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
 					"All Samples|*.wav;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm|"
 					"Wave Files (*.wav)|*.wav|"
 					"XI Samples (*.xi)|*.xi|"
@@ -731,7 +747,7 @@ void CCtrlSamples::OnSampleSave()
 	if (!szFileName[0]) strcpy(szFileName, "untitled");
 	CFileDialog dlg(FALSE, "wav",
 			szFileName,
-			OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 			"Wave File (*.wav)|*.wav||",
 			this);
 	if (CMainFrame::m_szCurSmpDir[0])

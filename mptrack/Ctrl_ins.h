@@ -23,6 +23,7 @@ public:
 	BOOL SetCurrentInstrument(CModDoc *pModDoc, UINT nIns);
 	BOOL SetCurrentNote(UINT nNote);
 	VOID Init(CCtrlInstruments *pParent) { m_pParent = pParent; }
+	void EnterNote(UINT note);
 
 public:
 	//{{AFX_VIRTUAL(CNoteMapWnd)
@@ -44,6 +45,7 @@ protected:
 	afx_msg void OnEditSample(UINT nID);
 	afx_msg void OnEditSampleMap();
 	afx_msg void OnInstrumentDuplicate();
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -57,7 +59,7 @@ protected:
 	CModControlBar m_ToolBar;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinFadeOut, m_SpinGlobalVol, m_SpinPanning;
 	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS;
-	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh;
+	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnMixPlug;
 	CEdit m_EditName, m_EditFileName, m_EditGlobalVol, m_EditPanning, m_EditPPS, m_EditCutOff;
 	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance;
 	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutOff, m_SliderResonance;
@@ -111,11 +113,13 @@ protected:
 	afx_msg void OnDCAChanged();
 	afx_msg void OnMPRChanged();
 	afx_msg void OnMCHChanged();
+	afx_msg void OnMixPlugChanged();
 	afx_msg void OnPPSChanged();
 	afx_msg void OnPPCChanged();
 	afx_msg void OnEnableCutOff();
 	afx_msg void OnEnableResonance();
 	afx_msg void OnEditSampleMap();
+	afx_msg void TogglePluginEditor();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

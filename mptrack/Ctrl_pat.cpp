@@ -14,12 +14,14 @@
 
 static UINT gnPatternSpacing = 0;
 static BOOL gbPatternVUMeters = FALSE;
+static BOOL gbPatternPluginNames = TRUE;
 
 void MPT_LoadPatternState(LPCSTR pszSection)
 //------------------------------------------
 {
 	gnPatternSpacing = theApp.GetProfileInt(pszSection, "Spacing", 0);
 	gbPatternVUMeters = theApp.GetProfileInt(pszSection, "VU-Meters", 0);
+	gbPatternPluginNames = theApp.GetProfileInt(pszSection, "Plugin-Names", 1);
 }
 
 void MPT_SavePatternState(LPCSTR pszSection)
@@ -27,6 +29,7 @@ void MPT_SavePatternState(LPCSTR pszSection)
 {
 	theApp.WriteProfileInt(pszSection, "Spacing", gnPatternSpacing);
 	theApp.WriteProfileInt(pszSection, "VU-Meters", gbPatternVUMeters);
+	theApp.WriteProfileInt(pszSection, "Plugin-Names", gbPatternPluginNames);
 }
 
 //////////////////////////////////////////////////////////////
@@ -45,7 +48,9 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(IDC_PATTERN_PLAYFROMSTART,	OnPatternPlayFromStart)
 	ON_COMMAND(IDC_PATTERN_RECORD,			OnPatternRecord)
 	ON_COMMAND(ID_PATTERN_PLAYROW,			OnPatternPlayRow)
+	//ON_COMMAND(ID_PATTERN_PLAYNOLOOP,		OnPatternPlayNoLoop)
 	ON_COMMAND(ID_PATTERN_VUMETERS,			OnPatternVUMeters)
+	ON_COMMAND(ID_VIEWPLUGNAMES,			OnPatternViewPlugNames)
 	ON_COMMAND(ID_NEXTINSTRUMENT,			OnNextInstrument)
 	ON_COMMAND(ID_PREVINSTRUMENT,			OnPrevInstrument)
 	ON_COMMAND(ID_CONTROLTAB,				OnSwitchToView)
@@ -64,6 +69,9 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(ID_PATTERNDETAIL_LO,			OnDetailLo)
 	ON_COMMAND(ID_PATTERNDETAIL_MED,		OnDetailMed)
 	ON_COMMAND(ID_PATTERNDETAIL_HI,			OnDetailHi)
+	//ON_COMMAND(ID_PATTERN_PLAY,				OnPatternPlay)
+	//ON_COMMAND(ID_PATTERN_PLAYNOLOOP,		OnPatternPlayNoLoop)
+	//ON_COMMAND(ID_PATTERN_RESTART,			OnPatternPlayFromStart)
 	ON_CBN_SELCHANGE(IDC_COMBO_INSTRUMENT,	OnInstrumentChanged)
 	ON_EN_CHANGE(IDC_EDIT_SPACING,			OnSpacingChanged)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		OnPatternNameChanged)
@@ -94,6 +102,7 @@ CCtrlPatterns::CCtrlPatterns()
 	m_nInstrument = 0;
 	m_bRecord = TRUE;
 	m_bVUMeters = gbPatternVUMeters;
+	m_bPluginNames = gbPatternPluginNames;
 	m_nDetailLevel = 4;
 }
 
@@ -124,7 +133,10 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_ToolBar.AddButton(IDC_PATTERN_STOP, 1);
 	m_ToolBar.AddButton(ID_PATTERN_PLAYROW, 28);
 	m_ToolBar.AddButton(IDC_PATTERN_RECORD, 4, TBSTYLE_CHECK, ((m_bRecord) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
+	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
 	m_ToolBar.AddButton(ID_PATTERN_VUMETERS, 16, TBSTYLE_CHECK, ((m_bVUMeters) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
+	m_ToolBar.AddButton(ID_VIEWPLUGNAMES, 33, TBSTYLE_CHECK, ((m_bPluginNames) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
+	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
 	m_ToolBar.AddButton(ID_PATTERN_MIDIMACRO, 17);
 	m_ToolBar.AddButton(ID_PATTERN_CHORDEDIT, 18);
 	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
@@ -132,7 +144,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_ToolBar.AddButton(ID_PATTERN_PROPERTIES, 19);
 	m_ToolBar.AddButton(ID_PATTERN_EXPAND, 20);
 	m_ToolBar.AddButton(ID_PATTERN_SHRINK, 21);
-	m_ToolBar.AddButton(ID_PATTERN_AMPLIFY, 9);
+//	m_ToolBar.AddButton(ID_PATTERN_AMPLIFY, 9);
 	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
 	m_ToolBar.AddButton(ID_PATTERNDETAIL_LO, 30, TBSTYLE_CHECK, TBSTATE_ENABLED);
 	m_ToolBar.AddButton(ID_PATTERNDETAIL_MED, 31, TBSTYLE_CHECK, TBSTATE_ENABLED);
@@ -293,8 +305,12 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		return SetCurrentInstrument(lParam);
 
 	case CTRLMSG_PLAYPATTERN:
-		if (lParam < 0) OnPatternPlayFromStart(); else OnPatternPlay();
-		break;
+		switch(lParam)
+		{
+			case -2: OnPatternPlayNoLoop();	break;
+			case -1: OnPatternPlayFromStart();	break;
+			default: OnPatternPlay();
+		}
 
 	case CTRLMSG_SETVIEWWND:
 		SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
@@ -302,6 +318,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);
 		SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
+		SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
 		break;
 
 	case CTRLMSG_GETSPACING:
@@ -332,6 +349,12 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_NEXTORDER:
 		m_OrderList.SetCurSel(m_OrderList.GetCurSel()+1, TRUE);
 		break;
+
+	case CTRLMSG_PAT_FOLLOWSONG:
+		CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
+		OnFollowSong();
+		break;
+
 
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);
@@ -651,12 +674,57 @@ void CCtrlPatterns::OnPatternPlay()
 		END_CRITICAL();
 		if (pMainFrm->GetModPlaying() != pModDoc)
 		{
+			pSndFile->ResumePlugins();
 			pMainFrm->PlayMod(pModDoc, m_hWndView, MPTNOTIFY_POSITION);
+		}
+		else
+		{
+			pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();
 		}
 	}
 	SwitchToView();
 }
 
+
+void CCtrlPatterns::OnPatternPlayNoLoop()
+//---------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	
+	if ((pMainFrm) && (pModDoc))
+	{
+		DWORD dwPos = SendViewMessage(VIEWMSG_GETCURRENTPOS);
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		int order = pSndFile->FindOrder(HIWORD(dwPos));
+		if  (order < 0)
+			return;			//we can't play song from a pat that's not in the orderlist.
+
+		BEGIN_CRITICAL();
+		// Cut instruments/samples
+		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
+		{
+			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
+		}
+		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
+		pSndFile->SetCurrentOrder(order);
+		pSndFile->DontLoopPattern(order, LOWORD(dwPos));
+		pSndFile->m_nNextRow = LOWORD(dwPos);
+		END_CRITICAL();
+		if (pMainFrm->GetModPlaying() != pModDoc)
+		{
+			pSndFile->ResumePlugins();
+			pMainFrm->PlayMod(pModDoc, m_hWndView, MPTNOTIFY_POSITION);
+		}
+		else
+		{
+			pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();
+		}
+	}
+	SwitchToView();
+}
 
 void CCtrlPatterns::OnPatternPlayFromStart()
 //------------------------------------------
@@ -687,7 +755,13 @@ void CCtrlPatterns::OnPatternPlayFromStart()
 		pMainFrm->ResetElapsedTime();
 		if (pMainFrm->GetModPlaying() != pModDoc)
 		{
+			pSndFile->ResumePlugins();
 			pMainFrm->PlayMod(pModDoc, m_hWndView, MPTNOTIFY_POSITION);
+		}
+		else
+		{
+			pSndFile->SuspendPlugins();
+			pSndFile->ResumePlugins();
 		}
 	}
 	SwitchToView();
@@ -714,6 +788,15 @@ void CCtrlPatterns::OnPatternVUMeters()
 	SwitchToView();
 }
 
+void CCtrlPatterns::OnPatternViewPlugNames()
+//-------------------------------------
+{
+	UINT nState = m_ToolBar.GetState(ID_VIEWPLUGNAMES);
+	m_bPluginNames = ((nState & TBSTATE_CHECKED) != 0);
+	gbPatternPluginNames = m_bPluginNames;
+	SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
+	SwitchToView();
+}
 
 void CCtrlPatterns::OnPatternProperties()
 //---------------------------------------

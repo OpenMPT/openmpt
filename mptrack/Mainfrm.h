@@ -1,7 +1,7 @@
 // MainFrm.h : interface of the CMainFrame class
 //
 /////////////////////////////////////////////////////////////////////////////
-
+//#include "VersionNo.h"
 #if !defined(AFX_MAINFRM_H__AE144DC8_DD0B_11D1_AF24_444553540000__INCLUDED_)
 #define AFX_MAINFRM_H__AE144DC8_DD0B_11D1_AF24_444553540000__INCLUDED_
 
@@ -10,43 +10,22 @@
 #endif // _MSC_VER >= 1000
 
 #include "sndfile.h"
+#include "CommandSet.h"
+#include "inputhandler.h"
 
 class CMainFrame;
 class CModDoc;
 class ISoundDevice;
 class ISoundSource;
 
-
 #define NUM_AUDIO_BUFFERS			3
 #define MIN_AUDIO_BUFFERSIZE		1024
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define KEYBOARDMAP_LENGTH			(3*12+2)
-#define MAINFRAME_TITLE				"Modplug Tracker.wild.001"
+#define MAINFRAME_TITLE				PRODUCT_VERSION_STR
 #define MPTRACK_FINALRELEASEVERSION	0x01090000
-#define MPTRACK_VERSION				0x002000001  // based on 0x011600CE it's version 2.00.001
+#define MPTRACK_VERSION				0x011600D4
 
-
-enum {
-	WM_MOD_UPDATEPOSITION	=	(WM_USER+1973),
-	WM_MOD_DESTROYMODDOC,
-	WM_MOD_DESTROYPATEDIT,
-	WM_MOD_UPDATESOUNDBUFFER,
-	WM_MOD_INVALIDATEPATTERNS,
-	WM_MOD_DESTROYSAMPLE,
-	WM_MOD_DESTROYINSTRUMENT,
-	WM_MOD_ACTIVATEVIEW,
-	WM_MOD_CHANGEVIEWCLASS,
-	WM_MOD_UNLOCKCONTROLS,
-	WM_MOD_CTRLMSG,
-	WM_MOD_VIEWMSG,
-	WM_MOD_TREEMSG,
-	WM_MOD_MIDIMSG,
-	WM_MOD_GETTOOLTIPTEXT,
-	WM_MOD_DRAGONDROPPING,
-	WM_MOD_SPECIALKEY,
-	WM_MOD_KBDNOTIFY,
-	WM_MOD_INSTRSELECTED,
-};
 
 enum {
 	CTRLMSG_BASE=0,
@@ -62,6 +41,7 @@ enum {
 	CTRLMSG_PAT_PREVINSTRUMENT,
 	CTRLMSG_PAT_NEXTINSTRUMENT,
 	CTRLMSG_PAT_SETINSTRUMENT,
+	CTRLMSG_PAT_FOLLOWSONG,
 	CTRLMSG_GETCURRENTINSTRUMENT,
 	CTRLMSG_SETCURRENTINSTRUMENT,
 	CTRLMSG_PLAYPATTERN,
@@ -104,6 +84,7 @@ enum {
 	VIEWMSG_SETSPACING,
 	VIEWMSG_PATTERNPROPERTIES,
 	VIEWMSG_SETVUMETERS,
+	VIEWMSG_SETPLUGINNAMES,
 	VIEWMSG_DOMIDISPACING,
 	VIEWMSG_EXPANDPATTERN,
 	VIEWMSG_SHRINKPATTERN,
@@ -343,6 +324,7 @@ public:
 		        glInstrumentWindowHeight, glCommentsWindowHeight; //rewbs.varWindowSize
     static HHOOK ghKbdHook;
 	static DWORD gdwNotificationType, gdwPreviousVersion;
+	
 	// Audio Setup
 	static DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
 	static LONG m_nWaveDevice, m_nMidiDevice;
@@ -357,14 +339,15 @@ public:
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;
 	static HBRUSH brushGray, brushBlack, brushWhite, brushHighLight, brushWindow;
-	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penSeparator, penScratch;
+	static CBrush *pbrushBlack, *pbrushWhite;
+	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
 	static COLORREF rgbCustomColors[MAX_MODCOLORS];
 	static LPMODPLUGDIB bmpPatterns, bmpNotes, bmpVUMeters, bmpVisNode;
 	static HPEN gpenVuMeter[NUM_VUMETER_PENS*2];
 	// Arrays
-	static CHAR m_szModDir[_MAX_PATH], m_szSmpDir[_MAX_PATH], m_szInsDir[_MAX_PATH];
-	static CHAR m_szCurModDir[_MAX_PATH], m_szCurSmpDir[_MAX_PATH], m_szCurInsDir[_MAX_PATH];
+	static CHAR m_szModDir[_MAX_PATH], m_szSmpDir[_MAX_PATH], m_szInsDir[_MAX_PATH], m_szKbdFile[_MAX_PATH];
+	static CHAR m_szCurModDir[_MAX_PATH], m_szCurSmpDir[_MAX_PATH], m_szCurInsDir[_MAX_PATH], m_szCurKbdDir[_MAX_PATH];
 
 	// Low-Level Audio
 public:
@@ -381,16 +364,17 @@ public:
 public:
 	static HMIDIIN shMidiIn;
 
+
 protected:
-	CSoundFile m_WaveFile;
 	CModTreeBar m_wndTree;
+	CSoundFile m_WaveFile;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
 	CImageList m_ImageList;
 	CModDoc *m_pModPlaying;
 	CSoundFile *m_pSndFile;
 	HWND m_hFollowSong, m_hWndMidi;
-	DWORD m_dwStatus, m_dwElapsedTime, m_dwTimeSec, m_dwNotifyType;
+	DWORD m_dwStatus, m_dwElapsedTime, m_dwTimeSec, m_dwNotifyType, m_dwLastPluginIdleCall;
 	UINT m_nTimer, m_nAvgMixChn, m_nMixChn;
 	CHAR m_szUserText[80], m_szInfoText[80];
 	// Chords
@@ -400,10 +384,12 @@ protected:
 	// Misc
 	CHAR m_szPluginsDir[_MAX_PATH];
 	CHAR m_szExportDir[_MAX_PATH];
+	bool m_bOptionsLocked;
 
 public:
 	CMainFrame();
 	VOID Initialize();
+	
 
 // Low-Level Audio
 public:
@@ -450,6 +436,7 @@ public:
 	static UINT IsHotKey(DWORD dwKey);
 	static const DWORD *GetKeyboardMap();
 	static VOID GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize);
+	static CInputHandler *m_InputHandler;
 
 // Misc functions
 public:
@@ -459,11 +446,18 @@ public:
 	UINT GetBaseOctave();
 	UINT GetCurrentInstrument();
 	CModDoc *GetActiveDoc();
+	CView *GetActiveView();
 	CImageList *GetImageList() { return &m_ImageList; }
 	PMPTCHORD GetChords() { return Chords; }
 	VOID OnDocumentCreated(CModDoc *pModDoc);
 	VOID OnDocumentClosed(CModDoc *pModDoc);
 	VOID UpdateTree(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
+	static CInputHandler* GetInputHandler() { return m_InputHandler; }
+	bool m_bModTreeHasFocus;
+	CWnd *m_pNoteMapHasFocus;
+	long GetSampleRate();
+	long GetTotalSampleCount();
+	double GetApproxBPM();
 
 // Player functions
 public:
@@ -490,6 +484,7 @@ public:
 	BOOL SetFollowSong(CModDoc *, HWND hwnd, BOOL bFollowSong=TRUE, DWORD dwType=MPTNOTIFY_DEFAULT);
 	BOOL ResetNotificationBuffer(HWND hwnd=NULL);
 
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMainFrame)
@@ -512,6 +507,7 @@ public:
 public:
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();
+	afx_msg void SetLastMixActiveTime();
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -528,15 +524,22 @@ protected:
 	afx_msg void OnPrevOctave();
 	afx_msg void OnNextOctave();
 	afx_msg void OnOctaveChanged();
+	afx_msg void OnReportBug();
 	afx_msg BOOL OnInternetLink(UINT nID);
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM lParam);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
 	afx_msg LRESULT OnSpecialKey(WPARAM, LPARAM);
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnInitMenu(CMenu* pMenu);
+	// We have swicthed focus to a new module - might need to update effect keys to reflect module type
+	bool UpdateEffectKeys(void);
 };
 
 const CHAR gszBuildDate[] = __TIMESTAMP__;
+const int gszBuildNumber = __COUNTER__;
 
 /////////////////////////////////////////////////////////////////////////////
 
