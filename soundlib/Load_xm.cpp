@@ -597,7 +597,6 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 		// jump extension header code
 		ptr += sizeof(__int32);
-
 		while( (DWORD)(ptr - lpStream) < dwMemLength ){
 
 			// read field code
@@ -605,7 +604,15 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			// jump field code
 			ptr += sizeof(__int32);
 
-			// nVolRamp
+			// read field size
+			size = (*((__int16 *)ptr));
+			// jump field size
+			ptr += sizeof(__int16);
+
+			//rewbs.instroVSTi: changed to use generic instrument header code loader,
+			//                  so as to pick up extra plugin info as well as ramping.
+			// OLD: 
+			/*// nVolRamp
 			if(code == 'VR..'){
 				// read field size
 				size = (*((__int16 *)ptr));
@@ -618,7 +625,19 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 						ptr += size;
 					}
 				}
+			}*/
+			//NEW:		
+			for(UINT nins=1; nins<=m_nInstruments; nins++){
+				if(Headers[nins]){
+					// get field's adress in instrument's header
+					BYTE * fadr = GetInstrumentHeaderFieldPointer(Headers[nins], code, size);
+					// copy field data in instrument's header (except for keyboard mapping)
+					if(fadr && code != 'K[..') memcpy(fadr,ptr,size);
+					// jump field
+					ptr += size;
+				}
 			}
+			//end rewbs.instroVSTi
 
 			if(code == 'SEP@' || code == 'MPTX'){
 				// this case induce more extra infos but not related to _INSTRUMENTHEADER
@@ -945,7 +964,6 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
-
 	if(Headers[1]){
 		__int16 size;
 		__int32 code = 'MPTX';
@@ -959,8 +977,36 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 		fwrite(&size, 1, sizeof(__int16), f);
 		// write nVolRamp field for each instrument
 		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nVolRamp, 1, sizeof(USHORT), f);
-	}
 
+		//rewbs.instroVSTi: manually write extra codes one by one 
+		// write nMixPlug field code
+		code = 'MiP.';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nMixPlug field size
+		size = sizeof(Headers[1]->nMixPlug);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nMixPlug field for each instrument
+		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nMixPlug, 1, size, f);
+
+		// write nMidiChannel field code
+		code = 'MC..';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nMidiChannel field size
+		size = sizeof(Headers[1]->nMidiChannel);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nMidiChannel field for each instrument
+		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nMidiChannel, 1, size, f);
+
+		// write nMidiProgram field code
+		code = 'MP..';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nMidiProgram field size
+		size = sizeof(Headers[1]->nMidiProgram);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nMidiProgram field for each instrument
+		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nMidiProgram, 1, size, f);
+		//end rewbs.instroVSTi
+	}
 // -! NEW_FEATURE#0027
 
 	fclose(f);

@@ -2062,6 +2062,11 @@ void CCommandSet::SetupCommands()
 	commands[kcCopyAndLoseSelection].isHidden = false;
 	commands[kcCopyAndLoseSelection].isDummy = false;
 	
+	commands[kcNewPattern].UID = 1672;
+	commands[kcNewPattern].isHidden = false;
+	commands[kcNewPattern].isDummy = false;
+	commands[kcNewPattern].Message = "Insert new pattern";
+
 
 	//DEBUG: check for duplicate UIDs:
 	for (int i=0; i<kcNumCommands; i++)
