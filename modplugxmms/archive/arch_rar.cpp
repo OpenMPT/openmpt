@@ -141,7 +141,7 @@ arch_Rar::arch_Rar(const string& aFileName)
 arch_Rar::~arch_Rar()
 {
 	if(mSize != 0)
-		delete [] mMap;
+		delete [] (char*)mMap;
 }
 
 bool arch_Rar::ContainsMod(const string& aFileName)

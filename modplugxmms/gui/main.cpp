@@ -41,7 +41,7 @@ void ShowAboutWindow()
 	gtk_widget_show(AboutWin);
 }
 
-void ShowConfigureWindow(const ModProperties& aProps)
+void ShowConfigureWindow(const ModplugXMMS::Settings& aProps)
 {
 	if(!ConfigWin)
 		ConfigWin = create_Config();
@@ -63,6 +63,15 @@ void ShowConfigureWindow(const ModProperties& aProps)
 	else
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "stereo"), TRUE);
 	
+	if(aProps.mResamplingMode == 0)
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "resampNearest"), TRUE);
+	else if(aProps.mResamplingMode == 1)
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "resampLinear"), TRUE);
+	else if(aProps.mResamplingMode == 2)
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "resampSpline"), TRUE);
+	else
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "resampPolyphase"), TRUE);
+	
 	if(aProps.mOversamp)
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxOversamp"), TRUE);
 	else
@@ -83,11 +92,6 @@ void ShowConfigureWindow(const ModProperties& aProps)
 	else
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxFastInfo"), FALSE);
 	
-	if(aProps.mLooping)
-		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxLooping"), TRUE);
-	else
-		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxLooping"), FALSE);
-	
 	if(aProps.mReverb)
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxReverb"), TRUE);
 	else
@@ -103,10 +107,10 @@ void ShowConfigureWindow(const ModProperties& aProps)
 	else
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxSurround"), FALSE);
 	
-	if(aProps.mFadeout)
-		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxFadeOut"), TRUE);
+	if(aProps.mPreamp)
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxPreamp"), TRUE);
 	else
-		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxFadeOut"), FALSE);
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxPreamp"), FALSE);
 	
 	gtk_adjustment_set_value(gtk_range_get_adjustment((GtkRange*)lookup_widget(ConfigWin, "fxReverbDepth")),   aProps.mReverbDepth);
 	gtk_adjustment_set_value(gtk_range_get_adjustment((GtkRange*)lookup_widget(ConfigWin, "fxReverbDelay")),   aProps.mReverbDelay);
@@ -114,7 +118,18 @@ void ShowConfigureWindow(const ModProperties& aProps)
 	gtk_adjustment_set_value(gtk_range_get_adjustment((GtkRange*)lookup_widget(ConfigWin, "fxBassRange")),     aProps.mBassRange);
 	gtk_adjustment_set_value(gtk_range_get_adjustment((GtkRange*)lookup_widget(ConfigWin, "fxSurroundDepth")), aProps.mSurroundDepth);
 	gtk_adjustment_set_value(gtk_range_get_adjustment((GtkRange*)lookup_widget(ConfigWin, "fxSurroundDelay")), aProps.mSurroundDelay);
-	gtk_adjustment_set_value(gtk_range_get_adjustment((GtkRange*)lookup_widget(ConfigWin, "fxFadeTime")),      aProps.mFadeTime);
+	gtk_adjustment_set_value(gtk_range_get_adjustment((GtkRange*)lookup_widget(ConfigWin, "fxPreampLevel")), aProps.mPreampLevel);
+	
+	if(aProps.mLoopCount < 0)
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxLoopForever"), TRUE);
+	else if(aProps.mLoopCount == 0)
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxNoLoop"), TRUE);
+	else
+	{
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxLoopFinite"), TRUE);
+		gtk_adjustment_set_value(gtk_spin_button_get_adjustment(
+			(GtkSpinButton*)lookup_widget(ConfigWin, "fxLoopCount")), aProps.mLoopCount);
+	}
 	
 	gtk_widget_show(ConfigWin);
 }
@@ -215,6 +230,9 @@ void ShowInfoWindow(const string& aFilename)
 		break;
 	case MOD_TYPE_AMF0:
 		lInfo+= "AMF0";
+		break;
+	case MOD_TYPE_PSM:
+		lInfo+= "PSM";
 		break;
 	default:
 		lInfo+= "Unknown";

@@ -25,41 +25,97 @@
 #include"stddefs.h"
 #endif
 
-#ifndef PLUGIN_H
-#include"plugin.h"
-#endif PLUGIN_H
+#include "plugin.h"
 
-struct ModProperties;
+class CSoundFile;
+class Archive;
 
-class CModplugXMMS
+class ModplugXMMS
 {
-private:
-	struct State;                                 //contains class data members.
-
 public:
-	static void Init(void);                      // Called when the plugin is loaded
-	static bool CanPlayFile(const string& aFilename);// Return true if the plugin can handle the file
+	struct Settings
+	{
+		bool   mSurround;
+		bool   mOversamp;
+		bool   mMegabass;
+		bool   mNoiseReduction;
+		bool   mVolumeRamp;
+		bool   mReverb;
+		bool   mFastinfo;
+		bool   mPreamp;
+	
+		uint8  mChannels;
+		uint8  mBits;
+		uint32 mFrequency;
+		uint32 mResamplingMode;
+	
+		uint32 mReverbDepth;
+		uint32 mReverbDelay;
+		uint32 mBassAmount;
+		uint32 mBassRange;
+		uint32 mSurroundDepth;
+		uint32 mSurroundDelay;
+		float  mPreampLevel;
+		int32  mLoopCount;
+		
+		Settings();
+	};
 
-	static void CloseConfigureBox(void);
+	ModplugXMMS();
+	~ModplugXMMS();
+	
+	void Init(void);                      // Called when the plugin is loaded
+	bool CanPlayFile(const string& aFilename);// Return true if the plugin can handle the file
 
-	static void PlayFile(const string& aFilename);// Play the file.
-	static void Stop(void);                       // Stop playing.
-	static void Pause(bool aPaused);              // Pause or unpause.
+	void CloseConfigureBox(void);
 
-	static void Seek(float32 aTime);                // Seek to the specified time.
-	static float32 GetTime(void);                   // Get the current play time.
+	void PlayFile(const string& aFilename);// Play the file.
+	void Stop(void);                       // Stop playing.
+	void Pause(bool aPaused);              // Pause or unpause.
 
-	static void GetSongInfo(const string& aFilename, char*& aTitle, int32& aLength); // Function to grab the title string
+	void Seek(float32 aTime);                // Seek to the specified time.
+	float32 GetTime(void);                   // Get the current play time.
 
-	static void SetInputPlugin(InputPlugin& aInPlugin);
-	static void SetOutputPlugin(OutputPlugin& aOutPlugin);
+	void GetSongInfo(const string& aFilename, char*& aTitle, int32& aLength); // Function to grab the title string
 
-	// Set the equalizer, most plugins won't be able to do this. :P
-	// woops, actually, only the preamp works as of now...
-	static void SetEquilizer(bool aOn, float32 aPreamp, float32 *aBands);
+	void SetInputPlugin(InputPlugin& aInPlugin);
+	void SetOutputPlugin(OutputPlugin& aOutPlugin);
 
-	static const ModProperties& GetModProps();
-	static void SetModProps(const ModProperties& aModProps);
+	const Settings& GetModProps();
+	void SetModProps(const Settings& aModProps);
+
+private:
+	InputPlugin*  mInPlug;
+	OutputPlugin* mOutPlug;
+
+	uchar*  mBuffer;
+	uint32  mBufSize;
+
+	bool          mPaused;
+	volatile bool mStopped;
+
+	Settings mModProps;
+
+	AFormat mFormat;
+
+	uint32  mBufTime;		//milliseconds
+
+	CSoundFile* mSoundFile;
+	Archive*    mArchive;
+
+	uint32      mPlayed;
+
+	pthread_t   mDecodeThread;
+
+	char        mModName[100];
+	
+	float mPreampFactor;
+
+	void PlayLoop();
+	static void* PlayThread(void* arg);
+	const char* Bool2OnOff(bool aValue);
 };
+
+extern ModplugXMMS gModplugXMMS;
 
 #endif //included

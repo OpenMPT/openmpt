@@ -237,4 +237,3 @@ BOOL CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 	return TRUE;
 }
 
-

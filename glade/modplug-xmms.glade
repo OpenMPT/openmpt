@@ -251,7 +251,7 @@ XMMS interface for Modplug by Kenton Varda.
 		<class>GtkRadioButton</class>
 		<name>mono</name>
 		<can_focus>True</can_focus>
-		<label>Mono</label>
+		<label>Mono (downmix)</label>
 		<active>False</active>
 		<draw_indicator>True</draw_indicator>
 		<child>
@@ -265,11 +265,10 @@ XMMS interface for Modplug by Kenton Varda.
 	</widget>
 
 	<widget>
-	  <class>GtkFrame</class>
-	  <name>frame3</name>
-	  <label>Sampling Rate</label>
-	  <label_xalign>0</label_xalign>
-	  <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
+	  <class>GtkHBox</class>
+	  <name>hbox10</name>
+	  <homogeneous>False</homogeneous>
+	  <spacing>0</spacing>
 	  <child>
 	    <padding>0</padding>
 	    <expand>True</expand>
@@ -277,51 +276,140 @@ XMMS interface for Modplug by Kenton Varda.
 	  </child>
 
 	  <widget>
-	    <class>GtkVBox</class>
-	    <name>vbox6</name>
-	    <homogeneous>False</homogeneous>
-	    <spacing>0</spacing>
+	    <class>GtkFrame</class>
+	    <name>frame3</name>
+	    <label>Sampling Rate</label>
+	    <label_xalign>0</label_xalign>
+	    <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
+	    <child>
+	      <padding>0</padding>
+	      <expand>True</expand>
+	      <fill>True</fill>
+	    </child>
 
 	    <widget>
-	      <class>GtkRadioButton</class>
-	      <name>samp44</name>
-	      <can_focus>True</can_focus>
-	      <label>44 kHz</label>
-	      <active>False</active>
-	      <draw_indicator>True</draw_indicator>
-	      <child>
-		<padding>0</padding>
-		<expand>False</expand>
-		<fill>False</fill>
-	      </child>
+	      <class>GtkVBox</class>
+	      <name>vbox6</name>
+	      <homogeneous>False</homogeneous>
+	      <spacing>0</spacing>
+
+	      <widget>
+		<class>GtkRadioButton</class>
+		<name>samp44</name>
+		<can_focus>True</can_focus>
+		<label>44 kHz</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkRadioButton</class>
+		<name>samp22</name>
+		<can_focus>True</can_focus>
+		<label>22 kHz</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkRadioButton</class>
+		<name>samp11</name>
+		<can_focus>True</can_focus>
+		<label>11 kHz</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
 	    </widget>
+	  </widget>
+
+	  <widget>
+	    <class>GtkFrame</class>
+	    <name>frame9</name>
+	    <label>Resampling</label>
+	    <label_xalign>0</label_xalign>
+	    <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
+	    <child>
+	      <padding>0</padding>
+	      <expand>True</expand>
+	      <fill>True</fill>
+	    </child>
 
 	    <widget>
-	      <class>GtkRadioButton</class>
-	      <name>samp22</name>
-	      <can_focus>True</can_focus>
-	      <label>22 kHz</label>
-	      <active>False</active>
-	      <draw_indicator>True</draw_indicator>
-	      <child>
-		<padding>0</padding>
-		<expand>False</expand>
-		<fill>False</fill>
-	      </child>
-	    </widget>
+	      <class>GtkVBox</class>
+	      <name>vbox15</name>
+	      <homogeneous>False</homogeneous>
+	      <spacing>0</spacing>
 
-	    <widget>
-	      <class>GtkRadioButton</class>
-	      <name>samp11</name>
-	      <can_focus>True</can_focus>
-	      <label>11 kHz</label>
-	      <active>False</active>
-	      <draw_indicator>True</draw_indicator>
-	      <child>
-		<padding>0</padding>
-		<expand>False</expand>
-		<fill>False</fill>
-	      </child>
+	      <widget>
+		<class>GtkRadioButton</class>
+		<name>resampNearest</name>
+		<can_focus>True</can_focus>
+		<label>Nearest (fastest)</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkRadioButton</class>
+		<name>resampLinear</name>
+		<can_focus>True</can_focus>
+		<label>Linear (fast)</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkRadioButton</class>
+		<name>resampSpline</name>
+		<can_focus>True</can_focus>
+		<label>Spline (good quality)</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkRadioButton</class>
+		<name>resampPolyphase</name>
+		<can_focus>True</can_focus>
+		<label>Polyphase (&quot;pro&quot; quality)</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
 	    </widget>
 	  </widget>
 	</widget>
@@ -378,38 +466,10 @@ XMMS interface for Modplug by Kenton Varda.
 
 	      <widget>
 		<class>GtkCheckButton</class>
-		<name>fxOversamp</name>
-		<can_focus>True</can_focus>
-		<label>Oversampling</label>
-		<active>True</active>
-		<draw_indicator>True</draw_indicator>
-		<child>
-		  <padding>0</padding>
-		  <expand>False</expand>
-		  <fill>False</fill>
-		</child>
-	      </widget>
-
-	      <widget>
-		<class>GtkCheckButton</class>
 		<name>fxNR</name>
 		<can_focus>True</can_focus>
 		<label>Noise Reduction</label>
 		<active>True</active>
-		<draw_indicator>True</draw_indicator>
-		<child>
-		  <padding>0</padding>
-		  <expand>False</expand>
-		  <fill>False</fill>
-		</child>
-	      </widget>
-
-	      <widget>
-		<class>GtkCheckButton</class>
-		<name>fxLooping</name>
-		<can_focus>True</can_focus>
-		<label>Looping</label>
-		<active>False</active>
 		<draw_indicator>True</draw_indicator>
 		<child>
 		  <padding>0</padding>
@@ -429,20 +489,6 @@ XMMS interface for Modplug by Kenton Varda.
 		<expand>True</expand>
 		<fill>True</fill>
 	      </child>
-
-	      <widget>
-		<class>GtkCheckButton</class>
-		<name>fxVolRamp</name>
-		<can_focus>True</can_focus>
-		<label>Volume Ramping</label>
-		<active>True</active>
-		<draw_indicator>True</draw_indicator>
-		<child>
-		  <padding>0</padding>
-		  <expand>False</expand>
-		  <fill>False</fill>
-		</child>
-	      </widget>
 
 	      <widget>
 		<class>GtkCheckButton</class>
@@ -526,7 +572,7 @@ XMMS interface for Modplug by Kenton Varda.
 		  <value_pos>GTK_POS_TOP</value_pos>
 		  <digits>1</digits>
 		  <policy>GTK_UPDATE_CONTINUOUS</policy>
-		  <value>1</value>
+		  <value>30</value>
 		  <lower>0</lower>
 		  <upper>100</upper>
 		  <step>0</step>
@@ -556,7 +602,7 @@ XMMS interface for Modplug by Kenton Varda.
 		  <value_pos>GTK_POS_TOP</value_pos>
 		  <digits>1</digits>
 		  <policy>GTK_UPDATE_CONTINUOUS</policy>
-		  <value>100</value>
+		  <value>90</value>
 		  <lower>40</lower>
 		  <upper>200</upper>
 		  <step>0</step>
@@ -699,7 +745,7 @@ XMMS interface for Modplug by Kenton Varda.
 		  <value_pos>GTK_POS_TOP</value_pos>
 		  <digits>1</digits>
 		  <policy>GTK_UPDATE_CONTINUOUS</policy>
-		  <value>6</value>
+		  <value>30</value>
 		  <lower>0</lower>
 		  <upper>100</upper>
 		  <step>0</step>
@@ -729,7 +775,7 @@ XMMS interface for Modplug by Kenton Varda.
 		  <value_pos>GTK_POS_TOP</value_pos>
 		  <digits>1</digits>
 		  <policy>GTK_UPDATE_CONTINUOUS</policy>
-		  <value>14</value>
+		  <value>30</value>
 		  <lower>10</lower>
 		  <upper>100</upper>
 		  <step>0</step>
@@ -872,7 +918,7 @@ XMMS interface for Modplug by Kenton Varda.
 		  <value_pos>GTK_POS_TOP</value_pos>
 		  <digits>1</digits>
 		  <policy>GTK_UPDATE_CONTINUOUS</policy>
-		  <value>12</value>
+		  <value>20</value>
 		  <lower>0</lower>
 		  <upper>100</upper>
 		  <step>0</step>
@@ -982,8 +1028,8 @@ XMMS interface for Modplug by Kenton Varda.
 
 	<widget>
 	  <class>GtkFrame</class>
-	  <name>frame8</name>
-	  <label>Fade on Stop (WARNING: SEE README)</label>
+	  <name>frame10</name>
+	  <label>Preamp</label>
 	  <label_xalign>0</label_xalign>
 	  <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
 	  <child>
@@ -993,18 +1039,22 @@ XMMS interface for Modplug by Kenton Varda.
 	  </child>
 
 	  <widget>
-	    <class>GtkHBox</class>
-	    <name>hbox7</name>
+	    <class>GtkVBox</class>
+	    <name>vbox16</name>
 	    <homogeneous>False</homogeneous>
 	    <spacing>0</spacing>
 
 	    <widget>
-	      <class>GtkCheckButton</class>
-	      <name>fxFadeOut</name>
-	      <can_focus>True</can_focus>
-	      <label>Enable</label>
-	      <active>True</active>
-	      <draw_indicator>True</draw_indicator>
+	      <class>GtkLabel</class>
+	      <name>label20</name>
+	      <label>Note:  Setting the preamp too high may cause
+clipping (annoying clicks and pops)!</label>
+	      <justify>GTK_JUSTIFY_CENTER</justify>
+	      <wrap>False</wrap>
+	      <xalign>0.5</xalign>
+	      <yalign>0.5</yalign>
+	      <xpad>0</xpad>
+	      <ypad>0</ypad>
 	      <child>
 		<padding>0</padding>
 		<expand>False</expand>
@@ -1013,8 +1063,8 @@ XMMS interface for Modplug by Kenton Varda.
 	    </widget>
 
 	    <widget>
-	      <class>GtkVBox</class>
-	      <name>vbox13</name>
+	      <class>GtkHBox</class>
+	      <name>hbox11</name>
 	      <homogeneous>False</homogeneous>
 	      <spacing>0</spacing>
 	      <child>
@@ -1024,55 +1074,173 @@ XMMS interface for Modplug by Kenton Varda.
 	      </child>
 
 	      <widget>
-		<class>GtkHBox</class>
-		<name>hbox8</name>
-		<homogeneous>False</homogeneous>
-		<spacing>0</spacing>
+		<class>GtkCheckButton</class>
+		<name>fxPreamp</name>
+		<can_focus>True</can_focus>
+		<label>Enable</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkLabel</class>
+		<name>label19</name>
+		<label>Volume</label>
+		<justify>GTK_JUSTIFY_CENTER</justify>
+		<wrap>False</wrap>
+		<xalign>0.5</xalign>
+		<yalign>0.5</yalign>
+		<xpad>0</xpad>
+		<ypad>0</ypad>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkHScale</class>
+		<name>fxPreampLevel</name>
+		<can_focus>True</can_focus>
+		<draw_value>True</draw_value>
+		<value_pos>GTK_POS_TOP</value_pos>
+		<digits>1</digits>
+		<policy>GTK_UPDATE_CONTINUOUS</policy>
+		<value>0</value>
+		<lower>-3</lower>
+		<upper>3</upper>
+		<step>1</step>
+		<page>0</page>
+		<page_size>0</page_size>
 		<child>
 		  <padding>0</padding>
 		  <expand>True</expand>
 		  <fill>True</fill>
 		</child>
-
-		<widget>
-		  <class>GtkLabel</class>
-		  <name>label9</name>
-		  <label>Length
-(ms)</label>
-		  <justify>GTK_JUSTIFY_CENTER</justify>
-		  <wrap>False</wrap>
-		  <xalign>0.5</xalign>
-		  <yalign>0.5</yalign>
-		  <xpad>0</xpad>
-		  <ypad>0</ypad>
-		  <child>
-		    <padding>0</padding>
-		    <expand>False</expand>
-		    <fill>False</fill>
-		  </child>
-		</widget>
-
-		<widget>
-		  <class>GtkHScale</class>
-		  <name>fxFadeTime</name>
-		  <can_focus>True</can_focus>
-		  <draw_value>True</draw_value>
-		  <value_pos>GTK_POS_TOP</value_pos>
-		  <digits>1</digits>
-		  <policy>GTK_UPDATE_CONTINUOUS</policy>
-		  <value>500</value>
-		  <lower>0</lower>
-		  <upper>2000</upper>
-		  <step>0</step>
-		  <page>0</page>
-		  <page_size>0</page_size>
-		  <child>
-		    <padding>0</padding>
-		    <expand>True</expand>
-		    <fill>True</fill>
-		  </child>
-		</widget>
 	      </widget>
+	    </widget>
+	  </widget>
+	</widget>
+
+	<widget>
+	  <class>GtkFrame</class>
+	  <name>frame11</name>
+	  <label>Looping</label>
+	  <label_xalign>0</label_xalign>
+	  <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
+	  <child>
+	    <padding>0</padding>
+	    <expand>True</expand>
+	    <fill>True</fill>
+	  </child>
+
+	  <widget>
+	    <class>GtkVBox</class>
+	    <name>vbox17</name>
+	    <homogeneous>False</homogeneous>
+	    <spacing>0</spacing>
+
+	    <widget>
+	      <class>GtkRadioButton</class>
+	      <name>fxNoLoop</name>
+	      <can_focus>True</can_focus>
+	      <label>Don't loop</label>
+	      <active>False</active>
+	      <draw_indicator>True</draw_indicator>
+	      <group>loopGroup</group>
+	      <child>
+		<padding>0</padding>
+		<expand>False</expand>
+		<fill>False</fill>
+	      </child>
+	    </widget>
+
+	    <widget>
+	      <class>GtkHBox</class>
+	      <name>hbox13</name>
+	      <homogeneous>False</homogeneous>
+	      <spacing>0</spacing>
+	      <child>
+		<padding>0</padding>
+		<expand>False</expand>
+		<fill>False</fill>
+	      </child>
+
+	      <widget>
+		<class>GtkRadioButton</class>
+		<name>fxLoopFinite</name>
+		<can_focus>True</can_focus>
+		<label>Loop</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<group>loopGroup</group>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkSpinButton</class>
+		<name>fxLoopCount</name>
+		<can_focus>True</can_focus>
+		<climb_rate>1</climb_rate>
+		<digits>0</digits>
+		<numeric>False</numeric>
+		<update_policy>GTK_UPDATE_ALWAYS</update_policy>
+		<snap>False</snap>
+		<wrap>False</wrap>
+		<value>1</value>
+		<lower>0</lower>
+		<upper>100</upper>
+		<step>1</step>
+		<page>10</page>
+		<page_size>10</page_size>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>True</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkLabel</class>
+		<name>label21</name>
+		<label>time(s)</label>
+		<justify>GTK_JUSTIFY_CENTER</justify>
+		<wrap>False</wrap>
+		<xalign>0.5</xalign>
+		<yalign>0.5</yalign>
+		<xpad>0</xpad>
+		<ypad>0</ypad>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+	    </widget>
+
+	    <widget>
+	      <class>GtkRadioButton</class>
+	      <name>fxLoopForever</name>
+	      <can_focus>True</can_focus>
+	      <label>Loop forever</label>
+	      <active>False</active>
+	      <draw_indicator>True</draw_indicator>
+	      <group>loopGroup</group>
+	      <child>
+		<padding>0</padding>
+		<expand>False</expand>
+		<fill>False</fill>
+	      </child>
 	    </widget>
 	  </widget>
 	</widget>
@@ -1153,7 +1321,7 @@ XMMS interface for Modplug by Kenton Varda.
   <class>GtkWindow</class>
   <name>Info</name>
   <width>290</width>
-  <height>240</height>
+  <height>264</height>
   <signal>
     <name>delete_event</name>
     <handler>hide_window</handler>

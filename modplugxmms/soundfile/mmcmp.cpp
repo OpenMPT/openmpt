@@ -10,6 +10,8 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
+BOOL PP20_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength);
+
 typedef struct MMCMPFILEHEADER
 {
 	DWORD id_ziRC;	// "ziRC"
@@ -81,7 +83,7 @@ DWORD MMCMPBITBUFFER::GetBits(UINT nBits)
 //#define MMCMP_LOG
 
 #ifdef MMCMP_LOG
-extern void Log(LPCSTR s, DWORD d1=0, DWORD d2=0, DWORD d3=0);
+extern void Log(LPCSTR s, ...);
 #endif
 
 const DWORD MMCMP8BitCommands[8] =
@@ -107,7 +109,6 @@ const UINT MMCMP16BitFetch[16] =
 };
 
 
-
 BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 //---------------------------------------------------------
 {
@@ -119,6 +120,10 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 	LPDWORD pblk_table;
 	DWORD dwFileSize;
 
+	if (PP20_Unpack(ppMemFile, pdwMemLength))
+	{
+		return TRUE;
+	}
 	if ((dwMemLength < 256) || (!pmfh) || (pmfh->id_ziRC != 0x4352697A) || (pmfh->id_ONia != 0x61694e4f) || (pmfh->hdrsize < 14)
 	 || (!pmmh->nblocks) || (pmmh->filesize < 16) || (pmmh->filesize > 0x8000000)
 	 || (pmmh->blktable >= dwMemLength) || (pmmh->blktable + 4*pmmh->nblocks > dwMemLength)) return FALSE;
@@ -287,4 +292,118 @@ BOOL MMCMP_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
 	*pdwMemLength = dwFileSize;
 	return TRUE;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// PowerPack PP20 Unpacker
+//
+
+typedef struct _PPBITBUFFER
+{
+	UINT bitcount;
+	ULONG bitbuffer;
+	LPCBYTE pStart;
+	LPCBYTE pSrc;
+
+	ULONG GetBits(UINT n);
+} PPBITBUFFER;
+
+
+ULONG PPBITBUFFER::GetBits(UINT n)
+{
+	ULONG result = 0;
+
+	for (UINT i=0; i<n; i++)
+	{
+		if (!bitcount)
+		{
+			bitcount = 8;
+			if (pSrc != pStart) pSrc--;
+			bitbuffer = *pSrc;
+		}
+		result = (result<<1) | (bitbuffer&1);
+		bitbuffer >>= 1;
+		bitcount--;
+    }
+    return result;
+}
+
+
+VOID PP20_DoUnpack(const BYTE *pSrc, UINT nSrcLen, BYTE *pDst, UINT nDstLen)
+{
+	PPBITBUFFER BitBuffer;
+	ULONG nBytesLeft;
+
+	BitBuffer.pStart = pSrc;
+	BitBuffer.pSrc = pSrc + nSrcLen - 4;
+	BitBuffer.bitbuffer = 0;
+	BitBuffer.bitcount = 0;
+	BitBuffer.GetBits(pSrc[nSrcLen-1]);
+	nBytesLeft = nDstLen;
+	while (nBytesLeft > 0)
+	{
+		if (!BitBuffer.GetBits(1))
+		{
+			UINT n = 1;
+			while (n < nBytesLeft)
+			{
+				UINT code = BitBuffer.GetBits(2);
+				n += code;
+				if (code != 3) break;
+			}
+			for (UINT i=0; i<n; i++)
+			{
+				pDst[--nBytesLeft] = (BYTE)BitBuffer.GetBits(8);
+			}
+			if (!nBytesLeft) break;
+		}
+		{
+			UINT n = BitBuffer.GetBits(2)+1;
+			UINT nbits = pSrc[n-1];
+			UINT nofs;
+			if (n==4)
+			{
+				nofs = BitBuffer.GetBits( (BitBuffer.GetBits(1)) ? nbits : 7 );
+				while (n < nBytesLeft)
+				{
+					UINT code = BitBuffer.GetBits(3);
+					n += code;
+					if (code != 7) break;
+				}
+			} else
+			{
+				nofs = BitBuffer.GetBits(nbits);
+			}
+			for (UINT i=0; i<=n; i++)
+			{
+				pDst[nBytesLeft-1] = (nBytesLeft+nofs < nDstLen) ? pDst[nBytesLeft+nofs] : 0;
+				if (!--nBytesLeft) break;
+			}
+		}
+	}
+}
+
+
+BOOL PP20_Unpack(LPCBYTE *ppMemFile, LPDWORD pdwMemLength)
+{
+	DWORD dwMemLength = *pdwMemLength;
+	LPCBYTE lpMemFile = *ppMemFile;
+	DWORD dwDstLen;
+	LPBYTE pBuffer;
+
+	if ((!lpMemFile) || (dwMemLength < 256) || (*(DWORD *)lpMemFile != 0x30325050)) return FALSE;
+	dwDstLen = (lpMemFile[dwMemLength-4]<<16) | (lpMemFile[dwMemLength-3]<<8) | (lpMemFile[dwMemLength-2]);
+	//Log("PP20 detected: Packed length=%d, Unpacked length=%d\n", dwMemLength, dwDstLen);
+	if ((dwDstLen < 512) || (dwDstLen > 0x400000) || (dwDstLen > 16*dwMemLength)) return FALSE;
+	if ((pBuffer = (LPBYTE)GlobalAllocPtr(GHND, (dwDstLen + 31) & ~15)) == NULL) return FALSE;
+	PP20_DoUnpack(lpMemFile+4, dwMemLength-4, pBuffer, dwDstLen);
+	*ppMemFile = pBuffer;
+	*pdwMemLength = dwDstLen;
+	return TRUE;
+}
+
+
+
+
 

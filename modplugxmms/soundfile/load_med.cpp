@@ -12,7 +12,9 @@
 
 //#define MED_LOG
 
+#ifdef MED_LOG
 extern void Log(LPCSTR s, ...);
+#endif
 
 //////////////////////////////////////////////////////////
 // OctaMed MED file support (import only)
@@ -317,7 +319,7 @@ static void MedConvert(MODCOMMAND *p, const MMD0SONGHEADER *pmsh)
 			// Old tempo
 			if (!(pmsh->flags2 & MMD_FLAG2_BPM))
 			{
-				param = MulDiv(param, 5*715909, 2*474326);
+				param = _muldiv(param, 5*715909, 2*474326);
 			}
 			// F.0B - F.F0: Set Tempo (assumes LPB=4)
 			if (param > 0x0A)
@@ -587,7 +589,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 	#endif
 	} else
 	{
-		deftempo = MulDiv(deftempo, 5*715909, 2*474326);
+		deftempo = _muldiv(deftempo, 5*715909, 2*474326);
 	#ifdef MED_LOG
 		Log("oldtempo: %3d bpm (bpm=%3d)\n", deftempo, BigEndianW(pmsh->deftempo));
 	#endif
@@ -825,11 +827,13 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 					if (s[0] & 0x40) instr |= 0x20;
 					if ((note) && (note <= 132)) p->note = note + playtransp;
 					p->instr = instr;
-					p->command = s[1] & 0x1F;
+					p->command = s[1] & 0x0F;
 					p->param = s[2];
+					// if (!iBlk) Log("%02X.%02X.%02X | ", s[0], s[1], s[2]);
 					MedConvert(p, pmsh);
 					p++;
 				}
+				//if (!iBlk) Log("\n");
 			}
 		} else
 		{
@@ -844,7 +848,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 			tracks = pmb->numtracks >> 8;
 			if (!tracks) tracks = m_nChannels;
 			if ((Patterns[iBlk] = AllocatePattern(lines, m_nChannels)) == NULL) continue;
-			PatternSize[iBlk] = lines;
+			PatternSize[iBlk] = (WORD)lines;
 			DWORD dwBlockInfo = BigEndian(pmb->info);
 			if ((dwBlockInfo) && (dwBlockInfo < dwMemLength - sizeof(MMD1BLOCKINFO)))
 			{
@@ -910,6 +914,5 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	return TRUE;
 }
-
 
 

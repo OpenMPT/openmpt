@@ -64,11 +64,9 @@ AWK = @AWK@
 CC = @CC@
 CXX = @CXX@
 DLLTOOL = @DLLTOOL@
-LD = @LD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
-NM = @NM@
 OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
@@ -92,7 +90,7 @@ noinst_LTLIBRARIES = libgui.la
 libgui_la_LDFLAGS = -module -avoid-version
 libgui_la_SOURCES = main.cpp support.cpp interface.cpp callbacks.cpp
 
-EXTRA_DIST = callbacks.cpp callbacks.h interface.cpp interface.h support.cpp support.h main.cpp main.h
+noinst_HEADERS = callbacks.h interface.h support.h main.h
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -110,6 +108,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+HEADERS =  $(noinst_HEADERS)
+
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -230,14 +230,13 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 callbacks.lo callbacks.o : callbacks.cpp ../../config.h callbacks.h \
-	interface.h support.h ../../modplugxmms/modprops.h \
-	../../modplugxmms/stddefs.h ../../modplugxmms/modplugxmms.h \
-	../../modplugxmms/plugin.h
+	interface.h support.h ../../modplugxmms/modplugxmms.h \
+	../../modplugxmms/stddefs.h ../../modplugxmms/plugin.h
 interface.lo interface.o : interface.cpp ../../config.h callbacks.h \
 	interface.h support.h
 main.lo main.o : main.cpp ../../config.h interface.h support.h main.h \
-	../../modplugxmms/modprops.h ../../modplugxmms/stddefs.h \
-	../../modplugxmms/soundfile/stdafx.h \
+	../../modplugxmms/modplugxmms.h ../../modplugxmms/stddefs.h \
+	../../modplugxmms/plugin.h ../../modplugxmms/soundfile/stdafx.h \
 	../../modplugxmms/soundfile/sndfile.h \
 	../../modplugxmms/archive/open.h \
 	../../modplugxmms/archive/archive.h
@@ -262,7 +261,7 @@ install-am: all-am
 install: install-am
 uninstall-am:
 uninstall: uninstall-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install

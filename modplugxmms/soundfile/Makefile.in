@@ -64,11 +64,9 @@ AWK = @AWK@
 CC = @CC@
 CXX = @CXX@
 DLLTOOL = @DLLTOOL@
-LD = @LD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
-NM = @NM@
 OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
@@ -88,9 +86,10 @@ plugindir = @plugindir@
 
 noinst_LTLIBRARIES = libsoundfile.la
 libsoundfile_la_LDFLAGS = -module -avoid-version
-libsoundfile_la_SOURCES = waveform.cpp tables.cpp sndmix.cpp sndfile.cpp snd_fx.cpp snd_flt.cpp snd_dsp.cpp mmcmp.cpp load_xm.cpp load_wav.cpp load_umx.cpp load_ult.cpp load_stm.cpp load_s3m.cpp load_ptm.cpp load_okt.cpp load_mtm.cpp load_mod.cpp load_med.cpp load_mdl.cpp load_it.cpp load_far.cpp load_dsm.cpp load_dmf.cpp load_dbm.cpp load_ams.cpp load_amf.cpp load_669.cpp fastmix.cpp
+libsoundfile_la_SOURCES = tables.cpp                                   sndmix.cpp                                   sndfile.cpp                                  snd_fx.cpp                                   snd_flt.cpp                                  snd_dsp.cpp                                  fastmix.cpp                                  mmcmp.cpp                                    load_xm.cpp                                  load_wav.cpp                                 load_umx.cpp                                 load_ult.cpp                                 load_stm.cpp                                 load_s3m.cpp                                 load_ptm.cpp                                 load_okt.cpp                                 load_mtm.cpp                                 load_mod.cpp                                 load_med.cpp                                 load_mdl.cpp                                 load_it.cpp                                  load_far.cpp                                 load_dsm.cpp                                 load_dmf.cpp                                 load_dbm.cpp                                 load_ams.cpp                                 load_amf.cpp                                 load_669.cpp                                 load_j2b.cpp                                 load_mt2.cpp                                 load_psm.cpp
 
-EXTRA_DIST = fastmix.cpp it_defs.h load_669.cpp load_amf.cpp load_ams.cpp load_dbm.cpp load_dmf.cpp load_dsm.cpp load_far.cpp load_it.cpp load_mdl.cpp load_med.cpp load_mod.cpp load_mtm.cpp load_okt.cpp load_ptm.cpp load_s3m.cpp load_stm.cpp load_ult.cpp load_umx.cpp load_wav.cpp load_xm.cpp mmcmp.cpp snd_dsp.cpp snd_flt.cpp snd_fx.cpp sndfile.cpp sndfile.h sndmix.cpp stdafx.h tables.cpp waveform.cpp 
+
+noinst_HEADERS = it_defs.h stdafx.h sndfile.h
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -102,17 +101,19 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libsoundfile_la_LIBADD = 
-libsoundfile_la_OBJECTS =  waveform.lo tables.lo sndmix.lo sndfile.lo \
-snd_fx.lo snd_flt.lo snd_dsp.lo mmcmp.lo load_xm.lo load_wav.lo \
+libsoundfile_la_OBJECTS =  tables.lo sndmix.lo sndfile.lo snd_fx.lo \
+snd_flt.lo snd_dsp.lo fastmix.lo mmcmp.lo load_xm.lo load_wav.lo \
 load_umx.lo load_ult.lo load_stm.lo load_s3m.lo load_ptm.lo load_okt.lo \
 load_mtm.lo load_mod.lo load_med.lo load_mdl.lo load_it.lo load_far.lo \
 load_dsm.lo load_dmf.lo load_dbm.lo load_ams.lo load_amf.lo load_669.lo \
-fastmix.lo
+load_j2b.lo load_mt2.lo load_psm.lo
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+HEADERS =  $(noinst_HEADERS)
+
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -241,11 +242,14 @@ load_dmf.lo load_dmf.o : load_dmf.cpp stdafx.h sndfile.h
 load_dsm.lo load_dsm.o : load_dsm.cpp stdafx.h sndfile.h
 load_far.lo load_far.o : load_far.cpp stdafx.h sndfile.h
 load_it.lo load_it.o : load_it.cpp stdafx.h sndfile.h it_defs.h
+load_j2b.lo load_j2b.o : load_j2b.cpp stdafx.h sndfile.h
 load_mdl.lo load_mdl.o : load_mdl.cpp stdafx.h sndfile.h
 load_med.lo load_med.o : load_med.cpp stdafx.h sndfile.h
 load_mod.lo load_mod.o : load_mod.cpp stdafx.h sndfile.h
+load_mt2.lo load_mt2.o : load_mt2.cpp stdafx.h sndfile.h
 load_mtm.lo load_mtm.o : load_mtm.cpp stdafx.h sndfile.h
 load_okt.lo load_okt.o : load_okt.cpp stdafx.h sndfile.h
+load_psm.lo load_psm.o : load_psm.cpp stdafx.h sndfile.h
 load_ptm.lo load_ptm.o : load_ptm.cpp stdafx.h sndfile.h
 load_s3m.lo load_s3m.o : load_s3m.cpp stdafx.h sndfile.h
 load_stm.lo load_stm.o : load_stm.cpp stdafx.h sndfile.h
@@ -260,7 +264,6 @@ snd_fx.lo snd_fx.o : snd_fx.cpp stdafx.h sndfile.h
 sndfile.lo sndfile.o : sndfile.cpp stdafx.h sndfile.h
 sndmix.lo sndmix.o : sndmix.cpp stdafx.h sndfile.h
 tables.lo tables.o : tables.cpp stdafx.h sndfile.h
-waveform.lo waveform.o : waveform.cpp stdafx.h sndfile.h
 
 info-am:
 info: info-am
@@ -281,7 +284,7 @@ install-am: all-am
 install: install-am
 uninstall-am:
 uninstall: uninstall-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install

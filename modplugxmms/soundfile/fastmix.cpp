@@ -5,15 +5,14 @@
  * option) any later version.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
- *          Rani Assaf <rani@magic.metawire.com> (C translations of asm)
- *          Kenton Varda <temporal@gauge3d.org> (GCC port)
- *          Markus Fick <webmaster@mark-f.de> (changed SNDMIX_PROCESSFILTER from 2p1z to 2p, WIN32 ifdefs)
 */
 
 #include "stdafx.h"
 #include "sndfile.h"
 
-//#pragma bss_seg(".modplug")
+#ifdef WIN32
+#pragma bss_seg(".modplug")
+#endif
 
 // Front Mix Buffer (Also room for interleaved rear mix)
 int MixSoundBuffer[MIXBUFFERSIZE*4];
@@ -24,22 +23,41 @@ int MixReverbBuffer[MIXBUFFERSIZE*2];
 extern UINT gnReverbSend;
 #endif
 
-//#pragma bss_seg()
+#ifndef FASTSOUNDLIB
+int MixRearBuffer[MIXBUFFERSIZE*2];
+float MixFloatBuffer[MIXBUFFERSIZE*2];
+#endif
+
+#ifdef WIN32
+#pragma bss_seg()
+#endif
+
+
+extern LONG gnDryROfsVol;
+extern LONG gnDryLOfsVol;
+extern LONG gnRvbROfsVol;
+extern LONG gnRvbLOfsVol;
+
+// 4x256 taps polyphase FIR resampling filter
+extern short int gFastSinc[];
+extern short int gKaiserSinc[]; // 8-taps polyphase
 
 /////////////////////////////////////////////////////
 // Mixing Macros
 
 #define SNDMIX_BEGINSAMPLELOOP8\
-	register MODCHANNEL *pChn = pChannel;\
+	register MODCHANNEL * const pChn = pChannel;\
 	nPos = pChn->nPosLo;\
-	signed char *p = (signed char *)(pChn->pCurrentSample+pChn->nPos);\
+	const signed char *p = (signed char *)(pChn->pCurrentSample+pChn->nPos);\
+	if (pChn->dwFlags & CHN_STEREO) p += pChn->nPos;\
 	int *pvol = pbuffer;\
 	do {
 
 #define SNDMIX_BEGINSAMPLELOOP16\
-	register MODCHANNEL *pChn = pChannel;\
+	register MODCHANNEL * const pChn = pChannel;\
 	nPos = pChn->nPosLo;\
-	signed short *p = (signed short *)(pChn->pCurrentSample+(pChn->nPos<<1));\
+	const signed short *p = (signed short *)(pChn->pCurrentSample+(pChn->nPos*2));\
+	if (pChn->dwFlags & CHN_STEREO) p += pChn->nPos;\
 	int *pvol = pbuffer;\
 	do {
 
@@ -52,86 +70,180 @@ extern UINT gnReverbSend;
 #define SNDMIX_ENDSAMPLELOOP8	SNDMIX_ENDSAMPLELOOP
 #define SNDMIX_ENDSAMPLELOOP16	SNDMIX_ENDSAMPLELOOP
 
+//////////////////////////////////////////////////////////////////////////////
+// Mono
 
-#define SNDMIX_GETVOL8NOIDO\
-	vol = p[nPos >> 16] << 8;
+// No interpolation
+#define SNDMIX_GETMONOVOL8NOIDO\
+	int vol = p[nPos >> 16] << 8;
 
-#define SNDMIX_GETVOL16NOIDO\
-	vol = p[nPos >> 16];
+#define SNDMIX_GETMONOVOL16NOIDO\
+	int vol = p[nPos >> 16];
 
-#define SNDMIX_GETVOL8LINEAR\
+// Linear Interpolation
+#define SNDMIX_GETMONOVOL8LINEAR\
 	int poshi = nPos >> 16;\
 	int poslo = (nPos >> 8) & 0xFF;\
 	int srcvol = p[poshi];\
 	int destvol = p[poshi+1];\
-	vol = (srcvol<<8) + ((int)(poslo * (destvol - srcvol)));
+	int vol = (srcvol<<8) + ((int)(poslo * (destvol - srcvol)));
 
-#define SNDMIX_GETVOL16LINEAR\
+#define SNDMIX_GETMONOVOL16LINEAR\
 	int poshi = nPos >> 16;\
 	int poslo = (nPos >> 8) & 0xFF;\
 	int srcvol = p[poshi];\
 	int destvol = p[poshi+1];\
-	vol = srcvol + ((int)(poslo * (destvol - srcvol)) >> 8);
+	int vol = srcvol + ((int)(poslo * (destvol - srcvol)) >> 8);
 
+
+/////////////////////////////////////////////////////////////////////////////
+// Stereo
+
+// No interpolation
+#define SNDMIX_GETSTEREOVOL8NOIDO\
+	int vol_l = p[(nPos>>16)*2] << 8;\
+	int vol_r = p[(nPos>>16)*2+1] << 8;
+
+#define SNDMIX_GETSTEREOVOL16NOIDO\
+	int vol_l = p[(nPos>>16)*2];\
+	int vol_r = p[(nPos>>16)*2+1];
+
+// Linear Interpolation
+#define SNDMIX_GETSTEREOVOL8LINEAR\
+	int poshi = nPos >> 16;\
+	int poslo = (nPos >> 8) & 0xFF;\
+	int srcvol_l = p[poshi*2];\
+	int vol_l = (srcvol_l<<8) + ((int)(poslo * (p[poshi*2+2] - srcvol_l)));\
+	int srcvol_r = p[poshi*2+1];\
+	int vol_r = (srcvol_r<<8) + ((int)(poslo * (p[poshi*2+3] - srcvol_r)));
+
+#define SNDMIX_GETSTEREOVOL16LINEAR\
+	int poshi = nPos >> 16;\
+	int poslo = (nPos >> 8) & 0xFF;\
+	int srcvol_l = p[poshi*2];\
+	int vol_l = srcvol_l + ((int)(poslo * (p[poshi*2+2] - srcvol_l)) >> 8);\
+	int srcvol_r = p[poshi*2+1];\
+	int vol_r = srcvol_r + ((int)(poslo * (p[poshi*2+3] - srcvol_r)) >> 8);\
+
+
+/////////////////////////////////////////////////////////////////////////////
 
 #define SNDMIX_STOREMONOVOL\
-	*pvol++ += vol * pChn->nRightVol;
-
-#define SNDMIX_STORESTEREOVOL\
 	pvol[0] += vol * pChn->nRightVol;\
 	pvol[1] += vol * pChn->nLeftVol;\
 	pvol += 2;
 
-#define SNDMIX_STOREFASTSTEREOVOL\
+#define SNDMIX_STORESTEREOVOL\
+	pvol[0] += vol_l * pChn->nRightVol;\
+	pvol[1] += vol_r * pChn->nLeftVol;\
+	pvol += 2;
+
+#define SNDMIX_STOREFASTMONOVOL\
 	int v = vol * pChn->nRightVol;\
 	pvol[0] += v;\
 	pvol[1] += v;\
 	pvol += 2;
 
-#define SNDMIX_VOLUMERAMPMONO\
-	nRampRightVol += pChn->nRightRamp;\
-	*pvol++ += vol * (nRampRightVol >> VOLUMERAMPPRECISION);
-
-#define SNDMIX_VOLUMERAMPSTEREO\
-	nRampRightVol += pChn->nRightRamp;\
+#define SNDMIX_RAMPMONOVOL\
 	nRampLeftVol += pChn->nLeftRamp;\
+	nRampRightVol += pChn->nRightRamp;\
 	pvol[0] += vol * (nRampRightVol >> VOLUMERAMPPRECISION);\
 	pvol[1] += vol * (nRampLeftVol >> VOLUMERAMPPRECISION);\
+	pvol += 2;
+
+#define SNDMIX_RAMPFASTMONOVOL\
+	nRampRightVol += pChn->nRightRamp;\
+	int fastvol = vol * (nRampRightVol >> VOLUMERAMPPRECISION);\
+	pvol[0] += fastvol;\
+	pvol[1] += fastvol;\
+	pvol += 2;
+
+#define SNDMIX_RAMPSTEREOVOL\
+	nRampLeftVol += pChn->nLeftRamp;\
+	nRampRightVol += pChn->nRightRamp;\
+	pvol[0] += vol_l * (nRampRightVol >> VOLUMERAMPPRECISION);\
+	pvol[1] += vol_r * (nRampLeftVol >> VOLUMERAMPPRECISION);\
 	pvol += 2;
 
 
 ///////////////////////////////////////////////////
 // Resonant Filters
 
+// Mono
 #define MIX_BEGIN_FILTER\
-	int fx1 = pChannel->nFilter_X1;\
-	int fx2 = pChannel->nFilter_X2;\
+	int fy1 = pChannel->nFilter_Y1;\
+	int fy2 = pChannel->nFilter_Y2;\
 
 #define MIX_END_FILTER\
-	pChannel->nFilter_X1 = fx1;\
-	pChannel->nFilter_X2 = fx2;
+	pChannel->nFilter_Y1 = fy1;\
+	pChannel->nFilter_Y2 = fy2;
 
 #define SNDMIX_PROCESSFILTER\
-	vol = (vol * pChn->nFilter_B0 + fx1 * pChn->nFilter_B1 + fx2 * pChn->nFilter_B2) / 8192;\
-	fx2 = fx1;\
-	fx1 = vol;\
+	vol = (vol * pChn->nFilter_A0 + fy1 * pChn->nFilter_B0 + fy2 * pChn->nFilter_B1 + 4096) >> 13;\
+	fy2 = fy1;\
+	fy1 = vol;\
+
+// Stereo
+#define MIX_BEGIN_STEREO_FILTER\
+	int fy1 = pChannel->nFilter_Y1;\
+	int fy2 = pChannel->nFilter_Y2;\
+	int fy3 = pChannel->nFilter_Y3;\
+	int fy4 = pChannel->nFilter_Y4;\
+
+#define MIX_END_STEREO_FILTER\
+	pChannel->nFilter_Y1 = fy1;\
+	pChannel->nFilter_Y2 = fy2;\
+	pChannel->nFilter_Y3 = fy3;\
+	pChannel->nFilter_Y4 = fy4;\
+
+#define SNDMIX_PROCESSSTEREOFILTER\
+	vol_l = (vol_l * pChn->nFilter_A0 + fy1 * pChn->nFilter_B0 + fy2 * pChn->nFilter_B1 + 4096) >> 13;\
+	vol_r = (vol_r * pChn->nFilter_A0 + fy3 * pChn->nFilter_B0 + fy4 * pChn->nFilter_B1 + 4096) >> 13;\
+	fy2 = fy1; fy1 = vol_l;\
+	fy4 = fy3; fy3 = vol_r;\
 
 //////////////////////////////////////////////////////////
 // Interfaces
 
-typedef LONG (MPPASMCALL * LPMIXINTERFACE)(MODCHANNEL *, int *, int *);
+typedef VOID (MPPASMCALL * LPMIXINTERFACE)(MODCHANNEL *, int *, int *);
 
 #define BEGIN_MIX_INTERFACE(func)\
-	LONG MPPASMCALL func(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)\
+	VOID MPPASMCALL func(MODCHANNEL *pChannel, int *pbuffer, int *pbufmax)\
 	{\
-		LONG vol, nPos;
+		LONG nPos;
 
 #define END_MIX_INTERFACE()\
 		SNDMIX_ENDSAMPLELOOP\
-		return vol;\
 	}
 
-// Resonant Filter
+// Volume Ramps
+#define BEGIN_RAMPMIX_INTERFACE(func)\
+	BEGIN_MIX_INTERFACE(func)\
+		LONG nRampRightVol = pChannel->nRampRightVol;\
+		LONG nRampLeftVol = pChannel->nRampLeftVol;
+
+#define END_RAMPMIX_INTERFACE()\
+		SNDMIX_ENDSAMPLELOOP\
+		pChannel->nRampRightVol = nRampRightVol;\
+		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
+		pChannel->nRampLeftVol = nRampLeftVol;\
+		pChannel->nLeftVol = nRampLeftVol >> VOLUMERAMPPRECISION;\
+	}
+
+#define BEGIN_FASTRAMPMIX_INTERFACE(func)\
+	BEGIN_MIX_INTERFACE(func)\
+		LONG nRampRightVol = pChannel->nRampRightVol;
+
+#define END_FASTRAMPMIX_INTERFACE()\
+		SNDMIX_ENDSAMPLELOOP\
+		pChannel->nRampRightVol = nRampRightVol;\
+		pChannel->nRampLeftVol = nRampRightVol;\
+		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
+		pChannel->nLeftVol = pChannel->nRightVol;\
+	}
+
+
+// Mono Resonant Filters
 #define BEGIN_MIX_FLT_INTERFACE(func)\
 	BEGIN_MIX_INTERFACE(func)\
 	MIX_BEGIN_FILTER
@@ -140,331 +252,417 @@ typedef LONG (MPPASMCALL * LPMIXINTERFACE)(MODCHANNEL *, int *, int *);
 #define END_MIX_FLT_INTERFACE()\
 	SNDMIX_ENDSAMPLELOOP\
 	MIX_END_FILTER\
-	return vol;\
 	}
 
-
-// Stereo Volume Ramp
-#define BEGIN_RAMP_STEREO(func)\
-	BEGIN_MIX_INTERFACE(func)\
-		LONG nRampRightVol = pChannel->nRampRightVol;\
-		LONG nRampLeftVol = pChannel->nRampLeftVol;
-
-
-#define END_RAMP_STEREO()\
-		SNDMIX_ENDSAMPLELOOP\
-		pChannel->nRampRightVol = nRampRightVol;\
-		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
-		pChannel->nRampLeftVol = nRampLeftVol;\
-		pChannel->nLeftVol = nRampLeftVol >> VOLUMERAMPPRECISION;\
-		return vol;\
-	}
-
-
-// Mono Volume Ramp
-#define BEGIN_RAMP_MONO(func)\
-	BEGIN_MIX_INTERFACE(func)\
-		LONG nRampRightVol = pChannel->nRampRightVol;\
-
-#define END_RAMP_MONO()\
-		SNDMIX_ENDSAMPLELOOP\
-		pChannel->nRampRightVol = nRampRightVol;\
-		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
-		return vol;\
-	}
-
-
-// Stereo Filtered Volume Ramp
-#define BEGIN_RAMPMIX_FLT_STEREO(func)\
+#define BEGIN_RAMPMIX_FLT_INTERFACE(func)\
 	BEGIN_MIX_INTERFACE(func)\
 		LONG nRampRightVol = pChannel->nRampRightVol;\
 		LONG nRampLeftVol = pChannel->nRampLeftVol;\
 		MIX_BEGIN_FILTER
 
-#define END_RAMPMIX_FLT_STEREO()\
+#define END_RAMPMIX_FLT_INTERFACE()\
 		SNDMIX_ENDSAMPLELOOP\
 		MIX_END_FILTER\
 		pChannel->nRampRightVol = nRampRightVol;\
 		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
 		pChannel->nRampLeftVol = nRampLeftVol;\
 		pChannel->nLeftVol = nRampLeftVol >> VOLUMERAMPPRECISION;\
-		return vol;\
 	}
 
+// Stereo Resonant Filters
+#define BEGIN_MIX_STFLT_INTERFACE(func)\
+	BEGIN_MIX_INTERFACE(func)\
+	MIX_BEGIN_STEREO_FILTER
+	
 
-// Mono Filtered Volume Ramp
-#define BEGIN_RAMPMIX_FLT_MONO(func)\
+#define END_MIX_STFLT_INTERFACE()\
+	SNDMIX_ENDSAMPLELOOP\
+	MIX_END_STEREO_FILTER\
+	}
+
+#define BEGIN_RAMPMIX_STFLT_INTERFACE(func)\
 	BEGIN_MIX_INTERFACE(func)\
 		LONG nRampRightVol = pChannel->nRampRightVol;\
-		MIX_BEGIN_FILTER\
+		LONG nRampLeftVol = pChannel->nRampLeftVol;\
+		MIX_BEGIN_STEREO_FILTER
 
-#define END_RAMPMIX_FLT_MONO()\
+#define END_RAMPMIX_STFLT_INTERFACE()\
 		SNDMIX_ENDSAMPLELOOP\
-		MIX_END_FILTER\
+		MIX_END_STEREO_FILTER\
 		pChannel->nRampRightVol = nRampRightVol;\
 		pChannel->nRightVol = nRampRightVol >> VOLUMERAMPPRECISION;\
-		return vol;\
+		pChannel->nRampLeftVol = nRampLeftVol;\
+		pChannel->nLeftVol = nRampLeftVol >> VOLUMERAMPPRECISION;\
 	}
 
 
 /////////////////////////////////////////////////////
-// Stereo Mix functions
+//
+
+void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
+void MPPASMCALL X86_EndChannelOfs(MODCHANNEL *pChannel, int *pBuffer, UINT nSamples);
+void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs);
+void X86_StereoMixToFloat(const int *, float *, float *, UINT nCount);
+void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
+
+/////////////////////////////////////////////////////
+// Mono samples functions
+
+BEGIN_MIX_INTERFACE(Mono8BitMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8NOIDO
+	SNDMIX_STOREMONOVOL
+END_MIX_INTERFACE()
+
+BEGIN_MIX_INTERFACE(Mono16BitMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16NOIDO
+	SNDMIX_STOREMONOVOL
+END_MIX_INTERFACE()
+
+BEGIN_MIX_INTERFACE(Mono8BitLinearMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8LINEAR
+	SNDMIX_STOREMONOVOL
+END_MIX_INTERFACE()
+
+BEGIN_MIX_INTERFACE(Mono16BitLinearMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16LINEAR
+	SNDMIX_STOREMONOVOL
+END_MIX_INTERFACE()
+
+
+// Volume Ramps
+BEGIN_RAMPMIX_INTERFACE(Mono8BitRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8NOIDO
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_INTERFACE()
+
+BEGIN_RAMPMIX_INTERFACE(Mono16BitRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16NOIDO
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_INTERFACE()
+
+BEGIN_RAMPMIX_INTERFACE(Mono8BitLinearRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8LINEAR
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_INTERFACE()
+
+BEGIN_RAMPMIX_INTERFACE(Mono16BitLinearRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16LINEAR
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_INTERFACE()
+
+//////////////////////////////////////////////////////
+// Fast mono mix for leftvol=rightvol (1 less imul)
+
+BEGIN_MIX_INTERFACE(FastMono8BitMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8NOIDO
+	SNDMIX_STOREFASTMONOVOL
+END_MIX_INTERFACE()
+
+BEGIN_MIX_INTERFACE(FastMono16BitMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16NOIDO
+	SNDMIX_STOREFASTMONOVOL
+END_MIX_INTERFACE()
+
+BEGIN_MIX_INTERFACE(FastMono8BitLinearMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8LINEAR
+	SNDMIX_STOREFASTMONOVOL
+END_MIX_INTERFACE()
+
+BEGIN_MIX_INTERFACE(FastMono16BitLinearMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16LINEAR
+	SNDMIX_STOREFASTMONOVOL
+END_MIX_INTERFACE()
+
+// Fast Ramps
+BEGIN_FASTRAMPMIX_INTERFACE(FastMono8BitRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8NOIDO
+	SNDMIX_RAMPFASTMONOVOL
+END_FASTRAMPMIX_INTERFACE()
+
+BEGIN_FASTRAMPMIX_INTERFACE(FastMono16BitRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16NOIDO
+	SNDMIX_RAMPFASTMONOVOL
+END_FASTRAMPMIX_INTERFACE()
+
+BEGIN_FASTRAMPMIX_INTERFACE(FastMono8BitLinearRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8LINEAR
+	SNDMIX_RAMPFASTMONOVOL
+END_FASTRAMPMIX_INTERFACE()
+
+BEGIN_FASTRAMPMIX_INTERFACE(FastMono16BitLinearRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16LINEAR
+	SNDMIX_RAMPFASTMONOVOL
+END_FASTRAMPMIX_INTERFACE()
+
+
+//////////////////////////////////////////////////////
+// Stereo samples
 
 BEGIN_MIX_INTERFACE(Stereo8BitMix)
 	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8NOIDO
+	SNDMIX_GETSTEREOVOL8NOIDO
 	SNDMIX_STORESTEREOVOL
 END_MIX_INTERFACE()
 
 BEGIN_MIX_INTERFACE(Stereo16BitMix)
 	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16NOIDO
+	SNDMIX_GETSTEREOVOL16NOIDO
 	SNDMIX_STORESTEREOVOL
 END_MIX_INTERFACE()
 
 BEGIN_MIX_INTERFACE(Stereo8BitLinearMix)
 	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8LINEAR
+	SNDMIX_GETSTEREOVOL8LINEAR
 	SNDMIX_STORESTEREOVOL
 END_MIX_INTERFACE()
 
 BEGIN_MIX_INTERFACE(Stereo16BitLinearMix)
 	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16LINEAR
+	SNDMIX_GETSTEREOVOL16LINEAR
 	SNDMIX_STORESTEREOVOL
 END_MIX_INTERFACE()
 
-
-// Stereo Ramps
-BEGIN_RAMP_STEREO(Stereo8BitRampMix)
+// Volume Ramps
+BEGIN_RAMPMIX_INTERFACE(Stereo8BitRampMix)
 	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8NOIDO
-	SNDMIX_VOLUMERAMPSTEREO
-END_RAMP_STEREO()
+	SNDMIX_GETSTEREOVOL8NOIDO
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_INTERFACE()
 
-BEGIN_RAMP_STEREO(Stereo16BitRampMix)
+BEGIN_RAMPMIX_INTERFACE(Stereo16BitRampMix)
 	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16NOIDO
-	SNDMIX_VOLUMERAMPSTEREO
-END_RAMP_STEREO()
+	SNDMIX_GETSTEREOVOL16NOIDO
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_INTERFACE()
 
-BEGIN_RAMP_STEREO(Stereo8BitLinearRampMix)
+BEGIN_RAMPMIX_INTERFACE(Stereo8BitLinearRampMix)
 	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8LINEAR
-	SNDMIX_VOLUMERAMPSTEREO
-END_RAMP_STEREO()
+	SNDMIX_GETSTEREOVOL8LINEAR
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_INTERFACE()
 
-BEGIN_RAMP_STEREO(Stereo16BitLinearRampMix)
+BEGIN_RAMPMIX_INTERFACE(Stereo16BitLinearRampMix)
 	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16LINEAR
-	SNDMIX_VOLUMERAMPSTEREO
-END_RAMP_STEREO()
+	SNDMIX_GETSTEREOVOL16LINEAR
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_INTERFACE()
 
-
-const LPMIXINTERFACE gpStereoMix[] =
-{
-	Stereo8BitMix,
-	Stereo16BitMix,
-	Stereo8BitLinearMix,
-	Stereo16BitLinearMix,
-	Stereo8BitRampMix,
-	Stereo16BitRampMix,
-	Stereo8BitLinearRampMix,
-	Stereo16BitLinearRampMix,
-};
-
-
-//////////////////////////////////////////////////////
-// Fast Stereo Mix for mono channels (1 less imul)
-
-BEGIN_MIX_INTERFACE(FastStereo8BitMix)
-	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8NOIDO
-	SNDMIX_STOREFASTSTEREOVOL
-END_MIX_INTERFACE()
-
-BEGIN_MIX_INTERFACE(FastStereo16BitMix)
-	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16NOIDO
-	SNDMIX_STOREFASTSTEREOVOL
-END_MIX_INTERFACE()
-
-BEGIN_MIX_INTERFACE(FastStereo8BitLinearMix)
-	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8LINEAR
-	SNDMIX_STOREFASTSTEREOVOL
-END_MIX_INTERFACE()
-
-BEGIN_MIX_INTERFACE(FastStereo16BitLinearMix)
-	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16LINEAR
-	SNDMIX_STOREFASTSTEREOVOL
-END_MIX_INTERFACE()
-
-
-const LPMIXINTERFACE gpFastStereoMix[] =
-{
-	FastStereo8BitMix,
-	FastStereo16BitMix,
-	FastStereo8BitLinearMix,
-	FastStereo16BitLinearMix
-};
 
 //////////////////////////////////////////////////////
 // Resonant Filter Mix
 
 #ifndef NO_FILTER
 
-// Stereo Filter Mix
-BEGIN_MIX_FLT_INTERFACE(FilterStereo8BitMix)
-	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8NOIDO
-	SNDMIX_PROCESSFILTER
-	SNDMIX_STORESTEREOVOL
-END_MIX_FLT_INTERFACE()
-
-BEGIN_MIX_FLT_INTERFACE(FilterStereo16BitMix)
-	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16NOIDO
-	SNDMIX_PROCESSFILTER
-	SNDMIX_STORESTEREOVOL
-END_MIX_FLT_INTERFACE()
-
-BEGIN_RAMPMIX_FLT_STEREO(FilterStereo8BitRampMix)
-	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8NOIDO
-	SNDMIX_PROCESSFILTER
-	SNDMIX_VOLUMERAMPSTEREO
-END_RAMPMIX_FLT_STEREO()
-
-BEGIN_RAMPMIX_FLT_STEREO(FilterStereo16BitRampMix)
-	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16NOIDO
-	SNDMIX_PROCESSFILTER
-	SNDMIX_VOLUMERAMPSTEREO
-END_RAMPMIX_FLT_STEREO()
-
-
-const LPMIXINTERFACE gpFilterStereoMix[] =
-{
-	FilterStereo8BitMix,
-	FilterStereo16BitMix,
-	FilterStereo8BitRampMix,
-	FilterStereo16BitRampMix,
-};
-
 // Mono Filter Mix
 BEGIN_MIX_FLT_INTERFACE(FilterMono8BitMix)
 	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8NOIDO
+	SNDMIX_GETMONOVOL8NOIDO
 	SNDMIX_PROCESSFILTER
 	SNDMIX_STOREMONOVOL
 END_MIX_FLT_INTERFACE()
 
 BEGIN_MIX_FLT_INTERFACE(FilterMono16BitMix)
 	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16NOIDO
+	SNDMIX_GETMONOVOL16NOIDO
 	SNDMIX_PROCESSFILTER
 	SNDMIX_STOREMONOVOL
 END_MIX_FLT_INTERFACE()
 
-BEGIN_RAMPMIX_FLT_MONO(FilterMono8BitRampMix)
+BEGIN_MIX_FLT_INTERFACE(FilterMono8BitLinearMix)
 	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8NOIDO
+	SNDMIX_GETMONOVOL8LINEAR
 	SNDMIX_PROCESSFILTER
-	SNDMIX_VOLUMERAMPMONO
-END_RAMPMIX_FLT_MONO()
+	SNDMIX_STOREMONOVOL
+END_MIX_FLT_INTERFACE()
 
-BEGIN_RAMPMIX_FLT_MONO(FilterMono16BitRampMix)
+BEGIN_MIX_FLT_INTERFACE(FilterMono16BitLinearMix)
 	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16NOIDO
+	SNDMIX_GETMONOVOL16LINEAR
 	SNDMIX_PROCESSFILTER
-	SNDMIX_VOLUMERAMPMONO
-END_RAMPMIX_FLT_MONO()
+	SNDMIX_STOREMONOVOL
+END_MIX_FLT_INTERFACE()
+
+// Filter + Ramp
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono8BitRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8NOIDO
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
+
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono16BitRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16NOIDO
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
+
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono8BitLinearRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETMONOVOL8LINEAR
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
+
+BEGIN_RAMPMIX_FLT_INTERFACE(FilterMono16BitLinearRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETMONOVOL16LINEAR
+	SNDMIX_PROCESSFILTER
+	SNDMIX_RAMPMONOVOL
+END_RAMPMIX_FLT_INTERFACE()
 
 
-const LPMIXINTERFACE gpFilterMonoMix[] =
+// Stereo Filter Mix
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo8BitMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8NOIDO
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo16BitMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16NOIDO
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo8BitLinearMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8LINEAR
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+BEGIN_MIX_STFLT_INTERFACE(FilterStereo16BitLinearMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16LINEAR
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_STORESTEREOVOL
+END_MIX_STFLT_INTERFACE()
+
+// Stereo Filter + Ramp
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo8BitRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8NOIDO
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo16BitRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16NOIDO
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo8BitLinearRampMix)
+	SNDMIX_BEGINSAMPLELOOP8
+	SNDMIX_GETSTEREOVOL8LINEAR
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+BEGIN_RAMPMIX_STFLT_INTERFACE(FilterStereo16BitLinearRampMix)
+	SNDMIX_BEGINSAMPLELOOP16
+	SNDMIX_GETSTEREOVOL16LINEAR
+	SNDMIX_PROCESSSTEREOFILTER
+	SNDMIX_RAMPSTEREOVOL
+END_RAMPMIX_STFLT_INTERFACE()
+
+#else
+// Mono
+#define FilterMono8BitMix				Mono8BitMix
+#define FilterMono16BitMix				Mono16BitMix
+#define FilterMono8BitLinearMix			Mono8BitLinearMix
+#define FilterMono16BitLinearMix		Mono16BitLinearMix
+#define FilterMono8BitRampMix			Mono8BitRampMix
+#define FilterMono16BitRampMix			Mono16BitRampMix
+#define FilterMono8BitLinearRampMix		Mono8BitLinearRampMix
+#define FilterMono16BitLinearRampMix	Mono16BitLinearRampMix
+// Stereo
+#define FilterStereo8BitMix				Stereo8BitMix
+#define FilterStereo16BitMix			Stereo16BitMix
+#define FilterStereo8BitLinearMix		Stereo8BitLinearMix
+#define FilterStereo16BitLinearMix		Stereo16BitLinearMix
+#define FilterStereo8BitRampMix			Stereo8BitRampMix
+#define FilterStereo16BitRampMix		Stereo16BitRampMix
+#define FilterStereo8BitLinearRampMix	Stereo8BitLinearRampMix
+#define FilterStereo16BitLinearRampMix	Stereo16BitLinearRampMix
+#endif
+
+/////////////////////////////////////////////////////////////////////////////////////
+//
+// Mix function tables
+//
+//
+// Index is as follow:
+//	[b1-b0]	format (8-bit-mono, 16-bit-mono, 8-bit-stereo, 16-bit-stereo)
+//	[b2]	ramp
+//	[b3]	filter
+//	[b5-b4]	src type
+//
+
+#define MIXNDX_16BIT	0x01
+#define MIXNDX_STEREO	0x02
+#define MIXNDX_RAMP		0x04
+#define MIXNDX_FILTER	0x08
+#define MIXNDX_LINEARSRC	0x10
+
+
+const LPMIXINTERFACE gpMixFunctionTable[2*16] =
 {
-	FilterMono8BitMix,
-	FilterMono16BitMix,
-	FilterMono8BitRampMix,
-	FilterMono16BitRampMix,
+	// No SRC
+	Mono8BitMix,				Mono16BitMix,				Stereo8BitMix,			Stereo16BitMix,
+	Mono8BitRampMix,			Mono16BitRampMix,			Stereo8BitRampMix,		Stereo16BitRampMix,
+	// No SRC, Filter
+	FilterMono8BitMix,			FilterMono16BitMix,			FilterStereo8BitMix,	FilterStereo16BitMix,
+	FilterMono8BitRampMix,		FilterMono16BitRampMix,		FilterStereo8BitRampMix,FilterStereo16BitRampMix,
+	// Linear SRC
+	Mono8BitLinearMix,			Mono16BitLinearMix,			Stereo8BitLinearMix,	Stereo16BitLinearMix,
+	Mono8BitLinearRampMix,		Mono16BitLinearRampMix,		Stereo8BitLinearRampMix,Stereo16BitLinearRampMix,
+	// Linear SRC, Filter
+	FilterMono8BitLinearMix,	FilterMono16BitLinearMix,	FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
+	FilterMono8BitLinearRampMix,FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
 };
 
-#endif // NO_FILTER
-
-/////////////////////////////////////////////////////
-// Mono Mix functions
-
-BEGIN_MIX_INTERFACE(Mono8BitMix)
-	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8NOIDO
-	SNDMIX_STOREMONOVOL
-END_MIX_INTERFACE()
-
-BEGIN_MIX_INTERFACE(Mono16BitMix)
-	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16NOIDO
-	SNDMIX_STOREMONOVOL
-END_MIX_INTERFACE()
-
-BEGIN_MIX_INTERFACE(Mono8BitLinearMix)
-	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8LINEAR
-	SNDMIX_STOREMONOVOL
-END_MIX_INTERFACE()
-
-BEGIN_MIX_INTERFACE(Mono16BitLinearMix)
-	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16LINEAR
-	SNDMIX_STOREMONOVOL
-END_MIX_INTERFACE()
-
-
-// Mono Ramps
-BEGIN_RAMP_MONO(Mono8BitRampMix)
-	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8NOIDO
-	SNDMIX_VOLUMERAMPMONO
-END_RAMP_MONO()
-
-BEGIN_RAMP_MONO(Mono16BitRampMix)
-	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16NOIDO
-	SNDMIX_VOLUMERAMPMONO
-END_RAMP_MONO()
-
-BEGIN_RAMP_MONO(Mono8BitLinearRampMix)
-	SNDMIX_BEGINSAMPLELOOP8
-	SNDMIX_GETVOL8LINEAR
-	SNDMIX_VOLUMERAMPMONO
-END_RAMP_MONO()
-
-BEGIN_RAMP_MONO(Mono16BitLinearRampMix)
-	SNDMIX_BEGINSAMPLELOOP16
-	SNDMIX_GETVOL16LINEAR
-	SNDMIX_VOLUMERAMPMONO
-END_RAMP_MONO()
-
-
-const LPMIXINTERFACE gpMonoMix[] =
+const LPMIXINTERFACE gpFastMixFunctionTable[2*16] =
 {
-	Mono8BitMix,
-	Mono16BitMix,
-	Mono8BitLinearMix,
-	Mono16BitLinearMix,
-	Mono8BitRampMix,
-	Mono16BitRampMix,
-	Mono8BitLinearRampMix,
-	Mono16BitLinearRampMix,
+	// No SRC
+	FastMono8BitMix,			FastMono16BitMix,			Stereo8BitMix,			Stereo16BitMix,
+	FastMono8BitRampMix,		FastMono16BitRampMix,		Stereo8BitRampMix,		Stereo16BitRampMix,
+	// No SRC, Filter
+	FilterMono8BitMix,			FilterMono16BitMix,			FilterStereo8BitMix,	FilterStereo16BitMix,
+	FilterMono8BitRampMix,		FilterMono16BitRampMix,		FilterStereo8BitRampMix,FilterStereo16BitRampMix,
+	// Linear SRC
+	FastMono8BitLinearMix,		FastMono16BitLinearMix,		Stereo8BitLinearMix,	Stereo16BitLinearMix,
+	FastMono8BitLinearRampMix,	FastMono16BitLinearRampMix,	Stereo8BitLinearRampMix,Stereo16BitLinearRampMix,
+	// Linear SRC, Filter
+	FilterMono8BitLinearMix,	FilterMono16BitLinearMix,	FilterStereo8BitLinearMix,	FilterStereo16BitLinearMix,
+	FilterMono8BitLinearRampMix,FilterMono16BitLinearRampMix,FilterStereo8BitLinearRampMix,FilterStereo16BitLinearRampMix,
 };
-
 
 
 /////////////////////////////////////////////////////////////////////////
 
-static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples, DWORD nType)
-//----------------------------------------------------------------------------------
+static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples)
+//---------------------------------------------------------------------
 {
 	LONG nLoopStart = (pChn->dwFlags & CHN_LOOP) ? pChn->nLoopStart : 0;
 	LONG nInc = pChn->nInc;
@@ -516,8 +714,7 @@ static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples, DWORD nT
 			LONG nDeltaLo = 0x10000 - (pChn->nPosLo & 0xffff);
 			pChn->nPos = pChn->nLength - nDeltaHi - (nDeltaLo>>16);
 			pChn->nPosLo = nDeltaLo & 0xffff;
-			if ((pChn->nPos <= pChn->nLoopStart) || (pChn->nPos >= pChn->nLength))
-				pChn->nPos = pChn->nLength-1;
+			if ((pChn->nPos <= pChn->nLoopStart) || (pChn->nPos >= pChn->nLength)) pChn->nPos = pChn->nLength-1;
 		} else
 		{
 			if (nInc < 0) // This is a bug
@@ -569,121 +766,49 @@ static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples, DWORD nT
 	return nSmpCount;
 }
 
-/* old version
-static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples, DWORD nType)
-{
-	LONG nLoopStart = (pChn->dwFlags & CHN_LOOP) ? pChn->nLoopStart : 0;
-	LONG nInc = pChn->nInc;
-
-	if ((nSamples <= 0) || (!nInc) || (!pChn->nLength)) return 0;
-	// Under zero ?
-	if ((LONG)pChn->nPos < nLoopStart)
-	{
-		if (nInc < 0)
-		{
-			// Invert loop for bidi loops
-			nInc = -nInc;
-			pChn->nInc = nInc;
-			pChn->dwFlags &= ~(CHN_PINGPONGFLAG); // go forward
-			if (!(pChn->dwFlags & CHN_LOOP)) return 0;
-			if (nType & MOD_TYPE_XM)
-			{
-				pChn->nPos += pChn->nInc >> 16;
-				if ((pChn->nPos < pChn->nLoopStart) || (pChn->nPos >= pChn->nLength)) pChn->nPos = pChn->nLoopStart;
-			} else pChn->nPos = nLoopStart;
-			pChn->nPosLo = 0;
-			if (pChn->nPos >= pChn->nLength) return 0; // shouldn't happen
-		} else
-		{
-			// We probably didn't hit the loop end yet (first loop), so we do nothing
-			if ((LONG)pChn->nPos < 0) pChn->nPos = 0;
-		}
-	} else
-	// Past the end
-	if (pChn->nPos >= pChn->nLength)
-	{
-		if (!(pChn->dwFlags & CHN_LOOP)) return 0; // not looping -> stop this channel
-		if (pChn->dwFlags & CHN_PINGPONGLOOP)
-		{
-			// Invert loop
-			if (nInc > 0)
-			{
-				nInc = -nInc;
-				pChn->nInc = nInc;
-			}
-			pChn->dwFlags |= CHN_PINGPONGFLAG;
-			// adjust loop position
-			if (nType & MOD_TYPE_XM)
-			{
-				pChn->nPos += pChn->nInc >> 16;
-				if ((pChn->nPos < pChn->nLoopStart) || (pChn->nPos >= pChn->nLength)) pChn->nPos = pChn->nLength-1;
-			} else pChn->nPos = pChn->nLength - 1;
-			pChn->nPosLo = 0xFFFF;
-		} else
-		{
-			if (nInc < 0) // This is a bug
-			{
-				nInc = -nInc;
-				pChn->nInc = nInc;
-			}
-			// Restart at loop start
-			pChn->nPos += nLoopStart - pChn->nLength;
-			if ((LONG)pChn->nPos < nLoopStart) pChn->nPos = pChn->nLoopStart;
-		}
-	}
-	LONG nPos = pChn->nPos;
-	// too big increment, and/or too small loop length
-	if (nPos < nLoopStart)
-	{
-		if ((nPos < 0) || (nInc < 0)) return 0;
-	}
-	if (nPos >= (LONG)pChn->nLength) return 0;
-	LONG nPosLo = pChn->nPosLo, nSmpCount = nSamples;
-	if (nInc < 0)
-	{
-		LONG nInv = -nInc;
-		LONG nDelta = (nPosLo >> 2) + (nInv >> 2) * (nSamples - 1);
-		LONG nPosDest = nPos - (nDelta >> 14);
-		if (nPosDest < nLoopStart)
-		{
-			nSmpCount = ((((nPos - nLoopStart) << 16) + nPosLo) / nInv) + 1;
-		}
-	} else
-	{
-		LONG nDelta = (nPosLo >> 2) + (nInc >> 2) * (nSamples - 1);
-		LONG nPosDest = nPos + (nDelta >> 14);
-		if (nPosDest >= (LONG)pChn->nLength)
-		{
-			nSmpCount = (((((LONG)pChn->nLength - nPos) << 16) - nPosLo - 1) / nInc) + 1;
-		}
-	}
-	if (nSmpCount <= 1) return 1;
-	if (nSmpCount > nSamples) return nSamples;
-	return nSmpCount;
-}
-*/
-
-#define CHNRAMPNDX	0x04
 
 UINT CSoundFile::CreateStereoMix(int count)
 //-----------------------------------------
 {
-	const LPMIXINTERFACE *pStereoMixFunc;
+	LPLONG pOfsL, pOfsR;
 	DWORD nchused, nchmixed;
 	
 	if (!count) return 0;
-	pStereoMixFunc = gpStereoMix;
+#ifndef FASTSOUNDLIB
+	if (gnChannels > 2) X86_InitMixBuffer(MixRearBuffer, count*2);
+#endif
 	nchused = nchmixed = 0;
 	for (UINT nChn=0; nChn<m_nMixChannels; nChn++)
 	{
-		MODCHANNEL *pChannel = ChnMix[nChn];
+		const LPMIXINTERFACE *pMixFuncTable;
+		MODCHANNEL * const pChannel = &Chn[ChnMix[nChn]];
+		UINT nFlags, nMasterCh;
 		LONG nSmpCount;
 		int nsamples;
 		int *pbuffer;
 
 		if (!pChannel->pCurrentSample) continue;
-		UINT nFlags = (pChannel->dwFlags & CHN_16BIT) ? 1 : 0;
-		if (!(pChannel->dwFlags & CHN_NOIDO)) nFlags |= 0x02;
+		nMasterCh = (ChnMix[nChn] < m_nChannels) ? ChnMix[nChn]+1 : pChannel->nMasterChn;
+		pOfsR = &gnDryROfsVol;
+		pOfsL = &gnDryLOfsVol;
+		nFlags = 0;
+		if (pChannel->dwFlags & CHN_16BIT) nFlags |= MIXNDX_16BIT;
+		if (pChannel->dwFlags & CHN_STEREO) nFlags |= MIXNDX_STEREO;
+	#ifndef NO_FILTER
+		if (pChannel->dwFlags & CHN_FILTER) nFlags |= MIXNDX_FILTER;
+	#endif
+		if (!(pChannel->dwFlags & CHN_NOIDO))
+		{
+			nFlags += MIXNDX_LINEARSRC;
+		}
+		if ((nFlags < 0x20) && (pChannel->nLeftVol == pChannel->nRightVol)
+		 && ((!pChannel->nRampLength) || (pChannel->nLeftRamp == pChannel->nRightRamp)))
+		{
+			pMixFuncTable = gpFastMixFunctionTable;
+		} else
+		{
+			pMixFuncTable = gpMixFunctionTable;
+		}
 		nsamples = count;
 #ifndef NO_REVERB
 		pbuffer = (gdwSoundSetup & SNDMIX_REVERB) ? MixReverbBuffer : MixSoundBuffer;
@@ -705,38 +830,21 @@ UINT CSoundFile::CreateStereoMix(int count)
 		{
 			if ((LONG)nrampsamples > pChannel->nRampLength) nrampsamples = pChannel->nRampLength;
 		}
-		if ((nSmpCount = GetSampleCount(pChannel, nrampsamples, m_nType)) <= 0)
+		if ((nSmpCount = GetSampleCount(pChannel, nrampsamples)) <= 0)
 		{
 			// Stopping the channel
-			LONG rofsvol = pChannel->nROfs & OFSVOLDECMASK;
-			LONG lofsvol = pChannel->nLOfs & OFSVOLDECMASK;
-			int rvcd = (rofsvol < 0) ? OFSVOLDECSPEED : -OFSVOLDECSPEED;
-			int lvcd = (lofsvol < 0) ? OFSVOLDECSPEED : -OFSVOLDECSPEED;
-			while (nsamples-- > 0)
-			{
-				if (rofsvol)
-				{
-					rofsvol += rvcd;
-					if (lofsvol) lofsvol += lvcd;
-				} else
-				{
-					if (!lofsvol) break;
-					lofsvol += lvcd;
-				}
-				pbuffer[0] += rofsvol;
-				pbuffer[1] += lofsvol;
-				pbuffer += 2;
-			}
 			pChannel->pCurrentSample = NULL;
 			pChannel->nLength = 0;
 			pChannel->nPos = 0;
 			pChannel->nPosLo = 0;
 			pChannel->nRampLength = 0;
+			X86_EndChannelOfs(pChannel, pbuffer, nsamples);
+			*pOfsR += pChannel->nROfs;
+			*pOfsL += pChannel->nLOfs;
 			pChannel->nROfs = pChannel->nLOfs = 0;
 			pChannel->dwFlags &= ~CHN_PINGPONGFLAG;
 			continue;
 		}
-
 		// Should we mix this channel ?
 		UINT naddmix;
 		if (((nchmixed >= m_nMaxMixChannels) && (!(gdwSoundSetup & SNDMIX_DIRECTTODISK)))
@@ -746,40 +854,20 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pChannel->nPosLo = delta & 0xFFFF;
 			pChannel->nPos += (delta >> 16);
 			pChannel->nROfs = pChannel->nLOfs = 0;
-			pbuffer += (nSmpCount << 1);
+			pbuffer += nSmpCount*2;
 			naddmix = 0;
 		} else
 		// Do mixing
 		{
 			// Choose function for mixing
 			LPMIXINTERFACE pMixFunc;
-#ifndef NO_FILTER
-			if (pChannel->dwFlags & CHN_FILTER)
-			{
-				UINT nFltFlag = nFlags & 1;
-				if (pChannel->nRampLength) nFltFlag |= 2;
-				pMixFunc = gpFilterStereoMix[nFltFlag];
-			} else
-#endif // NO_FILTER
-			{
-				if (pChannel->nRampLength)
-				{
-					pMixFunc = gpStereoMix[nFlags|CHNRAMPNDX];
-				} else
-				{
-					pMixFunc = pStereoMixFunc[nFlags];
-					// Fast for non-MMX
-					if ((nFlags < 4) && (pChannel->nLeftVol == pChannel->nRightVol) && (pStereoMixFunc == gpStereoMix))
-					{
-						pMixFunc = gpFastStereoMix[nFlags];
-					}
-				}
-			}
-
-			int *pbufmax = pbuffer + (nSmpCount << 1);
-			LONG vol = pMixFunc(pChannel, pbuffer, pbufmax);
-			pChannel->nROfs = vol * pChannel->nRightVol;
-			pChannel->nLOfs = vol * pChannel->nLeftVol;
+			pMixFunc = (pChannel->nRampLength) ? pMixFuncTable[nFlags|MIXNDX_RAMP] : pMixFuncTable[nFlags];
+			int *pbufmax = pbuffer + (nSmpCount*2);
+			pChannel->nROfs = - *(pbufmax-2);
+			pChannel->nLOfs = - *(pbufmax-1);
+			pMixFunc(pChannel, pbuffer, pbufmax);
+			pChannel->nROfs += *(pbufmax-2);
+			pChannel->nLOfs += *(pbufmax-1);
 			pbuffer = pbufmax;
 			naddmix = 1;
 		}
@@ -807,156 +895,15 @@ UINT CSoundFile::CreateStereoMix(int count)
 }
 
 
-UINT CSoundFile::CreateMonoMix(int count)
-//---------------------------------------
-{
-	DWORD nchused, nchmixed;
-
-	if (!count) return 0;
-	nchused = nchmixed = 0;
-	for (UINT nChn=0; nChn<m_nMixChannels; nChn++)
-	{
-		MODCHANNEL *pChannel = ChnMix[nChn];
-		LONG nSmpCount;
-		int nsamples;
-		int *pbuffer;
-
-		if (!pChannel->pCurrentSample) continue;
-		UINT nFlags = (pChannel->dwFlags & CHN_16BIT) ? 1 : 0;
-		if (!(pChannel->dwFlags & CHN_NOIDO)) nFlags |= 0x02;
-		nsamples = count;
-#ifndef NO_REVERB
-		pbuffer = (gdwSoundSetup & SNDMIX_REVERB) ? MixReverbBuffer : MixSoundBuffer;
-		if (pChannel->dwFlags & CHN_NOREVERB) pbuffer = MixSoundBuffer;
-		if (pChannel->dwFlags & CHN_REVERB) pbuffer = MixReverbBuffer;
-		if (pbuffer == MixReverbBuffer)
-		{
-			if (!gnReverbSend) memset(MixReverbBuffer, 0, count * 4);
-			gnReverbSend += count;
-		}
-#else
-		pbuffer = MixSoundBuffer;
-#endif
-		nchused++;
-	SampleLooping:
-		UINT nrampsamples = nsamples;
-		if (pChannel->nRampLength > 0)
-		{
-			if ((LONG)nrampsamples > pChannel->nRampLength) nrampsamples = pChannel->nRampLength;
-		}
-		if ((nSmpCount = GetSampleCount(pChannel, nrampsamples, m_nType)) <= 0)
-		{
-			LONG ofsvol = pChannel->nROfs & OFSVOLDECMASK;
-			int vcd = (ofsvol < 0) ? OFSVOLDECSPEED : -OFSVOLDECSPEED;
-			while ((nsamples-- > 0) && (ofsvol))
-			{
-				ofsvol += vcd;
-				*pbuffer++ += ofsvol;
-			}
-			gnROfsVol += ofsvol;
-			gnLOfsVol += ofsvol;
-			pChannel->pCurrentSample = NULL;
-			pChannel->nLength = 0;
-			pChannel->nPos = 0;
-			pChannel->nPosLo = 0;
-			pChannel->nRampLength = 0;
-			pChannel->nROfs = pChannel->nLOfs = 0;
-			pChannel->dwFlags &= ~CHN_PINGPONGFLAG;
-			continue;
-		}
-		// Should we mix this channel ?
-		UINT naddmix;
-		if (((nchmixed >= m_nMaxMixChannels) && (!(gdwSoundSetup & SNDMIX_DIRECTTODISK)))
-		 || ((!pChannel->nRampLength) && (!(pChannel->nLeftVol|pChannel->nRightVol))))
-		{
-			LONG delta = (pChannel->nInc * (LONG)nSmpCount) + (LONG)pChannel->nPosLo;
-			pChannel->nPosLo = delta & 0xFFFF;
-			pChannel->nPos += (delta >> 16);
-			pChannel->nROfs = pChannel->nLOfs = 0;
-			pbuffer += nSmpCount;
-			naddmix = 0;
-		} else
-		// Mix this channel
-		{
-			LPMIXINTERFACE pMixFunc;
-
-#ifndef NO_FILTER
-			if (pChannel->dwFlags & CHN_FILTER)
-			{
-				UINT nFltFlag = nFlags & 1;
-				pMixFunc = (pChannel->nRampLength) ? gpFilterMonoMix[nFltFlag|2] : gpFilterMonoMix[nFltFlag];
-			} else
-#endif // NO_FILTER
-			{
-				pMixFunc = (pChannel->nRampLength) ? gpMonoMix[nFlags|CHNRAMPNDX] : gpMonoMix[nFlags];
-			}
-
-			int *pbufmax = pbuffer + nSmpCount;
-			LONG vol = pMixFunc(pChannel, pbuffer, pbufmax);
-			pChannel->nLOfs = pChannel->nROfs = vol * pChannel->nRightVol;
-			pbuffer = pbufmax;
-			naddmix = 1;
-		}
-
-		nsamples -= nSmpCount;
-		if (pChannel->nRampLength)
-		{
-			pChannel->nRampLength -= nSmpCount;
-			if (pChannel->nRampLength <= 0)
-			{
-				pChannel->nRampLength = 0;
-				pChannel->nRightVol = pChannel->nNewRightVol;
-				pChannel->nLeftVol = pChannel->nNewLeftVol;
-				pChannel->nRightRamp = pChannel->nLeftRamp = 0;
-				if ((pChannel->dwFlags & CHN_NOTEFADE) && (!(pChannel->nFadeOutVol)))
-				{
-					pChannel->nLength = 0;
-					pChannel->pCurrentSample = NULL;
-				}
-			}
-		}
-		if (nsamples > 0) goto SampleLooping;
-		nchmixed += naddmix;
-	}
-	return nchused;
-}
-
-
-//#pragma warning (disable:4100)
-
-// Clip and convert to 8/16 bit
-
-
-//---GCCFIX: Asm replaced with C functions
-// The C versions were written by Rani Assaf <rani@magic.metawire.com>, I believe
-//TODO: Convert asm to GCC-style!
 #ifdef WIN32
-DWORD MPPASMCALL X86_Convert32To8(LPVOID lp8, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
-#else
-__declspec(naked) DWORD MPPASMCALL X86_Convert32To8(LPVOID lp8, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+#pragma warning (disable:4100)
 #endif
+
+// Clip and convert to 8 bit
+#ifdef WIN32
+__declspec(naked) DWORD MPPASMCALL X86_Convert32To8(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
 //----------------------------------------------------------------------------------------------------------------------------
 {
-	int vumin = *lpMin, vumax = *lpMax;
-	unsigned char *p = (unsigned char *)lp8;
-	for (UINT i=0; i<lSampleCount; i++)
-	{
-		int n = pBuffer[i];
-		if (n < MIXING_CLIPMIN)	
-			n = MIXING_CLIPMIN;
-		else if (n > MIXING_CLIPMAX)
-			n = MIXING_CLIPMAX;
-		if (n < vumin)
-			vumin = n;
-		else if (n > vumax)
-			vumax = n;
-		p[i] = (n >> (24-MIXING_ATTENUATION)) ^ 0x80;	// 8-bit unsigned
-	}
-	*lpMin = vumin;
-	*lpMax = vumax;
-	return lSampleCount;
-
-/*
 	_asm {
 	push ebx
 	push esi
@@ -1015,24 +962,18 @@ cliphigh:
 	mov eax, MIXING_CLIPMAX
 	jmp cliprecover
 	}
-*/
 }
-
-
-// Perform clipping
-#ifdef WIN32
-DWORD MPPASMCALL X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
-#else
-__declspec(naked) DWORD MPPASMCALL X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
-#endif
-//-----------------------------------------------------------------------------------------------------------------------------
+#else //WIN32
+//---GCCFIX: Asm replaced with C function
+// The C version was written by Rani Assaf <rani@magic.metawire.com>, I believe
+__declspec(naked) DWORD MPPASMCALL X86_Convert32To8(LPVOID lp8, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
 {
 	int vumin = *lpMin, vumax = *lpMax;
-	signed short *p = (signed short *)lp16;
+	unsigned char *p = (unsigned char *)lp8;
 	for (UINT i=0; i<lSampleCount; i++)
 	{
 		int n = pBuffer[i];
-		if (n < MIXING_CLIPMIN)
+		if (n < MIXING_CLIPMIN)	
 			n = MIXING_CLIPMIN;
 		else if (n > MIXING_CLIPMAX)
 			n = MIXING_CLIPMAX;
@@ -1040,13 +981,20 @@ __declspec(naked) DWORD MPPASMCALL X86_Convert32To16(LPVOID lp16, int *pBuffer, 
 			vumin = n;
 		else if (n > vumax)
 			vumax = n;
-		p[i] = n >> (16-MIXING_ATTENUATION);	// 16-bit signed
+		p[i] = (n >> (24-MIXING_ATTENUATION)) ^ 0x80;	// 8-bit unsigned
 	}
 	*lpMin = vumin;
 	*lpMax = vumax;
-	return lSampleCount * 2;
+	return lSampleCount;
+}
+#endif //WIN32, else
 
-/*
+
+#ifdef WIN32
+// Clip and convert to 16 bit
+__declspec(naked) DWORD MPPASMCALL X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+//-----------------------------------------------------------------------------------------------------------------------------
+{
 	_asm {
 	push ebx
 	push esi
@@ -1108,151 +1056,473 @@ cliphigh:
 	mov eax, MIXING_CLIPMAX
 	jmp cliprecover
 	}
-*/
 }
+#else //WIN32
+//---GCCFIX: Asm replaced with C function
+// The C version was written by Rani Assaf <rani@magic.metawire.com>, I believe
+__declspec(naked) DWORD MPPASMCALL X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+{
+	int vumin = *lpMin, vumax = *lpMax;
+	signed short *p = (signed short *)lp16;
+	for (UINT i=0; i<lSampleCount; i++)
+	{
+		int n = pBuffer[i];
+		if (n < MIXING_CLIPMIN)
+			n = MIXING_CLIPMIN;
+		else if (n > MIXING_CLIPMAX)
+			n = MIXING_CLIPMAX;
+		if (n < vumin)
+			vumin = n;
+		else if (n > vumax)
+			vumax = n;
+		p[i] = n >> (16-MIXING_ATTENUATION);	// 16-bit signed
+	}
+	*lpMin = vumin;
+	*lpMax = vumax;
+	return lSampleCount * 2;
+}
+#endif //WIN32, else
+
+#ifdef WIN32
+// Clip and convert to 24 bit
+__declspec(naked) DWORD MPPASMCALL X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+//-----------------------------------------------------------------------------------------------------------------------------
+{
+	_asm {
+	push ebx
+	push esi
+	push edi
+	mov ebx, 16[esp]		// ebx = 8-bit buffer
+	mov esi, 20[esp]		// esi = pBuffer
+	mov edi, 24[esp]		// edi = lSampleCount
+	mov eax, 28[esp]
+	mov ecx, dword ptr [eax]	// ecx = clipmin
+	mov eax, 32[esp]
+	push ebp
+	mov edx, dword ptr [eax]	// edx = clipmax
+cliploop:
+	mov eax, dword ptr [esi]
+	mov ebp, eax
+	sar ebp, 31
+	and ebp, (1 << (8-MIXING_ATTENUATION)) - 1
+	add eax, ebp
+	cmp eax, MIXING_CLIPMIN
+	jl cliplow
+	cmp eax, MIXING_CLIPMAX
+	jg cliphigh
+	cmp eax, ecx
+	jl updatemin
+	cmp eax, edx
+	jg updatemax
+cliprecover:
+	add ebx, 3
+	sar eax, 8-MIXING_ATTENUATION
+	add esi, 4
+	mov word ptr [ebx-3], ax
+	shr eax, 16
+	dec edi
+	mov byte ptr [ebx-1], al
+	jnz cliploop
+	pop ebp
+	mov eax, 28[esp]
+	mov dword ptr [eax], ecx
+	mov eax, 32[esp]
+	mov dword ptr [eax], edx
+	mov edx, 24[esp]
+	mov eax, edx
+	pop edi
+	shl eax, 1
+	pop esi
+	add eax, edx
+	pop ebx
+	ret
+updatemin:
+	mov ecx, eax
+	jmp cliprecover
+updatemax:
+	mov edx, eax
+	jmp cliprecover
+cliplow:
+	mov ecx, MIXING_CLIPMIN
+	mov edx, MIXING_CLIPMAX
+	mov eax, MIXING_CLIPMIN
+	jmp cliprecover
+cliphigh:
+	mov ecx, MIXING_CLIPMIN
+	mov edx, MIXING_CLIPMAX
+	mov eax, MIXING_CLIPMAX
+	jmp cliprecover
+	}
+}
+#else //WIN32
+//---GCCFIX: Asm replaced with C function
+// 24-bit audio not supported.
+__declspec(naked) DWORD MPPASMCALL X86_Convert32To24(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+{
+	return 0;
+}
+#endif
+
+#ifdef WIN32
+// Clip and convert to 32 bit
+__declspec(naked) DWORD MPPASMCALL X86_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+//-----------------------------------------------------------------------------------------------------------------------------
+{
+	_asm {
+	push ebx
+	push esi
+	push edi
+	mov ebx, 16[esp]			// ebx = 32-bit buffer
+	mov esi, 20[esp]			// esi = pBuffer
+	mov edi, 24[esp]			// edi = lSampleCount
+	mov eax, 28[esp]
+	mov ecx, dword ptr [eax]	// ecx = clipmin
+	mov eax, 32[esp]
+	mov edx, dword ptr [eax]	// edx = clipmax
+cliploop:
+	mov eax, dword ptr [esi]
+	add ebx, 4
+	add esi, 4
+	cmp eax, MIXING_CLIPMIN
+	jl cliplow
+	cmp eax, MIXING_CLIPMAX
+	jg cliphigh
+	cmp eax, ecx
+	jl updatemin
+	cmp eax, edx
+	jg updatemax
+cliprecover:
+	shl eax, MIXING_ATTENUATION
+	dec edi
+	mov dword ptr [ebx-4], eax
+	jnz cliploop
+	mov eax, 28[esp]
+	mov dword ptr [eax], ecx
+	mov eax, 32[esp]
+	mov dword ptr [eax], edx
+	mov edx, 24[esp]
+	pop edi
+	mov eax, edx
+	pop esi
+	shl eax, 2
+	pop ebx
+	ret
+updatemin:
+	mov ecx, eax
+	jmp cliprecover
+updatemax:
+	mov edx, eax
+	jmp cliprecover
+cliplow:
+	mov ecx, MIXING_CLIPMIN
+	mov edx, MIXING_CLIPMAX
+	mov eax, MIXING_CLIPMIN
+	jmp cliprecover
+cliphigh:
+	mov ecx, MIXING_CLIPMIN
+	mov edx, MIXING_CLIPMAX
+	mov eax, MIXING_CLIPMAX
+	jmp cliprecover
+	}
+}
+#else
+//---GCCFIX: Asm replaced with C function
+// 32-bit audio not supported
+__declspec(naked) DWORD MPPASMCALL X86_Convert32To32(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+{
+	return 0;
+}
+#endif
+
+
+#ifdef WIN32
+void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples)
+//------------------------------------------------------------
+{
+	_asm {
+	mov ecx, nSamples
+	mov esi, pBuffer
+	xor eax, eax
+	mov edx, ecx
+	shr ecx, 2
+	and edx, 3
+	jz unroll4x
+loop1x:
+	add esi, 4
+	dec edx
+	mov dword ptr [esi-4], eax
+	jnz loop1x
+unroll4x:
+	or ecx, ecx
+	jnz loop4x
+	jmp done
+loop4x:
+	add esi, 16
+	dec ecx
+	mov dword ptr [esi-16], eax
+	mov dword ptr [esi-12], eax
+	mov dword ptr [esi-8], eax
+	mov dword ptr [esi-4], eax
+	jnz loop4x
+done:;
+	}
+}
+#else
+//---GCCFIX: Asm replaced with C function
+// Will fill in later.
+void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples)
+{
+	memset(pBuffer, 0, nSamples * sizeof(int));
+}
+#endif
+
+
+#ifdef WIN32
+__declspec(naked) void MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples)
+//------------------------------------------------------------------------------------------------------
+{
+	_asm {
+	push ebx
+	push ebp
+	push esi
+	push edi
+	mov ecx, 28[esp] // ecx = samplecount
+	mov esi, 20[esp] // esi = front buffer
+	mov edi, 24[esp] // edi = rear buffer
+	lea esi, [esi+ecx*4]	// esi = &front[N]
+	lea edi, [edi+ecx*4]	// edi = &rear[N]
+	lea ebx, [esi+ecx*4]	// ebx = &front[N*2]
+interleaveloop:
+	mov eax, dword ptr [esi-8]
+	mov edx, dword ptr [esi-4]
+	sub ebx, 16
+	mov ebp, dword ptr [edi-8]
+	mov dword ptr [ebx], eax
+	mov dword ptr [ebx+4], edx
+	mov eax, dword ptr [edi-4]
+	sub esi, 8
+	sub edi, 8
+	dec ecx
+	mov dword ptr [ebx+8], ebp
+	mov dword ptr [ebx+12], eax
+	jnz interleaveloop
+	pop edi
+	pop esi
+	pop ebp
+	pop ebx
+	ret
+	}
+}
+#else
+//---GCCFIX: Asm replaced with C function
+// Multichannel not supported.
+__declspec(naked) void MPPASMCALL X86_InterleaveFrontRear(int *pFrontBuf, int *pRearBuf, DWORD nSamples)
+{
+}
+#endif
+
+
+#ifdef WIN32
+VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples)
+//-------------------------------------------------------------
+{
+	_asm {
+	mov ecx, nSamples
+	mov esi, pMixBuf
+	mov edi, esi
+stloop:
+	mov eax, dword ptr [esi]
+	mov edx, dword ptr [esi+4]
+	add edi, 4
+	add esi, 8
+	add eax, edx
+	sar eax, 1
+	dec ecx
+	mov dword ptr [edi-4], eax
+	jnz stloop
+	}
+}
+#else
+//---GCCFIX: Asm replaced with C function
+VOID MPPASMCALL X86_MonoFromStereo(int *pMixBuf, UINT nSamples)
+{
+	UINT j;
+	for(UINT i = 0; i < nSamples; i++)
+	{
+		j = i << 1;
+		pMixBuf[i] = (pMixBuf[j] + pMixBuf[j + 1]) >> 1;
+	}
+}
+#endif
+
+#define OFSDECAYSHIFT	8
+#define OFSDECAYMASK	0xFF
 
 
 #ifdef WIN32
 void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
+//---------------------------------------------------------------------------------------
+{
+	_asm {
+	mov edi, pBuffer
+	mov ecx, nSamples
+	mov eax, lpROfs
+	mov edx, lpLOfs
+	mov eax, [eax]
+	mov edx, [edx]
+	or ecx, ecx
+	jz fill_loop
+	mov ebx, eax
+	or ebx, edx
+	jz fill_loop
+ofsloop:
+	mov ebx, eax
+	mov esi, edx
+	neg ebx
+	neg esi
+	sar ebx, 31
+	sar esi, 31
+	and ebx, OFSDECAYMASK
+	and esi, OFSDECAYMASK
+	add ebx, eax
+	add esi, edx
+	sar ebx, OFSDECAYSHIFT
+	sar esi, OFSDECAYSHIFT
+	sub eax, ebx
+	sub edx, esi
+	mov ebx, eax
+	or ebx, edx
+	jz fill_loop
+	add edi, 8
+	dec ecx
+	mov [edi-8], eax
+	mov [edi-4], edx
+	jnz ofsloop
+fill_loop:
+	mov ebx, ecx
+	and ebx, 3
+	jz fill4x
+fill1x:
+	mov [edi], eax
+	mov [edi+4], edx
+	add edi, 8
+	dec ebx
+	jnz fill1x
+fill4x:
+	shr ecx, 2
+	or ecx, ecx
+	jz done
+fill4xloop:
+	mov [edi], eax
+	mov [edi+4], edx
+	mov [edi+8], eax
+	mov [edi+12], edx
+	add edi, 8*4
+	dec ecx
+	mov [edi-16], eax
+	mov [edi-12], edx
+	mov [edi-8], eax
+	mov [edi-4], edx
+	jnz fill4xloop
+done:
+	mov esi, lpROfs
+	mov edi, lpLOfs
+	mov [esi], eax
+	mov [edi], edx
+	}
+}
 #else
+//---GCCFIX: Asm replaced with C function
+#define OFSDECAYSHIFT    8
+#define OFSDECAYMASK     0xFF
 __declspec(naked) void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
-#endif
 //---------------------------------------------------------------------------------------------------------
 {
-	int ofsr = (*lpROfs) & OFSVOLDECMASK, ofsl = (*lpLOfs) & OFSVOLDECMASK;
-	for (UINT i=0; i<nSamples; i++, pBuffer += 2)
+	int rofs = *lpROfs;
+	int lofs = *lpLOfs;
+	
+	if ((!rofs) && (!lofs))
 	{
-		if (ofsr > OFSVOLDECSPEED)
-			ofsr -= OFSVOLDECSPEED;
-		else if (ofsr < -OFSVOLDECSPEED)
-			ofsr += OFSVOLDECSPEED;
-		if (ofsl > OFSVOLDECSPEED)
-			ofsl -= OFSVOLDECSPEED;
-		else if (ofsl < -OFSVOLDECSPEED)
-			ofsl += OFSVOLDECSPEED;
-		pBuffer[0] = ofsr;
-		pBuffer[1] = ofsl;
+		X86_InitMixBuffer(pBuffer, nSamples*2);
+		return;
 	}
-	*lpROfs = ofsr;
-	*lpLOfs = ofsl;
-
-/*
-	_asm {
-		push ebx
-		push ebp
-		push esi
-		push edi
-		mov esi, 20[esp]
-		mov ebp, 24[esp]
-		mov eax, 28[esp]
-		mov ecx, dword ptr [eax]	// ecx = Right Offset
-		mov ebx, -OFSVOLDECSPEED	// ebx = Right Offset Vol Delta
-		mov eax, 32[esp]
-		and ecx, OFSVOLDECMASK
-		mov edx, dword ptr [eax]
-		mov edi, -OFSVOLDECSPEED	// edi = Left Offset Vol Delta
-		and edx, OFSVOLDECMASK		// edx = Left offset
-		test ecx, ecx
-		jl right_ready
-		neg ebx
-		test ecx, ecx
-		jg right_ready
-		xor ebx, ebx
-	right_ready:
-		test edx, edx
-		jl left_ready
-		neg edi
-		test edx, edx
-		jg left_ready
-		xor edi, edi
-	left_ready:
-	fill_loop:
-		sub ecx, ebx
-		jc right_zero
-	right_recover:
-		sub edx, edi
-		jc left_zero
-	left_recover:
-		add esi, 8
-		dec ebp
-		mov dword ptr [esi-8], ecx
-		mov dword ptr [esi-4], edx
-		jnz fill_loop
-		mov eax, dword ptr 28[esp]
-		mov dword ptr [eax], ecx
-		mov eax, dword ptr 32[esp]
-		pop edi
-		mov dword ptr [eax], edx
-		pop esi
-		pop ebp
-		pop ebx
-		ret
-	right_zero:
-		xor ecx, ecx
-		xor ebx, ebx
-		jmp right_recover
-	left_zero:
-		xor edx, edx
-		xor edi, edi
-		jmp left_recover
+	for (UINT i=0; i<nSamples; i++)
+	{
+		int x_r = (rofs + (((-rofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
+		int x_l = (lofs + (((-lofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
+		rofs -= x_r;
+		lofs -= x_l;
+		pBuffer[i*2] = x_r;
+		pBuffer[i*2+1] = x_l;
 	}
-*/
+	*lpROfs = rofs;
+	*lpLOfs = lofs;
 }
+#endif
 
 #ifdef WIN32
-void MPPASMCALL X86_MonoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs)
-#else
-__declspec(naked) void MPPASMCALL X86_MonoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs)
-#endif
-//----------------------------------------------------------------------------------------
+void MPPASMCALL X86_EndChannelOfs(MODCHANNEL *pChannel, int *pBuffer, UINT nSamples)
+//----------------------------------------------------------------------------------
 {
-	int ofs = (*lpROfs) & OFSVOLDECMASK;
-	for (UINT i=0; i<nSamples; i++, pBuffer++)
-	{
-		if (ofs > OFSVOLDECSPEED)
-			ofs -= OFSVOLDECSPEED;
-		else if (ofs < -OFSVOLDECSPEED)
-			ofs += OFSVOLDECSPEED;
-		*pBuffer = ofs;
-	}
-	*lpROfs = ofs;
-
-/*
 	_asm {
-		push ebp
-		push esi
-		mov esi, 12[esp]
-		mov ebp, 16[esp]
-		mov eax, 20[esp]
-		mov edx, -OFSVOLDECSPEED	// edx = Offset Vol Delta
-		mov ecx, dword ptr [eax]	// ecx = Offset
-		and ecx, OFSVOLDECMASK
-		test ecx, ecx
-		jl fill_loop
-		neg edx
-		test ecx, ecx
-		jg fill_loop
-		xor edx, edx
-	fill_loop:
-		sub ecx, edx
-		jc mono_zero
-	mono_recover:
-		add esi, 4
-		dec ebp
-		mov dword ptr [esi-4], edx
-		jnz fill_loop
-		mov eax, dword ptr 20[esp]
-		pop esi
-		mov dword ptr [eax], ecx
-		pop ebp
-		ret
-	mono_zero:
-		xor ecx, ecx
-		xor edx, edx
-		jmp mono_recover
+	mov esi, pChannel
+	mov edi, pBuffer
+	mov ecx, nSamples
+	mov eax, dword ptr [esi+MODCHANNEL.nROfs]
+	mov edx, dword ptr [esi+MODCHANNEL.nLOfs]
+	or ecx, ecx
+	jz brkloop
+ofsloop:
+	mov ebx, eax
+	mov esi, edx
+	neg ebx
+	neg esi
+	sar ebx, 31
+	sar esi, 31
+	and ebx, OFSDECAYMASK
+	and esi, OFSDECAYMASK
+	add ebx, eax
+	add esi, edx
+	sar ebx, OFSDECAYSHIFT
+	sar esi, OFSDECAYSHIFT
+	sub eax, ebx
+	sub edx, esi
+	mov ebx, eax
+	add dword ptr [edi], eax
+	add dword ptr [edi+4], edx
+	or ebx, edx
+	jz brkloop
+	add edi, 8
+	dec ecx
+	jnz ofsloop
+brkloop:
+	mov esi, pChannel
+	mov dword ptr [esi+MODCHANNEL.nROfs], eax
+	mov dword ptr [esi+MODCHANNEL.nLOfs], edx
 	}
-*/
 }
+#else
+//---GCCFIX: Asm replaced with C function
+// Will fill in later.
+void MPPASMCALL X86_EndChannelOfs(MODCHANNEL *pChannel, int *pBuffer, UINT nSamples)
+{
+	int rofs = pChannel->nROfs;
+	int lofs = pChannel->nLOfs;
+	
+	if ((!rofs) && (!lofs)) return;
+	for (UINT i=0; i<nSamples; i++)
+	{
+		int x_r = (rofs + (((-rofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
+		int x_l = (lofs + (((-lofs)>>31) & OFSDECAYMASK)) >> OFSDECAYSHIFT;
+		rofs -= x_r;
+		lofs -= x_l;
+		pBuffer[i*2] += x_r;
+		pBuffer[i*2+1] += x_l;
+	}
+	pChannel->nROfs = rofs;
+	pChannel->nLOfs = lofs;
+}
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1261,14 +1531,10 @@ __declspec(naked) void MPPASMCALL X86_MonoFill(int *pBuffer, UINT nSamples, LPLO
 #ifndef NO_AGC
 
 // Limiter
-#define MIXING_LIMITMAX		(0x08080000)
+#define MIXING_LIMITMAX		(0x08100000)
 #define MIXING_LIMITMIN		(-MIXING_LIMITMAX)
 
-#ifdef WIN32
-UINT MPPASMCALL X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC)
-#else
 __declspec(naked) UINT MPPASMCALL X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC)
-#endif
 //-------------------------------------------------------------------------------
 {
 	__asm {
@@ -1304,9 +1570,7 @@ agcupdate:
 	}
 }
 
-//---END GCCFIX
-
-//#pragma warning (default:4100)
+#pragma warning (default:4100)
 
 void CSoundFile::ProcessAGC(int count)
 //------------------------------------
@@ -1334,6 +1598,7 @@ void CSoundFile::ProcessAGC(int count)
 }
 
 
+
 void CSoundFile::ResetAGC()
 //-------------------------
 {
@@ -1341,6 +1606,7 @@ void CSoundFile::ResetAGC()
 }
 
 #endif // NO_AGC
+
 
 
 

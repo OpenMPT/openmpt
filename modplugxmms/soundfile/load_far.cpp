@@ -80,6 +80,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	m_nDefaultSpeed = pmh1->speed;
 	m_nDefaultTempo = 80;
 	m_nDefaultGlobalVolume = 256;
+
 	memcpy(m_szNames[0], pmh1->songname, 32);
 	// Channel Setting
 	for (UINT nchpan=0; nchpan<16; nchpan++)
@@ -112,6 +113,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading Patterns	
 	dwMemPos += headerlen - (869 + pmh1->stlen);
 	if (dwMemPos >= dwMemLength) return TRUE;
+
 	WORD *patsiz = (WORD *)pmh2->patsiz;
 	for (UINT ipat=0; ipat<256; ipat++) if (patsiz[ipat])
 	{
@@ -258,6 +260,4 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	return TRUE;
 }
-
-
 

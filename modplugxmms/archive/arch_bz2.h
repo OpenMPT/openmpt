@@ -16,36 +16,21 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __MODPLUGXMMS_MODPROPS_H_INCLUDED__
-#define __MODPLUGXMMS_MODPROPS_H_INCLUDED__
+// BZ2 support added by Colin DeVilbiss <crdevilb@mtu.edu>
 
-#ifndef __MODPLUGXMMS_STDDEFS_H__INCLUDED__
-#include"stddefs.h"
-#endif
+#ifndef __MODPLUG_ARCH_BZIP2_H__INCLUDED__
+#define __MODPLUG_ARCH_BZIP2_H__INCLUDED__
 
-struct ModProperties
+#include "archive.h"
+#include <string>
+
+class arch_Bzip2: public Archive
 {
-	bool    mSurround;
-	bool    mOversamp;
-	bool    mMegabass;
-	bool    mNoiseReduction;
-	bool    mVolumeRamp;
-	bool    mReverb;
-	bool    mFadeout;
-	bool    mFastinfo;
-	bool    mLooping;
-
-	uint8   mChannels;
-	uint8   mBits;
-	uint32  mFrequency;
-
-	uint32  mReverbDepth;
-	uint32  mReverbDelay;
-	uint32  mBassAmount;
-	uint32  mBassRange;
-	uint32  mSurroundDepth;
-	uint32  mSurroundDelay;
-	uint32  mFadeTime;
+public:
+	arch_Bzip2(const string& aFileName);
+	virtual ~arch_Bzip2();
+	
+	static bool ContainsMod(const string& aFileName);
 };
 
-#endif //included
+#endif

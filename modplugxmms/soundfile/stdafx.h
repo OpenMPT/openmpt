@@ -27,6 +27,7 @@
 
 typedef char CHAR;
 typedef unsigned char UCHAR;
+typedef unsigned char* PUCHAR;
 typedef unsigned short USHORT;
 typedef unsigned long ULONG;
 typedef unsigned long UINT;
@@ -43,6 +44,7 @@ typedef unsigned long * LPDWORD;
 typedef unsigned short * LPWORD;
 typedef const char * LPCSTR;
 typedef long long LONGLONG;
+typedef void * PVOID;
 
 
 inline LONG MulDiv (long a, long b, long c)
@@ -50,6 +52,20 @@ inline LONG MulDiv (long a, long b, long c)
   // if (!c) return 0;
   return ((unsigned long long) a * (unsigned long long) b ) / c;
 }
+
+#ifdef __GNUG__
+#define __cdecl
+#define VOID void
+#define MODPLUG_NO_FILESAVE
+#define __declspec(BLAH)
+#define NO_AGC
+#define LPCTSTR LPCSTR
+#define lstrcpyn strncpy
+#define lstrcpy strcpy
+#define lstrcmp strcmp
+#define WAVE_FORMAT_PCM 1
+//#define ENABLE_EQ
+#endif
 
 #define  GHND   0
 
@@ -60,6 +76,8 @@ inline char * GlobalAllocPtr(unsigned int, size_t size)
   if (p != NULL) memset(p, 0, size);
   return p;
 }
+
+inline void ProcessPlugins(int n) {}
 
 #define GlobalFreePtr(p) free((void *)(p))
 

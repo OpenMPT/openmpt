@@ -17,6 +17,7 @@
 
 #pragma pack(1)
 
+
 typedef struct tagMTMSAMPLE
 {
 	CHAR samplename[22];
@@ -163,5 +164,4 @@ BOOL CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 	m_nMaxPeriod = 32767;
 	return TRUE;
 }
-
 

@@ -72,6 +72,12 @@ bool Archive::IsOurFile(const string& aFileName)
 		return true;
 	if (lExt == ".xm")
 		return true;
+	if (lExt == ".j2b")
+		return true;
+	if (lExt == ".mt2")
+		return true;
+	if (lExt == ".psm")
+		return true;
 	
 	return false;
 }

@@ -217,10 +217,9 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 	for (UINT smp=1; smp<=m_nSamples; smp++) if (Ins[smp].nLength)
 	{
 		if (dwMemPos >= dwMemLength) return TRUE;
-		UINT flags = (Ins[smp].uFlags & CHN_16BIT) ? 5 : 0;
+		UINT flags = (Ins[smp].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
 		dwMemPos += ReadSample(&Ins[smp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 	}
 	return TRUE;
 }
-
 

@@ -13,7 +13,9 @@
 ////////////////////////////////////////////////////////
 // FastTracker II XM file support
 
-//#pragma warning(disable:4244)
+#ifdef WIN32
+#pragma warning(disable:4244)
+#endif
 
 #pragma pack(1)
 typedef struct tagXMFILEHEADER
@@ -89,6 +91,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	m_nChannels = 0;
 	if ((!lpStream) || (dwMemLength < 0x200)) return FALSE;
 	if (strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return FALSE;
+
 	memcpy(m_szNames[0], lpStream+17, 20);
 	dwHdrSize = *((DWORD *)(lpStream+60));
 	norders = *((WORD *)(lpStream+64));
@@ -109,6 +112,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	m_nSamples = 0;
 	memcpy(&xmflags, lpStream+74, 2);
 	if (xmflags & 1) m_dwSongFlags |= SONG_LINEARSLIDES;
+	if (xmflags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
 	defspeed = *((WORD *)(lpStream+76));
 	deftempo = *((WORD *)(lpStream+78));
 	if ((deftempo >= 32) && (deftempo < 256)) m_nDefaultTempo = deftempo;
@@ -203,7 +207,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 					if ((p->note) && (p->note < 97)) p->note += 12;
 					if (p->note) channels_used[chn] = 1;
 					if (p->command | p->param) ConvertModCommand(p);
-					if (p->instr >= 0x80) p->instr = 0;
+					if (p->instr == 0xff) p->instr = 0;
 					if (p->instr) InstUsed[p->instr] = TRUE;
 					if ((vol >= 0x10) && (vol <= 0x50))
 					{
@@ -428,14 +432,21 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			 || (dwMemPos + xmsh.shsize > dwMemLength)) return TRUE;
 			memcpy(&xmss, lpStream+dwMemPos, sizeof(xmss));
 			dwMemPos += xmsh.shsize;
-			flags[ins] = (xmss.type & 0x10) ? 4 : 2;
+			flags[ins] = (xmss.type & 0x10) ? RS_PCM16D : RS_PCM8D;
+			if (xmss.type & 0x20) flags[ins] = (xmss.type & 0x10) ? RS_STPCM16D : RS_STPCM8D;
 			samplesize[ins] = xmss.samplen;
 			if (!samplemap[ins]) continue;
 			if (xmss.type & 0x10)
 			{
-				xmss.looplen /= 2;
-				xmss.loopstart /= 2;
-				xmss.samplen /= 2;
+				xmss.looplen >>= 1;
+				xmss.loopstart >>= 1;
+				xmss.samplen >>= 1;
+			}
+			if (xmss.type & 0x20)
+			{
+				xmss.looplen >>= 1;
+				xmss.loopstart >>= 1;
+				xmss.samplen >>= 1;
 			}
 			if (xmss.samplen > MAX_SAMPLE_LENGTH) xmss.samplen = MAX_SAMPLE_LENGTH;
 			if (xmss.loopstart >= xmss.samplen) xmss.type &= ~3;
@@ -459,9 +470,9 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			pins->nVolume = xmss.vol << 2;
 			if (pins->nVolume > 256) pins->nVolume = 256;
 			pins->nGlobalVol = 64;
-			if ((xmss.res == 0xAD) && (!(xmss.type & 0x10)))
+			if ((xmss.res == 0xAD) && (!(xmss.type & 0x30)))
 			{
-				flags[ins] = 3;
+				flags[ins] = RS_ADPCM4;
 				samplesize[ins] = (samplesize[ins]+1)/2 + 16;
 			}
 			pins->nFineTune = xmss.finetune;
@@ -526,6 +537,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_PATTERNS*MAX_PATTERNNAME) && (len >= MAX_PATTERNNAME))
 		{
 			m_lpszPatternNames = new char[len];
+
 			if (m_lpszPatternNames)
 			{
 				m_nPatternNames = len / MAX_PATTERNNAME;
@@ -549,6 +561,11 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			}
 			dwMemPos += len;
 		}
+	}
+	// Read mix plugins information
+	if (dwMemPos + 8 < dwMemLength) 
+	{
+		dwMemPos += LoadMixPlugins(lpStream+dwMemPos, dwMemLength-dwMemPos);
 	}
 	return TRUE;
 }
@@ -594,6 +611,7 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	header.instruments = m_nInstruments;
 	if (!header.instruments) header.instruments = m_nSamples;
 	header.flags = (m_dwSongFlags & SONG_LINEARSLIDES) ? 0x01 : 0x00;
+	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.tempo = m_nDefaultTempo;
 	header.speed = m_nDefaultSpeed;
 	memcpy(header.order, Order, header.norder);
@@ -756,33 +774,38 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 			xmss.looplen = pins->nLoopEnd - pins->nLoopStart;
 			xmss.vol = pins->nVolume / 4;
 			xmss.finetune = (char)pins->nFineTune;
-			xmss.type = (pins->uFlags & CHN_LOOP) ? 1 : 0;
-			if (pins->uFlags & CHN_PINGPONGLOOP) xmss.type |= 2;
-			flags[ins] = 2;
-			if (pins->uFlags & CHN_16BIT)
-			{
+			xmss.type = 0;
+			if (pins->uFlags & CHN_LOOP) xmss.type = (pins->uFlags & CHN_PINGPONGLOOP) ? 2 : 1;
+			flags[ins] = RS_PCM8D;
 #ifndef NO_PACKING
-				if (nPacking)
+			if (nPacking)
+			{
+				if ((!(pins->uFlags & (CHN_16BIT|CHN_STEREO)))
+				 && (CanPackSample(pins->pSample, pins->nLength, nPacking)))
 				{
-					flags[ins] = 0xFE; // convert to 8-bit delta
-				} else
-#endif // NO_PACKING
+					flags[ins] = RS_ADPCM4;
+					xmss.res = 0xAD;
+				}
+			} else
+#endif
+			{
+				if (pins->uFlags & CHN_16BIT)
 				{
-					flags[ins] = 4;
+					flags[ins] = RS_PCM16D;
 					xmss.type |= 0x10;
 					xmss.looplen *= 2;
 					xmss.loopstart *= 2;
 					xmss.samplen *= 2;
 				}
+				if (pins->uFlags & CHN_STEREO)
+				{
+					flags[ins] = (pins->uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
+					xmss.type |= 0x20;
+					xmss.looplen *= 2;
+					xmss.loopstart *= 2;
+					xmss.samplen *= 2;
+				}
 			}
-#ifndef NO_PACKING
-			else
-			if ((nPacking) && (CanPackSample(pins->pSample, pins->nLength, nPacking)))
-			{
-				flags[ins] = 3;
-				xmss.res = 0xAD;
-			}
-#endif // NO_PACKING
 			xmss.pan = 255;
 			if (pins->nPan < 256) xmss.pan = (BYTE)pins->nPan;
 			xmss.relnote = (signed char)pins->RelativeTone;
@@ -794,9 +817,9 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 			if (pins->pSample)
 			{
 #ifndef NO_PACKING
-				if ((flags[ismpd] == 3) && (xmih.samples >1)) CanPackSample(pins->pSample, pins->nLength, nPacking);
+				if ((flags[ismpd] == RS_ADPCM4) && (xmih.samples>1)) CanPackSample(pins->pSample, pins->nLength, nPacking);
 #endif // NO_PACKING
-				WriteSample(f, pins->pSample, pins->nLength, flags[ismpd]);
+				WriteSample(f, pins, flags[ismpd]);
 			}
 		}
 	}
@@ -851,9 +874,10 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 			}
 		}
 	}
+	// Save mix plugins information
+	SaveMixPlugins(f);
 	fclose(f);
 	return TRUE;
 }
 
 #endif // MODPLUG_NO_FILESAVE
-

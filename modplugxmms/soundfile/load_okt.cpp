@@ -197,4 +197,3 @@ BOOL CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 	return TRUE;
 }
 
-

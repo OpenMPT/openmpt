@@ -21,6 +21,7 @@
 #include "arch_gzip.h"
 #include "arch_zip.h"
 #include "arch_rar.h"
+#include "arch_bz2.h"
 
 Archive* OpenArchive(const string& aFileName)
 {
@@ -40,6 +41,8 @@ Archive* OpenArchive(const string& aFileName)
 		return new arch_Rar(aFileName);
 	if (lExt == ".mdgz")
 		return new arch_Gzip(aFileName);
+	if (lExt == ".mdbz")
+		return new arch_Bzip2(aFileName);
 	if (lExt == ".s3z")
 		return new arch_Zip(aFileName);
 	if (lExt == ".s3r")
@@ -64,6 +67,8 @@ Archive* OpenArchive(const string& aFileName)
 		return new arch_Rar(aFileName);
 	if (lExt == ".gz")
 		return new arch_Gzip(aFileName);
+	if (lExt == ".bz2")
+		return new arch_Bzip2(aFileName);
 
 	return new arch_Raw(aFileName);
 }
@@ -75,7 +80,7 @@ bool ContainsMod(const string& aFileName)
 
 	lPos = aFileName.find_last_of('.');
 	if(lPos < 0)
-		return NULL;
+		return false;
 	lExt = aFileName.substr(lPos);
 	for(uint32 i = 0; i < lExt.length(); i++)
 		lExt[i] = tolower(lExt[i]);
@@ -86,6 +91,8 @@ bool ContainsMod(const string& aFileName)
 		return arch_Rar::ContainsMod(aFileName);
 	if (lExt == ".mdgz")
 		return arch_Gzip::ContainsMod(aFileName);
+	if (lExt == ".mdbz")
+		return arch_Bzip2::ContainsMod(aFileName);
 	if (lExt == ".s3z")
 		return arch_Zip::ContainsMod(aFileName);
 	if (lExt == ".s3r")
@@ -110,6 +117,8 @@ bool ContainsMod(const string& aFileName)
 		return arch_Rar::ContainsMod(aFileName);
 	if (lExt == ".gz")
 		return arch_Gzip::ContainsMod(aFileName);
+	if (lExt == ".bz2")
+		return arch_Bzip2::ContainsMod(aFileName);
 
 	return arch_Raw::ContainsMod(aFileName);
 }

@@ -629,5 +629,3 @@ void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char pac
 	delete amstmp;
 }
 
-
-

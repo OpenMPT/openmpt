@@ -10,6 +10,8 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
+#define MODMAGIC_OFFSET	(20+31*30+130)
+
 
 BOOL CSoundFile::ReadUMX(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
@@ -20,7 +22,7 @@ BOOL CSoundFile::ReadUMX(const BYTE *lpStream, DWORD dwMemLength)
 	 && (*((DWORD *)(lpStream+0x18)) <= dwMemLength - 0x10)
 	 && (*((DWORD *)(lpStream+0x18)) >= dwMemLength - 0x200))
 	{
-		for (UINT uscan=0x40; uscan<0x300; uscan++)
+		for (UINT uscan=0x40; uscan<0x500; uscan++)
 		{
 			DWORD dwScan = *((DWORD *)(lpStream+uscan));
 			// IT
@@ -41,9 +43,14 @@ BOOL CSoundFile::ReadUMX(const BYTE *lpStream, DWORD dwMemLength)
 				DWORD dwRipOfs = uscan;
 				return ReadXM(lpStream + dwRipOfs, dwMemLength - dwRipOfs);
 			}
+			// MOD
+			if ((uscan > MODMAGIC_OFFSET) && (dwScan == 0x2e4b2e4d))
+			{
+				DWORD dwRipOfs = uscan - MODMAGIC_OFFSET;
+				return ReadMod(lpStream+dwRipOfs, dwMemLength-dwRipOfs);
+			}
 		}
 	}
 	return FALSE;
 }
-
 

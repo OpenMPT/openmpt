@@ -16,21 +16,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+// BZ2 support added by Colin DeVilbiss <crdevilb@mtu.edu>
+
 //open()
 #include<sys/types.h>
 #include<sys/stat.h>
 #include<fcntl.h>
 #include<unistd.h>
 
-#include "arch_gzip.h"
+#include "arch_bz2.h"
 #include <iostream>
 #include <procbuf.h>
-	
-arch_Gzip::arch_Gzip(const string& aFileName)
+ 	
+arch_Bzip2::arch_Bzip2(const string& aFileName)
 {
 	//check if file exists
 	int lFileDesc = open(aFileName.c_str(), O_RDONLY);
-
+	
 	if(lFileDesc == -1)
 	{
 		mSize = 0;
@@ -41,7 +43,7 @@ arch_Gzip::arch_Gzip(const string& aFileName)
 	
 	//ok, continue
 	procbuf lPipeBuf;
-	string lCommand = "gunzip -l \"" + aFileName + '\"';   //get info
+	string lCommand = "bzcat \'" + aFileName + "\' | wc -c";   //get info
 	iostream lPipe(&lPipeBuf);
 	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
 	{
@@ -49,8 +51,6 @@ arch_Gzip::arch_Gzip(const string& aFileName)
 		return;
 	}
 	
-	lPipe.ignore(80, '\n'); //ignore a line.
-	lPipe >> mSize;         //ignore a number.
 	lPipe >> mSize;         //this is our size.
 	
 	lPipeBuf.close();
@@ -62,7 +62,7 @@ arch_Gzip::arch_Gzip(const string& aFileName)
 		return;
 	}
 	
-	lCommand = "gunzip -c \"" + aFileName + '\"';  //decompress to stdout
+	lCommand = "bzcat \'" + aFileName + '\'';  //decompress to stdout
 	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
 	{
 		mSize = 0;
@@ -74,35 +74,21 @@ arch_Gzip::arch_Gzip(const string& aFileName)
 	lPipeBuf.close();
 }
 
-arch_Gzip::~arch_Gzip()
+arch_Bzip2::~arch_Bzip2()
 {
 	if(mSize != 0)
 		delete [] (char*)mMap;
 }
 
-bool arch_Gzip::ContainsMod(const string& aFileName)
+bool arch_Bzip2::ContainsMod(const string& aFileName)
 {
 	string lName;
 	int lFileDesc = open(aFileName.c_str(), O_RDONLY);
-	char lBuffer[257];
-
-	if(lFileDesc == -1)
+ 	if(lFileDesc == -1)
 		return false;
 	
 	close(lFileDesc);
 	
-	procbuf lPipeBuf;
-	string lCommand = "gunzip -l \"" + aFileName + '\"';   //get info
-	iostream lPipe(&lPipeBuf);
-	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
-		return false;
-	
-	lPipe.ignore(80, '\n'); //ignore a line.
-	lPipe >> lName;         //ignore a number.
-	lPipe >> lName;         //ignore size.
-	lPipe >> lName;         //ignore ratio.
-	lPipe.getline(lBuffer, 257);
-	lName = lBuffer;
-	
+	lName = aFileName.substr(0, aFileName.find_last_of('.'));
 	return IsOurFile(lName);
 }

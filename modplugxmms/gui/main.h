@@ -17,8 +17,8 @@
  */
 
 #include <string>
-#include "modplugxmms/modprops.h"
+#include "modplugxmms/modplugxmms.h"
 
 void ShowAboutWindow();
-void ShowConfigureWindow(const ModProperties& aProps);
+void ShowConfigureWindow(const ModplugXMMS::Settings& aProps);
 void ShowInfoWindow(const string& aFileName);

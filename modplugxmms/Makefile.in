@@ -63,11 +63,9 @@ AWK = @AWK@
 CC = @CC@
 CXX = @CXX@
 DLLTOOL = @DLLTOOL@
-LD = @LD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
-NM = @NM@
 OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
@@ -95,7 +93,7 @@ libmodplug_la_LIBADD = ./archive/libarchive.la ./gui/libgui.la ./soundfile/libso
 
 SUBDIRS = archive gui soundfile
 
-EXTRA_DIST = modplugxmms.cpp modplugxmms.h modprops.h plugin.cpp plugin.h stddefs.h 
+noinst_HEADERS = modplugxmms.h plugin.h stddefs.h
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -114,6 +112,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+HEADERS =  $(noinst_HEADERS)
+
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -320,10 +320,10 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 modplugxmms.lo modplugxmms.o : modplugxmms.cpp modplugxmms.h stddefs.h \
-	plugin.h soundfile/stdafx.h soundfile/sndfile.h modprops.h \
-	archive/open.h archive/archive.h stddefs.h
+	plugin.h soundfile/stdafx.h soundfile/sndfile.h archive/open.h \
+	archive/archive.h stddefs.h
 plugin.lo plugin.o : plugin.cpp plugin.h modplugxmms.h stddefs.h \
-	gui/main.h modprops.h
+	gui/main.h modplugxmms.h
 
 info-am:
 info: info-recursive
@@ -344,7 +344,7 @@ install-am: all-am
 install: install-recursive
 uninstall-am: uninstall-libLTLIBRARIES
 uninstall: uninstall-recursive
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 all-redirect: all-recursive
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install

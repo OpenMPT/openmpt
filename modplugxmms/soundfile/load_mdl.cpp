@@ -504,5 +504,3 @@ WORD MDLReadBits(DWORD &bitbuf, UINT &bitnum, LPBYTE &ibuf, CHAR n)
 }
 
 
-
-

@@ -10,35 +10,9 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-///////////////////////////////////////////////////////////////////////
 #ifndef FASTSOUNDLIB
-
-MODFORMATINFO gModFormatInfo[MAX_MODTYPE] =
-{
-	{ MOD_TYPE_MOD,	"ProTracker", ".mod" },
-	{ MOD_TYPE_S3M,	"ScreamTracker III", ".s3m" },
-	{ MOD_TYPE_XM,	"FastTracker II", ".xm" },
-	{ MOD_TYPE_IT,	"Impulse Tracker", ".it" },
-	{ MOD_TYPE_MDL, "DigiTracker", ".mdl" },
-	{ MOD_TYPE_MTM,	"MultiTracker", ".mtm" },
-	{ MOD_TYPE_STM,	"ScreamTracker II", ".stm" },
-	{ MOD_TYPE_OKT, "Oktalyzer", ".okt" },
-	{ MOD_TYPE_MED,	"OctaMed", ".med" },
-	{ MOD_TYPE_669,	"UNIS 669", ".669" },
-	{ MOD_TYPE_FAR,	"Farandole Composer", ".far" },
-	{ MOD_TYPE_ULT,	"UltraTracker", ".ult" },
-	{ MOD_TYPE_PTM, "PolyTracker", ".ptm" },
-	{ MOD_TYPE_WAV,	"Wave", ".wav" },
-	{ MOD_TYPE_MID, "Midi", ".mid" },
-	{ MOD_TYPE_AMS, "Extreme Tracker", ".ams" },
-	{ MOD_TYPE_AMF|MOD_TYPE_AMF0,"Asylum / DSMI", ".amf" },
-	{ MOD_TYPE_DSM, "DSIK Format", ".dsm" },
-	{ MOD_TYPE_DMF, "X-Tracker", ".dmf" },
-	{ MOD_TYPE_DBM, "DigiBooster Pro", ".dbm" },
-};
-
+//#pragma data_seg(".tables")
 #endif
-///////////////////////////////////////////////////////////////////////
 
 BYTE ImpulseTrackerPortaVolCmd[16] =
 {
@@ -80,10 +54,11 @@ WORD ProTrackerTunedPeriods[16*12] =
 
 
 // S3M C-4 periods
-WORD FreqS3MTable[12] = 
+WORD FreqS3MTable[16] = 
 {
 	1712,1616,1524,1440,1356,1280,
-	1208,1140,1076,1016,960,907
+	1208,1140,1076,1016,960,907,
+	0,0,0,0
 };
 
 
@@ -204,6 +179,7 @@ UINT XMLinearTable[768] =
 	386753,386404,386056,385707,385359,385012,384664,384317,
 	383971,383624,383278,382932,382587,382242,381897,381552,
 	381208,380864,380521,380177,379834,379492,379149,378807,
+
 	378466,378124,377783,377442,377102,376762,376422,376082,
 	375743,375404,375065,374727,374389,374051,373714,373377,
 	373040,372703,372367,372031,371695,371360,371025,370690,
@@ -337,6 +313,7 @@ DWORD LinearSlideDownTable[256] =
 	58385, 58175, 57965, 57757, 57548, 57341, 57134, 56928, 
 	56723, 56519, 56315, 56112, 55910, 55709, 55508, 55308, 
 	55108, 54910, 54712, 54515, 54318, 54123, 53928, 53733, 
+
 	53540, 53347, 53154, 52963, 52772, 52582, 52392, 52204, 
 	52015, 51828, 51641, 51455, 51270, 51085, 50901, 50717, 
 	50535, 50353, 50171, 49990, 49810, 49631, 49452, 49274, 
@@ -400,7 +377,4 @@ int SpectrumSinusTable[256*2] =
 	-24, -23, -22, -22, -21, -20, -20, -19, -18, -17, -17, -16, -15, -14, -14, -13, 
 	-12, -11, -10, -10, -9, -8, -7, -7, -6, -5, -4, -3, -3, -2, -1, 0, 
 };
-
-
-
 

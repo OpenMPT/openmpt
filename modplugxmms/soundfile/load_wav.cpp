@@ -157,7 +157,7 @@ typedef struct IMAADPCMBLOCK
 
 #pragma pack()
 
-static const int gIMAUnpackTable[89] = 
+static const int gIMAUnpackTable[90] = 
 {
   7,     8,     9,    10,    11,    12,    13,    14,
   16,    17,    19,    21,    23,    25,    28,    31,
@@ -170,7 +170,7 @@ static const int gIMAUnpackTable[89] =
   3327,  3660,  4026,  4428,  4871,  5358,  5894,  6484,
   7132,  7845,  8630,  9493, 10442, 11487, 12635, 13899,
   15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794,
-  32767 
+  32767, 0
 };
 
 
@@ -218,7 +218,6 @@ BOOL IMAADPCMUnpack16(signed short *pdest, UINT nLen, LPBYTE psrc, DWORD dwBytes
 	}
 	return TRUE;
 }
-
 
 
 

@@ -105,7 +105,7 @@ arch_Zip::arch_Zip(const string& aFileName)
 arch_Zip::~arch_Zip()
 {
 	if(mSize != 0)
-		delete [] mMap;
+		delete [] (char*)mMap;
 }
 	
 bool arch_Zip::ContainsMod(const string& aFileName)

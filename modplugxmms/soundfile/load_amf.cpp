@@ -19,6 +19,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
+//#define AMFLOG
 
 //#pragma warning(disable:4244)
 
@@ -46,8 +47,13 @@ typedef struct _AMFSAMPLE
 	UCHAR volume;
 } AMFSAMPLE;
 
+
 #pragma pack()
 
+
+#ifdef AMFLOG
+extern void Log(LPCSTR, ...);
+#endif
 
 VOID AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels)
 //-------------------------------------------------------------------------------
@@ -221,6 +227,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength)
 			for (UINT i=0; i<8*64; i++)
 			{
 				p->note = 0;
+
 				if (pin[0])
 				{
 					p->note = pin[0] + 13;
@@ -228,7 +235,13 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength)
 				p->instr = pin[1];
 				p->command = pin[2];
 				p->param = pin[3];
-				if (p->command > 0x0F) p->command = 0;
+				if (p->command > 0x0F)
+				{
+				#ifdef AMFLOG
+					Log("0x%02X.0x%02X ?", p->command, p->param);
+				#endif
+					p->command = 0;
+				}
 				ConvertModCommand(p);
 				pin += 4;
 				p++;
@@ -391,7 +404,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength)
 	}
 	delete pTrackData;
 	// Read Sample Data
-	for (UINT iSeek=1; iSeek<maxsampleseekpos; iSeek++)
+	for (UINT iSeek=1; iSeek<=maxsampleseekpos; iSeek++)
 	{
 		if (dwMemPos >= dwMemLength) break;
 		for (UINT iSmp=0; iSmp<m_nSamples; iSmp++) if (iSeek == sampleseekpos[iSmp])
@@ -403,6 +416,5 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength)
 	}
 	return TRUE;
 }
-
 
 

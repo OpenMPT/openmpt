@@ -81,7 +81,9 @@ typedef struct DMFSAMPLE
 #pragma pack()
 
 
-//void Log(LPCSTR s, DWORD d1=0, DWORD d2=0, DWORD d3=0);
+#ifdef DMFLOG
+extern void Log(LPCSTR s, ...);
+#endif
 
 
 BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
@@ -182,78 +184,187 @@ BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 					Patterns[npat] = m;
 					DWORD d = dwPos;
 					dwPos += pt->jmpsize;
+					UINT ttype = 1;
+					UINT tempo = 125;
+					UINT glbinfobyte = 0;
+					UINT pbeat = (pt->beat & 0xf0) ? pt->beat>>4 : 8;
+					BOOL tempochange = (pt->beat & 0xf0) ? TRUE : FALSE;
 					memset(infobyte, 0, sizeof(infobyte));
 					for (UINT row=0; row<ticks; row++)
 					{
 						MODCOMMAND *p = &m[row*m_nChannels];
-						//d += 2;
 						// Parse track global effects
+						if (!glbinfobyte)
 						{
-							BYTE b = lpStream[d++];
-							if (b & 0x80) // track counter ?
+							BYTE info = lpStream[d++];
+							BYTE infoval = 0;
+							if ((info & 0x80) && (d < dwPos)) glbinfobyte = lpStream[d++];
+							info &= 0x7f;
+							if ((info) && (d < dwPos)) infoval = lpStream[d++];
+							switch(info)
 							{
-								UINT trkcnt = lpStream[d++];
+							case 1:	ttype = 0; tempo = infoval; tempochange = TRUE; break;
+							case 2: ttype = 1; tempo = infoval; tempochange = TRUE; break;
+							case 3: pbeat = infoval>>4; tempochange = ttype; break;
 							#ifdef DMFLOG
-								//Log("trkcnt=0x%02X\n", trkcnt);
+							default: if (info) Log("GLB: %02X.%02X\n", info, infoval);
 							#endif
 							}
-							if (b & 0x7f)
-							{
-								UINT tikcnt = lpStream[d++];
-							#ifdef DMFLOG
-								//Log("b=0x%02X tikcnt=0x%02X\n", b, tikcnt);
-							#endif
-							}
+						} else
+						{
+							glbinfobyte--;
 						}
-						for (UINT i=0; i<tracks; i++)
+						// Parse channels
+						for (UINT i=0; i<tracks; i++) if (!infobyte[i])
 						{
 							MODCOMMAND cmd = {0,0,0,0,0,0};
-
-							BYTE b = lpStream[d++];
-							if (b & 0x80)
-							{
-								d++; // Tick counter ?
-							}
-							// instrument
-							if (b & 0x40)
+							BYTE info = lpStream[d++];
+							if (info & 0x80) infobyte[i] = lpStream[d++];
+							// Instrument
+							if (info & 0x40)
 							{
 								cmd.instr = lpStream[d++];
 							}
-							// note
-							if (b & 0x20)
+							// Note
+							if (info & 0x20)
 							{
 								cmd.note = lpStream[d++];
-								if ((cmd.note > 128) && (cmd.note < 255)) cmd.note -= 128;
+								if ((cmd.note) && (cmd.note < 0xfe)) cmd.note &= 0x7f;
 								if ((cmd.note) && (cmd.note < 128)) cmd.note += 24;
 							}
-							// volume
-							if (b & 0x10)
+							// Volume
+							if (info & 0x10)
 							{
 								cmd.volcmd = VOLCMD_VOLUME;
-								cmd.vol = (BYTE)((lpStream[d++]+1) >> 2);
+								cmd.vol = (lpStream[d++]+3)>>2;
 							}
-							// instrument effect
-							if (b & 0x08)
+							// Effect 1
+							if (info & 0x08)
 							{
-								d += 2;
+								BYTE efx = lpStream[d++];
+								BYTE eval = lpStream[d++];
+								switch(efx)
+								{
+								// 1: Key Off
+								case 1: if (!cmd.note) cmd.note = 0xFE; break;
+								// 2: Set Loop
+								// 4: Sample Delay
+								case 4: if (eval&0xe0) { cmd.command = CMD_S3MCMDEX; cmd.param = (eval>>5)|0xD0; } break;
+								// 5: Retrig
+								case 5: if (eval&0xe0) { cmd.command = CMD_RETRIG; cmd.param = (eval>>5); } break;
+								// 6: Offset
+								case 6: cmd.command = CMD_OFFSET; cmd.param = eval; break;
+								#ifdef DMFLOG
+								default: Log("FX1: %02X.%02X\n", efx, eval);
+								#endif
+								}
 							}
-							// note effect
-							if (b & 0x04)
+							// Effect 2
+							if (info & 0x04)
 							{
-								d += 2;
+								BYTE efx = lpStream[d++];
+								BYTE eval = lpStream[d++];
+								switch(efx)
+								{
+								// 1: Finetune
+								case 1: if (eval&0xf0) { cmd.command = CMD_S3MCMDEX; cmd.param = (eval>>4)|0x20; } break;
+								// 2: Note Delay
+								case 2: if (eval&0xe0) { cmd.command = CMD_S3MCMDEX; cmd.param = (eval>>5)|0xD0; } break;
+								// 3: Arpeggio
+								case 3: if (eval) { cmd.command = CMD_ARPEGGIO; cmd.param = eval; } break;
+								// 4: Portamento Up
+								case 4: cmd.command = CMD_PORTAMENTOUP; cmd.param = (eval >= 0xe0) ? 0xdf : eval; break;
+								// 5: Portamento Down
+								case 5: cmd.command = CMD_PORTAMENTODOWN; cmd.param = (eval >= 0xe0) ? 0xdf : eval; break;
+								// 6: Tone Portamento
+								case 6: cmd.command = CMD_TONEPORTAMENTO; cmd.param = eval; break;
+								// 8: Vibrato
+								case 8: cmd.command = CMD_VIBRATO; cmd.param = eval; break;
+								// 12: Note cut
+								case 12: if (eval & 0xe0) { cmd.command = CMD_S3MCMDEX; cmd.param = (eval>>5)|0xc0; }
+										else if (!cmd.note) { cmd.note = 0xfe; } break;
+								#ifdef DMFLOG
+								default: Log("FX2: %02X.%02X\n", efx, eval);
+								#endif
+								}
 							}
-							// volume effect
-							if (b & 0x02)
+							// Effect 3
+							if (info & 0x02)
 							{
-								d += 2;
+								BYTE efx = lpStream[d++];
+								BYTE eval = lpStream[d++];
+								switch(efx)
+								{
+								// 1: Vol Slide Up
+								case 1: if (eval == 0xff) break;
+										eval = (eval+3)>>2; if (eval > 0x0f) eval = 0x0f;
+										cmd.command = CMD_VOLUMESLIDE; cmd.param = eval<<4; break;
+								// 2: Vol Slide Down
+								case 2:	if (eval == 0xff) break;
+										eval = (eval+3)>>2; if (eval > 0x0f) eval = 0x0f;
+										cmd.command = CMD_VOLUMESLIDE; cmd.param = eval; break;
+								// 7: Set Pan
+								case 7: if (!cmd.volcmd) { cmd.volcmd = VOLCMD_PANNING; cmd.vol = (eval+3)>>2; }
+										else { cmd.command = CMD_PANNING8; cmd.param = eval; } break;
+								// 8: Pan Slide Left
+								case 8: eval = (eval+3)>>2; if (eval > 0x0f) eval = 0x0f;
+										cmd.command = CMD_PANNINGSLIDE; cmd.param = eval<<4; break;
+								// 9: Pan Slide Right
+								case 9: eval = (eval+3)>>2; if (eval > 0x0f) eval = 0x0f;
+										cmd.command = CMD_PANNINGSLIDE; cmd.param = eval; break;
+								#ifdef DMFLOG
+								default: Log("FX3: %02X.%02X\n", efx, eval);
+								#endif
+
+								}
 							}
+							// Store effect
 							if (i < m_nChannels) p[i] = cmd;
-							if (d >= dwPos)
+							if (d > dwPos)
 							{
 							#ifdef DMFLOG
-								Log("Unexpected EOP: row=%d", row);
+								Log("Unexpected EOP: row=%d\n", row);
 							#endif
 								break;
+							}
+						} else
+						{
+							infobyte[i]--;
+						}
+
+						// Find free channel for tempo change
+						if (tempochange)
+						{
+							tempochange = FALSE;
+							UINT speed=6, modtempo=tempo;
+							UINT rpm = ((ttype) && (pbeat)) ? tempo*pbeat : (tempo+1)*15;
+							for (speed=30; speed>1; speed--)
+							{
+								modtempo = rpm*speed/24;
+								if (modtempo <= 200) break;
+								if ((speed < 6) && (modtempo < 256)) break;
+							}
+						#ifdef DMFLOG
+							Log("Tempo change: ttype=%d pbeat=%d tempo=%3d -> speed=%d tempo=%d\n",
+								ttype, pbeat, tempo, speed, modtempo);
+						#endif
+							for (UINT ich=0; ich<m_nChannels; ich++) if (!p[ich].command)
+							{
+								if (speed)
+								{
+									p[ich].command = CMD_SPEED;
+									p[ich].param = (BYTE)speed;
+									speed = 0;
+								} else
+								if ((modtempo >= 32) && (modtempo < 256))
+								{
+									p[ich].command = CMD_TEMPO;
+									p[ich].param = (BYTE)modtempo;
+									modtempo = 0;
+								} else
+								{
+									break;
+								}
 							}
 						}
 						if (d >= dwPos) break;
@@ -302,7 +413,7 @@ BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 						smplflags[iSmp] = psh->flags;
 						dwPos += (pfh->version < 8) ? 22 : 30;
 					#ifdef DMFLOG
-						Log("SMPI %d/%d: len=%d flags=%d\n", iSmp, m_nSamples, psmp->nLength, psh->flags);
+						Log("SMPI %d/%d: len=%d flags=0x%02X\n", iSmp, m_nSamples, psmp->nLength, psh->flags);
 					#endif
 					}
 				}
@@ -494,7 +605,5 @@ int DMFUnpack(LPBYTE psample, LPBYTE ibuf, LPBYTE ibufmax, UINT maxlen)
 #endif
 	return tree.ibuf - ibuf;
 }
-
-
 
 

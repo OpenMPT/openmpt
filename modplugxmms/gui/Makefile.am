@@ -4,4 +4,4 @@ noinst_LTLIBRARIES = libgui.la
 libgui_la_LDFLAGS = -module -avoid-version
 libgui_la_SOURCES = main.cpp support.cpp interface.cpp callbacks.cpp
 
-EXTRA_DIST = callbacks.cpp callbacks.h interface.cpp interface.h support.cpp support.h main.cpp main.h
+noinst_HEADERS = callbacks.h interface.h support.h main.h

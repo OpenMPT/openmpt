@@ -194,4 +194,3 @@ BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 	return TRUE;
 }
 
-

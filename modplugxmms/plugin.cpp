@@ -23,7 +23,7 @@
 static void Init(void);
 static int CanPlayFile(char* aFilename)
 {
-	if(CModplugXMMS::CanPlayFile(aFilename))
+	if(gModplugXMMS.CanPlayFile(aFilename))
 		return 1;
 	return 0;
 }
@@ -31,22 +31,22 @@ static int CanPlayFile(char* aFilename)
 static void PlayFile(char* aFilename);
 static void Stop(void)
 {
-	CModplugXMMS::Stop();
+	gModplugXMMS.Stop();
 }
 static void Pause(short aPaused)
 {
-	CModplugXMMS::Pause((bool)aPaused);
+	gModplugXMMS.Pause((bool)aPaused);
 }
 
 static void Seek(int aTime)
 {
-	CModplugXMMS::Seek(float32(aTime));
+	gModplugXMMS.Seek(float32(aTime));
 }
 static int GetTime(void)
 {
 	float32 lTime;
 	
-	lTime = CModplugXMMS::GetTime();
+	lTime = gModplugXMMS.GetTime();
 	if(lTime == -1)
 		return -1;
 	else
@@ -55,12 +55,7 @@ static int GetTime(void)
 
 static void GetSongInfo(char* aFilename, char** aTitle, int* aLength)
 {
-	CModplugXMMS::GetSongInfo(aFilename, *aTitle, *aLength);
-}
-
-void SetEquilizer(int aOn, float aPreamp, float *aBands)
-{
-	CModplugXMMS::SetEquilizer((bool)aOn, aPreamp, aBands);
+	gModplugXMMS.GetSongInfo(aFilename, *aTitle, *aLength);
 }
 
 void ShowAboutBox(void)
@@ -70,7 +65,7 @@ void ShowAboutBox(void)
 
 void ShowConfigureBox(void)
 {
-	ShowConfigureWindow(CModplugXMMS::GetModProps());
+	ShowConfigureWindow(gModplugXMMS.GetModProps());
 }
 
 void ShowFileInfoBox(char* aFilename)
@@ -93,7 +88,7 @@ InputPlugin gModPlug =
 	Stop,
 	Pause,
 	Seek,
-	SetEquilizer,
+	NULL,
 	GetTime,
 	NULL,
 	NULL,
@@ -109,13 +104,13 @@ InputPlugin gModPlug =
 
 static void Init(void)
 {
-	CModplugXMMS::SetInputPlugin(gModPlug);
-	CModplugXMMS::Init();
+	gModplugXMMS.SetInputPlugin(gModPlug);
+	gModplugXMMS.Init();
 }
 static void PlayFile(char* aFilename)
 {
-	CModplugXMMS::SetOutputPlugin(*gModPlug.output);
-	CModplugXMMS::PlayFile(aFilename);
+	gModplugXMMS.SetOutputPlugin(*gModPlug.output);
+	gModplugXMMS.PlayFile(aFilename);
 }
 
 extern "C"

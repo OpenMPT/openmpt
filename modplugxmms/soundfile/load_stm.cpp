@@ -180,11 +180,10 @@ BOOL CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 			if ((nPos >= sizeof(STMHEADER)) && (nPos+pIns->nLength <= dwMemLength)) dwMemPos = nPos;
 			if (dwMemPos < dwMemLength)
 			{
-				dwMemPos += ReadSample(pIns, 0, (LPSTR)(lpStream+dwMemPos),dwMemLength-dwMemPos);
+				dwMemPos += ReadSample(pIns, RS_PCM8S, (LPSTR)(lpStream+dwMemPos),dwMemLength-dwMemPos);
 			}
 		}
 	}
 	return TRUE;
 }
-
 

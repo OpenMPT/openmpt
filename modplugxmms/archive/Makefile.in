@@ -64,11 +64,9 @@ AWK = @AWK@
 CC = @CC@
 CXX = @CXX@
 DLLTOOL = @DLLTOOL@
-LD = @LD@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
-NM = @NM@
 OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
@@ -88,9 +86,11 @@ plugindir = @plugindir@
 
 noinst_LTLIBRARIES = libarchive.la
 libarchive_la_LDFLAGS = -module -avoid-version
-libarchive_la_SOURCES = archive.cpp open.cpp arch_raw.cpp arch_gzip.cpp arch_zip.cpp arch_rar.cpp
+libarchive_la_SOURCES = archive.cpp                             open.cpp                                arch_raw.cpp                            arch_gzip.cpp                           arch_zip.cpp                            arch_rar.cpp                            arch_bz2.cpp
 
-EXTRA_DIST = archive.cpp open.cpp arch_raw.cpp archive.h open.h arch_raw.h arch_gzip.h arch_gzip.cpp arch_zip.cpp arch_zip.h arch_rar.cpp arch_rar.h
+
+noinst_HEADERS = archive.h                               open.h                                  arch_raw.h                              arch_gzip.h                             arch_zip.h                              arch_rar.h                              arch_bz2.h
+
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -103,12 +103,14 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libarchive_la_LIBADD = 
 libarchive_la_OBJECTS =  archive.lo open.lo arch_raw.lo arch_gzip.lo \
-arch_zip.lo arch_rar.lo
+arch_zip.lo arch_rar.lo arch_bz2.lo
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+HEADERS =  $(noinst_HEADERS)
+
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -228,6 +230,8 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
+arch_bz2.lo arch_bz2.o : arch_bz2.cpp arch_bz2.h archive.h \
+	../../modplugxmms/stddefs.h
 arch_gzip.lo arch_gzip.o : arch_gzip.cpp arch_gzip.h archive.h \
 	../../modplugxmms/stddefs.h
 arch_rar.lo arch_rar.o : arch_rar.cpp arch_rar.h archive.h \
@@ -238,7 +242,7 @@ arch_zip.lo arch_zip.o : arch_zip.cpp arch_zip.h archive.h \
 	../../modplugxmms/stddefs.h
 archive.lo archive.o : archive.cpp archive.h ../../modplugxmms/stddefs.h
 open.lo open.o : open.cpp open.h archive.h ../../modplugxmms/stddefs.h \
-	arch_raw.h arch_gzip.h arch_zip.h arch_rar.h
+	arch_raw.h arch_gzip.h arch_zip.h arch_rar.h arch_bz2.h
 
 info-am:
 info: info-am
@@ -259,7 +263,7 @@ install-am: all-am
 install: install-am
 uninstall-am:
 uninstall: uninstall-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install

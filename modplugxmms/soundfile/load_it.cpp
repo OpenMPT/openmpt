@@ -11,7 +11,9 @@
 #include "sndfile.h"
 #include "it_defs.h"
 
-//#pragma warning(disable:4244)
+#ifdef WIN32
+#pragma warning(disable:4244)
+#endif
 
 BYTE autovibit2xm[8] =
 { 0, 3, 1, 4, 2, 0, 0, 0 };
@@ -94,6 +96,7 @@ BOOL CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		if (pis->volenv.flags & 8) penv->dwFlags |= ENV_VOLCARRY;
 		penv->nVolEnv = pis->volenv.num;
 		if (penv->nVolEnv > 25) penv->nVolEnv = 25;
+
 		penv->nVolLoopStart = pis->volenv.lpb;
 		penv->nVolLoopEnd = pis->volenv.lpe;
 		penv->nVolSustainBegin = pis->volenv.slb;
@@ -171,6 +174,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	if (pifh->flags & 0x10) m_dwSongFlags |= SONG_ITOLDEFFECTS;
 	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATMODE;
 	if (pifh->flags & 0x80) m_dwSongFlags |= SONG_EMBEDMIDICFG;
+	if (pifh->flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
 	memcpy(m_szNames[0], pifh->songname, 26);
 	m_szNames[0][26] = 0;
 	// Global Volume
@@ -281,6 +285,11 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 			dwMemPos += len;
 		}
 	}
+	// Read mix plugins information
+	if (dwMemPos + 8 < dwMemLength) 
+	{
+		dwMemPos += LoadMixPlugins(lpStream+dwMemPos, dwMemLength-dwMemPos);
+	}
 	// Checking for unused channels
 	UINT npatterns = pifh->patnum;
 	if (npatterns > MAX_PATTERNS) npatterns = MAX_PATTERNS;
@@ -384,14 +393,14 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				if (pis->flags & 2)
 				{
 					flags += 5;
-					if (pis->flags & 4) flags |= 8;
+					if (pis->flags & 4) flags |= RSF_STEREO;
 					pins->uFlags |= CHN_16BIT;
 					// IT 2.14 16-bit packed sample ?
 					if (pis->flags & 8) flags = ((pifh->cmwt >= 0x215) && (pis->cvt & 4)) ? RS_IT21516 : RS_IT21416;
 				} else
 				{
-					if (pis->flags & 4) flags |= 8;
-					if (pis->cvt == 0xFF) flags = 3; else
+					if (pis->flags & 4) flags |= RSF_STEREO;
+					if (pis->cvt == 0xFF) flags = RS_ADPCM4; else
 					// IT 2.14 8-bit packed sample ?
 					if (pis->flags & 8)	flags =	((pifh->cmwt >= 0x215) && (pis->cvt & 4)) ? RS_IT2158 : RS_IT2148;
 				}
@@ -409,6 +418,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 			Patterns[npat] = AllocatePattern(64, m_nChannels);
 			continue;
 		}
+
 		UINT len = *((WORD *)(lpStream+patpos[npat]));
 		UINT rows = *((WORD *)(lpStream+patpos[npat]+2));
 		if ((rows < 4) || (rows > 256)) continue;
@@ -591,6 +601,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
 	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
+	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
 	header.mv = m_nSongPreAmp;
 	if (header.mv < 0x20) header.mv = 0x20;
@@ -623,7 +634,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		header.special |= 0x08;
 		dwExtra += sizeof(MODMIDICFG);
 	}
-	// Writing Pattern Names
+	// Pattern Names
 	if ((m_nPatternNames) && (m_lpszPatternNames))
 	{
 		dwPatNamLen = m_nPatternNames * MAX_PATTERNNAME;
@@ -631,12 +642,16 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		if (dwPatNamLen < MAX_PATTERNNAME) dwPatNamLen = 0;
 		if (dwPatNamLen) dwExtra += dwPatNamLen + 8;
 	}
+	// Mix Plugins
+	dwExtra += SaveMixPlugins(NULL, TRUE);
+	// Comments
 	if (m_lpszSongComments)
 	{
 		header.special |= 1;
 		header.msglength = strlen(m_lpszSongComments)+1;
 		header.msgoffset = dwHdrPos + dwExtra + header.insnum*4 + header.patnum*4 + header.smpnum*4;
 	}
+	// Write file header
 	fwrite(&header, 1, sizeof(header), f);
 	fwrite(Order, 1, header.ordnum, f);
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
@@ -685,6 +700,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
 		}
 	}
+	// Writing mix plugins info
+	SaveMixPlugins(f, FALSE);
 	// Writing song message
 	dwPos = dwHdrPos + dwExtra + (header.insnum + header.smpnum + header.patnum) * 4;
 	if (header.special & 1)
@@ -996,22 +1013,29 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		itss.vir = (psmp->nVibSweep < 64) ? psmp->nVibSweep * 4 : 255;
 		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
 		if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
-		UINT flags = 0;
+		UINT flags = RS_PCM8S;
 #ifndef NO_PACKING
 		if (nPacking)
 		{
-			if (psmp->uFlags & CHN_16BIT) flags = 0xFF;
-			else if (CanPackSample(psmp->pSample, psmp->nLength, nPacking))
+			if ((!(psmp->uFlags & (CHN_16BIT|CHN_STEREO)))
+			 && (CanPackSample(psmp->pSample, psmp->nLength, nPacking)))
 			{
-				flags = 3;
+				flags = RS_ADPCM4;
 				itss.cvt = 0xFF;
 			}
 		} else
 #endif // NO_PACKING
-		if (psmp->uFlags & CHN_16BIT)
 		{
-			itss.flags |= 0x02;
-			flags = 5;
+			if (psmp->uFlags & CHN_STEREO)
+			{
+				flags = RS_STPCM8S;
+				itss.flags |= 0x04;
+			}
+			if (psmp->uFlags & CHN_16BIT)
+			{
+				itss.flags |= 0x02;
+				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
+			}
 		}
 		itss.samplepointer = dwPos;
 		fseek(f, smppos[nsmp-1], SEEK_SET);
@@ -1019,7 +1043,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		fseek(f, dwPos, SEEK_SET);
 		if ((psmp->pSample) && (psmp->nLength))
 		{
-			dwPos += WriteSample(f, psmp->pSample, psmp->nLength, flags);
+			dwPos += WriteSample(f, psmp, flags);
 		}
 	}
 	// Updating offsets
@@ -1230,4 +1254,118 @@ void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLeng
 }
 
 
+UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
+//----------------------------------------------------
+{
+	DWORD chinfo[64];
+	CHAR s[32];
+	DWORD nPluginSize;
+	UINT nTotalSize = 0;
+	UINT nChInfo = 0;
+
+	for (UINT i=0; i<MAX_MIXPLUGINS; i++)
+	{
+		PSNDMIXPLUGIN p = &m_MixPlugins[i];
+		if ((p->Info.dwPluginId1) || (p->Info.dwPluginId2))
+		{
+			nPluginSize = sizeof(SNDMIXPLUGININFO)+4; // plugininfo+4 (datalen)
+			if ((p->pMixPlugin) && (bUpdate))
+			{
+				p->pMixPlugin->SaveAllParameters();
+			}
+			if (p->pPluginData)
+			{
+				nPluginSize += p->nPluginDataSize;
+			}
+			if (f)
+			{
+				s[0] = 'F';
+				s[1] = 'X';
+				s[2] = '0' + (i/10);
+				s[3] = '0' + (i%10);
+				fwrite(s, 1, 4, f);
+				fwrite(&nPluginSize, 1, 4, f);
+				fwrite(&p->Info, 1, sizeof(SNDMIXPLUGININFO), f);
+				fwrite(&m_MixPlugins[i].nPluginDataSize, 1, 4, f);
+				if (m_MixPlugins[i].pPluginData)
+				{
+					fwrite(m_MixPlugins[i].pPluginData, 1, m_MixPlugins[i].nPluginDataSize, f);
+				}
+			}
+			nTotalSize += nPluginSize + 8;
+		}
+	}
+	for (UINT j=0; j<m_nChannels; j++)
+	{
+		if (j < 64)
+		{
+			if ((chinfo[j] = ChnSettings[j].nMixPlugin) != 0)
+			{
+				nChInfo = j+1;
+			}
+		}
+	}
+	if (nChInfo)
+	{
+		if (f)
+		{
+			nPluginSize = 0x58464843;
+			fwrite(&nPluginSize, 1, 4, f);
+			nPluginSize = nChInfo*4;
+			fwrite(&nPluginSize, 1, 4, f);
+			fwrite(chinfo, 1, nPluginSize, f);
+		}
+		nTotalSize += nChInfo*4 + 8;
+	}
+	return nTotalSize;
+}
+
+
+UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
+//-----------------------------------------------------------
+{
+	const BYTE *p = (const BYTE *)pData;
+	UINT nPos = 0;
+
+	while (nPos+8 < nLen)
+	{
+		DWORD nPluginSize;
+		UINT nPlugin;
+
+		nPluginSize = *(DWORD *)(p+nPos+4);
+		if (nPluginSize > nLen-nPos-8) break;;
+		if ((*(DWORD *)(p+nPos)) == 0x58464843)
+		{
+			for (UINT ch=0; ch<64; ch++) if (ch*4 < nPluginSize)
+			{
+				ChnSettings[ch].nMixPlugin = *(DWORD *)(p+nPos+8+ch*4);
+			}
+		} else
+		{
+			if ((p[nPos] != 'F') || (p[nPos+1] != 'X')
+			 || (p[nPos+2] < '0') || (p[nPos+3] < '0'))
+			{
+				break;
+			}
+			nPlugin = (p[nPos+2]-'0')*10 + (p[nPos+3]-'0');
+			if ((nPlugin < MAX_MIXPLUGINS) && (nPluginSize >= sizeof(SNDMIXPLUGININFO)+4))
+			{
+				DWORD dwExtra = *(DWORD *)(p+nPos+8+sizeof(SNDMIXPLUGININFO));
+				m_MixPlugins[nPlugin].Info = *(const SNDMIXPLUGININFO *)(p+nPos+8);
+				if ((dwExtra) && (dwExtra <= nPluginSize-sizeof(SNDMIXPLUGININFO)-4))
+				{
+					m_MixPlugins[nPlugin].nPluginDataSize = 0;
+					m_MixPlugins[nPlugin].pPluginData = new char [dwExtra];
+					if (m_MixPlugins[nPlugin].pPluginData)
+					{
+						m_MixPlugins[nPlugin].nPluginDataSize = dwExtra;
+						memcpy(m_MixPlugins[nPlugin].pPluginData, p+nPos+8+sizeof(SNDMIXPLUGININFO)+4, dwExtra);
+					}
+				}
+			}
+		}
+		nPos += nPluginSize + 8;
+	}
+	return nPos;
+}
 

@@ -3,7 +3,7 @@ AC_INIT(Makefile.am)
 
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(modplugxmms, 1.3a)
+AM_INIT_AUTOMAKE(modplugxmms, 1.5)
 
 dnl Checks for programs.
 AC_DISABLE_STATIC
@@ -13,7 +13,7 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AM_PROG_LIBTOOL
 
-CXXFLAGS="-fno-exceptions -O2 -Wall -ffast-math -D_REENTRANT `glib-config --cflags`"
+CXXFLAGS="$CXXFLAGS -fno-exceptions -Wall -ffast-math -D_REENTRANT `glib-config --cflags`"
 # CXXFLAGS="-fno-exceptions -g -Wall -ffast-math -D_REENTRANT `glib-config --cflags`"
 
 case ${target_os} in

@@ -9,7 +9,6 @@
 #include "interface.h"
 #include "support.h"
 
-#include "modplugxmms/modprops.h"
 #include "modplugxmms/modplugxmms.h"
 
 
@@ -40,7 +39,7 @@ void
 on_config_apply_clicked                (GtkButton       *button,
                                         gpointer         user_data)
 {
-	ModProperties lProps;
+	ModplugXMMS::Settings lProps;
 	
 	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "bit8")))
 		lProps.mBits = 8;
@@ -54,19 +53,20 @@ on_config_apply_clicked                (GtkButton       *button,
 	else
 		lProps.mFrequency = 44100;
 	
+	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "resampNearest")))
+		lProps.mResamplingMode = 0;
+	else if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "resampLinear")))
+		lProps.mResamplingMode = 1;
+	else if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "resampSpline")))
+		lProps.mResamplingMode = 2;
+	else
+		lProps.mResamplingMode = 3;
+	
 	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "mono")))
 		lProps.mChannels = 1;
 	else
 		lProps.mChannels = 2;
 	
-	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxOversamp")))
-		lProps.mOversamp       = true;
-	else
-		lProps.mOversamp       = false;
-	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxVolRamp")))
-		lProps.mVolumeRamp     = true;
-	else
-		lProps.mVolumeRamp     = false;
 	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxNR")))
 		lProps.mNoiseReduction = true;
 	else
@@ -75,10 +75,6 @@ on_config_apply_clicked                (GtkButton       *button,
 		lProps.mFastinfo       = true;
 	else
 		lProps.mFastinfo       = false;
-	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxLooping")))
-		lProps.mLooping        = true;
-	else
-		lProps.mLooping        = false;
 	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxReverb")))
 		lProps.mReverb         = true;
 	else
@@ -90,11 +86,22 @@ on_config_apply_clicked                (GtkButton       *button,
 	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxSurround")))
 		lProps.mSurround       = true;
 	else
-		lProps.mSurround        = false;
-	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxFadeOut")))
-		lProps.mFadeout        = true;
+		lProps.mSurround       = false;
+	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxPreamp")))
+		lProps.mPreamp         = true;
 	else
-		lProps.mFadeout        = false;
+		lProps.mPreamp         = false;
+	
+	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxLoopForever")))
+		lProps.mLoopCount = -1;
+	else if (gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxLoopFinite")))
+	{
+		lProps.mLoopCount =
+			(uint32)gtk_spin_button_get_adjustment(
+			(GtkSpinButton*)lookup_widget((GtkWidget*)button, "fxLoopCount"))->value;
+	}
+	else
+		lProps.mLoopCount = 0;
 	
 	//hmm...  GTK objects have un-protected data members?  That's not good...
 	lProps.mReverbDepth =
@@ -109,10 +116,10 @@ on_config_apply_clicked                (GtkButton       *button,
 		(uint32)gtk_range_get_adjustment((GtkRange*)lookup_widget((GtkWidget*)button, "fxSurroundDepth"))->value;
 	lProps.mSurroundDelay =
 		(uint32)gtk_range_get_adjustment((GtkRange*)lookup_widget((GtkWidget*)button, "fxSurroundDelay"))->value;
-	lProps.mFadeTime =
-		(uint32)gtk_range_get_adjustment((GtkRange*)lookup_widget((GtkWidget*)button, "fxFadeTime"))->value;
+	lProps.mPreampLevel =
+		(float)gtk_range_get_adjustment((GtkRange*)lookup_widget((GtkWidget*)button, "fxPreampLevel"))->value;
 	
-	CModplugXMMS::SetModProps(lProps);
+	gModplugXMMS.SetModProps(lProps);
 }
 
 

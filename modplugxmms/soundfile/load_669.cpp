@@ -179,11 +179,10 @@ BOOL CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		UINT len = Ins[n].nLength;
 		if (dwMemPos >= dwMemLength) break;
-		if (len > 4) ReadSample(&Ins[n], 1, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
+		if (len > 4) ReadSample(&Ins[n], RS_PCM8U, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 		dwMemPos += len;
 	}
 	return TRUE;
 }
-
 
 

@@ -39,7 +39,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 0x0C:	command = CMD_VOLUME; break;
 	case 0x0D:	command = CMD_PATTERNBREAK; param = ((param >> 4) * 10) + (param & 0x0F); break;
 	case 0x0E:	command = CMD_MODCMDEX; break;
-	case 0x0F:	command = (param <= (UINT)((m_nType == MOD_TYPE_XM) ? 0x1F : 0x20)) ? CMD_SPEED : CMD_TEMPO;
+	case 0x0F:	command = (param <= (UINT)((m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? 0x1F : 0x20)) ? CMD_SPEED : CMD_TEMPO;
 				if ((param == 0xFF) && (m_nSamples == 15)) command = 0; break;
 	// Extension for XM extended effects
 	case 'G' - 55:	command = CMD_GLOBALVOLUME; break;
@@ -147,75 +147,119 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 }
 
 
+#pragma pack(1)
+
+typedef struct _MODSAMPLE
+{
+	CHAR name[22];
+	WORD length;
+	BYTE finetune;
+	BYTE volume;
+	WORD loopstart;
+	WORD looplen;
+} MODSAMPLE, *PMODSAMPLE;
+
+typedef struct _MODMAGIC
+{
+	BYTE nOrders;
+	BYTE nRestartPos;
+	BYTE Orders[128];
+	CHAR Magic[4];
+} MODMAGIC, *PMODMAGIC;
+
+#pragma pack()
+
+BOOL IsMagic(LPCSTR s1, LPCSTR s2)
+{
+	return ((*(DWORD *)s1) == (*(DWORD *)s2)) ? TRUE : FALSE;
+}
+
 
 BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	CHAR s[1024]="";
-	BYTE bTab[32];
-	UINT nbp, nbpbuggy, nbpbuggy2, norders;
-	DWORD dwMemPos = 20;
-	DWORD dwWowTest = 0x43C;
-	UINT nErr = 0;
+	CHAR s[1024];
+	DWORD dwMemPos, dwTotalSampleLen;
+	PMODMAGIC pMagic;
+	UINT nErr;
 
 	if ((!lpStream) || (dwMemLength < 0x600)) return FALSE;
-	memcpy(s, lpStream+0x438, 4);
-	s[4] = 0;
+	dwMemPos = 20;
 	m_nSamples = 31;
 	m_nChannels = 4;
-	if ((!lstrcmp(s,"M.K.")) || (!lstrcmp(s,"M!K!"))) m_nChannels = 4; else
-	if ((s[0]=='F') && (s[1]=='L') && (s[2]=='T') && (s[3]>='1') && (s[3]<='9')) m_nChannels = s[3] - '0'; else
-	if ((s[0]>='1') && (s[0]<='9') && (s[1]=='C') && (s[2]=='H') && (s[3]=='N')) m_nChannels = s[0] - '0'; else
+	pMagic = (PMODMAGIC)(lpStream+dwMemPos+sizeof(MODSAMPLE)*31);
+	// Check Mod Magic
+	memcpy(s, pMagic->Magic, 4);
+	if ((IsMagic(s, "M.K.")) || (IsMagic(s, "M!K!"))
+	 || (IsMagic(s, "M&K!")) || (IsMagic(s, "N.T."))) m_nChannels = 4; else
+	if ((IsMagic(s, "CD81")) || (IsMagic(s, "OKTA"))) m_nChannels = 8; else
+	if ((s[0]=='F') && (s[1]=='L') && (s[2]=='T') && (s[3]>='4') && (s[3]<='9')) m_nChannels = s[3] - '0'; else
+	if ((s[0]>='4') && (s[0]<='9') && (s[1]=='C') && (s[2]=='H') && (s[3]=='N')) m_nChannels = s[0] - '0'; else
 	if ((s[0]=='1') && (s[1]>='0') && (s[1]<='9') && (s[2]=='C') && (s[3]=='H')) m_nChannels = s[1] - '0' + 10; else
 	if ((s[0]=='2') && (s[1]>='0') && (s[1]<='9') && (s[2]=='C') && (s[3]=='H')) m_nChannels = s[1] - '0' + 20; else
 	if ((s[0]=='3') && (s[1]>='0') && (s[1]<='2') && (s[2]=='C') && (s[3]=='H')) m_nChannels = s[1] - '0' + 30; else
-	if ((s[0]=='T') && (s[1]=='D') && (s[2]=='Z') && (s[3]>='1') && (s[3]<='9')) m_nChannels = s[3] - '0'; else
-	if (!lstrcmp(s,"16CN")) m_nChannels = 16; else
-	if (!lstrcmp(s,"32CN")) m_nChannels = 32; else
-	if ((!lstrcmp(s,"CD81")) || (!lstrcmp(s,"OKTA"))) m_nChannels = 8; else m_nSamples = 15;
+	if ((s[0]=='T') && (s[1]=='D') && (s[2]=='Z') && (s[3]>='4') && (s[3]<='9')) m_nChannels = s[3] - '0'; else
+	if (IsMagic(s,"16CN")) m_nChannels = 16; else
+	if (IsMagic(s,"32CN")) m_nChannels = 32; else m_nSamples = 15;
+	// Load Samples
+	nErr = 0;
+	dwTotalSampleLen = 0;
 	for	(UINT i=1; i<=m_nSamples; i++)
 	{
-		UINT j,k;
-		memcpy(bTab, lpStream+dwMemPos, 30);
-		dwMemPos += 30;
-		memcpy(m_szNames[i],bTab,22);
-		if ((j = ((UINT)bTab[22] << 9) | ((UINT)bTab[23] << 1)) < 4) j = 0;
-		Ins[i].nLength = j;
-		dwWowTest += j;
-		Ins[i].nFineTune = MOD2XMFineTune(bTab[24] & 0x0F);
-		Ins[i].nVolume = bTab[25];
-		if (Ins[i].nVolume > 0x40) { Ins[i].nVolume = 0x40; nErr++; }
-		Ins[i].nVolume <<= 2;
-		Ins[i].nGlobalVol = 64;
-		if ((j = ((unsigned int)bTab[26] << 9) | ((unsigned int)bTab[27] << 1)) < 4) j = 0;
-		if ((k = ((unsigned int)bTab[28] << 9) | ((unsigned int)bTab[29] << 1)) < 4) k = 0;
-		if (j + k > Ins[i].nLength)
+		PMODSAMPLE pms = (PMODSAMPLE)(lpStream+dwMemPos);
+		MODINSTRUMENT *psmp = &Ins[i];
+		UINT loopstart, looplen;
+
+		memcpy(m_szNames[i], pms->name, 22);
+		m_szNames[i][22] = 0;
+		psmp->uFlags = 0;
+		psmp->nLength = BigEndianW(pms->length)*2;
+		dwTotalSampleLen += psmp->nLength;
+		psmp->nFineTune = MOD2XMFineTune(pms->finetune & 0x0F);
+		psmp->nVolume = 4*pms->volume;
+		if (psmp->nVolume > 256) { psmp->nVolume = 256; nErr++; }
+		psmp->nGlobalVol = 64;
+		psmp->nPan = 128;
+		loopstart = BigEndianW(pms->loopstart)*2;
+		looplen = BigEndianW(pms->looplen)*2;
+		// Fix loops
+		if ((looplen > 2) && (loopstart+looplen > psmp->nLength)
+		 && (loopstart/2+looplen <= psmp->nLength))
 		{
-			j >>= 1;
-			k = j + ((k+1)>>1);
-		} else k += j;
-		if (Ins[i].nLength)
+			loopstart /= 2;
+		}
+		psmp->nLoopStart = loopstart;
+		psmp->nLoopEnd = loopstart + looplen;
+		if (psmp->nLength < 4) psmp->nLength = 0;
+		if (psmp->nLength)
 		{
 			UINT derr = 0;
-			if (j >= Ins[i].nLength) { j = Ins[i].nLength - 1; derr |= 1; }
-			if (k >	Ins[i].nLength) { k = Ins[i].nLength; derr |= 1; }
-			if (j > k) derr |= 1;
-			if ((j > k) || (k < 4) || (k - j <= 4))	{ j = k = 0; }
-			nErr += derr;
+			if (psmp->nLoopStart >= psmp->nLength) { psmp->nLoopStart = psmp->nLength-1; derr|=1; }
+			if (psmp->nLoopEnd > psmp->nLength) { psmp->nLoopEnd = psmp->nLength; derr |= 1; }
+			if (psmp->nLoopStart > psmp->nLoopEnd) derr |= 1;
+			if ((psmp->nLoopStart > psmp->nLoopEnd) || (psmp->nLoopEnd <= 8)
+			 || (psmp->nLoopEnd - psmp->nLoopStart <= 4))
+			{
+				psmp->nLoopStart = 0;
+				psmp->nLoopEnd = 0;
+			}
+			if (psmp->nLoopEnd > psmp->nLoopStart)
+			{
+				psmp->uFlags |= CHN_LOOP;
+			}
 		}
-		Ins[i].nLoopStart = j;
-		Ins[i].nLoopEnd = k;
-		if (k) Ins[i].uFlags |= CHN_LOOP;
-		Ins[i].nPan = 0x80;
+		dwMemPos += sizeof(MODSAMPLE);
 	}
-	if ((m_nSamples == 15) && (dwWowTest > dwMemLength * 4)) return FALSE;
-	memcpy(bTab, lpStream+dwMemPos, 2);
-	dwMemPos += 2;
-	memset(Order,0,sizeof(Order));
-	memcpy(Order, lpStream+dwMemPos, 128);
-	dwMemPos += 128;
-	if (m_nSamples == 31) dwMemPos += 4;
-	norders = bTab[0];
+	if ((m_nSamples == 15) && (dwTotalSampleLen > dwMemLength * 4)) return FALSE;
+	pMagic = (PMODMAGIC)(lpStream+dwMemPos);
+	dwMemPos += sizeof(MODMAGIC);
+	if (m_nSamples == 15) dwMemPos -= 4;
+	memset(Order, 0,sizeof(Order));
+	memcpy(Order, pMagic->Orders, 128);
+
+	UINT nbp, nbpbuggy, nbpbuggy2, norders;
+
+	norders = pMagic->nOrders;
 	if ((!norders) || (norders > 0x80))
 	{
 		norders = 0x80;
@@ -236,10 +280,12 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	for (UINT iend=norders; iend<MAX_ORDERS; iend++) Order[iend] = 0xFF;
 	norders--;
-	m_nRestartPos = bTab[1];
+	m_nRestartPos = pMagic->nRestartPos;
+	if (m_nRestartPos >= 0x78) m_nRestartPos = 0;
 	if (m_nRestartPos + 1 >= (UINT)norders) m_nRestartPos = 0;
 	if (!nbp) return FALSE;
-	if ((m_nChannels == 4) && (dwWowTest + nbp*8*256 == dwMemLength)) m_nChannels = 8;
+	DWORD dwWowTest = dwTotalSampleLen+dwMemPos;
+	if ((IsMagic(pMagic->Magic, "M.K.")) && (dwWowTest + nbp*8*256 == dwMemLength)) m_nChannels = 8;
 	if ((nbp != nbpbuggy) && (dwWowTest + nbp*m_nChannels*256 != dwMemLength))
 	{
 		if (dwWowTest + nbpbuggy*m_nChannels*256 == dwMemLength) nbp = nbpbuggy;
@@ -262,7 +308,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	for (UINT ich=0; ich<m_nChannels; ich++)
 	{
 		ChnSettings[ich].nVolume = 64;
-		if (m_dwMidiSetup & MIDIMIX_MAXDEFAULTPAN)
+		if (gdwSoundSetup & SNDMIX_MAXDEFAULTPAN)
 			ChnSettings[ich].nPan = (((ich&3)==1) || ((ich&3)==2)) ? 256 : 0;
 		else
 			ChnSettings[ich].nPan = (((ich&3)==1) || ((ich&3)==2)) ? 0xC0 : 0x40;
@@ -357,7 +403,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 		MODINSTRUMENT *pins = &Ins[insmap[iins]];
 		memcpy(bTab, m_szNames[iins],22);
 		inslen[iins] = pins->nLength;
-		if (inslen[iins] > 131000) inslen[iins] = 131000;
+		if (inslen[iins] > 0x1fff0) inslen[iins] = 0x1fff0;
 		bTab[22] = inslen[iins] >> 9;
 		bTab[23] = inslen[iins] >> 1;
 		if (pins->RelativeTone < 0) bTab[24] = 0x08; else
@@ -396,7 +442,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 	// Writing patterns
 	for (UINT ipat=0; ipat<nbp; ipat++) if (Patterns[ipat])
 	{
-		BYTE s[32*4];
+		BYTE s[64*4];
 		MODCOMMAND *m = Patterns[ipat];
 		for (UINT i=0; i<64; i++) if (i < PatternSize[ipat])
 		{
@@ -433,20 +479,18 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 	for (UINT ismpd=1; ismpd<=31; ismpd++) if (inslen[ismpd])
 	{
 		MODINSTRUMENT *pins = &Ins[insmap[ismpd]];
-		UINT flags = 0;
-		if (pins->uFlags & CHN_16BIT)
-		{
-			flags = 0xFF;
-		}
+		UINT flags = RS_PCM8S;
 #ifndef NO_PACKING
-		else
-		if ((nPacking) && (CanPackSample(pins->pSample, inslen[ismpd], nPacking)))
+		if (!(pins->uFlags & (CHN_16BIT|CHN_STEREO)))
 		{
-			fwrite("ADPCM", 1, 5, f);
-			flags = 3;
+			if ((nPacking) && (CanPackSample(pins->pSample, inslen[ismpd], nPacking)))
+			{
+				fwrite("ADPCM", 1, 5, f);
+				flags = RS_ADPCM4;
+			}
 		}
 #endif
-		WriteSample(f, pins->pSample, inslen[ismpd], flags);
+		WriteSample(f, pins, flags, inslen[ismpd]);
 	}
 	fclose(f);
 	return TRUE;
@@ -454,4 +498,3 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 
 #pragma warning(default:4100)
 #endif // MODPLUG_NO_FILESAVE
-

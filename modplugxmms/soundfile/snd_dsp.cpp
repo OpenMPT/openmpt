@@ -103,8 +103,8 @@ static LONG SurroundBuffer[SURROUNDBUFFERSIZE];
 
 // Access the main temporary mix buffer directly: avoids an extra pointer
 extern int MixSoundBuffer[MIXBUFFERSIZE*2];
+//cextern int MixReverbBuffer[MIXBUFFERSIZE*2];
 extern int MixReverbBuffer[MIXBUFFERSIZE*2];
-
 
 static UINT GetMaskFromSize(UINT len)
 //-----------------------------------
@@ -468,5 +468,21 @@ BOOL CSoundFile::SetSurroundParameters(UINT nDepth, UINT nDelay)
 	if (nDelay < 4) nDelay = 4;
 	if (nDelay > 50) nDelay = 50;
 	m_nProLogicDelay = nDelay;
+	return TRUE;
+}
+
+BOOL CSoundFile::SetWaveConfigEx(BOOL bSurround,BOOL bNoOverSampling,BOOL bReverb,BOOL hqido,BOOL bMegaBass,BOOL bNR,BOOL bEQ)
+//----------------------------------------------------------------------------------------------------------------------------
+{
+	DWORD d = gdwSoundSetup & ~(SNDMIX_SURROUND | SNDMIX_NORESAMPLING | SNDMIX_REVERB | SNDMIX_HQRESAMPLER | SNDMIX_MEGABASS | SNDMIX_NOISEREDUCTION | SNDMIX_EQ);
+	if (bSurround) d |= SNDMIX_SURROUND;
+	if (bNoOverSampling) d |= SNDMIX_NORESAMPLING;
+	if (bReverb) d |= SNDMIX_REVERB;
+	if (hqido) d |= SNDMIX_HQRESAMPLER;
+	if (bMegaBass) d |= SNDMIX_MEGABASS;
+	if (bNR) d |= SNDMIX_NOISEREDUCTION;
+	if (bEQ) d |= SNDMIX_EQ;
+	gdwSoundSetup = d;
+	InitPlayer(FALSE);
 	return TRUE;
 }

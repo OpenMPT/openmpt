@@ -16,13 +16,14 @@
 
 #ifndef NO_FILTER
 
-//not gcc friendly...
-//#define _ASM_MATH
+#ifdef WIN32
+#define _ASM_MATH
+#endif
 
 #ifdef _ASM_MATH
 
 // pow(a,b) returns a^^b -> 2^^(b.log2(a))
-__inline float pow(float a, float b)
+static float pow(float a, float b)
 {
 	long tmpint;
 	float result;
@@ -52,31 +53,19 @@ __inline float pow(float a, float b)
 #endif // _ASM_MATH
 
 
-extern DWORD LinearSlideUpTable[256]; // 65536 * 2^(x/192)
-extern DWORD LinearSlideDownTable[256]; // 65536 * 2^(-x/192)
-
-DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier)
-//-----------------------------------------------------------------
+DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
+//-----------------------------------------------------------------------
 {
-#if 1
-	float Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff*(flt_modifier+256)))/(24.0f*512.0f));
-	LONG freq = (LONG)Fc;
-#else
-	LONG freq, fc_exp, fc_mod;
+	float Fc;
 
-	fc_exp = (((nCutOff * 73) >> 3) * (flt_modifier + 256)); // 140Hz * 2^(cutoff*9/192)
-	fc_mod = fc_exp & 0x01FF;
-	fc_exp >>= 9;
-	freq = MulDiv(125 << (fc_exp / 192), LinearSlideUpTable[fc_exp % 192], 65536);
-	// Linear interpolate for finer granularity
-	if (fc_mod)
-	{
-		LONG freq1 = MulDiv(125 << ((fc_exp+1) / 192), LinearSlideUpTable[(fc_exp+1) % 192], 65536);
-		freq += ((freq1 - freq) * fc_mod) >> 9;
-	}
-#endif
+	if (m_dwSongFlags & SONG_EXFILTERRANGE)
+		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff*(flt_modifier+256)))/(21.0f*512.0f));
+	else
+		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff*(flt_modifier+256)))/(24.0f*512.0f));
+	LONG freq = (LONG)Fc;
 	if (freq < 120) return 120;
 	if (freq > 10000) return 10000;
+	if (freq*2 > (LONG)gdwMixingFreq) freq = gdwMixingFreq>>1;
 	return (DWORD)freq;
 }
 
@@ -85,31 +74,31 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier)
 void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modifier) const
 //----------------------------------------------------------------------------------------
 {
-	float fc = (float)CutOffToFrequency(pChn->nCutOff, flt_modifier); // [0-255] => [100Hz-8000Hz]
+	float fc = (float)CutOffToFrequency(pChn->nCutOff, flt_modifier);
 	float fs = (float)gdwMixingFreq;
 	float fg, fb0, fb1;
 
-	fc *= 2.0*3.14159265358/fs;
-	float dmpfac = pow(10, -((24.0 / 128.0)*(float)pChn->nResonance) / 20.0);
-	float d = (1.0-2.0*dmpfac)* fc;
+	fc *= (float)(2.0*3.14159265358/fs);
+	float dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)pChn->nResonance) / 20.0f);
+	float d = (1.0f-2.0f*dmpfac)* fc;
 	if (d>2.0) d = 2.0;
-	d = (2.0*dmpfac - d)/fc;
+	d = (2.0f*dmpfac - d)/fc;
 	float e = pow(1.0f/fc,2.0);
 
 	fg=1/(1+d+e);
 	fb0=(d+e+e)/(1+d+e);
 	fb1=-e/(1+d+e);
 
-	pChn->nFilter_B0 = (int)(fg * FILTER_PRECISION);
-	pChn->nFilter_B1 = (int)(fb0 * FILTER_PRECISION);
-	pChn->nFilter_B2 = (int)(fb1 * FILTER_PRECISION);
+	pChn->nFilter_A0 = (int)(fg * FILTER_PRECISION);
+	pChn->nFilter_B0 = (int)(fb0 * FILTER_PRECISION);
+	pChn->nFilter_B1 = (int)(fb1 * FILTER_PRECISION);
 	
 	if (bReset)
 	{
-		pChn->nFilter_X1 = pChn->nFilter_X2 = 0;
+		pChn->nFilter_Y1 = pChn->nFilter_Y2 = 0;
+		pChn->nFilter_Y3 = pChn->nFilter_Y4 = 0;
 	}
 	pChn->dwFlags |= CHN_FILTER;
 }
 
 #endif // NO_FILTER
-
