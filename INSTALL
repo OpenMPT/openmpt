@@ -1,0 +1,5 @@
+1) make.
+2) copy libmodplug.so to your xmms input plugin directory.
+3) there is no step 3!
+
+This plugin requires gtk-- (the C++ wrapper for gtk).

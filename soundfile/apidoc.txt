@@ -1,0 +1,61 @@
+//==============
+class CSoundFile
+//==============
+{
+public:
+	CSoundFile();
+	~CSoundFile();
+
+public:
+--	BOOL Create(LPCBYTE lpStream, DWORD dwMemLength=0);
+--	BOOL Destroy();
+--	UINT GetNumChannels() const;
+--	BOOL SetMasterVolume(UINT vol, BOOL bAdjustAGC=FALSE);
+--	UINT GetMasterVolume() const { return m_nMasterVolume; }
+--	UINT GetSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
+--	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
+--	void GetTitle(LPSTR s) const { strcpy(s,m_szNames[0]); }
+--	LPCSTR GetTitle() const { return m_szNames[0]; }
+--	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
+--	UINT GetMusicTempo() const { return m_nMusicTempo; }
+--	DWORD GetSongTime() { return GetLength(FALSE, TRUE); }
+--	BOOL IsPaused() const {	return (m_dwSongFlags & SONG_PAUSED) ? TRUE : FALSE; }
+--	void CheckCPUUsage(UINT nCPU);
+	
+public:
+	// Real-time sound functions
+--	UINT Read(LPVOID lpBuffer, UINT cbBuffer);
+--	BOOL GlobalFadeSong(UINT msec);
+
+public:
+	// Mixer Config
+--	static BOOL SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX=FALSE);
+--	static BOOL SetWaveConfigEx(BOOL bSurround,BOOL bNoOversampling,BOOL bReverb,BOOL hqido,BOOL megabass=FALSE,BOOL dolbynr=FALSE,BOOL bEQ=FALSE);
+--	static void EnableMMX(BOOL b) { if (b) gdwSoundSetup |= SNDMIX_ENABLEMMX; else gdwSoundSetup &= ~SNDMIX_ENABLEMMX; }
+	// AGC
+--	static BOOL GetAGC() { return (gdwSoundSetup & SNDMIX_AGC) ? TRUE : FALSE; }
+--	static void SetAGC(BOOL b);
+--	static void ResetAGC();
+--	static void ProcessAGC(int count);
+	// [Reverb level 0(quiet)-100(loud)], [REVERBTYPE_XXXX]
+--	static BOOL SetReverbParameters(UINT nDepth, UINT nType);
+	// [XBass level 0(quiet)-100(loud)], [cutoff in Hz 10-100]
+--	static BOOL SetXBassParameters(UINT nDepth, UINT nRange);
+	// [Surround level 0(quiet)-100(heavy)] [delay in ms, usually 5-40ms]
+--	static BOOL SetSurroundParameters(UINT nDepth, UINT nDelay);
+#ifdef ENABLE_EQ
+	// EQ
+--	static void InitializeEQ(BOOL bReset=TRUE);
+--	static void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE);	// 0=-12dB, 32=+12dB
+--	static void EQStereo(int *pbuffer, UINT nCount);
+--	static void EQMono(int *pbuffer, UINT nCount);
+#endif
+	// Analyzer Functions
+--	static UINT WaveConvert(LPBYTE lpSrc, signed char *lpDest, UINT nSamples);
+--	static UINT WaveStereoConvert(LPBYTE lpSrc, signed char *lpDest, UINT nSamples);
+--	static LONG SpectrumAnalyzer(signed char *pBuffer, UINT nSamples, UINT nInc, UINT nChannels);
+--	static UINT GetVUMeter() { return gnVUMeter; }
+};
+
+
+

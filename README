@@ -1,0 +1,66 @@
+Modplug Plugin for XMMS v1.0
+ Based on the ModPlug sound engine by Olivier Lapicque <olivierl@jps.net>
+ XMMS port by Kenton Varda <temporal@gauge3d.org>
+ (C) 1999 Olivier Lapicqu and Kenton Varda
+
+Olivier Lapicque, author of Modplug, which is arguably the best quality
+MOD-playing software available, has sent me the latest version (dated
+12//99) of his sound rendering code liscensed under the GPL.  This
+plugin is based on that code.
+
+Features:
+- Plays MOD, S3M, XM, IT, and 15 other oddball formats.
+- Slightly better sound quality than Mikmod.  Vastly superior quality
+   over Winamp.
+- All XMMS calls are supported exept for the band gains on the
+   equalizer.  The preamp is supported, but MOD music is not anywhere
+   near as cheap to equalize as MP3.  Thus, equalization does is not
+   supported in this version.  However, a variable bass boost option
+   is available in the configuration dialog (see below).
+- Tons of playback options (see below).
+
+-------------------------------------------------------------------------
+Configurable stuff and explanations:
+ All of the following items are configurable from the plugin
+ configuration dialog box.
+
+Sampling rate: duh.
+
+Bits per sample: duh.
+
+Channels: mono/stereo.  Four-point surround can and will be supported
+ once XMMS supports it.
+
+Oversampling: This increases quality considerably by doing all
+ calculations at a higher sampling rate and then mixing down to the
+ desired output rate.  This should almost never be turned off.
+
+Noise Reduction: Reduces noise. :)
+
+Volume Ramping: Gets rid of pops and clicks.
+
+Fast Playlist Info: When this option is on, names of songs in your
+ playlist will load considerably faster, but song lengths will not be
+ shown and only MOD, S3M, XM, and IT formats will have their names shown.
+ Don't worry, though, because all the data which is skipped will still be
+ loaded when you actually play the song.  This should probably always be
+ on.
+
+Reverb: A nice reverb effect.  The depth and delay of the reverb can be
+ tuned to your liking using the sliders.
+
+Bass boost: Variable bass boost effect.  The "range" slider controls the
+ frequency range of the bass boost.  If you increase this value, higher
+ frequencies will be boosted, but the overall volume increase will be
+ less.  (you can compensate by using the volume slider:)
+
+Surround: Dolby Pro-Logic surround effect.  Depth and delay can be fine
+ tuned.
+
+Fade on Stop: With this enabled, when you click stop while a mod is
+ playing, it will fade out for up to two seconds (depending on where you
+ set the slidebar).
+ WARNING:  This is a hacked effect, and XMMS doesn't like it.  The
+  following actions will result in segmentation faults:
+ - Skipping to an MP3 (or other non-MOD format) while Modplug is playing
+ - Closing XMMS while Modplug is playing
