@@ -15,11 +15,11 @@ dist=true
 install=false
 type=SOURCE
 [Workspace_1]
-openfiles=Untitled.h,Untitled.cpp,/home/temporal/stf/src/modplugxmms/modplugxmms/modplugxmms.h,
+openfiles=Untitled.h,Untitled.cpp,/home/temporal/stf/src/modplugxmms/modplugxmms/modplugxmms.cpp,/home/temporal/stf/src/modplugxmms/modplugxmms/archive/archive.cpp,/home/temporal/stf/src/modplugxmms/modplugxmms/archive/arch_raw.cpp,/home/temporal/stf/src/modplugxmms/modplugxmms/archive/arch_gzip.cpp,/home/temporal/stf/src/modplugxmms/modplugxmms/archive/arch_rar.cpp,/home/temporal/stf/src/modplugxmms/modplugxmms/archive/arch_zip.cpp,/home/temporal/stf/src/modplugxmms/ChangeLog,
 show_outputview=true
 show_treeview=true
-header_file=/home/temporal/stf/src/modplugxmms/modplugxmms/modplugxmms.h
-cpp_file=Untitled.cpp
+header_file=/home/temporal/stf/src/modplugxmms/ChangeLog
+cpp_file=/home/temporal/stf/src/modplugxmms/modplugxmms/archive/arch_zip.cpp
 browser_file=file:/usr/doc/kde/HTML/default/kdevelop/reference/C/cref.html
 [modplugxmms/soundfile/snd_fx.cpp]
 install_location=

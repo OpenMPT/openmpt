@@ -1,3 +1,6 @@
+ModPlug-XMMS v1.1.1, Feb. 28, 2000
+* Fixed minor installation bug that could have affected a few systems.
+
 ModPlug-XMMS v1.1, Feb. 28, 2000
 + Latest ModPlug source from Olivier Lapique.
 + You can now play compressed mods of the following formats:
@@ -13,3 +16,4 @@ ModPlug-XMMS v1.1, Feb. 28, 2000
 * Fixed bug where files with capitalized extensions did not have their
   names loaded until they were played.
 * GUI looks a bit nicer.
+* Easier to install.  (automake/autoconf)

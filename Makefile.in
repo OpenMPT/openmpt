@@ -60,6 +60,7 @@ POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
 AS = @AS@
+AWK = @AWK@
 CC = @CC@
 CXX = @CXX@
 DLLTOOL = @DLLTOOL@
@@ -72,6 +73,17 @@ OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
+XMMS_CFLAGS = @XMMS_CFLAGS@
+XMMS_CONFIG = @XMMS_CONFIG@
+XMMS_DATA_DIR = @XMMS_DATA_DIR@
+XMMS_EFFECT_PLUGIN_DIR = @XMMS_EFFECT_PLUGIN_DIR@
+XMMS_GENERAL_PLUGIN_DIR = @XMMS_GENERAL_PLUGIN_DIR@
+XMMS_INPUT_PLUGIN_DIR = @XMMS_INPUT_PLUGIN_DIR@
+XMMS_LIBS = @XMMS_LIBS@
+XMMS_OUTPUT_PLUGIN_DIR = @XMMS_OUTPUT_PLUGIN_DIR@
+XMMS_PLUGIN_DIR = @XMMS_PLUGIN_DIR@
+XMMS_VERSION = @XMMS_VERSION@
+XMMS_VISUALIZATION_PLUGIN_DIR = @XMMS_VISUALIZATION_PLUGIN_DIR@
 plugindir = @plugindir@
 
 SUBDIRS = modplugxmms
@@ -84,9 +96,9 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = 
 DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
-Makefile.am Makefile.in TODO acconfig.h aclocal.m4 config.guess \
-config.h.in config.sub configure configure.in install-sh ltconfig \
-ltmain.sh missing mkinstalldirs
+Makefile.am Makefile.in TODO acconfig.h acinclude.m4 aclocal.m4 \
+config.guess config.h.in config.sub configure configure.in install-sh \
+ltconfig ltmain.sh missing mkinstalldirs
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -102,7 +114,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-$(ACLOCAL_M4):  configure.in 
+$(ACLOCAL_M4):  configure.in  acinclude.m4
 	cd $(srcdir) && $(ACLOCAL)
 
 config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)

@@ -3,7 +3,7 @@ AC_INIT(Makefile.am)
 
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(modplugxmms,1.1)
+AM_INIT_AUTOMAKE(modplugxmms,1.1.1)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -13,16 +13,9 @@ AM_PROG_LIBTOOL
 
 dnl find install dir
 
-dnl I hope this covers every installation...
+AM_PATH_XMMS(1.0.0, , AC_MSG_ERROR([*** XMMS >= 1.0.0 not installed - please install first ***]))
 
-if test -e /usr/local/lib/xmms; then
-	{ plugindir=/usr/local/lib/xmms/Input; }
-elif test -e /usr/lib/xmms; then
-	{ plugindir=/usr/lib/xmms/Input; }
-elif test -e /usr/X11R6/lib/xmms; then
-	{ plugindir=/usr/X11R6/lib/xmms/Input; }
-fi
-
+plugindir=$XMMS_INPUT_PLUGIN_DIR
 AC_SUBST(plugindir)
 
 AC_OUTPUT(Makefile modplugxmms/Makefile modplugxmms/soundfile/Makefile modplugxmms/gui/Makefile modplugxmms/archive/Makefile )

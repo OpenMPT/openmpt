@@ -21,6 +21,10 @@ ac_help="$ac_help
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]"
 ac_help="$ac_help
   --disable-libtool-lock  avoid locking (might break parallel builds)"
+ac_help="$ac_help
+  --with-xmms-prefix=PFX  Prefix where XMMS is installed (optional)"
+ac_help="$ac_help
+  --with-xmms-exec-prefix=PFX Exec prefix where XMMS is installed (optional)"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -567,7 +571,7 @@ ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 # SVR4 /usr/ucb/install, which tries to use the nonexistent group "staff"
 # ./install, which can be erroneously created by make from ./install.sh.
 echo $ac_n "checking for a BSD compatible install""... $ac_c" 1>&6
-echo "configure:571: checking for a BSD compatible install" >&5
+echo "configure:575: checking for a BSD compatible install" >&5
 if test -z "$INSTALL"; then
 if eval "test \"`echo '$''{'ac_cv_path_install'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -620,7 +624,7 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL_PROGRAM}'
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 echo $ac_n "checking whether build environment is sane""... $ac_c" 1>&6
-echo "configure:624: checking whether build environment is sane" >&5
+echo "configure:628: checking whether build environment is sane" >&5
 # Just in case
 sleep 1
 echo timestamp > conftestfile
@@ -677,7 +681,7 @@ test "$program_suffix" != NONE &&
 test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 
 echo $ac_n "checking whether ${MAKE-make} sets \${MAKE}""... $ac_c" 1>&6
-echo "configure:681: checking whether ${MAKE-make} sets \${MAKE}" >&5
+echo "configure:685: checking whether ${MAKE-make} sets \${MAKE}" >&5
 set dummy ${MAKE-make}; ac_make=`echo "$2" | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_prog_make_${ac_make}_set'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -706,7 +710,7 @@ fi
 
 PACKAGE=modplugxmms
 
-VERSION=1.1
+VERSION=1.1.1
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
@@ -723,7 +727,7 @@ EOF
 
 missing_dir=`cd $ac_aux_dir && pwd`
 echo $ac_n "checking for working aclocal""... $ac_c" 1>&6
-echo "configure:727: checking for working aclocal" >&5
+echo "configure:731: checking for working aclocal" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -736,7 +740,7 @@ else
 fi
 
 echo $ac_n "checking for working autoconf""... $ac_c" 1>&6
-echo "configure:740: checking for working autoconf" >&5
+echo "configure:744: checking for working autoconf" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -749,7 +753,7 @@ else
 fi
 
 echo $ac_n "checking for working automake""... $ac_c" 1>&6
-echo "configure:753: checking for working automake" >&5
+echo "configure:757: checking for working automake" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -762,7 +766,7 @@ else
 fi
 
 echo $ac_n "checking for working autoheader""... $ac_c" 1>&6
-echo "configure:766: checking for working autoheader" >&5
+echo "configure:770: checking for working autoheader" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -775,7 +779,7 @@ else
 fi
 
 echo $ac_n "checking for working makeinfo""... $ac_c" 1>&6
-echo "configure:779: checking for working makeinfo" >&5
+echo "configure:783: checking for working makeinfo" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -792,7 +796,7 @@ fi
 # Extract the first word of "gcc", so it can be a program name with args.
 set dummy gcc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:796: checking for $ac_word" >&5
+echo "configure:800: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -822,7 +826,7 @@ if test -z "$CC"; then
   # Extract the first word of "cc", so it can be a program name with args.
 set dummy cc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:826: checking for $ac_word" >&5
+echo "configure:830: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -873,7 +877,7 @@ fi
       # Extract the first word of "cl", so it can be a program name with args.
 set dummy cl; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:877: checking for $ac_word" >&5
+echo "configure:881: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -905,7 +909,7 @@ fi
 fi
 
 echo $ac_n "checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works""... $ac_c" 1>&6
-echo "configure:909: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works" >&5
+echo "configure:913: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works" >&5
 
 ac_ext=c
 # CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -916,12 +920,12 @@ cross_compiling=$ac_cv_prog_cc_cross
 
 cat > conftest.$ac_ext << EOF
 
-#line 920 "configure"
+#line 924 "configure"
 #include "confdefs.h"
 
 main(){return(0);}
 EOF
-if { (eval echo configure:925: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:929: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   ac_cv_prog_cc_works=yes
   # If we can't run a trivial program, we are probably using a cross compiler.
   if (./conftest; exit) 2>/dev/null; then
@@ -947,12 +951,12 @@ if test $ac_cv_prog_cc_works = no; then
   { echo "configure: error: installation or configuration problem: C compiler cannot create executables." 1>&2; exit 1; }
 fi
 echo $ac_n "checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler""... $ac_c" 1>&6
-echo "configure:951: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler" >&5
+echo "configure:955: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler" >&5
 echo "$ac_t""$ac_cv_prog_cc_cross" 1>&6
 cross_compiling=$ac_cv_prog_cc_cross
 
 echo $ac_n "checking whether we are using GNU C""... $ac_c" 1>&6
-echo "configure:956: checking whether we are using GNU C" >&5
+echo "configure:960: checking whether we are using GNU C" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gcc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -961,7 +965,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:965: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:969: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gcc=yes
 else
   ac_cv_prog_gcc=no
@@ -980,7 +984,7 @@ ac_test_CFLAGS="${CFLAGS+set}"
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS=
 echo $ac_n "checking whether ${CC-cc} accepts -g""... $ac_c" 1>&6
-echo "configure:984: checking whether ${CC-cc} accepts -g" >&5
+echo "configure:988: checking whether ${CC-cc} accepts -g" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_cc_g'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1016,7 +1020,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1020: checking for $ac_word" >&5
+echo "configure:1024: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1048,7 +1052,7 @@ test -n "$CXX" || CXX="gcc"
 
 
 echo $ac_n "checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) works""... $ac_c" 1>&6
-echo "configure:1052: checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) works" >&5
+echo "configure:1056: checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) works" >&5
 
 ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1059,12 +1063,12 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
 cat > conftest.$ac_ext << EOF
 
-#line 1063 "configure"
+#line 1067 "configure"
 #include "confdefs.h"
 
 int main(){return(0);}
 EOF
-if { (eval echo configure:1068: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1072: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   ac_cv_prog_cxx_works=yes
   # If we can't run a trivial program, we are probably using a cross compiler.
   if (./conftest; exit) 2>/dev/null; then
@@ -1090,12 +1094,12 @@ if test $ac_cv_prog_cxx_works = no; then
   { echo "configure: error: installation or configuration problem: C++ compiler cannot create executables." 1>&2; exit 1; }
 fi
 echo $ac_n "checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) is a cross-compiler""... $ac_c" 1>&6
-echo "configure:1094: checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) is a cross-compiler" >&5
+echo "configure:1098: checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) is a cross-compiler" >&5
 echo "$ac_t""$ac_cv_prog_cxx_cross" 1>&6
 cross_compiling=$ac_cv_prog_cxx_cross
 
 echo $ac_n "checking whether we are using GNU C++""... $ac_c" 1>&6
-echo "configure:1099: checking whether we are using GNU C++" >&5
+echo "configure:1103: checking whether we are using GNU C++" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gxx'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1104,7 +1108,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CXX-g++} -E conftest.C'; { (eval echo configure:1108: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CXX-g++} -E conftest.C'; { (eval echo configure:1112: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gxx=yes
 else
   ac_cv_prog_gxx=no
@@ -1123,7 +1127,7 @@ ac_test_CXXFLAGS="${CXXFLAGS+set}"
 ac_save_CXXFLAGS="$CXXFLAGS"
 CXXFLAGS=
 echo $ac_n "checking whether ${CXX-g++} accepts -g""... $ac_c" 1>&6
-echo "configure:1127: checking whether ${CXX-g++} accepts -g" >&5
+echo "configure:1131: checking whether ${CXX-g++} accepts -g" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_cxx_g'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1157,7 +1161,7 @@ fi
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1161: checking for $ac_word" >&5
+echo "configure:1165: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_RANLIB'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1260,7 +1264,7 @@ else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
 fi
 
 echo $ac_n "checking host system type""... $ac_c" 1>&6
-echo "configure:1264: checking host system type" >&5
+echo "configure:1268: checking host system type" >&5
 
 host_alias=$host
 case "$host_alias" in
@@ -1281,7 +1285,7 @@ host_os=`echo $host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 echo "$ac_t""$host" 1>&6
 
 echo $ac_n "checking build system type""... $ac_c" 1>&6
-echo "configure:1285: checking build system type" >&5
+echo "configure:1289: checking build system type" >&5
 
 build_alias=$build
 case "$build_alias" in
@@ -1310,7 +1314,7 @@ ac_prog=ld
 if test "$ac_cv_prog_gcc" = yes; then
   # Check if gcc -print-prog-name=ld gives a path.
   echo $ac_n "checking for ld used by GCC""... $ac_c" 1>&6
-echo "configure:1314: checking for ld used by GCC" >&5
+echo "configure:1318: checking for ld used by GCC" >&5
   ac_prog=`($CC -print-prog-name=ld) 2>&5`
   case "$ac_prog" in
     # Accept absolute paths.
@@ -1334,10 +1338,10 @@ echo "configure:1314: checking for ld used by GCC" >&5
   esac
 elif test "$with_gnu_ld" = yes; then
   echo $ac_n "checking for GNU ld""... $ac_c" 1>&6
-echo "configure:1338: checking for GNU ld" >&5
+echo "configure:1342: checking for GNU ld" >&5
 else
   echo $ac_n "checking for non-GNU ld""... $ac_c" 1>&6
-echo "configure:1341: checking for non-GNU ld" >&5
+echo "configure:1345: checking for non-GNU ld" >&5
 fi
 if eval "test \"`echo '$''{'ac_cv_path_LD'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1373,7 +1377,7 @@ fi
 test -z "$LD" && { echo "configure: error: no acceptable ld found in \$PATH" 1>&2; exit 1; }
 
 echo $ac_n "checking if the linker ($LD) is GNU ld""... $ac_c" 1>&6
-echo "configure:1377: checking if the linker ($LD) is GNU ld" >&5
+echo "configure:1381: checking if the linker ($LD) is GNU ld" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gnu_ld'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1389,7 +1393,7 @@ echo "$ac_t""$ac_cv_prog_gnu_ld" 1>&6
 
 
 echo $ac_n "checking for BSD-compatible nm""... $ac_c" 1>&6
-echo "configure:1393: checking for BSD-compatible nm" >&5
+echo "configure:1397: checking for BSD-compatible nm" >&5
 if eval "test \"`echo '$''{'ac_cv_path_NM'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1426,7 +1430,7 @@ echo "$ac_t""$NM" 1>&6
 
 
 echo $ac_n "checking whether ln -s works""... $ac_c" 1>&6
-echo "configure:1430: checking whether ln -s works" >&5
+echo "configure:1434: checking whether ln -s works" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_LN_S'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1475,8 +1479,8 @@ test x"$silent" = xyes && libtool_flags="$libtool_flags --silent"
 case "$host" in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 1479 "configure"' > conftest.$ac_ext
-  if { (eval echo configure:1480: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  echo '#line 1483 "configure"' > conftest.$ac_ext
+  if { (eval echo configure:1484: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
     case "`/usr/bin/file conftest.o`" in
     *32-bit*)
       LD="${LD-ld} -32"
@@ -1497,19 +1501,19 @@ case "$host" in
   SAVE_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS -belf"
   echo $ac_n "checking whether the C compiler needs -belf""... $ac_c" 1>&6
-echo "configure:1501: checking whether the C compiler needs -belf" >&5
+echo "configure:1505: checking whether the C compiler needs -belf" >&5
 if eval "test \"`echo '$''{'lt_cv_cc_needs_belf'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1506 "configure"
+#line 1510 "configure"
 #include "confdefs.h"
 
 int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1513: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1517: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   lt_cv_cc_needs_belf=yes
 else
@@ -1613,14 +1617,217 @@ exec 5>>./config.log
 
 
 
-if test -e /usr/local/lib/xmms; then
-	{ plugindir=/usr/local/lib/xmms/Input; }
-elif test -e /usr/lib/xmms; then
-	{ plugindir=/usr/lib/xmms/Input; }
-elif test -e /usr/X11R6/lib/xmms; then
-	{ plugindir=/usr/X11R6/lib/xmms/Input; }
+# Check whether --with-xmms-prefix or --without-xmms-prefix was given.
+if test "${with_xmms_prefix+set}" = set; then
+  withval="$with_xmms_prefix"
+  xmms_config_prefix="$withval"
+else
+  xmms_config_prefix=""
 fi
 
+# Check whether --with-xmms-exec-prefix or --without-xmms-exec-prefix was given.
+if test "${with_xmms_exec_prefix+set}" = set; then
+  withval="$with_xmms_exec_prefix"
+  xmms_config_exec_prefix="$withval"
+else
+  xmms_config_exec_prefix=""
+fi
+
+
+if test x$xmms_config_exec_prefix != x; then
+    xmms_config_args="$xmms_config_args --exec-prefix=$xmms_config_exec_prefix"
+    if test x${XMMS_CONFIG+set} != xset; then
+	XMMS_CONFIG=$xmms_config_exec_prefix/bin/xmms-config
+    fi
+fi
+
+if test x$xmms_config_prefix != x; then
+    xmms_config_args="$xmms_config_args --prefix=$xmms_config_prefix"
+    if test x${XMMS_CONFIG+set} != xset; then
+  	XMMS_CONFIG=$xmms_config_prefix/bin/xmms-config
+    fi
+fi
+
+# Extract the first word of "xmms-config", so it can be a program name with args.
+set dummy xmms-config; ac_word=$2
+echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
+echo "configure:1655: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_path_XMMS_CONFIG'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  case "$XMMS_CONFIG" in
+  /*)
+  ac_cv_path_XMMS_CONFIG="$XMMS_CONFIG" # Let the user override the test with a path.
+  ;;
+  ?:/*)			 
+  ac_cv_path_XMMS_CONFIG="$XMMS_CONFIG" # Let the user override the test with a dos path.
+  ;;
+  *)
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
+  ac_dummy="$PATH"
+  for ac_dir in $ac_dummy; do 
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
+      ac_cv_path_XMMS_CONFIG="$ac_dir/$ac_word"
+      break
+    fi
+  done
+  IFS="$ac_save_ifs"
+  test -z "$ac_cv_path_XMMS_CONFIG" && ac_cv_path_XMMS_CONFIG="no"
+  ;;
+esac
+fi
+XMMS_CONFIG="$ac_cv_path_XMMS_CONFIG"
+if test -n "$XMMS_CONFIG"; then
+  echo "$ac_t""$XMMS_CONFIG" 1>&6
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+min_xmms_version=1.0.0
+
+if test "$XMMS_CONFIG" = "no"; then
+    no_xmms=yes
+else
+    XMMS_CFLAGS=`$XMMS_CONFIG $xmms_config_args --cflags`
+    XMMS_LIBS=`$XMMS_CONFIG $xmms_config_args --libs`
+    XMMS_VERSION=`$XMMS_CONFIG $xmms_config_args --version`
+    XMMS_DATA_DIR=`$XMMS_CONFIG $xmms_config_args --data-dir`
+    XMMS_PLUGIN_DIR=`$XMMS_CONFIG $xmms_config_args --plugin-dir`
+    XMMS_VISUALIZATION_PLUGIN_DIR=`$XMMS_CONFIG $xmms_config_args \
+					--visualization-plugin-dir`
+    XMMS_INPUT_PLUGIN_DIR=`$XMMS_CONFIG $xmms_config_args --input-plugin-dir`
+    XMMS_OUTPUT_PLUGIN_DIR=`$XMMS_CONFIG $xmms_config_args --output-plugin-dir`
+    XMMS_EFFECT_PLUGIN_DIR=`$XMMS_CONFIG $xmms_config_args --effect-plugin-dir`
+    XMMS_GENERAL_PLUGIN_DIR=`$XMMS_CONFIG $xmms_config_args --general-plugin-dir`
+
+    
+
+# Determine which version number is greater. Prints 2 to stdout if	
+# the second number is greater, 1 if the first number is greater,	
+# 0 if the numbers are equal.						
+									
+# Written 15 December 1999 by Ben Gertzfield <che@debian.org>		
+# Revised 15 December 1999 by Jim Monty <monty@primenet.com>		
+									
+    for ac_prog in gawk mawk nawk awk
+do
+# Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
+echo "configure:1719: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_prog_AWK'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  if test -n "$AWK"; then
+  ac_cv_prog_AWK="$AWK" # Let the user override the test.
+else
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
+  ac_dummy="$PATH"
+  for ac_dir in $ac_dummy; do
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
+      ac_cv_prog_AWK="$ac_prog"
+      break
+    fi
+  done
+  IFS="$ac_save_ifs"
+fi
+fi
+AWK="$ac_cv_prog_AWK"
+if test -n "$AWK"; then
+  echo "$ac_t""$AWK" 1>&6
+else
+  echo "$ac_t""no" 1>&6
+fi
+
+test -n "$AWK" && break
+done
+
+    xmms_got_version=` $AWK '						\
+BEGIN {									\
+    print vercmp(ARGV[1], ARGV[2]);					\
+}									\
+									\
+function vercmp(ver1, ver2,    ver1arr, ver2arr,			\
+                               ver1len, ver2len,			\
+                               ver1int, ver2int, len, i, p) {		\
+									\
+    ver1len = split(ver1, ver1arr, /\./);				\
+    ver2len = split(ver2, ver2arr, /\./);				\
+									\
+    len = ver1len > ver2len ? ver1len : ver2len;			\
+									\
+    for (i = 1; i <= len; i++) {					\
+        p = 1000 ^ (len - i);						\
+        ver1int += ver1arr[i] * p;					\
+        ver2int += ver2arr[i] * p;					\
+    }									\
+									\
+    if (ver1int < ver2int)						\
+        return 2;							\
+    else if (ver1int > ver2int)						\
+        return 1;							\
+    else								\
+        return 0;							\
+}' $XMMS_VERSION $min_xmms_version`								
+
+    if test $xmms_got_version -eq 2; then 	# failure
+	no_xmms=version			
+    else  					# success!
+	:
+    fi
+
+fi
+
+echo $ac_n "checking for XMMS - version >= $min_xmms_version""... $ac_c" 1>&6
+echo "configure:1785: checking for XMMS - version >= $min_xmms_version" >&5
+
+if test "x$no_xmms" = x; then
+    echo "$ac_t""yes" 1>&6
+    :
+else
+    echo "$ac_t""no" 1>&6
+
+    if test "$XMMS_CONFIG" = "no" ; then
+	echo "*** The xmms-config script installed by XMMS could not be found."
+      	echo "*** If XMMS was installed in PREFIX, make sure PREFIX/bin is in"
+	echo "*** your path, or set the XMMS_CONFIG environment variable to the"
+	echo "*** full path to xmms-config."
+    else
+	if test "$no_xmms" = "version"; then
+	    echo "*** An old version of XMMS, $XMMS_VERSION, was found."
+	    echo "*** You need a version of XMMS newer than $min_xmms_version."
+	    echo "*** The latest version of XMMS is always available from"
+	    echo "*** http://www.xmms.org/"
+	    echo "***"
+
+            echo "*** If you have already installed a sufficiently new version, this error"
+            echo "*** probably means that the wrong copy of the xmms-config shell script is"
+            echo "*** being found. The easiest way to fix this is to remove the old version"
+            echo "*** of XMMS, but you can also set the XMMS_CONFIG environment to point to the"
+            echo "*** correct copy of xmms-config. (In this case, you will have to"
+            echo "*** modify your LD_LIBRARY_PATH enviroment variable, or edit /etc/ld.so.conf"
+            echo "*** so that the correct libraries are found at run-time)"
+	fi
+    fi
+    XMMS_CFLAGS=""
+    XMMS_LIBS=""
+    { echo "configure: error: *** XMMS >= 1.0.0 not installed - please install first ***" 1>&2; exit 1; }
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+plugindir=$XMMS_INPUT_PLUGIN_DIR
 
 
 trap '' 1 2 15
@@ -1784,6 +1991,18 @@ s%@LD@%$LD%g
 s%@NM@%$NM%g
 s%@LN_S@%$LN_S%g
 s%@LIBTOOL@%$LIBTOOL%g
+s%@XMMS_CONFIG@%$XMMS_CONFIG%g
+s%@AWK@%$AWK%g
+s%@XMMS_CFLAGS@%$XMMS_CFLAGS%g
+s%@XMMS_LIBS@%$XMMS_LIBS%g
+s%@XMMS_VERSION@%$XMMS_VERSION%g
+s%@XMMS_DATA_DIR@%$XMMS_DATA_DIR%g
+s%@XMMS_PLUGIN_DIR@%$XMMS_PLUGIN_DIR%g
+s%@XMMS_VISUALIZATION_PLUGIN_DIR@%$XMMS_VISUALIZATION_PLUGIN_DIR%g
+s%@XMMS_INPUT_PLUGIN_DIR@%$XMMS_INPUT_PLUGIN_DIR%g
+s%@XMMS_OUTPUT_PLUGIN_DIR@%$XMMS_OUTPUT_PLUGIN_DIR%g
+s%@XMMS_GENERAL_PLUGIN_DIR@%$XMMS_GENERAL_PLUGIN_DIR%g
+s%@XMMS_EFFECT_PLUGIN_DIR@%$XMMS_EFFECT_PLUGIN_DIR%g
 s%@plugindir@%$plugindir%g
 
 CEOF
