@@ -45,6 +45,28 @@ Cfxp::Cfxp(long ID, long version, long nParams, float *ps)
 	memset(prgName, 0, 28);
 }
 
+Cfxp::Cfxp(long ID, long version, long nPrograms, long inChunkSize, void *inChunk)
+//--------------------------------------------------------------------------------
+{
+	//Cfxp();
+	params=NULL;
+	chunk=NULL;
+	m_bNeedSwap=-1;
+	
+	ChunkMagic='CcnK';	// 'KncC';
+	fxMagic='FPCh';
+	byteSize=0;
+	version=2;
+	fxID=ID;
+	fxVersion=version;
+	numParams=nPrograms;
+	chunkSize=inChunkSize;
+	chunk = new char[chunkSize];
+	
+	memcpy(chunk, inChunk, sizeof(char)*chunkSize);
+	memset(prgName, 0, 28);
+}
+
 
 Cfxp::~Cfxp(void)
 {
@@ -105,10 +127,25 @@ bool Cfxp::Load(CString fileName)
 	}
 	else if (fxMagic == 'FPCh') // load chunk list
 	{
-		chunk = malloc(numParams);
-		if (!ReadLE(inStream, (char*)chunk, numParams))
+		if (!ReadLE(inStream, chunkSize))
 		{
-			::AfxMessageBox("Error reading Chunk.");
+			::AfxMessageBox("Error reading chunk size.");
+			inStream.Close();
+			return false;
+		}
+		
+		chunk = malloc(chunkSize);
+
+		if (!chunk)
+		{
+			::AfxMessageBox("Error allocating memory for chunk.");
+			inStream.Close();
+			return false;
+		}
+
+		if (!ReadLE(inStream, (char*)chunk, chunkSize))
+		{
+			::AfxMessageBox("Error reading chunk.");
 			inStream.Close();
 			return false;
 		}
@@ -145,14 +182,27 @@ bool Cfxp::Save(CString fileName)
 		return false;
 	}
 
-	for (int p=0; p<numParams; p++)
+	if (fxMagic == 'FxCk') // save param list
 	{
-		if (!WriteLE(outStream, params[p]))
+		for (int p=0; p<numParams; p++)
+		{
+			if (!WriteLE(outStream, params[p]))
+			{
+				//TODO: exception
+				outStream.Close();
+				return false;
+			}
+		}
+	}
+	else  if (fxMagic == 'FPCh') // save chunk list
+	{
+		if (!WriteLE(outStream, chunkSize) || !WriteLE(outStream, (char*)chunk, chunkSize))
 		{
 			//TODO: exception
 			outStream.Close();
 			return false;
 		}
+
 	}
 
 	outStream.Close();
