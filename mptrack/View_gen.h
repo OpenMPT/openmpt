@@ -31,10 +31,11 @@ protected:
 	UINT m_nCurrentPreset;
 // -! NEW_FEATURE#0002
 
-// -> CODE#0027
-// -> DESC="VST substract mix check box"
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
 	CComboBox m_CbnSpecialMixProcessing;
-// -! BEHAVIOUR_CHANGE#0027
+	CSpinButtonCtrl m_SpinMixGain;			// update#02
+// -! NEW_FEATURE#0028
 
 protected:
 	CViewGlobals():CFormView(IDD_VIEW_GLOBALS) { m_nLockCount = 1; }
@@ -110,11 +111,11 @@ protected:
 	afx_msg void OnBypassChanged();
 	afx_msg void OnDryMixChanged();
 
-// -> CODE#0027
-// -> DESC="VST substract mix check box"
+// -> CODE#0028
+// -> DESC="effect plugin mixing mode combo"
 	afx_msg void OnWetDryExpandChanged();
 	afx_msg void OnSpecialMixProcessingChanged();
-// -! BEHAVIOUR_CHANGE#0027
+// -! NEW_FEATURE#0028
 
 	afx_msg void OnOutputRoutingChanged();
 	afx_msg void OnPrevPlugin();

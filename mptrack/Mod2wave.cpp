@@ -776,7 +776,12 @@ void CDoWaveConvert::OnButton1()
 	}
 	CMainFrame::UpdateAudioParameters(TRUE);
 	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-	EndDialog(IDOK);
+
+// -> CODE#0024	UPDATE#03
+// -> DESC="wav export update"
+//	EndDialog(IDOK);
+	EndDialog(ok);
+// -! NEW_FEATURE#0024
 }
 
 

@@ -81,8 +81,14 @@ extern short int gDownsample2x[];
 
 
 extern int SpectrumSinusTable[256*2];
-const float _f2ic = (float)(1 << 28);
-const float _i2fc = (float)(1.0 / (1 << 28));
+
+// -> CODE#0024 UPDATE#04
+// -> DESC="wav export update"
+//const float _f2ic = (float)(1 << 28);
+//const float _i2fc = (float)(1.0 / (1 << 28));
+const float _f2ic = (float)(0x7fffffff>>2);
+const float _i2fc = (float)(1.0 / (0x7fffffff>>2));
+// -! NEW_FEATURE#0024
 
 static unsigned int QueryProcessorExtensions()
 {

@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -612,7 +612,7 @@ BEGIN
     PUSHBUTTON      "Plug",IDC_PATINSTROPLUGGUI2,137,50,24,11
 END
 
-IDD_CONTROL_SAMPLES DIALOGEX 0, 0, 412, 103
+IDD_CONTROL_SAMPLES DIALOGEX 0, 0, 530, 103
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
@@ -696,6 +696,28 @@ BEGIN
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,353,79,
                     11,11
     LTEXT           "Auto-Vibrato",IDC_STATIC,275,46,41,8
+    GROUPBOX        "Pitch shifting / Time stretching",IDC_STATIC,370,19,150,
+                    76
+    LTEXT           "Pitch",IDC_STATIC,374,34,23,10
+    LTEXT           "Quality",IDC_STATIC,374,50,23,10
+    LTEXT           "FFT:",IDC_STATIC,374,66,23,10
+    CONTROL         "Preview mode",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,373,79,65,11
+    CONTROL         "Time stretch",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | WS_TABSTOP,446,32,69,11
+    LTEXT           "Row(s)",IDC_STATIC,448,50,23,10
+    EDITTEXT        IDC_EDIT6,485,47,30,13,ES_RIGHT | ES_AUTOHSCROLL
+    CTEXT           "Static",IDC_STATIC1,448,65,67,10
+    PUSHBUTTON      "Process",IDC_BUTTON1,466,76,50,16,0,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "?",IDC_BUTTON2,448,76,15,16,0,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Keep",IDC_BUTTON3,448,78,32,13,0,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Restore",IDC_BUTTON4,482,78,33,13,0,WS_EX_CLIENTEDGE
+    COMBOBOX        IDC_COMBO4,400,31,39,61,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_GROUP | WS_TABSTOP
+    COMBOBOX        IDC_COMBO5,400,47,39,61,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_GROUP | WS_TABSTOP
+    COMBOBOX        IDC_COMBO6,400,63,39,61,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_GROUP | WS_TABSTOP
 END
 
 IDD_CONTROL_INSTRUMENTS DIALOGEX 0, 0, 492, 212
@@ -959,8 +981,8 @@ BEGIN
                     WS_EX_STATICEDGE
     PUSHBUTTON      ">>",IDC_BUTTON4,97,187,16,12,NOT WS_TABSTOP
     PUSHBUTTON      "<<",IDC_BUTTON5,78,187,16,12,NOT WS_TABSTOP
-    CONTROL         "Apply to final mix",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,299,188,69,10
+    CONTROL         "Master",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,299,188,46,10
     CONTROL         "Bypass",IDC_CHECK10,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,299,198,40,10
     CONTROL         "Dry mix",IDC_CHECK11,"Button",BS_AUTOCHECKBOX | 
@@ -976,9 +998,12 @@ BEGIN
     LTEXT           "Wet Dry Ratio",IDC_STATIC8,299,256,102,8
     CONTROL         "Expand",IDC_CHECK12,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,299,208,37,10
-    COMBOBOX        IDC_COMBO9,347,214,62,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO9,347,200,62,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Mix mode:",IDC_STATIC,376,203,34,8
+    LTEXT           "Mix mode:",IDC_STATIC,376,189,34,8
+    CONTROL         "",IDC_SPIN10,"msctls_updown32",UDS_ALIGNRIGHT | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,401,217,8,11
+    LTEXT           "Gain: x 1.0",IDC_STATIC2,364,219,34,13
 END
 
 IDD_EDIT_FIND DIALOG  0, 0, 182, 145
@@ -1606,7 +1631,7 @@ BEGIN
     IDD_CONTROL_SAMPLES, DIALOG
     BEGIN
         LEFTMARGIN, 2
-        RIGHTMARGIN, 404
+        RIGHTMARGIN, 522
         BOTTOMMARGIN, 101
     END
 
@@ -2054,12 +2079,12 @@ BEGIN
     ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
 END
 
-#endif    // English (U.S.) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
+// Anglais (Royaume-Uni) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2166,7 +2191,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (U.K.) resources
+#endif    // Anglais (Royaume-Uni) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -17,6 +17,8 @@
 #define NOTE_NOTECUT	0xFE
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Bit Mask for updating view (hints of what changed)
 #define HINT_MODTYPE		0x00001
 #define HINT_MODCOMMENTS	0x00002
@@ -37,6 +39,16 @@
 #define HINT_UNDO			0x10000
 #define HINT_MIXPLUGINS		0x20000
 #define HINT_SPEEDCHANGE	0x40000	//rewbs.envRowGrid
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// NOTE : be carefull when adding new flags !!!
+// -------------------------------------------------------------------------------------------------------------------------
+// those flags are passed through a 32bits parameter which can also contain instrument/sample/pattern row... number :
+// HINT_SAMPLEINFO & HINT_SAMPLEDATA & HINT_SMPNAMES : can be used with a sample number 12bit coded (passed as bit 20 to 31)
+// HINT_PATTERNROW : is used with a row number 10bit coded (passed as bit 22 to 31)
+// HINT_INSTRUMENT & HINT_INSNAMES : can be used with an instrument number 8bit coded (passed as bit 24 to 31)
+// new flags can be added BUT be carefull that they will not be used in a case they should aliased with, ie, a sample number
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Undo
 #define MAX_UNDO_LEVEL		100

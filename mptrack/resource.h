@@ -665,6 +665,8 @@
 #define IDC_RAMPING                     2204
 #define IDC_PLAYEROPTIONS               2205
 #define IDC_CHORDDETECTWAITTIME         2206
+#define IDC_STATIC2                     2207
+#define IDC_STATIC1                     2208
 #define IDC_TEXT_BPM                    2300
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
@@ -842,7 +844,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        500
 #define _APS_NEXT_COMMAND_VALUE         36000
-#define _APS_NEXT_CONTROL_VALUE         2207
+#define _APS_NEXT_CONTROL_VALUE         2209
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -1366,7 +1366,7 @@ void CModDoc::OnFileWaveConvert()
 		// Render song (or current channel if channel mode and channel not initially disabled)
 		if(!wsdlg.m_bChannelMode || !(flags[i] & CHN_MUTE)){
 			m_SndFile.SetCurrentPos(0);
-			dwcdlg.DoModal();
+			if( dwcdlg.DoModal() != IDOK ) break;	// UPDATE#03
 		}
 
 		// Re-mute processed channel

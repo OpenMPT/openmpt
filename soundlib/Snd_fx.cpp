@@ -286,7 +286,7 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 //		nSpeedCount += nMusicSpeed;
 //		dwElapsedTime += (2500 * nSpeedCount) / nMusicTempo;
 		if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED)
-			dwElapsedTime +=  60000.0 / (double)(nMusicSpeed * nMusicTempo);
+			dwElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); // update#01
 		else{
 			nSpeedCount += nMusicSpeed;
 			dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
