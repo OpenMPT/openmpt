@@ -735,7 +735,6 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	}
 }
 
-
 BOOL CSoundFile::ProcessEffects()
 //-------------------------------
 {
@@ -1225,8 +1224,8 @@ BOOL CSoundFile::ProcessEffects()
 						if (m_nRepeatCount > 0) m_nRepeatCount--;
 					} else
 					{
-						// Backward jump disabled
-						bNoLoop = TRUE;
+						// Backward jump disabled (mabey)
+						bNoLoop = !m_bEnableLooping;
 					}
 				}
 			}

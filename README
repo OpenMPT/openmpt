@@ -8,6 +8,16 @@ MOD-playing software available, has sent me the latest version (dated
 2/2000) of his sound rendering code liscensed under the GPL.  This
 plugin is based on that code.
 
+Requires:
+- XMMS 1.0.0 or higher
+- POSIX OS (Linux or other unix*)
+
+* This plugin is only guaranteed to work on Linux.  I have received
+  conflicting reports on whether or not it will work on Solaris x86.
+  One person reported that the plugin compiled fine with the
+  "-fpermissive" compiler flag, which I have added.  Others had far
+  more trouble.
+
 Features:
 - Plays 20 different mod formats, including:
     MOD, S3M, XM, IT, 669, AMF (both of them), AMS, DBM, DMF, DSM, FAR,
@@ -38,12 +48,12 @@ Configurable stuff and explanations:
  All of the following items are configurable from the plugin
  configuration dialog box.
 
-Sampling rate: duh.
+Sampling rate: Higher is better but slower.
 
-Bits per sample: duh.
+Bits per sample: 8-bit or 16-bit sound.
 
 Channels: mono/stereo.  Four-point surround can and will be supported
- once XMMS supports it.
+ once XMMS supports it.  :)
 
 Oversampling: This increases quality considerably by doing all
  calculations at a higher sampling rate and then mixing down to the
@@ -75,6 +85,7 @@ Fade on Stop: With this enabled, when you click stop while a mod is
  playing, it will fade out for up to two seconds (depending on where you
  set the slidebar).
  WARNING:  This is a hacked effect, and XMMS doesn't like it.  The
-  following actions will result in segmentation faults:
+  following actions will result in segmentation faults when using this
+  effect:
  - Skipping to an MP3 (or other non-MOD format) while Modplug is playing
  - Closing XMMS while Modplug is playing

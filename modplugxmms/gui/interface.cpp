@@ -6,6 +6,7 @@
 #  include <config.h>
 #endif
 
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
@@ -18,7 +19,7 @@
 #include "support.h"
 
 GtkWidget*
-create_About ()
+create_About (void)
 {
   GtkWidget *About;
   GtkWidget *vbox1;
@@ -81,7 +82,7 @@ create_About ()
 }
 
 GtkWidget*
-create_Config ()
+create_Config (void)
 {
   GtkWidget *Config;
   GtkWidget *vbox2;
@@ -111,6 +112,7 @@ create_Config ()
   GtkWidget *vbox8;
   GtkWidget *fxOversamp;
   GtkWidget *fxNR;
+  GtkWidget *fxLooping;
   GtkWidget *vbox9;
   GtkWidget *fxVolRamp;
   GtkWidget *fxFastInfo;
@@ -339,6 +341,13 @@ create_Config ()
   gtk_widget_show (fxNR);
   gtk_box_pack_start (GTK_BOX (vbox8), fxNR, FALSE, FALSE, 0);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (fxNR), TRUE);
+
+  fxLooping = gtk_check_button_new_with_label (_("Looping"));
+  gtk_widget_ref (fxLooping);
+  gtk_object_set_data_full (GTK_OBJECT (Config), "fxLooping", fxLooping,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (fxLooping);
+  gtk_box_pack_start (GTK_BOX (vbox8), fxLooping, FALSE, FALSE, 0);
 
   vbox9 = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox9);
@@ -579,7 +588,7 @@ create_Config ()
                     (GtkAttachOptions) (0),
                     (GtkAttachOptions) (0), 0, 0);
 
-  frame8 = gtk_frame_new (_("Fade on Stop (WARINING: SEE README)"));
+  frame8 = gtk_frame_new (_("Fade on Stop (WARNING: SEE README)"));
   gtk_widget_ref (frame8);
   gtk_object_set_data_full (GTK_OBJECT (Config), "frame8", frame8,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -686,7 +695,7 @@ create_Config ()
 }
 
 GtkWidget*
-create_Info ()
+create_Info (void)
 {
   GtkWidget *Info;
   GtkWidget *vbox14;
@@ -703,6 +712,9 @@ create_Info ()
   GtkWidget *viewport2;
   GtkWidget *info_instruments;
   GtkWidget *label17;
+  GtkWidget *scrolledwindow3;
+  GtkWidget *info_message;
+  GtkWidget *label18;
   GtkWidget *hbuttonbox3;
   GtkWidget *info_close;
 
@@ -710,7 +722,6 @@ create_Info ()
   gtk_object_set_data (GTK_OBJECT (Info), "Info", Info);
   gtk_widget_set_usize (Info, 290, 240);
   gtk_window_set_title (GTK_WINDOW (Info), _("MOD Info"));
-  gtk_window_set_policy (GTK_WINDOW (Info), FALSE, FALSE, FALSE);
 
   vbox14 = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox14);
@@ -820,6 +831,28 @@ create_Info ()
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (label17);
   gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook2), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook2), 2), label17);
+
+  scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_ref (scrolledwindow3);
+  gtk_object_set_data_full (GTK_OBJECT (Info), "scrolledwindow3", scrolledwindow3,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (scrolledwindow3);
+  gtk_container_add (GTK_CONTAINER (notebook2), scrolledwindow3);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow3), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+
+  info_message = gtk_text_new (NULL, NULL);
+  gtk_widget_ref (info_message);
+  gtk_object_set_data_full (GTK_OBJECT (Info), "info_message", info_message,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (info_message);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow3), info_message);
+
+  label18 = gtk_label_new (_("Message"));
+  gtk_widget_ref (label18);
+  gtk_object_set_data_full (GTK_OBJECT (Info), "label18", label18,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (label18);
+  gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook2), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook2), 3), label18);
 
   hbuttonbox3 = gtk_hbutton_box_new ();
   gtk_widget_ref (hbuttonbox3);

@@ -28,6 +28,8 @@
 #include"modplugxmms/soundfile/sndfile.h"
 #include"modplugxmms/archive/open.h"
 
+#define MAX_MESSAGE_LENGTH 4000
+
 GtkWidget *AboutWin    = NULL;
 GtkWidget *ConfigWin   = NULL;
 GtkWidget *InfoWin     = NULL;
@@ -80,6 +82,11 @@ void ShowConfigureWindow(const ModProperties& aProps)
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxFastInfo"), TRUE);
 	else
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxFastInfo"), FALSE);
+	
+	if(aProps.mLooping)
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxLooping"), TRUE);
+	else
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxLooping"), FALSE);
 	
 	if(aProps.mReverb)
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxReverb"), TRUE);
@@ -269,11 +276,23 @@ void ShowInfoWindow(const string& aFilename)
 	for(i = 0; i < lNumInstruments; i++)
 	{
 		lSoundFile->GetInstrumentName(i, lBuffer);
+	
 		lInfo += lBuffer;
 		lInfo += '\n';
 	}
 	gtk_label_set_text((GtkLabel*)lookup_widget(InfoWin, "info_instruments"), lInfo.c_str());
 
+	char message[MAX_MESSAGE_LENGTH];
+	static int length = 0;
+	GtkText *textbox;
+	
+	textbox = (GtkText*)lookup_widget(InfoWin, "info_message");
+	gtk_text_set_word_wrap(textbox, TRUE);
+	gtk_text_backward_delete(textbox, length);
+	length = lSoundFile->GetSongComments(message, MAX_MESSAGE_LENGTH, 80);
+	if (length != 0)
+		gtk_text_insert(textbox, NULL, NULL, NULL, message, length);
+	
 	//unload the file
 	lSoundFile->Destroy();
 	delete lSoundFile;

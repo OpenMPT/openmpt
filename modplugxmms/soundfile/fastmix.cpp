@@ -7,6 +7,7 @@
  * Authors: Olivier Lapicque <olivierl@jps.net>
  *          Rani Assaf <rani@magic.metawire.com> (C translations of asm)
  *          Kenton Varda <temporal@gauge3d.org> (GCC port)
+ *          Markus Fick <webmaster@mark-f.de> (changed SNDMIX_PROCESSFILTER from 2p1z to 2p, WIN32 ifdefs)
 */
 
 #include "stdafx.h"
@@ -111,11 +112,9 @@ extern UINT gnReverbSend;
 	pChannel->nFilter_X2 = fx2;
 
 #define SNDMIX_PROCESSFILTER\
-	int fx0 = (vol * pChn->nFilter_B0 + fx1 * pChn->nFilter_B1 + fx2 * pChn->nFilter_B2) / 16384;\
-	vol = fx0 + fx1*2 + fx2;\
+	vol = (vol * pChn->nFilter_B0 + fx1 * pChn->nFilter_B1 + fx2 * pChn->nFilter_B2) / 8192;\
 	fx2 = fx1;\
-	fx1 = fx0;\
-
+	fx1 = vol;\
 
 //////////////////////////////////////////////////////////
 // Interfaces
@@ -898,6 +897,7 @@ UINT CSoundFile::CreateMonoMix(int count)
 			pbuffer = pbufmax;
 			naddmix = 1;
 		}
+
 		nsamples -= nSmpCount;
 		if (pChannel->nRampLength)
 		{
@@ -930,8 +930,11 @@ UINT CSoundFile::CreateMonoMix(int count)
 //---GCCFIX: Asm replaced with C functions
 // The C versions were written by Rani Assaf <rani@magic.metawire.com>, I believe
 //TODO: Convert asm to GCC-style!
-
+#ifdef WIN32
+DWORD MPPASMCALL X86_Convert32To8(LPVOID lp8, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+#else
 __declspec(naked) DWORD MPPASMCALL X86_Convert32To8(LPVOID lp8, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+#endif
 //----------------------------------------------------------------------------------------------------------------------------
 {
 	int vumin = *lpMin, vumax = *lpMax;
@@ -1017,7 +1020,11 @@ cliphigh:
 
 
 // Perform clipping
+#ifdef WIN32
+DWORD MPPASMCALL X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+#else
 __declspec(naked) DWORD MPPASMCALL X86_Convert32To16(LPVOID lp16, int *pBuffer, DWORD lSampleCount, LPLONG lpMin, LPLONG lpMax)
+#endif
 //-----------------------------------------------------------------------------------------------------------------------------
 {
 	int vumin = *lpMin, vumax = *lpMax;
@@ -1105,8 +1112,11 @@ cliphigh:
 }
 
 
-
+#ifdef WIN32
+void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
+#else
 __declspec(naked) void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs, LPLONG lpLOfs)
+#endif
 //---------------------------------------------------------------------------------------------------------
 {
 	int ofsr = (*lpROfs) & OFSVOLDECMASK, ofsl = (*lpLOfs) & OFSVOLDECMASK;
@@ -1189,8 +1199,11 @@ __declspec(naked) void MPPASMCALL X86_StereoFill(int *pBuffer, UINT nSamples, LP
 */
 }
 
-
+#ifdef WIN32
+void MPPASMCALL X86_MonoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs)
+#else
 __declspec(naked) void MPPASMCALL X86_MonoFill(int *pBuffer, UINT nSamples, LPLONG lpROfs)
+#endif
 //----------------------------------------------------------------------------------------
 {
 	int ofs = (*lpROfs) & OFSVOLDECMASK;
@@ -1251,7 +1264,11 @@ __declspec(naked) void MPPASMCALL X86_MonoFill(int *pBuffer, UINT nSamples, LPLO
 #define MIXING_LIMITMAX		(0x08080000)
 #define MIXING_LIMITMIN		(-MIXING_LIMITMAX)
 
+#ifdef WIN32
+UINT MPPASMCALL X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC)
+#else
 __declspec(naked) UINT MPPASMCALL X86_AGC(int *pBuffer, UINT nSamples, UINT nAGC)
+#endif
 //-------------------------------------------------------------------------------
 {
 	__asm {

@@ -3,9 +3,11 @@ AC_INIT(Makefile.am)
 
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(modplugxmms, 1.2)
+AM_INIT_AUTOMAKE(modplugxmms, 1.3)
 
 dnl Checks for programs.
+AC_DISABLE_STATIC
+AM_DISABLE_STATIC
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -14,11 +16,22 @@ AM_PROG_LIBTOOL
 CXXFLAGS="-fno-exceptions -O2 -Wall -ffast-math -D_REENTRANT `glib-config --cflags`"
 # CXXFLAGS="-fno-exceptions -g -Wall -ffast-math -D_REENTRANT `glib-config --cflags`"
 
-dnl find install dir
+case ${target_os} in
+	*sun* | *solaris*)
+		CXXFLAGS="$CXXFLAGS -fpermissive"
+		;;
+esac
 
+dnl find install dir
 AM_PATH_XMMS(1.0.0, , AC_MSG_ERROR([*** XMMS >= 1.0.0 not installed - please install first ***]))
 
 plugindir=$XMMS_INPUT_PLUGIN_DIR
 AC_SUBST(plugindir)
 
-AC_OUTPUT(Makefile modplugxmms/Makefile modplugxmms/soundfile/Makefile modplugxmms/gui/Makefile modplugxmms/archive/Makefile )
+AC_OUTPUT(Makefile
+          modplugxmms/Makefile
+          modplugxmms/soundfile/Makefile
+          modplugxmms/gui/Makefile
+          modplugxmms/archive/Makefile
+          glade/Makefile
+         )

@@ -121,29 +121,16 @@ arch_Rar::arch_Rar(const string& aFileName)
 		return;
 	}
 	
-	lCommand = "unrar p \"" + aFileName + '\"';  //decompress to stdout
+	lCommand = "unrar p -inul \"" + aFileName + '\"';  //decompress to stdout
 	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
 	{
 		mSize = 0;
 		return;
 	}
 	
-	//unrar was obviously written by someone clueless in the ways of unix. :(
-	lPipe.ignore(90, '\n'); //ignore a line.
-	lPipe.ignore(90, '\n'); //ignore a line.
-	lPipe.ignore(90, '\n'); //ignore a line.
-	lPipe.ignore(90, '\n'); //ignore a line.
-	lPipe.ignore(90, '\n'); //ignore a line.
-	lPipe.ignore(90, '\n'); //ignore a line.
-	lPipe.ignore(90, '\n'); //ignore a line.
-	lPipe.ignore(90, '\n'); //ignore a line.
-	
 	for(uint32 i = 0; i < lFileNum; i++)
 	{
 		lPipe.ignore(lSizes[i]);
-		lPipe.ignore(90, '\n'); //ignore a line.
-		lPipe.ignore(90, '\n'); //ignore a line.
-		lPipe.ignore(90, '\n'); //ignore a line.
 	}
 	
 	lPipe.read(mMap, mSize);

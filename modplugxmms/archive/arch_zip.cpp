@@ -47,17 +47,13 @@ arch_Zip::arch_Zip(const string& aFileName)
 	close(lFileDesc);
 	
 	procbuf lPipeBuf;
-	string lCommand = "unzip -l \"" + aFileName + '\"';   //get info
+	string lCommand = "unzip -l -qq \"" + aFileName + '\"';   //get info
 	iostream lPipe(&lPipeBuf);
 	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
 	{
 		mSize = 0;
 		return;
 	}
-	
-	lPipe.ignore(80, '\n'); //ignore a line.
-	lPipe.ignore(80, '\n'); //ignore a line.
-	lPipe.ignore(80, '\n'); //ignore a line.
 	
 	while(lPipe)
 	{
@@ -124,14 +120,10 @@ bool arch_Zip::ContainsMod(const string& aFileName)
 	close(lFileDesc);
 	
 	procbuf lPipeBuf;
-	string lCommand = "unzip -l \"" + aFileName + '\"';   //get info
+	string lCommand = "unzip -l -qq \"" + aFileName + '\"';   //get info
 	iostream lPipe(&lPipeBuf);
 	if(!lPipeBuf.open(lCommand.c_str(), ios::in))
 		return false;
-	
-	lPipe.ignore(80, '\n'); //ignore a line.
-	lPipe.ignore(80, '\n'); //ignore a line.
-	lPipe.ignore(80, '\n'); //ignore a line.
 	
 	while(lPipe)
 	{

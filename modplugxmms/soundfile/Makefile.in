@@ -118,7 +118,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(libsoundfile_la_SOURCES)
 OBJECTS = $(libsoundfile_la_OBJECTS)
@@ -225,7 +225,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -255,9 +255,9 @@ load_wav.lo load_wav.o : load_wav.cpp stdafx.h sndfile.h
 load_xm.lo load_xm.o : load_xm.cpp stdafx.h sndfile.h
 mmcmp.lo mmcmp.o : mmcmp.cpp stdafx.h sndfile.h
 snd_dsp.lo snd_dsp.o : snd_dsp.cpp stdafx.h sndfile.h
-sndfile.lo sndfile.o : sndfile.cpp stdafx.h sndfile.h
 snd_flt.lo snd_flt.o : snd_flt.cpp stdafx.h sndfile.h
 snd_fx.lo snd_fx.o : snd_fx.cpp stdafx.h sndfile.h
+sndfile.lo sndfile.o : sndfile.cpp stdafx.h sndfile.h
 sndmix.lo sndmix.o : sndmix.cpp stdafx.h sndfile.h
 tables.lo tables.o : tables.cpp stdafx.h sndfile.h
 waveform.lo waveform.o : waveform.cpp stdafx.h sndfile.h

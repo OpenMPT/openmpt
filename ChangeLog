@@ -1,3 +1,15 @@
+ModPlug-XMMS v1.3, Jul. 17, 2000
++ Looping!  Check the configure dialog.
++ New IT filters, using the same algorithm as impulse tracker itself.
++ IT file comments supported.
+
+* No more crash when you press stop while paused.
+* Blank mod names are replaced by the filename.
+* Possibly works on Solaris-x86 now.
+* Better zip and rar support.  (should support every archive now)
+* Compiles faster (almost twice as fast!).
+* Glade project files are now included with the source code.
+
 ModPlug-XMMS v1.2, Apr. 10, 2000
 + New file formats recognised:
     S3Z, S3R, S3GZ, XMZ, XMR, XMGZ, ITZ, ITR, ITGZ

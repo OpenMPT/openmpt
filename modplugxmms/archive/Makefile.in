@@ -114,7 +114,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(libarchive_la_SOURCES)
 OBJECTS = $(libarchive_la_OBJECTS)
@@ -221,7 +221,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -230,13 +230,13 @@ distdir: $(DISTFILES)
 	done
 arch_gzip.lo arch_gzip.o : arch_gzip.cpp arch_gzip.h archive.h \
 	../../modplugxmms/stddefs.h
-archive.lo archive.o : archive.cpp archive.h ../../modplugxmms/stddefs.h
 arch_rar.lo arch_rar.o : arch_rar.cpp arch_rar.h archive.h \
 	../../modplugxmms/stddefs.h
 arch_raw.lo arch_raw.o : arch_raw.cpp arch_raw.h archive.h \
 	../../modplugxmms/stddefs.h
 arch_zip.lo arch_zip.o : arch_zip.cpp arch_zip.h archive.h \
 	../../modplugxmms/stddefs.h
+archive.lo archive.o : archive.cpp archive.h ../../modplugxmms/stddefs.h
 open.lo open.o : open.cpp open.h archive.h ../../modplugxmms/stddefs.h \
 	arch_raw.h arch_gzip.h arch_zip.h arch_rar.h
 

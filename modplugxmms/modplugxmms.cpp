@@ -37,8 +37,8 @@ struct CModplugXMMS::State
 	static uchar*  mBuffer;
 	static uint32  mBufSize;
 
-	static bool    mPaused;
-	static bool    mStopped;
+	static bool          mPaused;
+	static volatile bool mStopped;
 
 	static ModProperties mModProps;
 
@@ -65,7 +65,7 @@ uchar*        CModplugXMMS::State::mBuffer         = NULL;
 uint32        CModplugXMMS::State::mBufSize        = 0;
 
 bool          CModplugXMMS::State::mPaused         = false;
-bool          CModplugXMMS::State::mStopped        = true;
+volatile bool CModplugXMMS::State::mStopped        = true;
 
 ModProperties CModplugXMMS::State::mModProps;
 AFormat       CModplugXMMS::State::mFormat         = FMT_S16_LE;
@@ -175,6 +175,8 @@ void CModplugXMMS::Init(void)
 					State::mModProps.mFadeout          = lValueB;
 				else if(lField == "fastinfo")
 					State::mModProps.mFastinfo         = lValueB;
+				else if(lField == "looping")
+					State::mModProps.mLooping          = lValueB;
 
 				else if(lField == "channels")
 				{
@@ -306,16 +308,24 @@ static void* CModplugXMMS_PlayLoop(void* arg)
 				CModplugXMMS::State::mBufSize)))
 		{
 			//no more to play.  Wait for output to finish and then stop.
-			while(CModplugXMMS::State::mOutPlug->buffer_playing())
+			while((CModplugXMMS::State::mOutPlug->buffer_playing())
+			   && (!CModplugXMMS::State::mStopped))
 				usleep(10000);
 			break;
 		}
+		
+		if(CModplugXMMS::State::mStopped)
+			break;
 	
 		//wait for buffer space to free up.
-		while(CModplugXMMS::State::mOutPlug->buffer_free()
-		      < (int)CModplugXMMS::State::mBufSize)
+		while(((CModplugXMMS::State::mOutPlug->buffer_free()
+		    < (int)CModplugXMMS::State::mBufSize))
+		   && (!CModplugXMMS::State::mStopped))
 			usleep(10000);
 			
+		if(CModplugXMMS::State::mStopped)
+			break;
+		
 		CModplugXMMS::State::mOutPlug->write_audio
 		(
 			CModplugXMMS::State::mBuffer,
@@ -394,9 +404,11 @@ void CModplugXMMS::PlayFile(const string& aFilename)
 		State::mModProps.mSurround,
 		!State::mModProps.mOversamp,
 		State::mModProps.mReverb,
+		true,
 		State::mModProps.mMegabass,
 		State::mModProps.mNoiseReduction,
-		State::mModProps.mVolumeRamp
+		false,
+		State::mModProps.mLooping
 	);
 	// [Reverb level 0(quiet)-100(loud)], [delay in ms, usually 40-200ms]
 	if(State::mModProps.mReverb)
@@ -436,8 +448,17 @@ void CModplugXMMS::PlayFile(const string& aFilename)
 	);
 	State::mPlayed = 0;
 
-	//XMMS wants a non-const char*, but modplug returns a const...
 	strncpy(State::mModName, State::mSoundFile.GetTitle(), 100);
+	
+	for(int i = 0; State::mModName[i] == ' ' || State::mModName[i] == 0; i++)
+	{
+		if(State::mModName[i] == 0)
+		{
+			//mod name is blank.  Use filename instead.
+			strcpy(State::mModName, strrchr(aFilename.c_str(), '/') + 1);
+		}
+	}
+	
 	State::mInPlug->set_info
 	(
 		State::mModName,
@@ -585,9 +606,20 @@ void CModplugXMMS::GetSongInfo(const string& aFilename, char*& aTitle, int32& aL
 
 		if(lDone)
 		{
-			aTitle = new char[strlen(State::mModName) + 1];
-			strcpy(aTitle, State::mModName);
+			for(int i = 0; State::mModName[i] != 0; i++)
+			{
+				if(State::mModName[i] != ' ')
+				{
+					aTitle = new char[strlen(State::mModName) + 1];
+					strcpy(aTitle, State::mModName);
+					
+					return;
+				}
+			}
 			
+			//mod name is blank.  Use filename instead.
+			aTitle = new char[aFilename.length() + 1];
+			strcpy(aTitle, strrchr(aFilename.c_str(), '/') + 1);
 			return;
 		}
 	}
@@ -612,9 +644,22 @@ void CModplugXMMS::GetSongInfo(const string& aFilename, char*& aTitle, int32& aL
 	lSoundFile->Create((uchar*)lArchive->Map(), lArchive->Size());
 
 	lTitle = lSoundFile->GetTitle();
-	aTitle = new char[strlen(lTitle) + 1];
+	
+	for(int i = 0; lTitle[i] != 0; i++)
+	{
+		if(lTitle[i] != ' ')
+		{
+			aTitle = new char[strlen(lTitle) + 1];
+			strcpy(aTitle, lTitle);
+			goto therest;     //sorry
+		}
+	}
+	
+	//mod name is blank.  Use filename instead.
+	aTitle = new char[aFilename.length() + 1];
+	strcpy(aTitle, strrchr(aFilename.c_str(), '/') + 1);
 
-	strcpy(aTitle, lTitle);
+therest:	
 	aLength = lSoundFile->GetSongTime() * 1000;                   //It wants milliseconds!?!
 
 	//unload the file
@@ -679,6 +724,7 @@ void CModplugXMMS::SetModProps(const ModProperties& aModProps)
 	State::mModProps.mReverb         = aModProps.mReverb;
 	State::mModProps.mFadeout        = aModProps.mFadeout;
 	State::mModProps.mFastinfo       = aModProps.mFastinfo;
+	State::mModProps.mLooping        = aModProps.mLooping;
 
 	State::mModProps.mChannels       = aModProps.mChannels;
 	State::mModProps.mBits           = aModProps.mBits;
@@ -732,9 +778,11 @@ void CModplugXMMS::SetModProps(const ModProperties& aModProps)
 		State::mModProps.mSurround,
 		!State::mModProps.mOversamp,
 		State::mModProps.mReverb,
+		true,
 		State::mModProps.mMegabass,
 		State::mModProps.mNoiseReduction,
-		State::mModProps.mVolumeRamp
+		false,
+		State::mModProps.mLooping
 	);
 
 	lConfigFilename = g_get_home_dir();
@@ -762,6 +810,7 @@ void CModplugXMMS::SetModProps(const ModProperties& aModProps)
 	lConfigFile << "noisereduction  " << CModplugXMMS_Bool2OnOff(State::mModProps.mNoiseReduction) << endl;
 	lConfigFile << "volumeramping   " << CModplugXMMS_Bool2OnOff(State::mModProps.mVolumeRamp)     << endl;
 	lConfigFile << "fastinfo        " << CModplugXMMS_Bool2OnOff(State::mModProps.mFastinfo)       << endl;
+	lConfigFile << "looping         " << CModplugXMMS_Bool2OnOff(State::mModProps.mLooping)        << endl;
 	lConfigFile << endl;
 	lConfigFile << "fadeout         " << CModplugXMMS_Bool2OnOff(State::mModProps.mFadeout)        << endl;
 	lConfigFile << "fadeout_time    " << State::mModProps.mFadeTime      << endl;

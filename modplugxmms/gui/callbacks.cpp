@@ -75,6 +75,10 @@ on_config_apply_clicked                (GtkButton       *button,
 		lProps.mFastinfo       = true;
 	else
 		lProps.mFastinfo       = false;
+	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxLooping")))
+		lProps.mLooping        = true;
+	else
+		lProps.mLooping        = false;
 	if(gtk_toggle_button_get_active((GtkToggleButton*)lookup_widget((GtkWidget*)button, "fxReverb")))
 		lProps.mReverb         = true;
 	else

@@ -491,6 +491,7 @@ public:	// Static Members
 	static UINT m_nMaxMixChannels;
 	static LONG m_nStreamVolume;
 	static DWORD m_dwMidiSetup;
+	static BOOL m_bEnableLooping;
 	static DWORD gdwSysInfo, gdwSoundSetup, gdwMixingFreq, gnBitsPerSample, gnChannels;
 	static UINT gnAGC, gnVolumeRampSamples, gnVUMeter, gnCPUUsage;
 	static LONG gnROfsVol, gnLOfsVol;
@@ -618,7 +619,7 @@ public:
 	// Mixer Config
 	static BOOL InitPlayer(BOOL bReset=FALSE);
 	static BOOL SetWaveConfig(UINT nRate,UINT nBits,UINT nChannels,BOOL bMMX=FALSE);
-	static BOOL SetWaveConfigEx(BOOL bSurround,BOOL bNoOversampling,BOOL bReverb,BOOL hqido,BOOL megabass=FALSE,BOOL dolbynr=FALSE,BOOL bEQ=FALSE);
+	static BOOL SetWaveConfigEx(BOOL bSurround,BOOL bNoOversampling,BOOL bReverb,BOOL hqido,BOOL megabass=FALSE,BOOL dolbynr=FALSE,BOOL bEQ=FALSE, BOOL bLooping=FALSE);
 	static BOOL IsStereo() { return (gnChannels > 1) ? TRUE : FALSE; }
 	static DWORD GetSampleRate() { return gdwMixingFreq; }
 	static DWORD GetBitsPerSample() { return gnBitsPerSample; }
@@ -687,7 +688,7 @@ public:
 	void ExtendedChannelEffect(MODCHANNEL *, UINT param);
 	void ProcessMidiMacro(MODCHANNEL *, LPCSTR pszMidiMacro, UINT param=0);
 	void ResetChannelMixOffset(MODCHANNEL *p) const { gnROfsVol += p->nROfs; gnLOfsVol += p->nLOfs; p->nROfs = p->nLOfs = 0; }
-	void SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modifier=256) const;
+	void SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modifier=1234) const;
 	// Low-Level effect processing
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);
 	// Global Effects

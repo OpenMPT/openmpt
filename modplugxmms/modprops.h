@@ -33,6 +33,7 @@ struct ModProperties
 	bool    mReverb;
 	bool    mFadeout;
 	bool    mFastinfo;
+	bool    mLooping;
 
 	uint8   mChannels;
 	uint8   mBits;
