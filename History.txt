@@ -15,6 +15,10 @@ email: rf99@doc.ic.ac.uk.            Developer, Admin
 
 
 
+v2004.02.24   Author: Rewbs  Contact: rf99@doc.ic.ac.uk
+-------------------------------------------------------
+1. Each individual view (general/pattern/samples/intruments/comments) remembers its own horizontal splitter position.
+
 
 v2004.02.22   Author: Trevor Nunes Contact: modplug@plastikskouser.com
 -----------------------------------------------------------------------
@@ -28,7 +32,7 @@ Experimental features in this version:
   >64 channel modules.
 
 
-v2004.02.16   Author: Rewbs  Contact: f99.doc.ic.ac.uk
+v2004.02.16   Author: Rewbs  Contact: rf99@.doc.ic.ac.uk
 -------------------------------------------------------
 Experimental features in this version:
 
