@@ -40,9 +40,9 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 0x0D:	command = CMD_PATTERNBREAK; param = ((param >> 4) * 10) + (param & 0x0F); break;
 	case 0x0E:	command = CMD_MODCMDEX; break;
 	case 0x0F:	command = (param <= (UINT)((m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? 0x1F : 0x20)) ? CMD_SPEED : CMD_TEMPO;
-				if ((param == 0xFF) && (m_nSamples == 15)) command = 0; break;
+				if ((param == 0xFF) && (m_nSamples == 15)) command = 0; break; //<rewbs> what the hell is this?! :)
 	// Extension for XM extended effects
-	case 'G' - 55:	command = CMD_GLOBALVOLUME; break;
+	case 'G' - 55:	command = CMD_GLOBALVOLUME; break;		//16
 	case 'H' - 55:	command = CMD_GLOBALVOLSLIDE; if (param & 0xF0) param &= 0xF0; break;
 	case 'K' - 55:	command = CMD_KEYOFF; break;
 	case 'L' - 55:	command = CMD_SETENVPOSITION; break;
@@ -52,10 +52,11 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 'R' - 55:	command = CMD_RETRIG; break;
 	case 'T' - 55:	command = CMD_TREMOR; break;
 	case 'X' - 55:	command = CMD_XFINEPORTAUPDOWN;	break;
-	case 'Y' - 55:	command = CMD_PANBRELLO; break;
-	case 'Z' - 55:	command = CMD_MIDI;	break;
-//	case '\\' - 55:	command = CMD_SMOOTHMIDI;	break;	//rewbs.smoothVST
-//	case ':' - 55:	command = CMD_VELOCITY;	break;	//rewbs.velocity
+	case 'Y' - 55:	command = CMD_PANBRELLO; break;			//34
+	case 'Z' - 55:	command = CMD_MIDI;	break;				//35
+	case '\\' - 56:	command = CMD_SMOOTHMIDI;	break;		//rewbs.smoothVST: 36
+	case ':' - 21:	command = CMD_VELOCITY;	break;			//rewbs.velocity: 37
+	case '#' + 3:	command = CMD_XPARAM;	break;			//rewbs.XMfixes - XParam is 38
 	default:	command = 0;
 	}
 	m->command = command;
@@ -127,8 +128,9 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 	case CMD_XFINEPORTAUPDOWN:	command = 'X' - 55; break;
 	case CMD_PANBRELLO:			command = 'Y' - 55; break;
 	case CMD_MIDI:				command = 'Z' - 55; break;
-	case CMD_SMOOTHMIDI:		command = '\\' - 55; break; //rewbs.smoothVST
-	case CMD_VELOCITY:			command = ':' - 55; break; //rewbs.velocity
+	case CMD_SMOOTHMIDI:		command = '\\' - 56; break; //rewbs.smoothVST: 36
+	case CMD_VELOCITY:			command = ':' - 21; break; //rewbs.velocity: 37
+	case CMD_XPARAM:			command = '#' + 3; break; //rewbs.XMfixes - XParam is 38
 	case CMD_S3MCMDEX:
 		switch(param & 0xF0)
 		{

@@ -827,6 +827,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	if (m_nSamples >= MAX_SAMPLES) m_nSamples = MAX_SAMPLES-1;
 	for (UINT nsmp=0; nsmp<pifh->smpnum; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] + sizeof(ITSAMPLESTRUCT) <= dwMemLength))
 	{
+		lastSampleSize = 0; //ensure lastsamplesize = 0 if last sample is empty, else we'll skip the MPTX stuff.
 		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
 		if (pis->id == 0x53504D49)
 		{
@@ -1068,7 +1069,9 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 			// jump field code
 			ptr += sizeof(__int32);
 
-			// nVolRamp
+			//rewbs.instroVSTi: changed to use generic instrument header code loader,
+			// OLD: 
+			/*// nVolRamp
 			if(code == 'VR..'){
 				// read field size
 				size = (*((__int16 *)ptr));
@@ -1081,7 +1084,23 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 						ptr += size;
 					}
 				}
+			}*/
+			//NEW:		
+			// read field size
+			size = (*((__int16 *)ptr));
+			// jump field size
+			ptr += sizeof(__int16);
+			for(UINT nins=1; nins<=m_nInstruments; nins++){
+				if(Headers[nins]){
+					// get field's adress in instrument's header
+					BYTE * fadr = GetInstrumentHeaderFieldPointer(Headers[nins], code, size);
+					// copy field data in instrument's header (except for keyboard mapping)
+					if(fadr && code != 'K[..') memcpy(fadr,ptr,size);
+					// jump field
+					ptr += size;
+				}
 			}
+			//end rewbs.instroVSTi
 
 			if(code == 'SEP@' || code == 'MPTX'){
 				// this case induce more extra infos but not related to _INSTRUMENTHEADER
@@ -1925,6 +1944,40 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		fwrite(&size, 1, sizeof(__int16), f);
 		// write nVolRamp field for each instrument
 		for(UINT nins=1; nins<=header.insnum; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nVolRamp, 1, sizeof(USHORT), f);
+
+		
+		//rewbs.fix36944: write full precision panning, volume and fade.
+
+		// write nPan field code
+		code = 'P...';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nPan field size
+		size = sizeof(Headers[1]->nPan);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nPan field for each instrument
+		for(UINT nins=1; nins<=header.insnum; nins++) 
+			if(Headers[nins]) 
+				fwrite(&Headers[nins]->nPan, 1, size, f);
+
+		// write nGlobalVol field code
+		code = 'GV..';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nGlobalVol field size
+		size = sizeof(Headers[1]->nGlobalVol);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nGlobalVol field for each instrument
+		for(UINT nins=1; nins<=header.insnum; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nGlobalVol, 1, size, f);
+
+		// write nFadeOut field code
+		code = 'FO..';
+		fwrite(&code, 1, sizeof(__int32), f);
+		// write nFadeOut field size
+		size = sizeof(Headers[1]->nFadeOut);
+		fwrite(&size, 1, sizeof(__int16), f);
+		// write nFadeOut field for each instrument
+		for(UINT nins=1; nins<=header.insnum; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nFadeOut, 1, size, f);
+
+		//end rewbs.fix36944
 	}
 
 // -! NEW_FEATURE#0027

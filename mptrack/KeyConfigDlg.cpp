@@ -90,7 +90,6 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_RESTORE, OnRestoreKeyChoice)
 	ON_COMMAND(IDC_LOAD, OnLoad)
 	ON_COMMAND(IDC_SAVE, OnSave)
-	ON_COMMAND(IDC_BROWSEKEYCONF, OnBrowse)
 	ON_COMMAND(IDC_CHECKKEYDOWN, OnCheck)
 	ON_COMMAND(IDC_CHECKKEYHOLD, OnCheck)
 	ON_COMMAND(IDC_CHECKKEYUP, OnCheck)
@@ -639,6 +638,7 @@ void COptionsKeyboard::OnLoad()
 		m_sFullPathName=dlg.GetPathName();
 		plocalCmdSet->LoadFile(m_sFullPathName);
 		ForceUpdateGUI();
+		TentativeSetToDefaultFile(m_sFullPathName);
 	}
 	
 }
@@ -655,23 +655,25 @@ void COptionsKeyboard::OnSave()
 	{
 		m_sFullPathName=dlg.GetPathName(); 
 		plocalCmdSet->SaveFile(m_sFullPathName, m_bDebugSave.GetCheck());
+		TentativeSetToDefaultFile(m_sFullPathName);
 	}
+	
 }
 
-void COptionsKeyboard::OnBrowse()
-{ 
-	CFileDialog dlg(TRUE, "mkb", CMainFrame::m_szKbdFile,
-					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-					"Modplug Tracker Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
-	if (CMainFrame::m_szKbdFile[0])
-			dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szKbdFile;
-	
-	if (dlg.DoModal() == IDOK)
+bool COptionsKeyboard::TentativeSetToDefaultFile(CString m_sFullPathName)
+{
+	if (m_sFullPathName.Compare(CMainFrame::m_szKbdFile))
 	{
-		strcpy(CMainFrame::m_szKbdFile,dlg.GetPathName());
-		OnSettingsChanged();			// Enable "apply" button
-		UpdateDialog();					// Enable "apply" button
+		if (AfxMessageBox("Load this keyboard config file when MPT starts up?", MB_YESNO) == IDYES)
+		{
+			strcpy(CMainFrame::m_szKbdFile,m_sFullPathName);
+			OnSettingsChanged();			// Enable "apply" button
+			UpdateDialog();					
+			return true;
+		}
 	}
+
+	return false;
 }
 
 void COptionsKeyboard::OnNotesRepeat()

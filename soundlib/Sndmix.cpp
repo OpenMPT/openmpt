@@ -613,16 +613,14 @@ BOOL CSoundFile::ProcessRow()
 				// End of song ?
 				if ((m_nPattern == 0xFF) || (m_nCurrentPattern >= MAX_ORDERS))
 				{
+
 					if (!m_nRepeatCount) return FALSE;
 					if (!m_nRestartPos)
 					{
-						//rewbs.instroVSTi: kill & revive all plugins at end of song, if looping.
-						//SuspendPlugins();
-						
-						//ResumePlugins();
+
+						//rewbs.instroVSTi: stop all VSTi at end of song, if looping.
 						StopAllVsti();
-						
-						
+
 						m_nMusicSpeed = m_nDefaultSpeed;
 						m_nMusicTempo = m_nDefaultTempo;
 						m_nGlobalVolume = m_nDefaultGlobalVolume;
@@ -651,6 +649,8 @@ BOOL CSoundFile::ProcessRow()
 								}
 							}
 						}
+
+
 					}
 					if (m_nRepeatCount > 0) m_nRepeatCount--;
 					m_nCurrentPattern = m_nRestartPos;
@@ -1613,7 +1613,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 				{
 					UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
 					IMixPlugin *pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
 				}
 			}
 		}

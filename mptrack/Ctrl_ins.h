@@ -63,7 +63,7 @@ class CCtrlInstruments: public CModControlDlg
 protected:
 	CModControlBar m_ToolBar;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinFadeOut, m_SpinGlobalVol, m_SpinPanning;
-	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS;
+	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS, m_SpinMidiBK;
 	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnMixPlug;
 	CEdit m_EditName, m_EditFileName, m_EditGlobalVol, m_EditPanning, m_EditPPS, m_EditCutOff;
 	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance;
@@ -124,6 +124,7 @@ protected:
 	afx_msg void OnDCTChanged();
 	afx_msg void OnDCAChanged();
 	afx_msg void OnMPRChanged();
+	afx_msg void OnMBKChanged();	//rewbs.MidiBank
 	afx_msg void OnMCHChanged();
 	afx_msg void OnMixPlugChanged();  //rewbs.instroVSTi
 	afx_msg void OnPPSChanged();

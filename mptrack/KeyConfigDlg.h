@@ -112,6 +112,7 @@ protected:
 	CButton m_bAutoSave;
 
 	void ForceUpdateGUI();
+	bool TentativeSetToDefaultFile(CString);
 
 public:
 	COptionsKeyboard():CPropertyPage(IDD_OPTIONS_KEYBOARD) { m_nKeyboardCfg = 0; }
@@ -145,7 +146,6 @@ protected:
 	afx_msg void OnRestoreKeyChoice();
 	afx_msg void OnLoad();
 	afx_msg void OnSave();
-	afx_msg void OnBrowse();
     DECLARE_MESSAGE_MAP();
 public:
 	afx_msg void OnDestroy();

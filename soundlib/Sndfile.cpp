@@ -1059,6 +1059,7 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 void CSoundFile::SuspendPlugins()	
 //------------------------------
 {
+	float in[2][16], out[2][16]; //temp scratch buffers for final call to process.
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
 		if (!m_MixPlugins[iPlug].pMixPlugin)	
@@ -1068,8 +1069,7 @@ void CSoundFile::SuspendPlugins()
 		if (m_MixPlugins[iPlug].pMixState)
 		{
 			pPlugin->HardAllNotesOff();
-			float in[2][64], out[2][64]; //temp scratch buffers for final call to process.
-			pPlugin->Process((float*)in, (float*)out, 64); //final process.
+			pPlugin->Process((float*)in, (float*)out, 16); //final process.
 			pPlugin->Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
 			pPlugin->Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls suspend
 		}

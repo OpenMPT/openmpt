@@ -858,7 +858,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
 					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64, nCurrentChn);
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64, MAX_BASECHANNELS);
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, nVol ? nVol : 64, MAX_BASECHANNELS);
 				}
 			}
 		}
@@ -898,14 +898,14 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 			{
 				UINT nPlugin = 0;
 				if (pChn->pHeader) 
-					nPlugin = pChn->pHeader->nMixPlug;  		// first try intrument VST
+					nPlugin = penv->nMixPlug;  		// first try intrument VST
 				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
 					nPlugin = m_SndFile.ChnSettings[nCurrentChn+1].nMixPlugin;// Then try Channel VST
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
 					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note+0xFF, 0, nCurrentChn);
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note+0xFF, 0, MAX_BASECHANNELS);
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note+0xFF, 0, MAX_BASECHANNELS);
 
 				}
 			}
@@ -2479,8 +2479,6 @@ void CModDoc::OnPatternRestart()
 		else
 		{
 			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
-			/*pSndFile->SuspendPlugins();
-			pSndFile->ResumePlugins();*/
 		}
 	}
 	//SwitchToView();
@@ -2519,8 +2517,6 @@ void CModDoc::OnPatternPlay()
 		else
 		{
 			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
-			/*pSndFile->SuspendPlugins();
-			pSndFile->ResumePlugins();*/
 		}
 		
 	}
@@ -2566,8 +2562,6 @@ void CModDoc::OnPatternPlayNoLoop()
 		else
 		{
 			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
-			/*pSndFile->SuspendPlugins();
-			pSndFile->ResumePlugins();*/
 		}
 	}
 	//SwitchToView();

@@ -880,10 +880,17 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		break;
 	// something has changed, update 'multi-fx' display
 	case audioMasterUpdateDisplay:
-		if (effect)
+		if (effect && effect->resvd1)
 		{
-			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
-			effect->dispatcher(effect, effEditTop, 0,0, NULL, 0);
+			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
+			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor(); 
+			if (pVstEditor && ::IsWindow(pVstEditor->m_hWnd))
+			{
+				pVstEditor->SetupMenu();
+				//TODO: update general GUI to show selected program
+			}
+//			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+//			effect->dispatcher(effect, effEditTop, 0,0, NULL, 0);
 		}
 		return 0;
 
@@ -969,6 +976,38 @@ BOOL CSelectPluginDlg::OnInitDialog()
 }
 
 
+typedef struct _PROBLEMATIC_PLUG
+{
+	DWORD id1;
+	DWORD id2;
+	DWORD version;
+	LPCSTR name;
+	LPCSTR problem;
+} _PROBLEMATIC_PLUG, *PPROBLEMATIC_PLUG;
+
+#define NUM_PROBLEMPLUGS 2
+static _PROBLEMATIC_PLUG gProblemPlugs[NUM_PROBLEMPLUGS] =
+{
+	{'VstP', 'Sytr', 1, "Image Line Sytrus v1.2", "*Does not save parameters correctly.*"},
+	{'VstP', 'CLAW', 1, "ReFX Claw v1.0", "*Causes random crashes.*"},
+};
+
+bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug) 
+{
+	CString s;
+	for (int p=0; p<NUM_PROBLEMPLUGS; p++)
+	{
+		if ( (gProblemPlugs[p].id2 == plug->dwPluginId2) /*&&
+			(gProblemPlugs[p].id1 == plug->dwPluginId1)*/)
+		{
+			s.Format("WARNING: This plugin has been (losely) identified as %s,\r\n which is known to have the following problem with MPT:\r\n\r\n%s\r\n(see here for more information: http://www.modplug.com/forum/viewtopic.php?p=36930#36930)\r\n\r\nDo you want to continue to load?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
+			return (AfxMessageBox(s, MB_YESNO)  == IDYES);
+		}
+	}
+
+	return true;
+}
+
 VOID CSelectPluginDlg::OnOK()
 //---------------------------
 {
@@ -987,6 +1026,12 @@ VOID CSelectPluginDlg::OnOK()
 	// Plugin selected
 	if (pFactory)
 	{
+		if (!VerifyPlug(pFactory))
+		{
+			CDialog::OnCancel();
+			return;
+		}
+
 		if ((!pCurrentPlugin) || (pCurrentPlugin->GetPluginFactory() != pFactory))
 		{
 			BEGIN_CRITICAL();
@@ -1002,6 +1047,7 @@ VOID CSelectPluginDlg::OnOK()
 			memset(&m_pPlugin->Info, 0, sizeof(m_pPlugin->Info));
 			m_pPlugin->Info.dwPluginId1 = pFactory->dwPluginId1;
 			m_pPlugin->Info.dwPluginId2 = pFactory->dwPluginId2;
+
 			switch(m_pPlugin->Info.dwPluginId2)
 			{
 			// Enable drymix by default for these known plugins
@@ -1009,6 +1055,7 @@ VOID CSelectPluginDlg::OnOK()
 				m_pPlugin->Info.dwInputRouting |= MIXPLUG_INPUTF_WETMIX;
 				break;
 			}
+	
 			lstrcpyn(m_pPlugin->Info.szName, pFactory->szLibraryName, 32);
 			lstrcpyn(m_pPlugin->Info.szLibraryName, pFactory->szLibraryName, 64);
 			END_CRITICAL();
@@ -1028,6 +1075,7 @@ VOID CSelectPluginDlg::OnOK()
 					}
 				}
 			}
+
 			bChanged = TRUE;
 		}
 	} else
@@ -1258,6 +1306,8 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_nEditorX = m_nEditorY = -1;
 	m_pEvList = NULL;
 	m_pModDoc = NULL;
+	m_nPreviousMidiChan = -1; //rewbs.VSTCompliance
+
 	// Insert ourselves in the beginning of the list
 	if (m_pFactory)
 	{
@@ -1562,7 +1612,7 @@ bool CVstPlugin::SaveProgram(CString fileName)
 		void *chunk = NULL;
 		long chunkSize = Dispatch(effGetChunk, 1,0, &chunk, 0);
 		
-		if ((chunkSize > 0) && (chunk))
+		if ((chunkSize > 8) && (chunk))	//If chunk is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
 			fxp = new Cfxp(ID, plugVersion, 1, chunkSize, chunk);
 	}
 	if (fxp == NULL)
@@ -1839,7 +1889,10 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		}
 
 		//Do the VST processing magic
-		m_pEffect->process(m_pEffect, m_pInputs, m_pOutputs, nSamples);
+		try {
+			m_pEffect->process(m_pEffect, m_pInputs, m_pOutputs, nSamples);
+		} catch (...)
+		{}
 
 		//mix outputs of multi-output VSTs:
 		if(m_nOutputs>2){
@@ -2116,21 +2169,17 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 void CVstPlugin::HardAllNotesOff()
 {
 	bool overflow=false;
+	float in[2][16], out[2][16]; // scratch buffers
 
 	do {
 		for (int mc=0; mc<16; mc++)		//all midi chans
 		{	
-			//MidiSend(0xB0|mc|(0x79<<8));   // reset all controllers
-			MidiSend(0xB0|mc|(0x7b<<8));   // all notes off 
-			MidiSend(0xB0|mc|(0x78<<8));   // all sounds off 
-			
 			UINT nCh = mc & 0x0f;
-			DWORD dwMidiCode = 0x80|nCh|0x400000; //command|channel|velocity
+			DWORD dwMidiCode = 0x80|nCh; //command|channel|velocity
 			PVSTINSTCH pCh = &m_MidiCh[nCh];
-
+	
 			for (UINT i=0; i<128; i++)	//all notes
 			{
-				
 				for (UINT c=0; c<MAX_CHANNELS; c++)
 				{
 					while (pCh->uNoteOnMap[i][c] && !overflow)
@@ -2140,15 +2189,16 @@ void CVstPlugin::HardAllNotesOff()
 					}
 					if (overflow) break;	//yuck
 				}
-				
 				if (overflow) break;	//yuck
 			}
-
 			if (overflow) break;	//yuck
+
+			//MidiSend(0xB0|mc|(0x79<<8));   // reset all controllers
+			MidiSend(0xB0|mc|(0x7b<<8));   // all notes off 
+			MidiSend(0xB0|mc|(0x78<<8));   // all sounds off 
 		}
-		
-		ProcessVSTEvents();
-		ClearVSTEvents();
+
+		Process((float*)in, (float*)out, 16);   // let plug process events
 
 		//If we had hit an overflow, we need to loop around and start again.
 	} while (overflow);
@@ -2160,22 +2210,36 @@ void CVstPlugin::HardAllNotesOff()
 //end rewbs.VSTiNoteHoldonStopFix
 
 //rewbs.introVST - many changes to MidiCommand, still to be refined.
-void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, UINT trackChannel)
+void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChannel)
 //------------------------------------------------------------------------------------------------
 {
-	UINT nCh = (nMidiCh-1) & 0x0f;
+	UINT nCh = (--nMidiCh) & 0x0f;
 	PVSTINSTCH pCh = &m_MidiCh[nCh];
 	DWORD dwMidiCode = 0;
-
+	bool bankChanged = pCh->wMidiBank != --wMidiBank;
+	bool progChanged = pCh->nProgram != --nMidiProg;
+	bool chanChanged = nCh != m_nPreviousMidiChan;
 	if (vol == 0) vol=64;
 
-	// Program change ?
-	if ((pCh->nProgram != nMidiProg) && (nMidiCh != 10) && (nMidiProg < 0x80))
+	// Note: Some VSTis update bank/prog on midi channel change, others don't.
+	//       For those that don't, we do it for them.
+
+	// Bank change
+	if ( (wMidiBank < 0x80) && (chanChanged || bankChanged))
+	{
+		pCh->wMidiBank = wMidiBank;
+		MidiSend(((wMidiBank<<16)|(0x20<<8))|(0xB0|nCh));
+	}
+	// Program change
+	// Note: Some plugs don't update params on bank change - need to force it by sending prog update.
+	if ( (bankChanged || chanChanged || progChanged) && (nCh != 10) && (nMidiProg < 0x80))
 	{
 		pCh->nProgram = nMidiProg;
 		MidiSend((nMidiProg<<8)|(0xC0|nCh));
 	}
-	// Specific Note Off - don't really use this one any more, but it might be useful.
+
+
+	// Specific Note Off
 	if (note > 0xFF)			//rewbs.vstiLive
 	{
 		dwMidiCode = 0x80|nCh; //note off, on chan nCh
@@ -2246,6 +2310,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, 
 		MidiSend(dwMidiCode|(note<<8)|(vol<<16));
 	}
 
+	m_nPreviousMidiChan = nCh;
 	
 }
 
@@ -2357,7 +2422,7 @@ void CVstPlugin::SaveAllParameters()
 		{
 			PVOID p = NULL;
 			LONG nByteSize = Dispatch(effGetChunk, 0,0, &p, 0);
-			if ((nByteSize > 0) && (p))
+			if ((nByteSize > 8) && (p)) //If chunk is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
 			{
 				if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= (UINT)(nByteSize+4)))
 				{
