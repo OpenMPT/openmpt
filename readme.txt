@@ -1,17 +1,3 @@
-
-OpenMPT - Modplug Tracker Open Source Project
-
-This is the 'Wild' version of Modplug, almost anything
-goes in this release, so if you are reading this then please
-be aware this is an experimental branch of the Modplug software.
-New features and content are tried out in this branch and if they're
-useful will make they're way to the main development branch "Olivier"
-
-Okay have fun!
-
-Trevor Nunes http://sourceforge.net/projects/modplug
-
-
 //+++++++++++++++++++++++++++++++++++++++++++++++\\
 
 Source code copyright 1997-2004 Olivier Lapicque
@@ -32,11 +18,11 @@ Source code copyright 1997-2004 Olivier Lapicque
 
 \\+++++++++++++++++++++++++++++++++++++++++++++++//
 
-
 --===============++++++++++++++++===============--
 
 Requirements for building mptrack.exe:
-- Compiler: MSVC 6.0 SP5 with the Processor Pack, though it should be somewhat portable.
+- Compiler: MSVC 6.0 SP5. To compile with optimized MMX/SSE instructions
+  you will require the processor pack. 
 - SDK: A recent version of the DirectX SDK (works with the DX9 SDK)
 - Portability: X86/WIN32 only (X86-64 support will require removal or rewriting of all assembly code)
 

@@ -15,18 +15,18 @@ typedef const BYTE * LPCBYTE;
 #endif
 
 #define MOD_AMIGAC2			0x1AB
-#define MAX_SAMPLE_LENGTH	0x04000000	// 64MB
+#define MAX_SAMPLE_LENGTH	0x08000000	// 128MB
 #define MAX_SAMPLE_RATE		100000
 #define MAX_ORDERS			256
 #define MAX_PATTERNS		240
 #define MAX_SAMPLES			4000
-#define MAX_INSTRUMENTS		200
+#define MAX_INSTRUMENTS		255  // 200
 #ifdef FASTSOUNDLIB
 #define MAX_CHANNELS		80
 #else
-#define MAX_CHANNELS		200
+#define MAX_CHANNELS		255  // 200
 #endif
-#define MAX_BASECHANNELS	64
+#define MAX_BASECHANNELS	255  // 64
 #define MAX_ENVPOINTS		32
 #define MIN_PERIOD			0x0020
 #define MAX_PERIOD			0xFFFF
@@ -34,7 +34,7 @@ typedef const BYTE * LPCBYTE;
 #define MAX_CHANNELNAME		20
 #define MAX_INFONAME		80
 #define MAX_EQ_BANDS		6
-#define MAX_MIXPLUGINS		50
+#define MAX_MIXPLUGINS		100  // 50
 
 
 #define MOD_TYPE_NONE		0x00
@@ -148,6 +148,7 @@ typedef const BYTE * LPCBYTE;
 #define CMD_PANNINGSLIDE		29
 #define CMD_SETENVPOSITION		30
 #define CMD_MIDI				31
+#define CMD_SMOOTHMIDI			32 //rewbs.smoothVST
 
 // Filter Modes
 #define FLTMODE_LOWPASS			0
@@ -415,6 +416,9 @@ typedef struct _MODCHANNEL
 	BYTE nRowCommand, nRowParam;
 	BYTE nLeftVU, nRightVU;
 	BYTE nActiveMacro, nFilterMode;
+
+	float m_nPlugParamValueStep;  //rewbs.smoothVST 
+	int m_nPlugInitialParamValue; //rewbs.smoothVST
 } MODCHANNEL;
 
 
@@ -454,6 +458,7 @@ public:
 	virtual void MidiSend(DWORD dwMidiCode) = 0;
 	virtual void MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol) = 0;
 	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
+	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST
 };
 
 
@@ -479,7 +484,8 @@ typedef struct _SNDMIXPLUGININFO
 	DWORD dwReserved[4];	// Reserved for routing info
 	CHAR szName[32];
 	CHAR szLibraryName[64];	// original DLL name
-} SNDMIXPLUGININFO, *PSNDMIXPLUGININFO; // Size should be 128
+} SNDMIXPLUGININFO, *PSNDMIXPLUGININFO; // Size should be 128 
+										
 
 typedef struct _SNDMIXPLUGIN
 {
@@ -488,7 +494,8 @@ typedef struct _SNDMIXPLUGIN
 	ULONG nPluginDataSize;
 	PVOID pPluginData;
 	SNDMIXPLUGININFO Info;
-} SNDMIXPLUGIN, *PSNDMIXPLUGIN;
+	float fDryRatio;		    // rewbs.dryRatio [20040123]
+} SNDMIXPLUGIN, *PSNDMIXPLUGIN; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
 
 typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN);
 
@@ -765,6 +772,7 @@ public:
 	void ExtendedS3MCommands(UINT nChn, UINT param);
 	void ExtendedChannelEffect(MODCHANNEL *, UINT param);
 	void ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param=0);
+	void ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param=0); //Rewbs.smoothVST
 	void SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modifier=256) const;
 	// Low-Level effect processing
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);
@@ -823,7 +831,7 @@ public:
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-255] => [1-10KHz]
 #endif
 #ifdef MODPLUG_TRACKER
-	VOID ProcessMidiOut();
+	VOID ProcessMidiOut(UINT nChn, MODCHANNEL *pChn);		//rewbs.VSTdelay : added arg.
 #endif
 
 	// Static helper functions

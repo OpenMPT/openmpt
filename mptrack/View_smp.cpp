@@ -107,6 +107,7 @@ void CViewSample::UpdateScrollSize()
 	CModDoc *pModDoc = GetDocument();
 	
 	GetClientRect(&m_rcClient);
+	
 	if (pModDoc)
 	{
 		CPoint pt;
@@ -179,8 +180,12 @@ BOOL CViewSample::SetCurrentSample(UINT nSmp)
 BOOL CViewSample::SetZoom(UINT nZoom)
 //-----------------------------------
 {
-	if (nZoom == m_nZoom) return TRUE;
-	if (nZoom > MAX_ZOOM) return FALSE;
+  
+	if (nZoom == m_nZoom) 
+		return TRUE;
+	if (nZoom > MAX_ZOOM) 
+		return FALSE;
+
 	m_nZoom = nZoom;
 	UpdateScrollSize();
 	InvalidateRect(NULL, FALSE);
@@ -433,6 +438,8 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, int len, in
 }
 
 
+#ifdef ENABLE_MMX
+
 static void mmxex_findminmax16(void *p, int scanlen, int smplsize, int *smin, int *smax)
 //--------------------------------------------------------------------------------------
 {
@@ -571,6 +578,7 @@ done1x:
 	}
 }
 
+#endif
 
 void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, int uFlags, PVOID pSampleData)
 //----------------------------------------------------------------------------------------------------------
@@ -619,10 +627,12 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			signed short *p = (signed short *)(psample + poshi*smplsize);
 			smin = 32767;
 			smax = -32768;
+#ifdef ENABLE_MMX
 			if (CSoundFile::gdwSysInfo & SYSMIX_MMXEX)
 			{
 				mmxex_findminmax16(p, scanlen, smplsize, &smin, &smax);
 			} else
+#endif
 			{
 				for (int i=0; i<scanlen; i++)
 				{
@@ -640,10 +650,12 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 			signed char *p = psample + poshi * smplsize;
 			smin = 127;
 			smax = -128;
+#ifdef ENABLE_MMX
 			if (CSoundFile::gdwSysInfo & SYSMIX_MMXEX)
 			{
 				mmxex_findminmax8(p, scanlen, smplsize, &smin, &smax);
 			} else
+#endif
 			{
 				for (int i=0; i<scanlen; i++)
 				{

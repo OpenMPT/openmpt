@@ -2076,7 +2076,6 @@ void CViewInstrument::OnEditPaste()
 	if (pModDoc) pModDoc->PasteEnvelope(m_nInstrument, m_nEnv);
 }
 
-
 static DWORD nLastNotePlayed = 0;
 static DWORD nLastScanCode = 0;
 

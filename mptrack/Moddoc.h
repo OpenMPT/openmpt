@@ -141,6 +141,7 @@ public:
 	BOOL ShrinkPattern(UINT nPattern);
 	BOOL CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel);
 	BOOL PastePattern(UINT nPattern, DWORD dwBeginSel);
+	BOOL MixPastePattern(UINT nPattern, DWORD dwBeginSel);		//rewbs.mixPaste
 	BOOL CopyEnvelope(UINT nIns, UINT nEnv);
 	BOOL PasteEnvelope(UINT nIns, UINT nEnv);
 	BOOL ClearUndo();

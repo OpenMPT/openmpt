@@ -7,6 +7,8 @@
 #include "ctrl_gen.h"
 #include "view_gen.h"
 #include "vstplug.h"
+#include "EffectVis.h"
+
 
 #define ID_FXCOMMANDS_BASE	41000
 
@@ -84,6 +86,7 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER7,	m_sbVolume[3]);
 	DDX_Control(pDX, IDC_SLIDER8,	m_sbPan[3]);
 	DDX_Control(pDX, IDC_SLIDER9,	m_sbValue);
+	DDX_Control(pDX, IDC_SLIDER10,  m_sbDryRatio);
 	DDX_Control(pDX, IDC_SPIN1,		m_spinVolume[0]);
 	DDX_Control(pDX, IDC_SPIN2,		m_spinPan[0]);
 	DDX_Control(pDX, IDC_SPIN3,		m_spinVolume[1]);
@@ -96,7 +99,6 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON2,	m_BtnEdit);
 	//}}AFX_DATA_MAP
 }
-
 
 void CViewGlobals::OnInitialUpdate()
 //----------------------------------
@@ -139,6 +141,10 @@ void CViewGlobals::OnInitialUpdate()
 	}
 	m_sbValue.SetPos(0);
 	m_sbValue.SetRange(0, 100);
+
+	m_sbValue.SetPos(0);			// rewbs.dryRatio 20040122
+	m_sbValue.SetRange(0, 100);		// rewbs.dryRatio 20040122
+
 	UpdateView(HINT_MODTYPE);
 	OnParamChanged();
 	m_nLockCount = 0;
@@ -325,6 +331,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		CheckDlgButton(IDC_CHECK11, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) ? TRUE : FALSE);
 		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
 		m_BtnEdit.EnableWindow(((pVstPlugin) && ((pVstPlugin->HasEditor()) || (pVstPlugin->GetNumCommands()))) ? TRUE : FALSE);
+		m_sbDryRatio.SetPos(pPlugin->fDryRatio*100);		//rewbs.DryRatio [20040123]
 		if (pVstPlugin)
 		{
 			UINT nParams = pVstPlugin->GetNumParameters();
@@ -676,8 +683,26 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				}
 			}
 		}
+
+
+		//rewbs.dryRatio [20040123]
+		if ((pScrollBar) && (pScrollBar->m_hWnd == m_sbDryRatio.m_hWnd))
+		{
+			int n = m_sbDryRatio.GetPos();
+			if ((n >= 0) && (n <= 100) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
+			{				
+				CSoundFile *pSndFile = pModDoc->GetSoundFile();
+				PSNDMIXPLUGIN pPlugin;
+
+				pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
+				pPlugin->fDryRatio=(float)n/100;
+			}
+		}
+		//end rewbs.dryRatio  [20040123]
+
 		if (bUpdate) pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
 		UnlockControls();
+
 		if ((pScrollBar) && (pScrollBar->m_hWnd == m_sbValue.m_hWnd))
 		{
 			int n = (short int)m_sbValue.GetPos();

@@ -5,7 +5,7 @@
 #include "dlg_misc.h"
 #include "globals.h"
 #include "view_pat.h"
-
+#include "EffectVis.h"		//rewbs.fxvis
 // Headers
 #define ROWHDR_WIDTH		32	// Row header
 #define COLHDR_HEIGHT		16	// Column header
@@ -182,6 +182,7 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 	{
 		InvalidateRow(dwHintMask >> 24);
 	}
+
 }
 
 
@@ -262,6 +263,13 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcx = pfnt->nAlphaAM_X;
 		srcy = pfnt->nAlphaAM_Y + 13 * COLUMN_HEIGHT;
 		break;
+	//rewbs.smoothVST
+	case '\\':
+		srcx = pfnt->nAlphaNZ_X;
+		srcy = pfnt->nAlphaNZ_Y + 14 * COLUMN_HEIGHT;
+		break;
+	//end rewbs.smoothVST
+
 	}
 	m_Dib.TextBlt(x, y, sizex, COLUMN_HEIGHT, srcx+ofsx, srcy);
 }
@@ -500,6 +508,14 @@ void CViewPattern::OnDraw(CDC *pDC)
 		DrawDragSel(hdc);
 	}
 	if (oldpen) ::SelectObject(hdc, oldpen);
+
+	//rewbs.fxVis
+	if (m_pEffectVis)
+	{
+		//HACK: Update visualizer on every pattern redraw. Cleary there's space for opt here.
+		if (m_pEffectVis->m_hWnd) m_pEffectVis->Update();
+	}
+
 }
 
 
@@ -818,6 +834,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 		if (ypaint >= rcClient.bottom) break;
 	}
 	*pypaint = ypaint;
+
 }
 
 
@@ -1176,6 +1193,7 @@ void CViewPattern::InvalidateRow(int n)
 		rect.bottom = rect.top + m_szCell.cy;
 		InvalidateRect(&rect, FALSE);
 	}
+
 }
 
 

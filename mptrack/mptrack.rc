@@ -27,18 +27,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "#define _AFX_NO_OLE_RESOURCES\r\n"
     "#define _AFX_NO_TRACKER_RESOURCES\r\n"
@@ -72,23 +72,24 @@ IDR_MODULETYPE          ICON    DISCARDABLE     "res\\moddoc.ico"
 // Bitmap
 //
 
-IDB_MPTRACK             BITMAP  DISCARDABLE     "res\\mptrack.bmp"
-IDB_MAINBAR             BITMAP  DISCARDABLE     "res\\mainbar.bmp"
-IDB_IMAGELIST           BITMAP  DISCARDABLE     "res\\img_list.bmp"
-IDB_PATTERNS            BITMAP  DISCARDABLE     "res\\patterns.bmp"
-IDB_PATTERNVIEW         BITMAP  DISCARDABLE     "res\\view_pat.bmp"
-IDB_COLORSETUP          BITMAP  DISCARDABLE     "res\\colors.bmp"
-IDB_VUMETERS            BITMAP  DISCARDABLE     "res\\vumeters.bmp"
-IDB_SPLASHSCREEN        BITMAP  DISCARDABLE     "RES\\splash.bmp"
-IDB_ENVTOOLBAR          BITMAP  DISCARDABLE     "res\\envbar.bmp"
-IDB_SMPTOOLBAR          BITMAP  DISCARDABLE     "res\\smptoolb.bmp"
+IDB_MPTRACK             BITMAP  MOVEABLE PURE   "res\\mptrack.bmp"
+IDB_MAINBAR             BITMAP  MOVEABLE PURE   "res\\mainbar.bmp"
+IDB_IMAGELIST           BITMAP  MOVEABLE PURE   "res\\img_list.bmp"
+IDB_PATTERNS            BITMAP  MOVEABLE PURE   "res\\patterns.bmp"
+IDB_PATTERNVIEW         BITMAP  MOVEABLE PURE   "res\\view_pat.bmp"
+IDB_COLORSETUP          BITMAP  MOVEABLE PURE   "res\\colors.bmp"
+IDB_VUMETERS            BITMAP  MOVEABLE PURE   "res\\vumeters.bmp"
+IDB_SPLASHSCREEN        BITMAP  MOVEABLE PURE   "RES\\splash.bmp"
+IDB_ENVTOOLBAR          BITMAP  MOVEABLE PURE   "res\\envbar.bmp"
+IDB_SMPTOOLBAR          BITMAP  MOVEABLE PURE   "res\\smptoolb.bmp"
+IDB_VISNODE             BITMAP  MOVEABLE PURE   "res\\bitmap1.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+IDR_MAINFRAME MENU DISCARDABLE 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -131,6 +132,7 @@ BEGIN
         MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM "&Mix Paste\tCtrl+M",          ID_EDIT_PASTE_SPECIAL
         MENUITEM "Select &All\tCtrl+5",         ID_EDIT_SELECT_ALL
         MENUITEM SEPARATOR
         POPUP "C&leanup"
@@ -220,7 +222,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+IDR_MAINFRAME ACCELERATORS MOVEABLE PURE 
 BEGIN
     "5",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
@@ -234,6 +236,7 @@ BEGIN
     "S",            ID_VIEW_SAMPLES,        VIRTKEY, ALT, NOINVERT
     "T",            ID_SAMPLE_TRIM,         VIRTKEY, CONTROL, NOINVERT
     "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    "M",            ID_EDIT_PASTE_SPECIAL,  VIRTKEY, CONTROL, NOINVERT
     VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
     VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
     VK_DELETE,      ID_PATTERN_DELETEROW,   VIRTKEY, SHIFT, NOINVERT
@@ -274,7 +277,7 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 180, 151
+IDD_ABOUTBOX DIALOGEX 0, 0, 182, 206
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "About ModPlug Tracker"
@@ -284,12 +287,14 @@ BEGIN
                     SS_CENTERIMAGE,4,3,171,81,WS_EX_CLIENTEDGE
     CTEXT           "Modplug Tracker version",IDC_TEXT2,5,86,167,8,
                     SS_NOPREFIX
-    CTEXT           "Copyright © 1997-2002 Olivier Lapicque:\nolivier@modplug.com",
-                    IDC_STATIC,6,110,168,18
-    DEFPUSHBUTTON   "OK",IDOK,144,135,32,14,WS_GROUP
-    CTEXT           "Get the latest updates at ModPlug Central:\nhttp://www.modplug.com",
-                    IDC_STATIC,6,131,134,18
+    CTEXT           "Copyright © 2004 GPL\n\nRobin Fernandes: rf99@ic.ac.uk\nTrevor Nunes: modplug@plastikskouser.com",
+                    IDC_STATIC,5,110,170,45,0,WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "OK",IDOK,140,185,32,14,WS_GROUP
+    CTEXT           "Get the latest updates at:\nhttp://sourceforge.net/projects/modplug",
+                    IDC_STATIC,0,180,134,18
     CTEXT           "",IDC_TEXT1,6,98,167,8
+    CTEXT           "Copyright © 1997-2002 Olivier Lapicque:\nolivier@modplug.com",
+                    IDC_STATIC,5,160,168,18
 END
 
 IDD_OPTIONS_PLAYER DIALOG DISCARDABLE  0, 0, 240, 156
@@ -593,7 +598,7 @@ BEGIN
     LTEXT           "Song Message:",IDC_STATIC,4,2,76,8
 END
 
-IDD_CONTROL_PATTERNS DIALOG DISCARDABLE  0, 0, 440, 107
+IDD_CONTROL_PATTERNS DIALOGEX 0, 0, 440, 107
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1020,7 +1025,7 @@ END
 
 IDD_VIEW_GLOBALS DIALOGEX 0, 0, 419, 255
 STYLE DS_3DLOOK | WS_CHILD
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "ChnTab",IDC_TABCTRL1,"SysTabControl32",0x0,0,0,419,13
     GROUPBOX        "Channel 1",IDC_TEXT1,5,18,99,157
@@ -1135,7 +1140,11 @@ BEGIN
     CONTROL         "Bypass",IDC_CHECK10,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,299,202,69,10
     CONTROL         "Dry mix",IDC_CHECK11,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,299,214,69,10
+                    WS_TABSTOP,299,214,37,10
+    CONTROL         "",IDC_SLIDER10,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,346,215,64,10
+    LTEXT           "W",IDC_TEXT7,349,207,8,8
+    LTEXT           "D",IDC_TEXT8,399,207,8,8
 END
 
 IDD_EDIT_FIND DIALOG DISCARDABLE  0, 0, 182, 145
@@ -1602,7 +1611,7 @@ END
 IDD_SELECTMIXPLUGIN DIALOGEX 0, 0, 217, 164
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Mix Plugins"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,160,7,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,160,24,50,14
@@ -1667,6 +1676,16 @@ BEGIN
     PUSHBUTTON      "Save",IDC_BUTTON2,193,39,36,14
 END
 
+IDD_EFFECTVISUALIZER DIALOGEX 0, 0, 385, 108
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
+CAPTION "Param Editor [prototype]"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_VISSTATUS,4,91,377,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+END
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -1679,9 +1698,9 @@ VS_VERSION_INFO VERSIONINFO
  PRODUCTVERSION 4,10,1,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
- FILEFLAGS 0x9L
+ FILEFLAGS 0x29L
 #else
- FILEFLAGS 0x8L
+ FILEFLAGS 0x28L
 #endif
  FILEOS 0x4L
  FILETYPE 0x1L
@@ -1691,18 +1710,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Da Trakar Far Windaz\0"
+            VALUE "Comments", "Modplug Tracker 'wild' experimental release be careful!\0"
             VALUE "CompanyName", "Olivier Lapicque\0"
-            VALUE "FileDescription", "ModPlug Tracker\0"
-            VALUE "FileVersion", "1.16\0"
+            VALUE "FileDescription", "ModPlug Tracker 'wild' \0"
+            VALUE "FileVersion", "1.16 ( w0.01 )\0"
             VALUE "InternalName", "Modplug Tracker\0"
-            VALUE "LegalCopyright", "Copyright © 1997-2002 Olivier Lapicque\0"
+            VALUE "LegalCopyright", "Copyright © 1997-2002 Olivier Lapicque.  Copyright 2004  GPL.\0"
             VALUE "LegalTrademarks", "M.O.D.P.L.U.G\0"
             VALUE "OriginalFilename", "mptrack.exe\0"
-            VALUE "PrivateBuild", "January 10, 2002\0"
-            VALUE "ProductName", "ModPlug Tracker\0"
-            VALUE "ProductVersion", "1.16\0"
-            VALUE "SpecialBuild", "\0"
+            VALUE "PrivateBuild", "February 23 2004\0"
+            VALUE "ProductName", "ModPlug Tracker 'wild'\0"
+            VALUE "ProductVersion", "1.16  (w0.01)\0"
+            VALUE "SpecialBuild", "Rewbs, PlastikSkouser \0"
         END
     END
     BLOCK "VarFileInfo"
@@ -1720,7 +1739,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO MOVEABLE PURE 
 BEGIN
     IDD_CONTROL_SAMPLES, DIALOG
     BEGIN
@@ -1810,6 +1829,14 @@ BEGIN
         TOPMARGIN, 4
         BOTTOMMARGIN, 91
     END
+
+    IDD_EFFECTVISUALIZER, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 381
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 103
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1828,13 +1855,13 @@ IDC_NODRAG              CURSOR  DISCARDABLE     "res\\nodrag.cur"
 // String Table
 //
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDR_MAINFRAME           "Modplug Tracker"
     IDR_MODULETYPE          "\nModule\nuntitled\nMusic Modules (*.mod;*.s3m;*.it;*.xm)\n.mod\nModplugTracker.Document\nMusic Module"
 END
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE DISCARDABLE 
 BEGIN
     AFX_IDS_APP_TITLE       "Modplug Tracker"
     AFX_IDS_IDLEMESSAGE     "Ready"
@@ -1934,6 +1961,7 @@ BEGIN
     ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
     ID_EDIT_FIND            "Find the specified text\nFind"
     ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_PASTE_SPECIAL   "Mix Clipboard contents\nPaste"
     ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
     ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
     ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"

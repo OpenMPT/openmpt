@@ -3,277 +3,16 @@
 <pre>
 <h1>Build Log</h1>
 <h3>
---------------------Configuration: unlha - Win32 Debug--------------------
-</h3>
-<h3>Command Lines</h3>
-Creating temporary file "C:\WIN\TEMP\RSPB352.TMP" with contents
-[
-/nologo /MTd /W4 /GX /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
-"D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp"
-]
-Creating command line "cl.exe @C:\WIN\TEMP\RSPB352.TMP" 
-Creating command line "link.exe -lib /nologo /out:"Debug\unlha.lib"  .\Debug\unlha.obj "
-<h3>Output Window</h3>
-Compiling...
-unlha.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha32.h(83) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\header.cpp(36) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\header.cpp(46) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\header.cpp(54) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\header.cpp(56) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\header.cpp(85) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\header.cpp(107) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\header.cpp(184) : warning C4244: '+=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\slide.cpp(31) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\slide.cpp(35) : warning C4244: '=' : conversion from 'const int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\slide.cpp(73) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\slide.cpp(99) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\maketbl.cpp(20) : warning C4244: '=' : conversion from 'const int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\maketbl.cpp(30) : warning C4244: '+=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\maketbl.cpp(60) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\maketbl.cpp(70) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\maketbl.cpp(76) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\maketbl.cpp(78) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(35) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(41) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(42) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(46) : warning C4244: '=' : conversion from 'unsigned int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(49) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(50) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(51) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(53) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(55) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(90) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(91) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(95) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(112) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(112) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(118) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(119) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(121) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(123) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(136) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(136) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(137) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(138) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(139) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(140) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(149) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(152) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(193) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(194) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(195) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(203) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(204) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(229) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(257) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\huf.cpp(41) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\huf.cpp(46) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\huf.cpp(81) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\huf.cpp(82) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\huf.cpp(84) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\huf.cpp(118) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\huf.cpp(135) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\huf.cpp(137) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\shuf.cpp(45) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\shuf.cpp(46) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\shuf.cpp(58) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\shuf.cpp(63) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\shuf.cpp(81) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\shuf.cpp(122) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\shuf.cpp(126) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\shuf.cpp(143) : warning C4244: 'argument' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\shuf.cpp(145) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\larc.cpp(15) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\larc.cpp(21) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\larc.cpp(47) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\larc.cpp(52) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\larc.cpp(61) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\larc.cpp(62) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp(61) : warning C4100: 'lpszExtensions' : unreferenced formal parameter
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp(174) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp(182) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp(216) : warning C4244: '-=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp(217) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp(226) : warning C4244: '-=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp(227) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp(245) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\unlha.cpp(245) : warning C4244: 'argument' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\unlha\dhuf.cpp(121) : warning C4701: local variable 'b' may be used without having been initialized
-Creating library...
-<h3>
---------------------Configuration: unrar - Win32 Debug--------------------
-</h3>
-<h3>Command Lines</h3>
-Creating temporary file "C:\WIN\TEMP\RSPB355.TMP" with contents
-[
-/nologo /MTd /W4 /GX /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fo"Debug/" /Fd"Debug/" /FD /c 
-"D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\Unrar.cpp"
-]
-Creating command line "cl.exe @C:\WIN\TEMP\RSPB355.TMP" 
-Creating command line "link.exe -lib /nologo /out:"Debug\UNRAR.lib"  .\Debug\Unrar.obj "
-<h3>Output Window</h3>
-Compiling...
-Unrar.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(32) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(36) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(37) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(44) : warning C4127: conditional expression is constant
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(74) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(110) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(115) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(117) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(118) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(119) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(130) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(131) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(141) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(143) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(144) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(152) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(159) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(161) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(162) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\extract.cpp(22) : warning C4127: conditional expression is constant
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpack.cpp(310) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\crccrypt.cpp(39) : warning C4244: '+=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpold.cpp(344) : warning C4127: conditional expression is constant
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpold.cpp(452) : warning C4127: conditional expression is constant
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpold.cpp(474) : warning C4127: conditional expression is constant
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\Unrar.cpp(61) : warning C4100: 'lpszExtensions' : unreferenced formal parameter
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\Unrar.cpp(123) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\Unrar.cpp(145) : warning C4127: conditional expression is constant
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\block.cpp(72) : warning C4701: local variable 'Size' may be used without having been initialized
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpold.cpp(355) : warning C4701: local variable 'Distance' may be used without having been initialized
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpold.cpp(354) : warning C4701: local variable 'NewDistancePlace' may be used without having been initialized
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpold.cpp(463) : warning C4701: local variable 'CurByte' may be used without having been initialized
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpold.cpp(462) : warning C4701: local variable 'NewBytePlace' may be used without having been initialized
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpold.cpp(486) : warning C4701: local variable 'Flags' may be used without having been initialized
-D:\code\Audio_Projects\trackers\modplug_olivier\UNRAR\unpold.cpp(485) : warning C4701: local variable 'NewFlagsPlace' may be used without having been initialized
-Creating library...
-<h3>
---------------------Configuration: unzip - Win32 Debug--------------------
-</h3>
-<h3>Command Lines</h3>
-Creating temporary file "C:\WIN\TEMP\RSPB361.TMP" with contents
-[
-/nologo /MTd /W4 /GX /Zi /Od /Gf /Gy /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fo".\Debug/" /Fd".\Debug/" /FD /c 
-"D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\Unzip.cpp"
-]
-Creating command line "cl.exe @C:\WIN\TEMP\RSPB361.TMP" 
-Creating command line "link.exe -lib /nologo /out:".\Debug\unzip.lib"  .\Debug\Unzip.obj "
-<h3>Output Window</h3>
-Compiling...
-Unzip.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\inflate.cpp(249) : warning C4127: conditional expression is constant
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\mapname.cpp(38) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\mapname.cpp(76) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\mapname.cpp(88) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\mapname.cpp(92) : warning C4244: '=' : conversion from 'int' to 'char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\misc.cpp(181) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\misc.cpp(188) : warning C4244: '-=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\misc.cpp(207) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unimplod.cpp(188) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unimplod.cpp(189) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unimplod.cpp(277) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unimplod.cpp(278) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unimplod.cpp(287) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unimplod.cpp(288) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unimplod.cpp(313) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unreduce.cpp(173) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unreduce.cpp(176) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unshrink.cpp(52) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unshrink.cpp(97) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unshrink.cpp(103) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unshrink.cpp(112) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unshrink.cpp(131) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unshrink.cpp(132) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\Unzip.cpp(427) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unreduce.cpp(121) : warning C4701: local variable 'V' may be used without having been initialized
-D:\code\Audio_Projects\trackers\modplug_olivier\UNZIP\unreduce.cpp(119) : warning C4701: local variable 'Len' may be used without having been initialized
-Creating library...
-<h3>
 --------------------Configuration: mptrack - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating command line "rc.exe /l 0x409 /fo"Debug/mptrack.res" /d "_DEBUG" "D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.rc"" 
-Creating temporary file "C:\WIN\TEMP\RSPB364.TMP" with contents
+Creating temporary file "C:\WIN\TEMP\RSP2174.TMP" with contents
 [
-/nologo /G5 /MTd /W4 /GX /Zi /Od /Gf /Gy /I "..\unzip" /I "..\unrar" /I "..\unlha" /I "..\soundlib" /I "..\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "ENABLE_MMX" /D "ENABLE_EQ" /D "MODPLUG_TRACKER" /D "NO_PACKING" /Fp"Debug/mptrack.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\ChildFrm.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\ctrl_com.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\ctrl_gen.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\ctrl_ins.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\ctrl_pat.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\ctrl_seq.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\ctrl_smp.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\dlg_misc.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\dlsbank.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\draw_pat.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Fastmix.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\globals.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_669.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_amf.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_ams.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\load_dbm.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\load_dmf.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_dsm.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_far.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_it.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_mdl.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\load_mid.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_mod.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_mtm.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_okt.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_psm.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\load_ptm.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_s3m.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_stm.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_ult.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\Load_umx.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_wav.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_xm.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mainbar.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\mmcmp.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Mmx_mix.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\moddoc.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\modedit.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\Moptions.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\Mpdlgs.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mpt_midi.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sampleio.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\snd_dsp.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\snd_eq.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\snd_flt.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Snd_fx.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\Snd_rvb.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\snddev.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndmix.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Tables.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\view_com.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\view_gen.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\view_ins.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\view_pat.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\view_smp.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\view_tre.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\vstplug.cpp"
-"D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Waveform.cpp"
+/nologo /G5 /MTd /W4 /GX /Zi /Od /Gf /Gy /I "..\unzip" /I "..\unrar" /I "..\unlha" /I "..\soundlib" /I "..\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "ENABLE_EQ" /D "MODPLUG_TRACKER" /D "NO_PACKING" /FR"Debug/" /Fp"Debug/mptrack.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
+"C:\cygwin\home\tnunes\wild\soundlib\Load_it.cpp"
 ]
-Creating command line "cl.exe @C:\WIN\TEMP\RSPB364.TMP" 
-Creating temporary file "C:\WIN\TEMP\RSPB365.TMP" with contents
-[
-/nologo /G5 /MTd /W4 /GX /Zi /Od /Gf /Gy /I "..\unzip" /I "..\unrar" /I "..\unlha" /I "..\soundlib" /I "..\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "ENABLE_MMX" /D "ENABLE_EQ" /D "MODPLUG_TRACKER" /D "NO_PACKING" /Fp"Debug/mptrack.pch" /Yc"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /c 
-"D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\StdAfx.cpp"
-]
-Creating command line "cl.exe @C:\WIN\TEMP\RSPB365.TMP" 
-Creating temporary file "C:\WIN\TEMP\RSPB366.TMP" with contents
+Creating command line "cl.exe @C:\WIN\TEMP\RSP2174.TMP" 
+Creating temporary file "C:\WIN\TEMP\RSP2175.TMP" with contents
 [
 winmm.lib strmiids.lib dmoguids.lib /nologo /version:5.0 /subsystem:windows /incremental:no /pdb:"Debug/mptrack.pdb" /map:"Debug/mptrack.map" /debug /machine:I386 /out:"Debug/mptrack.exe" /libpath:"..\unzip\bin" /libpath:"..\unrar\bin" /libpath:"..\unlha\bin" 
 .\Debug\ChildFrm.obj
@@ -286,6 +25,7 @@ winmm.lib strmiids.lib dmoguids.lib /nologo /version:5.0 /subsystem:windows /inc
 .\Debug\dlg_misc.obj
 .\Debug\dlsbank.obj
 .\Debug\draw_pat.obj
+.\Debug\EffectVis.obj
 .\Debug\Fastmix.obj
 .\Debug\globals.obj
 .\Debug\Load_669.obj
@@ -343,317 +83,93 @@ winmm.lib strmiids.lib dmoguids.lib /nologo /version:5.0 /subsystem:windows /inc
 .\Debug\vstplug.obj
 .\Debug\Waveform.obj
 .\Debug\mptrack.res
-\code\Audio_Projects\trackers\modplug_olivier\unlha\Debug\unlha.lib
-\code\Audio_Projects\trackers\modplug_olivier\UNRAR\Debug\UNRAR.lib
-\code\Audio_Projects\trackers\modplug_olivier\UNZIP\Debug\unzip.lib
+\cygwin\home\tnunes\wild\unlha\Debug\unlha.lib
+\cygwin\home\tnunes\wild\UNRAR\Debug\UNRAR.lib
+\cygwin\home\tnunes\wild\UNZIP\Debug\unzip.lib
 ]
-Creating command line "link.exe @C:\WIN\TEMP\RSPB366.TMP"
+Creating command line "link.exe @C:\WIN\TEMP\RSP2175.TMP"
 <h3>Output Window</h3>
-Compiling resources...
 Compiling...
-StdAfx.cpp
-Compiling...
-ChildFrm.cpp
-ctrl_com.cpp
-ctrl_gen.cpp
-ctrl_ins.cpp
-ctrl_pat.cpp
-ctrl_seq.cpp
-ctrl_smp.cpp
-dlg_misc.cpp
-dlsbank.cpp
-draw_pat.cpp
-Fastmix.cpp
-globals.cpp
-Load_669.cpp
-load_amf.cpp
-Load_ams.cpp
-load_dbm.cpp
-load_dmf.cpp
-Load_dsm.cpp
-Load_far.cpp
 Load_it.cpp
-Generating Code...
-Compiling...
-Load_mdl.cpp
-Load_med.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp(470) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp(471) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp(617) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp(620) : warning C4244: '=' : conversion from 'int' to 'signed char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp(676) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp(824) : warning C4244: 'initializing' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp(825) : warning C4244: 'initializing' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp(828) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Load_med.cpp(830) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-load_mid.cpp
-Load_mod.cpp
-load_mt2.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(132) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(139) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(144) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(149) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(154) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(159) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(414) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(427) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(428) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(429) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(549) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(550) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_mt2.cpp(556) : warning C4244: '-=' : conversion from 'int' to 'signed char', possible loss of data
-Load_mtm.cpp
-Load_okt.cpp
-load_psm.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_psm.cpp(159) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_psm.cpp(160) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_psm.cpp(240) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_psm.cpp(324) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\load_psm.cpp(330) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-load_ptm.cpp
-Load_s3m.cpp
-Load_stm.cpp
-Load_ult.cpp
-Load_umx.cpp
-Load_wav.cpp
-Load_xm.cpp
-mainbar.cpp
-MainFrm.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(993) : error C2065: 'WAVEFORMATEXTENSIBLE' : undeclared identifier
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(993) : error C2146: syntax error : missing ';' before identifier 'WaveFormat'
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(993) : error C2065: 'WaveFormat' : undeclared identifier
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1002) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1002) : error C2228: left of '.wFormatTag' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1003) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1003) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1004) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1004) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1005) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1005) : error C2228: left of '.nAvgBytesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1006) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1006) : error C2228: left of '.nBlockAlign' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1007) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1007) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1008) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1008) : error C2228: left of '.cbSize' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1010) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1010) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1010) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1010) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1013) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1013) : error C2228: left of '.wFormatTag' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1013) : error C2065: 'WAVE_FORMAT_EXTENSIBLE' : undeclared identifier
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1014) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1014) : error C2228: left of '.cbSize' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1015) : error C2228: left of '.Samples' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1015) : error C2228: left of '.wValidBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1015) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1015) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1016) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1016) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1018) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1019) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1020) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1021) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1022) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1024) : error C2228: left of '.SubFormat' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\MainFrm.cpp(1048) : error C2228: left of '.Format' must have class/struct/union type
-mmcmp.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\mmcmp.cpp(660) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-Mmx_mix.cpp
-mod2midi.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(329) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(368) : warning C4244: 'argument' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(369) : warning C4244: 'argument' : conversion from 'unsigned int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(444) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(445) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(458) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(459) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(468) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(469) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2midi.cpp(470) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-Generating Code...
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Mmx_mix.cpp(1383) : fatal error C1601: unsupported inline assembly opcode
-Compiling...
-mod2wave.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.h(23) : error C2146: syntax error : missing ';' before identifier 'WaveFormat'
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.h(23) : error C2501: 'WAVEFORMATEXTENSIBLE' : missing storage-class or type specifiers
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.h(23) : error C2501: 'WaveFormat' : missing storage-class or type specifiers
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(104) : error C2065: 'WaveFormat' : undeclared identifier
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(105) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(105) : error C2228: left of '.wFormatTag' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(106) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(106) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(107) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(107) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(108) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(108) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(109) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(109) : error C2228: left of '.nBlockAlign' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(109) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(109) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(109) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(109) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(110) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(110) : error C2228: left of '.nAvgBytesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(110) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(110) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(110) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(110) : error C2228: left of '.nBlockAlign' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(144) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(144) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(156) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(156) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(156) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(156) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(234) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(234) : error C2228: left of '.wFormatTag' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(235) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(235) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(236) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(236) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(236) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(236) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(237) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(237) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(237) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(237) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(238) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(238) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(239) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(239) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(239) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(239) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(239) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(239) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(240) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(240) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(241) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(241) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(241) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(241) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(241) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(241) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(242) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(242) : error C2228: left of '.nBlockAlign' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(242) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(242) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(242) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(242) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(243) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(243) : error C2228: left of '.nAvgBytesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(243) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(243) : error C2228: left of '.nSamplesPerSec' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(243) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(243) : error C2228: left of '.nBlockAlign' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(244) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(244) : error C2228: left of '.cbSize' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(246) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(246) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(246) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(246) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(248) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(248) : error C2228: left of '.wFormatTag' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(251) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(251) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(251) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(251) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(254) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(254) : error C2228: left of '.wFormatTag' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(254) : error C2065: 'WAVE_FORMAT_EXTENSIBLE' : undeclared identifier
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(255) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(255) : error C2228: left of '.cbSize' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(255) : error C2065: 'WAVEFORMATEXTENSIBLE' : undeclared identifier
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(256) : error C2228: left of '.Samples' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(256) : error C2228: left of '.wValidBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(256) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(256) : error C2228: left of '.wBitsPerSample' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(257) : error C2228: left of '.Format' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(257) : error C2228: left of '.nChannels' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(259) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(260) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(261) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(262) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(263) : error C2228: left of '.dwChannelMask' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(265) : error C2228: left of '.SubFormat' must have class/struct/union type
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(320) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(362) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.cpp(802) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-moddoc.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.h(23) : error C2146: syntax error : missing ';' before identifier 'WaveFormat'
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.h(23) : error C2501: 'WAVEFORMATEXTENSIBLE' : missing storage-class or type specifiers
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.h(23) : error C2501: 'WaveFormat' : missing storage-class or type specifiers
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\moddoc.cpp(1066) : error C2039: 'WaveFormat' : is not a member of 'CWaveConvert'
-        D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mod2wave.h(19) : see declaration of 'CWaveConvert'
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\moddoc.cpp(1066) : error C2228: left of '.Format' must have class/struct/union type
-modedit.cpp
-Moptions.cpp
-Mpdlgs.cpp
-mpt_midi.cpp
-mptrack.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.cpp(1730) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.cpp(1731) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.cpp(1732) : warning C4244: '=' : conversion from 'unsigned int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.cpp(1781) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.cpp(1787) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.cpp(1788) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.cpp(1795) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\mptrack.cpp(2545) : warning C4189: 'dwLangId' : local variable is initialized but not referenced
-Sampleio.cpp
-snd_dsp.cpp
-snd_eq.cpp
-snd_flt.cpp
-Snd_fx.cpp
-Snd_rvb.cpp
-snddev.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\snddev.cpp(880) : warning C4100: 'nMaxLatency' : unreferenced formal parameter
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\snddev.cpp(974) : warning C4100: 'directProcess' : unreferenced formal parameter
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\snddev.cpp(981) : warning C4100: 'sRate' : unreferenced formal parameter
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\snddev.cpp(987) : warning C4100: 'opt' : unreferenced formal parameter
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\snddev.cpp(987) : warning C4100: 'message' : unreferenced formal parameter
-D:\code\Audio_Projects\trackers\modplug_olivier\Soundlib\snddev.cpp(987) : warning C4100: 'value' : unreferenced formal parameter
-Sndfile.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\../unlha/unlha32.h(83) : warning C4244: 'return' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp(1225) : warning C4244: 'argument' : conversion from 'int' to 'char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp(1227) : warning C4244: 'argument' : conversion from 'int' to 'char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp(1280) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp(1452) : warning C4244: '+=' : conversion from 'int' to 'signed char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp(1483) : warning C4244: '+=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp(1485) : warning C4244: '=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp(1486) : warning C4244: '+=' : conversion from 'int' to 'unsigned char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp(1777) : warning C4244: '=' : conversion from 'int' to 'signed char', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Sndfile.cpp(1778) : warning C4244: '=' : conversion from 'int' to 'signed char', possible loss of data
-Sndmix.cpp
-Tables.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\Tables.cpp(528) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-view_com.cpp
-view_gen.cpp
-view_ins.cpp
-Generating Code...
-fatal error C1600: unsupported data type
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\snd_eq.cpp(178) : fatal error C1601: unsupported inline assembly opcode
-D:\code\Audio_Projects\trackers\modplug_olivier\soundlib\snd_dsp.cpp(126) : warning C4725: instruction may be inaccurate on some Pentiums
-Compiling...
-view_pat.cpp
-view_smp.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\view_smp.cpp(1591) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-view_tre.cpp
-vstplug.cpp
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\vstplug.cpp(594) : warning C4100: 'opt' : unreferenced formal parameter
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\vstplug.cpp(594) : warning C4100: 'ptr' : unreferenced formal parameter
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\vstplug.cpp(2368) : warning C4244: '=' : conversion from 'int' to 'unsigned short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\vstplug.cpp(2468) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\vstplug.cpp(2469) : warning C4244: '=' : conversion from 'int' to 'short', possible loss of data
-Waveform.cpp
-Generating Code...
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\vstplug.cpp(2495) : fatal error C1601: unsupported inline assembly opcode
-D:\code\Audio_Projects\trackers\modplug_olivier\mptrack\view_smp.cpp(458) : fatal error C1601: unsupported inline assembly opcode
-Error executing cl.exe.
+Linking...
+Creating temporary file "C:\WIN\TEMP\RSP21B2.TMP" with contents
+[
+/nologo /o"Debug/mptrack.bsc" 
+.\Debug\StdAfx.sbr
+.\Debug\ChildFrm.sbr
+.\Debug\ctrl_com.sbr
+.\Debug\ctrl_gen.sbr
+.\Debug\ctrl_ins.sbr
+.\Debug\ctrl_pat.sbr
+.\Debug\ctrl_seq.sbr
+.\Debug\ctrl_smp.sbr
+.\Debug\dlg_misc.sbr
+.\Debug\dlsbank.sbr
+.\Debug\draw_pat.sbr
+.\Debug\EffectVis.sbr
+.\Debug\Fastmix.sbr
+.\Debug\globals.sbr
+.\Debug\Load_669.sbr
+.\Debug\load_amf.sbr
+.\Debug\Load_ams.sbr
+.\Debug\load_dbm.sbr
+.\Debug\load_dmf.sbr
+.\Debug\Load_dsm.sbr
+.\Debug\Load_far.sbr
+.\Debug\Load_it.sbr
+.\Debug\Load_mdl.sbr
+.\Debug\Load_med.sbr
+.\Debug\load_mid.sbr
+.\Debug\Load_mod.sbr
+.\Debug\load_mt2.sbr
+.\Debug\Load_mtm.sbr
+.\Debug\Load_okt.sbr
+.\Debug\load_psm.sbr
+.\Debug\load_ptm.sbr
+.\Debug\Load_s3m.sbr
+.\Debug\Load_stm.sbr
+.\Debug\Load_ult.sbr
+.\Debug\Load_umx.sbr
+.\Debug\Load_wav.sbr
+.\Debug\Load_xm.sbr
+.\Debug\mainbar.sbr
+.\Debug\MainFrm.sbr
+.\Debug\mmcmp.sbr
+.\Debug\Mmx_mix.sbr
+.\Debug\mod2midi.sbr
+.\Debug\mod2wave.sbr
+.\Debug\moddoc.sbr
+.\Debug\modedit.sbr
+.\Debug\Moptions.sbr
+.\Debug\Mpdlgs.sbr
+.\Debug\mpt_midi.sbr
+.\Debug\mptrack.sbr
+.\Debug\Sampleio.sbr
+.\Debug\snd_dsp.sbr
+.\Debug\snd_eq.sbr
+.\Debug\snd_flt.sbr
+.\Debug\Snd_fx.sbr
+.\Debug\Snd_rvb.sbr
+.\Debug\snddev.sbr
+.\Debug\Sndfile.sbr
+.\Debug\Sndmix.sbr
+.\Debug\Tables.sbr
+.\Debug\view_com.sbr
+.\Debug\view_gen.sbr
+.\Debug\view_ins.sbr
+.\Debug\view_pat.sbr
+.\Debug\view_smp.sbr
+.\Debug\view_tre.sbr
+.\Debug\vstplug.sbr
+.\Debug\Waveform.sbr]
+Creating command line "bscmake.exe @C:\WIN\TEMP\RSP21B2.TMP"
+Creating browse info file...
+<h3>Output Window</h3>
 
 
 
 <h3>Results</h3>
-mptrack.exe - 149 error(s), 218 warning(s)
+mptrack.exe - 0 error(s), 0 warning(s)
 </pre>
 </body>
 </html>

@@ -12,6 +12,12 @@
 #include "vstplug.h"
 #include "bladedll.h"
 
+// rewbs.memLeak
+#define CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+//end  rewbs.memLeak
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -161,8 +167,8 @@ LPCSTR szNoteNames[12] =
 };
 
 LPCSTR szHexChar = "0123456789ABCDEF";
-LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ";
-LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z";
+LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ?"; //rewbs.smoothVST: added last ?
+LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\"; //rewbs.smoothVST: added last \ (written as \\)
 LPCSTR gszVolCommands = " vpcdabuhlrgfe";
 
 
@@ -175,7 +181,8 @@ BYTE gEffectColors[MAX_EFFECTS] =
 	MODCOLOR_GLOBALS,	MODCOLOR_GLOBALS,	0,					0,					
 	0,					MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_GLOBALS,	
 	MODCOLOR_GLOBALS,	0,					MODCOLOR_PITCH,		MODCOLOR_PANNING,
-	MODCOLOR_PITCH,		MODCOLOR_PANNING,	0,					0
+	MODCOLOR_PITCH,		MODCOLOR_PANNING,	0,					0,
+	0 //rewbs.smoothVST
 };
 
 
@@ -583,7 +590,8 @@ BOOL CTrackApp::InitInstance()
 	m_pDocManager = new CModDocManager();
 
 #ifdef _DEBUG
-	ASSERT((sizeof(MODCHANNEL)&7) == 0);
+	//	ASSERT((sizeof(MODCHANNEL)&7) == 0);
+	// Disabled by rewbs for smoothVST. Not sure why this is necessary - MODCHANNEL doesn't get saved or anything.
 #endif
 
 	m_szConfigFileName[0] = 0;
@@ -1653,6 +1661,9 @@ void ErrorBox(UINT nStringID, CWnd*p)
 void CFastBitmap::Init(LPMODPLUGDIB lpTextDib)
 //--------------------------------------------
 {
+	m_nBlendOffset = 0;			// rewbs.buildfix for pattern display bug in debug builds
+								// & release builds when ran directly from vs.net 
+
 	m_pTextDib = lpTextDib;
 	memset(&m_Dib, 0, sizeof(m_Dib));
 	m_nTextColor = 0;

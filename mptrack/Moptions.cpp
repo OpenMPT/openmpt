@@ -75,6 +75,7 @@ MPTHOTKEY gDefaultHotKeys[MAX_MPTHOTKEYS] =
 	{ID_PATTERN_SETINSTRUMENT,	'I'|MPTF_CTRL,		'I'|MPTF_CTRL,		'S'|MPTF_ALT,		"Replace instrument"},
 	{ID_PATTERN_INTERPOLATE_VOLUME,'J'|MPTF_CTRL,	'J'|MPTF_CTRL,		'K'|MPTF_ALT,		"Interpolate volume"},
 	{ID_PATTERN_INTERPOLATE_EFFECT,'K'|MPTF_CTRL,	'K'|MPTF_CTRL,		'X'|MPTF_ALT,		"Interpolate effect"},
+	{ID_PATTERN_VISUALIZE_EFFECT,'B'|MPTF_CTRL,	'B'|MPTF_CTRL,		'B'|MPTF_ALT,		"Visualize effect"},	//rewbs.fxvis
 };
 
 const UINT wEditId[12+2] =
@@ -845,6 +846,7 @@ enum {
 	OPTGEN_SHOWPREVIOUS,
 	OPTGEN_CONTSCROLL,
 	OPTGEN_KBDNOTEOFF,
+	OPTGEN_FOLLOWSONGOFF,	//rewbs.noFollow
 	OPTGEN_MAXOPTIONS
 };
 
@@ -865,6 +867,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{"Show Prev/Next patterns",			"Displays grayed-out version of the previous/next patterns in the pattern editor"},
 	{"Continuous scroll",				"Jumps to the next pattern when moving past the end of a pattern"},
 	{"Record note off",					"Record note off when a key is released on the PC keyboard (Only works in instrument mode)."},
+	{"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."}, 	//rewbs.noFollow
 };
 
 
@@ -910,6 +913,7 @@ BOOL COptionsGeneral::OnInitDialog()
 		case OPTGEN_SHOWPREVIOUS:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SHOWPREVIOUS); break;
 		case OPTGEN_CONTSCROLL:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL); break;
 		case OPTGEN_KBDNOTEOFF:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_KBDNOTEOFF); break;
+		case OPTGEN_FOLLOWSONGOFF:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF); break;	//rewbs.noFollow
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
@@ -951,6 +955,7 @@ void COptionsGeneral::OnOK()
 		case OPTGEN_SHOWPREVIOUS:		mask = PATTERN_SHOWPREVIOUS; break;
 		case OPTGEN_CONTSCROLL:			mask = PATTERN_CONTSCROLL; break;
 		case OPTGEN_KBDNOTEOFF:			mask = PATTERN_KBDNOTEOFF; break;
+		case OPTGEN_FOLLOWSONGOFF:		mask = PATTERN_FOLLOWSONGOFF; break;	//rewbs.noFollow
 		}
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);

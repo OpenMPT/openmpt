@@ -3,6 +3,7 @@
 
 class CModDoc;
 class CEditCommand;
+class CEffectVis;	//rewbs.fxvis
 
 // Drag & Drop info
 #define DRAGITEM_MASK			0xFF0000
@@ -54,10 +55,13 @@ protected:
 	BYTE MultiRecordMask[(MAX_CHANNELS+7)/8];
 
 public:
+	CEffectVis *m_pEffectVis;	//rewbs.fxVis
+
 	CViewPattern();
 	DECLARE_SERIAL(CViewPattern)
 
 public:
+
 	BOOL UpdateSizes();
 	void UpdateScrollSize();
 	void UpdateScrollPos();
@@ -106,6 +110,7 @@ public:
 	void UpdateAllVUMeters(MPTNOTIFICATION *pnotify);
 	void DrawDragSel(HDC hdc);
 	void OnDrawDragSel();
+	
 
 public:
 	//{{AFX_VIRTUAL(CViewPattern)
@@ -117,9 +122,16 @@ public:
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	virtual LRESULT OnPlayerNotify(MPTNOTIFICATION *);
 	//}}AFX_VIRTUAL
+	//{{AFX_MSG(CViewPattern)
+	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);    //rewbs.fxVis - moved from protected
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags); //rewbs.fxVis - moved from protected
+	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);   //rewbs.fxVis - moved from protected
+
+
+
 
 protected:
-	//{{AFX_MSG(CViewPattern)
+
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDestroy();
@@ -129,14 +141,13 @@ protected:
 	afx_msg void OnLButtonUp(UINT, CPoint);
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnKillFocus(CWnd *pNewWnd);
 	afx_msg void OnEditCut();
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
+	afx_msg void OnEditMixPaste();		//rewbs.mixPaste
 	afx_msg void OnEditDelete();
 	afx_msg void OnEditSelectAll();
 	afx_msg void OnEditSelectColumn();
@@ -162,6 +173,7 @@ protected:
 	afx_msg void OnPatternRecord()	{ PostCtrlMessage(CTRLMSG_SETRECORD, -1); }
 	afx_msg void OnInterpolateVolume();
 	afx_msg void OnInterpolateEffect();
+	afx_msg void OnVisualizeEffect();		//rewbs.fxvis
 	afx_msg void OnTransposeUp();
 	afx_msg void OnTransposeDown();
 	afx_msg void OnTransposeOctUp();
@@ -177,6 +189,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
 
 
 #endif

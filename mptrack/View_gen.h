@@ -10,7 +10,7 @@ protected:
 	CTabCtrl m_TabCtrl;
 	CComboBox m_CbnEffects[4];
 	CComboBox m_CbnPlugin, m_CbnParam, m_CbnOutput;
-	CSliderCtrl m_sbVolume[4], m_sbPan[4], m_sbValue;
+	CSliderCtrl m_sbVolume[4], m_sbPan[4], m_sbValue, m_sbDryRatio;
 	CSpinButtonCtrl m_spinVolume[4], m_spinPan[4];
 	CButton m_BtnSelect, m_BtnEdit;
 	int m_nActiveTab, m_nLockCount;

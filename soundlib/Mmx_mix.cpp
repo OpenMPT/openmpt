@@ -5,11 +5,21 @@
  * option) any later version.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ * Name                 Date             Description
+ * Olivier Lapicque     --/--/--         Creation
+ * Trevor Nunes         26/01/04         encapsulated MMX,AMD,SSE with #define flags
+ *                                       moved X86_xxx functions to end of file.
 */
 
 ////////////////////////////////////////////////////////////////////////
 //
-//	MMX-Related functions
+// x86 ( AMD/INTEL ) based low level based mixing functions:
+// This file contains critical code. The basic X86 functions are
+// defined at the bottom of the file. #define's are used to isolate
+// the different flavours of functionality:
+// ENABLE_MMX, ENABLE_AMDNOW, ENABLE_SSE flags must be set to
+// to compile the optimized sections of the code. In both cases the 
+// X86_xxxxxx functions will compile. 
 //
 ////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
@@ -26,6 +36,53 @@ extern short int gDownsample2x[];
 #define PROCSUPPORT_3DNOW	0x08
 #define PROCSUPPORT_SSE		0x10
 
+
+#define CHNOFS_PCURRENTSAMPLE	0
+#define CHNOFS_NPOS				4
+#define CHNOFS_NPOSLO			8
+#define CHNOFS_NINC				12
+#define CHNOFS_NRIGHTVOL		16
+#define CHNOFS_NLEFTVOL			20
+#define CHNOFS_NRIGHTRAMP		24
+#define CHNOFS_NLEFTRAMP		28
+
+
+#ifdef ENABLE_MMX
+
+#define MMX_PARAM1				20[esp]
+#define MMX_PARAM2				24[esp]
+#define MMX_PARAM3				28[esp]
+#define MMX_PARAM4				32[esp]
+#define MMX_PARAM5				36[esp]
+
+#define MMX_PCHANNEL			MMX_PARAM1
+#define MMX_PBUFFER				MMX_PARAM2
+#define MMX_PBUFMAX				MMX_PARAM3
+
+#define MMX_ENTER	\
+	__asm push ebx	\
+	__asm push esi	\
+	__asm push edi	\
+	__asm push ebp
+
+
+#define MMX_LEAVE	\
+	__asm pop ebp	\
+	__asm pop edi	\
+	__asm pop esi	\
+	__asm pop ebx	\
+	__asm ret
+
+
+#endif
+
+#pragma warning (disable:4100)
+#pragma warning (disable:4799) // function has no EMMS instruction
+
+
+extern int SpectrumSinusTable[256*2];
+const float _f2ic = (float)(1 << 28);
+const float _i2fc = (float)(1.0 / (1 << 28));
 
 static unsigned int QueryProcessorExtensions()
 {
@@ -141,43 +198,7 @@ DWORD CSoundFile::InitSysInfo()
 
 #ifdef ENABLE_MMX
 
-#define CHNOFS_PCURRENTSAMPLE	0
-#define CHNOFS_NPOS				4
-#define CHNOFS_NPOSLO			8
-#define CHNOFS_NINC				12
-#define CHNOFS_NRIGHTVOL		16
-#define CHNOFS_NLEFTVOL			20
-#define CHNOFS_NRIGHTRAMP		24
-#define CHNOFS_NLEFTRAMP		28
 
-
-#define MMX_PARAM1				20[esp]
-#define MMX_PARAM2				24[esp]
-#define MMX_PARAM3				28[esp]
-#define MMX_PARAM4				32[esp]
-#define MMX_PARAM5				36[esp]
-
-#define MMX_PCHANNEL			MMX_PARAM1
-#define MMX_PBUFFER				MMX_PARAM2
-#define MMX_PBUFMAX				MMX_PARAM3
-
-#define MMX_ENTER	\
-	__asm push ebx	\
-	__asm push esi	\
-	__asm push edi	\
-	__asm push ebp
-
-
-#define MMX_LEAVE	\
-	__asm pop ebp	\
-	__asm pop edi	\
-	__asm pop esi	\
-	__asm pop ebx	\
-	__asm ret
-
-
-#pragma warning (disable:4100)
-#pragma warning (disable:4799) // function has no EMMS instruction
 
 VOID MMX_EndMix()
 {
@@ -1210,7 +1231,6 @@ mixloop:
 
 //////////////////////////////////////////////////////////////////////////////
 
-extern int SpectrumSinusTable[256*2];
 
 // MMX_Spectrum(signed char *pBuffer, UINT nSamples, UINT nInc, UINT nSmpSize, LPLONG lpSinCos)
 __declspec(naked) void __cdecl MMX_Spectrum(signed char *, UINT, UINT, UINT, LPLONG)
@@ -1255,113 +1275,19 @@ SpectrumLoop:
 }
 
 
+#endif  // MMX code
+
 //////////////////////////////////////////////////////////////////////////////////
 //
 // Misc. mix functions
 //
 
-const float _f2ic = (float)(1 << 28);
-const float _i2fc = (float)(1.0 / (1 << 28));
 
-
-// Convert floating-point mix to integer
-void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
-//-------------------------------------------------------------------------------------
-{
-	_asm {
-	mov esi, pIn1
-	mov ebx, pIn2
-	mov edi, pOut
-	mov ecx, nCount
-	fld _f2ic
-mainloop:
-	fld dword ptr [ebx]
-	add edi, 8
-	fld dword ptr [esi]
-	add ebx, 4
-	add esi, 4
-	fmul st(0), st(2)
-	fistp dword ptr [edi-8]
-	fmul st(0), st(1)
-	fistp dword ptr [edi-4]
-	dec ecx
-	jnz mainloop
-	fstp st(0)
-	}
-}
-
-// Convert integer mix to floating-point
-void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
-//---------------------------------------------------------------------------------
-{
-	_asm {
-	mov esi, pSrc
-	mov edi, pOut1
-	mov ebx, pOut2
-	mov ecx, nCount
-	fld _i2fc
-mainloop:
-	fild dword ptr [esi]
-	fild dword ptr [esi+4]
-	add ebx, 4
-	add edi, 4
-	fmul st(0), st(2)
-	add esi, 8
-	fstp dword ptr [ebx-4]
-	fmul st(0), st(1)
-	fstp dword ptr [edi-4]
-	dec ecx
-	jnz mainloop
-	fstp st(0)
-	}
-}
-
-
-void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
-//---------------------------------------------------------------
-{
-	_asm {
-	mov edx, pIn
-	mov eax, pOut
-	mov ecx, nCount
-	fld _f2ic
-	sub eax, 4
-R2I_Loop:
-	fld DWORD PTR [edx]
-	add eax, 4
-	fmul ST(0), ST(1)
-	dec ecx
-	lea edx, [edx+4]
-	fistp DWORD PTR [eax]
-	jnz R2I_Loop
-	fstp st(0)
-	}
-}
-
-
-void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
-//----------------------------------------------------------------
-{
-	_asm {
-	mov edx, pOut
-	mov eax, pSrc
-	mov ecx, nCount
-	fld _i2fc
-	sub edx, 4
-I2R_Loop:
-	fild DWORD PTR [eax]
-	add edx, 4
-	fmul ST(0), ST(1)
-	dec ecx
-	lea eax, [eax+4]
-	fstp DWORD PTR [edx]
-	jnz I2R_Loop
-	fstp st(0)
-	}
-}
 
 ////////////////////////////////////////////////////////////////////////////////////
 // 3DNow! optimizations
+
+#ifdef ENABLE_AMDNOW
 
 // Convert integer mix to floating-point
 void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
@@ -1491,8 +1417,12 @@ mainloop:
 	}
 }
 
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // SSE Optimizations
+
+#ifdef ENABLE_SSE
 
 void SSE_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
 //---------------------------------------------------------------------------------
@@ -1551,8 +1481,104 @@ mainloop:
 	}
 }
 
+#endif
 
 
-#endif // ENABLE_MMX
 
 
+
+// Convert floating-point mix to integer
+void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
+//-------------------------------------------------------------------------------------
+{
+	_asm {
+	mov esi, pIn1
+	mov ebx, pIn2
+	mov edi, pOut
+	mov ecx, nCount
+	fld _f2ic
+mainloop:
+	fld dword ptr [ebx]
+	add edi, 8
+	fld dword ptr [esi]
+	add ebx, 4
+	add esi, 4
+	fmul st(0), st(2)
+	fistp dword ptr [edi-8]
+	fmul st(0), st(1)
+	fistp dword ptr [edi-4]
+	dec ecx
+	jnz mainloop
+	fstp st(0)
+	}
+}
+
+// Convert integer mix to floating-point
+void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
+//---------------------------------------------------------------------------------
+{
+	_asm {
+	mov esi, pSrc
+	mov edi, pOut1
+	mov ebx, pOut2
+	mov ecx, nCount
+	fld _i2fc
+mainloop:
+	fild dword ptr [esi]
+	fild dword ptr [esi+4]
+	add ebx, 4
+	add edi, 4
+	fmul st(0), st(2)
+	add esi, 8
+	fstp dword ptr [ebx-4]
+	fmul st(0), st(1)
+	fstp dword ptr [edi-4]
+	dec ecx
+	jnz mainloop
+	fstp st(0)
+	}
+}
+
+
+void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
+//---------------------------------------------------------------
+{
+	_asm {
+	mov edx, pIn
+	mov eax, pOut
+	mov ecx, nCount
+	fld _f2ic
+	sub eax, 4
+R2I_Loop:
+	fld DWORD PTR [edx]
+	add eax, 4
+	fmul ST(0), ST(1)
+	dec ecx
+	lea edx, [edx+4]
+	fistp DWORD PTR [eax]
+	jnz R2I_Loop
+	fstp st(0)
+	}
+}
+
+
+void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
+//----------------------------------------------------------------
+{
+	_asm {
+	mov edx, pOut
+	mov eax, pSrc
+	mov ecx, nCount
+	fld _i2fc
+	sub edx, 4
+I2R_Loop:
+	fild DWORD PTR [eax]
+	add edx, 4
+	fmul ST(0), ST(1)
+	dec ecx
+	lea eax, [eax+4]
+	fstp DWORD PTR [edx]
+	jnz I2R_Loop
+	fstp st(0)
+	}
+}

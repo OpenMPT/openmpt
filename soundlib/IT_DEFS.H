@@ -140,3 +140,17 @@ extern BYTE autovibit2xm[8];
 extern BYTE autovibxm2it[8];
 
 #endif
+
+
+enum IT_ReaderBitMasks {
+
+	 // pattern row parsing, the channel data is read to obtain
+	 // number of channels active in the pattern. These bit masks are
+	 // to blank out sections of the byte of data being read.
+
+	 IT_bitmask_patternChanField_c   = 0x7f,
+	 IT_bitmask_patternChanMask_c    = 0x3f,
+	 IT_bitmask_patternChanEnabled_c = 0x80,
+	 IT_bitmask_patternChanUsed_c    = 0x0f
+
+};

@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by mptrack.rc
 //
 #define IDD_ABOUTBOX                    100
@@ -66,6 +66,8 @@
 #define IDD_SELECTMIXPLUGIN             423
 #define IDD_PLUGINEDITOR                424
 #define IDD_SETUP_REVERB                425
+#define IDD_EFFECTVISUALIZER            426
+#define IDB_VISNODE                     427
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -570,6 +572,7 @@
 #define IDC_SAMPLE_DOWNSAMPLE           2084
 #define IDC_COMBO7                      2085
 #define IDC_TREE1                       2086
+#define IDC_VISSTATUS                   2087
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -698,6 +701,7 @@
 #define ID_MODTREE_UNMUTEALL            32897
 #define ID_MODTREE_SOLO                 32898
 #define ID_ESTIMATESONGLENGTH           32899
+#define ID_PATTERN_VISUALIZE_EFFECT     32900
 #define IDS_ERR_FILEOPEN                55001
 #define IDS_ERR_FILETYPE                55002
 #define IDS_ERR_SAVEINS                 55003
@@ -716,9 +720,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        426
+#define _APS_NEXT_RESOURCE_VALUE        428
 #define _APS_NEXT_COMMAND_VALUE         32900
-#define _APS_NEXT_CONTROL_VALUE         2087
-#define _APS_NEXT_SYMED_VALUE           900
+#define _APS_NEXT_CONTROL_VALUE         2088
+#define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

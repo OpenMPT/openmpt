@@ -1,0 +1,53 @@
+** Warning this is the 'WILD' MODPLUG RELEASE **
+
+This release of Modplug contains experimental content. It has
+not been extensively tested and it's likely it can cause problems
+on your system. If you are prepared to accept that errors can occur
+and you might lose your music or worse the system crashes then you
+can enjoy some of the new features on offer. To be safe stick with the
+stable release of Modplug. If you do use this version of the software 
+then please provide feedback at:
+
+web:   http://sourceforge.net/projects/modplug 
+
+email: modplug@plastikskouser.com    Developer, Admin
+email: rf99@doc.ic.ac.uk.            Developer, Admin
+
+
+
+
+v2004.02.22   Author: Trevor Nunes Contact: modplug@plastikskouser.com
+-----------------------------------------------------------------------
+Experimental features in this version:
+
+1 Conditional compilation for MMX,SSE,AMD assembly routines
+  This should allow compilation on Vanilla VC6 compilers.
+
+2 255 channel support with updated IT loader/saver. It should not
+  impact existing .it modules and allows for safe loading and saving of
+  >64 channel modules.
+
+
+v2004.02.16   Author: Rewbs  Contact: f99.doc.ic.ac.uk
+-------------------------------------------------------
+Experimental features in this version:
+
+1. A Dry/wet slider for each plugin - values should save and load in this version, and be cleanly ignored by older versions.
+   Should also work properly now. :)
+
+2. Tick resolution midi macro slide. Use \xx command instead of Zxx if you want your plugin param to slide to xx over the course of that row rather than brutally jumping there. Should also work on built-in cutoff+resonance. For an example of what this effect does, download: http://www.soal.org/expMPT/paramSlideDemo.zip .
+
+3. Effect param graphical editor prototype. Left click modifies a single node, right click & drag to "draw".
+   Warning, things get quite sluggish if you're visualizing many rows and make the window quite large.
+   Known bugs:
+    . Occasional visual glitches: nodes sometimes don't get erased with large window size; resize the window to clear it up.
+    . you have to move the focus back to the pattern to undo
+
+4. Mixpaste, just like in IT2
+
+5. Option to have "follow song" disabled by default under general settings.
+
+6. SDx works on VSTis.
+
+Send bugs or any other complaints to rf99@doc.ic.ac.uk.
+
