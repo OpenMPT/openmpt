@@ -571,6 +571,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, DWORD dwMemLength)
 	m_nTickCount = m_nMusicSpeed;
 	m_nNextRow = 0;
 	m_nRow = 0;
+	m_nSamplesPerTick = //(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) ? gdwMixingFreq / m_nMusicTempo :
+					    (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
 	if ((m_nRestartPos >= MAX_ORDERS) || (Order[m_nRestartPos] >= MAX_PATTERNS)) m_nRestartPos = 0;
 	// Load plugins
 	if (gpMixPluginCreateProc)
@@ -1068,10 +1070,9 @@ void CSoundFile::SuspendPlugins()
 		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
 		if (m_MixPlugins[iPlug].pMixState)
 		{
-			pPlugin->HardAllNotesOff();
-			pPlugin->Process((float*)in, (float*)out, SCRATCH_BUFFER_SIZE); //final process.
-			pPlugin->Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
-			pPlugin->Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls suspend
+			pPlugin->NotifySongPlaying(false);
+			pPlugin->HardAllNotesOff(); 
+			pPlugin->Suspend();
 		}
 	}
 	m_lTotalSampleCount=0;
@@ -1085,15 +1086,11 @@ void CSoundFile::ResumePlugins()
 		if (!m_MixPlugins[iPlug].pMixPlugin)	
 			continue;  //most common branch
 
-		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
 		if (m_MixPlugins[iPlug].pMixState)
 		{
-			//reset some stuff
-			pPlugin->Dispatch(effStopProcess, 0, 0, NULL, 0.0f);	
-			pPlugin->Dispatch(effMainsChanged, 0, 0, NULL, 0.0f);	// calls suspend
-			//start off some stuff
-			pPlugin->Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);
-			pPlugin->Dispatch(effStartProcess, 0, 0, NULL, 0.0f);	// calls resume
+            IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
+			pPlugin->NotifySongPlaying(true);
+			pPlugin->Resume();
 		}
 	}
 	m_lTotalSampleCount=0;   //Already done in suspend.

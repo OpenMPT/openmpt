@@ -199,6 +199,7 @@ protected:
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditMixPaste();		//rewbs.mixPaste
+	afx_msg void OnEditMixPasteITStyle();		//rewbs.mixPaste
 	afx_msg void OnClearSelection(bool ITStyle=false); //rewbs.customKeys
 	afx_msg void OnGrowSelection();   //rewbs.customKeys
 	afx_msg void OnShrinkSelection(); //rewbs.customKeys

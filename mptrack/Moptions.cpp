@@ -184,13 +184,7 @@ void COptionsColors::OnOK()
 	if (IsDlgButtonChecked(IDC_CHECK4)) CMainFrame::m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
 	CMainFrame::m_nRowSpacing = GetDlgItemInt(IDC_EDIT1);
 	CMainFrame::m_nRowSpacing2 = GetDlgItemInt(IDC_EDIT2);
-	if ((CMainFrame::m_nRowSpacing2 > CMainFrame::m_nRowSpacing)
-	 && (CMainFrame::m_nRowSpacing) && (CMainFrame::m_nRowSpacing2))
-	{
-		UINT tmp = CMainFrame::m_nRowSpacing;
-		CMainFrame::m_nRowSpacing = CMainFrame::m_nRowSpacing2;
-		CMainFrame::m_nRowSpacing2 = tmp;
-	}
+
 	memcpy(CMainFrame::rgbCustomColors, CustomColors, sizeof(CMainFrame::rgbCustomColors));
 	CMainFrame::UpdateColors();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -383,6 +377,22 @@ void COptionsColors::OnColorSelChanged()
 	}
 }
 
+void COptionsColors::OnSettingsChanged()
+//--------------------------------------
+{
+	int temp_nRowSpacing = GetDlgItemInt(IDC_EDIT1);
+	int temp_nRowSpacing2 = GetDlgItemInt(IDC_EDIT2);
+
+	if ((temp_nRowSpacing2 >= temp_nRowSpacing))
+	{
+		::AfxMessageBox("Error: Rows per measure must be greater than rows per beat.", MB_OK|MB_ICONEXCLAMATION);
+		if (temp_nRowSpacing>0)
+			SetDlgItemInt(IDC_EDIT2, temp_nRowSpacing-1);
+		else 
+			SetDlgItemInt(IDC_EDIT2, 2);
+	}
+	SetModified(TRUE); 
+}
 
 void COptionsColors::OnUpdateDialog()
 //-----------------------------------

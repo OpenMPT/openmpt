@@ -14,6 +14,7 @@
 
 class CMainFrame;
 class CModDoc;
+class CAutoSaver;
 class ISoundDevice;
 class ISoundSource;
 
@@ -23,7 +24,7 @@ class ISoundSource;
 #define KEYBOARDMAP_LENGTH			(3*12+2)
 #define MAINFRAME_TITLE				"Modplug Tracker"
 #define MPTRACK_FINALRELEASEVERSION	0x01090000
-#define MPTRACK_VERSION				0x011600D7
+#define MPTRACK_VERSION				0x011700D7
 
 
 enum {
@@ -476,6 +477,7 @@ public:
 	static const DWORD *GetKeyboardMap();
 	static VOID GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
+	static CAutoSaver *m_pAutoSaver; 	//rewbs.customKeys
 
 // Misc functions
 public:
@@ -516,8 +518,8 @@ public:
 	CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
 	//CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()) ? m_pSndFile : NULL; } 
 	CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
-	BOOL InitRenderer(CModDoc*);  //rewbs.VSTTimeInfo
-	BOOL StopRenderer(CModDoc*);  //rewbs.VSTTimeInfo
+	BOOL InitRenderer(CSoundFile*);  //rewbs.VSTTimeInfo
+	BOOL StopRenderer(CSoundFile*);  //rewbs.VSTTimeInfo
 	void SwitchToActiveView();
 	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT bufsize, LONG wd);
 	BOOL SetupDirectories(LPCSTR s, LPCSTR s2, LPCSTR s3);

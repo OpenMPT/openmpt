@@ -318,6 +318,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_PLAYER_PAUSE:		s="Pause\t"; c=kcPauseSong; break;
 		case ID_MIDI_RECORD:		s="Midi Record\t"; c=kcMidiRecord; break;
 		case ID_ESTIMATESONGLENGTH:	s="Estimate Song Length\t"; c=kcEstimateSongLength; break;
+		case ID_APPROX_BPM:			s="Approx. real BPM\t"; c=kcApproxRealBPM; break;
 
 		case ID_EDIT_UNDO:			s="Undo\t"; c=kcEditUndo; break;
 		case ID_EDIT_CUT:			s="Cut\t"; c=kcEditCut; break;
@@ -375,6 +376,8 @@ void CInputHandler::UpdateMainMenu()
 	pMenu->ModifyMenu(ID_PLAYER_PAUSE, MF_BYCOMMAND | MF_STRING, ID_PLAYER_PAUSE, GetMenuText(ID_PLAYER_PAUSE));
 	pMenu->ModifyMenu(ID_MIDI_RECORD, MF_BYCOMMAND | MF_STRING, ID_MIDI_RECORD, GetMenuText(ID_MIDI_RECORD));
 	pMenu->ModifyMenu(ID_ESTIMATESONGLENGTH, MF_BYCOMMAND | MF_STRING, ID_ESTIMATESONGLENGTH, GetMenuText(ID_ESTIMATESONGLENGTH));
+	pMenu->ModifyMenu(ID_APPROX_BPM, MF_BYCOMMAND | MF_STRING, ID_APPROX_BPM,  GetMenuText(ID_APPROX_BPM));
+
 
 	pMenu->ModifyMenu(ID_EDIT_UNDO, MF_BYCOMMAND | MF_STRING, ID_EDIT_UNDO, GetMenuText(ID_EDIT_UNDO));
 	pMenu->ModifyMenu(ID_EDIT_CUT, MF_BYCOMMAND | MF_STRING, ID_EDIT_CUT, GetMenuText(ID_EDIT_CUT));

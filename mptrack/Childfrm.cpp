@@ -67,6 +67,7 @@ LONG CChildFrame::glMdiOpenCount = 0;
 CChildFrame::CChildFrame()
 //------------------------
 {
+	m_bInitialActivation=true; //rewbs.fix3185
 	m_szCurrentViewClassName[0] = 0;
 	m_hWndCtrl = m_hWndView = NULL;
 	m_bMaxWhenClosed = FALSE;
@@ -138,6 +139,25 @@ void CChildFrame::ActivateFrame(int nCmdShow)
 		nCmdShow = SW_SHOWMAXIMIZED;
 	}
 	CMDIChildWnd::ActivateFrame(nCmdShow);
+
+
+	//rewbs.fix3185: When song first loads, initialise patternViewState
+	//               to point to start of song.
+	CView *pView = GetActiveView();
+	CModDoc *pModDoc = NULL;
+	if (pView) pModDoc = (CModDoc *)pView->GetDocument();
+	if ((m_hWndCtrl) && (pModDoc))
+	{
+		if (m_bInitialActivation && m_ViewPatterns.nPattern==0)
+		{
+			CSoundFile *pSndFile = pModDoc->GetSoundFile();
+			m_ViewPatterns.nPattern=pModDoc->GetSoundFile()->Order[0];
+			m_ViewPatterns.nOrder=0; //just in case (should already be 0)
+			m_ViewPatterns.nRow=0;   //just in case
+			m_bInitialActivation=false;
+		}
+	}
+	//end rewbs.fix3185
 }
 
 

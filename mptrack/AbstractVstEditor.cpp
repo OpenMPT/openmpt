@@ -69,7 +69,7 @@ VOID CAbstractVstEditor::OnSavePreset()
 
 		//TODO: exception handling
 		if (!(m_pVstPlugin->SaveProgram(dlg.GetFileName())))
-			::AfxMessageBox("Error saving preset. Are you sure it is for this plugin?");
+			::AfxMessageBox("Error saving preset.");
 	}
 	return;
 }

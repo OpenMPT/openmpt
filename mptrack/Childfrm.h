@@ -96,6 +96,7 @@ protected:
 	INSTRUMENTVIEWSTATE m_ViewInstruments;
 	COMMENTVIEWSTATE m_ViewComments;
 	CHAR m_szCurrentViewClassName[256];
+	bool m_bInitialActivation; //rewbs.fix3185:
 
 // Operations
 public:

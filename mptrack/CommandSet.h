@@ -69,6 +69,7 @@ enum CommandID
 	kcPlayPatternFromStart,
 	kcPlayPatternFromCursor,
 	kcEstimateSongLength,
+	kcApproxRealBPM,
 	kcMidiRecord,
 	kcEndPlayCommands=kcMidiRecord,
 
@@ -78,6 +79,7 @@ enum CommandID
 	kcEditCopy,
 	kcEditPaste,
 	kcEditMixPaste,
+	kcEditMixPasteITStyle,
 	kcEditSelectAll,
 	kcEditFind,
 	kcEditFindNext,

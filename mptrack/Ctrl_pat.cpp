@@ -853,29 +853,8 @@ void CCtrlPatterns::OnPatternPlay()
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((pMainFrm) && (pModDoc))
-	{
-		DWORD dwPos = SendViewMessage(VIEWMSG_GETCURRENTPOS);
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		BEGIN_CRITICAL();
-		// Cut instruments/samples
-		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
-		{
-			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
-		}
-		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
-		pSndFile->LoopPattern(HIWORD(dwPos));
-		pSndFile->m_nNextRow = LOWORD(dwPos);
-		END_CRITICAL();
-		if (pMainFrm->GetModPlaying() != pModDoc)
-		{
-			pSndFile->ResumePlugins();		//rewbs.VSTcompliance
-			pMainFrm->PlayMod(pModDoc, m_hWndView, MPTNOTIFY_POSITION);
-		}
-		else
-		{
-			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
-		}
+	if ((pMainFrm) && (pModDoc)) {
+		pModDoc->OnPatternPlay();
 	}
 	SwitchToView();
 }
@@ -886,35 +865,8 @@ void CCtrlPatterns::OnPatternPlayNoLoop()
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	
-	if ((pMainFrm) && (pModDoc))
-	{
-		DWORD dwPos = SendViewMessage(VIEWMSG_GETCURRENTPOS);
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		int order = pSndFile->FindOrder(HIWORD(dwPos));
-		if  (order < 0)
-			return;			//we can't play song from a pat that's not in the orderlist.
-
-		BEGIN_CRITICAL();
-		// Cut instruments/samples
-		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
-		{
-			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
-		}
-		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
-		pSndFile->SetCurrentOrder(order);
-		pSndFile->DontLoopPattern(order, LOWORD(dwPos));
-		pSndFile->m_nNextRow = LOWORD(dwPos);
-		END_CRITICAL();
-		if (pMainFrm->GetModPlaying() != pModDoc)
-		{
-			pSndFile->ResumePlugins();
-			pMainFrm->PlayMod(pModDoc, m_hWndView, MPTNOTIFY_POSITION);
-		}
-		else
-		{
-			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
-		}
+	if ((pMainFrm) && (pModDoc)) {
+		pModDoc->OnPatternPlayNoLoop();
 	}
 	SwitchToView();
 }
@@ -925,37 +877,8 @@ void CCtrlPatterns::OnPatternPlayFromStart()
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((pMainFrm) && (pModDoc))
-	{
-		DWORD dwPos = SendViewMessage(VIEWMSG_GETCURRENTPOS);
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		BEGIN_CRITICAL();
-		// Cut instruments/samples
-		for (UINT i=0; i<MAX_CHANNELS; i++)
-		{
-			pSndFile->Chn[i].nPatternLoopCount = 0;
-			pSndFile->Chn[i].nPatternLoop = 0;
-			pSndFile->Chn[i].nFadeOutVol = 0;
-			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
-		}
-		UINT nPat = HIWORD(dwPos);
-		UINT nOrd = m_OrderList.GetCurSel();
-		if ((nOrd < MAX_PATTERNS) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = nOrd;
-		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
-		pSndFile->LoopPattern(nPat);
-		pSndFile->m_nNextRow = 0;
-		pSndFile->ResetTotalTickCount();
-		END_CRITICAL();
-		pMainFrm->ResetElapsedTime();
-		if (pMainFrm->GetModPlaying() != pModDoc)
-		{
-			pSndFile->ResumePlugins();	//rewbs.VSTcompliance
-			pMainFrm->PlayMod(pModDoc, m_hWndView, MPTNOTIFY_POSITION);
-		}
-		else
-		{
-			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
-		}
+	if ((pMainFrm) && (pModDoc)) {
+		pModDoc->OnPatternRestart();
 	}
 	SwitchToView();
 }

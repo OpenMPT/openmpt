@@ -68,7 +68,7 @@ protected:
 	afx_msg void OnUpdateDialog();
 	afx_msg void OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis);
 	afx_msg void OnColorSelChanged();
-	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnSettingsChanged();
 	afx_msg void OnSelectColor1();
 	afx_msg void OnSelectColor2();
 	afx_msg void OnSelectColor3();

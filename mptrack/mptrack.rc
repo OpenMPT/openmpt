@@ -125,6 +125,7 @@ BEGIN
         MENUITEM "&Midi Record\tF9",            ID_MIDI_RECORD
         MENUITEM SEPARATOR
         MENUITEM "&Estimate song length",       ID_ESTIMATESONGLENGTH
+        MENUITEM "Approx. real &BPM",           ID_APPROX_BPM
     END
     POPUP "&Edit"
     BEGIN
@@ -188,7 +189,7 @@ BEGIN
         BEGIN
             MENUITEM "&Modplug Central",            ID_NETLINK_MODPLUG
             MENUITEM "Modplug Central &Forums",     ID_NETLINK_FORUMS
-            MENUITEM "&Kvr-VST (plugins)",          ID_NETLINK_PLUGINS
+            MENUITEM "&Kvr Audio (plugins)",        ID_NETLINK_PLUGINS
             MENUITEM "&OSMusic.net",                ID_NETLINK_TRAXINSPACE
             MENUITEM "The Tracker's &Handbook",     ID_NETLINK_HANDBOOK
         END
@@ -405,40 +406,40 @@ BEGIN
     LTEXT           "Config to load on startup:",IDC_STATIC,139,239,80,8
 END
 
-IDD_OPTIONS_COLORS DIALOGEX 0, 0, 240, 156
+IDD_OPTIONS_COLORS DIALOGEX 0, 0, 265, 278
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Colors"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,4,3,232,150
-    LTEXT           "Background:",IDC_TEXT1,149,58,60,8
-    LTEXT           "Foreground:",IDC_TEXT2,149,88,62,8
-    CONTROL         "Color",IDC_BUTTON1,"Button",BS_OWNERDRAW,149,69,51,15
-    CONTROL         "Color",IDC_BUTTON2,"Button",BS_OWNERDRAW,149,99,51,15
-    CONTROL         "Color",IDC_BUTTON3,"Button",BS_OWNERDRAW,149,130,51,15
-    LTEXT           "Hilight:",IDC_TEXT3,149,120,61,8
+    GROUPBOX        "",IDC_STATIC,4,7,217,155
+    LTEXT           "Background:",IDC_TEXT1,154,64,60,8
+    LTEXT           "Foreground:",IDC_TEXT2,154,94,62,8
+    CONTROL         "Color",IDC_BUTTON1,"Button",BS_OWNERDRAW,154,75,51,15
+    CONTROL         "Color",IDC_BUTTON2,"Button",BS_OWNERDRAW,154,105,51,15
+    CONTROL         "Color",IDC_BUTTON3,"Button",BS_OWNERDRAW,154,136,51,15
+    LTEXT           "Hilight:",IDC_TEXT3,154,126,61,8
     COMBOBOX        IDC_COMBO1,9,26,134,109,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Select color for:",IDC_STATIC,10,15,63,8
-    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,13,97,114,
-                    43
-    EDITTEXT        IDC_EDIT1,74,42,21,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "rows",IDC_STATIC,99,44,16,8
-    CONTROL         "Highlight every",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,43,61,10
+    EDITTEXT        IDC_EDIT1,87,42,21,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "rows",IDC_STATIC,111,44,16,8
+    CONTROL         "Rows Per Measure",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,43,74,10
     CONTROL         "Enable effect highlighting",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,72,114,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,10,83,114,10
     CONTROL         "Use small font",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,83,102,10
+                    WS_TABSTOP,10,94,102,10
     LTEXT           "Presets:",IDC_STATIC,154,15,28,8
     PUSHBUTTON      "MPT",IDC_BUTTON5,154,26,22,12
     PUSHBUTTON      "FT2",IDC_BUTTON6,179,26,22,12
     PUSHBUTTON      "IT",IDC_BUTTON7,154,40,22,12
-    EDITTEXT        IDC_EDIT2,74,56,21,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "rows",IDC_STATIC,99,58,16,8
-    CONTROL         "2nd highlight:",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,57,61,10
+    EDITTEXT        IDC_EDIT2,87,56,21,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "rows",IDC_STATIC,111,58,16,8
+    CONTROL         "Rows Per Beat",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,10,57,71,10
     PUSHBUTTON      "Buzz",IDC_BUTTON8,179,40,22,12
+    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,13,108,
+                    114,43
 END
 
 IDD_MIDISETUP DIALOG  0, 0, 240, 156
@@ -1636,6 +1637,36 @@ BEGIN
     LTEXT           "New:",IDC_STATIC,101,35,18,8
 END
 
+IDD_OPTIONS_AUTOSAVE DIALOGEX 0, 0, 265, 278
+STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Auto Save"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Auto Save",IDC_STATIC,4,3,248,145
+    EDITTEXT        IDC_AUTOSAVE_PATH,68,91,154,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_AUTOSAVE_BROWSE,223,92,12,11,NOT WS_TABSTOP
+    LTEXT           "Save every:",IDC_STATIC,11,29,40,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_AUTOSAVE_INTERVAL,55,29,24,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Enable Autosave",IDC_AUTOSAVE_ENABLE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,15,70,10
+    LTEXT           "minutes",IDC_STATIC,83,29,36,12,SS_CENTERIMAGE
+    LTEXT           "File name:",IDC_STATIC,24,110,36,12,SS_CENTERIMAGE
+    LTEXT           "(example: mySong.AutoSave.20050327.2343.it)",IDC_STATIC,
+                    68,122,157,12,SS_CENTERIMAGE
+    CONTROL         "Use song's original directory",IDC_AUTOSAVE_USEORIGDIR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,76,103,10
+    LTEXT           "Backup dir:",IDC_STATIC,24,91,36,12,SS_CENTERIMAGE
+    LTEXT           "[filename].AutoSave.[timestamp].[extension]",IDC_STATIC,
+                    68,110,154,12,SS_CENTERIMAGE,WS_EX_CLIENTEDGE
+    LTEXT           "Keep up to:",IDC_STATIC,11,46,36,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_AUTOSAVE_HISTORY,55,46,24,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "backups of each file name",IDC_STATIC,83,46,87,12,
+                    SS_CENTERIMAGE
+    GROUPBOX        "Location:",IDC_STATIC,11,65,228,75
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1705,6 +1736,12 @@ BEGIN
         RIGHTMARGIN, 260
         TOPMARGIN, 5
         BOTTOMMARGIN, 274
+    END
+
+    IDD_OPTIONS_COLORS, DIALOG
+    BEGIN
+        RIGHTMARGIN, 240
+        BOTTOMMARGIN, 198
     END
 
     IDD_CONTROL_COMMENTS, DIALOG
@@ -1850,6 +1887,12 @@ BEGIN
         RIGHTMARGIN, 264
         TOPMARGIN, 7
         BOTTOMMARGIN, 163
+    END
+
+    IDD_OPTIONS_AUTOSAVE, DIALOG
+    BEGIN
+        RIGHTMARGIN, 259
+        BOTTOMMARGIN, 275
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2133,8 +2176,8 @@ BEGIN
     ID_PATTERN_EXPAND       "Expand pattern\nExpand Pattern"
     ID_PATTERN_SHRINK       "Shrink Pattern\nShrink Pattern"
     ID_HELP_SEARCH          "Displays the help index\nHelp Index"
-    ID_NETLINK_MODPLUG      "Go to Modplug Central (www.modplug.com)"
-    ID_NETLINK_UT           "Go to United Trackers (www.united-trackers.org)"
+    ID_NETLINK_MODPLUG      "Go to Modplug Central"
+    ID_NETLINK_UT           "Go to United Trackers"
     ID_NETLINK_OSMUSIC      "Go to OSMusic.net"
     ID_NETLINK_HANDBOOK     "Go to the Tracker's Handbook"
 END
@@ -2150,7 +2193,7 @@ BEGIN
     ID_FILE_SAVEMIDI        "Convert the current song to a standard midi file"
     ID_NETLINK_FORUMS       "Go to the Modplug Central Music Forums"
     ID_INSTRUMENT_SAMPLEMAP "Edit the sample map"
-    ID_NETLINK_PLUGINS      "Go to KVR-VST to download plugins!"
+    ID_NETLINK_PLUGINS      "Go to KVR Audio to download plugins"
     ID_PATTERN_AMPLIFY      "Amplify selection\nAmplify"
 END
 

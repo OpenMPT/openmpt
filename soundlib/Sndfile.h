@@ -553,6 +553,12 @@ public:
 	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
 	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST 
 	virtual long Dispatch(long opCode, long index, long value, void *ptr, float opt) =0; //rewbs.VSTCompliance
+	virtual void NotifySongPlaying(bool)=0;	//rewbs.VSTCompliance
+	virtual bool IsSongPlaying()=0;
+	virtual bool IsResumed()=0;
+	virtual void Resume()=0;
+	virtual void Suspend()=0;
+
 };
 
 
@@ -682,6 +688,7 @@ public:	// for Editing
 	UINT m_nMixChannels, m_nMixStat, m_nBufferCount;
 	UINT m_nTickCount, m_nTotalCount, m_nPatternDelay, m_nFrameDelay;
 	ULONG m_lTotalSampleCount;	// rewbs.VSTTimeInfo
+	UINT m_nSamplesPerTick;	// rewbs.betterBPM
 	UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
@@ -1128,7 +1135,7 @@ typedef struct WAVEEXTRAHEADER
 // Low-level Mixing functions
 
 #define MIXBUFFERSIZE		512
-#define SCRATCH_BUFFER_SIZE 16 //Used for plug's final processing (cleanup)
+#define SCRATCH_BUFFER_SIZE 64 //Used for plug's final processing (cleanup)
 #define MIXING_ATTENUATION	4
 #define MIXING_CLIPMIN		(-0x07FFFFFF)
 #define MIXING_CLIPMAX		(0x07FFFFFF)

@@ -1751,10 +1751,19 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 		{
 			PSNDMIXPLUGINSTATE pState = pPlugin->pMixState;
 			// Init plugins ?
-			if (gbInitPlugins)
-			{
+			/*if (gbInitPlugins)
+			{   //ToDo: do this in resume.
 				pPlugin->pMixPlugin->Init(gdwMixingFreq, (gbInitPlugins & 2) ? TRUE : FALSE);
+			}*/
+			if (!pPlugin->pMixPlugin->IsSongPlaying()) {
+				//We should only ever reach this point if the song is playing.
+				//Plugin doesn't know it is in a song that is playing;
+				//we must have added it during playback. Initialise it!
+				pPlugin->pMixPlugin->NotifySongPlaying(true);
+				pPlugin->pMixPlugin->Resume();
 			}
+
+
 			// Setup float input
 			if (pState->dwFlags & MIXPLUG_MIXREADY)
 			{

@@ -2134,7 +2134,17 @@ void CCommandSet::SetupCommands()
 	commands[kcSwitchToOrderList].isDummy = false;
 	commands[kcSwitchToOrderList].Message = "Switch to order list";
 
-	//DEBUG: check for duplicate UIDs:
+	commands[kcEditMixPasteITStyle].UID = 1686;
+	commands[kcEditMixPasteITStyle].Message = "Mix Paste (old IT Style)";
+	commands[kcEditMixPasteITStyle].isHidden = false;
+	commands[kcEditMixPasteITStyle].isDummy = false;
+
+	commands[kcApproxRealBPM].UID = 1687;
+	commands[kcApproxRealBPM].Message = "Show approx. real BPM";
+	commands[kcApproxRealBPM].isHidden = false;
+	commands[kcApproxRealBPM].isDummy = false;
+
+	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)
 	{
 		if (commands[i].UID != 0)	// ignore unset UIDs
@@ -2146,7 +2156,7 @@ void CCommandSet::SetupCommands()
 			}
 		}
 	}
-	//end DEBUG
+	#endif //_DEBUG
 }
 //-----------------------------------------
 
