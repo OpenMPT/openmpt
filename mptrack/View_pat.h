@@ -71,6 +71,8 @@ protected:
 	BYTE MultiRecordMask[(MAX_CHANNELS+7)/8];
 	UINT m_nFoundInstrument;
 	UINT m_nMenuOnChan;
+	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
+	UINT m_nLastPlayedChannel; //rewbs.customkeys
 	
 // -> CODE#0012
 // -> DESC="midi keyboard split"
@@ -148,7 +150,7 @@ public:
 	//rewbs.customKeys
 	BOOL ExecuteCommand(CommandID command);
 	void CursorJump(DWORD distance, bool direction, bool snap);
-	void TempEnterNote(int n, bool oldStyle = false);
+	void TempEnterNote(int n, bool oldStyle = false, int vol = -1);
 	void TempStopNote(int note);
 	void TempEnterChord(int n);
 	void TempStopChord(int note);

@@ -24,6 +24,16 @@ NOTE:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.16.0214a
+   + Added "copy and lose selection" command as a general pattern command, for those who like the cursor to be restored when they copy.
+     You obviously don't have to map a key to this command if you don't want to use it.
+   + Automatic chord detection, a la Ericus: if you're in a channel with recording enabled, and you hit several note keys at the same time, MPT should put the notes on the same row.
+   . Fixed velocity recording from midi in. (tx Squirrel Havoc)
+   . Fixed stuck notes when playing VSTis from pattern in record enabled channels.
+   . Fixed file corruption bug on saving after deleting an instrument (tx LPChip)
+   / Midi-in now uses same note entry code as normal keyboard note entry. (tx Squirrel Havoc)
+   / Added shrink and grow selection to pattern context menu.
+
 . v 1.16.0213a
    ? Untested: incomplete changes in midi in pattern recording (taken direct from Ericus' build - probably broken in my build atm).
    ? Untested: merged from Ericus' build: 'rearrange samples' menu entry in edit->cleanup

@@ -9,6 +9,7 @@ Cfxp::Cfxp(void)
 //--------------
 {
 	params=NULL;
+	chunk=NULL;
 	m_bNeedSwap=-1;
 }
 
@@ -17,6 +18,7 @@ Cfxp::Cfxp(CString fileName)
 {
 	//Cfxp();
 	params=NULL;
+	chunk=NULL;
 	m_bNeedSwap=-1;
 	Load(fileName);
 }
@@ -27,6 +29,7 @@ Cfxp::Cfxp(long ID, long version, long nParams, float *ps)
 {
 	//Cfxp();
 	params=NULL;
+	chunk=NULL;
 	m_bNeedSwap=-1;
 	
 	ChunkMagic='CcnK';	// 'KncC';
@@ -37,7 +40,7 @@ Cfxp::Cfxp(long ID, long version, long nParams, float *ps)
 	fxVersion=version;
 	numParams=nParams;
 	params = new float[numParams];
-
+	
 	memcpy(params, ps, sizeof(float)*numParams);
 	memset(prgName, 0, 28);
 }
@@ -47,6 +50,8 @@ Cfxp::~Cfxp(void)
 {
 	if (params)
 		delete[] params;
+	if (chunk)
+		free(chunk);
 }
 
 
@@ -63,6 +68,7 @@ bool Cfxp::Load(CString fileName)
 	if ( !inStream.Open(fileName, CFile::modeRead, &e) )
 	{
 		//TODO: exception
+		::AfxMessageBox("Error opening file.");
 		return false; 
 	}
 
@@ -77,21 +83,36 @@ bool Cfxp::Load(CString fileName)
 		  ReadLE(inStream, numParams)	&&
 		  ReadLE(inStream, prgName, 28) &&
 		  ChunkMagic == 'CcnK'			&&  
-		  fxMagic == 'FxCk'))
+		  (fxMagic == 'FxCk' || fxMagic == 'FPCh')))
 	{
+		::AfxMessageBox("Bad Magic.");
 		inStream.Close();
 		return false;
 	}
 
-	params = new float[numParams];
-
-	for (int p=0; p<numParams; p++)
+	if (fxMagic == 'FxCk') // load param list
 	{
-		if (!ReadLE(inStream, params[p]))
+		params = new float[numParams];
+		for (int p=0; p<numParams; p++)
 		{
+			if (!ReadLE(inStream, params[p]))
+			{
+				::AfxMessageBox("Error reading Params.");
+				inStream.Close();
+				return false;
+			}
+		}
+	}
+	else if (fxMagic == 'FPCh') // load chunk list
+	{
+		chunk = malloc(numParams);
+		if (!ReadLE(inStream, (char*)chunk, numParams))
+		{
+			::AfxMessageBox("Error reading Chunk.");
 			inStream.Close();
 			return false;
 		}
+
 	}
 
 	inStream.Close();

@@ -2057,6 +2057,11 @@ void CCommandSet::SetupCommands()
 	commands[kcViewChannelManager].isHidden = false;
 	commands[kcViewChannelManager].isDummy = false;
 
+	commands[kcCopyAndLoseSelection].UID = 1671;
+	commands[kcCopyAndLoseSelection].Message = "Copy and lose selection";
+	commands[kcCopyAndLoseSelection].isHidden = false;
+	commands[kcCopyAndLoseSelection].isDummy = false;
+	
 
 	//DEBUG: check for duplicate UIDs:
 	for (int i=0; i<kcNumCommands; i++)

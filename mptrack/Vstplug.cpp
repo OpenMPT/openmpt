@@ -1570,12 +1570,18 @@ bool CVstPlugin::LoadProgram(CString fileName)
 	//Verify
 	if (m_pEffect->uniqueID != fxp.fxID)
 		return false;
-	if (m_pEffect->numParams != fxp.numParams)
-		return false;
 
-	//Load
-	for (int p=0; p<fxp.numParams; p++)
-		SetParameter(p, fxp.params[p]);
+	if (fxp.fxMagic == 'FxCk') //Load preset based fxp 
+	{
+		if (m_pEffect->numParams != fxp.numParams)
+			return false;
+		for (int p=0; p<fxp.numParams; p++)
+			SetParameter(p, fxp.params[p]);
+	}
+	else if (fxp.fxMagic == 'FPCh')
+	{	
+		Dispatch(effSetChunk, 0, fxp.numParams, (BYTE*)fxp.chunk, 0);
+	}
 
 	return true;
 }

@@ -1507,55 +1507,43 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		}
 
 		//------------ rewbs.modularInstData
-		//WARNING!! this code is duplicated in SaveITIInstrument
-		//          TODO: sort this out.
-
-		long modularInstSize = 0;
-		UINT ModInstID = 'INSM';
-		fwrite(&ModInstID, 1, sizeof(ModInstID), f);	// mark this as an instrument with modular extensions
-		long sizePos = ftell(f);				// we will want to write the modular data's total size here
-		fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
-		
-		//Write chunks
-		UINT ID;
-		/*{	//Dummy chunk:
-			ID='DMMY';
-			BYTE dummyData[1024];
-			memset(dummyData, 0x99, 1024);
-
-			fwrite(&ID, 1, sizeof(int), f);
-			fwrite(dummyData, 1, 1024*sizeof(BYTE), f);
-			modularInstSize += sizeof(int)+1024*sizeof(BYTE);
-		}*/
-		{	//VST Slot chunk:
-			ID='PLUG';
-			fwrite(&ID, 1, sizeof(int), f);
-			if (Headers[nins])
-			{
+		if (Headers[nins])
+		{
+			long modularInstSize = 0;
+			UINT ModInstID = 'INSM';
+			fwrite(&ModInstID, 1, sizeof(ModInstID), f);	// mark this as an instrument with modular extensions
+			long sizePos = ftell(f);				// we will want to write the modular data's total size here
+			fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
+			
+			//Write chunks
+			UINT ID;
+			{	//VST Slot chunk:
+				ID='PLUG';
+				fwrite(&ID, 1, sizeof(int), f);
 				INSTRUMENTHEADER *penv = Headers[nins];
 				fwrite(&(penv->nMixPlug), 1, sizeof(BYTE), f);
+				modularInstSize += sizeof(int)+sizeof(BYTE);
 			}
-			modularInstSize += sizeof(int)+sizeof(BYTE);
-		}
-		//How to save your own modular instrument chunk:
-/*		{
-			ID='MYID';
-			fwrite(&ID, 1, sizeof(int), f);
-			instModularDataSize+=sizeof(int);
+			//How to save your own modular instrument chunk:
+	/*		{
+				ID='MYID';
+				fwrite(&ID, 1, sizeof(int), f);
+				instModularDataSize+=sizeof(int);
+				
+				//You can save your chunk size somwhere here if you need variable chunk size.
+				fwrite(myData, 1, myDataSize, f);
+				instModularDataSize+=myDataSize;
+			}
+	*/
+			//write modular data's total size
+			long curPos = ftell(f);			// remember current pos
+			fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
+			fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
+			fseek(f, curPos, SEEK_SET);		// go back to where we were.
 			
-			//You can save your chunk size somwhere here if you need variable chunk size.
-			fwrite(myData, 1, myDataSize, f);
-			instModularDataSize+=myDataSize;
+			//move forward 
+			dwPos+=sizeof(ModInstID)+sizeof(modularInstSize)+modularInstSize;
 		}
-*/
-		//write modular data's total size
-		long curPos = ftell(f);			// remember current pos
-		fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
-		fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
-		fseek(f, curPos, SEEK_SET);		// go back to where we were.
-		
-		//move forward 
-		dwPos+=sizeof(ModInstID)+sizeof(modularInstSize)+modularInstSize;
 		//------------ end rewbs.modularInstData
 	}
 	// Writing sample headers

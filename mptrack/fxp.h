@@ -32,6 +32,7 @@ public:
 	long numParams;
 	char prgName[30];
 	float *params;
+	void *chunk;
 
 	bool Save(CString fileName);
 

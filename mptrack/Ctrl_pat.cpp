@@ -215,13 +215,15 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_nOctaveLink = TRUE;
 	CheckDlgButton(IDC_PATTERN_OCTAVELINK, m_nOctaveLink ? MF_CHECKED : MF_UNCHECKED);
 
-	for(int i = 0; i<65 ; i++){
+	m_CbnSplitVolume.AddString("--");
+	m_CbnSplitVolume.SetItemData(0, 0);
+	for(int i = 1; i<65 ; i++){
 		wsprintf(s,"%d",i);
 		int n = m_CbnSplitVolume.AddString(s);
 		m_CbnSplitVolume.SetItemData(n, i);
 	}
 
-	m_nSplitVolume = 64;
+	m_nSplitVolume = 0;
 	m_CbnSplitVolume.SetCurSel(m_nSplitVolume);
 
 
