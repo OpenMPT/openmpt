@@ -684,13 +684,14 @@
 #define IDC_CREDITS                     2218
 #define IDC_MS_LENGTH_ORIGINAL2         2219
 #define IDC_RICHEDIT21                  2219
-#define IDC_AUTOSAVE_LOCATION           2220
 #define IDC_AUTOSAVE_PATH               2220
 #define IDC_AUTOSAVE_BROWSE             2221
 #define IDC_AUTOSAVE_INTERVAL           2222
 #define IDC_AUTOSAVE_ENABLE             2223
 #define IDC_AUTOSAVE_HISTORY            2224
 #define IDC_AUTOSAVE_USEORIGDIR         2225
+#define IDC_ROWSPERMEASURE              2226
+#define IDC_ROWSPERBEAT                 2227
 #define IDC_TEXT_BPM                    2300
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
@@ -875,7 +876,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        501
 #define _APS_NEXT_COMMAND_VALUE         36008
-#define _APS_NEXT_CONTROL_VALUE         2226
+#define _APS_NEXT_CONTROL_VALUE         2228
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
