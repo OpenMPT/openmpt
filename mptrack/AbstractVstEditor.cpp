@@ -98,10 +98,15 @@ VOID CAbstractVstEditor::SetupMenu()
 
 		if (m_pPresetMenu->m_hMenu)
 		{
+			if (curProg == m_nCurProg)
+				return; //Menu exists and is accurate.
+			
+			//TODO: create menu on click so it only updated when required
 			m_pPresetMenu->DestroyMenu();
 			m_pMenu->DeleteMenu(1, MF_BYPOSITION);	
 		}
-		m_pPresetMenu->CreatePopupMenu();
+		if (!m_pPresetMenu->m_hMenu)
+			m_pPresetMenu->CreatePopupMenu();
 		
 		for (long p=0; p<numProgs; p++)
 		{
@@ -127,8 +132,11 @@ VOID CAbstractVstEditor::SetupMenu()
 			m_pMenu->InsertMenu(1, MF_BYPOSITION|MF_POPUP, (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Factory");
 		else
 			m_pMenu->InsertMenu(1, MF_BYPOSITION|MF_POPUP|MF_GRAYED, (UINT) m_pPresetMenu->m_hMenu, (LPCTSTR)"&Factory");
+			
+		m_nCurProg=curProg;
+		::SetMenu(m_hWnd, m_pMenu->m_hMenu);
 	}
-	::SetMenu(m_hWnd, m_pMenu->m_hMenu);
+	return;
 }
 
 void CAbstractVstEditor::OnSetPreset(UINT nID)
@@ -136,7 +144,6 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 	int nIndex=nID-ID_PRESET_SET;
 	if (nIndex>=0)
 	{
-		m_nCurProg=nIndex;
 		m_pVstPlugin->SetCurrentProgram(nIndex);
 		SetupMenu();
 	}
