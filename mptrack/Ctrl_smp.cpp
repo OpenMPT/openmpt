@@ -1366,11 +1366,13 @@ void CCtrlSamples::OnEnableStretchToSize()
 	if(IsDlgButtonChecked(IDC_CHECK3)){
 		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(FALSE);
 		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(TRUE);
+		SetDlgItemText(IDC_BUTTON1, "Time Stretch");
 	}
 	// Enable pitch-shifting / disable unused time-stretching UI elements
 	else{
 		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(TRUE);
 		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(FALSE);
+		SetDlgItemText(IDC_BUTTON1, "Pitch Shift");
 	}
 }
 
