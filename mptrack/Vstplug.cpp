@@ -1450,13 +1450,13 @@ CVstPlugin::~CVstPlugin()
 		delete[] m_pTempBuffer;
 		m_pTempBuffer = NULL;
 	}
-	//Deleting inputs causes crashes on some plugs
+	//Deleting inputs causes crashes on some plugs, not deleting causes crashes in other cases. :)
 	//TODO: figure out what to do here.. :)
-	/*if (m_nInputs && m_pInputs) //if m_nInputs == 0, then m_pInputs will have been
+	if (m_nInputs && m_pInputs) //if m_nInputs == 0, then m_pInputs will have been
 	{							//initilised at 0 size, so we'll crash on delete.
 		delete[] m_pInputs;
 		m_pInputs = NULL;
-	}*/
+	}
 	if (m_pOutputs)
 	{
 		delete[] m_pOutputs;
