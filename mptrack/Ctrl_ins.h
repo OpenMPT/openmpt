@@ -74,6 +74,7 @@ public:
 	BOOL OpenInstrument(CSoundFile *pSndFile, UINT nInstr);
 	BOOL EditSample(UINT nSample);
 	VOID UpdateFilterText();
+	LONG* GetSplitPosRef() {return &CMainFrame::glInstrumentWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)

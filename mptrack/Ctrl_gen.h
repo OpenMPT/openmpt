@@ -27,6 +27,7 @@ class CCtrlGeneral: public CModControlDlg
 {
 public:
 	CCtrlGeneral();
+	LONG* GetSplitPosRef() {return &CMainFrame::glGeneralWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_DATA(CCtrlGeneral)

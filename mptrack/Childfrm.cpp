@@ -94,7 +94,8 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	if (!m_wndSplitter.CreateStatic(this, 2, 1)) return FALSE;
 
 	// add the first splitter pane - the default view in row 0
-	int cy = CMainFrame::glCtrlWindowHeight;
+	//int cy = CMainFrame::glCtrlWindowHeight;
+	int cy = CMainFrame::glGeneralWindowHeight;	//rewbs.varWindowSize - default to general tab.
 	if (cy <= 1) cy = (lpcs->cy*2) / 3;
 	if (!m_wndSplitter.CreateView(0, 0, pContext->m_pNewViewClass, CSize(0, cy), pContext)) return FALSE;
 	
@@ -112,6 +113,13 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	return TRUE;
 }
 
+//rewbs.varWindowSize
+void CChildFrame::SetSplitterHeight(int cy)
+{
+	if (cy <= 1) cy = 188;	//default to 188? why not..
+	m_wndSplitter.SetRowInfo(0,cy,15);
+}
+//end rewbs.varWindowSize
 
 BOOL CChildFrame::PreCreateWindow(CREATESTRUCT& cs)
 //-------------------------------------------------
@@ -207,12 +215,37 @@ void CChildFrame::SavePosition(BOOL bForce)
 			{
 				pWnd->GetWindowRect(&rect);
 				LONG l = rect.Height();
-				if (l > 15) CMainFrame::glCtrlWindowHeight = l;
+				//rewbs.varWindowPos - not the nicest piece of code, but we need to distinguish btw the views:
+				if (strcmp("CViewGlobals",m_szCurrentViewClassName) == 0)
+					CMainFrame::glGeneralWindowHeight = l;
+				else if (strcmp("CViewPattern", m_szCurrentViewClassName) == 0)
+					CMainFrame::glPatternWindowHeight = l;
+				else if (strcmp("CViewSample", m_szCurrentViewClassName) == 0)
+					CMainFrame::glSampleWindowHeight = l;
+				else if (strcmp("CViewInstrument", m_szCurrentViewClassName) == 0)
+					CMainFrame::glInstrumentWindowHeight = l;				
+				else if (strcmp("CViewComments", m_szCurrentViewClassName) == 0)
+					CMainFrame::glCommentsWindowHeight = l;				
 			}
 		}
 	}
 }
 
+//rewbs.varWindowSize
+int CChildFrame::GetSplitterHeight() { 
+	if (m_hWnd)
+	{
+		CRect rect;
+
+		CWnd *pWnd = m_wndSplitter.GetPane(0, 0);
+		if (pWnd)
+		{
+			pWnd->GetWindowRect(&rect);
+			return rect.Height();
+		} 
+	}
+	return 15;	// tidy default
+};
 
 LRESULT CChildFrame::SendViewMessage(UINT uMsg, LPARAM lParam) const
 //------------------------------------------------------------------

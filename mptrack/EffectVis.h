@@ -85,7 +85,7 @@ public:
 	BOOL OpenEditor(CWnd *parent);
 	VOID DoClose();
 	afx_msg void OnClose();
-	
+	LONG* GetSplitPosRef() {return NULL;} 	//rewbs.varWindowSize
 
 	CViewPattern *m_pViewPattern;
 	
