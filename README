@@ -1,15 +1,23 @@
-Modplug Plugin for XMMS v1.0
+Modplug Plugin for XMMS v1.1
  Based on the ModPlug sound engine by Olivier Lapicque <olivierl@jps.net>
  XMMS port by Kenton Varda <temporal@gauge3d.org>
- (C) 1999 Olivier Lapicqu and Kenton Varda
+ (C) 2000 Olivier Lapicque and Kenton Varda
 
 Olivier Lapicque, author of Modplug, which is arguably the best quality
 MOD-playing software available, has sent me the latest version (dated
-12//99) of his sound rendering code liscensed under the GPL.  This
+2/2000) of his sound rendering code liscensed under the GPL.  This
 plugin is based on that code.
 
 Features:
 - Plays MOD, S3M, XM, IT, and 15 other oddball formats.
+- Plays compressed mods in three flavors:
+   - .MDZ: Standard zipped mod.
+   - .MDR: Rar compressed mod.
+   - .MDGZ: Gzipped mod.  (not available on Windoze! :)
+   Note: To play these formats, you need to have the associated
+   decompression utilities (unzip, gunzip, unrar) installed.  To see
+   if you have them installed, try typing the commands at the command
+   line.
 - Slightly better sound quality than Mikmod.  Vastly superior quality
    over Winamp.
 - All XMMS calls are supported exept for the band gains on the

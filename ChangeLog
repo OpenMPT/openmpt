@@ -1,0 +1,15 @@
+ModPlug-XMMS v1.1, Feb. 28, 2000
++ Latest ModPlug source from Olivier Lapique.
++ You can now play compressed mods of the following formats:
+  - .MDZ: Standard zipped mod.
+  - .MDR: Rar compressed mod.
+  - .MDGZ: Gzipped mod.  (not available on Windoze! :)
+  Note: To play these formats, you need to have the associated
+  decompression utilities (unzip, gunzip, unrar) installed.  To see
+  if you have them installed, try typing the commands at the command
+  line.
+
+* gtk-- is no longer required.
+* Fixed bug where files with capitalized extensions did not have their
+  names loaded until they were played.
+* GUI looks a bit nicer.

@@ -1,0 +1,331 @@
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = ../..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AS = @AS@
+CC = @CC@
+CXX = @CXX@
+DLLTOOL = @DLLTOOL@
+LD = @LD@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
+MAKEINFO = @MAKEINFO@
+NM = @NM@
+OBJDUMP = @OBJDUMP@
+PACKAGE = @PACKAGE@
+RANLIB = @RANLIB@
+VERSION = @VERSION@
+plugindir = @plugindir@
+
+CXXFLAGS = -ffast-math -D_REENTRANT -O2
+
+noinst_LTLIBRARIES = libsoundfile.la
+libsoundfile_la_LDFLAGS = -module -avoid-version
+libsoundfile_la_SOURCES = waveform.cpp tables.cpp sndmix.cpp sndfile.cpp snd_fx.cpp snd_flt.cpp snd_dsp.cpp mmcmp.cpp load_xm.cpp load_wav.cpp load_umx.cpp load_ult.cpp load_stm.cpp load_s3m.cpp load_ptm.cpp load_okt.cpp load_mtm.cpp load_mod.cpp load_med.cpp load_mdl.cpp load_it.cpp load_far.cpp load_dsm.cpp load_dmf.cpp load_dbm.cpp load_ams.cpp load_amf.cpp load_669.cpp fastmix.cpp
+
+EXTRA_DIST = fastmix.cpp it_defs.h load_669.cpp load_amf.cpp load_ams.cpp load_dbm.cpp load_dmf.cpp load_dsm.cpp load_far.cpp load_it.cpp load_mdl.cpp load_med.cpp load_mod.cpp load_mtm.cpp load_okt.cpp load_ptm.cpp load_s3m.cpp load_stm.cpp load_ult.cpp load_umx.cpp load_wav.cpp load_xm.cpp mmcmp.cpp snd_dsp.cpp snd_flt.cpp snd_fx.cpp sndfile.cpp sndfile.h sndmix.cpp stdafx.h tables.cpp waveform.cpp 
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = ../../config.h
+CONFIG_CLEAN_FILES = 
+LTLIBRARIES =  $(noinst_LTLIBRARIES)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I../..
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+libsoundfile_la_LIBADD = 
+libsoundfile_la_OBJECTS =  waveform.lo tables.lo sndmix.lo sndfile.lo \
+snd_fx.lo snd_flt.lo snd_dsp.lo mmcmp.lo load_xm.lo load_wav.lo \
+load_umx.lo load_ult.lo load_stm.lo load_s3m.lo load_ptm.lo load_okt.lo \
+load_mtm.lo load_mod.lo load_med.lo load_mdl.lo load_it.lo load_far.lo \
+load_dsm.lo load_dmf.lo load_dbm.lo load_ams.lo load_amf.lo load_669.lo \
+fastmix.lo
+CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  Makefile.am Makefile.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = gtar
+GZIP_ENV = --best
+SOURCES = $(libsoundfile_la_SOURCES)
+OBJECTS = $(libsoundfile_la_OBJECTS)
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .cpp .lo .o .s
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps modplugxmms/soundfile/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+
+mostlyclean-noinstLTLIBRARIES:
+
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+
+distclean-noinstLTLIBRARIES:
+
+maintainer-clean-noinstLTLIBRARIES:
+
+.c.o:
+	$(COMPILE) -c $<
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+.c.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+libsoundfile.la: $(libsoundfile_la_OBJECTS) $(libsoundfile_la_DEPENDENCIES)
+	$(CXXLINK)  $(libsoundfile_la_LDFLAGS) $(libsoundfile_la_OBJECTS) $(libsoundfile_la_LIBADD) $(LIBS)
+.cpp.o:
+	$(CXXCOMPILE) -c $<
+.cpp.lo:
+	$(LTCXXCOMPILE) -c $<
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = modplugxmms/soundfile
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+fastmix.lo fastmix.o : fastmix.cpp stdafx.h sndfile.h
+load_669.lo load_669.o : load_669.cpp stdafx.h sndfile.h
+load_amf.lo load_amf.o : load_amf.cpp stdafx.h sndfile.h
+load_ams.lo load_ams.o : load_ams.cpp stdafx.h sndfile.h
+load_dbm.lo load_dbm.o : load_dbm.cpp stdafx.h sndfile.h
+load_dmf.lo load_dmf.o : load_dmf.cpp stdafx.h sndfile.h
+load_dsm.lo load_dsm.o : load_dsm.cpp stdafx.h sndfile.h
+load_far.lo load_far.o : load_far.cpp stdafx.h sndfile.h
+load_it.lo load_it.o : load_it.cpp stdafx.h sndfile.h it_defs.h
+load_mdl.lo load_mdl.o : load_mdl.cpp stdafx.h sndfile.h
+load_med.lo load_med.o : load_med.cpp stdafx.h sndfile.h
+load_mod.lo load_mod.o : load_mod.cpp stdafx.h sndfile.h
+load_mtm.lo load_mtm.o : load_mtm.cpp stdafx.h sndfile.h
+load_okt.lo load_okt.o : load_okt.cpp stdafx.h sndfile.h
+load_ptm.lo load_ptm.o : load_ptm.cpp stdafx.h sndfile.h
+load_s3m.lo load_s3m.o : load_s3m.cpp stdafx.h sndfile.h
+load_stm.lo load_stm.o : load_stm.cpp stdafx.h sndfile.h
+load_ult.lo load_ult.o : load_ult.cpp stdafx.h sndfile.h
+load_umx.lo load_umx.o : load_umx.cpp stdafx.h sndfile.h
+load_wav.lo load_wav.o : load_wav.cpp stdafx.h sndfile.h
+load_xm.lo load_xm.o : load_xm.cpp stdafx.h sndfile.h
+mmcmp.lo mmcmp.o : mmcmp.cpp stdafx.h sndfile.h
+snd_dsp.lo snd_dsp.o : snd_dsp.cpp stdafx.h sndfile.h
+sndfile.lo sndfile.o : sndfile.cpp stdafx.h sndfile.h
+snd_flt.lo snd_flt.o : snd_flt.cpp stdafx.h sndfile.h
+snd_fx.lo snd_fx.o : snd_fx.cpp stdafx.h sndfile.h
+sndmix.lo sndmix.o : sndmix.cpp stdafx.h sndfile.h
+tables.lo tables.o : tables.cpp stdafx.h sndfile.h
+waveform.lo waveform.o : waveform.cpp stdafx.h sndfile.h
+
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am:
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile $(LTLIBRARIES)
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+
+
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-noinstLTLIBRARIES mostlyclean-compile \
+		mostlyclean-libtool mostlyclean-tags \
+		mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-noinstLTLIBRARIES clean-compile clean-libtool \
+		clean-tags clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-noinstLTLIBRARIES distclean-compile \
+		distclean-libtool distclean-tags distclean-generic \
+		clean-am
+	-rm -f libtool
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-noinstLTLIBRARIES \
+		maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-tags maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: mostlyclean-noinstLTLIBRARIES distclean-noinstLTLIBRARIES \
+clean-noinstLTLIBRARIES maintainer-clean-noinstLTLIBRARIES \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile mostlyclean-libtool distclean-libtool \
+clean-libtool maintainer-clean-libtool tags mostlyclean-tags \
+distclean-tags clean-tags maintainer-clean-tags distdir info-am info \
+dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

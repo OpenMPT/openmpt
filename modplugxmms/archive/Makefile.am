@@ -1,0 +1,7 @@
+CXXFLAGS = -ffast-math -D_REENTRANT -O2
+
+noinst_LTLIBRARIES = libarchive.la
+libarchive_la_LDFLAGS = -module -avoid-version
+libarchive_la_SOURCES = archive.cpp open.cpp arch_raw.cpp arch_gzip.cpp arch_zip.cpp arch_rar.cpp
+
+EXTRA_DIST = archive.cpp open.cpp arch_raw.cpp archive.h open.h arch_raw.h arch_gzip.h arch_gzip.cpp arch_zip.cpp arch_zip.h arch_rar.cpp arch_rar.h
