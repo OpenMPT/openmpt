@@ -470,8 +470,14 @@ VOID CMainFrame::Initialize()
 	OnUpdateUser(NULL);
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
 	
+//rewbs: reduce to normal priority during debug for easier hang debugging
+#ifdef NDEBUG
 	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-	
+#endif 
+#ifdef _DEBUG
+	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+#endif
+
 	// Setup Keyboard Hook
 	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());
 	// Initialize Audio Mixer
@@ -1004,7 +1010,13 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 	nSleep = 50;
 // -> CODE#0021
 // -> DESC="use multimedia timer instead of Sleep() in audio thread"
+//rewbs: reduce to normal priority during debug for easier hang debugging
+#ifdef NDEBUG
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+#endif 
+#ifdef _DEBUG
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+#endif 
 //	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
 // -! BEHAVIOUR_CHANGE#0021
 	for (;;)
@@ -2598,9 +2610,7 @@ void CMainFrame::OnInitMenu(CMenu* pMenu)
 //end rewbs.VSTTimeInfo
 long CMainFrame::GetSampleRate()
 {
-	if (GetModPlaying())
-		return GetModPlaying()->GetSoundFile()->GetSampleRate();
-	return 0;
+	return CSoundFile::GetSampleRate();
 }
 
 long CMainFrame::GetTotalSampleCount()

@@ -1128,6 +1128,7 @@ typedef struct WAVEEXTRAHEADER
 // Low-level Mixing functions
 
 #define MIXBUFFERSIZE		512
+#define SCRATCH_BUFFER_SIZE 16 //Used for plug's final processing (cleanup)
 #define MIXING_ATTENUATION	4
 #define MIXING_CLIPMIN		(-0x08000000)
 #define MIXING_CLIPMAX		(0x07FFFFFF)

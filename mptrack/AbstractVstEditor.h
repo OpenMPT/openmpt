@@ -1,4 +1,8 @@
 //rewbs.defaultPlugGUI
+//
+// CVS TEST: dummy dev only change - hopefully this should not get propagated to the RC branch
+//
+
 #pragma once
 
 class CAbstractVstEditor: public CDialog
