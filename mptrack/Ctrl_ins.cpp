@@ -939,6 +939,18 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnEditSampleMap();
 		break;
 
+	//rewbs.customKeys
+	case IDC_INSTRUMENT_NEW:
+		OnInstrumentNew();
+		break;
+	case IDC_INSTRUMENT_OPEN:
+		OnInstrumentOpen();
+		break;
+	case IDC_INSTRUMENT_SAVEAS:
+		OnInstrumentSave();
+		break;
+	//end rewbs.customKeys
+
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);
 	}
@@ -1989,3 +2001,46 @@ void CCtrlInstruments::TogglePluginEditor()
 }
 //end rewbs.instroVSTi
 
+//rewbs.customKeys
+BOOL CCtrlInstruments::PreTranslateMessage(MSG *pMsg)
+//-----------------------------------------------
+{
+	if (pMsg)
+	{
+		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
+		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
+			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
+		{
+			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			
+			//Translate message manually
+			UINT nChar = pMsg->wParam;
+			UINT nRepCnt = LOWORD(pMsg->lParam);
+			UINT nFlags = HIWORD(pMsg->lParam);
+			KeyEventType kT = ih->GetKeyEventType(nFlags);
+			InputTargetContext ctx = (InputTargetContext)(kCtxCtrlInstruments);
+			
+			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+				return true; // Mapped to a command, no need to pass message on.
+		}
+
+	}
+	
+	return CModControlDlg::PreTranslateMessage(pMsg);
+}
+
+LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == kcNull)
+		return NULL;
+	
+	switch(wParam)
+	{
+		case kcInstrumentCtrlLoad: OnInstrumentOpen(); return wParam;
+		case kcInstrumentCtrlSave: OnInstrumentSave(); return wParam;
+		case kcInstrumentCtrlNew:  OnInstrumentNew();  return wParam;
+	}
+	
+	return 0;
+}
+//end rewbs.customKeys

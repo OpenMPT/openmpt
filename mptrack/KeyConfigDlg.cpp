@@ -24,9 +24,11 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 		}
 		else if ((pMsg->message == WM_KEYUP)    || (pMsg->message == WM_SYSKEYUP))
 		{
-			m_pOptKeyDlg->OnSetKeyChoice();
-		}
-
+			//if a key has been released but custom edit box is empty, we have probably just
+			//navigated into the box with TAB or SHIFT-TAB. No need to set keychoice.
+			if (code!=0)
+			  m_pOptKeyDlg->OnSetKeyChoice();         
+        }
 	}
 	return CEdit::PreTranslateMessage(pMsg);
 }
@@ -221,6 +223,7 @@ void COptionsKeyboard::DefineCommandCategories()
 	for (int c=kcStartSelect; c<=kcEndSelect; c++)
 		newCat->commands.Add(c);
 	newCat->separators.Add(kcEndSelect);			//--------------------------------------
+	newCat->commands.Add(kcCopyAndLoseSelection);
 	for (int c=kcClearRow; c<=kcInsertAllRows; c++)
 		newCat->commands.Add(c);
 	newCat->separators.Add(kcInsertAllRows);			//--------------------------------------
@@ -279,6 +282,9 @@ void COptionsKeyboard::DefineCommandCategories()
 
 	newCat = new CommandCategory("    Sample Editor", kCtxViewSamples);
 	for (int c=kcStartSampleEditing; c<=kcEndSampleEditing; c++)
+		newCat->commands.Add(c);
+	newCat->separators.Add(kcEndSampleEditing);			//--------------------------------------
+	for (int c=kcStartSampleMisc; c<=kcEndSampleMisc; c++)
 		newCat->commands.Add(c);
 	commandCategories.Add(*newCat);
 	delete newCat;

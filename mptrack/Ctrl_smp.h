@@ -18,6 +18,7 @@ protected:
 	CComboBox m_ComboAutoVib, m_ComboLoopType, m_ComboSustainType, m_ComboZoom, m_CbnBaseNote;
 	CButton m_CheckPanning;
 	UINT m_nSample;
+	
 
 // -> CODE#0029
 // -> DESC="pitch shifting - time stretching"
@@ -54,6 +55,7 @@ public:
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL GetToolTipText(UINT uId, LPSTR pszText);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlSamples)
@@ -90,7 +92,7 @@ protected:
 	afx_msg void OnVibSweepChanged();
 	afx_msg void OnVibRateChanged();
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
-
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 // -> CODE#0029
 // -> DESC=""
 	afx_msg void OnPitchShiftTimeStretch();

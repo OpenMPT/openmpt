@@ -2315,6 +2315,10 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditCut:			OnEditCut(); return wParam;
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
+
+		case kcSampleLoad:		PostCtrlMessage(IDC_SAMPLE_OPEN); return wParam;
+		case kcSampleSave:		PostCtrlMessage(IDC_SAMPLE_SAVEAS); return wParam;
+		case kcSampleNew:		PostCtrlMessage(IDC_SAMPLE_NEW); return wParam;
 								
 		case kcSampleReverse:	PostCtrlMessage(IDC_SAMPLE_REVERSE); return wParam;
 		case kcSampleSilence:	PostCtrlMessage(IDC_SAMPLE_SILENCE); return wParam;

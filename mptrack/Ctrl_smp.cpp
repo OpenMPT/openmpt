@@ -14,6 +14,10 @@
 #include "smbPitchShift.h"
 #include "samplerate.h"
 
+#ifdef _DEBUG
+#include <math.h>
+#endif
+
 #define FLOAT_ERROR 1.0e-20f
 
 // Float point comparison
@@ -88,6 +92,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_CBN_SELCHANGE(IDC_COMBO1,		OnLoopTypeChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2,		OnSustainTypeChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3,		OnVibTypeChanged)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)	//rewbs.customKeys
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -440,6 +445,18 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case IDC_SAMPLE_AMPLIFY:
 		OnAmplify();
+		break;
+
+	case IDC_SAMPLE_OPEN:
+		OnSampleOpen();
+		break;
+
+	case IDC_SAMPLE_SAVEAS:
+		OnSampleSave();
+		break;
+	
+	case IDC_SAMPLE_NEW:
+		OnSampleNew();
 		break;
 	//end rewbs.customKeys
 
@@ -2682,6 +2699,46 @@ NoSample:
 }
 
 
+//rewbs.customKeys
+BOOL CCtrlSamples::PreTranslateMessage(MSG *pMsg)
+//-----------------------------------------------
+{
+	if (pMsg)
+	{
+		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
+		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
+			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
+		{
+			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+			
+			//Translate message manually
+			UINT nChar = pMsg->wParam;
+			UINT nRepCnt = LOWORD(pMsg->lParam);
+			UINT nFlags = HIWORD(pMsg->lParam);
+			KeyEventType kT = ih->GetKeyEventType(nFlags);
+			InputTargetContext ctx = (InputTargetContext)(kCtxCtrlSamples);
+			
+			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+				return true; // Mapped to a command, no need to pass message on.
+		}
 
+	}
+	
+	return CModControlDlg::PreTranslateMessage(pMsg);
+}
 
-
+LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == kcNull)
+		return NULL;
+	
+	switch(wParam)
+	{
+		case kcSampleCtrlLoad: OnSampleOpen(); return wParam;
+		case kcSampleCtrlSave: OnSampleSave(); return wParam;
+		case kcSampleCtrlNew:  OnSampleNew();  return wParam;
+	}
+	
+	return 0;
+}
+//end rewbs.customKeys

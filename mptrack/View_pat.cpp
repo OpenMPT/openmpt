@@ -1731,7 +1731,7 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 			// Amplify
 			if (((m_dwBeginSel & 7) > 1) || ((m_dwEndSel & 0xFFFF) - (m_dwBeginSel & 0xFFF8) >= 4))
 			{
-				AppendMenu(hMenu, MF_STRING, ID_PATTERN_AMPLIFY, "Amplify\tCtrl+M");
+				AppendMenu(hMenu, MF_STRING, ID_PATTERN_AMPLIFY, "Amplify\t" + ih->GetKeyTextFromCommand(kcPatternAmplify));
 				bSep = TRUE;
 			}
 			if (bSep) AppendMenu(hMenu, MF_SEPARATOR, 0, "");
@@ -3811,6 +3811,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcTogglePluginEditor: TogglePluginEditor((m_dwCursor & 0xFFFF) >> 3); return wParam;
 		case kcToggleFollowSong: SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG); return wParam;
 		case kcNewPattern:		 SendCtrlMessage(CTRLMSG_PAT_NEWPATTERN); return wParam;
+		case kcSwitchToOrderList: OnSwitchToOrderList();
 
 	}
 	//Ranges:
@@ -3844,28 +3845,33 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	if (wParam>=kcSetIns0 && wParam<=kcSetIns9)
 	{
-		TempEnterIns(wParam-kcSetIns0);
+		if ((m_dwStatus & PATSTATUS_RECORD))
+			TempEnterIns(wParam-kcSetIns0);
 		return wParam;
 	}
 
 	if (wParam>=kcSetOctave0 && wParam<=kcSetOctave9)
 	{
-		TempEnterOctave(wParam-kcSetOctave0);
+		if ((m_dwStatus & PATSTATUS_RECORD))
+			TempEnterOctave(wParam-kcSetOctave0);
 		return wParam;
 	}
 	if (wParam>=kcSetVolumeStart && wParam<=kcSetVolumeEnd)
 	{
-		TempEnterVol(wParam-kcSetVolumeStart);
+		if ((m_dwStatus & PATSTATUS_RECORD))
+			TempEnterVol(wParam-kcSetVolumeStart);
 		return wParam;
 	}
 	if (wParam>=kcSetFXStart && wParam<=kcSetFXEnd)
 	{
-		TempEnterFX(wParam-kcSetFXStart+1);
+		if ((m_dwStatus & PATSTATUS_RECORD))
+			TempEnterFX(wParam-kcSetFXStart+1);
 		return wParam;
 	}
 	if (wParam>=kcSetFXParam0 && wParam<=kcSetFXParamF)
 	{
-		TempEnterFXparam(wParam-kcSetFXParam0);
+		if ((m_dwStatus & PATSTATUS_RECORD))
+			TempEnterFXparam(wParam-kcSetFXParam0);
 		return wParam;
 	}
 
@@ -3939,6 +3945,11 @@ void CViewPattern::TempEnterVol(int v)
 				InvalidateArea(sel, sel+5);
 				UpdateIndicator();
 			}
+		}
+		else
+		{
+			// recording disabled
+			*p = oldcmd;
 		}
 	}
 }

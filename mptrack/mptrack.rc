@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -362,50 +362,50 @@ STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Keyboard"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
+    COMBOBOX        IDC_KEYCATEGORY,0,16,130,204,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
     LISTBOX         IDC_COMMAND_LIST,0,32,130,242,LBS_NOINTEGRALHEIGHT | 
                     WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_CHOICECOMBO,141,16,79,51,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
-    PUSHBUTTON      "Set",IDC_SET,222,46,43,13,NOT WS_VISIBLE
-    PUSHBUTTON      "Delete",IDC_DELETE,212,64,43,13
-    GROUPBOX        "Key setup for this command ",IDC_STATIC,134,5,127,75
+    EDITTEXT        IDC_CUSTHOTKEY,157,31,98,13,ES_AUTOHSCROLL
     CONTROL         "On Key Down",IDC_CHECKKEYDOWN,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,141,44,66,14
     CONTROL         "On Key Hold",IDC_CHECKKEYHOLD,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,141,57,66,10
     CONTROL         "On Key Up",IDC_CHECKKEYUP,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,141,68,66,8
-    LTEXT           "Key:",IDC_STATIC,141,33,16,8
-    COMBOBOX        IDC_KEYCATEGORY,0,16,130,204,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Restore",IDC_RESTORE,212,46,43,13
-    GROUPBOX        "Misc",IDC_STATIC,134,146,126,52
-    EDITTEXT        IDC_CUSTHOTKEY,157,31,98,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Delete",IDC_DELETE,212,64,43,13
     EDITTEXT        IDC_KEYREPORT,135,84,125,60,ES_MULTILINE | 
                     ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
                     WS_VSCROLL
-    GROUPBOX        "Key Config to load on startup",IDC_STATIC,134,240,126,
-                    27
+    PUSHBUTTON      "Y",IDC_NOTESREPEAT,230,154,12,9
+    PUSHBUTTON      "N",IDC_NONOTESREPEAT,245,154,12,9
+    EDITTEXT        IDC_CHORDDETECTWAITTIME,229,164,28,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER,WS_EX_RIGHT
+    PUSHBUTTON      "it",IDC_EFFECTLETTERSIT,230,185,12,9,NOT WS_VISIBLE
+    PUSHBUTTON      "xm",IDC_EFFECTLETTERSXM,245,185,12,9,NOT WS_VISIBLE
+    PUSHBUTTON      "Load Keys",IDC_LOAD,140,213,54,13
+    PUSHBUTTON      "Save Keys",IDC_SAVE,200,213,54,13
+    CONTROL         "Debug Save",IDC_DEBUGSAVE,"Button",BS_AUTOCHECKBOX | 
+                    NOT WS_VISIBLE | WS_TABSTOP,200,228,56,10
     EDITTEXT        IDC_KEYMAPFILE,139,249,99,13,ES_AUTOHSCROLL
     PUSHBUTTON      "...",IDC_BROWSEKEYCONF,241,249,15,13
     CONTROL         "Save to this file on OK",IDC_AUTOSAVE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,173,263,84,10
-    PUSHBUTTON      "Save Keys",IDC_SAVE,200,213,54,13
+    LTEXT           "Select category:",IDC_STATIC,1,5,74,11
+    PUSHBUTTON      "Set",IDC_SET,222,46,43,13,NOT WS_VISIBLE
+    GROUPBOX        "Key setup for this command ",IDC_STATIC,134,5,127,75
+    LTEXT           "Key:",IDC_STATIC,141,33,16,8
+    GROUPBOX        "Misc",IDC_STATIC,134,146,126,52
+    GROUPBOX        "Key Config to load on startup",IDC_STATIC,134,240,126,
+                    27
     GROUPBOX        "Multi Config Handling",IDC_STATIC,134,200,126,32
-    PUSHBUTTON      "Load Keys",IDC_LOAD,140,213,54,13
-    CONTROL         "Debug Save",IDC_DEBUGSAVE,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_VISIBLE | WS_TABSTOP,200,228,56,10
     LTEXT           "Repeat notes on hold?",IDC_STATIC,138,155,74,11
-    PUSHBUTTON      "Y",IDC_NOTESREPEAT,230,154,12,9
-    PUSHBUTTON      "N",IDC_NONOTESREPEAT,245,154,12,9
     LTEXT           "Effect letters like:",IDC_STATIC,138,186,73,11,NOT 
                     WS_VISIBLE
-    PUSHBUTTON      "it",IDC_EFFECTLETTERSIT,230,185,12,9,NOT WS_VISIBLE
-    PUSHBUTTON      "xm",IDC_EFFECTLETTERSXM,245,185,12,9,NOT WS_VISIBLE
-    LTEXT           "Select category:",IDC_STATIC,1,5,74,11
     LTEXT           "Chord detect interval (ms):",IDC_STATIC,138,166,88,11
-    EDITTEXT        IDC_CHORDDETECTWAITTIME,229,164,28,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER,WS_EX_RIGHT
 END
 
 IDD_OPTIONS_COLORS DIALOGEX 0, 0, 240, 156
@@ -907,9 +907,9 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY,95,86,11,14
     CONTROL         "Mute",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
-                    BS_FLAT | WS_TABSTOP,13,129,42,10
+                    WS_TABSTOP,13,129,42,10
     CONTROL         "Surround",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
-                    BS_PUSHLIKE | BS_FLAT | WS_TABSTOP,56,129,42,10
+                    BS_PUSHLIKE | WS_TABSTOP,56,129,42,10
     COMBOBOX        IDC_COMBO1,10,155,89,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Effect:",IDC_STATIC,10,146,29,8
@@ -928,9 +928,9 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN4,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY,198,86,11,14
     CONTROL         "Mute",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
-                    BS_FLAT | WS_TABSTOP,116,129,42,10
+                    WS_TABSTOP,116,129,42,10
     CONTROL         "Surround",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    BS_PUSHLIKE | BS_FLAT | WS_TABSTOP,159,129,42,10
+                    BS_PUSHLIKE | WS_TABSTOP,159,129,42,10
     COMBOBOX        IDC_COMBO2,113,155,89,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Effect:",IDC_STATIC,113,146,29,8
@@ -949,9 +949,9 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN6,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY,301,86,11,14
     CONTROL         "Mute",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
-                    BS_FLAT | WS_TABSTOP,219,129,41,10
+                    WS_TABSTOP,219,129,41,10
     CONTROL         "Surround",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | 
-                    BS_PUSHLIKE | BS_FLAT | WS_TABSTOP,262,129,42,10
+                    BS_PUSHLIKE | WS_TABSTOP,262,129,42,10
     COMBOBOX        IDC_COMBO3,216,155,89,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Effect:",IDC_STATIC,216,146,29,8
@@ -970,9 +970,9 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN8,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY,404,86,11,14
     CONTROL         "Mute",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
-                    BS_FLAT | WS_TABSTOP,322,129,42,10
+                    WS_TABSTOP,322,129,42,10
     CONTROL         "Surround",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | 
-                    BS_PUSHLIKE | BS_FLAT | WS_TABSTOP,365,129,42,10
+                    BS_PUSHLIKE | WS_TABSTOP,365,129,42,10
     COMBOBOX        IDC_COMBO4,319,155,89,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Effect:",IDC_STATIC,319,146,29,8
@@ -2107,12 +2107,12 @@ BEGIN
     ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (Royaume-Uni) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2219,7 +2219,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Anglais (Royaume-Uni) resources
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
