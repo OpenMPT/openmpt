@@ -466,14 +466,16 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		m_OrderList.SetCurSel(m_OrderList.GetCurSel()+1, TRUE);
 		break;
 
-	//rewbs.followSongCustomKey
+	//rewbs.customKeys
 	case CTRLMSG_PAT_FOLLOWSONG:
 		CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
 		OnFollowSong();
 		break;
-	//end rewbs.followSongCustomKey
-
-
+	
+	case CTRLMSG_PAT_NEWPATTERN:
+		OnPatternNew();
+		break;
+	//end rewbs.customKeys
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);
 	}

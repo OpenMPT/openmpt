@@ -3809,7 +3809,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditMixPaste:	OnEditMixPaste(); return wParam;
 		case kcEditSelectAll:	OnEditSelectAll(); return wParam;
 		case kcTogglePluginEditor: TogglePluginEditor((m_dwCursor & 0xFFFF) >> 3); return wParam;
-		case kcToggleFollowSong: SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG);
+		case kcToggleFollowSong: SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG); return wParam;
+		case kcNewPattern:		 SendCtrlMessage(CTRLMSG_PAT_NEWPATTERN); return wParam;
 
 	}
 	//Ranges:

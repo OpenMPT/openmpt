@@ -962,8 +962,8 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	if (dwHintMask & HINT_MODTYPE)
 	{
 		BOOL b = ((m_pSndFile->m_nType == MOD_TYPE_IT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		//rewbs.instroVSTi
 		BOOL b2 = (((m_pSndFile->m_nType == MOD_TYPE_IT) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
-		OnMixPlugChanged();
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), b2);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), b2);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), b2);
@@ -1034,6 +1034,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 				m_CbnMixPlug.SetCurSel(penv->nMixPlug);
 			else 
 				m_CbnMixPlug.SetCurSel(0);
+			OnMixPlugChanged();
 			//end rewbs.instroVSTi
 			// NNA, DCT, DCA
 			m_ComboNNA.SetCurSel(penv->nNNA);
