@@ -15,7 +15,7 @@ CCommandSet::CCommandSet(void)
 	enforceRule[krAllowSelectCopySelectCombos]	= true;
 	enforceRule[krLockNotesToChords]			= true;
 	enforceRule[krNoteOffOnKeyRelease]			= true;
-	enforceRule[krPropagateNotesToSampAndIns]	= true;
+	enforceRule[krPropagateNotes]	= true;
 	enforceRule[krReassignDigitsToOctaves]		= true;
 	enforceRule[krDeleteOldOnConflict]			= true;
 	enforceRule[krDeleteOldOnConflict]			= true;
@@ -2067,6 +2067,71 @@ void CCommandSet::SetupCommands()
 	commands[kcNewPattern].isDummy = false;
 	commands[kcNewPattern].Message = "Insert new pattern";
 
+	commands[kcSampleLoad].UID = 1673;
+	commands[kcSampleLoad].isHidden = false;
+	commands[kcSampleLoad].isDummy = false;
+	commands[kcSampleLoad].Message = "Load a Sample";
+
+	commands[kcSampleSave].UID = 1674;
+	commands[kcSampleSave].isHidden = false;
+	commands[kcSampleSave].isDummy = false;
+	commands[kcSampleSave].Message = "Save Sample";
+
+	commands[kcSampleNew].UID = 1675;
+	commands[kcSampleNew].isHidden = false;
+	commands[kcSampleNew].isDummy = false;
+	commands[kcSampleNew].Message = "New Sample";
+
+
+	commands[kcSampleCtrlLoad].UID = 1676;
+	commands[kcSampleCtrlLoad].isHidden = true;
+	commands[kcSampleCtrlLoad].isDummy = false;
+	commands[kcSampleCtrlLoad].Message = "Load a Sample";
+
+	commands[kcSampleCtrlSave].UID = 1677;
+	commands[kcSampleCtrlSave].isHidden = true;
+	commands[kcSampleCtrlSave].isDummy = false;
+	commands[kcSampleCtrlSave].Message = "Save Sample";
+
+	commands[kcSampleCtrlNew].UID = 1678;
+	commands[kcSampleCtrlNew].isHidden = true;
+	commands[kcSampleCtrlNew].isDummy = false;
+	commands[kcSampleCtrlNew].Message = "New Sample";
+
+	commands[kcInstrumentLoad].UID = 1679;
+	commands[kcInstrumentLoad].isHidden = true;
+	commands[kcInstrumentLoad].isDummy = false;
+	commands[kcInstrumentLoad].Message = "Load an instrument";
+
+	commands[kcInstrumentSave].UID = 1680;
+	commands[kcInstrumentSave].isHidden = true;
+	commands[kcInstrumentSave].isDummy = false;
+	commands[kcInstrumentSave].Message = "Save instrument";
+
+	commands[kcInstrumentNew].UID = 1681;
+	commands[kcInstrumentNew].isHidden = true;
+	commands[kcInstrumentNew].isDummy = false;
+	commands[kcInstrumentNew].Message = "New instrument";
+
+	commands[kcInstrumentCtrlLoad].UID = 1682;
+	commands[kcInstrumentCtrlLoad].isHidden = true;
+	commands[kcInstrumentCtrlLoad].isDummy = false;
+	commands[kcInstrumentCtrlLoad].Message = "Load an instrument";
+
+	commands[kcInstrumentCtrlSave].UID = 1683;
+	commands[kcInstrumentCtrlSave].isHidden = true;
+	commands[kcInstrumentCtrlSave].isDummy = false;
+	commands[kcInstrumentCtrlSave].Message = "Save instrument";
+
+	commands[kcInstrumentCtrlNew].UID = 1684;
+	commands[kcInstrumentCtrlNew].isHidden = true;
+	commands[kcInstrumentCtrlNew].isDummy = false;
+	commands[kcInstrumentCtrlNew].Message = "New instrument";
+
+	commands[kcSwitchToOrderList].UID = 1685;
+	commands[kcSwitchToOrderList].isHidden = false;
+	commands[kcSwitchToOrderList].isDummy = false;
+	commands[kcSwitchToOrderList].Message = "Switch to order list";
 
 	//DEBUG: check for duplicate UIDs:
 	for (int i=0; i<kcNumCommands; i++)
@@ -2521,7 +2586,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			
 		}
 	}
-	if (enforceRule[krPropagateNotesToSampAndIns])
+	if (enforceRule[krPropagateNotes])
 	{
 		int noteOffset = 0;
 		//newKc=inKc;
@@ -2615,9 +2680,44 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			}
 		
 		}
-
-	
 	}
+	if (enforceRule[krPropagateSampleManipulation])
+	{
+		if (inCmd>=kcStartSampleMisc && inCmd<=kcEndSampleMisc)
+		{
+			int newCmd;
+			int offset = inCmd-kcStartSampleMisc;
+
+			//propagate to SampleCtrl
+/*			newCmd = kcStartSampleCtrlMisc+offset;
+			commands[newCmd].kcList.SetSize(commands[inCmd].kcList.GetSize());
+			for (int k=0; k<commands[inCmd].kcList.GetSize(); k++)
+			{
+				commands[newCmd].kcList[k].mod = commands[inCmd].kcList[k].mod;
+				commands[newCmd].kcList[k].code = commands[inCmd].kcList[k].code;
+				commands[newCmd].kcList[k].event = commands[inCmd].kcList[k].event;
+				commands[newCmd].kcList[k].ctx = kCtxCtrlSamples;
+			}
+*/
+
+			//propagate to InstrumentView
+			newCmd = kcStartInstrumentMisc+offset;
+			commands[newCmd].kcList.SetSize(commands[inCmd].kcList.GetSize());
+			for (int k=0; k<commands[inCmd].kcList.GetSize(); k++)
+			{
+				commands[newCmd].kcList[k].mod = commands[inCmd].kcList[k].mod;
+				commands[newCmd].kcList[k].code = commands[inCmd].kcList[k].code;
+				commands[newCmd].kcList[k].event = commands[inCmd].kcList[k].event;
+				commands[newCmd].kcList[k].ctx = kCtxViewInstruments;
+			}
+/*
+			//propagate to InstrumentCtrl
+			newCmd = kcStartInstrumentCtrlMisc+offset;
+*/
+		}
+
+	}
+
 
 
 	return report;

@@ -2516,6 +2516,9 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcNoteOff:			PlayNote(255); return wParam;
 		case kcNoteCutOld:
 		case kcNoteCut:			PlayNote(254); return wParam;
+		case kcInstrumentLoad:	SendCtrlMessage(IDC_INSTRUMENT_OPEN); return wParam;
+		case kcInstrumentSave:	SendCtrlMessage(IDC_INSTRUMENT_SAVEAS); return wParam;
+		case kcInstrumentNew:	SendCtrlMessage(IDC_INSTRUMENT_NEW); return wParam;	
 	}
 	if (wParam>=kcInstrumentStartNotes && wParam<=kcInstrumentEndNotes)
 	{

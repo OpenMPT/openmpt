@@ -308,6 +308,30 @@ BOOL COrderList::ProcessChar(UINT nChar)
 BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 //---------------------------------------------
 {
+	//rewbs.customKeys: 
+	//handle Patterns View context keys that we want to take effect in the orderlist.
+	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
+		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
+	{
+		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+
+		//Translate message manually
+		UINT nChar = pMsg->wParam;
+		UINT nRepCnt = LOWORD(pMsg->lParam);
+		UINT nFlags = HIWORD(pMsg->lParam);
+		KeyEventType kT = ih->GetKeyEventType(nFlags);
+		InputTargetContext ctx = (InputTargetContext)(kCtxCtrlInstruments);
+
+		CommandID kc = ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT);
+
+		switch (kc)
+		{
+			case kcSwitchToOrderList: OnSwitchToView(); return true;
+		}
+	}
+	//end rewbs.customKeys
+
+
 	switch(pMsg->message)
 	{
 	case WM_KEYUP:

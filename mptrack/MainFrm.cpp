@@ -400,12 +400,12 @@ CMainFrame::CMainFrame()
 		CEQSetupDlg::LoadEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
 
 		//rewbs.resamplerConf
-		dwSZSIZE = sizeof(gbWFIRType);
 		RegQueryValueEx(key, "XMMSModplugResamplerWFIRType", NULL, &dwREG_DWORD, (LPBYTE)&gbWFIRType, &dwDWORDSize);
-		dwSZSIZE = sizeof(gdWFIRCutoff);
-		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&gdWFIRCutoff, &dwDWORDSize);
-		dwSZSIZE = sizeof(glVolumeRampSamples);
+		int myerror = RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&gdWFIRCutoff, &dwDWORDSize);
+		//returns error 234, ERROR_MORE_DATA: "buffer specified by lpData parameter is not large 
+		// enough to hold the data" (MSDN), but it is!! :)
 		RegQueryValueEx(key, "VolumeRampSamples", NULL, &dwREG_DWORD, (LPBYTE)&glVolumeRampSamples, &dwDWORDSize);
+		
 		//end rewbs.resamplerConf
 		//rewbs.autochord
 		dwSZSIZE = sizeof(gnAutoChordWaitTime);
@@ -591,6 +591,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MAINFRAME_REG_WINDOW, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		DWORD dwREG_DWORD = REG_DWORD;
+		DWORD qwREG_DWORD = REG_QWORD;
 		DWORD dwDWORDSize = sizeof(UINT);
 
 		rect.SetRect(cs.x, cs.y, cs.cx, cs.cy);
@@ -802,9 +803,9 @@ void CMainFrame::OnClose()
 		//RegSetValueEx(key, "KeyboardCfg", NULL, REG_DWORD, (LPBYTE)&m_nKeyboardCfg, sizeof(DWORD));
 
 		//rewbs.resamplerConf
-		RegSetValueEx(key, "XMMSModplugResamplerWFIRType", NULL, REG_DWORD, (LPBYTE)&gbWFIRType, sizeof(gbWFIRType));
-		RegSetValueEx(key, "ResamplerWFIRCutoff", NULL, REG_DWORD, (LPBYTE)&gdWFIRCutoff, sizeof(gdWFIRCutoff));
-		RegSetValueEx(key, "VolumeRampSamples", NULL, REG_DWORD, (LPBYTE)&glVolumeRampSamples, sizeof(glVolumeRampSamples));		
+		RegSetValueEx(key, "XMMSModplugResamplerWFIRType", NULL, REG_NONE, (LPBYTE)&gbWFIRType, sizeof(gbWFIRType));
+		RegSetValueEx(key, "ResamplerWFIRCutoff", NULL, REG_QWORD, (LPBYTE)&gdWFIRCutoff, sizeof(gdWFIRCutoff));
+		RegSetValueEx(key, "VolumeRampSamples", NULL, REG_QWORD, (LPBYTE)&glVolumeRampSamples, sizeof(glVolumeRampSamples));		
 		//end rewbs.resamplerConf
 		RegSetValueEx(key, "AutoChordWaitTime", NULL, REG_DWORD, (LPBYTE)&gnAutoChordWaitTime, sizeof(gnAutoChordWaitTime)); //rewbs.autochord
 

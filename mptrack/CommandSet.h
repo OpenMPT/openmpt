@@ -99,7 +99,6 @@ enum CommandID
 	kcViewOptions,
 	kcViewChannelManager,
 	kcViewAddPlugin,
-	kcView,
 	kcHelp,
 	kcEndView=kcHelp,
 
@@ -201,6 +200,7 @@ enum CommandID
 	kcSetSpacing7,
 	kcSetSpacing8,
 	kcSetSpacing9,
+	kcSwitchToOrderList,
 	kcNewPattern,
 	kcTogglePluginEditor,
 	kcShowNoteProperties,
@@ -508,7 +508,31 @@ enum CommandID
 	kcSetFXvelocity,	//?,:
 	kcSetFXextension,	//?,#
 	kcSetFXEnd=kcSetFXextension,
-	
+
+	kcStartInstrumentMisc,
+	kcInstrumentLoad=kcStartInstrumentMisc,
+	kcInstrumentSave,
+	kcInstrumentNew,
+	kcEndInstrumentMisc=kcInstrumentNew,
+
+	kcStartInstrumentCtrlMisc,
+	kcInstrumentCtrlLoad=kcStartInstrumentCtrlMisc,
+	kcInstrumentCtrlSave,
+	kcInstrumentCtrlNew,
+	kcEndInstrumentCtrlMisc=kcInstrumentCtrlNew,
+
+	kcStartSampleMisc,
+	kcSampleLoad=kcStartSampleMisc,
+	kcSampleSave,
+	kcSampleNew,
+	kcEndSampleMisc=kcSampleNew,
+
+	kcStartSampleCtrlMisc,
+	kcSampleCtrlLoad=kcStartSampleCtrlMisc,
+	kcSampleCtrlSave,
+	kcSampleCtrlNew,
+	kcEndSampleCtrlMisc=kcSampleCtrlNew,
+
 	kcStartSampleEditing,
 	kcSampleTrim=kcStartSampleEditing,
 	kcSampleSilence,
@@ -520,6 +544,7 @@ enum CommandID
 	kcSampleZoomDown, 
 	kcEndSampleEditing=kcSampleZoomDown,
 
+	//kcSampStartNotes to kcInsNoteMapEndNoteStops must be contiguous.
 	kcSampStartNotes,
 	kcSampNoteC_0=kcSampStartNotes,
 	kcSampNoteCS0,
@@ -896,11 +921,11 @@ enum RuleID
 	krAllowSelectCopySelectCombos,
 	krLockNotesToChords,
 	krNoteOffOnKeyRelease,
-	krPropagateNotesToSampAndIns,
+	krPropagateNotes,
 	krReassignDigitsToOctaves,
 	krAutoSpacing,
 	krCheckModifiers,
-
+	krPropagateSampleManipulation,
 	kNumRules
 };
 
