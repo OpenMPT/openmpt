@@ -1001,12 +1001,12 @@ void CViewPattern::ProcessChar(UINT nChar, UINT nFlags)
 		if (nPlayNote)
 		{
 			BOOL bNotPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying())) ? FALSE : TRUE;
-			pModDoc->PlayNote(nPlayNote, nPlayIns, 0, bNotPlaying);
+			pModDoc->PlayNote(nPlayNote, nPlayIns, 0, bNotPlaying, -1, 0, 0, nChn);	//rewbs.vstiLive - added extra args
 			for (UINT kplchrd=0; kplchrd<nPlayChord; kplchrd++)
 			{
 				if (chordplaylist[kplchrd])
 				{
-					pModDoc->PlayNote(chordplaylist[kplchrd], nPlayIns, 0, FALSE);
+					pModDoc->PlayNote(chordplaylist[kplchrd], nPlayIns, 0, FALSE, -1, 0, 0, nChn);	//rewbs.vstiLive - 	- added extra args
 					m_dwStatus |= PATSTATUS_CHORDPLAYING;
 				}
 			}

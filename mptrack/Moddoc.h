@@ -118,7 +118,7 @@ public:
 	BOOL RemovePattern(UINT n);
 	BOOL RemoveSample(UINT n);
 	BOOL RemoveInstrument(UINT n);
-	BOOL PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0);
+	BOOL PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, UINT nCurrentChn=-1); //rewbs.vstiLive: added current chan param
 	BOOL NoteOff(UINT note, BOOL bFade=FALSE);
 	BOOL IsNotePlaying(UINT note, UINT nsmp=0, UINT nins=0);
 	BOOL MuteChannel(UINT nChn, BOOL bMute);
