@@ -815,7 +815,8 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64, nCurrentChn);
+					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64, nCurrentChn);
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64, MAX_BASECHANNELS);
 				}
 			}
 		}
@@ -861,7 +862,8 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note+0xFF, 0, nCurrentChn);
+					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note+0xFF, 0, nCurrentChn);
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note+0xFF, 0, MAX_BASECHANNELS);
 
 				}
 			}

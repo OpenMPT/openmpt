@@ -45,7 +45,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib"
-				OutputFile=".\Debug/mptrack.exe"
+				OutputFile=".\Debug/mptrack2.exe"
 				Version="5.0"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"

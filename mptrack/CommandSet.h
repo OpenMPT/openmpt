@@ -208,6 +208,7 @@ enum CommandID
 
 	kcChannelMute,
 	kcChannelSolo,
+	kcCopyAndLoseSelection,
 	kcTransposeUp,
 	kcTransposeDown,
 	kcTransposeOctUp,
