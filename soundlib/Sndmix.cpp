@@ -764,6 +764,9 @@ BOOL CSoundFile::ReadNote()
 	// Master Volume + Pre-Amplification / Attenuation setup
 	DWORD nMasterVol;
 	{
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ericus 10/02/2005
+/*
 		int nchn32 = (m_nChannels < 32) ? m_nChannels : 31;
 		if ((m_nType & MOD_TYPE_IT) && (m_nInstruments) && (nchn32 < 6)) nchn32 = 6;
 		int realmastervol = m_nMasterVolume;
@@ -780,6 +783,30 @@ BOOL CSoundFile::ReadNote()
 		}
 		nMasterVol = (mastervol << 7) / attenuation;
 		if (nMasterVol > 0x180) nMasterVol = 0x180;
+*/
+		int nchn32 = 0;
+		MODCHANNEL *pChn = Chn;
+		for (UINT nChn=0; nChn<m_nChannels; nChn++,pChn++) if(!(pChn->dwFlags & CHN_MUTE)) nchn32++;
+		if(nchn32 < 1) nchn32 = 1;
+		if(nchn32 > 31) nchn32 = 31;
+
+		int realmastervol = m_nMasterVolume;
+		if (realmastervol > 0x80)
+		{
+			realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32+4)) / 16;
+		}
+		DWORD mastervol = (realmastervol * (m_nSongPreAmp + 0x10)) >> 6;
+
+		if ((m_dwSongFlags & SONG_GLOBALFADE) && (m_nGlobalFadeMaxSamples))
+		{
+			mastervol = _muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
+		}
+
+		UINT attenuation = (gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32>>1] : PreAmpTable[nchn32>>1];
+		if(attenuation < 1) attenuation = 1;
+
+		nMasterVol = (mastervol << 7) / attenuation;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 	////////////////////////////////////////////////////////////////////////////////////
 	// Update channels data

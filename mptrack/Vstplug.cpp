@@ -1878,7 +1878,10 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	if ((m_pEffect) && (m_pEffect->process) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
 		isInstrument = (m_pEffect->numInputs < 1); // rewbs.dryRatio
-		if(isInstrument) gain /= 4.0f; // ericus 25/01/2005 restore VSTi level from previous release
+		if(isInstrument){
+			gain /= 32.0f;	// ericus 25/01/2005 restore VSTi level from previous release + reduce VSTi level
+			mixop = 0;		// + force disable mix mode
+		}
 
 		//Merge stereo before sending to the plug if it is mono
 		if (m_pEffect->numInputs == 1)
@@ -1950,7 +1953,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			}
 */
 			// Wet/Dry range expansion [0,1] -> [-1,1]	update#02
-			if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+			if(m_pEffect->numInputs > 0 && m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
 				wetRatio = 2.0f * wetRatio - 1.0f;
 				dryRatio = -wetRatio;
 			}
@@ -2054,7 +2057,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			}
 */
 			// Wet/Dry range expansion [0,1] -> [-1,1]	update#02
-			if(m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
+			if(m_pEffect->numInputs > 0 && m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND){
 				wetRatio = 2.0f * wetRatio - 1.0f;
 				dryRatio = -wetRatio;
 			}
@@ -2616,6 +2619,13 @@ BOOL CVstPlugin::GetSpeakerArrangement()
 	return true;
 }
 //end rewbs.VSTcompliance
+
+BOOL CVstPlugin::isInstrument() // ericus 18/02/2005
+{
+	if(m_pEffect) return (m_pEffect->numInputs < 1); // rewbs.dryRatio
+	return FALSE;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 //
 // BUZZ -> VST converter

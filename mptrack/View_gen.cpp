@@ -420,8 +420,16 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		
 // -> CODE#0028
 // -> DESC="effect plugin mixing mode combo"
-		m_CbnSpecialMixProcessing.SetCurSel( (pPlugin->Info.dwInputRouting>>8) & 0xff ); // update#02 (fix)
-		CheckDlgButton(IDC_CHECK12, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND) ? TRUE : FALSE);
+		if(pVstPlugin && pVstPlugin->isInstrument()){ // ericus 18/02/2005 : disable mix mode for VSTi
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), FALSE);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), FALSE);
+		}
+		else{
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_COMBO9), TRUE);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK12), TRUE);
+			m_CbnSpecialMixProcessing.SetCurSel( (pPlugin->Info.dwInputRouting>>8) & 0xff ); // update#02 (fix)
+			CheckDlgButton(IDC_CHECK12, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MIXEXPAND) ? TRUE : FALSE);
+		}
 		// update#02
 		DWORD gain = (pPlugin->Info.dwInputRouting>>16) & 0xff;
 		if(gain == 0) gain = 10;

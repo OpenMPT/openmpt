@@ -117,6 +117,7 @@ public:
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
 	BOOL GetSpeakerArrangement(); //rewbs.VSTCompliance
 
+	BOOL isInstrument(); // ericus 18/02/2005
 
 public: // IMixPlugin interface
 	int AddRef() { return ++m_nRefCount; }

@@ -1130,7 +1130,7 @@ typedef struct WAVEEXTRAHEADER
 #define MIXBUFFERSIZE		512
 #define SCRATCH_BUFFER_SIZE 16 //Used for plug's final processing (cleanup)
 #define MIXING_ATTENUATION	4
-#define MIXING_CLIPMIN		(-0x08000000)
+#define MIXING_CLIPMIN		(-0x07FFFFFF)
 #define MIXING_CLIPMAX		(0x07FFFFFF)
 #define VOLUMERAMPPRECISION	12				//rewbs.soundq exp (was 12)
 #define FADESONGDELAY		100
