@@ -72,16 +72,6 @@ void ShowConfigureWindow(const ModplugXMMS::Settings& aProps)
 	else
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "resampPolyphase"), TRUE);
 	
-	if(aProps.mOversamp)
-		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxOversamp"), TRUE);
-	else
-		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxOversamp"), FALSE);
-	
-	if(aProps.mVolumeRamp)
-		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxVolRamp"), TRUE);
-	else
-		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxVolRamp"), FALSE);
-	
 	if(aProps.mNoiseReduction)
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxNR"), TRUE);
 	else
@@ -91,6 +81,11 @@ void ShowConfigureWindow(const ModplugXMMS::Settings& aProps)
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxFastInfo"), TRUE);
 	else
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxFastInfo"), FALSE);
+	
+	if(aProps.mUseFilename)
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxUseFilename"), TRUE);
+	else
+		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxUseFilename"), FALSE);
 	
 	if(aProps.mReverb)
 		gtk_toggle_button_set_active((GtkToggleButton*)lookup_widget(ConfigWin, "fxReverb"), TRUE);
@@ -247,6 +242,8 @@ void ShowInfoWindow(const string& aFilename)
 	lInfo += ':';
 	lStrStream.seekp(0);
 	lStrStream << lSongTime % 60 << '\0';
+	if(lBuffer[1] == '\0')  //single digit for seconds?
+		lInfo += '0';        //yes, so add a 0.
 	lInfo += lBuffer;
 	lInfo += '\n';
 
@@ -261,17 +258,17 @@ void ShowInfoWindow(const string& aFilename)
 	lInfo += '\n';
 
 	lStrStream.seekp(0);
-	lStrStream << (int)(lNumSamples = lSoundFile->GetNumSamples() + 1) << '\0';
+	lStrStream << (int)(lNumSamples = lSoundFile->GetNumSamples()) << '\0';
 	lInfo += lBuffer;
 	lInfo += '\n';
 
 	lStrStream.seekp(0);
-	lStrStream << (int)(lNumInstruments = lSoundFile->GetNumInstruments() + 1) << '\0';
+	lStrStream << (int)(lNumInstruments = lSoundFile->GetNumInstruments()) << '\0';
 	lInfo += lBuffer;
 	lInfo += '\n';
 
 	lStrStream.seekp(0);
-	lStrStream << (int)(lSoundFile->GetNumPatterns() + 1) << '\0';
+	lStrStream << (int)(lSoundFile->GetNumPatterns()) << '\0';
 	lInfo += lBuffer;
 	lInfo += '\n';
 

@@ -42,6 +42,7 @@ public:
 		bool   mVolumeRamp;
 		bool   mReverb;
 		bool   mFastinfo;
+		bool   mUseFilename;
 		bool   mPreamp;
 	
 		uint8  mChannels;

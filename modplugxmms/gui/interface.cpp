@@ -118,9 +118,10 @@ create_Config (void)
   GtkWidget *frame4;
   GtkWidget *hbox3;
   GtkWidget *vbox8;
-  GtkWidget *fxNR;
-  GtkWidget *vbox9;
+  GtkWidget *fxUseFilename;
   GtkWidget *fxFastInfo;
+  GtkWidget *vbox9;
+  GtkWidget *fxNR;
   GtkWidget *frame5;
   GtkWidget *hbox4;
   GtkWidget *fxReverb;
@@ -350,7 +351,7 @@ create_Config (void)
   gtk_widget_show (resampSpline);
   gtk_box_pack_start (GTK_BOX (vbox15), resampSpline, FALSE, FALSE, 0);
 
-  resampPolyphase = gtk_radio_button_new_with_label (vbox15_group, _("Polyphase (\"pro\" quality)"));
+  resampPolyphase = gtk_radio_button_new_with_label (vbox15_group, _("8-tap Fir (extremely high quality)"));
   vbox15_group = gtk_radio_button_group (GTK_RADIO_BUTTON (resampPolyphase));
   gtk_widget_ref (resampPolyphase);
   gtk_object_set_data_full (GTK_OBJECT (Config), "resampPolyphase", resampPolyphase,
@@ -394,13 +395,20 @@ create_Config (void)
   gtk_widget_show (vbox8);
   gtk_box_pack_start (GTK_BOX (hbox3), vbox8, TRUE, TRUE, 0);
 
-  fxNR = gtk_check_button_new_with_label (_("Noise Reduction"));
-  gtk_widget_ref (fxNR);
-  gtk_object_set_data_full (GTK_OBJECT (Config), "fxNR", fxNR,
+  fxUseFilename = gtk_check_button_new_with_label (_("Use Filename as Song Title"));
+  gtk_widget_ref (fxUseFilename);
+  gtk_object_set_data_full (GTK_OBJECT (Config), "fxUseFilename", fxUseFilename,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (fxNR);
-  gtk_box_pack_start (GTK_BOX (vbox8), fxNR, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (fxNR), TRUE);
+  gtk_widget_show (fxUseFilename);
+  gtk_box_pack_start (GTK_BOX (vbox8), fxUseFilename, FALSE, FALSE, 0);
+
+  fxFastInfo = gtk_check_button_new_with_label (_("Fast Playlist Info"));
+  gtk_widget_ref (fxFastInfo);
+  gtk_object_set_data_full (GTK_OBJECT (Config), "fxFastInfo", fxFastInfo,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (fxFastInfo);
+  gtk_box_pack_start (GTK_BOX (vbox8), fxFastInfo, FALSE, FALSE, 0);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (fxFastInfo), TRUE);
 
   vbox9 = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox9);
@@ -409,13 +417,13 @@ create_Config (void)
   gtk_widget_show (vbox9);
   gtk_box_pack_start (GTK_BOX (hbox3), vbox9, TRUE, TRUE, 0);
 
-  fxFastInfo = gtk_check_button_new_with_label (_("Fast Playlist Info"));
-  gtk_widget_ref (fxFastInfo);
-  gtk_object_set_data_full (GTK_OBJECT (Config), "fxFastInfo", fxFastInfo,
+  fxNR = gtk_check_button_new_with_label (_("Noise Reduction"));
+  gtk_widget_ref (fxNR);
+  gtk_object_set_data_full (GTK_OBJECT (Config), "fxNR", fxNR,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (fxFastInfo);
-  gtk_box_pack_start (GTK_BOX (vbox9), fxFastInfo, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (fxFastInfo), TRUE);
+  gtk_widget_show (fxNR);
+  gtk_box_pack_start (GTK_BOX (vbox9), fxNR, FALSE, FALSE, 0);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (fxNR), TRUE);
 
   frame5 = gtk_frame_new (_("Reverb"));
   gtk_widget_ref (frame5);

@@ -1,3 +1,14 @@
+ModPlug-XMMS v1.5a, Jan. 24, 2001
+- Due to a misunderstanging between Olivier (creator of ModPlug) and
+  myself, I incorrectly reported that version 1.5 had polyphase and
+  spline resampling when this was not the case.
+
++ Added (for real this time!) spline and 8-tap fir resampling modes,
+  written by Markus Fick.
+
+* Preamp now correctly saves its state when you exit.
+* Other minor bug fixes.
+
 ModPlug-XMMS v1.5, Jan. 24, 2001
 + Latest Modplug sound engine, including the following changes:
   + Polyphase resampling.  I don't know what this is, but it sounds

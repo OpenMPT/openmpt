@@ -3,7 +3,7 @@ AC_INIT(Makefile.am)
 
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(modplugxmms, 1.5)
+AM_INIT_AUTOMAKE(modplugxmms, 1.5a)
 
 dnl Checks for programs.
 AC_DISABLE_STATIC

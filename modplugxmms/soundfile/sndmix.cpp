@@ -1142,7 +1142,14 @@ BOOL CSoundFile::ReadNote()
 			} else
 			{
 				pChn->dwFlags &= ~(CHN_NOIDO|CHN_HQSRC);
-				if (pChn->nInc >= 0xFE00) pChn->dwFlags |= CHN_NOIDO;
+				if( pChn->nInc == 0x10000 )
+				{	pChn->dwFlags |= CHN_NOIDO;
+				}
+				else
+				{	if( ((gdwSoundSetup & SNDMIX_HQRESAMPLER) == 0) && ((gdwSoundSetup & SNDMIX_ULTRAHQSRCMODE) == 0) )
+					{	if (pChn->nInc >= 0xFF00) pChn->dwFlags |= CHN_NOIDO;
+					}
+				}
 			}
 			pChn->nNewRightVol >>= MIXING_ATTENUATION;
 			pChn->nNewLeftVol >>= MIXING_ATTENUATION;

@@ -401,7 +401,7 @@ XMMS interface for Modplug by Kenton Varda.
 		<class>GtkRadioButton</class>
 		<name>resampPolyphase</name>
 		<can_focus>True</can_focus>
-		<label>Polyphase (&quot;pro&quot; quality)</label>
+		<label>8-tap Fir (extremely high quality)</label>
 		<active>False</active>
 		<draw_indicator>True</draw_indicator>
 		<child>
@@ -466,9 +466,23 @@ XMMS interface for Modplug by Kenton Varda.
 
 	      <widget>
 		<class>GtkCheckButton</class>
-		<name>fxNR</name>
+		<name>fxUseFilename</name>
 		<can_focus>True</can_focus>
-		<label>Noise Reduction</label>
+		<label>Use Filename as Song Title</label>
+		<active>False</active>
+		<draw_indicator>True</draw_indicator>
+		<child>
+		  <padding>0</padding>
+		  <expand>False</expand>
+		  <fill>False</fill>
+		</child>
+	      </widget>
+
+	      <widget>
+		<class>GtkCheckButton</class>
+		<name>fxFastInfo</name>
+		<can_focus>True</can_focus>
+		<label>Fast Playlist Info</label>
 		<active>True</active>
 		<draw_indicator>True</draw_indicator>
 		<child>
@@ -492,9 +506,9 @@ XMMS interface for Modplug by Kenton Varda.
 
 	      <widget>
 		<class>GtkCheckButton</class>
-		<name>fxFastInfo</name>
+		<name>fxNR</name>
 		<can_focus>True</can_focus>
-		<label>Fast Playlist Info</label>
+		<label>Noise Reduction</label>
 		<active>True</active>
 		<draw_indicator>True</draw_indicator>
 		<child>

@@ -78,7 +78,7 @@ CSoundFile::CSoundFile()
 
 CSoundFile::~CSoundFile()
 //-----------------------
-{
+{	
 	Destroy();
 }
 

@@ -19,6 +19,9 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <mmsystem.h>
+#include <stdio.h>
+
+inline void ProcessPlugins(int n) {}
 
 #else
 #include <stdlib.h>

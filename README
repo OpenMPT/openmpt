@@ -61,9 +61,8 @@ Contents
 All of the following items are configurable from the plugin
 configuration dialog box.
 
-Sampling rate: Higher is better but slower.  Note that the sound is
- rendered at a higher sampling rate and converted down to increase
- quality.
+Sampling rate: Higher is better.  Note that the sound is rendered at a
+ higher sampling rate and converted down to increase quality.
 
 Bits per sample: 8-bit or 16-bit sound.  Note that all computations are
  done at 32-bit and converted down to the sampling rate you specify.
@@ -73,7 +72,7 @@ Channels: mono/stereo.  Note that all computations are done in stereo.
 
 Resampling: Method used to convert samples to different sampling rates.
  "Nearest" is the fastest setting (but sounds terrible), while
- "polyphase" is the best-quality setting.
+ "8-tap fir" is the best-quality setting.
 
 Noise Reduction: Reduces noise. :)
 
@@ -152,6 +151,7 @@ Solution:
 
 Problem:
  Everything appears to be working, but no sound is being generated.
+ MP3's play just fine.
 
 Possible cause:
  Modplug has a relatively low default volume, and you may just not be
@@ -184,5 +184,5 @@ Problem:
 
 Solution:
  E-mail me (Kenton Varda) at <temporal@gauge3d.org>.  I would be
- happy to hear any suggestions or problems you have.  Note that I
- do not tollerate flamers or zealots.
+ happy to hear any suggestions or problems you have.
+

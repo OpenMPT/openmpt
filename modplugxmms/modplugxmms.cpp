@@ -48,6 +48,7 @@ ModplugXMMS::Settings::Settings()
 	mNoiseReduction = true;
 	mVolumeRamp     = true;
 	mFastinfo       = true;
+	mUseFilename    = false;
 
 	mChannels       = 2;
 	mFrequency      = 44100;
@@ -134,6 +135,8 @@ void ModplugXMMS::Init(void)
 					mModProps.mVolumeRamp       = lValueB;
 				else if(lField == "fastinfo")
 					mModProps.mFastinfo         = lValueB;
+				else if(lField == "use_filename")
+					mModProps.mUseFilename      = lValueB;
 				else if(lField == "preamp")
 					mModProps.mPreamp           = lValueB;
 
@@ -451,15 +454,27 @@ void ModplugXMMS::PlayFile(const string& aFilename)
 	);
 	mPlayed = 0;
 	
-	strncpy(mModName, mSoundFile->GetTitle(), 100);
+	bool useFilename = mModProps.mUseFilename;
 	
-	for(int i = 0; mModName[i] == ' ' || mModName[i] == 0; i++)
+	if(!useFilename)
 	{
-		if(mModName[i] == 0)
+		strncpy(mModName, mSoundFile->GetTitle(), 100);
+		
+		for(int i = 0; mModName[i] == ' ' || mModName[i] == 0; i++)
 		{
-			//mod name is blank.  Use filename instead.
-			strcpy(mModName, strrchr(aFilename.c_str(), '/') + 1);
+			if(mModName[i] == 0)
+			{
+				useFilename = true;  //mod name is blank -- use filename
+				break;
+			}
 		}
+	}
+	
+	if(useFilename)
+	{
+		strncpy(mModName, strrchr(aFilename.c_str(), '/') + 1, 100);
+		char* ext = strrchr(mModName, '.');
+		if(ext) *ext = '\0';
 	}
 	
 	mInPlug->set_info
@@ -560,6 +575,15 @@ void ModplugXMMS::GetSongInfo(const string& aFilename, char*& aTitle, int32& aLe
 
 	if(mModProps.mFastinfo)
 	{
+		if(mModProps.mUseFilename)
+		{
+			//Use filename as name
+			aTitle = new char[aFilename.length() + 1];
+			strcpy(aTitle, strrchr(aFilename.c_str(), '/') + 1);
+			*strrchr(aTitle, '.') = '\0';
+			return;
+		}
+		
 		fstream lModFile;
 		string lExt;
 		uint32 lPos;
@@ -618,6 +642,7 @@ void ModplugXMMS::GetSongInfo(const string& aFilename, char*& aTitle, int32& aLe
 			//mod name is blank.  Use filename instead.
 			aTitle = new char[aFilename.length() + 1];
 			strcpy(aTitle, strrchr(aFilename.c_str(), '/') + 1);
+			*strrchr(aTitle, '.') = '\0';
 			return;
 		}
 	}
@@ -641,21 +666,25 @@ void ModplugXMMS::GetSongInfo(const string& aFilename, char*& aTitle, int32& aLe
 	lSoundFile = new CSoundFile;
 	lSoundFile->Create((uchar*)lArchive->Map(), lArchive->Size());
 
-	lTitle = lSoundFile->GetTitle();
-	
-	for(int i = 0; lTitle[i] != 0; i++)
+	if(!mModProps.mUseFilename)
 	{
-		if(lTitle[i] != ' ')
+		lTitle = lSoundFile->GetTitle();
+		
+		for(int i = 0; lTitle[i] != 0; i++)
 		{
-			aTitle = new char[strlen(lTitle) + 1];
-			strcpy(aTitle, lTitle);
-			goto therest;     //sorry
+			if(lTitle[i] != ' ')
+			{
+				aTitle = new char[strlen(lTitle) + 1];
+				strcpy(aTitle, lTitle);
+				goto therest;     //sorry
+			}
 		}
 	}
 	
-	//mod name is blank.  Use filename instead.
+	//mod name is blank, or user wants the filename to be used as the title.
 	aTitle = new char[aFilename.length() + 1];
 	strcpy(aTitle, strrchr(aFilename.c_str(), '/') + 1);
+	*strrchr(aTitle, '.') = '\0';
 
 therest:	
 	aLength = lSoundFile->GetSongTime() * 1000;                   //It wants milliseconds!?!
@@ -768,10 +797,11 @@ void ModplugXMMS::SetModProps(const Settings& aModProps)
 	lConfigFile << "noisereduction  " << Bool2OnOff(mModProps.mNoiseReduction) << endl;
 	lConfigFile << "volumeramping   " << Bool2OnOff(mModProps.mVolumeRamp)     << endl;
 	lConfigFile << "fastinfo        " << Bool2OnOff(mModProps.mFastinfo)       << endl;
+	lConfigFile << "use_filename    " << Bool2OnOff(mModProps.mUseFilename)    << endl;
 	lConfigFile << "loop_count      " << mModProps.mLoopCount                  << endl;
 	lConfigFile << endl;
 	lConfigFile << "preamp          " << Bool2OnOff(mModProps.mPreamp)         << endl;
-	lConfigFile << "preamp_level    " << mModProps.mPreampLevel                << endl;
+	lConfigFile << "preamp_volume   " << mModProps.mPreampLevel                << endl;
 	lConfigFile << endl;
 
 	lConfigFile << "# ---Quality---" << endl;
@@ -796,7 +826,7 @@ void ModplugXMMS::SetModProps(const Settings& aModProps)
 		break;
 	default:
 	case SRCMODE_POLYPHASE:
-		lConfigFile << "polyphase" << endl;
+		lConfigFile << "fir" << endl;
 		break;
 	};
 
