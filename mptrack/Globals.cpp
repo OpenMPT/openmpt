@@ -540,6 +540,7 @@ LRESULT CModScrollView::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_SETFOCUS:
 	case VIEWMSG_SETACTIVE:
 		GetParentFrame()->SetActiveView(this);
+		SetFocus();
 		break;
 	}
 	return 0;

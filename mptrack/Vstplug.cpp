@@ -761,7 +761,14 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	case audioMasterWillReplaceOrAccumulate:
 		return 1; //we replace.
 	case audioMasterGetCurrentProcessLevel:
-		Log("VST plugin to host: Get Current Process Level\n");
+		//Log("VST plugin to host: Get Current Process Level\n");
+		//TODO: Support offline processing
+/*		if (CMainFrame::GetMainFrame()->IsRendering()) {
+			return 4;   //Offline
+		} else {
+			return 2;   //Unknown. 
+		}
+*/
 		break;		
 	// returns 0: not supported, 1: off, 2:read, 3:write, 4:read/write
 	case audioMasterGetAutomationState:

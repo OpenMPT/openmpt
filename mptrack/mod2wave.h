@@ -23,7 +23,7 @@ public:
 	WAVEFORMATEXTENSIBLE WaveFormat;
 	ULONGLONG m_dwFileLimit;
 	DWORD m_dwSongLimit;
-	BOOL m_bSelectPlay, m_bNormalize, m_bHighQuality;
+	BOOL m_bSelectPlay, m_bNormalize, m_bHighQuality, m_bGivePlugsIdleTime;
 	UINT m_nMinOrder, m_nMaxOrder;
 	CComboBox m_CbnSampleRate, m_CbnSampleFormat;
 	CEdit m_EditMinOrder, m_EditMaxOrder;
@@ -59,11 +59,17 @@ public:
 	LPCSTR m_lpszFileName;
 	DWORD m_dwFileLimit, m_dwSongLimit;
 	UINT m_nMaxPatterns;
-	BOOL m_bAbort, m_bNormalize;
+	BOOL m_bAbort, m_bNormalize, m_bGivePlugsIdleTime;
 
 public:
 	CDoWaveConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, BOOL bNorm, CWnd *parent=NULL):CDialog(IDD_PROGRESS, parent)
-		{ m_pSndFile = sndfile; m_lpszFileName = fname; m_pWaveFormat = pwfx; m_bAbort = FALSE; m_bNormalize = bNorm; m_dwFileLimit = m_dwSongLimit = 0; m_nMaxPatterns = 0; }
+		{ m_pSndFile = sndfile; 
+		  m_lpszFileName = fname; 
+		  m_pWaveFormat = pwfx; 
+		  m_bAbort = FALSE; 
+		  m_bNormalize = bNorm; 
+		  m_dwFileLimit = m_dwSongLimit = 0; 
+		  m_nMaxPatterns = 0; }
 	BOOL OnInitDialog();
 	void OnCancel() { m_bAbort = TRUE; }
 	afx_msg void OnButton1();

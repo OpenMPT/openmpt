@@ -4,6 +4,7 @@
 #include "dlsbank.h"
 #include "mainfrm.h"
 #include "mpdlgs.h"
+#include "vstplug.h"
 #include "mod2wave.h"
 
 #define NUM_GENRES		128
@@ -97,6 +98,7 @@ END_MESSAGE_MAP()
 CWaveConvert::CWaveConvert(CWnd *parent):CDialog(IDD_WAVECONVERT, parent)
 //-----------------------------------------------------------------------
 {
+	m_bGivePlugsIdleTime = false;
 	m_bNormalize = FALSE;
 	m_bHighQuality = FALSE;
 	m_bSelectPlay = FALSE;
@@ -263,6 +265,7 @@ void CWaveConvert::OnOK()
 	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = FALSE;
 	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? TRUE : FALSE; //rewbs.resamplerConf - we don't want this anymore.
 	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) ? TRUE : FALSE;
+	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) ? TRUE : FALSE;
 
 // -> CODE#0024
 // -> DESC="wav export update"
@@ -672,6 +675,22 @@ void CDoWaveConvert::OnButton1()
 	for (UINT n=0; ; n++)
 	{
 		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer));
+		
+		if (m_bGivePlugsIdleTime) {
+			LARGE_INTEGER startTime, endTime, duration,Freq;
+			QueryPerformanceFrequency(&Freq);
+			long samplesprocessed = sizeof(buffer)/(m_pWaveFormat->nChannels * m_pWaveFormat->wBitsPerSample / 8);
+			duration.QuadPart = samplesprocessed / static_cast<double>(m_pWaveFormat->nSamplesPerSec) * Freq.QuadPart;
+			if (QueryPerformanceCounter(&startTime)) {
+				endTime.QuadPart=0;
+				while ((endTime.QuadPart-startTime.QuadPart)<duration.QuadPart) {
+					theApp.GetPluginManager()->OnIdle();
+					QueryPerformanceCounter(&endTime);
+				}
+			}
+		}
+		//Sleep(100);
+
 		if (!lRead) 
 			break;
 		ullSamples += lRead;

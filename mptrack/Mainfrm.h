@@ -414,7 +414,7 @@ protected:
 	CModDoc *m_pModPlaying;
 	CSoundFile *m_pSndFile;
 	HWND m_hFollowSong, m_hWndMidi;
-	DWORD m_dwStatus, m_dwElapsedTime, m_dwTimeSec, m_dwNotifyType, m_dwLastPluginIdleCall;
+	DWORD m_dwStatus, m_dwElapsedTime, m_dwTimeSec, m_dwNotifyType;
 	UINT m_nTimer, m_nAvgMixChn, m_nMixChn;
 	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
 	// Chords

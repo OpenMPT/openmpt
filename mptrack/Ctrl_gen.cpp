@@ -120,6 +120,7 @@ void CCtrlGeneral::OnActivatePage(LPARAM)
 	if (m_pModDoc) m_pModDoc->SetFollowWnd(m_hWnd, MPTNOTIFY_MASTERVU);
 	if (pMainFrm) pMainFrm->SetFollowSong(m_pModDoc, m_hWnd, TRUE, MPTNOTIFY_MASTERVU);
 	CMainFrame::EnableLowLatencyMode(FALSE);
+	SetFocus();
 }
 
 

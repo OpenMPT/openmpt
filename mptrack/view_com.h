@@ -3,7 +3,7 @@
 
 
 //===============================
-class CViewComments: public CView
+class CViewComments: public CModScrollView
 //===============================
 {
 public:
@@ -29,6 +29,7 @@ public:
 // -! NEW_FEATURE#0015
 	virtual void OnInitialUpdate();
 	virtual void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint);
+	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	//}}AFX_VIRTUAL
 
 protected:

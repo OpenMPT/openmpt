@@ -1319,6 +1319,7 @@ void CModDoc::OnFileWaveConvert()
 
 	CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
 	dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
+	dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 	dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
 	//if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
@@ -2518,14 +2519,12 @@ HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
 	if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
 	{
 		followSonghWnd = pChildFrm->GetHwndView();
-		patternViewState = new PATTERNVIEWSTATE;
-		pChildFrm->SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)patternViewState);
+		PATTERNVIEWSTATE patternViewState;
+		pChildFrm->SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)(&patternViewState));
 		
-		pat = patternViewState->nPattern;
-		row = patternViewState->nRow;
-		ord = patternViewState->nOrder;
-		
-		delete patternViewState;
+		pat = patternViewState.nPattern;
+		row = patternViewState.nRow;
+		ord = patternViewState.nOrder;	
 	}
 	else	//patern editor object does not exist (i.e. is not active)  - use saved state.
 	{

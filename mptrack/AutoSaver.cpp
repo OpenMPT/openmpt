@@ -8,6 +8,10 @@
 #include "AutoSaver.h"
 #include "moptions.h"
 #include <algorithm>
+#include <io.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // AutoSaver.cpp : implementation file
@@ -59,13 +63,14 @@ bool CAutoSaver::DoSave(DWORD curTime)
  				if (pModDoc && pModDoc->IsModified()) {
 					if (SaveSingleFile(pModDoc)) {
 						CleanUpBackups(pModDoc);
+					} else {
+						AfxMessageBox("Warning: autosave failed.");
 					}
 				}
 			} //end all open documents
 
 		} //end pointless template loop (we have just 1 template)
 		m_nLastSave = timeGetTime();
-
 		pTrackApp->EndWaitCursor(); //end display hour glass
 	}
 	
@@ -371,4 +376,23 @@ BOOL CAutoSaverGUI::OnSetActive()
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_AUTOSAVE;
 	return CPropertyPage::OnSetActive();
+}
+
+BOOL CAutoSaverGUI::OnKillActive() 
+//---------------------------------
+{
+	CString path;
+	GetDlgItemText(IDC_AUTOSAVE_PATH, path);
+	if (!path.IsEmpty() && (path.Right(1)!="\\")) {
+		path.Append("\\");
+	}
+	bool pathIsOK = !_access(path, 0);
+
+	if (!pathIsOK && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))	{
+		::AfxMessageBox("Error: backup path does not exist.", MB_OK|MB_ICONEXCLAMATION);
+		::SetFocus(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH));
+		return 0;
+	}
+
+	return CPropertyPage::OnKillActive();
 }

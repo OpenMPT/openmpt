@@ -25,7 +25,7 @@
 				Optimization="0"
 				OptimizeForProcessor="1"
 				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
-				PreprocessorDefinitions="VST_LOG,_DEBUG,WIN32,_WINDOWS,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW,ENABLE_MMX"
+				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW,ENABLE_MMX"
 				StringPooling="TRUE"
 				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="TRUE"
@@ -38,7 +38,7 @@
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -48,7 +48,7 @@
 				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
-				LinkIncremental="1"
+				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\xsoundlib\Release"
 				GenerateDebugInformation="TRUE"

@@ -567,9 +567,23 @@ static DWORD GetDSoundVersion()
 /////////////////////////////////////////////////////////////////////////////
 // CTrackApp initialization
 
+void Terminate_AppThread()
+//----------------------------------------------
+{	
+	//TODO: Why does this not get called.
+	AfxMessageBox("Application thread terminated unexpectedly. Attempting to shut down audio device");
+	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+	if (pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
+	pMainFrame->audioCloseDevice();
+	exit(-1);
+}
+
 BOOL CTrackApp::InitInstance()
 //----------------------------
 {
+
+	set_terminate(Terminate_AppThread);
+
 	// Initialize OLE MFC support
 	AfxOleInit();
 	// Standard initialization
@@ -743,6 +757,7 @@ BOOL CTrackApp::InitInstance()
 	EndWaitCursor();
 
 	return TRUE;
+	m_dwLastPluginIdleCall=0;	//rewbs.VSTCompliance
 }
 
 int CTrackApp::ExitInstance()
@@ -1489,13 +1504,21 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 	{
 		if (gpRotoZoom->Animate()) return TRUE;
 	}
-	//if ((m_pPluginManager) && (m_pPluginManager->NeedIdle()))
-	/* Done in mainframe OnIdle
-	if (m_pPluginManager)	//rewbs.VSTCompliance
+
+	// Call plugins idle routine for open editor
+	DWORD curTime = timeGetTime();
+	// TODO: is it worth the overhead of checking that 10ms have passed,
+	//       or should we just do it on every idle message?
+	if (m_pPluginManager)
 	{
-		m_pPluginManager->OnIdle();
+		//rewbs.vstCompliance: call @ 100Hz
+		if (curTime - m_dwLastPluginIdleCall > 10) //10ms since last call?
+		{
+			m_pPluginManager->OnIdle();
+			m_dwLastPluginIdleCall = curTime;
+		}
 	}
-	*/
+
 	return b;
 }
 

@@ -69,6 +69,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual void OnOK();
+	virtual BOOL OnKillActive();
 
 private:
 	CAutoSaver *m_pAutoSaver;
