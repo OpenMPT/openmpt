@@ -7,6 +7,11 @@
 #include "ctrl_gen.h"
 #include "view_gen.h"
 
+// -> CODE#0015
+// -> DESC="channels management dlg"
+#include "Ctrl_pat.h"
+// -! NEW_FEATURE#0015
+
 BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlGeneral)
 	ON_WM_VSCROLL()
@@ -42,6 +47,10 @@ void CCtrlGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_RESTARTPOS,	m_EditRestartPos);
 	DDX_Control(pDX, IDC_SPIN_RESTARTPOS,	m_SpinRestartPos);
 	DDX_Control(pDX, IDC_SLIDER_SONGPREAMP,	m_SliderPreAmp);
+// -> CODE#0016
+// -> DESC="default tempo update"
+	DDX_Control(pDX, IDC_SLIDER_SONGTEMPO,	m_SliderTempo);
+// -! BEHAVIOUR_CHANGE#0016
 	DDX_Control(pDX, IDC_EDIT_MODTYPE,		m_EditModType);
 	DDX_Control(pDX, IDC_COMBO_RESAMPLING,	m_ComboResampling);
 	DDX_Control(pDX, IDC_VUMETER_LEFT,		m_VuMeterLeft);
@@ -62,12 +71,21 @@ BOOL CCtrlGeneral::OnInitDialog()
 	CModControlDlg::OnInitDialog();
 	// Song Title
 	m_EditTitle.SetLimitText(31);
-	m_SpinTempo.SetRange(32, 255);
-	m_SpinSpeed.SetRange(1, 31);
+// -> CODE#0016
+// -> DESC="default tempo update"
+//	m_SpinTempo.SetRange(32, 255);	// 255 bpm max
+	m_SpinTempo.SetRange(32, 512);
+	m_SpinSpeed.SetRange(1, 64);
+// -! BEHAVIOUR_CHANGE#0016
 	m_SpinGlobalVol.SetRange(0, 128);
 	m_SpinRestartPos.SetRange(0, 0);
 	m_SliderPreAmp.SetRange(0, 100);
 	m_SliderPreAmp.SetPos(100-48);
+// -> CODE#0016
+// -> DESC="default tempo update"
+//	m_SliderTempo.SetRange(0, 223);	// 255 bpm max
+	m_SliderTempo.SetRange(0, 480);
+// -! BEHAVIOUR_CHANGE#0016
 	m_ComboResampling.AddString("No Resampling");
 	m_ComboResampling.AddString("Linear");
 	m_ComboResampling.AddString("Cubic spline");
@@ -129,7 +147,6 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_EditTempo.SetWindowText(s);
 		wsprintf(s, "%d", m_pSndFile->m_nDefaultSpeed);
 		m_EditSpeed.SetWindowText(s);
-
 		wsprintf(s, "%d", m_pSndFile->m_nDefaultGlobalVolume / 2);
 		m_EditGlobalVol.SetWindowText(s);
 		wsprintf(s, "%d", m_pSndFile->m_nRestartPos);
@@ -138,6 +155,11 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		if (n > 100) n = 100;
 		if (n < 0) n = 0;
 		m_SliderPreAmp.SetPos(n);
+// -> CODE#0016
+// -> DESC="default tempo update"
+//		m_SliderTempo.SetPos(223 - m_pSndFile->m_nDefaultTempo + 32);	// 255 bpm max
+		m_SliderTempo.SetPos(480 - m_pSndFile->m_nDefaultTempo + 32);
+// -! BEHAVIOUR_CHANGE#0016
 	}
 	if (dwHint & HINT_MODTYPE)
 	{
@@ -183,6 +205,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 //--------------------------------------------------------------------
 {
 	CDialog::OnVScroll(code, pos, pscroll);
+
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized))
 	{
 		UINT n = 100 - m_SliderPreAmp.GetPos();
@@ -191,6 +214,20 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			m_pSndFile->m_nSongPreAmp = n;
 			m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 		}
+// -> CODE#0016
+// -> DESC="default tempo update"
+//		n = 223 - m_SliderTempo.GetPos() + 32;	// 255 bpm max
+		n = 480 - m_SliderTempo.GetPos() + 32;
+//		if ((n >= 32) && (n <= 255) && (n != m_pSndFile->m_nDefaultTempo))	// 255 bpm max
+		if ((n >= 32) && (n <= 512) && (n != m_pSndFile->m_nDefaultTempo))
+		{
+			m_pSndFile->m_nDefaultTempo = n;
+			m_pSndFile->m_nMusicTempo = n;
+			m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
+		}
+
+		UpdateView(HINT_MODGENERAL, NULL);
+// -! BEHAVIOUR_CHANGE#0016
 	}
 }
 
@@ -226,12 +263,21 @@ void CCtrlGeneral::OnTempoChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			if ((n >= 32) && (n <= 255) && (n != m_pSndFile->m_nDefaultTempo))
+// -> CODE#0016
+// -> DESC="default tempo update"
+//			if ((n >= 32) && (n <= 255) && (n != m_pSndFile->m_nDefaultTempo))	// 255 bpm max
+			if ((n >= 32) && (n <= 512) && (n != m_pSndFile->m_nDefaultTempo))
+// -! BEHAVIOUR_CHANGE#0016
 			{
 				m_EditTempo.SetModify(FALSE);
 				m_pSndFile->m_nDefaultTempo = n;
+// -> CODE#0016
+// -> DESC="default tempo update"
+				m_pSndFile->m_nMusicTempo = n;
+// -! BEHAVIOUR_CHANGE#0016
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
+				UpdateView(HINT_MODGENERAL, NULL); // rewbs: necessary?
 			}
 		}
 	}
@@ -248,10 +294,19 @@ void CCtrlGeneral::OnSpeedChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			if ((n >= 1) && (n < 32) && (n != m_pSndFile->m_nDefaultSpeed))
+// -> CODE#0016
+// -> DESC="default tempo update"
+//			if ((n >= 1) && (n < 32) && (n != m_pSndFile->m_nDefaultSpeed))
+			if ((n >= 1) && (n <= 64) && (n != m_pSndFile->m_nDefaultSpeed))
+// -! BEHAVIOUR_CHANGE#0016
 			{
 				m_EditSpeed.SetModify(FALSE);
 				m_pSndFile->m_nDefaultSpeed = n;
+// -> CODE#0016
+// -> DESC="default tempo update"
+				m_pSndFile->m_nMusicSpeed = n;
+// -! BEHAVIOUR_CHANGE#0016
+
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
@@ -276,7 +331,11 @@ void CCtrlGeneral::OnGlobalVolChanged()
 				if (n != n0)
 				{
 					m_EditGlobalVol.SetModify(FALSE);
+// -> CODE#0016
+// -> DESC="default tempo update"
 					m_pSndFile->m_nDefaultGlobalVolume = n << 1;
+					m_pSndFile->m_nGlobalVolume = n << 1;
+// -! BEHAVIOUR_CHANGE#0016
 					m_pModDoc->SetModified();
 					m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				}
@@ -327,8 +386,14 @@ void CCtrlGeneral::OnChangeModType()
 		}
 		if ((dlg.m_nChannels >= 4) && (dlg.m_nChannels != m_pSndFile->m_nChannels))
 		{
-			if (!m_pModDoc->ChangeNumChannels(dlg.m_nChannels)) return;
-			bShowLog = TRUE;
+// -> CODE#0015
+// -> DESC="channels management dlg"
+//			if (!m_pModDoc->ChangeNumChannels(dlg.m_nChannels)) return;
+//			bShowLog = TRUE;
+			if(m_pModDoc->ChangeNumChannels(dlg.m_nChannels)) bShowLog = TRUE;
+			if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
+				CChannelManagerDlg::sharedInstance()->Update();
+// -! NEW_FEATURE#0015
 		}
 		if (bShowLog) m_pModDoc->ShowLog("Conversion Status", this);
 	}

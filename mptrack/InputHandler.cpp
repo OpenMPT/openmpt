@@ -3,7 +3,7 @@
 #include "CommandSet.h"
 #include "inputhandler.h"
 #include "Resource.h"
-#include "KeyboardSettings.h"
+//#include "KeyboardSettings.h"
 #include "mptrack.h"
 #include "mainfrm.h"
 #include <direct.h>
@@ -329,14 +329,16 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_EDIT_FINDNEXT:		s="Find Next\t"; c=kcEditFindNext; break;
 	
 		case ID_VIEW_GLOBALS:		s="Globals\t"; c=kcViewGeneral; break;
-		case ID_VIEW_SAMPLES:		s="Pattens\t"; c=kcViewSamples; break;
-		case ID_VIEW_PATTERNS:		s="Samples\t"; c=kcViewPattern; break;
+		case ID_VIEW_SAMPLES:		s="Samples\t"; c=kcViewSamples; break;
+		case ID_VIEW_PATTERNS:		s="Pattens\t"; c=kcViewPattern; break;
 		case ID_VIEW_INSTRUMENTS:	s="Instruments\t"; c=kcViewInstruments; break;
 		case ID_VIEW_COMMENTS:		s="Comments\t"; c=kcViewComments; break;
 		case MAINVIEW:				s="Main\t"; c=kcViewMain; break;
 		case IDD_TREEVIEW:			s="Tree\t"; c=kcViewTree; break;
 		case ID_VIEW_OPTIONS:		s="Setup...\t"; c=kcViewOptions; break;
 		case ID_HELP:				s="Contents (todo)"; c=kcHelp; break;
+		case ID_PLUGIN_SETUP:		s="Plugin Setup...\t"; c=kcViewAddPlugin; break;
+		case ID_CHANNEL_MANAGER:	s="Channel Manager...\t"; c=kcViewChannelManager; break;
 /*	
 		case ID_WINDOW_NEW:			s="New Window\t"; c=kcWindowNew; break;
 		case ID_WINDOW_CASCADE:		s="Cascade\t"; c=kcWindowCascade; break;
@@ -391,6 +393,8 @@ void CInputHandler::UpdateMainMenu()
 	pMenu->ModifyMenu(MAINVIEW, MF_BYCOMMAND | MF_STRING, MAINVIEW, GetMenuText(MAINVIEW));
 	pMenu->ModifyMenu(IDD_TREEVIEW, MF_BYCOMMAND | MF_STRING, IDD_TREEVIEW, GetMenuText(IDD_TREEVIEW));
 	pMenu->ModifyMenu(ID_VIEW_OPTIONS, MF_BYCOMMAND | MF_STRING, ID_VIEW_OPTIONS, GetMenuText(ID_VIEW_OPTIONS));
+	pMenu->ModifyMenu(ID_PLUGIN_SETUP, MF_BYCOMMAND | MF_STRING, ID_PLUGIN_SETUP, GetMenuText(ID_PLUGIN_SETUP));
+	pMenu->ModifyMenu(ID_CHANNEL_MANAGER, MF_BYCOMMAND | MF_STRING, ID_CHANNEL_MANAGER, GetMenuText(ID_CHANNEL_MANAGER));
 	pMenu->ModifyMenu(ID_HELP, MF_BYCOMMAND | MF_STRING, ID_HELP, GetMenuText(ID_HELP));
 /*	
 	pMenu->ModifyMenu(ID_WINDOW_NEW, MF_BYCOMMAND | MF_STRING, ID_WINDOW_NEW, GetMenuText(ID_WINDOW_NEW));

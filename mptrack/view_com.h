@@ -22,7 +22,11 @@ public:
 
 public:
 	//{{AFX_VIRTUAL(CViewComments)
-	virtual void OnDraw(CDC *) {}
+// -> CODE#0015
+// -> DESC="channels management dlg"
+//	virtual void OnDraw(CDC *) {}
+	virtual void OnDraw(CDC *);
+// -! NEW_FEATURE#0015
 	virtual void OnInitialUpdate();
 	virtual void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint);
 	//}}AFX_VIRTUAL

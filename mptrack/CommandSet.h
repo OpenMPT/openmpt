@@ -1,3 +1,5 @@
+//rewbs.customKeys
+
 #pragma once
 #include "afxtempl.h"
 #include <string>
@@ -95,6 +97,9 @@ enum CommandID
 	kcViewMain,
 	kcViewTree,
 	kcViewOptions,
+	kcViewChannelManager,
+	kcViewAddPlugin,
+	kcView,
 	kcHelp,
 	kcEndView=kcHelp,
 
@@ -398,7 +403,9 @@ enum CommandID
 	kcChordModifier=kcStartNoteMisc,
 	kcNoteCut,
 	kcNoteOff,
-	kcEndNoteMisc=kcNoteOff,
+	kcNoteCutOld,
+	kcNoteOffOld,
+	kcEndNoteMisc=kcNoteOffOld,
 
 
 	//Set instruments
@@ -497,7 +504,8 @@ enum CommandID
 	kcFixedFXend=kcSetFXmacro,
 	kcSetFXmacroSlide,	//?,\ 
 	kcSetFXvelocity,	//?,:
-	kcSetFXEnd=kcSetFXvelocity,
+	kcSetFXextension,	//?,#
+	kcSetFXEnd=kcSetFXextension,
 	
 	kcStartSampleEditing,
 	kcSampleTrim=kcStartSampleEditing,
@@ -906,7 +914,6 @@ protected:
 	int FindCmd(int uid);
 
 	//members
-	//CommandStruct commands[kcNumCommands];
 	CArray <CommandStruct,CommandStruct> commands;
 	bool enforceRule[kNumRules];
 
@@ -944,6 +951,5 @@ public:
 	bool SaveFile(CString FileName, bool debug);
 	bool LoadFile(CString FileName);
 	
-
-
 };
+//end rewbs.customKeys

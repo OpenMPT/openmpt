@@ -14,16 +14,21 @@ protected:
 	CModDoc *m_pModDoc;
 	CCtrlInstruments *m_pParent;
 	UINT m_nInstrument, m_nNote, m_bIns, m_nOldNote, m_nOldIns;
+	int m_nPlayingNote;
 	HFONT m_hFont;
 	int m_cxFont, m_cyFont;
 	COLORREF colorText, colorTextSel;
 
 public:
-	CNoteMapWnd() { m_nNote = 5*12; m_pModDoc = NULL; m_nInstrument = 0; m_bIns = FALSE; m_cxFont = m_cyFont = 0; m_hFont = NULL; m_nOldNote = m_nOldIns = 0; m_pParent = NULL; }
+	CNoteMapWnd() { m_nPlayingNote=-1; m_nNote = 5*12; m_pModDoc = NULL; m_nInstrument = 0; m_bIns = FALSE; m_cxFont = m_cyFont = 0; m_hFont = NULL; m_nOldNote = m_nOldIns = 0; m_pParent = NULL; }
 	BOOL SetCurrentInstrument(CModDoc *pModDoc, UINT nIns);
 	BOOL SetCurrentNote(UINT nNote);
 	VOID Init(CCtrlInstruments *pParent) { m_pParent = pParent; }
-	void EnterNote(UINT note);
+	void EnterNote(UINT note); //rewbs.customKeys - handle notes separately from other input.
+	bool HandleChar(WPARAM c); //rewbs.customKeys
+	bool HandleNav(WPARAM k);  //rewbs.customKeys
+	void PlayNote(int note); //rewbs.customKeys
+	void StopNote(int note); //rewbs.customKeys
 
 public:
 	//{{AFX_VIRTUAL(CNoteMapWnd)
@@ -45,7 +50,7 @@ protected:
 	afx_msg void OnEditSample(UINT nID);
 	afx_msg void OnEditSampleMap();
 	afx_msg void OnInstrumentDuplicate();
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -113,13 +118,13 @@ protected:
 	afx_msg void OnDCAChanged();
 	afx_msg void OnMPRChanged();
 	afx_msg void OnMCHChanged();
-	afx_msg void OnMixPlugChanged();
+	afx_msg void OnMixPlugChanged();  //rewbs.instroVSTi
 	afx_msg void OnPPSChanged();
 	afx_msg void OnPPCChanged();
 	afx_msg void OnEnableCutOff();
 	afx_msg void OnEnableResonance();
 	afx_msg void OnEditSampleMap();
-	afx_msg void TogglePluginEditor();
+	afx_msg void TogglePluginEditor();  //rewbs.instroVSTi
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

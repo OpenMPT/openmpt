@@ -60,8 +60,11 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 		INSTRUMENTHEADER *penv = new INSTRUMENTHEADER;
 		if (!penv) return FALSE;
 		memset(penv, 0, sizeof(INSTRUMENTHEADER));
-		RemoveInstrumentSamples(nInstr);
-		DestroyInstrument(nInstr);
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+//		RemoveInstrumentSamples(nInstr);
+		DestroyInstrument(nInstr,1);
+// -! BEHAVIOUR_CHANGE#0003
 		Headers[nInstr] = penv;
 		// Scanning free sample
 		UINT nSample = 0;
@@ -91,11 +94,28 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 }
 
 
-BOOL CSoundFile::DestroyInstrument(UINT nInstr)
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+// BOOL CSoundFile::DestroyInstrument(UINT nInstr)
+BOOL CSoundFile::DestroyInstrument(UINT nInstr, char removeSamples)
+// -! BEHAVIOUR_CHANGE#0003
 //---------------------------------------------
 {
 	if ((!nInstr) || (nInstr > m_nInstruments)) return FALSE;
 	if (!Headers[nInstr]) return TRUE;
+
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+	//rewbs: changed message
+	if(removeSamples > 0 || (removeSamples == 0 && ::MessageBox(NULL, "Remove associated samples if they are unused??", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
+		RemoveInstrumentSamples(nInstr);
+// -! BEHAVIOUR_CHANGE#0003
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	m_szInstrumentPath[nInstr-1][0] = '\0';
+// -! NEW_FEATURE#0023
+
 	INSTRUMENTHEADER *penv = Headers[nInstr];
 	Headers[nInstr] = NULL;
 	for (UINT i=0; i<MAX_CHANNELS; i++)
@@ -200,8 +220,11 @@ BOOL CSoundFile::ReadInstrumentFromSong(UINT nInstr, CSoundFile *pSrcSong, UINT 
 	if ((!pSrcSong) || (!nSrcInstr) || (nSrcInstr > pSrcSong->m_nInstruments)
 	 || (nInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Headers[nSrcInstr])) return FALSE;
 	if (m_nInstruments < nInstr) m_nInstruments = nInstr;
-	RemoveInstrumentSamples(nInstr);
-	DestroyInstrument(nInstr);
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+//	RemoveInstrumentSamples(nInstr);
+	DestroyInstrument(nInstr,1);
+// -! BEHAVIOUR_CHANGE#0003
 	if (!Headers[nInstr]) Headers[nInstr] = new INSTRUMENTHEADER;
 	INSTRUMENTHEADER *penv = Headers[nInstr];
 	if (penv)
@@ -855,8 +878,11 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	 || (phdr->instrum < 1) || (!phdr->samples)
 	 || (!pih->layers) || (!plh->samples)) return FALSE;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
-	RemoveInstrumentSamples(nInstr);
-	DestroyInstrument(nInstr);
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+//	RemoveInstrumentSamples(nInstr);
+	DestroyInstrument(nInstr,1);
+// -! BEHAVIOUR_CHANGE#0003
 	penv = new INSTRUMENTHEADER;
 	if (!penv) return FALSE;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
@@ -1072,8 +1098,11 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	dwMemPos += pxh->shsize - 0x102;
 	if ((dwMemPos < sizeof(XIFILEHEADER)) || (dwMemPos >= dwFileLength)) return FALSE;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
-	RemoveInstrumentSamples(nInstr);
-	DestroyInstrument(nInstr);
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+//	RemoveInstrumentSamples(nInstr);
+	DestroyInstrument(nInstr,1);
+// -! BEHAVIOUR_CHANGE#0003
 	Headers[nInstr] = new INSTRUMENTHEADER;
 	INSTRUMENTHEADER *penv = Headers[nInstr];
 	if (!penv) return FALSE;
@@ -1615,6 +1644,13 @@ BOOL CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 	{
 		flags += 5;
 		if (pis->flags & 4) flags |= RSF_STEREO;
+		{
+			flags |= RSF_STEREO;
+// -> CODE#0001
+// -> DESC="enable saving stereo ITI"
+			pins->uFlags |= CHN_STEREO;
+// -! BUG_FIX#0001
+		}
 		pins->uFlags |= CHN_16BIT;
 		// IT 2.14 16-bit packed sample ?
 		if (pis->flags & 8) flags = RS_IT21416;
@@ -1641,8 +1677,11 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	if ((!lpMemFile) || (dwFileLength < sizeof(ITINSTRUMENT))
 	 || (pinstr->id != 0x49504D49)) return FALSE;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
-	RemoveInstrumentSamples(nInstr);
-	DestroyInstrument(nInstr);
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+//	RemoveInstrumentSamples(nInstr);
+	DestroyInstrument(nInstr,1);
+// -! BEHAVIOUR_CHANGE#0003
 	Headers[nInstr] = new INSTRUMENTHEADER;
 	INSTRUMENTHEADER *penv = Headers[nInstr];
 	if (!penv) return FALSE;
@@ -1651,10 +1690,13 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	dwMemPos = 554;
 	dwMemPos += ITInstrToMPT(pinstr, penv, pinstr->trkvers);
 	nsamples = pinstr->nos;
-	//if (nsamples >= 64) nsamples = 64;		//rewbs.noSamplePerInstroLimit
-	if (nsamples >= 120) nsamples = 120;		//120 is  max cos of 10 octaves
-	// Reading Samples
+// -> CODE#0019
+// -> DESC="correctly load ITI & XI instruments sample note map"
+//	if (nsamples >= 64) nsamples = 64;
+// -! BUG_FIX#0019
 	nsmp = 1;
+	// Reading Samples
+
 	for (UINT i=0; i<nsamples; i++)
 	{
 		while ((nsmp < MAX_SAMPLES) && ((Ins[nsmp].pSample) || (m_szNames[nsmp][0]))) nsmp++;
@@ -1667,7 +1709,11 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	}
 	for (UINT j=0; j<128; j++)
 	{
-		if ((penv->Keyboard[j]) && (penv->Keyboard[j] <= 120)) //rewbs.noSamplePerInstroLimit (120 was 64)
+// -> CODE#0019
+// -> DESC="correctly load ITI & XI instruments sample note map"
+//		if ((penv->Keyboard[j]) && (penv->Keyboard[j] <= 64))
+		if (penv->Keyboard[j])
+// -! BUG_FIX#0019
 		{
 			penv->Keyboard[j] = samplemap[penv->Keyboard[j]-1];
 		}
@@ -1711,7 +1757,8 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	iti->rp = penv->nPanSwing;
 	iti->ifc = penv->nIFC;
 	iti->ifr = penv->nIFR;
-	iti->trkvers =	0x220;	 //0x202
+	//iti->trkvers = 0x202;
+	iti->trkvers =	0x220;	 //rewbs.ITVersion (was 0x202)
 	iti->nos = 0;
 	for (UINT i=0; i<120; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
 	{
@@ -1724,7 +1771,11 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 			iti->nos++;
 		}
 		iti->keyboard[i*2] = penv->NoteMap[i] - 1;
-		iti->keyboard[i*2+1] = smpmap[smp] + 1;
+// -> CODE#0019
+// -> DESC="correctly load ITI & XI instruments sample note map"
+//		iti->keyboard[i*2+1] = smpmap[smp] + 1;
+		iti->keyboard[i*2+1] = smp ? smpmap[smp] + 1 : 0;
+// -! BUG_FIX#0019
 	}
 	// Writing Volume envelope
 	if (penv->dwFlags & ENV_VOLUME) iti->volenv.flags |= 0x01;
@@ -1814,6 +1865,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 		{
 			itss.flags &= ~(0x02);
 		}
+		//rewbs.enableStereoITI
 		if (psmp->uFlags & CHN_STEREO)
 		{
 			itss.flags |= 0x04;
@@ -1822,20 +1874,29 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 		{
 			itss.flags &= ~(0x04);
 		}
-
+		//end rewbs.enableStereoITI
 		itss.samplepointer = dwPos;
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 		dwPos += smpsize;
 	}
 	// Writing Sample Data
+	//rewbs.enableStereoITI
 	WORD sampleType=0;
 	if (itss.flags | 0x02) sampleType=RS_PCM16S; else sampleType=RS_PCM8S;	//8 or 16 bit signed
 	if (itss.flags | 0x04) sampleType |= RSF_STEREO;						//mono or stereo
 	for (UINT k=0; k<iti->nos; k++)
 	{
-		UINT nsmp = smptable[k];
-		MODINSTRUMENT *psmp = &Ins[nsmp];
-		WriteSample(f, psmp, sampleType);
+//rewbs.enableStereoITI - using eric's code as it is better here.
+// -> CODE#0001
+// -> DESC="enable saving stereo ITI"
+		//UINT nsmp = smptable[k];
+		//MODINSTRUMENT *psmp = &Ins[nsmp];
+		//WriteSample(f, psmp, (psmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S);
+		MODINSTRUMENT *pins = &Ins[smptable[k]];
+		UINT smpflags = (pins->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
+		if (pins->uFlags & CHN_STEREO) smpflags = (pins->uFlags & CHN_16BIT) ? RS_STPCM16S : RS_STPCM8S;
+		WriteSample(f, pins, smpflags);
+// -! BUG_FIX#0001
 	}
 
 

@@ -305,12 +305,13 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		SetPathName(drive, FALSE);
 	}
 
-	//update effect key commands
+	//rewbs.cutomKeys: update effect key commands
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
 	if	(nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 		ih->SetXMEffects();
 	else
 		ih->SetITEffects();
+	//end rewbs.cutomKeys
 
 	SetModified();
 	ClearUndo();
@@ -332,7 +333,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 
 		// Checking for unused channels
 		UINT nFound = nChnToRemove;
-		for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--)
+		for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--) //rewbs.removeChanWindowCleanup
 		{
 			rem.m_bChnMask[iRst] = TRUE;
 			for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++) if (m_SndFile.Patterns[ipat])
@@ -432,7 +433,11 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 BOOL CModDoc::ResizePattern(UINT nPattern, UINT nRows)
 //----------------------------------------------------
 {
-	if ((nPattern >= MAX_PATTERNS) || (nRows < 2) || (nRows > 256)) return FALSE;
+// -> CODE#0008
+// -> DESC="#define to set pattern size"
+//	if ((nPattern >= MAX_PATTERNS) || (nRows < 2) || (nRows > 256)) return FALSE;
+	if ((nPattern >= MAX_PATTERNS) || (nRows < 2) || (nRows > MAX_PATTERN_ROWS)) return FALSE;
+// -! BEHAVIOUR_CHANGE#0008
 	if (m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_S3M)) nRows = 64;
 	if (nRows == m_SndFile.PatternSize[nPattern]) return TRUE;
 	BeginWaitCursor();
@@ -808,14 +813,28 @@ BOOL CModDoc::RemoveUnusedInstruments()
 	BOOL bReorg = FALSE;
 
 	if (!m_SndFile.m_nInstruments) return FALSE;
+
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+	char removeSamples = 0;
+	//rewbs: changed message
+	if(::MessageBox(NULL, "Remove associated samples if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) removeSamples = 1;
+	else removeSamples = -1;
+// -! BEHAVIOUR_CHANGE#0003
+
 	BeginWaitCursor();
 	memset(usedmap, 0, sizeof(usedmap));
+
 	for (UINT i=m_SndFile.m_nInstruments; i>=1; i--)
 	{
 		if (!m_SndFile.IsInstrumentUsed(i))
 		{
 			BEGIN_CRITICAL();
-			m_SndFile.DestroyInstrument(i);
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+//			m_SndFile.DestroyInstrument(i);
+			m_SndFile.DestroyInstrument(i,removeSamples);
+// -! BEHAVIOUR_CHANGE#0003
 			if ((i == m_SndFile.m_nInstruments) && (i>1)) m_SndFile.m_nInstruments--; else bReorg = TRUE;
 			END_CRITICAL();
 			nRemoved++;
@@ -1222,6 +1241,55 @@ BOOL CModDoc::RemoveSample(UINT n)
 }
 
 
+// -> CODE#0020
+// -> DESC="rearrange sample list"
+void CModDoc::RearrangeSampleList(void)
+{
+	BEGIN_CRITICAL();
+	UINT i,j,k,n,l,c;
+
+	for(n = 1 ; n <= m_SndFile.m_nSamples ; n++){
+
+		if(!m_SndFile.Ins[n].pSample){
+			
+			k = 1;
+
+			while(n+k <= m_SndFile.m_nSamples && !m_SndFile.Ins[n+k].pSample) k++;
+			if(n+k >= m_SndFile.m_nSamples) break;
+
+			c = k;
+			l = 0;
+
+			while(n+k <= m_SndFile.m_nSamples && m_SndFile.Ins[n+k].pSample){
+
+				m_SndFile.MoveSample(n+k,n+l);
+				strcpy(m_SndFile.m_szNames[n+l], m_SndFile.m_szNames[n+k]);
+				m_SndFile.m_szNames[n+k][0] = '\0';
+
+				for(i=1; i<m_SndFile.m_nInstruments; i++){
+					if(m_SndFile.Headers[i]){
+						INSTRUMENTHEADER *p = m_SndFile.Headers[i];
+						for(j=0; j<128; j++) if(p->Keyboard[j] == n+k) p->Keyboard[j] = n+l;
+					}
+				}
+
+				k++;
+				l++;
+			}
+
+			n += l;
+			m_SndFile.m_nSamples -= c;
+		}
+	}
+
+	END_CRITICAL();
+
+	SetModified();
+	UpdateAllViews(NULL, HINT_SMPNAMES);
+}
+// -! NEW_FEATURE#0020
+
+
 BOOL CModDoc::RemoveInstrument(UINT n)
 //------------------------------------
 {
@@ -1268,8 +1336,12 @@ BOOL CModDoc::ExpandPattern(UINT nPattern)
 {
 	MODCOMMAND *newPattern, *oldPattern;
 	UINT nRows, nChns;
-	
-	if ((nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern]) || (m_SndFile.PatternSize[nPattern] > 128)) return FALSE;
+
+// -> CODE#0008
+// -> DESC="#define to set pattern size"
+//	if ((nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern]) || (m_SndFile.PatternSize[nPattern] > 128)) return FALSE;
+	if ((nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern]) || (m_SndFile.PatternSize[nPattern] > MAX_PATTERN_ROWS / 2)) return FALSE;
+// -! BEHAVIOUR_CHANGE#0008
 	BeginWaitCursor();
 	nRows = m_SndFile.PatternSize[nPattern];
 	nChns = m_SndFile.m_nChannels;
@@ -1465,7 +1537,12 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 }
 
 
-BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
+//rewbs.mixpaste: using eric's method, as it is fat more elegant.
+// -> CODE#0014
+// -> DESC="vst wet/dry slider"
+//BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
+BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
+// -! NEW_FEATURE#0014
 //---------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -1520,7 +1597,11 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
 					if (col < m_SndFile.m_nChannels)
 					{
 						// Note
-						if (s[0] > ' ')
+// -> CODE#0014
+// -> DESC="vst wet/dry slider"
+//						if (s[0] > ' ')
+						if (s[0] > ' ' && (m[col].note==0 || !mix))
+// -! NEW_FEATURE#0014
 						{
 							m[col].note = 0;
 							if (s[0] == '=') m[col].note = 0xFF; else
@@ -1536,7 +1617,11 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
 							}
 						}
 						// Instrument
-						if (s[3] > ' ')
+// -> CODE#0014
+// -> DESC="vst wet/dry slider"
+//						if (s[3] > ' ')
+						if (s[3] > ' ' && (m[col].instr==0 || !mix))
+// -! NEW_FEATURE#0014
 						{
 							if ((s[3] >= '0') && (s[3] <= ('0'+(MAX_SAMPLES/10))))
 							{
@@ -1544,7 +1629,11 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
 							} else m[col].instr = 0;
 						}
 						// Volume
-						if (s[5] > ' ')
+// -> CODE#0014
+// -> DESC="vst wet/dry slider"
+//						if (s[5] > ' ')
+						if (s[5] > ' ' && (m[col].volcmd==0 || !mix))
+// -! NEW_FEATURE#0014
 						{
 							if (s[5] != '.')
 							{
@@ -1561,7 +1650,11 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
 							} else m[col].volcmd = m[col].vol = 0;
 						}
 						// Effect
-						if (s[8] > ' ')
+// -> CODE#0014
+// -> DESC="vst wet/dry slider"
+//						if (s[8] > ' ')
+						if (s[8] > ' ' && (m[col].volcmd==0 || !mix))
+// -! NEW_FEATURE#0014
 						{
 							m[col].command = 0;
 							if (s[8] != '.')
@@ -1574,7 +1667,11 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
 							}
 						}
 						// Effect value
-						if (s[9] > ' ')
+// -> CODE#0014
+// -> DESC="vst wet/dry slider"
+//						if (s[9] > ' ')
+						if (s[9] > ' ' && (m[col].param==0 || !mix))
+// -! NEW_FEATURE#0014
 						{
 							m[col].param = 0;
 							if (s[9] != '.')
@@ -1632,176 +1729,6 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
 	EndWaitCursor();
 	return TRUE;
 }
-
-//end rewbs.mixPaste
-BOOL CModDoc::MixPastePattern(UINT nPattern, DWORD dwBeginSel)
-//---------------------------------------------------------
-{
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((!pMainFrm) || (nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern])) return FALSE;
-	BeginWaitCursor();
-	if (pMainFrm->OpenClipboard())
-	{
-		HGLOBAL hCpy = ::GetClipboardData(CF_TEXT);
-		LPSTR p;
-
-		if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
-		{
-			PrepareUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
-			BYTE spdmax = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 0x20 : 0x1F;
-			DWORD dwMemSize = GlobalSize(hCpy);
-			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
-			UINT nrow = dwBeginSel >> 16;
-			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
-			UINT col;
-			BOOL bS3M = FALSE, bOk = FALSE;
-			UINT len = 0;
-
-			if ((nrow >= m_SndFile.PatternSize[nPattern]) || (ncol >= m_SndFile.m_nChannels)) goto PasteDone;
-			m += nrow * m_SndFile.m_nChannels;
-			// Search for signature
-			for (;;)
-			{
-				if (len + 11 >= dwMemSize) goto PasteDone;
-				char c = p[len++];
-				if (!c) goto PasteDone;
-				if ((c == 0x0D) && (len > 3))
-				{
-					if ((p[len-3] == 'I') || (p[len-4] == 'S')) bS3M = TRUE;
-					break;
-				}
-			}
-			bOk = TRUE;
-			while ((nrow < m_SndFile.PatternSize[nPattern]) && (len + 11 < dwMemSize))
-			{
-				// Search for column separator
-				while (p[len] != '|')
-				{
-					if (len + 11 >= dwMemSize) goto PasteDone;
-					if (!p[len]) goto PasteDone;
-					len++;
-				}
-				col = ncol;
-				// Paste columns
-				while ((p[len] == '|') && (len + 11 < dwMemSize))
-				{
-					LPSTR s = p+len+1;
-					if (col < m_SndFile.m_nChannels)
-					{
-						// Note
-						if (s[0] > ' ' && m[col].note==0)
-						{
-							m[col].note = 0;
-							if (s[0] == '=') m[col].note = 0xFF; else
-							if (s[0] == '^') m[col].note = 0xFE; else
-							if (s[0] != '.')
-							{
-								for (UINT i=0; i<12; i++)
-								{
-									if ((s[0] == szNoteNames[i][0])
-									 && (s[1] == szNoteNames[i][1])) m[col].note = i+1;
-								}
-								if (m[col].note) m[col].note += (s[2] - '0') * 12;
-							}
-						}
-						// Instrument
-						if (s[3] > ' ' && m[col].instr==0)
-						{
-							if ((s[3] >= '0') && (s[3] <= ('0'+(MAX_SAMPLES/10))))
-							{
-								m[col].instr = (s[3]-'0') * 10 + (s[4]-'0');
-							} else m[col].instr = 0;
-						}
-						// Volume
-						if (s[5] > ' ' && m[col].volcmd==0)
-						{
-							if (s[5] != '.')
-							{
-								m[col].volcmd = 0;
-								for (UINT i=1; i<MAX_VOLCMDS; i++)
-								{
-									if (s[5] == gszVolCommands[i])
-									{
-										m[col].volcmd = i;
-										break;
-									}
-								}
-								m[col].vol = (s[6]-'0')*10 + (s[7]-'0');
-							} else m[col].volcmd = m[col].vol = 0;
-						}
-						// Effect
-						if (s[8] > ' ' && m[col].command==0)
-						{
-							m[col].command = 0;
-							if (s[8] != '.')
-							{
-								LPCSTR psc = (bS3M) ? gszS3mCommands : gszModCommands;
-								for (UINT i=1; i<MAX_EFFECTS; i++)
-								{
-									if ((s[8] == psc[i]) && (psc[i] != '?')) m[col].command = i;
-								}
-							}
-						}
-						// Effect value
-						if (s[9] > ' ' && m[col].param==0)
-						{
-							m[col].param = 0;
-							if (s[9] != '.')
-							{
-								for (UINT i=0; i<16; i++)
-								{
-									if (s[9] == szHexChar[i]) m[col].param |= (i<<4);
-									if (s[10] == szHexChar[i]) m[col].param |= i;
-								}
-							}
-						}
-						// Checking command
-						if (m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-						{
-							switch (m[col].command)
-							{
-							case CMD_SPEED:
-							case CMD_TEMPO:
-								if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
-								else
-								{
-									if ((m[col].command == CMD_SPEED) && (m[col].param > spdmax)) m[col].param = CMD_TEMPO; else
-									if ((m[col].command == CMD_TEMPO) && (m[col].param <= spdmax)) m[col].param = CMD_SPEED;
-								}
-								break;
-							}
-						} else
-						{
-							switch (m[col].command)
-							{
-							case CMD_SPEED:
-							case CMD_TEMPO:
-								if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
-								break;
-							}
-						}
-					}
-					len += 12;
-					col++;
-				}
-				// Next row
-				m += m_SndFile.m_nChannels;
-				nrow++;
-			}
-		PasteDone:
-			GlobalUnlock(hCpy);
-			if (bOk)
-			{
-				SetModified();
-				UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << 24), NULL);
-			}
-		}
-		CloseClipboard();
-	}
-	EndWaitCursor();
-	return TRUE;
-}
-//end rewbs.mixPaste
 
 
 /////////////////////////////////////////////////////////////////////////////////////////

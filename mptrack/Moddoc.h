@@ -36,7 +36,7 @@
 #define HINT_INSNAMES		0x08000
 #define HINT_UNDO			0x10000
 #define HINT_MIXPLUGINS		0x20000
-#define HINT_SPEEDCHANGE	0x40000
+#define HINT_SPEEDCHANGE	0x40000	//rewbs.envRowGrid
 
 // Undo
 #define MAX_UNDO_LEVEL		100
@@ -61,7 +61,13 @@ protected:
 	HWND m_hWndFollow;
 	DWORD m_dwNotifyType;
 	PATTERNUNDOBUFFER PatternUndo[MAX_UNDO_LEVEL];
-	BYTE OrderUndo[MAX_UNDO_LEVEL][MAX_ORDERS];
+	BYTE OrderUndo[MAX_UNDO_LEVEL][MAX_ORDERS];  //rewbs.orderListUndo
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	BYTE MultiRecordMask[(MAX_CHANNELS+7)/8];
+	BYTE MultiSplitRecordMask[(MAX_CHANNELS+7)/8];
+// -! NEW_FEATURE#0015
 
 protected: // create from serialization only
 	CModDoc();
@@ -121,17 +127,39 @@ public:
 	BOOL RemoveSample(UINT n);
 	BOOL RemoveInstrument(UINT n);
 	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, UINT nCurrentChn=-1); //rewbs.vstiLive: added current chan param
-	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, UINT nCurrentChn=-1);
+	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, UINT nCurrentChn=-1); //rewbs.vstiLive: add params
+
+// -> CODE#0020
+// -> DESC="rearrange sample list"
+	void RearrangeSampleList(void);
+// -! NEW_FEATURE#0020
+
 	BOOL IsNotePlaying(UINT note, UINT nsmp=0, UINT nins=0);
 	BOOL MuteChannel(UINT nChn, BOOL bMute);
 	BOOL MuteSample(UINT nSample, BOOL bMute);
 	BOOL MuteInstrument(UINT nInstr, BOOL bMute);
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+	BOOL SoloChannel(UINT nChn, BOOL bSolo);
+	BOOL IsChannelSolo(UINT nChn) const;
+// -! NEW_FEATURE#0012
 	BOOL SurroundChannel(UINT nChn, BOOL bSurround);
 	BOOL SetChannelGlobalVolume(UINT nChn, UINT nVolume);
 	BOOL SetChannelDefaultPan(UINT nChn, UINT nPan);
 	BOOL IsChannelMuted(UINT nChn) const;
 	BOOL IsSampleMuted(UINT nSample) const;
 	BOOL IsInstrumentMuted(UINT nInstr) const;
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	BOOL NoFxChannel(UINT nChn, BOOL bNoFx, BOOL updateMix = TRUE);
+	BOOL IsChannelNoFx(UINT nChn) const;
+	BOOL IsChannelRecord1(UINT channel);
+	BOOL IsChannelRecord2(UINT channel);
+	BYTE IsChannelRecord(UINT channel);
+	void Record1Channel(UINT channel, BOOL select = TRUE);
+	void Record2Channel(UINT channel, BOOL select = TRUE);
+	void ReinitRecordState(BOOL unselect = TRUE);
+// -! NEW_FEATURE#0015
 	UINT GetNumChannels() const { return m_SndFile.m_nChannels; }
 	UINT GetPatternSize(UINT nPat) const;
 	BOOL AdjustEndOfSample(UINT nSample);
@@ -142,8 +170,8 @@ public:
 	BOOL ExpandPattern(UINT nPattern);
 	BOOL ShrinkPattern(UINT nPattern);
 	BOOL CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel);
-	BOOL PastePattern(UINT nPattern, DWORD dwBeginSel);
-	BOOL MixPastePattern(UINT nPattern, DWORD dwBeginSel);		//rewbs.mixPaste
+	BOOL PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix);	//rewbs.mixpaste
+
 	BOOL CopyEnvelope(UINT nIns, UINT nEnv);
 	BOOL PasteEnvelope(UINT nIns, UINT nEnv);
 	BOOL ClearUndo();
@@ -152,14 +180,14 @@ public:
 	BOOL CanUndo();
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
 	void UpdateAllViews(CView *pSender, LPARAM lHint=0L, CObject *pHint=NULL);
-	HWND GetEditPosition(UINT &row, UINT &pat, UINT &ord);
-	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
-	void TogglePluginEditor(UINT m_nCurrentPlugin);
+	HWND GetEditPosition(UINT &row, UINT &pat, UINT &ord); //rewbs.customKeys
+	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);				   //rewbs.customKeys
+	void TogglePluginEditor(UINT m_nCurrentPlugin);		   //rewbs.patPlugNames
 
 // protected members
 protected:
 	BOOL InitializeMod();
-	void* GetChildFrame();
+	void* GetChildFrame(); //rewbs.customKeys
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -210,9 +238,9 @@ public:
 	afx_msg void OnUpdateXMITOnly(CCmdUI *p);
 	afx_msg void OnUpdateInstrumentOnly(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMP3Encode(CCmdUI *pCmdUI);
-	afx_msg void OnPatternRestart();
-	afx_msg void OnPatternPlay();
-	afx_msg void OnPatternPlayNoLoop();
+	afx_msg void OnPatternRestart(); //rewbs.customKeys
+	afx_msg void OnPatternPlay(); //rewbs.customKeys
+	afx_msg void OnPatternPlayNoLoop(); //rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

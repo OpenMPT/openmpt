@@ -192,8 +192,8 @@ static UINT BASED_CODE MainButtons[] =
 	ID_VIEW_OPTIONS,
 	ID_APP_ABOUT,
 	ID_CONTEXT_HELP,
-		ID_SEPARATOR,
-	ID_REPORT_BUG,
+		ID_SEPARATOR,	//rewbs.reportBug
+	ID_REPORT_BUG,		//rewbs.reportBug
 };
 
 
@@ -295,7 +295,7 @@ BOOL CMainToolBar::SetHorizontal()
 	SetButtonInfo(SPEEDTEXT_INDEX, IDC_TEXT_CURRENTSPEED, TBBS_SEPARATOR, SPEEDTEXT_WIDTH);
 	SetButtonInfo(EDITSPEED_INDEX, IDC_EDIT_CURRENTSPEED, TBBS_SEPARATOR, EDITSPEED_WIDTH);
 	SetButtonInfo(SPINSPEED_INDEX, IDC_SPIN_CURRENTSPEED, TBBS_SEPARATOR, SPINSPEED_WIDTH);
-	SetButtonInfo(SPINSPEED_INDEX+1, IDC_TEXT_BPM, TBBS_SEPARATOR, SPEEDTEXT_WIDTH);
+	//SetButtonInfo(SPINSPEED_INDEX+1, IDC_TEXT_BPM, TBBS_SEPARATOR, SPEEDTEXT_WIDTH);
 	// Octave Box
 	EnableControl(m_EditOctave, EDITOCTAVE_INDEX);
 	EnableControl(m_SpinOctave, SPINOCTAVE_INDEX);
@@ -376,9 +376,11 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		int nSpeed = pSndFile->m_nMusicSpeed;
 		if (nSpeed != nCurrentSpeed)
 		{
+			//rewbs.envRowGrid
 			CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
             if (pModDoc)
 				pModDoc->UpdateAllViews(NULL, HINT_SPEEDCHANGE);
+			//end rewbs.envRowGrid
 				
 			if (nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
 			nCurrentSpeed = nSpeed;
@@ -946,6 +948,7 @@ void CModTreeBar::OnLButtonUp(UINT, CPoint)
 	DoLButtonUp();
 }
 
+//rewbs.customKeys
 HWND CModTreeBar::GetModTreeHWND()
 {
 	return m_pModTree->m_hWnd;
@@ -958,3 +961,4 @@ BOOL CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
 	if (::GetFocus() == m_pModTreeData->m_hWnd)
 		return m_pModTreeData->PostMessage(cmdID, wParam, lParam);
 }
+//end rewbs.customKeys

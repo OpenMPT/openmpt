@@ -7,6 +7,10 @@
 #include "ctrl_ins.h"
 #include "view_ins.h"
 #include "dlsbank.h"
+// -> CODE#0015
+// -> DESC="channels management dlg"
+#include "ctrl_pat.h"
+// -! NEW_FEATURE#0015
 
 #define ENV_ZOOM				4
 #define ENV_DRAGLOOPSTART		0x100
@@ -39,7 +43,7 @@ const UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
 		ID_SEPARATOR,
 	ID_INSTRUMENT_SAMPLEMAP,
 		ID_SEPARATOR,
-	ID_ENVELOPE_VIEWGRID,
+	ID_ENVELOPE_VIEWGRID,			//rewbs.envRowGrid
 		ID_SEPARATOR,
 };
 
@@ -75,7 +79,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_ENVELOPE_PANNING,			OnEnvPanChanged)
 	ON_COMMAND(ID_ENVELOPE_PITCH,			OnEnvPitchChanged)
 	ON_COMMAND(ID_ENVELOPE_FILTER,			OnEnvFilterChanged)
-	ON_COMMAND(ID_ENVELOPE_VIEWGRID,		OnEnvToggleGrid)
+	ON_COMMAND(ID_ENVELOPE_VIEWGRID,		OnEnvToggleGrid) //rewbs.envRowGrid
 	ON_COMMAND(ID_ENVSEL_VOLUME,			OnSelectVolumeEnv)
 	ON_COMMAND(ID_ENVSEL_PANNING,			OnSelectPanningEnv)
 	ON_COMMAND(ID_ENVSEL_PITCH,				OnSelectPitchEnv)
@@ -83,7 +87,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_EDIT_PASTE,				OnEditPaste)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP,		OnEditSampleMap)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -102,9 +106,9 @@ CViewInstrument::CViewInstrument()
 	memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
 	memset(m_NcButtonState, 0, sizeof(m_NcButtonState));
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
-	memset(m_baPlayingNote, 0, sizeof(bool)*120); 
-	m_nPlayingChannel =-1;
-	m_bGrid=true;
+	memset(m_baPlayingNote, 0, sizeof(bool)*120);  //rewbs.customKeys
+	m_nPlayingChannel =-1;						   //rewbs.customKeys
+	m_bGrid=true;								   //rewbs.envRowGrid
 }
 
 
@@ -1148,7 +1152,7 @@ void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 {
 	if ((dwHintMask & (HINT_MPTOPTIONS|HINT_MODTYPE))
 	 || ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == (dwHintMask >> 24)))
-	 || ((dwHintMask & HINT_SPEEDCHANGE)))
+	 || ((dwHintMask & HINT_SPEEDCHANGE))) //rewbs.envRowGrid
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();
@@ -1156,6 +1160,7 @@ void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 	}
 }
 
+//rewbs.envRowGrid
 void CViewInstrument::DrawGrid(CDC *memDC, UINT speed)
 //----------------------------------------------------
 {
@@ -1196,6 +1201,7 @@ void CViewInstrument::DrawGrid(CDC *memDC, UINT speed)
 		}
 	}
 }
+//end rewbs.envRowGrid
 
 void CViewInstrument::OnDraw(CDC *pDC)
 //------------------------------------
@@ -1209,6 +1215,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	UINT maxpoint;
 	int ymed = (m_rcClient.bottom - 1) / 2;
 
+//rewbs.envRowGrid
 	// to avoid flicker, establish a memory dc, draw to it 
 	// and then BitBlt it to the destination "pDC"
 	CDC memDC ;
@@ -1220,6 +1227,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		return;
 	memBitmap.CreateCompatibleBitmap(pDC, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top);
 	oldBitmap = (CBitmap *)memDC.SelectObject(&memBitmap) ;
+//end rewbs.envRowGrid
 
 	if ((!pModDoc) || (!pDC)) return;
 	pSndFile = pModDoc->GetSoundFile();
@@ -1285,7 +1293,18 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	}
 	DrawPositionMarks(memDC.m_hDC);
 	if (oldpen) memDC.SelectObject(oldpen);
+	
+	//rewbs.envRowGrid
 	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.right-m_rcClient.left, m_rcClient.bottom-m_rcClient.top, &memDC, 0, 0, SRCCOPY) ;
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
+	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
+
+	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
+		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
+// -! NEW_FEATURE#0015
 }
 
 
@@ -1947,6 +1966,7 @@ void CViewInstrument::OnEnvFilterChanged()
 	}
 }
 
+//rewbs.envRowGrid
 void CViewInstrument::OnEnvToggleGrid()
 //----------------------------------------
 {
@@ -1956,7 +1976,7 @@ void CViewInstrument::OnEnvToggleGrid()
 	if (pModDoc)
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
 }
-
+//end rewbs.envRowGrid
 
 void CViewInstrument::OnEnvRemovePoint()
 //--------------------------------------
@@ -2170,7 +2190,7 @@ void CViewInstrument::PlayNote(UINT note)
 		CHAR s[64];
 		if (note >= 0xFE)
 		{
-			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE);
+			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE, m_nInstrument);
 			pMainFrm->SetInfoText("");
 		} else
 		if (m_nInstrument && !m_baPlayingNote[note])
@@ -2435,7 +2455,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 	// Note On
 	case 0x90:
 		note = (dwMidiByte1 & 0x7F)+1;
-		pModDoc->NoteOff(note, FALSE);
+		pModDoc->NoteOff(note, FALSE, m_nInstrument);
 		if (dwMidiByte2 & 0x7F)
 		{
 			int vol = (CDLSBank::DLSMidiVolumeToLinear(dwMidiByte2 & 0x7F)+255) >> 8;
@@ -2492,7 +2512,9 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcNextInstrument:	OnNextInstrument(); return wParam;
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
+		case kcNoteOffOld:
 		case kcNoteOff:			PlayNote(255); return wParam;
+		case kcNoteCutOld:
 		case kcNoteCut:			PlayNote(254); return wParam;
 	}
 	if (wParam>=kcInstrumentStartNotes && wParam<=kcInstrumentEndNotes)
@@ -2504,7 +2526,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	{	
 		int note =wParam-kcInstrumentStartNoteStops+1+pMainFrm->GetBaseOctave()*12;
 		m_baPlayingNote[note]=false; 
-		pModDoc->NoteOff(note, FALSE);
+		pModDoc->NoteOff(note, FALSE, m_nInstrument);
 		return wParam;
 	}
 }

@@ -20,7 +20,7 @@
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GX"
+				AdditionalOptions="/GX-"
 				Optimization="0"
 				OptimizeForProcessor="1"
 				AdditionalIncludeDirectories="..\unzip,..\unrar,..\unlha,..\soundlib,..\include"
@@ -85,7 +85,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Bin"
+			OutputDirectory=".\Bin2"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			UseOfMFC="1"
@@ -409,9 +409,6 @@
 			</File>
 			<File
 				RelativePath=".\ChildFrm.h">
-			</File>
-			<File
-				RelativePath=".\commandList.h">
 			</File>
 			<File
 				RelativePath=".\CommandSet.h">

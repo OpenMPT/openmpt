@@ -368,7 +368,7 @@ LONG __cdecl CDLSBank::DLS32BitTimeCentsToMilliseconds(LONG lTimeCents)
 	// tc = log2(time[secs]) * 1200*65536
 	// time[secs] = 2^(tc/(1200*65536))
 	if ((DWORD)lTimeCents == 0x80000000) return 0;
-	double fmsecs = 1000.0 * pow(2.0, (double)(lTimeCents)/(1200.0*65536.0));
+	double fmsecs = 1000.0 * pow(2.0, ((double)lTimeCents)/(1200.0*65536.0));
 	if (fmsecs < -32767) return -32767;
 	if (fmsecs > 32767) return 32767;
 	return (LONG)fmsecs;
@@ -1642,8 +1642,12 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
 	if (pSndFile->Headers[nInstr])
 	{
-		pSndFile->RemoveInstrumentSamples(nInstr);
-		pSndFile->DestroyInstrument(nInstr);
+// -> CODE#0003
+// -> DESC="remove instrument's samples"
+//		pSndFile->RemoveInstrumentSamples(nInstr);
+//		pSndFile->DestroyInstrument(nInstr);
+		pSndFile->DestroyInstrument(nInstr,1);
+// -! BEHAVIOUR_CHANGE#0003
 	}
 	// Initializes Instrument
 	if (pins->ulBank & F_INSTRUMENT_DRUMS)

@@ -7,6 +7,10 @@
 #include "view_smp.h"
 #include "ctrl_smp.h"
 #include "dlsbank.h"
+// -> CODE#0015
+// -> DESC="channels management dlg"
+#include "ctrl_pat.h"
+// -! NEW_FEATURE#0015
 
 // Non-client toolbar
 #define SMP_LEFTBAR_CY			29
@@ -67,7 +71,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_ZOOMUP,			OnZoomUp)
 	ON_COMMAND(ID_SAMPLE_ZOOMDOWN,			OnZoomDown)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -108,7 +112,6 @@ void CViewSample::UpdateScrollSize()
 	CModDoc *pModDoc = GetDocument();
 	
 	GetClientRect(&m_rcClient);
-	
 	if (pModDoc)
 	{
 		CPoint pt;
@@ -608,7 +611,11 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	} else
 	{
 		xmax = cx;
-		posincr = _muldiv(len, 0x10000, cx);
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+//		posincr = _muldiv(len, 0x10000, cx);
+		posincr = (len / (xmax+1)) * 0x10000;
+// -! BEHAVIOUR_CHANGE#0006
 	}
 	::MoveToEx(hdc, 0, ymed, NULL);
 	posfrac = 0;
@@ -821,6 +828,15 @@ void CViewSample::OnDraw(CDC *pDC)
 	}
 	DrawPositionMarks(hdc);
 	if (oldpen) ::SelectObject(hdc, oldpen);
+
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	CMainFrame * pMainFrm = CMainFrame::GetMainFrame();
+	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
+
+	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
+		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
+// -! NEW_FEATURE#0015
 }
 
 
@@ -1261,7 +1277,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODINSTRUMENT *pins = &pSndFile->Ins[m_nSample];
 		HMENU hMenu = ::CreatePopupMenu();
-		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler(); //rewbs.customKeys
 		if (!hMenu)	return;
 		if (pins->nLength)
 		{

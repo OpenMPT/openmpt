@@ -84,6 +84,8 @@ MPTHOTKEY gDefaultHotKeys[MAX_MPTHOTKEYS] =
 	{ID_PATTERN_VISUALIZE_EFFECT,'B'|MPTF_CTRL,	'B'|MPTF_CTRL,		'B'|MPTF_ALT,		"Visualize effect"},	//rewbs.fxvis
 };
 
+//rewbs.customKeys: moved COptionsKeyboard to a separate file.
+//					removed CNotifyHotKey
 //////////////////////////////////////////////////////////////
 // COptionsColors
 
@@ -550,6 +552,16 @@ enum {
 	OPTGEN_CONTSCROLL,
 	OPTGEN_KBDNOTEOFF,
 	OPTGEN_FOLLOWSONGOFF,	//rewbs.noFollow
+// -> CODE#0017
+// -> DESC="midi in record mode setup option"
+	OPTGEN_MIDIRECORD,
+// -! BEHAVIOUR_CHANGE#0017
+
+// -> CODE#0022
+// -> DESC="alternative BPM/Speed interpretation method"
+	OPTGEN_ALTERNTIVEBPMSPEED,
+// -! NEW_FEATURE#0022
+
 	OPTGEN_MAXOPTIONS
 };
 
@@ -571,6 +583,15 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{"Continuous scroll",				"Jumps to the next pattern when moving past the end of a pattern"},
 	{"Record note off",					"Record note off when a key is released on the PC keyboard (Only works in instrument mode)."},
 	{"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."}, 	//rewbs.noFollow
+// -> CODE#0017
+// -> DESC="midi in record mode setup option"
+	{"Midi record",						"Enable midi in record by default."},
+// -! BEHAVIOUR_CHANGE#0017
+
+// -> CODE#0022
+// -> DESC="alternative BPM/Speed interpretation method"
+	{"Alternative BPM/Speed",			"Alternative BPM/Speed interpretation where speed represents the number of tempo ticks per pattern row."},
+// -! NEW_FEATURE#0022
 };
 
 
@@ -617,6 +638,16 @@ BOOL COptionsGeneral::OnInitDialog()
 		case OPTGEN_CONTSCROLL:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL); break;
 		case OPTGEN_KBDNOTEOFF:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_KBDNOTEOFF); break;
 		case OPTGEN_FOLLOWSONGOFF:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF); break;	//rewbs.noFollow
+
+// -> CODE#0017
+// -> DESC="midi in record mode setup option"
+		case OPTGEN_MIDIRECORD:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_MIDIRECORD); break;
+// -! BEHAVIOUR_CHANGE#0017
+
+// -> CODE#0022
+// -> DESC="alternative BPM/Speed interpretation method"
+		case OPTGEN_ALTERNTIVEBPMSPEED:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED); break;
+// -! NEW_FEATURE#0022
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
@@ -659,6 +690,16 @@ void COptionsGeneral::OnOK()
 		case OPTGEN_CONTSCROLL:			mask = PATTERN_CONTSCROLL; break;
 		case OPTGEN_KBDNOTEOFF:			mask = PATTERN_KBDNOTEOFF; break;
 		case OPTGEN_FOLLOWSONGOFF:		mask = PATTERN_FOLLOWSONGOFF; break;	//rewbs.noFollow
+
+// -> CODE#0017
+// -> DESC="midi in record mode setup option"
+		case OPTGEN_MIDIRECORD:			mask = PATTERN_MIDIRECORD; break;
+// -! BEHAVIOUR_CHANGE#0017
+
+// -> CODE#0022
+// -> DESC="alternative BPM/Speed interpretation method"
+		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
+// -! NEW_FEATURE#0022
 		}
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);

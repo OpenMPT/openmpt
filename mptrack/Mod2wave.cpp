@@ -133,7 +133,13 @@ BOOL CWaveConvert::OnInitDialog()
 	else
 		CheckDlgButton(IDC_RADIO1, MF_CHECKED);
 	CheckDlgButton(IDC_CHECK3, MF_CHECKED); // HQ resampling
-	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// Normalize
+	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// rewbs.NoNormalize
+
+// -> CODE#0024
+// -> DESC="wav export update"
+	CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
+// -! NEW_FEATURE#0024
+
 	SetDlgItemInt(IDC_EDIT3, m_nMinOrder);
 	SetDlgItemInt(IDC_EDIT4, m_nMaxOrder);
 	for (UINT i=0; i<NUMMIXRATE; i++)
@@ -143,14 +149,28 @@ BOOL CWaveConvert::OnInitDialog()
 		m_CbnSampleRate.SetItemData(m_CbnSampleRate.AddString(s), n);
 		if (n == WaveFormat.Format.nSamplesPerSec) m_CbnSampleRate.SetCurSel(i);
 	}
-	for (UINT j=0; j<3*3; j++)
+// -> CODE#0024
+// -> DESC="wav export update"
+//	for (UINT j=0; j<3*3; j++)
+	for (UINT j=0; j<3*4; j++)
+// -! NEW_FEATURE#0024
 	{
-		UINT n = 3*3-1-j;
-		UINT nBits = 8 << (n % 3);
-		UINT nChannels = 1 << (n/3);
+// -> CODE#0024
+// -> DESC="wav export update"
+//		UINT n = 3*3-1-j;
+//		UINT nBits = 8 << (n % 3);
+//		UINT nChannels = 1 << (n/3);
+		UINT n = 3*4-1-j;
+		UINT nBits = 8 * (1 + n % 4);
+		UINT nChannels = 1 << (n/4);
+// -! NEW_FEATURE#0024
 		if ((nBits >= 16) || (nChannels <= 2))
 		{
-			wsprintf(s, "%s, %d-Bit", gszChnCfgNames[n/3], nBits);
+// -> CODE#0024
+// -> DESC="wav export update"
+//			wsprintf(s, "%s, %d Bit", gszChnCfgNames[j/3], nBits);
+			wsprintf(s, "%s, %d-Bit", gszChnCfgNames[n/4], nBits);
+// -! NEW_FEATURE#0024
 			UINT ndx = m_CbnSampleFormat.AddString(s);
 			m_CbnSampleFormat.SetItemData(ndx, (nChannels<<8)|nBits);
 			if ((nBits == WaveFormat.Format.wBitsPerSample) && (nChannels == WaveFormat.Format.nChannels))
@@ -169,7 +189,11 @@ void CWaveConvert::OnFormatChanged()
 {
 	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 	UINT nBits = dwFormat & 0xFF;
-	::EnableWindow( ::GetDlgItem(m_hWnd, IDC_CHECK5), (nBits <= 16) ? TRUE : FALSE );
+// -> CODE#0024
+// -> DESC="wav export update"
+//	::EnableWindow( ::GetDlgItem(m_hWnd, IDC_CHECK5), (nBits <= 16) ? TRUE : FALSE );
+	::EnableWindow( ::GetDlgItem(m_hWnd, IDC_CHECK5), (nBits <= 24) ? TRUE : FALSE );
+// -! NEW_FEATURE#0024
 }
 
 
@@ -229,6 +253,12 @@ void CWaveConvert::OnOK()
 	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = FALSE;
 	m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? TRUE : FALSE;
 	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) ? TRUE : FALSE;
+
+// -> CODE#0024
+// -> DESC="wav export update"
+	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) ? TRUE : FALSE;
+// -! NEW_FEATURE#0024
+
 	// WaveFormatEx
 	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
@@ -238,7 +268,13 @@ void CWaveConvert::OnOK()
 	WaveFormat.Format.nChannels = (WORD)(dwFormat >> 8);
 	if ((WaveFormat.Format.nChannels != 1) && (WaveFormat.Format.nChannels != 4)) WaveFormat.Format.nChannels = 2;
 	WaveFormat.Format.wBitsPerSample = (WORD)(dwFormat & 0xFF);
-	if ((WaveFormat.Format.wBitsPerSample != 8) && (WaveFormat.Format.wBitsPerSample != 32)) WaveFormat.Format.wBitsPerSample = 16;
+
+// -> CODE#0024
+// -> DESC="wav export update"
+//	if ((WaveFormat.Format.wBitsPerSample != 8) && (WaveFormat.Format.wBitsPerSample != 32)) WaveFormat.Format.wBitsPerSample = 16;
+	if ((WaveFormat.Format.wBitsPerSample != 8) && (WaveFormat.Format.wBitsPerSample != 24) && (WaveFormat.Format.wBitsPerSample != 32)) WaveFormat.Format.wBitsPerSample = 16;
+// -! NEW_FEATURE#0024
+
 	WaveFormat.Format.nBlockAlign = (WaveFormat.Format.wBitsPerSample * WaveFormat.Format.nChannels) / 8;
 	WaveFormat.Format.nAvgBytesPerSec = WaveFormat.Format.nSamplesPerSec * WaveFormat.Format.nBlockAlign;
 	WaveFormat.Format.cbSize = 0;
@@ -555,7 +591,11 @@ void CDoWaveConvert::OnButton1()
 	CSoundFile::gdwMixingFreq = m_pWaveFormat->nSamplesPerSec;
 	CSoundFile::gnBitsPerSample = m_pWaveFormat->wBitsPerSample;
 	CSoundFile::gnChannels = m_pWaveFormat->nChannels;
-	if ((m_bNormalize) && (m_pWaveFormat->wBitsPerSample <= 16))
+// -> CODE#0024
+// -> DESC="wav export update"
+//	if ((m_bNormalize) && (m_pWaveFormat->wBitsPerSample <= 16))
+	if ((m_bNormalize) && (m_pWaveFormat->wBitsPerSample <= 24))
+// -! NEW_FEATURE#0024
 	{
 		m_pSndFile->gnBitsPerSample = 24;
 		m_pSndFile->SetAGC(FALSE);
@@ -647,6 +687,10 @@ void CDoWaveConvert::OnButton1()
 			DWORD l = (DWORD)(ullSamples / CSoundFile::gdwMixingFreq);
 			wsprintf(s, "Writing file... (%uKB, %umn%02us)", datahdr.length >> 10, l / 60, l % 60);
 			SetDlgItemText(IDC_TEXT1, s);
+// -> CODE#0024
+// -> DESC="wav export update"
+			Sleep(40);
+// -! NEW_FEATURE#0024
 		}
 		if ((progress != NULL) && ((DWORD)(ullSamples >> 14) != pos))
 		{

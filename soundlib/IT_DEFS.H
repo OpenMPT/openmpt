@@ -108,14 +108,6 @@ typedef struct _ITINSTRUMENTEX
 	BYTE keyboardhi[120];
 } ITINSTRUMENTEX, *PITINSTRUMENTEX;
 
-// MPT IT Instrument Module Extension
-/*typedef struct _ITINSTRUMENTEXMMOD			//rewbs.modularInst
-{
-	ITINSTRUMENT iti;
-	BYTE keyboardhi[120];
-	long modularDataSize;
-} ITINSTRUMENTEXMMOD, *PITINSTRUMENTEXMMOD;*/
-
 
 // IT Sample Format
 typedef struct ITSAMPLESTRUCT
@@ -149,7 +141,7 @@ extern BYTE autovibxm2it[8];
 
 #endif
 
-
+//plastiq.manyChannels
 enum IT_ReaderBitMasks {
 
 	 // pattern row parsing, the channel data is read to obtain
@@ -162,3 +154,4 @@ enum IT_ReaderBitMasks {
 	 IT_bitmask_patternChanUsed_c    = 0x0f
 
 };
+//end plastiq.manyChannels

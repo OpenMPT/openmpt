@@ -9,7 +9,7 @@
 class CVstPluginManager;
 class CVstPlugin;
 class CVstEditor;
-class Cfxp;
+class Cfxp;				//rewbs.VSTpresets
 
 enum {
 	effBuzzGetNumCommands=0x1000,
@@ -44,21 +44,20 @@ typedef struct _VSTINSTCH
 class CVstPlugin: public IMixPlugin
 //=================================
 {
-	friend class CAbstractVstEditor;
-	friend class COwnerVstEditor;
+	friend class CAbstractVstEditor;	//rewbs.defaultPlugGUI
+	friend class COwnerVstEditor;		//rewbs.defaultPlugGUI
 	friend class CVstPluginManager;
 public:
-	enum {VSTEVENT_QUEUE_LEN=128}; 
+	enum {VSTEVENT_QUEUE_LEN=256}; 
 
 protected:
-	BOOL m_bSomePlugNeedsIdle;
 	ULONG m_nRefCount;
 	CVstPlugin *m_pNext, *m_pPrev;
 	HINSTANCE m_hLibrary;
 	PVSTPLUGINLIB m_pFactory;
 	PSNDMIXPLUGIN m_pMixStruct;
 	AEffect *m_pEffect;
-	CAbstractVstEditor *m_pEditor;
+	CAbstractVstEditor *m_pEditor;		//rewbs.defaultPlugGUI
 	UINT m_nSampleRate;
 	BOOL m_bIsVst2;
 	SNDMIXPLUGINSTATE m_MixState;
@@ -84,10 +83,23 @@ public:
 	long GetNumPrograms();
 	long GetNumParameters();
 	long GetCurrentProgram();
-	long GetNumProgramCategories();
-	long GetProgramNameIndexed(long index, long category, char *text);
-	//long GetProgramName();
+	long GetNumProgramCategories();	//rewbs.VSTpresets
+	long GetProgramNameIndexed(long index, long category, char *text);	//rewbs.VSTpresets
+	bool LoadProgram(CString fileName);
+	bool SaveProgram(CString fileName);
+	long GetUID();			//rewbs.VSTpresets
+	long GetVersion();		//rewbs.VSTpresets
+	bool GetParams(float* param, long min, long max); 	//rewbs.VSTpresets
+	bool RandomizeParams(long minParam=0, long maxParam=0); 	//rewbs.VSTpresets
+
 	VOID SetCurrentProgram(UINT nIndex);
+//rewbs.VSTCompliance: Eric's non standard preset stuff:
+// -> CODE#0002
+// -> DESC="VST plugins presets"
+	//VOID GetProgramName(UINT nIndex, LPSTR pszName, UINT cbSize);
+	//BOOL SavePreset(LPCSTR lpszFileName);
+	//BOOL LoadPreset(LPCSTR lpszFileName);
+// -! NEW_FEATURE#0002
 	FLOAT GetParameter(UINT nIndex);
 	VOID SetParameter(UINT nIndex, FLOAT fValue);
 	VOID GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize);
@@ -100,12 +112,8 @@ public:
 	UINT GetNumCommands();
 	BOOL GetCommandName(UINT index, LPSTR pszName);
 	BOOL ExecuteCommand(UINT nIndex);
-	CAbstractVstEditor* GetEditor();
-	bool LoadProgram(Cfxp *fxp);
-	long GetUID();
-	long GetVersion();
-	bool GetParams(float* param, long min, long max);
-	bool RandomizeParams(long minParam=0, long maxParam=0);
+	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
+
 
 public: // IMixPlugin interface
 	int AddRef() { return ++m_nRefCount; }
@@ -116,12 +124,12 @@ public: // IMixPlugin interface
 	void ClearVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
 	void Process(float *pOutL, float *pOutR, unsigned long nSamples);
 	void Init(unsigned long nFreq, int bReset);
-	void MidiSend(DWORD dwMidiCode);
+	bool MidiSend(DWORD dwMidiCode);
 	void MidiCommand(UINT nMidiCh, UINT nMidiProg, UINT note, UINT vol, UINT trackChan);
 	void HardAllNotesOff(); //rewbs.VSTiNoteHoldonStopFix
-	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);
-	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn);
-	bool m_bNeedIdle;
+	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST
+	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn); //rewbs.instroVST
+	bool m_bNeedIdle; //rewbs.VSTCompliance
 	
 
 	void SetZxxParameter(UINT nParam, UINT nValue);
@@ -135,7 +143,6 @@ class CVstPluginManager
 {
 protected:
 	PVSTPLUGINLIB m_pVstHead;
-	BOOL m_bSomePlugNeedsIdle, m_bAllPlugsNeedEditorIdle;
 
 public:
 	CVstPluginManager();
@@ -156,7 +163,7 @@ protected:
 	long VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 	static long VSTCALLBACK MasterCallBack(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN);
-	VstTimeInfo timeInfo;
+	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
 };
 
 

@@ -24,6 +24,8 @@
 #define MMNODRV
 #define MMNOMCI
 
+
+
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 #include <afxcmn.h>			// MFC support for Windows Common Controls
@@ -45,6 +47,7 @@
 
 #ifndef _WAVEFORMATEXTENSIBLE_
 #define _WAVEFORMATEXTENSIBLE_
+
 typedef struct {
     WAVEFORMATEX    Format;
     union {
@@ -56,12 +59,12 @@ typedef struct {
                                         /* present in stream  */
     GUID            SubFormat;
 } WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE;
+
 #endif // !_WAVEFORMATEXTENSIBLE_
 
 #if !defined(WAVE_FORMAT_EXTENSIBLE)
 #define  WAVE_FORMAT_EXTENSIBLE                 0xFFFE
 #endif // !defined(WAVE_FORMAT_EXTENSIBLE)
-
 
 void Log(LPCSTR format,...);
 

@@ -74,16 +74,22 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_MUTE,			OnMuteTreeItem)
 	ON_COMMAND(ID_MODTREE_SOLO,			OnSoloTreeItem)
 	ON_COMMAND(ID_MODTREE_UNMUTEALL,	OnUnmuteAllTreeItem)
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	ON_COMMAND(ID_MODTREE_SETPATH,		OnSetItemPath)
+// -! NEW_FEATURE#0023
+
 	ON_COMMAND(ID_ADD_SOUNDBANK,		OnAddDlsBank)
 	ON_COMMAND(ID_IMPORT_MIDILIB,		OnImportMidiLib)
 	ON_COMMAND(ID_EXPORT_MIDILIB,		OnExportMidiLib)
 	ON_COMMAND(ID_SOUNDBANK_PROPERTIES,	OnSoundBankProperties)
 	ON_COMMAND(ID_MODTREE_SHOWALLFILES, OnShowAllFiles)
 	ON_COMMAND(ID_MODTREE_SOUNDFILESONLY,OnShowSoundFiles)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)	//rewbs.customKeys
 	//}}AFX_MSG_MAP
-	ON_WM_KILLFOCUS()
-	ON_WM_SETFOCUS()
+	ON_WM_KILLFOCUS()		//rewbs.customKeys
+	ON_WM_SETFOCUS()		//rewbs.customKeys
 END_MESSAGE_MAP()
 
 
@@ -208,7 +214,7 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 		DWORD nFlags = HIWORD(pMsg->lParam);
 		if (CMainFrame::GetNoteFromKey(nChar, nFlags)) return TRUE;
 	}*/
-
+	//rewbs.customKeys
 	//We handle keypresses before Windows has a chance to handle them (for alt etc..)
 	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
 		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
@@ -225,7 +231,7 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
 			return true; // Mapped to a command, no need to pass message on.
 	}
-
+	//end rewbs.customKeys
 	return CTreeCtrl::PreTranslateMessage(pMsg);
 }
 
@@ -860,7 +866,12 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		{
 			if ((iSmp <= pSndFile->m_nInstruments) && (pSndFile->Headers[iSmp]))
 			{
-				wsprintf(s, "%3d: %s", iSmp, pSndFile->Headers[iSmp]->name);
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+//				wsprintf(s, "%3d: %s", iSmp, pSndFile->Headers[iSmp]->name);
+				BOOL pathOk = pSndFile->m_szInstrumentPath[iSmp-1][0] != '\0';
+				wsprintf(s, pathOk ? "%3d: %s" : "%3d: * %s", iSmp, pSndFile->Headers[iSmp]->name);
+// -! NEW_FEATURE#0023
 				if (!pInfo->tiInstruments[iSmp])
 				{
 					pInfo->tiInstruments[iSmp] = InsertItem(s, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, pInfo->hInstruments, TVI_LAST);
@@ -1132,10 +1143,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				if (pPlugin->pMixPlugin)
 				{
 					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-//					if (pVstPlugin->HasEditor())
-//					{
-						pVstPlugin->ToggleEditor();
-//					}
+					pVstPlugin->ToggleEditor();
 				}
 			}
 			return TRUE;
@@ -1528,6 +1536,10 @@ VOID CModTree::FillInstrumentLibrary()
 					 || (!lstrcmpi(s, ".s3m"))
 					 || (!lstrcmpi(s, ".xm"))
 					 || (!lstrcmpi(s, ".it"))
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+					 || (!lstrcmpi(s, ".itp"))
+// -! NEW_FEATURE#0023
 					 || ((m_bShowAllFiles)
 					  && ((!lstrcmpi(s, ".mdz"))
 					  || (!lstrcmpi(s, ".s3z"))
@@ -1922,7 +1934,6 @@ void CModTree::OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint)
 	}
 }
 
-
 void CModTree::OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult)
 //-------------------------------------------------------------
 {
@@ -2112,6 +2123,11 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 						AppendMenu(hMenu, (pModDoc->IsInstrumentMuted(dwItemNo) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Instrument");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "&Solo Instrument");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, "&Unmute all");
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SETPATH, "&Set path");
+// -! NEW_FEATURE#0023
 					}
 				}
 				break;
@@ -2437,9 +2453,8 @@ void CModTree::OnDeleteTreeItem()
 
 void CModTree::OnPlayTreeItem()
 //-----------------------------
-{	
-	HTREEITEM hItem = GetSelectedItem();
-	PlayItem(hItem);
+{
+	PlayItem(GetSelectedItem());
 }
 
 
@@ -2534,6 +2549,42 @@ void CModTree::OnUnmuteAllTreeItem()
 		}
 	}
 }
+
+
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+void CModTree::OnSetItemPath()
+{
+	HTREEITEM hItem = GetSelectedItem();
+	DWORD dwItemType = GetModItem(hItem);
+	DWORD dwItem = dwItemType >> 16;
+	dwItemType &= 0xFFFF;
+	CModDoc *pModDoc = GetDocumentFromItem(hItem);
+	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+
+	if(pSndFile && dwItem){
+
+		CHAR pszFileNames[_MAX_PATH];
+		CFileDialog dlg(TRUE, NULL, NULL, 
+						OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST|OFN_FORCESHOWHIDDEN,
+						"All files(*.*)|*.*||",
+						this);
+
+		pszFileNames[0] = 0;
+		pszFileNames[1] = 0;
+		dlg.m_ofn.lpstrFile = pszFileNames;
+		dlg.m_ofn.nMaxFile = _MAX_PATH;
+
+		if(dlg.DoModal() == IDOK){
+			strcpy(&pSndFile->m_szInstrumentPath[dwItem-1][0],pszFileNames);
+			OnRefreshTree();
+		}
+
+		dlg.m_ofn.lpstrFile = NULL;
+		dlg.m_ofn.nMaxFile = 0;
+	}
+}
+// -! NEW_FEATURE#0023
 
 
 void CModTree::OnAddDlsBank()

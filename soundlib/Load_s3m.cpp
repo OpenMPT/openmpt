@@ -100,6 +100,10 @@ void CSoundFile::S3MConvert(MODCOMMAND *m, BOOL bIT) const
 	case 'Z':	command = CMD_MIDI; break;
 	case '\\':	command = CMD_SMOOTHMIDI; break; //rewbs.smoothVST
 	case ':':	command = CMD_VELOCITY; break; //rewbs.velocity
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+	case '[':	command = CMD_XPARAM; break;
+// -! NEW_FEATURE#0010
 	default:	command = 0;
 	}
 	m->command = command;
@@ -180,6 +184,12 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT) const
 		case 0xB0:	if (param & 0x0F) { command = 'D'; param |= 0xF0; } else command=param=0; break;
 		}
 		break;
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+	case CMD_XPARAM:
+		command = '[';
+		break;
+// -! NEW_FEATURE#0010
 	default:	command = param = 0;
 	}
 	command &= ~0x40;

@@ -371,7 +371,7 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 		}
 		_asm ldmxcsr sse_state;
 		X86_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
-	}
+	} else
 
 #endif // ENABLE_SSE
 #endif // ENABLE_AMD
@@ -381,7 +381,7 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
      // We still perform the MMX check because the user can enable/disable this
 
 	if ((gdwSysInfo & SYSMIX_3DNOW) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
-	{
+	{ 
 		AMD_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2);
 		for (UINT b=0; b<MAX_EQ_BANDS; b++)
 		{
@@ -390,12 +390,10 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 				AMD_StereoEQ(&gEQ[b], &gEQ[b+MAX_EQ_BANDS], MixFloatBuffer, nCount);
 		}
 		AMD_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
-	} 
-	
-#endif
+	} else
+#endif // ENABLE_AMD
 
-#ifndef ENABLE_AMD
-#ifndef ENABLE_MMX
+	{	
 
 		X86_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount);
 		for (UINT bl=0; bl<MAX_EQ_BANDS; bl++)
@@ -407,9 +405,7 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 			if ((gEQ[br].bEnable) && (gEQ[br].Gain != 1.0f)) EQFilter(&gEQ[br], MixFloatBuffer+MIXBUFFERSIZE, nCount);
 		}
 		X86_FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount);
-
-#endif  // NOT ENABLE_AMD
-#endif  // NOT ENABLE_MMX
+	}
 }
 
 

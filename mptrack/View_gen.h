@@ -10,11 +10,26 @@ protected:
 	CTabCtrl m_TabCtrl;
 	CComboBox m_CbnEffects[4];
 	CComboBox m_CbnPlugin, m_CbnParam, m_CbnOutput;
+
 	CSliderCtrl m_sbVolume[4], m_sbPan[4], m_sbValue, m_sbDryRatio;
+
+// -> CODE#0002
+// -> DESC="VST plugins presets"
+	CComboBox m_CbnPreset;
+// -! NEW_FEATURE#0002
+//	CSliderCtrl m_sbVolume[4], m_sbPan[4], m_sbValue;
+// -> CODE#0014
+// -> DESC="vst wet/dry slider"
+	CSliderCtrl m_sbWetDry;
+// -! NEW_FEATURE#0014
 	CSpinButtonCtrl m_spinVolume[4], m_spinPan[4];
 	CButton m_BtnSelect, m_BtnEdit;
 	int m_nActiveTab, m_nLockCount;
 	UINT m_nCurrentPlugin, m_nCurrentParam;
+// -> CODE#0002
+// -> DESC="VST plugins presets"
+	UINT m_nCurrentPreset;
+// -! NEW_FEATURE#0002
 
 protected:
 	CViewGlobals():CFormView(IDD_VIEW_GLOBALS) { m_nLockCount = 1; }
@@ -37,6 +52,10 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+// -> CODE#0015
+// -> DESC="channels management dlg"
+	virtual void OnDraw(CDC* pDC);
+// -! NEW_FEATURE#0015
 	//}}AFX_VIRTUAL
 
 protected:
@@ -68,8 +87,19 @@ protected:
 	afx_msg void OnPluginChanged();
 	afx_msg void OnPluginNameChanged();
 	afx_msg void OnParamChanged();
+// -> CODE#0002
+// -> DESC="VST plugins presets"
+	afx_msg void OnProgramChanged();
+	afx_msg void OnLoadParam();
+	afx_msg void OnSaveParam();
+// -! NEW_FEATURE#0002
 	afx_msg void OnSelectPlugin();
 	afx_msg void OnSetParameter();
+// -> CODE#0014
+// -> DESC="vst wet/dry slider"
+	afx_msg void OnSetWetDry();
+//	afx_msg void OnWetDryChanged();
+// -! NEW_FEATURE#0014
 	afx_msg void OnEditPlugin();
 	afx_msg void OnMixModeChanged();
 	afx_msg void OnBypassChanged();
@@ -87,6 +117,5 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
 
 #endif

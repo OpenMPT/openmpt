@@ -21,7 +21,7 @@ protected:
 	DWORD m_dwStatus;
 	DWORD m_NcButtonState[ENV_LEFTBAR_BUTTONS];
 	DWORD m_dwNotifyPos[MAX_CHANNELS];
-	bool m_bGrid;
+	bool m_bGrid;	//rewbs.envRowGrid
 
 
 
@@ -70,8 +70,8 @@ public:
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
-	void PlayNote(UINT note);
-	void DrawGrid(CDC *memDC, UINT speed);
+	void PlayNote(UINT note);				//rewbs.customKeys
+	void DrawGrid(CDC *memDC, UINT speed);	//rewbs.envRowGrid
 
 public:
 	//{{AFX_VIRTUAL(CViewInstrument)
@@ -114,14 +114,14 @@ protected:
 	afx_msg void OnEnvPanChanged();
 	afx_msg void OnEnvPitchChanged();
 	afx_msg void OnEnvFilterChanged();
-	afx_msg void OnEnvToggleGrid();
+	afx_msg void OnEnvToggleGrid(); //rewbs.envRowGrid
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditSampleMap();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
+	virtual BOOL PreTranslateMessage(MSG *pMsg); //rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

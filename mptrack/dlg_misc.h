@@ -65,9 +65,7 @@ public:
 	CSoundFile *m_pSndFile;
 	BOOL m_bChnMask[MAX_CHANNELS];
 	UINT m_nChannels, m_nRemove;
-	//CButton m_ButChan[MAX_CHANNELS];	
-	//CStatic m_Label[MAX_CHANNELS];	
-	CListBox m_RemChansList;
+	CListBox m_RemChansList;		//rewbs.removeChansDlgCleanup
 
 public:
 	CRemoveChannelsDlg(CSoundFile *pSndFile, UINT nChns, CWnd *parent=NULL):CDialog(IDD_REMOVECHANNELS, parent)
@@ -78,7 +76,7 @@ public:
 
 protected:
 	//{{AFX_VIRTUAL(CRemoveChannelsDlg)
-	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual void DoDataExchange(CDataExchange* pDX); //rewbs.removeChansDlgCleanup
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	//}}AFX_VIRTUAL
@@ -86,8 +84,6 @@ protected:
 	afx_msg void OnChannelChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP();
-public:
-//	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 
@@ -219,10 +215,18 @@ class CPageEditEffect: public CPageEditCommand
 {
 protected:
 	UINT m_nCommand, m_nParam;
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+	UINT m_nXParam, m_nMultiplier;
+// -! NEW_FEATURE#0010
 
 public:
 	CPageEditEffect(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITEFFECT) {}
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
 	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; }
+	void XInit(UINT xparam = 0, UINT multiplier = 1) { m_nXParam = xparam; m_nMultiplier = multiplier; }
+// -! NEW_FEATURE#0010
 	void UpdateDialog();
 	void UpdateRange(BOOL bSet);
 	void UpdateValue(BOOL bSet);
@@ -255,6 +259,10 @@ public:
 public:
 	BOOL SetParent(CWnd *parent, CModDoc *pModDoc);
 	BOOL ShowEditWindow(UINT nPat, DWORD dwCursor);
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+	void OnSelListChange();
+// -! NEW_FEATURE#0010
 	void UpdateNote(UINT note, UINT instr);
 	void UpdateVolume(UINT volcmd, UINT vol);
 	void UpdateEffect(UINT command, UINT param);

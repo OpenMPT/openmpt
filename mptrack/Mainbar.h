@@ -104,8 +104,8 @@ public:
 	VOID OnDocumentClosed(CModDoc *pModDoc);
 	VOID OnUpdate(CModDoc *pModDoc, DWORD lHint=0, CObject *pHint=NULL);
 	VOID UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify);
-	HWND GetModTreeHWND();
-	BOOL PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam);
+	HWND GetModTreeHWND(); //rewbs.customKeys
+	BOOL PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam); //rewbs.customKeys
 
 
 protected:

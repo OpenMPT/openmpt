@@ -30,23 +30,21 @@ public:
 	long fxID;			// Plugin unique ID 
 	long fxVersion;		// plugin version - ignore?
 	long numParams;
-	char prgName[28];
+	char prgName[30];
 	float *params;
 
 	bool Save(CString fileName);
 
 protected:
 	BOOL m_bNeedSwap;
-
-
 	bool Load(CString fileName);
 
-	bool ReadLE(CFile in, long &l);
-	bool ReadLE(CFile in, float &f);
-	bool ReadLE(CFile in, char *c, UINT length=1);
-	bool WriteLE(CFile out, long l);
-	bool WriteLE(CFile out, float f);
-	bool WriteLE(CFile out, char *c, UINT length=1);
+	bool ReadLE(CFile &in, long &l);
+	bool ReadLE(CFile &in, float &f);
+	bool ReadLE(CFile &in, char *c, UINT length=1);
+	bool WriteLE(CFile &out, const long &l);
+	bool WriteLE(CFile &out, const float &f);
+	bool WriteLE(CFile &out, const char *c, UINT length=1);
 
 	bool NeedSwap();
 	void SwapBytes(long &l);

@@ -295,6 +295,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		SetCurrentSample(lParam, -1, TRUE);
 		break;
 
+	//rewbs.customKeys
 	case IDC_SAMPLE_REVERSE:
 		OnReverse();
 		break;
@@ -310,6 +311,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case IDC_SAMPLE_AMPLIFY:
 		OnAmplify();
 		break;
+	//end rewbs.customKeys
 
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);

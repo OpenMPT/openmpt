@@ -9,7 +9,7 @@ class CEffectVis;	//rewbs.fxvis
 #define DRAGITEM_MASK			0xFF0000
 #define DRAGITEM_CHNHEADER		0x010000
 #define DRAGITEM_PATTERNHEADER	0x020000
-#define DRAGITEM_PLUGNAME		0x040000
+#define DRAGITEM_PLUGNAME		0x040000	//rewbs.patPlugName
 
 #define PATSTATUS_MOUSEDRAGSEL			0x01
 #define PATSTATUS_KEYDRAGSEL			0x02
@@ -24,7 +24,7 @@ class CEffectVis;	//rewbs.fxvis
 #define PATSTATUS_DRAGNDROPPING			0x400
 #define PATSTATUS_MIDISPACINGPENDING	0x800
 #define PATSTATUS_CTRLDRAGSEL			0x1000
-#define PATSTATUS_PLUGNAMESINHEADERS		0x2000
+#define PATSTATUS_PLUGNAMESINHEADERS	0x2000 //rewbs.patPlugName
 
 
 //////////////////////////////////////////////////////////////////
@@ -46,6 +46,19 @@ protected:
 	CEditCommand *m_pEditWnd;
 	SIZE m_szHeader, m_szCell;
 	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar;
+
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+//	UINT CViewPattern::GetCurrentSplitInstrument() const;
+//	UINT CViewPattern::GetCurrentSplitNote() const;
+//	UINT CViewPattern::GetCurrentOctaveModifier() const;
+//	UINT CViewPattern::GetCurrentOctaveLink() const;
+//	UINT CViewPattern::GetCurrentSplitVolume() const;
+//	rewbs.merge: inverted message direction
+	UINT m_nSplitInstrument, m_nSplitNote, m_nOctaveModifier, m_nSplitVolume;
+	BOOL m_bOctaveLink;
+// -! NEW_FEATURE#0012
+
 	int m_nXScroll, m_nYScroll;
 	DWORD m_nDragItem, m_nMenuParam, m_nDetailLevel;
 	BOOL m_bDragging, m_bInItemRect, m_bRecord, m_bContinueSearch, m_bWholePatternFitsOnScreen;
@@ -54,11 +67,22 @@ protected:
 	DWORD m_dwBeginSel, m_dwEndSel, m_dwStartSel, m_dwDragPos;
 	WORD ChnVUMeters[MAX_BASECHANNELS];
 	WORD OldVUMeters[MAX_BASECHANNELS];
-	CListBox *ChnEffectList[MAX_BASECHANNELS];
+	CListBox *ChnEffectList[MAX_BASECHANNELS]; //rewbs.patPlugName
 	BYTE MultiRecordMask[(MAX_CHANNELS+7)/8];
 	UINT m_nFoundInstrument;
 	UINT m_nMenuOnChan;
 	
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+	BYTE noteoffchannel[120];
+	BYTE splitnoteoffchannel[120];
+	int oldrow,oldchn,oldsplitchn;
+// -! NEW_FEATURE#0012
+
+// -> CODE#0018
+// -> DESC="route PC keyboard inputs to midi in mechanism"
+	int ignorekey;
+// -! BEHAVIOUR_CHANGE#0018
 public:
 	CEffectVis *m_pEffectVis;	//rewbs.fxVis
 
@@ -95,9 +119,14 @@ public:
 	BOOL SetCurrentColumn(UINT ncol);
 	BOOL DragToSel(DWORD dwPos, BOOL bScroll, BOOL bNoMove=FALSE);
 	BOOL SetPlayCursor(UINT nPat, UINT nRow);
-	BOOL EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
+// -> CODE#0014
+// -> DESC="vst wet/dry slider"
+//	BOOL EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
+	BYTE EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
+// -! NEW_FEATURE#0014// -> CODE#0012
 	BOOL ShowEditWindow();
 	UINT GetCurrentInstrument() const;
+
 	BOOL TransposeSelection(int transp);
 	BOOL PrepareUndo(DWORD dwBegin, DWORD dwEnd);
 	void DeleteRows(UINT colmin, UINT colmax, UINT nrows);
@@ -116,9 +145,10 @@ public:
 	void DrawDragSel(HDC hdc);
 	void OnDrawDragSel();
 	
+	//rewbs.customKeys
 	BOOL ExecuteCommand(CommandID command);
 	void CursorJump(DWORD distance, bool direction, bool snap);
-	void TempEnterNote(int n);
+	void TempEnterNote(int n, bool oldStyle = false);
 	void TempStopNote(int note);
 	void TempEnterChord(int n);
 	void TempStopChord(int note);
@@ -130,7 +160,9 @@ public:
 	void SetSpacing(int n);
 	void OnClearField(int, bool, bool=false);
 	void InsertRows(UINT colmin, UINT colmax);
-	void TogglePluginEditor(int chan);
+	//end rewbs.customKeys
+	
+	void TogglePluginEditor(int chan); //rewbs.patPlugName
 
 public:
 	//{{AFX_VIRTUAL(CViewPattern)
@@ -142,13 +174,9 @@ public:
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	virtual LRESULT OnPlayerNotify(MPTNOTIFICATION *);
 	//}}AFX_VIRTUAL
-	//{{AFX_MSG(CViewPattern)
-
-
-
 
 protected:
-
+	//{{AFX_MSG(CViewPattern)
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);   
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);  
@@ -168,19 +196,25 @@ protected:
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditMixPaste();		//rewbs.mixPaste
-	afx_msg void OnClearSelection(bool ITStyle=false);
-	afx_msg void OnGrowSelection();
-	afx_msg void OnShrinkSelection();
+	afx_msg void OnClearSelection(bool ITStyle=false); //rewbs.customKeys
+	afx_msg void OnGrowSelection();   //rewbs.customKeys
+	afx_msg void OnShrinkSelection(); //rewbs.customKeys
 	afx_msg void OnEditSelectAll();
 	afx_msg void OnEditSelectColumn();
 	afx_msg void OnSelectCurrentColumn();
 	afx_msg void OnEditFind();
 	afx_msg void OnEditFindNext();
 	afx_msg void OnEditUndo();
-	afx_msg void OnMuteFromClick();
-	afx_msg void OnSoloFromClick();
+	afx_msg void OnMuteFromClick(); //rewbs.customKeys
+	afx_msg void OnSoloFromClick(); //rewbs.customKeys
+	afx_msg void OnSoloChannel(BOOL current); //rewbs.customKeys
+	afx_msg void OnMuteChannel(BOOL current); //rewbs.customKeys
 	afx_msg void OnUnmuteAll();
 	afx_msg void OnRecordSelect();
+// -> CODE#0012
+// -> DESC="midi keyboard split"
+	afx_msg void OnSplitRecordSelect();
+// -! NEW_FEATURE#0012
 	afx_msg void OnDeleteRows();
 	afx_msg void OnDeleteRowsEx();
 	afx_msg void OnInsertRows();
@@ -190,9 +224,11 @@ protected:
 	afx_msg void OnNextOrder();
 	afx_msg void OnPrevInstrument() { PostCtrlMessage(CTRLMSG_PAT_PREVINSTRUMENT); }
 	afx_msg void OnNextInstrument() { PostCtrlMessage(CTRLMSG_PAT_NEXTINSTRUMENT); }
-	afx_msg void OnPatternRestart() {/* PostCtrlMessage(CTRLMSG_PLAYPATTERN, -1); */}
-	afx_msg void OnPatternPlay()	{/* PostCtrlMessage(CTRLMSG_PLAYPATTERN, 0); */}
-	afx_msg void OnPatternPlayNoLoop()	{/* PostCtrlMessage(CTRLMSG_PLAYPATTERN, -2); */}
+//rewbs.customKeys - now implemented at ModDoc level
+/*	afx_msg void OnPatternRestart() {}
+	afx_msg void OnPatternPlay()	{}
+	afx_msg void OnPatternPlayNoLoop()	{} */
+//end rewbs.customKeys
 	afx_msg void OnPatternRecord()	{ PostCtrlMessage(CTRLMSG_SETRECORD, -1); }
 	afx_msg void OnInterpolateVolume();
 	afx_msg void OnInterpolateEffect();
@@ -207,17 +243,19 @@ protected:
 	afx_msg void OnCursorPaste();
 	afx_msg void OnPatternAmplify();
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
-	afx_msg void OnSelectPlugin(UINT nID);
+	afx_msg void OnSelectPlugin(UINT nID);  //rewbs.patPlugName
 	afx_msg LRESULT OnUpdatePosition(WPARAM nOrd, LPARAM nRow);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-	void OnSoloChannel(BOOL current);
-	void OnMuteChannel(BOOL current);
+
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
+private:
+
+	bool HandleSplit(MODCOMMAND* p, int note);
 };
 
 

@@ -23,12 +23,10 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CViewExSplitWnd, CSplitterWnd)
 
-CWnd* CViewExSplitWnd::GetActivePane(int* row, int* col)	// pRow, pCol
+CWnd* CViewExSplitWnd::GetActivePane(int*, int*)	// pRow, pCol
 //----------------------------------------------
 {
 	// attempt to use active view of frame window
-//	if (row) (*row)=0;	//rewbs: fix minor bug in debug mode
-//	if (col) (*col)=0;   //rewbs: fix minor bug in debug mode
 	CWnd* pView = NULL;
  	CFrameWnd* pFrameWnd = GetParentFrame();
 	ASSERT_VALID(pFrameWnd);
@@ -58,8 +56,7 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
 	//}}AFX_MSG_MAP
-	ON_WM_ACTIVATE()
-	ON_WM_SETFOCUS()
+	ON_WM_SETFOCUS() //rewbs.customKeysAutoEffects
 END_MESSAGE_MAP()
 
 LONG CChildFrame::glMdiOpenCount = 0;
@@ -220,7 +217,7 @@ void CChildFrame::SavePosition(BOOL bForce)
 			{
 				pWnd->GetWindowRect(&rect);
 				LONG l = rect.Height();
-				//rewbs.varWindowPos - not the nicest piece of code, but we need to distinguish btw the views:
+				//rewbs.varWindowSize - not the nicest piece of code, but we need to distinguish btw the views:
 				if (strcmp("CViewGlobals",m_szCurrentViewClassName) == 0)
 					CMainFrame::glGeneralWindowHeight = l;
 				else if (strcmp("CViewPattern", m_szCurrentViewClassName) == 0)
@@ -383,12 +380,15 @@ BOOL CChildFrame::OnNcActivate(BOOL bActivate)
 	return CMDIChildWnd::OnNcActivate(bActivate);
 }
 
+//rewbs.varWindowSize
 CHAR* CChildFrame::GetCurrentViewClassName()
 {
 	return m_szCurrentViewClassName;
 }
+//end rewbs.varWindowSize
 
-
+//rewbs.customKeysAutoEffects
+//We use this to update effect keys when user changes document, if necessary.
 void CChildFrame::OnSetFocus(CWnd* pOldWnd)
 {
 	CMDIChildWnd::OnSetFocus(pOldWnd);
@@ -398,5 +398,5 @@ void CChildFrame::OnSetFocus(CWnd* pOldWnd)
 	{
 		pMainFrm->UpdateEffectKeys();
 	}
-
 }
+//end rewbs.customKeysAutoEffects
