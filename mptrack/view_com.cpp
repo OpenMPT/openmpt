@@ -78,9 +78,9 @@ LISTCOLHDR gInstrumentHeaders[INSLIST_COLUMNS] =
 };
 
 
-IMPLEMENT_SERIAL(CViewComments, CView, 0)
+IMPLEMENT_SERIAL(CViewComments, CModScrollView, 0)
 
-BEGIN_MESSAGE_MAP(CViewComments, CView)
+BEGIN_MESSAGE_MAP(CViewComments, CModScrollView)
 	//{{AFX_MSG_MAP(CViewComments)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
@@ -569,3 +569,13 @@ void CViewComments::OnShowPatterns()
 }
 
 
+
+LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
+//-----------------------------------------------------------------
+{
+	switch(wParam)
+	{
+		default:
+			return CModScrollView::OnModViewMsg(wParam, lParam);
+	}
+}

@@ -1441,7 +1441,12 @@ BOOL CSoundFile::ProcessEffects()
 				}
 			}
 		#endif	// FASTSOUNDLIB
-			if (((!bNoLoop) && (nPosJump < MAX_ORDERS))
+			//rewbs.fix 
+			//if (((!bNoLoop) && (nPosJump < MAX_ORDERS))
+			if (nPosJump>MAX_ORDERS) 
+				nPosJump = 0;
+			if ((!bNoLoop)
+			//end rewbs.fix 
 			 && ((nPosJump != (int)m_nCurrentPattern) || (nBreakRow != (int)m_nRow)))
 			{
 				if (nPosJump != (int)m_nCurrentPattern)
@@ -1622,6 +1627,8 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 			{
 				UINT n = pChn->nPortamentoSlide >> 2;
 				if (n > 255) n = 255;
+				// Return (a*b+c/2)/c - no divide error
+				// Table is 65536*2(n/192)
 				delta = _muldivr(pChn->nPeriod, LinearSlideUpTable[n], 65536) - pChn->nPeriod;
 				if (delta < 1) delta = 1;
 			}

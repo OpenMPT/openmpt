@@ -121,7 +121,7 @@ protected:
 	CMultiDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
 	BOOL m_bInitialized, m_bLayer3Present, m_bExWaveSupport, m_bDebugMode;
-	DWORD m_dwTimeStarted;
+	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
 	HANDLE m_hAlternateResourceHandle;
 	// Default macro configuration
 	MODMIDICFG m_MidiCfg;

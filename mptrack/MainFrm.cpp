@@ -295,7 +295,6 @@ CMainFrame::CMainFrame()
 	m_dwStatus = 0;
 	m_dwElapsedTime = 0;
 	m_dwTimeSec = 0;
-	m_dwLastPluginIdleCall=0;	//rewbs.VSTCompliance
 	m_dwNotifyType = 0;
 	m_nTimer = 0;
 	m_nAvgMixChn = m_nMixChn = 0;
@@ -908,17 +907,25 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 	{
 		//Check if textbox has focus
 		bool textboxHasFocus = false;
-		//CWnd *pWnd = ::GetFocus();
-		//ASSERT(pWnd != NULL);
-		HWND hWnd = ::GetFocus(); //pWnd->GetSafeHwnd();*/
+		bool handledByTextBox = false;
+
+		HWND hWnd = ::GetFocus();
 		if (hWnd != NULL) {
 			TCHAR szClassName[512];
 			textboxHasFocus = GetClassName(hWnd, szClassName, 6) && _tcsicmp(szClassName, _T("Edit")) == 0;		
+			if (textboxHasFocus) {
+				if ((!CMainFrame::GetInputHandler()->CtrlPressed() && !CMainFrame::GetInputHandler()->AltPressed() && ((wParam>='A'&&wParam<='Z') || (wParam>='0'&&wParam<='9') || wParam==VK_DIVIDE || wParam==VK_MULTIPLY)) ||
+					wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_UP || wParam == VK_DOWN || wParam == VK_HOME || wParam == VK_END || wParam == VK_DELETE || wParam == VK_INSERT || wParam == VK_BACK ||
+					(CMainFrame::GetInputHandler()->GetModifierMask()==HOTKEYF_CONTROL && (wParam == 'Y' || wParam == 'Z' || wParam == 'X' ||  wParam == 'C' || wParam == 'V'))
+					) {
+                        handledByTextBox = true;
+					}
+			}
+
 		}
 
-		if (!textboxHasFocus && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
+		if (!handledByTextBox && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
 		{
-			
 			if (wParam != VK_ESCAPE)
 				return -1;	// We've handled the keypress. No need to take it further.
 							// Unless it was esc, in which case we need it to close Windows
@@ -933,6 +940,10 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 //---------------------------------------------
 {
+	if (pMsg->message == WM_KEYDOWN) {
+		pMsg->message;
+	}
+
 	if ((pMsg->message == WM_RBUTTONDOWN) || (pMsg->message == WM_NCRBUTTONDOWN))
 	{
 		CWnd* pWnd = CWnd::FromHandlePermanent(pMsg->hwnd);
@@ -2310,7 +2321,6 @@ void CMainFrame::OnImportMidiLib()
 void CMainFrame::SetLastMixActiveTime()		//rewbs.LiveVSTi
 //-------------------------------------
 {
-	Log("setting to %d\n", gdwLastMixActiveTime);
 	gdwLastMixActiveTime = timeGetTime();
 }
 
@@ -2358,17 +2368,7 @@ void CMainFrame::OnTimer(UINT)
 		}
 	}
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
-	// Call plugins idle routine for open editor
-	CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-	if (pPluginManager)
-	{
-		//rewbs.vstCompliance: call @ 10Hz
-		if (curTime - m_dwLastPluginIdleCall > 100)
-		{
-			pPluginManager->OnIdle();
-			m_dwLastPluginIdleCall = dwTime;
-		}
-	}
+
 	if (m_pAutoSaver && m_pAutoSaver->IsEnabled()) {
 		m_pAutoSaver->DoSave(curTime);
 	}

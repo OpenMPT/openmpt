@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(IDC_BUTTON3,		OnSetParameter)
 	ON_COMMAND(IDC_BUTTON4,		OnNextPlugin)
 	ON_COMMAND(IDC_BUTTON5,		OnPrevPlugin)
+	
 
 // -> CODE#0002
 // -> DESC="VST plugins presets"
@@ -92,6 +93,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND_RANGE(ID_FXCOMMANDS_BASE, ID_FXCOMMANDS_BASE+10, OnFxCommands)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	OnTabSelchange)
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		OnUnlockControls)
+	ON_MESSAGE(WM_MOD_VIEWMSG,	OnModViewMsg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -159,6 +161,7 @@ void CViewGlobals::OnInitialUpdate()
 	m_nCurrentPreset = 0;
 // -! NEW_FEATURE#0002
 	CFormView::OnInitialUpdate();
+
 	if (pFrame)
 	{
 		GENERALVIEWSTATE *pState = pFrame->GetGeneralViewState();
@@ -802,6 +805,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	UINT nChn;
 
 	CFormView::OnHScroll(nSBCode, nPos, pScrollBar);
+
 	pModDoc = GetDocument();
 	nChn = m_nActiveTab * 4;
 	if ((pModDoc) && (!IsLocked()) && (nChn < 64))
@@ -850,6 +854,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
 					SetDlgItemText(IDC_STATIC8, s);
 					pPlugin->fDryRatio = static_cast<float>(n)/100.0f;
+					if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 				}
 			}
 		}
@@ -911,10 +916,12 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			if(gain == 0) gain = 1;
 
 			pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0xff00ffff) | (gain<<16);
-
+			
 			float fValue = 0.1f * (float)gain;
 			sprintf(s,"Gain: x %1.1f",fValue);
 			SetDlgItemText(IDC_STATIC2, s);
+
+			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 		}
 	}
 // -! BEHAVIOUR_CHANGE#0028
@@ -1118,6 +1125,7 @@ void CViewGlobals::OnPluginNameChanged()
 		if (strcmp(s, pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName))
 		{
 			memcpy(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s, 32);
+			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | (m_nActiveTab << 24));
 		}
 	}
@@ -1168,8 +1176,8 @@ void CViewGlobals::OnPluginChanged()
 	}
 // -> CODE#0002
 // -> DESC="VST plugins presets"
-	m_nCurrentPreset = 1;
-	m_CbnPreset.SetCurSel(1);
+	m_nCurrentPreset = 0;
+	m_CbnPreset.SetCurSel(0);
 // -! NEW_FEATURE#0002
 
 // -> CODE#0014
@@ -1263,6 +1271,7 @@ void CViewGlobals::OnProgramChanged()
 		if (m_nCurrentPreset > 0 && m_nCurrentPreset <= nParams){
 			pVstPlugin->SetCurrentProgram(m_nCurrentPreset-1);
 		}
+		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 	}
 }
 
@@ -1282,8 +1291,12 @@ void CViewGlobals::OnLoadParam()
 	if (!(dlg.DoModal() == IDOK))	return;
     
 	//TODO: exception handling
-	if (!(pVstPlugin->LoadProgram(dlg.GetFileName())))
+	if (!(pVstPlugin->LoadProgram(dlg.GetFileName()))) {
 		::AfxMessageBox("Error loading preset.Are you sure it is for this plugin?");
+	} else {
+		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
+	}
+
 	//end rewbs.fxpPresets
 }
 
@@ -1331,7 +1344,8 @@ VOID CViewGlobals::OnSetParameter()
 		{
 			FLOAT fValue = (FLOAT)atof(s);
 			pVstPlugin->SetParameter(m_nCurrentParam, fValue);
-			OnParamChanged();
+            OnParamChanged();
+			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 		}
 	}
 }
@@ -1352,6 +1366,7 @@ VOID CViewGlobals::OnSetWetDry()
 		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 		UINT value = GetDlgItemIntEx(IDC_EDIT15);
 		pPlugin->fDryRatio = (float)value / 100.0f;
+		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 		//OnWetDryChanged();
 	}
 }
@@ -1401,6 +1416,8 @@ VOID CViewGlobals::OnMixModeChanged()
 	{
 		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_MASTEREFFECT;
 	}
+	
+	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 }
 
 
@@ -1421,6 +1438,8 @@ VOID CViewGlobals::OnBypassChanged()
 	{
 		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
 	}
+
+	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 }
 
 
@@ -1442,7 +1461,8 @@ void CViewGlobals::OnWetDryExpandChanged()
 	{
 		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_MIXEXPAND;
 	}
-
+	
+	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 }
 
 VOID CViewGlobals::OnSpecialMixProcessingChanged()
@@ -1453,6 +1473,7 @@ VOID CViewGlobals::OnSpecialMixProcessingChanged()
 
 	if(!pPlugin) return;
 	pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0xffff00ff) | (m_CbnSpecialMixProcessing.GetCurSel()<<8);	// update#02 (fix)
+	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 }
 // -! BEHAVIOUR_CHANGE#0028
 
@@ -1474,6 +1495,8 @@ VOID CViewGlobals::OnDryMixChanged()
 	{
 		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_WETMIX;
 	}
+
+	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 }
 
 
@@ -1502,6 +1525,7 @@ VOID CViewGlobals::OnFxCommands(UINT id)
 	{
 		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 		pVstPlugin->ExecuteCommand(nIndex);
+		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 	}
 }
 
@@ -1519,7 +1543,22 @@ VOID CViewGlobals::OnOutputRoutingChanged()
 	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
 	nroute = m_CbnOutput.GetItemData(m_CbnOutput.GetCurSel());
 	pPlugin->Info.dwOutputRouting = nroute;
+	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 }
 
 
 
+LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM lParam)
+//-----------------------------------------------------------------
+{
+	switch(wParam)
+	{
+		case VIEWMSG_SETFOCUS:
+		case VIEWMSG_SETACTIVE:
+			GetParentFrame()->SetActiveView(this);
+			SetFocus();
+			break;
+		default:
+			return 0;
+	}
+}

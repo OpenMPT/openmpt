@@ -891,7 +891,7 @@ void CViewPattern::OnGrowSelection()
 			MODCOMMAND *src  = &p[(row-offset/2) * pSndFile->m_nChannels + chn];
 			MODCOMMAND *blank= &p[(row-1) * pSndFile->m_nChannels + chn];
 			//memcpy(dest/*+(i%5)*/, src/*+(i%5)*/, /*sizeof(MODCOMMAND) - (i-chn)*/ sizeof(BYTE));
-			Log("dst: %d; src: %d; blk: %d\n", row, (row-offset/2), (row-1));
+			//Log("dst: %d; src: %d; blk: %d\n", row, (row-offset/2), (row-1));
 			switch(i & 7)
 			{
 				case 0:	dest->note    = src->note;    blank->note=0;   break;
@@ -998,7 +998,7 @@ void CViewPattern::OnClearSelection(bool ITStyle) //rewbs.customKeys: was OnEdit
 			switch(i & 7)
 			{
 			// Clear note
-			case 0:	m->note = 0; if (ITStyle) m->instr = 0;  if (m_dwBeginSel == m_dwEndSel) { m->instr = 0; tmp = m_dwEndSel+1; } break;
+			case 0:	m->note = 0; if (ITStyle) m->instr = 0; /* if (m_dwBeginSel == m_dwEndSel) { m->instr = 0; tmp = m_dwEndSel+1; }*/ break;
 			// Clear instrument
 			case 1: m->instr = 0; break;
 			// Clear Volume Column
