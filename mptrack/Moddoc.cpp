@@ -1294,7 +1294,6 @@ void CModDoc::OnFileWaveConvert()
 	strcpy(s, dlg.GetPathName());
 
 	// Saving as wave file
-
 // -> CODE#0024
 // -> DESC="wav export update"
 	UINT p,n = 1;
@@ -1325,6 +1324,8 @@ void CModDoc::OnFileWaveConvert()
 	UINT pos = m_SndFile.GetCurrentPos();
 	bplaying = TRUE;
 	pMainFrm->PauseMod();
+
+	CMainFrame::GetMainFrame()->InitRenderer(this);	//rewbs.VSTTimeInfo
 	m_SndFile.SetCurrentPos(0);
 	if (wsdlg.m_bSelectPlay)
 	{
@@ -1377,6 +1378,7 @@ void CModDoc::OnFileWaveConvert()
 		for(UINT i = 0 ; i < n ; i++) m_SndFile.ChnSettings[i].dwFlags = flags[i];
 	}
 // -! NEW_FEATURE#0024
+	CMainFrame::GetMainFrame()->StopRenderer();	//rewbs.VSTTimeInfo
 
 	m_SndFile.SetCurrentPos(pos);
 	m_SndFile.GetLength(TRUE);
