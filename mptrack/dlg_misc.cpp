@@ -1367,6 +1367,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	CheckDlgButton(IDC_CHECK1, m_bEmbed);
 	m_EditSFx.SetLimitText(31);
 	m_EditZxx.SetLimitText(31);
+
 	for (UINT isfx=0; isfx<16; isfx++)
 	{
 		wsprintf(s, "%d (SF%X)", isfx, isfx);
@@ -1380,7 +1381,6 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_CbnSFxPreset.AddString("Control Plugin Param...");
 	m_CbnSFxPreset.AddString("Custom");
 	OnSFxChanged();
-
 
 	for (UINT zxx=0; zxx<128; zxx++)
 	{
@@ -1420,7 +1420,6 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	}
 	UpdateMacroList();
 
-	
 	if (CMainFrame::GetMainFrame()->GetActiveDoc())
 		m_pSndFile = CMainFrame::GetMainFrame()->GetActiveDoc()->GetSoundFile();
 	if (!m_pSndFile)
@@ -1437,7 +1436,6 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	}
 	m_CbnMacroPlug.SetCurSel(0);
 	OnPlugChanged();
-
 	return FALSE;
 }
 void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
@@ -1752,16 +1750,21 @@ void CMidiMacroSetup::OnPlugChanged()
 	if (!m_pSndFile)
 		return;
 
-	char s[72], sname[64];
+    char s[72], sname[64];
 	int plug = m_CbnMacroPlug.GetItemData(m_CbnMacroPlug.GetCurSel());
-	CVstPlugin *pVstPlugin = (CVstPlugin*) m_pSndFile->m_MixPlugins[plug].pMixPlugin;
-	
+
+	if (plug<0 || plug>MAX_MIXPLUGINS)
+		return;
+
+	PSNDMIXPLUGIN pPlugin = &m_pSndFile->m_MixPlugins[plug];
+	CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
+
 	if (pVstPlugin)
 	{
 		m_CbnMacroParam.SetRedraw(FALSE);
 		m_CbnMacroParam.Clear();
 		m_CbnMacroParam.ResetContent();
-
+		
 		UINT nParams = pVstPlugin->GetNumParameters();
 		for (UINT i=0; i<nParams; i++)
 		{
@@ -1783,7 +1786,7 @@ void CMidiMacroSetup::OnPlugParamChanged()
 	int param = m_CbnMacroParam.GetItemData(m_CbnMacroParam.GetCurSel());
 	if (param>127)
 	{
-		::AfxMessageBox("Warning: Currently MPT can only assign macros to parameters 0 to 127.");
+		::AfxMessageBox("Warning: Currently MPT can only assign macros to parameters 0 to 127 (80 to FF)");
 		param = 127;
 	}
 	macroText.Format("F0F0%Xz",128+param);
