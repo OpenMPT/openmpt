@@ -2,6 +2,7 @@
 // Microsoft Visual C++ generated include file.
 // Used by mptrack.rc
 //
+
 #define IDD_ABOUTBOX                    100
 #define IDD_FILE_NEW                    101
 #define IDD_OPTIONS_PLAYER              103
@@ -660,6 +661,10 @@
 #define IDC_STATIC8                     2200
 #define IDC_PATINSTROPLUGGUI            2201
 #define IDC_PATINSTROPLUGGUI2           2202
+#define IDC_WFIRCUTOFF                  2202
+#define IDC_WFIRTYPE                    2203
+#define IDC_RAMPING                     2204
+#define IDC_PLAYEROPTIONS               2205
 #define IDC_TEXT_BPM                    2300
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
@@ -837,7 +842,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        500
 #define _APS_NEXT_COMMAND_VALUE         36000
-#define _APS_NEXT_CONTROL_VALUE         2202
+#define _APS_NEXT_CONTROL_VALUE         2206
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

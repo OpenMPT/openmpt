@@ -25,14 +25,22 @@ NOTE:
 (tx XYZ): thanks to XYZ for telling me about the bug
 
 . v 1.16.0214a
-   + Added "copy and lose selection" command as a general pattern command, for those who like the cursor to be restored when they copy.
+   / <rewbs> added button on wave writer dialog to open player settings rather than checkbox to enable "HQ resampling".
+   + <rewbs> GUI for resampler & default ramping configuration
+   . <ericus> fixed wav export at >44.1kHz and >24bit.
+   + <ericus> added per-instrument sample ramping
+   + <ericus> Channel manager updates
+   + <ericus> Multiple mix modes 
+   / <ericus> new internal instrument format
+   + <ericus> polyphase resampler tuning and fixes (enabled polyphase on filtered samples...)
+   + <rewbs> Added "copy and lose selection" command as a general pattern command, for those who like the cursor to be restored when they copy.
      You obviously don't have to map a key to this command if you don't want to use it.
-   + Automatic chord detection, a la Ericus: if you're in a channel with recording enabled, and you hit several note keys at the same time, MPT should put the notes on the same row.
-   . Fixed velocity recording from midi in. (tx Squirrel Havoc)
-   . Fixed stuck notes when playing VSTis from pattern in record enabled channels.
-   . Fixed file corruption bug on saving after deleting an instrument (tx LPChip)
-   / Midi-in now uses same note entry code as normal keyboard note entry. (tx Squirrel Havoc)
-   / Added shrink and grow selection to pattern context menu.
+   + <rewbs> Automatic chord detection, a la Ericus: if you're in a channel with recording enabled, and you hit several note keys at the same time, MPT should put the notes on the same row.
+   . <rewbs> Fixed velocity recording from midi in. (tx Squirrel Havoc)
+   . <rewbs> Fixed stuck notes when playing VSTis from pattern in record enabled channels.
+   . <rewbs> Fixed file corruption bug on saving after deleting an instrument (tx LPChip)
+   / <rewbs> Midi-in now uses same note entry code as normal keyboard note entry. (tx Squirrel Havoc)
+   / <rewbs> Added shrink and grow selection to pattern context menu.
 
 . v 1.16.0213a
    ? Untested: incomplete changes in midi in pattern recording (taken direct from Ericus' build - probably broken in my build atm).

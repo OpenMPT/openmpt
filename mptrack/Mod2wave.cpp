@@ -50,7 +50,8 @@ extern LPCSTR gszChnCfgNames[3];
 
 static void __cdecl M2W_32ToFloat(void *pBuffer, long nCount)
 {
-	const float _ki2f = 1.0f / (FLOAT)(ULONG)0x80000000;
+	//const float _ki2f = 1.0f / (FLOAT)(ULONG)0x80000000;  
+	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x7fffffff>>2); //ericus' 32bit fix
 	_asm {
 	mov esi, pBuffer
 	mov ecx, nCount
@@ -88,6 +89,7 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 	ON_COMMAND(IDC_CHECK2,			OnCheck2)
 	ON_COMMAND(IDC_RADIO1,			UpdateDialog)
 	ON_COMMAND(IDC_RADIO2,			UpdateDialog)
+	ON_COMMAND(IDC_PLAYEROPTIONS,   OnPlayerOptions) //rewbs.resamplerConf
 	ON_CBN_SELCHANGE(IDC_COMBO2,	OnFormatChanged)
 END_MESSAGE_MAP()
 
@@ -225,6 +227,14 @@ void CWaveConvert::OnCheck1()
 	UpdateDialog();
 }
 
+//rewbs.resamplerConf
+void CWaveConvert::OnPlayerOptions()
+//----------------------------------
+{
+	CMainFrame::m_nLastOptionsPage = 2;
+	CMainFrame::GetMainFrame()->OnViewOptions();
+}
+//end rewbs.resamplerConf
 
 void CWaveConvert::OnCheck2()
 //---------------------------
@@ -251,7 +261,7 @@ void CWaveConvert::OnOK()
 	m_nMinOrder = GetDlgItemInt(IDC_EDIT3, NULL, FALSE);
 	m_nMaxOrder = GetDlgItemInt(IDC_EDIT4, NULL, FALSE);
 	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = FALSE;
-	m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? TRUE : FALSE;
+	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? TRUE : FALSE; //rewbs.resamplerConf - we don't want this anymore.
 	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) ? TRUE : FALSE;
 
 // -> CODE#0024
@@ -264,7 +274,7 @@ void CWaveConvert::OnOK()
 	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
 	WaveFormat.Format.nSamplesPerSec = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
 	if (WaveFormat.Format.nSamplesPerSec < 11025) WaveFormat.Format.nSamplesPerSec = 11025;
-	if (WaveFormat.Format.nSamplesPerSec > 48000) WaveFormat.Format.nSamplesPerSec = 48000;
+	if (WaveFormat.Format.nSamplesPerSec > 96000) WaveFormat.Format.nSamplesPerSec = 96000; //ericus' fix: 44100 -> 96000
 	WaveFormat.Format.nChannels = (WORD)(dwFormat >> 8);
 	if ((WaveFormat.Format.nChannels != 1) && (WaveFormat.Format.nChannels != 4)) WaveFormat.Format.nChannels = 2;
 	WaveFormat.Format.wBitsPerSample = (WORD)(dwFormat & 0xFF);

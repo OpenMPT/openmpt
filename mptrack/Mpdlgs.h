@@ -41,10 +41,11 @@ class COptionsPlayer: public CPropertyPage
 //========================================
 {
 protected:
-	CComboBox m_CbnResampling, m_CbnReverbPreset;
+	CComboBox m_CbnResampling, m_CbnReverbPreset, m_CbnWFIRType; //rewbs.resamplerConf: added m_CbnWFIRType
 	CSliderCtrl m_SbXBassDepth, m_SbXBassRange;
 	CSliderCtrl m_SbSurroundDepth, m_SbSurroundDelay;
 	CSliderCtrl m_SbReverbDepth;
+	CEdit m_CEditWFIRCutoff, m_CEditRamping; //rewbs.resamplerConf: added m_CEditRamping
 
 public:
 	COptionsPlayer():CPropertyPage(IDD_OPTIONS_PLAYER) {}
@@ -56,6 +57,11 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	//rewbs.resamplerConf
+	afx_msg void OnWFIRTypeChanged();
+	afx_msg void OnResamplerChanged();
+	//end rewbs.resamplerConf
+
 	DECLARE_MESSAGE_MAP()
 };
 

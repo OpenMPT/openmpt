@@ -389,6 +389,12 @@ public:
 	static LONG gnLVuMeter, gnRVuMeter;
 	static UINT gdwIdleTime;
 	static LONG slSampleSize, sdwSamplesPerSec, sdwAudioBufferSize;
+	//rewbs.resamplerConf
+	static double gdWFIRCutoff;
+	static BYTE gbWFIRType;
+	static long glVolumeRampSamples;
+	//end rewbs.resamplerConf
+
 
 	// Midi Input
 public:
@@ -539,12 +545,12 @@ public:
 	afx_msg void OnImportMidiLib();
 	afx_msg void SetLastMixActiveTime(); //rewbs.VSTCompliance
 
+	afx_msg void OnViewOptions(); //rewbs.resamplerConf: made public so it's accessible from mod2wav gui :/
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT);
-	afx_msg void OnViewOptions();
 
 // -> CODE#0002
 // -> DESC="list box to choose VST plugin presets (programs)"

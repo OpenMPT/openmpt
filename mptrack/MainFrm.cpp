@@ -129,6 +129,12 @@ HHOOK CMainFrame::ghKbdHook = NULL;
 DWORD CMainFrame::gdwPreviousVersion = 0x01000000;
 DWORD CMainFrame::gnHotKeyMask = 0;
 // Audio Setup
+//rewbs.resamplerConf
+long CMainFrame::glVolumeRampSamples = 42;
+double CMainFrame::gdWFIRCutoff = 0.5;
+BYTE  CMainFrame::gbWFIRType = 7; //WFIR_KAISER4T;
+//end rewbs.resamplerConf
+
 CRITICAL_SECTION CMainFrame::m_csAudio;
 HANDLE CMainFrame::m_hPlayThread = NULL;
 DWORD CMainFrame::m_dwPlayThreadId = 0;
@@ -391,6 +397,15 @@ CMainFrame::CMainFrame()
 		CEQSetupDlg::LoadEQ(key, "EQ_User2", &CEQSetupDlg::gUserPresets[1]);
 		CEQSetupDlg::LoadEQ(key, "EQ_User3", &CEQSetupDlg::gUserPresets[2]);
 		CEQSetupDlg::LoadEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
+
+		//rewbs.resamplerConf
+		dwSZSIZE = sizeof(gbWFIRType);
+		RegQueryValueEx(key, "XMMSModplugResamplerWFIRType", NULL, &dwREG_DWORD, (LPBYTE)&gbWFIRType, &dwDWORDSize);
+		dwSZSIZE = sizeof(gdWFIRCutoff);
+		RegQueryValueEx(key, "ResamplerWFIRCutoff", NULL, &dwREG_DWORD, (LPBYTE)&gdWFIRCutoff, &dwDWORDSize);
+		dwSZSIZE = sizeof(glVolumeRampSamples);
+		RegQueryValueEx(key, "VolumeRampSamples", NULL, &dwREG_DWORD, (LPBYTE)&glVolumeRampSamples, &dwDWORDSize);
+		//end rewbs.resamplerConf
 		RegCloseKey(key);
 	}
 	// Read more registry settings
@@ -779,6 +794,13 @@ void CMainFrame::OnClose()
 		CEQSetupDlg::SaveEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
 		// Keyboard Config
 		//RegSetValueEx(key, "KeyboardCfg", NULL, REG_DWORD, (LPBYTE)&m_nKeyboardCfg, sizeof(DWORD));
+
+		//rewbs.resamplerConf
+		RegSetValueEx(key, "XMMSModplugResamplerWFIRType", NULL, REG_DWORD, (LPBYTE)&gbWFIRType, sizeof(gbWFIRType));
+		RegSetValueEx(key, "ResamplerWFIRCutoff", NULL, REG_DWORD, (LPBYTE)&gdWFIRCutoff, sizeof(gdWFIRCutoff));
+		RegSetValueEx(key, "VolumeRampSamples", NULL, REG_DWORD, (LPBYTE)&glVolumeRampSamples, sizeof(glVolumeRampSamples));		
+		//end rewbs.resamplerConf
+
 		RegCloseKey(key);
 	}
 	if (RegCreateKey(HKEY_CURRENT_USER,	MAINFRAME_REG_SETTINGS, &key) == ERROR_SUCCESS)

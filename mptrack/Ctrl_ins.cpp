@@ -965,6 +965,8 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		OnMixPlugChanged();
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), b);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), b);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), b);
+		m_SliderAttack.EnableWindow(b);
 		m_EditName.EnableWindow(b);
 		m_EditFileName.EnableWindow(b);
 		m_CbnMidiCh.EnableWindow(b);

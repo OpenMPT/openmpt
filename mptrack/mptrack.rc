@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -247,20 +247,20 @@ BEGIN
                     IDC_STATIC,5,160,168,18
 END
 
-IDD_OPTIONS_PLAYER DIALOG  0, 0, 240, 156
+IDD_OPTIONS_PLAYER DIALOGEX 0, 0, 266, 278
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Player"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,4,3,232,150
+    GROUPBOX        "Sound Quality",IDC_STATIC,1,155,256,97
     CONTROL         "Automatic Gain Control",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,14,97,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,9,17,97,10
     CONTROL         "Noise reduction",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,27,82,10
+                    WS_TABSTOP,9,29,82,10
     CONTROL         "Enable Graphic Equalizer",IDC_CHECK3,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,40,116,10
-    LTEXT           "Resampling:",IDC_STATIC,154,14,41,8
-    COMBOBOX        IDC_COMBO1,154,25,74,52,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    BS_AUTOCHECKBOX | WS_TABSTOP,9,41,107,10
+    LTEXT           "Resampling:",IDC_STATIC,7,169,41,8
+    COMBOBOX        IDC_COMBO1,50,167,120,56,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "Bass Expansion",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,9,59,81,10
@@ -293,6 +293,19 @@ BEGIN
     LTEXT           "50ms",IDC_STATIC,205,137,23,8
     COMBOBOX        IDC_COMBO2,130,103,100,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
+    GROUPBOX        "Control",IDC_STATIC,0,5,257,150
+    EDITTEXT        IDC_WFIRCUTOFF,150,205,19,14,ES_AUTOHSCROLL | ES_NUMBER
+    COMBOBOX        IDC_WFIRTYPE,50,186,119,64,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "WFIR type:",IDC_STATIC,7,188,37,8
+    LTEXT           "WFIR cutoff factor:",IDC_STATIC,8,208,62,8
+    LTEXT           "%",IDC_STATIC,173,208,8,8
+    LTEXT           "Sample ramping (click avoidance):",IDC_STATIC,8,228,109,
+                    8
+    EDITTEXT        IDC_RAMPING,145,225,24,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Samples",IDC_STATIC,172,228,29,8
+    LTEXT           "(overridden by instrument setting)",IDC_STATIC,9,238,
+                    104,8
 END
 
 IDD_WAVECONVERT DIALOGEX 0, 0, 211, 151
@@ -316,18 +329,20 @@ BEGIN
     CONTROL         "From position",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,
                     15,91,58,10
     CONTROL         "Normalize Output",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_VISIBLE | WS_TABSTOP,10,134,73,10
+                    NOT WS_VISIBLE | WS_TABSTOP,76,133,73,10
     COMBOBOX        IDC_COMBO1,10,106,54,82,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     COMBOBOX        IDC_COMBO2,70,106,73,75,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "High quality resampling",IDC_CHECK3,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,122,104,10
+                    BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,76,122,104,
+                    10
     EDITTEXT        IDC_EDIT3,75,90,19,12,ES_AUTOHSCROLL | ES_NUMBER
     CTEXT           "to",IDC_STATIC,99,91,8,8
     EDITTEXT        IDC_EDIT4,109,90,19,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Channel mode",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
                     BS_LEFTTEXT | WS_TABSTOP,82,66,60,12
+    DEFPUSHBUTTON   "Change Player Options",IDC_PLAYEROPTIONS,10,124,81,14
 END
 
 IDD_PROGRESS DIALOG  0, 0, 186, 55
@@ -1560,6 +1575,13 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO 
 BEGIN
+    IDD_OPTIONS_PLAYER, DIALOG
+    BEGIN
+        VERTGUIDE, 50
+        VERTGUIDE, 169
+        VERTGUIDE, 256
+    END
+
     IDD_OPTIONS_KEYBOARD, DIALOG
     BEGIN
         RIGHTMARGIN, 260
@@ -2030,12 +2052,12 @@ BEGIN
     ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (Royaume-Uni) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2142,7 +2164,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Anglais (Royaume-Uni) resources
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

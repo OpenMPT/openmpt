@@ -400,6 +400,9 @@
 			<File
 				RelativePath="..\soundlib\Waveform.cpp">
 			</File>
+			<File
+				RelativePath="..\soundlib\WindowedFIR.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -520,6 +523,9 @@
 			</File>
 			<File
 				RelativePath=".\vstplug.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\WindowedFIR.h">
 			</File>
 		</Filter>
 		<Filter

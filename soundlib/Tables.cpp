@@ -15,6 +15,11 @@
 #include <math.h>
 #include "sndfile.h"
 
+// rewbs.resamplerConf
+#include "../mptrack/mptrack.h"
+#include "../mptrack/MainFrm.h"
+#include "WindowedFIR.h"
+// end  rewbs.resamplerConf
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -579,11 +584,14 @@ static void getdownsample2x(short int *psinc)
 
 VOID SndMixInitializeTables()
 {
-
-	getsinc(gKaiserSinc, 9.6377, 1);
- 	getsinc(gDownsample13x, 8.5, 3.0/4.0);
-	getdownsample2x(gDownsample2x);
-
+	CWindowedFIR::InitTable();
+	getsinc(gKaiserSinc, 9.6377, CMainFrame::gdWFIRCutoff);
+ 	//ericus' downsampling improvement.
+ 	//getsinc(gDownsample13x, 8.5, 3.0/4.0);
+	//getdownsample2x(gDownsample2x);
+	getsinc(gDownsample13x, 8.5, 0.5);	   
+	getsinc(gDownsample2x, 2.7625, 0.425); 
+	//end ericus' downsampling improvement.
 }
 
 
