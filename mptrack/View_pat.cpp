@@ -3413,7 +3413,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 	//  since a note-off can have a velocity too:
 	//  BYTE event  = (dwMidiData>>16) & 0x64; 
 
-	BYTE nNote  = (dwMidiData >> 8) & 0xFF +1; // +1 is for MPT, where middle C is 61
+	BYTE nNote  = ((dwMidiData >> 8) & 0xFF) +1; // +1 is for MPT, where middle C is 61
 	BYTE nVol   = (dwMidiData >> 16) & 0xFF;   // At this stage nVol is a non linear value in [0;127]
 	                                           // Need to convert to linear in [0;64] - see below
 	BYTE event  = dwMidiData & 0xF0;
