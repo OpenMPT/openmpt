@@ -20,8 +20,21 @@ NOTES:
 /: change
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
-
-
+  
+   . <rewbs> modifier keys are no longer reset on pattern editor focus loss
+   . <rewbs> fixed scrollpos jumping to row 0 on change pattern
+   . <rewbs> if the full pattern can be visible in window, pattern is moved down so row 0 is visible and scrollbar is not needed. (tx lpchip)
+   . <rewbs> some VU meter fixes
+   . <rewbs> instrument view slider optimisations (we think it affects just WinXP)
+   . <rewbs> fixed hang on song stop with some OhmForce plugs (and maybe others).
+   . <rewbs> fixed minor slider GUI bug with some OhmForce plugs (and maybe others).
+   . <rewbs> various minor fixes: instrument open/save/new shortcut key propagation, VSTi playback at volume 0 ...
+   + <rewbs> Extra statusbar info in pattern view. Ugly but useful (particularly for macros).
+   / <rewbs> Minor VST destruction memory management change - may increase or decrease crash occurences. :)
+   / <rewbs> internal: changed to make thread priority normal in debug mode, for easier hang debugging.
+   / <ericus> Restored VSTi original output level 
+   . <ericus> floating point plugin parameter edit box fix 
+   / <ericus> (internal) removed unwanted (at this point) vst parallel routing feature
    . <rewbs> Checked  preset in VST dialog menu is updated when preset is changed from inside the plug's on GUI.
    + <rewbs> Assign a MIDI bank to an instrument, for plugs that support it (e.g. Edirol Orchestral) (tx ganja)
    / <rewbs> Changes/clarifications to custom keys GUI  (tx lpchip)

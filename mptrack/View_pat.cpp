@@ -182,10 +182,10 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 	UpdateScrollSize();
 	UpdateIndicator();
 	
-	if (bUpdateScroll && !m_bWholePatternFitsOnScreen) 		//rewbs.scrollFix
-		SetScrollPos(SB_VERT, m_nRow * GetColumnHeight());
-	else 
+	if (m_bWholePatternFitsOnScreen) 		//rewbs.scrollFix
 		SetScrollPos(SB_VERT, 0);
+	else if (bUpdateScroll) //rewbs.fix3147
+		SetScrollPos(SB_VERT, m_nRow * GetColumnHeight());
 	
 	UpdateScrollPos();
 	InvalidatePattern(TRUE);
@@ -849,7 +849,7 @@ void CViewPattern::OnKillFocus(CWnd *pNewWnd)
 	//Unset all selection
 	m_dwStatus &= ~PATSTATUS_KEYDRAGSEL;
 	m_dwStatus &= ~PATSTATUS_CTRLDRAGSEL;
-	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
+//	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
 	//end rewbs.customKeys	
 
 	m_dwStatus &= ~PATSTATUS_FOCUS;
@@ -4693,10 +4693,11 @@ void CViewPattern::OnInitMenu(CMenu* pMenu)
 {
 	CModScrollView::OnInitMenu(pMenu);
 
-	// TODO: Add your message handler code here
-	m_dwStatus &= ~PATSTATUS_KEYDRAGSEL;
+	//rewbs: ensure modifiers are reset when we go into menu
+	m_dwStatus &= ~PATSTATUS_KEYDRAGSEL;	
 	m_dwStatus &= ~PATSTATUS_CTRLDRAGSEL;
 	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
+	//end rewbs
 
 }
 

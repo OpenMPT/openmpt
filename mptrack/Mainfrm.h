@@ -592,6 +592,7 @@ public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
 	//rewbs.customKeys - We have swicthed focus to a new module - might need to update effect keys to reflect module type
 	bool UpdateEffectKeys(void); 
+	afx_msg void OnKillFocus(CWnd* pNewWnd); //end rewbs.fix3116
 };
 
 const CHAR gszBuildDate[] = __TIMESTAMP__;

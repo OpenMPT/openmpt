@@ -1483,7 +1483,7 @@ void CChannelManagerDlg::OnApply()
 	// Update document & player
 	pModDoc->SetModified();
 	pModDoc->UpdateAllViews(NULL,0xff,NULL);
-	pMainFrm->PlayMod(pActiveMod, followSong, MPTNOTIFY_POSITION);
+	pMainFrm->PlayMod(pActiveMod, followSong, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
 
 	// Redraw channel manager window
 	InvalidateRect(NULL,TRUE);
