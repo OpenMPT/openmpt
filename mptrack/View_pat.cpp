@@ -3394,32 +3394,55 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
-	DWORD dwMidiByte1 = (dwMidiData >> 8) & 0xFF;
-	DWORD dwMidiByte2 = (dwMidiData >> 16) & 0xFF;
-	UINT nVol, nNote = -1;
 
 	if ((!pModDoc) || (!pMainFrm)) return 0;
+
+//Midi message from our perspective: 
+//     +---------------------------+---------------------------+-------------+-------------+
+//bit: | 24.23.22.21 | 20.19.18.17 | 16.15.14.13 | 12.11.10.09 | 08.07.06.05 | 04.03.02.01 |
+//     +---------------------------+---------------------------+-------------+-------------+
+//     |     Velocity (0-127)      |  Note (middle C is 60)    |   Event     |   Channel   |
+//     +---------------------------+---------------------------+-------------+-------------+
+//(http://www.borg.com/~jglatt/tech/midispec.htm)
+
+	//Notes:
+	//. If no event is recieved, previous event is assumed.
+	//. A note-on (event=8) with velocity 0 is equivalent to a note off.
+	//. We only handle note-on and note off events.
+	//. Basing the event solely on the velocity as follows is incorrect,
+	//  since a note-off can have a velocity too:
+	//  BYTE event  = (dwMidiData>>16) & 0x64; 
+
+	BYTE nNote  = (dwMidiData >> 8) & 0xFF +1; // +1 is for MPT, where middle C is 61
+	BYTE nVol   = (dwMidiData >> 16) & 0xFF;   // At this stage nVol is a non linear value in [0;127]
+	                                           // Need to convert to linear in [0;64] - see below
+	BYTE event  = dwMidiData & 0xF0;
+	if ((event == 0x90) && !nVol) event = 0x80;	//Convert event to note-off if req'd
 	
-	//Decode midi message
-	switch(dwMidiData & 0xF0)
+	//Event nibble: 8 if Note Off, 9 is Note on. Don't care about other events ATM.
+	switch(event) 
 	{
 	case 0x80: // Note Off
-		dwMidiByte1 &= 0x7F;
-		nNote = dwMidiByte1+1;
-		nNote = dwMidiByte1+1;
+		// The following method takes care of:
+		// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
+		// . Entering a note off in pattern if required
 		TempStopNote(nNote, CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF);
 		break;
 
 	case 0x90: // Note On
-		dwMidiByte1 &= 0x7F;
-		dwMidiByte2 &= 0x7F;
-		nNote = dwMidiByte1+1;
 		if (CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
-		{
-			nVol = (CDLSBank::DLSMidiVolumeToLinear(dwMidiByte2)+1023) >> 10;
+		{   
+			//Convert non linear value in [0;127] to linear value in [0;64]:
+			nVol = (CDLSBank::DLSMidiVolumeToLinear(nVol)+1023) >> 10;
+			//Amplify if requested:
 			if (CMainFrame::m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) nVol *= 2;
+			//Bound, in case of overamplification:
 			if (nVol < 1) nVol = 1;
 			if (nVol > 64) nVol = 64;
+		}
+		else
+		{	//Use default volume
+			nVol = -1; 
 		}
 
 		TempEnterNote(nNote, true, nVol);
@@ -4081,7 +4104,8 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 	if ( ((CMainFrame::m_dwPatternSetup & PATTERN_KBDNOTEOFF) || fromMidi) 
 		&& (note) && (note < 120))
 	{
-		if ((m_dwCursor & 7) < 2) EnterNote(note|0x80, 0, TRUE, -1, TRUE); //TODO: use TempEnterNote
+		if ((m_dwCursor & 7) < 2 || fromMidi)
+			EnterNote(note|0x80, 0, TRUE, -1, TRUE); //TODO: use TempEnterNote
 	}
 }
 
