@@ -246,6 +246,9 @@ void COptionsKeyboard::DefineCommandCategories()
 	for (int c=kcVPStartNotes; c<=kcVPEndNotes; c++)
 		newCat->commands.Add(c);
 	newCat->separators.Add(kcVPEndNotes);			//--------------------------------------
+	for (int c=kcSetOctave0; c<=kcSetOctave9; c++)
+		newCat->commands.Add(c);
+	newCat->separators.Add(kcVPEndNotes);			//--------------------------------------
 	for (int c=kcStartNoteMisc; c<=kcEndNoteMisc; c++)
 		newCat->commands.Add(c);
 	commandCategories.Add(*newCat);
@@ -404,7 +407,7 @@ void COptionsKeyboard::OnCommandKeySelChanged()
         {
 			for (int i=0; i<numChoices; i++)
 			{
-				wsprintf(s, "Choice %d \t(of %d)", i+1, numChoices);
+				wsprintf(s, "Choice %d (of %d)", i+1, numChoices);
 				m_cmbKeyChoice.SetItemData(m_cmbKeyChoice.AddString(s), i);
 			}
 		}

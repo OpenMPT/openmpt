@@ -1796,8 +1796,9 @@ void CCtrlInstruments::OnAttackChanged()
 		penv->nVolRamp = newRamp;
 		m_SliderAttack.SetPos(n);
 		if( CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1) ) spin->SetPos(n);
-		if(n == 0) SetDlgItemText(IDC_EDIT2,"default");
-
+		LockControls();
+		if (n == 0) SetDlgItemText(IDC_EDIT2,"default");
+		UnlockControls();
 		m_pModDoc->SetModified();
 	}
 }

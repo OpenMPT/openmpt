@@ -15,8 +15,8 @@ CCommandSet::CCommandSet(void)
 	enforceRule[krAllowSelectCopySelectCombos]	= true;
 	enforceRule[krLockNotesToChords]			= true;
 	enforceRule[krNoteOffOnKeyRelease]			= true;
-	enforceRule[krPropagateNotes]	= true;
-	enforceRule[krReassignDigitsToOctaves]		= true;
+	enforceRule[krPropagateNotes]				= true;
+	enforceRule[krReassignDigitsToOctaves]		= false;
 	enforceRule[krDeleteOldOnConflict]			= true;
 	enforceRule[krDeleteOldOnConflict]			= true;
 	enforceRule[krAutoSelectOff]				= true;
@@ -2542,22 +2542,16 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	//# Reassign freed number keys to octaves
 	if (enforceRule[krReassignDigitsToOctaves] && !adding)
 	{  
-		//Avoid inifinit recursion:
-		if ((inKc.mod !=0) || ((inKc.ctx !=kCtxViewPatternsNote) && (inKc.ctx !=kCtxViewPatterns)) || 
-			(!('0'<=inKc.code && inKc.code<='9') && !(VK_NUMPAD0<=inKc.code && inKc.code<=VK_NUMPAD9)))
-		{
-			newKc.ctx=kCtxViewPatternsNote;
-			newKc.mod=0;
-			newKc.event= (KeyEventType)1;
-			for (newKc.code='0'; newKc.code<='9'; newKc.code++)
-			{
-				Add(newKc, (CommandID)(kcSetOctave0 + (newKc.code-'0')), false);		
-			}
-			for (newKc.code=VK_NUMPAD0; newKc.code<=VK_NUMPAD9; newKc.code++)
-			{
-				Add(newKc, (CommandID)(kcSetOctave0 + (newKc.code-VK_NUMPAD0)), false);		
-			}
-		}
+		  if ( (inKc.mod = 0) &&	//no modifier
+			 ( (inKc.ctx == kCtxViewPatternsNote) || (inKc.ctx == kCtxViewPatterns) ) && //note scope or pattern scope
+			 ( ('0'<=inKc.code && inKc.code<='9') || (VK_NUMPAD0<=inKc.code && inKc.code<=VK_NUMPAD9) ) ) {  //is number key 
+				newKc.ctx=kCtxViewPatternsNote;
+				newKc.mod=0;
+				newKc.event= (KeyEventType)1;
+				newKc.code=inKc.code;
+				int offset = ('0'<=inKc.code && inKc.code<='9') ? newKc.code-'0' : newKc.code-VK_NUMPAD0;
+				Add(newKc, (CommandID)(kcSetOctave0 + (newKc.code-offset)), false);		
+			 }
 	}
 	// Add spacing
 	if (enforceRule[krAutoSpacing])
@@ -2699,18 +2693,6 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			int newCmd;
 			int offset = inCmd-kcStartSampleMisc;
 
-			//propagate to SampleCtrl
-/*			newCmd = kcStartSampleCtrlMisc+offset;
-			commands[newCmd].kcList.SetSize(commands[inCmd].kcList.GetSize());
-			for (int k=0; k<commands[inCmd].kcList.GetSize(); k++)
-			{
-				commands[newCmd].kcList[k].mod = commands[inCmd].kcList[k].mod;
-				commands[newCmd].kcList[k].code = commands[inCmd].kcList[k].code;
-				commands[newCmd].kcList[k].event = commands[inCmd].kcList[k].event;
-				commands[newCmd].kcList[k].ctx = kCtxCtrlSamples;
-			}
-*/
-
 			//propagate to InstrumentView
 			newCmd = kcStartInstrumentMisc+offset;
 			commands[newCmd].kcList.SetSize(commands[inCmd].kcList.GetSize());
@@ -2721,10 +2703,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				commands[newCmd].kcList[k].event = commands[inCmd].kcList[k].event;
 				commands[newCmd].kcList[k].ctx = kCtxViewInstruments;
 			}
-/*
-			//propagate to InstrumentCtrl
-			newCmd = kcStartInstrumentCtrlMisc+offset;
-*/
+
 		}
 
 	}
