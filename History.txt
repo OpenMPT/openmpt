@@ -22,7 +22,7 @@ NOTES:
 (tx XYZ): thanks to XYZ for telling me about the bug
 
 
-
+. v 1.17RC1 (revision 1.13.2.10)
   + <rewbs> Can now bypass plug from plug's window and from tree view.
   + <rewbs> Added commands to navigate up/down by spacing
   . <rewbs> Improved handling of keystrokes when textbox has focus.
@@ -32,7 +32,6 @@ NOTES:
   . <rewbs> Changing a plug param now marks song as modified.
   . <rewbs> Fixed minor solo/mute bug ("solo" could unexepectedly behave like unmute all in some cases)  - tx Gazus Snake
   . <rewbs> Sample GUI not getting updated with samples > 255 - tx POPS125
-
   . <rewbs> Fixed some tiny memory leaks.
   / <rewbs> Minor code cleanups
 
