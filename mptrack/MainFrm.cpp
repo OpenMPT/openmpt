@@ -225,8 +225,8 @@ HPEN CMainFrame::penSeparator = NULL;
 HBRUSH CMainFrame::brushGray = NULL;
 HBRUSH CMainFrame::brushBlack = NULL;
 HBRUSH CMainFrame::brushWhite = NULL;
-CBrush *CMainFrame::pbrushBlack = NULL;//rewbs.envRowGrid
-CBrush *CMainFrame::pbrushWhite = NULL;//rewbs.envRowGrid
+//CBrush *CMainFrame::pbrushBlack = NULL;//rewbs.envRowGrid
+//CBrush *CMainFrame::pbrushWhite = NULL;//rewbs.envRowGrid
 
 HBRUSH CMainFrame::brushHighLight = NULL;
 HBRUSH CMainFrame::brushWindow = NULL;
@@ -566,8 +566,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (m_hGUIFont == NULL) m_hGUIFont = (HFONT)GetStockObject(ANSI_VAR_FONT);
 	brushBlack = (HBRUSH)::GetStockObject(BLACK_BRUSH);
 	brushWhite = (HBRUSH)::GetStockObject(WHITE_BRUSH);
-	pbrushBlack = new CBrush(RGB(0,0,0));
-	pbrushWhite = new CBrush(RGB(0xff,0xff,0xff));
+//	pbrushBlack = new CBrush(RGB(0,0,0));
+//	pbrushWhite = new CBrush(RGB(0xff,0xff,0xff));
 	brushGray = ::CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 	penLightGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNHIGHLIGHT));
 	penDarkGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
@@ -713,11 +713,11 @@ BOOL CMainFrame::DestroyWindow()
 		bmpVisNode = NULL;
 	}
 	//end rewbs.fxvis
-	if	(pbrushBlack)
+/*	if	(pbrushBlack)
 		pbrushBlack->DeleteObject();
 	if	(pbrushWhite)
 		pbrushWhite->DeleteObject();		
-
+*/
 
 	// Kill GDI Objects
 	DeleteGDIObject(brushGray);
@@ -735,8 +735,8 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penGray99);
 	DeleteGDIObject(penGraycc);
 	DeleteGDIObject(penGrayff);
-	DeleteGDIObject(pbrushBlack);
-	DeleteGDIObject(pbrushWhite);
+//	DeleteGDIObject(pbrushBlack);
+//	DeleteGDIObject(pbrushWhite);
 
 	for (UINT i=0; i<NUM_VUMETER_PENS*2; i++)
 	{
@@ -914,14 +914,8 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 			TCHAR szClassName[512];
 			textboxHasFocus = GetClassName(hWnd, szClassName, 6) && _tcsicmp(szClassName, _T("Edit")) == 0;		
 			if (textboxHasFocus) {
-				if ((!CMainFrame::GetInputHandler()->CtrlPressed() && !CMainFrame::GetInputHandler()->AltPressed() && ((wParam>='A'&&wParam<='Z') || (wParam>='0'&&wParam<='9') || wParam==VK_DIVIDE || wParam==VK_MULTIPLY)) ||
-					wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_UP || wParam == VK_DOWN || wParam == VK_HOME || wParam == VK_END || wParam == VK_DELETE || wParam == VK_INSERT || wParam == VK_BACK ||
-					(CMainFrame::GetInputHandler()->GetModifierMask()==HOTKEYF_CONTROL && (wParam == 'Y' || wParam == 'Z' || wParam == 'X' ||  wParam == 'C' || wParam == 'V'))
-					) {
-                        handledByTextBox = true;
-					}
+				handledByTextBox = m_InputHandler->isKeyPressHandledByTextBox(wParam);
 			}
-
 		}
 
 		if (!handledByTextBox && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
@@ -940,10 +934,6 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 //---------------------------------------------
 {
-	if (pMsg->message == WM_KEYDOWN) {
-		pMsg->message;
-	}
-
 	if ((pMsg->message == WM_RBUTTONDOWN) || (pMsg->message == WM_NCRBUTTONDOWN))
 	{
 		CWnd* pWnd = CWnd::FromHandlePermanent(pMsg->hwnd);
@@ -1785,8 +1775,16 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	if (m_dwStatus & MODSTATUS_PLAYING)
 	{
 		m_dwStatus &= ~MODSTATUS_PLAYING;
+
+		m_pSndFile->StopAllVsti();
+
 		if (gpSoundDevice) gpSoundDevice->Reset();
 		audioCloseDevice();
+
+		BEGIN_CRITICAL();
+		m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
+		END_CRITICAL();
+
 		m_nMixChn = m_nAvgMixChn = 0;
 		Sleep(1);
 		if (m_hFollowSong)
@@ -1796,9 +1794,6 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 			mn.dwType = MPTNOTIFY_STOP;
 			::SendMessage(m_hFollowSong, WM_MOD_UPDATEPOSITION, 0, (LPARAM)&mn);
 		}
-		BEGIN_CRITICAL();
-		m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
-		END_CRITICAL();
 	}
 	if (m_pModPlaying)
 	{
@@ -2253,7 +2248,7 @@ void CMainFrame::OnViewOptions()
 // -> DESC="list box to choose VST plugin presets (programs)"
 void CMainFrame::OnPluginSetup()
 {
-	CSelectPluginDlg dlg(NULL, this);
+	CSelectPluginDlg dlg(NULL, GetActiveDoc(), this);
 	dlg.DoModal();
 }
 // -! NEW_FEATURE#0002

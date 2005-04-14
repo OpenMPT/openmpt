@@ -187,6 +187,7 @@ private:
 	bool HasValidPlug(UINT instr);
 public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg BOOL OnToolTip(UINT id, NMHDR *pTTTStruct, LRESULT *pResult);
 };
 
 

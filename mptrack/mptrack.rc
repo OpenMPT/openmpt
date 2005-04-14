@@ -2259,6 +2259,10 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Randomize",                  ID_PRESET_RANDOM
     END
+    POPUP "Options"
+    BEGIN
+        MENUITEM "Bypass",                      ID_PLUG_BYPASS
+    END
 END
 
 IDR_PLUGINMENU MENU 

@@ -1265,7 +1265,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	pSndFile = pModDoc->GetSoundFile();
 	//hdc = pDC->m_hDC;
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
-	m_dcMemMain.FillRect(&m_rcClient, CMainFrame::pbrushBlack);
+	m_dcMemMain.FillRect(&m_rcClient, CBrush::FromHandle(CMainFrame::brushBlack));
 	if (m_nEnv != ENV_VOLUME)
 	{
 		m_dcMemMain.MoveTo(0, ymed);
@@ -1316,7 +1316,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 			rect.top = y - 3;
 			rect.right = x + 4;
 			rect.bottom = y + 4;
-			m_dcMemMain.FrameRect(&rect, CMainFrame::pbrushWhite);
+			m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushWhite));
 			if (i)
 				m_dcMemMain.LineTo(x, y);
 			else

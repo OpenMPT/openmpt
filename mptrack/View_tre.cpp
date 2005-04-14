@@ -263,7 +263,7 @@ VOID CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 				LPBYTE lpStream = f.Lock();
 				if (lpStream)
 				{
-					m_SongFile.Create(lpStream, dwLen);
+					m_SongFile.Create(lpStream, CMainFrame::GetMainFrame()->GetActiveDoc(), dwLen);
 					f.Unlock();
 				}
 			}
@@ -1139,14 +1139,15 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 
 		case MODITEM_EFFECT:
 			if ((pModDoc) && (dwItem < MAX_MIXPLUGINS))
-			{
+			{/*
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
 				PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[dwItem];
 				if (pPlugin->pMixPlugin)
 				{
 					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 					pVstPlugin->ToggleEditor();
-				}
+				}*/
+				pModDoc->TogglePluginEditor(dwItem);
 			}
 			return TRUE;
 
@@ -2136,8 +2137,20 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				break;
 
 			case MODITEM_EFFECT:
-				nDefault = ID_MODTREE_EXECUTE;
-				AppendMenu(hMenu, MF_STRING, nDefault, "&Edit");
+				{
+					nDefault = ID_MODTREE_EXECUTE;
+					AppendMenu(hMenu, MF_STRING, nDefault, "&Edit");
+
+					CModDoc *pModDoc = GetDocumentFromItem(hItem);
+					CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+					if (pSndFile) {
+						PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[dwItemNo];
+						if (pPlugin) {
+							bool bypassed = pPlugin->Info.dwInputRouting&MIXPLUG_INPUTF_BYPASS;
+							AppendMenu(hMenu, (bypassed?MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Bypass");
+						}
+					}
+				}
 				break;
 
 			case MODITEM_MIDIINSTRUMENT:
@@ -2489,6 +2502,19 @@ void CModTree::OnMuteTreeItem()
 		{
 			pModDoc->MuteInstrument(dwItemNo, (pModDoc->IsInstrumentMuted(dwItemNo)) ? FALSE : TRUE);
 		}
+
+		if ((dwItemType == MODITEM_EFFECT) && (pModDoc->GetNumInstruments()))
+		{
+			CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+			if (pSndFile) {
+				PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[dwItemNo];
+				if (pPlugin) {
+					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+					if (pVstPlugin) pVstPlugin->Bypass();
+				}
+			}
+		}
+
 	}
 }
 

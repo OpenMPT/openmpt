@@ -819,7 +819,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	// In order to properly compute the position, in file, of eventual extended settings
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
 	// setting will follow this sample in the file
-	UINT lastSampleSize;
+	UINT lastSampleSize = 0;
 // -! NEW_FEATURE#0027
 
 	// Reading Samples

@@ -851,6 +851,9 @@
 #define ID_PLAYER_APPROXI               36004
 #define ID_Menu36005                    36005
 #define ID_APPROX_BPM                   36007
+#define ID_FACTORY_MENU                 36008
+#define ID_PLUG_BYPASS                  36009
+#define ID_FACTORY_PRESETS              36010
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
@@ -874,7 +877,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        501
-#define _APS_NEXT_COMMAND_VALUE         36008
+#define _APS_NEXT_COMMAND_VALUE         36011
 #define _APS_NEXT_CONTROL_VALUE         2229
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

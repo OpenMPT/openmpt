@@ -366,8 +366,8 @@ CSoundFile::~CSoundFile()
 }
 
 
-BOOL CSoundFile::Create(LPCBYTE lpStream, DWORD dwMemLength)
-//----------------------------------------------------------
+BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
+//---------------------------------------------------------------------------
 {
 	m_nType = MOD_TYPE_NONE;
 	m_dwSongFlags = 0;
@@ -582,7 +582,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, DWORD dwMemLength)
 			if ((m_MixPlugins[iPlug].Info.dwPluginId1)
 			 || (m_MixPlugins[iPlug].Info.dwPluginId2))
 			{
-				gpMixPluginCreateProc(&m_MixPlugins[iPlug]);
+				gpMixPluginCreateProc(&m_MixPlugins[iPlug], pModDoc);
 				if (m_MixPlugins[iPlug].pMixPlugin)
 				{
 					m_MixPlugins[iPlug].pMixPlugin->RestoreAllParameters(m_MixPlugins[iPlug].defaultProgram); //rewbs.plugDefaultProgram: added param
@@ -1070,7 +1070,7 @@ void CSoundFile::SuspendPlugins()
 		if (m_MixPlugins[iPlug].pMixState)
 		{
 			pPlugin->NotifySongPlaying(false);
-			pPlugin->HardAllNotesOff(); 
+//			pPlugin->HardAllNotesOff();
 			pPlugin->Suspend();
 		}
 	}
@@ -2332,5 +2332,16 @@ BOOL CSoundFile::MoveSample(UINT from, UINT to)
 // -! NEW_FEATURE#0020
 #endif // FASTSOUNDLIB
 
-
+//rewbs.plugDocAware
+/*PSNDMIXPLUGIN CSoundFile::GetSndPlugMixPlug(IMixPlugin *pPlugin) 
+{
+	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	{
+		if (m_MixPlugins[iPlug].pMixPlugin == pPlugin)
+			return &(m_MixPlugins[iPlug]);
+	}
+	
+	return NULL;
+}*/
+//end rewbs.plugDocAware
 

@@ -5,6 +5,7 @@
 #include "mptrack.h"
 #include "mainfrm.h"
 #include "vstplug.h"
+#include "moddoc.h"
 #include "fxp.h"					//rewbs.VSTpresets
 #include "AbstractVstEditor.h"		//rewbs.defaultPlugGUI
 #include "VstEditor.h"				//rewbs.defaultPlugGUI
@@ -18,7 +19,6 @@
 #ifdef ENABLE_BUZZ
 #define STATIC_BUILD
 #include <machineinterface.h>	// Buzz
-#include ".\vstplug.h"
 AEffect *Buzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzInfo);
 #endif // ENABLE_BUZZ
 
@@ -37,13 +37,13 @@ long VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect,	long opcode,
 }
 
 
-BOOL CVstPluginManager::CreateMixPluginProc(PSNDMIXPLUGIN pMixPlugin)
-//-------------------------------------------------------------------
+BOOL CVstPluginManager::CreateMixPluginProc(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModDoc)
+//-------------------------------------------------------------------------------------
 {
 	CVstPluginManager *that = theApp.GetPluginManager();
 	if (that)
 	{
-		return that->CreateMixPlugin(pMixPlugin);
+		return that->CreateMixPlugin(pMixPlugin, pModDoc);
 	}
 	return FALSE;
 }
@@ -390,8 +390,8 @@ BOOL CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
 }
 
 
-BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin)
-//---------------------------------------------------------------
+BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModDoc)
+//---------------------------------------------------------------------------------
 {
 	UINT nMatch=0;
 	PVSTPLUGINLIB pFound = NULL;
@@ -444,7 +444,7 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin)
 			CVstPlugin *pVstPlug = new CVstPlugin(NULL, pFound, pMixPlugin, pEffect);
 			if (pVstPlug)
 			{
-				pVstPlug->Initialize();
+				pVstPlug->Initialize(pModDoc);
 				bOk = TRUE;
 			}
 			END_CRITICAL();
@@ -526,7 +526,7 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin)
 						}
 					}
 					CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, pFound, pMixPlugin, pEffect);
-					if (pVstPlug) pVstPlug->Initialize();
+					if (pVstPlug) pVstPlug->Initialize(pModDoc);
 				}
 			} else
 			{
@@ -600,7 +600,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 			if (pVstEditor) {
 				pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);
 			}
-			//pVstPlugin->m_bModified=true;
+			pVstPlugin->GetModDoc()->SetModified();
 		}
 		return 0; 
 	// Called when plugin asks for VST version supported by host
@@ -949,9 +949,10 @@ void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CSelectPluginDlg::CSelectPluginDlg(PSNDMIXPLUGIN pPlugin, CWnd *parent):CDialog(IDD_SELECTMIXPLUGIN, parent)
+CSelectPluginDlg::CSelectPluginDlg(PSNDMIXPLUGIN pPlugin, CModDoc *pModDoc, CWnd *parent):CDialog(IDD_SELECTMIXPLUGIN, parent)
 //----------------------------------------------------------------------------------------------------------
 {
+	m_pModDoc = pModDoc; //rewbs.plugDocAware
 	m_pPlugin = pPlugin;
 }
 
@@ -1058,7 +1059,7 @@ VOID CSelectPluginDlg::OnOK()
 			// Now, create the new plugin
 			if (pManager)
 			{
-				pManager->CreateMixPlugin(m_pPlugin);
+				pManager->CreateMixPlugin(m_pPlugin, m_pModDoc);
 				if (m_pPlugin->pMixPlugin)
 				{
 					CHAR s[128];
@@ -1324,6 +1325,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_nInputs = m_nOutputs = 0;
 	m_nEditorX = m_nEditorY = -1;
 	m_pEvList = NULL;
+	m_pModDoc = NULL; //rewbs.plugDocAware
 	m_nPreviousMidiChan = -1; //rewbs.VSTCompliance
 	m_pProcessFP = NULL;
 
@@ -1357,8 +1359,8 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 }
 
 
-void CVstPlugin::Initialize()
-//---------------------------
+void CVstPlugin::Initialize(CModDoc *pModDoc)
+//-------------------------------------------
 {
 	if (!m_pEvList)
 	{
@@ -1436,6 +1438,12 @@ void CVstPlugin::Initialize()
 	
 	//TODO:
 	//GetSpeakerArrangement();
+
+	//rewbs.plugDocAware
+	m_pModDoc = pModDoc;
+//	m_pSndMixPlugin = m_pSndFile->GetSndPlugMixPlug(this);
+//	ASSERT(m_pSndMixPlugin);
+	//end rewbs.plugDocAware
 }
 
 
@@ -1500,6 +1508,8 @@ CVstPlugin::~CVstPlugin()
 		delete (char *)m_pEvList;
 		m_pEvList = NULL;
 	}
+
+	 processCalled = CreateEvent(NULL,FALSE,FALSE,NULL);
 }
 
 
@@ -1975,8 +1985,9 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
 			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
 			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->Info.szName, processMethod);
+			ClearVSTEvents();
+			SetEvent(processCalled);
 		}
-
 		//mix outputs of multi-output VSTs:
 		if(m_nOutputs>2){
 			// first, mix extra outputs on a stereo basis
@@ -2210,7 +2221,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	}
 
 	ClearVSTEvents();
-
+	SetEvent(processCalled);
 }
 
 
@@ -2252,7 +2263,12 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 void CVstPlugin::HardAllNotesOff()
 {
 	bool overflow=false;
-	float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
+	//float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
+
+	// Relies on a wait on processCalled, which will never get set
+	// if plug is bypassed.
+	if (IsBypassed())	
+		return;
 
 	do {
 		for (int mc=0; mc<16; mc++)		//all midi chans
@@ -2283,12 +2299,15 @@ void CVstPlugin::HardAllNotesOff()
 		// let plug process events
 		// TODO: wait for notification from audio thread that process has been called,
 		//       rather than re-call it here
-		//WaitForSingleObject(...)
-		Process((float*)in, (float*)out, SCRATCH_BUFFER_SIZE);
+		//Process((float*)in, (float*)out, SCRATCH_BUFFER_SIZE);
+
+		ResetEvent(processCalled);				  // Unset processCalled.
+		WaitForSingleObject(processCalled, 10000);// Will not return until processCalled is set again,
+												  // i.e. until processReplacing() has been called.
 	
 
-	//If we had hit an overflow, we need to loop around and start again.
-	} while (overflow);	
+	// If we had hit an overflow, we need to loop around and start again.
+	} while (overflow);
 
 }
 //end rewbs.VSTiNoteHoldonStopFix
@@ -2685,6 +2704,26 @@ CAbstractVstEditor* CVstPlugin::GetEditor()
 {
 	return m_pEditor;
 }
+
+bool CVstPlugin::Bypass(bool bypass)
+{
+	if (bypass)
+		m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
+	else
+		m_pMixStruct->Info.dwInputRouting &=~ MIXPLUG_INPUTF_BYPASS;
+		
+	return bypass;
+}
+bool CVstPlugin::Bypass()
+{
+	return Bypass(!IsBypassed());
+}
+
+bool CVstPlugin::IsBypassed()
+{
+	return m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS;
+}
+
 //end rewbs.defaultPlugGui
 //rewbs.defaultPlugGui: CVstEditor now COwnerVstEditor
 

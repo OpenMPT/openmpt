@@ -508,7 +508,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 	}
 	if (!(dwHintMask & (HINT_SAMPLEINFO|HINT_MODTYPE))) return;
 	// 05/01/05 : ericus replaced ">> 24" by ">> 20" : 4000 samples -> 12bits [see Moddoc.h]
-	if (((dwHintMask >> 20) != (m_nSample&0xff)) && (!(dwHintMask & HINT_MODTYPE))) return;
+	if (((dwHintMask >> 20) != (m_nSample&0x0fff)) && (!(dwHintMask & HINT_MODTYPE))) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	// Updating Ranges

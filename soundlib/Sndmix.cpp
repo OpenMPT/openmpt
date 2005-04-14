@@ -1621,34 +1621,33 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 
 	if ((!m_nInstruments) || (m_nPattern >= MAX_PATTERNS)
 	 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
-	//pChn = Chn;
+
 	m = Patterns[m_nPattern] + m_nRow * m_nChannels + nChn;	
-//	for (UINT nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
-//	{
-		if (m->note)
-		{
-			INSTRUMENTHEADER *penv = pChn->pHeader;
-			if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) penv = Headers[m->instr];
-			if ((penv) && (penv->nMidiChannel >= 1) && (penv->nMidiChannel <= 16))
-			{
-				UINT nPlugin = penv->nMixPlug;				// first try intrument VST
-				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
-				{
-					nPlugin = ChnSettings[nChn].nMixPlugin; // Then try Channel VST
-// -> CODE#0015.rewbs
-// -> DESC="channels management dlg"
-					if(pChn->dwFlags & CHN_NOFX) nPlugin = 0;
-// -! NEW_FEATURE#0015.rewbs
-				}
-				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
-				{
-					UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
-					IMixPlugin *pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
-				}
+	if (m->note) {
+
+		INSTRUMENTHEADER *penv = pChn->pHeader;
+		if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) penv = Headers[m->instr];
+
+		if ((penv) && (penv->nMidiChannel >= 1) && (penv->nMidiChannel <= 16)) {
+
+			UINT nPlugin = 0;
+			if (!(penv->dwFlags & ENV_MUTE)) {	// first try intrument VST
+				nPlugin = penv->nMixPlug;				
+			}
+			if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS)) {
+				if (!(pChn->dwFlags & CHN_NOFX))
+				nPlugin = ChnSettings[nChn].nMixPlugin; // Then try Channel VST
+			}
+
+			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS)) {
+				UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
+				IMixPlugin *pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
+				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
 			}
 		}
-//	}
+
+	}
+
 }
 
 

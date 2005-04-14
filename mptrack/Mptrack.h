@@ -55,7 +55,7 @@ typedef struct MIDILIBSTRUCT
 /////////////////////////////////////////////////////////////////////////////
 // DLS Sound Banks
 
-#define MAX_DLS_BANKS	10
+#define MAX_DLS_BANKS	100 //rewbs.increaseMaxDLSBanks
 
 class CDLSBank;
 

@@ -21,6 +21,21 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+
+
+  + <rewbs> Can now bypass plug from plug's window and from tree view.
+  + <rewbs> Added commands to navigate up/down by spacing
+  . <rewbs> Improved handling of keystrokes when textbox has focus.
+  . <rewbs> Fixed auto-chord detection bugs which caused it to screw up in the last rows of the pattern.
+  / <rewbs> Changes to plugin threading in the hope of reducing hangs. I can't reproduce the hangs on my system so this is a stab in the dark.
+  . <rewbs>  Closing a document via a shortcut key no longer bypasses modified check - tx diamond.
+  . <rewbs> Changing a plug param now marks song as modified.
+  . <rewbs> Fixed minor solo/mute bug ("solo" could unexepectedly behave like unmute all in some cases)  - tx Gazus Snake
+  . <rewbs> Sample GUI not getting updated with samples > 255 - tx POPS125
+
+  . <rewbs> Fixed some tiny memory leaks.
+  / <rewbs> Minor code cleanups
+
 . v 1.17RC1 (revision 1.13.2.9)
   . <rewbs> In autosave dialog, will check backup path exists (if it is to be used). Also Autosave should issue a warning if save fails for whatever reason.
   . <rewbs> File marked as modified on all sample/intrument/general tab changes (some had been missed).

@@ -1633,14 +1633,14 @@ UINT CSoundFile::CreateStereoMix(int count)
 		UINT nMixPlugin = 0;
 
 		//rewbs.instroVSTi
-		if (pChannel->pHeader)												// first try intrument VST
-			nMixPlugin = pChannel->pHeader->nMixPlug;
-		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) 	// Then try Channel VST
-// -> CODE#0015
-// -> DESC="channels management dlg"
-//			nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
-			if(!(pChannel->dwFlags & CHN_NOFX)) nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
-// -! NEW_FEATURE#0015
+		if (pChannel->pHeader && pChannel->pInstrument) {	// first try intrument VST
+			if (!(pChannel->pInstrument->uFlags & ENV_MUTE))
+				nMixPlugin = pChannel->pHeader->nMixPlug;
+		}
+		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) { 	// Then try Channel VST
+			if(!(pChannel->dwFlags & CHN_NOFX)) 
+				nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
+		}
 		//end rewbs.instroVSTi		
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
