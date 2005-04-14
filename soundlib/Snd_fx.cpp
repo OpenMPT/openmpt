@@ -2780,6 +2780,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) cons
 		} else
 		{
 			if (!nC4Speed) nC4Speed = 8363;
+			//(a*b)/c
 			return _muldiv(8363, (FreqS3MTable[note % 12] << 5), nC4Speed << (note / 12));
 		}
 	} else

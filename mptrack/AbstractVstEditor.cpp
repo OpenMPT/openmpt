@@ -11,6 +11,7 @@
 BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_CLOSE()
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
+	ON_COMMAND(ID_PLUG_BYPASS,			OnBypassPlug)
 	ON_COMMAND(ID_PRESET_SAVE,			OnSavePreset)
 	ON_COMMAND(ID_PRESET_RANDOM,		OnRandomizePreset)
 	ON_COMMAND(ID_VSTMACRO_INFO,		OnMacroInfo)
@@ -147,6 +148,17 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 	{
 		m_pVstPlugin->SetCurrentProgram(nIndex);
 		SetupMenu();
+	}
+}
+
+void CAbstractVstEditor::OnBypassPlug()
+{
+	if (m_pVstPlugin)
+	{
+		if (m_pVstPlugin->Bypass())
+			m_pMenu->ModifyMenu(ID_PLUG_BYPASS, MF_BYCOMMAND|MF_CHECKED, ID_PLUG_BYPASS, "&Bypass");
+		else
+			m_pMenu->ModifyMenu(ID_PLUG_BYPASS, MF_BYCOMMAND|MF_UNCHECKED, ID_PLUG_BYPASS, "&Bypass");
 	}
 }
 

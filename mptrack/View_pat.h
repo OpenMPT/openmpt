@@ -73,6 +73,7 @@ protected:
 	UINT m_nMenuOnChan;
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
 	UINT m_nLastPlayedChannel; //rewbs.customkeys
+	bool m_bLastNoteEntryBlocked;
 	
 // -> CODE#0012
 // -> DESC="midi keyboard split"

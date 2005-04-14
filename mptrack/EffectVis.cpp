@@ -367,7 +367,7 @@ void CEffectVis::DrawNodes()
 	else
 	{
 		int x = RowToScreenX(m_nRowToErase);
-		int y = ParamToScreenY(m_nParamToErase);
+		//int y = ParamToScreenY(m_nParamToErase);
 		CRect r( x-NODEHALF-1, m_rcDraw.top, x-NODEHALF+NODESIZE+1, m_rcDraw.bottom);
 		::FillRect(m_dcNodes.m_hDC, r, m_brushBlack /*CMainFrame::brushHighLight*/);
 	}

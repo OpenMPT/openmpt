@@ -169,7 +169,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			LPBYTE lpStream = f.Lock();
 			if (lpStream)
 			{
-				m_SndFile.Create(lpStream, dwLen);
+				m_SndFile.Create(lpStream, this, dwLen);
 				f.Unlock();
 			}
 		}
@@ -854,7 +854,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 				if (pChn->pHeader) 
 					nPlugin = pChn->pHeader->nMixPlug;  					// first try intrument VST
 				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
-					nPlugin = m_SndFile.ChnSettings[nCurrentChn+1].nMixPlugin; // Then try Channel VST                    
+					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin; // Then try Channel VST
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
@@ -901,7 +901,7 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 				if (pChn->pHeader) 
 					nPlugin = penv->nMixPlug;  		// first try intrument VST
 				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
-					nPlugin = m_SndFile.ChnSettings[nCurrentChn+1].nMixPlugin;// Then try Channel VST
+					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;// Then try Channel VST
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
@@ -1506,12 +1506,16 @@ void CModDoc::OnPlayerPlay()
 			m_SndFile.Chn[i].dwFlags |= (CHN_NOTEFADE|CHN_KEYOFF);
 			if (!bPlaying) m_SndFile.Chn[i].nLength = 0;
 		}
+		END_CRITICAL();
+		
 		if (bPlaying) {
 			m_SndFile.StopAllVsti();
 		} else {
+			BEGIN_CRITICAL();
 			m_SndFile.ResumePlugins();
+			END_CRITICAL();
 		}
-		END_CRITICAL();
+
 		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED);
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
 	}
@@ -2611,14 +2615,18 @@ void CModDoc::OnPatternRestart()
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = 0;
 		pSndFile->ResetTotalTickCount();
+		END_CRITICAL();
+		
 		//rewbs.vstCompliance
 		if (pModPlaying == this) {
 			pSndFile->StopAllVsti();
 		} else {
+			BEGIN_CRITICAL();
 			pSndFile->ResumePlugins();
+			END_CRITICAL();
 		}
 		//end rewbs.vstCompliance
-		END_CRITICAL();
+
 		
 		pMainFrm->ResetElapsedTime();
 		if (pModPlaying != this) {
@@ -2651,14 +2659,18 @@ void CModDoc::OnPatternPlay()
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
+		END_CRITICAL();
+
 		//rewbs.VSTCompliance		
 		if (pModPlaying == this) {
 			pSndFile->StopAllVsti();
 		} else {
+			BEGIN_CRITICAL();
 			pSndFile->ResumePlugins();
+			END_CRITICAL();
 		}
 		//end rewbs.VSTCompliance
-		END_CRITICAL();
+		
 
 		pMainFrm->ResetElapsedTime();
 		if (pModPlaying != this) {
@@ -2696,14 +2708,17 @@ void CModDoc::OnPatternPlayNoLoop()
 		else
 			pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
+		END_CRITICAL();
+
 		//end rewbs.VSTCompliance
 		if (pModPlaying == this) {
 			pSndFile->StopAllVsti();	
 		} else {
+			BEGIN_CRITICAL();
 			pSndFile->ResumePlugins();
+			END_CRITICAL();
 		}
 		//rewbs.VSTCompliance
-		END_CRITICAL();
 
 		pMainFrm->ResetElapsedTime();
 		
@@ -2734,7 +2749,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcApproxRealBPM:	OnApproximateBPM(); break;
 		case kcFileSave:	DoSave(m_strPathName, 0); break;
 		case kcFileSaveAs:	DoSave(NULL, 1); break;
-		case kcFileClose:	OnCloseDocument(); break;
+		case kcFileClose:	OnFileClose(); break;
 
 		case kcPlayPatternFromCursor: OnPatternPlay(); break;
 		case kcPlayPatternFromStart: OnPatternRestart(); break;

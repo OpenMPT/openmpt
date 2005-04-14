@@ -10,6 +10,7 @@ class CVstPluginManager;
 class CVstPlugin;
 class CVstEditor;
 class Cfxp;				//rewbs.VSTpresets
+class CModDoc;
 
 enum {
 	effBuzzGetNumCommands=0x1000,
@@ -73,15 +74,19 @@ protected:
 	int m_MixBuffer[MIXBUFFERSIZE*2+2];		// Stereo interleaved
 	float m_FloatBuffer[MIXBUFFERSIZE*32+31];	// 2ch separated + up to 32 VSTi outputs...
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
+	CModDoc* m_pModDoc;			 //rewbs.plugDocAware
+//	PSNDMIXPLUGIN m_pSndMixPlugin;	 //rewbs.plugDocAware
 	UINT m_nPreviousMidiChan; //rewbs.VSTCompliance
 	bool m_bSongPlaying; //rewbs.VSTCompliance
 	bool m_bPlugResumed; //rewbs.VSTCompliance
 	DWORD m_dwTimeAtStartOfProcess;
+	bool m_bModified;
+	HANDLE processCalled;
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN pMixPlugin, AEffect *pEffect);
 	virtual ~CVstPlugin();
-	void Initialize();
+	void Initialize(CModDoc* pModDoc);
 
 public:
 	PVSTPLUGINLIB GetPluginFactory() const { return m_pFactory; }
@@ -97,7 +102,8 @@ public:
 	long GetVersion();		//rewbs.VSTpresets
 	bool GetParams(float* param, long min, long max); 	//rewbs.VSTpresets
 	bool RandomizeParams(long minParam=0, long maxParam=0); 	//rewbs.VSTpresets
-	bool m_bModified;
+	bool isModified() {return m_bModified;}
+	CModDoc* GetModDoc() {return m_pModDoc;}
 
 	VOID SetCurrentProgram(UINT nIndex);
 //rewbs.VSTCompliance: Eric's non standard preset stuff:
@@ -121,6 +127,9 @@ public:
 	BOOL ExecuteCommand(UINT nIndex);
 	CAbstractVstEditor* GetEditor(); //rewbs.defaultPlugGUI
 	BOOL GetSpeakerArrangement(); //rewbs.VSTCompliance
+	bool Bypass(bool);  //rewbs.defaultPlugGUI
+	bool Bypass();  //rewbs.defaultPlugGUI
+	bool IsBypassed();  //rewbs.defaultPlugGUI
 
 	BOOL isInstrument(); // ericus 18/02/2005
 	BOOL CanRecieveMidiEvents();
@@ -172,7 +181,7 @@ public:
 	BOOL IsValidPlugin(const VSTPLUGINLIB *pLib);
 	PVSTPLUGINLIB AddPlugin(LPCSTR pszDllPath, BOOL bCache=TRUE);
 	BOOL RemovePlugin(PVSTPLUGINLIB);
-	BOOL CreateMixPlugin(PSNDMIXPLUGIN);
+	BOOL CreateMixPlugin(PSNDMIXPLUGIN, CModDoc*);
 	VOID OnIdle();
 	static void ReportPlugException(LPCSTR format,...);
 
@@ -182,7 +191,7 @@ protected:
 protected:
 	long VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 	static long VSTCALLBACK MasterCallBack(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
-	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN);
+	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN, CModDoc*);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
 };
 
@@ -193,10 +202,11 @@ class CSelectPluginDlg: public CDialog
 {
 protected:
 	PSNDMIXPLUGIN m_pPlugin;
+	CModDoc *m_pModDoc;
 	CTreeCtrl m_treePlugins;
 
 public:
-	CSelectPluginDlg(PSNDMIXPLUGIN, CWnd *parent);
+	CSelectPluginDlg(PSNDMIXPLUGIN, CModDoc *pModDoc, CWnd *parent); //rewbs.plugDocAware
 	VOID DoClose();
 	VOID UpdatePluginsList();
 	bool VerifyPlug(PVSTPLUGINLIB plug);

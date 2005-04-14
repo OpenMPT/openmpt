@@ -608,7 +608,9 @@ typedef struct _SNDMIXPLUGIN
 	long defaultProgram;		// rewbs.plugDefaultProgram
 } SNDMIXPLUGIN, *PSNDMIXPLUGIN; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
 
-typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN);
+//class CSoundFile;
+class CModDoc;
+typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN, CModDoc*);
 
 typedef struct _SNDMIXSONGEQ
 {
@@ -726,7 +728,7 @@ public:
 	~CSoundFile();
 
 public:
-	BOOL Create(LPCBYTE lpStream, DWORD dwMemLength=0);
+	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
 	BOOL Destroy();
 	UINT GetType() const { return m_nType; }
 	UINT GetNumChannels() const;
@@ -976,6 +978,7 @@ public:
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
 	long ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers); //change from BOOL for rewbs.modularInstData
 	UINT LoadMixPlugins(const void *pData, UINT nLen);
+//	PSNDMIXPLUGIN GetSndPlugMixPlug(IMixPlugin *pPlugin); //rewbs.plugDocAware
 #ifndef NO_FILTER
 	DWORD CutOffToFrequency(UINT nCutOff, int flt_modifier=256) const; // [0-255] => [1-10KHz]
 #endif

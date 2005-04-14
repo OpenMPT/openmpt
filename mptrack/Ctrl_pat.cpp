@@ -87,6 +87,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_SPACING,			OnSpacingChanged)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		OnPatternNameChanged)
 	ON_UPDATE_COMMAND_UI(IDC_PATTERN_RECORD,OnUpdateRecord)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTip)
 	//}}AFX_MSG_MAP
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
@@ -128,6 +129,7 @@ CCtrlPatterns::CCtrlPatterns()
 BOOL CCtrlPatterns::OnInitDialog()
 //--------------------------------
 {
+	CWnd::EnableToolTips(true);
 	CRect rect, rcOrderList;
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModControlDlg::OnInitDialog();
@@ -2336,6 +2338,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 // -! NEW_FEATURE#0015
 
 BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+//--------------------------------------------------------------------
 {
 	// TODO: Add your message handler code here and/or call default
 
@@ -2343,4 +2346,24 @@ BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		PostViewMessage(VIEWMSG_DOSCROLL, zDelta);
 	}
 	return CModControlDlg::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+BOOL CCtrlPatterns::OnToolTip(UINT id, NMHDR *pNMHDR, LRESULT *pResult) 
+//---------------------------------------------------------------------
+{
+    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
+    UINT nID =pNMHDR->idFrom;
+    if (pTTT->uFlags & TTF_IDISHWND)
+    {
+        // idFrom is actually the HWND of the tool
+        nID = ::GetDlgCtrlID((HWND)nID);
+        if(nID)
+        {
+            pTTT->lpszText = MAKEINTRESOURCE(nID);
+            pTTT->hinst = AfxGetResourceHandle();
+            return(TRUE);
+        }
+    }
+
+	return FALSE;
 }

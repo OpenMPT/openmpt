@@ -232,12 +232,12 @@ void CCommandSet::SetupCommands()
 	commands[kcNavigateDown].UID = 1038;
 	commands[kcNavigateDown].isHidden = false;
 	commands[kcNavigateDown].isDummy = false;
-	commands[kcNavigateDown].Message = "Navigate down";
+	commands[kcNavigateDown].Message = "Navigate down by 1 row";
 
 	commands[kcNavigateUp].UID = 1039;
 	commands[kcNavigateUp].isHidden = false;
 	commands[kcNavigateUp].isDummy = false;
-	commands[kcNavigateUp].Message = "Navigate up";
+	commands[kcNavigateUp].Message = "Navigate up by 1 row";
 
 	commands[kcNavigateLeft].UID = 1040;
 	commands[kcNavigateLeft].isHidden = false;
@@ -2144,15 +2144,31 @@ void CCommandSet::SetupCommands()
 	commands[kcApproxRealBPM].isHidden = false;
 	commands[kcApproxRealBPM].isDummy = false;
 
+	commands[kcNavigateDownBySpacingSelect].UID = 1689;
+	commands[kcNavigateDownBySpacingSelect].isHidden = true;
+	commands[kcNavigateDownBySpacingSelect].isDummy = false;
+	commands[kcNavigateDownBySpacingSelect].Message = "kcNavigateDownBySpacingSelect";
+
+	commands[kcNavigateUpBySpacingSelect].UID = 1690;
+	commands[kcNavigateUpBySpacingSelect].isHidden = true;
+	commands[kcNavigateUpBySpacingSelect].isDummy = false;
+	commands[kcNavigateUpBySpacingSelect].Message = "kcNavigateUpBySpacingSelect";
+
+	commands[kcNavigateDownBySpacing].UID = 1691;
+	commands[kcNavigateDownBySpacing].isHidden = false;
+	commands[kcNavigateDownBySpacing].isDummy = false;
+	commands[kcNavigateDownBySpacing].Message = "Navigate down by spacing";
+
+	commands[kcNavigateUpBySpacing].UID = 1692;
+	commands[kcNavigateUpBySpacing].isHidden = false;
+	commands[kcNavigateUpBySpacing].isDummy = false;
+	commands[kcNavigateUpBySpacing].Message = "Navigate up by spacing";
+
 	#ifdef _DEBUG
-	for (int i=0; i<kcNumCommands; i++)
-	{
-		if (commands[i].UID != 0)	// ignore unset UIDs
-		{
-			for (int j=i+1; j<kcNumCommands; j++)
-			{
-				if (commands[i].UID==commands[j].UID)
-					ASSERT(false);
+	for (int i=0; i<kcNumCommands; i++)	{
+		if (commands[i].UID != 0) {	// ignore unset UIDs
+			for (int j=i+1; j<kcNumCommands; j++) {
+				ASSERT(commands[i].UID != commands[j].UID);
 			}
 		}
 	}
@@ -2871,7 +2887,7 @@ bool CCommandSet::LoadFile(CString fileName)
 
 	FILE *inStream;
 	KeyCombination kc;
-	CommandID cmd;
+	CommandID cmd=kcNumCommands;
 	char s[1024];
 	CString curLine, token;
 	int commentStart;

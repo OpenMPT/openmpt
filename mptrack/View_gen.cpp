@@ -1196,7 +1196,7 @@ void CViewGlobals::OnSelectPlugin()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-		CSelectPluginDlg dlg(pPlugin, this);
+		CSelectPluginDlg dlg(pPlugin, pModDoc, this); //rewbs.plugDocAware
 		if (dlg.DoModal() == IDOK)
 		{
 			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT))
@@ -1557,7 +1557,7 @@ LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		case VIEWMSG_SETACTIVE:
 			GetParentFrame()->SetActiveView(this);
 			SetFocus();
-			break;
+			return 0;
 		default:
 			return 0;
 	}

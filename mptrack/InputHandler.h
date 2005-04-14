@@ -49,6 +49,7 @@ public:
 	int SetCommand(InputTargetContext context, CommandID command, UINT modifierMask, UINT actionKey, UINT keyEventType);
 	KeyEventType GetKeyEventType(UINT nFlags);
 	DWORD GetKey(CommandID);
+	bool isKeyPressHandledByTextBox(DWORD wparam);
 
 	KeyCombination GetKey(CommandID cmd, UINT key);
 	int GetKeyListSize(CommandID cmd);

@@ -372,7 +372,7 @@ public:
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;
 	static HBRUSH brushGray, brushBlack, brushWhite, brushHighLight, brushWindow;
-	static CBrush *pbrushBlack, *pbrushWhite;
+//	static CBrush *pbrushBlack, *pbrushWhite;
 	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
 	static COLORREF rgbCustomColors[MAX_MODCOLORS];

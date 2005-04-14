@@ -709,6 +709,7 @@ void CPatternPropertiesDlg::OnOK()
 BEGIN_MESSAGE_MAP(CEditCommand, CPropertySheet)
 	ON_WM_ACTIVATE()
 	ON_WM_CLOSE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -744,6 +745,24 @@ BOOL CEditCommand::SetParent(CWnd *parent, CModDoc *pModDoc)
 	return TRUE;
 }
 
+void CEditCommand::OnDestroy()
+//----------------------------
+{
+	CPropertySheet::OnDestroy();
+
+	if (m_pageNote) {
+		m_pageNote->DestroyWindow();
+		delete m_pageNote;
+	}
+	if (m_pageVolume) {
+		m_pageVolume->DestroyWindow();
+		delete m_pageVolume;
+	}
+	if (m_pageEffect) {
+		m_pageEffect->DestroyWindow();
+		delete m_pageEffect;
+	}
+}
 
 BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 //-----------------------------------------------
@@ -2395,3 +2414,5 @@ VOID CSampleMapDlg::OnOK()
 	}
 	CDialog::OnCancel();
 }
+
+

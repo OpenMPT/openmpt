@@ -100,6 +100,7 @@ CViewPattern::CViewPattern()
 //--------------------------
 {
 	m_pEffectVis = NULL; //rewbs.fxvis
+	m_bLastNoteEntryBlocked=false;
 
 	m_nMenuOnChan = 0;
 	m_nPattern = 0;
@@ -108,8 +109,6 @@ CViewPattern::CViewPattern()
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 }
-
-
 
 void CViewPattern::OnInitialUpdate()
 //----------------------------------
@@ -2198,6 +2197,15 @@ void CViewPattern::OnMuteChannel(BOOL current)
 		UINT nChn = current ? (m_dwCursor&0xFFFF)>>3 : (m_nMenuParam&0xFFFF)>>3;
 		pModDoc->SoloChannel(nChn, FALSE); //rewbs.merge: recover old solo/mute behaviour
 		pModDoc->MuteChannel(nChn, !pModDoc->IsChannelMuted(nChn));
+
+		//If we just unmuted a channel, make sure none are still considered "solo".
+		if (!pModDoc->IsChannelMuted(nChn)) {
+			UINT nNumChn = pModDoc->GetNumChannels();
+			for (UINT i=0; i<nNumChn; i++){
+				pModDoc->SoloChannel(i, FALSE);
+			}
+		}
+
 		InvalidateChannelsHeaders();
 	}
 }
@@ -3760,6 +3768,12 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcNavigateDown:	SetCurrentRow(m_nRow+1, TRUE); return wParam;
 		case kcNavigateUpSelect:
 		case kcNavigateUp:		SetCurrentRow(m_nRow-1, TRUE); return wParam;
+		
+		case kcNavigateDownBySpacingSelect:
+		case kcNavigateDownBySpacing:	SetCurrentRow(m_nRow+m_nSpacing, TRUE); return wParam;
+		case kcNavigateUpBySpacingSelect:
+		case kcNavigateUpBySpacing:		SetCurrentRow(m_nRow-m_nSpacing, TRUE); return wParam;
+		
 		case kcNavigateLeftSelect:
 		case kcNavigateLeft:	if ((CMainFrame::m_dwPatternSetup & PATTERN_WRAP) && (!m_dwCursor))
 									SetCurrentColumn((((pSndFile->m_nChannels-1) << 3) | 4));
@@ -4388,7 +4402,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		{
 			if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
 			{
-				if ((timeGetTime() - m_dwLastNoteEntryTime < CMainFrame::gnAutoChordWaitTime) && (nRow>=m_nSpacing))
+				if ((timeGetTime() - m_dwLastNoteEntryTime < CMainFrame::gnAutoChordWaitTime) 
+					&& (nRow>=m_nSpacing) && (!m_bLastNoteEntryBlocked))
 					nRow -= m_nSpacing;
 			}
 		}
@@ -4431,8 +4446,15 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			if ((pMainFrm->GetFollowSong(pModDoc) != m_hWnd) || (pSndFile->IsPaused())
 					|| (!(m_dwStatus & PATSTATUS_FOLLOWSONG)))
 			{
-				if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) 
-					SetCurrentRow(nRow+m_nSpacing);
+				if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) {
+					if (nRow+m_nSpacing<pSndFile->PatternSize[m_nPattern]) {
+						SetCurrentRow(nRow+m_nSpacing);
+						m_bLastNoteEntryBlocked=false;
+					} else {
+						m_bLastNoteEntryBlocked=true;  // if the cursor is block by the end of the pattern here,
+					}								   // we must remember to not step back should the next note form a chord.
+						
+				}
 				DWORD sel = m_dwCursor | (m_nRow << 16);
 				SetCurSel(sel, sel);
 			}
