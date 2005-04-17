@@ -22,6 +22,7 @@ public:
 
 public:
 	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = m_nChannels = 0; }
+	BOOL VerifyData();
 	void UpdateDialog();
 
 protected:
@@ -29,6 +30,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+	
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CModTypeDlg)
 	afx_msg void OnCheck1();

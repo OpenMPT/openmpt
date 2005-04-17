@@ -11,6 +11,7 @@ class CVstPlugin;
 class CVstEditor;
 class Cfxp;				//rewbs.VSTpresets
 class CModDoc;
+class CSoundFile;
 
 enum {
 	effBuzzGetNumCommands=0x1000,
@@ -75,6 +76,7 @@ protected:
 	float m_FloatBuffer[MIXBUFFERSIZE*32+31];	// 2ch separated + up to 32 VSTi outputs...
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
 	CModDoc* m_pModDoc;			 //rewbs.plugDocAware
+	CSoundFile* m_pSndFile;			 //rewbs.plugDocAware
 //	PSNDMIXPLUGIN m_pSndMixPlugin;	 //rewbs.plugDocAware
 	UINT m_nPreviousMidiChan; //rewbs.VSTCompliance
 	bool m_bSongPlaying; //rewbs.VSTCompliance
@@ -103,7 +105,8 @@ public:
 	bool GetParams(float* param, long min, long max); 	//rewbs.VSTpresets
 	bool RandomizeParams(long minParam=0, long maxParam=0); 	//rewbs.VSTpresets
 	bool isModified() {return m_bModified;}
-	CModDoc* GetModDoc() {return m_pModDoc;}
+	inline CModDoc* GetModDoc() {return m_pModDoc;}
+	inline CSoundFile* GetSoundFile() {return m_pSndFile;}
 
 	VOID SetCurrentProgram(UINT nIndex);
 //rewbs.VSTCompliance: Eric's non standard preset stuff:

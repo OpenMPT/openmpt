@@ -409,6 +409,7 @@ void CCtrlGeneral::OnChangeModType()
 // -! NEW_FEATURE#0015
 		}
 		if (bShowLog) m_pModDoc->ShowLog("Conversion Status", this);
+		m_pModDoc->SetModified();
 	}
 }
 

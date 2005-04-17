@@ -1,5 +1,6 @@
 #include "stdafx.h"
 //#include "vstplug.h"
+#include "moddoc.h"
 #include "defaultvsteditor.h"
 #include ".\defaultvsteditor.h"
 
@@ -121,8 +122,10 @@ void CDefaultVstEditor::OnParamValChangedText()
 		val=100;
 	m_pVstPlugin->SetParameter(m_nCurrentParam, val/100.0f);
 	
-	if (!m_nControlLock)
+	if (!m_nControlLock) {
 		UpdateAll();
+		m_pVstPlugin->GetModDoc()->SetModified();
+	}
 }
 
 void CDefaultVstEditor::OnParamValChangedSlide()
@@ -133,8 +136,10 @@ void CDefaultVstEditor::OnParamValChangedSlide()
 	
 	wsprintf(s, "%000d", val);
 	
-	if (!m_nControlLock)
+	if (!m_nControlLock) {
 		UpdateAll();
+		m_pVstPlugin->GetModDoc()->SetModified();
+	}
 }
 void CDefaultVstEditor::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {

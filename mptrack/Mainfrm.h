@@ -205,6 +205,9 @@ enum
 #define	PATTERN_ALTERNTIVEBPMSPEED	0x200000
 // -! NEW_FEATURE#0022
 
+#define PATTERN_HILITETIMESIGS	0x400000 
+
+
 // Keyboard Setup
 enum {
 	KEYBOARD_CUSTOM=0,
@@ -511,13 +514,12 @@ public:
 	BOOL PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample, UINT nNote=0);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn);
 	BOOL StopSoundFile(CSoundFile *);
-	BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); 	}
-	BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); 	} //rewbs.VSTTimeInfo
+	inline BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); 	}
+	inline BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); 	} //rewbs.VSTTimeInfo
 	DWORD GetElapsedTime() const { return m_dwElapsedTime; }
 	void ResetElapsedTime() { m_dwElapsedTime = 0; }
-	CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
-	//CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()) ? m_pSndFile : NULL; } 
-	CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
+	inline CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
+	inline CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
 	BOOL InitRenderer(CSoundFile*);  //rewbs.VSTTimeInfo
 	BOOL StopRenderer(CSoundFile*);  //rewbs.VSTTimeInfo
 	void SwitchToActiveView();
@@ -594,6 +596,7 @@ public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
 	//rewbs.customKeys - We have swicthed focus to a new module - might need to update effect keys to reflect module type
 	bool UpdateEffectKeys(void); 
+	bool UpdateHighlights(void);
 	afx_msg void OnKillFocus(CWnd* pNewWnd); //end rewbs.fix3116
 };
 

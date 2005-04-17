@@ -688,9 +688,11 @@
 #define IDC_AUTOSAVE_ENABLE             2223
 #define IDC_AUTOSAVE_HISTORY            2224
 #define IDC_AUTOSAVE_USEORIGDIR         2225
-#define IDC_ROWSPERMEASURE              2226
-#define IDC_ROWSPERBEAT                 2227
+#define IDC_PRIMARYHILITE               2226
+#define IDC_SECONDARYHILITE             2227
 #define IDC_GIVEPLUGSIDLETIME           2228
+#define IDC_ROWSPERBEAT                 2229
+#define IDC_ROWSPERMEASURE              2230
 #define IDC_TEXT_BPM                    2300
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
@@ -878,7 +880,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        501
 #define _APS_NEXT_COMMAND_VALUE         36011
-#define _APS_NEXT_CONTROL_VALUE         2229
+#define _APS_NEXT_CONTROL_VALUE         2231
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -885,6 +885,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 						{
 							pVstPlugin->SetParameter(m_nCurrentParam, fValue);
 							OnParamChanged();
+							if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) pModDoc->SetModified();
 						}
 					}
 				}

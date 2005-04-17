@@ -418,34 +418,37 @@ FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     COMBOBOX        IDC_COMBO1,9,26,134,109,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "Rows Per Measure",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,43,74,10
-    EDITTEXT        IDC_ROWSPERMEASURE,87,42,21,12,ES_AUTOHSCROLL | 
+    CONTROL         "Primary highlight",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,19,75,74,10
+    EDITTEXT        IDC_PRIMARYHILITE,100,74,21,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    CONTROL         "Rows Per Beat",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,57,71,10
-    EDITTEXT        IDC_ROWSPERBEAT,87,56,21,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Secondary highlight",IDC_CHECK4,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,19,87,80,10
+    EDITTEXT        IDC_SECONDARYHILITE,100,86,21,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
     CONTROL         "Enable effect highlighting",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,83,114,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,10,53,114,10
     CONTROL         "Use small font",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,94,102,10
+                    WS_TABSTOP,10,43,102,10
     PUSHBUTTON      "MPT",IDC_BUTTON5,154,26,22,12
     PUSHBUTTON      "FT2",IDC_BUTTON6,179,26,22,12
     PUSHBUTTON      "IT",IDC_BUTTON7,154,40,22,12
     PUSHBUTTON      "Buzz",IDC_BUTTON8,179,40,22,12
-    CONTROL         "Color",IDC_BUTTON1,"Button",BS_OWNERDRAW,154,75,51,15
-    CONTROL         "Color",IDC_BUTTON2,"Button",BS_OWNERDRAW,154,105,51,15
-    CONTROL         "Color",IDC_BUTTON3,"Button",BS_OWNERDRAW,154,136,51,15
-    LTEXT           "Background:",IDC_TEXT1,154,64,60,8
-    LTEXT           "Foreground:",IDC_TEXT2,154,94,62,8
-    LTEXT           "Hilight:",IDC_TEXT3,154,126,61,8
-    GROUPBOX        "",IDC_STATIC,4,7,217,155
+    CONTROL         "Color",IDC_BUTTON1,"Button",BS_OWNERDRAW,15,174,51,15
+    CONTROL         "Color",IDC_BUTTON2,"Button",BS_OWNERDRAW,88,174,51,15
+    CONTROL         "Color",IDC_BUTTON3,"Button",BS_OWNERDRAW,158,174,51,15
+    LTEXT           "Background:",IDC_TEXT1,15,163,60,8
+    LTEXT           "Foreground:",IDC_TEXT2,88,163,62,8
+    LTEXT           "Highlight:",IDC_TEXT3,159,164,61,8
+    GROUPBOX        "",IDC_STATIC,4,7,217,191
     LTEXT           "Select color for:",IDC_STATIC,10,15,63,8
-    LTEXT           "rows",IDC_STATIC,111,44,16,8
+    LTEXT           "rows",IDC_STATIC,124,76,16,8
     LTEXT           "Presets:",IDC_STATIC,154,15,28,8
-    LTEXT           "rows",IDC_STATIC,111,58,16,8
-    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,13,108,
+    LTEXT           "rows",IDC_STATIC,124,88,16,8
+    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,54,113,
                     114,43
+    CONTROL         "Set highlights to songs' time sigatures",IDC_CHECK5,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,63,136,10
 END
 
 IDD_MIDISETUP DIALOG  0, 0, 240, 156
@@ -842,15 +845,15 @@ BEGIN
     GROUPBOX        "Attack",IDC_STATIC,3,138,123,30
 END
 
-IDD_MODDOC_MODTYPE DIALOGEX 0, 0, 237, 118
+IDD_MODDOC_MODTYPE DIALOGEX 0, 0, 243, 118
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Module Type"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,183,8,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,183,26,50,14
-    GROUPBOX        "",IDC_STATIC,4,4,174,111
+    DEFPUSHBUTTON   "OK",IDOK,189,8,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,189,26,50,14
+    GROUPBOX        "",IDC_STATIC,4,4,181,111
     COMBOBOX        IDC_COMBO1,8,22,101,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     COMBOBOX        IDC_COMBO2,114,22,60,77,CBS_DROPDOWNLIST | WS_VSCROLL | 
@@ -869,6 +872,11 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,8,88,96,10
     CONTROL         "Embed instrument parameters",IDC_CHECK6,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,8,100,124,10
+    EDITTEXT        IDC_ROWSPERBEAT,114,39,16,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_ROWSPERMEASURE,114,51,16,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Rows/beat",IDC_STATIC,133,41,36,8
+    LTEXT           "Rows/measure",IDC_STATIC,133,53,49,8
 END
 
 IDD_SHOWLOG DIALOG  0, 0, 300, 106
@@ -1784,6 +1792,11 @@ BEGIN
     BEGIN
         RIGHTMARGIN, 435
         BOTTOMMARGIN, 168
+    END
+
+    IDD_MODDOC_MODTYPE, DIALOG
+    BEGIN
+        RIGHTMARGIN, 237
     END
 
     IDD_SHOWLOG, DIALOG

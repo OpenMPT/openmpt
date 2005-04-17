@@ -130,6 +130,9 @@ BOOL CModTypeDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_nType = m_pSndFile->m_nType;
 	m_nChannels = m_pSndFile->m_nChannels;
+	SetDlgItemInt(IDC_ROWSPERBEAT, m_pSndFile->m_nRowsPerBeat);
+	SetDlgItemInt(IDC_ROWSPERMEASURE, m_pSndFile->m_nRowsPerMeasure);
+
 	m_TypeBox.SetItemData(m_TypeBox.AddString("ProTracker MOD"), MOD_TYPE_MOD);
 	m_TypeBox.SetItemData(m_TypeBox.AddString("ScreamTracker S3M"), MOD_TYPE_S3M);
 	m_TypeBox.SetItemData(m_TypeBox.AddString("FastTracker XM"), MOD_TYPE_XM);
@@ -188,6 +191,10 @@ void CModTypeDlg::UpdateDialog()
 // -> DESC="IT project files (.itp)"
 	m_CheckBox6.EnableWindow(m_TypeBox.GetCurSel() == 4 ? TRUE : FALSE);
 // -! NEW_FEATURE#0023
+	
+	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+
 }
 
 
@@ -252,10 +259,29 @@ void CModTypeDlg::OnCheck6()
 }
 // -! NEW_FEATURE#0023
 
+BOOL CModTypeDlg::VerifyData() 
+//---------------------------------
+{
+
+	int temp_nRPB = GetDlgItemInt(IDC_ROWSPERBEAT);
+	int temp_nRPM = GetDlgItemInt(IDC_ROWSPERMEASURE);
+	if ((temp_nRPB >= temp_nRPM))
+	{
+		::AfxMessageBox("Error: Rows per measure must be greater than rows per beat.", MB_OK|MB_ICONEXCLAMATION);
+		GetDlgItem(IDC_ROWSPERMEASURE)->SetFocus();
+		return FALSE;
+	}
+
+	return TRUE;
+}
 
 void CModTypeDlg::OnOK()
 //----------------------
 {
+	if (!VerifyData()) {
+		return;
+	}
+
 	int sel = m_TypeBox.GetCurSel();
 	if (sel >= 0)
 	{
@@ -275,6 +301,9 @@ void CModTypeDlg::OnOK()
 		m_nChannels = m_ChannelsBox.GetItemData(sel);
 		//if (m_nType & MOD_TYPE_XM) m_nChannels = (m_nChannels+1) & 0xFE;
 	}
+	m_pSndFile->m_nRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
+	m_pSndFile->m_nRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
+
 	CDialog::OnOK();
 }
 

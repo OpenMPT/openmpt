@@ -591,42 +591,23 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	BYTE * ptr = (BYTE *)(lpStream + dwMemPos);
 
 	// Seek for supported extended settings header
-	if( (*((__int32 *)ptr)) == 'MPTX' && m_nInstruments ){
+	__int16 size = 0;
+	__int32 code = (*((__int32 *)ptr));
 
-		__int16 size;
-		__int32 code;
+	// Instrument extensions
+	if( code == 'MPTX' && m_nInstruments ){
+		ptr += sizeof(__int32);							// jump extension header code
+		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for inst. extensions
 
-		// jump extension header code
-		ptr += sizeof(__int32);
-		while( (DWORD)(ptr - lpStream) < dwMemLength ){
+			code = (*((__int32 *)ptr));			// read field code
+			if (code == 'MPTS') {				//Reached song extensions, break out of this loop
+				break;
+			}
+			
+			ptr += sizeof(__int32);				// jump field code
+			size = (*((__int16 *)ptr));			// read field size
+			ptr += sizeof(__int16);				// jump field size
 
-			// read field code
-			code = (*((__int32 *)ptr));
-			// jump field code
-			ptr += sizeof(__int32);
-
-			//rewbs.instroVSTi: changed to use generic instrument header code loader,
-			//                  so as to pick up extra plugin info as well as ramping.
-			// OLD: 
-			/*// nVolRamp
-			if(code == 'VR..'){
-				// read field size
-				size = (*((__int16 *)ptr));
-				// jump field size
-				ptr += sizeof(__int16);
-				// read ramping values
-				for(UINT nins=1; nins<=m_nInstruments; nins++){
-					if(Headers[nins]){
-						Headers[nins]->nVolRamp = (*((USHORT *)ptr));
-						ptr += size;
-					}
-				}
-			}*/
-			//NEW:		
-			// read field size
-			size = (*((__int16 *)ptr));
-			// jump field size
-			ptr += sizeof(__int16);
 			for(UINT nins=1; nins<=m_nInstruments; nins++){
 				if(Headers[nins]){
 					// get field's adress in instrument's header
@@ -638,16 +619,32 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				}
 			}
 			//end rewbs.instroVSTi
-
-			if(code == 'SEP@' || code == 'MPTX'){
-				// this case induce more extra infos but not related to _INSTRUMENTHEADER
-				// for now, as nothing more is supported, we just leave normally.........
-				return TRUE;
-			}
 		}
 	}
-
 // -! NEW_FEATURE#0027
+
+	// Song extensions
+	if( code == 'MPTS' ){
+		ptr += sizeof(__int32); // jump extension header code
+		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for song extensions
+			code = (*((__int32 *)ptr));			// read field code
+			ptr += sizeof(__int32);				// jump field code
+			size = (*((__int16 *)ptr));			// read field size
+			ptr += sizeof(__int16);				// jump field size
+
+			BYTE * fadr = NULL;
+			switch (code) {						// interpret field code
+				case 'DT..': fadr = reinterpret_cast<BYTE*>(&m_nDefaultTempo);   break;
+				case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
+				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;
+			}
+
+			if (fadr != NULL) {					// if field code recognized
+				memcpy(fadr,ptr,size);			// read field data
+			}
+			ptr += size;						// jump field data
+		}
+	}
 
 	return TRUE;
 }
@@ -1050,6 +1047,34 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 
 	}
 // -! NEW_FEATURE#0027
+
+	{  //Extra song data - Yet Another Hack. 
+		__int16 size;
+		//Extra song file data
+		__int32 code = 'MPTS';
+		fwrite(&code, 1, sizeof(__int32), f);
+		
+		
+		code = 'DT..';							//write m_nDefaultTempo field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
+
+		code = 'RPB.';							//write m_nRowsPerBeat field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nRowsPerBeat);			//write m_nRowsPerBeat field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nRowsPerBeat, 1, size, f);	//write m_nRowsPerBeat
+
+		code = 'RPM.';							//write m_nRowsPerMeasure field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nRowsPerMeasure);		//write m_nRowsPerMeasure field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nRowsPerMeasure, 1, size, f);	//write m_nRowsPerMeasure
+
+	}
+
 
 	fclose(f);
 	return TRUE;
