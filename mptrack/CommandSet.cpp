@@ -127,22 +127,22 @@ void CCommandSet::SetupCommands()
 	commands[kcPatternJumpDownh1].UID = 1017;
 	commands[kcPatternJumpDownh1].isHidden = false;
 	commands[kcPatternJumpDownh1].isDummy = false;
-	commands[kcPatternJumpDownh1].Message = "Jump down by highlight1";
+	commands[kcPatternJumpDownh1].Message = "Jump down by measure";
 
 	commands[kcPatternJumpUph1].UID = 1018;
 	commands[kcPatternJumpUph1].isHidden = false;
 	commands[kcPatternJumpUph1].isDummy = false;
-	commands[kcPatternJumpUph1].Message = "Jump up by highlight1";
+	commands[kcPatternJumpUph1].Message = "Jump up by measure";
 
 	commands[kcPatternSnapDownh1].UID = 1019;
 	commands[kcPatternSnapDownh1].isHidden = false;
 	commands[kcPatternSnapDownh1].isDummy = false;
-	commands[kcPatternSnapDownh1].Message = "Snap down to highlight1";
+	commands[kcPatternSnapDownh1].Message = "Snap down to measure";
 
 	commands[kcPatternSnapUph1].UID = 1020;
 	commands[kcPatternSnapUph1].isHidden = false;
 	commands[kcPatternSnapUph1].isDummy = false;
-	commands[kcPatternSnapUph1].Message = "Snap up to highlight1";
+	commands[kcPatternSnapUph1].Message = "Snap up to measure";
 
 	commands[kcViewGeneral].UID = 1021;
 	commands[kcViewGeneral].isHidden = false;
@@ -1735,22 +1735,22 @@ void CCommandSet::SetupCommands()
 	commands[kcPatternJumpDownh2].UID = 1338;
 	commands[kcPatternJumpDownh2].isHidden = false;
 	commands[kcPatternJumpDownh2].isDummy = false;
-	commands[kcPatternJumpDownh2].Message = "Jump down by highlight2";
+	commands[kcPatternJumpDownh2].Message = "Jump down by beat";
 
 	commands[kcPatternJumpUph2].UID = 1339;
 	commands[kcPatternJumpUph2].isHidden = false;
 	commands[kcPatternJumpUph2].isDummy = false;
-	commands[kcPatternJumpUph2].Message = "Jump up by highlight2";
+	commands[kcPatternJumpUph2].Message = "Jump up by beat";
 
 	commands[kcPatternSnapDownh2].UID = 1340;
 	commands[kcPatternSnapDownh2].isHidden = false;
 	commands[kcPatternSnapDownh2].isDummy = false;
-	commands[kcPatternSnapDownh2].Message = "Snap down to highlight2";
+	commands[kcPatternSnapDownh2].Message = "Snap down to beat";
 
 	commands[kcPatternSnapUph2].UID = 1341;
 	commands[kcPatternSnapUph2].isHidden = false;
 	commands[kcPatternSnapUph2].isDummy = false;
-	commands[kcPatternSnapUph2].Message = "Snap up to highlight2";
+	commands[kcPatternSnapUph2].Message = "Snap up to beat";
 
 
 	commands[kcPatternJumpDownh2Select].UID = 1342;
@@ -2163,6 +2163,18 @@ void CCommandSet::SetupCommands()
 	commands[kcNavigateUpBySpacing].isHidden = false;
 	commands[kcNavigateUpBySpacing].isDummy = false;
 	commands[kcNavigateUpBySpacing].Message = "Navigate up by spacing";
+
+	commands[kcPrevDocument].UID = 1693;
+	commands[kcPrevDocument].Message = "Previous Document";
+	commands[kcPrevDocument].isHidden = false;
+	commands[kcPrevDocument].isDummy = false;
+	
+	commands[kcNextDocument].UID = 1694;
+	commands[kcNextDocument].Message = "Next Document";
+	commands[kcNextDocument].isHidden = false;
+	commands[kcNextDocument].isDummy = false;
+
+
 
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{

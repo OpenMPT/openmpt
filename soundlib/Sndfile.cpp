@@ -120,8 +120,10 @@ Exemple with "nPanLoopEnd" , "nPitchLoopEnd" & "VolEnv[MAX_ENVPOINTS]" members :
 
 		[EXT]	means external (not related) to INSTRUMENTHEADER content
 
+C...	[EXT]	nChannels
 DCT.			nDCT;
 dF..			dwFlags;
+DT..	[EXT]	nDefaultTempo;			
 DNA.			nDNA;
 EBIH	[EXT]	embeded instrument header tag (ITP file format)
 fn[.			filename[12];
@@ -135,6 +137,7 @@ MC..			nMidiChannel;
 MDK.			nMidiDrumKey;
 MiP.			nMixPlug;
 MP..			nMidiProgram;
+MPTS	[EXT]									Extra song info tag
 MPTX	[EXT]									EXTRA INFO tag
 n[..			name[32];
 NNA.			nNNA;
@@ -157,6 +160,8 @@ PPS.			nPPS;
 PS..			nPanSwing;
 PSB.			nPanSustainBegin;
 PSE.			nPanSustainEnd;
+RPB.	[EXT]	nRowsPerBeat;
+RPM.	[EXT]	nRowsPerMeasure;
 SEP@	[EXT]									chunk SEPARATOR tag
 VE..			nVolEnv;
 VE[.			VolEnv[MAX_ENVPOINTS];
@@ -336,6 +341,9 @@ CSoundFile::CSoundFile()
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
 	m_nSeqOverride = 0;
+	m_nRowsPerBeat = 4;
+	m_nRowsPerMeasure = 16;
+
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -918,6 +926,14 @@ UINT CSoundFile::GetCurrentPos() const
 	return pos + m_nRow; 
 }
 
+double  CSoundFile::GetCurrentBPM() const
+//---------------------------------------
+{
+	double ticksPerBeat = m_nMusicSpeed*m_nRowsPerBeat;			//ticks/beat = ticks/row  * rows/beat
+	double samplesPerBeat = m_nSamplesPerTick*ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
+	double bpm =  gdwMixingFreq/samplesPerBeat*60;				//beats/sec  = samps/sec  / samps/beat
+    return bpm;													//beats/min  =  beats/sec * 60
+}
 
 void CSoundFile::SetCurrentPos(UINT nPos)
 //---------------------------------------

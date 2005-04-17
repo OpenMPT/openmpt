@@ -694,6 +694,8 @@ public:	// for Editing
 	UINT m_nTickCount, m_nTotalCount, m_nPatternDelay, m_nFrameDelay;
 	ULONG m_lTotalSampleCount;	// rewbs.VSTTimeInfo
 	UINT m_nSamplesPerTick;	// rewbs.betterBPM
+	UINT m_nRowsPerBeat;	// rewbs.betterBPM
+	UINT m_nRowsPerMeasure;	// rewbs.betterBPM
 	UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
@@ -744,6 +746,7 @@ public:
 	UINT GetSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;
+	double GetCurrentBPM() const;
 	int FindOrder(BYTE pat);					//rewbs.playSongFromCursor
 	void DontLoopPattern(int nPat, int nRow=0); //rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);

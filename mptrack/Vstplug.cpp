@@ -6,6 +6,7 @@
 #include "mainfrm.h"
 #include "vstplug.h"
 #include "moddoc.h"
+#include "sndfile.h"
 #include "fxp.h"					//rewbs.VSTpresets
 #include "AbstractVstEditor.h"		//rewbs.defaultPlugGUI
 #include "VstEditor.h"				//rewbs.defaultPlugGUI
@@ -665,21 +666,22 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		{
 			timeInfo.flags |= kVstPpqPosValid;
 			if (timeInfo.flags & kVstTransportPlaying)
-				timeInfo.ppqPos = (timeInfo.samplePos/timeInfo.sampleRate)*(CMainFrame::GetMainFrame()->GetApproxBPM()/60.0);
+				timeInfo.ppqPos = (timeInfo.samplePos/timeInfo.sampleRate)*(((CVstPlugin*)effect->resvd1)->GetSoundFile()->GetCurrentBPM()/60.0);
 			else
 				timeInfo.ppqPos = 0;
 		}
 		if (value & kVstTempoValid)
 		{	
-			timeInfo.tempo = CMainFrame::GetMainFrame()->GetApproxBPM();
+			timeInfo.tempo = ((CVstPlugin*)effect->resvd1)->GetSoundFile()->GetCurrentBPM();
 			if (timeInfo.tempo)
 				timeInfo.flags |= kVstTempoValid;
 		}
 		if (value & kVstTimeSigValid)
-		{	//Send a fake time sig until we get this sorted.
+		{
+			CSoundFile *pSndFile = ((CVstPlugin*)effect->resvd1)->GetSoundFile();
 			timeInfo.flags |= 	kVstTimeSigValid;
-			timeInfo.timeSigNumerator = CMainFrame::m_nRowSpacing2;
-			timeInfo.timeSigDenominator = CMainFrame::m_nRowSpacing;
+			timeInfo.timeSigNumerator = pSndFile->m_nRowsPerBeat;
+			timeInfo.timeSigDenominator = pSndFile->m_nRowsPerMeasure;
 		}
 		return (long)&timeInfo;
 	}
@@ -694,7 +696,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	// returns tempo (in bpm * 10000) at sample frame location passed in <value>
 	case audioMasterTempoAt:
 		//Screw it! Let's just return the tempo at this point in time (might be a bit wrong).
-		return CMainFrame::GetMainFrame()->GetApproxBPM()*10000;
+		return ((CVstPlugin*)effect->resvd1)->GetSoundFile()->GetCurrentBPM()*10000;
 	// parameters
 	case audioMasterGetNumAutomatableParameters:						
 		Log("VST plugin to host: Get Num Automatable Parameters\n");
@@ -1441,6 +1443,7 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 
 	//rewbs.plugDocAware
 	m_pModDoc = pModDoc;
+	m_pSndFile = pModDoc->GetSoundFile();
 //	m_pSndMixPlugin = m_pSndFile->GetSndPlugMixPlug(this);
 //	ASSERT(m_pSndMixPlugin);
 	//end rewbs.plugDocAware
@@ -1916,9 +1919,11 @@ void CVstPlugin::ProcessVSTEvents()
 		try {
 			m_pEffect->dispatcher(m_pEffect, effProcessEvents, 0, 0, m_pEvList, 0);
 		} catch (...) {
-			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s)\n", m_pFactory->szLibraryName);
+			CVstPluginManager::ReportPlugException("Exception in ProcessVSTEvents() (Plugin=%s, pEventList:%p, numEvents:%d, MidicodeCh:%d, MidicodeEv:%d, MidicodeNote:%d, MidiCodeVel:%d)\n", m_pFactory->szLibraryName, m_pEvList, m_pEvList->numEvents,
+(((VstMidiEvent *)(m_pEvList->events[0]))->midiData[0])&0x0f, (((VstMidiEvent *)(m_pEvList->events[0]))->midiData[0])&0xf0, (((VstMidiEvent *)(m_pEvList->events[0]))->midiData[1])&0xff, (((VstMidiEvent *)(m_pEvList->events[0]))->midiData[2])&0xff);
 		}
 	}
+	
 }
 
 void CVstPlugin::ClearVSTEvents()
@@ -1935,6 +1940,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 {
 	float wetRatio, dryRatio; // rewbs.dryRatio [20040123]
 	bool isInstrument;
+
 
 	ProcessVSTEvents();
 

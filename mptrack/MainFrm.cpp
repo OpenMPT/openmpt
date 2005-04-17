@@ -172,7 +172,7 @@ DWORD CMainFrame::m_dwMidiSetup = MIDISETUP_RECORDVELOCITY|MIDISETUP_RECORDNOTEO
 DWORD CMainFrame::m_dwPatternSetup = PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
 								   | PATTERN_SMALLFONT | PATTERN_CENTERROW | PATTERN_AUTOSPACEBAR
 								   | PATTERN_DRAGNDROPEDIT | PATTERN_FLATBUTTONS 
-								   | PATTERN_2NDHIGHLIGHT | PATTERN_STDHIGHLIGHT;
+								   | PATTERN_2NDHIGHLIGHT | PATTERN_STDHIGHLIGHT | PATTERN_HILITETIMESIGS;
 DWORD CMainFrame::m_nRowSpacing = 16;
 DWORD CMainFrame::m_nRowSpacing2 = 4;
 DWORD CMainFrame::m_nKeyboardCfg = KEYBOARD_MPT;
@@ -2611,6 +2611,9 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcHelp: 		CMDIFrameWnd::OnHelp(); break;
 		case kcViewAddPlugin: OnPluginSetup(); break;
 		case kcViewChannelManager: OnChannelManager(); break;
+		case kcNextDocument:	MDINext(); break;
+		case kcPrevDocument:	MDIPrev(); break;
+
 
 		//D'oh!! moddoc isn't a CWnd so we have to handle its messages and pass them on.
 
@@ -2684,19 +2687,10 @@ double CMainFrame::GetApproxBPM()
 	CModDoc *pPlayingModDoc = GetModPlaying();
 	CSoundFile *pSndFile = NULL;
 
-	if (pPlayingModDoc) {
-		pSndFile = pPlayingModDoc->GetSoundFile();
-	} else if (GetActiveDoc()) {
-		pSndFile = GetActiveDoc()->GetSoundFile();
-	}
+	pSndFile = GetActiveDoc()->GetSoundFile();
 	if (pSndFile) {
-		// Assumes Highlight2 is rows per beat.
-		double ticksPerBeat = pSndFile->m_nMusicSpeed*m_nRowSpacing2;
-		double samplesPerBeat = pSndFile->m_nSamplesPerTick*ticksPerBeat;
-		double bpm = pSndFile->GetSampleRate()/samplesPerBeat*60;
-		return bpm;
+		return pSndFile->GetCurrentBPM();
 	}
-
 	return 0;
 }
 
@@ -2742,6 +2736,27 @@ bool CMainFrame::UpdateEffectKeys(void)
 	return false;
 }
 //end rewbs.customKeys
+
+bool CMainFrame::UpdateHighlights()
+//---------------------------------
+{
+	if (!(CMainFrame::m_dwPatternSetup & PATTERN_HILITETIMESIGS))
+		return false;
+
+	CModDoc* pModDoc = GetActiveDoc();
+	if (pModDoc)
+	{
+		CSoundFile* pSndFile = pModDoc->GetSoundFile();
+		if (pSndFile)
+		{
+			CMainFrame::m_nRowSpacing  = pSndFile->m_nRowsPerMeasure;
+			CMainFrame::m_nRowSpacing2 = pSndFile->m_nRowsPerBeat;
+			return true;
+		}
+	}
+	
+	return false;
+}
 
 
 //rewbs.fix3116

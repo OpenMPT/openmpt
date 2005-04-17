@@ -116,7 +116,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		else
 			pEndInstHeader=(BYTE*)pis+sizeof(ITINSTRUMENT);
 
-		//If the next piece of data is 'INSM' we have modular extensions to our instrument and...
+		//If the next piece of data is 'INSM' we have modular extensions to our instrument...
 		if ( *( (UINT*)pEndInstHeader ) == 'INSM' )
 		{
 			//...the next piece of data must be the total size of the modular data
@@ -524,14 +524,16 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 
 // Extra info data
 
-	__int32 fcode;
-	__int16 fsize;
+	__int32 fcode = 0;
+	__int16 fsize = 0;
 	BYTE * ptr = (BYTE *)(lpStream + streamPos);
 
+	if (streamPos < dwMemLength) {
+		fcode = (*((__int32 *)ptr));
+	}
+
 // Embed instruments' header [v1.01]
-
-	if(version >= 0x00000101 && m_dwSongFlags & SONG_ITPEMBEDIH && streamPos < dwMemLength && (*((__int32 *)ptr)) == 'EBIH'){
-
+	if(version >= 0x00000101 && m_dwSongFlags & SONG_ITPEMBEDIH && fcode == 'EBIH'){
 		// jump embeded instrument header tag
 		ptr += sizeof(__int32);
 
@@ -541,35 +543,59 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 		// parse file
 		while( ptr < (BYTE *)(lpStream + dwMemLength) && i <= m_nInstruments ){
 
-			// read field code
-			fcode = (*((__int32 *)ptr));
+			fcode = (*((__int32 *)ptr));			// read field code
 
 			switch( fcode ){
+				case 'MPTS': goto mpts; //:)		// reached end of instrument headers 
 				case 'SEP@': case 'MPTX':
-					// jump code
-					ptr += sizeof(__int32);
-					// switch to next instrument
-					i++;
+					ptr += sizeof(__int32);			// jump code
+					i++;							// switch to next instrument
 				break;
 
 				default:
-					// jump field code
-					ptr += sizeof(__int32);
-					// read field size
-					fsize = (*((__int16 *)ptr));
-					// jump field size
-					ptr += sizeof(__int16);
-					// get field's adress in instrument's header
+					ptr += sizeof(__int32);			// jump field code
+					fsize = (*((__int16 *)ptr));	// read field size
+					ptr += sizeof(__int16);			// jump field size
 					BYTE * fadr = GetInstrumentHeaderFieldPointer(Headers[i], fcode, fsize);
-					// copy field data in instrument's header (except for keyboard mapping)
-					if(fadr && fcode != 'K[..') memcpy(fadr,ptr,fsize);
-					// jump field
-					ptr += fsize;
+					if(fadr && fcode != 'K[..')		// copy field data in instrument's header
+						memcpy(fadr,ptr,fsize);		// (except for keyboard mapping)
+					ptr += fsize;					// jump field
 				break;
 			}
 		}
 	}
 
+	//HACK: if we fail on i <= m_nInstruments above, arrive here without having set fcode as appropriate,
+	//      hence the code duplication.
+	if (ptr < (BYTE *)(lpStream + dwMemLength)) {
+		fcode = (*((__int32 *)ptr));
+	}
+
+	// Song extensions
+mpts:
+	if( fcode == 'MPTS' ){
+		ptr += sizeof(__int32); // jump extension header code
+		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for song extensions
+			fcode = (*((__int32 *)ptr));		// read field code
+			ptr += sizeof(__int32);				// jump field code
+			fsize = (*((__int16 *)ptr));		// read field size
+			ptr += sizeof(__int16);				// jump field size
+
+			BYTE * fadr = NULL;
+			switch (fcode) {					// interpret field code
+				case 'DT..': fadr = reinterpret_cast<BYTE*>(&m_nDefaultTempo);   break;
+				case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
+				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;
+				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels);		 break;
+			}
+
+			if (fadr != NULL) {					// if field code recognized
+				memcpy(fadr,ptr,fsize);			// read field data
+			}
+			ptr += fsize;						// jump field data
+		}
+		
+	}
 // Leave
 
 	m_nType = MOD_TYPE_IT;
@@ -885,6 +911,88 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		memcpy(m_szNames[nsmp+1], pis->name, 26);
 	}
+
+	for (UINT ncu=0; ncu<MAX_BASECHANNELS; ncu++)
+	{
+		if (ncu>=m_nChannels)
+		{
+			ChnSettings[ncu].nVolume = 64;
+			ChnSettings[ncu].dwFlags &= ~CHN_MUTE;
+		}
+	}
+	m_nMinPeriod = 8;
+	m_nMaxPeriod = 0xF000;
+
+// -> CODE#0027
+// -> DESC="per-instrument volume ramping setup (refered as attack)"
+
+	// Compute extra instruments settings position
+	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[pifh->smpnum-1]);
+	dwMemPos = pis->samplepointer + lastSampleSize;
+
+	// Get file pointer to match the first byte of extra settings informations	__int16 size = 0;
+	__int32 code = 0;
+	__int16 size = 0;
+	BYTE * ptr = NULL;
+	if(dwMemPos < dwMemLength) {
+		ptr = (BYTE *)(lpStream + dwMemPos);
+		code = (*((__int32 *)ptr));;
+	}
+
+	// Instrument extensions
+	if( code == 'MPTX' ){
+		ptr += sizeof(__int32);							// jump extension header code
+		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for inst. extensions
+
+			code = (*((__int32 *)ptr));			// read field code
+			if (code == 'MPTS') {				//Reached song extensions, break out of this loop
+				break;
+			}
+			
+			ptr += sizeof(__int32);				// jump field code
+			size = (*((__int16 *)ptr));			// read field size
+			ptr += sizeof(__int16);				// jump field size
+
+			for(UINT nins=1; nins<=m_nInstruments; nins++){
+				if(Headers[nins]){
+					// get field's adress in instrument's header
+					BYTE * fadr = GetInstrumentHeaderFieldPointer(Headers[nins], code, size);
+					// copy field data in instrument's header (except for keyboard mapping)
+					if(fadr && code != 'K[..') memcpy(fadr,ptr,size);
+					// jump field
+					ptr += size;
+				}
+			}
+			//end rewbs.instroVSTi
+		}
+	}
+// -! NEW_FEATURE#0027
+
+	// Song extensions
+	if( code == 'MPTS' ){
+		ptr += sizeof(__int32); // jump extension header code
+		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for song extensions
+			code = (*((__int32 *)ptr));			// read field code
+			ptr += sizeof(__int32);				// jump field code
+			size = (*((__int16 *)ptr));			// read field size
+			ptr += sizeof(__int16);				// jump field size
+
+			BYTE * fadr = NULL;
+			switch (code) {						// interpret field code
+				case 'DT..': fadr = reinterpret_cast<BYTE*>(&m_nDefaultTempo);   break;
+				case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
+				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;			
+				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels); break;		
+			}
+
+			if (fadr != NULL) {					// if field code recognized
+				memcpy(fadr,ptr,size);			// read field data
+			}
+			ptr += size;						// jump field data
+		}
+	}
+
+
 	// Reading Patterns
 	for (UINT npat=0; npat<npatterns; npat++)
 	{
@@ -1029,88 +1137,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 			}
 		}
 	}
-	for (UINT ncu=0; ncu<MAX_BASECHANNELS; ncu++)
-	{
-		if (ncu>=m_nChannels)
-		{
-			ChnSettings[ncu].nVolume = 64;
-			ChnSettings[ncu].dwFlags &= ~CHN_MUTE;
-		}
-	}
-	m_nMinPeriod = 8;
-	m_nMaxPeriod = 0xF000;
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-
-	// Compute extra instruments settings position
-	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[pifh->smpnum-1]);
-	dwMemPos = pis->samplepointer + lastSampleSize;
-
-	// Leave if no extra instrument settings are available (end of file reached)
-	if(dwMemPos >= dwMemLength) return TRUE;
-
-	// Get file pointer to match the first byte of extra settings informations
-	BYTE * ptr = (BYTE *)(lpStream + dwMemPos);
-
-	// Seek for supported extended settings header
-	if( (*((__int32 *)ptr)) == 'MPTX' && m_nInstruments ){
-
-		__int16 size;
-		__int32 code;
-
-		// jump extension header code
-		ptr += sizeof(__int32);
-
-		while( (DWORD)(ptr - lpStream) < dwMemLength ){
-
-			// read field code
-			code = (*((__int32 *)ptr));
-			// jump field code
-			ptr += sizeof(__int32);
-
-			//rewbs.instroVSTi: changed to use generic instrument header code loader,
-			// OLD: 
-			/*// nVolRamp
-			if(code == 'VR..'){
-				// read field size
-				size = (*((__int16 *)ptr));
-				// jump field size
-				ptr += sizeof(__int16);
-				// read ramping values
-				for(UINT nins=1; nins<=m_nInstruments; nins++){
-					if(Headers[nins]){
-						Headers[nins]->nVolRamp = (*((USHORT *)ptr));
-						ptr += size;
-					}
-				}
-			}*/
-			//NEW:		
-			// read field size
-			size = (*((__int16 *)ptr));
-			// jump field size
-			ptr += sizeof(__int16);
-			for(UINT nins=1; nins<=m_nInstruments; nins++){
-				if(Headers[nins]){
-					// get field's adress in instrument's header
-					BYTE * fadr = GetInstrumentHeaderFieldPointer(Headers[nins], code, size);
-					// copy field data in instrument's header (except for keyboard mapping)
-					if(fadr && code != 'K[..') memcpy(fadr,ptr,size);
-					// jump field
-					ptr += size;
-				}
-			}
-			//end rewbs.instroVSTi
-
-			if(code == 'SEP@' || code == 'MPTX'){
-				// this case induce more extra infos but not related to _INSTRUMENTHEADER
-				// for now, as nothing more is supported, we just leave normally.........
-				return TRUE;
-			}
-		}
-	}
-
-// -! NEW_FEATURE#0027
 
 	return TRUE;
 }
@@ -1361,6 +1388,34 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 		}
 	}
 
+//Extra song data - Yet Another Hack. 
+	{  //Extra song data - Yet Another Hack. 
+		__int16 size;
+		//Extra song file data
+		__int32 code = 'MPTS';
+		fwrite(&code, 1, sizeof(__int32), f);
+		
+		
+		code = 'DT..';							//write m_nDefaultTempo field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
+
+		code = 'RPB.';							//write m_nRowsPerBeat field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nRowsPerBeat);			//write m_nRowsPerBeat field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nRowsPerBeat, 1, size, f);	//write m_nRowsPerBeat
+
+		code = 'RPM.';							//write m_nRowsPerMeasure field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nRowsPerMeasure);		//write m_nRowsPerMeasure field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nRowsPerMeasure, 1, size, f);	//write m_nRowsPerMeasure
+	}
+
+
 // Close file
 
 	fclose(f);
@@ -1433,7 +1488,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (header.mv < 0x20) header.mv = 0x20;
 	if (header.mv > 0x7F) header.mv = 0x7F;
 	header.speed = m_nDefaultSpeed;
-	header.tempo = m_nDefaultTempo;
+ 	header.tempo = min(m_nDefaultTempo,255);  //Limit this one to 255, we save the real one as an extension below.
 	header.sep = 128;
 	dwHdrPos = sizeof(header) + header.ordnum;
 	// Channel Pan and Volume
@@ -1980,8 +2035,40 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		//end rewbs.fix36944
 	}
 
-// -! NEW_FEATURE#0027
+	{  //Extra song data - Yet Another Hack. 
+		__int16 size;
+		//Extra song file data
+		__int32 code = 'MPTS';
+		fwrite(&code, 1, sizeof(__int32), f);
+		
+		
+		code = 'DT..';							//write m_nDefaultTempo field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
 
+		code = 'RPB.';							//write m_nRowsPerBeat field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nRowsPerBeat);			//write m_nRowsPerBeat field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nRowsPerBeat, 1, size, f);	//write m_nRowsPerBeat
+
+		code = 'RPM.';							//write m_nRowsPerMeasure field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nRowsPerMeasure);		//write m_nRowsPerMeasure field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nRowsPerMeasure, 1, size, f);	//write m_nRowsPerMeasure
+
+		code = 'C...';							//write m_nChannels field code
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nChannels);				//write m_nChannels field size
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nChannels, 1, size, f);		//write m_nChannels
+
+	}
+
+// -! NEW_FEATURE#0027
 	// Updating offsets
 	fseek(f, dwHdrPos, SEEK_SET);
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);

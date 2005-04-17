@@ -2744,12 +2744,12 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
 		case kcFileSaveAsMP3:	OnFileMP3Convert(); break;
-		case kcFileSaveMidi: OnFileMidiConvert(); break;
+		case kcFileSaveMidi:	OnFileMidiConvert(); break;
 		case kcEstimateSongLength: OnEstimateSongLength(); break;
 		case kcApproxRealBPM:	OnApproximateBPM(); break;
-		case kcFileSave:	DoSave(m_strPathName, 0); break;
-		case kcFileSaveAs:	DoSave(NULL, 1); break;
-		case kcFileClose:	OnFileClose(); break;
+		case kcFileSave:		DoSave(m_strPathName, 0); break;
+		case kcFileSaveAs:		DoSave(NULL, 1); break;
+		case kcFileClose:		OnFileClose(); break;
 
 		case kcPlayPatternFromCursor: OnPatternPlay(); break;
 		case kcPlayPatternFromStart: OnPatternRestart(); break;
