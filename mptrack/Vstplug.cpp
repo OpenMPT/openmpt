@@ -694,9 +694,17 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		Log("VST plugin to host: Set Time\n");
 		break;
 	// returns tempo (in bpm * 10000) at sample frame location passed in <value>
-	case audioMasterTempoAt:
+	case audioMasterTempoAt: 
 		//Screw it! Let's just return the tempo at this point in time (might be a bit wrong).
-		return ((CVstPlugin*)effect->resvd1)->GetSoundFile()->GetCurrentBPM()*10000;
+		if (effect->resvd1) {
+			CSoundFile *pSndFile = ((CVstPlugin*)effect->resvd1)->GetSoundFile();
+			if (pSndFile) {
+				return pSndFile->GetCurrentBPM()*10000;
+			} else {
+				return 125*10000;
+			}
+		}
+		return 125*10000;
 	// parameters
 	case audioMasterGetNumAutomatableParameters:						
 		Log("VST plugin to host: Get Num Automatable Parameters\n");
@@ -1374,6 +1382,12 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 		m_pEvList->reserved = 0;
 	}
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
+
+	//rewbs.VSTcompliance
+	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
+	//Assuming 32bit address space...
+    m_pEffect->resvd1=(long)this;
+
 	Dispatch(effOpen, 0, 0, NULL, 0);
 	m_bIsVst2 = (CVstPlugin::Dispatch(effGetVstVersion, 0,0, NULL, 0) >= 2) ? TRUE : FALSE;
     if (m_bIsVst2)
@@ -1433,10 +1447,7 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 	//rewbs.VSTcompliance
 	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ?  m_pEffect->processReplacing : m_pEffect->process;
 
-	//rewbs.VSTcompliance
-	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
-	//Assuming 32bit address space...
-    m_pEffect->resvd1=(long)this;
+
 	
 	//TODO:
 	//GetSpeakerArrangement();
