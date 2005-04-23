@@ -45,7 +45,7 @@ public:
 	CInputHandler(CWnd *mainframe);
 	~CInputHandler(void);
 	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam);
-	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType);
+	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd=NULL);
 	int SetCommand(InputTargetContext context, CommandID command, UINT modifierMask, UINT actionKey, UINT keyEventType);
 	KeyEventType GetKeyEventType(UINT nFlags);
 	DWORD GetKey(CommandID);
@@ -56,7 +56,7 @@ public:
 	CString GetCommandText(CommandID cmd);
 
 protected:
-	CWnd *pMainFrm;
+	CWnd *m_pMainFrm;
 	int AsciiToScancode(char ch);
 	KeyMap keyMap;
 	void LogModifiers(UINT mask);	

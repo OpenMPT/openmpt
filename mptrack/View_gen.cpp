@@ -457,9 +457,10 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 				wsprintf(s, "%02X: %s", i|0x80, sname);
 				m_CbnParam.SetItemData(m_CbnParam.AddString(s), i);
 			}
-			m_CbnParam.SetRedraw(TRUE);
+            m_CbnParam.SetRedraw(TRUE);
 			if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
 			m_CbnParam.SetCurSel(m_nCurrentParam);
+			OnParamChanged();
 			pVstPlugin->GetPluginType(s);
 
 // -> CODE#0002
@@ -488,6 +489,9 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_nCurrentPreset = 0;
 			m_CbnPreset.SetRedraw(TRUE);
 			m_CbnPreset.SetCurSel(0);
+			m_sbValue.EnableWindow(TRUE);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), TRUE);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), TRUE);
 // -! NEW_FEATURE#0002
 
 		} else
@@ -505,6 +509,9 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_nCurrentPreset = 0;
 			m_CbnPreset.SetRedraw(TRUE);
 			m_CbnPreset.SetCurSel(0);
+			m_sbValue.EnableWindow(FALSE);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), FALSE);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), FALSE);
 // -! NEW_FEATURE#0002
 		}
 		SetDlgItemText(IDC_TEXT6, s);

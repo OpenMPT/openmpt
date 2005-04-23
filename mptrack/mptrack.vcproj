@@ -451,6 +451,9 @@
 				RelativePath=".\ChildFrm.cpp">
 			</File>
 			<File
+				RelativePath=".\ColourEdit.cpp">
+			</File>
+			<File
 				RelativePath=".\CommandSet.cpp">
 			</File>
 			<File
@@ -756,6 +759,9 @@
 			</File>
 			<File
 				RelativePath=".\ChildFrm.h">
+			</File>
+			<File
+				RelativePath=".\ColourEdit.h">
 			</File>
 			<File
 				RelativePath=".\CommandSet.h">

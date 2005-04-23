@@ -266,6 +266,13 @@ void CWaveConvert::OnOK()
 	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? TRUE : FALSE; //rewbs.resamplerConf - we don't want this anymore.
 	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) ? TRUE : FALSE;
 	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) ? TRUE : FALSE;
+	if (m_bGivePlugsIdleTime) {
+		if (MessageBox("You only need slow render if you are experiencing dropped notes with a Kontakt based sampler with Direct-From-Disk enabled.\nIt will make rendering *very* slow.\n\nAre you sure you want to enable slow render?",
+			"Really enable slow render?", MB_YESNO) == IDNO ) {
+			CheckDlgButton(IDC_GIVEPLUGSIDLETIME, BST_UNCHECKED);
+			return;
+		}
+	}
 
 // -> CODE#0024
 // -> DESC="wav export update"
@@ -676,20 +683,23 @@ void CDoWaveConvert::OnButton1()
 	{
 		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer));
 		
-		if (m_bGivePlugsIdleTime) {
+/*		if (m_bGivePlugsIdleTime) {
 			LARGE_INTEGER startTime, endTime, duration,Freq;
 			QueryPerformanceFrequency(&Freq);
 			long samplesprocessed = sizeof(buffer)/(m_pWaveFormat->nChannels * m_pWaveFormat->wBitsPerSample / 8);
 			duration.QuadPart = samplesprocessed / static_cast<double>(m_pWaveFormat->nSamplesPerSec) * Freq.QuadPart;
 			if (QueryPerformanceCounter(&startTime)) {
 				endTime.QuadPart=0;
-				while ((endTime.QuadPart-startTime.QuadPart)<duration.QuadPart) {
+				while ((endTime.QuadPart-startTime.QuadPart)<duration.QuadPart*4) {
 					theApp.GetPluginManager()->OnIdle();
 					QueryPerformanceCounter(&endTime);
 				}
 			}
+	}*/
+
+		if (m_bGivePlugsIdleTime) {
+			Sleep(20);
 		}
-		//Sleep(100);
 
 		if (!lRead) 
 			break;

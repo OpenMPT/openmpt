@@ -1506,16 +1506,12 @@ void CModDoc::OnPlayerPlay()
 			m_SndFile.Chn[i].dwFlags |= (CHN_NOTEFADE|CHN_KEYOFF);
 			if (!bPlaying) m_SndFile.Chn[i].nLength = 0;
 		}
-		END_CRITICAL();
-		
 		if (bPlaying) {
 			m_SndFile.StopAllVsti();
 		} else {
-			BEGIN_CRITICAL();
 			m_SndFile.ResumePlugins();
-			END_CRITICAL();
 		}
-
+		END_CRITICAL();
 		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED);
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
 	}
@@ -1990,15 +1986,21 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 				case sfx_cutoff: chanSpec.Append("Cutoff"); break;
 				case sfx_reso: chanSpec.Append("Resonance"); break;
 				case sfx_mode: chanSpec.Append("Filter Mode"); break;
+				case sfx_drywet: chanSpec.Append("Plug wet/dry ratio"); break;
 				case sfx_plug: {
 					int nParam = MacroToPlugParam(macroText);
 					char paramName[128];
 					memset(paramName, 0, sizeof(paramName));
-					UINT nPlug = m_SndFile.ChnSettings[nChn].nMixPlugin;
+					UINT nPlug = m_SndFile.ChnSettings[nChn].nMixPlugin;  //try channel's plug first
+					if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
+						if (m_SndFile.Chn[nChn].pHeader &&  m_SndFile.Chn[nChn].pInstrument) {	// then try intrument's plug
+								nPlug = m_SndFile.Chn[nChn].pHeader->nMixPlug;
+						}
+					}
 					if (nPlug)
 					{
 						CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
-						if (pPlug)
+						if (pPlug) 
 							pPlug->GetParamName(nParam, paramName, sizeof(paramName));
 						if (paramName[0] == 0)
 							strcpy(paramName, "N/A");
@@ -2563,6 +2565,7 @@ int CModDoc::GetMacroType(CString value)
 	if (value.Compare("F0F000z")==0) return sfx_cutoff;
 	if (value.Compare("F0F001z")==0) return sfx_reso;
 	if (value.Compare("F0F002z")==0) return sfx_mode;
+	if (value.Compare("F0F003z")==0) return sfx_drywet;
 	if (value.Compare("F0F079z")>0 && value.Compare("F0F0G")<0 && value.GetLength()==7) //can be fooled :)
 		return sfx_plug; 
 	return sfx_custom; //custom/unknown
@@ -2584,7 +2587,7 @@ int CModDoc::MacroToPlugParam(CString macro)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// Playback
+// Playback#
 
 
 void CModDoc::OnPatternRestart()
@@ -2615,18 +2618,14 @@ void CModDoc::OnPatternRestart()
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = 0;
 		pSndFile->ResetTotalTickCount();
-		END_CRITICAL();
-		
 		//rewbs.vstCompliance
 		if (pModPlaying == this) {
 			pSndFile->StopAllVsti();
 		} else {
-			BEGIN_CRITICAL();
 			pSndFile->ResumePlugins();
-			END_CRITICAL();
 		}
 		//end rewbs.vstCompliance
-
+		END_CRITICAL();
 		
 		pMainFrm->ResetElapsedTime();
 		if (pModPlaying != this) {
@@ -2659,18 +2658,14 @@ void CModDoc::OnPatternPlay()
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
-		END_CRITICAL();
-
 		//rewbs.VSTCompliance		
 		if (pModPlaying == this) {
 			pSndFile->StopAllVsti();
 		} else {
-			BEGIN_CRITICAL();
 			pSndFile->ResumePlugins();
-			END_CRITICAL();
 		}
 		//end rewbs.VSTCompliance
-		
+		END_CRITICAL();
 
 		pMainFrm->ResetElapsedTime();
 		if (pModPlaying != this) {
@@ -2708,17 +2703,14 @@ void CModDoc::OnPatternPlayNoLoop()
 		else
 			pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
-		END_CRITICAL();
-
 		//end rewbs.VSTCompliance
 		if (pModPlaying == this) {
 			pSndFile->StopAllVsti();	
 		} else {
-			BEGIN_CRITICAL();
 			pSndFile->ResumePlugins();
-			END_CRITICAL();
 		}
 		//rewbs.VSTCompliance
+		END_CRITICAL();
 
 		pMainFrm->ResetElapsedTime();
 		

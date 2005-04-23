@@ -2503,7 +2503,7 @@ void CModTree::OnMuteTreeItem()
 			pModDoc->MuteInstrument(dwItemNo, (pModDoc->IsInstrumentMuted(dwItemNo)) ? FALSE : TRUE);
 		}
 
-		if ((dwItemType == MODITEM_EFFECT) && (pModDoc->GetNumInstruments()))
+		if ((dwItemType == MODITEM_EFFECT))
 		{
 			CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 			if (pSndFile) {

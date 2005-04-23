@@ -1315,7 +1315,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.12)",
+	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.13)",
 				MAINFRAME_TITLE,
 				(MPTRACK_VERSION>>24)&0xFF,
 				(MPTRACK_VERSION>>16)&0xFF,
@@ -1511,8 +1511,8 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 	//       or should we just do it on every idle message?
 	if (m_pPluginManager)
 	{
-		//rewbs.vstCompliance: call @ 100Hz
-		if (curTime - m_dwLastPluginIdleCall > 10) //10ms since last call?
+		//rewbs.vstCompliance: call @ 50Hz
+		if (curTime - m_dwLastPluginIdleCall > 20) //20ms since last call?
 		{
 			m_pPluginManager->OnIdle();
 			m_dwLastPluginIdleCall = curTime;

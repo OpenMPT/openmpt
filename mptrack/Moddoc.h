@@ -69,6 +69,7 @@ enum
 	sfx_cutoff,
 	sfx_reso,
 	sfx_mode,
+	sfx_drywet,
 	sfx_plug,
 	sfx_custom
 };
