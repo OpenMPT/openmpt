@@ -307,6 +307,13 @@ void COptionsKeyboard::DefineCommandCategories()
 	commandCategories.Add(*newCat);
 	delete newCat;
 
+	newCat = new CommandCategory("  Plugin Editor", kCtxVSTGUI);
+	for (int c=kcStartVSTGUICommands; c<=kcEndVSTGUICommands; c++)
+		newCat->commands.Add(c);
+	commandCategories.Add(*newCat);
+	delete newCat;
+
+
 }
 
 

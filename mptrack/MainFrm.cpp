@@ -1775,8 +1775,6 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	if (m_dwStatus & MODSTATUS_PLAYING)
 	{
 		m_dwStatus &= ~MODSTATUS_PLAYING;
-		
-		m_pSndFile->StopAllVsti();
 
 		if (gpSoundDevice) gpSoundDevice->Reset();
 		audioCloseDevice();

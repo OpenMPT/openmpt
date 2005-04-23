@@ -57,6 +57,7 @@ BOOL CDefaultVstEditor::OpenEditor(CWnd *parent)
 	{
 		char s[128];
 		long nParams = m_pVstPlugin->GetNumParameters();
+		SetTitle();
 		m_lbParameters.SetRedraw(FALSE);
 		m_lbParameters.ResetContent();
 		for (long i=0; i<nParams; i++)

@@ -856,6 +856,13 @@
 #define ID_FACTORY_MENU                 36008
 #define ID_PLUG_BYPASS                  36009
 #define ID_FACTORY_PRESETS              36010
+#define ID_INFO_INPUTS                  36011
+#define ID_INFO_OUTPUTS                 36012
+#define ID_INFO_MACROS                  36013
+#define ID_INFO36014                    36014
+#define ID_INFO_INPUTS36015             36015
+#define ID_INFO_OUPUTS                  36016
+#define ID_INFO_MACROS36017             36017
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
@@ -879,7 +886,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        501
-#define _APS_NEXT_COMMAND_VALUE         36011
+#define _APS_NEXT_COMMAND_VALUE         36018
 #define _APS_NEXT_CONTROL_VALUE         2231
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

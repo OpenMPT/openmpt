@@ -2174,7 +2174,30 @@ void CCommandSet::SetupCommands()
 	commands[kcNextDocument].isHidden = false;
 	commands[kcNextDocument].isDummy = false;
 
+	//time saving HACK:
+	for (int j=kcVSTGUIStartNotes; j<=kcVSTGUINoteStopA_3; j++)
+	{
+		commands[j].UID = 1695+j-kcVSTGUIStartNotes;
+		commands[j].Message = "Auto Note in some context";
+		commands[j].isHidden = true;
+		commands[j].isDummy = false;
+	}
+	//end hack
 
+	commands[kcVSTGUIPrevPreset].UID = 1763;
+	commands[kcVSTGUIPrevPreset].Message = "Previous plugin preset";
+	commands[kcVSTGUIPrevPreset].isHidden = false;
+	commands[kcVSTGUIPrevPreset].isDummy = false;
+
+	commands[kcVSTGUINextPreset].UID = 1764;
+	commands[kcVSTGUINextPreset].Message = "Next plugin preset";
+	commands[kcVSTGUINextPreset].isHidden = false;
+	commands[kcVSTGUINextPreset].isDummy = false;
+
+	commands[kcVSTGUIRandParams].UID = 1765;
+	commands[kcVSTGUIRandParams].Message = "Randomize plugin parameters";
+	commands[kcVSTGUIRandParams].isHidden = false;
+	commands[kcVSTGUIRandParams].isDummy = false;
 
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
@@ -2629,11 +2652,13 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			KeyCombination newKcIns  = inKc;
 			KeyCombination newKcTree = inKc;
 			KeyCombination newKcInsNoteMap = inKc;
+			KeyCombination newKcVSTGUI = inKc;
 
 			newKcSamp.ctx=kCtxViewSamples;
 			newKcIns.ctx=kCtxViewInstruments;
 			newKcTree.ctx=kCtxViewTree;
 			newKcInsNoteMap.ctx=kCtxInsNoteMap;
+			newKcVSTGUI.ctx=kCtxVSTGUI;
 
 			noteOffset = inCmd - kcVPStartNotes;
 			if (adding)
@@ -2643,6 +2668,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Add(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset), false);
 				Add(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset), false);
 				Add(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNotes+noteOffset), false);
+				Add(newKcVSTGUI, (CommandID)(kcVSTGUIStartNotes+noteOffset), false);
 			}
 			else
 			{
@@ -2651,6 +2677,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Remove(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset));
 				Remove(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset));
 				Remove(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNotes+noteOffset));
+				Remove(newKcVSTGUI, (CommandID)(kcVSTGUIStartNotes+noteOffset));
 			}
 		}
 		if (inCmd>=kcVPStartNoteStops && inCmd<=kcVPEndNoteStops)
@@ -2659,11 +2686,13 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			KeyCombination newKcIns  = inKc;
 			KeyCombination newKcTree = inKc;
 			KeyCombination newKcInsNoteMap = inKc;
+			KeyCombination newKcVSTGUI = inKc;
 
 			newKcSamp.ctx=kCtxViewSamples;
 			newKcIns.ctx=kCtxViewInstruments;
 			newKcTree.ctx=kCtxViewTree;
 			newKcInsNoteMap.ctx=kCtxInsNoteMap;
+			newKcVSTGUI.ctx=kCtxVSTGUI;
 
 			noteOffset = inCmd - kcVPStartNoteStops;
 			if (adding)
@@ -2673,6 +2702,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Add(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset), false);
 				Add(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset), false);
 				Add(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNoteStops+noteOffset), false);
+				Add(newKcVSTGUI, (CommandID)(kcVSTGUIStartNoteStops+noteOffset), false);
 			}
 			else
 			{
@@ -2681,6 +2711,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Remove(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset));
 				Remove(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset));
 				Remove(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNoteStops+noteOffset));
+				Remove(newKcVSTGUI, (CommandID)(kcVSTGUIStartNoteStops+noteOffset));
 			}
 
 		}

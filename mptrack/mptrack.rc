@@ -344,9 +344,9 @@ BEGIN
                     BS_LEFTTEXT | WS_TABSTOP,82,66,60,12
     DEFPUSHBUTTON   "Change Player Options",IDC_PLAYEROPTIONS,10,124,81,14,
                     BS_CENTER
-    CONTROL         "Give Plugs extra Idle Time (exp.)",
-                    IDC_GIVEPLUGSIDLETIME,"Button",BS_AUTOCHECKBOX | BS_LEFT | 
-                    BS_MULTILINE | NOT WS_VISIBLE | WS_TABSTOP,10,142,133,17
+    CONTROL         "Slow render (for Kontakt+DFD)",IDC_GIVEPLUGSIDLETIME,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | BS_MULTILINE | 
+                    WS_TABSTOP,10,142,133,17
 END
 
 IDD_PROGRESS DIALOG  0, 0, 186, 55
@@ -1345,6 +1345,7 @@ END
 
 IDD_MIDIMACRO DIALOGEX 0, 0, 349, 345
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
 CAPTION "Zxx Macros Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
@@ -1379,7 +1380,7 @@ BEGIN
     EDITTEXT        IDC_EDIT1,175,229,110,12,ES_AUTOHSCROLL
     LTEXT           "Value:",IDC_STATIC,175,219,47,8
     LTEXT           "Preset:",IDC_STATIC,10,295,37,8
-    GROUPBOX        "Generate Macro:",IDC_STATIC,11,245,274,28
+    GROUPBOX        "Generate Macro:",IDC_STATIC,11,244,274,28
 END
 
 IDD_CHORDEDIT DIALOGEX 0, 0, 245, 148
@@ -2265,16 +2266,22 @@ IDB_SPLASHNOFOLDFIN     BITMAP                  "res\\splashno.bmp"
 
 IDR_VSTMENU MENU 
 BEGIN
-    POPUP "Presets"
+    POPUP "&File"
     BEGIN
-        MENUITEM "&Load...",                    ID_PRESET_LOAD
-        MENUITEM "&Save As...",                 ID_PRESET_SAVE
+        MENUITEM "&Load Preset...",             ID_PRESET_LOAD
+        MENUITEM "&Save Preset As...",          ID_PRESET_SAVE
         MENUITEM SEPARATOR
-        MENUITEM "&Randomize",                  ID_PRESET_RANDOM
+        MENUITEM "&Randomize Params",           ID_PRESET_RANDOM
     END
-    POPUP "Options"
+    POPUP "&Info"
     BEGIN
-        MENUITEM "Bypass",                      ID_PLUG_BYPASS
+        MENUITEM "I&nputs",                     ID_INFO_INPUTS36015
+        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
+        MENUITEM "&Macros",                     ID_INFO_MACROS36017
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Bypass",                     ID_PLUG_BYPASS
     END
 END
 

@@ -332,6 +332,10 @@ public:
 
 #define NMACROS 16
 
+//class CColourEdit;
+#include "ColourEdit.h"
+
+
 //===================================
 class CMidiMacroSetup: public CDialog
 //===================================
@@ -345,8 +349,8 @@ public:
 protected:
 	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam;
 	CEdit m_EditSFx, m_EditZxx;
-	CEdit m_EditMacro[NMACROS], m_EditMacroValue[NMACROS], m_EditMacroType[NMACROS]; //rewbs.macroGUI
-	CButton m_BtnMacro[NMACROS];
+	CColourEdit m_EditMacroValue[NMACROS], m_EditMacroType[NMACROS]; //rewbs.macroGUI
+	CButton m_EditMacro[NMACROS], m_BtnMacroShowAll[NMACROS];
 	CSoundFile *m_pSndFile;
 	CModDoc *m_pModDoc;
 
@@ -365,6 +369,7 @@ protected:
 	afx_msg void OnPlugChanged();
 	afx_msg void OnPlugParamChanged();
 	afx_msg void OnViewAllParams(UINT id);
+	afx_msg void OnSetSFx(UINT id);
 	DECLARE_MESSAGE_MAP()
 };
 

@@ -601,7 +601,11 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 			if (pVstEditor) {
 				pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);
 			}
-			pVstPlugin->GetModDoc()->SetModified();
+            CModDoc* pModDoc = pVstPlugin->GetModDoc();
+			if (pModDoc) {
+				pModDoc->SetModified();
+			//	pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   //Causes flickers in treeview
+			}
 		}
 		return 0; 
 	// Called when plugin asks for VST version supported by host
@@ -641,47 +645,46 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	// returns const VstTimeInfo* (or 0 if not supported)
 	// <value> should contain a mask indicating which fields are required
 	case audioMasterGetTime: {
+
 		CVstPlugin* pVstPlugin = (CVstPlugin*)effect->resvd1;
 		memset(&timeInfo, 0, sizeof(timeInfo));
 		timeInfo.sampleRate = CMainFrame::GetMainFrame()->GetSampleRate();
 
-		if (pVstPlugin && pVstPlugin->IsSongPlaying())
-		{
-			timeInfo.flags |= kVstTransportPlaying;
-			timeInfo.samplePos = CMainFrame::GetMainFrame()->GetTotalSampleCount();
-			if (timeInfo.samplePos == 0) //samplePos=0 means we just started playing
-			   timeInfo.flags |= kVstTransportChanged;	
-		}
-		else
-		{
-			timeInfo.flags |= kVstTransportChanged; //just stopped.
-			timeInfo.samplePos = 0;
-		}
-		if (pVstPlugin &&  (value & kVstNanosValid))
-		{
-			timeInfo.flags |= kVstNanosValid;
-			timeInfo.nanoSeconds = pVstPlugin->GetTimeAtStartOfProcess();
-		}
-		if (value & kVstPpqPosValid)
-		{
-			timeInfo.flags |= kVstPpqPosValid;
-			if (timeInfo.flags & kVstTransportPlaying)
-				timeInfo.ppqPos = (timeInfo.samplePos/timeInfo.sampleRate)*(((CVstPlugin*)effect->resvd1)->GetSoundFile()->GetCurrentBPM()/60.0);
-			else
-				timeInfo.ppqPos = 0;
-		}
-		if (value & kVstTempoValid)
-		{	
-			timeInfo.tempo = ((CVstPlugin*)effect->resvd1)->GetSoundFile()->GetCurrentBPM();
-			if (timeInfo.tempo)
-				timeInfo.flags |= kVstTempoValid;
-		}
-		if (value & kVstTimeSigValid)
-		{
-			CSoundFile *pSndFile = ((CVstPlugin*)effect->resvd1)->GetSoundFile();
-			timeInfo.flags |= 	kVstTimeSigValid;
-			timeInfo.timeSigNumerator = pSndFile->m_nRowsPerBeat;
-			timeInfo.timeSigDenominator = pSndFile->m_nRowsPerMeasure;
+		if (pVstPlugin) {
+			CSoundFile* pSndFile = pVstPlugin->GetSoundFile();
+
+			if (pVstPlugin->IsSongPlaying()) {
+				timeInfo.flags |= kVstTransportPlaying;
+				timeInfo.samplePos = CMainFrame::GetMainFrame()->GetTotalSampleCount();
+				if (timeInfo.samplePos == 0) //samplePos=0 means we just started playing
+				timeInfo.flags |= kVstTransportChanged;	
+			} else {
+				timeInfo.flags |= kVstTransportChanged; //just stopped.
+				timeInfo.samplePos = 0;
+			}
+			if ((value & kVstNanosValid)) {
+				timeInfo.flags |= kVstNanosValid;
+				timeInfo.nanoSeconds = pVstPlugin->GetTimeAtStartOfProcess();
+			}
+			if ((value & kVstPpqPosValid) && pSndFile) {
+				timeInfo.flags |= kVstPpqPosValid;
+				if (timeInfo.flags & kVstTransportPlaying) {
+					timeInfo.ppqPos = (timeInfo.samplePos/timeInfo.sampleRate)*(pSndFile->GetCurrentBPM()/60.0);
+				} else {
+					timeInfo.ppqPos = 0;
+				}
+			}
+			if ((value & kVstTempoValid) && pSndFile) {	
+				timeInfo.tempo = pSndFile->GetCurrentBPM();
+				if (timeInfo.tempo) {
+					timeInfo.flags |= kVstTempoValid;
+				}
+			}
+			if ((value & kVstTimeSigValid) && pSndFile) {
+				timeInfo.flags |= 	kVstTimeSigValid;
+				timeInfo.timeSigNumerator = pSndFile->m_nRowsPerBeat;
+				timeInfo.timeSigDenominator = pSndFile->m_nRowsPerMeasure;
+			}
 		}
 		return (long)&timeInfo;
 	}
@@ -865,12 +868,14 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		if (effect && effect->resvd1)
 		{
 			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
-			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor(); 
+//            pVstPlugin->GetModDoc()->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL); //No Need.
+
+/*			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor(); 
 			if (pVstEditor && ::IsWindow(pVstEditor->m_hWnd))
 			{
-				pVstEditor->SetupMenu();
-				//TODO: update general GUI to show selected program
+				//pVstEditor->SetupMenu();
 			}
+*/
 //			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
 //			effect->dispatcher(effect, effEditTop, 0,0, NULL, 0);
 		}
@@ -1366,6 +1371,8 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_dwTimeAtStartOfProcess=0;
 	m_nSampleRate = -1; //rewbs.VSTCompliance: gets set on Resume()
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
+
+	processCalled = CreateEvent(NULL,FALSE,FALSE,NULL);
 }
 
 
@@ -1387,6 +1394,11 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	//Assuming 32bit address space...
     m_pEffect->resvd1=(long)this;
+	//rewbs.plugDocAware
+	m_pModDoc = pModDoc;
+	m_pSndFile = pModDoc->GetSoundFile();
+	m_nSlot = GetSlot();
+	//end rewbs.plugDocAware
 
 	Dispatch(effOpen, 0, 0, NULL, 0);
 	m_bIsVst2 = (CVstPlugin::Dispatch(effGetVstVersion, 0,0, NULL, 0) >= 2) ? TRUE : FALSE;
@@ -1397,7 +1409,6 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 		VstPinProperties tempPinProperties;
 		Dispatch(effGetInputProperties, 0, 0, &tempPinProperties, 0);
 		Dispatch(effGetOutputProperties, 0, 0, &tempPinProperties, 0);
-	
 
 		Dispatch(effConnectInput, 0, 1, NULL, 0);
 		if (m_pEffect->numInputs > 1) Dispatch(effConnectInput, 1, 1, NULL, 0.0f);
@@ -1411,7 +1422,7 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 		//end rewbs.VSTCompliance
 
 	}
-	
+
 	Dispatch(effSetSampleRate, 0, 0, NULL, CSoundFile::gdwMixingFreq);
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0.0f);
 	if (m_pEffect->numPrograms > 0)	{
@@ -1452,9 +1463,6 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 	//TODO:
 	//GetSpeakerArrangement();
 
-	//rewbs.plugDocAware
-	m_pModDoc = pModDoc;
-	m_pSndFile = pModDoc->GetSoundFile();
 //	m_pSndMixPlugin = m_pSndFile->GetSndPlugMixPlug(this);
 //	ASSERT(m_pSndMixPlugin);
 	//end rewbs.plugDocAware
@@ -1523,7 +1531,7 @@ CVstPlugin::~CVstPlugin()
 		m_pEvList = NULL;
 	}
 
-	 processCalled = CreateEvent(NULL,FALSE,FALSE,NULL);
+	CloseHandle(processCalled);
 }
 
 
@@ -1905,9 +1913,12 @@ void CVstPlugin::Resume()
 		Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);	// calls plugin's resume
 		Dispatch(effStartProcess, 0, 0, NULL, 0.0f);
 		m_bPlugResumed = true;
+//		ClearVSTEvents();		//DEBUG
 	} catch (...) {
 		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
+
+
 }
 
 void CVstPlugin::Suspend() 
@@ -1938,6 +1949,7 @@ void CVstPlugin::ProcessVSTEvents()
 }
 
 void CVstPlugin::ClearVSTEvents()
+//-------------------------------
 {
 	// Clear VST events
 	if ((m_pEvList) && (m_pEvList->numEvents > 0))
@@ -2238,7 +2250,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	}
 
 	ClearVSTEvents();
-	SetEvent(processCalled);
+	//SetEvent(processCalled);
 }
 
 
@@ -2280,12 +2292,12 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 void CVstPlugin::HardAllNotesOff()
 {
 	bool overflow=false;
-	//float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
+	float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
 
 	// Relies on a wait on processCalled, which will never get set
 	// if plug is bypassed.
-	if (IsBypassed())	
-		return;
+	//if (IsBypassed())	
+	//	return;
 
 	do {
 		for (int mc=0; mc<16; mc++)		//all midi chans
@@ -2315,13 +2327,11 @@ void CVstPlugin::HardAllNotesOff()
 		}
 		// let plug process events
 		// TODO: wait for notification from audio thread that process has been called,
-		//       rather than re-call it here
-		//Process((float*)in, (float*)out, SCRATCH_BUFFER_SIZE);
-
-		ResetEvent(processCalled);				  // Unset processCalled.
-		WaitForSingleObject(processCalled, 10000);// Will not return until processCalled is set again,
+		//       rather than re-call it here		
+		//ResetEvent(processCalled);				  // Unset processCalled.
+		//WaitForSingleObject(processCalled, 10000);// Will not return until processCalled is set again,
 												  // i.e. until processReplacing() has been called.
-	
+		Process((float*)in, (float*)out, SCRATCH_BUFFER_SIZE);
 
 	// If we had hit an overflow, we need to loop around and start again.
 	} while (overflow);
@@ -2467,7 +2477,7 @@ void CVstPlugin::SetZxxParameter(UINT nParam, UINT nValue)
 UINT CVstPlugin::GetZxxParameter(UINT nParam)
 //--------------------------------------------------------
 {
-	return (UINT) (GetParameter(nParam) * 127.0f);
+	return (UINT) (GetParameter(nParam) * 127.0f+0.5f);
 }
 //end rewbs.smoothVST
 
@@ -2724,11 +2734,16 @@ CAbstractVstEditor* CVstPlugin::GetEditor()
 
 bool CVstPlugin::Bypass(bool bypass)
 {
-	if (bypass)
+	if (bypass) {
 		m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
-	else
+	} else {
 		m_pMixStruct->Info.dwInputRouting &=~ MIXPLUG_INPUTF_BYPASS;
-		
+	}
+	
+	if (m_pModDoc) {
+		m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);
+	}
+
 	return bypass;
 }
 bool CVstPlugin::Bypass()
@@ -2760,6 +2775,17 @@ void CVstPlugin::NotifySongPlaying(bool playing) {
 	m_bSongPlaying=playing;
 }
 
+UINT CVstPlugin::GetSlot() {
+	UINT slot=0;
+
+	if (m_pSndFile) {
+		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot<=MAX_MIXPLUGINS) {
+			slot++;
+		}
+	}
+
+	return slot;
+}
 //end rewbs.VSTcompliance
 
 BOOL CVstPlugin::isInstrument() // ericus 18/02/2005
@@ -2771,6 +2797,58 @@ BOOL CVstPlugin::isInstrument() // ericus 18/02/2005
 BOOL CVstPlugin::CanRecieveMidiEvents() {
 	CString s = "receiveVstMidiEvent";
 	return (CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0));
+}
+
+
+void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list) 
+{
+	// At the moment we know there will only be 1 output. 
+	// Returning NULL ptr means plugin outputs directly to master.
+	list.RemoveAll();
+
+	CVstPlugin *pOutputPlug = NULL;
+	if (m_pMixStruct->Info.dwOutputRouting & 0x80)	{
+		UINT nOutput = m_pMixStruct->Info.dwOutputRouting & 0x7f;
+		if ((nOutput > m_nSlot) && (nOutput < MAX_MIXPLUGINS)) {
+			pOutputPlug = (CVstPlugin*) m_pSndFile->m_MixPlugins[nOutput].pMixPlugin;
+		}
+	}
+	list.Add(pOutputPlug);
+
+	return;
+}
+
+void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list) 
+{
+	CArray<CVstPlugin*, CVstPlugin*> candidatePlugOutputs;
+	CVstPlugin* pCandidatePlug = NULL;
+	list.RemoveAll();
+
+	for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++) {
+		pCandidatePlug = (CVstPlugin*) m_pSndFile->m_MixPlugins[nPlug].pMixPlugin;
+		if (pCandidatePlug) {
+			pCandidatePlug->GetOutputPlugList(candidatePlugOutputs);
+			
+			for(int nOutput=0; nOutput<candidatePlugOutputs.GetSize(); nOutput++) 	{
+				if (candidatePlugOutputs[nOutput] == this) {
+					list.Add(pCandidatePlug);
+					break;
+				}
+			}
+		}
+	}
+
+	return;
+}
+
+void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list) 
+{
+
+
+}
+
+void CVstPlugin::GetInputChannelList(CArray<UINT,UINT> &list) {
+
 }
 
 

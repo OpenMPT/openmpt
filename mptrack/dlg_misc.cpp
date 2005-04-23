@@ -8,6 +8,7 @@
 #include "vstplug.h"
 #include ".\dlg_misc.h"
 
+
 #pragma warning(disable:4244)
 
 // -> CODE#0010
@@ -1366,8 +1367,10 @@ BEGIN_MESSAGE_MAP(CMidiMacroSetup, CDialog)
 	ON_CBN_SELCHANGE(IDC_MACROPARAM,OnPlugParamChanged)
 	ON_EN_CHANGE(IDC_EDIT1,			OnSFxEditChanged)
 	ON_EN_CHANGE(IDC_EDIT2,			OnZxxEditChanged)
-	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+NMACROS, OnViewAllParams) //rewbs.patPlugName
+	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+NMACROS-1, OnViewAllParams) //rewbs.patPlugName
+	ON_COMMAND_RANGE(ID_PLUGSELECT+NMACROS, ID_PLUGSELECT+NMACROS+NMACROS-1, OnSetSFx) //rewbs.patPlugName
 END_MESSAGE_MAP()
+
 
 CMidiMacroSetup::CMidiMacroSetup(MODMIDICFG *pcfg, BOOL bEmbed, CWnd *parent):CDialog(IDD_MIDIMACRO, parent)
 //----------------------------------------------------------------------------------------------------------
@@ -1415,6 +1418,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_CbnSFxPreset.AddString("Set Filter Cutoff");
 	m_CbnSFxPreset.AddString("Set Filter Resonance");
 	m_CbnSFxPreset.AddString("Set Filter Mode");
+	m_CbnSFxPreset.AddString("Plugin Dry/Wet Ratio");
 	m_CbnSFxPreset.AddString("Control Plugin Param...");
 	m_CbnSFxPreset.AddString("Custom");
 	OnSFxChanged();
@@ -1439,21 +1443,21 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	
 	for (UINT m=0; m<NMACROS; m++)
 	{
-		m_EditMacro[m].Create(ES_CENTER | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
-			CRect(offsetx, offsety+m*(separatory+height), offsetx+widthMacro, offsety+m*(separatory+height)+height), this, 1*m);
+		m_EditMacro[m].Create("", BS_FLAT | WS_CHILD | WS_VISIBLE | WS_TABSTOP /*| WS_BORDER*/,
+			CRect(offsetx, offsety+m*(separatory+height), offsetx+widthMacro, offsety+m*(separatory+height)+height), this, ID_PLUGSELECT+NMACROS+m);
 		m_EditMacro[m].SetFont(GetFont());
 		
 		m_EditMacroType[m].Create(ES_READONLY | WS_CHILD| WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
-			CRect(offsetx+separatorx+widthMacro, offsety+m*(separatory+height), offsetx+widthMacro+widthType, offsety+m*(separatory+height)+height), this, 3*m);
+			CRect(offsetx+separatorx+widthMacro, offsety+m*(separatory+height), offsetx+widthMacro+widthType, offsety+m*(separatory+height)+height), this, ID_PLUGSELECT+NMACROS+m);
 		m_EditMacroType[m].SetFont(GetFont());
 
 		m_EditMacroValue[m].Create(ES_CENTER | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
-			CRect(offsetx+separatorx+widthType+widthMacro, offsety+m*(separatory+height), offsetx+widthMacro+widthType+widthVal, offsety+m*(separatory+height)+height), this, 2*m);
+			CRect(offsetx+separatorx+widthType+widthMacro, offsety+m*(separatory+height), offsetx+widthMacro+widthType+widthVal, offsety+m*(separatory+height)+height), this, ID_PLUGSELECT+NMACROS+m);
 		m_EditMacroValue[m].SetFont(GetFont());
 
-		m_BtnMacro[m].Create("Show All...", WS_CHILD | WS_TABSTOP | WS_VISIBLE,
+		m_BtnMacroShowAll[m].Create("Show All...", WS_CHILD | WS_TABSTOP | WS_VISIBLE,
 			CRect(offsetx+separatorx+widthType+widthMacro+widthVal, offsety+m*(separatory+height), offsetx+widthMacro+widthType+widthVal+widthBtn, offsety+m*(separatory+height)+height), this, ID_PLUGSELECT+m);
-		m_BtnMacro[m].SetFont(GetFont());
+		m_BtnMacroShowAll[m].SetFont(GetFont());
 	}
 	UpdateMacroList();
 
@@ -1483,6 +1487,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 
 	CString s, macroText;
 	UINT start, end, macroType;
+	int selectedMacro=m_CbnSFx.GetCurSel();
 
 	if (macro>=0 && macro<16)
 	{
@@ -1504,6 +1509,8 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 		//Macro value:
 		CString macroText = &m_MidiCfg.szMidiSFXExt[m*32];
 		m_EditMacroValue[m].SetWindowText(macroText);
+		m_EditMacroValue[m].SetBackColor(m==selectedMacro?RGB(200,200,225) : RGB(245,245,245) );
+
 
 		//Macro Type:
 		macroType = m_pModDoc->GetMacroType(macroText);
@@ -1513,6 +1520,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 			case sfx_cutoff: s = "Set Filter Cutoff"; break;
 			case sfx_reso: s = "Set Filter Resonance"; break;
 			case sfx_mode: s = "Set Filter Mode"; break;
+			case sfx_drywet: s = "Set Plugin dry/wet ratio"; break;
 			case sfx_plug: 
 				s.Format("Control Plugin Param %d", m_pModDoc->MacroToPlugParam(macroText)); 
 				break;
@@ -1520,12 +1528,13 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 			default: s = "Custom";
 		}
 		m_EditMacroType[m].SetWindowText(s);
+		m_EditMacroType[m].SetBackColor(m==selectedMacro?RGB(200,200,225) : RGB(245,245,245) );
 
 		//Param details button:
 		if (macroType == sfx_plug)
-			m_BtnMacro[m].ShowWindow(SW_SHOW);
+			m_BtnMacroShowAll[m].ShowWindow(SW_SHOW);
 		else 
-			m_BtnMacro[m].ShowWindow(SW_HIDE);
+			m_BtnMacroShowAll[m].ShowWindow(SW_HIDE);
 	}
 }
 
@@ -1605,6 +1614,7 @@ void CMidiMacroSetup::OnSFxChanged()
 		memcpy(macroText.GetBuffer(32), &m_MidiCfg.szMidiSFXExt[sfx*32], 32);
 		int preset = m_pModDoc->GetMacroType(macroText);
 		m_CbnSFxPreset.SetCurSel(preset);
+				
 	}
 	UpdateDialog();
 }
@@ -1625,6 +1635,7 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 		case sfx_cutoff:	strcpy(pmacro, "F0F000z"); break;	// cutoff
 		case sfx_reso:		strcpy(pmacro, "F0F001z"); break;   // reso
 		case sfx_mode:		strcpy(pmacro, "F0F002z"); break;   // mode
+		case sfx_drywet:	strcpy(pmacro, "F0F003z"); break;   // mode
 		case sfx_plug:		strcpy(pmacro, "F0F080z"); break;	// plug param - TODO: get value from other menus
 		case sfx_custom:	/*strcpy(pmacro, "z");*/ break;		// custom - leave as is.
 		}
@@ -1726,6 +1737,12 @@ void CMidiMacroSetup::OnZxxEditChanged()
 		s[31] = 0;
 		memcpy(&m_MidiCfg.szMidiZXXExt[zxx*32], s, 32);
 	}
+}
+
+void CMidiMacroSetup::OnSetSFx(UINT id)
+{
+	m_CbnSFx.SetCurSel(id-(ID_PLUGSELECT+NMACROS));
+	OnSFxChanged();
 }
 
 void CMidiMacroSetup::OnViewAllParams(UINT id)

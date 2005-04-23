@@ -84,6 +84,7 @@ protected:
 	DWORD m_dwTimeAtStartOfProcess;
 	bool m_bModified;
 	HANDLE processCalled;
+	UINT m_nSlot;
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN pMixPlugin, AEffect *pEffect);
@@ -107,6 +108,7 @@ public:
 	bool isModified() {return m_bModified;}
 	inline CModDoc* GetModDoc() {return m_pModDoc;}
 	inline CSoundFile* GetSoundFile() {return m_pSndFile;}
+	UINT GetSlot();
 
 	VOID SetCurrentProgram(UINT nIndex);
 //rewbs.VSTCompliance: Eric's non standard preset stuff:
@@ -137,6 +139,10 @@ public:
 	BOOL isInstrument(); // ericus 18/02/2005
 	BOOL CanRecieveMidiEvents();
 
+	void GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list);
+	void GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list);
+	void GetInputInstrumentList(CArray<UINT,UINT> &list);
+	void GetInputChannelList(CArray<UINT,UINT> &list);
 
 public: // IMixPlugin interface
 	int AddRef() { return ++m_nRefCount; }

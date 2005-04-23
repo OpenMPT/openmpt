@@ -15,7 +15,7 @@
 //--------------------------------------------------------------
 CInputHandler::CInputHandler(CWnd *mainframe)
 {
-	pMainFrm = mainframe;
+	m_pMainFrm = mainframe;
 		
 	//Init CommandSet and Load defaults
 	activeCommandSet = new CCommandSet();
@@ -81,16 +81,16 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 			executeCommand = keyMap[context][modifierMask][wParam][keyEventType];
 	}
 
-	if (pMainFrm && executeCommand != kcNull)
+	if (m_pMainFrm && executeCommand != kcNull)
 	{
-		pMainFrm->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam);
+		m_pMainFrm->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam);
 	}
 
 	return executeCommand;
 }
 
 //--------------------------------------------------------------
-CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType)
+CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd)
 {
 	
 	CommandID executeCommand = keyMap[context][modifierMask][nChar][keyEventType];
@@ -98,9 +98,12 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 /*		if (keyEventType == kKeyEventUp)
 			keyEventType=kKeyEventUp;
 */
-	if (pMainFrm && executeCommand != kcNull) 
+	if (pSourceWnd == NULL) {
+		pSourceWnd = m_pMainFrm;	//by default, send command message to main frame.
+	}
+	if (pSourceWnd && (executeCommand != kcNull)) 
 	{
-		pMainFrm->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar);
+		pSourceWnd->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar);
 	}
 
 	return executeCommand;
