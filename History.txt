@@ -21,9 +21,36 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17RC1 (revision 1.13.2.13)
+  . <rewbs> More fixes to plugs that try to get tempo before we've had a chance to init them properly.
+  . <rewbs> Backed out first attempt at reducing hangs on stop (from rev 1.13.2.10) - it was pointless. I think 1.13.2.11 really solved it though.
+  / <rewbs> Plugin window's factory preset menu improvements for plugs with lots of presets 
+  + <rewbs> Can now access info about a plug from the Plugin's window, such as inputs, outputs and relevant macros. FX slot number shown in window title.
+  + <rewbs> Added prev&next preset and randomize params shortcut keys (take effect when plugin's window has focus).
+  / <rewbs> Reduced plugin idle call rate from 100Hz to 50Hz, in accordance with some discussion on the VST sdk mailing list.
+  + <rewbs> Added macro to control dry/wet ratio (==volume for VSTis) from pattern. Zxx and \xx should both work.
+  . <rewbs> Fixed minor imprecision in \xx slide calculations.
+  + <rewbs> If macros are used on a channel to which no plugin is assigned, but an instrument with an assigned plugin is active on that channel, the macros will be effective in the instrument's plugin. Be careful now!
+  + <rewbs> Fixed old bug that was preventing custom MIDI messages from being sent to plugs. So you can now send MIDI CC commands to your plugs!
+            For example, to send Modwheel commands with Zxx on midi chan 0, create a custom macro with the value "B001z" (Only Zxx works for now, not \xx).
+  / <rewbs> Minor enhancenments to Zxx Macro window. TODO: add support to easily add MIDI CC macros.
+  . <rewbs> Minor GUI refresh fixes (tx xtr1m).
+
+
+
 . v 1.17RC1 (revision 1.13.2.12)
+  . <rewbs> Fix to plugs that try to get tempo before we've had a chance to init them properly.
 
 . v 1.17RC1 (revision 1.13.2.11)
+  + <rewbs> Time signature (rows per beat & rows per measure) now saved with songs.
+  + <rewbs> Added next and previous document shortcut keys (that work :).
+  . <rewbs> IT files can now save tempo > 255.
+  . <rewbs> Various minor fixes relating to marking file as modified.
+  . <rewbs> Another stab at the elusive hangs on stop. Let me know if there's any improvement.
+  / <rewbs> IT files now save the number of channels you choose, rather than shrinking to fit & removing the last unused channels. I like it this way, yell if you don't.
+
+
+
 
 . v 1.17RC1 (revision 1.13.2.10)
   + <rewbs> Can now bypass plug from plug's window and from tree view.
