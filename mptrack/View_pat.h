@@ -4,6 +4,7 @@
 class CModDoc;
 class CEditCommand;
 class CEffectVis;	//rewbs.fxvis
+class CPatternGotoDialog;
 
 // Drag & Drop info
 #define DRAGITEM_MASK			0xFF0000
@@ -44,6 +45,7 @@ public:
 protected:
 	CFastBitmap m_Dib;
 	CEditCommand *m_pEditWnd;
+	CPatternGotoDialog *m_pGotoWnd;
 	SIZE m_szHeader, m_szCell;
 	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar;
 
@@ -208,6 +210,7 @@ protected:
 	afx_msg void OnEditSelectColumn();
 	afx_msg void OnSelectCurrentColumn();
 	afx_msg void OnEditFind();
+	afx_msg void OnEditGoto();
 	afx_msg void OnEditFindNext();
 	afx_msg void OnEditUndo();
 	afx_msg void OnMuteFromClick(); //rewbs.customKeys

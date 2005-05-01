@@ -637,7 +637,7 @@ void COptionsKeyboard::OnLoad()
 { 
 	CFileDialog dlg(TRUE, "mkb", m_sFullPathName,
 					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-					"Modplug Tracker Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
+					"OpenMPT Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
 	if (CMainFrame::m_szKbdFile[0])
 			dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szKbdFile;
 
@@ -655,7 +655,7 @@ void COptionsKeyboard::OnSave()
 {	
 	CFileDialog dlg(FALSE, "mkb", m_sFullPathName,
 					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-					"Modplug Tracker Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
+					"OpenMPT Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
 	if (CMainFrame::m_szKbdFile[0])
 			dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szKbdFile;
 	

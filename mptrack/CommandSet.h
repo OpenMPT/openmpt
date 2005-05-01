@@ -227,6 +227,7 @@ enum CommandID
 	kcPatternInterpolateVol,
 	kcPatternInterpolateEffect,
 	kcPatternVisualizeEffect,
+	kcPatternGoto,
 	kcPatternSetInstrument,
 	kcPatternGrowSelection,
 	kcPatternShrinkSelection,

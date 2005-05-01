@@ -12,11 +12,13 @@
 #include "CommandSet.h"
 #include "inputhandler.h"
 
+class CInputHandler;
 class CMainFrame;
 class CModDoc;
 class CAutoSaver;
 class ISoundDevice;
 class ISoundSource;
+class CPerformanceCounter;
 
 #define NUM_AUDIO_BUFFERS			3
 #define MIN_AUDIO_BUFFERSIZE		1024
@@ -428,6 +430,7 @@ protected:
 	CHAR m_szPluginsDir[_MAX_PATH];
 	CHAR m_szExportDir[_MAX_PATH];
 	bool m_bOptionsLocked; 	 	//rewbs.customKeys
+	double m_dTotalCPU;
 
 public:
 	CMainFrame();
@@ -481,6 +484,7 @@ public:
 	static VOID GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
+	static CPerformanceCounter *m_pPerfCounter;
 
 // Misc functions
 public:
@@ -578,6 +582,7 @@ protected:
 	afx_msg void OnUpdateUser(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateInfo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateXInfo(CCmdUI *pCmdUI); //rewbs.xinfo
+	afx_msg void OnUpdateCPU(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMidiRecord(CCmdUI *pCmdUI);
 	afx_msg void OnPlayerPause();
 	afx_msg void OnMidiRecord();

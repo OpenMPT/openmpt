@@ -82,6 +82,7 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 		penv->nGlobalVol = 64;
 		penv->nPan = 128;
 		penv->nPPC = 5*12;
+		penv->nResampling = SRCMODE_DEFAULT;
 		for (UINT iinit=0; iinit<128; iinit++)
 		{
 			penv->Keyboard[iinit] = nSample;
@@ -896,6 +897,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	penv->nGlobalVol = 64;
 	penv->nPan = 128;
 	penv->nPPC = 60;
+	penv->nResampling = SRCMODE_DEFAULT;
 	if (m_nType == MOD_TYPE_IT)
 	{
 		penv->nNNA = NNA_NOTEOFF;
@@ -1163,6 +1165,7 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	if (penv->nPanLoopStart >= penv->nPanLoopEnd) penv->dwFlags &= ~ENV_PANLOOP;
 	penv->nGlobalVol = 64;
 	penv->nPPC = 5*12;
+	penv->nResampling = SRCMODE_DEFAULT;
 	for (UINT ienv=0; ienv<12; ienv++)
 	{
 		penv->VolPoints[ienv] = (WORD)pih->venv[ienv*2];
@@ -1270,37 +1273,20 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 
 	// Seek for supported extended settings header
 	if( (*((__int32 *)ptr)) == 'MPTX' && penv ){
-
 		__int16 size;
 		__int32 code;
+		ptr += sizeof(__int32); // jump extension header code
 
-		// jump extension header code
-		ptr += sizeof(__int32);
+ 		while( (DWORD)(ptr - lpMemFile) < dwFileLength ){
+			code = (*((__int32 *)ptr));		// read field code
+			ptr += sizeof(__int32);			// jump field code
+			size = (*((__int16 *)ptr));	// read field size
+			ptr += sizeof(__int16);			// jump field size
 
-		while( (DWORD)(ptr - lpMemFile) < dwFileLength ){
-
-			// read field code
-			code = (*((__int32 *)ptr));
-			// jump field code
-			ptr += sizeof(__int32);
-
-			// nVolRamp
-			if(code == 'VR..'){
-				// read field size
-				size = (*((__int16 *)ptr));
-				// jump field size
-				ptr += sizeof(__int16);
-				// read ramping value
-				penv->nVolRamp = (*((USHORT *)ptr));
-				// jump ramping value
-				ptr += size;
-			}
-
-			if(code == 'SEP@' || code == 'MPTX'){
-				// this case induce more extra infos but not related to _INSTRUMENTHEADER
-				// for now, as nothing more is supported, we just leave normally.........
-				return TRUE;
-			}
+			BYTE * fadr = GetInstrumentHeaderFieldPointer(penv, code, size);
+			if(fadr && code != 'K[..')		// copy field data in instrument's header
+				memcpy(fadr,ptr,size);		// (except for keyboard mapping)
+			ptr += size;					// jump field
 		}
 	}
 
@@ -1429,22 +1415,10 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 		WriteSample(f, pins, smpflags);
 	}
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-	__int16 size;
 	__int32 code = 'MPTX';
+	fwrite(&code, 1, sizeof(__int32), f);	// Write extension tag
+	WriteInstrumentHeaderStruct(penv, f);	// Write full extended header.
 
-	// Write extension tag
-	fwrite(&code, 1, sizeof(__int32), f);
-	// Write nVolRamp field code
-	code = 'VR..';
-	fwrite(&code, 1, sizeof(__int32), f);
-	// Write nVolRamp field size
-	size = sizeof(penv->nVolRamp);
-	fwrite(&size, 1, sizeof(__int16), f);
-	// Write field value
-	fwrite(&penv->nVolRamp, 1, sizeof(USHORT), f);
-// -! NEW_FEATURE#0027
 
 	fclose(f);
 	return TRUE;
@@ -1827,37 +1801,20 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 
 	// Seek for supported extended settings header
 	if( (*((__int32 *)ptr)) == 'MPTX' && penv ){
-
 		__int16 size;
 		__int32 code;
-
-		// jump extension header code
-		ptr += sizeof(__int32);
+		ptr += sizeof(__int32); // jump extension header code
 
 		while( (DWORD)(ptr - lpMemFile) < dwFileLength ){
+			code = (*((__int32 *)ptr));		// read field code
+			ptr += sizeof(__int32);			// jump field code
+			size = (*((__int16 *)ptr));	// read field size
+			ptr += sizeof(__int16);			// jump field size
 
-			// read field code
-			code = (*((__int32 *)ptr));
-			// jump field code
-			ptr += sizeof(__int32);
-
-			// nVolRamp
-			if(code == 'VR..'){
-				// read field size
-				size = (*((__int16 *)ptr));
-				// jump field size
-				ptr += sizeof(__int16);
-				// read ramping value
-				penv->nVolRamp = (*((USHORT *)ptr));
-				// jump ramping value
-				ptr += size;
-			}
-
-			if(code == 'SEP@' || code == 'MPTX'){
-				// this case induce more extra infos but not related to _INSTRUMENTHEADER
-				// for now, as nothing more is supported, we just leave normally.........
-				return TRUE;
-			}
+			BYTE * fadr = GetInstrumentHeaderFieldPointer(penv, code, size);
+			if(fadr && code != 'K[..')		// copy field data in instrument's header
+				memcpy(fadr,ptr,size);		// (except for keyboard mapping)
+			ptr += size;					// jump field
 		}
 	}
 
@@ -2045,63 +2002,9 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 // -! BUG_FIX#0001
 	}
 
-
-	//------------ rewbs.modularInstData
-	//WARNING!! this code is duplicated in SaveIT
-	//          TODO: sort this out.
-/*
-    long modularInstSize = 0;
-	UINT ModInstID = 'INSM';
-	fwrite(&ModInstID, 1, sizeof(ModInstID), f);	// mark this as an instrument with modular extensions
-	long sizePos = ftell(f);				// we will want to write the modular data's total size here
-	fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
-	
-	//Write chunks
-	UINT ID;
-		{	//VST Slot chunk:
-			ID='PLUG';
-			fwrite(&ID, 1, sizeof(int), f);
-			fwrite(&(penv->nMixPlug), 1, sizeof(BYTE), f);
-			modularInstSize += sizeof(int)+sizeof(BYTE);
-		}
-	//How to save your own modular instrument chunk:
-		//{
-		//ID='MYID';
-		//fwrite(&ID, 1, sizeof(int), f);
-		//instModularDataSize+=sizeof(int);
-		//
-		////You can save your chunk size somwhere here if you need variable chunk size.
-		//fwrite(myData, 1, myDataSize, f);
-		//instModularDataSize+=myDataSize;
-	}
-
-	//write modular data's total size
-	long curPos = ftell(f);			// remember current pos
-	fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
-	fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
-	fseek(f, curPos, SEEK_SET);		// go back to where we were.
-	
-	//move forward 
-	dwPos+=sizeof(ModInstID)+sizeof(modularInstSize)+modularInstSize;
-	//------------ end rewbs.modularInstData
-*/
-
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-	__int16 size;
 	__int32 code = 'MPTX';
-
-	// Write extension tag
-	fwrite(&code, 1, sizeof(__int32), f);
-	// Write nVolRamp field code
-	code = 'VR..';
-	fwrite(&code, 1, sizeof(__int32), f);
-	// Write nVolRamp field size
-	size = sizeof(penv->nVolRamp);
-	fwrite(&size, 1, sizeof(__int16), f);
-	// Write field value
-	fwrite(&penv->nVolRamp, 1, sizeof(USHORT), f);
-// -! NEW_FEATURE#0027
+	fwrite(&code, 1, sizeof(__int32), f);	// Write extension tag
+	WriteInstrumentHeaderStruct(penv, f);	// Write full extended header.
 
 	fclose(f);
 	return TRUE;

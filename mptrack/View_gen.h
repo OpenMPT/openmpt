@@ -51,6 +51,8 @@ public:
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
 	BOOL IsLocked() const { return (m_nLockCount > 0); }
 	int GetDlgItemIntEx(UINT nID);
+	void BuildEmptySlotList(CArray<UINT, UINT> &emptySlots);
+	bool MovePlug(UINT src, UINT dest);
 
 public:
 	//{{AFX_VIRTUAL(CViewGlobals)
@@ -111,6 +113,9 @@ protected:
 	afx_msg void OnMixModeChanged();
 	afx_msg void OnBypassChanged();
 	afx_msg void OnDryMixChanged();
+	afx_msg void OnMovePlugToSlot();
+	afx_msg void OnInsertSlot();
+	afx_msg void OnClonePlug();
 
 // -> CODE#0028
 // -> DESC="effect plugin mixing mode combo"

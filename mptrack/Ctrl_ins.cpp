@@ -629,6 +629,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(IDC_CHECK2,				OnEnableCutOff)
 	ON_COMMAND(IDC_CHECK3,				OnEnableResonance)
+	ON_COMMAND(IDC_CHECK4,				OnToggleHighpass)
 	ON_COMMAND(IDC_INSVIEWPLG,			TogglePluginEditor)		//rewbs.instroVSTi
 	ON_EN_CHANGE(IDC_EDIT_INSTRUMENT,	OnInstrumentChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
@@ -650,7 +651,8 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_CBN_SELCHANGE(IDC_COMBO3,		OnDCAChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4,		OnPPCChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5,		OnMCHChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)	//rewbs.instroVSTi
+	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)		//rewbs.instroVSTi
+	ON_CBN_SELCHANGE(IDC_COMBO9,		OnResamplingChanged)	//rewbs.instroVSTi
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, OnEditSampleMap)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -671,6 +673,7 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO4,				m_ComboPPC);
 	DDX_Control(pDX, IDC_COMBO5,				m_CbnMidiCh);
 	DDX_Control(pDX, IDC_COMBO6,				m_CbnMixPlug);	//rewbs.instroVSTi
+	DDX_Control(pDX, IDC_COMBO9,				m_CbnResampling);
 	DDX_Control(pDX, IDC_SPIN7,					m_SpinFadeOut);
 	DDX_Control(pDX, IDC_SPIN8,					m_SpinGlobalVol);
 	DDX_Control(pDX, IDC_SPIN9,					m_SpinPanning);
@@ -684,10 +687,13 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK1,				m_CheckPanning);
 	DDX_Control(pDX, IDC_CHECK2,				m_CheckCutOff);
 	DDX_Control(pDX, IDC_CHECK3,				m_CheckResonance);
+	DDX_Control(pDX, IDC_CHECK4,				m_CheckHighpass);
 	DDX_Control(pDX, IDC_SLIDER1,				m_SliderVolSwing);
 	DDX_Control(pDX, IDC_SLIDER2,				m_SliderPanSwing);
 	DDX_Control(pDX, IDC_SLIDER3,				m_SliderCutOff);
 	DDX_Control(pDX, IDC_SLIDER4,				m_SliderResonance);
+	DDX_Control(pDX, IDC_SLIDER6,				m_SliderCutSwing);
+	DDX_Control(pDX, IDC_SLIDER7,				m_SliderResSwing);
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 	DDX_Control(pDX, IDC_SLIDER5,				m_SliderAttack);
@@ -762,18 +768,26 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_SpinMidiBK.SetRange(0, 128);
 	// Midi Channel
 	//rewbs.instroVSTi: we no longer combine midi chan and FX in same cbbox
-	for (UINT ich=0; ich<17; ich++)
-	{
+	for (UINT ich=0; ich<17; ich++)	{
 		UINT n = 0;
 		s[0] = 0;
 		if (!ich) { strcpy(s, "None"); n=0; } 
 		else { wsprintf(s, "%d", ich); n=ich; }
 		if (s[0]) m_CbnMidiCh.SetItemData(m_CbnMidiCh.AddString(s), n);
 	}
-	//end rewbs.instroVSTi:
+	//end rewbs.instroVSTi
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Default"), SRCMODE_DEFAULT);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString("None"), SRCMODE_NEAREST);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Linear"), SRCMODE_LINEAR);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Spline"), SRCMODE_SPLINE);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Polyphase"), SRCMODE_POLYPHASE);
+	m_CbnResampling.SetItemData(m_CbnResampling.AddString("XMMS"), SRCMODE_FIRFILTER);
+
 	// Vol/Pan Swing
 	m_SliderVolSwing.SetRange(0, 64);
 	m_SliderPanSwing.SetRange(0, 64);
+	m_SliderCutSwing.SetRange(0, 64);
+	m_SliderResSwing.SetRange(0, 64);
 	// Filter
 	m_SliderCutOff.SetRange(0x00, 0x7F);
 	m_SliderResonance.SetRange(0x00, 0x7F);
@@ -973,50 +987,55 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	{
 		m_ToolBar.UpdateStyle();
 	}
+	LockControls();
 	if (dwHintMask & HINT_MIXPLUGINS) OnMixPlugChanged();
+	UnlockControls();
 	if (!(dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE|HINT_MODTYPE))) return;
 	if (((dwHintMask >> 24) != m_nInstrument) && (dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE)) && (!(dwHintMask & HINT_MODTYPE))) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	if (dwHintMask & HINT_MODTYPE)
 	{
-		BOOL b = ((m_pSndFile->m_nType == MOD_TYPE_IT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		BOOL bITonly = ((m_pSndFile->m_nType == MOD_TYPE_IT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		//rewbs.instroVSTi
-		BOOL b2 = (((m_pSndFile->m_nType == MOD_TYPE_IT) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), b2);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), b2);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), b2);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), b2);
-		m_SliderAttack.EnableWindow(b2);
-		m_EditName.EnableWindow(b2);
-		m_EditFileName.EnableWindow(b);
-		m_CbnMidiCh.EnableWindow(b2);
-		m_CbnMixPlug.EnableWindow(b2);
-		m_SpinMidiPR.EnableWindow(b2);
-		m_SpinMidiBK.EnableWindow(b2);	//rewbs.MidiBank
-		m_SpinFadeOut.EnableWindow(b2);
-		m_NoteMap.EnableWindow(b2);
-		m_SliderVolSwing.EnableWindow(b);
-		m_SliderPanSwing.EnableWindow(b);
+		BOOL bITandXM = (((m_pSndFile->m_nType == MOD_TYPE_IT) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), bITandXM);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), bITandXM);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), bITandXM);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), bITandXM);
+		m_SliderAttack.EnableWindow(bITandXM);
+		m_EditName.EnableWindow(bITandXM);
+		m_EditFileName.EnableWindow(bITonly);
+		m_CbnMidiCh.EnableWindow(bITandXM);
+		m_CbnMixPlug.EnableWindow(bITandXM);
+		m_SpinMidiPR.EnableWindow(bITandXM);
+		m_SpinMidiBK.EnableWindow(bITandXM);	//rewbs.MidiBank
 		//end rewbs.instroVSTi
-		m_ComboNNA.EnableWindow(b);
-		m_ComboDCT.EnableWindow(b);
-		m_ComboDCA.EnableWindow(b);
-		m_ComboPPC.EnableWindow(b);
-		m_SpinPPS.EnableWindow(b);
-		m_EditGlobalVol.EnableWindow(b);
-		m_SpinGlobalVol.EnableWindow(b);
-		m_EditPanning.EnableWindow(b);
-		m_SpinPanning.EnableWindow(b);
-		m_CheckPanning.EnableWindow(b);
-		m_EditPPS.EnableWindow(b);
-		m_EditCutOff.EnableWindow(b);
-		m_CheckCutOff.EnableWindow(b);
-		m_CheckResonance.EnableWindow(b);
-		m_SliderVolSwing.EnableWindow(b);
-		m_SliderPanSwing.EnableWindow(b);
-		m_SliderCutOff.EnableWindow(b);
-		m_SliderResonance.EnableWindow(b);
+		m_SpinFadeOut.EnableWindow(bITandXM);
+		m_NoteMap.EnableWindow(bITandXM);
+		m_CbnResampling.EnableWindow(bITandXM);
+		
+		m_ComboNNA.EnableWindow(bITonly);
+		m_SliderVolSwing.EnableWindow(bITonly);
+		m_SliderPanSwing.EnableWindow(bITonly);
+		m_SliderCutSwing.EnableWindow(bITonly);
+		m_SliderResSwing.EnableWindow(bITonly);
+		m_ComboDCT.EnableWindow(bITonly);
+		m_ComboDCA.EnableWindow(bITonly);
+		m_ComboPPC.EnableWindow(bITonly);
+		m_SpinPPS.EnableWindow(bITonly);
+		m_EditGlobalVol.EnableWindow(bITonly);
+		m_SpinGlobalVol.EnableWindow(bITonly);
+		m_EditPanning.EnableWindow(bITonly);
+		m_SpinPanning.EnableWindow(bITonly);
+		m_CheckPanning.EnableWindow(bITonly);
+		m_EditPPS.EnableWindow(bITonly);
+		m_EditCutOff.EnableWindow(bITonly);
+		m_CheckCutOff.EnableWindow(bITonly);
+		m_CheckResonance.EnableWindow(bITonly);
+		m_CheckHighpass.EnableWindow(bITonly);
+		m_SliderCutOff.EnableWindow(bITonly);
+		m_SliderResonance.EnableWindow(bITonly);
 		m_SpinInstrument.SetRange(1, m_pSndFile->m_nInstruments);
 		m_SpinInstrument.EnableWindow((m_pSndFile->m_nInstruments) ? TRUE : FALSE);
 	}
@@ -1040,11 +1059,11 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			SetDlgItemInt(IDC_EDIT9, penv->nPan);
 			m_CheckPanning.SetCheck((penv->dwFlags & ENV_SETPANNING) ? TRUE : FALSE);
 			// Midi
-			if (penv->nMidiProgram)
+			if (penv->nMidiProgram>0 && penv->nMidiProgram<=128)
 				SetDlgItemInt(IDC_EDIT10, penv->nMidiProgram);
 			else
 				SetDlgItemText(IDC_EDIT10, "---");
-			if (penv->wMidiBank)
+			if (penv->wMidiBank && penv->wMidiBank<=128)
 				SetDlgItemInt(IDC_EDIT11, penv->wMidiBank);
 			else
 				SetDlgItemText(IDC_EDIT11, "---");
@@ -1054,16 +1073,25 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			//if (penv->nMidiChannel & 0x80) m_CbnMidiCh.SetCurSel((penv->nMidiChannel&0x7f)+16); else
 			//	m_CbnMidiCh.SetCurSel(0);
 			//now:
-			if (penv->nMidiChannel < 17) 
+			if (penv->nMidiChannel < 17) {
 				m_CbnMidiCh.SetCurSel(penv->nMidiChannel); 
-			else 
+			} else {
 				m_CbnMidiCh.SetCurSel(0);
-			if (penv->nMixPlug < MAX_MIXPLUGINS) 
+			}
+			if (penv->nMixPlug < MAX_MIXPLUGINS) {
 				m_CbnMixPlug.SetCurSel(penv->nMixPlug);
-			else 
+			} else {
 				m_CbnMixPlug.SetCurSel(0);
+			}
 			OnMixPlugChanged();
 			//end rewbs.instroVSTi
+			for(int nRes = 0; nRes<m_CbnResampling.GetCount(); nRes++) {
+                DWORD v = m_CbnResampling.GetItemData(nRes);
+		        if (penv->nResampling == v) {
+					m_CbnResampling.SetCurSel(nRes);
+					break;
+	             }
+			}
 			// NNA, DCT, DCA
 			m_ComboNNA.SetCurSel(penv->nNNA);
 			m_ComboDCT.SetCurSel(penv->nDCT);
@@ -1076,8 +1104,11 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			{
 				m_CheckCutOff.SetCheck((penv->nIFC & 0x80) ? TRUE : FALSE);
 				m_CheckResonance.SetCheck((penv->nIFR & 0x80) ? TRUE : FALSE);
+				m_CheckHighpass.SetCheck(penv->nFilterMode);
 				m_SliderVolSwing.SetPos(penv->nVolSwing);
 				m_SliderPanSwing.SetPos(penv->nPanSwing);
+				m_SliderResSwing.SetPos(penv->nResSwing);
+				m_SliderCutSwing.SetPos(penv->nCutSwing);
 				m_SliderCutOff.SetPos(penv->nIFC & 0x7F);
 				m_SliderResonance.SetPos(penv->nIFR & 0x7F);
 				UpdateFilterText();
@@ -1085,7 +1116,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 			// Volume ramping (attack)
-			int n = penv->nVolRamp ? MAX_ATTACK_LENGTH - penv->nVolRamp : 0;
+			int n = penv->nVolRamp; //? MAX_ATTACK_LENGTH - penv->nVolRamp : 0;
 			m_SliderAttack.SetPos(n);
 			if(n == 0) SetDlgItemText(IDC_EDIT2,"default");
 			else SetDlgItemInt(IDC_EDIT2,n);
@@ -1117,7 +1148,12 @@ VOID CCtrlInstruments::UpdateFilterText()
 		if (penv)
 		{
 			CHAR s[64];
-			wsprintf(s, "%d Hz", pSndFile->CutOffToFrequency(penv->nIFC & 0x7F));
+			if (penv->nIFC&0x80 && penv->nIFC<0xFF) {
+				wsprintf(s, "%d Hz", pSndFile->CutOffToFrequency(penv->nIFC & 0x7F));
+			} else {
+				wsprintf(s, "Off");
+			}
+
 			m_EditCutOff.SetWindowText(s);
 		}
 	}
@@ -1746,36 +1782,50 @@ void CCtrlInstruments::OnMCHChanged()
 		if (penv->nMidiChannel != (BYTE)(n & 0xff)) {
 			penv->nMidiChannel = (BYTE)(n & 0xff);
 			m_pModDoc->SetModified();
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
 		}
-
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
-		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
-// -! NEW_FEATURE#0023
 	}
 }
+
+void CCtrlInstruments::OnResamplingChanged() 
+//------------------------------------------
+{
+	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
+	if ((!IsLocked()) && (penv))
+	{
+		int n = m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel());
+		if (penv->nResampling != (BYTE)(n & 0xff)) {
+			penv->nResampling = (BYTE)(n & 0xff);
+			m_pModDoc->SetModified();
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+		}
+	}
+}
+
 
 //rewbs.instroVSTi
 void CCtrlInstruments::OnMixPlugChanged()
 //---------------------------------------
 {
 	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
-	if (/*(!IsLocked()) &&*/ (penv))
+	BYTE nPlug = static_cast<BYTE>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()) & 0xff);
+
+	if (penv)
 	{
-		BYTE nPlug = static_cast<BYTE>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()) & 0xff);
 		if (nPlug>=0 && nPlug<MAX_MIXPLUGINS+1)
 		{
-			if (penv->nMixPlug != nPlug) {
+			if ((!IsLocked()) && penv->nMixPlug != nPlug) { 
 				m_pModDoc->SetModified();
 				penv->nMixPlug = nPlug;
 			}
 
 			m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, this);
 			
-			if (nPlug)	//if we have not just set to no plugin
+			if (penv->nMixPlug)	//if we have not just set to no plugin
 			{
-				PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[nPlug-1]);
+				PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[penv->nMixPlug-1]);
 				if (pPlug && pPlug->pMixPlugin)
 				{
 					::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), true);
@@ -1821,7 +1871,6 @@ void CCtrlInstruments::OnPPSChanged()
 	}
 }
 
-
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 void CCtrlInstruments::OnAttackChanged()
@@ -1831,7 +1880,7 @@ void CCtrlInstruments::OnAttackChanged()
 		int n = GetDlgItemInt(IDC_EDIT2);
 		if(n < 0) n = 0;
 		if(n > MAX_ATTACK_VALUE) n = MAX_ATTACK_VALUE;
-		int newRamp = n ? MAX_ATTACK_LENGTH - n : 0;
+		int newRamp = n; //? MAX_ATTACK_LENGTH - n : 0;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -1960,6 +2009,38 @@ void CCtrlInstruments::OnEnableResonance()
 	}
 }
 
+void CCtrlInstruments::OnToggleHighpass()
+//----------------------------------------
+{
+	BOOL bHighpass = IsDlgButtonChecked(IDC_CHECK4);
+
+	if (!m_pModDoc) {
+		return;
+	}
+
+	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
+
+	if (penv)	{
+		if (bHighpass) {
+			penv->nFilterMode = FLTMODE_HIGHPASS;
+		} else {
+			penv->nFilterMode = 0;
+		}
+
+		for (UINT i=0; i<MAX_CHANNELS; i++)	{
+			if (pSndFile->Chn[i].pHeader == penv) {
+				pSndFile->Chn[i].nFilterMode = penv->nFilterMode;
+			}
+		}
+	}
+	m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+	m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+	m_pModDoc->SetModified();
+	SwitchToView();
+
+}
+
 
 void CCtrlInstruments::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 //----------------------------------------------------------------------
@@ -1990,7 +2071,7 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			// Volume ramping (attack)
 			if (pSlider==&m_SliderAttack) {
 				n = m_SliderAttack.GetPos();
-				int newRamp = n ? MAX_ATTACK_LENGTH - n : 0;
+				int newRamp = n; //? MAX_ATTACK_LENGTH - n : 0;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 				if(penv->nVolRamp != newRamp){
@@ -2028,6 +2109,28 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 					m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
 // -! NEW_FEATURE#0023
 					penv->nPanSwing = (BYTE)n;
+					m_pModDoc->SetModified();
+				}
+			}
+			//Cutoff swing
+			else if (pSlider==&m_SliderCutSwing) 
+			{
+				n = m_SliderCutSwing.GetPos();
+				if ((n >= 0) && (n <= 64) && (n != (int)penv->nCutSwing))
+				{
+					m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+					penv->nCutSwing = (BYTE)n;
+					m_pModDoc->SetModified();
+				}
+			}
+			//Resonance swing
+			else if (pSlider==&m_SliderResSwing) 
+			{
+				n = m_SliderResSwing.GetPos();
+				if ((n >= 0) && (n <= 64) && (n != (int)penv->nResSwing))
+				{
+					m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+					penv->nResSwing = (BYTE)n;
 					m_pModDoc->SetModified();
 				}
 			}

@@ -634,6 +634,7 @@ BOOL CSoundFile::ProcessRow()
 								Chn[i].nVolume = ChnSettings[i].nVolume;
 								Chn[i].nPan = ChnSettings[i].nPan;
 								Chn[i].nPanSwing = Chn[i].nVolSwing = 0;
+								Chn[i].nCutSwing = Chn[i].nResSwing = 0;
 								Chn[i].nOldVolParam = 0;
 								Chn[i].nOldOffset = 0;
 								Chn[i].nOldHiOffset = 0;

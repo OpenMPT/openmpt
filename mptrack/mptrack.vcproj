@@ -604,6 +604,9 @@
 				RelativePath=".\Moptions.cpp">
 			</File>
 			<File
+				RelativePath=".\MoveFXSlotDialog.cpp">
+			</File>
+			<File
 				RelativePath=".\Mpdlgs.cpp">
 			</File>
 			<File
@@ -614,6 +617,12 @@
 			</File>
 			<File
 				RelativePath=".\mptrack.rc">
+			</File>
+			<File
+				RelativePath=".\PatternGotoDialog.cpp">
+			</File>
+			<File
+				RelativePath=".\PerformanceCounter.cpp">
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.cpp">
@@ -830,10 +839,19 @@
 				RelativePath=".\Moptions.h">
 			</File>
 			<File
+				RelativePath=".\MoveFXSlotDialog.h">
+			</File>
+			<File
 				RelativePath=".\Mpdlgs.h">
 			</File>
 			<File
 				RelativePath=".\mptrack.h">
+			</File>
+			<File
+				RelativePath=".\PatternGotoDialog.h">
+			</File>
+			<File
+				RelativePath=".\PerformanceCounter.h">
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.h">

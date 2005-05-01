@@ -1699,6 +1699,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 	penv->nNNA = NNA_NOTEOFF;
 	penv->nDCT = DCT_NOTE;
 	penv->nDNA = DNA_NOTEFADE;
+	penv->nResampling = SRCMODE_DEFAULT;
 	pSndFile->Headers[nInstr] = penv;
 	nSample = 1;
 	UINT nLoadedSmp = 0;
