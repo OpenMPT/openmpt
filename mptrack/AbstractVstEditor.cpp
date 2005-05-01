@@ -22,6 +22,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND_RANGE(ID_PRESET_SET, ID_PRESET_SET+MAX_PLUGPRESETS, OnSetPreset)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnToggleEditor) //rewbs.patPlugName
+	ON_COMMAND_RANGE(ID_SELECTINST, ID_SELECTINST+MAX_INSTRUMENTS, OnSetInputInstrument) //rewbs.patPlugName
 END_MESSAGE_MAP()
 
 CAbstractVstEditor::CAbstractVstEditor(CVstPlugin *pPlugin)
@@ -37,6 +38,7 @@ CAbstractVstEditor::CAbstractVstEditor(CVstPlugin *pPlugin)
 	m_pPresetMenuGroup.SetSize(0);
 
 	m_pMenu->LoadMenu(IDR_VSTMENU);
+	m_nInstrument = GetBestInstrumentCandidate();
 }
 
 CAbstractVstEditor::~CAbstractVstEditor()
@@ -184,8 +186,16 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
 			InputTargetContext ctx = (InputTargetContext)(kCtxVSTGUI);
 			
-			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull) {
-				return true; // Mapped to a command, no need to pass message on.
+			// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
+			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull
+				 /*&& !(m_pVstPlugin->KeysRequired()) */) {
+				return true; 
+			}
+			
+			// Don't forward key repeats if plug does not listen for keypresses
+		    // (avoids system beeps on note hold)
+			if (kT == kKeyEventRepeat/* && !(m_pVstPlugin->KeysRequired())*/) {
+				return true;
 			}
 		}
 	}
@@ -228,8 +238,31 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	}
 	if (wParam>=kcVSTGUIStartNotes && wParam<=kcVSTGUIEndNotes)
 	{
-		//PlayNote(wParam-kcSampStartNotes+1+pMainFrm->GetBaseOctave()*12);
-		AfxMessageBox("Play Note");
+		if (!CheckInstrument(m_nInstrument)) {
+			m_nInstrument = GetBestInstrumentCandidate();
+		}
+		
+		if (m_nInstrument<0 && m_pVstPlugin->CanRecieveMidiEvents()) {	//only send warning if plug is able to process notes.
+			AfxMessageBox("You need to assign an instrument to this plugin before you can play notes from here.");
+		} else {
+			CModDoc* pModDoc     = m_pVstPlugin->GetModDoc();
+			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
+			pModDoc->PlayNote(wParam-kcVSTGUIStartNotes+1+pMainFrm->GetBaseOctave()*12, m_nInstrument, 0, TRUE);
+		}
+		return wParam;
+	}
+	if (wParam>=kcVSTGUIStartNoteStops && wParam<=kcVSTGUIEndNoteStops)
+	{
+		if (!CheckInstrument(m_nInstrument)) {
+			m_nInstrument = GetBestInstrumentCandidate();
+		}
+		if (m_nInstrument<0 && m_pVstPlugin->CanRecieveMidiEvents()) {	//only send warning if plug is able to process notes.
+			AfxMessageBox("You need to assign an instrument to this plugin before you can play notes from here.");
+		} else {	
+			CModDoc* pModDoc     = m_pVstPlugin->GetModDoc();
+			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
+			pModDoc->NoteOff(wParam-kcVSTGUIStartNoteStops+1+pMainFrm->GetBaseOctave()*12, FALSE, m_nInstrument);
+		}
 		return wParam;
 	}
 
@@ -319,6 +352,9 @@ void CAbstractVstEditor::UpdateInputMenu()
  	CMenu* pInfoMenu = m_pMenu->GetSubMenu(2);
 	pInfoMenu->DeleteMenu(0, MF_BYPOSITION);
 
+	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
+	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+
 	if (m_pInputMenu->m_hMenu)	{
 		m_pInputMenu->DestroyMenu();
 	}
@@ -326,16 +362,41 @@ void CAbstractVstEditor::UpdateInputMenu()
 		m_pInputMenu->CreatePopupMenu();
 	}
 
-	CArray<CVstPlugin*, CVstPlugin*> inputPlugs;
-	m_pVstPlugin->GetInputPlugList(inputPlugs);
 	CString name;
 
+	CArray<CVstPlugin*, CVstPlugin*> inputPlugs;
+	m_pVstPlugin->GetInputPlugList(inputPlugs);
 	for (int nPlug=0; nPlug<inputPlugs.GetSize(); nPlug++) {
-		name.Format("FX%02d: %s", inputPlugs[nPlug]->m_nSlot+1,
-								  inputPlugs[nPlug]->m_pMixStruct->Info.szName);
+		name.Format("FX%02d: %s", inputPlugs[nPlug]->m_nSlot+1, inputPlugs[nPlug]->m_pMixStruct->Info.szName);
 		m_pInputMenu->AppendMenu(MF_STRING, ID_PLUGSELECT+inputPlugs[nPlug]->m_nSlot, name);
 	}
-	if (inputPlugs.GetSize() == 0) {
+
+	CArray<UINT, UINT> inputChannels;
+	m_pVstPlugin->GetInputChannelList(inputChannels);
+	for (int nChn=0; nChn<inputChannels.GetSize(); nChn++) {
+		if (nChn==0 && inputPlugs.GetSize()) { 
+			m_pInputMenu->AppendMenu(MF_SEPARATOR);
+		}
+		name.Format("Chn%02d: %s", inputChannels[nChn]+1, pSndFile->ChnSettings[inputChannels[nChn]].szName);
+		m_pInputMenu->AppendMenu(MF_STRING, NULL, name);
+	}
+
+	CArray<UINT, UINT> inputInstruments;
+	m_pVstPlugin->GetInputInstrumentList(inputInstruments);
+	bool checked;
+	for (int nIns=0; nIns<inputInstruments.GetSize(); nIns++) {
+		checked=false;
+		if (nIns==0 && (inputPlugs.GetSize() || inputChannels.GetSize())) { 
+			m_pInputMenu->AppendMenu(MF_SEPARATOR);
+		}
+		name.Format("Ins%02d: %s", inputInstruments[nIns], pSndFile->Headers[inputInstruments[nIns]]->name);
+		if (inputInstruments[nIns]==m_nInstrument)	checked=true;
+		m_pInputMenu->AppendMenu(MF_STRING|(checked?MF_CHECKED:0), ID_SELECTINST+inputInstruments[nIns], name);
+	}
+
+	if ((inputPlugs.GetSize() == 0) &&
+		(inputChannels.GetSize() == 0) &&
+		(inputInstruments.GetSize() == 0)) {
 		m_pInputMenu->AppendMenu(MF_STRING|MF_GRAYED, NULL, "None");
 	}
 
@@ -447,4 +508,39 @@ void CAbstractVstEditor::OnToggleEditor(UINT nID)
 void CAbstractVstEditor::OnInitMenu(CMenu* pMenu) {
 	//AfxMessageBox("");
 	SetupMenu();
+}
+
+bool CAbstractVstEditor::CheckInstrument(int instrument) 
+{
+	CSoundFile* pSndFile = m_pVstPlugin->GetSoundFile();
+	
+	if (instrument>=0 && instrument<MAX_INSTRUMENTS && pSndFile->Headers[instrument]) {
+		return (pSndFile->Headers[instrument]->nMixPlug) == (m_pVstPlugin->m_nSlot+1);
+	}
+	return false;
+}
+
+int CAbstractVstEditor::GetBestInstrumentCandidate() 
+{
+	//First try current instrument:
+/*	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
+	int currentInst =	//HOW DO WE DO THIS??
+	if (CheckInstrument(currentInst)) {
+		return currentInst;
+	}
+*/
+	//Then just take the first instrument that points to this plug..
+	CArray<UINT, UINT> plugInstrumentList;
+	m_pVstPlugin->GetInputInstrumentList(plugInstrumentList);
+	if (plugInstrumentList.GetSize()) {
+		return plugInstrumentList[0];
+	}
+
+	//No instrument in the entire track points to this plug.
+	return -1;
+}
+
+void CAbstractVstEditor::OnSetInputInstrument(UINT nID)
+{
+	m_nInstrument = (nID-ID_SELECTINST);
 }

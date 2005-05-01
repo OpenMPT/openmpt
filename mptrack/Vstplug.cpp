@@ -815,13 +815,13 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		break;
 	case audioMasterGetVendorString:	// Prentending to be Steinberg for compat.
 		strcpy((char*)ptr,"Steinberg");
-//		strcpy((char*)ptr,"Open MPT");
+//		strcpy((char*)ptr,"OpenMPT");
 		return 0;
 	case audioMasterGetVendorVersion:	// Prentending to be Cubase VST 7. :)
 		return 7000;					
 	case audioMasterGetProductString:	// Prentending to be Cubase VST for compat.
 		strcpy((char*)ptr,"Cubase VST");
-//		strcpy((char*)ptr,"Modplug Tracker");
+//		strcpy((char*)ptr,"OpenMPT");
 		return 0;
 	case audioMasterVendorSpecific:		
 		return 0;
@@ -1397,7 +1397,7 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 	//rewbs.plugDocAware
 	m_pModDoc = pModDoc;
 	m_pSndFile = pModDoc->GetSoundFile();
-	m_nSlot = GetSlot();
+	m_nSlot = FindSlot();
 	//end rewbs.plugDocAware
 
 	Dispatch(effOpen, 0, 0, NULL, 0);
@@ -2291,7 +2291,7 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 //rewbs.VSTiNoteHoldonStopFix
 void CVstPlugin::HardAllNotesOff()
 {
-	bool overflow=false;
+	bool overflow;
 	float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
 
 	// Relies on a wait on processCalled, which will never get set
@@ -2300,6 +2300,7 @@ void CVstPlugin::HardAllNotesOff()
 	//	return;
 
 	do {
+		overflow=false;
 		for (int mc=0; mc<16; mc++)		//all midi chans
 		{	
 			UINT nCh = mc & 0x0f;
@@ -2328,9 +2329,9 @@ void CVstPlugin::HardAllNotesOff()
 		// let plug process events
 		// TODO: wait for notification from audio thread that process has been called,
 		//       rather than re-call it here		
-		//ResetEvent(processCalled);				  // Unset processCalled.
-		//WaitForSingleObject(processCalled, 10000);// Will not return until processCalled is set again,
-												  // i.e. until processReplacing() has been called.
+		//ResetEvent(processCalled);				 // Unset processCalled.
+		//WaitForSingleObject(processCalled, 10000); // Will not return until processCalled is set again,
+		//                                           // i.e. until processReplacing() has been called.
 		Process((float*)in, (float*)out, SCRATCH_BUFFER_SIZE);
 
 	// If we had hit an overflow, we need to loop around and start again.
@@ -2775,17 +2776,35 @@ void CVstPlugin::NotifySongPlaying(bool playing) {
 	m_bSongPlaying=playing;
 }
 
-UINT CVstPlugin::GetSlot() {
+UINT CVstPlugin::FindSlot() 
+//------------------------
+{
 	UINT slot=0;
-
 	if (m_pSndFile) {
 		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot<=MAX_MIXPLUGINS) {
 			slot++;
 		}
 	}
-
 	return slot;
 }
+
+void CVstPlugin::SetSlot(UINT slot) 
+//------------------------
+{
+	m_nSlot = slot;
+}
+
+UINT CVstPlugin::GetSlot() 
+//------------------------
+{
+	return m_nSlot;
+}
+void CVstPlugin::UpdateMixStructPtr(PSNDMIXPLUGIN p)
+//--------------------------------------------------
+{
+	m_pMixStruct = p;
+}
+
 //end rewbs.VSTcompliance
 
 BOOL CVstPlugin::isInstrument() // ericus 18/02/2005
@@ -2795,10 +2814,16 @@ BOOL CVstPlugin::isInstrument() // ericus 18/02/2005
 }
 
 BOOL CVstPlugin::CanRecieveMidiEvents() {
+//---------------------------------------
 	CString s = "receiveVstMidiEvent";
 	return (CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0));
 }
 
+bool CVstPlugin::KeysRequired()
+//-----------------------------
+{
+	return (CVstPlugin::Dispatch(effKeysRequired, 0, 0, NULL, 0));
+}
 
 void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list) 
 {
@@ -2843,11 +2868,37 @@ void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list)
 
 void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list) 
 {
+	list.RemoveAll();
+	
+	CModDoc* pModDoc = GetModDoc();
+	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	
+	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
+	for (int nIns=0; nIns<MAX_INSTRUMENTS; nIns++) {
+		if (pSndFile->Headers[nIns] && (pSndFile->Headers[nIns]->nMixPlug==nThisMixPlug)) {
+			list.Add(nIns);
+		}
+	}
 
+	return;
 
 }
 
-void CVstPlugin::GetInputChannelList(CArray<UINT,UINT> &list) {
+void CVstPlugin::GetInputChannelList(CArray<UINT,UINT> &list) 
+{
+	list.RemoveAll();
+	
+	CModDoc* pModDoc = GetModDoc();
+	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	
+	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
+	for (int nChn=0; nChn<pSndFile->m_nChannels; nChn++) {
+		if (pSndFile->ChnSettings[nChn].nMixPlugin==nThisMixPlug) {
+			list.Add(nChn);
+		}
+	}
+
+	return;
 
 }
 

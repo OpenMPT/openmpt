@@ -8,6 +8,7 @@
 #include "view_gen.h"
 #include "vstplug.h"
 #include "EffectVis.h"
+#include "movefxslotdialog.h"
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -46,7 +47,10 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(IDC_BUTTON3,		OnSetParameter)
 	ON_COMMAND(IDC_BUTTON4,		OnNextPlugin)
 	ON_COMMAND(IDC_BUTTON5,		OnPrevPlugin)
-	
+	ON_COMMAND(IDC_MOVEFXSLOT,  OnMovePlugToSlot)
+	ON_COMMAND(IDC_INSERTFXSLOT,OnInsertSlot)
+	ON_COMMAND(IDC_CLONEPLUG,   OnClonePlug)
+
 
 // -> CODE#0002
 // -> DESC="VST plugins presets"
@@ -414,6 +418,9 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		CheckDlgButton(IDC_CHECK11, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) ? TRUE : FALSE);
 		CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : NULL;
 		m_BtnEdit.EnableWindow(((pVstPlugin) && ((pVstPlugin->HasEditor()) || (pVstPlugin->GetNumCommands()))) ? TRUE : FALSE);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_MOVEFXSLOT), (pVstPlugin)?TRUE:FALSE);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSERTFXSLOT), (pVstPlugin)?TRUE:FALSE);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CLONEPLUG), (pVstPlugin)?TRUE:FALSE);
 		//rewbs.DryRatio
 		int n = static_cast<int>(pPlugin->fDryRatio*100);
 		wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
@@ -1569,4 +1576,128 @@ LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		default:
 			return 0;
 	}
+}
+
+void CViewGlobals::OnMovePlugToSlot() 
+//-----------------------------------
+{
+	CMoveFXSlotDialog dlg((CWnd*)this);
+	CArray<UINT, UINT> emptySlots;
+	BuildEmptySlotList(emptySlots);
+
+	dlg.SetupMove(m_nCurrentPlugin, emptySlots);
+
+	if (dlg.DoModal() == IDOK) { 
+		MovePlug(m_nCurrentPlugin, dlg.m_nToSlot);
+		m_CbnPlugin.SetCurSel(dlg.m_nToSlot);
+		OnPluginChanged();
+	}
+
+}
+
+bool CViewGlobals::MovePlug(UINT src, UINT dest)
+//----------------------------------------------
+{
+	//AfxMessageBox("Moving %d to %d", src, dest);
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	
+	BEGIN_CRITICAL();
+		
+	// Move plug data
+	memcpy(&(pSndFile->m_MixPlugins[dest]), &(pSndFile->m_MixPlugins[src]), sizeof(SNDMIXPLUGIN));
+	memset(&(pSndFile->m_MixPlugins[src]), 0, sizeof(SNDMIXPLUGIN));
+	
+	//Prevent plug from pointing backwards.
+	if (pSndFile->m_MixPlugins[dest].Info.dwOutputRouting & 0x80) {
+		UINT nOutput = pSndFile->m_MixPlugins[dest].Info.dwOutputRouting & 0x7f;
+		if (nOutput<=dest) {
+			pSndFile->m_MixPlugins[dest].Info.dwOutputRouting = 0;
+		}
+	}
+	
+	// Update current plug
+	if (pSndFile->m_MixPlugins[dest].pMixPlugin) {
+		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->SetSlot(dest);
+		((CVstPlugin*)pSndFile->m_MixPlugins[dest].pMixPlugin)->UpdateMixStructPtr(&(pSndFile->m_MixPlugins[dest]));
+	}
+	
+	// Update all other plugs' outputs
+	for (int nPlug=0; nPlug<src; nPlug++) {
+		if (pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80) {
+			if ((pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x7f) == src) {
+				pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting = ((BYTE)dest)|0x80;
+			}
+		}
+	}
+	// Update channels
+	for (int nChn=0; nChn<pSndFile->m_nChannels; nChn++) {
+		if (pSndFile->ChnSettings[nChn].nMixPlugin == src+1) {
+			pSndFile->ChnSettings[nChn].nMixPlugin = dest+1;
+		}
+	}
+
+	// Update instruments
+	for (int nIns=1; nIns<=pSndFile->m_nInstruments; nIns++) {
+		if (pSndFile->Headers[nIns] && (pSndFile->Headers[nIns]->nMixPlug == src+1)) {
+			pSndFile->Headers[nIns]->nMixPlug = dest+1;
+		}
+	}
+
+	END_CRITICAL();
+
+	return true;
+}
+
+void CViewGlobals::BuildEmptySlotList(CArray<UINT, UINT> &emptySlots) 
+//-------------------------------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	
+	emptySlots.RemoveAll();
+
+	for (UINT nSlot=0; nSlot<MAX_MIXPLUGINS; nSlot++) {
+		if (pSndFile->m_MixPlugins[nSlot].pMixPlugin == NULL) {
+			emptySlots.Add(nSlot);	
+		}
+	}
+	return;
+}
+
+void CViewGlobals::OnInsertSlot()
+//-------------------------------
+{
+	CString prompt;
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	prompt.Format("Insert empty slot before slot FX%d?", m_nCurrentPlugin+1);
+	if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin) {
+		prompt.Append("\nWarning: plugin data in slot last will be lost."); 
+	}
+	if (AfxMessageBox(prompt, MB_YESNO) == IDYES) {
+
+		//Delete last plug...
+		if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin) {
+			pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin->Release();
+			memset(&(pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1]), 0, sizeof(SNDMIXPLUGIN));
+			//possible mem leak here...
+		}
+
+		for (int nSlot=MAX_MIXPLUGINS-1; nSlot>(int)m_nCurrentPlugin; nSlot--) {
+			if (pSndFile->m_MixPlugins[nSlot-1].pMixPlugin) {
+				MovePlug(nSlot-1, nSlot);
+			}
+		}
+
+		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
+		OnPluginChanged();
+	}
+
+}
+
+void CViewGlobals::OnClonePlug()
+//------------------------------
+{
+	AfxMessageBox("Not yet implemented.");
 }

@@ -13,6 +13,7 @@
 #include "vstplug.h"
 #include "KeyConfigDlg.h"
 #include "AutoSaver.h"
+#include "performancecounter.h"
 #include ".\mainfrm.h"
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -98,6 +99,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_USER,	OnUpdateUser)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_INFO,	OnUpdateInfo)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,OnUpdateXInfo) //rewbs.xinfo
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_CPU,  OnUpdateCPU)
 	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		OnUpdateControlBarMenu)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
@@ -262,6 +264,7 @@ CHAR CMainFrame::m_szCurInsDir[_MAX_PATH] = "";
 
 CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
 CAutoSaver *CMainFrame::m_pAutoSaver = NULL; //rewbs.autosave
+CPerformanceCounter *CMainFrame::m_pPerfCounter = NULL;
 
 static UINT indicators[] =
 {
@@ -269,7 +272,8 @@ static UINT indicators[] =
 	ID_INDICATOR_XINFO,		//rewbs.xinfo
 	ID_INDICATOR_INFO,
 	ID_INDICATOR_USER,
-	ID_INDICATOR_TIME
+	ID_INDICATOR_TIME,
+	ID_INDICATOR_CPU
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -303,12 +307,24 @@ CMainFrame::CMainFrame()
 	m_szXInfoText[0]= 0;	//rewbs.xinfo
 	m_szPluginsDir[0] = 0;
 	m_szExportDir[0] = 0;
+	m_dTotalCPU=0;
+
 	memset(gpenVuMeter, 0, sizeof(gpenVuMeter));
 	memset(Chords, 0, sizeof(Chords));
 	memcpy(KeyboardMap, KeyboardMPT, sizeof(KeyboardMap));
 	// Create Audio Critical Section
 	memset(&m_csAudio, 0, sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(&m_csAudio);
+
+	//rewbs.autosave
+	bool asEnabled=true;
+	int asInterval=10;
+	int asBackupHistory=3;
+	bool asUseOriginalPath=true;
+	CString asPath ="";
+	CString asFileNameTemplate="";
+	//end rewbs.autosave
+
 	// Default chords
 	for (UINT ichord=0; ichord<3*12; ichord++)
 	{
@@ -421,13 +437,6 @@ CMainFrame::CMainFrame()
 		//end rewbs.autochord
 
 		//rewbs.autoSave
-		bool asEnabled=true;
-		int asInterval=10;
-		int asBackupHistory=3;
-		bool asUseOriginalPath=true;
-		CString asPath ="";
-		CString asFileNameTemplate="";
-
 		dwDWORDSize = sizeof(asEnabled);
 		RegQueryValueEx(key, "AutoSave_Enabled", NULL, &dwREG_DWORD, (LPBYTE)&asEnabled, &dwDWORDSize);
 		dwDWORDSize = sizeof(asInterval);
@@ -445,8 +454,6 @@ CMainFrame::CMainFrame()
 		RegQueryValueEx(key, "AutoSave_FileNameTemplate", NULL, &dwREG_DWORD, (LPBYTE)asFileNameTemplate.GetBuffer(dwDWORDSize/sizeof(TCHAR)), &dwDWORDSize);
 		asFileNameTemplate.ReleaseBuffer();
 
-		m_pAutoSaver = new CAutoSaver(asEnabled, asInterval, asBackupHistory, 
-			                          asUseOriginalPath, asPath, asFileNameTemplate);
 		//end rewbs.autoSave
 
 		RegCloseKey(key);
@@ -468,7 +475,10 @@ CMainFrame::CMainFrame()
 		m_dwPatternSetup |= PATTERN_SHOWPREVIOUS|PATTERN_CONTSCROLL;
 	}
 */
+	m_pAutoSaver = new CAutoSaver(asEnabled, asInterval, asBackupHistory, asUseOriginalPath, asPath, asFileNameTemplate);
 	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
+	m_pPerfCounter= new CPerformanceCounter();
+
 }
 
 
@@ -543,6 +553,7 @@ CMainFrame::~CMainFrame()
 	DeleteCriticalSection(&m_csAudio);
 	delete m_InputHandler; 	//rewbs.customKeys
 	delete m_pAutoSaver; //rewbs.autosaver
+	delete m_pPerfCounter;
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -1098,7 +1109,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 				nSleep = 50;
 			}
 		}
-		END_CRITICAL();
+        END_CRITICAL();
 	}
 
 // -> CODE#0021
@@ -1194,6 +1205,7 @@ ULONG CMainFrame::AudioRead(PVOID pvData, ULONG ulSize)
 	if ((IsPlaying()) && (m_pSndFile))
 	{
 		DWORD dwSamplesRead = m_pSndFile->Read(pvData, ulSize);
+		m_dTotalCPU = m_pPerfCounter->StartStop()/(static_cast<double>(dwSamplesRead)/m_dwRate);
 		return dwSamplesRead * slSampleSize;
 	}
 	return 0;
@@ -1455,6 +1467,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 			return TRUE;
 		}
 	}
+
 	return FALSE;
 }
 
@@ -2218,7 +2231,7 @@ void CMainFrame::OnViewOptions()
 	if (m_bOptionsLocked)	//rewbs.customKeys
 		return;
 		
-	CPropertySheet dlg("Modplug Tracker Setup", this, m_nLastOptionsPage);
+	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
 	COptionsSoundcard sounddlg(m_dwRate, m_dwSoundSetup, m_nBitsPerSample, m_nChannels, m_nBufferLength, m_nWaveDevice);
 	COptionsKeyboard keyboard;
@@ -2446,6 +2459,18 @@ void CMainFrame::OnUpdateInfo(CCmdUI *)
 //-------------------------------------
 {
 	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_INFO), m_szInfoText, TRUE);
+}
+
+
+void CMainFrame::OnUpdateCPU(CCmdUI *)
+//-------------------------------------
+{
+	CString s;
+	double totalCPUPercent = m_dTotalCPU*100;
+	UINT intPart = static_cast<int>(totalCPUPercent);
+	UINT decPart = static_cast<int>(totalCPUPercent-intPart)*100;
+	s.Format("%d.%d%%", intPart, decPart);
+	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_CPU), s, TRUE);
 }
 
 //rewbs.xinfo

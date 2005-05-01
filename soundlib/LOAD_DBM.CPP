@@ -167,6 +167,7 @@ BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				else
 					penv->nPan = 128;
 				penv->nPPC = 5*12;
+				penv->nResampling = SRCMODE_DEFAULT;
 				for (UINT i=0; i<120; i++)
 				{
 					penv->Keyboard[i] = nsmp;

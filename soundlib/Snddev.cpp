@@ -10,6 +10,7 @@
 #include "snddev.h"
 #include "snddevx.h"
 
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // ISoundDevice base class
@@ -183,7 +184,6 @@ BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWOR
 {
 	ULONG nBytesWritten;
 	ULONG nLatency;
-
 	if (!m_hWaveOut) return FALSE;
 	nBytesWritten = 0;
 	nLatency = m_nBuffersPending * m_nWaveBufferSize;
@@ -966,6 +966,7 @@ BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWOR
 	}
 	if (m_bPostOutput) m_pAsioDrv->outputReady();
 	pSource->AudioDone(dwBufferOffset*dwSampleSize, m_nAsioBufferLen);
+
 	return TRUE;
 }
 

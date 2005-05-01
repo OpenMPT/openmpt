@@ -108,7 +108,10 @@ public:
 	bool isModified() {return m_bModified;}
 	inline CModDoc* GetModDoc() {return m_pModDoc;}
 	inline CSoundFile* GetSoundFile() {return m_pSndFile;}
+	UINT FindSlot();
+	void SetSlot(UINT slot);
 	UINT GetSlot();
+	void UpdateMixStructPtr(PSNDMIXPLUGIN);
 
 	VOID SetCurrentProgram(UINT nIndex);
 //rewbs.VSTCompliance: Eric's non standard preset stuff:
@@ -138,6 +141,7 @@ public:
 
 	BOOL isInstrument(); // ericus 18/02/2005
 	BOOL CanRecieveMidiEvents();
+	bool KeysRequired();
 
 	void GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list);
 	void GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list);

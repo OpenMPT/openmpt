@@ -121,11 +121,13 @@ Exemple with "nPanLoopEnd" , "nPitchLoopEnd" & "VolEnv[MAX_ENVPOINTS]" members :
 		[EXT]	means external (not related) to INSTRUMENTHEADER content
 
 C...	[EXT]	nChannels
+CS..			nCutSwing
 DCT.			nDCT;
 dF..			dwFlags;
 DT..	[EXT]	nDefaultTempo;			
 DNA.			nDNA;
 EBIH	[EXT]	embeded instrument header tag (ITP file format)
+FM..			nFilterMode;
 fn[.			filename[12];
 FO..			nFadeOut;
 GV..			nGlobalVol;
@@ -160,8 +162,10 @@ PPS.			nPPS;
 PS..			nPanSwing;
 PSB.			nPanSustainBegin;
 PSE.			nPanSustainEnd;
+R...			nResampling;
 RPB.	[EXT]	nRowsPerBeat;
 RPM.	[EXT]	nRowsPerMeasure;
+RS..			nResSwing;
 SEP@	[EXT]									chunk SEPARATOR tag
 VE..			nVolEnv;
 VE[.			VolEnv[MAX_ENVPOINTS];
@@ -244,6 +248,10 @@ WRITE_MPTHEADER_array_member(	name				, CHAR			, n[..		, 32				)
 WRITE_MPTHEADER_array_member(	filename			, CHAR			, fn[.		, 12				)
 WRITE_MPTHEADER_sized_member(	nMixPlug			, BYTE			, MiP.							)
 WRITE_MPTHEADER_sized_member(	nVolRamp			, USHORT		, VR..							)
+WRITE_MPTHEADER_sized_member(	nResampling			, USHORT		, R...							)
+WRITE_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
+WRITE_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
+WRITE_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
 }
 
 // --------------------------------------------------------------------------------------------
@@ -313,6 +321,10 @@ GET_MPTHEADER_array_member(	name				, CHAR			, n[..		, 32				)
 GET_MPTHEADER_array_member(	filename			, CHAR			, fn[.		, 12				)
 GET_MPTHEADER_sized_member(	nMixPlug			, BYTE			, MiP.							)
 GET_MPTHEADER_sized_member(	nVolRamp			, USHORT		, VR..							)
+GET_MPTHEADER_sized_member(	nResampling			, UINT			, R...							)
+GET_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
+GET_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
+GET_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
 }
 
 return pointer;
@@ -1086,7 +1098,7 @@ void CSoundFile::SuspendPlugins()
 		if (m_MixPlugins[iPlug].pMixState)
 		{
 			pPlugin->NotifySongPlaying(false);
-//			pPlugin->HardAllNotesOff();
+			pPlugin->HardAllNotesOff();
 			pPlugin->Suspend();
 		}
 	}
@@ -1180,20 +1192,23 @@ void CSoundFile::DontLoopPattern(int nPat, int nRow)
 	m_nSeqOverride = 0;
 }
 
-int CSoundFile::FindOrder(BYTE pat)
+int CSoundFile::FindOrder(BYTE pat, UINT startFromOrder)
+//------------------------------------------------------
 {
-	int order = -1;
+	int foundAtOrder = -1;
+	int candidateOrder = 0;
 
 	for (UINT p=0; p<MAX_ORDERS; p++)
 	{
-		if (Order[p] == pat)
+		candidateOrder = (startFromOrder+p)%MAX_ORDERS;		//wrap around MAX_ORDERS
+		if (Order[candidateOrder] == pat)
 		{
-			order = p;
+			foundAtOrder = candidateOrder;
 			break;
 		}
 	}
 
-	return order;
+	return foundAtOrder;
 }
 //end rewbs.playSongFromCursor
 

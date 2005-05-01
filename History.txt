@@ -21,6 +21,28 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17RC1 (revision 1.13.2.14)
+  + <rewbs> Rubbish CPU usage indicator. Dishonestly shows 10-20% less than Windows taskmanager, not sure why yet.
+  + <rewbs> Quick "Go to row/channel/pattern/order" dialog in pattern editor. Set up a custom key to use it the Pattern Editor/General category.
+  + <rewbs> List input channels & instruments (as well as input plugins) in the plugin info/input menu.
+  + <rewbs> Can play VSTi in plugin's window if you have set up an intrument that is assigned to that plugin.
+            If you have multiple instruments assigned to that plugin, you can select which one is used from the info/input menu.
+  + <rewbs> Option to force built-in filter into highpass mode on particular instruments.
+  + <rewbs> Cutoff / resonance random variation.
+  + <rewbs> Optional per-instrument resampling mode selection!
+  + <rewbs> Move a plugin from an FX slot to another FX slot (hopefully automatically updates references throughout track, so it should sound unchanged).
+  + <rewbs> Inset a blank FX slot between 2 FX slots. Again, song should sound unchanged.
+  . <rewbs> Prevented another very rare hang on stop which could occur when more than 255 notes were active simultaneously on a same plugin.
+  / <rewbs> Previously, in the instrument view, "Attack" represented the sample ramping where more attack meant less ramping.
+            The property has been renamed to ramping and inverted so as to be more intuitive.
+  / <rewbs> Replaced a bunch of "Modplug Tracker" strings with "OpenMPT". :)
+  / <rewbs> Code cleanups, particularly in IT/ITP/ITI/XM/XI extended info saving. Extensive testing is TODO, including 2-way compat with previous versions.
+  
+TODO: change goto key context, remove from menu.
+
+
+
+
 . v 1.17RC1 (revision 1.13.2.13)
   . <rewbs> More fixes to plugs that try to get tempo before we've had a chance to init them properly.
   . <rewbs> Backed out first attempt at reducing hangs on stop (from rev 1.13.2.10) - it was pointless. I think 1.13.2.11 really solved it though.

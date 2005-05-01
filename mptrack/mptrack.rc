@@ -739,7 +739,7 @@ BEGIN
     LTEXT           "%",IDC_STATIC,494,53,8,10
 END
 
-IDD_CONTROL_INSTRUMENTS DIALOGEX 0, 0, 558, 171
+IDD_CONTROL_INSTRUMENTS DIALOGEX 0, 0, 558, 173
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
@@ -751,21 +751,21 @@ BEGIN
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
                     UDS_NOTHOUSANDS,116,7,9,11
     EDITTEXT        IDC_SAMPLE_NAME,131,6,151,12,ES_AUTOHSCROLL
-    CTEXT           "Fade Out",IDC_STATIC,10,56,72,12,SS_CENTERIMAGE,
+    CTEXT           "Fade Out",IDC_STATIC,8,53,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_EDIT7,87,56,34,12,ES_NUMBER
+    EDITTEXT        IDC_EDIT7,87,53,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN7,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,112,57,
                     8,10
-    CTEXT           "Global Volume",IDC_STATIC,10,39,72,12,SS_CENTERIMAGE,
+    CTEXT           "Global Volume",IDC_STATIC,8,36,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_EDIT8,87,39,34,12,ES_NUMBER
+    EDITTEXT        IDC_EDIT8,87,36,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN8,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,112,40,
                     8,10
     CONTROL         "Pan",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,55,74,29,10
-    EDITTEXT        IDC_EDIT9,87,73,34,12,ES_NUMBER
+                    WS_TABSTOP,55,71,29,10
+    EDITTEXT        IDC_EDIT9,87,70,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN9,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,112,74,
                     8,11
@@ -781,60 +781,61 @@ BEGIN
                     WS_TABSTOP
     COMBOBOX        IDC_COMBO1,308,36,50,54,CBS_DROPDOWNLIST | WS_TABSTOP
     COMBOBOX        IDC_COMBO2,308,53,50,69,CBS_DROPDOWNLIST | WS_TABSTOP
-    COMBOBOX        IDC_COMBO3,308,71,50,54,CBS_DROPDOWNLIST | WS_TABSTOP
+    COMBOBOX        IDC_COMBO3,308,70,50,54,CBS_DROPDOWNLIST | WS_TABSTOP
     CTEXT           "File",IDC_STATIC,289,6,36,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     EDITTEXT        IDC_SAMPLE_FILENAME,324,6,105,12,ES_AUTOHSCROLL
-    CTEXT           "Separation",IDC_STATIC,10,102,72,13,SS_CENTERIMAGE,
+    CTEXT           "Sep",IDC_STATIC,8,99,25,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_EDIT15,88,102,33,13,ES_NUMBER
+    EDITTEXT        IDC_EDIT15,33,99,27,13,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN12,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,113,103,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,61,103,
                     7,11
-    CTEXT           "Center",IDC_STATIC,10,120,72,13,SS_CENTERIMAGE,
+    CTEXT           "Centre",IDC_STATIC,69,99,26,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    COMBOBOX        IDC_COMBO4,88,120,33,91,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO4,95,99,27,91,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "",IDC_NOTEMAP,"Static",SS_GRAYRECT | SS_NOTIFY | 
                     WS_TABSTOP,368,37,62,131,WS_EX_CLIENTEDGE
-    GROUPBOX        "Random Variation",IDC_STATIC,131,106,104,62
-    CTEXT           "Volume",IDC_STATIC,137,123,33,13,SS_CENTERIMAGE,
+    GROUPBOX        "Random Variation",IDC_STATIC,131,88,104,80
+    CTEXT           "Volume",IDC_STATIC,136,99,33,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,172,126,60,10
-    CTEXT           "Panning",IDC_STATIC,137,146,33,13,SS_CENTERIMAGE,
+                    TBS_NOTICKS,172,101,60,10
+    CTEXT           "Panning",IDC_STATIC,136,116,33,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,172,149,60,10
+                    TBS_NOTICKS,172,118,60,10
     CONTROL         "Cutoff",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | BS_FLAT,
-                    136,40,35,10
-    EDITTEXT        IDC_EDIT1,180,39,45,12,ES_READONLY | NOT WS_TABSTOP
+                    136,54,35,10
+    EDITTEXT        IDC_EDIT1,197,63,30,12,ES_RIGHT | ES_READONLY | NOT 
+                    WS_BORDER | NOT WS_TABSTOP,WS_EX_RIGHT
     CONTROL         "Slider2",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_DISABLED,133,57,96,10
-    CONTROL         "Resonance",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT,136,74,53,10
+                    TBS_NOTICKS | WS_DISABLED,168,54,64,10
+    CONTROL         "Reso",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | BS_FLAT,136,
+                    37,33,10
     CONTROL         "Slider2",IDC_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_DISABLED,133,88,96,10
+                    TBS_NOTICKS | WS_DISABLED,168,37,64,10
     COMBOBOX        IDC_COMBO6,246,99,72,127,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CTEXT           "Duplicate Action",IDC_STATIC,246,71,59,13,
+    CTEXT           "Duplicate Action",IDC_STATIC,246,70,59,13,
                     SS_CENTERIMAGE,WS_EX_STATICEDGE
     CTEXT           "Duplicate Check",IDC_STATIC,246,53,59,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    GROUPBOX        "Filter",IDC_STATIC,131,25,104,143
-    GROUPBOX        "General",IDC_STATIC,3,25,123,143
-    GROUPBOX        "Pitch/Pan",IDC_STATIC,3,88,123,55
+    GROUPBOX        "Filter",IDC_STATIC,131,27,104,141
+    GROUPBOX        "General",IDC_STATIC,3,27,123,141
+    GROUPBOX        "Pitch/Pan",IDC_STATIC,3,88,123,35
     PUSHBUTTON      "Editor",IDC_INSVIEWPLG,321,99,37,13,0,WS_EX_STATICEDGE
     CONTROL         "",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,8,152,74,10
-    EDITTEXT        IDC_EDIT2,83,150,38,12,ES_AUTOHSCROLL | ES_NUMBER
+                    TBS_NOTICKS,47,135,36,10
+    EDITTEXT        IDC_EDIT2,85,133,36,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
-                    UDS_NOTHOUSANDS,119,150,8,12
+                    UDS_NOTHOUSANDS,116,133,8,12
     CTEXT           "Action",IDC_STATIC,246,36,59,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    GROUPBOX        "New Note Action",IDC_STATIC,240,25,123,63
-    GROUPBOX        "Plugin / Midi",IDC_STATIC,240,89,123,79
+    GROUPBOX        "New Note Action",IDC_STATIC,240,27,123,141
+    GROUPBOX        "Plugin / Midi",IDC_STATIC,240,88,123,80
     CTEXT           "Sample Map",IDC_STATIC,378,23,40,12,SS_CENTERIMAGE
     CTEXT           "Midi Bank",IDC_STATIC,245,152,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
@@ -842,7 +843,22 @@ BEGIN
     CONTROL         "",IDC_SPIN11,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,351,153,
                     8,11
-    GROUPBOX        "Attack",IDC_STATIC,3,138,123,30
+    GROUPBOX        "Sample Quality",IDC_STATIC,3,118,123,50
+    CTEXT           "Ramping",IDC_STATIC,7,133,39,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    CTEXT           "Cutoff",IDC_STATIC,136,133,33,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    CTEXT           "Reso",IDC_STATIC,136,151,33,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    CTEXT           "Resampling",IDC_STATIC,7,151,39,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    COMBOBOX        IDC_COMBO9,50,151,71,81,CBS_DROPDOWNLIST | WS_TABSTOP
+    CONTROL         "",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS,172,135,60,10
+    CONTROL         "",IDC_SLIDER7,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS,172,152,60,10
+    CONTROL         "Highpass",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,136,71,45,10
 END
 
 IDD_MODDOC_MODTYPE DIALOGEX 0, 0, 243, 118
@@ -1014,8 +1030,8 @@ BEGIN
                     WS_EX_STATICEDGE
     COMBOBOX        IDC_COMBO7,285,261,117,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CTEXT           "",IDC_TEXT6,11,208,396,13,SS_CENTERIMAGE,
-                    WS_EX_STATICEDGE
+    CONTROL         "",IDC_TEXT6,"Static",SS_LEFTNOWORDWRAP | SS_CENTERIMAGE | 
+                    WS_GROUP,311,208,96,13,WS_EX_STATICEDGE
     PUSHBUTTON      ">>",IDC_BUTTON4,32,191,18,13,NOT WS_TABSTOP,
                     WS_EX_STATICEDGE
     PUSHBUTTON      "<<",IDC_BUTTON5,11,191,18,13,NOT WS_TABSTOP,
@@ -1046,6 +1062,13 @@ BEGIN
     GROUPBOX        "Mix settings",IDC_STATIC,193,226,214,78
     GROUPBOX        "Factory preset",IDC_STATIC,11,226,177,34
     GROUPBOX        "",IDC_STATIC,11,255,177,49
+    CTEXT           "I/O Type:",IDC_STATIC,263,208,47,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "Move...",IDC_MOVEFXSLOT,53,207,34,13,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Clone...",IDC_CLONEPLUG,103,207,34,13,0,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "Insert...",IDC_INSERTFXSLOT,154,207,34,13,0,
+                    WS_EX_STATICEDGE
 END
 
 IDD_EDIT_FIND DIALOG  0, 0, 182, 145
@@ -1683,6 +1706,24 @@ BEGIN
     GROUPBOX        "Location:",IDC_STATIC,11,65,228,75
 END
 
+IDD_EDIT_GOTO DIALOGEX 0, 0, 129, 89
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Go to..."
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Go to:",IDC_STATIC,4,4,121,81
+    EDITTEXT        IDC_GOTO_ROW,41,15,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_GOTO_CHAN,41,32,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_GOTO_PAT,41,49,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Row:",IDC_STATIC,21,18,18,8
+    LTEXT           "Channel:",IDC_STATIC,10,35,29,8
+    LTEXT           "Pattern:",IDC_STATIC,13,52,26,8
+    EDITTEXT        IDC_GOTO_ORD,41,66,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Order:",IDC_STATIC,19,69,20,8
+    PUSHBUTTON      "OK",IDOK,88,66,32,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1707,16 +1748,15 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "Comments", "Da Trakar Far Windaz"
-            VALUE "CompanyName", "Olivier Lapicque"
-            VALUE "FileDescription", "ModPlug Tracker"
-            VALUE "FileVersion", "1.16"
+            VALUE "CompanyName", "Olivier Lapicque / OpenMPT team"
+            VALUE "FileDescription", "OpenMPT / ModPlug Tracker"
+            VALUE "FileVersion", "1.17"
             VALUE "InternalName", "Modplug Tracker"
-            VALUE "LegalCopyright", "Copyright © 1997-2003 Olivier Lapicque.   GPL"
+            VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2005 GPL."
             VALUE "LegalTrademarks", "M.O.D.P.L.U.G"
             VALUE "OriginalFilename", "mptrack.exe"
-            VALUE "PrivateBuild", "Jan 12.23am 2004"
-            VALUE "ProductName", "ModPlug Tracker"
-            VALUE "ProductVersion", "1.16"
+            VALUE "ProductName", "OpenMPT / ModPlug Tracker"
+            VALUE "ProductVersion", "1.17"
         END
     END
     BLOCK "VarFileInfo"
@@ -1791,7 +1831,7 @@ BEGIN
 
     IDD_CONTROL_INSTRUMENTS, DIALOG
     BEGIN
-        RIGHTMARGIN, 435
+        RIGHTMARGIN, 444
         BOTTOMMARGIN, 168
     END
 
@@ -1926,6 +1966,12 @@ BEGIN
         RIGHTMARGIN, 259
         BOTTOMMARGIN, 275
     END
+
+    IDD_EDIT_GOTO, DIALOG
+    BEGIN
+        RIGHTMARGIN, 94
+        TOPMARGIN, 4
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1946,10 +1992,11 @@ IDC_NODRAG              CURSOR                  "res\\nodrag.cur"
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME           "Modplug Tracker"
+    IDR_MAINFRAME           "OpenMPT"
     IDR_MODULETYPE          "\nModule\nuntitled\nMusic Modules (*.mod;*.s3m;*.it;*.xm)\n.mod\nModplugTracker.Document\nMusic Module"
     ID_PATTERN_CHANNELMANAGER 
                             "Display channel manager window\nChannel manager"
+    ID_INDICATOR_CPU        "000.00%"
 END
 
 STRINGTABLE 
@@ -2239,6 +2286,11 @@ BEGIN
     ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
 END
 
+STRINGTABLE 
+BEGIN
+    ID_EDIT_GOTO            "Go to row, channel, pattern...\nGo to row"
+END
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2341,6 +2393,20 @@ BEGIN
     LTEXT           "%",IDC_PARAMLABEL2,136,200,8,8
 END
 
+IDD_MOVEFXSLOT DIALOGEX 0, 0, 133, 78
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,76,59,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,59,50,14
+    COMBOBOX        IDC_COMBO1,42,38,48,172,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_EDIT1,7,14,119,19,ES_CENTER | ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2356,6 +2422,14 @@ BEGIN
         RIGHTMARGIN, 144
         TOPMARGIN, 7
         BOTTOMMARGIN, 220
+    END
+
+    IDD_MOVEFXSLOT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 126
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 73
     END
 END
 #endif    // APSTUDIO_INVOKED

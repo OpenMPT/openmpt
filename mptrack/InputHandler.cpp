@@ -330,7 +330,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_EDIT_SELECT_ALL:	s="Select All\t"; c=kcEditSelectAll; break;
 		case ID_EDIT_FIND:			s="Find\t"; c=kcEditFind; break;
 		case ID_EDIT_FINDNEXT:		s="Find Next\t"; c=kcEditFindNext; break;
-	
+
 		case ID_VIEW_GLOBALS:		s="Globals\t"; c=kcViewGeneral; break;
 		case ID_VIEW_SAMPLES:		s="Samples\t"; c=kcViewSamples; break;
 		case ID_VIEW_PATTERNS:		s="Patterns\t"; c=kcViewPattern; break;

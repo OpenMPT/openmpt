@@ -64,10 +64,11 @@ protected:
 	CModControlBar m_ToolBar;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinFadeOut, m_SpinGlobalVol, m_SpinPanning;
 	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS, m_SpinMidiBK;
-	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnMixPlug;
+	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnMixPlug, m_CbnResampling;
 	CEdit m_EditName, m_EditFileName, m_EditGlobalVol, m_EditPanning, m_EditPPS, m_EditCutOff;
-	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance;
-	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutOff, m_SliderResonance;
+	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance, m_CheckHighpass;
+	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutSwing, m_SliderResSwing, 
+		        m_SliderCutOff, m_SliderResonance;
 	CNoteMapWnd m_NoteMap;
 	UINT m_nInstrument;
 
@@ -126,6 +127,7 @@ protected:
 	afx_msg void OnMPRChanged();
 	afx_msg void OnMBKChanged();	//rewbs.MidiBank
 	afx_msg void OnMCHChanged();
+	afx_msg void OnResamplingChanged();
 	afx_msg void OnMixPlugChanged();  //rewbs.instroVSTi
 	afx_msg void OnPPSChanged();
 	afx_msg void OnPPCChanged();
@@ -137,6 +139,7 @@ protected:
 
 	afx_msg void OnEnableCutOff();
 	afx_msg void OnEnableResonance();
+	afx_msg void OnToggleHighpass();
 	afx_msg void OnEditSampleMap();
 	afx_msg void TogglePluginEditor();  //rewbs.instroVSTi
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys

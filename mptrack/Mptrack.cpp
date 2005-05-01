@@ -750,7 +750,7 @@ BOOL CTrackApp::InitInstance()
 
 	if (m_bDebugMode)
 	{
-		Log("Modplug Tracker v%X.%02X.%04d started\n", (MPTRACK_VERSION>>24)&0xFF, (MPTRACK_VERSION>>16)&0xFF, (MPTRACK_VERSION & 0xFFFF));
+		Log("OpenMPT v%X.%02X.%04d started\n", (MPTRACK_VERSION>>24)&0xFF, (MPTRACK_VERSION>>16)&0xFF, (MPTRACK_VERSION & 0xFFFF));
 	}
 
 	pMainFrame->m_InputHandler->UpdateMainMenu();	//rewbs.customKeys
@@ -1315,7 +1315,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.13)",
+	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.14)",
 				MAINFRAME_TITLE,
 				(MPTRACK_VERSION>>24)&0xFF,
 				(MPTRACK_VERSION>>16)&0xFF,
@@ -1325,7 +1325,7 @@ BOOL CAboutDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT1, "Contact:\r\nMPC forums: http://www.modplug.com/forums\r\nEric Chavanon: contact@ericus.org\r\nRobin Fernandes: modplug@soal.org\r\n\r\nGet the latest updates at:\r\n http://sourceforge.net/projects/modplug");
 
 	char *pArrCredit = { 
-		"Modplug Tracker|"
+		"Modplug Tracker / OpenMPT|"
 		"Copyright © 2004-2005 GPL|"
 		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
 		"|"

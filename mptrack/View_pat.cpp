@@ -9,6 +9,7 @@
 #include "ctrl_pat.h"
 #include "dlsbank.h"
 #include "EffectVis.h"		//rewbs.fxvis
+#include "PatternGotoDialog.h"		
 #include ".\view_pat.h"
 
 #define MAX_SPACING		16
@@ -53,6 +54,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_SELECTCOLUMN,OnEditSelectColumn)
 	ON_COMMAND(ID_EDIT_SELECTCOLUMN2,OnSelectCurrentColumn)
 	ON_COMMAND(ID_EDIT_FIND,		OnEditFind)
+	ON_COMMAND(ID_EDIT_FIND,		OnEditGoto)
 	ON_COMMAND(ID_EDIT_FINDNEXT,	OnEditFindNext)
 	ON_COMMAND(ID_EDIT_RECSELECT,	OnRecordSelect)
 // -> CODE#0012
@@ -106,6 +108,7 @@ CViewPattern::CViewPattern()
 	m_nPattern = 0;
 	m_nDetailLevel = 4;
 	m_pEditWnd = NULL;
+	m_pGotoWnd = NULL;
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 }
@@ -827,6 +830,13 @@ void CViewPattern::OnDestroy()
 		m_pEditWnd->DestroyWindow();
 		delete m_pEditWnd;
 		m_pEditWnd = NULL;
+	}
+
+	if (m_pGotoWnd)
+	{
+		m_pGotoWnd->DestroyWindow();
+		delete m_pGotoWnd;
+		m_pGotoWnd = NULL;
 	}
 	CModScrollView::OnDestroy();
 }
@@ -2503,6 +2513,47 @@ void CViewPattern::OnEditFind()
 	}
 }
 
+void CViewPattern::OnEditGoto()
+//-----------------------------
+{
+	CModDoc* pModDoc = GetDocument();
+	if (!pModDoc)
+		return;
+
+
+	if (!m_pGotoWnd) {
+		m_pGotoWnd = new CPatternGotoDialog(this);
+		//if (m_pGotoWnd) m_pGotoWnd->SetParent(this/*, GetDocument()*/);
+	}
+	if (m_pGotoWnd)	{
+		CSoundFile* pSndFile = pModDoc->GetSoundFile();
+		UINT nCurrentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+		UINT nCurrentChannel = ((m_dwCursor & 0xFFFF) >> 3) + 1;
+		
+		m_pGotoWnd->UpdatePos(m_nRow, nCurrentChannel, m_nPattern, nCurrentOrder, pSndFile);
+
+		if (m_pGotoWnd->DoModal() == IDOK) {
+			//Position should be valididated.
+			
+			if (m_pGotoWnd->m_nPattern != m_nPattern) {
+				SetCurrentPattern(m_pGotoWnd->m_nPattern);
+			}
+			
+			if (m_pGotoWnd->m_nOrder != nCurrentOrder) {
+				SendCtrlMessage(CTRLMSG_SETCURRENTORDER,  m_pGotoWnd->m_nOrder);
+			}
+
+			if (m_pGotoWnd->m_nChannel != nCurrentChannel) {
+				SetCurrentColumn((m_pGotoWnd->m_nChannel-1) << 3);
+			}
+
+			if (m_pGotoWnd->m_nRow != m_nRow) {
+				SetCurrentRow(m_pGotoWnd->m_nRow);
+			}
+		}
+	}
+	return;
+}
 
 void CViewPattern::OnEditFindNext()
 //---------------------------------
@@ -3856,6 +3907,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcShowEditMenu:	{CPoint pt =	GetPointFromPosition((m_nRow << 16) | m_dwCursor);
 								OnRButtonDown(0, pt); }
 								return wParam; 
+		case kcPatternGoto:		OnEditGoto(); return wParam;
 
 		case kcNoteCut:			TempEnterNote(254, false); return wParam;
 		case kcNoteCutOld:		TempEnterNote(254, true);  return wParam;

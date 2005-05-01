@@ -39,6 +39,7 @@
 #define IDR_TOOLBARS                    202
 #define ID_PATTERN_CHANNELMANAGER       202
 #define IDR_ENVELOPES                   203
+#define ID_INDICATOR_CPU                203
 #define IDB_MAINBAR                     300
 #define IDB_IMAGELIST                   301
 #define IDB_PATTERNS                    302
@@ -80,6 +81,9 @@
 #define IDR_PLUGINMENU                  442
 #define IDD_PITCHSHIFT                  442
 #define IDD_OPTIONS_AUTOSAVE            443
+#define IDD_EDIT_GOTO                   444
+#define IDD_DIALOG1                     501
+#define IDD_MOVEFXSLOT                  501
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -693,6 +697,13 @@
 #define IDC_GIVEPLUGSIDLETIME           2228
 #define IDC_ROWSPERBEAT                 2229
 #define IDC_ROWSPERMEASURE              2230
+#define IDC_GOTO_ROW                    2231
+#define IDC_GOTO_CHAN                   2232
+#define IDC_GOTO_PAT                    2233
+#define IDC_GOTO_ORD                    2234
+#define IDC_MOVEFXSLOT                  2235
+#define IDC_CLONEPLUG                   2236
+#define IDC_INSERTFXSLOT                2237
 #define IDC_TEXT_BPM                    2300
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
@@ -863,6 +874,8 @@
 #define ID_INFO_INPUTS36015             36015
 #define ID_INFO_OUPUTS                  36016
 #define ID_INFO_MACROS36017             36017
+#define ID_EDIT_GOTO                    36018
+#define ID_SELECTINST                   36100
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
@@ -885,9 +898,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        501
-#define _APS_NEXT_COMMAND_VALUE         36018
-#define _APS_NEXT_CONTROL_VALUE         2231
+#define _APS_NEXT_RESOURCE_VALUE        502
+#define _APS_NEXT_COMMAND_VALUE         37000
+#define _APS_NEXT_CONTROL_VALUE         2238
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

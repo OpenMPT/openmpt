@@ -436,6 +436,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 			if (penv->nIFR & 0x80) pChn->nResonance = penv->nIFR & 0x7F;
 		}
 		pChn->nVolSwing = pChn->nPanSwing = 0;
+		pChn->nResSwing = pChn->nCutSwing = 0;
 	}
 	pChn->pInstrument = psmp;
 	pChn->nLength = psmp->nLength;
@@ -567,6 +568,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		if (bResetEnv)
 		{
 			pChn->nVolSwing = pChn->nPanSwing = 0;
+			pChn->nResSwing = pChn->nCutSwing = 0;
 			if (penv)
 			{
 				if (!(penv->dwFlags & ENV_VOLCARRY)) pChn->nVolEnvPosition = 0;
@@ -586,6 +588,18 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 						int d = ((LONG)penv->nPanSwing*(LONG)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nPanSwing = (signed short)d;
 					}
+					// Cutoff Swing
+					if (penv->nCutSwing)
+					{
+						int d = ((LONG)penv->nCutSwing*(LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						pChn->nCutSwing = (signed short)((d * pChn->nCutOff + 1)/128);
+					}
+					// Resonance Swing
+					if (penv->nResSwing)
+					{
+						int d = ((LONG)penv->nResSwing*(LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						pChn->nResSwing = (signed short)((d * pChn->nResonance + 1)/128);d;
+					}
 				}
 			}
 			pChn->nAutoVibDepth = 0;
@@ -598,9 +612,13 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		{
 			if (penv->nIFR & 0x80) { pChn->nResonance = penv->nIFR & 0x7F; bFlt = TRUE; }
 			if (penv->nIFC & 0x80) { pChn->nCutOff = penv->nIFC & 0x7F; bFlt = TRUE; }
+			if (bFlt && penv->nFilterMode) {
+				pChn->nFilterMode = penv->nFilterMode;
+			}
 		} else
 		{
 			pChn->nVolSwing = pChn->nPanSwing = 0;
+			pChn->nCutSwing = pChn->nResSwing = 0;
 		}
 #ifndef NO_FILTER
 		if ((pChn->nCutOff < 0x7F) && (bFlt)) SetupChannelFilter(pChn, TRUE);
@@ -2046,13 +2064,15 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 			if ((cData >= 'a') && (cData <= 'f')) { dwByteCode = (dwByteCode<<4) | (cData-'a'+10); nNib++; } else
 			if ((cData == 'z') || (cData == 'Z')) { dwByteCode = param & 0x7f; nNib = 2; } else
 			if ((cData == 'x') || (cData == 'X')) { dwByteCode = param & 0x70; nNib = 2; } else
-			if ((cData == 'y') || (cData == 'Y')) { dwByteCode = (param & 0x0f)<<3; nNib = 2; } else
+			if ((cData == 'y') || (cData == 'Y')) { dwByteCode = (param & 0x0f)<<3; nNib = 2; }
+
 			if (nNib >= 2)
 			{
 				nNib = 0;
 				dwMidiCode |= dwByteCode << (nBytes*8);
 				dwByteCode = 0;
 				nBytes++;
+
 				if (nBytes >= 3)
 				{
 					UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
@@ -2140,15 +2160,38 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 			#endif // NO_FILTER
 			}
 			break;
-		// F0.F0.{80|n}.xx: Set VST effect parameter n to xx
 
+	// F0.F0.03.xx: Set plug dry/wet
+		case 0x03:
+			{
+				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
+				UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
+				if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
+					if (pChn->pHeader && pChn->pInstrument) {	// then try intrument VST
+							nPlug = pChn->pHeader->nMixPlug;
+					}
+				}
+				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))	{
+					if (dwParam < 0x80)
+						m_MixPlugins[nPlug-1].fDryRatio = 1.0-(static_cast<float>(dwParam)/127.0f);
+				}
+			}
+			break;
+
+
+		// F0.F0.{80|n}.xx: Set VST effect parameter n to xx
 		default:
 			if (nInternalCode & 0x80)
 			{
 				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
 				if ((nMasterCh) && (nMasterCh <= m_nChannels))
 				{
-					UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin;
+					UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
+					if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
+						if (pChn->pHeader && pChn->pInstrument) {	// then try intrument VST
+								nPlug = pChn->pHeader->nMixPlug;
+						}
+					}
 					if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 					{
 						IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
@@ -2262,15 +2305,50 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 			#endif // NO_FILTER
 			}
 			break;
-		// F0.F0.{80|n}.xx: Set VST effect parameter n to xx
 
+	// F0.F0.03.xx: Set plug dry/wet
+		case 0x03:
+			{
+
+				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
+				UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
+				if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
+					if (pChn->pHeader && pChn->pInstrument) {	// then try intrument VST
+							nPlug = pChn->pHeader->nMixPlug;
+					}
+				}
+				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))	{
+					// on the fist tick only, calculate step 
+					if (m_dwSongFlags & SONG_FIRSTTICK)
+					{
+						pChn->m_nPlugInitialParamValue = m_MixPlugins[nPlug-1].fDryRatio;
+						// (dwParam & 0x7F) extracts the actual value that we're going to pass
+						pChn->m_nPlugParamValueStep =  ((1-((float)(dwParam)/127.0f))-pChn->m_nPlugInitialParamValue)/(float)m_nMusicSpeed;
+					}
+					//update param on all ticks
+					IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
+					if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState)) 	{
+						pPlugin->SetZxxParameter(nInternalCode & 0x7F, (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5));
+						m_MixPlugins[nPlug-1].fDryRatio = pChn->m_nPlugInitialParamValue+(float)(m_nTickCount+1)*pChn->m_nPlugParamValueStep;
+					}
+					
+				}
+			}
+		
+
+		// F0.F0.{80|n}.xx: Set VST effect parameter n to xx
 		default:
 			if (nInternalCode & 0x80)
 			{
 				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
 				if ((nMasterCh) && (nMasterCh <= m_nChannels))
 				{
-					UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin;
+					UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
+					if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
+						if (pChn->pHeader && pChn->pInstrument) {	// then try intrument VST
+								nPlug = pChn->pHeader->nMixPlug;
+						}
+					}
 					if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 					{
 						IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;

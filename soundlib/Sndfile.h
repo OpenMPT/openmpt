@@ -343,6 +343,7 @@ enum {
 	SRCMODE_SPLINE,
 	SRCMODE_POLYPHASE,
 	SRCMODE_FIRFILTER, //rewbs.resamplerConf
+	SRCMODE_DEFAULT,
 	NUM_SRC_MODES
 };
 
@@ -429,6 +430,10 @@ typedef struct _INSTRUMENTHEADER
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 	USHORT nVolRamp;
 // -! NEW_FEATURE#0027
+	UINT nResampling;
+	BYTE nCutSwing;
+	BYTE nResSwing;
+	BYTE nFilterMode;
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
@@ -486,6 +491,7 @@ typedef struct _MODCHANNEL
 	LONG nPortamentoSlide, nAutoVibDepth;
 	UINT nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
 	LONG nVolSwing, nPanSwing;
+	LONG nCutSwing, nResSwing;
 	// 8-bit members
 	BYTE nNote, nNNA;
 	BYTE nNewNote, nNewIns, nCommand, nArpeggio;
@@ -508,7 +514,7 @@ typedef struct _MODCHANNEL
 	BYTE nActiveMacro, nFilterMode;
 
 	float m_nPlugParamValueStep;  //rewbs.smoothVST 
-	int m_nPlugInitialParamValue; //rewbs.smoothVST
+	float m_nPlugInitialParamValue; //rewbs.smoothVST
 } MODCHANNEL;
 
 
@@ -747,8 +753,8 @@ public:
 	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;
 	double GetCurrentBPM() const;
-	int FindOrder(BYTE pat);					//rewbs.playSongFromCursor
-	void DontLoopPattern(int nPat, int nRow=0); //rewbs.playSongFromCursor
+	int FindOrder(BYTE pat, UINT startFromOrder=0);	//rewbs.playSongFromCursor
+	void DontLoopPattern(int nPat, int nRow=0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(UINT nOrder);
 	void GetTitle(LPSTR s) const { lstrcpyn(s,m_szNames[0],32); }
@@ -808,6 +814,10 @@ public:
 	BOOL SaveITProject(LPCSTR lpszFileName);
 // -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
+	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, INSTRUMENTHEADER* instruments[], UINT nInstruments);
+	void SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[], UINT nInstruments, FILE* f);
+	void SaveExtendedSongProperties(FILE* f);
+
 #endif // MODPLUG_NO_FILESAVE
 	// MOD Convert function
 	UINT GetBestSaveFormat() const;
@@ -826,6 +836,7 @@ public:
 	UINT Read(LPVOID lpBuffer, UINT cbBuffer);
 	UINT ReadMix(LPVOID lpBuffer, UINT cbBuffer, CSoundFile *, DWORD *, LPBYTE ps=NULL);
 	UINT CreateStereoMix(int count);
+	UINT GetResamplingFlag(const MODCHANNEL *pChannel);
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
 	UINT GetTotalTickCount() const { return m_nTotalCount; }

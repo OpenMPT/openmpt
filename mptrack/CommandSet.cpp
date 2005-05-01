@@ -2199,6 +2199,11 @@ void CCommandSet::SetupCommands()
 	commands[kcVSTGUIRandParams].isHidden = false;
 	commands[kcVSTGUIRandParams].isDummy = false;
 
+	commands[kcPatternGoto].UID = 1766;
+	commands[kcPatternGoto].Message = "Go to row/channel/...";
+	commands[kcPatternGoto].isHidden = false;
+	commands[kcPatternGoto].isDummy = false;
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs
@@ -2891,7 +2896,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 		::MessageBox(NULL, "Can't open file for writing.", "", MB_ICONEXCLAMATION|MB_OK);
 		return false;
 	}
-	fprintf(outStream, "//-------- Modplug Tracker key binding definition file  -------\n"); 
+	fprintf(outStream, "//-------- OpenMPT key binding definition file  -------\n"); 
 	fprintf(outStream, "//-Format is:                                                          -\n"); 	
 	fprintf(outStream, "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n"); 
 	fprintf(outStream, "//----------------------------------------------------------------------\n"); 

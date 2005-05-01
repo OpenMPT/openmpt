@@ -1561,6 +1561,8 @@ static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples)
 }
 
 
+
+
 UINT CSoundFile::CreateStereoMix(int count)
 //-----------------------------------------
 {
@@ -1592,19 +1594,9 @@ UINT CSoundFile::CreateStereoMix(int count)
 	#ifndef NO_FILTER
 		if (pChannel->dwFlags & CHN_FILTER) nFlags |= MIXNDX_FILTER;
 	#endif
-		if (!(pChannel->dwFlags & CHN_NOIDO))
-		{
-			//rewbs.resamplerConf
-			//nFlags += (pChannel->dwFlags & CHN_HQSRC) ? ((gdwSoundSetup & SNDMIX_ULTRAHQSRCMODE) ? MIXNDX_KAISERSRC : MIXNDX_HQSRC) : MIXNDX_LINEARSRC;
-			if (pChannel->dwFlags & CHN_HQSRC)
-			{
-				if (gdwSoundSetup & SNDMIX_SPLINESRCMODE) nFlags += MIXNDX_HQSRC;
-				else if (gdwSoundSetup & SNDMIX_POLYPHASESRCMODE) nFlags += MIXNDX_KAISERSRC;
-				else if (gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE) nFlags += MIXNDX_FIRFILTERSRC;				
-			}
-			else nFlags += MIXNDX_LINEARSRC;
-			//end rewbs.resamplerConf
-		}
+		//rewbs.resamplerConf
+		nFlags |= GetResamplingFlag(pChannel);
+		//end rewbs.resamplerConf
 	#ifdef ENABLE_MMX
 		if ((gdwSysInfo & SYSMIX_ENABLEMMX) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
 		{
@@ -1751,6 +1743,33 @@ UINT CSoundFile::CreateStereoMix(int count)
 	return nchused;
 }
 
+UINT CSoundFile::GetResamplingFlag(const MODCHANNEL *pChannel)
+//------------------------------------------------------------
+{
+	UINT returnFlag = 0;
+	if (pChannel->pHeader) {
+		switch (pChannel->pHeader->nResampling) {
+			case SRCMODE_NEAREST:	return 0;
+			case SRCMODE_LINEAR:	return MIXNDX_LINEARSRC;
+			case SRCMODE_SPLINE:	return MIXNDX_HQSRC;
+			case SRCMODE_POLYPHASE: return MIXNDX_KAISERSRC;
+			case SRCMODE_FIRFILTER: return MIXNDX_FIRFILTERSRC;
+//			default: ;
+		}
+	}
+	
+	//didn't manage to get flag from instrument header, use channel flags.
+	if (pChannel->dwFlags & CHN_HQSRC)	{
+		if (gdwSoundSetup & SNDMIX_SPLINESRCMODE)		return MIXNDX_HQSRC;
+		if (gdwSoundSetup & SNDMIX_POLYPHASESRCMODE)	return MIXNDX_KAISERSRC;
+		if (gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE)	return MIXNDX_FIRFILTERSRC;				
+	} else if (!(pChannel->dwFlags & CHN_NOIDO)) {
+		return MIXNDX_LINEARSRC;
+	}
+	
+	return 0;
+}
+
 
 extern int gbInitPlugins;
 
@@ -1772,8 +1791,9 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 			{   //ToDo: do this in resume.
 				pPlugin->pMixPlugin->Init(gdwMixingFreq, (gbInitPlugins & 2) ? TRUE : FALSE);
 			}*/
+
+			//We should only ever reach this point if the song is playing.
 			if (!pPlugin->pMixPlugin->IsSongPlaying()) {
-				//We should only ever reach this point if the song is playing.
 				//Plugin doesn't know it is in a song that is playing;
 				//we must have added it during playback. Initialise it!
 				pPlugin->pMixPlugin->NotifySongPlaying(true);

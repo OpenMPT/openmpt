@@ -48,8 +48,12 @@ private:
 	void UpdateInputMenu();
 	void UpdateOutputMenu();
 	void UpdateMacroMenu();
+	int GetBestInstrumentCandidate();
+	bool CheckInstrument(int instrument);
+	int m_nInstrument;
 	
 	void OnToggleEditor(UINT nID);
+	void OnSetInputInstrument(UINT nID);
 	afx_msg void OnInitMenu(CMenu* pMenu);
 };
 //end rewbs.defaultPlugGUI

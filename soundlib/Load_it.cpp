@@ -79,7 +79,8 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		const ITINSTRUMENT *pis = (const ITINSTRUMENT *)p;
 		memcpy(penv->name, pis->name, 26);
 		memcpy(penv->filename, pis->filename, 12);
-		penv->nMidiProgram = pis->mpr;
+		if (pis->mpr<=128)
+			penv->nMidiProgram = pis->mpr;
 		penv->nMidiChannel = pis->mch;
 		if (penv->nMidiChannel > 16)	//rewbs.instroVSTi
 		{								//(handle old format where midichan
@@ -87,7 +88,8 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 			penv->nMixPlug = penv->nMidiChannel-128;
 			penv->nMidiChannel = 0;		
 		}
-		penv->wMidiBank = pis->mbank;
+		if (pis->mbank<=128)
+			penv->wMidiBank = pis->mbank;
 		penv->nFadeOut = pis->fadeout << 5;
 		penv->nGlobalVol = pis->gbv >> 1;
 		if (penv->nGlobalVol > 64) penv->nGlobalVol = 64;
@@ -209,6 +211,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		penv->nVolSwing = pis->rv;
 		penv->nPanSwing = pis->rp;
 		penv->nPan = (pis->dfp & 0x7F) << 2;
+		penv->nResampling = SRCMODE_DEFAULT;
 		if (penv->nPan > 256) penv->nPan = 128;
 		if (pis->dfp < 0x80) penv->dwFlags |= ENV_SETPANNING;
 	}
@@ -1388,36 +1391,9 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 		}
 	}
 
-//Extra song data - Yet Another Hack. 
-	{  //Extra song data - Yet Another Hack. 
-		__int16 size;
-		//Extra song file data
-		__int32 code = 'MPTS';
-		fwrite(&code, 1, sizeof(__int32), f);
-		
-		
-		code = 'DT..';							//write m_nDefaultTempo field code
-		fwrite(&code, 1, sizeof(__int32), f);	
-		size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
-		fwrite(&size, 1, sizeof(__int16), f);
-		fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
-
-		code = 'RPB.';							//write m_nRowsPerBeat field code
-		fwrite(&code, 1, sizeof(__int32), f);	
-		size = sizeof(m_nRowsPerBeat);			//write m_nRowsPerBeat field size
-		fwrite(&size, 1, sizeof(__int16), f);
-		fwrite(&m_nRowsPerBeat, 1, size, f);	//write m_nRowsPerBeat
-
-		code = 'RPM.';							//write m_nRowsPerMeasure field code
-		fwrite(&code, 1, sizeof(__int32), f);	
-		size = sizeof(m_nRowsPerMeasure);		//write m_nRowsPerMeasure field size
-		fwrite(&size, 1, sizeof(__int16), f);
-		fwrite(&m_nRowsPerMeasure, 1, size, f);	//write m_nRowsPerMeasure
-	}
-
+	SaveExtendedSongProperties(f);
 
 // Close file
-
 	fclose(f);
 	return TRUE;
 }
@@ -1983,92 +1959,10 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		}
 	}
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
+	//Save hacked-on extra info
+	SaveExtendedInstrumentProperties(Headers, header.insnum, f);
+	SaveExtendedSongProperties(f);
 
-	if(Headers[1]){
-		__int16 size;
-		__int32 code = 'MPTX';
-		// write extension header code
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nVolRamp field code
-		code = 'VR..';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nVolRamp field size
-		size = sizeof(Headers[1]->nVolRamp);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nVolRamp field for each instrument
-		for(UINT nins=1; nins<=header.insnum; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nVolRamp, 1, sizeof(USHORT), f);
-
-		
-		//rewbs.fix36944: write full precision panning, volume and fade.
-
-		// write nPan field code
-		code = 'P...';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nPan field size
-		size = sizeof(Headers[1]->nPan);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nPan field for each instrument
-		for(UINT nins=1; nins<=header.insnum; nins++) 
-			if(Headers[nins]) 
-				fwrite(&Headers[nins]->nPan, 1, size, f);
-
-		// write nGlobalVol field code
-		code = 'GV..';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nGlobalVol field size
-		size = sizeof(Headers[1]->nGlobalVol);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nGlobalVol field for each instrument
-		for(UINT nins=1; nins<=header.insnum; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nGlobalVol, 1, size, f);
-
-		// write nFadeOut field code
-		code = 'FO..';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nFadeOut field size
-		size = sizeof(Headers[1]->nFadeOut);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nFadeOut field for each instrument
-		for(UINT nins=1; nins<=header.insnum; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nFadeOut, 1, size, f);
-
-		//end rewbs.fix36944
-	}
-
-	{  //Extra song data - Yet Another Hack. 
-		__int16 size;
-		//Extra song file data
-		__int32 code = 'MPTS';
-		fwrite(&code, 1, sizeof(__int32), f);
-		
-		
-		code = 'DT..';							//write m_nDefaultTempo field code
-		fwrite(&code, 1, sizeof(__int32), f);	
-		size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
-		fwrite(&size, 1, sizeof(__int16), f);
-		fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
-
-		code = 'RPB.';							//write m_nRowsPerBeat field code
-		fwrite(&code, 1, sizeof(__int32), f);	
-		size = sizeof(m_nRowsPerBeat);			//write m_nRowsPerBeat field size
-		fwrite(&size, 1, sizeof(__int16), f);
-		fwrite(&m_nRowsPerBeat, 1, size, f);	//write m_nRowsPerBeat
-
-		code = 'RPM.';							//write m_nRowsPerMeasure field code
-		fwrite(&code, 1, sizeof(__int32), f);	
-		size = sizeof(m_nRowsPerMeasure);		//write m_nRowsPerMeasure field size
-		fwrite(&size, 1, sizeof(__int16), f);
-		fwrite(&m_nRowsPerMeasure, 1, size, f);	//write m_nRowsPerMeasure
-
-		code = 'C...';							//write m_nChannels field code
-		fwrite(&code, 1, sizeof(__int32), f);	
-		size = sizeof(m_nChannels);				//write m_nChannels field size
-		fwrite(&size, 1, sizeof(__int16), f);
-		fwrite(&m_nChannels, 1, size, f);		//write m_nChannels
-
-	}
-
-// -! NEW_FEATURE#0027
 	// Updating offsets
 	fseek(f, dwHdrPos, SEEK_SET);
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
@@ -2505,3 +2399,86 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 	return nPos;
 }
 
+
+void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[], UINT nInstruments, FILE* f)
+//------------------------------------------------------------------------------------------------------------
+// Used only when saving IT and XM. ITI, ITP saves using Ericus' macros etc...
+// The reason is that ITs and XMs save [code][size][ins1.Value][ins2.Value]...
+// whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
+// too late to turn back....
+{
+	__int16 size=0;
+	__int32 code=0;
+
+	if(Headers[1] == NULL) {
+		return;
+	}
+
+	code = 'MPTX';							// write extension header code
+	fwrite(&code, 1, sizeof(__int32), f);		
+
+	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(instruments[1]->nVolRamp),    f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(instruments[1]->nMixPlug),    f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(instruments[1]->nMidiChannel),f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(instruments[1]->nMidiProgram),f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(instruments[1]->wMidiBank),   f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('P...', sizeof(instruments[1]->nPan),        f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(instruments[1]->nGlobalVol),  f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(instruments[1]->nFadeOut),    f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('R...', sizeof(instruments[1]->nResampling), f, instruments, nInstruments);
+   	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(instruments[1]->nCutSwing),   f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(instruments[1]->nResSwing),   f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(instruments[1]->nFilterMode), f, instruments, nInstruments);
+
+	return;
+}
+
+void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, INSTRUMENTHEADER *instruments[], UINT nInstruments) 
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	BYTE* pField = NULL;	// pointer to instrument value field
+
+	fwrite(&code, 1, sizeof(__int32), f);				//write code
+	fwrite(&size, 1, sizeof(__int16), f);			//write size
+	for(UINT nins=1; nins<=nInstruments; nins++) {  //for all instruments...
+		if (!instruments[nins])	break; 
+		BYTE* pField = GetInstrumentHeaderFieldPointer(instruments[nins], code, size); //get ptr to field
+		fwrite(pField, 1, size, f);					//write field data
+	}
+
+	return;
+}
+
+void CSoundFile::SaveExtendedSongProperties(FILE* f)
+//--------------------------------------------------
+{  //Extra song data - Yet Another Hack. 
+	__int16 size;
+	__int32 code = 'MPTS';					//Extra song file data
+	fwrite(&code, 1, sizeof(__int32), f);
+	
+	code = 'DT..';							//write m_nDefaultTempo field code
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nDefaultTempo);			//write m_nDefaultTempo field size
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
+
+	code = 'RPB.';							//write m_nRowsPerBeat
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nRowsPerBeat);			
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nRowsPerBeat, 1, size, f);	
+
+	code = 'RPM.';							//write m_nRowsPerMeasure
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nRowsPerMeasure);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nRowsPerMeasure, 1, size, f);	
+
+	code = 'C...';							//write m_nChannels 
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nChannels);				
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nChannels, 1, size, f);		
+
+	return;
+}
