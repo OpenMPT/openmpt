@@ -1808,7 +1808,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 		while( (DWORD)(ptr - lpMemFile) < dwFileLength ){
 			code = (*((__int32 *)ptr));		// read field code
 			ptr += sizeof(__int32);			// jump field code
-			size = (*((__int16 *)ptr));	// read field size
+			size = (*((__int16 *)ptr));		// read field size
 			ptr += sizeof(__int16);			// jump field size
 
 			BYTE * fadr = GetInstrumentHeaderFieldPointer(penv, code, size);
