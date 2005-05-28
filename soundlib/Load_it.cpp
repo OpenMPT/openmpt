@@ -212,6 +212,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		penv->nPanSwing = pis->rp;
 		penv->nPan = (pis->dfp & 0x7F) << 2;
 		penv->nResampling = SRCMODE_DEFAULT;
+		penv->nFilterMode = FLTMODE_UNCHANGED;
 		if (penv->nPan > 256) penv->nPan = 128;
 		if (pis->dfp < 0x80) penv->dwFlags |= ENV_SETPANNING;
 	}

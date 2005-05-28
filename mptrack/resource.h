@@ -629,6 +629,7 @@
 #define IDC_KEYMAPFILE                  2106
 #define IDC_CHECK149                    2107
 #define IDC_BROWSEKEYCONF               2107
+#define IDC_CLEARLOG                    2107
 #define IDC_CHECK150                    2108
 #define IDC_NOTESREPEAT                 2108
 #define IDC_REMCHANSLIST                2108
@@ -704,6 +705,7 @@
 #define IDC_MOVEFXSLOT                  2235
 #define IDC_CLONEPLUG                   2236
 #define IDC_INSERTFXSLOT                2237
+#define IDC_FILTERMODE                  2238
 #define IDC_TEXT_BPM                    2300
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
@@ -900,7 +902,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        502
 #define _APS_NEXT_COMMAND_VALUE         37000
-#define _APS_NEXT_CONTROL_VALUE         2238
+#define _APS_NEXT_CONTROL_VALUE         2239
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -425,6 +425,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	penv->nDCT = (nChannel == MIDI_DRUMCHANNEL) ? DCT_SAMPLE : DCT_NOTE;
 	penv->nDNA = DNA_NOTEFADE;
 	penv->nResampling = SRCMODE_DEFAULT;
+	penv->nFilterMode = FLTMODE_UNCHANGED;
 	for (UINT j=0; j<120; j++)
 	{
 		int mapnote = j+1;

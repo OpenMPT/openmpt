@@ -629,7 +629,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(IDC_CHECK2,				OnEnableCutOff)
 	ON_COMMAND(IDC_CHECK3,				OnEnableResonance)
-	ON_COMMAND(IDC_CHECK4,				OnToggleHighpass)
+//	ON_COMMAND(IDC_CHECK4,				OnToggleHighpass)
 	ON_COMMAND(IDC_INSVIEWPLG,			TogglePluginEditor)		//rewbs.instroVSTi
 	ON_EN_CHANGE(IDC_EDIT_INSTRUMENT,	OnInstrumentChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
@@ -652,7 +652,8 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_CBN_SELCHANGE(IDC_COMBO4,		OnPPCChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO5,		OnMCHChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)		//rewbs.instroVSTi
-	ON_CBN_SELCHANGE(IDC_COMBO9,		OnResamplingChanged)	//rewbs.instroVSTi
+	ON_CBN_SELCHANGE(IDC_COMBO9,		OnResamplingChanged)
+	ON_CBN_SELCHANGE(IDC_FILTERMODE,	OnFilterModeChanged)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, OnEditSampleMap)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -674,6 +675,7 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO5,				m_CbnMidiCh);
 	DDX_Control(pDX, IDC_COMBO6,				m_CbnMixPlug);	//rewbs.instroVSTi
 	DDX_Control(pDX, IDC_COMBO9,				m_CbnResampling);
+	DDX_Control(pDX, IDC_FILTERMODE,			m_CbnFilterMode);
 	DDX_Control(pDX, IDC_SPIN7,					m_SpinFadeOut);
 	DDX_Control(pDX, IDC_SPIN8,					m_SpinGlobalVol);
 	DDX_Control(pDX, IDC_SPIN9,					m_SpinPanning);
@@ -783,6 +785,13 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("Polyphase"), SRCMODE_POLYPHASE);
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString("XMMS"), SRCMODE_FIRFILTER);
 
+	//end rewbs.instroVSTi
+	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Channel default"), FLTMODE_UNCHANGED);
+	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force lowpass"), FLTMODE_LOWPASS);
+	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force highpass"), FLTMODE_HIGHPASS);
+
+
+
 	// Vol/Pan Swing
 	m_SliderVolSwing.SetRange(0, 64);
 	m_SliderPanSwing.SetRange(0, 64);
@@ -808,6 +817,9 @@ BOOL CCtrlInstruments::OnInitDialog()
 // -! NEW_FEATURE#0027
 
 	m_SpinInstrument.SetFocus();
+
+
+
 	return FALSE;
 }
 
@@ -909,6 +921,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if (pFrame) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetInstrumentViewState());
 	SwitchToView();
+
 }
 
 
@@ -1092,6 +1105,14 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 					break;
 	             }
 			}
+			for(int nFltMode = 0; nFltMode<m_CbnFilterMode.GetCount(); nFltMode++) {
+                DWORD v = m_CbnFilterMode.GetItemData(nFltMode);
+		        if (penv->nFilterMode == v) {
+					m_CbnFilterMode.SetCurSel(nFltMode);
+					break;
+	             }
+			}
+
 			// NNA, DCT, DCA
 			m_ComboNNA.SetCurSel(penv->nNNA);
 			m_ComboDCT.SetCurSel(penv->nDCT);
@@ -1104,7 +1125,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			{
 				m_CheckCutOff.SetCheck((penv->nIFC & 0x80) ? TRUE : FALSE);
 				m_CheckResonance.SetCheck((penv->nIFR & 0x80) ? TRUE : FALSE);
-				m_CheckHighpass.SetCheck(penv->nFilterMode);
+				//m_CheckHighpass.SetCheck(penv->nFilterMode);
 				m_SliderVolSwing.SetPos(penv->nVolSwing);
 				m_SliderPanSwing.SetPos(penv->nPanSwing);
 				m_SliderResSwing.SetPos(penv->nResSwing);
@@ -2009,6 +2030,50 @@ void CCtrlInstruments::OnEnableResonance()
 	}
 }
 
+void CCtrlInstruments::OnFilterModeChanged() 
+//------------------------------------------
+{
+	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
+	if ((!IsLocked()) && (penv))
+	{
+		int instFiltermode = m_CbnFilterMode.GetItemData(m_CbnFilterMode.GetCurSel());
+		if (!m_pModDoc) {
+			return;
+		}
+
+		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
+
+		if (penv)	{
+			
+			penv->nFilterMode = instFiltermode;
+
+			// Translate from mode as stored in instrument to mode as understood by player. 
+			// (The reason for the translation is that the player treats 0 as lowpass,
+			// but we need to keep 0 as "do not change", so that the instrument setting doesn't
+			// override the channel setting by default.)
+			/*int playerFilterMode=-1;
+			switch (instFilterMode) {
+				case INST_FILTERMODE_DEFAULT:  playerFilterMode = FLTMODE_UNCHANGED;break;
+				case INST_FILTERMODE_HIGHPASS: playerFilterMode = FLTMODE_HIGHPASS; break;
+				case INST_FILTERMODE_LOWPASS:  playerFilterMode = FLTMODE_LOWPASS;  break;
+			}*/
+
+            //Update channel settings where this instrument is active, if required.
+			if (instFiltermode != FLTMODE_UNCHANGED) {
+				for (UINT i=0; i<MAX_CHANNELS; i++)	{
+					if (pSndFile->Chn[i].pHeader == penv) {
+						pSndFile->Chn[i].nFilterMode = instFiltermode;
+					}
+				}
+			}
+
+		}
+
+	}
+}
+
+/*
 void CCtrlInstruments::OnToggleHighpass()
 //----------------------------------------
 {
@@ -2040,7 +2105,7 @@ void CCtrlInstruments::OnToggleHighpass()
 	SwitchToView();
 
 }
-
+*/
 
 void CCtrlInstruments::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 //----------------------------------------------------------------------

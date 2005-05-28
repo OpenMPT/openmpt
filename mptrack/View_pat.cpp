@@ -3660,8 +3660,9 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		{
 			PATTERNVIEWSTATE *pState = (PATTERNVIEWSTATE *)lParam;
 			if (pState->nDetailLevel) m_nDetailLevel = pState->nDetailLevel;
-			if ((pState->nPattern == m_nPattern) && (pState->cbStruct == sizeof(PATTERNVIEWSTATE)))
+			if (/*(pState->nPattern == m_nPattern) && */(pState->cbStruct == sizeof(PATTERNVIEWSTATE)))
 			{
+				SetCurrentPattern(pState->nPattern);
 				SetCurrentRow(pState->nRow);
 				SetCurrentColumn(pState->nCursor);
 				SetCurSel(pState->dwBeginSel, pState->dwEndSel);

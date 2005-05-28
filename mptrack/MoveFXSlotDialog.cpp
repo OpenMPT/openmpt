@@ -46,7 +46,7 @@ void CMoveFXSlotDialog::OnOK()
 void CMoveFXSlotDialog::SetupMove(UINT currentSlot, CArray<UINT, UINT> &emptySlots)
 //---------------------------------------------------------------------------------
 {	
-	m_csPrompt.Format("Move plugin in slot %d to the following empty slot:", currentSlot);
+	m_csPrompt.Format("Move plugin in slot %d to the following empty slot:", currentSlot+1);
 	m_csTitle.Format("Move To Slot..");
 	m_EmptySlots.Copy(emptySlots);
 }

@@ -1673,7 +1673,7 @@ void CViewGlobals::OnInsertSlot()
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
 	prompt.Format("Insert empty slot before slot FX%d?", m_nCurrentPlugin+1);
 	if (pSndFile->m_MixPlugins[MAX_MIXPLUGINS-1].pMixPlugin) {
-		prompt.Append("\nWarning: plugin data in slot last will be lost."); 
+		prompt.Append("\nWarning: plugin data in last slot will be lost."); 
 	}
 	if (AfxMessageBox(prompt, MB_YESNO) == IDYES) {
 

@@ -17,15 +17,16 @@ CCommandSet::CCommandSet(void)
 	enforceRule[krNoteOffOnKeyRelease]			= true;
 	enforceRule[krPropagateNotes]				= true;
 	enforceRule[krReassignDigitsToOctaves]		= false;
-	enforceRule[krDeleteOldOnConflict]			= true;
-	enforceRule[krDeleteOldOnConflict]			= true;
 	enforceRule[krAutoSelectOff]				= true;
 	enforceRule[krAutoSpacing]					= true;
 	enforceRule[krCheckModifiers]				= true;
 	enforceRule[krPropagateSampleManipulation]  = true;
+//	enforceRule[krCheckContextHierarchy]		= true;
+	
 	
 	commands.SetSize(kcNumCommands);
 	SetupCommands();
+	SetupContextHierarchy();
 }
 
 CCommandSet::~CCommandSet(void)
@@ -2250,7 +2251,8 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 		for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
 		{ //search all keys for curCommand
 			curKc=commands[curCmd].kcList[k];
-			if (curKc.Conflicting(kc))
+			bool crossContext=false;
+			if (KeyCombinationConflict(curKc, kc, crossContext))
 			{
 				if (!overwrite)
 				{
@@ -2260,9 +2262,14 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 				}
 				else
 				{
-					Remove(curKc, (CommandID)curCmd);
-					report += "Warning! removed: " + GetCommandText((CommandID)curCmd) + "\r\n";
-					Log("%s",report);
+					if (crossContext) { 
+						report += "Warning! the following commands may conflict:\r\n   >" + GetCommandText((CommandID)curCmd) + " in " + GetContextText(curKc.ctx) + "\r\n   >" + GetCommandText((CommandID)cmd) + " in " + GetContextText(kc.ctx) + "\r\n\r\n";
+						Log("%s",report);
+					} else {
+						Remove(curKc, (CommandID)curCmd);
+						report += "Removed due to conflict in same context:\r\n   >" + GetCommandText((CommandID)curCmd) + " in " + GetContextText(curKc.ctx) + "\r\n\r\n";
+						Log("%s",report);
+					}
 				}
 			}
 		}
@@ -2852,9 +2859,6 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 
 void CCommandSet::Copy(CCommandSet *source)
 {
-	//memcpy(enforceRule,source->enforceRule,sizeof(bool)*kNumRules);
-	
-	// can't do memcopy for command array, since it may not be contiguous.
 	// copy constructors should take care of complexity (I hope)
 	for (int cmd=0; cmd<commands.GetSize(); cmd++)
 		commands[cmd] = source->commands[cmd];
@@ -2879,6 +2883,7 @@ CString CCommandSet::GetCommandText(CommandID cmd)
 
 bool CCommandSet::SaveFile(CString fileName, bool debug)
 { //TODO: Make C++
+
 /* Layout:
 ----( Context1 Text (id) )----
 ctx:UID:Description:Modifier:Key:EventMask
@@ -3059,6 +3064,7 @@ CString CCommandSet::GetContextText(InputTargetContext ctx)
 		case kCtxCtrlSamples:			return "Sample Context [top]";
 		case kCtxCtrlInstruments:		return "Instrument Context [top]";
 		case kCtxCtrlComments:			return "Comments Context [top]";
+		case kCtxVSTGUI:				return "Plugin GUI Context";
 	    case kCtxUnknownContext:
 		default:						return "Unknown Context";
 	}
@@ -3235,6 +3241,85 @@ bool CCommandSet::IsExtended(UINT code)
 		return true;
 
 	return false;
+}
+
+
+void CCommandSet::GetParentContexts(InputTargetContext child, CArray<InputTargetContext, InputTargetContext> parentList)
+{
+	//parentList.RemoveAll();
+
+	//for (InputTargetContext parent; parent<kCtxMaxInputContexts; parent++) {
+	//	if (m_isParentContext[child][parent]) {
+	//		parentList.Add(parent);
+	//	}
+	//}
+}
+
+void CCommandSet::GetChildContexts(InputTargetContext parent, CArray<InputTargetContext, InputTargetContext> childList)
+{
+	//childList.RemoveAll();
+
+	//for (InputTargetContext child; child<kCtxMaxInputContexts; child++) {
+	//	if (m_isParentContext[child][parent]) {
+	//		childList.Add(child);
+	//	}
+	//}
+}
+
+
+void CCommandSet::SetupContextHierarchy() 
+{
+//	m_isParentContext.SetSize(kCtxMaxInputContexts);
+	
+	for (UINT nCtx=0; nCtx<kCtxMaxInputContexts; nCtx++) {
+//		m_isParentContext[nCtx].SetSize(kCtxMaxInputContexts);
+		for (UINT nCtx2=0; nCtx2<kCtxMaxInputContexts; nCtx2++) {
+			m_isParentContext[nCtx][nCtx2] = false;
+		}//InputTargetContext
+	}
+	
+	//For now much be fully expanded (i.e. don't rely on grandparent relationships).
+	m_isParentContext[kCtxViewGeneral][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatterns][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsNote][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsIns][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsVol][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsFX][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsFXparam][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewSamples][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewInstruments][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewComments][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewTree][kCtxAllContexts] = true;
+	m_isParentContext[kCtxInsNoteMap][kCtxAllContexts] = true;
+	m_isParentContext[kCtxVSTGUI][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlGeneral][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlPatterns][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlSamples][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlInstruments][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlComments][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlSamples][kCtxAllContexts] = true;
+
+	m_isParentContext[kCtxViewPatternsNote][kCtxViewPatterns] = true;
+	m_isParentContext[kCtxViewPatternsIns][kCtxViewPatterns] = true;
+	m_isParentContext[kCtxViewPatternsVol][kCtxViewPatterns] = true;
+	m_isParentContext[kCtxViewPatternsFX][kCtxViewPatterns] = true;
+	m_isParentContext[kCtxViewPatternsFXparam][kCtxViewPatterns] = true;
+
+}
+
+bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict) 
+{
+	bool modConflict     = (kc1.mod==kc2.mod);
+	bool codeConflict    = (kc1.code==kc2.code);
+	bool eventConflict   = ((kc1.event&kc2.event)!=0);
+	bool ctxConflict     = (kc1.ctx == kc2.ctx);
+	crossCxtConflict     = m_isParentContext[kc1.ctx][kc2.ctx] || m_isParentContext[kc2.ctx][kc1.ctx];
+		
+
+	bool conflict = modConflict && codeConflict && eventConflict && 
+		(ctxConflict || crossCxtConflict);
+
+    return conflict;
 }
 
 //end rewbs.customKeys

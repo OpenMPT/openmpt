@@ -1209,6 +1209,7 @@ void CModDoc::InitializeInstrument(INSTRUMENTHEADER *penv, UINT nsample)
 	penv->nPan = 128;
 	penv->nPPC = 5*12;
 	penv->nResampling = SRCMODE_DEFAULT;
+	penv->nFilterMode = FLTMODE_UNCHANGED;
 	for (UINT n=0; n<128; n++)
 	{
 		penv->Keyboard[n] = nsample;

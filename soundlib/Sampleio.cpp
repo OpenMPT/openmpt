@@ -83,6 +83,7 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 		penv->nPan = 128;
 		penv->nPPC = 5*12;
 		penv->nResampling = SRCMODE_DEFAULT;
+		penv->nFilterMode = FLTMODE_UNCHANGED;
 		for (UINT iinit=0; iinit<128; iinit++)
 		{
 			penv->Keyboard[iinit] = nSample;
@@ -898,6 +899,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	penv->nPan = 128;
 	penv->nPPC = 60;
 	penv->nResampling = SRCMODE_DEFAULT;
+	penv->nFilterMode = FLTMODE_UNCHANGED;
 	if (m_nType == MOD_TYPE_IT)
 	{
 		penv->nNNA = NNA_NOTEOFF;
@@ -1166,6 +1168,7 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	penv->nGlobalVol = 64;
 	penv->nPPC = 5*12;
 	penv->nResampling = SRCMODE_DEFAULT;
+	penv->nFilterMode = FLTMODE_UNCHANGED;
 	for (UINT ienv=0; ienv<12; ienv++)
 	{
 		penv->VolPoints[ienv] = (WORD)pih->venv[ienv*2];
