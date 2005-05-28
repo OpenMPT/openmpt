@@ -19,7 +19,9 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 	{
 		if ((pMsg->message == WM_KEYDOWN)    || (pMsg->message == WM_SYSKEYDOWN))
 		{
-			SetKey(CMainFrame::GetInputHandler()->GetModifierMask(), pMsg->wParam);
+			//if (!(pMsg->lparam & 0x40000000)) { // only on first presss
+				SetKey(CMainFrame::GetInputHandler()->GetModifierMask(), pMsg->wParam);
+			//}
 			return -1; // Keypress handled, don't pass on message.
 		}
 		else if ((pMsg->message == WM_KEYUP)    || (pMsg->message == WM_SYSKEYUP))
@@ -97,6 +99,7 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_NONOTESREPEAT, OnNoNotesRepeat)
 	ON_COMMAND(IDC_EFFECTLETTERSXM, OnSetXMEffects)
 	ON_COMMAND(IDC_EFFECTLETTERSIT, OnSetITEffects)
+	ON_COMMAND(IDC_CLEARLOG, OnClearLog)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
@@ -597,8 +600,8 @@ void COptionsKeyboard::OnSetKeyChoice()
 	
 	//Update log
 	m_eReport.GetWindowText(reportHistory);
-	reportHistory = reportHistory.Mid(6,reportHistory.GetLength()-1);
-	m_eReport.SetWindowText("Log:\r\n"+report+reportHistory);
+	//reportHistory = reportHistory.Mid(6,reportHistory.GetLength()-1);
+	m_eReport.SetWindowText(report+reportHistory);
 
 	ForceUpdateGUI();
 	m_bModified=false;
@@ -717,4 +720,10 @@ void COptionsKeyboard::ForceUpdateGUI()
 	m_cmbKeyChoice.SetCurSel(ntmpChoice);		// select fresh keychoice (thus restoring m_nCurKeyChoice)
 	OnKeyChoiceSelect();						// update key data
 	OnSettingsChanged();						// Enable "apply" button
+}
+
+void COptionsKeyboard::OnClearLog()
+{
+	m_eReport.SetWindowText("");
+	ForceUpdateGUI();
 }

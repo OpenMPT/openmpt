@@ -189,6 +189,7 @@ typedef const BYTE * LPCBYTE;
 // -! NEW_FEATURE#0010
 
 // Filter Modes
+#define FLTMODE_UNCHANGED		0xFF
 #define FLTMODE_LOWPASS			0
 #define FLTMODE_HIGHPASS		1
 #define FLTMODE_BANDPASS		2
@@ -347,6 +348,13 @@ enum {
 	NUM_SRC_MODES
 };
 
+// filtermodes
+/*enum {
+	INST_FILTERMODE_DEFAULT=0,
+	INST_FILTERMODE_HIGHPASS,
+	INST_FILTERMODE_LOWPASS,
+	INST_NUMFILTERMODES
+};*/
 
 // Sample Struct
 typedef struct _MODINSTRUMENT

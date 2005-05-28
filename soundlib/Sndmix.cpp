@@ -771,7 +771,7 @@ BOOL CSoundFile::ReadNote()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ericus 10/02/2005
 /*
-		int nchn32 = (m_nChannels < 32) ? m_nChannels : 31;
+ 		int nchn32 = (m_nChannels < 32) ? m_nChannels : 31;
 		if ((m_nType & MOD_TYPE_IT) && (m_nInstruments) && (nchn32 < 6)) nchn32 = 6;
 		int realmastervol = m_nMasterVolume;
 		if (realmastervol > 0x80)
@@ -790,7 +790,10 @@ BOOL CSoundFile::ReadNote()
 */
 		int nchn32 = 0;
 		MODCHANNEL *pChn = Chn;
-		for (UINT nChn=0; nChn<m_nChannels; nChn++,pChn++) if(!(pChn->dwFlags & CHN_MUTE)) nchn32++;
+		for (UINT nChn=0; nChn<m_nChannels; nChn++,pChn++) {
+			//if(!(pChn->dwFlags & CHN_MUTE))	//removed by rewbs: fix http://www.modplug.com/forum/viewtopic.php?t=3358
+				nchn32++;
+		}
 		if(nchn32 < 1) nchn32 = 1;
 		if(nchn32 > 31) nchn32 = 31;
 
@@ -810,6 +813,7 @@ BOOL CSoundFile::ReadNote()
 		if(attenuation < 1) attenuation = 1;
 
 		nMasterVol = (mastervol << 7) / attenuation;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 	////////////////////////////////////////////////////////////////////////////////////

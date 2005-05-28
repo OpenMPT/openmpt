@@ -24,24 +24,25 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	char wd[255];
 	_getdcwd(_getdrive(), wd, 255);
 	workingDir = wd;
-
-	if (!CMainFrame::m_szKbdFile[0])
+	if (!CMainFrame::m_szKbdFile[0]) {
 		strcpy(CMainFrame::m_szKbdFile, workingDir + "\\default.mkb");
-	
-	if (!(activeCommandSet->LoadFile(CMainFrame::m_szKbdFile)))
+	}
+	if (!(activeCommandSet->LoadFile(CMainFrame::m_szKbdFile))) {
 		activeCommandSet->LoadFile(workingDir + "\\default.mkb");
+	}
 
 	//Get Keymap 
 	activeCommandSet->GenKeyMap(keyMap);
 	
-
 	m_bDistinguishControls = false; 
 	m_bDistinguishShifts = false;
 	m_bDistinguishAlts = false;
 	m_bBypass = false;
 	modifierMask=0;
-	 m_bNoAltMenu = true;
+	m_bNoAltMenu = true;
 	m_bAutoSave = true;
+
+
 }
 CInputHandler::~CInputHandler(void)
 {
@@ -466,4 +467,3 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 
 	return false;
 }
-

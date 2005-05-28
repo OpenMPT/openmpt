@@ -381,15 +381,14 @@ BEGIN
                     WS_TABSTOP,141,68,66,8
     PUSHBUTTON      "Restore",IDC_RESTORE,212,46,43,13
     PUSHBUTTON      "Delete",IDC_DELETE,212,64,43,13
-    EDITTEXT        IDC_KEYREPORT,135,84,125,60,ES_MULTILINE | 
-                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
-                    WS_VSCROLL
-    PUSHBUTTON      "Y",IDC_NOTESREPEAT,230,155,12,9
-    PUSHBUTTON      "N",IDC_NONOTESREPEAT,245,155,12,9
-    EDITTEXT        IDC_CHORDDETECTWAITTIME,229,168,28,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_KEYREPORT,135,94,125,70,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
+    PUSHBUTTON      "Y",IDC_NOTESREPEAT,230,176,12,9
+    PUSHBUTTON      "N",IDC_NONOTESREPEAT,245,176,12,9
+    EDITTEXT        IDC_CHORDDETECTWAITTIME,229,189,28,12,ES_AUTOHSCROLL | 
                     ES_NUMBER,WS_EX_RIGHT
-    PUSHBUTTON      "it",IDC_EFFECTLETTERSIT,230,185,12,9,NOT WS_VISIBLE
-    PUSHBUTTON      "xm",IDC_EFFECTLETTERSXM,245,185,12,9,NOT WS_VISIBLE
+    PUSHBUTTON      "it",IDC_EFFECTLETTERSIT,98,184,12,9,NOT WS_VISIBLE
+    PUSHBUTTON      "xm",IDC_EFFECTLETTERSXM,113,184,12,9,NOT WS_VISIBLE
     PUSHBUTTON      "Load Keys...",IDC_LOAD,139,221,54,13
     PUSHBUTTON      "Save Keys As...",IDC_SAVE,199,221,54,13
     CONTROL         "Debug Save",IDC_DEBUGSAVE,"Button",BS_AUTOCHECKBOX | 
@@ -399,16 +398,18 @@ BEGIN
     PUSHBUTTON      "Set",IDC_SET,222,46,43,13,NOT WS_VISIBLE
     GROUPBOX        "Key setup for this command ",IDC_STATIC,134,5,127,75
     LTEXT           "Key:",IDC_STATIC,141,33,16,8
-    GROUPBOX        "Misc",IDC_STATIC,134,146,126,60
+    GROUPBOX        "Misc",IDC_STATIC,134,167,126,40
     GROUPBOX        "Multi Config Handling",IDC_STATIC,134,209,126,66
-    LTEXT           "Repeat notes on hold?",IDC_STATIC,138,155,74,11
-    LTEXT           "Effect letters like:",IDC_STATIC,138,186,73,11,NOT 
+    LTEXT           "Repeat notes on hold?",IDC_STATIC,138,176,74,11
+    LTEXT           "Effect letters like:",IDC_STATIC,6,185,73,11,NOT 
                     WS_VISIBLE
-    LTEXT           "Chord detect interval (ms):",IDC_STATIC,138,169,88,11
+    LTEXT           "Chord detect interval (ms):",IDC_STATIC,138,190,88,11
     CONTROL         "Save to this file on OK/Apply?",IDC_AUTOSAVE,"Button",
                     BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,147,262,106,
                     10
     LTEXT           "Config to load on startup:",IDC_STATIC,139,239,80,8
+    LTEXT           "Log:",IDC_STATIC,136,84,19,10
+    PUSHBUTTON      "Clear Log",IDC_CLEARLOG,222,85,37,9
 END
 
 IDD_OPTIONS_COLORS DIALOGEX 0, 0, 265, 278
@@ -808,7 +809,7 @@ BEGIN
                     TBS_NOTICKS,172,118,60,10
     CONTROL         "Cutoff",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | BS_FLAT,
                     136,54,35,10
-    EDITTEXT        IDC_EDIT1,197,63,30,12,ES_RIGHT | ES_READONLY | NOT 
+    EDITTEXT        IDC_EDIT1,197,62,30,12,ES_RIGHT | ES_READONLY | NOT 
                     WS_BORDER | NOT WS_TABSTOP,WS_EX_RIGHT
     CONTROL         "Slider2",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_DISABLED,168,54,64,10
@@ -858,7 +859,11 @@ BEGIN
     CONTROL         "",IDC_SLIDER7,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS,172,152,60,10
     CONTROL         "Highpass",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,136,71,45,10
+                    NOT WS_VISIBLE | WS_TABSTOP,181,19,45,10
+    COMBOBOX        IDC_FILTERMODE,163,70,69,42,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Mode",IDC_STATIC,135,70,23,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
 END
 
 IDD_MODDOC_MODTYPE DIALOGEX 0, 0, 243, 118

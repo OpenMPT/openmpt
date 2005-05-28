@@ -966,9 +966,6 @@ struct KeyCombination
 	KeyEventType event;
 	bool operator==(const KeyCombination &other)
 		{return (mod==other.mod && code==other.code && ctx==other.ctx && event==other.event);}
-	bool Conflicting(const KeyCombination &other)
-		{return (mod==other.mod && code==other.code && ctx==other.ctx && ((event&other.event)!=0));}
-
 };
 
 struct CommandStruct
@@ -1024,14 +1021,21 @@ class CCommandSet
 protected:
 	//util
 	void SetupCommands();
+	void SetupContextHierarchy();
 	bool IsDummyCommand(CommandID cmd);
 	UINT CodeToModifier(UINT code);
 	CString EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
+	void GetParentContexts(InputTargetContext child, CArray<InputTargetContext, InputTargetContext> ctxList);
+	void GetChildContexts(InputTargetContext child, CArray<InputTargetContext, InputTargetContext> ctxList);
+
 	bool IsExtended(UINT code);
 	int FindCmd(int uid);
+	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict);
 
 	//members
 	CArray <CommandStruct,CommandStruct> commands;
+	//CArray<CArray<bool,bool>, CArray<bool,bool> > m_isParentContext;
+	bool m_isParentContext[kCtxMaxInputContexts][kCtxMaxInputContexts];
 	bool enforceRule[kNumRules];
 
 public:

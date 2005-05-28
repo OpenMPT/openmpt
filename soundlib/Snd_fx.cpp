@@ -612,7 +612,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		{
 			if (penv->nIFR & 0x80) { pChn->nResonance = penv->nIFR & 0x7F; bFlt = TRUE; }
 			if (penv->nIFC & 0x80) { pChn->nCutOff = penv->nIFC & 0x7F; bFlt = TRUE; }
-			if (bFlt && penv->nFilterMode) {
+			if (bFlt && (penv->nFilterMode != FLTMODE_UNCHANGED)) {
 				pChn->nFilterMode = penv->nFilterMode;
 			}
 		} else

@@ -81,7 +81,7 @@ void CPatternGotoDialog::OnOK()
 	}
 	
 	//Does track have enough channels?
-	if (validated && m_pSndFile->m_nChannels>0 && m_pSndFile->m_nChannels <= m_nChannel) {
+	if (validated && m_pSndFile->m_nChannels < m_nChannel) {
 		validated=false;
 	}
 

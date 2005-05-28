@@ -61,10 +61,10 @@ protected:
 	KeyMap keyMap;
 	void LogModifiers(UINT mask);	
 	UINT modifierMask;
-	bool CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode);
-	bool m_bDistinguishControls, m_bDistinguishShifts, m_bDistinguishAlts;
 	bool m_bBypass;
 	bool m_bNoAltMenu;
+	bool m_bDistinguishControls, m_bDistinguishShifts, m_bDistinguishAlts;
+	bool CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode);
 
 public:
 	CCommandSet *activeCommandSet;

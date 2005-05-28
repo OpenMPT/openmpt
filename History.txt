@@ -21,6 +21,12 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17RC1 (revision 1.13.2.15)
+  / <rewbs> Warning in custom keys log when entering a key that causes a cross-context conflict.
+  . <rewbs> Instruments can now force lowpass filter mode
+  . <rewbs> Fixed some boundary typos.
+  . <rewbs> Fixed volume changes on muting/unmuting channels.
+
 . v 1.17RC1 (revision 1.13.2.14)
   + <rewbs> Rubbish CPU usage indicator. Dishonestly shows 10-20% less than Windows taskmanager, not sure why yet.
   + <rewbs> Quick "Go to row/channel/pattern/order" dialog in pattern editor. Set up a custom key to use it the Pattern Editor/General category.
