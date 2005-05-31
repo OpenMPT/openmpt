@@ -21,6 +21,10 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17RC1 (revision 1.13.2.16)
+  . <rewbs> Fixed corrupt .mod when non existent pattern is listed in sequence.
+  . <rewbs> Autosaver is automatically disabled when save fails.
+
 . v 1.17RC1 (revision 1.13.2.15)
   / <rewbs> Warning in custom keys log when entering a key that causes a cross-context conflict.
   . <rewbs> Instruments can now force lowpass filter mode
