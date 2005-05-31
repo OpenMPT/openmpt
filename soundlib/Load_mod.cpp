@@ -438,6 +438,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 	fwrite(bTab, 2, 1, f);
 	// Writing pattern list
 	if (norders) memcpy(ord, Order, norders);
+
 	fwrite(ord, 128, 1, f);
 	// Writing signature
 	if (m_nChannels == 4)
@@ -446,41 +447,56 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 		wsprintf((LPSTR)&bTab, "%luCHN", m_nChannels);
 	fwrite(bTab, 4, 1, f);
 	// Writing patterns
-	for (UINT ipat=0; ipat<nbp; ipat++) if (Patterns[ipat])
-	{
+	for (UINT ipat=0; ipat<nbp; ipat++) {	//for all patterns
 		BYTE s[64*4];
-		MODCOMMAND *m = Patterns[ipat];
-		for (UINT i=0; i<64; i++) if (i < PatternSize[ipat])
-		{
-			LPBYTE p=s;
-			for (UINT c=0; c<m_nChannels; c++,p+=4,m++)
-			{
-				UINT param = ModSaveCommand(m, FALSE);
-				UINT command = param >> 8;
-				param &= 0xFF;
-				if (command > 0x0F) command = param = 0;
-				if ((m->vol >= 0x10) && (m->vol <= 0x50) && (!command) && (!param)) { command = 0x0C; param = m->vol - 0x10; }
-				UINT period = m->note;
-				if (period)
-				{
-					if (period < 37) period = 37;
-					period -= 37;
-					if (period >= 6*12) period = 6*12-1;
-					period = ProTrackerPeriodTable[period];
+		if (Patterns[ipat])	{					//if pattern exists
+			MODCOMMAND *m = Patterns[ipat];
+			for (UINT i=0; i<64; i++) {				//for all rows 
+				if (i < PatternSize[ipat]) {			//if row exists
+					LPBYTE p=s;
+					for (UINT c=0; c<m_nChannels; c++,p+=4,m++)
+					{
+						UINT param = ModSaveCommand(m, FALSE);
+						UINT command = param >> 8;
+						param &= 0xFF;
+						if (command > 0x0F) command = param = 0;
+						if ((m->vol >= 0x10) && (m->vol <= 0x50) && (!command) && (!param)) { command = 0x0C; param = m->vol - 0x10; }
+						UINT period = m->note;
+						if (period)
+						{
+							if (period < 37) period = 37;
+							period -= 37;
+							if (period >= 6*12) period = 6*12-1;
+							period = ProTrackerPeriodTable[period];
+						}
+						UINT instr = (m->instr > 31) ? 0 : m->instr;
+						p[0] = ((period >> 8) & 0x0F) | (instr & 0x10);
+						p[1] = period & 0xFF;
+						p[2] = ((instr & 0x0F) << 4) | (command & 0x0F);
+						p[3] = param;
+					}
+					fwrite(s, m_nChannels, 4, f);
+				} else {								//if row does not exist
+					memset(s, 0, m_nChannels*4);		//invent blank row
+					fwrite(s, m_nChannels, 4, f);
 				}
-				UINT instr = (m->instr > 31) ? 0 : m->instr;
-				p[0] = ((period >> 8) & 0x0F) | (instr & 0x10);
-				p[1] = period & 0xFF;
-				p[2] = ((instr & 0x0F) << 4) | (command & 0x0F);
-				p[3] = param;
+			}										//end for all rows
+		} else	{								
+			memset(s, 0, m_nChannels*4);		//if patten does not exist
+			for (UINT i=0; i<64; i++) {			//invent blank pattern
+				fwrite(s, m_nChannels, 4, f);
 			}
-			fwrite(s, m_nChannels, 4, f);
-		} else
-		{
-			memset(s, 0, m_nChannels*4);
-			fwrite(s, m_nChannels, 4, f);
+		}
+	}										//end for all patterns
+	
+	//Check for unsaved patterns
+	for (UINT ipat=nbp; ipat<MAX_PATTERNS; ipat++) {
+		if (Patterns[ipat])	{
+			AfxMessageBox("Warning: this track contains at least 1 pattern after the highest pattern number referred to in the sequence.\r\nSuch patterns will not be saved in the .mod format.");
+			break;
 		}
 	}
+
 	// Writing instruments
 	for (UINT ismpd=1; ismpd<=31; ismpd++) if (inslen[ismpd])
 	{

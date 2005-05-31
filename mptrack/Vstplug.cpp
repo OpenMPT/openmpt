@@ -999,8 +999,6 @@ typedef struct _PROBLEMATIC_PLUG
 #define NUM_PROBLEMPLUGS 3
 static _PROBLEMATIC_PLUG gProblemPlugs[NUM_PROBLEMPLUGS] =
 {
-	{'VstP', 'Sytr', 1, "Image Line Sytrus", "*v1.2 does not save parameters correctly.*"},
-	{'VstP', 'CLAW', 1, "ReFX Claw", "*v1.0 causes random crashes.*"},
 	{'VstP', 'Ni4S', 1, "Native Instruments B4", "*v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5.*"},
 };
 

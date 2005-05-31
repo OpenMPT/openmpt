@@ -1315,7 +1315,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.15)",
+	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.16)",
 				MAINFRAME_TITLE,
 				(MPTRACK_VERSION>>24)&0xFF,
 				(MPTRACK_VERSION>>16)&0xFF,

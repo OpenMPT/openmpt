@@ -64,7 +64,8 @@ bool CAutoSaver::DoSave(DWORD curTime)
 					if (SaveSingleFile(pModDoc)) {
 						CleanUpBackups(pModDoc);
 					} else {
-						AfxMessageBox("Warning: autosave failed.");
+						m_bEnabled=false;
+						AfxMessageBox("Warning: autosave failed and has been disabled.\r\nPlease review your autosave settings. Also check available diskspace & filesystem access rights.");
 					}
 				}
 			} //end all open documents
