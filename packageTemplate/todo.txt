@@ -1,0 +1,94 @@
+This rewbs' incomplete OpenMPT TODO list.
+
+. Misc stuff
+  . Get all RC bug fixes into dev line
+  . Navigation dialog (jump to row/channel)
+  . Random cutoff / res variation
+  . Save rows per beat/measure in song.
+  . Show total channels used and total CPU Usage
+  . CPU usage for each plugin
+  . VU meters for each plugin
+  . Clipping warning
+  . Resampling mode per instrument
+  . Bypass a plug from plug window
+  . Move plugins in FX list
+  . Clone plugins
+  . Option to lock sample's frequency so its duration is X rows.
+  . Optionally automatically create an instrument on adding a VSTi
+  . Optionally redirect notes played on split instrument to Split MIDI Record enabled channels, if there are any.
+  . Sample editor: export sample & open in external editor
+  . Save plugin list in .ini as plugs are added, keep log of successfully loaded plugs on startup.
+  . Optionally recurse subdirectories when adding plugs (aka scan for new plugins)
+  . Prompt to load a backup on restart after a crash
+  . Mark track as modified on param change
+
+
+. VST compliancy
+  . Support tails: stop calling process() on plugs when they aren't generating any sound. 
+  . Threading cleanup
+  . Add support for speaker arrangements.
+  . Add support for pin properties
+  . Add support for delta frames 
+  . Add support for note offset
+  . Add support for detune
+  . Add support for VST MIDI effects.
+  . Add support for fxb saving/loading
+
+. Tuning
+  . Add a choice of tuning mode per instrument.
+  . Can be applied to both samples and VSTis that support detune
+  . Custom tuning modes?
+
+. Virtual instrument effect handling
+  . Retrig VSTis
+  . Offset VSTis (for those VSTis that support note offset)
+  . Automatically map certain pattern effects to MIDI CCs (pitch bend etc..)
+
+. Modular audio & MIDI data routing from instruments, channels and plugins, and between plugins.
+
+
+. Sound driver
+  . Option to leave sound driver open at all times
+
+. Optionally show beginning sample's name instead of note in pattern editor (e.g. for multi-sample drum instruments).
+
+
+. Generalise Effect parameter visualiser
+  . Note visualiser
+  . Volume visualiser
+
+
+. Custom keys design
+  . Harden subcontext/supercontext implementation, it's currently a bit approximate.
+  . Make plugin windows input contexts
+    . Play VSTi from plug GUI
+    . Custom keys for preset manipulation
+
+. Optional progressive buffer adjustements to achieve exact rounded BPMs.
+
+
+. Fluctuators (new parameter control mechanism)
+  . Linear [done]
+  . Set
+  . Stop
+  . Oscillator
+  . Random
+  . Envelope bank
+  . Pattern editor enhancements for fluctuators
+  . Fluctuator visualiser/GUI
+  . Cross-plugin parameter grouping/modulation?
+
+. MIDI
+  . Smarter MIDI-in (make use of more types of MIDI messages)
+  . MIDI-out (including CCs)
+
+. Real time paramter variation recording
+  . From plugin GUI
+  . From MIDI controllers
+
+. Menu enhancements
+  . Make more instrument/sample/pattern editor commands available from main menu bar
+  . Make context menus customisable.
+  . Improve VST preset menu to make navigating huge numbers of presets easier
+
+. Pattern editor re-design with resizable/hideable channels, multiple effect columns etc..
