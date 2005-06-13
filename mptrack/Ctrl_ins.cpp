@@ -1033,6 +1033,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SliderPanSwing.EnableWindow(bITonly);
 		m_SliderCutSwing.EnableWindow(bITonly);
 		m_SliderResSwing.EnableWindow(bITonly);
+		m_CbnFilterMode.EnableWindow(bITonly);
 		m_ComboDCT.EnableWindow(bITonly);
 		m_ComboDCA.EnableWindow(bITonly);
 		m_ComboPPC.EnableWindow(bITonly);

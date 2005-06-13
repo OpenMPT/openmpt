@@ -27,9 +27,17 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+/*
 #define MAINFRAME_REGKEY		"Software\\Olivier Lapicque\\ModPlug Tracker"
 #define MAINFRAME_REG_WINDOW	"Software\\Olivier Lapicque\\ModPlug Tracker\\Window"
 #define MAINFRAME_REG_SETTINGS	"Software\\Olivier Lapicque\\ModPlug Tracker\\Settings"
+*/
+
+#define MAINFRAME_REGKEY_BASE		"Software\\Olivier Lapicque\\"
+#define MAINFRAME_REGKEY_DEFAULT	"ModPlug Tracker"
+#define MAINFRAME_REGEXT_WINDOW		"\\Window"
+#define MAINFRAME_REGEXT_SETTINGS	"\\Settings"
+
 
 
 #define MPTTIMER_PERIOD		200
@@ -141,6 +149,12 @@ double CMainFrame::gdWFIRCutoff = 0.97;
 BYTE  CMainFrame::gbWFIRType = 7; //WFIR_KAISER4T;
 //end rewbs.resamplerConf
 UINT CMainFrame::gnAutoChordWaitTime = 60;
+
+int CMainFrame::gnPlugWindowX = 243;
+int CMainFrame::gnPlugWindowY = 273;
+int CMainFrame::gnPlugWindowWidth = 370;
+int CMainFrame::gnPlugWindowHeight = 332;
+DWORD CMainFrame::gnPlugWindowLast = 0;
 
 CRITICAL_SECTION CMainFrame::m_csAudio;
 HANDLE CMainFrame::m_hPlayThread = NULL;
@@ -279,8 +293,8 @@ static UINT indicators[] =
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
 
-CMainFrame::CMainFrame()
-//----------------------
+CMainFrame::CMainFrame(/*CString regKeyExtension*/)
+//---------------------------------------------
 {
 	DWORD dwREG_DWORD = REG_DWORD;
 	DWORD dwREG_SZ = REG_SZ;
@@ -325,6 +339,19 @@ CMainFrame::CMainFrame()
 	CString asFileNameTemplate="";
 	//end rewbs.autosave
 
+	//Construct registry keys:
+	/*m_csRegExt = regKeyExtension;
+	
+	if (m_csRegExt != "") {
+		m_csRegKey.Format("%s%s", MAINFRAME_REGKEY_BASE, m_csRegExt);
+	} else {
+*/		m_csRegKey.Format("%s%s", MAINFRAME_REGKEY_BASE, MAINFRAME_REGKEY_DEFAULT);
+//	}
+
+	m_csRegSettings.Format("%s%s", m_csRegKey, MAINFRAME_REGEXT_SETTINGS);
+	m_csRegWindow.Format("%s%s", m_csRegKey, MAINFRAME_REGEXT_WINDOW);
+
+
 	// Default chords
 	for (UINT ichord=0; ichord<3*12; ichord++)
 	{
@@ -348,7 +375,7 @@ CMainFrame::CMainFrame()
 		}
 	}
 	// Read Display Registry Settings
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MAINFRAME_REG_WINDOW, 0, KEY_READ, &key) == ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegWindow, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		DWORD d = 0;
 		RegQueryValueEx(key, "Maximized", NULL, &dwREG_DWORD, (LPBYTE)&d, &dwDWORDSize);
@@ -377,7 +404,7 @@ CMainFrame::CMainFrame()
 	if (CSoundFile::gdwSysInfo & SYSMIX_ENABLEMMX) CSoundFile::m_nMaxMixChannels = 64;
 	if (CSoundFile::gdwSysInfo & SYSMIX_SSE) CSoundFile::m_nMaxMixChannels = MAX_CHANNELS;
 	// Read registry settings
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MAINFRAME_REGKEY, 0, KEY_READ, &key) == ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegKey, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwSoundSetup, &dwDWORDSize);
 		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_dwQuality, &dwDWORDSize);
@@ -436,6 +463,18 @@ CMainFrame::CMainFrame()
 		RegQueryValueEx(key, "AutoChordWaitTime", NULL, &dwREG_DWORD, (LPBYTE)&gnAutoChordWaitTime, &dwDWORDSize);
 		//end rewbs.autochord
 
+		dwDWORDSize = sizeof(gnPlugWindowX);
+		RegQueryValueEx(key, "PlugSelectWindowX", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowX, &dwDWORDSize);
+		dwDWORDSize = sizeof(gnPlugWindowY);
+		RegQueryValueEx(key, "PlugSelectWindowY", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowY, &dwDWORDSize);
+		dwDWORDSize = sizeof(gnPlugWindowWidth);
+		RegQueryValueEx(key, "PlugSelectWindowWidth", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowWidth, &dwDWORDSize);
+		dwDWORDSize = sizeof(gnPlugWindowHeight);
+		RegQueryValueEx(key, "PlugSelectWindowHeight", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowHeight, &dwDWORDSize);
+		dwDWORDSize = sizeof(gnPlugWindowLast);
+		RegQueryValueEx(key, "PlugSelectWindowLast", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowLast, &dwDWORDSize);
+
+
 		//rewbs.autoSave
 		dwDWORDSize = sizeof(asEnabled);
 		RegQueryValueEx(key, "AutoSave_Enabled", NULL, &dwREG_DWORD, (LPBYTE)&asEnabled, &dwDWORDSize);
@@ -459,7 +498,7 @@ CMainFrame::CMainFrame()
 		RegCloseKey(key);
 	}
 	// Read more registry settings
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MAINFRAME_REG_SETTINGS, 0, KEY_READ, &key) == ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegSettings, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		// Version
 		dwDWORDSize = sizeof(DWORD);
@@ -643,7 +682,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	HKEY key;
 
 	// Read registry settings
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MAINFRAME_REG_WINDOW, 0, KEY_READ, &key) == ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegWindow, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		DWORD dwREG_DWORD = REG_DWORD;
 		DWORD qwREG_DWORD = REG_QWORD;
@@ -782,7 +821,7 @@ void CMainFrame::OnClose()
 	}
 	GetWindowRect(&rect);
 	// Save Window Settings
-	if (RegCreateKey(HKEY_CURRENT_USER,	MAINFRAME_REG_WINDOW, &key) == ERROR_SUCCESS)
+	if (RegCreateKey(HKEY_CURRENT_USER,	m_csRegWindow, &key) == ERROR_SUCCESS)
 	{
 		DWORD d = IsZoomed();
 		if ((!IsIconic()) && (!d))
@@ -814,7 +853,7 @@ void CMainFrame::OnClose()
 		}
 		RegCloseKey(key);
 	}
-	if (RegCreateKey(HKEY_CURRENT_USER,	MAINFRAME_REGKEY, &key) == ERROR_SUCCESS)
+	if (RegCreateKey(HKEY_CURRENT_USER,	m_csRegKey, &key) == ERROR_SUCCESS)
 	{
 		// Player
 		RegSetValueEx(key, "WaveDevice", NULL, REG_DWORD, (LPBYTE)&m_nWaveDevice, sizeof(DWORD));
@@ -864,6 +903,12 @@ void CMainFrame::OnClose()
 		//end rewbs.resamplerConf
 		RegSetValueEx(key, "AutoChordWaitTime", NULL, REG_DWORD, (LPBYTE)&gnAutoChordWaitTime, sizeof(gnAutoChordWaitTime)); //rewbs.autochord
 
+		RegSetValueEx(key, "PlugSelectWindowX", NULL, REG_DWORD, (LPBYTE)&gnPlugWindowX, sizeof(gnPlugWindowX));
+		RegSetValueEx(key, "PlugSelectWindowY", NULL, REG_DWORD, (LPBYTE)&gnPlugWindowY, sizeof(gnPlugWindowY));
+		RegSetValueEx(key, "PlugSelectWindowWidth", NULL, REG_DWORD, (LPBYTE)&gnPlugWindowWidth, sizeof(gnPlugWindowWidth));
+		RegSetValueEx(key, "PlugSelectWindowHeight", NULL, REG_DWORD, (LPBYTE)&gnPlugWindowHeight, sizeof(gnPlugWindowHeight));
+		RegSetValueEx(key, "PlugSelectWindowLast", NULL, REG_DWORD, (LPBYTE)&gnPlugWindowLast, sizeof(gnPlugWindowLast));
+
 		//rewbs.autoSave
 		bool asEnabled=m_pAutoSaver->IsEnabled();
 		int asInterval=m_pAutoSaver->GetSaveInterval();
@@ -876,14 +921,14 @@ void CMainFrame::OnClose()
 		RegSetValueEx(key, "AutoSave_IntervalMinutes", NULL, REG_DWORD, (LPBYTE)&asInterval, sizeof(asInterval));
 		RegSetValueEx(key, "AutoSave_BackupHistory", NULL, REG_DWORD, (LPBYTE)&asBackupHistory, sizeof(asBackupHistory));
 		RegSetValueEx(key, "AutoSave_UseOriginalPath", NULL, REG_BINARY, (LPBYTE)&asUseOriginalPath, sizeof(asUseOriginalPath));		
-		RegSetValueEx(key, "AutoSave_Path", NULL, REG_SZ, (CONST BYTE *) (LPCTSTR)asPath, MAX_PATH);
+		RegSetValueEx(key, "AutoSave_Path", NULL, REG_SZ, (CONST BYTE *) (LPCTSTR)asPath, asPath.GetLength());
 		RegSetValueEx(key, "AutoSave_FileNameTemplate", NULL, REG_SZ, (CONST BYTE *) (LPCTSTR)asFileNameTemplate, MAX_PATH);
 
 		//end rewbs.autoSave
 
 		RegCloseKey(key);
 	}
-	if (RegCreateKey(HKEY_CURRENT_USER,	MAINFRAME_REG_SETTINGS, &key) == ERROR_SUCCESS)
+	if (RegCreateKey(HKEY_CURRENT_USER,	m_csRegSettings, &key) == ERROR_SUCCESS)
 	{
 		DWORD dwVersion = MPTRACK_VERSION;
 		// Author information
@@ -2376,7 +2421,11 @@ void CMainFrame::OnTimer(UINT)
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 
 	if (m_pAutoSaver && m_pAutoSaver->IsEnabled()) {
-		m_pAutoSaver->DoSave(curTime);
+		bool success = m_pAutoSaver->DoSave(curTime);
+		if (!success) {					//autosave failure; bring up options.
+			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_AUTOSAVE;
+			OnViewOptions();
+		}
 	}
 
 }
@@ -2720,6 +2769,7 @@ double CMainFrame::GetApproxBPM()
 BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 {
 	BEGIN_CRITICAL();
+	pSndFile->m_bIsRendering=true;
 	pSndFile->SuspendPlugins();
 	pSndFile->ResumePlugins();
 	END_CRITICAL();
@@ -2734,6 +2784,7 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 	m_pModPlaying = NULL;
 	BEGIN_CRITICAL();
 	pSndFile->SuspendPlugins();
+	pSndFile->m_bIsRendering=false;
 	END_CRITICAL();
 	return true;
 }

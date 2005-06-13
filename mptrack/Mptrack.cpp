@@ -196,10 +196,17 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	BOOL m_bNoAcm, m_bNoDls, m_bNoMp3, m_bSafeMode, m_bWavEx, m_bNoPlugins, m_bDebug;
+	BOOL m_bNoAcm, m_bNoDls, m_bNoMp3, m_bSafeMode, m_bWavEx, m_bNoPlugins, m_bDebug,
+		 m_bNoSettingsOnNewVersion;
+
+	CString m_csExtension;
 
 public:
-	CMPTCommandLineInfo() { m_bNoAcm = m_bNoDls = m_bNoMp3 = m_bSafeMode = m_bWavEx = m_bNoPlugins = m_bDebug = FALSE; }
+	CMPTCommandLineInfo() { 
+		m_bNoAcm = m_bNoDls = m_bNoMp3 = m_bSafeMode = m_bWavEx = 
+		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = FALSE; 
+		m_csExtension = "";
+	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
 };
 
@@ -215,7 +222,19 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 		if (!lstrcmpi(lpszParam, "nomp3")) { m_bNoMp3 = TRUE; return; } else
 		if (!lstrcmpi(lpszParam, "wavex")) { m_bWavEx = TRUE; } else
 		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = TRUE; } else
-		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = TRUE; }
+		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = TRUE; } else
+		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = TRUE; }
+/*		else {
+
+			CString param = lpszParam;
+			CString resToken;
+			int curPos = 0;
+			resToken = param.Tokenize(":",curPos);
+			if (resToken == "appendToRegistryKey") {
+				m_csExtension = param.Tokenize(":",curPos);
+			}
+		}
+*/		
 	}
 	CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
 }
@@ -682,15 +701,15 @@ BOOL CTrackApp::InitInstance()
 		memcpy(&m_MidiCfg.szMidiZXXExt[izxx*32], s, 32);
 	}
 
-	// create main MDI Frame window
-	CMainFrame* pMainFrame = new CMainFrame;
-	if (!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
-	m_pMainWnd = pMainFrame;
-
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
 	if (GetDSoundVersion() >= 0x0700) cmdInfo.m_bWavEx = TRUE;
 	ParseCommandLine(cmdInfo);
+
+	// create main MDI Frame window
+	CMainFrame* pMainFrame = new CMainFrame(/*cmdInfo.m_csExtension*/);
+	if (!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
+	m_pMainWnd = pMainFrame;
 
 	if (cmdInfo.m_bShowSplash)
 	{
@@ -742,7 +761,7 @@ BOOL CTrackApp::InitInstance()
 	m_bInitialized = TRUE;
 
 	// Check previous version number
-	if (CMainFrame::gdwPreviousVersion < MPTRACK_FINALRELEASEVERSION)
+	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gdwPreviousVersion < MPTRACK_FINALRELEASEVERSION)
 	{
 		StopSplashScreen();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
@@ -1315,7 +1334,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.16)",
+	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.17)",
 				MAINFRAME_TITLE,
 				(MPTRACK_VERSION>>24)&0xFF,
 				(MPTRACK_VERSION>>16)&0xFF,
@@ -2645,20 +2664,22 @@ BOOL CTrackApp::OpenURL(LPCSTR lpszURL)
 void Log(LPCSTR format,...)
 //-------------------------
 {
-	CHAR cBuf[1024];
-	va_list va;
-	va_start(va, format);
-	wvsprintf(cBuf, format, va);
-	OutputDebugString(cBuf);
-	#ifdef LOG_TO_FILE
-		FILE *f = fopen("c:\\mptrack.log", "a");
-		if (f)
-		{
-			fwrite(cBuf, 1, strlen(cBuf), f);
-			fclose(f);
-		}
-	#endif //LOG_TO_FILE
-	va_end(va);
+	#ifdef _DEBUG
+		CHAR cBuf[1024];
+		va_list va;
+		va_start(va, format);
+		wvsprintf(cBuf, format, va);
+		OutputDebugString(cBuf);
+		#ifdef LOG_TO_FILE
+			FILE *f = fopen("c:\\mptrack.log", "a");
+			if (f)
+			{
+				fwrite(cBuf, 1, strlen(cBuf), f);
+				fclose(f);
+			}
+		#endif //LOG_TO_FILE
+		va_end(va);
+	#endif //_DEBUG
 }
 
 

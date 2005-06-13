@@ -381,8 +381,9 @@ void CViewSample::UpdateView(DWORD dwHintMask, CObject *)
 //-------------------------------------------------------
 {
 	// 05/01/05 : ericus replaced ">> 24" by ">> 20" : 4000 samples -> 12bits [see Moddoc.h]
+	//rewbs: replaced 0xff by 0x0fff for 4000 samples.
 	if ((dwHintMask & (HINT_MPTOPTIONS|HINT_MODTYPE))
-	 || ((dwHintMask & HINT_SAMPLEDATA) && ((m_nSample&0xff) == (dwHintMask >> 20))) )
+	 || ((dwHintMask & HINT_SAMPLEDATA) && ((m_nSample&0x0fff) == (dwHintMask >> 20))) )
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();

@@ -981,6 +981,12 @@ BOOL CSelectPluginDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_treePlugins.ModifyStyle(dwRemove, dwAdd);
 	m_treePlugins.SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
+	
+	MoveWindow(CMainFrame::GetMainFrame()->gnPlugWindowX,
+			   CMainFrame::GetMainFrame()->gnPlugWindowY,
+			   CMainFrame::GetMainFrame()->gnPlugWindowWidth,
+			   CMainFrame::GetMainFrame()->gnPlugWindowHeight);
+		
 	UpdatePluginsList();
 	OnSelChanged(NULL, NULL);
 	return TRUE;
@@ -1007,8 +1013,8 @@ bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug)
 	CString s;
 	for (int p=0; p<NUM_PROBLEMPLUGS; p++)
 	{
-		if ( (gProblemPlugs[p].id2 == plug->dwPluginId2) /*&&
-			(gProblemPlugs[p].id1 == plug->dwPluginId1)*/)
+		if ( (gProblemPlugs[p].id2 == plug->dwPluginId2) && gProblemPlugs[p].id2
+			/*&& (gProblemPlugs[p].id1 == plug->dwPluginId1)*/)
 		{
 			s.Format("WARNING: This plugin has been identified as %s,\r\n which is known to have the following problem with MPT:\r\n\r\n%s\r\n\r\n(see here for more information: http://www.modplug.com/forum/viewtopic.php?p=36930#36930)\r\n\r\nDo you want to continue to load?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
 			return (AfxMessageBox(s, MB_YESNO)  == IDYES);
@@ -1107,15 +1113,27 @@ VOID CSelectPluginDlg::OnOK()
 		memset(&m_pPlugin->Info, 0, sizeof(m_pPlugin->Info));
 		END_CRITICAL();
 	}
-	if (bChanged)
+	
+	//remember window size:
+	RECT rect;
+	GetWindowRect(&rect);
+	CMainFrame::GetMainFrame()->gnPlugWindowX = rect.left;
+	CMainFrame::GetMainFrame()->gnPlugWindowY = rect.top;
+	CMainFrame::GetMainFrame()->gnPlugWindowWidth  = rect.right - rect.left;
+	CMainFrame::GetMainFrame()->gnPlugWindowHeight = rect.bottom - rect.top;
+
+	if (bChanged) {
+		CMainFrame::GetMainFrame()->gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
 		CDialog::OnOK();
-	else
+	}
+	else {
 		CDialog::OnCancel();
+	}
 }
 
 
-VOID CSelectPluginDlg::UpdatePluginsList()
-//----------------------------------------
+VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
+//---------------------------------------------------------------
 {
 	TVINSERTSTRUCT tvis;
 	CVstPluginManager *pManager = theApp.GetPluginManager();
@@ -1136,7 +1154,7 @@ VOID CSelectPluginDlg::UpdatePluginsList()
 	hDmo = m_treePlugins.InsertItem(&tvis);
 	tvis.item.pszText = "VST Audio Effects";
 	hVst = m_treePlugins.InsertItem(&tvis);
-	tvis.item.pszText = " No effect (default)";
+	tvis.item.pszText = " No plugin (empty slot)";
 	tvis.item.iImage = IMAGE_WAVEOUT;
 	tvis.item.iSelectedImage = IMAGE_WAVEOUT;
 	cursel = m_treePlugins.InsertItem(&tvis);
@@ -1157,18 +1175,34 @@ VOID CSelectPluginDlg::UpdatePluginsList()
 			tvis.item.pszText = p->szLibraryName;
 			tvis.item.lParam = (LPARAM)p;
 			HTREEITEM h = m_treePlugins.InsertItem(&tvis);
-			if (m_pPlugin)
-			{
-				if (m_pPlugin->pMixPlugin)
-				{
+
+			//Which plugin should be selected?
+			if (m_pPlugin) {
+				
+				//forced selection (e.g. just after add plugin)
+				if (forceSelect != 0) {
+					if (p->dwPluginId2 == forceSelect) {
+						pCurrent = p;
+					}
+				}
+
+				//Current slot's plugin
+				else if (m_pPlugin->pMixPlugin) {
 					CVstPlugin *pVstPlug = (CVstPlugin *)m_pPlugin->pMixPlugin;
 					if (pVstPlug->GetPluginFactory() == p) pCurrent = p;
-				} else
-				if (!pCurrent)
-				{
+				} 
+				
+				//Plugin with matching ID to current slot's plug
+				else if (/* (!pCurrent) && */ m_pPlugin->Info.dwPluginId1 !=0 || m_pPlugin->Info.dwPluginId2 != 0 )	{
 					if ((p->dwPluginId1 == m_pPlugin->Info.dwPluginId1)
-					 && (p->dwPluginId2 == m_pPlugin->Info.dwPluginId2))
-					{
+					 && (p->dwPluginId2 == m_pPlugin->Info.dwPluginId2)) {
+						pCurrent = p;
+					}
+				}
+                
+				//Last selected plugin
+				else {
+					if (p->dwPluginId2 == CMainFrame::GetMainFrame()->gnPlugWindowLast) {
 						pCurrent = p;
 					}
 				}
@@ -1250,28 +1284,30 @@ VOID CSelectPluginDlg::OnAddPlugin()
 		pszFileNames[MAX_FILEOPEN_BUFSIZE-1] = 0;
 		POSITION pos = dlg.GetStartPosition();
 		BOOL bOk = FALSE;
+		
 		int n = 0;
-		while (pos != NULL)
-		{
+		PVSTPLUGINLIB plugLib = NULL;
+		while (pos != NULL)	{
+
 			CString str = dlg.GetNextPathName(pos);
-			if (!n)
-			{
+			if (!n)	{
 				_splitpath(str, s, sdir, NULL, NULL);
 				strcat(s, sdir);
 				if (pMainFrm) pMainFrm->SetPluginsDir(s);
 			}
 			n++;
-			if ((pManager) && (pManager->AddPlugin(str, FALSE)))
-			{
-				bOk = TRUE;
+
+			if (pManager) {
+				plugLib = pManager->AddPlugin(str, FALSE);
+				if (plugLib) { 
+					bOk = TRUE;
+				}
 			}
 		}
-		if (bOk)
-		{
-			UpdatePluginsList();
-		} else
-		{
-			MessageBox("This file is not a valid VST-Plugin", NULL, MB_ICONERROR|MB_OK);
+		if (bOk) {
+			UpdatePluginsList(plugLib->dwPluginId2);	//force selection to last added plug.
+		} else {
+			MessageBox("At least one selected file was not a valid VST-Plugin", NULL, MB_ICONERROR|MB_OK);
 		}
 	}
 	dlg.m_ofn.lpstrFile = NULL;

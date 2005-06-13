@@ -28,7 +28,9 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		strcpy(CMainFrame::m_szKbdFile, workingDir + "\\default.mkb");
 	}
 	if (!(activeCommandSet->LoadFile(CMainFrame::m_szKbdFile))) {
-		activeCommandSet->LoadFile(workingDir + "\\default.mkb");
+		if (!(activeCommandSet->LoadFile(workingDir + "\\default.mkb"))) {
+			AfxMessageBox("Warning! OpenMPT has not been able to locate a keymap file. Please locate one in the settings.\r\nUntil you do so, the keyboard will not work in OpenMPT.");
+		}
 	}
 
 	//Get Keymap 

@@ -84,6 +84,7 @@
 #define IDD_EDIT_GOTO                   444
 #define IDD_DIALOG1                     501
 #define IDD_MOVEFXSLOT                  501
+#define IDB_BITMAP2                     503
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -707,6 +708,9 @@
 #define IDC_INSERTFXSLOT                2237
 #define IDC_FILTERMODE                  2238
 #define IDC_TEXT_BPM                    2300
+#define IDC_TEXT_RPB                    2301
+#define IDC_SPIN_RPB                    2302
+#define IDC_EDIT_RPB                    2303
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -900,7 +904,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        502
+#define _APS_NEXT_RESOURCE_VALUE        504
 #define _APS_NEXT_COMMAND_VALUE         37000
 #define _APS_NEXT_CONTROL_VALUE         2239
 #define _APS_NEXT_SYMED_VALUE           901

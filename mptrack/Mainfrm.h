@@ -205,10 +205,10 @@ enum
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
 #define	PATTERN_ALTERNTIVEBPMSPEED	0x200000
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
 
 #define PATTERN_HILITETIMESIGS	0x400000 
-
 
 // Keyboard Setup
 enum {
@@ -354,6 +354,10 @@ class CMainFrame: public CMDIFrameWnd
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
 public:
+	CString m_csRegKey;
+	CString m_csRegExt;
+	CString m_csRegSettings;
+	CString m_csRegWindow;
 	// Globals
 	static UINT m_nLastOptionsPage, m_nFilterIndex;
 	static BOOL gbMdiMaximize;
@@ -389,6 +393,7 @@ public:
 
 	// Low-Level Audio
 public:
+
 	static CRITICAL_SECTION m_csAudio;
 	static ISoundDevice *gpSoundDevice;
 	static HANDLE m_hAudioWakeUp, m_hNotifyWakeUp;
@@ -404,6 +409,11 @@ public:
 	//end rewbs.resamplerConf
 	static UINT gnAutoChordWaitTime;
 
+	static int gnPlugWindowX;
+	static int gnPlugWindowY;
+	static int gnPlugWindowWidth;
+	static int gnPlugWindowHeight;
+	static DWORD gnPlugWindowLast;
 
 	// Midi Input
 public:
@@ -433,7 +443,7 @@ protected:
 	double m_dTotalCPU;
 
 public:
-	CMainFrame();
+	CMainFrame(/*CString regKeyExtension*/);
 	VOID Initialize();
 	
 
