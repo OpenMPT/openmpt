@@ -1423,7 +1423,8 @@ void CCtrlSamples::OnEstimateSampleSize()
 
 	//Open dialog
 	CPSRatioCalc dlg(pins->nLength, lSampleRate, 
-					 m_pSndFile->m_nMusicSpeed, m_pSndFile->m_nMusicTempo, 
+					 m_pSndFile->m_nMusicSpeed,  m_pSndFile->m_nMusicTempo, 
+					 m_pSndFile->m_nRowsPerBeat, m_pSndFile->m_nTempoMode,
 					 m_dTimeStretchRatio, this);
 	if (dlg.DoModal() != IDOK) return;
 	

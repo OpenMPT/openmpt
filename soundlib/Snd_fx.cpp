@@ -281,16 +281,33 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 				break;
 			}
 		}
+
+	switch(m_nTempoMode) {
+		case tempo_mode_alternative: 
+			dwElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
+		case tempo_mode_modern: 
+			dwElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat;; break;
+		case tempo_mode_classic: default:
+			dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
+	}
+	nSpeedCount += nMusicSpeed;
+
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
 //		nSpeedCount += nMusicSpeed;
 //		dwElapsedTime += (2500 * nSpeedCount) / nMusicTempo;
-		if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED)
+/*		if(CMainFrame::m_dwPatternSetup & PATTERN_MODERNSPEED) {
+			dwElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat;;
+		}
+		else if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
+			nSpeedCount += nMusicSpeed;
 			dwElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); // update#01
-		else{
+		} 
+		else {
 			nSpeedCount += nMusicSpeed;
 			dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
 		}
+*/
 // -! NEW_FEATURE#0022
 	}
 EndMod:
@@ -313,10 +330,12 @@ EndMod:
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
 //	return (UINT)((dwElapsedTime+500.0) / 1000.0);
-	if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED)
+//	if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
+	if 	(m_nTempoMode == tempo_mode_alternative) {
 		return (UINT)((dwElapsedTime + 1000.0) / 1000.0);
-	else
+	} else {
 		return (UINT)((dwElapsedTime + 500.0) / 1000.0);
+	}
 // -! NEW_FEATURE#0022
 }
 
@@ -1172,8 +1191,15 @@ BOOL CSoundFile::ProcessEffects()
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 				m = NULL;
-				if(m_nRow < PatternSize[m_nPattern]-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels;
-				if(m && m->command == CMD_XPARAM) param = (param<<8) + m->param;
+				if (m_nRow < PatternSize[m_nPattern]-1) {
+					m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
+				}
+				if (m && m->command == CMD_XPARAM) { 
+					if (m_nType & MOD_TYPE_XM) {
+                        param -= 0x20; //with XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
+					}
+					param = (param<<8) + m->param;
+				}
 // -! NEW_FEATURE#0010
 				if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
 				{
@@ -1379,7 +1405,7 @@ BOOL CSoundFile::ProcessEffects()
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 			m = NULL;
-			if(m_nRow < PatternSize[m_nPattern]-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels;
+			if(m_nRow < PatternSize[m_nPattern]-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
 
 			if(m && m->command == CMD_XPARAM)
 				nBreakRow = (param<<8) + m->param;
@@ -2387,12 +2413,12 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 			MODCOMMAND *m;
 			m = NULL;
 
-			if(m_nRow < PatternSize[m_nPattern]-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels;
+			if(m_nRow < PatternSize[m_nPattern]-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
 
 			if(m && m->command == CMD_XPARAM){
 				UINT tmp = m->param;
 				m = NULL;
-				if(m_nRow < PatternSize[m_nPattern]-2) m = Patterns[m_nPattern] + (m_nRow+2) * m_nChannels;
+				if(m_nRow < PatternSize[m_nPattern]-2) m = Patterns[m_nPattern] + (m_nRow+2) * m_nChannels  + nChn;
 
 				if(m && m->command == CMD_XPARAM) param = (param<<16) + (tmp<<8) + m->param;
 				else param = (param<<8) + tmp;

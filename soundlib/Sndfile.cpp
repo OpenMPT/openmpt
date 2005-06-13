@@ -11,6 +11,7 @@
 #include "sndfile.h"
 #include "aeffectx.h"
 
+
 #ifndef NO_COPYRIGHT
 #ifndef NO_MMCMP_SUPPORT
 #define MMCMP_SUPPORT
@@ -167,6 +168,7 @@ RPB.	[EXT]	nRowsPerBeat;
 RPM.	[EXT]	nRowsPerMeasure;
 RS..			nResSwing;
 SEP@	[EXT]									chunk SEPARATOR tag
+TM..	[EXT]	nTempoMode;
 VE..			nVolEnv;
 VE[.			VolEnv[MAX_ENVPOINTS];
 VLE.			nVolLoopEnd;
@@ -355,6 +357,8 @@ CSoundFile::CSoundFile()
 	m_nSeqOverride = 0;
 	m_nRowsPerBeat = 4;
 	m_nRowsPerMeasure = 16;
+	m_nTempoMode = tempo_mode_classic;
+	m_bIsRendering = false;
 
 
 // -> CODE#0023
@@ -588,11 +592,30 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nCurrentPattern = 0;
 	m_nPattern = 0;
 	m_nBufferCount = 0;
+	m_dBufferDiff = 0;
 	m_nTickCount = m_nMusicSpeed;
 	m_nNextRow = 0;
 	m_nRow = 0;
-	m_nSamplesPerTick = //(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) ? gdwMixingFreq / m_nMusicTempo :
-					    (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+
+	switch(m_nTempoMode) {
+		case tempo_mode_alternative: 
+			m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo; break;
+		case tempo_mode_modern: 
+			m_nSamplesPerTick = gdwMixingFreq * (60/m_nMusicTempo / (m_nMusicSpeed * m_nRowsPerBeat)); break;
+		case tempo_mode_classic: default:
+			m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+	}
+
+/*	if (CMainFrame::m_dwPatternSetup & PATTERN_MODERNSPEED) {
+		m_nSamplesPerTick = gdwMixingFreq * (60/m_nMusicTempo / (m_nMusicSpeed * m_nRowsPerBeat));
+	} 
+	else if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
+		m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo;
+	}
+	else {
+		m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+	}
+*/
 	if ((m_nRestartPos >= MAX_ORDERS) || (Order[m_nRestartPos] >= MAX_PATTERNS)) m_nRestartPos = 0;
 	// Load plugins
 	if (gpMixPluginCreateProc)
@@ -941,10 +964,19 @@ UINT CSoundFile::GetCurrentPos() const
 double  CSoundFile::GetCurrentBPM() const
 //---------------------------------------
 {
-	double ticksPerBeat = m_nMusicSpeed*m_nRowsPerBeat;			//ticks/beat = ticks/row  * rows/beat
-	double samplesPerBeat = m_nSamplesPerTick*ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
-	double bpm =  gdwMixingFreq/samplesPerBeat*60;				//beats/sec  = samps/sec  / samps/beat
-    return bpm;													//beats/min  =  beats/sec * 60
+	double bpm;
+
+	if (m_nTempoMode == tempo_mode_modern) {		// With modern mode, we trust that true bpm 
+		bpm = static_cast<double>(m_nMusicTempo);	// is  be close enough to what user chose.
+	}												// This avoids oscillation due to tick-to-tick corrections.
+
+	else {												//with other modes, we calculate it:
+		double ticksPerBeat = m_nMusicSpeed*m_nRowsPerBeat;		//ticks/beat = ticks/row  * rows/beat
+		double samplesPerBeat = m_nSamplesPerTick*ticksPerBeat;	//samps/beat = samps/tick * ticks/beat
+		bpm =  gdwMixingFreq/samplesPerBeat*60;					//beats/sec  = samps/sec  / samps/beat
+	}															//beats/min  =  beats/sec * 60
+	
+	return bpm;
 }
 
 void CSoundFile::SetCurrentPos(UINT nPos)

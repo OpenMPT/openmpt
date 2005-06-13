@@ -43,6 +43,8 @@ CAutoSaver::~CAutoSaver(void)
 
 bool CAutoSaver::DoSave(DWORD curTime)
 {
+	bool success = true;
+    
 	if (CheckTimer(curTime)) { //if time to save
 
 		CDocTemplate *pDocTemplate;
@@ -66,6 +68,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 					} else {
 						m_bEnabled=false;
 						AfxMessageBox("Warning: autosave failed and has been disabled.\r\nPlease review your autosave settings. Also check available diskspace & filesystem access rights.");
+						success = false;
 					}
 				}
 			} //end all open documents
@@ -75,7 +78,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 		pTrackApp->EndWaitCursor(); //end display hour glass
 	}
 	
-	return true;
+	return success;
 }
 
 ////////////////

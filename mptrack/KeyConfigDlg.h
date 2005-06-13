@@ -46,7 +46,6 @@ public:
 		{
 			if (separators[p]==c)
                 return true;
-			Log("%d\n", separators[p]);
 		}
 		return false;
 	}

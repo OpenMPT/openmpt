@@ -683,6 +683,12 @@ typedef struct MODMIDICFG
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
 
+enum {
+	tempo_mode_classic      = 0,
+	tempo_mode_alternative  = 1,
+	tempo_mode_modern       = 2,
+};
+
 
 //==============
 class CSoundFile
@@ -704,12 +710,15 @@ public:	// for Editing
 	UINT m_nType, m_nChannels, m_nSamples, m_nInstruments;
 	UINT m_nDefaultSpeed, m_nDefaultTempo, m_nDefaultGlobalVolume;
 	DWORD m_dwSongFlags;							// Song flags SONG_XXXX
+	bool m_bIsRendering;
 	UINT m_nMixChannels, m_nMixStat, m_nBufferCount;
+	double m_dBufferDiff;
 	UINT m_nTickCount, m_nTotalCount, m_nPatternDelay, m_nFrameDelay;
 	ULONG m_lTotalSampleCount;	// rewbs.VSTTimeInfo
 	UINT m_nSamplesPerTick;	// rewbs.betterBPM
 	UINT m_nRowsPerBeat;	// rewbs.betterBPM
 	UINT m_nRowsPerMeasure;	// rewbs.betterBPM
+	BYTE m_nTempoMode;		// rewbs.betterBPM
 	UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;

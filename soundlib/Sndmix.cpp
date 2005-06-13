@@ -302,11 +302,11 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 				}
 #endif // MODPLUG_TRACKER
 #ifndef FASTSOUNDLIB
-				if (!FadeSong(FADESONGDELAY))
+				if (!FadeSong(FADESONGDELAY) || m_bIsRendering)	//rewbs: disable song fade when rendering.
 #endif
 				{
 					m_dwSongFlags |= SONG_ENDREACHED;
-					if (lRead == lMax) 
+					if (lRead == lMax || m_bIsRendering)		//rewbs: don't complete buffer when rendering
 						goto MixDone;
 					m_nBufferCount = lRead;
 				}
@@ -753,8 +753,42 @@ BOOL CSoundFile::ReadNote()
 	if (!m_nMusicTempo) return FALSE;
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-	if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
-	else m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+
+
+	switch(m_nTempoMode) {
+
+		case tempo_mode_alternative: 
+			m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
+			break;
+
+		case tempo_mode_modern: {
+			double accurateBufferCount = (double)gdwMixingFreq * (60.0/(double)m_nMusicTempo / ((double)m_nMusicSpeed * (double)m_nRowsPerBeat));
+			m_nBufferCount = static_cast<int>(accurateBufferCount);
+			m_dBufferDiff += accurateBufferCount-m_nBufferCount;
+			//tick-to-tick tempo correction:
+			if (m_dBufferDiff>=1) { 
+				m_nBufferCount++;
+				m_dBufferDiff-=1;
+			} else if (m_dBufferDiff<=-1) { 
+				m_nBufferCount--;
+				m_dBufferDiff+=1;
+			}
+			ASSERT(abs(m_dBufferDiff)<1);
+			break;
+		}
+
+		case tempo_mode_classic:
+		default:
+			m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+	}
+	/*
+	if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
+		m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
+	}
+	else {
+		m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+	}
+	*/
 // -! NEW_FEATURE#0022
 	
 	m_nSamplesPerTick = m_nBufferCount; //rewbs.flu

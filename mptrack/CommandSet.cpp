@@ -2953,6 +2953,7 @@ bool CCommandSet::LoadFile(CString fileName)
 	if( (inStream  = fopen( fileName, "r" )) == NULL )
 	{
 		::MessageBox(NULL, "Can't open file keyboard config file " + fileName + "  for reading.", "", MB_ICONEXCLAMATION|MB_OK);
+		delete pTempCS;
 		return false;
 	}
 

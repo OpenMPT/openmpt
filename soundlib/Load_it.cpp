@@ -591,6 +591,7 @@ mpts:
 				case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
 				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;
 				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels);		 break;
+				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -987,6 +988,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
 				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;			
 				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels); break;		
+				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -2480,6 +2482,12 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	size = sizeof(m_nChannels);				
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nChannels, 1, size, f);		
+
+	code = 'TM..';							//write m_nTempoMode
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nTempoMode);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nTempoMode, 1, size, f);	
 
 	return;
 }

@@ -590,7 +590,8 @@ enum {
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-	OPTGEN_ALTERNTIVEBPMSPEED,
+//	OPTGEN_ALTERNTIVEBPMSPEED,
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
 	OPTGEN_MAXOPTIONS
 };
@@ -620,7 +621,8 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-	{"Alternative BPM/Speed",			"Alternative BPM/Speed interpretation where speed represents the number of tempo ticks per pattern row."},
+//	{"Alternative BPM/Speed",			"Alternative BPM/Speed interpretation where speed represents the number of tempo ticks per pattern row."}, 
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
 };
 
@@ -676,7 +678,8 @@ BOOL COptionsGeneral::OnInitDialog()
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-		case OPTGEN_ALTERNTIVEBPMSPEED:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED); break;
+//		case OPTGEN_ALTERNTIVEBPMSPEED:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED); break;
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
@@ -728,7 +731,8 @@ void COptionsGeneral::OnOK()
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
+//		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022		
 		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;

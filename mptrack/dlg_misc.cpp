@@ -111,6 +111,7 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CModTypeDlg)
 	DDX_Control(pDX, IDC_COMBO1,		m_TypeBox);
 	DDX_Control(pDX, IDC_COMBO2,		m_ChannelsBox);
+	DDX_Control(pDX, IDC_COMBO3,		m_TempoModeBox);
 	DDX_Control(pDX, IDC_CHECK1,		m_CheckBox1);
 	DDX_Control(pDX, IDC_CHECK2,		m_CheckBox2);
 	DDX_Control(pDX, IDC_CHECK3,		m_CheckBox3);
@@ -163,6 +164,18 @@ BOOL CModTypeDlg::OnInitDialog()
 		m_ChannelsBox.SetItemData(m_ChannelsBox.AddString(s), i);
 	}
 	m_ChannelsBox.SetCurSel(m_nChannels-4);
+
+	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
+	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
+	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern"), tempo_mode_modern);
+	switch(m_pSndFile->m_nTempoMode)
+	{
+		case tempo_mode_alternative:	m_TempoModeBox.SetCurSel(1); break;
+		case tempo_mode_modern:			m_TempoModeBox.SetCurSel(2); break;
+		case tempo_mode_classic:
+		default:						m_TempoModeBox.SetCurSel(0); break;
+	}
+
 	UpdateDialog();
 	return TRUE;
 }
@@ -193,6 +206,7 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox6.EnableWindow(m_TypeBox.GetCurSel() == 4 ? TRUE : FALSE);
 // -! NEW_FEATURE#0023
 	
+	m_TempoModeBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
 	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
 	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
 
@@ -302,6 +316,12 @@ void CModTypeDlg::OnOK()
 		m_nChannels = m_ChannelsBox.GetItemData(sel);
 		//if (m_nType & MOD_TYPE_XM) m_nChannels = (m_nChannels+1) & 0xFE;
 	}
+	
+	sel = m_TempoModeBox.GetCurSel();
+	if (sel >= 0) {
+		m_pSndFile->m_nTempoMode = m_TempoModeBox.GetItemData(sel);
+	}
+	
 	m_pSndFile->m_nRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
 	m_pSndFile->m_nRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
 
@@ -2066,7 +2086,8 @@ BOOL CChordEditor::OnInitDialog()
 		CMainFrame::GetKeyName(kbdmap[ikey] << 16, stmp, sizeof(stmp)-1);
 		if ((stmp[0] > ' ') && (!stmp[1]))
 		{
-			wsprintf(s, "%s%d: Shift+%c", szNoteNames[ikey % 12], ikey/12, stmp[0]);
+			//wsprintf(s, "%s%d: Shift+%c", szNoteNames[ikey % 12], ikey/12, stmp[0]);
+			wsprintf(s, "%s%d", szNoteNames[ikey % 12], ikey/12);
 			m_CbnShortcut.SetItemData(m_CbnShortcut.AddString(s), ikey);
 		}
 	}

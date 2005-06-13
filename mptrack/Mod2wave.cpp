@@ -1093,7 +1093,7 @@ void CDoAcmConvert::OnButton1()
 				// IGNR
 				case 4: if (m_id3tag.genre < NUM_GENRES) strcpy(s, gpszGenreNames[m_id3tag.genre]); chunk.id_data = IFFID_IGNR; break;
 				// ISFT
-				case 5: strcpy(s, "Modplug Tracker"); chunk.id_data = IFFID_ISFT; break;
+				case 5: strcpy(s, "OpenMPT"); chunk.id_data = IFFID_ISFT; break;
 				// ICRD
 				case 6: memcpy(s, m_id3tag.year, 4); s[4] = 0; strcat(s, "-01-01"); if (s[0] <= '0') s[0] = 0; chunk.id_data = IFFID_ICRD; break;
 				}

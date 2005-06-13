@@ -221,7 +221,7 @@ protected:
 public:
 	CSelectPluginDlg(PSNDMIXPLUGIN, CModDoc *pModDoc, CWnd *parent); //rewbs.plugDocAware
 	VOID DoClose();
-	VOID UpdatePluginsList();
+	VOID UpdatePluginsList(DWORD forceSelect=0);
 	bool VerifyPlug(PVSTPLUGINLIB plug);
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();

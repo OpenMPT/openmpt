@@ -6,14 +6,14 @@
 #include "mainfrm.h"
 #include "PSRatioCalc.h"
 #include ".\psratiocalc.h"
-
+#include "sndfile.h"		//for tempo mode enum
 
 // CPSRatioCalc dialog
 
 IMPLEMENT_DYNAMIC(CPSRatioCalc, CDialog)
-CPSRatioCalc::CPSRatioCalc(ULONGLONG samples, ULONGLONG sampleRate, UINT speed, UINT tempo, double ratio, CWnd* pParent /*=NULL*/)
+CPSRatioCalc::CPSRatioCalc(ULONGLONG samples, ULONGLONG sampleRate, UINT speed, UINT tempo, UINT rowsPerBeat, BYTE tempoMode, double ratio, CWnd* pParent /*=NULL*/)
 	: CDialog(CPSRatioCalc::IDD, pParent)
-	, m_lSamplesOrig(samples), m_nSpeed(speed), m_nTempo(tempo), m_dRatio(ratio)
+	, m_lSamplesOrig(samples), m_nSpeed(speed), m_nTempo(tempo), m_dRatio(ratio), m_nRowsPerBeat(rowsPerBeat), m_nTempoMode(tempoMode)
 {
 	//Sample rate will not change. We can calculate original duration once and disgard sampleRate.
 	m_lMsOrig=1000.0*((double)m_lSamplesOrig / sampleRate);
@@ -136,11 +136,32 @@ void CPSRatioCalc::CalcRows()
 {
 	double rowTime;
 
-	if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED)
+	switch(m_nTempoMode) {
+
+		case tempo_mode_alternative: 
+			rowTime = 60000.0 / (1.65625 * (double)(m_nSpeed * m_nTempo));
+			break;
+
+		case tempo_mode_modern: 
+			rowTime = 60000.0/(double)m_nTempo / (double)m_nRowsPerBeat;
+			break;
+
+		case tempo_mode_classic: 
+		default:
+			rowTime = 2500.0 * (double)m_nSpeed/(double)m_nTempo;
+			break;
+	}
+/*
+	if (CMainFrame::m_dwPatternSetup & PATTERN_MODERNSPEED) {
+		rowTime = 60000.0/(double)m_nTempo / (double)m_nRowsPerBeat;
+	} 
+	else if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
 		rowTime = 60000.0 / (1.65625 * (double)(m_nSpeed * m_nTempo));
-	else
+	} 
+	else {
 		rowTime = 2500.0 * (double)m_nSpeed/(double)m_nTempo;
-	
+	}
+*/	
 	m_dRowsOrig = (double)m_lMsOrig/rowTime;
 	m_dRowsNew = m_dRowsOrig*(m_dRatio/100);
 

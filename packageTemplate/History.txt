@@ -1,13 +1,9 @@
-27/02/2005:
------------
-
 1. What is this?
 ----------------
 This is a test build of Modplug Tracker. 
 It is unfinished, do not expect to be able to compose with this version safely. But by all means try, and let me know what goes wrong. 
 
 NOTES: 
- . Your old key settings from your previous official version of MPT will not load in this version, you *have* to re-configure the keys.
  . The "report bug" button only works if you are a member of the Beta Testers group on the MPT forums. Register on the modplug forums and PM Rewbs for access.
 
 
@@ -20,6 +16,29 @@ NOTES:
 /: change
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
+
+. v 1.17RC1 (revision 1.13.2.17)
+  / <rewbs> If autosave fails for whatever reason, options window should open automatically on Autosave page.
+  . <rewbs> Fixed memory leak on close if no keymap file could be found.
+  . <rewbs> If a broken plugin was in the plugin list, the "Select Plugin" dialog would always select it by default (tx LPChip)
+  + <rewbs> "Select Plugin" window now remembers size & position, plus other minor enhancements.
+  . <rewbs> Fixed possible crash on close if Autosave path is empty.
+  . <rewbs> Fixed additional silence that could appear at the end of rendered wavs.
+  + <rewbs> To avoid getting Settings popup when version number in registry is less than current version, use command line option: "/noSettingsOnNewVersion"
+  . <rewbs> Fix to sample view refresh bug with sample > 255.
+  . <rewbs> Fixes to eXtension Param (#), which previously only worked on channel 1, and could not extend tempo with XMs.
+
+  / <rewbs> Ericus' "alternative" tempo interpretation is now a song setting rather than a general setting.
+            You can select it in the same popup as where you set module type, num channels etc. Set "tempo mode: alternative".
+
+  + <rewbs> NEW - Precise & simplified BPM Mode! (Please test :D)
+      --> Enable it in the song setting window, where you set module type, num channels etc. Set "tempo mode: modern".
+      --> Txx (Fxx with xx>20 with XM) defines the real, exact beats per minute. Always.
+      --> The effective playback speed therefore also depends on the "rows per beat" value in the song settings.
+      --> Axx (Fxx with xx<21 with XM) continues to define the ticks per row, but does not affect playback speed per se.
+      --> Features tick-to-tick compensation for buffer size calculation rounding errors (aka high precision).
+      --> Feedback more than welcome!!
+  / <rewbs> GUI changes to accomodate for new speed mode.
 
 . v 1.17RC1 (revision 1.13.2.16)
   . <rewbs> Fixed corrupt .mod when non existent pattern is listed in sequence.
