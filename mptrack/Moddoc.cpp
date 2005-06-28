@@ -850,16 +850,20 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			//MODINSTRUMENT *psmp = &(m_SndFile.Ins[nins]);
 			if (nCurrentChn >=0 && penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
 			{
+				// UINT nPlugin = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
+				 
 				UINT nPlugin = 0;
 				if (pChn->pHeader) 
 					nPlugin = pChn->pHeader->nMixPlug;  					// first try intrument VST
 				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
 					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin; // Then try Channel VST
+				
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
 					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64, nCurrentChn);
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, nVol ? nVol : 64, MAX_BASECHANNELS);
+					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, nVol ? nVol : 64, MAX_BASECHANNELS);
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, pChn->nVolume, MAX_BASECHANNELS);
 				}
 			}
 		}
@@ -897,11 +901,14 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 //			MODINSTRUMENT *psmp = &(m_SndFile.Ins[nins]);
 			if (nCurrentChn >=0 && penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
 			{
+				//UINT nPlugin = m_SndFile.GetBestPlugin(nCurrentChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
+				
 				UINT nPlugin = 0;
 				if (pChn->pHeader) 
 					nPlugin = penv->nMixPlug;  		// first try intrument VST
 				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
 					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;// Then try Channel VST
+			    
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
@@ -958,7 +965,7 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL bMute)
 	else	m_SndFile.Chn[nChn].dwFlags &= ~CHN_MUTE;
 	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++)
 	{
-		if (m_SndFile.Chn[i].nMasterChn == i+1)
+		if (m_SndFile.Chn[i].nMasterChn == nChn+1)
 		{
 			if (d)	m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
 			else	m_SndFile.Chn[i].dwFlags &= ~CHN_MUTE;
@@ -2014,13 +2021,17 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 					int nParam = MacroToPlugParam(macroText);
 					char paramName[128];
 					memset(paramName, 0, sizeof(paramName));
+					
+					UINT nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+					/*
 					UINT nPlug = m_SndFile.ChnSettings[nChn].nMixPlugin;  //try channel's plug first
 					if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
 						if (m_SndFile.Chn[nChn].pHeader &&  m_SndFile.Chn[nChn].pInstrument) {	// then try intrument's plug
 								nPlug = m_SndFile.Chn[nChn].pHeader->nMixPlug;
 						}
 					}
-					if (nPlug)
+					*/
+					if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
 					{
 						CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
 						if (pPlug) 

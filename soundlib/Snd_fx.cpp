@@ -281,7 +281,7 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 				break;
 			}
 		}
-
+	nSpeedCount += nMusicSpeed;
 	switch(m_nTempoMode) {
 		case tempo_mode_alternative: 
 			dwElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
@@ -290,7 +290,7 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 		case tempo_mode_classic: default:
 			dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
 	}
-	nSpeedCount += nMusicSpeed;
+	
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
@@ -735,9 +735,10 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			}
 		} else pSample = NULL;
 	}
-	if (!penv) return;
 	MODCHANNEL *p = pChn;
-	if (pChn->dwFlags & CHN_MUTE) return;
+	//rewbs: removing these returns so that NNAs are still applied if chan is muted.
+	//if (!penv) return;
+	//if (pChn->dwFlags & CHN_MUTE) return;
 
 	bool applyDNAtoPlug;	//rewbs.VSTiNNA
 	for (UINT i=nChn; i<MAX_CHANNELS; p++, i++)
@@ -827,10 +828,13 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	IMixPlugin *pPlugin = NULL;
 	if (pChn->pHeader && pChn->pHeader->nMidiChannel > 0 && pChn->pHeader->nMidiChannel < 17 && pChn->nNote>0 && pChn->nNote<128) // instro sends to a midi chan
 	{
+		UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+		/*
 		UINT nPlugin = 0;
 		nPlugin = pChn->pHeader->nMixPlug;  		   // first try intrument VST
 		if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))  // Then try Channel VST
 			nPlugin = ChnSettings[nChn].nMixPlugin;			
+		*/
 		if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 		{ 
 			pPlugin =  m_MixPlugins[nPlugin-1].pMixPlugin;
@@ -855,6 +859,11 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			// Copy Channel
 			*p = *pChn;
 			p->dwFlags &= ~(CHN_VIBRATO|CHN_TREMOLO|CHN_PANBRELLO|CHN_MUTE|CHN_PORTAMENTO);
+			
+			//rewbs: Copy mute and FX status from master chan.
+			//I'd like to copy other flags too, but this would change playback behaviour.
+			p->dwFlags |= (pChn->dwFlags & CHN_MUTE) | (pChn->dwFlags & CHN_NOFX);
+
 			p->nMasterChn = nChn+1;
 			p->nCommand = 0;
 			//rewbs.VSTiNNA	
@@ -995,7 +1004,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		//rewbs.VSTnoteDelay
 		#ifdef MODPLUG_TRACKER
-			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
+//			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
 		#endif // MODPLUG_TRACKER
 		//end rewbs.VSTnoteDelay
 
@@ -1044,7 +1053,13 @@ BOOL CSoundFile::ProcessEffects()
 				pChn->nPan = vol << 2;
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
 			}
+
+		//rewbs.VSTnoteDelay
+		#ifdef MODPLUG_TRACKER
+			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
+		#endif // MODPLUG_TRACKER
 		}
+
 
 		// Volume Column Effect (except volume & panning)
 		if ((volcmd > VOLCMD_PANNING) && (m_nTickCount >= nStartTick))
@@ -1512,6 +1527,8 @@ BOOL CSoundFile::ProcessEffects()
 void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param)
 //---------------------------------------------------------
 {
+	MidiPortamento(pChn, param); //Send midi pitch bend event if there's a plugin
+
 	if (param) pChn->nOldPortaUpDown = param; else param = pChn->nOldPortaUpDown;
 	if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
 	{
@@ -1533,12 +1550,16 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param)
 	{
 		DoFreqSlide(pChn, -(int)(param * 4));
 	}
+
+
 }
 
 
 void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param)
 //-----------------------------------------------------------
 {
+	MidiPortamento(pChn, -param); //Send midi pitch bend event if there's a plugin
+
 	if (param) pChn->nOldPortaUpDown = param; else param = pChn->nOldPortaUpDown;
 	if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
 	{
@@ -1555,10 +1576,25 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param)
 		}
 		return;
 	}
-	if (!(m_dwSongFlags & SONG_FIRSTTICK)  || (m_nMusicSpeed == 1))   //rewbs.PortaA01fix
+	if (!(m_dwSongFlags & SONG_FIRSTTICK)  || (m_nMusicSpeed == 1)) {  //rewbs.PortaA01fix
 		DoFreqSlide(pChn, (int)(param << 2));
+	}
+
 }
 
+void CSoundFile::MidiPortamento(MODCHANNEL *pChn, int param)
+//----------------------------------------------------------
+{
+	//Send midi pitch bend event if there's a plugin:
+	INSTRUMENTHEADER *pHeader = pChn->pHeader;
+	if (pHeader && pHeader->nMidiChannel>0 && pHeader->nMidiChannel<17) { // instro sends to a midi chan
+		UINT nPlug = pHeader->nMixPlug;
+		if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
+			IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
+			pPlug->MidiPitchBend(pHeader->nMidiChannel, param, 0);
+		}
+	}
+}
 
 void CSoundFile::FinePortamentoUp(MODCHANNEL *pChn, UINT param)
 //-------------------------------------------------------------
@@ -2190,13 +2226,16 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 	// F0.F0.03.xx: Set plug dry/wet
 		case 0x03:
 			{
-				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
+				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+				
+				/*UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
 				UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
 				if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
 					if (pChn->pHeader && pChn->pInstrument) {	// then try intrument VST
 							nPlug = pChn->pHeader->nMixPlug;
 					}
-				}
+				}*/
+				
 				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))	{
 					if (dwParam < 0x80)
 						m_MixPlugins[nPlug-1].fDryRatio = 1.0-(static_cast<float>(dwParam)/127.0f);
@@ -2209,6 +2248,8 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 		default:
 			if (nInternalCode & 0x80)
 			{
+				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+				/*
 				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
 				if ((nMasterCh) && (nMasterCh <= m_nChannels))
 				{
@@ -2218,6 +2259,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 								nPlug = pChn->pHeader->nMixPlug;
 						}
 					}
+				*/
 					if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 					{
 						IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
@@ -2226,7 +2268,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 							pPlugin->SetZxxParameter(nInternalCode & 0x7F, dwParam & 0x7F);
 						}
 					}
-				}
+				//}
 			}
 
 		} // end switch
@@ -2335,7 +2377,8 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 	// F0.F0.03.xx: Set plug dry/wet
 		case 0x03:
 			{
-
+				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+				/*
 				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
 				UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
 				if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
@@ -2343,6 +2386,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 							nPlug = pChn->pHeader->nMixPlug;
 					}
 				}
+				*/
 				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))	{
 					// on the fist tick only, calculate step 
 					if (m_dwSongFlags & SONG_FIRSTTICK)
@@ -2366,6 +2410,8 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 		default:
 			if (nInternalCode & 0x80)
 			{
+				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+				/*
 				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
 				if ((nMasterCh) && (nMasterCh <= m_nChannels))
 				{
@@ -2375,6 +2421,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 								nPlug = pChn->pHeader->nMixPlug;
 						}
 					}
+				*/
 					if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 					{
 						IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
@@ -2391,7 +2438,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 							pPlugin->SetZxxParameter(nInternalCode & 0x7F, (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5));
 						}
 					}
-				}
+				//}
 			} 
 	} // end switch
 
@@ -2511,6 +2558,9 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			if (param < 0x100) bResetEnv = TRUE;
 		}
 		NoteChange(nChn, nNote, FALSE, bResetEnv);
+		if (m_nInstruments) {
+			ProcessMidiOut(nChn, pChn);	//Send retrig to Midi
+		}
 		if ((m_nType & MOD_TYPE_IT) && (!pChn->nRowNote) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
 		if (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))) nRetrigCount = 0;
 
@@ -2958,6 +3008,90 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC4Speed, int nPeriodFrac) 
 			return _muldiv(8363, 1712L << 8, (period << 8)+nPeriodFrac);
 		}
 	}
+}
+
+
+UINT  CSoundFile::GetBestPlugin(UINT nChn, UINT priority, bool respectMutes)
+//-------------------------------------------------------------------------
+{
+	if (nChn > MAX_CHANNELS) {		//Check valid channel number
+		return 0;
+	}
+
+	//Function pointers to the methods we will use to try to find the plugin
+	//UINT (*pFirstTry)(UINT, bool) = NULL;
+	//UINT (*pSecondTry)(UINT, bool) = NULL;
+	
+	//Define search source order
+	UINT nPlugin=0;
+	switch (priority) {
+		case CHANNEL_ONLY:						
+			nPlugin = GetChannelPlugin(nChn, respectMutes);
+			break;
+		case INSTRUMENT_ONLY:						
+			nPlugin  = GetActiveInstrumentPlugin(nChn, respectMutes);
+			break;
+		case PRIORITISE_INSTRUMENT:						
+			nPlugin  = GetActiveInstrumentPlugin(nChn, respectMutes);
+			if ((!nPlugin) || (nPlugin>MAX_MIXPLUGINS)) {
+				nPlugin = GetChannelPlugin(nChn, respectMutes);
+			}
+			break;
+		case PRIORITISE_CHANNEL:										
+			nPlugin  = GetChannelPlugin(nChn, respectMutes);
+			if ((!nPlugin) || (nPlugin>MAX_MIXPLUGINS)) {
+				nPlugin = GetActiveInstrumentPlugin(nChn, respectMutes);
+			}
+			break;
+	}
+
+	//Do search
+	/*UINT nPlugin = (*pFirstTry)(nChn, respectMutes); // Try from first source.
+	if ((!nPlugin) || (nPlugin>MAX_MIXPLUGINS)) {	 // If first source couldn't find a valid plug...
+		nPlugin = (*pSecondTry)(nChn, respectMutes); // try from second source.
+	}*/
+
+	return nPlugin; // 0 Means no plugin found.
+}
+
+UINT __cdecl CSoundFile::GetChannelPlugin(UINT nChn, bool respectMutes)
+//--------------------------------------------------------------
+{
+	MODCHANNEL *pChn= &Chn[nChn];
+
+	// If it looks like this is an NNA channel, we need to find the master channel.
+	// This ensures we pick up the right ChnSettings. 
+	// NB: nMasterChn==0 means no master channel, so we need to -1 to get correct index.
+	if (nChn>m_nChannels && pChn && pChn->nMasterChn>0) { 
+		nChn = pChn->nMasterChn-1;				  
+	}
+
+	UINT nPlugin;
+	if ( (respectMutes && (pChn->dwFlags & CHN_MUTE)) || 
+	 (pChn->dwFlags&CHN_NOFX) ) {
+		nPlugin = 0;
+	} else {
+		nPlugin = ChnSettings[nChn].nMixPlugin;
+	}
+	return nPlugin;
+}
+
+UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
+//-----------------------------------------------------------------------
+{
+	MODCHANNEL *pChn = &Chn[nChn];
+	// Unlike channel settings, pHeader is copied from the original chan to the NNA chan,
+	// so we don't nee to worry about finding the master chan.
+
+	UINT nPlugin=0;
+	if (pChn && pChn->pHeader && pChn->pInstrument) {
+		if (respectMutes && (pChn->pInstrument->uFlags&ENV_MUTE)) { 
+			nPlugin = 0;
+		} else {
+			nPlugin = pChn->pHeader->nMixPlug;
+		}
+	}
+	return nPlugin;
 }
 
 

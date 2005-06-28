@@ -115,7 +115,7 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 		UINT ln = 0;
 		while ((c = *p++) != NULL)
 		{
-			if ((ln >= 80) || (!*p))
+			if ((ln >= LINE_LENGTH-1) || (!*p))
 			{
 				if (((BYTE)c) > ' ') s[ln++] = c;
 				c = 0x0D;
@@ -146,7 +146,6 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 	m_nLockCount--;
 }
 
-
 void CCtrlComments::OnCommentsChanged()
 //-------------------------------------
 {
@@ -162,15 +161,17 @@ void CCtrlComments::OnCommentsChanged()
 	}
 	// Updating comments
 	{
+
+
 		UINT n = m_EditComments.GetLineCount();
-		LPSTR p = new char[n*81+1];
+		LPSTR p = new char[n*LINE_LENGTH+1];
 		p[0] = 0;
 		if (!p) return;
 		for (UINT i=0; i<n; i++)
 		{
-			int ln = m_EditComments.GetLine(i, s, 81);
+			int ln = m_EditComments.GetLine(i, s, LINE_LENGTH);
 			if (ln < 0) ln = 0;
-			if (ln > 80) ln = 80;
+			if (ln > LINE_LENGTH-1) ln = LINE_LENGTH-1;
 			s[ln] = 0;
 			while ((ln > 0) && (((BYTE)s[ln-1]) <= ' ')) s[--ln] = 0;
 			if (i+1 < n) strcat(s, "\x0D");

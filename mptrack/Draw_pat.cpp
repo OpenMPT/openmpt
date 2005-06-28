@@ -1210,6 +1210,20 @@ void CViewPattern::SetCurSel(DWORD dwBegin, DWORD dwEnd)
 		y2 = y1;
 		y1 = y;
 	}
+	// rewbs.fix3417: adding error checking
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc) {
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		if (pSndFile) {
+			y1 = max(y1, 0);
+			y2 = min(y2, (int)pSndFile->PatternSize[m_nPattern]);
+			x1 = max(x1, 0);
+			x2 = min(x2, pSndFile->m_nChannels*8 - 4);
+		}
+	}
+	// end rewbs.fix3417
+
+
 	// Get current selection area
 	pt = GetPointFromPosition(m_dwBeginSel);
 	rect1.left = pt.x;

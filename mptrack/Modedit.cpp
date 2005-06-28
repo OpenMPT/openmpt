@@ -1632,12 +1632,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 					if (col < m_SndFile.m_nChannels)
 					{
 						// Note
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[0] > ' ')
 						if (s[0] > ' ' && (!mix || ((!ITStyleMix && origModCmd.note==0) || 
 												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
-// -! NEW_FEATURE#0014
 						{
 							m[col].note = 0;
 							if (s[0] == '=') m[col].note = 0xFF; else
@@ -1653,13 +1649,9 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 							}
 						}
 						// Instrument
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[3] > ' ')
 						if (s[3] > ' ' && (!mix || ( (!ITStyleMix && origModCmd.instr==0) || 
 												     (ITStyleMix  && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0) ) ))
 
-// -! NEW_FEATURE#0014
 						{
 							if ((s[3] >= '0') && (s[3] <= ('0'+(MAX_SAMPLES/10))))
 							{
@@ -1667,14 +1659,9 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 							} else m[col].instr = 0;
 						}
 						// Volume
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[5] > ' ')
 						if (s[5] > ' ' && (!mix || ((!ITStyleMix && origModCmd.volcmd==0) || 
-//												     (ITStyleMix && notePasted))))
 												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
 
-// -! NEW_FEATURE#0014
 						{
 							if (s[5] != '.')
 							{
@@ -1690,13 +1677,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 								m[col].vol = (s[6]-'0')*10 + (s[7]-'0');
 							} else m[col].volcmd = m[col].vol = 0;
 						}
-						// Effect
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[8] > ' ')
 						if (s[8] > ' ' && (!mix || ((!ITStyleMix && origModCmd.command==0) || 
 												     (ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
-// -! NEW_FEATURE#0014
 						{
 							m[col].command = 0;
 							if (s[8] != '.')
@@ -1709,12 +1691,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 							}
 						}
 						// Effect value
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[9] > ' ')
 						if (s[9] > ' ' && (!mix || ((!ITStyleMix && origModCmd.param==0) || 
 													(ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
-// -! NEW_FEATURE#0014
 						{
 							m[col].param = 0;
 							if (s[9] != '.')

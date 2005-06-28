@@ -84,7 +84,11 @@
 #define IDD_EDIT_GOTO                   444
 #define IDD_DIALOG1                     501
 #define IDD_MOVEFXSLOT                  501
-#define IDB_BITMAP2                     503
+#define IDD_PATTERNRANDOMIZER           502
+#define IDD_PATTERNRANDOMIZER_NOTE      503
+#define IDD_PATTERNRANDOMIZER_INSTRUMENT 504
+#define IDD_PATTERNRANDOMIZER_VOLCMD    505
+#define IDD_PATTERNRANDOMIZER_EFFECT    506
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -707,6 +711,10 @@
 #define IDC_CLONEPLUG                   2236
 #define IDC_INSERTFXSLOT                2237
 #define IDC_FILTERMODE                  2238
+#define IDC_RANDOMIZE_NOTE_ENABLE       2240
+#define IDC_LIST2                       2241
+#define IDC_APPLY                       2243
+#define IDC_RANDOM_PLACEHOLDER          2244
 #define IDC_TEXT_BPM                    2300
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302
@@ -843,6 +851,8 @@
 #define ID_PATTERN_VISUALIZE_EFFECT     32900
 #define ID_ACCELERATOR32900             32900
 #define ID_PATTERN_PLAYNOLOOP           32901
+#define ID_PATTERN_OPEN_RANDOMIZER		32905
+#define ID_PATTERN_INTERPOLATE_NOTE		32906
 #define ID_Menu                         32911
 #define ID_PRESET_LOAD                  32915
 #define ID_PRESET_SAVE                  32916
@@ -906,7 +916,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        504
 #define _APS_NEXT_COMMAND_VALUE         37000
-#define _APS_NEXT_CONTROL_VALUE         2239
+#define _APS_NEXT_CONTROL_VALUE         2245
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -348,6 +348,87 @@ enum {
 	NUM_SRC_MODES
 };
 
+// Midi Continuous Controller Codes
+// http://www.borg.com/~jglatt/tech/midispec/ctllist.htm
+enum {
+	MIDICC_BankSelect_Coarse = 0,
+	MIDICC_ModulationWheel_Coarse = 1,
+	MIDICC_Breathcontroller_Coarse = 2,
+	MIDICC_FootPedal_Coarse = 4,
+	MIDICC_PortamentoTime_Coarse = 5,
+	MIDICC_DataEntry_Coarse = 6,
+	MIDICC_Volume_Coarse = 7,
+	MIDICC_Balance_Coarse = 8,
+	MIDICC_Panposition_Coarse = 10,
+	MIDICC_Expression_Coarse = 11,
+	MIDICC_EffectControl1_Coarse = 12,
+	MIDICC_EffectControl2_Coarse = 13,
+	MIDICC_GeneralPurposeSlider1 = 16,
+	MIDICC_GeneralPurposeSlider2 = 17,
+	MIDICC_GeneralPurposeSlider3 = 18,
+	MIDICC_GeneralPurposeSlider4 = 19,
+	MIDICC_BankSelect_Fine = 32,
+	MIDICC_ModulationWheel_Fine = 33,
+	MIDICC_Breathcontroller_Fine = 34,
+	MIDICC_FootPedal_Fine = 36,
+	MIDICC_PortamentoTime_Fine = 37,
+	MIDICC_DataEntry_Fine = 38,
+	MIDICC_Volume_Fine = 39,
+	MIDICC_Balance_Fine = 40,
+	MIDICC_Panposition_Fine = 42,
+	MIDICC_Expression_Fine = 43,
+	MIDICC_EffectControl1_Fine = 44,
+	MIDICC_EffectControl2_Fine = 45,
+	MIDICC_HoldPedal_OnOff = 64,
+	MIDICC_Portamento_OnOff = 65,
+	MIDICC_SustenutoPedal_OnOff = 66,
+	MIDICC_SoftPedal_OnOff = 67,
+	MIDICC_LegatoPedal_OnOff = 68,
+	MIDICC_Hold2Pedal_OnOff = 69,
+	MIDICC_SoundVariation = 70,
+	MIDICC_SoundTimbre = 71,
+	MIDICC_SoundReleaseTime = 72,
+	MIDICC_SoundAttackTime = 73,
+	MIDICC_SoundBrightness = 74,
+	MIDICC_SoundControl6 = 75,
+	MIDICC_SoundControl7 = 76,
+	MIDICC_SoundControl8 = 77,
+	MIDICC_SoundControl9 = 78,
+	MIDICC_SoundControl10 = 79,
+	MIDICC_GeneralPurposeButton1_OnOff = 80,
+	MIDICC_GeneralPurposeButton2_OnOff = 81,
+	MIDICC_GeneralPurposeButton3_OnOff = 82,
+	MIDICC_GeneralPurposeButton4_OnOff = 83,
+	MIDICC_EffectsLevel = 91,
+	MIDICC_TremuloLevel = 92,
+	MIDICC_ChorusLevel = 93,
+	MIDICC_CelesteLevel = 94,
+	MIDICC_PhaserLevel = 95,
+	MIDICC_DataButtonincrement = 96,
+	MIDICC_DataButtondecrement = 97,
+	MIDICC_NonRegisteredParameter_Fine = 98,
+	MIDICC_NonRegisteredParameter_Coarse = 99,
+	MIDICC_RegisteredParameter_Fine = 100,
+	MIDICC_RegisteredParameter_Coarse = 101,
+	MIDICC_AllSoundOff = 120,
+	MIDICC_AllControllersOff = 121,
+	MIDICC_LocalKeyboard_OnOff = 122,
+	MIDICC_AllNotesOff = 123,
+	MIDICC_OmniModeOff = 124,
+	MIDICC_OmniModeOn = 125,
+	MIDICC_MonoOperation = 126,
+	MIDICC_PolyOperation = 127,
+};
+
+enum {
+	CHANNEL_ONLY		  = 0,
+	INSTRUMENT_ONLY       = 1,
+	PRIORITISE_INSTRUMENT = 2,
+	PRIORITISE_CHANNEL    = 3,
+	EVEN_IF_MUTED         = false,
+	RESPECT_MUTES         = true,
+};
+
 // filtermodes
 /*enum {
 	INST_FILTERMODE_DEFAULT=0,
@@ -560,6 +641,8 @@ public:
 	virtual void Process(float *pOutL, float *pOutR, unsigned long nSamples) = 0;
 	virtual void Init(unsigned long nFreq, int bReset) = 0;
 	virtual bool MidiSend(DWORD dwMidiCode) = 0;
+	virtual void MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel) = 0;
+	virtual void MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel) = 0;
 	virtual void MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChan) = 0;
 	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
 	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
@@ -915,6 +998,7 @@ public:
 	// Channel Effects
 	void PortamentoUp(MODCHANNEL *pChn, UINT param);
 	void PortamentoDown(MODCHANNEL *pChn, UINT param);
+	void MidiPortamento(MODCHANNEL *pChn, int param);
 	void FinePortamentoUp(MODCHANNEL *pChn, UINT param);
 	void FinePortamentoDown(MODCHANNEL *pChn, UINT param);
 	void ExtraFinePortamentoUp(MODCHANNEL *pChn, UINT param);
@@ -1030,6 +1114,10 @@ public:
 	static void FreePattern(LPVOID pat);
 	static void FreeSample(LPVOID p);
 	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
+	UINT GetBestPlugin(UINT nChn, UINT priority, bool respectMutes);
+private:
+	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes);
+	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes);
 };
 
 

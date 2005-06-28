@@ -1661,6 +1661,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 	if ((!m_nInstruments) || (m_nPattern >= MAX_PATTERNS)
 	 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
 
+	
 	m = Patterns[m_nPattern] + m_nRow * m_nChannels + nChn;	
 	if (m->note) {
 
@@ -1668,20 +1669,26 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 		if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) penv = Headers[m->instr];
 
 		if ((penv) && (penv->nMidiChannel >= 1) && (penv->nMidiChannel <= 16)) {
-
+			
+			UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+			/*
 			UINT nPlugin = 0;
-			if (!(penv->dwFlags & ENV_MUTE)) {	// first try intrument VST
+			if (!(penv->dwFlags & ENV_MUTE)) {			// first try intrument VST
 				nPlugin = penv->nMixPlug;				
 			}
 			if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS)) {
 				if (!(pChn->dwFlags & CHN_NOFX))
 				nPlugin = ChnSettings[nChn].nMixPlugin; // Then try Channel VST
 			}
+			*/
 
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS)) {
-				UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
+				//UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
+				UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : pChn->nNote;
 				IMixPlugin *pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
-				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
+//				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
+				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, pChn->nVolume, nChn);
+				//pChn->nno
 			}
 		}
 

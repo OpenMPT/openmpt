@@ -2175,6 +2175,7 @@ void CCommandSet::SetupCommands()
 	commands[kcNextDocument].isHidden = false;
 	commands[kcNextDocument].isDummy = false;
 
+
 	//time saving HACK:
 	for (int j=kcVSTGUIStartNotes; j<=kcVSTGUINoteStopA_3; j++)
 	{
@@ -2205,11 +2206,24 @@ void CCommandSet::SetupCommands()
 	commands[kcPatternGoto].isHidden = false;
 	commands[kcPatternGoto].isDummy = false;
 
+	commands[kcPatternOpenRandomizer].UID = 1767;
+	commands[kcPatternOpenRandomizer].isHidden = false;
+	commands[kcPatternOpenRandomizer].isDummy = false;
+	commands[kcPatternOpenRandomizer].Message = "Open pattern randomizer";
+
+	commands[kcPatternInterpolateNote].UID = 1768;
+	commands[kcPatternInterpolateNote].isHidden = false;
+	commands[kcPatternInterpolateNote].isDummy = false;
+	commands[kcPatternInterpolateNote].Message = "Interpolate note";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs
 			for (int j=i+1; j<kcNumCommands; j++) {
-				ASSERT(commands[i].UID != commands[j].UID);
+				if (commands[i].UID == commands[j].UID) {
+					Log("Duplicate command UID: %d\n", commands[i].UID);
+					ASSERT(false);
+				}
 			}
 		}
 	}
