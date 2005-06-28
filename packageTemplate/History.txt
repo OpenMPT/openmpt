@@ -17,6 +17,24 @@ NOTES:
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17RC1 (revision 1.13.2.18)
+  / <rewbs> (internal) Pattern editor cleanups
+  / <rewbs> Recoded pattern editor context menu (in view of making it customizable)
+  + <rewbs> Interpolate notes. :)
+  . <rewbs> Fixed possible truncated lines in comments
+  . <rewbs> Fixed channel manager close bug - don't need to "open twice" anymore.
+  . <rewbs> Restored old behaviour that I had accidentally broken: Ctrl-clicking a position in the order list will schedule it to play next.
+  . <rewbs> Fixed corrupt selection bug when mouse drags to the right of last channel.
+  . <rewbs> Fixed bug by which NNA'd notes originating from muted channels would still be audible.
+  . <rewbs> Changing VSTi preset from an instrument no longer forces reselection of current bank (perf improvement on some plugs)
+  + <rewbs> Portamento (Fxx Exx) now sent to VSTis as Pitch Bend Midi CC.
+  + <rewbs> Retrig (Qxx) now works on VSTis.
+  . <rewbs> Minor VSTi volume fixes. Hope this doesn't screw your old track us too much. :(
+  . <rewbs> Fixed chunk saving for plugs with chunks less than 8 bytes (e.g. VB ffx4) - warning: might have broken loading/saving plug settings for other plugs.
+  . <rewbs> Fixed estimate song with classic tempo mode.
+  [ / <rewbs> Pattern randomizer GUI only so far. No functionality yet. ]
+
+
 . v 1.17RC1 (revision 1.13.2.17)
   / <rewbs> If autosave fails for whatever reason, options window should open automatically on Autosave page.
   . <rewbs> Fixed memory leak on close if no keymap file could be found.

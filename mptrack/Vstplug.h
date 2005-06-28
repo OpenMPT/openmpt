@@ -68,6 +68,7 @@ protected:
 	UINT m_nInputs, m_nOutputs;
 	VstEvents *m_pEvList;
 	VSTINSTCH m_MidiCh[16];
+	short m_nMidiPitchBendPos[16];
 	float **m_pTempBuffer;					//rewbs.dryRatio: changed from * to **
 	float **m_pInputs;
 	float **m_pOutputs;
@@ -158,6 +159,8 @@ public: // IMixPlugin interface
 	void Process(float *pOutL, float *pOutR, unsigned long nSamples);
 	void Init(unsigned long nFreq, int bReset);
 	bool MidiSend(DWORD dwMidiCode);
+	void MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel);
+	void MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel);
 	void MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChan);
 	void HardAllNotesOff(); //rewbs.VSTiNoteHoldonStopFix
 	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST
@@ -175,6 +178,9 @@ public: // IMixPlugin interface
 	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST
 
 	VstSpeakerArrangement speakerArrangement;  //rewbs.VSTcompliance
+
+private:
+	short constructMidiPitchBend(short value); 
 };
 
 

@@ -69,6 +69,7 @@ protected:
 public:
 	CCommandSet *activeCommandSet;
 	bool ShiftPressed(void);
+	bool SelectionPressed(void);
 	bool CtrlPressed(void);
 	bool AltPressed(void);
 	bool Bypass();

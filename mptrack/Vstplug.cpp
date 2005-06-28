@@ -1398,13 +1398,16 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	//rewbs.dryRatio: we now initialise this in CVstPlugin::Initialize(). 
 	//m_pTempBuffer = (float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*2])+7)&~7);
 
-
 	m_bSongPlaying = false; //rewbs.VSTCompliance
 	m_bPlugResumed = false;
 	m_bModified = false;
 	m_dwTimeAtStartOfProcess=0;
 	m_nSampleRate = -1; //rewbs.VSTCompliance: gets set on Resume()
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
+
+	for (int ch=0; ch<=16; ch++) {
+		m_nMidiPitchBendPos[ch]=0x2000; //centre pitch bend on all channels
+	}
 
 	processCalled = CreateEvent(NULL,FALSE,FALSE,NULL);
 }
@@ -2018,8 +2021,9 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	//If the plug is found & ok, continue
 	if ((m_pEffect) && (m_pProcessFP) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
-		isInstrument = (m_pEffect->numInputs < 1); // rewbs.dryRatio
-		if(isInstrument && !(CSoundFile::gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) ){
+		isInstrument = (m_pEffect->numInputs < 1 || (m_pEffect->flags & effFlagsIsSynth)); // rewbs.dryRatio
+		
+		if(isInstrument && !(CSoundFile::gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS)){
 			gain /= 32.0f;	// ericus 25/01/2005 restore VSTi level from previous release + reduce VSTi level
 			mixop = 0;		// + force disable mix mode
 		}
@@ -2324,6 +2328,7 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 
 //rewbs.VSTiNoteHoldonStopFix
 void CVstPlugin::HardAllNotesOff()
+//--------------------------------
 {
 	bool overflow;
 	float in[2][SCRATCH_BUFFER_SIZE], out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
@@ -2341,9 +2346,10 @@ void CVstPlugin::HardAllNotesOff()
 			DWORD dwMidiCode = 0x80|nCh; //command|channel|velocity
 			PVSTINSTCH pCh = &m_MidiCh[nCh];
 
-			//MidiSend(0xB0|mc|(0x79<<8));   // reset all controllers
-			MidiSend(0xB0|mc|(0x7b<<8));   // all notes off 
-			MidiSend(0xB0|mc|(0x78<<8));   // all sounds off 
+			MidiSend(0xB0|mc|(0x79<<8));    // reset all controllers
+			m_nMidiPitchBendPos[mc]=0x2000; //centre pitch bend on all channels
+			MidiSend(0xB0|mc|(0x7b<<8));    // all notes off 
+			MidiSend(0xB0|mc|(0x78<<8));    // all sounds off 
 
 			for (UINT i=0; i<128; i++)	//all notes
 			{
@@ -2374,17 +2380,67 @@ void CVstPlugin::HardAllNotesOff()
 }
 //end rewbs.VSTiNoteHoldonStopFix
 
+void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel) 
+//------------------------------------------------------------------------------------------
+{
+	//Error checking
+	if (--nMidiCh>16) { // Decrement midi chan cos we recieve a value in [1,17]; we want [0,16].
+		nMidiCh=16;
+	}
+	if (nController>127) {
+		nController=127;
+	}
+	if (nParam>127) {
+		nParam=127;
+	}
+
+	MidiSend(nController<<16 | nParam<<8 | 0xB0|nMidiCh );
+}
+
+short CVstPlugin::constructMidiPitchBend(short value) 
+//---------------------------------------------------------------------------------
+{
+	//http://www.srm.com/qtma/davidsmidispec.html: 
+	// The two bytes of the pitch bend message form a 14 bit number, 0 to 16383. 
+	// The value 8192 (sent, LSB first, as 0x00 0x40), is centered, or "no pitch bend." 
+	// The value 0 (0x00 0x00) means, "bend as low as possible," and, 
+	// similarly, 16383 (0x7F 0x7F) is to "bend as high as possible." 
+	// The exact range of the pitch bend is specific to the synthesizer.
+
+	BYTE byte1 = value >> 7;			// get last   7 bytes only
+	BYTE byte2 = value & 0x7F;			// get first  7 bytes only
+	short converted = byte1<<8 | byte2; // merge
+
+	return converted;
+}
+
+void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel) 
+//-------------------------------------------------------------------------
+{
+	nMidiCh--;		// move from 1-17 scope to 0-16 scope
+
+	short increment = nParam * 0x2000/0xFF;
+	m_nMidiPitchBendPos[nMidiCh] += increment;
+	m_nMidiPitchBendPos[nMidiCh] =  min(16383, m_nMidiPitchBendPos[nMidiCh]);	// cap upper
+	m_nMidiPitchBendPos[nMidiCh] =  max(0, m_nMidiPitchBendPos[nMidiCh]);		// cap lower
+
+	short midi_14_bit_value = constructMidiPitchBend(m_nMidiPitchBendPos[nMidiCh]);
+	MidiSend(midi_14_bit_value<<8 | 0xE0|nMidiCh );
+}
+
 //rewbs.introVST - many changes to MidiCommand, still to be refined.
 void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChannel)
-//------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------
 {
 	UINT nCh = (--nMidiCh) & 0x0f;
 	PVSTINSTCH pCh = &m_MidiCh[nCh];
 	DWORD dwMidiCode = 0;
-	bool bankChanged = pCh->wMidiBank != --wMidiBank;
-	bool progChanged = pCh->nProgram != --nMidiProg;
+	bool bankChanged = (pCh->wMidiBank != --wMidiBank) && (wMidiBank < 0x80);
+	bool progChanged = (pCh->nProgram != --nMidiProg) && (nMidiProg < 0x80);
 	bool chanChanged = nCh != m_nPreviousMidiChan;
-	if (vol > 64) vol=64;
+	//get vol in [0,128[
+	vol = vol/2; 
+	if (vol > 127) vol=127;
 
 	// Note: Some VSTis update bank/prog on midi channel change, others don't.
 	//       For those that don't, we do it for them.
@@ -2461,10 +2517,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		dwMidiCode = 0x90|nCh; //note on, on chan nCh
 
 		note--;
-		vol *= 2;
-		if (vol < 1) vol = 1;
-		if (vol > 0x7f) vol = 0x7f;
-		
+
 		// count instances of active notes.
 		// This is to send a note off for each instance of a note, for plugs like Fabfilter.
 		// Problem: if a note dies out naturally and we never send a note off, this counter 
@@ -2586,19 +2639,23 @@ void CVstPlugin::SaveAllParameters()
 		m_bModified = false;
 
 		if ((m_pEffect->flags & effFlagsProgramChunks)
-		 && (Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf'))
+		 && (Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf')
+		 && (m_pEffect->uniqueID != 'Sytr')) //special case: imageline sytrus pretends to support chunks but gives us garbage.
 		{
 			PVOID p = NULL;
 			LONG nByteSize; 
 			
-			nByteSize = Dispatch(effGetChunk, 0,0, &p, 0); 		// Try to get whole bank
+			// Try to get whole bank
+			if (m_pEffect->uniqueID != 1984054788) { //special case: VB ffx4 pretends to get a valid bank but gives us garbage.
+				nByteSize = Dispatch(effGetChunk, 0,0, &p, 0);
+			}
 			
-			if ((nByteSize < 8) || !p) {
-				nByteSize = Dispatch(effGetChunk, 1,0, &p, 0); 	// That failed, try to get get just preset
+			if (/*(nByteSize < 8) ||*/ !p) { //If bank is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
+				nByteSize = Dispatch(effGetChunk, 1,0, &p, 0); 	// Getting bank failed, try to get get just preset
 			} else {
 				m_pMixStruct->defaultProgram = GetCurrentProgram();	//we managed to get the bank, now we need to remember which program we're on.
 			}
-			if ((nByteSize >= 8) && (p)) //If chunk is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
+			if (/*(nByteSize >= 8) && */(p)) //If program is less that 8 bytes, the plug must be kidding. :) (e.g.: imageline sytrus)
 			{
 				if ((m_pMixStruct->pPluginData) && (m_pMixStruct->nPluginDataSize >= (UINT)(nByteSize+4)))
 				{
@@ -2666,11 +2723,15 @@ void CVstPlugin::RestoreAllParameters(long nProgram)
 		if ((Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf') && (nType == 'NvEf'))
 		{
 			PVOID p = NULL;
-			Dispatch(effGetChunk, 0,0, &p, 0);
-			Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize-4, ((BYTE *)m_pMixStruct->pPluginData)+4, 0);
-			if ((nProgram>=0) && (nProgram < m_pEffect->numPrograms)) {
+			Dispatch(effGetChunk, 0,0, &p, 0); //init plug for chunk reception
+			
+			if ((nProgram>=0) && (nProgram < m_pEffect->numPrograms)) { // Bank:
+				Dispatch(effSetChunk, 0, m_pMixStruct->nPluginDataSize-4, ((BYTE *)m_pMixStruct->pPluginData)+4, 0);
 				SetCurrentProgram(nProgram);
+			} else { // Program:
+				Dispatch(effSetChunk, 1, m_pMixStruct->nPluginDataSize-4, ((BYTE *)m_pMixStruct->pPluginData)+4, 0);
 			}
+
 		} else
 		{
 			FLOAT *p = (FLOAT *)m_pMixStruct->pPluginData;

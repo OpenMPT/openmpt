@@ -756,6 +756,46 @@
 			<File
 				RelativePath="..\soundlib\WindowedFIR.cpp">
 			</File>
+			<Filter
+				Name="PatternRandomizer"
+				Filter="">
+				<File
+					RelativePath=".\PatternRandomizer.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizer.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUI.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUI.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIEffect.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIEffect.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIInstrument.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIInstrument.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUINote.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUINote.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIVolCmd.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIVolCmd.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"

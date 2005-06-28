@@ -489,7 +489,9 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 	if (pt.y < rect.bottom)
 	{
 		SetFocus();
-		if (CMainFrame::gnHotKeyMask & HOTKEYF_CONTROL)
+		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+
+		if (ih->CtrlPressed())
 		{
 			if (m_pModDoc)
 			{

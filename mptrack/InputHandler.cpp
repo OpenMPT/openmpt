@@ -251,6 +251,23 @@ KeyEventType CInputHandler::GetKeyEventType(UINT nFlags)
 			return kKeyEventDown;		
 }
 
+bool CInputHandler::SelectionPressed(void)
+{
+	bool result=false;
+	int nSelectionKeys = activeCommandSet->GetKeyListSize(kcSelect);
+	KeyCombination key;
+
+	for (int k=0; k<nSelectionKeys; k++) { 
+		key = activeCommandSet->GetKey(kcSelect, k);
+		if (modifierMask & key.mod) {
+			result=true;
+			break;
+		}
+	}
+	return result;
+}
+
+
 bool CInputHandler::ShiftPressed(void)
 {
 	return (modifierMask & HOTKEYF_SHIFT);
@@ -464,7 +481,7 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 	
 	//Copy paste etc..
 	if (CMainFrame::GetInputHandler()->GetModifierMask()==HOTKEYF_CONTROL && 
-		(key == 'Y' || key == 'Z' || key == 'X' ||  key == 'C' || key == 'V'))
+		(key == 'Y' || key == 'Z' || key == 'X' ||  key == 'C' || key == 'V' || key == 'A'))
 		return true;
 
 	return false;
