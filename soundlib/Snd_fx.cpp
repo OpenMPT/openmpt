@@ -1514,6 +1514,7 @@ BOOL CSoundFile::ProcessEffects()
 				}
 				m_nNextPattern = nPosJump;
 				m_nNextRow = (UINT)nBreakRow;
+				m_bPatternTransitionOccurred=true;
 			}
 		}
 	}
@@ -3093,5 +3094,27 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 	}
 	return nPlugin;
 }
+
+void CSoundFile::HandlePatternTransitionEvents()
+{
+	if (m_bPatternTransitionOccurred) {
+		// MPT sequence override
+		if ((m_nSeqOverride > 0) && (m_nSeqOverride <= MAX_ORDERS) && !(m_dwSongFlags & SONG_PATTERNLOOP))
+		{
+			m_nNextPattern = m_nSeqOverride - 1;
+			m_nSeqOverride = 0;
+		}
+
+		// Channel mutes
+		for (int chan=0; chan<m_nChannels; chan++) {
+			if (m_bChannelMuteTogglePending[chan]) {
+				m_pModDoc->MuteChannel(chan, !m_pModDoc->IsChannelMuted(chan));
+				m_bChannelMuteTogglePending[chan]=false;
+			}
+		}
+		m_bPatternTransitionOccurred=false;
+	}
+}
+
 
 

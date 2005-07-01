@@ -306,6 +306,7 @@ CMainFrame::CMainFrame(/*CString regKeyExtension*/)
 	m_pNoteMapHasFocus = NULL;	//rewbs.customKeys
 	m_bOptionsLocked = false;	//rewbs.customKeys
 
+	m_pJustModifiedDoc = NULL;
 	m_pModPlaying = NULL;
 	m_hFollowSong = NULL;
 	m_hWndMidi = NULL;
@@ -2426,6 +2427,19 @@ void CMainFrame::OnTimer(UINT)
 			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_AUTOSAVE;
 			OnViewOptions();
 		}
+	}
+	
+	// Ensure the modified flag gets set in the WinMain thread, even if modification
+	// originated from Audio Thread (access to CWnd is not thread safe).
+	// Flaw: if 2 docs are modified in between Timer ticks (very rare), one mod will be lost.
+	/*CModDoc* pModDoc = GetActiveDoc();
+	if (pModDoc && pModDoc->m_bModifiedChanged) {
+		pModDoc->SetModifiedFlag(pModDoc->m_bDocModified);
+		pModDoc->m_bModifiedChanged=false;
+	}*/
+	if (m_pJustModifiedDoc) {
+		m_pJustModifiedDoc->SetModifiedFlag(true);
+		m_pJustModifiedDoc = NULL;
 	}
 
 }

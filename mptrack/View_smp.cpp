@@ -1937,7 +1937,7 @@ void CViewSample::PlayNote(UINT note)
 				pModDoc->NoteOff(0, TRUE);
 			DWORD loopstart = m_dwBeginSel, loopend = m_dwEndSel;
 			if (loopend - loopstart < (UINT)(4 << m_nZoom)) loopend = loopstart = 0;
-			pModDoc->PlayNote(note, 0, m_nSample, TRUE, -1, loopstart, loopend);
+			pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend);
 			m_dwStatus |= SMPSTATUS_KEYDOWN;
 			s[0] = 0;
 			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);

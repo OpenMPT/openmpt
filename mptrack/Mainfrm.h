@@ -421,7 +421,7 @@ public:
 
 
 protected:
-	CSoundFile m_WaveFile;
+    CSoundFile m_WaveFile;
 	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
@@ -441,6 +441,7 @@ protected:
 	CHAR m_szExportDir[_MAX_PATH];
 	bool m_bOptionsLocked; 	 	//rewbs.customKeys
 	double m_dTotalCPU;
+	CModDoc* m_pJustModifiedDoc;
 
 public:
 	CMainFrame(/*CString regKeyExtension*/);
@@ -517,6 +518,7 @@ public:
 	long GetSampleRate();  		//rewbs.VSTTimeInfo
 	long GetTotalSampleCount(); //rewbs.VSTTimeInfo
 	double GetApproxBPM();		//rewbs.VSTTimeInfo
+	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
 
 // Player functions
 public:

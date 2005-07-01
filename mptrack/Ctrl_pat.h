@@ -272,6 +272,9 @@ protected:
 	afx_msg LRESULT OnMouseHover(WPARAM wparam, LPARAM lparam);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP();
+public:
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 };
 
 // -! NEW_FEATURE#0015

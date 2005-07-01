@@ -56,7 +56,7 @@ protected:
 	CEditCommand *m_pEditWnd;
 	CPatternGotoDialog *m_pGotoWnd;
 	SIZE m_szHeader, m_szCell;
-	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar;
+	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow;
 
 // -> CODE#0012
 // -> DESC="midi keyboard split"
@@ -303,6 +303,8 @@ private:
 	bool IsInterpolationPossible(UINT startRow, UINT endRow, UINT chan, UINT colType, CSoundFile* pSndFile);
 	void Interpolate(UINT type);
 
+public:
+	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 };
 
 

@@ -96,6 +96,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
+	ON_WM_RBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 
@@ -152,6 +153,7 @@ void CViewPattern::OnInitialUpdate()
 	UpdateScrollSize();
 	SetCurrentPattern(0);
 	m_nFoundInstrument=0;
+	m_nLastPlayedRow=0;
 }
 
 
@@ -1099,8 +1101,10 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 	 || ((m_nMenuParam & 0xFFFF) < (m_dwBeginSel & 0xFFFF))
 	 || ((m_nMenuParam & 0xFFFF) > (m_dwEndSel & 0xFFFF)))
 	{
-		SetCurrentRow(m_nMenuParam >> 16);
-		SetCurrentColumn(m_nMenuParam & 0xFFFF);
+		if (pt.y > m_szHeader.cy) { //ensure we're not clicking header
+			SetCurrentRow(m_nMenuParam >> 16);
+			SetCurrentColumn(m_nMenuParam & 0xFFFF);
+		}
 	}
 	UINT nChn = (m_nMenuParam & 0xFFFF) >> 3;
 	if ((nChn < pSndFile->m_nChannels) && (pSndFile->Patterns[m_nPattern]))
@@ -1117,9 +1121,14 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 		
 		//------ Header Menu ---------- :
 		else if (pt.y <= m_szHeader.cy){
-			BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile);
-			AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			BuildRecordCtxMenu(hMenu, nChn, pModDoc);
+			if (ih->CtrlPressed()) {
+				pSndFile->m_bChannelMuteTogglePending[nChn]=!pSndFile->m_bChannelMuteTogglePending[nChn];
+				InvalidateChannelsHeaders();
+			} else {
+				BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile);
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				BuildRecordCtxMenu(hMenu, nChn, pModDoc);
+			}
 		}
 		
 		//------ Standard Menu ---------- :
@@ -2519,6 +2528,12 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		UINT nRow = pnotify->nRow;
 		UINT nPat = 0xFFFF;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		
+		if (nRow < m_nLastPlayedRow) {
+			InvalidateChannelsHeaders();
+		}
+		m_nLastPlayedRow = nRow;
+
 		if (pSndFile->m_dwSongFlags & (SONG_PAUSED|SONG_STEP)) return 0;
 		if (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP)
 		{
@@ -3892,10 +3907,10 @@ void CViewPattern::OnInitMenu(CMenu* pMenu)
 	CModScrollView::OnInitMenu(pMenu);
 
 	//rewbs: ensure modifiers are reset when we go into menu
-	m_dwStatus &= ~PATSTATUS_KEYDRAGSEL;	
+/*	m_dwStatus &= ~PATSTATUS_KEYDRAGSEL;	
 	m_dwStatus &= ~PATSTATUS_CTRLDRAGSEL;
 	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
-	//end rewbs
+*/	//end rewbs
 
 }
 
@@ -3918,8 +3933,12 @@ void CViewPattern::OnSelectPlugin(UINT nID)
 
 	if (m_nMenuOnChan)
 	{
-		pSndFile->ChnSettings[m_nMenuOnChan-1].nMixPlugin = nID-ID_PLUGSELECT;
-		InvalidateChannelsHeaders();
+		int newPlug = nID-ID_PLUGSELECT;
+		if (newPlug != pSndFile->ChnSettings[m_nMenuOnChan-1].nMixPlugin) {
+			pSndFile->ChnSettings[m_nMenuOnChan-1].nMixPlugin = newPlug;
+			pModDoc->SetModified();
+			InvalidateChannelsHeaders();
+		}
 	}
 }
 
@@ -4248,7 +4267,8 @@ bool CViewPattern::IsInterpolationPossible(UINT startRow, UINT endRow,
 	return result;
 }
 
-
-
-
-
+void CViewPattern::OnRButtonDblClk(UINT nFlags, CPoint point)
+{
+	OnRButtonDown(nFlags, point);
+	CModScrollView::OnRButtonDblClk(nFlags, point);
+}

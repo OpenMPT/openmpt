@@ -406,13 +406,13 @@ void CViewPattern::OnDraw(CDC *pDC)
 			{
 // -> CODE#0012
 // -> DESC="midi keyboard split"
-//				const char *pszfmt = "Channel %d";
-				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
+				const char *pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]? "[Channel %d]" : "Channel %d";
+//				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
 // -! NEW_FEATURE#0012
 				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] > 0x20))
 					pszfmt = "%d: %s";
-				else if (m_nDetailLevel < 2) pszfmt = "Ch%d";
-				else if (m_nDetailLevel < 3) pszfmt = "Chn %d";
+				else if (m_nDetailLevel < 2) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Ch%d]":"Ch%d";
+				else if (m_nDetailLevel < 3) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Chn %d]":"Chn %d";
 				wsprintf(s, pszfmt, ncolhdr+1, pSndFile->ChnSettings[ncolhdr].szName);
 // -> CODE#0012
 // -> DESC="midi keyboard split"
