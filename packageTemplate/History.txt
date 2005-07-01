@@ -3,10 +3,6 @@
 This is a test build of Modplug Tracker. 
 It is unfinished, do not expect to be able to compose with this version safely. But by all means try, and let me know what goes wrong. 
 
-NOTES: 
- . The "report bug" button only works if you are a member of the Beta Testers group on the MPT forums. Register on the modplug forums and PM Rewbs for access.
-
-
 
 2. What's new in this build?
 ----------------------------
@@ -16,6 +12,16 @@ NOTES:
 /: change
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
+
+. v 1.17RC1 (revision 1.13.2.19)
+  + <rewbs> Ctrl-right-clicking a channel will cause it to be muted at the next pattern transition. 
+            Let me know if this is working the way you want, then I'll work on adding keyboard shortcuts, channel manager integration etc...
+  . <rewbs> Fixed "play row" only playing first tick. Should play whole row now (tx LPChip).
+  . <rewbs> Fixed broken noteoffs. (tx anboi)
+  . <rewbs> Fixed minor Channel Manager bug by which the second of two quick consecutive clicks was ignored.
+  / <rewbs> First (naive) attempt at allowing sample & intrument plaback from sample & instrument tab without stopping the track. Let me know what breaks.
+  / <rewbs> Setting a documement's "modified" flag (the asterisk) is now done in a thread safe manner if the modification come from the audio thread rather than the GUI thread. Could prevent rare crashes.
+  
 
 . v 1.17RC1 (revision 1.13.2.18)
   / <rewbs> (internal) Pattern editor cleanups
@@ -30,7 +36,7 @@ NOTES:
   + <rewbs> Portamento (Fxx Exx) now sent to VSTis as Pitch Bend Midi CC.
   + <rewbs> Retrig (Qxx) now works on VSTis.
   . <rewbs> Minor VSTi volume fixes. Hope this doesn't screw your old track us too much. :(
-  . <rewbs> Fixed chunk saving for plugs with chunks less than 8 bytes (e.g. VB ffx4) - warning: might have broken loading/saving plug settings for other plugs.
+  . <rewbs> Fixed chunk saving for plugs with chunks less than 8 bytes (e.g. VB ffx4) - warning: might have broken loading/saving plug settings for other plugs. (tx anboi)
   . <rewbs> Fixed estimate song with classic tempo mode.
   [ / <rewbs> Pattern randomizer GUI only so far. No functionality yet. ]
 

@@ -603,7 +603,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 			}
             CModDoc* pModDoc = pVstPlugin->GetModDoc();
 			if (pModDoc) {
-				pModDoc->SetModified();
+				CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 			//	pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   //Causes flickers in treeview
 			}
 		}

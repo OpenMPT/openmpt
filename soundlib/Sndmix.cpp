@@ -597,6 +597,7 @@ BOOL CSoundFile::ProcessRow()
 {
 	if (++m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay+1) + m_nFrameDelay)
 	{
+		HandlePatternTransitionEvents();
 		m_nPatternDelay = 0;
 		m_nFrameDelay = 0;
 		m_nTickCount = 0;
@@ -671,13 +672,13 @@ BOOL CSoundFile::ProcessRow()
 		if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition)) return FALSE;
 	#endif // MODPLUG_TRACKER
 		}
-#ifdef MODPLUG_TRACKER
-		if (m_dwSongFlags & SONG_STEP)
-		{
-			m_dwSongFlags &= ~SONG_STEP;
-			m_dwSongFlags |= SONG_PAUSED;
-		}
-#endif // MODPLUG_TRACKER
+//#ifdef MODPLUG_TRACKER
+//		if (m_dwSongFlags & SONG_STEP)
+//		{
+//			m_dwSongFlags &= ~SONG_STEP;
+//			m_dwSongFlags |= SONG_PAUSED;
+//		}
+//#endif // MODPLUG_TRACKER
 		// Weird stuff?
 		if ((m_nPattern >= MAX_PATTERNS) || (!Patterns[m_nPattern])) return FALSE;
 		// Should never happen
@@ -687,12 +688,7 @@ BOOL CSoundFile::ProcessRow()
 		{
 			if (!(m_dwSongFlags & SONG_PATTERNLOOP)) m_nNextPattern = m_nCurrentPattern + 1;
 			m_nNextRow = 0;
-			// MPT sequence override
-			if ((m_nSeqOverride > 0) && (m_nSeqOverride <= MAX_ORDERS))
-			{
-				m_nNextPattern = m_nSeqOverride - 1;
-				m_nSeqOverride = 0;
-			}
+			m_bPatternTransitionOccurred=true;
 		}
 		// Reset channel values
 		MODCHANNEL *pChn = Chn;
@@ -718,6 +714,17 @@ BOOL CSoundFile::ProcessRow()
 	m_dwSongFlags |= SONG_FIRSTTICK;
 	if (m_nTickCount)
 	{
+		//End of row? stop pattern step (aka "play row").
+		if (m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay+1) + m_nFrameDelay - 1) {
+			#ifdef MODPLUG_TRACKER
+			if (m_dwSongFlags & SONG_STEP) {
+				m_dwSongFlags &= ~SONG_STEP;
+				m_dwSongFlags |= SONG_PAUSED;
+			}
+			#endif // MODPLUG_TRACKER
+		}
+
+
 		m_dwSongFlags &= ~SONG_FIRSTTICK;
 		if ((!(m_nType & MOD_TYPE_XM)) && (m_nTickCount < m_nMusicSpeed * (1 + m_nPatternDelay)))
 		{
@@ -1664,7 +1671,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 	
 	m = Patterns[m_nPattern] + m_nRow * m_nChannels + nChn;	
 	if (m->note) {
-
+		
 		INSTRUMENTHEADER *penv = pChn->pHeader;
 		if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) penv = Headers[m->instr];
 
@@ -1683,12 +1690,11 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 			*/
 
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS)) {
-				//UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
-				UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : pChn->nNote;
+				UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
+				//UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : pChn->nNote;
 				IMixPlugin *pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
 //				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
 				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, pChn->nVolume, nChn);
-				//pChn->nno
 			}
 		}
 

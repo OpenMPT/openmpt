@@ -790,6 +790,7 @@ public:	// Static Members
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
 
 public:	// for Editing
+	CModDoc* m_pModDoc;
 	UINT m_nType, m_nChannels, m_nSamples, m_nInstruments;
 	UINT m_nDefaultSpeed, m_nDefaultTempo, m_nDefaultGlobalVolume;
 	DWORD m_dwSongFlags;							// Song flags SONG_XXXX
@@ -805,6 +806,7 @@ public:	// for Editing
 	UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
+	bool m_bPatternTransitionOccurred;
 	UINT m_nMasterVolume, m_nGlobalVolume, m_nSongPreAmp;
 	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
 	LONG m_nMinPeriod, m_nMaxPeriod, m_nRepeatCount;
@@ -824,6 +826,8 @@ public:	// for Editing
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];		// Mix plugins
 	SNDMIXSONGEQ m_SongEQ;							// Default song EQ preset
 	CHAR CompressionTable[16];
+
+	bool m_bChannelMuteTogglePending[MAX_CHANNELS];
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -1118,6 +1122,8 @@ public:
 private:
 	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes);
 	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes);
+
+	void HandlePatternTransitionEvents();
 };
 
 

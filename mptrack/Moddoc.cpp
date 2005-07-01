@@ -106,6 +106,7 @@ CModDoc::CModDoc()
 // -> DESC="channels management dlg"
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
+
 }
 
 
@@ -130,7 +131,7 @@ BOOL CModDoc::OnNewDocument()
 //---------------------------
 {
 	if (!CDocument::OnNewDocument()) return FALSE;
-	m_SndFile.Create(NULL, 0);
+	m_SndFile.Create(NULL, this, 0);
 	m_SndFile.m_nType = CTrackApp::GetDefaultDocType();
 
 // -> CODE#0023
@@ -632,6 +633,7 @@ BOOL CModDoc::InitializeMod()
 		}
 	}
 	m_SndFile.SetCurrentPos(0);
+
 	return TRUE;
 }
 
@@ -956,7 +958,7 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL bMute)
 	if (nChn >= m_SndFile.m_nChannels) return FALSE;
 	if (d != (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE))
 	{
-		if (m_SndFile.m_nType == MOD_TYPE_IT) SetModified();
+		if (m_SndFile.m_nType == MOD_TYPE_IT && setModified) CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
 		if (d)	m_SndFile.ChnSettings[nChn].dwFlags |= CHN_MUTE;
 		else	m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
 		
@@ -1066,7 +1068,7 @@ void CModDoc::Record2Channel(UINT channel, BOOL select)
 void CModDoc::ReinitRecordState(BOOL unselect)
 {
 	memset(MultiRecordMask, unselect ? 0 : 0xff, sizeof(MultiRecordMask));
-	memset(MultiSplitRecordMask, unselect ? 0 : 0xff, sizeof(MultiSplitRecordMask));
+	memset(MultiSplitRecordMask, unselect ? 0 : 0xff, sizeof(MultiSplitRecordMask));	
 }
 // -! NEW_FEATURE#0015
 

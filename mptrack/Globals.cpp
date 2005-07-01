@@ -12,6 +12,7 @@
 #include "ctrl_smp.h"
 #include "ctrl_ins.h"
 #include "ctrl_com.h"
+#include ".\globals.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -686,6 +687,3 @@ LRESULT CModControlBar::OnHelpHitTest(WPARAM, LPARAM lParam)
 	}
 	return 0;
 }
-
-
-

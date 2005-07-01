@@ -1182,6 +1182,8 @@ BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
 	ON_COMMAND(IDC_BUTTON8,	OnRestore)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1,	OnTabSelchange)
 	//}}AFX_MSG_MAP
+	ON_WM_LBUTTONDBLCLK()
+	ON_WM_RBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 CChannelManagerDlg * CChannelManagerDlg::sharedInstance_ = NULL;
@@ -2367,4 +2369,17 @@ BOOL CCtrlPatterns::OnToolTip(UINT id, NMHDR *pNMHDR, LRESULT *pResult)
     }
 
 	return FALSE;
+}
+void CChannelManagerDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	OnLButtonDown(nFlags, point);
+	CDialog::OnLButtonDblClk(nFlags, point);
+}
+
+void CChannelManagerDlg::OnRButtonDblClk(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	OnRButtonDown(nFlags, point);
+	CDialog::OnRButtonDblClk(nFlags, point);
 }

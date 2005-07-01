@@ -355,10 +355,14 @@ CSoundFile::CSoundFile()
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
 	m_nSeqOverride = 0;
+	m_bPatternTransitionOccurred = false;
 	m_nRowsPerBeat = 4;
 	m_nRowsPerMeasure = 16;
 	m_nTempoMode = tempo_mode_classic;
 	m_bIsRendering = false;
+
+	m_pModDoc = NULL;
+	memset(m_bChannelMuteTogglePending, 0, sizeof(m_bChannelMuteTogglePending));
 
 
 // -> CODE#0023
@@ -393,6 +397,7 @@ CSoundFile::~CSoundFile()
 BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 //---------------------------------------------------------------------------
 {
+	m_pModDoc=pModDoc;
 	m_nType = MOD_TYPE_NONE;
 	m_dwSongFlags = 0;
 	m_nChannels = 0;
@@ -1080,7 +1085,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	m_nBufferCount = 0;
 	m_nPatternDelay = 0;
 	m_nFrameDelay = 0;
-	m_nSeqOverride = 0;
+	//m_nSeqOverride = 0;
 }
 
 
@@ -1205,7 +1210,7 @@ void CSoundFile::LoopPattern(int nPat, int nRow)
 		m_nFrameDelay = 0;
 		m_nBufferCount = 0;
 		m_dwSongFlags |= SONG_PATTERNLOOP;
-		m_nSeqOverride = 0;
+	//	m_nSeqOverride = 0;
 	}
 }
 //rewbs.playSongFromCursor
@@ -1221,7 +1226,7 @@ void CSoundFile::DontLoopPattern(int nPat, int nRow)
 	m_nFrameDelay = 0;
 	m_nBufferCount = 0;
 	m_dwSongFlags &= ~SONG_PATTERNLOOP;
-	m_nSeqOverride = 0;
+	//m_nSeqOverride = 0;
 }
 
 int CSoundFile::FindOrder(BYTE pat, UINT startFromOrder)

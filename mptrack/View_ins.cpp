@@ -1388,7 +1388,8 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		BOOL bUpdate = FALSE;
 		for (UINT i=0; i<MAX_CHANNELS; i++)
 		{
-			DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[i] : 0;
+			//DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[i] : 0;
+			DWORD newpos = pnotify->dwPos[i];
 			if (m_dwNotifyPos[i] != newpos)
 			{
 				bUpdate = TRUE;
@@ -2247,7 +2248,7 @@ void CViewInstrument::PlayNote(UINT note)
 			INSTRUMENTHEADER *penv = pModDoc->GetSoundFile()->Headers[m_nInstrument];
 			if ((!penv) || (!penv->Keyboard[note])) return;
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
-			m_nPlayingChannel= pModDoc->PlayNote(note, m_nInstrument, 0, TRUE); //rewbs.instViewNNA
+			m_nPlayingChannel= pModDoc->PlayNote(note, m_nInstrument, 0, FALSE); //rewbs.instViewNNA
 			s[0] = 0;
 			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
 			pMainFrm->SetInfoText(s);
