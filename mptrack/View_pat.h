@@ -223,6 +223,7 @@ protected:
 	afx_msg void OnEditUndo();
 	afx_msg void OnMuteFromClick(); //rewbs.customKeys
 	afx_msg void OnSoloFromClick(); //rewbs.customKeys
+	afx_msg void OnTogglePendingMuteFromClick(); //rewbs.customKeys
 	afx_msg void OnSoloChannel(BOOL current); //rewbs.customKeys
 	afx_msg void OnMuteChannel(BOOL current); //rewbs.customKeys
 	afx_msg void OnUnmuteAll();
@@ -305,6 +306,11 @@ private:
 
 public:
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
+private:
+
+	void TogglePendingMute(UINT nChn);
+public:
+	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };
 
 

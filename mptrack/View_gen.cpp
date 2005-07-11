@@ -13,6 +13,7 @@
 // -> CODE#0015
 // -> DESC="channels management dlg"
 #include "ctrl_pat.h"
+#include ".\view_gen.h"
 // -! NEW_FEATURE#0015
 
 #define ID_FXCOMMANDS_BASE	41000
@@ -220,6 +221,8 @@ void CViewGlobals::OnInitialUpdate()
 	//OnWetDryChanged();
 // -! NEW_FEATURE#0014
 	m_nLockCount = 0;
+
+	
 }
 
 
@@ -425,7 +428,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		int n = static_cast<int>(pPlugin->fDryRatio*100);
 		wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
 		SetDlgItemText(IDC_STATIC8, s);
-		m_sbDryRatio.SetPos(n);
+	m_sbDryRatio.SetPos(n);
 		//end rewbs.DryRatio
 		
 // -> CODE#0028
@@ -497,6 +500,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_CbnPreset.SetRedraw(TRUE);
 			m_CbnPreset.SetCurSel(0);
 			m_sbValue.EnableWindow(TRUE);
+			m_sbDryRatio.EnableWindow(TRUE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), TRUE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), TRUE);
 // -! NEW_FEATURE#0002
@@ -517,6 +521,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_CbnPreset.SetRedraw(TRUE);
 			m_CbnPreset.SetCurSel(0);
 			m_sbValue.EnableWindow(FALSE);
+			m_sbDryRatio.EnableWindow(FALSE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), FALSE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON3), FALSE);
 // -! NEW_FEATURE#0002
@@ -1701,3 +1706,4 @@ void CViewGlobals::OnClonePlug()
 {
 	AfxMessageBox("Not yet implemented.");
 }
+

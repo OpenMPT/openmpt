@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib comctl32.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="2"
@@ -445,6 +445,9 @@
 				RelativePath=".\AbstractVstEditor.cpp">
 			</File>
 			<File
+				RelativePath=".\ArrayUtils.cpp">
+			</File>
+			<File
 				RelativePath=".\AutoSaver.cpp">
 			</File>
 			<File
@@ -500,6 +503,15 @@
 			</File>
 			<File
 				RelativePath=".\globals.cpp">
+			</File>
+			<File
+				RelativePath=".\HyperEdit.cpp">
+			</File>
+			<File
+				RelativePath=".\HyperEdit2.cpp">
+			</File>
+			<File
+				RelativePath=".\HyperEdit3.cpp">
 			</File>
 			<File
 				RelativePath="InputHandler.cpp">
@@ -685,6 +697,9 @@
 				RelativePath="..\soundlib\Sndmix.cpp">
 			</File>
 			<File
+				RelativePath=".\SoundFilePlayConfig.cpp">
+			</File>
+			<File
 				RelativePath=".\StdAfx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -796,12 +811,73 @@
 					RelativePath=".\PatternRandomizerGUIVolCmd.h">
 				</File>
 			</Filter>
+			<Filter
+				Name="MixGraph"
+				Filter="">
+				<File
+					RelativePath=".\ChannelNode.cpp">
+				</File>
+				<File
+					RelativePath=".\ChannelNode.h">
+				</File>
+				<File
+					RelativePath=".\ctrl_graph.cpp">
+				</File>
+				<File
+					RelativePath=".\ctrl_graph.h">
+				</File>
+				<File
+					RelativePath=".\EffectNode.cpp">
+				</File>
+				<File
+					RelativePath=".\EffectNode.h">
+				</File>
+				<File
+					RelativePath=".\FinalNode.cpp">
+				</File>
+				<File
+					RelativePath=".\FinalNode.h">
+				</File>
+				<File
+					RelativePath=".\Graph.cpp">
+				</File>
+				<File
+					RelativePath=".\Graph.h">
+				</File>
+				<File
+					RelativePath=".\InstrumentNode.cpp">
+				</File>
+				<File
+					RelativePath=".\InstrumentNode.h">
+				</File>
+				<File
+					RelativePath=".\Node.cpp">
+				</File>
+				<File
+					RelativePath=".\Node.h">
+				</File>
+				<File
+					RelativePath=".\Vertex.cpp">
+				</File>
+				<File
+					RelativePath=".\Vertex.h">
+				</File>
+				<File
+					RelativePath=".\view_graph.cpp">
+				</File>
+				<File
+					RelativePath=".\view_graph.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
 				RelativePath=".\AbstractVstEditor.h">
+			</File>
+			<File
+				RelativePath=".\ArrayUtils.h">
 			</File>
 			<File
 				RelativePath=".\AutoSaver.h">
@@ -909,6 +985,9 @@
 				RelativePath="..\Soundlib\Sndfile.h">
 			</File>
 			<File
+				RelativePath=".\SoundFilePlayConfig.h">
+			</File>
+			<File
 				RelativePath=".\StdAfx.h">
 			</File>
 			<File
@@ -983,6 +1062,9 @@
 			</File>
 			<File
 				RelativePath=".\res\patterns.bmp">
+			</File>
+			<File
+				RelativePath=".\res\rt_manif.bin">
 			</File>
 			<File
 				RelativePath=".\Res\smptoolb.bmp">

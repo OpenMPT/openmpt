@@ -248,6 +248,11 @@ void CChildFrame::SavePosition(BOOL bForce)
 					CMainFrame::glInstrumentWindowHeight = l;				
 				else if (strcmp("CViewComments", m_szCurrentViewClassName) == 0)
 					CMainFrame::glCommentsWindowHeight = l;				
+				//rewbs.graph
+				else if (strcmp("CViewGraph", m_szCurrentViewClassName) == 0)
+					CMainFrame::glGraphWindowHeight = l;				
+				//end rewbs.graph
+
 			}
 		}
 	}
@@ -421,3 +426,4 @@ void CChildFrame::OnSetFocus(CWnd* pOldWnd)
 	}
 }
 //end rewbs.customKeysAutoEffects
+

@@ -639,6 +639,10 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				case 'DT..': fadr = reinterpret_cast<BYTE*>(&m_nDefaultTempo);   break;
 				case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
 				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;
+				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
+				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
+				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
+				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized

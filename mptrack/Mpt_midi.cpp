@@ -83,12 +83,14 @@ BOOL CMainFrame::midiOpenDevice()
 //-------------------------------
 {
 	if (shMidiIn) return TRUE;
-	if (midiInOpen(&shMidiIn, m_nMidiDevice, (DWORD)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
-	{
-		shMidiIn = NULL;
-		return FALSE;
-	}
-	midiInStart(shMidiIn);
+	try {
+		if (midiInOpen(&shMidiIn, m_nMidiDevice, (DWORD)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+		{
+			shMidiIn = NULL;
+			return FALSE;
+		}
+		midiInStart(shMidiIn);
+	} catch (...) {}
 	return TRUE;
 }
 

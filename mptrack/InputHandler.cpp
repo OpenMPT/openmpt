@@ -95,7 +95,6 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 //--------------------------------------------------------------
 CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd)
 {
-	
 	CommandID executeCommand = keyMap[context][modifierMask][nChar][keyEventType];
 
 /*		if (keyEventType == kKeyEventUp)
@@ -356,6 +355,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_VIEW_PATTERNS:		s="Patterns\t"; c=kcViewPattern; break;
 		case ID_VIEW_INSTRUMENTS:	s="Instruments\t"; c=kcViewInstruments; break;
 		case ID_VIEW_COMMENTS:		s="Comments\t"; c=kcViewComments; break;
+		case ID_VIEW_GRAPH:			s="Graph\t"; c=kcViewGraph; break; //rewbs.graph
 		case MAINVIEW:				s="Main\t"; c=kcViewMain; break;
 		case IDD_TREEVIEW:			s="Tree\t"; c=kcViewTree; break;
 		case ID_VIEW_OPTIONS:		s="Setup...\t"; c=kcViewOptions; break;

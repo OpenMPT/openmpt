@@ -967,7 +967,7 @@ void CCtrlSamples::OnSamplePlay()
 			m_pModDoc->NoteOff(0, TRUE);
 		} else
 		{
-			m_pModDoc->PlayNote(NOTE_MIDDLEC, 0, m_nSample, TRUE);
+			m_pModDoc->PlayNote(NOTE_MIDDLEC, 0, m_nSample, FALSE);
 		}
 	}
 	SwitchToView();

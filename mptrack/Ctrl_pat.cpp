@@ -87,7 +87,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_SPACING,			OnSpacingChanged)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		OnPatternNameChanged)
 	ON_UPDATE_COMMAND_UI(IDC_PATTERN_RECORD,OnUpdateRecord)
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTip)
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
 	//}}AFX_MSG_MAP
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
@@ -351,7 +351,12 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		}
 		if (dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
 		{
-			UINT nPat = SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
+			UINT nPat;
+			if (dwHintMask&HINT_PATNAMES) {
+				nPat=(dwHintMask>>24)&0xFF;
+			} else {
+				nPat = SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
+			}
 			m_pSndFile->GetPatternName(nPat, s, sizeof(s));
 			m_EditPatName.SetWindowText(s);
 			BOOL bXMIT = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE;

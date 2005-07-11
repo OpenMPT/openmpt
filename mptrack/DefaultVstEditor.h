@@ -4,6 +4,10 @@
 #include "VstPlug.h"
 #include "abstractvsteditor.h"
 
+enum {
+	PARAM_RESOLUTION=1000,
+};
+
 class CDefaultVstEditor :
 	public CAbstractVstEditor
 {

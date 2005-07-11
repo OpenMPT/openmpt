@@ -10,7 +10,7 @@ class CModTypeDlg: public CDialog
 //===============================
 {
 public:
-	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox;
+	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5;
 	CSoundFile *m_pSndFile;
 	UINT m_nChannels, m_nType;

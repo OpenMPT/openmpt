@@ -1402,7 +1402,8 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			DrawPositionMarks(hdc);
 			for (UINT j=0; j<MAX_CHANNELS; j++)
 			{
-				DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[j] : 0;
+				//DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[j] : 0;
+				DWORD newpos = pnotify->dwPos[j];
 				m_dwNotifyPos[j] = newpos;
 			}
 			DrawPositionMarks(hdc);
@@ -2498,7 +2499,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 			if (CMainFrame::m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) vol *= 2;
 			if (vol < 1) vol = 1;
 			if (vol > 256) vol = 256;
-			pModDoc->PlayNote(note, m_nInstrument, 0, TRUE, vol);
+			pModDoc->PlayNote(note, m_nInstrument, 0, FALSE, vol);
 		}
 	}
 	return 0;

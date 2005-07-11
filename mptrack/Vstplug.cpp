@@ -2021,11 +2021,11 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 	//If the plug is found & ok, continue
 	if ((m_pEffect) && (m_pProcessFP) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
-		isInstrument = (m_pEffect->numInputs < 1 || (m_pEffect->flags & effFlagsIsSynth)); // rewbs.dryRatio
-		
-		if(isInstrument && !(CSoundFile::gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS)){
-			gain /= 32.0f;	// ericus 25/01/2005 restore VSTi level from previous release + reduce VSTi level
-			mixop = 0;		// + force disable mix mode
+		isInstrument = (m_pEffect->numInputs < 1 || (m_pEffect->flags & effFlagsIsSynth));
+
+		if (isInstrument) {
+			gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
+			mixop = 0;	// force disable mix mode on instruments
 		}
 
 		//Merge stereo before sending to the plug if it is mono

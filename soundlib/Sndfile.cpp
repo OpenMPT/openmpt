@@ -8,6 +8,8 @@
 */
 
 #include "stdafx.h"
+#include "../mptrack/mptrack.h"
+#include "../mptrack/mainfrm.h"
 #include "sndfile.h"
 #include "aeffectx.h"
 
@@ -123,6 +125,7 @@ Exemple with "nPanLoopEnd" , "nPitchLoopEnd" & "VolEnv[MAX_ENVPOINTS]" members :
 
 C...	[EXT]	nChannels
 CS..			nCutSwing
+CWV.	[EXT]	dwCreatedWithVersion
 DCT.			nDCT;
 dF..			dwFlags;
 DT..	[EXT]	nDefaultTempo;			
@@ -135,6 +138,7 @@ GV..			nGlobalVol;
 IFC.			nIFC;
 IFR.			nIFR;
 K[.				Keyboard[128];
+LSWV	[EXT]	nPlugMixMode
 MB..			wMidiBank;
 MC..			nMidiChannel;
 MDK.			nMidiDrumKey;
@@ -157,6 +161,7 @@ PiSB			nPitchSustainBegin;
 PiSE			nPitchSustainEnd;
 PLE.			nPanLoopEnd;
 PLS.			nPanLoopStart;
+PMM.	[EXT]	nPlugMixMode;
 PP[.			PanPoints[MAX_ENVPOINTS];
 PPC.			nPPC;
 PPS.			nPPS;
@@ -360,8 +365,11 @@ CSoundFile::CSoundFile()
 	m_nRowsPerMeasure = 16;
 	m_nTempoMode = tempo_mode_classic;
 	m_bIsRendering = false;
+	m_nMaxSample = 0;
 
 	m_pModDoc = NULL;
+	m_dwLastSavedWithVersion=0;
+	m_dwCreatedWithVersion=0;
 	memset(m_bChannelMuteTogglePending, 0, sizeof(m_bChannelMuteTogglePending));
 
 
@@ -384,12 +392,18 @@ CSoundFile::CSoundFile()
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	m_lTotalSampleCount=0;
+
+	m_nPlugMixMode=plugmix_mode_117RC2;
+	m_pConfig = new CSoundFilePlayConfig();
+	
+
 }
 
 
 CSoundFile::~CSoundFile()
 //-----------------------
 {
+	delete m_pConfig;
 	Destroy();
 }
 
@@ -529,6 +543,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			lpStream = NULL;
 		}
 #endif
+	} else {
+		m_dwCreatedWithVersion = MPTRACK_VERSION;
 	}
 	// Adjust song names
 	for (UINT iSmp=0; iSmp<MAX_SAMPLES; iSmp++)
@@ -638,6 +654,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			}
 		}
 	}
+	m_pConfig->SetPluginMixLevels(m_nPlugMixMode);
+
 	if (m_nType)
 	{
 		UINT maxpreamp = 0x10+(m_nChannels*8);
@@ -645,6 +663,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		if (m_nSongPreAmp > maxpreamp) m_nSongPreAmp = maxpreamp;
 		return TRUE;
 	}
+
+	
+
 	return FALSE;
 }
 

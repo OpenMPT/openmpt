@@ -24,9 +24,9 @@ class CPerformanceCounter;
 #define MIN_AUDIO_BUFFERSIZE		1024
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define KEYBOARDMAP_LENGTH			(3*12+2)
-#define MAINFRAME_TITLE				"Modplug Tracker"
-#define MPTRACK_FINALRELEASEVERSION	0x011700D7
-#define MPTRACK_VERSION				0x011700D7
+#define MAINFRAME_TITLE				"Open Modplug Tracker"
+#define MPTRACK_VERSION				0x01170220
+#define INFORMAL_VERSION			"1.17RC2"
 
 
 enum {
@@ -252,6 +252,7 @@ enum {
 	IMAGE_DIRECTX,
 	IMAGE_WAVEOUT,
 	IMAGE_ASIO,
+	IMAGE_GRAPH,
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -358,12 +359,13 @@ public:
 	CString m_csRegExt;
 	CString m_csRegSettings;
 	CString m_csRegWindow;
+	static CString m_csExecutablePath;
 	// Globals
 	static UINT m_nLastOptionsPage, m_nFilterIndex;
 	static BOOL gbMdiMaximize;
 	static LONG glCtrlWindowHeight, glTreeWindowWidth, glTreeSplitRatio;
 	static LONG glGeneralWindowHeight, glPatternWindowHeight, glSampleWindowHeight, 
-		        glInstrumentWindowHeight, glCommentsWindowHeight; //rewbs.varWindowSize
+		        glInstrumentWindowHeight, glCommentsWindowHeight, glGraphWindowHeight; //rewbs.varWindowSize
     static HHOOK ghKbdHook;
 	static DWORD gdwNotificationType, gdwPreviousVersion;
 	
@@ -483,6 +485,8 @@ public:
 	static CMainFrame *GetMainFrame() { return (CMainFrame *)theApp.m_pMainWnd; }
 	static UINT GetNoteFromKey(UINT nChar, DWORD dwFlags);
 	static VOID UpdateColors();
+	static CString GetFullVersionString();
+	static CString GetVersionString(DWORD);
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }
 	static HFONT GetFixedFont() { return m_hFixedFont; }
@@ -496,6 +500,7 @@ public:
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
 	static CPerformanceCounter *m_pPerfCounter;
+	
 
 // Misc functions
 public:

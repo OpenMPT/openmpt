@@ -99,6 +99,7 @@ enum CommandID
 	kcViewSamples,
 	kcViewInstruments,
 	kcViewComments,
+	kcViewGraph,
 	kcViewMain,
 	kcViewTree,
 	kcViewOptions,
@@ -218,6 +219,7 @@ enum CommandID
 
 	kcChannelMute,
 	kcChannelSolo,
+	kcToggleChanMuteOnPatTransition,
 	kcCopyAndLoseSelection,
 	kcTransposeUp,
 	kcTransposeDown,
@@ -959,6 +961,9 @@ enum Modifiers
 #define MAINKEYS 256
 #define KeyMapSize kCtxMaxInputContexts*MaxMod*MAINKEYS*kNumKeyEvents
 typedef CommandID KeyMap[kCtxMaxInputContexts][MaxMod][MAINKEYS][kNumKeyEvents];
+//typedef CMap<long, long, CommandID, CommandID> KeyMap;
+
+//KeyMap
 
 struct KeyCombination
 {
@@ -1073,6 +1078,8 @@ public:
 	void GenKeyMap(KeyMap &km);		// Generate a keymap from this command set
 	bool SaveFile(CString FileName, bool debug);
 	bool LoadFile(CString FileName);
+
+	static DWORD GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, KeyEventType ke);
 	
 };
 //end rewbs.customKeys

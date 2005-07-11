@@ -20,6 +20,7 @@
 #include "globals.h"
 #include "ctrl_pat.h"
 // -! NEW_FEATURE#0015
+#include <direct.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -98,6 +99,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND_EX(ID_NETLINK_MODPLUG,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_UT,			OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_OSMUSIC,		OnInternetLink)
+	ON_COMMAND_EX(ID_NETLINK_MPTFR,			OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_HANDBOOK,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_FORUMS,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_PLUGINS,		OnInternetLink)
@@ -136,6 +138,7 @@ LONG CMainFrame::glPatternWindowHeight = 232;
 LONG CMainFrame::glSampleWindowHeight = 188;
 LONG CMainFrame::glInstrumentWindowHeight = 300;
 LONG CMainFrame::glCommentsWindowHeight = 288;
+LONG CMainFrame::glGraphWindowHeight = 288; //rewbs.graph
 //end rewbs.varWindowSize
 LONG CMainFrame::glTreeWindowWidth = 160;
 LONG CMainFrame::glTreeSplitRatio = 128;
@@ -280,6 +283,8 @@ CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
 CAutoSaver *CMainFrame::m_pAutoSaver = NULL; //rewbs.autosave
 CPerformanceCounter *CMainFrame::m_pPerfCounter = NULL;
 
+CString CMainFrame::m_csExecutablePath = "";
+
 static UINT indicators[] =
 {
 	ID_SEPARATOR,           // status line indicator
@@ -292,10 +297,14 @@ static UINT indicators[] =
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
-
+//#include <direct.h>
 CMainFrame::CMainFrame(/*CString regKeyExtension*/)
 //---------------------------------------------
 {
+	char wd[255];
+	_getdcwd(_getdrive(), wd, 255);
+	m_csExecutablePath = wd;	//Assume working dir is executable path at this stage.
+
 	DWORD dwREG_DWORD = REG_DWORD;
 	DWORD dwREG_SZ = REG_SZ;
 	DWORD dwDWORDSize = sizeof(UINT);
@@ -390,6 +399,7 @@ CMainFrame::CMainFrame(/*CString regKeyExtension*/)
 		RegQueryValueEx(key, "MDISampleHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glSampleWindowHeight, &dwDWORDSize);
 		RegQueryValueEx(key, "MDIInstrumentHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glInstrumentWindowHeight, &dwDWORDSize);
 		RegQueryValueEx(key, "MDICommentsHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glCommentsWindowHeight, &dwDWORDSize);
+		RegQueryValueEx(key, "MDIGraphHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glGraphWindowHeight, &dwDWORDSize); //rewbs.graph
 		//end rewbs.varWindowSize
 		RegQueryValueEx(key, "MDITreeRatio", NULL, &dwREG_DWORD, (LPBYTE)&glTreeSplitRatio, &dwDWORDSize);
 		// Colors
@@ -846,6 +856,8 @@ void CMainFrame::OnClose()
 		RegSetValueEx(key, "MDIInstrumentHeight", NULL, REG_DWORD,  (LPBYTE)&glInstrumentWindowHeight, sizeof(DWORD));
 		RegSetValueEx(key, "MDICommentsHeight", NULL, REG_DWORD,  (LPBYTE)&glCommentsWindowHeight, sizeof(DWORD));
 		RegSetValueEx(key, "MDITreeRatio", NULL, REG_DWORD, (LPBYTE)&glTreeSplitRatio, sizeof(DWORD));
+		RegSetValueEx(key, "MDIGraphHeight", NULL, REG_DWORD, (LPBYTE)&glGraphWindowHeight, sizeof(DWORD)); //rewbs.graph
+		//end rewbs.varWindowSize
 		// Colors
 		for (int ncol=0; ncol<MAX_MODCOLORS; ncol++)
 		{
@@ -1574,6 +1586,39 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame static helpers
+CString CMainFrame::GetFullVersionString() 
+//------------------------------------
+{
+	CString version;
+
+	version.Format("%s version %X.%02X.%02X.%02X (%s)",
+					(MAINFRAME_TITLE),
+					(MPTRACK_VERSION>>24)&0xFF,
+					(MPTRACK_VERSION>>16)&0xFF,
+					(MPTRACK_VERSION>>8)&0xFF,
+					(MPTRACK_VERSION)&0xFF,
+					(INFORMAL_VERSION));
+	return version;
+}
+
+CString CMainFrame::GetVersionString(DWORD v) 
+//-------------------------------------------
+{
+	CString version;
+	if (v==0) {
+		version = "Unknown";
+	}
+	else {
+		version.Format("%X.%02X.%02X.%02X",
+						(v>>24)&0xFF,
+						(v>>16)&0xFF,
+						(v>>8)&0xFF, 
+						(v)&0xFF);
+	}
+	return version;
+}
+
+
 
 void CMainFrame::UpdateColors()
 //-----------------------------
@@ -1802,13 +1847,10 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	}
 	m_nMixChn = m_nAvgMixChn = 0;
 	gsdwTotalSamples = 0;
-	if (!bPatLoop)
-	{
-		if (bPaused)
-		{
+	if (!bPatLoop) {
+		if (bPaused) {
 			pSndFile->m_dwSongFlags |= SONG_PAUSED;
-		} else
-		{
+		} else	{
 			pModDoc->SetPause(FALSE);
 			//rewbs.fix3185: removed this check so play position stays on last pattern if song ends and loop is off.
 			//Otherwise play from cursor screws up.
@@ -1861,16 +1903,12 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	{
 		m_pSndFile->LoopPattern(-1);
 		m_pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
-		if (m_pSndFile == &m_WaveFile)
-		{
+		if (m_pSndFile == &m_WaveFile)	{
 			m_pSndFile = NULL;
 			m_WaveFile.Destroy();
-		} else
-		{
-			for (UINT i=m_pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
-			{
-				if (!(m_pSndFile->Chn[i].nMasterChn))
-				{
+		} else {
+			for (UINT i=m_pSndFile->m_nChannels; i<MAX_CHANNELS; i++) {
+				if (!(m_pSndFile->Chn[i].nMasterChn)) {
 					m_pSndFile->Chn[i].nPos = m_pSndFile->Chn[i].nPosLo = m_pSndFile->Chn[i].nLength = 0;
 				}
 			}
@@ -2634,7 +2672,8 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 	case ID_NETLINK_UT:			pszURL = "http://www.united-trackers.org"; break;
 	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
 	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
-	case ID_NETLINK_FORUMS:		pszURL = "http://www.modplug.com/forums"; break;
+	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
+	case ID_NETLINK_FORUMS:		pszURL = "http://www.modplug.com/forum"; break;
 	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com"; break;
 	}
 	if (pszURL) return CTrackApp::OpenURL(pszURL);
@@ -2713,6 +2752,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewSamples:
 		case kcViewInstruments:
 		case kcViewComments: 
+		case kcViewGraph: //rewbs.graph
 		case kcPlayPatternFromCursor:
 		case kcPlayPatternFromStart: 
 		case kcPlaySongFromCursor: 

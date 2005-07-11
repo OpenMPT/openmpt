@@ -50,7 +50,7 @@ BOOL CDefaultVstEditor::OpenEditor(CWnd *parent)
 
 	ShowWindow(SW_SHOW);
 
-	m_slParam.SetRange(0, 100);
+	m_slParam.SetRange(0, PARAM_RESOLUTION);
 
 
 	if (m_pVstPlugin)
@@ -119,9 +119,9 @@ void CDefaultVstEditor::OnParamValChangedText()
 	char s[64];
 	m_editParam.GetWindowText(s, 64);
 	int val = atoi(s);
-	if (val > 100) 
-		val=100;
-	m_pVstPlugin->SetParameter(m_nCurrentParam, val/100.0f);
+	if (val > PARAM_RESOLUTION) 
+		val=PARAM_RESOLUTION;
+	m_pVstPlugin->SetParameter(m_nCurrentParam, val/static_cast<float>(PARAM_RESOLUTION));
 	
 	if (!m_nControlLock) {
 		UpdateAll();
@@ -132,10 +132,10 @@ void CDefaultVstEditor::OnParamValChangedText()
 void CDefaultVstEditor::OnParamValChangedSlide()
 {
 	char s[64];
-	int val = 100-m_slParam.GetPos();
-	m_pVstPlugin->SetParameter(m_nCurrentParam, val/100.0f);
+	int val = PARAM_RESOLUTION-m_slParam.GetPos();
+	m_pVstPlugin->SetParameter(m_nCurrentParam, val/static_cast<float>(PARAM_RESOLUTION));
 	
-	wsprintf(s, "%000d", val);
+	wsprintf(s, "%0000d", val);
 	
 	if (!m_nControlLock) {
 		UpdateAll();
@@ -158,8 +158,8 @@ void CDefaultVstEditor::UpdateAll()
 		return;
 
 	char s[256];
-	int val = static_cast<int>(m_pVstPlugin->GetParameter(m_nCurrentParam)*100.0f+0.5f);
-	wsprintf(s, "%000d", val);
+	int val = static_cast<int>(m_pVstPlugin->GetParameter(m_nCurrentParam)*static_cast<float>(PARAM_RESOLUTION)+0.5f);
+	wsprintf(s, "%0000d", val);
 
 	CHAR sunits[64], sdisplay[64], label[128];
 	m_pVstPlugin->GetParamLabel(m_nCurrentParam, sunits);
@@ -171,7 +171,7 @@ void CDefaultVstEditor::UpdateAll()
 	if (&m_editParam !=	m_editParam.GetFocus())	
 		m_editParam.SetWindowText(s);
 	m_statParamLabel.SetWindowText(label);
-	m_slParam.SetPos(100-val);
+	m_slParam.SetPos(PARAM_RESOLUTION-val);
 	m_nControlLock--;
 	
 }

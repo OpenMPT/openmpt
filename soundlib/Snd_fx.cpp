@@ -736,9 +736,8 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 		} else pSample = NULL;
 	}
 	MODCHANNEL *p = pChn;
-	//rewbs: removing these returns so that NNAs are still applied if chan is muted.
 	//if (!penv) return;
-	//if (pChn->dwFlags & CHN_MUTE) return;
+	if (pChn->dwFlags & CHN_MUTE) return;
 
 	bool applyDNAtoPlug;	//rewbs.VSTiNNA
 	for (UINT i=nChn; i<MAX_CHANNELS; p++, i++)
@@ -3099,8 +3098,11 @@ void CSoundFile::HandlePatternTransitionEvents()
 {
 	if (m_bPatternTransitionOccurred) {
 		// MPT sequence override
-		if ((m_nSeqOverride > 0) && (m_nSeqOverride <= MAX_ORDERS) && !(m_dwSongFlags & SONG_PATTERNLOOP))
+		if ((m_nSeqOverride > 0) && (m_nSeqOverride <= MAX_ORDERS))
 		{
+			if (m_dwSongFlags & SONG_PATTERNLOOP) {
+				m_nPattern = Order[m_nSeqOverride-1];
+			}
 			m_nNextPattern = m_nSeqOverride - 1;
 			m_nSeqOverride = 0;
 		}

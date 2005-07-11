@@ -26,27 +26,14 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	CHAR s[256];
 	UINT b64 = 0;
 	
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//	if (nNewType == m_SndFile.m_nType) return TRUE;
 	if (nNewType == m_SndFile.m_nType){
-		// Changing doc name
-		CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME];
-		_splitpath(GetPathName(), drive, path, fname, NULL);
-		strcat(drive, path);
-		strcat(drive, fname);
-		switch(nNewType)
-		{
-		case MOD_TYPE_XM:	strcat(drive, ".xm"); break;
-		case MOD_TYPE_IT:	m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? strcat(drive, ".itp") : strcat(drive, ".it"); break;
-		case MOD_TYPE_S3M:	strcat(drive, ".s3m"); break;
-		default:			strcat(drive, ".mod"); break;
-		}
-		SetPathName(drive, FALSE);
-		UpdateAllViews(NULL, HINT_MODTYPE);
+		// Even if m_nType doesn't change, we might need to change extension in itp<->it case.
+		// This is because ITP is a HACK and doesn't genuinely change m_nType,
+		// but uses flages instead.
+		ChangeFileExtension(nNewType);
 		return TRUE;
 	}
-// -! NEW_FEATURE#0023
+
 
 	// Check if conversion to 64 rows is necessary
 	for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++)
@@ -181,7 +168,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		for (UINT nPat=0; nPat<MAX_PATTERNS; nPat++) if (m_SndFile.Patterns[nPat])
 		{
 			MODCOMMAND *m = m_SndFile.Patterns[nPat];
-			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len--; m++, len--)
+			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len--; m++)
 			{
 				if (m->command) switch(m->command)
 				{
@@ -310,32 +297,15 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	if (nNewType != MOD_TYPE_IT) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATMODE);
 	if (nNewType != MOD_TYPE_S3M) m_SndFile.m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
 	END_CRITICAL();
-	// Changing doc name
-	{
-		CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME];
-		_splitpath(GetPathName(), drive, path, fname, NULL);
-		strcat(drive, path);
-		strcat(drive, fname);
-		switch(nNewType)
-		{
-		case MOD_TYPE_XM:	strcat(drive, ".xm"); break;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//		case MOD_TYPE_IT:	strcat(drive, ".it"); break;
-		case MOD_TYPE_IT:	m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? strcat(drive, ".itp") : strcat(drive, ".it"); break;
-// -! NEW_FEATURE#0023
-		case MOD_TYPE_S3M:	strcat(drive, ".s3m"); break;
-		default:			strcat(drive, ".mod"); break;
-		}
-		SetPathName(drive, FALSE);
-	}
+	ChangeFileExtension(nNewType);
 
 	//rewbs.cutomKeys: update effect key commands
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
-	if	(nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+	if	(nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM)) {
 		ih->SetXMEffects();
-	else
+	} else {
 		ih->SetITEffects();
+	}
 	//end rewbs.cutomKeys
 
 	SetModified();
@@ -708,6 +678,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 	UINT nExt = 0, nLoopOpt = 0;
 	UINT nRemoved = 0;
 	
+
 	BeginWaitCursor();
 	for (UINT i=m_SndFile.m_nSamples; i>=1; i--) if (m_SndFile.Ins[i].pSample)
 	{
@@ -763,9 +734,9 @@ BOOL CModDoc::RemoveUnusedSamples()
 		}
 	}
 	EndWaitCursor();
-	if (nExt)
-	{
-		wsprintf(s, "ModPlug Tracker detected %d sample(s) referenced by an instrument,\n"
+	if (nExt &&  !((m_SndFile.m_nType==MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT)))
+	{	//We don't remove an instrument's unused samples in an ITP.
+		wsprintf(s, "OpenMPT detected %d sample(s) referenced by an instrument,\n"
 					"but not used in the song. Do you want to remove them ?", nExt);
 		if (::MessageBox(NULL, s, "Sample Cleanup", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
@@ -790,7 +761,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 	}
 	if (nLoopOpt)
 	{
-		wsprintf(s, "ModPlug Tracker detected %d sample(s) with unused data after the loop end point,\n"
+		wsprintf(s, "OpenMPT detected %d sample(s) with unused data after the loop end point,\n"
 					"Do you want to optimize it, and remove this unused data ?", nLoopOpt);
 		if (::MessageBox(NULL, s, "Sample Cleanup", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
@@ -839,13 +810,14 @@ BOOL CModDoc::RemoveUnusedInstruments()
 
 	if (!m_SndFile.m_nInstruments) return FALSE;
 
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-	char removeSamples = 0;
-	//rewbs: changed message
-	if(::MessageBox(NULL, "Remove associated samples if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) removeSamples = 1;
-	else removeSamples = -1;
-// -! BEHAVIOUR_CHANGE#0003
+	char removeSamples = -1;
+	if ( !((m_SndFile.m_nType==MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT))) { //never remove an instrument's samples in ITP.
+		if(::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) {
+			removeSamples = 1;
+		}
+	} else {
+		MessageBox(NULL, "This is an IT project, so no samples associated with a used instrument will be removed.", "Removing Instruments", MB_OK | MB_ICONINFORMATION);
+	}
 
 	BeginWaitCursor();
 	memset(usedmap, 0, sizeof(usedmap));

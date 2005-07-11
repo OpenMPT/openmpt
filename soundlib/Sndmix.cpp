@@ -382,6 +382,23 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 #endif
 		// Perform clipping + VU-Meter
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
+
+		//DEBUG
+		/*int maxInt=0;
+		int minInt=0;
+		for (int pos=0; pos<lTotalSampleCount; pos++) {
+			maxInt=max(maxInt, (*(int*)(lpBuffer+sizeof(int)*pos)));
+			minInt=min(minInt, (*(int*)(lpBuffer+sizeof(int)*pos)));
+		}
+
+		int maxInt2=0;
+		int minInt2=0;
+		for (int pos=0; pos<lTotalSampleCount; pos++) {
+			maxInt2=max(maxInt2, MixSoundBuffer[pos]);
+			minInt2=min(minInt2, MixSoundBuffer[pos]);
+		}*/
+		//end DEBUG
+
 		// Buffer ready
 		lRead -= lCount;
 		m_nBufferCount -= lCount;

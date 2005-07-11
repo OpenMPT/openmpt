@@ -592,6 +592,9 @@ mpts:
 				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;
 				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels);		 break;
 				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
+				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
+				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
+				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -987,8 +990,11 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				case 'DT..': fadr = reinterpret_cast<BYTE*>(&m_nDefaultTempo);   break;
 				case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
 				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;			
-				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels); break;		
+				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels);		 break;		
 				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
+				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
+				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
+				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -1453,8 +1459,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	header.smpnum = m_nSamples;
 	header.patnum = MAX_PATTERNS;
 	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) header.patnum--;
-	header.cwtv = 0x217;
-	header.cmwt = 0x200;
+	header.cwtv = 0x300;	//We don't use these version info fields any more.
+	header.cmwt = 0x300;	//
 	header.flags = 0x0001;
 	header.special = 0x0006;
 	if (m_nInstruments) header.flags |= 0x04;
@@ -2488,6 +2494,24 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	size = sizeof(m_nTempoMode);		
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nTempoMode, 1, size, f);	
+
+	code = 'PMM.';							//write m_nPlugMixMode
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nPlugMixMode);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nPlugMixMode, 1, size, f);	
+
+	code = 'CWV.';							//write m_dwCreatedWithVersion
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_dwCreatedWithVersion);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_dwCreatedWithVersion, 1, size, f);	
+
+	code = 'LSWV';							//write m_dwCreatedWithVersion
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_dwLastSavedWithVersion);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_dwLastSavedWithVersion, 1, size, f);	
 
 	return;
 }
