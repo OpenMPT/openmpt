@@ -13,6 +13,42 @@ It is unfinished, do not expect to be able to compose with this version safely. 
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+
+. v 1.17.02.20
+  + <rewbs> OpenMPT version saved in file, visible in song settings dialog.
+  / <rewbs> Enabled XP themes. 
+  . <rewbs> Keyconfig loader no longer reports errors in bad key config file after the 10th error, to avoid reporting hundred of errors if for example you try to load a binary by mistake.
+  . <rewbs> Song is marked as modified on tempo & volume slider move in general tab, as well as on drag selection.
+  . <rewbs> Correct pattern name displayed on first opening of pattern editor.
+  . <rewbs> Tool tips restored on pattern editor.
+  . <rewbs> The instrument and sample tab play buttons should no longer stop the song.
+  / <rewbs> Resolution of plugin default GUI parameter slider increased from 100 to 1000. I couldn't get the per-thousand symbol to display yet. :(
+  / <rewbs> Version number change - we no longer specify revision number explicitly. It is bad practice to make revision numbers external, as we have no real control over the way they change. The version number will always be in the CVS-commit comments fiel from now on.
+  + <rewbs> !! Emulate Mix Bugs Has GONE!! Now select Plugin Mix Level from song properties; it gets saved with the song now.
+               Note that there are 3 settings: 
+                 > Original (equivalent to "emulate mix bugs")
+                 > 1.17RC1  (what it was from RC1 up until this build)
+                 > 1.17RC2  (what I believe to be correct... mastering plugins report the same levels as exported WAVs with this one).
+
+  . <rewbs> ITP users are now warned that autosaves fail if their instrument paths aren't set up.
+  . <rewbs> If "use songs' original dirs" is ticked but the song has never been saved and therefore has no path, the backups will now always go in mptrack.exe's working directory as it was at startup.
+  / <rewbs> GUI now uses radiobuttons for path type selection.
+  + <rewbs> Added customisable shortcut key for toggling (un)mute on pattern transition.
+  + <rewbs> Force pattern sequence override (ctrl-left-click orderlist) now works in play-pattern mode.
+            - Known issue: orderlist GUI is not refreshed so line remains.
+  / <rewbs> Toggle (un)mute on pattern transition is now ctrl-left-click (not ctrl-right-click).
+  . <rewbs> Fixed play selected part of a sample.
+  . <rewbs> Fixed start of samples not playing when previewing them whilst song is playing (I think -  I had trouble reproducing this one :)
+  . <rewbs> Fixed stuck notes when playing VSTis during pattern transition (I think -  I had trouble reproducing this one :)
+  . <rewbs> Fixed: samples attached to instruments should never be removed in cleanups with ITP.
+  . <rewbs> Fixed build-up of NNA'ed notes whilst channel is muted, which all play together on unmute.
+  . <rewbs> Fixed XM->IT conversion of Sxx over row 32.
+  . <rewbs> Fixed: Effect interpolation works even if only param column is selected again.
+  . <rewbs> Fixed: paste, delete, drag should no longer work if recording is disabled.
+  / <rewbs> Song settings dialog cleanup. Minor instrument tab GUI cleanups. About dialog cleanups.
+  / <rewbs> Internal: "stubs" for graph tab (currently hidden) and graph data structures + unused array utilities class. 
+
+
 . v 1.17RC1 (revision 1.13.2.19)
   + <rewbs> Ctrl-right-clicking a channel will cause it to be muted at the next pattern transition. 
             Let me know if this is working the way you want, then I'll work on adding keyboard shortcuts, channel manager integration etc...
