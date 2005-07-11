@@ -67,7 +67,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 						CleanUpBackups(pModDoc);
 					} else {
 						m_bEnabled=false;
-						AfxMessageBox("Warning: autosave failed and has been disabled.\r\nPlease review your autosave settings. Also check available diskspace & filesystem access rights.");
+						AfxMessageBox("Warning: autosave failed and has been disabled. Please:\r\n\r\n- Review your autosave paths\r\n- Check available diskspace & filesystem access rights\r\n- If you are using the ITP format, ensure all instruments exist as independant .iti files");
 						success = false;
 					}
 				}
@@ -175,7 +175,19 @@ bool CAutoSaver::CheckTimer(DWORD curTime)
 CString CAutoSaver::BuildFileName(CModDoc* pModDoc)
 {
 	CString timeStamp = (CTime::GetCurrentTime()).Format("%Y%m%d.%H%M%S");
-	CString name = m_bUseOriginalPath?pModDoc->GetPathName():(m_csPath+pModDoc->GetTitle());
+	CString name;
+	
+	if (m_bUseOriginalPath) {
+		if (pModDoc->m_bHasValidPath) { // Check that the file has a user-chosen path
+			name = pModDoc->GetPathName(); 
+		} else {						// if it doesnt, put it in executable dir
+			name = CMainFrame::m_csExecutablePath + "\\" + pModDoc->GetTitle(); 		
+		}
+	
+	} else {
+		name = m_csPath+pModDoc->GetTitle();
+	}
+	
 	
 	name.Append(".AutoSave.");					//append backup tag
 	name.Append(timeStamp);						//append timestamp
@@ -285,6 +297,7 @@ BEGIN_MESSAGE_MAP(CAutoSaverGUI, CPropertyPage)
 	ON_BN_CLICKED(IDC_AUTOSAVE_BROWSE, OnBnClickedAutosaveBrowse)
 	ON_BN_CLICKED(IDC_AUTOSAVE_ENABLE, OnBnClickedAutosaveEnable)
 	ON_BN_CLICKED(IDC_AUTOSAVE_USEORIGDIR, OnBnClickedAutosaveUseorigdir)
+	ON_BN_CLICKED(IDC_AUTOSAVE_USECUSTOMDIR, OnBnClickedAutosaveUseorigdir)
 	ON_EN_UPDATE(IDC_AUTOSAVE_PATH, OnSettingsChanged)
 	ON_EN_UPDATE(IDC_AUTOSAVE_HISTORY, OnSettingsChanged)
 	ON_EN_UPDATE(IDC_AUTOSAVE_INTERVAL, OnSettingsChanged)
@@ -303,6 +316,7 @@ BOOL CAutoSaverGUI::OnInitDialog()
 	SetDlgItemText(IDC_AUTOSAVE_PATH, m_pAutoSaver->GetPath());
 	SetDlgItemInt(IDC_AUTOSAVE_INTERVAL, m_pAutoSaver->GetSaveInterval());
 	CheckDlgButton(IDC_AUTOSAVE_USEORIGDIR, m_pAutoSaver->GetUseOriginalPath()?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(IDC_AUTOSAVE_USECUSTOMDIR, m_pAutoSaver->GetUseOriginalPath()?BST_UNCHECKED:BST_CHECKED);
 
 	//enable/disable stuff as appropriate
 	OnBnClickedAutosaveEnable();
@@ -354,6 +368,7 @@ void CAutoSaverGUI::OnBnClickedAutosaveEnable()
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_INTERVAL), enabled);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_HISTORY), enabled);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_USEORIGDIR), enabled);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_USECUSTOMDIR), enabled);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH), enabled);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_BROWSE), enabled);
 	OnSettingsChanged();

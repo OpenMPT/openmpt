@@ -89,6 +89,7 @@
 #define IDD_PATTERNRANDOMIZER_INSTRUMENT 504
 #define IDD_PATTERNRANDOMIZER_VOLCMD    505
 #define IDD_PATTERNRANDOMIZER_EFFECT    506
+#define IDD_CONTROL_GRAPH               507
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -582,9 +583,13 @@
 #define IDC_EDIT_BASEOCTAVE             2070
 #define IDC_SPIN_BASEOCTAVE             2071
 #define IDC_LIST1                       2072
+#define IDC_LIST3                       2073
 #define IDC_TOOLBAR1                    2074
+#define IDC_LIST4                       2074
 #define IDC_TOOLBAR2                    2075
+#define IDC_LIST5                       2075
 #define IDC_TOOLBAR_DETAILS             2076
+#define IDC_LIST6                       2076
 #define IDC_KEYBOARD1                   2078
 #define IDC_SPLASH                      2079
 #define IDC_HOTKEY1                     2080
@@ -715,6 +720,7 @@
 #define IDC_LIST2                       2241
 #define IDC_APPLY                       2243
 #define IDC_RANDOM_PLACEHOLDER          2244
+#define IDC_AUTOSAVE_USECUSTOMDIR       2245
 #define IDC_TEXT_BPM                    2300
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302
@@ -851,9 +857,8 @@
 #define ID_PATTERN_VISUALIZE_EFFECT     32900
 #define ID_ACCELERATOR32900             32900
 #define ID_PATTERN_PLAYNOLOOP           32901
-#define ID_PATTERN_OPEN_RANDOMIZER		32905
-#define ID_PATTERN_INTERPOLATE_NOTE		32906
-#define ID_Menu                         32911
+#define ID_PATTERN_OPEN_RANDOMIZER      32905
+#define ID_PATTERN_INTERPOLATE_NOTE     32906
 #define ID_PRESET_LOAD                  32915
 #define ID_PRESET_SAVE                  32916
 #define ID_PRESET_RANDOM                32917
@@ -891,7 +896,10 @@
 #define ID_INFO_OUPUTS                  36016
 #define ID_INFO_MACROS36017             36017
 #define ID_EDIT_GOTO                    36018
+#define ID_VIEW_GRAPH                   36019
+#define ID_PATTERN_TRANSITIONMUTE       36020
 #define ID_SELECTINST                   36100
+#define ID_NETLINK_MPTFR                37001
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
@@ -914,9 +922,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        504
-#define _APS_NEXT_COMMAND_VALUE         37000
-#define _APS_NEXT_CONTROL_VALUE         2245
+#define _APS_NEXT_RESOURCE_VALUE        510
+#define _APS_NEXT_COMMAND_VALUE         37002
+#define _APS_NEXT_CONTROL_VALUE         2246
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

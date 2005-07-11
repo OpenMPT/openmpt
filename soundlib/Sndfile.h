@@ -6,6 +6,7 @@
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
 */
+#include "../mptrack/SoundFilePlayConfig.h"
 
 #ifndef __SNDFILE_H
 #define __SNDFILE_H
@@ -766,19 +767,13 @@ typedef struct MODMIDICFG
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
 
-enum {
-	tempo_mode_classic      = 0,
-	tempo_mode_alternative  = 1,
-	tempo_mode_modern       = 2,
-};
-
-
 //==============
 class CSoundFile
 //==============
 {
 public:	// Static Members
 	static UINT m_nXBassDepth, m_nXBassRange;
+	static float m_nMaxSample;
 	static UINT m_nReverbDepth, gnReverbType;
 	static UINT m_nProLogicDepth, m_nProLogicDelay;
 	static UINT m_nStereoSeparation;
@@ -803,7 +798,8 @@ public:	// for Editing
 	UINT m_nRowsPerBeat;	// rewbs.betterBPM
 	UINT m_nRowsPerMeasure;	// rewbs.betterBPM
 	BYTE m_nTempoMode;		// rewbs.betterBPM
-	UINT m_nMusicSpeed, m_nMusicTempo;
+	BYTE m_nPlugMixMode;
+    UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
 	bool m_bPatternTransitionOccurred;
@@ -826,8 +822,11 @@ public:	// for Editing
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];		// Mix plugins
 	SNDMIXSONGEQ m_SongEQ;							// Default song EQ preset
 	CHAR CompressionTable[16];
-
 	bool m_bChannelMuteTogglePending[MAX_CHANNELS];
+
+	CSoundFilePlayConfig* m_pConfig;
+	DWORD m_dwCreatedWithVersion;
+	DWORD m_dwLastSavedWithVersion;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -978,18 +977,18 @@ public:
 	// EQ
 	static void InitializeEQ(BOOL bReset=TRUE);
 	static void SetEQGains(const UINT *pGains, UINT nBands, const UINT *pFreqs=NULL, BOOL bReset=FALSE);	// 0=-12dB, 32=+12dB
-	static void EQStereo(int *pbuffer, UINT nCount);
-	static void EQMono(int *pbuffer, UINT nCount);
+	/*static*/ void EQStereo(int *pbuffer, UINT nCount);
+	/*static*/ void EQMono(int *pbuffer, UINT nCount);
 #endif
 	// Analyzer Functions
 	static UINT WaveConvert(LPBYTE lpSrc, signed char *lpDest, UINT nSamples);
 	static UINT WaveStereoConvert(LPBYTE lpSrc, signed char *lpDest, UINT nSamples);
 	static LONG SpectrumAnalyzer(signed char *pBuffer, UINT nSamples, UINT nInc, UINT nChannels);
 	// Float <-> Int conversion routines
-	static VOID StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
-	static VOID FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
-	static VOID MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
-	static VOID FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+	/*static */VOID StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
+	/*static */VOID FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
+	/*static */VOID MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
+	/*static */VOID FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
 
 public:
 	BOOL ReadNote();
@@ -1268,9 +1267,7 @@ typedef struct WAVEEXTRAHEADER
 #define MIXBUFFERSIZE		512
 #define SCRATCH_BUFFER_SIZE 64 //Used for plug's final processing (cleanup)
 #define MIXING_ATTENUATION	4
-#define MIXING_CLIPMIN		(-0x07FFFFFF)
-#define MIXING_CLIPMAX		(0x07FFFFFF)
-#define VOLUMERAMPPRECISION	12				//rewbs.soundq exp (was 12)
+#define VOLUMERAMPPRECISION	12	
 #define FADESONGDELAY		100
 #define EQ_BUFFERSIZE		(MIXBUFFERSIZE)
 #define AGC_PRECISION		10

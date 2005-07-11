@@ -11,7 +11,9 @@
 #include "snddev.h"
 #include "vstplug.h"
 #include "CreditStatic.h"
+#include "hyperEdit.h"
 #include "bladedll.h"
+#include "commctrl.h";
 
 // rewbs.memLeak
 #define CRTDBG_MAP_ALLOC
@@ -410,8 +412,8 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 		}
 		RegCloseKey(key);
 	}
-	if ((bFirstTime) || (CMainFrame::gdwPreviousVersion < MPTRACK_FINALRELEASEVERSION))
-	{
+//	if ((bFirstTime) || (CMainFrame::gdwPreviousVersion < MPTRACK_FINALRELEASEVERSION))
+//	{
 		SaveDefaultDLSBanks(); // This will avoid a crash the next time if we crash while loading the bank
 		szFileName[0] = 0;
 		GetSystemDirectory(szFileName, sizeof(szFileName));
@@ -436,7 +438,7 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 			}
 		}
 		if (glpMidiLibrary) ImportMidiConfig(szFileName, TRUE);
-	}
+//	}
 	return TRUE;
 }
 
@@ -761,22 +763,21 @@ BOOL CTrackApp::InitInstance()
 	m_bInitialized = TRUE;
 
 	// Check previous version number
-	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gdwPreviousVersion < MPTRACK_FINALRELEASEVERSION)
-	{
+	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gdwPreviousVersion < MPTRACK_VERSION) {
 		StopSplashScreen();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 	}
 
-	if (m_bDebugMode)
-	{
+	if (m_bDebugMode) {
 		Log("OpenMPT v%X.%02X.%04d started\n", (MPTRACK_VERSION>>24)&0xFF, (MPTRACK_VERSION>>16)&0xFF, (MPTRACK_VERSION & 0xFFFF));
 	}
-
+	
+	InitCommonControls();
+	m_dwLastPluginIdleCall=0;	//rewbs.VSTCompliance
+	
 	pMainFrame->m_InputHandler->UpdateMainMenu();	//rewbs.customKeys
 	EndWaitCursor();
-
 	return TRUE;
-	m_dwLastPluginIdleCall=0;	//rewbs.VSTCompliance
 }
 
 int CTrackApp::ExitInstance()
@@ -1287,6 +1288,7 @@ class CAboutDlg: public CDialog
 protected:
 	CPaletteBitmap m_bmp;
 	CCreditStatic m_static;
+	CHyperEdit m_heContact;
 
 public:
 	CAboutDlg() {}
@@ -1297,14 +1299,25 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	virtual void OnCancel();
+	virtual void DoDataExchange(CDataExchange* pDX);
 };
 
 static CAboutDlg *gpAboutDlg = NULL;
+
 
 CAboutDlg::~CAboutDlg()
 //---------------------
 {
 	gpAboutDlg = NULL;
+}
+
+void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+//------------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CModTypeDlg)
+	DDX_Control(pDX, IDC_EDIT1,			m_heContact);
+	//}}AFX_DATA_MAP
 }
 
 
@@ -1333,18 +1346,18 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
-	SetDlgItemText(IDC_TEXT1, s);
-	wsprintf(s, "%s version %X.%02XRC1 (revision 1.13.2.19)",
-				MAINFRAME_TITLE,
-				(MPTRACK_VERSION>>24)&0xFF,
-				(MPTRACK_VERSION>>16)&0xFF,
-				(MPTRACK_VERSION & 0xFFFF));
-	SetDlgItemText(IDC_TEXT2, s);
+	SetDlgItemText(IDC_EDIT2, s);
+	SetDlgItemText(IDC_EDIT3, CMainFrame::GetFullVersionString());
 
-	SetDlgItemText(IDC_EDIT1, "Contact:\r\nMPC forums: http://www.modplug.com/forums\r\nEric Chavanon: contact@ericus.org\r\nRobin Fernandes: modplug@soal.org\r\n\r\nGet the latest updates at:\r\n http://sourceforge.net/projects/modplug");
+	m_heContact.SetWindowText(
+"Contact:\r\n\
+MPC forums: http://www.modplug.com/forum\r\n\
+Robin Fernandes: mailto:modplug@soal.org\r\n\r\n\
+Updates:\r\n\
+http://www.modplug.com/forum/showpage.php?p=download");
 
 	char *pArrCredit = { 
-		"Modplug Tracker / OpenMPT|"
+		"OpenMPT / Modplug Tracker|"
 		"Copyright © 2004-2005 GPL|"
 		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
 		"|"
@@ -2721,8 +2734,10 @@ LRESULT CTrackApp::ProcessWndProcException(CException* e, const MSG* pMsg)
 	Log("Unhandled Exception\n");
 	Log("Attempting to close sound device\n");
 	
-	CMainFrame::gpSoundDevice->Reset(); 
-	CMainFrame::gpSoundDevice->Close();
+	if (CMainFrame::gpSoundDevice) {
+		CMainFrame::gpSoundDevice->Reset(); 
+		CMainFrame::gpSoundDevice->Close();
+	}
 
 	return CWinApp::ProcessWndProcException(e, pMsg);
 }

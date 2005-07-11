@@ -109,7 +109,7 @@ BOOL CSoundFile::DestroyInstrument(UINT nInstr, char removeSamples)
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 	//rewbs: changed message
-	if(removeSamples > 0 || (removeSamples == 0 && ::MessageBox(NULL, "Remove associated samples if they are unused??", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
+	if(removeSamples > 0 || (removeSamples == 0 && ::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES))
 		RemoveInstrumentSamples(nInstr);
 // -! BEHAVIOUR_CHANGE#0003
 

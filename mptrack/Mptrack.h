@@ -33,7 +33,6 @@ typedef MMRESULT (ACMAPI *PFNACMDRIVERDETAILS)(HACMDRIVERID, LPACMDRIVERDETAILS,
 
 
 /////////////////////////////////////////////////////////////////////////////
-
 // 16-colors DIB
 typedef struct MODPLUGDIB
 {

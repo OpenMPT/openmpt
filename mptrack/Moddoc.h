@@ -153,7 +153,7 @@ public:
 	BOOL RemovePattern(UINT n);
 	BOOL RemoveSample(UINT n);
 	BOOL RemoveInstrument(UINT n);
-	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, UINT nCurrentChn=-1); //rewbs.vstiLive: added current chan param
+	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, int nCurrentChn=-1); //rewbs.vstiLive: added current chan param
 	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, UINT nCurrentChn=-1); //rewbs.vstiLive: add params
 
 // -> CODE#0020
@@ -210,6 +210,8 @@ public:
 	HWND GetEditPosition(UINT &row, UINT &pat, UINT &ord); //rewbs.customKeys
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);				   //rewbs.customKeys
 	void TogglePluginEditor(UINT m_nCurrentPlugin);		   //rewbs.patPlugNames
+	
+	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 
 // protected members
 protected:
@@ -258,6 +260,7 @@ public:
 	afx_msg void OnEditSamples();
 	afx_msg void OnEditInstruments();
 	afx_msg void OnEditComments();
+	afx_msg void OnEditGraph();	//rewbs.Graph
 	afx_msg void OnInsertPattern();
 	afx_msg void OnInsertSample();
 	afx_msg void OnInsertInstrument();
@@ -277,6 +280,10 @@ public:
 	afx_msg void OnPatternPlayNoLoop(); //rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+private:
+
+	void ChangeFileExtension(UINT nNewType);
+	UINT FindAvailableChannel();
 };
 
 /////////////////////////////////////////////////////////////////////////////

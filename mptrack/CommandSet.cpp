@@ -2216,6 +2216,19 @@ void CCommandSet::SetupCommands()
 	commands[kcPatternInterpolateNote].isDummy = false;
 	commands[kcPatternInterpolateNote].Message = "Interpolate note";
 
+	//rewbs.graph
+	commands[kcViewGraph].UID = 1769;
+	commands[kcViewGraph].isHidden = false;
+	commands[kcViewGraph].isDummy = false;
+	commands[kcViewGraph].Message = "View Graph";
+	//end rewbs.graph
+
+	commands[kcToggleChanMuteOnPatTransition].UID = 1770;
+	commands[kcToggleChanMuteOnPatTransition].isHidden = false;
+	commands[kcToggleChanMuteOnPatTransition].isDummy = false;
+	commands[kcToggleChanMuteOnPatTransition].Message = "(Un)mute chan on pat transition";
+
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs
@@ -2821,6 +2834,9 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	
 	//Clear map
 	memset(km, -1, sizeof(kcNull)*KeyMapSize);
+//	km.RemoveAll();
+//	km.InitHashTable(700423);
+	
 
     //Copy commandlist content into map:
 	for (UINT cmd=0; cmd<kcNumCommands; cmd++)
@@ -2844,23 +2860,20 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 			//ASSERT(eventTypes.GetSize()>0);
 
 			//Handle super-contexts (contexts that represent a set of sub contexts)
-			if (curKc.ctx == kCtxViewPatterns)
-			{
+			if (curKc.ctx == kCtxViewPatterns) {
 				contexts.Add(kCtxViewPatternsNote);
 				contexts.Add(kCtxViewPatternsIns);
 				contexts.Add(kCtxViewPatternsVol);
 				contexts.Add(kCtxViewPatternsFX);
 				contexts.Add(kCtxViewPatternsFXparam);
 			}
-			else
-			{
+			else {
 				contexts.Add(curKc.ctx);
 			}
 
-			for (int cx=0; cx<contexts.GetSize(); cx++)
-			{
-				for (int ke=0; ke<eventTypes.GetSize(); ke++)
-				{
+			long label = 0;
+			for (int cx=0; cx<contexts.GetSize(); cx++)	{
+				for (int ke=0; ke<eventTypes.GetSize(); ke++) {
 					km[contexts[cx]][curKc.mod][curKc.code][eventTypes[ke]] = (CommandID)cmd;
 				}
 			}
@@ -2870,6 +2883,23 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 }
 //-------------------------------------
 
+
+DWORD CCommandSet::GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, KeyEventType ke)
+{ //Unused
+	ASSERT((long)ctx<0xFF);
+	ASSERT((long)mod<0xFF);
+	ASSERT((long)code<0xFF);
+	ASSERT((long)ke<0xFF);
+
+	BYTE ctxCode  = (BYTE)ctx;
+	BYTE modCode  = (BYTE)mod;
+	BYTE codeCode = (BYTE)code;
+	BYTE keCode   = (BYTE)ke;
+
+	DWORD label = ctxCode | (modCode<<8) | (codeCode<<16) | (ke<<24);
+
+	return label;
+}
 
 void CCommandSet::Copy(CCommandSet *source)
 {
@@ -2971,6 +3001,7 @@ bool CCommandSet::LoadFile(CString fileName)
 		return false;
 	}
 
+	int errorCount=0;
 	while(fgets(s,1024,inStream))
 	{
 		//::MessageBox(NULL, s, "", MB_ICONEXCLAMATION|MB_OK);
@@ -3023,10 +3054,17 @@ bool CCommandSet::LoadFile(CString fileName)
 			//Error checking (TODO):
 			if (cmd<0 || cmd>=kcNumCommands || spos==-1)
 			{
+				errorCount++;
 				CString err;
-				err.Format("Line %d in key binding file %s was not understood.", l, fileName);
-				Log(err);
-				::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
+				if (errorCount<10) {
+					err.Format("Line %d in key binding file %s was not understood.", l, fileName);
+					::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
+					Log(err);
+				} else if (errorCount==10) {
+					err.Format("Too many errors detected, not reporting any more.");
+					::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
+					Log(err);
+				}
 			}
 			else
 			{
@@ -3248,9 +3286,7 @@ bool CCommandSet::IsExtended(UINT code)
 		return true;
 	if (code==VK_DIVIDE)	//Numpad '/'
 		return true;
-/*	if (code>=VK_NUMPAD0 && code<=VK_NUMPAD9) //numpad
-		return false;				
-*/	if (code==VK_NUMLOCK)	//print screen
+	if (code==VK_NUMLOCK)	//print screen
 		return true;
 	if (code>=0xA0 && code<=0xA5) //attempt for RL mods
 		return true;

@@ -12,6 +12,7 @@
 #include "ctrl_smp.h"
 #include "ctrl_ins.h"
 #include "ctrl_com.h"
+#include "ctrl_graph.h" //rewbs.graph
 #include ".\globals.h"
 
 #ifdef _DEBUG
@@ -309,6 +310,11 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 	{
 		switch(nID)
 		{
+		//rewbs.graph
+		case IDD_CONTROL_GRAPH:
+			pDlg = new CCtrlGraph();
+			break;
+		//end rewbs.graph
 		case IDD_CONTROL_COMMENTS:
 			pDlg = new CCtrlComments();
 			break;
@@ -380,6 +386,7 @@ void CModControlView::UpdateView(DWORD lHint, CObject *pObject)
 		if (nType & (MOD_TYPE_XM|MOD_TYPE_IT))
 		{
 			mask |= 8;
+			//mask |= 32; //rewbs.graph
 			nCount ++;
 		}
 		if (nCount != (UINT)m_TabCtrl.GetItemCount())
@@ -395,6 +402,7 @@ void CModControlView::UpdateView(DWORD lHint, CObject *pObject)
 			if (mask & 2) m_TabCtrl.InsertItem(count++, "Patterns", IDD_CONTROL_PATTERNS, IMAGE_PATTERNS);
 			if (mask & 4) m_TabCtrl.InsertItem(count++, "Samples", IDD_CONTROL_SAMPLES, IMAGE_SAMPLES);
 			if (mask & 8) m_TabCtrl.InsertItem(count++, "Instruments", IDD_CONTROL_INSTRUMENTS, IMAGE_INSTRUMENTS);
+			if (mask & 32) m_TabCtrl.InsertItem(count++, "Graph", IDD_CONTROL_GRAPH, IMAGE_GRAPH); //rewbs.graph
 			if (mask & 16) m_TabCtrl.InsertItem(count++, "Comments", IDD_CONTROL_COMMENTS, IMAGE_COMMENTS);
 		}
 	}

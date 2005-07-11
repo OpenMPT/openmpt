@@ -590,7 +590,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 void CNoteMapWnd::PlayNote(int note)
 {
 	if (m_nPlayingNote >=0) return; //no polyphony in notemap window
-	m_pModDoc->PlayNote(note, m_nInstrument, 0, TRUE);
+	m_pModDoc->PlayNote(note, m_nInstrument, 0, FALSE);
 	m_nPlayingNote=note;
 }
 
@@ -682,7 +682,6 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN10,				m_SpinMidiPR);
 	DDX_Control(pDX, IDC_SPIN11,				m_SpinMidiBK);	//rewbs.MidiBank
 	DDX_Control(pDX, IDC_SPIN12,				m_SpinPPS);
-	DDX_Control(pDX, IDC_EDIT1,					m_EditCutOff);
 	DDX_Control(pDX, IDC_EDIT8,					m_EditGlobalVol);
 	DDX_Control(pDX, IDC_EDIT9,					m_EditPanning);
 	DDX_Control(pDX, IDC_EDIT15,				m_EditPPS);
@@ -1044,7 +1043,6 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinPanning.EnableWindow(bITonly);
 		m_CheckPanning.EnableWindow(bITonly);
 		m_EditPPS.EnableWindow(bITonly);
-		m_EditCutOff.EnableWindow(bITonly);
 		m_CheckCutOff.EnableWindow(bITonly);
 		m_CheckResonance.EnableWindow(bITonly);
 		m_CheckHighpass.EnableWindow(bITonly);
@@ -1175,8 +1173,8 @@ VOID CCtrlInstruments::UpdateFilterText()
 			} else {
 				wsprintf(s, "Off");
 			}
-
-			m_EditCutOff.SetWindowText(s);
+			
+			SetDlgItemText(IDC_TEXT1, s);
 		}
 	}
 }
@@ -1532,7 +1530,7 @@ void CCtrlInstruments::OnInstrumentPlay()
 			m_pModDoc->NoteOff(NOTE_MIDDLEC, TRUE, m_nInstrument);
 		} else
 		{
-			m_pModDoc->PlayNote(NOTE_MIDDLEC, m_nInstrument, 0, TRUE);
+			m_pModDoc->PlayNote(NOTE_MIDDLEC, m_nInstrument, 0, FALSE);
 		}
 	}
 	SwitchToView();

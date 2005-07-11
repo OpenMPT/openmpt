@@ -394,7 +394,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	dwQuality = CMainFrame::m_dwQuality;
 	// Resampling type
 	{
-		m_CbnResampling.AddString("No Resampling");
+		m_CbnResampling.AddString("No Interpolation");
 		m_CbnResampling.AddString("Linear");
 		m_CbnResampling.AddString("Cubic spline");
 		//rewbs.resamplerConf

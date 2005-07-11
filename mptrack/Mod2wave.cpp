@@ -51,8 +51,9 @@ extern LPCSTR gszChnCfgNames[3];
 
 static void __cdecl M2W_32ToFloat(void *pBuffer, long nCount)
 {
-	//const float _ki2f = 1.0f / (FLOAT)(ULONG)0x80000000;  
+//	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x80000000); //olivier 
 	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x7fffffff); //ericus' 32bit fix
+//	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x7ffffff);  //robin
 	_asm {
 	mov esi, pBuffer
 	mov ecx, nCount
@@ -682,7 +683,6 @@ void CDoWaveConvert::OnButton1()
 	for (UINT n=0; ; n++)
 	{
 		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer));
-		
 /*		if (m_bGivePlugsIdleTime) {
 			LARGE_INTEGER startTime, endTime, duration,Freq;
 			QueryPerformanceFrequency(&Freq);
@@ -719,6 +719,7 @@ void CDoWaveConvert::OnButton1()
 		{
 			M2W_32ToFloat(buffer, lRead*(nBytesPerSample>>2));
 		}
+
 		UINT lWrite = fwrite(buffer, 1, lRead*nBytesPerSample, f);
 		if (!lWrite) 
 			break;

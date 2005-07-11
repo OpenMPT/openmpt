@@ -86,7 +86,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 //	m_SliderTempo.SetRange(0, 223);	// 255 bpm max
 	m_SliderTempo.SetRange(0, 480);
 // -! BEHAVIOUR_CHANGE#0016
-	m_ComboResampling.AddString("No Resampling");
+	m_ComboResampling.AddString("No Interpolation");
 	m_ComboResampling.AddString("Linear");
 	m_ComboResampling.AddString("Cubic spline");
 	//rewbs.resamplerConf
@@ -220,6 +220,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		if ((n > 0) && (n <= 100) && (n != m_pSndFile->m_nSongPreAmp))
 		{
 			m_pSndFile->m_nSongPreAmp = n;
+			m_pModDoc->SetModified();
 			m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 		}
 // -> CODE#0016
@@ -231,6 +232,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		{
 			m_pSndFile->m_nDefaultTempo = n;
 			m_pSndFile->m_nMusicTempo = n;
+			m_pModDoc->SetModified();
 			m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 		}
 

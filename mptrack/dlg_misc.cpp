@@ -112,6 +112,7 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO1,		m_TypeBox);
 	DDX_Control(pDX, IDC_COMBO2,		m_ChannelsBox);
 	DDX_Control(pDX, IDC_COMBO3,		m_TempoModeBox);
+	DDX_Control(pDX, IDC_COMBO4,		m_PlugMixBox);
 	DDX_Control(pDX, IDC_CHECK1,		m_CheckBox1);
 	DDX_Control(pDX, IDC_CHECK2,		m_CheckBox2);
 	DDX_Control(pDX, IDC_CHECK3,		m_CheckBox3);
@@ -167,7 +168,7 @@ BOOL CModTypeDlg::OnInitDialog()
 
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
-	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern"), tempo_mode_modern);
+	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
 	switch(m_pSndFile->m_nTempoMode)
 	{
 		case tempo_mode_alternative:	m_TempoModeBox.SetCurSel(1); break;
@@ -175,6 +176,25 @@ BOOL CModTypeDlg::OnInitDialog()
 		case tempo_mode_classic:
 		default:						m_TempoModeBox.SetCurSel(0); break;
 	}
+
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),   plugmix_mode_117RC2);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),   plugmix_mode_117RC1);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original"),		  plugmix_mode_original);
+	switch(m_pSndFile->m_nPlugMixMode)
+	{
+		case plugmix_mode_original:	m_PlugMixBox.SetCurSel(2); break;
+		case plugmix_mode_117RC1:	m_PlugMixBox.SetCurSel(1); break;
+		case plugmix_mode_117RC2:
+		default:					m_PlugMixBox.SetCurSel(0); break;
+	}
+
+;
+
+	SetDlgItemText(IDC_EDIT5, "Created with:");
+	SetDlgItemText(IDC_EDIT6, "Last saved with:");
+
+	SetDlgItemText(IDC_EDIT1, CMainFrame::GetVersionString(m_pSndFile->m_dwCreatedWithVersion));
+	SetDlgItemText(IDC_EDIT2, CMainFrame::GetVersionString(m_pSndFile->m_dwLastSavedWithVersion));
 
 	UpdateDialog();
 	return TRUE;
@@ -210,6 +230,7 @@ void CModTypeDlg::UpdateDialog()
 	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
 	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
 
+	m_PlugMixBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
 }
 
 
@@ -321,9 +342,16 @@ void CModTypeDlg::OnOK()
 	if (sel >= 0) {
 		m_pSndFile->m_nTempoMode = m_TempoModeBox.GetItemData(sel);
 	}
-	
+
+	sel = m_PlugMixBox.GetCurSel();
+	if (sel >= 0) {
+		m_pSndFile->m_nPlugMixMode = m_PlugMixBox.GetItemData(sel);
+		m_pSndFile->m_pConfig->SetPluginMixLevels(m_pSndFile->m_nPlugMixMode);
+	}
+
 	m_pSndFile->m_nRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
 	m_pSndFile->m_nRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
+	
 
 	CDialog::OnOK();
 }
