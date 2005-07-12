@@ -2877,8 +2877,10 @@ bool CMainFrame::UpdateHighlights()
 		CSoundFile* pSndFile = pModDoc->GetSoundFile();
 		if (pSndFile)
 		{
-			CMainFrame::m_nRowSpacing  = pSndFile->m_nRowsPerMeasure;
-			CMainFrame::m_nRowSpacing2 = pSndFile->m_nRowsPerBeat;
+			if (CMainFrame::m_dwPatternSetup&PATTERN_HILITETIMESIGS) {
+				CMainFrame::m_nRowSpacing  = pSndFile->m_nRowsPerMeasure;
+				CMainFrame::m_nRowSpacing2 = pSndFile->m_nRowsPerBeat;
+			}
 			return true;
 		}
 	}
