@@ -200,7 +200,7 @@ BOOL COptionsColors::OnKillActive()
 void COptionsColors::OnOK()
 //-------------------------
 {
-	CMainFrame::m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT|PATTERN_SMALLFONT);
+	CMainFrame::m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT|PATTERN_SMALLFONT|PATTERN_HILITETIMESIGS);
 	if (IsDlgButtonChecked(IDC_CHECK1)) CMainFrame::m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
 	if (IsDlgButtonChecked(IDC_CHECK2)) CMainFrame::m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
 	if (IsDlgButtonChecked(IDC_CHECK3)) CMainFrame::m_dwPatternSetup |= PATTERN_SMALLFONT;
