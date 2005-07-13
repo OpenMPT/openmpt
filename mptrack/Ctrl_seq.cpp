@@ -542,6 +542,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				if (m_pModDoc->MoveOrder(m_nDragOrder, m_nDropPos, TRUE, m_bShift))
 				{
 					SetCurSel(((m_nDragOrder < (UINT)m_nDropPos) && (!m_bShift)) ? m_nDropPos-1 : m_nDropPos);
+					m_pModDoc->SetModified();
 				}
 			}
 		}
