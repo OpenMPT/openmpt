@@ -246,9 +246,19 @@ bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc)
 
 void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
 {
-	CString path = m_bUseOriginalPath?pModDoc->GetPathName():m_csPath;
-	//remove file name if necessary
-	if (m_bUseOriginalPath) path = path.Left(path.GetLength()-pModDoc->GetTitle().GetLength());
+	CString path;
+	
+	if (m_bUseOriginalPath) {
+		if (pModDoc->m_bHasValidPath) { // Check that the file has a user-chosen path
+			CString fullPath = pModDoc->GetPathName();
+			path = fullPath.Left(fullPath.GetLength()-pModDoc->GetTitle().GetLength()); //remove file name if necessary
+		} else {
+			path = CMainFrame::m_csExecutablePath + "\\";
+		}
+	} else {
+		path = m_csPath;
+	}
+
 	CString searchPattern = path + pModDoc->GetTitle() + ".AutoSave.*";
 
 	CFileFind finder;
