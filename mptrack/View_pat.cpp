@@ -1115,33 +1115,32 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 			if (ih->ShiftPressed()) {
 				//Don't bring up menu if shift is pressed, else we won't get button up msg.
 			} else {
-				BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile);
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+				if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
+					AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 				BuildRecordCtxMenu(hMenu, nChn, pModDoc);
 			}
 		}
 		
 		//------ Standard Menu ---------- :
 		else if ((pt.x >= m_szHeader.cx) && (pt.y > m_szHeader.cy))	{
-			BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile);
-			AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			BuildSelectionCtxMenu(hMenu, ih);
-			AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			BuildEditCtxMenu(hMenu, ih, pModDoc);
-			AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			BuildNoteInterpolationCtxMenu(hMenu, ih, pSndFile);
-			BuildVolColInterpolationCtxMenu(hMenu, ih, pSndFile);
-			BuildEffectInterpolationCtxMenu(hMenu, ih, pSndFile);
-			AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			BuildTransposeCtxMenu(hMenu, ih);
-			AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			BuildVisFXCtxMenu(hMenu, ih);
-			BuildRandomCtxMenu(hMenu, ih);
-			BuildAmplifyCtxMenu(hMenu, ih);
-			BuildSetInstCtxMenu(hMenu, ih);
-			AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			BuildGrowShrinkCtxMenu(hMenu, ih);
-			AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			if (BuildSelectionCtxMenu(hMenu, ih))
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			if (BuildEditCtxMenu(hMenu, ih, pModDoc))
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			if (BuildNoteInterpolationCtxMenu(hMenu, ih, pSndFile) |	//Use bitwise ORs to avoid shortcuts?
+				BuildVolColInterpolationCtxMenu(hMenu, ih, pSndFile) | 
+				BuildEffectInterpolationCtxMenu(hMenu, ih, pSndFile) )
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			if (BuildTransposeCtxMenu(hMenu, ih))
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			if (BuildVisFXCtxMenu(hMenu, ih)   ||
+				BuildAmplifyCtxMenu(hMenu, ih) ||
+				BuildSetInstCtxMenu(hMenu, ih) )
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			if (BuildGrowShrinkCtxMenu(hMenu, ih))
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			BuildRowInsDelCtxMenu(hMenu, ih);
 		}
 
@@ -4006,7 +4005,7 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 	}
 }
 
-void CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFile)
+bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFile)
 //---------------------------------------------------------------------------------
 {
 	CHAR s[512];
@@ -4035,11 +4034,11 @@ void CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFi
 				AppendMenu(hMenu, MF_STRING, ID_PLUGSELECT+plug, s);
 			}
 		}
-
 	}
+	return true;
 }
 
-void CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nChn, CSoundFile* pSndFile)
+bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nChn, CSoundFile* pSndFile)
 //------------------------------------------------------------------------------------------------------
 {
 	AppendMenu(hMenu, (pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ? 
@@ -4066,18 +4065,21 @@ void CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 			(pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ?
 			"Unmute on Transition\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
 			"Mute on Transition\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
+
+	return true;
 }
 
-void CViewPattern::BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc)
+bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc)
 //-----------------------------------------------------------------------------
 {
 	AppendMenu(hMenu, pModDoc->IsChannelRecord1(nChn) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_EDIT_RECSELECT, "Record select");
 	AppendMenu(hMenu, pModDoc->IsChannelRecord2(nChn) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_EDIT_SPLITRECSELECT, "Split Record select");
+	return true;
 }
 
 
 
-void CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih)
+bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih)
 //----------------------------------------------------------------------
 {
 	CString label = "";
@@ -4089,23 +4091,26 @@ void CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih)
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_INSERTROW, "Insert " + label + "\t" + ih->GetKeyTextFromCommand(kcInsertRow));
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DELETEROW, "Delete " + label + "\t" + ih->GetKeyTextFromCommand(kcDeleteRows) );
+	return true;
 }
 
-void CViewPattern::BuildSelectionCtxMenu(HMENU hMenu, CInputHandler* ih)
+bool CViewPattern::BuildSelectionCtxMenu(HMENU hMenu, CInputHandler* ih)
 //----------------------------------------------------------------------
 {
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECTCOLUMN, "Select Column\t" + ih->GetKeyTextFromCommand(kcSelectColumn));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_SELECT_ALL, "Select Pattern\t" + ih->GetKeyTextFromCommand(kcEditSelectAll));
+	return true;
 }
 
-void CViewPattern::BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler* ih)
+bool CViewPattern::BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler* ih)
 //----------------------------------------------------------------------
 {
 	AppendMenu(hMenu, MF_STRING, ID_GROW_SELECTION, "Grow selection\t" + ih->GetKeyTextFromCommand(kcPatternGrowSelection));
 	AppendMenu(hMenu, MF_STRING, ID_SHRINK_SELECTION, "Shrink selection\t" + ih->GetKeyTextFromCommand(kcPatternShrinkSelection));
+	return true;
 }
 
-void CViewPattern::BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
+bool CViewPattern::BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
 //----------------------------------------------------------------------------------------------------
 {
 	CArray<UINT, UINT> validChans;
@@ -4124,10 +4129,14 @@ void CViewPattern::BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih,
 		}
 
 	}
-	AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_NOTE, "Interpolate Note\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateNote));
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_NOTE, "Interpolate Note\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateNote));
+		return true;
+	}
+	return false;
 }
 
-void CViewPattern::BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
+bool CViewPattern::BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
 //------------------------------------------------------------------------------------------------------
 {
 	CArray<UINT, UINT> validChans;
@@ -4145,11 +4154,15 @@ void CViewPattern::BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler* i
 			}
 		}
 	}
-	AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_VOLUME, "Interpolate Vol\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateVol));
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_VOLUME, "Interpolate Vol\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateVol));
+		return true;
+	}
+	return false;
 }
 
 
-void CViewPattern::BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
+bool CViewPattern::BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
 //------------------------------------------------------------------------------------------------------
 {
 	CArray<UINT, UINT> validChans;
@@ -4177,62 +4190,89 @@ void CViewPattern::BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* i
 	}
 
 
-
-	AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_EFFECT, "Interpolate Effect\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect));
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_EFFECT, "Interpolate Effect\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateEffect));
+		return true;
+	}
+	return false;
 }
 
-void CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih, CModDoc* pModDoc)
+bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih, CModDoc* pModDoc)
 //-----------------------------------------------------------------------------------
 {
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\t" + ih->GetKeyTextFromCommand(kcEditCut));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_MIXPASTE, "Mix Paste\t" + ih->GetKeyTextFromCommand(kcEditMixPaste));
-	AppendMenu(hMenu, MF_STRING|(pModDoc->CanUndo()?0:MF_GRAYED), ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
+	
+	DWORD greyed = pModDoc->CanUndo()?FALSE:MF_GRAYED;
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+		AppendMenu(hMenu, MF_STRING|greyed, ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
+	}
+	return true;
 }
 
-void CViewPattern::BuildVisFXCtxMenu(HMENU hMenu, CInputHandler* ih)
+bool CViewPattern::BuildVisFXCtxMenu(HMENU hMenu, CInputHandler* ih)
 //------------------------------------------------------------------
 {
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(EFFECT_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
-	AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_VISUALIZE_EFFECT, "Visualize Effect\t" + ih->GetKeyTextFromCommand(kcPatternVisualizeEffect));
+
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_VISUALIZE_EFFECT, "Visualize Effect\t" + ih->GetKeyTextFromCommand(kcPatternVisualizeEffect));
+		return true;
+	}
+	return false;
 }
 
-void CViewPattern::BuildRandomCtxMenu(HMENU hMenu, CInputHandler* ih)
+bool CViewPattern::BuildRandomCtxMenu(HMENU hMenu, CInputHandler* ih)
 //------------------------------------------------------------------
 {
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_OPEN_RANDOMIZER, "Randomize...\t" + ih->GetKeyTextFromCommand(kcPatternOpenRandomizer));
+	return true;
 }
 
-void CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler* ih)
+bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler* ih)
 //----------------------------------------------------------------------
 {
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(NOTE_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
-	AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_UP, "Transpose +1\t" + ih->GetKeyTextFromCommand(kcTransposeUp));
-	AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_DOWN, "Transpose -1\t" + ih->GetKeyTextFromCommand(kcTransposeDown));
-	AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_OCTUP, "Transpose +12\t" + ih->GetKeyTextFromCommand(kcTransposeOctUp));
-	AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_OCTDOWN, "Transpose -12\t" + ih->GetKeyTextFromCommand(kcTransposeOctDown));
+
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_UP, "Transpose +1\t" + ih->GetKeyTextFromCommand(kcTransposeUp));
+		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_DOWN, "Transpose -1\t" + ih->GetKeyTextFromCommand(kcTransposeDown));
+		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_OCTUP, "Transpose +12\t" + ih->GetKeyTextFromCommand(kcTransposeOctUp));
+		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_OCTDOWN, "Transpose -12\t" + ih->GetKeyTextFromCommand(kcTransposeOctDown));
+		return true;
+	}
+	return false;
 }
 
-void CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih)
+bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih)
 //--------------------------------------------------------------------
 {
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(VOL_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
-	AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_AMPLIFY, "Amplify\t" + ih->GetKeyTextFromCommand(kcPatternAmplify));
+
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_AMPLIFY, "Amplify\t" + ih->GetKeyTextFromCommand(kcPatternAmplify));
+		return true;
+	}
+	return false;
 }
 
-void CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih)
+bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih)
 //--------------------------------------------------------------------
 {
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(INST_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
-	AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_SETINSTRUMENT, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
+
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
+		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_SETINSTRUMENT, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
+		return true;
+	}
+	return false;
 }
-
-
 
 
 UINT CViewPattern::GetSelectionStartRow() {

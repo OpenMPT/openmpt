@@ -25,7 +25,7 @@ class CPerformanceCounter;
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define KEYBOARDMAP_LENGTH			(3*12+2)
 #define MAINFRAME_TITLE				"Open Modplug Tracker"
-#define MPTRACK_VERSION				0x01170220
+#define MPTRACK_VERSION				0x01170221
 #define INFORMAL_VERSION			"1.17RC2"
 
 
@@ -208,7 +208,9 @@ enum
 // rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
 
-#define PATTERN_HILITETIMESIGS	0x400000 
+#define PATTERN_HILITETIMESIGS	0x400000
+
+#define PATTERN_OLDCTXMENUSTYLE	0x800000
 
 // Keyboard Setup
 enum {
@@ -376,6 +378,7 @@ public:
 	static EQPRESET m_EqSettings;
 	// Pattern Setup
 	static DWORD m_dwPatternSetup, m_dwMidiSetup, m_nRowSpacing, m_nRowSpacing2, m_nKeyboardCfg, gnHotKeyMask;
+	static bool m_bHideUnavailableCtxMenuItems;
 	static DWORD KeyboardMap[KEYBOARDMAP_LENGTH], KeyboardMPT[KEYBOARDMAP_LENGTH];
 	static DWORD KeyboardFT2[KEYBOARDMAP_LENGTH],KeyboardIT[KEYBOARDMAP_LENGTH];
 	static DWORD CustomKeys[MAX_MPTHOTKEYS];

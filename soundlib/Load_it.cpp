@@ -595,6 +595,7 @@ mpts:
 				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
+				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -995,6 +996,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
+				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -2512,6 +2514,12 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	size = sizeof(m_dwLastSavedWithVersion);		
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_dwLastSavedWithVersion, 1, size, f);	
+
+	code = 'SPA.';							//write m_nSongPreAmp
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nSongPreAmp);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nSongPreAmp, 1, size, f);	
 
 	return;
 }

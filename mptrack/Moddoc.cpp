@@ -898,36 +898,34 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 //--------------------------------------------------------------------------
 {
 	BEGIN_CRITICAL();
+
+
+	//rewbs.vstiLive
+	if (nins>0 && nins<=m_SndFile.m_nInstruments) {
+
+		INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
+		if (penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
+		{
+
+			UINT nPlugin = penv->nMixPlug;  		// First try intrument VST
+			if (((!nPlugin) || (nPlugin > MAX_MIXPLUGINS)) && //no good plug yet
+				(nCurrentChn<MAX_CHANNELS)) // chan OK
+				nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;// Then try Channel VST
+			
+			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+			{
+				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
+				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note+0xFF, 0, MAX_BASECHANNELS);
+
+			}
+		}
+	}
+	//end rewbs.vstiLive
+
 	MODCHANNEL *pChn = &m_SndFile.Chn[m_SndFile.m_nChannels];
 	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
 		DWORD mask = (bFade) ? CHN_NOTEFADE : (CHN_NOTEFADE|CHN_KEYOFF);
-
-		//rewbs.vstiLive
-		if (nins>0 && nins<=m_SndFile.m_nInstruments)
-		{
-			INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
-//			MODINSTRUMENT *psmp = &(m_SndFile.Ins[nins]);
-			if (nCurrentChn >=0 && penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
-			{
-				//UINT nPlugin = m_SndFile.GetBestPlugin(nCurrentChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
-				
-				UINT nPlugin = 0;
-				if (pChn->pHeader) 
-					nPlugin = penv->nMixPlug;  		// first try intrument VST
-				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
-					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;// Then try Channel VST
-			    
-				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
-				{
-					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note+0xFF, 0, nCurrentChn);
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note+0xFF, 0, MAX_BASECHANNELS);
-
-				}
-			}
-		}
-		//end rewbs.vstiLive
 
 		// Fade all channels > m_nChannels which are playing this note. 
 		// Could conflict with NNAs.

@@ -173,6 +173,7 @@ RPB.	[EXT]	nRowsPerBeat;
 RPM.	[EXT]	nRowsPerMeasure;
 RS..			nResSwing;
 SEP@	[EXT]									chunk SEPARATOR tag
+SPA.	[EXT]	m_nSongPreAmp;
 TM..	[EXT]	nTempoMode;
 VE..			nVolEnv;
 VE[.			VolEnv[MAX_ENVPOINTS];
@@ -603,7 +604,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	// Check invalid instruments
 	while ((m_nInstruments > 0) && (!Headers[m_nInstruments])) m_nInstruments--;
 	// Set default values
-	if (m_nSongPreAmp < 0x20) m_nSongPreAmp = 0x20;
 	if (m_nDefaultTempo < 32) m_nDefaultTempo = 125;
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
 	m_nMusicSpeed = m_nDefaultSpeed;

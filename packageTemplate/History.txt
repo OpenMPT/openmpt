@@ -13,6 +13,16 @@ It is unfinished, do not expect to be able to compose with this version safely. 
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.21
+  . <rewbs> Drags on Orderlist mark song as modified.
+  . <rewbs> Fixed auto-deletion of excess autosaves where song has no associated directory.
+  . <rewbs> Fixed option in colour setting tab to override time sig highlighting with custom highlight positions (was always getting reset to time sig highlighting before).
+  . <rewbs> Fixes to play note from VST gui.
+  . <rewbs> Second attempt at fixing stuck VSTi notes when playing during playback.
+  . <rewbs> If an effect is removed, channels pointing to that effect now display "[empty]"
+  . <rewbs> Full range song pre-amp is now saved in song with both "XM" and "IT".
+  / <rewbs> Added option to hide unavailable options in pattern ctx menu, rather than greying them out.
+  
 
 . v 1.17.02.20
   + <rewbs> OpenMPT version saved in file, visible in song settings dialog.
