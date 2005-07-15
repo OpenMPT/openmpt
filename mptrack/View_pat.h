@@ -275,21 +275,21 @@ public:
 private:
 
 	bool HandleSplit(MODCOMMAND* p, int note);
-	void BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFile);
-	void BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc);
-	void BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nChn, CSoundFile* pSndFile);
-	void BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih);
-	void BuildSelectionCtxMenu(HMENU hMenu, CInputHandler* ih);
-	void BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler* ih);
-	void BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
-	void BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
-	void BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
-	void BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih,  CModDoc* pModDoc);
-	void BuildVisFXCtxMenu(HMENU hMenu, CInputHandler* ih);
-	void BuildRandomCtxMenu(HMENU hMenu, CInputHandler* ih);
-	void BuildTransposeCtxMenu(HMENU hMenu, CInputHandler* ih);
-	void BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih);
-	void BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFile);
+	bool BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc);
+	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nChn, CSoundFile* pSndFile);
+	bool BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildSelectionCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
+	bool BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
+	bool BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
+	bool BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih,  CModDoc* pModDoc);
+	bool BuildVisFXCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildRandomCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildTransposeCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih);
 
 	UINT GetSelectionStartRow();
 	UINT GetSelectionEndRow();

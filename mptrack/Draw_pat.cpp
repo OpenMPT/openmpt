@@ -464,10 +464,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 					rect.top+=PLUGNAME_HEIGHT;
 					rect.bottom+=PLUGNAME_HEIGHT;
 					mixPlug=pSndFile->ChnSettings[ncolhdr].nMixPlugin;
-					if (mixPlug)
-						wsprintf(s, "%d: %s", mixPlug, (pSndFile->m_MixPlugins[mixPlug-1]).Info.szName);
-					else
+					if (mixPlug) {
+						wsprintf(s, "%d: %s", mixPlug, (pSndFile->m_MixPlugins[mixPlug-1]).pMixPlugin?(pSndFile->m_MixPlugins[mixPlug-1]).Info.szName:"[empty]");
+					} else {
 						wsprintf(s, "---");
+					}
 					DrawButtonRect(hdc, &rect, s, FALSE, 
 						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 				}

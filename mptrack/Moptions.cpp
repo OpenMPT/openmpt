@@ -411,8 +411,13 @@ void COptionsColors::OnSettingsChanged()
 void COptionsColors::OnHiliteTimeSigsChanged()
 //--------------------------------------
 {
-	GetDlgItem(IDC_PRIMARYHILITE)->EnableWindow(!IsDlgButtonChecked(IDC_CHECK5));
-	GetDlgItem(IDC_SECONDARYHILITE)->EnableWindow(!IsDlgButtonChecked(IDC_CHECK5));
+	bool enabling = !IsDlgButtonChecked(IDC_CHECK5);
+	if (enabling) {
+		SetDlgItemInt(IDC_PRIMARYHILITE, CMainFrame::m_nRowSpacing);
+		SetDlgItemInt(IDC_SECONDARYHILITE, CMainFrame::m_nRowSpacing2);
+	}
+	GetDlgItem(IDC_PRIMARYHILITE)->EnableWindow(enabling);
+	GetDlgItem(IDC_SECONDARYHILITE)->EnableWindow(enabling);
 	OnSettingsChanged();
 }
 
@@ -593,6 +598,7 @@ enum {
 //	OPTGEN_ALTERNTIVEBPMSPEED,
 // rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
+	OPTGEN_PATTERNCTXMENUSTYLE,
 	OPTGEN_MAXOPTIONS
 };
 
@@ -624,6 +630,8 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 //	{"Alternative BPM/Speed",			"Alternative BPM/Speed interpretation where speed represents the number of tempo ticks per pattern row."}, 
 // rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
+
+	{"Old style pattern context menu",	"Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
 };
 
 
@@ -681,6 +689,7 @@ BOOL COptionsGeneral::OnInitDialog()
 //		case OPTGEN_ALTERNTIVEBPMSPEED:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED); break;
 // rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
+		case OPTGEN_PATTERNCTXMENUSTYLE: bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE); break;
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
@@ -734,6 +743,8 @@ void COptionsGeneral::OnOK()
 //		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
 // rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022		
+		case OPTGEN_PATTERNCTXMENUSTYLE:			mask = PATTERN_OLDCTXMENUSTYLE; break;
+			
 		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
