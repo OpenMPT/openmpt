@@ -1129,7 +1129,7 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildEditCtxMenu(hMenu, ih, pModDoc))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			if (BuildNoteInterpolationCtxMenu(hMenu, ih, pSndFile) |	//Use bitwise ORs to avoid shortcuts?
+			if (BuildNoteInterpolationCtxMenu(hMenu, ih, pSndFile) |	//Use bitwise ORs to avoid shortcuts
 				BuildVolColInterpolationCtxMenu(hMenu, ih, pSndFile) | 
 				BuildEffectInterpolationCtxMenu(hMenu, ih, pSndFile) )
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
