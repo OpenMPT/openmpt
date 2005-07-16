@@ -747,6 +747,9 @@ BOOL CTrackApp::InitInstance()
 
 	// Initialize CMainFrame
 	pMainFrame->Initialize();
+	InitCommonControls();
+	m_dwLastPluginIdleCall=0;	//rewbs.VSTCompliance
+	pMainFrame->m_InputHandler->UpdateMainMenu();	//rewbs.customKeys
 
 	// Dispatch commands specified on the command line
 	if (!ProcessShellCommand(cmdInfo))
@@ -772,10 +775,6 @@ BOOL CTrackApp::InitInstance()
 		Log("OpenMPT v%X.%02X.%04d started\n", (MPTRACK_VERSION>>24)&0xFF, (MPTRACK_VERSION>>16)&0xFF, (MPTRACK_VERSION & 0xFFFF));
 	}
 	
-	InitCommonControls();
-	m_dwLastPluginIdleCall=0;	//rewbs.VSTCompliance
-	
-	pMainFrame->m_InputHandler->UpdateMainMenu();	//rewbs.customKeys
 	EndWaitCursor();
 	return TRUE;
 }
