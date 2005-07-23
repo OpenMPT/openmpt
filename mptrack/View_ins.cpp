@@ -1246,7 +1246,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	// to avoid flicker, establish a memory dc, draw to it 
 	// and then BitBlt it to the destination "pDC"
 	
-	//check foe window resize
+	//check for window resize
 	if (m_dcMemMain.GetSafeHdc()) {
 		m_dcMemMain.SelectObject(oldBitmap);
 		m_dcMemMain.DeleteDC();

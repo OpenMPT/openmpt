@@ -184,6 +184,7 @@ VR..			nVolRamp;
 VS..			nVolSwing;
 VSB.			nVolSustainBegin;
 VSE.			nVolSustainEnd;
+VSTV	[EXT]	nVSTiVolume;
 -----------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------*/
 
@@ -438,6 +439,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
 	m_nSongPreAmp = 0x30;
+	m_nVSTiVolume = 100;
 	m_nPatternNames = 0;
 	m_nMaxOrderPosition = 0;
 	m_lpszPatternNames = NULL;
@@ -658,10 +660,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	if (m_nType)
 	{
-		UINT maxpreamp = 0x10+(m_nChannels*8);
+/*		UINT maxpreamp = 0x10+(m_nChannels*8);
 		if (maxpreamp > 100) maxpreamp = 100;
 		if (m_nSongPreAmp > maxpreamp) m_nSongPreAmp = maxpreamp;
-		return TRUE;
+*/		return TRUE;
 	}
 
 	
@@ -743,6 +745,7 @@ MODCOMMAND *CSoundFile::AllocatePattern(UINT rows, UINT nchns)
 void CSoundFile::FreePattern(LPVOID pat)
 //--------------------------------------
 {
+	
 	if (pat) delete pat;
 }
 

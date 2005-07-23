@@ -511,61 +511,79 @@ BEGIN
                     37,10
 END
 
-IDD_CONTROL_GLOBALS DIALOGEX 0, 0, 440, 99
+IDD_CONTROL_GLOBALS DIALOGEX 0, 0, 561, 94
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    LTEXT           "Song Title:",IDC_STATIC,2,4,51,8
-    EDITTEXT        IDC_EDIT_SONGTITLE,2,14,151,12,ES_AUTOHSCROLL
-    LTEXT           "Tempo:",IDC_STATIC,8,42,46,8
-    LTEXT           "Ticks per row:",IDC_STATIC,8,67,46,8
-    LTEXT           "Global volume:",IDC_STATIC,83,42,49,8
-    GROUPBOX        "Initial Settings",IDC_STATIC,2,31,152,63
-    LTEXT           "Restart position:",IDC_STATIC,83,67,57,8
-    EDITTEXT        IDC_EDIT_TEMPO,8,51,40,12,ES_NUMBER
-    CONTROL         "Spin1",IDC_SPIN_TEMPO,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,42,51,
-                    11,14
-    EDITTEXT        IDC_EDIT_SPEED,8,76,40,12,ES_NUMBER
+    EDITTEXT        IDC_EDIT_SONGTITLE,2,3,167,12,ES_AUTOHSCROLL
+    LTEXT           "Ticks/row:",IDC_STATIC,44,40,35,8
+    LTEXT           "Restart:",IDC_STATIC,44,70,26,8
+    EDITTEXT        IDC_EDIT_SPEED,44,51,30,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN_SPEED,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,43,76,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,67,50,
                     11,14
-    EDITTEXT        IDC_EDIT_GLOBALVOL,83,51,40,12,ES_NUMBER
-    CONTROL         "Spin1",IDC_SPIN_GLOBALVOL,"msctls_updown32",
-                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_NOTHOUSANDS,117,51,11,14
-    EDITTEXT        IDC_EDIT_RESTARTPOS,83,76,40,12,ES_NUMBER
+    EDITTEXT        IDC_EDIT_RESTARTPOS,44,78,30,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN_RESTARTPOS,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_NOTHOUSANDS,120,76,11,14
+                    UDS_NOTHOUSANDS,65,77,11,14
     CONTROL         "Slider1",IDC_SLIDER_SONGPREAMP,"msctls_trackbar32",
-                    TBS_VERT | TBS_BOTH | TBS_NOTICKS,134,37,15,55
-    PUSHBUTTON      "Settings...",IDC_BUTTON_MODTYPE,283,14,37,12,NOT 
-                    WS_TABSTOP,WS_EX_STATICEDGE
-    CTEXT           "Type EXT, ## channels",IDC_EDIT_MODTYPE,158,14,121,12,
-                    SS_CENTERIMAGE,WS_EX_STATICEDGE
-    GROUPBOX        "Effects",IDC_STATIC,158,31,162,63
-    CONTROL         "Bass Expansion",IDC_CHECK_BASS,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,161,43,75,10
-    CONTROL         "Reverb",IDC_CHECK_REVERB,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,161,55,73,10
-    CONTROL         "Surround",IDC_CHECK_SURROUND,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,161,67,81,10
-    CONTROL         "Loop Song",IDC_CHECK_LOOPSONG,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,248,79,66,10
-    COMBOBOX        IDC_COMBO_RESAMPLING,248,50,67,74,CBS_DROPDOWNLIST | 
+                    TBS_VERT | TBS_BOTH | TBS_NOTICKS,221,28,15,50
+    PUSHBUTTON      "Song Properties...",IDC_BUTTON_MODTYPE,262,18,60,12,NOT 
                     WS_TABSTOP
-    LTEXT           "Resampling:",IDC_STATIC,248,41,43,8
-    CONTROL         "Graphic Equalizer",IDC_CHECK_EQ,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,161,79,81,10
+    CTEXT           "Type EXT, ## channels",IDC_EDIT_MODTYPE,173,3,149,12,
+                    SS_CENTERIMAGE,WS_EX_STATICEDGE
+    GROUPBOX        "Player Settings (not saved in song!)",IDC_STATIC,414,31,
+                    147,63,NOT WS_VISIBLE
+    CONTROL         "Bass Expansion",IDC_CHECK_BASS,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,43,65,10
+    CONTROL         "Reverb",IDC_CHECK_REVERB,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,55,46,10
+    CONTROL         "Surround",IDC_CHECK_SURROUND,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,67,48,10
+    CONTROL         "Loop Song",IDC_CHECK_LOOPSONG,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,491,55,66,10
+    COMBOBOX        IDC_COMBO_RESAMPLING,490,76,67,74,CBS_DROPDOWNLIST | NOT 
+                    WS_VISIBLE | WS_TABSTOP
+    LTEXT           "Resampling:",IDC_STATIC,491,67,43,8,NOT WS_VISIBLE
+    CONTROL         "Graphic EQ",IDC_CHECK_EQ,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,79,58,10
     CONTROL         "AGC",IDC_CHECK_AGC,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,248,67,31,10
+                    NOT WS_VISIBLE | WS_TABSTOP,491,43,31,10
     CONTROL         "",IDC_VUMETER_LEFT,"Static",SS_BLACKRECT | SS_SUNKEN,
-                    325,14,15,80
+                    325,1,15,91
     CONTROL         "",IDC_VUMETER_RIGHT,"Static",SS_BLACKRECT | SS_SUNKEN,
-                    343,14,15,80
+                    343,1,15,91
+    LTEXT           "Sample vol:",IDC_STATIC,212,20,38,8
+    EDITTEXT        IDC_EDIT_SAMPLEPA,212,78,36,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_SAMPLEPA,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,238,75,
+                    11,14
+    PUSHBUTTON      "Player Settings...",IDC_BUTTON_PLAYERPROPS,262,59,60,12,
+                    NOT WS_TABSTOP
+    CTEXT           "Not saved with song!",IDC_STATIC,262,73,60,17
+    CONTROL         "",IDC_SLIDER_VSTIVOL,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS,164,28,15,50
+    LTEXT           "VSTi vol:",IDC_STATIC,159,20,33,8
+    EDITTEXT        IDC_EDIT_VSTIVOL,156,78,36,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_VSTIVOL,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,180,76,
+                    11,14
+    EDITTEXT        IDC_EDIT_TEMPO,5,78,29,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_TEMPO,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,27,76,
+                    11,14
+    CONTROL         "",IDC_SLIDER_GLOBALVOL,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS,105,28,15,50
+    LTEXT           "Global vol:",IDC_STATIC,95,20,43,8
+    EDITTEXT        IDC_EDIT_GLOBALVOL,95,78,36,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_GLOBALVOL,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,120,76,
+                    11,14
+    GROUPBOX        "",IDC_STATIC,83,14,175,78
+    GROUPBOX        "",IDC_STATIC,1,14,83,78
+    LTEXT           "Tempo:",IDC_STATIC,7,20,26,8
     CONTROL         "",IDC_SLIDER_SONGTEMPO,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS,57,37,15,55
+                    TBS_BOTH | TBS_NOTICKS,11,28,15,50
 END
 
 IDD_CONTROL_COMMENTS DIALOGEX 0, 0, 435, 119
@@ -1942,6 +1960,11 @@ BEGIN
     BEGIN
         RIGHTMARGIN, 240
         BOTTOMMARGIN, 198
+    END
+
+    IDD_CONTROL_GLOBALS, DIALOG
+    BEGIN
+        RIGHTMARGIN, 440
     END
 
     IDD_CONTROL_COMMENTS, DIALOG

@@ -16,6 +16,7 @@ enum {
 	plugmix_mode_original = 0,
 	plugmix_mode_117RC1   = 1,
 	plugmix_mode_117RC2   = 2,
+	plugmix_mode_Test   = 3,
 };
 
 // Class used to store settings for a song file.
@@ -35,12 +36,28 @@ public:
 
 	void setVSTiAttenuation(float);
 	float getVSTiAttenuation();
+	void setVSTiVolume(float);
+	float getVSTiVolume();
+
+	void setGlobalVolumeAffectsPlugs(bool);
+	bool getGlobalVolumeAffectsPlugs();
+	
+
+//calculated internally (getters only):	
+	float getVSTiGainFactor();
+
+
 
 //
 private:
 	float m_IntToFloat;
 	float m_FloatToInt;
-	float m_VSTiAttenuation;
+	float m_VSTiAttenuation;	// default VSTi gain factor, different depending on the MPT version we're "emulating"
+	float m_VSTiVolume;			// user-controllable VSTi gain factor.
+	float m_VSTiGainFactor;		// always m_VSTiAttenuation * m_VSTiVolume. No public setter.
+
+	bool m_bGlobalVolumeAffectsPlugs;
+
 	DWORD m_LastSavedWithVersion;
 	DWORD m_CreatedWithVersion;
 };

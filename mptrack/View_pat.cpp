@@ -1123,9 +1123,9 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 		
 		//------ Standard Menu ---------- :
 		else if ((pt.x >= m_szHeader.cx) && (pt.y > m_szHeader.cy))	{
-			if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
+/*			if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			if (BuildSelectionCtxMenu(hMenu, ih))
+*/			if (BuildSelectionCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildEditCtxMenu(hMenu, ih, pModDoc))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
@@ -1135,8 +1135,8 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildTransposeCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-			if (BuildVisFXCtxMenu(hMenu, ih)   ||
-				BuildAmplifyCtxMenu(hMenu, ih) ||
+			if (BuildVisFXCtxMenu(hMenu, ih)   | 	//Use bitwise ORs to avoid shortcuts
+				BuildAmplifyCtxMenu(hMenu, ih) |
 				BuildSetInstCtxMenu(hMenu, ih) )
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildGrowShrinkCtxMenu(hMenu, ih))

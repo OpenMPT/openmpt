@@ -231,7 +231,7 @@ void CEffectVis::DrawGrid()
 void CEffectVis::SetPlayCursor(UINT nPat, UINT nRow)
 {
 	//TEMP:
-	::FillRect(m_dcPlayPos.m_hDC, &m_rcDraw, m_brushBlack);
+//	::FillRect(m_dcPlayPos.m_hDC, &m_rcDraw, m_brushBlack);
 
 	int x1;
 	//erase current playpos:

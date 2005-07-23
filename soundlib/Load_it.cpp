@@ -596,6 +596,7 @@ mpts:
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
+				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -997,6 +998,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
+				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -2186,6 +2188,8 @@ void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLeng
 UINT CSoundFile::SaveMixPlugins(FILE *f, BOOL bUpdate)
 //----------------------------------------------------
 {
+
+
 // -> CODE#0006
 // -> DESC="misc quantity changes"
 //	DWORD chinfo[64];
@@ -2520,6 +2524,12 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	size = sizeof(m_nSongPreAmp);		
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nSongPreAmp, 1, size, f);	
+
+	code = 'VSTV';							//write m_nVSTiVolume
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nVSTiVolume);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nVSTiVolume, 1, size, f);	
 
 	return;
 }

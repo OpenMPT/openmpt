@@ -644,6 +644,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
+				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -667,7 +668,6 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	XMINSTRUMENTHEADER xmih;
 	XMSAMPLEHEADER xmsh;
 	XMSAMPLESTRUCT xmss;
-	WORD smptable[32];
 	BYTE xmph[9];
 	FILE *f;
 	int i;
@@ -783,8 +783,10 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	for (i=1; i<=header.instruments; i++)
 	{
 		MODINSTRUMENT *pins;
+		WORD smptable[32];
 		BYTE flags[32];
 
+		memset(&smptable, 0, sizeof(smptable));
 		memset(&xmih, 0, sizeof(xmih));
 		memset(&xmsh, 0, sizeof(xmsh));
 		xmih.size = sizeof(xmih) + sizeof(xmsh);
@@ -822,16 +824,24 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 				xmsh.psustain = (BYTE)penv->nPanSustainBegin;
 				xmsh.ploops = (BYTE)penv->nPanLoopStart;
 				xmsh.ploope = (BYTE)penv->nPanLoopEnd;
-				for (UINT j=0; j<96; j++) if (penv->Keyboard[j+12])
+				for (UINT j=0; j<96; j++) if (penv->Keyboard[j+12]) // for all notes
 				{
 					UINT k;
-					for (k=0; k<xmih.samples; k++)	if (smptable[k] == penv->Keyboard[j+12]) break;
-					if (k == xmih.samples)
-					{
-						smptable[xmih.samples++] = penv->Keyboard[j+12];
+					UINT sample = penv->Keyboard[j+12];
+
+					// Check to see if sample mapped to this note is already accounted for in this instrument
+					for (k=0; k<xmih.samples; k++)	{
+						if (smptable[k] == sample) {
+							break;
+						}
 					}
+				    
+					if (k == xmih.samples) { //we got to the end of the loop: sample unnaccounted for.
+						smptable[xmih.samples++] = sample; //record in instrument's sample table
+					}
+					
 					if (xmih.samples >= 32) break;
-					xmsh.snum[j] = k;
+					xmsh.snum[j] = k;	//record sample table offset in instrument's note map
 				}
 //				xmsh.reserved2 = xmih.samples;
 			}

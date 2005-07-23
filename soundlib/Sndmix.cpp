@@ -860,7 +860,7 @@ BOOL CSoundFile::ReadNote()
 		{
 			realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32+4)) / 16;
 		}
-		DWORD mastervol = (realmastervol * (m_nSongPreAmp + 0x10)) >> 6;
+		DWORD mastervol = (realmastervol * (m_nSongPreAmp)) >> 6;
 
 		if ((m_dwSongFlags & SONG_GLOBALFADE) && (m_nGlobalFadeMaxSamples))
 		{
@@ -1517,8 +1517,8 @@ BOOL CSoundFile::ReadNote()
 				pChn->nNewLeftVol = pChn->nNewRightVol;
 			}
 			// Clipping volumes
-			if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
-			if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
+			//if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
+			//if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
 			// Check IDO
 			if (gdwSoundSetup & SNDMIX_NORESAMPLING)
 			{
