@@ -2227,15 +2227,6 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 		case 0x03:
 			{
 				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-				
-				/*UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
-				UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
-				if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
-					if (pChn->pHeader && pChn->pInstrument) {	// then try intrument VST
-							nPlug = pChn->pHeader->nMixPlug;
-					}
-				}*/
-				
 				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))	{
 					if (dwParam < 0x80)
 						m_MixPlugins[nPlug-1].fDryRatio = 1.0-(static_cast<float>(dwParam)/127.0f);
@@ -2249,26 +2240,14 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 			if (nInternalCode & 0x80)
 			{
 				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-				/*
-				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
-				if ((nMasterCh) && (nMasterCh <= m_nChannels))
+				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 				{
-					UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
-					if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
-						if (pChn->pHeader && pChn->pInstrument) {	// then try intrument VST
-								nPlug = pChn->pHeader->nMixPlug;
-						}
-					}
-				*/
-					if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+					IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
+					if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
 					{
-						IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
-						if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
-						{
-							pPlugin->SetZxxParameter(nInternalCode & 0x7F, dwParam & 0x7F);
-						}
+						pPlugin->SetZxxParameter(nInternalCode & 0x7F, dwParam & 0x7F);
 					}
-				//}
+				}
 			}
 
 		} // end switch
@@ -2378,15 +2357,6 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 		case 0x03:
 			{
 				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-				/*
-				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
-				UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
-				if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
-					if (pChn->pHeader && pChn->pInstrument) {	// then try intrument VST
-							nPlug = pChn->pHeader->nMixPlug;
-					}
-				}
-				*/
 				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))	{
 					// on the fist tick only, calculate step 
 					if (m_dwSongFlags & SONG_FIRSTTICK)
@@ -2398,12 +2368,12 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 					//update param on all ticks
 					IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
 					if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState)) 	{
-						pPlugin->SetZxxParameter(nInternalCode & 0x7F, (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5));
 						m_MixPlugins[nPlug-1].fDryRatio = pChn->m_nPlugInitialParamValue+(float)(m_nTickCount+1)*pChn->m_nPlugParamValueStep;
 					}
 					
 				}
 			}
+			break;
 		
 
 		// F0.F0.{80|n}.xx: Set VST effect parameter n to xx
@@ -2411,34 +2381,23 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 			if (nInternalCode & 0x80)
 			{
 				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-				/*
-				UINT nMasterCh = (nChn < m_nChannels) ? nChn+1 : pChn->nMasterChn;
-				if ((nMasterCh) && (nMasterCh <= m_nChannels))
+				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
 				{
-					UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin; //try channel's plug first
-					if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
-						if (pChn->pHeader && pChn->pInstrument) {	// then try intrument VST
-								nPlug = pChn->pHeader->nMixPlug;
-						}
-					}
-				*/
-					if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+					IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
+					if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
 					{
-						IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
-						if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
+						// on the fist tick only, calculate step 
+						if (m_dwSongFlags & SONG_FIRSTTICK)
 						{
-							// on the fist tick only, calculate step 
-							if (m_dwSongFlags & SONG_FIRSTTICK)
-							{
-								pChn->m_nPlugInitialParamValue = pPlugin->GetZxxParameter(nInternalCode & 0x7F);
-								// (dwParam & 0x7F) extracts the actual value that we're going to pass
-								pChn->m_nPlugParamValueStep = ((int)(dwParam & 0x7F)-pChn->m_nPlugInitialParamValue)/(float)m_nMusicSpeed;
-							}
-							//update param on all ticks
-							pPlugin->SetZxxParameter(nInternalCode & 0x7F, (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5));
+							pChn->m_nPlugInitialParamValue = pPlugin->GetZxxParameter(nInternalCode & 0x7F);
+							// (dwParam & 0x7F) extracts the actual value that we're going to pass
+							pChn->m_nPlugParamValueStep = ((int)(dwParam & 0x7F)-pChn->m_nPlugInitialParamValue)/(float)m_nMusicSpeed;
 						}
+						//update param on all ticks
+						pPlugin->SetZxxParameter(nInternalCode & 0x7F, (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5));
 					}
-				//}
+				}
+
 			} 
 	} // end switch
 

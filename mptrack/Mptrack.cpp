@@ -1378,8 +1378,8 @@ http://www.modplug.com/forum/showpage.php?p=download");
 		"Pel K. Txnder for the scrolling credits control :)|"
 		"http://tinyurl.com/4yze8||"
 		"...and to the following for ideas, testing and support:|"
-		"LPChip, Ganja, Diamond, Nofold,|"
-		"Goor00, Georg, Squirrel Havoc, 33, Waxhead|"
+		"LPChip, Ganja, Diamond, Nofold, Goor00,|"
+		"Georg, Skilletaudio, Squirrel Havoc, 33, Waxhead,|"
 		"all at the MPC forums.|"
 		"||||||" 
 	};

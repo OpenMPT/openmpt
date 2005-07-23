@@ -514,8 +514,10 @@
 #define IDC_SPIN_SPEED                  1897
 #define IDC_SPIN_GLOBALVOL              1898
 #define IDC_SPIN_RESTARTPOS             1899
+#define IDC_SPIN_SAMPLEPA               1900
 #define IDC_PROGRESS1                   1901
 #define IDC_PROGRESS2                   1902
+#define IDC_SPIN_VSTIVOL                1921
 #define IDC_TABCTRL1                    1951
 #define IDC_SCROLLBAR1                  1998
 #define IDC_QUESTION1                   1999
@@ -530,6 +532,7 @@
 #define IDC_EDIT_RESTARTPOS             2010
 #define IDC_SLIDER_SONGPREAMP           2011
 #define IDC_BUTTON_MODTYPE              2012
+#define IDC_EDIT_SAMPLEPA               2013
 #define IDC_EDIT_MODTYPE                2014
 #define IDC_EDIT_CURRENTTEMPO           2015
 #define IDC_EDIT_CURRENTSPEED           2016
@@ -721,6 +724,12 @@
 #define IDC_APPLY                       2243
 #define IDC_RANDOM_PLACEHOLDER          2244
 #define IDC_AUTOSAVE_USECUSTOMDIR       2245
+#define IDC_BUTTON_MODTYPE2             2246
+#define IDC_BUTTON_PLAYERPROPS          2247
+#define IDC_SLIDER_SONGPREAMP3          2248
+#define IDC_SLIDER_GLOBALVOL            2249
+#define IDC_EDIT_VSTIVOL                2250
+#define IDC_SLIDER_VSTIVOL              2251
 #define IDC_TEXT_BPM                    2300
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302
@@ -924,7 +933,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        510
 #define _APS_NEXT_COMMAND_VALUE         37002
-#define _APS_NEXT_CONTROL_VALUE         2246
+#define _APS_NEXT_CONTROL_VALUE         2252
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

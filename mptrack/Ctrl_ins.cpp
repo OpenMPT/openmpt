@@ -1212,6 +1212,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 	if (!m_nInstrument) m_nInstrument = 1;
 	if (m_pSndFile->ReadInstrumentFromFile(m_nInstrument, lpFile, len))
 	{
+		m_pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 		int n = strlen(lpszFileName);

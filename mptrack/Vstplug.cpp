@@ -1493,16 +1493,9 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 	}
 
 	//rewbs.VSTcompliance
+	m_bIsInstrument = isInstrument();
 	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ?  m_pEffect->processReplacing : m_pEffect->process;
 
-
-	
-	//TODO:
-	//GetSpeakerArrangement();
-
-//	m_pSndMixPlugin = m_pSndFile->GetSndPlugMixPlug(this);
-//	ASSERT(m_pSndMixPlugin);
-	//end rewbs.plugDocAware
 }
 
 
@@ -1999,8 +1992,6 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 //--------------------------------------------------------------------------
 {
 	float wetRatio, dryRatio; // rewbs.dryRatio [20040123]
-	bool isInstrument;
-
 
 	ProcessVSTEvents();
 
@@ -2014,25 +2005,29 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 // -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
 //				   MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
 	int mixop = m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>8) & 0xff : 0;
-	float gain = 0.1f * (float)( m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>16) & 0xff : 10 );
-	if(gain < 0.1f) gain = 1.0f;
 // -! NEW_FEATURE#0028
 
 	//If the plug is found & ok, continue
 	if ((m_pEffect) && (m_pProcessFP) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
-		isInstrument = (m_pEffect->numInputs < 1 || (m_pEffect->flags & effFlagsIsSynth));
+		//TODO: re-calculate gain this when these values change as opposed to on every process() call!!!
+		float gain = 0.1f * (float)( m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>16) & 0xff : 10 );
+		if(gain < 0.1f) gain = 1.0f;
 
-		if (isInstrument) {
+		if (m_bIsInstrument) {
 			gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
+			gain *= (m_pSndFile->m_nVSTiVolume / 100.0f);
 			mixop = 0;	// force disable mix mode on instruments
 		}
+		if (m_pSndFile->m_pConfig->getGlobalVolumeAffectsPlugs()) {
+			gain *= (m_pSndFile->m_nGlobalVolume / 256.0f);
+		}
+		//End TODO
 
 		//Merge stereo before sending to the plug if it is mono
 		if (m_pEffect->numInputs == 1)
 		{
-			for (UINT i=0; i<nSamples; i++)
-			{
+			for (UINT i=0; i<nSamples; i++)	{
 				m_MixState.pOutBufferL[i] = 0.5f*m_MixState.pOutBufferL[i] + 0.5f*m_MixState.pOutBufferR[i];
 			}
 		}
@@ -2083,7 +2078,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		if(m_pEffect->numOutputs == 1)
 		{
 			wetRatio = 1-m_pMixStruct->fDryRatio;  //rewbs.dryRatio
-			dryRatio = isInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
+			dryRatio = m_bIsInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
 
 // -> CODE#0028
 // -> DESC="effect plugin mixing mode combo"
@@ -2172,7 +2167,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 			//If dry mix is ticked we add the unprocessed buffer,
 			//except if this is an instrument since this it has already been done:
-			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument){
+			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !m_bIsInstrument){
 				for (UINT i=0; i<nSamples; i++){
 					pOutL[i] += m_MixState.pOutBufferL[i];
 					pOutR[i] += m_MixState.pOutBufferR[i];
@@ -2185,7 +2180,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 		else if (m_pEffect->numOutputs > 1)
 		{
 			wetRatio = 1-m_pMixStruct->fDryRatio;  //rewbs.dryRatio
-			dryRatio = isInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
+			dryRatio = m_bIsInstrument ? 1 : m_pMixStruct->fDryRatio; //always mix full dry if this is an instrument
 
 // -> CODE#0028
 // -> DESC="effect plugin mixing mode combo"
@@ -2276,7 +2271,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 			//If dry mix is ticked we add the unprocessed buffer,
 			//except if this is an instrument since this it has already been done:
-			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !isInstrument){
+			if((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_WETMIX) && !m_bIsInstrument){
 				for (UINT i=0; i<nSamples; i++){
 					pOutL[i] += m_MixState.pOutBufferL[i];
 					pOutR[i] += m_MixState.pOutBufferR[i];

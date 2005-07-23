@@ -86,6 +86,8 @@ protected:
 	bool m_bModified;
 	HANDLE processCalled;
 	UINT m_nSlot;
+	float m_fGain;
+	bool m_bIsInstrument;
 
 public:
 	CVstPlugin(HINSTANCE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN pMixPlugin, AEffect *pEffect);

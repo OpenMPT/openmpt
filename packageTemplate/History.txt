@@ -13,7 +13,18 @@ It is unfinished, do not expect to be able to compose with this version safely. 
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.22
+  + <rewbs> In order to let the user achieve a good balance between sample and VSTi volumes, there have been changes & improvements to the volume handling, as exposed on the general tab:
+        --> Sliders available for "Sample volume", "VSTi volume" and "Global volume". 
+        --> "Sample volume" is in fact the old sample pre-amp slider. Note that the slider can go up to 500 (which is already pretty loud), but if you're feeling insane you can type values up to 2000 in the textbox.
+        --> Changing the VSTi volume is equivalent to changing the plugin "gain" individually for all VSTis. Same slider/textbox limitations apply as to "Sample volume".
+        --> If 1.17RC2 plugin mix mode is selected in the song properties (it is by default), Global Volume will be applied to plugins too. (NOTE: this is somewhat of a _hack_, since global volume continues to be applied separately to _all_ samples  as well.. so samples played through plugins are in fact affected _twice_ by the global volume).
+  . <rewbs> If a sample was replaced via a drag&drop onto the instrument tab, the sample properties in the sample tab (e.g. loop points etc..) were not refreshed - fixed.
+  . <rewbs> Fixed random crash on XM save if an instrument had an empty sample map (tx Skilletaudio!)
+  . <rewbs> Changing plugin's dry/wet ratio directly from the pattern with \xx: previously could trigger an unpredictable VST parameter change - fixed
+  . <rewbs> Restored amplify & change instrument in pattern ctx menu - sorry!! (no need to send me death threats about this anymore, please! :)
   . <rewbs> Minor refresh fix to graphical parameter editor.
+  / <rewbs> removed player options from general tab to avoid confusion as to what is saved in file, in favour of button to open separate Player Settings dialog.
 
 . v 1.17.02.21
   . <rewbs> Drags on Orderlist mark song as modified.
