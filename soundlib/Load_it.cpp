@@ -597,6 +597,7 @@ mpts:
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
 				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
+				case 'DGV.': fadr = reinterpret_cast<BYTE*>(&m_nDefaultGlobalVolume);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -999,6 +1000,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
 				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
+				case 'DGV.': fadr = reinterpret_cast<BYTE*>(&m_nDefaultGlobalVolume);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -2530,6 +2532,12 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	size = sizeof(m_nVSTiVolume);		
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nVSTiVolume, 1, size, f);	
+
+	code = 'DGV.';							//write m_nDefaultGlobalVolume
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nDefaultGlobalVolume);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nDefaultGlobalVolume, 1, size, f);	
 
 	return;
 }

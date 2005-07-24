@@ -1494,6 +1494,7 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 
 	//rewbs.VSTcompliance
 	m_bIsInstrument = isInstrument();
+	RecalculateGain();
 	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ?  m_pEffect->processReplacing : m_pEffect->process;
 
 }
@@ -1982,10 +1983,26 @@ void CVstPlugin::ClearVSTEvents()
 //-------------------------------
 {
 	// Clear VST events
-	if ((m_pEvList) && (m_pEvList->numEvents > 0))
-	{
+	if ((m_pEvList) && (m_pEvList->numEvents > 0)) {
 		m_pEvList->numEvents = 0;
 	}
+}
+
+void CVstPlugin::RecalculateGain() 
+//--------------------------------
+{
+	float gain = 0.1f * (float)( m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>16) & 0xff : 10 );
+	if(gain < 0.1f) gain = 1.0f;
+
+	if (m_bIsInstrument) {
+		gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
+		gain *= (m_pSndFile->m_nVSTiVolume / 100.0f);
+	}
+	if (m_pSndFile->m_pConfig->getGlobalVolumeAffectsPlugs()) {
+		gain *= (m_pSndFile->m_nGlobalVolume / 256.0f);
+	}
+
+	m_fGain = gain;
 }
 
 void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
@@ -1995,7 +2012,6 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 	ProcessVSTEvents();
 
-// -> CODE#0028 + update#02
 // -> DESC="effect plugin mixing mode combo"
 // -> mixop == 0 : normal processing
 // -> mixop == 1 : MIX += DRY - WET * wetRatio
@@ -2004,25 +2020,18 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 // -> mixop == 4 : MIX -= middle - WET * wetRatio + middle - DRY
 // -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
 //				   MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
-	int mixop = m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>8) & 0xff : 0;
-// -! NEW_FEATURE#0028
 
 	//If the plug is found & ok, continue
 	if ((m_pEffect) && (m_pProcessFP) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct))
 	{
-		//TODO: re-calculate gain this when these values change as opposed to on every process() call!!!
-		float gain = 0.1f * (float)( m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>16) & 0xff : 10 );
-		if(gain < 0.1f) gain = 1.0f;
-
+		int mixop;
 		if (m_bIsInstrument) {
-			gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
-			gain *= (m_pSndFile->m_nVSTiVolume / 100.0f);
-			mixop = 0;	// force disable mix mode on instruments
+			mixop = 0; //force normal mix mode for instruments
+		} else {
+			mixop = m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>8) & 0xff : 0;
 		}
-		if (m_pSndFile->m_pConfig->getGlobalVolumeAffectsPlugs()) {
-			gain *= (m_pSndFile->m_nGlobalVolume / 256.0f);
-		}
-		//End TODO
+
+		//RecalculateGain();
 
 		//Merge stereo before sending to the plug if it is mono
 		if (m_pEffect->numInputs == 1)
@@ -2050,6 +2059,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			ClearVSTEvents();
 			SetEvent(processCalled);
 		}
+
 		//mix outputs of multi-output VSTs:
 		if(m_nOutputs>2){
 			// first, mix extra outputs on a stereo basis
@@ -2104,8 +2114,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				dryRatio = -wetRatio;
 			}
 
-			wetRatio *= gain;	// update#02
-			dryRatio *= gain;	// update#02
+			wetRatio *= m_fGain;	// update#02
+			dryRatio *= m_fGain;	// update#02
 
 			// Mix operation
 			switch(mixop){
@@ -2208,8 +2218,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				dryRatio = -wetRatio;
 			}
 
-			wetRatio *= gain;	// update#02
-			dryRatio *= gain;	// update#02
+			wetRatio *= m_fGain;	// update#02
+			dryRatio *= m_fGain;	// update#02
 
 			// Mix operation
 			switch(mixop){

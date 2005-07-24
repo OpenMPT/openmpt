@@ -128,6 +128,7 @@ CS..			nCutSwing
 CWV.	[EXT]	dwCreatedWithVersion
 DCT.			nDCT;
 dF..			dwFlags;
+DGV.	[EXT]	nDefaultGlobalVolume
 DT..	[EXT]	nDefaultTempo;			
 DNA.			nDNA;
 EBIH	[EXT]	embeded instrument header tag (ITP file format)
@@ -422,8 +423,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nInstruments = 0;
 	m_nFreqFactor = m_nTempoFactor = 128;
 	m_nMasterVolume = 128;
-	m_nDefaultGlobalVolume = 256;
-	m_nGlobalVolume = 256;
+	m_nDefaultGlobalVolume = 128;
+	m_nGlobalVolume = 128;
 	m_nOldGlbVolSlide = 0;
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo = 125;
@@ -438,7 +439,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nRestartPos = 0;
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
-	m_nSongPreAmp = 0x30;
+	m_nSongPreAmp = 100;
 	m_nVSTiVolume = 100;
 	m_nPatternNames = 0;
 	m_nMaxOrderPosition = 0;
@@ -657,6 +658,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		}
 	}
 	m_pConfig->SetPluginMixLevels(m_nPlugMixMode);
+	RecalculateGainForAllPlugs();
 
 	if (m_nType)
 	{
@@ -1187,15 +1189,14 @@ void CSoundFile::ResumePlugins()
 
 
 void CSoundFile::StopAllVsti()
+//----------------------------
 {
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
-	{
+	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++) {
 		if (!m_MixPlugins[iPlug].pMixPlugin)	
 			continue;  //most common branch
 		
 		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState)
-		{
+		if (m_MixPlugins[iPlug].pMixState) {
 			pPlugin->HardAllNotesOff();
 		}
 	}
@@ -1203,6 +1204,19 @@ void CSoundFile::StopAllVsti()
 }
 
 
+void CSoundFile::RecalculateGainForAllPlugs()
+//------------------------------------------
+{
+	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++) {
+		if (!m_MixPlugins[iPlug].pMixPlugin)	
+			continue;  //most common branch
+		
+		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
+		if (m_MixPlugins[iPlug].pMixState) {
+			pPlugin->RecalculateGain();
+		}
+	}
+}
 
 //end rewbs.VSTCompliance
 

@@ -178,7 +178,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 			m_EditRestartPos.SetWindowText(s);
 		}
 
-		m_SliderGlobalVol.SetPos(256-m_pSndFile->m_nGlobalVolume);
+		m_SliderGlobalVol.SetPos(256-m_pSndFile->m_nDefaultGlobalVolume);
 		m_SliderVSTiVol.SetPos(500-m_pSndFile->m_nVSTiVolume);
 		m_SliderPreAmp.SetPos(500-m_pSndFile->m_nSongPreAmp);
 		m_SliderTempo.SetPos(480 - m_pSndFile->m_nDefaultTempo + 32);
@@ -261,6 +261,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			if ((gv >= 0) && (gv <= 256) && (gv != m_pSndFile->m_nDefaultGlobalVolume)) {
 				m_pSndFile->m_nGlobalVolume = gv;
 				m_pSndFile->m_nDefaultGlobalVolume = gv;
+				m_pSndFile->RecalculateGainForAllPlugs();
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
@@ -279,6 +280,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			int vv = 500 - m_SliderVSTiVol.GetPos();
 			if ((vv >= 0) && (vv <= 500) && (vv != m_pSndFile->m_nVSTiVolume)) {
 				m_pSndFile->m_nVSTiVolume = vv;
+				m_pSndFile->RecalculateGainForAllPlugs();
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
@@ -371,6 +373,7 @@ void CCtrlGeneral::OnVSTiVolChanged()
 			if ((n >= 0) && (n <= 2000) && (n != m_pSndFile->m_nVSTiVolume)) {
 				m_bEditsLocked=true;
 				m_pSndFile->m_nVSTiVolume = n;
+				m_pSndFile->RecalculateGainForAllPlugs();
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				UpdateView(HINT_MODGENERAL, NULL); 
@@ -419,6 +422,7 @@ void CCtrlGeneral::OnGlobalVolChanged()
 					m_EditGlobalVol.SetModify(FALSE);
 					m_pSndFile->m_nDefaultGlobalVolume = n << 1;
 					m_pSndFile->m_nGlobalVolume = n << 1;
+					m_pSndFile->RecalculateGainForAllPlugs();
 					m_pModDoc->SetModified();
 					m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 					UpdateView(HINT_MODGENERAL, NULL);

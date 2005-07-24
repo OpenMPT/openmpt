@@ -349,6 +349,7 @@ void CModTypeDlg::OnOK()
 	if (sel >= 0) {
 		m_pSndFile->m_nPlugMixMode = m_PlugMixBox.GetItemData(sel);
 		m_pSndFile->m_pConfig->SetPluginMixLevels(m_pSndFile->m_nPlugMixMode);
+		m_pSndFile->RecalculateGainForAllPlugs();
 	}
 
 	m_pSndFile->m_nRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
