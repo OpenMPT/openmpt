@@ -158,6 +158,7 @@ public: // IMixPlugin interface
 	void RestoreAllParameters(long nProg=-1); //rewbs.plugDefaultProgram - added param 
 	void ProcessVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
 	void ClearVSTEvents(); //rewbs.VSTiNoteHoldonStopFix
+	void RecalculateGain();
 	void Process(float *pOutL, float *pOutR, unsigned long nSamples);
 	void Init(unsigned long nFreq, int bReset);
 	bool MidiSend(DWORD dwMidiCode);

@@ -936,6 +936,7 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			if(gain == 0) gain = 1;
 
 			pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0xff00ffff) | (gain<<16);
+			pPlugin->pMixPlugin->RecalculateGain();
 			
 			float fValue = 0.1f * (float)gain;
 			sprintf(s,"Gain: x %1.1f",fValue);

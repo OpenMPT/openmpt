@@ -646,6 +646,7 @@ public:
 	virtual void MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel) = 0;
 	virtual void MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChan) = 0;
 	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
+	virtual void RecalculateGain() = 0;		
 	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
 	virtual bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn) = 0; //rewbs.VSTiNNA
 	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
@@ -935,6 +936,7 @@ public:
 	VOID SuspendPlugins(); //rewbs.VSTCompliance
 	VOID ResumePlugins();  //rewbs.VSTCompliance
 	VOID StopAllVsti();    //rewbs.VSTCompliance
+	VOID RecalculateGainForAllPlugs();
 	VOID ResetChannels();
 	UINT Read(LPVOID lpBuffer, UINT cbBuffer);
 	UINT ReadMix(LPVOID lpBuffer, UINT cbBuffer, CSoundFile *, DWORD *, LPBYTE ps=NULL);

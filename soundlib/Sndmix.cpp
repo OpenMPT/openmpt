@@ -642,6 +642,7 @@ BOOL CSoundFile::ProcessRow()
 						m_nMusicSpeed = m_nDefaultSpeed;
 						m_nMusicTempo = m_nDefaultTempo;
 						m_nGlobalVolume = m_nDefaultGlobalVolume;
+						RecalculateGainForAllPlugs();
 						for (UINT i=0; i<MAX_CHANNELS; i++)
 						{
 							Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
