@@ -1089,11 +1089,20 @@ BOOL CSoundFile::ReadNote()
 				}
 			}
 			// vol is 14-bits
-			if (vol)
-			{
+			if (vol) {
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
 				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
-				pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+				
+				UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+				//Don't let global volume affect level of sample if sample is going to be put through a plugin:
+				//global volume is going to be applied to plugin output anyway.
+				if (m_pConfig->getGlobalVolumeAffectsPlugs() 
+					&& nPlugin>0 && nPlugin<MAX_MIXPLUGINS 
+					&& !(m_MixPlugins[nPlugin-1].Info.dwInputRouting&MIXPLUG_INPUTF_BYPASS)) {
+					pChn->nRealVolume = _muldiv(vol*256, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+				} else {
+					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+				}
 			}
 			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
 			int period = pChn->nPeriod;
@@ -1582,7 +1591,7 @@ BOOL CSoundFile::ReadNote()
 			{
 				LONG nRampLength = gnVolumeRampSamples;
 // -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
+// -> DESC="per-instrument volume ramping setup"
 				BOOL enableCustomRamp = pChn->pHeader && (m_nType & (MOD_TYPE_IT | MOD_TYPE_XM));
 				if(enableCustomRamp) nRampLength = pChn->pHeader->nVolRamp ? (gdwMixingFreq * pChn->pHeader->nVolRamp / 100000) : gnVolumeRampSamples;
 				if(!nRampLength) nRampLength = 1;
@@ -1591,7 +1600,7 @@ BOOL CSoundFile::ReadNote()
 				LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
 #ifndef FASTSOUNDLIB
 // -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
+// -> DESC="per-instrument volume ramping setup "
 //				if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
 //				 || ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
 //				  && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50)))

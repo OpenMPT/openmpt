@@ -3024,7 +3024,7 @@ UINT __cdecl CSoundFile::GetChannelPlugin(UINT nChn, bool respectMutes)
 	// If it looks like this is an NNA channel, we need to find the master channel.
 	// This ensures we pick up the right ChnSettings. 
 	// NB: nMasterChn==0 means no master channel, so we need to -1 to get correct index.
-	if (nChn>m_nChannels && pChn && pChn->nMasterChn>0) { 
+	if (nChn>=m_nChannels && pChn && pChn->nMasterChn>0) { 
 		nChn = pChn->nMasterChn-1;				  
 	}
 

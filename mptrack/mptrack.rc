@@ -2180,7 +2180,7 @@ BEGIN
     IDR_MODULETYPE          "\nModule\nuntitled\nMusic Modules (*.mod;*.s3m;*.it;*.xm)\n.mod\nModplugTracker.Document\nMusic Module"
     ID_PATTERN_CHANNELMANAGER 
                             "Display channel manager window\nChannel manager"
-    ID_INDICATOR_CPU        "000.00%"
+    ID_INDICATOR_CPU        "-"
 END
 
 STRINGTABLE 
