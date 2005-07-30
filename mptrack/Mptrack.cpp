@@ -1379,7 +1379,8 @@ http://www.modplug.com/forum/showpage.php?p=download");
 		"http://tinyurl.com/4yze8||"
 		"...and to the following for ideas, testing and support:|"
 		"LPChip, Ganja, Diamond, Nofold, Goor00,|"
-		"Georg, Skilletaudio, Squirrel Havoc, 33, Waxhead,|"
+		"Georg, Skilletaudio, Squirrel Havoc, Snu,|"
+		"Anboi, Sam Zen, BooT-SectoR-ViruZ, 33, Waxhead,|"
 		"all at the MPC forums.|"
 		"||||||" 
 	};

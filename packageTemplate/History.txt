@@ -13,6 +13,11 @@ It is unfinished, do not expect to be able to compose with this version safely. 
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.24
+  . <rewbs> Global volume no longer applied twice on samples that are put through plugins.
+  . <rewbs> If a VST plugin was assigned to a channel and a note interrupted another, the resulting ramped part of the note would not be processed by the plugin. The outcome was potential "clicks".
+  / <rewbs> Removed broken CPU usage meter.
+
 . v 1.17.02.23
   . <rewbs> Restored loop song on general tab.
   . <rewbs> Global volume is stored with our disfigured "XM"s.

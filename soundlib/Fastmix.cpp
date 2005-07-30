@@ -1606,10 +1606,11 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pbuffer = MixReverbBuffer;
 	#endif
 
+		//Look for plugins associated with this implicit tracker channel.
 		UINT nMixPlugin = GetBestPlugin(ChnMix[nChn], PRIORITISE_INSTRUMENT, RESPECT_MUTES);
 		
 		//rewbs.instroVSTi
-		/*UINT nMixPlugin=0;
+/*		UINT nMixPlugin=0;
 		if (pChannel->pHeader && pChannel->pInstrument) {	// first try intrument VST
 			if (!(pChannel->pInstrument->uFlags & ENV_MUTE))
 				nMixPlugin = pChannel->pHeader->nMixPlug;
@@ -1617,7 +1618,9 @@ UINT CSoundFile::CreateStereoMix(int count)
 		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) { 	// Then try Channel VST
 			if(!(pChannel->dwFlags & CHN_NOFX)) 
 				nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
-		}*/
+		}
+*/
+
 		//end rewbs.instroVSTi		
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
@@ -1806,6 +1809,7 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 	StereoMixToFloat(MixSoundBuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount);
 	FLOAT *pMixL = MixFloatBuffer;
 	FLOAT *pMixR = MixFloatBuffer + MIXBUFFERSIZE;
+
 	// Process Plugins
 	for (UINT iDoPlug=0; iDoPlug<MAX_MIXPLUGINS; iDoPlug++)
 	{

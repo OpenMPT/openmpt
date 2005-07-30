@@ -2227,7 +2227,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 				// Default mix (update#02)
 				case 0:
 					for(UINT i=0; i<nSamples; i++){
-						//rewbs.wetratio - added the factors. [20040123]			
+						//rewbs.wetratio - added the factors. [20040123]		
 						pOutL[i] += m_pTempBuffer[0][i]*wetRatio + m_MixState.pOutBufferL[i]*dryRatio;
 						pOutR[i] += m_pTempBuffer[1][i]*wetRatio + m_MixState.pOutBufferR[i]*dryRatio;
 					}

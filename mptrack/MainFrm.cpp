@@ -1263,7 +1263,7 @@ ULONG CMainFrame::AudioRead(PVOID pvData, ULONG ulSize)
 	if ((IsPlaying()) && (m_pSndFile))
 	{
 		DWORD dwSamplesRead = m_pSndFile->Read(pvData, ulSize);
-		m_dTotalCPU = m_pPerfCounter->StartStop()/(static_cast<double>(dwSamplesRead)/m_dwRate);
+		//m_dTotalCPU = m_pPerfCounter->StartStop()/(static_cast<double>(dwSamplesRead)/m_dwRate);
 		return dwSamplesRead * slSampleSize;
 	}
 	return 0;
@@ -2566,12 +2566,12 @@ void CMainFrame::OnUpdateInfo(CCmdUI *)
 void CMainFrame::OnUpdateCPU(CCmdUI *)
 //-------------------------------------
 {
-	CString s;
+/*	CString s;
 	double totalCPUPercent = m_dTotalCPU*100;
 	UINT intPart = static_cast<int>(totalCPUPercent);
 	UINT decPart = static_cast<int>(totalCPUPercent-intPart)*100;
 	s.Format("%d.%d%%", intPart, decPart);
-	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_CPU), s, TRUE);
+	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_CPU), s, TRUE);*/
 }
 
 //rewbs.xinfo
