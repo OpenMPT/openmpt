@@ -19,7 +19,7 @@ void CSoundFilePlayConfig::SetPluginMixLevels(int mixLevelType) {
 			setVSTiAttenuation(NO_ATTENUATION);
 			setIntToFloat(1.0f/static_cast<float>(1<<28));
 			setFloatToInt(static_cast<float>(1<<28));
-			setGlobalVolumeAffectsPlugs(false);
+			setGlobalVolumeAppliesToMaster(false);
 			break;
 
 		// Ericus' version gives us floats in [-0.06;0.06] and requires attenuation to
@@ -28,7 +28,7 @@ void CSoundFilePlayConfig::SetPluginMixLevels(int mixLevelType) {
 			setVSTiAttenuation(32.0f);
 			setIntToFloat(1.0f/static_cast<float>(0x07FFFFFFF));
 			setFloatToInt(static_cast<float>(0x07FFFFFFF));
-			setGlobalVolumeAffectsPlugs(false);
+			setGlobalVolumeAppliesToMaster(false);
 			break;
 
 		// FOR TEST PURPOSES ONLY:
@@ -36,18 +36,18 @@ void CSoundFilePlayConfig::SetPluginMixLevels(int mixLevelType) {
 			setVSTiAttenuation(2.0f);
 			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
 			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
-			setGlobalVolumeAffectsPlugs(false);
+			setGlobalVolumeAppliesToMaster(false);
 			break;
 
 
-		// Rewbs' version gives us floats in [-1.0; 1.0] and hopefully plays VSTis at 
+		// 117RC2 applies  Rewbs' version gives us floats in [-1.0; 1.0] and hopefully plays VSTis at 
 		// the right volume... but we attenuate by 2x to approx. match sample volume.
 		default:
 		case plugmix_mode_117RC2:
 			setVSTiAttenuation(2.0f);
 			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
 			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
-			setGlobalVolumeAffectsPlugs(true);
+			setGlobalVolumeAppliesToMaster(true);
 	}
 	
 	return;
@@ -56,13 +56,13 @@ void CSoundFilePlayConfig::SetPluginMixLevels(int mixLevelType) {
 
 
 //getters and setters.
-bool CSoundFilePlayConfig::getGlobalVolumeAffectsPlugs() {
-	return m_bGlobalVolumeAffectsPlugs;
+bool CSoundFilePlayConfig::getGlobalVolumeAppliesToMaster() {
+	return m_bGlobalVolumeAppliesToMaster;
 }
 
 
-void CSoundFilePlayConfig::setGlobalVolumeAffectsPlugs(bool inGlobalVolumeAffectsPlugs){
-	m_bGlobalVolumeAffectsPlugs=inGlobalVolumeAffectsPlugs;
+void CSoundFilePlayConfig::setGlobalVolumeAppliesToMaster(bool inGlobalVolumeAppliesToMaster){
+	m_bGlobalVolumeAppliesToMaster=inGlobalVolumeAppliesToMaster;
 }
 
 float CSoundFilePlayConfig::getVSTiGainFactor() {

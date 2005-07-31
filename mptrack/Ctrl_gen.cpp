@@ -261,7 +261,6 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			if ((gv >= 0) && (gv <= 256) && (gv != m_pSndFile->m_nDefaultGlobalVolume)) {
 				m_pSndFile->m_nGlobalVolume = gv;
 				m_pSndFile->m_nDefaultGlobalVolume = gv;
-				m_pSndFile->RecalculateGainForAllPlugs();
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
@@ -422,7 +421,6 @@ void CCtrlGeneral::OnGlobalVolChanged()
 					m_EditGlobalVol.SetModify(FALSE);
 					m_pSndFile->m_nDefaultGlobalVolume = n << 1;
 					m_pSndFile->m_nGlobalVolume = n << 1;
-					m_pSndFile->RecalculateGainForAllPlugs();
 					m_pModDoc->SetModified();
 					m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 					UpdateView(HINT_MODGENERAL, NULL);
