@@ -374,30 +374,23 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			 && ((gnCPUUsage < 25) || (gdwSoundSetup & SNDMIX_DIRECTTODISK)))
 				X86_Dither(MixSoundBuffer, lTotalSampleCount, gnBitsPerSample);
 		}
+
+		//Apply global volume
+		if (m_pConfig->getGlobalVolumeAppliesToMaster()) {
+			for (int pos=0; pos<lTotalSampleCount; pos++) {
+				//Overflow hazard? Or will param long casting make it all OK?
+				MixSoundBuffer[pos] = _muldiv(MixSoundBuffer[pos], m_nGlobalVolume , MAX_GLOBAL_VOLUME);
+			}
+		}
+
 		// Hook Function
-		if (gpSndMixHook)
-		{
+		if (gpSndMixHook) {	//Currently only used for VU Meter, so it's OK to do it after global Vol.
 			gpSndMixHook(MixSoundBuffer, lTotalSampleCount, gnChannels);
 		}
 #endif
-		// Perform clipping + VU-Meter
+
+		// Perform clipping
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
-
-		//DEBUG
-		/*int maxInt=0;
-		int minInt=0;
-		for (int pos=0; pos<lTotalSampleCount; pos++) {
-			maxInt=max(maxInt, (*(int*)(lpBuffer+sizeof(int)*pos)));
-			minInt=min(minInt, (*(int*)(lpBuffer+sizeof(int)*pos)));
-		}
-
-		int maxInt2=0;
-		int minInt2=0;
-		for (int pos=0; pos<lTotalSampleCount; pos++) {
-			maxInt2=max(maxInt2, MixSoundBuffer[pos]);
-			minInt2=min(minInt2, MixSoundBuffer[pos]);
-		}*/
-		//end DEBUG
 
 		// Buffer ready
 		lRead -= lCount;
@@ -591,6 +584,7 @@ UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFil
 			 && ((gnCPUUsage < 25) || (gdwSoundSetup & SNDMIX_DIRECTTODISK)))
 				X86_Dither(MixSoundBuffer, lTotalSampleCount, gnBitsPerSample);
 		}
+
 		// Perform clipping + VU-Meter
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
 		// Buffer ready
@@ -642,7 +636,6 @@ BOOL CSoundFile::ProcessRow()
 						m_nMusicSpeed = m_nDefaultSpeed;
 						m_nMusicTempo = m_nDefaultTempo;
 						m_nGlobalVolume = m_nDefaultGlobalVolume;
-						RecalculateGainForAllPlugs();
 						for (UINT i=0; i<MAX_CHANNELS; i++)
 						{
 							Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
@@ -1094,12 +1087,10 @@ BOOL CSoundFile::ReadNote()
 				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
 				
 				UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
-				//Don't let global volume affect level of sample if sample is going to be put through a plugin:
-				//global volume is going to be applied to plugin output anyway.
-				if (m_pConfig->getGlobalVolumeAffectsPlugs() 
-					&& nPlugin>0 && nPlugin<MAX_MIXPLUGINS 
-					&& !(m_MixPlugins[nPlugin-1].Info.dwInputRouting&MIXPLUG_INPUTF_BYPASS)) {
-					pChn->nRealVolume = _muldiv(vol*256, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+				//Don't let global volume affect level of sample if
+				//global volume is going to be applied to master output anyway.
+				if (m_pConfig->getGlobalVolumeAppliesToMaster()) {
+					pChn->nRealVolume = _muldiv(vol*MAX_GLOBAL_VOLUME, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
 				} else {
 					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
 				}

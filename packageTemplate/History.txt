@@ -13,9 +13,13 @@ It is unfinished, do not expect to be able to compose with this version safely. 
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.25
+  . <rewbs> In 117RC2 plugmix mode, applying global volume is now the last tranformation applied to the buffer. 
+            Should fix bugs in the last few builds by which global volume was taken into account multiple times.
+
 . v 1.17.02.24
   . <rewbs> Global volume no longer applied twice on samples that are put through plugins.
-  . <rewbs> If a VST plugin was assigned to a channel and a note interrupted another, the resulting ramped part of the note would not be processed by the plugin. The outcome was potential "clicks".
+  . <rewbs> If a plugin was assigned to a channel in which a note interrupted another, the resulting ramped part of the note would not be processed by the plugin. The outcome was potential "clicks".
   / <rewbs> Removed broken CPU usage meter.
 
 . v 1.17.02.23

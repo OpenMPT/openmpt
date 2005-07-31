@@ -314,7 +314,6 @@ EndMod:
 	if ((bAdjust) && (!bTotal))
 	{
 		m_nGlobalVolume = nGlbVol;
-		RecalculateGainForAllPlugs();
 		m_nOldGlbVolSlide = nOldGlbVolSlide;
 		for (UINT n=0; n<m_nChannels; n++)
 		{
@@ -1300,7 +1299,6 @@ BOOL CSoundFile::ProcessEffects()
 			if (m_nType != MOD_TYPE_IT) param <<= 1;
 			if (param > 128) param = 128;
 			m_nGlobalVolume = param << 1;
-			RecalculateGainForAllPlugs();
 			break;
 
 		// Global Volume Slide
@@ -2741,7 +2739,6 @@ void CSoundFile::GlobalVolSlide(UINT param)
 		if (nGlbSlide < 0) nGlbSlide = 0;
 		if (nGlbSlide > 256) nGlbSlide = 256;
 		m_nGlobalVolume = nGlbSlide;
-		RecalculateGainForAllPlugs();
 	}
 }
 

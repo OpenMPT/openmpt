@@ -1998,10 +1998,6 @@ void CVstPlugin::RecalculateGain()
 		gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
 		gain *= (m_pSndFile->m_nVSTiVolume / 100.0f);
 	}
-	if (m_pSndFile->m_pConfig->getGlobalVolumeAffectsPlugs()) {
-		gain *= (m_pSndFile->m_nGlobalVolume / 256.0f);
-	}
-
 	m_fGain = gain;
 }
 

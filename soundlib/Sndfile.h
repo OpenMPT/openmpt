@@ -338,6 +338,8 @@ typedef const BYTE * LPCBYTE;
 #define SNDMIX_MUTECHNMODE		0x100000 // Notes are not played on muted channels
 #define SNDMIX_EMULATE_MIX_BUGS 0x200000 // rewbs.emulateMixBugs
 
+#define MAX_GLOBAL_VOLUME 256
+
 // Resampling modes
 enum {
 	SRCMODE_NEAREST,

@@ -39,8 +39,8 @@ public:
 	void setVSTiVolume(float);
 	float getVSTiVolume();
 
-	void setGlobalVolumeAffectsPlugs(bool);
-	bool getGlobalVolumeAffectsPlugs();
+	void setGlobalVolumeAppliesToMaster(bool);
+	bool getGlobalVolumeAppliesToMaster();
 	
 
 //calculated internally (getters only):	
@@ -56,7 +56,7 @@ private:
 	float m_VSTiVolume;			// user-controllable VSTi gain factor.
 	float m_VSTiGainFactor;		// always m_VSTiAttenuation * m_VSTiVolume. No public setter.
 
-	bool m_bGlobalVolumeAffectsPlugs;
+	bool m_bGlobalVolumeAppliesToMaster;
 
 	DWORD m_LastSavedWithVersion;
 	DWORD m_CreatedWithVersion;
