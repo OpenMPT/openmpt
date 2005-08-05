@@ -377,10 +377,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 
 		//Apply global volume
 		if (m_pConfig->getGlobalVolumeAppliesToMaster()) {
-			for (int pos=0; pos<lTotalSampleCount; pos++) {
-				//Overflow hazard? Or will param long casting make it all OK?
-				MixSoundBuffer[pos] = _muldiv(MixSoundBuffer[pos], m_nGlobalVolume , MAX_GLOBAL_VOLUME);
-			}
+			ApplyGlobalVolume(MixSoundBuffer, lTotalSampleCount);
 		}
 
 		// Hook Function
@@ -1720,5 +1717,42 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 
 }
 
-
 #endif
+
+
+VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
+//--------------------------------------------------------
+{
+		long delta=0;
+		long step=0;
+
+		if (m_nGlobalVolumeDestination != m_nGlobalVolume) { //user has provided new global volume
+			m_nGlobalVolumeDestination = m_nGlobalVolume;
+			m_nSamplesToGlobalVolRampDest = gnVolumeRampSamples;
+		} 
+
+		if (m_nSamplesToGlobalVolRampDest>0) {	// still some ramping left to do.
+			long highResGlobalVolumeDestination = static_cast<long>(m_nGlobalVolumeDestination)<<VOLUMERAMPPRECISION;
+			
+			delta = highResGlobalVolumeDestination-m_lHighResRampingGlobalVolume;
+			step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
+			
+			UINT maxStep = max(50, (10000/gnVolumeRampSamples+1)); //define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
+			while (abs(step)>maxStep) {					 //if step is too big (might cause click), extend ramp length.
+				m_nSamplesToGlobalVolRampDest += gnVolumeRampSamples;
+				step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
+			}
+		}
+
+		for (int pos=0; pos<lTotalSampleCount; pos++) {
+
+			if (m_nSamplesToGlobalVolRampDest>0) { //ramping required
+				m_lHighResRampingGlobalVolume += step;
+				SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME<<VOLUMERAMPPRECISION);
+				m_nSamplesToGlobalVolRampDest--;
+			} else {
+				SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+			}
+
+		}
+}

@@ -301,8 +301,8 @@ BEGIN
                     8
     EDITTEXT        IDC_RAMPING,145,225,24,14,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Samples",IDC_STATIC,172,228,29,8
-    LTEXT           "(overridden by instrument setting)",IDC_STATIC,9,238,
-                    104,8
+    LTEXT           "(can be overridden by instrument setting)",IDC_STATIC,9,
+                    238,128,8
     CONTROL         "Enable Graphic Equalizer",IDC_CHECK3,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,130,20,107,10
 END
@@ -1098,7 +1098,7 @@ BEGIN
     CTEXT           "I/O Type:",IDC_STATIC,263,208,47,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     PUSHBUTTON      "Move...",IDC_MOVEFXSLOT,53,207,34,13,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Clone...",IDC_CLONEPLUG,103,207,34,13,0,
+    PUSHBUTTON      "Clone...",IDC_CLONEPLUG,103,207,34,13,NOT WS_VISIBLE,
                     WS_EX_STATICEDGE
     PUSHBUTTON      "Insert...",IDC_INSERTFXSLOT,154,207,34,13,0,
                     WS_EX_STATICEDGE
