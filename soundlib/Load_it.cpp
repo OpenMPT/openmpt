@@ -657,6 +657,9 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	if (pifh->speed) m_nDefaultSpeed = pifh->speed;
 	if (pifh->tempo) m_nDefaultTempo = pifh->tempo;
 	m_nSongPreAmp = pifh->mv & 0x7F;
+	if (m_nSongPreAmp<0x20) {
+		m_nSongPreAmp=100;
+	}
 	// Reading Channels Pan Positions
 // -> CODE#0006
 // -> DESC="misc quantity changes"
@@ -1465,8 +1468,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	header.smpnum = m_nSamples;
 	header.patnum = MAX_PATTERNS;
 	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) header.patnum--;
-	header.cwtv = 0x300;	//We don't use these version info fields any more.
-	header.cmwt = 0x300;	//
+	header.cwtv = 0x888;	// We don't use these version info fields any more.
+	header.cmwt = 0x888;	// Might come up as "Impulse Tracker 8" file in XMPlay. :)
 	header.flags = 0x0001;
 	header.special = 0x0006;
 	if (m_nInstruments) header.flags |= 0x04;

@@ -612,6 +612,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nMusicSpeed = m_nDefaultSpeed;
 	m_nMusicTempo = m_nDefaultTempo;
 	m_nGlobalVolume = m_nDefaultGlobalVolume;
+	m_lHighResRampingGlobalVolume = m_nGlobalVolume<<VOLUMERAMPPRECISION;
+	m_nGlobalVolumeDestination = m_nGlobalVolume;
+	m_nSamplesToGlobalVolRampDest=0;
 	m_nNextPattern = 0;
 	m_nCurrentPattern = 0;
 	m_nPattern = 0;

@@ -13,6 +13,14 @@ It is unfinished, do not expect to be able to compose with this version safely. 
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.26
+  . <rewbs> Added volume ramping on global volume change in RC2 mix mode. Should eliminate most clicks on global volume change. Try increasing general ramping in the player settings dialog if it's still too clicky.
+  . <rewbs> Arpeggio with XM was messed up because implicit transposes were not always taken into account. I introduced this bug shortly after touching the code for the very first time, over a year ago. :) I dread to think what will fall appart now this is fixed.. XM users, test away!! :) (tx LPChip)
+  / <rewbs> Plugins are no longer forcefully informed of samplerate on first playback if it has not changed since initialisation. This works around a problem we were having with Crystal where the voice oscillator type soundfont was reset on the first playback. NB: it still gets reset if you explicitly change the samplerate - we're probably still doing something wrong. Have asked Crystal developper.
+  . <rewbs> Old IT files were loading with sample volume at 0.
+  . <rewbs> Minor: Removed plugin clone button, corrected view menu to say "General" instead of "Global", implulse tracker version marker changed from "impulse tracker v3" to v8.88.
+
+
 . v 1.17.02.25
   . <rewbs> In 117RC2 plugmix mode, applying global volume is now the last tranformation applied to the buffer. 
             Should fix bugs in the last few builds by which global volume was taken into account multiple times.

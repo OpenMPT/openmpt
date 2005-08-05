@@ -1460,6 +1460,7 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 
 	}
 
+	m_nSampleRate=CSoundFile::gdwMixingFreq;
 	Dispatch(effSetSampleRate, 0, 0, NULL, CSoundFile::gdwMixingFreq);
 	Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0.0f);
 	if (m_pEffect->numPrograms > 0)	{
@@ -1496,6 +1497,9 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 	m_bIsInstrument = isInstrument();
 	RecalculateGain();
 	m_pProcessFP = (m_pEffect->flags & effFlagsCanReplacing) ?  m_pEffect->processReplacing : m_pEffect->process;
+
+ // issue samplerate again here, cos some plugs like it before the block size, other like it right at the end.
+	Dispatch(effSetSampleRate, 0, 0, NULL, CSoundFile::gdwMixingFreq);
 
 }
 
@@ -1930,7 +1934,7 @@ void CVstPlugin::Resume()
 	long sampleRate = CSoundFile::gdwMixingFreq;
 
 	try {
-		//reset some stuff	
+		//reset some stuf
 		m_MixState.nVolDecayL = 0;
 		m_MixState.nVolDecayR = 0;
 		Dispatch(effStopProcess, 0, 0, NULL, 0.0f);	

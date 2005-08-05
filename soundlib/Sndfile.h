@@ -806,7 +806,9 @@ public:	// for Editing
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
 	bool m_bPatternTransitionOccurred;
-	UINT m_nMasterVolume, m_nGlobalVolume, m_nSongPreAmp, m_nVSTiVolume;
+	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest,
+		 m_nGlobalVolumeDestination, m_nSongPreAmp, m_nVSTiVolume;
+	long m_lHighResRampingGlobalVolume;
 	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
 	LONG m_nMinPeriod, m_nMaxPeriod, m_nRepeatCount;
 	DWORD m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples;
@@ -1107,6 +1109,7 @@ public:
 #ifdef MODPLUG_TRACKER
 	VOID ProcessMidiOut(UINT nChn, MODCHANNEL *pChn);		//rewbs.VSTdelay : added arg.
 #endif
+	VOID ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount);
 
 	// Static helper functions
 public:

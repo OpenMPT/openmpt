@@ -503,20 +503,23 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		}
 		return;
 	}
-	if (note < 1) note = 1;			//rewbs.VSTiDCT: moved to before return
-	if (note > 132) note = 132;		//
-	pChn->nNote = note;				//
 
-	if (!pins) return;
-	if ((!bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MT2)))
-	{
-		pChn->nTranspose = pins->RelativeTone;
-		pChn->nFineTune = pins->nFineTune;
+	if ((!bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MT2))) {
+		if (pins) {
+			pChn->nTranspose = pins->RelativeTone;
+			pChn->nFineTune = pins->nFineTune;
+		}
 	}
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose;
-	//rewbs.VSTiDCT	[moved from here]
+
+	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose; 
+	if (note < 1) note = 1;
+	if (note > 132) note = 132;
+	pChn->nNote = note;
+
 	if ((!bPorta) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))) pChn->nNewIns = 0;
 	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC4Speed);
+
+	if (!pins) return;
 	if (period)
 	{
 		if ((!bPorta) || (!pChn->nPeriod)) pChn->nPeriod = period;
@@ -839,7 +842,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			pPlugin =  m_MixPlugins[nPlugin-1].pMixPlugin;
 			if (pPlugin) 
 			{
-				// applyNAtoPlug iff this plug is currently playing a note on this tracking chan)
+				// apply NNA to this Plug iff this plug is currently playing a note on this tracking chan
 				// (and if it is playing a note, we know that would be the last note played on this chan).
 				applyNNAtoPlug = pPlugin->isPlaying(pChn->nNote, pChn->pHeader->nMidiChannel, nChn);
 			}
