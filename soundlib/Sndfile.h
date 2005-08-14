@@ -822,6 +822,7 @@ public:	// for Editing
 	BYTE Order[MAX_ORDERS];							// Pattern Orders
 	MODINSTRUMENT Ins[MAX_SAMPLES];					// Instruments
 	INSTRUMENTHEADER *Headers[MAX_INSTRUMENTS];		// Instrument Headers
+	INSTRUMENTHEADER m_defaultInstrument;			// Currently only used to get default values for extented properties. 
 	CHAR m_szNames[MAX_SAMPLES][32];				// Song and sample names
 	MODMIDICFG m_MidiCfg;							// Midi macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];		// Mix plugins
@@ -1130,6 +1131,7 @@ private:
 	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes);
 
 	void HandlePatternTransitionEvents();
+	void BuildDefaultInstrument();
 };
 
 

@@ -2430,25 +2430,25 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[
 	__int16 size=0;
 	__int32 code=0;
 
-	if(Headers[1] == NULL) {
+/*	if(Headers[1] == NULL) {
 		return;
-	}
+	}*/
 
 	code = 'MPTX';							// write extension header code
 	fwrite(&code, 1, sizeof(__int32), f);		
-
-	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(instruments[1]->nVolRamp),    f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(instruments[1]->nMixPlug),    f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(instruments[1]->nMidiChannel),f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(instruments[1]->nMidiProgram),f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(instruments[1]->wMidiBank),   f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('P...', sizeof(instruments[1]->nPan),        f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(instruments[1]->nGlobalVol),  f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(instruments[1]->nFadeOut),    f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('R...', sizeof(instruments[1]->nResampling), f, instruments, nInstruments);
-   	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(instruments[1]->nCutSwing),   f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(instruments[1]->nResSwing),   f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(instruments[1]->nFilterMode), f, instruments, nInstruments);
+	
+	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(m_defaultInstrument.nVolRamp),    f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(m_defaultInstrument.nMixPlug),    f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MC..', sizeof(m_defaultInstrument.nMidiChannel),f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MP..', sizeof(m_defaultInstrument.nMidiProgram),f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('MB..', sizeof(m_defaultInstrument.wMidiBank),   f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('P...', sizeof(m_defaultInstrument.nPan),        f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('GV..', sizeof(m_defaultInstrument.nGlobalVol),  f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FO..', sizeof(m_defaultInstrument.nFadeOut),    f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('R...', sizeof(m_defaultInstrument.nResampling), f, instruments, nInstruments);
+   	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(m_defaultInstrument.nCutSwing),   f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(m_defaultInstrument.nResSwing),   f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(m_defaultInstrument.nFilterMode), f, instruments, nInstruments);
 
 	return;
 }
@@ -2458,12 +2458,16 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16
 {
 	BYTE* pField = NULL;	// pointer to instrument value field
 
-	fwrite(&code, 1, sizeof(__int32), f);				//write code
-	fwrite(&size, 1, sizeof(__int16), f);			//write size
+	fwrite(&code, 1, sizeof(__int32), f);		//write code
+	fwrite(&size, 1, sizeof(__int16), f);		//write size
 	for(UINT nins=1; nins<=nInstruments; nins++) {  //for all instruments...
-		if (!instruments[nins])	break; 
-		BYTE* pField = GetInstrumentHeaderFieldPointer(instruments[nins], code, size); //get ptr to field
-		fwrite(pField, 1, size, f);					//write field data
+		BYTE* pField;
+		if (instruments[nins])	{
+			pField = GetInstrumentHeaderFieldPointer(instruments[nins], code, size); //get ptr to field
+		} else { 
+			pField = GetInstrumentHeaderFieldPointer(&m_defaultInstrument, code, size); //get ptr to field
+		}
+		fwrite(pField, 1, size, f);				//write field data
 	}
 
 	return;
