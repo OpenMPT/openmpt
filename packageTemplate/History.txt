@@ -13,6 +13,12 @@ It is unfinished, do not expect to be able to compose with this version safely. 
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+
+. v 1.17.02.27
+  . <rewbs> XMs saved in OpenMPT should no longer have a bunch of blank patterns at the end when played in XMPlay.
+  . <rewbs> Some instrument properties were saved incorrectly if an instrument had been deleted (either from song cleanup or treeview).
+  / <rewbs> Hiding "Test" plugin mix mode; minor cosmetic changes.
+
 . v 1.17.02.26
   . <rewbs> Added volume ramping on global volume change in RC2 mix mode. Should eliminate most clicks on global volume change. Try increasing general ramping in the player settings dialog if it's still too clicky.
   . <rewbs> Arpeggio with XM was messed up because implicit transposes were not always taken into account. I introduced this bug shortly after touching the code for the very first time, over a year ago. :) I dread to think what will fall appart now this is fixed.. XM users, test away!! :) (tx LPChip)
@@ -173,11 +179,6 @@ It is unfinished, do not expect to be able to compose with this version safely. 
             The property has been renamed to ramping and inverted so as to be more intuitive.
   / <rewbs> Replaced a bunch of "Modplug Tracker" strings with "OpenMPT". :)
   / <rewbs> Code cleanups, particularly in IT/ITP/ITI/XM/XI extended info saving. Extensive testing is TODO, including 2-way compat with previous versions.
-  
-TODO: change goto key context, remove from menu.
-
-
-
 
 . v 1.17RC1 (revision 1.13.2.13)
   . <rewbs> More fixes to plugs that try to get tempo before we've had a chance to init them properly.

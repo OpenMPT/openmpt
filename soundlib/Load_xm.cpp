@@ -689,15 +689,19 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	header.restartpos = m_nRestartPos;
 	header.channels = m_nChannels;
 	header.patterns = 0;
-	for (i=0; i<MAX_ORDERS; i++)
-	{
-// -> CODE#0013
-// -> DESC="load/save the whole pattern order list"
-//		if (Order[i] == 0xFF) break;
-// -! CODE#0013
+  /*for (i=0; i<MAX_ORDERS; i++) {
 		header.norder++;
 		if ((Order[i] >= header.patterns) && (Order[i] < MAX_PATTERNS)) header.patterns = Order[i]+1;
+	}*/
+	for (i=MAX_ORDERS-1; i>=0; i--) { // walk backwards over orderlist
+		if ((Order[i]!=0xFF) && (header.norder==0)) {
+			header.norder=i+1;	//find last used order
+		}
+		if ((Order[i] >= header.patterns) && (Order[i] < MAX_PATTERNS)) {
+			header.patterns = Order[i]+1;	//find last pattern
+		}
 	}
+
 	header.instruments = m_nInstruments;
 	if (!header.instruments) header.instruments = m_nSamples;
 	header.flags = (m_dwSongFlags & SONG_LINEARSLIDES) ? 0x01 : 0x00;

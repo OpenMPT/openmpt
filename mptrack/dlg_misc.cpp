@@ -180,12 +180,12 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),   plugmix_mode_117RC2);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),   plugmix_mode_117RC1);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original"),		  plugmix_mode_original);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),   plugmix_mode_Test);
+//	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),   plugmix_mode_Test);
 	switch(m_pSndFile->m_nPlugMixMode)
 	{
 		case plugmix_mode_original:	m_PlugMixBox.SetCurSel(2); break;
 		case plugmix_mode_117RC1:	m_PlugMixBox.SetCurSel(1); break;
-		case plugmix_mode_Test:		m_PlugMixBox.SetCurSel(3); break;
+//		case plugmix_mode_Test:		m_PlugMixBox.SetCurSel(3); break;
 		case plugmix_mode_117RC2:
 		default:					m_PlugMixBox.SetCurSel(0); break;
 	}

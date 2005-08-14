@@ -399,7 +399,7 @@ CSoundFile::CSoundFile()
 	m_nPlugMixMode=plugmix_mode_117RC2;
 	m_pConfig = new CSoundFilePlayConfig();
 	
-
+	BuildDefaultInstrument();
 }
 
 
@@ -2454,3 +2454,17 @@ BOOL CSoundFile::MoveSample(UINT from, UINT to)
 }*/
 //end rewbs.plugDocAware
 
+
+void CSoundFile::BuildDefaultInstrument() 
+//---------------------------------------
+{
+// m_defaultInstrument is currently only used to get default values for extented properties. 
+// In the future we can make better use of this.
+	memset(&m_defaultInstrument, 0, sizeof(INSTRUMENTHEADER));
+	m_defaultInstrument.nResampling = SRCMODE_DEFAULT;
+	m_defaultInstrument.nFilterMode = FLTMODE_UNCHANGED;
+	m_defaultInstrument.nPPC = 5*12;
+	m_defaultInstrument.nGlobalVol=128;
+	m_defaultInstrument.nPan = 0x20 << 2;
+	m_defaultInstrument.nIFC = 0xFF;
+}
