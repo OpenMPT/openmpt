@@ -1,4 +1,4 @@
-//-------- Modplug Tracker key binding definition file prototype -------
+//-------- Modplug Tracker key binding definition file  -------
 //-Format is:                                                          -
 //- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -
 //----------------------------------------------------------------------
@@ -13,7 +13,7 @@
 0:1029:0:117:1		//Play song from start: F6 (KeyDown)
 0:1027:0:118:5		//Play pattern from start: F7 (KeyDown|KeyHold)
 0:1026:2:118:5		//Play pattern from cursor: Ctrl+F7 (KeyDown|KeyHold)
-0:1376:2:120:1		//Toggle Midi Record: Ctrl+F9 (KeyDown)
+0:1376:0:120:1		//Toggle Midi Record: F9 (KeyDown)
 0:1359:2:90:1		//Undo: Ctrl+Z (KeyDown)
 0:1360:2:88:1		//Cut: Ctrl+X (KeyDown)
 0:1361:2:67:1		//Copy: Ctrl+C (KeyDown)
@@ -31,12 +31,12 @@
 0:1368:2:113:1		//Toggle Tree View: Ctrl+F2 (KeyDown)
 0:1369:2:112:1		//View Options: Ctrl+F1 (KeyDown)
 0:1370:0:112:1		//Help (to do): F1 (KeyDown)
-0:1032:2:191:5		//Previous instrument: Ctrl+/ (KeyDown|KeyHold)
-0:1032:2:38:1		//Previous instrument: Ctrl+Up (KeyDown)
+0:1032:2:111:5		//Previous instrument: Ctrl+ (KeyDown|KeyHold)
+0:1032:2:38:5		//Previous instrument: Ctrl+Up (KeyDown|KeyHold)
 0:1033:2:106:5		//Next instrument: Ctrl+Num * (KeyDown|KeyHold)
-0:1033:2:40:1		//Next instrument: Ctrl+Down (KeyDown)
-0:1036:0:191:5		//Previous octave: / (KeyDown|KeyHold)
-0:1037:0:106:5		//Next octave: Num * (KeyDown|KeyHold)
+0:1033:2:40:5		//Next instrument: Ctrl+Down (KeyDown|KeyHold)
+0:1036:0:111:1		//Previous octave:  (KeyDown)
+0:1037:0:106:1		//Next octave: Num * (KeyDown)
 0:1034:2:37:5		//Previous order: Ctrl+Left (KeyDown|KeyHold)
 0:1035:2:39:5		//Next order: Ctrl+Right (KeyDown|KeyHold)
 

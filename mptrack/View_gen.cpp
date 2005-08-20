@@ -414,7 +414,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_CbnPlugin.SetRedraw(TRUE);
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
-		PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
+		PSNDMIXPLUGIN pPlugin = &(pSndFile->m_MixPlugins[m_nCurrentPlugin]);
 		SetDlgItemText(IDC_EDIT13, pPlugin->Info.szName);
 		CheckDlgButton(IDC_CHECK9, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT) ? TRUE : FALSE);
 		CheckDlgButton(IDC_CHECK10, (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS) ? TRUE : FALSE);

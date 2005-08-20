@@ -618,11 +618,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	} else
 	{
 		xmax = cx;
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//		posincr = _muldiv(len, 0x10000, cx);
-		posincr = (len / (xmax+1)) * 0x10000;
-// -! BEHAVIOUR_CHANGE#0006
+		posincr = _muldiv(len, 0x10000, cx);
 	}
 	::MoveToEx(hdc, 0, ymed, NULL);
 	posfrac = 0;

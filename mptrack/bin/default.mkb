@@ -1,4 +1,4 @@
-//-------- Modplug Tracker key binding definition file  -------
+//-------- OpenMPT key binding definition file  -------
 //-Format is:                                                          -
 //- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -
 //----------------------------------------------------------------------
@@ -48,16 +48,16 @@
 //----( General Context [bottom] (1) )------------
 
 //----( Pattern Context [bottom] (2) )------------
-2:1017:0:34:5		//Jump down by highlight1: PGDOWN (KeyDown|KeyHold)
-2:1018:0:33:5		//Jump up by highlight1: PGUP (KeyDown|KeyHold)
-2:1338:4:34:5		//Jump down by highlight2: Alt+PGDOWN (KeyDown|KeyHold)
-2:1339:4:33:5		//Jump up by highlight2: Alt+PGUP (KeyDown|KeyHold)
-2:1019:2:34:5		//Snap down to highlight1: Ctrl+PGDOWN (KeyDown|KeyHold)
-2:1020:2:33:5		//Snap up to highlight1: Ctrl+PGUP (KeyDown|KeyHold)
-2:1340:6:34:5		//Snap down to highlight2: Ctrl+Alt+PGDOWN (KeyDown|KeyHold)
-2:1341:6:33:5		//Snap up to highlight2: Ctrl+Alt+PGUP (KeyDown|KeyHold)
-2:1038:0:40:5		//Navigate down: DOWN (KeyDown|KeyHold)
-2:1039:0:38:5		//Navigate up: UP (KeyDown|KeyHold)
+2:1017:0:34:5		//Jump down by measure: PGDOWN (KeyDown|KeyHold)
+2:1018:0:33:5		//Jump up by measure: PGUP (KeyDown|KeyHold)
+2:1338:4:34:5		//Jump down by beat: Alt+PGDOWN (KeyDown|KeyHold)
+2:1339:4:33:5		//Jump up by beat: Alt+PGUP (KeyDown|KeyHold)
+2:1019:2:34:5		//Snap down to measure: Ctrl+PGDOWN (KeyDown|KeyHold)
+2:1020:2:33:5		//Snap up to measure: Ctrl+PGUP (KeyDown|KeyHold)
+2:1340:6:34:5		//Snap down to beat: Ctrl+Alt+PGDOWN (KeyDown|KeyHold)
+2:1341:6:33:5		//Snap up to beat: Ctrl+Alt+PGUP (KeyDown|KeyHold)
+2:1038:0:40:5		//Navigate down by 1 row: DOWN (KeyDown|KeyHold)
+2:1039:0:38:5		//Navigate up by 1 row: UP (KeyDown|KeyHold)
 2:1040:0:37:5		//Navigate left: LEFT (KeyDown|KeyHold)
 2:1041:0:39:5		//Navigate right: RIGHT (KeyDown|KeyHold)
 2:1042:0:9:5		//Navigate to next channel: TAB (KeyDown|KeyHold)
@@ -269,12 +269,14 @@
 
 //----( Unknown Context (12) )------------
 
-//----( General Context [top] (13) )------------
+//----( Plugin GUI Context (13) )------------
 
-//----( Pattern Context [top] (14) )------------
+//----( General Context [top] (14) )------------
 
-//----( Sample Context [top] (15) )------------
+//----( Pattern Context [top] (15) )------------
 
-//----( Instrument Context [top] (16) )------------
+//----( Sample Context [top] (16) )------------
 
-//----( Comments Context [top] (17) )------------
+//----( Instrument Context [top] (17) )------------
+
+//----( Comments Context [top] (18) )------------

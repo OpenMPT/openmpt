@@ -23,10 +23,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xsoundlib", "..\xsoundlib\x
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{7E48C4C4-2A07-4723-AE5D-912028257CD8}") = "mptrackModel", "mptrackModel\mptrackModel.mdproj", "{98A91D25-E814-47DF-9D9E-C02757B6D6D2}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Athlon32 = Athlon32
@@ -34,7 +30,6 @@ Global
 		Generic = Generic
 		P3 = P3
 		P4-Athlon64 = P4-Athlon64
-		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{DB18719C-9177-4632-A9E0-7E72E2E6B05E}.Athlon32.ActiveCfg = Athlon32|Win32
@@ -47,8 +42,6 @@ Global
 		{DB18719C-9177-4632-A9E0-7E72E2E6B05E}.P3.Build.0 = P3|Win32
 		{DB18719C-9177-4632-A9E0-7E72E2E6B05E}.P4-Athlon64.ActiveCfg = P4-Athlon64|Win32
 		{DB18719C-9177-4632-A9E0-7E72E2E6B05E}.P4-Athlon64.Build.0 = P4-Athlon64|Win32
-		{DB18719C-9177-4632-A9E0-7E72E2E6B05E}.Release.ActiveCfg = Release|Win32
-		{DB18719C-9177-4632-A9E0-7E72E2E6B05E}.Release.Build.0 = Release|Win32
 		{71531076-78C7-488D-8FD6-9D841F20AADE}.Athlon32.ActiveCfg = Athlon32|Win32
 		{71531076-78C7-488D-8FD6-9D841F20AADE}.Athlon32.Build.0 = Athlon32|Win32
 		{71531076-78C7-488D-8FD6-9D841F20AADE}.Debug.ActiveCfg = Debug|Win32
@@ -59,8 +52,6 @@ Global
 		{71531076-78C7-488D-8FD6-9D841F20AADE}.P3.Build.0 = P3|Win32
 		{71531076-78C7-488D-8FD6-9D841F20AADE}.P4-Athlon64.ActiveCfg = P4-Athlon64|Win32
 		{71531076-78C7-488D-8FD6-9D841F20AADE}.P4-Athlon64.Build.0 = P4-Athlon64|Win32
-		{71531076-78C7-488D-8FD6-9D841F20AADE}.Release.ActiveCfg = Release|Win32
-		{71531076-78C7-488D-8FD6-9D841F20AADE}.Release.Build.0 = Release|Win32
 		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}.Athlon32.ActiveCfg = Athlon32|Win32
 		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}.Athlon32.Build.0 = Athlon32|Win32
 		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}.Debug.ActiveCfg = Debug|Win32
@@ -71,8 +62,6 @@ Global
 		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}.P3.Build.0 = P3|Win32
 		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}.P4-Athlon64.ActiveCfg = P4-Athlon64|Win32
 		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}.P4-Athlon64.Build.0 = P4-Athlon64|Win32
-		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}.Release.ActiveCfg = Release|Win32
-		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}.Release.Build.0 = Release|Win32
 		{1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4}.Athlon32.ActiveCfg = Athlon32|Win32
 		{1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4}.Athlon32.Build.0 = Athlon32|Win32
 		{1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4}.Debug.ActiveCfg = Debug|Win32
@@ -83,8 +72,6 @@ Global
 		{1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4}.P3.Build.0 = P3|Win32
 		{1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4}.P4-Athlon64.ActiveCfg = P4-Athlon64|Win32
 		{1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4}.P4-Athlon64.Build.0 = P4-Athlon64|Win32
-		{1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4}.Release.ActiveCfg = Release|Win32
-		{1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4}.Release.Build.0 = Release|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Athlon32.ActiveCfg = Athlon32|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Athlon32.Build.0 = Athlon32|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Debug.ActiveCfg = Debug|Win32
@@ -95,8 +82,6 @@ Global
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.P3.Build.0 = P3|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.P4-Athlon64.ActiveCfg = P4-Athlon64|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.P4-Athlon64.Build.0 = P4-Athlon64|Win32
-		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Release.ActiveCfg = Release|Win32
-		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
