@@ -50,7 +50,7 @@
 				Version="5.0"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\xsoundlib\Release"
+				AdditionalLibraryDirectories="..\xsoundlib\Debug"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\Debug/mptrack.pdb"
 				GenerateMapFile="TRUE"
