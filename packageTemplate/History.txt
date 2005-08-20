@@ -1,11 +1,6 @@
-1. What is this?
-----------------
-This is a test build of Modplug Tracker. 
-It is unfinished, do not expect to be able to compose with this version safely. But by all means try, and let me know what goes wrong. 
+OpenMPT - Full Version History
+------------------------------
 
-
-2. What's new in this build?
-----------------------------
 .: bug fix
 +: new feature
 -: known issue / regression
@@ -13,6 +8,9 @@ It is unfinished, do not expect to be able to compose with this version safely. 
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.28
+  . <rewbs> Fixed sample editor display bug with "auto" zoom level.
+  . <rewbs> Internal: project configuration changes.
 
 . v 1.17.02.27
   . <rewbs> XMs saved in OpenMPT should no longer have a bunch of blank patterns at the end when played in XMPlay.
@@ -492,6 +490,6 @@ It is unfinished, do not expect to be able to compose with this version safely. 
    + SDx works on VSTis.
 
 
-3. I have questions/comments/bug reports.
------------------------------------------
-Visit http://www.modplug.com/forums, or write to robin@soal.org or contact@ericus.org.
+Questions/comments/bug reports?
+-------------------------------
+Visit http://www.modplug.com/forums, or write to robin@soal.org.
