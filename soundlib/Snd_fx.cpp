@@ -756,7 +756,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			// Note
 			case DCT_NOTE:
 				if ((note) && (p->nNote == note) && (pHeader == p->pHeader)) bOk = TRUE;
-				if (pHeader->nMixPlug) applyDNAtoPlug = true; //rewbs.VSTiNNA
+				if (pHeader && pHeader->nMixPlug) applyDNAtoPlug = true; //rewbs.VSTiNNA
 				break;
 			// Sample
 			case DCT_SAMPLE:
@@ -766,11 +766,11 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			case DCT_INSTRUMENT:
 				if (pHeader == p->pHeader) bOk = TRUE;
 				//rewbs.VSTiNNA
-				if (pHeader->nMixPlug) applyDNAtoPlug = true;
+				if (pHeader && pHeader->nMixPlug) applyDNAtoPlug = true;
 				break;
 			// Plugin
 			case DCT_PLUGIN:
-				if ((pHeader->nMixPlug) && (pHeader->nMixPlug == p->pHeader->nMixPlug))
+				if (pHeader && (pHeader->nMixPlug) && (pHeader->nMixPlug == p->pHeader->nMixPlug))
 				{
 					applyDNAtoPlug = true;
 					bOk = TRUE;

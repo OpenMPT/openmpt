@@ -8,7 +8,11 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
-. v 1.17.02.28
+. v 1.17.02.29
+  . <rewbs> Fixed 3 digit instrument numbers when there are less  than 100 instruments. (http://www.modplug.com/forum/viewtopic.php?p=42006)
+  . <rewbs> Fixed crash in plugin DNA/NNA check we transitionning between existing and non existing instruments. (http://www.modplug.com/forum/viewtopic.php?p=42006)
+
+. v 1.17.02.28 (official RC2 release)
   . <rewbs> Fixed sample editor display bug with "auto" zoom level.
   . <rewbs> Internal: project configuration changes.
 
