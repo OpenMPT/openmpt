@@ -3545,7 +3545,10 @@ void CViewPattern::TempEnterIns(int val)
 		UINT instr  = p->instr;
 		instr = ((instr * 10) + val) % 1000;
 		if (instr > MAX_INSTRUMENTS) instr = instr % 100;
-		if ((pSndFile->m_nSamples < 100) && (pSndFile->m_nInstruments < 100) && (instr >= 100)) instr = instr % 100;
+		if ( ((pSndFile->m_nInstruments==0) && (pSndFile->m_nSamples<100)) ||	// if we're using samples & have less than 100 samples
+			  (pSndFile->m_nInstruments < 100)) {								// or if we're using instruments and have less than 100 instruments
+				instr = instr % 100;											// --> ensure the entered instrument value is less than 100.
+			}
 		p->instr = instr;
 
 		if (m_dwStatus & PATSTATUS_RECORD)

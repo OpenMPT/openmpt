@@ -25,8 +25,8 @@ class CPerformanceCounter;
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define KEYBOARDMAP_LENGTH			(3*12+2)
 #define MAINFRAME_TITLE				"Open Modplug Tracker"
-#define MPTRACK_VERSION				0x01170228
-#define INFORMAL_VERSION			"1.17RC2"
+#define MPTRACK_VERSION				0x01170229
+#define INFORMAL_VERSION			"1.17RC3_"
 
 
 enum {
