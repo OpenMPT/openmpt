@@ -8,6 +8,11 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.30
+  . <rewbs> Fixed drum program being offset by 1 on MIDI export.
+            NB: MIDI import/export uses 0-127 range for midi program, whereas messages to plugins use 1-128 (0 is used to indicate that no program change is required).
+                The MIDI import/export range should be adapted to use the 1-128 range at some point.
+
 . v 1.17.02.29
   . <rewbs> Fixed 3 digit instrument numbers when there are less  than 100 instruments. (http://www.modplug.com/forum/viewtopic.php?p=42006)
   . <rewbs> Fixed crash in plugin DNA/NNA check we transitionning between existing and non existing instruments. (http://www.modplug.com/forum/viewtopic.php?p=42006)
