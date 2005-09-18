@@ -1383,12 +1383,10 @@ void CViewPattern::OnSoloChannel(BOOL current)
 			OnUnmuteAll();
 			return;
 		} 
-	} else { 
-		
-		for (UINT i=0; i<nNumChn; i++)	{
-			pModDoc->MuteChannel(i, !(i == nChn)); //mute all chans except nChn, unmute nChn
-			pModDoc->SoloChannel(i, (i == nChn));  //unsolo all chans except nChn, solo nChn
-		}
+	} 
+	for (UINT i=0; i<nNumChn; i++)	{
+		pModDoc->MuteChannel(i, !(i == nChn)); //mute all chans except nChn, unmute nChn
+		pModDoc->SoloChannel(i, (i == nChn));  //unsolo all chans except nChn, solo nChn
 	}
 	InvalidateChannelsHeaders();
 }
