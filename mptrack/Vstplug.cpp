@@ -569,9 +569,8 @@ VOID CVstPluginManager::OnIdle()
 					p->m_bNeedIdle=false;
 			}
 			//We need to update all open editors
-			if ((p->m_pEditor) && (p->m_pEditor->m_hWnd))
-			{
-				p->m_pEditor->UpdateAll();
+			if ((p->m_pEditor) && (p->m_pEditor->m_hWnd)) {
+				p->m_pEditor->UpdateParamDisplays();
 			}
 			//end rewbs. VSTCompliance:
 
@@ -597,15 +596,30 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		if (effect && effect->resvd1)
 		{
 			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
-			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
-			if (pVstEditor) {
-				pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);
-			}
+			
+			//Mark track modified
             CModDoc* pModDoc = pVstPlugin->GetModDoc();
 			if (pModDoc) {
 				CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
-			//	pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   //Causes flickers in treeview
+				//Could be used to update general tab in real time, but causes flickers in treeview
+				//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
 			}
+			//Record param change
+			if (pVstPlugin->m_bRecordAutomation) {
+				pModDoc->RecordParamChange(pVstPlugin->GetSlot(), index);
+			}
+
+			// Learn macro
+			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
+			int macroToLearn = pVstEditor->GetLearnMacro();
+			if (pVstEditor && macroToLearn>-1) {
+				pModDoc->LearnMacro(macroToLearn, index);
+				pVstEditor->SetLearnMacro(-1);
+
+				//Commenting this out to see if it fixes http://www.modplug.com/forum/viewtopic.php?t=3710
+				//pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);
+			}
+
 		}
 		return 0; 
 	// Called when plugin asks for VST version supported by host
@@ -1425,6 +1439,9 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 		m_pEvList->numEvents = 0;
 		m_pEvList->reserved = 0;
 	}
+	m_bNeedIdle=false;
+	m_bRecordAutomation=false;
+
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
 
 	//rewbs.VSTcompliance
@@ -2899,6 +2916,7 @@ UINT CVstPlugin::GetSlot()
 {
 	return m_nSlot;
 }
+
 void CVstPlugin::UpdateMixStructPtr(PSNDMIXPLUGIN p)
 //--------------------------------------------------
 {

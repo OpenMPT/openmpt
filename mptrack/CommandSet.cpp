@@ -2228,6 +2228,10 @@ void CCommandSet::SetupCommands()
 	commands[kcToggleChanMuteOnPatTransition].isDummy = false;
 	commands[kcToggleChanMuteOnPatTransition].Message = "(Un)mute chan on pat transition";
 
+	commands[kcChannelUnmuteAll].UID = 1771;
+	commands[kcChannelUnmuteAll].isHidden = false;
+	commands[kcChannelUnmuteAll].isDummy = false;
+	commands[kcChannelUnmuteAll].Message = "Unmute all channels";
 
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
@@ -2804,9 +2808,28 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		}
 
 	}
-
-
-
+/*	if (enforceRule[krFoldEffectColumnAnd])
+	{
+		if (inKc.ctx == kCtxViewPatternsFX) {
+			KeyCombination newKc = inKc;
+			newKc.ctx = kCtxViewPatternsFXparam;
+			if (adding)	{            
+				Add(newKc, inCmd, false);
+			} else {
+				Remove(newKc, inCmd);
+			}
+		}
+		if (inKc.ctx == kCtxViewPatternsFXparam) {
+			KeyCombination newKc = inKc;
+			newKc.ctx = kCtxViewPatternsFX;
+			if (adding)	{            
+				Add(newKc, inCmd, false);
+			} else {
+				Remove(newKc, inCmd);
+			}
+		} 
+	}
+*/
 	return report;
 }
 

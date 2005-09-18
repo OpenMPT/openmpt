@@ -151,7 +151,7 @@ public:
 	void GetInputInstrumentList(CArray<UINT,UINT> &list);
 	void GetInputChannelList(CArray<UINT,UINT> &list);
 
-public: // IMixPlugin interface
+public:
 	int AddRef() { return ++m_nRefCount; }
 	int Release();
 	void SaveAllParameters();
@@ -169,6 +169,7 @@ public: // IMixPlugin interface
 	bool isPlaying(UINT note, UINT midiChn, UINT trackerChn);	//rewbs.instroVST
 	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn); //rewbs.instroVST
 	bool m_bNeedIdle; //rewbs.VSTCompliance
+	bool m_bRecordAutomation;
 	void NotifySongPlaying(bool playing);	//rewbs.VSTCompliance
 	bool IsSongPlaying() {return m_bSongPlaying;}	//rewbs.VSTCompliance
 	bool IsResumed() {return m_bPlugResumed;}

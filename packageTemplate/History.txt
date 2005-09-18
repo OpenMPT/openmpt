@@ -8,6 +8,22 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.31
+  + <rewbs> Automatically generate a macro for a param by touching that param on the plug's GUI.
+            To try it, select an unused macro from the plug GUI's Info/Macros menu, then touch a param.
+  + <rewbs> Added "unmute all" custom key.
+  . <rewbs> Restored original MPT behaviour: If the cursor is in the effect letter column, and a key is pressed that corresponds to no known effects, that keypress will be applied to the effect param column. And vice versa.(tx Emperor)
+  . <rewbs> Tentative fix: Changed effEditIdle dispatching behaviour in an attempt to fix issue with Lounge Lizard (http://www.modplug.com/forum/viewtopic.php?t=3710)
+            Please let me know if this breaks GUI refreshes for other plugs.
+  . <rewbs> Fixed: Minor bug in search and replace - searching for "compoud" effects like SDx sometimes failed.
+  . <rewbs> Fixed: It was impossible to preview simultaneous notes in the pattern editor (tx Emperor)
+  . <rewbs> Fixed: Changing a param in default plugin GUI could result in a continuous param update cycle until the param value returned by the plug stabilised.
+  . <rewbs> Fixed: Unsoloing a previously soloed channel resulted in unmute all if other channels had since been unmuted. :)
+  . <rewbs> Minor code cleanups
+  (+) <rewbs> Preliminary parameter value recording. Enable from plug GUI's Option menu.
+              However it currently does not work correctly with follow song enabled: 
+	      active mousing on a plug gui blocks the cursor, so all values get written in the same place. :)
+
 . v 1.17.02.30
   . <rewbs> Fixed drum program being offset by 1 on MIDI export.
             NB: MIDI import/export uses 0-127 range for midi program, whereas messages to plugins use 1-128 (0 is used to indicate that no program change is required).

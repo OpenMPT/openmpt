@@ -15,6 +15,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_INITMENU()
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
 	ON_COMMAND(ID_PLUG_BYPASS,			OnBypassPlug)
+	ON_COMMAND(ID_PLUG_RECORDAUTOMATION,OnRecordAutomation)
 	ON_COMMAND(ID_PRESET_SAVE,			OnSavePreset)
 	ON_COMMAND(ID_PRESET_RANDOM,		OnRandomizePreset)
 	ON_COMMAND(ID_VSTMACRO_INFO,		OnMacroInfo)
@@ -23,6 +24,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnToggleEditor) //rewbs.patPlugName
 	ON_COMMAND_RANGE(ID_SELECTINST, ID_SELECTINST+MAX_INSTRUMENTS, OnSetInputInstrument) //rewbs.patPlugName
+	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI+NMACROS, PrepareToLearnMacro)
 END_MESSAGE_MAP()
 
 CAbstractVstEditor::CAbstractVstEditor(CVstPlugin *pPlugin)
@@ -39,6 +41,7 @@ CAbstractVstEditor::CAbstractVstEditor(CVstPlugin *pPlugin)
 
 	m_pMenu->LoadMenu(IDR_VSTMENU);
 	m_nInstrument = GetBestInstrumentCandidate();
+	m_nLearnMacro = -1;
 }
 
 CAbstractVstEditor::~CAbstractVstEditor()
@@ -113,7 +116,7 @@ VOID CAbstractVstEditor::OnRandomizePreset()
 	{
 		if (::AfxMessageBox("Are you sure you want to randomize parameters?\nYou will lose current parameter values.", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 			m_pVstPlugin->RandomizeParams();
-		UpdateAll();
+		UpdateParamDisplays();
 	}
 }
 
@@ -143,13 +146,26 @@ void CAbstractVstEditor::OnSetPreset(UINT nID)
 }
 
 void CAbstractVstEditor::OnBypassPlug()
+//-------------------------------------
 {
-	if (m_pVstPlugin)
-	{
+	if (m_pVstPlugin) {
 		if (m_pVstPlugin->Bypass()) {
 			m_pMenu->ModifyMenu(ID_PLUG_BYPASS, MF_BYCOMMAND|MF_CHECKED, ID_PLUG_BYPASS, "&Bypass");
 		} else {
 			m_pMenu->ModifyMenu(ID_PLUG_BYPASS, MF_BYCOMMAND|MF_UNCHECKED, ID_PLUG_BYPASS, "&Bypass");
+		}
+	}
+}
+
+void CAbstractVstEditor::OnRecordAutomation()
+//-------------------------------------------
+{
+	if (m_pVstPlugin) {
+		m_pVstPlugin->m_bRecordAutomation = !m_pVstPlugin->m_bRecordAutomation;
+		if (m_pVstPlugin->m_bRecordAutomation) {
+			m_pMenu->ModifyMenu(ID_PLUG_RECORDAUTOMATION, MF_BYCOMMAND|MF_CHECKED, ID_PLUG_RECORDAUTOMATION, "Record &Params");
+		} else {
+			m_pMenu->ModifyMenu(ID_PLUG_RECORDAUTOMATION, MF_BYCOMMAND|MF_UNCHECKED, ID_PLUG_RECORDAUTOMATION, "Record &Params");
 		}
 	}
 }
@@ -437,12 +453,13 @@ void CAbstractVstEditor::UpdateMacroMenu()
 {
 	CString label, macroName, macroText;
 	char paramName[128];
-	bool greyed=true;
-	int macroType,nParam;
+	bool greyed;
+	int macroType,nParam,action;
 
 	CModDoc* pModDoc = m_pVstPlugin->GetModDoc();
-	if (!pModDoc)
+	if (!pModDoc) {
 		return;
+	}
 
  	CMenu* pInfoMenu = m_pMenu->GetSubMenu(2);
 	pInfoMenu->DeleteMenu(2, MF_BYPOSITION);	
@@ -455,15 +472,25 @@ void CAbstractVstEditor::UpdateMacroMenu()
 	}
 
 	for (int nMacro=0; nMacro<NMACROS; nMacro++)	{
+		action=NULL;
 		greyed=true;
 		macroText = &(pModDoc->GetSoundFile()->m_MidiCfg.szMidiSFXExt[nMacro*32]);
  		macroType = pModDoc->GetMacroType(macroText);
 
 		switch (macroType)	{
-			case sfx_unused: macroName = "Unused"; break;
-			case sfx_cutoff: macroName = "Set Filter Cutoff"; break;
-			case sfx_reso: macroName = "Set Filter Resonance"; break;
-			case sfx_mode: macroName = "Set Filter Mode"; break;
+			case sfx_unused: 
+				macroName = "Unused. Learn Param..."; 
+				action=ID_LEARN_MACRO_FROM_PLUGGUI+nMacro;
+				greyed=false; 
+				break;
+			case sfx_cutoff: 
+				macroName = "Set Filter Cutoff"; 
+				break;
+			case sfx_reso: 
+				macroName = "Set Filter Resonance"; 
+				break;
+			case sfx_mode: macroName = "Set Filter Mode"; 
+				break;
 			case sfx_drywet: 
 				macroName = "Set plugin dry/wet ratio"; 
 				greyed=false; 
@@ -488,9 +515,8 @@ void CAbstractVstEditor::UpdateMacroMenu()
 				greyed=false;
 
 		}
-
 		label.Format("SF%X: %s", nMacro, macroName);
-		m_pMacroMenu->AppendMenu(MF_STRING|(greyed?MF_GRAYED:0), NULL, label);
+		m_pMacroMenu->AppendMenu(MF_STRING|(greyed?MF_GRAYED:0), action, label);
 	}
 
 	pInfoMenu->InsertMenu(2, MF_BYPOSITION|MF_POPUP, (UINT)m_pMacroMenu->m_hMenu, "&Macros");
@@ -543,4 +569,21 @@ int CAbstractVstEditor::GetBestInstrumentCandidate()
 void CAbstractVstEditor::OnSetInputInstrument(UINT nID)
 {
 	m_nInstrument = (nID-ID_SELECTINST);
+}
+
+void CAbstractVstEditor::PrepareToLearnMacro(UINT nID)
+{
+	m_nLearnMacro = (nID-ID_LEARN_MACRO_FROM_PLUGGUI);
+	//Now we wait for a param to be touched. We'll get the message from the VST Plug Manager.
+	//Then pModDoc->LearnMacro(macro, param) is called
+}
+
+void CAbstractVstEditor::SetLearnMacro(int inMacro) {
+	if (inMacro<NMACROS) {
+		m_nLearnMacro=inMacro;
+	}
+}
+
+int CAbstractVstEditor::GetLearnMacro() {
+	return m_nLearnMacro;
 }

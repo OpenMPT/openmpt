@@ -16,7 +16,7 @@
 
 
 #define MAX_SPACING		16
-#define	PLUGNAME_HEIGHT		16	//rewbs.patPlugName
+#define	PLUGNAME_HEIGHT	16	//rewbs.patPlugName
 
 #pragma warning(disable:4244)
 
@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_WM_DESTROY()
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg)		//rewbs.customKeys
 	ON_MESSAGE(WM_MOD_MIDIMSG,		OnMidiMsg)
+	ON_MESSAGE(WM_MOD_RECORDPARAM,  OnRecordPlugParamChange)
 	ON_COMMAND(ID_EDIT_CUT,			OnEditCut)
 	ON_COMMAND(ID_EDIT_COPY,		OnEditCopy)
 	ON_COMMAND(ID_EDIT_PASTE,		OnEditPaste)
@@ -571,10 +572,23 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
 			InputTargetContext ctx = (InputTargetContext)(kCtxViewPatterns+1 + (m_dwCursor & 0x07));
 			
-			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
-			{	
+			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull) {
 				return true; // Mapped to a command, no need to pass message on.
+			} 
+			//HACK: fold kCtxViewPatternsFX and kCtxViewPatternsFXparam so that all commands of 1 are active in the other
+			else { 
+				if (ctx==kCtxViewPatternsFX) {
+					if (ih->KeyEvent(kCtxViewPatternsFXparam, nChar, nRepCnt, nFlags, kT) != kcNull) {
+						return true; // Mapped to a command, no need to pass message on.
+					}
+				} 
+				if (ctx==kCtxViewPatternsFXparam) {
+					if (ih->KeyEvent(kCtxViewPatternsFX, nChar, nRepCnt, nFlags, kT) != kcNull) {
+						return true; // Mapped to a command, no need to pass message on.
+					}
+				}
 			}
+			//end HACK.
 		}
 		//end rewbs.customKeys
 		
@@ -1340,34 +1354,43 @@ void CViewPattern::OnSoloFromClick()
 }
 
 
+// When trying to solo a channel that is already the only unmuted channel,
+// this will result in unmuting all channels, in order to satisfy user habits.
+// In all other cases, soloing a channel unsoloes all and mutes all except this channel
 void CViewPattern::OnSoloChannel(BOOL current)
 //--------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		UINT nNumChn = pModDoc->GetNumChannels();
-		UINT nChn = current ? (m_dwCursor&0xFFFF)>>3 : (m_nMenuParam&0xFFFF)>>3;
-		
-		if (nChn < nNumChn)		{
-			if (pModDoc->IsChannelSolo(nChn)) {
-				 //trying to solo a channel that is solo'ed -> unSolo and unMute all
-				for (UINT i=0; i<nNumChn; i++){
-					pModDoc->MuteChannel(i, FALSE);
-					pModDoc->SoloChannel(i, FALSE);
-				}
-			} 
-			else {
-				// Soloing a channel when another channel is soloed mutes all except for new one
-				pModDoc->SoloChannel(nChn, TRUE);
-				for (UINT i=0; i<nNumChn; i++)	{
-					pModDoc->MuteChannel(i, !(i == nChn)); //mute all chans except this one
-					pModDoc->SoloChannel(i, (i == nChn));  //unsolo all chans except this one, solo this channel
-				}
+	if (!pModDoc) {
+		return;
+	}
+
+	UINT nNumChn = pModDoc->GetNumChannels();
+	UINT nChn = current ? (m_dwCursor&0xFFFF)>>3 : (m_nMenuParam&0xFFFF)>>3;
+	if (nChn >= nNumChn)	{
+		return;
+	}
+
+	if (pModDoc->IsChannelSolo(nChn)) {
+		bool nChnIsOnlyUnMutedChan=true;
+		for (UINT i=0; i<nNumChn; i++){	//check status of all other chans
+			if (i!=nChn && !pModDoc->IsChannelMuted(i)) {
+				nChnIsOnlyUnMutedChan=false;	//found a channel that isn't muted!
+				break;					
 			}
-			InvalidateChannelsHeaders();
+		}
+		if (nChnIsOnlyUnMutedChan) { //this is the only playable channel and it is already soloed ->  uunMute all
+			OnUnmuteAll();
+			return;
+		} 
+	} else { 
+		
+		for (UINT i=0; i<nNumChn; i++)	{
+			pModDoc->MuteChannel(i, !(i == nChn)); //mute all chans except nChn, unmute nChn
+			pModDoc->SoloChannel(i, (i == nChn));  //unsolo all chans except nChn, solo nChn
 		}
 	}
+	InvalidateChannelsHeaders();
 }
 
 
@@ -2605,6 +2628,34 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 
 }
 
+LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM param, LPARAM value)
+//--------------------------------------------------------------------------
+{	
+	CModDoc *pModDoc = GetDocument();
+	if (!m_bRecord || !pModDoc) {
+		return 0;
+	}
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	if (!pSndFile) {
+		return 0;
+	}
+
+	MODCOMMAND *pRow;
+	PrepareUndo(m_dwBeginSel, m_dwEndSel);
+
+	//Work out where to put the new data
+	UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
+	pRow = pSndFile->Patterns[m_nPattern] + m_nRow*pSndFile->m_nChannels + nChn;
+
+	//TODO: ensure correct macro is active.
+
+	//Write the data
+	pRow->command = CMD_SMOOTHMIDI;
+	pRow->param = value;
+	InvalidateRow();
+
+}
+
 
 LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 //--------------------------------------------------------
@@ -2921,6 +2972,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcCursorPaste:					OnCursorPaste(); return wParam;
 		case kcChannelMute:					OnMuteChannel(true); return wParam;
 		case kcChannelSolo:					OnSoloChannel(true); return wParam;
+		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: TogglePendingMute((m_dwCursor&0xFFFF)>>3); return wParam;
 		case kcTransposeUp:					OnTransposeUp(); return wParam;
 		case kcTransposeDown:				OnTransposeDown(); return wParam;
@@ -4059,7 +4111,7 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 		if (pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) bAll = TRUE;
 	}
 	if (b) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, "Solo Channel\t" + ih->GetKeyTextFromCommand(kcChannelSolo));
-	if (bAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, "Unmute All");
+	if (bAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, "Unmute All\t" + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
 
 	AppendMenu(hMenu, 
 			pSndFile->m_bChannelMuteTogglePending[nChn] ? 

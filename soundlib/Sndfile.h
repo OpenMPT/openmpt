@@ -1126,6 +1126,7 @@ public:
 	static void FreeSample(LPVOID p);
 	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
 	UINT GetBestPlugin(UINT nChn, UINT priority, bool respectMutes);
+
 private:
 	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes);
 	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes);

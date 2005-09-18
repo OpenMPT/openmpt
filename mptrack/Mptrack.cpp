@@ -2664,8 +2664,7 @@ BOOL CTrackApp::OpenURL(LPCSTR lpszURL)
 					lpszURL,
 					NULL,
 					NULL,
-					0)) >= 32) return TRUE;
-						
+					0)) >= 32) return TRUE;				
 	}
 	return FALSE;
 }

@@ -777,26 +777,26 @@ void CEffectVis::MakeChange(int currentRow, int newParam)
 	{
 		case kAction_Preserve:
 			if (currentCommand)	{ //Only set param if we have an effect type here
-				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), &newParam);
+				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), newParam);
 				SetParam(currentRow, newParam);
 			}
 			break;
 
 		case kAction_Fill:
 			if (currentCommand)	{  //If we have an effect type here, just set param
-				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), &newParam);
+				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), newParam);
 				SetParam(currentRow, newParam);
 			}
 			else //Else set command and param
 			{
-				SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, &newParam));
+				SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, newParam));
 				SetParam(currentRow, newParam);
 			}
 			break;
 
 		case kAction_Overwrite: 
 			//Always set command and param
-			SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, &newParam));
+			SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, newParam));
 			SetParam(currentRow, newParam);
 	}
 	

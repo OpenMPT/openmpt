@@ -123,7 +123,7 @@ public:
 	UINT GetNumEffects() const;
 	BOOL GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX=FALSE, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
 	LONG GetIndexFromEffect(UINT command, UINT param);
-	UINT GetEffectFromIndex(UINT ndx, int *pParam=NULL);
+	UINT GetEffectFromIndex(UINT ndx, int &refParam);
 	BOOL GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param);
 	BOOL IsExtendedEffect(UINT ndx) const;
 	UINT MapValueToPos(UINT ndx, UINT param);
@@ -210,7 +210,9 @@ public:
 	HWND GetEditPosition(UINT &row, UINT &pat, UINT &ord); //rewbs.customKeys
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);				   //rewbs.customKeys
 	void TogglePluginEditor(UINT m_nCurrentPlugin);		   //rewbs.patPlugNames
-	
+	void RecordParamChange(int slot, long param);
+	void LearnMacro(int macro, long param);
+
 	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 
 // protected members

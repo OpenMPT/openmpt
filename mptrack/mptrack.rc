@@ -2519,6 +2519,7 @@ BEGIN
     POPUP "&Options"
     BEGIN
         MENUITEM "&Bypass",                     ID_PLUG_BYPASS
+        MENUITEM "Record &Params",              ID_PLUG_RECORDAUTOMATION
     END
 END
 
