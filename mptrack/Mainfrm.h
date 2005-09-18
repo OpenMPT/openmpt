@@ -25,7 +25,7 @@ class CPerformanceCounter;
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define KEYBOARDMAP_LENGTH			(3*12+2)
 #define MAINFRAME_TITLE				"Open Modplug Tracker"
-#define MPTRACK_VERSION				0x01170230
+#define MPTRACK_VERSION				0x01170231
 #define INFORMAL_VERSION			"1.17RC3_"
 
 
@@ -580,8 +580,7 @@ public:
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();
 	afx_msg void SetLastMixActiveTime(); //rewbs.VSTCompliance
-
-	afx_msg void OnViewOptions(); //rewbs.resamplerConf: made public so it's accessible from mod2wav gui :/
+	afx_msg void OnViewOptions();		 //rewbs.resamplerConf: made public so it's accessible from mod2wav gui :/
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnRButtonDown(UINT, CPoint);

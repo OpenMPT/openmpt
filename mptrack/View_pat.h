@@ -265,6 +265,7 @@ protected:
 	afx_msg void OnSelectPlugin(UINT nID);  //rewbs.patPlugName
 	afx_msg LRESULT OnUpdatePosition(WPARAM nOrd, LPARAM nRow);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
+	afx_msg LRESULT OnRecordPlugParamChange(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

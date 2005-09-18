@@ -769,9 +769,9 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		}
 
 		//find a channel if required
-		if (nCurrentChn<0) { 
+		//if (nCurrentChn<0) { 
 			nChn = FindAvailableChannel();
-		}
+		//}
 
 		MODCHANNEL *pChn = &m_SndFile.Chn[nChn];
 		
@@ -2084,32 +2084,29 @@ LONG CModDoc::GetIndexFromEffect(UINT command, UINT param)
 }
 
 
-UINT CModDoc::GetEffectFromIndex(UINT ndx, int *pParam)
-//-----------------------------------------------------
+//Returns command and corrects parameter refParam if necessary
+UINT CModDoc::GetEffectFromIndex(UINT ndx, int &refParam)
+//-------------------------------------------------------
 {
 	//if (pParam) *pParam = -1;
-	if (ndx >= MAX_FXINFO)
-	{
-		if (pParam) *pParam = 0;
+	if (ndx >= MAX_FXINFO) {
+		refParam = 0;
 		return 0;
 	}
-	if ((pParam) && (gFXInfo[ndx].dwParamMask))
-	{
-		//rewbs.fxVis - correct parameter to match FX if necessary.
-		if (*pParam < gFXInfo[ndx].dwParamValue)
-			*pParam = gFXInfo[ndx].dwParamValue;
-		else if (*pParam > gFXInfo[ndx].dwParamValue+15)
-			*pParam = gFXInfo[ndx].dwParamValue+15;
-		//end rewbs.fxVis
+
+	//Cap parameter to match FX if necessary.
+	if (gFXInfo[ndx].dwParamMask) {
+		if (refParam < static_cast<int>(gFXInfo[ndx].dwParamValue)) {
+			refParam = gFXInfo[ndx].dwParamValue;	 // for example: delay with param < D0 becomes SD0
+		} else if (refParam > static_cast<int>(gFXInfo[ndx].dwParamValue)+15) {
+			refParam = gFXInfo[ndx].dwParamValue+15; // for example: delay with param > DF becomes SDF
+		}
 	}
-	//rewbs.fxVis
-	if ((pParam) && (gFXInfo[ndx].dwFlags))
-	{
-		//correct parameter to match FX max if necessary.
-		if (*pParam > gFXInfo[ndx].dwFlags)
-			*pParam = gFXInfo[ndx].dwFlags;
+	if (gFXInfo[ndx].dwFlags) {
+		if (refParam > gFXInfo[ndx].dwFlags) {
+			refParam = gFXInfo[ndx].dwFlags;	//used for Zxx macro control: limit to 7F max.
+		}
 	}
-	//end rewbs.fxVis
 
 	return gFXInfo[ndx].dwEffect;
 }
@@ -2868,5 +2865,46 @@ UINT CModDoc::FindAvailableChannel()
 	
 	//Last resort: go for first virutal channel.
 	return m_SndFile.m_nChannels;
-	
 }
+
+void CModDoc::RecordParamChange(int plugSlot, long param) 
+//------------------------------------------------------
+{
+	CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[plugSlot].pMixPlugin;
+	if (pPlug) {
+		UINT value = pPlug->GetZxxParameter(param);
+		SendMessageToActiveViews(WM_MOD_RECORDPARAM, param, value);
+	}
+}
+
+void CModDoc::LearnMacro(int macroToSet, long paramToUse)
+//-------------------------------------------------------
+{
+	if (macroToSet<0 || macroToSet>NMACROS) {
+		return;
+	}
+	
+	//if macro already exists for this param, alert user and return
+	for (int checkMacro=0; checkMacro<NMACROS; checkMacro++)	{
+		CString macroText = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[checkMacro*32]);
+ 		int macroType = GetMacroType(macroText);
+		
+		if (macroType==sfx_plug && MacroToPlugParam(macroText)==paramToUse) {
+			CString message;
+			message.Format("Param %d can already be controlled with macro %X", paramToUse, checkMacro);
+			::MessageBox(NULL,message, "Macro exists for this param",MB_ICONINFORMATION | MB_OK);
+			return;
+		}
+	}
+
+	//set new macro
+	CHAR *pMacroToSet = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[macroToSet*32]);
+	wsprintf(pMacroToSet, "F0F0%Xz",128+paramToUse);
+
+	CString message;
+	message.Format("Param %d can now be controlled with macro %X", paramToUse, macroToSet);
+	::MessageBox(NULL,message, "Macro assigned for this param",MB_ICONINFORMATION | MB_OK);
+	
+	return;
+}
+

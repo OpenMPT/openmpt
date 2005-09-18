@@ -133,11 +133,13 @@ BOOL CWaveConvert::OnInitDialog()
 	CHAR s[128];
 
 	CDialog::OnInitDialog();
-	if (m_bSelectPlay)
+	if (m_bSelectPlay) {
 		CheckDlgButton(IDC_RADIO2, MF_CHECKED);
-	else
+	} else {
 		CheckDlgButton(IDC_RADIO1, MF_CHECKED);
-	CheckDlgButton(IDC_CHECK3, MF_CHECKED); // HQ resampling
+	}
+
+	CheckDlgButton(IDC_CHECK3, MF_CHECKED);		// HQ resampling
 	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// rewbs.NoNormalize
 
 // -> CODE#0024

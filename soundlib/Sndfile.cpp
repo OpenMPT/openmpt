@@ -2468,3 +2468,4 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.nPan = 0x20 << 2;
 	m_defaultInstrument.nIFC = 0xFF;
 }
+

@@ -713,7 +713,7 @@ void CFindReplaceTab::OnOK()
 	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL) && (m_pModDoc))
 	{
 		int n = -1;
-		m_nCommand = m_pModDoc->GetEffectFromIndex(combo->GetItemData(combo->GetCurSel()), &n);
+		m_nCommand = m_pModDoc->GetEffectFromIndex(combo->GetItemData(combo->GetCurSel()), n);
 		if (n >= 0) m_nParam = n;
 	}
 	// Param
@@ -1302,7 +1302,7 @@ void CPageEditEffect::OnCommandChanged()
 		if (n >= 0)
 		{
 			int param = -1, ndx = combo->GetItemData(n);
-			m_nCommand = (ndx >= 0) ? m_pModDoc->GetEffectFromIndex(ndx, &param) : 0;
+			m_nCommand = (ndx >= 0) ? m_pModDoc->GetEffectFromIndex(ndx, param) : 0;
 			if (param >= 0) m_nParam = param;
 			bSet = TRUE;
 		}
