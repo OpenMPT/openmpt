@@ -8,6 +8,9 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.32
+  . <rewbs> Fixed typo in solo fix in 1.17.02.31.
+
 . v 1.17.02.31
   + <rewbs> Automatically generate a macro for a param by touching that param on the plug's GUI.
             To try it, select an unused macro from the plug GUI's Info/Macros menu, then touch a param.
