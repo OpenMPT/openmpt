@@ -596,7 +596,6 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		if (effect && effect->resvd1)
 		{
 			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
-			
 			//Mark track modified
             CModDoc* pModDoc = pVstPlugin->GetModDoc();
 			if (pModDoc) {
@@ -611,15 +610,15 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 
 			// Learn macro
 			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
-			int macroToLearn = pVstEditor->GetLearnMacro();
-			if (pVstEditor && macroToLearn>-1) {
-				pModDoc->LearnMacro(macroToLearn, index);
-				pVstEditor->SetLearnMacro(-1);
-
+			if (pVstEditor) {
+				int macroToLearn = pVstEditor->GetLearnMacro();
+				if (macroToLearn>-1) {
+					pModDoc->LearnMacro(macroToLearn, index);
+					pVstEditor->SetLearnMacro(-1);
+				}
 				//Commenting this out to see if it fixes http://www.modplug.com/forum/viewtopic.php?t=3710
 				//pVstPlugin->Dispatch(effEditIdle, 0,0, NULL, 0);
 			}
-
 		}
 		return 0; 
 	// Called when plugin asks for VST version supported by host
