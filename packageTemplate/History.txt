@@ -8,6 +8,9 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.33
+  . <rewbs> Fixed plugin exceptions introduced 1.17.02.31 (misplaced conditional caused bad ptr in audioMasterAutomate case).
+
 . v 1.17.02.32
   . <rewbs> Fixed typo in solo fix in 1.17.02.31.
 
