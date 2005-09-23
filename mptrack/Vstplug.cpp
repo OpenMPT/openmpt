@@ -235,7 +235,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 		DWORD dw = GetLastError(); 
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL );
 		wsprintf(szBuf, "Warning: encountered problem when loading plugin dll. Error %d: %s", dw, lpMsgBuf); 
-	 	MessageBox(NULL, szBuf, "Error when loading plugin dll", MB_OK);
+		MessageBox(NULL, szBuf, "DEBUG: Error when loading plugin dll", MB_OK);
 		LocalFree(lpMsgBuf);
 	}
 #endif //_DEBUG	
@@ -544,6 +544,14 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModD
 		return bOk;
 	} else
 	{
+		CString message;
+		message.Format("This track uses the plugin \"%s\", which could not be found.\n\rSearch for this plug on kvraudio?", pMixPlugin->Info.szLibraryName);
+		if (AfxMessageBox(message, MB_YESNO|MB_ICONQUESTION) == IDYES )  {
+			CString url;
+			url.Format("http://www.kvraudio.com/search.php?q=%s&lq=db", pMixPlugin->Info.szLibraryName);
+			CTrackApp::OpenURL(url);
+		}
+		
 	#ifdef VST_LOG
 		Log("Unknown plugin\n");
 	#endif

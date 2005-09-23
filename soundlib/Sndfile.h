@@ -868,8 +868,8 @@ public:
 	void SetCurrentOrder(UINT nOrder);
 	void GetTitle(LPSTR s) const { lstrcpyn(s,m_szNames[0],32); }
 	LPCSTR GetTitle() const { return m_szNames[0]; }
-	UINT GetSampleName(UINT nSample,LPSTR s=NULL) const;
-	UINT GetInstrumentName(UINT nInstr,LPSTR s=NULL) const;
+	CString GetSampleName(UINT nSample) const;
+	CString GetInstrumentName(UINT nInstr) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
 	DWORD GetLength(BOOL bAdjust, BOOL bTotal=FALSE);

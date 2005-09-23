@@ -1326,31 +1326,24 @@ UINT CSoundFile::GetSaveFormats() const
 }
 
 
-UINT CSoundFile::GetSampleName(UINT nSample,LPSTR s) const
+CString CSoundFile::GetSampleName(UINT nSample) const
 //--------------------------------------------------------
 {
-	CHAR sztmp[40] = "";
-	memcpy(sztmp, m_szNames[nSample],32);
-	sztmp[31] = 0;
-	if (s) strcpy(s, sztmp);
-	return strlen(sztmp);
+	if (nSample<MAX_SAMPLES) {
+		return m_szNames[nSample];
+	} else {
+		return "";
+	}
 }
 
 
-UINT CSoundFile::GetInstrumentName(UINT nInstr,LPSTR s) const
+CString CSoundFile::GetInstrumentName(UINT nInstr) const
 //-----------------------------------------------------------
 {
-	CHAR sztmp[40] = "";
-	if ((nInstr >= MAX_INSTRUMENTS) || (!Headers[nInstr]))
-	{
-		if (s) *s = 0;
-		return 0;
+	if ((nInstr >= MAX_INSTRUMENTS) || (!Headers[nInstr]))	{
+		return "";
 	}
-	INSTRUMENTHEADER *penv = Headers[nInstr];
-	memcpy(sztmp, penv->name, 32);
-	sztmp[31] = 0;
-	if (s) strcpy(s, sztmp);
-	return strlen(sztmp);
+	return Headers[nInstr]->name;
 }
 
 

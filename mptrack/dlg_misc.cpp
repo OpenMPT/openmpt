@@ -2375,33 +2375,27 @@ VOID CSampleMapDlg::OnUpdateSamples()
 	BOOL bAll;
 	
 	if ((!m_pSndFile) || (m_nInstrument >= MAX_INSTRUMENTS)) return;
-	if (m_CbnSample.GetCount() > 0)
-	{
+	if (m_CbnSample.GetCount() > 0)	{
 		nOldPos = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 	}
 	m_CbnSample.ResetContent();
 	bAll = IsDlgButtonChecked(IDC_CHECK1);
-	for (UINT i=1; i<=m_pSndFile->m_nSamples; i++)
-	{
+	for (UINT i=1; i<=m_pSndFile->m_nSamples; i++)	{
 		BOOL bUsed = bAll;
 
-		if (!bUsed)
-		{
-			for (UINT j=0; j<120; j++)
-			{
-				if (KeyboardMap[j] == i)
-				{
+		if (!bUsed)	{
+			for (UINT j=0; j<120; j++)	{
+				if (KeyboardMap[j] == i) {
 					bUsed = TRUE;
 					break;
 				}
 			}
 		}
-		if (bUsed)
-		{
-			CHAR s[64];
-			wsprintf(s, "%d: ", i);
-			m_pSndFile->GetSampleName(i, s+strlen(s));
-			UINT nPos = m_CbnSample.AddString(s);
+		if (bUsed) {
+			CString sampleName;
+			sampleName.Format("%d: %s", i, m_pSndFile->GetSampleName(i));
+			UINT nPos = m_CbnSample.AddString(sampleName);
+			
 			m_CbnSample.SetItemData(nPos, i);
 			if (i == nOldPos) nNewPos = nPos;
 		}

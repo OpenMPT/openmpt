@@ -8,6 +8,15 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.34
+  + <Relabsoluness> Added dynamic instrument list for Change Instrument item in pattern ctx menu.
+                    / <rewbs> Disabled it for users who have opted for the old style context menu in general settings, + other minor change.
+  + <Relabsoluness> Added "Clear selection" item in pattern ctx menu
+  / <Relabsoluness> Can now set an instrument value for notes which previously had no attached instruments.
+  + <rewbs> If you load a track with unrecognized plugins, you'll be prompted to search for the plugs on kvraudio.
+  . <rewbs> Fixed rare crash on playback if playing a song with missing plugins.
+  / <rewbs> Minor code cleanups
+
 . v 1.17.02.33
   . <rewbs> Fixed plugin exceptions introduced 1.17.02.31 (misplaced conditional caused bad ptr in audioMasterAutomate case).
 
@@ -25,7 +34,7 @@ OpenMPT - Full Version History
   . <rewbs> Fixed: It was impossible to preview simultaneous notes in the pattern editor (tx Emperor)
   . <rewbs> Fixed: Changing a param in default plugin GUI could result in a continuous param update cycle until the param value returned by the plug stabilised.
   . <rewbs> Fixed: Unsoloing a previously soloed channel resulted in unmute all if other channels had since been unmuted. :)
-  . <rewbs> Minor code cleanups
+  / <rewbs> Minor code cleanups
   (+) <rewbs> Preliminary parameter value recording. Enable from plug GUI's Option menu.
               However it currently does not work correctly with follow song enabled: 
 	      active mousing on a plug gui blocks the cursor, so all values get written in the same place. :)
