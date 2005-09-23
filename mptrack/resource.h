@@ -911,6 +911,8 @@
 #define ID_NETLINK_MPTFR                37001
 #define ID_PLUG_RECORDAUTOMATION        37003
 #define	ID_LEARN_MACRO_FROM_PLUGGUI		37004
+#define ID_CHANGE_INSTRUMENT			37020
+#define ID_CLEAR_SELECTION				38000
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
@@ -934,7 +936,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        510
-#define _APS_NEXT_COMMAND_VALUE         37100
+#define _APS_NEXT_COMMAND_VALUE         38001
 #define _APS_NEXT_CONTROL_VALUE         2252
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

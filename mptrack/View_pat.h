@@ -37,6 +37,19 @@ enum {
 };
 
 
+//Struct for controlling selection clearing. This is used to define which data fields
+//should be cleared.
+struct RowMask
+{
+      bool note;
+      bool instrument;
+      bool volume;
+      bool command;
+      bool parameter;
+};
+const RowMask DefaultRowMask = {true, true, true, true, true}; //Default SwitchBox-instance
+
+
 //////////////////////////////////////////////////////////////////
 // Pattern editing class
 
@@ -211,7 +224,7 @@ protected:
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditMixPaste();		//rewbs.mixPaste
 	afx_msg void OnEditMixPasteITStyle();		//rewbs.mixPaste
-	afx_msg void OnClearSelection(bool ITStyle=false); //rewbs.customKeys
+	afx_msg void OnClearSelection(bool ITStyle=false, RowMask sb = DefaultRowMask); //rewbs.customKeys
 	afx_msg void OnGrowSelection();   //rewbs.customKeys
 	afx_msg void OnShrinkSelection(); //rewbs.customKeys
 	afx_msg void OnEditSelectAll();
@@ -267,6 +280,8 @@ protected:
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnRecordPlugParamChange(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg void OnClearSelectionFromMenu();
+	afx_msg void OnSelectInstrument(UINT nid);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -289,7 +304,7 @@ private:
 	bool BuildVisFXCtxMenu(HMENU hMenu, CInputHandler* ih);
 	bool BuildRandomCtxMenu(HMENU hMenu, CInputHandler* ih);
 	bool BuildTransposeCtxMenu(HMENU hMenu, CInputHandler* ih);
-	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
 	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih);
 
 	UINT GetSelectionStartRow();

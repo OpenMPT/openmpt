@@ -1594,7 +1594,9 @@ void CSoundFile::MidiPortamento(MODCHANNEL *pChn, int param)
 		UINT nPlug = pHeader->nMixPlug;
 		if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
 			IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
-			pPlug->MidiPitchBend(pHeader->nMidiChannel, param, 0);
+			if (pPlug) {
+				pPlug->MidiPitchBend(pHeader->nMidiChannel, param, 0);
+			}
 		}
 	}
 }

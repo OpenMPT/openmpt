@@ -94,6 +94,8 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_CURSORCOPY,					OnCursorCopy)
 	ON_COMMAND(ID_CURSORPASTE,					OnCursorPaste)
 	ON_COMMAND(ID_PATTERN_AMPLIFY,				OnPatternAmplify)
+	ON_COMMAND(ID_CLEAR_SELECTION,				OnClearSelectionFromMenu)
+	ON_COMMAND_RANGE(ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT+MAX_INSTRUMENTS, OnSelectInstrument)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,			OnUpdateUndo)
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnSelectPlugin) //rewbs.patPlugName
 
@@ -774,9 +776,14 @@ void CViewPattern::OnShrinkSelection()
 }
 //rewbs.customKeys
 
+void CViewPattern::OnClearSelectionFromMenu()
+//-------------------------------------------
+{
+	OnClearSelection();
+}
 
-void CViewPattern::OnClearSelection(bool ITStyle) //rewbs.customKeys: was OnEditDelete
-//-----------------------------------
+void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask: all elements enabled
+//-----------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc || !(m_dwStatus&PATSTATUS_RECORD)) return;
@@ -786,28 +793,46 @@ void CViewPattern::OnClearSelection(bool ITStyle) //rewbs.customKeys: was OnEdit
 	BeginWaitCursor();
 	PrepareUndo(m_dwBeginSel, m_dwEndSel);
 	DWORD tmp = m_dwEndSel;
-	for (UINT row=(m_dwBeginSel >> 16); row<=(m_dwEndSel >> 16); row++)
-	{
-		for (UINT i=(m_dwBeginSel & 0xFFFF); i<=(m_dwEndSel & 0xFFFF); i++) if ((i & 7) < 5)
-		{
+
+	for (UINT row=(m_dwBeginSel >> 16); row<=(m_dwEndSel >> 16); row++) { // for all selected rows
+		for (UINT i=(m_dwBeginSel & 0xFFFF); i<=(m_dwEndSel & 0xFFFF); i++) if ((i & 7) < 5) { // for all selected cols
+			
 			UINT chn = i >> 3;
 			if ((chn >= pSndFile->m_nChannels) || (row >= pSndFile->PatternSize[m_nPattern])) continue;
 			MODCOMMAND *m = &p[row * pSndFile->m_nChannels + chn];
-			switch(i & 7)
-			{
-			// Clear note
-			case 0:	m->note = 0; if (ITStyle) m->instr = 0; /* if (m_dwBeginSel == m_dwEndSel) { m->instr = 0; tmp = m_dwEndSel+1; }*/ break;
-			// Clear instrument
-			case 1: m->instr = 0; break;
-			// Clear Volume Column
-			case 2:	m->volcmd = m->vol = 0; break;
-			// Clear Command
-			case 3:	m->command = 0; break;
-			// Clear Command Param
-			case 4:	m->param = 0; break;
-			}
-		}
-	}
+
+			switch(i & 7) {
+				case 0:	// Clear note
+					if (rm.note) {
+						m->note = 0; 
+						if (ITStyle) m->instr = 0;
+					}
+					break;
+				case 1: // Clear instrument
+					if (rm.instrument) {
+						m->instr = 0; 
+					}
+					break;
+				case 2:	// Clear volume
+					if (rm.volume) {
+						m->volcmd = m->vol = 0; 
+					}
+					break;			
+				case 3: // Clear Command	
+					if (rm.command) {
+						m->command = 0;
+					}
+					break;
+				case 4:	// Clear Command Param
+					if (rm.parameter) {
+						m->param = 0; 
+					}
+					break;
+			} //end switch
+
+		} //end selected columns
+	} //end selected rows
+
 	if ((tmp & 7) == 3) tmp++;
 	InvalidateArea(m_dwBeginSel, tmp);
 	pModDoc->SetModified();
@@ -1151,7 +1176,7 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildVisFXCtxMenu(hMenu, ih)   | 	//Use bitwise ORs to avoid shortcuts
 				BuildAmplifyCtxMenu(hMenu, ih) |
-				BuildSetInstCtxMenu(hMenu, ih) )
+				BuildSetInstCtxMenu(hMenu, ih, pSndFile) )
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildGrowShrinkCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
@@ -2342,7 +2367,7 @@ void CViewPattern::OnSetSelInstrument()
 		for (UINT c=startChan; c<endChan+1; c++)
 		{
 			p = pSndFile->Patterns[m_nPattern] + r * pSndFile->m_nChannels + c;
-			if (p->instr && p->instr != (BYTE)nIns)
+			if (p->note && p->instr != (BYTE)nIns)
 			{
 				p->instr = (BYTE)nIns;
 				bModified = TRUE;
@@ -4009,6 +4034,24 @@ void CViewPattern::TogglePluginEditor(int chan)
 	return;
 }
 
+
+void CViewPattern::OnSelectInstrument(UINT nID)
+//---------------------------------------------
+{
+	UINT o_inst = GetCurrentInstrument();
+	UINT n_inst = nID-ID_CHANGE_INSTRUMENT;
+	 
+	if (n_inst == 0)	{
+		RowMask sp = {0,1,0,0,0};    // Setup mask to only clear instrument data in OnClearSelection
+		OnClearSelection(false, sp); // Clears instrument selection from pattern
+	} else	{
+		SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, n_inst);
+		OnSetSelInstrument();
+		SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, o_inst); //Restoring old instrument.
+	}
+}
+
+
 void CViewPattern::OnSelectPlugin(UINT nID)
 {
 	CModDoc *pModDoc = GetDocument(); if (!pModDoc) return;
@@ -4262,6 +4305,9 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih, CModDoc* pMo
 	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
 		AppendMenu(hMenu, MF_STRING|greyed, ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
 	}
+
+	AppendMenu(hMenu, MF_STRING, ID_CLEAR_SELECTION, "Clear selection\t" + ih->GetKeyTextFromCommand(kcSampleDelete));
+
 	return true;
 }
 
@@ -4314,14 +4360,47 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih)
 	return false;
 }
 
-bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih)
-//--------------------------------------------------------------------
+bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
+//------------------------------------------------------------------------------------------
 {
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(INST_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
 
-	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
-		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_SETINSTRUMENT, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
+	if (CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE && (!greyed)) { 
+		// User has opted to use old style menu style.
+		AppendMenu(hMenu, MF_STRING, ID_PATTERN_SETINSTRUMENT, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
+	} 
+	else {
+		// Create the new menu and add it to the existing menu.
+		HMENU instrumentChangeMenu = ::CreatePopupMenu();
+		AppendMenu(hMenu, MF_POPUP|greyed, (UINT)instrumentChangeMenu, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
+		
+		bool useSamples = false;
+		UINT nItems = pSndFile->m_nInstruments;
+
+		if (nItems==0) {	//if there are no instruments, try to use samples instead.
+			nItems = pSndFile->m_nSamples;
+			useSamples = true;
+		}
+
+		if (nItems>0) {		//if we have some menu items now, add them:
+			for(UINT i=1; i<=nItems; i++) {
+				bool itemExists = (useSamples ? (pSndFile->Ins[i].pSample!=NULL) : (pSndFile->Headers[i]!=NULL));
+				if (!itemExists) {
+					continue;
+				}
+				CString menuItem;
+				menuItem.Format("%d. %s", i, useSamples ? pSndFile->GetSampleName(i) : pSndFile->GetInstrumentName(i));
+				AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, menuItem);
+			}
+		} else {
+			AppendMenu(instrumentChangeMenu, MF_STRING|MF_GRAYED, 0, "No instruments available");	
+		}
+
+		//Add options to remove instrument from selection.
+     	AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);
+		AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, "Remove instrument");
+		AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+GetCurrentInstrument(), "Set to current instrument");
 		return true;
 	}
 	return false;
