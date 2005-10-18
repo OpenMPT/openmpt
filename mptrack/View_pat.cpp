@@ -2651,7 +2651,7 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 
 }
 
-LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM param, LPARAM value)
+LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 //--------------------------------------------------------------------------
 {	
 	CModDoc *pModDoc = GetDocument();
@@ -2668,14 +2668,46 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM param, LPARAM value)
 
 	//Work out where to put the new data
 	UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
-	pRow = pSndFile->Patterns[m_nPattern] + m_nRow*pSndFile->m_nChannels + nChn;
+	bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&								//work out whether we should use
+								(CMainFrame::GetMainFrame()->GetFollowSong(pModDoc) == m_hWnd) &&	//player engine position or
+								!(pSndFile->IsPaused());											//edit cursor position
+	UINT nRow = usePlaybackPosition?pSndFile->m_nRow:m_nRow;	
+	pRow = pSndFile->Patterns[m_nPattern] + nRow*pSndFile->m_nChannels + nChn;
 
-	//TODO: ensure correct macro is active.
+	// TODO: Is the right plugin active? Move to a chan with the right plug
+	// Probably won't do this - finish fluctuator implementation instead.
 
-	//Write the data
-	pRow->command = CMD_SMOOTHMIDI;
-	pRow->param = value;
-	InvalidateRow();
+	//Figure out which plug param (if any) is controllable using the active macro on this channel.
+	long activePlugParam  = -1;
+	BYTE activeMacro      = pSndFile->Chn[nChn].nActiveMacro;
+	CString activeMacroString = &(pSndFile->m_MidiCfg.szMidiSFXExt[activeMacro*32]);
+	if (pModDoc->GetMacroType(activeMacroString) == sfx_plug) {
+		activePlugParam = pModDoc->MacroToPlugParam(activeMacroString);
+	}
+	//If the wrong macro is active, see if we can find the right one.
+	//If we can, activate it for this chan by writing appropriate SFx command it.
+	if (activePlugParam != paramIndex) { 
+		int foundMacro = pModDoc->FindMacroForParam(paramIndex);
+		if (foundMacro >= 0) {
+			pSndFile->Chn[nChn].nActiveMacro = foundMacro;
+			if (pRow->command == 0 || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) { //we overwrite existing Zxx and \xx only.
+				pRow->command = (pSndFile->m_nType == MOD_TYPE_IT)?CMD_S3MCMDEX:CMD_MODCMDEX;;
+				pRow->param = 0xF0 + (foundMacro&0x0F);
+				InvalidateRow();
+			}
+			
+		}
+	}
+
+	
+
+	//Write the data, but we only overwrite if the command is a macro anyway.
+	if (pRow->command == 0 || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) {
+		pRow->command = CMD_SMOOTHMIDI;
+		pRow->param = value;
+		InvalidateRow();
+	}
+	
 
 }
 
@@ -3446,11 +3478,19 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 
 	activeNoteMap[note] = 0xFF;	//unlock channel
 
-	if  (!(CMainFrame::m_dwPatternSetup&PATTERN_KBDNOTEOFF || fromMidi))
+	if  (!(CMainFrame::m_dwPatternSetup&PATTERN_KBDNOTEOFF || fromMidi)) {
 		return;
-	
+	}
+
+	// -- write sdx if playing live
+	bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&		// work out whether we should use
+						(pMainFrm->GetFollowSong(pModDoc) == m_hWnd) &&	// player engine position or
+						!(pSndFile->IsPaused());						// edit cursor position
+
 	//Work out where to put the note off
-	prowbase = p + m_nRow * pSndFile->m_nChannels;
+	UINT nRow = usePlaybackPosition?pSndFile->m_nRow:m_nRow;
+
+	prowbase = p + nRow * pSndFile->m_nChannels;
 	if (releaseChan>=0 && releaseChan<pSndFile->m_nChannels) 
 		p=prowbase+releaseChan;
 	else 
@@ -3461,7 +3501,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 		//if there's a note in the current location and the song is playing and following,
 		//the user probably just tapped the key - let's try the next row down.
 		if (p->note==note && (m_dwStatus&PATSTATUS_FOLLOWSONG) && !(pSndFile->IsPaused())) {
-			p=pSndFile->Patterns[m_nPattern]+(m_nRow+1)*pSndFile->m_nChannels+releaseChan;
+			p=pSndFile->Patterns[m_nPattern]+(nRow+1)*pSndFile->m_nChannels+releaseChan;
 			if (p->note || p->instr || p->volcmd) {
 				return;
 			}
@@ -3470,16 +3510,22 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 		}
 	}		
 
+	// -- write sdx if playing live
+	if (usePlaybackPosition && pSndFile->m_nTickCount) {	// avoid SD0 which will be mis-interpreted
+		if (p->command == 0) {	//make sure we don't overwrite any existing commands.
+			p->command = (pSndFile->m_nType == MOD_TYPE_IT)?CMD_S3MCMDEX:CMD_MODCMDEX;
+			p->param   = 0xD0 + (pSndFile->m_nTickCount&0x0F); //&0x0F is to limit to max 0x0F
+		}
+	}
+
 	//Enter note off
 	p->note		= 0xFF;
     p->instr	= 0;
 	p->volcmd	= 0;
 	p->vol		= 0;
-//	p->command	= 0;
-//	p->param	= 0;
 
 	pModDoc->SetModified();
-	DWORD sel = (m_nRow << 16) | (releaseChan << 3);
+	DWORD sel = (nRow << 16) | (releaseChan << 3);
 	InvalidateArea(sel, sel+5);
 	UpdateIndicator();
 
@@ -3666,19 +3712,21 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 		if (note>120 && note<254) note=120;
 
+		bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&		// work out whether we should use
+								(pMainFrm->GetFollowSong(pModDoc) == m_hWnd) &&	// player engine position or
+								!(pSndFile->IsPaused());						// edit cursor position
+
 		// -- Chord autodetection: step back if we just entered a note
-		if ((m_dwStatus & PATSTATUS_RECORD) && (recordGroup) &&
-			((pMainFrm->GetFollowSong(pModDoc) != m_hWnd) || (pSndFile->IsPaused())  
-			                                              || (!(m_dwStatus & PATSTATUS_FOLLOWSONG))))
-		{
-			if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
-			{
+		if ((m_dwStatus & PATSTATUS_RECORD) && (recordGroup) && !usePlaybackPosition) {
+			if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) {
 				if ((timeGetTime() - m_dwLastNoteEntryTime < CMainFrame::gnAutoChordWaitTime) 
 					&& (nRow>=m_nSpacing) && (!m_bLastNoteEntryBlocked))
 					nRow -= m_nSpacing;
 			}
 		}
 		m_dwLastNoteEntryTime=timeGetTime();
+
+		nRow = usePlaybackPosition?pSndFile->m_nRow:m_nRow;
 
 		// -- Work out where to put the new note
 		prowbase = p + nRow * pSndFile->m_nChannels;
@@ -3690,10 +3738,17 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		isSplit = HandleSplit(p, note);
 
 		// -- write vol data
-		if (!isSplit && vol>=0 && vol<=64)
-		{
+		if (!isSplit && vol>=0 && vol<=64)	{
 			p->volcmd=VOLCMD_VOLUME;
 			p->vol = vol;
+		}
+	    
+		// -- write sdx if playing live
+		if (usePlaybackPosition && pSndFile->m_nTickCount) {	// avoid SD0 which will be mis-interpreted
+			if (p->command == 0) {	//make sure we don't overwrite any existing commands.
+				p->command = (pSndFile->m_nType == MOD_TYPE_IT)?CMD_S3MCMDEX:CMD_MODCMDEX;
+				p->param   = 0xD0 + (pSndFile->m_nTickCount&0x0F); //&0x0F is to limit to max 0x0F
+			}
 		}
 
 		// -- old style note cut/off: erase instrument number
@@ -4251,7 +4306,7 @@ bool CViewPattern::BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler* i
 		}
 	}
 	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
-		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_VOLUME, "Interpolate Vol\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateVol));
+		AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_INTERPOLATE_VOLUME, "Interpolate Vol Col\t" + ih->GetKeyTextFromCommand(kcPatternInterpolateVol));
 		return true;
 	}
 	return false;

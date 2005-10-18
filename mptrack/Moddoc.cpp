@@ -963,21 +963,43 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL bMute)
 	DWORD d = (bMute) ? CHN_MUTE : 0;
 	
 	if (nChn >= m_SndFile.m_nChannels) return FALSE;
-	if (d != (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE))
-	{
-		if (m_SndFile.m_nType == MOD_TYPE_IT) CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
-		if (d)	m_SndFile.ChnSettings[nChn].dwFlags |= CHN_MUTE;
-		else	m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
+
+	if (d != (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE))	{
+		if (m_SndFile.m_nType == MOD_TYPE_IT) {
+			CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
+		}
+		if (d)	{
+			m_SndFile.ChnSettings[nChn].dwFlags |= CHN_MUTE;
+		} else {
+			m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
+		}
 		
 	}
-	if (d)	m_SndFile.Chn[nChn].dwFlags |= CHN_MUTE;
-	else	m_SndFile.Chn[nChn].dwFlags &= ~CHN_MUTE;
-	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++)
-	{
-		if (m_SndFile.Chn[i].nMasterChn == nChn+1)
-		{
-			if (d)	m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
-			else	m_SndFile.Chn[i].dwFlags &= ~CHN_MUTE;
+	if (d) {
+		m_SndFile.Chn[nChn].dwFlags |= CHN_MUTE;
+		//Send a note-off to any VSTi active on this channel:
+		//NoteOff(0xFF, 0, m_SndFile.Chn[nChn].pHeader , nChn);
+
+		UINT nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
+		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))	{
+			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
+			INSTRUMENTHEADER* penv = m_SndFile.Chn[nChn].pHeader;
+			if (pPlug && penv) {
+				pPlug->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, 0xFF, 0, nChn);
+			}
+		}
+
+	} else {
+		m_SndFile.Chn[nChn].dwFlags &= ~CHN_MUTE;
+	}
+
+	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++) {
+		if (m_SndFile.Chn[i].nMasterChn == nChn+1)	{
+			if (d) { 
+				m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
+			} else {
+				m_SndFile.Chn[i].dwFlags &= ~CHN_MUTE;
+			}
 		}
 	}
 	return TRUE;
@@ -2624,7 +2646,19 @@ int CModDoc::MacroToPlugParam(CString macro)
 
 	return code&0x7F;
 }
+
 //end rewbs.xinfo
+int CModDoc::FindMacroForParam(long param) {
+//------------------------------------------
+	for (int macro=0; macro<16; macro++) {	//what's the named_const for num macros?? :D
+		CString macroString = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[macro*32]);
+		if (GetMacroType(macroString) == sfx_plug &&  MacroToPlugParam(macroString) == param) {
+			return macro;
+		}
+	}
+
+	return -1;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -2867,13 +2901,13 @@ UINT CModDoc::FindAvailableChannel()
 	return m_SndFile.m_nChannels;
 }
 
-void CModDoc::RecordParamChange(int plugSlot, long param) 
+void CModDoc::RecordParamChange(int plugSlot, long paramIndex) 
 //------------------------------------------------------
 {
 	CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[plugSlot].pMixPlugin;
 	if (pPlug) {
-		UINT value = pPlug->GetZxxParameter(param);
-		SendMessageToActiveViews(WM_MOD_RECORDPARAM, param, value);
+		UINT value = pPlug->GetZxxParameter(paramIndex);
+		SendMessageToActiveViews(WM_MOD_RECORDPARAM, paramIndex, value);
 	}
 }
 

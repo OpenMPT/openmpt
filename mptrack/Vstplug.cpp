@@ -1427,7 +1427,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
 
 	for (int ch=0; ch<=16; ch++) {
-		m_nMidiPitchBendPos[ch]=0x2000; //centre pitch bend on all channels
+		m_nMidiPitchBendPos[ch]=MIDI_PitchBend_Centre; //centre pitch bend on all channels
 	}
 
 	processCalled = CreateEvent(NULL,FALSE,FALSE,NULL);
@@ -2375,11 +2375,11 @@ void CVstPlugin::HardAllNotesOff()
 			DWORD dwMidiCode = 0x80|nCh; //command|channel|velocity
 			PVSTINSTCH pCh = &m_MidiCh[nCh];
 
-			MidiSend(0xB0|mc|(0x79<<8));    // reset all controllers
-			m_nMidiPitchBendPos[mc]=0x2000; //centre pitch bend on all channels
-			MidiSend(0xB0|mc|(0x7b<<8));    // all notes off 
-			MidiSend(0xB0|mc|(0x78<<8));    // all sounds off 
-
+			MidiPitchBend(mc, MIDI_PitchBend_Centre); // centre pitch bend
+			MidiSend(0xB0|mc|(0x79<<8));			  // reset all controllers
+			MidiSend(0xB0|mc|(0x7b<<8));			  // all notes off 
+			MidiSend(0xB0|mc|(0x78<<8));			  // all sounds off 
+ 
 			for (UINT i=0; i<128; i++)	//all notes
 			{
 				for (UINT c=0; c<MAX_CHANNELS; c++)
@@ -2426,7 +2426,7 @@ void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackC
 	MidiSend(nController<<16 | nParam<<8 | 0xB0|nMidiCh );
 }
 
-short CVstPlugin::constructMidiPitchBend(short value) 
+short CVstPlugin::getMIDI14bitValueFromShort(short value) 
 //---------------------------------------------------------------------------------
 {
 	//http://www.srm.com/qtma/davidsmidispec.html: 
@@ -2436,6 +2436,8 @@ short CVstPlugin::constructMidiPitchBend(short value)
 	// similarly, 16383 (0x7F 0x7F) is to "bend as high as possible." 
 	// The exact range of the pitch bend is specific to the synthesizer.
 
+	// pre: 0 <= value <= 16383
+
 	BYTE byte1 = value >> 7;			// get last   7 bytes only
 	BYTE byte2 = value & 0x7F;			// get first  7 bytes only
 	short converted = byte1<<8 | byte2; // merge
@@ -2443,18 +2445,25 @@ short CVstPlugin::constructMidiPitchBend(short value)
 	return converted;
 }
 
+//Bend midi pitch for given midi channel using tracker param (0x00-0xFF)
 void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel) 
 //-------------------------------------------------------------------------
 {
-	nMidiCh--;		// move from 1-17 scope to 0-16 scope
-
+	nMidiCh--;		// move from 1-17 range to 0-16 range
+	
 	short increment = nParam * 0x2000/0xFF;
-	m_nMidiPitchBendPos[nMidiCh] += increment;
-	m_nMidiPitchBendPos[nMidiCh] =  min(16383, m_nMidiPitchBendPos[nMidiCh]);	// cap upper
-	m_nMidiPitchBendPos[nMidiCh] =  max(0, m_nMidiPitchBendPos[nMidiCh]);		// cap lower
+	short newPitchBendPos = m_nMidiPitchBendPos[nMidiCh] + increment;
+    newPitchBendPos = max(MIDI_PitchBend_Min, min(MIDI_PitchBend_Max, newPitchBendPos)); // cap
+	
+	MidiPitchBend(nMidiCh, newPitchBendPos);
+}
 
-	short midi_14_bit_value = constructMidiPitchBend(m_nMidiPitchBendPos[nMidiCh]);
-	MidiSend(midi_14_bit_value<<8 | 0xE0|nMidiCh );
+//Set midi pitch for given midi channel using uncoverted midi value (0-16383)
+void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos) {
+//----------------------------------------------------------------
+	m_nMidiPitchBendPos[nMidiCh] = newPitchBendPos; //store pitch bend position
+	short converted = getMIDI14bitValueFromShort(newPitchBendPos);
+	MidiSend(converted<<8 | MIDI_PitchBend_Command|nMidiCh);
 }
 
 //rewbs.introVST - many changes to MidiCommand, still to be refined.
@@ -2532,10 +2541,11 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 			// But this can cause a VST event overflow if we have many active notes...
 			while (pCh->uNoteOnMap[i][trackChannel])
 			{
-				if (MidiSend(dwMidiCode|(i<<8)))
+				if (MidiSend(dwMidiCode|(i<<8))) {
 					pCh->uNoteOnMap[i][trackChannel]--;
-				else //VST event queue overflow, no point in submitting more note offs.
+				} else { //VST event queue overflow, no point in submitting more note offs.
                     break; //todo: overflow buffer?
+				}
 			}
 		}
 	}
@@ -2547,6 +2557,11 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 
 		note--;
 
+		//reset pitch bend on each new note, tracker style.
+		if (m_nMidiPitchBendPos[nCh] != MIDI_PitchBend_Centre) {
+			MidiPitchBend(nCh, MIDI_PitchBend_Centre);
+		}
+
 		// count instances of active notes.
 		// This is to send a note off for each instance of a note, for plugs like Fabfilter.
 		// Problem: if a note dies out naturally and we never send a note off, this counter 
@@ -2554,6 +2569,9 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		// Safe to assume we won't need more than 16 note offs max on a given note?
 		if (pCh->uNoteOnMap[note][trackChannel]<17) 
 			pCh->uNoteOnMap[note][trackChannel]++;
+
+		
+		
 		MidiSend(dwMidiCode|(note<<8)|(vol<<16));
 	}
 

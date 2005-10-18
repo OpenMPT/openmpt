@@ -6,6 +6,7 @@
 #define kBuzzMagic	'Buzz'
 #define kDmoMagic	'DXMO'
 
+
 class CVstPluginManager;
 class CVstPlugin;
 class CVstEditor;
@@ -18,6 +19,8 @@ enum {
 	effBuzzGetCommandName,
 	effBuzzExecuteCommand,
 };
+
+
 
 typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
 
@@ -184,7 +187,8 @@ public:
 	VstSpeakerArrangement speakerArrangement;  //rewbs.VSTcompliance
 
 private:
-	short constructMidiPitchBend(short value); 
+	short getMIDI14bitValueFromShort(short value); 
+	void MidiPitchBend(UINT nMidiCh, short pitchBendPos);
 };
 
 
