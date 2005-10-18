@@ -221,8 +221,11 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 	//rewbs.fix36944
-	//m_SpinPanning.SetRange(0, 256);
-	m_SpinPanning.SetRange(0, 64);
+	if (m_pSndFile->m_nType == MOD_TYPE_XM) {
+		m_SpinPanning.SetRange(0, 255);
+	} else 	{
+		m_SpinPanning.SetRange(0, 64);
+	}
 	//end rewbs.fix36944
 	m_ComboAutoVib.AddString("Sine");
 	m_ComboAutoVib.AddString("Square");
@@ -598,8 +601,11 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// Panning
 		CheckDlgButton(IDC_CHECK1, (pins->uFlags & CHN_PANNING) ? MF_CHECKED : 0);
 		//rewbs.fix36944
-		//SetDlgItemInt(IDC_EDIT9, pins->nPan);
-		SetDlgItemInt(IDC_EDIT9, pins->nPan>>2);
+		if (m_pSndFile->m_nType == MOD_TYPE_XM) {
+			SetDlgItemInt(IDC_EDIT9, pins->nPan);		//displayed panning with XM is 0-256, just like MPT's internal engine
+		} else {
+			SetDlgItemInt(IDC_EDIT9, pins->nPan>>2);	//displayed panning with anything but XM is 0-64 so we divide by 4
+		}
 		//end rewbs.fix36944
 		// FineTune / C-4 Speed / BaseNote
         int transp = 0;
@@ -2229,9 +2235,12 @@ void CCtrlSamples::OnPanningChanged()
 	int nPan = GetDlgItemInt(IDC_EDIT9);
 	if (nPan < 0) nPan = 0;
 	//rewbs.fix36944: sample pan range to 0-64.
-	//if (nPan > 256) nPan = 256;
-	if (nPan > 64) nPan = 64;		
-	nPan = nPan << 2;
+	if (m_pSndFile->m_nType == MOD_TYPE_XM) {
+		if (nPan>255) nPan = 255;	// displayed panning will be 0-255 with XM
+	} else {
+		if (nPan>64) nPan = 64;		// displayed panning will be 0-64 with anything but XM.
+		nPan = nPan << 2;			// so we x4 to get MPT's internal 0-256 range.
+	}
 	//end rewbs.fix36944
 	if (nPan != m_pSndFile->Ins[m_nSample].nPan)
 	{

@@ -8,6 +8,13 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.35
+  + <rewbs & Relabsoluness> Note delay (SDx) is written automatically during "live tracking" if there are no effects already on the existing row.
+  + <rewbs> Preliminary parameter value recording should work a bit now with follow song on. Attempts to set correct macro if it exists. Will only overwite \xx. Does not work with certain plugs that don't give idle time back to the host during mouse down (e.g. Albino, Vanguard...), still trying to understand this. Please play with this & give feedback, but don't expect miracles yet. :)
+  . <rewbs> Restored external 0-255 sample panning range with XM.
+  / <rewbs> experimental: muting a channel with a VSTi playing should turn off the active note on that channel.
+  / <rewbs> Midi pitch bend reset on each new note for that instrument's midi channel.
+
 . v 1.17.02.34
   + <Relabsoluness> Added dynamic instrument list for Change Instrument item in pattern ctx menu.
                     / <rewbs> Disabled it for users who have opted for the old style context menu in general settings, + other minor change.

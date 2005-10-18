@@ -135,6 +135,7 @@ public:
 	BOOL GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
 	int GetMacroType(CString value); //rewbs.xinfo
 	int MacroToPlugParam(CString value); //rewbs.xinfo
+	int FindMacroForParam(long param);
 
 // operations
 public:

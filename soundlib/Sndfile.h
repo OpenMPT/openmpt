@@ -424,6 +424,13 @@ enum {
 };
 
 enum {
+	MIDI_PitchBend_Command = 0xE0,
+	MIDI_PitchBend_Min     = 0x00,
+	MIDI_PitchBend_Centre  = 0x2000,
+	MIDI_PitchBend_Max     = 0x3FFF
+};
+
+enum {
 	CHANNEL_ONLY		  = 0,
 	INSTRUMENT_ONLY       = 1,
 	PRIORITISE_INSTRUMENT = 2,
