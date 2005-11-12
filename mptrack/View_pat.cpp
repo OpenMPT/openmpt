@@ -2110,7 +2110,7 @@ void CViewPattern::Interpolate(UINT type)
         ListChansWhereColSelected(EFFECT_COLUMN, validChans);
 		ListChansWhereColSelected(PARAM_COLUMN, moreValidChans);
 		//CArrayUtils<UINT>::Merge(validChans, moreValidChans); //Causes unresolved external, not sure why yet.
-		validChans.Append(moreValidChans);						//for now we'll jost interpolate the same data several times. :)
+		validChans.Append(moreValidChans);						//for now we'll just interpolate the same data several times. :)
 	} else {
 		ListChansWhereColSelected(type, validChans);
 	}
@@ -4270,7 +4270,7 @@ bool CViewPattern::BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih,
 	UINT startRow = GetSelectionStartRow();
 	UINT endRow   = GetSelectionEndRow();
 	
-	if ((startRow != endRow) && ListChansWhereColSelected(NOTE_COLUMN, validChans)>0) {
+	if (ListChansWhereColSelected(NOTE_COLUMN, validChans)>0) {
 		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++) {
 			if (IsInterpolationPossible(startRow, endRow, 
 									    validChans[valChnIdx], NOTE_COLUMN, pSndFile)) {
@@ -4296,7 +4296,7 @@ bool CViewPattern::BuildVolColInterpolationCtxMenu(HMENU hMenu, CInputHandler* i
 	UINT startRow = GetSelectionStartRow();
 	UINT endRow   = GetSelectionEndRow();
 	
-	if ((startRow != endRow) && ListChansWhereColSelected(VOL_COLUMN, validChans)>0) {
+	if (ListChansWhereColSelected(VOL_COLUMN, validChans)>0) {
 		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++) {
 			if (IsInterpolationPossible(startRow, endRow, 
 									    validChans[valChnIdx], VOL_COLUMN, pSndFile)) {
@@ -4322,7 +4322,7 @@ bool CViewPattern::BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* i
 	UINT startRow = GetSelectionStartRow();
 	UINT endRow   = GetSelectionEndRow();
 	
-	if ((startRow != endRow) && ListChansWhereColSelected(EFFECT_COLUMN, validChans)>0) {
+	if (ListChansWhereColSelected(EFFECT_COLUMN, validChans)>0) {
 		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++) {
 			if  (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], EFFECT_COLUMN, pSndFile)) {
 				greyed=0;	//Can do interpolation.
@@ -4331,7 +4331,7 @@ bool CViewPattern::BuildEffectInterpolationCtxMenu(HMENU hMenu, CInputHandler* i
 		}
 	}
 
-	if ((startRow != endRow) && ListChansWhereColSelected(PARAM_COLUMN, validChans)>0) {
+	if (ListChansWhereColSelected(PARAM_COLUMN, validChans)>0) {
 		for (int valChnIdx=0; valChnIdx<validChans.GetCount(); valChnIdx++) {
 			if  (IsInterpolationPossible(startRow, endRow, validChans[valChnIdx], EFFECT_COLUMN, pSndFile)) {
 				greyed=0;	//Can do interpolation.
@@ -4522,6 +4522,11 @@ bool CViewPattern::IsInterpolationPossible(UINT startRow, UINT endRow,
 	bool result = false;
 	MODCOMMAND *pcmd = pSndFile->Patterns[m_nPattern];
 	UINT startRowCmd, endRowCmd;
+	
+	if (startRow == endRow) {
+		return false;
+	}
+
 	switch (colType) {
 		case NOTE_COLUMN:
 			startRowCmd = pcmd[startRow*pSndFile->m_nChannels+chan].note;

@@ -302,41 +302,60 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_CbnInstrument.SetRedraw(FALSE);
 			m_CbnInstrument.ResetContent();
 			m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(" None"), 0);
-// -> CODE#0012
-// -> DESC="midi keyboard split"
 			m_CbnSplitInstrument.SetRedraw(FALSE);
 			m_CbnSplitInstrument.ResetContent();
 			m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString(" None"), 0);
-// -! NEW_FEATURE#0012
-			if (m_pSndFile->m_nInstruments)
-			{
-				for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++) if (m_pSndFile->Headers[i])
-				{
-					wsprintf(s, "%02d: %s", i, (m_pSndFile->Headers[i]) ? m_pSndFile->Headers[i]->name : "");
-					UINT n = m_CbnInstrument.AddString(s);
+			if (m_pSndFile->m_nInstruments)	{
+				for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++) {
+					if (m_pSndFile->Headers[i] == NULL) {
+						continue;
+					}
+
+					CString displayName, instrumentName, pluginName = "";
+					
+					// Use instrument name
+					instrumentName.Format("%s", m_pSndFile->Headers[i]->name);
+
+					// if there's no instrument name, use name of sample associated with C-5.
+					if (instrumentName == "") {
+						instrumentName.Format("samp: %s", m_pSndFile->m_szNames[m_pSndFile->Headers[i]->Keyboard[60]]); //60 is C-5
+					}
+
+					// still no name? give it a dummy name
+					if (instrumentName == "") {
+                        instrumentName = "(no name)";
+					}
+
+					//Get plugin name:
+					UINT nPlug=m_pSndFile->Headers[i]->nMixPlug;
+					if (nPlug>0 && nPlug<MAX_MIXPLUGINS) {
+						pluginName = m_pSndFile->m_MixPlugins[nPlug-1].Info.szName;
+					}
+
+					if (pluginName == "") {
+						displayName.Format("%02d: %s", i, instrumentName);
+					} else {
+						displayName.Format("%02d: %s (%s)", i, instrumentName, pluginName);
+					}
+					
+					UINT n = m_CbnInstrument.AddString(displayName);
 					if (n == m_nInstrument) nPos = n;
 					m_CbnInstrument.SetItemData(n, i);
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-					m_CbnSplitInstrument.AddString(s);
+					m_CbnSplitInstrument.AddString(displayName);
 					m_CbnSplitInstrument.SetItemData(n, i);
-// -! NEW_FEATURE#0012
+
 				}
-			} else
-			{
+
+			} else {
 				UINT nmax = m_pSndFile->m_nSamples;
 				while ((nmax > 1) && (m_pSndFile->Ins[nmax].pSample == NULL) && (!m_pSndFile->m_szNames[nmax][0])) nmax--;
-				for (UINT i=1; i<=nmax; i++) if ((m_pSndFile->m_szNames[i][0]) || (m_pSndFile->Ins[i].pSample))
-				{
+				for (UINT i=1; i<=nmax; i++) if ((m_pSndFile->m_szNames[i][0]) || (m_pSndFile->Ins[i].pSample)) 	{
 					wsprintf(s, "%02d: %s", i, m_pSndFile->m_szNames[i]);
 					UINT n = m_CbnInstrument.AddString(s);
 					if (n == m_nInstrument) nPos = n;
 					m_CbnInstrument.SetItemData(n, i);
-// -> CODE#0012
-// -> DESC="midi keyboard split"
 					m_CbnSplitInstrument.AddString(s);
 					m_CbnSplitInstrument.SetItemData(n, i);
-// -! NEW_FEATURE#0012
 				}
 			}
 			m_CbnInstrument.SetCurSel(nPos);
@@ -345,8 +364,6 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 // -> DESC="midi keyboard split"
 			m_CbnSplitInstrument.SetCurSel(nPos);
 			m_CbnSplitInstrument.SetRedraw(TRUE);
-
-		
 // -! NEW_FEATURE#0012
 		}
 		if (dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
@@ -1417,6 +1434,7 @@ void CChannelManagerDlg::OnApply()
 	// Update document & player
 	pModDoc->SetModified();
 	pModDoc->UpdateAllViews(NULL,0xff,NULL);
+	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS ); //refresh channel headers
 	pMainFrm->PlayMod(pActiveMod, followSong, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
 
 	// Redraw channel manager window

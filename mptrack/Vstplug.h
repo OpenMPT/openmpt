@@ -173,13 +173,15 @@ public:
 	bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn); //rewbs.instroVST
 	bool m_bNeedIdle; //rewbs.VSTCompliance
 	bool m_bRecordAutomation;
+	bool m_bPassKeypressesToPlug;
 	void NotifySongPlaying(bool playing);	//rewbs.VSTCompliance
 	bool IsSongPlaying() {return m_bSongPlaying;}	//rewbs.VSTCompliance
 	bool IsResumed() {return m_bPlugResumed;}
 	void Resume();
 	void Suspend();
 	DWORD GetTimeAtStartOfProcess() {return m_dwTimeAtStartOfProcess;}
-	
+	void SetDryRatio(UINT param);
+
 
 	void SetZxxParameter(UINT nParam, UINT nValue);
 	UINT GetZxxParameter(UINT nParam); //rewbs.smoothVST

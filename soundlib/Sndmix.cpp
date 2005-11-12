@@ -1315,7 +1315,8 @@ BOOL CSoundFile::ReadNote()
 				if (m_nType & MOD_TYPE_S3M) pChn->nLength = 0;
 				period = m_nMinPeriod;
 			}
-			if (period > m_nMaxPeriod)
+			//rewbs: temporarily commenting out block to allow notes below A-0.
+			/*if (period > m_nMaxPeriod)
 			{
 				if ((m_nType & MOD_TYPE_IT) || (period >= 0x100000))
 				{
@@ -1325,7 +1326,7 @@ BOOL CSoundFile::ReadNote()
 				}
 				period = m_nMaxPeriod;
 				nPeriodFrac = 0;
-			}
+			}*/
 			UINT freq = GetFreqFromPeriod(period, pChn->nC4Speed, nPeriodFrac);
 			if ((m_nType & MOD_TYPE_IT) && (freq < 256))
 			{
@@ -1677,42 +1678,39 @@ done:
 VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
 //----------------------------------------------------------
 {
-	MODCOMMAND *m;
+	// Do we need to process midi?
 	if (pChn->dwFlags & CHN_MUTE) return;
-
 	if ((!m_nInstruments) || (m_nPattern >= MAX_PATTERNS)
-	 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
-
+		 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
 	
-	m = Patterns[m_nPattern] + m_nRow * m_nChannels + nChn;	
-	if (m->note) {
-		
-		INSTRUMENTHEADER *penv = pChn->pHeader;
-		if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) penv = Headers[m->instr];
+	// Get instrument info and plugin reference
+	MODCOMMAND *m = Patterns[m_nPattern] + m_nRow * m_nChannels + nChn;	
+	INSTRUMENTHEADER *penv = pChn->pHeader;
+	IMixPlugin *pPlugin = NULL;
 
-		if ((penv) && (penv->nMidiChannel >= 1) && (penv->nMidiChannel <= 16)) {
-			
-			UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
-			/*
-			UINT nPlugin = 0;
-			if (!(penv->dwFlags & ENV_MUTE)) {			// first try intrument VST
-				nPlugin = penv->nMixPlug;				
-			}
-			if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS)) {
-				if (!(pChn->dwFlags & CHN_NOFX))
-				nPlugin = ChnSettings[nChn].nMixPlugin; // Then try Channel VST
-			}
-			*/
-
-			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS)) {
-				UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
-				//UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : pChn->nNote;
-				IMixPlugin *pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
-//				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
-				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, pChn->nVolume, nChn);
-			}
+	if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) {
+		penv = Headers[m->instr];
+	}
+	if ((penv) && (penv->nMidiChannel >= 1) && (penv->nMidiChannel <= 16)) {
+		UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+		if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS)) {
+			pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
 		}
+	}
 
+	//Do couldn't find a valid plugin
+	if (pPlugin == NULL) {
+		return;	
+	}
+
+	//Send Midi command
+	if (m->note) {
+		pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, m->note, pChn->nVolume, nChn);
+	} else if (m->volcmd == VOLCMD_VOLUME) {
+		//No plugs seem to respond to volume CC.
+		pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Fine, m->vol, nChn);
+		//pPlugin->SetDryRatio(m->vol*2);  //TODO: we need another field to represent volume, since this makes 
+										   //	   it difficult to restore default levels on new notes.
 	}
 
 }

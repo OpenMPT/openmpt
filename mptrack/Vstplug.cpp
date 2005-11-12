@@ -1448,6 +1448,7 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 	}
 	m_bNeedIdle=false;
 	m_bRecordAutomation=false;
+	m_bPassKeypressesToPlug=false;
 
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
 
@@ -2029,6 +2030,13 @@ void CVstPlugin::RecalculateGain()
 	m_fGain = gain;
 }
 
+
+void CVstPlugin::SetDryRatio(UINT param) {
+//----------------------------------------
+	param = min(param, 127);
+	m_pMixStruct->fDryRatio = 1.0-(static_cast<float>(param)/127.0f);
+}
+
 void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 //--------------------------------------------------------------------------
 {
@@ -2465,6 +2473,7 @@ void CVstPlugin::MidiPitchBend(UINT nMidiCh, short newPitchBendPos) {
 	short converted = getMIDI14bitValueFromShort(newPitchBendPos);
 	MidiSend(converted<<8 | MIDI_PitchBend_Command|nMidiCh);
 }
+
 
 //rewbs.introVST - many changes to MidiCommand, still to be refined.
 void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChannel)

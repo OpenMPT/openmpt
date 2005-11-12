@@ -1295,31 +1295,24 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			{
 				CHAR s[256];
 				DWORD dwPos = ScreenToSample(pt.x);
-				if (dwPos <= pins->nLength)
-				{
-					if (dwPos+4 <= pins->nLoopEnd)
-					{
-						wsprintf(s, "Set Loop Start to:\t%d", dwPos);
-						::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOPSTART, s);
-					}
-					if (dwPos >= pins->nLoopStart+4)
-					{
-						wsprintf(s, "Set Loop End to:\t%d", dwPos);
-						::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOPEND, s);
-					}
-					if (pSndFile->m_nType == MOD_TYPE_IT)
-					{
+				if (dwPos <= pins->nLength) {
+					//Set loop points
+					wsprintf(s, "Set Loop Start to:\t%d", dwPos);
+					::AppendMenu(hMenu, MF_STRING|((dwPos+4<=pins->nLoopEnd)?0:MF_GRAYED), 
+								 ID_SAMPLE_SETLOOPSTART, s);
+					wsprintf(s, "Set Loop End to:\t%d", dwPos);
+					::AppendMenu(hMenu, MF_STRING|((dwPos>=pins->nLoopStart+4)?0:MF_GRAYED), 
+								 ID_SAMPLE_SETLOOPEND, s);
+						
+					if (pSndFile->m_nType == MOD_TYPE_IT) {
+						//Set sustain loop points
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-						if (dwPos+4 <= pins->nSustainEnd)
-						{
-							wsprintf(s, "Set Sustain Start to:\t%d", dwPos);
-							::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINSTART, s);
-						}
-						if (dwPos >= pins->nSustainStart+4)
-						{
-							wsprintf(s, "Set Sustain End to:\t%d", dwPos);
-							::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINEND, s);
-						}
+						wsprintf(s, "Set Sustain Start to:\t%d", dwPos);
+						::AppendMenu(hMenu, MF_STRING|((dwPos+4<=pins->nSustainEnd)?0:MF_GRAYED), 
+	  								 ID_SAMPLE_SETSUSTAINSTART, s);
+						wsprintf(s, "Set Sustain End to:\t%d", dwPos);
+						::AppendMenu(hMenu, MF_STRING|((dwPos>=pins->nSustainStart+4)?0:MF_GRAYED), 
+								     ID_SAMPLE_SETSUSTAINEND, s);
 					}
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 					m_dwMenuParam = dwPos;

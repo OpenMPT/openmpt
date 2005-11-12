@@ -231,32 +231,21 @@ void CNoteMapWnd::OnKillFocus(CWnd *pNewWnd)
 void CNoteMapWnd::OnLButtonDown(UINT, CPoint pt)
 //----------------------------------------------
 {
-	if ((pt.x >= m_cxFont) && (pt.x < m_cxFont*2) && (m_bIns))
-	{
+	if ((pt.x >= m_cxFont) && (pt.x < m_cxFont*2) && (m_bIns)) {
 		m_bIns = FALSE;
 		InvalidateRect(NULL, FALSE);
 	}
-	if ((pt.x > m_cxFont*2) && (pt.x <= m_cxFont*3) && (!m_bIns))
-	{
+	if ((pt.x > m_cxFont*2) && (pt.x <= m_cxFont*3) && (!m_bIns)) {
 		m_bIns = TRUE;
 		InvalidateRect(NULL, FALSE);
 	}
-	if ((pt.x >= m_cxFont) && (m_cyFont))
-	{
+	if ((pt.x >= 0) && (m_cyFont)) {
 		CRect rcClient;
 		GetClientRect(&rcClient);
 		int nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
 		UINT n = (pt.y / m_cyFont) + m_nNote - (nNotes/2);
-		if ((n < m_nNote) && (m_nNote > 0))
-		{
-			m_nNote--;
-			InvalidateRect(NULL, FALSE);
-		} else
-		if ((n > m_nNote) && (m_nNote < 119))
-		{
-			m_nNote++;
-			InvalidateRect(NULL, FALSE);
-		}
+		m_nNote = n;
+		InvalidateRect(NULL, FALSE);
 	}
 	SetFocus();
 }
@@ -462,7 +451,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 			}
 			if (bOk) 
 			{
-				SetCurrentNote(m_nNote+1);
+				//SetCurrentNote(m_nNote+1);
 				PlayNote(m_nNote);
 			}
 			
@@ -475,58 +464,57 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
-	if ((penv) && (m_nNote < 120))
-	{
-		if ((m_bIns) && (((c >= '0') && (c <= '9')) || (c == ' ')))	//in sample # column
-		{
+	if ((penv) && (m_nNote < 120))	{
+
+		if ((m_bIns) && (((c >= '0') && (c <= '9')) || (c == ' '))) {	//in sample # column
+		
 			UINT n = m_nOldIns;
-			if (c != ' ')
-			{
+			if (c != ' ') {
 				n = (10*penv->Keyboard[m_nNote] + (c - '0')) % 10000;
 				if ((n >= MAX_SAMPLES) || ((pSndFile->m_nSamples < 1000) && (n >= 1000))) n = (n % 1000);
 				if ((n >= MAX_SAMPLES) || ((pSndFile->m_nSamples < 100) && (n >= 100))) n = (n % 100); else
 				if ((n > 31) && (pSndFile->m_nSamples < 32) && (n % 10)) n = (n % 10);
 			}
-			if (n != penv->Keyboard[m_nNote])
-			{
+
+			if (n != penv->Keyboard[m_nNote]) {
 				penv->Keyboard[m_nNote] = n;
 				m_pModDoc->SetModified();
 				InvalidateRect(NULL, FALSE);
 				PlayNote(m_nNote+1);
 			}
-			if (c == ' ')
-			{
+
+			if (c == ' ') {
 				if (m_nNote < 119) m_nNote++;
 				InvalidateRect(NULL, FALSE);
 				PlayNote(m_nNote);
 			}
 			return true;
-		} 
-		else if ((!m_bIns) || (pSndFile->m_nType & MOD_TYPE_IT)) //in note column
-		{
+		}
+
+		else if ((!m_bIns) || (pSndFile->m_nType & MOD_TYPE_IT)) { //in note column
+
 			UINT n = penv->NoteMap[m_nNote];
 
-			if ((c >= '0') && (c <= '9'))
-			{
-				if (n)
-				{
+			if ((c >= '0') && (c <= '9')) {
+				if (n) {
 					n = ((n-1) % 12) + (c-'0')*12 + 1;
-				} else
-				{
+				} else {
 					n = (m_nNote % 12) + (c-'0')*12 + 1;
 				}
-			} else
-			if (c == ' ')
-			{
+			} else if (c == ' ') {
 				n = (m_nOldNote) ? m_nOldNote : m_nNote+1;
 			}
-			if (n != penv->NoteMap[m_nNote])
-			{
+
+			if (n != penv->NoteMap[m_nNote]) {
 				penv->NoteMap[m_nNote] = n;
 				m_pModDoc->SetModified();
 				InvalidateRect(NULL, FALSE);
 			}
-			SetCurrentNote(m_nNote+1);
+			
+			if (c == ' ') {
+				SetCurrentNote(m_nNote+1);
+			}
+
 			PlayNote(m_nNote);
 
 			return true;
@@ -1843,6 +1831,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 			}
 
 			m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, this);
+			m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSNAMES, this);
 			
 			if (penv->nMixPlug)	//if we have not just set to no plugin
 			{

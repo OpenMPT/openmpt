@@ -16,6 +16,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_PRESET_LOAD,			OnLoadPreset)
 	ON_COMMAND(ID_PLUG_BYPASS,			OnBypassPlug)
 	ON_COMMAND(ID_PLUG_RECORDAUTOMATION,OnRecordAutomation)
+	ON_COMMAND(ID_PLUG_PASSKEYS,		OnPassKeypressesToPlug)
 	ON_COMMAND(ID_PRESET_SAVE,			OnSavePreset)
 	ON_COMMAND(ID_PRESET_RANDOM,		OnRandomizePreset)
 	ON_COMMAND(ID_VSTMACRO_INFO,		OnMacroInfo)
@@ -35,9 +36,11 @@ CAbstractVstEditor::CAbstractVstEditor(CVstPlugin *pPlugin)
 	m_pInputMenu  = new CMenu();
 	m_pOutputMenu = new CMenu();
 	m_pMacroMenu  = new CMenu();
-
+	
 	m_pPresetMenu = new CMenu();
 	m_pPresetMenuGroup.SetSize(0);
+
+	m_pOptionsMenu  = new CMenu();
 
 	m_pMenu->LoadMenu(IDR_VSTMENU);
 	m_nInstrument = GetBestInstrumentCandidate();
@@ -57,11 +60,14 @@ CAbstractVstEditor::~CAbstractVstEditor()
 		m_pOutputMenu->DestroyMenu();
 		m_pMacroMenu->DestroyMenu();
 
+		m_pOptionsMenu->DestroyMenu();
+
 		delete m_pMenu;
 		delete m_pPresetMenu;
 		delete m_pInputMenu;
 		delete m_pOutputMenu;
 		delete m_pMacroMenu;
+		delete m_pOptionsMenu;
 
 		for (int i=0; i<m_pPresetMenuGroup.GetSize(); i++) {
 			if (m_pPresetMenuGroup[i]->m_hMenu) {
@@ -130,6 +136,7 @@ VOID CAbstractVstEditor::SetupMenu()
 		UpdateInputMenu();
 		UpdateOutputMenu();
 		UpdateMacroMenu();
+		UpdateOptionsMenu();
 		::SetMenu(m_hWnd, m_pMenu->m_hMenu);
 	}
 	return;
@@ -149,11 +156,7 @@ void CAbstractVstEditor::OnBypassPlug()
 //-------------------------------------
 {
 	if (m_pVstPlugin) {
-		if (m_pVstPlugin->Bypass()) {
-			m_pMenu->ModifyMenu(ID_PLUG_BYPASS, MF_BYCOMMAND|MF_CHECKED, ID_PLUG_BYPASS, "&Bypass");
-		} else {
-			m_pMenu->ModifyMenu(ID_PLUG_BYPASS, MF_BYCOMMAND|MF_UNCHECKED, ID_PLUG_BYPASS, "&Bypass");
-		}
+		m_pVstPlugin->Bypass();
 	}
 }
 
@@ -162,11 +165,14 @@ void CAbstractVstEditor::OnRecordAutomation()
 {
 	if (m_pVstPlugin) {
 		m_pVstPlugin->m_bRecordAutomation = !m_pVstPlugin->m_bRecordAutomation;
-		if (m_pVstPlugin->m_bRecordAutomation) {
-			m_pMenu->ModifyMenu(ID_PLUG_RECORDAUTOMATION, MF_BYCOMMAND|MF_CHECKED, ID_PLUG_RECORDAUTOMATION, "Record &Params");
-		} else {
-			m_pMenu->ModifyMenu(ID_PLUG_RECORDAUTOMATION, MF_BYCOMMAND|MF_UNCHECKED, ID_PLUG_RECORDAUTOMATION, "Record &Params");
-		}
+	}
+}
+
+void CAbstractVstEditor::OnPassKeypressesToPlug()
+//-----------------------------------------------
+{
+	if (m_pVstPlugin) {
+		m_pVstPlugin->m_bPassKeypressesToPlug  = !m_pVstPlugin->m_bPassKeypressesToPlug;
 	}
 }
 
@@ -190,9 +196,10 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 	if (pMsg)
 	{
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
-		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
-			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
-		{
+		if ( (!m_pVstPlugin->m_bPassKeypressesToPlug) &&  
+			((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 
+			 (pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN)) )	{
+
 			CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 			
 			//Translate message manually
@@ -203,14 +210,13 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 			InputTargetContext ctx = (InputTargetContext)(kCtxVSTGUI);
 			
 			// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
-			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull
-				 /*&& !(m_pVstPlugin->KeysRequired()) */) {
+			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT, (CWnd*)this) != kcNull) {
 				return true; 
 			}
 			
 			// Don't forward key repeats if plug does not listen for keypresses
 		    // (avoids system beeps on note hold)
-			if (kT == kKeyEventRepeat/* && !(m_pVstPlugin->KeysRequired())*/) {
+			if (kT == kKeyEventRepeat) {
 				return true;
 			}
 		}
@@ -449,8 +455,9 @@ void CAbstractVstEditor::UpdateOutputMenu()
 	pInfoMenu->InsertMenu(1, MF_BYPOSITION|MF_POPUP, (UINT)m_pOutputMenu->m_hMenu, "Ou&tputs");
 }
 
-void CAbstractVstEditor::UpdateMacroMenu()
-{
+void CAbstractVstEditor::UpdateMacroMenu() {
+//------------------------------------------
+
 	CString label, macroName, macroText;
 	char paramName[128];
 	bool greyed;
@@ -520,6 +527,31 @@ void CAbstractVstEditor::UpdateMacroMenu()
 	}
 
 	pInfoMenu->InsertMenu(2, MF_BYPOSITION|MF_POPUP, (UINT)m_pMacroMenu->m_hMenu, "&Macros");
+}
+
+void CAbstractVstEditor::UpdateOptionsMenu() {
+//--------------------------------------------
+
+	if (m_pOptionsMenu->m_hMenu) {
+		m_pOptionsMenu->DestroyMenu();	
+	}
+
+	m_pOptionsMenu->CreatePopupMenu();
+	
+	//Bypass
+	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->IsBypassed()?MF_CHECKED:0,
+							   ID_PLUG_BYPASS, "&Bypass");
+	//Record Params
+	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bRecordAutomation?MF_CHECKED:0,
+							   ID_PLUG_RECORDAUTOMATION, "Record &Params");
+	//Pass on keypresses
+	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bPassKeypressesToPlug?MF_CHECKED:0,
+							   ID_PLUG_PASSKEYS, "Pass &Keys to Plug");
+
+
+	m_pMenu->DeleteMenu(3, MF_BYPOSITION);
+	m_pMenu->InsertMenu(3, MF_BYPOSITION|MF_POPUP, (UINT)m_pOptionsMenu->m_hMenu, "&Options");
+
 }
 
 void CAbstractVstEditor::OnToggleEditor(UINT nID)
