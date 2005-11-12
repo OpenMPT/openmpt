@@ -2118,7 +2118,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 	int nInternalCode;
 
 	// Not Internal Device ?
-	if (dwMacro != 0x30463046)
+	if (dwMacro != 0x30463046 && dwMacro != 0x31463046)
 	{
 		UINT pos = 0, nNib = 0, nBytes = 0;
 		DWORD dwMidiCode = 0, dwByteCode = 0;
@@ -2170,6 +2170,12 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 	}
 
 	// Internal device
+	//HACK:
+	bool extendedParam = false;
+	if (dwMacro == 0x31463046) {
+		extendedParam = true;
+	}
+
 	pszMidiMacro += 4;
 	nInternalCode = -256;
 	if ((pszMidiMacro[0] >= '0') && (pszMidiMacro[0] <= '9')) nInternalCode = (pszMidiMacro[0] - '0') << 4; else
@@ -2242,7 +2248,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 
 		// F0.F0.{80|n}.xx: Set VST effect parameter n to xx
 		default:
-			if (nInternalCode & 0x80)
+			if (nInternalCode & 0x80  || extendedParam)
 			{
 				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
 				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
@@ -2250,7 +2256,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 					IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
 					if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
 					{
-						pPlugin->SetZxxParameter(nInternalCode & 0x7F, dwParam & 0x7F);
+						pPlugin->SetZxxParameter(extendedParam?(0x80+nInternalCode):(nInternalCode&0x7F), dwParam & 0x7F);
 					}
 				}
 			}
@@ -2270,10 +2276,16 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 	CHAR cData1;		// rewbs.smoothVST: 
 	DWORD dwParam;		// increased scope to fuction.
 
+	bool extendedParam = false;
 
-	if (dwMacro != 0x30463046) // we don't cater for external devices at tick resolution.
+	if (dwMacro != 0x30463046 && dwMacro != 0x31463046) // we don't cater for external devices at tick resolution.
 		return;
 	
+	//HACK:
+	if (dwMacro == 0x31463046) {
+		extendedParam = true;
+	}
+
 	// not sure what we're doing here; some sort of info gathering from the macros
 	pszMidiMacro += 4;
 	nInternalCode = -256;
@@ -2383,7 +2395,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 
 		// F0.F0.{80|n}.xx: Set VST effect parameter n to xx
 		default:
-			if (nInternalCode & 0x80)
+			if (nInternalCode & 0x80 || extendedParam)
 			{
 				UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
 				if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
@@ -2394,12 +2406,12 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 						// on the fist tick only, calculate step 
 						if (m_dwSongFlags & SONG_FIRSTTICK)
 						{
-							pChn->m_nPlugInitialParamValue = pPlugin->GetZxxParameter(nInternalCode & 0x7F);
+							pChn->m_nPlugInitialParamValue = pPlugin->GetZxxParameter(extendedParam?(0x80+nInternalCode):(nInternalCode&0x7F));
 							// (dwParam & 0x7F) extracts the actual value that we're going to pass
 							pChn->m_nPlugParamValueStep = ((int)(dwParam & 0x7F)-pChn->m_nPlugInitialParamValue)/(float)m_nMusicSpeed;
 						}
 						//update param on all ticks
-						pPlugin->SetZxxParameter(nInternalCode & 0x7F, (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5));
+						pPlugin->SetZxxParameter(extendedParam?(0x80+nInternalCode):(nInternalCode&0x7F), (UINT) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5));
 					}
 				}
 

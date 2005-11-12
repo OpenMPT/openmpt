@@ -2386,7 +2386,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_SAMPLE_SILENCE      "Silence Sample\nSilence"
-    IDC_INSTRUMENT_NEW      "Create a new instrument\nNew instrument"
+    IDC_INSTRUMENT_NEW      "Create a new instrument\nNew instrument (hold shift to duplicate)"
     IDC_INSTRUMENT_OPEN     "Import instrument\nImport instrument"
     IDC_INSTRUMENT_SAVEAS   "Save the current instrument to disk\nSave instrument"
     IDC_INSTRUMENT_PLAY     "Play the current instrument\nPlay instrument"

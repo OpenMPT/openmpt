@@ -756,7 +756,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		
 		//kill notes if required.
 		if ( (bpause) || (m_SndFile.IsPaused()) || pMainFrm->GetModPlaying() != this) { 
-			//OnPlayerPause();				  // pause song - pausing VSTis is too slow too slow
+			//OnPlayerPause();				  // pause song - pausing VSTis is too slow
 			pMainFrm->SetLastMixActiveTime(); // mark activity
 
 			// All notes off
@@ -2933,7 +2933,16 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 
 	//set new macro
 	CHAR *pMacroToSet = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[macroToSet*32]);
-	wsprintf(pMacroToSet, "F0F0%Xz",128+paramToUse);
+	if (paramToUse<128) {
+		wsprintf(pMacroToSet, "F0F0%Xz",paramToUse+128);
+	} else if (paramToUse<384) {
+		wsprintf(pMacroToSet, "F0F1%Xz",paramToUse-128);
+	} else {
+		CString message;
+		message.Format("Param %d beyond controllable range.", paramToUse);
+		::MessageBox(NULL,message, "Macro not assigned for this param",MB_ICONINFORMATION | MB_OK);
+		return;
+	}
 
 	CString message;
 	message.Format("Param %d can now be controlled with macro %X", paramToUse, macroToSet);

@@ -2145,6 +2145,7 @@ void CCtrlSamples::OnNameChanged()
 		memcpy(m_pSndFile->m_szNames[m_nSample], s, 32);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
 		m_pModDoc->SetModified();
 	}
 }

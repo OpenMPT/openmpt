@@ -8,6 +8,19 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.36
+  + <rewbs> Added "Pass keypresses to plug" option in plugin GUI options menu, to prevent MPT from stealing keypresses from plugins that need them.
+  + <rewbs> More intelligent instrument dropdown box in patten editor will show sample name if instrument has no name, and instrument's plugin name.
+  . <rewbs> Options menu on plugin GUI sometimes failed to show checked options after closing and re-opening the window.
+  . <rewbs> Channel headers properly updated after moving them in the channel manager (tx anboi).
+  . <rewbs> Fixed crash when interpolating with keyboard shortcuts with a selection spanning a single row (tx lpchip).
+  / <rewbs> Disabled period cap to allow playback of notes below A-0 (experimental).
+  / <rewbs> Leave unavailable loop options visible (but greyed out) in sample editor context menu, to avoid confusion (tx lpchip).
+  / <rewbs> Clicking in the notemap will set the active note to be the one that was clicked on, rather than just movin up/down by 1.
+  / <rewbs> Changing the note in the notemap will no longer move down one note.
+
+ (+ <rewbs> volume commands without notes now send volume MIDI CC to plugs, but as far as I've seen, no plugs seem to respond to it.)
+
 . v 1.17.02.35
   + <rewbs & Relabsoluness> Note delay (SDx) is written automatically during "live tracking" if there are no effects already on the existing row.
   + <rewbs> Preliminary parameter value recording should work a bit now with follow song on. Attempts to set correct macro if it exists. Will only overwite \xx. Does not work with certain plugs that don't give idle time back to the host during mouse down (e.g. Albino, Vanguard...), still trying to understand this. Please play with this & give feedback, but don't expect miracles yet. :)

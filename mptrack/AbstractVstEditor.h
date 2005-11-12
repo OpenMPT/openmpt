@@ -28,6 +28,7 @@ public:
 	afx_msg void OnInputInfo();
 	afx_msg void OnBypassPlug();
 	afx_msg void OnRecordAutomation();
+	afx_msg void OnPassKeypressesToPlug();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 
 	//Overridden methods:
@@ -46,11 +47,13 @@ private:
 	CMenu *m_pInputMenu;
 	CMenu *m_pOutputMenu;
 	CMenu *m_pMacroMenu;
+	CMenu *m_pOptionsMenu;
 
 	void UpdatePresetMenu();
 	void UpdateInputMenu();
 	void UpdateOutputMenu();
 	void UpdateMacroMenu();
+	void UpdateOptionsMenu();
 	int GetBestInstrumentCandidate();
 	bool CheckInstrument(int instrument);
 	int m_nInstrument;

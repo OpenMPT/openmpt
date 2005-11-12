@@ -668,6 +668,7 @@ public:
 	virtual void Suspend()=0;
 	virtual BOOL isInstrument()=0;
 	virtual BOOL CanRecieveMidiEvents()=0;
+	virtual void SetDryRatio(UINT param)=0;
 
 };
 
