@@ -1270,7 +1270,7 @@ void CModDoc::RearrangeSampleList(void)
 				strcpy(m_SndFile.m_szNames[n+l], m_SndFile.m_szNames[n+k]);
 				m_SndFile.m_szNames[n+k][0] = '\0';
 
-				for(i=1; i<m_SndFile.m_nInstruments; i++){
+				for(i=1; i<=m_SndFile.m_nInstruments; i++){
 					if(m_SndFile.Headers[i]){
 						INSTRUMENTHEADER *p = m_SndFile.Headers[i];
 						for(j=0; j<128; j++) if(p->Keyboard[j] == n+k) p->Keyboard[j] = n+l;
