@@ -18,7 +18,7 @@
 // -> CODE#0015
 // -> DESC="channels management dlg"
 #include "globals.h"
-#include "ctrl_pat.h"
+#include "ChannelManagerDlg.h"
 // -! NEW_FEATURE#0015
 #include <direct.h>
 
@@ -2753,6 +2753,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewInstruments:
 		case kcViewComments: 
 		case kcViewGraph: //rewbs.graph
+		case kcViewSongProperties:
 		case kcPlayPatternFromCursor:
 		case kcPlayPatternFromStart: 
 		case kcPlaySongFromCursor: 

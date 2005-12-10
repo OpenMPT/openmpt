@@ -38,6 +38,39 @@ extern short int ModRandomTable[64];
 ////////////////////////////////////////////////////////////
 // Length
 
+
+/*
+void CSoundFile::GenerateSamplePosMap() {
+
+
+
+
+
+	double accurateBufferCount = 
+
+	long lSample = 0;
+	nPattern
+
+	//for each order
+		//get pattern for this order
+		//if pattern if duff: break, we're done.
+		//for each row in this pattern
+			//get ticks for this row
+			//get ticks per row and tempo for this row
+			//for each tick
+
+			//Recalc if ticks per row or tempo has changed
+
+		samplesPerTick = (double)gdwMixingFreq * (60.0/(double)m_nMusicTempo / ((double)m_nMusicSpeed * (double)m_nRowsPerBeat));
+		lSample += samplesPerTick;
+
+
+		nPattern = ++nOrder;
+	}
+
+}
+*/
+
 DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 //----------------------------------------------------
 {
@@ -286,7 +319,7 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 		case tempo_mode_alternative: 
 			dwElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
 		case tempo_mode_modern: 
-			dwElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat;; break;
+			dwElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat; break;
 		case tempo_mode_classic: default:
 			dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
 	}
@@ -654,6 +687,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 	{
 		if (!bManual) pChn->nPeriod = 0;
 	}
+
 }
 
 
@@ -1434,22 +1468,18 @@ BOOL CSoundFile::ProcessEffects()
 		// Midi Controller
 		case CMD_MIDI:
 			if (m_nTickCount) break;
-			if (param < 0x80)
-			{
+			if (param < 0x80){
 				ProcessMidiMacro(nChn, &m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro << 5], param);
-			} else 
-			{
+			} else {
 				ProcessMidiMacro(nChn, &m_MidiCfg.szMidiZXXExt[(param & 0x7F) << 5], 0);
 			}
 			break;
 
 		//rewbs.smoothVST: Smooth Macro slide
 		case CMD_SMOOTHMIDI:
-			if (param < 0x80)
-			{
+			if (param < 0x80) {
 				ProcessSmoothMidiMacro(nChn, &m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro << 5], param);
-			} else
-			{
+			} else	{
 				ProcessSmoothMidiMacro(nChn, &m_MidiCfg.szMidiZXXExt[(param & 0x7F) << 5], 0);
 			}
 			break;
@@ -2132,6 +2162,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 			if ((cData == 'z') || (cData == 'Z')) { dwByteCode = param & 0x7f; nNib = 2; } else
 			if ((cData == 'x') || (cData == 'X')) { dwByteCode = param & 0x70; nNib = 2; } else
 			if ((cData == 'y') || (cData == 'Y')) { dwByteCode = (param & 0x0f)<<3; nNib = 2; }
+			if ((cData == 'k') || (cData == 'K')) { dwByteCode = (dwByteCode<<4) | GetBestMidiChan(pChn); nNib++; }
 
 			if (nNib >= 2)
 			{
@@ -2147,14 +2178,12 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 					{
 // -> CODE#0015
 // -> DESC="channels management dlg"
-						UINT nPlug = ChnSettings[nMasterCh-1].nMixPlugin;
+						UINT nPlug = GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
 						if(pChn->dwFlags & CHN_NOFX) nPlug = 0;
 // -! NEW_FEATURE#0015
-						if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
-						{
+						if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
 							IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
-							if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
-							{
+							if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))	{
 								pPlugin->MidiSend(dwMidiCode);
 							}
 						}
@@ -2278,8 +2307,13 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 
 	bool extendedParam = false;
 
-	if (dwMacro != 0x30463046 && dwMacro != 0x31463046) // we don't cater for external devices at tick resolution.
+	if (dwMacro != 0x30463046 && dwMacro != 0x31463046) {
+		// we don't cater for external devices at tick resolution.
+		if (!m_nTickCount) {
+			ProcessMidiMacro(nChn, pszMidiMacro, param);
+		}
 		return;
+	}
 	
 	//HACK:
 	if (dwMacro == 0x31463046) {
@@ -2993,10 +3027,6 @@ UINT  CSoundFile::GetBestPlugin(UINT nChn, UINT priority, bool respectMutes)
 	if (nChn > MAX_CHANNELS) {		//Check valid channel number
 		return 0;
 	}
-
-	//Function pointers to the methods we will use to try to find the plugin
-	//UINT (*pFirstTry)(UINT, bool) = NULL;
-	//UINT (*pSecondTry)(UINT, bool) = NULL;
 	
 	//Define search source order
 	UINT nPlugin=0;
@@ -3020,12 +3050,6 @@ UINT  CSoundFile::GetBestPlugin(UINT nChn, UINT priority, bool respectMutes)
 			}
 			break;
 	}
-
-	//Do search
-	/*UINT nPlugin = (*pFirstTry)(nChn, respectMutes); // Try from first source.
-	if ((!nPlugin) || (nPlugin>MAX_MIXPLUGINS)) {	 // If first source couldn't find a valid plug...
-		nPlugin = (*pSecondTry)(nChn, respectMutes); // try from second source.
-	}*/
 
 	return nPlugin; // 0 Means no plugin found.
 }
@@ -3068,6 +3092,16 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 		}
 	}
 	return nPlugin;
+}
+
+UINT CSoundFile::GetBestMidiChan(MODCHANNEL *pChn) {
+//--------------------------------------------------
+	if (pChn && pChn->pHeader) {
+		if (pChn->pHeader->nMidiChannel) {
+			return (pChn->pHeader->nMidiChannel-1)&0x0F;
+		}
+	}
+	return 0;
 }
 
 void CSoundFile::HandlePatternTransitionEvents()

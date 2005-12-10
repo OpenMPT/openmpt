@@ -133,7 +133,8 @@
 				TargetEnvironment="1"
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="perl $(TargetDir)getVersionFromCode.pl  $(TargetDir)..\Mainfrm.h &gt; $(TargetDir)version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -204,7 +205,8 @@
 				TargetEnvironment="1"
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="perl $(TargetDir)getVersionFromCode.pl  $(TargetDir)..\Mainfrm.h &gt; $(TargetDir)version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -275,7 +277,8 @@
 				TargetEnvironment="1"
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="perl $(TargetDir)getVersionFromCode.pl  $(TargetDir)..\Mainfrm.h &gt; $(TargetDir)version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -346,7 +349,8 @@
 				TargetEnvironment="1"
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="perl $(TargetDir)getVersionFromCode.pl  $(TargetDir)..\Mainfrm.h &gt; $(TargetDir)version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -381,6 +385,9 @@
 			</File>
 			<File
 				RelativePath=".\AutoSaver.cpp">
+			</File>
+			<File
+				RelativePath=".\ChannelManagerDlg.cpp">
 			</File>
 			<File
 				RelativePath=".\ChildFrm.cpp">
@@ -804,6 +811,9 @@
 			</File>
 			<File
 				RelativePath=".\AutoSaver.h">
+			</File>
+			<File
+				RelativePath=".\ChannelManagerDlg.h">
 			</File>
 			<File
 				RelativePath=".\ChildFrm.h">

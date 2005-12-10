@@ -599,6 +599,7 @@ enum {
 // rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
 	OPTGEN_PATTERNCTXMENUSTYLE,
+	OPTGEN_SYNCMUTE,
 	OPTGEN_MAXOPTIONS
 };
 
@@ -632,6 +633,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 // -! NEW_FEATURE#0022
 
 	{"Old style pattern context menu",	"Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
+	{"Maintain sample sync on mute",	"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
 };
 
 
@@ -690,6 +692,7 @@ BOOL COptionsGeneral::OnInitDialog()
 // rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
 		case OPTGEN_PATTERNCTXMENUSTYLE: bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE); break;
+		case OPTGEN_SYNCMUTE:			 bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SYNCMUTE); break;
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
@@ -743,7 +746,8 @@ void COptionsGeneral::OnOK()
 //		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
 // rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022		
-		case OPTGEN_PATTERNCTXMENUSTYLE:			mask = PATTERN_OLDCTXMENUSTYLE; break;
+		case OPTGEN_PATTERNCTXMENUSTYLE: mask = PATTERN_OLDCTXMENUSTYLE; break;
+		case OPTGEN_SYNCMUTE:			 mask = PATTERN_SYNCMUTE; break;
 			
 		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;

@@ -6,10 +6,7 @@
 #include "globals.h"
 #include "ctrl_com.h"
 #include "view_com.h"
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#include "ctrl_pat.h"
-// -! NEW_FEATURE#0015
+#include "ChannelManagerDlg.h"
 
 #define DETAILS_TOOLBAR_CY	28
 

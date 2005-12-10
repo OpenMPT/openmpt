@@ -783,10 +783,10 @@ BOOL CSoundFile::ReadNote()
 			//tick-to-tick tempo correction:
 			if (m_dBufferDiff>=1) { 
 				m_nBufferCount++;
-				m_dBufferDiff-=1;
+				m_dBufferDiff--;
 			} else if (m_dBufferDiff<=-1) { 
 				m_nBufferCount--;
-				m_dBufferDiff+=1;
+				m_dBufferDiff++;
 			}
 			ASSERT(abs(m_dBufferDiff)<1);
 			break;
@@ -1086,7 +1086,9 @@ BOOL CSoundFile::ReadNote()
 				UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
 				//Don't let global volume affect level of sample if
 				//global volume is going to be applied to master output anyway.
-				if (m_pConfig->getGlobalVolumeAppliesToMaster()) {
+				if (pChn->dwFlags&CHN_SYNCMUTE) {
+					pChn->nRealVolume = 0;
+				} else if (m_pConfig->getGlobalVolumeAppliesToMaster()) {
 					pChn->nRealVolume = _muldiv(vol*MAX_GLOBAL_VOLUME, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
 				} else {
 					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);

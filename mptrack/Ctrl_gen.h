@@ -63,7 +63,7 @@ protected:
 	afx_msg void OnVSTiVolChanged();
 	afx_msg void OnSamplePAChanged();
 	afx_msg void OnRestartPosChanged();
-	afx_msg void OnChangeModType();
+	afx_msg void OnSongProperties();
 	afx_msg void OnPlayerProperties();
 	afx_msg void OnResamplingChanged();
 	afx_msg void OnLoopSongChanged();

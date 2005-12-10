@@ -360,8 +360,9 @@ CString CInputHandler::GetMenuText(UINT id)
 		case IDD_TREEVIEW:			s="Tree\t"; c=kcViewTree; break;
 		case ID_VIEW_OPTIONS:		s="Setup...\t"; c=kcViewOptions; break;
 		case ID_HELP:				s="Contents (todo)"; c=kcHelp; break;
-		case ID_PLUGIN_SETUP:		s="Plugin Setup...\t"; c=kcViewAddPlugin; break;
+		case ID_PLUGIN_SETUP:		s="Plugin Manager...\t"; c=kcViewAddPlugin; break;
 		case ID_CHANNEL_MANAGER:	s="Channel Manager...\t"; c=kcViewChannelManager; break;
+		case ID_VIEW_SONGPROPERTIES:s="Song Properties...\t"; c=kcViewSongProperties; break; //rewbs.graph
 /*	
 		case ID_WINDOW_NEW:			s="New Window\t"; c=kcWindowNew; break;
 		case ID_WINDOW_CASCADE:		s="Cascade\t"; c=kcWindowCascade; break;

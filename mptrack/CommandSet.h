@@ -105,6 +105,7 @@ enum CommandID
 	kcViewOptions,
 	kcViewChannelManager,
 	kcViewAddPlugin,
+	kcViewSongProperties,
 	kcHelp,
 	kcEndView=kcHelp,
 
@@ -214,6 +215,8 @@ enum CommandID
 	kcNewPattern,
 	kcTogglePluginEditor,
 	kcShowNoteProperties,
+	kcShowPatternProperties,
+	kcShowMacroConfig,
 	kcShowEditMenu,
 	kcEndPatternEditMisc=kcShowEditMenu,
 

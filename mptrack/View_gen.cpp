@@ -9,12 +9,8 @@
 #include "vstplug.h"
 #include "EffectVis.h"
 #include "movefxslotdialog.h"
-
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#include "ctrl_pat.h"
+#include "ChannelManagerDlg.h"
 #include ".\view_gen.h"
-// -! NEW_FEATURE#0015
 
 #define ID_FXCOMMANDS_BASE	41000
 

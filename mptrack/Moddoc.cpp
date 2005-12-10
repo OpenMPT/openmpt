@@ -13,9 +13,6 @@
 #include "mod2midi.h"
 #include "vstplug.h"
 
-
-#pragma warning(disable:4244)
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -957,29 +954,26 @@ BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 }
 
 
-BOOL CModDoc::MuteChannel(UINT nChn, BOOL bMute)
+BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
 //----------------------------------------------
 {
-	DWORD d = (bMute) ? CHN_MUTE : 0;
-	
-	if (nChn >= m_SndFile.m_nChannels) return FALSE;
+	DWORD muteType = (CMainFrame::m_dwPatternSetup&PATTERN_SYNCMUTE)? CHN_SYNCMUTE:CHN_MUTE;
 
-	if (d != (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE))	{
-		if (m_SndFile.m_nType == MOD_TYPE_IT) {
-			CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
-		}
-		if (d)	{
-			m_SndFile.ChnSettings[nChn].dwFlags |= CHN_MUTE;
-		} else {
-			m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
-		}
-		
+	if (nChn >= m_SndFile.m_nChannels) {
+		return FALSE;
 	}
-	if (d) {
-		m_SndFile.Chn[nChn].dwFlags |= CHN_MUTE;
-		//Send a note-off to any VSTi active on this channel:
-		//NoteOff(0xFF, 0, m_SndFile.Chn[nChn].pHeader , nChn);
 
+	//Mark channel as muted in channel settings
+	if (doMute)	{
+		m_SndFile.ChnSettings[nChn].dwFlags |= CHN_MUTE;
+	} else {
+		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
+	}
+	
+	//Mute pattern channel
+	if (doMute) {
+		m_SndFile.Chn[nChn].dwFlags |= muteType;
+		//Kill VSTi notes on muted channel.
 		UINT nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
 		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))	{
 			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
@@ -988,20 +982,26 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL bMute)
 				pPlug->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, 0xFF, 0, nChn);
 			}
 		}
-
 	} else {
-		m_SndFile.Chn[nChn].dwFlags &= ~CHN_MUTE;
+		m_SndFile.Chn[nChn].dwFlags &= ~muteType;
 	}
 
+	//mute any NNA'd channels
 	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++) {
 		if (m_SndFile.Chn[i].nMasterChn == nChn+1)	{
-			if (d) { 
-				m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
+			if (doMute) { 
+				m_SndFile.Chn[i].dwFlags |= muteType;
 			} else {
-				m_SndFile.Chn[i].dwFlags &= ~CHN_MUTE;
+				m_SndFile.Chn[i].dwFlags &= ~muteType;
 			}
 		}
 	}
+
+	//Mark IT as modified
+	if (m_SndFile.m_nType == MOD_TYPE_IT) {
+		CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
+	}
+
 	return TRUE;
 }
 
@@ -2049,22 +2049,19 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 				case sfx_reso: chanSpec.Append("Resonance"); break;
 				case sfx_mode: chanSpec.Append("Filter Mode"); break;
 				case sfx_drywet: chanSpec.Append("Plug wet/dry ratio"); break;
+				case sfx_cc: {
+					int nCC = MacroToMidiCC(macroText);
+					CString temp; 
+					temp.Format("MidiCC %d", nCC);
+					chanSpec.Append(temp); 
+					break;
+				}
 				case sfx_plug: {
 					int nParam = MacroToPlugParam(macroText);
 					char paramName[128];
-					memset(paramName, 0, sizeof(paramName));
-					
+					memset(paramName, 0, sizeof(paramName));				
 					UINT nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
-					/*
-					UINT nPlug = m_SndFile.ChnSettings[nChn].nMixPlugin;  //try channel's plug first
-					if (!(nPlug) || (nPlug > MAX_MIXPLUGINS)) {
-						if (m_SndFile.Chn[nChn].pHeader &&  m_SndFile.Chn[nChn].pInstrument) {	// then try intrument's plug
-								nPlug = m_SndFile.Chn[nChn].pHeader->nMixPlug;
-						}
-					}
-					*/
-					if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
-					{
+					if ((nPlug) && (nPlug<=MAX_MIXPLUGINS)) {
 						CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
 						if (pPlug) 
 							pPlug->GetParamName(nParam, paramName, sizeof(paramName));
@@ -2081,8 +2078,9 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 				default: chanSpec.Append("Custom");
 				}
 			}
-			if (chanSpec != "")
+			if (chanSpec != "") {
 				strcat(pszDescription, chanSpec);
+			}
 
 		}
 		//end rewbs.xinfo
@@ -2621,7 +2619,6 @@ HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
 
 }
 
-//rewbs.xinfo
 int CModDoc::GetMacroType(CString value)
 {
 	if (value.Compare("")==0) return sfx_unused;
@@ -2629,25 +2626,41 @@ int CModDoc::GetMacroType(CString value)
 	if (value.Compare("F0F001z")==0) return sfx_reso;
 	if (value.Compare("F0F002z")==0) return sfx_mode;
 	if (value.Compare("F0F003z")==0) return sfx_drywet;
-	if (value.Compare("F0F079z")>0 && value.Compare("F0F0G")<0 && value.GetLength()==7) //can be fooled :)
+	if (value.Compare("BK00z")>=0 && value.Compare("BKFFz")<=0 && value.GetLength()==5)
+		return sfx_cc;
+	if (value.Compare("F0F079z")>0 && value.Compare("F0F1G")<0 && value.GetLength()==7)
 		return sfx_plug; 
 	return sfx_custom; //custom/unknown
 }
 
 int CModDoc::MacroToPlugParam(CString macro)
 {
+	int code=0;
 	char* param = (char *) (LPCTSTR) macro;
 	param +=4;
-	int code = -256;
 	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
 	if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
 	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
 	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
 
-	return code&0x7F;
+	if (macro.GetLength()>=4 && macro.GetAt(3)=='0') {
+		return (code-128);
+	} else {
+		return (code+128);
+	}
+}
+int CModDoc::MacroToMidiCC(CString macro) {
+	int code=0;
+	char* param = (char *) (LPCTSTR) macro;
+	param +=2;
+	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
+	if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
+	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
+	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
+
+	return code;
 }
 
-//end rewbs.xinfo
 int CModDoc::FindMacroForParam(long param) {
 //------------------------------------------
 	for (int macro=0; macro<16; macro++) {	//what's the named_const for num macros?? :D
@@ -2662,7 +2675,7 @@ int CModDoc::FindMacroForParam(long param) {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// Playback#
+// Playback
 
 
 void CModDoc::OnPatternRestart()
@@ -2809,6 +2822,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewInstruments: OnEditInstruments(); break;
 		case kcViewComments: OnEditComments(); break;
 		case kcViewGraph: OnEditGraph(); break; //rewbs.graph
+		case kcViewSongProperties: SongProperties(); break;
 
 		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
 		case kcFileSaveAsMP3:	OnFileMP3Convert(); break;
@@ -2951,3 +2965,20 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	return;
 }
 
+void CModDoc::SongProperties() {
+	CModTypeDlg dlg(GetSoundFile(), CMainFrame::GetMainFrame());
+	if (dlg.DoModal() == IDOK)
+	{
+		BOOL bShowLog = FALSE;
+		ClearLog();
+		if(dlg.m_nType)	{
+			if (!ChangeModType(dlg.m_nType)) return;
+			bShowLog = TRUE;
+		}
+		if ((dlg.m_nChannels >= 4) && (dlg.m_nChannels != GetSoundFile()->m_nChannels)) {
+			if(ChangeNumChannels(dlg.m_nChannels)) bShowLog = TRUE;
+		}
+		if (bShowLog) ShowLog("Conversion Status", CMainFrame::GetMainFrame());
+		SetModified();
+	}
+}

@@ -2233,6 +2233,27 @@ void CCommandSet::SetupCommands()
 	commands[kcChannelUnmuteAll].isDummy = false;
 	commands[kcChannelUnmuteAll].Message = "Unmute all channels";
 
+	commands[kcShowPatternProperties].UID = 1772;
+	commands[kcShowPatternProperties].isHidden = false;
+	commands[kcShowPatternProperties].isDummy = false;
+	commands[kcShowPatternProperties].Message = "Show pattern properties window";
+
+	commands[kcShowMacroConfig].UID = 1773;
+	commands[kcShowMacroConfig].isHidden = false;
+	commands[kcShowMacroConfig].isDummy = false;
+	commands[kcShowMacroConfig].Message = "Show macro configuration";
+
+	commands[kcViewSongProperties].UID = 1775;
+	commands[kcViewSongProperties].isHidden = false;
+	commands[kcViewSongProperties].isDummy = false;
+	commands[kcViewSongProperties].Message = "Show song properties window";
+
+/*	commands[kcToggleLoopSong].UID = 1776;
+	commands[kcToggleLoopSong].isHidden = false;
+	commands[kcToggleLoopSong].isDummy = false;
+	commands[kcToggleLoopSong].Message = "Toggle loop song";
+*/
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs
