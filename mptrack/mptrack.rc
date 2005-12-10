@@ -166,6 +166,7 @@ BEGIN
         MENUITEM "Set&up...",                   ID_VIEW_OPTIONS
         MENUITEM "Add &Plugin...",              ID_PLUGIN_SETUP
         MENUITEM "Channel &Manager...",         ID_CHANNEL_MANAGER
+        MENUITEM "Song Properties...",          ID_VIEW_SONGPROPERTIES
     END
     POPUP "&Window"
     BEGIN
@@ -1430,7 +1431,7 @@ BEGIN
     PUSHBUTTON      "Reset",IDC_BUTTON2,295,62,50,14
     COMBOBOX        IDC_MACROPLUG,62,255,111,111,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Plug/param:",IDC_STATIC,17,257,40,8
+    LTEXT           "Plug/param:",IDC_GENMACROLABEL,17,257,40,8
     LTEXT           "Current Macros:",IDC_STATIC,11,16,54,8
     COMBOBOX        IDC_MACROPARAM,175,255,106,126,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
@@ -1439,6 +1440,8 @@ BEGIN
     LTEXT           "Value:",IDC_STATIC,175,219,47,8
     LTEXT           "Preset:",IDC_STATIC,10,295,37,8
     GROUPBOX        "Generate Macro:",IDC_STATIC,11,244,274,28
+    COMBOBOX        IDC_MACROCC,61,255,111,111,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
 END
 
 IDD_CHORDEDIT DIALOGEX 0, 0, 245, 148

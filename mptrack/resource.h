@@ -730,6 +730,8 @@
 #define IDC_SLIDER_GLOBALVOL            2249
 #define IDC_EDIT_VSTIVOL                2250
 #define IDC_SLIDER_VSTIVOL              2251
+#define IDC_MACROCC                     2252
+#define IDC_GENMACROLABEL               2253
 #define IDC_TEXT_BPM                    2300
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302
@@ -910,10 +912,11 @@
 #define ID_SELECTINST                   36100
 #define ID_NETLINK_MPTFR                37001
 #define ID_PLUG_RECORDAUTOMATION        37003
-#define	ID_LEARN_MACRO_FROM_PLUGGUI		37004
-#define ID_CHANGE_INSTRUMENT			37020
-#define ID_CLEAR_SELECTION				38000
-#define ID_PLUG_PASSKEYS				38001
+#define ID_LEARN_MACRO_FROM_PLUGGUI     37004
+#define ID_CHANGE_INSTRUMENT            37020
+#define ID_CLEAR_SELECTION              38000
+#define ID_PLUG_PASSKEYS                38001
+#define ID_VIEW_SONGPROPERTIES          38002
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
@@ -937,8 +940,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        510
-#define _APS_NEXT_COMMAND_VALUE         38002
-#define _APS_NEXT_CONTROL_VALUE         2252
+#define _APS_NEXT_COMMAND_VALUE         38003
+#define _APS_NEXT_CONTROL_VALUE         2254
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

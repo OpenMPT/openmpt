@@ -15,7 +15,7 @@
 BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlGeneral)
 	ON_WM_VSCROLL()
-	ON_COMMAND(IDC_BUTTON_MODTYPE,			OnChangeModType)
+	ON_COMMAND(IDC_BUTTON_MODTYPE,			OnSongProperties)
 	ON_COMMAND(IDC_BUTTON_PLAYERPROPS,		OnPlayerProperties)
 	ON_COMMAND(IDC_CHECK_LOOPSONG,			OnLoopSongChanged)
 	ON_COMMAND(IDC_CHECK_BASS,				OnXBassChanged)
@@ -464,38 +464,29 @@ void CCtrlGeneral::OnPlayerProperties()
 	CMainFrame::GetMainFrame()->OnViewOptions();
 }
 
-void CCtrlGeneral::OnChangeModType()
+void CCtrlGeneral::OnSongProperties()
 //----------------------------------
 {
+	m_pModDoc->SongProperties();
+	/*
 	CModTypeDlg dlg(m_pSndFile, this);
 	if (dlg.DoModal() == IDOK)
 	{
 		BOOL bShowLog = FALSE;
 		m_pModDoc->ClearLog();
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//		if ((dlg.m_nType) && (dlg.m_nType != m_pSndFile->m_nType))
-//		if(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT) m_pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
-		if(dlg.m_nType)
-// -! NEW_FEATURE#0023
-		{
+		if(dlg.m_nType)	{
 			if (!m_pModDoc->ChangeModType(dlg.m_nType)) return;
 			bShowLog = TRUE;
 		}
-		if ((dlg.m_nChannels >= 4) && (dlg.m_nChannels != m_pSndFile->m_nChannels))
-		{
-// -> CODE#0015
-// -> DESC="channels management dlg"
-//			if (!m_pModDoc->ChangeNumChannels(dlg.m_nChannels)) return;
-//			bShowLog = TRUE;
+		if ((dlg.m_nChannels >= 4) && (dlg.m_nChannels != m_pSndFile->m_nChannels)) {
 			if(m_pModDoc->ChangeNumChannels(dlg.m_nChannels)) bShowLog = TRUE;
 			if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 				CChannelManagerDlg::sharedInstance()->Update();
-// -! NEW_FEATURE#0015
 		}
 		if (bShowLog) m_pModDoc->ShowLog("Conversion Status", this);
 		m_pModDoc->SetModified();
 	}
+	*/
 }
 
 

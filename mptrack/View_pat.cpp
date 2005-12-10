@@ -3151,7 +3151,9 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcInsertRow:		OnInsertRows(); return wParam;
 		case kcInsertAllRows:	InsertRows(0, pSndFile->m_nChannels-1); return wParam;		
 
-		case kcShowNoteProperties: ShowEditWindow();return wParam;
+		case kcShowNoteProperties: ShowEditWindow(); return wParam;
+		case kcShowPatternProperties: OnPatternProperties(); return wParam;
+		case kcShowMacroConfig:	SendCtrlMessage(CTRLMSG_SETUPMACROS); return wParam;
 		case kcShowEditMenu:	{CPoint pt =	GetPointFromPosition((m_nRow << 16) | m_dwCursor);
 								OnRButtonDown(0, pt); }
 								return wParam; 
@@ -3738,9 +3740,14 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		isSplit = HandleSplit(p, note);
 
 		// -- write vol data
-		if (!isSplit && vol>=0 && vol<=64)	{
+		if (vol>=0 && vol<=64 && !(isSplit && m_nSplitVolume)) {	//write valid volume, as long as there's no split volume override.
 			p->volcmd=VOLCMD_VOLUME;
 			p->vol = vol;
+		} else if (isSplit && m_nSplitVolume) {						//cater for split volume override.
+			if (m_nSplitVolume>0 && m_nSplitVolume<=64) {
+				p->volcmd=VOLCMD_VOLUME;
+				p->vol = m_nSplitVolume;
+			} 
 		}
 	    
 		// -- write sdx if playing live
@@ -3752,8 +3759,9 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}
 
 		// -- old style note cut/off: erase instrument number
-        if (oldStyle && ((p->note==254) || (p->note==255)))
+		if (oldStyle && ((p->note==254) || (p->note==255))) {
 			p->instr=0;
+		}
 
 		// -- if recording, handle post note entry behaviour (move cursor etc..)
 		if (m_dwStatus & PATSTATUS_RECORD)
@@ -4141,11 +4149,6 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 			p->instr = m_nSplitInstrument;
 		else
 			p->instr = GetCurrentInstrument();
-		if (m_nSplitVolume)
-		{
-			p->volcmd=VOLCMD_VOLUME;
-			p->vol = m_nSplitVolume;
-		}
 		if (m_bOctaveLink)
 			note += 12*(m_nOctaveModifier-9);
 		if (note>120 && note<254) note=120;

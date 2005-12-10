@@ -133,6 +133,7 @@ typedef const BYTE * LPCBYTE;
 #define CHN_NOFX			0x20000000
 // -! NEW_FEATURE#0015
 
+#define CHN_SYNCMUTE		0x40000000
 
 #define ENV_VOLUME			0x0001
 #define ENV_VOLSUSTAIN		0x0002
@@ -354,7 +355,8 @@ enum {
 // Midi Continuous Controller Codes
 // http://www.borg.com/~jglatt/tech/midispec/ctllist.htm
 enum {
-	MIDICC_BankSelect_Coarse = 0,
+	MIDICC_start = 0,
+	MIDICC_BankSelect_Coarse = MIDICC_start,
 	MIDICC_ModulationWheel_Coarse = 1,
 	MIDICC_Breathcontroller_Coarse = 2,
 	MIDICC_FootPedal_Coarse = 4,
@@ -421,6 +423,7 @@ enum {
 	MIDICC_OmniModeOn = 125,
 	MIDICC_MonoOperation = 126,
 	MIDICC_PolyOperation = 127,
+	MIDICC_end = MIDICC_PolyOperation,
 };
 
 enum {
@@ -1138,6 +1141,7 @@ public:
 private:
 	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes);
 	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes);
+	UINT GetBestMidiChan(MODCHANNEL *pChn);
 
 	void HandlePatternTransitionEvents();
 	void BuildDefaultInstrument();

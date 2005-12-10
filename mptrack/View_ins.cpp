@@ -7,10 +7,7 @@
 #include "ctrl_ins.h"
 #include "view_ins.h"
 #include "dlsbank.h"
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#include "ctrl_pat.h"
-// -! NEW_FEATURE#0015
+#include "channelManagerDlg.h"
 
 #define ENV_ZOOM				4
 #define ENV_DRAGLOOPSTART		0x100

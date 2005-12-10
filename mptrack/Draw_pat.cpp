@@ -6,10 +6,7 @@
 #include "globals.h"
 #include "view_pat.h"
 #include "EffectVis.h"		//rewbs.fxvis
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#include "ctrl_pat.h"
-// -! NEW_FEATURE#0015
+#include "ChannelManagerDlg.h"
 
 // Headers
 #define ROWHDR_WIDTH		32	// Row header

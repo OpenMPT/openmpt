@@ -8,6 +8,12 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.37
+  + <rewbs> Added new mute mode which maintains sample synchronisation. Enable it in the global settings (last checkbox).
+  + <rewbs> Added macro presets to control MIDI ccs in midiCC window.
+  + <rewbs> Added configurable keys for Song Properties, Pattern Properties & Macro Configuration.
+  . <rewbs> Fixed incorrect volume when receiving notes from MIDI-in when beyond keyboard split mark.
+
 . v 1.17.02.36
   + <rewbs> Added "Pass keypresses to plug" option in plugin GUI options menu, to prevent MPT from stealing keypresses from plugins that need them.
   + <rewbs> More intelligent instrument dropdown box in patten editor will show sample name if instrument has no name, and instrument's plugin name.

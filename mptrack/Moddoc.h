@@ -71,6 +71,7 @@ enum
 	sfx_mode,
 	sfx_drywet,
 	sfx_plug,
+	sfx_cc,
 	sfx_custom
 };
 
@@ -135,8 +136,9 @@ public:
 	BOOL GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
 	int GetMacroType(CString value); //rewbs.xinfo
 	int MacroToPlugParam(CString value); //rewbs.xinfo
+	int MacroToMidiCC(CString value);
 	int FindMacroForParam(long param);
-
+	void SongProperties();
 // operations
 public:
 	BOOL ChangeModType(UINT nNewType);

@@ -4,13 +4,10 @@
 #include "childfrm.h"
 #include "moddoc.h"
 #include "globals.h"
-#include "view_smp.h"
 #include "ctrl_smp.h"
 #include "dlsbank.h"
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#include "ctrl_pat.h"
-// -! NEW_FEATURE#0015
+#include "channelManagerDlg.h"
+#include "view_smp.h"
 
 // Non-client toolbar
 #define SMP_LEFTBAR_CY			29

@@ -347,7 +347,7 @@ public:
 
 
 protected:
-	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam;
+	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam, m_CbnMacroCC;
 	CEdit m_EditSFx, m_EditZxx;
 	CColourEdit m_EditMacroValue[NMACROS], m_EditMacroType[NMACROS]; //rewbs.macroGUI
 	CButton m_EditMacro[NMACROS], m_BtnMacroShowAll[NMACROS];
@@ -355,6 +355,7 @@ protected:
 	CModDoc *m_pModDoc;
 
 	void UpdateMacroList(int macro=-1);
+	void ToggleBoxes(UINT preset, UINT sfx);
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	afx_msg void UpdateDialog();
@@ -368,6 +369,8 @@ protected:
 	afx_msg void OnZxxEditChanged();
 	afx_msg void OnPlugChanged();
 	afx_msg void OnPlugParamChanged();
+	afx_msg void OnCCChanged();
+	
 	afx_msg void OnViewAllParams(UINT id);
 	afx_msg void OnSetSFx(UINT id);
 	DECLARE_MESSAGE_MAP()
