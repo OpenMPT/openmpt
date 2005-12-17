@@ -983,7 +983,8 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
 			}
 		}
 	} else {
-		m_SndFile.Chn[nChn].dwFlags &= ~muteType;
+		//on unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
+		m_SndFile.Chn[nChn].dwFlags &= ~(CHN_SYNCMUTE|CHN_MUTE);
 	}
 
 	//mute any NNA'd channels
@@ -992,7 +993,8 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
 			if (doMute) { 
 				m_SndFile.Chn[i].dwFlags |= muteType;
 			} else {
-				m_SndFile.Chn[i].dwFlags &= ~muteType;
+				//on unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
+				m_SndFile.Chn[i].dwFlags &= ~(CHN_SYNCMUTE|CHN_MUTE);
 			}
 		}
 	}

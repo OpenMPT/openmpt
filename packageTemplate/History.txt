@@ -8,6 +8,17 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.38
+  . <rewbs> Fixed possible buffer overrun in VST event queue
+  . <rewbs> Changed handling of VSTi noteoffs to reduce unexpected "interaction" between notes on different channels (a VSTi note-on in chan1 could sometimes be blocked by a VSTi note-off on the same row in chan2) (tx ganja)
+  . <rewbs> No longer issue MIDI bank & program message every time midi channel changes - this fixes HyperCanvas behaviour (tx ganja)
+  . <rewbs> Fixed: new channel mute mode did not mute VSTis at all.
+  . <rewbs> Fixed: changing mute mode while some channels were muted prevented them from being unmuted.
+  . <rewbs> Fixed: editing a pattern from treeview by double clicking it was broken
+  . <rewbs> Editing of note column of sample map is disabled for XMs (XM doesn't save that data).
+  . <rewbs> Fixed: If you agreed to reorganized instrument during an instrument cleanup, nothing at all would happen.
+  . <rewbs> Fixed Pattern amplification had no effect on instruments mapped to "phantom samples" (tx lpchip)
+
 . v 1.17.02.37
   + <rewbs> Added new mute mode which maintains sample synchronisation. Enable it in the global settings (last checkbox).
   + <rewbs> Added macro presets to control MIDI ccs in midiCC window.

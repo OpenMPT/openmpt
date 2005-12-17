@@ -434,7 +434,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 	INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
 	if ((penv) && (m_nNote < 120))
 	{
-		if ((!m_bIns) || (pSndFile->m_nType & MOD_TYPE_IT))
+		if (!m_bIns && (pSndFile->m_nType & MOD_TYPE_IT))
 		{
 			UINT n = penv->NoteMap[m_nNote];
 			BOOL bOk = FALSE;
@@ -491,7 +491,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			return true;
 		}
 
-		else if ((!m_bIns) || (pSndFile->m_nType & MOD_TYPE_IT)) { //in note column
+		else if ((!m_bIns) && (pSndFile->m_nType & MOD_TYPE_IT)) { //in note column
 
 			UINT n = penv->NoteMap[m_nNote];
 

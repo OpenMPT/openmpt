@@ -1681,7 +1681,8 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 //----------------------------------------------------------
 {
 	// Do we need to process midi?
-	if (pChn->dwFlags & CHN_MUTE) return;
+	// For now there is no difference between mute and sync mute with VSTis.
+	if (pChn->dwFlags & (CHN_MUTE|CHN_SYNCMUTE)) return;
 	if ((!m_nInstruments) || (m_nPattern >= MAX_PATTERNS)
 		 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
 	

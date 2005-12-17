@@ -2334,8 +2334,20 @@ bool CVstPlugin::MidiSend(DWORD dwMidiCode)
 {
 	if ((m_pEvList) && (m_pEvList->numEvents < VSTEVENT_QUEUE_LEN-1))
 	{
+		int insertPos;
+		if ((dwMidiCode & 0xF0) == 0x80) {	//noteoffs go at the start of the queue.
+			if (m_pEvList->numEvents) {
+				for (int i=m_pEvList->numEvents; i>=1; i--){
+					m_pEvList->events[i] = m_pEvList->events[i-1];
+				}
+			}
+			insertPos=0;
+		} else {
+			insertPos=m_pEvList->numEvents;
+		}
+
 		VstMidiEvent *pev = &m_ev_queue[m_pEvList->numEvents];
-		m_pEvList->events[m_pEvList->numEvents] = (VstEvent *)pev;
+		m_pEvList->events[insertPos] = (VstEvent *)pev;
 		pev->type = kVstMidiType;
 		pev->byteSize = 24;
 		pev->deltaFrames = 0;
@@ -2486,21 +2498,23 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	bool progChanged = (pCh->nProgram != --nMidiProg) && (nMidiProg < 0x80);
 	bool chanChanged = nCh != m_nPreviousMidiChan;
 	//get vol in [0,128[
-	vol = vol/2; 
-	if (vol > 127) vol=127;
-
+	vol = min(vol/2, 127); 
+	
 	// Note: Some VSTis update bank/prog on midi channel change, others don't.
 	//       For those that don't, we do it for them.
+	// Note 17/12/2005 - I have disabled that because it breaks Edirol Hypercanvas
+	// and I can't remember why it would be useful.
 
 	// Bank change
-	if ( (wMidiBank < 0x80) && (chanChanged || bankChanged))
+	if ((wMidiBank < 0x80) && ( bankChanged /*|| chanChanged */))
 	{
 		pCh->wMidiBank = wMidiBank;
 		MidiSend(((wMidiBank<<16)|(0x20<<8))|(0xB0|nCh));
 	}
 	// Program change
-	// Note: Some plugs don't update params on bank change - need to force it by sending prog update.
-	if ( (bankChanged || chanChanged || progChanged) && (nCh != 10) && (nMidiProg < 0x80))
+	// Note: Some plugs (Edirol Orchestral) don't update on bank change only - 
+	// need to force it by sending prog change too.
+	if ((nMidiProg < 0x80) && (progChanged || bankChanged /*|| chanChanged */ ))
 	{
 		pCh->nProgram = nMidiProg;
 		MidiSend((nMidiProg<<8)|(0xC0|nCh));
@@ -2553,7 +2567,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 				if (MidiSend(dwMidiCode|(i<<8))) {
 					pCh->uNoteOnMap[i][trackChannel]--;
 				} else { //VST event queue overflow, no point in submitting more note offs.
-                    break; //todo: overflow buffer?
+                    break; //todo: secondary buffer?
 				}
 			}
 		}

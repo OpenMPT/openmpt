@@ -2515,6 +2515,13 @@ void CViewPattern::OnPatternAmplify()
 							{
 								chvol[j] = (BYTE)(pSndFile->Ins[nSmp].nVolume >> 2);
 								break;
+							} 
+							else 
+							{	//nonexistant sample and no volume present in patten? assume volume=64.
+								m->volcmd = VOLCMD_VOLUME;
+								chvol[j] = 64;
+								m->vol = 64;
+								break;
 							}
 						}
 					}

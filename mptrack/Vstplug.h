@@ -53,8 +53,6 @@ class CVstPlugin: public IMixPlugin
 	friend class CAbstractVstEditor;	//rewbs.defaultPlugGUI
 	friend class COwnerVstEditor;		//rewbs.defaultPlugGUI
 	friend class CVstPluginManager;
-public:
-	enum {VSTEVENT_QUEUE_LEN=256}; 
 
 protected:
 	ULONG m_nRefCount;
