@@ -842,7 +842,7 @@ BOOL CModDoc::RemoveUnusedInstruments()
 	}
 	EndWaitCursor();
 	if ((bReorg) && (m_SndFile.m_nInstruments > 1)
-	 && (::MessageBox(NULL, "Do you want to reorganize the remaining instruments ?", NULL, MB_YESNO | MB_ICONQUESTION) == IDOK))
+	 && (::MessageBox(NULL, "Do you want to reorganize the remaining instruments ?", NULL, MB_YESNO | MB_ICONQUESTION) == IDYES))
 	{
 		BeginWaitCursor();
 		BEGIN_CRITICAL();

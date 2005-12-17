@@ -22,6 +22,9 @@
 	#pragma pack(8)
 #endif
 
+enum {VSTEVENT_QUEUE_LEN=256}; 
+
+
 //-------------------------------------------------
 // VstEvent
 //-------------------------------------------------
@@ -56,7 +59,7 @@ struct VstEvents			// a block of events for the current audio block
 {
 	long numEvents;
 	long reserved;			// zero
-	VstEvent* events[2];	// variable
+	VstEvent* events[VSTEVENT_QUEUE_LEN];	// variable
 };
 
 //---Defined Events--------------------------------

@@ -178,6 +178,11 @@ VOID CWaveDevice::Reset()
 	}
 }
 
+void CWaveDevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
+{
+
+}
+
 
 BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD)
 //--------------------------------------------------------------------------------
@@ -503,6 +508,11 @@ BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DW
 	return FALSE;
 }
 
+
+void CDSoundDevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
+{
+
+}
 
 BOOL CDSoundDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD)
 //----------------------------------------------------------------------------------
@@ -875,6 +885,13 @@ VOID CASIODevice::Reset()
 	}
 }
 
+void CASIODevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
+{
+	for (UINT ich=0; ich<m_nChannels; ich++){
+		memset(m_BufferInfo[ich].buffers[dwBuffer], 0, m_nAsioBufferLen);
+	}
+
+}
 
 BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
 //-----------------------------------------------------------------------------------------

@@ -826,6 +826,8 @@ void CMainFrame::OnClose()
 	if (gpSoundDevice)
 	{
 		BEGIN_CRITICAL();
+		//gpSoundDevice->Reset();
+		//audioCloseDevice();
 		gpSoundDevice->Release();
 		gpSoundDevice = NULL;
 		END_CRITICAL();
@@ -1073,10 +1075,11 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
 	if (gbStopSent) return FALSE;
 	BEGIN_CRITICAL();
-	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
-	{
+	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice)) {
 		bOk = CMainFrame::gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
-	}
+	}/* else {
+		CMainFrame::gpSoundDevice->SilenceAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
+	}*/
 	if (!bOk)
 	{
 		gbStopSent = TRUE;
@@ -1159,6 +1162,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 					if (nSleep > 40) nSleep = 40;
 				} else
 				{
+					//CMainFrame::gpSoundDevice->SilenceAudioBuffer(&gMPTSoundSource, gdwPlayLatency);
 					gbStopSent = TRUE;
 					pMainFrm->PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 				}

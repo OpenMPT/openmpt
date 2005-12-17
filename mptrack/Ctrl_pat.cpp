@@ -516,7 +516,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 void CCtrlPatterns::SetCurrentPattern(UINT nPat)
 //----------------------------------------------
 {
-	PostViewMessage(VIEWMSG_SETCURRENTPATTERN, nPat);
+	SendViewMessage(VIEWMSG_SETCURRENTPATTERN, nPat);
 }
 
 
@@ -581,8 +581,8 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 			}
 		}
 		SetCurrentPattern(lParam);
-	} else
-	if ((lParam >= 0x8000) && (lParam < MAX_ORDERS + 0x8000))
+	} 
+	else if ((lParam >= 0x8000) && (lParam < MAX_ORDERS + 0x8000)) 
 	{
 		if (pModDoc)
 		{
@@ -597,7 +597,12 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		OnSpacingChanged();
 		if (m_bRecord) SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
-		if (pFrame) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetPatternViewState());
+		
+		//Restore all save pattern state, except pattern number which we might have just set.
+		PATTERNVIEWSTATE* patternViewState = pFrame->GetPatternViewState();
+		patternViewState->nPattern = SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
+		if (pFrame) SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)patternViewState);
+		
 		SwitchToView();
 	}
 }
