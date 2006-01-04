@@ -509,7 +509,14 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 		m_RemChansList.SetItemData(m_RemChansList.AddString(label), n);
 		if (m_bChnMask[n]) m_RemChansList.SetSel(n);
 	}
-	wsprintf(label, "Select %d channels to remove:", m_nRemove);
+	
+	//Relabsoluness.note: Added for case in which the number of channels to remove is choosable in the dialog.
+	if (m_nRemove > 0) {
+		wsprintf(label, "Select %d channels to remove:", m_nRemove);
+	} else {
+		wsprintf(label, "Select channels to remove:");
+	}
+	
 	SetDlgItemText(IDC_QUESTION1, label);
 
 	OnChannelChanged();
@@ -520,7 +527,6 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 void CRemoveChannelsDlg::OnOK()
 //-----------------------------
 {
-	UINT nr = 0;
 	memset(m_bChnMask, 0, sizeof(m_bChnMask));
 	int nCount = m_RemChansList.GetSelCount();
 	CArray<int,int> aryListBoxSel;
@@ -531,7 +537,7 @@ void CRemoveChannelsDlg::OnOK()
 	{
 		m_bChnMask[aryListBoxSel[n]]++;
 	}
-	if (nCount == m_nRemove)
+	if ((nCount == m_nRemove && nCount >0)  || (m_nRemove == 0 && (m_pSndFile->m_nChannels - nCount >= 4)))
 		CDialog::OnOK();
 	else
 		CDialog::OnCancel();
@@ -543,7 +549,7 @@ void CRemoveChannelsDlg::OnChannelChanged()
 {
 	UINT nr = 0;
 	nr = m_RemChansList.GetSelCount();
-	GetDlgItem(IDOK)->EnableWindow((nr == m_nRemove) ? TRUE : FALSE);
+	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (m_pSndFile->m_nChannels - nr >= 4) && nr > 0)) ? TRUE : FALSE);
 }
 //end rewbs.removeChansDlgCleanup
 

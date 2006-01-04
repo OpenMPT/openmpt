@@ -2247,8 +2247,14 @@ void CCommandSet::SetupCommands()
 	commands[kcViewSongProperties].isHidden = false;
 	commands[kcViewSongProperties].isDummy = false;
 	commands[kcViewSongProperties].Message = "Show song properties window";
+	
+	commands[kcChangeLoopStatus].UID = 1776;
+	commands[kcChangeLoopStatus].isHidden = false;
+	commands[kcChangeLoopStatus].isDummy = false;
+	commands[kcChangeLoopStatus].Message = "Toggle loop pattern";
 
-/*	commands[kcToggleLoopSong].UID = 1776;
+
+/*	commands[kcToggleLoopSong].UID = 1777;
 	commands[kcToggleLoopSong].isHidden = false;
 	commands[kcToggleLoopSong].isDummy = false;
 	commands[kcToggleLoopSong].Message = "Toggle loop song";

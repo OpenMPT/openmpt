@@ -117,6 +117,7 @@ public:
 	void SetCurrentPattern(UINT nPat);
 	BOOL SetCurrentInstrument(UINT nIns);
 	BOOL GetFollowSong() { return IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG); }
+	BOOL GetLoopPattern() {return IsDlgButtonChecked(IDC_PATTERN_LOOP);}
 	//{{AFX_VIRTUAL(CCtrlPatterns)
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
@@ -155,6 +156,7 @@ protected:
 	afx_msg void OnPatternCopy();
 	afx_msg void OnPatternPaste();
 	afx_msg void OnFollowSong();
+	afx_msg void OnChangeLoopStatus();
 	afx_msg void OnSwitchToView();
 	afx_msg void OnInstrumentChanged();
 // -> CODE#0012

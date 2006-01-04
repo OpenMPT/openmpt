@@ -316,6 +316,10 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 }
 
 
+
+
+
+
 // Change the number of channels
 BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 //------------------------------------------------
@@ -323,11 +327,20 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 	if (nNewChannels == m_SndFile.m_nChannels) return TRUE;
 	if (nNewChannels < m_SndFile.m_nChannels)
 	{
-		UINT nChnToRemove = m_SndFile.m_nChannels - nNewChannels;
+		UINT nChnToRemove = 0;
+		UINT nFound = 0;
+
+		//Relabsoluness: nNewChannels = 0 means user can chose how many channels to remove
+		if(nNewChannels > 0) {
+			nChnToRemove = m_SndFile.m_nChannels - nNewChannels;
+			nFound = nChnToRemove;
+		} else {
+			nChnToRemove = 0;
+			nFound = m_SndFile.m_nChannels;
+		}
 		CRemoveChannelsDlg rem(&m_SndFile, nChnToRemove);
 
 		// Checking for unused channels
-		UINT nFound = nChnToRemove;
 		for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--) //rewbs.removeChanWindowCleanup
 		{
 			rem.m_bChnMask[iRst] = TRUE;
@@ -352,46 +365,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 		}
 		if (rem.DoModal() != IDOK) return TRUE;
 		// Removing selected channels
-		BeginWaitCursor();
-		BEGIN_CRITICAL();
-		for (UINT i=0; i<MAX_PATTERNS; i++) if (m_SndFile.Patterns[i])
-		{
-			MODCOMMAND *p = m_SndFile.Patterns[i];
-			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.PatternSize[i], nNewChannels);
-			if (!newp)
-			{
-				END_CRITICAL();
-				AddToLog("ERROR: Not enough memory to resize patterns!\nPattern Data is corrupted!");
-				return TRUE;
-			}
-			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
-			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
-			{
-				for (UINT k=0; k<m_SndFile.m_nChannels; k++, tmpsrc++)
-				{
-					if (!rem.m_bChnMask[k]) *tmpdest++ = *tmpsrc;
-				}
-			}
-			m_SndFile.Patterns[i] = newp;
-			CSoundFile::FreePattern(p);
-		}
-		UINT tmpchn = 0;
-		for (i=0; i<m_SndFile.m_nChannels; i++)
-		{
-			if (!rem.m_bChnMask[i])
-			{
-				if (tmpchn != i)
-				{
-					m_SndFile.ChnSettings[tmpchn] = m_SndFile.ChnSettings[i];
-					m_SndFile.Chn[tmpchn] = m_SndFile.Chn[i];
-				}
-				tmpchn++;
-				if (i >= nNewChannels) m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
-			}
-		}
-		m_SndFile.m_nChannels = nNewChannels;
-		END_CRITICAL();
-		EndWaitCursor();
+		RemoveChannels(rem.m_bChnMask); //Relabsoluness.note, the code moved to separate function RemoveChannels(...).
 	} else
 	{
 		BeginWaitCursor();
@@ -404,7 +378,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 			if (!newp)
 			{
 				END_CRITICAL();
-				AddToLog("ERROR: Not enough memory to create new channels!\nPattern Data is corrupted!!!\n");
+				AddToLog("ERROR: Not enough memory to create new channels!\nPattern Data is corrupted!\n");
 				return TRUE;
 			}
 			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
@@ -424,6 +398,77 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 	return FALSE;
 }
 
+//Relabsoluness
+BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
+//--------------------------------------------------------
+//To remove all channels whose index corresponds to true value at m_bChnMask[] array. Code is almost non-modified copy of
+//the code which was in CModDoc::ChangeNumChannels(UINT nNewChannels) - the only differences are the lines before 
+//BeginWaitCursor(), few lines in the end and that nNewChannels is renamed to nRemaningChannels.
+{
+		UINT nRemainingChannels = 0;
+		//First calculating how many channels are to be left
+		for(UINT i = 0; i<m_SndFile.m_nChannels; i++)
+		{
+			if(!m_bChnMask[i]) nRemainingChannels++;
+		}
+		if(nRemainingChannels == m_SndFile.m_nChannels || nRemainingChannels < 4)
+		{
+			CString str;	
+			if(nRemainingChannels == m_SndFile.m_nChannels) str.Format("No channels chosen to be removed.");
+			else str.Format("No removal done - channel number is already at minimum.");
+			CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_OK | MB_ICONINFORMATION);
+			return FALSE;
+		}
+
+		BeginWaitCursor();
+		BEGIN_CRITICAL();
+		for (UINT i=0; i<MAX_PATTERNS; i++) if (m_SndFile.Patterns[i])
+		{
+			MODCOMMAND *p = m_SndFile.Patterns[i];
+			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.PatternSize[i], nRemainingChannels);
+			if (!newp)
+			{
+				END_CRITICAL();
+				AddToLog("ERROR: Not enough memory to resize patterns!\nPattern Data is corrupted!");
+				return TRUE;
+			}
+			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
+			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
+			{
+				for (UINT k=0; k<m_SndFile.m_nChannels; k++, tmpsrc++)
+				{
+					if (!m_bChnMask[k]) *tmpdest++ = *tmpsrc;
+				}
+			}
+			m_SndFile.Patterns[i] = newp;
+			CSoundFile::FreePattern(p);
+		}
+		UINT tmpchn = 0;
+		for (i=0; i<m_SndFile.m_nChannels; i++)
+		{
+			if (!m_bChnMask[i])
+			{
+				if (tmpchn != i)
+				{
+					m_SndFile.ChnSettings[tmpchn] = m_SndFile.ChnSettings[i];
+					m_SndFile.Chn[tmpchn] = m_SndFile.Chn[i];
+				}
+				tmpchn++;
+				if (i >= nRemainingChannels)
+				{
+					m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
+					m_SndFile.SetChannelSettingsToDefault(i); //Relabsoluness
+				}
+			}
+		}
+		m_SndFile.m_nChannels = nRemainingChannels;
+		END_CRITICAL();
+		EndWaitCursor();
+		SetModified(); //Relabsoluness
+		ClearUndo(); //Relabsoluness
+		UpdateAllViews(NULL, HINT_MODTYPE); //Relabsoluness
+		return FALSE;
+}
 
 BOOL CModDoc::ResizePattern(UINT nPattern, UINT nRows)
 //----------------------------------------------------

@@ -732,6 +732,8 @@
 #define IDC_SLIDER_VSTIVOL              2251
 #define IDC_MACROCC                     2252
 #define IDC_GENMACROLABEL               2253
+#define IDC_RENDERZONE                  2254
+#define IDC_PATTERN_LOOP                2255
 #define IDC_TEXT_BPM                    2300
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302
@@ -933,6 +935,10 @@
 #define ID_INDICATOR_INFO               59145
 #define IDS_STRING59146                 59146
 #define ID_INDICATOR_XINFO              59147
+#define ID_PATTERN_ADDCHANNEL_FRONT     59148
+#define ID_PATTERN_ADDCHANNEL_AFTER     59149
+#define ID_PATTERN_REMOVECHANNEL        59150
+#define ID_PATTERN_REMOVECHANNELDIALOG  59151
 
 // Next default values for new objects
 // 
@@ -940,8 +946,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        510
-#define _APS_NEXT_COMMAND_VALUE         38003
-#define _APS_NEXT_CONTROL_VALUE         2254
+#define _APS_NEXT_COMMAND_VALUE         59200
+#define _APS_NEXT_CONTROL_VALUE         2255
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

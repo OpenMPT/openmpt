@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib comctl32.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="2"
@@ -116,7 +116,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
 				OutputFile=".\Bin/mptrack_Generic.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -134,7 +134,7 @@
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="perl $(TargetDir)getVersionFromCode.pl  $(TargetDir)..\Mainfrm.h &gt; $(TargetDir)version"/>
+				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -188,7 +188,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
 				OutputFile=".\Bin/mptrack_P3.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -206,7 +206,7 @@
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="perl $(TargetDir)getVersionFromCode.pl  $(TargetDir)..\Mainfrm.h &gt; $(TargetDir)version"/>
+				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -260,7 +260,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
 				OutputFile=".\Bin/mptrack_athlon32.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -278,7 +278,7 @@
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="perl $(TargetDir)getVersionFromCode.pl  $(TargetDir)..\Mainfrm.h &gt; $(TargetDir)version"/>
+				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -332,7 +332,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
 				OutputFile=".\Bin/mptrack_P4-Athlon64.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -350,7 +350,7 @@
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="perl $(TargetDir)getVersionFromCode.pl  $(TargetDir)..\Mainfrm.h &gt; $(TargetDir)version"/>
+				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -570,6 +570,15 @@
 				RelativePath=".\mptrack.rc">
 			</File>
 			<File
+				RelativePath=".\OpenGLControl.cpp">
+			</File>
+			<File
+				RelativePath=".\OpenGLDevice.cpp">
+			</File>
+			<File
+				RelativePath=".\OpenGLEditor.cpp">
+			</File>
+			<File
 				RelativePath=".\PatternGotoDialog.cpp">
 			</File>
 			<File
@@ -628,9 +637,6 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Sndmix.cpp">
-			</File>
-			<File
-				RelativePath=".\SongRenderer.cpp">
 			</File>
 			<File
 				RelativePath=".\SoundFilePlayConfig.cpp">
@@ -897,6 +903,15 @@
 				RelativePath=".\mptrack.h">
 			</File>
 			<File
+				RelativePath=".\OpenGLControl.h">
+			</File>
+			<File
+				RelativePath=".\OpenGLDevice.h">
+			</File>
+			<File
+				RelativePath=".\OpenGLEditor.h">
+			</File>
+			<File
 				RelativePath=".\PatternGotoDialog.h">
 			</File>
 			<File
@@ -916,9 +931,6 @@
 			</File>
 			<File
 				RelativePath="..\Soundlib\Sndfile.h">
-			</File>
-			<File
-				RelativePath=".\SongRenderer.h">
 			</File>
 			<File
 				RelativePath=".\SoundFilePlayConfig.h">

@@ -7,6 +7,7 @@
  * Authors: Olivier Lapicque <olivierl@jps.net>
 */
 #include "../mptrack/SoundFilePlayConfig.h"
+#include <vector>
 
 #ifndef __SNDFILE_H
 #define __SNDFILE_H
@@ -881,6 +882,7 @@ public:
 	LPCSTR GetTitle() const { return m_szNames[0]; }
 	CString GetSampleName(UINT nSample) const;
 	CString GetInstrumentName(UINT nInstr) const;
+	CString GetPatternViewInstrumentName(UINT nInstr, bool returnEmptyInsteadOfNoName = false) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
 	DWORD GetLength(BOOL bAdjust, BOOL bTotal=FALSE);
@@ -892,6 +894,9 @@ public:
 	void CheckCPUUsage(UINT nCPU);
 	BOOL SetPatternName(UINT nPat, LPCSTR lpszName);
 	BOOL GetPatternName(UINT nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
+	UINT ReArrangeChannels(const std::vector<UINT>& fromToArray);
+	bool MoveChannel(UINT chn_from, UINT chn_to);
+	bool SetChannelSettingsToDefault(UINT nch);
 	// Module Loaders
 	BOOL ReadXM(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadS3M(LPCBYTE lpStream, DWORD dwMemLength);

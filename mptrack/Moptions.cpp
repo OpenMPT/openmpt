@@ -600,6 +600,7 @@ enum {
 // -! NEW_FEATURE#0022
 	OPTGEN_PATTERNCTXMENUSTYLE,
 	OPTGEN_SYNCMUTE,
+	OPTGEN_AUTODELAY, //Relabsoluness
 	OPTGEN_MAXOPTIONS
 };
 
@@ -634,6 +635,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 
 	{"Old style pattern context menu",	"Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
 	{"Maintain sample sync on mute",	"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
+	{"Automatic delay commands",	    "Automatically insert appropriate note-delay commands when recording notes during live playback."}, //Relabsoluness
 };
 
 
@@ -693,6 +695,8 @@ BOOL COptionsGeneral::OnInitDialog()
 // -! NEW_FEATURE#0022
 		case OPTGEN_PATTERNCTXMENUSTYLE: bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE); break;
 		case OPTGEN_SYNCMUTE:			 bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SYNCMUTE); break;
+
+		case OPTGEN_AUTODELAY:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY); break; //Relabsoluness
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
@@ -721,7 +725,7 @@ void COptionsGeneral::OnOK()
 		{
 		case OPTGEN_PLAYNEWNOTES:		mask = PATTERN_PLAYNEWNOTE; break;
 		case OPTGEN_CENTERROW:			mask = PATTERN_CENTERROW; break;
-		case OPTGEN_LARGECOMMENTSFONT:	mask = PATTERN_LARGECOMMENTS; break;
+		case OPTGEN_LARGECOMMENTSFONT:	mask = PATTERN_LARGECOMMENTS; break;		
 		case OPTGEN_HEXROWDISP:			mask = PATTERN_HEXDISPLAY; break;
 		case OPTGEN_CURSORWRAP:			mask = PATTERN_WRAP; break;
 		case OPTGEN_CREATEBACKUP:		mask = PATTERN_CREATEBACKUP; break;
@@ -735,6 +739,7 @@ void COptionsGeneral::OnOK()
 		case OPTGEN_CONTSCROLL:			mask = PATTERN_CONTSCROLL; break;
 		case OPTGEN_KBDNOTEOFF:			mask = PATTERN_KBDNOTEOFF; break;
 		case OPTGEN_FOLLOWSONGOFF:		mask = PATTERN_FOLLOWSONGOFF; break;	//rewbs.noFollow
+		
 
 // -> CODE#0017
 // -> DESC="midi in record mode setup option"
@@ -748,6 +753,7 @@ void COptionsGeneral::OnOK()
 // -! NEW_FEATURE#0022		
 		case OPTGEN_PATTERNCTXMENUSTYLE: mask = PATTERN_OLDCTXMENUSTYLE; break;
 		case OPTGEN_SYNCMUTE:			 mask = PATTERN_SYNCMUTE; break;
+		case OPTGEN_AUTODELAY:			 mask = PATTERN_AUTODELAY; break; //Relabsoluness
 			
 		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;

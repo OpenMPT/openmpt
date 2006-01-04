@@ -6,6 +6,7 @@ class CEditCommand;
 class CEffectVis;	//rewbs.fxvis
 class CPatternGotoDialog;
 class CPatternRandomizer;
+class COpenGLEditor;
 
 // Drag & Drop info
 #define DRAGITEM_MASK			0xFF0000
@@ -27,6 +28,7 @@ class CPatternRandomizer;
 #define PATSTATUS_MIDISPACINGPENDING	0x800
 #define PATSTATUS_CTRLDRAGSEL			0x1000
 #define PATSTATUS_PLUGNAMESINHEADERS	0x2000 //rewbs.patPlugName
+#define PATSTATUS_PATTERNLOOP			0x4000
 
 enum {
 	NOTE_COLUMN=0,
@@ -112,7 +114,8 @@ protected:
 // -! BEHAVIOUR_CHANGE#0018
 	CPatternRandomizer *m_pRandomizer;	//rewbs.fxVis
 public:
-	CEffectVis *m_pEffectVis;	//rewbs.fxVis
+	CEffectVis    *m_pEffectVis;	//rewbs.fxVis
+	COpenGLEditor *m_pOpenGLEditor;	//rewbs.fxVis
 	
 
 	CViewPattern();
@@ -270,6 +273,10 @@ protected:
 	afx_msg void OnTransposeOctUp();
 	afx_msg void OnTransposeOctDown();
 	afx_msg void OnSetSelInstrument();
+	afx_msg void OnAddChannelFront(); //Relabsoluness
+	afx_msg void OnAddChannelAfter(); //Relabsoluness
+	afx_msg void OnRemoveChannel(); //Relabsoluness
+	afx_msg void OnRemoveChannelDialog(); //Relabsoluness
 	afx_msg void OnPatternProperties();
 	afx_msg void OnCursorCopy();
 	afx_msg void OnCursorPaste();
@@ -291,6 +298,7 @@ public:
 private:
 
 	bool HandleSplit(MODCOMMAND* p, int note);
+	bool BuildChannelControlCtxMenu(HMENU hMenu); //Relabsoluness
 	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFile);
 	bool BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc);
 	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nChn, CSoundFile* pSndFile);

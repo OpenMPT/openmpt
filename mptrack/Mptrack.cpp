@@ -766,15 +766,11 @@ BOOL CTrackApp::InitInstance()
 	m_bInitialized = TRUE;
 
 	// Check previous version number
-	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gdwPreviousVersion < MPTRACK_VERSION) {
+	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gdwPreviousVersion < CMainFrame::GetFullVersionNumeric()) {
 		StopSplashScreen();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 	}
 
-	if (m_bDebugMode) {
-		Log("OpenMPT v%X.%02X.%04d started\n", (MPTRACK_VERSION>>24)&0xFF, (MPTRACK_VERSION>>16)&0xFF, (MPTRACK_VERSION & 0xFFFF));
-	}
-	
 	EndWaitCursor();
 	return TRUE;
 }
@@ -1319,7 +1315,6 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-
 void CAboutDlg::OnOK()
 //--------------------
 {
@@ -1350,7 +1345,7 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_heContact.SetWindowText(
 "Contact:\r\n\
-MPC forums: http://www.modplug.com/forum\r\n\
+MPC forums: http://lpchip.com/modplug/\r\n\
 Robin Fernandes: mailto:modplug@soal.org\r\n\r\n\
 Updates:\r\n\
 http://www.modplug.com/forum/showpage.php?p=download");
@@ -1361,9 +1356,11 @@ http://www.modplug.com/forum/showpage.php?p=download");
 		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
 		"|"
 		"Development:|"
-		"Robin Fernandes:  modplug@soal.org|"
-		"Eric Chavanon:  contact@ericus.org|"
-		"Trevor Nunes:  modplug@plastikskouser.com|"
+		"Robin Fernandes:  modplug@soal.org (2004-2006)|"
+		"Relabsoluness:  lk52916@mesta.net (2005-2006)|"
+		"Eric Chavanon:  contact@ericus.org (2004-2005)|"
+		"Trevor Nunes:  modplug@plastikskouser.com (2004)|"
+		"Olivier Lapicque:  olivier@modplug.com (1997-2003)|"
 		"|"
 		"|"
 		"Thanks to:||"

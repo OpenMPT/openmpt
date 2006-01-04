@@ -216,6 +216,8 @@ public:
 	void RecordParamChange(int slot, long param);
 	void LearnMacro(int macro, long param);
 
+	BOOL RemoveChannels(BOOL bChnMask[MAX_CHANNELS]); //Relabsoluness 20.12.2005
+
 	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 
 // protected members

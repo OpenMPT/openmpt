@@ -564,7 +564,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	{
 		SetModified(FALSE);
 		m_bHasValidPath=true;
-		m_SndFile.m_dwLastSavedWithVersion=MPTRACK_VERSION;
+		m_SndFile.m_dwLastSavedWithVersion=CMainFrame::GetFullVersionNumeric();
 		return TRUE;
 	} else
 	{
@@ -1534,6 +1534,13 @@ void CModDoc::OnPlayerPlay()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
+		CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+ 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // Relabsoluness.note: Using existing 'dirty HACK'
+		{
+			//Relabsoluness.note: User has sent play song command: set loop pattern checkbox to false.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
+		}
+                 
 		BOOL bPlaying = (pMainFrm->GetModPlaying() == this) ? TRUE : FALSE;
 		if ((bPlaying) && (!(m_SndFile.m_dwSongFlags & (SONG_PAUSED|SONG_STEP/*|SONG_PATTERNLOOP*/))))
 		{
@@ -1618,6 +1625,14 @@ void CModDoc::OnPlayerPlayFromStart()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
+		CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		{
+			//Relabsoluness.note: User has sent play song command: set loop pattern checkbox to false.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
+		}
+		
+
 		pMainFrm->PauseMod();
 		m_SndFile.m_dwSongFlags &= ~SONG_STEP;
 		m_SndFile.SetCurrentPos(0);
@@ -2687,6 +2702,12 @@ void CModDoc::OnPatternRestart()
 
 	if ((pMainFrm) && (pChildFrm))
 	{
+		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		{
+			//Relabsoluness.note: User has sent play pattern command: set loop pattern checkbox to true.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
+		}
+                   
 		CSoundFile *pSndFile = GetSoundFile();
 		UINT nPat,nOrd,nRow;
 		HWND followSonghWnd;
@@ -2732,6 +2753,12 @@ void CModDoc::OnPatternPlay()
 
 	if ((pMainFrm) && (pChildFrm))
 	{
+		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		{
+			//Relabsoluness.note: User has sent play pattern command: set loop pattern checkbox to true.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
+		}
+                   
 		CSoundFile *pSndFile = GetSoundFile();
 		UINT nRow,nPat,nOrd;
 		HWND followSonghWnd;
@@ -2773,6 +2800,12 @@ void CModDoc::OnPatternPlayNoLoop()
 
 	if ((pMainFrm) && (pChildFrm))
 	{
+		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		{
+			//Relabsoluness.note: User has sent play song command: set loop pattern checkbox to false.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
+		}
+                   
 		CSoundFile *pSndFile = GetSoundFile();
 		UINT nPat,nOrd,nRow;
 		HWND followSonghWnd;

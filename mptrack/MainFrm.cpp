@@ -675,7 +675,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 // -! BEHAVIOUR_CHANGE#0017
 
 	// Restore toobar positions
-	if (gdwPreviousVersion == MPTRACK_VERSION)
+	if (gdwPreviousVersion == GetFullVersionNumeric())
 	{
 //		try { try {
 			LoadBarState("Toolbars");
@@ -945,7 +945,7 @@ void CMainFrame::OnClose()
 	}
 	if (RegCreateKey(HKEY_CURRENT_USER,	m_csRegSettings, &key) == ERROR_SUCCESS)
 	{
-		DWORD dwVersion = MPTRACK_VERSION;
+		DWORD dwVersion = CMainFrame::GetFullVersionNumeric();
 		// Author information
 		RegSetValueEx(key, "Version", NULL, REG_DWORD, (LPBYTE)&dwVersion, sizeof(DWORD));
 		RegCloseKey(key);
@@ -1590,20 +1590,51 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame static helpers
+
+DWORD CMainFrame::GetFullVersionNumeric() {
+	char  szFullPath[MAX_PATH];
+	DWORD dwVerHnd;
+	DWORD dwVerInfoSize;
+
+	// Get version information from the application
+	::GetModuleFileName(NULL, szFullPath, sizeof(szFullPath));
+	dwVerInfoSize = ::GetFileVersionInfoSize(szFullPath, &dwVerHnd);
+	if (!dwVerInfoSize)    {
+		return 0;
+	}
+    char* pVersionInfo = new char[dwVerInfoSize];
+    if (!pVersionInfo)    {
+		return 0;
+	}
+    char* szVer = NULL;
+    UINT uVerLength;
+    if (!(::GetFileVersionInfo((LPTSTR)szFullPath, (DWORD)dwVerHnd, 
+							   (DWORD)dwVerInfoSize, (LPVOID)pVersionInfo))) {
+		delete pVersionInfo;
+		return 0;
+	}   
+	if (!(::VerQueryValue(pVersionInfo, TEXT("\\StringFileInfo\\040904b0\\FileVersion"), 
+						  (LPVOID*)&szVer, &uVerLength))) {
+		delete pVersionInfo;
+		return 0;
+	}
+
+	//version will be like: 1, 17, 2, 38
+	CString version = szVer;	
+	delete pVersionInfo;
+
+	int v1, v2, v3, v4; 
+	sscanf(version, "%x, %x, %x, %x", &v1, &v2, &v3, &v4);
+	DWORD versionLong = v1<<24 | v2<<16 | v3<<8 | v4 ;
+	return versionLong;
+}
+
 CString CMainFrame::GetFullVersionString() 
 //------------------------------------
 {
-	CString version;
-
-	version.Format("%s version %X.%02X.%02X.%02X (%s)",
-					(MAINFRAME_TITLE),
-					(MPTRACK_VERSION>>24)&0xFF,
-					(MPTRACK_VERSION>>16)&0xFF,
-					(MPTRACK_VERSION>>8)&0xFF,
-					(MPTRACK_VERSION)&0xFF,
-					(INFORMAL_VERSION));
-	return version;
-}
+	return GetVersionString(GetFullVersionNumeric());
+   
+};
 
 CString CMainFrame::GetVersionString(DWORD v) 
 //-------------------------------------------
@@ -2659,8 +2690,7 @@ void CMainFrame::OnOctaveChanged()
 //rewbs.reportBug
 void CMainFrame::OnReportBug()
 {
-	//CTrackApp::OpenURL("http://www.modplug.com/forum/viewforum.php?f=22");
-	CTrackApp::OpenURL("http://www.modplug.com/forum/");
+	CTrackApp::OpenURL("http://www.lpchip.com/modplug/");
 	return;
 }
 //end rewbs.reportBug
@@ -2672,12 +2702,12 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 
 	switch(nID)
 	{
-	case ID_NETLINK_MODPLUG:	pszURL = "http://www.modplug.com"; break;
+//	case ID_NETLINK_MODPLUG:	pszURL = "http://www.modplug.com"; break;
 	case ID_NETLINK_UT:			pszURL = "http://www.united-trackers.org"; break;
 	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
-	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
+//	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
 	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
-	case ID_NETLINK_FORUMS:		pszURL = "http://www.modplug.com/forum"; break;
+	case ID_NETLINK_FORUMS:		pszURL = "http://www.lpchip.com/modplug"; break;
 	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com"; break;
 	}
 	if (pszURL) return CTrackApp::OpenURL(pszURL);

@@ -48,6 +48,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(IDC_PATTERN_PLAY,			OnPatternPlay)
 	ON_COMMAND(IDC_PATTERN_PLAYFROMSTART,	OnPatternPlayFromStart)
 	ON_COMMAND(IDC_PATTERN_RECORD,			OnPatternRecord)
+	ON_COMMAND(IDC_PATTERN_LOOP,			OnChangeLoopStatus)
 	ON_COMMAND(ID_PATTERN_PLAYROW,			OnPatternPlayRow)
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -311,33 +312,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 						continue;
 					}
 
-					CString displayName, instrumentName, pluginName = "";
-					
-					// Use instrument name
-					instrumentName.Format("%s", m_pSndFile->Headers[i]->name);
-
-					// if there's no instrument name, use name of sample associated with C-5.
-					if (instrumentName == "") {
-						instrumentName.Format("samp: %s", m_pSndFile->m_szNames[m_pSndFile->Headers[i]->Keyboard[60]]); //60 is C-5
-					}
-
-					// still no name? give it a dummy name
-					if (instrumentName == "") {
-                        instrumentName = "(no name)";
-					}
-
-					//Get plugin name:
-					UINT nPlug=m_pSndFile->Headers[i]->nMixPlug;
-					if (nPlug>0 && nPlug<MAX_MIXPLUGINS) {
-						pluginName = m_pSndFile->m_MixPlugins[nPlug-1].Info.szName;
-					}
-
-					if (pluginName == "") {
-						displayName.Format("%02d: %s", i, instrumentName);
-					} else {
-						displayName.Format("%02d: %s (%s)", i, instrumentName, pluginName);
-					}
-					
+					CString displayName = m_pSndFile->GetPatternViewInstrumentName(i);
 					UINT n = m_CbnInstrument.AddString(displayName);
 					if (n == m_nInstrument) nPos = n;
 					m_CbnInstrument.SetItemData(n, i);
@@ -495,6 +470,31 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_PAT_FOLLOWSONG:
 		CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
 		OnFollowSong();
+		break;
+
+	case CTRLMSG_PAT_LOOP:
+        {
+            //lparam is to tell to which state to change, not what is current state.
+            CModDoc *pModDoc = GetDocument();
+            CSoundFile* pSndFile;
+            if (pModDoc != 0 && (pSndFile = pModDoc->GetSoundFile()) != 0) {
+                //Using lParam value -1 for 'change status'
+                if (lParam == -1) {
+                	lParam = !IsDlgButtonChecked(IDC_PATTERN_LOOP);
+                }
+
+        	    if (lParam) {
+					pSndFile->m_dwSongFlags |= SONG_PATTERNLOOP;
+        			pSndFile->SetRepeatCount(-1);
+					CheckDlgButton(IDC_PATTERN_LOOP, BST_CHECKED);
+					
+        		} else {
+					pSndFile->m_dwSongFlags &= ~SONG_PATTERNLOOP;
+					CheckDlgButton(IDC_PATTERN_LOOP, BST_UNCHECKED);	
+				}
+            }
+        }
+	    
 		break;
 	
 	case CTRLMSG_PAT_NEWPATTERN:
@@ -1018,6 +1018,14 @@ void CCtrlPatterns::OnFollowSong()
 //--------------------------------
 {
 	SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
+	SwitchToView();
+}
+
+
+void CCtrlPatterns::OnChangeLoopStatus()
+//--------------------------------------
+{
+	OnModCtrlMsg(CTRLMSG_PAT_LOOP, IsDlgButtonChecked(IDC_PATTERN_LOOP));
 	SwitchToView();
 }
 
