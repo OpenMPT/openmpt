@@ -9,6 +9,7 @@
 #include "ctrl_pat.h"
 #include "dlsbank.h"
 #include "EffectVis.h"		//rewbs.fxvis
+#include "OpenGLEditor.h"		//rewbs.fxvis
 #include "PatternGotoDialog.h"		
 #include "PatternRandomizer.h"
 #include ".\arrayutils.h"
@@ -91,6 +92,10 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_GROW_SELECTION,				OnGrowSelection)
 	ON_COMMAND(ID_SHRINK_SELECTION,				OnShrinkSelection)
 	ON_COMMAND(ID_PATTERN_SETINSTRUMENT,		OnSetSelInstrument)
+	ON_COMMAND(ID_PATTERN_ADDCHANNEL_FRONT,		OnAddChannelFront)
+	ON_COMMAND(ID_PATTERN_ADDCHANNEL_AFTER,		OnAddChannelAfter)
+	ON_COMMAND(ID_PATTERN_REMOVECHANNEL,		OnRemoveChannel)
+	ON_COMMAND(ID_PATTERN_REMOVECHANNELDIALOG,	OnRemoveChannelDialog)
 	ON_COMMAND(ID_CURSORCOPY,					OnCursorCopy)
 	ON_COMMAND(ID_CURSORPASTE,					OnCursorPaste)
 	ON_COMMAND(ID_PATTERN_AMPLIFY,				OnPatternAmplify)
@@ -109,6 +114,7 @@ END_MESSAGE_MAP()
 CViewPattern::CViewPattern()
 //--------------------------
 {
+	m_pOpenGLEditor = NULL; //rewbs.fxvis
 	m_pEffectVis = NULL; //rewbs.fxvis
 	m_pRandomizer = NULL;
 	m_bLastNoteEntryBlocked=false;
@@ -628,6 +634,13 @@ void CViewPattern::OnDestroy()
 		delete m_pRandomizer;
 		m_pRandomizer=NULL;
 	}
+
+	if (m_pOpenGLEditor)	{
+		m_pOpenGLEditor->DoClose(); 
+		delete m_pOpenGLEditor;
+		m_pOpenGLEditor = NULL;
+	}
+
 
 	CModScrollView::OnDestroy();
 }
@@ -1157,14 +1170,15 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 				if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
 					AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 				BuildRecordCtxMenu(hMenu, nChn, pModDoc);
+				BuildChannelControlCtxMenu(hMenu);
 			}
 		}
 		
 		//------ Standard Menu ---------- :
 		else if ((pt.x >= m_szHeader.cx) && (pt.y > m_szHeader.cy))	{
-/*			if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
+			if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-*/			if (BuildSelectionCtxMenu(hMenu, ih))
+			if (BuildSelectionCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildEditCtxMenu(hMenu, ih, pModDoc))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
@@ -2072,7 +2086,14 @@ void CViewPattern::OnVisualizeEffect()
 				// construction, 1st draw code and all draw code.
 				m_pEffectVis->OnSize(0,0,0);
 
-			}	
+			}
+			/*
+			m_pOpenGLEditor = new COpenGLEditor(this);
+			if (m_pOpenGLEditor) {
+				m_pOpenGLEditor->OpenEditor(CMainFrame::GetMainFrame());
+			}
+			*/
+
 		}
 	}
 }
@@ -2379,6 +2400,87 @@ void CViewPattern::OnSetSelInstrument()
 		pModDoc->SetModified();
 		pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
 	}
+	EndWaitCursor();
+}
+
+void CViewPattern::OnRemoveChannelDialog()
+//----------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == 0) return;
+	pModDoc->ChangeNumChannels(0);
+	SetCurrentPattern(m_nPattern); //Updating the screen.
+}
+
+void CViewPattern::OnRemoveChannel()
+//----------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile* pSndFile;
+	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
+
+	if(pSndFile->m_nChannels <= 4)
+	{
+		CMainFrame::GetMainFrame()->MessageBox("No channel removed - channel number already at minimum.", "Remove channel", MB_OK | MB_ICONINFORMATION);
+		return;
+	}
+
+	UINT nChn = ((m_nMenuParam&0xFFFF)>>3);
+	CString str;
+	str.Format("Remove channel %d (No undo)?", nChn+1);
+	if(CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_YESNO | MB_ICONQUESTION) == IDYES)
+	{
+		BOOL chnMask[MAX_CHANNELS];
+		for(UINT i = 0; i<MAX_CHANNELS; chnMask[i] = FALSE, i++) {}
+		chnMask[nChn] = TRUE;
+		pModDoc->RemoveChannels(chnMask);
+		SetCurrentPattern(m_nPattern); //Updating the screen.
+	}
+}
+
+
+void CViewPattern::OnAddChannelFront()
+//------------------------------------
+{
+	UINT nChn = ((m_nMenuParam&0xFFFF)>>3); 
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile* pSndFile;
+	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
+	
+	BeginWaitCursor();
+	//First adding channel as the last channel...
+	pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1);
+	pSndFile->SetChannelSettingsToDefault(pSndFile->m_nChannels-1);
+	//...and then moving it to right position.
+	pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
+
+	//Relabsoluness.note: Maybe not all, or too many, update-functions are put here.
+	pModDoc->SetModified();
+	pModDoc->ClearUndo();
+	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS); //refresh channel headers
+	pModDoc->UpdateAllViews(NULL, HINT_MODTYPE); //updates(?) the channel number to general tab display
+	SetCurrentPattern(m_nPattern);
+	EndWaitCursor();
+}
+
+void CViewPattern::OnAddChannelAfter()
+//------------------------------------
+{
+	UINT nChn = ((m_nMenuParam&0xFFFF)>>3)+1; 
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile* pSndFile;
+	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
+
+	BeginWaitCursor();
+	pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1);
+	pSndFile->SetChannelSettingsToDefault(pSndFile->m_nChannels-1);
+	pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
+
+	pModDoc->SetModified();
+	pModDoc->ClearUndo();
+	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
+	pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
+	SetCurrentPattern(m_nPattern);
 	EndWaitCursor();
 }
 
@@ -2843,6 +2945,10 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		}
 		break;
 
+	case VIEWMSG_PATTERNLOOP:
+		SendCtrlMessage(CTRLMSG_PAT_LOOP, lParam);
+		break;
+
 	case VIEWMSG_SETRECORD:
 		if (lParam) m_dwStatus |= PATSTATUS_RECORD; else m_dwStatus &= ~PATSTATUS_RECORD;
 		break;
@@ -3189,6 +3295,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditSelectAll:	OnEditSelectAll(); return wParam;
 		case kcTogglePluginEditor: TogglePluginEditor((m_dwCursor & 0xFFFF) >> 3); return wParam;
 		case kcToggleFollowSong: SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG); return wParam;
+		case kcChangeLoopStatus: SendCtrlMessage(CTRLMSG_PAT_LOOP, -1); return wParam;
 		case kcNewPattern:		 SendCtrlMessage(CTRLMSG_PAT_NEWPATTERN); return wParam;
 		case kcSwitchToOrderList: OnSwitchToOrderList();
 
@@ -3723,7 +3830,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 
 		bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&		// work out whether we should use
 								(pMainFrm->GetFollowSong(pModDoc) == m_hWnd) &&	// player engine position or
-								!(pSndFile->IsPaused());						// edit cursor position
+								!(pSndFile->IsPaused()) &&						// edit cursor position
+								(CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY);						
 
 		// -- Chord autodetection: step back if we just entered a note
 		if ((m_dwStatus & PATSTATUS_RECORD) && (recordGroup) && !usePlaybackPosition) {
@@ -3760,7 +3868,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		// -- write sdx if playing live
 		if (usePlaybackPosition && pSndFile->m_nTickCount) {	// avoid SD0 which will be mis-interpreted
 			if (p->command == 0) {	//make sure we don't overwrite any existing commands.
-				p->command = (pSndFile->m_nType == MOD_TYPE_IT)?CMD_S3MCMDEX:CMD_MODCMDEX;
+				p->command = (pSndFile->m_nType == MOD_TYPE_IT || pSndFile->m_nType == MOD_TYPE_S3M)?CMD_S3MCMDEX:CMD_MODCMDEX;
 				p->param   = 0xD0 + (pSndFile->m_nTickCount&0x0F); //&0x0F is to limit to max 0x0F
 			}
 		}
@@ -4425,6 +4533,29 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih)
 	return false;
 }
 
+
+bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu)
+//--------------------------------------------------------------------
+{
+	if (CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE) return false;
+	//Not doing the menuentries if opted to use old style menu style.
+	
+	AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+	HMENU addChannelMenu = ::CreatePopupMenu();
+	AppendMenu(hMenu, MF_POPUP, (UINT)addChannelMenu, "Add channel\t");
+	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_FRONT, "Before this channel");
+	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_AFTER, "After this channel");
+
+	HMENU removeChannelMenu = ::CreatePopupMenu();
+	AppendMenu(hMenu, MF_POPUP, (UINT)removeChannelMenu, "Remove channel\t");
+	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNEL, "Remove this channel\t");
+	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNELDIALOG, "Choose channels to remove...\t");
+
+
+	return false;
+}
+
+
 bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
 //------------------------------------------------------------------------------------------
 {
@@ -4432,35 +4563,39 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 	DWORD greyed = (ListChansWhereColSelected(INST_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
 
 	if (CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE && (!greyed)) { 
-		// User has opted to use old style menu style.
+		// Case: User has opted to use old style menu style.
 		AppendMenu(hMenu, MF_STRING, ID_PATTERN_SETINSTRUMENT, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
 	} 
 	else {
 		// Create the new menu and add it to the existing menu.
 		HMENU instrumentChangeMenu = ::CreatePopupMenu();
 		AppendMenu(hMenu, MF_POPUP|greyed, (UINT)instrumentChangeMenu, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
-		
-		bool useSamples = false;
-		UINT nItems = pSndFile->m_nInstruments;
 
-		if (nItems==0) {	//if there are no instruments, try to use samples instead.
-			nItems = pSndFile->m_nSamples;
-			useSamples = true;
-		}
+		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+		CModDoc *pModDoc = GetDocument();
+		CSoundFile* pSndFile;
+		if(pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return true;
 
-		if (nItems>0) {		//if we have some menu items now, add them:
-			for(UINT i=1; i<=nItems; i++) {
-				bool itemExists = (useSamples ? (pSndFile->Ins[i].pSample!=NULL) : (pSndFile->Headers[i]!=NULL));
-				if (!itemExists) {
-					continue;
+		if (pSndFile->m_nInstruments)	{
+				for (UINT i=1; i<=pSndFile->m_nInstruments; i++) {
+					if (pSndFile->Headers[i] == NULL) {
+						continue;
+					}
+					CString instString = pSndFile->GetPatternViewInstrumentName(i, true);
+					if(instString.GetLength() > 0) AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, pSndFile->GetPatternViewInstrumentName(i));
+					//Relabsoluness.note: Adding the entry to the list only if it has some name, since if the name is empty,
+					//it likely is some non-used instrument.
 				}
-				CString menuItem;
-				menuItem.Format("%d. %s", i, useSamples ? pSndFile->GetSampleName(i) : pSndFile->GetInstrumentName(i));
-				AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, menuItem);
+
+			} else {
+				CHAR s[256];
+				UINT nmax = pSndFile->m_nSamples;
+				while ((nmax > 1) && (pSndFile->Ins[nmax].pSample == NULL) && (!pSndFile->m_szNames[nmax][0])) nmax--;
+				for (UINT i=1; i<=nmax; i++) if ((pSndFile->m_szNames[i][0]) || (pSndFile->Ins[i].pSample)) 	{
+					wsprintf(s, "%02d: %s", i, pSndFile->m_szNames[i]);
+					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, s);
+				}
 			}
-		} else {
-			AppendMenu(instrumentChangeMenu, MF_STRING|MF_GRAYED, 0, "No instruments available");	
-		}
 
 		//Add options to remove instrument from selection.
      	AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);

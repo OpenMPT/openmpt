@@ -187,11 +187,9 @@ BEGIN
         POPUP "&Internet"
         BEGIN
             MENUITEM "Modplug Central &Forums",     ID_NETLINK_FORUMS
-            MENUITEM "&Modplug Central",            ID_NETLINK_MODPLUG
-            MENUITEM "The Tracker's &Handbook",     ID_NETLINK_HANDBOOK
+            MENUITEM "MPT-FR",                      ID_NETLINK_MPTFR
             MENUITEM "&Kvr Audio (plugins)",        ID_NETLINK_PLUGINS
             MENUITEM "&OSMusic.net",                ID_NETLINK_TRAXINSPACE
-            MENUITEM "MPT-FR",                      ID_NETLINK_MPTFR
         END
         MENUITEM SEPARATOR
         MENUITEM "&About MPTrack...",           ID_APP_ABOUT
@@ -644,6 +642,8 @@ BEGIN
     GROUPBOX        "Keyboard Split",IDC_STATIC,167,53,328,40
     LTEXT           "Octave shift",IDC_STATIC,382,65,52,8
     GROUPBOX        "",IDC_STATIC,2,22,493,27
+    CONTROL         "Loop Pattern",IDC_PATTERN_LOOP,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | BS_FLAT | WS_TABSTOP,355,34,57,10
 END
 
 IDD_CONTROL_SAMPLES DIALOGEX 0, 0, 544, 106
@@ -1666,6 +1666,7 @@ BEGIN
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_VISACTION,221,90,76,158,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
+    LTEXT           "",IDC_RENDERZONE,4,3,377,84,NOT WS_VISIBLE
 END
 
 IDD_SOUNDBANK_INFO1 DIALOGEX 0, 0, 271, 167
@@ -1891,8 +1892,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,10,1,1
- PRODUCTVERSION 4,10,1,1
+ FILEVERSION 1,17,2,39
+ PRODUCTVERSION 0,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x9L
@@ -1907,16 +1908,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Da Trakar Far Windaz"
             VALUE "CompanyName", "Olivier Lapicque / OpenMPT team"
             VALUE "FileDescription", "OpenMPT / ModPlug Tracker"
-            VALUE "FileVersion", "1.17"
+            VALUE "FileVersion", "1, 17, 2, 39"
             VALUE "InternalName", "Modplug Tracker"
             VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2005 GPL."
             VALUE "LegalTrademarks", "M.O.D.P.L.U.G"
             VALUE "OriginalFilename", "mptrack.exe"
             VALUE "ProductName", "OpenMPT / ModPlug Tracker"
-            VALUE "ProductVersion", "1.17"
         END
     END
     BLOCK "VarFileInfo"

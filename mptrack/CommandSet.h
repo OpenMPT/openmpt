@@ -217,6 +217,7 @@ enum CommandID
 	kcShowNoteProperties,
 	kcShowPatternProperties,
 	kcShowMacroConfig,
+	kcChangeLoopStatus,
 	kcShowEditMenu,
 	kcEndPatternEditMisc=kcShowEditMenu,
 

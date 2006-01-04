@@ -604,13 +604,18 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		if (effect && effect->resvd1)
 		{
 			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
+			
 			//Mark track modified
             CModDoc* pModDoc = pVstPlugin->GetModDoc();
 			if (pModDoc) {
-				CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
+				CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
+				if (pVstEditor && pVstEditor->m_hWnd) {	//Check GUI is open
+					CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
+				}
 				//Could be used to update general tab in real time, but causes flickers in treeview
 				//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
 			}
+
 			//Record param change
 			if (pVstPlugin->m_bRecordAutomation) {
 				pModDoc->RecordParamChange(pVstPlugin->GetSlot(), index);

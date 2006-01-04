@@ -8,6 +8,18 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v 1.17.02.39
+  + <Relabsoluness> Remove and insert channels directly from pattern editor via channel header context menu
+  + <Relabsoluness> Toggle loop pattern playback mode with a shortcut key and a checkbox above the pattern editor
+  + <Relabsoluness> The automatic note delays that are inserted when recording notes live are now optional
+  . <Relabsoluness> Fixed auto note delays so they work with S3Ms too
+  . <Relabsoluness> Fixes and improvements to displayed instrument name in pattern editor
+  . <Relabsoluness> Fixes and improvements to instrument swap from context menu
+  . <rewbs> Plugins should never cause song to be marked as modified if their GUI is not open (tx LPChip)
+  / <rewbs> Version number in executable properties now correlates with real OpenMPT version number
+  / <rewbs> Restored solo/mute in pattern editor main context menu.
+
+
 . v 1.17.02.38
   . <rewbs> Fixed possible buffer overrun in VST event queue
   . <rewbs> Changed handling of VSTi noteoffs to reduce unexpected "interaction" between notes on different channels (a VSTi note-on in chan1 could sometimes be blocked by a VSTi note-off on the same row in chan2) (tx ganja)

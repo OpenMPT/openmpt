@@ -44,6 +44,7 @@ enum {
 	CTRLMSG_PAT_NEXTINSTRUMENT,
 	CTRLMSG_PAT_SETINSTRUMENT,
 	CTRLMSG_PAT_FOLLOWSONG,		//rewbs.customKeys
+	CTRLMSG_PAT_LOOP,
 	CTRLMSG_PAT_NEWPATTERN,		//rewbs.customKeys
 	CTRLMSG_SETUPMACROS,
 	CTRLMSG_GETCURRENTINSTRUMENT,
@@ -93,6 +94,7 @@ enum {
 	VIEWMSG_SETCURRENTPATTERN,
 	VIEWMSG_GETCURRENTPATTERN,
 	VIEWMSG_FOLLOWSONG,
+	VIEWMSG_PATTERNLOOP,
 	VIEWMSG_GETCURRENTPOS,
 	VIEWMSG_SETRECORD,
 	VIEWMSG_SETSPACING,
@@ -212,7 +214,8 @@ enum
 #define PATTERN_HILITETIMESIGS	0x400000
 
 #define PATTERN_OLDCTXMENUSTYLE	0x800000
-#define PATTERN_SYNCMUTE 0x1000000
+#define PATTERN_SYNCMUTE		0x1000000
+#define PATTERN_AUTODELAY		0x2000000 
 
 // Keyboard Setup
 enum {
@@ -491,6 +494,7 @@ public:
 	static UINT GetNoteFromKey(UINT nChar, DWORD dwFlags);
 	static VOID UpdateColors();
 	static CString GetFullVersionString();
+	static DWORD GetFullVersionNumeric();
 	static CString GetVersionString(DWORD);
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }

@@ -12,6 +12,7 @@
 #include "../mptrack/mainfrm.h"
 #include "sndfile.h"
 #include "aeffectx.h"
+#include <vector>
 
 
 #ifndef NO_COPYRIGHT
@@ -1235,6 +1236,7 @@ void CSoundFile::ResetChannels()
 }
 
 
+
 void CSoundFile::LoopPattern(int nPat, int nRow)
 //----------------------------------------------
 {
@@ -1344,6 +1346,196 @@ CString CSoundFile::GetInstrumentName(UINT nInstr) const
 		return "";
 	}
 	return Headers[nInstr]->name;
+}
+
+
+bool CSoundFile::SetChannelSettingsToDefault(UINT nch)
+//-------------------------------------
+{
+    //Relabsoluness.note: This is used to set default setting to new channels,
+    //so that a new channel for example won't have some plug in when created. It would be a 
+    //surprise if this defaulted everything that it should, but at least it does something.
+                                       
+	if(nch > MAX_BASECHANNELS) return true;
+
+	ChnSettings[nch].nPan = 128;
+	ChnSettings[nch].nVolume = 64;
+	ChnSettings[nch].dwFlags = 0;
+	ChnSettings[nch].dwFlags &= ~CHN_MUTE; //Unmuting
+	ChnSettings[nch].nMixPlugin = 0;
+	ChnSettings[nch].szName[0] = 0;
+
+	Chn[nch].dwFlags = ChnSettings[nch].dwFlags;
+	Chn[nch].nPan = ChnSettings[nch].nPan;
+	Chn[nch].nGlobalVol = ChnSettings[nch].nVolume;
+
+	
+	return false;
+}
+
+
+
+UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
+//-------------------------------------------------------------------
+{
+    //newOrder[i] tells which current channel should be placed to i:th position in
+    //the new order, or if i is not an index of current channels, then new channel is
+    //added to position i - and if there is no index of some channel in the newOrder-vector, then it gets removed.
+	//Thus this function can practically be used to add, remove, reorder, duplicate, clear etc. channels, 
+	//IF it works, that is.
+
+	//TODO: This function does not take 'record status' nor 'mute on transions' into account, meaning
+	//that they won't be reordered with the channels.
+
+	MODCOMMAND emptyModCom = {0,0,0,0,0,0};
+
+	UINT nRemainingChannels = newOrder.size();
+
+	if(nRemainingChannels > min(MAX_CHANNELS, MAX_BASECHANNELS) || nRemainingChannels < 4) 	
+	{
+		CString str = "Error: Bad newOrder vector in CSoundFile::ReArrangeChannels(...)";	
+		CMainFrame::GetMainFrame()->MessageBox(str , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
+		return 0;
+	}
+
+	BEGIN_CRITICAL();
+	for (UINT i=0; i<MAX_PATTERNS; i++) 
+	{
+		if (Patterns[i])
+		{
+			MODCOMMAND *p = Patterns[i];
+			MODCOMMAND *newp = CSoundFile::AllocatePattern(PatternSize[i], nRemainingChannels);
+			if (!newp)
+			{
+				END_CRITICAL();
+				CMainFrame::GetMainFrame()->MessageBox("ERROR: Pattern allocation failed in ReArrangechannels(...)" , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
+				return 0;
+			}
+			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
+			for (UINT j=0; j<PatternSize[i]; j++) //Scrolling rows
+			{
+				for (UINT k=0; k<nRemainingChannels; k++, tmpdest++) //Scrolling channels.
+				{
+					if(newOrder[k] < m_nChannels) //Case: getting old channel to the new channel order.
+								*tmpdest = tmpsrc[j*m_nChannels+newOrder[k]];
+					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
+						*tmpdest = emptyModCom;
+							
+				}
+			}
+			Patterns[i] = newp;
+			CSoundFile::FreePattern(p);
+		}
+	}
+
+	MODCHANNELSETTINGS settings[MAX_BASECHANNELS];
+	MODCHANNEL chns[MAX_CHANNELS];		
+
+	for(i = 0 ; i < m_nChannels ; i++) settings[i] = ChnSettings[i];
+	for(i = 0 ; i < m_nChannels ; i++) chns[i] = Chn[i];
+
+
+	for (UINT i=0; i<nRemainingChannels; i++)
+	{
+		if(newOrder[i] < m_nChannels)
+		{
+				ChnSettings[i] = settings[newOrder[i]];
+				Chn[i] = chns[newOrder[i]];
+		}
+		else
+		{
+			SetChannelSettingsToDefault(i);
+		}
+	}
+
+	m_nChannels = nRemainingChannels;
+	END_CRITICAL();
+
+	return m_nChannels;
+
+     
+         
+}
+
+bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
+//-----------------------------------------------------
+{
+    //Implementation of move channel using ReArrangeChannels(...). So this function
+    //only creates correct newOrder-vector used in the ReArrangeChannels(...).
+	if(chnFrom == chnTo) return false;
+    if(chnFrom >= m_nChannels || chnTo >= m_nChannels)
+    {
+            CString str = "Error: Bad move indexes in CSoundFile::MoveChannel(...)";	
+			CMainFrame::GetMainFrame()->MessageBox(str , "MoveChannel(...)", MB_OK | MB_ICONINFORMATION);
+			return true;
+    }
+     std::vector<UINT> newOrder;
+     //First creating new order identical to current order...
+     for(UINT i = 0; i<m_nChannels; i++)
+     {
+              newOrder.push_back(i);
+     }
+     //...and then add the move channel effect.
+     if(chnFrom < chnTo)
+     {
+                UINT temp = newOrder[chnFrom];
+                for(UINT i = chnFrom; i<chnTo; i++)
+                {
+                         newOrder[i] = newOrder[i+1];
+                }
+                newOrder[chnTo] = temp;
+     }
+     else //case chnFrom > chnT(can't be equal, since it has been examined earlier.)
+     {
+          UINT temp = newOrder[chnFrom];
+		  for(UINT i = chnFrom; i>=chnTo+1; i--)
+          {
+                   newOrder[i] = newOrder[i-1];
+          }
+          newOrder[chnTo] = temp;
+     }
+
+      if(newOrder.size() != ReArrangeChannels(newOrder))
+      {
+		  CMainFrame::GetMainFrame()->MessageBox("BUG: Channel number chanced in MoveChannel()" , "", MB_OK | MB_ICONINFORMATION);
+      }
+	  return false;
+}
+
+
+CString CSoundFile::GetPatternViewInstrumentName(UINT nInstr, bool returnEmptyInsteadOfNoName) const
+//-----------------------------------------------------------------
+{
+	//Default: returnEmptyInsteadOfNoName = false;
+	if(nInstr >= MAX_INSTRUMENTS || m_nInstruments == 0 || Headers[nInstr] == 0) return "";
+
+	CString displayName, instrumentName, pluginName = "";
+					
+	// Use instrument name
+	instrumentName.Format("%s", Headers[nInstr]->name);
+
+	if (instrumentName == "") {
+		// if there's no instrument name, use name of sample associated with C-5.
+ 		//TODO: If there's no sample mapped to that note, we could check the other notes.
+		if (Headers[nInstr]->Keyboard[60] && Ins[Headers[nInstr]->Keyboard[60]].pSample) {
+			instrumentName.Format("s: %s", m_szNames[Headers[nInstr]->Keyboard[60]]); //60 is C-5
+		}
+	}
+
+	//Get plugin name:
+	UINT nPlug=Headers[nInstr]->nMixPlug;
+	if (nPlug>0 && nPlug<MAX_MIXPLUGINS) {
+		pluginName = m_MixPlugins[nPlug-1].Info.szName;
+	}
+
+	if (pluginName == "") {
+		if(returnEmptyInsteadOfNoName && instrumentName == "") return "";
+		if(instrumentName == "") instrumentName = "(no name)";
+		displayName.Format("%02d: %s", nInstr, instrumentName);
+	} else {
+		displayName.Format("%02d: %s (%s)", nInstr, instrumentName, pluginName);
+	}
+	return displayName;
 }
 
 
