@@ -49,7 +49,7 @@ struct RowMask
       bool command;
       bool parameter;
 };
-const RowMask DefaultRowMask = {true, true, true, true, true}; //Default SwitchBox-instance
+const RowMask DefaultRowMask = {true, true, true, true, true};
 
 
 //////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ protected:
 	CEditCommand *m_pEditWnd;
 	CPatternGotoDialog *m_pGotoWnd;
 	SIZE m_szHeader, m_szCell;
-	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow;
+	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 
 // -> CODE#0012
 // -> DESC="midi keyboard split"
@@ -165,7 +165,6 @@ public:
 	void DeleteRows(UINT colmin, UINT colmax, UINT nrows);
 	void OnDropSelection();
 	void ProcessChar(UINT nChar, UINT nFlags);
-	BOOL CheckCustomKeys(UINT nChar, DWORD dwFlags);	//soon to be removed
 	
 public:
 	void DrawPatternData(HDC, CSoundFile *, UINT, BOOL, BOOL, UINT, UINT, UINT, CRect&, int *);
@@ -273,10 +272,10 @@ protected:
 	afx_msg void OnTransposeOctUp();
 	afx_msg void OnTransposeOctDown();
 	afx_msg void OnSetSelInstrument();
-	afx_msg void OnAddChannelFront(); //Relabsoluness
-	afx_msg void OnAddChannelAfter(); //Relabsoluness
-	afx_msg void OnRemoveChannel(); //Relabsoluness
-	afx_msg void OnRemoveChannelDialog(); //Relabsoluness
+	afx_msg void OnAddChannelFront();
+	afx_msg void OnAddChannelAfter();
+	afx_msg void OnRemoveChannel();
+	afx_msg void OnRemoveChannelDialog();
 	afx_msg void OnPatternProperties();
 	afx_msg void OnCursorCopy();
 	afx_msg void OnCursorPaste();
@@ -298,7 +297,7 @@ public:
 private:
 
 	bool HandleSplit(MODCOMMAND* p, int note);
-	bool BuildChannelControlCtxMenu(HMENU hMenu); //Relabsoluness
+	bool BuildChannelControlCtxMenu(HMENU hMenu);
 	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFile);
 	bool BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc);
 	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nChn, CSoundFile* pSndFile);

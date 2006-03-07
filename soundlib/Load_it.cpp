@@ -396,7 +396,10 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// m_lpszPatternNames
-	memcpy(&m_lpszPatternNames[0],lpStream+streamPos,m_nPatternNames * len);
+	m_lpszPatternNames = new char[m_nPatternNames * len];
+	if (m_lpszPatternNames) {
+		memcpy(&m_lpszPatternNames[0],lpStream+streamPos,m_nPatternNames * len);
+	}
 	streamPos += m_nPatternNames * len;
 
 	// modcommand data length

@@ -166,6 +166,7 @@ void CViewPattern::OnInitialUpdate()
 	SetCurrentPattern(0);
 	m_nFoundInstrument=0;
 	m_nLastPlayedRow=0;
+	m_nLastPlayedOrder = 0;
 }
 
 
@@ -208,6 +209,7 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 	UpdateScrollPos();
 	InvalidatePattern(TRUE);
 	SendCtrlMessage(CTRLMSG_PATTERNCHANGED, m_nPattern);
+
 	return TRUE;
 }
 
@@ -920,29 +922,6 @@ void CViewPattern::OnEditMixPasteITStyle()
 
 
 
-BOOL CViewPattern::CheckCustomKeys(UINT nChar, DWORD dwFlags)
-//-----------------------------------------------------------
-{
-	DWORD dwKey = nChar | (CMainFrame::gnHotKeyMask << 16);
-	UINT nId = CMainFrame::IsHotKey(dwKey);
-	if (nId != NULL)
-	{
-		if (!(dwKey & 0xFFFF0000))
-		{
-			if ((CMainFrame::GetNoteFromKey(nChar, HIWORD(dwFlags)))
-			 || ((nChar >= '0') && (nChar <= '9') && (m_dwCursor & 0x07))
-			 || ((nChar >= 'A') && (nChar <= 'F') && ((m_dwCursor & 0x07) > 2)))
-				return FALSE;			 
-		}
-		m_nMenuParam = (m_nRow << 16) | m_dwCursor;
-		if (((nId == ID_CURSORPASTE) && (CMainFrame::m_dwPatternSetup & PATTERN_AUTOSPACEBAR))
-		 || (!(dwFlags & 0x40000000))) PostMessage(WM_COMMAND, nId);
-		return TRUE;
-	}
-	return FALSE;
-}
-
-
 void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 //--------------------------------------------------
 {
@@ -1282,34 +1261,6 @@ void CViewPattern::OnMouseMove(UINT, CPoint point)
 	}
 }
 
-/*
-void CViewPattern::OnChar(UINT nChar, UINT, UINT nFlags)
-//------------------------------------------------------
-{
-	m_nAccelChar = 0;
-// -> CODE#0018
-// -> DESC="route PC keyboard inputs to midi in mechanism"
-//	ProcessChar(nChar, nFlags);
-	CModDoc *pModDoc = GetDocument();
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-
-	UINT nNote = pMainFrm->GetNoteFromKey(nChar, nFlags);
-	MODCOMMAND * oldcmd = pSndFile->Patterns[m_nPattern];
-
-	BOOL special = (nNote >= 0x80) || (!nNote && nChar >= '0' && nChar <= '9' && oldcmd->note > 0 && oldcmd->note < 128);
-	BOOL keymodifier = (GetKeyState(VK_SHIFT) & 0x8000) || (GetKeyState(VK_CONTROL) & 0x8000) || (nFlags & 0x2000);
-
-	UINT nCursor = m_dwCursor & 0x07;
-	if( nCursor != 0 && !(nCursor == 1 && (nChar > '9' || nChar == ' ')) ) special = TRUE;
-
-	if(keymodifier || special){
-		ProcessChar(nChar, nFlags);
-	}
-// -! BEHAVIOUR_CHANGE#0018
-
-}
-*/
 
 void CViewPattern::OnEditSelectAll()
 //----------------------------------
@@ -2427,7 +2378,7 @@ void CViewPattern::OnRemoveChannel()
 
 	UINT nChn = ((m_nMenuParam&0xFFFF)>>3);
 	CString str;
-	str.Format("Remove channel %d (No undo)?", nChn+1);
+	str.Format("Remove channel %d?\nNote: Affects all patterns and no undo", nChn+1);
 	if(CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_YESNO | MB_ICONQUESTION) == IDYES)
 	{
 		BOOL chnMask[MAX_CHANNELS];
@@ -2454,7 +2405,6 @@ void CViewPattern::OnAddChannelFront()
 	//...and then moving it to right position.
 	pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
 
-	//Relabsoluness.note: Maybe not all, or too many, update-functions are put here.
 	pModDoc->SetModified();
 	pModDoc->ClearUndo();
 	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS); //refresh channel headers
@@ -2462,6 +2412,7 @@ void CViewPattern::OnAddChannelFront()
 	SetCurrentPattern(m_nPattern);
 	EndWaitCursor();
 }
+
 
 void CViewPattern::OnAddChannelAfter()
 //------------------------------------
@@ -2701,6 +2652,9 @@ void CViewPattern::OnPatternAmplify()
 }
 
 
+
+
+
 LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 //------------------------------------------------------------
 {
@@ -2712,6 +2666,13 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		UINT nRow = pnotify->nRow;
 		UINT nPat = 0xFFFF;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		bool updateOrderList = false;
+
+		if(m_nLastPlayedOrder != nOrd)
+		{
+			updateOrderList = true;
+			m_nLastPlayedOrder = nOrd;
+		}
 		
 		if (nRow < m_nLastPlayedRow) {
 			InvalidateChannelsHeaders();
@@ -2719,11 +2680,15 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		m_nLastPlayedRow = nRow;
 
 		if (pSndFile->m_dwSongFlags & (SONG_PAUSED|SONG_STEP)) return 0;
+		
+		//rewbs.toCheck: is it safe to remove this? What if a pattern has no order?
+		/*
 		if (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP)
 		{
 			nPat = pSndFile->m_nPattern;
 			nOrd = 0xFFFF;
 		} else
+		*/
 		if (nOrd < MAX_ORDERS)
 		{
 			nPat = pSndFile->Order[nOrd];
@@ -2737,17 +2702,29 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		{
 			if (nPat < MAX_PATTERNS)
 			{
-				if (nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
+				if (nPat != m_nPattern || updateOrderList)
+				{
+					if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
+					if (nOrd < MAX_ORDERS) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
+					updateOrderList = false;
+				}
 				if (nRow != m_nRow)	SetCurrentRow((nRow < pSndFile->PatternSize[nPat]) ? nRow : 0);
 			}
 			SetPlayCursor(0xFFFF, 0);
-			if (nOrd < MAX_ORDERS) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
 		} else
 		{
+			if(updateOrderList)
+			{
+				SendCtrlMessage(CTRLMSG_FORCEREFRESH); //force orderlist refresh
+				updateOrderList = false;
+			}
 			SetPlayCursor(nPat, nRow);
 		}
 
-	}
+		
+
+	} //Ends condition "if(pnotify->dwType & MPTNOTIFY_POSITION)"
+
 	if ((pnotify->dwType & (MPTNOTIFY_VUMETERS|MPTNOTIFY_STOP)) && (m_dwStatus & PATSTATUS_VUMETERS))
 	{
 		UpdateAllVUMeters(pnotify);
@@ -3231,12 +3208,18 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEndAbsolute:		SetCurrentColumn(((pSndFile->m_nChannels-1) << 3) | 4); if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1); return wParam;
 
 		case kcNextPattern:	{	UINT n = m_nPattern + 1;
-								while ((n < MAX_PATTERNS) && (!pSndFile->Patterns[n])) n++;
+            					while ((n < MAX_PATTERNS) && (!pSndFile->Patterns[n])) n++;
 								SetCurrentPattern((n < MAX_PATTERNS) ? n : 0);	
+								int currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+								int newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, true);
+								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
 								return wParam; }
 		case kcPrevPattern: {	UINT n = (m_nPattern) ? m_nPattern - 1 : MAX_PATTERNS-1;
 								while ((n > 0) && (!pSndFile->Patterns[n])) n--;
 								SetCurrentPattern(n);
+								int currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+								int newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, false);
+								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
 								return wParam; }
 		case kcSelectWithCopySelect:
 		case kcSelectWithNav:
@@ -3601,7 +3584,8 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 	// -- write sdx if playing live
 	bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&		// work out whether we should use
 						(pMainFrm->GetFollowSong(pModDoc) == m_hWnd) &&	// player engine position or
-						!(pSndFile->IsPaused());						// edit cursor position
+						!(pSndFile->IsPaused()) &&						// edit cursor position
+								(CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY);
 
 	//Work out where to put the note off
 	UINT nRow = usePlaybackPosition?pSndFile->m_nRow:m_nRow;
@@ -4583,7 +4567,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 					}
 					CString instString = pSndFile->GetPatternViewInstrumentName(i, true);
 					if(instString.GetLength() > 0) AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, pSndFile->GetPatternViewInstrumentName(i));
-					//Relabsoluness.note: Adding the entry to the list only if it has some name, since if the name is empty,
+					//Adding the entry to the list only if it has some name, since if the name is empty,
 					//it likely is some non-used instrument.
 				}
 

@@ -2257,37 +2257,6 @@ void CViewInstrument::PlayNote(UINT note)
 void CViewInstrument::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 //-----------------------------------------------------------------
 {
-/*	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (pMainFrm) && (!(nFlags & 0x4000)))
-	{
-		CHAR s[64];
-		UINT note = pMainFrm->GetNoteFromKey(nChar, nFlags);
-
-		if (note >= 0xFE)
-		{
-			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE);
-			pMainFrm->SetInfoText("");
-		} else
-		if ((note) && (note < 128) && (m_nInstrument))
-		{
-			INSTRUMENTHEADER *penv = pModDoc->GetSoundFile()->Headers[m_nInstrument];
-			if ((!penv) || (!penv->Keyboard[note])) return;
-			if ((nChar < 'A') || (nChar > 'z') || ((nChar > 'Z') && (nChar < 'a')))
-			{
-				nLastNotePlayed = (nLastNotePlayed << 8) | (note & 0xFF);
-				nLastScanCode = (nLastScanCode << 8) | (nFlags & 0x7F);
-			}
-			pModDoc->PlayNote(note, m_nInstrument, 0, TRUE);
-			s[0] = 0;
-			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
-			pMainFrm->SetInfoText(s);
-		} else
-		{
-			CModScrollView::OnChar(nChar, nRepCnt, nFlags);
-		}
-	}
-*/
 	CModScrollView::OnChar(nChar, nRepCnt, nFlags);
 }
 
@@ -2295,33 +2264,6 @@ void CViewInstrument::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CViewInstrument::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 //------------------------------------------------------------------
 {
-/*	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (pMainFrm))
-	{
-		UINT note = pMainFrm->GetNoteFromKey(nChar, nFlags);
-
-		if ((!note) && (nLastScanCode))
-		{
-			for (UINT j=0; j<32; j+=8)
-			{
-				UINT i = 24 - j;
-				if (((nLastScanCode >> i) & 0x7F) == (nFlags & 0x7F))
-				{
-					note = (nLastNotePlayed >> i) & 0xFF;
-					nLastScanCode &= ~(0xFF << i);
-					nLastNotePlayed &= ~(0xFF << i);
-					break;
-				}
-			}
-		}
-		if (note)
-		{
-			pModDoc->NoteOff(note, FALSE);
-			pMainFrm->SetInfoText("");
-			return;
-		}
-	}*/
 	CModScrollView::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 

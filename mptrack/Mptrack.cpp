@@ -226,17 +226,6 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = TRUE; } else
 		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = TRUE; } else
 		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = TRUE; }
-/*		else {
-
-			CString param = lpszParam;
-			CString resToken;
-			int curPos = 0;
-			resToken = param.Tokenize(":",curPos);
-			if (resToken == "appendToRegistryKey") {
-				m_csExtension = param.Tokenize(":",curPos);
-			}
-		}
-*/		
 	}
 	CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
 }
@@ -387,86 +376,103 @@ CDLSBank *CTrackApp::gpDLSBanks[MAX_DLS_BANKS];
 BOOL CTrackApp::LoadDefaultDLSBanks()
 //-----------------------------------
 {
-	CHAR szFileName[_MAX_PATH];
-	BOOL bFirstTime = TRUE;
+	CHAR szFileName[MAX_PATH];
 	HKEY key;
-	
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MPTRACK_REG_DLS, 0, KEY_READ, &key) == ERROR_SUCCESS)
+
+	CString storedVersion = CMainFrame::GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
+	//If version number stored in INI is 1.17.02.40 or later, load DLS from INI file.
+	//Else load DLS from Registry
+	if (storedVersion >= "1.17.02.40") {
+		CHAR s[MAX_PATH];
+		UINT numBanks = CMainFrame::GetPrivateProfileLong("DLS Banks", "NumBanks", 0, theApp.GetConfigFileName());
+		for (UINT i=0; i<numBanks; i++) {
+			wsprintf(s, "Bank%d", i+1);
+			CString dlsFileName = CMainFrame::GetPrivateProfileCString("DLS Banks", s, "", theApp.GetConfigFileName());
+			AddDLSBank(dlsFileName);
+		}
+	} else {
+		LoadRegistryDLS();
+	}
+
+	SaveDefaultDLSBanks(); // This will avoid a crash the next time if we crash while loading the bank
+
+	szFileName[0] = 0;
+	GetSystemDirectory(szFileName, sizeof(szFileName));
+	lstrcat(szFileName, "\\GM.DLS");
+	if (!AddDLSBank(szFileName))
+	{
+		GetWindowsDirectory(szFileName, sizeof(szFileName));
+		lstrcat(szFileName, "\\SYSTEM32\\DRIVERS\\GM.DLS");
+		if (!AddDLSBank(szFileName))
+		{
+			if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
+			{
+				DWORD dwRegType = REG_SZ;
+				DWORD dwSize = sizeof(szFileName);
+				szFileName[0] = 0;
+				if (RegQueryValueEx(key, "GMFilePath", NULL, &dwRegType, (LPBYTE)&szFileName, &dwSize) == ERROR_SUCCESS)
+				{
+					AddDLSBank(szFileName);
+				}
+				RegCloseKey(key);
+			}
+		}
+	}
+	if (glpMidiLibrary) ImportMidiConfig(szFileName, TRUE);
+
+	return TRUE;
+}
+
+void CTrackApp::LoadRegistryDLS()
+{
+	CHAR szFileNameX[_MAX_PATH];
+	HKEY keyX;
+
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MPTRACK_REG_DLS, 0, KEY_READ, &keyX) == ERROR_SUCCESS)
 	{
 		DWORD dwRegType = REG_DWORD;
 		DWORD dwSize = sizeof(DWORD);
 		DWORD d = 0;
-		bFirstTime = FALSE;
-		if (RegQueryValueEx(key, "NumBanks", NULL, &dwRegType, (LPBYTE)&d, &dwSize) == ERROR_SUCCESS)
+		if (RegQueryValueEx(keyX, "NumBanks", NULL, &dwRegType, (LPBYTE)&d, &dwSize) == ERROR_SUCCESS)
 		{
 			CHAR s[64];
 			for (UINT i=0; i<d; i++)
 			{
 				wsprintf(s, "Bank%d", i+1);
-				szFileName[0] = 0;
+				szFileNameX[0] = 0;
 				dwRegType = REG_SZ;
-				dwSize = sizeof(szFileName);
-				RegQueryValueEx(key, s, NULL, &dwRegType, (LPBYTE)szFileName, &dwSize);
-				AddDLSBank(szFileName);
+				dwSize = sizeof(szFileNameX);
+				RegQueryValueEx(keyX, s, NULL, &dwRegType, (LPBYTE)szFileNameX, &dwSize);
+				AddDLSBank(szFileNameX);
 			}
 		}
-		RegCloseKey(key);
+		RegCloseKey(keyX);
 	}
-//	if ((bFirstTime) || (CMainFrame::gdwPreviousVersion < MPTRACK_FINALRELEASEVERSION))
-//	{
-		SaveDefaultDLSBanks(); // This will avoid a crash the next time if we crash while loading the bank
-		szFileName[0] = 0;
-		GetSystemDirectory(szFileName, sizeof(szFileName));
-		lstrcat(szFileName, "\\GM.DLS");
-		if (!AddDLSBank(szFileName))
-		{
-			GetWindowsDirectory(szFileName, sizeof(szFileName));
-			lstrcat(szFileName, "\\SYSTEM32\\DRIVERS\\GM.DLS");
-			if (!AddDLSBank(szFileName))
-			{
-				if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\DirectMusic", 0, KEY_READ, &key) == ERROR_SUCCESS)
-				{
-					DWORD dwRegType = REG_SZ;
-					DWORD dwSize = sizeof(szFileName);
-					szFileName[0] = 0;
-					if (RegQueryValueEx(key, "GMFilePath", NULL, &dwRegType, (LPBYTE)&szFileName, &dwSize) == ERROR_SUCCESS)
-					{
-						AddDLSBank(szFileName);
-					}
-					RegCloseKey(key);
-				}
-			}
-		}
-		if (glpMidiLibrary) ImportMidiConfig(szFileName, TRUE);
-//	}
-	return TRUE;
 }
 
 
 BOOL CTrackApp::SaveDefaultDLSBanks()
 //-----------------------------------
 {
-	HKEY key;
-	if (RegCreateKey(HKEY_CURRENT_USER,	MPTRACK_REG_DLS, &key) == ERROR_SUCCESS)
-	{
-		CHAR s[64];
-		DWORD nBanks = 0;
-		for (UINT i=0; i<MAX_DLS_BANKS; i++)
-		{
-			if (gpDLSBanks[i])
-			{
-				LPCSTR pszBankName = gpDLSBanks[i]->GetFileName();
-				if ((pszBankName) && (pszBankName[0]))
-				{
-					wsprintf(s, "Bank%d", nBanks+1);
-					RegSetValueEx(key, s, NULL, REG_SZ, (LPBYTE)pszBankName, strlen(pszBankName)+1);
-					nBanks++;
-				}
-			}
+	CHAR s[64];
+	DWORD nBanks = 0;
+	for (UINT i=0; i<MAX_DLS_BANKS; i++) {
+		
+		if (!gpDLSBanks[i]) {
+			continue;
 		}
-		RegSetValueEx(key, "NumBanks", NULL, REG_DWORD, (LPBYTE)&nBanks, sizeof(DWORD));
-		RegCloseKey(key);
+		
+		LPCSTR pszBankName = gpDLSBanks[i]->GetFileName();
+		if (!(pszBankName) || !(pszBankName[0])) {
+			continue;
+		}
+
+		wsprintf(s, "Bank%d", nBanks+1);
+		WritePrivateProfileString("DLS Banks", s, pszBankName, theApp.GetConfigFileName());
+		nBanks++;
+
 	}
+	CMainFrame::WritePrivateProfileLong("DLS Banks", "NumBanks", nBanks, theApp.GetConfigFileName());
 	return TRUE;
 }
 
@@ -615,7 +621,7 @@ BOOL CTrackApp::InitInstance()
 #endif
 
 	// Change the registry key under which our settings are stored.
-	SetRegistryKey(_T("Olivier Lapicque"));
+	//SetRegistryKey(_T("Olivier Lapicque"));
 
 	// Start loading
 	BeginWaitCursor();
@@ -652,6 +658,13 @@ BOOL CTrackApp::InitInstance()
 		m_szConfigFileName[sizeof(m_szConfigFileName)-1] = 0;
 		strncat(m_szConfigFileName, "mptrack.ini", sizeof(m_szConfigFileName));
 		m_szConfigFileName[sizeof(m_szConfigFileName)-1] = 0;
+
+		m_szPluginCacheFileName[0] = 0;
+		lstrcpyn(m_szPluginCacheFileName, szDrive, sizeof(m_szPluginCacheFileName));
+		strncat(m_szPluginCacheFileName, szDir, sizeof(m_szPluginCacheFileName));
+		m_szPluginCacheFileName[sizeof(m_szPluginCacheFileName)-1] = 0;
+		strncat(m_szPluginCacheFileName, "plugin.cache", sizeof(m_szPluginCacheFileName));
+		m_szPluginCacheFileName[sizeof(m_szPluginCacheFileName)-1] = 0;
 
 		m_szStringsFileName[0] = 0;
 		lstrcpyn(m_szStringsFileName, szDrive, sizeof(m_szStringsFileName));
@@ -766,7 +779,7 @@ BOOL CTrackApp::InitInstance()
 	m_bInitialized = TRUE;
 
 	// Check previous version number
-	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gdwPreviousVersion < CMainFrame::GetFullVersionNumeric()) {
+	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gcsPreviousVersion < CMainFrame::GetFullVersionString()) {
 		StopSplashScreen();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 	}
@@ -1348,7 +1361,7 @@ BOOL CAboutDlg::OnInitDialog()
 MPC forums: http://lpchip.com/modplug/\r\n\
 Robin Fernandes: mailto:modplug@soal.org\r\n\r\n\
 Updates:\r\n\
-http://www.modplug.com/forum/showpage.php?p=download");
+http://lpchip.com/modplug/viewtopic.php?t=18");
 
 	char *pArrCredit = { 
 		"OpenMPT / Modplug Tracker|"

@@ -197,24 +197,8 @@ BOOL CModTree::PreTranslateMessage(MSG* pMsg)
 				}
 			}
 			return TRUE;
-		} /*else
-		{
-			UINT nChar = pMsg->wParam;
-			DWORD nFlags = HIWORD(pMsg->lParam);
-			UINT nNote = CMainFrame::GetNoteFromKey(nChar, nFlags);
-			if ((nNote) && (nNote <= 120))
-			{
-				PlayItem(GetSelectedItem(), nNote);
-				return TRUE;
-			}
-		}*/
-	} /*else
-	if (pMsg->message == WM_KEYUP)
-	{
-		UINT nChar = pMsg->wParam;
-		DWORD nFlags = HIWORD(pMsg->lParam);
-		if (CMainFrame::GetNoteFromKey(nChar, nFlags)) return TRUE;
-	}*/
+		} 
+	} 
 	//rewbs.customKeys
 	//We handle keypresses before Windows has a chance to handle them (for alt etc..)
 	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) || 

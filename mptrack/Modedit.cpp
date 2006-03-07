@@ -330,7 +330,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 		UINT nChnToRemove = 0;
 		UINT nFound = 0;
 
-		//Relabsoluness: nNewChannels = 0 means user can chose how many channels to remove
+		//nNewChannels = 0 means user can choose how many channels to remove
 		if(nNewChannels > 0) {
 			nChnToRemove = m_SndFile.m_nChannels - nNewChannels;
 			nFound = nChnToRemove;
@@ -365,7 +365,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 		}
 		if (rem.DoModal() != IDOK) return TRUE;
 		// Removing selected channels
-		RemoveChannels(rem.m_bChnMask); //Relabsoluness.note, the code moved to separate function RemoveChannels(...).
+		RemoveChannels(rem.m_bChnMask);
 	} else
 	{
 		BeginWaitCursor();
@@ -398,7 +398,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 	return FALSE;
 }
 
-//Relabsoluness
+
 BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 //--------------------------------------------------------
 //To remove all channels whose index corresponds to true value at m_bChnMask[] array. Code is almost non-modified copy of
@@ -457,16 +457,16 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 				if (i >= nRemainingChannels)
 				{
 					m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
-					m_SndFile.SetChannelSettingsToDefault(i); //Relabsoluness
+					m_SndFile.SetChannelSettingsToDefault(i);
 				}
 			}
 		}
 		m_SndFile.m_nChannels = nRemainingChannels;
 		END_CRITICAL();
 		EndWaitCursor();
-		SetModified(); //Relabsoluness
-		ClearUndo(); //Relabsoluness
-		UpdateAllViews(NULL, HINT_MODTYPE); //Relabsoluness
+		SetModified();
+		ClearUndo();
+		UpdateAllViews(NULL, HINT_MODTYPE);
 		return FALSE;
 }
 

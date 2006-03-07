@@ -17,22 +17,6 @@ static UINT gnPatternSpacing = 0;
 static BOOL gbPatternVUMeters = FALSE;
 static BOOL gbPatternPluginNames = TRUE;	//rewbs.patPlugNames
 
-void MPT_LoadPatternState(LPCSTR pszSection)
-//------------------------------------------
-{
-	gnPatternSpacing = theApp.GetProfileInt(pszSection, "Spacing", 0);
-	gbPatternVUMeters = theApp.GetProfileInt(pszSection, "VU-Meters", 0);
-	gbPatternPluginNames = theApp.GetProfileInt(pszSection, "Plugin-Names", 1);	//rewbs.patPlugNames
-}
-
-void MPT_SavePatternState(LPCSTR pszSection)
-//------------------------------------------
-{
-	theApp.WriteProfileInt(pszSection, "Spacing", gnPatternSpacing);
-	theApp.WriteProfileInt(pszSection, "VU-Meters", gbPatternVUMeters);
-	theApp.WriteProfileInt(pszSection, "Plugin-Names", gbPatternPluginNames);	//rewbs.patPlugNames
-}
-
 //////////////////////////////////////////////////////////////
 // CCtrlPatterns
 
@@ -401,7 +385,13 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_SETCURRENTORDER:
+		//Set orderlist selection and refresh GUI if change successful
 		m_OrderList.SetCurSel(lParam, FALSE);
+		break;
+
+	case CTRLMSG_FORCEREFRESH:
+		//refresh GUI
+		m_OrderList.InvalidateRect(NULL, FALSE);
 		break;
 
 	case CTRLMSG_GETCURRENTORDER:
@@ -420,21 +410,23 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		}
 
 	case CTRLMSG_SETVIEWWND:
-		SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
-		OnSpacingChanged();
-		
-		//rewbs.merge
-		SendViewMessage(VIEWMSG_SETSPLITINSTRUMENT, m_nSplitInstrument);
-		SendViewMessage(VIEWMSG_SETSPLITNOTE, m_nSplitNote);
-		SendViewMessage(VIEWMSG_SETOCTAVEMODIFIER, m_nOctaveModifier);
-		SendViewMessage(VIEWMSG_SETOCTAVELINK, m_nOctaveLink);
-		SendViewMessage(VIEWMSG_SETSPLITVOLUME, m_nSplitVolume);	
-		//end rewbs.merge
-
-		SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);
-		SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
-		SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
-		SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames); //rewbs.patPlugNames
+		{
+			SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
+			if (m_pSndFile) {
+				SendViewMessage(VIEWMSG_PATTERNLOOP, (SONG_PATTERNLOOP & m_pSndFile->m_dwSongFlags));
+			}
+			OnSpacingChanged();
+			
+			SendViewMessage(VIEWMSG_SETSPLITINSTRUMENT, m_nSplitInstrument);
+			SendViewMessage(VIEWMSG_SETSPLITNOTE, m_nSplitNote);
+			SendViewMessage(VIEWMSG_SETOCTAVEMODIFIER, m_nOctaveModifier);
+			SendViewMessage(VIEWMSG_SETOCTAVELINK, m_nOctaveLink);
+			SendViewMessage(VIEWMSG_SETSPLITVOLUME, m_nSplitVolume);	
+			SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);
+			SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
+			SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
+			SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
+		}
 		break;
 
 	case CTRLMSG_GETSPACING:
@@ -473,30 +465,30 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_PAT_LOOP:
-        {
-            //lparam is to tell to which state to change, not what is current state.
-            CModDoc *pModDoc = GetDocument();
-            CSoundFile* pSndFile;
-            if (pModDoc != 0 && (pSndFile = pModDoc->GetSoundFile()) != 0) {
-                //Using lParam value -1 for 'change status'
-                if (lParam == -1) {
-                	lParam = !IsDlgButtonChecked(IDC_PATTERN_LOOP);
-                }
+		{
+			if (!m_pSndFile) {
+				break;
+			}
 
-        	    if (lParam) {
-					pSndFile->m_dwSongFlags |= SONG_PATTERNLOOP;
-        			pSndFile->SetRepeatCount(-1);
-					CheckDlgButton(IDC_PATTERN_LOOP, BST_CHECKED);
-					
-        		} else {
-					pSndFile->m_dwSongFlags &= ~SONG_PATTERNLOOP;
-					CheckDlgButton(IDC_PATTERN_LOOP, BST_UNCHECKED);	
-				}
-            }
-        }
-	    
-		break;
-	
+		    bool setLoop = false;
+			if (lParam == -1) {
+				//Toggle loop state
+				setLoop = !(m_pSndFile->m_dwSongFlags&SONG_PATTERNLOOP);
+			} else {
+				setLoop = static_cast<bool>(lParam);
+			}
+				
+			if (setLoop) {
+				m_pSndFile->m_dwSongFlags |= SONG_PATTERNLOOP;
+        		m_pSndFile->SetRepeatCount(-1);
+				CheckDlgButton(IDC_PATTERN_LOOP, BST_CHECKED);
+			} else {
+				m_pSndFile->m_dwSongFlags &= ~SONG_PATTERNLOOP;
+				CheckDlgButton(IDC_PATTERN_LOOP, BST_UNCHECKED);	
+			}
+
+			break;
+		}
 	case CTRLMSG_PAT_NEWPATTERN:
 		OnPatternNew();
 		break;

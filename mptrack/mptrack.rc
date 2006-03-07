@@ -1892,7 +1892,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,17,2,39
+ FILEVERSION 1,17,2,40
  PRODUCTVERSION 0,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -1910,12 +1910,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Olivier Lapicque / OpenMPT team"
             VALUE "FileDescription", "OpenMPT / ModPlug Tracker"
-            VALUE "FileVersion", "1, 17, 2, 39"
+            VALUE "FileVersion", "1, 17, 2, 40"
             VALUE "InternalName", "Modplug Tracker"
             VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2005 GPL."
             VALUE "LegalTrademarks", "M.O.D.P.L.U.G"
             VALUE "OriginalFilename", "mptrack.exe"
             VALUE "ProductName", "OpenMPT / ModPlug Tracker"
+            VALUE "ProductVersion", "0, 0, 0, 0"
         END
     END
     BLOCK "VarFileInfo"

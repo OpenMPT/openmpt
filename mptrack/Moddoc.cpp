@@ -2632,6 +2632,15 @@ HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
 	}
 	//end rewbs.fix3185
 
+	//ensure order correlates with pattern.
+	if (pSndFile->Order[ord]!=pat) {
+		int tentativeOrder = pSndFile->FindOrder(pat);
+		if (tentativeOrder != -1) {	//ensure a valid order exists.
+			ord = tentativeOrder;
+		}
+	}
+
+
 	return followSonghWnd;
 
 }
