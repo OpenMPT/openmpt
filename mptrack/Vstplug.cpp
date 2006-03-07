@@ -154,12 +154,12 @@ VOID CVstPluginManager::EnumerateDirectXDMOs()
 // PluginCache format:
 // LibraryName = ID100000ID200000
 // ID100000ID200000 = FullDllPath
+// ID100000ID200000.Flags = Plugin Flags (for now, just isInstrument).
 
 
 PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 //------------------------------------------------------------------------
 {
-	CHAR s[_MAX_PATH];
 	PVSTPLUGINLIB pDup = m_pVstHead;
 	while (pDup)
 	{
@@ -169,14 +169,17 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 	// Look if the plugin info is stored in the PluginCache
 	if (bCache)
 	{
-		LPCSTR pszSection = "PluginCache";
-		_splitpath(pszDllPath, NULL, NULL, s, NULL);
-		s[63] = 0;
-		CString strIds = theApp.GetProfileString(pszSection, s);
-		if (strIds.GetLength() >= 16)
+		CString cacheSection = "PluginCache";
+		CString cacheFile = theApp.GetPluginCacheFileName();
+		char fileName[_MAX_PATH];
+		_splitpath(pszDllPath, NULL, NULL, fileName, NULL);
+
+		CString IDs = CMainFrame::GetPrivateProfileCString(cacheSection, fileName, "", cacheFile);
+
+		if (IDs.GetLength() >= 16)
 		{
-			CString strFullPath = theApp.GetProfileString(pszSection, strIds);
-			if ((strFullPath) && (strFullPath[0]) && (!lstrcmpi(strFullPath, pszDllPath)))
+			CString fullPath = CMainFrame::GetPrivateProfileCString(cacheSection, IDs, "", cacheFile);
+			if ((fullPath) && (fullPath[0]) && (!lstrcmpi(fullPath, pszDllPath)))
 			{
 				PVSTPLUGINLIB p = new VSTPLUGINLIB;
 				if (!p) return NULL;
@@ -194,8 +197,8 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 				// Extract plugin Ids
 				for (UINT i=0; i<16; i++)
 				{
-					UINT n = ((LPCTSTR)strIds)[i] - '0';
-					if (n > 9) n = ((LPCTSTR)strIds)[i] + 10 - 'A';
+					UINT n = ((LPCTSTR)IDs)[i] - '0';
+					if (n > 9) n = ((LPCTSTR)IDs)[i] + 10 - 'A';
 					n &= 0x0f;
 					if (i < 8)
 					{
@@ -205,8 +208,9 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 						p->dwPluginId2 = (p->dwPluginId2<<4) | n;
 					}
 				}
-				wsprintf(s, "%s.Flags", (const char *)strIds);
-				int infoex = theApp.GetProfileInt(pszSection, s, 0);
+				CString flagKey;
+				flagKey.Format("%s.Flags", IDs);
+				int infoex = CMainFrame::GetPrivateProfileLong(cacheSection, flagKey, 0, cacheFile);
 				if (infoex&1) p->bIsInstrument = TRUE;
 			#ifdef VST_LOG
 				Log("Plugin \"%s\" found in PluginCache\n", p->szLibraryName);
@@ -215,7 +219,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 			} else
 			{
 			#ifdef VST_LOG
-				Log("Plugin \"%s\" mismatch in PluginCache: \"%s\" [%s]=\"%s\"\n", s, pszDllPath, (LPCTSTR)strIds, (LPCTSTR)strFullPath);
+				Log("Plugin \"%s\" mismatch in PluginCache: \"%s\" [%s]=\"%s\"\n", s, pszDllPath, (LPCTSTR)IDs, (LPCTSTR)strFullPath);
 			#endif
 			}
 		}
@@ -295,12 +299,14 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 			// If OK, write the information in PluginCache
 			if (bOk)
 			{
-				LPCSTR pszSection = "PluginCache";
-				wsprintf(s, "%08X%08X", p->dwPluginId1, p->dwPluginId2);
-				theApp.WriteProfileString(pszSection, s, pszDllPath);
-				theApp.WriteProfileString(pszSection, p->szLibraryName, s);
-				strcat(s, ".Flags");
-				theApp.WriteProfileInt(pszSection, s, p->bIsInstrument);
+				CString cacheSection = "PluginCache";
+				CString cacheFile = theApp.GetPluginCacheFileName();
+				CString IDs, flagsKey;
+				IDs.Format("%08X%08X", p->dwPluginId1, p->dwPluginId2);
+				flagsKey.Format("%s.Flags", IDs);			
+				CMainFrame::WritePrivateProfileCString(cacheSection, IDs, pszDllPath, cacheFile);
+				CMainFrame::WritePrivateProfileCString(cacheSection, p->szLibraryName, IDs, cacheFile);
+				CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, p->bIsInstrument, cacheFile);
 			}
 		} else
 	#ifdef ENABLE_BUZZ
@@ -465,11 +471,12 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModD
 		pFound = AddPlugin(s);
 		if (!pFound)
 		{
-			LPCSTR pszSection = "PluginCache";
-			CString strIds = theApp.GetProfileString(pszSection, pMixPlugin->Info.szLibraryName);
-			if (strIds.GetLength() >= 16)
+			CString cacheSection = "PluginCache";
+			CString cacheFile = theApp.GetPluginCacheFileName();
+			CString IDs = CMainFrame::GetPrivateProfileCString(cacheSection, pMixPlugin->Info.szLibraryName, "", cacheFile);
+			if (IDs.GetLength() >= 16)
 			{
-				CString strFullPath = theApp.GetProfileString(pszSection, strIds);
+				CString strFullPath = CMainFrame::GetPrivateProfileCString(cacheSection, IDs, "", cacheFile);
 				if ((strFullPath) && (strFullPath[0])) pFound = AddPlugin(strFullPath);
 			}
 		}
@@ -519,11 +526,13 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModD
 					{
 						if (!pFound->bIsInstrument)
 						{
+							CString cacheSection = "PluginCache";
+							CString cacheFile = theApp.GetPluginCacheFileName();
 							LPCSTR pszSection = "PluginCache";
-							CHAR s[64];
 							pFound->bIsInstrument = TRUE;
-							wsprintf(s, "%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
-							theApp.WriteProfileInt(pszSection, s, 1);
+							CString flagsKey;
+							flagsKey.Format("%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
+							CMainFrame::WritePrivateProfileLong(cacheSection, flagsKey, 1, cacheFile);
 						}
 					}
 					CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, pFound, pMixPlugin, pEffect);

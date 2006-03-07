@@ -125,6 +125,7 @@ protected:
 	// Default macro configuration
 	MODMIDICFG m_MidiCfg;
 	CHAR m_szConfigFileName[_MAX_PATH];
+	CHAR m_szPluginCacheFileName[_MAX_PATH];
 	CHAR m_szStringsFileName[_MAX_PATH];
 
 public:
@@ -161,6 +162,7 @@ public:
 	BOOL IsWaveExEnabled() const { return m_bExWaveSupport; }
 	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCSTR GetConfigFileName() const { return m_szConfigFileName; }
+	LPCSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
 
 // Splash Screen
 protected:
@@ -227,6 +229,9 @@ public:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
+
+private:
+	static void LoadRegistryDLS();
 };
 
 

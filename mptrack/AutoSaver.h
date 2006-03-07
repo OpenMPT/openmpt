@@ -7,6 +7,7 @@ class CAutoSaver
 {
 public:
 //Cons/Destr
+	CAutoSaver(void);
 	CAutoSaver(bool enabled, int saveInterval, int backupHistory,
 			   bool useOriginalPath, CString path, CString fileNameTemplate);
 	~CAutoSaver(void);

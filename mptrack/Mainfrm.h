@@ -23,11 +23,9 @@ class CPerformanceCounter;
 #define NUM_AUDIO_BUFFERS			3
 #define MIN_AUDIO_BUFFERSIZE		1024
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
-#define KEYBOARDMAP_LENGTH			(3*12+2)
 #define MAINFRAME_TITLE				"Open Modplug Tracker"
-#define MPTRACK_VERSION				0x01170238
 #define INFORMAL_VERSION			"1.17RC3_"
-
+#define INIBUFFERSIZE				MAX_PATH
 
 enum {
 	CTRLMSG_BASE=0,
@@ -40,6 +38,7 @@ enum {
 	CTRLMSG_GETCURRENTPATTERN,
 	CTRLMSG_SETCURRENTORDER,
 	CTRLMSG_GETCURRENTORDER,
+	CTRLMSG_FORCEREFRESH,
 	CTRLMSG_PAT_PREVINSTRUMENT,
 	CTRLMSG_PAT_NEXTINSTRUMENT,
 	CTRLMSG_PAT_SETINSTRUMENT,
@@ -49,16 +48,6 @@ enum {
 	CTRLMSG_SETUPMACROS,
 	CTRLMSG_GETCURRENTINSTRUMENT,
 	CTRLMSG_SETCURRENTINSTRUMENT,
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-// rewbs.merged: swapped message direction
-/*	CTRLMSG_GETCURRENTSPLITINSTRUMENT,
-	CTRLMSG_GETCURRENTSPLITNOTE,
-	CTRLMSG_GETCURRENTOCTAVEMODIFIER,
-	CTRLMSG_GETCURRENTOCTAVELINK,
-	CTRLMSG_GETCURRENTSPLITVOLUME,
-*/
-// !- CODE#0012
 	CTRLMSG_PLAYPATTERN,
 	CTRLMSG_GETSPACING,
 	CTRLMSG_SETSPACING,
@@ -374,7 +363,8 @@ public:
 	static LONG glGeneralWindowHeight, glPatternWindowHeight, glSampleWindowHeight, 
 		        glInstrumentWindowHeight, glCommentsWindowHeight, glGraphWindowHeight; //rewbs.varWindowSize
     static HHOOK ghKbdHook;
-	static DWORD gdwNotificationType, gdwPreviousVersion;
+	static DWORD gdwNotificationType;
+	static CString gcsPreviousVersion;
 	
 	// Audio Setup
 	static DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
@@ -384,9 +374,6 @@ public:
 	// Pattern Setup
 	static DWORD m_dwPatternSetup, m_dwMidiSetup, m_nRowSpacing, m_nRowSpacing2, m_nKeyboardCfg, gnHotKeyMask;
 	static bool m_bHideUnavailableCtxMenuItems;
-	static DWORD KeyboardMap[KEYBOARDMAP_LENGTH], KeyboardMPT[KEYBOARDMAP_LENGTH];
-	static DWORD KeyboardFT2[KEYBOARDMAP_LENGTH],KeyboardIT[KEYBOARDMAP_LENGTH];
-	static DWORD CustomKeys[MAX_MPTHOTKEYS];
 	// GDI
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;
@@ -491,7 +478,6 @@ public:
 // static functions
 public:
 	static CMainFrame *GetMainFrame() { return (CMainFrame *)theApp.m_pMainWnd; }
-	static UINT GetNoteFromKey(UINT nChar, DWORD dwFlags);
 	static VOID UpdateColors();
 	static CString GetFullVersionString();
 	static DWORD GetFullVersionNumeric();
@@ -503,12 +489,17 @@ public:
 	static void UpdateAllViews(DWORD dwHint, CObject *pHint=NULL);
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
 	static void TranslateKeyboardMap(LPSTR pszKbd);
-	static UINT IsHotKey(DWORD dwKey);
-	static const DWORD *GetKeyboardMap();
 	static VOID GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
 	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
 	static CPerformanceCounter *m_pPerfCounter;
+
+	static bool WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile);
+	static long GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile);
+	static bool WritePrivateProfileDWord(const CString section, const CString key, const DWORD value, const CString iniFile);
+	static DWORD GetPrivateProfileDWord(const CString section, const CString key, const DWORD defaultValue, const CString iniFile);
+	static bool WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile);
+	static CString GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile);
 	
 
 // Misc functions
@@ -624,13 +615,21 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
-	//rewbs.customKeys - We have swicthed focus to a new module - might need to update effect keys to reflect module type
 	bool UpdateEffectKeys(void); 
 	bool UpdateHighlights(void);
-	afx_msg void OnKillFocus(CWnd* pNewWnd); //end rewbs.fix3116
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+
+private:
+	void LoadRegistrySettings();
+	void LoadIniSettings();
+	void SaveIniSettings();
+
 };
 
 const CHAR gszBuildDate[] = __TIMESTAMP__;
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 

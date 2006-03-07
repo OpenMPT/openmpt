@@ -874,7 +874,7 @@ public:
 	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;
 	double GetCurrentBPM() const;
-	int FindOrder(BYTE pat, UINT startFromOrder=0);	//rewbs.playSongFromCursor
+	int FindOrder(BYTE pat, UINT startFromOrder=0, bool direction=true);	//rewbs.playSongFromCursor
 	void DontLoopPattern(int nPat, int nRow=0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(UINT nOrder);

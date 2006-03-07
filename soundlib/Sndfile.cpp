@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "../mptrack/mptrack.h"
 #include "../mptrack/mainfrm.h"
+#include "../mptrack/moddoc.h"
 #include "sndfile.h"
 #include "aeffectx.h"
 #include <vector>
@@ -549,7 +550,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		}
 #endif
 	} else {
-		m_dwCreatedWithVersion = MPTRACK_VERSION;
+		m_dwCreatedWithVersion = CMainFrame::GetFullVersionNumeric();
 	}
 	// Adjust song names
 	for (UINT iSmp=0; iSmp<MAX_SAMPLES; iSmp++)
@@ -634,16 +635,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
 	}
 
-/*	if (CMainFrame::m_dwPatternSetup & PATTERN_MODERNSPEED) {
-		m_nSamplesPerTick = gdwMixingFreq * (60/m_nMusicTempo / (m_nMusicSpeed * m_nRowsPerBeat));
-	} 
-	else if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
-		m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo;
-	}
-	else {
-		m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
-	}
-*/
 	if ((m_nRestartPos >= MAX_ORDERS) || (Order[m_nRestartPos] >= MAX_PATTERNS)) m_nRestartPos = 0;
 	// Load plugins
 	if (gpMixPluginCreateProc)
@@ -666,10 +657,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	if (m_nType)
 	{
-/*		UINT maxpreamp = 0x10+(m_nChannels*8);
-		if (maxpreamp > 100) maxpreamp = 100;
-		if (m_nSongPreAmp > maxpreamp) m_nSongPreAmp = maxpreamp;
-*/		return TRUE;
+		return TRUE;
 	}
 
 	
@@ -1272,17 +1260,19 @@ void CSoundFile::DontLoopPattern(int nPat, int nRow)
 	//m_nSeqOverride = 0;
 }
 
-int CSoundFile::FindOrder(BYTE pat, UINT startFromOrder)
-//------------------------------------------------------
+int CSoundFile::FindOrder(BYTE pat, UINT startFromOrder, bool direction)
+//----------------------------------------------------------------------
 {
 	int foundAtOrder = -1;
 	int candidateOrder = 0;
 
-	for (UINT p=0; p<MAX_ORDERS; p++)
-	{
-		candidateOrder = (startFromOrder+p)%MAX_ORDERS;		//wrap around MAX_ORDERS
-		if (Order[candidateOrder] == pat)
-		{
+	for (UINT p=0; p<MAX_ORDERS; p++) 	{
+		if (direction) {
+			candidateOrder = (startFromOrder+p)%MAX_ORDERS;		//wrap around MAX_ORDERS
+		} else {
+			candidateOrder = (startFromOrder-p+MAX_ORDERS)%MAX_ORDERS;	//wrap around 0 and MAX_ORDERS
+		}
+		if (Order[candidateOrder] == pat) {
 			foundAtOrder = candidateOrder;
 			break;
 		}
@@ -1352,9 +1342,9 @@ CString CSoundFile::GetInstrumentName(UINT nInstr) const
 bool CSoundFile::SetChannelSettingsToDefault(UINT nch)
 //-------------------------------------
 {
-    //Relabsoluness.note: This is used to set default setting to new channels,
-    //so that a new channel for example won't have some plug in when created. It would be a 
-    //surprise if this defaulted everything that it should, but at least it does something.
+    //This is used to set default setting to new channels,
+    //so that a new channel for example won't have some plug in when created - might not do all defaultings,
+    //though.
                                        
 	if(nch > MAX_BASECHANNELS) return true;
 
@@ -1369,6 +1359,10 @@ bool CSoundFile::SetChannelSettingsToDefault(UINT nch)
 	Chn[nch].nPan = ChnSettings[nch].nPan;
 	Chn[nch].nGlobalVol = ChnSettings[nch].nVolume;
 
+	m_pModDoc->Record1Channel(nch,FALSE);
+	m_pModDoc->Record2Channel(nch,FALSE);
+	m_bChannelMuteTogglePending[nch] = false;
+
 	
 	return false;
 }
@@ -1380,16 +1374,14 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 {
     //newOrder[i] tells which current channel should be placed to i:th position in
     //the new order, or if i is not an index of current channels, then new channel is
-    //added to position i - and if there is no index of some channel in the newOrder-vector, then it gets removed.
+    //added to position i - and if there is no index of some current channel in the
+    //newOrder-vector, then it gets removed.
 	//Thus this function can practically be used to add, remove, reorder, duplicate, clear etc. channels, 
 	//IF it works, that is.
-
-	//TODO: This function does not take 'record status' nor 'mute on transions' into account, meaning
-	//that they won't be reordered with the channels.
-
+	
 	MODCOMMAND emptyModCom = {0,0,0,0,0,0};
 
-	UINT nRemainingChannels = newOrder.size();
+	UINT nRemainingChannels = newOrder.size();	
 
 	if(nRemainingChannels > min(MAX_CHANNELS, MAX_BASECHANNELS) || nRemainingChannels < 4) 	
 	{
@@ -1429,11 +1421,19 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 	}
 
 	MODCHANNELSETTINGS settings[MAX_BASECHANNELS];
-	MODCHANNEL chns[MAX_CHANNELS];		
+	MODCHANNEL chns[MAX_BASECHANNELS];		
+	UINT recordStates[MAX_BASECHANNELS];
+	bool chnMutePendings[MAX_BASECHANNELS];
 
-	for(i = 0 ; i < m_nChannels ; i++) settings[i] = ChnSettings[i];
-	for(i = 0 ; i < m_nChannels ; i++) chns[i] = Chn[i];
-
+	for(i = 0 ; i < m_nChannels ; i++)
+	{
+		settings[i] = ChnSettings[i];
+		chns[i] = Chn[i];
+		recordStates[i] = m_pModDoc->IsChannelRecord(i);
+		chnMutePendings[i] = m_bChannelMuteTogglePending[i];
+	}
+	
+	m_pModDoc->ReinitRecordState();
 
 	for (UINT i=0; i<nRemainingChannels; i++)
 	{
@@ -1441,6 +1441,9 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 		{
 				ChnSettings[i] = settings[newOrder[i]];
 				Chn[i] = chns[newOrder[i]];
+				if(recordStates[newOrder[i]] == 1) m_pModDoc->Record1Channel(i,TRUE);
+				if(recordStates[newOrder[i]] == 2) m_pModDoc->Record2Channel(i,TRUE);
+				m_bChannelMuteTogglePending[i] = chnMutePendings[newOrder[i]];
 		}
 		else
 		{
@@ -1451,10 +1454,7 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 	m_nChannels = nRemainingChannels;
 	END_CRITICAL();
 
-	return m_nChannels;
-
-     
-         
+	return m_nChannels;  
 }
 
 bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
@@ -1497,7 +1497,7 @@ bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
 
       if(newOrder.size() != ReArrangeChannels(newOrder))
       {
-		  CMainFrame::GetMainFrame()->MessageBox("BUG: Channel number chanced in MoveChannel()" , "", MB_OK | MB_ICONINFORMATION);
+		  CMainFrame::GetMainFrame()->MessageBox("BUG: Channel number changed in MoveChannel()" , "", MB_OK | MB_ICONINFORMATION);
       }
 	  return false;
 }

@@ -2202,24 +2202,16 @@ BOOL CChordEditor::OnInitDialog()
 {
 	CMainFrame *pMainFrm;
 	CHAR s[128], stmp[32];
-	const DWORD *kbdmap;
 
 	CDialog::OnInitDialog();
 	m_Keyboard.Init(m_hWnd, 2);
 	pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return TRUE;
-	kbdmap = CMainFrame::GetKeyboardMap();
 	// Fills the shortcut key combo box
 	for (UINT ikey=0; ikey<3*12; ikey++)
 	{
-		stmp[0] = 0;
-		CMainFrame::GetKeyName(kbdmap[ikey] << 16, stmp, sizeof(stmp)-1);
-		if ((stmp[0] > ' ') && (!stmp[1]))
-		{
-			//wsprintf(s, "%s%d: Shift+%c", szNoteNames[ikey % 12], ikey/12, stmp[0]);
 			wsprintf(s, "%s%d", szNoteNames[ikey % 12], ikey/12);
 			m_CbnShortcut.SetItemData(m_CbnShortcut.AddString(s), ikey);
-		}
 	}
 	m_CbnShortcut.SetCurSel(0);
 	// Base Note combo box

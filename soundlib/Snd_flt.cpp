@@ -80,7 +80,8 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modif
 		fc = (float)CutOffToFrequency(pChn->nCutOff, flt_modifier);
 		dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)pChn->nResonance) / 20.0f);
 	} else {*/
-		fc = (float)CutOffToFrequency((pChn->nCutOff+pChn->nCutSwing)&0x7F, flt_modifier);
+		int cutoff = max( min((int)pChn->nCutOff+(int)pChn->nCutSwing,127), 0); // cap cutoff
+		fc = (float)CutOffToFrequency(cutoff, flt_modifier);
 		dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)((pChn->nResonance+pChn->nResSwing)&0x7F)) / 20.0f);
 //	}
 

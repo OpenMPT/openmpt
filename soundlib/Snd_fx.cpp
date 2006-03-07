@@ -1449,20 +1449,33 @@ BOOL CSoundFile::ProcessEffects()
 		// Position Jump
 		case CMD_POSITIONJUMP:
 			nPosJump = param;
+			//I don't think the following block is necessary. 
+			//It breaks manual sequence override if the pattern contains a Bxx.
+			//Please provide a testcase that shows it is necessary. -rewbs
+			/*if((m_dwSongFlags & SONG_PATTERNLOOP)) {
+				//without this the pattern view could show pattern y even though the playing pattern was x. 
+				 m_nSeqOverride = param+1;
+			}*/
 			break;
 
 		// Pattern Break
 		case CMD_PATTERNBREAK:
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
 			m = NULL;
-			if(m_nRow < PatternSize[m_nPattern]-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
-
-			if(m && m->command == CMD_XPARAM)
+			if (m_nRow < PatternSize[m_nPattern]-1) {
+			  m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
+			}
+			if (m && m->command == CMD_XPARAM) {
 				nBreakRow = (param<<8) + m->param;
-			else
-// -! NEW_FEATURE#0010
+			} else {
 				nBreakRow = param;
+			}
+			
+			if((m_dwSongFlags & SONG_PATTERNLOOP)) {
+				//If song is set to loop and a pattern break occurs we should stay on the same pattern.
+				//Use nPosJump to force playback to "jump to this pattern" rather than move to next, as by default.
+				//rewbs.to
+				nPosJump = (int)m_nCurrentPattern;
+			}
 			break;
 
 		// Midi Controller
@@ -1548,7 +1561,7 @@ BOOL CSoundFile::ProcessEffects()
 				m_nNextRow = (UINT)nBreakRow;
 				m_bPatternTransitionOccurred=true;
 			}
-		}
+		} //Ends condition (nBreakRow >= 0) || (nPosJump >= 0)
 	}
 	return TRUE;
 }
@@ -3105,6 +3118,7 @@ UINT CSoundFile::GetBestMidiChan(MODCHANNEL *pChn) {
 }
 
 void CSoundFile::HandlePatternTransitionEvents()
+//----------------------------------------------
 {
 	if (m_bPatternTransitionOccurred) {
 		// MPT sequence override
@@ -3124,6 +3138,9 @@ void CSoundFile::HandlePatternTransitionEvents()
 				m_bChannelMuteTogglePending[chan]=false;
 			}
 		}
+		
+		
+
 		m_bPatternTransitionOccurred=false;
 	}
 }

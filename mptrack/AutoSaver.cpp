@@ -21,6 +21,10 @@
 // Construction/Destruction
 ///////////////////////////
 
+CAutoSaver::CAutoSaver()
+{
+}
+
 CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory,
 					   bool useOriginalPath, CString path, CString fileNameTemplate)
 {

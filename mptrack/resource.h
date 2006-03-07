@@ -546,7 +546,7 @@
 #define IDC_PATTERN_PLAYFROMSTART       2026
 #define IDC_PATTERN_STOP                2027
 #define IDC_PATTERN_RECORD              2028
-#define IDC_PATTERN_FOLLOWSONG          2029
+#define IDC_PATTERN_FOLLOWSONG          3029
 #define IDC_PATTERN_NEW                 2030
 #define IDC_PATTERN_OCTAVELINK          2031
 #define IDC_SPIN_SPACING                2032

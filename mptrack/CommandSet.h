@@ -30,7 +30,7 @@ enum InputTargetContext
 	kCtxCtrlSamples,
 	kCtxCtrlInstruments,
 	kCtxCtrlComments,
-	
+	kCtxCtrlOrderlist,	
 	kCtxMaxInputContexts
 };
 

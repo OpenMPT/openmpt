@@ -1865,42 +1865,7 @@ void CViewSample::OnSampleTrim()
 
 void CViewSample::OnChar(UINT nChar, UINT, UINT nFlags)
 //-----------------------------------------------------
-{/*
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (pMainFrm) && (!(nFlags & 0x4000)))
-	{
-		UINT note = pMainFrm->GetNoteFromKey(nChar, nFlags);
-
-		if (note >= 0xFE)
-		{
-			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE);
-		} else
-		if (note)
-		{
-			CHAR s[64];
-			if (m_dwStatus & SMPSTATUS_KEYDOWN)
-				pModDoc->NoteOff(note, TRUE);
-			else
-				pModDoc->NoteOff(0, TRUE);
-			DWORD loopstart = m_dwBeginSel, loopend = m_dwEndSel;
-			if (loopend - loopstart < (UINT)(4 << m_nZoom)) loopend = loopstart = 0;
-			pModDoc->PlayNote(note, 0, m_nSample, TRUE, -1, loopstart, loopend);
-			m_dwStatus |= SMPSTATUS_KEYDOWN;
-			s[0] = 0;
-			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
-			pMainFrm->SetInfoText(s);
-		} else
-		if (nChar == '-')
-		{
-			OnZoomDown();
-		} else
-		if (nChar == '+')
-		{
-			OnZoomUp();
-		}
-	}
-	*/
+{
 }
 
 void CViewSample::PlayNote(UINT note)
