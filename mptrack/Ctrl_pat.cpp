@@ -480,7 +480,6 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 				
 			if (setLoop) {
 				m_pSndFile->m_dwSongFlags |= SONG_PATTERNLOOP;
-        		m_pSndFile->SetRepeatCount(-1);
 				CheckDlgButton(IDC_PATTERN_LOOP, BST_CHECKED);
 			} else {
 				m_pSndFile->m_dwSongFlags &= ~SONG_PATTERNLOOP;
