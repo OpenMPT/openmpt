@@ -1458,6 +1458,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 			p->dwLatency = gsdwTotalSamples + d;
 			p->nOrder = m_pSndFile->m_nCurrentPattern;
 			p->nRow = m_pSndFile->m_nRow;
+			p->nPattern = m_pSndFile->m_nPattern;
 			if (m_dwNotifyType & MPTNOTIFY_SAMPLE)
 			{
 				UINT nSmp = m_dwNotifyType & 0xFFFF;

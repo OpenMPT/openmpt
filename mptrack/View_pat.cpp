@@ -2664,7 +2664,8 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 	{
 		UINT nOrd = pnotify->nOrder;
 		UINT nRow = pnotify->nRow;
-		UINT nPat = 0xFFFF;
+		//UINT nPat = 0xFFFF;
+		UINT nPat = pnotify->nPattern; //get player pattern
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		bool updateOrderList = false;
 
@@ -2689,11 +2690,17 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			nOrd = 0xFFFF;
 		} else
 		*/
-		if (nOrd < MAX_ORDERS)
-		{
+		/*
+		if (nOrd < MAX_ORDERS) {
 			nPat = pSndFile->Order[nOrd];
 		}
-		//rewbs.fxVis: 
+		*/
+		
+		if (pSndFile->Order[nOrd] != nPat) {
+			//order doesn't correlate with pattern, so mark it as invalid
+			nOrd = 0xFFFF; 
+		}
+
 		if (m_pEffectVis && m_pEffectVis->m_hWnd) {	
 			m_pEffectVis->SetPlayCursor(nPat, nRow);
 		}
