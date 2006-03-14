@@ -33,7 +33,6 @@ typedef MMRESULT (ACMAPI *PFNACMDRIVERDETAILS)(HACMDRIVERID, LPACMDRIVERDETAILS,
 
 
 /////////////////////////////////////////////////////////////////////////////
-
 // 16-colors DIB
 typedef struct MODPLUGDIB
 {
@@ -55,7 +54,7 @@ typedef struct MIDILIBSTRUCT
 /////////////////////////////////////////////////////////////////////////////
 // DLS Sound Banks
 
-#define MAX_DLS_BANKS	10
+#define MAX_DLS_BANKS	100 //rewbs.increaseMaxDLSBanks
 
 class CDLSBank;
 
@@ -121,11 +120,12 @@ protected:
 	CMultiDocTemplate *m_pModTemplate;
 	CVstPluginManager *m_pPluginManager;
 	BOOL m_bInitialized, m_bLayer3Present, m_bExWaveSupport, m_bDebugMode;
-	DWORD m_dwTimeStarted;
+	DWORD m_dwTimeStarted, m_dwLastPluginIdleCall;
 	HANDLE m_hAlternateResourceHandle;
 	// Default macro configuration
 	MODMIDICFG m_MidiCfg;
 	CHAR m_szConfigFileName[_MAX_PATH];
+	CHAR m_szPluginCacheFileName[_MAX_PATH];
 	CHAR m_szStringsFileName[_MAX_PATH];
 
 public:
@@ -162,6 +162,7 @@ public:
 	BOOL IsWaveExEnabled() const { return m_bExWaveSupport; }
 	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCSTR GetConfigFileName() const { return m_szConfigFileName; }
+	LPCSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
 
 // Splash Screen
 protected:
@@ -228,6 +229,9 @@ public:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
+
+private:
+	static void LoadRegistryDLS();
 };
 
 

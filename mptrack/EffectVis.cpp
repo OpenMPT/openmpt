@@ -231,7 +231,7 @@ void CEffectVis::DrawGrid()
 void CEffectVis::SetPlayCursor(UINT nPat, UINT nRow)
 {
 	//TEMP:
-	::FillRect(m_dcPlayPos.m_hDC, &m_rcDraw, m_brushBlack);
+//	::FillRect(m_dcPlayPos.m_hDC, &m_rcDraw, m_brushBlack);
 
 	int x1;
 	//erase current playpos:
@@ -367,9 +367,9 @@ void CEffectVis::DrawNodes()
 	else
 	{
 		int x = RowToScreenX(m_nRowToErase);
-		int y = ParamToScreenY(m_nParamToErase);
+		//int y = ParamToScreenY(m_nParamToErase);
 		CRect r( x-NODEHALF-1, m_rcDraw.top, x-NODEHALF+NODESIZE+1, m_rcDraw.bottom);
-		::FillRect(m_dcNodes.m_hDC, r, m_brushBlack /*CMainFrame::brushHighLight*/);
+		::FillRect(m_dcNodes.m_hDC, r, m_brushBlack);
 	}
 
 	//Draw
@@ -634,8 +634,6 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 			for (int i=1; i<=diff; i++)
 			{
 				currentRow = m_nLastDrawnRow+(sign*i);
-				m_nRowToErase = currentRow;
-				m_nParamToErase = GetParam(currentRow);
 				int newParam = GetParam(m_nLastDrawnRow)+((float)i*factor+0.5f);
 				if (newParam>0xFF) newParam = 0xFF; if (newParam<0x00) newParam = 0x00;
 				MakeChange(currentRow, newParam);
@@ -647,12 +645,9 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 		else 
 		{
 			//m_nLastDrawnRow = row;
-			m_nRowToErase = row;
-			m_nParamToErase = GetParam(row);
+			m_nRowToErase = -1;
+			m_nParamToErase = -1; //GetParam(row);
 			MakeChange(row, paramValue);
-
-			//m_pModDoc->SetModified();
-			//m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
 		}
 
 		m_nLastDrawnRow = row;
@@ -782,26 +777,26 @@ void CEffectVis::MakeChange(int currentRow, int newParam)
 	{
 		case kAction_Preserve:
 			if (currentCommand)	{ //Only set param if we have an effect type here
-				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), &newParam);
+				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), newParam);
 				SetParam(currentRow, newParam);
 			}
 			break;
 
 		case kAction_Fill:
 			if (currentCommand)	{  //If we have an effect type here, just set param
-				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), &newParam);
+				m_pModDoc->GetEffectFromIndex(m_pModDoc->GetIndexFromEffect(currentCommand, m_nParamToErase), newParam);
 				SetParam(currentRow, newParam);
 			}
 			else //Else set command and param
 			{
-				SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, &newParam));
+				SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, newParam));
 				SetParam(currentRow, newParam);
 			}
 			break;
 
 		case kAction_Overwrite: 
 			//Always set command and param
-			SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, &newParam));
+			SetCommand(currentRow, m_pModDoc->GetEffectFromIndex(m_nFillEffect, newParam));
 			SetParam(currentRow, newParam);
 	}
 	

@@ -8,7 +8,7 @@ class CPSRatioCalc : public CDialog
 
 public:
 	enum { IDD = IDD_PITCHSHIFT };
-	CPSRatioCalc(ULONGLONG samples, ULONGLONG sampleRate, UINT speed, UINT tempo, double ratio, CWnd* pParent = NULL);   // standard constructor
+	CPSRatioCalc(ULONGLONG samples, ULONGLONG sampleRate, UINT speed, UINT tempo, UINT rowsPerBeat, BYTE tempoMode, double ratio,  CWnd* pParent = NULL);   // standard constructor
 	virtual ~CPSRatioCalc();
 	double m_dRatio;
 
@@ -17,7 +17,8 @@ protected:
 
 	ULONGLONG m_lSamplesNew, m_lSamplesOrig;
 	ULONGLONG m_lMsNew, m_lMsOrig;
-	UINT m_nTempo, m_nSpeed;
+	UINT m_nTempo, m_nSpeed, m_nRowsPerBeat;
+	BYTE m_nTempoMode;
 	double m_dRowsOrig, m_dRowsNew; 
 	
 	afx_msg void OnEnChangeSamples();

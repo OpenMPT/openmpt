@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "ctrl_pat.h"
 #include "view_pat.h"
+#include ".\ctrl_pat.h"
 
 //////////////////////////////////////////////////////////////
 // CPatEdit
@@ -192,6 +193,8 @@ BOOL COrderList::SetCurSel(int sel, BOOL bEdit)
 			{
 				BEGIN_CRITICAL();
 				pSndFile->m_nPattern = n;
+				pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = m_nScrollPos;
+				pMainFrm->ResetNotificationBuffer(); //rewbs.toCheck
 				pSndFile->m_nNextRow = 0;
 				END_CRITICAL();
 			} else
@@ -199,6 +202,7 @@ BOOL COrderList::SetCurSel(int sel, BOOL bEdit)
 			{
 				BEGIN_CRITICAL();
 				DWORD dwPaused = pSndFile->m_dwSongFlags & (SONG_PAUSED|SONG_STEP|SONG_PATTERNLOOP);
+				pSndFile->m_nCurrentPattern = m_nScrollPos;
 				pSndFile->SetCurrentOrder(m_nScrollPos);
 				pSndFile->m_dwSongFlags |= dwPaused;
 				if (!(dwPaused & SONG_PATTERNLOOP)) pSndFile->GetLength(TRUE);
@@ -320,13 +324,18 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 		UINT nRepCnt = LOWORD(pMsg->lParam);
 		UINT nFlags = HIWORD(pMsg->lParam);
 		KeyEventType kT = ih->GetKeyEventType(nFlags);
-		InputTargetContext ctx = (InputTargetContext)(kCtxCtrlInstruments);
-
+		//HACK: masquerade as kCtxViewPatternsNote context until we implement appropriate
+		//      command propagation to kCtxCtrlOrderlist context.
+		//InputTargetContext ctx = (InputTargetContext)(kCtxCtrlOrderlist);
+		InputTargetContext ctx = (InputTargetContext)(kCtxViewPatternsNote);
+		
 		CommandID kc = ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT);
 
 		switch (kc)
 		{
 			case kcSwitchToOrderList: OnSwitchToView(); return true;
+			case kcChangeLoopStatus: m_pParent->OnModCtrlMsg(CTRLMSG_PAT_LOOP, -1); return true;
+			case kcToggleFollowSong: m_pParent->OnFollowSong(); return true;
 		}
 	}
 	//end rewbs.customKeys
@@ -432,6 +441,8 @@ void COrderList::OnPaint()
 			if ((rect.right = rect.left + m_cxFont) > rcClient.right) rect.right = rcClient.right;
 			rect.right--;
 			FillRect(dc.m_hDC, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
+			
+			//Drawing the shown pattern-indicator or drag position.
 			if (nIndex == ((m_bDragging) ? (int)m_nDropPos : m_nScrollPos))
 			{
 				rect.InflateRect(-1, -1);
@@ -440,10 +451,20 @@ void COrderList::OnPaint()
 			}
 			MoveToEx(dc.m_hDC, rect.right, rect.top, NULL);
 			LineTo(dc.m_hDC, rect.right, rect.bottom);
+			//Drawing the 'ctrl-transition' indicator
 			if (nIndex == (int)pSndFile->m_nSeqOverride-1)
 			{
 				MoveToEx(dc.m_hDC, rect.left+4, rect.bottom-4, NULL);
 				LineTo(dc.m_hDC, rect.right-4, rect.bottom-4);
+			}
+
+            CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+
+            //Drawing 'playing'-indicator.
+			if(nIndex == (int)pSndFile->GetCurrentOrder() && pMainFrm->IsPlaying() )
+			{
+				MoveToEx(dc.m_hDC, rect.left+4, rect.top+2, NULL);
+				LineTo(dc.m_hDC, rect.right-4, rect.top+2);
 			}
 			s[0] = 0;
 			if ((nOrder >= 0) && (rect.left + m_cxFont - 4 <= rcClient.right))
@@ -489,7 +510,9 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 	if (pt.y < rect.bottom)
 	{
 		SetFocus();
-		if (CMainFrame::gnHotKeyMask & HOTKEYF_CONTROL)
+		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+
+		if (ih->CtrlPressed())
 		{
 			if (m_pModDoc)
 			{
@@ -497,7 +520,11 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 				int nOrder = m_nXScroll + (pt.x - rect.left) / m_cxFont;
 				if ((nOrder >= 0) && (nOrder < MAX_ORDERS))
 				{
-					pSndFile->m_nSeqOverride = nOrder+1;
+					if (pSndFile->m_nSeqOverride == nOrder+1) {
+						pSndFile->m_nSeqOverride=0;
+					} else {
+						pSndFile->m_nSeqOverride = nOrder+1;
+					}
 					InvalidateRect(NULL, FALSE);
 				}
 			}
@@ -535,6 +562,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				if (m_pModDoc->MoveOrder(m_nDragOrder, m_nDropPos, TRUE, m_bShift))
 				{
 					SetCurSel(((m_nDragOrder < (UINT)m_nDropPos) && (!m_bShift)) ? m_nDropPos-1 : m_nDropPos);
+					m_pModDoc->SetModified();
 				}
 			}
 		}

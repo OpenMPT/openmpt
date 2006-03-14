@@ -72,6 +72,7 @@ public:
 	virtual UINT HasFixedBitsPerSample() { return 0; }
 	virtual BOOL IsOpen() = 0;
 	virtual UINT GetCurrentLatency() = 0;
+	virtual void SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwUser=0) = 0;
 };
 
 

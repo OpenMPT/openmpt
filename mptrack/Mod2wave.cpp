@@ -4,6 +4,7 @@
 #include "dlsbank.h"
 #include "mainfrm.h"
 #include "mpdlgs.h"
+#include "vstplug.h"
 #include "mod2wave.h"
 
 #define NUM_GENRES		128
@@ -50,8 +51,9 @@ extern LPCSTR gszChnCfgNames[3];
 
 static void __cdecl M2W_32ToFloat(void *pBuffer, long nCount)
 {
-	//const float _ki2f = 1.0f / (FLOAT)(ULONG)0x80000000;  
-	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x7fffffff>>2); //ericus' 32bit fix
+//	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x80000000); //olivier 
+	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x7fffffff); //ericus' 32bit fix
+//	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x7ffffff);  //robin
 	_asm {
 	mov esi, pBuffer
 	mov ecx, nCount
@@ -97,6 +99,7 @@ END_MESSAGE_MAP()
 CWaveConvert::CWaveConvert(CWnd *parent):CDialog(IDD_WAVECONVERT, parent)
 //-----------------------------------------------------------------------
 {
+	m_bGivePlugsIdleTime = false;
 	m_bNormalize = FALSE;
 	m_bHighQuality = FALSE;
 	m_bSelectPlay = FALSE;
@@ -130,11 +133,13 @@ BOOL CWaveConvert::OnInitDialog()
 	CHAR s[128];
 
 	CDialog::OnInitDialog();
-	if (m_bSelectPlay)
+	if (m_bSelectPlay) {
 		CheckDlgButton(IDC_RADIO2, MF_CHECKED);
-	else
+	} else {
 		CheckDlgButton(IDC_RADIO1, MF_CHECKED);
-	CheckDlgButton(IDC_CHECK3, MF_CHECKED); // HQ resampling
+	}
+
+	CheckDlgButton(IDC_CHECK3, MF_CHECKED);		// HQ resampling
 	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// rewbs.NoNormalize
 
 // -> CODE#0024
@@ -263,6 +268,14 @@ void CWaveConvert::OnOK()
 	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = FALSE;
 	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? TRUE : FALSE; //rewbs.resamplerConf - we don't want this anymore.
 	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) ? TRUE : FALSE;
+	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) ? TRUE : FALSE;
+	if (m_bGivePlugsIdleTime) {
+		if (MessageBox("You only need slow render if you are experiencing dropped notes with a Kontakt based sampler with Direct-From-Disk enabled.\nIt will make rendering *very* slow.\n\nAre you sure you want to enable slow render?",
+			"Really enable slow render?", MB_YESNO) == IDNO ) {
+			CheckDlgButton(IDC_GIVEPLUGSIDLETIME, BST_UNCHECKED);
+			return;
+		}
+	}
 
 // -> CODE#0024
 // -> DESC="wav export update"
@@ -576,7 +589,7 @@ BOOL CDoWaveConvert::OnInitDialog()
 // -> CODE#0024
 // -> DESC="wav export update"
 //#define WAVECONVERTBUFSIZE	2048
-#define WAVECONVERTBUFSIZE	MIXBUFFERSIZE*4
+#define WAVECONVERTBUFSIZE	MIXBUFFERSIZE //Going over MIXBUFFERSIZE can kill VSTPlugs 
 // -! NEW_FEATURE#0024
 
 
@@ -597,6 +610,7 @@ void CDoWaveConvert::OnButton1()
 
 	if ((!m_pSndFile) || (!m_lpszFileName) || ((f = fopen(m_lpszFileName, "w+b")) == NULL))
 	{
+		::AfxMessageBox("Could not open file for writing. Is it open in another application?");
 		EndDialog(IDCANCEL);
 		return;
 	}
@@ -667,10 +681,30 @@ void CDoWaveConvert::OnButton1()
 	}
 	// Process the conversion
 	UINT nBytesPerSample = (CSoundFile::gnBitsPerSample * CSoundFile::gnChannels) / 8;
+	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n=0; ; n++)
 	{
 		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer));
-		if (!lRead) break;
+/*		if (m_bGivePlugsIdleTime) {
+			LARGE_INTEGER startTime, endTime, duration,Freq;
+			QueryPerformanceFrequency(&Freq);
+			long samplesprocessed = sizeof(buffer)/(m_pWaveFormat->nChannels * m_pWaveFormat->wBitsPerSample / 8);
+			duration.QuadPart = samplesprocessed / static_cast<double>(m_pWaveFormat->nSamplesPerSec) * Freq.QuadPart;
+			if (QueryPerformanceCounter(&startTime)) {
+				endTime.QuadPart=0;
+				while ((endTime.QuadPart-startTime.QuadPart)<duration.QuadPart*4) {
+					theApp.GetPluginManager()->OnIdle();
+					QueryPerformanceCounter(&endTime);
+				}
+			}
+	}*/
+
+		if (m_bGivePlugsIdleTime) {
+			Sleep(20);
+		}
+
+		if (!lRead) 
+			break;
 		ullSamples += lRead;
 		if (m_bNormalize)
 		{
@@ -687,18 +721,23 @@ void CDoWaveConvert::OnButton1()
 		{
 			M2W_32ToFloat(buffer, lRead*(nBytesPerSample>>2));
 		}
+
 		UINT lWrite = fwrite(buffer, 1, lRead*nBytesPerSample, f);
-		if (!lWrite) break;
+		if (!lWrite) 
+			break;
 		datahdr.length += lWrite;
 		if (m_bNormalize)
 		{
 			ULONGLONG d = ((ULONGLONG)datahdr.length * m_pWaveFormat->wBitsPerSample) / 24;
-			if (d >= m_dwFileLimit) break;
+			if (d >= m_dwFileLimit) 
+				break;
 		} else
 		{
-			if (datahdr.length >= m_dwFileLimit) break;
+			if (datahdr.length >= m_dwFileLimit) 
+				break;
 		}
-		if (ullSamples >= ullMaxSamples) break;
+		if (ullSamples >= ullMaxSamples) 
+			break;
 		if (!(n % 10))
 		{
 			DWORD l = (DWORD)(ullSamples / CSoundFile::gdwMixingFreq);
@@ -721,6 +760,7 @@ void CDoWaveConvert::OnButton1()
 			break;
 		}
 	}
+	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	if (m_bNormalize)
 	{
 		DWORD dwLength = datahdr.length;
@@ -887,7 +927,10 @@ void CDoAcmConvert::OnButton1()
 	if (theApp.AcmStreamPrepareHeader(has, &ash, 0L) != MMSYSERR_NOERROR) goto OnError;
 	bPrepared = TRUE;
 	// Creating the output file
-	if ((f = fopen(m_lpszFileName, "wb")) == NULL) goto OnError;
+	if ((f = fopen(m_lpszFileName, "wb")) == NULL) {
+		::AfxMessageBox("Could not open file for writing. Is it open in another application?");
+		goto OnError;
+	}
 	wfh.id_RIFF = IFFID_RIFF;
 	wfh.id_WAVE = IFFID_WAVE;
 	wfh.filesize = 0;
@@ -938,6 +981,7 @@ void CDoAcmConvert::OnButton1()
 	pcmBufSize = WAVECONVERTBUFSIZE;
 	bFinished = FALSE;
 	// Writing File
+	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (n=0; ; n++)
 	{
 		UINT lRead = 0;
@@ -986,6 +1030,7 @@ void CDoAcmConvert::OnButton1()
 		}
 		if (m_bAbort) break;
 	}
+	CMainFrame::GetMainFrame()->StopRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	// Done
 	CSoundFile::gdwSoundSetup = oldsndcfg;
 	CSoundFile::gdwSoundSetup &= ~(SNDMIX_DIRECTTODISK|SNDMIX_NOBACKWARDJUMPS);
@@ -1051,7 +1096,7 @@ void CDoAcmConvert::OnButton1()
 				// IGNR
 				case 4: if (m_id3tag.genre < NUM_GENRES) strcpy(s, gpszGenreNames[m_id3tag.genre]); chunk.id_data = IFFID_IGNR; break;
 				// ISFT
-				case 5: strcpy(s, "Modplug Tracker"); chunk.id_data = IFFID_ISFT; break;
+				case 5: strcpy(s, "OpenMPT"); chunk.id_data = IFFID_ISFT; break;
 				// ICRD
 				case 6: memcpy(s, m_id3tag.year, 4); s[4] = 0; strcat(s, "-01-01"); if (s[0] <= '0') s[0] = 0; chunk.id_data = IFFID_ICRD; break;
 				}

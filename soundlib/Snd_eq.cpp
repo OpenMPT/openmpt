@@ -22,18 +22,21 @@
 
 extern REAL MixFloatBuffer[];
 
-extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
-extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
-extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
-extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
+extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
+extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
+extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 
 #ifdef ENABLE_SSE
-extern void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
+extern void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 #endif
 #ifdef ENABLE_AMD
-extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
-extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
+extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 #endif
+
+
+
 
 #pragma pack(4)
 typedef struct _EQBANDSTRUCT
@@ -360,7 +363,8 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 	if ((gdwSysInfo & SYSMIX_SSE) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
     {
 		int sse_state, sse_eqstate;
-		SSE_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2);
+		SSE_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, m_pConfig->getIntToFloat());
+
 		_asm stmxcsr sse_state;
 		sse_eqstate = sse_state | 0xFF80;
 		_asm ldmxcsr sse_eqstate;
@@ -370,7 +374,9 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 				SSE_StereoEQ(&gEQ[b], &gEQ[b+MAX_EQ_BANDS], MixFloatBuffer, nCount);
 		}
 		_asm ldmxcsr sse_state;
-		X86_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
+
+		X86_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, m_pConfig->getFloatToInt());
+
 	} else
 
 #endif // ENABLE_SSE
@@ -382,20 +388,23 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 
 	if ((gdwSysInfo & SYSMIX_3DNOW) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
 	{ 
-		AMD_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2);
+		AMD_MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, m_pConfig->getIntToFloat());
+
 		for (UINT b=0; b<MAX_EQ_BANDS; b++)
 		{
 			if (((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f))
 			 || ((gEQ[b+MAX_EQ_BANDS].bEnable) && (gEQ[b+MAX_EQ_BANDS].Gain != 1.0f)))
 				AMD_StereoEQ(&gEQ[b], &gEQ[b+MAX_EQ_BANDS], MixFloatBuffer, nCount);
 		}
-		AMD_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2);
+
+		AMD_FloatToMonoMix(MixFloatBuffer, pbuffer, nCount*2, m_pConfig->getFloatToInt());
+		
 	} else
 #endif // ENABLE_AMD
 
 	{	
-
-		X86_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount);
+		X86_StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, m_pConfig->getIntToFloat());
+		
 		for (UINT bl=0; bl<MAX_EQ_BANDS; bl++)
 		{
 			if ((gEQ[bl].bEnable) && (gEQ[bl].Gain != 1.0f)) EQFilter(&gEQ[bl], MixFloatBuffer, nCount);
@@ -404,7 +413,8 @@ void CSoundFile::EQStereo(int *pbuffer, UINT nCount)
 		{
 			if ((gEQ[br].bEnable) && (gEQ[br].Gain != 1.0f)) EQFilter(&gEQ[br], MixFloatBuffer+MIXBUFFERSIZE, nCount);
 		}
-		X86_FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount);
+
+		X86_FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount, m_pConfig->getFloatToInt());
 	}
 }
 

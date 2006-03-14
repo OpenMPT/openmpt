@@ -125,7 +125,7 @@ class CModControlView: public CView
 //=================================
 {
 protected:
-	enum { MAX_PAGES=5 };
+	enum { MAX_PAGES=6 };		//rewbs.graph: 5 to 6
 
 protected:
 	CModTabCtrl m_TabCtrl;

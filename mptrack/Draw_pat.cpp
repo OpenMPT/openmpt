@@ -6,10 +6,7 @@
 #include "globals.h"
 #include "view_pat.h"
 #include "EffectVis.h"		//rewbs.fxvis
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#include "ctrl_pat.h"
-// -! NEW_FEATURE#0015
+#include "ChannelManagerDlg.h"
 
 // Headers
 #define ROWHDR_WIDTH		32	// Row header
@@ -406,13 +403,13 @@ void CViewPattern::OnDraw(CDC *pDC)
 			{
 // -> CODE#0012
 // -> DESC="midi keyboard split"
-//				const char *pszfmt = "Channel %d";
-				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
+				const char *pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]? "[Channel %d]" : "Channel %d";
+//				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
 // -! NEW_FEATURE#0012
 				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] > 0x20))
-					pszfmt = "%d: %s";
-				else if (m_nDetailLevel < 2) pszfmt = "Ch%d";
-				else if (m_nDetailLevel < 3) pszfmt = "Chn %d";
+					pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"%d: [%s]":"%d: %s";
+				else if (m_nDetailLevel < 2) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Ch%d]":"Ch%d";
+				else if (m_nDetailLevel < 3) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Chn %d]":"Chn %d";
 				wsprintf(s, pszfmt, ncolhdr+1, pSndFile->ChnSettings[ncolhdr].szName);
 // -> CODE#0012
 // -> DESC="midi keyboard split"
@@ -464,10 +461,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 					rect.top+=PLUGNAME_HEIGHT;
 					rect.bottom+=PLUGNAME_HEIGHT;
 					mixPlug=pSndFile->ChnSettings[ncolhdr].nMixPlugin;
-					if (mixPlug)
-						wsprintf(s, "%d: %s", mixPlug, (pSndFile->m_MixPlugins[mixPlug-1]).Info.szName);
-					else
+					if (mixPlug) {
+						wsprintf(s, "%d: %s", mixPlug, (pSndFile->m_MixPlugins[mixPlug-1]).pMixPlugin?(pSndFile->m_MixPlugins[mixPlug-1]).Info.szName:"[empty]");
+					} else {
 						wsprintf(s, "---");
+					}
 					DrawButtonRect(hdc, &rect, s, FALSE, 
 						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 				}
@@ -1069,10 +1067,12 @@ void CViewPattern::UpdateScrollSize()
 		if (m_nMidRow) sizeTotal.cy += m_nMidRow * m_szCell.cy * 2;
 		SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
 		//UpdateScrollPos(); //rewbs.FixLPsOddScrollingIssue
-		if (rect.Height() >= sizeTotal.cy)
+		if (rect.Height() >= sizeTotal.cy) {
 			m_bWholePatternFitsOnScreen=true;
-		else
+			m_nYScroll = 0;  //rewbs.fix2977
+		} else {
 			m_bWholePatternFitsOnScreen=false;
+		}
 	}
 }
 
@@ -1208,6 +1208,20 @@ void CViewPattern::SetCurSel(DWORD dwBegin, DWORD dwEnd)
 		y2 = y1;
 		y1 = y;
 	}
+	// rewbs.fix3417: adding error checking
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc) {
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		if (pSndFile) {
+			y1 = max(y1, 0);
+			y2 = min(y2, (int)pSndFile->PatternSize[m_nPattern]);
+			x1 = max(x1, 0);
+			x2 = min(x2, pSndFile->m_nChannels*8 - 4);
+		}
+	}
+	// end rewbs.fix3417
+
+
 	// Get current selection area
 	pt = GetPointFromPosition(m_dwBeginSel);
 	rect1.left = pt.x;

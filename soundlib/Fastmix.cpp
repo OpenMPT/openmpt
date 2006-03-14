@@ -471,10 +471,10 @@ typedef VOID (MPPASMCALL * LPMIXINTERFACE)(MODCHANNEL *, int *, int *);
 
 /////////////////////////////////////////////////////
 //
-extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
-extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
-extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
-extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+extern void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
+extern void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
+extern void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
+extern void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 
 void MPPASMCALL X86_InitMixBuffer(int *pBuffer, UINT nSamples);
 void MPPASMCALL X86_EndChannelOfs(MODCHANNEL *pChannel, int *pBuffer, UINT nSamples);
@@ -504,16 +504,17 @@ extern VOID MMX_FilterMono16BitLinearRampMix(MODCHANNEL *, int *, int *);
 
 
 #ifdef ENABLE_AMD
-extern void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
-extern void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount);
-extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
-extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount);
+extern void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
+extern void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic);
+extern void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
+extern void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic);
 #endif
 
 #ifdef ENABLE_SSE
-extern void SSE_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount);
-extern void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount);
+extern void SSE_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc);
+extern void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc);
 #endif
+
 
 /////////////////////////////////////////////////////
 // Mono samples functions
@@ -1544,6 +1545,8 @@ static LONG MPPFASTCALL GetSampleCount(MODCHANNEL *pChn, LONG nSamples)
 }
 
 
+
+
 UINT CSoundFile::CreateStereoMix(int count)
 //-----------------------------------------
 {
@@ -1575,19 +1578,9 @@ UINT CSoundFile::CreateStereoMix(int count)
 	#ifndef NO_FILTER
 		if (pChannel->dwFlags & CHN_FILTER) nFlags |= MIXNDX_FILTER;
 	#endif
-		if (!(pChannel->dwFlags & CHN_NOIDO))
-		{
-			//rewbs.resamplerConf
-			//nFlags += (pChannel->dwFlags & CHN_HQSRC) ? ((gdwSoundSetup & SNDMIX_ULTRAHQSRCMODE) ? MIXNDX_KAISERSRC : MIXNDX_HQSRC) : MIXNDX_LINEARSRC;
-			if (pChannel->dwFlags & CHN_HQSRC)
-			{
-				if (gdwSoundSetup & SNDMIX_SPLINESRCMODE) nFlags += MIXNDX_HQSRC;
-				else if (gdwSoundSetup & SNDMIX_POLYPHASESRCMODE) nFlags += MIXNDX_KAISERSRC;
-				else if (gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE) nFlags += MIXNDX_FIRFILTERSRC;				
-			}
-			else nFlags += MIXNDX_LINEARSRC;
-			//end rewbs.resamplerConf
-		}
+		//rewbs.resamplerConf
+		nFlags |= GetResamplingFlag(pChannel);
+		//end rewbs.resamplerConf
 	#ifdef ENABLE_MMX
 		if ((gdwSysInfo & SYSMIX_ENABLEMMX) && (gdwSoundSetup & SNDMIX_ENABLEMMX))
 		{
@@ -1613,17 +1606,21 @@ UINT CSoundFile::CreateStereoMix(int count)
 			pbuffer = MixReverbBuffer;
 	#endif
 
-		UINT nMixPlugin = 0;
-
+		//Look for plugins associated with this implicit tracker channel.
+		UINT nMixPlugin = GetBestPlugin(ChnMix[nChn], PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+		
 		//rewbs.instroVSTi
-		if (pChannel->pHeader)												// first try intrument VST
-			nMixPlugin = pChannel->pHeader->nMixPlug;
-		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) 	// Then try Channel VST
-// -> CODE#0015
-// -> DESC="channels management dlg"
-//			nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
-			if(!(pChannel->dwFlags & CHN_NOFX)) nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
-// -! NEW_FEATURE#0015
+/*		UINT nMixPlugin=0;
+		if (pChannel->pHeader && pChannel->pInstrument) {	// first try intrument VST
+			if (!(pChannel->pInstrument->uFlags & ENV_MUTE))
+				nMixPlugin = pChannel->pHeader->nMixPlug;
+		}
+		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) { 	// Then try Channel VST
+			if(!(pChannel->dwFlags & CHN_NOFX)) 
+				nMixPlugin = ChnSettings[nMasterCh-1].nMixPlugin;
+		}
+*/
+
 		//end rewbs.instroVSTi		
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS))
 		{
@@ -1734,6 +1731,32 @@ UINT CSoundFile::CreateStereoMix(int count)
 	return nchused;
 }
 
+UINT CSoundFile::GetResamplingFlag(const MODCHANNEL *pChannel)
+//------------------------------------------------------------
+{
+	if (pChannel->pHeader) {
+		switch (pChannel->pHeader->nResampling) {
+			case SRCMODE_NEAREST:	return 0;
+			case SRCMODE_LINEAR:	return MIXNDX_LINEARSRC;
+			case SRCMODE_SPLINE:	return MIXNDX_HQSRC;
+			case SRCMODE_POLYPHASE: return MIXNDX_KAISERSRC;
+			case SRCMODE_FIRFILTER: return MIXNDX_FIRFILTERSRC;
+//			default: ;
+		}
+	}
+	
+	//didn't manage to get flag from instrument header, use channel flags.
+	if (pChannel->dwFlags & CHN_HQSRC)	{
+		if (gdwSoundSetup & SNDMIX_SPLINESRCMODE)		return MIXNDX_HQSRC;
+		if (gdwSoundSetup & SNDMIX_POLYPHASESRCMODE)	return MIXNDX_KAISERSRC;
+		if (gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE)	return MIXNDX_FIRFILTERSRC;				
+	} else if (!(pChannel->dwFlags & CHN_NOIDO)) {
+		return MIXNDX_LINEARSRC;
+	}
+	
+	return 0;
+}
+
 
 extern int gbInitPlugins;
 
@@ -1751,10 +1774,20 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 		{
 			PSNDMIXPLUGINSTATE pState = pPlugin->pMixState;
 			// Init plugins ?
-			if (gbInitPlugins)
-			{
+			/*if (gbInitPlugins)
+			{   //ToDo: do this in resume.
 				pPlugin->pMixPlugin->Init(gdwMixingFreq, (gbInitPlugins & 2) ? TRUE : FALSE);
+			}*/
+
+			//We should only ever reach this point if the song is playing.
+			if (!pPlugin->pMixPlugin->IsSongPlaying()) {
+				//Plugin doesn't know it is in a song that is playing;
+				//we must have added it during playback. Initialise it!
+				pPlugin->pMixPlugin->NotifySongPlaying(true);
+				pPlugin->pMixPlugin->Resume();
 			}
+
+
 			// Setup float input
 			if (pState->dwFlags & MIXPLUG_MIXREADY)
 			{
@@ -1776,6 +1809,7 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 	StereoMixToFloat(MixSoundBuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount);
 	FLOAT *pMixL = MixFloatBuffer;
 	FLOAT *pMixR = MixFloatBuffer + MIXBUFFERSIZE;
+
 	// Process Plugins
 	for (UINT iDoPlug=0; iDoPlug<MAX_MIXPLUGINS; iDoPlug++)
 	{
@@ -1855,30 +1889,35 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 // Float <-> Int conversion
 //
 
+
+float CSoundFile::m_nMaxSample = 0;
+
 VOID CSoundFile::StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
 //-----------------------------------------------------------------------------------------
 {
+
 #ifdef ENABLE_MMX
 	if (gdwSoundSetup & SNDMIX_ENABLEMMX)
 	{
 		if (gdwSysInfo & SYSMIX_SSE)
 		{
 #ifdef ENABLE_SSE
-		SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
+		SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_pConfig->getIntToFloat());
 #endif
 			return;
 		}
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
 #ifdef ENABLE_AMD
-		AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
+		AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_pConfig->getIntToFloat());
 #endif
 			return;
 		}
 	}
 #endif
 
- 	X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount);
+ 	X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, m_pConfig->getIntToFloat());
+
 }
 
 
@@ -1890,12 +1929,12 @@ VOID CSoundFile::FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOu
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
 #ifdef ENABLE_AMDNOW
-			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount);
+			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_pConfig->getFloatToInt());
 #endif
 			return;
 		}
 	}
-	X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount);
+	X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, m_pConfig->getFloatToInt());
 }
 
 
@@ -1907,19 +1946,20 @@ VOID CSoundFile::MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
 		if (gdwSysInfo & SYSMIX_SSE)
 		{
 #ifdef ENABLE_SSE
- 		SSE_MonoMixToFloat(pSrc, pOut, nCount);
+ 		SSE_MonoMixToFloat(pSrc, pOut, nCount, m_pConfig->getIntToFloat());
 #endif
 			return;
 		}
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
 #ifdef ENABLE_AMDNOW
-			AMD_MonoMixToFloat(pSrc, pOut, nCount);
+			AMD_MonoMixToFloat(pSrc, pOut, nCount, m_pConfig->getIntToFloat());
 #endif
 			return;
 		}
 	}
-	X86_MonoMixToFloat(pSrc, pOut, nCount);
+	X86_MonoMixToFloat(pSrc, pOut, nCount, m_pConfig->getIntToFloat());	
+
 }
 
 
@@ -1931,12 +1971,12 @@ VOID CSoundFile::FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
 		if (gdwSysInfo & SYSMIX_3DNOW)
 		{
 #ifdef ENABLE_AMDNOW
-			AMD_FloatToMonoMix(pIn, pOut, nCount);
+			AMD_FloatToMonoMix(pIn, pOut, nCount, m_pConfig->getFloatToInt());
 #endif
 			return;
 		}
 	}
-	X86_FloatToMonoMix(pIn, pOut, nCount);
+	X86_FloatToMonoMix(pIn, pOut, nCount, m_pConfig->getFloatToInt());
 }
 
 

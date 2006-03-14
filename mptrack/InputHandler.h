@@ -35,6 +35,7 @@ enum {
 	WM_MOD_KBDNOTIFY,
 	WM_MOD_INSTRSELECTED,
 	WM_MOD_KEYCOMMAND,
+	WM_MOD_RECORDPARAM,
 };
 
 
@@ -45,29 +46,31 @@ public:
 	CInputHandler(CWnd *mainframe);
 	~CInputHandler(void);
 	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam);
-	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType);
+	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd=NULL);
 	int SetCommand(InputTargetContext context, CommandID command, UINT modifierMask, UINT actionKey, UINT keyEventType);
 	KeyEventType GetKeyEventType(UINT nFlags);
 	DWORD GetKey(CommandID);
+	bool isKeyPressHandledByTextBox(DWORD wparam);
 
 	KeyCombination GetKey(CommandID cmd, UINT key);
 	int GetKeyListSize(CommandID cmd);
 	CString GetCommandText(CommandID cmd);
 
 protected:
-	CWnd *pMainFrm;
+	CWnd *m_pMainFrm;
 	int AsciiToScancode(char ch);
 	KeyMap keyMap;
 	void LogModifiers(UINT mask);	
 	UINT modifierMask;
-	bool CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode);
-	bool m_bDistinguishControls, m_bDistinguishShifts, m_bDistinguishAlts;
 	bool m_bBypass;
 	bool m_bNoAltMenu;
+	bool m_bDistinguishControls, m_bDistinguishShifts, m_bDistinguishAlts;
+	bool CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode);
 
 public:
 	CCommandSet *activeCommandSet;
 	bool ShiftPressed(void);
+	bool SelectionPressed(void);
 	bool CtrlPressed(void);
 	bool AltPressed(void);
 	bool Bypass();

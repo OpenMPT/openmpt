@@ -67,12 +67,7 @@ BOOL COwnerVstEditor::OpenEditor(CWnd *parent)
 					SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
 			}
 		}
-		if (m_pVstPlugin->m_pMixStruct)
-		{
-			const char *pszTitle = m_pVstPlugin->m_pMixStruct->Info.szName;
-			if (!pszTitle[0]) pszTitle = m_pVstPlugin->m_pMixStruct->Info.szLibraryName;
-			SetWindowText(pszTitle);
-		}
+		SetTitle();
 		
 
 		m_pVstPlugin->Dispatch(effEditTop, 0,0, NULL, 0);

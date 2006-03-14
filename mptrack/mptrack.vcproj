@@ -21,7 +21,7 @@
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GX-"
+				AdditionalOptions="/EHsc"
 				Optimization="0"
 				OptimizeForProcessor="1"
 				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
@@ -38,19 +38,19 @@
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
-				LinkIncremental="1"
+				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\xsoundlib\Release"
+				AdditionalLibraryDirectories="..\xsoundlib\Debug"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\Debug/mptrack.pdb"
 				GenerateMapFile="TRUE"
@@ -85,28 +85,29 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory=".\Bin2"
-			IntermediateDirectory=".\Release"
+			Name="Generic|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/GX-"
+				AdditionalOptions="/EHsc"
 				InlineFunctionExpansion="1"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
+				BufferSecurityCheck="FALSE"
+				EnableFunctionLevelLinking="FALSE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/mptrack.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile=".\Generic/mptrack.pch"
+				AssemblerListingLocation=".\Generic/"
+				ObjectFile=".\Generic/"
+				ProgramDataBaseFileName=".\Generic/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -115,14 +116,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib"
-				OutputFile=".\Bin/mptrack.exe"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
+				OutputFile=".\Bin/mptrack_Generic.exe"
 				Version="5.0"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\xsoundlib\Release"
-				GenerateMapFile="TRUE"
-				MapFileName=".\Release/mptrack.map"
+				AdditionalLibraryDirectories="..\xsoundlib\Generic"
+				GenerateMapFile="FALSE"
+				MapFileName=".\Generic/mptrack.map"
 				SubSystem="2"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -132,7 +133,224 @@
 				TargetEnvironment="1"
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="P3|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="1"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/EHsc"
+				InlineFunctionExpansion="1"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
+				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="FALSE"
+				EnableFunctionLevelLinking="FALSE"
+				EnableEnhancedInstructionSet="1"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderFile=".\P3/mptrack.pch"
+				AssemblerListingLocation=".\P3/"
+				ObjectFile=".\P3/"
+				ProgramDataBaseFileName=".\P3/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
+				OutputFile=".\Bin/mptrack_P3.exe"
+				Version="5.0"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="..\xsoundlib\P3"
+				GenerateMapFile="FALSE"
+				MapFileName=".\P3/mptrack.map"
+				SubSystem="2"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Bin/mptrack.tlb"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Athlon32|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="1"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/EHsc"
+				InlineFunctionExpansion="1"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
+				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="FALSE"
+				EnableFunctionLevelLinking="FALSE"
+				EnableEnhancedInstructionSet="1"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderFile=".\Athlon32/mptrack.pch"
+				AssemblerListingLocation=".\Athlon32/"
+				ObjectFile=".\Athlon32/"
+				ProgramDataBaseFileName=".\Athlon32/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
+				OutputFile=".\Bin/mptrack_athlon32.exe"
+				Version="5.0"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="..\xsoundlib\Athlon32"
+				GenerateMapFile="FALSE"
+				MapFileName=".\Athlon32/mptrack.map"
+				SubSystem="2"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Bin/mptrack.tlb"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="P4-Athlon64|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="1"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/EHsc"
+				InlineFunctionExpansion="2"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
+				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="FALSE"
+				EnableFunctionLevelLinking="FALSE"
+				EnableEnhancedInstructionSet="2"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="stdafx.h"
+				PrecompiledHeaderFile=".\P4-Athlon64/mptrack.pch"
+				AssemblerListingLocation=".\P4-Athlon64/"
+				ObjectFile=".\P4-Athlon64/"
+				ProgramDataBaseFileName=".\P4-Athlon64/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
+				OutputFile=".\Bin/mptrack_P4-Athlon64.exe"
+				Version="5.0"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="..\xsoundlib\P4-Athlon64"
+				GenerateMapFile="FALSE"
+				MapFileName=".\P4-Athlon64/mptrack.map"
+				SubSystem="2"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="TRUE"
+				SuppressStartupBanner="TRUE"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Bin/mptrack.tlb"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -163,7 +381,19 @@
 				RelativePath=".\AbstractVstEditor.cpp">
 			</File>
 			<File
+				RelativePath=".\ArrayUtils.cpp">
+			</File>
+			<File
+				RelativePath=".\AutoSaver.cpp">
+			</File>
+			<File
+				RelativePath=".\ChannelManagerDlg.cpp">
+			</File>
+			<File
 				RelativePath=".\ChildFrm.cpp">
+			</File>
+			<File
+				RelativePath=".\ColourEdit.cpp">
 			</File>
 			<File
 				RelativePath=".\CommandSet.cpp">
@@ -212,6 +442,15 @@
 			</File>
 			<File
 				RelativePath=".\globals.cpp">
+			</File>
+			<File
+				RelativePath=".\HyperEdit.cpp">
+			</File>
+			<File
+				RelativePath=".\HyperEdit2.cpp">
+			</File>
+			<File
+				RelativePath=".\HyperEdit3.cpp">
 			</File>
 			<File
 				RelativePath="InputHandler.cpp">
@@ -316,6 +555,9 @@
 				RelativePath=".\Moptions.cpp">
 			</File>
 			<File
+				RelativePath=".\MoveFXSlotDialog.cpp">
+			</File>
+			<File
 				RelativePath=".\Mpdlgs.cpp">
 			</File>
 			<File
@@ -326,6 +568,21 @@
 			</File>
 			<File
 				RelativePath=".\mptrack.rc">
+			</File>
+			<File
+				RelativePath=".\OpenGLControl.cpp">
+			</File>
+			<File
+				RelativePath=".\OpenGLDevice.cpp">
+			</File>
+			<File
+				RelativePath=".\OpenGLEditor.cpp">
+			</File>
+			<File
+				RelativePath=".\PatternGotoDialog.cpp">
+			</File>
+			<File
+				RelativePath=".\PerformanceCounter.cpp">
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.cpp">
@@ -348,7 +605,25 @@
 			<File
 				RelativePath="..\Soundlib\Snd_rvb.cpp">
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Generic|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="P3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Athlon32|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="4"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="P4-Athlon64|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						AssemblerOutput="4"/>
@@ -364,6 +639,9 @@
 				RelativePath="..\soundlib\Sndmix.cpp">
 			</File>
 			<File
+				RelativePath=".\SoundFilePlayConfig.cpp">
+			</File>
+			<File
 				RelativePath=".\StdAfx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -372,7 +650,25 @@
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Generic|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="P3|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Athlon32|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="P4-Athlon64|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
@@ -411,6 +707,104 @@
 			<File
 				RelativePath="..\soundlib\WindowedFIR.cpp">
 			</File>
+			<Filter
+				Name="PatternRandomizer"
+				Filter="">
+				<File
+					RelativePath=".\PatternRandomizer.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizer.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUI.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUI.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIEffect.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIEffect.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIInstrument.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIInstrument.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUINote.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUINote.h">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIVolCmd.cpp">
+				</File>
+				<File
+					RelativePath=".\PatternRandomizerGUIVolCmd.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="MixGraph"
+				Filter="">
+				<File
+					RelativePath=".\ChannelNode.cpp">
+				</File>
+				<File
+					RelativePath=".\ChannelNode.h">
+				</File>
+				<File
+					RelativePath=".\ctrl_graph.cpp">
+				</File>
+				<File
+					RelativePath=".\ctrl_graph.h">
+				</File>
+				<File
+					RelativePath=".\EffectNode.cpp">
+				</File>
+				<File
+					RelativePath=".\EffectNode.h">
+				</File>
+				<File
+					RelativePath=".\FinalNode.cpp">
+				</File>
+				<File
+					RelativePath=".\FinalNode.h">
+				</File>
+				<File
+					RelativePath=".\Graph.cpp">
+				</File>
+				<File
+					RelativePath=".\Graph.h">
+				</File>
+				<File
+					RelativePath=".\InstrumentNode.cpp">
+				</File>
+				<File
+					RelativePath=".\InstrumentNode.h">
+				</File>
+				<File
+					RelativePath=".\Node.cpp">
+				</File>
+				<File
+					RelativePath=".\Node.h">
+				</File>
+				<File
+					RelativePath=".\Vertex.cpp">
+				</File>
+				<File
+					RelativePath=".\Vertex.h">
+				</File>
+				<File
+					RelativePath=".\view_graph.cpp">
+				</File>
+				<File
+					RelativePath=".\view_graph.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -419,7 +813,19 @@
 				RelativePath=".\AbstractVstEditor.h">
 			</File>
 			<File
+				RelativePath=".\ArrayUtils.h">
+			</File>
+			<File
+				RelativePath=".\AutoSaver.h">
+			</File>
+			<File
+				RelativePath=".\ChannelManagerDlg.h">
+			</File>
+			<File
 				RelativePath=".\ChildFrm.h">
+			</File>
+			<File
+				RelativePath=".\ColourEdit.h">
 			</File>
 			<File
 				RelativePath=".\CommandSet.h">
@@ -488,10 +894,28 @@
 				RelativePath=".\Moptions.h">
 			</File>
 			<File
+				RelativePath=".\MoveFXSlotDialog.h">
+			</File>
+			<File
 				RelativePath=".\Mpdlgs.h">
 			</File>
 			<File
 				RelativePath=".\mptrack.h">
+			</File>
+			<File
+				RelativePath=".\OpenGLControl.h">
+			</File>
+			<File
+				RelativePath=".\OpenGLDevice.h">
+			</File>
+			<File
+				RelativePath=".\OpenGLEditor.h">
+			</File>
+			<File
+				RelativePath=".\PatternGotoDialog.h">
+			</File>
+			<File
+				RelativePath=".\PerformanceCounter.h">
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.h">
@@ -507,6 +931,9 @@
 			</File>
 			<File
 				RelativePath="..\Soundlib\Sndfile.h">
+			</File>
+			<File
+				RelativePath=".\SoundFilePlayConfig.h">
 			</File>
 			<File
 				RelativePath=".\StdAfx.h">
@@ -583,6 +1010,9 @@
 			</File>
 			<File
 				RelativePath=".\res\patterns.bmp">
+			</File>
+			<File
+				RelativePath=".\res\rt_manif.bin">
 			</File>
 			<File
 				RelativePath=".\Res\smptoolb.bmp">
