@@ -199,6 +199,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboZoom.AddString("1:16");
 	m_ComboZoom.AddString("1:32");
 	m_ComboZoom.AddString("1:64");
+	m_ComboZoom.AddString("1:128");
 	m_ComboZoom.SetCurSel(0);
 	// File ToolBar
 	m_ToolBar1.Init();
@@ -220,8 +221,11 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 	//rewbs.fix36944
-	//m_SpinPanning.SetRange(0, 256);
-	m_SpinPanning.SetRange(0, 64);
+	if (m_pSndFile->m_nType == MOD_TYPE_XM) {
+		m_SpinPanning.SetRange(0, 255);
+	} else 	{
+		m_SpinPanning.SetRange(0, 64);
+	}
 	//end rewbs.fix36944
 	m_ComboAutoVib.AddString("Sine");
 	m_ComboAutoVib.AddString("Square");
@@ -507,7 +511,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 	}
 	if (!(dwHintMask & (HINT_SAMPLEINFO|HINT_MODTYPE))) return;
 	// 05/01/05 : ericus replaced ">> 24" by ">> 20" : 4000 samples -> 12bits [see Moddoc.h]
-	if (((dwHintMask >> 20) != (m_nSample&0xff)) && (!(dwHintMask & HINT_MODTYPE))) return;
+	if (((dwHintMask >> 20) != (m_nSample&0x0fff)) && (!(dwHintMask & HINT_MODTYPE))) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	// Updating Ranges
@@ -597,8 +601,11 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// Panning
 		CheckDlgButton(IDC_CHECK1, (pins->uFlags & CHN_PANNING) ? MF_CHECKED : 0);
 		//rewbs.fix36944
-		//SetDlgItemInt(IDC_EDIT9, pins->nPan);
-		SetDlgItemInt(IDC_EDIT9, pins->nPan>>2);
+		if (m_pSndFile->m_nType == MOD_TYPE_XM) {
+			SetDlgItemInt(IDC_EDIT9, pins->nPan);		//displayed panning with XM is 0-256, just like MPT's internal engine
+		} else {
+			SetDlgItemInt(IDC_EDIT9, pins->nPan>>2);	//displayed panning with anything but XM is 0-64 so we divide by 4
+		}
 		//end rewbs.fix36944
 		// FineTune / C-4 Speed / BaseNote
         int transp = 0;
@@ -966,7 +973,7 @@ void CCtrlSamples::OnSamplePlay()
 			m_pModDoc->NoteOff(0, TRUE);
 		} else
 		{
-			m_pModDoc->PlayNote(NOTE_MIDDLEC, 0, m_nSample, TRUE);
+			m_pModDoc->PlayNote(NOTE_MIDDLEC, 0, m_nSample, FALSE);
 		}
 	}
 	SwitchToView();
@@ -1422,7 +1429,8 @@ void CCtrlSamples::OnEstimateSampleSize()
 
 	//Open dialog
 	CPSRatioCalc dlg(pins->nLength, lSampleRate, 
-					 m_pSndFile->m_nMusicSpeed, m_pSndFile->m_nMusicTempo, 
+					 m_pSndFile->m_nMusicSpeed,  m_pSndFile->m_nMusicTempo, 
+					 m_pSndFile->m_nRowsPerBeat, m_pSndFile->m_nTempoMode,
 					 m_dTimeStretchRatio, this);
 	if (dlg.DoModal() != IDOK) return;
 	
@@ -2137,6 +2145,7 @@ void CCtrlSamples::OnNameChanged()
 		memcpy(m_pSndFile->m_szNames[m_nSample], s, 32);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
+		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
 		m_pModDoc->SetModified();
 	}
 }
@@ -2227,9 +2236,12 @@ void CCtrlSamples::OnPanningChanged()
 	int nPan = GetDlgItemInt(IDC_EDIT9);
 	if (nPan < 0) nPan = 0;
 	//rewbs.fix36944: sample pan range to 0-64.
-	//if (nPan > 256) nPan = 256;
-	if (nPan > 64) nPan = 64;		
-	nPan = nPan << 2;
+	if (m_pSndFile->m_nType == MOD_TYPE_XM) {
+		if (nPan>255) nPan = 255;	// displayed panning will be 0-255 with XM
+	} else {
+		if (nPan>64) nPan = 64;		// displayed panning will be 0-64 with anything but XM.
+		nPan = nPan << 2;			// so we x4 to get MPT's internal 0-256 range.
+	}
 	//end rewbs.fix36944
 	if (nPan != m_pSndFile->Ins[m_nSample].nPan)
 	{
@@ -2260,11 +2272,15 @@ void CCtrlSamples::OnFineTuneChanged()
 				m_CbnBaseNote.SetCurSel(basenote);
 				UnlockControls();
 			}
+			m_pModDoc->SetModified();
 		}
 	} else
 	{
-		if ((n >= -128) && (n <= 127))
+		if ((n >= -128) && (n <= 127)) {
 			m_pSndFile->Ins[m_nSample].nFineTune = n;
+			m_pModDoc->SetModified();
+		}
+
 	}
 }
 
@@ -2286,12 +2302,13 @@ void CCtrlSamples::OnBaseNoteChanged()
 			LockControls();
 			m_EditFineTune.SetWindowText(s);
 			UnlockControls();
+			m_pModDoc->SetModified();
 		}
 	} else
 	{
-		if ((n >= -128) && (n < 128))
-		{
+		if ((n >= -128) && (n < 128)) {
 			m_pSndFile->Ins[m_nSample].RelativeTone = n;
+			m_pModDoc->SetModified();
 		}
 	}
 }
@@ -2303,6 +2320,7 @@ void CCtrlSamples::OnVibTypeChanged()
 	if (IsLocked()) return;
 	int n = m_ComboAutoVib.GetCurSel();
 	if (n >= 0) m_pSndFile->Ins[m_nSample].nVibType = (BYTE)n;
+	m_pModDoc->SetModified();
 }
 
 
@@ -2313,8 +2331,10 @@ void CCtrlSamples::OnVibDepthChanged()
 	int lmin = 0, lmax = 0;
 	m_SpinVibDepth.GetRange(lmin, lmax);
 	int n = GetDlgItemInt(IDC_EDIT15);
-	if ((n >= lmin) && (n <= lmax))
+	if ((n >= lmin) && (n <= lmax)) {
 		m_pSndFile->Ins[m_nSample].nVibDepth = n;
+		m_pModDoc->SetModified();
+	}
 }
 
 
@@ -2325,8 +2345,10 @@ void CCtrlSamples::OnVibSweepChanged()
 	int lmin = 0, lmax = 0;
 	m_SpinVibSweep.GetRange(lmin, lmax);
 	int n = GetDlgItemInt(IDC_EDIT14);
-	if ((n >= lmin) && (n <= lmax))
+	if ((n >= lmin) && (n <= lmax)) {
 		m_pSndFile->Ins[m_nSample].nVibSweep = n;
+		m_pModDoc->SetModified();
+	}
 }
 
 
@@ -2337,8 +2359,10 @@ void CCtrlSamples::OnVibRateChanged()
 	int lmin = 0, lmax = 0;
 	m_SpinVibRate.GetRange(lmin, lmax);
 	int n = GetDlgItemInt(IDC_EDIT16);
-	if ((n >= lmin) && (n <= lmax))
+	if ((n >= lmin) && (n <= lmax)) {
 		m_pSndFile->Ins[m_nSample].nVibRate = n;
+		m_pModDoc->SetModified();
+	}
 }
 
 
@@ -2362,6 +2386,7 @@ void CCtrlSamples::OnLoopTypeChanged()
 		break;
 	}
 	m_pModDoc->AdjustEndOfSample(m_nSample);
+	m_pModDoc->SetModified();
 }
 
 
@@ -2377,6 +2402,7 @@ void CCtrlSamples::OnLoopStartChanged()
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->SetModified();
 	}
 }
 
@@ -2393,6 +2419,7 @@ void CCtrlSamples::OnLoopEndChanged()
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->SetModified();
 	}
 }
 
@@ -2416,6 +2443,7 @@ void CCtrlSamples::OnSustainTypeChanged()
 		pins->uFlags |= CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN;
 		break;
 	}
+	m_pModDoc->SetModified();
 }
 
 
@@ -2431,6 +2459,7 @@ void CCtrlSamples::OnSustainStartChanged()
 		pins->nSustainStart = n;
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->SetModified();
 	}
 }
 
@@ -2447,6 +2476,7 @@ void CCtrlSamples::OnSustainEndChanged()
 		pins->nSustainEnd = n;
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->SetModified();
 	}
 }
 
@@ -2722,10 +2752,10 @@ NoSample:
 		m_SpinFineTune.SetPos(0);
 	}
 	if ((nCode == SB_ENDSCROLL) || (nCode == SB_THUMBPOSITION)) SwitchToView();
-	if (bRedraw)
-	{
+	if (bRedraw) {
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->SetModified();
 	}
 	UnlockControls();
 }

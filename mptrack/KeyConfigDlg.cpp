@@ -19,7 +19,9 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 	{
 		if ((pMsg->message == WM_KEYDOWN)    || (pMsg->message == WM_SYSKEYDOWN))
 		{
-			SetKey(CMainFrame::GetInputHandler()->GetModifierMask(), pMsg->wParam);
+			//if (!(pMsg->lparam & 0x40000000)) { // only on first presss
+				SetKey(CMainFrame::GetInputHandler()->GetModifierMask(), pMsg->wParam);
+			//}
 			return -1; // Keypress handled, don't pass on message.
 		}
 		else if ((pMsg->message == WM_KEYUP)    || (pMsg->message == WM_SYSKEYUP))
@@ -97,6 +99,7 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_NONOTESREPEAT, OnNoNotesRepeat)
 	ON_COMMAND(IDC_EFFECTLETTERSXM, OnSetXMEffects)
 	ON_COMMAND(IDC_EFFECTLETTERSIT, OnSetITEffects)
+	ON_COMMAND(IDC_CLEARLOG, OnClearLog)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
@@ -226,9 +229,9 @@ void COptionsKeyboard::DefineCommandCategories()
 	for (int c=kcClearRow; c<=kcInsertAllRows; c++)
 		newCat->commands.Add(c);
 	newCat->separators.Add(kcInsertAllRows);			//--------------------------------------
-	for (int c=kcChannelMute; c<=kcChannelSolo; c++)
+	for (int c=kcChannelMute; c<=kcToggleChanMuteOnPatTransition; c++)
 		newCat->commands.Add(c);
-	newCat->separators.Add(kcChannelSolo);			//--------------------------------------
+	newCat->separators.Add(kcToggleChanMuteOnPatTransition);			//--------------------------------------
 	for (int c=kcTransposeUp; c<=kcTransposeOctDown; c++)
 		newCat->commands.Add(c);
 	newCat->separators.Add(kcTransposeOctDown);			//--------------------------------------
@@ -244,6 +247,9 @@ void COptionsKeyboard::DefineCommandCategories()
 
 	newCat = new CommandCategory("        Pattern Editor - Note col", kCtxViewPatternsNote);
 	for (int c=kcVPStartNotes; c<=kcVPEndNotes; c++)
+		newCat->commands.Add(c);
+	newCat->separators.Add(kcVPEndNotes);			//--------------------------------------
+	for (int c=kcSetOctave0; c<=kcSetOctave9; c++)
 		newCat->commands.Add(c);
 	newCat->separators.Add(kcVPEndNotes);			//--------------------------------------
 	for (int c=kcStartNoteMisc; c<=kcEndNoteMisc; c++)
@@ -303,6 +309,13 @@ void COptionsKeyboard::DefineCommandCategories()
 	newCat = new CommandCategory("  Comments [Bottom]", kCtxViewComments);
 	commandCategories.Add(*newCat);
 	delete newCat;
+
+	newCat = new CommandCategory("  Plugin Editor", kCtxVSTGUI);
+	for (int c=kcStartVSTGUICommands; c<=kcEndVSTGUICommands; c++)
+		newCat->commands.Add(c);
+	commandCategories.Add(*newCat);
+	delete newCat;
+
 
 }
 
@@ -394,7 +407,6 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 		m_bKeyUp.EnableWindow(TRUE);
 		
 		m_nCurHotKey = nCmd;
-		WORD code, mod=0;
 		BOOL bEnable = FALSE;
 		char s[20];
 			
@@ -404,7 +416,7 @@ void COptionsKeyboard::OnCommandKeySelChanged()
         {
 			for (int i=0; i<numChoices; i++)
 			{
-				wsprintf(s, "Choice %d \t(of %d)", i+1, numChoices);
+				wsprintf(s, "Choice %d (of %d)", i+1, numChoices);
 				m_cmbKeyChoice.SetItemData(m_cmbKeyChoice.AddString(s), i);
 			}
 		}
@@ -527,7 +539,6 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 
 void COptionsKeyboard::OnDeleteKeyChoice()
 {
-	KeyCombination kc;
 	CommandID cmd = (CommandID)m_nCurHotKey;
 
 	//Do nothing if there's no key defined for this slot.
@@ -589,8 +600,8 @@ void COptionsKeyboard::OnSetKeyChoice()
 	
 	//Update log
 	m_eReport.GetWindowText(reportHistory);
-	reportHistory = reportHistory.Mid(6,reportHistory.GetLength()-1);
-	m_eReport.SetWindowText("Log:\r\n"+report+reportHistory);
+	//reportHistory = reportHistory.Mid(6,reportHistory.GetLength()-1);
+	m_eReport.SetWindowText(report+reportHistory);
 
 	ForceUpdateGUI();
 	m_bModified=false;
@@ -629,7 +640,7 @@ void COptionsKeyboard::OnLoad()
 { 
 	CFileDialog dlg(TRUE, "mkb", m_sFullPathName,
 					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-					"Modplug Tracker Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
+					"OpenMPT Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
 	if (CMainFrame::m_szKbdFile[0])
 			dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szKbdFile;
 
@@ -647,7 +658,7 @@ void COptionsKeyboard::OnSave()
 {	
 	CFileDialog dlg(FALSE, "mkb", m_sFullPathName,
 					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-					"Modplug Tracker Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
+					"OpenMPT Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
 	if (CMainFrame::m_szKbdFile[0])
 			dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szKbdFile;
 	
@@ -709,4 +720,10 @@ void COptionsKeyboard::ForceUpdateGUI()
 	m_cmbKeyChoice.SetCurSel(ntmpChoice);		// select fresh keychoice (thus restoring m_nCurKeyChoice)
 	OnKeyChoiceSelect();						// update key data
 	OnSettingsChanged();						// Enable "apply" button
+}
+
+void COptionsKeyboard::OnClearLog()
+{
+	m_eReport.SetWindowText("");
+	ForceUpdateGUI();
 }

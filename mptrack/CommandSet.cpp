@@ -15,17 +15,18 @@ CCommandSet::CCommandSet(void)
 	enforceRule[krAllowSelectCopySelectCombos]	= true;
 	enforceRule[krLockNotesToChords]			= true;
 	enforceRule[krNoteOffOnKeyRelease]			= true;
-	enforceRule[krPropagateNotes]	= true;
-	enforceRule[krReassignDigitsToOctaves]		= true;
-	enforceRule[krDeleteOldOnConflict]			= true;
-	enforceRule[krDeleteOldOnConflict]			= true;
+	enforceRule[krPropagateNotes]				= true;
+	enforceRule[krReassignDigitsToOctaves]		= false;
 	enforceRule[krAutoSelectOff]				= true;
 	enforceRule[krAutoSpacing]					= true;
 	enforceRule[krCheckModifiers]				= true;
 	enforceRule[krPropagateSampleManipulation]  = true;
+//	enforceRule[krCheckContextHierarchy]		= true;
+	
 	
 	commands.SetSize(kcNumCommands);
 	SetupCommands();
+	SetupContextHierarchy();
 }
 
 CCommandSet::~CCommandSet(void)
@@ -127,22 +128,22 @@ void CCommandSet::SetupCommands()
 	commands[kcPatternJumpDownh1].UID = 1017;
 	commands[kcPatternJumpDownh1].isHidden = false;
 	commands[kcPatternJumpDownh1].isDummy = false;
-	commands[kcPatternJumpDownh1].Message = "Jump down by highlight1";
+	commands[kcPatternJumpDownh1].Message = "Jump down by measure";
 
 	commands[kcPatternJumpUph1].UID = 1018;
 	commands[kcPatternJumpUph1].isHidden = false;
 	commands[kcPatternJumpUph1].isDummy = false;
-	commands[kcPatternJumpUph1].Message = "Jump up by highlight1";
+	commands[kcPatternJumpUph1].Message = "Jump up by measure";
 
 	commands[kcPatternSnapDownh1].UID = 1019;
 	commands[kcPatternSnapDownh1].isHidden = false;
 	commands[kcPatternSnapDownh1].isDummy = false;
-	commands[kcPatternSnapDownh1].Message = "Snap down to highlight1";
+	commands[kcPatternSnapDownh1].Message = "Snap down to measure";
 
 	commands[kcPatternSnapUph1].UID = 1020;
 	commands[kcPatternSnapUph1].isHidden = false;
 	commands[kcPatternSnapUph1].isDummy = false;
-	commands[kcPatternSnapUph1].Message = "Snap up to highlight1";
+	commands[kcPatternSnapUph1].Message = "Snap up to measure";
 
 	commands[kcViewGeneral].UID = 1021;
 	commands[kcViewGeneral].isHidden = false;
@@ -232,12 +233,12 @@ void CCommandSet::SetupCommands()
 	commands[kcNavigateDown].UID = 1038;
 	commands[kcNavigateDown].isHidden = false;
 	commands[kcNavigateDown].isDummy = false;
-	commands[kcNavigateDown].Message = "Navigate down";
+	commands[kcNavigateDown].Message = "Navigate down by 1 row";
 
 	commands[kcNavigateUp].UID = 1039;
 	commands[kcNavigateUp].isHidden = false;
 	commands[kcNavigateUp].isDummy = false;
-	commands[kcNavigateUp].Message = "Navigate up";
+	commands[kcNavigateUp].Message = "Navigate up by 1 row";
 
 	commands[kcNavigateLeft].UID = 1040;
 	commands[kcNavigateLeft].isHidden = false;
@@ -1735,22 +1736,22 @@ void CCommandSet::SetupCommands()
 	commands[kcPatternJumpDownh2].UID = 1338;
 	commands[kcPatternJumpDownh2].isHidden = false;
 	commands[kcPatternJumpDownh2].isDummy = false;
-	commands[kcPatternJumpDownh2].Message = "Jump down by highlight2";
+	commands[kcPatternJumpDownh2].Message = "Jump down by beat";
 
 	commands[kcPatternJumpUph2].UID = 1339;
 	commands[kcPatternJumpUph2].isHidden = false;
 	commands[kcPatternJumpUph2].isDummy = false;
-	commands[kcPatternJumpUph2].Message = "Jump up by highlight2";
+	commands[kcPatternJumpUph2].Message = "Jump up by beat";
 
 	commands[kcPatternSnapDownh2].UID = 1340;
 	commands[kcPatternSnapDownh2].isHidden = false;
 	commands[kcPatternSnapDownh2].isDummy = false;
-	commands[kcPatternSnapDownh2].Message = "Snap down to highlight2";
+	commands[kcPatternSnapDownh2].Message = "Snap down to beat";
 
 	commands[kcPatternSnapUph2].UID = 1341;
 	commands[kcPatternSnapUph2].isHidden = false;
 	commands[kcPatternSnapUph2].isDummy = false;
-	commands[kcPatternSnapUph2].Message = "Snap up to highlight2";
+	commands[kcPatternSnapUph2].Message = "Snap up to beat";
 
 
 	commands[kcPatternJumpDownh2Select].UID = 1342;
@@ -2134,19 +2135,143 @@ void CCommandSet::SetupCommands()
 	commands[kcSwitchToOrderList].isDummy = false;
 	commands[kcSwitchToOrderList].Message = "Switch to order list";
 
-	//DEBUG: check for duplicate UIDs:
-	for (int i=0; i<kcNumCommands; i++)
+	commands[kcEditMixPasteITStyle].UID = 1686;
+	commands[kcEditMixPasteITStyle].Message = "Mix Paste (old IT Style)";
+	commands[kcEditMixPasteITStyle].isHidden = false;
+	commands[kcEditMixPasteITStyle].isDummy = false;
+
+	commands[kcApproxRealBPM].UID = 1687;
+	commands[kcApproxRealBPM].Message = "Show approx. real BPM";
+	commands[kcApproxRealBPM].isHidden = false;
+	commands[kcApproxRealBPM].isDummy = false;
+
+	commands[kcNavigateDownBySpacingSelect].UID = 1689;
+	commands[kcNavigateDownBySpacingSelect].isHidden = true;
+	commands[kcNavigateDownBySpacingSelect].isDummy = false;
+	commands[kcNavigateDownBySpacingSelect].Message = "kcNavigateDownBySpacingSelect";
+
+	commands[kcNavigateUpBySpacingSelect].UID = 1690;
+	commands[kcNavigateUpBySpacingSelect].isHidden = true;
+	commands[kcNavigateUpBySpacingSelect].isDummy = false;
+	commands[kcNavigateUpBySpacingSelect].Message = "kcNavigateUpBySpacingSelect";
+
+	commands[kcNavigateDownBySpacing].UID = 1691;
+	commands[kcNavigateDownBySpacing].isHidden = false;
+	commands[kcNavigateDownBySpacing].isDummy = false;
+	commands[kcNavigateDownBySpacing].Message = "Navigate down by spacing";
+
+	commands[kcNavigateUpBySpacing].UID = 1692;
+	commands[kcNavigateUpBySpacing].isHidden = false;
+	commands[kcNavigateUpBySpacing].isDummy = false;
+	commands[kcNavigateUpBySpacing].Message = "Navigate up by spacing";
+
+	commands[kcPrevDocument].UID = 1693;
+	commands[kcPrevDocument].Message = "Previous Document";
+	commands[kcPrevDocument].isHidden = false;
+	commands[kcPrevDocument].isDummy = false;
+	
+	commands[kcNextDocument].UID = 1694;
+	commands[kcNextDocument].Message = "Next Document";
+	commands[kcNextDocument].isHidden = false;
+	commands[kcNextDocument].isDummy = false;
+
+
+	//time saving HACK:
+	for (int j=kcVSTGUIStartNotes; j<=kcVSTGUINoteStopA_3; j++)
 	{
-		if (commands[i].UID != 0)	// ignore unset UIDs
-		{
-			for (int j=i+1; j<kcNumCommands; j++)
-			{
-				if (commands[i].UID==commands[j].UID)
+		commands[j].UID = 1695+j-kcVSTGUIStartNotes;
+		commands[j].Message = "Auto Note in some context";
+		commands[j].isHidden = true;
+		commands[j].isDummy = false;
+	}
+	//end hack
+
+	commands[kcVSTGUIPrevPreset].UID = 1763;
+	commands[kcVSTGUIPrevPreset].Message = "Previous plugin preset";
+	commands[kcVSTGUIPrevPreset].isHidden = false;
+	commands[kcVSTGUIPrevPreset].isDummy = false;
+
+	commands[kcVSTGUINextPreset].UID = 1764;
+	commands[kcVSTGUINextPreset].Message = "Next plugin preset";
+	commands[kcVSTGUINextPreset].isHidden = false;
+	commands[kcVSTGUINextPreset].isDummy = false;
+
+	commands[kcVSTGUIRandParams].UID = 1765;
+	commands[kcVSTGUIRandParams].Message = "Randomize plugin parameters";
+	commands[kcVSTGUIRandParams].isHidden = false;
+	commands[kcVSTGUIRandParams].isDummy = false;
+
+	commands[kcPatternGoto].UID = 1766;
+	commands[kcPatternGoto].Message = "Go to row/channel/...";
+	commands[kcPatternGoto].isHidden = false;
+	commands[kcPatternGoto].isDummy = false;
+
+	commands[kcPatternOpenRandomizer].UID = 1767;
+	commands[kcPatternOpenRandomizer].isHidden = false;
+	commands[kcPatternOpenRandomizer].isDummy = false;
+	commands[kcPatternOpenRandomizer].Message = "Open pattern randomizer";
+
+	commands[kcPatternInterpolateNote].UID = 1768;
+	commands[kcPatternInterpolateNote].isHidden = false;
+	commands[kcPatternInterpolateNote].isDummy = false;
+	commands[kcPatternInterpolateNote].Message = "Interpolate note";
+
+	//rewbs.graph
+	commands[kcViewGraph].UID = 1769;
+	commands[kcViewGraph].isHidden = false;
+	commands[kcViewGraph].isDummy = false;
+	commands[kcViewGraph].Message = "View Graph";
+	//end rewbs.graph
+
+	commands[kcToggleChanMuteOnPatTransition].UID = 1770;
+	commands[kcToggleChanMuteOnPatTransition].isHidden = false;
+	commands[kcToggleChanMuteOnPatTransition].isDummy = false;
+	commands[kcToggleChanMuteOnPatTransition].Message = "(Un)mute chan on pat transition";
+
+	commands[kcChannelUnmuteAll].UID = 1771;
+	commands[kcChannelUnmuteAll].isHidden = false;
+	commands[kcChannelUnmuteAll].isDummy = false;
+	commands[kcChannelUnmuteAll].Message = "Unmute all channels";
+
+	commands[kcShowPatternProperties].UID = 1772;
+	commands[kcShowPatternProperties].isHidden = false;
+	commands[kcShowPatternProperties].isDummy = false;
+	commands[kcShowPatternProperties].Message = "Show pattern properties window";
+
+	commands[kcShowMacroConfig].UID = 1773;
+	commands[kcShowMacroConfig].isHidden = false;
+	commands[kcShowMacroConfig].isDummy = false;
+	commands[kcShowMacroConfig].Message = "Show macro configuration";
+
+	commands[kcViewSongProperties].UID = 1775;
+	commands[kcViewSongProperties].isHidden = false;
+	commands[kcViewSongProperties].isDummy = false;
+	commands[kcViewSongProperties].Message = "Show song properties window";
+	
+	commands[kcChangeLoopStatus].UID = 1776;
+	commands[kcChangeLoopStatus].isHidden = false;
+	commands[kcChangeLoopStatus].isDummy = false;
+	commands[kcChangeLoopStatus].Message = "Toggle loop pattern";
+
+
+/*	commands[kcToggleLoopSong].UID = 1777;
+	commands[kcToggleLoopSong].isHidden = false;
+	commands[kcToggleLoopSong].isDummy = false;
+	commands[kcToggleLoopSong].Message = "Toggle loop song";
+*/
+
+	#ifdef _DEBUG
+	for (int i=0; i<kcNumCommands; i++)	{
+		if (commands[i].UID != 0) {	// ignore unset UIDs
+			for (int j=i+1; j<kcNumCommands; j++) {
+				if (commands[i].UID == commands[j].UID) {
+					Log("Duplicate command UID: %d\n", commands[i].UID);
 					ASSERT(false);
+				}
 			}
 		}
 	}
-	//end DEBUG
+	#endif //_DEBUG
 }
 //-----------------------------------------
 
@@ -2184,7 +2309,8 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 		for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
 		{ //search all keys for curCommand
 			curKc=commands[curCmd].kcList[k];
-			if (curKc.Conflicting(kc))
+			bool crossContext=false;
+			if (KeyCombinationConflict(curKc, kc, crossContext))
 			{
 				if (!overwrite)
 				{
@@ -2194,9 +2320,14 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 				}
 				else
 				{
-					Remove(curKc, (CommandID)curCmd);
-					report += "Warning! removed: " + GetCommandText((CommandID)curCmd) + "\r\n";
-					Log("%s",report);
+					if (crossContext) { 
+						report += "Warning! the following commands may conflict:\r\n   >" + GetCommandText((CommandID)curCmd) + " in " + GetContextText(curKc.ctx) + "\r\n   >" + GetCommandText((CommandID)cmd) + " in " + GetContextText(kc.ctx) + "\r\n\r\n";
+						Log("%s",report);
+					} else {
+						Remove(curKc, (CommandID)curCmd);
+						report += "Removed due to conflict in same context:\r\n   >" + GetCommandText((CommandID)curCmd) + " in " + GetContextText(curKc.ctx) + "\r\n\r\n";
+						Log("%s",report);
+					}
 				}
 			}
 		}
@@ -2261,7 +2392,6 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	bool removing = !adding; //for attempt to salvage readability.. 
 	KeyCombination curKc;	// for looping through key combinations
 	KeyCombination newKc;	// for adding new key combinations
-	KeyCombination newKc2;	// for adding new key combinations
 	CString report="";
 
 	if (enforceRule[krAllowNavigationWithSelection])
@@ -2532,22 +2662,16 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	//# Reassign freed number keys to octaves
 	if (enforceRule[krReassignDigitsToOctaves] && !adding)
 	{  
-		//Avoid inifinit recursion:
-		if ((inKc.mod !=0) || ((inKc.ctx !=kCtxViewPatternsNote) && (inKc.ctx !=kCtxViewPatterns)) || 
-			(!('0'<=inKc.code && inKc.code<='9') && !(VK_NUMPAD0<=inKc.code && inKc.code<=VK_NUMPAD9)))
-		{
-			newKc.ctx=kCtxViewPatternsNote;
-			newKc.mod=0;
-			newKc.event= (KeyEventType)1;
-			for (newKc.code='0'; newKc.code<='9'; newKc.code++)
-			{
-				Add(newKc, (CommandID)(kcSetOctave0 + (newKc.code-'0')), false);		
-			}
-			for (newKc.code=VK_NUMPAD0; newKc.code<=VK_NUMPAD9; newKc.code++)
-			{
-				Add(newKc, (CommandID)(kcSetOctave0 + (newKc.code-VK_NUMPAD0)), false);		
-			}
-		}
+		  if ( (inKc.mod == 0) &&	//no modifier
+			 ( (inKc.ctx == kCtxViewPatternsNote) || (inKc.ctx == kCtxViewPatterns) ) && //note scope or pattern scope
+			 ( ('0'<=inKc.code && inKc.code<='9') || (VK_NUMPAD0<=inKc.code && inKc.code<=VK_NUMPAD9) ) ) {  //is number key 
+				newKc.ctx=kCtxViewPatternsNote;
+				newKc.mod=0;
+				newKc.event= (KeyEventType)1;
+				newKc.code=inKc.code;
+				int offset = ('0'<=inKc.code && inKc.code<='9') ? newKc.code-'0' : newKc.code-VK_NUMPAD0;
+				Add(newKc, (CommandID)(kcSetOctave0 + (newKc.code-offset)), false);		
+			 }
 	}
 	// Add spacing
 	if (enforceRule[krAutoSpacing])
@@ -2598,11 +2722,13 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			KeyCombination newKcIns  = inKc;
 			KeyCombination newKcTree = inKc;
 			KeyCombination newKcInsNoteMap = inKc;
+			KeyCombination newKcVSTGUI = inKc;
 
 			newKcSamp.ctx=kCtxViewSamples;
 			newKcIns.ctx=kCtxViewInstruments;
 			newKcTree.ctx=kCtxViewTree;
 			newKcInsNoteMap.ctx=kCtxInsNoteMap;
+			newKcVSTGUI.ctx=kCtxVSTGUI;
 
 			noteOffset = inCmd - kcVPStartNotes;
 			if (adding)
@@ -2612,6 +2738,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Add(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset), false);
 				Add(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset), false);
 				Add(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNotes+noteOffset), false);
+				Add(newKcVSTGUI, (CommandID)(kcVSTGUIStartNotes+noteOffset), false);
 			}
 			else
 			{
@@ -2620,6 +2747,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Remove(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset));
 				Remove(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset));
 				Remove(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNotes+noteOffset));
+				Remove(newKcVSTGUI, (CommandID)(kcVSTGUIStartNotes+noteOffset));
 			}
 		}
 		if (inCmd>=kcVPStartNoteStops && inCmd<=kcVPEndNoteStops)
@@ -2628,11 +2756,13 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			KeyCombination newKcIns  = inKc;
 			KeyCombination newKcTree = inKc;
 			KeyCombination newKcInsNoteMap = inKc;
+			KeyCombination newKcVSTGUI = inKc;
 
 			newKcSamp.ctx=kCtxViewSamples;
 			newKcIns.ctx=kCtxViewInstruments;
 			newKcTree.ctx=kCtxViewTree;
 			newKcInsNoteMap.ctx=kCtxInsNoteMap;
+			newKcVSTGUI.ctx=kCtxVSTGUI;
 
 			noteOffset = inCmd - kcVPStartNoteStops;
 			if (adding)
@@ -2642,6 +2772,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Add(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset), false);
 				Add(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset), false);
 				Add(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNoteStops+noteOffset), false);
+				Add(newKcVSTGUI, (CommandID)(kcVSTGUIStartNoteStops+noteOffset), false);
 			}
 			else
 			{
@@ -2650,6 +2781,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Remove(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset));
 				Remove(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset));
 				Remove(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNoteStops+noteOffset));
+				Remove(newKcVSTGUI, (CommandID)(kcVSTGUIStartNoteStops+noteOffset));
 			}
 
 		}
@@ -2689,18 +2821,6 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			int newCmd;
 			int offset = inCmd-kcStartSampleMisc;
 
-			//propagate to SampleCtrl
-/*			newCmd = kcStartSampleCtrlMisc+offset;
-			commands[newCmd].kcList.SetSize(commands[inCmd].kcList.GetSize());
-			for (int k=0; k<commands[inCmd].kcList.GetSize(); k++)
-			{
-				commands[newCmd].kcList[k].mod = commands[inCmd].kcList[k].mod;
-				commands[newCmd].kcList[k].code = commands[inCmd].kcList[k].code;
-				commands[newCmd].kcList[k].event = commands[inCmd].kcList[k].event;
-				commands[newCmd].kcList[k].ctx = kCtxCtrlSamples;
-			}
-*/
-
 			//propagate to InstrumentView
 			newCmd = kcStartInstrumentMisc+offset;
 			commands[newCmd].kcList.SetSize(commands[inCmd].kcList.GetSize());
@@ -2711,16 +2831,32 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				commands[newCmd].kcList[k].event = commands[inCmd].kcList[k].event;
 				commands[newCmd].kcList[k].ctx = kCtxViewInstruments;
 			}
-/*
-			//propagate to InstrumentCtrl
-			newCmd = kcStartInstrumentCtrlMisc+offset;
-*/
+
 		}
 
 	}
-
-
-
+/*	if (enforceRule[krFoldEffectColumnAnd])
+	{
+		if (inKc.ctx == kCtxViewPatternsFX) {
+			KeyCombination newKc = inKc;
+			newKc.ctx = kCtxViewPatternsFXparam;
+			if (adding)	{            
+				Add(newKc, inCmd, false);
+			} else {
+				Remove(newKc, inCmd);
+			}
+		}
+		if (inKc.ctx == kCtxViewPatternsFXparam) {
+			KeyCombination newKc = inKc;
+			newKc.ctx = kCtxViewPatternsFX;
+			if (adding)	{            
+				Add(newKc, inCmd, false);
+			} else {
+				Remove(newKc, inCmd);
+			}
+		} 
+	}
+*/
 	return report;
 }
 
@@ -2748,6 +2884,9 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	
 	//Clear map
 	memset(km, -1, sizeof(kcNull)*KeyMapSize);
+//	km.RemoveAll();
+//	km.InitHashTable(700423);
+	
 
     //Copy commandlist content into map:
 	for (UINT cmd=0; cmd<kcNumCommands; cmd++)
@@ -2771,23 +2910,20 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 			//ASSERT(eventTypes.GetSize()>0);
 
 			//Handle super-contexts (contexts that represent a set of sub contexts)
-			if (curKc.ctx == kCtxViewPatterns)
-			{
+			if (curKc.ctx == kCtxViewPatterns) {
 				contexts.Add(kCtxViewPatternsNote);
 				contexts.Add(kCtxViewPatternsIns);
 				contexts.Add(kCtxViewPatternsVol);
 				contexts.Add(kCtxViewPatternsFX);
 				contexts.Add(kCtxViewPatternsFXparam);
 			}
-			else
-			{
+			else {
 				contexts.Add(curKc.ctx);
 			}
 
-			for (int cx=0; cx<contexts.GetSize(); cx++)
-			{
-				for (int ke=0; ke<eventTypes.GetSize(); ke++)
-				{
+			long label = 0;
+			for (int cx=0; cx<contexts.GetSize(); cx++)	{
+				for (int ke=0; ke<eventTypes.GetSize(); ke++) {
 					km[contexts[cx]][curKc.mod][curKc.code][eventTypes[ke]] = (CommandID)cmd;
 				}
 			}
@@ -2798,11 +2934,25 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 //-------------------------------------
 
 
+DWORD CCommandSet::GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, KeyEventType ke)
+{ //Unused
+	ASSERT((long)ctx<0xFF);
+	ASSERT((long)mod<0xFF);
+	ASSERT((long)code<0xFF);
+	ASSERT((long)ke<0xFF);
+
+	BYTE ctxCode  = (BYTE)ctx;
+	BYTE modCode  = (BYTE)mod;
+	BYTE codeCode = (BYTE)code;
+	BYTE keCode   = (BYTE)ke;
+
+	DWORD label = ctxCode | (modCode<<8) | (codeCode<<16) | (ke<<24);
+
+	return label;
+}
+
 void CCommandSet::Copy(CCommandSet *source)
 {
-	//memcpy(enforceRule,source->enforceRule,sizeof(bool)*kNumRules);
-	
-	// can't do memcopy for command array, since it may not be contiguous.
 	// copy constructors should take care of complexity (I hope)
 	for (int cmd=0; cmd<commands.GetSize(); cmd++)
 		commands[cmd] = source->commands[cmd];
@@ -2811,8 +2961,6 @@ void CCommandSet::Copy(CCommandSet *source)
 KeyCombination CCommandSet::GetKey(CommandID cmd, UINT key)
 {
 	return commands[cmd].kcList[key];
-	KeyCombination kc;
-	return kc;
 }
 
 
@@ -2820,7 +2968,6 @@ KeyCombination CCommandSet::GetKey(CommandID cmd, UINT key)
 int CCommandSet::GetKeyListSize(CommandID cmd)
 {
 	return  commands[cmd].kcList.GetSize();
-
 }
 
 CString CCommandSet::GetCommandText(CommandID cmd)
@@ -2830,6 +2977,7 @@ CString CCommandSet::GetCommandText(CommandID cmd)
 
 bool CCommandSet::SaveFile(CString fileName, bool debug)
 { //TODO: Make C++
+
 /* Layout:
 ----( Context1 Text (id) )----
 ctx:UID:Description:Modifier:Key:EventMask
@@ -2847,7 +2995,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 		::MessageBox(NULL, "Can't open file for writing.", "", MB_ICONEXCLAMATION|MB_OK);
 		return false;
 	}
-	fprintf(outStream, "//-------- Modplug Tracker key binding definition file prototype -------\n"); 
+	fprintf(outStream, "//-------- OpenMPT key binding definition file  -------\n"); 
 	fprintf(outStream, "//-Format is:                                                          -\n"); 	
 	fprintf(outStream, "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n"); 
 	fprintf(outStream, "//----------------------------------------------------------------------\n"); 
@@ -2886,7 +3034,7 @@ bool CCommandSet::LoadFile(CString fileName)
 
 	FILE *inStream;
 	KeyCombination kc;
-	CommandID cmd;
+	CommandID cmd=kcNumCommands;
 	char s[1024];
 	CString curLine, token;
 	int commentStart;
@@ -2899,9 +3047,11 @@ bool CCommandSet::LoadFile(CString fileName)
 	if( (inStream  = fopen( fileName, "r" )) == NULL )
 	{
 		::MessageBox(NULL, "Can't open file keyboard config file " + fileName + "  for reading.", "", MB_ICONEXCLAMATION|MB_OK);
+		delete pTempCS;
 		return false;
 	}
 
+	int errorCount=0;
 	while(fgets(s,1024,inStream))
 	{
 		//::MessageBox(NULL, s, "", MB_ICONEXCLAMATION|MB_OK);
@@ -2954,10 +3104,17 @@ bool CCommandSet::LoadFile(CString fileName)
 			//Error checking (TODO):
 			if (cmd<0 || cmd>=kcNumCommands || spos==-1)
 			{
+				errorCount++;
 				CString err;
-				err.Format("Line %d in key binding file %s was not understood.", l, fileName);
-				Log(err);
-				::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
+				if (errorCount<10) {
+					err.Format("Line %d in key binding file %s was not understood.", l, fileName);
+					::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
+					Log(err);
+				} else if (errorCount==10) {
+					err.Format("Too many errors detected, not reporting any more.");
+					::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
+					Log(err);
+				}
 			}
 			else
 			{
@@ -3010,6 +3167,7 @@ CString CCommandSet::GetContextText(InputTargetContext ctx)
 		case kCtxCtrlSamples:			return "Sample Context [top]";
 		case kCtxCtrlInstruments:		return "Instrument Context [top]";
 		case kCtxCtrlComments:			return "Comments Context [top]";
+		case kCtxVSTGUI:				return "Plugin GUI Context";
 	    case kCtxUnknownContext:
 		default:						return "Unknown Context";
 	}
@@ -3063,12 +3221,10 @@ CString CCommandSet::GetKeyText(UINT mod, UINT code)
 
 CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
 {
-	CString keyText;
 	if (key < commands[c].kcList.GetSize())
 		return GetKeyText(commands[c].kcList[0].mod, commands[c].kcList[0].code);
 	else 
 		return "";
-	return keyText;
 }
 
 bool CCommandSet::isHidden(UINT c)
@@ -3180,14 +3336,91 @@ bool CCommandSet::IsExtended(UINT code)
 		return true;
 	if (code==VK_DIVIDE)	//Numpad '/'
 		return true;
-/*	if (code>=VK_NUMPAD0 && code<=VK_NUMPAD9) //numpad
-		return false;				
-*/	if (code==VK_NUMLOCK)	//print screen
+	if (code==VK_NUMLOCK)	//print screen
 		return true;
 	if (code>=0xA0 && code<=0xA5) //attempt for RL mods
 		return true;
 
 	return false;
+}
+
+
+void CCommandSet::GetParentContexts(InputTargetContext child, CArray<InputTargetContext, InputTargetContext> parentList)
+{
+	//parentList.RemoveAll();
+
+	//for (InputTargetContext parent; parent<kCtxMaxInputContexts; parent++) {
+	//	if (m_isParentContext[child][parent]) {
+	//		parentList.Add(parent);
+	//	}
+	//}
+}
+
+void CCommandSet::GetChildContexts(InputTargetContext parent, CArray<InputTargetContext, InputTargetContext> childList)
+{
+	//childList.RemoveAll();
+
+	//for (InputTargetContext child; child<kCtxMaxInputContexts; child++) {
+	//	if (m_isParentContext[child][parent]) {
+	//		childList.Add(child);
+	//	}
+	//}
+}
+
+
+void CCommandSet::SetupContextHierarchy() 
+{
+//	m_isParentContext.SetSize(kCtxMaxInputContexts);
+	
+	for (UINT nCtx=0; nCtx<kCtxMaxInputContexts; nCtx++) {
+//		m_isParentContext[nCtx].SetSize(kCtxMaxInputContexts);
+		for (UINT nCtx2=0; nCtx2<kCtxMaxInputContexts; nCtx2++) {
+			m_isParentContext[nCtx][nCtx2] = false;
+		}//InputTargetContext
+	}
+	
+	//For now much be fully expanded (i.e. don't rely on grandparent relationships).
+	m_isParentContext[kCtxViewGeneral][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatterns][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsNote][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsIns][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsVol][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsFX][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewPatternsFXparam][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewSamples][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewInstruments][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewComments][kCtxAllContexts] = true;
+	m_isParentContext[kCtxViewTree][kCtxAllContexts] = true;
+	m_isParentContext[kCtxInsNoteMap][kCtxAllContexts] = true;
+	m_isParentContext[kCtxVSTGUI][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlGeneral][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlPatterns][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlSamples][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlInstruments][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlComments][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlSamples][kCtxAllContexts] = true;
+
+	m_isParentContext[kCtxViewPatternsNote][kCtxViewPatterns] = true;
+	m_isParentContext[kCtxViewPatternsIns][kCtxViewPatterns] = true;
+	m_isParentContext[kCtxViewPatternsVol][kCtxViewPatterns] = true;
+	m_isParentContext[kCtxViewPatternsFX][kCtxViewPatterns] = true;
+	m_isParentContext[kCtxViewPatternsFXparam][kCtxViewPatterns] = true;
+
+}
+
+bool CCommandSet::KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool &crossCxtConflict) 
+{
+	bool modConflict     = (kc1.mod==kc2.mod);
+	bool codeConflict    = (kc1.code==kc2.code);
+	bool eventConflict   = ((kc1.event&kc2.event)!=0);
+	bool ctxConflict     = (kc1.ctx == kc2.ctx);
+	crossCxtConflict     = m_isParentContext[kc1.ctx][kc2.ctx] || m_isParentContext[kc2.ctx][kc1.ctx];
+		
+
+	bool conflict = modConflict && codeConflict && eventConflict && 
+		(ctxConflict || crossCxtConflict);
+
+    return conflict;
 }
 
 //end rewbs.customKeys

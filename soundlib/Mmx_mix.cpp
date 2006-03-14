@@ -86,8 +86,10 @@ extern int SpectrumSinusTable[256*2];
 // -> DESC="wav export update"
 //const float _f2ic = (float)(1 << 28);
 //const float _i2fc = (float)(1.0 / (1 << 28));
-const float _f2ic = (float)(0x7fffffff>>2);
-const float _i2fc = (float)(1.0 / (0x7fffffff>>2));
+//const float _f2ic = (float)0x7fffffff;
+//const float _i2fc = (float)(1.0 / 0x7fffffff);
+//const float _f2ic = (float)MIXING_CLIPMAX;
+//const float _i2fc = (float)(1.0/MIXING_CLIPMAX);
 // -! NEW_FEATURE#0024
 
 static unsigned int QueryProcessorExtensions()
@@ -1296,8 +1298,8 @@ SpectrumLoop:
 #ifdef ENABLE_AMDNOW
 
 // Convert integer mix to floating-point
-void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
-//---------------------------------------------------------------------------------
+void AMD_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
+//----------------------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _i2fc
@@ -1329,8 +1331,8 @@ mainloop:
 	}
 }
 
-void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
-//-------------------------------------------------------------------------------------
+void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
+//--------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _f2ic
@@ -1364,8 +1366,8 @@ mainloop:
 }
 
 
-void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
-//---------------------------------------------------------------
+void AMD_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
+//----------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _f2ic
@@ -1394,8 +1396,8 @@ mainloop:
 }
 
 
-void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
-//----------------------------------------------------------------
+void AMD_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
+//-----------------------------------------------------------------------------------
 {
 	_asm {
 	movd mm0, _i2fc
@@ -1430,8 +1432,8 @@ mainloop:
 
 #ifdef ENABLE_SSE
 
-void SSE_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
-//---------------------------------------------------------------------------------
+void SSE_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
+//----------------------------------------------------------------------------------------------------
 {
 	_asm {
 	movss xmm0, _i2fc
@@ -1461,8 +1463,8 @@ mainloop:
 }
 
 
-void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
-//----------------------------------------------------------------
+void SSE_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
+//-----------------------------------------------------------------------------------
 {
 	_asm {
 	movss xmm0, _i2fc
@@ -1494,8 +1496,8 @@ mainloop:
 
 
 // Convert floating-point mix to integer
-void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount)
-//-------------------------------------------------------------------------------------
+void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int *pOut, UINT nCount, const float _f2ic)
+//--------------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov esi, pIn1
@@ -1520,8 +1522,8 @@ mainloop:
 }
 
 // Convert integer mix to floating-point
-void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount)
-//---------------------------------------------------------------------------------
+void X86_StereoMixToFloat(const int *pSrc, float *pOut1, float *pOut2, UINT nCount, const float _i2fc)
+//----------------------------------------------------------------------------------------------------
 {
 	_asm {
 	mov esi, pSrc
@@ -1546,8 +1548,8 @@ mainloop:
 }
 
 
-void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount)
-//---------------------------------------------------------------
+void X86_FloatToMonoMix(const float *pIn, int *pOut, UINT nCount, const float _f2ic)
+//----------------------------------------------------------------------------------
 {
 	_asm {
 	mov edx, pIn
@@ -1568,8 +1570,8 @@ R2I_Loop:
 }
 
 
-void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount)
-//----------------------------------------------------------------
+void X86_MonoMixToFloat(const int *pSrc, float *pOut, UINT nCount, const float _i2fc)
+//-----------------------------------------------------------------------------------
 {
 	_asm {
 	mov edx, pOut

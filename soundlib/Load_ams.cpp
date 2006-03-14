@@ -366,6 +366,8 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		penv->nGlobalVol = 64;
 		penv->nPan = 128;
 		penv->nPPC = 60;
+		penv->nResampling = SRCMODE_DEFAULT;
+		penv->nFilterMode = FLTMODE_UNCHANGED;
 		Headers[nIns] = penv;
 		if (insnamelen)
 		{

@@ -73,13 +73,11 @@ IDR_MODULETYPE          ICON                    "res\\moddoc.ico"
 //
 
 IDB_MPTRACK             BITMAP                  "res\\mptrack.bmp"
-IDB_MAINBAR             BITMAP                  "res\\mainbar.bmp"
 IDB_IMAGELIST           BITMAP                  "res\\img_list.bmp"
 IDB_PATTERNS            BITMAP                  "res\\patterns.bmp"
 IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
 IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
 IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
-IDB_SPLASHSCREENOLD     BITMAP                  "RES\\splash.bmp"
 IDB_ENVTOOLBAR          BITMAP                  "res\\envbar.bmp"
 IDB_SMPTOOLBAR          BITMAP                  "res\\smptoolb.bmp"
 IDB_VISNODE             BITMAP                  "res\\bitmap1.bmp"
@@ -125,6 +123,7 @@ BEGIN
         MENUITEM "&Midi Record\tF9",            ID_MIDI_RECORD
         MENUITEM SEPARATOR
         MENUITEM "&Estimate song length",       ID_ESTIMATESONGLENGTH
+        MENUITEM "Approx. real &BPM",           ID_APPROX_BPM
     END
     POPUP "&Edit"
     BEGIN
@@ -167,6 +166,7 @@ BEGIN
         MENUITEM "Set&up...",                   ID_VIEW_OPTIONS
         MENUITEM "Add &Plugin...",              ID_PLUGIN_SETUP
         MENUITEM "Channel &Manager...",         ID_CHANNEL_MANAGER
+        MENUITEM "Song Properties...",          ID_VIEW_SONGPROPERTIES
     END
     POPUP "&Window"
     BEGIN
@@ -186,11 +186,10 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Internet"
         BEGIN
-            MENUITEM "&Modplug Central",            ID_NETLINK_MODPLUG
             MENUITEM "Modplug Central &Forums",     ID_NETLINK_FORUMS
-            MENUITEM "&Kvr-VST (plugins)",          ID_NETLINK_PLUGINS
+            MENUITEM "MPT-FR",                      ID_NETLINK_MPTFR
+            MENUITEM "&Kvr Audio (plugins)",        ID_NETLINK_PLUGINS
             MENUITEM "&OSMusic.net",                ID_NETLINK_TRAXINSPACE
-            MENUITEM "The Tracker's &Handbook",     ID_NETLINK_HANDBOOK
         END
         MENUITEM SEPARATOR
         MENUITEM "&About MPTrack...",           ID_APP_ABOUT
@@ -227,7 +226,7 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 267, 235
+IDD_ABOUTBOX DIALOGEX 0, 0, 267, 254
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
 CAPTION "About ModPlug Tracker"
@@ -235,14 +234,15 @@ FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_BITMAP1,"Static",SS_BLACKRECT | SS_NOTIFY | 
                     SS_CENTERIMAGE,5,3,256,81,WS_EX_CLIENTEDGE
-    CTEXT           "Modplug Tracker version",IDC_TEXT2,47,86,171,8,
-                    SS_NOPREFIX
-    CTEXT           "",IDC_CREDITS,5,110,256,51,0,WS_EX_STATICEDGE
-    DEFPUSHBUTTON   "OK",IDOK,228,214,32,14,WS_GROUP
-    CTEXT           "",IDC_TEXT1,49,98,167,8
-    EDITTEXT        IDC_EDIT1,47,169,171,61,ES_CENTER | ES_MULTILINE | 
-                    ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER,
-                    WS_EX_STATICEDGE
+    CTEXT           "",IDC_CREDITS,5,116,256,72,0,WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "OK",IDOK,229,235,32,14,WS_GROUP
+    EDITTEXT        IDC_EDIT1,5,194,221,55,ES_CENTER | ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | NOT 
+                    WS_BORDER | WS_VSCROLL,WS_EX_STATICEDGE
+    EDITTEXT        IDC_EDIT2,15,100,233,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_EDIT3,26,87,212,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
 END
 
 IDD_OPTIONS_PLAYER DIALOGEX 0, 0, 266, 278
@@ -252,44 +252,42 @@ FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Sound Quality",IDC_STATIC,1,155,256,97
     CONTROL         "Automatic Gain Control",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,17,97,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,9,20,97,10
     CONTROL         "Noise reduction",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,29,82,10
-    CONTROL         "Enable Graphic Equalizer",IDC_CHECK3,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,41,107,10
+                    WS_TABSTOP,9,32,82,10
     LTEXT           "Resampling:",IDC_STATIC,7,169,41,8
     COMBOBOX        IDC_COMBO1,50,167,120,56,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "Bass Expansion",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,59,81,10
-    LTEXT           "Low",IDC_STATIC,12,73,14,8
+                    WS_TABSTOP,9,53,81,10
+    LTEXT           "Low",IDC_STATIC,12,67,14,8
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,27,71,62,15
-    LTEXT           "High",IDC_STATIC,90,73,16,8
-    LTEXT           "10Hz",IDC_STATIC,126,73,18,8
-    LTEXT           "Range:",IDC_STATIC,163,59,24,8
+                    TBS_NOTICKS | WS_TABSTOP,27,65,62,15
+    LTEXT           "High",IDC_STATIC,90,67,16,8
+    LTEXT           "10Hz",IDC_STATIC,126,67,18,8
+    LTEXT           "Range:",IDC_STATIC,163,53,24,8
     CONTROL         "Slider2",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,143,70,62,15
-    LTEXT           "100Hz",IDC_STATIC,205,72,23,8
+                    TBS_NOTICKS | WS_TABSTOP,143,64,62,15
+    LTEXT           "100Hz",IDC_STATIC,205,66,23,8
     CONTROL         "Reverb",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,90,62,10
-    LTEXT           "Low",IDC_STATIC,12,106,14,8
+                    WS_TABSTOP,9,84,62,10
+    LTEXT           "Low",IDC_STATIC,12,100,14,8
     CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,27,102,62,15
-    LTEXT           "High",IDC_STATIC,90,106,16,8
+                    TBS_NOTICKS | WS_TABSTOP,27,96,62,15
+    LTEXT           "High",IDC_STATIC,90,100,16,8
     CTEXT           "Reverb Preset:",IDC_STATIC,143,90,62,8
     CONTROL         "Pro-Logic Surround",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,122,99,10
-    LTEXT           "Low",IDC_STATIC,12,138,14,8
+                    WS_TABSTOP,9,116,99,10
+    LTEXT           "Low",IDC_STATIC,12,132,14,8
     CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,27,135,62,15
-    LTEXT           "High",IDC_STATIC,90,138,16,8
-    LTEXT           "5ms",IDC_STATIC,126,137,18,8
-    CTEXT           "Front/Rear Delay:",IDC_STATIC,142,124,65,8
+                    TBS_NOTICKS | WS_TABSTOP,27,129,62,15
+    LTEXT           "High",IDC_STATIC,90,132,16,8
+    LTEXT           "5ms",IDC_STATIC,126,131,18,8
+    CTEXT           "Front/Rear Delay:",IDC_STATIC,142,118,65,8
     CONTROL         "Slider2",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,143,134,62,15
-    LTEXT           "50ms",IDC_STATIC,205,137,23,8
-    COMBOBOX        IDC_COMBO2,130,103,100,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    TBS_NOTICKS | WS_TABSTOP,143,128,62,15
+    LTEXT           "50ms",IDC_STATIC,205,131,23,8
+    COMBOBOX        IDC_COMBO2,130,97,100,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     GROUPBOX        "Control",IDC_STATIC,0,5,257,150
     EDITTEXT        IDC_WFIRCUTOFF,150,205,19,14,ES_AUTOHSCROLL | ES_NUMBER
@@ -302,11 +300,13 @@ BEGIN
                     8
     EDITTEXT        IDC_RAMPING,145,225,24,14,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Samples",IDC_STATIC,172,228,29,8
-    LTEXT           "(overridden by instrument setting)",IDC_STATIC,9,238,
-                    104,8
+    LTEXT           "(can be overridden by instrument setting)",IDC_STATIC,9,
+                    238,128,8
+    CONTROL         "Enable Graphic Equalizer",IDC_CHECK3,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,130,20,107,10
 END
 
-IDD_WAVECONVERT DIALOGEX 0, 0, 211, 151
+IDD_WAVECONVERT DIALOGEX 0, 0, 211, 166
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION | WS_SYSMENU
 CAPTION "Wave Convert"
@@ -314,7 +314,7 @@ FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,155,8,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,155,28,50,14
-    GROUPBOX        "",IDC_STATIC,4,4,146,144
+    GROUPBOX        "",IDC_STATIC,4,4,146,157
     CONTROL         "Limit file size to: (KBytes)",IDC_CHECK1,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,10,13,111,10
     EDITTEXT        IDC_EDIT1,21,24,50,12,ES_AUTOHSCROLL
@@ -340,7 +340,11 @@ BEGIN
     EDITTEXT        IDC_EDIT4,109,90,19,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Channel mode",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
                     BS_LEFTTEXT | WS_TABSTOP,82,66,60,12
-    DEFPUSHBUTTON   "Change Player Options",IDC_PLAYEROPTIONS,10,124,81,14
+    DEFPUSHBUTTON   "Change Player Options",IDC_PLAYEROPTIONS,10,124,81,14,
+                    BS_CENTER
+    CONTROL         "Slow render (for Kontakt+DFD)",IDC_GIVEPLUGSIDLETIME,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | BS_MULTILINE | 
+                    WS_TABSTOP,10,142,133,17
 END
 
 IDD_PROGRESS DIALOG  0, 0, 186, 55
@@ -375,15 +379,14 @@ BEGIN
                     WS_TABSTOP,141,68,66,8
     PUSHBUTTON      "Restore",IDC_RESTORE,212,46,43,13
     PUSHBUTTON      "Delete",IDC_DELETE,212,64,43,13
-    EDITTEXT        IDC_KEYREPORT,135,84,125,60,ES_MULTILINE | 
-                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
-                    WS_VSCROLL
-    PUSHBUTTON      "Y",IDC_NOTESREPEAT,230,155,12,9
-    PUSHBUTTON      "N",IDC_NONOTESREPEAT,245,155,12,9
-    EDITTEXT        IDC_CHORDDETECTWAITTIME,229,168,28,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_KEYREPORT,135,94,125,70,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
+    PUSHBUTTON      "Y",IDC_NOTESREPEAT,230,176,12,9
+    PUSHBUTTON      "N",IDC_NONOTESREPEAT,245,176,12,9
+    EDITTEXT        IDC_CHORDDETECTWAITTIME,229,189,28,12,ES_AUTOHSCROLL | 
                     ES_NUMBER,WS_EX_RIGHT
-    PUSHBUTTON      "it",IDC_EFFECTLETTERSIT,230,185,12,9,NOT WS_VISIBLE
-    PUSHBUTTON      "xm",IDC_EFFECTLETTERSXM,245,185,12,9,NOT WS_VISIBLE
+    PUSHBUTTON      "it",IDC_EFFECTLETTERSIT,98,184,12,9,NOT WS_VISIBLE
+    PUSHBUTTON      "xm",IDC_EFFECTLETTERSXM,113,184,12,9,NOT WS_VISIBLE
     PUSHBUTTON      "Load Keys...",IDC_LOAD,139,221,54,13
     PUSHBUTTON      "Save Keys As...",IDC_SAVE,199,221,54,13
     CONTROL         "Debug Save",IDC_DEBUGSAVE,"Button",BS_AUTOCHECKBOX | 
@@ -393,52 +396,58 @@ BEGIN
     PUSHBUTTON      "Set",IDC_SET,222,46,43,13,NOT WS_VISIBLE
     GROUPBOX        "Key setup for this command ",IDC_STATIC,134,5,127,75
     LTEXT           "Key:",IDC_STATIC,141,33,16,8
-    GROUPBOX        "Misc",IDC_STATIC,134,146,126,60
+    GROUPBOX        "Misc",IDC_STATIC,134,167,126,40
     GROUPBOX        "Multi Config Handling",IDC_STATIC,134,209,126,66
-    LTEXT           "Repeat notes on hold?",IDC_STATIC,138,155,74,11
-    LTEXT           "Effect letters like:",IDC_STATIC,138,186,73,11,NOT 
+    LTEXT           "Repeat notes on hold?",IDC_STATIC,138,176,74,11
+    LTEXT           "Effect letters like:",IDC_STATIC,6,185,73,11,NOT 
                     WS_VISIBLE
-    LTEXT           "Chord detect interval (ms):",IDC_STATIC,138,169,88,11
+    LTEXT           "Chord detect interval (ms):",IDC_STATIC,138,190,88,11
     CONTROL         "Save to this file on OK/Apply?",IDC_AUTOSAVE,"Button",
                     BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,147,262,106,
                     10
     LTEXT           "Config to load on startup:",IDC_STATIC,139,239,80,8
+    LTEXT           "Log:",IDC_STATIC,136,84,19,10
+    PUSHBUTTON      "Clear Log",IDC_CLEARLOG,222,85,37,9
 END
 
-IDD_OPTIONS_COLORS DIALOGEX 0, 0, 240, 156
+IDD_OPTIONS_COLORS DIALOGEX 0, 0, 265, 278
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Colors"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,4,3,232,150
-    LTEXT           "Background:",IDC_TEXT1,149,58,60,8
-    LTEXT           "Foreground:",IDC_TEXT2,149,88,62,8
-    CONTROL         "Color",IDC_BUTTON1,"Button",BS_OWNERDRAW,149,69,51,15
-    CONTROL         "Color",IDC_BUTTON2,"Button",BS_OWNERDRAW,149,99,51,15
-    CONTROL         "Color",IDC_BUTTON3,"Button",BS_OWNERDRAW,149,130,51,15
-    LTEXT           "Hilight:",IDC_TEXT3,149,120,61,8
     COMBOBOX        IDC_COMBO1,9,26,134,109,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Select color for:",IDC_STATIC,10,15,63,8
-    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,13,97,114,
-                    43
-    EDITTEXT        IDC_EDIT1,74,42,21,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "rows",IDC_STATIC,99,44,16,8
-    CONTROL         "Highlight every",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,43,61,10
+    CONTROL         "Primary highlight",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,19,75,74,10
+    EDITTEXT        IDC_PRIMARYHILITE,100,74,21,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Secondary highlight",IDC_CHECK4,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,19,87,80,10
+    EDITTEXT        IDC_SECONDARYHILITE,100,86,21,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
     CONTROL         "Enable effect highlighting",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,72,114,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,10,53,114,10
     CONTROL         "Use small font",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,83,102,10
-    LTEXT           "Presets:",IDC_STATIC,154,15,28,8
+                    WS_TABSTOP,10,43,102,10
     PUSHBUTTON      "MPT",IDC_BUTTON5,154,26,22,12
     PUSHBUTTON      "FT2",IDC_BUTTON6,179,26,22,12
     PUSHBUTTON      "IT",IDC_BUTTON7,154,40,22,12
-    EDITTEXT        IDC_EDIT2,74,56,21,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "rows",IDC_STATIC,99,58,16,8
-    CONTROL         "2nd highlight:",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,57,61,10
     PUSHBUTTON      "Buzz",IDC_BUTTON8,179,40,22,12
+    CONTROL         "Color",IDC_BUTTON1,"Button",BS_OWNERDRAW,15,174,51,15
+    CONTROL         "Color",IDC_BUTTON2,"Button",BS_OWNERDRAW,88,174,51,15
+    CONTROL         "Color",IDC_BUTTON3,"Button",BS_OWNERDRAW,158,174,51,15
+    LTEXT           "Background:",IDC_TEXT1,15,163,60,8
+    LTEXT           "Foreground:",IDC_TEXT2,88,163,62,8
+    LTEXT           "Highlight:",IDC_TEXT3,159,164,61,8
+    GROUPBOX        "",IDC_STATIC,4,7,217,191
+    LTEXT           "Select color for:",IDC_STATIC,10,15,63,8
+    LTEXT           "rows",IDC_STATIC,124,76,16,8
+    LTEXT           "Presets:",IDC_STATIC,154,15,28,8
+    LTEXT           "rows",IDC_STATIC,124,88,16,8
+    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,54,113,
+                    114,43
+    CONTROL         "Set highlights to songs' time sigatures",IDC_CHECK5,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,63,136,10
 END
 
 IDD_MIDISETUP DIALOG  0, 0, 240, 156
@@ -501,62 +510,79 @@ BEGIN
                     37,10
 END
 
-IDD_CONTROL_GLOBALS DIALOGEX 0, 0, 440, 99
+IDD_CONTROL_GLOBALS DIALOGEX 0, 0, 561, 94
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    LTEXT           "Song Title:",IDC_STATIC,2,4,51,8
-    EDITTEXT        IDC_EDIT_SONGTITLE,2,14,151,12,ES_AUTOHSCROLL
-    LTEXT           "Tempo (bpm):",IDC_STATIC,8,42,46,8
-    LTEXT           "Speed:",IDC_STATIC,8,67,24,8
-    LTEXT           "Global Volume:",IDC_STATIC,83,42,49,8
-    GROUPBOX        "Initial Settings",IDC_STATIC,2,31,152,63
-    LTEXT           "Restart Position:",IDC_STATIC,83,67,57,8
-    EDITTEXT        IDC_EDIT_TEMPO,8,51,40,12,ES_NUMBER
-    CONTROL         "Spin1",IDC_SPIN_TEMPO,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,42,51,
+    EDITTEXT        IDC_EDIT_SONGTITLE,2,3,167,12,ES_AUTOHSCROLL
+    CTEXT           "Type EXT, ## channels",IDC_EDIT_MODTYPE,173,3,149,12,
+                    SS_CENTERIMAGE,WS_EX_STATICEDGE
+    GROUPBOX        "",IDC_STATIC,1,14,83,78
+    LTEXT           "Initial tempo:",IDC_STATIC,4,20,44,8
+    CONTROL         "",IDC_SLIDER_SONGTEMPO,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS,11,28,15,50
+    EDITTEXT        IDC_EDIT_TEMPO,5,78,29,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_TEMPO,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,27,76,
                     11,14
-    EDITTEXT        IDC_EDIT_SPEED,8,76,40,12,ES_NUMBER
+    LTEXT           "Ticks/row:",IDC_STATIC,44,40,35,8
+    EDITTEXT        IDC_EDIT_SPEED,44,51,30,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN_SPEED,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,43,76,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,67,50,
                     11,14
-    EDITTEXT        IDC_EDIT_GLOBALVOL,83,51,40,12,ES_NUMBER
-    CONTROL         "Spin1",IDC_SPIN_GLOBALVOL,"msctls_updown32",
-                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_NOTHOUSANDS,117,51,11,14
-    EDITTEXT        IDC_EDIT_RESTARTPOS,83,76,40,12,ES_NUMBER
+    LTEXT           "Restart:",IDC_STATIC,44,70,26,8
+    EDITTEXT        IDC_EDIT_RESTARTPOS,44,78,30,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN_RESTARTPOS,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_NOTHOUSANDS,120,76,11,14
+                    UDS_NOTHOUSANDS,65,77,11,14
+    GROUPBOX        "",IDC_STATIC,83,14,175,78
+    LTEXT           "Initial global vol:",IDC_STATIC,90,20,52,8
+    CONTROL         "",IDC_SLIDER_GLOBALVOL,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS,105,28,15,50
+    EDITTEXT        IDC_EDIT_GLOBALVOL,95,78,36,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_GLOBALVOL,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,120,76,
+                    11,14
+    LTEXT           "VSTi vol:",IDC_STATIC,159,20,33,8
+    CONTROL         "",IDC_SLIDER_VSTIVOL,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS,164,28,15,50
+    EDITTEXT        IDC_EDIT_VSTIVOL,156,78,36,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_VSTIVOL,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,180,76,
+                    11,14
+    LTEXT           "Sample vol:",IDC_STATIC,212,20,38,8
     CONTROL         "Slider1",IDC_SLIDER_SONGPREAMP,"msctls_trackbar32",
-                    TBS_VERT | TBS_BOTH | TBS_NOTICKS,134,37,15,55
-    PUSHBUTTON      "Change...",IDC_BUTTON_MODTYPE,283,14,37,12,NOT 
-                    WS_TABSTOP,WS_EX_STATICEDGE
-    LTEXT           "Song Type:",IDC_STATIC,158,4,51,8
-    CTEXT           "Module Type EXT, ## channels",IDC_EDIT_MODTYPE,158,14,
-                    121,12,SS_CENTERIMAGE,WS_EX_STATICEDGE
-    GROUPBOX        "Effects",IDC_STATIC,158,31,162,63
-    CONTROL         "Bass Expansion",IDC_CHECK_BASS,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,161,43,75,10
-    CONTROL         "Reverb",IDC_CHECK_REVERB,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,161,55,73,10
-    CONTROL         "Surround",IDC_CHECK_SURROUND,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,161,67,81,10
-    CONTROL         "Loop Song",IDC_CHECK_LOOPSONG,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,248,79,66,10
-    COMBOBOX        IDC_COMBO_RESAMPLING,248,50,67,74,CBS_DROPDOWNLIST | 
+                    TBS_VERT | TBS_BOTH | TBS_NOTICKS,221,28,15,50
+    EDITTEXT        IDC_EDIT_SAMPLEPA,212,78,36,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_SAMPLEPA,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,238,75,
+                    11,14
+    PUSHBUTTON      "Song Properties...",IDC_BUTTON_MODTYPE,262,18,60,12,NOT 
                     WS_TABSTOP
-    LTEXT           "Resampling:",IDC_STATIC,248,41,43,8
-    CONTROL         "Graphic Equalizer",IDC_CHECK_EQ,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,161,79,81,10
-    CONTROL         "AGC",IDC_CHECK_AGC,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,248,67,31,10
+    CONTROL         "Loop Song",IDC_CHECK_LOOPSONG,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,263,48,50,10
+    PUSHBUTTON      "Player Settings...",IDC_BUTTON_PLAYERPROPS,262,59,60,12,
+                    NOT WS_TABSTOP
+    CTEXT           "Not saved with song!",IDC_STATIC,262,73,60,17
     CONTROL         "",IDC_VUMETER_LEFT,"Static",SS_BLACKRECT | SS_SUNKEN,
-                    325,14,15,80
+                    325,1,15,91
     CONTROL         "",IDC_VUMETER_RIGHT,"Static",SS_BLACKRECT | SS_SUNKEN,
-                    343,14,15,80
-    CONTROL         "",IDC_SLIDER_SONGTEMPO,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS,57,37,15,55
+                    343,1,15,91
+    GROUPBOX        "Player Settings (not saved in song!)",IDC_STATIC,414,31,
+                    147,63,NOT WS_VISIBLE
+    CONTROL         "Bass Expansion",IDC_CHECK_BASS,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,43,65,10
+    CONTROL         "Reverb",IDC_CHECK_REVERB,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,55,46,10
+    CONTROL         "Surround",IDC_CHECK_SURROUND,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,67,48,10
+    COMBOBOX        IDC_COMBO_RESAMPLING,490,76,67,74,CBS_DROPDOWNLIST | NOT 
+                    WS_VISIBLE | WS_TABSTOP
+    LTEXT           "Resampling:",IDC_STATIC,491,67,43,8,NOT WS_VISIBLE
+    CONTROL         "Graphic EQ",IDC_CHECK_EQ,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,79,58,10
+    CONTROL         "AGC",IDC_CHECK_AGC,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    NOT WS_VISIBLE | WS_TABSTOP,491,43,31,10
 END
 
 IDD_CONTROL_COMMENTS DIALOGEX 0, 0, 435, 119
@@ -564,8 +590,8 @@ STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_EDIT_COMMENTS,4,11,426,104,ES_MULTILINE | 
-                    ES_AUTOHSCROLL | ES_WANTRETURN | NOT WS_BORDER | 
-                    WS_VSCROLL | NOT WS_TABSTOP,WS_EX_STATICEDGE
+                    ES_WANTRETURN | NOT WS_BORDER | WS_VSCROLL | NOT 
+                    WS_TABSTOP,WS_EX_STATICEDGE
     LTEXT           "Song Message:",IDC_STATIC,4,2,76,8
 END
 
@@ -616,6 +642,8 @@ BEGIN
     GROUPBOX        "Keyboard Split",IDC_STATIC,167,53,328,40
     LTEXT           "Octave shift",IDC_STATIC,382,65,52,8
     GROUPBOX        "",IDC_STATIC,2,22,493,27
+    CONTROL         "Loop Pattern",IDC_PATTERN_LOOP,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | BS_FLAT | WS_TABSTOP,355,34,57,10
 END
 
 IDD_CONTROL_SAMPLES DIALOGEX 0, 0, 544, 106
@@ -729,7 +757,7 @@ BEGIN
     LTEXT           "%",IDC_STATIC,494,53,8,10
 END
 
-IDD_CONTROL_INSTRUMENTS DIALOGEX 0, 0, 558, 171
+IDD_CONTROL_INSTRUMENTS DIALOGEX 0, 0, 558, 173
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
@@ -741,21 +769,21 @@ BEGIN
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
                     UDS_NOTHOUSANDS,116,7,9,11
     EDITTEXT        IDC_SAMPLE_NAME,131,6,151,12,ES_AUTOHSCROLL
-    CTEXT           "Fade Out",IDC_STATIC,10,56,72,12,SS_CENTERIMAGE,
+    CTEXT           "Fade Out",IDC_STATIC,8,53,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_EDIT7,87,56,34,12,ES_NUMBER
+    EDITTEXT        IDC_EDIT7,87,53,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN7,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,112,57,
                     8,10
-    CTEXT           "Global Volume",IDC_STATIC,10,39,72,12,SS_CENTERIMAGE,
+    CTEXT           "Global Volume",IDC_STATIC,8,36,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_EDIT8,87,39,34,12,ES_NUMBER
+    EDITTEXT        IDC_EDIT8,87,36,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN8,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,112,40,
                     8,10
     CONTROL         "Pan",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,55,74,33,10
-    EDITTEXT        IDC_EDIT9,87,73,34,12,ES_NUMBER
+                    WS_TABSTOP,55,71,29,10
+    EDITTEXT        IDC_EDIT9,87,70,34,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN9,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,112,74,
                     8,11
@@ -771,61 +799,61 @@ BEGIN
                     WS_TABSTOP
     COMBOBOX        IDC_COMBO1,308,36,50,54,CBS_DROPDOWNLIST | WS_TABSTOP
     COMBOBOX        IDC_COMBO2,308,53,50,69,CBS_DROPDOWNLIST | WS_TABSTOP
-    COMBOBOX        IDC_COMBO3,308,71,50,54,CBS_DROPDOWNLIST | WS_TABSTOP
+    COMBOBOX        IDC_COMBO3,308,70,50,54,CBS_DROPDOWNLIST | WS_TABSTOP
     CTEXT           "File",IDC_STATIC,289,6,36,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     EDITTEXT        IDC_SAMPLE_FILENAME,324,6,105,12,ES_AUTOHSCROLL
-    CTEXT           "Separation",IDC_STATIC,10,102,72,13,SS_CENTERIMAGE,
+    CTEXT           "Sep",IDC_STATIC,8,99,25,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_EDIT15,88,102,33,13,ES_NUMBER
+    EDITTEXT        IDC_EDIT15,33,99,27,13,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN12,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,113,103,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,61,103,
                     7,11
-    CTEXT           "Center",IDC_STATIC,10,120,72,13,SS_CENTERIMAGE,
+    CTEXT           "Centre",IDC_STATIC,69,99,26,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    COMBOBOX        IDC_COMBO4,88,120,33,91,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO4,95,99,27,91,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "",IDC_NOTEMAP,"Static",SS_GRAYRECT | SS_NOTIFY | 
                     WS_TABSTOP,368,37,62,131,WS_EX_CLIENTEDGE
-    GROUPBOX        "Random Variation",IDC_STATIC,131,106,104,62
-    CTEXT           "Volume",IDC_STATIC,137,123,33,13,SS_CENTERIMAGE,
+    GROUPBOX        "Random Variation",IDC_STATIC,131,88,104,80
+    CTEXT           "Volume",IDC_STATIC,136,99,33,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,172,126,60,10
-    CTEXT           "Panning",IDC_STATIC,137,146,33,13,SS_CENTERIMAGE,
+                    TBS_NOTICKS,172,101,60,10
+    CTEXT           "Panning",IDC_STATIC,136,116,33,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,172,149,60,10
+                    TBS_NOTICKS,172,118,60,10
     CONTROL         "Cutoff",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | BS_FLAT,
-                    136,40,35,10
-    EDITTEXT        IDC_EDIT1,180,39,45,12,ES_READONLY | NOT WS_TABSTOP
+                    136,52,35,10
+    EDITTEXT        IDC_EDIT1,414,119,30,12,ES_RIGHT | ES_READONLY | NOT 
+                    WS_VISIBLE | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_RIGHT
     CONTROL         "Slider2",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_DISABLED,133,57,96,10
-    CONTROL         "Resonance",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT,136,74,53,10
+                    TBS_NOTICKS | WS_DISABLED,168,53,64,10
+    CONTROL         "Reso",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | BS_FLAT,136,
+                    37,33,10
     CONTROL         "Slider2",IDC_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_DISABLED,133,88,96,10
+                    TBS_NOTICKS | WS_DISABLED,168,37,64,10
     COMBOBOX        IDC_COMBO6,246,99,72,127,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CTEXT           "Duplicate Action",IDC_STATIC,246,71,59,13,
+    CTEXT           "Duplicate Action",IDC_STATIC,246,70,59,13,
                     SS_CENTERIMAGE,WS_EX_STATICEDGE
     CTEXT           "Duplicate Check",IDC_STATIC,246,53,59,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    GROUPBOX        "Filter",IDC_STATIC,131,25,104,143
-    GROUPBOX        "General",IDC_STATIC,3,25,123,143
-    GROUPBOX        "Pitch/Pan",IDC_STATIC,3,88,123,55
+    GROUPBOX        "Filter",IDC_STATIC,131,27,104,141
+    GROUPBOX        "General",IDC_STATIC,3,27,123,141
+    GROUPBOX        "Pitch/Pan",IDC_STATIC,3,88,123,35
     PUSHBUTTON      "Editor",IDC_INSVIEWPLG,321,99,37,13,0,WS_EX_STATICEDGE
     CONTROL         "",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,8,152,74,10
-    EDITTEXT        IDC_EDIT2,83,150,38,12,ES_AUTOHSCROLL | ES_NUMBER
+                    TBS_NOTICKS,47,135,36,10
+    EDITTEXT        IDC_EDIT2,85,133,36,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
-                    UDS_NOTHOUSANDS,119,150,8,12
-    GROUPBOX        "Attack",IDC_STATIC,3,138,123,30
+                    UDS_NOTHOUSANDS,116,133,8,12
     CTEXT           "Action",IDC_STATIC,246,36,59,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    GROUPBOX        "New Note Action",IDC_STATIC,240,25,123,63
-    GROUPBOX        "Plugin / Midi",IDC_STATIC,240,89,123,79
+    GROUPBOX        "New Note Action",IDC_STATIC,240,27,123,141
+    GROUPBOX        "Plugin / Midi",IDC_STATIC,240,88,123,80
     CTEXT           "Sample Map",IDC_STATIC,378,23,40,12,SS_CENTERIMAGE
     CTEXT           "Midi Bank",IDC_STATIC,245,152,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
@@ -833,35 +861,74 @@ BEGIN
     CONTROL         "",IDC_SPIN11,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,351,153,
                     8,11
+    GROUPBOX        "Sample Quality",IDC_STATIC,3,118,123,50
+    CTEXT           "Ramping",IDC_STATIC,7,133,39,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    CTEXT           "Cutoff",IDC_STATIC,136,133,33,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    CTEXT           "Reso",IDC_STATIC,136,151,33,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    CTEXT           "Resampling",IDC_STATIC,7,151,39,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    COMBOBOX        IDC_COMBO9,50,151,71,81,CBS_DROPDOWNLIST | WS_TABSTOP
+    CONTROL         "",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS,172,135,60,10
+    CONTROL         "",IDC_SLIDER7,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS,172,152,60,10
+    CONTROL         "Highpass",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    NOT WS_VISIBLE | WS_TABSTOP,181,19,45,10
+    COMBOBOX        IDC_FILTERMODE,163,70,69,42,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Mode",IDC_STATIC,135,70,23,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    RTEXT           "--",IDC_TEXT1,204,62,27,8
 END
 
-IDD_MODDOC_MODTYPE DIALOGEX 0, 0, 237, 118
+IDD_MODDOC_MODTYPE DIALOGEX 0, 0, 243, 198
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
-CAPTION "Module Type"
+CAPTION "Song Properties"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,183,8,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,183,26,50,14
-    GROUPBOX        "",IDC_STATIC,4,4,174,111
-    COMBOBOX        IDC_COMBO1,8,22,101,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    DEFPUSHBUTTON   "OK",IDOK,189,8,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,189,26,50,14
+    GROUPBOX        "Type",IDC_STATIC,4,4,174,41
+    COMBOBOX        IDC_COMBO1,8,16,101,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    COMBOBOX        IDC_COMBO2,114,22,60,77,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO2,114,16,60,77,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Module Type:",IDC_STATIC,8,12,52,8
-    LTEXT           "Channels:",IDC_STATIC,114,12,32,8
     CONTROL         "Linear Frequency Slides",IDC_CHECK1,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,8,40,93,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,106,93,10
     CONTROL         "Fast Volume Slides",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,8,52,75,10
+                    WS_TABSTOP,7,118,75,10
     CONTROL         "IT Old Effects",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,8,64,76,10
+                    WS_TABSTOP,111,106,76,10
     CONTROL         "IT Compatible Gxx",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,8,76,76,10
+                    WS_TABSTOP,111,118,76,10
     CONTROL         "Extended filter range",IDC_CHECK5,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,8,88,96,10
-    CONTROL         "Embed instrument parameters",IDC_CHECK6,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,8,100,96,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,130,82,10
+    CONTROL         "Embed instrument parameters in ITP",IDC_CHECK6,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,33,128,10
+    EDITTEXT        IDC_ROWSPERBEAT,114,60,16,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_ROWSPERMEASURE,114,72,16,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Rows/beat",IDC_STATIC,132,62,36,8
+    LTEXT           "Rows/measure",IDC_STATIC,132,74,49,8
+    COMBOBOX        IDC_COMBO3,7,72,99,77,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    GROUPBOX        "Tempo",IDC_STATIC,4,51,235,38
+    LTEXT           "Mode:",IDC_STATIC,7,62,21,8
+    COMBOBOX        IDC_COMBO4,156,129,81,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    GROUPBOX        "Playback",IDC_STATIC,4,95,235,51
+    LTEXT           "Plugin levels:",IDC_STATIC,111,131,43,10
+    GROUPBOX        "OpenMPT Version Info",IDC_STATIC,4,150,235,42
+    EDITTEXT        IDC_EDIT1,67,161,166,13,ES_AUTOHSCROLL | ES_READONLY,
+                    WS_EX_STATICEDGE
+    EDITTEXT        IDC_EDIT2,67,175,166,13,ES_AUTOHSCROLL | ES_READONLY,
+                    WS_EX_STATICEDGE
+    EDITTEXT        IDC_EDIT5,7,161,58,13,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT6,7,175,58,13,ES_AUTOHSCROLL | ES_READONLY
 END
 
 IDD_SHOWLOG DIALOG  0, 0, 300, 106
@@ -890,11 +957,10 @@ BEGIN
                     LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
 END
 
-IDD_VIEW_GLOBALS DIALOGEX 0, 0, 429, 312
+IDD_VIEW_GLOBALS DIALOGEX 0, 0, 471, 337
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    CONTROL         "ChnTab",IDC_TABCTRL1,"SysTabControl32",0x0,0,0,419,13
     GROUPBOX        "Channel 1",IDC_TEXT1,5,18,99,157
     EDITTEXT        IDC_EDIT9,10,30,89,12,ES_AUTOHSCROLL
     LTEXT           "Initial Volume:",IDC_STATIC,10,48,45,8
@@ -910,9 +976,9 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY,95,86,11,14
     CONTROL         "Mute",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
-                    WS_TABSTOP,13,129,42,10
+                    WS_TABSTOP,13,129,42,12
     CONTROL         "Surround",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
-                    BS_PUSHLIKE | WS_TABSTOP,56,129,42,10
+                    BS_PUSHLIKE | WS_TABSTOP,57,129,42,12
     COMBOBOX        IDC_COMBO1,10,155,89,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Effect:",IDC_STATIC,10,146,29,8
@@ -931,9 +997,9 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN4,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY,198,86,11,14
     CONTROL         "Mute",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
-                    WS_TABSTOP,116,129,42,10
+                    WS_TABSTOP,116,129,42,12
     CONTROL         "Surround",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    BS_PUSHLIKE | WS_TABSTOP,159,129,42,10
+                    BS_PUSHLIKE | WS_TABSTOP,159,129,42,12
     COMBOBOX        IDC_COMBO2,113,155,89,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Effect:",IDC_STATIC,113,146,29,8
@@ -952,13 +1018,12 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN6,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY,301,86,11,14
     CONTROL         "Mute",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
-                    WS_TABSTOP,219,129,41,10
+                    WS_TABSTOP,219,129,42,12
     CONTROL         "Surround",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | 
-                    BS_PUSHLIKE | WS_TABSTOP,262,129,42,10
+                    BS_PUSHLIKE | WS_TABSTOP,262,129,42,12
     COMBOBOX        IDC_COMBO3,216,155,89,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Effect:",IDC_STATIC,216,146,29,8
-    GROUPBOX        "Channel 4",IDC_TEXT4,314,18,99,157
     EDITTEXT        IDC_EDIT12,319,30,89,12,ES_AUTOHSCROLL
     LTEXT           "Initial Volume:",IDC_STATIC,319,48,45,8
     LTEXT           "Initial Pan:",IDC_STATIC,319,89,34,8
@@ -968,23 +1033,23 @@ BEGIN
                     TBS_BOTH | WS_TABSTOP,319,100,92,22
     EDITTEXT        IDC_EDIT7,372,46,36,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN7,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY,404,45,11,14
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY,396,45,11,14
     EDITTEXT        IDC_EDIT8,372,88,36,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN8,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY,404,86,11,14
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY,401,86,11,14
     CONTROL         "Mute",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
-                    WS_TABSTOP,322,129,42,10
+                    WS_TABSTOP,322,129,42,12
     CONTROL         "Surround",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | 
-                    BS_PUSHLIKE | WS_TABSTOP,365,129,42,10
+                    BS_PUSHLIKE | WS_TABSTOP,365,129,42,12
     COMBOBOX        IDC_COMBO4,319,155,89,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Effect:",IDC_STATIC,319,146,29,8
-    GROUPBOX        "Effect Plugins",IDC_STATIC,5,178,408,132
+    GROUPBOX        "Effect Plugins",IDC_STATIC,5,177,408,131
     COMBOBOX        IDC_COMBO5,53,191,135,148,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CTEXT           "Display name",IDC_STATIC,263,191,48,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    EDITTEXT        IDC_EDIT13,310,191,97,13,ES_CENTER | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT13,310,191,96,13,ES_CENTER | ES_AUTOHSCROLL
     PUSHBUTTON      "Select...",IDC_BUTTON1,193,191,34,13,0,WS_EX_STATICEDGE
     PUSHBUTTON      "Edit...",IDC_BUTTON2,231,191,27,13,0,WS_EX_STATICEDGE
     CTEXT           "Parameter",IDC_STATIC,16,266,43,13,SS_CENTERIMAGE,
@@ -999,8 +1064,8 @@ BEGIN
                     WS_EX_STATICEDGE
     COMBOBOX        IDC_COMBO7,285,261,117,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CTEXT           "",IDC_TEXT6,11,208,396,13,SS_CENTERIMAGE,
-                    WS_EX_STATICEDGE
+    CONTROL         "",IDC_TEXT6,"Static",SS_LEFTNOWORDWRAP | SS_CENTERIMAGE | 
+                    WS_GROUP,311,208,96,13,WS_EX_STATICEDGE
     PUSHBUTTON      ">>",IDC_BUTTON4,32,191,18,13,NOT WS_TABSTOP,
                     WS_EX_STATICEDGE
     PUSHBUTTON      "<<",IDC_BUTTON5,11,191,18,13,NOT WS_TABSTOP,
@@ -1031,6 +1096,15 @@ BEGIN
     GROUPBOX        "Mix settings",IDC_STATIC,193,226,214,78
     GROUPBOX        "Factory preset",IDC_STATIC,11,226,177,34
     GROUPBOX        "",IDC_STATIC,11,255,177,49
+    CTEXT           "I/O Type:",IDC_STATIC,263,208,47,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "Move...",IDC_MOVEFXSLOT,53,207,34,13,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Clone...",IDC_CLONEPLUG,103,207,34,13,NOT WS_VISIBLE,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "Insert...",IDC_INSERTFXSLOT,154,207,34,13,0,
+                    WS_EX_STATICEDGE
+    GROUPBOX        "Channel 4",IDC_TEXT4,314,18,99,157
+    CONTROL         "",IDC_TABCTRL1,"SysTabControl32",0x0,0,0,412,14
 END
 
 IDD_EDIT_FIND DIALOG  0, 0, 182, 145
@@ -1289,7 +1363,7 @@ BEGIN
                     WS_TABSTOP
 END
 
-IDD_OPTIONS_SOUNDCARD DIALOGEX 0, 0, 240, 156
+IDD_OPTIONS_SOUNDCARD DIALOGEX 0, 0, 266, 274
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Sound Card"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
@@ -1302,7 +1376,7 @@ BEGIN
     COMBOBOX        IDC_COMBO2,71,41,54,83,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Mixing Quality:",IDC_STATIC,11,62,57,8
-    COMBOBOX        IDC_COMBO3,71,59,54,90,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO3,71,60,54,90,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Max. Polyphony:",IDC_STATIC,11,78,57,8
     COMBOBOX        IDC_COMBO4,71,76,54,88,CBS_DROPDOWNLIST | WS_TABSTOP
@@ -1320,7 +1394,7 @@ BEGIN
     CONTROL         "Slider2",IDC_SLIDER_PREAMP,"msctls_trackbar32",
                     TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,200,87,
                     27,62
-    COMBOBOX        IDC_COMBO5,131,59,64,80,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO5,131,60,64,80,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "Reverse Stereo",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,131,78,62,10
@@ -1328,42 +1402,46 @@ BEGIN
                     WS_TABSTOP,131,90,64,10
 END
 
-IDD_MIDIMACRO DIALOGEX 0, 0, 349, 332
+IDD_MIDIMACRO DIALOGEX 0, 0, 349, 345
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
 CAPTION "Zxx Macros Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Parametered Macro (Z00-Z7F)",IDC_STATIC,4,4,288,259
-    COMBOBOX        IDC_COMBO1,13,229,48,103,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    GROUPBOX        "Parametered Macro (Z00-Z7F)",IDC_STATIC,4,4,288,272
+    COMBOBOX        IDC_COMBO1,11,229,48,103,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    COMBOBOX        IDC_COMBO2,64,229,111,79,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO2,62,229,111,79,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Modify macro:",IDC_STATIC,13,219,47,8
-    GROUPBOX        "Fixed Macros (Z80-ZFF)",IDC_STATIC,4,269,288,46
-    COMBOBOX        IDC_COMBO3,48,283,173,65,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "Modify macro:",IDC_STATIC,11,219,47,8
+    GROUPBOX        "Fixed Macros (Z80-ZFF)",IDC_STATIC,4,278,288,46
+    COMBOBOX        IDC_COMBO3,48,292,173,65,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Customize:",IDC_STATIC,10,301,47,8
-    COMBOBOX        IDC_COMBO4,47,299,48,101,CBS_DROPDOWNLIST | CBS_SORT | 
+    LTEXT           "Customize:",IDC_STATIC,10,310,47,8
+    COMBOBOX        IDC_COMBO4,47,308,48,101,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Value:",IDC_STATIC,115,301,47,8
-    EDITTEXT        IDC_EDIT2,137,299,116,12,ES_AUTOHSCROLL
+    LTEXT           "Value:",IDC_STATIC,115,310,47,8
+    EDITTEXT        IDC_EDIT2,137,308,116,12,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK",IDOK,295,7,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,295,24,50,14
     CONTROL         "Embed macro configuration in file when saving",
                     IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,4,317,288,10
+                    WS_TABSTOP,4,330,288,10
     PUSHBUTTON      "Set as default",IDC_BUTTON1,295,43,50,14
     PUSHBUTTON      "Reset",IDC_BUTTON2,295,62,50,14
-    COMBOBOX        IDC_MACROPLUG,64,246,110,111,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_MACROPLUG,62,255,111,111,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Plug / param:",IDC_STATIC,13,248,44,8
+    LTEXT           "Plug/param:",IDC_GENMACROLABEL,17,257,40,8
     LTEXT           "Current Macros:",IDC_STATIC,11,16,54,8
-    COMBOBOX        IDC_MACROPARAM,177,246,111,126,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_MACROPARAM,175,255,106,126,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Type:",IDC_STATIC,64,219,47,8
-    EDITTEXT        IDC_EDIT1,177,229,110,12,ES_AUTOHSCROLL
-    LTEXT           "Value:",IDC_STATIC,177,219,47,8
-    LTEXT           "Preset:",IDC_STATIC,10,286,37,8
+    LTEXT           "Type:",IDC_STATIC,62,219,47,8
+    EDITTEXT        IDC_EDIT1,175,229,110,12,ES_AUTOHSCROLL
+    LTEXT           "Value:",IDC_STATIC,175,219,47,8
+    LTEXT           "Preset:",IDC_STATIC,10,295,37,8
+    GROUPBOX        "Generate Macro:",IDC_STATIC,11,244,274,28
+    COMBOBOX        IDC_MACROCC,61,255,111,111,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
 END
 
 IDD_CHORDEDIT DIALOGEX 0, 0, 245, 148
@@ -1504,16 +1582,16 @@ BEGIN
     RTEXT           "--",IDC_TEXT2,260,89,22,8
 END
 
-IDD_SELECTMIXPLUGIN DIALOGEX 0, 0, 217, 164
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_SELECTMIXPLUGIN DIALOGEX 0, 0, 218, 166
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Mix Plugins"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,160,7,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,160,24,50,14
-    LTEXT           "",IDC_TEXT1,7,149,203,8
-    PUSHBUTTON      "Add Plugin...",IDC_BUTTON1,160,115,50,14
-    PUSHBUTTON      "Remove",IDC_BUTTON2,160,132,50,14
+    DEFPUSHBUTTON   "OK",IDOK,161,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,161,24,50,14
+    LTEXT           "",IDC_TEXT1,7,151,204,8
+    PUSHBUTTON      "Add Plugin...",IDC_BUTTON1,161,115,50,14
+    PUSHBUTTON      "Remove",IDC_BUTTON2,161,132,50,14
     CONTROL         "Tree1",IDC_TREE1,"SysTreeView32",TVS_DISABLEDRAGDROP | 
                     TVS_SHOWSELALWAYS | WS_TABSTOP,7,7,148,140,
                     WS_EX_CLIENTEDGE
@@ -1576,7 +1654,7 @@ END
 IDD_EFFECTVISUALIZER DIALOGEX 0, 0, 385, 108
 STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
-CAPTION "Param Editor [prototype]"
+CAPTION "Param Editor"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_VISSTATUS,4,91,162,12,ES_AUTOHSCROLL | ES_READONLY | 
@@ -1588,6 +1666,7 @@ BEGIN
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_VISACTION,221,90,76,158,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
+    LTEXT           "",IDC_RENDERZONE,4,3,377,84,NOT WS_VISIBLE
 END
 
 IDD_SOUNDBANK_INFO1 DIALOGEX 0, 0, 271, 167
@@ -1636,6 +1715,176 @@ BEGIN
     LTEXT           "New:",IDC_STATIC,101,35,18,8
 END
 
+IDD_OPTIONS_AUTOSAVE DIALOGEX 0, 0, 265, 278
+STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Auto Save"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "Enable Autosave",IDC_AUTOSAVE_ENABLE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,15,70,10
+    EDITTEXT        IDC_AUTOSAVE_INTERVAL,55,29,24,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_AUTOSAVE_HISTORY,55,46,24,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_AUTOSAVE_PATH,56,91,164,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_AUTOSAVE_BROWSE,222,92,12,11,NOT WS_TABSTOP
+    LTEXT           "[filename].AutoSave.[timestamp].[extension]",IDC_STATIC,
+                    56,115,164,12,SS_CENTERIMAGE,WS_EX_CLIENTEDGE
+    GROUPBOX        "Auto Save",IDC_STATIC,4,3,248,150
+    LTEXT           "Save every:",IDC_STATIC,11,29,40,12,SS_CENTERIMAGE
+    LTEXT           "minutes",IDC_STATIC,83,29,36,12,SS_CENTERIMAGE
+    LTEXT           "Filename:",IDC_STATIC,24,115,30,12,SS_CENTERIMAGE
+    LTEXT           "(example: mySong.AutoSave.20050327.2343.it)",IDC_STATIC,
+                    56,130,157,12,SS_CENTERIMAGE
+    LTEXT           "Keep up to:",IDC_STATIC,11,46,36,12,SS_CENTERIMAGE
+    LTEXT           "backups of each file name",IDC_STATIC,83,46,87,12,
+                    SS_CENTERIMAGE
+    GROUPBOX        "Location:",IDC_STATIC,11,65,228,80
+    CONTROL         "Use:",IDC_AUTOSAVE_USECUSTOMDIR,"Button",
+                    BS_AUTORADIOBUTTON,24,92,31,10
+    CONTROL         "Use song's original directory.",IDC_AUTOSAVE_USEORIGDIR,
+                    "Button",BS_AUTORADIOBUTTON,24,78,105,10
+END
+
+IDD_EDIT_GOTO DIALOGEX 0, 0, 129, 89
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Go to..."
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Go to:",IDC_STATIC,4,4,121,81
+    EDITTEXT        IDC_GOTO_ROW,41,15,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_GOTO_CHAN,41,32,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_GOTO_PAT,41,49,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Row:",IDC_STATIC,21,18,18,8
+    LTEXT           "Channel:",IDC_STATIC,10,35,29,8
+    LTEXT           "Pattern:",IDC_STATIC,13,52,26,8
+    EDITTEXT        IDC_GOTO_ORD,41,66,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Order:",IDC_STATIC,19,69,20,8
+    PUSHBUTTON      "OK",IDOK,88,66,32,14
+END
+
+IDD_PATTERNRANDOMIZER DIALOGEX 0, 0, 246, 255
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_APPWINDOW
+CAPTION "Pattern Randomizer - NOT YET FUNCTIONAL"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Load",IDC_BUTTON1,112,13,30,14
+    PUSHBUTTON      "Save",IDC_BUTTON2,143,13,30,14
+    EDITTEXT        IDC_EDIT1,9,13,99,14,ES_AUTOHSCROLL
+    GROUPBOX        "Profile:",IDC_STATIC,4,3,238,35
+    CONTROL         "",IDC_TAB1,"SysTabControl32",0x0,4,40,238,190
+    PUSHBUTTON      "Apply",IDC_APPLY,192,235,50,14
+    LTEXT           "Static",IDC_RANDOM_PLACEHOLDER,6,53,232,175
+END
+
+IDD_PATTERNRANDOMIZER_NOTE DIALOGEX 0, 0, 235, 172
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "",IDC_STATIC,5,5,224,164
+    CONTROL         "Randomize Notes",IDC_RANDOMIZE_NOTE_ENABLE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,4,72,10
+    CONTROL         "Range",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,11,17,37,
+                    10
+    CONTROL         "Use the following notes:",IDC_RADIO3,"Button",
+                    BS_AUTORADIOBUTTON,11,29,91,10
+    CONTROL         "",IDC_LIST2,"SysListView32",LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,11,41,210,83
+    EDITTEXT        IDC_EDIT1,48,16,20,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "semitones around current note.",IDC_STATIC,71,18,98,8
+    GROUPBOX        "Include random...",IDC_STATIC,11,130,107,33
+    CONTROL         "Notes",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    15,141,35,10
+    CONTROL         "Note offs",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,150,45,10
+    CONTROL         "Note cuts",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,60,150,47,10
+    CONTROL         "Blank rows",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,60,140,51,10
+    GROUPBOX        "Overwrite existing...",IDC_STATIC,117,130,105,33
+    CONTROL         "Notes",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    123,141,35,10
+    CONTROL         "Note offs",IDC_CHECK10,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,123,150,45,10
+    CONTROL         "Note cuts",IDC_CHECK11,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,170,150,44,10
+    CONTROL         "Blank rows",IDC_CHECK12,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,170,140,49,10
+END
+
+IDD_PATTERNRANDOMIZER_INSTRUMENT DIALOGEX 0, 0, 236, 172
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "",-1,5,5,225,164
+    CONTROL         "Randomize Instruments",IDC_RANDOMIZE_NOTE_ENABLE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,4,89,10
+    LTEXT           "Use the following instruments:",-1,12,18,94,8
+    LISTBOX         IDC_LIST1,11,30,125,135,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_PATTERNRANDOMIZER_VOLCMD DIALOGEX 0, 0, 235, 172
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "",IDC_STATIC,5,5,224,164
+    CONTROL         "Use existing commands.",IDC_RADIO2,"Button",
+                    BS_AUTORADIOBUTTON,14,27,92,10
+    CONTROL         "Use the following:",IDC_RADIO3,"Button",
+                    BS_AUTORADIOBUTTON,14,38,72,10
+    GROUPBOX        "Command types:",IDC_STATIC,11,16,211,147
+    LISTBOX         IDC_LIST1,15,49,91,108,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO1,122,49,96,96,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Min:",IDC_STATIC,136,69,14,8
+    CONTROL         "Randomize Volume Commands",IDC_RANDOMIZE_NOTE_ENABLE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,4,113,10
+    EDITTEXT        IDC_EDIT2,152,67,20,12,ES_AUTOHSCROLL
+    LTEXT           "Max:",IDC_STATIC,178,69,16,8
+    EDITTEXT        IDC_EDIT3,195,67,20,12,ES_AUTOHSCROLL
+    GROUPBOX        "Command parameters:",IDC_STATIC,115,16,107,147
+    CONTROL         "Radio1",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,123,68,
+                    10,10
+    CONTROL         "Radio1",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,123,83,
+                    10,10
+    EDITTEXT        IDC_EDIT4,136,82,17,12,ES_AUTOHSCROLL
+    LTEXT           "around current",IDC_STATIC,156,84,49,8
+END
+
+IDD_PATTERNRANDOMIZER_EFFECT DIALOGEX 0, 0, 235, 172
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "",IDC_STATIC,5,5,224,164
+    CONTROL         "Use existing effects.",IDC_RADIO2,"Button",
+                    BS_AUTORADIOBUTTON,14,27,79,10
+    CONTROL         "Use the following effects:",IDC_RADIO3,"Button",
+                    BS_AUTORADIOBUTTON,14,38,95,10
+    GROUPBOX        "Effect types:",IDC_STATIC,11,16,211,147
+    LISTBOX         IDC_LIST1,15,49,91,108,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO1,122,49,96,96,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Min:",IDC_STATIC,136,69,14,8
+    CONTROL         "Randomize Effects",IDC_RANDOMIZE_NOTE_ENABLE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,4,75,10
+    EDITTEXT        IDC_EDIT2,152,67,20,12,ES_AUTOHSCROLL
+    LTEXT           "Max:",IDC_STATIC,178,69,16,8
+    EDITTEXT        IDC_EDIT3,195,67,20,12,ES_AUTOHSCROLL
+    GROUPBOX        "Effect parameters:",IDC_STATIC,115,16,107,147
+    CONTROL         "Radio1",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,123,68,
+                    10,10
+    CONTROL         "Radio1",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,123,83,
+                    10,10
+    EDITTEXT        IDC_EDIT4,136,82,17,12,ES_AUTOHSCROLL
+    LTEXT           "around current",IDC_STATIC,156,84,49,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1643,8 +1892,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,10,1,1
- PRODUCTVERSION 4,10,1,1
+ FILEVERSION 1,17,2,40
+ PRODUCTVERSION 0,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x9L
@@ -1659,17 +1908,15 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Da Trakar Far Windaz"
-            VALUE "CompanyName", "Olivier Lapicque"
-            VALUE "FileDescription", "ModPlug Tracker"
-            VALUE "FileVersion", "1.16"
+            VALUE "CompanyName", "Olivier Lapicque / OpenMPT team"
+            VALUE "FileDescription", "OpenMPT / ModPlug Tracker"
+            VALUE "FileVersion", "1, 17, 2, 40"
             VALUE "InternalName", "Modplug Tracker"
-            VALUE "LegalCopyright", "Copyright © 1997-2003 Olivier Lapicque.   GPL"
+            VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2005 GPL."
             VALUE "LegalTrademarks", "M.O.D.P.L.U.G"
             VALUE "OriginalFilename", "mptrack.exe"
-            VALUE "PrivateBuild", "Jan 12.23am 2004"
-            VALUE "ProductName", "ModPlug Tracker"
-            VALUE "ProductVersion", "1.16"
+            VALUE "ProductName", "OpenMPT / ModPlug Tracker"
+            VALUE "ProductVersion", "0, 0, 0, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -1689,8 +1936,8 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
-        RIGHTMARGIN, 182
-        BOTTOMMARGIN, 230
+        RIGHTMARGIN, 261
+        BOTTOMMARGIN, 249
     END
 
     IDD_OPTIONS_PLAYER, DIALOG
@@ -1700,11 +1947,22 @@ BEGIN
         VERTGUIDE, 256
     END
 
+    IDD_WAVECONVERT, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 163
+    END
+
     IDD_OPTIONS_KEYBOARD, DIALOG
     BEGIN
         RIGHTMARGIN, 260
         TOPMARGIN, 5
         BOTTOMMARGIN, 274
+    END
+
+    IDD_OPTIONS_COLORS, DIALOG
+    BEGIN
+        RIGHTMARGIN, 240
+        BOTTOMMARGIN, 198
     END
 
     IDD_CONTROL_COMMENTS, DIALOG
@@ -1733,7 +1991,7 @@ BEGIN
 
     IDD_CONTROL_INSTRUMENTS, DIALOG
     BEGIN
-        RIGHTMARGIN, 435
+        RIGHTMARGIN, 444
         BOTTOMMARGIN, 168
     END
 
@@ -1752,8 +2010,7 @@ BEGIN
 
     IDD_VIEW_GLOBALS, DIALOG
     BEGIN
-        RIGHTMARGIN, 251
-        BOTTOMMARGIN, 233
+        BOTTOMMARGIN, 335
     END
 
     IDD_PATTERN_PROPERTIES, DIALOG
@@ -1778,12 +2035,18 @@ BEGIN
         BOTTOMMARGIN, 275
     END
 
+    IDD_OPTIONS_SOUNDCARD, DIALOG
+    BEGIN
+        RIGHTMARGIN, 240
+        BOTTOMMARGIN, 156
+    END
+
     IDD_MIDIMACRO, DIALOG
     BEGIN
         LEFTMARGIN, 4
         RIGHTMARGIN, 345
         TOPMARGIN, 4
-        BOTTOMMARGIN, 327
+        BOTTOMMARGIN, 340
     END
 
     IDD_CHORDEDIT, DIALOG
@@ -1823,9 +2086,9 @@ BEGIN
     IDD_SELECTMIXPLUGIN, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 210
+        RIGHTMARGIN, 211
         TOPMARGIN, 7
-        BOTTOMMARGIN, 157
+        BOTTOMMARGIN, 159
     END
 
     IDD_PLUGINEDITOR, DIALOG
@@ -1851,6 +2114,51 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 163
     END
+
+    IDD_OPTIONS_AUTOSAVE, DIALOG
+    BEGIN
+        RIGHTMARGIN, 259
+        BOTTOMMARGIN, 275
+    END
+
+    IDD_EDIT_GOTO, DIALOG
+    BEGIN
+        RIGHTMARGIN, 94
+        TOPMARGIN, 4
+    END
+
+    IDD_PATTERNRANDOMIZER, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 242
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 249
+    END
+
+    IDD_PATTERNRANDOMIZER_NOTE, DIALOG
+    BEGIN
+        RIGHTMARGIN, 229
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_PATTERNRANDOMIZER_INSTRUMENT, DIALOG
+    BEGIN
+        RIGHTMARGIN, 230
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_PATTERNRANDOMIZER_VOLCMD, DIALOG
+    BEGIN
+        RIGHTMARGIN, 229
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_PATTERNRANDOMIZER_EFFECT, DIALOG
+    BEGIN
+        RIGHTMARGIN, 229
+        BOTTOMMARGIN, 169
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1871,10 +2179,11 @@ IDC_NODRAG              CURSOR                  "res\\nodrag.cur"
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME           "Modplug Tracker"
+    IDR_MAINFRAME           "OpenMPT"
     IDR_MODULETYPE          "\nModule\nuntitled\nMusic Modules (*.mod;*.s3m;*.it;*.xm)\n.mod\nModplugTracker.Document\nMusic Module"
     ID_PATTERN_CHANNELMANAGER 
                             "Display channel manager window\nChannel manager"
+    ID_INDICATOR_CPU        "-"
 END
 
 STRINGTABLE 
@@ -2080,7 +2389,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_SAMPLE_SILENCE      "Silence Sample\nSilence"
-    IDC_INSTRUMENT_NEW      "Create a new instrument\nNew instrument"
+    IDC_INSTRUMENT_NEW      "Create a new instrument\nNew instrument (hold shift to duplicate)"
     IDC_INSTRUMENT_OPEN     "Import instrument\nImport instrument"
     IDC_INSTRUMENT_SAVEAS   "Save the current instrument to disk\nSave instrument"
     IDC_INSTRUMENT_PLAY     "Play the current instrument\nPlay instrument"
@@ -2133,8 +2442,8 @@ BEGIN
     ID_PATTERN_EXPAND       "Expand pattern\nExpand Pattern"
     ID_PATTERN_SHRINK       "Shrink Pattern\nShrink Pattern"
     ID_HELP_SEARCH          "Displays the help index\nHelp Index"
-    ID_NETLINK_MODPLUG      "Go to Modplug Central (www.modplug.com)"
-    ID_NETLINK_UT           "Go to United Trackers (www.united-trackers.org)"
+    ID_NETLINK_MODPLUG      "Go to Modplug Central"
+    ID_NETLINK_UT           "Go to United Trackers"
     ID_NETLINK_OSMUSIC      "Go to OSMusic.net"
     ID_NETLINK_HANDBOOK     "Go to the Tracker's Handbook"
 END
@@ -2150,7 +2459,7 @@ BEGIN
     ID_FILE_SAVEMIDI        "Convert the current song to a standard midi file"
     ID_NETLINK_FORUMS       "Go to the Modplug Central Music Forums"
     ID_INSTRUMENT_SAMPLEMAP "Edit the sample map"
-    ID_NETLINK_PLUGINS      "Go to KVR-VST to download plugins!"
+    ID_NETLINK_PLUGINS      "Go to KVR Audio to download plugins"
     ID_PATTERN_AMPLIFY      "Amplify selection\nAmplify"
 END
 
@@ -2162,6 +2471,11 @@ END
 STRINGTABLE 
 BEGIN
     ID_VIEWPLUGNAMES        "Displays the channel plugins in channel headers\nShow Plugins"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_GOTO            "Go to row, channel, pattern...\nGo to row"
 END
 
 #endif    // English (U.S.) resources
@@ -2182,8 +2496,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 // Bitmap
 //
 
-IDB_SPLASHNOFOLD        BITMAP                  "res\\modplthingmorecontrast.bmp"
 IDB_SPLASHNOFOLDFIN     BITMAP                  "res\\splashno.bmp"
+IDB_MAINBAR             BITMAP                  "res\\MAINBAR.BMP"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2192,12 +2506,23 @@ IDB_SPLASHNOFOLDFIN     BITMAP                  "res\\splashno.bmp"
 
 IDR_VSTMENU MENU 
 BEGIN
-    POPUP "Presets"
+    POPUP "&File"
     BEGIN
-        MENUITEM "&Load...",                    ID_PRESET_LOAD
-        MENUITEM "&Save As...",                 ID_PRESET_SAVE
+        MENUITEM "&Load Preset...",             ID_PRESET_LOAD
+        MENUITEM "&Save Preset As...",          ID_PRESET_SAVE
         MENUITEM SEPARATOR
-        MENUITEM "&Randomize",                  ID_PRESET_RANDOM
+        MENUITEM "&Randomize Params",           ID_PRESET_RANDOM
+    END
+    POPUP "&Info"
+    BEGIN
+        MENUITEM "I&nputs",                     ID_INFO_INPUTS36015
+        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
+        MENUITEM "&Macros",                     ID_INFO_MACROS36017
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Bypass",                     ID_PLUG_BYPASS
+        MENUITEM "Record &Params",              ID_PLUG_RECORDAUTOMATION
     END
 END
 
@@ -2254,7 +2579,52 @@ BEGIN
                     ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Static",IDC_PARAMLABEL,112,8,32,8
     LTEXT           "Parameters:",IDC_STATIC,7,7,38,8
-    LTEXT           "%",IDC_PARAMLABEL2,136,200,8,8
+    LTEXT           "‰",IDC_PARAMLABEL2,136,200,8,8
+END
+
+IDD_MOVEFXSLOT DIALOGEX 0, 0, 133, 78
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,76,59,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,59,50,14
+    COMBOBOX        IDC_COMBO1,42,38,48,172,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_EDIT1,7,14,119,19,ES_CENTER | ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+END
+
+IDD_CONTROL_GRAPH DIALOGEX 0, 0, 424, 145
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Node",IDC_STATIC,9,9,408,132
+    COMBOBOX        IDC_COMBO5,57,22,140,148,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      ">>",IDC_BUTTON4,36,22,18,13,NOT WS_TABSTOP,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "<<",IDC_BUTTON5,15,22,18,13,NOT WS_TABSTOP,
+                    WS_EX_STATICEDGE
+    GROUPBOX        "Audio",IDC_STATIC,16,38,182,100
+    COMBOBOX        IDC_COMBO1,21,48,86,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Midi",IDC_STATIC,219,38,182,100
+    LISTBOX         IDC_LIST3,21,63,86,68,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO2,109,48,86,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_LIST4,109,62,86,68,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO3,224,48,86,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_LIST5,224,62,86,68,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO4,312,48,86,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_LIST6,312,62,86,68,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
 END
 
 
@@ -2273,9 +2643,32 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 220
     END
+
+    IDD_MOVEFXSLOT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 126
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 73
+    END
+
+    IDD_CONTROL_GRAPH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 417
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 138
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+1                       RT_MANIFEST             "res\\rt_manif.bin"
 #endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 

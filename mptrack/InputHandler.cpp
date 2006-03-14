@@ -15,7 +15,7 @@
 //--------------------------------------------------------------
 CInputHandler::CInputHandler(CWnd *mainframe)
 {
-	pMainFrm = mainframe;
+	m_pMainFrm = mainframe;
 		
 	//Init CommandSet and Load defaults
 	activeCommandSet = new CCommandSet();
@@ -24,24 +24,27 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	char wd[255];
 	_getdcwd(_getdrive(), wd, 255);
 	workingDir = wd;
-
-	if (!CMainFrame::m_szKbdFile[0])
+	if (!CMainFrame::m_szKbdFile[0]) {
 		strcpy(CMainFrame::m_szKbdFile, workingDir + "\\default.mkb");
-	
-	if (!(activeCommandSet->LoadFile(CMainFrame::m_szKbdFile)))
-		activeCommandSet->LoadFile(workingDir + "\\default.mkb");
+	}
+	if (!(activeCommandSet->LoadFile(CMainFrame::m_szKbdFile))) {
+		if (!(activeCommandSet->LoadFile(workingDir + "\\default.mkb"))) {
+			AfxMessageBox("Warning! OpenMPT has not been able to locate a keymap file. Please locate one in the settings.\r\nUntil you do so, the keyboard will not work in OpenMPT.");
+		}
+	}
 
 	//Get Keymap 
 	activeCommandSet->GenKeyMap(keyMap);
 	
-
 	m_bDistinguishControls = false; 
 	m_bDistinguishShifts = false;
 	m_bDistinguishAlts = false;
 	m_bBypass = false;
 	modifierMask=0;
-	 m_bNoAltMenu = true;
+	m_bNoAltMenu = true;
 	m_bAutoSave = true;
+
+
 }
 CInputHandler::~CInputHandler(void)
 {
@@ -56,7 +59,6 @@ CInputHandler::~CInputHandler(void)
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam)
 
 {
-	int scancode;
 	CommandID executeCommand = kcNull;	
 	KeyEventType keyEventType;
 
@@ -82,26 +84,28 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 			executeCommand = keyMap[context][modifierMask][wParam][keyEventType];
 	}
 
-	if (pMainFrm && executeCommand != kcNull)
+	if (m_pMainFrm && executeCommand != kcNull)
 	{
-		pMainFrm->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam);
+		m_pMainFrm->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam);
 	}
 
 	return executeCommand;
 }
 
 //--------------------------------------------------------------
-CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType)
+CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd)
 {
-	
 	CommandID executeCommand = keyMap[context][modifierMask][nChar][keyEventType];
 
 /*		if (keyEventType == kKeyEventUp)
 			keyEventType=kKeyEventUp;
 */
-	if (pMainFrm && executeCommand != kcNull) 
+	if (pSourceWnd == NULL) {
+		pSourceWnd = m_pMainFrm;	//by default, send command message to main frame.
+	}
+	if (pSourceWnd && (executeCommand != kcNull)) 
 	{
-		pMainFrm->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar);
+		pSourceWnd->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, nChar);
 	}
 
 	return executeCommand;
@@ -246,6 +250,23 @@ KeyEventType CInputHandler::GetKeyEventType(UINT nFlags)
 			return kKeyEventDown;		
 }
 
+bool CInputHandler::SelectionPressed(void)
+{
+	bool result=false;
+	int nSelectionKeys = activeCommandSet->GetKeyListSize(kcSelect);
+	KeyCombination key;
+
+	for (int k=0; k<nSelectionKeys; k++) { 
+		key = activeCommandSet->GetKey(kcSelect, k);
+		if (modifierMask & key.mod) {
+			result=true;
+			break;
+		}
+	}
+	return result;
+}
+
+
 bool CInputHandler::ShiftPressed(void)
 {
 	return (modifierMask & HOTKEYF_SHIFT);
@@ -318,6 +339,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_PLAYER_PAUSE:		s="Pause\t"; c=kcPauseSong; break;
 		case ID_MIDI_RECORD:		s="Midi Record\t"; c=kcMidiRecord; break;
 		case ID_ESTIMATESONGLENGTH:	s="Estimate Song Length\t"; c=kcEstimateSongLength; break;
+		case ID_APPROX_BPM:			s="Approx. real BPM\t"; c=kcApproxRealBPM; break;
 
 		case ID_EDIT_UNDO:			s="Undo\t"; c=kcEditUndo; break;
 		case ID_EDIT_CUT:			s="Cut\t"; c=kcEditCut; break;
@@ -327,18 +349,20 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_EDIT_SELECT_ALL:	s="Select All\t"; c=kcEditSelectAll; break;
 		case ID_EDIT_FIND:			s="Find\t"; c=kcEditFind; break;
 		case ID_EDIT_FINDNEXT:		s="Find Next\t"; c=kcEditFindNext; break;
-	
-		case ID_VIEW_GLOBALS:		s="Globals\t"; c=kcViewGeneral; break;
+
+		case ID_VIEW_GLOBALS:		s="General\t"; c=kcViewGeneral; break;
 		case ID_VIEW_SAMPLES:		s="Samples\t"; c=kcViewSamples; break;
 		case ID_VIEW_PATTERNS:		s="Patterns\t"; c=kcViewPattern; break;
 		case ID_VIEW_INSTRUMENTS:	s="Instruments\t"; c=kcViewInstruments; break;
 		case ID_VIEW_COMMENTS:		s="Comments\t"; c=kcViewComments; break;
+		case ID_VIEW_GRAPH:			s="Graph\t"; c=kcViewGraph; break; //rewbs.graph
 		case MAINVIEW:				s="Main\t"; c=kcViewMain; break;
 		case IDD_TREEVIEW:			s="Tree\t"; c=kcViewTree; break;
 		case ID_VIEW_OPTIONS:		s="Setup...\t"; c=kcViewOptions; break;
 		case ID_HELP:				s="Contents (todo)"; c=kcHelp; break;
-		case ID_PLUGIN_SETUP:		s="Plugin Setup...\t"; c=kcViewAddPlugin; break;
+		case ID_PLUGIN_SETUP:		s="Plugin Manager...\t"; c=kcViewAddPlugin; break;
 		case ID_CHANNEL_MANAGER:	s="Channel Manager...\t"; c=kcViewChannelManager; break;
+		case ID_VIEW_SONGPROPERTIES:s="Song Properties...\t"; c=kcViewSongProperties; break; //rewbs.graph
 /*	
 		case ID_WINDOW_NEW:			s="New Window\t"; c=kcWindowNew; break;
 		case ID_WINDOW_CASCADE:		s="Cascade\t"; c=kcWindowCascade; break;
@@ -375,6 +399,8 @@ void CInputHandler::UpdateMainMenu()
 	pMenu->ModifyMenu(ID_PLAYER_PAUSE, MF_BYCOMMAND | MF_STRING, ID_PLAYER_PAUSE, GetMenuText(ID_PLAYER_PAUSE));
 	pMenu->ModifyMenu(ID_MIDI_RECORD, MF_BYCOMMAND | MF_STRING, ID_MIDI_RECORD, GetMenuText(ID_MIDI_RECORD));
 	pMenu->ModifyMenu(ID_ESTIMATESONGLENGTH, MF_BYCOMMAND | MF_STRING, ID_ESTIMATESONGLENGTH, GetMenuText(ID_ESTIMATESONGLENGTH));
+	pMenu->ModifyMenu(ID_APPROX_BPM, MF_BYCOMMAND | MF_STRING, ID_APPROX_BPM,  GetMenuText(ID_APPROX_BPM));
+
 
 	pMenu->ModifyMenu(ID_EDIT_UNDO, MF_BYCOMMAND | MF_STRING, ID_EDIT_UNDO, GetMenuText(ID_EDIT_UNDO));
 	pMenu->ModifyMenu(ID_EDIT_CUT, MF_BYCOMMAND | MF_STRING, ID_EDIT_CUT, GetMenuText(ID_EDIT_CUT));
@@ -436,4 +462,28 @@ bool CInputHandler::SetXMEffects(void)
 	bool retval = activeCommandSet->QuickChange_SetEffectsXM();
 	activeCommandSet->GenKeyMap(keyMap);
 	return retval;
+}
+
+
+bool CInputHandler::isKeyPressHandledByTextBox(DWORD key) 
+{
+
+	//Alpha-numerics (only shift or no modifier):
+	if (!CtrlPressed() &&  !AltPressed() && 
+        ((key>='A'&&key<='Z') || (key>='0'&&key<='9') || 
+		 key==VK_DIVIDE  || key==VK_MULTIPLY || key==VK_SPACE || key==VK_RETURN ||
+		 key==VK_CAPITAL || (key>=VK_OEM_1 && key<=VK_OEM_3) || (key>=VK_OEM_4 && key<=VK_OEM_8)))
+		return true;
+	
+	//navigation (any modifier):
+	if (key == VK_LEFT || key == VK_RIGHT || key == VK_UP || key == VK_DOWN || 
+		key == VK_HOME || key == VK_END || key == VK_DELETE || key == VK_INSERT || key == VK_BACK)
+		return true;
+	
+	//Copy paste etc..
+	if (CMainFrame::GetInputHandler()->GetModifierMask()==HOTKEYF_CONTROL && 
+		(key == 'Y' || key == 'Z' || key == 'X' ||  key == 'C' || key == 'V' || key == 'A'))
+		return true;
+
+	return false;
 }

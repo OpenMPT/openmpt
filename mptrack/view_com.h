@@ -1,9 +1,12 @@
 #ifndef _VIEW_COMMENTS_H_
 #define _VIEW_COMMENTS_H_
 
+enum { 
+	LINE_LENGTH = 128,	//was 81. must be larger than visible comment area.
+};
 
 //===============================
-class CViewComments: public CView
+class CViewComments: public CModScrollView
 //===============================
 {
 public:
@@ -29,6 +32,7 @@ public:
 // -! NEW_FEATURE#0015
 	virtual void OnInitialUpdate();
 	virtual void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint);
+	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
 	//}}AFX_VIRTUAL
 
 protected:

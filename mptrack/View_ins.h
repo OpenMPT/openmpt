@@ -21,9 +21,18 @@ protected:
 	DWORD m_dwStatus;
 	DWORD m_NcButtonState[ENV_LEFTBAR_BUTTONS];
 	DWORD m_dwNotifyPos[MAX_CHANNELS];
-	bool m_bGrid;	//rewbs.envRowGrid
-
-
+	//rewbs.envRowGrid
+	bool m_bGrid;			  
+	bool m_bGridForceRedraw;
+	CBitmap *m_pbmpOldGrid;
+	CBitmap m_bmpGrid;
+	CDC m_dcGrid;
+	int m_GridScrollPos;
+	int m_GridSpeed;
+	CDC m_dcMemMain;
+	CBitmap m_bmpMemMain;
+	CBitmap* oldBitmap;
+	//rewbs.envRowGrid
 
 public:
 	CViewInstrument();
@@ -62,6 +71,7 @@ public:
 	int TickToScreen(int nTick) const;
 	int PointToScreen(int nPoint) const;
 	int ScreenToTick(int x) const;
+	int QuickScreenToTick(int x, int cachedScrollPos) const;
 	int ScreenToPoint(int x, int y) const;
 	int ValueToScreen(int val) const { return m_rcClient.bottom - 1 - (val * (m_rcClient.bottom-1)) / 64; }
 	int ScreenToValue(int y) const;

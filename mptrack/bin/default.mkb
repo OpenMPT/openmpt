@@ -1,4 +1,4 @@
-//-------- Modplug Tracker key binding definition file prototype -------
+//-------- OpenMPT key binding definition file  -------
 //-Format is:                                                          -
 //- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -
 //----------------------------------------------------------------------
@@ -14,6 +14,7 @@
 0:1028:0:118:5		//Play song from cursor: F7 (KeyDown|KeyHold)
 0:1027:0:117:5		//Play pattern from start: F6 (KeyDown|KeyHold)
 0:1026:2:117:5		//Play pattern from cursor: Ctrl+F6 (KeyDown|KeyHold)
+0:1687:6:66:1		//Show approx. real BPM: Ctrl+Alt+B (KeyDown)
 0:1376:2:120:1		//Toggle Midi Record: Ctrl+F9 (KeyDown)
 0:1359:2:90:1		//Undo: Ctrl+Z (KeyDown)
 0:1360:2:88:1		//Cut: Ctrl+X (KeyDown)
@@ -47,19 +48,19 @@
 //----( General Context [bottom] (1) )------------
 
 //----( Pattern Context [bottom] (2) )------------
-2:1017:0:34:5		//Jump down by highlight1: PGDOWN (KeyDown|KeyHold)
-2:1018:0:33:5		//Jump up by highlight1: PGUP (KeyDown|KeyHold)
-2:1338:4:34:5		//Jump down by highlight2: Alt+PGDOWN (KeyDown|KeyHold)
-2:1339:4:33:5		//Jump up by highlight2: Alt+PGUP (KeyDown|KeyHold)
-2:1019:2:34:5		//Snap down to highlight1: Ctrl+PGDOWN (KeyDown|KeyHold)
-2:1020:2:33:5		//Snap up to highlight1: Ctrl+PGUP (KeyDown|KeyHold)
-2:1340:6:34:5		//Snap down to highlight2: Ctrl+Alt+PGDOWN (KeyDown|KeyHold)
-2:1341:6:33:5		//Snap up to highlight2: Ctrl+Alt+PGUP (KeyDown|KeyHold)
-2:1038:0:40:5		//Navigate down: DOWN (KeyDown|KeyHold)
-2:1039:0:38:5		//Navigate up: UP (KeyDown|KeyHold)
+2:1017:0:34:5		//Jump down by measure: PGDOWN (KeyDown|KeyHold)
+2:1018:0:33:5		//Jump up by measure: PGUP (KeyDown|KeyHold)
+2:1338:4:34:5		//Jump down by beat: Alt+PGDOWN (KeyDown|KeyHold)
+2:1339:4:33:5		//Jump up by beat: Alt+PGUP (KeyDown|KeyHold)
+2:1019:2:34:5		//Snap down to measure: Ctrl+PGDOWN (KeyDown|KeyHold)
+2:1020:2:33:5		//Snap up to measure: Ctrl+PGUP (KeyDown|KeyHold)
+2:1340:6:34:5		//Snap down to beat: Ctrl+Alt+PGDOWN (KeyDown|KeyHold)
+2:1341:6:33:5		//Snap up to beat: Ctrl+Alt+PGUP (KeyDown|KeyHold)
+2:1038:0:40:5		//Navigate down by 1 row: DOWN (KeyDown|KeyHold)
+2:1039:0:38:5		//Navigate up by 1 row: UP (KeyDown|KeyHold)
 2:1040:0:37:5		//Navigate left: LEFT (KeyDown|KeyHold)
 2:1041:0:39:5		//Navigate right: RIGHT (KeyDown|KeyHold)
-2:1042:0:9:1		//Navigate to next channel: TAB (KeyDown)
+2:1042:0:9:5		//Navigate to next channel: TAB (KeyDown|KeyHold)
 2:1043:2:9:5		//Navigate to previous channel: Ctrl+TAB (KeyDown|KeyHold)
 2:1044:0:36:1		//Go to first channel: HOME (KeyDown)
 2:1045:2:36:1		//Go to first row: Ctrl+HOME (KeyDown)
@@ -71,10 +72,14 @@
 2:1011:4:76:1		//Select channel / Select all: Alt+L (KeyDown)
 2:1663:2:118:1		//Toggle follow song: Ctrl+F7 (KeyDown)
 2:1003:0:13:1		//Quick copy: ENTER (KeyDown)
-2:1004:0:32:1		//Quick paste: SPACE (KeyDown)
+2:1004:0:32:5		//Quick paste: SPACE (KeyDown|KeyHold)
 2:1001:1:120:1		//Enable recording: Shift+F9 (KeyDown)
-2:1002:2:13:5		//Play row: Ctrl+ENTER (KeyDown|KeyHold)
+2:1002:2:13:1		//Play row: Ctrl+ENTER (KeyDown)
+2:1002:0:104:1		//Play row: NUM 8 (KeyDown)
+2:1002:0:56:1		//Play row: 8 (KeyDown)
 2:1317:4:18:1		//Set row jump on note entry: Alt (KeyDown)
+2:1685:6:9:1		//Switch to order list: Ctrl+Alt+TAB (KeyDown)
+2:1672:3:13:1		//Insert new pattern: Shift+Ctrl+ENTER (KeyDown)
 2:1662:6:80:1		//Toggle channel's plugin editor: Ctrl+Alt+P (KeyDown)
 2:1062:0:93:1		//Show note properties: Application (KeyDown)
 2:1063:2:93:1		//Show context (right-click) menu: Ctrl+Application (KeyDown)
@@ -101,8 +106,8 @@
 2:1377:2:8:5		//Delete all rows: Ctrl+BACKSPACE (KeyDown|KeyHold)
 2:1378:0:45:5		//Insert Row: INSERT (KeyDown|KeyHold)
 2:1379:2:45:1		//Insert All Rows: Ctrl+INSERT (KeyDown)
-2:1055:0:109:1		//Previous pattern: NUM SUB (KeyDown)
-2:1054:0:107:1		//Next pattern: NUM PLUS (KeyDown)
+2:1055:0:109:5		//Previous pattern: NUM SUB (KeyDown|KeyHold)
+2:1054:0:107:5		//Next pattern: NUM PLUS (KeyDown|KeyHold)
 
 //----( Pattern Context [bottom] - Note Col (3) )------------
 3:1064:0:90:1		//Base octave C: Z (KeyDown)
@@ -143,7 +148,6 @@
 3:1217:0:101:1		//Set octave 5: NUM 5 (KeyDown)
 3:1218:0:102:1		//Set octave 6: NUM 6 (KeyDown)
 3:1219:0:103:1		//Set octave 7: NUM 7 (KeyDown)
-3:1220:0:56:1		//Set octave 8: 8 (KeyDown)
 3:1220:0:104:1		//Set octave 8: NUM 8 (KeyDown)
 3:1221:0:105:1		//Set octave 9: NUM 9 (KeyDown)
 3:1316:1:16:1		//Chord Modifier: Shift (KeyDown)
@@ -245,6 +249,9 @@
 7:1262:0:70:1		//FX Param digit F: F (KeyDown)
 
 //----( Sample Context [bottom] (8) )------------
+8:1673:4:76:1		//Load a Sample: Alt+L (KeyDown)
+8:1674:4:83:1		//Save Sample: Alt+S (KeyDown)
+8:1675:4:78:1		//New Sample: Alt+N (KeyDown)
 8:1380:2:84:1		//Trim sample around loop points: Ctrl+T (KeyDown)
 8:1383:0:8:1		//Silence sample selection: BACKSPACE (KeyDown)
 8:1384:3:78:1		//Normalise Sample: Shift+Ctrl+N (KeyDown)
@@ -262,12 +269,14 @@
 
 //----( Unknown Context (12) )------------
 
-//----( General Context [top] (13) )------------
+//----( Plugin GUI Context (13) )------------
 
-//----( Pattern Context [top] (14) )------------
+//----( General Context [top] (14) )------------
 
-//----( Sample Context [top] (15) )------------
+//----( Pattern Context [top] (15) )------------
 
-//----( Instrument Context [top] (16) )------------
+//----( Sample Context [top] (16) )------------
 
-//----( Comments Context [top] (17) )------------
+//----( Instrument Context [top] (17) )------------
+
+//----( Comments Context [top] (18) )------------

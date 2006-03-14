@@ -12,6 +12,7 @@ enum {
 	OPTIONS_PAGE_KEYBOARD,
 	OPTIONS_PAGE_COLORS,
 	OPTIONS_PAGE_MIDI,
+	OPTIONS_PAGE_AUTOSAVE,
 };
 
 
@@ -62,13 +63,15 @@ public:
 
 protected:
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnKillActive();
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnSetActive();
 	afx_msg void OnUpdateDialog();
 	afx_msg void OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis);
 	afx_msg void OnColorSelChanged();
-	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnSettingsChanged();
+	afx_msg void OnHiliteTimeSigsChanged();
 	afx_msg void OnSelectColor1();
 	afx_msg void OnSelectColor2();
 	afx_msg void OnSelectColor3();

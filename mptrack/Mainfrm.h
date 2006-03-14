@@ -12,19 +12,20 @@
 #include "CommandSet.h"
 #include "inputhandler.h"
 
+class CInputHandler;
 class CMainFrame;
 class CModDoc;
+class CAutoSaver;
 class ISoundDevice;
 class ISoundSource;
+class CPerformanceCounter;
 
 #define NUM_AUDIO_BUFFERS			3
 #define MIN_AUDIO_BUFFERSIZE		1024
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
-#define KEYBOARDMAP_LENGTH			(3*12+2)
-#define MAINFRAME_TITLE				"Modplug Tracker"
-#define MPTRACK_FINALRELEASEVERSION	0x01090000
-#define MPTRACK_VERSION				0x011600D7
-
+#define MAINFRAME_TITLE				"Open Modplug Tracker"
+#define INFORMAL_VERSION			"1.17RC3_"
+#define INIBUFFERSIZE				MAX_PATH
 
 enum {
 	CTRLMSG_BASE=0,
@@ -37,23 +38,16 @@ enum {
 	CTRLMSG_GETCURRENTPATTERN,
 	CTRLMSG_SETCURRENTORDER,
 	CTRLMSG_GETCURRENTORDER,
+	CTRLMSG_FORCEREFRESH,
 	CTRLMSG_PAT_PREVINSTRUMENT,
 	CTRLMSG_PAT_NEXTINSTRUMENT,
 	CTRLMSG_PAT_SETINSTRUMENT,
 	CTRLMSG_PAT_FOLLOWSONG,		//rewbs.customKeys
+	CTRLMSG_PAT_LOOP,
 	CTRLMSG_PAT_NEWPATTERN,		//rewbs.customKeys
+	CTRLMSG_SETUPMACROS,
 	CTRLMSG_GETCURRENTINSTRUMENT,
 	CTRLMSG_SETCURRENTINSTRUMENT,
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-// rewbs.merged: swapped message direction
-/*	CTRLMSG_GETCURRENTSPLITINSTRUMENT,
-	CTRLMSG_GETCURRENTSPLITNOTE,
-	CTRLMSG_GETCURRENTOCTAVEMODIFIER,
-	CTRLMSG_GETCURRENTOCTAVELINK,
-	CTRLMSG_GETCURRENTSPLITVOLUME,
-*/
-// !- CODE#0012
 	CTRLMSG_PLAYPATTERN,
 	CTRLMSG_GETSPACING,
 	CTRLMSG_SETSPACING,
@@ -89,6 +83,7 @@ enum {
 	VIEWMSG_SETCURRENTPATTERN,
 	VIEWMSG_GETCURRENTPATTERN,
 	VIEWMSG_FOLLOWSONG,
+	VIEWMSG_PATTERNLOOP,
 	VIEWMSG_GETCURRENTPOS,
 	VIEWMSG_SETRECORD,
 	VIEWMSG_SETSPACING,
@@ -115,7 +110,7 @@ enum {
 	VIEWMSG_SETOCTAVELINK,
 	VIEWMSG_SETSPLITVOLUME,
 // -! CODE#0012
-
+	VIEWMSG_DOSCROLL,
 
 };
 
@@ -202,7 +197,14 @@ enum
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
 #define	PATTERN_ALTERNTIVEBPMSPEED	0x200000
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
+
+#define PATTERN_HILITETIMESIGS	0x400000
+
+#define PATTERN_OLDCTXMENUSTYLE	0x800000
+#define PATTERN_SYNCMUTE		0x1000000
+#define PATTERN_AUTODELAY		0x2000000 
 
 // Keyboard Setup
 enum {
@@ -246,6 +248,7 @@ enum {
 	IMAGE_DIRECTX,
 	IMAGE_WAVEOUT,
 	IMAGE_ASIO,
+	IMAGE_GRAPH,
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -310,7 +313,7 @@ typedef struct MPTNOTIFICATION
 {
 	DWORD dwType;
 	DWORD dwLatency;
-	UINT nOrder, nRow;			// Always valid
+	UINT nOrder, nPattern, nRow;			// Always valid
 	DWORD dwPos[MAX_CHANNELS];	// sample/envelope pos for each channel if >= 0
 } MPTNOTIFICATION, *PMPTNOTIFICATION;
 
@@ -348,14 +351,20 @@ class CMainFrame: public CMDIFrameWnd
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
 public:
+	CString m_csRegKey;
+	CString m_csRegExt;
+	CString m_csRegSettings;
+	CString m_csRegWindow;
+	static CString m_csExecutablePath;
 	// Globals
 	static UINT m_nLastOptionsPage, m_nFilterIndex;
 	static BOOL gbMdiMaximize;
 	static LONG glCtrlWindowHeight, glTreeWindowWidth, glTreeSplitRatio;
 	static LONG glGeneralWindowHeight, glPatternWindowHeight, glSampleWindowHeight, 
-		        glInstrumentWindowHeight, glCommentsWindowHeight; //rewbs.varWindowSize
+		        glInstrumentWindowHeight, glCommentsWindowHeight, glGraphWindowHeight; //rewbs.varWindowSize
     static HHOOK ghKbdHook;
-	static DWORD gdwNotificationType, gdwPreviousVersion;
+	static DWORD gdwNotificationType;
+	static CString gcsPreviousVersion;
 	
 	// Audio Setup
 	static DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
@@ -364,14 +373,12 @@ public:
 	static EQPRESET m_EqSettings;
 	// Pattern Setup
 	static DWORD m_dwPatternSetup, m_dwMidiSetup, m_nRowSpacing, m_nRowSpacing2, m_nKeyboardCfg, gnHotKeyMask;
-	static DWORD KeyboardMap[KEYBOARDMAP_LENGTH], KeyboardMPT[KEYBOARDMAP_LENGTH];
-	static DWORD KeyboardFT2[KEYBOARDMAP_LENGTH],KeyboardIT[KEYBOARDMAP_LENGTH];
-	static DWORD CustomKeys[MAX_MPTHOTKEYS];
+	static bool m_bHideUnavailableCtxMenuItems;
 	// GDI
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;
 	static HBRUSH brushGray, brushBlack, brushWhite, brushHighLight, brushWindow;
-	static CBrush *pbrushBlack, *pbrushWhite;
+//	static CBrush *pbrushBlack, *pbrushWhite;
 	static HPEN penBlack, penDarkGray, penLightGray, penWhite, penHalfDarkGray, penSample, penEnvelope, penSeparator, penScratch, penGray00, penGray33, penGray40, penGray55, penGray80, penGray99, penGraycc, penGrayff;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
 	static COLORREF rgbCustomColors[MAX_MODCOLORS];
@@ -383,6 +390,7 @@ public:
 
 	// Low-Level Audio
 public:
+
 	static CRITICAL_SECTION m_csAudio;
 	static ISoundDevice *gpSoundDevice;
 	static HANDLE m_hAudioWakeUp, m_hNotifyWakeUp;
@@ -398,6 +406,11 @@ public:
 	//end rewbs.resamplerConf
 	static UINT gnAutoChordWaitTime;
 
+	static int gnPlugWindowX;
+	static int gnPlugWindowY;
+	static int gnPlugWindowWidth;
+	static int gnPlugWindowHeight;
+	static DWORD gnPlugWindowLast;
 
 	// Midi Input
 public:
@@ -405,7 +418,7 @@ public:
 
 
 protected:
-	CSoundFile m_WaveFile;
+    CSoundFile m_WaveFile;
 	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
@@ -413,7 +426,7 @@ protected:
 	CModDoc *m_pModPlaying;
 	CSoundFile *m_pSndFile;
 	HWND m_hFollowSong, m_hWndMidi;
-	DWORD m_dwStatus, m_dwElapsedTime, m_dwTimeSec, m_dwNotifyType, m_dwLastPluginIdleCall;
+	DWORD m_dwStatus, m_dwElapsedTime, m_dwTimeSec, m_dwNotifyType;
 	UINT m_nTimer, m_nAvgMixChn, m_nMixChn;
 	CHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512]; //rewbs.xinfo
 	// Chords
@@ -424,9 +437,11 @@ protected:
 	CHAR m_szPluginsDir[_MAX_PATH];
 	CHAR m_szExportDir[_MAX_PATH];
 	bool m_bOptionsLocked; 	 	//rewbs.customKeys
+	double m_dTotalCPU;
+	CModDoc* m_pJustModifiedDoc;
 
 public:
-	CMainFrame();
+	CMainFrame(/*CString regKeyExtension*/);
 	VOID Initialize();
 	
 
@@ -463,8 +478,10 @@ public:
 // static functions
 public:
 	static CMainFrame *GetMainFrame() { return (CMainFrame *)theApp.m_pMainWnd; }
-	static UINT GetNoteFromKey(UINT nChar, DWORD dwFlags);
 	static VOID UpdateColors();
+	static CString GetFullVersionString();
+	static DWORD GetFullVersionNumeric();
+	static CString GetVersionString(DWORD);
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }
 	static HFONT GetFixedFont() { return m_hFixedFont; }
@@ -472,10 +489,18 @@ public:
 	static void UpdateAllViews(DWORD dwHint, CObject *pHint=NULL);
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
 	static void TranslateKeyboardMap(LPSTR pszKbd);
-	static UINT IsHotKey(DWORD dwKey);
-	static const DWORD *GetKeyboardMap();
 	static VOID GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize);
 	static CInputHandler *m_InputHandler; 	//rewbs.customKeys
+	static CAutoSaver *m_pAutoSaver; 		//rewbs.customKeys
+	static CPerformanceCounter *m_pPerfCounter;
+
+	static bool WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile);
+	static long GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile);
+	static bool WritePrivateProfileDWord(const CString section, const CString key, const DWORD value, const CString iniFile);
+	static DWORD GetPrivateProfileDWord(const CString section, const CString key, const DWORD defaultValue, const CString iniFile);
+	static bool WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile);
+	static CString GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile);
+	
 
 // Misc functions
 public:
@@ -498,6 +523,7 @@ public:
 	long GetSampleRate();  		//rewbs.VSTTimeInfo
 	long GetTotalSampleCount(); //rewbs.VSTTimeInfo
 	double GetApproxBPM();		//rewbs.VSTTimeInfo
+	void ThreadSafeSetModified(CModDoc* modified) {m_pJustModifiedDoc=modified;}
 
 // Player functions
 public:
@@ -509,15 +535,14 @@ public:
 	BOOL PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample, UINT nNote=0);
 	BOOL PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn);
 	BOOL StopSoundFile(CSoundFile *);
-	BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); 	}
-	BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); 	} //rewbs.VSTTimeInfo
+	inline BOOL IsPlaying() const { return (m_dwStatus & MODSTATUS_PLAYING); 	}
+	inline BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); 	} //rewbs.VSTTimeInfo
 	DWORD GetElapsedTime() const { return m_dwElapsedTime; }
 	void ResetElapsedTime() { m_dwElapsedTime = 0; }
-	CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
-	//CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()) ? m_pSndFile : NULL; } 
-	CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
-	BOOL InitRenderer(CModDoc*);  //rewbs.VSTTimeInfo
-	BOOL StopRenderer(CModDoc*);  //rewbs.VSTTimeInfo
+	inline CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
+	inline CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
+	BOOL InitRenderer(CSoundFile*);  //rewbs.VSTTimeInfo
+	BOOL StopRenderer(CSoundFile*);  //rewbs.VSTTimeInfo
 	void SwitchToActiveView();
 	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT bufsize, LONG wd);
 	BOOL SetupDirectories(LPCSTR s, LPCSTR s2, LPCSTR s3);
@@ -552,8 +577,7 @@ public:
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();
 	afx_msg void SetLastMixActiveTime(); //rewbs.VSTCompliance
-
-	afx_msg void OnViewOptions(); //rewbs.resamplerConf: made public so it's accessible from mod2wav gui :/
+	afx_msg void OnViewOptions();		 //rewbs.resamplerConf: made public so it's accessible from mod2wav gui :/
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnRButtonDown(UINT, CPoint);
@@ -574,6 +598,7 @@ protected:
 	afx_msg void OnUpdateUser(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateInfo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateXInfo(CCmdUI *pCmdUI); //rewbs.xinfo
+	afx_msg void OnUpdateCPU(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMidiRecord(CCmdUI *pCmdUI);
 	afx_msg void OnPlayerPause();
 	afx_msg void OnMidiRecord();
@@ -590,11 +615,21 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
-	//rewbs.customKeys - We have swicthed focus to a new module - might need to update effect keys to reflect module type
 	bool UpdateEffectKeys(void); 
+	bool UpdateHighlights(void);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+
+private:
+	void LoadRegistrySettings();
+	void LoadIniSettings();
+	void SaveIniSettings();
+
 };
 
 const CHAR gszBuildDate[] = __TIMESTAMP__;
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 

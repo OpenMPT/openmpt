@@ -26,27 +26,14 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	CHAR s[256];
 	UINT b64 = 0;
 	
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//	if (nNewType == m_SndFile.m_nType) return TRUE;
 	if (nNewType == m_SndFile.m_nType){
-		// Changing doc name
-		CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME];
-		_splitpath(GetPathName(), drive, path, fname, NULL);
-		strcat(drive, path);
-		strcat(drive, fname);
-		switch(nNewType)
-		{
-		case MOD_TYPE_XM:	strcat(drive, ".xm"); break;
-		case MOD_TYPE_IT:	m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? strcat(drive, ".itp") : strcat(drive, ".it"); break;
-		case MOD_TYPE_S3M:	strcat(drive, ".s3m"); break;
-		default:			strcat(drive, ".mod"); break;
-		}
-		SetPathName(drive, FALSE);
-		UpdateAllViews(NULL, HINT_MODTYPE);
+		// Even if m_nType doesn't change, we might need to change extension in itp<->it case.
+		// This is because ITP is a HACK and doesn't genuinely change m_nType,
+		// but uses flages instead.
+		ChangeFileExtension(nNewType);
 		return TRUE;
 	}
-// -! NEW_FEATURE#0023
+
 
 	// Check if conversion to 64 rows is necessary
 	for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++)
@@ -181,7 +168,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		for (UINT nPat=0; nPat<MAX_PATTERNS; nPat++) if (m_SndFile.Patterns[nPat])
 		{
 			MODCOMMAND *m = m_SndFile.Patterns[nPat];
-			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len--; m++, len--)
+			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len--; m++)
 			{
 				if (m->command) switch(m->command)
 				{
@@ -310,32 +297,15 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	if (nNewType != MOD_TYPE_IT) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATMODE);
 	if (nNewType != MOD_TYPE_S3M) m_SndFile.m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
 	END_CRITICAL();
-	// Changing doc name
-	{
-		CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME];
-		_splitpath(GetPathName(), drive, path, fname, NULL);
-		strcat(drive, path);
-		strcat(drive, fname);
-		switch(nNewType)
-		{
-		case MOD_TYPE_XM:	strcat(drive, ".xm"); break;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//		case MOD_TYPE_IT:	strcat(drive, ".it"); break;
-		case MOD_TYPE_IT:	m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? strcat(drive, ".itp") : strcat(drive, ".it"); break;
-// -! NEW_FEATURE#0023
-		case MOD_TYPE_S3M:	strcat(drive, ".s3m"); break;
-		default:			strcat(drive, ".mod"); break;
-		}
-		SetPathName(drive, FALSE);
-	}
+	ChangeFileExtension(nNewType);
 
 	//rewbs.cutomKeys: update effect key commands
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
-	if	(nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+	if	(nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM)) {
 		ih->SetXMEffects();
-	else
+	} else {
 		ih->SetITEffects();
+	}
 	//end rewbs.cutomKeys
 
 	SetModified();
@@ -346,6 +316,10 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 }
 
 
+
+
+
+
 // Change the number of channels
 BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 //------------------------------------------------
@@ -353,11 +327,20 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 	if (nNewChannels == m_SndFile.m_nChannels) return TRUE;
 	if (nNewChannels < m_SndFile.m_nChannels)
 	{
-		UINT nChnToRemove = m_SndFile.m_nChannels - nNewChannels;
+		UINT nChnToRemove = 0;
+		UINT nFound = 0;
+
+		//nNewChannels = 0 means user can choose how many channels to remove
+		if(nNewChannels > 0) {
+			nChnToRemove = m_SndFile.m_nChannels - nNewChannels;
+			nFound = nChnToRemove;
+		} else {
+			nChnToRemove = 0;
+			nFound = m_SndFile.m_nChannels;
+		}
 		CRemoveChannelsDlg rem(&m_SndFile, nChnToRemove);
 
 		// Checking for unused channels
-		UINT nFound = nChnToRemove;
 		for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--) //rewbs.removeChanWindowCleanup
 		{
 			rem.m_bChnMask[iRst] = TRUE;
@@ -382,46 +365,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 		}
 		if (rem.DoModal() != IDOK) return TRUE;
 		// Removing selected channels
-		BeginWaitCursor();
-		BEGIN_CRITICAL();
-		for (UINT i=0; i<MAX_PATTERNS; i++) if (m_SndFile.Patterns[i])
-		{
-			MODCOMMAND *p = m_SndFile.Patterns[i];
-			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.PatternSize[i], nNewChannels);
-			if (!newp)
-			{
-				END_CRITICAL();
-				AddToLog("ERROR: Not enough memory to resize patterns!\nPattern Data is corrupted!");
-				return TRUE;
-			}
-			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
-			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
-			{
-				for (UINT k=0; k<m_SndFile.m_nChannels; k++, tmpsrc++)
-				{
-					if (!rem.m_bChnMask[k]) *tmpdest++ = *tmpsrc;
-				}
-			}
-			m_SndFile.Patterns[i] = newp;
-			CSoundFile::FreePattern(p);
-		}
-		UINT tmpchn = 0;
-		for (i=0; i<m_SndFile.m_nChannels; i++)
-		{
-			if (!rem.m_bChnMask[i])
-			{
-				if (tmpchn != i)
-				{
-					m_SndFile.ChnSettings[tmpchn] = m_SndFile.ChnSettings[i];
-					m_SndFile.Chn[tmpchn] = m_SndFile.Chn[i];
-				}
-				tmpchn++;
-				if (i >= nNewChannels) m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
-			}
-		}
-		m_SndFile.m_nChannels = nNewChannels;
-		END_CRITICAL();
-		EndWaitCursor();
+		RemoveChannels(rem.m_bChnMask);
 	} else
 	{
 		BeginWaitCursor();
@@ -434,7 +378,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 			if (!newp)
 			{
 				END_CRITICAL();
-				AddToLog("ERROR: Not enough memory to create new channels!\nPattern Data is corrupted!!!\n");
+				AddToLog("ERROR: Not enough memory to create new channels!\nPattern Data is corrupted!\n");
 				return TRUE;
 			}
 			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
@@ -454,6 +398,77 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 	return FALSE;
 }
 
+
+BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
+//--------------------------------------------------------
+//To remove all channels whose index corresponds to true value at m_bChnMask[] array. Code is almost non-modified copy of
+//the code which was in CModDoc::ChangeNumChannels(UINT nNewChannels) - the only differences are the lines before 
+//BeginWaitCursor(), few lines in the end and that nNewChannels is renamed to nRemaningChannels.
+{
+		UINT nRemainingChannels = 0;
+		//First calculating how many channels are to be left
+		for(UINT i = 0; i<m_SndFile.m_nChannels; i++)
+		{
+			if(!m_bChnMask[i]) nRemainingChannels++;
+		}
+		if(nRemainingChannels == m_SndFile.m_nChannels || nRemainingChannels < 4)
+		{
+			CString str;	
+			if(nRemainingChannels == m_SndFile.m_nChannels) str.Format("No channels chosen to be removed.");
+			else str.Format("No removal done - channel number is already at minimum.");
+			CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_OK | MB_ICONINFORMATION);
+			return FALSE;
+		}
+
+		BeginWaitCursor();
+		BEGIN_CRITICAL();
+		for (UINT i=0; i<MAX_PATTERNS; i++) if (m_SndFile.Patterns[i])
+		{
+			MODCOMMAND *p = m_SndFile.Patterns[i];
+			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.PatternSize[i], nRemainingChannels);
+			if (!newp)
+			{
+				END_CRITICAL();
+				AddToLog("ERROR: Not enough memory to resize patterns!\nPattern Data is corrupted!");
+				return TRUE;
+			}
+			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
+			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
+			{
+				for (UINT k=0; k<m_SndFile.m_nChannels; k++, tmpsrc++)
+				{
+					if (!m_bChnMask[k]) *tmpdest++ = *tmpsrc;
+				}
+			}
+			m_SndFile.Patterns[i] = newp;
+			CSoundFile::FreePattern(p);
+		}
+		UINT tmpchn = 0;
+		for (i=0; i<m_SndFile.m_nChannels; i++)
+		{
+			if (!m_bChnMask[i])
+			{
+				if (tmpchn != i)
+				{
+					m_SndFile.ChnSettings[tmpchn] = m_SndFile.ChnSettings[i];
+					m_SndFile.Chn[tmpchn] = m_SndFile.Chn[i];
+				}
+				tmpchn++;
+				if (i >= nRemainingChannels)
+				{
+					m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
+					m_SndFile.SetChannelSettingsToDefault(i);
+				}
+			}
+		}
+		m_SndFile.m_nChannels = nRemainingChannels;
+		END_CRITICAL();
+		EndWaitCursor();
+		SetModified();
+		ClearUndo();
+		UpdateAllViews(NULL, HINT_MODTYPE);
+		return FALSE;
+}
 
 BOOL CModDoc::ResizePattern(UINT nPattern, UINT nRows)
 //----------------------------------------------------
@@ -708,6 +723,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 	UINT nExt = 0, nLoopOpt = 0;
 	UINT nRemoved = 0;
 	
+
 	BeginWaitCursor();
 	for (UINT i=m_SndFile.m_nSamples; i>=1; i--) if (m_SndFile.Ins[i].pSample)
 	{
@@ -763,9 +779,9 @@ BOOL CModDoc::RemoveUnusedSamples()
 		}
 	}
 	EndWaitCursor();
-	if (nExt)
-	{
-		wsprintf(s, "ModPlug Tracker detected %d sample(s) referenced by an instrument,\n"
+	if (nExt &&  !((m_SndFile.m_nType==MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT)))
+	{	//We don't remove an instrument's unused samples in an ITP.
+		wsprintf(s, "OpenMPT detected %d sample(s) referenced by an instrument,\n"
 					"but not used in the song. Do you want to remove them ?", nExt);
 		if (::MessageBox(NULL, s, "Sample Cleanup", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
@@ -790,7 +806,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 	}
 	if (nLoopOpt)
 	{
-		wsprintf(s, "ModPlug Tracker detected %d sample(s) with unused data after the loop end point,\n"
+		wsprintf(s, "OpenMPT detected %d sample(s) with unused data after the loop end point,\n"
 					"Do you want to optimize it, and remove this unused data ?", nLoopOpt);
 		if (::MessageBox(NULL, s, "Sample Cleanup", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
@@ -839,13 +855,14 @@ BOOL CModDoc::RemoveUnusedInstruments()
 
 	if (!m_SndFile.m_nInstruments) return FALSE;
 
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-	char removeSamples = 0;
-	//rewbs: changed message
-	if(::MessageBox(NULL, "Remove associated samples if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) removeSamples = 1;
-	else removeSamples = -1;
-// -! BEHAVIOUR_CHANGE#0003
+	char removeSamples = -1;
+	if ( !((m_SndFile.m_nType==MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT))) { //never remove an instrument's samples in ITP.
+		if(::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) {
+			removeSamples = 1;
+		}
+	} else {
+		MessageBox(NULL, "This is an IT project, so no samples associated with a used instrument will be removed.", "Removing Instruments", MB_OK | MB_ICONINFORMATION);
+	}
 
 	BeginWaitCursor();
 	memset(usedmap, 0, sizeof(usedmap));
@@ -870,7 +887,7 @@ BOOL CModDoc::RemoveUnusedInstruments()
 	}
 	EndWaitCursor();
 	if ((bReorg) && (m_SndFile.m_nInstruments > 1)
-	 && (::MessageBox(NULL, "Do you want to reorganize the remaining instruments ?", NULL, MB_YESNO | MB_ICONQUESTION) == IDOK))
+	 && (::MessageBox(NULL, "Do you want to reorganize the remaining instruments ?", NULL, MB_YESNO | MB_ICONQUESTION) == IDYES))
 	{
 		BeginWaitCursor();
 		BEGIN_CRITICAL();
@@ -1208,6 +1225,8 @@ void CModDoc::InitializeInstrument(INSTRUMENTHEADER *penv, UINT nsample)
 	penv->nGlobalVol = 64;
 	penv->nPan = 128;
 	penv->nPPC = 5*12;
+	penv->nResampling = SRCMODE_DEFAULT;
+	penv->nFilterMode = FLTMODE_UNCHANGED;
 	for (UINT n=0; n<128; n++)
 	{
 		penv->Keyboard[n] = nsample;
@@ -1296,7 +1315,7 @@ void CModDoc::RearrangeSampleList(void)
 				strcpy(m_SndFile.m_szNames[n+l], m_SndFile.m_szNames[n+k]);
 				m_SndFile.m_szNames[n+k][0] = '\0';
 
-				for(i=1; i<m_SndFile.m_nInstruments; i++){
+				for(i=1; i<=m_SndFile.m_nInstruments; i++){
 					if(m_SndFile.Headers[i]){
 						INSTRUMENTHEADER *p = m_SndFile.Headers[i];
 						for(j=0; j<128; j++) if(p->Keyboard[j] == n+k) p->Keyboard[j] = n+l;
@@ -1571,7 +1590,7 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
-BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
+BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix)
 // -! NEW_FEATURE#0014
 //---------------------------------------------------------
 {
@@ -1594,6 +1613,7 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 			UINT col;
 			BOOL bS3M = FALSE, bOk = FALSE;
 			UINT len = 0;
+			MODCOMMAND origModCmd;
 
 			if ((nrow >= m_SndFile.PatternSize[nPattern]) || (ncol >= m_SndFile.m_nChannels)) goto PasteDone;
 			m += nrow * m_SndFile.m_nChannels;
@@ -1623,15 +1643,14 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 				// Paste columns
 				while ((p[len] == '|') && (len + 11 < dwMemSize))
 				{
+					origModCmd = m[col]; // ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
+					                     // so that we can refer back to check if there was anything in e.g. the note column before we pasted.
 					LPSTR s = p+len+1;
 					if (col < m_SndFile.m_nChannels)
 					{
 						// Note
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[0] > ' ')
-						if (s[0] > ' ' && (m[col].note==0 || !mix))
-// -! NEW_FEATURE#0014
+						if (s[0] > ' ' && (!mix || ((!ITStyleMix && origModCmd.note==0) || 
+												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
 						{
 							m[col].note = 0;
 							if (s[0] == '=') m[col].note = 0xFF; else
@@ -1647,11 +1666,9 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 							}
 						}
 						// Instrument
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[3] > ' ')
-						if (s[3] > ' ' && (m[col].instr==0 || !mix))
-// -! NEW_FEATURE#0014
+						if (s[3] > ' ' && (!mix || ( (!ITStyleMix && origModCmd.instr==0) || 
+												     (ITStyleMix  && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0) ) ))
+
 						{
 							if ((s[3] >= '0') && (s[3] <= ('0'+(MAX_SAMPLES/10))))
 							{
@@ -1659,11 +1676,9 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 							} else m[col].instr = 0;
 						}
 						// Volume
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[5] > ' ')
-						if (s[5] > ' ' && (m[col].volcmd==0 || !mix))
-// -! NEW_FEATURE#0014
+						if (s[5] > ' ' && (!mix || ((!ITStyleMix && origModCmd.volcmd==0) || 
+												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
+
 						{
 							if (s[5] != '.')
 							{
@@ -1679,12 +1694,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 								m[col].vol = (s[6]-'0')*10 + (s[7]-'0');
 							} else m[col].volcmd = m[col].vol = 0;
 						}
-						// Effect
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[8] > ' ')
-						if (s[8] > ' ' && (m[col].command==0 || !mix))
-// -! NEW_FEATURE#0014
+						if (s[8] > ' ' && (!mix || ((!ITStyleMix && origModCmd.command==0) || 
+												     (ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
 						{
 							m[col].command = 0;
 							if (s[8] != '.')
@@ -1697,11 +1708,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix)
 							}
 						}
 						// Effect value
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
-//						if (s[9] > ' ')
-						if (s[9] > ' ' && (m[col].param==0 || !mix))
-// -! NEW_FEATURE#0014
+						if (s[9] > ' ' && (!mix || ((!ITStyleMix && origModCmd.param==0) || 
+													(ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
 						{
 							m[col].param = 0;
 							if (s[9] != '.')

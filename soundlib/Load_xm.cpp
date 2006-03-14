@@ -385,6 +385,8 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		penv->nFadeOut = xmsh.volfade;
 		penv->nPan = 128;
 		penv->nPPC = 5*12;
+		penv->nResampling = SRCMODE_DEFAULT;
+		penv->nFilterMode = FLTMODE_UNCHANGED;
 		if (xmsh.vtype & 1) penv->dwFlags |= ENV_VOLUME;
 		if (xmsh.vtype & 2) penv->dwFlags |= ENV_VOLSUSTAIN;
 		if (xmsh.vtype & 4) penv->dwFlags |= ENV_VOLLOOP;
@@ -591,42 +593,23 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	BYTE * ptr = (BYTE *)(lpStream + dwMemPos);
 
 	// Seek for supported extended settings header
-	if( (*((__int32 *)ptr)) == 'MPTX' && m_nInstruments ){
+	__int16 size = 0;
+	__int32 code = (*((__int32 *)ptr));
 
-		__int16 size;
-		__int32 code;
+	// Instrument extensions
+	if( code == 'MPTX' && m_nInstruments ){
+		ptr += sizeof(__int32);							// jump extension header code
+		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for inst. extensions
 
-		// jump extension header code
-		ptr += sizeof(__int32);
-		while( (DWORD)(ptr - lpStream) < dwMemLength ){
+			code = (*((__int32 *)ptr));			// read field code
+			if (code == 'MPTS') {				//Reached song extensions, break out of this loop
+				break;
+			}
+			
+			ptr += sizeof(__int32);				// jump field code
+			size = (*((__int16 *)ptr));			// read field size
+			ptr += sizeof(__int16);				// jump field size
 
-			// read field code
-			code = (*((__int32 *)ptr));
-			// jump field code
-			ptr += sizeof(__int32);
-
-			//rewbs.instroVSTi: changed to use generic instrument header code loader,
-			//                  so as to pick up extra plugin info as well as ramping.
-			// OLD: 
-			/*// nVolRamp
-			if(code == 'VR..'){
-				// read field size
-				size = (*((__int16 *)ptr));
-				// jump field size
-				ptr += sizeof(__int16);
-				// read ramping values
-				for(UINT nins=1; nins<=m_nInstruments; nins++){
-					if(Headers[nins]){
-						Headers[nins]->nVolRamp = (*((USHORT *)ptr));
-						ptr += size;
-					}
-				}
-			}*/
-			//NEW:		
-			// read field size
-			size = (*((__int16 *)ptr));
-			// jump field size
-			ptr += sizeof(__int16);
 			for(UINT nins=1; nins<=m_nInstruments; nins++){
 				if(Headers[nins]){
 					// get field's adress in instrument's header
@@ -638,16 +621,39 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				}
 			}
 			//end rewbs.instroVSTi
-
-			if(code == 'SEP@' || code == 'MPTX'){
-				// this case induce more extra infos but not related to _INSTRUMENTHEADER
-				// for now, as nothing more is supported, we just leave normally.........
-				return TRUE;
-			}
 		}
 	}
-
 // -! NEW_FEATURE#0027
+
+	// Song extensions
+	if( code == 'MPTS' ){
+		ptr += sizeof(__int32); // jump extension header code
+		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for song extensions
+			code = (*((__int32 *)ptr));			// read field code
+			ptr += sizeof(__int32);				// jump field code
+			size = (*((__int16 *)ptr));			// read field size
+			ptr += sizeof(__int16);				// jump field size
+
+			BYTE * fadr = NULL;
+			switch (code) {						// interpret field code
+				case 'DT..': fadr = reinterpret_cast<BYTE*>(&m_nDefaultTempo);   break;
+				case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
+				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;
+				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
+				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
+				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
+				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
+				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
+				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
+				case 'DGV.': fadr = reinterpret_cast<BYTE*>(&m_nDefaultGlobalVolume);	 break;
+			}
+
+			if (fadr != NULL) {					// if field code recognized
+				memcpy(fadr,ptr,size);			// read field data
+			}
+			ptr += size;						// jump field data
+		}
+	}
 
 	return TRUE;
 }
@@ -663,7 +669,6 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	XMINSTRUMENTHEADER xmih;
 	XMSAMPLEHEADER xmsh;
 	XMSAMPLESTRUCT xmss;
-	WORD smptable[32];
 	BYTE xmph[9];
 	FILE *f;
 	int i;
@@ -684,15 +689,19 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	header.restartpos = m_nRestartPos;
 	header.channels = m_nChannels;
 	header.patterns = 0;
-	for (i=0; i<MAX_ORDERS; i++)
-	{
-// -> CODE#0013
-// -> DESC="load/save the whole pattern order list"
-//		if (Order[i] == 0xFF) break;
-// -! CODE#0013
+  /*for (i=0; i<MAX_ORDERS; i++) {
 		header.norder++;
 		if ((Order[i] >= header.patterns) && (Order[i] < MAX_PATTERNS)) header.patterns = Order[i]+1;
+	}*/
+	for (i=MAX_ORDERS-1; i>=0; i--) { // walk backwards over orderlist
+		if ((Order[i]!=0xFF) && (header.norder==0)) {
+			header.norder=i+1;	//find last used order
+		}
+		if ((Order[i] >= header.patterns) && (Order[i] < MAX_PATTERNS)) {
+			header.patterns = Order[i]+1;	//find last pattern
+		}
 	}
+
 	header.instruments = m_nInstruments;
 	if (!header.instruments) header.instruments = m_nSamples;
 	header.flags = (m_dwSongFlags & SONG_LINEARSLIDES) ? 0x01 : 0x00;
@@ -779,8 +788,10 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	for (i=1; i<=header.instruments; i++)
 	{
 		MODINSTRUMENT *pins;
+		WORD smptable[32];
 		BYTE flags[32];
 
+		memset(&smptable, 0, sizeof(smptable));
 		memset(&xmih, 0, sizeof(xmih));
 		memset(&xmsh, 0, sizeof(xmsh));
 		xmih.size = sizeof(xmih) + sizeof(xmsh);
@@ -818,16 +829,24 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 				xmsh.psustain = (BYTE)penv->nPanSustainBegin;
 				xmsh.ploops = (BYTE)penv->nPanLoopStart;
 				xmsh.ploope = (BYTE)penv->nPanLoopEnd;
-				for (UINT j=0; j<96; j++) if (penv->Keyboard[j+12])
+				for (UINT j=0; j<96; j++) if (penv->Keyboard[j+12]) // for all notes
 				{
 					UINT k;
-					for (k=0; k<xmih.samples; k++)	if (smptable[k] == penv->Keyboard[j+12]) break;
-					if (k == xmih.samples)
-					{
-						smptable[xmih.samples++] = penv->Keyboard[j+12];
+					UINT sample = penv->Keyboard[j+12];
+
+					// Check to see if sample mapped to this note is already accounted for in this instrument
+					for (k=0; k<xmih.samples; k++)	{
+						if (smptable[k] == sample) {
+							break;
+						}
 					}
+				    
+					if (k == xmih.samples) { //we got to the end of the loop: sample unnaccounted for.
+						smptable[xmih.samples++] = sample; //record in instrument's sample table
+					}
+					
 					if (xmih.samples >= 32) break;
-					xmsh.snum[j] = k;
+					xmsh.snum[j] = k;	//record sample table offset in instrument's note map
 				}
 //				xmsh.reserved2 = xmih.samples;
 			}
@@ -959,97 +978,11 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 			}
 		}
 	}
-	// Save mix plugins information
+
+	//Save hacked-on extra info
 	SaveMixPlugins(f);
-
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-	if(Headers[1]){
-		__int16 size;
-		__int32 code = 'MPTX';
-		// write extension header code
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nVolRamp field code
-		code = 'VR..';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nVolRamp field size
-		size = sizeof(Headers[1]->nVolRamp);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nVolRamp field for each instrument
-		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nVolRamp, 1, sizeof(USHORT), f);
-
-		//rewbs.instroVSTi: manually write extra codes one by one 
-		// write nMixPlug field code
-		code = 'MiP.';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nMixPlug field size
-		size = sizeof(Headers[1]->nMixPlug);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nMixPlug field for each instrument
-		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nMixPlug, 1, size, f);
-
-		// write nMidiChannel field code
-		code = 'MC..';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nMidiChannel field size
-		size = sizeof(Headers[1]->nMidiChannel);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nMidiChannel field for each instrument
-		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nMidiChannel, 1, size, f);
-
-		// write nMidiProgram field code
-		code = 'MP..';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nMidiProgram field size
-		size = sizeof(Headers[1]->nMidiProgram);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nMidiProgram field for each instrument
-		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nMidiProgram, 1, size, f);
-		//end rewbs.instroVSTi
-
-		// write wMidiBank field code
-		code = 'MB..';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write wMidiBank field size
-		size = sizeof(Headers[1]->wMidiBank);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write wMidiBank field for each instrument
-		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->wMidiBank, 1, size, f);
-		//end rewbs.instroVSTi
-
-		//rewbs.fix36944: write full precision panning, volume and fade.
-
-		// write nPan field code
-		code = 'P...';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nPan field size
-		size = sizeof(Headers[1]->nPan);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nPan field for each instrument
-		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nPan, 1, size, f);
-
-		// write nGlobalVol field code
-		code = 'GV..';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nGlobalVol field size
-		size = sizeof(Headers[1]->nGlobalVol);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nGlobalVol field for each instrument
-		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nGlobalVol, 1, size, f);
-
-		// write nFadeOut field code
-		code = 'FO..';
-		fwrite(&code, 1, sizeof(__int32), f);
-		// write nFadeOut field size
-		size = sizeof(Headers[1]->nFadeOut);
-		fwrite(&size, 1, sizeof(__int16), f);
-		// write nFadeOut field for each instrument
-		for(UINT nins=1; nins<=header.instruments; nins++) if(Headers[nins]) fwrite(&Headers[nins]->nFadeOut, 1, size, f);
-
-		//end rewbs.fix36944
-
-	}
-// -! NEW_FEATURE#0027
+	SaveExtendedInstrumentProperties(Headers, header.instruments, f);
+	SaveExtendedSongProperties(f);
 
 	fclose(f);
 	return TRUE;

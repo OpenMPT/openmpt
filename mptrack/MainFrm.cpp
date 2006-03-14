@@ -12,12 +12,15 @@
 #include "moptions.h"
 #include "vstplug.h"
 #include "KeyConfigDlg.h"
+#include "AutoSaver.h"
+#include "performancecounter.h"
 #include ".\mainfrm.h"
 // -> CODE#0015
 // -> DESC="channels management dlg"
 #include "globals.h"
-#include "ctrl_pat.h"
+#include "ChannelManagerDlg.h"
 // -! NEW_FEATURE#0015
+#include <direct.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -25,15 +28,13 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define MAINFRAME_REGKEY		"Software\\Olivier Lapicque\\ModPlug Tracker"
-#define MAINFRAME_REG_WINDOW	"Software\\Olivier Lapicque\\ModPlug Tracker\\Window"
-#define MAINFRAME_REG_SETTINGS	"Software\\Olivier Lapicque\\ModPlug Tracker\\Settings"
-
+#define MAINFRAME_REGKEY_BASE		"Software\\Olivier Lapicque\\"
+#define MAINFRAME_REGKEY_DEFAULT	"ModPlug Tracker"
+#define MAINFRAME_REGEXT_WINDOW		"\\Window"
+#define MAINFRAME_REGEXT_SETTINGS	"\\Settings"
 
 #define MPTTIMER_PERIOD		200
 
-extern void MPT_LoadPatternState(LPCSTR pszSection);
-extern void MPT_SavePatternState(LPCSTR pszSection);
 extern UINT gnMidiImportSpeed;
 extern UINT gnMidiPatternLen;
 
@@ -88,6 +89,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND_EX(ID_NETLINK_MODPLUG,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_UT,			OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_OSMUSIC,		OnInternetLink)
+	ON_COMMAND_EX(ID_NETLINK_MPTFR,			OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_HANDBOOK,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_FORUMS,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_PLUGINS,		OnInternetLink)
@@ -97,6 +99,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_USER,	OnUpdateUser)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_INFO,	OnUpdateInfo)
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,OnUpdateXInfo) //rewbs.xinfo
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_CPU,  OnUpdateCPU)
 	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		OnUpdateControlBarMenu)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	OnInvalidatePatterns)
@@ -104,6 +107,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
+	ON_WM_KILLFOCUS() //rewbs.fix3116
+	ON_WM_MOUSEWHEEL()
+	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 // Static
@@ -111,6 +117,11 @@ static gdwLastLowLatencyTime = 0;
 static gdwLastMixActiveTime = 0;
 static DWORD gsdwTotalSamples = 0;
 static DWORD gdwPlayLatency = 0;
+
+static UINT gnPatternSpacing = 0;
+static BOOL gbPatternVUMeters = FALSE;
+static BOOL gbPatternPluginNames = TRUE;	//rewbs.patPlugNames
+
 // Globals
 DWORD CMainFrame::gdwNotificationType = MPTNOTIFY_DEFAULT;
 UINT CMainFrame::m_nFilterIndex = 0;
@@ -118,24 +129,31 @@ UINT CMainFrame::m_nLastOptionsPage = 0;
 BOOL CMainFrame::gbMdiMaximize = FALSE;
 //rewbs.varWindowSize
 LONG CMainFrame::glCtrlWindowHeight = 188; //obsolete, for backwards compat only
-LONG CMainFrame::glGeneralWindowHeight = 188;
-LONG CMainFrame::glPatternWindowHeight = 159;
+LONG CMainFrame::glGeneralWindowHeight = 178;
+LONG CMainFrame::glPatternWindowHeight = 232;
 LONG CMainFrame::glSampleWindowHeight = 188;
-LONG CMainFrame::glInstrumentWindowHeight = 188;
+LONG CMainFrame::glInstrumentWindowHeight = 300;
 LONG CMainFrame::glCommentsWindowHeight = 288;
+LONG CMainFrame::glGraphWindowHeight = 288; //rewbs.graph
 //end rewbs.varWindowSize
 LONG CMainFrame::glTreeWindowWidth = 160;
 LONG CMainFrame::glTreeSplitRatio = 128;
 HHOOK CMainFrame::ghKbdHook = NULL;
-DWORD CMainFrame::gdwPreviousVersion = 0x01000000;
+CString CMainFrame::gcsPreviousVersion = "";
 DWORD CMainFrame::gnHotKeyMask = 0;
 // Audio Setup
 //rewbs.resamplerConf
 long CMainFrame::glVolumeRampSamples = 42;
-double CMainFrame::gdWFIRCutoff = 0.5;
+double CMainFrame::gdWFIRCutoff = 0.97;
 BYTE  CMainFrame::gbWFIRType = 7; //WFIR_KAISER4T;
 //end rewbs.resamplerConf
 UINT CMainFrame::gnAutoChordWaitTime = 60;
+
+int CMainFrame::gnPlugWindowX = 243;
+int CMainFrame::gnPlugWindowY = 273;
+int CMainFrame::gnPlugWindowWidth = 370;
+int CMainFrame::gnPlugWindowHeight = 332;
+DWORD CMainFrame::gnPlugWindowLast = 0;
 
 CRITICAL_SECTION CMainFrame::m_csAudio;
 HANDLE CMainFrame::m_hPlayThread = NULL;
@@ -168,34 +186,11 @@ DWORD CMainFrame::m_dwMidiSetup = MIDISETUP_RECORDVELOCITY|MIDISETUP_RECORDNOTEO
 // Pattern Setup
 DWORD CMainFrame::m_dwPatternSetup = PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
 								   | PATTERN_SMALLFONT | PATTERN_CENTERROW | PATTERN_AUTOSPACEBAR
-								   | PATTERN_DRAGNDROPEDIT | PATTERN_FLATBUTTONS;
+								   | PATTERN_DRAGNDROPEDIT | PATTERN_FLATBUTTONS 
+								   | PATTERN_2NDHIGHLIGHT | PATTERN_STDHIGHLIGHT | PATTERN_HILITETIMESIGS;
 DWORD CMainFrame::m_nRowSpacing = 16;
 DWORD CMainFrame::m_nRowSpacing2 = 4;
-DWORD CMainFrame::m_nKeyboardCfg = KEYBOARD_MPT;
-DWORD CMainFrame::CustomKeys[MAX_MPTHOTKEYS];
-// US Keyboard Maps
-DWORD CMainFrame::KeyboardMap[KEYBOARDMAP_LENGTH];
-DWORD CMainFrame::KeyboardFT2[KEYBOARDMAP_LENGTH] =
-{
-	44,31,45,32,46,47,34,48,35,49,36,50,	// ZSXDCVGBHNJM
-	16, 3,17, 4,18,19, 6,20, 7,21, 8,22,	// Q2W3ER5T6Y7U
-	23,10,24,11,25, 0, 0, 0, 0, 0, 0, 0,	// I9O0P
-	41,13	// `=
-};
-DWORD CMainFrame::KeyboardIT[KEYBOARDMAP_LENGTH] =
-{
-	44,31,45,32,46,47,34,48,35,49,36,50,	// ZSXDCVGBHNJM
-	16, 3,17, 4,18,19, 6,20, 7,21, 8,22,	// Q2W3ER5T6Y7U
-	23,10,24,11,25, 0, 0, 0, 0, 0, 0, 0,	// I9O0P
-	2,41	// 1`
-};
-DWORD CMainFrame::KeyboardMPT[KEYBOARDMAP_LENGTH] =
-{	16,17,18,19,20,21,22,23,24,25,26,27,	// QWERTYUIOP[]
-	30,31,32,33,34,35,36,37,38,39,40,43,	// ASDFGHJKL;:/
-	44,45,46,47,48,49,50,51,52,53,0,0,
-	41,13	// `=
-};
-	 
+
 // GDI
 HICON CMainFrame::m_hIcon = NULL;
 HFONT CMainFrame::m_hGUIFont = NULL;
@@ -221,8 +216,8 @@ HPEN CMainFrame::penSeparator = NULL;
 HBRUSH CMainFrame::brushGray = NULL;
 HBRUSH CMainFrame::brushBlack = NULL;
 HBRUSH CMainFrame::brushWhite = NULL;
-CBrush *CMainFrame::pbrushBlack = NULL;//rewbs.envRowGrid
-CBrush *CMainFrame::pbrushWhite = NULL;//rewbs.envRowGrid
+//CBrush *CMainFrame::pbrushBlack = NULL;//rewbs.envRowGrid
+//CBrush *CMainFrame::pbrushWhite = NULL;//rewbs.envRowGrid
 
 HBRUSH CMainFrame::brushHighLight = NULL;
 HBRUSH CMainFrame::brushWindow = NULL;
@@ -257,6 +252,10 @@ CHAR CMainFrame::m_szCurInsDir[_MAX_PATH] = "";
 //CHAR CMainFrame::m_szCurKbdFile[_MAX_PATH] = "";	//rewbs.customKeys
 
 CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
+CAutoSaver *CMainFrame::m_pAutoSaver = NULL; //rewbs.autosave
+CPerformanceCounter *CMainFrame::m_pPerfCounter = NULL;
+
+CString CMainFrame::m_csExecutablePath = "";
 
 static UINT indicators[] =
 {
@@ -264,25 +263,25 @@ static UINT indicators[] =
 	ID_INDICATOR_XINFO,		//rewbs.xinfo
 	ID_INDICATOR_INFO,
 	ID_INDICATOR_USER,
-	ID_INDICATOR_TIME
+	ID_INDICATOR_TIME,
+	ID_INDICATOR_CPU
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
-
+//#include <direct.h>
 CMainFrame::CMainFrame()
 //----------------------
 {
-	DWORD dwREG_DWORD = REG_DWORD;
-	DWORD dwREG_SZ = REG_SZ;
-	DWORD dwDWORDSize = sizeof(UINT);
-	DWORD dwSZSIZE = sizeof(m_szModDir);
-	DWORD dwCRSIZE = sizeof(COLORREF);
-	HKEY key;
+	char wd[255];
+	_getdcwd(_getdrive(), wd, 255);
+	m_csExecutablePath = wd;	//Assume working dir is executable path at this stage.
+
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = NULL;	//rewbs.customKeys
 	m_bOptionsLocked = false;	//rewbs.customKeys
 
+	m_pJustModifiedDoc = NULL;
 	m_pModPlaying = NULL;
 	m_hFollowSong = NULL;
 	m_hWndMidi = NULL;
@@ -290,7 +289,6 @@ CMainFrame::CMainFrame()
 	m_dwStatus = 0;
 	m_dwElapsedTime = 0;
 	m_dwTimeSec = 0;
-	m_dwLastPluginIdleCall=0;	//rewbs.VSTCompliance
 	m_dwNotifyType = 0;
 	m_nTimer = 0;
 	m_nAvgMixChn = m_nMixChn = 0;
@@ -299,13 +297,11 @@ CMainFrame::CMainFrame()
 	m_szXInfoText[0]= 0;	//rewbs.xinfo
 	m_szPluginsDir[0] = 0;
 	m_szExportDir[0] = 0;
+	m_dTotalCPU=0;
 	memset(gpenVuMeter, 0, sizeof(gpenVuMeter));
-	memset(Chords, 0, sizeof(Chords));
-	memcpy(KeyboardMap, KeyboardMPT, sizeof(KeyboardMap));
-	// Create Audio Critical Section
-	memset(&m_csAudio, 0, sizeof(CRITICAL_SECTION));
-	InitializeCriticalSection(&m_csAudio);
+	
 	// Default chords
+	memset(Chords, 0, sizeof(Chords));
 	for (UINT ichord=0; ichord<3*12; ichord++)
 	{
 		Chords[ichord].key = (BYTE)ichord;
@@ -327,22 +323,145 @@ CMainFrame::CMainFrame()
 			Chords[ichord].notes[2] = (BYTE)(ichord-1);
 		}
 	}
-	// Read Display Registry Settings
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MAINFRAME_REG_WINDOW, 0, KEY_READ, &key) == ERROR_SUCCESS)
+
+	// Create Audio Critical Section
+	memset(&m_csAudio, 0, sizeof(CRITICAL_SECTION));
+	InitializeCriticalSection(&m_csAudio);
+
+	m_csRegKey.Format("%s%s", MAINFRAME_REGKEY_BASE, MAINFRAME_REGKEY_DEFAULT);
+	m_csRegSettings.Format("%s%s", m_csRegKey, MAINFRAME_REGEXT_SETTINGS);
+	m_csRegWindow.Format("%s%s", m_csRegKey, MAINFRAME_REGEXT_WINDOW);
+
+	CString storedVersion = GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
+	//If version number stored in INI is 1.17.02.40 or later, load setting from INI file.
+	//Else load settings from Registry
+	if (storedVersion >= "1.17.02.40") {
+		LoadIniSettings();
+	} else {
+		LoadRegistrySettings();
+	}
+
+	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
+	m_pPerfCounter= new CPerformanceCounter();
+
+}
+
+void CMainFrame::LoadIniSettings()
+{
+	CString iniFile = theApp.GetConfigFileName();
+	CHAR collectedString[INIBUFFERSIZE];
+
+	gcsPreviousVersion = GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
+	glTreeWindowWidth = GetPrivateProfileLong("Display", "MDITreeWidth", 160, iniFile);
+	glTreeSplitRatio = GetPrivateProfileLong("Display", "MDITreeRatio", 128, iniFile);
+	glGeneralWindowHeight = GetPrivateProfileLong("Display", "MDIGeneralHeight", 178, iniFile);
+	glPatternWindowHeight = GetPrivateProfileLong("Display", "MDIPatternHeight", 232, iniFile);
+	glSampleWindowHeight = GetPrivateProfileLong("Display", "MDISampleHeight", 188, iniFile);
+	glInstrumentWindowHeight = GetPrivateProfileLong("Display", "MDIInstrumentHeight", 300, iniFile);
+	glCommentsWindowHeight = GetPrivateProfileLong("Display", "MDICommentsHeight", 288, iniFile);
+	glGraphWindowHeight = GetPrivateProfileLong("Display", "MDIGraphHeight", 288, iniFile); //rewbs.graph
+	gnPlugWindowX = GetPrivateProfileInt("Display", "PlugSelectWindowX", 243, iniFile);
+	gnPlugWindowY = GetPrivateProfileInt("Display", "PlugSelectWindowY", 273, iniFile);
+	gnPlugWindowWidth = GetPrivateProfileInt("Display", "PlugSelectWindowWidth", 370, iniFile);
+	gnPlugWindowHeight = GetPrivateProfileInt("Display", "PlugSelectWindowHeight", 332, iniFile);
+	gnPlugWindowLast = GetPrivateProfileInt("Display", "PlugSelectWindowLast", 0, iniFile);
+
+	CHAR s[16];
+	for (int ncol=0; ncol<MAX_MODCOLORS; ncol++) {
+		wsprintf(s, "Color%02d", ncol);
+		rgbCustomColors[ncol] = GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
+	}
+
+	m_nWaveDevice = GetPrivateProfileLong("Sound Settings", "WaveDevice", (SNDDEV_DSOUND<<8), iniFile);
+	m_dwSoundSetup = GetPrivateProfileDWord("Sound Settings", "SoundSetup", SOUNDSETUP_SECONDARY, iniFile);
+	m_dwQuality = GetPrivateProfileDWord("Sound Settings", "Quality", 0, iniFile);
+	m_nSrcMode = GetPrivateProfileDWord("Sound Settings", "SrcMode", SRCMODE_POLYPHASE, iniFile);
+	m_dwRate = GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 44100, iniFile);
+	m_nBitsPerSample = GetPrivateProfileDWord("Sound Settings", "BitsPerSample", 16, iniFile);
+	m_nChannels = GetPrivateProfileDWord("Sound Settings", "ChannelMode", 2, iniFile);
+	m_nBufferLength = GetPrivateProfileDWord("Sound Settings", "BufferLength", 75, iniFile);
+	m_nPreAmp = GetPrivateProfileDWord("Sound Settings", "PreAmp", 128, iniFile);
+	CSoundFile::m_nStereoSeparation = GetPrivateProfileLong("Sound Settings", "StereoSeparation", 128, iniFile);
+	CSoundFile::m_nMaxMixChannels = GetPrivateProfileLong("Sound Settings", "MixChannels", MAX_CHANNELS, iniFile);
+	gbWFIRType = GetPrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", 7, iniFile);
+	gdWFIRCutoff = static_cast<double>(GetPrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", 97, iniFile))/100.0;
+	glVolumeRampSamples = GetPrivateProfileLong("Sound Settings", "VolumeRampSamples", 42, iniFile);
+
+	m_dwMidiSetup = GetPrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
+	m_nMidiDevice = GetPrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);
+	gnMidiImportSpeed = GetPrivateProfileLong("MIDI Settings", "MidiImportSpeed", gnMidiImportSpeed, iniFile);
+	gnMidiPatternLen = GetPrivateProfileLong("MIDI Settings", "MidiImportPatLen", gnMidiPatternLen, iniFile);
+
+	m_dwPatternSetup = GetPrivateProfileDWord("Pattern Editor", "PatternSetup", m_dwPatternSetup, iniFile);
+	m_nRowSpacing = GetPrivateProfileDWord("Pattern Editor", "RowSpacing", 16, iniFile);
+	m_nRowSpacing2 = GetPrivateProfileDWord("Pattern Editor", "RowSpacing2", 4, iniFile);
+	gbLoopSong = GetPrivateProfileDWord("Pattern Editor", "LoopSong", true, iniFile);
+	gnPatternSpacing = GetPrivateProfileDWord("Pattern Editor", "Spacing", 1, iniFile);
+	gbPatternVUMeters = GetPrivateProfileDWord("Pattern Editor", "VU-Meters", false, iniFile);
+	gbPatternPluginNames = GetPrivateProfileDWord("Pattern Editor", "Plugin-Names", true, iniFile);	
+	gnAutoChordWaitTime = GetPrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", 60, iniFile);	
+
+	GetPrivateProfileString("Paths", "Songs_Directory", m_szModDir, m_szModDir, INIBUFFERSIZE, iniFile);
+	GetPrivateProfileString("Paths", "Samples_Directory", m_szSmpDir, m_szSmpDir, INIBUFFERSIZE, iniFile);
+	GetPrivateProfileString("Paths", "Instruments_Directory", m_szInsDir, m_szInsDir, INIBUFFERSIZE, iniFile);
+	GetPrivateProfileString("Paths", "Plugins_Directory", m_szPluginsDir, m_szPluginsDir, INIBUFFERSIZE, iniFile);
+	GetPrivateProfileString("Paths", "Key_Config_File", m_szKbdFile, m_szKbdFile, INIBUFFERSIZE, iniFile);
+
+	CSoundFile::m_nXBassDepth = GetPrivateProfileLong("Effects", "XBassDepth", 0, iniFile);
+	CSoundFile::m_nXBassRange = GetPrivateProfileLong("Effects", "XBassRange", 0, iniFile);
+	CSoundFile::m_nReverbDepth = GetPrivateProfileLong("Effects", "ReverbDepth", 0, iniFile);
+	CSoundFile::gnReverbType = GetPrivateProfileLong("Effects", "ReverbType", 0, iniFile);
+	CSoundFile::m_nProLogicDepth = GetPrivateProfileLong("Effects", "ProLogicDepth", 0, iniFile);
+	CSoundFile::m_nProLogicDelay = GetPrivateProfileLong("Effects", "ProLogicDelay", 0, iniFile);
+
+	GetPrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPRESET), iniFile);
+	GetPrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPRESET), iniFile);
+	GetPrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPRESET), iniFile);
+	GetPrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPRESET), iniFile);
+	GetPrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPRESET), iniFile);
+
+
+	m_pAutoSaver = new CAutoSaver();
+	GetPrivateProfileLong("AutoSave", "Enabled", true, iniFile)?m_pAutoSaver->Enable():m_pAutoSaver->Disable();
+	m_pAutoSaver->SetSaveInterval(GetPrivateProfileLong("AutoSave", "IntervalMinutes", 10, iniFile));
+	m_pAutoSaver->SetHistoryDepth(GetPrivateProfileLong("AutoSave", "BackupHistory", 3, iniFile));
+	m_pAutoSaver->SetUseOriginalPath(GetPrivateProfileLong("AutoSave", "UseOriginalPath", true, iniFile));
+	m_pAutoSaver->SetPath(GetPrivateProfileCString("AutoSave", "Path", "", iniFile));
+	m_pAutoSaver->SetFilenameTemplate(GetPrivateProfileCString("AutoSave", "FileNameTemplate", "", iniFile));
+}
+
+void CMainFrame::LoadRegistrySettings()
+{
+
+	HKEY key;
+	DWORD dwREG_DWORD = REG_DWORD;
+	DWORD dwREG_SZ = REG_SZ;
+	DWORD dwDWORDSize = sizeof(UINT);
+	DWORD dwSZSIZE = sizeof(m_szModDir);
+	DWORD dwCRSIZE = sizeof(COLORREF);
+
+
+	bool asEnabled=true;
+	int asInterval=10;
+	int asBackupHistory=3;
+	bool asUseOriginalPath=true;
+	CString asPath ="";
+	CString asFileNameTemplate="";
+
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegWindow, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		DWORD d = 0;
 		RegQueryValueEx(key, "Maximized", NULL, &dwREG_DWORD, (LPBYTE)&d, &dwDWORDSize);
 		if (d) theApp.m_nCmdShow = SW_SHOWMAXIMIZED;
 		RegQueryValueEx(key, "MDIMaximize", NULL, &dwREG_DWORD, (LPBYTE)&gbMdiMaximize, &dwDWORDSize);
 		RegQueryValueEx(key, "MDITreeWidth", NULL, &dwREG_DWORD, (LPBYTE)&glTreeWindowWidth, &dwDWORDSize);
-		//rewbs.varWindowSize
 		RegQueryValueEx(key, "MDICtrlHeight", NULL, &dwREG_DWORD, (LPBYTE)&glCtrlWindowHeight, &dwDWORDSize); //obsolete, for backwards compat only
 		RegQueryValueEx(key, "MDIGeneralHeight", NULL, &dwREG_DWORD, (LPBYTE)&glGeneralWindowHeight, &dwDWORDSize);
 		RegQueryValueEx(key, "MDIPatternHeight", NULL, &dwREG_DWORD, (LPBYTE)&glPatternWindowHeight, &dwDWORDSize);
 		RegQueryValueEx(key, "MDISampleHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glSampleWindowHeight, &dwDWORDSize);
 		RegQueryValueEx(key, "MDIInstrumentHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glInstrumentWindowHeight, &dwDWORDSize);
 		RegQueryValueEx(key, "MDICommentsHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glCommentsWindowHeight, &dwDWORDSize);
-		//end rewbs.varWindowSize
+		RegQueryValueEx(key, "MDIGraphHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glGraphWindowHeight, &dwDWORDSize); //rewbs.graph
 		RegQueryValueEx(key, "MDITreeRatio", NULL, &dwREG_DWORD, (LPBYTE)&glTreeSplitRatio, &dwDWORDSize);
 		// Colors
 		for (int ncol=0; ncol<MAX_MODCOLORS; ncol++)
@@ -353,11 +472,8 @@ CMainFrame::CMainFrame()
 		}
 		RegCloseKey(key);
 	}
-	CSoundFile::m_nMaxMixChannels = 32;
-	if (CSoundFile::gdwSysInfo & SYSMIX_ENABLEMMX) CSoundFile::m_nMaxMixChannels = 64;
-	if (CSoundFile::gdwSysInfo & SYSMIX_SSE) CSoundFile::m_nMaxMixChannels = MAX_CHANNELS;
-	// Read registry settings
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MAINFRAME_REGKEY, 0, KEY_READ, &key) == ERROR_SUCCESS)
+
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegKey, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		RegQueryValueEx(key, "SoundSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwSoundSetup, &dwDWORDSize);
 		RegQueryValueEx(key, "Quality", NULL, &dwREG_DWORD, (LPBYTE)&m_dwQuality, &dwDWORDSize);
@@ -373,8 +489,8 @@ CMainFrame::CMainFrame()
 		RegQueryValueEx(key, "Instruments_Directory", NULL, &dwREG_SZ, (LPBYTE)m_szInsDir, &dwSZSIZE);
 		dwSZSIZE = sizeof(m_szPluginsDir);
 		RegQueryValueEx(key, "Plugins_Directory", NULL, &dwREG_SZ, (LPBYTE)m_szPluginsDir, &dwSZSIZE);
-		dwSZSIZE = sizeof(m_szKbdFile);	//rewbs.customKeys																//rewbs.custKeys
-		RegQueryValueEx(key, "Key_Config_File", NULL, &dwREG_SZ, (LPBYTE)m_szKbdFile, &dwSZSIZE);	//rewbs.custKeys
+		dwSZSIZE = sizeof(m_szKbdFile);
+		RegQueryValueEx(key, "Key_Config_File", NULL, &dwREG_SZ, (LPBYTE)m_szKbdFile, &dwSZSIZE);
 		RegQueryValueEx(key, "XBassDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nXBassDepth, &dwDWORDSize);
 		RegQueryValueEx(key, "XBassRange", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nXBassRange, &dwDWORDSize);
 		RegQueryValueEx(key, "ReverbDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nReverbDepth, &dwDWORDSize);
@@ -389,7 +505,6 @@ CMainFrame::CMainFrame()
 		RegQueryValueEx(key, "PatternSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwPatternSetup, &dwDWORDSize);
 		RegQueryValueEx(key, "RowSpacing", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowSpacing, &dwDWORDSize);
 		RegQueryValueEx(key, "RowSpacing2", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowSpacing2, &dwDWORDSize);
-		//RegQueryValueEx(key, "KeyboardCfg", NULL, &dwREG_DWORD, (LPBYTE)&m_nKeyboardCfg, &dwDWORDSize);
 		RegQueryValueEx(key, "LoopSong", NULL, &dwREG_DWORD, (LPBYTE)&gbLoopSong, &dwDWORDSize);
 		RegQueryValueEx(key, "BitsPerSample", NULL, &dwREG_DWORD, (LPBYTE)&m_nBitsPerSample, &dwDWORDSize);
 		RegQueryValueEx(key, "ChannelMode", NULL, &dwREG_DWORD, (LPBYTE)&m_nChannels, &dwDWORDSize);
@@ -416,26 +531,55 @@ CMainFrame::CMainFrame()
 		RegQueryValueEx(key, "AutoChordWaitTime", NULL, &dwREG_DWORD, (LPBYTE)&gnAutoChordWaitTime, &dwDWORDSize);
 		//end rewbs.autochord
 
+		dwDWORDSize = sizeof(gnPlugWindowX);
+		RegQueryValueEx(key, "PlugSelectWindowX", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowX, &dwDWORDSize);
+		dwDWORDSize = sizeof(gnPlugWindowY);
+		RegQueryValueEx(key, "PlugSelectWindowY", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowY, &dwDWORDSize);
+		dwDWORDSize = sizeof(gnPlugWindowWidth);
+		RegQueryValueEx(key, "PlugSelectWindowWidth", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowWidth, &dwDWORDSize);
+		dwDWORDSize = sizeof(gnPlugWindowHeight);
+		RegQueryValueEx(key, "PlugSelectWindowHeight", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowHeight, &dwDWORDSize);
+		dwDWORDSize = sizeof(gnPlugWindowLast);
+		RegQueryValueEx(key, "PlugSelectWindowLast", NULL, &dwREG_DWORD, (LPBYTE)&gnPlugWindowLast, &dwDWORDSize);
+
+
+		//rewbs.autoSave
+		dwDWORDSize = sizeof(asEnabled);
+		RegQueryValueEx(key, "AutoSave_Enabled", NULL, &dwREG_DWORD, (LPBYTE)&asEnabled, &dwDWORDSize);
+		dwDWORDSize = sizeof(asInterval);
+		RegQueryValueEx(key, "AutoSave_IntervalMinutes", NULL, &dwREG_DWORD, (LPBYTE)&asInterval, &dwDWORDSize);
+		dwDWORDSize = sizeof(asBackupHistory);
+		RegQueryValueEx(key, "AutoSave_BackupHistory", NULL, &dwREG_DWORD, (LPBYTE)&asBackupHistory, &dwDWORDSize);		
+		dwDWORDSize = sizeof(asUseOriginalPath);
+		RegQueryValueEx(key, "AutoSave_UseOriginalPath", NULL, &dwREG_DWORD, (LPBYTE)&asUseOriginalPath, &dwDWORDSize);		
+
+		dwDWORDSize = MAX_PATH;
+		RegQueryValueEx(key, "AutoSave_Path", NULL, &dwREG_DWORD, (LPBYTE)asPath.GetBuffer(dwDWORDSize/sizeof(TCHAR)), &dwDWORDSize);
+		asPath.ReleaseBuffer();
+
+		dwDWORDSize = MAX_PATH;
+		RegQueryValueEx(key, "AutoSave_FileNameTemplate", NULL, &dwREG_DWORD, (LPBYTE)asFileNameTemplate.GetBuffer(dwDWORDSize/sizeof(TCHAR)), &dwDWORDSize);
+		asFileNameTemplate.ReleaseBuffer();
+
+		//end rewbs.autoSave
+
 		RegCloseKey(key);
 	}
-	// Read more registry settings
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MAINFRAME_REG_SETTINGS, 0, KEY_READ, &key) == ERROR_SUCCESS)
+
+	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegSettings, 0, KEY_READ, &key) == ERROR_SUCCESS)
 	{
 		// Version
 		dwDWORDSize = sizeof(DWORD);
-		RegQueryValueEx(key, "Version", NULL, &dwREG_DWORD, (LPBYTE)&gdwPreviousVersion, &dwDWORDSize);
+		DWORD dwPreviousVersion;
+		RegQueryValueEx(key, "Version", NULL, &dwREG_DWORD, (LPBYTE)&dwPreviousVersion, &dwDWORDSize);
+		gcsPreviousVersion=GetVersionString(dwPreviousVersion);
 		RegCloseKey(key);
 	}
-	if (gdwPreviousVersion < MPTRACK_FINALRELEASEVERSION)
-	{
-		m_dwPatternSetup |= (PATTERN_EFFECTHILIGHT | PATTERN_SMALLFONT | PATTERN_CENTERROW | PATTERN_DRAGNDROPEDIT);
-	}
-	if (gdwPreviousVersion < 0x0114009A)
-	{
-		m_dwPatternSetup |= PATTERN_SHOWPREVIOUS|PATTERN_CONTSCROLL;
-	}
+	m_pAutoSaver = new CAutoSaver(asEnabled, asInterval, asBackupHistory, asUseOriginalPath, asPath, asFileNameTemplate);
 
-	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
+	gnPatternSpacing = theApp.GetProfileInt("Pattern Editor", "Spacing", 0);
+	gbPatternVUMeters = theApp.GetProfileInt("Pattern Editor", "VU-Meters", 0);
+	gbPatternPluginNames = theApp.GetProfileInt("Pattern Editor", "Plugin-Names", 1);
 }
 
 
@@ -482,23 +626,6 @@ VOID CMainFrame::Initialize()
 	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());
 	// Initialize Audio Mixer
 	UpdateAudioParameters(TRUE);
-	// Load View State
-	MPT_LoadPatternState("Pattern Editor");
-	// Load Hot Keys
-	for (UINT iKey=0; iKey<MAX_MPTHOTKEYS; iKey++)
-	{
-		wsprintf(s, "Key_%02d", iKey);
-		DWORD vkCode;
-		if (0xFFFF == (vkCode = theApp.GetProfileInt("Hotkeys", s, 0xFFFF))) vkCode = gDefaultHotKeys[iKey].nMPTHotKey;
-		CustomKeys[iKey] = vkCode;
-	}
-	// Keyboard Mapping
-	for (UINT iNote=0; iNote<KEYBOARDMAP_LENGTH; iNote++)
-	{
-		wsprintf(s, "Note_%02d", iNote);
-		DWORD dwKey = 0xFFFF;
-		if (0xFFFF != (dwKey = theApp.GetProfileInt("Hotkeys", s, 0xFFFF))) KeyboardMap[iNote] = dwKey;
-	}
 	// Update the tree
 	m_wndTree.Init();
 }
@@ -509,6 +636,8 @@ CMainFrame::~CMainFrame()
 {
 	DeleteCriticalSection(&m_csAudio);
 	delete m_InputHandler; 	//rewbs.customKeys
+	delete m_pAutoSaver; //rewbs.autosaver
+	delete m_pPerfCounter;
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -532,8 +661,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (m_hGUIFont == NULL) m_hGUIFont = (HFONT)GetStockObject(ANSI_VAR_FONT);
 	brushBlack = (HBRUSH)::GetStockObject(BLACK_BRUSH);
 	brushWhite = (HBRUSH)::GetStockObject(WHITE_BRUSH);
-	pbrushBlack = new CBrush(RGB(0,0,0));
-	pbrushWhite = new CBrush(RGB(0xff,0xff,0xff));
 	brushGray = ::CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 	penLightGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNHIGHLIGHT));
 	penDarkGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
@@ -573,20 +700,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
 	m_wndToolBar.Init(this);
 	m_wndTree.RecalcLayout();
-
-// -> CODE#0017
-// -> DESC="midi in record mode setup option"
-	if(m_dwPatternSetup & PATTERN_MIDIRECORD) OnMidiRecord();
-// -! BEHAVIOUR_CHANGE#0017
-
 	// Restore toobar positions
-	if (gdwPreviousVersion == MPTRACK_VERSION)
-	{
-//		try { try {
-			LoadBarState("Toolbars");
-//		} 
-//		} catch(EXCEPTION_EXECUTE_HANDLER) {}
-	}
+	LoadBarState("Toolbars");
+
+	if(m_dwPatternSetup & PATTERN_MIDIRECORD) OnMidiRecord();
+
 	return 0;
 }
 
@@ -594,35 +712,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 //------------------------------------------------
 {
-	CRect rect;
-	HKEY key;
-
-	// Read registry settings
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,	MAINFRAME_REG_WINDOW, 0, KEY_READ, &key) == ERROR_SUCCESS)
-	{
-		DWORD dwREG_DWORD = REG_DWORD;
-		DWORD qwREG_DWORD = REG_QWORD;
-		DWORD dwDWORDSize = sizeof(UINT);
-
-		rect.SetRect(cs.x, cs.y, cs.cx, cs.cy);
-		RegQueryValueEx(key, "MainWindow_x", NULL, &dwREG_DWORD, (LPBYTE)&rect.left, &dwDWORDSize);
-		RegQueryValueEx(key, "MainWindow_y", NULL, &dwREG_DWORD, (LPBYTE)&rect.top, &dwDWORDSize);
-		RegQueryValueEx(key, "MainWindow_width", NULL, &dwREG_DWORD, (LPBYTE)&rect.right, &dwDWORDSize);
-		RegQueryValueEx(key, "MainWindow_height", NULL, &dwREG_DWORD, (LPBYTE)&rect.bottom, &dwDWORDSize);
-		RegCloseKey(key);
-		rect.right += rect.left;
-		rect.bottom += rect.top;
-		if ((rect.Width() <	GetSystemMetrics(SM_CXSCREEN)) && (rect.Width() > 16)
-		 && (rect.Height() < GetSystemMetrics(SM_CYSCREEN)) && (rect.Height() > 16)
-		 && (rect.right > 16) && (rect.left < GetSystemMetrics(SM_CXSCREEN) - 16)
-		 && (rect.bottom > 16) && (rect.top < GetSystemMetrics(SM_CYSCREEN) - 16))
-		{
-			cs.x = rect.left;
-			cs.y = rect.top;
-			cs.cx = rect.Width();
-			cs.cy = rect.Height();
-		}
-	}
 	return CMDIFrameWnd::PreCreateWindow(cs);
 }
 
@@ -646,14 +735,10 @@ BOOL CMainFrame::DestroyWindow()
 	if (shMidiIn) midiCloseDevice();
 	if (m_hPlayThread != NULL)
 	{
-		//TerminateThread(m_hPlayThread, 0);
-		//m_hPlayThread = NULL;
 		if(TerminateThread(m_hPlayThread, 0)) m_hPlayThread = NULL;
 	}
 	if (m_hNotifyThread != NULL)
 	{
-		//TerminateThread(m_hNotifyThread, 0);
-		//m_hNotifyThread = NULL;
 		if(TerminateThread(m_hNotifyThread, 0)) m_hNotifyThread = NULL;
 	}
 	// Delete bitmaps
@@ -672,18 +757,11 @@ BOOL CMainFrame::DestroyWindow()
 		delete bmpVUMeters;
 		bmpVUMeters = NULL;
 	}
-	//rewbs.fxvis
 	if (bmpVisNode)
 	{
 		delete bmpVisNode;
 		bmpVisNode = NULL;
 	}
-	//end rewbs.fxvis
-	if	(pbrushBlack)
-		pbrushBlack->DeleteObject();
-	if	(pbrushWhite)
-		pbrushWhite->DeleteObject();		
-
 
 	// Kill GDI Objects
 	DeleteGDIObject(brushGray);
@@ -701,8 +779,6 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penGray99);
 	DeleteGDIObject(penGraycc);
 	DeleteGDIObject(penGrayff);
-	DeleteGDIObject(pbrushBlack);
-	DeleteGDIObject(pbrushWhite);
 
 	for (UINT i=0; i<NUM_VUMETER_PENS*2; i++)
 	{
@@ -731,122 +807,162 @@ void CMainFrame::OnClose()
 	if (gpSoundDevice)
 	{
 		BEGIN_CRITICAL();
+		//gpSoundDevice->Reset();
+		//audioCloseDevice();
 		gpSoundDevice->Release();
 		gpSoundDevice = NULL;
 		END_CRITICAL();
 	}
-	GetWindowRect(&rect);
 	// Save Window Settings
-	if (RegCreateKey(HKEY_CURRENT_USER,	MAINFRAME_REG_WINDOW, &key) == ERROR_SUCCESS)
-	{
-		DWORD d = IsZoomed();
-		if ((!IsIconic()) && (!d))
-		{
-			rect.right -= rect.left;
-			rect.bottom -= rect.top;
-			RegSetValueEx(key, "MainWindow_x", NULL, REG_DWORD, (LPBYTE)&rect.left, sizeof(UINT));
-			RegSetValueEx(key, "MainWindow_y", NULL, REG_DWORD, (LPBYTE)&rect.top, sizeof(UINT));
-			RegSetValueEx(key, "MainWindow_width", NULL, REG_DWORD, (LPBYTE)&rect.right, sizeof(UINT));
-			RegSetValueEx(key, "MainWindow_height", NULL, REG_DWORD, (LPBYTE)&rect.bottom, sizeof(UINT));
-		}
-		RegSetValueEx(key, "Maximized", NULL, REG_DWORD, (LPBYTE)&d, sizeof(DWORD));
-		RegSetValueEx(key, "MDIMaximize", NULL, REG_DWORD, (LPBYTE)&gbMdiMaximize, sizeof(BOOL));
-		RegSetValueEx(key, "MDITreeWidth", NULL, REG_DWORD, (LPBYTE)&glTreeWindowWidth, sizeof(DWORD));
+	SaveIniSettings();
 
-		//rewbs.varWindowSize
-		RegSetValueEx(key, "MDICtrlHeight", NULL, REG_DWORD, (LPBYTE)&glCtrlWindowHeight, sizeof(DWORD));	//obsolete, for backwards compat only
-		RegSetValueEx(key, "MDIGeneralHeight", NULL, REG_DWORD, (LPBYTE)&glGeneralWindowHeight, sizeof(DWORD));
-		RegSetValueEx(key, "MDIPatternHeight", NULL, REG_DWORD, (LPBYTE)&glPatternWindowHeight, sizeof(DWORD));
-		RegSetValueEx(key, "MDISampleHeight", NULL, REG_DWORD,  (LPBYTE)&glSampleWindowHeight, sizeof(DWORD));
-		RegSetValueEx(key, "MDIInstrumentHeight", NULL, REG_DWORD,  (LPBYTE)&glInstrumentWindowHeight, sizeof(DWORD));
-		RegSetValueEx(key, "MDICommentsHeight", NULL, REG_DWORD,  (LPBYTE)&glCommentsWindowHeight, sizeof(DWORD));
-		RegSetValueEx(key, "MDITreeRatio", NULL, REG_DWORD, (LPBYTE)&glTreeSplitRatio, sizeof(DWORD));
-		// Colors
-		for (int ncol=0; ncol<MAX_MODCOLORS; ncol++)
-		{
-			wsprintf(s, "Color%02d", ncol);
-			RegSetValueEx(key, s, NULL, REG_DWORD, (LPBYTE)&rgbCustomColors[ncol], sizeof(COLORREF));
-		}
-		RegCloseKey(key);
-	}
-	if (RegCreateKey(HKEY_CURRENT_USER,	MAINFRAME_REGKEY, &key) == ERROR_SUCCESS)
-	{
-		// Player
-		RegSetValueEx(key, "WaveDevice", NULL, REG_DWORD, (LPBYTE)&m_nWaveDevice, sizeof(DWORD));
-		RegSetValueEx(key, "SoundSetup", NULL, REG_DWORD, (LPBYTE)&m_dwSoundSetup, sizeof(DWORD));
-		RegSetValueEx(key, "Quality", NULL, REG_DWORD, (LPBYTE)&m_dwQuality, sizeof(DWORD));
-		RegSetValueEx(key, "SrcMode", NULL, REG_DWORD, (LPBYTE)&m_nSrcMode, sizeof(DWORD));
-		RegSetValueEx(key, "Mixing_Rate", NULL, REG_DWORD, (LPBYTE)&m_dwRate, sizeof(DWORD));
-		RegSetValueEx(key, "BitsPerSample", NULL, REG_DWORD, (LPBYTE)&m_nBitsPerSample, sizeof(DWORD));
-		RegSetValueEx(key, "ChannelMode", NULL, REG_DWORD, (LPBYTE)&m_nChannels, sizeof(DWORD));
-		RegSetValueEx(key, "BufferLength", NULL, REG_DWORD, (LPBYTE)&m_nBufferLength, sizeof(DWORD));
-		RegSetValueEx(key, "Songs_Directory", NULL, REG_SZ, (LPBYTE)m_szModDir, strlen(m_szModDir)+1);
-		RegSetValueEx(key, "Samples_Directory", NULL, REG_SZ, (LPBYTE)m_szSmpDir, strlen(m_szSmpDir)+1);
-		RegSetValueEx(key, "Instruments_Directory", NULL, REG_SZ, (LPBYTE)m_szInsDir, strlen(m_szInsDir)+1);
-		RegSetValueEx(key, "Plugins_Directory", NULL, REG_SZ, (LPBYTE)m_szPluginsDir, strlen(m_szPluginsDir)+1);
-		RegSetValueEx(key, "Key_Config_File", NULL, REG_SZ, (LPBYTE)m_szKbdFile, strlen(m_szKbdFile)+1); 	//rewbs.customKeys
-		RegSetValueEx(key, "PreAmp", NULL, REG_DWORD, (LPBYTE)&m_nPreAmp, sizeof(DWORD));
-		RegSetValueEx(key, "StereoSeparation", NULL, REG_DWORD, (LPBYTE)&CSoundFile::m_nStereoSeparation, sizeof(DWORD));
-		RegSetValueEx(key, "MidiSetup", NULL, REG_DWORD, (LPBYTE)&m_dwMidiSetup, sizeof(DWORD));
-		RegSetValueEx(key, "MidiDevice", NULL, REG_DWORD, (LPBYTE)&m_nMidiDevice, sizeof(DWORD));
-		RegSetValueEx(key, "PatternSetup", NULL, REG_DWORD, (LPBYTE)&m_dwPatternSetup, sizeof(DWORD));
-		RegSetValueEx(key, "RowSpacing", NULL, REG_DWORD, (LPBYTE)&m_nRowSpacing, sizeof(DWORD));
-		RegSetValueEx(key, "RowSpacing2", NULL, REG_DWORD, (LPBYTE)&m_nRowSpacing2, sizeof(DWORD));
-		RegSetValueEx(key, "LoopSong", NULL, REG_DWORD, (LPBYTE)&gbLoopSong, sizeof(BOOL));
-		RegSetValueEx(key, "MidiImportSpeed", NULL, REG_DWORD, (LPBYTE)&gnMidiImportSpeed, sizeof(DWORD));
-		RegSetValueEx(key, "MidiImportPatLen", NULL, REG_DWORD, (LPBYTE)&gnMidiPatternLen, sizeof(DWORD));
-		// Effects
-		RegSetValueEx(key, "MixChannels", NULL, REG_DWORD, (LPBYTE)&CSoundFile::m_nMaxMixChannels, sizeof(UINT));
-		RegSetValueEx(key, "XBassDepth", NULL, REG_DWORD, (LPBYTE)&CSoundFile::m_nXBassDepth, sizeof(UINT));
-		RegSetValueEx(key, "XBassRange", NULL, REG_DWORD, (LPBYTE)&CSoundFile::m_nXBassRange, sizeof(UINT));
-		RegSetValueEx(key, "ReverbDepth", NULL, REG_DWORD, (LPBYTE)&CSoundFile::m_nReverbDepth, sizeof(UINT));
-		RegSetValueEx(key, "ReverbType", NULL, REG_DWORD, (LPBYTE)&CSoundFile::gnReverbType, sizeof(UINT));
-		RegSetValueEx(key, "ProLogicDepth", NULL, REG_DWORD, (LPBYTE)&CSoundFile::m_nProLogicDepth, sizeof(UINT));
-		RegSetValueEx(key, "ProLogicDelay", NULL, REG_DWORD, (LPBYTE)&CSoundFile::m_nProLogicDelay, sizeof(UINT));
-		// EQ
-		CEQSetupDlg::SaveEQ(key, "EQ_Settings", &m_EqSettings);
-		CEQSetupDlg::SaveEQ(key, "EQ_User1", &CEQSetupDlg::gUserPresets[0]);
-		CEQSetupDlg::SaveEQ(key, "EQ_User2", &CEQSetupDlg::gUserPresets[1]);
-		CEQSetupDlg::SaveEQ(key, "EQ_User3", &CEQSetupDlg::gUserPresets[2]);
-		CEQSetupDlg::SaveEQ(key, "EQ_User4", &CEQSetupDlg::gUserPresets[3]);
-		// Keyboard Config
-		//RegSetValueEx(key, "KeyboardCfg", NULL, REG_DWORD, (LPBYTE)&m_nKeyboardCfg, sizeof(DWORD));
 
-		//rewbs.resamplerConf
-		RegSetValueEx(key, "XMMSModplugResamplerWFIRType", NULL, REG_NONE, (LPBYTE)&gbWFIRType, sizeof(gbWFIRType));
-		RegSetValueEx(key, "ResamplerWFIRCutoff", NULL, REG_QWORD, (LPBYTE)&gdWFIRCutoff, sizeof(gdWFIRCutoff));
-		RegSetValueEx(key, "VolumeRampSamples", NULL, REG_QWORD, (LPBYTE)&glVolumeRampSamples, sizeof(glVolumeRampSamples));		
-		//end rewbs.resamplerConf
-		RegSetValueEx(key, "AutoChordWaitTime", NULL, REG_DWORD, (LPBYTE)&gnAutoChordWaitTime, sizeof(gnAutoChordWaitTime)); //rewbs.autochord
-
-		RegCloseKey(key);
-	}
-	if (RegCreateKey(HKEY_CURRENT_USER,	MAINFRAME_REG_SETTINGS, &key) == ERROR_SUCCESS)
-	{
-		DWORD dwVersion = MPTRACK_VERSION;
-		// Author information
-		RegSetValueEx(key, "Version", NULL, REG_DWORD, (LPBYTE)&dwVersion, sizeof(DWORD));
-		RegCloseKey(key);
-	}
-	// Save Custom HotKeys
-	for (UINT iKey=0; iKey<MAX_MPTHOTKEYS; iKey++)
-	{
-		wsprintf(s, "Key_%02d", iKey);
-		theApp.WriteProfileInt("Hotkeys", s, CustomKeys[iKey]);
-	}
-	// Save Keyboard Mapping
-	for (UINT iNote=0; iNote<KEYBOARDMAP_LENGTH; iNote++)
-	{
-		wsprintf(s, "Note_%02d", iNote);
-		theApp.WriteProfileInt("Hotkeys", s, KeyboardMap[iNote]);
-	}
 	// Save chords
 	theApp.SaveChords(Chords);
-	MPT_SavePatternState("Pattern Editor");
 	SaveBarState("Toolbars");
 	EndWaitCursor();
 	CMDIFrameWnd::OnClose();
 }
+
+void CMainFrame::SaveIniSettings()
+{
+	CString iniFile = theApp.GetConfigFileName();
+
+	CString version = CMainFrame::GetFullVersionString();
+	WritePrivateProfileString("Version", "Version", version, iniFile);
+
+    WINDOWPLACEMENT wpl;
+	wpl.length = sizeof(WINDOWPLACEMENT);
+    GetWindowPlacement(&wpl);
+	WritePrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), iniFile);
+
+	WritePrivateProfileLong("Display", "MDITreeWidth", glTreeWindowWidth, iniFile);
+	WritePrivateProfileLong("Display", "MDITreeRatio", glTreeSplitRatio, iniFile);
+	WritePrivateProfileLong("Display", "MDIGeneralHeight", glGeneralWindowHeight, iniFile);
+	WritePrivateProfileLong("Display", "MDIPatternHeight", glPatternWindowHeight, iniFile);
+	WritePrivateProfileLong("Display", "MDISampleHeight", glSampleWindowHeight, iniFile);
+	WritePrivateProfileLong("Display", "MDIInstrumentHeight", glInstrumentWindowHeight, iniFile);
+	WritePrivateProfileLong("Display", "MDICommentsHeight", glCommentsWindowHeight, iniFile);
+	WritePrivateProfileLong("Display", "MDIGraphHeight", glGraphWindowHeight, iniFile); //rewbs.graph
+	WritePrivateProfileLong("Display", "PlugSelectWindowX", gnPlugWindowX, iniFile);
+	WritePrivateProfileLong("Display", "PlugSelectWindowY", gnPlugWindowY, iniFile);
+	WritePrivateProfileLong("Display", "PlugSelectWindowWidth", gnPlugWindowWidth, iniFile);
+	WritePrivateProfileLong("Display", "PlugSelectWindowHeight", gnPlugWindowHeight, iniFile);
+	WritePrivateProfileLong("Display", "PlugSelectWindowLast", gnPlugWindowLast, iniFile);
+
+	CHAR s[16];
+	for (int ncol=0; ncol<MAX_MODCOLORS; ncol++) {
+		wsprintf(s, "Color%02d", ncol);
+		WritePrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
+	}
+	
+	WritePrivateProfileLong("Sound Settings", "WaveDevice", m_nWaveDevice, iniFile);
+	WritePrivateProfileDWord("Sound Settings", "SoundSetup", m_dwSoundSetup, iniFile);
+	WritePrivateProfileDWord("Sound Settings", "Quality", m_dwQuality, iniFile);
+	WritePrivateProfileDWord("Sound Settings", "SrcMode", m_nSrcMode, iniFile);
+	WritePrivateProfileDWord("Sound Settings", "Mixing_Rate", m_dwRate, iniFile);
+	WritePrivateProfileDWord("Sound Settings", "BitsPerSample", m_nBitsPerSample, iniFile);
+	WritePrivateProfileDWord("Sound Settings", "ChannelMode", m_nChannels, iniFile);
+	WritePrivateProfileDWord("Sound Settings", "BufferLength", m_nBufferLength, iniFile);
+	WritePrivateProfileDWord("Sound Settings", "PreAmp", m_nPreAmp, iniFile);
+	WritePrivateProfileLong("Sound Settings", "StereoSeparation", CSoundFile::m_nStereoSeparation, iniFile);
+	WritePrivateProfileLong("Sound Settings", "MixChannels", CSoundFile::m_nMaxMixChannels, iniFile);
+	WritePrivateProfileDWord("Sound Settings", "XMMSModplugResamplerWFIRType", gbWFIRType, iniFile);
+	WritePrivateProfileLong("Sound Settings", "ResamplerWFIRCutoff", static_cast<int>(gdWFIRCutoff*100+0.5), iniFile);
+	WritePrivateProfileLong("Sound Settings", "VolumeRampSamples", glVolumeRampSamples, iniFile);
+
+	WritePrivateProfileDWord("MIDI Settings", "MidiSetup", m_dwMidiSetup, iniFile);
+	WritePrivateProfileDWord("MIDI Settings", "MidiDevice", m_nMidiDevice, iniFile);
+	WritePrivateProfileLong("MIDI Settings", "MidiImportSpeed", gnMidiImportSpeed, iniFile);
+	WritePrivateProfileLong("MIDI Settings", "MidiImportPatLen", gnMidiPatternLen, iniFile);
+
+	WritePrivateProfileDWord("Pattern Editor", "PatternSetup", m_dwPatternSetup, iniFile);
+	WritePrivateProfileDWord("Pattern Editor", "RowSpacing", m_nRowSpacing, iniFile);
+	WritePrivateProfileDWord("Pattern Editor", "RowSpacing2", m_nRowSpacing2, iniFile);
+	WritePrivateProfileDWord("Pattern Editor", "LoopSong", gbLoopSong, iniFile);
+	WritePrivateProfileDWord("Pattern Editor", "Spacing", gnPatternSpacing, iniFile);
+	WritePrivateProfileDWord("Pattern Editor", "VU-Meters", gbPatternVUMeters, iniFile);
+	WritePrivateProfileDWord("Pattern Editor", "Plugin-Names", gbPatternPluginNames, iniFile);	
+	WritePrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);	
+
+	WritePrivateProfileString("Paths", "Songs_Directory", m_szModDir, iniFile);
+	WritePrivateProfileString("Paths", "Samples_Directory", m_szSmpDir, iniFile);
+	WritePrivateProfileString("Paths", "Instruments_Directory", m_szInsDir, iniFile);
+	WritePrivateProfileString("Paths", "Plugins_Directory", m_szPluginsDir, iniFile);
+	WritePrivateProfileString("Paths", "Key_Config_File", m_szKbdFile, iniFile);
+
+	WritePrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_nXBassDepth, iniFile);
+	WritePrivateProfileLong("Effects", "XBassRange", CSoundFile::m_nXBassRange, iniFile);
+	WritePrivateProfileLong("Effects", "ReverbDepth", CSoundFile::m_nReverbDepth, iniFile);
+	WritePrivateProfileLong("Effects", "ReverbType", CSoundFile::gnReverbType, iniFile);
+	WritePrivateProfileLong("Effects", "ProLogicDepth", CSoundFile::m_nProLogicDepth, iniFile);
+	WritePrivateProfileLong("Effects", "ProLogicDelay", CSoundFile::m_nProLogicDelay, iniFile);
+
+	WritePrivateProfileStruct("Effects", "EQ_Settings", &m_EqSettings, sizeof(EQPRESET), iniFile);
+	WritePrivateProfileStruct("Effects", "EQ_User1", &CEQSetupDlg::gUserPresets[0], sizeof(EQPRESET), iniFile);
+	WritePrivateProfileStruct("Effects", "EQ_User2", &CEQSetupDlg::gUserPresets[1], sizeof(EQPRESET), iniFile);
+	WritePrivateProfileStruct("Effects", "EQ_User3", &CEQSetupDlg::gUserPresets[2], sizeof(EQPRESET), iniFile);
+	WritePrivateProfileStruct("Effects", "EQ_User4", &CEQSetupDlg::gUserPresets[3], sizeof(EQPRESET), iniFile);
+
+	WritePrivateProfileLong("AutoSave", "Enabled", m_pAutoSaver->IsEnabled(), iniFile);
+	WritePrivateProfileLong("AutoSave", "IntervalMinutes", m_pAutoSaver->GetSaveInterval(), iniFile);
+	WritePrivateProfileLong("AutoSave", "BackupHistory", m_pAutoSaver->GetHistoryDepth(), iniFile);
+	WritePrivateProfileLong("AutoSave", "UseOriginalPath", m_pAutoSaver->GetUseOriginalPath(), iniFile);
+	WritePrivateProfileString("AutoSave", "Path", m_pAutoSaver->GetPath(), iniFile);
+	WritePrivateProfileString("AutoSave", "FileNameTemplate", m_pAutoSaver->GetFilenameTemplate(), iniFile);
+}
+
+bool CMainFrame::WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile)
+{
+	CHAR valueBuffer[INIBUFFERSIZE];
+	wsprintf(valueBuffer, "%li", value);
+	return WritePrivateProfileString(section, key, valueBuffer, iniFile);
+}
+
+
+long CMainFrame::GetPrivateProfileLong(const CString section, const CString key, const long defaultValue, const CString iniFile)
+{
+	CHAR defaultValueBuffer[INIBUFFERSIZE];
+	wsprintf(defaultValueBuffer, "%li", defaultValue);
+
+	CHAR valueBuffer[INIBUFFERSIZE];
+	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
+
+	return atol(valueBuffer);
+}
+
+
+bool CMainFrame::WritePrivateProfileDWord(const CString section, const CString key, const DWORD value, const CString iniFile)
+{
+	CHAR valueBuffer[INIBUFFERSIZE];
+	wsprintf(valueBuffer, "%lu", value);
+	return WritePrivateProfileString(section, key, valueBuffer, iniFile);
+}
+
+DWORD CMainFrame::GetPrivateProfileDWord(const CString section, const CString key, const DWORD defaultValue, const CString iniFile)
+{
+	CHAR defaultValueBuffer[INIBUFFERSIZE];
+	wsprintf(defaultValueBuffer, "%lu", defaultValue);
+
+	CHAR valueBuffer[INIBUFFERSIZE];
+	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
+	return static_cast<DWORD>(atol(valueBuffer));
+}
+
+bool CMainFrame::WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile) 
+{
+	return WritePrivateProfileString(section, key, value, iniFile);
+}
+
+CString CMainFrame::GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile)
+{
+	CHAR defaultValueBuffer[INIBUFFERSIZE];
+	strcpy(defaultValueBuffer, defaultValue);
+	CHAR valueBuffer[INIBUFFERSIZE];
+	GetPrivateProfileString(section, key, defaultValueBuffer, valueBuffer, INIBUFFERSIZE, iniFile);
+	return valueBuffer;
+}
+
 
 
 LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam)
@@ -854,55 +970,28 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 {
 	if (code>=0)
 	{
-		if (m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
+		//Check if textbox has focus
+		bool textboxHasFocus = false;
+		bool handledByTextBox = false;
+
+		HWND hWnd = ::GetFocus();
+		if (hWnd != NULL) {
+			TCHAR szClassName[512];
+			textboxHasFocus = GetClassName(hWnd, szClassName, 6) && _tcsicmp(szClassName, _T("Edit")) == 0;		
+			if (textboxHasFocus) {
+				handledByTextBox = m_InputHandler->isKeyPressHandledByTextBox(wParam);
+			}
+		}
+
+		if (!handledByTextBox && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
 		{
-			
-			if ((wParam != VK_ESCAPE) &&
-				!(wParam == 'C' && m_InputHandler->CtrlPressed()) && 
-				!(wParam == 'X' && m_InputHandler->CtrlPressed()) && 
-				!(wParam == 'V' && m_InputHandler->CtrlPressed()))
+			if (wParam != VK_ESCAPE)
 				return -1;	// We've handled the keypress. No need to take it further.
 							// Unless it was esc, in which case we need it to close Windows
-							// (there might be other special cases.. will have to see..)
+							// (there might be other special cases, we'll see.. )
 		}
 	}
-	//TODO: get rid of this. As we wittle out hardcoded keys we won't need this.
-/*	static BOOL sbPostKeyPending = FALSE;
-	if (code == HC_ACTION)
-	{
-		DWORD scancode = lParam >> 16;
-		BOOL bUp = ((scancode & 0xC000) == 0xC000);
-		BOOL bDn = ((scancode & 0xC000) == 0x0000);
 
-		if ((bUp) || (bDn))
-		{
-			UINT hkmask = 0;
-			switch(wParam)
-			{
-			case VK_LCONTROL:
-			case VK_RCONTROL:
-			case VK_CONTROL:
-				hkmask = HOTKEYF_CONTROL;
-				break;
-			case VK_LMENU:
-			case VK_RMENU:
-			case VK_MENU:
-				hkmask = HOTKEYF_ALT;
-				break;
-			case VK_LSHIFT:
-			case VK_RSHIFT:
-			case VK_SHIFT:
-				hkmask = HOTKEYF_SHIFT;
-				break;
-			}
-			if (hkmask)
-			{
-				if (bUp) gnHotKeyMask &= ~hkmask;
-				if (bDn) gnHotKeyMask |= hkmask;
-			}
-		}
-	}
-*/
 	return CallNextHookEx(ghKbdHook, code, wParam, lParam);
 }	
 
@@ -980,10 +1069,11 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 	CMainFrame *pMainFrm = (CMainFrame *)theApp.m_pMainWnd;
 	if (gbStopSent) return FALSE;
 	BEGIN_CRITICAL();
-	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice))
-	{
+	if ((pMainFrm) && (pMainFrm->IsPlaying()) && (CMainFrame::gpSoundDevice)) {
 		bOk = CMainFrame::gpSoundDevice->FillAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
-	}
+	}/* else {
+		CMainFrame::gpSoundDevice->SilenceAudioBuffer(&gMPTSoundSource, gdwPlayLatency, dwUser);
+	}*/
 	if (!bOk)
 	{
 		gbStopSent = TRUE;
@@ -993,6 +1083,19 @@ BOOL SoundDeviceCallback(DWORD dwUser)
 	return bOk;
 }
 
+
+void Terminate_AudioThread()
+//----------------------------------------------
+{	
+	//TODO: Why does this not get called.
+	AfxMessageBox("Audio thread terminated unexpectedly. Attempting to shut down audio device");
+	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+	if (pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
+	pMainFrame->audioCloseDevice();
+	exit(-1);
+}
+
+
 // Audio thread
 DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 //------------------------------------------
@@ -1000,6 +1103,8 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 	CMainFrame *pMainFrm;
 	BOOL bWait;
 	UINT nSleep;
+
+	set_terminate(Terminate_AudioThread);
 
 // -> CODE#0021
 // -> DESC="use multimedia timer instead of Sleep() in audio thread"
@@ -1012,7 +1117,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 // -> DESC="use multimedia timer instead of Sleep() in audio thread"
 //rewbs: reduce to normal priority during debug for easier hang debugging
 #ifdef NDEBUG
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
 #endif 
 #ifdef _DEBUG
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
@@ -1051,6 +1156,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 					if (nSleep > 40) nSleep = 40;
 				} else
 				{
+					//CMainFrame::gpSoundDevice->SilenceAudioBuffer(&gMPTSoundSource, gdwPlayLatency);
 					gbStopSent = TRUE;
 					pMainFrm->PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 				}
@@ -1059,7 +1165,7 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 				nSleep = 50;
 			}
 		}
-		END_CRITICAL();
+        END_CRITICAL();
 	}
 
 // -> CODE#0021
@@ -1072,11 +1178,24 @@ DWORD WINAPI CMainFrame::AudioThread(LPVOID)
 }
 
 
-// Audio thread
+void Terminate_NotifyThread()
+//----------------------------------------------
+{	
+	//TODO: Why does this not get called.
+	AfxMessageBox("Notify thread terminated unexpectedly. Attempting to shut down audio device");
+	CMainFrame* pMainFrame = CMainFrame::GetMainFrame();
+	if (pMainFrame->gpSoundDevice) pMainFrame->gpSoundDevice->Reset();
+	pMainFrame->audioCloseDevice();
+	exit(-1);
+}
+
+// Notify thread
 DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 //-------------------------------------------
 {
 	CMainFrame *pMainFrm;
+
+	set_terminate(Terminate_NotifyThread);
 
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
 	for (;;)
@@ -1116,6 +1235,8 @@ DWORD WINAPI CMainFrame::NotifyThread(LPVOID)
 }
 
 
+
+
 ULONG CMPTSoundSource::AudioRead(PVOID pData, ULONG cbSize)
 //---------------------------------------------------------
 {
@@ -1140,6 +1261,7 @@ ULONG CMainFrame::AudioRead(PVOID pvData, ULONG ulSize)
 	if ((IsPlaying()) && (m_pSndFile))
 	{
 		DWORD dwSamplesRead = m_pSndFile->Read(pvData, ulSize);
+		//m_dTotalCPU = m_pPerfCounter->StartStop()/(static_cast<double>(dwSamplesRead)/m_dwRate);
 		return dwSamplesRead * slSampleSize;
 	}
 	return 0;
@@ -1336,6 +1458,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 			p->dwLatency = gsdwTotalSamples + d;
 			p->nOrder = m_pSndFile->m_nCurrentPattern;
 			p->nRow = m_pSndFile->m_nRow;
+			p->nPattern = m_pSndFile->m_nPattern;
 			if (m_dwNotifyType & MPTNOTIFY_SAMPLE)
 			{
 				UINT nSmp = m_dwNotifyType & 0xFFFF;
@@ -1401,6 +1524,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 			return TRUE;
 		}
 	}
+
 	return FALSE;
 }
 
@@ -1461,6 +1585,70 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame static helpers
+
+DWORD CMainFrame::GetFullVersionNumeric() {
+	char  szFullPath[MAX_PATH];
+	DWORD dwVerHnd;
+	DWORD dwVerInfoSize;
+
+	// Get version information from the application
+	::GetModuleFileName(NULL, szFullPath, sizeof(szFullPath));
+	dwVerInfoSize = ::GetFileVersionInfoSize(szFullPath, &dwVerHnd);
+	if (!dwVerInfoSize)    {
+		return 0;
+	}
+    char* pVersionInfo = new char[dwVerInfoSize];
+    if (!pVersionInfo)    {
+		return 0;
+	}
+    char* szVer = NULL;
+    UINT uVerLength;
+    if (!(::GetFileVersionInfo((LPTSTR)szFullPath, (DWORD)dwVerHnd, 
+							   (DWORD)dwVerInfoSize, (LPVOID)pVersionInfo))) {
+		delete pVersionInfo;
+		return 0;
+	}   
+	if (!(::VerQueryValue(pVersionInfo, TEXT("\\StringFileInfo\\040904b0\\FileVersion"), 
+						  (LPVOID*)&szVer, &uVerLength))) {
+		delete pVersionInfo;
+		return 0;
+	}
+
+	//version will be like: 1, 17, 2, 38
+	CString version = szVer;	
+	delete pVersionInfo;
+
+	int v1, v2, v3, v4; 
+	sscanf(version, "%x, %x, %x, %x", &v1, &v2, &v3, &v4);
+	DWORD versionLong = v1<<24 | v2<<16 | v3<<8 | v4 ;
+	return versionLong;
+}
+
+CString CMainFrame::GetFullVersionString() 
+//------------------------------------
+{
+	return GetVersionString(GetFullVersionNumeric());
+   
+};
+
+CString CMainFrame::GetVersionString(DWORD v) 
+//-------------------------------------------
+{
+	CString version;
+	if (v==0) {
+		version = "Unknown";
+	}
+	else {
+		version.Format("%X.%02X.%02X.%02X",
+						(v>>24)&0xFF,
+						(v>>16)&0xFF,
+						(v>>8)&0xFF, 
+						(v)&0xFF);
+	}
+	return version;
+}
+
+
 
 void CMainFrame::UpdateColors()
 //-----------------------------
@@ -1550,72 +1738,6 @@ VOID CMainFrame::GetKeyName(LONG lParam, LPSTR pszName, UINT cbSize)
 }
 
 
-UINT CMainFrame::GetNoteFromKey(UINT nChar, DWORD dwFlags)
-//--------------------------------------------------------
-{
-	const DWORD *lpKeyboardMap;
-	UINT note = 0;
-
-	if ((m_nKeyboardCfg & KEYBOARD_FT2KEYS) && (nChar == VK_CAPITAL)) return 0xFF;
-	lpKeyboardMap = GetKeyboardMap();
-	dwFlags &= 0x1FF; // Keep scan code only
-	if (!dwFlags) return 0;
-	for (UINT ich=0; ich<KEYBOARDMAP_LENGTH; ich++)
-	{
-		if (lpKeyboardMap[ich] == dwFlags)
-		{
-			if (ich == 3*12) return 0xFE;
-			if (ich == 3*12+1) return 0xFF;
-			note = ich+1;
-			break;
-		}
-	}
-	if (note > 0)
-	{
-		CMainFrame *pMainFrm = GetMainFrame();
-		if (!pMainFrm) return 0;
-		int octave = pMainFrm->GetBaseOctave();
-		int n = octave * 12 + note;
-		if (n < 1) n = 1;
-		if (n > 120) n = 0;
-		note = n;
-	}
-	return note;
-}
-
-
-const DWORD *CMainFrame::GetKeyboardMap()
-//---------------------------------------
-{
-	switch(m_nKeyboardCfg & KEYBOARD_MASK)
-	{
-	case KEYBOARD_FT2:	return KeyboardFT2;
-	case KEYBOARD_IT:	return KeyboardIT;
-	case KEYBOARD_MPT:	return KeyboardMPT;
-	default:			return KeyboardMap;
-	}
-}
-
-
-UINT CMainFrame::IsHotKey(DWORD dwKey)
-//------------------------------------
-{
-/*	for (UINT i=0; i<MAX_MPTHOTKEYS; i++)
-	{
-		UINT n = CustomKeys[i];
-		switch(m_nKeyboardCfg & KEYBOARD_MASK)
-		{
-		case KEYBOARD_FT2:	n = gDefaultHotKeys[i].nFT2HotKey; break;
-		case KEYBOARD_IT:	n = gDefaultHotKeys[i].nITHotKey; break;
-		case KEYBOARD_MPT:	n = gDefaultHotKeys[i].nMPTHotKey; break;
-		}
-		if ((n) && (n == dwKey)) return gDefaultHotKeys[i].nID;
-	}
-*/
-	return 0;
-}
-
-
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame operations
 
@@ -1689,15 +1811,14 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 	}
 	m_nMixChn = m_nAvgMixChn = 0;
 	gsdwTotalSamples = 0;
-	if (!bPatLoop)
-	{
-		if (bPaused)
-		{
+	if (!bPatLoop) {
+		if (bPaused) {
 			pSndFile->m_dwSongFlags |= SONG_PAUSED;
-		} else
-		{
+		} else	{
 			pModDoc->SetPause(FALSE);
-			if (pSndFile->GetCurrentPos() + 2 >= pSndFile->GetMaxPosition()) pSndFile->SetCurrentPos(0);
+			//rewbs.fix3185: removed this check so play position stays on last pattern if song ends and loop is off.
+			//Otherwise play from cursor screws up.
+			//if (pSndFile->GetCurrentPos() + 2 >= pSndFile->GetMaxPosition()) pSndFile->SetCurrentPos(0);
 			pSndFile->SetRepeatCount((gbLoopSong) ? -1 : 0);
 		}
 	}
@@ -1719,8 +1840,14 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	if (m_dwStatus & MODSTATUS_PLAYING)
 	{
 		m_dwStatus &= ~MODSTATUS_PLAYING;
+
 		if (gpSoundDevice) gpSoundDevice->Reset();
 		audioCloseDevice();
+
+		BEGIN_CRITICAL();
+		m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
+		END_CRITICAL();
+
 		m_nMixChn = m_nAvgMixChn = 0;
 		Sleep(1);
 		if (m_hFollowSong)
@@ -1738,19 +1865,14 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	}
 	if (m_pSndFile)
 	{
-		m_pSndFile->SuspendPlugins(); 	//rewbs.VSTCompliance
 		m_pSndFile->LoopPattern(-1);
 		m_pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
-		if (m_pSndFile == &m_WaveFile)
-		{
+		if (m_pSndFile == &m_WaveFile)	{
 			m_pSndFile = NULL;
 			m_WaveFile.Destroy();
-		} else
-		{
-			for (UINT i=m_pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
-			{
-				if (!(m_pSndFile->Chn[i].nMasterChn))
-				{
+		} else {
+			for (UINT i=m_pSndFile->m_nChannels; i<MAX_CHANNELS; i++) {
+				if (!(m_pSndFile->Chn[i].nMasterChn)) {
 					m_pSndFile->Chn[i].nPos = m_pSndFile->Chn[i].nPosLo = m_pSndFile->Chn[i].nLength = 0;
 				}
 			}
@@ -2157,7 +2279,7 @@ void CMainFrame::OnViewOptions()
 	if (m_bOptionsLocked)	//rewbs.customKeys
 		return;
 		
-	CPropertySheet dlg("Modplug Tracker Setup", this, m_nLastOptionsPage);
+	CPropertySheet dlg("OpenMPT Setup", this, m_nLastOptionsPage);
 	COptionsGeneral general;
 	COptionsSoundcard sounddlg(m_dwRate, m_dwSoundSetup, m_nBitsPerSample, m_nChannels, m_nBufferLength, m_nWaveDevice);
 	COptionsKeyboard keyboard;
@@ -2165,6 +2287,7 @@ void CMainFrame::OnViewOptions()
 	COptionsPlayer playerdlg;
 	CMidiSetupDlg mididlg(m_dwMidiSetup, m_nMidiDevice);
 	CEQSetupDlg eqdlg(&m_EqSettings);
+	CAutoSaverGUI autosavedlg(m_pAutoSaver); //rewbs.AutoSaver
 	dlg.AddPage(&general);
 	dlg.AddPage(&sounddlg);
 	dlg.AddPage(&playerdlg);
@@ -2172,6 +2295,7 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&keyboard);
 	dlg.AddPage(&colors);
 	dlg.AddPage(&mididlg);
+	dlg.AddPage(&autosavedlg);
 	m_bOptionsLocked=true;	//rewbs.customKeys
 	dlg.DoModal();
 	m_bOptionsLocked=false;	//rewbs.customKeys
@@ -2183,7 +2307,7 @@ void CMainFrame::OnViewOptions()
 // -> DESC="list box to choose VST plugin presets (programs)"
 void CMainFrame::OnPluginSetup()
 {
-	CSelectPluginDlg dlg(NULL, this);
+	CSelectPluginDlg dlg(NULL, GetActiveDoc(), this);
 	dlg.DoModal();
 }
 // -! NEW_FEATURE#0002
@@ -2251,7 +2375,6 @@ void CMainFrame::OnImportMidiLib()
 void CMainFrame::SetLastMixActiveTime()		//rewbs.LiveVSTi
 //-------------------------------------
 {
-	Log("setting to %d\n", gdwLastMixActiveTime);
 	gdwLastMixActiveTime = timeGetTime();
 }
 
@@ -2267,25 +2390,25 @@ void CMainFrame::OnTimer(UINT)
 		OnUpdateTime(NULL);
 	}
 	// Idle Time Check
+	DWORD curTime = timeGetTime();
 	if (IsPlaying())
 	{
-		DWORD dwTime = timeGetTime();
 		gdwIdleTime = 0;
-		if (dwTime - gdwLastLowLatencyTime > 15000)
+		if (curTime - gdwLastLowLatencyTime > 15000)
 		{
 			gdwPlayLatency = 0;
 		}
 		if ((m_pSndFile) && (m_pSndFile->IsPaused()) && (!m_pSndFile->m_nMixChannels))
 		{
 			//Log("%d (%d)\n", dwTime - gdwLastMixActiveTime, gdwLastMixActiveTime);
-			if (dwTime - gdwLastMixActiveTime > 5000)
+			if (curTime - gdwLastMixActiveTime > 5000)
 			{
 				//rewbs.instroVSTi: testing without shutting down audio device after 5s of idle time.
 				//PauseMod();
 			}
 		} else
 		{
-			gdwLastMixActiveTime = dwTime;
+			gdwLastMixActiveTime = curTime;
 		}
 	} else
 	{
@@ -2299,18 +2422,28 @@ void CMainFrame::OnTimer(UINT)
 		}
 	}
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
-	// Call plugins idle routine for open editor
-	CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-	if (pPluginManager)
-	{
-		////rewbs.vstCompliance: call @ 10Hz
-		DWORD curTime = timeGetTime();
-		if (curTime - m_dwLastPluginIdleCall > 100)
-		{
-			pPluginManager->OnIdle();
-			m_dwLastPluginIdleCall = curTime;
+
+	if (m_pAutoSaver && m_pAutoSaver->IsEnabled()) {
+		bool success = m_pAutoSaver->DoSave(curTime);
+		if (!success) {					//autosave failure; bring up options.
+			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_AUTOSAVE;
+			OnViewOptions();
 		}
 	}
+	
+	// Ensure the modified flag gets set in the WinMain thread, even if modification
+	// originated from Audio Thread (access to CWnd is not thread safe).
+	// Flaw: if 2 docs are modified in between Timer ticks (very rare), one mod will be lost.
+	/*CModDoc* pModDoc = GetActiveDoc();
+	if (pModDoc && pModDoc->m_bModifiedChanged) {
+		pModDoc->SetModifiedFlag(pModDoc->m_bDocModified);
+		pModDoc->m_bModifiedChanged=false;
+	}*/
+	if (m_pJustModifiedDoc) {
+		m_pJustModifiedDoc->SetModifiedFlag(true);
+		m_pJustModifiedDoc = NULL;
+	}
+
 }
 
 
@@ -2391,6 +2524,18 @@ void CMainFrame::OnUpdateInfo(CCmdUI *)
 //-------------------------------------
 {
 	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_INFO), m_szInfoText, TRUE);
+}
+
+
+void CMainFrame::OnUpdateCPU(CCmdUI *)
+//-------------------------------------
+{
+/*	CString s;
+	double totalCPUPercent = m_dTotalCPU*100;
+	UINT intPart = static_cast<int>(totalCPUPercent);
+	UINT decPart = static_cast<int>(totalCPUPercent-intPart)*100;
+	s.Format("%d.%d%%", intPart, decPart);
+	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_CPU), s, TRUE);*/
 }
 
 //rewbs.xinfo
@@ -2474,7 +2619,7 @@ void CMainFrame::OnOctaveChanged()
 //rewbs.reportBug
 void CMainFrame::OnReportBug()
 {
-	CTrackApp::OpenURL("http://www.modplug.com/forum/viewforum.php?f=22");
+	CTrackApp::OpenURL("http://www.lpchip.com/modplug/");
 	return;
 }
 //end rewbs.reportBug
@@ -2486,12 +2631,13 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 
 	switch(nID)
 	{
-	case ID_NETLINK_MODPLUG:	pszURL = "http://www.modplug.com"; break;
+//	case ID_NETLINK_MODPLUG:	pszURL = "http://www.modplug.com"; break;
 	case ID_NETLINK_UT:			pszURL = "http://www.united-trackers.org"; break;
 	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
-	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
-	case ID_NETLINK_FORUMS:		pszURL = "http://www.modplug.com/forums"; break;
-	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvr-vst.com"; break;
+//	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
+	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
+	case ID_NETLINK_FORUMS:		pszURL = "http://www.lpchip.com/modplug"; break;
+	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com"; break;
 	}
 	if (pszURL) return CTrackApp::OpenURL(pszURL);
 	return FALSE;
@@ -2553,6 +2699,9 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcHelp: 		CMDIFrameWnd::OnHelp(); break;
 		case kcViewAddPlugin: OnPluginSetup(); break;
 		case kcViewChannelManager: OnChannelManager(); break;
+		case kcNextDocument:	MDINext(); break;
+		case kcPrevDocument:	MDIPrev(); break;
+
 
 		//D'oh!! moddoc isn't a CWnd so we have to handle its messages and pass them on.
 
@@ -2566,6 +2715,8 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewSamples:
 		case kcViewInstruments:
 		case kcViewComments: 
+		case kcViewGraph: //rewbs.graph
+		case kcViewSongProperties:
 		case kcPlayPatternFromCursor:
 		case kcPlayPatternFromStart: 
 		case kcPlaySongFromCursor: 
@@ -2573,6 +2724,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcPlayPauseSong:
 		case kcStopSong:
 		case kcEstimateSongLength:
+		case kcApproxRealBPM:
 			{	CModDoc* pModDoc = GetActiveDoc();
 				if (pModDoc)
 					return GetActiveDoc()->OnCustomKeyMsg(wParam, lParam);
@@ -2622,32 +2774,36 @@ long CMainFrame::GetTotalSampleCount()
 
 double CMainFrame::GetApproxBPM()
 {
-	if (!GetModPlaying())
-		return 0;
-    
-	CSoundFile *pSndFile = GetModPlaying()->GetSoundFile();
+	CModDoc *pPlayingModDoc = GetModPlaying();
+	CSoundFile *pSndFile = NULL;
 
-	// Assumes Highlight1 rows per beat.
-	double ticksPerBeat = pSndFile->m_nMusicSpeed *m_nRowSpacing2;
-	double msPerBeat = (5000.0*pSndFile->m_nTempoFactor)/(pSndFile->m_nMusicTempo*256.0) * ticksPerBeat;
-	double bpm = 60000/msPerBeat;
-	return bpm;
+	pSndFile = GetActiveDoc()->GetSoundFile();
+	if (pSndFile) {
+		return pSndFile->GetCurrentBPM();
+	}
+	return 0;
 }
 
-BOOL CMainFrame::InitRenderer(CModDoc* modDoc)
+BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 {
-	modDoc->GetSoundFile()->SuspendPlugins();
-	modDoc->GetSoundFile()->ResumePlugins();
+	BEGIN_CRITICAL();
+	pSndFile->m_bIsRendering=true;
+	pSndFile->SuspendPlugins();
+	pSndFile->ResumePlugins();
+	END_CRITICAL();
 	m_dwStatus |= MODSTATUS_RENDERING;
-	m_pModPlaying = modDoc;
+	m_pModPlaying = GetActiveDoc();
 	return true;
 }
 
-BOOL CMainFrame::StopRenderer(CModDoc* modDoc)
+BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 {
 	m_dwStatus &= ~MODSTATUS_RENDERING;
 	m_pModPlaying = NULL;
-	modDoc->GetSoundFile()->SuspendPlugins();
+	BEGIN_CRITICAL();
+	pSndFile->SuspendPlugins();
+	pSndFile->m_bIsRendering=false;
+	END_CRITICAL();
 	return true;
 }
 //end rewbs.VSTTimeInfo
@@ -2673,4 +2829,48 @@ bool CMainFrame::UpdateEffectKeys(void)
 }
 //end rewbs.customKeys
 
+bool CMainFrame::UpdateHighlights()
+//---------------------------------
+{
+	if (!(CMainFrame::m_dwPatternSetup & PATTERN_HILITETIMESIGS))
+		return false;
 
+	CModDoc* pModDoc = GetActiveDoc();
+	if (pModDoc)
+	{
+		CSoundFile* pSndFile = pModDoc->GetSoundFile();
+		if (pSndFile)
+		{
+			if (CMainFrame::m_dwPatternSetup&PATTERN_HILITETIMESIGS) {
+				CMainFrame::m_nRowSpacing  = pSndFile->m_nRowsPerMeasure;
+				CMainFrame::m_nRowSpacing2 = pSndFile->m_nRowsPerBeat;
+			}
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+
+//rewbs.fix3116
+void CMainFrame::OnKillFocus(CWnd* pNewWnd)
+{
+	CMDIFrameWnd::OnKillFocus(pNewWnd);
+	
+	//rewbs: ensure modifiers are reset when we leave the window (e.g. alt-tab)
+	CMainFrame::GetMainFrame()->GetInputHandler()->SetModifierMask(0);
+	//end rewbs
+}
+//end rewbs.fix3116
+
+void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+    static bool firstShow = true;
+    if (bShow && !IsWindowVisible() && firstShow)  {
+        firstShow = false;
+		WINDOWPLACEMENT wpl;
+		GetPrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), theApp.GetConfigFileName());
+		SetWindowPlacement(&wpl);
+    }
+}

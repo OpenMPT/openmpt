@@ -4,6 +4,10 @@
 #include "VstPlug.h"
 #include "abstractvsteditor.h"
 
+enum {
+	PARAM_RESOLUTION=1000,
+};
+
 class CDefaultVstEditor :
 	public CAbstractVstEditor
 {
@@ -29,8 +33,8 @@ public:
 	afx_msg void OnLoadPreset();
 	afx_msg void OnSavePreset();
 	afx_msg void OnRandomizePreset();
-	afx_msg void OnParamValChangedText();
-	afx_msg void OnParamValChangedSlide();
+	afx_msg void OnParamTextboxChanged();
+	afx_msg void OnParamSliderChanged();
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 	
@@ -39,5 +43,5 @@ public:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 private:
 
-	void UpdateAll();
+	void UpdateParamDisplays();
 };

@@ -56,7 +56,7 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 //-----------------------------------------------------------------------
 {
 	float Fc;
-
+	ASSERT(nCutOff<128);
 	if (m_dwSongFlags & SONG_EXFILTERRANGE)
 		Fc = 110.0f * pow(2.0f, 0.25f + ((float)(nCutOff*(flt_modifier+256)))/(20.0f*512.0f));
 	else
@@ -73,12 +73,20 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modifier) const
 //----------------------------------------------------------------------------------------
 {
-	float fc = (float)CutOffToFrequency(pChn->nCutOff, flt_modifier);
 	float fs = (float)gdwMixingFreq;
-	float fg, fb0, fb1;
+	float fg, fb0, fb1, fc, dmpfac;
+	
+/*	if (pChn->pHeader) {
+		fc = (float)CutOffToFrequency(pChn->nCutOff, flt_modifier);
+		dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)pChn->nResonance) / 20.0f);
+	} else {*/
+		int cutoff = max( min((int)pChn->nCutOff+(int)pChn->nCutSwing,127), 0); // cap cutoff
+		fc = (float)CutOffToFrequency(cutoff, flt_modifier);
+		dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)((pChn->nResonance+pChn->nResSwing)&0x7F)) / 20.0f);
+//	}
 
 	fc *= (float)(2.0*3.14159265358/fs);
-	float dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)pChn->nResonance) / 20.0f);
+		
 	float d = (1.0f-2.0f*dmpfac)* fc;
 	if (d>2.0) d = 2.0;
 	d = (2.0f*dmpfac - d)/fc;

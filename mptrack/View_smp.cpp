@@ -4,13 +4,10 @@
 #include "childfrm.h"
 #include "moddoc.h"
 #include "globals.h"
-#include "view_smp.h"
 #include "ctrl_smp.h"
 #include "dlsbank.h"
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#include "ctrl_pat.h"
-// -! NEW_FEATURE#0015
+#include "channelManagerDlg.h"
+#include "view_smp.h"
 
 // Non-client toolbar
 #define SMP_LEFTBAR_CY			29
@@ -19,6 +16,7 @@
 #define SMP_LEFTBAR_CXBTN		24
 #define SMP_LEFTBAR_CYBTN		22
 
+#define MIN_ZOOM	0
 #define MAX_ZOOM	8
 
 const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] = 
@@ -380,8 +378,9 @@ void CViewSample::UpdateView(DWORD dwHintMask, CObject *)
 //-------------------------------------------------------
 {
 	// 05/01/05 : ericus replaced ">> 24" by ">> 20" : 4000 samples -> 12bits [see Moddoc.h]
+	//rewbs: replaced 0xff by 0x0fff for 4000 samples.
 	if ((dwHintMask & (HINT_MPTOPTIONS|HINT_MODTYPE))
-	 || ((dwHintMask & HINT_SAMPLEDATA) && ((m_nSample&0xff) == (dwHintMask >> 20))) )
+	 || ((dwHintMask & HINT_SAMPLEDATA) && ((m_nSample&0x0fff) == (dwHintMask >> 20))) )
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();
@@ -616,11 +615,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	} else
 	{
 		xmax = cx;
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//		posincr = _muldiv(len, 0x10000, cx);
-		posincr = (len / (xmax+1)) * 0x10000;
-// -! BEHAVIOUR_CHANGE#0006
+		posincr = _muldiv(len, 0x10000, cx);
 	}
 	::MoveToEx(hdc, 0, ymed, NULL);
 	posfrac = 0;
@@ -883,7 +878,7 @@ LRESULT CViewSample::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		BOOL bUpdate = FALSE;
 		for (UINT i=0; i<MAX_CHANNELS; i++)
 		{
-			DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[i] : 0;
+			DWORD newpos = /*(pSndFile->m_dwSongFlags & SONG_PAUSED) ?*/ pnotify->dwPos[i]/* : 0*/;
 			if (m_dwNotifyPos[i] != newpos)
 			{
 				bUpdate = TRUE;
@@ -896,7 +891,7 @@ LRESULT CViewSample::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 			DrawPositionMarks(hdc);
 			for (UINT j=0; j<MAX_CHANNELS; j++)
 			{
-				DWORD newpos = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? pnotify->dwPos[j] : 0;
+				DWORD newpos = /*(pSndFile->m_dwSongFlags & SONG_PAUSED) ?*/ pnotify->dwPos[j] /*: 0*/;
 				m_dwNotifyPos[j] = newpos;
 			}
 			DrawPositionMarks(hdc);
@@ -1297,31 +1292,24 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			{
 				CHAR s[256];
 				DWORD dwPos = ScreenToSample(pt.x);
-				if (dwPos <= pins->nLength)
-				{
-					if (dwPos+4 <= pins->nLoopEnd)
-					{
-						wsprintf(s, "Set Loop Start to:\t%d", dwPos);
-						::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOPSTART, s);
-					}
-					if (dwPos >= pins->nLoopStart+4)
-					{
-						wsprintf(s, "Set Loop End to:\t%d", dwPos);
-						::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOPEND, s);
-					}
-					if (pSndFile->m_nType == MOD_TYPE_IT)
-					{
+				if (dwPos <= pins->nLength) {
+					//Set loop points
+					wsprintf(s, "Set Loop Start to:\t%d", dwPos);
+					::AppendMenu(hMenu, MF_STRING|((dwPos+4<=pins->nLoopEnd)?0:MF_GRAYED), 
+								 ID_SAMPLE_SETLOOPSTART, s);
+					wsprintf(s, "Set Loop End to:\t%d", dwPos);
+					::AppendMenu(hMenu, MF_STRING|((dwPos>=pins->nLoopStart+4)?0:MF_GRAYED), 
+								 ID_SAMPLE_SETLOOPEND, s);
+						
+					if (pSndFile->m_nType == MOD_TYPE_IT) {
+						//Set sustain loop points
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
-						if (dwPos+4 <= pins->nSustainEnd)
-						{
-							wsprintf(s, "Set Sustain Start to:\t%d", dwPos);
-							::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINSTART, s);
-						}
-						if (dwPos >= pins->nSustainStart+4)
-						{
-							wsprintf(s, "Set Sustain End to:\t%d", dwPos);
-							::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINEND, s);
-						}
+						wsprintf(s, "Set Sustain Start to:\t%d", dwPos);
+						::AppendMenu(hMenu, MF_STRING|((dwPos+4<=pins->nSustainEnd)?0:MF_GRAYED), 
+	  								 ID_SAMPLE_SETSUSTAINSTART, s);
+						wsprintf(s, "Set Sustain End to:\t%d", dwPos);
+						::AppendMenu(hMenu, MF_STRING|((dwPos>=pins->nSustainStart+4)?0:MF_GRAYED), 
+								     ID_SAMPLE_SETSUSTAINEND, s);
 					}
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 					m_dwMenuParam = dwPos;
@@ -1877,42 +1865,7 @@ void CViewSample::OnSampleTrim()
 
 void CViewSample::OnChar(UINT nChar, UINT, UINT nFlags)
 //-----------------------------------------------------
-{/*
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (pMainFrm) && (!(nFlags & 0x4000)))
-	{
-		UINT note = pMainFrm->GetNoteFromKey(nChar, nFlags);
-
-		if (note >= 0xFE)
-		{
-			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE);
-		} else
-		if (note)
-		{
-			CHAR s[64];
-			if (m_dwStatus & SMPSTATUS_KEYDOWN)
-				pModDoc->NoteOff(note, TRUE);
-			else
-				pModDoc->NoteOff(0, TRUE);
-			DWORD loopstart = m_dwBeginSel, loopend = m_dwEndSel;
-			if (loopend - loopstart < (UINT)(4 << m_nZoom)) loopend = loopstart = 0;
-			pModDoc->PlayNote(note, 0, m_nSample, TRUE, -1, loopstart, loopend);
-			m_dwStatus |= SMPSTATUS_KEYDOWN;
-			s[0] = 0;
-			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
-			pMainFrm->SetInfoText(s);
-		} else
-		if (nChar == '-')
-		{
-			OnZoomDown();
-		} else
-		if (nChar == '+')
-		{
-			OnZoomUp();
-		}
-	}
-	*/
+{
 }
 
 void CViewSample::PlayNote(UINT note)
@@ -1935,7 +1888,7 @@ void CViewSample::PlayNote(UINT note)
 				pModDoc->NoteOff(0, TRUE);
 			DWORD loopstart = m_dwBeginSel, loopend = m_dwEndSel;
 			if (loopend - loopstart < (UINT)(4 << m_nZoom)) loopend = loopstart = 0;
-			pModDoc->PlayNote(note, 0, m_nSample, TRUE, -1, loopstart, loopend);
+			pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend);
 			m_dwStatus |= SMPSTATUS_KEYDOWN;
 			s[0] = 0;
 			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
@@ -2227,15 +2180,15 @@ void CViewSample::OnSetSustainEnd()
 void CViewSample::OnZoomUp()
 //--------------------------
 {
-	if (m_nZoom > 1) SendCtrlMessage(CTRLMSG_SMP_SETZOOM, m_nZoom - 1);
+	if (m_nZoom >= MIN_ZOOM)
+		SendCtrlMessage(CTRLMSG_SMP_SETZOOM, (m_nZoom>MIN_ZOOM) ? m_nZoom-1 : MAX_ZOOM);
 }
 
 
 void CViewSample::OnZoomDown()
 //----------------------------
 {
-	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, (m_nZoom < MAX_ZOOM) ? m_nZoom+1 : 0);
-
+	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, (m_nZoom<MAX_ZOOM) ? m_nZoom+1 : MIN_ZOOM);
 }
 
 
@@ -2263,7 +2216,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 			if (CMainFrame::m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) vol *= 2;
 			if (vol < 1) vol = 1;
 			if (vol > 256) vol = 256;
-			pModDoc->PlayNote(note, 0, m_nSample, TRUE, vol);
+			pModDoc->PlayNote(note, 0, m_nSample, FALSE, vol);
 		}
 	}
 	return 0;
@@ -2343,4 +2296,6 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		m_dwStatus &= ~SMPSTATUS_KEYDOWN;
 		return wParam;
 	}
+
+	return NULL;
 }

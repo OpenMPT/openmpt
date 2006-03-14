@@ -39,6 +39,7 @@
 #define IDR_TOOLBARS                    202
 #define ID_PATTERN_CHANNELMANAGER       202
 #define IDR_ENVELOPES                   203
+#define ID_INDICATOR_CPU                203
 #define IDB_MAINBAR                     300
 #define IDB_IMAGELIST                   301
 #define IDB_PATTERNS                    302
@@ -54,7 +55,6 @@
 #define IDC_NODRAG                      352
 #define ID_ENVELOPE_VIEWGRID            353
 #define ID_REPORT_BUG                   354
-#define IDB_SPLASHSCREENOLD             355
 #define IDD_SOUNDBANK_INFO              401
 #define IDD_OPTIONS_GENERAL             402
 #define IDD_OPTIONS_SOUNDCARD           403
@@ -73,7 +73,6 @@
 #define IDD_EFFECTVISUALIZER            426
 #define IDB_VISNODE                     427
 #define IDB_SPLASHTEST                  432
-#define IDB_SPLASHNOFOLD                434
 #define IDB_SPLASHNOFOLDFIN             435
 #define IDR_VSTMENU                     436
 #define IDD_DEFAULTPLUGINEDITOR         438
@@ -81,6 +80,16 @@
 #define IDD_SOUNDBANK_INFO1             441
 #define IDR_PLUGINMENU                  442
 #define IDD_PITCHSHIFT                  442
+#define IDD_OPTIONS_AUTOSAVE            443
+#define IDD_EDIT_GOTO                   444
+#define IDD_DIALOG1                     501
+#define IDD_MOVEFXSLOT                  501
+#define IDD_PATTERNRANDOMIZER           502
+#define IDD_PATTERNRANDOMIZER_NOTE      503
+#define IDD_PATTERNRANDOMIZER_INSTRUMENT 504
+#define IDD_PATTERNRANDOMIZER_VOLCMD    505
+#define IDD_PATTERNRANDOMIZER_EFFECT    506
+#define IDD_CONTROL_GRAPH               507
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -505,8 +514,10 @@
 #define IDC_SPIN_SPEED                  1897
 #define IDC_SPIN_GLOBALVOL              1898
 #define IDC_SPIN_RESTARTPOS             1899
+#define IDC_SPIN_SAMPLEPA               1900
 #define IDC_PROGRESS1                   1901
 #define IDC_PROGRESS2                   1902
+#define IDC_SPIN_VSTIVOL                1921
 #define IDC_TABCTRL1                    1951
 #define IDC_SCROLLBAR1                  1998
 #define IDC_QUESTION1                   1999
@@ -521,6 +532,7 @@
 #define IDC_EDIT_RESTARTPOS             2010
 #define IDC_SLIDER_SONGPREAMP           2011
 #define IDC_BUTTON_MODTYPE              2012
+#define IDC_EDIT_SAMPLEPA               2013
 #define IDC_EDIT_MODTYPE                2014
 #define IDC_EDIT_CURRENTTEMPO           2015
 #define IDC_EDIT_CURRENTSPEED           2016
@@ -534,7 +546,7 @@
 #define IDC_PATTERN_PLAYFROMSTART       2026
 #define IDC_PATTERN_STOP                2027
 #define IDC_PATTERN_RECORD              2028
-#define IDC_PATTERN_FOLLOWSONG          2029
+#define IDC_PATTERN_FOLLOWSONG          3029
 #define IDC_PATTERN_NEW                 2030
 #define IDC_PATTERN_OCTAVELINK          2031
 #define IDC_SPIN_SPACING                2032
@@ -574,9 +586,13 @@
 #define IDC_EDIT_BASEOCTAVE             2070
 #define IDC_SPIN_BASEOCTAVE             2071
 #define IDC_LIST1                       2072
+#define IDC_LIST3                       2073
 #define IDC_TOOLBAR1                    2074
+#define IDC_LIST4                       2074
 #define IDC_TOOLBAR2                    2075
+#define IDC_LIST5                       2075
 #define IDC_TOOLBAR_DETAILS             2076
+#define IDC_LIST6                       2076
 #define IDC_KEYBOARD1                   2078
 #define IDC_SPLASH                      2079
 #define IDC_HOTKEY1                     2080
@@ -626,6 +642,7 @@
 #define IDC_KEYMAPFILE                  2106
 #define IDC_CHECK149                    2107
 #define IDC_BROWSEKEYCONF               2107
+#define IDC_CLEARLOG                    2107
 #define IDC_CHECK150                    2108
 #define IDC_NOTESREPEAT                 2108
 #define IDC_REMCHANSLIST                2108
@@ -683,7 +700,44 @@
 #define IDC_CREDITS                     2218
 #define IDC_MS_LENGTH_ORIGINAL2         2219
 #define IDC_RICHEDIT21                  2219
+#define IDC_AUTOSAVE_PATH               2220
+#define IDC_AUTOSAVE_BROWSE             2221
+#define IDC_AUTOSAVE_INTERVAL           2222
+#define IDC_AUTOSAVE_ENABLE             2223
+#define IDC_AUTOSAVE_HISTORY            2224
+#define IDC_AUTOSAVE_USEORIGDIR         2225
+#define IDC_PRIMARYHILITE               2226
+#define IDC_SECONDARYHILITE             2227
+#define IDC_GIVEPLUGSIDLETIME           2228
+#define IDC_ROWSPERBEAT                 2229
+#define IDC_ROWSPERMEASURE              2230
+#define IDC_GOTO_ROW                    2231
+#define IDC_GOTO_CHAN                   2232
+#define IDC_GOTO_PAT                    2233
+#define IDC_GOTO_ORD                    2234
+#define IDC_MOVEFXSLOT                  2235
+#define IDC_CLONEPLUG                   2236
+#define IDC_INSERTFXSLOT                2237
+#define IDC_FILTERMODE                  2238
+#define IDC_RANDOMIZE_NOTE_ENABLE       2240
+#define IDC_LIST2                       2241
+#define IDC_APPLY                       2243
+#define IDC_RANDOM_PLACEHOLDER          2244
+#define IDC_AUTOSAVE_USECUSTOMDIR       2245
+#define IDC_BUTTON_MODTYPE2             2246
+#define IDC_BUTTON_PLAYERPROPS          2247
+#define IDC_SLIDER_SONGPREAMP3          2248
+#define IDC_SLIDER_GLOBALVOL            2249
+#define IDC_EDIT_VSTIVOL                2250
+#define IDC_SLIDER_VSTIVOL              2251
+#define IDC_MACROCC                     2252
+#define IDC_GENMACROLABEL               2253
+#define IDC_RENDERZONE                  2254
+#define IDC_PATTERN_LOOP                2255
 #define IDC_TEXT_BPM                    2300
+#define IDC_TEXT_RPB                    2301
+#define IDC_SPIN_RPB                    2302
+#define IDC_EDIT_RPB                    2303
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -816,7 +870,8 @@
 #define ID_PATTERN_VISUALIZE_EFFECT     32900
 #define ID_ACCELERATOR32900             32900
 #define ID_PATTERN_PLAYNOLOOP           32901
-#define ID_Menu                         32911
+#define ID_PATTERN_OPEN_RANDOMIZER      32905
+#define ID_PATTERN_INTERPOLATE_NOTE     32906
 #define ID_PRESET_LOAD                  32915
 #define ID_PRESET_SAVE                  32916
 #define ID_PRESET_RANDOM                32917
@@ -840,6 +895,30 @@
 #define ID_PLUGSELECT                   35000
 #define ID_VSTMACRO_INFO                36002
 #define ID_VSTINPUT_INFO                36003
+#define ID_PLAYER_APPROXI               36004
+#define ID_Menu36005                    36005
+#define ID_APPROX_BPM                   36007
+#define ID_FACTORY_MENU                 36008
+#define ID_PLUG_BYPASS                  36009
+#define ID_FACTORY_PRESETS              36010
+#define ID_INFO_INPUTS                  36011
+#define ID_INFO_OUTPUTS                 36012
+#define ID_INFO_MACROS                  36013
+#define ID_INFO36014                    36014
+#define ID_INFO_INPUTS36015             36015
+#define ID_INFO_OUPUTS                  36016
+#define ID_INFO_MACROS36017             36017
+#define ID_EDIT_GOTO                    36018
+#define ID_VIEW_GRAPH                   36019
+#define ID_PATTERN_TRANSITIONMUTE       36020
+#define ID_SELECTINST                   36100
+#define ID_NETLINK_MPTFR                37001
+#define ID_PLUG_RECORDAUTOMATION        37003
+#define ID_LEARN_MACRO_FROM_PLUGGUI     37004
+#define ID_CHANGE_INSTRUMENT            37020
+#define ID_CLEAR_SELECTION              38000
+#define ID_PLUG_PASSKEYS                38001
+#define ID_VIEW_SONGPROPERTIES          38002
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define IDS_ERR_FILEOPEN                55001
@@ -856,15 +935,19 @@
 #define ID_INDICATOR_INFO               59145
 #define IDS_STRING59146                 59146
 #define ID_INDICATOR_XINFO              59147
+#define ID_PATTERN_ADDCHANNEL_FRONT     59148
+#define ID_PATTERN_ADDCHANNEL_AFTER     59149
+#define ID_PATTERN_REMOVECHANNEL        59150
+#define ID_PATTERN_REMOVECHANNELDIALOG  59151
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        500
-#define _APS_NEXT_COMMAND_VALUE         36004
-#define _APS_NEXT_CONTROL_VALUE         2220
+#define _APS_NEXT_RESOURCE_VALUE        510
+#define _APS_NEXT_COMMAND_VALUE         59200
+#define _APS_NEXT_CONTROL_VALUE         2255
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

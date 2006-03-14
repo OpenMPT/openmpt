@@ -223,8 +223,8 @@ VOID CModToMidi::FillProgramBox(BOOL bPerc)
 		for (UINT i=0; i<61; i++)
 		{
 			UINT note = i+24;
-			wsprintf(s, "%s%d: %s", szNoteNames[note%12], note/12, szMidiPercussionNames[i]);
-			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), note+1);
+			wsprintf(s, "%d (%s%d): %s", note, szNoteNames[note%12], note/12, szMidiPercussionNames[i]);
+			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), note/*+1*/); //+1 removed by rewbs because MIDI drums appear to be offset by 1
 		}
 	} else
 	{
@@ -260,7 +260,8 @@ VOID CModToMidi::UpdateDialog()
 		UINT nMidiProgram = m_InstrMap[m_nCurrInstr].nProgram;
 		if (m_bPerc)
 		{
-			nMidiProgram -= 25;
+			//nMidiProgram -= 25;
+			nMidiProgram -= 24;	//rewbs: tentative fix to MIDI drums being offset by 1.
 			if (nMidiProgram > 60) nMidiProgram = 24;
 		} else
 		{

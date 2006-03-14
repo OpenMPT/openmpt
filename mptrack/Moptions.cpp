@@ -118,8 +118,8 @@ static MPTCOLORDEF gColorDefs[] =
 BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_WM_DRAWITEM()
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnColorSelChanged)
-	ON_EN_CHANGE(IDC_EDIT1,			OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT2,			OnSettingsChanged)
+	ON_EN_CHANGE(IDC_PRIMARYHILITE,OnSettingsChanged)
+	ON_EN_CHANGE(IDC_SECONDARYHILITE,	OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,			OnSelectColor1)
 	ON_COMMAND(IDC_BUTTON2,			OnSelectColor2)
 	ON_COMMAND(IDC_BUTTON3,			OnSelectColor3)
@@ -131,6 +131,7 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_CHECK2,			OnPreviewChanged)
 	ON_COMMAND(IDC_CHECK3,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,			OnPreviewChanged)
+	ON_COMMAND(IDC_CHECK5,			OnHiliteTimeSigsChanged)
 END_MESSAGE_MAP()
 
 
@@ -167,30 +168,48 @@ BOOL COptionsColors::OnInitDialog()
 	if (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
 	if (CMainFrame::m_dwPatternSetup & PATTERN_SMALLFONT) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 	if (CMainFrame::m_dwPatternSetup & PATTERN_2NDHIGHLIGHT) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
-	SetDlgItemInt(IDC_EDIT1, CMainFrame::m_nRowSpacing);
-	SetDlgItemInt(IDC_EDIT2, CMainFrame::m_nRowSpacing2);
+	SetDlgItemInt(IDC_PRIMARYHILITE, CMainFrame::m_nRowSpacing);
+	SetDlgItemInt(IDC_SECONDARYHILITE, CMainFrame::m_nRowSpacing2);
+	
+	if (CMainFrame::m_dwPatternSetup & PATTERN_HILITETIMESIGS) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
+	GetDlgItem(IDC_PRIMARYHILITE)->EnableWindow(!IsDlgButtonChecked(IDC_CHECK5));
+	GetDlgItem(IDC_SECONDARYHILITE)->EnableWindow(!IsDlgButtonChecked(IDC_CHECK5));
+
+
 	OnColorSelChanged();
 	return TRUE;
 }
 
 
+BOOL COptionsColors::OnKillActive() 
+//---------------------------------
+{
+	int temp_nRowSpacing = GetDlgItemInt(IDC_PRIMARYHILITE);
+	int temp_nRowSpacing2 = GetDlgItemInt(IDC_SECONDARYHILITE);
+
+	if ((temp_nRowSpacing2 >= temp_nRowSpacing))
+	{
+		::AfxMessageBox("Error: Primary highlight must be greater than secondary highlight.", MB_OK|MB_ICONEXCLAMATION);
+		::SetFocus(::GetDlgItem(m_hWnd, IDC_PRIMARYHILITE));
+		return 0;
+	}
+
+	return CPropertyPage::OnKillActive();
+}
+
 void COptionsColors::OnOK()
 //-------------------------
 {
-	CMainFrame::m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT|PATTERN_SMALLFONT);
+	CMainFrame::m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT|PATTERN_SMALLFONT|PATTERN_HILITETIMESIGS);
 	if (IsDlgButtonChecked(IDC_CHECK1)) CMainFrame::m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
 	if (IsDlgButtonChecked(IDC_CHECK2)) CMainFrame::m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
 	if (IsDlgButtonChecked(IDC_CHECK3)) CMainFrame::m_dwPatternSetup |= PATTERN_SMALLFONT;
 	if (IsDlgButtonChecked(IDC_CHECK4)) CMainFrame::m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
-	CMainFrame::m_nRowSpacing = GetDlgItemInt(IDC_EDIT1);
-	CMainFrame::m_nRowSpacing2 = GetDlgItemInt(IDC_EDIT2);
-	if ((CMainFrame::m_nRowSpacing2 > CMainFrame::m_nRowSpacing)
-	 && (CMainFrame::m_nRowSpacing) && (CMainFrame::m_nRowSpacing2))
-	{
-		UINT tmp = CMainFrame::m_nRowSpacing;
-		CMainFrame::m_nRowSpacing = CMainFrame::m_nRowSpacing2;
-		CMainFrame::m_nRowSpacing2 = tmp;
-	}
+	if (IsDlgButtonChecked(IDC_CHECK5)) CMainFrame::m_dwPatternSetup |= PATTERN_HILITETIMESIGS;
+
+	CMainFrame::m_nRowSpacing = GetDlgItemInt(IDC_PRIMARYHILITE);
+	CMainFrame::m_nRowSpacing2 = GetDlgItemInt(IDC_SECONDARYHILITE);
+
 	memcpy(CMainFrame::rgbCustomColors, CustomColors, sizeof(CMainFrame::rgbCustomColors));
 	CMainFrame::UpdateColors();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -383,6 +402,24 @@ void COptionsColors::OnColorSelChanged()
 	}
 }
 
+void COptionsColors::OnSettingsChanged()
+//--------------------------------------
+{
+	SetModified(TRUE); 
+}
+
+void COptionsColors::OnHiliteTimeSigsChanged()
+//--------------------------------------
+{
+	bool enabling = !IsDlgButtonChecked(IDC_CHECK5);
+	if (enabling) {
+		SetDlgItemInt(IDC_PRIMARYHILITE, CMainFrame::m_nRowSpacing);
+		SetDlgItemInt(IDC_SECONDARYHILITE, CMainFrame::m_nRowSpacing2);
+	}
+	GetDlgItem(IDC_PRIMARYHILITE)->EnableWindow(enabling);
+	GetDlgItem(IDC_SECONDARYHILITE)->EnableWindow(enabling);
+	OnSettingsChanged();
+}
 
 void COptionsColors::OnUpdateDialog()
 //-----------------------------------
@@ -425,7 +462,6 @@ void COptionsColors::OnPreviewChanged()
 	m_BtnColor2.InvalidateRect(NULL, FALSE);
 	m_BtnColor3.InvalidateRect(NULL, FALSE);
 }
-
 
 void COptionsColors::OnPresetMPT()
 //--------------------------------
@@ -559,16 +595,19 @@ enum {
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-	OPTGEN_ALTERNTIVEBPMSPEED,
+//	OPTGEN_ALTERNTIVEBPMSPEED,
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
-
+	OPTGEN_PATTERNCTXMENUSTYLE,
+	OPTGEN_SYNCMUTE,
+	OPTGEN_AUTODELAY, //Relabsoluness
 	OPTGEN_MAXOPTIONS
 };
 
 static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 {
 	{"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
-	{"Always center active row",		"Turn on this option to have the active row always centered in the pattern editor."},
+	{"Always center active row",		"Turn on this option to have the active row always centered in the pattern editor (requires \"Always center active row\")."},
 	{"Use large font for comments",		"With this option enabled, the song message editor will use a larger font."},
 	{"Display rows in hex",				"With this option enabled, row numbers and sequence numbers will be displayed in hexadecimal."},
 	{"Cursor wrap in pattern editor",	"When this option is active, going past the end of a pattern will move the cursor to the beginning."},
@@ -590,8 +629,13 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-	{"Alternative BPM/Speed",			"Alternative BPM/Speed interpretation where speed represents the number of tempo ticks per pattern row."},
+//	{"Alternative BPM/Speed",			"Alternative BPM/Speed interpretation where speed represents the number of tempo ticks per pattern row."}, 
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
+
+	{"Old style pattern context menu",	"Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
+	{"Maintain sample sync on mute",	"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
+	{"Automatic delay commands",	    "Automatically insert appropriate note-delay commands when recording notes during live playback."}, //Relabsoluness
 };
 
 
@@ -646,8 +690,13 @@ BOOL COptionsGeneral::OnInitDialog()
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-		case OPTGEN_ALTERNTIVEBPMSPEED:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED); break;
+//		case OPTGEN_ALTERNTIVEBPMSPEED:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED); break;
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022
+		case OPTGEN_PATTERNCTXMENUSTYLE: bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE); break;
+		case OPTGEN_SYNCMUTE:			 bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SYNCMUTE); break;
+
+		case OPTGEN_AUTODELAY:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY); break; //Relabsoluness
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
@@ -676,7 +725,7 @@ void COptionsGeneral::OnOK()
 		{
 		case OPTGEN_PLAYNEWNOTES:		mask = PATTERN_PLAYNEWNOTE; break;
 		case OPTGEN_CENTERROW:			mask = PATTERN_CENTERROW; break;
-		case OPTGEN_LARGECOMMENTSFONT:	mask = PATTERN_LARGECOMMENTS; break;
+		case OPTGEN_LARGECOMMENTSFONT:	mask = PATTERN_LARGECOMMENTS; break;		
 		case OPTGEN_HEXROWDISP:			mask = PATTERN_HEXDISPLAY; break;
 		case OPTGEN_CURSORWRAP:			mask = PATTERN_WRAP; break;
 		case OPTGEN_CREATEBACKUP:		mask = PATTERN_CREATEBACKUP; break;
@@ -690,6 +739,7 @@ void COptionsGeneral::OnOK()
 		case OPTGEN_CONTSCROLL:			mask = PATTERN_CONTSCROLL; break;
 		case OPTGEN_KBDNOTEOFF:			mask = PATTERN_KBDNOTEOFF; break;
 		case OPTGEN_FOLLOWSONGOFF:		mask = PATTERN_FOLLOWSONGOFF; break;	//rewbs.noFollow
+		
 
 // -> CODE#0017
 // -> DESC="midi in record mode setup option"
@@ -698,9 +748,14 @@ void COptionsGeneral::OnOK()
 
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
-// -! NEW_FEATURE#0022
-		}
+//		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
+// rewbs: this options is now available under song settings. It is therefore saved with the song.
+// -! NEW_FEATURE#0022		
+		case OPTGEN_PATTERNCTXMENUSTYLE: mask = PATTERN_OLDCTXMENUSTYLE; break;
+		case OPTGEN_SYNCMUTE:			 mask = PATTERN_SYNCMUTE; break;
+		case OPTGEN_AUTODELAY:			 mask = PATTERN_AUTODELAY; break; //Relabsoluness
+			
+		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}

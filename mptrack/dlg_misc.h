@@ -10,7 +10,7 @@ class CModTypeDlg: public CDialog
 //===============================
 {
 public:
-	CComboBox m_TypeBox, m_ChannelsBox;
+	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5;
 	CSoundFile *m_pSndFile;
 	UINT m_nChannels, m_nType;
@@ -22,6 +22,7 @@ public:
 
 public:
 	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = m_nChannels = 0; }
+	BOOL VerifyData();
 	void UpdateDialog();
 
 protected:
@@ -29,6 +30,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+	
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CModTypeDlg)
 	afx_msg void OnCheck1();
@@ -287,6 +289,8 @@ protected:
 	afx_msg void OnClose()	{ ShowWindow(SW_HIDE); }
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnDestroy();
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -328,6 +332,10 @@ public:
 
 #define NMACROS 16
 
+//class CColourEdit;
+#include "ColourEdit.h"
+
+
 //===================================
 class CMidiMacroSetup: public CDialog
 //===================================
@@ -339,14 +347,15 @@ public:
 
 
 protected:
-	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam;
+	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam, m_CbnMacroCC;
 	CEdit m_EditSFx, m_EditZxx;
-	CEdit m_EditMacro[NMACROS], m_EditMacroValue[NMACROS], m_EditMacroType[NMACROS]; //rewbs.macroGUI
-	CButton m_BtnMacro[NMACROS];
+	CColourEdit m_EditMacroValue[NMACROS], m_EditMacroType[NMACROS]; //rewbs.macroGUI
+	CButton m_EditMacro[NMACROS], m_BtnMacroShowAll[NMACROS];
 	CSoundFile *m_pSndFile;
 	CModDoc *m_pModDoc;
 
 	void UpdateMacroList(int macro=-1);
+	void ToggleBoxes(UINT preset, UINT sfx);
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	afx_msg void UpdateDialog();
@@ -360,7 +369,10 @@ protected:
 	afx_msg void OnZxxEditChanged();
 	afx_msg void OnPlugChanged();
 	afx_msg void OnPlugParamChanged();
+	afx_msg void OnCCChanged();
+	
 	afx_msg void OnViewAllParams(UINT id);
+	afx_msg void OnSetSFx(UINT id);
 	DECLARE_MESSAGE_MAP()
 };
 

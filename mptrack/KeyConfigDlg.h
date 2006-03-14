@@ -46,7 +46,6 @@ public:
 		{
 			if (separators[p]==c)
                 return true;
-			Log("%d\n", separators[p]);
 		}
 		return false;
 	}
@@ -98,8 +97,6 @@ protected:
 	CButton m_bnReset;
 	CCustEdit m_eCustHotKey;
 	CEdit m_eReport, m_eKeyFile, m_eChordWaitTime;
-	DWORD KeyboardMap[KEYBOARDMAP_LENGTH];
-	DWORD CustomKeys[MAX_MPTHOTKEYS];
 	UINT m_nKeyboardCfg;
 	int m_nCurHotKey, m_nCurCategory, m_nCurKeyChoice;
 	CString m_sFullPathName;
@@ -146,6 +143,7 @@ protected:
 	afx_msg void OnRestoreKeyChoice();
 	afx_msg void OnLoad();
 	afx_msg void OnSave();
+	afx_msg void OnClearLog();
     DECLARE_MESSAGE_MAP();
 public:
 	afx_msg void OnDestroy();

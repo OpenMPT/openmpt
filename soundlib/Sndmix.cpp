@@ -302,11 +302,11 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 				}
 #endif // MODPLUG_TRACKER
 #ifndef FASTSOUNDLIB
-				if (!FadeSong(FADESONGDELAY))
+				if (!FadeSong(FADESONGDELAY) || m_bIsRendering)	//rewbs: disable song fade when rendering.
 #endif
 				{
 					m_dwSongFlags |= SONG_ENDREACHED;
-					if (lRead == lMax) 
+					if (lRead == lMax || m_bIsRendering)		//rewbs: don't complete buffer when rendering
 						goto MixDone;
 					m_nBufferCount = lRead;
 				}
@@ -374,14 +374,21 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 			 && ((gnCPUUsage < 25) || (gdwSoundSetup & SNDMIX_DIRECTTODISK)))
 				X86_Dither(MixSoundBuffer, lTotalSampleCount, gnBitsPerSample);
 		}
+
+		//Apply global volume
+		if (m_pConfig->getGlobalVolumeAppliesToMaster()) {
+			ApplyGlobalVolume(MixSoundBuffer, lTotalSampleCount);
+		}
+
 		// Hook Function
-		if (gpSndMixHook)
-		{
+		if (gpSndMixHook) {	//Currently only used for VU Meter, so it's OK to do it after global Vol.
 			gpSndMixHook(MixSoundBuffer, lTotalSampleCount, gnChannels);
 		}
 #endif
-		// Perform clipping + VU-Meter
+
+		// Perform clipping
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
+
 		// Buffer ready
 		lRead -= lCount;
 		m_nBufferCount -= lCount;
@@ -574,6 +581,7 @@ UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFil
 			 && ((gnCPUUsage < 25) || (gdwSoundSetup & SNDMIX_DIRECTTODISK)))
 				X86_Dither(MixSoundBuffer, lTotalSampleCount, gnBitsPerSample);
 		}
+
 		// Perform clipping + VU-Meter
 		lpBuffer += pCvt(lpBuffer, MixSoundBuffer, lTotalSampleCount);
 		// Buffer ready
@@ -597,6 +605,7 @@ BOOL CSoundFile::ProcessRow()
 {
 	if (++m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay+1) + m_nFrameDelay)
 	{
+		HandlePatternTransitionEvents();
 		m_nPatternDelay = 0;
 		m_nFrameDelay = 0;
 		m_nTickCount = 0;
@@ -634,6 +643,7 @@ BOOL CSoundFile::ProcessRow()
 								Chn[i].nVolume = ChnSettings[i].nVolume;
 								Chn[i].nPan = ChnSettings[i].nPan;
 								Chn[i].nPanSwing = Chn[i].nVolSwing = 0;
+								Chn[i].nCutSwing = Chn[i].nResSwing = 0;
 								Chn[i].nOldVolParam = 0;
 								Chn[i].nOldOffset = 0;
 								Chn[i].nOldHiOffset = 0;
@@ -670,13 +680,13 @@ BOOL CSoundFile::ProcessRow()
 		if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition)) return FALSE;
 	#endif // MODPLUG_TRACKER
 		}
-#ifdef MODPLUG_TRACKER
-		if (m_dwSongFlags & SONG_STEP)
-		{
-			m_dwSongFlags &= ~SONG_STEP;
-			m_dwSongFlags |= SONG_PAUSED;
-		}
-#endif // MODPLUG_TRACKER
+//#ifdef MODPLUG_TRACKER
+//		if (m_dwSongFlags & SONG_STEP)
+//		{
+//			m_dwSongFlags &= ~SONG_STEP;
+//			m_dwSongFlags |= SONG_PAUSED;
+//		}
+//#endif // MODPLUG_TRACKER
 		// Weird stuff?
 		if ((m_nPattern >= MAX_PATTERNS) || (!Patterns[m_nPattern])) return FALSE;
 		// Should never happen
@@ -686,12 +696,7 @@ BOOL CSoundFile::ProcessRow()
 		{
 			if (!(m_dwSongFlags & SONG_PATTERNLOOP)) m_nNextPattern = m_nCurrentPattern + 1;
 			m_nNextRow = 0;
-			// MPT sequence override
-			if ((m_nSeqOverride > 0) && (m_nSeqOverride <= MAX_ORDERS))
-			{
-				m_nNextPattern = m_nSeqOverride - 1;
-				m_nSeqOverride = 0;
-			}
+			m_bPatternTransitionOccurred=true;
 		}
 		// Reset channel values
 		MODCHANNEL *pChn = Chn;
@@ -717,6 +722,17 @@ BOOL CSoundFile::ProcessRow()
 	m_dwSongFlags |= SONG_FIRSTTICK;
 	if (m_nTickCount)
 	{
+		//End of row? stop pattern step (aka "play row").
+		if (m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay+1) + m_nFrameDelay - 1) {
+			#ifdef MODPLUG_TRACKER
+			if (m_dwSongFlags & SONG_STEP) {
+				m_dwSongFlags &= ~SONG_STEP;
+				m_dwSongFlags |= SONG_PAUSED;
+			}
+			#endif // MODPLUG_TRACKER
+		}
+
+
 		m_dwSongFlags &= ~SONG_FIRSTTICK;
 		if ((!(m_nType & MOD_TYPE_XM)) && (m_nTickCount < m_nMusicSpeed * (1 + m_nPatternDelay)))
 		{
@@ -752,9 +768,46 @@ BOOL CSoundFile::ReadNote()
 	if (!m_nMusicTempo) return FALSE;
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
-	if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
-	else m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+
+
+	switch(m_nTempoMode) {
+
+		case tempo_mode_alternative: 
+			m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
+			break;
+
+		case tempo_mode_modern: {
+			double accurateBufferCount = (double)gdwMixingFreq * (60.0/(double)m_nMusicTempo / ((double)m_nMusicSpeed * (double)m_nRowsPerBeat));
+			m_nBufferCount = static_cast<int>(accurateBufferCount);
+			m_dBufferDiff += accurateBufferCount-m_nBufferCount;
+			//tick-to-tick tempo correction:
+			if (m_dBufferDiff>=1) { 
+				m_nBufferCount++;
+				m_dBufferDiff--;
+			} else if (m_dBufferDiff<=-1) { 
+				m_nBufferCount--;
+				m_dBufferDiff++;
+			}
+			ASSERT(abs(m_dBufferDiff)<1);
+			break;
+		}
+
+		case tempo_mode_classic:
+		default:
+			m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+	}
+	/*
+	if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
+		m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
+	}
+	else {
+		m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
+	}
+	*/
 // -! NEW_FEATURE#0022
+	
+	m_nSamplesPerTick = m_nBufferCount; //rewbs.flu
+
 #ifdef MODPLUG_TRACKER
 	if (m_dwSongFlags & SONG_PAUSED)
 	{
@@ -764,7 +817,10 @@ BOOL CSoundFile::ReadNote()
 	// Master Volume + Pre-Amplification / Attenuation setup
 	DWORD nMasterVol;
 	{
-		int nchn32 = (m_nChannels < 32) ? m_nChannels : 31;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ericus 10/02/2005
+/*
+ 		int nchn32 = (m_nChannels < 32) ? m_nChannels : 31;
 		if ((m_nType & MOD_TYPE_IT) && (m_nInstruments) && (nchn32 < 6)) nchn32 = 6;
 		int realmastervol = m_nMasterVolume;
 		if (realmastervol > 0x80)
@@ -780,6 +836,34 @@ BOOL CSoundFile::ReadNote()
 		}
 		nMasterVol = (mastervol << 7) / attenuation;
 		if (nMasterVol > 0x180) nMasterVol = 0x180;
+*/
+		int nchn32 = 0;
+		MODCHANNEL *pChn = Chn;
+		for (UINT nChn=0; nChn<m_nChannels; nChn++,pChn++) {
+			//if(!(pChn->dwFlags & CHN_MUTE))	//removed by rewbs: fix http://www.modplug.com/forum/viewtopic.php?t=3358
+				nchn32++;
+		}
+		if(nchn32 < 1) nchn32 = 1;
+		if(nchn32 > 31) nchn32 = 31;
+
+		int realmastervol = m_nMasterVolume;
+		if (realmastervol > 0x80)
+		{
+			realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32+4)) / 16;
+		}
+		DWORD mastervol = (realmastervol * (m_nSongPreAmp)) >> 6;
+
+		if ((m_dwSongFlags & SONG_GLOBALFADE) && (m_nGlobalFadeMaxSamples))
+		{
+			mastervol = _muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
+		}
+
+		UINT attenuation = (gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32>>1] : PreAmpTable[nchn32>>1];
+		if(attenuation < 1) attenuation = 1;
+
+		nMasterVol = (mastervol << 7) / attenuation;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 	////////////////////////////////////////////////////////////////////////////////////
 	// Update channels data
@@ -995,11 +1079,20 @@ BOOL CSoundFile::ReadNote()
 				}
 			}
 			// vol is 14-bits
-			if (vol)
-			{
+			if (vol) {
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
 				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
-				pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+				
+				UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+				//Don't let global volume affect level of sample if
+				//global volume is going to be applied to master output anyway.
+				if (pChn->dwFlags&CHN_SYNCMUTE) {
+					pChn->nRealVolume = 0;
+				} else if (m_pConfig->getGlobalVolumeAppliesToMaster()) {
+					pChn->nRealVolume = _muldiv(vol*MAX_GLOBAL_VOLUME, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+				} else {
+					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+				}
 			}
 			if (pChn->nPeriod < m_nMinPeriod) pChn->nPeriod = m_nMinPeriod;
 			int period = pChn->nPeriod;
@@ -1224,7 +1317,8 @@ BOOL CSoundFile::ReadNote()
 				if (m_nType & MOD_TYPE_S3M) pChn->nLength = 0;
 				period = m_nMinPeriod;
 			}
-			if (period > m_nMaxPeriod)
+			//rewbs: temporarily commenting out block to allow notes below A-0.
+			/*if (period > m_nMaxPeriod)
 			{
 				if ((m_nType & MOD_TYPE_IT) || (period >= 0x100000))
 				{
@@ -1234,7 +1328,7 @@ BOOL CSoundFile::ReadNote()
 				}
 				period = m_nMaxPeriod;
 				nPeriodFrac = 0;
-			}
+			}*/
 			UINT freq = GetFreqFromPeriod(period, pChn->nC4Speed, nPeriodFrac);
 			if ((m_nType & MOD_TYPE_IT) && (freq < 256))
 			{
@@ -1424,8 +1518,8 @@ BOOL CSoundFile::ReadNote()
 				pChn->nNewLeftVol = pChn->nNewRightVol;
 			}
 			// Clipping volumes
-			if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
-			if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
+			//if (pChn->nNewRightVol > 0xFFFF) pChn->nNewRightVol = 0xFFFF;
+			//if (pChn->nNewLeftVol > 0xFFFF) pChn->nNewLeftVol = 0xFFFF;
 			// Check IDO
 			if (gdwSoundSetup & SNDMIX_NORESAMPLING)
 			{
@@ -1488,7 +1582,7 @@ BOOL CSoundFile::ReadNote()
 			{
 				LONG nRampLength = gnVolumeRampSamples;
 // -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
+// -> DESC="per-instrument volume ramping setup"
 				BOOL enableCustomRamp = pChn->pHeader && (m_nType & (MOD_TYPE_IT | MOD_TYPE_XM));
 				if(enableCustomRamp) nRampLength = pChn->pHeader->nVolRamp ? (gdwMixingFreq * pChn->pHeader->nVolRamp / 100000) : gnVolumeRampSamples;
 				if(!nRampLength) nRampLength = 1;
@@ -1497,7 +1591,7 @@ BOOL CSoundFile::ReadNote()
 				LONG nLeftDelta = ((pChn->nNewLeftVol - pChn->nLeftVol) << VOLUMERAMPPRECISION);
 #ifndef FASTSOUNDLIB
 // -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
+// -> DESC="per-instrument volume ramping setup "
 //				if ((gdwSoundSetup & SNDMIX_DIRECTTODISK)
 //				 || ((gdwSysInfo & (SYSMIX_ENABLEMMX|SYSMIX_FASTCPU))
 //				  && (gdwSoundSetup & SNDMIX_HQRESAMPLER) && (gnCPUUsage <= 50)))
@@ -1584,42 +1678,82 @@ done:
 #ifdef MODPLUG_TRACKER
 
 VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: added arg
-//-------------------------------
+//----------------------------------------------------------
 {
-	MODCOMMAND *m;
-	if (pChn->dwFlags & CHN_MUTE) return;
-
+	// Do we need to process midi?
+	// For now there is no difference between mute and sync mute with VSTis.
+	if (pChn->dwFlags & (CHN_MUTE|CHN_SYNCMUTE)) return;
 	if ((!m_nInstruments) || (m_nPattern >= MAX_PATTERNS)
-	 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
-	//pChn = Chn;
-	m = Patterns[m_nPattern] + m_nRow * m_nChannels + nChn;	
-//	for (UINT nChn=0; nChn<m_nChannels; pChn++, nChn++, m++)
-//	{
-		if (m->note)
-		{
-			INSTRUMENTHEADER *penv = pChn->pHeader;
-			if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) penv = Headers[m->instr];
-			if ((penv) && (penv->nMidiChannel >= 1) && (penv->nMidiChannel <= 16))
-			{
-				UINT nPlugin = penv->nMixPlug;				// first try intrument VST
-				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
-				{
-					nPlugin = ChnSettings[nChn].nMixPlugin; // Then try Channel VST
-// -> CODE#0015.rewbs
-// -> DESC="channels management dlg"
-					if(pChn->dwFlags & CHN_NOFX) nPlugin = 0;
-// -! NEW_FEATURE#0015.rewbs
-				}
-				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
-				{
-					UINT nNote = (pChn->dwFlags & CHN_MUTE) ? 0xff : m->note;
-					IMixPlugin *pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, nNote, (m->volcmd == VOLCMD_VOLUME) ? m->vol : 64, nChn);
-				}
-			}
+		 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
+	
+	// Get instrument info and plugin reference
+	MODCOMMAND *m = Patterns[m_nPattern] + m_nRow * m_nChannels + nChn;	
+	INSTRUMENTHEADER *penv = pChn->pHeader;
+	IMixPlugin *pPlugin = NULL;
+
+	if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) {
+		penv = Headers[m->instr];
+	}
+	if ((penv) && (penv->nMidiChannel >= 1) && (penv->nMidiChannel <= 16)) {
+		UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+		if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS)) {
+			pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
 		}
-//	}
+	}
+
+	//Do couldn't find a valid plugin
+	if (pPlugin == NULL) {
+		return;	
+	}
+
+	//Send Midi command
+	if (m->note) {
+		pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, m->note, pChn->nVolume, nChn);
+	} else if (m->volcmd == VOLCMD_VOLUME) {
+		//No plugs seem to respond to volume CC.
+		pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Fine, m->vol, nChn);
+		//pPlugin->SetDryRatio(m->vol*2);  //TODO: we need another field to represent volume, since this makes 
+										   //	   it difficult to restore default levels on new notes.
+	}
+
 }
 
-
 #endif
+
+
+VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
+//--------------------------------------------------------
+{
+		long delta=0;
+		long step=0;
+
+		if (m_nGlobalVolumeDestination != m_nGlobalVolume) { //user has provided new global volume
+			m_nGlobalVolumeDestination = m_nGlobalVolume;
+			m_nSamplesToGlobalVolRampDest = gnVolumeRampSamples;
+		} 
+
+		if (m_nSamplesToGlobalVolRampDest>0) {	// still some ramping left to do.
+			long highResGlobalVolumeDestination = static_cast<long>(m_nGlobalVolumeDestination)<<VOLUMERAMPPRECISION;
+			
+			delta = highResGlobalVolumeDestination-m_lHighResRampingGlobalVolume;
+			step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
+			
+			UINT maxStep = max(50, (10000/gnVolumeRampSamples+1)); //define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
+			while (abs(step)>maxStep) {					 //if step is too big (might cause click), extend ramp length.
+				m_nSamplesToGlobalVolRampDest += gnVolumeRampSamples;
+				step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
+			}
+		}
+
+		for (int pos=0; pos<lTotalSampleCount; pos++) {
+
+			if (m_nSamplesToGlobalVolRampDest>0) { //ramping required
+				m_lHighResRampingGlobalVolume += step;
+				SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_lHighResRampingGlobalVolume, MAX_GLOBAL_VOLUME<<VOLUMERAMPPRECISION);
+				m_nSamplesToGlobalVolRampDest--;
+			} else {
+				SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+			}
+
+		}
+}

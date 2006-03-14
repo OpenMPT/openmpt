@@ -13,9 +13,6 @@
 #include "mod2midi.h"
 #include "vstplug.h"
 
-
-#pragma warning(disable:4244)
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -42,6 +39,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_VIEW_SAMPLES,			OnEditSamples)
 	ON_COMMAND(ID_VIEW_INSTRUMENTS,		OnEditInstruments)
 	ON_COMMAND(ID_VIEW_COMMENTS,		OnEditComments)
+	ON_COMMAND(ID_VIEW_GRAPH,			OnEditGraph) //rewbs.graph
 	ON_COMMAND(ID_INSERT_PATTERN,		OnInsertPattern)
 	ON_COMMAND(ID_INSERT_SAMPLE,		OnInsertSample)
 	ON_COMMAND(ID_INSERT_INSTRUMENT,	OnInsertInstrument)
@@ -56,6 +54,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_REARRANGE_SAMPLES,	RearrangeSampleList)
 // -! NEW_FEATURE#0020
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
+	ON_COMMAND(ID_APPROX_BPM,	OnApproximateBPM)
 	ON_COMMAND(ID_PATTERN_PLAY,			OnPatternPlay)				//rewbs.patPlayAllViews
 	ON_COMMAND(ID_PATTERN_PLAYNOLOOP,	OnPatternPlayNoLoop)		//rewbs.patPlayAllViews
 	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)		//rewbs.patPlayAllViews
@@ -91,6 +90,7 @@ void CModDoc::Dump(CDumpContext& dc) const
 CModDoc::CModDoc()
 //----------------
 {
+	m_bHasValidPath=false;
 	m_bPaused = TRUE;
 	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
@@ -105,6 +105,7 @@ CModDoc::CModDoc()
 // -> DESC="channels management dlg"
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
+
 }
 
 
@@ -129,7 +130,7 @@ BOOL CModDoc::OnNewDocument()
 //---------------------------
 {
 	if (!CDocument::OnNewDocument()) return FALSE;
-	m_SndFile.Create(NULL, 0);
+	m_SndFile.Create(NULL, this, 0);
 	m_SndFile.m_nType = CTrackApp::GetDefaultDocType();
 
 // -> CODE#0023
@@ -168,7 +169,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			LPBYTE lpStream = f.Lock();
 			if (lpStream)
 			{
-				m_SndFile.Create(lpStream, dwLen);
+				m_SndFile.Create(lpStream, this, dwLen);
 				f.Unlock();
 			}
 		}
@@ -348,6 +349,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 // -! NEW_FEATURE#0015
 
 	SetModifiedFlag(FALSE); // (bModified);
+	m_bHasValidPath=true;
 	return TRUE;
 }
 
@@ -355,6 +357,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 //------------------------------------------------
 {
+
 	static int greccount = 0;
 	CHAR fext[_MAX_EXT]="";
 	UINT nType = m_SndFile.m_nType, dwPacking = 0;
@@ -375,7 +378,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		greccount++;
 		bOk = DoSave(NULL, TRUE);
 		greccount--;
-		return bOk;
+        return bOk;
 	}
 	BeginWaitCursor();
 	switch(nType)
@@ -560,6 +563,8 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	if (OnSaveDocument(s))
 	{
 		SetModified(FALSE);
+		m_bHasValidPath=true;
+		m_SndFile.m_dwLastSavedWithVersion=CMainFrame::GetFullVersionNumeric();
 		return TRUE;
 	} else
 	{
@@ -599,7 +604,7 @@ BOOL CModDoc::InitializeMod()
 		strcpy(m_SndFile.m_szNames[0], "untitled");
 		m_SndFile.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
 		m_SndFile.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
-		m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = 256;
+		m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = 128;
 		for (UINT init=0; init<MAX_BASECHANNELS; init++)
 		{
 			m_SndFile.ChnSettings[init].dwFlags = 0;
@@ -631,6 +636,7 @@ BOOL CModDoc::InitializeMod()
 		}
 	}
 	m_SndFile.SetCurrentPos(0);
+
 	return TRUE;
 }
 
@@ -733,7 +739,7 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 	return IDCANCEL;
 }
 
-UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, UINT nCurrentChn) //rewbs.vstiLive: added current chan param
+UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, int nCurrentChn) //rewbs.vstiLive: added current chan param
 //-----------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -744,69 +750,54 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 	if (note < 128)
 	{
 		BEGIN_CRITICAL();
-		if ((bpause) || (m_SndFile.IsPaused()))
-		{
-			pMainFrm->SetLastMixActiveTime();
-			BOOL bFound = FALSE;
+		
+		//kill notes if required.
+		if ( (bpause) || (m_SndFile.IsPaused()) || pMainFrm->GetModPlaying() != this) { 
+			//OnPlayerPause();				  // pause song - pausing VSTis is too slow
+			pMainFrm->SetLastMixActiveTime(); // mark activity
+
 			// All notes off
-			for (UINT i=0; i<MAX_CHANNELS; i++)
-			{
-				if ((i < m_SndFile.m_nChannels) || (m_SndFile.Chn[i].nMasterChn))
-				{
+			for (UINT i=0; i<MAX_CHANNELS; i++)	{
+				if ((i < m_SndFile.m_nChannels) || (m_SndFile.Chn[i].nMasterChn)) {
 					m_SndFile.Chn[i].dwFlags |= CHN_KEYOFF | CHN_NOTEFADE;
 					m_SndFile.Chn[i].nFadeOutVol = 0;
 				}
 			}
-			// Search for available channel
-			for (UINT j=m_SndFile.m_nChannels; j<MAX_CHANNELS; j++)
-			{
-				MODCHANNEL *p = &m_SndFile.Chn[j];
-				if (!p->nLength)
-				{
-					bFound = TRUE;
-					nChn = j;
-					break;
-				}
-			}
-			if (!bFound)
-			{
-				// Not found: look for one that's stopped
-				for (UINT j=m_SndFile.m_nChannels; j<MAX_CHANNELS; j++)
-				{
-					MODCHANNEL *p = &m_SndFile.Chn[j];
-					if (p->dwFlags & CHN_NOTEFADE)
-					{
-						bFound = TRUE;
-						nChn = j;
-						break;
-					}
-				}
-			}
 		}
+
+		//find a channel if required
+		//if (nCurrentChn<0) { 
+			nChn = FindAvailableChannel();
+		//}
+
 		MODCHANNEL *pChn = &m_SndFile.Chn[nChn];
-		if (pChn->nLength)
-		{
+		
+		//stop channel, just in case.
+		if (pChn->nLength)	{
 			pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
 		}
+
+		//reset channel properties; in theory the chan is completely unused anyway.
 		pChn->dwFlags &= 0xFF;
 		pChn->dwFlags &= ~(CHN_MUTE);
 		pChn->nGlobalVol = 64;
 		pChn->nInsVol = 64;
 		pChn->nPan = 128;
-		pChn->nNewNote = note;
 		pChn->nRightVol = pChn->nLeftVol = 0;
 		pChn->nROfs = pChn->nLOfs = 0;
 		pChn->nCutOff = 0x7F;
 		pChn->nResonance = 0;
-		if (nins)
-		{
+		pChn->nVolume = 256;
+		pChn->nMasterChn = 0;	//remove NNA association
+		pChn->nNewNote = note;
+
+		if (nins) {									//Set instrument
 			pChn->nVolEnvPosition = 0;
 			pChn->nPanEnvPosition = 0;
 			pChn->nPitchEnvPosition = 0;
 			m_SndFile.InstrumentChange(pChn, nins);
-		} else
-		if ((nsmp) && (nsmp < MAX_SAMPLES))
-		{
+		} 
+		else if ((nsmp) && (nsmp < MAX_SAMPLES)) {	//Or set sample
 			MODINSTRUMENT *pins = &m_SndFile.Ins[nsmp];
 			pChn->pCurrentSample = pins->pSample;
 			pChn->pHeader = NULL;
@@ -823,14 +814,29 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			pChn->nInsVol = pins->nGlobalVol;
 			pChn->nFadeOutVol = 0x10000;
 		}
-		pChn->nVolume = 256;
+
 		m_SndFile.NoteChange(nChn, note, FALSE, TRUE, TRUE);
 		if (nVol > 0) pChn->nVolume = nVol;
-		pChn->nMasterChn = 0;
-		if (bpause)
-		{   
-			if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength))
-			{
+		
+		// handle sample looping.
+		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
+			pChn->nPos = loopstart;
+			pChn->nPosLo = 0;
+			pChn->nLoopStart = loopstart;
+			pChn->nLoopEnd = loopend;
+			pChn->nLength = loopend;
+		}
+
+		// handle extra-loud flag
+		if ((!(CMainFrame::m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp)) {
+			pChn->dwFlags |= CHN_EXTRALOUD;
+		} else {
+			pChn->dwFlags &= ~CHN_EXTRALOUD;
+		}
+
+		/*
+		if (bpause) {   
+			if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
 				pChn->nPos = loopstart;
 				pChn->nPosLo = 0;
 				pChn->nLoopStart = loopstart;
@@ -841,28 +847,33 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			m_SndFile.m_dwSongFlags |= SONG_PAUSED;
 			if ((!(CMainFrame::m_dwPatternSetup & PATTERN_NOEXTRALOUD)) && (nsmp)) pChn->dwFlags |= CHN_EXTRALOUD;
 		} else pChn->dwFlags &= ~CHN_EXTRALOUD;
-		END_CRITICAL();
+		*/
+
 		//rewbs.vstiLive
 		if (nins <= m_SndFile.m_nInstruments)
 		{
 			INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
-			//MODINSTRUMENT *psmp = &(m_SndFile.Ins[nins]);
-			if (nCurrentChn >=0 && penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
+			if (penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
 			{
+				// UINT nPlugin = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
+				 
 				UINT nPlugin = 0;
 				if (pChn->pHeader) 
 					nPlugin = pChn->pHeader->nMixPlug;  					// first try intrument VST
-				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
-					nPlugin = m_SndFile.ChnSettings[nCurrentChn+1].nMixPlugin; // Then try Channel VST                    
+				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS) && (nCurrentChn >=0))
+					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin; // Then try Channel VST
+				
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note, nVol ? nVol : 64, nCurrentChn);
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, nVol ? nVol : 64, MAX_BASECHANNELS);
+					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, pChn->nVolume, MAX_BASECHANNELS);
 				}
 			}
 		}
 		//end rewbs.vstiLive
+
+		END_CRITICAL();
+
 		if (pMainFrm->GetModPlaying() != this)
 		{
 			m_SndFile.m_dwSongFlags |= SONG_PAUSED;
@@ -884,34 +895,37 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 //--------------------------------------------------------------------------
 {
 	BEGIN_CRITICAL();
+
+
+	//rewbs.vstiLive
+	if (nins>0 && nins<=m_SndFile.m_nInstruments) {
+
+		INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
+		if (penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
+		{
+
+			UINT nPlugin = penv->nMixPlug;  		// First try intrument VST
+			if (((!nPlugin) || (nPlugin > MAX_MIXPLUGINS)) && //no good plug yet
+				(nCurrentChn<MAX_CHANNELS)) // chan OK
+				nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;// Then try Channel VST
+			
+			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+			{
+				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
+				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note+0xFF, 0, MAX_BASECHANNELS);
+
+			}
+		}
+	}
+	//end rewbs.vstiLive
+
 	MODCHANNEL *pChn = &m_SndFile.Chn[m_SndFile.m_nChannels];
 	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
 	{
 		DWORD mask = (bFade) ? CHN_NOTEFADE : (CHN_NOTEFADE|CHN_KEYOFF);
 
-		//rewbs.vstiLive
-		if (nins>0 && nins<=m_SndFile.m_nInstruments)
-		{
-			INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
-//			MODINSTRUMENT *psmp = &(m_SndFile.Ins[nins]);
-			if (nCurrentChn >=0 && penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
-			{
-				UINT nPlugin = 0;
-				if (pChn->pHeader) 
-					nPlugin = penv->nMixPlug;  		// first try intrument VST
-				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
-					nPlugin = m_SndFile.ChnSettings[nCurrentChn+1].nMixPlugin;// Then try Channel VST
-				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
-				{
-					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, note+0xFF, 0, nCurrentChn);
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note+0xFF, 0, MAX_BASECHANNELS);
-
-				}
-			}
-		}
-		//end rewbs.vstiLive
-
+		// Fade all channels > m_nChannels which are playing this note. 
+		// Could conflict with NNAs.
 		if ((!(pChn->dwFlags & mask)) && (pChn->nLength) && ((note == pChn->nNewNote) || (!note)))
 		{
 			m_SndFile.KeyOff(i);
@@ -940,29 +954,56 @@ BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 }
 
 
-BOOL CModDoc::MuteChannel(UINT nChn, BOOL bMute)
+BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
 //----------------------------------------------
 {
-	DWORD d = (bMute) ? CHN_MUTE : 0;
-	
-	if (nChn >= m_SndFile.m_nChannels) return FALSE;
-	if (d != (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE))
-	{
-		if (m_SndFile.m_nType == MOD_TYPE_IT) SetModified();
-		if (d)	m_SndFile.ChnSettings[nChn].dwFlags |= CHN_MUTE;
-		else	m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
-		
+	DWORD muteType = (CMainFrame::m_dwPatternSetup&PATTERN_SYNCMUTE)? CHN_SYNCMUTE:CHN_MUTE;
+
+	if (nChn >= m_SndFile.m_nChannels) {
+		return FALSE;
 	}
-	if (d)	m_SndFile.Chn[nChn].dwFlags |= CHN_MUTE;
-	else	m_SndFile.Chn[nChn].dwFlags &= ~CHN_MUTE;
-	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++)
-	{
-		if (m_SndFile.Chn[i].nMasterChn == i+1)
-		{
-			if (d)	m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
-			else	m_SndFile.Chn[i].dwFlags &= ~CHN_MUTE;
+
+	//Mark channel as muted in channel settings
+	if (doMute)	{
+		m_SndFile.ChnSettings[nChn].dwFlags |= CHN_MUTE;
+	} else {
+		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
+	}
+	
+	//Mute pattern channel
+	if (doMute) {
+		m_SndFile.Chn[nChn].dwFlags |= muteType;
+		//Kill VSTi notes on muted channel.
+		UINT nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
+		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))	{
+			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
+			INSTRUMENTHEADER* penv = m_SndFile.Chn[nChn].pHeader;
+			if (pPlug && penv) {
+				pPlug->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, 0xFF, 0, nChn);
+			}
+		}
+	} else {
+		//on unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
+		m_SndFile.Chn[nChn].dwFlags &= ~(CHN_SYNCMUTE|CHN_MUTE);
+	}
+
+	//mute any NNA'd channels
+	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++) {
+		if (m_SndFile.Chn[i].nMasterChn == nChn+1)	{
+			if (doMute) { 
+				m_SndFile.Chn[i].dwFlags |= muteType;
+			} else {
+				//on unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
+				m_SndFile.Chn[i].dwFlags &= ~(CHN_SYNCMUTE|CHN_MUTE);
+			}
 		}
 	}
+
+	//Mark IT as modified
+	if (m_SndFile.m_nType == MOD_TYPE_IT) {
+		CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
+	}
+
 	return TRUE;
 }
 
@@ -1058,7 +1099,7 @@ void CModDoc::Record2Channel(UINT channel, BOOL select)
 void CModDoc::ReinitRecordState(BOOL unselect)
 {
 	memset(MultiRecordMask, unselect ? 0 : 0xff, sizeof(MultiRecordMask));
-	memset(MultiSplitRecordMask, unselect ? 0 : 0xff, sizeof(MultiSplitRecordMask));
+	memset(MultiSplitRecordMask, unselect ? 0 : 0xff, sizeof(MultiSplitRecordMask));	
 }
 // -! NEW_FEATURE#0015
 
@@ -1318,6 +1359,7 @@ void CModDoc::OnFileWaveConvert()
 
 	CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
 	dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
+	dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 	dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
 	//if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
@@ -1328,8 +1370,8 @@ void CModDoc::OnFileWaveConvert()
 	bplaying = TRUE;
 	pMainFrm->PauseMod();
 
-	CMainFrame::GetMainFrame()->InitRenderer(this);	//rewbs.VSTTimeInfo
-	m_SndFile.SetCurrentPos(0);
+// rewbs.fix3239: moved position definition into loop below
+/*  m_SndFile.SetCurrentPos(0);
 	if (wsdlg.m_bSelectPlay)
 	{
 		m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
@@ -1337,6 +1379,8 @@ void CModDoc::OnFileWaveConvert()
 		m_SndFile.GetLength(TRUE, FALSE);
 		m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
 	}
+*/
+//end rewbs.fix3239: moved position definition into loop below
 	// Saving file
 
 // -> CODE#0024
@@ -1368,7 +1412,15 @@ void CModDoc::OnFileWaveConvert()
 
 		// Render song (or current channel if channel mode and channel not initially disabled)
 		if(!wsdlg.m_bChannelMode || !(flags[i] & CHN_MUTE)){
+			// rewbs.fix3239
 			m_SndFile.SetCurrentPos(0);
+			if (wsdlg.m_bSelectPlay) {
+				m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
+				m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
+				m_SndFile.GetLength(TRUE, FALSE);
+				m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
+			}
+			//end rewbs.fix3239
 			if( dwcdlg.DoModal() != IDOK ) break;	// UPDATE#03
 		}
 
@@ -1381,7 +1433,6 @@ void CModDoc::OnFileWaveConvert()
 		for(UINT i = 0 ; i < n ; i++) m_SndFile.ChnSettings[i].dwFlags = flags[i];
 	}
 // -! NEW_FEATURE#0024
-	CMainFrame::GetMainFrame()->StopRenderer(this);	//rewbs.VSTTimeInfo
 
 	m_SndFile.SetCurrentPos(pos);
 	m_SndFile.GetLength(TRUE);
@@ -1433,7 +1484,6 @@ void CModDoc::OnFileMP3Convert()
 		UINT pos = m_SndFile.GetCurrentPos();
 		bplaying = TRUE;
 		pMainFrm->PauseMod();
-		CMainFrame::GetMainFrame()->InitRenderer(this);	//rewbs.VSTTimeInfo
 		m_SndFile.SetCurrentPos(0);
 		// Saving file
 		PTAGID3INFO pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_id3tag : NULL;
@@ -1441,7 +1491,6 @@ void CModDoc::OnFileMP3Convert()
 		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 		dwcdlg.DoModal();
-		CMainFrame::GetMainFrame()->StopRenderer(this);	//rewbs.VSTTimeInfo
 		m_SndFile.SetCurrentPos(pos);
 		m_SndFile.GetLength(TRUE);
 		CMainFrame::UpdateAudioParameters(TRUE);
@@ -1485,6 +1534,13 @@ void CModDoc::OnPlayerPlay()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
+		CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+ 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // Relabsoluness.note: Using existing 'dirty HACK'
+		{
+			//Relabsoluness.note: User has sent play song command: set loop pattern checkbox to false.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
+		}
+                 
 		BOOL bPlaying = (pMainFrm->GetModPlaying() == this) ? TRUE : FALSE;
 		if ((bPlaying) && (!(m_SndFile.m_dwSongFlags & (SONG_PAUSED|SONG_STEP/*|SONG_PATTERNLOOP*/))))
 		{
@@ -1496,6 +1552,11 @@ void CModDoc::OnPlayerPlay()
 		{
 			m_SndFile.Chn[i].dwFlags |= (CHN_NOTEFADE|CHN_KEYOFF);
 			if (!bPlaying) m_SndFile.Chn[i].nLength = 0;
+		}
+		if (bPlaying) {
+			m_SndFile.StopAllVsti();
+		} else {
+			m_SndFile.ResumePlugins();
 		}
 		END_CRITICAL();
 		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED);
@@ -1564,10 +1625,21 @@ void CModDoc::OnPlayerPlayFromStart()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
+		CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		{
+			//Relabsoluness.note: User has sent play song command: set loop pattern checkbox to false.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
+		}
+		
+
 		pMainFrm->PauseMod();
 		m_SndFile.m_dwSongFlags &= ~SONG_STEP;
 		m_SndFile.SetCurrentPos(0);
 		pMainFrm->ResetElapsedTime();
+		BEGIN_CRITICAL();
+		m_SndFile.ResumePlugins();
+		END_CRITICAL();
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
 		CMainFrame::EnableLowLatencyMode(FALSE);
 	}
@@ -1623,6 +1695,14 @@ void CModDoc::OnEditComments()
 {
 	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_COMMENTS);
 }
+
+//rewbs.graph
+void CModDoc::OnEditGraph()
+//----------------------------
+{
+	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_GRAPH);
+}
+//end rewbs.graph
 
 
 void CModDoc::OnCleanupSamples()
@@ -1743,20 +1823,13 @@ void CModDoc::OnRemoveAllInstruments()
 	{
 		ConvertInstrumentsToSamples();
 	}
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-	char removeSamples = 0;
-	//rewbs: changed message
-	if(::MessageBox(NULL, "Remove associated samples if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) removeSamples = 1;
-	else removeSamples = -1;
-// -! BEHAVIOUR_CHANGE#0003
-	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
-	{
-// -> CODE#0003
-// -> DESC="remove instrument's samples"
-//		m_SndFile.DestroyInstrument(i);
+	char removeSamples = -1;
+	if (::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) {
+		removeSamples = 1;
+	}
+
+	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++) {
 		m_SndFile.DestroyInstrument(i,removeSamples);
-// -! BEHAVIOUR_CHANGE#0003
 	}
 	m_SndFile.m_nInstruments = 0;
 	SetModified();
@@ -1772,6 +1845,47 @@ void CModDoc::OnEstimateSongLength()
 	wsprintf(s, "Approximate song length: %dmn%02ds", dwSongLength/60, dwSongLength%60);
 	CMainFrame::GetMainFrame()->MessageBox(s, NULL, MB_OK|MB_ICONINFORMATION);
 }
+
+void CModDoc::OnApproximateBPM()
+//----------------------------------
+{
+	//Convert BPM to string:
+	CString Message;
+	double bpm = CMainFrame::GetMainFrame()->GetApproxBPM();
+
+
+	switch(m_SndFile.m_nTempoMode) {
+		case tempo_mode_alternative: 
+			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+			break;
+
+		case tempo_mode_modern: 
+			Message.Format("Using modern tempo interpretation.\n\nThe tempo is: %.20g BPM", bpm); 
+			break;
+
+		case tempo_mode_classic: 
+		default:
+			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+			break;
+	}
+/*
+	if (CMainFrame::m_dwPatternSetup & PATTERN_MODERNSPEED) {
+		Message.Format("Using modern speed interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+		m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+	} 
+	else if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
+		Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+		m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+	} else {
+		Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
+		m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+	}
+	*/
+	CMainFrame::GetMainFrame()->MessageBox(Message, NULL, MB_OK|MB_ICONINFORMATION);
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1951,15 +2065,22 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 				case sfx_cutoff: chanSpec.Append("Cutoff"); break;
 				case sfx_reso: chanSpec.Append("Resonance"); break;
 				case sfx_mode: chanSpec.Append("Filter Mode"); break;
+				case sfx_drywet: chanSpec.Append("Plug wet/dry ratio"); break;
+				case sfx_cc: {
+					int nCC = MacroToMidiCC(macroText);
+					CString temp; 
+					temp.Format("MidiCC %d", nCC);
+					chanSpec.Append(temp); 
+					break;
+				}
 				case sfx_plug: {
 					int nParam = MacroToPlugParam(macroText);
 					char paramName[128];
-					memset(paramName, 0, sizeof(paramName));
-					UINT nPlug = m_SndFile.ChnSettings[nChn].nMixPlugin;
-					if (nPlug)
-					{
+					memset(paramName, 0, sizeof(paramName));				
+					UINT nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_CHANNEL, EVEN_IF_MUTED);
+					if ((nPlug) && (nPlug<=MAX_MIXPLUGINS)) {
 						CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
-						if (pPlug)
+						if (pPlug) 
 							pPlug->GetParamName(nParam, paramName, sizeof(paramName));
 						if (paramName[0] == 0)
 							strcpy(paramName, "N/A");
@@ -1974,8 +2095,9 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 				default: chanSpec.Append("Custom");
 				}
 			}
-			if (chanSpec != "")
+			if (chanSpec != "") {
 				strcat(pszDescription, chanSpec);
+			}
 
 		}
 		//end rewbs.xinfo
@@ -1999,32 +2121,29 @@ LONG CModDoc::GetIndexFromEffect(UINT command, UINT param)
 }
 
 
-UINT CModDoc::GetEffectFromIndex(UINT ndx, int *pParam)
-//-----------------------------------------------------
+//Returns command and corrects parameter refParam if necessary
+UINT CModDoc::GetEffectFromIndex(UINT ndx, int &refParam)
+//-------------------------------------------------------
 {
 	//if (pParam) *pParam = -1;
-	if (ndx >= MAX_FXINFO)
-	{
-		if (pParam) *pParam = 0;
+	if (ndx >= MAX_FXINFO) {
+		refParam = 0;
 		return 0;
 	}
-	if ((pParam) && (gFXInfo[ndx].dwParamMask))
-	{
-		//rewbs.fxVis - correct parameter to match FX if necessary.
-		if (*pParam < gFXInfo[ndx].dwParamValue)
-			*pParam = gFXInfo[ndx].dwParamValue;
-		else if (*pParam > gFXInfo[ndx].dwParamValue+15)
-			*pParam = gFXInfo[ndx].dwParamValue+15;
-		//end rewbs.fxVis
+
+	//Cap parameter to match FX if necessary.
+	if (gFXInfo[ndx].dwParamMask) {
+		if (refParam < static_cast<int>(gFXInfo[ndx].dwParamValue)) {
+			refParam = gFXInfo[ndx].dwParamValue;	 // for example: delay with param < D0 becomes SD0
+		} else if (refParam > static_cast<int>(gFXInfo[ndx].dwParamValue)+15) {
+			refParam = gFXInfo[ndx].dwParamValue+15; // for example: delay with param > DF becomes SDF
+		}
 	}
-	//rewbs.fxVis
-	if ((pParam) && (gFXInfo[ndx].dwFlags))
-	{
-		//correct parameter to match FX max if necessary.
-		if (*pParam > gFXInfo[ndx].dwFlags)
-			*pParam = gFXInfo[ndx].dwFlags;
+	if (gFXInfo[ndx].dwFlags) {
+		if (refParam > gFXInfo[ndx].dwFlags) {
+			refParam = gFXInfo[ndx].dwFlags;	//used for Zxx macro control: limit to 7F max.
+		}
 	}
-	//end rewbs.fxVis
 
 	return gFXInfo[ndx].dwEffect;
 }
@@ -2479,18 +2598,17 @@ HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
 	HWND followSonghWnd;
 	PATTERNVIEWSTATE *patternViewState;
 	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
+	CSoundFile *pSndFile = GetSoundFile();
 
 	if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
 	{
 		followSonghWnd = pChildFrm->GetHwndView();
-		patternViewState = new PATTERNVIEWSTATE;
-		pChildFrm->SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)patternViewState);
+		PATTERNVIEWSTATE patternViewState;
+		pChildFrm->SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)(&patternViewState));
 		
-		pat = patternViewState->nPattern;
-		row = patternViewState->nRow;
-		ord = patternViewState->nOrder;
-		
-		delete patternViewState;
+		pat = patternViewState.nPattern;
+		row = patternViewState.nRow;
+		ord = patternViewState.nOrder;	
 	}
 	else	//patern editor object does not exist (i.e. is not active)  - use saved state.
 	{
@@ -2501,10 +2619,89 @@ HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
 		row = patternViewState->nRow;
 		ord = patternViewState->nOrder;
 	}
+	//rewbs.fix3185: if position is invalid, go to start of song.
+	if (ord > MAX_ORDERS) {
+		ord = 0;
+		pat = pSndFile->Order[ord];
+	}
+	if (pat > MAX_PATTERNS) {
+		pat=0;
+	}
+	if (row > pSndFile->PatternSize[pat]) {
+		row=0;
+	}
+	//end rewbs.fix3185
+
+	//ensure order correlates with pattern.
+	if (pSndFile->Order[ord]!=pat) {
+		int tentativeOrder = pSndFile->FindOrder(pat);
+		if (tentativeOrder != -1) {	//ensure a valid order exists.
+			ord = tentativeOrder;
+		}
+	}
+
 
 	return followSonghWnd;
 
 }
+
+int CModDoc::GetMacroType(CString value)
+{
+	if (value.Compare("")==0) return sfx_unused;
+	if (value.Compare("F0F000z")==0) return sfx_cutoff;
+	if (value.Compare("F0F001z")==0) return sfx_reso;
+	if (value.Compare("F0F002z")==0) return sfx_mode;
+	if (value.Compare("F0F003z")==0) return sfx_drywet;
+	if (value.Compare("BK00z")>=0 && value.Compare("BKFFz")<=0 && value.GetLength()==5)
+		return sfx_cc;
+	if (value.Compare("F0F079z")>0 && value.Compare("F0F1G")<0 && value.GetLength()==7)
+		return sfx_plug; 
+	return sfx_custom; //custom/unknown
+}
+
+int CModDoc::MacroToPlugParam(CString macro)
+{
+	int code=0;
+	char* param = (char *) (LPCTSTR) macro;
+	param +=4;
+	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
+	if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
+	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
+	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
+
+	if (macro.GetLength()>=4 && macro.GetAt(3)=='0') {
+		return (code-128);
+	} else {
+		return (code+128);
+	}
+}
+int CModDoc::MacroToMidiCC(CString macro) {
+	int code=0;
+	char* param = (char *) (LPCTSTR) macro;
+	param +=2;
+	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
+	if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
+	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
+	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
+
+	return code;
+}
+
+int CModDoc::FindMacroForParam(long param) {
+//------------------------------------------
+	for (int macro=0; macro<16; macro++) {	//what's the named_const for num macros?? :D
+		CString macroString = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[macro*32]);
+		if (GetMacroType(macroString) == sfx_plug &&  MacroToPlugParam(macroString) == param) {
+			return macro;
+		}
+	}
+
+	return -1;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Playback
 
 
 void CModDoc::OnPatternRestart()
@@ -2514,11 +2711,18 @@ void CModDoc::OnPatternRestart()
 
 	if ((pMainFrm) && (pChildFrm))
 	{
+		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		{
+			//Relabsoluness.note: User has sent play pattern command: set loop pattern checkbox to true.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
+		}
+                   
 		CSoundFile *pSndFile = GetSoundFile();
 		UINT nPat,nOrd,nRow;
 		HWND followSonghWnd;
 
 		followSonghWnd = GetEditPosition(nRow, nPat, nOrd);
+		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 		
 		BEGIN_CRITICAL();
 		// Cut instruments/samples
@@ -2534,17 +2738,18 @@ void CModDoc::OnPatternRestart()
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = 0;
 		pSndFile->ResetTotalTickCount();
-		END_CRITICAL();
-
-		pMainFrm->ResetElapsedTime();
-		if (pMainFrm->GetModPlaying() != this)
-		{
+		//rewbs.vstCompliance
+		if (pModPlaying == this) {
+			pSndFile->StopAllVsti();
+		} else {
 			pSndFile->ResumePlugins();
-			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION);
 		}
-		else
-		{
-			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
+		//end rewbs.vstCompliance
+		END_CRITICAL();
+		
+		pMainFrm->ResetElapsedTime();
+		if (pModPlaying != this) {
+			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
 		}
 	}
 	//SwitchToView();
@@ -2557,11 +2762,18 @@ void CModDoc::OnPatternPlay()
 
 	if ((pMainFrm) && (pChildFrm))
 	{
+		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		{
+			//Relabsoluness.note: User has sent play pattern command: set loop pattern checkbox to true.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
+		}
+                   
 		CSoundFile *pSndFile = GetSoundFile();
 		UINT nRow,nPat,nOrd;
 		HWND followSonghWnd;
 
 		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
+		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 	
 		BEGIN_CRITICAL();
 		// Cut instruments/samples
@@ -2572,19 +2784,19 @@ void CModDoc::OnPatternPlay()
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
+		//rewbs.VSTCompliance		
+		if (pModPlaying == this) {
+			pSndFile->StopAllVsti();
+		} else {
+			pSndFile->ResumePlugins();
+		}
+		//end rewbs.VSTCompliance
 		END_CRITICAL();
 
 		pMainFrm->ResetElapsedTime();
-		if (pMainFrm->GetModPlaying() != this)
-		{
-			pSndFile->ResumePlugins();
-			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION);
+		if (pModPlaying != this) {
+			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
-		else
-		{
-			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
-		}
-		
 	}
 	//SwitchToView();
 
@@ -2597,11 +2809,18 @@ void CModDoc::OnPatternPlayNoLoop()
 
 	if ((pMainFrm) && (pChildFrm))
 	{
+		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		{
+			//Relabsoluness.note: User has sent play song command: set loop pattern checkbox to false.
+			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
+		}
+                   
 		CSoundFile *pSndFile = GetSoundFile();
 		UINT nPat,nOrd,nRow;
 		HWND followSonghWnd;
 
 		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
+		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 
 		BEGIN_CRITICAL();
 		// Cut instruments/samples
@@ -2616,18 +2835,19 @@ void CModDoc::OnPatternPlayNoLoop()
 		else
 			pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
+		//end rewbs.VSTCompliance
+		if (pModPlaying == this) {
+			pSndFile->StopAllVsti();	
+		} else {
+			pSndFile->ResumePlugins();
+		}
+		//rewbs.VSTCompliance
 		END_CRITICAL();
 
 		pMainFrm->ResetElapsedTime();
 		
-		if (pMainFrm->GetModPlaying() != this)
-		{
-			pSndFile->ResumePlugins();
-			pMainFrm->PlayMod(this, followSonghWnd, MPTNOTIFY_POSITION);
-		}
-		else
-		{
-			pSndFile->StopAllVsti();	//rewbs.VSTCompliance
+		if (pModPlaying != this)	{
+			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
 	}
 	//SwitchToView();
@@ -2645,14 +2865,17 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewSamples: OnEditSamples(); break;
 		case kcViewInstruments: OnEditInstruments(); break;
 		case kcViewComments: OnEditComments(); break;
+		case kcViewGraph: OnEditGraph(); break; //rewbs.graph
+		case kcViewSongProperties: SongProperties(); break;
 
 		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
 		case kcFileSaveAsMP3:	OnFileMP3Convert(); break;
-		case kcFileSaveMidi: OnFileMidiConvert(); break;
+		case kcFileSaveMidi:	OnFileMidiConvert(); break;
 		case kcEstimateSongLength: OnEstimateSongLength(); break;
-		case kcFileSave:	DoSave(m_strPathName, 0); break;
-		case kcFileSaveAs:	DoSave(NULL, 1); break;
-		case kcFileClose:	OnCloseDocument(); break;
+		case kcApproxRealBPM:	OnApproximateBPM(); break;
+		case kcFileSave:		DoSave(m_strPathName, 0); break;
+		case kcFileSaveAs:		DoSave(NULL, 1); break;
+		case kcFileClose:		OnFileClose(); break;
 
 		case kcPlayPatternFromCursor: OnPatternPlay(); break;
 		case kcPlayPatternFromStart: OnPatternRestart(); break;
@@ -2682,28 +2905,124 @@ void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 
 	return;
 }
-//rewbs.xinfo
-int CModDoc::GetMacroType(CString value)
+
+void CModDoc::ChangeFileExtension(UINT nNewType)
+//----------------------------------------------
 {
-	if (value.Compare("")==0) return sfx_unused;
-	if (value.Compare("F0F000z")==0) return sfx_cutoff;
-	if (value.Compare("F0F001z")==0) return sfx_reso;
-	if (value.Compare("F0F002z")==0) return sfx_mode;
-	if (value.Compare("F0F079z")>0 && value.Compare("F0F0G")<0 && value.GetLength()==7) //can be fooled :)
-		return sfx_plug; 
-	return sfx_custom; //custom/unknown
+	CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME];
+	_splitpath(GetPathName(), drive, path, fname, NULL);
+
+	CString newPath = drive;
+	newPath += path;
+
+	//Catch case where we don't have a filename yet.
+	if (fname[0] == 0) {
+		newPath += GetTitle();
+	} else {
+		newPath += fname;
+	}
+
+	switch(nNewType)
+	{
+	case MOD_TYPE_XM:  newPath += ".xm"; break;
+	case MOD_TYPE_IT:  m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? newPath+=".itp" : newPath+=".it"; break;
+	case MOD_TYPE_S3M: newPath += ".s3m"; break;
+	case MOD_TYPE_MOD: newPath += ".mod"; break;
+	default: ASSERT(false);		
+	}
+	SetPathName(newPath, FALSE);
+	UpdateAllViews(NULL, HINT_MODTYPE);
 }
 
-int CModDoc::MacroToPlugParam(CString macro)
-{
-	char* param = (char *) (LPCTSTR) macro;
-	param +=4;
-	int code = -256;
-	if ((param[0] >= '0') && (param[0] <= '9')) code = (param[0] - '0') << 4; else
-	if ((param[0] >= 'A') && (param[0] <= 'F')) code = (param[0] - 'A' + 0x0A) << 4;
-	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
-	if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
 
-	return code&0x7F;
+
+UINT CModDoc::FindAvailableChannel()
+//-------------------------------------------
+{
+	// Search for available channel
+	for (UINT j=m_SndFile.m_nChannels; j<MAX_CHANNELS; j++)	{
+		MODCHANNEL *p = &m_SndFile.Chn[j];
+		if (!p->nLength) {
+			return j;
+		}
+	}
+
+	// Not found: look for one that's stopped
+	for (UINT j=m_SndFile.m_nChannels; j<MAX_CHANNELS; j++)	{
+		MODCHANNEL *p = &m_SndFile.Chn[j];
+		if (p->dwFlags & CHN_NOTEFADE) {
+			return j;
+		}
+	}
+	
+	//Last resort: go for first virutal channel.
+	return m_SndFile.m_nChannels;
 }
-//end rewbs.xinfo
+
+void CModDoc::RecordParamChange(int plugSlot, long paramIndex) 
+//------------------------------------------------------
+{
+	CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[plugSlot].pMixPlugin;
+	if (pPlug) {
+		UINT value = pPlug->GetZxxParameter(paramIndex);
+		SendMessageToActiveViews(WM_MOD_RECORDPARAM, paramIndex, value);
+	}
+}
+
+void CModDoc::LearnMacro(int macroToSet, long paramToUse)
+//-------------------------------------------------------
+{
+	if (macroToSet<0 || macroToSet>NMACROS) {
+		return;
+	}
+	
+	//if macro already exists for this param, alert user and return
+	for (int checkMacro=0; checkMacro<NMACROS; checkMacro++)	{
+		CString macroText = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[checkMacro*32]);
+ 		int macroType = GetMacroType(macroText);
+		
+		if (macroType==sfx_plug && MacroToPlugParam(macroText)==paramToUse) {
+			CString message;
+			message.Format("Param %d can already be controlled with macro %X", paramToUse, checkMacro);
+			::MessageBox(NULL,message, "Macro exists for this param",MB_ICONINFORMATION | MB_OK);
+			return;
+		}
+	}
+
+	//set new macro
+	CHAR *pMacroToSet = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[macroToSet*32]);
+	if (paramToUse<128) {
+		wsprintf(pMacroToSet, "F0F0%Xz",paramToUse+128);
+	} else if (paramToUse<384) {
+		wsprintf(pMacroToSet, "F0F1%Xz",paramToUse-128);
+	} else {
+		CString message;
+		message.Format("Param %d beyond controllable range.", paramToUse);
+		::MessageBox(NULL,message, "Macro not assigned for this param",MB_ICONINFORMATION | MB_OK);
+		return;
+	}
+
+	CString message;
+	message.Format("Param %d can now be controlled with macro %X", paramToUse, macroToSet);
+	::MessageBox(NULL,message, "Macro assigned for this param",MB_ICONINFORMATION | MB_OK);
+	
+	return;
+}
+
+void CModDoc::SongProperties() {
+	CModTypeDlg dlg(GetSoundFile(), CMainFrame::GetMainFrame());
+	if (dlg.DoModal() == IDOK)
+	{
+		BOOL bShowLog = FALSE;
+		ClearLog();
+		if(dlg.m_nType)	{
+			if (!ChangeModType(dlg.m_nType)) return;
+			bShowLog = TRUE;
+		}
+		if ((dlg.m_nChannels >= 4) && (dlg.m_nChannels != GetSoundFile()->m_nChannels)) {
+			if(ChangeNumChannels(dlg.m_nChannels)) bShowLog = TRUE;
+		}
+		if (bShowLog) ShowLog("Conversion Status", CMainFrame::GetMainFrame());
+		SetModified();
+	}
+}

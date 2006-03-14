@@ -10,6 +10,7 @@
 #include "snddev.h"
 #include "snddevx.h"
 
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 // ISoundDevice base class
@@ -177,13 +178,17 @@ VOID CWaveDevice::Reset()
 	}
 }
 
+void CWaveDevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
+{
+
+}
+
 
 BOOL CWaveDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD)
 //--------------------------------------------------------------------------------
 {
 	ULONG nBytesWritten;
 	ULONG nLatency;
-
 	if (!m_hWaveOut) return FALSE;
 	nBytesWritten = 0;
 	nLatency = m_nBuffersPending * m_nWaveBufferSize;
@@ -504,6 +509,11 @@ BOOL CDSoundDevice::UnlockBuffer(LPVOID lpBuf1, DWORD dwSize1, LPVOID lpBuf2, DW
 }
 
 
+void CDSoundDevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
+{
+
+}
+
 BOOL CDSoundDevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD)
 //----------------------------------------------------------------------------------
 {
@@ -818,11 +828,10 @@ VOID CASIODevice::Start()
 	if (m_pAsioDrv)
 	{
 		m_bMixRunning = TRUE;
-		__try {
+		try {
 		m_pAsioDrv->start();
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-			Log("ASIO crash in start()\n");
+		} catch(...) {
+			CASIODevice::ReportASIOException("ASIO crash in start()\n");
 		}
 	}
 }
@@ -836,24 +845,21 @@ BOOL CASIODevice::Close()
 		if (m_bMixRunning)
 		{
 			m_bMixRunning = FALSE;
-			__try {
-			m_pAsioDrv->stop();
-			} __except(EXCEPTION_EXECUTE_HANDLER)
-			{
-				Log("ASIO crash in stop()\n");
+			try {
+				m_pAsioDrv->stop();
+			} catch(...) {
+				CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 			}
 		}
-		__try {
-		m_pAsioDrv->disposeBuffers();
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-			Log("ASIO crash in disposeBuffers()\n");
+		try {
+			m_pAsioDrv->disposeBuffers();
+		} catch(...) {
+			CASIODevice::ReportASIOException("ASIO crash in disposeBuffers()\n");
 		}
-		__try {
-		m_pAsioDrv->Release();
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-			Log("ASIO crash in Release()\n");
+		try {
+			m_pAsioDrv->Release();
+		} catch(...) {
+			CASIODevice::ReportASIOException("ASIO crash in Release()\n");
 		}
 		m_pAsioDrv = NULL;
 	}
@@ -871,15 +877,21 @@ VOID CASIODevice::Reset()
 	if (m_pAsioDrv)
 	{
 		m_bMixRunning = FALSE;
-		__try {
-		m_pAsioDrv->stop();
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-			Log("ASIO crash in stop()\n");
+		try {
+			m_pAsioDrv->stop();
+		} catch(...) {
+			CASIODevice::ReportASIOException("ASIO crash in stop()\n");
 		}
 	}
 }
 
+void CASIODevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
+{
+	for (UINT ich=0; ich<m_nChannels; ich++){
+		memset(m_BufferInfo[ich].buffers[dwBuffer], 0, m_nAsioBufferLen);
+	}
+
+}
 
 BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
 //-----------------------------------------------------------------------------------------
@@ -971,6 +983,7 @@ BOOL CASIODevice::FillAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWOR
 	}
 	if (m_bPostOutput) m_pAsioDrv->outputReady();
 	pSource->AudioDone(dwBufferOffset*dwSampleSize, m_nAsioBufferLen);
+
 	return TRUE;
 }
 
@@ -1260,6 +1273,20 @@ cvtloop:
 	mov word ptr [edi-2], ax
 	jnz cvtloop
 	}
+}
+
+BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
+//-------------------------------------------------------
+{
+	CHAR cBuf[1024];
+	va_list va;
+	va_start(va, format);
+	wvsprintf(cBuf, format, va);
+	AfxMessageBox(cBuf);
+	Log(cBuf);
+	va_end(va);
+	
+	return TRUE;
 }
 
 #endif // NO_ASIO
