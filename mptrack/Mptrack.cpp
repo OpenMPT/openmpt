@@ -622,7 +622,6 @@ BOOL CTrackApp::InitInstance()
 
 	// Change the registry key under which our settings are stored.
 	//SetRegistryKey(_T("Olivier Lapicque"));
-
 	// Start loading
 	BeginWaitCursor();
 
@@ -673,6 +672,13 @@ BOOL CTrackApp::InitInstance()
 		strncat(m_szStringsFileName, "mpt_intl.ini", sizeof(m_szStringsFileName));
 		m_szStringsFileName[sizeof(m_szStringsFileName)-1] = 0;
 	}
+
+	//Force use of custom ini file rather than windowsDir\executableName.ini
+	if (m_pszProfileName) {
+		free((void *)m_pszProfileName);
+	}
+	m_pszProfileName = strdup(m_szConfigFileName); 
+
 
 	LoadStdProfileSettings(10);  // Load standard INI file options (including MRU)
 

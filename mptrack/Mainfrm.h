@@ -372,6 +372,8 @@ public:
 	static DWORD m_nBufferLength;
 	static EQPRESET m_EqSettings;
 	// Pattern Setup
+	static UINT gnPatternSpacing;
+	static BOOL gbPatternVUMeters, gbPatternPluginNames, gbPatternRecord;
 	static DWORD m_dwPatternSetup, m_dwMidiSetup, m_nRowSpacing, m_nRowSpacing2, m_nKeyboardCfg, gnHotKeyMask;
 	static bool m_bHideUnavailableCtxMenuItems;
 	// GDI

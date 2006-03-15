@@ -1,0 +1,606 @@
+OpenMPT - Full Version History
+------------------------------
+
+.: bug fix
++: new feature
+-: known issue / regression
+/: change
+?: other
+(tx XYZ): thanks to XYZ for telling me about the bug
+
+
+. v 1.17.02.41
+  + <rewbs> Pattern record state is now saved to ini
+  . <rewbs> Fixed the following settings that were not saving correctly: mod document window status, row spacing, channel VU meters, channel effect visibility, Most recent files list, Toolbar settings.
+  . <rewbs> Process priority no longer defaults to high.
+
+. v 1.17.02.40
+  + <Relabsoluness> Added indicator of currently playing pattern to orderlist.
+  + <Relabsoluness> 'Loop pattern' and 'follow song' keys should now work when orderlist has focus.
+  + <rewbs> Removed registry dependencies. All settings will now be saved to ini file.
+  . <rewbs> Correcly update orderlist position when cycling through patterns
+  . <Relabsoluness> Fixed orderlist GUI update on ctrl-transition when in patternloop mode
+  . <Relabsoluness> Moving a channel should now correctly take into account record-channels and pending mutes
+  . <Relabsoluness> Switching autodelay off in the options now works for note-offs as well.
+  . <Relabsoluness> Some mod-effects like 'pattern jump' and 'break pattern' no longer conflict with pattern loop toggling.
+  . <rewbs> Fixed bad capping of random cutoff variation (tx LPChip)
+  . <rewbs> Fixed crash on loading ITP with pattern names (tx Relabsoluness)
+  . <rewbs> Fixed incorrect version number in saved files (tx Relabsoluness)
+  . <rewbs> Improved screen position restoration (tx Snu, Waxhead)
+  / <rewbs> Code cleanups: removed old hotkey code
+
+
+. v 1.17.02.39
+  + <Relabsoluness> Remove and insert channels directly from pattern editor via channel header context menu
+  + <Relabsoluness> Toggle loop pattern playback mode with a shortcut key and a checkbox above the pattern editor
+  + <Relabsoluness> The automatic note delays that are inserted when recording notes live are now optional
+  . <Relabsoluness> Fixed auto note delays so they work with S3Ms too
+  . <Relabsoluness> Fixes and improvements to displayed instrument name in pattern editor
+  . <Relabsoluness> Fixes and improvements to instrument swap from context menu
+  . <rewbs> Plugins should never cause song to be marked as modified if their GUI is not open (tx LPChip)
+  / <rewbs> Version number in executable properties now correlates with real OpenMPT version number
+  / <rewbs> Restored solo/mute in pattern editor main context menu.
+
+
+. v 1.17.02.38
+  . <rewbs> Fixed possible buffer overrun in VST event queue
+  . <rewbs> Changed handling of VSTi noteoffs to reduce unexpected "interaction" between notes on different channels (a VSTi note-on in chan1 could sometimes be blocked by a VSTi note-off on the same row in chan2) (tx ganja)
+  . <rewbs> No longer issue MIDI bank & program message every time midi channel changes - this fixes HyperCanvas behaviour (tx ganja)
+  . <rewbs> Fixed: new channel mute mode did not mute VSTis at all.
+  . <rewbs> Fixed: changing mute mode while some channels were muted prevented them from being unmuted.
+  . <rewbs> Fixed: editing a pattern from treeview by double clicking it was broken
+  . <rewbs> Editing of note column of sample map is disabled for XMs (XM doesn't save that data).
+  . <rewbs> Fixed: If you agreed to reorganized instrument during an instrument cleanup, nothing at all would happen.
+  . <rewbs> Fixed Pattern amplification had no effect on instruments mapped to "phantom samples" (tx lpchip)
+
+. v 1.17.02.37
+  + <rewbs> Added new mute mode which maintains sample synchronisation. Enable it in the global settings (last checkbox).
+  + <rewbs> Added macro presets to control MIDI ccs in midiCC window.
+  + <rewbs> Added configurable keys for Song Properties, Pattern Properties & Macro Configuration.
+  . <rewbs> Fixed incorrect volume when receiving notes from MIDI-in when beyond keyboard split mark.
+
+. v 1.17.02.36
+  + <rewbs> Added "Pass keypresses to plug" option in plugin GUI options menu, to prevent MPT from stealing keypresses from plugins that need them.
+  + <rewbs> More intelligent instrument dropdown box in patten editor will show sample name if instrument has no name, and instrument's plugin name.
+  . <rewbs> Options menu on plugin GUI sometimes failed to show checked options after closing and re-opening the window.
+  . <rewbs> Channel headers properly updated after moving them in the channel manager (tx anboi).
+  . <rewbs> Fixed crash when interpolating with keyboard shortcuts with a selection spanning a single row (tx lpchip).
+  / <rewbs> Disabled period cap to allow playback of notes below A-0 (experimental).
+  / <rewbs> Leave unavailable loop options visible (but greyed out) in sample editor context menu, to avoid confusion (tx lpchip).
+  / <rewbs> Clicking in the notemap will set the active note to be the one that was clicked on, rather than just movin up/down by 1.
+  / <rewbs> Changing the note in the notemap will no longer move down one note.
+
+ (+ <rewbs> volume commands without notes now send volume MIDI CC to plugs, but as far as I've seen, no plugs seem to respond to it.)
+
+. v 1.17.02.35
+  + <rewbs & Relabsoluness> Note delay (SDx) is written automatically during "live tracking" if there are no effects already on the existing row.
+  + <rewbs> Preliminary parameter value recording should work a bit now with follow song on. Attempts to set correct macro if it exists. Will only overwite \xx. Does not work with certain plugs that don't give idle time back to the host during mouse down (e.g. Albino, Vanguard...), still trying to understand this. Please play with this & give feedback, but don't expect miracles yet. :)
+  . <rewbs> Restored external 0-255 sample panning range with XM.
+  / <rewbs> experimental: muting a channel with a VSTi playing should turn off the active note on that channel.
+  / <rewbs> Midi pitch bend reset on each new note for that instrument's midi channel.
+
+. v 1.17.02.34
+  + <Relabsoluness> Added dynamic instrument list for Change Instrument item in pattern ctx menu.
+                    / <rewbs> Disabled it for users who have opted for the old style context menu in general settings, + other minor change.
+  + <Relabsoluness> Added "Clear selection" item in pattern ctx menu
+  / <Relabsoluness> Can now set an instrument value for notes which previously had no attached instruments.
+  + <rewbs> If you load a track with unrecognized plugins, you'll be prompted to search for the plugs on kvraudio.
+  . <rewbs> Fixed rare crash on playback if playing a song with missing plugins.
+  / <rewbs> Minor code cleanups
+
+. v 1.17.02.33
+  . <rewbs> Fixed plugin exceptions introduced 1.17.02.31 (misplaced conditional caused bad ptr in audioMasterAutomate case).
+
+. v 1.17.02.32
+  . <rewbs> Fixed typo in solo fix in 1.17.02.31.
+
+. v 1.17.02.31
+  + <rewbs> Automatically generate a macro for a param by touching that param on the plug's GUI.
+            To try it, select an unused macro from the plug GUI's Info/Macros menu, then touch a param.
+  + <rewbs> Added "unmute all" custom key.
+  . <rewbs> Restored original MPT behaviour: If the cursor is in the effect letter column, and a key is pressed that corresponds to no known effects, that keypress will be applied to the effect param column. And vice versa.(tx Emperor)
+  . <rewbs> Tentative fix: Changed effEditIdle dispatching behaviour in an attempt to fix issue with Lounge Lizard (http://www.modplug.com/forum/viewtopic.php?t=3710)
+            Please let me know if this breaks GUI refreshes for other plugs.
+  . <rewbs> Fixed: Minor bug in search and replace - searching for "compoud" effects like SDx sometimes failed.
+  . <rewbs> Fixed: It was impossible to preview simultaneous notes in the pattern editor (tx Emperor)
+  . <rewbs> Fixed: Changing a param in default plugin GUI could result in a continuous param update cycle until the param value returned by the plug stabilised.
+  . <rewbs> Fixed: Unsoloing a previously soloed channel resulted in unmute all if other channels had since been unmuted. :)
+  / <rewbs> Minor code cleanups
+  (+) <rewbs> Preliminary parameter value recording. Enable from plug GUI's Option menu.
+              However it currently does not work correctly with follow song enabled: 
+	      active mousing on a plug gui blocks the cursor, so all values get written in the same place. :)
+
+. v 1.17.02.30
+  . <rewbs> Fixed drum program being offset by 1 on MIDI export.
+            NB: MIDI import/export uses 0-127 range for midi program, whereas messages to plugins use 1-128 (0 is used to indicate that no program change is required).
+                The MIDI import/export range should be adapted to use the 1-128 range at some point.
+
+. v 1.17.02.29
+  . <rewbs> Fixed 3 digit instrument numbers when there are less  than 100 instruments. (http://www.modplug.com/forum/viewtopic.php?p=42006)
+  . <rewbs> Fixed crash in plugin DNA/NNA check we transitionning between existing and non existing instruments. (http://www.modplug.com/forum/viewtopic.php?p=42006)
+
+. v 1.17.02.28 (official RC2 release)
+  . <rewbs> Fixed sample editor display bug with "auto" zoom level.
+  . <rewbs> Internal: project configuration changes.
+
+. v 1.17.02.27
+  . <rewbs> XMs saved in OpenMPT should no longer have a bunch of blank patterns at the end when played in XMPlay.
+  . <rewbs> Some instrument properties were saved incorrectly if an instrument had been deleted (either from song cleanup or treeview).
+  / <rewbs> Hiding "Test" plugin mix mode; minor cosmetic changes.
+
+. v 1.17.02.26
+  . <rewbs> Added volume ramping on global volume change in RC2 mix mode. Should eliminate most clicks on global volume change. Try increasing general ramping in the player settings dialog if it's still too clicky.
+  . <rewbs> Arpeggio with XM was messed up because implicit transposes were not always taken into account. I introduced this bug shortly after touching the code for the very first time, over a year ago. :) I dread to think what will fall appart now this is fixed.. XM users, test away!! :) (tx LPChip)
+  / <rewbs> Plugins are no longer forcefully informed of samplerate on first playback if it has not changed since initialisation. This works around a problem we were having with Crystal where the voice oscillator type soundfont was reset on the first playback. NB: it still gets reset if you explicitly change the samplerate - we're probably still doing something wrong. Have asked Crystal developper.
+  . <rewbs> Old IT files were loading with sample volume at 0.
+  . <rewbs> Minor: Removed plugin clone button, corrected view menu to say "General" instead of "Global", implulse tracker version marker changed from "impulse tracker v3" to v8.88.
+
+
+. v 1.17.02.25
+  . <rewbs> In 117RC2 plugmix mode, applying global volume is now the last tranformation applied to the buffer. 
+            Should fix bugs in the last few builds by which global volume was taken into account multiple times.
+
+. v 1.17.02.24
+  . <rewbs> Global volume no longer applied twice on samples that are put through plugins.
+  . <rewbs> If a plugin was assigned to a channel in which a note interrupted another, the resulting ramped part of the note would not be processed by the plugin. The outcome was potential "clicks".
+  / <rewbs> Removed broken CPU usage meter.
+
+. v 1.17.02.23
+  . <rewbs> Restored loop song on general tab.
+  . <rewbs> Global volume is stored with our disfigured "XM"s.
+  . <rewbs> Initial settings explicitly marked as such.
+  / <rewbs> Changes to sample pre-amp and global volume defaults.
+  / <rewbs> Internal: optimisations to volume handling.
+
+. v 1.17.02.22
+  + <rewbs> In order to let the user achieve a good balance between sample and VSTi volumes, there have been changes & improvements to the volume handling, as exposed on the general tab:
+        --> Sliders available for "Sample volume", "VSTi volume" and "Global volume". 
+        --> "Sample volume" is in fact the old sample pre-amp slider. Note that the slider can go up to 500 (which is already pretty loud), but if you're feeling insane you can type values up to 2000 in the textbox.
+        --> Changing the VSTi volume is equivalent to changing the plugin "gain" individually for all VSTis. Same slider/textbox limitations apply as to "Sample volume".
+        --> If 1.17RC2 plugin mix mode is selected in the song properties (it is by default), Global Volume will be applied to plugins too. (NOTE: this is somewhat of a _hack_, since global volume continues to be applied separately to _all_ samples  as well.. so samples played through plugins are in fact affected _twice_ by the global volume).
+  . <rewbs> If a sample was replaced via a drag&drop onto the instrument tab, the sample properties in the sample tab (e.g. loop points etc..) were not refreshed - fixed.
+  . <rewbs> Fixed random crash on XM save if an instrument had an empty sample map (tx Skilletaudio!)
+  . <rewbs> Changing plugin's dry/wet ratio directly from the pattern with \xx: previously could trigger an unpredictable VST parameter change - fixed
+  . <rewbs> Restored amplify & change instrument in pattern ctx menu - sorry!! (no need to send me death threats about this anymore, please! :)
+  . <rewbs> Minor refresh fix to graphical parameter editor.
+  / <rewbs> removed player options from general tab to avoid confusion as to what is saved in file, in favour of button to open separate Player Settings dialog.
+
+. v 1.17.02.21
+  . <rewbs> Drags on Orderlist mark song as modified.
+  . <rewbs> Fixed auto-deletion of excess autosaves where song has no associated directory.
+  . <rewbs> Fixed option in colour setting tab to override time sig highlighting with custom highlight positions (was always getting reset to time sig highlighting before).
+  . <rewbs> Fixes to play note from VST gui.
+  . <rewbs> Second attempt at fixing stuck VSTi notes when playing during playback.
+  . <rewbs> If an effect is removed, channels pointing to that effect now display "[empty]"
+  . <rewbs> Full range song pre-amp is now saved in song with both "XM" and "IT".
+  / <rewbs> Added option to hide unavailable options in pattern ctx menu, rather than greying them out.
+  
+
+. v 1.17.02.20
+  + <rewbs> OpenMPT version saved in file, visible in song settings dialog.
+  / <rewbs> Enabled XP themes. 
+  . <rewbs> Keyconfig loader no longer reports errors in bad key config file after the 10th error, to avoid reporting hundred of errors if for example you try to load a binary by mistake.
+  . <rewbs> Song is marked as modified on tempo & volume slider move in general tab, as well as on drag selection.
+  . <rewbs> Correct pattern name displayed on first opening of pattern editor.
+  . <rewbs> Tool tips restored on pattern editor.
+  . <rewbs> The instrument and sample tab play buttons should no longer stop the song.
+  / <rewbs> Resolution of plugin default GUI parameter slider increased from 100 to 1000. I couldn't get the per-thousand symbol to display yet. :(
+  / <rewbs> Version number change - we no longer specify revision number explicitly. It is bad practice to make revision numbers external, as we have no real control over the way they change. The version number will always be in the CVS-commit comments fiel from now on.
+  + <rewbs> !! Emulate Mix Bugs Has GONE!! Now select Plugin Mix Level from song properties; it gets saved with the song now.
+               Note that there are 3 settings: 
+                 > Original (equivalent to "emulate mix bugs")
+                 > 1.17RC1  (what it was from RC1 up until this build)
+                 > 1.17RC2  (what I believe to be correct... mastering plugins report the same levels as exported WAVs with this one).
+
+  . <rewbs> ITP users are now warned that autosaves fail if their instrument paths aren't set up.
+  . <rewbs> If "use songs' original dirs" is ticked but the song has never been saved and therefore has no path, the backups will now always go in mptrack.exe's working directory as it was at startup.
+  / <rewbs> GUI now uses radiobuttons for path type selection.
+  + <rewbs> Added customisable shortcut key for toggling (un)mute on pattern transition.
+  + <rewbs> Force pattern sequence override (ctrl-left-click orderlist) now works in play-pattern mode.
+            - Known issue: orderlist GUI is not refreshed so line remains.
+  / <rewbs> Toggle (un)mute on pattern transition is now ctrl-left-click (not ctrl-right-click).
+  . <rewbs> Fixed play selected part of a sample.
+  . <rewbs> Fixed start of samples not playing when previewing them whilst song is playing (I think -  I had trouble reproducing this one :)
+  . <rewbs> Fixed stuck notes when playing VSTis during pattern transition (I think -  I had trouble reproducing this one :)
+  . <rewbs> Fixed: samples attached to instruments should never be removed in cleanups with ITP.
+  . <rewbs> Fixed build-up of NNA'ed notes whilst channel is muted, which all play together on unmute.
+  . <rewbs> Fixed XM->IT conversion of Sxx over row 32.
+  . <rewbs> Fixed: Effect interpolation works even if only param column is selected again.
+  . <rewbs> Fixed: paste, delete, drag should no longer work if recording is disabled.
+  / <rewbs> Song settings dialog cleanup. Minor instrument tab GUI cleanups. About dialog cleanups.
+  / <rewbs> Internal: "stubs" for graph tab (currently hidden) and graph data structures + unused array utilities class. 
+
+
+. v 1.17RC1 (revision 1.13.2.19)
+  + <rewbs> Ctrl-right-clicking a channel will cause it to be muted at the next pattern transition. 
+            Let me know if this is working the way you want, then I'll work on adding keyboard shortcuts, channel manager integration etc...
+  . <rewbs> Fixed "play row" only playing first tick. Should play whole row now (tx LPChip).
+  . <rewbs> Fixed broken noteoffs. (tx anboi)
+  . <rewbs> Fixed minor Channel Manager bug by which the second of two quick consecutive clicks was ignored.
+  / <rewbs> First (naive) attempt at allowing sample & intrument plaback from sample & instrument tab without stopping the track. Let me know what breaks.
+  / <rewbs> Setting a documement's "modified" flag (the asterisk) is now done in a thread safe manner if the modification come from the audio thread rather than the GUI thread. Could prevent rare crashes.
+  
+
+. v 1.17RC1 (revision 1.13.2.18)
+  / <rewbs> (internal) Pattern editor cleanups
+  / <rewbs> Recoded pattern editor context menu (in view of making it customizable)
+  + <rewbs> Interpolate notes. :)
+  . <rewbs> Fixed possible truncated lines in comments
+  . <rewbs> Fixed channel manager close bug - don't need to "open twice" anymore.
+  . <rewbs> Restored old behaviour that I had accidentally broken: Ctrl-clicking a position in the order list will schedule it to play next.
+  . <rewbs> Fixed corrupt selection bug when mouse drags to the right of last channel.
+  . <rewbs> Fixed bug by which NNA'd notes originating from muted channels would still be audible.
+  . <rewbs> Changing VSTi preset from an instrument no longer forces reselection of current bank (perf improvement on some plugs)
+  + <rewbs> Portamento (Fxx Exx) now sent to VSTis as Pitch Bend Midi CC.
+  + <rewbs> Retrig (Qxx) now works on VSTis.
+  . <rewbs> Minor VSTi volume fixes. Hope this doesn't screw your old track us too much. :(
+  . <rewbs> Fixed chunk saving for plugs with chunks less than 8 bytes (e.g. VB ffx4) - warning: might have broken loading/saving plug settings for other plugs. (tx anboi)
+  . <rewbs> Fixed estimate song with classic tempo mode.
+  [ / <rewbs> Pattern randomizer GUI only so far. No functionality yet. ]
+
+
+. v 1.17RC1 (revision 1.13.2.17)
+  / <rewbs> If autosave fails for whatever reason, options window should open automatically on Autosave page.
+  . <rewbs> Fixed memory leak on close if no keymap file could be found.
+  . <rewbs> If a broken plugin was in the plugin list, the "Select Plugin" dialog would always select it by default (tx LPChip)
+  + <rewbs> "Select Plugin" window now remembers size & position, plus other minor enhancements.
+  . <rewbs> Fixed possible crash on close if Autosave path is empty.
+  . <rewbs> Fixed additional silence that could appear at the end of rendered wavs.
+  + <rewbs> To avoid getting Settings popup when version number in registry is less than current version, use command line option: "/noSettingsOnNewVersion"
+  . <rewbs> Fix to sample view refresh bug with sample > 255.
+  . <rewbs> Fixes to eXtension Param (#), which previously only worked on channel 1, and could not extend tempo with XMs.
+
+  / <rewbs> Ericus' "alternative" tempo interpretation is now a song setting rather than a general setting.
+            You can select it in the same popup as where you set module type, num channels etc. Set "tempo mode: alternative".
+
+  + <rewbs> NEW - Precise & simplified BPM Mode! (Please test :D)
+      --> Enable it in the song setting window, where you set module type, num channels etc. Set "tempo mode: modern".
+      --> Txx (Fxx with xx>20 with XM) defines the real, exact beats per minute. Always.
+      --> The effective playback speed therefore also depends on the "rows per beat" value in the song settings.
+      --> Axx (Fxx with xx<21 with XM) continues to define the ticks per row, but does not affect playback speed per se.
+      --> Features tick-to-tick compensation for buffer size calculation rounding errors (aka high precision).
+      --> Feedback more than welcome!!
+  / <rewbs> GUI changes to accomodate for new speed mode.
+
+. v 1.17RC1 (revision 1.13.2.16)
+  . <rewbs> Fixed corrupt .mod when non existent pattern is listed in sequence.
+  . <rewbs> Autosaver is automatically disabled when save fails.
+
+. v 1.17RC1 (revision 1.13.2.15)
+  / <rewbs> Warning in custom keys log when entering a key that causes a cross-context conflict.
+  . <rewbs> Instruments can now force lowpass filter mode
+  . <rewbs> Fixed some boundary typos.
+  . <rewbs> Fixed volume changes on muting/unmuting channels.
+
+. v 1.17RC1 (revision 1.13.2.14)
+  + <rewbs> Rubbish CPU usage indicator. Dishonestly shows 10-20% less than Windows taskmanager, not sure why yet.
+  + <rewbs> Quick "Go to row/channel/pattern/order" dialog in pattern editor. Set up a custom key to use it the Pattern Editor/General category.
+  + <rewbs> List input channels & instruments (as well as input plugins) in the plugin info/input menu.
+  + <rewbs> Can play VSTi in plugin's window if you have set up an intrument that is assigned to that plugin.
+            If you have multiple instruments assigned to that plugin, you can select which one is used from the info/input menu.
+  + <rewbs> Option to force built-in filter into highpass mode on particular instruments.
+  + <rewbs> Cutoff / resonance random variation.
+  + <rewbs> Optional per-instrument resampling mode selection!
+  + <rewbs> Move a plugin from an FX slot to another FX slot (hopefully automatically updates references throughout track, so it should sound unchanged).
+  + <rewbs> Inset a blank FX slot between 2 FX slots. Again, song should sound unchanged.
+  . <rewbs> Prevented another very rare hang on stop which could occur when more than 255 notes were active simultaneously on a same plugin.
+  / <rewbs> Previously, in the instrument view, "Attack" represented the sample ramping where more attack meant less ramping.
+            The property has been renamed to ramping and inverted so as to be more intuitive.
+  / <rewbs> Replaced a bunch of "Modplug Tracker" strings with "OpenMPT". :)
+  / <rewbs> Code cleanups, particularly in IT/ITP/ITI/XM/XI extended info saving. Extensive testing is TODO, including 2-way compat with previous versions.
+
+. v 1.17RC1 (revision 1.13.2.13)
+  . <rewbs> More fixes to plugs that try to get tempo before we've had a chance to init them properly.
+  . <rewbs> Backed out first attempt at reducing hangs on stop (from rev 1.13.2.10) - it was pointless. I think 1.13.2.11 really solved it though.
+  / <rewbs> Plugin window's factory preset menu improvements for plugs with lots of presets 
+  + <rewbs> Can now access info about a plug from the Plugin's window, such as inputs, outputs and relevant macros. FX slot number shown in window title.
+  + <rewbs> Added prev&next preset and randomize params shortcut keys (take effect when plugin's window has focus).
+  / <rewbs> Reduced plugin idle call rate from 100Hz to 50Hz, in accordance with some discussion on the VST sdk mailing list.
+  + <rewbs> Added macro to control dry/wet ratio (==volume for VSTis) from pattern. Zxx and \xx should both work.
+  . <rewbs> Fixed minor imprecision in \xx slide calculations.
+  + <rewbs> If macros are used on a channel to which no plugin is assigned, but an instrument with an assigned plugin is active on that channel, the macros will be effective in the instrument's plugin. Be careful now!
+  + <rewbs> Fixed old bug that was preventing custom MIDI messages from being sent to plugs. So you can now send MIDI CC commands to your plugs!
+            For example, to send Modwheel commands with Zxx on midi chan 0, create a custom macro with the value "B001z" (Only Zxx works for now, not \xx).
+  / <rewbs> Minor enhancenments to Zxx Macro window. TODO: add support to easily add MIDI CC macros.
+  . <rewbs> Minor GUI refresh fixes (tx xtr1m).
+
+
+
+. v 1.17RC1 (revision 1.13.2.12)
+  . <rewbs> Fix to plugs that try to get tempo before we've had a chance to init them properly.
+
+. v 1.17RC1 (revision 1.13.2.11)
+  + <rewbs> Time signature (rows per beat & rows per measure) now saved with songs.
+  + <rewbs> Added next and previous document shortcut keys (that work :).
+  . <rewbs> IT files can now save tempo > 255.
+  . <rewbs> Various minor fixes relating to marking file as modified.
+  . <rewbs> Another stab at the elusive hangs on stop. Let me know if there's any improvement.
+  / <rewbs> IT files now save the number of channels you choose, rather than shrinking to fit & removing the last unused channels. I like it this way, yell if you don't.
+
+
+
+
+. v 1.17RC1 (revision 1.13.2.10)
+  + <rewbs> Can now bypass plug from plug's window and from tree view.
+  + <rewbs> Added commands to navigate up/down by spacing
+  . <rewbs> Improved handling of keystrokes when textbox has focus.
+  . <rewbs> Fixed auto-chord detection bugs which caused it to screw up in the last rows of the pattern.
+  / <rewbs> Changes to plugin threading in the hope of reducing hangs. I can't reproduce the hangs on my system so this is a stab in the dark.
+  . <rewbs>  Closing a document via a shortcut key no longer bypasses modified check - tx diamond.
+  . <rewbs> Changing a plug param now marks song as modified.
+  . <rewbs> Fixed minor solo/mute bug ("solo" could unexepectedly behave like unmute all in some cases)  - tx Gazus Snake
+  . <rewbs> Sample GUI not getting updated with samples > 255 - tx POPS125
+  . <rewbs> Fixed some tiny memory leaks.
+  / <rewbs> Minor code cleanups
+
+. v 1.17RC1 (revision 1.13.2.9)
+  . <rewbs> In autosave dialog, will check backup path exists (if it is to be used). Also Autosave should issue a warning if save fails for whatever reason.
+  . <rewbs> File marked as modified on all sample/intrument/general tab changes (some had been missed).
+  . <rewbs> Change to command handling when textbox has focus
+  . <rewbs> Idle time dished out to plugs at 100Hz rather than 10Hz and from TrackApp::OnIdle rather than MainFrame::OnTimer
+  . <rewbs> Internal: Edit & Continue debugging enabled in debug build settings.
+  . <rewbs> Cxx no longer ignored after 255 loops
+  . <rewbs> Autosaver will now save is autsaver is disabled. :)
+  . <rewbs> Samplemap and instrument name should be accessible with XM files now.
+  . <rewbs> Mousewheel should scroll pattern even if focus is in some elements above the pattern editor.
+(I believe winME and maybe win98 users might still have trouble with the mousewheel. I'm not sure why this is. If anyone has any ideas, let me know.)
+  . <rewbs> No MPT commands will be executed if a texbox has focus, i.e. textboxes will work again now.
+  . <rewbs> Minor optimisations to instrument view envelope drawing
+  . <rewbs> Internal: a couple of code cleanups to remove a few compilation warnings.
+  / <rewbs> processReplacing() is now favoured over process() in VST plugs
+  . <rewbs> Plugin automatically bypassed if an exception is thrown in process()/processReplacing()
+  . <rewbs> Switched to C++ exceptions handlers throughout, which will actually get compiled into the release builds.
+  + <rewbs> Select plugin dialog is now resizable. :D
+  . <rewbs> Other minor fixes (Options dialog now remembers if autosave tab was selected, zoom level cycling in sample view fixed...)
+
+. v 1.17RC1 (revision 1.13.2.8) 
+   / <rewbs> If a plug identifies itself as willing to recieve midi events, midi channel 1 will automatically be selected when it is assigned to an instrument
+   + <rewbs> Option to emulate some old mixing bugs, in case your old track sounds too different in this version  (could happen with some distortion plugins for example) and you aren't able to recover the sound by adjusting the levels
+   . <rewbs> Minor GUI fixes
+
+. v 1.17RC0 (revision 1.13.2.7) 
+   . <rewbs> Fixed crash in instrument view in win 98. 
+   / <rewbs> Set octave keys are now customisable. Not that they will no longer be automatically assigned to freed number keys.
+             So if you map a note to key 8 then unmap it, you'll have to explicitly set Set Octave 8 back to key 8 again.
+
+. v 1.17RC0 (revision 1.13.2.6) 
+   . <rewbs> Minor GUI fixes
+
+. v 1.17RC0 (revision 1.13.2.5) 
+   . <rewbs> Fixed ridiculous mono ITI loading bug.
+
+. v 1.17RC0 (revision 1.13.2.4) 
+   + <rewbs> Autosave function. Be sure to configure it to your taste.
+   . <rewbs> Some VST threading & initialisation improvements, might prevent some hangs/crashes.
+   . <rewbs> Plugs that save an entire bank in their chunks should be better at restoring their active program on load
+   . <rewbs> cursor dependant play commands now play from start of song even before cursor position is initialised.
+   . <rewbs> Minor wave rendering fixes
+   + <rewbs> Added IT style mix paste command, for those of you who just weren't ready for *real* mixpasting ;)
+   + <rewbs> Option to show estimated "real BPM", just as it is communicated to plugins.
+   / <rewbs> Minor GUI changes
+   / <rewbs> Various internal cleanups
+   . <ericus> Mastervolume calculation fixes
+   . <ericus> VSTi mixing & volume fixes
+   . <ericus> Float conversion fixes
+   
+. v 1.17RC0 (revision 1.13.2.3) 
+   / <rewbs> When wrap and continuous scroll are off, cursor jump/snap now goes to row 0 or last row when it should go beyond, rather than doing nothing.
+   . <rewbs> modifier keys are no longer reset on pattern editor focus loss
+   . <rewbs> fixed scrollpos jumping to row 0 on change pattern
+   . <rewbs> if the full pattern can be visible in window, pattern is moved down so row 0 is visible and scrollbar is not needed. (tx lpchip)
+   . <rewbs> some VU meter fixes
+   . <rewbs> instrument view slider optimisations (we think it affects just WinXP)
+   . <rewbs> fixed hang on song stop with some OhmForce plugs (and maybe others).
+   . <rewbs> fixed minor slider GUI bug with some OhmForce plugs (and maybe others).
+   . <rewbs> various minor fixes: instrument open/save/new shortcut key propagation, VSTi playback at volume 0 ...
+   + <rewbs> Extra statusbar info in pattern view. Ugly but useful (particularly for macros).
+   / <rewbs> Minor VST destruction memory management change - may increase or decrease crash occurences. :)
+   / <rewbs> internal: changed to make thread priority normal in debug mode, for easier hang debugging.
+   / <ericus> Restored VSTi original output level 
+   . <ericus> floating point plugin parameter edit box fix 
+   / <ericus> (internal) removed unwanted (at this point) vst parallel routing feature
+   . <rewbs> Checked  preset in VST dialog menu is updated when preset is changed from inside the plug's on GUI.
+   + <rewbs> Assign a MIDI bank to an instrument, for plugs that support it (e.g. Edirol Orchestral) (tx ganja)
+   / <rewbs> Changes/clarifications to custom keys GUI  (tx lpchip)
+   + <rewbs> Improvements to note recording with record select (from midi-in as well as normal keyboard): 
+       . If note off recording is enabled, note offs appear in the channel in which the note was played, even if the cursor has moved to another channel.
+       . Channels in which a note is still being played is "locked", so no new notes can interrupt it, unless there are no other unlocked record select channels.
+   . <rewbs> Minor VST compliancy improvements (fixes elusive stuck notes with synthedit plugs on song loop)
+   / <rewbs> On adding a plugin to a song, MPT checks it against a list of known problematic plugins and warns you if necessary.
+   . <rewbs> MIDI-in fixes
+   . <rewbs> Save full precision instrument panning and fadeout values in IT and XM, sample panning range limited to 0-64 at GUI level, to correlate with the range that gets saved. 
+   . <rewbs> Fix to IT loading algorithm when last sample is empty (MPTX data was ignored)
+   . <rewbs> Fix to XM loading algorithm when macro definitions embedded in file
+   . <rewbs> Zxx Macro window fixes
+
+
+
+. v 1.16.0215a
+   . <rewbs> Various minor fixes (registry, VST, GUI)
+   + <rewbs> "Overwrite effect type" mode in effect param visualiser
+   / <rewbs> Zxx macro GUI total revamp
+   / <rewbs> Time stretcher GUI changes, stretch loop points
+   + <rewbs> new custom keys: 
+		. Toggle focus between pattern editor<->order list
+		. Open/Save/New instrument/sample (focus must be in bottom part
+		. Pattern editor copy and lose selection
+   / <ericus> GUI Cleanup
+   . <ericus> Plugin 32bit float conversion and mixing fixes
+   + <ericus> Plugin gain control
+   + <ericus> Pitch shifer / time stretcher in sample view! (non real-time :)
+   + <rewbs> added key command to insert new pattern from pattern editor.
+   . <rewbs> XM saving changes/fixes.
+   . <rewbs> Added support for VSTs which change their window size. (tx goor00)
+   . <rewbs> Minor GUI fixes.
+   / <rewbs> Changed behaviour of calls to VST plugs on loop song or on replay song without stopping. No longer do suspend/resume, just kill all notes. 
+             This avoids pause caused by plugs with a heavy "resume" method, but means buffers are no longer cleared.
+             [Work in progress - some VSTis don't stop notes, not sure why yet]
+   . <rewbs> fixes to chunk-based FXP loading/saving. (tx Diamond)
+   . <rewbs> fix to allow VST synchronisation when rendering to wav. Added fix for MP3 export too.
+
+. v 1.16.0214a
+   . <rewbs> fix to note playback when pattern record is disabled (tx ganja).
+   . <rewbs> fix for VST plugs with >2 outputs, though it is currently assumed they are stereo. (tx Muox, ganja, ericus for further fixes)
+   / <rewbs> added button on wave writer dialog to open player settings rather than checkbox to enable "HQ resampling".
+   + <rewbs> GUI for resampler & default ramping configuration
+   . <ericus> fixed wav export at >44.1kHz and >24bit.
+   + <ericus> added per-instrument sample ramping
+   + <ericus> Channel manager updates
+   + <ericus> Multiple mix modes for plugins
+   / <ericus> new internal instrument format
+   + <ericus> polyphase resampler tuning and fixes (enabled polyphase on filtered samples...)
+   + <rewbs> Added "copy and lose selection" command as a general pattern command, for those who like the cursor to be restored when they copy.
+     You obviously don't have to map a key to this command if you don't want to use it.
+   + <rewbs> Automatic chord detection, a la Ericus: Assuming you're in a channel with note recording enabled and you have other channels with note recording enabled, if you hit two note keys within a given time, MPT should put the notes on the same row. You can set the interval time in keyboard config dialog.
+   . <rewbs> Fixed velocity recording from midi in. (tx Squirrel Havoc)
+   . <rewbs> Fixed stuck notes when playing VSTis from pattern in record enabled channels.
+   . <rewbs> Fixed file corruption bug on saving after deleting an instrument (tx LPChip)
+   / <rewbs> Midi-in now uses same note entry code as normal keyboard note entry. (tx Squirrel Havoc)
+   / <rewbs> Added shrink and grow selection to pattern context menu.
+
+. v 1.16.0213a
+   ? Untested: incomplete changes in midi in pattern recording (taken direct from Ericus' build - probably broken in my build atm).
+   ? Untested: merged from Ericus' build: 'rearrange samples' menu entry in edit->cleanup
+   ? Untested: merged from Ericus' build: alternative BPM/Speed interpretation method
+   ? Untested: merged from Ericus' build: IT project files (.itp)
+   + merged from Ericus' build: Channel manager window. 
+   + merged from Ericus' build (kind of): keyboard split - allows you to have 2 active instruments, distinguishable by the note you enter. 
+   + merged from Ericus' build (kind of): second channel record group - if enabled, chords for instrument 1 go to channel group1, whereas notes for instrument 2 go to channel group 2. In the future all notes will be redirected to the appropriate record channels iff they are enabled.
+   / ^^ now sends "all sounds off" to plugs; note that few plugs support it, but those that do should stop quickly, without playing decay, unlike with == where decay is played. ^^ also explicitly sends a note off to all 128 notes on that tracker and midi channel, regardless of active notemap, so it might deal with some stuck note cases. == is more conservative. This is a bit shoddy and will hopefully all be clarified in the future.
+   . Some VSTi stuck note cases fixed... some still remain. (tx LPChip )
+   + For people who just cannot cope with the slightest change, I added alternative == and ^^ commands which do not enter the current instrument number. (tx LPChip ;)
+   + Added button to access an instrument's plug's gui from the pattern, if possible. (tx LPChip)
+   / experiment: audio device left open when playing notes in pattern but song not playing (device still closes on stop song though)
+   . Sample map window fixes (tx Ganja)
+   . Various VSTi fixes (tx LPChip)
+   + Notes audible in sample map window in instrument control; notes also play when you change sample. Notes do not yet play in "keyboard" view.
+   ? NOT merged from Ericus' build: non binary solo/mute behaviour (aka multiple solo channels - why not just unmute channels? :).
+   . merged from Ericus' build: ITI note sample map save fix
+   + merged from Ericus' build: WAV export update (24 bits wave out + channel-based wave files output mode)
+   + merged from Ericus' build: tempo/speed/volume (in general tab) realtime update + tempo up to 512 bpm
+   + merged from Ericus' build: option to free associate samples when removing one or more instrument(s)
+   + merged from Ericus' build: Polyphase interpolation on stereo samples.
+   + merged from Ericus' build: default enable/disable midi in record setup option added
+   + merged from Ericus' build: parameter extension pattern effect (# command - key customisable)
+   + merged from Ericus' build: pattern size up to 1024 rows
+   + merged from Ericus' build: 256MB samples
+   . reduced max channels from 256 to 128, so NNA etc still have a chance to work (tx Ericus)
+   / some wet/dry slider cosmetic enhancements
+   / merged from Ericus's build: load/save preset on General tab
+   + merged from Ericus's build: factory presets menus for VSTs on general tab and VST gui (some known issues e.g. with Amplitube).
+   . Various keyboard fixes (tx Diamond).
+   . merged from Ericus's build: live VSTi playback on channel 1 bugfix.
+   / Set Instrument command no longer requires instrument column to be selected (tx LPChip)
+   / Cosmetic changes in instrument pane (tx LPChip)
+   . Another attempt at getting rid of beeps with alt-combo keys that do not open menu items and are assigned to commands, without screwing everything up. (tx LPChip)
+
+. v 1.16.0212a
+   - Can no longer select "Normalize" when writing to wave, as this can produce incorrect output with certain VSTs.
+     For now, use an external editor to normalize you wavs.
+   . Extra safety checks for plugins that don't return parameters between 0 and 1 exactly.
+   . Tentative fix to silent dx plugins on non SSE enabled cpus.
+   + Added "IT Style" clear field commands. Using this, clearing the note field automatically clears the instrument field. 
+   / Swapped left and right mouse button action in effect visualiser (now use left button to "paint" nodes, right to move a specific node).
+   + "Fill gaps" mode in effect visualiser, to automatically enter effects in blank spaces.
+   
+
+. v 1.16.0211a
+   . Fixed crashes/bugs in instrument view when playing high notes. (tx LP)
+   . Fixed (tx LP)
+   / Removed "Unused?" text under Midi Prog listbox - hehe Ganja, does it actually work?! :)
+
+   
+. v 1.16.0210a
+   . Fixed warnings if no keyboard map file is found in registry (on first run)
+   + Shortcut key to toggle "follow song".
+   + Can change/access plugins froms pattern editor. Can also open editor via shortcut key.
+   . Custom keys fixes
+   + Default plugin GUI.
+   . Fixed some more stuck note cases.
+   . Fix scrolling bug when toggling follow song with whole pattern visible on screen. (tx LPChip)
+   + Load/Save VST preset
+   + Randomize VST parameters
+   / Porta slides occur on tick 0 iff speed is 1 tick per row. (tx felineki)
+   + "Report bug" button on the GUI takes you to beta tester's forum :)
+   + Optional "row guidelines" in instrument envelope editor.
+   / Optimised instrument envelope GUI to avoid flickering on resize. Various other cosmetic changes.
+   . Fixed "Remove channels" window
+   . Fixed beeps with certain alt-combo keys
+   . Offset in the volume column now works with retrigs.   
+   / Effect Keys are updated automatically when you change module type. You cannot customise them anymore.
+   . Improved VST idle time handling. Should fix the bug by which CPU usage would jump to 100% with certain combinations of plugs.
+   . (internal) Improved VSTGui compliancy
+
+. 20041012
+   . (internal) some VST compliancy improvements on start/stop
+   + VSTTimeInfo data sent 
+   - Cutter offset still does not restart with multilens; other plugs also have some sync issues...
+     > Modulation sync seems OK with FabFilter but not with Multilens.
+       ---> could be that transport is never reset.
+   + VSTi can be assigned to an instrument, not just a channel 
+       (I would encourage this method from now on - consider assigning VSTis to channels deprecated)
+   / Started re-styling the instrument view to reflect this.
+   + More sensible VSTi polyphony, should behave more like ample-based normal instruments:
+      Two subsequent notes sent to a same VSTi on a same Midi channel from a same tracker channel will cause the first note to be NoteOff'ed just before the second plays... EXCEPT if NNA is set to continue. 
+      Got it? :) In other words, NNAs are kinda working for VSTis (but Note Off, Cut and Fade all do the same thing)
+   + Same with DNAs.
+   . Fixed some issues with VSTi playback on note entry. Should now stop note on key release, like with sample-based normal instrs.     
+   - Bugs with Xlutop Chainer and some other plugs (more f'ing stuck notes) - working on it.
+   - Increased memory footprint, possible performance regressions
+   + Can now enable/disable all notes on key hold with a single click in the key config dialog
+   / No longer need to press 'set' in key config dialog: changes are recorded automatically.
+   . Loading patterns of less than 4 rows screws up. We now prevent users from setting pattern size to less than 4. Just use a pattern break command. (tx Ganja) (bug introduced before opensourcing)
+
+. 20041009
+   . Tempo slides now behave as specified in it.txt. (tx ManaSmack) (bug introduced before opensourcing)
+   + Can now save stereo ITIs 
+   + Removed 64 sample limit on ITIs (can now load/save instruments with up to 120 samples, i.e. one separate sample for each note)
+   . Fixed bug which allowed entering notes higher than B-9 (even though they didn't play) (bug introduced 20040910)
+   . Fixed graphical parameter editor key. (tx LPChip) (bug introduced 20040910)
+   . Fixed transpose octave down key (bug introduced 20040910)
+   . Fixed note fade on key release in instrument view. (tx Ganja) bug introduced 20040910 
+   . Prevented multiple note playback in sample view, except on chord playback. (tx LPChip) (bug introduced 20040910)
+   . Finished custom note handling for instrument notemapper and treeview (tx Ganja) (bug introduced 20040910)
+   . This version shouldn't corrupt the custom key registry setting used by previous versions of MPT. (bug introduced 20040910)
+   + Can now save orders past blank order, a la IT2. (tx Nofold)
+   + Some pattern undo improvements (still far from perfect!)
+   + Stretch/Shrink selection (a la IT2)
+
+  
+. 20040910
+   + Fully customisable keys, with profile loading and saving, multiple keys for same command, etc..
+   + Some new commands (e.g. Snap to highlight...)
+   / Enhanced some old commands (e.g. homing vertically twice homes horizontally...)
+   / Changed scope of some commands (e.g. play pattern should work from anywhere...)
+   - Lots of keypress related bugs, please help me isolate them
+   . Some minor VSTi fixes
+   + Oxx (offset) kind of works in the volume command
+   ? Half-finished "velocity" command (Ask LPChip about this).
+   / Wicked new splash by Nofold!
+   ? Internal changes.
+   ? Various other minor bits n bobs
+
+. --------- Wild Prebeta: 2004.02.24 ----------------
+   + Each individual view (general/pattern/samples/intruments/comments) remembers its own horizontal splitter position. 
+   + If you enter notes in a channel to which a VSTi has been assigned, and you're using an instrument with a midi channel send, you should hear the VSTi play as you enter the notes.
+   / Minor cosmetic changes, including about dialog image by Snu & Shableep. :)
+
+. v2004.02.22
+   + Conditional compilation for MMX,SSE,AMD assembly routines. This should allow compilation on Vanilla VC6 compilers.
+   + 255 channel support with updated IT loader/saver. It should not impact existing .it modules and allows for safe loading and saving of
+  >64 channel modules.
+
+
+. v2004.02.16
+   + A Dry/wet slider for each plugin - values should save and load in this version, and be cleanly ignored by older versions.
+   + Tick resolution midi macro slide. Use \xx command instead of Zxx if you want your plugin param to slide to xx over the course of that row rather than brutally jumping there. Should also work on built-in cutoff+resonance. For an example of what this effect does, download: http://www.soal.org/expMPT/paramSlideDemo.zip .
+   + Effect param graphical editor prototype. Left click modifies a single node, right click & drag to "draw".
+   Warning, things get quite sluggish if you're visualizing many rows and make the window quite large.
+   + Mixpaste, just like in IT2
+   + Option to have "follow song" disabled by default under general settings.
+   + SDx works on VSTis.
+
+
+Questions/comments/bug reports?
+-------------------------------
+Visit http://www.modplug.com/forums, or write to robin@soal.org.
