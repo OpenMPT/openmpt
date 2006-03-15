@@ -11,13 +11,6 @@
 #include ".\ctrl_pat.h"
 
 //////////////////////////////////////////////////////////////
-// Load/Save pattern settings in the registry
-
-static UINT gnPatternSpacing = 0;
-static BOOL gbPatternVUMeters = FALSE;
-static BOOL gbPatternPluginNames = TRUE;	//rewbs.patPlugNames
-
-//////////////////////////////////////////////////////////////
 // CCtrlPatterns
 
 BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
@@ -104,9 +97,10 @@ CCtrlPatterns::CCtrlPatterns()
 //----------------------------
 {
 	m_nInstrument = 0;
-	m_bRecord = TRUE;
-	m_bVUMeters = gbPatternVUMeters;
-	m_bPluginNames = gbPatternPluginNames;	 	//rewbs.patPlugNames
+	
+	m_bVUMeters = CMainFrame::gbPatternVUMeters;
+	m_bPluginNames = CMainFrame::gbPatternPluginNames;	 	//rewbs.patPlugNames
+	m_bRecord = CMainFrame::gbPatternRecord;
 	m_nDetailLevel = 4;
 }
 
@@ -167,9 +161,9 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_SpinSpacing.SetRange(0, 16);
 	m_SpinInstrument.SetRange(-1, 1);
 	m_SpinInstrument.SetPos(0);
-	m_SpinSpacing.SetPos(gnPatternSpacing);
+	m_SpinSpacing.SetPos(CMainFrame::gnPatternSpacing);
 	m_EditPatName.SetLimitText(MAX_PATTERNNAME);
-	SetDlgItemInt(IDC_EDIT_SPACING, gnPatternSpacing);
+	SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::gnPatternSpacing);
 	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
 	m_OrderList.SetFocus(); 
 
@@ -675,9 +669,9 @@ void CCtrlPatterns::OnSpacingChanged()
 {
 	if ((m_EditSpacing.m_hWnd) && (m_EditSpacing.GetWindowTextLength() > 0))
 	{
-		gnPatternSpacing = GetDlgItemInt(IDC_EDIT_SPACING);
-		if (gnPatternSpacing > 16) gnPatternSpacing = 16;
-		SendViewMessage(VIEWMSG_SETSPACING, gnPatternSpacing);
+		CMainFrame::gnPatternSpacing = GetDlgItemInt(IDC_EDIT_SPACING);
+		if (CMainFrame::gnPatternSpacing > 16) CMainFrame::gnPatternSpacing = 16;
+		SendViewMessage(VIEWMSG_SETSPACING, CMainFrame::gnPatternSpacing);
 	}
 }
 
@@ -915,6 +909,7 @@ void CCtrlPatterns::OnPatternRecord()
 {
 	UINT nState = m_ToolBar.GetState(IDC_PATTERN_RECORD);
 	m_bRecord = ((nState & TBSTATE_CHECKED) != 0);
+	CMainFrame::gbPatternRecord=m_bRecord;
 	SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 	SwitchToView();
 }
@@ -925,18 +920,18 @@ void CCtrlPatterns::OnPatternVUMeters()
 {
 	UINT nState = m_ToolBar.GetState(ID_PATTERN_VUMETERS);
 	m_bVUMeters = ((nState & TBSTATE_CHECKED) != 0);
-	gbPatternVUMeters = m_bVUMeters;
+	CMainFrame::gbPatternVUMeters = m_bVUMeters;
 	SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
 	SwitchToView();
 }
 
 //rewbs.patPlugName
 void CCtrlPatterns::OnPatternViewPlugNames()
-//-------------------------------------
+//------------------------------------------
 {
 	UINT nState = m_ToolBar.GetState(ID_VIEWPLUGNAMES);
 	m_bPluginNames = ((nState & TBSTATE_CHECKED) != 0);
-	gbPatternPluginNames = m_bPluginNames;
+	CMainFrame::gbPatternPluginNames = m_bPluginNames;
 	SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
 	SwitchToView();
 }

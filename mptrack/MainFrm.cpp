@@ -118,11 +118,11 @@ static gdwLastMixActiveTime = 0;
 static DWORD gsdwTotalSamples = 0;
 static DWORD gdwPlayLatency = 0;
 
-static UINT gnPatternSpacing = 0;
-static BOOL gbPatternVUMeters = FALSE;
-static BOOL gbPatternPluginNames = TRUE;	//rewbs.patPlugNames
-
 // Globals
+UINT CMainFrame::gnPatternSpacing = 0;
+BOOL CMainFrame::gbPatternRecord = TRUE;
+BOOL CMainFrame::gbPatternVUMeters = FALSE;
+BOOL CMainFrame::gbPatternPluginNames = TRUE;
 DWORD CMainFrame::gdwNotificationType = MPTNOTIFY_DEFAULT;
 UINT CMainFrame::m_nFilterIndex = 0;
 UINT CMainFrame::m_nLastOptionsPage = 0;
@@ -352,6 +352,7 @@ void CMainFrame::LoadIniSettings()
 	CHAR collectedString[INIBUFFERSIZE];
 
 	gcsPreviousVersion = GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
+	gbMdiMaximize = GetPrivateProfileLong("Display", "MDIMaximize", true, iniFile);
 	glTreeWindowWidth = GetPrivateProfileLong("Display", "MDITreeWidth", 160, iniFile);
 	glTreeSplitRatio = GetPrivateProfileLong("Display", "MDITreeRatio", 128, iniFile);
 	glGeneralWindowHeight = GetPrivateProfileLong("Display", "MDIGeneralHeight", 178, iniFile);
@@ -399,6 +400,7 @@ void CMainFrame::LoadIniSettings()
 	gnPatternSpacing = GetPrivateProfileDWord("Pattern Editor", "Spacing", 1, iniFile);
 	gbPatternVUMeters = GetPrivateProfileDWord("Pattern Editor", "VU-Meters", false, iniFile);
 	gbPatternPluginNames = GetPrivateProfileDWord("Pattern Editor", "Plugin-Names", true, iniFile);	
+	gbPatternRecord = GetPrivateProfileDWord("Pattern Editor", "Record", true, iniFile);	
 	gnAutoChordWaitTime = GetPrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", 60, iniFile);	
 
 	GetPrivateProfileString("Paths", "Songs_Directory", m_szModDir, m_szModDir, INIBUFFERSIZE, iniFile);
@@ -615,12 +617,8 @@ VOID CMainFrame::Initialize()
 	m_nTimer = SetTimer(1, MPTTIMER_PERIOD, NULL);
 	
 //rewbs: reduce to normal priority during debug for easier hang debugging
-#ifdef NDEBUG
-	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-#endif 
-#ifdef _DEBUG
+	//SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
-#endif
 
 	// Setup Keyboard Hook
 	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());
@@ -813,13 +811,9 @@ void CMainFrame::OnClose()
 		gpSoundDevice = NULL;
 		END_CRITICAL();
 	}
-	// Save Window Settings
+	// Save Settings
 	SaveIniSettings();
 
-
-	// Save chords
-	theApp.SaveChords(Chords);
-	SaveBarState("Toolbars");
 	EndWaitCursor();
 	CMDIFrameWnd::OnClose();
 }
@@ -836,6 +830,7 @@ void CMainFrame::SaveIniSettings()
     GetWindowPlacement(&wpl);
 	WritePrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), iniFile);
 
+	WritePrivateProfileLong("Display", "MDIMaximize", gbMdiMaximize, iniFile);
 	WritePrivateProfileLong("Display", "MDITreeWidth", glTreeWindowWidth, iniFile);
 	WritePrivateProfileLong("Display", "MDITreeRatio", glTreeSplitRatio, iniFile);
 	WritePrivateProfileLong("Display", "MDIGeneralHeight", glGeneralWindowHeight, iniFile);
@@ -883,6 +878,7 @@ void CMainFrame::SaveIniSettings()
 	WritePrivateProfileDWord("Pattern Editor", "Spacing", gnPatternSpacing, iniFile);
 	WritePrivateProfileDWord("Pattern Editor", "VU-Meters", gbPatternVUMeters, iniFile);
 	WritePrivateProfileDWord("Pattern Editor", "Plugin-Names", gbPatternPluginNames, iniFile);	
+	WritePrivateProfileDWord("Pattern Editor", "Record", gbPatternRecord, iniFile);	
 	WritePrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);	
 
 	WritePrivateProfileString("Paths", "Songs_Directory", m_szModDir, iniFile);
@@ -910,6 +906,9 @@ void CMainFrame::SaveIniSettings()
 	WritePrivateProfileLong("AutoSave", "UseOriginalPath", m_pAutoSaver->GetUseOriginalPath(), iniFile);
 	WritePrivateProfileString("AutoSave", "Path", m_pAutoSaver->GetPath(), iniFile);
 	WritePrivateProfileString("AutoSave", "FileNameTemplate", m_pAutoSaver->GetFilenameTemplate(), iniFile);
+
+	theApp.SaveChords(Chords);
+	SaveBarState("Toolbars");
 }
 
 bool CMainFrame::WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile)
