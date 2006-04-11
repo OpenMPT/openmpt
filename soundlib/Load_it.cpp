@@ -601,6 +601,7 @@ mpts:
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
 				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
 				case 'DGV.': fadr = reinterpret_cast<BYTE*>(&m_nDefaultGlobalVolume);	 break;
+				case 'RP..': fadr = reinterpret_cast<BYTE*>(&m_nRestartPos);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -1007,6 +1008,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
 				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
 				case 'DGV.': fadr = reinterpret_cast<BYTE*>(&m_nDefaultGlobalVolume);	 break;
+				case 'RP..': fadr = reinterpret_cast<BYTE*>(&m_nRestartPos);	 break;
 			}
 
 			if (fadr != NULL) {					// if field code recognized
@@ -1996,6 +1998,579 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 #pragma warning(default:4100)
 #endif // MODPLUG_NO_FILESAVE
 
+//HACK: This is a quick fix. Needs to be better integrated into player and GUI.
+//And need to split into subroutines and eliminate code duplication with SaveIT.
+BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName) 
+//------------------------------------------------
+{
+	const int IT_MAX_CHANNELS=64;
+	DWORD dwPatNamLen, dwChnNamLen;
+	ITFILEHEADER header;
+	ITINSTRUMENT iti;
+	ITSAMPLESTRUCT itss;
+	BYTE smpcount[(MAX_SAMPLES+7)/8];
+	DWORD inspos[MAX_INSTRUMENTS];
+	DWORD patpos[MAX_PATTERNS];
+	DWORD smppos[MAX_SAMPLES];
+	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2;
+	WORD patinfo[4];
+// -> CODE#0006
+// -> DESC="misc quantity changes"
+	BYTE chnmask[IT_MAX_CHANNELS];
+	MODCOMMAND lastvalue[IT_MAX_CHANNELS];
+	UINT nChannels = min(m_nChannels, IT_MAX_CHANNELS);
+// -! BEHAVIOUR_CHANGE#0006
+	BYTE buf[512];
+	FILE *f;
+
+
+	if ((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return FALSE;
+	memset(inspos, 0, sizeof(inspos));
+	memset(patpos, 0, sizeof(patpos));
+	memset(smppos, 0, sizeof(smppos));
+	// Writing Header
+	memset(&header, 0, sizeof(header));
+	dwPatNamLen = 0;
+	dwChnNamLen = 0;
+	header.id = 0x4D504D49;
+	lstrcpyn(header.songname, m_szNames[0], 27);
+	header.reserved1 = 0x1004;
+	header.ordnum = 0;
+	header.ordnum=MAX_ORDERS;
+	while (header.ordnum>0 && Order[header.ordnum-1]==0xFF) {
+		header.ordnum--;
+	}
+	header.patnum = MAX_PATTERNS;
+	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) {
+		header.patnum--;
+	}
+
+	header.insnum = m_nInstruments;
+	header.smpnum = m_nSamples;
+	header.cwtv = 0x888;	// We don't use these version info fields any more.
+	header.cmwt = 0x888;	// Might come up as "Impulse Tracker 8" file in XMPlay. :)
+	header.flags = 0x0001;
+	header.special = 0x0006;
+	if (m_nInstruments) header.flags |= 0x04;
+	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
+	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
+	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
+	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
+	header.globalvol = m_nDefaultGlobalVolume >> 1;
+	header.mv = m_nSongPreAmp;
+	if (header.mv < 0x20) header.mv = 0x20;
+	if (header.mv > 0x7F) header.mv = 0x7F;
+	header.speed = m_nDefaultSpeed;
+ 	header.tempo = min(m_nDefaultTempo,255);  //Limit this one to 255, we save the real one as an extension below.
+	header.sep = 128;
+	dwHdrPos = sizeof(header) + header.ordnum;
+	// Channel Pan and Volume
+	memset(header.chnpan, 0xFF, 64);
+	memset(header.chnvol, 64, 64);
+	for (UINT ich=0; ich<nChannels; ich++)
+	{
+		header.chnpan[ich] = ChnSettings[ich].nPan >> 2;
+		if (ChnSettings[ich].dwFlags & CHN_SURROUND) header.chnpan[ich] = 100;
+		header.chnvol[ich] = ChnSettings[ich].nVolume;
+		if (ChnSettings[ich].dwFlags & CHN_MUTE) header.chnpan[ich] |= 0x80;
+/*		if (ChnSettings[ich].szName[0])
+		{
+			dwChnNamLen = (ich+1) * MAX_CHANNELNAME;
+		}
+*/
+	}
+//	if (dwChnNamLen) dwExtra += dwChnNamLen + 8;
+/*#ifdef SAVEITTIMESTAMP
+	dwExtra += 8; // Time Stamp
+#endif
+*/
+	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
+	{
+		header.flags |= 0x80;
+		header.special |= 0x08;
+		dwExtra += sizeof(MODMIDICFG);
+	}
+	// Pattern Names
+/*	if ((m_nPatternNames) && (m_lpszPatternNames))
+	{
+		dwPatNamLen = m_nPatternNames * MAX_PATTERNNAME;
+		while ((dwPatNamLen >= MAX_PATTERNNAME) && (!m_lpszPatternNames[dwPatNamLen-MAX_PATTERNNAME])) dwPatNamLen -= MAX_PATTERNNAME;
+		if (dwPatNamLen < MAX_PATTERNNAME) dwPatNamLen = 0;
+		if (dwPatNamLen) dwExtra += dwPatNamLen + 8;
+	}
+*/	// Mix Plugins
+	//dwExtra += SaveMixPlugins(NULL, TRUE);
+	// Comments
+	if (m_lpszSongComments)
+	{
+		header.special |= 1;
+		header.msglength = strlen(m_lpszSongComments)+1;
+		header.msgoffset = dwHdrPos + dwExtra + header.insnum*4 + header.patnum*4 + header.smpnum*4;
+	}
+	// Write file header
+	fwrite(&header, 1, sizeof(header), f);
+	fwrite(Order, 1, header.ordnum, f);
+	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
+	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
+	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
+	// Writing editor history information
+	{
+/*#ifdef SAVEITTIMESTAMP
+		SYSTEMTIME systime;
+		FILETIME filetime;
+		WORD timestamp[4];
+		WORD nInfoEx = 1;
+		memset(timestamp, 0, sizeof(timestamp));
+		fwrite(&nInfoEx, 1, 2, f);
+		GetSystemTime(&systime);
+		SystemTimeToFileTime(&systime, &filetime);
+		FileTimeToDosDateTime(&filetime, &timestamp[0], &timestamp[1]);
+		fwrite(timestamp, 1, 8, f);
+#else
+*/		WORD nInfoEx = 0;
+		fwrite(&nInfoEx, 1, 2, f);
+//#endif
+	}
+	// Writing midi cfg
+	if (header.flags & 0x80)
+	{
+		fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
+	}
+	// Writing pattern names
+/*	if (dwPatNamLen)
+	{
+		DWORD d = 0x4d414e50;
+		fwrite(&d, 1, 4, f);
+		fwrite(&dwPatNamLen, 1, 4, f);
+		fwrite(m_lpszPatternNames, 1, dwPatNamLen, f);
+	}
+*/	// Writing channel Names
+/*	if (dwChnNamLen)
+	{
+		DWORD d = 0x4d414e43;
+		fwrite(&d, 1, 4, f);
+		fwrite(&dwChnNamLen, 1, 4, f);
+		UINT nChnNames = dwChnNamLen / MAX_CHANNELNAME;
+		for (UINT inam=0; inam<nChnNames; inam++)
+		{
+			fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
+		}
+	}
+*/	// Writing mix plugins info
+/*	SaveMixPlugins(f, FALSE);
+*/	// Writing song message
+	dwPos = dwHdrPos + dwExtra + (header.insnum + header.smpnum + header.patnum) * 4;
+	if (header.special & 1)
+	{
+		dwPos += strlen(m_lpszSongComments) + 1;
+		fwrite(m_lpszSongComments, 1, strlen(m_lpszSongComments)+1, f);
+	}
+	// Writing instruments
+	for (UINT nins=1; nins<=header.insnum; nins++)
+	{
+		BOOL bKbdEx = FALSE;
+		BYTE keyboardex[120];
+
+		memset(&iti, 0, sizeof(iti));
+		iti.id = 0x49504D49;	// "IMPI"
+		//iti.trkvers = 0x211;
+		iti.trkvers = 0x220;	//rewbs.itVersion
+		if (Headers[nins])
+		{
+			INSTRUMENTHEADER *penv = Headers[nins];
+			memset(smpcount, 0, sizeof(smpcount));
+			memcpy(iti.filename, penv->filename, 12);
+			memcpy(iti.name, penv->name, 26);
+			iti.mbank = penv->wMidiBank;
+			iti.mpr = penv->nMidiProgram;
+			iti.mch = penv->nMidiChannel;
+			iti.nna = penv->nNNA;
+			if (penv->nDCT<DCT_PLUGIN) iti.dct = penv->nDCT; else iti.dct =0;	
+			iti.dca = penv->nDNA;
+			iti.fadeout = penv->nFadeOut >> 5;
+			iti.pps = penv->nPPS;
+			iti.ppc = penv->nPPC;
+			iti.gbv = (BYTE)(penv->nGlobalVol << 1);
+			iti.dfp = (BYTE)penv->nPan >> 2;
+			if (!(penv->dwFlags & ENV_SETPANNING)) iti.dfp |= 0x80;
+			iti.rv = penv->nVolSwing;
+			iti.rp = penv->nPanSwing;
+			iti.ifc = penv->nIFC;
+			iti.ifr = penv->nIFR;
+			iti.nos = 0;
+			for (UINT i=0; i<120; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
+			{
+				UINT smp = penv->Keyboard[i];
+				if ((smp) && (!(smpcount[smp>>3] & (1<<(smp&7)))))
+				{
+					smpcount[smp>>3] |= 1 << (smp&7);
+					iti.nos++;
+				}
+				iti.keyboard[i*2] = penv->NoteMap[i] - 1;
+				iti.keyboard[i*2+1] = smp;
+				if (smp > 0xff) bKbdEx = TRUE;
+				keyboardex[i] = (smp>>8);
+			} else keyboardex[i] = 0;
+			// Writing Volume envelope
+			if (penv->dwFlags & ENV_VOLUME) iti.volenv.flags |= 0x01;
+			if (penv->dwFlags & ENV_VOLLOOP) iti.volenv.flags |= 0x02;
+			if (penv->dwFlags & ENV_VOLSUSTAIN) iti.volenv.flags |= 0x04;
+			if (penv->dwFlags & ENV_VOLCARRY) iti.volenv.flags |= 0x08;
+			iti.volenv.num = (BYTE)penv->nVolEnv;
+			iti.volenv.lpb = (BYTE)penv->nVolLoopStart;
+			iti.volenv.lpe = (BYTE)penv->nVolLoopEnd;
+			iti.volenv.slb = penv->nVolSustainBegin;
+			iti.volenv.sle = penv->nVolSustainEnd;
+			// Writing Panning envelope
+			if (penv->dwFlags & ENV_PANNING) iti.panenv.flags |= 0x01;
+			if (penv->dwFlags & ENV_PANLOOP) iti.panenv.flags |= 0x02;
+			if (penv->dwFlags & ENV_PANSUSTAIN) iti.panenv.flags |= 0x04;
+			if (penv->dwFlags & ENV_PANCARRY) iti.panenv.flags |= 0x08;
+			iti.panenv.num = (BYTE)penv->nPanEnv;
+			iti.panenv.lpb = (BYTE)penv->nPanLoopStart;
+			iti.panenv.lpe = (BYTE)penv->nPanLoopEnd;
+			iti.panenv.slb = penv->nPanSustainBegin;
+			iti.panenv.sle = penv->nPanSustainEnd;
+			// Writing Pitch Envelope
+			if (penv->dwFlags & ENV_PITCH) iti.pitchenv.flags |= 0x01;
+			if (penv->dwFlags & ENV_PITCHLOOP) iti.pitchenv.flags |= 0x02;
+			if (penv->dwFlags & ENV_PITCHSUSTAIN) iti.pitchenv.flags |= 0x04;
+			if (penv->dwFlags & ENV_PITCHCARRY) iti.pitchenv.flags |= 0x08;
+			if (penv->dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
+			iti.pitchenv.num = (BYTE)penv->nPitchEnv;
+			iti.pitchenv.lpb = (BYTE)penv->nPitchLoopStart;
+			iti.pitchenv.lpe = (BYTE)penv->nPitchLoopEnd;
+			iti.pitchenv.slb = (BYTE)penv->nPitchSustainBegin;
+			iti.pitchenv.sle = (BYTE)penv->nPitchSustainEnd;
+			// Writing Envelopes data
+			for (UINT ev=0; ev<25; ev++)
+			{
+				iti.volenv.data[ev*3] = penv->VolEnv[ev];
+				iti.volenv.data[ev*3+1] = penv->VolPoints[ev] & 0xFF;
+				iti.volenv.data[ev*3+2] = penv->VolPoints[ev] >> 8;
+				iti.panenv.data[ev*3] = penv->PanEnv[ev] - 32;
+				iti.panenv.data[ev*3+1] = penv->PanPoints[ev] & 0xFF;
+				iti.panenv.data[ev*3+2] = penv->PanPoints[ev] >> 8;
+				iti.pitchenv.data[ev*3] = penv->PitchEnv[ev] - 32;
+				iti.pitchenv.data[ev*3+1] = penv->PitchPoints[ev] & 0xFF;
+				iti.pitchenv.data[ev*3+2] = penv->PitchPoints[ev] >> 8;
+			}
+		} else
+		// Save Empty Instrument
+		{
+			for (UINT i=0; i<120; i++) iti.keyboard[i*2] = i;
+			iti.ppc = 5*12;
+			iti.gbv = 128;
+			iti.dfp = 0x20;
+			iti.ifc = 0xFF;
+		}
+		if (!iti.nos) iti.trkvers = 0;
+		// Writing instrument
+		if (bKbdEx) *((int *)iti.dummy) = 'MPTX';
+		inspos[nins-1] = dwPos;
+		dwPos += sizeof(ITINSTRUMENT);
+		fwrite(&iti, 1, sizeof(ITINSTRUMENT), f);
+		if (bKbdEx)
+		{
+			dwPos += 120;
+			fwrite(keyboardex, 1, 120, f);
+		}
+
+		//------------ rewbs.modularInstData
+/*		if (Headers[nins])
+		{
+			long modularInstSize = 0;
+			UINT ModInstID = 'INSM';
+			fwrite(&ModInstID, 1, sizeof(ModInstID), f);	// mark this as an instrument with modular extensions
+			long sizePos = ftell(f);				// we will want to write the modular data's total size here
+			fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write a DUMMY size, just to move file pointer by a long
+			
+			//Write chunks
+			UINT ID;
+			{	//VST Slot chunk:
+				ID='PLUG';
+				fwrite(&ID, 1, sizeof(int), f);
+				INSTRUMENTHEADER *penv = Headers[nins];
+				fwrite(&(penv->nMixPlug), 1, sizeof(BYTE), f);
+				modularInstSize += sizeof(int)+sizeof(BYTE);
+			}
+*/			//How to save your own modular instrument chunk:
+	/*		{
+				ID='MYID';
+				fwrite(&ID, 1, sizeof(int), f);
+				instModularDataSize+=sizeof(int);
+				
+				//You can save your chunk size somwhere here if you need variable chunk size.
+				fwrite(myData, 1, myDataSize, f);
+				instModularDataSize+=myDataSize;
+			}
+	*/
+/*			//write modular data's total size
+			long curPos = ftell(f);			// remember current pos
+			fseek(f, sizePos, SEEK_SET);	// go back to  sizePos
+			fwrite(&modularInstSize, 1, sizeof(modularInstSize), f);	// write data
+			fseek(f, curPos, SEEK_SET);		// go back to where we were.
+			
+			//move forward 
+			dwPos+=sizeof(ModInstID)+sizeof(modularInstSize)+modularInstSize;
+		}
+*/		//------------ end rewbs.modularInstData
+	}
+	// Writing sample headers
+	memset(&itss, 0, sizeof(itss));
+	for (UINT hsmp=0; hsmp<header.smpnum; hsmp++)
+	{
+		smppos[hsmp] = dwPos;
+		dwPos += sizeof(ITSAMPLESTRUCT);
+		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
+	}
+	// Writing Patterns
+	for (UINT npat=0; npat<header.patnum; npat++)
+	{
+		DWORD dwPatPos = dwPos;
+		UINT len;
+		if (!Patterns[npat]) continue;
+		patpos[npat] = dwPos;
+		patinfo[0] = 0;
+		patinfo[1] = PatternSize[npat];
+		patinfo[2] = 0;
+		patinfo[3] = 0;
+		// Check for empty pattern
+		if (PatternSize[npat] == 64)
+		{
+			MODCOMMAND *pzc = Patterns[npat];
+			UINT nz = PatternSize[npat] * nChannels;
+			for (UINT iz=0; iz<nz; iz++)
+			{
+				if ((pzc[iz].note) || (pzc[iz].instr)
+				 || (pzc[iz].volcmd) || (pzc[iz].command)) break;
+			}
+			if (iz == nz)
+			{
+				patpos[npat] = 0;
+				continue;
+			}
+		}
+		fwrite(patinfo, 8, 1, f);
+		dwPos += 8;
+		memset(chnmask, 0xFF, sizeof(chnmask));
+		memset(lastvalue, 0, sizeof(lastvalue));
+		MODCOMMAND *m = Patterns[npat];
+		for (UINT row=0; row<PatternSize[npat]; row++)
+		{
+			len = 0;
+			for (UINT ch=0; ch<nChannels; ch++, m++)
+			{
+				BYTE b = 0;
+				UINT command = m->command;
+				UINT param = m->param;
+				UINT vol = 0xFF;
+				UINT note = m->note;
+				if (note) b |= 1;
+				if ((note) && (note < 0xFE)) note--;
+				if (m->instr) b |= 2;
+				if (m->volcmd)
+				{
+					UINT volcmd = m->volcmd;
+					switch(volcmd)
+					{
+					case VOLCMD_VOLUME:			vol = m->vol; if (vol > 64) vol = 64; break;
+					case VOLCMD_PANNING:		vol = m->vol + 128; if (vol > 192) vol = 192; break;
+					case VOLCMD_VOLSLIDEUP:		vol = 85 + ConvertVolParam(m->vol); break;
+					case VOLCMD_VOLSLIDEDOWN:	vol = 95 + ConvertVolParam(m->vol); break;
+					case VOLCMD_FINEVOLUP:		vol = 65 + ConvertVolParam(m->vol); break;
+					case VOLCMD_FINEVOLDOWN:	vol = 75 + ConvertVolParam(m->vol); break;
+					case VOLCMD_VIBRATO:		vol = 203; break;
+					case VOLCMD_VIBRATOSPEED:	vol = 203 + ConvertVolParam(m->vol); break;
+					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m->vol); break;
+					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m->vol); break;
+					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m->vol); break;
+					case VOLCMD_VELOCITY:		vol = 213 + ConvertVolParam(m->vol); break; //rewbs.velocity
+					case VOLCMD_OFFSET:			vol = 223 + ConvertVolParam(m->vol); break; //rewbs.volOff
+					default:					vol = 0xFF;
+					}
+				}
+				if (vol != 0xFF) b |= 4;
+				if (command)
+				{
+					S3MSaveConvert(&command, &param, TRUE);
+					if (command) b |= 8;
+				}
+				// Packing information
+				if (b)
+				{
+					// Same note ?
+					if (b & 1)
+					{
+						if ((note == lastvalue[ch].note) && (lastvalue[ch].volcmd & 1))
+						{
+							b &= ~1;
+							b |= 0x10;
+						} else
+						{
+							lastvalue[ch].note = note;	
+							lastvalue[ch].volcmd |= 1;
+						}
+					}
+					// Same instrument ?
+					if (b & 2)
+					{
+						if ((m->instr == lastvalue[ch].instr) && (lastvalue[ch].volcmd & 2))
+						{
+							b &= ~2;
+							b |= 0x20;
+						} else
+						{
+							lastvalue[ch].instr = m->instr;
+							lastvalue[ch].volcmd |= 2;
+						}
+					}
+					// Same volume column byte ?
+					if (b & 4)
+					{
+						if ((vol == lastvalue[ch].vol) && (lastvalue[ch].volcmd & 4))
+						{
+							b &= ~4;
+							b |= 0x40;
+						} else
+						{
+							lastvalue[ch].vol = vol;
+							lastvalue[ch].volcmd |= 4;
+						}
+					}
+					// Same command / param ?
+					if (b & 8)
+					{
+						if ((command == lastvalue[ch].command) && (param == lastvalue[ch].param) && (lastvalue[ch].volcmd & 8))
+						{
+							b &= ~8;
+							b |= 0x80;
+						} else
+						{
+							lastvalue[ch].command = command;
+							lastvalue[ch].param = param;
+							lastvalue[ch].volcmd |= 8;
+						}
+					}
+					if (b != chnmask[ch])
+					{
+						chnmask[ch] = b;
+						buf[len++] = (ch+1) | 0x80;
+						buf[len++] = b;
+					} else
+					{
+						buf[len++] = ch+1;
+					}
+					if (b & 1) buf[len++] = note;
+					if (b & 2) buf[len++] = m->instr;
+					if (b & 4) buf[len++] = vol;
+					if (b & 8)
+					{
+						buf[len++] = command;
+						buf[len++] = param;
+					}
+				}
+			}
+			buf[len++] = 0;
+			dwPos += len;
+			patinfo[0] += len;
+			fwrite(buf, 1, len, f);
+		}
+		fseek(f, dwPatPos, SEEK_SET);
+		fwrite(patinfo, 8, 1, f);
+		fseek(f, dwPos, SEEK_SET);
+	}
+	// Writing Sample Data
+	for (UINT nsmp=1; nsmp<=header.smpnum; nsmp++)
+	{
+		MODINSTRUMENT *psmp = &Ins[nsmp];
+		memset(&itss, 0, sizeof(itss));
+		memcpy(itss.filename, psmp->name, 12);
+		memcpy(itss.name, m_szNames[nsmp], 26);
+		itss.id = 0x53504D49;
+		itss.gvl = (BYTE)psmp->nGlobalVol;
+		if (m_nInstruments)
+		{
+			for (UINT iu=1; iu<=m_nInstruments; iu++) if (Headers[iu])
+			{
+				INSTRUMENTHEADER *penv = Headers[iu];
+				for (UINT ju=0; ju<128; ju++) if (penv->Keyboard[ju] == nsmp)
+				{
+					itss.flags = 0x01;
+					break;
+				}
+			}
+		} else
+		{
+			itss.flags = 0x01;
+		}
+		if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
+		if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
+		if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
+		if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
+		itss.C5Speed = psmp->nC4Speed;
+		if (!itss.C5Speed) itss.C5Speed = 8363;
+		itss.length = psmp->nLength;
+		itss.loopbegin = psmp->nLoopStart;
+		itss.loopend = psmp->nLoopEnd;
+		itss.susloopbegin = psmp->nSustainStart;
+		itss.susloopend = psmp->nSustainEnd;
+		itss.vol = psmp->nVolume >> 2;
+		itss.dfp = psmp->nPan >> 2;
+		itss.vit = autovibxm2it[psmp->nVibType & 7];
+		itss.vis = psmp->nVibRate;
+		itss.vid = psmp->nVibDepth;
+		itss.vir = (psmp->nVibSweep < 64) ? psmp->nVibSweep * 4 : 255;
+		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
+		if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
+		UINT flags = RS_PCM8S;
+#ifndef NO_PACKING
+		if (nPacking)
+		{
+			if ((!(psmp->uFlags & (CHN_16BIT|CHN_STEREO)))
+			 && (CanPackSample(psmp->pSample, psmp->nLength, nPacking)))
+			{
+				flags = RS_ADPCM4;
+				itss.cvt = 0xFF;
+			}
+		} else
+#endif // NO_PACKING
+		{
+			if (psmp->uFlags & CHN_STEREO)
+			{
+				flags = RS_STPCM8S;
+				itss.flags |= 0x04;
+			}
+			if (psmp->uFlags & CHN_16BIT)
+			{
+				itss.flags |= 0x02;
+				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
+			}
+		}
+		itss.samplepointer = dwPos;
+		fseek(f, smppos[nsmp-1], SEEK_SET);
+		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
+		fseek(f, dwPos, SEEK_SET);
+		if ((psmp->pSample) && (psmp->nLength))
+		{
+			dwPos += WriteSample(f, psmp, flags);
+		}
+	}
+
+	//Save hacked-on extra info
+//	SaveExtendedInstrumentProperties(Headers, header.insnum, f);
+//	SaveExtendedSongProperties(f);
+
+	// Updating offsets
+	fseek(f, dwHdrPos, SEEK_SET);
+	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
+	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
+	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
+	fclose(f);
+	return TRUE;
+
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // IT 2.14 compression
 
@@ -2548,6 +3123,13 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	size = sizeof(m_nDefaultGlobalVolume);		
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nDefaultGlobalVolume, 1, size, f);	
+
+	code = 'RP..';							//write m_nRestartPos
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nRestartPos);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nRestartPos, 1, size, f);	
+
 
 	return;
 }

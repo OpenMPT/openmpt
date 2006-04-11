@@ -2253,12 +2253,10 @@ void CCommandSet::SetupCommands()
 	commands[kcChangeLoopStatus].isDummy = false;
 	commands[kcChangeLoopStatus].Message = "Toggle loop pattern";
 
-
-/*	commands[kcToggleLoopSong].UID = 1777;
-	commands[kcToggleLoopSong].isHidden = false;
-	commands[kcToggleLoopSong].isDummy = false;
-	commands[kcToggleLoopSong].Message = "Toggle loop song";
-*/
+	commands[kcFileExportCompat].UID = 1777;
+	commands[kcFileExportCompat].Message = "File/Export to standard IT/XM";
+	commands[kcFileExportCompat].isHidden = false;
+	commands[kcFileExportCompat].isDummy = false;
 
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{

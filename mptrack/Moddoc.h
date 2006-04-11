@@ -258,6 +258,7 @@ public:
 	afx_msg void OnFileWaveConvert();
 	afx_msg void OnFileMP3Convert();
 	afx_msg void OnFileMidiConvert();
+	afx_msg void OnFileCompatibilitySave();
 	afx_msg void OnPlayerPlay();
 	afx_msg void OnPlayerStop();
 	afx_msg void OnPlayerPause();

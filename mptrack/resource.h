@@ -40,6 +40,7 @@
 #define ID_PATTERN_CHANNELMANAGER       202
 #define IDR_ENVELOPES                   203
 #define ID_INDICATOR_CPU                203
+#define ID_FILE_EXPORTCOMPAT            204
 #define IDB_MAINBAR                     300
 #define IDB_IMAGELIST                   301
 #define IDB_PATTERNS                    302
@@ -546,7 +547,6 @@
 #define IDC_PATTERN_PLAYFROMSTART       2026
 #define IDC_PATTERN_STOP                2027
 #define IDC_PATTERN_RECORD              2028
-#define IDC_PATTERN_FOLLOWSONG          3029
 #define IDC_PATTERN_NEW                 2030
 #define IDC_PATTERN_OCTAVELINK          2031
 #define IDC_SPIN_SPACING                2032
@@ -738,6 +738,7 @@
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302
 #define IDC_EDIT_RPB                    2303
+#define IDC_PATTERN_FOLLOWSONG          3029
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -939,6 +940,8 @@
 #define ID_PATTERN_ADDCHANNEL_AFTER     59149
 #define ID_PATTERN_REMOVECHANNEL        59150
 #define ID_PATTERN_REMOVECHANNELDIALOG  59151
+#define ID_Menu                         59200
+#define ID_FILE_SAVECOMPAT              59202
 
 // Next default values for new objects
 // 
@@ -946,7 +949,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        510
-#define _APS_NEXT_COMMAND_VALUE         59200
+#define _APS_NEXT_COMMAND_VALUE         59203
 #define _APS_NEXT_CONTROL_VALUE         2255
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

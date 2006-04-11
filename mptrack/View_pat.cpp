@@ -2315,7 +2315,7 @@ void CViewPattern::OnSetSelInstrument()
 {
 	CModDoc *pModDoc;
 	CSoundFile *pSndFile;
-	UINT nIns = GetCurrentInstrument();
+	BYTE nIns = static_cast<BYTE>(GetCurrentInstrument());
 	MODCOMMAND *p;
 	BOOL bModified;
 	
@@ -2334,14 +2334,15 @@ void CViewPattern::OnSetSelInstrument()
 	UINT startChan = GetSelectionStartChan();
 	UINT endChan   = GetSelectionEndChan();
 
-	for (UINT r=startRow; r<endRow+1; r++)
-	{
-		for (UINT c=startChan; c<endChan+1; c++)
-		{
+	for (UINT r=startRow; r<endRow+1; r++) {
+		for (UINT c=startChan; c<endChan+1; c++) {
+
 			p = pSndFile->Patterns[m_nPattern] + r * pSndFile->m_nChannels + c;
-			if (p->note && p->instr != (BYTE)nIns)
-			{
-				p->instr = (BYTE)nIns;
+			
+			// If a note or an instr is present on the row, do the change, if required.
+			// Do not set instr if note and instr are both blank.
+			if ( (p->note||p->instr) && (p->instr!=nIns) ) {
+				p->instr = nIns;
 				bModified = TRUE;
 			}
 		}

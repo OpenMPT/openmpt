@@ -8,6 +8,14 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v1.17.02.42
+  + <rewbs> "Compatibility export" in file menu: save as 'plain' IT, without all of OpenMPT's crap. IT only for now (not XM).
+  . <rewbs> Set instrument in pattern editor should work when no note is specified (tx Torvus - http://lpchip.com/modplug/viewtopic.php?t=470)
+  . <rewbs> Restart position saved in IT (tx LPChip - http://lpchip.com/modplug/viewtopic.php?t=473)
+  . <rewbs> Loop song now works even if restart pos falls on +++ (tx LPChip - http://lpchip.com/modplug/viewtopic.php?t=463)
+  . <rewbs> Last used tempo is applied even when playback is triggered from instrument panel. (tx LPChip - http://lpchip.com/modplug/viewtopic.php?t=480)
+  / <rewbs> User now gets a warning when loading MDA Degrade (tx fisk0 - http://lpchip.com/modplug/viewtopic.php?t=467)
+
 
 . v 1.17.02.41
   + <rewbs> Pattern record state is now saved to ini
