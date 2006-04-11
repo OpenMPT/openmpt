@@ -172,6 +172,7 @@ PS..			nPanSwing;
 PSB.			nPanSustainBegin;
 PSE.			nPanSustainEnd;
 R...			nResampling;
+RP..	[EXT]	nRestartPos;
 RPB.	[EXT]	nRowsPerBeat;
 RPM.	[EXT]	nRowsPerMeasure;
 RS..			nResSwing;

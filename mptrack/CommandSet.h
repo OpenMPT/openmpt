@@ -57,6 +57,7 @@ enum CommandID
 	kcFileSaveAsWave,
 	kcFileSaveAsMP3,
 	kcFileSaveMidi,
+	kcFileExportCompat,
 	kcPrevDocument,
 	kcNextDocument,
 	kcFileImportMidiLib,

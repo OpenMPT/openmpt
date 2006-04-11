@@ -1040,7 +1040,8 @@ typedef struct _PROBLEMATIC_PLUG
 #define NUM_PROBLEMPLUGS 3
 static _PROBLEMATIC_PLUG gProblemPlugs[NUM_PROBLEMPLUGS] =
 {
-	{'VstP', 'Ni4S', 1, "Native Instruments B4", "*v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5.*"},
+	{'VstP', 'Ni4S', 1, "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5.  *"},
+	{'VstP', 'mdaC', 1, "MDA Degrade", "*  This plugin can cause OpenMPT to behave erratically.\r\nYou should try SoundHack's Decimate, ConcreteFX's Lowbit or Subtek's LoFi Plus instead.  *"},
 };
 
 bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug) 
@@ -1048,10 +1049,10 @@ bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug)
 	CString s;
 	for (int p=0; p<NUM_PROBLEMPLUGS; p++)
 	{
-		if ( (gProblemPlugs[p].id2 == plug->dwPluginId2) && gProblemPlugs[p].id2
+		if ( (gProblemPlugs[p].id2 == plug->dwPluginId2)
 			/*&& (gProblemPlugs[p].id1 == plug->dwPluginId1)*/)
 		{
-			s.Format("WARNING: This plugin has been identified as %s,\r\n which is known to have the following problem with MPT:\r\n\r\n%s\r\n\r\n(see here for more information: http://www.modplug.com/forum/viewtopic.php?p=36930#36930)\r\n\r\nDo you want to continue to load?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
+			s.Format("WARNING: This plugin has been identified as %s,\r\nwhich is known to have the following problem with OpenMPT:\r\n\r\n%s\r\n\r\nWould you like to continue to load this plugin?", gProblemPlugs[p].name, gProblemPlugs[p].problem);
 			return (AfxMessageBox(s, MB_YESNO)  == IDYES);
 		}
 	}
@@ -2564,6 +2565,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 			pCh->uNoteOnMap[i][trackChannel]=0;
 			MidiSend(dwMidiCode|(i<<8));
 		}
+	
 	} 
 
 	// All "active" notes off on this midi and tracker channel

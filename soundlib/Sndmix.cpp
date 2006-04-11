@@ -611,7 +611,8 @@ BOOL CSoundFile::ProcessRow()
 		m_nTickCount = 0;
 		m_nRow = m_nNextRow;
 		// Reset Pattern Loop Effect
-		if (m_nCurrentPattern != m_nNextPattern) m_nCurrentPattern = m_nNextPattern;
+		if (m_nCurrentPattern != m_nNextPattern) 
+			m_nCurrentPattern = m_nNextPattern;
 		// Check if pattern is valid
 		if (!(m_dwSongFlags & SONG_PATTERNLOOP))
 		{
@@ -629,16 +630,14 @@ BOOL CSoundFile::ProcessRow()
 
 						//rewbs.instroVSTi: stop all VSTi at end of song, if looping.
 						StopAllVsti();
-
 						m_nMusicSpeed = m_nDefaultSpeed;
 						m_nMusicTempo = m_nDefaultTempo;
 						m_nGlobalVolume = m_nDefaultGlobalVolume;
-						for (UINT i=0; i<MAX_CHANNELS; i++)
-						{
+						for (UINT i=0; i<MAX_CHANNELS; i++)	{
 							Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
 							Chn[i].nFadeOutVol = 0;
-							if (i < m_nChannels)
-							{
+
+							if (i < m_nChannels) {
 								Chn[i].nGlobalVol = ChnSettings[i].nVolume;
 								Chn[i].nVolume = ChnSettings[i].nVolume;
 								Chn[i].nPan = ChnSettings[i].nPan;
@@ -648,8 +647,8 @@ BOOL CSoundFile::ProcessRow()
 								Chn[i].nOldOffset = 0;
 								Chn[i].nOldHiOffset = 0;
 								Chn[i].nPortamentoDest = 0;
-								if (!Chn[i].nLength)
-								{
+
+								if (!Chn[i].nLength) {
 									Chn[i].dwFlags = ChnSettings[i].dwFlags;
 									Chn[i].nLoopStart = 0;
 									Chn[i].nLoopEnd = 0;
@@ -662,31 +661,42 @@ BOOL CSoundFile::ProcessRow()
 
 
 					}
+
+					//Handle Repeat position
 					if (m_nRepeatCount > 0) m_nRepeatCount--;
 					m_nCurrentPattern = m_nRestartPos;
-					m_nRow = 0;
-					if ((Order[m_nCurrentPattern] >= MAX_PATTERNS) || (!Patterns[Order[m_nCurrentPattern]])) return FALSE;
-				} else
-				{
+					m_nRow = 0;					
+					//If restart pos points to +++, move along
+					while (Order[m_nCurrentPattern] == 0xFE) {
+						m_nCurrentPattern++;
+					}
+					//Check for end of song or bad pattern
+					if ( (Order[m_nCurrentPattern] >= MAX_PATTERNS) 
+						|| (!Patterns[Order[m_nCurrentPattern]]) ) 	{
+						return FALSE;
+					}
+
+				} else {
 					m_nCurrentPattern++;
 				}
-				m_nPattern = (m_nCurrentPattern < MAX_ORDERS) ? Order[m_nCurrentPattern] : 0xFF;
-				if ((m_nPattern < MAX_PATTERNS) && (!Patterns[m_nPattern])) m_nPattern = 0xFE;
+
+				if (m_nCurrentPattern < MAX_ORDERS) {
+					m_nPattern = Order[m_nCurrentPattern];
+				} else {
+					m_nPattern = 0xFF;
+				}
+
+				if ((m_nPattern < MAX_PATTERNS) && (!Patterns[m_nPattern])) {
+					m_nPattern = 0xFE;
+				}
 			}
 			m_nNextPattern = m_nCurrentPattern;
 
 	#ifdef MODPLUG_TRACKER
-//		if (m_nInstruments) ProcessMidiOut(); //rewbs.VSTnoteDelay
 		if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition)) return FALSE;
 	#endif // MODPLUG_TRACKER
 		}
-//#ifdef MODPLUG_TRACKER
-//		if (m_dwSongFlags & SONG_STEP)
-//		{
-//			m_dwSongFlags &= ~SONG_STEP;
-//			m_dwSongFlags |= SONG_PAUSED;
-//		}
-//#endif // MODPLUG_TRACKER
+
 		// Weird stuff?
 		if ((m_nPattern >= MAX_PATTERNS) || (!Patterns[m_nPattern])) return FALSE;
 		// Should never happen
@@ -766,9 +776,6 @@ BOOL CSoundFile::ReadNote()
 	////////////////////////////////////////////////////////////////////////////////////
 	m_nTotalCount++;
 	if (!m_nMusicTempo) return FALSE;
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-
 
 	switch(m_nTempoMode) {
 
@@ -796,47 +803,22 @@ BOOL CSoundFile::ReadNote()
 		default:
 			m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
 	}
-	/*
-	if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
-		m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
-	}
-	else {
-		m_nBufferCount = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
-	}
-	*/
-// -! NEW_FEATURE#0022
 	
 	m_nSamplesPerTick = m_nBufferCount; //rewbs.flu
 
-#ifdef MODPLUG_TRACKER
-	if (m_dwSongFlags & SONG_PAUSED)
-	{
-		m_nBufferCount = gdwMixingFreq / 64; // 1/64 seconds
-	}
-#endif
+
+// robinf: this block causes envelopes to behave incorrectly when 
+// playback is triggered from instrument panel. 
+// I can't see why it would be useful. Dissabling for now.
+//
+//	if (m_dwSongFlags & SONG_PAUSED) {
+//		m_nBufferCount = gdwMixingFreq / 64; // 1/64 seconds
+//	}
+
+
 	// Master Volume + Pre-Amplification / Attenuation setup
 	DWORD nMasterVol;
 	{
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ericus 10/02/2005
-/*
- 		int nchn32 = (m_nChannels < 32) ? m_nChannels : 31;
-		if ((m_nType & MOD_TYPE_IT) && (m_nInstruments) && (nchn32 < 6)) nchn32 = 6;
-		int realmastervol = m_nMasterVolume;
-		if (realmastervol > 0x80)
-		{
-			realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32+4)) / 16;
-		}
-		UINT attenuation = (gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32>>1] : PreAmpTable[nchn32>>1];
-		DWORD mastervol = (realmastervol * (m_nSongPreAmp + 0x10)) >> 6;
-		if (mastervol > 0x200) mastervol = 0x200;
-		if ((m_dwSongFlags & SONG_GLOBALFADE) && (m_nGlobalFadeMaxSamples))
-		{
-			mastervol = _muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
-		}
-		nMasterVol = (mastervol << 7) / attenuation;
-		if (nMasterVol > 0x180) nMasterVol = 0x180;
-*/
 		int nchn32 = 0;
 		MODCHANNEL *pChn = Chn;
 		for (UINT nChn=0; nChn<m_nChannels; nChn++,pChn++) {
@@ -862,8 +844,6 @@ BOOL CSoundFile::ReadNote()
 		if(attenuation < 1) attenuation = 1;
 
 		nMasterVol = (mastervol << 7) / attenuation;
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 	////////////////////////////////////////////////////////////////////////////////////
 	// Update channels data

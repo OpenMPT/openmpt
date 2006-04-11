@@ -988,4 +988,12 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	return TRUE;
 }
 
+//HACK: This is a quick fix. Needs to be better integrated into player and GUI.
+BOOL CSoundFile::SaveCompatXM(LPCSTR lpszFileName) 
+//------------------------------------------------
+{
+
+	return TRUE;
+}
+
 #endif // MODPLUG_NO_FILESAVE

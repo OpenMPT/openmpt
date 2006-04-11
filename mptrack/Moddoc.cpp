@@ -30,6 +30,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_FILE_SAVEASWAVE,		OnFileWaveConvert)
 	ON_COMMAND(ID_FILE_SAVEASMP3,		OnFileMP3Convert)
 	ON_COMMAND(ID_FILE_SAVEMIDI,		OnFileMidiConvert)
+	ON_COMMAND(ID_FILE_SAVECOMPAT,		OnFileCompatibilitySave)
 	ON_COMMAND(ID_PLAYER_PLAY,			OnPlayerPlay)
 	ON_COMMAND(ID_PLAYER_PAUSE,			OnPlayerPause)
 	ON_COMMAND(ID_PLAYER_STOP,			OnPlayerStop)
@@ -386,11 +387,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(lpszPathName, dwPacking); break;
 	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(lpszPathName, dwPacking); break;
 	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(lpszPathName, dwPacking); break;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//	case MOD_TYPE_IT:	bOk = m_SndFile.SaveIT(lpszPathName, dwPacking); break;
 	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT || !lstrcmpi(fext, ".itp")) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName, dwPacking); break;
-// -! NEW_FEATURE#0023
 	}
 	EndWaitCursor();
 	if (bOk)
@@ -398,12 +395,8 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		if (nType == m_SndFile.m_nType) SetPathName(lpszPathName);
 	} else
 	{
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 		if(nType == MOD_TYPE_IT && m_SndFile.m_dwSongFlags & SONG_ITPROJECT) ::MessageBox(NULL,"ITP projects need to have a path set for each instrument...",NULL,MB_ICONERROR | MB_OK);
 		else ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
-// -! NEW_FEATURE#0023
 	}
 	return bOk;
 }
@@ -1499,7 +1492,7 @@ void CModDoc::OnFileMP3Convert()
 
 
 void CModDoc::OnFileMidiConvert()
-//-------------------------------
+//-------------------------------------
 {
 	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
 	CHAR s[_MAX_PATH], fname[_MAX_FNAME]="";
@@ -1524,6 +1517,59 @@ void CModDoc::OnFileMidiConvert()
 			mididlg.DoConvert();
 			EndWaitCursor();
 		}
+	}
+}
+
+//HACK: This is a quick fix. Needs to be better integrated into player and GUI.
+void CModDoc::OnFileCompatibilitySave()
+//-------------------------------
+{
+	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
+	CHAR s[_MAX_PATH], fname[_MAX_FNAME]="";
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CString ext, pattern;
+	
+	UINT type = m_SndFile.GetType();
+
+	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
+	switch (type) {
+		/*case MOD_TYPE_XM:
+			ext = "xm";
+			pattern = "Fast Tracker Files (*.xm)|*.xm||";
+			break;*/
+		case MOD_TYPE_IT:
+			ext = "it";
+			pattern = "Impulse Tracker Files (*.it)|*.it||";
+			break;
+		default:
+			::MessageBox(NULL,"Compatibility export is currently only available the IT format.", "Can't do compatibility export.",MB_ICONINFORMATION | MB_OK);
+			return;
+	}
+
+	::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
+	_splitpath(GetPathName(), drive, path, fname, NULL);
+	strcpy(s, drive);
+	strcat(s, path);
+	strcat(s, fname);
+	if (!strstr(fname, "compat")) {
+		strcat(s, ".compat.");
+	} else {
+		strcat(s, ".");
+	}
+	strcat(s, ext);
+	CFileDialog dlg(FALSE, ext, s,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+					pattern, pMainFrm);
+	if (dlg.DoModal() != IDOK){ 
+		return;
+	}
+	switch (type) {
+		case MOD_TYPE_XM:
+			m_SndFile.SaveCompatXM(dlg.GetPathName());
+			break;
+		case MOD_TYPE_IT:
+			m_SndFile.SaveCompatIT(dlg.GetPathName());
+			break;
 	}
 }
 
@@ -2871,6 +2917,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
 		case kcFileSaveAsMP3:	OnFileMP3Convert(); break;
 		case kcFileSaveMidi:	OnFileMidiConvert(); break;
+		case kcFileExportCompat:  OnFileCompatibilitySave(); break;
 		case kcEstimateSongLength: OnEstimateSongLength(); break;
 		case kcApproxRealBPM:	OnApproximateBPM(); break;
 		case kcFileSave:		DoSave(m_strPathName, 0); break;

@@ -934,6 +934,8 @@ public:
 	BOOL SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveMod(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveIT(LPCSTR lpszFileName, UINT nPacking=0);
+	BOOL SaveCompatIT(LPCSTR lpszFileName);
+	BOOL SaveCompatXM(LPCSTR lpszFileName);
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	BOOL SaveITProject(LPCSTR lpszFileName);

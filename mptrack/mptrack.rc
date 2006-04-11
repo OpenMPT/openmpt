@@ -106,6 +106,7 @@ BEGIN
         MENUITEM "Save as &Wave...",            ID_FILE_SAVEASWAVE
         MENUITEM "Save as M&P3...",             ID_FILE_SAVEASMP3
         MENUITEM "Export as M&idi...",          ID_FILE_SAVEMIDI
+        MENUITEM "Export &unraped...",          ID_FILE_SAVECOMPAT
         MENUITEM SEPARATOR
         MENUITEM "Import &midi Library...",     ID_IMPORT_MIDILIB
         MENUITEM "Add Sound &Bank...",          ID_ADD_SOUNDBANK
@@ -1892,7 +1893,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,17,2,41
+ FILEVERSION 1,17,2,42
  PRODUCTVERSION 0,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -1910,7 +1911,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Olivier Lapicque / OpenMPT team"
             VALUE "FileDescription", "OpenMPT / ModPlug Tracker"
-            VALUE "FileVersion", "1, 17, 2, 41"
+            VALUE "FileVersion", "1, 17, 2, 42"
             VALUE "InternalName", "Modplug Tracker"
             VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2005 GPL."
             VALUE "LegalTrademarks", "M.O.D.P.L.U.G"
@@ -2184,6 +2185,7 @@ BEGIN
     ID_PATTERN_CHANNELMANAGER 
                             "Display channel manager window\nChannel manager"
     ID_INDICATOR_CPU        "-"
+    ID_FILE_EXPORTCOMPAT    "Export file to standard IT/XM."
 END
 
 STRINGTABLE 
@@ -2456,7 +2458,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_SAMPLE_TRIM          "Delete everything except the current selection\nTrim Sample"
-    ID_FILE_SAVEMIDI        "Convert the current song to a standard midi file"
+    ID_FILE_SAVEMIDI        "Export the current song to a standard midi file"
     ID_NETLINK_FORUMS       "Go to the Modplug Central Music Forums"
     ID_INSTRUMENT_SAMPLEMAP "Edit the sample map"
     ID_NETLINK_PLUGINS      "Go to KVR Audio to download plugins"
