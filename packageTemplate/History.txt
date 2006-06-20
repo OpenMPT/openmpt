@@ -8,6 +8,14 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+. v1.17.02.43
+  + <rewbs> You can now load up new plugins from anywhere, not just the General tab. Select "Plugin Manager..." from the view menu. This can also be assigned to a global hotkey.
+            Limitation: currently plugins added to a song in this manner with always be put in the first empty slot. In a future version you'll be able to choose the slot directly from that window.
+  + <rewbs> "Cleanup Plugins" to remove any plugs that are not associated to a channel and not used by an instrument and not used as an output for any used plugs.
+  . <rewbs> Fixed channel limits. Should be able to correctly save IT pattern data with up to 127 chans. There's only space for 64 channel headers though (channel names etc..). XMs restricted to 64 chans.
+  . <rewbs> Added channel limit check when adding chans from the pattern editor.
+  . <rewbs> Fixed instant crash with SampleTank 2.1.
+
 . v1.17.02.42
   + <rewbs> "Compatibility export" in file menu: save as 'plain' IT, without all of OpenMPT's crap. IT only for now (not XM).
   . <rewbs> Set instrument in pattern editor should work when no note is specified (tx Torvus - http://lpchip.com/modplug/viewtopic.php?t=470)
@@ -21,6 +29,7 @@ OpenMPT - Full Version History
   + <rewbs> Pattern record state is now saved to ini
   . <rewbs> Fixed the following settings that were not saving correctly: mod document window status, row spacing, channel VU meters, channel effect visibility, Most recent files list, Toolbar settings.
   . <rewbs> Process priority no longer defaults to high.
+
 
 . v 1.17.02.40
   + <Relabsoluness> Added indicator of currently playing pattern to orderlist.

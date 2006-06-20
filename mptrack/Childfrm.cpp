@@ -220,6 +220,17 @@ BOOL CChildFrame::ChangeViewClass(CRuntimeClass* pViewClass, CCreateContext* pCo
 	return TRUE;
 }
 
+void CChildFrame::ForceRefresh()
+//------------------------------
+{
+	CModControlView *pModView;
+	if ((pModView = (CModControlView *)m_wndSplitter.GetPane(0, 0)) != NULL)
+	{
+		pModView->ForceRefresh();
+	}
+
+	return;
+}
 
 void CChildFrame::SavePosition(BOOL bForce)
 //-----------------------------------------

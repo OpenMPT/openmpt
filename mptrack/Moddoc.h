@@ -147,6 +147,7 @@ public:
 	BOOL ConvertInstrumentsToSamples();;
 	BOOL RemoveUnusedSamples();
 	BOOL RemoveUnusedInstruments();
+	BOOL RemoveUnusedPlugs();
 	BOOL RemoveUnusedPatterns(BOOL bRemove=TRUE);
 	LONG InsertPattern(LONG nOrd=-1, UINT nRows=64);
 	LONG InsertSample(BOOL bLimit=FALSE);
@@ -274,6 +275,7 @@ public:
 	afx_msg void OnInsertInstrument();
 	afx_msg void OnCleanupSamples();
 	afx_msg void OnCleanupInstruments();
+	afx_msg void OnCleanupPlugs();
 	afx_msg void OnCleanupPatterns();
 	afx_msg void OnCleanupSong();
 	afx_msg void OnRearrangePatterns();

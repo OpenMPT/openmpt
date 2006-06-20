@@ -102,6 +102,7 @@ protected:
 // Operations
 public:
 	BOOL ChangeViewClass(CRuntimeClass* pNewViewClass, CCreateContext* pContext=NULL);
+	void ForceRefresh();
 	void SavePosition(BOOL bExit=FALSE);
 	CHAR* GetCurrentViewClassName();	//rewbs.varWindowSize
 	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam=0) const;

@@ -324,7 +324,24 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 //------------------------------------------------
 {
-	if (nNewChannels == m_SndFile.m_nChannels) return TRUE;
+	int maxChans;
+	if (m_SndFile.m_nType&MOD_TYPE_IT) {
+		maxChans=max_chans_IT;
+	} else if (m_SndFile.m_nType&MOD_TYPE_XM) {
+		maxChans=max_chans_XM;
+	} else if (m_SndFile.m_nType&MOD_TYPE_S3M) {
+		maxChans=max_chans_S3M;
+	} else {
+		maxChans=max_chans_MOD;
+	}
+	if (nNewChannels > maxChans) {
+		CString error;
+		error.Format("Error: Max number of channels for this type is %d", maxChans);
+		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;
+	}
+
+	if (nNewChannels == m_SndFile.m_nChannels) return FALSE;
 	if (nNewChannels < m_SndFile.m_nChannels)
 	{
 		UINT nChnToRemove = 0;
@@ -363,7 +380,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 				if ((--nFound) == 0) break;
 			}
 		}
-		if (rem.DoModal() != IDOK) return TRUE;
+		if (rem.DoModal() != IDOK) return FALSE;
 		// Removing selected channels
 		RemoveChannels(rem.m_bChnMask);
 	} else
@@ -379,7 +396,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 			{
 				END_CRITICAL();
 				AddToLog("ERROR: Not enough memory to create new channels!\nPattern Data is corrupted!\n");
-				return TRUE;
+				return FALSE;
 			}
 			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
 			{
@@ -395,7 +412,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 	SetModified();
 	ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE);
-	return FALSE;
+	return TRUE;
 }
 
 
@@ -841,6 +858,82 @@ BOOL CModDoc::RemoveUnusedSamples()
 	return FALSE;
 }
 
+BOOL CModDoc::RemoveUnusedPlugs() 
+//-------------------------------
+{
+	BYTE usedmap[MAX_MIXPLUGINS];
+	memset(usedmap, false, MAX_MIXPLUGINS);
+	
+
+	for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++) {
+
+		//Is the plugin assigned to a channel?
+		for (int nChn=0; nChn<m_SndFile.m_nChannels; nChn++) {
+			if (m_SndFile.ChnSettings[nChn].nMixPlugin == nPlug+1) {
+				usedmap[nPlug]=true;
+				break;
+			}
+		}
+
+		//Is the plugin used by an instrument?
+		for (int nIns=1; nIns<=m_SndFile.m_nInstruments; nIns++) {
+			if (m_SndFile.Headers[nIns] && (m_SndFile.Headers[nIns]->nMixPlug == nPlug+1)) {
+				usedmap[nPlug]=true;
+				break;
+			}
+		}
+
+		//Is the plugin assigned to master?
+		if (m_SndFile.m_MixPlugins[nPlug].Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT) {
+			usedmap[nPlug]=true;
+		}
+
+		//all outputs of used plugins count as used
+		if (usedmap[nPlug]==true) {
+			if (m_SndFile.m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80) {
+				int output = m_SndFile.m_MixPlugins[nPlug].Info.dwOutputRouting & 0x7f;
+				usedmap[output]=true;
+			}
+		}
+
+	}
+
+	//Remove unused plugins
+	int nRemoved=0;
+	for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++) {
+		SNDMIXPLUGIN* pPlug = &m_SndFile.m_MixPlugins[nPlug];		
+		if (usedmap[nPlug] || !pPlug) {
+			Log("Keeping mixplug addess (%d): %X\n", nPlug, &(pPlug->pMixPlugin));	
+			continue;
+		}
+
+		if (pPlug->pPluginData) {
+			delete pPlug->pPluginData;
+			pPlug->pPluginData = NULL;
+		}
+		if (pPlug->pMixPlugin) {
+			pPlug->pMixPlugin->Release();
+			pPlug->pMixPlugin=NULL;
+		}
+		if (pPlug->pMixState) {
+			delete pPlug->pMixState;
+		}
+
+		memset(&(pPlug->Info), 0, sizeof(SNDMIXPLUGININFO));
+		Log("Zeroing range (%d) %X - %X\n", nPlug, &(pPlug->Info),  &(pPlug->Info)+sizeof(SNDMIXPLUGININFO));
+		pPlug->nPluginDataSize=0;
+		pPlug->fDryRatio=0;	
+		pPlug->defaultProgram=0;
+		nRemoved++;
+
+	}
+
+	if (nRemoved) {
+		SetModified();
+	}
+
+	return nRemoved;
+}
 
 BOOL CModDoc::RemoveUnusedInstruments()
 //-------------------------------------

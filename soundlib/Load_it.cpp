@@ -665,11 +665,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 		m_nSongPreAmp=100;
 	}
 	// Reading Channels Pan Positions
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//	for (int ipan=0; ipan<64; ipan++) if (pifh->chnpan[ipan] != 0xFF)
-	for (int ipan=0; ipan<MAX_BASECHANNELS; ipan++) if (pifh->chnpan[ipan] != 0xFF)
-// -! BEHAVIOUR_CHANGE#0006
+	for (int ipan=0; ipan</*MAX_BASECHANNELS*/64; ipan++) if (pifh->chnpan[ipan] != 0xFF) //Header only has room for settings for 64 chans...		
 	{
 		ChnSettings[ipan].nVolume = pifh->chnvol[ipan];
 		ChnSettings[ipan].nPan = 128;
@@ -814,7 +810,8 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 
 			UINT ch = b & IT_bitmask_patternChanField_c;   // 0x7f We have some data grab a byte keeping only 127 bits
 			if (ch) 
-				ch = (ch - 1) & IT_bitmask_patternChanMask_c;   // 0x3f mask of the byte again, keeping only 64 bits
+				ch = (ch - 1);// & IT_bitmask_patternChanMask_c;   // 0x3f mask of the byte again, keeping only 64 bits
+
 			if (b & IT_bitmask_patternChanEnabled_c)            // 0x80 check if the upper bit is enabled.
 			{
 				if (i >= len)               
@@ -1056,9 +1053,9 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 			}
 		
 			UINT ch = b & IT_bitmask_patternChanField_c; // 0x7f
-			
+		
 			if (ch)
-				ch = (ch - 1) & IT_bitmask_patternChanMask_c; // 0x3f
+				ch = (ch - 1); //& IT_bitmask_patternChanMask_c; // 0x3f
 		
 			if (b & IT_bitmask_patternChanEnabled_c)  // 0x80
 			{
@@ -1493,17 +1490,22 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	// Channel Pan and Volume
 	memset(header.chnpan, 0xFF, 64);
 	memset(header.chnvol, 64, 64);
-	for (UINT ich=0; ich<m_nChannels; ich++)
+	for (UINT ich=0; ich</*m_nChannels*/64; ich++) //Header only has room for settings for 64 chans...
 	{
 		header.chnpan[ich] = ChnSettings[ich].nPan >> 2;
 		if (ChnSettings[ich].dwFlags & CHN_SURROUND) header.chnpan[ich] = 100;
 		header.chnvol[ich] = ChnSettings[ich].nVolume;
 		if (ChnSettings[ich].dwFlags & CHN_MUTE) header.chnpan[ich] |= 0x80;
+	}
+
+	for (UINT ich=0; ich<m_nChannels; ich++)
+	{
 		if (ChnSettings[ich].szName[0])
 		{
 			dwChnNamLen = (ich+1) * MAX_CHANNELNAME;
 		}
 	}
+
 	if (dwChnNamLen) dwExtra += dwChnNamLen + 8;
 #ifdef SAVEITTIMESTAMP
 	dwExtra += 8; // Time Stamp
@@ -2067,7 +2069,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	// Channel Pan and Volume
 	memset(header.chnpan, 0xFF, 64);
 	memset(header.chnvol, 64, 64);
-	for (UINT ich=0; ich<nChannels; ich++)
+	for (UINT ich=0; ich</*m_nChannels*/64; ich++) //Header only has room for settings for 64 chans...
 	{
 		header.chnpan[ich] = ChnSettings[ich].nPan >> 2;
 		if (ChnSettings[ich].dwFlags & CHN_SURROUND) header.chnpan[ich] = 100;

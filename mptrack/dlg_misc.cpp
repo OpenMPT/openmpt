@@ -381,6 +381,25 @@ BOOL CModTypeDlg::VerifyData()
 		return FALSE;
 	}
 
+	int sel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
+	int type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
+	int maxChans;
+	if (type&MOD_TYPE_IT) {
+		maxChans=max_chans_IT;
+	} else if (type&MOD_TYPE_XM) {
+		maxChans=max_chans_XM;
+	} else if (type&MOD_TYPE_S3M) {
+		maxChans=max_chans_S3M;
+	} else {
+		maxChans=max_chans_MOD;
+	}
+	if (sel > maxChans) {
+		CString error;
+		error.Format("Error: Max number of channels for this type is %d", maxChans);
+		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;
+	}
+
 	return TRUE;
 }
 

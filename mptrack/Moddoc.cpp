@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_INSERT_INSTRUMENT,	OnInsertInstrument)
 	ON_COMMAND(ID_CLEANUP_SAMPLES,		OnCleanupSamples)
 	ON_COMMAND(ID_CLEANUP_INSTRUMENTS,	OnCleanupInstruments)
+	ON_COMMAND(ID_CLEANUP_PLUGS,		OnCleanupPlugs)
 	ON_COMMAND(ID_CLEANUP_PATTERNS,		OnCleanupPatterns)
 	ON_COMMAND(ID_CLEANUP_SONG,			OnCleanupSong)
 	ON_COMMAND(ID_CLEANUP_REARRANGE,	OnRearrangePatterns)
@@ -1770,6 +1771,16 @@ void CModDoc::OnCleanupInstruments()
 	ShowLog("Instrument Cleanup", CMainFrame::GetMainFrame());
 }
 
+void CModDoc::OnCleanupPlugs()
+//----------------------------------
+{
+	ClearLog();
+	RemoveUnusedPlugs();
+	UpdateAllViews(NULL, HINT_MODTYPE);
+	ShowLog("Plugin Cleanup", CMainFrame::GetMainFrame());
+}
+
+
 
 void CModDoc::OnCleanupPatterns()
 //-------------------------------
@@ -1788,6 +1799,7 @@ void CModDoc::OnCleanupSong()
 	RemoveUnusedPatterns();
 	RemoveUnusedInstruments();
 	RemoveUnusedSamples();
+	RemoveUnusedPlugs();
 	UpdateAllViews(NULL, HINT_MODTYPE|HINT_MODSEQUENCE);
 	ShowLog("Song Cleanup", CMainFrame::GetMainFrame());
 }

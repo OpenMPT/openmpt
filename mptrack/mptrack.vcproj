@@ -807,6 +807,70 @@
 			</Filter>
 		</Filter>
 		<Filter
+			Name="Resource Files"
+			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe">
+			<File
+				RelativePath="res\bitmap1.bmp">
+			</File>
+			<File
+				RelativePath=".\res\colors.bmp">
+			</File>
+			<File
+				RelativePath=".\res\dragging.cur">
+			</File>
+			<File
+				RelativePath=".\Res\envbar.bmp">
+			</File>
+			<File
+				RelativePath=".\res\img_list.bmp">
+			</File>
+			<File
+				RelativePath=".\res\mainbar.bmp">
+			</File>
+			<File
+				RelativePath=".\res\moddoc.ico">
+			</File>
+			<File
+				RelativePath=".\res\modplthingmorecontrast.bmp">
+			</File>
+			<File
+				RelativePath=".\res\MPTRACK.bmp">
+			</File>
+			<File
+				RelativePath=".\res\mptrack.ico">
+			</File>
+			<File
+				RelativePath=".\res\mptrack.rc2">
+			</File>
+			<File
+				RelativePath=".\Res\nodrag.cur">
+			</File>
+			<File
+				RelativePath=".\res\nodrop.cur">
+			</File>
+			<File
+				RelativePath=".\res\patterns.bmp">
+			</File>
+			<File
+				RelativePath=".\res\rt_manif.bin">
+			</File>
+			<File
+				RelativePath=".\Res\smptoolb.bmp">
+			</File>
+			<File
+				RelativePath=".\Res\splash.bmp">
+			</File>
+			<File
+				RelativePath=".\res\splashno.bmp">
+			</File>
+			<File
+				RelativePath=".\res\view_pat.bmp">
+			</File>
+			<File
+				RelativePath=".\res\vumeters.bmp">
+			</File>
+		</Filter>
+		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
@@ -964,70 +1028,6 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\WindowedFIR.h">
-			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe">
-			<File
-				RelativePath="res\bitmap1.bmp">
-			</File>
-			<File
-				RelativePath=".\res\colors.bmp">
-			</File>
-			<File
-				RelativePath=".\res\dragging.cur">
-			</File>
-			<File
-				RelativePath=".\Res\envbar.bmp">
-			</File>
-			<File
-				RelativePath=".\res\img_list.bmp">
-			</File>
-			<File
-				RelativePath=".\res\mainbar.bmp">
-			</File>
-			<File
-				RelativePath=".\res\moddoc.ico">
-			</File>
-			<File
-				RelativePath=".\res\modplthingmorecontrast.bmp">
-			</File>
-			<File
-				RelativePath=".\res\MPTRACK.bmp">
-			</File>
-			<File
-				RelativePath=".\res\mptrack.ico">
-			</File>
-			<File
-				RelativePath=".\res\mptrack.rc2">
-			</File>
-			<File
-				RelativePath=".\Res\nodrag.cur">
-			</File>
-			<File
-				RelativePath=".\res\nodrop.cur">
-			</File>
-			<File
-				RelativePath=".\res\patterns.bmp">
-			</File>
-			<File
-				RelativePath=".\res\rt_manif.bin">
-			</File>
-			<File
-				RelativePath=".\Res\smptoolb.bmp">
-			</File>
-			<File
-				RelativePath=".\Res\splash.bmp">
-			</File>
-			<File
-				RelativePath=".\res\splashno.bmp">
-			</File>
-			<File
-				RelativePath=".\res\view_pat.bmp">
-			</File>
-			<File
-				RelativePath=".\res\vumeters.bmp">
 			</File>
 		</Filter>
 		<File

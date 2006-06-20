@@ -34,21 +34,21 @@ typedef const BYTE * LPCBYTE;
 // -> DESC="misc quantity changes"
 #define MAX_INSTRUMENTS		256	//200
 // -! BEHAVIOUR_CHANGE#0006
-#ifdef FASTSOUNDLIB
-#define MAX_CHANNELS		80
-#else
+//#ifdef FASTSOUNDLIB
+//#define MAX_CHANNELS		80
+//#else
 // -> CODE#0006
 // -> DESC="misc quantity changes"
 #define MAX_CHANNELS		256	//200
 // -! BEHAVIOUR_CHANGE#0006
-#endif
+//#endif
 // -> CODE#0006
 // -> DESC="misc quantity changes"
-#ifdef FASTSOUNDLIB
-#define MAX_BASECHANNELS	64
-#else
-#define MAX_BASECHANNELS	128	// Let 128 channels between MAX_BASECHANNELS & MAX_CHANNELS
-#endif
+//#ifdef FASTSOUNDLIB
+//#define MAX_BASECHANNELS	64
+//#else
+#define MAX_BASECHANNELS	127
+//#endif
 // -! BEHAVIOUR_CHANGE#0006
 #define MAX_ENVPOINTS		32
 #define MIN_PERIOD			0x0020
@@ -769,6 +769,14 @@ enum {
 	MIDIOUT_BANKSEL,
 	MIDIOUT_PROGRAM,
 };
+
+enum {
+	max_chans_IT=127,
+	max_chans_XM=64,
+	max_chans_MOD=32,
+	max_chans_S3M=32,
+};
+
 
 
 typedef struct MODMIDICFG

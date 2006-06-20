@@ -999,11 +999,19 @@ void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CSelectPluginDlg::CSelectPluginDlg(PSNDMIXPLUGIN pPlugin, CModDoc *pModDoc, CWnd *parent):CDialog(IDD_SELECTMIXPLUGIN, parent)
+CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent):CDialog(IDD_SELECTMIXPLUGIN, parent)
 //----------------------------------------------------------------------------------------------------------
 {
-	m_pModDoc = pModDoc; //rewbs.plugDocAware
-	m_pPlugin = pPlugin;
+	m_pPlugin = NULL;
+	m_pModDoc = pModDoc;
+	m_nPlugSlot = nPlugSlot;
+	
+	 if (m_pModDoc) {
+		CSoundFile* pSndFile = pModDoc->GetSoundFile();
+		if (pSndFile && (0<=m_nPlugSlot && m_nPlugSlot<MAX_MIXPLUGINS)) {
+			m_pPlugin = &pSndFile->m_MixPlugins[m_nPlugSlot];
+		}
+	 }
 }
 
 
@@ -1016,6 +1024,15 @@ BOOL CSelectPluginDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_treePlugins.ModifyStyle(dwRemove, dwAdd);
 	m_treePlugins.SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
+
+	if (m_pPlugin) {
+		CString targetSlot;
+		targetSlot.Format("Put in FX%02d", m_nPlugSlot+1);
+		SetDlgItemText(IDOK, targetSlot);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), TRUE);
+	} else {
+		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), FALSE);
+	}
 	
 	MoveWindow(CMainFrame::GetMainFrame()->gnPlugWindowX,
 			   CMainFrame::GetMainFrame()->gnPlugWindowY,
@@ -1065,7 +1082,7 @@ VOID CSelectPluginDlg::OnOK()
 {
 // -> CODE#0002
 // -> DESC="list box to choose VST plugin presets (programs)"
-	if(m_pPlugin == NULL) { CDialog::OnOK(); return; }
+	if(m_pPlugin==NULL) { CDialog::OnOK(); return; }
 // -! NEW_FEATURE#0002
 
 	BOOL bChanged = FALSE;
@@ -1371,11 +1388,11 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 
 	if (m_treePlugins) {
 		m_treePlugins.MoveWindow(11,11, cx-105, cy-40, FALSE);
-		::MoveWindow(GetDlgItem(IDC_TEXT1)->m_hWnd, 11,cy-25, cx-22, 25, FALSE);   
-		::MoveWindow(GetDlgItem(IDOK)->m_hWnd,         cx-85, 11,    75, 23, FALSE);
-		::MoveWindow(GetDlgItem(IDCANCEL)->m_hWnd,     cx-85, 39,    75, 23, FALSE);
-		::MoveWindow(GetDlgItem(IDC_BUTTON1)->m_hWnd , cx-85, cy-80, 75, 23, FALSE);	
-		::MoveWindow(GetDlgItem(IDC_BUTTON2)->m_hWnd,  cx-85, cy-52, 75, 23, FALSE);
+		::MoveWindow(GetDlgItem(IDC_TEXT1)->m_hWnd,	11,cy-25, cx-22, 25, FALSE);   
+		::MoveWindow(GetDlgItem(IDOK)->m_hWnd,			 cx-85, 11,    75, 23, FALSE);
+		::MoveWindow(GetDlgItem(IDCANCEL)->m_hWnd,		 cx-85, 39,    75, 23, FALSE);
+		::MoveWindow(GetDlgItem(IDC_BUTTON1)->m_hWnd ,	 cx-85, cy-80, 75, 23, FALSE);	
+		::MoveWindow(GetDlgItem(IDC_BUTTON2)->m_hWnd,	 cx-85, cy-52, 75, 23, FALSE);
 		Invalidate();
 	}
 }
@@ -1508,8 +1525,8 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 	}
 	Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);
 
-	m_nInputs = (m_pEffect->numInputs < 16) ? m_pEffect->numInputs : 16;
-	m_nOutputs = (m_pEffect->numOutputs < 16) ? m_pEffect->numOutputs : 16;
+	m_nInputs = m_pEffect->numInputs;
+	m_nOutputs = m_pEffect->numOutputs;
 	m_pInputs = (float **)new char[m_nInputs*sizeof(float *)];
 	m_pOutputs = (float **)new char[m_nOutputs*sizeof(float *)];
 	m_pTempBuffer = (float **)new char[m_nOutputs*sizeof(float *)];	//rewbs.dryRatio
@@ -2052,6 +2069,50 @@ void CVstPlugin::SetDryRatio(UINT param) {
 	m_pMixStruct->fDryRatio = 1.0-(static_cast<float>(param)/127.0f);
 }
 
+/*
+void CVstPlugin::Process(float **pOutputs, unsigned long nSamples)
+//----------------------------------------------------------------
+{
+	float wetRatio, dryRatio;
+	wetRatio *= m_fGain;
+	dryRatio *= m_fGain;
+
+	ProcessVSTEvents();
+	if ((m_pEffect) && (m_pProcessFP) && (m_pInputs) && (m_pOutputs) && (m_pMixStruct)) {
+		
+		//Merge stereo input before sending to the plug if the plug can only handle one input.
+		if (m_pEffect->numInputs == 1) {
+			for (UINT i=0; i<nSamples; i++)	{
+				m_pInputs[0][i] = 0.5f*m_pInputs[0][i] + 0.5f*m_pInputs[1][i];
+			}
+		}
+
+		//Clear the buffers that will be receiving the plugin's output.
+		for (UINT iOut=0; iOut<m_nOutputs; iOut++) {
+			memset(m_pTempBuffer[iOut], 0, nSamples*sizeof(float));
+			m_pOutputs[iOut] = m_pTempBuffer[iOut];
+		}
+
+		//Do the VST processing magic
+		m_dwTimeAtStartOfProcess = timeGetTime();
+		try {
+			ASSERT(nSamples<=MIXBUFFERSIZE);
+			m_pProcessFP(m_pEffect, m_pInputs, m_pOutputs, nSamples);
+		} catch (char * str) {
+			m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
+			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
+			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s: %s. It has automatically been set to \"Bypass\".", m_pMixStruct->Info.szName, processMethod, str);
+			ClearVSTEvents();
+			SetEvent(processCalled);
+		}
+
+		for(UINT i=0; i<nSamples; i++) {
+			pOutL[stream][i] += m_pTempBuffer[stream][i]*wetRatio + m_pInputs[stream%2][i]*dryRatio;
+		}
+	
+	}
+}
+*/
 void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 //--------------------------------------------------------------------------
 {
@@ -2080,7 +2141,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 
 		//RecalculateGain();
 
-		//Merge stereo before sending to the plug if it is mono
+		//Merge stereo input before sending to the plug if the plug can only handle one input.
 		if (m_pEffect->numInputs == 1)
 		{
 			for (UINT i=0; i<nSamples; i++)	{
