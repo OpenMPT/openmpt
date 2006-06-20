@@ -942,6 +942,7 @@
 #define ID_PATTERN_REMOVECHANNELDIALOG  59151
 #define ID_Menu                         59200
 #define ID_FILE_SAVECOMPAT              59202
+#define ID_CLEANUP_PLUGS                59205
 
 // Next default values for new objects
 // 
@@ -949,8 +950,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        510
-#define _APS_NEXT_COMMAND_VALUE         59203
-#define _APS_NEXT_CONTROL_VALUE         2255
+#define _APS_NEXT_COMMAND_VALUE         59206
+#define _APS_NEXT_CONTROL_VALUE         2256
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

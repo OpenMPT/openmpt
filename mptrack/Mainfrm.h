@@ -588,7 +588,7 @@ protected:
 
 // -> CODE#0002
 // -> DESC="list box to choose VST plugin presets (programs)"
-	afx_msg void OnPluginSetup();
+	afx_msg void OnPluginManager();
 // -! NEW_FEATURE#0002
 
 // -> CODE#0015

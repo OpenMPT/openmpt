@@ -2401,16 +2401,17 @@ void CViewPattern::OnAddChannelFront()
 	
 	BeginWaitCursor();
 	//First adding channel as the last channel...
-	pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1);
-	pSndFile->SetChannelSettingsToDefault(pSndFile->m_nChannels-1);
-	//...and then moving it to right position.
-	pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
+	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1)) {
+		pSndFile->SetChannelSettingsToDefault(pSndFile->m_nChannels-1);
+		//...and then moving it to right position.
+		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
 
-	pModDoc->SetModified();
-	pModDoc->ClearUndo();
-	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS); //refresh channel headers
-	pModDoc->UpdateAllViews(NULL, HINT_MODTYPE); //updates(?) the channel number to general tab display
-	SetCurrentPattern(m_nPattern);
+		pModDoc->SetModified();
+		pModDoc->ClearUndo();
+		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS); //refresh channel headers
+		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE); //updates(?) the channel number to general tab display
+		SetCurrentPattern(m_nPattern);
+	}
 	EndWaitCursor();
 }
 
@@ -2424,15 +2425,16 @@ void CViewPattern::OnAddChannelAfter()
 	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
 
 	BeginWaitCursor();
-	pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1);
-	pSndFile->SetChannelSettingsToDefault(pSndFile->m_nChannels-1);
-	pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
+	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1)) {
+		pSndFile->SetChannelSettingsToDefault(pSndFile->m_nChannels-1);
+		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
 
-	pModDoc->SetModified();
-	pModDoc->ClearUndo();
-	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
-	pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
-	SetCurrentPattern(m_nPattern);
+		pModDoc->SetModified();
+		pModDoc->ClearUndo();
+		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
+		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
+		SetCurrentPattern(m_nPattern);
+	}
 	EndWaitCursor();
 }
 

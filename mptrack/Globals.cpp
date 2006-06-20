@@ -272,6 +272,18 @@ void CModControlView::OnUpdate(CView*, LPARAM lHint, CObject*pHint)
 }
 
 
+void CModControlView::ForceRefresh() 
+//---------------------------------
+{
+	SetActivePage(GetActivePage());
+}
+
+int  CModControlView::GetActivePage() 
+//-----------------------------------
+{
+	return m_nActiveDlg;
+}
+
 BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 //------------------------------------------------------------
 {

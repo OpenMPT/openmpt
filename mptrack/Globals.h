@@ -143,11 +143,13 @@ public:
 	void InstrumentChanged(int nInstr=-1) { m_nInstrumentChanged = nInstr; }
 	int GetInstrumentChange() const { return m_nInstrumentChanged; }
 	void SetMDIParentFrame(HWND hwnd) { m_hWndMDI = hwnd; }
+	void ForceRefresh();
 
 protected:
 	void RecalcLayout();
 	void UpdateView(DWORD dwHintMask=0, CObject *pHint=NULL);
 	BOOL SetActivePage(int nIndex=-1, LPARAM lParam=-1);
+	int GetActivePage();
 
 	//{{AFX_VIRTUAL(CModControlView)
 	public:

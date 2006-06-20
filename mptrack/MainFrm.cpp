@@ -67,7 +67,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 
 // -> CODE#0002
 // -> DESC="list box to choose VST plugin presets (programs)"
-	ON_COMMAND(ID_PLUGIN_SETUP,				OnPluginSetup)
+	ON_COMMAND(ID_PLUGIN_SETUP,				OnPluginManager)
 // -! NEW_FEATURE#0002
 
 // -> CODE#0015
@@ -2304,10 +2304,31 @@ void CMainFrame::OnViewOptions()
 
 // -> CODE#0002
 // -> DESC="list box to choose VST plugin presets (programs)"
-void CMainFrame::OnPluginSetup()
+void CMainFrame::OnPluginManager()
 {
-	CSelectPluginDlg dlg(NULL, GetActiveDoc(), this);
+	int nPlugslot=-1;
+	CModDoc* pModDoc = GetActiveDoc();
+
+	if (pModDoc) {
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		//Find empty plugin slot
+		for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++) {
+			PSNDMIXPLUGIN pCandidatePlugin = &pSndFile->m_MixPlugins[nPlug];
+			if (pCandidatePlugin->pMixPlugin == NULL) {
+				nPlugslot=nPlug;
+				break;
+			}
+		}
+	}
+	CSelectPluginDlg dlg(GetActiveDoc(), nPlugslot, this);
 	dlg.DoModal();
+	if (pModDoc) {
+		//Refresh views
+		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS|HINT_MODTYPE);
+		//Refresh Controls
+		CChildFrame *pActiveChild = (CChildFrame *)MDIGetActive();
+		pActiveChild->ForceRefresh();
+	}
 }
 // -! NEW_FEATURE#0002
 
@@ -2696,7 +2717,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcFileOpen:	theApp.OnFileOpen(); break;
 		case kcMidiRecord:	OnMidiRecord(); break;
 		case kcHelp: 		CMDIFrameWnd::OnHelp(); break;
-		case kcViewAddPlugin: OnPluginSetup(); break;
+		case kcViewAddPlugin: OnPluginManager(); break;
 		case kcViewChannelManager: OnChannelManager(); break;
 		case kcNextDocument:	MDINext(); break;
 		case kcPrevDocument:	MDIPrev(); break;

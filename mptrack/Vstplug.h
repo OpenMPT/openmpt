@@ -228,12 +228,13 @@ class CSelectPluginDlg: public CDialog
 //====================================
 {
 protected:
+	int m_nPlugSlot;
 	PSNDMIXPLUGIN m_pPlugin;
 	CModDoc *m_pModDoc;
 	CTreeCtrl m_treePlugins;
 
 public:
-	CSelectPluginDlg(PSNDMIXPLUGIN, CModDoc *pModDoc, CWnd *parent); //rewbs.plugDocAware
+	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent); //rewbs.plugDocAware
 	VOID DoClose();
 	VOID UpdatePluginsList(DWORD forceSelect=0);
 	bool VerifyPlug(PVSTPLUGINLIB plug);

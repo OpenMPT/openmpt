@@ -1847,6 +1847,19 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 				}
 			}
 
+			/*
+			if (pPlugin->multiRouting) {
+				int nOutput=0;
+				for (int nOutput=0; nOutput<pPlugin->nOutputs/2; nOutput++) {
+					destinationPlug = pPlugin->multiRoutingDestinations[nOutput];
+					pOutState = m_MixPlugins[destinationPlug].pMixState;
+					pOutputs[2*nOutput] = pOutState->pOutBufferL;
+					pOutputs[2*(nOutput+1)] = pOutState->pOutBufferR;
+				}
+				
+			}
+*/
+
 			if (pPlugin->Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT)
 			{
 				if (!bMasterMix)

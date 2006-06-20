@@ -2050,7 +2050,7 @@ void CCommandSet::SetupCommands()
 	commands[kcNoteOffOld].Message = "Note off (don't remember instrument)";
 
 	commands[kcViewAddPlugin].UID = 1669;
-	commands[kcViewAddPlugin].Message = "View 'Add Plugin' Window";
+	commands[kcViewAddPlugin].Message = "View Plugin Manager";
 	commands[kcViewAddPlugin].isHidden = false;
 	commands[kcViewAddPlugin].isDummy = false;
 

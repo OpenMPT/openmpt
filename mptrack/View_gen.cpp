@@ -1212,8 +1212,7 @@ void CViewGlobals::OnSelectPlugin()
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
-		CSelectPluginDlg dlg(pPlugin, pModDoc, this); //rewbs.plugDocAware
+		CSelectPluginDlg dlg(pModDoc, m_nCurrentPlugin, this); 
 		if (dlg.DoModal() == IDOK)
 		{
 			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT))

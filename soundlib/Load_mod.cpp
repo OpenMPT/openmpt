@@ -482,7 +482,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 				}
 			}										//end for all rows
 		} else	{								
-			memset(s, 0, m_nChannels*4);		//if patten does not exist
+			memset(s, 0, m_nChannels*4);		//if pattern does not exist
 			for (UINT i=0; i<64; i++) {			//invent blank pattern
 				fwrite(s, m_nChannels, 4, f);
 			}
