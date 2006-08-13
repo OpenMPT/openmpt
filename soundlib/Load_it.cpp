@@ -211,8 +211,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		penv->nVolSwing = pis->rv;
 		penv->nPanSwing = pis->rp;
 		penv->nPan = (pis->dfp & 0x7F) << 2;
-		penv->nResampling = SRCMODE_DEFAULT;
-		penv->nFilterMode = FLTMODE_UNCHANGED;
+		SetDefaultInstrumentValues(penv);
 		if (penv->nPan > 256) penv->nPan = 128;
 		if (pis->dfp < 0x80) penv->dwFlags |= ENV_SETPANNING;
 	}
@@ -249,8 +248,10 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// name string
-	memcpy(&m_szNames[0],lpStream+streamPos,len);
-	streamPos += len;
+	if (streamPos+len<=dwMemLength && len<MAX_SAMPLES*32) {
+		memcpy(&m_szNames[0],lpStream+streamPos,len);
+		streamPos += len;
+	}
 
 // Song comments
 
@@ -260,11 +261,15 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 
 	// allocate comment string
 	if(m_lpszSongComments) delete m_lpszSongComments;
-	m_lpszSongComments = new char[id];
+	if (id<dwMemLength) {
+		m_lpszSongComments = new char[id];
+	}
 
 	// m_lpszSongComments
-	if(id) memcpy(&m_lpszSongComments[0],lpStream+streamPos,id);
-	streamPos += id;
+	if (m_lpszSongComments && id && streamPos+id<=dwMemLength) {
+		memcpy(&m_lpszSongComments[0],lpStream+streamPos,id);
+		streamPos += id;
+	}
 
 // Song global config
 
@@ -326,8 +331,10 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 		streamPos += sizeof(DWORD);
 
 		// ChnSettings[i].szName
-		memcpy(&ChnSettings[i].szName[0],lpStream+streamPos,len);
-		streamPos += len;
+		if (streamPos+len<=dwMemLength && len<MAX_CHANNELNAME) {
+			memcpy(&ChnSettings[i].szName[0],lpStream+streamPos,len);
+			streamPos += len;
+		}
 	}
 
 // Song mix plugins
@@ -346,8 +353,10 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// midi cfg
-	memcpy(&m_MidiCfg,lpStream+streamPos,id);
-	streamPos += id;
+	if (id<=sizeof(m_MidiCfg) && id+streamPos<=dwMemLength) {
+		memcpy(&m_MidiCfg,lpStream+streamPos,id);
+		streamPos += id;
+	}
 
 // Song Instruments
 
@@ -363,8 +372,10 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 
 	// instruments' paths
 	for(i=0; i<m_nInstruments; i++){
-		memcpy(&m_szInstrumentPath[i][0],lpStream+streamPos,len);
-		streamPos += len;
+		if (len+streamPos<=dwMemLength && len<_MAX_PATH) {
+			memcpy(&m_szInstrumentPath[i][0],lpStream+streamPos,len);
+			streamPos += len;
+		}
 	}
 
 // Song Orders
@@ -375,8 +386,11 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// order data
-	memcpy(&Order[0],lpStream+streamPos,size);
-	streamPos += size;
+	if (size+streamPos<=dwMemLength && size<MAX_ORDERS) {
+		memcpy(&Order[0],lpStream+streamPos,size);
+		streamPos += size;
+	}
+	
 
 // Song Patterns
 
@@ -427,8 +441,11 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 			}
 
 			// Pattern data
-			memcpy(Patterns[npat],lpStream+streamPos,m_nChannels * PatternSize[npat] * n);
-			streamPos += m_nChannels * PatternSize[npat] * n;
+			long datasize = m_nChannels * PatternSize[npat] * n;
+			if (streamPos+datasize<=dwMemLength) {
+				memcpy(Patterns[npat],lpStream+streamPos,datasize);
+				streamPos += datasize;
+			}
 		}
 	}
 
@@ -3002,7 +3019,8 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 
 void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[], UINT nInstruments, FILE* f)
 //------------------------------------------------------------------------------------------------------------
-// Used only when saving IT and XM. ITI, ITP saves using Ericus' macros etc...
+// Used only when saving IT and XM. 
+// ITI, ITP saves using Ericus' macros etc...
 // The reason is that ITs and XMs save [code][size][ins1.Value][ins2.Value]...
 // whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
 // too late to turn back....
@@ -3029,6 +3047,9 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[
    	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(m_defaultInstrument.nCutSwing),   f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(m_defaultInstrument.nResSwing),   f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(m_defaultInstrument.nFilterMode), f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(m_defaultInstrument.nPitchEnvReleaseNode ), f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(m_defaultInstrument.nPanEnvReleaseNode), f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(m_defaultInstrument.nVolEnvReleaseNode), f, instruments, nInstruments);
 
 	return;
 }
@@ -3135,3 +3156,4 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 
 	return;
 }
+
