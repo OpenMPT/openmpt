@@ -623,19 +623,25 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		SetCurSel(m_nXScroll + (pt.x - rect.left) / m_cxFont);
 		SetFocus();
 		HMENU hMenu = ::CreatePopupMenu();
+		
+		UINT nCurrentPattern = GetCurrentPattern();
+		bool patternExists = (nCurrentPattern<MAX_PATTERNS
+						      && m_pModDoc->GetSoundFile()->Patterns[nCurrentPattern] != NULL);
+		DWORD greyed = patternExists?FALSE:MF_GRAYED;
+
 		if (hMenu)
 		{
 			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Pattern\tIns");
 			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Pattern\tDel");
 			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_NEW, "Create &New Pattern");
-			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_COPY, "&Duplicate Pattern");
-			AppendMenu(hMenu, MF_STRING, ID_PATTERNCOPY, "&Copy Pattern");
-			AppendMenu(hMenu, MF_STRING, ID_PATTERNPASTE, "P&aste Pattern");
+			AppendMenu(hMenu, MF_STRING|greyed, ID_ORDERLIST_COPY, "&Duplicate Pattern");
+			AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERNCOPY, "&Copy Pattern");
+			AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERNPASTE, "P&aste Pattern");
 			if ((m_pModDoc) && (m_pModDoc->GetSoundFile()->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)))
 			{
 				AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-				AppendMenu(hMenu, MF_STRING, ID_PATTERN_PROPERTIES, "&Properties...");
+				AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_PROPERTIES, "&Properties...");
 			}
 			ClientToScreen(&pt);
 			::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);

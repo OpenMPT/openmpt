@@ -786,9 +786,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		pChn->nNewNote = note;
 
 		if (nins) {									//Set instrument
-			pChn->nVolEnvPosition = 0;
-			pChn->nPanEnvPosition = 0;
-			pChn->nPitchEnvPosition = 0;
+			m_SndFile.resetEnvelopes(pChn);
 			m_SndFile.InstrumentChange(pChn, nins);
 		} 
 		else if ((nsmp) && (nsmp < MAX_SAMPLES)) {	//Or set sample
