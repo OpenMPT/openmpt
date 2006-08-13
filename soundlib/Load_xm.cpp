@@ -385,8 +385,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		penv->nFadeOut = xmsh.volfade;
 		penv->nPan = 128;
 		penv->nPPC = 5*12;
-		penv->nResampling = SRCMODE_DEFAULT;
-		penv->nFilterMode = FLTMODE_UNCHANGED;
+		SetDefaultInstrumentValues(penv);
 		if (xmsh.vtype & 1) penv->dwFlags |= ENV_VOLUME;
 		if (xmsh.vtype & 2) penv->dwFlags |= ENV_VOLSUSTAIN;
 		if (xmsh.vtype & 4) penv->dwFlags |= ENV_VOLLOOP;

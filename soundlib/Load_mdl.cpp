@@ -331,8 +331,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 					memcpy(penv->name, lpStream+dwPos+2, 32);
 					penv->nGlobalVol = 64;
 					penv->nPPC = 5*12;
-					penv->nResampling = SRCMODE_DEFAULT;
-					penv->nFilterMode = FLTMODE_UNCHANGED;
+					SetDefaultInstrumentValues(penv);
 					for (j=0; j<lpStream[dwPos+1]; j++)
 					{
 						const BYTE *ps = lpStream+dwPos+34+14*j;
