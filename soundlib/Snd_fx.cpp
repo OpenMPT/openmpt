@@ -437,25 +437,17 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		 || (!pChn->nLength) || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol)))
 		{
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
-			if ((m_nType & MOD_TYPE_IT) && (!bInstrumentChanged) && (penv) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
-			{
-				if (!(penv->dwFlags & ENV_VOLCARRY)) pChn->nVolEnvPosition = 0;
-				if (!(penv->dwFlags & ENV_PANCARRY)) pChn->nPanEnvPosition = 0;
-				if (!(penv->dwFlags & ENV_PITCHCARRY)) pChn->nPitchEnvPosition = 0;
-			} else
-			{
-				pChn->nVolEnvPosition = 0;
-				pChn->nPanEnvPosition = 0;
-				pChn->nPitchEnvPosition = 0;
+			if ((m_nType & MOD_TYPE_IT) && (!bInstrumentChanged) && (penv) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE)))) {
+				if (!(penv->dwFlags & ENV_VOLCARRY)) resetEnvelopes(pChn, ENV_RESET_VOL);
+				if (!(penv->dwFlags & ENV_PANCARRY)) resetEnvelopes(pChn, ENV_RESET_PAN);
+				if (!(penv->dwFlags & ENV_PITCHCARRY)) resetEnvelopes(pChn, ENV_RESET_PITCH);
+			} else {
+				resetEnvelopes(pChn);
 			}
 			pChn->nAutoVibDepth = 0;
 			pChn->nAutoVibPos = 0;
-		} else
-		if ((penv) && (!(penv->dwFlags & ENV_VOLUME)))
-		{
-			pChn->nVolEnvPosition = 0;
-			pChn->nAutoVibDepth = 0;
-			pChn->nAutoVibPos = 0;
+		} else if ((penv) && (!(penv->dwFlags & ENV_VOLUME)))	{
+			resetEnvelopes(pChn);		
 		}
 	}
 	// Invalid sample ?
@@ -593,9 +585,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 	{
 		if ((m_nType & MOD_TYPE_IT) && (pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		{
-			pChn->nVolEnvPosition = 0;
-			pChn->nPanEnvPosition = 0;
-			pChn->nPitchEnvPosition = 0;
+			resetEnvelopes(pChn);
 			pChn->nAutoVibDepth = 0;
 			pChn->nAutoVibPos = 0;
 			pChn->dwFlags &= ~CHN_NOTEFADE;
@@ -1013,9 +1003,7 @@ BOOL CSoundFile::ProcessEffects()
 					if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 					{
 						pChn->dwFlags |= CHN_FASTVOLRAMP;
-						pChn->nVolEnvPosition = 0;
-						pChn->nPanEnvPosition = 0;
-						pChn->nPitchEnvPosition = 0;
+						resetEnvelopes(pChn);	
 						pChn->nAutoVibDepth = 0;
 						pChn->nAutoVibPos = 0;
 						pChn->dwFlags &= ~CHN_NOTEFADE;
@@ -1069,9 +1057,7 @@ BOOL CSoundFile::ProcessEffects()
 				if ((bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
-					pChn->nVolEnvPosition = 0;
-					pChn->nPanEnvPosition = 0;
-					pChn->nPitchEnvPosition = 0;
+					resetEnvelopes(pChn);
 					pChn->nAutoVibDepth = 0;
 					pChn->nAutoVibPos = 0;
 				}
@@ -1564,6 +1550,32 @@ BOOL CSoundFile::ProcessEffects()
 		} //Ends condition (nBreakRow >= 0) || (nPosJump >= 0)
 	}
 	return TRUE;
+}
+
+void CSoundFile::resetEnvelopes(MODCHANNEL* pChn, int envToReset)
+{
+	switch (envToReset) {
+		case ENV_RESET_ALL:
+			pChn->nVolEnvPosition = 0;
+			pChn->nPanEnvPosition = 0;
+			pChn->nPitchEnvPosition = 0;
+			pChn->nVolEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			pChn->nPitchEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			pChn->nPanEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			break;
+		case ENV_RESET_VOL:
+			pChn->nVolEnvPosition = 0;
+			pChn->nVolEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			break;
+		case ENV_RESET_PAN:
+			pChn->nPanEnvPosition = 0;
+			pChn->nPanEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			break;
+		case ENV_RESET_PITCH:
+			pChn->nPitchEnvPosition = 0;
+			pChn->nPitchEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			break;				
+	}
 }
 
 
@@ -2689,8 +2701,15 @@ void CSoundFile::KeyOff(UINT nChn)
 	if (pChn->pHeader)
 	{
 		INSTRUMENTHEADER *penv = pChn->pHeader;
-		if (((penv->dwFlags & ENV_VOLLOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (penv->nFadeOut))
+		if (((penv->dwFlags & ENV_VOLLOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (penv->nFadeOut)) {
 			pChn->dwFlags |= CHN_NOTEFADE;
+		}
+	
+		if (penv->nVolEnvReleaseNode != ENV_RELEASE_NODE_UNSET) {
+			pChn->nVolEnvValueAtReleaseJump=getVolEnvValueFromPosition(pChn->nVolEnvPosition, penv);
+			pChn->nVolEnvPosition= penv->VolPoints[penv->nVolEnvReleaseNode];
+		}
+
 	}
 }
 
