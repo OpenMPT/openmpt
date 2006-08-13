@@ -944,39 +944,30 @@ BOOL CSoundFile::ReadNote()
 				// Volume Envelope
 				if ((pChn->dwFlags & CHN_VOLENV) && (penv->nVolEnv))
 				{
-					int envpos = pChn->nVolEnvPosition;
-					UINT pt = penv->nVolEnv - 1;
-					for (UINT i=0; i<(UINT)(penv->nVolEnv-1); i++)
-					{
-						if (envpos <= penv->VolPoints[i])
-						{
-							pt = i;
-							break;
+					int envvol = getVolEnvValueFromPosition(pChn->nVolEnvPosition, penv);
+					
+					// if we are in the release portion of the envelope,
+					// rescale envelope factor so that it is proportional to the release point
+					// and release envelope beginning.
+					if (penv->nVolEnvReleaseNode != ENV_RELEASE_NODE_UNSET
+						&& pChn->nVolEnvPosition>=penv->VolPoints[penv->nVolEnvReleaseNode]
+						&& pChn->nVolEnvValueAtReleaseJump != NOT_YET_RELEASED) {
+						int envValueAtReleaseJump = pChn->nVolEnvValueAtReleaseJump;
+						int envValueAtReleaseNode = penv->VolEnv[penv->nVolEnvReleaseNode] << 2;
+
+						//If we have just hit the release node, force the current env value
+						//to be that of the release node. This works around the case where 
+						// we have another node at the same position as the release node.
+						if (pChn->nVolEnvPosition==penv->VolPoints[penv->nVolEnvReleaseNode]) {
+							envvol=envValueAtReleaseNode;
 						}
-					}
-					int x2 = penv->VolPoints[pt];
-					int x1, envvol;
-					if (envpos >= x2)
-					{
-						envvol = penv->VolEnv[pt] << 2;
-						x1 = x2;
-					} else
-					if (pt)
-					{
-						envvol = penv->VolEnv[pt-1] << 2;
-						x1 = penv->VolPoints[pt-1];
-					} else
-					{
-						envvol = 0;
-						x1 = 0;
-					}
-					if (envpos > x2) envpos = x2;
-					if ((x2 > x1) && (envpos > x1))
-					{
-						envvol += ((envpos - x1) * (((int)penv->VolEnv[pt]<<2) - envvol)) / (x2 - x1);
+
+						int relativeVolumeChange = (envvol-envValueAtReleaseNode)*2;
+						envvol = envValueAtReleaseJump + relativeVolumeChange;
 					}
 					if (envvol < 0) envvol = 0;
-					if (envvol > 256) envvol = 256;
+					if (envvol > 512) 
+						envvol = 512;
 					vol = (vol * envvol) >> 8;
 				}
 				// Panning Envelope
@@ -1696,6 +1687,41 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 										   //	   it difficult to restore default levels on new notes.
 	}
 
+}
+
+int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)
+{
+	UINT pt = penv->nVolEnv - 1;
+	for (UINT i=0; i<(UINT)(penv->nVolEnv-1); i++)
+	{
+		if (position <= penv->VolPoints[i])
+		{
+			pt = i;
+			break;
+		}
+	}
+	int x2 = penv->VolPoints[pt];
+	int x1, envvol;
+	if (position >= x2)
+	{
+		envvol = penv->VolEnv[pt] << 2;
+		x1 = x2;
+	} else
+		if (pt)
+		{
+			envvol = penv->VolEnv[pt-1] << 2;
+			x1 = penv->VolPoints[pt-1];
+		} else
+		{
+			envvol = 0;
+			x1 = 0;
+		}
+		if (position > x2) position = x2;
+		if ((x2 > x1) && (position > x1))
+		{
+			envvol += ((position - x1) * (((int)penv->VolEnv[pt]<<2) - envvol)) / (x2 - x1);
+		}
+		return envvol;
 }
 
 #endif
