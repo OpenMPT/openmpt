@@ -85,6 +85,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP,		OnEditSampleMap)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
+	ON_COMMAND(ID_ENVELOPE_TOGGLERELEASENODE, OnEnvToggleReleasNode)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -1305,6 +1306,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	{
 		maxpoint--;
 		m_dcMemMain.SelectObject(CMainFrame::penEnvelope);
+		int releaseNode = EnvGetReleaseNode();	
 		for (UINT i=0; i<=maxpoint; i++)
 		{
 			int x = (EnvGetTick(i) + 1) * ENV_ZOOM - nScrollPos;
@@ -1313,11 +1315,18 @@ void CViewInstrument::OnDraw(CDC *pDC)
 			rect.top = y - 3;
 			rect.right = x + 4;
 			rect.bottom = y + 4;
-			m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushWhite));
-			if (i)
+			if (i) {
 				m_dcMemMain.LineTo(x, y);
-			else
+			} else {
 				m_dcMemMain.MoveTo(x, y);
+			}
+			if (i==releaseNode) {
+				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushHighLightRed));
+				m_dcMemMain.SelectObject(CMainFrame::penEnvelopeHighlight);
+			} else {
+				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushWhite));
+			}
+
 		}
 	}
 	DrawPositionMarks(m_dcMemMain.m_hDC);
@@ -1335,6 +1344,72 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
 
 // -! NEW_FEATURE#0015
+}
+
+BYTE CViewInstrument::EnvGetReleaseNode()
+//--------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc) {
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
+		if (penv) {
+			switch(m_nEnv) {
+				case ENV_VOLUME:
+					return penv->nVolEnvReleaseNode;
+				case ENV_PANNING:
+					return penv->nPanEnvReleaseNode;
+				case ENV_PITCH:
+					return penv->nPitchEnvReleaseNode;
+				default:
+					return ENV_RELEASE_NODE_UNSET;
+			}
+		}
+	}
+}
+
+WORD CViewInstrument::EnvGetReleaseNodeValue()
+//--------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc) {
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
+		if (penv) {
+			switch(m_nEnv) {
+				case ENV_VOLUME:
+					return penv->VolEnv[EnvGetReleaseNode()];
+				case ENV_PANNING:
+					return penv->PanEnv[EnvGetReleaseNode()];
+				case ENV_PITCH:
+					return penv->PitchEnv[EnvGetReleaseNode()];
+				default:
+					return 0;
+			}
+		}
+	}
+}
+
+WORD CViewInstrument::EnvGetReleaseNodeTick()
+//--------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc) {
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
+		if (penv) {
+			switch(m_nEnv) {
+				case ENV_VOLUME:
+					return penv->VolPoints[EnvGetReleaseNode()];
+				case ENV_PANNING:
+					return penv->PanPoints[EnvGetReleaseNode()];
+				case ENV_PITCH:
+					return penv->PitchPoints[EnvGetReleaseNode()];
+				default:
+					return 0;
+			}
+		}
+	}
 }
 
 
@@ -1654,7 +1729,14 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 	if (nVal < 0) nVal = 0;
 	if (nVal > 64) nVal = 64;
 	if (nTick < 0) nTick = 0;
-	wsprintf(s, "Tick %d, [%d]", nTick, (m_nEnv != ENV_VOLUME) ? nVal-32 : nVal);
+	if (nTick<=EnvGetReleaseNodeTick()+1) {
+		int displayVal = (m_nEnv != ENV_VOLUME) ? nVal-32 : nVal;
+		wsprintf(s, "Tick %d, [%d]", nTick, displayVal);
+	} else {
+		int displayVal = (nVal-EnvGetReleaseNodeValue())*2;
+		displayVal = (m_nEnv != ENV_VOLUME) ? displayVal-32 : displayVal;
+		wsprintf(s, "Tick %d, [Rel%c%d]",  nTick, displayVal>0?'+':'-', abs(displayVal));
+	}
 	UpdateIndicator(s);
 	if ((m_dwStatus & INSSTATUS_DRAGGING) && (m_nDragItem))
 	{
@@ -1860,9 +1942,11 @@ void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_INSERTPOINT, (lastpoint < maxpoint) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_REMOVEPOINT, ((m_nDragItem) && (lastpoint > 1)) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->m_nType & MOD_TYPE_IT) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (pSndFile->m_nType&MOD_TYPE_IT && m_nEnv==ENV_VOLUME) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SETLOOP, (EnvGetLoop()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SUSTAIN, (EnvGetSustain()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_CARRY, (EnvGetCarry()) ? MF_CHECKED : MF_UNCHECKED);
+			pSubMenu->CheckMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (EnvGetReleaseNode()==m_nDragItem-1) ? MF_CHECKED : MF_UNCHECKED);
 			m_ptMenu = pt;
 			ClientToScreen(&pt);
 			pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON,pt.x,pt.y,this);
@@ -1947,6 +2031,44 @@ void CViewInstrument::OnEnvCarryChanged()
 	{
 		pModDoc->SetModified();
 		UpdateNcButtonState();
+	}
+}
+
+void CViewInstrument::OnEnvToggleReleasNode() 
+//---------------------------------------------------
+{
+	int node = m_nDragItem-1;
+
+	CModDoc *pModDoc = GetDocument();
+	if ((pModDoc) && (node>0) && (node <= EnvGetLastPoint()))
+	{
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
+		switch(m_nEnv) {
+			case ENV_VOLUME:
+				if (penv->nVolEnvReleaseNode == node) {
+					penv->nVolEnvReleaseNode = ENV_RELEASE_NODE_UNSET;
+				} else { 
+					penv->nVolEnvReleaseNode = node;
+				}
+				break;
+			case ENV_PANNING:
+				if (penv->nPanEnvReleaseNode == node) {
+					penv->nPanEnvReleaseNode = ENV_RELEASE_NODE_UNSET;
+				} else { 
+					penv->nPanEnvReleaseNode = node;
+				}
+				break;
+			case ENV_PITCH:
+				if (penv->nPitchEnvReleaseNode == node) {
+					penv->nPitchEnvReleaseNode = ENV_RELEASE_NODE_UNSET;
+				} else { 
+					penv->nPitchEnvReleaseNode = node;
+				}
+				break;			
+		}
+		pModDoc->SetModified();
+		InvalidateRect(NULL, FALSE);
 	}
 }
 
@@ -2040,6 +2162,7 @@ void CViewInstrument::OnEnvRemovePoint()
 					if (penv->nVolLoopEnd > nPoint) penv->nVolLoopEnd--;
 					if (penv->nVolSustainBegin > nPoint) penv->nVolSustainBegin--;
 					if (penv->nVolSustainEnd > nPoint) penv->nVolSustainEnd--;
+					if (penv->nVolEnvReleaseNode>nPoint && penv->nVolEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) penv->nVolEnvReleaseNode--;
 					penv->VolPoints[0] = 0;
 					bOk = TRUE;
 				}
@@ -2058,6 +2181,7 @@ void CViewInstrument::OnEnvRemovePoint()
 					if (penv->nPanLoopEnd > nPoint) penv->nPanLoopEnd--;
 					if (penv->nPanSustainBegin > nPoint) penv->nPanSustainBegin--;
 					if (penv->nPanSustainEnd > nPoint) penv->nPanSustainEnd--;
+					if (penv->nPanEnvReleaseNode>nPoint && penv->nPanEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) penv->nPanEnvReleaseNode--;
 					penv->PanPoints[0] = 0;
 					bOk = TRUE;
 				}
@@ -2076,6 +2200,7 @@ void CViewInstrument::OnEnvRemovePoint()
 					if (penv->nPitchLoopEnd > nPoint) penv->nPitchLoopEnd--;
 					if (penv->nPitchSustainBegin > nPoint) penv->nPitchSustainBegin--;
 					if (penv->nPitchSustainEnd > nPoint) penv->nPitchSustainEnd--;
+					if (penv->nPitchEnvReleaseNode>nPoint && penv->nPitchEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) penv->nPitchEnvReleaseNode--;
 					penv->PitchPoints[0] = 0;
 					bOk = TRUE;
 				}
@@ -2131,6 +2256,7 @@ void CViewInstrument::OnEnvInsertPoint()
 					if (penv->nVolLoopEnd >= i) penv->nVolLoopEnd++;
 					if (penv->nVolSustainBegin >= i) penv->nVolSustainBegin++;
 					if (penv->nVolSustainEnd >= i) penv->nVolSustainEnd++;
+					if (penv->nVolEnvReleaseNode>=i && penv->nVolEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) penv->nVolEnvReleaseNode++;
 					bOk = TRUE;
 				}
 				break;
@@ -2156,6 +2282,7 @@ void CViewInstrument::OnEnvInsertPoint()
 					if (penv->nPanLoopEnd >= i) penv->nPanLoopEnd++;
 					if (penv->nPanSustainBegin >= i) penv->nPanSustainBegin++;
 					if (penv->nPanSustainEnd >= i) penv->nPanSustainEnd++;
+					if (penv->nPanEnvReleaseNode>=i && penv->nPanEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) penv->nPanEnvReleaseNode++;
 					bOk = TRUE;
 				}
 				break;
@@ -2181,6 +2308,7 @@ void CViewInstrument::OnEnvInsertPoint()
 					if (penv->nPitchLoopEnd >= i) penv->nPitchLoopEnd++;
 					if (penv->nPitchSustainBegin >= i) penv->nPitchSustainBegin++;
 					if (penv->nPitchSustainEnd >= i) penv->nPitchSustainEnd++;
+					if (penv->nPitchEnvReleaseNode>=i && penv->nPitchEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) penv->nPitchEnvReleaseNode++;
 					bOk = TRUE;
 				}
 				break;

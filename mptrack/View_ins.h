@@ -115,6 +115,7 @@ protected:
 	afx_msg void OnEnvLoopChanged();
 	afx_msg void OnEnvSustainChanged();
 	afx_msg void OnEnvCarryChanged();
+	afx_msg void OnEnvToggleReleasNode();
 	afx_msg void OnEnvInsertPoint();
 	afx_msg void OnEnvRemovePoint();
 	afx_msg void OnSelectVolumeEnv();
@@ -134,6 +135,11 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG *pMsg); //rewbs.customKeys
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	BYTE EnvGetReleaseNode();
+	WORD EnvGetReleaseNodeValue();
+	WORD EnvGetReleaseNodeTick();
 };
 
 

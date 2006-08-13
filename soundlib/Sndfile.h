@@ -62,6 +62,7 @@ typedef const BYTE * LPCBYTE;
 #define MAX_MIXPLUGINS		100	//50
 // -! BEHAVIOUR_CHANGE#0006
 #define MAX_PLUGPRESETS		1000 //rewbs.plugPresets
+#define MED_MAX_COMMENT_LENGTH 5*1024 //I think 5kB should be enough, though I admit this is a guess.
 
 #define MOD_TYPE_NONE		0x00
 #define MOD_TYPE_MOD		0x01
@@ -353,6 +354,15 @@ enum {
 	NUM_SRC_MODES
 };
 
+enum {
+	ENV_RESET_ALL,
+	ENV_RESET_VOL,
+	ENV_RESET_PAN,
+	ENV_RESET_PITCH,
+	ENV_RELEASE_NODE_UNSET=0xFF,
+	NOT_YET_RELEASED=-1
+};
+
 // Midi Continuous Controller Codes
 // http://www.borg.com/~jglatt/tech/midispec/ctllist.htm
 enum {
@@ -537,6 +547,9 @@ typedef struct _INSTRUMENTHEADER
 	BYTE nCutSwing;
 	BYTE nResSwing;
 	BYTE nFilterMode;
+	BYTE nPitchEnvReleaseNode;
+	BYTE nPanEnvReleaseNode;
+	BYTE nVolEnvReleaseNode;
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
@@ -588,6 +601,7 @@ typedef struct _MODCHANNEL
 	INSTRUMENTHEADER *pHeader;
 	MODINSTRUMENT *pInstrument;
 	DWORD nVolEnvPosition, nPanEnvPosition, nPitchEnvPosition;
+	LONG nVolEnvValueAtReleaseJump, nPanEnvValueAtReleaseJump, nPitchEnvValueAtReleaseJump;
 	DWORD nMasterChn, nVUMeter;
 	LONG nGlobalVol, nInsVol;
 	LONG nFineTune, nTranspose;
@@ -1153,6 +1167,10 @@ public:
 	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
 	UINT GetBestPlugin(UINT nChn, UINT priority, bool respectMutes);
 
+
+	int getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv);
+    void resetEnvelopes(MODCHANNEL* pChn, int envToReset = ENV_RESET_ALL);
+	void SetDefaultInstrumentValues(INSTRUMENTHEADER *penv);
 private:
 	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes);
 	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes);
@@ -1160,6 +1178,9 @@ private:
 
 	void HandlePatternTransitionEvents();
 	void BuildDefaultInstrument();
+
+
+	
 };
 
 

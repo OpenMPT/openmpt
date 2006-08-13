@@ -189,6 +189,9 @@ VS..			nVolSwing;
 VSB.			nVolSustainBegin;
 VSE.			nVolSustainEnd;
 VSTV	[EXT]	nVSTiVolume;
+PERN			nPitchEnvReleaseNode
+AERN			nPanEnvReleaseNode
+VERN			nVolEnvReleaseNode
 -----------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------*/
 
@@ -265,6 +268,9 @@ WRITE_MPTHEADER_sized_member(	nResampling			, USHORT		, R...							)
 WRITE_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
 WRITE_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
 WRITE_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
+WRITE_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
+WRITE_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
+WRITE_MPTHEADER_sized_member(	nVolEnvReleaseNode	, BYTE			, VERN							)
 }
 
 // --------------------------------------------------------------------------------------------
@@ -338,6 +344,9 @@ GET_MPTHEADER_sized_member(	nResampling			, UINT			, R...							)
 GET_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
 GET_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
 GET_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
+GET_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
+GET_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
+GET_MPTHEADER_sized_member(	nVolEnvReleaseNode	, BYTE			, VERN							)
 }
 
 return pointer;
@@ -748,6 +757,8 @@ void CSoundFile::FreePattern(LPVOID pat)
 LPSTR CSoundFile::AllocateSample(UINT nbytes)
 //-------------------------------------------
 {
+	if (nbytes>0xFFFFFFD6)
+		return NULL;
 	LPSTR p = (LPSTR)GlobalAllocPtr(GHND, (nbytes+39) & ~7);
 	if (p) p += 16;
 	return p;
@@ -2650,8 +2661,20 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.nResampling = SRCMODE_DEFAULT;
 	m_defaultInstrument.nFilterMode = FLTMODE_UNCHANGED;
 	m_defaultInstrument.nPPC = 5*12;
-	m_defaultInstrument.nGlobalVol=128;
+	m_defaultInstrument.nGlobalVol=64;
 	m_defaultInstrument.nPan = 0x20 << 2;
 	m_defaultInstrument.nIFC = 0xFF;
+	m_defaultInstrument.nPanEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
+	m_defaultInstrument.nPitchEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
+	m_defaultInstrument.nVolEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 }
 
+void CSoundFile::SetDefaultInstrumentValues(INSTRUMENTHEADER *penv) 
+//-----------------------------------------------------------------
+{
+	penv->nResampling = m_defaultInstrument.nResampling;
+	penv->nFilterMode = m_defaultInstrument.nFilterMode;
+	penv->nPitchEnvReleaseNode = m_defaultInstrument.nPitchEnvReleaseNode;
+	penv->nPanEnvReleaseNode = m_defaultInstrument.nPanEnvReleaseNode;
+	penv->nVolEnvReleaseNode = m_defaultInstrument.nVolEnvReleaseNode;
+}
