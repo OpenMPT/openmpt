@@ -696,11 +696,13 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 		// Song Comments
 		UINT annotxt = BigEndian(pmex->annotxt);
 		UINT annolen = BigEndian(pmex->annolen);
-		if ((annotxt) && (annolen) && (annotxt+annolen <= dwMemLength))
-		{
+		annolen = min(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
+		if ((annotxt) && (annolen) && (annotxt+annolen <= dwMemLength) ) { 
 			m_lpszSongComments = new char[annolen+1];
-			memcpy(m_lpszSongComments, lpStream+annotxt, annolen);
-			m_lpszSongComments[annolen] = 0;
+			if (m_lpszSongComments) {
+				memcpy(m_lpszSongComments, lpStream+annotxt, annolen);
+				m_lpszSongComments[annolen] = 0;
+			}
 		}
 		// Song Name
 		UINT songname = BigEndian(pmex->songname);

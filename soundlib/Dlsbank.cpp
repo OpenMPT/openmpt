@@ -1701,6 +1701,9 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 	penv->nDNA = DNA_NOTEFADE;
 	penv->nResampling = SRCMODE_DEFAULT;
 	penv->nFilterMode = FLTMODE_UNCHANGED;
+	penv->nPanEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
+	penv->nPitchEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
+	penv->nVolEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 	pSndFile->Headers[nInstr] = penv;
 	nSample = 1;
 	UINT nLoadedSmp = 0;

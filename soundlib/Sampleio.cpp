@@ -82,8 +82,7 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 		penv->nGlobalVol = 64;
 		penv->nPan = 128;
 		penv->nPPC = 5*12;
-		penv->nResampling = SRCMODE_DEFAULT;
-		penv->nFilterMode = FLTMODE_UNCHANGED;
+		SetDefaultInstrumentValues(penv);
 		for (UINT iinit=0; iinit<128; iinit++)
 		{
 			penv->Keyboard[iinit] = nSample;
@@ -1167,8 +1166,7 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	if (penv->nPanLoopStart >= penv->nPanLoopEnd) penv->dwFlags &= ~ENV_PANLOOP;
 	penv->nGlobalVol = 64;
 	penv->nPPC = 5*12;
-	penv->nResampling = SRCMODE_DEFAULT;
-	penv->nFilterMode = FLTMODE_UNCHANGED;
+	SetDefaultInstrumentValues(penv);
 	for (UINT ienv=0; ienv<12; ienv++)
 	{
 		penv->VolPoints[ienv] = (WORD)pih->venv[ienv*2];
