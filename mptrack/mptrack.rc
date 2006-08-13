@@ -216,6 +216,8 @@ BEGIN
         MENUITEM "C&arry envelope",             ID_ENVELOPE_CARRY
         MENUITEM "&Insert Point",               ID_ENVELOPE_INSERTPOINT
         MENUITEM "&Remove Point",               ID_ENVELOPE_REMOVEPOINT
+        MENUITEM "&Toggle Release Node",        ID_ENVELOPE_TOGGLERELEASENODE
+
         MENUITEM SEPARATOR
         MENUITEM "&Copy envelope",              ID_EDIT_COPY
         MENUITEM "&Paste envelope",             ID_EDIT_PASTE
@@ -1894,7 +1896,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,17,2,43
+ FILEVERSION 1,17,2,44
  PRODUCTVERSION 0,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -1912,9 +1914,9 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Olivier Lapicque / OpenMPT team"
             VALUE "FileDescription", "OpenMPT / ModPlug Tracker"
-            VALUE "FileVersion", "1, 17, 2, 43"
+            VALUE "FileVersion", "1, 17, 2, 44"
             VALUE "InternalName", "Modplug Tracker"
-            VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2005 GPL."
+            VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2007 GPL."
             VALUE "LegalTrademarks", "M.O.D.P.L.U.G"
             VALUE "OriginalFilename", "mptrack.exe"
             VALUE "ProductName", "OpenMPT / ModPlug Tracker"
@@ -2187,6 +2189,7 @@ BEGIN
                             "Display channel manager window\nChannel manager"
     ID_INDICATOR_CPU        "-"
     ID_FILE_EXPORTCOMPAT    "Export file to standard IT/XM."
+    ID_ENVELOPE_SETRELEASENODE "Set release node"
 END
 
 STRINGTABLE 

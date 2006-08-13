@@ -212,6 +212,7 @@ HPEN CMainFrame::penWhite = NULL;
 HPEN CMainFrame::penHalfDarkGray = NULL;
 HPEN CMainFrame::penSample = NULL;
 HPEN CMainFrame::penEnvelope = NULL;
+HPEN CMainFrame::penEnvelopeHighlight = NULL;
 HPEN CMainFrame::penSeparator = NULL;
 HBRUSH CMainFrame::brushGray = NULL;
 HBRUSH CMainFrame::brushBlack = NULL;
@@ -220,6 +221,7 @@ HBRUSH CMainFrame::brushWhite = NULL;
 //CBrush *CMainFrame::pbrushWhite = NULL;//rewbs.envRowGrid
 
 HBRUSH CMainFrame::brushHighLight = NULL;
+HBRUSH CMainFrame::brushHighLightRed = NULL;
 HBRUSH CMainFrame::brushWindow = NULL;
 HCURSOR CMainFrame::curDragging = NULL;
 HCURSOR CMainFrame::curArrow = NULL;
@@ -767,6 +769,7 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penDarkGray);
 	DeleteGDIObject(penSample);
 	DeleteGDIObject(penEnvelope);
+	DeleteGDIObject(penEnvelopeHighlight);
 	DeleteGDIObject(m_hFixedFont);
 	DeleteGDIObject(penScratch);
 	DeleteGDIObject(penGray00);
@@ -1672,6 +1675,9 @@ void CMainFrame::UpdateColors()
 	penSample = ::CreatePen(PS_SOLID, 0, rgbCustomColors[MODCOLOR_SAMPLE]);
 	if (penEnvelope) DeleteObject(penEnvelope);
 	penEnvelope = ::CreatePen(PS_SOLID, 0, rgbCustomColors[MODCOLOR_ENVELOPES]);
+	if (penEnvelopeHighlight) DeleteObject(penEnvelopeHighlight);
+	penEnvelopeHighlight = ::CreatePen(PS_SOLID, 0, RGB(0xFF, 0xFF, 0x00));
+
 	for (UINT i=0; i<NUM_VUMETER_PENS*2; i++)
 	{
 		int r0,g0,b0, r1,g1,b1;
@@ -1718,8 +1724,11 @@ void CMainFrame::UpdateColors()
 		COLORREF crBkgnd = GetSysColor(COLOR_WINDOW);
 		if (brushHighLight) DeleteObject(brushHighLight);
 		brushHighLight = CreateSolidBrush(GetSysColor(COLOR_HIGHLIGHT));
+		if (brushHighLightRed) DeleteObject(brushHighLight);
+		brushHighLightRed = CreateSolidBrush(RGB(0xFF,0x00,0x00));
+
 		if (brushWindow) DeleteObject(brushWindow);
-		brushWindow = CreateSolidBrush(crBkgnd);
+        brushWindow = CreateSolidBrush(crBkgnd);
 		if (penSeparator) DeleteObject(penSeparator);
 		penSeparator = CreatePen(PS_SOLID, 0, RGB(GetRValue(crBkgnd)/2, GetGValue(crBkgnd)/2, GetBValue(crBkgnd)/2));
 	}

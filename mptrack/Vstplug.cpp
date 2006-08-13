@@ -2005,7 +2005,6 @@ void CVstPlugin::Resume()
 		Dispatch(effMainsChanged, 0, 1, NULL, 0.0f);	// calls plugin's resume
 		Dispatch(effStartProcess, 0, 0, NULL, 0.0f);
 		m_bPlugResumed = true;
-//		ClearVSTEvents();		//DEBUG
 	} catch (...) {
 		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
@@ -2623,8 +2622,10 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 		dwMidiCode = 0x80|nCh|(vol<<16); //note off, on chan nCh; vol is note off velocity.
 		for (UINT i=0; i<128; i++)	//all notes
 		{
-			pCh->uNoteOnMap[i][trackChannel]=0;
-			MidiSend(dwMidiCode|(i<<8));
+			//if (!(m_pEffect->uniqueID==1413633619L) || pCh->uNoteOnMap[i][trackChannel]>0) { //only send necessary NOs for TBVS.
+				pCh->uNoteOnMap[i][trackChannel]=0;
+				MidiSend(dwMidiCode|(i<<8)); 
+			//}
 		}
 	
 	} 

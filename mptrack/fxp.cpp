@@ -106,7 +106,7 @@ bool Cfxp::Load(CString fileName)
 		  ChunkMagic == 'CcnK'			&&  
 		  (fxMagic == 'FxCk' || fxMagic == 'FPCh')))
 	{
-		::AfxMessageBox("Bad Magic.");
+		::AfxMessageBox("Bad Magic number: this does not look like a preset file.");
 		inStream.Close();
 		return false;
 	}
@@ -124,7 +124,7 @@ bool Cfxp::Load(CString fileName)
 			}
 		}
 	}
-	else if (fxMagic == 'FPCh') // load chunk list
+	else if (fxMagic == 'FPCh') // load chunk
 	{
 		if (!ReadLE(inStream, chunkSize))
 		{
@@ -254,7 +254,7 @@ bool Cfxp::ReadLE(CFile &in, char *c, UINT length)
 bool Cfxp::WriteLE(CFile &out, const long &l)
 {
 	int size=sizeof(long);
-	long l2 = l; // maybe I should have made that arg a const..
+	long l2 = l; 
 	if (NeedSwap())
 		SwapBytes(l2);
 	out.Write(&l2, size);
@@ -264,7 +264,7 @@ bool Cfxp::WriteLE(CFile &out, const long &l)
 bool Cfxp::WriteLE(CFile &out, const float &f)
 {
 	int size=sizeof(float);
-	float f2 = f; // maybe I should have made that arg a const..
+	float f2 = f;
 	if (NeedSwap())
 		SwapBytes(f2);
 	out.Write(&f2, size);
