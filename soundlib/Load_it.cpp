@@ -248,7 +248,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// name string
-	if (streamPos+len<=dwMemLength && len<MAX_SAMPLES*32) {
+	if (streamPos+len<=dwMemLength && len<=MAX_SAMPLES*32) {
 		memcpy(&m_szNames[0],lpStream+streamPos,len);
 		streamPos += len;
 	}
@@ -331,7 +331,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 		streamPos += sizeof(DWORD);
 
 		// ChnSettings[i].szName
-		if (streamPos+len<=dwMemLength && len<MAX_CHANNELNAME) {
+		if (streamPos+len<=dwMemLength && len<=MAX_CHANNELNAME) {
 			memcpy(&ChnSettings[i].szName[0],lpStream+streamPos,len);
 			streamPos += len;
 		}
@@ -372,7 +372,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 
 	// instruments' paths
 	for(i=0; i<m_nInstruments; i++){
-		if (len+streamPos<=dwMemLength && len<_MAX_PATH) {
+		if (len+streamPos<=dwMemLength && len<=_MAX_PATH) {
 			memcpy(&m_szInstrumentPath[i][0],lpStream+streamPos,len);
 			streamPos += len;
 		}
@@ -386,7 +386,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// order data
-	if (size+streamPos<=dwMemLength && size<MAX_ORDERS) {
+	if (size+streamPos<=dwMemLength && size<=MAX_ORDERS) {
 		memcpy(&Order[0],lpStream+streamPos,size);
 		streamPos += size;
 	}
@@ -410,8 +410,8 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// m_lpszPatternNames
-	m_lpszPatternNames = new char[m_nPatternNames * len];
-	if (m_lpszPatternNames) {
+	if (len<=MAX_PATTERNNAME && m_nPatternNames<=MAX_PATTERNS) {
+		m_lpszPatternNames = new char[m_nPatternNames * len];
 		memcpy(&m_lpszPatternNames[0],lpStream+streamPos,m_nPatternNames * len);
 	}
 	streamPos += m_nPatternNames * len;
