@@ -648,6 +648,11 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,2,22,493,27
     CONTROL         "Loop Pattern",IDC_PATTERN_LOOP,"Button",BS_AUTOCHECKBOX | 
                     BS_LEFTTEXT | BS_FLAT | WS_TABSTOP,355,34,57,10
+    EDITTEXT        IDC_EDIT_ORDERLIST_MARGINS,2,113,28,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    CONTROL         "",IDC_SPIN_ORDERLIST_MARGINS,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_NOTHOUSANDS,15,118,11,11
 END
 
 IDD_CONTROL_SAMPLES DIALOGEX 0, 0, 544, 106
@@ -818,7 +823,7 @@ BEGIN
     COMBOBOX        IDC_COMBO4,95,99,27,91,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "",IDC_NOTEMAP,"Static",SS_GRAYRECT | SS_NOTIFY | 
-                    WS_TABSTOP,368,37,62,131,WS_EX_CLIENTEDGE
+                    WS_TABSTOP,461,37,62,131,WS_EX_CLIENTEDGE
     GROUPBOX        "Random Variation",IDC_STATIC,131,88,104,80
     CTEXT           "Volume",IDC_STATIC,136,99,33,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
@@ -830,7 +835,7 @@ BEGIN
                     TBS_NOTICKS,172,118,60,10
     CONTROL         "Cutoff",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | BS_FLAT,
                     136,52,35,10
-    EDITTEXT        IDC_EDIT1,414,119,30,12,ES_RIGHT | ES_READONLY | NOT 
+    EDITTEXT        IDC_EDIT1,492,119,30,12,ES_RIGHT | ES_READONLY | NOT 
                     WS_VISIBLE | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_RIGHT
     CONTROL         "Slider2",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_DISABLED,168,53,64,10
@@ -846,7 +851,7 @@ BEGIN
                     WS_EX_STATICEDGE
     GROUPBOX        "Filter",IDC_STATIC,131,27,104,141
     GROUPBOX        "General",IDC_STATIC,3,27,123,141
-    GROUPBOX        "Pitch/Pan",IDC_STATIC,3,88,123,35
+    GROUPBOX        "Pitch/Pan",IDC_STATIC,3,88,123,80
     PUSHBUTTON      "Editor",IDC_INSVIEWPLG,321,99,37,13,0,WS_EX_STATICEDGE
     CONTROL         "",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS,47,135,36,10
@@ -858,7 +863,6 @@ BEGIN
                     WS_EX_STATICEDGE
     GROUPBOX        "New Note Action",IDC_STATIC,240,27,123,141
     GROUPBOX        "Plugin / Midi",IDC_STATIC,240,88,123,80
-    CTEXT           "Sample Map",IDC_STATIC,378,23,40,12,SS_CENTERIMAGE
     CTEXT           "Midi Bank",IDC_STATIC,245,152,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     EDITTEXT        IDC_EDIT11,321,152,37,12
@@ -886,6 +890,11 @@ BEGIN
     CTEXT           "Mode",IDC_STATIC,135,70,23,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     RTEXT           "--",IDC_TEXT1,204,62,27,8
+    EDITTEXT        IDC_EDIT_PITCHTEMPOLOCK,428,36,24,12,ES_AUTOHSCROLL
+    CONTROL         "Loop tempo:",IDC_CHECK_PITCHTEMPOLOCK,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,371,38,51,8
+    GROUPBOX        "Pitch/Tempo Lock",IDC_STATIC,367,27,89,25
+    GROUPBOX        "Sample Map",IDC_STATIC,461,27,62,141
 END
 
 IDD_MODDOC_MODTYPE DIALOGEX 0, 0, 243, 198
@@ -1048,7 +1057,7 @@ BEGIN
     COMBOBOX        IDC_COMBO4,319,155,89,99,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Effect:",IDC_STATIC,319,146,29,8
-    GROUPBOX        "Effect Plugins",IDC_STATIC,5,177,408,131
+    GROUPBOX        "Plugins",IDC_STATIC,5,177,408,131
     COMBOBOX        IDC_COMBO5,53,191,135,148,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CTEXT           "Display name",IDC_STATIC,263,191,48,13,SS_CENTERIMAGE,
@@ -1896,7 +1905,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,17,2,44
+ FILEVERSION 1,17,2,45
  PRODUCTVERSION 0,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -1914,7 +1923,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Olivier Lapicque / OpenMPT team"
             VALUE "FileDescription", "OpenMPT / ModPlug Tracker"
-            VALUE "FileVersion", "1, 17, 2, 44"
+            VALUE "FileVersion", "1, 17, 2, 45"
             VALUE "InternalName", "Modplug Tracker"
             VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2007 GPL."
             VALUE "LegalTrademarks", "M.O.D.P.L.U.G"
@@ -1995,7 +2004,7 @@ BEGIN
 
     IDD_CONTROL_INSTRUMENTS, DIALOG
     BEGIN
-        RIGHTMARGIN, 444
+        RIGHTMARGIN, 522
         BOTTOMMARGIN, 168
     END
 

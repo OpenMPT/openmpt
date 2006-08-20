@@ -109,7 +109,6 @@ WORD FreqS3MTable[16] =
 	0,0,0,0
 };
 
-
 // S3M FineTune frequencies
 WORD S3MFineTuneTable[16] = 
 {

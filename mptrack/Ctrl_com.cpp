@@ -186,13 +186,13 @@ void CCtrlComments::OnCommentsChanged()
 		if (p[0])
 			m_pSndFile->m_lpszSongComments = p;
 		else
-			delete p;
+			delete[] p;
 		if (oldcomments)
 		{
 			BOOL bSame = FALSE;
 			if ((m_pSndFile->m_lpszSongComments)
 			 && (!strcmp(m_pSndFile->m_lpszSongComments, oldcomments))) bSame = TRUE;
-			delete oldcomments;
+			delete[] oldcomments;
 			if (bSame) return;
 		} else
 		{

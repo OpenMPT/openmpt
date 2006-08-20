@@ -457,7 +457,8 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			UINT nParams = pVstPlugin->GetNumParameters();
 			m_CbnParam.SetRedraw(FALSE);
 			m_CbnParam.ResetContent();
-			for (UINT i=0; i<nParams; i++)
+			UINT i = 0;
+			for (i=0; i<nParams; i++)
 			{
 				pVstPlugin->GetParamName(i, sname, sizeof(sname));
 				wsprintf(s, "%02X: %s", i|0x80, sname);

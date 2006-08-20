@@ -107,7 +107,6 @@ CModDoc::CModDoc()
 // -> DESC="channels management dlg"
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
-
 }
 
 
@@ -132,6 +131,7 @@ BOOL CModDoc::OnNewDocument()
 //---------------------------
 {
 	if (!CDocument::OnNewDocument()) return FALSE;
+
 	m_SndFile.Create(NULL, this, 0);
 	m_SndFile.m_nType = CTrackApp::GetDefaultDocType();
 
@@ -349,6 +349,13 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 // -> DESC="channels management dlg"
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
+	if (m_SndFile.m_dwLastSavedWithVersion>CMainFrame::GetFullVersionNumeric()) {
+		char s[256];
+		wsprintf(s, "Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%s. Current version: v%s.\r\n", 
+			CMainFrame::GetVersionString(m_SndFile.m_dwLastSavedWithVersion),
+			CMainFrame::GetFullVersionString());
+		::AfxMessageBox(s);
+	}
 
 	SetModifiedFlag(FALSE); // (bModified);
 	m_bHasValidPath=true;
@@ -364,7 +371,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	CHAR fext[_MAX_EXT]="";
 	UINT nType = m_SndFile.m_nType, dwPacking = 0;
 	BOOL bOk = FALSE;
-
+	m_SndFile.m_dwLastSavedWithVersion=CMainFrame::GetFullVersionNumeric();
 	if (!lpszPathName) return FALSE;
 	_splitpath(lpszPathName, NULL, NULL, NULL, fext);
 	if (!lstrcmpi(fext, ".mod")) nType = MOD_TYPE_MOD; else
@@ -558,7 +565,6 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	{
 		SetModified(FALSE);
 		m_bHasValidPath=true;
-		m_SndFile.m_dwLastSavedWithVersion=CMainFrame::GetFullVersionNumeric();
 		return TRUE;
 	} else
 	{
@@ -693,7 +699,7 @@ BOOL CModDoc::AddToLog(LPCSTR lpszLog)
 		{
 			strcpy(p, m_lpszLog);
 			strcat(p, lpszLog);
-			delete m_lpszLog;
+			delete[] m_lpszLog;
 			m_lpszLog = p;
 		}
 	} else
@@ -710,7 +716,7 @@ BOOL CModDoc::ClearLog()
 {
 	if (m_lpszLog)
 	{
-		delete m_lpszLog;
+		delete[] m_lpszLog;
 		m_lpszLog = NULL;
 	}
 	return TRUE;
@@ -1406,6 +1412,9 @@ void CModDoc::OnFileWaveConvert()
 		if(!wsdlg.m_bChannelMode || !(flags[i] & CHN_MUTE)){
 			// rewbs.fix3239
 			m_SndFile.SetCurrentPos(0);
+			//Relabs.note: Since I removed pattern loop disabling from certain
+			//methods, making sure that pattern loop is off.
+			m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
 			if (wsdlg.m_bSelectPlay) {
 				m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
 				m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
@@ -1477,6 +1486,9 @@ void CModDoc::OnFileMP3Convert()
 		bplaying = TRUE;
 		pMainFrm->PauseMod();
 		m_SndFile.SetCurrentPos(0);
+
+		m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
+
 		// Saving file
 		PTAGID3INFO pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_id3tag : NULL;
 		CDoAcmConvert dwcdlg(&m_SndFile, s, &wfx.wfx, hadid, pTag, pMainFrm);
@@ -1580,9 +1592,9 @@ void CModDoc::OnPlayerPlay()
 	if (pMainFrm)
 	{
 		CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
- 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // Relabsoluness.note: Using existing 'dirty HACK'
+ 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
 		{
-			//Relabsoluness.note: User has sent play song command: set loop pattern checkbox to false.
+			//User has sent play song command: set loop pattern checkbox to false.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
                  
@@ -1604,7 +1616,9 @@ void CModDoc::OnPlayerPlay()
 			m_SndFile.ResumePlugins();
 		}
 		END_CRITICAL();
-		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED);
+		//m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED);
+		//Relabs.note: Added SONG_PATTERNLOOP.
+		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED|SONG_PATTERNLOOP);
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
 	}
 }
@@ -1679,7 +1693,9 @@ void CModDoc::OnPlayerPlayFromStart()
 		
 
 		pMainFrm->PauseMod();
-		m_SndFile.m_dwSongFlags &= ~SONG_STEP;
+		//m_SndFile.m_dwSongFlags &= ~SONG_STEP;
+		//Relabs.hack: Added SONG_PATTERNLOOP
+		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PATTERNLOOP);
 		m_SndFile.SetCurrentPos(0);
 		pMainFrm->ResetElapsedTime();
 		BEGIN_CRITICAL();
@@ -2061,7 +2077,8 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 	BOOL bSupported;
 	int fxndx = -1;
 	pszDescription[0] = 0;
-	for (UINT i=0; i<MAX_FXINFO; i++)
+	UINT i = 0;
+	for (i=0; i<MAX_FXINFO; i++)
 	{
 		if ((command == gFXInfo[i].dwEffect) // Effect
 		 && ((param & gFXInfo[i].dwParamMask) == gFXInfo[i].dwParamValue)) // Value
@@ -2837,6 +2854,8 @@ void CModDoc::OnPatternPlay()
 		{
 			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
 		}
+		if ((nOrd < MAX_PATTERNS) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = nOrd;
+		//Relabs.note: Some jumps occured when using pattern play and loop pattern checkbox - above line hopefully fixes it.
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
@@ -3041,7 +3060,8 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 		if (macroType==sfx_plug && MacroToPlugParam(macroText)==paramToUse) {
 			CString message;
 			message.Format("Param %d can already be controlled with macro %X", paramToUse, checkMacro);
-			::MessageBox(NULL,message, "Macro exists for this param",MB_ICONINFORMATION | MB_OK);
+			CMainFrame::GetMainFrame()->MessageBox(message, "Macro exists for this param",MB_ICONINFORMATION | MB_OK);
+			//Relabs.expl: Modified to prevent notification box go 'under' ompt to block key messages.
 			return;
 		}
 	}

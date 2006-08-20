@@ -82,7 +82,7 @@ CLhaArchive::~CLhaArchive()
 	}
 	if (m_pDecoderData)
 	{
-		delete m_pDecoderData;
+		delete[] m_pDecoderData;
 		m_pDecoderData = NULL;
 	}
 }

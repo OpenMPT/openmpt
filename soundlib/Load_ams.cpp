@@ -627,6 +627,6 @@ void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char pac
 			pdest[i] = old;
 		}
 	}
-	delete amstmp;
+	delete[] amstmp;
 }
 

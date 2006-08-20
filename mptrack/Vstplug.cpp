@@ -1110,7 +1110,7 @@ VOID CSelectPluginDlg::OnOK()
 			m_pPlugin->pMixState = NULL;
 			// Remove old state
 			m_pPlugin->nPluginDataSize = 0;
-			if (m_pPlugin->pPluginData) delete m_pPlugin->pPluginData;
+			if (m_pPlugin->pPluginData) delete[] m_pPlugin->pPluginData;
 			m_pPlugin->pPluginData = NULL;
 			// Initialize plugin info
 			memset(&m_pPlugin->Info, 0, sizeof(m_pPlugin->Info));
@@ -1160,7 +1160,7 @@ VOID CSelectPluginDlg::OnOK()
 		m_pPlugin->pMixState = NULL;
 		// Remove old state
 		m_pPlugin->nPluginDataSize = 0;
-		if (m_pPlugin->pPluginData) delete m_pPlugin->pPluginData;
+		if (m_pPlugin->pPluginData) delete[] m_pPlugin->pPluginData;
 		m_pPlugin->pPluginData = NULL;
 		// Clear plugin info
 		memset(&m_pPlugin->Info, 0, sizeof(m_pPlugin->Info));
@@ -1365,7 +1365,7 @@ VOID CSelectPluginDlg::OnAddPlugin()
 	}
 	dlg.m_ofn.lpstrFile = NULL;
 	dlg.m_ofn.nMaxFile = 0;
-	delete pszFileNames;
+	delete[] pszFileNames;
 }
 
 
@@ -1619,7 +1619,7 @@ CVstPlugin::~CVstPlugin()
 	}
 	if (m_pEvList)
 	{
-		delete (char *)m_pEvList;
+		delete[] (char *)m_pEvList;
 		m_pEvList = NULL;
 	}
 
@@ -1783,6 +1783,7 @@ bool CVstPlugin::SaveProgram(CString fileName)
 	if (fxp)
 		delete fxp;
 
+	delete[] params;
 	return success;
 	
 }
@@ -1958,32 +1959,10 @@ BOOL CVstPlugin::GetDefaultEffectName(LPSTR pszName)
 	return FALSE;
 }
 
-//rewbs: TODO: clean up. Much of this is duplicated in ResumePlugins().
 void CVstPlugin::Init(unsigned long nFreq, int bReset)
 //----------------------------------------------------
 {
-	/*
-	
-	if ((bReset) || (nFreq != m_nSampleRate))
-	{
-		__try { __try {
-		m_nSampleRate = nFreq;
-		m_MixState.nVolDecayL = 0;
-		m_MixState.nVolDecayR = 0;
-		CVstPlugin::Dispatch(effMainsChanged, 0, FALSE, NULL, 0);
-		CVstPlugin::Dispatch(effSetBlockSize, 0, MIXBUFFERSIZE, NULL, 0);
-		CVstPlugin::Dispatch(effMainsChanged, 0, TRUE, NULL, 0);
-		CVstPlugin::Dispatch(effStartProcess, 0, 0, NULL, 0.0f);
-		CVstPlugin::Dispatch(effSetSampleRate, 0, 0, NULL, (float)m_nSampleRate);
-		} __finally {}
-		} __except(EXCEPTION_EXECUTE_HANDLER)
-		{
-		#ifdef VST_LOG
-			Log("GPF in Init() (Plugin=%s)\n", m_pFactory->szLibraryName);
-		#endif
-		}
-	}
-	*/
+
 }
 
 void CVstPlugin::Resume() 
@@ -2810,7 +2789,7 @@ void CVstPlugin::SaveAllParameters()
 					m_pMixStruct->nPluginDataSize = nByteSize+4;
 				} else
 				{
-					if (m_pMixStruct->pPluginData) delete m_pMixStruct->pPluginData;
+					if (m_pMixStruct->pPluginData) delete[] m_pMixStruct->pPluginData;
 					m_pMixStruct->nPluginDataSize = 0;
 					m_pMixStruct->pPluginData = new char[nByteSize+4];
 					if (m_pMixStruct->pPluginData)
@@ -2836,7 +2815,7 @@ void CVstPlugin::SaveAllParameters()
 			m_pMixStruct->nPluginDataSize = nLen;
 		} else
 		{
-			if (m_pMixStruct->pPluginData) delete m_pMixStruct->pPluginData;
+			if (m_pMixStruct->pPluginData) delete[] m_pMixStruct->pPluginData;
 			m_pMixStruct->nPluginDataSize = 0;
 			m_pMixStruct->pPluginData = new char[nLen];
 			if (m_pMixStruct->pPluginData)

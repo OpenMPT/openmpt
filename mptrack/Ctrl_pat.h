@@ -12,6 +12,11 @@ protected:
 	HFONT m_hFont;
 	COLORREF colorText, colorTextSel;
 	int m_cxFont, m_cyFont, m_nXScroll, m_nScrollPos, m_nDropPos;
+	//m_nXScroll  : The order at the beginning of shown orderlist?
+	//m_nScrollPos: The same as order?
+	BYTE m_nOrderlistMargins;
+	//To tell how many orders('orderboxes') to show at least
+	//on both sides of current order(when updating orderslist position).
 	UINT m_nDragOrder;
 	BOOL m_bScrolling, m_bDragging, m_bShift;
 	CModDoc *m_pModDoc;
@@ -32,6 +37,9 @@ public:
 	BOOL UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
+	BYTE SetOrderlistMargins(int); //Returns the number that was set.
+	BYTE GetOrderlistMargins() const {return m_nOrderlistMargins;}
+	BYTE GetShownOrdersMax();	//Should return the maximum number of shown orders.
 
 public:
 	//{{AFX_VIRTUAL(COrderList)
@@ -98,8 +106,8 @@ protected:
 // -> DESC="midi keyboard split"
 	CComboBox m_CbnSplitInstrument,m_CbnSplitNote,m_CbnOctaveModifier,m_CbnSplitVolume;
 // -! NEW_FEATURE#0012
-	CPatEdit m_EditSpacing, m_EditPatName;
-	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing;
+	CPatEdit m_EditSpacing, m_EditPatName, m_EditOrderListMargins;
+	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinOrderListMargins;
 	CModControlBar m_ToolBar;
 	UINT m_nInstrument, m_nDetailLevel;
 	BOOL m_bRecord, m_bVUMeters, m_bPluginNames;
@@ -171,6 +179,7 @@ protected:
 	afx_msg void OnNextInstrument();
 	afx_msg void OnSpacingChanged();
 	afx_msg void OnPatternNameChanged();
+	afx_msg void OnOrderListMarginsChanged();
 	afx_msg void OnSetupZxxMacros();
 	afx_msg void OnChordEditor();
 	afx_msg void OnDetailLo();

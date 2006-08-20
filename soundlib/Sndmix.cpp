@@ -1307,6 +1307,10 @@ BOOL CSoundFile::ReadNote()
 				pChn->dwFlags |= CHN_NOTEFADE;
 				pChn->nRealVolume = 0;
 			}
+			if(m_nType == MOD_TYPE_IT && pChn->pHeader && pChn->pHeader->wPitchToTempoLock)
+			{
+				freq *= (float)m_nMusicTempo / (float)pChn->pHeader->wPitchToTempoLock;
+			}
 			UINT ninc = _muldiv(freq, 0x10000, gdwMixingFreq);
 			if ((ninc >= 0xFFB0) && (ninc <= 0x10090)) ninc = 0x10000;
 			if (m_nFreqFactor != 128) ninc = (ninc * m_nFreqFactor) >> 7;

@@ -171,6 +171,7 @@ PPS.			nPPS;
 PS..			nPanSwing;
 PSB.			nPanSustainBegin;
 PSE.			nPanSustainEnd;
+PTTL			wPitchToTempoLock;
 R...			nResampling;
 RP..	[EXT]	nRestartPos;
 RPB.	[EXT]	nRowsPerBeat;
@@ -268,6 +269,7 @@ WRITE_MPTHEADER_sized_member(	nResampling			, USHORT		, R...							)
 WRITE_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
 WRITE_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
 WRITE_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
+WRITE_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL		,					)
 WRITE_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
 WRITE_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
 WRITE_MPTHEADER_sized_member(	nVolEnvReleaseNode	, BYTE			, VERN							)
@@ -344,6 +346,7 @@ GET_MPTHEADER_sized_member(	nResampling			, UINT			, R...							)
 GET_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
 GET_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
 GET_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
+GET_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL		,					)
 GET_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
 GET_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
 GET_MPTHEADER_sized_member(	nVolEnvReleaseNode	, BYTE			, VERN							)
@@ -688,12 +691,12 @@ BOOL CSoundFile::Destroy()
 	m_nPatternNames = 0;
 	if (m_lpszPatternNames)
 	{
-		delete m_lpszPatternNames;
+		delete[] m_lpszPatternNames;
 		m_lpszPatternNames = NULL;
 	}
 	if (m_lpszSongComments)
 	{
-		delete m_lpszSongComments;
+		delete[] m_lpszSongComments;
 		m_lpszSongComments = NULL;
 	}
 	for (i=1; i<MAX_SAMPLES; i++)
@@ -718,7 +721,7 @@ BOOL CSoundFile::Destroy()
 		if ((m_MixPlugins[i].nPluginDataSize) && (m_MixPlugins[i].pPluginData))
 		{
 			m_MixPlugins[i].nPluginDataSize = 0;
-			delete m_MixPlugins[i].pPluginData;
+			delete[] m_MixPlugins[i].pPluginData;
 			m_MixPlugins[i].pPluginData = NULL;
 		}
 		m_MixPlugins[i].pMixState = NULL;
@@ -961,7 +964,7 @@ UINT CSoundFile::GetNumPatterns() const
 	return i;
 }
 
-
+/*
 UINT CSoundFile::GetNumInstruments() const
 //----------------------------------------
 {
@@ -969,6 +972,7 @@ UINT CSoundFile::GetNumInstruments() const
 	for (UINT i=0; i<MAX_INSTRUMENTS; i++) if (Ins[i].pSample) n++;
 	return n;
 }
+*/
 
 
 UINT CSoundFile::GetMaxPosition() const
@@ -1067,7 +1071,9 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 		m_nMusicSpeed = m_nDefaultSpeed;
 		m_nMusicTempo = m_nDefaultTempo;
 	}
-	m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
+	//m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
+	//Relabs.note: Removed SONG_PATTERNLOOP - why it should be disabled here?
+	m_dwSongFlags &= ~(SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
 	for (nPattern = 0; nPattern < MAX_ORDERS; nPattern++)
 	{
 		UINT ord = Order[nPattern];
@@ -1149,7 +1155,9 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 		m_nPatternDelay = 0;
 		m_nFrameDelay = 0;
 	}
-	m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
+	//m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
+	//Relabs.note: Removed SONG_PATTERNLOOP
+	m_dwSongFlags &= ~(SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
 }
 
 //rewbs.VSTCompliance
@@ -1187,7 +1195,7 @@ void CSoundFile::ResumePlugins()
 			pPlugin->Resume();
 		}
 	}
-	m_lTotalSampleCount=0;   //Already done in suspend.
+	m_lTotalSampleCount=GetSampleOffset();
 
 }
 
@@ -1204,7 +1212,7 @@ void CSoundFile::StopAllVsti()
 			pPlugin->HardAllNotesOff();
 		}
 	}
-	m_lTotalSampleCount=0;   //Already done in suspend.
+	m_lTotalSampleCount=GetSampleOffset();
 }
 
 
@@ -1403,7 +1411,8 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 	}
 
 	BEGIN_CRITICAL();
-	for (UINT i=0; i<MAX_PATTERNS; i++) 
+	UINT i = 0;
+	for (i=0; i<MAX_PATTERNS; i++) 
 	{
 		if (Patterns[i])
 		{
@@ -2437,7 +2446,7 @@ void CSoundFile::FrequencyToTranspose(MODINSTRUMENT *psmp)
 {
 	int f2t = FrequencyToTranspose(psmp->nC4Speed);
 	int transp = f2t >> 7;
-	int ftune = f2t & 0x7F;
+	int ftune = f2t & 0x7F; //0x7F == 111 1111
 	if (ftune > 80)
 	{
 		transp++;
@@ -2498,7 +2507,7 @@ BOOL CSoundFile::SetPatternName(UINT nPat, LPCSTR lpszName)
 		if (m_lpszPatternNames)
 		{
 			memcpy(p, m_lpszPatternNames, m_nPatternNames * MAX_PATTERNNAME);
-			delete m_lpszPatternNames;
+			delete[] m_lpszPatternNames;
 			m_lpszPatternNames = NULL;
 		}
 		m_lpszPatternNames = p;
@@ -2620,6 +2629,7 @@ BOOL CSoundFile::DestroySample(UINT nSample)
 // -> CODE#0020
 // -> DESC="rearrange sample list"
 BOOL CSoundFile::MoveSample(UINT from, UINT to)
+//---------------------------------------------
 {
 	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return FALSE;
 	if (!Ins[from].pSample || Ins[to].pSample) return TRUE;
@@ -2667,6 +2677,7 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.nPanEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.nPitchEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.nVolEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
+	m_defaultInstrument.wPitchToTempoLock = 0;
 }
 
 void CSoundFile::SetDefaultInstrumentValues(INSTRUMENTHEADER *penv) 
@@ -2677,4 +2688,14 @@ void CSoundFile::SetDefaultInstrumentValues(INSTRUMENTHEADER *penv)
 	penv->nPitchEnvReleaseNode = m_defaultInstrument.nPitchEnvReleaseNode;
 	penv->nPanEnvReleaseNode = m_defaultInstrument.nPanEnvReleaseNode;
 	penv->nVolEnvReleaseNode = m_defaultInstrument.nVolEnvReleaseNode;
+}
+
+long CSoundFile::GetSampleOffset() 
+//-------------------------------
+{
+	//TODO: This is where we could inform patterns of the exact song position when playback starts.
+	//order: m_nNextPattern
+	//long ticksFromStartOfPattern = m_nRow*m_nMusicSpeed;
+	//return ticksFromStartOfPattern*m_nSamplesPerTick;
+	return 0;
 }

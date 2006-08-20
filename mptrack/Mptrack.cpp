@@ -1158,12 +1158,12 @@ CPaletteBitmap::~CPaletteBitmap()
 	}
 	if (m_lpRotoZoom)
 	{
-		delete m_lpRotoZoom;
+		delete[] m_lpRotoZoom;
 		m_lpRotoZoom = NULL;
 	}
 	if (m_lpCopy)
 	{
-		delete m_lpCopy;
+		delete[] m_lpCopy;
 		m_lpCopy = NULL;
 	}
 }

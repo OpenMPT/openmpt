@@ -2243,7 +2243,8 @@ void CViewInstrument::OnEnvInsertPoint()
 						penv->VolEnv[0] = 64;
 						penv->nVolEnv = 1;
 					}
-					for (UINT i=0; i<penv->nVolEnv; i++) if (nTick <= penv->VolPoints[i]) break;
+					UINT i = 0;
+					for (i=0; i<penv->nVolEnv; i++) if (nTick <= penv->VolPoints[i]) break;
 					for (UINT j=penv->nVolEnv; j>i; j--)
 					{
 						penv->VolPoints[j] = penv->VolPoints[j-1];
@@ -2269,7 +2270,8 @@ void CViewInstrument::OnEnvInsertPoint()
 						penv->PanEnv[0] = 32;
 						penv->nPanEnv = 1;
 					}
-					for (UINT i=0; i<penv->nPanEnv; i++) if (nTick <= penv->PanPoints[i]) break;
+					UINT i = 0;
+					for (i=0; i<penv->nPanEnv; i++) if (nTick <= penv->PanPoints[i]) break;
 					for (UINT j=penv->nPanEnv; j>i; j--)
 					{
 						penv->PanPoints[j] = penv->PanPoints[j-1];
@@ -2295,7 +2297,8 @@ void CViewInstrument::OnEnvInsertPoint()
 						penv->PitchEnv[0] = 32;
 						penv->nPitchEnv = 1;
 					}
-					for (UINT i=0; i<penv->nPitchEnv; i++) if (nTick <= penv->PitchPoints[i]) break;
+					UINT i = 0;
+					for (i=0; i<penv->nPitchEnv; i++) if (nTick <= penv->PitchPoints[i]) break;
 					for (UINT j=penv->nPitchEnv; j>i; j--)
 					{
 						penv->PitchPoints[j] = penv->PitchPoints[j-1];

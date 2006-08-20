@@ -64,6 +64,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(IDC_PATINSTROPLUGGUI2,		ToggleSplitPluginEditor) //rewbs.instroVST
 	ON_EN_CHANGE(IDC_EDIT_SPACING,			OnSpacingChanged)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		OnPatternNameChanged)
+	ON_EN_KILLFOCUS(IDC_EDIT_ORDERLIST_MARGINS, OnOrderListMarginsChanged)
 	ON_UPDATE_COMMAND_UI(IDC_PATTERN_RECORD,OnUpdateRecord)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
 	//}}AFX_MSG_MAP
@@ -85,8 +86,10 @@ void CCtrlPatterns::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_OCTAVEMODIFIER,	m_CbnOctaveModifier);
 	DDX_Control(pDX, IDC_COMBO_SPLITVOLUME,		m_CbnSplitVolume);
 	DDX_Control(pDX, IDC_EDIT_SPACING,			m_EditSpacing);
+	DDX_Control(pDX, IDC_EDIT_ORDERLIST_MARGINS,m_EditOrderListMargins);
 	DDX_Control(pDX, IDC_EDIT_PATTERNNAME,		m_EditPatName);
 	DDX_Control(pDX, IDC_SPIN_SPACING,			m_SpinSpacing);
+	DDX_Control(pDX, IDC_SPIN_ORDERLIST_MARGINS,m_SpinOrderListMargins);
 	DDX_Control(pDX, IDC_SPIN_INSTRUMENT,		m_SpinInstrument);
 	DDX_Control(pDX, IDC_TOOLBAR1,				m_ToolBar);
 	//}}AFX_DATA_MAP
@@ -157,13 +160,18 @@ BOOL CCtrlPatterns::OnInitDialog()
 	// Special edit controls -> tab switch to view
 	m_EditSpacing.SetParent(this);
 	m_EditPatName.SetParent(this);
+	m_EditPatName.SetLimitText(MAX_PATTERNNAME);
+	m_EditOrderListMargins.SetParent(this);
+	m_EditOrderListMargins.SetLimitText(3);
 	// Spin controls
 	m_SpinSpacing.SetRange(0, 16);
+	m_SpinSpacing.SetPos(CMainFrame::gnPatternSpacing);
 	m_SpinInstrument.SetRange(-1, 1);
 	m_SpinInstrument.SetPos(0);
-	m_SpinSpacing.SetPos(CMainFrame::gnPatternSpacing);
-	m_EditPatName.SetLimitText(MAX_PATTERNNAME);
+	m_SpinOrderListMargins.SetRange(0, m_OrderList.GetShownOrdersMax());
+	m_SpinOrderListMargins.SetPos(m_OrderList.GetOrderlistMargins());
 	SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::gnPatternSpacing);
+	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetOrderlistMargins());
 	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
 	m_OrderList.SetFocus(); 
 
@@ -240,6 +248,7 @@ void CCtrlPatterns::RecalcLayout()
 		{
 			m_OrderList.SetWindowPos(NULL, 0,0, cx, cy, SWP_NOMOVE|SWP_NOZORDER|SWP_DRAWFRAME);
 		}
+		OnOrderListMarginsChanged();
 	}
 }
 
@@ -410,6 +419,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 				SendViewMessage(VIEWMSG_PATTERNLOOP, (SONG_PATTERNLOOP & m_pSndFile->m_dwSongFlags));
 			}
 			OnSpacingChanged();
+			OnOrderListMarginsChanged(); //mimicry
 			
 			SendViewMessage(VIEWMSG_SETSPLITINSTRUMENT, m_nSplitInstrument);
 			SendViewMessage(VIEWMSG_SETSPLITNOTE, m_nSplitNote);
@@ -580,6 +590,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 	if (m_hWndView)
 	{
 		OnSpacingChanged();
+		OnOrderListMarginsChanged(); //mimicry...
 		if (m_bRecord) SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 		
@@ -664,6 +675,24 @@ void CCtrlPatterns::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 }
 
 
+void CCtrlPatterns::OnOrderListMarginsChanged()
+//---------------------------------------------
+{
+	BYTE i;
+	BYTE maxOrders = m_OrderList.GetShownOrdersMax();
+	if((m_EditOrderListMargins.m_hWnd) && (m_EditOrderListMargins.GetWindowTextLength() > 0))
+	{
+		i = m_OrderList.SetOrderlistMargins(GetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS));
+	}
+	else
+	{
+		i = m_OrderList.GetOrderlistMargins();
+	}
+
+	m_SpinOrderListMargins.SetRange(0, maxOrders);
+	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, i);
+
+}
 void CCtrlPatterns::OnSpacingChanged()
 //------------------------------------
 {

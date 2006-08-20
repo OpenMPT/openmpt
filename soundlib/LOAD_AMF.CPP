@@ -400,7 +400,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength)
 			}
 		}
 	}
-	delete pTrackData;
+	delete[] pTrackData;
 	// Read Sample Data
 	for (UINT iSeek=1; iSeek<=maxsampleseekpos; iSeek++)
 	{

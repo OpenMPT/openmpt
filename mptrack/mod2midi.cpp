@@ -56,7 +56,7 @@ void DYNMIDITRACK::Write(const void *pBuffer, unsigned long nBytes)
 		PUCHAR p = new UCHAR[nAllocatedMem+nGrow];
 		if (!p) return;
 		memcpy(p, pTrackData, nTrackSize);
-		delete pTrackData;
+		delete[] pTrackData;
 		pTrackData = p;
 		nAllocatedMem += nGrow;
 	}
@@ -537,7 +537,7 @@ BOOL CModToMidi::DoConvert()
 		if (Tracks[iTrk].nTrackSize > 0)
 		{
 			f.Write(Tracks[iTrk].pTrackData, Tracks[iTrk].nTrackSize);
-			delete Tracks[iTrk].pTrackData;
+			delete[] Tracks[iTrk].pTrackData;
 		}
 	}
 	// Misc fields

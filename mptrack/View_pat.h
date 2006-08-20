@@ -100,7 +100,7 @@ protected:
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
 	UINT m_nLastPlayedChannel; //rewbs.customkeys
 	bool m_bLastNoteEntryBlocked;
-	
+
 // -> CODE#0012
 // -> DESC="midi keyboard split"
 	BYTE activeNoteChannel[120];
@@ -116,7 +116,7 @@ protected:
 public:
 	CEffectVis    *m_pEffectVis;	//rewbs.fxVis
 	COpenGLEditor *m_pOpenGLEditor;	//rewbs.fxVis
-	
+
 
 	CViewPattern();
 	DECLARE_SERIAL(CViewPattern)
@@ -165,7 +165,7 @@ public:
 	void DeleteRows(UINT colmin, UINT colmax, UINT nrows);
 	void OnDropSelection();
 	void ProcessChar(UINT nChar, UINT nFlags);
-	
+
 public:
 	void DrawPatternData(HDC, CSoundFile *, UINT, BOOL, BOOL, UINT, UINT, UINT, CRect&, int *);
 	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
@@ -176,7 +176,7 @@ public:
 	void UpdateAllVUMeters(MPTNOTIFICATION *pnotify);
 	void DrawDragSel(HDC hdc);
 	void OnDrawDragSel();
-	
+
 	//rewbs.customKeys
 	BOOL ExecuteCommand(CommandID command);
 	void CursorJump(DWORD distance, bool direction, bool snap);
@@ -193,7 +193,7 @@ public:
 	void OnClearField(int, bool, bool=false);
 	void InsertRows(UINT colmin, UINT colmax);
 	//end rewbs.customKeys
-	
+
 	void TogglePluginEditor(int chan); //rewbs.patPlugName
 
 public:
@@ -218,7 +218,6 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT, CPoint);
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnKillFocus(CWnd *pNewWnd);
 	afx_msg void OnEditCut();
@@ -327,11 +326,16 @@ private:
 	bool IsInterpolationPossible(UINT startRow, UINT endRow, UINT chan, UINT colType, CSoundFile* pSndFile);
 	void Interpolate(UINT type);
 
+	bool IsEditingEnabled() const {return static_cast<bool>(m_dwStatus&PATSTATUS_RECORD);}
+	bool IsEditingEnabled_bmsg();
+	//Checks the editing status and does some notification when editing is not enabled.
+
 public:
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 private:
 
 	void TogglePendingMute(UINT nChn);
+
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };

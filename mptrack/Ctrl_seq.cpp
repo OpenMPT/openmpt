@@ -67,7 +67,8 @@ COrderList::COrderList()
 	m_pParent = NULL;
 	m_cxFont = m_cyFont = 0;
 	m_pModDoc = NULL;
-	m_nScrollPos = m_nXScroll = 0; 
+	m_nScrollPos = m_nXScroll = 0;
+	m_nOrderlistMargins = 2;
 	m_bScrolling = FALSE;
 	m_bDragging = FALSE;
 	m_bShift = FALSE;
@@ -151,6 +152,16 @@ void COrderList::InvalidateSelection() const
 }
 
 
+BYTE COrderList::GetShownOrdersMax()
+//----------------------------------
+{
+	CRect rcClient;
+	GetClientRect(&rcClient);
+	if(m_cxFont>0) return static_cast<BYTE>(rcClient.right / m_cxFont);
+	else return static_cast<BYTE>(rcClient.right / GetFontWidth());
+}
+
+
 BOOL COrderList::SetCurSel(int sel, BOOL bEdit)
 //---------------------------------------------
 {
@@ -164,18 +175,18 @@ BOOL COrderList::SetCurSel(int sel, BOOL bEdit)
 	m_nScrollPos = sel;
 	if (!m_bScrolling)
 	{
-		if ((m_nScrollPos < m_nXScroll) || (!m_cxFont) || (!m_cyFont))
+		if ((m_nScrollPos < m_nXScroll+m_nOrderlistMargins) || (!m_cxFont) || (!m_cyFont))
 		{
-			m_nXScroll = m_nScrollPos;
+			m_nXScroll = max(0, m_nScrollPos - m_nOrderlistMargins);
 			SetScrollPos(SB_HORZ, m_nXScroll);
 			InvalidateRect(NULL, FALSE);
 		} else
 		{
-			int maxsel = (rcClient.right / m_cxFont);
+			int maxsel = GetShownOrdersMax();
 			if (maxsel) maxsel--;
-			if (m_nScrollPos - m_nXScroll >= maxsel)
+			if (m_nScrollPos - m_nXScroll >= maxsel-m_nOrderlistMargins)
 			{
-				m_nXScroll = m_nScrollPos - maxsel;
+				m_nXScroll = m_nScrollPos - (maxsel-m_nOrderlistMargins);
 				SetScrollPos(SB_HORZ, m_nXScroll);
 				InvalidateRect(NULL, FALSE);
 			}
@@ -243,7 +254,8 @@ BOOL COrderList::ProcessKeyDown(UINT nChar)
 		if (m_pModDoc)
 		{
 			CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-			for (int i=0; i<MAX_ORDERS-1; i++) if (pSndFile->Order[i+1] == 0xFF) break;
+			int i = 0;
+			for (i=0; i<MAX_ORDERS-1; i++) if (pSndFile->Order[i+1] == 0xFF) break;
 			SetCurSel(i);
 		}
 		break;
@@ -434,6 +446,7 @@ void COrderList::OnPaint()
 		GetClientRect(&rcClient);
 		rect = rcClient;
 		int nIndex = m_nXScroll;
+		//Scrolling the shown orders(the showns rectangles)?
 		while (rect.left < rcClient.right)
 		{
 			BOOL bHighLight = ((bFocus) && (nIndex == m_nScrollPos)) ? TRUE : FALSE;
@@ -858,4 +871,25 @@ LRESULT COrderList::OnDragonDropping(WPARAM bDoDrop, LPARAM lParam)
 		SetCurSel(posdest, TRUE);
 	}
 	return bCanDrop;
+}
+
+
+BYTE COrderList::SetOrderlistMargins(int i)
+//----------------------------------------------
+{
+	const BYTE maxOrders = GetShownOrdersMax(); 
+	const BYTE maxMargins = (maxOrders % 2 == 0) ? maxOrders/2 - 1 : maxOrders/2;
+	//For example: If maximum is 4 orders -> maxMargins = 4/2 - 1 = 1;
+	//if maximum is 5 -> maxMargins = (int)5/2 = 2
+	
+	if(i >= 0 && i < maxMargins)
+	{
+		m_nOrderlistMargins = static_cast<BYTE>(i);	
+	}
+	else
+	{
+		if(i<0) m_nOrderlistMargins = 0;
+		else m_nOrderlistMargins = maxMargins;
+	}
+	return m_nOrderlistMargins;
 }

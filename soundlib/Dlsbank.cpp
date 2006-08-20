@@ -431,19 +431,19 @@ void CDLSBank::Destroy()
 {
 	if (m_pWaveForms)
 	{
-		delete m_pWaveForms;
+		delete[] m_pWaveForms;
 		m_pWaveForms = NULL;
 		m_nWaveForms = 0;
 	}
 	if (m_pSamplesEx)
 	{
-		delete m_pSamplesEx;
+		delete[] m_pSamplesEx;
 		m_pSamplesEx = NULL;
 		m_nSamplesEx = 0;
 	}
 	if (m_pInstruments)
 	{
-		delete m_pInstruments;
+		delete[] m_pInstruments;
 		m_pInstruments = NULL;
 		m_nInstruments = 0;
 	}

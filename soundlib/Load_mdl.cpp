@@ -255,7 +255,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 		#endif
 			if (blocklen)
 			{
-				if (m_lpszSongComments) delete m_lpszSongComments;
+				if (m_lpszSongComments) delete[] m_lpszSongComments;
 				m_lpszSongComments = new char[blocklen];
 				if (m_lpszSongComments)
 				{

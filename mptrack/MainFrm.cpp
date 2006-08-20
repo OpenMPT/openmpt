@@ -279,6 +279,12 @@ CMainFrame::CMainFrame()
 	_getdcwd(_getdrive(), wd, 255);
 	m_csExecutablePath = wd;	//Assume working dir is executable path at this stage.
 
+	//Relabs.note: m_csExecutablePath doesn't give right path
+	//at least for debug builds.
+	#ifdef DEBUG
+		m_csExecutablePath += "\\bin";
+	#endif
+
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = NULL;	//rewbs.customKeys
 	m_bOptionsLocked = false;	//rewbs.customKeys
@@ -1607,18 +1613,18 @@ DWORD CMainFrame::GetFullVersionNumeric() {
     UINT uVerLength;
     if (!(::GetFileVersionInfo((LPTSTR)szFullPath, (DWORD)dwVerHnd, 
 							   (DWORD)dwVerInfoSize, (LPVOID)pVersionInfo))) {
-		delete pVersionInfo;
+		delete[] pVersionInfo;
 		return 0;
 	}   
 	if (!(::VerQueryValue(pVersionInfo, TEXT("\\StringFileInfo\\040904b0\\FileVersion"), 
 						  (LPVOID*)&szVer, &uVerLength))) {
-		delete pVersionInfo;
+		delete[] pVersionInfo;
 		return 0;
 	}
 
 	//version will be like: 1, 17, 2, 38
 	CString version = szVer;	
-	delete pVersionInfo;
+	delete[] pVersionInfo;
 
 	int v1, v2, v3, v4; 
 	sscanf(version, "%x, %x, %x, %x", &v1, &v2, &v3, &v4);
@@ -1873,7 +1879,9 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	}
 	if (m_pSndFile)
 	{
-		m_pSndFile->LoopPattern(-1);
+		//m_pSndFile->LoopPattern(-1);
+		//Relabs.note: Commented above line - why loop should be disabled when pausing?
+
 		m_pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
 		if (m_pSndFile == &m_WaveFile)	{
 			m_pSndFile = NULL;

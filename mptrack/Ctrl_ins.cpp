@@ -7,6 +7,11 @@
 #include "ctrl_ins.h"
 #include "view_ins.h"
 #include "dlg_misc.h"
+#include "misc_util.h"
+#include <vector>
+#include <string>
+using std::string;
+using std::vector;
 
 #pragma warning(disable:4244)
 
@@ -215,7 +220,7 @@ void CNoteMapWnd::OnSetFocus(CWnd *pOldWnd)
 {
 	CWnd::OnSetFocus(pOldWnd);
 	InvalidateRect(NULL, FALSE);
-	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus= (CWnd*) this; //rewbs.customKeys
+	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = (CWnd*) this; //rewbs.customKeys
 }
 
 
@@ -644,6 +649,9 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_CBN_SELCHANGE(IDC_FILTERMODE,	OnFilterModeChanged)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, OnEditSampleMap)
 	//}}AFX_MSG_MAP
+	ON_EN_CHANGE(IDC_EDIT_PITCHTEMPOLOCK, OnEnChangeEditPitchtempolock)
+	ON_BN_CLICKED(IDC_CHECK_PITCHTEMPOLOCK, OnBnClickedCheckPitchtempolock)
+	ON_EN_KILLFOCUS(IDC_EDIT_PITCHTEMPOLOCK, OnEnKillfocusEditPitchtempolock)
 END_MESSAGE_MAP()
 
 void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
@@ -688,6 +696,8 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER5,				m_SliderAttack);
 	DDX_Control(pDX, IDC_SPIN1,					m_SpinAttack);
 // -! NEW_FEATURE#0027
+	DDX_Control(pDX, IDC_CHECK_PITCHTEMPOLOCK,	m_CheckPitchTempoLock);
+	DDX_Control(pDX, IDC_EDIT_PITCHTEMPOLOCK,	m_EditPitchTempoLock);
 	//}}AFX_DATA_MAP
 }
 
@@ -804,6 +814,10 @@ BOOL CCtrlInstruments::OnInitDialog()
 // -! NEW_FEATURE#0027
 
 	m_SpinInstrument.SetFocus();
+
+	CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
+	//OnBnClickedCheckPitchtempolock();
+	m_EditPitchTempoLock.SetLimitText(4);
 
 
 
@@ -1038,6 +1052,8 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SliderResonance.EnableWindow(bITonly);
 		m_SpinInstrument.SetRange(1, m_pSndFile->m_nInstruments);
 		m_SpinInstrument.EnableWindow((m_pSndFile->m_nInstruments) ? TRUE : FALSE);
+		m_EditPitchTempoLock.EnableWindow(bITonly);
+		m_CheckPitchTempoLock.EnableWindow(bITonly);
 	}
 	if (dwHintMask & (HINT_INSTRUMENT|HINT_MODTYPE))
 	{
@@ -1129,6 +1145,12 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			if(n == 0) SetDlgItemText(IDC_EDIT2,"default");
 			else SetDlgItemInt(IDC_EDIT2,n);
 // -! NEW_FEATURE#0027
+			if(penv->wPitchToTempoLock > 0) //Current instrument uses pitchTempoLock.
+				CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_CHECKED);
+			else
+				CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
+			
+			OnBnClickedCheckPitchtempolock();
 		} else
 		{
 			m_EditName.SetWindowText("");
@@ -1301,6 +1323,7 @@ BOOL CCtrlInstruments::EditSample(UINT nSample)
 BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 //------------------------------------------------------------
 {
+	//NOTE: pszText seems to point to char array of length 256.
 	if ((pszText) && (uId))
 	{
 		switch(uId)
@@ -1310,6 +1333,23 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 			{
 				INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
 				wsprintf(pszText, "Z%02X", penv->nIFC & 0x7f);
+				return TRUE;
+			}
+			break;
+		case IDC_EDIT_PITCHTEMPOLOCK:
+		case IDC_CHECK_PITCHTEMPOLOCK:
+			if ((m_pSndFile) && (m_pSndFile->Headers[m_nInstrument]))
+			{
+				const string str = string("Tempo range: ") + Stringify(m_pSndFile->GetTempoMin()) + string(" - ") + Stringify(m_pSndFile->GetTempoMax());
+				ASSERT(str.size() < 256);
+				wsprintf(pszText, str.c_str());
+				return TRUE;
+			}
+			break;
+		case IDC_EDIT7: //Fade out
+			if ((m_pSndFile) && (m_pSndFile->Headers[m_nInstrument]))
+			{
+				wsprintf(pszText, "Higher value <-> Faster fade out");
 				return TRUE;
 			}
 			break;
@@ -2323,3 +2363,93 @@ LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 //end rewbs.customKeys
+void CCtrlInstruments::OnEnChangeEditPitchtempolock()
+//----------------------------------------------------
+{
+	if(IsLocked() || !m_pModDoc || !m_pSndFile || !m_nInstrument || !m_pSndFile->Headers[m_nInstrument]) return;
+
+	const WORD MINTEMPO = m_pSndFile->GetTempoMin();
+	const WORD MAXTEMPO = m_pSndFile->GetTempoMax();
+	char buffer[7];
+	m_EditPitchTempoLock.GetWindowText(buffer, 6);
+	int ptlTempo = atoi(buffer);
+	if(ptlTempo < MINTEMPO)
+		ptlTempo = MINTEMPO;
+	if(ptlTempo > MAXTEMPO)
+		ptlTempo = MAXTEMPO;
+	
+	BEGIN_CRITICAL();
+	m_pSndFile->Headers[m_nInstrument]->wPitchToTempoLock = ptlTempo;
+	END_CRITICAL();
+	m_pModDoc->SetModified();
+}
+
+void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
+//-----------------------------------------------------
+{
+	if(!m_pSndFile || !m_nInstrument || !m_pSndFile->Headers[m_nInstrument])
+		return;
+
+	if(IsDlgButtonChecked(IDC_CHECK_PITCHTEMPOLOCK))
+	{
+		
+		INSTRUMENTHEADER* penv = m_pSndFile->Headers[m_nInstrument];
+		if(!penv)
+			return;
+
+		//Checking to what value to put for the wPitchToTempoLock.
+		m_EditPitchTempoLock.EnableWindow();
+		WORD ptl = penv->wPitchToTempoLock;
+		if(ptl == 0)
+		{
+			if(m_EditPitchTempoLock.GetWindowTextLength() > 0)
+			{
+				char buffer[7];
+				m_EditPitchTempoLock.GetWindowText(buffer, 6);
+				ptl = atoi(buffer);
+			}
+			else
+				ptl = m_pSndFile->m_nDefaultTempo;
+		}
+		m_EditPitchTempoLock.SetWindowText(Stringify(ptl).c_str());
+		//SetModified() comes with this.
+	}
+	else
+	{
+		m_EditPitchTempoLock.EnableWindow(FALSE);
+		if(m_pSndFile && m_nInstrument && m_pSndFile->Headers[m_nInstrument] &&
+			m_pSndFile->Headers[m_nInstrument]->wPitchToTempoLock > 0)
+		{
+			BEGIN_CRITICAL();
+			m_pSndFile->Headers[m_nInstrument]->wPitchToTempoLock = 0;
+			END_CRITICAL();
+			m_pModDoc->SetModified();
+		}
+	}
+}
+
+void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
+//------------------------------------------------------
+{
+	if(!m_pSndFile || IsLocked()) return;
+
+	char buffer[6];
+	m_EditPitchTempoLock.GetWindowText(buffer, 5);
+	int ptlTempo = atoi(buffer);
+	bool changed = false;
+
+	
+	if(ptlTempo < m_pSndFile->GetTempoMin())
+	{
+		ptlTempo = m_pSndFile->GetTempoMin();
+		changed = true;
+	}
+	if(ptlTempo > m_pSndFile->GetTempoMax())
+	{
+		ptlTempo = m_pSndFile->GetTempoMax();
+		changed = true;
+
+	}
+
+	if(changed) m_EditPitchTempoLock.SetWindowText(Stringify(ptlTempo).c_str());
+}
