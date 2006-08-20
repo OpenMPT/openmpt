@@ -78,6 +78,10 @@ protected:
 	CSpinButtonCtrl m_SpinAttack;
 // -! NEW_FEATURE#0027
 
+	//Pitch/Tempo lock
+	CEdit m_EditPitchTempoLock;
+	CButton m_CheckPitchTempoLock;
+
 public:
 	CCtrlInstruments();
 	virtual ~CCtrlInstruments();
@@ -144,6 +148,9 @@ protected:
 	afx_msg void OnEditSampleMap();
 	afx_msg void TogglePluginEditor();  //rewbs.instroVSTi
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg void OnEnChangeEditPitchtempolock();
+	afx_msg void OnBnClickedCheckPitchtempolock();
+	afx_msg void OnEnKillfocusEditPitchtempolock();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

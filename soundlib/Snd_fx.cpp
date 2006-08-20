@@ -111,6 +111,9 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 		nCurrentPattern = nNextPattern;
 		// Check if pattern is valid
 		nPattern = Order[nCurrentPattern];
+		bool positionJumpOnThisRow=false;
+		bool patternBreakOnThisRow=false;
+
 		while (nPattern >= MAX_PATTERNS)
 		{
 			// End of song ?
@@ -153,6 +156,7 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 		}
 		MODCHANNEL *pChn = Chn;
 		MODCOMMAND *p = Patterns[nPattern] + nRow * m_nChannels;
+		MODCOMMAND *nextRow = NULL;
 		for (UINT nChn=0; nChn<m_nChannels; p++,pChn++, nChn++) if (*((DWORD *)p))
 		{
 			UINT command = p->command;
@@ -165,9 +169,11 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 			{
 			// Position Jump
 			case CMD_POSITIONJUMP:
-				if (param <= nCurrentPattern) goto EndMod;
+				positionJumpOnThisRow=true;
 				nNextPattern = param;
-				nNextRow = 0;
+				if (!patternBreakOnThisRow) {
+					nNextRow = 0;
+				}
 				if (bAdjust)
 				{
 					pChn->nPatternLoopCount = 0;
@@ -176,8 +182,21 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 				break;
 			// Pattern Break
 			case CMD_PATTERNBREAK:
-				nNextRow = param;
-				nNextPattern = nCurrentPattern + 1;
+				patternBreakOnThisRow=true;				
+				//Try to check next row for XPARAM
+				nextRow = NULL;
+				if (nRow < PatternSize[nPattern]-1) {
+					nextRow = Patterns[nPattern] + (nRow+1) * m_nChannels + nChn;
+				}
+				if (nextRow && nextRow->command == CMD_XPARAM) {
+					nNextRow = (param<<8) + nextRow->param;
+				} else {
+					nNextRow = param;
+				}
+						
+				if (!positionJumpOnThisRow) {
+					nNextPattern = nCurrentPattern + 1;
+				}
 				if (bAdjust)
 				{
 					pChn->nPatternLoopCount = 0;
@@ -314,34 +333,20 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 				break;
 			}
 		}
-	nSpeedCount += nMusicSpeed;
-	switch(m_nTempoMode) {
-		case tempo_mode_alternative: 
-			dwElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
-		case tempo_mode_modern: 
-			dwElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat; break;
-		case tempo_mode_classic: default:
-			dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
-	}
-	
-
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-//		nSpeedCount += nMusicSpeed;
-//		dwElapsedTime += (2500 * nSpeedCount) / nMusicTempo;
-/*		if(CMainFrame::m_dwPatternSetup & PATTERN_MODERNSPEED) {
-			dwElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat;;
+		nSpeedCount += nMusicSpeed;
+		switch(m_nTempoMode) {
+			case tempo_mode_alternative: 
+				dwElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
+			case tempo_mode_modern: 
+				dwElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat; break;
+			case tempo_mode_classic: default:
+				dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
 		}
-		else if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
-			nSpeedCount += nMusicSpeed;
-			dwElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); // update#01
-		} 
-		else {
-			nSpeedCount += nMusicSpeed;
-			dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
+		//Detect backwards loop 
+		if (nNextPattern<nCurrentPattern 
+			|| (nNextPattern==nCurrentPattern && nNextRow<=nRow)) {
+			goto EndMod;
 		}
-*/
-// -! NEW_FEATURE#0022
 	}
 EndMod:
 	if ((bAdjust) && (!bTotal))
@@ -1442,6 +1447,7 @@ BOOL CSoundFile::ProcessEffects()
 				//without this the pattern view could show pattern y even though the playing pattern was x. 
 				 m_nSeqOverride = param+1;
 			}*/
+			//Still to be checked.
 			break;
 
 		// Pattern Break
@@ -2978,6 +2984,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) cons
 			if (!nC4Speed) nC4Speed = 8363;
 			//(a*b)/c
 			return _muldiv(8363, (FreqS3MTable[note % 12] << 5), nC4Speed << (note / 12));
+			//8363 * freq[note%12] / nC4Speed * 2^(5-note/12)
 		}
 	} else
 	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))

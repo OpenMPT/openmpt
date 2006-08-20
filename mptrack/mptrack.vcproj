@@ -534,6 +534,9 @@
 				RelativePath=".\MainFrm.cpp">
 			</File>
 			<File
+				RelativePath=".\misc_util.cpp">
+			</File>
+			<File
 				RelativePath="..\soundlib\mmcmp.cpp">
 			</File>
 			<File
@@ -944,6 +947,9 @@
 			</File>
 			<File
 				RelativePath=".\MainFrm.h">
+			</File>
+			<File
+				RelativePath=".\misc_util.h">
 			</File>
 			<File
 				RelativePath=".\mod2midi.h">

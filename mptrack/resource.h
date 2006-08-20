@@ -148,6 +148,7 @@
 #define IDC_EDIT27                      1127
 #define IDC_EDIT28                      1128
 #define IDC_EDIT29                      1129
+#define IDC_EDIT_RATIOPERIOD            1130
 #define IDC_COMBO1                      1201
 #define IDC_COMBO2                      1202
 #define IDC_COMBO3                      1203
@@ -735,6 +736,12 @@
 #define IDC_GENMACROLABEL               2253
 #define IDC_RENDERZONE                  2254
 #define IDC_PATTERN_LOOP                2255
+#define IDC_EDIT_TEST                   2257
+#define IDC_EDIT_ORDERLIST_MARGINS      2258
+#define IDC_STATICRATIOMAP              2259
+#define IDC_SPIN_ORDERLIST_MARGINS      2260
+#define IDC_EDIT_PITCHTEMPOLOCK         2278
+#define IDC_CHECK_PITCHTEMPOLOCK        2279
 #define IDC_TEXT_BPM                    2300
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302

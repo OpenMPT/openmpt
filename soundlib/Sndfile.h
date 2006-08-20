@@ -526,8 +526,8 @@ typedef struct _INSTRUMENTHEADER
 	BYTE nMidiProgram;
 	BYTE nMidiChannel;
 	BYTE nMidiDrumKey;
-	signed char nPPS;
-	unsigned char nPPC;
+	signed char nPPS; //Pitch to Pan Separator?
+	unsigned char nPPC; //Pitch Centre?
 	WORD VolPoints[MAX_ENVPOINTS];
 	WORD PanPoints[MAX_ENVPOINTS];
 	WORD PitchPoints[MAX_ENVPOINTS];
@@ -551,6 +551,7 @@ typedef struct _INSTRUMENTHEADER
 	BYTE nPanEnvReleaseNode;
 	BYTE nVolEnvReleaseNode;
 
+	WORD wPitchToTempoLock; //PTL <-> Pitch/Tempo Lock
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -808,6 +809,9 @@ typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); 
 class CSoundFile
 //==============
 {
+public:
+	WORD GetTempoMin() const {return 32;}
+	WORD GetTempoMax() const {return 512;}
 public:	// Static Members
 	static UINT m_nXBassDepth, m_nXBassRange;
 	static float m_nMaxSample;
@@ -820,6 +824,8 @@ public:	// Static Members
 	static UINT gnAGC, gnVolumeRampSamples, gnCPUUsage;
 	static LPSNDMIXHOOKPROC gpSndMixHook;
 	static PMIXPLUGINCREATEPROC gpMixPluginCreateProc;
+
+
 
 public:	// for Editing
 	CModDoc* m_pModDoc;
@@ -887,7 +893,13 @@ public:
 	BOOL SetMasterVolume(UINT vol, BOOL bAdjustAGC=FALSE);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
 	UINT GetNumPatterns() const;
-	UINT GetNumInstruments() const;
+	UINT GetNumInstruments() const {return m_nInstruments;} 
+		//Relabs.note: The above method didn't seem to work
+		//reasonably nor any reference to it seemed to exist.
+		//Replaced it so that it now really returns the
+		//number of instruments, not the number of samples
+		//within the range of maximum instrument number
+
 	UINT GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
 	UINT GetCurrentPattern() const { return m_nPattern; }
@@ -1178,9 +1190,7 @@ private:
 
 	void HandlePatternTransitionEvents();
 	void BuildDefaultInstrument();
-
-
-	
+	long GetSampleOffset();
 };
 
 

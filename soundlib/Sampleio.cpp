@@ -241,7 +241,8 @@ BOOL CSoundFile::ReadInstrumentFromSong(UINT nInstr, CSoundFile *pSrcSong, UINT 
 			UINT n = penv->Keyboard[i];
 			if ((n) && (n <= pSrcSong->m_nSamples) && (i < 120))
 			{
-				for (UINT j=0; j<nSamples; j++)
+				UINT j = 0;
+				for (j=0; j<nSamples; j++)
 				{
 					if (samplesrc[j] == n) break;
 				}
@@ -1348,7 +1349,8 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	for (UINT j=0; j<96; j++) if (penv->Keyboard[j+12])
 	{
 		UINT n = penv->Keyboard[j+12];
-		for (UINT k=0; k<nsamples; k++)	if (smptable[k] == n) break;
+		UINT k = 0;
+		for (k=0; k<nsamples; k++)	if (smptable[k] == n) break;
 		if (k == nsamples)
 		{
 			if (!k)

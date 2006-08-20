@@ -61,7 +61,7 @@ Cfxp::Cfxp(long ID, long plugVersion, long nPrograms, long inChunkSize, void *in
 	fxVersion=plugVersion;
 	numParams=nPrograms;
 	chunkSize=inChunkSize;
-	chunk = new char[chunkSize];
+	chunk = malloc(chunkSize);
 	memcpy(chunk, inChunk, sizeof(char)*chunkSize);
 	memset(prgName, 0, 28);
 }
@@ -69,10 +69,8 @@ Cfxp::Cfxp(long ID, long plugVersion, long nPrograms, long inChunkSize, void *in
 
 Cfxp::~Cfxp(void)
 {
-	if (params)
-		delete[] params;
-	if (chunk)
-		free(chunk);
+	delete[] params;
+	free(chunk);
 }
 
 

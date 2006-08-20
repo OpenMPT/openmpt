@@ -1069,7 +1069,7 @@ void CDoAcmConvert::OnButton1()
 						fwrite(&zero, 1, 1, f);
 						list.filesize++;
 					}
-					delete pszComments;
+					delete[] pszComments;
 				}
 			}
 			for (UINT iCmt=0; iCmt<=6; iCmt++)

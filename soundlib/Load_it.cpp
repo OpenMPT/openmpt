@@ -260,7 +260,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// allocate comment string
-	if(m_lpszSongComments) delete m_lpszSongComments;
+	if(m_lpszSongComments) delete[] m_lpszSongComments;
 	if (id<dwMemLength) {
 		m_lpszSongComments = new char[id];
 	}
@@ -1202,7 +1202,9 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 // Open file
 
 	FILE *f;
+
 	if((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return FALSE;
+	
 
 // File ID
 
@@ -1469,7 +1471,10 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	dwPatNamLen = 0;
 	dwChnNamLen = 0;
 	header.id = 0x4D504D49;
-	lstrcpyn(header.songname, m_szNames[0], 27);
+	lstrcpyn(header.songname, m_szNames[0], 26);
+	//Relabs.note: Modified max length in above function
+	//to 26 since songname array has size 26.
+
 	header.reserved1 = 0x1004;
 	header.ordnum = 0;
 	//while ((header.ordnum < MAX_ORDERS) /*&& (Order[header.ordnum] < 0xFF)*/) header.ordnum++; //rewbs.AllowSaveHiddenPatterns
@@ -1784,7 +1789,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		{
 			MODCOMMAND *pzc = Patterns[npat];
 			UINT nz = PatternSize[npat] * m_nChannels;
-			for (UINT iz=0; iz<nz; iz++)
+			UINT iz = 0;
+			for (iz=0; iz<nz; iz++)
 			{
 				if ((pzc[iz].note) || (pzc[iz].instr)
 				 || (pzc[iz].volcmd) || (pzc[iz].command)) break;
@@ -2052,7 +2058,10 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	dwPatNamLen = 0;
 	dwChnNamLen = 0;
 	header.id = 0x4D504D49;
-	lstrcpyn(header.songname, m_szNames[0], 27);
+	lstrcpyn(header.songname, m_szNames[0], 26);
+	//Relabs.note: Modified max length in above function
+	//to 26 since songname array has size 26.
+
 	header.reserved1 = 0x1004;
 	header.ordnum = 0;
 	header.ordnum=MAX_ORDERS;
@@ -2359,7 +2368,8 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		{
 			MODCOMMAND *pzc = Patterns[npat];
 			UINT nz = PatternSize[npat] * nChannels;
-			for (UINT iz=0; iz<nz; iz++)
+			UINT iz = 0;
+			for (iz=0; iz<nz; iz++)
 			{
 				if ((pzc[iz].note) || (pzc[iz].instr)
 				 || (pzc[iz].volcmd) || (pzc[iz].command)) break;
@@ -3050,7 +3060,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[
 	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(m_defaultInstrument.nPitchEnvReleaseNode ), f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(m_defaultInstrument.nPanEnvReleaseNode), f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(m_defaultInstrument.nVolEnvReleaseNode), f, instruments, nInstruments);
-
+	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(m_defaultInstrument.wPitchToTempoLock),  f, instruments, nInstruments);
 	return;
 }
 
