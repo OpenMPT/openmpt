@@ -60,6 +60,7 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 		INSTRUMENTHEADER *penv = new INSTRUMENTHEADER;
 		if (!penv) return FALSE;
 		memset(penv, 0, sizeof(INSTRUMENTHEADER));
+		penv->pTuning = penv->s_DefaultTuning;
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 //		RemoveInstrumentSamples(nInstr);
@@ -889,6 +890,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	penv = new INSTRUMENTHEADER;
 	if (!penv) return FALSE;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
+	penv->pTuning = penv->s_DefaultTuning;
 	Headers[nInstr] = penv;
 	nSamples = plh->samples;
 	if (nSamples > 16) nSamples = 16;
@@ -900,7 +902,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	penv->nPPC = 60;
 	penv->nResampling = SRCMODE_DEFAULT;
 	penv->nFilterMode = FLTMODE_UNCHANGED;
-	if (m_nType == MOD_TYPE_IT)
+	if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
 	{
 		penv->nNNA = NNA_NOTEOFF;
 		penv->nDNA = DNA_NOTEFADE;
@@ -1112,6 +1114,7 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	INSTRUMENTHEADER *penv = Headers[nInstr];
 	if (!penv) return FALSE;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
+	penv->pTuning = penv->s_DefaultTuning;
 	memcpy(penv->name, pxh->name, 22);
 	nsamples = 0;
 	for (UINT i=0; i<96; i++)
@@ -1741,6 +1744,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	INSTRUMENTHEADER *penv = Headers[nInstr];
 	if (!penv) return FALSE;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
+	penv->pTuning = penv->s_DefaultTuning;
 	memset(samplemap, 0, sizeof(samplemap));
 	dwMemPos = 554;
 	dwMemPos += ITInstrToMPT(pinstr, penv, pinstr->trkvers);

@@ -214,6 +214,7 @@ BOOL CModTypeDlg::OnInitDialog()
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	m_TypeBox.SetItemData(m_TypeBox.AddString("Impulse Tracker Project ITP"), MOD_TYPE_IT);
+	m_TypeBox.SetItemData(m_TypeBox.AddString("OpenMPT MPTM"), MOD_TYPE_MPT);
 // -! NEW_FEATURE#0023
 	switch(m_nType)
 	{
@@ -223,6 +224,7 @@ BOOL CModTypeDlg::OnInitDialog()
 // -> DESC="IT project files (.itp)"
 //	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(3); break;
 	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT ? 4 : 3); break;
+	case MOD_TYPE_MPT:	m_TypeBox.SetCurSel(5); break;
 // -! NEW_FEATURE#0023
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
@@ -288,22 +290,22 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox6.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITPEMBEDIH) ? MF_CHECKED : 0);
 // -! NEW_FEATURE#0023
 
-	m_CheckBox1.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+	m_CheckBox1.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 	m_CheckBox2.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_S3M) ? TRUE : FALSE);
-	m_CheckBox3.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_IT) ? TRUE : FALSE);
-	m_CheckBox4.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_IT) ? TRUE : FALSE);
-	m_CheckBox5.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+	m_CheckBox3.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	m_CheckBox4.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	m_CheckBox5.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	m_CheckBox6.EnableWindow(m_TypeBox.GetCurSel() == 4 ? TRUE : FALSE);
 // -! NEW_FEATURE#0023
 	
-	m_TempoModeBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
-	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
-	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+	m_TempoModeBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 
-	m_PlugMixBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+	m_PlugMixBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 }
 
 
@@ -384,7 +386,7 @@ BOOL CModTypeDlg::VerifyData()
 	int sel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
 	int type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
 	int maxChans;
-	if (type&MOD_TYPE_IT) {
+	if (type&(MOD_TYPE_IT|MOD_TYPE_MPT)) {
 		maxChans=max_chans_IT;
 	} else if (type&MOD_TYPE_XM) {
 		maxChans=max_chans_XM;
@@ -1136,13 +1138,13 @@ void CPageEditNote::UpdateDialog()
 			wsprintf(s, "%s%d", szNoteNames[(i-1)%12], (i-1)/12);
 			combo->SetItemData(combo->AddString(s), i);
 		}
-		if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
+		if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			int k = combo->AddString("Note Cut");
 			combo->SetItemData(k, 0xFE);
 			if (m_nNote == 0xFE) combo->SetCurSel(k);
 		}
-		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT))
+		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			int k = combo->AddString("Note Off");
 			combo->SetItemData(k, 0xFF);

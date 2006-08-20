@@ -913,7 +913,7 @@ BOOL CSoundFile::ReadNote()
 						vol += (ModSinusTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
 					}
 				}
-				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
 					pChn->nTremoloPos = (trempos + pChn->nTremoloSpeed) & 0x3F;
 				}
@@ -923,10 +923,10 @@ BOOL CSoundFile::ReadNote()
 			{
 				UINT n = (pChn->nTremorParam >> 4) + (pChn->nTremorParam & 0x0F);
 				UINT ontime = pChn->nTremorParam >> 4;
-				if ((!(m_nType & MOD_TYPE_IT)) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) { n += 2; ontime++; }
+				if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) { n += 2; ontime++; }
 				UINT tremcount = (UINT)pChn->nTremorCount;
 				if (tremcount >= n) tremcount = 0;
-				if ((m_nTickCount) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT)))
+				if ((m_nTickCount) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
 				{
 					if (tremcount >= ontime) vol = 0;
 					pChn->nTremorCount = (BYTE)(tremcount + 1);
@@ -1168,9 +1168,9 @@ BOOL CSoundFile::ReadNote()
 				default:
 					vdelta = ModSinusTable[vibpos];
 				}
-				UINT vdepth = ((m_nType != MOD_TYPE_IT) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
+				UINT vdepth = ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
 				vdelta = (vdelta * (int)pChn->nVibratoDepth) >> vdepth;
-				if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & MOD_TYPE_IT))
+				if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
 					LONG l = vdelta;
 					if (l < 0)
@@ -1185,7 +1185,7 @@ BOOL CSoundFile::ReadNote()
 					}
 				}
 				period += vdelta;
-				if ((m_nTickCount) || ((m_nType & MOD_TYPE_IT) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
 					pChn->nVibratoPos = (vibpos + pChn->nVibratoSpeed) & 0x3F;
 				}
@@ -1226,7 +1226,7 @@ BOOL CSoundFile::ReadNote()
 					pChn->nAutoVibDepth = pins->nVibDepth << 8;
 				} else
 				{
-					if (m_nType & MOD_TYPE_IT)
+					if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 					{
 						pChn->nAutoVibDepth += pins->nVibSweep << 3;
 					} else
@@ -1258,7 +1258,7 @@ BOOL CSoundFile::ReadNote()
 					val = ft2VibratoTable[pChn->nAutoVibPos & 255];
 				}
 				int n =	((val * pChn->nAutoVibDepth) >> 8);
-				if (m_nType & MOD_TYPE_IT)
+				if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 				{
 					int df1, df2;
 					if (n < 0)
@@ -1301,7 +1301,9 @@ BOOL CSoundFile::ReadNote()
 				nPeriodFrac = 0;
 			}*/
 			UINT freq = GetFreqFromPeriod(period, pChn->nC4Speed, nPeriodFrac);
-			if ((m_nType & MOD_TYPE_IT) && (freq < 256))
+
+
+			if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
 			{
 				pChn->nFadeOutVol = 0;
 				pChn->dwFlags |= CHN_NOTEFADE;
@@ -1352,9 +1354,9 @@ BOOL CSoundFile::ReadNote()
 				// End of Envelope ?
 				if (pChn->nVolEnvPosition > penv->VolPoints[penv->nVolEnv - 1])
 				{
-					if ((m_nType & MOD_TYPE_IT) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
+					if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
 					pChn->nVolEnvPosition = penv->VolPoints[penv->nVolEnv - 1];
-					if ((!penv->VolEnv[penv->nVolEnv-1]) && ((nChn >= m_nChannels) || (m_nType & MOD_TYPE_IT)))
+					if ((!penv->VolEnv[penv->nVolEnv-1]) && ((nChn >= m_nChannels) || (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
 					{
 						pChn->dwFlags |= CHN_NOTEFADE;
 						pChn->nFadeOutVol = 0;
@@ -1558,7 +1560,7 @@ BOOL CSoundFile::ReadNote()
 				LONG nRampLength = gnVolumeRampSamples;
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup"
-				BOOL enableCustomRamp = pChn->pHeader && (m_nType & (MOD_TYPE_IT | MOD_TYPE_XM));
+				BOOL enableCustomRamp = pChn->pHeader && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM));
 				if(enableCustomRamp) nRampLength = pChn->pHeader->nVolRamp ? (gdwMixingFreq * pChn->pHeader->nVolRamp / 100000) : gnVolumeRampSamples;
 				if(!nRampLength) nRampLength = 1;
 // -! NEW_FEATURE#0027

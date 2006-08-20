@@ -152,6 +152,7 @@ BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				nsmp = BigEndianW(pih->sampleno);
 				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Ins[nsmp] : NULL;
 				memset(penv, 0, sizeof(INSTRUMENTHEADER));
+				penv->pTuning = penv->s_DefaultTuning;
 				memcpy(penv->name, pih->name, 30);
 				if (psmp)
 				{

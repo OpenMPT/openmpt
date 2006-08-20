@@ -297,6 +297,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		if (dwMemPos + pih->size > dwMemLength) return TRUE;
 		if ((Headers[iIns] = new INSTRUMENTHEADER) == NULL) continue;
 		memset(Headers[iIns], 0, sizeof(INSTRUMENTHEADER));
+		Headers[iIns]->pTuning = Headers[iIns]->s_DefaultTuning;
 		memcpy(Headers[iIns]->name, pih->name, 22);
 		if ((nsamples = pih->samples) > 0)
 		{

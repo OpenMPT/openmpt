@@ -357,10 +357,16 @@ return pointer;
 
 // -! NEW_FEATURE#0027
 
+CTuning* INSTRUMENTHEADER::s_DefaultTuning = 0;
+
 //////////////////////////////////////////////////////////
 // CSoundFile
 
-CSoundFile::CSoundFile()
+CTuningCollection CSoundFile::s_TuningsSharedStandard("Standard tunings");
+CTuningCollection CSoundFile::s_TuningsSharedLocal("Local Tunings");
+
+
+CSoundFile::CSoundFile() : m_TuningsTuneSpecific("Tune specific tunings")
 //----------------------
 {
 	m_nType = MOD_TYPE_NONE;
@@ -522,6 +528,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		 && (!ReadITProject(lpStream, dwMemLength))
 // -! NEW_FEATURE#0023
 		 && (!ReadIT(lpStream, dwMemLength))
+		 && (!ReadMPT(lpStream, dwMemLength))
 		 && (!ReadS3M(lpStream, dwMemLength))
 		 && (!ReadWav(lpStream, dwMemLength))
 #ifndef MODPLUG_BASIC_SUPPORT
@@ -1314,6 +1321,8 @@ UINT CSoundFile::GetBestSaveFormat() const
 		return MOD_TYPE_S3M;
 	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MTM|MOD_TYPE_MT2))
 		return MOD_TYPE_XM;
+	if(m_nType & MOD_TYPE_MPT)
+		return MOD_TYPE_MPT;
 	return MOD_TYPE_IT;
 }
 
@@ -1328,7 +1337,7 @@ UINT CSoundFile::GetSaveFormats() const
 	case MOD_TYPE_MOD:	n = MOD_TYPE_MOD;
 	case MOD_TYPE_S3M:	n = MOD_TYPE_S3M;
 	}
-	n |= MOD_TYPE_XM | MOD_TYPE_IT;
+	n |= MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT;
 	if (!m_nInstruments)
 	{
 		if (m_nSamples < 32) n |= MOD_TYPE_MOD;
@@ -2678,7 +2687,53 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.nPitchEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.nVolEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.wPitchToTempoLock = 0;
+	m_defaultInstrument.pTuning = m_defaultInstrument.s_DefaultTuning;
+	//Todo: s_DefaultInstrument is not necessarily set yet when
+	//this method gets called.
 }
+
+
+
+bool CSoundFile::LoadStaticTunings()
+//-----------------------------------
+{
+	if(s_TuningsSharedStandard.GetNumTunings() > 0) return true;
+	if(s_TuningsSharedLocal.GetNumTunings() > 0) return true;
+	//For now not allowing to reload tunings(one should be careful when reloading them
+	//since various parts may use the very addresses of tunings.
+	
+	const string exePath = CMainFrame::m_csExecutablePath;
+    const string baseDirectoryName = exePath + "\\tunings\\";
+	string filenameBase;
+	string filename;
+
+	s_TuningsSharedStandard.SetSavefilePath(baseDirectoryName + string("standard\\std_tunings.tc"));
+	s_TuningsSharedLocal.SetSavefilePath(baseDirectoryName + string("local_tunings.tc"));
+
+	s_TuningsSharedStandard.UnSerializeBinary();
+	s_TuningsSharedLocal.UnSerializeBinary();
+
+	//Bug?
+	if(s_TuningsSharedStandard.GetNumTunings() == 0)
+	{
+		CTuningRTI* pT = new CTuningRTI;
+		//Note: Tuning collection class handles deleting.
+		pT->CreateTET(1,1);
+		s_TuningsSharedStandard.AddTuning(pT);
+	}
+
+	//Allowing modification to standard tuning collection
+	//only for debug builds.
+	#ifndef DEBUG
+		s_TuningsSharedStandard.SetConstStatus(CTuningCollection::EM_CONST);
+	#endif
+
+	INSTRUMENTHEADER::s_DefaultTuning = &s_TuningsSharedStandard.GetTuning(0);
+
+	return false;
+}
+
+
 
 void CSoundFile::SetDefaultInstrumentValues(INSTRUMENTHEADER *penv) 
 //-----------------------------------------------------------------

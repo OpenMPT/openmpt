@@ -7,6 +7,7 @@
 #include "ctrl_ins.h"
 #include "view_ins.h"
 #include "dlg_misc.h"
+#include "tuningDialog.h"
 #include "misc_util.h"
 #include <vector>
 #include <string>
@@ -439,7 +440,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 	INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
 	if ((penv) && (m_nNote < 120))
 	{
-		if (!m_bIns && (pSndFile->m_nType & MOD_TYPE_IT))
+		if (!m_bIns && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			UINT n = penv->NoteMap[m_nNote];
 			BOOL bOk = FALSE;
@@ -496,7 +497,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			return true;
 		}
 
-		else if ((!m_bIns) && (pSndFile->m_nType & MOD_TYPE_IT)) { //in note column
+		else if ((!m_bIns) && (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) { //in note column
 
 			UINT n = penv->NoteMap[m_nNote];
 
@@ -649,6 +650,7 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_CBN_SELCHANGE(IDC_FILTERMODE,	OnFilterModeChanged)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, OnEditSampleMap)
 	//}}AFX_MSG_MAP
+	ON_CBN_SELCHANGE(IDC_COMBOTUNING, OnCbnSelchangeCombotuning)
 	ON_EN_CHANGE(IDC_EDIT_PITCHTEMPOLOCK, OnEnChangeEditPitchtempolock)
 	ON_BN_CLICKED(IDC_CHECK_PITCHTEMPOLOCK, OnBnClickedCheckPitchtempolock)
 	ON_EN_KILLFOCUS(IDC_EDIT_PITCHTEMPOLOCK, OnEnKillfocusEditPitchtempolock)
@@ -696,6 +698,7 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER5,				m_SliderAttack);
 	DDX_Control(pDX, IDC_SPIN1,					m_SpinAttack);
 // -! NEW_FEATURE#0027
+	DDX_Control(pDX, IDC_COMBOTUNING,			m_ComboTuning);
 	DDX_Control(pDX, IDC_CHECK_PITCHTEMPOLOCK,	m_CheckPitchTempoLock);
 	DDX_Control(pDX, IDC_EDIT_PITCHTEMPOLOCK,	m_EditPitchTempoLock);
 	//}}AFX_DATA_MAP
@@ -814,6 +817,24 @@ BOOL CCtrlInstruments::OnInitDialog()
 // -! NEW_FEATURE#0027
 
 	m_SpinInstrument.SetFocus();
+
+	//-->Setting tunings to Combobox
+		for(size_t i = 0; i<CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
+		{
+			m_ComboTuning.AddString(CSoundFile::s_TuningsSharedStandard.GetTuning(i).GetName().c_str());
+		}
+		for(size_t i = 0; i<CSoundFile::s_TuningsSharedLocal.GetNumTunings(); i++)
+		{
+			m_ComboTuning.AddString(CSoundFile::s_TuningsSharedLocal.GetTuning(i).GetName().c_str());
+		}
+		for(size_t i = 0; i<m_pSndFile->m_TuningsTuneSpecific.GetNumTunings(); i++)
+		{
+			m_ComboTuning.AddString(m_pSndFile->m_TuningsTuneSpecific.GetTuning(i).GetName().c_str());
+		}
+		m_ComboTuning.AddString("Control tunings...");
+		m_ComboTuning.SetCurSel(0);
+
+	//<--Setting tunings to Combobox
 
 	CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
 	//OnBnClickedCheckPitchtempolock();
@@ -1010,9 +1031,10 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	if (dwHintMask & HINT_MODTYPE)
 	{
-		BOOL bITonly = ((m_pSndFile->m_nType == MOD_TYPE_IT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		BOOL bITonly = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		//rewbs.instroVSTi
-		BOOL bITandXM = (((m_pSndFile->m_nType == MOD_TYPE_IT) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		BOOL bITandXM = (((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		bool bMPTOnly = ((m_pSndFile->m_nType == MOD_TYPE_MPT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), bITandXM);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), bITandXM);
@@ -1052,6 +1074,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SliderResonance.EnableWindow(bITonly);
 		m_SpinInstrument.SetRange(1, m_pSndFile->m_nInstruments);
 		m_SpinInstrument.EnableWindow((m_pSndFile->m_nInstruments) ? TRUE : FALSE);
+		m_ComboTuning.EnableWindow(bMPTOnly);
 		m_EditPitchTempoLock.EnableWindow(bITonly);
 		m_CheckPitchTempoLock.EnableWindow(bITonly);
 	}
@@ -1124,7 +1147,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_ComboPPC.SetCurSel(penv->nPPC);
 			SetDlgItemInt(IDC_EDIT15, penv->nPPS);
 			// Filter
-			if (m_pSndFile->m_nType & MOD_TYPE_IT)
+			if (m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 			{
 				m_CheckCutOff.SetCheck((penv->nIFC & 0x80) ? TRUE : FALSE);
 				m_CheckResonance.SetCheck((penv->nIFR & 0x80) ? TRUE : FALSE);
@@ -1145,6 +1168,8 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			if(n == 0) SetDlgItemText(IDC_EDIT2,"default");
 			else SetDlgItemInt(IDC_EDIT2,n);
 // -! NEW_FEATURE#0027
+
+			UpdateTuningComboBox();
 			if(penv->wPitchToTempoLock > 0) //Current instrument uses pitchTempoLock.
 				CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_CHECKED);
 			else
@@ -1411,7 +1436,7 @@ void CCtrlInstruments::OnInstrumentNew()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		if ((pSndFile->m_nType & MOD_TYPE_IT)
+		if ((pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 		 && (pSndFile->m_nInstruments > 0)
 		 && (CMainFrame::GetInputHandler()->ShiftPressed())) //rewbs.customKeys
 		{
@@ -1438,7 +1463,7 @@ void CCtrlInstruments::OnInstrumentDuplicate()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		if ((pSndFile->m_nType & MOD_TYPE_IT) && (pSndFile->m_nInstruments > 0))
+		if ((pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (pSndFile->m_nInstruments > 0))
 		{
 			BOOL bFirst = (pSndFile->m_nInstruments) ? FALSE : TRUE;
 			LONG smp = m_pModDoc->InsertInstrument(0, m_nInstrument);
@@ -1503,10 +1528,10 @@ void CCtrlInstruments::OnInstrumentSave()
 //			"FastTracker II Instruments (*.xi)|*.xi|"
 //			"Impulse Tracker Instruments (*.iti)|*.iti||",
 //			this);
-	CFileDialog dlg(FALSE, (m_pSndFile->m_nType & MOD_TYPE_IT) ? "iti" : "xi",
+	CFileDialog dlg(FALSE, (m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? "iti" : "xi",
 			szFileName,
 			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-			( m_pSndFile->m_nType & MOD_TYPE_IT ? "Impulse Tracker Instruments (*.iti)|*.iti|"
+			( m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT) ? "Impulse Tracker Instruments (*.iti)|*.iti|"
 												  "FastTracker II Instruments (*.xi)|*.xi||"
 												: "FastTracker II Instruments (*.xi)|*.xi|"
 												  "Impulse Tracker Instruments (*.iti)|*.iti||" ),
@@ -1649,7 +1674,7 @@ void CCtrlInstruments::OnGlobalVolChanged()
 		if (nVol != (int)penv->nGlobalVol)
 		{
 			penv->nGlobalVol = nVol;
-			if (m_pSndFile->m_nType == MOD_TYPE_IT) m_pModDoc->SetModified();
+			if (m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) m_pModDoc->SetModified();
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
@@ -1691,7 +1716,7 @@ void CCtrlInstruments::OnPanningChanged()
 		if (nPan != (int)penv->nPan)
 		{
 			penv->nPan = nPan;
-			if (m_pSndFile->m_nType == MOD_TYPE_IT) m_pModDoc->SetModified();
+			if (m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) m_pModDoc->SetModified();
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
@@ -2363,6 +2388,121 @@ LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 //end rewbs.customKeys
+
+void CCtrlInstruments::OnCbnSelchangeCombotuning()
+//------------------------------------------------
+{
+	if (IsLocked() || m_pModDoc == NULL || m_pSndFile == NULL) return;
+
+	INSTRUMENTHEADER* pInstH = m_pSndFile->Headers[m_nInstrument];
+	if(pInstH == 0)
+		return;
+
+	CTuningCollection* tc = 0;
+	size_t sel = m_ComboTuning.GetCurSel();
+	if(sel < CSoundFile::s_TuningsSharedStandard.GetNumTunings())
+		tc = &CSoundFile::s_TuningsSharedStandard;
+	else
+	{
+		sel -= CSoundFile::s_TuningsSharedStandard.GetNumTunings();
+		if(sel < CSoundFile::s_TuningsSharedLocal.GetNumTunings())
+			tc = &CSoundFile::s_TuningsSharedLocal;
+		else
+		{
+			sel -= CSoundFile::s_TuningsSharedLocal.GetNumTunings();
+			if(sel < m_pSndFile->m_TuningsTuneSpecific.GetNumTunings())
+				tc = &m_pSndFile->m_TuningsTuneSpecific;
+		}
+	}
+
+	if(tc)
+	{
+		BEGIN_CRITICAL();
+		pInstH->pTuning = &tc->GetTuning(sel);
+		END_CRITICAL();
+		m_pModDoc->SetModified();
+		return;
+	}
+
+	
+	//Creating vector for the CTuningDialog.
+	vector<CTuningCollection*> v;
+	v.push_back(&m_pSndFile->s_TuningsSharedStandard);
+	v.push_back(&m_pSndFile->s_TuningsSharedLocal);
+	v.push_back(&m_pSndFile->m_TuningsTuneSpecific);
+	CTuningDialog td(this, v, pInstH->pTuning);
+	td.DoModal();
+
+	//Recreating tuning combobox so that possible
+	//new tuning(s) come visible.
+	while(m_ComboTuning.GetCount() > 0)
+		m_ComboTuning.DeleteString(0);
+	for(size_t i = 0; i<CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
+	{
+		m_ComboTuning.AddString(CSoundFile::s_TuningsSharedStandard.GetTuning(i).GetName().c_str());
+	}
+	for(size_t i = 0; i<CSoundFile::s_TuningsSharedLocal.GetNumTunings(); i++)
+	{
+		m_ComboTuning.AddString(CSoundFile::s_TuningsSharedLocal.GetTuning(i).GetName().c_str());
+	}
+	for(size_t i = 0; i<m_pSndFile->m_TuningsTuneSpecific.GetNumTunings(); i++)
+	{
+		m_ComboTuning.AddString(m_pSndFile->m_TuningsTuneSpecific.GetTuning(i).GetName().c_str());
+	}
+	m_ComboTuning.AddString("Control tunings...");
+	m_ComboTuning.SetCurSel(0);
+
+	UpdateTuningComboBox();
+
+
+	//TODO: Update notemap window with correct notenames.
+}
+
+
+void CCtrlInstruments::UpdateTuningComboBox()
+//-------------------------------------------
+{
+	if (m_pModDoc == 0 || m_pSndFile == 0 
+		|| m_nInstrument > m_pSndFile->GetNumInstruments()
+		|| m_pSndFile->Headers[m_nInstrument]->pTuning == 0) return;
+
+	for(size_t i = 0; i < CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
+	{
+		if(m_pSndFile->Headers[m_nInstrument]->pTuning == &CSoundFile::s_TuningsSharedStandard.GetTuning(i))
+		{
+			m_ComboTuning.SetCurSel(i);
+			return;
+		}
+	}
+
+	for(size_t i = 0; i < CSoundFile::s_TuningsSharedLocal.GetNumTunings(); i++)
+	{
+		if(m_pSndFile->Headers[m_nInstrument]->pTuning == &CSoundFile::s_TuningsSharedLocal.GetTuning(i))
+		{
+			m_ComboTuning.SetCurSel(i+CSoundFile::s_TuningsSharedStandard.GetNumTunings());
+			return;
+		}
+	}
+
+	for(size_t i = 0; i < m_pSndFile->m_TuningsTuneSpecific.GetNumTunings(); i++)
+	{
+		if(m_pSndFile->Headers[m_nInstrument]->pTuning == &m_pSndFile->m_TuningsTuneSpecific.GetTuning(i))
+		{
+			m_ComboTuning.SetCurSel(i+CSoundFile::s_TuningsSharedStandard.GetNumTunings() + CSoundFile::s_TuningsSharedLocal.GetNumTunings());
+			return;
+		}
+	}
+
+
+	string str = string("Tuning ") + m_pSndFile->Headers[m_nInstrument]->pTuning->GetName()
+		 + string(" was not found. Setting to default tuning.");
+	MessageBox(str.c_str());
+	BEGIN_CRITICAL();
+	m_pSndFile->Headers[m_nInstrument]->pTuning = m_pSndFile->Headers[m_nInstrument]->s_DefaultTuning;
+	END_CRITICAL();
+	m_ComboTuning.SetCurSel(0);
+}
+
 void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 //----------------------------------------------------
 {

@@ -34,6 +34,12 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		return TRUE;
 	}
 
+	if(m_SndFile.m_nType == MOD_TYPE_MPT)
+	{
+		if(::MessageBox(NULL, "Convertion from MPT to any other modtype makes certain features unavailable and is not assured to work properly; Do the convertion anyway? If yes, backupping the mod might be a good idea",
+		"Notice", MB_YESNO) != IDYES)
+			return FALSE;
+	}
 
 	// Check if conversion to 64 rows is necessary
 	for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++)
@@ -105,10 +111,10 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		m_SndFile.m_nInstruments = 0;
 		END_CRITICAL();
 		EndWaitCursor();
-	}
+	} //End if (((m_SndFile.m_nInstruments) || (b64)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 	BeginWaitCursor();
 	// Adjust pattern data
-	if ((m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) && (nNewType & (MOD_TYPE_S3M|MOD_TYPE_IT)))
+	if ((m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) && (nNewType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
 	{
 		for (UINT nPat=0; nPat<MAX_PATTERNS; nPat++) if (m_SndFile.Patterns[nPat])
 		{
@@ -164,7 +170,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			}
 		}
 	} else
-	if ((m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM)))
+	if ((m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM)))
 	{
 		for (UINT nPat=0; nPat<MAX_PATTERNS; nPat++) if (m_SndFile.Patterns[nPat])
 		{
@@ -243,7 +249,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	if ((m_SndFile.m_nType == MOD_TYPE_MOD) && (nNewType == MOD_TYPE_XM))
 	{
 	} else
-	// Convert XM to S3M/IT
+	// Convert XM to S3M/IT/MPT
 	if ((m_SndFile.m_nType == MOD_TYPE_XM) && (nNewType != MOD_TYPE_XM))
 	{
 		for (UINT i=1; i<=m_SndFile.m_nSamples; i++)
@@ -252,9 +258,9 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			m_SndFile.Ins[i].RelativeTone = 0;
 			m_SndFile.Ins[i].nFineTune = 0;
 		}
-		if (nNewType & MOD_TYPE_IT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATMODE;
+		if (nNewType & (MOD_TYPE_IT|MOD_TYPE_MPT)) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATMODE;
 	} else
-	// Convert S3M/IT to XM
+	// Convert S3M/IT/MPT to XM
 	if ((m_SndFile.m_nType != MOD_TYPE_XM) && (nNewType == MOD_TYPE_XM))
 	{
 		for (UINT i=1; i<=m_SndFile.m_nSamples; i++)
@@ -290,12 +296,12 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	}
 	BEGIN_CRITICAL();
 	m_SndFile.m_nType = nNewType;
-	if ((!(nNewType & (MOD_TYPE_IT|MOD_TYPE_XM))) && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
+	if ((!(nNewType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_XM))) && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
 	{
 		AddToLog("WARNING: Linear Frequency Slides not supported by the new format.\n");
 		m_SndFile.m_dwSongFlags &= ~SONG_LINEARSLIDES;
 	}
-	if (nNewType != MOD_TYPE_IT) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATMODE);
+	if (!(nNewType & (MOD_TYPE_IT|MOD_TYPE_MPT))) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATMODE);
 	if (nNewType != MOD_TYPE_S3M) m_SndFile.m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
 	END_CRITICAL();
 	ChangeFileExtension(nNewType);
@@ -326,7 +332,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 //------------------------------------------------
 {
 	int maxChans;
-	if (m_SndFile.m_nType&MOD_TYPE_IT) {
+	if (m_SndFile.m_nType&(MOD_TYPE_IT|MOD_TYPE_MPT)) {
 		maxChans=max_chans_IT;
 	} else if (m_SndFile.m_nType&MOD_TYPE_XM) {
 		maxChans=max_chans_XM;
@@ -799,7 +805,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 		}
 	}
 	EndWaitCursor();
-	if (nExt &&  !((m_SndFile.m_nType==MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT)))
+	if (nExt &&  !(m_SndFile.m_nType & MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT))
 	{	//We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample(s) referenced by an instrument,\n"
 					"but not used in the song. Do you want to remove them ?", nExt);
@@ -952,7 +958,7 @@ BOOL CModDoc::RemoveUnusedInstruments()
 	if (!m_SndFile.m_nInstruments) return FALSE;
 
 	char removeSamples = -1;
-	if ( !((m_SndFile.m_nType==MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT))) { //never remove an instrument's samples in ITP.
+	if ( !((m_SndFile.m_nType & MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT))) { //never remove an instrument's samples in ITP.
 		if(::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) {
 			removeSamples = 1;
 		}
@@ -1215,7 +1221,7 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 //-----------------------------------------------------------
 {
 	INSTRUMENTHEADER *pDup = NULL;
-	if ((m_SndFile.m_nType != MOD_TYPE_XM) && (m_SndFile.m_nType != MOD_TYPE_IT)) return -1;
+	if ((m_SndFile.m_nType != MOD_TYPE_XM) && !(m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) return -1;
 	if ((lDuplicate > 0) && (lDuplicate <= (LONG)m_SndFile.m_nInstruments))
 	{
 		pDup = m_SndFile.Headers[lDuplicate];
@@ -1329,6 +1335,7 @@ void CModDoc::InitializeInstrument(INSTRUMENTHEADER *penv, UINT nsample)
 		penv->Keyboard[n] = nsample;
 		penv->NoteMap[n] = n+1;
 	}
+	penv->pTuning = penv->s_DefaultTuning;
 }
 
 
@@ -1582,6 +1589,7 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 		case MOD_TYPE_S3M:	pszFormatName = "S3M"; break;
 		case MOD_TYPE_XM:	pszFormatName = "XM"; break;
 		case MOD_TYPE_IT:	pszFormatName = "IT"; break;
+		case MOD_TYPE_MPT:	pszFormatName = "MPT"; break;
 		default:			pszFormatName = "MOD"; break;
 		}
 		LPSTR p = (LPSTR)GlobalLock(hCpy);
@@ -1654,7 +1662,7 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 					{
 						if (m->command)
 						{
-							if (m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
+							if (m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 								p[9] = gszS3mCommands[m->command];
 							else
 								p[9] = gszModCommands[m->command];
@@ -1722,7 +1730,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 				if (!c) goto PasteDone;
 				if ((c == 0x0D) && (len > 3))
 				{
-					if ((p[len-3] == 'I') || (p[len-4] == 'S')) bS3M = TRUE;
+					//if ((p[len-3] == 'I') || (p[len-4] == 'S')) bS3M = TRUE;
+					if ((p[len-3] == 'I') || (p[len-4] == 'S') || (p[len-4] == 'M')) bS3M = TRUE;
 					break;
 				}
 			}

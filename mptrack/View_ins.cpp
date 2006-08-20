@@ -958,7 +958,7 @@ BOOL CViewInstrument::EnvSetPitchEnv(BOOL bEnable)
 		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
 		if (penv)
 		{
-			if ((bEnable) && (pSndFile->m_nType & MOD_TYPE_IT))
+			if ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
 				penv->dwFlags |= ENV_PITCH;
 				penv->dwFlags &= ~ENV_FILTER;
@@ -992,7 +992,7 @@ BOOL CViewInstrument::EnvSetFilterEnv(BOOL bEnable)
 		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
 		if (penv)
 		{
-			if ((bEnable) && (pSndFile->m_nType & MOD_TYPE_IT))
+			if ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
 				penv->dwFlags |= (ENV_PITCH|ENV_FILTER);
 				if (!penv->nPitchEnv)
@@ -1125,17 +1125,17 @@ void CViewInstrument::UpdateNcButtonState()
 		{
 		case ID_ENVSEL_VOLUME:		if (m_nEnv == ENV_VOLUME) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVSEL_PANNING:		if (m_nEnv == ENV_PANNING) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVSEL_PITCH:		if (!(pSndFile->m_nType & MOD_TYPE_IT)) dwStyle |= NCBTNS_DISABLED;
+		case ID_ENVSEL_PITCH:		if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
 									else if (m_nEnv == ENV_PITCH) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_SETLOOP:	if (EnvGetLoop()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_SUSTAIN:	if (EnvGetSustain()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_CARRY:		if (!(pSndFile->m_nType & MOD_TYPE_IT)) dwStyle |= NCBTNS_DISABLED;
+		case ID_ENVELOPE_CARRY:		if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
 									else if (EnvGetCarry()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_VOLUME:	if (EnvGetVolEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_PANNING:	if (EnvGetPanEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_PITCH:		if (!(pSndFile->m_nType & MOD_TYPE_IT)) dwStyle |= NCBTNS_DISABLED; else
+		case ID_ENVELOPE_PITCH:		if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
 									if (EnvGetPitchEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_FILTER:	if (!(pSndFile->m_nType & MOD_TYPE_IT)) dwStyle |= NCBTNS_DISABLED; else
+		case ID_ENVELOPE_FILTER:	if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
 									if (EnvGetFilterEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_VIEWGRID:	if (m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
 		}
@@ -2451,7 +2451,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		break;
 	}
 	if ((!bCanDrop) || (!bDoDrop)) return bCanDrop;
-	if ((!pSndFile->m_nInstruments) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)))
+	if ((!pSndFile->m_nInstruments) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 	{
 		SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT);
 	}

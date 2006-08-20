@@ -218,6 +218,7 @@ public:
 	afx_msg void OnFileNewS3M();
 	afx_msg void OnFileNewXM();
 	afx_msg void OnFileNewIT();
+	afx_msg void OnFileNewMPT();
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	afx_msg void OnFileNewITProject();

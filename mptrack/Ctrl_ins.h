@@ -78,6 +78,10 @@ protected:
 	CSpinButtonCtrl m_SpinAttack;
 // -! NEW_FEATURE#0027
 
+	//Tuning
+	CComboBox m_ComboTuning;
+	void UpdateTuningComboBox();
+
 	//Pitch/Tempo lock
 	CEdit m_EditPitchTempoLock;
 	CButton m_CheckPitchTempoLock;
@@ -148,6 +152,7 @@ protected:
 	afx_msg void OnEditSampleMap();
 	afx_msg void TogglePluginEditor();  //rewbs.instroVSTi
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg void OnCbnSelchangeCombotuning();
 	afx_msg void OnEnChangeEditPitchtempolock();
 	afx_msg void OnBnClickedCheckPitchtempolock();
 	afx_msg void OnEnKillfocusEditPitchtempolock();

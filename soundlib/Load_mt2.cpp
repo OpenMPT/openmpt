@@ -406,6 +406,7 @@ BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 			if (penv)
 			{
 				memset(penv, 0, sizeof(INSTRUMENTHEADER));
+				penv->pTuning = penv->s_DefaultTuning;
 				memcpy(penv->name, pmi->szName, 32);
 				penv->nGlobalVol = 64;
 				penv->nPan = 128;

@@ -527,6 +527,7 @@ BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 // -> DESC="IT project files (.itp)"
 	ON_COMMAND(ID_NEW_ITPROJECT,OnFileNewITProject)	
 // -! NEW_FEATURE#0023
+	ON_COMMAND(ID_NEW_MPT,		OnFileNewMPT)
 	ON_COMMAND(ID_FILE_OPEN,	OnFileOpen)
 	ON_COMMAND(ID_APP_ABOUT,	OnAppAbout)
 	ON_COMMAND(ID_HELP_INDEX,	CWinApp::OnHelpIndex)
@@ -953,10 +954,20 @@ void CTrackApp::OnFileNewIT()
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
 }
 
+void CTrackApp::OnFileNewMPT()
+//---------------------------
+{
+	SetAsProject(FALSE);
+	SetDefaultDocType(MOD_TYPE_MPT);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+}
+
+
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 void CTrackApp::OnFileNewITProject()
+//----------------------------------
 {
 	SetAsProject(TRUE);
 	SetDefaultDocType(MOD_TYPE_IT);
@@ -986,6 +997,7 @@ void CTrackApp::OnFileOpen()
 // -> DESC="IT project files (.itp)"
 					"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
 // -! NEW_FEATURE#0023
+					"Open MPT Modules (*.mptm)|*.mptm;*.mptmz|"
 					"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.dsm;*.umx;*.amf;*.psm;*.mt2|"
 					"Wave Files (*.wav)|*.wav|"
 					"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"

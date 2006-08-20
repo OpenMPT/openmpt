@@ -92,6 +92,9 @@
 #define IDD_PATTERNRANDOMIZER_VOLCMD    505
 #define IDD_PATTERNRANDOMIZER_EFFECT    506
 #define IDD_CONTROL_GRAPH               507
+#define IDD_TUNING                      511
+#define IDD_DIALOG2                     512
+#define IDD_DIALOG3                     513
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -740,6 +743,24 @@
 #define IDC_EDIT_ORDERLIST_MARGINS      2258
 #define IDC_STATICRATIOMAP              2259
 #define IDC_SPIN_ORDERLIST_MARGINS      2260
+#define IDC_CHECK_NEWTUNING             2260
+#define IDC_COMBO_TCOL                  2261
+#define IDC_TUNINGBOX                   2262
+#define IDC_COMBO_T                     2262
+#define IDC_TUNINGNAME                  2263
+#define IDC_COMBOTUNINGNAME             2263
+#define IDC_COMBO_TTYPE                 2264
+#define IDC_EDIT_STEPS                  2265
+#define IDC_EDIT_BEGINNOTE              2266
+#define IDC_EDIT_TABLESIZE              2267
+#define IDC_ADD_TUNING                  2269
+#define IDC_REMOVE_TUNING               2270
+#define IDC_EDIT_RATIOVALUE             2272
+#define IDC_EDIT_NOTENAME               2273
+#define IDC_BUTTON_SETVALUES            2274
+#define IDC_BUTTON_IMPORT               2275
+#define IDC_BUTTON_EXPORT               2276
+#define IDC_COMBOTUNING                 2277
 #define IDC_EDIT_PITCHTEMPOLOCK         2278
 #define IDC_CHECK_PITCHTEMPOLOCK        2279
 #define IDC_TEXT_BPM                    2300
@@ -950,6 +971,7 @@
 #define ID_PATTERN_REMOVECHANNELDIALOG  59151
 #define ID_Menu                         59200
 #define ID_FILE_SAVECOMPAT              59202
+#define ID_NEW_MPT                      59203
 #define ID_CLEANUP_PLUGS                59205
 #define ID_ENVELOPE_TOGGLERELEASENODE   59206
 

@@ -1285,7 +1285,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			{
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_ZOOMONSEL, "Zoom");
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, "Set As Loop");
-				if (pSndFile->m_nType ==MOD_TYPE_IT)
+				if (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, "Set As Sustain Loop");
 				::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			} else
@@ -1301,7 +1301,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					::AppendMenu(hMenu, MF_STRING|((dwPos>=pins->nLoopStart+4)?0:MF_GRAYED), 
 								 ID_SAMPLE_SETLOOPEND, s);
 						
-					if (pSndFile->m_nType == MOD_TYPE_IT) {
+					if (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) {
 						//Set sustain loop points
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 						wsprintf(s, "Set Sustain Start to:\t%d", dwPos);

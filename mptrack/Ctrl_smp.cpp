@@ -527,7 +527,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ComboSustainType.AddString("Off");
 		m_ComboSustainType.AddString("On");
 		// Bidirectional Loops
-		if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT))
+		if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			m_ComboLoopType.AddString("Bidi");
 			m_ComboSustainType.AddString("Bidi");
@@ -545,19 +545,19 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinSustainEnd.SetRange(-1, 1);
 		m_SpinSustainEnd.SetPos(0);
 		// Sustain Loops only available in IT
-		b = (m_pSndFile->m_nType == MOD_TYPE_IT) ? TRUE : FALSE;
+		b = (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		m_ComboSustainType.EnableWindow(b);
 		m_SpinSustainStart.EnableWindow(b);
 		m_SpinSustainEnd.EnableWindow(b);
 		m_EditSustainStart.EnableWindow(b);
 		m_EditSustainEnd.EnableWindow(b);
 		// Finetune / C-4 Speed / BaseNote
-		b = (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT)) ? TRUE : FALSE;
+		b = (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		SetDlgItemText(IDC_TEXT7, (b) ? "Freq. (Hz)" : "Finetune");
 		m_SpinFineTune.SetRange(-1, 1);
 		m_EditFileName.EnableWindow(b);
 		// AutoVibrato
-		b = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE;
+		b = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		m_ComboAutoVib.EnableWindow(b);
 		m_SpinVibSweep.EnableWindow(b);
 		m_SpinVibDepth.EnableWindow(b);
@@ -566,11 +566,11 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_EditVibDepth.EnableWindow(b);
 		m_EditVibRate.EnableWindow(b);
 		// Global Volume
-		b = (m_pSndFile->m_nType == MOD_TYPE_IT) ? TRUE : FALSE;
+		b = (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		m_EditGlobalVol.EnableWindow(b);
 		m_SpinGlobalVol.EnableWindow(b);
 		// Panning
-		b = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE;
+		b = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 		m_CheckPanning.EnableWindow(b);
 		m_EditPanning.EnableWindow(b);
 		m_SpinPanning.EnableWindow(b);
@@ -609,7 +609,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		//end rewbs.fix36944
 		// FineTune / C-4 Speed / BaseNote
         int transp = 0;
-		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
+		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			wsprintf(s, "%lu", pins->nC4Speed);
 			m_EditFineTune.SetWindowText(s);
@@ -926,7 +926,7 @@ void CCtrlSamples::OnSampleSave()
 		SwitchToView();
 		return;
 	}
-	if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
+	if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 	{
 		memcpy(szFileName, m_pSndFile->Ins[m_nSample].name, 22);
 		szFileName[22] = 0;
@@ -2166,7 +2166,7 @@ void CCtrlSamples::OnFileNameChanged()
 		memcpy(m_pSndFile->Ins[m_nSample].name, s, 22);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEINFO, this);
-		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT)) m_pModDoc->SetModified();
+		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 	}
 }
 
@@ -2207,7 +2207,7 @@ void CCtrlSamples::OnSetPanningChanged()
 {
 	if (IsLocked()) return;
 	BOOL b = FALSE;
-	if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT))
+	if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 	{
 		b = IsDlgButtonChecked(IDC_CHECK1);
 	}
@@ -2216,14 +2216,14 @@ void CCtrlSamples::OnSetPanningChanged()
 		if (!(m_pSndFile->Ins[m_nSample].uFlags & CHN_PANNING))
 		{
 			m_pSndFile->Ins[m_nSample].uFlags |= CHN_PANNING;
-			if (m_pSndFile->m_nType == MOD_TYPE_IT) m_pModDoc->SetModified();
+			if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 		}
 	} else
 	{
 		if (m_pSndFile->Ins[m_nSample].uFlags & CHN_PANNING)
 		{
 			m_pSndFile->Ins[m_nSample].uFlags &= ~CHN_PANNING;
-			if (m_pSndFile->m_nType == MOD_TYPE_IT) m_pModDoc->SetModified();
+			if (m_pSndFile->m_nType == (MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 		}
 	}
 }
@@ -2246,7 +2246,7 @@ void CCtrlSamples::OnPanningChanged()
 	if (nPan != m_pSndFile->Ins[m_nSample].nPan)
 	{
 		m_pSndFile->Ins[m_nSample].nPan = nPan;
-		if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) m_pModDoc->SetModified();
+		if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 	}
 }
 
@@ -2256,7 +2256,7 @@ void CCtrlSamples::OnFineTuneChanged()
 {
 	if (IsLocked()) return;
 	int n = GetDlgItemInt(IDC_EDIT5);
-	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M))
+	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
 		if ((n >= 2000) && (n <= 256000) && (n != (int)m_pSndFile->Ins[m_nSample].nC4Speed))
 		{
@@ -2290,7 +2290,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 {
 	if (IsLocked()) return;
 	int n = 60 - (m_CbnBaseNote.GetCurSel() + BASENOTE_MIN);
-	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M))
+	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
 		LONG ft = CSoundFile::FrequencyToTranspose(m_pSndFile->Ins[m_nSample].nC4Speed) & 0x7f;
 		n = CSoundFile::TransposeToFrequency(n, ft);
@@ -2724,7 +2724,7 @@ NoSample:
 	// FineTune / C-5 Speed
 	if ((pos = (short int)m_SpinFineTune.GetPos()) != 0)
 	{
-		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
+		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			LONG d = pins->nC4Speed;
 			if (d < 1) d = 8363;

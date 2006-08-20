@@ -410,6 +410,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	penv = new INSTRUMENTHEADER;
 	if (!penv) return 0;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
+	penv->pTuning = penv->s_DefaultTuning;
 	m_nSamples++;
 	m_nInstruments++;
 	Headers[m_nInstruments] = penv;

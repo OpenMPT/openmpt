@@ -338,7 +338,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			}
 			m_pSndFile->GetPatternName(nPat, s, sizeof(s));
 			m_EditPatName.SetWindowText(s);
-			BOOL bXMIT = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE;
+			BOOL bXMIT = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
 			m_ToolBar.EnableButton(ID_PATTERN_MIDIMACRO, bXMIT);
 			m_ToolBar.EnableButton(ID_PATTERN_PROPERTIES, bXMIT);
 			m_ToolBar.EnableButton(ID_PATTERN_EXPAND, bXMIT);
@@ -822,7 +822,7 @@ void CCtrlPatterns::OnPatternNew()
 		UINT nCurOrd = m_OrderList.GetCurSel();
 		UINT pat = pSndFile->Order[nCurOrd];
 		UINT rows = 64;
-		if ((pat < MAX_PATTERNS) && (pSndFile->Patterns[pat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)))
+		if ((pat < MAX_PATTERNS) && (pSndFile->Patterns[pat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			rows = pSndFile->PatternSize[pat];
 			if (rows < 32) rows = 32;
@@ -852,7 +852,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 		UINT rows = 64;
 		if (nCurPat < MAX_PATTERNS)
 		{
-			if ((pSndFile->Patterns[nCurPat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)))
+			if ((pSndFile->Patterns[nCurPat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
 				rows = pSndFile->PatternSize[nCurPat];
 				if (rows < 16) rows = 16;
@@ -1074,7 +1074,7 @@ void CCtrlPatterns::OnPatternNameChanged()
 		if (strcmp(s, sold))
 		{
 			 m_pSndFile->SetPatternName(nPat, s);
-			 if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) m_pModDoc->SetModified();
+			 if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 			 m_pModDoc->UpdateAllViews(NULL, (nPat << 24) | HINT_PATNAMES, this);
 		}
 	}
@@ -1203,5 +1203,6 @@ bool CCtrlPatterns::HasValidPlug(UINT instr)
 	}
 	return false;
 }
+
 
 //end rewbs.instroVST

@@ -215,6 +215,8 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 // -> DESC="IT project files (.itp)"
 //		case MOD_TYPE_IT:	pszModType = "IT (Impulse Tracker)"; break;
 		case MOD_TYPE_IT:	pszModType = m_pSndFile->m_dwSongFlags & SONG_ITPROJECT ? "ITP (IT Project)" : "IT (Impulse Tracker)"; break;
+		case MOD_TYPE_MPT:	pszModType = "MPTM (OpenMPT)"; break;
+
 // -! NEW_FEATURE#0023
 		}
 		wsprintf(s, "%s, %d channels", pszModType, m_pSndFile->m_nChannels);

@@ -74,7 +74,7 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 	case 0:						command = param = 0; break;
 	case CMD_ARPEGGIO:			command = 0; break;
 	case CMD_PORTAMENTOUP:
-		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM))
+		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM|MOD_TYPE_MPT))
 		{
 			if ((param & 0xF0) == 0xE0) { command=0x0E; param=((param & 0x0F) >> 2)|0x10; break; }
 			else if ((param & 0xF0) == 0xF0) { command=0x0E; param &= 0x0F; param|=0x10; break; }
@@ -82,7 +82,7 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 		command = 0x01;
 		break;
 	case CMD_PORTAMENTODOWN:
-		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM))
+		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM|MOD_TYPE_MPT))
 		{
 			if ((param & 0xF0) == 0xE0) { command=0x0E; param=((param & 0x0F) >> 2)|0x20; break; }
 			else if ((param & 0xF0) == 0xF0) { command=0x0E; param &= 0x0F; param|=0x20; break; }
@@ -98,14 +98,14 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 		command = 0x08;
 		if (bXM)
 		{
-			if ((m_nType != MOD_TYPE_IT) && (m_nType != MOD_TYPE_XM) && (param <= 0x80))
+			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (m_nType != MOD_TYPE_XM) && (param <= 0x80))
 			{
 				param <<= 1;
 				if (param > 255) param = 255;
 			}
 		} else
 		{
-			if ((m_nType == MOD_TYPE_IT) || (m_nType == MOD_TYPE_XM)) param >>= 1;
+			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) || (m_nType == MOD_TYPE_XM)) param >>= 1;
 		}
 		break;
 	case CMD_OFFSET:			command = 0x09; break;

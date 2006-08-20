@@ -7,6 +7,8 @@
  * Authors: Olivier Lapicque <olivierl@jps.net>
 */
 #include "../mptrack/SoundFilePlayConfig.h"
+#include "tuning.h"
+#include "tuningCollection.h"
 #include <vector>
 
 #ifndef __SNDFILE_H
@@ -89,8 +91,9 @@ typedef const BYTE * LPCBYTE;
 #define MOD_TYPE_AMF0		0x200000
 #define MOD_TYPE_PSM		0x400000
 #define MOD_TYPE_J2B		0x800000
+#define MOD_TYPE_MPT		0x1000000
 #define MOD_TYPE_UMX		0x80000000 // Fake type
-#define MAX_MODTYPE			23
+#define MAX_MODTYPE			24
 
 
 
@@ -494,7 +497,8 @@ MODULAR STRUCT DECLARATIONS :
 ---------------------------------------------------------------------------------------------*/
 
 // Instrument Struct
-typedef struct _INSTRUMENTHEADER
+//typedef struct _INSTRUMENTHEADER
+struct INSTRUMENTHEADER
 {
 	UINT nFadeOut;
 	DWORD dwFlags;
@@ -556,7 +560,14 @@ typedef struct _INSTRUMENTHEADER
 // WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-} INSTRUMENTHEADER;
+	CTuning* pTuning;
+	static CTuning* s_DefaultTuning;
+
+	INSTRUMENTHEADER(CTuning* const pT = s_DefaultTuning) : pTuning(pT) {}
+
+};
+
+//INSTRUMENTHEADER;
 
 // -----------------------------------------------------------------------------------------
 // MODULAR INSTRUMENTHEADER FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
@@ -812,6 +823,18 @@ class CSoundFile
 public:
 	WORD GetTempoMin() const {return 32;}
 	WORD GetTempoMax() const {return 512;}
+	
+	//Tuning-->
+public:
+	static bool LoadStaticTunings();
+public:
+	CTuningCollection m_TuningsTuneSpecific;
+	static CTuningCollection s_TuningsSharedStandard;
+	static CTuningCollection s_TuningsSharedLocal;
+	//<--Tuning
+
+
+
 public:	// Static Members
 	static UINT m_nXBassDepth, m_nXBassRange;
 	static float m_nMaxSample;
@@ -939,6 +962,7 @@ public:
 	BOOL ReadMTM(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadSTM(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadIT(LPCBYTE lpStream, DWORD dwMemLength);
+	BOOL ReadMPT(LPCBYTE lpStream, const DWORD dwMemLength);
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	BOOL ReadITProject(LPCBYTE lpStream, DWORD dwMemLength);
@@ -968,6 +992,7 @@ public:
 	BOOL SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveMod(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveIT(LPCSTR lpszFileName, UINT nPacking=0);
+	BOOL SaveMPT(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveCompatIT(LPCSTR lpszFileName);
 	BOOL SaveCompatXM(LPCSTR lpszFileName);
 // -> CODE#0023
