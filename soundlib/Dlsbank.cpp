@@ -1640,6 +1640,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 	penv = new INSTRUMENTHEADER;
 	if (!penv) return FALSE;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
+	penv->pTuning = penv->s_DefaultTuning;
 	if (pSndFile->Headers[nInstr])
 	{
 // -> CODE#0003
@@ -1678,7 +1679,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 		penv->NoteMap[iNoteMap] = (BYTE)(iNoteMap+1);
 		if (pins->ulBank & F_INSTRUMENT_DRUMS)
 		{
-			if (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MID))
+			if (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MID|MOD_TYPE_MPT))
 			{
 				if (iNoteMap < pins->Regions[nDrumRgn].uKeyMin) penv->NoteMap[iNoteMap] = (BYTE)(pins->Regions[nDrumRgn].uKeyMin + 1);
 				if (iNoteMap > pins->Regions[nDrumRgn].uKeyMax) penv->NoteMap[iNoteMap] = (BYTE)(pins->Regions[nDrumRgn].uKeyMax + 1);

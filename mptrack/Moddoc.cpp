@@ -140,9 +140,9 @@ BOOL CModDoc::OnNewDocument()
 	if(CTrackApp::IsProject()) m_SndFile.m_dwSongFlags |= SONG_ITPROJECT;
 // -! NEW_FEATURE#0023
 
-	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
+	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT)) m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
 	 //rewbs.MacroGUI: enable embedded macros by default.
-	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) m_SndFile.m_dwSongFlags |= SONG_EMBEDMIDICFG;
+	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT)) m_SndFile.m_dwSongFlags |= SONG_EMBEDMIDICFG;
 
 	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
 // -> CODE#0015
@@ -313,6 +313,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_S3M:
 	case MOD_TYPE_XM:
 	case MOD_TYPE_IT:
+	case MOD_TYPE_MPT:
 		bModified = FALSE;
 		break;
 	case MOD_TYPE_AMF0:
@@ -381,6 +382,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 // -> DESC="IT project files (.itp)"
 //	if (!lstrcmpi(fext, ".it")) nType = MOD_TYPE_IT; else
 	if (!lstrcmpi(fext, ".it") || !lstrcmpi(fext, ".itp")) nType = MOD_TYPE_IT; else
+	if (!lstrcmpi(fext, ".mptm")) nType = MOD_TYPE_MPT; else
 // -! NEW_FEATURE#0023
 	if (!greccount)
 	{
@@ -396,6 +398,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(lpszPathName, dwPacking); break;
 	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(lpszPathName, dwPacking); break;
 	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT || !lstrcmpi(fext, ".itp")) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName, dwPacking); break;
+	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveMPT(lpszPathName, dwPacking); break;
 	}
 	EndWaitCursor();
 	if (bOk)
@@ -414,7 +417,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 // -> DESC="IT project files (.itp)"
 BOOL CModDoc::SaveModified()
 {
-	if(m_SndFile.m_nType == MOD_TYPE_IT && m_SndFile.m_dwSongFlags & SONG_ITPROJECT && !(m_SndFile.m_dwSongFlags & SONG_ITPEMBEDIH)){
+	if((m_SndFile.m_nType & MOD_TYPE_IT) && m_SndFile.m_dwSongFlags & SONG_ITPROJECT && !(m_SndFile.m_dwSongFlags & SONG_ITPEMBEDIH)){
 
 		BOOL unsavedInstrument = FALSE;
 
@@ -430,7 +433,7 @@ BOOL CModDoc::SaveModified()
 					BOOL iti = stricmp(&m_SndFile.m_szInstrumentPath[i][size-3],"iti") == 0;
 					BOOL xi  = stricmp(&m_SndFile.m_szInstrumentPath[i][size-2],"xi") == 0;
 
-					if(iti || (!iti && !xi  && m_SndFile.m_nType == MOD_TYPE_IT))
+					if(iti || (!iti && !xi  && m_SndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 						m_SndFile.SaveITIInstrument(i+1, m_SndFile.m_szInstrumentPath[i]);
 					if(xi  || (!xi  && !iti && m_SndFile.m_nType == MOD_TYPE_XM))
 						m_SndFile.SaveXIInstrument(i+1, m_SndFile.m_szInstrumentPath[i]);
@@ -508,6 +511,11 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 			strcpy(fext, ".it");
 		}
 // -! NEW_FEATURE#0023
+		break;
+	case MOD_TYPE_MPT:
+			lpszDefExt = "mptm";
+			lpszFilter = "OpenMPT Modules (*.mptm)|*.mptm||";
+			strcpy(fext, ".mptm");
 		break;
 	default:	
 		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
@@ -609,7 +617,7 @@ BOOL CModDoc::InitializeMod()
 		{
 			m_SndFile.ChnSettings[init].dwFlags = 0;
 			m_SndFile.ChnSettings[init].nVolume = 64;
-			if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT))
+			if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT))
 				m_SndFile.ChnSettings[init].nPan = 128;
 			else
 				m_SndFile.ChnSettings[init].nPan = (init & 0x01) ? 64 : 192;
@@ -630,7 +638,7 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.Headers[1] = new INSTRUMENTHEADER;
 			InitializeInstrument(m_SndFile.Headers[1], 1);
 		}
-		if (m_SndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_XM))
+		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT|MOD_TYPE_XM))
 		{
 			m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
 		}
@@ -998,7 +1006,7 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
 	}
 
 	//Mark IT as modified
-	if (m_SndFile.m_nType == MOD_TYPE_IT) {
+	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) {
 		CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
 	}
 
@@ -1016,7 +1024,7 @@ BOOL CModDoc::IsChannelSolo(UINT nChn) const
 BOOL CModDoc::SoloChannel(UINT nChn, BOOL bSolo)
 {
 	if (nChn >= m_SndFile.m_nChannels) return FALSE;
-	if (m_SndFile.m_nType == MOD_TYPE_IT) SetModified();
+	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 	if (bSolo)	m_SndFile.ChnSettings[nChn].dwFlags |= CHN_SOLO;
 	else		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SOLO;
 	return TRUE;
@@ -1035,7 +1043,7 @@ BOOL CModDoc::IsChannelNoFx(UINT nChn) const
 BOOL CModDoc::NoFxChannel(UINT nChn, BOOL bNoFx, BOOL updateMix)
 {
 	if (nChn >= m_SndFile.m_nChannels) return FALSE;
-	if (m_SndFile.m_nType == MOD_TYPE_IT) SetModified();
+	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 	if (bNoFx){
 		m_SndFile.ChnSettings[nChn].dwFlags |= CHN_NOFX;
 		if(updateMix) m_SndFile.Chn[nChn].dwFlags |= CHN_NOFX;
@@ -1127,10 +1135,10 @@ BOOL CModDoc::SurroundChannel(UINT nChn, BOOL bSurround)
 	DWORD d = (bSurround) ? CHN_SURROUND : 0;
 	
 	if (nChn >= m_SndFile.m_nChannels) return FALSE;
-	if (m_SndFile.m_nType != MOD_TYPE_IT) d = 0;
+	if (!(m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) d = 0;
 	if (d != (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SURROUND))
 	{
-		if (m_SndFile.m_nType == MOD_TYPE_IT) SetModified();
+		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 		if (d)	m_SndFile.ChnSettings[nChn].dwFlags |= CHN_SURROUND;
 		else	m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
 		
@@ -1149,7 +1157,7 @@ BOOL CModDoc::SetChannelGlobalVolume(UINT nChn, UINT nVolume)
 	if (m_SndFile.ChnSettings[nChn].nVolume != nVolume)
 	{
 		m_SndFile.ChnSettings[nChn].nVolume = nVolume;
-		if (m_SndFile.m_nType & MOD_TYPE_IT) SetModified();
+		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 		bOk = TRUE;
 	}
 	m_SndFile.Chn[nChn].nGlobalVol = nVolume;
@@ -1165,7 +1173,7 @@ BOOL CModDoc::SetChannelDefaultPan(UINT nChn, UINT nPan)
 	if (m_SndFile.ChnSettings[nChn].nPan != nPan)
 	{
 		m_SndFile.ChnSettings[nChn].nPan = nPan;
-		if (m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT)) SetModified();
+		if (m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 		bOk = TRUE;
 	}
 	m_SndFile.Chn[nChn].nPan = nPan;
@@ -1754,14 +1762,14 @@ void CModDoc::OnEditInstruments()
 void CModDoc::OnEditComments()
 //----------------------------
 {
-	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_COMMENTS);
+	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_COMMENTS);
 }
 
 //rewbs.graph
 void CModDoc::OnEditGraph()
 //----------------------------
 {
-	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_GRAPH);
+	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_GRAPH);
 }
 //end rewbs.graph
 
@@ -1840,7 +1848,7 @@ void CModDoc::OnUpdateXMITOnly(CCmdUI *p)
 //---------------------------------------
 {
 	if (p) p->Enable(((m_SndFile.m_nType == MOD_TYPE_XM) 
-		|| (m_SndFile.m_nType == MOD_TYPE_IT)) ? TRUE : FALSE);
+		|| (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) ? TRUE : FALSE);
 }
 
 
@@ -1975,8 +1983,11 @@ typedef struct MPTEFFECTINFO
 
 #define MOD_TYPE_MODXM	(MOD_TYPE_MOD|MOD_TYPE_XM)
 #define MOD_TYPE_S3MIT	(MOD_TYPE_S3M|MOD_TYPE_IT)
-#define MOD_TYPE_NOMOD	(MOD_TYPE_S3M|MOD_TYPE_XM|MOD_TYPE_IT)
+#define MOD_TYPE_S3MITMPT (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)
+#define MOD_TYPE_NOMOD	(MOD_TYPE_S3M|MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)
 #define MOD_TYPE_XMIT	(MOD_TYPE_XM|MOD_TYPE_IT)
+#define MOD_TYPE_XMITMPT (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)
+#define MOD_TYPE_ITMPT (MOD_TYPE_IT|MOD_TYPE_MPT)
 #define MAX_FXINFO		66					//rewbs.smoothVST, increased from 64... I wonder what this will break?
 
 const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
@@ -1999,12 +2010,12 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_SPEED,			0,0,		0,	0xFFFFFFFF,		"Set Speed"},
 	{CMD_TEMPO,			0,0,		0,	0xFFFFFFFF,		"Set Tempo"},
 	{CMD_TREMOR,		0,0,		0,	MOD_TYPE_NOMOD,	"Tremor"},
-	{CMD_CHANNELVOLUME,	0,0,		0,	MOD_TYPE_S3MIT,	"Set channel volume"},
-	{CMD_CHANNELVOLSLIDE,0,0,		0,	MOD_TYPE_S3MIT,	"Channel volslide"},
+	{CMD_CHANNELVOLUME,	0,0,		0,	MOD_TYPE_S3MITMPT,	"Set channel volume"},
+	{CMD_CHANNELVOLSLIDE,0,0,		0,	MOD_TYPE_S3MITMPT,	"Channel volslide"},
 	{CMD_GLOBALVOLUME,	0,0,		0,	MOD_TYPE_NOMOD,	"Set global volume"},
 	{CMD_GLOBALVOLSLIDE,0,0,		0,	MOD_TYPE_NOMOD,	"Global volume slide"},
 	{CMD_KEYOFF,		0,0,		0,	MOD_TYPE_XM,	"Key off"},
-	{CMD_FINEVIBRATO,	0,0,		0,	MOD_TYPE_S3MIT,	"Fine vibrato"},
+	{CMD_FINEVIBRATO,	0,0,		0,	MOD_TYPE_S3MITMPT,	"Fine vibrato"},
 	{CMD_PANBRELLO,		0,0,		0,	MOD_TYPE_NOMOD,	"Panbrello"},
 	{CMD_PANNINGSLIDE,	0,0,		0,	MOD_TYPE_NOMOD,	"Panning slide"},
 	{CMD_SETENVPOSITION,0,0,		0,	MOD_TYPE_XM,	"Envelope position"},
@@ -2027,19 +2038,19 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_MODCMDEX,		0xF0,0xE0,	0,	MOD_TYPE_MODXM,	"Pattern delay"},
 	{CMD_MODCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_XM,	"Set active macro"},
 	// Extended S3M/IT effects
-	{CMD_S3MCMDEX,		0xF0,0x10,	0,	MOD_TYPE_S3MIT,	"Glissando control"},
+	{CMD_S3MCMDEX,		0xF0,0x10,	0,	MOD_TYPE_S3MITMPT,	"Glissando control"},
 	{CMD_S3MCMDEX,		0xF0,0x20,	0,	MOD_TYPE_S3M,	"Set finetune"},
-	{CMD_S3MCMDEX,		0xF0,0x30,	0,	MOD_TYPE_S3MIT,	"Vibrato waveform"},
-	{CMD_S3MCMDEX,		0xF0,0x40,	0,	MOD_TYPE_S3MIT,	"Tremolo waveform"},
-	{CMD_S3MCMDEX,		0xF0,0x50,	0,	MOD_TYPE_S3MIT,	"Panbrello waveform"},
-	{CMD_S3MCMDEX,		0xF0,0x60,	0,	MOD_TYPE_S3MIT,	"Fine pattern delay"},
-	{CMD_S3MCMDEX,		0xF0,0x80,	0,	MOD_TYPE_S3MIT,	"Set panning"},
-	{CMD_S3MCMDEX,		0xF0,0xA0,	0,	MOD_TYPE_S3MIT,	"Set high offset"},
-	{CMD_S3MCMDEX,		0xF0,0xB0,	0,	MOD_TYPE_S3MIT,	"Pattern loop"},
-	{CMD_S3MCMDEX,		0xF0,0xC0,	0,	MOD_TYPE_S3MIT,	"Note cut"},
-	{CMD_S3MCMDEX,		0xF0,0xD0,	0,	MOD_TYPE_S3MIT,	"Note delay"},
-	{CMD_S3MCMDEX,		0xF0,0xE0,	0,	MOD_TYPE_S3MIT,	"Pattern delay"},
-	{CMD_S3MCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_IT,	"Set active macro"},
+	{CMD_S3MCMDEX,		0xF0,0x30,	0,	MOD_TYPE_S3MITMPT,	"Vibrato waveform"},
+	{CMD_S3MCMDEX,		0xF0,0x40,	0,	MOD_TYPE_S3MITMPT,	"Tremolo waveform"},
+	{CMD_S3MCMDEX,		0xF0,0x50,	0,	MOD_TYPE_S3MITMPT,	"Panbrello waveform"},
+	{CMD_S3MCMDEX,		0xF0,0x60,	0,	MOD_TYPE_S3MITMPT,	"Fine pattern delay"},
+	{CMD_S3MCMDEX,		0xF0,0x80,	0,	MOD_TYPE_S3MITMPT,	"Set panning"},
+	{CMD_S3MCMDEX,		0xF0,0xA0,	0,	MOD_TYPE_S3MITMPT,	"Set high offset"},
+	{CMD_S3MCMDEX,		0xF0,0xB0,	0,	MOD_TYPE_S3MITMPT,	"Pattern loop"},
+	{CMD_S3MCMDEX,		0xF0,0xC0,	0,	MOD_TYPE_S3MITMPT,	"Note cut"},
+	{CMD_S3MCMDEX,		0xF0,0xD0,	0,	MOD_TYPE_S3MITMPT,	"Note delay"},
+	{CMD_S3MCMDEX,		0xF0,0xE0,	0,	MOD_TYPE_S3MITMPT,	"Pattern delay"},
+	{CMD_S3MCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_ITMPT,	"Set active macro"},
 	// MPT XM extensions and special effects
 	{CMD_XFINEPORTAUPDOWN,0xF0,0x10,0,	MOD_TYPE_XM,	"Extra fine porta up"},
 	{CMD_XFINEPORTAUPDOWN,0xF0,0x20,0,	MOD_TYPE_XM,	"Extra fine porta down"},
@@ -2048,11 +2059,11 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_XFINEPORTAUPDOWN,0xF0,0x90,0,	MOD_TYPE_XM,	"Sound control"},
 	{CMD_XFINEPORTAUPDOWN,0xF0,0xA0,0,	MOD_TYPE_XM,	"Set high offset"},
 	// MPT IT extensions and special effects
-	{CMD_S3MCMDEX,		0xF0,0x90,	0,	MOD_TYPE_S3MIT,	"Sound control"},
-	{CMD_S3MCMDEX,		0xF0,0x70,	0,	MOD_TYPE_IT,	"Instr. control"},
+	{CMD_S3MCMDEX,		0xF0,0x90,	0,	MOD_TYPE_S3MITMPT,	"Sound control"},
+	{CMD_S3MCMDEX,		0xF0,0x70,	0,	MOD_TYPE_ITMPT,	"Instr. control"},
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMIT,	"X param"}
+	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMITMPT,	"X param"}
 // -! NEW_FEATURE#0010
 };
 
@@ -2258,7 +2269,7 @@ BOOL CModDoc::GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX, DWORD *prangeMin, DWORD
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 //			if (nType & MOD_TYPE_S3MIT) nmin = 1;
-			if (nType & MOD_TYPE_S3MIT) nmin = 0;
+			if (nType & MOD_TYPE_S3MITMPT) nmin = 0;
 // -! NEW_FEATURE#0010
 			break;
 		case CMD_VOLUMESLIDE:
@@ -2266,13 +2277,13 @@ BOOL CModDoc::GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX, DWORD *prangeMin, DWORD
 		case CMD_VIBRATOVOL:
 		case CMD_GLOBALVOLSLIDE:
 		case CMD_CHANNELVOLSLIDE:
-			nmax = (nType & MOD_TYPE_S3MIT) ? 58 : 30;
+			nmax = (nType & MOD_TYPE_S3MITMPT) ? 58 : 30;
 			break;
 		case CMD_PANNING8:
 			if (nType & (MOD_TYPE_MOD|MOD_TYPE_S3M)) nmax = 0x80;
 			break;
 		case CMD_GLOBALVOLUME:
-			nmax = (nType & MOD_TYPE_IT) ? 128 : 64;
+			nmax = (nType & MOD_TYPE_IT | MOD_TYPE_MPT) ? 128 : 64;
 			break;
 		}
 		*prangeMin = nmin;
@@ -2301,7 +2312,7 @@ UINT CModDoc::MapValueToPos(UINT ndx, UINT param)
 	case CMD_VIBRATOVOL:
 	case CMD_GLOBALVOLSLIDE:
 	case CMD_CHANNELVOLSLIDE:
-		if (m_SndFile.m_nType & MOD_TYPE_S3MIT)
+		if (m_SndFile.m_nType & MOD_TYPE_S3MITMPT)
 		{
 			if (!param) pos = 29; else
 			if (((param & 0x0F) == 0x0F) && (param & 0xF0))
@@ -2338,7 +2349,7 @@ UINT CModDoc::MapPosToValue(UINT ndx, UINT pos)
 	case CMD_VIBRATOVOL:
 	case CMD_GLOBALVOLSLIDE:
 	case CMD_CHANNELVOLSLIDE:
-		if (m_SndFile.m_nType & MOD_TYPE_S3MIT)
+		if (m_SndFile.m_nType & MOD_TYPE_S3MITMPT)
 		{
 			if (pos < 15) param = 15-pos; else
 			if (pos < 29) param = (29-pos) | 0xF0; else
@@ -2426,11 +2437,11 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		{
 			wsprintf(s, "continue");
 		} else
-		if ((m_SndFile.m_nType & MOD_TYPE_S3MIT) && ((param & 0x0F) == 0x0F) && (param & 0xF0))
+		if ((m_SndFile.m_nType & MOD_TYPE_S3MITMPT) && ((param & 0x0F) == 0x0F) && (param & 0xF0))
 		{
 			wsprintf(s, "fine +%d", param >> 4);
 		} else
-		if ((m_SndFile.m_nType & MOD_TYPE_S3MIT) && ((param & 0xF0) == 0xF0) && (param & 0x0F))
+		if ((m_SndFile.m_nType & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0) && (param & 0x0F))
 		{
 			wsprintf(s, "fine -%d", param & 0x0F);
 		} else
@@ -2569,19 +2580,19 @@ const MPTVOLCMDINFO gVolCmdInfo[MAX_VOLINFO] =
 {
 	{VOLCMD_VOLUME,			MOD_TYPE_NOMOD,		"v: Set Volume"},
 	{VOLCMD_PANNING,		MOD_TYPE_NOMOD,		"p: Set Panning"},
-	{VOLCMD_VOLSLIDEUP,		MOD_TYPE_XMIT,		"c: Volume slide up"},
-	{VOLCMD_VOLSLIDEDOWN,	MOD_TYPE_XMIT,		"d: Volume slide down"},
-	{VOLCMD_FINEVOLUP,		MOD_TYPE_XMIT,		"a: Fine volume up"},
-	{VOLCMD_FINEVOLDOWN,	MOD_TYPE_XMIT,		"b: Fine volume down"},
-	{VOLCMD_VIBRATOSPEED,	MOD_TYPE_XMIT,		"u: Vibrato speed"},
+	{VOLCMD_VOLSLIDEUP,		MOD_TYPE_XMITMPT,		"c: Volume slide up"},
+	{VOLCMD_VOLSLIDEDOWN,	MOD_TYPE_XMITMPT,		"d: Volume slide down"},
+	{VOLCMD_FINEVOLUP,		MOD_TYPE_XMITMPT,		"a: Fine volume up"},
+	{VOLCMD_FINEVOLDOWN,	MOD_TYPE_XMITMPT,		"b: Fine volume down"},
+	{VOLCMD_VIBRATOSPEED,	MOD_TYPE_XMITMPT,		"u: Vibrato speed"},
 	{VOLCMD_VIBRATO,		MOD_TYPE_XM,		"h: Vibrato depth"},
 	{VOLCMD_PANSLIDELEFT,	MOD_TYPE_XM,		"l: Pan slide left"},
 	{VOLCMD_PANSLIDERIGHT,	MOD_TYPE_XM,		"r: Pan slide right"},
-	{VOLCMD_TONEPORTAMENTO,	MOD_TYPE_XMIT,		"g: Tone portamento"},
-	{VOLCMD_PORTAUP,		MOD_TYPE_IT,		"f: Portamento up"},
-	{VOLCMD_PORTADOWN,		MOD_TYPE_IT,		"e: Portamento down"},
-	{VOLCMD_VELOCITY,		MOD_TYPE_IT,		":: velocity"},		//rewbs.velocity
-	{VOLCMD_OFFSET,		MOD_TYPE_IT,		"o: offset"},		//rewbs.volOff
+	{VOLCMD_TONEPORTAMENTO,	MOD_TYPE_XMITMPT,		"g: Tone portamento"},
+	{VOLCMD_PORTAUP,		MOD_TYPE_ITMPT,		"f: Portamento up"},
+	{VOLCMD_PORTADOWN,		MOD_TYPE_ITMPT,		"e: Portamento down"},
+	{VOLCMD_VELOCITY,		MOD_TYPE_ITMPT,		":: velocity"},		//rewbs.velocity
+	{VOLCMD_OFFSET,		MOD_TYPE_ITMPT,		"o: offset"},		//rewbs.volOff
 };
 
 
@@ -3002,6 +3013,7 @@ void CModDoc::ChangeFileExtension(UINT nNewType)
 	{
 	case MOD_TYPE_XM:  newPath += ".xm"; break;
 	case MOD_TYPE_IT:  m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? newPath+=".itp" : newPath+=".it"; break;
+	case MOD_TYPE_MPT: newPath += ".mptm"; break;
 	case MOD_TYPE_S3M: newPath += ".s3m"; break;
 	case MOD_TYPE_MOD: newPath += ".mod"; break;
 	default: ASSERT(false);		

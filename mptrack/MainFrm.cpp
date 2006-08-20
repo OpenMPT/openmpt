@@ -352,6 +352,8 @@ CMainFrame::CMainFrame()
 	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
 	m_pPerfCounter= new CPerformanceCounter();
 
+	//Loading static tunings here - probably not the best place to do that but anyway.
+	CSoundFile::LoadStaticTunings();
 }
 
 void CMainFrame::LoadIniSettings()
@@ -1976,7 +1978,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 	m_WaveFile.m_nDefaultTempo = 125;
 	m_WaveFile.m_nDefaultSpeed = 4;
 	m_WaveFile.m_nRepeatCount = 0;
-	m_WaveFile.m_nType = MOD_TYPE_IT;
+	m_WaveFile.m_nType = MOD_TYPE_IT; //MOD_TYPE_MPT?
 	m_WaveFile.m_nChannels = 4;
 	m_WaveFile.m_nInstruments = 1;
 	m_WaveFile.m_nSamples = 1;

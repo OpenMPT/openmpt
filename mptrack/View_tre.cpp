@@ -634,7 +634,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			SetItem(&tvi);
 		}
 	}
-	if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_XM))
+	if (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_XM|MOD_TYPE_MPT))
 	{
 		if (!pInfo->hInstruments) pInfo->hInstruments = InsertItem("Instruments", IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
 	} else
@@ -2612,9 +2612,9 @@ void CModTree::OnSaveItem()
 		if(pSndFile->m_szInstrumentPath[dwItem-1][0] == '\0'){
 			CHAR pszFileNames[_MAX_PATH];
 
-			CFileDialog dlg(FALSE, (pSndFile->m_nType & MOD_TYPE_IT) ? "iti" : "xi", NULL, 
+			CFileDialog dlg(FALSE, (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? "iti" : "xi", NULL, 
 							OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-							( pSndFile->m_nType & MOD_TYPE_IT ? "Impulse Tracker Instruments (*.iti)|*.iti|"
+							( pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT) ? "Impulse Tracker Instruments (*.iti)|*.iti|"
 																"FastTracker II Instruments (*.xi)|*.xi||"
 															  : "FastTracker II Instruments (*.xi)|*.xi|"
 																"Impulse Tracker Instruments (*.iti)|*.iti||" ),
@@ -2636,7 +2636,7 @@ void CModTree::OnSaveItem()
 			BOOL iti = stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-3],"iti") == 0;
 			BOOL xi  = stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-2],"xi") == 0;
 
-			if(iti || (!iti && !xi  && pSndFile->m_nType == MOD_TYPE_IT))
+			if(iti || (!iti && !xi  && pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 				pSndFile->SaveITIInstrument(dwItem, pSndFile->m_szInstrumentPath[dwItem-1]);
 			if(xi  || (!xi  && !iti && pSndFile->m_nType == MOD_TYPE_XM))
 				pSndFile->SaveXIInstrument(dwItem, pSndFile->m_szInstrumentPath[dwItem-1]);

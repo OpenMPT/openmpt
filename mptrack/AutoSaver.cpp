@@ -206,6 +206,9 @@ CString CAutoSaver::BuildFileName(CModDoc* pModDoc)
  				name.Append(".it");
 			}
 			break;
+		case MOD_TYPE_MPT:
+			name.Append(".mptm");
+			break;
 		case MOD_TYPE_XM:
 			name.Append(".xm");
 			break;
@@ -240,6 +243,9 @@ bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc)
 				success = (pSndFile->m_dwSongFlags & SONG_ITPROJECT) ? 
 						   pSndFile->SaveITProject(fileName) : 
 						   pSndFile->SaveIT(fileName, 0); 
+				break;
+			case MOD_TYPE_MPT:
+				success = pSndFile->SaveMPT(fileName, 0);
 				break;
 			//default:
 				//Do nothing

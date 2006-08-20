@@ -14,7 +14,8 @@
 #include "PatternRandomizer.h"
 #include ".\arrayutils.h"
 #include ".\view_pat.h"
-
+#include "misc_util.h"
+#include <cmath>
 
 #define MAX_SPACING		16
 #define	PLUGNAME_HEIGHT	16	//rewbs.patPlugName
@@ -1869,7 +1870,7 @@ EndSearch:
 		{
 			if (m_cmdFind.command)
 			{
-				if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
+				if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 					wsprintf(&szFind[strlen(szFind)], "%c", gszS3mCommands[m_cmdFind.command]);
 				else
 					wsprintf(&szFind[strlen(szFind)], "%c", gszModCommands[m_cmdFind.command]);
@@ -2795,7 +2796,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 		if (foundMacro >= 0) {
 			pSndFile->Chn[nChn].nActiveMacro = foundMacro;
 			if (pRow->command == 0 || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) { //we overwrite existing Zxx and \xx only.
-				pRow->command = (pSndFile->m_nType == MOD_TYPE_IT)?CMD_S3MCMDEX:CMD_MODCMDEX;;
+				pRow->command = (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))?CMD_S3MCMDEX:CMD_MODCMDEX;;
 				pRow->param = 0xF0 + (foundMacro&0x0F);
 				InvalidateRow();
 			}
@@ -3413,10 +3414,10 @@ void CViewPattern::TempEnterVol(int v)
 			case kcSetVolumeXMPanLeft:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDELEFT; break;
 			case kcSetVolumeXMPanRight:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDERIGHT; break;
 			case kcSetVolumePortamento:		volcmd = VOLCMD_TONEPORTAMENTO; break;
-			case kcSetVolumeITPortaUp:		if (pSndFile->m_nType & MOD_TYPE_IT) volcmd = VOLCMD_PORTAUP; break;
-			case kcSetVolumeITPortaDown:	if (pSndFile->m_nType & MOD_TYPE_IT) volcmd = VOLCMD_PORTADOWN; break;
-			case kcSetVolumeITVelocity:		if (pSndFile->m_nType & MOD_TYPE_IT) volcmd = VOLCMD_VELOCITY; break;	//rewbs.velocity
-			case kcSetVolumeITOffset:		if (pSndFile->m_nType & MOD_TYPE_IT) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
+			case kcSetVolumeITPortaUp:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTAUP; break;
+			case kcSetVolumeITPortaDown:	if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTADOWN; break;
+			case kcSetVolumeITVelocity:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_VELOCITY; break;	//rewbs.velocity
+			case kcSetVolumeITOffset:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
 			}
 		if ((pSndFile->m_nType & MOD_TYPE_MOD) && (volcmd > VOLCMD_PANNING)) volcmd = vol = 0;
 
@@ -3642,7 +3643,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 	// -- write sdx if playing live
 	if (usePlaybackPosition && pSndFile->m_nTickCount) {	// avoid SD0 which will be mis-interpreted
 		if (p->command == 0) {	//make sure we don't overwrite any existing commands.
-			p->command = (pSndFile->m_nType == MOD_TYPE_IT)?CMD_S3MCMDEX:CMD_MODCMDEX;
+			p->command = (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M))?CMD_S3MCMDEX:CMD_MODCMDEX;
 			p->param   = 0xD0 + (pSndFile->m_nTickCount&0x0F); //&0x0F is to limit to max 0x0F
 		}
 	}
@@ -3883,7 +3884,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		// -- write sdx if playing live
 		if (usePlaybackPosition && pSndFile->m_nTickCount) {	// avoid SD0 which will be mis-interpreted
 			if (p->command == 0) {	//make sure we don't overwrite any existing commands.
-				p->command = (pSndFile->m_nType == MOD_TYPE_IT || pSndFile->m_nType == MOD_TYPE_S3M)?CMD_S3MCMDEX:CMD_MODCMDEX;
+				p->command = (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M))?CMD_S3MCMDEX:CMD_MODCMDEX;
 				p->param   = 0xD0 + (pSndFile->m_nTickCount&0x0F); //&0x0F is to limit to max 0x0F
 			}
 		}

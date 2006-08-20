@@ -567,6 +567,9 @@
 				RelativePath=".\mpt_midi.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\MPT_module.cpp">
+			</File>
+			<File
 				RelativePath=".\mptrack.cpp">
 			</File>
 			<File
@@ -592,6 +595,9 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Sampleio.cpp">
+			</File>
+			<File
+				RelativePath=".\serialization_utils.cpp">
 			</File>
 			<File
 				RelativePath="..\soundlib\snd_dsp.cpp">
@@ -679,6 +685,18 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Tables.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\tuning.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\tuningCollection.cpp">
+			</File>
+			<File
+				RelativePath=".\TuningDialog.cpp">
+			</File>
+			<File
+				RelativePath=".\tuningRatioMapWnd.cpp">
 			</File>
 			<File
 				RelativePath=".\view_com.cpp">
@@ -970,6 +988,9 @@
 				RelativePath=".\Mpdlgs.h">
 			</File>
 			<File
+				RelativePath="..\soundlib\MPT_module.h">
+			</File>
+			<File
 				RelativePath=".\mptrack.h">
 			</File>
 			<File
@@ -994,6 +1015,9 @@
 				RelativePath=".\Resource.h">
 			</File>
 			<File
+				RelativePath=".\serialization_utils.h">
+			</File>
+			<File
 				RelativePath="..\Soundlib\snddev.h">
 			</File>
 			<File
@@ -1007,6 +1031,21 @@
 			</File>
 			<File
 				RelativePath=".\StdAfx.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\tuning.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\tuning_template.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\tuningcollection.h">
+			</File>
+			<File
+				RelativePath=".\TuningDialog.h">
+			</File>
+			<File
+				RelativePath=".\tuningRatioMapWnd.h">
 			</File>
 			<File
 				RelativePath=".\view_com.h">

@@ -651,7 +651,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			AppendMenu(hMenu, MF_STRING|greyed, ID_ORDERLIST_COPY, "&Duplicate Pattern");
 			AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERNCOPY, "&Copy Pattern");
 			AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERNPASTE, "P&aste Pattern");
-			if ((m_pModDoc) && (m_pModDoc->GetSoundFile()->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)))
+			if ((m_pModDoc) && (m_pModDoc->GetSoundFile()->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
 				AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 				AppendMenu(hMenu, MF_STRING|greyed, ID_PATTERN_PROPERTIES, "&Properties...");
