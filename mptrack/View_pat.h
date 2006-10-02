@@ -7,6 +7,7 @@ class CEffectVis;	//rewbs.fxvis
 class CPatternGotoDialog;
 class CPatternRandomizer;
 class COpenGLEditor;
+typedef CTuning CTuning; //Some trickery to avoid compiler errors.
 
 // Drag & Drop info
 #define DRAGITEM_MASK			0xFF0000
@@ -169,7 +170,7 @@ public:
 public:
 	void DrawPatternData(HDC, CSoundFile *, UINT, BOOL, BOOL, UINT, UINT, UINT, CRect&, int *);
 	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
-	void DrawNote(int x, int y, UINT note);
+	void DrawNote(int x, int y, UINT note, CTuning* pTuning = NULL);
 	void DrawInstrument(int x, int y, UINT instr);
 	void DrawVolumeCommand(int x, int y, UINT volcmd, UINT vol);
 	void DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn);

@@ -15,14 +15,17 @@
 #include "sndfile.h"
 #include "it_defs.h"
 #include "../mptrack/mainfrm.h"
+#include "../mptrack/moddoc.h"
 #include <map>
 #include <string>
+#include <vector>
 #include <algorithm>
 #include "MPT_module.h"
 #include "../mptrack/serialization_utils.h"
 #include <fstream>
 
 using std::map;
+using std::vector;
 using std::string;
 using std::fstream;
 
@@ -236,6 +239,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
+//-----------------------------------------------------------------
 {
 	UINT i,n,nsmp;
 	DWORD id,len,size;
@@ -399,7 +403,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 
 	// order data
 	if (size+streamPos<=dwMemLength && size<=MAX_ORDERS) {
-		memcpy(&Order[0],lpStream+streamPos,size);
+		Order.ReadAsByte(lpStream+streamPos, size, dwMemLength-streamPos);
 		streamPos += size;
 	}
 	
@@ -435,19 +439,19 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 
 	for(UINT npat=0; npat<size; npat++){
 
-		// PatternSize[npat]
-		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
-		PatternSize[npat] = id;
-		streamPos += sizeof(DWORD);
-
 		// Free pattern if not empty
 		if(Patterns[npat]) { FreePattern(Patterns[npat]); Patterns[npat] = NULL; }
+
+		// PatternSize[npat]
+		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
+		Patterns[npat].Resize(id);
+		streamPos += sizeof(DWORD);
 
 		// Try to allocate & read only sized patterns
 		if(PatternSize[npat]){
 
 			// Allocate pattern
-			if( (Patterns[npat] = AllocatePattern(PatternSize[npat], m_nChannels)) == NULL ){
+			if(Patterns.Insert(npat, PatternSize[npat])){
 				streamPos += m_nChannels * PatternSize[npat] * n;
 				continue;
 			}
@@ -717,7 +721,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading orders
 	UINT nordsize = pifh->ordnum;
 	if (nordsize > MAX_ORDERS) nordsize = MAX_ORDERS;
-	memcpy(Order, lpStream+dwMemPos, nordsize);
+	Order.ReadAsByte(lpStream+dwMemPos, nordsize, dwMemLength-dwMemPos);
 	dwMemPos += pifh->ordnum;
 	// Reading Instrument Offsets
 	memset(inspos, 0, sizeof(inspos));
@@ -1051,8 +1055,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		if ((!patpos[npat]) || ((DWORD)patpos[npat] + 4 >= dwMemLength))
 		{
-			PatternSize[npat] = 64;
-			Patterns[npat] = AllocatePattern(64, m_nChannels);
+			Patterns.Insert(npat, 64);
 			continue;
 		}
 		UINT len = *((WORD *)(lpStream+patpos[npat]));
@@ -1063,8 +1066,9 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 		if ((rows < 4) || (rows > MAX_PATTERN_ROWS)) continue;
 // -> BEHAVIOUR_CHANGE#0008
 		if (patpos[npat]+8+len > dwMemLength) continue;
-		PatternSize[npat] = rows;
-		if ((Patterns[npat] = AllocatePattern(rows, m_nChannels)) == NULL) continue;
+		
+		if(Patterns.Insert(npat, rows)) continue;
+
 		memset(lastvalue, 0, sizeof(lastvalue));
 		memset(chnmask, 0, sizeof(chnmask));
 		MODCOMMAND *m = Patterns[npat];
@@ -1313,7 +1317,7 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 // Song Orders
 
 	// order array size
-	id = MAX_ORDERS;
+	id = Order.size();
 	fwrite(&id, 1, sizeof(id), f);
 
 	// order array
@@ -1476,6 +1480,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 
 
 	if ((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return FALSE;
+
+
 	memset(inspos, 0, sizeof(inspos));
 	memset(patpos, 0, sizeof(patpos));
 	memset(smppos, 0, sizeof(smppos));
@@ -1570,7 +1576,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	}
 	// Write file header
 	fwrite(&header, 1, sizeof(header), f);
-	fwrite(Order, 1, header.ordnum, f);
+	Order.WriteAsByte(f, header.ordnum);
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
 	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
 	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
@@ -2150,7 +2156,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	}
 	// Write file header
 	fwrite(&header, 1, sizeof(header), f);
-	fwrite(Order, 1, header.ordnum, f);
+	Order.WriteAsByte(f, header.ordnum);
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
 	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
 	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
@@ -3180,7 +3186,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	return;
 }
 
-//Horribly copied from SaveIT(...) - some modifications have appeared since.
+//Rudely copied from SaveIT(...) - some modifications have appeared since.
 BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 //-------------------------------------------------------------
 {
@@ -3190,7 +3196,8 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 	ITSAMPLESTRUCT itss;
 	BYTE smpcount[(MAX_SAMPLES+7)/8];
 	DWORD inspos[MAX_INSTRUMENTS];
-	DWORD patpos[MAX_PATTERNS];
+	vector<DWORD> patpos; patpos.resize(Patterns.Size(), 0);
+	ASSERT(patpos.size() == Patterns.Size());
 	DWORD smppos[MAX_SAMPLES];
 	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2;
 	WORD patinfo[4];
@@ -3209,18 +3216,13 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 
 
 	memset(inspos, 0, sizeof(inspos));
-	memset(patpos, 0, sizeof(patpos));
 	memset(smppos, 0, sizeof(smppos));
 	// Writing Header
 	memset(&header, 0, sizeof(header));
 	dwPatNamLen = 0;
 	dwChnNamLen = 0;
-	//header.id = 0x4D504D49; 
-	//header.id = 0x2e6D7074; //.mpt ASCII
 	header.id = CMPTModule::m_ModID;
 	lstrcpyn(header.songname, m_szNames[0], 26);
-	//Relabs.note: Modified max length in above function
-	//to 26 since songname array has size 26.
 
 	header.reserved1 = 0x1004;
 	header.ordnum = 0;
@@ -3231,18 +3233,25 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 // -> DESC="load/save the whole pattern order list"
 //	while ((header.ordnum < MAX_ORDERS) && (Order[header.ordnum] < 0xFF)) header.ordnum++;
 //	if (header.ordnum < MAX_ORDERS) Order[header.ordnum++] = 0xFF;
-	header.ordnum = MAX_ORDERS;
-	Order[MAX_ORDERS-1] = 0xFF;
+	header.ordnum = Order.size();
+	//Order[Order.size()-1] = Patterns.GetInvalidIndex();
 // -! CODE#0013
 
 	header.insnum = m_nInstruments;
 	header.smpnum = m_nSamples;
-	header.patnum = MAX_PATTERNS;
+	header.patnum = Patterns.Size();
 	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) header.patnum--;
 
 	//VERSION
-	header.cwtv = 0x888;	// We don't use these version info fields any more.
+	//header.cwtv = 0x888;	// We don't use these version info fields any more.
+	header.cwtv = 0x88B;	// But now they are in use again :)
 	header.cmwt = 0x888;	// Might come up as "Impulse Tracker 8" file in XMPlay. :)
+
+	/*
+	Version history:
+	0x88A -> 0x88B: Changed order-to-pattern-index table type from BYTE-array to vector<UINT>.
+	*/
+
 
 	header.flags = 0x0001;
 	header.special = 0x0006;
@@ -3258,7 +3267,7 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 	header.speed = m_nDefaultSpeed;
  	header.tempo = min(m_nDefaultTempo,255);  //Limit this one to 255, we save the real one as an extension below.
 	header.sep = 128;
-	dwHdrPos = sizeof(header) + header.ordnum;
+	dwHdrPos = sizeof(header) + Order.GetSerializationByteNum();
 	// Channel Pan and Volume
 	memset(header.chnpan, 0xFF, 64);
 	memset(header.chnvol, 64, 64);
@@ -3302,10 +3311,10 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 	}
 	// Write file header
 	fwrite(&header, 1, sizeof(header), f);
-	fwrite(Order, 1, header.ordnum, f);
+	Order.Serialize(f);
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
 	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
-	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
+	if (header.patnum) fwrite(&patpos[0], 4, header.patnum, f);
 	// Writing editor history information
 	{
 #ifdef SAVEITTIMESTAMP
@@ -3760,7 +3769,7 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 	fseek(f, dwHdrPos, SEEK_SET);
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
 	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
-	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
+	if (header.patnum) fwrite(&patpos[0], 4, header.patnum, f);
 	fclose(f);
 
 
@@ -3772,7 +3781,7 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 	CSerializationMessager errorMessages;
 
 	ofstream fout(lpszFileName, ios::app|ios::ate|ios::binary);
-	const unsigned long int MPTStartPos = fout.tellp();
+	const DWORD MPTStartPos = fout.tellp();
 
 	//Begin: Tuning related things
 	
@@ -3794,7 +3803,7 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 		//tuning 'T2', so the output would be something like
 		//T1 1 T2 2 1 1 1 2 2 2
 
-		//2. Creating the tuning name <-> tuning id number map.
+		//2. Creating the tuning address <-> tuning id number map.
 		typedef map<CTuning*, unsigned short> TNTS_MAP;
 		typedef TNTS_MAP::iterator TNTS_MAP_ITER;
 		TNTS_MAP tNameToShort_Map;
@@ -3802,7 +3811,7 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 		unsigned short figMap = 0;
 		for(UINT i = 1; i<=GetNumInstruments(); i++)
 		{
-			if(Headers[i] == NULL || Headers[i]->pTuning == NULL)
+			if(Headers[i] == NULL)
 			{
 				ASSERT(false);
 				continue;
@@ -3816,7 +3825,8 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 			figMap++;
 		}
 
-		//...and write it.
+		//...and write the map with tuning names replacing
+		//the addresses.
 		const size_t tuningMapSize = tNameToShort_Map.size();
 		fout.write(reinterpret_cast<const char*>(&tuningMapSize), sizeof(tuningMapSize));
 		if(tuningMapSize == 0)
@@ -3827,7 +3837,11 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 		{	
 			for(TNTS_MAP_ITER iter = tNameToShort_Map.begin(); iter != tNameToShort_Map.end(); iter++)
 			{
-				StringToBinaryStream(fout, iter->first->GetName());
+				if(iter->first)
+					StringToBinaryStream(fout, iter->first->GetName());
+				else //Case: Using original IT tuning.
+					StringToBinaryStream(fout, "->MPT_ORIGINAL_IT<-");
+
 				fout.write(reinterpret_cast<const char*>(&(iter->second)), sizeof(iter->second));
 			}
 
@@ -3849,7 +3863,7 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 	}
 
 	ASSERT(errorMessages.GetCount() == 0);
-	//Todo: These should be show as well.
+	//Todo: These should be shown as well.
 	
 	//End: Tuning related things.
 
@@ -3857,7 +3871,7 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 	//Relabs.note:
 	//Last bytes tell where the hack mpt things begin.
 	//It _must_ be there.
-	if(fout.fail())
+	if(!fout.good())
 	{
 		fout.clear();
 		fout.write(reinterpret_cast<const char*>(&MPTStartPos), sizeof(MPTStartPos));
@@ -3883,7 +3897,7 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 	DWORD dwMemPos = sizeof(ITFILEHEADER);
 	DWORD inspos[MAX_INSTRUMENTS];
 	DWORD smppos[MAX_SAMPLES];
-	DWORD patpos[MAX_PATTERNS];
+	vector<DWORD> patpos;
 // Using eric's code here to take care of NNAs etc..
 // -> CODE#0006
 // -> DESC="misc quantity changes"
@@ -3897,7 +3911,18 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 	 || (!pifh->smpnum) || (pifh->smpnum >= MAX_SAMPLES) || (!pifh->ordnum)) return FALSE;
 	if (dwMemPos + pifh->ordnum + pifh->insnum*4
 	 + pifh->smpnum*4 + pifh->patnum*4 > dwMemLength) return FALSE;
-	m_nType = MOD_TYPE_MPT;
+
+    DWORD temp = 0;
+	memcpy(&temp, lpStream + (dwMemLength - sizeof(DWORD)), sizeof(DWORD));
+	const DWORD mptStartPos = temp;
+	if(mptStartPos >= dwMemLength)
+	{
+		::MessageBox(NULL, "Corrupted savefile - loading unsuccesful", 0, MB_OK);
+		return FALSE;
+	}
+
+	//m_nType = MOD_TYPE_MPT;
+	ChangeModTypeTo(MOD_TYPE_MPT);
 	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;
 	if (pifh->flags & 0x10) m_dwSongFlags |= SONG_ITOLDEFFECTS;
 	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATMODE;
@@ -3945,9 +3970,18 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 	// Reading orders
 	UINT nordsize = pifh->ordnum;
-	if (nordsize > MAX_ORDERS) nordsize = MAX_ORDERS;
-	memcpy(Order, lpStream+dwMemPos, nordsize);
-	dwMemPos += pifh->ordnum;
+	if (nordsize > Order.GetOrderNumberLimitMax()) nordsize = Order.GetOrderNumberLimitMax();
+	if(pifh->cwtv > 0x88A)
+		dwMemPos += Order.UnSerialize(lpStream+dwMemPos, dwMemLength-dwMemPos);
+	else
+	{
+		Order.ReadAsByte(lpStream+dwMemPos, nordsize, dwMemLength - dwMemPos);
+		dwMemPos += pifh->ordnum;
+		//Replacing 0xFF and 0xFE with new corresponding indexes
+		replace(Order.begin(), Order.end(), static_cast<UINT>(0xFE), Patterns.GetIgnoreIndex());
+		replace(Order.begin(), Order.end(), static_cast<UINT>(0xFF), Patterns.GetInvalidIndex());
+	}
+
 	// Reading Instrument Offsets
 	memset(inspos, 0, sizeof(inspos));
 	UINT inspossize = pifh->insnum;
@@ -3963,11 +3997,15 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 	memcpy(smppos, lpStream+dwMemPos, smppossize);
 	dwMemPos += pifh->smpnum * 4;
 	// Reading Patterns Offsets
-	memset(patpos, 0, sizeof(patpos));
 	UINT patpossize = pifh->patnum;
-	if (patpossize > MAX_PATTERNS) patpossize = MAX_PATTERNS;
-	patpossize <<= 2;
-	memcpy(patpos, lpStream+dwMemPos, patpossize);
+	if(patpossize > Patterns.GetPatternNumberLimitMax())
+	{
+		ASSERT(false);
+		patpossize = Patterns.GetPatternNumberLimitMax();
+	}
+	patpos.resize(patpossize);
+	patpossize <<= 2; // <-> patpossize *= sizeof(DWORD);
+	memcpy(&patpos[0], lpStream+dwMemPos, patpossize);
 	dwMemPos += pifh->patnum * 4;
 	// Reading IT Extra Info
 	if (dwMemPos + 2 < dwMemLength)
@@ -3990,7 +4028,8 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
-		if ((dwMemPos + len <= dwMemLength) && (len <= MAX_PATTERNS*MAX_PATTERNNAME) && (len >= MAX_PATTERNNAME))
+		//if ((dwMemPos + len <= dwMemLength) && (len <= MAX_PATTERNS*MAX_PATTERNNAME) && (len >= MAX_PATTERNNAME))
+		if ((dwMemPos + len <= dwMemLength) && (len <= pifh->patnum*MAX_PATTERNNAME) && (len >= MAX_PATTERNNAME))
 		{
 			m_lpszPatternNames = new char[len];
 			if (m_lpszPatternNames)
@@ -4032,9 +4071,8 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 	// Checking for unused channels
 	UINT npatterns = pifh->patnum;
 	
-	//plastiq: code readability improvements
-	if (npatterns > MAX_PATTERNS) 
-		npatterns = MAX_PATTERNS;
+	if (npatterns > Patterns.GetPatternNumberLimitMax()) 
+		npatterns = Patterns.GetPatternNumberLimitMax();
 
 	for (UINT patchk=0; patchk<npatterns; patchk++)
 	{
@@ -4215,8 +4253,8 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 	// Instrument extensions
 	if( code == 'MPTX' ){
 		ptr += sizeof(__int32);							// jump extension header code
-		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for inst. extensions
-
+		while( (DWORD)(ptr - lpStream) < mptStartPos ){ //Loop 'till beginning of mpt specific looking for inst. extensions
+		
 			code = (*((__int32 *)ptr));			// read field code
 			if (code == 'MPTS') {				//Reached song extensions, break out of this loop
 				break;
@@ -4244,7 +4282,7 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 	// Song extensions
 	if( code == 'MPTS' ){
 		ptr += sizeof(__int32); // jump extension header code
-		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for song extensions
+		while( (DWORD)(ptr - lpStream) < mptStartPos ){ //Loop 'till start of mpt specific
 			code = (*((__int32 *)ptr));			// read field code
 			ptr += sizeof(__int32);				// jump field code
 			size = (*((__int16 *)ptr));			// read field size
@@ -4279,8 +4317,7 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 	{
 		if ((!patpos[npat]) || ((DWORD)patpos[npat] + 4 >= dwMemLength))
 		{
-			PatternSize[npat] = 64;
-			Patterns[npat] = AllocatePattern(64, m_nChannels);
+			Patterns.Insert(npat, 64);
 			continue;
 		}
 		UINT len = *((WORD *)(lpStream+patpos[npat]));
@@ -4291,8 +4328,9 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 		if ((rows < 4) || (rows > MAX_PATTERN_ROWS)) continue;
 // -> BEHAVIOUR_CHANGE#0008
 		if (patpos[npat]+8+len > dwMemLength) continue;
-		PatternSize[npat] = rows;
-		if ((Patterns[npat] = AllocatePattern(rows, m_nChannels)) == NULL) continue;
+
+		if(Patterns.Insert(npat, rows)) continue;
+
 		memset(lastvalue, 0, sizeof(lastvalue));
 		memset(chnmask, 0, sizeof(chnmask));
 		MODCOMMAND *m = Patterns[npat];
@@ -4421,19 +4459,10 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 
 
 	//START - mpt specific:
-	if(m_dwLastSavedWithVersion > 0x01170244)
+	//Using member cwtv on pifh as the version number.
+	if(pifh->cwtv > 0x889)
 	{
-		unsigned long int mptStart = 0;
-		memcpy(&mptStart, lpStream + dwMemLength - sizeof(unsigned long int), sizeof(unsigned long int));
-		if(mptStart >= dwMemLength)
-		{
-			mptStart = dwMemLength;
-			::MessageBox(NULL, "Corrupted savefile - loading of module might have failed", 0, MB_OK);
-			return TRUE;
-		}
-			
-
-		const char* const cpcMPTStart = reinterpret_cast<const char*>(lpStream + mptStart);
+		const char* const cpcMPTStart = reinterpret_cast<const char*>(lpStream + mptStartPos);
 
 		//1. Reading tunespecific tunings.
 		//Relabs.note: Since for example the tuning systems
@@ -4446,7 +4475,7 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 		//methods. So this was new to me, and checking this
 		//might be a good idea.
 		CCharStreamBufFrom cbs;
-		cbs.pubsetbuf((char*)cpcMPTStart, dwMemLength-mptStart);
+		cbs.pubsetbuf((char*)cpcMPTStart, dwMemLength-mptStartPos);
 		istream fin(&cbs);
 
 		m_TuningsTuneSpecific.UnSerializeBinary(fin);
@@ -4467,6 +4496,14 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 			if(Headers[i] && iter != shortToTNameMap.end())
 			{
 				const string str = iter->second;
+
+				if(str == string("->MPT_ORIGINAL_IT<-"))
+				{
+					Headers[i]->pTuning = NULL;
+					continue;
+				}
+
+
 				Headers[i]->pTuning = s_TuningsSharedStandard.GetTuning(str);
 				if(Headers[i]->pTuning)
 					continue;
@@ -4489,6 +4526,8 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 					string erm = string("Tuning ") + str + string(" used by the module was not found.");
 					if(p)
 						p->MessageBox(erm.c_str());
+					m_pModDoc->SetModified(); //The tuning is changed so
+					//the modified flag is set.
 				}
 				Headers[i]->pTuning = Headers[i]->s_DefaultTuning;
 

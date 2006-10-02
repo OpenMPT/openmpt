@@ -177,16 +177,16 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 	CSoundFile *pSndFile;
 	CModDoc *pModDoc = GetDocument();
 	BOOL bUpdateScroll;
+	pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 	
-	if ((npat >= MAX_PATTERNS) || (!pModDoc)) return FALSE;
+	if ( (!pModDoc) || (!pSndFile) || (npat >= pSndFile->Patterns.Size()) ) return FALSE;
 	if ((m_pEditWnd) && (m_pEditWnd->IsWindowVisible())) m_pEditWnd->ShowWindow(SW_HIDE);
-	pSndFile = pModDoc->GetSoundFile();
-	if ((npat < MAX_PATTERNS-1) && (!pSndFile->Patterns[npat])) npat = 0;
+	
+	if ((npat < pSndFile->Patterns.Size()-1) && (!pSndFile->Patterns[npat])) npat = 0;
 	while ((npat > 0) && (!pSndFile->Patterns[npat])) npat--;
 	if (!pSndFile->Patterns[npat])
 	{
-		pSndFile->PatternSize[npat] = 64;
-		pSndFile->Patterns[npat] = CSoundFile::AllocatePattern(64, pSndFile->m_nChannels);
+		pSndFile->Patterns.Insert(npat, 64);
 	}
 	
 
@@ -238,10 +238,10 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap)
 			if (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-				if ((nCurOrder > 0) && (nCurOrder < MAX_ORDERS) && (m_nPattern == pSndFile->Order[nCurOrder]))
+				if ((nCurOrder > 0) && (nCurOrder < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[nCurOrder]))
 				{
 					UINT nPrevPat = pSndFile->Order[nCurOrder-1];
-					if ((nPrevPat < MAX_PATTERNS) && (pSndFile->PatternSize[nPrevPat]))
+					if ((nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nPrevPat]))
 					{
 						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nCurOrder-1);
 						if (SetCurrentPattern(nPrevPat)) return SetCurrentRow(pSndFile->PatternSize[nPrevPat]-1);
@@ -264,10 +264,10 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap)
 			if (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-				if ((nCurOrder+1 < MAX_ORDERS) && (m_nPattern == pSndFile->Order[nCurOrder]))
+				if ((nCurOrder+1 < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[nCurOrder]))
 				{
 					UINT nNextPat = pSndFile->Order[nCurOrder+1];
-					if ((nNextPat < MAX_PATTERNS) && (pSndFile->PatternSize[nNextPat]))
+					if ((nNextPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nNextPat]))
 					{
 						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nCurOrder+1);
 						if (SetCurrentPattern(nNextPat)) return SetCurrentRow(0);
@@ -1234,7 +1234,7 @@ void CViewPattern::OnMouseMove(UINT, CPoint point)
 	{
 		CModDoc *pModDoc = GetDocument();
 		DWORD dwPos = GetPositionFromPoint(point);
-		if ((pModDoc) && (m_nPattern < MAX_PATTERNS))
+		if ((pModDoc) && (m_nPattern < pModDoc->GetSoundFile()->Patterns.Size()))
 		{
 			UINT row = dwPos >> 16;
 			UINT max = pModDoc->GetSoundFile()->PatternSize[m_nPattern];
@@ -1685,7 +1685,7 @@ void CViewPattern::OnEditFindNext()
 	if (m_dwFindFlags & PATSEARCH_FULLSEARCH)
 	{
 		nPatStart = 0;
-		nPatEnd = MAX_PATTERNS;
+		nPatEnd = pSndFile->Patterns.Size();
 	}
 	if (m_bContinueSearch)
 	{
@@ -2516,7 +2516,7 @@ void CViewPattern::OnEditUndo()
 	if (pModDoc && IsEditingEnabled_bmsg())
 	{
 		UINT nPat = pModDoc->DoUndo();
-		if (nPat < MAX_PATTERNS)
+		if (nPat < pModDoc->GetSoundFile()->Patterns.Size())
 		{
 			pModDoc->SetModified();
 			if (nPat != m_nPattern)
@@ -2719,12 +2719,12 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 
 		if ((m_dwStatus & (PATSTATUS_FOLLOWSONG|PATSTATUS_DRAGVSCROLL|PATSTATUS_DRAGHSCROLL|PATSTATUS_MOUSEDRAGSEL)) == PATSTATUS_FOLLOWSONG)
 		{
-			if (nPat < MAX_PATTERNS)
+			if (nPat < pSndFile->Patterns.Size())
 			{
 				if (nPat != m_nPattern || updateOrderList)
 				{
 					if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
-					if (nOrd < MAX_ORDERS) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
+					if (nOrd < pSndFile->Order.size()) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
 					updateOrderList = false;
 				}
 				if (nRow != m_nRow)	SetCurrentRow((nRow < pSndFile->PatternSize[nPat]) ? nRow : 0);
@@ -3233,13 +3233,13 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEndAbsolute:		SetCurrentColumn(((pSndFile->m_nChannels-1) << 3) | 4); if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1); return wParam;
 
 		case kcNextPattern:	{	UINT n = m_nPattern + 1;
-            					while ((n < MAX_PATTERNS) && (!pSndFile->Patterns[n])) n++;
-								SetCurrentPattern((n < MAX_PATTERNS) ? n : 0);
+            					while ((n < pSndFile->Patterns.Size()) && (!pSndFile->Patterns[n])) n++;
+								SetCurrentPattern((n < pSndFile->Patterns.Size()) ? n : 0);
 								int currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 								int newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, true);
 								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
 								return wParam; }
-		case kcPrevPattern: {	UINT n = (m_nPattern) ? m_nPattern - 1 : MAX_PATTERNS-1;
+		case kcPrevPattern: {	UINT n = (m_nPattern) ? m_nPattern - 1 : pSndFile->Patterns.Size()-1;
 								while ((n > 0) && (!pSndFile->Patterns[n])) n--;
 								SetCurrentPattern(n);
 								int currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);

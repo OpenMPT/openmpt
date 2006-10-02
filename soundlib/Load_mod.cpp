@@ -260,8 +260,8 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	pMagic = (PMODMAGIC)(lpStream+dwMemPos);
 	dwMemPos += sizeof(MODMAGIC);
 	if (m_nSamples == 15) dwMemPos -= 4;
-	memset(Order, 0,sizeof(Order));
-	memcpy(Order, pMagic->Orders, 128);
+	Order.assign(Order.size(), 0);
+	Order.ReadAsByte(pMagic->Orders, 128, 128);
 
 	UINT nbp, nbpbuggy, nbpbuggy2, norders;
 
@@ -324,8 +324,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		if (ipat < MAX_PATTERNS)
 		{
-			if ((Patterns[ipat] = AllocatePattern(64, m_nChannels)) == NULL) break;
-			PatternSize[ipat] = 64;
+			if(Patterns.Insert(ipat, 64)) break;
 			if (dwMemPos + m_nChannels*256 >= dwMemLength) break;
 			MODCOMMAND *m = Patterns[ipat];
 			LPCBYTE p = lpStream + dwMemPos;
@@ -437,7 +436,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 	bTab[1] = m_nRestartPos;
 	fwrite(bTab, 2, 1, f);
 	// Writing pattern list
-	if (norders) memcpy(ord, Order, norders);
+	if (norders) Order.WriteToByteArray(ord, norders, 128);
 
 	fwrite(ord, 128, 1, f);
 	// Writing signature

@@ -102,7 +102,7 @@ BOOL CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 		ChnSettings[ich].nVolume = 64;
 	}
 	// Reading pattern order
-	memcpy(Order, lpStream + dwMemPos, pmh->lastorder+1);
+	Order.ReadAsByte(lpStream+dwMemPos, pmh->lastorder+1, dwMemLength-dwMemPos);
 	dwMemPos += 128;
 	// Reading Patterns
 	LPCBYTE pTracks = lpStream + dwMemPos;
@@ -110,8 +110,7 @@ BOOL CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 	LPWORD pSeq = (LPWORD)(lpStream + dwMemPos);
 	for (UINT pat=0; pat<=pmh->lastpattern; pat++)
 	{
-		PatternSize[pat] = 64;
-		if ((Patterns[pat] = AllocatePattern(64, m_nChannels)) == NULL) break;
+		if(Patterns.Insert(pat, 64)) break;
 		for (UINT n=0; n<32; n++) if ((pSeq[n]) && (pSeq[n] <= pmh->numtracks) && (n < m_nChannels))
 		{
 			LPCBYTE p = pTracks + 192 * (pSeq[n]-1);

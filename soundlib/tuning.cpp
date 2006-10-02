@@ -8,7 +8,7 @@ const CTuning::STEPTYPE CTuningRTI::s_RatioTableSizeDefault(256);
 //CTuningRTi-statics
 const CTuning::SERIALIZATION_MARKER CTuningRTI::s_SerializationBeginMarker("CTRTI_B.");
 const CTuning::SERIALIZATION_MARKER CTuningRTI::s_SerializationEndMarker("CTRTI_E.");
-const CTuning::SERIALIZATION_VERSION CTuningRTI::s_SerializationVersion(1);
+const CTuning::SERIALIZATION_VERSION CTuningRTI::s_SerializationVersion(2);
 
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -19,9 +19,7 @@ const CTuning::SERIALIZATION_VERSION CTuningRTI::s_SerializationVersion(1);
 TODOS:
 -Handling of const status could be improved(e.g. case one can
  change ratios, but not type)
--The ratiovalue copying is general enough that it could be moved to base class.
--Check how tuning name handles things if ratio periodic/tet 
- tuning has note mapped outside first period.
+-Finetune improvements
 */
 
 CTuningRTI::CTuningRTI(const CTuning*& pTun)
@@ -30,30 +28,19 @@ CTuningRTI::CTuningRTI(const CTuning*& pTun)
 	SetDummyValues();
 	if(pTun)
 	{
-		//For now, only copying ratio values from *pTun
-		//to *this without checking validity range and
-		//not taking finetuning into account.
-		//TODO: 
-		m_StepMin = s_StepMinDefault;
-		m_RatioTable.resize(s_RatioTableSizeDefault);
-		for(STEPTYPE i = 0; i<m_RatioTable.size(); i++)
-		{
-            m_RatioTable[i]= pTun->GetFrequencyRatio(i+m_StepMin, 0);
-		}
-		m_StepsInPeriod = pTun->GetPeriod();
-		m_PeriodRatio = pTun->GetPeriodRatio();
-		CTuning::operator=(*pTun);
+		CTuning::operator=(*pTun);	
 	}	
 }
 
 void CTuningRTI::SetDummyValues()
 //---------------------------------
 {
-	if(MayEdit(EM_RATIOS))
+	if(MayEdit(EM_MAINRATIOS))
 	{
 		m_RatioTable.clear();
 		m_StepMin = m_StepsInPeriod = 0;
 		m_PeriodRatio = 0;
+		m_RatioTableFine.clear();
 		BelowRatios = AboveRatios = DefaultBARFUNC;
 	}
 }
@@ -62,7 +49,7 @@ void CTuningRTI::SetDummyValues()
 bool CTuningRTI::CreateRatioTableRP(const vector<RATIOTYPE>& v, const RATIOTYPE r)
 //------------------------------------------------------------------------------
 {
-	if(!MayEdit(EM_RATIOS) || 
+	if(!MayEdit(EM_MAINRATIOS) || 
 		(!MayEdit(EM_TYPE) && GetType() != TT_RATIOPERIODIC))
 		return true;
 
@@ -96,58 +83,54 @@ bool CTuningRTI::CreateRatioTableRP(const vector<RATIOTYPE>& v, const RATIOTYPE 
 }
 
 
-bool CTuningRTI::CreateRatioPeriodic(const vector<RATIOTYPE>& v, const RATIOTYPE& r)
+bool CTuningRTI::ProCreateRatioPeriodic(const vector<RATIOTYPE>& v, const RATIOTYPE& r)
 //---------------------------------------------------------------------
 {
-	if(MayEdit(EM_RATIOS) &&
-		(MayEdit(EM_TYPE) || GetType() == TT_RATIOPERIODIC))
-	{
-		SetType(TT_RATIOPERIODIC);
-		if(CreateRatioTableRP(v, r)) return true;
-		return false;
-	}
-	else
-		return true;
+	if(CreateRatioTableRP(v, r)) return true;
+	else return false;
 }
 
 
-bool CTuningRTI::CreateTET(const STEPTYPE& s, const RATIOTYPE& r)
+bool CTuningRTI::ProCreateTET(const STEPTYPE& s, const RATIOTYPE& r)
 //---------------------------------------------------------------
 {
-	if(MayEdit(EM_RATIOS) &&
-	  (MayEdit(EM_TYPE) || GetType() == TT_TET))
+	if(s <= 0 || r <= 0) return true;
+	SetDummyValues();
+	m_StepMin = s_StepMinDefault;
+	m_StepsInPeriod = s;
+	m_PeriodRatio = r;
+	BelowRatios = AboveRatios = DefaultBARFUNC;
+	const RATIOTYPE stepRatio = pow(r, static_cast<RATIOTYPE>(1)/s);
+
+	m_RatioTable.clear();
+	m_RatioTable.reserve(s_RatioTableSizeDefault);
+	for(STEPTYPE i = 0; i<s_RatioTableSizeDefault; i++)
 	{
-		if(s <= 0 || r <= 0) return true;
-
-		SetDummyValues();
-		m_StepMin = s_StepMinDefault;
-		m_StepsInPeriod = s;
-		m_PeriodRatio = r;
-		SetType(TT_TET);
-		BelowRatios = AboveRatios = DefaultBARFUNC;
-
-		const RATIOTYPE stepRatio = pow(r, 1.0F/s);
-
-		m_RatioTable.clear();
-		m_RatioTable.reserve(s_RatioTableSizeDefault);
-		for(STEPTYPE i = 0; i<s_RatioTableSizeDefault; i++)
-		{
-			m_RatioTable.push_back(pow(stepRatio, i + m_StepMin));
-		}
-		return false;
+		m_RatioTable.push_back(pow(stepRatio, i + m_StepMin));
 	}
-	return true;
+	return false;
 }
 
 string CTuningRTI::GetNoteName(const STEPTYPE& x) const
 //-----------------------------------------------------
 {
-	if(m_StepsInPeriod < 1)
+	if(GetPeriod() < 1)
 	{
 		return CTuning::GetNoteName(x);
 	}
-	else
+	else //Tuning periodic.
 	{
+		//First checking whether note is not within the 
+		//first period and whether it exists in the map - always
+		//using specifically given notename instead of possible
+		//tuning specific naming style.
+		if(x >= GetPeriod() || x < 0)
+		{
+			NNM_CITER nmi = m_NoteNameMap.find(x);
+			if(nmi != m_NoteNameMap.end())
+				return nmi->second;
+		}
+
 		const STEPTYPE pos = ((x % m_StepsInPeriod) + m_StepsInPeriod) % m_StepsInPeriod;
 		const STEPTYPE middlePeriodNumber = 5;
 		string rValue;
@@ -178,7 +161,7 @@ string CTuningRTI::GetNoteName(const STEPTYPE& x) const
 CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::SerializeBinary(ostream& outStrm, const int mode) const
 //-------------------------------------------------------
 {
-	if(outStrm.fail())
+	if(!outStrm.good())
 		return SERIALIZATION_FAILURE;
 
 	if(!(mode & NO_SERIALIZATION_MARKERS))
@@ -192,11 +175,15 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::SerializeBinary(ostream& outStrm,
 	//Baseclass serialization
 	if(CTuning::SerializeBinary(outStrm) == SERIALIZATION_FAILURE) return SERIALIZATION_FAILURE;
 	
-	//Vector data
+	//Main Ratios
 	if(VectorToBinaryStream(outStrm, m_RatioTable))
 		return SERIALIZATION_FAILURE;
+
+	//Fine ratios
+	if(VectorToBinaryStream(outStrm, m_RatioTableFine))
+		return SERIALIZATION_FAILURE;
 	
-	//StepMin
+	//m_StepMin
 	outStrm.write(reinterpret_cast<const char*>(&m_StepMin), sizeof(m_StepMin));
 
 	//m_StepsInPeriod
@@ -204,7 +191,6 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::SerializeBinary(ostream& outStrm,
 
 	//m_PeriodRatio
 	outStrm.write(reinterpret_cast<const char*>(&m_PeriodRatio), sizeof(m_PeriodRatio));
-
 
 	//TODO: BARFUNC serialization.
 
@@ -223,7 +209,7 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::SerializeBinary(ostream& outStrm,
 CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::UnSerializeBinary(istream& inStrm, const int mode)
 //-------------------------------------------------------------------------------
 {
-	if(inStrm.fail())
+	if(!inStrm.good())
 		return SERIALIZATION_FAILURE;
 
 	SERIALIZATION_MARKER begin;
@@ -247,8 +233,9 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::UnSerializeBinary(istream& inStrm
 	
 	//Version
 	inStrm.read(reinterpret_cast<char*>(&version), sizeof(version));
-    if(version != s_SerializationVersion) return SERIALIZATION_FAILURE;
-
+	if(version != 1 && version != s_SerializationVersion)
+		return SERIALIZATION_FAILURE;
+	
 	//Baseclass Unserialization
 	if(CTuning::UnSerializeBinary(inStrm) == SERIALIZATION_FAILURE)
 		return SERIALIZATION_FAILURE;
@@ -256,6 +243,14 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::UnSerializeBinary(istream& inStrm
 	//Ratiotable
 	if(VectorFromBinaryStream(inStrm, m_RatioTable))
 		return SERIALIZATION_FAILURE;
+
+	//Ratiotable fine
+	if(version > 1)
+	{
+		if(VectorFromBinaryStream(inStrm, m_RatioTableFine))
+			return SERIALIZATION_FAILURE;
+	}
+	
 
 	//m_StepMin
 	inStrm.read(reinterpret_cast<char*>(&m_StepMin), sizeof(m_StepMin));
@@ -275,6 +270,7 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::UnSerializeBinary(istream& inStrm
 
 	if(inStrm.good()) return SERIALIZATION_SUCCESS;
 	else return SERIALIZATION_FAILURE;
+
 }
 
 
@@ -284,56 +280,107 @@ CTuningRTI::RATIOTYPE CTuningRTI::DefaultBARFUNC(const STEPTYPE&, const STEPTYPE
 	return 1;
 }
 
-
-CTuning::RATIOTYPE CTuningRTI::GetFrequencyRatio(const STEPTYPE& stepsFromCentre, const STEPTYPE& finetune) const
-//----------------------------------------------------------------------------------------------------
+//Without finetune
+CTuning::RATIOTYPE CTuningRTI::GetFrequencyRatio(const STEPTYPE& stepsFromCentre) const
+//-------------------------------------------------------------------------------------
 {
-	if(stepsFromCentre < m_StepMin) return BelowRatios(stepsFromCentre, finetune);
-	if(stepsFromCentre >= m_StepMin + static_cast<RATIOTYPE>(m_RatioTable.size())) return AboveRatios(stepsFromCentre, finetune);
+	if(stepsFromCentre < m_StepMin) return BelowRatios(stepsFromCentre,0);
+	if(stepsFromCentre >= m_StepMin + static_cast<RATIOTYPE>(m_RatioTable.size())) return AboveRatios(stepsFromCentre,0);
 	return m_RatioTable[stepsFromCentre - m_StepMin];
 }
 
-bool CTuningRTI::SetRatio(const STEPTYPE& s, const RATIOTYPE& r)
+
+//With finetune
+CTuning::RATIOTYPE CTuningRTI::GetFrequencyRatio(const STEPTYPE& baseStep, const FINESTEPTYPE& baseFineStep) const
+//----------------------------------------------------------------------------------------------------
+{
+	if(GetFineStepCount() < 1)
+		return GetFrequencyRatio(baseStep);
+
+	//If finestep count is more than the number of finesteps between notes,
+	//step is increased. So first figuring out what step and fineStep values to
+	//actually use. Interpreting finestep -1 on note x so that it is the same as 
+	//finestep GetFineStepCount()-1 on note x-1.
+	STEPTYPE stepsFromCentre;
+	FINESTEPTYPE fineStep;
+	if(baseFineStep >= 0)
+	{
+		stepsFromCentre = baseStep + baseFineStep / GetFineStepCount();
+		fineStep = baseFineStep % GetFineStepCount();
+	}
+	else
+	{
+		stepsFromCentre = baseStep + (baseFineStep + 1) / GetFineStepCount() - 1;
+		fineStep = (GetFineStepCount() + baseFineStep % GetFineStepCount()) % GetFineStepCount();
+	}
+	
+    if(stepsFromCentre < m_StepMin) return BelowRatios(stepsFromCentre, fineStep);
+	if(stepsFromCentre >= m_StepMin + static_cast<RATIOTYPE>(m_RatioTable.size())) return AboveRatios(stepsFromCentre, fineStep);
+
+	return m_RatioTable[stepsFromCentre - m_StepMin] * GetFineStepRatio(fineStep);
+}
+
+
+bool CTuningRTI::ProSetRatio(const STEPTYPE& s, const RATIOTYPE& r)
 //--------------------------------------------------------------
 {
-	if(MayEdit(EM_RATIOS))
+	//Creating ratio table if doesn't exist.
+	if(m_RatioTable.empty())
 	{
-		//Creating ratio table if doesnt exist.
-		if(m_RatioTable.empty())
-		{
-			m_RatioTable.assign(s_RatioTableSizeDefault, 1);
-			m_StepMin = s_StepMinDefault;
-		}
-
-		//If note is not within the table, at least for now
-		//simply don't change anything.
-		if(!IsNoteInTable(s))
-			return true;
-		
-		m_RatioTable[s - m_StepMin] = fabs(r);
-		
-		SetType(TT_GENERAL);
-		//Not checking whether the tuning type changed;
-		//simply setting it to general
-
-		return false;
+		m_RatioTable.assign(s_RatioTableSizeDefault, 1);
+		m_StepMin = s_StepMinDefault;
 	}
-	return true;
+
+	//If note is not within the table, at least for now
+	//simply don't change anything.
+	if(!IsNoteInTable(s))
+		return true;
+	
+	m_RatioTable[s - m_StepMin] = fabs(r);
+	
+	return false;
 }
 
-void CTuningRTI::SetType(const CTUNINGTYPE& ct)
-//------------------------
+
+CTuningRTI::VRPAIR CTuningRTI::SetValidityRange(const VRPAIR&)
+//---------------------------------------------------------------
 {
-	if(!MayEdit(EM_TYPE))
-		return;
-
-	if(ct == TT_GENERAL)
-	{
-		m_StepsInPeriod = 0;
-		m_PeriodRatio = 0;
-	}
-	CTuning::SetType(ct);
+	//For now setting default regardless of demand:
+	//TODO: Make it work properly.
+	m_StepMin = s_StepMinDefault;
+	m_RatioTable.resize(s_RatioTableSizeDefault, 1);
+	return GetValidityRange();
 }
 
+CTuningRTI::FINESTEPTYPE CTuningRTI::ProSetFineStepCount(const STEPTYPE& s)
+//-----------------------------------------------------
+{
+	STEPTYPE fineSteps = s;
+	if(fineSteps < 0) //Interpreting this as 'use default'
+		fineSteps = 16; //16 is the default here.
+
+	if(fineSteps == 0)
+	{
+		m_RatioTableFine.clear();
+		return GetFineStepCount();
+	}
+
+	if(DoesTypeInclude(TT_RATIOPERIODIC))
+	{
+		m_RatioTableFine.resize(fineSteps);
+		const RATIOTYPE rFineStep = pow(GetFrequencyRatio(1) / GetFrequencyRatio(0), static_cast<RATIOTYPE>(1)/fineSteps);
+		for(STEPTYPE i = 0; i<fineSteps; i++)
+			m_RatioTableFine[i] = pow(rFineStep, i);
+		return GetFineStepCount();
+		//NOTE: Above is actually intented for TET only, and thus may be totally
+		//senseless for many Ratioperiodics, but that'll do for now - functionality
+		//for better finetune support(e.g. own ratios for every step and for every
+		//finestep) for non-TET-tunings is something that could be implemented some
+		//day.
+	}
+
+	m_RatioTableFine.clear();
+	return GetFineStepCount();
+}
 
 

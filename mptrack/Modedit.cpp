@@ -42,7 +42,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	}
 
 	// Check if conversion to 64 rows is necessary
-	for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++)
+	for (UINT ipat=0; ipat<m_SndFile.Patterns.Size(); ipat++)
 	{
 		if ((m_SndFile.Patterns[ipat]) && (m_SndFile.PatternSize[ipat] != 64)) b64++;
 	}
@@ -63,29 +63,9 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		// Resizing all patterns to 64 rows
 		UINT nPatCvt = 0;
 		UINT i = 0;
-		for (i=0; i<MAX_PATTERNS; i++) if ((m_SndFile.Patterns[i]) && (m_SndFile.PatternSize[i] != 64))
+		for (i=0; i<m_SndFile.Patterns.Size(); i++) if ((m_SndFile.Patterns[i]) && (m_SndFile.PatternSize[i] != 64))
 		{
-			if (m_SndFile.PatternSize[i] < 64)
-			{
-				MODCOMMAND *p = CSoundFile::AllocatePattern(64, m_SndFile.m_nChannels);
-				if (p)
-				{
-					memcpy(p, m_SndFile.Patterns[i], m_SndFile.m_nChannels*m_SndFile.PatternSize[i]*sizeof(MODCOMMAND));
-					CSoundFile::FreePattern(m_SndFile.Patterns[i]);
-					m_SndFile.Patterns[i] = p;
-					m_SndFile.PatternSize[i] = 64;
-				} else AddToLog("ERROR: Not enough memory to resize pattern!\n");
-			} else
-			{
-				MODCOMMAND *pnew = CSoundFile::AllocatePattern(64, m_SndFile.m_nChannels);
-				if (pnew)
-				{
-					memcpy(pnew, m_SndFile.Patterns[i], m_SndFile.m_nChannels*64*sizeof(MODCOMMAND));
-					CSoundFile::FreePattern(m_SndFile.Patterns[i]);
-					m_SndFile.Patterns[i] = pnew;
-				}
-				m_SndFile.PatternSize[i] = 64;
-			}
+			m_SndFile.Patterns[i].Resize(64);
 			if (b64 < 5)
 			{
 				wsprintf(s, "WARNING: Pattern %d resized to 64 rows\n", i);
@@ -116,7 +96,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	// Adjust pattern data
 	if ((m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) && (nNewType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
 	{
-		for (UINT nPat=0; nPat<MAX_PATTERNS; nPat++) if (m_SndFile.Patterns[nPat])
+		for (UINT nPat=0; nPat<m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 		{
 			MODCOMMAND *m = m_SndFile.Patterns[nPat];
 			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
@@ -172,7 +152,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	} else
 	if ((m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM)))
 	{
-		for (UINT nPat=0; nPat<MAX_PATTERNS; nPat++) if (m_SndFile.Patterns[nPat])
+		for (UINT nPat=0; nPat<m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 		{
 			MODCOMMAND *m = m_SndFile.Patterns[nPat];
 			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len--; m++)
@@ -295,7 +275,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		AddToLog("WARNING: Samples above 31 will be lost when saving this file as MOD!\n");
 	}
 	BEGIN_CRITICAL();
-	m_SndFile.m_nType = nNewType;
+	m_SndFile.ChangeModTypeTo(nNewType);
 	if ((!(nNewType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_XM))) && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
 	{
 		AddToLog("WARNING: Linear Frequency Slides not supported by the new format.\n");
@@ -368,7 +348,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 		for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--) //rewbs.removeChanWindowCleanup
 		{
 			rem.m_bChnMask[iRst] = TRUE;
-			for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++) if (m_SndFile.Patterns[ipat])
+			for (UINT ipat=0; ipat<m_SndFile.Patterns.Size(); ipat++) if (m_SndFile.Patterns[ipat])
 			{
 				MODCOMMAND *p = m_SndFile.Patterns[ipat] + iRst;
 				UINT len = m_SndFile.PatternSize[ipat];
@@ -395,7 +375,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 		BeginWaitCursor();
 		// Increasing number of channels
 		BEGIN_CRITICAL();
-		for (UINT i=0; i<MAX_PATTERNS; i++) if (m_SndFile.Patterns[i])
+		for (UINT i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
 		{
 			MODCOMMAND *p = m_SndFile.Patterns[i];
 			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.PatternSize[i], nNewChannels);
@@ -447,7 +427,7 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 
 		BeginWaitCursor();
 		BEGIN_CRITICAL();
-		for (i=0; i<MAX_PATTERNS; i++) if (m_SndFile.Patterns[i])
+		for (i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
 		{
 			MODCOMMAND *p = m_SndFile.Patterns[i];
 			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.PatternSize[i], nRemainingChannels);
@@ -495,102 +475,36 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 		return FALSE;
 }
 
-BOOL CModDoc::ResizePattern(UINT nPattern, UINT nRows)
-//----------------------------------------------------
-{
-// -> CODE#0008
-// -> DESC="#define to set pattern size"
-//	if ((nPattern >= MAX_PATTERNS) || (nRows < 2) || (nRows > 256)) return FALSE;
-	if ((nPattern >= MAX_PATTERNS) || (nRows < 2) || (nRows > MAX_PATTERN_ROWS)) return FALSE;
-// -! BEHAVIOUR_CHANGE#0008
-	if (m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_S3M)) nRows = 64;
-	if (nRows == m_SndFile.PatternSize[nPattern]) return TRUE;
-	BeginWaitCursor();
-	BEGIN_CRITICAL();
-	if (!m_SndFile.Patterns[nPattern])
-	{
-		m_SndFile.Patterns[nPattern] = CSoundFile::AllocatePattern(nRows, m_SndFile.m_nChannels);
-		m_SndFile.PatternSize[nPattern] = nRows;
-	} else
-	if (nRows > m_SndFile.PatternSize[nPattern])
-	{
-		MODCOMMAND *p = CSoundFile::AllocatePattern(nRows, m_SndFile.m_nChannels);
-		if (p)
-		{
-			memcpy(p, m_SndFile.Patterns[nPattern], m_SndFile.m_nChannels*m_SndFile.PatternSize[nPattern]*sizeof(MODCOMMAND));
-			CSoundFile::FreePattern(m_SndFile.Patterns[nPattern]);
-			m_SndFile.Patterns[nPattern] = p;
-			m_SndFile.PatternSize[nPattern] = nRows;
-		}
-	} else
-	{
-		BOOL bOk = TRUE;
-		MODCOMMAND *p = m_SndFile.Patterns[nPattern];
-		UINT ndif = (m_SndFile.PatternSize[nPattern] - nRows) * m_SndFile.m_nChannels;
-		UINT npos = nRows * m_SndFile.m_nChannels;
-		for (UINT i=0; i<ndif; i++)
-		{
-			if (*((DWORD *)(p+i+npos)))
-			{
-				bOk = FALSE;
-				break;
-			}
-		}
-		if (!bOk)
-		{
-			END_CRITICAL();
-			EndWaitCursor();
-			if (CMainFrame::GetMainFrame()->MessageBox("Data at the end of the pattern will be lost.\nDo you want to continue",
-								"Shrink Pattern", MB_YESNO|MB_ICONQUESTION) == IDYES) bOk = TRUE;
-			BeginWaitCursor();
-			BEGIN_CRITICAL();
-		}
-		if (bOk)
-		{
-			MODCOMMAND *pnew = CSoundFile::AllocatePattern(nRows, m_SndFile.m_nChannels);
-			if (pnew)
-			{
-				memcpy(pnew, m_SndFile.Patterns[nPattern], m_SndFile.m_nChannels*nRows*sizeof(MODCOMMAND));
-				CSoundFile::FreePattern(m_SndFile.Patterns[nPattern]);
-				m_SndFile.Patterns[nPattern] = pnew;
-				m_SndFile.PatternSize[nPattern] = nRows;
-			}
-		}
-	}
-	END_CRITICAL();
-	EndWaitCursor();
-	SetModified();
-	return (nRows == m_SndFile.PatternSize[nPattern]) ? TRUE : FALSE;
-}
-
 
 BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 //----------------------------------------------
 {
-	UINT nPatMap[MAX_PATTERNS];
-	UINT nPatRows[MAX_PATTERNS];
-	MODCOMMAND *pPatterns[MAX_PATTERNS];
-	BOOL bPatUsed[MAX_PATTERNS];
+	const UINT maxPatIndex = m_SndFile.Patterns.Size();
+	const UINT maxOrdIndex = m_SndFile.Order.size();
+	vector<UINT> nPatMap(maxPatIndex, 0);
+	vector<UINT> nPatRows(maxPatIndex, 0);
+	vector<MODCOMMAND*> pPatterns(maxPatIndex, NULL);
+	vector<BOOL> bPatUsed(maxPatIndex, false);
+	
 	CHAR s[512];
 	BOOL bEnd = FALSE, bReordered = FALSE;
 	UINT nPatRemoved = 0, nMinToRemove, nPats;
 	
 	BeginWaitCursor();
-	memset(bPatUsed, 0, sizeof(bPatUsed));
 	UINT maxpat = 0;
-	for (UINT iord=0; iord<MAX_ORDERS; iord++)
+	for (UINT iord=0; iord<maxOrdIndex; iord++)
 	{
 		UINT n = m_SndFile.Order[iord];
-		if (n < MAX_PATTERNS)
+		if (n < maxPatIndex)
 		{
 			if (n >= maxpat) maxpat = n+1;
 			if (!bEnd) bPatUsed[n] = TRUE;
-		} else if (n == 0xFF) bEnd = TRUE;
+		} else if (n == m_SndFile.Patterns.GetInvalidIndex()) bEnd = TRUE;
 	}
 	nMinToRemove = 0;
 	if (!bRemove)
 	{
-		UINT imax=MAX_PATTERNS;
+		UINT imax = maxPatIndex;
 		while (imax > 0)
 		{
 			imax--;
@@ -598,7 +512,7 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 		}
 		nMinToRemove = imax+1;
 	}
-	for (UINT ipat=maxpat; ipat<MAX_PATTERNS; ipat++) if ((m_SndFile.Patterns[ipat]) && (ipat >= nMinToRemove))
+	for (UINT ipat=maxpat; ipat<maxPatIndex; ipat++) if ((m_SndFile.Patterns[ipat]) && (ipat >= nMinToRemove))
 	{
 		MODCOMMAND *m = m_SndFile.Patterns[ipat];
 		UINT ncmd = m_SndFile.m_nChannels * m_SndFile.PatternSize[ipat];
@@ -606,17 +520,13 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 		{
 			if ((m[i].note) || (m[i].instr) || (m[i].volcmd) || (m[i].command)) goto NotEmpty;
 		}
-		BEGIN_CRITICAL();
-		m_SndFile.PatternSize[ipat] = 0;
-		m_SndFile.FreePattern(m_SndFile.Patterns[ipat]);
-		m_SndFile.Patterns[ipat] = NULL;
+		m_SndFile.Patterns.Remove(ipat);
 		nPatRemoved++;
-		END_CRITICAL();
 	NotEmpty:
 		;
 	}
 	UINT bWaste = 0;
-	for (UINT ichk=0; ichk<MAX_PATTERNS; ichk++)
+	for (UINT ichk=0; ichk < maxPatIndex; ichk++)
 	{
 		if ((m_SndFile.Patterns[ichk]) && (!bPatUsed[ichk])) bWaste++;
 	}
@@ -627,34 +537,32 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 		if (CMainFrame::GetMainFrame()->MessageBox(s, "Pattern Cleanup", MB_YESNO) != IDYES) return TRUE;
 		BeginWaitCursor();
 	}
-	memset(nPatRows, 0, sizeof(nPatRows));
-	memset(pPatterns, 0, sizeof(pPatterns));
-	for (UINT irst=0; irst<MAX_PATTERNS; irst++) nPatMap[irst] = 0xFFFF;
+	for (UINT irst=0; irst<maxPatIndex; irst++) nPatMap[irst] = 0xFFFF;
 	nPats = 0;
 	UINT imap = 0;
-	for (imap=0; imap<MAX_ORDERS; imap++)
+	for (imap=0; imap<maxOrdIndex; imap++)
 	{
 		UINT n = m_SndFile.Order[imap];
-		if (n < MAX_PATTERNS)
+		if (n < maxPatIndex)
 		{
-			if (nPatMap[n] > MAX_PATTERNS) nPatMap[n] = nPats++;
+			if (nPatMap[n] > maxPatIndex) nPatMap[n] = nPats++;
 			m_SndFile.Order[imap] = nPatMap[n];
 		} else if (n == 0xFF) break;
 	}
 	// Add unused patterns at the end
 	if ((!bRemove) || (!bWaste))
 	{
-		for (UINT iadd=0; iadd<MAX_PATTERNS; iadd++)
+		for (UINT iadd=0; iadd<maxPatIndex; iadd++)
 		{
-			if ((m_SndFile.Patterns[iadd]) && (nPatMap[iadd] >= MAX_PATTERNS))
+			if ((m_SndFile.Patterns[iadd]) && (nPatMap[iadd] >= maxPatIndex))
 			{
 				nPatMap[iadd] = nPats++;
 			}
 		}
 	}
-	while (imap < MAX_ORDERS)
+	while (imap < maxOrdIndex)
 	{
-		m_SndFile.Order[imap++] = 0xFF;
+		m_SndFile.Order[imap++] = m_SndFile.Patterns.GetInvalidIndex();
 	}
 	BEGIN_CRITICAL();
 	// Reorder patterns & Delete unused patterns
@@ -663,10 +571,10 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 		LPSTR lpszpatnames = m_SndFile.m_lpszPatternNames;
 		m_SndFile.m_nPatternNames = 0;
 		m_SndFile.m_lpszPatternNames = NULL;
-		for (UINT i=0; i<MAX_PATTERNS; i++)
+		for (UINT i=0; i<maxPatIndex; i++)
 		{
 			UINT k = nPatMap[i];
-			if (k < MAX_PATTERNS)
+			if (k < maxPatIndex)
 			{
 				if (i != k) bReordered = TRUE;
 				// Remap pattern names
@@ -686,16 +594,13 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 			} else
 			if (m_SndFile.Patterns[i])
 			{
-				m_SndFile.FreePattern(m_SndFile.Patterns[i]);
-				m_SndFile.Patterns[i] = NULL;
-				m_SndFile.PatternSize[i] = 0;
+				m_SndFile.Patterns.Remove(i);
 				nPatRemoved++;
 			}
 		}
-		for (UINT j=0; j<MAX_PATTERNS;j++)
+		for (UINT j=0; j<maxPatIndex;j++)
 		{
-			m_SndFile.PatternSize[j] = nPatRows[j];
-			m_SndFile.Patterns[j] = pPatterns[j];
+			m_SndFile.Patterns[j].SetData(pPatterns[j], nPatRows[j]);
 		}
 	}
 	END_CRITICAL();
@@ -719,7 +624,7 @@ BOOL CModDoc::ConvertInstrumentsToSamples()
 //-----------------------------------------
 {
 	if (!m_SndFile.m_nInstruments) return FALSE;
-	for (UINT i=0; i<MAX_PATTERNS; i++) if (m_SndFile.Patterns[i])
+	for (UINT i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
 	{
 		MODCOMMAND *p = m_SndFile.Patterns[i];
 		for (UINT j=m_SndFile.m_nChannels*m_SndFile.PatternSize[i]; j; j--, p++) if (p->instr)
@@ -765,7 +670,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 	if (m_SndFile.m_nInstruments)
 	{
 		memset(bIns, 0, sizeof(bIns));
-		for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++)
+		for (UINT ipat=0; ipat<m_SndFile.Patterns.Size(); ipat++)
 		{
 			MODCOMMAND *p = m_SndFile.Patterns[ipat];
 			if (p)
@@ -898,7 +803,7 @@ BOOL CModDoc::RemoveUnusedPlugs()
 		}
 
 		//all outputs of used plugins count as used
-		if (usedmap[nPlug]==true) {
+		if (usedmap[nPlug]!=0) {
 			if (m_SndFile.m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80) {
 				int output = m_SndFile.m_MixPlugins[nPlug].Info.dwOutputRouting & 0x7f;
 				usedmap[output]=true;
@@ -1021,7 +926,7 @@ BOOL CModDoc::RemoveUnusedInstruments()
 		END_CRITICAL();
 		if (nSwap > 0)
 		{
-			for (UINT iPat=0; iPat<MAX_PATTERNS; iPat++) if (m_SndFile.Patterns[iPat])
+			for (UINT iPat=0; iPat<m_SndFile.Patterns.Size(); iPat++) if (m_SndFile.Patterns[iPat])
 			{
 				MODCOMMAND *p = m_SndFile.Patterns[iPat];
 				UINT nLen = m_SndFile.m_nChannels * m_SndFile.PatternSize[iPat];
@@ -1139,28 +1044,30 @@ BOOL CModDoc::AdjustEndOfSample(UINT nSample)
 LONG CModDoc::InsertPattern(LONG nOrd, UINT nRows)
 //------------------------------------------------
 {
-	UINT maxpat = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 128 : MAX_PATTERNS;
-	UINT i = 0;
-	for (i=0; i<maxpat; i++)
-	{
-		if (!m_SndFile.Patterns[i]) break;
-	}
-	if (i >= maxpat)
-	{
-		ErrorBox(IDS_ERR_TOOMANYPAT, CMainFrame::GetMainFrame());
+	const int i = m_SndFile.Patterns.Insert(nRows);
+	if(i < 0)
 		return -1;
+
+	//Increasing orderlist size if given order is beyond current limit,
+	//or if the last order already has a pattern.
+	if((nOrd == m_SndFile.Order.size() ||
+		m_SndFile.Order.back() < m_SndFile.Patterns.Size() ) &&
+		m_SndFile.Order.size() < m_SndFile.Order.GetOrderNumberLimitMax())
+	{
+		m_SndFile.Order.push_back(m_SndFile.Patterns.GetInvalidIndex());
 	}
-	for (UINT j=0; j<MAX_ORDERS; j++)
+
+	for (UINT j=0; j<m_SndFile.Order.size(); j++)
 	{
 		if (m_SndFile.Order[j] == i) break;
-		if (m_SndFile.Order[j] == 0xFF)
+		if (m_SndFile.Order[j] == m_SndFile.Patterns.GetInvalidIndex())
 		{
 			m_SndFile.Order[j] = i;
 			break;
 		}
 		if ((nOrd >= 0) && (j == (UINT)nOrd))
 		{
-			for (UINT k=MAX_ORDERS-1; k>j; k--)
+			for (UINT k=m_SndFile.Order.size()-1; k>j; k--)
 			{
 				m_SndFile.Order[k] = m_SndFile.Order[k-1];
 			}
@@ -1168,13 +1075,8 @@ LONG CModDoc::InsertPattern(LONG nOrd, UINT nRows)
 			break;
 		}
 	}
-	if (nRows < 4) nRows = 64;
-	if (!m_SndFile.Patterns[i])
-	{
-		m_SndFile.PatternSize[i] = nRows;
-		m_SndFile.Patterns[i] = CSoundFile::AllocatePattern(nRows, m_SndFile.m_nChannels);
-		SetModified();
-	}
+
+	SetModified();
 	return i;
 }
 
@@ -1342,14 +1244,14 @@ void CModDoc::InitializeInstrument(INSTRUMENTHEADER *penv, UINT nsample)
 BOOL CModDoc::RemoveOrder(UINT n)
 //-------------------------------
 {
-	if (n < MAX_ORDERS)
+	if (n < m_SndFile.Order.size())
 	{
 		BEGIN_CRITICAL();
-		for (UINT i=n; i<MAX_ORDERS-1; i++)
+		for (UINT i=n; i<m_SndFile.Order.size()-1; i++)
 		{
 			m_SndFile.Order[i] = m_SndFile.Order[i+1];
 		}
-		m_SndFile.Order[MAX_ORDERS-1] = 0xFF;
+		m_SndFile.Order[m_SndFile.Order.size()-1] = m_SndFile.Patterns.GetInvalidIndex();
 		END_CRITICAL();
 		SetModified();
 		return TRUE;
@@ -1361,7 +1263,7 @@ BOOL CModDoc::RemoveOrder(UINT n)
 BOOL CModDoc::RemovePattern(UINT n)
 //---------------------------------
 {
-	if ((n < MAX_PATTERNS) && (m_SndFile.Patterns[n]))
+	if ((n < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[n]))
 	{
 		BEGIN_CRITICAL();
 		LPVOID p = m_SndFile.Patterns[n];
@@ -1465,17 +1367,17 @@ BOOL CModDoc::RemoveInstrument(UINT n)
 BOOL CModDoc::MoveOrder(UINT nSourceNdx, UINT nDestNdx, BOOL bUpdate, BOOL bCopy)
 //-------------------------------------------------------------------------------
 {
-	if ((nSourceNdx >= MAX_ORDERS) || (nDestNdx >= MAX_ORDERS)) return FALSE;
+	if ((nSourceNdx >= m_SndFile.Order.size()) || (nDestNdx >= m_SndFile.Order.size())) return FALSE;
 	UINT n = m_SndFile.Order[nSourceNdx];
 	// Delete source
 	if (!bCopy)
 	{
-		for (UINT i=nSourceNdx; i<MAX_ORDERS-1; i++) m_SndFile.Order[i] = m_SndFile.Order[i+1];
+		for (UINT i=nSourceNdx; i<m_SndFile.Order.size()-1; i++) m_SndFile.Order[i] = m_SndFile.Order[i+1];
 		if (nSourceNdx < nDestNdx) nDestNdx--;
 	}
 	// Insert at dest
-	for (UINT j=MAX_ORDERS-1; j>nDestNdx; j--) m_SndFile.Order[j] = m_SndFile.Order[j-1];
-	m_SndFile.Order[nDestNdx] = (BYTE)n;
+	for (UINT j=m_SndFile.Order.size()-1; j>nDestNdx; j--) m_SndFile.Order[j] = m_SndFile.Order[j-1];
+	m_SndFile.Order[nDestNdx] = n;
 	if (bUpdate)
 	{
 		UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
@@ -1487,74 +1389,29 @@ BOOL CModDoc::MoveOrder(UINT nSourceNdx, UINT nDestNdx, BOOL bUpdate, BOOL bCopy
 BOOL CModDoc::ExpandPattern(UINT nPattern)
 //----------------------------------------
 {
+
 	MODCOMMAND *newPattern, *oldPattern;
 	UINT nRows, nChns;
 
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
-//	if ((nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern]) || (m_SndFile.PatternSize[nPattern] > 128)) return FALSE;
-	if ((nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern]) || (m_SndFile.PatternSize[nPattern] > MAX_PATTERN_ROWS / 2)) return FALSE;
-// -! BEHAVIOUR_CHANGE#0008
-	BeginWaitCursor();
-	nRows = m_SndFile.PatternSize[nPattern];
-	nChns = m_SndFile.m_nChannels;
-	newPattern = CSoundFile::AllocatePattern(nRows*2, nChns);
-	if (!newPattern) return FALSE;
-	PrepareUndo(nPattern, 0,0, nChns, nRows);
-	oldPattern = m_SndFile.Patterns[nPattern];
-	for (UINT y=0; y<nRows; y++)
-	{
-		memcpy(newPattern+y*2*nChns, oldPattern+y*nChns, nChns*sizeof(MODCOMMAND));
-	}
-	m_SndFile.Patterns[nPattern] = newPattern;
-	m_SndFile.PatternSize[nPattern] = nRows * 2;
-	SetModified();
-	UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << 24), NULL);
-	EndWaitCursor();
-	return TRUE;
+
+	if ((nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
+	if(m_SndFile.Patterns[nPattern].Expand())
+		return FALSE;
+	else
+		return TRUE;
 }
 
 
 BOOL CModDoc::ShrinkPattern(UINT nPattern)
 //----------------------------------------
 {
-	UINT nRows, nChns;
-
-	if ((nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern]) || (m_SndFile.PatternSize[nPattern] < 32)) return FALSE;
-	BeginWaitCursor();
-	nRows = m_SndFile.PatternSize[nPattern];
-	nChns = m_SndFile.m_nChannels;
-	PrepareUndo(nPattern, 0,0, nChns, nRows);
-	nRows /= 2;
-	for (UINT y=0; y<nRows; y++)
-	{
-		MODCOMMAND *psrc = m_SndFile.Patterns[nPattern] + (y * 2 * nChns);
-		MODCOMMAND *pdest = m_SndFile.Patterns[nPattern] + (y * nChns);
-		for (UINT x=0; x<nChns; x++)
-		{
-			pdest[x] = psrc[x];
-			if ((!pdest[x].note) && (!pdest[x].instr))
-			{
-				pdest[x].note = psrc[x+nChns].note;
-				pdest[x].instr = psrc[x+nChns].instr;
-				if (psrc[x+nChns].volcmd)
-				{
-					pdest[x].volcmd = psrc[x+nChns].volcmd;
-					pdest[x].vol = psrc[x+nChns].vol;
-				}
-				if (!pdest[x].command)
-				{
-					pdest[x].command = psrc[x+nChns].command;
-					pdest[x].param = psrc[x+nChns].param;
-				}
-			}
-		}
-	}
-	m_SndFile.PatternSize[nPattern] = nRows;
-	SetModified();
-	UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << 24), NULL);
-	EndWaitCursor();
-	return TRUE;
+	if ((nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
+	if(m_SndFile.Patterns[nPattern].Shrink())
+		return FALSE;
+	else
+		return TRUE;
 }
 
 
@@ -1576,7 +1433,7 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 	UINT nrows = (dwEndSel >> 16) - (dwBeginSel >> 16) + 1;
 	UINT ncols = ((dwEndSel & 0xFFFF) >> 3) - ((dwBeginSel & 0xFFFF) >> 3) + 1;
 
-	if ((!pMainFrm) || (nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern])) return FALSE;
+	if ((!pMainFrm) || (nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
 	BeginWaitCursor();
 	dwMemSize = strlen(lpszClipboardPatternHdr) + 1;
 	dwMemSize += nrows * (ncols * 12 + 2);
@@ -1700,7 +1557,7 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 //---------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((!pMainFrm) || (nPattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[nPattern])) return FALSE;
+	if ((!pMainFrm) || (nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
 	BeginWaitCursor();
 	if (pMainFrm->OpenClipboard())
 	{
@@ -2108,7 +1965,7 @@ BOOL CModDoc::PrepareUndo(UINT pattern, UINT x, UINT y, UINT cx, UINT cy)
 	UINT nRows;
 	BOOL bUpdate;
 
-	if ((pattern >= MAX_PATTERNS) || (!m_SndFile.Patterns[pattern])) return FALSE;
+	if ((pattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[pattern])) return FALSE;
 	nRows = m_SndFile.PatternSize[pattern];
 	pPattern = m_SndFile.Patterns[pattern];
 	if ((y >= nRows) || (cx < 1) || (cy < 1) || (x >= m_SndFile.m_nChannels)) return FALSE;
@@ -2157,7 +2014,7 @@ UINT CModDoc::DoUndo()
 	MODCOMMAND *pUndo, *pPattern;
 	UINT nPattern, nRows;
 
-	if ((!PatternUndo[0].pbuffer) || (PatternUndo[0].pattern >= MAX_PATTERNS)) return (UINT)-1;
+	if ((!PatternUndo[0].pbuffer) || (PatternUndo[0].pattern >= m_SndFile.Patterns.Size())) return (UINT)-1;
 	nPattern = PatternUndo[0].pattern;
 	nRows = PatternUndo[0].patternsize;
 	if (PatternUndo[0].column + PatternUndo[0].cx <= m_SndFile.m_nChannels)
@@ -2167,13 +2024,12 @@ UINT CModDoc::DoUndo()
 			MODCOMMAND *newPattern = CSoundFile::AllocatePattern(nRows, m_SndFile.m_nChannels);
 			MODCOMMAND *oldPattern = m_SndFile.Patterns[nPattern];
 			if (!newPattern) return (UINT)-1;
-			m_SndFile.Patterns[nPattern] = newPattern;
+			m_SndFile.Patterns[nPattern].SetData(newPattern, nRows);
 			if (oldPattern)
 			{
 				memcpy(newPattern, oldPattern, m_SndFile.m_nChannels*m_SndFile.PatternSize[nPattern]*sizeof(MODCOMMAND));
 				CSoundFile::FreePattern(oldPattern);
 			}
-			m_SndFile.PatternSize[nPattern] = nRows;
 		}
 		pUndo = PatternUndo[0].pbuffer;
 		pPattern = m_SndFile.Patterns[nPattern];

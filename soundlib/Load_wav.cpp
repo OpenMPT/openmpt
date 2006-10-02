@@ -52,9 +52,9 @@ BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 	m_dwSongFlags |= SONG_LINEARSLIDES; // For no resampling
 	Order[0] = 0;
 	Order[1] = 0xFF;
-	PatternSize[0] = PatternSize[1] = 64;
-	if ((Patterns[0] = AllocatePattern(64, 4)) == NULL) return TRUE;
-	if ((Patterns[1] = AllocatePattern(64, 4)) == NULL) return TRUE;
+	bool fail = Patterns.Insert(0, 64);
+	fail = Patterns.Insert(1, 64);
+	if(fail) return TRUE;
 	UINT samplesize = (pfmt->channels * pfmt->bitspersample) >> 3;
 	UINT len = pdata->length, bytelen;
 	if (dwMemPos + len > dwMemLength - 8) len = dwMemLength - dwMemPos - 8;

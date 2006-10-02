@@ -119,9 +119,9 @@ BOOL CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 		if (!rows) rows = 64;
 		if (npat < MAX_PATTERNS)
 		{
-			if ((Patterns[npat] = AllocatePattern(rows, m_nChannels)) == NULL) return TRUE;
+			if(Patterns.Insert(npat, rows))
+				return TRUE;
 			MODCOMMAND *m = Patterns[npat];
-			PatternSize[npat] = rows;
 			UINT imax = m_nChannels*rows;
 			for (UINT i=0; i<imax; i++, m++, dwPos+=4)
 			{

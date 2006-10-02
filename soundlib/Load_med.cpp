@@ -629,7 +629,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 		UINT nbo = pmsh->songlen >> 8;
 		if (nbo >= MAX_ORDERS) nbo = MAX_ORDERS-1;
 		if (!nbo) nbo = 1;
-		memcpy(Order, pmsh->playseq, nbo);
+		Order.ReadAsByte(pmsh->playseq, nbo, nbo);
 		playtransp = pmsh->playtransp;
 	} else
 	{
@@ -813,8 +813,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 			lines = pmb->lines + 1;
 			tracks = pmb->numtracks;
 			if (!tracks) tracks = m_nChannels;
-			if ((Patterns[iBlk] = AllocatePattern(lines, m_nChannels)) == NULL) continue;
-			PatternSize[iBlk] = lines;
+			if(Patterns.Insert(iBlk, lines)) continue;
 			MODCOMMAND *p = Patterns[iBlk];
 			LPBYTE s = (LPBYTE)(lpStream + dwPos + 2);
 			UINT maxlen = tracks*lines*3;
@@ -849,8 +848,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 			lines = (pmb->lines >> 8) + 1;
 			tracks = pmb->numtracks >> 8;
 			if (!tracks) tracks = m_nChannels;
-			if ((Patterns[iBlk] = AllocatePattern(lines, m_nChannels)) == NULL) continue;
-			PatternSize[iBlk] = (WORD)lines;
+			Patterns.Insert(iBlk, lines);
 			DWORD dwBlockInfo = BigEndian(pmb->info);
 			if ((dwBlockInfo) && (dwBlockInfo < dwMemLength - sizeof(MMD1BLOCKINFO)))
 			{

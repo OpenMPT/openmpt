@@ -20,7 +20,7 @@ using std::map;
 	typedef unsigned char BYTE;
 #endif
 
-//This is just class for the data which is written in serializations as a ID.
+//This is just a class for the data which is written in serializations as a ID.
 template<int SIZE>
 class CSerializationID
 {
@@ -61,18 +61,28 @@ public:
 	}
 };
 
+/*
+TODO: Make certain methods pure virtual?
+TODO: Finetune to be notespecific?
+TODO: Better return values(e.g. NOTHING_DONE, ERROR etc.)?
+*/
+
 //Class defining tuning which is fundamentally based on discrete steps.
-template<class TSTEPTYPE = short int, class TRATIOTYPE = float, class TFINETUNESTEP = TSTEPTYPE>
+template<class TSTEPTYPE = short int, class TRATIOTYPE = float, class TFINESTEPTYPE = TSTEPTYPE>
 class CTuningBase
 {
 	//STEPTYPE: Some type that has properties that of 'ordinary' signed and discrete figures.
 	//RATIOTYPE: Some 'real figure' type which is able to present ratios.
 
+	//NOTE: Tuning can, to some extent, be thought simply as 'alias' for
+	//      function from set defined by STEPTYPE to positive figures 
+	//		in set defined by RATIOTYPE(similar to f: Z -> R+)
+
 public:
 //BEING TYPEDEFS:
 	typedef TSTEPTYPE STEPTYPE;
 	typedef TRATIOTYPE RATIOTYPE;
-	typedef TFINETUNESTEP FINETUNESTEP;
+	typedef TFINESTEPTYPE FINESTEPTYPE;
 
 	typedef std::exception TUNINGEXCEPTION;
 
@@ -81,6 +91,7 @@ public:
 	typedef bool SERIALIZATION_RETURN_TYPE;
 
 	typedef std::pair<STEPTYPE, STEPTYPE> VRPAIR;
+	//Validity Range PAIR
 
 	typedef bitset<16> CEDITMASK;
 	//If making bitset larger, see whether serialization
@@ -108,12 +119,16 @@ public:
 
 	static const string s_FileExtension;
 
-	static const CEDITMASK EM_RATIOS;
+	static const CEDITMASK EM_MAINRATIOS;
 	static const CEDITMASK EM_NOTENAME;
 	static const CEDITMASK EM_TYPE;
 	static const CEDITMASK EM_NAME;
+	static const CEDITMASK EM_FINETUNE;
+	static const CEDITMASK EM_EDITMASK;
+
 	static const CEDITMASK EM_ALLOWALL;
 	static const CEDITMASK EM_CONST;
+	static const CEDITMASK EM_CONST_STRICT; //This won't allow changing const status
 	//Add declarations of editmasks here.
 	//NOTE: When adding, check definition of CEDITMASK - 
 	//might need to be modified.
@@ -121,7 +136,7 @@ public:
 	static const CTUNINGTYPE TT_GENERAL;
 	static const CTUNINGTYPE TT_RATIOPERIODIC;
 	static const CTUNINGTYPE TT_TET;
-	//Add declarations of tuning typee specifiers here.
+	//Add declarations of tuning type specifiers here.
 	//NOTE: When adding, check definition of CTUNINGTYPE - 
 	//might need to be modified.
 
@@ -130,17 +145,43 @@ public:
 	
 public:
 //BEGIN TUNING INTERFACE
-	virtual RATIOTYPE GetFrequencyRatio(const STEPTYPE&, const STEPTYPE&) const {return 0;};
-	//Neglecting possible use of fineSteps, returned value is to be such that
+	virtual RATIOTYPE GetFrequencyRatio(const STEPTYPE&) const {return 0;};
+	//Returned value is to be such that
 	//returnvalue * ReferenceFrequency == Frequency_of_note_stepsFromCenter_away_from_reference.
 	//E.g. in 12-TET it is 2^(stepFromCenter/12)
 
-	virtual NOTESTR GetNoteName(const STEPTYPE& x) const;
+	virtual RATIOTYPE GetFrequencyRatio(const STEPTYPE& s, const FINESTEPTYPE&) const {return GetFrequencyRatio(s);};
+	//Like previous but here having additional finetune parameter - by default calling
+	//previous method.
 
-	virtual bool CreateRatioPeriodic(const vector<RATIOTYPE>&, const RATIOTYPE&) {return true;}
-	//Create ratioperiodic tuning of *this.
+	virtual RATIOTYPE GetFrequencyRatioFine(const FINESTEPTYPE&) const {return 1;}
 
-	virtual bool CreateTET(const STEPTYPE&, const RATIOTYPE&) {return true;}
+	virtual FINESTEPTYPE GetFineStepCount() const {return 0;}
+	//To return the number of finesteps between main steps. It is not defined 
+	//what to return in case of tuning in which this number is dependent on 
+	//on the chosen notes.
+	
+	virtual FINESTEPTYPE GetFineStepCount(const STEPTYPE&, const STEPTYPE&) const {return 0;}
+	//To return the number of finesteps between given notes.
+	//First parameter is 'from' and second 'to'.
+
+	virtual FINESTEPTYPE GetFineStepCount(const STEPTYPE&, const FINESTEPTYPE&, const STEPTYPE&, const FINESTEPTYPE&) const {return 0;}
+	//To return the number of finesteps between given notes including finesteps.
+
+	FINESTEPTYPE SetFineStepCount(const FINESTEPTYPE& s) {if(MayEdit(EM_FINETUNE)) return ProSetFineStepCount(s); else return GetFineStepCount();}
+	//Returns the number that was set.
+
+	virtual bool Multiply(const RATIOTYPE&);
+	//Multiply all ratios by given figure.
+    
+	bool CreateRatioPeriodic(const vector<RATIOTYPE>&, const RATIOTYPE&);
+	//Create ratioperiodic tuning of *this using 
+	//virtual ProCreateRatioPeriodic.
+
+	bool CreateRatioPeriodic(const STEPTYPE&, const RATIOTYPE&);
+	//Create ratioperiodic of *this using ratios from 'itself'.
+
+	bool CreateTET(const STEPTYPE&, const RATIOTYPE&);
 	//Create TET tuning of *this. Actually this doesn't really
 	//need two parameters, but with this one also has to define
 	//some period.
@@ -154,6 +195,8 @@ public:
 	virtual SERIALIZATION_RETURN_TYPE UnSerializeBinary(istream& in, const int mode = 0);
 	//Purpose: See SerialiseBinary(...).
 
+	virtual NOTESTR GetNoteName(const STEPTYPE& x) const;
+
 	void SetName(const string& s)
 	{
 		if(MayEdit(EM_NAME))
@@ -166,13 +209,16 @@ public:
 
 	bool ClearNoteName(const STEPTYPE& n, const bool clearAll = false);
 	
-	virtual bool SetRatio(const STEPTYPE&, const RATIOTYPE&) {return true;}
+	bool SetRatio(const STEPTYPE& s, const RATIOTYPE& r);
 	
 	CTUNINGTYPE GetTuningType() const {return m_TuningType;}
 
 	static string GetTuningTypeStr(const CTUNINGTYPE& tt);
 
 	bool DoesTypeInclude(const CTUNINGTYPE& type) const;
+
+	bool ChangePeriod(const STEPTYPE&);
+	bool ChangePeriodRatio(const RATIOTYPE&);
 
 	virtual STEPTYPE GetPeriod() const {return 0;}
 	virtual RATIOTYPE GetPeriodRatio() const {return 0;}
@@ -186,13 +232,43 @@ public:
 	//Tunings might not be valid for arbitrarily large range,
 	//so this can be used to ask where it is valid. 
 
+	virtual VRPAIR SetValidityRange(const VRPAIR&) {return GetValidityRange();}
+	//To try to set validity range to given range, returns
+	//the range that could be set.
+
 	virtual void GeneralMessenger(const string&, ...) {}
 	//Maybe somelike this might be needed for possible need to do something
 	//specific with tunings(tweak parameters etc.)
 
+	bool MayEdit(const CEDITMASK& em) const {return (em & m_EditMask).any();}
+
+	bool SetEditMask(const CEDITMASK& em)
+	{
+		if(MayEdit(EM_EDITMASK))
+			{m_EditMask = em; return false;}
+		else
+			return true;
+	}
+
+	CEDITMASK GetEditMask() const {return m_EditMask;}
+
+
 	virtual ~CTuningBase() {};
 
 //END TUNING INTERFACE
+
+//BEGIN PROTECTED VIRTUALS
+protected:
+	virtual bool ProSetRatio(const STEPTYPE&, const RATIOTYPE&) {return true;}
+	virtual bool ProCreateRatioPeriodic(const vector<RATIOTYPE>&, const RATIOTYPE&) {return true;}
+	virtual bool ProCreateTET(const STEPTYPE&, const RATIOTYPE&) {return true;}
+	//Above methods return false if action was done, true otherwise.
+	virtual FINESTEPTYPE ProSetFineStepCount(const STEPTYPE& = -1) {return GetFineStepCount();}
+	virtual RATIOTYPE ProSetRatioFine(const FINESTEPTYPE&, const RATIOTYPE&) {return 0;}
+	virtual STEPTYPE ProSetPeriod(const STEPTYPE&) {return 0;}
+	virtual RATIOTYPE ProSetPeriodRatio(const RATIOTYPE&) {return 0;}
+
+//END PROTECTED VIRTUALS
 
 
 
@@ -203,9 +279,16 @@ protected:
 	//When copying tunings, the name must not be exact copy
 	//since it is to be unique for every tuning.
 
-	bool MayEdit(const CEDITMASK& em) {return (em & m_ConstMask).any();}
-
 	CTUNINGTYPE GetType() const {return m_TuningType;}
+
+	
+//END PROTECTED INTERFACE
+
+
+//BEGIN PRIVATE METHODS
+private:
+	SERIALIZATION_RETURN_TYPE NotenameMapToBinary(ostream&) const;
+	SERIALIZATION_RETURN_TYPE NotenameMapFromBinary(istream&);
 
 	bool SetType(const CTUNINGTYPE& tt)
 	{
@@ -214,26 +297,25 @@ protected:
 		if(MayEdit(EM_TYPE))
 		{
 			m_TuningType = tt;
+
+			if(m_TuningType == TT_GENERAL)
+			{
+				ProSetPeriod(0);
+				ProSetPeriodRatio(0);
+			}
+
 			return false;
 		}
 		else
 			return true;
 	}
-
-//END PROTECTED INTERFACE
-
-
-//BEGIN PRIVATE METHODS
-private:
-	SERIALIZATION_RETURN_TYPE NotenameMapToBinary(ostream&) const;
-	SERIALIZATION_RETURN_TYPE NotenameMapFromBinary(istream&);
 //END PRIVATE METHODS
 
 
 //BEGIN: DATA MEMBERS
 private:
 	string m_TuningName;
-	CEDITMASK m_ConstMask; //Behavior: true <~> allow modification
+	CEDITMASK m_EditMask; //Behavior: true <~> allow modification
 	CTUNINGTYPE m_TuningType;
 protected:
 	NOTENAMEMAP m_NoteNameMap;
@@ -247,7 +329,7 @@ protected:
 		m_TuningName(name),
 		m_TuningType(0) //Unspecific tuning by default.
 		{
-			m_ConstMask.set(); //Allow all by default.
+			m_EditMask.set(); //Allow all by default.
 		}
 	
 protected:
@@ -289,17 +371,23 @@ template<class A, class B, class C>
 const string CTuningBase<A, B, C>::s_FileExtension = ".mptt";
 
 template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_RATIOS = 1; //1b
+const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_MAINRATIOS = 0x1; //1b
 template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_NOTENAME = 2; //10b
+const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_NOTENAME = 0x2; //10b
 template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_TYPE = 4; //100b
+const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_TYPE = 0x4; //100b
 template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_NAME = 8; //1000b
+const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_NAME = 0x8; //1000b
 template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_ALLOWALL = 0xFFFF; //
+const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_FINETUNE = 0x10; //10000b
 template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_CONST = 0; //All bits are zero.
+const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_ALLOWALL = 0xFFFF; //All editing allowed.
+template<class A, class B, class C>
+const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_EDITMASK = 0x8000; //Whether to allow modifications to editmask.
+template<class A, class B, class C>
+const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_CONST = 0x8000;  //All editing except changing const status disable.
+template<class A, class B, class C>
+const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_CONST_STRICT = 0; //All bits are zero.
 
 
 template<class A, class B, class C>
@@ -318,8 +406,34 @@ CTuningBase<A,B,C>& CTuningBase<A,B,C>::operator =(const CTuningBase& pt)
 
 	m_TuningName = string("Copy of ") + pt.m_TuningName;
 	m_NoteNameMap = pt.m_NoteNameMap;
-	m_ConstMask.set(); //NOTE: Not copying const status.
+	m_EditMask = pt.m_EditMask;
+	m_EditMask |= EM_EDITMASK; //Not copying possible strict-const-status.
+
 	m_TuningType = pt.m_TuningType;
+
+	
+	//TODO: Copying mode flags to be added(e.g. if tuning doesn't want the ratios
+	//to be copied here)?
+
+	//Copying ratios(Maybe inefficient, but general nevertheless).
+	const VRPAIR rp = SetValidityRange(pt.GetValidityRange());
+	//Returns best range the tuning can set. Ideally should be 
+	//the same as validityrange of pt.
+
+	//Copying ratios
+	for(STEPTYPE i = rp.first; i<=rp.second; i++)
+	{
+		ProSetRatio(i, pt.GetFrequencyRatio(i));
+	}
+	ProSetPeriod(pt.GetPeriod());
+	ProSetPeriodRatio(pt.GetPeriodRatio());
+
+	//Copying finetune.
+    ProSetFineStepCount(pt.GetFineStepCount());
+	for(FINESTEPTYPE i = 0; i<GetFineStepCount(); i++)
+		ProSetRatioFine(i, pt.GetFrequencyRatioFine(i));
+	
+
 	return *this;
 }
 
@@ -328,6 +442,23 @@ CTuningBase<A,B,C>::CTuningBase(const CTuningBase& pt)
 //-----------------------------------------------------------------------
 {
 	*this = pt;
+}
+
+template<class A, class B, class C>
+bool CTuningBase<A,B,C>::SetRatio(const STEPTYPE& s, const RATIOTYPE& r)
+//-----------------------------------------------------------------
+{
+	if(MayEdit(EM_MAINRATIOS))
+	{
+		if(ProSetRatio(s, r))
+			return true;
+		else
+			SetType(TT_GENERAL);
+
+		return false;
+	}
+	return true;
+	
 }
 
 template<class A, class B, class C>
@@ -414,8 +545,118 @@ bool CTuningBase<A,B,C>::ClearNoteName(const STEPTYPE& n, const bool eraseAll)
 }
 
 
-template<class TSTEPTYPE, class TRATIOTYPE, class TFINETUNESTEP>
-CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFINETUNESTEP>::SerializeBinary(ostream& outStrm, const int mode) const
+template<class A, class B, class C>
+bool CTuningBase<A,B,C>::Multiply(const RATIOTYPE& r)
+//---------------------------------------------------
+{
+	if(r <= 0 || !MayEdit(EM_MAINRATIOS))
+		return true;
+
+	//Note: Multiplying ratios by constant doesn't 
+	//change, e.g. TETness or ratioperiodic'ness status.
+	VRPAIR vrp = GetValidityRange();
+	for(STEPTYPE i = vrp.first; i<vrp.second; i++)
+	{
+		if(ProSetRatio(i, r*GetFrequencyRatio(i)))
+			return true;
+	}
+	return false;
+}
+
+template<class A, class B, class C>
+bool CTuningBase<A,B,C>::CreateRatioPeriodic(const STEPTYPE& s, const RATIOTYPE& r)
+//-------------------------------------------------------------
+{
+	if(s < 1 || r <= 0)
+		return true;
+
+	vector<RATIOTYPE> v;
+	v.reserve(s);
+	for(STEPTYPE i = 0; i<s; i++)
+		v.push_back(GetFrequencyRatio(i));
+	return CreateRatioPeriodic(v, r);
+}
+
+template<class A, class B, class C>
+bool CTuningBase<A,B,C>::CreateRatioPeriodic(const vector<RATIOTYPE>& v, const RATIOTYPE& r)
+//------------------------------------------------------------------------------------------
+{
+	if(MayEdit(EM_MAINRATIOS) &&
+		(MayEdit(EM_TYPE) || GetType() == TT_RATIOPERIODIC))
+	{
+		if(ProCreateRatioPeriodic(v,r))
+			return true;
+		else
+		{
+			SetType(TT_RATIOPERIODIC);
+			if(MayEdit(EM_FINETUNE))
+				ProSetFineStepCount();
+			return false;
+		}
+	}
+	else 
+		return true;
+}
+
+
+template<class A, class B, class C>
+bool CTuningBase<A,B,C>::CreateTET(const STEPTYPE& s, const RATIOTYPE& r)
+//-------------------------------------------------------------------
+{
+	if(MayEdit(EM_MAINRATIOS) &&
+	  (MayEdit(EM_TYPE) || GetType() == TT_TET))
+	{
+		if(ProCreateTET(s,r))
+			return true;
+		else
+		{
+			SetType(TT_TET);
+			if(MayEdit(EM_FINETUNE))
+				ProSetFineStepCount();
+			return false;
+		}
+	}
+	else
+		return true;
+}
+
+
+template<class A, class B, class C>
+bool CTuningBase<A,B,C>::ChangePeriod(const STEPTYPE& s)
+//---------------------------------------------------
+{
+	if(!MayEdit(EM_MAINRATIOS) || s < 1)
+		return true;
+
+	if(m_TuningType == TT_RATIOPERIODIC)
+		return CreateRatioPeriodic(s, GetPeriodRatio());
+
+	if(m_TuningType == TT_TET)
+		return CreateTET(s, GetPeriodRatio());
+
+	return true;
+}	
+
+
+template<class A, class B, class C>
+bool CTuningBase<A,B,C>::ChangePeriodRatio(const RATIOTYPE& r)
+//---------------------------------------------------
+{
+	if(!MayEdit(EM_MAINRATIOS) || r <= 0)
+		return true;
+
+	if(m_TuningType == TT_RATIOPERIODIC)
+		return CreateRatioPeriodic(GetPeriod(), r);
+
+	if(m_TuningType == TT_TET)
+		return CreateTET(GetPeriod(), r);
+
+	return true;
+}	
+
+
+template<class TSTEPTYPE, class TRATIOTYPE, class TFINESTEPTYPE>
+CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFINESTEPTYPE>::SerializeBinary(ostream& outStrm, const int mode) const
 //------------------------------------------------------------------------------------------------------------------------------
 {
 	//Writing the tuning name here.
@@ -429,7 +670,7 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFIN
 	if(StringToBinaryStream(outStrm, m_TuningName)) return SERIALIZATION_FAILURE;
 
 	//Const mask
-	const __int16 cm = static_cast<__int16>(m_ConstMask.to_ulong());
+	const __int16 cm = static_cast<__int16>(m_EditMask.to_ulong());
 	outStrm.write(reinterpret_cast<const char*>(&cm), sizeof(cm));
 
 	//Tuning type
@@ -452,11 +693,11 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFIN
 }
 
 
-template<class TSTEPTYPE, class TRATIOTYPE, class TFINETUNESTEP>
-CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFINETUNESTEP>::UnSerializeBinary(istream& inStrm, const int mode) 
+template<class TSTEPTYPE, class TRATIOTYPE, class TFINESTEPTYPE>
+CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFINESTEPTYPE>::UnSerializeBinary(istream& inStrm, const int mode) 
 //----------------------------------------------------------------------------------------------------------------------------
 {
-	if(inStrm.fail())
+	if(!inStrm.good() || !MayEdit(EM_ALLOWALL))
 		return SERIALIZATION_FAILURE;
 
 	SERIALIZATION_MARKER begin;
@@ -478,9 +719,9 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFIN
 		return SERIALIZATION_FAILURE;
 
 	//Const mask
-	__int16 cm = 0;
-	inStrm.read(reinterpret_cast<char*>(&cm), sizeof(cm));
-	m_ConstMask = cm;
+	__int16 em = 0;
+	inStrm.read(reinterpret_cast<char*>(&em), sizeof(em));
+	m_EditMask = em;
 
 	//Tuning type
 	__int16 tt = 0;
@@ -507,7 +748,7 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE
 CTuningBase<A,B,C>::NotenameMapToBinary(ostream& outStrm) const
 //-----------------------------------------------------------------------------------------------
 {
-	if(outStrm.fail())
+	if(!outStrm.good())
 		return SERIALIZATION_FAILURE;
 
 	//Size.
@@ -533,7 +774,7 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE
 CTuningBase<A,B,C>::NotenameMapFromBinary(istream& inStrm)
 //--------------------------------------------------
 {
-	if(inStrm.fail())
+	if(!inStrm.good())
 		return SERIALIZATION_FAILURE;
 
 	//Size

@@ -157,7 +157,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 	{
 		// Detecting max valid restart position
 		UINT i = 0;
-		for (i=0; i<MAX_ORDERS; i++) if (m_pSndFile->Order[i] == 0xFF) break;
+		for (i=0; i<m_pSndFile->Order.size(); i++) if (m_pSndFile->Order[i] == m_pSndFile->Patterns.GetInvalidIndex()) break;
 		m_SpinRestartPos.SetRange(0, i);
 	}
 	if (dwHint & HINT_MODGENERAL)
@@ -446,9 +446,9 @@ void CCtrlGeneral::OnRestartPosChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			if (n < MAX_ORDERS)
+			if(n < m_pSndFile->Order.size())
 			{
-				for (UINT i=0; i<=n; i++) if (m_pSndFile->Order[i] == 0xFF) return;
+				for (UINT i=0; i<=n; i++) if (m_pSndFile->Order[i] == m_pSndFile->Patterns.GetInvalidIndex()) return;
 				if (n != m_pSndFile->m_nRestartPos)
 				{
 					m_EditRestartPos.SetModify(FALSE);

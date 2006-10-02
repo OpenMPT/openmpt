@@ -178,10 +178,9 @@ BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 					if (ticks < 16) ticks = 16;
 					dwPos += 8;
 					if ((pt->jmpsize >= dwMemLength) || (dwPos + pt->jmpsize + 4 >= dwMemLength)) break;
-					PatternSize[npat] = (WORD)ticks;
-					MODCOMMAND *m = AllocatePattern(PatternSize[npat], m_nChannels);
-					if (!m) goto dmfexit;
-					Patterns[npat] = m;
+					if(Patterns.Insert(npat, ticks)) goto dmfexit;
+					MODCOMMAND *m = Patterns[npat];
+
 					DWORD d = dwPos;
 					dwPos += pt->jmpsize;
 					UINT ttype = 1;

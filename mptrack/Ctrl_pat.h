@@ -12,11 +12,13 @@ protected:
 	HFONT m_hFont;
 	COLORREF colorText, colorTextSel;
 	int m_cxFont, m_cyFont, m_nXScroll, m_nScrollPos, m_nDropPos;
+
 	//m_nXScroll  : The order at the beginning of shown orderlist?
 	//m_nScrollPos: The same as order?
 	BYTE m_nOrderlistMargins;
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
+
 	UINT m_nDragOrder;
 	BOOL m_bScrolling, m_bDragging, m_bShift;
 	CModDoc *m_pModDoc;
@@ -37,9 +39,14 @@ public:
 	BOOL UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
-	BYTE SetOrderlistMargins(int); //Returns the number that was set.
+
+	BYTE SetOrderlistMargins(int);
+	//Returns the number that was set.
+
 	BYTE GetOrderlistMargins() const {return m_nOrderlistMargins;}
-	BYTE GetShownOrdersMax();	//Should return the maximum number of shown orders.
+
+	BYTE GetShownOrdersMax();
+	//Should return the maximum number of shown orders.
 
 public:
 	//{{AFX_VIRTUAL(COrderList)
