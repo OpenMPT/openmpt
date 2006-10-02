@@ -1458,7 +1458,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_nSampleRate = -1; //rewbs.VSTCompliance: gets set on Resume()
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
 
-	for (int ch=0; ch<=16; ch++) {
+	for (int ch=0; ch<16; ch++) {
 		m_nMidiPitchBendPos[ch]=MIDI_PitchBend_Centre; //centre pitch bend on all channels
 	}
 
@@ -3003,7 +3003,7 @@ UINT CVstPlugin::FindSlot()
 {
 	UINT slot=0;
 	if (m_pSndFile) {
-		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot<=MAX_MIXPLUGINS) {
+		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot<MAX_MIXPLUGINS-1) {
 			slot++;
 		}
 	}

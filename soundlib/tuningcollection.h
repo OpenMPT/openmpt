@@ -49,6 +49,8 @@ public:
 	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_SUCCESS;
 	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_FAILURE;
 
+	static const string s_FileExtension;
+
 //END PUBLIC STATIC CONSTS
 
 //BEGIN INTERFACE:
@@ -65,6 +67,8 @@ public:
 
 	void SetConstStatus(const CEDITMASK& em) {m_EditMask = em;}
 
+	const CEDITMASK& GetEditMask() const {return m_EditMask;}
+	
 	const CTuning& GetTuning(unsigned short int i) const {return *m_Tunings.at(i);}
 
 	CTuning& GetTuning(unsigned short int i) {return *m_Tunings.at(i);}
@@ -72,15 +76,13 @@ public:
 
 	size_t GetNumTunings() const {return m_Tunings.size();}
 
-	const string& GetName() {return m_Name;}
+	const string& GetName() const {return m_Name;}
 
-	void SetSavefilePath(const string& str) {m_SavefilePath = str;}
+	void SetSavefilePath(const string& str) {m_SavefilePath = str + s_FileExtension;}
 
 	//Serialization/unserialisation
-	//bool SerializeBinary(ofstream&) const;
 	bool SerializeBinary(ostream&) const;
 	bool SerializeBinary() const;
-	//bool UnSerializeBinary(ifstream&);
 	bool UnSerializeBinary(istream&);
 	bool UnSerializeBinary();
 
@@ -90,7 +92,7 @@ public:
 //BEGIN: DATA MEMBERS
 private:
 	//BEGIN: SERIALIZABLE DATA MEMBERS
-	TUNINGVECTOR m_Tunings;
+	TUNINGVECTOR m_Tunings; //The actual tunings are collected as deletable pointers in vector m_Tunings.
 	string m_Name;
 	CEDITMASK m_EditMask;
 	//END: SERIALIZABLE DATA MEMBERS
@@ -99,7 +101,7 @@ private:
 	TUNINGVECTOR m_DeletedTunings; //See Remove()-method for explanation of this.
 	string m_SavefilePath;
 	//END: NOTSERIALIZABLE DATA MEMBERS
-	//The actual tunings are collected as deletable pointers in vector m_Tunings.
+	
 //END: DATA MEMBERS
 
 //BEGIN PRIVATE METHODS

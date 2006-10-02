@@ -9,6 +9,7 @@
 #include "../mptrack/SoundFilePlayConfig.h"
 #include "tuning.h"
 #include "tuningCollection.h"
+#include "mod_specifications.h"
 #include <vector>
 
 #ifndef __SNDFILE_H
@@ -497,7 +498,6 @@ MODULAR STRUCT DECLARATIONS :
 ---------------------------------------------------------------------------------------------*/
 
 // Instrument Struct
-//typedef struct _INSTRUMENTHEADER
 struct INSTRUMENTHEADER
 {
 	UINT nFadeOut;
@@ -554,7 +554,6 @@ struct INSTRUMENTHEADER
 	BYTE nPitchEnvReleaseNode;
 	BYTE nPanEnvReleaseNode;
 	BYTE nVolEnvReleaseNode;
-
 	WORD wPitchToTempoLock; //PTL <-> Pitch/Tempo Lock
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
@@ -564,6 +563,13 @@ struct INSTRUMENTHEADER
 	static CTuning* s_DefaultTuning;
 
 	INSTRUMENTHEADER(CTuning* const pT = s_DefaultTuning) : pTuning(pT) {}
+
+	void SetTuning(CTuning* pT)
+	{
+		pTuning = pT;
+	}
+
+	
 
 };
 
@@ -644,6 +650,22 @@ typedef struct _MODCHANNEL
 
 	float m_nPlugParamValueStep;  //rewbs.smoothVST 
 	float m_nPlugInitialParamValue; //rewbs.smoothVST
+
+	//-->Relabs.Tuning-modes-to-work-properly-with-effects-variables
+		bool m_ReCalculateFreqOnFirstTick;
+		//If true, freq should be recalculated in ReadNote() on first tick.
+		//Currently used only for vibrato things - using in other context might be 
+		//problematic.
+
+		bool m_CalculateFreq;
+		//To tell whether to calculate frequency.
+
+		CTuning::FINESTEPTYPE m_PortamentoFineSteps;
+		long m_PortamentoTickSlide;
+
+		UINT m_Freq;
+		float m_VibratoDepth;
+	//<----
 } MODCHANNEL;
 
 
@@ -796,12 +818,7 @@ enum {
 	MIDIOUT_PROGRAM,
 };
 
-enum {
-	max_chans_IT=127,
-	max_chans_XM=64,
-	max_chans_MOD=32,
-	max_chans_S3M=32,
-};
+
 
 
 
@@ -815,23 +832,54 @@ typedef struct MODMIDICFG
 
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
+#include "../mptrack/pattern.h"
+#include "../mptrack/patternContainer.h"
+#include "../mptrack/ordertopatterntable.h"
+
+class CSoundFile;
+
+//======================
+class CPatternSizesMimic
+//======================
+{
+public:
+	const ROWINDEX operator[](const int i) const;
+	CPatternSizesMimic(const CSoundFile& csf) : m_rSndFile(csf) {}
+private:
+	const CSoundFile& m_rSndFile;
+};
 
 //==============
 class CSoundFile
 //==============
 {
 public:
-	WORD GetTempoMin() const {return 32;}
-	WORD GetTempoMax() const {return 512;}
+	typedef CPatternContainer::PATTERNINDEX PATTERNINDEX;
+public:
+	WORD GetTempoMin() const;
+	WORD GetTempoMax() const;
+
+	ROWINDEX GetRowMax() const;
+	ROWINDEX GetRowMin() const;
+
+	void ChangeModTypeTo(const int& newType);
+	UINT GetModType() const {return m_nType;}
 	
 	//Tuning-->
 public:
 	static bool LoadStaticTunings();
+	static bool SaveStaticTunings();
+
+	string GetNoteName(const CTuning::STEPTYPE&, const int inst = -1) const;
 public:
 	CTuningCollection m_TuningsTuneSpecific;
 	static CTuningCollection s_TuningsSharedStandard;
 	static CTuningCollection s_TuningsSharedLocal;
 	//<--Tuning
+
+private:
+	void PortamentoMPT(MODCHANNEL*, int);
+	void PortamentoFineMPT(MODCHANNEL*, int);
 
 
 
@@ -868,6 +916,7 @@ public:	// for Editing
     UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
+	//NOTE: m_nCurrentPattern and m_nNextPattern refer to order index - not pattern index.
 	bool m_bPatternTransitionOccurred;
 	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest,
 		 m_nGlobalVolumeDestination, m_nSongPreAmp, m_nVSTiVolume;
@@ -880,9 +929,9 @@ public:	// for Editing
 	UINT ChnMix[MAX_CHANNELS];						// Channels to be mixed
 	MODCHANNEL Chn[MAX_CHANNELS];					// Channels
 	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS]; // Channels settings
-	MODCOMMAND *Patterns[MAX_PATTERNS];				// Patterns
-	UINT PatternSize[MAX_PATTERNS];					// Patterns Lengths
-	BYTE Order[MAX_ORDERS];							// Pattern Orders
+	CPatternContainer Patterns;						//Patterns
+	CPatternSizesMimic PatternSize;					// Mimics old PatternsSize-array(is read-only).
+	COrderToPatternTable Order;						//Order[x] gives the pattern index at order x.
 	MODINSTRUMENT Ins[MAX_SAMPLES];					// Instruments
 	INSTRUMENTHEADER *Headers[MAX_INSTRUMENTS];		// Instrument Headers
 	INSTRUMENTHEADER m_defaultInstrument;			// Currently only used to get default values for extented properties. 
@@ -931,7 +980,7 @@ public:
 	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;
 	double GetCurrentBPM() const;
-	int FindOrder(BYTE pat, UINT startFromOrder=0, bool direction=true);	//rewbs.playSongFromCursor
+	int FindOrder(PATTERNINDEX pat, UINT startFromOrder=0, bool direction=true);	//rewbs.playSongFromCursor
 	void DontLoopPattern(int nPat, int nRow=0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(UINT nOrder);
@@ -1197,14 +1246,15 @@ public:
 
 	// System-Dependant functions
 public:
-	static MODCOMMAND *AllocatePattern(UINT rows, UINT nchns);
 	static LPSTR AllocateSample(UINT nbytes);
-	static void FreePattern(LPVOID pat);
 	static void FreeSample(LPVOID p);
 	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
 	UINT GetBestPlugin(UINT nChn, UINT priority, bool respectMutes);
+//private:
+	static MODCOMMAND *AllocatePattern(UINT rows, UINT nchns);
+	static void FreePattern(LPVOID pat);
 
-
+public:
 	int getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv);
     void resetEnvelopes(MODCHANNEL* pChn, int envToReset = ENV_RESET_ALL);
 	void SetDefaultInstrumentValues(INSTRUMENTHEADER *penv);

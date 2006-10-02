@@ -200,7 +200,7 @@ void CChannelManagerDlg::OnApply()
 	BEGIN_CRITICAL();
 
 	// Rearrange patterns content
-	for(i = 0 ; i < MAX_PATTERNS ; i++){
+	for(i = 0; i < m_pSndFile->Patterns.Size(); i++){
 
 		// Allocate a new empty pattern to replace current pattern at i'th position in pattern array
 		p = m_pSndFile->Patterns[i];

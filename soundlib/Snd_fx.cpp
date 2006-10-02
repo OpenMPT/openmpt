@@ -114,21 +114,21 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 		bool positionJumpOnThisRow=false;
 		bool patternBreakOnThisRow=false;
 
-		while (nPattern >= MAX_PATTERNS)
+		while (nPattern >= Patterns.Size())
 		{
 			// End of song ?
-			if ((nPattern == 0xFF) || (nCurrentPattern >= MAX_ORDERS))
+			if ((nPattern == Patterns.GetInvalidIndex()) || (nCurrentPattern >= Order.size()))
 			{
 				goto EndMod;
 			} else
 			{
 				nCurrentPattern++;
-				nPattern = (nCurrentPattern < MAX_ORDERS) ? Order[nCurrentPattern] : 0xFF;
+				nPattern = (nCurrentPattern < Order.size()) ? Order[nCurrentPattern] : Patterns.GetInvalidIndex();
 			}
 			nNextPattern = nCurrentPattern;
 		}
 		// Weird stuff?
-		if ((nPattern >= MAX_PATTERNS) || (!Patterns[nPattern])) break;
+		if ((nPattern >= Patterns.Size()) || (!Patterns[nPattern])) break;
 		// Should never happen
 		if (nRow >= PatternSize[nPattern]) nRow = 0;
 		// Update next position
@@ -390,6 +390,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	INSTRUMENTHEADER *penv = Headers[instr];
 	MODINSTRUMENT *psmp = &Ins[instr];
 	UINT note = pChn->nNewNote;
+
 	if ((penv) && (note) && (note <= 128))
 	{
 		if (penv->NoteMap[note-1] >= 0xFE) return;
@@ -401,6 +402,12 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		if (note >= 0xFE) return;
 		psmp = NULL;
 	}
+
+	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && penv && penv->pTuning);
+	//Playback behavior change for MPT: Don't change sample if it is in the same instrument as previous sample.
+	if(bPorta && bNewTuning && penv == pChn->pHeader)
+		return;
+	
 	// Update Volume
 	if (bUpdVol) pChn->nVolume = (psmp) ? psmp->nVolume : 0;
 	// bInstrumentChanged is used for IT carry-on env option
@@ -463,10 +470,11 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		pChn->nInsVol = 0;
 		return;
 	}
+
 	// Tone-Portamento doesn't reset the pingpong direction flag
 	if ((bPorta) && (psmp == pChn->pInstrument))
 	{
-		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) return;
+		if(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) return;
 		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE);
 		pChn->dwFlags = (pChn->dwFlags & (0xFFFFFF00 | CHN_PINGPONGFLAG)) | (psmp->uFlags & 0xFF);
 	} else
@@ -492,21 +500,27 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	pChn->nLength = psmp->nLength;
 	pChn->nLoopStart = psmp->nLoopStart;
 	pChn->nLoopEnd = psmp->nLoopEnd;
-	if(m_nType == MOD_TYPE_MPT) //(HACK)
+
+	if(bNewTuning)
 	{
-		//Scaling C4speed to get the desired result. Here using TET12 ratio from
-		//the new tuning system thingy.
-		ASSERT( !penv || penv->pTuning);
-		if(penv)
-			pChn->nC4Speed = psmp->nC4Speed * penv->pTuning->GetFrequencyRatio(note - NOTE_MIDDLEC, 0) / s_TuningsSharedStandard.GetTuning(0).GetFrequencyRatio(note - NOTE_MIDDLEC, 0);
-		//Note: For this to work, s_TuningsSharedStandard.GetTuning(0)
-		//must be TET12.
+		pChn->nC4Speed = psmp->nC4Speed;
+		pChn->m_CalculateFreq = true;
+		pChn->nFineTune = 0;
 	}
-	else //When not MPT
-	pChn->nC4Speed = psmp->nC4Speed;
+	else
+	{
+		pChn->nC4Speed = psmp->nC4Speed;
+		pChn->nFineTune = psmp->nFineTune;
+	}
+
+	
+	
 	pChn->pSample = psmp->pSample;
 	pChn->nTranspose = psmp->RelativeTone;
-	pChn->nFineTune = psmp->nFineTune;
+
+	pChn->m_PortamentoFineSteps = 0;
+	pChn->nPortamentoDest = 0;
+
 	if (pChn->dwFlags & CHN_SUSTAINLOOP)
 	{
 		pChn->nLoopStart = psmp->nSustainStart;
@@ -525,6 +539,9 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 	MODCHANNEL * const pChn = &Chn[nChn];
 	MODINSTRUMENT *pins = pChn->pInstrument;
 	INSTRUMENTHEADER *penv = pChn->pHeader;
+
+	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && penv && penv->pTuning);
+
 	if ((penv) && (note <= 0x80))
 	{
 		UINT n = penv->Keyboard[note - 1];
@@ -546,6 +563,18 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		return;
 	}
 
+	if(bNewTuning)
+	{
+		if(!bPorta || pChn->nNote == 0)
+			pChn->nPortamentoDest = 0;
+		else
+		{
+			pChn->nPortamentoDest = penv->pTuning->GetFineStepCount(pChn->nNote, pChn->m_PortamentoFineSteps, note, 0);
+			//Here pCnh->nPortamentoDest means 'steps to slide'.
+			pChn->m_PortamentoFineSteps = -pChn->nPortamentoDest;
+		}
+	}
+
 	if ((!bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MT2))) {
 		if (pins) {
 			pChn->nTranspose = pins->RelativeTone;
@@ -557,15 +586,18 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 	if (note < 1) note = 1;
 	if (note > 132) note = 132;
 	pChn->nNote = note;
+	pChn->m_CalculateFreq = true;
 
-	if ((!bPorta) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) pChn->nNewIns = 0;
+	if ((!bPorta) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
+		pChn->nNewIns = 0;
+
 	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC4Speed);
 
 	if (!pins) return;
 	if (period)
 	{
 		if ((!bPorta) || (!pChn->nPeriod)) pChn->nPeriod = period;
-		pChn->nPortamentoDest = period;
+		if(!bNewTuning) pChn->nPortamentoDest = period;
 		if ((!bPorta) || ((!pChn->nLength) && (!(m_nType & MOD_TYPE_S3M))))
 		{
 			pChn->pInstrument = pins;
@@ -966,13 +998,14 @@ BOOL CSoundFile::ProcessEffects()
 		UINT cmd = pChn->nRowCommand;
 		UINT param = pChn->nRowParam;
 		BOOL bPorta = ((cmd != CMD_TONEPORTAMENTO) && (cmd != CMD_TONEPORTAVOL) && (volcmd != VOLCMD_TONEPORTAMENTO)) ? FALSE : TRUE;
+
 		UINT nStartTick = 0;
 
 		pChn->dwFlags &= ~CHN_FASTVOLRAMP;
 		// Process special effects (note delay, pattern delay, pattern loop)
 		if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
-			if ((!param) && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))) param = pChn->nOldCmdEx; else pChn->nOldCmdEx = param;
+			if ((!param) && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) param = pChn->nOldCmdEx; else pChn->nOldCmdEx = param;
 			// Note Delay ?
 			if ((param & 0xF0) == 0xD0)
 			{
@@ -1056,7 +1089,8 @@ BOOL CSoundFile::ProcessEffects()
 				InstrumentChange(pChn, instr, bPorta, TRUE);
 				pChn->nNewIns = 0;
 				// Special IT case: portamento+note causes sample change -> ignore portamento
-				if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+				//if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+				if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
 				 && (psmp != pChn->pInstrument) && (note) && (note < 0x80))
 				{
 					bPorta = FALSE;
@@ -1301,7 +1335,7 @@ BOOL CSoundFile::ProcessEffects()
 		// Arpeggio
 		case CMD_ARPEGGIO:
 			if ((m_nTickCount) || (!pChn->nPeriod) || (!pChn->nNote)) break;
-			if ((!param) && (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT)))) break;
+			if ((!param) && (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))) break;
 			pChn->nCommand = CMD_ARPEGGIO;
 			if (param) pChn->nArpeggio = param;
 			break;
@@ -1336,6 +1370,7 @@ BOOL CSoundFile::ProcessEffects()
 		// Set Global Volume
 		case CMD_GLOBALVOLUME:
 			if (m_nTickCount) break;
+			
 			if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
 			if (param > 128) param = 128;
 			m_nGlobalVolume = param << 1;
@@ -1452,14 +1487,12 @@ BOOL CSoundFile::ProcessEffects()
 		// Position Jump
 		case CMD_POSITIONJUMP:
 			nPosJump = param;
-			//I don't think the following block is necessary. 
-			//It breaks manual sequence override if the pattern contains a Bxx.
-			//Please provide a testcase that shows it is necessary. -rewbs
-			/*if((m_dwSongFlags & SONG_PATTERNLOOP)) {
-				//without this the pattern view could show pattern y even though the playing pattern was x. 
+			if((m_dwSongFlags & SONG_PATTERNLOOP && m_nSeqOverride == 0)) {
 				 m_nSeqOverride = param+1;
-			}*/
-			//Still to be checked.
+				 //Releasing pattern loop after position jump could cause 
+				 //instant jumps - modifying behavior so that now position jumps
+				 //occurs also when pattern loop is enabled.
+			}
 			break;
 
 		// Pattern Break
@@ -1551,7 +1584,7 @@ BOOL CSoundFile::ProcessEffects()
 		#endif	// FASTSOUNDLIB
 			//rewbs.fix 
 			//if (((!bNoLoop) && (nPosJump < MAX_ORDERS))
-			if (nPosJump>MAX_ORDERS) 
+			if (nPosJump>=Order.size()) 
 				nPosJump = 0;
 			if ((!bNoLoop)
 			//end rewbs.fix 
@@ -1605,6 +1638,20 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param)
 {
 	MidiPortamento(pChn, param); //Send midi pitch bend event if there's a plugin
 
+	if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
+	{
+		if(param)
+			pChn->nOldPortaUpDown = param;
+		else
+			param = pChn->nOldPortaUpDown;
+
+		if(param >= 0xF0)
+			PortamentoFineMPT(pChn, param - 0xF0);
+		else
+			PortamentoMPT(pChn, param);
+		return;
+	}
+
 	if (param) pChn->nOldPortaUpDown = param; else param = pChn->nOldPortaUpDown;
 	if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
 	{
@@ -1626,15 +1673,27 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param)
 	{
 		DoFreqSlide(pChn, -(int)(param * 4));
 	}
-
-
 }
 
 
 void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param)
 //-----------------------------------------------------------
 {
-	MidiPortamento(pChn, -param); //Send midi pitch bend event if there's a plugin
+	MidiPortamento(pChn, -1*param); //Send midi pitch bend event if there's a plugin
+
+	if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
+	{
+		if(param)
+			pChn->nOldPortaUpDown = param;
+		else
+			param = pChn->nOldPortaUpDown;
+
+		if(param >= 0xF0)
+			PortamentoFineMPT(pChn, -1*(param - 0xF0));
+		else
+			PortamentoMPT(pChn, -1*param);
+		return;
+	}
 
 	if (param) pChn->nOldPortaUpDown = param; else param = pChn->nOldPortaUpDown;
 	if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
@@ -1774,8 +1833,55 @@ void CSoundFile::ExtraFinePortamentoDown(MODCHANNEL *pChn, UINT param)
 void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 //-----------------------------------------------------------
 {
-	if (param) pChn->nPortamentoSlide = param * 4;
 	pChn->dwFlags |= CHN_PORTAMENTO;
+
+	if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
+	{
+		//Behavior: Param tells number of finesteps(or with glissando fullsteps)
+		//to slide per row(not per tick).	
+		const long old_PortamentoTickSlide = (m_nTickCount != 0) ? pChn->m_PortamentoTickSlide : 0;
+
+		if(param)
+			pChn->nPortamentoSlide = param;
+		else
+			if(pChn->nPortamentoSlide == NULL)
+				return;
+
+
+		if((pChn->nPortamentoDest > 0 && pChn->nPortamentoSlide < 0) ||
+			(pChn->nPortamentoDest < 0 && pChn->nPortamentoSlide > 0))
+			pChn->nPortamentoSlide = -pChn->nPortamentoSlide;
+
+		pChn->m_PortamentoTickSlide = (m_nTickCount + 1.0) * pChn->nPortamentoSlide / m_nMusicSpeed;
+
+		if(pChn->dwFlags & CHN_GLISSANDO)
+		{
+			pChn->m_PortamentoTickSlide *= pChn->pHeader->pTuning->GetFineStepCount();
+			//With glissando interpreting param as fullsteps instead of finesteps.
+		}
+
+		const long slide = pChn->m_PortamentoTickSlide - old_PortamentoTickSlide;
+
+		if(abs(pChn->nPortamentoDest) <= abs(slide))
+		{
+			if(pChn->nPortamentoDest != 0)
+			{
+				pChn->m_PortamentoFineSteps += pChn->nPortamentoDest;
+				pChn->nPortamentoDest = 0;
+				pChn->m_CalculateFreq = true;
+			}
+		}
+		else
+		{
+			pChn->m_PortamentoFineSteps += slide;
+			pChn->nPortamentoDest -= slide;
+			pChn->m_CalculateFreq = true;
+		}
+
+		return;
+	} //End candidate MPT behavior.
+
+	if (param) pChn->nPortamentoSlide = param * 4;
 	if ((pChn->nPeriod) && (pChn->nPortamentoDest) && ((m_nMusicSpeed == 1) || !(m_dwSongFlags & SONG_FIRSTTICK)))  //rewbs.PortaA01fix
 	{
 		if (pChn->nPeriod < pChn->nPortamentoDest)
@@ -1813,6 +1919,10 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 void CSoundFile::Vibrato(MODCHANNEL *p, UINT param)
 //-------------------------------------------------
 {
+	p->m_VibratoDepth = param % 16 / 15.0F;
+	//'New tuning'-thing: 0 - 1 <-> No depth - Full depth.
+
+
 	if (param & 0x0F) p->nVibratoDepth = (param & 0x0F) * 4;
 	if (param & 0xF0) p->nVibratoSpeed = (param >> 4) & 0x0F;
 	p->dwFlags |= CHN_VIBRATO;
@@ -2774,12 +2884,12 @@ void CSoundFile::SetTempo(UINT param)
 // -> CODE#0016
 // -> DESC="default tempo update"
 //			if (m_nMusicTempo > 255) m_nMusicTempo = 255;
-			if (m_nMusicTempo > 512) m_nMusicTempo = 512;
+			if (m_nMusicTempo > GetTempoMax()) m_nMusicTempo = GetTempoMax();
 // -! BEHAVIOUR_CHANGE#0016
 		} else
 		{
 			m_nMusicTempo -= (param & 0x0F); //rewbs.tempoSlideFix: no *2
-			if ((LONG)m_nMusicTempo < 32) m_nMusicTempo = 32;
+			if ((LONG)m_nMusicTempo < GetTempoMin()) m_nMusicTempo = GetTempoMin();
 		}
 	}
 }
@@ -2849,15 +2959,13 @@ DWORD CSoundFile::IsSongFinished(UINT nStartOrder, UINT nStartRow) const
 {
 	UINT nOrd;
 
-	for (nOrd=nStartOrder; nOrd<MAX_ORDERS; nOrd++)
+	for (nOrd=nStartOrder; nOrd<Order.size(); nOrd++)
 	{
 		UINT nPat = Order[nOrd];
-		if (nPat != 0xFE)
+		if (nPat != Patterns.GetIgnoreIndex())
 		{
-			MODCOMMAND *p;
-
-			if (nPat >= MAX_PATTERNS) break;
-			p = Patterns[nPat];
+			if (nPat >= Patterns.Size()) break;
+			const MODPATTERN& p = Patterns[nPat];
 			if (p)
 			{
 				UINT len = PatternSize[nPat] * m_nChannels;
@@ -2879,15 +2987,15 @@ DWORD CSoundFile::IsSongFinished(UINT nStartOrder, UINT nStartRow) const
 			}
 		}
 	}
-	return (nOrd < MAX_ORDERS) ? nOrd : MAX_ORDERS-1;
+	return (nOrd < Order.size()) ? nOrd : Order.size()-1;
 }
 
 
 BOOL CSoundFile::IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const
 //----------------------------------------------------------------------------------------------------------
 {
-	while ((nJumpOrder < MAX_PATTERNS) && (Order[nJumpOrder] == 0xFE)) nJumpOrder++;
-	if ((nStartOrder >= MAX_PATTERNS) || (nJumpOrder >= MAX_PATTERNS)) return FALSE;
+	while ((nJumpOrder < Patterns.Size()) && (Order[nJumpOrder] == Patterns.GetIgnoreIndex())) nJumpOrder++;
+	if ((nStartOrder >= Patterns.Size()) || (nJumpOrder >= Patterns.Size())) return FALSE;
 	// Treat only case with jumps in the same pattern
 	if (nJumpOrder > nStartOrder) return TRUE;
 
@@ -2895,8 +3003,11 @@ BOOL CSoundFile::IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJum
 // -> DESC="#define to set pattern size"
 //	if ((nJumpOrder < nStartOrder) || (nJumpRow >= PatternSize[nStartOrder])
 //	 || (!Patterns[nStartOrder]) || (nStartRow >= 256) || (nJumpRow >= 256)) return FALSE;
+
 	if ((nJumpOrder < nStartOrder) || (nJumpRow >= PatternSize[nStartOrder])
-	 || (!Patterns[nStartOrder]) || (nStartRow >= MAX_PATTERN_ROWS) || (nJumpRow >= MAX_PATTERN_ROWS)) return FALSE;
+	 || (!(Patterns[nStartOrder])) || (nStartRow >= MAX_PATTERN_ROWS) || (nJumpRow >= MAX_PATTERN_ROWS)) return FALSE;
+	
+
 	// See if the pattern is being played backward
 //	BYTE row_hist[256];
 	BYTE row_hist[MAX_PATTERN_ROWS];
@@ -2916,7 +3027,7 @@ BOOL CSoundFile::IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJum
 	{
 		if (row >= nRows) return TRUE;
 		row_hist[row] = TRUE;
-		MODCOMMAND *p = Patterns[nStartOrder] + row * m_nChannels;
+		const MODCOMMAND* p = Patterns[nStartOrder].GetpModCommand(row, m_nChannels);
 		row++;
 		int breakrow = -1, posjump = 0;
 		for (UINT i=0; i<m_nChannels; i++, p++)
@@ -3160,7 +3271,7 @@ void CSoundFile::HandlePatternTransitionEvents()
 {
 	if (m_bPatternTransitionOccurred) {
 		// MPT sequence override
-		if ((m_nSeqOverride > 0) && (m_nSeqOverride <= MAX_ORDERS))
+		if ((m_nSeqOverride > 0) && (m_nSeqOverride <= Order.size()))
 		{
 			if (m_dwSongFlags & SONG_PATTERNLOOP) {
 				m_nPattern = Order[m_nSeqOverride-1];
@@ -3181,6 +3292,38 @@ void CSoundFile::HandlePatternTransitionEvents()
 
 		m_bPatternTransitionOccurred=false;
 	}
+}
+
+
+void CSoundFile::PortamentoMPT(MODCHANNEL* pChn, int param)
+//----------------------------------------------------------------
+{
+	//Behavior: Modifies portamento by param-steps on every tick.
+	//Note that step meaning depends on tuning.
+
+	pChn->m_PortamentoFineSteps += param;
+	pChn->m_CalculateFreq = true;
+}
+
+
+void CSoundFile::PortamentoFineMPT(MODCHANNEL* pChn, int param)
+//-------------------------------------------------------------------
+{
+	//Behavior: Divides portamento change between ticks/row. For example
+	//if Ticks/row == 6, and param == +-6, portamento goes up/down by one tuning-dependent
+	//fine step every tick.
+
+	if(m_nTickCount == 0)
+		pChn->nOldFinePortaUpDown = 0;
+
+	const int tickParam = (m_nTickCount + 1.0) * param / m_nMusicSpeed;
+	pChn->m_PortamentoFineSteps += (param >= 0) ? tickParam - pChn->nOldFinePortaUpDown : tickParam + pChn->nOldFinePortaUpDown;
+	if(m_nTickCount + 1 == m_nMusicSpeed)
+		pChn->nOldFinePortaUpDown = abs(param);
+	else
+		pChn->nOldFinePortaUpDown = abs(tickParam);
+
+	pChn->m_CalculateFreq = true;
 }
 
 

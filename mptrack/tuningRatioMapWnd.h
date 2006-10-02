@@ -12,7 +12,7 @@ class CTuningRatioMapWnd: public CStatic
 {
 	friend class CTuningDialog;
 protected:
-	CTuning* m_pTuning;
+	const CTuning* m_pTuning;
 
 	CTuningDialog* m_pParent;
 

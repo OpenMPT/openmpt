@@ -83,11 +83,12 @@ class CModDoc: public CDocument
 protected:
 	LPSTR m_lpszLog;
 	CSoundFile m_SndFile;
+
 	BOOL m_bPaused;
 	HWND m_hWndFollow;
 	DWORD m_dwNotifyType;
 	PATTERNUNDOBUFFER PatternUndo[MAX_UNDO_LEVEL];
-	BYTE OrderUndo[MAX_UNDO_LEVEL][MAX_ORDERS];  //rewbs.orderListUndo
+	vector<vector<BYTE> > OrderUndo;
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -143,7 +144,6 @@ public:
 public:
 	BOOL ChangeModType(UINT nNewType);
 	BOOL ChangeNumChannels(UINT nNewChannels);
-	BOOL ResizePattern(UINT nPattern, UINT nRows);
 	BOOL ConvertInstrumentsToSamples();;
 	BOOL RemoveUnusedSamples();
 	BOOL RemoveUnusedInstruments();
@@ -217,7 +217,7 @@ public:
 	void RecordParamChange(int slot, long param);
 	void LearnMacro(int macro, long param);
 
-	BOOL RemoveChannels(BOOL bChnMask[MAX_CHANNELS]); //Relabsoluness 20.12.2005
+	BOOL RemoveChannels(BOOL bChnMask[MAX_CHANNELS]);
 
 	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 

@@ -97,7 +97,8 @@ CModDoc::CModDoc()
 	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
 	memset(PatternUndo, 0, sizeof(PatternUndo));
-	memset(OrderUndo, 0, sizeof(OrderUndo));	 //rewbs.orderListUndo
+	vector<BYTE> temp; temp.resize(MAX_UNDO_LEVEL, 0);
+	OrderUndo.resize(m_SndFile.Order.size(), temp);
 #ifdef _DEBUG
 	MODCHANNEL *p = m_SndFile.Chn;
 	if (((DWORD)p) & 7) Log("MODCHANNEL is not aligned (0x%08X)\n", p);
@@ -133,7 +134,7 @@ BOOL CModDoc::OnNewDocument()
 	if (!CDocument::OnNewDocument()) return FALSE;
 
 	m_SndFile.Create(NULL, this, 0);
-	m_SndFile.m_nType = CTrackApp::GetDefaultDocType();
+	m_SndFile.ChangeModTypeTo(CTrackApp::GetDefaultDocType());
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -190,7 +191,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			pEmbeddedBank = new CDLSBank();
 			pEmbeddedBank->Open(lpszPathName);
 		}
-		m_SndFile.m_nType = MOD_TYPE_IT;
+		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
 		BeginWaitCursor();
 		LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
 		// Scan Instruments
@@ -319,17 +320,17 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_AMF0:
 	case MOD_TYPE_MTM:
 	case MOD_TYPE_669:
-		m_SndFile.m_nType = MOD_TYPE_MOD;
+		m_SndFile.ChangeModTypeTo(MOD_TYPE_MOD);
 		break;
 	case MOD_TYPE_MED:
 	case MOD_TYPE_OKT:
 	case MOD_TYPE_AMS:
 	case MOD_TYPE_MT2:
-		m_SndFile.m_nType = MOD_TYPE_XM;
+		m_SndFile.ChangeModTypeTo(MOD_TYPE_XM);
 		if ((m_SndFile.m_nDefaultTempo == 125) && (m_SndFile.m_nDefaultSpeed == 6) && (!m_SndFile.m_nInstruments))
 		{
 			m_SndFile.m_nType = MOD_TYPE_MOD;
-			for (UINT i=0; i<MAX_PATTERNS; i++)
+			for (UINT i=0; i<m_SndFile.Patterns.Size(); i++)
 				if ((m_SndFile.Patterns[i]) && (m_SndFile.PatternSize[i] != 64))
 					m_SndFile.m_nType = MOD_TYPE_XM;
 		}
@@ -603,11 +604,10 @@ BOOL CModDoc::InitializeMod()
 //		m_SndFile.m_nChannels = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 8 : 16;
 		m_SndFile.m_nChannels = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 8 : 32;
 // -! BEHAVIOUR_CHANGE#0006
-		if (m_SndFile.Order[0] >= MAX_PATTERNS)	m_SndFile.Order[0] = 0;
+		if (m_SndFile.Order[0] >= m_SndFile.Patterns.Size())	m_SndFile.Order[0] = 0;
 		if (!m_SndFile.Patterns[0])
 		{
-			m_SndFile.PatternSize[0] = 64;
-			m_SndFile.Patterns[0] = CSoundFile::AllocatePattern(m_SndFile.PatternSize[0], m_SndFile.m_nChannels);
+			m_SndFile.Patterns.Insert(0, 64);
 		}
 		strcpy(m_SndFile.m_szNames[0], "untitled");
 		m_SndFile.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
@@ -1208,7 +1208,7 @@ BOOL CModDoc::IsInstrumentMuted(UINT nInstr) const
 UINT CModDoc::GetPatternSize(UINT nPat) const
 //-------------------------------------------
 {
-	if ((nPat < MAX_PATTERNS) && (m_SndFile.Patterns[nPat])) return m_SndFile.PatternSize[nPat];
+	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat])) return m_SndFile.PatternSize[nPat];
 	return 0;
 }
 
@@ -1346,7 +1346,7 @@ void CModDoc::OnFileWaveConvert()
 	// Saving as wave file
 // -> CODE#0024
 // -> DESC="wav export update"
-	UINT p,n = 1;
+	UINT p = 0,n = 1;
 	DWORD flags[MAX_BASECHANNELS];
 	CHAR channel[MAX_CHANNELNAME+2];
 
@@ -1646,18 +1646,18 @@ void CModDoc::OnPlayerPause()
 			UINT nNextRow = m_SndFile.m_nNextRow;
 			pMainFrm->PauseMod();
 			BEGIN_CRITICAL();
-			if ((bLoop) && (nPat < MAX_PATTERNS))
+			if ((bLoop) && (nPat < m_SndFile.Patterns.Size()))
 			{
-				if ((m_SndFile.m_nCurrentPattern < MAX_ORDERS) && (m_SndFile.Order[m_SndFile.m_nCurrentPattern] == nPat))
+				if ((m_SndFile.m_nCurrentPattern < m_SndFile.Order.size()) && (m_SndFile.Order[m_SndFile.m_nCurrentPattern] == nPat))
 				{
 					m_SndFile.m_nNextPattern = m_SndFile.m_nCurrentPattern;
 					m_SndFile.m_nNextRow = nNextRow;
 					m_SndFile.m_nRow = nRow;
 				} else
 				{
-					for (UINT i=0; i<MAX_ORDERS; i++)
+					for (UINT i=0; i<m_SndFile.Order.size(); i++)
 					{
-						if (m_SndFile.Order[i] == 0xFF) break;
+						if (m_SndFile.Order[i] == m_SndFile.Patterns.GetInvalidIndex()) break;
 						if (m_SndFile.Order[i] == nPat)
 						{
 							m_SndFile.m_nCurrentPattern = i;
@@ -1695,7 +1695,7 @@ void CModDoc::OnPlayerPlayFromStart()
 		CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
 		{
-			//Relabsoluness.note: User has sent play song command: set loop pattern checkbox to false.
+			//User has sent play song command: set loop pattern checkbox to false.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
 		
@@ -1866,10 +1866,10 @@ void CModDoc::OnInsertPattern()
 	if (pat >= 0)
 	{
 		UINT ord = 0;
-		for (UINT i=0; i<MAX_ORDERS; i++)
+		for (UINT i=0; i<m_SndFile.Order.size(); i++)
 		{
 			if (m_SndFile.Order[i] == pat) ord = i;
-			if (m_SndFile.Order[i] == 0xFF) break;
+			if (m_SndFile.Order[i] == m_SndFile.Patterns.GetInvalidIndex()) break;
 		}
 		ViewPattern(pat, ord);
 	}
@@ -1989,6 +1989,7 @@ typedef struct MPTEFFECTINFO
 #define MOD_TYPE_XMITMPT (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)
 #define MOD_TYPE_ITMPT (MOD_TYPE_IT|MOD_TYPE_MPT)
 #define MAX_FXINFO		66					//rewbs.smoothVST, increased from 64... I wonder what this will break?
+
 
 const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 {
@@ -2704,14 +2705,14 @@ HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
 		ord = patternViewState->nOrder;
 	}
 	//rewbs.fix3185: if position is invalid, go to start of song.
-	if (ord > MAX_ORDERS) {
+	if (ord >= m_SndFile.Order.size()) {
 		ord = 0;
 		pat = pSndFile->Order[ord];
 	}
-	if (pat > MAX_PATTERNS) {
+	if (pat >= m_SndFile.Patterns.Size()) {
 		pat=0;
 	}
-	if (row > pSndFile->PatternSize[pat]) {
+	if (row >= pSndFile->PatternSize[pat]) {
 		row=0;
 	}
 	//end rewbs.fix3185
@@ -2797,7 +2798,7 @@ void CModDoc::OnPatternRestart()
 	{
 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
 		{
-			//Relabsoluness.note: User has sent play pattern command: set loop pattern checkbox to true.
+			//User has sent play pattern command: set loop pattern checkbox to true.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
 		}
                    
@@ -2817,7 +2818,7 @@ void CModDoc::OnPatternRestart()
 			pSndFile->Chn[i].nFadeOutVol = 0;
 			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
 		}
-		if ((nOrd < MAX_PATTERNS) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = nOrd;
+		if ((nOrd < m_SndFile.Order.size()) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = nOrd;
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = 0;
@@ -2848,7 +2849,7 @@ void CModDoc::OnPatternPlay()
 	{
 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
 		{
-			//Relabsoluness.note: User has sent play pattern command: set loop pattern checkbox to true.
+			//User has sent play pattern command: set loop pattern checkbox to true.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
 		}
                    
@@ -2865,8 +2866,7 @@ void CModDoc::OnPatternPlay()
 		{
 			pSndFile->Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
 		}
-		if ((nOrd < MAX_PATTERNS) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = nOrd;
-		//Relabs.note: Some jumps occured when using pattern play and loop pattern checkbox - above line hopefully fixes it.
+		if ((nOrd < m_SndFile.Order.size()) && (pSndFile->Order[nOrd] == nPat)) pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = nOrd;
 		pSndFile->m_dwSongFlags &= ~(SONG_PAUSED|SONG_STEP);
 		pSndFile->LoopPattern(nPat);
 		pSndFile->m_nNextRow = nRow;
@@ -2897,7 +2897,7 @@ void CModDoc::OnPatternPlayNoLoop()
 	{
 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
 		{
-			//Relabsoluness.note: User has sent play song command: set loop pattern checkbox to false.
+			//User has sent play song command: set loop pattern checkbox to false.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
                    

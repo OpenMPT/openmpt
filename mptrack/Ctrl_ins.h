@@ -81,11 +81,15 @@ protected:
 	//Tuning
 	CComboBox m_ComboTuning;
 	void UpdateTuningComboBox();
+	void BuildTuningComboBox();
+	static const pair<string, WORD> s_TuningNotFound;
+	//first <-> string, second <-> place where to put tuning name.
 
 	//Pitch/Tempo lock
 	CEdit m_EditPitchTempoLock;
 	CButton m_CheckPitchTempoLock;
 
+	
 public:
 	CCtrlInstruments();
 	virtual ~CCtrlInstruments();
@@ -97,6 +101,8 @@ public:
 	BOOL EditSample(UINT nSample);
 	VOID UpdateFilterText();
 	LONG* GetSplitPosRef() {return &CMainFrame::glInstrumentWindowHeight;} 	//rewbs.varWindowSize
+
+	
 
 public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)

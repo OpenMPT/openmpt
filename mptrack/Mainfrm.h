@@ -11,6 +11,7 @@
 #include "sndfile.h"
 #include "CommandSet.h"
 #include "inputhandler.h"
+#include "mptrack.h"
 
 class CInputHandler;
 class CMainFrame;

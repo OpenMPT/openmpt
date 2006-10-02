@@ -11,7 +11,7 @@
 
 #pragma warning(disable:4244)
 
-static CString MidiCCNames[MIDICC_end] ={	//TODO: find a better home for these.
+static CString MidiCCNames[MIDICC_end+1] ={	//TODO: find a better home for these.
 "BankSelect [Coarse]",
 "ModulationWheel [Coarse]",
 "Breathcontroller [Coarse]",
@@ -841,9 +841,9 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 	CComboBox *combo;
 	CDialog::OnInitDialog();
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
-	if ((m_pModDoc) && (m_nPattern < MAX_PATTERNS) && (combo))
+	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	if ((m_pModDoc) && (m_nPattern < pSndFile->Patterns.Size()) && (combo))
 	{
-		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		CHAR s[256];
 		UINT nrows = pSndFile->PatternSize[m_nPattern];
 
@@ -878,7 +878,8 @@ void CPatternPropertiesDlg::OnOK()
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
 //	if ((n >= 2) && (n <= 256) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
-	if ((n >= 2) && (n <= MAX_PATTERN_ROWS) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
+	//if ((n >= 2) && (n <= MAX_PATTERN_ROWS) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
+	if(m_pModDoc) m_pModDoc->GetSoundFile()->Patterns[m_nPattern].Resize(n);
 // -! BEHAVIOUR_CHANGE#0008
 	CDialog::OnOK();
 }
@@ -968,7 +969,7 @@ BOOL CEditCommand::ShowEditWindow(UINT nPat, DWORD dwCursor)
 	UINT nRow = dwCursor >> 16;
 	UINT nChannel = (dwCursor & 0xFFFF) >> 3;
 
-	if ((nPat >= MAX_PATTERNS) || (!m_pModDoc)
+	if ((nPat >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 	 || (nRow >= pSndFile->PatternSize[nPat]) || (nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[nPat])) return FALSE;
 	m_Command = pSndFile->Patterns[nPat][nRow * pSndFile->m_nChannels + nChannel];
@@ -1012,7 +1013,7 @@ void CEditCommand::UpdateNote(UINT note, UINT instr)
 //--------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_nPattern >= MAX_PATTERNS) || (!m_pModDoc)
+	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 	 || (m_nRow >= pSndFile->PatternSize[m_nPattern])
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
@@ -1036,7 +1037,7 @@ void CEditCommand::UpdateVolume(UINT volcmd, UINT vol)
 //----------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_nPattern >= MAX_PATTERNS) || (!m_pModDoc)
+	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 	 || (m_nRow >= pSndFile->PatternSize[m_nPattern])
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
@@ -1059,7 +1060,7 @@ void CEditCommand::UpdateEffect(UINT command, UINT param)
 //-------------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_nPattern >= MAX_PATTERNS) || (!m_pModDoc)
+	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 	 || (m_nRow >= pSndFile->PatternSize[m_nPattern])
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
@@ -1135,7 +1136,7 @@ void CPageEditNote::UpdateDialog()
 		combo->SetItemData(combo->AddString("No note"), 0);
 		for (UINT i=1; i<=120; i++)
 		{
-			wsprintf(s, "%s%d", szNoteNames[(i-1)%12], (i-1)/12);
+			wsprintf(s, "%s", pSndFile->GetNoteName(i, m_nInstr).c_str());
 			combo->SetItemData(combo->AddString(s), i);
 		}
 		if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
@@ -1189,7 +1190,18 @@ void CPageEditNote::OnNoteChanged()
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
 		int n = combo->GetCurSel();
-		if (n >= 0) m_nInstr = combo->GetItemData(n);
+		if(n >= 0)
+		{
+			const UINT oldInstr = m_nInstr;
+			CSoundFile* pSndFile = m_pModDoc->GetSoundFile();
+			m_nInstr = combo->GetItemData(n);
+			//Checking whether note names should be recreated.
+			if(pSndFile && pSndFile->Headers[m_nInstr] && pSndFile->Headers[oldInstr])
+			{
+				if(pSndFile->Headers[m_nInstr]->pTuning != pSndFile->Headers[oldInstr]->pTuning)
+					UpdateDialog();
+			}
+		}
 	}
 	if (m_pParent) m_pParent->UpdateNote(m_nNote, m_nInstr);
 }
@@ -2559,7 +2571,9 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 	{
 		UINT nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
-		wsprintf(s, "%s%d", szNoteNames[lParam%12], lParam/12+nBaseOctave);
+		
+		wsprintf(s, "%s", m_pSndFile->GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str());
+
 		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
 		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample > 0) && (nSample < MAX_SAMPLES) && (penv))
 		{

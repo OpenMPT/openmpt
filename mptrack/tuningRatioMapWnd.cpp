@@ -75,7 +75,7 @@ void CTuningRatioMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
-			string str = Stringify(m_pTuning->GetFrequencyRatio(nPos - m_nNoteCentre, 0));
+			string str = Stringify(m_pTuning->GetFrequencyRatio(nPos - m_nNoteCentre));
 			dc.DrawText(str.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		}
 		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);

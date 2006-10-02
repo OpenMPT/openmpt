@@ -1941,8 +1941,8 @@ void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
 			m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_INSERTPOINT, (lastpoint < maxpoint) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_REMOVEPOINT, ((m_nDragItem) && (lastpoint > 1)) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->m_nType & MOD_TYPE_IT) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (pSndFile->m_nType&MOD_TYPE_IT && m_nEnv==ENV_VOLUME) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (pSndFile->m_nType&(MOD_TYPE_IT|MOD_TYPE_MPT) && m_nEnv==ENV_VOLUME) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SETLOOP, (EnvGetLoop()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SUSTAIN, (EnvGetSustain()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_CARRY, (EnvGetCarry()) ? MF_CHECKED : MF_UNCHECKED);
@@ -2379,7 +2379,7 @@ void CViewInstrument::PlayNote(UINT note)
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
 			m_nPlayingChannel= pModDoc->PlayNote(note, m_nInstrument, 0, FALSE); //rewbs.instViewNNA
 			s[0] = 0;
-			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
+			if ((note) && (note <= 120)) wsprintf(s, "%s", pModDoc->GetSoundFile()->GetNoteName(static_cast<CTuning::STEPTYPE>(note), m_nInstrument).c_str());
 			pMainFrm->SetInfoText(s);
 		}
 	}

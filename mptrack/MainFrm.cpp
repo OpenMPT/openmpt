@@ -646,6 +646,9 @@ CMainFrame::~CMainFrame()
 	delete m_InputHandler; 	//rewbs.customKeys
 	delete m_pAutoSaver; //rewbs.autosaver
 	delete m_pPerfCounter;
+
+	//Saving statictunings here.
+	CSoundFile::SaveStaticTunings();
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -1984,11 +1987,9 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 	m_WaveFile.m_nSamples = 1;
 	m_WaveFile.Order[0] = 0;
 	m_WaveFile.Order[1] = 1;
-	m_WaveFile.Order[2] = 0xFF;
-	m_WaveFile.PatternSize[0] = 64;
-	m_WaveFile.PatternSize[1] = 64;
-	m_WaveFile.Patterns[0] = CSoundFile::AllocatePattern(64, 4);
-	m_WaveFile.Patterns[1] = CSoundFile::AllocatePattern(64, 4);
+	m_WaveFile.Order[2] = m_WaveFile.Patterns.GetInvalidIndex();
+	m_WaveFile.Patterns.Insert(0,64);
+	m_WaveFile.Patterns.Insert(1,64);
 	if (m_WaveFile.Patterns[0])
 	{
 		if (!nNote) nNote = 5*12+1;
@@ -2059,11 +2060,9 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample
 	}
 	m_WaveFile.Order[0] = 0;
 	m_WaveFile.Order[1] = 1;
-	m_WaveFile.Order[2] = 0xFF;
-	m_WaveFile.PatternSize[0] = 64;
-	m_WaveFile.PatternSize[1] = 64;
-	m_WaveFile.Patterns[0] = CSoundFile::AllocatePattern(64, 4);
-	m_WaveFile.Patterns[1] = CSoundFile::AllocatePattern(64, 4);
+	m_WaveFile.Order[2] = m_WaveFile.Patterns.GetInvalidIndex();
+	m_WaveFile.Patterns.Insert(0, 64);
+	m_WaveFile.Patterns.Insert(1, 64);
 	if (m_WaveFile.Patterns[0])
 	{
 		if (!nNote) nNote = 5*12+1;
@@ -2539,7 +2538,7 @@ void CMainFrame::OnUpdateTime(CCmdUI *)
 		if (m_pSndFile != &m_WaveFile)
 		{
 			UINT nPat = m_pSndFile->m_nPattern;
-			if (nPat < MAX_PATTERNS)
+			if(nPat < m_pSndFile->Patterns.Size())
 			{
 				if (nPat < 10) strcat(s, " ");
 				if (nPat < 100) strcat(s, " ");

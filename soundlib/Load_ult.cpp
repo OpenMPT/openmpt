@@ -110,7 +110,7 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 			pins->nLoopEnd >>= 1;
 		}
 	}
-	memcpy(Order, lpStream+dwMemPos, 256);
+	Order.ReadAsByte(lpStream+dwMemPos, 256, dwMemLength-dwMemPos);
 	dwMemPos += 256;
 	m_nChannels = lpStream[dwMemPos] + 1;
 	nop = lpStream[dwMemPos+1] + 1;
@@ -135,10 +135,9 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 	// Allocating Patterns
 	for (UINT nAllocPat=0; nAllocPat<nop; nAllocPat++)
 	{
-		if (nAllocPat < MAX_PATTERNS)
+		if (nAllocPat < Patterns.Size())
 		{
-			PatternSize[nAllocPat] = 64;
-			Patterns[nAllocPat] = AllocatePattern(64, m_nChannels);
+			Patterns.Insert(nAllocPat, 64);
 		}
 	}
 	// Reading Patterns

@@ -280,8 +280,7 @@ BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	#ifdef MT2DEBUG
 			Log("Pattern #%d @%04X: %d lines, %d bytes\n", iPat, dwMemPos-6, nLines, pmp->wDataLen);
 	#endif
-			PatternSize[iPat] = nLines;
-			Patterns[iPat] = AllocatePattern(nLines, m_nChannels);
+			Patterns.Insert(iPat, nLines);
 			if (!Patterns[iPat]) return TRUE;
 			MODCOMMAND *m = Patterns[iPat];
 			UINT len = wDataLen;

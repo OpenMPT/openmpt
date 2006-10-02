@@ -4,6 +4,10 @@
 class CModDoc;
 class CModTree;
 
+#include <vector>
+
+using std::vector;
+
 enum {
 	MODITEM_NULL=0,
 	MODITEM_ORDER,
@@ -37,17 +41,36 @@ enum {
 
 #define MODTREE_MAX_DOCUMENTS		32
 
-typedef struct _MODTREEDOCINFO
+struct MODTREEDOCINFO
 {
 	CModDoc *pModDoc;
 	UINT nOrdSel;
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
-	HTREEITEM tiPatterns[MAX_PATTERNS];
+	vector<HTREEITEM> tiPatterns;
 	HTREEITEM tiSamples[MAX_SAMPLES];
 	HTREEITEM tiInstruments[MAX_INSTRUMENTS];
-	HTREEITEM tiOrders[MAX_ORDERS];
+	vector<HTREEITEM> tiOrders;
 	HTREEITEM tiEffects[MAX_MIXPLUGINS];
-} MODTREEDOCINFO, *PMODTREEDOCINFO;
+
+	
+	MODTREEDOCINFO(const CSoundFile* const pSndFile)
+	{
+		pModDoc = NULL;
+		nOrdSel = 0;
+		hSong = hPatterns = hSamples = hInstruments = hComments = hOrders = hEffects = NULL;
+		if(pSndFile != NULL)
+		{
+			tiPatterns.resize(pSndFile->Patterns.Size(), NULL);
+			tiOrders.resize(pSndFile->Order.size(), NULL);
+		}
+		memset(tiSamples, 0, sizeof(tiSamples));
+		memset(tiInstruments, 0, sizeof(tiInstruments));
+		memset(tiEffects, 0, sizeof(tiEffects));
+	}
+};
+
+typedef MODTREEDOCINFO _MODTREEDOCINFO;
+typedef MODTREEDOCINFO* PMODTREEDOCINFO;
 
 
 //=============================================

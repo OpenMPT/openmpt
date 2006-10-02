@@ -7,6 +7,10 @@
 #include "view_pat.h"
 #include "EffectVis.h"		//rewbs.fxvis
 #include "ChannelManagerDlg.h"
+#include "../soundlib/tuning_template.h"
+#include <string>
+
+using std::string;
 
 // Headers
 #define ROWHDR_WIDTH		32	// Row header
@@ -269,8 +273,11 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcy = pfnt->nAlphaNZ_Y + 13 * COLUMN_HEIGHT;
 		break;
 	case '#':
-		srcx = pfnt->nAlphaAM_X;
-		srcy = pfnt->nAlphaAM_Y + 13 * COLUMN_HEIGHT;
+		srcx = pfnt->nNoteX + pfnt->nNoteWidth/2;
+		srcy = pfnt->nNoteY + 2*COLUMN_HEIGHT;
+		//TODO: '#' doesn't show properly in effect column.
+		//srcx = pfnt->nAlphaAM_X;
+		//srcy = pfnt->nAlphaAM_Y + 13 * COLUMN_HEIGHT;
 		break;
 	//rewbs.smoothVST
 	case '\\':
@@ -284,16 +291,24 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcy = pfnt->nAlphaNZ_Y + 15 * COLUMN_HEIGHT;
 		break;
 	//end rewbs.velocity
-
+	case ' ':
+		srcx = pfnt->nClrX;
+		srcy = pfnt->nClrY;
+		break;
+	case '-':
+		srcx = pfnt->nNoteX + pfnt->nNoteWidth/2;
+		srcy = pfnt->nNoteY + COLUMN_HEIGHT;
+		break;
 	}
 	m_Dib.TextBlt(x, y, sizex, COLUMN_HEIGHT, srcx+ofsx, srcy);
 }
 
 
-void CViewPattern::DrawNote(int x, int y, UINT note)
-//--------------------------------------------------
+void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
+//---------------------------------------------------------------------------
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
+	
 	UINT xsrc = pfnt->nNoteX, ysrc = pfnt->nNoteY, dx = pfnt->nEltWidths[0];
 	if (!note)
 	{
@@ -308,11 +323,22 @@ void CViewPattern::DrawNote(int x, int y, UINT note)
 		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 14*COLUMN_HEIGHT);
 	} else
 	{
-		UINT o = (note-1) / 12;
-		UINT n = (note-1) % 12;
-		m_Dib.TextBlt(x, y, pfnt->nNoteWidth, COLUMN_HEIGHT, xsrc, ysrc+(n+1)*COLUMN_HEIGHT);
-		m_Dib.TextBlt(x+pfnt->nNoteWidth, y, pfnt->nOctaveWidth, COLUMN_HEIGHT,
-						pfnt->nNumX, pfnt->nNumY+o*COLUMN_HEIGHT);
+		if(pTuning)
+		{
+			string noteStr = pTuning->GetNoteName(static_cast<CTuning::STEPTYPE>(note-NOTE_MIDDLEC));
+			noteStr.resize(3, ' ');
+			DrawLetter(x, y, noteStr[0]);
+			DrawLetter(x + pfnt->nNoteWidth/2, y, noteStr[1]);
+			DrawLetter(x + pfnt->nNoteWidth, y, noteStr[2]);
+		}
+		else //Original
+		{
+			UINT o = (note-1) / 12; //Octave
+			UINT n = (note-1) % 12; //Note
+			m_Dib.TextBlt(x, y, pfnt->nNoteWidth, COLUMN_HEIGHT, xsrc, ysrc+(n+1)*COLUMN_HEIGHT);
+			m_Dib.TextBlt(x+pfnt->nNoteWidth, y, pfnt->nOctaveWidth, COLUMN_HEIGHT,
+							pfnt->nNumX, pfnt->nNumY+o*COLUMN_HEIGHT);
+		}
 	}
 }
 
@@ -491,13 +517,13 @@ void CViewPattern::OnDraw(CDC *pDC)
 			{
 				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 			
-				if ((nCurOrder > 0) && (nCurOrder < MAX_ORDERS) && (pSndFile->Order[nCurOrder] == m_nPattern))
+				if ((nCurOrder > 0) && (nCurOrder < pSndFile->Order.size()) && (pSndFile->Order[nCurOrder] == m_nPattern))
 				{
 					nPrevPat = pSndFile->Order[nCurOrder-1];
 					bPrevPatFound = TRUE;
 				}
 			}
-			if ((bPrevPatFound) && (nPrevPat < MAX_PATTERNS) && (pSndFile->Patterns[nPrevPat]))
+			if ((bPrevPatFound) && (nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat]))
 			{
 				UINT nPrevRows = pSndFile->PatternSize[nPrevPat];
 				UINT n = (nSkip < nPrevRows) ? nSkip : nPrevRows;
@@ -535,12 +561,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 			BOOL bNextPatFound = FALSE;
 			UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 			
-			if ((nCurOrder+1 < MAX_ORDERS) && (pSndFile->Order[nCurOrder] == m_nPattern))
+			if ((nCurOrder+1 < pSndFile->Order.size()) && (pSndFile->Order[nCurOrder] == m_nPattern))
 			{
 				nNextPat = pSndFile->Order[nCurOrder+1];
 				bNextPatFound = TRUE;
 			}
-			if ((bNextPatFound) && (nNextPat < MAX_PATTERNS) && (pSndFile->Patterns[nNextPat]))
+			if ((bNextPatFound) && (nNextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nNextPat]))
 			{
 				UINT nNextRows = pSndFile->PatternSize[nNextPat];
 				UINT n = ((UINT)nVisRows < nNextRows) ? nVisRows : nNextRows;
@@ -757,7 +783,10 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				}
 				// Drawing note
 				m_Dib.SetTextColor(tx_col, bk_col);
-				DrawNote(xbmp+x, 0, m->note);
+				if(pSndFile->m_nType == MOD_TYPE_MPT && m->instr < MAX_INSTRUMENTS && pSndFile->Headers[m->instr])
+					DrawNote(xbmp+x, 0, m->note, pSndFile->Headers[m->instr]->pTuning);
+				else //Original
+					DrawNote(xbmp+x, 0, m->note);
 			}
 			x += pfnt->nEltWidths[0];
 			// Instrument

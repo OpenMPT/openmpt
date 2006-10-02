@@ -166,10 +166,13 @@ BOOL CCtrlPatterns::OnInitDialog()
 	// Spin controls
 	m_SpinSpacing.SetRange(0, 16);
 	m_SpinSpacing.SetPos(CMainFrame::gnPatternSpacing);
+
 	m_SpinInstrument.SetRange(-1, 1);
 	m_SpinInstrument.SetPos(0);
+
 	m_SpinOrderListMargins.SetRange(0, m_OrderList.GetShownOrdersMax());
 	m_SpinOrderListMargins.SetPos(m_OrderList.GetOrderlistMargins());
+
 	SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::gnPatternSpacing);
 	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetOrderlistMargins());
 	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
@@ -177,6 +180,8 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	UpdateView(HINT_MODTYPE|HINT_PATNAMES, NULL);
 	RecalcLayout();
+
+	
 
 // -> CODE#0012
 // -> DESC="midi keyboard split"
@@ -222,6 +227,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	m_bInitialized = TRUE;
 	UnlockControls();
+
 	return FALSE;
 }
 
@@ -550,6 +556,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 //-----------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
+	CSoundFile* pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
 	if ((pModDoc) && (m_pParent))
 	{
@@ -560,28 +567,26 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		}
 		m_pParent->InstrumentChanged(-1);
 	}
-	if ((lParam >= 0) && (lParam < MAX_PATTERNS))
+	if ((lParam >= 0) && (lParam < m_pSndFile->Patterns.Size()))
 	{
-		if (pModDoc)
+		if (pSndFile)
 		{
-			CSoundFile *pSndFile = pModDoc->GetSoundFile();
-			for (UINT i=0; i<MAX_ORDERS; i++)
+			for (UINT i=0; i<pSndFile->Order.size(); i++)
 			{
 				if (pSndFile->Order[i] == (UINT)lParam)
 				{
 					m_OrderList.SetCurSel(i, TRUE);
 					break;
 				}
-				if (pSndFile->Order[i] == 0xFF) break;
+				if (pSndFile->Order[i] == pSndFile->Patterns.GetInvalidIndex()) break;
 			}
 		}
 		SetCurrentPattern(lParam);
 	} 
-	else if ((lParam >= 0x8000) && (lParam < MAX_ORDERS + 0x8000)) 
+	else if ((lParam >= 0x8000) && (lParam < pSndFile->Order.size() + 0x8000)) 
 	{
-		if (pModDoc)
+		if (pSndFile)
 		{
-			CSoundFile *pSndFile = pModDoc->GetSoundFile();
 			lParam &= 0x7FFF;
 			m_OrderList.SetCurSel(lParam);
 			SetCurrentPattern(pSndFile->Order[lParam]);
@@ -693,6 +698,8 @@ void CCtrlPatterns::OnOrderListMarginsChanged()
 	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, i);
 
 }
+
+
 void CCtrlPatterns::OnSpacingChanged()
 //------------------------------------
 {
@@ -822,13 +829,13 @@ void CCtrlPatterns::OnPatternNew()
 		UINT nCurOrd = m_OrderList.GetCurSel();
 		UINT pat = pSndFile->Order[nCurOrd];
 		UINT rows = 64;
-		if ((pat < MAX_PATTERNS) && (pSndFile->Patterns[pat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
+		if ((pat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[pat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			rows = pSndFile->PatternSize[pat];
 			if (rows < 32) rows = 32;
 		}
 		LONG nNewPat = m_pModDoc->InsertPattern(nCurOrd+1, rows);
-		if ((nNewPat >= 0) && (nNewPat < MAX_PATTERNS))
+		if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()))
 		{
 			m_OrderList.SetCurSel(nCurOrd+1);
 			m_OrderList.InvalidateRect(NULL, FALSE);
@@ -850,7 +857,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 		UINT nCurOrd = m_OrderList.GetCurSel();
 		UINT nCurPat = pSndFile->Order[nCurOrd];
 		UINT rows = 64;
-		if (nCurPat < MAX_PATTERNS)
+		if (nCurPat < pSndFile->Patterns.Size())
 		{
 			if ((pSndFile->Patterns[nCurPat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
@@ -858,7 +865,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 				if (rows < 16) rows = 16;
 			}
 			LONG nNewPat = m_pModDoc->InsertPattern(nCurOrd+1, rows);
-			if ((nNewPat >= 0) && (nNewPat < MAX_PATTERNS))
+			if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()))
 			{
 				MODCOMMAND *pSrc = pSndFile->Patterns[nCurPat];
 				MODCOMMAND *pDest = pSndFile->Patterns[nNewPat];

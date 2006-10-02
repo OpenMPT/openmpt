@@ -149,7 +149,7 @@ BOOL CSoundFile::IsSampleUsed(UINT nSample)
 		}
 	} else
 	{
-		for (UINT i=0; i<MAX_PATTERNS; i++) if (Patterns[i])
+		for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 		{
 			MODCOMMAND *m = Patterns[i];
 			for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
@@ -166,7 +166,7 @@ BOOL CSoundFile::IsInstrumentUsed(UINT nInstr)
 //--------------------------------------------
 {
 	if ((!nInstr) || (nInstr > m_nInstruments) || (!Headers[nInstr])) return FALSE;
-	for (UINT i=0; i<MAX_PATTERNS; i++) if (Patterns[i])
+	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 	{
 		MODCOMMAND *m = Patterns[i];
 		for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)

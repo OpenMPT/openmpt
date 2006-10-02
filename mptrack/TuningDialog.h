@@ -12,7 +12,9 @@ using std::string;
 
 // CTuningDialog dialog
 
+//==================================
 class CTuningDialog : public CDialog
+//==================================
 {
 	DECLARE_DYNAMIC(CTuningDialog)
 
@@ -37,18 +39,19 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	void UpdateTuningType(const CTuning* pT);
-	void SetView(const CTuning* pT = 0);
-	void UpdateTempTuning(bool forceUpdate = false);
 	CTuning::CTUNINGTYPE GetTuningTypeFromStr(const string& str) const;
+
+	void UpdateView();
+	void UpdateTuningType();
 	
 
 private:
 	CTuningRatioMapWnd m_RatioMapWnd;
 	TUNINGVECTOR m_TuningCollections;
+	vector<CTuningCollection*> m_DeletableTuningCollections;
 
-	CTuning* m_pTempTuning;
-	CTuningCollection* m_pTempTuningCol;
+	CTuning* m_pActiveTuning;
+	CTuningCollection m_TempTunings;
 
 	CComboBox m_CombobTuningCollection;
 	CComboBox m_CombobTuningName;
@@ -60,11 +63,17 @@ private:
 	CEdit m_EditRatioPeriod;
 	CEdit m_EditRatio;
 	CEdit m_EditNotename;
+	CEdit m_EditMiscActions;
+	CEdit m_EditFineTuneSteps;
+	CEdit m_EditName;
 	
 	CButton m_CheckNewTuning;
 	CButton m_ButtonAddTuning;
 	CButton m_ButtonRemoveTuning;
 	CButton m_ButtonSet;
+	CButton m_ButtonExport;
+	CButton m_ButtonImport;
+	CButton m_ButtonReadOnly;
 
 
 public:
@@ -79,6 +88,17 @@ public:
 	afx_msg void OnCbnEditchangeComboT();
 	afx_msg void OnEnChangeEditNotename();
 	afx_msg void OnBnClickedButtonSetvalues();
+	afx_msg void OnEnChangeEditRatiovalue();
+	afx_msg void OnBnClickedButtonExport();
+	afx_msg void OnBnClickedButtonImport();
+	afx_msg void OnEnChangeEditFinetunesteps();
+	afx_msg void OnEnKillfocusEditFinetunesteps();
+	afx_msg void OnBnClickedCheckReadonly();
+	afx_msg void OnEnKillfocusEditName();
+	afx_msg void OnEnKillfocusEditSteps();
+	afx_msg void OnEnKillfocusEditRatioperiod();
+	afx_msg void OnEnKillfocusEditRatiovalue();
+	afx_msg void OnEnKillfocusEditNotename();
 
 private:
 	static const string s_stringTypeGEN;
@@ -88,10 +108,9 @@ private:
 	bool m_NoteEditApply;
 	bool m_RatioEditApply;
 	//To indicate whether to apply changes made to 
-	//to those edit boxes.
-	
-public:
-	afx_msg void OnEnChangeEditRatiovalue();
+	//to those edit boxes(they are modified by non-user 
+	//activies and in these cases the value should be applied
+	//to the tuning data.
 };
 
 #endif

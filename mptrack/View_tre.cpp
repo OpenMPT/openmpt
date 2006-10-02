@@ -290,10 +290,9 @@ VOID CModTree::AddDocument(CModDoc *pModDoc)
 	}
 	if (nNewNdx < MODTREE_MAX_DOCUMENTS)
 	{
-		PMODTREEDOCINFO pInfo = new MODTREEDOCINFO;
+		PMODTREEDOCINFO pInfo = new MODTREEDOCINFO(pModDoc->GetSoundFile());
 		if (pInfo)
 		{
-			memset(pInfo, 0, sizeof(MODTREEDOCINFO));
 			pInfo->pModDoc = pModDoc;
 			pInfo->nOrdSel = (UINT)-1;
 			DocInfo[nNewNdx] = pInfo;
@@ -690,12 +689,13 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	// Add Orders
 	if ((pInfo->hOrders) && (lHint != HINT_INSNAMES) && (lHint != HINT_SMPNAMES))
 	{
-		UINT imin=0, imax=MAX_ORDERS-1;
-		if ((lHint == HINT_PATNAMES) && (dwHintParam < MAX_ORDERS)) imin = imax = dwHintParam;
+		pInfo->tiOrders.resize(pSndFile->Order.size(), NULL);
+		UINT imin=0, imax=pSndFile->Order.size()-1;
+		if ((lHint == HINT_PATNAMES) && (dwHintParam < pSndFile->Order.size())) imin = imax = dwHintParam;
 		BOOL bEnded = FALSE;
 		for (UINT iOrd=imin; iOrd<=imax; iOrd++)
 		{
-			if (pSndFile->Order[iOrd] == 0xFF) bEnded = TRUE;
+			if (pSndFile->Order[iOrd] == pSndFile->Patterns.GetInvalidIndex()) bEnded = TRUE;
 			if (bEnded)
 			{
 				if (pInfo->tiOrders[iOrd])
@@ -706,7 +706,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			} else
 			{
 				UINT state = (iOrd == pInfo->nOrdSel) ? TVIS_BOLD : 0;
-				if (pSndFile->Order[iOrd] < MAX_PATTERNS)
+				if (pSndFile->Order[iOrd] < pSndFile->Patterns.Size())
 				{
 					stmp[0] = 0;
 					pSndFile->GetPatternName(pSndFile->Order[iOrd], stmp, sizeof(stmp));
@@ -744,10 +744,13 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	// Add Patterns
 	if ((pInfo->hPatterns) && (lHint != HINT_INSNAMES) && (lHint != HINT_SMPNAMES))
 	{
-		UINT imin = 0, imax = MAX_PATTERNS-1;
-		if ((lHint == HINT_PATNAMES) && (dwHintParam < MAX_PATTERNS)) imin = imax = dwHintParam;
+		pInfo->tiPatterns.resize(pSndFile->Patterns.Size(), NULL);
+		UINT imin = 0, imax = pSndFile->Patterns.Size()-1;
+		if ((lHint == HINT_PATNAMES) && (dwHintParam < pSndFile->Patterns.Size())) imin = imax = dwHintParam;
 		BOOL bDelPat = FALSE;
-		for (UINT iPat=0; iPat<MAX_PATTERNS; iPat++)
+
+		ASSERT(pInfo->tiPatterns.size() == pSndFile->Patterns.Size());
+		for (UINT iPat=0; iPat<pInfo->tiPatterns.size(); iPat++)
 		{
 			if ((bDelPat) && (pInfo->tiPatterns[iPat]))
 			{
@@ -897,6 +900,8 @@ DWORD CModTree::GetModItem(HTREEITEM hItem)
 	lParam = GetItemData(hItem);
 	hItemParent = GetParentItem(hItem);
 	hRootParent = hItemParent;
+	CModDoc *pModDoc = GetDocumentFromItem(hItem);
+	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 	if ((hRootParent != NULL) && (m_pDataTree))
 	{
 		HTREEITEM h;
@@ -960,15 +965,17 @@ DWORD CModTree::GetModItem(HTREEITEM hItem)
 			// Order List ?
 			if (hItemParent == pSong->hOrders)
 			{
-				for (UINT i=0; i<MAX_ORDERS; i++)
+				ASSERT(pSong->tiOrders.size() == pSndFile->Order.size());
+				for (UINT i=0; i<pSong->tiOrders.size(); i++)
 				{
 					if (hItem == pSong->tiOrders[i]) return (MODITEM_ORDER | (i << 16));
 				}
 			}
 			// Pattern ?
-			if (hItemParent == pSong->hPatterns)
+			if (hItemParent == pSong->hPatterns && pSndFile)
 			{
-				for (UINT i=0; i<MAX_PATTERNS; i++)
+				ASSERT(pSong->tiPatterns.size() == pSndFile->Patterns.Size());
+				for (UINT i=0; i<pSong->tiPatterns.size(); i++)
 				{
 					if (hItem == pSong->tiPatterns[i]) return (MODITEM_PATTERN | (i << 16));
 				}

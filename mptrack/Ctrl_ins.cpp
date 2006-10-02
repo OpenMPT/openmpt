@@ -16,6 +16,8 @@ using std::vector;
 
 #pragma warning(disable:4244)
 
+const pair<string, WORD> CCtrlInstruments::s_TuningNotFound("Tuning  was not found. Setting to default tuning", 7);
+
 /////////////////////////////////////////////////////////////////////////
 // CNoteMapWnd
 
@@ -161,7 +163,9 @@ void CNoteMapWnd::OnPaint()
 
 			// Note
 			s[0] = 0;
-			if ((nPos >= 0) && (nPos < 120)) wsprintf(s, "%s%d", szNoteNames[nPos % 12], nPos/12);
+
+
+			if ((nPos >= 0) && (nPos < 120)) wsprintf(s, "%s", pSndFile->GetNoteName(nPos+1, m_nInstrument).c_str());
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
 			DrawButtonRect(hdc, &rect, s, FALSE, FALSE);
 			// Mapped Note
@@ -174,7 +178,7 @@ void CNoteMapWnd::OnPaint()
 				UINT n = penv->NoteMap[nPos];
 				if (n == 0xFF) strcpy(s, "==="); else
 				if (n == 0xFE) strcpy(s, "^^^"); else
-				if (n <= 120) wsprintf(s, "%s%d", szNoteNames[(n-1)%12], (n-1)/12);
+				if (n <= 120) wsprintf(s, "%s", pSndFile->GetNoteName(n, m_nInstrument).c_str());
 			}
 			FillRect(hdc, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if ((nPos == (int)m_nNote) && (!m_bIns))
@@ -818,29 +822,11 @@ BOOL CCtrlInstruments::OnInitDialog()
 
 	m_SpinInstrument.SetFocus();
 
-	//-->Setting tunings to Combobox
-		for(size_t i = 0; i<CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
-		{
-			m_ComboTuning.AddString(CSoundFile::s_TuningsSharedStandard.GetTuning(i).GetName().c_str());
-		}
-		for(size_t i = 0; i<CSoundFile::s_TuningsSharedLocal.GetNumTunings(); i++)
-		{
-			m_ComboTuning.AddString(CSoundFile::s_TuningsSharedLocal.GetTuning(i).GetName().c_str());
-		}
-		for(size_t i = 0; i<m_pSndFile->m_TuningsTuneSpecific.GetNumTunings(); i++)
-		{
-			m_ComboTuning.AddString(m_pSndFile->m_TuningsTuneSpecific.GetTuning(i).GetName().c_str());
-		}
-		m_ComboTuning.AddString("Control tunings...");
-		m_ComboTuning.SetCurSel(0);
-
-	//<--Setting tunings to Combobox
-
+	BuildTuningComboBox();
+	
 	CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
-	//OnBnClickedCheckPitchtempolock();
+	OnBnClickedCheckPitchtempolock();
 	m_EditPitchTempoLock.SetLimitText(4);
-
-
 
 	return FALSE;
 }
@@ -1075,8 +1061,8 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinInstrument.SetRange(1, m_pSndFile->m_nInstruments);
 		m_SpinInstrument.EnableWindow((m_pSndFile->m_nInstruments) ? TRUE : FALSE);
 		m_ComboTuning.EnableWindow(bMPTOnly);
-		m_EditPitchTempoLock.EnableWindow(bITonly);
-		m_CheckPitchTempoLock.EnableWindow(bITonly);
+		m_EditPitchTempoLock.EnableWindow(bMPTOnly);
+		m_CheckPitchTempoLock.EnableWindow(bMPTOnly);
 	}
 	if (dwHintMask & (HINT_INSTRUMENT|HINT_MODTYPE))
 	{
@@ -2387,6 +2373,7 @@ LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	
 	return 0;
 }
+
 //end rewbs.customKeys
 
 void CCtrlInstruments::OnCbnSelchangeCombotuning()
@@ -2398,8 +2385,20 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	if(pInstH == 0)
 		return;
 
-	CTuningCollection* tc = 0;
 	size_t sel = m_ComboTuning.GetCurSel();
+	if(sel == 0) //Setting IT behavior.
+	{
+		BEGIN_CRITICAL();
+		pInstH->SetTuning(NULL);
+		END_CRITICAL();
+		m_pModDoc->SetModified();
+		UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT);
+		return;
+	}
+
+	sel -= 1;
+	CTuningCollection* tc = 0;
+	
 	if(sel < CSoundFile::s_TuningsSharedStandard.GetNumTunings())
 		tc = &CSoundFile::s_TuningsSharedStandard;
 	else
@@ -2418,13 +2417,14 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	if(tc)
 	{
 		BEGIN_CRITICAL();
-		pInstH->pTuning = &tc->GetTuning(sel);
+		pInstH->SetTuning(&tc->GetTuning(sel));
 		END_CRITICAL();
 		m_pModDoc->SetModified();
+		UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT);
 		return;
 	}
 
-	
+	//Case: Chosen tuning editor to be displayed.
 	//Creating vector for the CTuningDialog.
 	vector<CTuningCollection*> v;
 	v.push_back(&m_pSndFile->s_TuningsSharedStandard);
@@ -2435,27 +2435,9 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 
 	//Recreating tuning combobox so that possible
 	//new tuning(s) come visible.
-	while(m_ComboTuning.GetCount() > 0)
-		m_ComboTuning.DeleteString(0);
-	for(size_t i = 0; i<CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
-	{
-		m_ComboTuning.AddString(CSoundFile::s_TuningsSharedStandard.GetTuning(i).GetName().c_str());
-	}
-	for(size_t i = 0; i<CSoundFile::s_TuningsSharedLocal.GetNumTunings(); i++)
-	{
-		m_ComboTuning.AddString(CSoundFile::s_TuningsSharedLocal.GetTuning(i).GetName().c_str());
-	}
-	for(size_t i = 0; i<m_pSndFile->m_TuningsTuneSpecific.GetNumTunings(); i++)
-	{
-		m_ComboTuning.AddString(m_pSndFile->m_TuningsTuneSpecific.GetTuning(i).GetName().c_str());
-	}
-	m_ComboTuning.AddString("Control tunings...");
-	m_ComboTuning.SetCurSel(0);
-
-	UpdateTuningComboBox();
-
-
-	//TODO: Update notemap window with correct notenames.
+	BuildTuningComboBox();
+	
+	UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT);
 }
 
 
@@ -2464,43 +2446,50 @@ void CCtrlInstruments::UpdateTuningComboBox()
 {
 	if (m_pModDoc == 0 || m_pSndFile == 0 
 		|| m_nInstrument > m_pSndFile->GetNumInstruments()
-		|| m_pSndFile->Headers[m_nInstrument]->pTuning == 0) return;
+		|| m_pSndFile->Headers[m_nInstrument] == NULL) return;
+
+	INSTRUMENTHEADER* const penv = m_pSndFile->Headers[m_nInstrument];
+	if(penv->pTuning == NULL)
+	{
+		m_ComboTuning.SetCurSel(0);
+		return;
+	}
 
 	for(size_t i = 0; i < CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
 	{
-		if(m_pSndFile->Headers[m_nInstrument]->pTuning == &CSoundFile::s_TuningsSharedStandard.GetTuning(i))
+		if(penv->pTuning == &CSoundFile::s_TuningsSharedStandard.GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i);
+			m_ComboTuning.SetCurSel(i+1);
 			return;
 		}
 	}
 
 	for(size_t i = 0; i < CSoundFile::s_TuningsSharedLocal.GetNumTunings(); i++)
 	{
-		if(m_pSndFile->Headers[m_nInstrument]->pTuning == &CSoundFile::s_TuningsSharedLocal.GetTuning(i))
+		if(penv->pTuning == &CSoundFile::s_TuningsSharedLocal.GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i+CSoundFile::s_TuningsSharedStandard.GetNumTunings());
+			m_ComboTuning.SetCurSel(i+CSoundFile::s_TuningsSharedStandard.GetNumTunings()+1);
 			return;
 		}
 	}
 
 	for(size_t i = 0; i < m_pSndFile->m_TuningsTuneSpecific.GetNumTunings(); i++)
 	{
-		if(m_pSndFile->Headers[m_nInstrument]->pTuning == &m_pSndFile->m_TuningsTuneSpecific.GetTuning(i))
+		if(penv->pTuning == &m_pSndFile->m_TuningsTuneSpecific.GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i+CSoundFile::s_TuningsSharedStandard.GetNumTunings() + CSoundFile::s_TuningsSharedLocal.GetNumTunings());
+			m_ComboTuning.SetCurSel(i+CSoundFile::s_TuningsSharedStandard.GetNumTunings() + CSoundFile::s_TuningsSharedLocal.GetNumTunings()+1);
 			return;
 		}
 	}
 
-
-	string str = string("Tuning ") + m_pSndFile->Headers[m_nInstrument]->pTuning->GetName()
-		 + string(" was not found. Setting to default tuning.");
+	string str = s_TuningNotFound.first;
+	str.insert(s_TuningNotFound.second, m_pSndFile->Headers[m_nInstrument]->pTuning->GetName());
 	MessageBox(str.c_str());
 	BEGIN_CRITICAL();
-	m_pSndFile->Headers[m_nInstrument]->pTuning = m_pSndFile->Headers[m_nInstrument]->s_DefaultTuning;
+	penv->SetTuning(penv->s_DefaultTuning);
 	END_CRITICAL();
-	m_ComboTuning.SetCurSel(0);
+	m_pModDoc->SetModified();
+	UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT);
 }
 
 void CCtrlInstruments::OnEnChangeEditPitchtempolock()
@@ -2537,7 +2526,7 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 		if(!penv)
 			return;
 
-		//Checking to what value to put for the wPitchToTempoLock.
+		//Checking what value to put for the wPitchToTempoLock.
 		m_EditPitchTempoLock.EnableWindow();
 		WORD ptl = penv->wPitchToTempoLock;
 		if(ptl == 0)
@@ -2552,7 +2541,7 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 				ptl = m_pSndFile->m_nDefaultTempo;
 		}
 		m_EditPitchTempoLock.SetWindowText(Stringify(ptl).c_str());
-		//SetModified() comes with this.
+		//SetModified() comes with SetWindowText(.).
 	}
 	else
 	{
@@ -2568,9 +2557,12 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 	}
 }
 
+
 void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 //------------------------------------------------------
 {
+	//Checking that tempo value is in correct range.
+
 	if(!m_pSndFile || IsLocked()) return;
 
 	char buffer[6];
@@ -2578,7 +2570,6 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 	int ptlTempo = atoi(buffer);
 	bool changed = false;
 
-	
 	if(ptlTempo < m_pSndFile->GetTempoMin())
 	{
 		ptlTempo = m_pSndFile->GetTempoMin();
@@ -2590,6 +2581,29 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 		changed = true;
 
 	}
-
 	if(changed) m_EditPitchTempoLock.SetWindowText(Stringify(ptlTempo).c_str());
+}
+
+
+void CCtrlInstruments::BuildTuningComboBox()
+//------------------------------------------
+{
+	while(m_ComboTuning.GetCount() > 0)
+		m_ComboTuning.DeleteString(0);
+
+	m_ComboTuning.AddString("IT behavior"); //<-> Instrument pTuning pointer == NULL
+	for(size_t i = 0; i<CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
+	{
+		m_ComboTuning.AddString(CSoundFile::s_TuningsSharedStandard.GetTuning(i).GetName().c_str());
+	}
+	for(size_t i = 0; i<CSoundFile::s_TuningsSharedLocal.GetNumTunings(); i++)
+	{
+		m_ComboTuning.AddString(CSoundFile::s_TuningsSharedLocal.GetTuning(i).GetName().c_str());
+	}
+	for(size_t i = 0; i<m_pSndFile->m_TuningsTuneSpecific.GetNumTunings(); i++)
+	{
+		m_ComboTuning.AddString(m_pSndFile->m_TuningsTuneSpecific.GetTuning(i).GetName().c_str());
+	}
+	m_ComboTuning.AddString("Control tunings...");
+	m_ComboTuning.SetCurSel(0);
 }
