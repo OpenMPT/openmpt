@@ -1045,7 +1045,7 @@ BOOL CSoundFile::ProcessEffects()
 					note = instr = 0;
 				}
 			}
-			if ((!note) && (instr))
+			if ((!note) && (instr)) //Case: instrument with no note data. 
 			{
 				if (m_nInstruments)
 				{
@@ -1059,9 +1059,11 @@ BOOL CSoundFile::ProcessEffects()
 						pChn->dwFlags &= ~CHN_NOTEFADE;
 						pChn->nFadeOutVol = 65536;
 					}
-				} else
+				} else //Case: Only samples are used; no instruments.
 				{
 					if (instr < MAX_SAMPLES) pChn->nVolume = Ins[instr].nVolume;
+					if (m_nType == MOD_TYPE_IT && GetModSpecificFlag(IT_STANDARD))
+						note = pChn->nNote;
 				}
 				if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) instr = 0;
 			}
@@ -1089,7 +1091,6 @@ BOOL CSoundFile::ProcessEffects()
 				InstrumentChange(pChn, instr, bPorta, TRUE);
 				pChn->nNewIns = 0;
 				// Special IT case: portamento+note causes sample change -> ignore portamento
-				//if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 				if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
 				 && (psmp != pChn->pInstrument) && (note) && (note < 0x80))
 				{
@@ -3281,7 +3282,7 @@ void CSoundFile::HandlePatternTransitionEvents()
 		}
 
 		// Channel mutes
-		for (int chan=0; chan<m_nChannels; chan++) {
+		for (UINT chan=0; chan<m_nChannels; chan++) {
 			if (m_bChannelMuteTogglePending[chan]) {
 				m_pModDoc->MuteChannel(chan, !m_pModDoc->IsChannelMuted(chan));
 				m_bChannelMuteTogglePending[chan]=false;

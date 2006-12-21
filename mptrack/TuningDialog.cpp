@@ -1,11 +1,7 @@
-// TuningDialog.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "mptrack.h"
 #include "TuningDialog.h"
 #include <algorithm>
-#include ".\tuningdialog.h"
 #include "misc_util.h"
 
 const string CTuningDialog::s_stringTypeGEN = "General";

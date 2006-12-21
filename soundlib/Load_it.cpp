@@ -4478,7 +4478,11 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 		cbs.pubsetbuf((char*)cpcMPTStart, dwMemLength-mptStartPos);
 		istream fin(&cbs);
 
-		m_TuningsTuneSpecific.UnSerializeBinary(fin);
+		if(m_TuningsTuneSpecific.UnSerializeBinary(fin))
+		{
+			::MessageBox(NULL, "Error occured - loading failed while trying to load tune specific tunings.", 0, MB_OK);
+			return FALSE;
+		}
 		
 		//2. Reading tuning id <-> tuning name map.
 		typedef map<WORD, string> MAP;

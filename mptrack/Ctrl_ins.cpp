@@ -1334,7 +1334,7 @@ BOOL CCtrlInstruments::EditSample(UINT nSample)
 BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 //------------------------------------------------------------
 {
-	//NOTE: pszText seems to point to char array of length 256.
+	//NOTE: pszText seems to point to char array of length 256 (Noverber 2006).
 	if ((pszText) && (uId))
 	{
 		switch(uId)
@@ -1472,7 +1472,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 	CFileDialog dlg(TRUE,
 					NULL,
 					NULL,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT,
 					"All Instruments|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff|"
 					"FastTracker II Instruments (*.xi)|*.xi|"
 					"GF1 Patches (*.pat)|*.pat|"
@@ -1483,8 +1483,36 @@ void CCtrlInstruments::OnInstrumentOpen()
 	{
 		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurInsDir;
 	}
+	const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size.
+	vector<char> filenameBuffer(bufferSize, 0);
+	dlg.GetOFN().lpstrFile = &filenameBuffer[0];
+	dlg.GetOFN().nMaxFile = bufferSize;
+
 	if (dlg.DoModal() != IDOK) return;
-	if (!OpenInstrument(dlg.GetPathName())) ErrorBox(IDS_ERR_FILEOPEN, this);
+
+	POSITION pos = dlg.GetStartPosition();
+	size_t counter = 0;
+	while(pos != NULL)
+	{
+		//If loading multiple instruments, advancing to next instrument and creating
+		//new instrument if necessary.
+		if(counter > 0)	
+		{
+			if(m_nInstrument >= MAX_INSTRUMENTS-1)
+				break;
+			else
+				m_nInstrument++;
+
+            if(m_nInstrument > m_pSndFile->GetNumInstruments())
+				OnInstrumentNew();
+		}
+
+		if(!OpenInstrument(dlg.GetNextPathName(pos)))
+			ErrorBox(IDS_ERR_FILEOPEN, this);
+
+		counter++;
+	}
+	filenameBuffer.clear();
 	if (m_pParent) m_pParent->InstrumentChanged(m_nInstrument);
 	SwitchToView();
 }
@@ -2386,7 +2414,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 		return;
 
 	size_t sel = m_ComboTuning.GetCurSel();
-	if(sel == 0) //Setting IT behavior.
+	if(sel == 0) //Setting IT behavior
 	{
 		BEGIN_CRITICAL();
 		pInstH->SetTuning(NULL);
@@ -2591,7 +2619,7 @@ void CCtrlInstruments::BuildTuningComboBox()
 	while(m_ComboTuning.GetCount() > 0)
 		m_ComboTuning.DeleteString(0);
 
-	m_ComboTuning.AddString("IT behavior"); //<-> Instrument pTuning pointer == NULL
+	m_ComboTuning.AddString("OMPT IT behavior"); //<-> Instrument pTuning pointer == NULL
 	for(size_t i = 0; i<CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
 	{
 		m_ComboTuning.AddString(CSoundFile::s_TuningsSharedStandard.GetTuning(i).GetName().c_str());

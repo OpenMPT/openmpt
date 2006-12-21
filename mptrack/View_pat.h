@@ -239,6 +239,8 @@ protected:
 	afx_msg void OnMuteFromClick(); //rewbs.customKeys
 	afx_msg void OnSoloFromClick(); //rewbs.customKeys
 	afx_msg void OnTogglePendingMuteFromClick(); //rewbs.customKeys
+	afx_msg void OnPendingSoloChnFromClick();
+	afx_msg void OnPendingUnmuteAllChnFromClick();
 	afx_msg void OnSoloChannel(BOOL current); //rewbs.customKeys
 	afx_msg void OnMuteChannel(BOOL current); //rewbs.customKeys
 	afx_msg void OnUnmuteAll();
@@ -336,6 +338,8 @@ public:
 private:
 
 	void TogglePendingMute(UINT nChn);
+	void PendingSoloChn(const CHANNELINDEX nChn);
+	void PendingUnmuteAllChn();
 
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);

@@ -1,17 +1,15 @@
-#ifndef __SNDFILE_H
-#include "../soundlib/sndfile.h"
-#endif
-
 #ifndef PATTERN_H
 #define PATTERN_H
 
 #include <vector>
+#include "modcommand.h"
 
 using std::vector;
 
 class CPatternContainer;
 
-typedef UINT ROWINDEX;
+typedef size_t ROWINDEX;
+typedef size_t CHANNELINDEX;
 
 //============
 class CPattern

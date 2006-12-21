@@ -13,6 +13,7 @@
 #include "../mptrack/moddoc.h"
 #include "sndfile.h"
 #include "aeffectx.h"
+#include "wavConverter.h"
 #include <vector>
 #include <algorithm>
 
@@ -26,6 +27,7 @@
 #define UNLHA_SUPPORT
 #define ZIPPED_MOD_SUPPORT
 LPCSTR glpszModExtensions = "mod|s3m|xm|it|stm|nst|ult|669|wow|mtm|med|far|mdl|ams|dsm|amf|okt|dmf|ptm|psm|mt2|umx";
+//Should there be mptm?
 #endif // NO_ARCHIVE_SUPPORT
 #else // NO_COPYRIGHT: EarSaver only loads mod/s3m/xm/it/wav
 #define MODPLUG_BASIC_SUPPORT
@@ -375,7 +377,7 @@ CTuningCollection CSoundFile::s_TuningsSharedStandard("Standard tunings");
 CTuningCollection CSoundFile::s_TuningsSharedLocal("Local Tunings");
 
 
-CSoundFile::CSoundFile() : m_TuningsTuneSpecific("Tune specific tunings"), PatternSize(*this), Patterns(*this), Order(*this)
+CSoundFile::CSoundFile() : m_TuningsTuneSpecific("Tune specific tunings"), PatternSize(*this), Patterns(*this), Order(*this), m_PlaybackEventer(*this)
 //----------------------
 {
 	m_nType = MOD_TYPE_NONE;
@@ -399,6 +401,8 @@ CSoundFile::CSoundFile() : m_TuningsTuneSpecific("Tune specific tunings"), Patte
 	m_nTempoMode = tempo_mode_classic;
 	m_bIsRendering = false;
 	m_nMaxSample = 0;
+
+	m_ModFlags.reset();
 
 	m_pModDoc = NULL;
 	m_dwLastSavedWithVersion=0;
@@ -698,7 +702,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 BOOL CSoundFile::Destroy()
 //------------------------
 {
-	int i;
+	size_t i;
 	for (i=0; i<Patterns.Size(); i++) if (Patterns[i])
 	{
 		FreePattern(Patterns[i]);
@@ -1422,7 +1426,7 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 
 	UINT nRemainingChannels = newOrder.size();	
 
-	if(nRemainingChannels > min(MAX_CHANNELS, MAX_BASECHANNELS) || nRemainingChannels < 4) 	
+	if(nRemainingChannels > min(MAX_CHANNELS, MAX_BASECHANNELS) || nRemainingChannels < GetNumChannelMin()) 	
 	{
 		CString str = "Error: Bad newOrder vector in CSoundFile::ReArrangeChannels(...)";	
 		CMainFrame::GetMainFrame()->MessageBox(str , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
@@ -1856,9 +1860,8 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 //	5 = signed 16-bit PCM data
 //	6 = unsigned 16-bit PCM data
 
-
-UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength)
-//------------------------------------------------------------------------------------------------
+UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength, const WORD format)
+//-----------------------------------------------------------------------------------------------------------------------
 {
 	UINT len = 0, mem = pIns->nLength+6;
 
@@ -1888,7 +1891,7 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 			len = pIns->nLength;
 			if (len > dwMemLength) len = pIns->nLength = dwMemLength;
 			LPSTR pSample = pIns->pSample;
-			for (UINT j=0; j<len; j++) pSample[j] = (char)(lpMemFile[j] - 0x80);
+			for (UINT j=0; j<len; j++) pSample[j] = (char)(lpMemFile[j] - 0x80); 
 		}
 		break;
 
@@ -2207,7 +2210,7 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		break;
 
 #ifdef MODPLUG_TRACKER
-	// PCM 24-bit signed -> load sample, and normalize it to 16-bit
+	// Mono PCM 24/32-bit signed & 32 bit float -> load sample, and normalize it to 16-bit
 	case RS_PCM24S:
 	case RS_PCM32S:
 		len = pIns->nLength * 3;
@@ -2215,56 +2218,66 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		if (len > dwMemLength) break;
 		if (len > 4*8)
 		{
-			UINT slsize = (nFlags == RS_PCM32S) ? 4 : 3;
-			LPBYTE pSrc = (LPBYTE)lpMemFile;
-			LONG max = 255;
-			if (nFlags == RS_PCM32S) pSrc++;
-			for (UINT j=0; j<len; j+=slsize)
+			if(nFlags == RS_PCM24S)
 			{
-				LONG l = ((((pSrc[j+2] << 8) + pSrc[j+1]) << 8) + pSrc[j]) << 8;
-				l /= 256;
-				if (l > max) max = l;
-				if (-l > max) max = -l;
+				char* pSrc = (char*)lpMemFile;
+				char* pDest = (char*)pIns->pSample;
+				CopyWavBuffer<3, 2, WavSigned24To16, MaxFinderInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 			}
-			max = (max / 128) + 1;
-			signed short *pDest = (signed short *)pIns->pSample;
-			for (UINT k=0; k<len; k+=slsize)
+			else //RS_PCM32S
 			{
-				LONG l = ((((pSrc[k+2] << 8) + pSrc[k+1]) << 8) + pSrc[k]) << 8;
-				*pDest++ = (signed short)(l / max);
+				char* pSrc = (char*)lpMemFile;
+				char* pDest = (char*)pIns->pSample;
+				if(format == 3)
+					CopyWavBuffer<4, 2, WavFloat32To16, MaxFinderFloat32>(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+				else
+					CopyWavBuffer<4, 2, WavSigned32To16, MaxFinderInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 			}
 		}
 		break;
 
-	// Stereo PCM 24-bit signed -> load sample, and normalize it to 16-bit
+	// Stereo PCM 24/32-bit signed & 32 bit float -> convert sample to 16 bit
 	case RS_STIPCM24S:
 	case RS_STIPCM32S:
-		len = pIns->nLength * 6;
-		if (nFlags == RS_STIPCM32S) len += pIns->nLength * 2;
-		if (len > dwMemLength) break;
-		if (len > 8*8)
+		if(format == 3 && nFlags == RS_STIPCM32S) //Microsoft IEEE float
 		{
-			UINT slsize = (nFlags == RS_STIPCM32S) ? 4 : 3;
-			LPBYTE pSrc = (LPBYTE)lpMemFile;
-			LONG max = 255;
-			if (nFlags == RS_STIPCM32S) pSrc++;
-			for (UINT j=0; j<len; j+=slsize)
+			len = pIns->nLength * 6;
+			//pIns->nLength tells(?) the number of frames there
+			//are. One 'frame' of 1 byte(== 8 bit) mono data requires
+			//1 byte of space, while one frame of 3 byte(24 bit) 
+			//stereo data requires 3*2 = 6 bytes. This is(?)
+			//why there is factor 6.
+
+			len += pIns->nLength * 2;
+			//Compared to 24 stereo, 32 bit stereo needs 16 bits(== 2 bytes)
+			//more per frame.
+
+			if(len > dwMemLength) break;
+			char* pSrc = (char*)lpMemFile;
+			char* pDest = (char*)pIns->pSample;
+			if (len > 8*8)
 			{
-				LONG l = ((((pSrc[j+2] << 8) + pSrc[j+1]) << 8) + pSrc[j]) << 8;
-				l /= 256;
-				if (l > max) max = l;
-				if (-l > max) max = -l;
+				CopyWavBuffer<4, 2, WavFloat32To16, MaxFinderFloat32>(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 			}
-			max = (max / 128) + 1;
-			signed short *pDest = (signed short *)pIns->pSample;
-			for (UINT k=0; k<len; k+=slsize)
+		}
+		else
+		{
+			len = pIns->nLength * 6;
+			if (nFlags == RS_STIPCM32S) len += pIns->nLength * 2;
+			if (len > dwMemLength) break;
+			if (len > 8*8)
 			{
-				LONG lr = ((((pSrc[k+2] << 8) + pSrc[k+1]) << 8) + pSrc[k]) << 8;
-				k += slsize;
-				LONG ll = ((((pSrc[k+2] << 8) + pSrc[k+1]) << 8) + pSrc[k]) << 8;
-				pDest[0] = (signed short)ll;
-				pDest[1] = (signed short)lr;
-				pDest += 2;
+				char* pSrc = (char*)lpMemFile;
+				char* pDest = (char*)pIns->pSample;
+				if(nFlags == RS_STIPCM32S)
+				{
+					CopyWavBuffer<4,2,WavSigned32To16, MaxFinderInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+				}
+				if(nFlags == RS_STIPCM24S)
+				{
+					CopyWavBuffer<3,2,WavSigned24To16, MaxFinderInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+				}
+
 			}
 		}
 		break;
@@ -2800,12 +2813,33 @@ WORD CSoundFile::GetTempoMax() const {return 512;}
 ROWINDEX CSoundFile::GetRowMax() const {return MAX_PATTERN_ROWS;}
 ROWINDEX CSoundFile::GetRowMin() const {return 2;}
 
+CHANNELINDEX CSoundFile::GetNumChannelMax() const
+//-----------------------------------
+{
+	if(m_nType == MOD_TYPE_MPT) return MPTM_SPECS.channelsMax;
+	if(m_nType == MOD_TYPE_IT) return max_chans_IT;
+	if(m_nType == MOD_TYPE_XM) return max_chans_XM;
+	if(m_nType == MOD_TYPE_MOD) return max_chans_MOD;
+	if(m_nType == MOD_TYPE_S3M) return max_chans_S3M;
+	return 4;
+}
+
+CHANNELINDEX CSoundFile::GetNumChannelMin() const
+//-----------------------------------
+{
+	if(m_nType == MOD_TYPE_MPT) return MPTM_SPECS.channelsMin;
+	else return 4;
+}
+
 void CSoundFile::ChangeModTypeTo(const int& newType)
 //---------------------------------------------------
 {
 	const UINT oldInvalidIndex = Patterns.GetInvalidIndex();
 	const UINT oldIgnoreIndex = Patterns.GetIgnoreIndex();
 	m_nType = newType;
+
+	m_ModFlags.reset();
+
 	replace(Order.begin(), Order.end(), oldInvalidIndex, Patterns.GetInvalidIndex());
 	replace(Order.begin(), Order.end(), oldIgnoreIndex, Patterns.GetIgnoreIndex());
 }

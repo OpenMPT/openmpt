@@ -2,9 +2,9 @@
 #define TUNINGDIALOG_H
 
 #include "tuningratiomapwnd.h"
+#include "tuningcollection.h"
 #include <vector>
 #include <string>
-#include "afxwin.h"
 
 using std::vector;
 using std::string;
@@ -111,6 +111,7 @@ private:
 	//to those edit boxes(they are modified by non-user 
 	//activies and in these cases the value should be applied
 	//to the tuning data.
+
 };
 
 #endif

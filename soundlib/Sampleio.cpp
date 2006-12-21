@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 #include "it_defs.h"
+#include "wavConverter.h"
 
 #pragma warning(disable:4244)
 
@@ -421,26 +422,28 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 			 || (pfmtpk->channels != 1)) return FALSE;
 		} else pfmtpk = NULL;
 	}
-	// WAVE_FORMAT_PCM, WAVE_FORMAT_EXTENSIBLE
-	if (((pfmt->format != 1) && (pfmt->format != 0xFFFE))
+	// WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT, WAVE_FORMAT_EXTENSIBLE
+	if ((((pfmt->format != 1) && (pfmt->format != 0xFFFE))
+	 && (pfmt->format != 3 || pfmt->bitspersample != 32)) //Microsoft IEEE FLOAT
 	 || (pfmt->channels > 2)
 	 || (!pfmt->channels)
 	 || (pfmt->bitspersample & 7)
 	 || (!pfmt->bitspersample)
 	 || (pfmt->bitspersample > 32)
 	) return FALSE;
+
 	DestroySample(nSample);
 	UINT nType = RS_PCM8U;
 	if (pfmt->channels == 1)
 	{
 		if (pfmt->bitspersample == 24) nType = RS_PCM24S; 
-		if (pfmt->bitspersample == 32) nType = RS_PCM32S; 
-		else nType = (pfmt->bitspersample == 16) ? RS_PCM16S : RS_PCM8U;
+		else if (pfmt->bitspersample == 32) nType = RS_PCM32S; 
+			else nType = (pfmt->bitspersample == 16) ? RS_PCM16S : RS_PCM8U;
 	} else
 	{
 		if (pfmt->bitspersample == 24) nType = RS_STIPCM24S; 
 		else if (pfmt->bitspersample == 32) nType = RS_STIPCM32S; 
-		else nType = (pfmt->bitspersample == 16) ? RS_STIPCM16S : RS_STIPCM8U;
+			else nType = (pfmt->bitspersample == 16) ? RS_STIPCM16S : RS_STIPCM8U;
 	}
 	UINT samplesize = pfmt->channels * (pfmt->bitspersample >> 3);
 	MODINSTRUMENT *pins = &Ins[nSample];
@@ -477,7 +480,7 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 		AdjustSampleLoop(pins);
 	} else
 	{
-		ReadSample(pins, nType, (LPSTR)(lpMemFile+dwDataPos), dwFileLength-dwDataPos);
+		ReadSample(pins, nType, (LPSTR)(lpMemFile+dwDataPos), dwFileLength-dwDataPos, pfmt->format);
 	}
 	// smpl field
 	if (psh)

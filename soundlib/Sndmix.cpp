@@ -1099,10 +1099,26 @@ BOOL CSoundFile::ReadNote()
 				}
 				else //Original
 				{
-					switch(m_nTickCount % 3)
+					BYTE note = pChn->nNote;
+					bool apply = true;
+
+					if(m_nType == MOD_TYPE_IT && GetModSpecificFlag(IT_STANDARD))
 					{
-					case 1:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC4Speed); break;
-					case 2:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC4Speed); break;
+						if(pChn->nArpeggio >> 4 == 0 && (pChn->nArpeggio & 0x0F) == 0)
+							apply = false;
+						//Ignoring J00.
+
+						if(apply) note = GetNoteFromPeriod(pChn->nPeriod);
+						//Using actual note instead of channel note.
+					}
+					
+					if(apply)
+					{
+						switch(m_nTickCount % 3)
+						{
+						case 1:	period = GetPeriodFromNote(note + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC4Speed); break;
+						case 2:	period = GetPeriodFromNote(note + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC4Speed); break;
+						}
 					}
 				}
 			}
