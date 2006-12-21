@@ -647,6 +647,9 @@ CMainFrame::~CMainFrame()
 	delete m_pAutoSaver; //rewbs.autosaver
 	delete m_pPerfCounter;
 
+	CChannelManagerDlg::DestroySharedInstance();
+	
+
 	//Saving statictunings here.
 	CSoundFile::SaveStaticTunings();
 }

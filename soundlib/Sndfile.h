@@ -261,8 +261,11 @@ typedef const BYTE * LPCBYTE;
 // 24-bit signed
 #define RS_PCM24S		(RS_PCM16S|0x80)			// mono 24-bit signed
 #define RS_STIPCM24S	(RS_PCM16S|0x80|RSF_STEREO)	// stereo 24-bit signed
-#define RS_PCM32S		(RS_PCM16S|0xC0)			// mono 24-bit signed
-#define RS_STIPCM32S	(RS_PCM16S|0xC0|RSF_STEREO)	// stereo 24-bit signed
+// 32-bit
+#define RS_PCM32S		(RS_PCM16S|0xC0)			// mono 32-bit signed
+#define RS_STIPCM32S	(RS_PCM16S|0xC0|RSF_STEREO)	// stereo 32-bit signed
+
+
 
 // NNA types
 #define NNA_NOTECUT		0
@@ -469,6 +472,7 @@ enum {
 typedef struct _MODINSTRUMENT
 {
 	UINT nLength,nLoopStart,nLoopEnd;
+		//nLength <-> Number of 'frames'?
 	UINT nSustainStart, nSustainEnd;
 	LPSTR pSample;
 	UINT nC4Speed;
@@ -483,6 +487,16 @@ typedef struct _MODINSTRUMENT
 	BYTE nVibDepth;
 	BYTE nVibRate;
 	CHAR name[22];
+
+	//Returns size which pSample is at least.
+	//Very dirty implementation.
+	DWORD GetSampleSizeInBytes() const
+	{
+		DWORD len = nLength;
+		if(uFlags & CHN_16BIT) len *= 2;
+		if(uFlags & CHN_STEREO) len *= 2;
+		return len;
+	}
 } MODINSTRUMENT;
 
 
@@ -678,16 +692,7 @@ typedef struct _MODCHANNELSETTINGS
 	CHAR szName[MAX_CHANNELNAME];
 } MODCHANNELSETTINGS;
 
-
-typedef struct _MODCOMMAND
-{
-	BYTE note;
-	BYTE instr;
-	BYTE volcmd;
-	BYTE command;
-	BYTE vol;
-	BYTE param;
-} MODCOMMAND, *LPMODCOMMAND;
+#include "modcommand.h"
 
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
@@ -836,6 +841,12 @@ typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); 
 #include "../mptrack/patternContainer.h"
 #include "../mptrack/ordertopatterntable.h"
 
+typedef CPatternContainer::PATTERNINDEX PATTERNINDEX;
+
+#include "../mptrack/playbackEventer.h"
+
+
+
 class CSoundFile;
 
 //======================
@@ -848,6 +859,9 @@ public:
 private:
 	const CSoundFile& m_rSndFile;
 };
+
+
+const BYTE IT_STANDARD = 0;
 
 //==============
 class CSoundFile
@@ -862,8 +876,22 @@ public:
 	ROWINDEX GetRowMax() const;
 	ROWINDEX GetRowMin() const;
 
+	CHANNELINDEX GetNumChannelMax() const;
+	CHANNELINDEX GetNumChannelMin() const;
+
 	void ChangeModTypeTo(const int& newType);
 	UINT GetModType() const {return m_nType;}
+
+	bitset<8> m_ModFlags;
+	virtual bool GetModSpecificFlag(BYTE i)
+	{
+		return (i < m_ModFlags.size()) ? m_ModFlags[i] : false;
+	}
+	virtual void SetModSpecificFlag(BYTE i, bool val)
+	{
+		if(i < m_ModFlags.size())
+			m_ModFlags[i] = val;
+	}
 	
 	//Tuning-->
 public:
@@ -877,9 +905,17 @@ public:
 	static CTuningCollection s_TuningsSharedLocal;
 	//<--Tuning
 
+public:
+	CPlaybackEventer& GetPlaybackEventer() {return m_PlaybackEventer;}
+	//const CPlaybackEventer& GetPlaybackEventer() const {return m_playbackEventer;}
+
 private:
 	void PortamentoMPT(MODCHANNEL*, int);
 	void PortamentoFineMPT(MODCHANNEL*, int);
+
+private:
+	CPlaybackEventer m_PlaybackEventer;
+
 
 
 
@@ -1172,7 +1208,7 @@ public:
 	char GetDeltaValue(char prev, UINT n) const { return (char)(prev + CompressionTable[n & 0x0F]); }
 	UINT PackSample(int &sample, int next);
 	BOOL CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *result=NULL);
-	UINT ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength);
+	UINT ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength, const WORD format = 1);
 	BOOL DestroySample(UINT nSample);
 
 // -> CODE#0020

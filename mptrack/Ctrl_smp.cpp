@@ -893,7 +893,7 @@ void CCtrlSamples::OnSampleOpen()
 	CFileDialog dlg(TRUE,
 					NULL,
 					NULL,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT,
 					"All Samples|*.wav;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm|"
 					"Wave Files (*.wav)|*.wav|"
 					"XI Samples (*.xi)|*.xi|"
@@ -909,9 +909,38 @@ void CCtrlSamples::OnSampleOpen()
 		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurSmpDir;
 	}
 	dlg.m_ofn.nFilterIndex = nLastIndex;
+	const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
+	vector<char> filenameBuffer(bufferSize, 0);
+	dlg.GetOFN().lpstrFile = &filenameBuffer[0];
+	dlg.GetOFN().nMaxFile = bufferSize;
+
 	if (dlg.DoModal() != IDOK) return;
+
 	nLastIndex = dlg.m_ofn.nFilterIndex;
-	if (!OpenSample(dlg.GetPathName())) ErrorBox(IDS_ERR_FILEOPEN, this);
+
+	POSITION pos = dlg.GetStartPosition();
+	size_t counter = 0;
+	while(pos != NULL)
+	{
+		//If loading multiple samples, advancing to next sample and creating
+		//new one if necessary.
+		if(counter > 0)	
+		{
+			if(m_nSample >= MAX_SAMPLES-1)
+				break;
+			else
+				m_nSample++;
+
+            if(m_nSample > m_pSndFile->GetNumSamples())
+				OnSampleNew();
+		}
+
+		if(!OpenSample(dlg.GetNextPathName(pos)))
+			ErrorBox(IDS_ERR_FILEOPEN, this);
+
+		counter++;
+	}
+	filenameBuffer.clear();
 	SwitchToView();
 }
 
@@ -2790,6 +2819,7 @@ BOOL CCtrlSamples::PreTranslateMessage(MSG *pMsg)
 }
 
 LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+//----------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;

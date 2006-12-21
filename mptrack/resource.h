@@ -438,7 +438,7 @@
 #define IDC_CHECK67                     1767
 #define IDC_CHECK68                     1768
 #define IDC_CHECK69                     1769
-#define IDC_CHECK70                     1770
+#define IDC_IT_STANDARD                 1770
 #define IDC_CHECK71                     1771
 #define IDC_CHECK72                     1772
 #define IDC_CHECK73                     1773
@@ -946,6 +946,8 @@
 #define ID_EDIT_GOTO                    36018
 #define ID_VIEW_GRAPH                   36019
 #define ID_PATTERN_TRANSITIONMUTE       36020
+#define ID_PATTERN_TRANSITIONSOLO       36021
+#define ID_PATTERN_TRANSITION_UNMUTEALL 36022
 #define ID_SELECTINST                   36100
 #define ID_NETLINK_MPTFR                37001
 #define ID_PLUG_RECORDAUTOMATION        37003

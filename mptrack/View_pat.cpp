@@ -68,6 +68,8 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_MUTE,		OnMuteFromClick) //rewbs.customKeys
 	ON_COMMAND(ID_PATTERN_SOLO,		OnSoloFromClick) //rewbs.customKeys
 	ON_COMMAND(ID_PATTERN_TRANSITIONMUTE, OnTogglePendingMuteFromClick)
+	ON_COMMAND(ID_PATTERN_TRANSITIONSOLO, OnPendingSoloChnFromClick)
+	ON_COMMAND(ID_PATTERN_TRANSITION_UNMUTEALL, OnPendingUnmuteAllChnFromClick)
 	ON_COMMAND(ID_PATTERN_UNMUTEALL,OnUnmuteAll)
 	ON_COMMAND(ID_PATTERN_DELETEROW,OnDeleteRows)
 	ON_COMMAND(ID_PATTERN_DELETEALLROW,OnDeleteRowsEx)
@@ -1092,7 +1094,6 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
-	CHAR s[256]; //rewbs.patPlugNames
 	HMENU hMenu;
 
 	// Too far left to get a ctx menu:
@@ -2813,6 +2814,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 		InvalidateRow();
 	}
 
+	return 0;
 
 }
 
@@ -3144,6 +3146,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcChannelSolo:					OnSoloChannel(true); return wParam;
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: TogglePendingMute((m_dwCursor&0xFFFF)>>3); return wParam;
+		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
+		case kcSoloChnOnPatTransition:		PendingSoloChn(GetCurrentChannel()); return wParam;
 		case kcTransposeUp:					OnTransposeUp(); return wParam;
 		case kcTransposeDown:				OnTransposeDown(); return wParam;
 		case kcTransposeOctUp:				OnTransposeOctUp(); return wParam;
@@ -3797,7 +3801,7 @@ void CViewPattern::TempEnterIns(int val)
 
 		UINT instr  = p->instr;
 		instr = ((instr * 10) + val) % 1000;
-		if (instr > MAX_INSTRUMENTS) instr = instr % 100;
+		if (instr >= MAX_INSTRUMENTS) instr = instr % 100;
 		if ( ((pSndFile->m_nInstruments==0) && (pSndFile->m_nSamples<100)) ||	// if we're using samples & have less than 100 samples
 			  (pSndFile->m_nInstruments < 100)) {								// or if we're using instruments and have less than 100 instruments
 				instr = instr % 100;											// --> ensure the entered instrument value is less than 100.
@@ -4247,6 +4251,7 @@ void CViewPattern::OnSelectInstrument(UINT nID)
 
 
 void CViewPattern::OnSelectPlugin(UINT nID)
+//-----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument(); if (!pModDoc) return;
 	CSoundFile *pSndFile = pModDoc->GetSoundFile(); if (!pSndFile) return;
@@ -4342,15 +4347,18 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 	}
 	if (b) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, "Solo Channel\t" + ih->GetKeyTextFromCommand(kcChannelSolo));
 	if (bAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, "Unmute All\t" + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
-
+	
 	AppendMenu(hMenu, 
 			pSndFile->m_bChannelMuteTogglePending[nChn] ? 
 					(MF_STRING|MF_CHECKED) : MF_STRING,
 			 ID_PATTERN_TRANSITIONMUTE,
 			(pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ?
-			"Unmute on Transition\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
-			"Mute on Transition\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
+			"On transition: Unmute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
+			"On transition: Mute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
 
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, "On transition: Unmute all\t" + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, "On transition: Solo\t" + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
+	
 	return true;
 }
 
@@ -4587,10 +4595,9 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 		HMENU instrumentChangeMenu = ::CreatePopupMenu();
 		AppendMenu(hMenu, MF_POPUP|greyed, (UINT)instrumentChangeMenu, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
 
-		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		CModDoc *pModDoc = GetDocument();
-		CSoundFile* pSndFile;
-		if(pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return true;
+		if(pSndFile == NULL)
+			return false;
+	
 
 		if (pSndFile->m_nInstruments)	{
 				for (UINT i=1; i<=pSndFile->m_nInstruments; i++) {
@@ -4652,7 +4659,7 @@ UINT CViewPattern::ListChansWhereColSelected(UINT colType, CArray<UINT,UINT> &ch
 	if (GetColTypeFromCursor(m_dwBeginSel) <= colType) {
 		chans.Add(startChan);	//first selected chan includes this col type
 	}
-	for (int chan=startChan+1; chan<endChan; chan++) {
+	for (UINT chan=startChan+1; chan<endChan; chan++) {
 		chans.Add(chan); //All chans between first & last must include this col type
 	}
 	if ((startChan != endChan) && colType <= GetColTypeFromCursor(m_dwEndSel)) {
@@ -4723,6 +4730,26 @@ void CViewPattern::OnTogglePendingMuteFromClick()
 	TogglePendingMute((m_nMenuParam&0xFFFF)>>3);
 }
 
+void CViewPattern::OnPendingSoloChnFromClick()
+//-----------------------------------------------
+{
+	PendingSoloChn(GetChanFromCursor(m_nMenuParam));
+}
+
+void CViewPattern::OnPendingUnmuteAllChnFromClick()
+//----------------------------------------------
+{
+	GetDocument()->GetSoundFile()->GetPlaybackEventer().PatternTransitionChnUnmuteAll();
+	InvalidateChannelsHeaders();
+}
+
+void CViewPattern::PendingSoloChn(const CHANNELINDEX nChn)
+//---------------------------------------------
+{
+	GetDocument()->GetSoundFile()->GetPlaybackEventer().PatternTranstionChnSolo(nChn);
+	InvalidateChannelsHeaders();
+}
+
 void CViewPattern::TogglePendingMute(UINT nChn)
 //---------------------------------------------
 {
@@ -4745,15 +4772,11 @@ bool CViewPattern::IsEditingEnabled_bmsg()
 	
 	CPoint pt = GetPointFromPosition(m_dwCursor);
 
-	//AppendMenu(hMenu, MF_STRING|MF_GRAYED, 0, "Record is disabled(editing blocked).");
-	//AppendMenu(hMenu, MF_STRING|MF_GRAYED, 0, "--------------------");
 	AppendMenu(hMenu, MF_STRING, IDC_PATTERN_RECORD, "Editing(record) is disabled; click here to enable it.");
-	//AppendMenu(hMenu, MF_STRING|MF_GRAYED, 0, "--------------------");
 	//To check: It seems to work the way it should, but still is it ok to use IDC_PATTERN_RECORD here since it is not
 	//'aimed' to be used here.
 
 	ClientToScreen(&pt);
-	//::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_NONOTIFY, pt.x, pt.y, 0, m_hWnd, NULL);
 	::TrackPopupMenu(hMenu, TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, NULL);
 
 	::DestroyMenu(hMenu);

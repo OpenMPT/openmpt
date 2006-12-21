@@ -39,7 +39,7 @@ protected:
 	}
 	
 	//Gets called on seekg
-	pos_type seekpos(pos_type sp, ios_base::openmode which = ios_base::in | ios_base::binary)
+	pos_type seekpos(pos_type sp, ios_base::openmode) // which = ios_base::in | ios_base::binary)
 	{
 		DWORD offset = static_cast<DWORD>(sp);
 		if(offset >= 0 && offset < GetStrmSize())
@@ -52,7 +52,7 @@ protected:
 	}
 
 	//Gets called on tellg
-	pos_type seekoff(off_type off, ios_base::seekdir way, ios_base::openmode which = ios_base::in | ios_base::binary)
+	pos_type seekoff(off_type off, ios_base::seekdir way, ios_base::openmode) // which = ios_base::in | ios_base::binary)
 	{
 		DWORD beginOffset = 0;
 		if(way == ios::cur)

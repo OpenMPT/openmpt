@@ -181,7 +181,7 @@ void CChannelManagerDlg::OnApply()
 
 	EnterCriticalSection(&applying);
 
-	MODCOMMAND *p,*newp;
+	MODCOMMAND *p = NULL,*newp = NULL;
 	MODCHANNELSETTINGS settings[MAX_BASECHANNELS];
 	UINT i,j,k,nChannels,newpat[MAX_BASECHANNELS],newMemory[4][MAX_BASECHANNELS];
 

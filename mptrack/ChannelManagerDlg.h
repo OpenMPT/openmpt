@@ -12,6 +12,7 @@ class CChannelManagerDlg: public CDialog
 public:
 
 	static CChannelManagerDlg * sharedInstance(BOOL autoCreate = TRUE);
+	static void DestroySharedInstance() {delete sharedInstance_; sharedInstance_ = NULL;}
 	void SetDocument(void * parent);
 	BOOL IsOwner(void * ctrl);
 	BOOL IsDisplayed(void);

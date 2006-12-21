@@ -20,6 +20,8 @@ public:
 	CButton m_CheckBox6;
 // -! NEW_FEATURE#0023
 
+	CButton m_CheckBoxITStandard;
+
 public:
 	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = m_nChannels = 0; }
 	BOOL VerifyData();
@@ -42,6 +44,7 @@ protected:
 // -> DESC="IT project files (.itp)"
 	afx_msg void OnCheck6();
 // -! NEW_FEATURE#0023
+	afx_msg void OnITStandard();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -982,7 +982,7 @@ void CTrackApp::OnFileOpen()
 	CFileDialog dlg(TRUE,
 					NULL,
 					NULL,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_FORCESHOWHIDDEN,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_FORCESHOWHIDDEN | OFN_ALLOWMULTISELECT,
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 //					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
@@ -1008,15 +1008,25 @@ void CTrackApp::OnFileOpen()
 	{
 		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurModDir;
 	}
-	if (dlg.DoModal() == IDOK) 
+	const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
+	vector<char> filenameBuffer(bufferSize, 0);
+	dlg.GetOFN().lpstrFile = &filenameBuffer[0];
+	dlg.GetOFN().nMaxFile = bufferSize;
+    if (dlg.DoModal() == IDOK) 
 	{
-		CHAR szDrive[_MAX_PATH], szDir[_MAX_PATH];
-		_splitpath(dlg.GetPathName(), szDrive, szDir, NULL, NULL);
-		strcpy(CMainFrame::m_szCurModDir, szDrive);
-		strcat(CMainFrame::m_szCurModDir, szDir);
-		CMainFrame::m_nFilterIndex = dlg.m_ofn.nFilterIndex;
-		OpenDocumentFile(dlg.GetPathName());
+		POSITION pos = dlg.GetStartPosition();
+		while(pos != NULL)
+		{
+			CHAR szDrive[_MAX_PATH], szDir[_MAX_PATH];
+			CString pathName = dlg.GetNextPathName(pos);
+			_splitpath(pathName, szDrive, szDir, NULL, NULL);
+			strcpy(CMainFrame::m_szCurModDir, szDrive);
+			strcat(CMainFrame::m_szCurModDir, szDir);
+			CMainFrame::m_nFilterIndex = dlg.m_ofn.nFilterIndex;
+			OpenDocumentFile(pathName);
+		}
 	}
+	filenameBuffer.clear();
 }
 
 
@@ -1370,7 +1380,7 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
-	wsprintf(s, "Build Date: %s", gszBuildDate);
+	wsprintf(s, "Build Date: %s", buildDateTime.c_str());
 	SetDlgItemText(IDC_EDIT2, s);
 	SetDlgItemText(IDC_EDIT3, CMainFrame::GetFullVersionString());
 
