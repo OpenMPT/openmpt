@@ -1135,6 +1135,7 @@ void CPageEditNote::UpdateDialog()
 //--------------------------------
 {
 	char s[64];
+	const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 	CComboBox *combo;
 	CSoundFile *pSndFile;
 
@@ -1147,7 +1148,12 @@ void CPageEditNote::UpdateDialog()
 		combo->SetItemData(combo->AddString("No note"), 0);
 		for (UINT i=1; i<=120; i++)
 		{
-			wsprintf(s, "%s", pSndFile->GetNoteName(i, m_nInstr).c_str());
+			const string temp = pSndFile->GetNoteName(i, m_nInstr);
+			if(temp.size() >= sizeofS)
+				wsprintf(s, "%s", "...");
+			else
+				wsprintf(s, "%s", temp.c_str());
+
 			combo->SetItemData(combo->AddString(s), i);
 		}
 		if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
@@ -2577,13 +2583,18 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 //-------------------------------------------------------------------
 {
 	CHAR s[32] = "--";
+	const size_t sizeofS = sizeof(s)/sizeof(s[0]);
 
 	if ((lParam >= 0) && (lParam < 3*12) && (m_pSndFile))
 	{
 		UINT nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
 		
-		wsprintf(s, "%s", m_pSndFile->GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str());
+		const string temp = m_pSndFile->GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
+        if(temp.size() >= sizeofS)
+			wsprintf(s, "%s", "...");
+		else
+			wsprintf(s, "%s", temp.c_str());
 
 		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
 		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample > 0) && (nSample < MAX_SAMPLES) && (penv))

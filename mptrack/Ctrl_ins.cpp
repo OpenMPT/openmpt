@@ -164,8 +164,9 @@ void CNoteMapWnd::OnPaint()
 			// Note
 			s[0] = 0;
 
-
-			if ((nPos >= 0) && (nPos < 120)) wsprintf(s, "%s", pSndFile->GetNoteName(nPos+1, m_nInstrument).c_str());
+			string temp = pSndFile->GetNoteName(nPos+1, m_nInstrument);
+			temp.resize(4);
+			if ((nPos >= 0) && (nPos < 120)) wsprintf(s, "%s", temp.c_str());
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
 			DrawButtonRect(hdc, &rect, s, FALSE, FALSE);
 			// Mapped Note
@@ -178,7 +179,12 @@ void CNoteMapWnd::OnPaint()
 				UINT n = penv->NoteMap[nPos];
 				if (n == 0xFF) strcpy(s, "==="); else
 				if (n == 0xFE) strcpy(s, "^^^"); else
-				if (n <= 120) wsprintf(s, "%s", pSndFile->GetNoteName(n, m_nInstrument).c_str());
+				if (n <= 120)
+				{
+					string temp = pSndFile->GetNoteName(n, m_nInstrument);
+					temp.resize(4);
+					wsprintf(s, "%s", temp.c_str());
+				}
 			}
 			FillRect(hdc, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if ((nPos == (int)m_nNote) && (!m_bIns))
@@ -1351,8 +1357,8 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 		case IDC_CHECK_PITCHTEMPOLOCK:
 			if ((m_pSndFile) && (m_pSndFile->Headers[m_nInstrument]))
 			{
-				const string str = string("Tempo range: ") + Stringify(m_pSndFile->GetTempoMin()) + string(" - ") + Stringify(m_pSndFile->GetTempoMax());
-				ASSERT(str.size() < 256);
+				string str = string("Tempo range: ") + Stringify(m_pSndFile->GetTempoMin()) + string(" - ") + Stringify(m_pSndFile->GetTempoMax());
+				if(str.size() >= 250) str.resize(250);
 				wsprintf(pszText, str.c_str());
 				return TRUE;
 			}

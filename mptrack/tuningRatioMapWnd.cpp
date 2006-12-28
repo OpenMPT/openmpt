@@ -46,6 +46,7 @@ void CTuningRatioMapWnd::OnPaint()
 	{
 		BOOL bFocus = (::GetFocus() == m_hWnd) ? TRUE : FALSE;
 		CHAR s[64];
+		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 		CRect rect;
 
 		CTuning::STEPTYPE nNotes = static_cast<CTuning::STEPTYPE>((rcClient.bottom + m_cyFont - 1) / m_cyFont);
@@ -59,7 +60,12 @@ void CTuningRatioMapWnd::OnPaint()
 			BOOL bHighLight;
 			// Note
 			s[0] = 0;
-			wsprintf(s, "%s", m_pTuning->GetNoteName(nPos - 61).c_str());
+			const string temp = m_pTuning->GetNoteName(nPos - 61).c_str();
+			if(temp.size() >= sizeofS)
+				wsprintf(s, "%s", "...");
+			else
+				wsprintf(s, "%s", temp.c_str());
+
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
 			DrawButtonRect(hdc, &rect, s, FALSE, FALSE);
 			// Mapped Note
