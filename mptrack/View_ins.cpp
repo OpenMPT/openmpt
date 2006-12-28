@@ -1366,6 +1366,7 @@ BYTE CViewInstrument::EnvGetReleaseNode()
 			}
 		}
 	}
+	return ENV_RELEASE_NODE_UNSET;
 }
 
 WORD CViewInstrument::EnvGetReleaseNodeValue()
@@ -1388,6 +1389,7 @@ WORD CViewInstrument::EnvGetReleaseNodeValue()
 			}
 		}
 	}
+	return 0;
 }
 
 WORD CViewInstrument::EnvGetReleaseNodeTick()
@@ -1410,6 +1412,7 @@ WORD CViewInstrument::EnvGetReleaseNodeTick()
 			}
 		}
 	}
+	return 0;
 }
 
 
@@ -1456,7 +1459,6 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 	} else
 	if ((pnotify->dwType & dwType) && ((pnotify->dwType & 0xFFFF) == m_nInstrument))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		BOOL bUpdate = FALSE;
 		for (UINT i=0; i<MAX_CHANNELS; i++)
 		{
@@ -2353,6 +2355,7 @@ void CViewInstrument::PlayNote(UINT note)
 	if ((pModDoc) && (pMainFrm) && (note<128))
 	{
 		CHAR s[64];
+		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 		if (note >= 0xFE)
 		{
 			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE, m_nInstrument);
@@ -2379,7 +2382,14 @@ void CViewInstrument::PlayNote(UINT note)
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
 			m_nPlayingChannel= pModDoc->PlayNote(note, m_nInstrument, 0, FALSE); //rewbs.instViewNNA
 			s[0] = 0;
-			if ((note) && (note <= 120)) wsprintf(s, "%s", pModDoc->GetSoundFile()->GetNoteName(static_cast<CTuning::STEPTYPE>(note), m_nInstrument).c_str());
+			if ((note) && (note <= 120)) 
+			{
+				const string temp = pModDoc->GetSoundFile()->GetNoteName(static_cast<CTuning::STEPTYPE>(note), m_nInstrument);
+				if(temp.size() >= sizeofS)
+					wsprintf(s, "%s", "...");
+				else
+					wsprintf(s, "%s", temp.c_str());
+			}
 			pMainFrm->SetInfoText(s);
 		}
 	}
@@ -2602,7 +2612,7 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 	return CModScrollView::PreTranslateMessage(pMsg);
 }
 
-LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -2610,7 +2620,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	CModDoc *pModDoc = GetDocument();	
 	if (!pModDoc) return NULL;
 	
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();	
+	//CSoundFile *pSndFile = pModDoc->GetSoundFile();	
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)

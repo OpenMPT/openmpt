@@ -199,40 +199,28 @@ void CChannelManagerDlg::OnApply()
 	BeginWaitCursor();
 	BEGIN_CRITICAL();
 
-	// Rearrange patterns content
-	for(i = 0; i < m_pSndFile->Patterns.Size(); i++){
-
-		// Allocate a new empty pattern to replace current pattern at i'th position in pattern array
-		p = m_pSndFile->Patterns[i];
-		if(p) newp = CSoundFile::AllocatePattern(m_pSndFile->PatternSize[i], nChannels);
-
-		if(p && !newp){
-			END_CRITICAL();
-			EndWaitCursor();
-			LeaveCriticalSection(&applying);
-			::MessageBox(NULL, "Pattern Data is corrupted!!!", "ERROR: Not enough memory to rearrange channels!", MB_ICONERROR | MB_OK);
-			return;
-		}
-
-		// Copy data from old pattern taking care of new channel reodering
-		if(p != NULL){
-			for(j = 0 ; j < m_pSndFile->PatternSize[i] ; j++){
-				for(k = 0 ; k < nChannels ; k++)
-					memcpy(&newp[j*nChannels + k],&p[j*m_pSndFile->m_nChannels + newpat[k]],sizeof(MODCOMMAND));
-			}
-			// Set new pattern in pattern array & free previous pattern
-			m_pSndFile->Patterns[i] = newp;
-			CSoundFile::FreePattern(p);
-		}
+	//Creating new order-vector for ReArrangeChannels.
+	vector<CHANNELINDEX> newChnOrder; newChnOrder.reserve(nChannels);
+	for(i = 0; i<nChannels; i++)
+	{
+		newChnOrder.push_back(newpat[i]);
 	}
+	if(m_pSndFile->ReArrangeChannels(newChnOrder) != nChannels)
+	{
+		MessageBox("Rearranging channels failed");
+		END_CRITICAL();
+		EndWaitCursor();
 
-	// Copy channel settings
-	for(i = 0 ; i < m_pSndFile->m_nChannels ; i++) settings[i] = m_pSndFile->ChnSettings[i];
+		ResetState(TRUE,TRUE,TRUE,TRUE,TRUE);
+		LeaveCriticalSection(&applying);
+
+		return;
+	}
+	
 
 	// Redistribute channel setting & update manager internal store memory
 	for(i = 0 ; i < nChannels ; i++){
 		if(i != newpat[i]){
-			m_pSndFile->ChnSettings[i] = settings[newpat[i]];
 			memory[0][i] = newMemory[0][newpat[i]];
 			memory[1][i] = newMemory[1][newpat[i]];
 			memory[2][i] = newMemory[2][newpat[i]];
@@ -240,23 +228,13 @@ void CChannelManagerDlg::OnApply()
 		memory[3][i] = i;
 	}
 
-	// Also update record states (unfortunetely they are not part of channel settings)
-	for(i = 0 ; i < nChannels ; i++) newMemory[1][i] = pModDoc->IsChannelRecord(i);
-
-	pModDoc->ReinitRecordState();
-	for(i = 0 ; i < nChannels ; i++){
-		if(newMemory[1][newpat[i]] == 1) pModDoc->Record1Channel(i,TRUE);
-		if(newMemory[1][newpat[i]] == 2) pModDoc->Record2Channel(i,TRUE);
-	}
-
-	// Update new number of channels
-	m_pSndFile->m_nChannels = nChannels;
 	if(pActiveMod == pModDoc){
 		i = m_pSndFile->GetCurrentPos();
 		m_pSndFile->m_dwSongFlags &= ~SONG_STEP;
 		m_pSndFile->SetCurrentPos(0);
 		m_pSndFile->SetCurrentPos(i);
 	}
+	
 
 	END_CRITICAL();
 	EndWaitCursor();

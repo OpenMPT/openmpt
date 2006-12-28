@@ -368,7 +368,7 @@ template<class A, class B, class C>
 const CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<A, B, C>::SERIALIZATION_FAILURE = true;
 
 template<class A, class B, class C>
-const string CTuningBase<A, B, C>::s_FileExtension = ".mptt";
+const string CTuningBase<A, B, C>::s_FileExtension = ".tun";
 
 template<class A, class B, class C>
 const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_MAINRATIOS = 0x1; //1b
