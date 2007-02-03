@@ -55,7 +55,8 @@ UINT CPatternContainer::GetIndex(const MODPATTERN* const pPat) const
 {
 	for(UINT i = 0; i<m_Patterns.size(); i++)
 		if(&m_Patterns[i] == pPat) return i;
-	return i;
+
+	return m_Patterns.size();
 }
 
 UINT CPatternContainer::GetInvalidIndex() const {return m_rSndFile.m_nType == MOD_TYPE_MPT ?  LIMIT_UINT_MAX : 0xFF;}

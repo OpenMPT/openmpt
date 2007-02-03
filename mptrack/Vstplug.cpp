@@ -11,6 +11,7 @@
 #include "AbstractVstEditor.h"		//rewbs.defaultPlugGUI
 #include "VstEditor.h"				//rewbs.defaultPlugGUI
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
+#include "midi.h"
 
 
 //#define VST_LOG
@@ -234,7 +235,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 #ifdef _DEBUG
 	if (!hLib)
 	{
-		TCHAR szBuf[80]; 
+		TCHAR szBuf[256]; 
 		LPVOID lpMsgBuf;
 		DWORD dw = GetLastError(); 
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL );
@@ -1612,6 +1613,10 @@ CVstPlugin::~CVstPlugin()
 	//TODO: figure out what to do here.. :)
 	if (m_nInputs && m_pInputs) //if m_nInputs == 0, then m_pInputs will have been
 	{							//initilised at 0 size, so we'll crash on delete.
+								//Even though the size is zero,
+								//new returns a non-NULL address and absence 
+								//of delete can make debugger report 
+								//of a memory leak of 0 bytes long.
 		delete[] m_pInputs;
 		m_pInputs = NULL;
 	}

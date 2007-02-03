@@ -22,9 +22,9 @@
 
 #pragma warning(disable:4244)
 
-MODCOMMAND CViewPattern::m_cmdOld = { 0,0, 0,0, 0,0};
-MODCOMMAND CViewPattern::m_cmdFind = { 0,0,0,0,0,0 };
-MODCOMMAND CViewPattern::m_cmdReplace = { 0,0,0,0,0,0 };
+MODCOMMAND CViewPattern::m_cmdOld;
+MODCOMMAND CViewPattern::m_cmdFind;
+MODCOMMAND CViewPattern::m_cmdReplace;
 DWORD CViewPattern::m_dwFindFlags = 0;
 DWORD CViewPattern::m_dwReplaceFlags = 0;
 UINT CViewPattern::m_nFindMinChn = 0;
@@ -782,7 +782,7 @@ void CViewPattern::OnShrinkSelection()
 		{
 			UINT chn = i >> 3;
 			MODCOMMAND *blank= &p[row * pSndFile->m_nChannels + chn];
-			memset(blank, 0, sizeof(MODCOMMAND));
+			*blank = MODCOMMAND();
 		}
 	}
 	m_dwBeginSel = startSel;
@@ -3440,7 +3440,7 @@ void CViewPattern::TempEnterVol(int v)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(oldcmd != *p)
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -3465,6 +3465,8 @@ void CViewPattern::SetSpacing(int n)
 	}
 }
 
+
+#ifdef TRADITIONAL_MODCOMMAND
 void CViewPattern::TempEnterFX(int c)
 //-----------------------------------
 {
@@ -3495,7 +3497,7 @@ void CViewPattern::TempEnterFX(int c)
 
 		// Check for MOD/XM Speed/Tempo command
 		if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-		 && ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
+		&& ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
 		{
 			UINT maxspd = (pSndFile->m_nType & MOD_TYPE_XM) ? 0x1F : 0x20;
 			p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
@@ -3506,7 +3508,7 @@ void CViewPattern::TempEnterFX(int c)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(oldcmd != *p)
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -3515,6 +3517,52 @@ void CViewPattern::TempEnterFX(int c)
 		}
 	}	// end if mainframe & moddoc exist
 }
+#else
+void CViewPattern::TempEnterFX(int e /*EFFECT_ID eID*/)
+//-----------------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
+
+	if(!pSndFile || !pMainFrm)
+		return;
+	
+	EFFECT_ID eID = e;
+	
+	const ROWINDEX r = m_nRow;
+	const CHANNELINDEX c = GetChanFromCursor(m_dwCursor);
+	const MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(r, c);
+	MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
+			
+	PrepareUndo(m_dwBeginSel, m_dwEndSel);
+
+	//Checking whether to use the param of previous effect.
+	if (eID)
+	{
+		if ((eID == m_cmdOld.GetEffect()) && (!p->GetEffectParam()) && (!p->GetEffect()))
+			pSndFile->Patterns[m_nPattern].SetModCommandEffectParam(r, c, m_cmdOld.GetEffectParam());
+		else 
+			m_cmdOld.SetEffectParam(0);
+
+		m_cmdOld.SetEffectByID(eID);
+	}
+	pSndFile->Patterns[m_nPattern].SetModCommandEffect(r, c, eID);
+
+	if (IsEditingEnabled_bmsg())
+	{
+		DWORD sel = (m_nRow << 16) | m_dwCursor;
+		SetCurSel(sel, sel);
+		sel &= ~7;
+		if(oldcmd != *p)
+		{
+			pModDoc->SetModified();
+			InvalidateArea(sel, sel+5);
+			UpdateIndicator();
+		}
+	}
+}
+#endif
 
 void CViewPattern::TempEnterFXparam(int v)
 //----------------------------------------
@@ -3559,7 +3607,7 @@ void CViewPattern::TempEnterFXparam(int v)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(*p != oldcmd)
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -3813,7 +3861,7 @@ void CViewPattern::TempEnterIns(int val)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(*p != oldcmd)
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -3904,7 +3952,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			DWORD sel = (nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND))) //has it really changed?
+			if(*p != oldcmd) //has it really changed?
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -4087,7 +4135,7 @@ void CViewPattern::TempEnterChord(int note)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(*p != oldcmd)
 			{
 				pModDoc->SetModified();
 				InvalidateRow();
@@ -4185,7 +4233,7 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))	
+			if(*p != oldcmd)
 			{
 				pModDoc->SetModified();
 				InvalidateRow();
@@ -4783,4 +4831,5 @@ bool CViewPattern::IsEditingEnabled_bmsg()
 
 	return false;
 }
+
 

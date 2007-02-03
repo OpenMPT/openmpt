@@ -16,6 +16,7 @@
 #include "../mptrack/MainFrm.h"
 // -! NEW_FEATURE#0022
 #include "sndfile.h"
+#include "midi.h"
 
 #ifdef MODPLUG_TRACKER
 #define ENABLE_STEREOVU
@@ -1822,8 +1823,12 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 }
 
 int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)
+//------------------------------------------------------------------------------
 {
 	UINT pt = penv->nVolEnv - 1;
+
+	//Checking where current 'tick' is relative to the 
+	//envelope points.
 	for (UINT i=0; i<(UINT)(penv->nVolEnv-1); i++)
 	{
 		if (position <= penv->VolPoints[i])
@@ -1832,13 +1837,16 @@ int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)
 			break;
 		}
 	}
+
 	int x2 = penv->VolPoints[pt];
 	int x1, envvol;
-	if (position >= x2)
+	if (position >= x2) //Case: current 'tick' is on a envelope point.
 	{
 		envvol = penv->VolEnv[pt] << 2;
 		x1 = x2;
-	} else
+	}
+	else //Case: current 'tick' is between two envelope points.
+	{
 		if (pt)
 		{
 			envvol = penv->VolEnv[pt-1] << 2;
@@ -1848,12 +1856,15 @@ int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)
 			envvol = 0;
 			x1 = 0;
 		}
-		if (position > x2) position = x2;
-		if ((x2 > x1) && (position > x1))
+
+		if(x2 > x1 && position > x1)
 		{
+			//Linear approximation between the points;
+			//f(x+d) ~ f(x) + f'(x)*d, where f'(x) = (y2-y1)/(x2-x1)
 			envvol += ((position - x1) * (((int)penv->VolEnv[pt]<<2) - envvol)) / (x2 - x1);
 		}
-		return envvol;
+	}
+	return envvol;
 }
 
 #endif

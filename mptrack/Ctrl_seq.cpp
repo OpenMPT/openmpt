@@ -409,8 +409,16 @@ void COrderList::UpdateInfoText()
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 
 		s[0] = 0;
-		wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "Position %02Xh of %02Xh" : "Position %d of %d",
-			m_nScrollPos, pSndFile->GetNumPatterns());
+		if(CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY)
+		{
+			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, pSndFile->GetNumPatterns());
+		}
+		else
+		{
+			wsprintf(s, "Position %d of %d (%02Xh of %02Xh)",
+			m_nScrollPos, pSndFile->GetNumPatterns(), m_nScrollPos, pSndFile->GetNumPatterns());
+		}
+		
 		if (m_nScrollPos < pSndFile->Order.size())
 		{
 			UINT nPat = pSndFile->Order[m_nScrollPos];
@@ -661,8 +669,8 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 
 		if (hMenu)
 		{
-			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Pattern\tIns");
-			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Pattern\tDel");
+			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Order\tIns");
+			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Order\tDel");
 			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_NEW, "Create &New Pattern");
 			AppendMenu(hMenu, MF_STRING|greyed, ID_ORDERLIST_COPY, "&Duplicate Pattern");

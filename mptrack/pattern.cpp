@@ -5,6 +5,12 @@
 #include "moddoc.h"
 
 
+CHANNELINDEX CPattern::GetNumChannels() const
+//-------------------------------------------
+{
+	return m_rPatternContainer.GetSoundFile().GetNumChannels();
+}
+
 bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning)
 //-------------------------------------------
 {
@@ -174,5 +180,77 @@ bool CPattern::Shrink()
 	rModDoc.UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << 24), NULL);
 	rModDoc.EndWaitCursor();
 	return false;
+}
+
+#ifndef TRADITIONAL_MODCOMMAND
+void CPattern::SetModCommandEffect(ROWINDEX r, CHANNELINDEX c, EFFECT_ID eID)
+//---------------------------------------------------------------------------
+{
+	m_rPatternContainer.GetSoundFile().OnSetEffect(GetModCommand(r,c), eID);
+}
+
+void CPattern::SetModCommandEffectParam(ROWINDEX r, CHANNELINDEX c, EFFECT_PARAM eParam)
+//---------------------------------------------------------------------------
+{
+	m_rPatternContainer.GetSoundFile().OnSetEffectParam(GetModCommand(r,c), eParam);
+}
+#endif
+
+
+bool CPattern::WriteITPdata(FILE* f) const
+//----------------------------------------
+{
+	for(ROWINDEX r = 0; r<GetNumRows(); r++)
+	{
+		for(CHANNELINDEX c = 0; c<GetNumChannels(); c++)
+		{
+			MODCOMMAND mc = GetModCommand(r,c);
+			#ifdef TRADITIONAL_MODCOMMAND
+				fwrite(&mc, sizeof(MODCOMMAND), 1, f);
+			#else
+				MODCOMMAND_ORIGINAL temp;
+				temp.command = mc.GetEffect();
+				temp.instr = mc.GetInstr();
+				temp.note = mc.GetNote();
+				temp.param = mc.GetEffectParam();
+				temp.vol = mc.GetVolParam();
+				temp.volcmd = mc.GetVolCmd();
+				fwrite(&temp, sizeof(MODCOMMAND_ORIGINAL), 1, f);
+			#endif
+			
+		}
+	}
+    return false;
+}
+
+bool CPattern::ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const DWORD datasize, const DWORD dwMemLength)
+//-----------------------------------------------------------------------------------------------
+{
+	if(streamPos+datasize >= dwMemLength || datasize < sizeof(MODCOMMAND_ORIGINAL))
+		return true;
+
+	const DWORD startPos = streamPos;
+	ROWINDEX counter = 0;
+	while(streamPos - startPos + sizeof(MODCOMMAND_ORIGINAL) <= datasize)
+	{
+		MODCOMMAND_ORIGINAL temp;
+		memcpy(&temp, lpStream+streamPos, sizeof(MODCOMMAND_ORIGINAL));
+		MODCOMMAND& mc = GetModCommand(counter);
+		mc.command = temp.command;
+		mc.instr = temp.instr;
+		mc.note = temp.note;
+		mc.param = temp.param;
+		mc.vol = temp.vol;
+		mc.volcmd = temp.volcmd;
+		streamPos += sizeof(MODCOMMAND_ORIGINAL);
+		counter++;
+	}
+	if(streamPos != startPos + datasize)
+	{
+		ASSERT(false);
+		return true;
+	}
+	else
+		return false;
 }
 

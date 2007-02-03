@@ -60,31 +60,45 @@ public:
 	
 	bool AddTuning(istream& inStrm);
 	bool AddTuning(CTuning* const pT);
+	//Note: By default, given pointer is deleted by CTuningCollection
+	//at some point.
+	//TODO: Make possible to add tuning which won't be deleted.
 
 	bool Remove(const size_t i);
+	bool Remove(const CTuning*);
 
 	bool CanEdit(const CEDITMASK& em) const {return (m_EditMask & em).any();}
 
 	void SetConstStatus(const CEDITMASK& em) {m_EditMask = em;}
 
 	const CEDITMASK& GetEditMask() const {return m_EditMask;}
-	
-	const CTuning& GetTuning(unsigned short int i) const {return *m_Tunings.at(i);}
 
-	CTuning& GetTuning(unsigned short int i) {return *m_Tunings.at(i);}
+	string GetEditMaskString() const {return m_EditMask.to_string<char, 
+		char_traits<char>, allocator<char> >();}
+
+	const CTuning& GetTuning(size_t i) const {return *m_Tunings.at(i);}
+
+	CTuning& GetTuning(size_t i) {return *m_Tunings.at(i);}
 	CTuning* GetTuning(const string& name);
+	const CTuning* GetTuning(const string& name) const;
 
 	size_t GetNumTunings() const {return m_Tunings.size();}
 
 	const string& GetName() const {return m_Name;}
 
-	void SetSavefilePath(const string& str) {m_SavefilePath = str + s_FileExtension;}
+	void SetSavefilePath(const string& str) {m_SavefilePath = str;}
+	const string GetSaveFilePath() const {return m_SavefilePath;}
+
+	string GetVersionString() const {return Stringify(s_SerializationVersion);}
 
 	//Serialization/unserialisation
 	bool SerializeBinary(ostream&) const;
 	bool SerializeBinary() const;
 	bool UnSerializeBinary(istream&);
 	bool UnSerializeBinary();
+
+	static bool TransferTuning(CTuningCollection* pTCsrc, CTuningCollection* pTCdest, CTuning* pT);
+	//Transfer tuning pT from pTCsrc to pTCdest
 
 //END INTERFACE
 	
@@ -95,9 +109,12 @@ private:
 	TUNINGVECTOR m_Tunings; //The actual tunings are collected as deletable pointers in vector m_Tunings.
 	string m_Name;
 	CEDITMASK m_EditMask;
+	//TODO: TO_BE_ADDED: TUNINGCOLLECTIONVECTOR m_TuningCollections;
+	//A tuningcollection to be able to contain tuningcollections(compare
+	//treeview)
 	//END: SERIALIZABLE DATA MEMBERS
 
-	//BEGIN: NOTSERIALIZABLE DATA MEMBERS
+	//BEGIN: NONSERIALIZABLE DATA MEMBERS
 	TUNINGVECTOR m_DeletedTunings; //See Remove()-method for explanation of this.
 	string m_SavefilePath;
 	//END: NOTSERIALIZABLE DATA MEMBERS
@@ -107,8 +124,11 @@ private:
 //BEGIN PRIVATE METHODS
 private:
 	CTuning* FindTuning(const string& name) const;
+	size_t FindTuning(const CTuning* const) const;
 
-	//Hiding default operators because default meaning doesn't work right.
+	bool Remove(TITER removable, bool moveToTrashBin = true);
+
+	//Hiding default operators because default meaning might not work right.
 	CTuningCollection& operator=(const CTuningCollection&) {}
 	CTuningCollection(const CTuningCollection&) {}
 

@@ -273,11 +273,8 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcy = pfnt->nAlphaNZ_Y + 13 * COLUMN_HEIGHT;
 		break;
 	case '#':
-		srcx = pfnt->nNoteX + pfnt->nNoteWidth/2;
-		srcy = pfnt->nNoteY + 2*COLUMN_HEIGHT;
-		//TODO: '#' doesn't show properly in effect column.
-		//srcx = pfnt->nAlphaAM_X;
-		//srcy = pfnt->nAlphaAM_Y + 13 * COLUMN_HEIGHT;
+		srcx = pfnt->nAlphaAM_X;
+		srcy = pfnt->nAlphaAM_Y + 13 * COLUMN_HEIGHT;
 		break;
 	//rewbs.smoothVST
 	case '\\':

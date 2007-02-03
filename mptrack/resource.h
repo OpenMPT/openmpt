@@ -43,6 +43,10 @@
 #define ID_FILE_EXPORTCOMPAT            204
 #define ID_ENVELOPE_SETRELEASENODE      205
 #define IDS_ERR_EXPORT_TUNING           206
+#define IDS_APPLY_TUNING_MODIFICATIONS  207
+#define IDS_ERR_NO_TUNING_SELECTION     208
+#define IDS_UNSUPPORTED_TUNING_DnD      209
+#define IDS_OPERATION_FAIL              210
 #define IDB_MAINBAR                     300
 #define IDB_IMAGELIST                   301
 #define IDB_PATTERNS                    302
@@ -58,6 +62,7 @@
 #define IDC_NODRAG                      352
 #define ID_ENVELOPE_VIEWGRID            353
 #define ID_REPORT_BUG                   354
+#define IDS_ERR_DIALOG                  355
 #define IDD_SOUNDBANK_INFO              401
 #define IDD_OPTIONS_GENERAL             402
 #define IDD_OPTIONS_SOUNDCARD           403
@@ -93,9 +98,11 @@
 #define IDD_PATTERNRANDOMIZER_VOLCMD    505
 #define IDD_PATTERNRANDOMIZER_EFFECT    506
 #define IDD_CONTROL_GRAPH               507
+#define IDD_SCALE_ENV_POINTS            510
 #define IDD_TUNING                      511
 #define IDD_DIALOG2                     512
 #define IDD_DIALOG3                     513
+#define IDS_ERR_TUNING_SERIALISATION    514
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -740,6 +747,7 @@
 #define IDC_GENMACROLABEL               2253
 #define IDC_RENDERZONE                  2254
 #define IDC_PATTERN_LOOP                2255
+#define IDC_EDIT_FACTOR                 2256
 #define IDC_EDIT_TEST                   2257
 #define IDC_EDIT_ORDERLIST_MARGINS      2258
 #define IDC_STATICRATIOMAP              2259
@@ -768,11 +776,19 @@
 #define IDC_COMBOTUNINGNAME             2282
 #define IDC_EDIT_NAME                   2283
 #define IDC_EDIT_MISC_ACTIONS           2284
+#define IDC_BUTTON_TUNINGCOLLECTION_SAVE 2285
+#define IDC_EDIT_TUNINGCOLLECTION_PATH  2286
+#define IDC_EDIT_TUNINGC_EDITMASK       2287
+#define IDC_EDIT_TUNINGNUM              2288
+#define IDC_EDIT_TUNINGC_VERSION        2289
+#define IDC_EDIT_TUNINGCVERSION         2290
+#define IDC_EDIT_TUNINGCOLLECTION_NAME  2291
+#define IDC_TREE_TUNING                 2292
+#define IDC_PATTERN_FOLLOWSONG          2293
 #define IDC_TEXT_BPM                    2300
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302
 #define IDC_EDIT_RPB                    2303
-#define IDC_PATTERN_FOLLOWSONG          3029
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -948,6 +964,11 @@
 #define ID_PATTERN_TRANSITIONMUTE       36020
 #define ID_PATTERN_TRANSITIONSOLO       36021
 #define ID_PATTERN_TRANSITION_UNMUTEALL 36022
+#define ID_REMOVETUNING                 36023
+#define ID_ADDTUNING                    36024
+#define ID_MOVETUNING                   36025
+#define ID_COPYTUNING                   36026
+#define ID_REMOVETUNINGCOLLECTION       36027
 #define ID_SELECTINST                   36100
 #define ID_NETLINK_MPTFR                37001
 #define ID_PLUG_RECORDAUTOMATION        37003
@@ -981,15 +1002,17 @@
 #define ID_NEW_MPT                      59203
 #define ID_CLEANUP_PLUGS                59205
 #define ID_ENVELOPE_TOGGLERELEASENODE   59206
+#define ID_Menu59207                    59207
+#define ID_ENVELOPE_SCALEPOINTS         59208
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        510
-#define _APS_NEXT_COMMAND_VALUE         59207
-#define _APS_NEXT_CONTROL_VALUE         2256
+#define _APS_NEXT_RESOURCE_VALUE        515
+#define _APS_NEXT_COMMAND_VALUE         59209
+#define _APS_NEXT_CONTROL_VALUE         2304
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

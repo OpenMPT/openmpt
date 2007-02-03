@@ -8,78 +8,11 @@
 #include "vstplug.h"
 #include "ChannelManagerDlg.h"
 #include ".\dlg_misc.h"
+#include "midi.h"
 
 #pragma warning(disable:4244)
 
-static CString MidiCCNames[MIDICC_end+1] ={	//TODO: find a better home for these.
-"BankSelect [Coarse]",
-"ModulationWheel [Coarse]",
-"Breathcontroller [Coarse]",
-"FootPedal [Coarse]",
-"PortamentoTime [Coarse]",
-"DataEntry [Coarse]",
-"Volume [Coarse]",
-"Balance [Coarse]",
-"Panposition [Coarse]",
-"Expression [Coarse]",
-"EffectControl1 [Coarse]",
-"EffectControl2 [Coarse]",
-"GeneralPurposeSlider1",
-"GeneralPurposeSlider2",
-"GeneralPurposeSlider3",
-"GeneralPurposeSlider4",
-"BankSelect [Fine]",
-"ModulationWheel [Fine]",
-"Breathcontroller [Fine]",
-"FootPedal [Fine]",
-"PortamentoTime [Fine]",
-"DataEntry [Fine]",
-"Volume [Fine]",
-"Balance [Fine]",
-"Panposition [Fine]",
-"Expression [Fine]",
-"EffectControl1 [Fine]",
-"EffectControl2 [Fine]",
-"HoldPedal [OnOff]",
-"Portamento [OnOff]",
-"SustenutoPedal [OnOff]",
-"SoftPedal [OnOff]",
-"LegatoPedal [OnOff]",
-"Hold2Pedal [OnOff]",
-"SoundVariation",
-"SoundTimbre",
-"SoundReleaseTime",
-"SoundAttackTime",
-"SoundBrightness",
-"SoundControl6",
-"SoundControl7",
-"SoundControl8",
-"SoundControl9",
-"SoundControl10",
-"GeneralPurposeButton1 [OnOff]",
-"GeneralPurposeButton2 [OnOff]",
-"GeneralPurposeButton3 [OnOff]",
-"GeneralPurposeButton4 [OnOff]",
-"EffectsLevel",
-"TremuloLevel",
-"ChorusLevel",
-"CelesteLevel",
-"PhaserLevel",
-"DataButtonIncrement",
-"DataButtonDecrement",
-"NonRegisteredParameter [Fine]",
-"NonRegisteredParameter [Coarse]",
-"RegisteredParameter [Fine]",
-"RegisteredParameter [Coarse]",
-"AllSoundOff",
-"AllControllersOff",
-"LocalKeyboard [OnOff]",
-"AllNotesOff",
-"OmniModeOff",
-"OmniModeOn",
-"MonoOperation",
-"PolyOperation",
-};
+
 
 
 // -> CODE#0010
@@ -546,7 +479,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 	if (m_nRemove > 0) {
 		wsprintf(label, "Select %d channels to remove:", m_nRemove);
 	} else {
-		wsprintf(label, "Select channels to remove:");
+		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %d)", m_pSndFile->GetNumChannelMin());
 	}
 	
 	SetDlgItemText(IDC_QUESTION1, label);
@@ -569,7 +502,7 @@ void CRemoveChannelsDlg::OnOK()
 	{
 		m_bChnMask[aryListBoxSel[n]]++;
 	}
-	if ((nCount == m_nRemove && nCount >0)  || (m_nRemove == 0 && (m_pSndFile->m_nChannels - nCount >= 4)))
+	if ((nCount == m_nRemove && nCount >0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nCount + m_pSndFile->GetNumChannelMin())))
 		CDialog::OnOK();
 	else
 		CDialog::OnCancel();
@@ -581,7 +514,7 @@ void CRemoveChannelsDlg::OnChannelChanged()
 {
 	UINT nr = 0;
 	nr = m_RemChansList.GetSelCount();
-	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (m_pSndFile->m_nChannels - nr >= 4) && nr > 0)) ? TRUE : FALSE);
+	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nr + m_pSndFile->GetNumChannelMin()) && nr > 0)) ? TRUE : FALSE);
 }
 //end rewbs.removeChansDlgCleanup
 
@@ -1339,36 +1272,75 @@ void CPageEditVolume::OnHScroll(UINT, UINT, CScrollBar *)
 BEGIN_MESSAGE_MAP(CPageEditEffect, CPageEditCommand)
 	ON_WM_HSCROLL()
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnCommandChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	OnCommand2Changed)
 END_MESSAGE_MAP()
 
 
 void CPageEditEffect::UpdateDialog()
 //----------------------------------
 {
-	CHAR s[128];
-	CComboBox *combo;
-	CSoundFile *pSndFile;
-	
-	if ((!m_pModDoc) || (!m_bInitialized)) return;
-	pSndFile = m_pModDoc->GetSoundFile();
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		UINT numfx = m_pModDoc->GetNumEffects();
-		UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
-		combo->ResetContent();
-		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-		if (!m_nCommand) combo->SetCurSel(0);
-		for (UINT i=0; i<numfx; i++)
+	#ifdef TRADITIONAL_MODCOMMAND
+		CHAR s[128];
+		CComboBox *combo;
+		CSoundFile *pSndFile;
+		
+		if ((!m_pModDoc) || (!m_bInitialized)) return;
+		pSndFile = m_pModDoc->GetSoundFile();
+		if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 		{
-			if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+			UINT numfx = m_pModDoc->GetNumEffects();
+			UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
+			combo->ResetContent();
+			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
+			if (!m_nCommand) combo->SetCurSel(0);
+			for (UINT i=0; i<numfx; i++)
 			{
-				int k = combo->AddString(s);
-				combo->SetItemData(k, i);
-				if (i == fxndx) combo->SetCurSel(k);
+				if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+				{
+					int k = combo->AddString(s);
+					combo->SetItemData(k, i);
+					if (i == fxndx) combo->SetCurSel(k);
+				}
 			}
 		}
-	}
-	UpdateRange(FALSE);
+		UpdateRange(FALSE);
+	#else //Modcommand testing
+		CHAR s[128];
+		CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
+		CComboBox *combo2 = (CComboBox *)GetDlgItem(IDC_COMBO2);
+		CSoundFile *pSndFile;
+		
+		if ((!m_pModDoc) || (!m_bInitialized)) return;
+		pSndFile = m_pModDoc->GetSoundFile();
+		if (combo && combo2)
+		{
+			combo->ResetContent();
+			combo2->ResetContent();
+			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
+			combo2->SetItemData(combo2->AddString(" None"), (DWORD)-1);
+
+            UINT numfx = m_pModDoc->GetNumEffects();
+			const UINT fxndx1 = m_pModDoc->GetIndexFromEffect(m_pModcommand->GetEffect(0), m_pModcommand->GetEffectParam(0));
+			const UINT fxndx2 = m_pModDoc->GetIndexFromEffect(m_pModcommand->GetEffect(1), m_pModcommand->GetEffectParam(1));
+
+			if(!m_pModcommand->GetEffect(0)) combo->SetCurSel(0);
+			if(!m_pModcommand->GetEffect(1)) combo2->SetCurSel(0);
+			
+			for (UINT i=0; i<numfx; i++)
+			{
+				if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+				{
+					int k = combo->AddString(s);
+					combo->SetItemData(k, i);
+					int k2 = combo2->AddString(s);
+					combo2->SetItemData(k2, i);
+					if (i == fxndx1) combo->SetCurSel(k);
+					if (i == fxndx2) combo2->SetCurSel(k2);
+				}
+			}
+		}
+		UpdateRange(FALSE);
+	#endif
 }
 
 
@@ -1437,6 +1409,31 @@ void CPageEditEffect::OnCommandChanged()
 		}
 		UpdateRange(bSet);
 	}
+}
+
+
+void CPageEditEffect::OnCommand2Changed()
+//--------------------------------------
+{
+	UINT value = GetDlgItemInt(IDC_COMBO2);
+
+	/*
+	CComboBox *combo;
+
+	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL) && (m_pModDoc))
+	{
+		BOOL bSet = FALSE;
+		int n = combo->GetCurSel();
+		if (n >= 0)
+		{
+			int param = -1, ndx = combo->GetItemData(n);
+			m_nCommand = (ndx >= 0) ? m_pModDoc->GetEffectFromIndex(ndx, param) : 0;
+			if (param >= 0) m_nParam = param;
+			bSet = TRUE;
+		}
+		UpdateRange(bSet);
+	}
+	*/
 }
 
 

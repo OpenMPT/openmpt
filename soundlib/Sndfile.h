@@ -370,87 +370,6 @@ enum {
 	NOT_YET_RELEASED=-1
 };
 
-// Midi Continuous Controller Codes
-// http://www.borg.com/~jglatt/tech/midispec/ctllist.htm
-enum {
-	MIDICC_start = 0,
-	MIDICC_BankSelect_Coarse = MIDICC_start,
-	MIDICC_ModulationWheel_Coarse = 1,
-	MIDICC_Breathcontroller_Coarse = 2,
-	MIDICC_FootPedal_Coarse = 4,
-	MIDICC_PortamentoTime_Coarse = 5,
-	MIDICC_DataEntry_Coarse = 6,
-	MIDICC_Volume_Coarse = 7,
-	MIDICC_Balance_Coarse = 8,
-	MIDICC_Panposition_Coarse = 10,
-	MIDICC_Expression_Coarse = 11,
-	MIDICC_EffectControl1_Coarse = 12,
-	MIDICC_EffectControl2_Coarse = 13,
-	MIDICC_GeneralPurposeSlider1 = 16,
-	MIDICC_GeneralPurposeSlider2 = 17,
-	MIDICC_GeneralPurposeSlider3 = 18,
-	MIDICC_GeneralPurposeSlider4 = 19,
-	MIDICC_BankSelect_Fine = 32,
-	MIDICC_ModulationWheel_Fine = 33,
-	MIDICC_Breathcontroller_Fine = 34,
-	MIDICC_FootPedal_Fine = 36,
-	MIDICC_PortamentoTime_Fine = 37,
-	MIDICC_DataEntry_Fine = 38,
-	MIDICC_Volume_Fine = 39,
-	MIDICC_Balance_Fine = 40,
-	MIDICC_Panposition_Fine = 42,
-	MIDICC_Expression_Fine = 43,
-	MIDICC_EffectControl1_Fine = 44,
-	MIDICC_EffectControl2_Fine = 45,
-	MIDICC_HoldPedal_OnOff = 64,
-	MIDICC_Portamento_OnOff = 65,
-	MIDICC_SustenutoPedal_OnOff = 66,
-	MIDICC_SoftPedal_OnOff = 67,
-	MIDICC_LegatoPedal_OnOff = 68,
-	MIDICC_Hold2Pedal_OnOff = 69,
-	MIDICC_SoundVariation = 70,
-	MIDICC_SoundTimbre = 71,
-	MIDICC_SoundReleaseTime = 72,
-	MIDICC_SoundAttackTime = 73,
-	MIDICC_SoundBrightness = 74,
-	MIDICC_SoundControl6 = 75,
-	MIDICC_SoundControl7 = 76,
-	MIDICC_SoundControl8 = 77,
-	MIDICC_SoundControl9 = 78,
-	MIDICC_SoundControl10 = 79,
-	MIDICC_GeneralPurposeButton1_OnOff = 80,
-	MIDICC_GeneralPurposeButton2_OnOff = 81,
-	MIDICC_GeneralPurposeButton3_OnOff = 82,
-	MIDICC_GeneralPurposeButton4_OnOff = 83,
-	MIDICC_EffectsLevel = 91,
-	MIDICC_TremuloLevel = 92,
-	MIDICC_ChorusLevel = 93,
-	MIDICC_CelesteLevel = 94,
-	MIDICC_PhaserLevel = 95,
-	MIDICC_DataButtonincrement = 96,
-	MIDICC_DataButtondecrement = 97,
-	MIDICC_NonRegisteredParameter_Fine = 98,
-	MIDICC_NonRegisteredParameter_Coarse = 99,
-	MIDICC_RegisteredParameter_Fine = 100,
-	MIDICC_RegisteredParameter_Coarse = 101,
-	MIDICC_AllSoundOff = 120,
-	MIDICC_AllControllersOff = 121,
-	MIDICC_LocalKeyboard_OnOff = 122,
-	MIDICC_AllNotesOff = 123,
-	MIDICC_OmniModeOff = 124,
-	MIDICC_OmniModeOn = 125,
-	MIDICC_MonoOperation = 126,
-	MIDICC_PolyOperation = 127,
-	MIDICC_end = MIDICC_PolyOperation,
-};
-
-enum {
-	MIDI_PitchBend_Command = 0xE0,
-	MIDI_PitchBend_Min     = 0x00,
-	MIDI_PitchBend_Centre  = 0x2000,
-	MIDI_PitchBend_Max     = 0x3FFF
-};
-
 enum {
 	CHANNEL_ONLY		  = 0,
 	INSTRUMENT_ONLY       = 1,
@@ -518,7 +437,7 @@ struct INSTRUMENTHEADER
 	DWORD dwFlags;
 	UINT nGlobalVol;
 	UINT nPan;
-	UINT nVolEnv;
+	UINT nVolEnv; //Number of points in the volume envelope
 	UINT nPanEnv;
 	UINT nPitchEnv;
 	BYTE nVolLoopStart;
@@ -664,6 +583,9 @@ typedef struct _MODCHANNEL
 
 	float m_nPlugParamValueStep;  //rewbs.smoothVST 
 	float m_nPlugInitialParamValue; //rewbs.smoothVST
+
+	typedef UINT VOLUME;
+	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol : nVolume;}
 
 	//-->Relabs.Tuning-modes-to-work-properly-with-effects-variables
 		bool m_ReCalculateFreqOnFirstTick;
@@ -867,9 +789,10 @@ const BYTE IT_STANDARD = 0;
 class CSoundFile
 //==============
 {
-public:
+public: //Typedefs
 	typedef CPatternContainer::PATTERNINDEX PATTERNINDEX;
-public:
+	typedef UINT MODTYPE;
+public: //Get details(TODO?: Move detail asking to a 'controller')
 	WORD GetTempoMin() const;
 	WORD GetTempoMax() const;
 
@@ -879,19 +802,30 @@ public:
 	CHANNELINDEX GetNumChannelMax() const;
 	CHANNELINDEX GetNumChannelMin() const;
 
+public: //Misc
 	void ChangeModTypeTo(const int& newType);
-	UINT GetModType() const {return m_nType;}
+	//
 
-	bitset<8> m_ModFlags;
+	MODTYPE GetModType() const {return m_nType;}
+	//
+
+	#ifndef TRADITIONAL_MODCOMMAND
+		void OnSetEffect(MODCOMMAND& mc, EFFECT_ID);
+		//When adding a modeffect to pattern, this is to be called to 
+		//do the actual adding and this can do modifications if needed.
+
+		void OnSetEffectParam(MODCOMMAND& mc, EFFECT_PARAM);
+		//When adding a modeffect parameter to pattern, this is to be called to 
+		//do the actual adding and this can do modifications if needed.
+	#endif
+
 	virtual bool GetModSpecificFlag(BYTE i)
-	{
-		return (i < m_ModFlags.size()) ? m_ModFlags[i] : false;
-	}
+		{return (i < m_ModFlags.size()) ? m_ModFlags[i] : false;}
+	//
+
 	virtual void SetModSpecificFlag(BYTE i, bool val)
-	{
-		if(i < m_ModFlags.size())
-			m_ModFlags[i] = val;
-	}
+		{if(i < m_ModFlags.size()) m_ModFlags[i] = val;}
+	//
 	
 	//Tuning-->
 public:
@@ -899,22 +833,25 @@ public:
 	static bool SaveStaticTunings();
 
 	string GetNoteName(const CTuning::STEPTYPE&, const int inst = -1) const;
-public:
+public: //TODO: Make tunings private.
 	CTuningCollection m_TuningsTuneSpecific;
 	static CTuningCollection s_TuningsSharedStandard;
 	static CTuningCollection s_TuningsSharedLocal;
 	//<--Tuning
 
-public:
+public: //Get 'controllers'
 	CPlaybackEventer& GetPlaybackEventer() {return m_PlaybackEventer;}
-	//const CPlaybackEventer& GetPlaybackEventer() const {return m_playbackEventer;}
+	const CPlaybackEventer& GetPlaybackEventer() const {return m_PlaybackEventer;}
 
-private:
+private: //Effect functions
 	void PortamentoMPT(MODCHANNEL*, int);
 	void PortamentoFineMPT(MODCHANNEL*, int);
 
-private:
+private: //'Controllers'
 	CPlaybackEventer m_PlaybackEventer;
+
+private: //Misc data
+	bitset<8> m_ModFlags;
 
 
 
@@ -996,8 +933,10 @@ public:
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
 	BOOL Destroy();
 	UINT GetType() const { return m_nType; }
-	UINT GetNumChannels() const;
-	UINT GetLogicalChannels() const { return m_nChannels; }
+	UINT GetNumChannels() const {return m_nChannels;}
+		//Return the number of channels in the pattern. In 1.17.02.45
+		//it returned the number of channels with volume != 0
+		
 	BOOL SetMasterVolume(UINT vol, BOOL bAdjustAGC=FALSE);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
 	UINT GetNumPatterns() const;
@@ -1036,7 +975,7 @@ public:
 	void CheckCPUUsage(UINT nCPU);
 	BOOL SetPatternName(UINT nPat, LPCSTR lpszName);
 	BOOL GetPatternName(UINT nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
-	UINT ReArrangeChannels(const std::vector<UINT>& fromToArray);
+	CHANNELINDEX ReArrangeChannels(const std::vector<CHANNELINDEX>& fromToArray);
 	bool MoveChannel(UINT chn_from, UINT chn_to);
 	bool SetChannelSettingsToDefault(UINT nch);
 	// Module Loaders

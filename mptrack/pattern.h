@@ -33,10 +33,12 @@ public:
 
 //BEGIN: INTERFACE METHODS
 public:
-	MODCOMMAND* GetpModCommand(const UINT r, const UINT c) {return &m_ModCommands[r*c+c];}
-	const MODCOMMAND* GetpModCommand(const UINT r, const UINT c) const {return &m_ModCommands[r*c+c];}
+	//MODCOMMAND* GetpModCommand(const UINT r, const UINT c) {return &m_ModCommands[r*c+c];}
+	const MODCOMMAND* GetpModCommand(const UINT r, const UINT c) const {return &m_ModCommands[r*GetNumChannels()+c];}
+	
+	ROWINDEX GetNumRows() const {return m_Rows;}
 
-	ROWINDEX Rows() const {return m_Rows;}
+	CHANNELINDEX GetNumChannels() const;
 
 	bool Resize(const ROWINDEX newRowCount, const bool showDataLossWarning = true);
 
@@ -48,9 +50,35 @@ public:
 
 	bool Shrink();
 
+#ifndef TRADITIONAL_MODCOMMAND
+	void SetModCommandEffect(ROWINDEX r, CHANNELINDEX c, EFFECT_ID eID);
+	//Sets effect eID to modcommand at position (r,c)
+
+	void SetModCommandEffectParam(ROWINDEX r, CHANNELINDEX c, EFFECT_PARAM eParam);
+	//Sets effect eParam to modcommand at position (r,c)
+
+#endif
+
+	bool WriteITPdata(FILE* f) const;
+	bool ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const DWORD datasize, const DWORD dwMemLength);
+	//Parameters:
+	//1. Pointer to the beginning of the stream
+	//2. Tells where to start(lpStream+streamPos) and number of bytes read is added to it.
+	//3. How many bytes to read
+	//4. Length of the stream.
+	//Returns true on error.
+
 //END: INTERFACE METHODS
 
 	CPattern(CPatternContainer& patCont) : m_ModCommands(0), m_Rows(64), m_rPatternContainer(patCont) {}
+
+private:
+	MODCOMMAND& GetModCommand(ROWINDEX i) {return m_ModCommands[i];}
+	//Returns modcommand from (floor[i/channelCount], i%channelCount) 
+
+	MODCOMMAND& GetModCommand(ROWINDEX r, CHANNELINDEX c) {return m_ModCommands[r*GetNumChannels()+c];}
+	const MODCOMMAND& GetModCommand(ROWINDEX r, CHANNELINDEX c) const {return m_ModCommands[r*GetNumChannels()+c];}
+
 
 //BEGIN: DATA
 private:

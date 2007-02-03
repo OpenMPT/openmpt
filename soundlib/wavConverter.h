@@ -30,7 +30,7 @@ inline double MaxFinderInt(const char* const buffer, const size_t bs)
 		__int64 temp = 0;
 		memcpy((char*)(&temp)+(8-INBYTES), buffer + i, INBYTES);
 		if(temp < 0) temp = -temp;
-		temp >>= 8*INBYTES;
+		temp >>= 8*(8-INBYTES);
 		if(temp > max)
 			max = temp;
 	}
@@ -41,6 +41,8 @@ inline double MaxFinderInt(const char* const buffer, const size_t bs)
 inline double MaxFinderFloat32(const char* const buffer, const size_t bs)
 //----------------------------------------------------------------------
 {
+	if(bs < 4) return 0;
+
 	float max = 0;
 	for(size_t i = 0; i<=bs-4; i+=4)
 	{

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "tuningCollection.h"
+#include <algorithm>
 
 //Serializations statics:
 const CTuningCollection::SERIALIZATION_MARKER CTuningCollection::s_SerializationBeginMarker = 0x54435348; //ascii of TCSH(TuningCollectionSerialisationHeader) in hex.
@@ -58,12 +59,25 @@ CTuning* CTuningCollection::FindTuning(const string& name) const
 	return NULL;
 }
 
+size_t CTuningCollection::FindTuning(const CTuning* const pT) const
+//-----------------------------------------------------------------
+{
+	CTITER citer = find(m_Tunings.begin(), m_Tunings.end(), pT);
+		return citer - m_Tunings.begin();
+}
+
+
 CTuning* CTuningCollection::GetTuning(const string& name)
 //----------------------------------------------
 {
 	return FindTuning(name);
 }
 
+const CTuning* CTuningCollection::GetTuning(const string& name) const
+//-------------------------------------------------------------------
+{
+	return FindTuning(name);
+}
 
 CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::WriteTuningVector(ostream& outStrm) const
 //------------------------------------------------------
@@ -103,7 +117,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::ReadTuningVector
 		if(AddTuning(inStrm))
 			return SERIALIZATION_FAILURE;
 	}
-	
+
 	return SERIALIZATION_SUCCESS;
 }
 
@@ -214,27 +228,42 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::UnSerializeBinar
 	else return SERIALIZATION_FAILURE;
 }	
 
+bool CTuningCollection::Remove(const CTuning* pT)
+//--------------------------------------------
+{
+	TITER iter = find(m_Tunings.begin(), m_Tunings.end(), pT);
+	if(iter != m_Tunings.end())
+		return Remove(iter);
+	else
+		return true;
+}
+
+bool CTuningCollection::Remove(TITER removable, bool moveToTrashBin)
+//---------------------------------------------
+{
+	//Behavior:
+	//By default, moves tuning to carbage bin(m_DeletedTunings) so that
+	//it gets deleted in destructor. This way
+	//the tuning address remains valid until the destruction.
+	//Optinally only removing the pointer without deleting or moving
+	//it to trashbin(e.g. transferring tuning to other collection)
+	if((m_EditMask & EM_REMOVE).any())
+	{
+		if(moveToTrashBin) m_DeletedTunings.push_back(*removable);
+		m_Tunings.erase(removable);
+		return false;
+	}
+	else
+		return true;
+}
 
 bool CTuningCollection::Remove(const size_t i)
 //--------------------------------------------
 {
-	//Behavior:
-	//Moves tuning to carbage bin(m_DeletedTunings) so that
-	//it gets deleted in destructor. This way
-	//the tuning address remains valid until the destruction.
-	
-	if((m_EditMask & EM_REMOVE).any())
-	{
-		if(i >= m_Tunings.size())
+	if(i >= m_Tunings.size())
 			return true;
 
-		m_DeletedTunings.push_back(m_Tunings[i]);
-		m_Tunings.erase(m_Tunings.begin() + i);
-		SerializeBinary();
-		return false;
-	}
-	
-	return true;
+	return Remove(m_Tunings.begin()+i);
 }
 
 
@@ -249,11 +278,6 @@ bool CTuningCollection::AddTuning(CTuning* const pT)
 
 	m_Tunings.push_back(pT);
 
-	if(m_SavefilePath.length() > 0)
-	{
-		ofstream fout(m_SavefilePath.c_str(), ios::binary);
-		SerializeBinary(fout);
-	}
 	return false;
 }
 
@@ -285,7 +309,30 @@ bool CTuningCollection::AddTuning(istream& inStrm)
 		m_Tunings.push_back(p);
 		return false;
 	}
-
 	if(!inStrm.good()) return true;
 	else return false;
+}
+
+//Static
+bool CTuningCollection::TransferTuning(CTuningCollection* pTCsrc, CTuningCollection* pTCdest, CTuning* pT)
+//--------------------------------------------------------------------------------------------------------
+{
+	if(pTCsrc == NULL || pTCdest == NULL || pT == NULL)
+		return true;
+
+	if(pTCsrc == pTCdest)
+		return true;
+
+	size_t i = pTCsrc->FindTuning(pT);
+	if(i >= pTCsrc->m_Tunings.size()) //Tuning not found?
+		return true;
+
+	if(pTCdest->AddTuning(pTCsrc->m_Tunings[i]))
+		return true;
+
+	if(pTCsrc->Remove(pTCsrc->m_Tunings.begin()+i, false))
+		return true;
+
+	return false;
+
 }

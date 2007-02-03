@@ -366,7 +366,7 @@ CTuning* INSTRUMENTHEADER::s_DefaultTuning = 0;
 const ROWINDEX CPatternSizesMimic::operator [](const int i) const
 //-----------------------------------------------------------
 {
-	return m_rSndFile.Patterns[i].Rows();
+	return m_rSndFile.Patterns[i].GetNumRows();
 }
 
 
@@ -812,15 +812,6 @@ void CSoundFile::ResetMidiCfg()
 	lstrcpy(&m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM*32], "Cc p");
 	lstrcpy(&m_MidiCfg.szMidiSFXExt[0], "F0F000z");
 	for (int iz=0; iz<16; iz++) wsprintf(&m_MidiCfg.szMidiZXXExt[iz*32], "F0F001%02X", iz*8);
-}
-
-
-UINT CSoundFile::GetNumChannels() const
-//-------------------------------------
-{
-	UINT n = 0;
-	for (UINT i=0; i<m_nChannels; i++) if (ChnSettings[i].nVolume) n++;
-	return n;
 }
 
 
@@ -1412,7 +1403,7 @@ bool CSoundFile::SetChannelSettingsToDefault(UINT nch)
 
 
 
-UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
+CHANNELINDEX CSoundFile::ReArrangeChannels(const std::vector<CHANNELINDEX>& newOrder)
 //-------------------------------------------------------------------
 {
     //newOrder[i] tells which current channel should be placed to i:th position in
@@ -1422,8 +1413,6 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 	//Thus this function can practically be used to add, remove, reorder, duplicate, clear etc. channels, 
 	//IF it works, that is.
 	
-	MODCOMMAND emptyModCom = {0,0,0,0,0,0};
-
 	UINT nRemainingChannels = newOrder.size();	
 
 	if(nRemainingChannels > min(MAX_CHANNELS, MAX_BASECHANNELS) || nRemainingChannels < GetNumChannelMin()) 	
@@ -1455,7 +1444,7 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 					if(newOrder[k] < m_nChannels) //Case: getting old channel to the new channel order.
 								*tmpdest = tmpsrc[j*m_nChannels+newOrder[k]];
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
-						*tmpdest = emptyModCom;
+						*tmpdest = MODCOMMAND();
 							
 				}
 			}
@@ -1529,7 +1518,7 @@ bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
                 }
                 newOrder[chnTo] = temp;
      }
-     else //case chnFrom > chnT(can't be equal, since it has been examined earlier.)
+     else //case chnFrom > chnTo(can't be equal, since it has been examined earlier.)
      {
           UINT temp = newOrder[chnFrom];
 		  for(UINT i = chnFrom; i>=chnTo+1; i--)
@@ -2718,12 +2707,12 @@ void CSoundFile::BuildDefaultInstrument()
 bool CSoundFile::SaveStaticTunings()
 //----------------------------------
 {
-	bool status = s_TuningsSharedStandard.SerializeBinary();
-	if(status)
-		s_TuningsSharedLocal.SerializeBinary();
-	else
-		status = s_TuningsSharedLocal.SerializeBinary();
-	return status;
+	if(s_TuningsSharedLocal.SerializeBinary())
+	{
+		ErrorBox(IDS_ERR_TUNING_SERIALISATION, NULL);
+		return true;
+	}
+	return false;
 }
 
 bool CSoundFile::LoadStaticTunings()
@@ -2739,8 +2728,8 @@ bool CSoundFile::LoadStaticTunings()
 	string filenameBase;
 	string filename;
 
-	s_TuningsSharedStandard.SetSavefilePath(baseDirectoryName + string("standard\\std_tunings"));
-	s_TuningsSharedLocal.SetSavefilePath(baseDirectoryName + string("local_tunings"));
+	s_TuningsSharedStandard.SetSavefilePath(baseDirectoryName + string("standard\\std_tunings") + CTuningCollection::s_FileExtension);
+	s_TuningsSharedLocal.SetSavefilePath(baseDirectoryName + string("local_tunings") + CTuningCollection::s_FileExtension);
 
 	s_TuningsSharedStandard.UnSerializeBinary();
 	s_TuningsSharedLocal.UnSerializeBinary();
@@ -2843,3 +2832,31 @@ void CSoundFile::ChangeModTypeTo(const int& newType)
 	replace(Order.begin(), Order.end(), oldInvalidIndex, Patterns.GetInvalidIndex());
 	replace(Order.begin(), Order.end(), oldIgnoreIndex, Patterns.GetIgnoreIndex());
 }
+
+#ifndef TRADITIONAL_MODCOMMAND
+void CSoundFile::OnSetEffect(MODCOMMAND& mc, EFFECT_ID eID)
+//---------------------------------------------------------
+{
+	// Check for MOD/XM Speed/Tempo command
+	if(
+		(GetModType() & (MOD_TYPE_MOD|MOD_TYPE_XM)) &&
+		(eID == CMD_SPEED || eID == CMD_TEMPO)
+		)
+	{
+		UINT maxspd = (GetModType() == MOD_TYPE_XM) ? 0x1F : 0x20;
+		mc.SetEffectByID((mc.GetEffectParam() <= maxspd) ? CMD_SPEED : CMD_TEMPO);
+	}
+	else
+	{
+		mc.SetEffectByID(eID);
+	}
+}
+
+
+void CSoundFile::OnSetEffectParam(MODCOMMAND& mc, EFFECT_PARAM eParam)
+//---------------------------------------------------------
+{
+	mc.SetEffectParam(eParam);
+}
+
+#endif
