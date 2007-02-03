@@ -8,6 +8,8 @@
 #include "view_ins.h"
 #include "dlsbank.h"
 #include "channelManagerDlg.h"
+#include "ScaleEnvPointsDlg.h"
+#include ".\view_ins.h"
 
 #define ENV_ZOOM				4
 #define ENV_DRAGLOOPSTART		0x100
@@ -87,6 +89,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND(ID_ENVELOPE_TOGGLERELEASENODE, OnEnvToggleReleasNode)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_ENVELOPE_SCALEPOINTS, OnEnvelopeScalepoints)
 END_MESSAGE_MAP()
 
 
@@ -2232,6 +2235,8 @@ void CViewInstrument::OnEnvInsertPoint()
 			int nTick = ScreenToTick(m_ptMenu.x);
 			int nValue = ScreenToValue(m_ptMenu.y);
 			UINT maxpoints = (pSndFile->m_nType == MOD_TYPE_XM) ? 12 : 25;
+			//To check: Should there be MAX_ENVPOINTS?
+
 			if (nValue < 0) nValue = 0;
 			if (nValue > 64) nValue = 64;
 			if (nTick >= 0) switch(m_nEnv)
@@ -2651,4 +2656,26 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	}
 
 	return NULL;
+}
+void CViewInstrument::OnEnvelopeScalepoints()
+//--------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
+	if(pSndFile == NULL)
+		return;
+
+	if(m_nInstrument >= 1 &&
+	   m_nInstrument <= pSndFile->GetNumInstruments() &&
+	   pSndFile->Headers[m_nInstrument])
+	{
+		CScaleEnvPointsDlg dialog(this, pSndFile->Headers[m_nInstrument], m_nEnv);
+		if (dialog.DoModal() == IDOK)
+		{
+			pModDoc->SetModified();
+			pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+		}
+	}
+
+	
 }

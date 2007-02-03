@@ -51,7 +51,7 @@ public:
 	CSerializationID(const string& a = "")
 	{
 		int i = 0;
-		for(i = 0; i < min<int>(SIZE, static_cast<int>(a.size())); i++)
+		for(i = 0; i < std::min<int>(SIZE, static_cast<int>(a.size())); i++)
 		{
 			m_ID[i] = a.at(i);
 		}
@@ -263,7 +263,7 @@ protected:
 	virtual bool ProCreateRatioPeriodic(const vector<RATIOTYPE>&, const RATIOTYPE&) {return true;}
 	virtual bool ProCreateTET(const STEPTYPE&, const RATIOTYPE&) {return true;}
 	//Above methods return false if action was done, true otherwise.
-	virtual FINESTEPTYPE ProSetFineStepCount(const STEPTYPE& = -1) {return GetFineStepCount();}
+	virtual FINESTEPTYPE ProSetFineStepCount(const STEPTYPE&) {return GetFineStepCount();}
 	virtual RATIOTYPE ProSetRatioFine(const FINESTEPTYPE&, const RATIOTYPE&) {return 0;}
 	virtual STEPTYPE ProSetPeriod(const STEPTYPE&) {return 0;}
 	virtual RATIOTYPE ProSetPeriodRatio(const RATIOTYPE&) {return 0;}
@@ -590,7 +590,7 @@ bool CTuningBase<A,B,C>::CreateRatioPeriodic(const vector<RATIOTYPE>& v, const R
 		{
 			SetType(TT_RATIOPERIODIC);
 			if(MayEdit(EM_FINETUNE))
-				ProSetFineStepCount();
+				ProSetFineStepCount(GetFineStepCount());
 			return false;
 		}
 	}
@@ -612,7 +612,7 @@ bool CTuningBase<A,B,C>::CreateTET(const STEPTYPE& s, const RATIOTYPE& r)
 		{
 			SetType(TT_TET);
 			if(MayEdit(EM_FINETUNE))
-				ProSetFineStepCount();
+				ProSetFineStepCount(GetFineStepCount());
 			return false;
 		}
 	}

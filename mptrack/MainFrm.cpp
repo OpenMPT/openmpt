@@ -648,10 +648,6 @@ CMainFrame::~CMainFrame()
 	delete m_pPerfCounter;
 
 	CChannelManagerDlg::DestroySharedInstance();
-	
-
-	//Saving statictunings here.
-	CSoundFile::SaveStaticTunings();
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)

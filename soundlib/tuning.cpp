@@ -22,7 +22,7 @@ TODOS:
 -Finetune improvements
 */
 
-CTuningRTI::CTuningRTI(const CTuning*& pTun)
+CTuningRTI::CTuningRTI(const CTuning* const pTun)
 //------------------------------------------
 {
 	SetDummyValues();
@@ -95,6 +95,7 @@ bool CTuningRTI::ProCreateTET(const STEPTYPE& s, const RATIOTYPE& r)
 //---------------------------------------------------------------
 {
 	if(s <= 0 || r <= 0) return true;
+	const FINESTEPTYPE fineSteps = GetFineStepCount();
 	SetDummyValues();
 	m_StepMin = s_StepMinDefault;
 	m_StepsInPeriod = s;
@@ -108,6 +109,7 @@ bool CTuningRTI::ProCreateTET(const STEPTYPE& s, const RATIOTYPE& r)
 	{
 		m_RatioTable.push_back(pow(stepRatio, i + m_StepMin));
 	}
+	SetFineStepCount(fineSteps);
 	return false;
 }
 

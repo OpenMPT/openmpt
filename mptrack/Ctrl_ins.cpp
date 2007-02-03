@@ -877,6 +877,7 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 	}
 	PostViewMessage(VIEWMSG_SETCURRENTINSTRUMENT, m_nInstrument);
 	UnlockControls();
+
 	return TRUE;
 }
 
@@ -2466,6 +2467,15 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	v.push_back(&m_pSndFile->m_TuningsTuneSpecific);
 	CTuningDialog td(this, v, pInstH->pTuning);
 	td.DoModal();
+	if(td.GetModifiedStatus(&m_pSndFile->s_TuningsSharedLocal))
+	{
+		if(MsgBox(IDS_APPLY_TUNING_MODIFICATIONS, this, "", MB_OKCANCEL) == IDOK)
+			m_pSndFile->SaveStaticTunings();
+	}
+	if(td.GetModifiedStatus(&m_pSndFile->m_TuningsTuneSpecific))
+	{
+		m_pModDoc->SetModified();
+	}
 
 	//Recreating tuning combobox so that possible
 	//new tuning(s) come visible.

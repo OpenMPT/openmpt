@@ -277,9 +277,12 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 
 	// allocate comment string
 	if(m_lpszSongComments) delete[] m_lpszSongComments;
-	if (id<dwMemLength) {
+	if (id<dwMemLength && id > 0)
+	{
 		m_lpszSongComments = new char[id];
 	}
+	else
+		m_lpszSongComments = NULL;
 
 	// m_lpszSongComments
 	if (m_lpszSongComments && id && streamPos+id<=dwMemLength) {
@@ -458,10 +461,15 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 
 			// Pattern data
 			long datasize = m_nChannels * PatternSize[npat] * n;
-			if (streamPos+datasize<=dwMemLength) {
-				memcpy(Patterns[npat],lpStream+streamPos,datasize);
-				streamPos += datasize;
+			//if (streamPos+datasize<=dwMemLength) {
+			if(Patterns[npat].ReadITPdata(lpStream, streamPos, datasize, dwMemLength))
+			{
+				ErrorBox(IDS_ERR_FILEOPEN, NULL);
+				return FALSE;
 			}
+				//memcpy(Patterns[npat],lpStream+streamPos,datasize);
+				//streamPos += datasize;
+			//}
 		}
 	}
 
@@ -1321,7 +1329,7 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 
 	// order array
-	fwrite(&Order[0], 1, MAX_ORDERS, f);
+	Order.WriteAsByte(f, MAX_ORDERS);
 
 // Song Patterns
 
@@ -1339,7 +1347,7 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&m_lpszPatternNames[0], 1, m_nPatternNames * MAX_PATTERNNAME, f);
 
 	// modcommand data length
-	id = sizeof(MODCOMMAND);
+	id = sizeof(MODCOMMAND_ORIGINAL);
 	fwrite(&id, 1, sizeof(id), f);
 
 	// patterns data content
@@ -1348,7 +1356,8 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 		id = Patterns[npat] ? PatternSize[npat] : 0;
 		fwrite(&id, 1, sizeof(id), f);
 		// pattern data
-		if(Patterns[npat] && PatternSize[npat]) fwrite(Patterns[npat], 1, m_nChannels * PatternSize[npat] * sizeof(MODCOMMAND), f);
+		if(Patterns[npat] && PatternSize[npat]) Patterns[npat].WriteITPdata(f);
+			//fwrite(Patterns[npat], 1, m_nChannels * PatternSize[npat] * sizeof(MODCOMMAND_ORIGINAL), f);
 	}
 
 // Song lonely (instrument-less) samples

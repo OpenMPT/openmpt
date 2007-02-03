@@ -9,8 +9,11 @@ struct CModSpecifications
 	char fileExtension[10];
 	UINT patternsMax;
 	UINT ordersMax;
-	UINT channelsMin;
+	UINT channelsMin; 
 	UINT channelsMax;
+	//NOTE: The two above refer to the user editable pattern channels,
+	//not to the internal sound channels. Maybe there should be a separate
+	//setting for those(comment by: Relabs, January 2007).
 	UINT tempoMin;
 	UINT tempoMax;
 	UINT patternRowsMin;
@@ -37,6 +40,10 @@ const CModSpecifications MPTM_SPECS =
 	"MPTm",								//File extension
 	65000,								//Pattern max.
 	65000,								//Order max.
+	//Note: 0xFFFF == 65535 seems to be used in various places 
+	//in the code as a invalid pattern/order indicator, so going past
+	//that limit likely requires modifications(Relabs, January 2007).
+
 	4,									//Channel min
 	256,								//Channel max
 	32,									//Min tempo

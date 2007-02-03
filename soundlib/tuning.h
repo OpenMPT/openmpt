@@ -58,10 +58,13 @@ public:
 
 	FINESTEPTYPE GetFineStepCount(const STEPTYPE& from, const STEPTYPE& to) const
 	{return (to - from)*GetFineStepCount();}
-	//To be improved.
+	//Returns the number of finesteps between fullsteps from <-> to
+	//To be improved. 
 
 	virtual FINESTEPTYPE GetFineStepCount(const STEPTYPE& fromStep, const FINESTEPTYPE& fromFineSteps, const STEPTYPE& toStep, const FINESTEPTYPE& toFineSteps) const
 	{return GetFineStepCount(fromStep, toStep) + toFineSteps - fromFineSteps;}
+	//Returns the number of finesteps between to notepoints
+	//(fullstep, finesteps).
 
 	VRPAIR SetValidityRange(const VRPAIR& rp);
 	
@@ -78,7 +81,7 @@ public:
 		m_RatioTable = ratios;
 	}
 
-	CTuningRTI(const CTuning*& pTun);
+	CTuningRTI(const CTuning* const pTun);
 	//Copy tuning.
 
 	CTuningRTI() {SetDummyValues();}

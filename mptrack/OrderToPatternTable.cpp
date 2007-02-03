@@ -83,7 +83,6 @@ size_t COrderToPatternTable::WriteAsByte(FILE* f, const UINT count)
 //---------------------------------------------------------------
 {
 	if(size() < count) resize(count, 0xFF);
-	ASSERT(count == size());
 
 	size_t i = 0;
 	
