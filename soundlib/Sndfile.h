@@ -585,7 +585,7 @@ typedef struct _MODCHANNEL
 	float m_nPlugInitialParamValue; //rewbs.smoothVST
 
 	typedef UINT VOLUME;
-	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol : nVolume;}
+	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol*4 : nVolume;}
 
 	//-->Relabs.Tuning-modes-to-work-properly-with-effects-variables
 		bool m_ReCalculateFreqOnFirstTick;
