@@ -2035,7 +2035,7 @@ void CVstPlugin::RecalculateGain()
 
 	if (m_bIsInstrument) {
 		gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
-		gain *= (m_pSndFile->m_nVSTiVolume / 100.0f);
+		gain *= (m_pSndFile->m_nVSTiVolume / m_pSndFile->m_pConfig->getNormalVSTiVol());
 	}
 	m_fGain = gain;
 }
@@ -2091,6 +2091,7 @@ void CVstPlugin::Process(float **pOutputs, unsigned long nSamples)
 	}
 }
 */
+
 void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 //--------------------------------------------------------------------------
 {

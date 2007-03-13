@@ -20,6 +20,12 @@ protected:
 	DECLARE_MESSAGE_MAP();
 };
 
+enum {
+	MAX_SLIDER_GLOBAL_VOL=256,
+	MAX_SLIDER_VSTI_VOL=256,
+	MAX_SLIDER_SAMPLE_VOL=256
+};
+
 
 //=======================================
 class CCtrlGeneral: public CModControlDlg
@@ -28,6 +34,9 @@ class CCtrlGeneral: public CModControlDlg
 public:
 	CCtrlGeneral();
 	LONG* GetSplitPosRef() {return &CMainFrame::glGeneralWindowHeight;} 	//rewbs.varWindowSize
+
+private:
+	void setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB);
 
 public:
 	bool m_bEditsLocked;
@@ -39,7 +48,7 @@ public:
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinGlobalVol, m_SpinRestartPos, 
 				    m_SpinSamplePA, m_SpinVSTiVol;
 
-	CSliderCtrl m_SliderTempo, m_SliderPreAmp, m_SliderGlobalVol, m_SliderVSTiVol;
+	CSliderCtrl m_SliderTempo, m_SliderSamplePreAmp, m_SliderGlobalVol, m_SliderVSTiVol;
 	CComboBox m_ComboResampling;
 	CVuMeter m_VuMeterLeft, m_VuMeterRight;
 	//}}AFX_DATA
@@ -51,6 +60,7 @@ public:
 	virtual CRuntimeClass *GetAssociatedViewClass();
 	virtual void OnActivatePage(LPARAM);
 	virtual void OnDeactivatePage();
+	virtual BOOL GetToolTipText(UINT uId, LPSTR pszText);
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlGeneral)

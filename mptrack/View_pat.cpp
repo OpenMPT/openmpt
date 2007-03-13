@@ -79,6 +79,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PREVORDER,		OnPrevOrder)
 	ON_COMMAND(ID_NEXTORDER,		OnNextOrder)
 	ON_COMMAND(IDC_PATTERN_RECORD,	OnPatternRecord)
+	ON_COMMAND(ID_RUN_SCRIPT,					OnRunScript)
 	ON_COMMAND(ID_TRANSPOSE_UP,					OnTransposeUp)
 	ON_COMMAND(ID_TRANSPOSE_DOWN,				OnTransposeDown)
 	ON_COMMAND(ID_TRANSPOSE_OCTUP,				OnTransposeOctUp)
@@ -2447,6 +2448,12 @@ void CViewPattern::OnAddChannelAfter()
 	EndWaitCursor();
 }
 
+void CViewPattern::OnRunScript()
+//--------------------------------
+{
+	;
+}
+
 
 void CViewPattern::OnTransposeUp()
 //--------------------------------
@@ -4524,6 +4531,8 @@ bool CViewPattern::BuildTransposeCtxMenu(HMENU hMenu, CInputHandler* ih)
 {
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(NOTE_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
+
+	//AppendMenu(hMenu, MF_STRING, ID_RUN_SCRIPT, "Run script");
 
 	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
 		AppendMenu(hMenu, MF_STRING|greyed, ID_TRANSPOSE_UP, "Transpose +1\t" + ih->GetKeyTextFromCommand(kcTransposeUp));

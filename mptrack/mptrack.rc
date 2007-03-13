@@ -542,21 +542,22 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,83,14,175,78
     LTEXT           "Initial global vol:",IDC_STATIC,90,20,52,8
     CONTROL         "",IDC_SLIDER_GLOBALVOL,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS,105,28,15,50
+                    TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS,105,28,15,50
     EDITTEXT        IDC_EDIT_GLOBALVOL,95,78,36,12,ES_NUMBER
     CONTROL         "",IDC_SPIN_GLOBALVOL,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,120,76,
                     11,14
     LTEXT           "VSTi vol:",IDC_STATIC,159,20,33,8
     CONTROL         "",IDC_SLIDER_VSTIVOL,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS,164,28,15,50
+                    TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS,164,28,15,50
     EDITTEXT        IDC_EDIT_VSTIVOL,156,78,36,12,ES_NUMBER
     CONTROL         "",IDC_SPIN_VSTIVOL,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,180,76,
                     11,14
     LTEXT           "Sample vol:",IDC_STATIC,212,20,38,8
-    CONTROL         "Slider1",IDC_SLIDER_SONGPREAMP,"msctls_trackbar32",
-                    TBS_VERT | TBS_BOTH | TBS_NOTICKS,221,28,15,50
+    CONTROL         "Slider1",IDC_SLIDER_SAMPLEPREAMP,"msctls_trackbar32",
+                    TBS_VERT | TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS,221,28,
+                    15,50
     EDITTEXT        IDC_EDIT_SAMPLEPA,212,78,36,12,ES_NUMBER
     CONTROL         "",IDC_SPIN_SAMPLEPA,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,238,75,
@@ -931,10 +932,10 @@ BEGIN
                     WS_TABSTOP
     GROUPBOX        "Tempo",IDC_STATIC,4,51,235,38
     LTEXT           "Mode:",IDC_STATIC,7,62,21,8
-    COMBOBOX        IDC_COMBO4,156,129,81,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO4,153,129,81,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     GROUPBOX        "Playback",IDC_STATIC,4,95,235,51
-    LTEXT           "Plugin levels:",IDC_STATIC,111,131,43,10
+    LTEXT           "Mix Levels:",IDC_STATIC,111,131,40,10
     GROUPBOX        "OpenMPT Version Info",IDC_STATIC,4,150,235,42
     EDITTEXT        IDC_EDIT1,67,161,166,13,ES_AUTOHSCROLL | ES_READONLY,
                     WS_EX_STATICEDGE
@@ -1905,7 +1906,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,17,2,45
+ FILEVERSION 1,17,2,46
  PRODUCTVERSION 0,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -1923,7 +1924,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Olivier Lapicque / OpenMPT team"
             VALUE "FileDescription", "OpenMPT / ModPlug Tracker"
-            VALUE "FileVersion", "1, 17, 2, 45"
+            VALUE "FileVersion", "1, 17, 2, 46"
             VALUE "InternalName", "Modplug Tracker"
             VALUE "LegalCopyright", "Copyright ©1997-2003 Olivier Lapicque; ©2004-2007 GPL."
             VALUE "LegalTrademarks", "M.O.D.P.L.U.G"

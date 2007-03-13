@@ -76,7 +76,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	m_nChannels = 16;
 	m_nInstruments = 0;
 	m_nSamples = 0;
-	m_nSongPreAmp = 0x20;
+	m_nSamplePreAmp = 0x20;
 	m_nDefaultSpeed = pmh1->speed;
 	m_nDefaultTempo = 80;
 	m_nDefaultGlobalVolume = 256;

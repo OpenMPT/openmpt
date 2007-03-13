@@ -266,6 +266,7 @@ protected:
 	afx_msg void OnInterpolateNote();
 	afx_msg void OnVisualizeEffect();		//rewbs.fxvis
 	afx_msg void OnOpenRandomizer();		//rewbs.fxvis
+	afx_msg void OnRunScript();
 	afx_msg void OnTransposeUp();
 	afx_msg void OnTransposeDown();
 	afx_msg void OnTransposeOctUp();

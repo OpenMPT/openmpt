@@ -2668,6 +2668,18 @@ void CSoundFile::NoteCut(UINT nChn, UINT nTick)
 		// if (m_nInstruments) KeyOff(pChn); ?
 		pChn->nVolume = 0;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
+
+		INSTRUMENTHEADER *pHeader = pChn->pHeader;
+		if (pHeader && pHeader->nMidiChannel>0 && pHeader->nMidiChannel<17) { // instro sends to a midi chan
+			UINT nPlug = pHeader->nMixPlug;
+			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
+				IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
+				if (pPlug) {
+					pPlug->MidiCommand(pHeader->nMidiChannel, pHeader->nMidiProgram, pHeader->wMidiBank, /*pChn->nNote+*/0xFF, 0, nChn);
+				}
+			}
+		}
+
 	}
 }
 

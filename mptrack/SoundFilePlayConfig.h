@@ -16,7 +16,8 @@ enum {
 	plugmix_mode_original = 0,
 	plugmix_mode_117RC1   = 1,
 	plugmix_mode_117RC2   = 2,
-	plugmix_mode_Test   = 3,
+	plugmix_mode_117RC3   = 3,
+	plugmix_mode_Test   = 4,
 };
 
 // Class used to store settings for a song file.
@@ -34,30 +35,55 @@ public:
 	float getFloatToInt();
 	void setFloatToInt(float);
 
+	// default VSTi gain factor, different depending on the MPT version we're "emulating"
 	void setVSTiAttenuation(float);
 	float getVSTiAttenuation();
+
+	// user-controllable VSTi gain factor.
 	void setVSTiVolume(float);
 	float getVSTiVolume();
 
-	void setGlobalVolumeAppliesToMaster(bool);
+    void setGlobalVolumeAppliesToMaster(bool);
 	bool getGlobalVolumeAppliesToMaster();
 	
+	void setUseGlobalPreAmp(bool);
+	bool getUseGlobalPreAmp();
+
+	void setTreatPanLikeBalance(bool);
+	bool getTreatPanLikeBalance();
+
+	void setDisplayDBValues(bool);
+	bool getDisplayDBValues();
+
+	//Values at which volumes are unchanged
+	double getNormalSamplePreAmp();
+	double getNormalVSTiVol();
+	double getNormalGlobalVol();
+	void setNormalSamplePreAmp(double);
+	void setNormalVSTiVol(double);
+	void setNormalGlobalVol(double);
+
+private:
 
 //calculated internally (getters only):	
 	float getVSTiGainFactor();
 
-
-
-//
-private:
 	float m_IntToFloat;
 	float m_FloatToInt;
-	float m_VSTiAttenuation;	// default VSTi gain factor, different depending on the MPT version we're "emulating"
-	float m_VSTiVolume;			// user-controllable VSTi gain factor.
+	float m_VSTiAttenuation;	
+	float m_VSTiVolume;			
 	float m_VSTiGainFactor;		// always m_VSTiAttenuation * m_VSTiVolume. No public setter.
 
-	bool m_bGlobalVolumeAppliesToMaster;
+	float m_normalSamplePreAmp;
+	float m_normalVSTiVol;
+	float m_normalGlobalVol;
+
+	bool m_globalVolumeAppliesToMaster;
+	bool m_ignorePreAmp;
+	bool m_treatPanLikeBalance;
+	bool m_displayDBValues;
 
 	DWORD m_LastSavedWithVersion;
 	DWORD m_CreatedWithVersion;
 };
+

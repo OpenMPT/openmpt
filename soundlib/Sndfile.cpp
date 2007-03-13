@@ -178,7 +178,7 @@ RPB.	[EXT]	nRowsPerBeat;
 RPM.	[EXT]	nRowsPerMeasure;
 RS..			nResSwing;
 SEP@	[EXT]									chunk SEPARATOR tag
-SPA.	[EXT]	m_nSongPreAmp;
+SPA.	[EXT]	m_nSamplePreAmp;
 TM..	[EXT]	nTempoMode;
 VE..			nVolEnv;
 VE[.			VolEnv[MAX_ENVPOINTS];
@@ -411,7 +411,7 @@ CSoundFile::CSoundFile()
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	m_lTotalSampleCount=0;
 
-	m_nPlugMixMode=plugmix_mode_117RC2;
+	m_nPlugMixMode=plugmix_mode_Test;
 	m_pConfig = new CSoundFilePlayConfig();
 	
 	BuildDefaultInstrument();
@@ -438,8 +438,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nInstruments = 0;
 	m_nFreqFactor = m_nTempoFactor = 128;
 	m_nMasterVolume = 128;
-	m_nDefaultGlobalVolume = 128;
-	m_nGlobalVolume = 128;
+	m_nDefaultGlobalVolume = 256;
+	m_nGlobalVolume = 256;
 	m_nOldGlbVolSlide = 0;
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo = 125;
@@ -454,8 +454,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nRestartPos = 0;
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
-	m_nSongPreAmp = 100;
-	m_nVSTiVolume = 100;
+	m_nSamplePreAmp = 128;
+	m_nVSTiVolume = 128;
 	m_nPatternNames = 0;
 	m_nMaxOrderPosition = 0;
 	m_lpszPatternNames = NULL;

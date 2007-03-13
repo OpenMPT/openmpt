@@ -226,7 +226,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	// Global Volume
 	m_nDefaultGlobalVolume = psfh->globalvol << 2;
 	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > 256)) m_nDefaultGlobalVolume = 256;
-	m_nSongPreAmp = psfh->mastervol & 0x7F;
+	m_nSamplePreAmp = psfh->mastervol & 0x7F;
 	// Channels
 	m_nChannels = 4;
 	for (UINT ich=0; ich<32; ich++)
@@ -456,7 +456,7 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	header[0x30] = m_nDefaultGlobalVolume >> 2;
 	header[0x31] = m_nDefaultSpeed;
 	header[0x32] = m_nDefaultTempo;
-	header[0x33] = ((m_nSongPreAmp < 0x20) ? 0x20 : m_nSongPreAmp) | 0x80;	// Stereo
+	header[0x33] = ((m_nSamplePreAmp < 0x20) ? 0x20 : m_nSamplePreAmp) | 0x80;	// Stereo
 	header[0x35] = 0xFC;
 	for (i=0; i<32; i++)
 	{
