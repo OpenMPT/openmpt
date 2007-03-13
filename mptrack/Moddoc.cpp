@@ -604,7 +604,7 @@ BOOL CModDoc::InitializeMod()
 		strcpy(m_SndFile.m_szNames[0], "untitled");
 		m_SndFile.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
 		m_SndFile.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
-		m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = 128;
+		m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = 256;
 		for (UINT init=0; init<MAX_BASECHANNELS; init++)
 		{
 			m_SndFile.ChnSettings[init].dwFlags = 0;

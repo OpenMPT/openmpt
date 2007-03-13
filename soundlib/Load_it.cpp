@@ -285,9 +285,9 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	m_nDefaultGlobalVolume = id;
 	streamPos += sizeof(DWORD);
 
-	// m_nSongPreAmp
+	// m_nSamplePreAmp
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
-	m_nSongPreAmp = id;
+	m_nSamplePreAmp = id;
 	streamPos += sizeof(DWORD);
 
 	// m_nDefaultSpeed
@@ -615,7 +615,7 @@ mpts:
 				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
-				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
+				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSamplePreAmp);	 break;
 				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
 				case 'DGV.': fadr = reinterpret_cast<BYTE*>(&m_nDefaultGlobalVolume);	 break;
 				case 'RP..': fadr = reinterpret_cast<BYTE*>(&m_nRestartPos);	 break;
@@ -677,9 +677,9 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	if (pifh->speed) m_nDefaultSpeed = pifh->speed;
 	if (pifh->tempo) m_nDefaultTempo = pifh->tempo;
-	m_nSongPreAmp = pifh->mv & 0x7F;
-	if (m_nSongPreAmp<0x20) {
-		m_nSongPreAmp=100;
+	m_nSamplePreAmp = pifh->mv & 0x7F;
+	if (m_nSamplePreAmp<0x20) {
+		m_nSamplePreAmp=100;
 	}
 	// Reading Channels Pan Positions
 	for (int ipan=0; ipan</*MAX_BASECHANNELS*/64; ipan++) if (pifh->chnpan[ipan] != 0xFF) //Header only has room for settings for 64 chans...		
@@ -1019,7 +1019,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
-				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSongPreAmp);	 break;
+				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSamplePreAmp);	 break;
 				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
 				case 'DGV.': fadr = reinterpret_cast<BYTE*>(&m_nDefaultGlobalVolume);	 break;
 				case 'RP..': fadr = reinterpret_cast<BYTE*>(&m_nRestartPos);	 break;
@@ -1238,7 +1238,7 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	fwrite(&id, 1, sizeof(id), f);
 	id = m_nDefaultGlobalVolume;
 	fwrite(&id, 1, sizeof(id), f);
-	id = m_nSongPreAmp;
+	id = m_nSamplePreAmp;
 	fwrite(&id, 1, sizeof(id), f);
 	id = m_nDefaultSpeed;
 	fwrite(&id, 1, sizeof(id), f);
@@ -1502,7 +1502,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
-	header.mv = m_nSongPreAmp;
+	header.mv = m_nSamplePreAmp;
 	if (header.mv < 0x20) header.mv = 0x20;
 	if (header.mv > 0x7F) header.mv = 0x7F;
 	header.speed = m_nDefaultSpeed;
@@ -2085,7 +2085,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
-	header.mv = m_nSongPreAmp;
+	header.mv = m_nSamplePreAmp;
 	if (header.mv < 0x20) header.mv = 0x20;
 	if (header.mv > 0x7F) header.mv = 0x7F;
 	header.speed = m_nDefaultSpeed;
@@ -3139,11 +3139,11 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_dwLastSavedWithVersion, 1, size, f);	
 
-	code = 'SPA.';							//write m_nSongPreAmp
+	code = 'SPA.';							//write m_nSamplePreAmp
 	fwrite(&code, 1, sizeof(__int32), f);	
-	size = sizeof(m_nSongPreAmp);		
+	size = sizeof(m_nSamplePreAmp);		
 	fwrite(&size, 1, sizeof(__int16), f);
-	fwrite(&m_nSongPreAmp, 1, size, f);	
+	fwrite(&m_nSamplePreAmp, 1, size, f);	
 
 	code = 'VSTV';							//write m_nVSTiVolume
 	fwrite(&code, 1, sizeof(__int32), f);	

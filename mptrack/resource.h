@@ -533,7 +533,7 @@
 #define IDC_EDIT_SPEED                  2008
 #define IDC_EDIT_GLOBALVOL              2009
 #define IDC_EDIT_RESTARTPOS             2010
-#define IDC_SLIDER_SONGPREAMP           2011
+#define IDC_SLIDER_SAMPLEPREAMP           2011
 #define IDC_BUTTON_MODTYPE              2012
 #define IDC_EDIT_SAMPLEPA               2013
 #define IDC_EDIT_MODTYPE                2014
@@ -728,7 +728,7 @@
 #define IDC_AUTOSAVE_USECUSTOMDIR       2245
 #define IDC_BUTTON_MODTYPE2             2246
 #define IDC_BUTTON_PLAYERPROPS          2247
-#define IDC_SLIDER_SONGPREAMP3          2248
+#define IDC_SLIDER_SAMPLEPREAMP3        2248
 #define IDC_SLIDER_GLOBALVOL            2249
 #define IDC_EDIT_VSTIVOL                2250
 #define IDC_SLIDER_VSTIVOL              2251
@@ -930,6 +930,7 @@
 #define ID_VIEW_SONGPROPERTIES          38002
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
+#define ID_RUN_SCRIPT                   40003
 #define IDS_ERR_FILEOPEN                55001
 #define IDS_ERR_FILETYPE                55002
 #define IDS_ERR_SAVEINS                 55003

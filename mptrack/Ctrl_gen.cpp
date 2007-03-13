@@ -6,6 +6,7 @@
 #include "dlg_misc.h"
 #include "ctrl_gen.h"
 #include "view_gen.h"
+#include "math.h"
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -58,7 +59,7 @@ void CCtrlGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER_SONGTEMPO,	m_SliderTempo);
 	DDX_Control(pDX, IDC_SLIDER_VSTIVOL,	m_SliderVSTiVol);
 	DDX_Control(pDX, IDC_SLIDER_GLOBALVOL,	m_SliderGlobalVol);
-	DDX_Control(pDX, IDC_SLIDER_SONGPREAMP,	m_SliderPreAmp);
+	DDX_Control(pDX, IDC_SLIDER_SAMPLEPREAMP,	m_SliderSamplePreAmp);
 
 	DDX_Control(pDX, IDC_EDIT_MODTYPE,		m_EditModType);
 	DDX_Control(pDX, IDC_COMBO_RESAMPLING,	m_ComboResampling);
@@ -91,12 +92,13 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SpinVSTiVol.SetRange(0, 2000);
 	m_SpinRestartPos.SetRange(0, 255);
 	
-	m_SliderPreAmp.SetRange(0, 500);
 	m_SliderTempo.SetRange(0, 480);
-	m_SliderVSTiVol.SetRange(0, 500);
-	m_SliderGlobalVol.SetRange(0, 256);
+	m_SliderGlobalVol.SetRange(0, MAX_SLIDER_GLOBAL_VOL);
+	m_SliderVSTiVol.SetRange(0, MAX_SLIDER_VSTI_VOL);
+	m_SliderSamplePreAmp.SetRange(0, MAX_SLIDER_SAMPLE_VOL);
 	
 
+	
 	// -! BEHAVIOUR_CHANGE#0016
 	m_ComboResampling.AddString("None");
 	m_ComboResampling.AddString("Linear");
@@ -174,15 +176,15 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 			m_EditRestartPos.SetWindowText(s);
 			wsprintf(s, "%d", m_pSndFile->m_nVSTiVolume);
 			m_EditVSTiVol.SetWindowText(s);
-			wsprintf(s, "%d", m_pSndFile->m_nSongPreAmp);
+			wsprintf(s, "%d", m_pSndFile->m_nSamplePreAmp);
 			m_EditSamplePA.SetWindowText(s);
 			wsprintf(s, "%d", m_pSndFile->m_nRestartPos);
 			m_EditRestartPos.SetWindowText(s);
 		}
 
-		m_SliderGlobalVol.SetPos(256-m_pSndFile->m_nDefaultGlobalVolume);
-		m_SliderVSTiVol.SetPos(500-m_pSndFile->m_nVSTiVolume);
-		m_SliderPreAmp.SetPos(500-m_pSndFile->m_nSongPreAmp);
+		m_SliderGlobalVol.SetPos(MAX_SLIDER_GLOBAL_VOL-m_pSndFile->m_nDefaultGlobalVolume);
+		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL-m_pSndFile->m_nVSTiVolume);
+		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL-m_pSndFile->m_nSamplePreAmp);
 		m_SliderTempo.SetPos(480 - m_pSndFile->m_nDefaultTempo + 32);
 
 
@@ -202,7 +204,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SpinVSTiVol.EnableWindow(b);
 		m_EditSamplePA.EnableWindow(b);
 		m_SpinSamplePA.EnableWindow(b);
-		m_SliderPreAmp.EnableWindow(b);
+		m_SliderSamplePreAmp.EnableWindow(b);
 		m_SliderVSTiVol.EnableWindow(b);
 
 		// MOD Type
@@ -259,8 +261,8 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		}
 
 		else if (pSlider==&m_SliderGlobalVol) {
-			int gv = 256 - m_SliderGlobalVol.GetPos();
-			if ((gv >= 0) && (gv <= 256) && (gv != m_pSndFile->m_nDefaultGlobalVolume)) {
+			int gv = MAX_SLIDER_GLOBAL_VOL - m_SliderGlobalVol.GetPos();
+			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_pSndFile->m_nDefaultGlobalVolume)) {
 				m_pSndFile->m_nGlobalVolume = gv;
 				m_pSndFile->m_nDefaultGlobalVolume = gv;
 				m_pModDoc->SetModified();
@@ -268,18 +270,18 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			}
 		}
 
-		else if (pSlider==&m_SliderPreAmp) {
-			int spa = 500 - m_SliderPreAmp.GetPos();
-			if ((spa >= 0) && (spa <= 500) && (spa != m_pSndFile->m_nSongPreAmp)) {
-				m_pSndFile->m_nSongPreAmp = spa;
+		else if (pSlider==&m_SliderSamplePreAmp) {
+			int spa = MAX_SLIDER_SAMPLE_VOL - m_SliderSamplePreAmp.GetPos();
+			if ((spa >= 0) && (spa <= MAX_SLIDER_SAMPLE_VOL) && (spa != m_pSndFile->m_nSamplePreAmp)) {
+				m_pSndFile->m_nSamplePreAmp = spa;
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
 		}
 
 		else if (pSlider==&m_SliderVSTiVol) {
-			int vv = 500 - m_SliderVSTiVol.GetPos();
-			if ((vv >= 0) && (vv <= 500) && (vv != m_pSndFile->m_nVSTiVolume)) {
+			int vv = MAX_SLIDER_VSTI_VOL - m_SliderVSTiVol.GetPos();
+			if ((vv >= 0) && (vv <= MAX_SLIDER_VSTI_VOL) && (vv != m_pSndFile->m_nVSTiVolume)) {
 				m_pSndFile->m_nVSTiVolume = vv;
 				m_pSndFile->RecalculateGainForAllPlugs();
 				m_pModDoc->SetModified();
@@ -392,9 +394,9 @@ void CCtrlGeneral::OnSamplePAChanged()
 		m_EditSamplePA.GetWindowText(s, sizeof(s));
 		if (s[0]) {
 			int n = atoi(s);
-			if ((n >= 0) && (n <= 2000) && (n != m_pSndFile->m_nSongPreAmp)) {
+			if ((n >= 0) && (n <= 2000) && (n != m_pSndFile->m_nSamplePreAmp)) {
 				m_bEditsLocked=true;
-				m_pSndFile->m_nSongPreAmp = n;
+				m_pSndFile->m_nSamplePreAmp = n;
 				m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 				UpdateView(HINT_MODGENERAL, NULL); 
@@ -607,6 +609,53 @@ LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 }
 
 
+BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText) {
+//----------------------------------------------------------
+	if ((pszText) && (uId))
+	{
+		if (!m_pSndFile->m_pConfig->getDisplayDBValues()) {
+			wsprintf(pszText, "Use a more recent mixmode to see dB offsets.");
+			return TRUE;
+		}
+		
+
+		switch(uId) 	{
+			case IDC_SLIDER_SAMPLEPREAMP:
+				setAsDecibels(pszText, m_pSndFile->m_nSamplePreAmp, m_pSndFile->m_pConfig->getNormalSamplePreAmp());
+				return TRUE;
+				break;
+			case IDC_SLIDER_VSTIVOL:
+				setAsDecibels(pszText, m_pSndFile->m_nVSTiVolume, m_pSndFile->m_pConfig->getNormalVSTiVol());
+				return TRUE;
+				break;
+			case IDC_SLIDER_GLOBALVOL:
+				setAsDecibels(pszText, m_pSndFile->m_nGlobalVolume, m_pSndFile->m_pConfig->getNormalGlobalVol());
+				return TRUE;
+				break;
+		}
+	}
+	return FALSE;
+	
+}
+
+void CCtrlGeneral::setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB) {
+//-------------------------------------------------------------------------------------
+
+	if (value==0) {
+		wsprintf(stringToSet, "-inf");
+		return;
+	}
+	
+	double changeFactor = value / valueAtZeroDB;
+    double dB = 10*log(changeFactor);
+
+	char sign = (dB>=0)?'+':' ';
+	sprintf(stringToSet, "%c%.2f dB", sign, dB);
+	return;
+
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -672,3 +721,5 @@ VOID CVuMeter::DrawVuMeter(HDC hdc)
 	SelectObject(hdc, oldpen);
 	m_nDisplayedVu = m_nVuMeter;
 }
+
+

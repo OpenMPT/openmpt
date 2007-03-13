@@ -847,7 +847,7 @@ public:	// for Editing
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
 	bool m_bPatternTransitionOccurred;
 	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest,
-		 m_nGlobalVolumeDestination, m_nSongPreAmp, m_nVSTiVolume;
+		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
 	long m_lHighResRampingGlobalVolume;
 	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
 	LONG m_nMinPeriod, m_nMaxPeriod, m_nRepeatCount;

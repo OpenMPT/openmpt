@@ -828,22 +828,33 @@ BOOL CSoundFile::ReadNote()
 		if(nchn32 < 1) nchn32 = 1;
 		if(nchn32 > 31) nchn32 = 31;
 
-		int realmastervol = m_nMasterVolume;
-		if (realmastervol > 0x80)
-		{
-			realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32+4)) / 16;
+		
+		DWORD mastervol;
+
+		if (m_pConfig->getUseGlobalPreAmp()) {
+			int realmastervol = m_nMasterVolume;
+			if (realmastervol > 0x80) {
+				//Attenuate global pre-amp depending on num channels
+				realmastervol = 0x80 + ((realmastervol - 0x80) * (nchn32+4)) / 16;
+			}
+			mastervol = (realmastervol * (m_nSamplePreAmp)) >> 6;
+		} else {
+			//Preferred option: don't use global pre-amp at all.
+			mastervol = m_nSamplePreAmp;
 		}
-		DWORD mastervol = (realmastervol * (m_nSongPreAmp)) >> 6;
 
 		if ((m_dwSongFlags & SONG_GLOBALFADE) && (m_nGlobalFadeMaxSamples))
 		{
 			mastervol = _muldiv(mastervol, m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples);
 		}
 
-		UINT attenuation = (gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32>>1] : PreAmpTable[nchn32>>1];
-		if(attenuation < 1) attenuation = 1;
-
-		nMasterVol = (mastervol << 7) / attenuation;
+		if (m_pConfig->getUseGlobalPreAmp()) {
+			UINT attenuation = (gdwSoundSetup & SNDMIX_AGC) ? PreAmpAGCTable[nchn32>>1] : PreAmpTable[nchn32>>1];
+			if(attenuation < 1) attenuation = 1;
+			nMasterVol = (mastervol << 7) / attenuation;
+		} else {
+			nMasterVol = mastervol;
+		}
 	}
 	////////////////////////////////////////////////////////////////////////////////////
 	// Update channels data
@@ -1459,8 +1470,7 @@ BOOL CSoundFile::ReadNote()
 #define		kChnMasterVol	nMasterVol
 #endif // MODPLUG_TRACKER
 			// Adjusting volumes
-			if (gnChannels >= 2)
-			{
+			if (gnChannels >= 2) {
 				int pan = ((int)pChn->nRealPan) - 128;
 				pan *= (int)m_nStereoSeparation;
 				pan /= 128;
@@ -1470,25 +1480,29 @@ BOOL CSoundFile::ReadNote()
 #ifndef FASTSOUNDLIB
 				if (gdwSoundSetup & SNDMIX_REVERSESTEREO) pan = 256 - pan;
 #endif
-				LONG realvol = (pChn->nRealVolume * kChnMasterVol) >> (8-1);
-				if (gdwSoundSetup & SNDMIX_SOFTPANNING)
-				{
-					if (pan < 128)
-					{
+
+				LONG realvol;
+				if (m_pConfig->getUseGlobalPreAmp()) {
+					realvol = (pChn->nRealVolume * kChnMasterVol) >> 7;
+				} else {
+					//Extra attenuation required here if we're bypassing pre-amp.
+					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
+				}
+				
+				if (m_pConfig->getTreatPanLikeBalance()) {
+					if (pan < 128) {
 						pChn->nNewLeftVol = (realvol * pan) >> 8;
 						pChn->nNewRightVol = (realvol * 128) >> 8;
-					} else
-					{
+					} else {
 						pChn->nNewLeftVol = (realvol * 128) >> 8;
 						pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
 					}
-				} else
-				{
+				} else {
 					pChn->nNewLeftVol = (realvol * pan) >> 8;
 					pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
 				}
-			} else
-			{
+
+			} else {
 				pChn->nNewRightVol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				pChn->nNewLeftVol = pChn->nNewRightVol;
 			}
@@ -1544,8 +1558,11 @@ BOOL CSoundFile::ReadNote()
 				if (pChn->nInc >= 0xFE00) pChn->dwFlags |= CHN_NOIDO;
 #endif // FASTSOUNDLIB
 			}
-			pChn->nNewRightVol >>= MIXING_ATTENUATION;
-			pChn->nNewLeftVol >>= MIXING_ATTENUATION;
+			if (m_pConfig->getUseGlobalPreAmp()) {
+				pChn->nNewRightVol >>= MIXING_ATTENUATION;
+				pChn->nNewLeftVol >>= MIXING_ATTENUATION;
+			}
+
 			pChn->nRightRamp = pChn->nLeftRamp = 0;
 			// Dolby Pro-Logic Surround
 			if ((pChn->dwFlags & CHN_SURROUND) && (gnChannels == 2)) pChn->nNewLeftVol = - pChn->nNewLeftVol;
@@ -1732,7 +1749,7 @@ int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)
 
 
 VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
-//--------------------------------------------------------
+//---------------------------------------------------------------------------
 {
 		long delta=0;
 		long step=0;
@@ -1754,7 +1771,6 @@ VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
 				step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
 			}
 		}
-
 		for (int pos=0; pos<lTotalSampleCount; pos++) {
 
 			if (m_nSamplesToGlobalVolRampDest>0) { //ramping required
@@ -1767,3 +1783,4 @@ VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
 
 		}
 }
+

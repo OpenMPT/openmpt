@@ -1973,7 +1973,13 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 	StopSoundFile(&m_WaveFile);
 	m_WaveFile.Destroy();
 	m_WaveFile.Create(NULL, 0);
+
+	//Avoid global volume ramping when trying samples in the treeview.
+	m_WaveFile.m_pConfig->setGlobalVolumeAppliesToMaster(false);
+	m_WaveFile.m_nDefaultGlobalVolume=64;
+
 	m_WaveFile.m_nDefaultTempo = 125;
+	m_WaveFile.m_nGlobalVolume=64;
 	m_WaveFile.m_nDefaultSpeed = 4;
 	m_WaveFile.m_nRepeatCount = 0;
 	m_WaveFile.m_nType = MOD_TYPE_IT;
