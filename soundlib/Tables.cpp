@@ -50,6 +50,7 @@ MODFORMATINFO gModFormatInfo[MAX_MODTYPE] =
 	{ MOD_TYPE_PSM, "Protracker Studio", ".psm",	0 },
 	{ MOD_TYPE_UMX, "Unreal Music", ".umx",			0 },
 	{ MOD_TYPE_MT2, "MadTracker 2", ".mt2",			0 },
+	{ MOD_TYPE_MPT, "OpenMPT", ".mptm",		0 },
 };
 
 #endif

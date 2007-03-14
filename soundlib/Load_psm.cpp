@@ -258,8 +258,9 @@ BOOL CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength)
 		UINT nRows = pPsmPat->rows;
 		if (len > pPsmPat->size) len = pPsmPat->size;
 		if ((nRows < 64) || (nRows > 256)) nRows = 64;
-		PatternSize[nPat] = nRows;
-		if ((Patterns[nPat] = AllocatePattern(nRows, m_nChannels)) == NULL) break;
+		if(Patterns.Insert(nPat, nRows))
+			break;
+
 		MODCOMMAND *m = Patterns[nPat];
 		BYTE *p = pPsmPat->data;
 		UINT pos = 0;

@@ -81,7 +81,8 @@ BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 	m_nSamples = (pfh->nsamples < MAX_SAMPLES) ? pfh->nsamples : MAX_SAMPLES-1;
 	dwMemPos = SIZEOF_PTMFILEHEADER;
 	nOrders = (pfh->norders < MAX_ORDERS) ? pfh->norders : MAX_ORDERS-1;
-	memcpy(Order, pfh->orders, nOrders);
+	Order.ReadAsByte(pfh->orders, nOrders, nOrders);
+
 	for (UINT ipan=0; ipan<m_nChannels; ipan++)
 	{
 		ChnSettings[ipan].nVolume = 64;
@@ -129,8 +130,8 @@ BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		dwMemPos = ((UINT)pfh->patseg[ipat]) << 4;
 		if ((!dwMemPos) || (dwMemPos >= dwMemLength)) continue;
-		PatternSize[ipat] = 64;
-		if ((Patterns[ipat] = AllocatePattern(64, m_nChannels)) == NULL) break;
+		if(Patterns.Insert(ipat, 64))
+			break;
 		//
 		MODCOMMAND *m = Patterns[ipat];
 		for (UINT row=0; ((row < 64) && (dwMemPos < dwMemLength)); )

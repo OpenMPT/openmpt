@@ -14,16 +14,17 @@
 #include "PatternRandomizer.h"
 #include ".\arrayutils.h"
 #include ".\view_pat.h"
-
+#include "misc_util.h"
+#include <cmath>
 
 #define MAX_SPACING		16
 #define	PLUGNAME_HEIGHT	16	//rewbs.patPlugName
 
 #pragma warning(disable:4244)
 
-MODCOMMAND CViewPattern::m_cmdOld = { 0,0, 0,0, 0,0};
-MODCOMMAND CViewPattern::m_cmdFind = { 0,0,0,0,0,0 };
-MODCOMMAND CViewPattern::m_cmdReplace = { 0,0,0,0,0,0 };
+MODCOMMAND CViewPattern::m_cmdOld;
+MODCOMMAND CViewPattern::m_cmdFind;
+MODCOMMAND CViewPattern::m_cmdReplace;
 DWORD CViewPattern::m_dwFindFlags = 0;
 DWORD CViewPattern::m_dwReplaceFlags = 0;
 UINT CViewPattern::m_nFindMinChn = 0;
@@ -67,6 +68,8 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_MUTE,		OnMuteFromClick) //rewbs.customKeys
 	ON_COMMAND(ID_PATTERN_SOLO,		OnSoloFromClick) //rewbs.customKeys
 	ON_COMMAND(ID_PATTERN_TRANSITIONMUTE, OnTogglePendingMuteFromClick)
+	ON_COMMAND(ID_PATTERN_TRANSITIONSOLO, OnPendingSoloChnFromClick)
+	ON_COMMAND(ID_PATTERN_TRANSITION_UNMUTEALL, OnPendingUnmuteAllChnFromClick)
 	ON_COMMAND(ID_PATTERN_UNMUTEALL,OnUnmuteAll)
 	ON_COMMAND(ID_PATTERN_DELETEROW,OnDeleteRows)
 	ON_COMMAND(ID_PATTERN_DELETEALLROW,OnDeleteRowsEx)
@@ -177,16 +180,16 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 	CSoundFile *pSndFile;
 	CModDoc *pModDoc = GetDocument();
 	BOOL bUpdateScroll;
+	pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 	
-	if ((npat >= MAX_PATTERNS) || (!pModDoc)) return FALSE;
+	if ( (!pModDoc) || (!pSndFile) || (npat >= pSndFile->Patterns.Size()) ) return FALSE;
 	if ((m_pEditWnd) && (m_pEditWnd->IsWindowVisible())) m_pEditWnd->ShowWindow(SW_HIDE);
-	pSndFile = pModDoc->GetSoundFile();
-	if ((npat < MAX_PATTERNS-1) && (!pSndFile->Patterns[npat])) npat = 0;
+	
+	if ((npat < pSndFile->Patterns.Size()-1) && (!pSndFile->Patterns[npat])) npat = 0;
 	while ((npat > 0) && (!pSndFile->Patterns[npat])) npat--;
 	if (!pSndFile->Patterns[npat])
 	{
-		pSndFile->PatternSize[npat] = 64;
-		pSndFile->Patterns[npat] = CSoundFile::AllocatePattern(64, pSndFile->m_nChannels);
+		pSndFile->Patterns.Insert(npat, 64);
 	}
 	
 
@@ -238,10 +241,10 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap)
 			if (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-				if ((nCurOrder > 0) && (nCurOrder < MAX_ORDERS) && (m_nPattern == pSndFile->Order[nCurOrder]))
+				if ((nCurOrder > 0) && (nCurOrder < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[nCurOrder]))
 				{
 					UINT nPrevPat = pSndFile->Order[nCurOrder-1];
-					if ((nPrevPat < MAX_PATTERNS) && (pSndFile->PatternSize[nPrevPat]))
+					if ((nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nPrevPat]))
 					{
 						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nCurOrder-1);
 						if (SetCurrentPattern(nPrevPat)) return SetCurrentRow(pSndFile->PatternSize[nPrevPat]-1);
@@ -264,10 +267,10 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap)
 			if (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-				if ((nCurOrder+1 < MAX_ORDERS) && (m_nPattern == pSndFile->Order[nCurOrder]))
+				if ((nCurOrder+1 < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[nCurOrder]))
 				{
 					UINT nNextPat = pSndFile->Order[nCurOrder+1];
-					if ((nNextPat < MAX_PATTERNS) && (pSndFile->PatternSize[nNextPat]))
+					if ((nNextPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nNextPat]))
 					{
 						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nCurOrder+1);
 						if (SetCurrentPattern(nNextPat)) return SetCurrentRow(0);
@@ -780,7 +783,7 @@ void CViewPattern::OnShrinkSelection()
 		{
 			UINT chn = i >> 3;
 			MODCOMMAND *blank= &p[row * pSndFile->m_nChannels + chn];
-			memset(blank, 0, sizeof(MODCOMMAND));
+			*blank = MODCOMMAND();
 		}
 	}
 	m_dwBeginSel = startSel;
@@ -1092,7 +1095,6 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
-	CHAR s[256]; //rewbs.patPlugNames
 	HMENU hMenu;
 
 	// Too far left to get a ctx menu:
@@ -1234,7 +1236,7 @@ void CViewPattern::OnMouseMove(UINT, CPoint point)
 	{
 		CModDoc *pModDoc = GetDocument();
 		DWORD dwPos = GetPositionFromPoint(point);
-		if ((pModDoc) && (m_nPattern < MAX_PATTERNS))
+		if ((pModDoc) && (m_nPattern < pModDoc->GetSoundFile()->Patterns.Size()))
 		{
 			UINT row = dwPos >> 16;
 			UINT max = pModDoc->GetSoundFile()->PatternSize[m_nPattern];
@@ -1685,7 +1687,7 @@ void CViewPattern::OnEditFindNext()
 	if (m_dwFindFlags & PATSEARCH_FULLSEARCH)
 	{
 		nPatStart = 0;
-		nPatEnd = MAX_PATTERNS;
+		nPatEnd = pSndFile->Patterns.Size();
 	}
 	if (m_bContinueSearch)
 	{
@@ -1870,7 +1872,7 @@ EndSearch:
 		{
 			if (m_cmdFind.command)
 			{
-				if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
+				if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 					wsprintf(&szFind[strlen(szFind)], "%c", gszS3mCommands[m_cmdFind.command]);
 				else
 					wsprintf(&szFind[strlen(szFind)], "%c", gszModCommands[m_cmdFind.command]);
@@ -2522,7 +2524,7 @@ void CViewPattern::OnEditUndo()
 	if (pModDoc && IsEditingEnabled_bmsg())
 	{
 		UINT nPat = pModDoc->DoUndo();
-		if (nPat < MAX_PATTERNS)
+		if (nPat < pModDoc->GetSoundFile()->Patterns.Size())
 		{
 			pModDoc->SetModified();
 			if (nPat != m_nPattern)
@@ -2725,12 +2727,12 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 
 		if ((m_dwStatus & (PATSTATUS_FOLLOWSONG|PATSTATUS_DRAGVSCROLL|PATSTATUS_DRAGHSCROLL|PATSTATUS_MOUSEDRAGSEL)) == PATSTATUS_FOLLOWSONG)
 		{
-			if (nPat < MAX_PATTERNS)
+			if (nPat < pSndFile->Patterns.Size())
 			{
 				if (nPat != m_nPattern || updateOrderList)
 				{
 					if(nPat != m_nPattern) SetCurrentPattern(nPat, nRow);
-					if (nOrd < MAX_ORDERS) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
+					if (nOrd < pSndFile->Order.size()) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
 					updateOrderList = false;
 				}
 				if (nRow != m_nRow)	SetCurrentRow((nRow < pSndFile->PatternSize[nPat]) ? nRow : 0);
@@ -2802,7 +2804,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 		if (foundMacro >= 0) {
 			pSndFile->Chn[nChn].nActiveMacro = foundMacro;
 			if (pRow->command == 0 || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) { //we overwrite existing Zxx and \xx only.
-				pRow->command = (pSndFile->m_nType == MOD_TYPE_IT)?CMD_S3MCMDEX:CMD_MODCMDEX;;
+				pRow->command = (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))?CMD_S3MCMDEX:CMD_MODCMDEX;;
 				pRow->param = 0xF0 + (foundMacro&0x0F);
 				InvalidateRow();
 			}
@@ -2819,6 +2821,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 		InvalidateRow();
 	}
 
+	return 0;
 
 }
 
@@ -3150,6 +3153,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcChannelSolo:					OnSoloChannel(true); return wParam;
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: TogglePendingMute((m_dwCursor&0xFFFF)>>3); return wParam;
+		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
+		case kcSoloChnOnPatTransition:		PendingSoloChn(GetCurrentChannel()); return wParam;
 		case kcTransposeUp:					OnTransposeUp(); return wParam;
 		case kcTransposeDown:				OnTransposeDown(); return wParam;
 		case kcTransposeOctUp:				OnTransposeOctUp(); return wParam;
@@ -3239,13 +3244,13 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEndAbsolute:		SetCurrentColumn(((pSndFile->m_nChannels-1) << 3) | 4); if (m_nRow < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1); return wParam;
 
 		case kcNextPattern:	{	UINT n = m_nPattern + 1;
-            					while ((n < MAX_PATTERNS) && (!pSndFile->Patterns[n])) n++;
-								SetCurrentPattern((n < MAX_PATTERNS) ? n : 0);
+            					while ((n < pSndFile->Patterns.Size()) && (!pSndFile->Patterns[n])) n++;
+								SetCurrentPattern((n < pSndFile->Patterns.Size()) ? n : 0);
 								int currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 								int newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, true);
 								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
 								return wParam; }
-		case kcPrevPattern: {	UINT n = (m_nPattern) ? m_nPattern - 1 : MAX_PATTERNS-1;
+		case kcPrevPattern: {	UINT n = (m_nPattern) ? m_nPattern - 1 : pSndFile->Patterns.Size()-1;
 								while ((n > 0) && (!pSndFile->Patterns[n])) n--;
 								SetCurrentPattern(n);
 								int currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
@@ -3420,10 +3425,10 @@ void CViewPattern::TempEnterVol(int v)
 			case kcSetVolumeXMPanLeft:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDELEFT; break;
 			case kcSetVolumeXMPanRight:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDERIGHT; break;
 			case kcSetVolumePortamento:		volcmd = VOLCMD_TONEPORTAMENTO; break;
-			case kcSetVolumeITPortaUp:		if (pSndFile->m_nType & MOD_TYPE_IT) volcmd = VOLCMD_PORTAUP; break;
-			case kcSetVolumeITPortaDown:	if (pSndFile->m_nType & MOD_TYPE_IT) volcmd = VOLCMD_PORTADOWN; break;
-			case kcSetVolumeITVelocity:		if (pSndFile->m_nType & MOD_TYPE_IT) volcmd = VOLCMD_VELOCITY; break;	//rewbs.velocity
-			case kcSetVolumeITOffset:		if (pSndFile->m_nType & MOD_TYPE_IT) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
+			case kcSetVolumeITPortaUp:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTAUP; break;
+			case kcSetVolumeITPortaDown:	if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTADOWN; break;
+			case kcSetVolumeITVelocity:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_VELOCITY; break;	//rewbs.velocity
+			case kcSetVolumeITOffset:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
 			}
 		if ((pSndFile->m_nType & MOD_TYPE_MOD) && (volcmd > VOLCMD_PANNING)) volcmd = vol = 0;
 
@@ -3442,7 +3447,7 @@ void CViewPattern::TempEnterVol(int v)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(oldcmd != *p)
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -3497,7 +3502,7 @@ void CViewPattern::TempEnterFX(int c)
 
 		// Check for MOD/XM Speed/Tempo command
 		if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-		 && ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
+		&& ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
 		{
 			UINT maxspd = (pSndFile->m_nType & MOD_TYPE_XM) ? 0x1F : 0x20;
 			p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
@@ -3508,7 +3513,7 @@ void CViewPattern::TempEnterFX(int c)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(oldcmd != *p)
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -3561,7 +3566,7 @@ void CViewPattern::TempEnterFXparam(int v)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(*p != oldcmd)
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -3649,7 +3654,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 	// -- write sdx if playing live
 	if (usePlaybackPosition && pSndFile->m_nTickCount) {	// avoid SD0 which will be mis-interpreted
 		if (p->command == 0) {	//make sure we don't overwrite any existing commands.
-			p->command = (pSndFile->m_nType == MOD_TYPE_IT)?CMD_S3MCMDEX:CMD_MODCMDEX;
+			p->command = (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M))?CMD_S3MCMDEX:CMD_MODCMDEX;
 			p->param   = 0xD0 + (pSndFile->m_nTickCount&0x0F); //&0x0F is to limit to max 0x0F
 		}
 	}
@@ -3803,7 +3808,7 @@ void CViewPattern::TempEnterIns(int val)
 
 		UINT instr  = p->instr;
 		instr = ((instr * 10) + val) % 1000;
-		if (instr > MAX_INSTRUMENTS) instr = instr % 100;
+		if (instr >= MAX_INSTRUMENTS) instr = instr % 100;
 		if ( ((pSndFile->m_nInstruments==0) && (pSndFile->m_nSamples<100)) ||	// if we're using samples & have less than 100 samples
 			  (pSndFile->m_nInstruments < 100)) {								// or if we're using instruments and have less than 100 instruments
 				instr = instr % 100;											// --> ensure the entered instrument value is less than 100.
@@ -3815,7 +3820,7 @@ void CViewPattern::TempEnterIns(int val)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(*p != oldcmd)
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -3890,7 +3895,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		// -- write sdx if playing live
 		if (usePlaybackPosition && pSndFile->m_nTickCount) {	// avoid SD0 which will be mis-interpreted
 			if (p->command == 0) {	//make sure we don't overwrite any existing commands.
-				p->command = (pSndFile->m_nType == MOD_TYPE_IT || pSndFile->m_nType == MOD_TYPE_S3M)?CMD_S3MCMDEX:CMD_MODCMDEX;
+				p->command = (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M))?CMD_S3MCMDEX:CMD_MODCMDEX;
 				p->param   = 0xD0 + (pSndFile->m_nTickCount&0x0F); //&0x0F is to limit to max 0x0F
 			}
 		}
@@ -3906,7 +3911,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			DWORD sel = (nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND))) //has it really changed?
+			if(*p != oldcmd) //has it really changed?
 			{
 				pModDoc->SetModified();
 				InvalidateArea(sel, sel+5);
@@ -4089,7 +4094,7 @@ void CViewPattern::TempEnterChord(int note)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))
+			if(*p != oldcmd)
 			{
 				pModDoc->SetModified();
 				InvalidateRow();
@@ -4187,7 +4192,7 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
-			if (memcmp(&oldcmd, p, sizeof(MODCOMMAND)))	
+			if(*p != oldcmd)
 			{
 				pModDoc->SetModified();
 				InvalidateRow();
@@ -4253,6 +4258,7 @@ void CViewPattern::OnSelectInstrument(UINT nID)
 
 
 void CViewPattern::OnSelectPlugin(UINT nID)
+//-----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument(); if (!pModDoc) return;
 	CSoundFile *pSndFile = pModDoc->GetSoundFile(); if (!pSndFile) return;
@@ -4348,15 +4354,18 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 	}
 	if (b) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, "Solo Channel\t" + ih->GetKeyTextFromCommand(kcChannelSolo));
 	if (bAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, "Unmute All\t" + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
-
+	
 	AppendMenu(hMenu, 
 			pSndFile->m_bChannelMuteTogglePending[nChn] ? 
 					(MF_STRING|MF_CHECKED) : MF_STRING,
 			 ID_PATTERN_TRANSITIONMUTE,
 			(pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ?
-			"Unmute on Transition\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
-			"Mute on Transition\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
+			"On transition: Unmute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
+			"On transition: Mute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
 
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, "On transition: Unmute all\t" + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, "On transition: Solo\t" + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
+	
 	return true;
 }
 
@@ -4595,10 +4604,9 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 		HMENU instrumentChangeMenu = ::CreatePopupMenu();
 		AppendMenu(hMenu, MF_POPUP|greyed, (UINT)instrumentChangeMenu, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
 
-		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		CModDoc *pModDoc = GetDocument();
-		CSoundFile* pSndFile;
-		if(pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return true;
+		if(pSndFile == NULL)
+			return false;
+	
 
 		if (pSndFile->m_nInstruments)	{
 				for (UINT i=1; i<=pSndFile->m_nInstruments; i++) {
@@ -4660,7 +4668,7 @@ UINT CViewPattern::ListChansWhereColSelected(UINT colType, CArray<UINT,UINT> &ch
 	if (GetColTypeFromCursor(m_dwBeginSel) <= colType) {
 		chans.Add(startChan);	//first selected chan includes this col type
 	}
-	for (int chan=startChan+1; chan<endChan; chan++) {
+	for (UINT chan=startChan+1; chan<endChan; chan++) {
 		chans.Add(chan); //All chans between first & last must include this col type
 	}
 	if ((startChan != endChan) && colType <= GetColTypeFromCursor(m_dwEndSel)) {
@@ -4731,6 +4739,26 @@ void CViewPattern::OnTogglePendingMuteFromClick()
 	TogglePendingMute((m_nMenuParam&0xFFFF)>>3);
 }
 
+void CViewPattern::OnPendingSoloChnFromClick()
+//-----------------------------------------------
+{
+	PendingSoloChn(GetChanFromCursor(m_nMenuParam));
+}
+
+void CViewPattern::OnPendingUnmuteAllChnFromClick()
+//----------------------------------------------
+{
+	GetDocument()->GetSoundFile()->GetPlaybackEventer().PatternTransitionChnUnmuteAll();
+	InvalidateChannelsHeaders();
+}
+
+void CViewPattern::PendingSoloChn(const CHANNELINDEX nChn)
+//---------------------------------------------
+{
+	GetDocument()->GetSoundFile()->GetPlaybackEventer().PatternTranstionChnSolo(nChn);
+	InvalidateChannelsHeaders();
+}
+
 void CViewPattern::TogglePendingMute(UINT nChn)
 //---------------------------------------------
 {
@@ -4753,15 +4781,11 @@ bool CViewPattern::IsEditingEnabled_bmsg()
 	
 	CPoint pt = GetPointFromPosition(m_dwCursor);
 
-	//AppendMenu(hMenu, MF_STRING|MF_GRAYED, 0, "Record is disabled(editing blocked).");
-	//AppendMenu(hMenu, MF_STRING|MF_GRAYED, 0, "--------------------");
 	AppendMenu(hMenu, MF_STRING, IDC_PATTERN_RECORD, "Editing(record) is disabled; click here to enable it.");
-	//AppendMenu(hMenu, MF_STRING|MF_GRAYED, 0, "--------------------");
 	//To check: It seems to work the way it should, but still is it ok to use IDC_PATTERN_RECORD here since it is not
 	//'aimed' to be used here.
 
 	ClientToScreen(&pt);
-	//::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_NONOTIFY, pt.x, pt.y, 0, m_hWnd, NULL);
 	::TrackPopupMenu(hMenu, TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, NULL);
 
 	::DestroyMenu(hMenu);

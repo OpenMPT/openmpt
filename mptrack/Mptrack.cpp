@@ -527,6 +527,7 @@ BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 // -> DESC="IT project files (.itp)"
 	ON_COMMAND(ID_NEW_ITPROJECT,OnFileNewITProject)	
 // -! NEW_FEATURE#0023
+	ON_COMMAND(ID_NEW_MPT,		OnFileNewMPT)
 	ON_COMMAND(ID_FILE_OPEN,	OnFileOpen)
 	ON_COMMAND(ID_APP_ABOUT,	OnAppAbout)
 	ON_COMMAND(ID_HELP_INDEX,	CWinApp::OnHelpIndex)
@@ -953,10 +954,20 @@ void CTrackApp::OnFileNewIT()
 	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
 }
 
+void CTrackApp::OnFileNewMPT()
+//---------------------------
+{
+	SetAsProject(FALSE);
+	SetDefaultDocType(MOD_TYPE_MPT);
+	if (m_pModTemplate) m_pModTemplate->OpenDocumentFile(NULL);
+}
+
+
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 void CTrackApp::OnFileNewITProject()
+//----------------------------------
 {
 	SetAsProject(TRUE);
 	SetDefaultDocType(MOD_TYPE_IT);
@@ -971,11 +982,11 @@ void CTrackApp::OnFileOpen()
 	CFileDialog dlg(TRUE,
 					NULL,
 					NULL,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_FORCESHOWHIDDEN,
+					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_FORCESHOWHIDDEN | OFN_ALLOWMULTISELECT,
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 //					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
-					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
+					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
 // -! NEW_FEATURE#0023
 					"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha|"
 					"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
@@ -986,6 +997,7 @@ void CTrackApp::OnFileOpen()
 // -> DESC="IT project files (.itp)"
 					"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
 // -! NEW_FEATURE#0023
+					"Open MPT Modules (*.mptm)|*.mptm;*.mptmz|"
 					"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.dsm;*.umx;*.amf;*.psm;*.mt2|"
 					"Wave Files (*.wav)|*.wav|"
 					"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
@@ -996,15 +1008,25 @@ void CTrackApp::OnFileOpen()
 	{
 		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurModDir;
 	}
-	if (dlg.DoModal() == IDOK) 
+	const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
+	vector<char> filenameBuffer(bufferSize, 0);
+	dlg.GetOFN().lpstrFile = &filenameBuffer[0];
+	dlg.GetOFN().nMaxFile = bufferSize;
+    if (dlg.DoModal() == IDOK) 
 	{
-		CHAR szDrive[_MAX_PATH], szDir[_MAX_PATH];
-		_splitpath(dlg.GetPathName(), szDrive, szDir, NULL, NULL);
-		strcpy(CMainFrame::m_szCurModDir, szDrive);
-		strcat(CMainFrame::m_szCurModDir, szDir);
-		CMainFrame::m_nFilterIndex = dlg.m_ofn.nFilterIndex;
-		OpenDocumentFile(dlg.GetPathName());
+		POSITION pos = dlg.GetStartPosition();
+		while(pos != NULL)
+		{
+			CHAR szDrive[_MAX_PATH], szDir[_MAX_PATH];
+			CString pathName = dlg.GetNextPathName(pos);
+			_splitpath(pathName, szDrive, szDir, NULL, NULL);
+			strcpy(CMainFrame::m_szCurModDir, szDrive);
+			strcat(CMainFrame::m_szCurModDir, szDir);
+			CMainFrame::m_nFilterIndex = dlg.m_ofn.nFilterIndex;
+			OpenDocumentFile(pathName);
+		}
 	}
+	filenameBuffer.clear();
 }
 
 
@@ -1358,7 +1380,7 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
-	wsprintf(s, "Build Date: %s", gszBuildDate);
+	wsprintf(s, "Build Date: %s", buildDateTime.c_str());
 	SetDlgItemText(IDC_EDIT2, s);
 	SetDlgItemText(IDC_EDIT3, CMainFrame::GetFullVersionString());
 

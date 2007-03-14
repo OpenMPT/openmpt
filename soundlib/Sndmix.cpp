@@ -16,6 +16,7 @@
 #include "../mptrack/MainFrm.h"
 // -! NEW_FEATURE#0022
 #include "sndfile.h"
+#include "midi.h"
 
 #ifdef MODPLUG_TRACKER
 #define ENABLE_STEREOVU
@@ -616,12 +617,12 @@ BOOL CSoundFile::ProcessRow()
 		// Check if pattern is valid
 		if (!(m_dwSongFlags & SONG_PATTERNLOOP))
 		{
-			m_nPattern = (m_nCurrentPattern < MAX_ORDERS) ? Order[m_nCurrentPattern] : 0xFF;
-			if ((m_nPattern < MAX_PATTERNS) && (!Patterns[m_nPattern])) m_nPattern = 0xFE;
-			while (m_nPattern >= MAX_PATTERNS)
+			m_nPattern = (m_nCurrentPattern < Order.size()) ? Order[m_nCurrentPattern] : Patterns.GetInvalidIndex();
+			if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern])) m_nPattern = Patterns.GetIgnoreIndex();
+			while (m_nPattern >= Patterns.Size())
 			{
 				// End of song ?
-				if ((m_nPattern == 0xFF) || (m_nCurrentPattern >= MAX_ORDERS))
+				if ((m_nPattern == Patterns.GetInvalidIndex()) || (m_nCurrentPattern >= Order.size()))
 				{
 
 					if (!m_nRepeatCount) return FALSE;
@@ -667,11 +668,11 @@ BOOL CSoundFile::ProcessRow()
 					m_nCurrentPattern = m_nRestartPos;
 					m_nRow = 0;					
 					//If restart pos points to +++, move along
-					while (Order[m_nCurrentPattern] == 0xFE) {
+					while (Order[m_nCurrentPattern] == Patterns.GetIgnoreIndex()) {
 						m_nCurrentPattern++;
 					}
 					//Check for end of song or bad pattern
-					if ( (Order[m_nCurrentPattern] >= MAX_PATTERNS) 
+					if ( (Order[m_nCurrentPattern] >= Patterns.Size()) 
 						|| (!Patterns[Order[m_nCurrentPattern]]) ) 	{
 						return FALSE;
 					}
@@ -680,14 +681,14 @@ BOOL CSoundFile::ProcessRow()
 					m_nCurrentPattern++;
 				}
 
-				if (m_nCurrentPattern < MAX_ORDERS) {
+				if (m_nCurrentPattern < Order.size()) {
 					m_nPattern = Order[m_nCurrentPattern];
 				} else {
-					m_nPattern = 0xFF;
+					m_nPattern = Patterns.GetInvalidIndex();
 				}
 
-				if ((m_nPattern < MAX_PATTERNS) && (!Patterns[m_nPattern])) {
-					m_nPattern = 0xFE;
+				if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern])) {
+					m_nPattern = Patterns.GetIgnoreIndex();
 				}
 			}
 			m_nNextPattern = m_nCurrentPattern;
@@ -698,7 +699,7 @@ BOOL CSoundFile::ProcessRow()
 		}
 
 		// Weird stuff?
-		if ((m_nPattern >= MAX_PATTERNS) || (!Patterns[m_nPattern])) return FALSE;
+		if ((m_nPattern >= Patterns.Size()) || (!Patterns[m_nPattern])) return FALSE;
 		// Should never happen
 		if (m_nRow >= PatternSize[m_nPattern]) m_nRow = 0;
 		m_nNextRow = m_nRow + 1;
@@ -895,6 +896,11 @@ BOOL CSoundFile::ReadNote()
 		if (pChn->nRealPan < 0) pChn->nRealPan = 0;
 		if (pChn->nRealPan > 256) pChn->nRealPan = 256;
 		pChn->nRampLength = 0;
+
+		//Aux variables
+		CTuning::RATIOTYPE vibratoFactor = 1;
+		CTuning::STEPTYPE arpeggioSteps = 0;
+
 		// Calc Frequency
 		if ((pChn->nPeriod)	&& (pChn->nLength))
 		{
@@ -924,7 +930,7 @@ BOOL CSoundFile::ReadNote()
 						vol += (ModSinusTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
 					}
 				}
-				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
 					pChn->nTremoloPos = (trempos + pChn->nTremoloSpeed) & 0x3F;
 				}
@@ -934,10 +940,10 @@ BOOL CSoundFile::ReadNote()
 			{
 				UINT n = (pChn->nTremorParam >> 4) + (pChn->nTremorParam & 0x0F);
 				UINT ontime = pChn->nTremorParam >> 4;
-				if ((!(m_nType & MOD_TYPE_IT)) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) { n += 2; ontime++; }
+				if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) { n += 2; ontime++; }
 				UINT tremcount = (UINT)pChn->nTremorCount;
 				if (tremcount >= n) tremcount = 0;
-				if ((m_nTickCount) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT)))
+				if ((m_nTickCount) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
 				{
 					if (tremcount >= ontime) vol = 0;
 					pChn->nTremorCount = (BYTE)(tremcount + 1);
@@ -1086,10 +1092,46 @@ BOOL CSoundFile::ReadNote()
 			// Arpeggio ?
 			if (pChn->nCommand == CMD_ARPEGGIO)
 			{
-				switch(m_nTickCount % 3)
+				if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
 				{
-				case 1:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC4Speed); break;
-				case 2:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC4Speed); break;
+					switch(m_nTickCount % 3)
+					{
+						case 0:
+							arpeggioSteps = 0;
+							break;
+						case 1: 
+							arpeggioSteps = pChn->nArpeggio >> 4; // >> 4 <-> division by 16. This gives the first number in the parameter.
+							break;
+						case 2:
+							arpeggioSteps = pChn->nArpeggio % 16; //Gives the latter number in the parameter.
+							pChn->m_ReCalculateFreqOnFirstTick = true;
+							break;
+					}
+					pChn->m_CalculateFreq = true;
+				}
+				else //Original
+				{
+					BYTE note = pChn->nNote;
+					bool apply = true;
+
+					if(m_nType == MOD_TYPE_IT && GetModSpecificFlag(IT_STANDARD))
+					{
+						if(pChn->nArpeggio >> 4 == 0 && (pChn->nArpeggio & 0x0F) == 0)
+							apply = false;
+						//Ignoring J00.
+
+						if(apply) note = GetNoteFromPeriod(pChn->nPeriod);
+						//Using actual note instead of channel note.
+					}
+					
+					if(apply)
+					{
+						switch(m_nTickCount % 3)
+						{
+						case 1:	period = GetPeriodFromNote(note + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC4Speed); break;
+						case 2:	period = GetPeriodFromNote(note + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC4Speed); break;
+						}
+					}
 				}
 			}
 
@@ -1146,17 +1188,31 @@ BOOL CSoundFile::ReadNote()
 				} else
 				// Pitch Envelope
 				{
-					int l = envpitch;
-					if (l < 0)
+					if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
 					{
-						l = -l;
-						if (l > 255) l = 255;
-						period = _muldiv(period, LinearSlideUpTable[l], 0x10000);
-					} else
-					{
-						if (l > 255) l = 255;
-						period = _muldiv(period, LinearSlideDownTable[l], 0x10000);
+						if(pChn->nFineTune != envpitch)
+						{
+							pChn->nFineTune = envpitch;
+                            pChn->m_CalculateFreq = true;
+							//Preliminary tests indicated that this behavior
+							//is very close to original(with TET12) when finestep count
+							//is 16.
+						}
 					}
+					else //Original behavior
+					{
+						int l = envpitch;
+						if (l < 0)
+						{
+							l = -l;
+							if (l > 255) l = 255;
+							period = _muldiv(period, LinearSlideUpTable[l], 0x10000);
+						} else
+						{
+							if (l > 255) l = 255;
+							period = _muldiv(period, LinearSlideDownTable[l], 0x10000);
+						}
+					} //End: Original behavior.
 				}
 			}
 			
@@ -1179,24 +1235,53 @@ BOOL CSoundFile::ReadNote()
 				default:
 					vdelta = ModSinusTable[vibpos];
 				}
-				UINT vdepth = ((m_nType != MOD_TYPE_IT) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
-				vdelta = (vdelta * (int)pChn->nVibratoDepth) >> vdepth;
-				if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & MOD_TYPE_IT))
+
+				if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
 				{
-					LONG l = vdelta;
-					if (l < 0)
-					{
-						l = -l;
-						vdelta = _muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
-						if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
-					} else
-					{
-						vdelta = _muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
-						if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
-					}
+					//Hack implementation: Scaling vibratofactor to [0.95; 1.05]
+					//using figure from above tables and vibratodepth parameter
+					vibratoFactor += 0.05F * vdelta * pChn->m_VibratoDepth / 128.0F;
+					pChn->m_CalculateFreq = true;
+					pChn->m_ReCalculateFreqOnFirstTick = false;
+
+					if(m_nTickCount + 1 == m_nMusicSpeed)
+						pChn->m_ReCalculateFreqOnFirstTick = true;
+				
+					/*
+					Code for 'step vibrato' - oscillate finesteps instead of frequency
+					(in certain cases these end up to the same result.)
+					vibratoFineSteps += static_cast<CTuning::FINESTEPTYPE>(pChn->pHeader->pTuning->GetFineStepCount() * vdelta * pChn->m_VibratoDepth / 128.0F);
+					pChn->m_CalculateFreq = true;
+			
+					pChn->m_ReCalculateFreqOnFirstTick = false;
+
+					if(m_nTickCount + 1 == m_nMusicSpeed)
+						pChn->m_ReCalculateFreqOnFirstTick = true;
+					//To remove possible vibrato frequency from the 'main' frequency.
+
+					*/
 				}
-				period += vdelta;
-				if ((m_nTickCount) || ((m_nType & MOD_TYPE_IT) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
+				else //Original behavior
+				{
+					UINT vdepth = ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
+					vdelta = (vdelta * (int)pChn->nVibratoDepth) >> vdepth;
+					if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+					{
+						LONG l = vdelta;
+						if (l < 0)
+						{
+							l = -l;
+							vdelta = _muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
+							if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
+						} else
+						{
+							vdelta = _muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
+							if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
+						}
+					}
+					period += vdelta;
+				}
+				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
 					pChn->nVibratoPos = (vibpos + pChn->nVibratoSpeed) & 0x3F;
 				}
@@ -1232,12 +1317,13 @@ BOOL CSoundFile::ReadNote()
 			if ((pChn->pInstrument) && (pChn->pInstrument->nVibDepth))
 			{
 				MODINSTRUMENT *pins = pChn->pInstrument;
+
 				if (pins->nVibSweep == 0)
 				{
 					pChn->nAutoVibDepth = pins->nVibDepth << 8;
 				} else
 				{
-					if (m_nType & MOD_TYPE_IT)
+					if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 					{
 						pChn->nAutoVibDepth += pins->nVibSweep << 3;
 					} else
@@ -1269,30 +1355,47 @@ BOOL CSoundFile::ReadNote()
 					val = ft2VibratoTable[pChn->nAutoVibPos & 255];
 				}
 				int n =	((val * pChn->nAutoVibDepth) >> 8);
-				if (m_nType & MOD_TYPE_IT)
+
+				if(pChn->pHeader && pChn->pHeader->pTuning)
 				{
-					int df1, df2;
-					if (n < 0)
+					//Vib sweep is not taken into account here.
+					vibratoFactor += 0.05F * pins->nVibDepth * val / 4096.0F; //4096 == 64^2
+					//See vibrato for explanation.
+					pChn->m_CalculateFreq = true;
+					/*
+					Finestep vibrato:
+					const float autoVibDepth = pins->nVibDepth * val / 4096.0F; //4096 == 64^2
+					vibratoFineSteps += static_cast<CTuning::FINESTEPTYPE>(pChn->pHeader->pTuning->GetFineStepCount() *  autoVibDepth);
+					pChn->m_CalculateFreq = true;
+					*/
+				}
+				else //Original behavior
+				{
+					if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 					{
-						n = -n;
-						UINT n1 = n >> 8;
-						df1 = LinearSlideUpTable[n1];
-						df2 = LinearSlideUpTable[n1+1];
+						int df1, df2;
+						if (n < 0)
+						{
+							n = -n;
+							UINT n1 = n >> 8;
+							df1 = LinearSlideUpTable[n1];
+							df2 = LinearSlideUpTable[n1+1];
+						} else
+						{
+							UINT n1 = n >> 8;
+							df1 = LinearSlideDownTable[n1];
+							df2 = LinearSlideDownTable[n1+1];
+						}
+						n >>= 2;
+						period = _muldiv(period, df1 + ((df2-df1)*(n&0x3F)>>6), 256);
+						nPeriodFrac = period & 0xFF;
+						period >>= 8;
 					} else
 					{
-						UINT n1 = n >> 8;
-						df1 = LinearSlideDownTable[n1];
-						df2 = LinearSlideDownTable[n1+1];
+						period += (n >> 6);
 					}
-					n >>= 2;
-					period = _muldiv(period, df1 + ((df2-df1)*(n&0x3F)>>6), 256);
-					nPeriodFrac = period & 0xFF;
-					period >>= 8;
-				} else
-				{
-					period += (n >> 6);
-				}
-			}
+				} //Original MPT behavior
+			} //End: AutoVibrato
 			// Final Period
 			if (period <= m_nMinPeriod)
 			{
@@ -1311,17 +1414,43 @@ BOOL CSoundFile::ReadNote()
 				period = m_nMaxPeriod;
 				nPeriodFrac = 0;
 			}*/
-			UINT freq = GetFreqFromPeriod(period, pChn->nC4Speed, nPeriodFrac);
-			if ((m_nType & MOD_TYPE_IT) && (freq < 256))
+			UINT freq = 0;
+
+			if(m_nType != MOD_TYPE_MPT || !pChn->pHeader || pChn->pHeader->pTuning == NULL)
+			{
+				freq = GetFreqFromPeriod(period, pChn->nC4Speed, nPeriodFrac);
+			}
+			else //In this case: m_nType == MOD_TYPE_MPT
+			{
+				m_nRow;
+				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_nTickCount == 0))
+				{
+					pChn->m_Freq = static_cast<UINT>(pChn->nC4Speed * vibratoFactor * pChn->pHeader->pTuning->GetFrequencyRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, static_cast<CTuning::FINESTEPTYPE>(pChn->nFineTune)+pChn->m_PortamentoFineSteps));
+					if(!pChn->m_CalculateFreq)
+						pChn->m_ReCalculateFreqOnFirstTick = false;
+					else
+						pChn->m_CalculateFreq = false;
+				}
+
+				freq = pChn->m_Freq;
+
+				//Doing instrument specific things.
+				if(pChn->pHeader)
+				{
+					//Pitch/Tempo lock (yet another feature from MPT23 :)
+					if(pChn->pHeader->wPitchToTempoLock)
+						freq *= static_cast<UINT>((float)m_nMusicTempo / (float)pChn->pHeader->wPitchToTempoLock);
+				}
+			}
+
+
+			if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
 			{
 				pChn->nFadeOutVol = 0;
 				pChn->dwFlags |= CHN_NOTEFADE;
 				pChn->nRealVolume = 0;
 			}
-			if(m_nType == MOD_TYPE_IT && pChn->pHeader && pChn->pHeader->wPitchToTempoLock)
-			{
-				freq *= (float)m_nMusicTempo / (float)pChn->pHeader->wPitchToTempoLock;
-			}
+
 			UINT ninc = _muldiv(freq, 0x10000, gdwMixingFreq);
 			if ((ninc >= 0xFFB0) && (ninc <= 0x10090)) ninc = 0x10000;
 			if (m_nFreqFactor != 128) ninc = (ninc * m_nFreqFactor) >> 7;
@@ -1363,9 +1492,9 @@ BOOL CSoundFile::ReadNote()
 				// End of Envelope ?
 				if (pChn->nVolEnvPosition > penv->VolPoints[penv->nVolEnv - 1])
 				{
-					if ((m_nType & MOD_TYPE_IT) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
+					if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
 					pChn->nVolEnvPosition = penv->VolPoints[penv->nVolEnv - 1];
-					if ((!penv->VolEnv[penv->nVolEnv-1]) && ((nChn >= m_nChannels) || (m_nType & MOD_TYPE_IT)))
+					if ((!penv->VolEnv[penv->nVolEnv-1]) && ((nChn >= m_nChannels) || (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
 					{
 						pChn->dwFlags |= CHN_NOTEFADE;
 						pChn->nFadeOutVol = 0;
@@ -1575,7 +1704,7 @@ BOOL CSoundFile::ReadNote()
 				LONG nRampLength = gnVolumeRampSamples;
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup"
-				BOOL enableCustomRamp = pChn->pHeader && (m_nType & (MOD_TYPE_IT | MOD_TYPE_XM));
+				BOOL enableCustomRamp = pChn->pHeader && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM));
 				if(enableCustomRamp) nRampLength = pChn->pHeader->nVolRamp ? (gdwMixingFreq * pChn->pHeader->nVolRamp / 100000) : gnVolumeRampSamples;
 				if(!nRampLength) nRampLength = 1;
 // -! NEW_FEATURE#0027
@@ -1675,7 +1804,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 	// Do we need to process midi?
 	// For now there is no difference between mute and sync mute with VSTis.
 	if (pChn->dwFlags & (CHN_MUTE|CHN_SYNCMUTE)) return;
-	if ((!m_nInstruments) || (m_nPattern >= MAX_PATTERNS)
+	if ((!m_nInstruments) || (m_nPattern >= Patterns.Size())
 		 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
 	
 	// Get instrument info and plugin reference
@@ -1711,8 +1840,12 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 }
 
 int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)
+//------------------------------------------------------------------------------
 {
 	UINT pt = penv->nVolEnv - 1;
+
+	//Checking where current 'tick' is relative to the 
+	//envelope points.
 	for (UINT i=0; i<(UINT)(penv->nVolEnv-1); i++)
 	{
 		if (position <= penv->VolPoints[i])
@@ -1721,13 +1854,16 @@ int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)
 			break;
 		}
 	}
+
 	int x2 = penv->VolPoints[pt];
 	int x1, envvol;
-	if (position >= x2)
+	if (position >= x2) //Case: current 'tick' is on a envelope point.
 	{
 		envvol = penv->VolEnv[pt] << 2;
 		x1 = x2;
-	} else
+	}
+	else //Case: current 'tick' is between two envelope points.
+	{
 		if (pt)
 		{
 			envvol = penv->VolEnv[pt-1] << 2;
@@ -1737,19 +1873,22 @@ int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)
 			envvol = 0;
 			x1 = 0;
 		}
-		if (position > x2) position = x2;
-		if ((x2 > x1) && (position > x1))
+
+		if(x2 > x1 && position > x1)
 		{
+			//Linear approximation between the points;
+			//f(x+d) ~ f(x) + f'(x)*d, where f'(x) = (y2-y1)/(x2-x1)
 			envvol += ((position - x1) * (((int)penv->VolEnv[pt]<<2) - envvol)) / (x2 - x1);
 		}
-		return envvol;
+	}
+	return envvol;
 }
 
 #endif
 
 
 VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
-//---------------------------------------------------------------------------
+//--------------------------------------------------------
 {
 		long delta=0;
 		long step=0;
@@ -1771,6 +1910,7 @@ VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
 				step = delta/static_cast<long>(m_nSamplesToGlobalVolRampDest);
 			}
 		}
+
 		for (int pos=0; pos<lTotalSampleCount; pos++) {
 
 			if (m_nSamplesToGlobalVolRampDest>0) { //ramping required

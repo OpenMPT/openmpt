@@ -282,7 +282,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				{
 					const MDLPATTERNDATA *pmpd = (const MDLPATTERNDATA *)(lpStream + dwPos);
 					if (pmpd->channels > 32) break;
-					PatternSize[i] = pmpd->lastrow+1;
+					Patterns[i].Resize(pmpd->lastrow+1);
 					if (m_nChannels < pmpd->channels) m_nChannels = pmpd->channels;
 					dwPos += 18 + 2*pmpd->channels;
 					pdata = pmpd->data;
@@ -290,7 +290,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				} else
 				{
 					pdata = (const WORD *)(lpStream + dwPos);
-					PatternSize[i] = 64;
+					Patterns[i].Resize(64);
 					if (m_nChannels < 32) m_nChannels = 32;
 					dwPos += 2*32;
 					ch = 32;
@@ -328,6 +328,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 					if ((Headers[nins] = new INSTRUMENTHEADER) == NULL) break;
 					INSTRUMENTHEADER *penv = Headers[nins];
 					memset(penv, 0, sizeof(INSTRUMENTHEADER));
+					penv->pTuning = penv->s_DefaultTuning;
 					memcpy(penv->name, lpStream+dwPos+2, 32);
 					penv->nGlobalVol = 64;
 					penv->nPPC = 5*12;

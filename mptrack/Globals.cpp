@@ -395,7 +395,7 @@ void CModControlView::UpdateView(DWORD lHint, CObject *pObject)
 		UINT nType = pSndFile->GetType();
 		UINT mask = 1 | 2 | 4 | 16;
 
-		if (nType & (MOD_TYPE_XM|MOD_TYPE_IT))
+		if (nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			mask |= 8;
 			//mask |= 32; //rewbs.graph

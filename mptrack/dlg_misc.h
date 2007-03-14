@@ -20,6 +20,8 @@ public:
 	CButton m_CheckBox6;
 // -! NEW_FEATURE#0023
 
+	CButton m_CheckBoxITStandard;
+
 public:
 	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = m_nChannels = 0; }
 	BOOL VerifyData();
@@ -42,6 +44,7 @@ protected:
 // -> DESC="IT project files (.itp)"
 	afx_msg void OnCheck6();
 // -! NEW_FEATURE#0023
+	afx_msg void OnITStandard();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -231,11 +234,13 @@ protected:
 	UINT m_nXParam, m_nMultiplier;
 // -! NEW_FEATURE#0010
 
+	MODCOMMAND* m_pModcommand;
+
 public:
 	CPageEditEffect(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITEFFECT) {}
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; }
+	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m;}
 	void XInit(UINT xparam = 0, UINT multiplier = 1) { m_nXParam = xparam; m_nMultiplier = multiplier; }
 // -! NEW_FEATURE#0010
 	void UpdateDialog();
@@ -245,6 +250,7 @@ public:
 protected:
 	//{{AFX_MSG(CPageEditEffect)
 	afx_msg void OnCommandChanged();
+	afx_msg void OnCommand2Changed();
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

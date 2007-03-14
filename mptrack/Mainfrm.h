@@ -11,6 +11,7 @@
 #include "sndfile.h"
 #include "CommandSet.h"
 #include "inputhandler.h"
+#include "mptrack.h"
 
 class CInputHandler;
 class CMainFrame;
@@ -629,7 +630,8 @@ private:
 
 };
 
-const CHAR gszBuildDate[] = __TIMESTAMP__;
+//const CHAR gszBuildDate[] = __TIMESTAMP__;
+const string buildDateTime = string(__DATE__) + string(" ") + string(__TIME__);
 
 
 

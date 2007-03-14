@@ -600,7 +600,7 @@ enum {
 // -! NEW_FEATURE#0022
 	OPTGEN_PATTERNCTXMENUSTYLE,
 	OPTGEN_SYNCMUTE,
-	OPTGEN_AUTODELAY, //Relabsoluness
+	OPTGEN_AUTODELAY,
 	OPTGEN_MAXOPTIONS
 };
 
@@ -635,7 +635,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 
 	{"Old style pattern context menu",	"Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
 	{"Maintain sample sync on mute",	"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
-	{"Automatic delay commands",	    "Automatically insert appropriate note-delay commands when recording notes during live playback."}, //Relabsoluness
+	{"Automatic delay commands",	    "Automatically insert appropriate note-delay commands when recording notes during live playback."},
 };
 
 
@@ -696,7 +696,7 @@ BOOL COptionsGeneral::OnInitDialog()
 		case OPTGEN_PATTERNCTXMENUSTYLE: bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE); break;
 		case OPTGEN_SYNCMUTE:			 bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SYNCMUTE); break;
 
-		case OPTGEN_AUTODELAY:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY); break; //Relabsoluness
+		case OPTGEN_AUTODELAY:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY); break;
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
@@ -753,7 +753,7 @@ void COptionsGeneral::OnOK()
 // -! NEW_FEATURE#0022		
 		case OPTGEN_PATTERNCTXMENUSTYLE: mask = PATTERN_OLDCTXMENUSTYLE; break;
 		case OPTGEN_SYNCMUTE:			 mask = PATTERN_SYNCMUTE; break;
-		case OPTGEN_AUTODELAY:			 mask = PATTERN_AUTODELAY; break; //Relabsoluness
+		case OPTGEN_AUTODELAY:			 mask = PATTERN_AUTODELAY; break;
 			
 		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;

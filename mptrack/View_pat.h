@@ -7,6 +7,7 @@ class CEffectVis;	//rewbs.fxvis
 class CPatternGotoDialog;
 class CPatternRandomizer;
 class COpenGLEditor;
+typedef CTuning CTuning; //Some trickery to avoid compiler errors.
 
 // Drag & Drop info
 #define DRAGITEM_MASK			0xFF0000
@@ -169,7 +170,7 @@ public:
 public:
 	void DrawPatternData(HDC, CSoundFile *, UINT, BOOL, BOOL, UINT, UINT, UINT, CRect&, int *);
 	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
-	void DrawNote(int x, int y, UINT note);
+	void DrawNote(int x, int y, UINT note, CTuning* pTuning = NULL);
 	void DrawInstrument(int x, int y, UINT instr);
 	void DrawVolumeCommand(int x, int y, UINT volcmd, UINT vol);
 	void DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn);
@@ -238,6 +239,8 @@ protected:
 	afx_msg void OnMuteFromClick(); //rewbs.customKeys
 	afx_msg void OnSoloFromClick(); //rewbs.customKeys
 	afx_msg void OnTogglePendingMuteFromClick(); //rewbs.customKeys
+	afx_msg void OnPendingSoloChnFromClick();
+	afx_msg void OnPendingUnmuteAllChnFromClick();
 	afx_msg void OnSoloChannel(BOOL current); //rewbs.customKeys
 	afx_msg void OnMuteChannel(BOOL current); //rewbs.customKeys
 	afx_msg void OnUnmuteAll();
@@ -266,7 +269,6 @@ protected:
 	afx_msg void OnInterpolateNote();
 	afx_msg void OnVisualizeEffect();		//rewbs.fxvis
 	afx_msg void OnOpenRandomizer();		//rewbs.fxvis
-	afx_msg void OnRunScript();
 	afx_msg void OnTransposeUp();
 	afx_msg void OnTransposeDown();
 	afx_msg void OnTransposeOctUp();
@@ -288,6 +290,7 @@ protected:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg void OnClearSelectionFromMenu();
 	afx_msg void OnSelectInstrument(UINT nid);
+	afx_msg void OnRunScript();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -336,6 +339,8 @@ public:
 private:
 
 	void TogglePendingMute(UINT nChn);
+	void PendingSoloChn(const CHANNELINDEX nChn);
+	void PendingUnmuteAllChn();
 
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);

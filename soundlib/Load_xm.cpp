@@ -126,7 +126,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if ((deftempo >= 32) && (deftempo <= 512)) m_nDefaultTempo = deftempo;
 	if ((defspeed > 0) && (defspeed < 40)) m_nDefaultSpeed = defspeed;
 // -! BEHAVIOUR_CHANGE#0016
-	memcpy(Order, lpStream+80, norders);
+	Order.ReadAsByte(lpStream+80, norders, dwMemLength-80);
 	memset(InstUsed, 0, sizeof(InstUsed));
 	if (patterns > MAX_PATTERNS)
 	{
@@ -186,8 +186,9 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		MODCOMMAND *p;
 		if (ipatmap < MAX_PATTERNS)
 		{
-			PatternSize[ipatmap] = rows;
-			if ((Patterns[ipatmap] = AllocatePattern(rows, m_nChannels)) == NULL) return TRUE;
+			if(Patterns.Insert(ipatmap, rows))
+				return TRUE;
+
 			if (!packsize) continue;
 			p = Patterns[ipatmap];
 		} else p = NULL;
@@ -297,6 +298,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		if (dwMemPos + pih->size > dwMemLength) return TRUE;
 		if ((Headers[iIns] = new INSTRUMENTHEADER) == NULL) continue;
 		memset(Headers[iIns], 0, sizeof(INSTRUMENTHEADER));
+		Headers[iIns]->pTuning = Headers[iIns]->s_DefaultTuning;
 		memcpy(Headers[iIns]->name, pih->name, 22);
 		if ((nsamples = pih->samples) > 0)
 		{
@@ -707,7 +709,8 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.tempo = m_nDefaultTempo;
 	header.speed = m_nDefaultSpeed;
-	memcpy(header.order, Order, header.norder);
+	Order.WriteToByteArray(header.order, header.norder, 256);
+
 	fwrite(&header, 1, sizeof(header), f);
 	// Writing patterns
 	for (i=0; i<header.patterns; i++) if (Patterns[i])
