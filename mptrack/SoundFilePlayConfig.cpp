@@ -43,23 +43,9 @@ void CSoundFilePlayConfig::SetPluginMixLevels(int mixLevelType) {
 			setNormalGlobalVol(128.0);
 			break;
 
-		// FOR TEST PURPOSES ONLY:
-		case plugmix_mode_Test:
-			setVSTiAttenuation(1.0f);
-			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
-			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
-			setGlobalVolumeAppliesToMaster(true);
-			setUseGlobalPreAmp(false);
-			setTreatPanLikeBalance(true);
-			setDisplayDBValues(true);
-			setNormalSamplePreAmp(128.0);
-			setNormalVSTiVol(128.0);
-			setNormalGlobalVol(256.0);
-			break;
-
 		// 117RC2 gives us floats in [-1.0; 1.0] and hopefully plays VSTis at 
 		// the right volume... but we attenuate by 2x to approx. match sample volume.
-		default:
+	
 		case plugmix_mode_117RC2:
 			setVSTiAttenuation(2.0f);
 			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
@@ -71,10 +57,12 @@ void CSoundFilePlayConfig::SetPluginMixLevels(int mixLevelType) {
 			setNormalSamplePreAmp(128.0);
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
+			break;
 
 		// 117RC3 ignores the horrible global, system-specific pre-amp, 
 		// treats panning as balance to avoid saturation on loud sample (and because I think it's better :),
 		// and allows display of attenuation in decibels.
+		default:
 		case plugmix_mode_117RC3:
 			setVSTiAttenuation(1.0f);
 			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
@@ -87,6 +75,23 @@ void CSoundFilePlayConfig::SetPluginMixLevels(int mixLevelType) {
 			setNormalVSTiVol(128.0);
 			setNormalGlobalVol(256.0);
 			break;
+
+		// FOR TEST PURPOSES ONLY:
+		/*
+		case plugmix_mode_Test:
+			setVSTiAttenuation(1.0f);
+			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
+			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
+			setGlobalVolumeAppliesToMaster(true);
+			setUseGlobalPreAmp(false);
+			setTreatPanLikeBalance(true);
+			setDisplayDBValues(true);
+			setNormalSamplePreAmp(128.0);
+			setNormalVSTiVol(128.0);
+			setNormalGlobalVol(256.0);
+			break;
+		*/
+
 	}
 	
 	return;
