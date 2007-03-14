@@ -8,6 +8,8 @@
 #include "view_ins.h"
 #include "dlsbank.h"
 #include "channelManagerDlg.h"
+#include "ScaleEnvPointsDlg.h"
+#include ".\view_ins.h"
 
 #define ENV_ZOOM				4
 #define ENV_DRAGLOOPSTART		0x100
@@ -87,6 +89,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND(ID_ENVELOPE_TOGGLERELEASENODE, OnEnvToggleReleasNode)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_ENVELOPE_SCALEPOINTS, OnEnvelopeScalepoints)
 END_MESSAGE_MAP()
 
 
@@ -958,7 +961,7 @@ BOOL CViewInstrument::EnvSetPitchEnv(BOOL bEnable)
 		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
 		if (penv)
 		{
-			if ((bEnable) && (pSndFile->m_nType & MOD_TYPE_IT))
+			if ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
 				penv->dwFlags |= ENV_PITCH;
 				penv->dwFlags &= ~ENV_FILTER;
@@ -992,7 +995,7 @@ BOOL CViewInstrument::EnvSetFilterEnv(BOOL bEnable)
 		INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
 		if (penv)
 		{
-			if ((bEnable) && (pSndFile->m_nType & MOD_TYPE_IT))
+			if ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
 				penv->dwFlags |= (ENV_PITCH|ENV_FILTER);
 				if (!penv->nPitchEnv)
@@ -1125,17 +1128,17 @@ void CViewInstrument::UpdateNcButtonState()
 		{
 		case ID_ENVSEL_VOLUME:		if (m_nEnv == ENV_VOLUME) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVSEL_PANNING:		if (m_nEnv == ENV_PANNING) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVSEL_PITCH:		if (!(pSndFile->m_nType & MOD_TYPE_IT)) dwStyle |= NCBTNS_DISABLED;
+		case ID_ENVSEL_PITCH:		if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
 									else if (m_nEnv == ENV_PITCH) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_SETLOOP:	if (EnvGetLoop()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_SUSTAIN:	if (EnvGetSustain()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_CARRY:		if (!(pSndFile->m_nType & MOD_TYPE_IT)) dwStyle |= NCBTNS_DISABLED;
+		case ID_ENVELOPE_CARRY:		if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
 									else if (EnvGetCarry()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_VOLUME:	if (EnvGetVolEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_PANNING:	if (EnvGetPanEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_PITCH:		if (!(pSndFile->m_nType & MOD_TYPE_IT)) dwStyle |= NCBTNS_DISABLED; else
+		case ID_ENVELOPE_PITCH:		if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
 									if (EnvGetPitchEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_FILTER:	if (!(pSndFile->m_nType & MOD_TYPE_IT)) dwStyle |= NCBTNS_DISABLED; else
+		case ID_ENVELOPE_FILTER:	if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
 									if (EnvGetFilterEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_VIEWGRID:	if (m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
 		}
@@ -1366,6 +1369,7 @@ BYTE CViewInstrument::EnvGetReleaseNode()
 			}
 		}
 	}
+	return ENV_RELEASE_NODE_UNSET;
 }
 
 WORD CViewInstrument::EnvGetReleaseNodeValue()
@@ -1388,6 +1392,7 @@ WORD CViewInstrument::EnvGetReleaseNodeValue()
 			}
 		}
 	}
+	return 0;
 }
 
 WORD CViewInstrument::EnvGetReleaseNodeTick()
@@ -1410,6 +1415,7 @@ WORD CViewInstrument::EnvGetReleaseNodeTick()
 			}
 		}
 	}
+	return 0;
 }
 
 
@@ -1456,7 +1462,6 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 	} else
 	if ((pnotify->dwType & dwType) && ((pnotify->dwType & 0xFFFF) == m_nInstrument))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		BOOL bUpdate = FALSE;
 		for (UINT i=0; i<MAX_CHANNELS; i++)
 		{
@@ -1941,8 +1946,8 @@ void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
 			m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_INSERTPOINT, (lastpoint < maxpoint) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_REMOVEPOINT, ((m_nDragItem) && (lastpoint > 1)) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->m_nType & MOD_TYPE_IT) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (pSndFile->m_nType&MOD_TYPE_IT && m_nEnv==ENV_VOLUME) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (pSndFile->m_nType&(MOD_TYPE_IT|MOD_TYPE_MPT) && m_nEnv==ENV_VOLUME) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SETLOOP, (EnvGetLoop()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SUSTAIN, (EnvGetSustain()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_CARRY, (EnvGetCarry()) ? MF_CHECKED : MF_UNCHECKED);
@@ -2230,6 +2235,8 @@ void CViewInstrument::OnEnvInsertPoint()
 			int nTick = ScreenToTick(m_ptMenu.x);
 			int nValue = ScreenToValue(m_ptMenu.y);
 			UINT maxpoints = (pSndFile->m_nType == MOD_TYPE_XM) ? 12 : 25;
+			//To check: Should there be MAX_ENVPOINTS?
+
 			if (nValue < 0) nValue = 0;
 			if (nValue > 64) nValue = 64;
 			if (nTick >= 0) switch(m_nEnv)
@@ -2353,6 +2360,7 @@ void CViewInstrument::PlayNote(UINT note)
 	if ((pModDoc) && (pMainFrm) && (note<128))
 	{
 		CHAR s[64];
+		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 		if (note >= 0xFE)
 		{
 			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE, m_nInstrument);
@@ -2379,7 +2387,14 @@ void CViewInstrument::PlayNote(UINT note)
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
 			m_nPlayingChannel= pModDoc->PlayNote(note, m_nInstrument, 0, FALSE); //rewbs.instViewNNA
 			s[0] = 0;
-			if ((note) && (note <= 120)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
+			if ((note) && (note <= 120)) 
+			{
+				const string temp = pModDoc->GetSoundFile()->GetNoteName(static_cast<CTuning::STEPTYPE>(note), m_nInstrument);
+				if(temp.size() >= sizeofS)
+					wsprintf(s, "%s", "...");
+				else
+					wsprintf(s, "%s", temp.c_str());
+			}
 			pMainFrm->SetInfoText(s);
 		}
 	}
@@ -2451,7 +2466,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 		break;
 	}
 	if ((!bCanDrop) || (!bDoDrop)) return bCanDrop;
-	if ((!pSndFile->m_nInstruments) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)))
+	if ((!pSndFile->m_nInstruments) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 	{
 		SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT);
 	}
@@ -2602,7 +2617,7 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 	return CModScrollView::PreTranslateMessage(pMsg);
 }
 
-LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -2610,7 +2625,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	CModDoc *pModDoc = GetDocument();	
 	if (!pModDoc) return NULL;
 	
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();	
+	//CSoundFile *pSndFile = pModDoc->GetSoundFile();	
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)
@@ -2641,4 +2656,26 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	}
 
 	return NULL;
+}
+void CViewInstrument::OnEnvelopeScalepoints()
+//--------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
+	if(pSndFile == NULL)
+		return;
+
+	if(m_nInstrument >= 1 &&
+	   m_nInstrument <= pSndFile->GetNumInstruments() &&
+	   pSndFile->Headers[m_nInstrument])
+	{
+		CScaleEnvPointsDlg dialog(this, pSndFile->Headers[m_nInstrument], m_nEnv);
+		if (dialog.DoModal() == IDOK)
+		{
+			pModDoc->SetModified();
+			pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+		}
+	}
+
+	
 }

@@ -226,6 +226,8 @@ enum CommandID
 	kcChannelSolo,
 	kcChannelUnmuteAll,
 	kcToggleChanMuteOnPatTransition,
+	kcUnmuteAllChnOnPatTransition,
+	kcSoloChnOnPatTransition,
 	kcCopyAndLoseSelection,
 	kcTransposeUp,
 	kcTransposeDown,

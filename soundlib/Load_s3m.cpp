@@ -250,7 +250,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	if (iord > MAX_ORDERS) iord = MAX_ORDERS;
 	if (iord)
 	{
-		memcpy(Order, lpStream+dwMemPos, iord);
+		Order.ReadAsByte(lpStream+dwMemPos, iord, dwMemLength-dwMemPos);
 		dwMemPos += iord;
 	}
 	if ((iord & 1) && (lpStream[dwMemPos] == 0xFF)) dwMemPos++;
@@ -325,9 +325,9 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		if (nInd + 0x40 > dwMemLength) continue;
 		WORD len = *((WORD *)(lpStream+nInd));
 		nInd += 2;
-		PatternSize[iPat] = 64;
+		bool fail = Patterns.Insert(iPat, 64);
 		if ((!len) || (nInd + len > dwMemLength - 6)
-		 || ((Patterns[iPat] = AllocatePattern(64, m_nChannels)) == NULL)) continue;
+		 || (fail) ) continue;
 		LPBYTE src = (LPBYTE)(lpStream+nInd);
 		// Unpacking pattern
 		MODCOMMAND *p = Patterns[iPat];
@@ -467,7 +467,7 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 		} else header[0x40+i] = 0xFF;
 	}
 	fwrite(header, 0x60, 1, f);
-	fwrite(Order, nbo, 1, f);
+	Order.WriteAsByte(f, nbo);
 	memset(patptr, 0, sizeof(patptr));
 	memset(insptr, 0, sizeof(insptr));
 	UINT ofs0 = 0x60 + nbo;

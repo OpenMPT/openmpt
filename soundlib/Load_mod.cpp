@@ -74,7 +74,7 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 	case 0:						command = param = 0; break;
 	case CMD_ARPEGGIO:			command = 0; break;
 	case CMD_PORTAMENTOUP:
-		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM))
+		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM|MOD_TYPE_MPT))
 		{
 			if ((param & 0xF0) == 0xE0) { command=0x0E; param=((param & 0x0F) >> 2)|0x10; break; }
 			else if ((param & 0xF0) == 0xF0) { command=0x0E; param &= 0x0F; param|=0x10; break; }
@@ -82,7 +82,7 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 		command = 0x01;
 		break;
 	case CMD_PORTAMENTODOWN:
-		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM))
+		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM|MOD_TYPE_MPT))
 		{
 			if ((param & 0xF0) == 0xE0) { command=0x0E; param=((param & 0x0F) >> 2)|0x20; break; }
 			else if ((param & 0xF0) == 0xF0) { command=0x0E; param &= 0x0F; param|=0x20; break; }
@@ -98,14 +98,14 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 		command = 0x08;
 		if (bXM)
 		{
-			if ((m_nType != MOD_TYPE_IT) && (m_nType != MOD_TYPE_XM) && (param <= 0x80))
+			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (m_nType != MOD_TYPE_XM) && (param <= 0x80))
 			{
 				param <<= 1;
 				if (param > 255) param = 255;
 			}
 		} else
 		{
-			if ((m_nType == MOD_TYPE_IT) || (m_nType == MOD_TYPE_XM)) param >>= 1;
+			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) || (m_nType == MOD_TYPE_XM)) param >>= 1;
 		}
 		break;
 	case CMD_OFFSET:			command = 0x09; break;
@@ -260,8 +260,8 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	pMagic = (PMODMAGIC)(lpStream+dwMemPos);
 	dwMemPos += sizeof(MODMAGIC);
 	if (m_nSamples == 15) dwMemPos -= 4;
-	memset(Order, 0,sizeof(Order));
-	memcpy(Order, pMagic->Orders, 128);
+	Order.assign(Order.size(), 0);
+	Order.ReadAsByte(pMagic->Orders, 128, 128);
 
 	UINT nbp, nbpbuggy, nbpbuggy2, norders;
 
@@ -324,8 +324,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		if (ipat < MAX_PATTERNS)
 		{
-			if ((Patterns[ipat] = AllocatePattern(64, m_nChannels)) == NULL) break;
-			PatternSize[ipat] = 64;
+			if(Patterns.Insert(ipat, 64)) break;
 			if (dwMemPos + m_nChannels*256 >= dwMemLength) break;
 			MODCOMMAND *m = Patterns[ipat];
 			LPCBYTE p = lpStream + dwMemPos;
@@ -437,7 +436,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 	bTab[1] = m_nRestartPos;
 	fwrite(bTab, 2, 1, f);
 	// Writing pattern list
-	if (norders) memcpy(ord, Order, norders);
+	if (norders) Order.WriteToByteArray(ord, norders, 128);
 
 	fwrite(ord, 128, 1, f);
 	// Writing signature

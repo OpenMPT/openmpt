@@ -82,7 +82,7 @@ BOOL CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 	m_nDefaultTempo = 125;
 	m_nDefaultGlobalVolume = phdr->globalvol << 2;
 	if (m_nDefaultGlobalVolume > 256) m_nDefaultGlobalVolume = 256;
-	memcpy(Order, phdr->patorder, 128);
+	Order.ReadAsByte(phdr->patorder, 128, 128);
 	// Setting up channels
 	for (UINT nSet=0; nSet<4; nSet++)
 	{
@@ -113,8 +113,8 @@ BOOL CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 	for (UINT nPat=0; nPat<nPatterns; nPat++)
 	{
 		if (dwMemPos + 64*4*4 > dwMemLength) return TRUE;
-		PatternSize[nPat] = 64;
-		if ((Patterns[nPat] = AllocatePattern(64, m_nChannels)) == NULL) return TRUE;
+		if(Patterns.Insert(nPat, 64))
+			return TRUE;
 		MODCOMMAND *m = Patterns[nPat];
 		STMNOTE *p = (STMNOTE *)(lpStream + dwMemPos);
 		for (UINT n=0; n<64*4; n++, p++, m++)

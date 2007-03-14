@@ -11,6 +11,7 @@
 #include "AbstractVstEditor.h"		//rewbs.defaultPlugGUI
 #include "VstEditor.h"				//rewbs.defaultPlugGUI
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
+#include "midi.h"
 
 
 //#define VST_LOG
@@ -234,7 +235,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
 #ifdef _DEBUG
 	if (!hLib)
 	{
-		TCHAR szBuf[80]; 
+		TCHAR szBuf[256]; 
 		LPVOID lpMsgBuf;
 		DWORD dw = GetLastError(); 
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL );
@@ -1305,7 +1306,10 @@ VOID CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	if (result) *result = 0;
 }
 
-#define MAX_FILEOPEN_BUFSIZE	32000
+#define MAX_FILEOPEN_BUFSIZE	2048
+//Note: Above value might be the maximum size the buffer can be; 
+//it might be worthwhile to check the CFileDialog documentation
+//if wanting the increase that.
 
 VOID CSelectPluginDlg::OnAddPlugin()
 //----------------------------------
@@ -1458,7 +1462,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 	m_nSampleRate = -1; //rewbs.VSTCompliance: gets set on Resume()
 	memset(m_MidiCh, 0, sizeof(m_MidiCh));
 
-	for (int ch=0; ch<=16; ch++) {
+	for (int ch=0; ch<16; ch++) {
 		m_nMidiPitchBendPos[ch]=MIDI_PitchBend_Centre; //centre pitch bend on all channels
 	}
 
@@ -1609,6 +1613,10 @@ CVstPlugin::~CVstPlugin()
 	//TODO: figure out what to do here.. :)
 	if (m_nInputs && m_pInputs) //if m_nInputs == 0, then m_pInputs will have been
 	{							//initilised at 0 size, so we'll crash on delete.
+								//Even though the size is zero,
+								//new returns a non-NULL address and absence 
+								//of delete can make debugger report 
+								//of a memory leak of 0 bytes long.
 		delete[] m_pInputs;
 		m_pInputs = NULL;
 	}
@@ -2091,7 +2099,6 @@ void CVstPlugin::Process(float **pOutputs, unsigned long nSamples)
 	}
 }
 */
-
 void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 //--------------------------------------------------------------------------
 {
@@ -3004,7 +3011,7 @@ UINT CVstPlugin::FindSlot()
 {
 	UINT slot=0;
 	if (m_pSndFile) {
-		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot<=MAX_MIXPLUGINS) {
+		while ((m_pMixStruct != &(m_pSndFile->m_MixPlugins[slot])) && slot<MAX_MIXPLUGINS-1) {
 			slot++;
 		}
 	}

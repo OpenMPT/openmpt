@@ -92,7 +92,7 @@ BOOL CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 	memcpy(m_lpszSongComments, pfh->songmessage, 108);
 	m_lpszSongComments[108] = 0;
 	// Reading Orders
-	memcpy(Order, pfh->orders, 128);
+	Order.ReadAsByte(pfh->orders, 128, 128);
 	m_nRestartPos = pfh->restartpos;
 	if (Order[m_nRestartPos] >= pfh->patterns) m_nRestartPos = 0;
 	// Reading Pattern Break Locations
@@ -105,9 +105,9 @@ BOOL CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 	dwMemPos = 0x1F1 + pfh->samples * 25;
 	for (UINT npat=0; npat<pfh->patterns; npat++)
 	{
-		Patterns[npat] = AllocatePattern(64, m_nChannels);
-		if (!Patterns[npat]) break;
-		PatternSize[npat] = 64;
+		if(Patterns.Insert(npat, 64))
+			break;
+
 		MODCOMMAND *m = Patterns[npat];
 		const BYTE *p = lpStream + dwMemPos;
 		for (UINT row=0; row<64; row++)

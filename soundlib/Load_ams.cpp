@@ -135,7 +135,7 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT iOrd=0; iOrd<pfh->orders; iOrd++, dwMemPos += 2)
 	{
 		UINT n = *((WORD *)(lpStream+dwMemPos));
-		Order[iOrd] = (BYTE)n;
+		Order[iOrd] = n;
 	}
 	// Read Patterns
 	for (UINT iPat=0; iPat<pfh->patterns; iPat++)
@@ -144,10 +144,9 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 		UINT len = *((DWORD *)(lpStream + dwMemPos));
 		dwMemPos += 4;
 		if ((len >= dwMemLength) || (dwMemPos + len > dwMemLength)) return TRUE;
-		PatternSize[iPat] = 64;
-		MODCOMMAND *m = AllocatePattern(PatternSize[iPat], m_nChannels);
+		Patterns.Insert(iPat, 64);
+		MODCOMMAND* m = Patterns[iPat];
 		if (!m) return TRUE;
-		Patterns[iPat] = m;
 		const BYTE *p = lpStream + dwMemPos;
 		UINT row = 0, i = 0;
 		while ((row < PatternSize[iPat]) && (i+2 < len))
@@ -357,6 +356,7 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		if (!penv) return TRUE;
 		memset(smpmap, 0, sizeof(smpmap));
 		memset(penv, 0, sizeof(INSTRUMENTHEADER));
+		penv->pTuning = penv->s_DefaultTuning;
 		for (UINT ismpmap=0; ismpmap<pins->samples; ismpmap++)
 		{
 			if ((ismpmap >= 16) || (m_nSamples+1 >= MAX_SAMPLES)) break;
@@ -462,7 +462,7 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 	{
 		for (UINT i=0; i<MAX_ORDERS; i++)
 		{
-			Order[i] = 0xFF;
+			Order[i] = Patterns.GetInvalidIndex();
 			if (dwMemPos + 2 >= dwMemLength) return TRUE;
 			if (i < psh->orders)
 			{
@@ -490,9 +490,7 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 				s[patnamlen] = 0;
 				SetPatternName(ipat, s);
 			}
-			PatternSize[ipat] = numrows;
-			Patterns[ipat] = AllocatePattern(numrows, m_nChannels);
-			if (!Patterns[ipat]) return TRUE;
+			if(Patterns.Insert(ipat, numrows)) return TRUE;
 			// Unpack Pattern Data
 			LPCBYTE psrc = lpStream + dwMemPos;
 			UINT pos = 3 + patnamlen;

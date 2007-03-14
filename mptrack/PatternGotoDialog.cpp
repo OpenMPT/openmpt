@@ -61,7 +61,7 @@ void CPatternGotoDialog::OnOK()
 	bool validated=true;
 	
 	//is pattern number sensible?
-	if (m_nPattern>=MAX_PATTERNS) {
+	if (m_nPattern>=m_pSndFile->Patterns.Size()) {
 		validated=false;
 	}
 
@@ -105,7 +105,7 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 	UpdateData();
 	m_nOrder = m_pSndFile->FindOrder(m_nPattern, m_nActiveOrder);
 
-	if (m_nOrder>MAX_ORDERS) {
+	if (m_nOrder >= m_pSndFile->Order.size()) {
 		m_nOrder=0;
 	}
 
@@ -122,9 +122,9 @@ void CPatternGotoDialog::OnEnChangeGotoOrd()
 
 	UpdateData();
 
-	if (m_nOrder<MAX_ORDERS) {
+	if (m_nOrder<m_pSndFile->Order.size()) {
 		UINT candidatePattern = m_pSndFile->Order[m_nOrder];
-		if (candidatePattern<MAX_PATTERNS && m_pSndFile->Patterns[candidatePattern]) {
+		if (candidatePattern<m_pSndFile->Patterns.Size() && m_pSndFile->Patterns[candidatePattern]) {
 			m_nPattern = candidatePattern;
 		} 
 	}

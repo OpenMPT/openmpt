@@ -152,6 +152,7 @@ BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				nsmp = BigEndianW(pih->sampleno);
 				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Ins[nsmp] : NULL;
 				memset(penv, 0, sizeof(INSTRUMENTHEADER));
+				penv->pTuning = penv->s_DefaultTuning;
 				memcpy(penv->name, pih->name, 30);
 				if (psmp)
 				{
@@ -249,15 +250,14 @@ BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				nRows = BigEndianW(pph->rows);
 				if ((nRows >= 4) && (nRows <= 256))
 				{
-					MODCOMMAND *m = AllocatePattern(nRows, m_nChannels);
+					Patterns.Insert(iPat, nRows);
+					MODCOMMAND *m = Patterns[iPat];
 					if (m)
 					{
 						LPBYTE pkdata = (LPBYTE)&pph->patterndata;
 						UINT row = 0;
 						UINT i = 0;
 
-						PatternSize[iPat] = nRows;
-						Patterns[iPat] = m;
 						while ((i+3<pksize) && (row < nRows))
 						{
 							UINT ch = pkdata[i++];

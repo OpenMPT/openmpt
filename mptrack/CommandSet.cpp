@@ -2258,6 +2258,16 @@ void CCommandSet::SetupCommands()
 	commands[kcFileExportCompat].isHidden = false;
 	commands[kcFileExportCompat].isDummy = false;
 
+	commands[kcUnmuteAllChnOnPatTransition].UID = 1778;
+	commands[kcUnmuteAllChnOnPatTransition].isHidden = false;
+	commands[kcUnmuteAllChnOnPatTransition].isDummy = false;
+	commands[kcUnmuteAllChnOnPatTransition].Message = "Unmute all channels on pattern transition";
+
+	commands[kcSoloChnOnPatTransition].UID = 1779;
+	commands[kcSoloChnOnPatTransition].isHidden = false;
+	commands[kcSoloChnOnPatTransition].isDummy = false;
+	commands[kcSoloChnOnPatTransition].Message = "Solo channel on pattern transition";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

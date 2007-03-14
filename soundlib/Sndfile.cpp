@@ -13,7 +13,9 @@
 #include "../mptrack/moddoc.h"
 #include "sndfile.h"
 #include "aeffectx.h"
+#include "wavConverter.h"
 #include <vector>
+#include <algorithm>
 
 
 #ifndef NO_COPYRIGHT
@@ -25,6 +27,7 @@
 #define UNLHA_SUPPORT
 #define ZIPPED_MOD_SUPPORT
 LPCSTR glpszModExtensions = "mod|s3m|xm|it|stm|nst|ult|669|wow|mtm|med|far|mdl|ams|dsm|amf|okt|dmf|ptm|psm|mt2|umx";
+//Should there be mptm?
 #endif // NO_ARCHIVE_SUPPORT
 #else // NO_COPYRIGHT: EarSaver only loads mod/s3m/xm/it/wav
 #define MODPLUG_BASIC_SUPPORT
@@ -269,7 +272,7 @@ WRITE_MPTHEADER_sized_member(	nResampling			, USHORT		, R...							)
 WRITE_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
 WRITE_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
 WRITE_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
-WRITE_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL		,					)
+WRITE_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL							)
 WRITE_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
 WRITE_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
 WRITE_MPTHEADER_sized_member(	nVolEnvReleaseNode	, BYTE			, VERN							)
@@ -357,10 +360,24 @@ return pointer;
 
 // -! NEW_FEATURE#0027
 
+
+CTuning* INSTRUMENTHEADER::s_DefaultTuning = 0;
+
+const ROWINDEX CPatternSizesMimic::operator [](const int i) const
+//-----------------------------------------------------------
+{
+	return m_rSndFile.Patterns[i].GetNumRows();
+}
+
+
 //////////////////////////////////////////////////////////
 // CSoundFile
 
-CSoundFile::CSoundFile()
+CTuningCollection CSoundFile::s_TuningsSharedStandard("Standard tunings");
+CTuningCollection CSoundFile::s_TuningsSharedLocal("Local Tunings");
+
+
+CSoundFile::CSoundFile() : m_TuningsTuneSpecific("Tune specific tunings"), PatternSize(*this), Patterns(*this), Order(*this), m_PlaybackEventer(*this)
 //----------------------
 {
 	m_nType = MOD_TYPE_NONE;
@@ -385,6 +402,8 @@ CSoundFile::CSoundFile()
 	m_bIsRendering = false;
 	m_nMaxSample = 0;
 
+	m_ModFlags.reset();
+
 	m_pModDoc = NULL;
 	m_dwLastSavedWithVersion=0;
 	m_dwCreatedWithVersion=0;
@@ -404,14 +423,14 @@ CSoundFile::CSoundFile()
 	memset(Ins, 0, sizeof(Ins));
 	memset(ChnSettings, 0, sizeof(ChnSettings));
 	memset(Headers, 0, sizeof(Headers));
-	memset(Order, 0xFF, sizeof(Order));
-	memset(Patterns, 0, sizeof(Patterns));
+	Order.assign(MAX_ORDERS, Patterns.GetInvalidIndex());
+	Patterns.ClearPatterns();
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	m_lTotalSampleCount=0;
 
-	m_nPlugMixMode=plugmix_mode_Test;
+	m_nPlugMixMode=plugmix_mode_117RC2;
 	m_pConfig = new CSoundFilePlayConfig();
 	
 	BuildDefaultInstrument();
@@ -464,13 +483,13 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	memset(ChnMix, 0, sizeof(ChnMix));
 	memset(Chn, 0, sizeof(Chn));
 	memset(Headers, 0, sizeof(Headers));
-	memset(Order, 0xFF, sizeof(Order));
-	memset(Patterns, 0, sizeof(Patterns));
+	Order.assign(MAX_ORDERS, Patterns.GetInvalidIndex());
+	Patterns.ClearPatterns();
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	ResetMidiCfg();
-	for (UINT npt=0; npt<MAX_PATTERNS; npt++) PatternSize[npt] = 64;
+	//for (UINT npt=0; npt<Patterns.Size(); npt++) PatternSize[npt] = 64;
 	for (UINT nch=0; nch<MAX_BASECHANNELS; nch++)
 	{
 		ChnSettings[nch].nPan = 128;
@@ -522,6 +541,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		 && (!ReadITProject(lpStream, dwMemLength))
 // -! NEW_FEATURE#0023
 		 && (!ReadIT(lpStream, dwMemLength))
+		 && (!ReadMPT(lpStream, dwMemLength))
 		 && (!ReadS3M(lpStream, dwMemLength))
 		 && (!ReadWav(lpStream, dwMemLength))
 #ifndef MODPLUG_BASIC_SUPPORT
@@ -648,7 +668,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
 	}
 
-	if ((m_nRestartPos >= MAX_ORDERS) || (Order[m_nRestartPos] >= MAX_PATTERNS)) m_nRestartPos = 0;
+	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 	// Load plugins
 	if (gpMixPluginCreateProc)
 	{
@@ -682,8 +702,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 BOOL CSoundFile::Destroy()
 //------------------------
 {
-	int i;
-	for (i=0; i<MAX_PATTERNS; i++) if (Patterns[i])
+	size_t i;
+	for (i=0; i<Patterns.Size(); i++) if (Patterns[i])
 	{
 		FreePattern(Patterns[i]);
 		Patterns[i] = NULL;
@@ -792,15 +812,6 @@ void CSoundFile::ResetMidiCfg()
 	lstrcpy(&m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM*32], "Cc p");
 	lstrcpy(&m_MidiCfg.szMidiSFXExt[0], "F0F000z");
 	for (int iz=0; iz<16; iz++) wsprintf(&m_MidiCfg.szMidiZXXExt[iz*32], "F0F001%02X", iz*8);
-}
-
-
-UINT CSoundFile::GetNumChannels() const
-//-------------------------------------
-{
-	UINT n = 0;
-	for (UINT i=0; i<m_nChannels; i++) if (ChnSettings[i].nVolume) n++;
-	return n;
 }
 
 
@@ -960,7 +971,7 @@ UINT CSoundFile::GetNumPatterns() const
 //-------------------------------------
 {
 	UINT i = 0;
-	while ((i < MAX_ORDERS) && (Order[i] < 0xFF)) i++;
+	while ((i < Order.size()) && (Order[i] < Patterns.GetInvalidIndex())) i++;
 	return i;
 }
 
@@ -981,9 +992,9 @@ UINT CSoundFile::GetMaxPosition() const
 	UINT max = 0;
 	UINT i = 0;
 
-	while ((i < MAX_ORDERS) && (Order[i] != 0xFF))
+	while ((i < Order.size()) && (Order[i] != Patterns.GetInvalidIndex()))
 	{
-		if (Order[i] < MAX_PATTERNS) max += PatternSize[Order[i]];
+		if (Order[i] < Patterns.Size()) max += PatternSize[Order[i]];
 		i++;
 	}
 	return max;
@@ -995,7 +1006,7 @@ UINT CSoundFile::GetCurrentPos() const
 {
 	UINT pos = 0;
 
-	for (UINT i=0; i<m_nCurrentPattern; i++) if (Order[i] < MAX_PATTERNS)
+	for (UINT i=0; i<m_nCurrentPattern; i++) if (Order[i] < Patterns.Size())
 		pos += PatternSize[Order[i]];
 	return pos + m_nRow; 
 }
@@ -1074,27 +1085,27 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	//m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
 	//Relabs.note: Removed SONG_PATTERNLOOP - why it should be disabled here?
 	m_dwSongFlags &= ~(SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
-	for (nPattern = 0; nPattern < MAX_ORDERS; nPattern++)
+	for (nPattern = 0; nPattern < Order.size(); nPattern++)
 	{
 		UINT ord = Order[nPattern];
-		if (ord == 0xFE) continue;
-		if (ord == 0xFF) break;
-		if (ord < MAX_PATTERNS)
+		if(ord == Patterns.GetIgnoreIndex()) continue;
+		if (ord == Patterns.GetInvalidIndex()) break;
+		if (ord < Patterns.Size())
 		{
 			if (nPos < (UINT)PatternSize[ord]) break;
 			nPos -= PatternSize[ord];
 		}
 	}
 	// Buggy position ?
-	if ((nPattern >= MAX_ORDERS)
-	 || (Order[nPattern] >= MAX_PATTERNS)
+	if ((nPattern >= Order.size())
+	 || (Order[nPattern] >= Patterns.Size())
 	 || (nPos >= PatternSize[Order[nPattern]]))
 	{
 		nPos = 0;
 		nPattern = 0;
 	}
 	UINT nRow = nPos;
-	if ((nRow) && (Order[nPattern] < MAX_PATTERNS))
+	if ((nRow) && (Order[nPattern] < Patterns.Size()))
 	{
 		MODCOMMAND *p = Patterns[Order[nPattern]];
 		if ((p) && (nRow < PatternSize[Order[nPattern]]))
@@ -1129,8 +1140,9 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 void CSoundFile::SetCurrentOrder(UINT nPos)
 //-----------------------------------------
 {
-	while ((nPos < MAX_ORDERS) && (Order[nPos] == 0xFE)) nPos++;
-	if ((nPos >= MAX_ORDERS) || (Order[nPos] >= MAX_PATTERNS)) return;
+	//while ((nPos < Order.size()) && (Order[nPos] == 0xFE)) nPos++;
+	while ((nPos < Order.size()) && (Order[nPos] == Patterns.GetIgnoreIndex())) nPos++;
+	if ((nPos >= Order.size()) || (Order[nPos] >= Patterns.Size())) return;
 	for (UINT j=0; j<MAX_CHANNELS; j++)
 	{
 		Chn[j].nPeriod = 0;
@@ -1248,7 +1260,7 @@ void CSoundFile::ResetChannels()
 void CSoundFile::LoopPattern(int nPat, int nRow)
 //----------------------------------------------
 {
-	if ((nPat < 0) || (nPat >= MAX_PATTERNS) || (!Patterns[nPat]))
+	if ((nPat < 0) || (nPat >= Patterns.Size()) || (!Patterns[nPat]))
 	{
 		m_dwSongFlags &= ~SONG_PATTERNLOOP;
 	} else
@@ -1268,7 +1280,7 @@ void CSoundFile::LoopPattern(int nPat, int nRow)
 void CSoundFile::DontLoopPattern(int nPat, int nRow)
 //----------------------------------------------
 {
-	if ((nPat < 0) || (nPat >= MAX_PATTERNS) || (!Patterns[nPat])) nPat = 0;
+	if ((nPat < 0) || (nPat >= Patterns.Size()) || (!Patterns[nPat])) nPat = 0;
 	if ((nRow < 0) || (nRow >= (int)PatternSize[nPat])) nRow = 0;
 	m_nPattern = nPat;
 	m_nRow = m_nNextRow = nRow;
@@ -1280,17 +1292,17 @@ void CSoundFile::DontLoopPattern(int nPat, int nRow)
 	//m_nSeqOverride = 0;
 }
 
-int CSoundFile::FindOrder(BYTE pat, UINT startFromOrder, bool direction)
+int CSoundFile::FindOrder(PATTERNINDEX pat, UINT startFromOrder, bool direction)
 //----------------------------------------------------------------------
 {
 	int foundAtOrder = -1;
 	int candidateOrder = 0;
 
-	for (UINT p=0; p<MAX_ORDERS; p++) 	{
+	for (UINT p=0; p<Order.size(); p++) 	{
 		if (direction) {
-			candidateOrder = (startFromOrder+p)%MAX_ORDERS;		//wrap around MAX_ORDERS
+			candidateOrder = (startFromOrder+p)%Order.size();		//wrap around MAX_ORDERS
 		} else {
-			candidateOrder = (startFromOrder-p+MAX_ORDERS)%MAX_ORDERS;	//wrap around 0 and MAX_ORDERS
+			candidateOrder = (startFromOrder-p+Order.size())%Order.size();	//wrap around 0 and MAX_ORDERS
 		}
 		if (Order[candidateOrder] == pat) {
 			foundAtOrder = candidateOrder;
@@ -1314,6 +1326,8 @@ UINT CSoundFile::GetBestSaveFormat() const
 		return MOD_TYPE_S3M;
 	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MTM|MOD_TYPE_MT2))
 		return MOD_TYPE_XM;
+	if(m_nType & MOD_TYPE_MPT)
+		return MOD_TYPE_MPT;
 	return MOD_TYPE_IT;
 }
 
@@ -1328,7 +1342,7 @@ UINT CSoundFile::GetSaveFormats() const
 	case MOD_TYPE_MOD:	n = MOD_TYPE_MOD;
 	case MOD_TYPE_S3M:	n = MOD_TYPE_S3M;
 	}
-	n |= MOD_TYPE_XM | MOD_TYPE_IT;
+	n |= MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT;
 	if (!m_nInstruments)
 	{
 		if (m_nSamples < 32) n |= MOD_TYPE_MOD;
@@ -1389,7 +1403,7 @@ bool CSoundFile::SetChannelSettingsToDefault(UINT nch)
 
 
 
-UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
+CHANNELINDEX CSoundFile::ReArrangeChannels(const std::vector<CHANNELINDEX>& newOrder)
 //-------------------------------------------------------------------
 {
     //newOrder[i] tells which current channel should be placed to i:th position in
@@ -1399,11 +1413,9 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 	//Thus this function can practically be used to add, remove, reorder, duplicate, clear etc. channels, 
 	//IF it works, that is.
 	
-	MODCOMMAND emptyModCom = {0,0,0,0,0,0};
-
 	UINT nRemainingChannels = newOrder.size();	
 
-	if(nRemainingChannels > min(MAX_CHANNELS, MAX_BASECHANNELS) || nRemainingChannels < 4) 	
+	if(nRemainingChannels > min(MAX_CHANNELS, MAX_BASECHANNELS) || nRemainingChannels < GetNumChannelMin()) 	
 	{
 		CString str = "Error: Bad newOrder vector in CSoundFile::ReArrangeChannels(...)";	
 		CMainFrame::GetMainFrame()->MessageBox(str , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
@@ -1412,7 +1424,7 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 
 	BEGIN_CRITICAL();
 	UINT i = 0;
-	for (i=0; i<MAX_PATTERNS; i++) 
+	for (i=0; i<Patterns.Size(); i++) 
 	{
 		if (Patterns[i])
 		{
@@ -1432,7 +1444,7 @@ UINT CSoundFile::ReArrangeChannels(const std::vector<UINT>& newOrder)
 					if(newOrder[k] < m_nChannels) //Case: getting old channel to the new channel order.
 								*tmpdest = tmpsrc[j*m_nChannels+newOrder[k]];
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
-						*tmpdest = emptyModCom;
+						*tmpdest = MODCOMMAND();
 							
 				}
 			}
@@ -1506,7 +1518,7 @@ bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
                 }
                 newOrder[chnTo] = temp;
      }
-     else //case chnFrom > chnT(can't be equal, since it has been examined earlier.)
+     else //case chnFrom > chnTo(can't be equal, since it has been examined earlier.)
      {
           UINT temp = newOrder[chnFrom];
 		  for(UINT i = chnFrom; i>=chnTo+1; i--)
@@ -1837,9 +1849,8 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 //	5 = signed 16-bit PCM data
 //	6 = unsigned 16-bit PCM data
 
-
-UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength)
-//------------------------------------------------------------------------------------------------
+UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength, const WORD format)
+//-----------------------------------------------------------------------------------------------------------------------
 {
 	UINT len = 0, mem = pIns->nLength+6;
 
@@ -1869,7 +1880,7 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 			len = pIns->nLength;
 			if (len > dwMemLength) len = pIns->nLength = dwMemLength;
 			LPSTR pSample = pIns->pSample;
-			for (UINT j=0; j<len; j++) pSample[j] = (char)(lpMemFile[j] - 0x80);
+			for (UINT j=0; j<len; j++) pSample[j] = (char)(lpMemFile[j] - 0x80); 
 		}
 		break;
 
@@ -2188,7 +2199,7 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		break;
 
 #ifdef MODPLUG_TRACKER
-	// PCM 24-bit signed -> load sample, and normalize it to 16-bit
+	// Mono PCM 24/32-bit signed & 32 bit float -> load sample, and normalize it to 16-bit
 	case RS_PCM24S:
 	case RS_PCM32S:
 		len = pIns->nLength * 3;
@@ -2196,56 +2207,66 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		if (len > dwMemLength) break;
 		if (len > 4*8)
 		{
-			UINT slsize = (nFlags == RS_PCM32S) ? 4 : 3;
-			LPBYTE pSrc = (LPBYTE)lpMemFile;
-			LONG max = 255;
-			if (nFlags == RS_PCM32S) pSrc++;
-			for (UINT j=0; j<len; j+=slsize)
+			if(nFlags == RS_PCM24S)
 			{
-				LONG l = ((((pSrc[j+2] << 8) + pSrc[j+1]) << 8) + pSrc[j]) << 8;
-				l /= 256;
-				if (l > max) max = l;
-				if (-l > max) max = -l;
+				char* pSrc = (char*)lpMemFile;
+				char* pDest = (char*)pIns->pSample;
+				CopyWavBuffer<3, 2, WavSigned24To16, MaxFinderInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 			}
-			max = (max / 128) + 1;
-			signed short *pDest = (signed short *)pIns->pSample;
-			for (UINT k=0; k<len; k+=slsize)
+			else //RS_PCM32S
 			{
-				LONG l = ((((pSrc[k+2] << 8) + pSrc[k+1]) << 8) + pSrc[k]) << 8;
-				*pDest++ = (signed short)(l / max);
+				char* pSrc = (char*)lpMemFile;
+				char* pDest = (char*)pIns->pSample;
+				if(format == 3)
+					CopyWavBuffer<4, 2, WavFloat32To16, MaxFinderFloat32>(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+				else
+					CopyWavBuffer<4, 2, WavSigned32To16, MaxFinderInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 			}
 		}
 		break;
 
-	// Stereo PCM 24-bit signed -> load sample, and normalize it to 16-bit
+	// Stereo PCM 24/32-bit signed & 32 bit float -> convert sample to 16 bit
 	case RS_STIPCM24S:
 	case RS_STIPCM32S:
-		len = pIns->nLength * 6;
-		if (nFlags == RS_STIPCM32S) len += pIns->nLength * 2;
-		if (len > dwMemLength) break;
-		if (len > 8*8)
+		if(format == 3 && nFlags == RS_STIPCM32S) //Microsoft IEEE float
 		{
-			UINT slsize = (nFlags == RS_STIPCM32S) ? 4 : 3;
-			LPBYTE pSrc = (LPBYTE)lpMemFile;
-			LONG max = 255;
-			if (nFlags == RS_STIPCM32S) pSrc++;
-			for (UINT j=0; j<len; j+=slsize)
+			len = pIns->nLength * 6;
+			//pIns->nLength tells(?) the number of frames there
+			//are. One 'frame' of 1 byte(== 8 bit) mono data requires
+			//1 byte of space, while one frame of 3 byte(24 bit) 
+			//stereo data requires 3*2 = 6 bytes. This is(?)
+			//why there is factor 6.
+
+			len += pIns->nLength * 2;
+			//Compared to 24 stereo, 32 bit stereo needs 16 bits(== 2 bytes)
+			//more per frame.
+
+			if(len > dwMemLength) break;
+			char* pSrc = (char*)lpMemFile;
+			char* pDest = (char*)pIns->pSample;
+			if (len > 8*8)
 			{
-				LONG l = ((((pSrc[j+2] << 8) + pSrc[j+1]) << 8) + pSrc[j]) << 8;
-				l /= 256;
-				if (l > max) max = l;
-				if (-l > max) max = -l;
+				CopyWavBuffer<4, 2, WavFloat32To16, MaxFinderFloat32>(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 			}
-			max = (max / 128) + 1;
-			signed short *pDest = (signed short *)pIns->pSample;
-			for (UINT k=0; k<len; k+=slsize)
+		}
+		else
+		{
+			len = pIns->nLength * 6;
+			if (nFlags == RS_STIPCM32S) len += pIns->nLength * 2;
+			if (len > dwMemLength) break;
+			if (len > 8*8)
 			{
-				LONG lr = ((((pSrc[k+2] << 8) + pSrc[k+1]) << 8) + pSrc[k]) << 8;
-				k += slsize;
-				LONG ll = ((((pSrc[k+2] << 8) + pSrc[k+1]) << 8) + pSrc[k]) << 8;
-				pDest[0] = (signed short)ll;
-				pDest[1] = (signed short)lr;
-				pDest += 2;
+				char* pSrc = (char*)lpMemFile;
+				char* pDest = (char*)pIns->pSample;
+				if(nFlags == RS_STIPCM32S)
+				{
+					CopyWavBuffer<4,2,WavSigned32To16, MaxFinderInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+				}
+				if(nFlags == RS_STIPCM24S)
+				{
+					CopyWavBuffer<3,2,WavSigned24To16, MaxFinderInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+				}
+
 			}
 		}
 		break;
@@ -2493,7 +2514,7 @@ BOOL CSoundFile::SetPatternName(UINT nPat, LPCSTR lpszName)
 //---------------------------------------------------------
 {
 	CHAR szName[MAX_PATTERNNAME] = "";
-	if (nPat >= MAX_PATTERNS) return FALSE;
+	if (nPat >= Patterns.Size()) return FALSE;
 	if (lpszName) lstrcpyn(szName, lpszName, MAX_PATTERNNAME);
 	szName[MAX_PATTERNNAME-1] = 0;
 	if (!m_lpszPatternNames) m_nPatternNames = 0;
@@ -2545,7 +2566,7 @@ UINT CSoundFile::DetectUnusedSamples(BYTE *pbIns)
 	if (m_nInstruments)
 	{
 		memset(pbIns, 0, (MAX_SAMPLES+7)/8);
-		for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++)
+		for (UINT ipat=0; ipat<Patterns.Size(); ipat++)
 		{
 			MODCOMMAND *p = Patterns[ipat];
 			if (p)
@@ -2678,7 +2699,65 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.nPitchEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.nVolEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.wPitchToTempoLock = 0;
+	m_defaultInstrument.pTuning = m_defaultInstrument.s_DefaultTuning;
+	//Known issue: s_DefaultInstrument is not necessarily set yet when
+	//this method gets called.
 }
+
+bool CSoundFile::SaveStaticTunings()
+//----------------------------------
+{
+	if(s_TuningsSharedLocal.SerializeBinary())
+	{
+		ErrorBox(IDS_ERR_TUNING_SERIALISATION, NULL);
+		return true;
+	}
+	return false;
+}
+
+bool CSoundFile::LoadStaticTunings()
+//-----------------------------------
+{
+	if(s_TuningsSharedStandard.GetNumTunings() > 0) return true;
+	if(s_TuningsSharedLocal.GetNumTunings() > 0) return true;
+	//For now not allowing to reload tunings(one should be careful when reloading them
+	//since various parts may use the very addresses of tunings.
+	
+	const string exePath = CMainFrame::m_csExecutablePath;
+    const string baseDirectoryName = exePath + "\\tunings\\";
+	string filenameBase;
+	string filename;
+
+	s_TuningsSharedStandard.SetSavefilePath(baseDirectoryName + string("standard\\std_tunings") + CTuningCollection::s_FileExtension);
+	s_TuningsSharedLocal.SetSavefilePath(baseDirectoryName + string("local_tunings") + CTuningCollection::s_FileExtension);
+
+	s_TuningsSharedStandard.UnSerializeBinary();
+	s_TuningsSharedLocal.UnSerializeBinary();
+
+	//Bug?
+	if(s_TuningsSharedStandard.GetNumTunings() == 0)
+	{
+		CTuningRTI* pT = new CTuningRTI;
+		//Note: Tuning collection class handles deleting.
+		pT->CreateTET(1,1);
+		if(s_TuningsSharedStandard.AddTuning(pT))
+			delete pT;
+	}
+
+	//Enabling adding/removing of tunings for standard collection
+	//only for debug builds.
+	#ifdef DEBUG
+		s_TuningsSharedStandard.SetConstStatus(CTuningCollection::EM_ALLOWALL);
+	#else
+		s_TuningsSharedStandard.SetConstStatus(CTuningCollection::EM_CONST);
+	#endif
+
+	INSTRUMENTHEADER::s_DefaultTuning = NULL;
+
+	return false;
+}
+
+
 
 void CSoundFile::SetDefaultInstrumentValues(INSTRUMENTHEADER *penv) 
 //-----------------------------------------------------------------
@@ -2688,7 +2767,11 @@ void CSoundFile::SetDefaultInstrumentValues(INSTRUMENTHEADER *penv)
 	penv->nPitchEnvReleaseNode = m_defaultInstrument.nPitchEnvReleaseNode;
 	penv->nPanEnvReleaseNode = m_defaultInstrument.nPanEnvReleaseNode;
 	penv->nVolEnvReleaseNode = m_defaultInstrument.nVolEnvReleaseNode;
+	penv->pTuning = m_defaultInstrument.pTuning;
+
 }
+
+
 
 long CSoundFile::GetSampleOffset() 
 //-------------------------------
@@ -2699,3 +2782,54 @@ long CSoundFile::GetSampleOffset()
 	//return ticksFromStartOfPattern*m_nSamplesPerTick;
 	return 0;
 }
+
+string CSoundFile::GetNoteName(const CTuning::STEPTYPE& note, const int inst) const
+//----------------------------------------------------------------------------------
+{
+	if(inst >= MAX_INSTRUMENTS || inst < -1) return "BUG";
+	if(inst == -1)
+		return string(szNoteNames[abs(note-1)%12]) + Stringify((note-1)/12);
+	
+	if(m_nType == MOD_TYPE_MPT && Headers[inst] && Headers[inst]->pTuning)
+		return Headers[inst]->pTuning->GetNoteName(note-NOTE_MIDDLEC);
+	else
+		return string(szNoteNames[abs(note-1)%12]) + Stringify((note-1)/12);
+}
+
+WORD CSoundFile::GetTempoMin() const {return 32;}
+WORD CSoundFile::GetTempoMax() const {return 512;}
+
+ROWINDEX CSoundFile::GetRowMax() const {return MAX_PATTERN_ROWS;}
+ROWINDEX CSoundFile::GetRowMin() const {return 2;}
+
+CHANNELINDEX CSoundFile::GetNumChannelMax() const
+//-----------------------------------
+{
+	if(m_nType == MOD_TYPE_MPT) return MPTM_SPECS.channelsMax;
+	if(m_nType == MOD_TYPE_IT) return max_chans_IT;
+	if(m_nType == MOD_TYPE_XM) return max_chans_XM;
+	if(m_nType == MOD_TYPE_MOD) return max_chans_MOD;
+	if(m_nType == MOD_TYPE_S3M) return max_chans_S3M;
+	return 4;
+}
+
+CHANNELINDEX CSoundFile::GetNumChannelMin() const
+//-----------------------------------
+{
+	if(m_nType == MOD_TYPE_MPT) return MPTM_SPECS.channelsMin;
+	else return 4;
+}
+
+void CSoundFile::ChangeModTypeTo(const int& newType)
+//---------------------------------------------------
+{
+	const UINT oldInvalidIndex = Patterns.GetInvalidIndex();
+	const UINT oldIgnoreIndex = Patterns.GetIgnoreIndex();
+	m_nType = newType;
+
+	m_ModFlags.reset();
+
+	replace(Order.begin(), Order.end(), oldInvalidIndex, Patterns.GetInvalidIndex());
+	replace(Order.begin(), Order.end(), oldIgnoreIndex, Patterns.GetIgnoreIndex());
+}
+

@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 #include "it_defs.h"
+#include "wavConverter.h"
 
 #pragma warning(disable:4244)
 
@@ -60,6 +61,7 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 		INSTRUMENTHEADER *penv = new INSTRUMENTHEADER;
 		if (!penv) return FALSE;
 		memset(penv, 0, sizeof(INSTRUMENTHEADER));
+		penv->pTuning = penv->s_DefaultTuning;
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 //		RemoveInstrumentSamples(nInstr);
@@ -148,7 +150,7 @@ BOOL CSoundFile::IsSampleUsed(UINT nSample)
 		}
 	} else
 	{
-		for (UINT i=0; i<MAX_PATTERNS; i++) if (Patterns[i])
+		for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 		{
 			MODCOMMAND *m = Patterns[i];
 			for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
@@ -165,7 +167,7 @@ BOOL CSoundFile::IsInstrumentUsed(UINT nInstr)
 //--------------------------------------------
 {
 	if ((!nInstr) || (nInstr > m_nInstruments) || (!Headers[nInstr])) return FALSE;
-	for (UINT i=0; i<MAX_PATTERNS; i++) if (Patterns[i])
+	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 	{
 		MODCOMMAND *m = Patterns[i];
 		for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
@@ -420,26 +422,28 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 			 || (pfmtpk->channels != 1)) return FALSE;
 		} else pfmtpk = NULL;
 	}
-	// WAVE_FORMAT_PCM, WAVE_FORMAT_EXTENSIBLE
-	if (((pfmt->format != 1) && (pfmt->format != 0xFFFE))
+	// WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT, WAVE_FORMAT_EXTENSIBLE
+	if ((((pfmt->format != 1) && (pfmt->format != 0xFFFE))
+	 && (pfmt->format != 3 || pfmt->bitspersample != 32)) //Microsoft IEEE FLOAT
 	 || (pfmt->channels > 2)
 	 || (!pfmt->channels)
 	 || (pfmt->bitspersample & 7)
 	 || (!pfmt->bitspersample)
 	 || (pfmt->bitspersample > 32)
 	) return FALSE;
+
 	DestroySample(nSample);
 	UINT nType = RS_PCM8U;
 	if (pfmt->channels == 1)
 	{
 		if (pfmt->bitspersample == 24) nType = RS_PCM24S; 
-		if (pfmt->bitspersample == 32) nType = RS_PCM32S; 
-		else nType = (pfmt->bitspersample == 16) ? RS_PCM16S : RS_PCM8U;
+		else if (pfmt->bitspersample == 32) nType = RS_PCM32S; 
+			else nType = (pfmt->bitspersample == 16) ? RS_PCM16S : RS_PCM8U;
 	} else
 	{
 		if (pfmt->bitspersample == 24) nType = RS_STIPCM24S; 
 		else if (pfmt->bitspersample == 32) nType = RS_STIPCM32S; 
-		else nType = (pfmt->bitspersample == 16) ? RS_STIPCM16S : RS_STIPCM8U;
+			else nType = (pfmt->bitspersample == 16) ? RS_STIPCM16S : RS_STIPCM8U;
 	}
 	UINT samplesize = pfmt->channels * (pfmt->bitspersample >> 3);
 	MODINSTRUMENT *pins = &Ins[nSample];
@@ -476,7 +480,7 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 		AdjustSampleLoop(pins);
 	} else
 	{
-		ReadSample(pins, nType, (LPSTR)(lpMemFile+dwDataPos), dwFileLength-dwDataPos);
+		ReadSample(pins, nType, (LPSTR)(lpMemFile+dwDataPos), dwFileLength-dwDataPos, pfmt->format);
 	}
 	// smpl field
 	if (psh)
@@ -889,6 +893,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	penv = new INSTRUMENTHEADER;
 	if (!penv) return FALSE;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
+	penv->pTuning = penv->s_DefaultTuning;
 	Headers[nInstr] = penv;
 	nSamples = plh->samples;
 	if (nSamples > 16) nSamples = 16;
@@ -900,7 +905,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	penv->nPPC = 60;
 	penv->nResampling = SRCMODE_DEFAULT;
 	penv->nFilterMode = FLTMODE_UNCHANGED;
-	if (m_nType == MOD_TYPE_IT)
+	if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
 	{
 		penv->nNNA = NNA_NOTEOFF;
 		penv->nDNA = DNA_NOTEFADE;
@@ -1112,6 +1117,7 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	INSTRUMENTHEADER *penv = Headers[nInstr];
 	if (!penv) return FALSE;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
+	penv->pTuning = penv->s_DefaultTuning;
 	memcpy(penv->name, pxh->name, 22);
 	nsamples = 0;
 	for (UINT i=0; i<96; i++)
@@ -1741,6 +1747,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	INSTRUMENTHEADER *penv = Headers[nInstr];
 	if (!penv) return FALSE;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
+	penv->pTuning = penv->s_DefaultTuning;
 	memset(samplemap, 0, sizeof(samplemap));
 	dwMemPos = 554;
 	dwMemPos += ITInstrToMPT(pinstr, penv, pinstr->trkvers);

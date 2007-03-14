@@ -8,78 +8,11 @@
 #include "vstplug.h"
 #include "ChannelManagerDlg.h"
 #include ".\dlg_misc.h"
+#include "midi.h"
 
 #pragma warning(disable:4244)
 
-static CString MidiCCNames[MIDICC_end] ={	//TODO: find a better home for these.
-"BankSelect [Coarse]",
-"ModulationWheel [Coarse]",
-"Breathcontroller [Coarse]",
-"FootPedal [Coarse]",
-"PortamentoTime [Coarse]",
-"DataEntry [Coarse]",
-"Volume [Coarse]",
-"Balance [Coarse]",
-"Panposition [Coarse]",
-"Expression [Coarse]",
-"EffectControl1 [Coarse]",
-"EffectControl2 [Coarse]",
-"GeneralPurposeSlider1",
-"GeneralPurposeSlider2",
-"GeneralPurposeSlider3",
-"GeneralPurposeSlider4",
-"BankSelect [Fine]",
-"ModulationWheel [Fine]",
-"Breathcontroller [Fine]",
-"FootPedal [Fine]",
-"PortamentoTime [Fine]",
-"DataEntry [Fine]",
-"Volume [Fine]",
-"Balance [Fine]",
-"Panposition [Fine]",
-"Expression [Fine]",
-"EffectControl1 [Fine]",
-"EffectControl2 [Fine]",
-"HoldPedal [OnOff]",
-"Portamento [OnOff]",
-"SustenutoPedal [OnOff]",
-"SoftPedal [OnOff]",
-"LegatoPedal [OnOff]",
-"Hold2Pedal [OnOff]",
-"SoundVariation",
-"SoundTimbre",
-"SoundReleaseTime",
-"SoundAttackTime",
-"SoundBrightness",
-"SoundControl6",
-"SoundControl7",
-"SoundControl8",
-"SoundControl9",
-"SoundControl10",
-"GeneralPurposeButton1 [OnOff]",
-"GeneralPurposeButton2 [OnOff]",
-"GeneralPurposeButton3 [OnOff]",
-"GeneralPurposeButton4 [OnOff]",
-"EffectsLevel",
-"TremuloLevel",
-"ChorusLevel",
-"CelesteLevel",
-"PhaserLevel",
-"DataButtonIncrement",
-"DataButtonDecrement",
-"NonRegisteredParameter [Fine]",
-"NonRegisteredParameter [Coarse]",
-"RegisteredParameter [Fine]",
-"RegisteredParameter [Coarse]",
-"AllSoundOff",
-"AllControllersOff",
-"LocalKeyboard [OnOff]",
-"AllNotesOff",
-"OmniModeOff",
-"OmniModeOn",
-"MonoOperation",
-"PolyOperation",
-};
+
 
 
 // -> CODE#0010
@@ -169,6 +102,7 @@ BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	ON_COMMAND(IDC_CHECK6,		OnCheck6)
+	ON_COMMAND(IDC_IT_STANDARD, OnITStandard)
 	ON_CBN_SELCHANGE(IDC_COMBO1,UpdateDialog)
 // -! NEW_FEATURE#0023
 	//}}AFX_MSG_MAP
@@ -193,6 +127,7 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 // -> DESC="IT project files (.itp)"
 	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
 // -! NEW_FEATURE#0023
+	DDX_Control(pDX, IDC_IT_STANDARD,	m_CheckBoxITStandard);
 	//}}AFX_DATA_MAP
 }
 
@@ -214,6 +149,7 @@ BOOL CModTypeDlg::OnInitDialog()
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	m_TypeBox.SetItemData(m_TypeBox.AddString("Impulse Tracker Project ITP"), MOD_TYPE_IT);
+	m_TypeBox.SetItemData(m_TypeBox.AddString("OpenMPT MPTM"), MOD_TYPE_MPT);
 // -! NEW_FEATURE#0023
 	switch(m_nType)
 	{
@@ -223,6 +159,7 @@ BOOL CModTypeDlg::OnInitDialog()
 // -> DESC="IT project files (.itp)"
 //	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(3); break;
 	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT ? 4 : 3); break;
+	case MOD_TYPE_MPT:	m_TypeBox.SetCurSel(5); break;
 // -! NEW_FEATURE#0023
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
@@ -282,28 +219,31 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox3.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITOLDEFFECTS) ? MF_CHECKED : 0);
 	m_CheckBox4.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITCOMPATMODE) ? MF_CHECKED : 0);
 	m_CheckBox5.SetCheck((m_pSndFile->m_dwSongFlags & SONG_EXFILTERRANGE) ? MF_CHECKED : 0);
+	m_CheckBoxITStandard.SetCheck( (m_pSndFile->GetModSpecificFlag(IT_STANDARD) && m_pSndFile->GetType() == MOD_TYPE_IT) ? MF_CHECKED : MF_UNCHECKED);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	m_CheckBox6.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITPEMBEDIH) ? MF_CHECKED : 0);
 // -! NEW_FEATURE#0023
 
-	m_CheckBox1.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+	m_CheckBox1.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 	m_CheckBox2.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_S3M) ? TRUE : FALSE);
-	m_CheckBox3.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_IT) ? TRUE : FALSE);
-	m_CheckBox4.EnableWindow((m_pSndFile->m_nType == MOD_TYPE_IT) ? TRUE : FALSE);
-	m_CheckBox5.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+	m_CheckBox3.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	m_CheckBox4.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	m_CheckBox5.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	m_CheckBox6.EnableWindow(m_TypeBox.GetCurSel() == 4 ? TRUE : FALSE);
 // -! NEW_FEATURE#0023
-	
-	m_TempoModeBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
-	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
-	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
 
-	m_PlugMixBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)) ? TRUE : FALSE);
+	m_CheckBoxITStandard.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_IT) ? TRUE : FALSE);
+	
+	m_TempoModeBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+
+	m_PlugMixBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 }
 
 
@@ -368,6 +308,12 @@ void CModTypeDlg::OnCheck6()
 }
 // -! NEW_FEATURE#0023
 
+void CModTypeDlg::OnITStandard()
+//------------------------------
+{
+	m_pSndFile->SetModSpecificFlag(IT_STANDARD, m_CheckBoxITStandard.GetCheck());
+}
+
 BOOL CModTypeDlg::VerifyData() 
 //---------------------------------
 {
@@ -384,7 +330,7 @@ BOOL CModTypeDlg::VerifyData()
 	int sel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
 	int type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
 	int maxChans;
-	if (type&MOD_TYPE_IT) {
+	if (type&(MOD_TYPE_IT|MOD_TYPE_MPT)) {
 		maxChans=max_chans_IT;
 	} else if (type&MOD_TYPE_XM) {
 		maxChans=max_chans_XM;
@@ -533,7 +479,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 	if (m_nRemove > 0) {
 		wsprintf(label, "Select %d channels to remove:", m_nRemove);
 	} else {
-		wsprintf(label, "Select channels to remove:");
+		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %d)", m_pSndFile->GetNumChannelMin());
 	}
 	
 	SetDlgItemText(IDC_QUESTION1, label);
@@ -556,7 +502,7 @@ void CRemoveChannelsDlg::OnOK()
 	{
 		m_bChnMask[aryListBoxSel[n]]++;
 	}
-	if ((nCount == m_nRemove && nCount >0)  || (m_nRemove == 0 && (m_pSndFile->m_nChannels - nCount >= 4)))
+	if ((nCount == m_nRemove && nCount >0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nCount + m_pSndFile->GetNumChannelMin())))
 		CDialog::OnOK();
 	else
 		CDialog::OnCancel();
@@ -568,7 +514,7 @@ void CRemoveChannelsDlg::OnChannelChanged()
 {
 	UINT nr = 0;
 	nr = m_RemChansList.GetSelCount();
-	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (m_pSndFile->m_nChannels - nr >= 4) && nr > 0)) ? TRUE : FALSE);
+	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nr + m_pSndFile->GetNumChannelMin()) && nr > 0)) ? TRUE : FALSE);
 }
 //end rewbs.removeChansDlgCleanup
 
@@ -839,9 +785,9 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 	CComboBox *combo;
 	CDialog::OnInitDialog();
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
-	if ((m_pModDoc) && (m_nPattern < MAX_PATTERNS) && (combo))
+	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	if ((m_pModDoc) && (m_nPattern < pSndFile->Patterns.Size()) && (combo))
 	{
-		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		CHAR s[256];
 		UINT nrows = pSndFile->PatternSize[m_nPattern];
 
@@ -876,7 +822,8 @@ void CPatternPropertiesDlg::OnOK()
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
 //	if ((n >= 2) && (n <= 256) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
-	if ((n >= 2) && (n <= MAX_PATTERN_ROWS) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
+	//if ((n >= 2) && (n <= MAX_PATTERN_ROWS) && (m_pModDoc)) m_pModDoc->ResizePattern(m_nPattern, n);
+	if(m_pModDoc) m_pModDoc->GetSoundFile()->Patterns[m_nPattern].Resize(n);
 // -! BEHAVIOUR_CHANGE#0008
 	CDialog::OnOK();
 }
@@ -966,7 +913,7 @@ BOOL CEditCommand::ShowEditWindow(UINT nPat, DWORD dwCursor)
 	UINT nRow = dwCursor >> 16;
 	UINT nChannel = (dwCursor & 0xFFFF) >> 3;
 
-	if ((nPat >= MAX_PATTERNS) || (!m_pModDoc)
+	if ((nPat >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 	 || (nRow >= pSndFile->PatternSize[nPat]) || (nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[nPat])) return FALSE;
 	m_Command = pSndFile->Patterns[nPat][nRow * pSndFile->m_nChannels + nChannel];
@@ -1010,7 +957,7 @@ void CEditCommand::UpdateNote(UINT note, UINT instr)
 //--------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_nPattern >= MAX_PATTERNS) || (!m_pModDoc)
+	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 	 || (m_nRow >= pSndFile->PatternSize[m_nPattern])
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
@@ -1034,7 +981,7 @@ void CEditCommand::UpdateVolume(UINT volcmd, UINT vol)
 //----------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_nPattern >= MAX_PATTERNS) || (!m_pModDoc)
+	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 	 || (m_nRow >= pSndFile->PatternSize[m_nPattern])
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
@@ -1057,7 +1004,7 @@ void CEditCommand::UpdateEffect(UINT command, UINT param)
 //-------------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_nPattern >= MAX_PATTERNS) || (!m_pModDoc)
+	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
 	 || (m_nRow >= pSndFile->PatternSize[m_nPattern])
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
@@ -1121,6 +1068,7 @@ void CPageEditNote::UpdateDialog()
 //--------------------------------
 {
 	char s[64];
+	const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 	CComboBox *combo;
 	CSoundFile *pSndFile;
 
@@ -1133,16 +1081,21 @@ void CPageEditNote::UpdateDialog()
 		combo->SetItemData(combo->AddString("No note"), 0);
 		for (UINT i=1; i<=120; i++)
 		{
-			wsprintf(s, "%s%d", szNoteNames[(i-1)%12], (i-1)/12);
+			const string temp = pSndFile->GetNoteName(i, m_nInstr);
+			if(temp.size() >= sizeofS)
+				wsprintf(s, "%s", "...");
+			else
+				wsprintf(s, "%s", temp.c_str());
+
 			combo->SetItemData(combo->AddString(s), i);
 		}
-		if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
+		if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			int k = combo->AddString("Note Cut");
 			combo->SetItemData(k, 0xFE);
 			if (m_nNote == 0xFE) combo->SetCurSel(k);
 		}
-		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT))
+		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			int k = combo->AddString("Note Off");
 			combo->SetItemData(k, 0xFF);
@@ -1187,7 +1140,18 @@ void CPageEditNote::OnNoteChanged()
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
 		int n = combo->GetCurSel();
-		if (n >= 0) m_nInstr = combo->GetItemData(n);
+		if(n >= 0)
+		{
+			const UINT oldInstr = m_nInstr;
+			CSoundFile* pSndFile = m_pModDoc->GetSoundFile();
+			m_nInstr = combo->GetItemData(n);
+			//Checking whether note names should be recreated.
+			if(pSndFile && pSndFile->Headers[m_nInstr] && pSndFile->Headers[oldInstr])
+			{
+				if(pSndFile->Headers[m_nInstr]->pTuning != pSndFile->Headers[oldInstr]->pTuning)
+					UpdateDialog();
+			}
+		}
 	}
 	if (m_pParent) m_pParent->UpdateNote(m_nNote, m_nInstr);
 }
@@ -1406,6 +1370,31 @@ void CPageEditEffect::OnCommandChanged()
 		}
 		UpdateRange(bSet);
 	}
+}
+
+
+void CPageEditEffect::OnCommand2Changed()
+//--------------------------------------
+{
+	UINT value = GetDlgItemInt(IDC_COMBO2);
+
+	/*
+	CComboBox *combo;
+
+	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL) && (m_pModDoc))
+	{
+		BOOL bSet = FALSE;
+		int n = combo->GetCurSel();
+		if (n >= 0)
+		{
+			int param = -1, ndx = combo->GetItemData(n);
+			m_nCommand = (ndx >= 0) ? m_pModDoc->GetEffectFromIndex(ndx, param) : 0;
+			if (param >= 0) m_nParam = param;
+			bSet = TRUE;
+		}
+		UpdateRange(bSet);
+	}
+	*/
 }
 
 
@@ -2552,12 +2541,19 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 //-------------------------------------------------------------------
 {
 	CHAR s[32] = "--";
+	const size_t sizeofS = sizeof(s)/sizeof(s[0]);
 
 	if ((lParam >= 0) && (lParam < 3*12) && (m_pSndFile))
 	{
 		UINT nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
-		wsprintf(s, "%s%d", szNoteNames[lParam%12], lParam/12+nBaseOctave);
+		
+		const string temp = m_pSndFile->GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
+        if(temp.size() >= sizeofS)
+			wsprintf(s, "%s", "...");
+		else
+			wsprintf(s, "%s", temp.c_str());
+
 		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
 		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample > 0) && (nSample < MAX_SAMPLES) && (penv))
 		{

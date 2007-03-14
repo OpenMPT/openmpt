@@ -37,9 +37,13 @@ public:
 	BOOL UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
-	BYTE SetOrderlistMargins(int); //Returns the number that was set.
+
+	//Returns the number that was set.
+	BYTE SetOrderlistMargins(int);
 	BYTE GetOrderlistMargins() const {return m_nOrderlistMargins;}
-	BYTE GetShownOrdersMax();	//Should return the maximum number of shown orders.
+
+	//Should return the maximum number of shown orders.
+	BYTE GetShownOrdersMax();
 
 public:
 	//{{AFX_VIRTUAL(COrderList)

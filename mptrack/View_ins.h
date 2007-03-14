@@ -129,6 +129,7 @@ protected:
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditSampleMap();
+	afx_msg void OnEnvelopeScalepoints();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);

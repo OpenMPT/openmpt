@@ -410,6 +410,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	penv = new INSTRUMENTHEADER;
 	if (!penv) return 0;
 	memset(penv, 0, sizeof(INSTRUMENTHEADER));
+	penv->pTuning = penv->s_DefaultTuning;
 	m_nSamples++;
 	m_nInstruments++;
 	Headers[m_nInstruments] = penv;
@@ -562,13 +563,13 @@ BOOL CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	Log("%d tracks, tempo = %dus, division = %04X TickFactor=%d\n", tracks, nTempoUsec, ((UINT)division) & 0xFFFF, nTickMultiplier);
 #endif
 	// Initializing 
-	memset(Order, 0xFF, sizeof(Order));
+	Order.assign(Order.size(), Patterns.GetInvalidIndex());
 	memset(chnstate, 0, sizeof(chnstate));
 	memset(miditracks, 0, sizeof(miditracks));
 	memset(midichstate, 0, sizeof(midichstate));
 	// Initializing Patterns
 	Order[0] = 0;
-	for (UINT ipat=0; ipat<MAX_PATTERNS; ipat++) PatternSize[ipat] = gnMidiPatternLen;
+	for (UINT ipat=0; ipat<Patterns.Size(); ipat++) Patterns[ipat].Resize(gnMidiPatternLen, false);
 	// Initializing Channels
 	for (UINT ics=0; ics<MAX_BASECHANNELS; ics++)
 	{
