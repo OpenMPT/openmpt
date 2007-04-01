@@ -8,7 +8,13 @@ const CTuning::STEPTYPE CTuningRTI::s_RatioTableSizeDefault(256);
 //CTuningRTi-statics
 const CTuning::SERIALIZATION_MARKER CTuningRTI::s_SerializationBeginMarker("CTRTI_B.");
 const CTuning::SERIALIZATION_MARKER CTuningRTI::s_SerializationEndMarker("CTRTI_E.");
-const CTuning::SERIALIZATION_VERSION CTuningRTI::s_SerializationVersion(2);
+const CTuning::SERIALIZATION_VERSION CTuningRTI::s_SerializationVersion(3);
+
+/*
+Version changes:
+	2->3: The type for the size_type in the serialisation changed
+		  from default(size_t, uint64) to unsigned STEPTYPE. (March 2007)
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -178,11 +184,12 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::SerializeBinary(ostream& outStrm,
 	if(CTuning::SerializeBinary(outStrm) == SERIALIZATION_FAILURE) return SERIALIZATION_FAILURE;
 	
 	//Main Ratios
-	if(VectorToBinaryStream(outStrm, m_RatioTable))
+	if(VectorToBinaryStream<RATIOTYPE, USTEPTYPE>(outStrm, m_RatioTable))
 		return SERIALIZATION_FAILURE;
 
+
 	//Fine ratios
-	if(VectorToBinaryStream(outStrm, m_RatioTableFine))
+	if(VectorToBinaryStream<RATIOTYPE, UFINESTEPTYPE>(outStrm, m_RatioTableFine))
 		return SERIALIZATION_FAILURE;
 	
 	//m_StepMin
@@ -235,7 +242,7 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::UnSerializeBinary(istream& inStrm
 	
 	//Version
 	inStrm.read(reinterpret_cast<char*>(&version), sizeof(version));
-	if(version != 1 && version != s_SerializationVersion)
+	if(version > s_SerializationVersion)
 		return SERIALIZATION_FAILURE;
 	
 	//Baseclass Unserialization
@@ -243,14 +250,31 @@ CTuning::SERIALIZATION_RETURN_TYPE CTuningRTI::UnSerializeBinary(istream& inStrm
 		return SERIALIZATION_FAILURE;
 
 	//Ratiotable
-	if(VectorFromBinaryStream(inStrm, m_RatioTable))
-		return SERIALIZATION_FAILURE;
+	if(version < 3)
+	{
+		if(VectorFromBinaryStream<RATIOTYPE, uint64>(inStrm, m_RatioTable))
+			return SERIALIZATION_FAILURE;
+	}
+	else //Version >= 3
+	{
+		if(VectorFromBinaryStream<RATIOTYPE, USTEPTYPE>(inStrm, m_RatioTable))
+			return SERIALIZATION_FAILURE;
+	}
+
 
 	//Ratiotable fine
 	if(version > 1)
 	{
-		if(VectorFromBinaryStream(inStrm, m_RatioTableFine))
-			return SERIALIZATION_FAILURE;
+		if(version < 3)
+		{
+			if(VectorFromBinaryStream<RATIOTYPE, uint64>(inStrm, m_RatioTableFine))
+				return SERIALIZATION_FAILURE;
+		}
+		else //Version >= 3
+		{
+			if(VectorFromBinaryStream<RATIOTYPE, UFINESTEPTYPE>(inStrm, m_RatioTableFine))
+				return SERIALIZATION_FAILURE;
+		}
 	}
 	
 

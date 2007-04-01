@@ -80,7 +80,11 @@ BOOL CCtrlGeneral::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
 	// Song Title
-	m_EditTitle.SetLimitText(31);
+	if(m_pSndFile)
+		m_EditTitle.SetLimitText(m_pSndFile->GetModNameLengthMax());
+	else
+		m_EditTitle.SetLimitText(31);
+
 // -> CODE#0016
 // -> DESC="default tempo update"
 //	m_SpinTempo.SetRange(32, 255);	// 255 bpm max
@@ -98,7 +102,6 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SliderSamplePreAmp.SetRange(0, MAX_SLIDER_SAMPLE_VOL);
 	
 
-	
 	// -! BEHAVIOUR_CHANGE#0016
 	m_ComboResampling.AddString("None");
 	m_ComboResampling.AddString("Linear");
@@ -299,14 +302,14 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 void CCtrlGeneral::OnTitleChanged()
 //---------------------------------
 {
-	CHAR s[80];
+	CHAR s[35];
 	if ((!m_pSndFile) || (!m_EditTitle.m_hWnd) || (!m_EditTitle.GetModify())) return;
 	memset(s, 0, sizeof(s));
 	m_EditTitle.GetWindowText(s, sizeof(s));
-	s[31] = 0;
+	s[25] = 0;
 	if (strcmp(m_pSndFile->m_szNames[0], s))
 	{
-		memcpy(m_pSndFile->m_szNames[0], s, 32);
+		memcpy(m_pSndFile->m_szNames[0], s, 26);
 		if (m_pModDoc)
 		{
 			m_EditTitle.SetModify(FALSE);
@@ -723,5 +726,3 @@ VOID CVuMeter::DrawVuMeter(HDC hdc)
 	SelectObject(hdc, oldpen);
 	m_nDisplayedVu = m_nVuMeter;
 }
-
-

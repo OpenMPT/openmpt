@@ -1619,6 +1619,9 @@ BOOL CSoundFile::ReadNote()
 				}
 				
 				if (m_pConfig->getTreatPanLikeBalance()) {
+					pChn->nNewLeftVol = (realvol * pan) >> 8;
+					pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
+				} else {
 					if (pan < 128) {
 						pChn->nNewLeftVol = (realvol * pan) >> 8;
 						pChn->nNewRightVol = (realvol * 128) >> 8;
@@ -1626,9 +1629,6 @@ BOOL CSoundFile::ReadNote()
 						pChn->nNewLeftVol = (realvol * 128) >> 8;
 						pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
 					}
-				} else {
-					pChn->nNewLeftVol = (realvol * pan) >> 8;
-					pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
 				}
 
 			} else {

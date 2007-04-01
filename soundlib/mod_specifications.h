@@ -18,7 +18,7 @@ struct CModSpecifications
 	UINT tempoMax;
 	UINT patternRowsMin;
 	UINT patternRowsMax;
-	UINT modNameLengthMax;
+	UINT modNameLengthMax;	//Meaning 'usable letters', possible null character is not included.
 	UINT samplesMax;
 	UINT instrumentsMax;
 };
@@ -50,31 +50,86 @@ const CModSpecifications MPTM_SPECS =
 	512,								//Max tempo
 	2,									//Min pattern rows
 	1024,								//Max pattern rows
-    100,								//Max mod name length
+    256,								//Max mod name length
 	4000,								//SamplesMax
 	256,								//instrumentMax
 };
 
 
 
-/*
-const CModSpecifications MOD_TYPE_MOD =
+
+const CModSpecifications MOD_SPECS =
 {
-	"mod",
+	//TODO: Set correct values.
+	"mod",								//File extension
+	64,									//Pattern max.
+	128,								//Order max.
+	4,									//Channel min
+	4,									//Channel max
+	32,									//Min tempo
+	256,								//Max tempo
+	64,									//Min pattern rows
+	64,									//Max pattern rows
+    25,									//Max mod name length
+	31,									//SamplesMax
+	0,									//instrumentMax
+};
+
+
+const CModSpecifications XM_SPECS =
+{
+	//TODO: Set correct values.
+	"xm",								//File extension
+	64,									//Pattern max.
+	128,								//Order max.
+	4,									//Channel min
+	64,									//Channel max
+	32,									//Min tempo
+	256,								//Max tempo
+	4,									//Min pattern rows
+	256,									//Max pattern rows
+    25,									//Max mod name length
+	31,									//SamplesMax
+	256,					//instrumentMax
 
 };
 
-const CModSpecifications MOD_TYPE_XM =
+const CModSpecifications S3M_SPECS =
 {
-	"xm",
-
+	//TODO: Set correct values.
+	"s3m",								//File extension
+	240,								//Pattern max.
+	256,								//Order max.
+	4,									//Channel min
+	32,									//Channel max
+	32,									//Min tempo
+	256,								//Max tempo
+	64,									//Min pattern rows
+	64,									//Max pattern rows
+    25,									//Max mod name length
+	31,									//SamplesMax
+	0,									//instrumentMax
 };
 
-const CModSpecifications MOD_TYPE_IT =
+const CModSpecifications IT_SPECS =
 {
-	"it",
+	//TODO: Set correct values.
+	"it",								//File extension
+	240,								//Pattern max.
+	256,								//Order max.
+	4,									//Channel min
+	64,									//Channel max
+	32,									//Min tempo
+	256,								//Max tempo
+	4,									//Min pattern rows
+	256,								//Max pattern rows
+    25,									//Max mod name length(in ittech.txt: "0000: ³'I'³'M'³'P'³'M'³ Song Name, max 26 characters, includes NULL   ³")
+	256,								//SamplesMax
+	256,					//instrumentMax
 };
-*/
+
+
+
 
 
 

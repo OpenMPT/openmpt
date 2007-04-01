@@ -3472,6 +3472,8 @@ void CViewPattern::SetSpacing(int n)
 	}
 }
 
+
+#ifdef TRADITIONAL_MODCOMMAND
 void CViewPattern::TempEnterFX(int c)
 //-----------------------------------
 {
@@ -3522,6 +3524,52 @@ void CViewPattern::TempEnterFX(int c)
 		}
 	}	// end if mainframe & moddoc exist
 }
+#else
+void CViewPattern::TempEnterFX(int e /*EFFECT_ID eID*/)
+//-----------------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
+
+	if(!pSndFile || !pMainFrm)
+		return;
+	
+	EFFECT_ID eID = e;
+	
+	const ROWINDEX r = m_nRow;
+	const CHANNELINDEX c = GetChanFromCursor(m_dwCursor);
+	const MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(r, c);
+	MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
+			
+	PrepareUndo(m_dwBeginSel, m_dwEndSel);
+
+	//Checking whether to use the param of previous effect.
+	if (eID)
+	{
+		if ((eID == m_cmdOld.GetEffect()) && (!p->GetEffectParam()) && (!p->GetEffect()))
+			pSndFile->Patterns[m_nPattern].SetModCommandEffectParam(r, c, m_cmdOld.GetEffectParam());
+		else 
+			m_cmdOld.SetEffectParam(0);
+
+		m_cmdOld.SetEffectByID(eID);
+	}
+	pSndFile->Patterns[m_nPattern].SetModCommandEffect(r, c, eID);
+
+	if (IsEditingEnabled_bmsg())
+	{
+		DWORD sel = (m_nRow << 16) | m_dwCursor;
+		SetCurSel(sel, sel);
+		sel &= ~7;
+		if(oldcmd != *p)
+		{
+			pModDoc->SetModified();
+			InvalidateArea(sel, sel+5);
+			UpdateIndicator();
+		}
+	}
+}
+#endif
 
 void CViewPattern::TempEnterFXparam(int v)
 //----------------------------------------
@@ -4792,4 +4840,6 @@ bool CViewPattern::IsEditingEnabled_bmsg()
 
 	return false;
 }
+
+
 

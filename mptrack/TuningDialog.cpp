@@ -1249,6 +1249,7 @@ void CTuningDialog::OnBnClickedButtonTuningcollectionSave()
 	}
 	else
 	{
+		MessageBox("Saving succesful.");
 		m_ModifiedTCs[m_pActiveTuningCollection] = false;
 	}
 }

@@ -113,8 +113,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 END_MESSAGE_MAP()
 
 // Static
-static gdwLastLowLatencyTime = 0;
-static gdwLastMixActiveTime = 0;
+static int gdwLastLowLatencyTime = 0;
+static int gdwLastMixActiveTime = 0;
 static DWORD gsdwTotalSamples = 0;
 static DWORD gdwPlayLatency = 0;
 
@@ -443,6 +443,7 @@ void CMainFrame::LoadIniSettings()
 }
 
 void CMainFrame::LoadRegistrySettings()
+//-------------------------------------
 {
 
 	HKEY key;
@@ -599,6 +600,16 @@ VOID CMainFrame::Initialize()
 //---------------------------
 {
 	CHAR s[256];
+
+	//Adding version number to the frame title
+	CString title = GetTitle();
+	#ifdef DEBUG
+		title += CString(" DEBUG");
+	#endif
+	title += CString(" ") + GetFullVersionString();
+	SetTitle(title);
+	OnUpdateFrameTitle(false);
+	
 
 	// Load Chords
 	theApp.LoadChords(Chords);

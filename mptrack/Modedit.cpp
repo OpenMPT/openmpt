@@ -520,10 +520,8 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 		{
 			if ((m[i].note) || (m[i].instr) || (m[i].volcmd) || (m[i].command)) goto NotEmpty;
 		}
-		BEGIN_CRITICAL();
 		m_SndFile.Patterns.Remove(ipat);
 		nPatRemoved++;
-		END_CRITICAL();
 	NotEmpty:
 		;
 	}
@@ -2053,4 +2051,5 @@ UINT CModDoc::DoUndo()
 	if (!PatternUndo[0].pbuffer) UpdateAllViews(NULL, HINT_UNDO);
 	return nPattern;
 }
+
 

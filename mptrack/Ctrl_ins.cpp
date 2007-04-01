@@ -1262,9 +1262,10 @@ OpenError:
 		if (penv)
 		{
 			CHAR szPath[_MAX_PATH], szNewPath[_MAX_PATH];
-			_splitpath(lpszFileName, szPath, szNewPath, szName, szExt);
+			_splitpath(lpszFileName, szNewPath, szPath, szName, szExt);
 			strcat(szNewPath, szPath);
 			strcpy(CMainFrame::m_szCurInsDir, szNewPath);
+	
 			if (!penv->name[0])
 			{
 				szName[31] = 0;

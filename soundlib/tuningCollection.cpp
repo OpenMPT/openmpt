@@ -5,7 +5,14 @@
 //Serializations statics:
 const CTuningCollection::SERIALIZATION_MARKER CTuningCollection::s_SerializationBeginMarker = 0x54435348; //ascii of TCSH(TuningCollectionSerialisationHeader) in hex.
 const CTuningCollection::SERIALIZATION_MARKER CTuningCollection::s_SerializationEndMarker = 0x54435346; //ascii of TCSF(TuningCollectionSerialisationFooter) in hex.
-const CTuningCollection::SERIALIZATION_MARKER CTuningCollection::s_SerializationVersion = 1;
+const CTuningCollection::SERIALIZATION_MARKER CTuningCollection::s_SerializationVersion = 2;
+
+/*
+Version history:
+	1->2: Sizetypes of string serialisation from size_t(uint64)
+		  to uint8. (March 2007)
+*/
+
 
 const CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SERIALIZATION_SUCCESS = false;
 const CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SERIALIZATION_FAILURE = true;
@@ -29,6 +36,7 @@ TODOS:
 CTuningCollection::CTuningCollection(const string& name) : m_Name(name)
 //------------------------------------
 {
+	if(m_Name.size() > GetNameLengthMax()) m_Name.resize(GetNameLengthMax());
 	m_EditMask.set();
 }
 
@@ -132,7 +140,7 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SerializeBinary(
 	outStrm.write(reinterpret_cast<const char*>(&s_SerializationVersion), sizeof(s_SerializationVersion));
 
 	//3. Name
-	if(StringToBinaryStream(outStrm, m_Name))
+	if(StringToBinaryStream<uint8>(outStrm, m_Name))
 		return SERIALIZATION_FAILURE;
 	
 	//4. Edit mask
@@ -202,11 +210,19 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::UnSerializeBinar
 
 	//2. Serialization version
 	inStrm.read(reinterpret_cast<char*>(&version), sizeof(version));
-	if(version != s_SerializationVersion) return SERIALIZATION_FAILURE;
+	if(version > s_SerializationVersion) return SERIALIZATION_FAILURE;
 
 	//3. Name
-	if(StringFromBinaryStream(inStrm, m_Name))
-		return SERIALIZATION_FAILURE;
+	if(version < 2)
+	{
+        if(StringFromBinaryStream<uint64>(inStrm, m_Name))
+			return SERIALIZATION_FAILURE;
+	}
+	else
+	{
+		if(StringFromBinaryStream<uint8>(inStrm, m_Name))
+			return SERIALIZATION_FAILURE;
+	}
 
 	//4. Editmask
 	__int16 em = 0;
