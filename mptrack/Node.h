@@ -20,7 +20,7 @@ public:
 	virtual CString GetLabel() = 0;
 	virtual HPEN GetBorderPen() = 0;
 
-	ConnectInput(int input, CNode sourceNode, int sourceNodeOutput);
+	int ConnectInput(int input, CNode sourceNode, int sourceNodeOutput);
 
 protected:
 	int x,y;

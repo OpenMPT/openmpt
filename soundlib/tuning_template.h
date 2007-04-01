@@ -68,7 +68,9 @@ TODO: Better return values(e.g. NOTHING_DONE, ERROR etc.)?
 */
 
 //Class defining tuning which is fundamentally based on discrete steps.
-template<class TSTEPTYPE = short int, class TRATIOTYPE = float, class TFINESTEPTYPE = TSTEPTYPE>
+template<class TSTEPTYPE = short int, class TUSTEPTYPE = unsigned short int,
+		 class TRATIOTYPE = float,
+		 class TFINESTEPTYPE = TSTEPTYPE, class TUFINESTEPTYPE = TUSTEPTYPE>
 class CTuningBase
 {
 	//STEPTYPE: Some type that has properties that of 'ordinary' signed and discrete figures.
@@ -81,8 +83,10 @@ class CTuningBase
 public:
 //BEING TYPEDEFS:
 	typedef TSTEPTYPE STEPTYPE;
+	typedef TUSTEPTYPE USTEPTYPE; //Unsigned steptype
 	typedef TRATIOTYPE RATIOTYPE;
 	typedef TFINESTEPTYPE FINESTEPTYPE;
+	typedef TUFINESTEPTYPE UFINESTEPTYPE; //Unsigned finesteptype
 
 	typedef std::exception TUNINGEXCEPTION;
 
@@ -103,6 +107,7 @@ public:
 
 	typedef std::string NOTESTR;
 	typedef std::map<STEPTYPE, NOTESTR> NOTENAMEMAP;
+	typedef USTEPTYPE SIZETYPE;
 	typedef typename NOTENAMEMAP::iterator NNM_ITER;
 	typedef typename NOTENAMEMAP::const_iterator NNM_CITER;
 
@@ -277,7 +282,8 @@ protected:
 	CTuningBase& operator=(const CTuningBase&);
 	CTuningBase(const CTuningBase&);
 	//When copying tunings, the name must not be exact copy
-	//since it is to be unique for every tuning.
+	//since it is to be unique for every tuning, or maybe some
+	//better identification could be introduced.
 
 	CTUNINGTYPE GetType() const {return m_TuningType;}
 
@@ -288,7 +294,7 @@ protected:
 //BEGIN PRIVATE METHODS
 private:
 	SERIALIZATION_RETURN_TYPE NotenameMapToBinary(ostream&) const;
-	SERIALIZATION_RETURN_TYPE NotenameMapFromBinary(istream&);
+	SERIALIZATION_RETURN_TYPE NotenameMapFromBinary(istream&, const SERIALIZATION_VERSION);
 
 	bool SetType(const CTUNINGTYPE& tt)
 	{
@@ -342,63 +348,64 @@ protected:
 
 
 //Specialising tuning for ompt.
-typedef short int MPT_TUNING_STEPTYPE;
-typedef float MPT_TUNING_RATIOTYPE;
-typedef MPT_TUNING_STEPTYPE MPT_TUNING_FINESTEPTYPE;
-
-typedef CTuningBase<MPT_TUNING_STEPTYPE, MPT_TUNING_RATIOTYPE, MPT_TUNING_FINESTEPTYPE> CTuning;
+typedef CTuningBase<int16, uint16, float32, int16, uint16> CTuning;
 
 const CTuning::SERIALIZATION_MARKER CTuning::s_SerializationBeginMarker("CT<sfs>B");
 const CTuning::SERIALIZATION_MARKER CTuning::s_SerializationEndMarker("CT<sfs>E");
 //<sfs> <-> Short Float Short
 
-template<class A, class B, class C>
-const CTuningBase<>::SERIALIZATION_MARKER CTuningBase<A, B, C>::s_SerializationBeginMarker("CTB<ABC>");
+template<class A, class B, class C, class D, class E>
+const CTuningBase<>::SERIALIZATION_MARKER CTuningBase<A, B, C, D, E>::s_SerializationBeginMarker("CTB<ABC>");
 
-template<class A, class B, class C>
-const CTuningBase<>::SERIALIZATION_MARKER CTuningBase<A, B, C>::s_SerializationEndMarker("CTB<ABC>");
+template<class A, class B, class C, class D, class E>
+const CTuningBase<>::SERIALIZATION_MARKER CTuningBase<A, B, C, D, E>::s_SerializationEndMarker("CTB<ABC>");
 
-template<class A, class B, class C>
-const CTuningBase<>::SERIALIZATION_VERSION CTuningBase<A, B, C>::s_SerializationVersion(3);
+template<class A, class B, class C, class D, class E>
+const CTuningBase<>::SERIALIZATION_VERSION CTuningBase<A, B, C, D, E>::s_SerializationVersion(4);
+/*
+Version history:
+	3->4: Changed sizetypes in serialisation from size_t(uint64) to
+			smaller types (uint8, USTEPTYPE) (March 2007)
+*/
 
-template<class A, class B, class C>
-const CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<A, B, C>::SERIALIZATION_SUCCESS = false;
+template<class A, class B, class C, class D, class E>
+const CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<A, B, C, D, E>::SERIALIZATION_SUCCESS = false;
 
-template<class A, class B, class C>
-const CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<A, B, C>::SERIALIZATION_FAILURE = true;
+template<class A, class B, class C, class D, class E>
+const CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<A, B, C, D, E>::SERIALIZATION_FAILURE = true;
 
-template<class A, class B, class C>
-const string CTuningBase<A, B, C>::s_FileExtension = ".tun";
+template<class A, class B, class C, class D, class E>
+const string CTuningBase<A, B, C, D, E>::s_FileExtension = ".tun";
 
-template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_MAINRATIOS = 0x1; //1b
-template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_NOTENAME = 0x2; //10b
-template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_TYPE = 0x4; //100b
-template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_NAME = 0x8; //1000b
-template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_FINETUNE = 0x10; //10000b
-template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_ALLOWALL = 0xFFFF; //All editing allowed.
-template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_EDITMASK = 0x8000; //Whether to allow modifications to editmask.
-template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_CONST = 0x8000;  //All editing except changing const status disable.
-template<class A, class B, class C>
-const CTuning::CEDITMASK CTuningBase<A, B, C>::EM_CONST_STRICT = 0; //All bits are zero.
+template<class A, class B, class C, class D, class E>
+const CTuning::CEDITMASK CTuningBase<A, B, C, D, E>::EM_MAINRATIOS = 0x1; //1b
+template<class A, class B, class C, class D, class E>
+const CTuning::CEDITMASK CTuningBase<A, B, C, D, E>::EM_NOTENAME = 0x2; //10b
+template<class A, class B, class C, class D, class E>
+const CTuning::CEDITMASK CTuningBase<A, B, C, D, E>::EM_TYPE = 0x4; //100b
+template<class A, class B, class C, class D, class E>
+const CTuning::CEDITMASK CTuningBase<A, B, C, D, E>::EM_NAME = 0x8; //1000b
+template<class A, class B, class C, class D, class E>
+const CTuning::CEDITMASK CTuningBase<A, B, C, D, E>::EM_FINETUNE = 0x10; //10000b
+template<class A, class B, class C, class D, class E>
+const CTuning::CEDITMASK CTuningBase<A, B, C, D, E>::EM_ALLOWALL = 0xFFFF; //All editing allowed.
+template<class A, class B, class C, class D, class E>
+const CTuning::CEDITMASK CTuningBase<A, B, C, D, E>::EM_EDITMASK = 0x8000; //Whether to allow modifications to editmask.
+template<class A, class B, class C, class D, class E>
+const CTuning::CEDITMASK CTuningBase<A, B, C, D, E>::EM_CONST = 0x8000;  //All editing except changing const status disable.
+template<class A, class B, class C, class D, class E>
+const CTuning::CEDITMASK CTuningBase<A, B, C, D, E>::EM_CONST_STRICT = 0; //All bits are zero.
 
 
-template<class A, class B, class C>
-const CTuning::CTUNINGTYPE CTuningBase<A, B, C>::TT_GENERAL = 0; //0...00b
-template<class A, class B, class C>
-const CTuning::CTUNINGTYPE CTuningBase<A, B, C>::TT_RATIOPERIODIC = 1; //0...10b
-template<class A, class B, class C>
-const CTuning::CTUNINGTYPE CTuningBase<A, B, C>::TT_TET = 3; //0...11b
+template<class A, class B, class C, class D, class E>
+const CTuning::CTUNINGTYPE CTuningBase<A, B, C, D, E>::TT_GENERAL = 0; //0...00b
+template<class A, class B, class C, class D, class E>
+const CTuning::CTUNINGTYPE CTuningBase<A, B, C, D, E>::TT_RATIOPERIODIC = 1; //0...10b
+template<class A, class B, class C, class D, class E>
+const CTuning::CTUNINGTYPE CTuningBase<A, B, C, D, E>::TT_TET = 3; //0...11b
 
-template<class A, class B, class C>
-CTuningBase<A,B,C>& CTuningBase<A,B,C>::operator =(const CTuningBase& pt)
+template<class A, class B, class C, class D, class E>
+CTuningBase<A,B,C,D,E>& CTuningBase<A,B,C,D,E>::operator =(const CTuningBase& pt)
 //-----------------------------------------------------------------------
 {
 	if(!MayEdit(EM_ALLOWALL))
@@ -437,15 +444,15 @@ CTuningBase<A,B,C>& CTuningBase<A,B,C>::operator =(const CTuningBase& pt)
 	return *this;
 }
 
-template<class A, class B, class C>
-CTuningBase<A,B,C>::CTuningBase(const CTuningBase& pt)
+template<class A, class B, class C, class D, class E>
+CTuningBase<A,B,C,D,E>::CTuningBase(const CTuningBase& pt)
 //-----------------------------------------------------------------------
 {
 	*this = pt;
 }
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::SetRatio(const STEPTYPE& s, const RATIOTYPE& r)
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::SetRatio(const STEPTYPE& s, const RATIOTYPE& r)
 //-----------------------------------------------------------------
 {
 	if(MayEdit(EM_MAINRATIOS))
@@ -461,8 +468,8 @@ bool CTuningBase<A,B,C>::SetRatio(const STEPTYPE& s, const RATIOTYPE& r)
 	
 }
 
-template<class A, class B, class C>
-string CTuningBase<A,B,C>::GetTuningTypeStr(const CTUNINGTYPE& tt)
+template<class A, class B, class C, class D, class E>
+string CTuningBase<A,B,C,D,E>::GetTuningTypeStr(const CTUNINGTYPE& tt)
 //----------------------------------------------------------------
 {
 	if(tt == TT_GENERAL)
@@ -476,8 +483,8 @@ string CTuningBase<A,B,C>::GetTuningTypeStr(const CTUNINGTYPE& tt)
 
 
 
-template<class A, class B, class C>
-CTuningBase<>::NOTESTR CTuningBase<A,B,C>::GetNoteName(const STEPTYPE& x) const
+template<class A, class B, class C, class D, class E>
+CTuningBase<>::NOTESTR CTuningBase<A,B,C,D,E>::GetNoteName(const STEPTYPE& x) const
 //-----------------------------------------------------------------------
 {
 	NNM_CITER i = m_NoteNameMap.find(x);
@@ -488,8 +495,8 @@ CTuningBase<>::NOTESTR CTuningBase<A,B,C>::GetNoteName(const STEPTYPE& x) const
 }
 
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::DoesTypeInclude(const CTUNINGTYPE& type) const
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::DoesTypeInclude(const CTUNINGTYPE& type) const
 //-----------------------------------------------------------------------------
 {
 	if(type == TT_GENERAL)
@@ -508,8 +515,8 @@ bool CTuningBase<A,B,C>::DoesTypeInclude(const CTUNINGTYPE& type) const
 		return false;
 }
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::SetNoteName(const STEPTYPE& n, const string& str)
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::SetNoteName(const STEPTYPE& n, const string& str)
 //-----------------------------------------------------------------------
 {
 	if(MayEdit(EM_NOTENAME))
@@ -520,8 +527,8 @@ bool CTuningBase<A,B,C>::SetNoteName(const STEPTYPE& n, const string& str)
 	return true;
 }
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::ClearNoteName(const STEPTYPE& n, const bool eraseAll)
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::ClearNoteName(const STEPTYPE& n, const bool eraseAll)
 //-------------------------------------------------------
 {
 	if(MayEdit(EM_NOTENAME))
@@ -545,8 +552,8 @@ bool CTuningBase<A,B,C>::ClearNoteName(const STEPTYPE& n, const bool eraseAll)
 }
 
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::Multiply(const RATIOTYPE& r)
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::Multiply(const RATIOTYPE& r)
 //---------------------------------------------------
 {
 	if(r <= 0 || !MayEdit(EM_MAINRATIOS))
@@ -563,8 +570,8 @@ bool CTuningBase<A,B,C>::Multiply(const RATIOTYPE& r)
 	return false;
 }
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::CreateRatioPeriodic(const STEPTYPE& s, const RATIOTYPE& r)
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::CreateRatioPeriodic(const STEPTYPE& s, const RATIOTYPE& r)
 //-------------------------------------------------------------
 {
 	if(s < 1 || r <= 0)
@@ -577,8 +584,8 @@ bool CTuningBase<A,B,C>::CreateRatioPeriodic(const STEPTYPE& s, const RATIOTYPE&
 	return CreateRatioPeriodic(v, r);
 }
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::CreateRatioPeriodic(const vector<RATIOTYPE>& v, const RATIOTYPE& r)
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::CreateRatioPeriodic(const vector<RATIOTYPE>& v, const RATIOTYPE& r)
 //------------------------------------------------------------------------------------------
 {
 	if(MayEdit(EM_MAINRATIOS) &&
@@ -599,8 +606,8 @@ bool CTuningBase<A,B,C>::CreateRatioPeriodic(const vector<RATIOTYPE>& v, const R
 }
 
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::CreateTET(const STEPTYPE& s, const RATIOTYPE& r)
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::CreateTET(const STEPTYPE& s, const RATIOTYPE& r)
 //-------------------------------------------------------------------
 {
 	if(MayEdit(EM_MAINRATIOS) &&
@@ -621,8 +628,8 @@ bool CTuningBase<A,B,C>::CreateTET(const STEPTYPE& s, const RATIOTYPE& r)
 }
 
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::ChangePeriod(const STEPTYPE& s)
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::ChangePeriod(const STEPTYPE& s)
 //---------------------------------------------------
 {
 	if(!MayEdit(EM_MAINRATIOS) || s < 1)
@@ -638,8 +645,8 @@ bool CTuningBase<A,B,C>::ChangePeriod(const STEPTYPE& s)
 }	
 
 
-template<class A, class B, class C>
-bool CTuningBase<A,B,C>::ChangePeriodRatio(const RATIOTYPE& r)
+template<class A, class B, class C, class D, class E>
+bool CTuningBase<A,B,C,D,E>::ChangePeriodRatio(const RATIOTYPE& r)
 //---------------------------------------------------
 {
 	if(!MayEdit(EM_MAINRATIOS) || r <= 0)
@@ -655,8 +662,8 @@ bool CTuningBase<A,B,C>::ChangePeriodRatio(const RATIOTYPE& r)
 }	
 
 
-template<class TSTEPTYPE, class TRATIOTYPE, class TFINESTEPTYPE>
-CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFINESTEPTYPE>::SerializeBinary(ostream& outStrm, const int mode) const
+template<class A, class B, class C, class D, class E>
+CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<A, B, C, D, E>::SerializeBinary(ostream& outStrm, const int mode) const
 //------------------------------------------------------------------------------------------------------------------------------
 {
 	//Writing the tuning name here.
@@ -667,7 +674,7 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFIN
 	outStrm.write(reinterpret_cast<const char*>(&s_SerializationVersion), sizeof(s_SerializationVersion));
 
 	//Tuning name
-	if(StringToBinaryStream(outStrm, m_TuningName)) return SERIALIZATION_FAILURE;
+	if(StringToBinaryStream<uint8>(outStrm, m_TuningName)) return SERIALIZATION_FAILURE;
 
 	//Const mask
 	const __int16 cm = static_cast<__int16>(m_EditMask.to_ulong());
@@ -693,8 +700,8 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFIN
 }
 
 
-template<class TSTEPTYPE, class TRATIOTYPE, class TFINESTEPTYPE>
-CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFINESTEPTYPE>::UnSerializeBinary(istream& inStrm, const int mode) 
+template<class A, class B, class C, class D, class E>
+CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<A,B,C,D,E>::UnSerializeBinary(istream& inStrm, const int mode) 
 //----------------------------------------------------------------------------------------------------------------------------
 {
 	if(!inStrm.good() || !MayEdit(EM_ALLOWALL))
@@ -711,12 +718,20 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFIN
 	}
 
 	inStrm.read(reinterpret_cast<char*>(&version), sizeof(version));
-	if(version != s_SerializationVersion) 
+	if(version > s_SerializationVersion) 
 		return SERIALIZATION_FAILURE;
 
 	//Tuning name
-	if(StringFromBinaryStream(inStrm, m_TuningName))
-		return SERIALIZATION_FAILURE;
+	if(version < 4)
+	{
+		if(StringFromBinaryStream<uint64>(inStrm, m_TuningName))
+			return SERIALIZATION_FAILURE;	
+	}
+	else
+	{
+		if(StringFromBinaryStream<uint8>(inStrm, m_TuningName))
+			return SERIALIZATION_FAILURE;
+	}
 
 	//Const mask
 	__int16 em = 0;
@@ -729,7 +744,7 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFIN
 	m_TuningType = tt;
 
 	//Notemap
-	if(NotenameMapFromBinary(inStrm))
+	if(NotenameMapFromBinary(inStrm, version))
 		return SERIALIZATION_FAILURE;
 
 	if(!(mode & NO_SERIALIZATION_MARKERS))
@@ -743,23 +758,25 @@ CTuningBase<>::SERIALIZATION_RETURN_TYPE CTuningBase<TSTEPTYPE, TRATIOTYPE, TFIN
 }
 
 
-template<class A, class B, class C>
+template<class A, class B, class C, class D, class E>
 CTuningBase<>::SERIALIZATION_RETURN_TYPE
-CTuningBase<A,B,C>::NotenameMapToBinary(ostream& outStrm) const
+CTuningBase<A,B,C,D,E>::NotenameMapToBinary(ostream& outStrm) const
 //-----------------------------------------------------------------------------------------------
 {
 	if(!outStrm.good())
 		return SERIALIZATION_FAILURE;
+	if(m_NoteNameMap.size() > (std::numeric_limits<SIZETYPE>::max)())
+		return SERIALIZATION_FAILURE;
 
 	//Size.
-	const size_t size = m_NoteNameMap.size();
+	const SIZETYPE size = static_cast<SIZETYPE>(m_NoteNameMap.size());
 	outStrm.write(reinterpret_cast<const char*>(&size), sizeof(size));
 
 	for(NNM_CITER i = m_NoteNameMap.begin(); i != m_NoteNameMap.end(); i++)
 	{
 		const STEPTYPE n = i->first;
 		outStrm.write(reinterpret_cast<const char*>(&n), sizeof(n));
-		if(StringToBinaryStream(outStrm, i->second))
+		if(StringToBinaryStream<uint8>(outStrm, i->second))
 			return SERIALIZATION_FAILURE;
 	}
 
@@ -769,21 +786,25 @@ CTuningBase<A,B,C>::NotenameMapToBinary(ostream& outStrm) const
 		return SERIALIZATION_FAILURE;
 }
 
-template<class A, class B, class C>
+template<class A, class B, class C, class D, class E>
 CTuningBase<>::SERIALIZATION_RETURN_TYPE
-CTuningBase<A,B,C>::NotenameMapFromBinary(istream& inStrm)
+CTuningBase<A,B,C,D,E>::NotenameMapFromBinary(istream& inStrm, const SERIALIZATION_VERSION version)
 //--------------------------------------------------
 {
 	if(!inStrm.good())
 		return SERIALIZATION_FAILURE;
 
 	//Size
-	size_t size;
-	inStrm.read(reinterpret_cast<char*>(&size), sizeof(size));
-
-	//Todo: Handle this better.
-	if(size > 1000)
-		return SERIALIZATION_FAILURE;
+	SIZETYPE size;
+	if(version < 4)
+	{
+		uint64 s = 0;
+        inStrm.read(reinterpret_cast<char*>(&s), sizeof(s));
+		size = static_cast<SIZETYPE>(s);
+	}
+	else 
+		inStrm.read(reinterpret_cast<char*>(&size), sizeof(size));
+	
 
 
 	for(size_t i = 0; i<size; i++)
@@ -791,8 +812,16 @@ CTuningBase<A,B,C>::NotenameMapFromBinary(istream& inStrm)
 		STEPTYPE n;
 		string str;
 		inStrm.read(reinterpret_cast<char*>(&n), sizeof(n));
-		if(StringFromBinaryStream(inStrm, str))
-			return SERIALIZATION_FAILURE;
+		if(version < 4)
+		{
+			if(StringFromBinaryStream<uint64>(inStrm, str))
+				return SERIALIZATION_FAILURE;	
+		}
+		else
+		{
+			if(StringFromBinaryStream<uint8>(inStrm, str))
+				return SERIALIZATION_FAILURE;	
+		}
 		m_NoteNameMap[n] = str;
 	}
 

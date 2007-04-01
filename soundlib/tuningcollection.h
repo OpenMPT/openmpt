@@ -91,6 +91,9 @@ public:
 
 	string GetVersionString() const {return Stringify(s_SerializationVersion);}
 
+	//Stringsize-data is saved as byte so maxlength is 256.
+	size_t GetNameLengthMax() const {return 256;}
+
 	//Serialization/unserialisation
 	bool SerializeBinary(ostream&) const;
 	bool SerializeBinary() const;

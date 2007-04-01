@@ -785,8 +785,8 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 	CComboBox *combo;
 	CDialog::OnInitDialog();
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	if ((m_pModDoc) && (m_nPattern < pSndFile->Patterns.Size()) && (combo))
+	CSoundFile *pSndFile = (m_pModDoc) ? m_pModDoc->GetSoundFile() : NULL;
+	if ((pSndFile) && (m_nPattern < pSndFile->Patterns.Size()) && (combo))
 	{
 		CHAR s[256];
 		UINT nrows = pSndFile->PatternSize[m_nPattern];
@@ -794,17 +794,14 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
 //		for (UINT irow=32; irow<=256; irow++)
-		for (UINT irow=32; irow<=MAX_PATTERN_ROWS; irow++)
+//		for (UINT irow=32; irow<=MAX_PATTERN_ROWS; irow++)
+		for (UINT irow=pSndFile->GetRowMin(); irow<=pSndFile->GetRowMax(); irow++)
 // -! BEHAVIOUR_CHANGE#0008
 		{
 			wsprintf(s, "%d", irow);
 			combo->AddString(s);
 		}
-		if (nrows < 32)
-		{
-			wsprintf(s, "%d", nrows);
-			combo->SetWindowText(s);
-		} else combo->SetCurSel(nrows-32);
+		combo->SetCurSel(nrows-pSndFile->GetRowMin());
 		wsprintf(s, "Pattern #%d:\x0d\x0a %d rows (%dK)",
 			m_nPattern,
 			pSndFile->PatternSize[m_nPattern],
@@ -1272,36 +1269,75 @@ void CPageEditVolume::OnHScroll(UINT, UINT, CScrollBar *)
 BEGIN_MESSAGE_MAP(CPageEditEffect, CPageEditCommand)
 	ON_WM_HSCROLL()
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnCommandChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,	OnCommand2Changed)
 END_MESSAGE_MAP()
 
 
 void CPageEditEffect::UpdateDialog()
 //----------------------------------
 {
-	CHAR s[128];
-	CComboBox *combo;
-	CSoundFile *pSndFile;
-	
-	if ((!m_pModDoc) || (!m_bInitialized)) return;
-	pSndFile = m_pModDoc->GetSoundFile();
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
-	{
-		UINT numfx = m_pModDoc->GetNumEffects();
-		UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
-		combo->ResetContent();
-		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-		if (!m_nCommand) combo->SetCurSel(0);
-		for (UINT i=0; i<numfx; i++)
+	#ifdef TRADITIONAL_MODCOMMAND
+		CHAR s[128];
+		CComboBox *combo;
+		CSoundFile *pSndFile;
+		
+		if ((!m_pModDoc) || (!m_bInitialized)) return;
+		pSndFile = m_pModDoc->GetSoundFile();
+		if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 		{
-			if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+			UINT numfx = m_pModDoc->GetNumEffects();
+			UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
+			combo->ResetContent();
+			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
+			if (!m_nCommand) combo->SetCurSel(0);
+			for (UINT i=0; i<numfx; i++)
 			{
-				int k = combo->AddString(s);
-				combo->SetItemData(k, i);
-				if (i == fxndx) combo->SetCurSel(k);
+				if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+				{
+					int k = combo->AddString(s);
+					combo->SetItemData(k, i);
+					if (i == fxndx) combo->SetCurSel(k);
+				}
 			}
 		}
-	}
-	UpdateRange(FALSE);
+		UpdateRange(FALSE);
+	#else //Modcommand testing
+		CHAR s[128];
+		CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
+		CComboBox *combo2 = (CComboBox *)GetDlgItem(IDC_COMBO2);
+		CSoundFile *pSndFile;
+		
+		if ((!m_pModDoc) || (!m_bInitialized)) return;
+		pSndFile = m_pModDoc->GetSoundFile();
+		if (combo && combo2)
+		{
+			combo->ResetContent();
+			combo2->ResetContent();
+			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
+			combo2->SetItemData(combo2->AddString(" None"), (DWORD)-1);
+
+            UINT numfx = m_pModDoc->GetNumEffects();
+			const UINT fxndx1 = m_pModDoc->GetIndexFromEffect(m_pModcommand->GetEffect(0), m_pModcommand->GetEffectParam(0));
+			const UINT fxndx2 = m_pModDoc->GetIndexFromEffect(m_pModcommand->GetEffect(1), m_pModcommand->GetEffectParam(1));
+
+			if(!m_pModcommand->GetEffect(0)) combo->SetCurSel(0);
+			if(!m_pModcommand->GetEffect(1)) combo2->SetCurSel(0);
+			
+			for (UINT i=0; i<numfx; i++)
+			{
+				if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+				{
+					int k = combo->AddString(s);
+					combo->SetItemData(k, i);
+					int k2 = combo2->AddString(s);
+					combo2->SetItemData(k2, i);
+					if (i == fxndx1) combo->SetCurSel(k);
+					if (i == fxndx2) combo2->SetCurSel(k2);
+				}
+			}
+		}
+		UpdateRange(FALSE);
+	#endif
 }
 
 

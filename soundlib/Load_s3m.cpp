@@ -143,13 +143,13 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT) const
 	case CMD_GLOBALVOLSLIDE:	command = 'W'; break;
 	case CMD_PANNING8:			
 		command = 'X';
-		if ((bIT) && (m_nType != MOD_TYPE_IT) && (m_nType != MOD_TYPE_XM))
+		if ((bIT) && (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) && (m_nType != MOD_TYPE_XM))
 		{
 			if (param == 0xA4) { command = 'S'; param = 0x91; }	else
 			if (param <= 0x80) { param <<= 1; if (param > 255) param = 255; } else
 			command = param = 0;
 		} else
-		if ((!bIT) && ((m_nType == MOD_TYPE_IT) || (m_nType == MOD_TYPE_XM)))
+		if ((!bIT) && ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) || (m_nType == MOD_TYPE_XM)))
 		{
 			param >>= 1;
 		}

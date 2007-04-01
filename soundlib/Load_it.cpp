@@ -3252,12 +3252,13 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) header.patnum--;
 
 	//VERSION
-	//header.cwtv = 0x888;	// We don't use these version info fields any more.
-	header.cwtv = 0x88B;	// But now they are in use again :)
+	header.cwtv = 0x88C;	// Used in OMPT-hack versioning.
 	header.cmwt = 0x888;	// Might come up as "Impulse Tracker 8" file in XMPlay. :)
 
 	/*
 	Version history:
+	0x88B -> 0x88C: Changed type in which tuning number is printed
+					to file: size_t -> uint16.
 	0x88A -> 0x88B: Changed order-to-pattern-index table type from BYTE-array to vector<UINT>.
 	*/
 
@@ -3836,7 +3837,7 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 
 		//...and write the map with tuning names replacing
 		//the addresses.
-		const size_t tuningMapSize = tNameToShort_Map.size();
+		const uint16 tuningMapSize = tNameToShort_Map.size();
 		fout.write(reinterpret_cast<const char*>(&tuningMapSize), sizeof(tuningMapSize));
 		if(tuningMapSize == 0)
 		{
@@ -3847,9 +3848,9 @@ BOOL CSoundFile::SaveMPT(LPCSTR lpszFileName, UINT)
 			for(TNTS_MAP_ITER iter = tNameToShort_Map.begin(); iter != tNameToShort_Map.end(); iter++)
 			{
 				if(iter->first)
-					StringToBinaryStream(fout, iter->first->GetName());
+					StringToBinaryStream<uint8>(fout, iter->first->GetName());
 				else //Case: Using original IT tuning.
-					StringToBinaryStream(fout, "->MPT_ORIGINAL_IT<-");
+					StringToBinaryStream<uint8>(fout, "->MPT_ORIGINAL_IT<-");
 
 				fout.write(reinterpret_cast<const char*>(&(iter->second)), sizeof(iter->second));
 			}
@@ -4469,7 +4470,9 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 
 	//START - mpt specific:
 	//Using member cwtv on pifh as the version number.
-	if(pifh->cwtv > 0x889)
+	const uint16 version = pifh->cwtv;
+	try{
+	if(version > 0x889)
 	{
 		const char* const cpcMPTStart = reinterpret_cast<const char*>(lpStream + mptStartPos);
 
@@ -4483,21 +4486,23 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 		//std::streambuf which can be used in the istream
 		//methods. So this was new to me, and checking this
 		//might be a good idea.
-		CCharStreamBufFrom cbs;
+		CCharBufferStreamIn cbs;
 		cbs.pubsetbuf((char*)cpcMPTStart, dwMemLength-mptStartPos);
 		istream fin(&cbs);
 
 		if(m_TuningsTuneSpecific.UnSerializeBinary(fin))
 		{
-			::MessageBox(NULL, "Error occured - loading failed while trying to load tune specific tunings.", 0, MB_OK);
-			return FALSE;
+			throw(exception("Error occured - loading failed while trying to load tune specific tunings."));
 		}
 		
 		//2. Reading tuning id <-> tuning name map.
 		typedef map<WORD, string> MAP;
 		typedef MAP::iterator MAP_ITER;
 		MAP shortToTNameMap;
-		ReadTuningMap(fin, shortToTNameMap);
+		if(version < 0x88C)
+			ReadTuningMap<uint64, uint64>(fin, shortToTNameMap);
+		else
+			ReadTuningMap<uint16, uint8>(fin, shortToTNameMap);
 
 		//Read & set tunings for instruments
 		list<string> notFoundTunings;
@@ -4556,6 +4561,12 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 		//End read&set instrument tunings
 
 	} //version condition(MPT)
+	} //try block ends
+	catch(exception& e)
+	{
+		::MessageBox(0, e.what(), "", MB_ICONERROR);
+		return TRUE; //Return value to be revised.
+	}
 	
 
 

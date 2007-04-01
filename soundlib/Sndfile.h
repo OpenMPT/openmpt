@@ -604,6 +604,10 @@ typedef struct _MODCHANNEL
 	//<----
 } MODCHANNEL;
 
+#define CHNRESET_BASIC	1
+#define CHNRESET_MOST	3
+#define CHNRESET_TOTAL	255
+
 
 typedef struct _MODCHANNELSETTINGS
 {
@@ -802,6 +806,8 @@ public: //Get details(TODO?: Move detail asking to a 'controller')
 	CHANNELINDEX GetNumChannelMax() const;
 	CHANNELINDEX GetNumChannelMin() const;
 
+	size_t GetModNameLengthMax() {return 25;}
+
 public: //Misc
 	void ChangeModTypeTo(const int& newType);
 	//
@@ -933,9 +939,11 @@ public:
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
 	BOOL Destroy();
 	UINT GetType() const { return m_nType; }
+
+	//Return the number of channels in the pattern. In 1.17.02.45
+	//it returned the number of channels with volume != 0
 	UINT GetNumChannels() const {return m_nChannels;}
-		//Return the number of channels in the pattern. In 1.17.02.45
-		//it returned the number of channels with volume != 0
+		
 		
 	BOOL SetMasterVolume(UINT vol, BOOL bAdjustAGC=FALSE);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
@@ -978,6 +986,17 @@ public:
 	CHANNELINDEX ReArrangeChannels(const std::vector<CHANNELINDEX>& fromToArray);
 	bool MoveChannel(UINT chn_from, UINT chn_to);
 	bool SetChannelSettingsToDefault(UINT nch);
+
+	
+	//Sets default channels settings from MODCHANNELSETTINGS to current
+	//channel settings. Flag can be used to tell whether to completely
+	//reset channels, not only a few settings(for maintaining old behavior).
+	void ResetChannelSettings(CHANNELINDEX chn, BYTE resetStyle);
+
+	//For all channels.
+	void ResetChannelSettings(BYTE resetStyle);
+
+
 	// Module Loaders
 	BOOL ReadXM(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadS3M(LPCBYTE lpStream, DWORD dwMemLength);

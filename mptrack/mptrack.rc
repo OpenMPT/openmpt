@@ -1269,6 +1269,12 @@ BEGIN
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,104,15,114,12
     LTEXT           "Effect Type:",IDC_STATIC,0,4,55,8
+    LTEXT           "Value:",IDC_TEXT2,183,1,35,8,NOT WS_VISIBLE
+    COMBOBOX        IDC_COMBO2,78,0,16,83,CBS_DROPDOWNLIST | CBS_SORT | NOT 
+                    WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | NOT WS_VISIBLE | WS_TABSTOP,134,0,43,12
+    LTEXT           "Effect Type:",IDC_STATIC,54,1,19,8,NOT WS_VISIBLE
 END
 
 IDD_SAMPLE_AMPLIFY DIALOGEX 0, 0, 175, 66

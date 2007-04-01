@@ -5,11 +5,47 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include "misc_util.h"
+
+
 
 using namespace std;
 
 const size_t MAX_TUNING_NUM_DEFAULT = 1000;
-bool ReadTuningMap(istream&, map<WORD, string>&, const size_t maxNum = MAX_TUNING_NUM_DEFAULT);
+
+template<class TUNNUMTYPE, class STRSIZETYPE>
+bool ReadTuningMap(istream& fin, map<WORD, string>& shortToTNameMap, const size_t maxNum = MAX_TUNING_NUM_DEFAULT)
+//----------------------------------------------------------------------------------------
+{
+	//In first versions: SIZETYPE1 == SIZETYPE2 == size_t == uint64.
+	typedef map<WORD, string> MAP;
+	typedef MAP::iterator MAP_ITER;
+	TUNNUMTYPE numTuning = 0;
+	fin.read(reinterpret_cast<char*>(&numTuning), sizeof(numTuning));
+	if(numTuning > maxNum)
+	{
+		fin.setstate(ios::failbit);
+		return true;
+	}
+
+	for(size_t i = 0; i<numTuning; i++)
+	{
+		string temp;
+		uint16 ui;
+		if(StringFromBinaryStream<STRSIZETYPE>(fin, temp))
+		{
+			fin.setstate(ios::failbit);
+			return true;
+		}
+
+		fin.read(reinterpret_cast<char*>(&ui), sizeof(ui));
+		shortToTNameMap[ui] = temp;
+	}
+	if(fin.good())
+		return false;
+	else
+		return true;
+}
 
 
 enum //Serialization Message
@@ -19,7 +55,7 @@ enum //Serialization Message
 };
 
 //==============================================
-class CCharStreamBufFrom : public std::streambuf
+class CCharBufferStreamIn : public std::streambuf
 //==============================================
 {
 private:
@@ -29,7 +65,7 @@ private:
 		return rv;
 	}
 public:
-	CCharStreamBufFrom() {}
+	CCharBufferStreamIn() {}
 protected:
 	
 	streambuf* setbuf(char_type* buffer, std::streamsize count)

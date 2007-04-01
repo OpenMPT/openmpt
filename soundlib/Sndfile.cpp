@@ -349,7 +349,7 @@ GET_MPTHEADER_sized_member(	nResampling			, UINT			, R...							)
 GET_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
 GET_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
 GET_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
-GET_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL		,					)
+GET_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL							)
 GET_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
 GET_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
 GET_MPTHEADER_sized_member(	nVolEnvReleaseNode	, BYTE			, VERN							)
@@ -1033,51 +1033,13 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 //---------------------------------------
 {
 	UINT i, nPattern;
+	BYTE resetMask = (!nPos) ? CHNRESET_TOTAL : CHNRESET_MOST;
 
 	for (i=0; i<MAX_CHANNELS; i++)
-	{
-		Chn[i].nNote = Chn[i].nNewNote = Chn[i].nNewIns = 0;
-		Chn[i].pInstrument = NULL;
-		Chn[i].pHeader = NULL;
-		Chn[i].nPortamentoDest = 0;
-		Chn[i].nCommand = 0;
-		Chn[i].nPatternLoopCount = 0;
-		Chn[i].nPatternLoop = 0;
-		Chn[i].nFadeOutVol = 0;
-		Chn[i].dwFlags |= CHN_KEYOFF|CHN_NOTEFADE;
-		Chn[i].nTremorCount = 0;
-	}
+		ResetChannelSettings(i, resetMask);
+	
 	if (!nPos)
 	{
-		for (i=0; i<MAX_CHANNELS; i++)
-		{
-			Chn[i].nPeriod = 0;
-			Chn[i].nPos = Chn[i].nLength = 0;
-			Chn[i].nLoopStart = 0;
-			Chn[i].nLoopEnd = 0;
-			Chn[i].nROfs = Chn[i].nLOfs = 0;
-			Chn[i].pSample = NULL;
-			Chn[i].pInstrument = NULL;
-			Chn[i].pHeader = NULL;
-			Chn[i].nCutOff = 0x7F;
-			Chn[i].nResonance = 0;
-			Chn[i].nFilterMode = 0;
-			Chn[i].nLeftVol = Chn[i].nRightVol = 0;
-			Chn[i].nNewLeftVol = Chn[i].nNewRightVol = 0;
-			Chn[i].nLeftRamp = Chn[i].nRightRamp = 0;
-			Chn[i].nVolume = 256;
-			if (i < MAX_BASECHANNELS)
-			{
-				Chn[i].dwFlags = ChnSettings[i].dwFlags;
-				Chn[i].nPan = ChnSettings[i].nPan;
-				Chn[i].nGlobalVol = ChnSettings[i].nVolume;
-			} else
-			{
-				Chn[i].dwFlags = 0;
-				Chn[i].nPan = 128;
-				Chn[i].nGlobalVol = 64;
-			}
-		}
 		m_nGlobalVolume = m_nDefaultGlobalVolume;
 		m_nMusicSpeed = m_nDefaultSpeed;
 		m_nMusicTempo = m_nDefaultTempo;
@@ -1382,10 +1344,11 @@ bool CSoundFile::SetChannelSettingsToDefault(UINT nch)
                                        
 	if(nch > MAX_BASECHANNELS) return true;
 
+	ResetChannelSettings(nch, CHNRESET_TOTAL);
+
 	ChnSettings[nch].nPan = 128;
 	ChnSettings[nch].nVolume = 64;
 	ChnSettings[nch].dwFlags = 0;
-	ChnSettings[nch].dwFlags &= ~CHN_MUTE; //Unmuting
 	ChnSettings[nch].nMixPlugin = 0;
 	ChnSettings[nch].szName[0] = 0;
 
@@ -1399,6 +1362,72 @@ bool CSoundFile::SetChannelSettingsToDefault(UINT nch)
 
 	
 	return false;
+}
+
+void CSoundFile::ResetChannelSettings(CHANNELINDEX i, BYTE resetMask)
+//-------------------------------------------------------
+{
+	//Relabs.Hack
+	if(i >= MAX_CHANNELS) return;
+	
+	if(resetMask & CHNRESET_BASIC)
+	{
+		if(i < MAX_BASECHANNELS)
+		{
+			//Chn[i].dwFlags = ChnSettings[i].dwFlags;
+			Chn[i].nPan = ChnSettings[i].nPan;
+			Chn[i].nGlobalVol = ChnSettings[i].nVolume;
+		}
+		else
+		{
+			Chn[i].dwFlags = 0;
+			Chn[i].nPan = 128;
+			Chn[i].nGlobalVol = 64;
+		}
+		
+	}
+	if(resetMask == CHNRESET_BASIC) return;
+
+	if(resetMask & CHNRESET_MOST)
+	{
+		Chn[i].nNote = Chn[i].nNewNote = Chn[i].nNewIns = 0;
+		Chn[i].pInstrument = NULL;
+		Chn[i].pHeader = NULL;
+		Chn[i].nPortamentoDest = 0;
+		Chn[i].nCommand = 0;
+		Chn[i].nPatternLoopCount = 0;
+		Chn[i].nPatternLoop = 0;
+		Chn[i].nFadeOutVol = 0;
+		Chn[i].dwFlags |= CHN_KEYOFF|CHN_NOTEFADE;
+		Chn[i].nTremorCount = 0;
+	}
+	if(resetMask == CHNRESET_MOST) return;
+
+	if(resetMask & CHNRESET_TOTAL)
+	{
+		Chn[i].nPeriod = 0;
+		Chn[i].nPos = Chn[i].nLength = 0;
+		Chn[i].nLoopStart = 0;
+		Chn[i].nLoopEnd = 0;
+		Chn[i].nROfs = Chn[i].nLOfs = 0;
+		Chn[i].pSample = NULL;
+		Chn[i].pInstrument = NULL;
+		Chn[i].pHeader = NULL;
+		Chn[i].nCutOff = 0x7F;
+		Chn[i].nResonance = 0;
+		Chn[i].nFilterMode = 0;
+		Chn[i].nLeftVol = Chn[i].nRightVol = 0;
+		Chn[i].nNewLeftVol = Chn[i].nNewRightVol = 0;
+		Chn[i].nLeftRamp = Chn[i].nRightRamp = 0;
+		Chn[i].nVolume = 256;
+	}
+}
+
+void CSoundFile::ResetChannelSettings(BYTE resetMask)
+//-------------------------------------
+{
+	for(CHANNELINDEX i = 0; i<GetNumChannels(); i++)
+		ResetChannelSettings(i, resetMask);
 }
 
 
@@ -2799,8 +2828,46 @@ string CSoundFile::GetNoteName(const CTuning::STEPTYPE& note, const int inst) co
 WORD CSoundFile::GetTempoMin() const {return 32;}
 WORD CSoundFile::GetTempoMax() const {return 512;}
 
-ROWINDEX CSoundFile::GetRowMax() const {return MAX_PATTERN_ROWS;}
-ROWINDEX CSoundFile::GetRowMin() const {return 2;}
+ROWINDEX CSoundFile::GetRowMax() const
+//------------------------------------
+{
+	switch(m_nType)
+	{
+		case MOD_TYPE_MPT:
+			return MPTM_SPECS.patternRowsMax;
+		case MOD_TYPE_MOD:
+			return MOD_SPECS.patternRowsMax;
+		case MOD_TYPE_XM:
+			return XM_SPECS.patternRowsMax;
+		case MOD_TYPE_IT:
+			return IT_SPECS.patternRowsMax;
+		case MOD_TYPE_S3M:
+			return S3M_SPECS.patternRowsMax;
+		default:
+			return MAX_PATTERN_ROWS;
+	}
+}
+
+ROWINDEX CSoundFile::GetRowMin() const
+//------------------------------------
+{
+	switch(m_nType)
+	{
+		case MOD_TYPE_MPT:
+			return MPTM_SPECS.patternRowsMin;
+		case MOD_TYPE_MOD:
+			return MOD_SPECS.patternRowsMin;
+		case MOD_TYPE_XM:
+			return XM_SPECS.patternRowsMin;
+		case MOD_TYPE_IT:
+			return IT_SPECS.patternRowsMin;
+		case MOD_TYPE_S3M:
+			return S3M_SPECS.patternRowsMin;
+		default:
+			return 2;
+	}
+}
+
 
 CHANNELINDEX CSoundFile::GetNumChannelMax() const
 //-----------------------------------
@@ -2833,3 +2900,30 @@ void CSoundFile::ChangeModTypeTo(const int& newType)
 	replace(Order.begin(), Order.end(), oldIgnoreIndex, Patterns.GetIgnoreIndex());
 }
 
+#ifndef TRADITIONAL_MODCOMMAND
+void CSoundFile::OnSetEffect(MODCOMMAND& mc, EFFECT_ID eID)
+//---------------------------------------------------------
+{
+	// Check for MOD/XM Speed/Tempo command
+	if(
+		(GetModType() & (MOD_TYPE_MOD|MOD_TYPE_XM)) &&
+		(eID == CMD_SPEED || eID == CMD_TEMPO)
+		)
+	{
+		UINT maxspd = (GetModType() == MOD_TYPE_XM) ? 0x1F : 0x20;
+		mc.SetEffectByID((mc.GetEffectParam() <= maxspd) ? CMD_SPEED : CMD_TEMPO);
+	}
+	else
+	{
+		mc.SetEffectByID(eID);
+	}
+}
+
+
+void CSoundFile::OnSetEffectParam(MODCOMMAND& mc, EFFECT_PARAM eParam)
+//---------------------------------------------------------
+{
+	mc.SetEffectParam(eParam);
+}
+
+#endif

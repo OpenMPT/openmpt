@@ -1042,6 +1042,7 @@ BOOL CModDoc::IsChannelNoFx(UINT nChn) const
 }
 
 BOOL CModDoc::NoFxChannel(UINT nChn, BOOL bNoFx, BOOL updateMix)
+//--------------------------------------------------------------
 {
 	if (nChn >= m_SndFile.m_nChannels) return FALSE;
 	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
@@ -2791,6 +2792,7 @@ int CModDoc::FindMacroForParam(long param) {
 
 
 void CModDoc::OnPatternRestart()
+//------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
@@ -2811,6 +2813,12 @@ void CModDoc::OnPatternRestart()
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 		
 		BEGIN_CRITICAL();
+
+		m_SndFile.SetCurrentPos(0);
+		//Relabs.note: Dirty hack to try to make replay pattern to be 
+		//more like 'play song from start' - a little clean up for 
+		//these playback calls would be nice (March 2007).
+
 		// Cut instruments/samples
 		for (UINT i=0; i<MAX_CHANNELS; i++)
 		{
@@ -2842,6 +2850,7 @@ void CModDoc::OnPatternRestart()
 }
 
 void CModDoc::OnPatternPlay()
+//---------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
@@ -2890,6 +2899,7 @@ void CModDoc::OnPatternPlay()
 }
 
 void CModDoc::OnPatternPlayNoLoop()
+//---------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CChildFrame *pChildFrm = (CChildFrame *) GetChildFrame();
