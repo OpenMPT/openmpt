@@ -767,8 +767,6 @@ typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); 
 #include "../mptrack/patternContainer.h"
 #include "../mptrack/ordertopatterntable.h"
 
-typedef CPatternContainer::PATTERNINDEX PATTERNINDEX;
-
 #include "../mptrack/playbackEventer.h"
 
 
@@ -789,31 +787,35 @@ private:
 
 const BYTE IT_STANDARD = 0;
 
+
 //==============
 class CSoundFile
 //==============
 {
 public: //Typedefs
-	typedef CPatternContainer::PATTERNINDEX PATTERNINDEX;
 	typedef UINT MODTYPE;
 public: //Get details(TODO?: Move detail asking to a 'controller')
-	WORD GetTempoMin() const;
-	WORD GetTempoMax() const;
+	TEMPO GetTempoMin() const {return m_pModSpecs->tempoMin;}
+	TEMPO GetTempoMax() const {return m_pModSpecs->tempoMax;}
 
-	ROWINDEX GetRowMax() const;
-	ROWINDEX GetRowMin() const;
+	//Using special hack for OMPTs modifed ITs and XMs.
+	ROWINDEX GetRowMax() const {return (GetType() == MOD_TYPE_IT || GetType() == MOD_TYPE_XM) ? 1024 : min(MAX_PATTERN_ROWS, m_pModSpecs->patternRowsMax);}
 
-	CHANNELINDEX GetNumChannelMax() const;
-	CHANNELINDEX GetNumChannelMin() const;
+	ROWINDEX GetRowMin() const {return m_pModSpecs->patternRowsMin;}
+	CHANNELINDEX GetNumChannelMax() const {return min(MAX_BASECHANNELS, m_pModSpecs->channelsMax);}
+	CHANNELINDEX GetNumChannelMin() const {return m_pModSpecs->channelsMin;}
+	uint16 GetModNameLengthMax() {return (GetModType() == MOD_TYPE_MPT) ? 25 : m_pModSpecs->modNameLengthMax;}
 
-	size_t GetModNameLengthMax() {return 25;}
+	//Return true if title was changed.
+	bool SetTitle(const char*, size_t strSize);
 
 public: //Misc
 	void ChangeModTypeTo(const int& newType);
-	//
-
+	
 	MODTYPE GetModType() const {return m_nType;}
-	//
+	
+	//Return value in seconds.
+	double GetPlaybackTimeAt(ORDERINDEX, ROWINDEX);
 
 	#ifndef TRADITIONAL_MODCOMMAND
 		void OnSetEffect(MODCOMMAND& mc, EFFECT_ID);
@@ -853,11 +855,15 @@ private: //Effect functions
 	void PortamentoMPT(MODCHANNEL*, int);
 	void PortamentoFineMPT(MODCHANNEL*, int);
 
+private: //Misc private methods.
+	void SetModSpecsPointer();
+
 private: //'Controllers'
 	CPlaybackEventer m_PlaybackEventer;
 
 private: //Misc data
 	bitset<8> m_ModFlags;
+	const CModSpecifications* m_pModSpecs;
 
 
 
@@ -910,7 +916,7 @@ public:	// for Editing
 	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS]; // Channels settings
 	CPatternContainer Patterns;						//Patterns
 	CPatternSizesMimic PatternSize;					// Mimics old PatternsSize-array(is read-only).
-	COrderToPatternTable Order;						//Order[x] gives the pattern index at order x.
+	COrderToPatternTable Order;						// Order[x] gives the index of the pattern located at order x.
 	MODINSTRUMENT Ins[MAX_SAMPLES];					// Instruments
 	INSTRUMENTHEADER *Headers[MAX_INSTRUMENTS];		// Instrument Headers
 	INSTRUMENTHEADER m_defaultInstrument;			// Currently only used to get default values for extented properties. 
@@ -974,8 +980,18 @@ public:
 	CString GetPatternViewInstrumentName(UINT nInstr, bool returnEmptyInsteadOfNoName = false) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
-	DWORD GetLength(BOOL bAdjust, BOOL bTotal=FALSE);
-	DWORD GetSongTime() { return GetLength(FALSE, TRUE); }
+    
+	//Get modlength in various cases: total length, length to 
+	//specific order&row etc. Return value is in seconds.
+	//NOTE: Also seems to be used for some 'simulate playback'-purposes (Relabs, April 2007)
+	double GetLength(BOOL bAdjust, BOOL bTotal=FALSE);
+private:
+	double GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal=FALSE, ORDERINDEX ord = ORDERINDEX_MAX, ROWINDEX row = ROWINDEX_MAX);
+
+public:
+	//Returns song length in seconds.
+	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(FALSE, TRUE)+1.0 : GetLength(FALSE, TRUE)+0.5); }
+
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
 	BOOL IsPaused() const {	return (m_dwSongFlags & SONG_PAUSED) ? TRUE : FALSE; }
@@ -992,7 +1008,6 @@ public:
 	//channel settings. Flag can be used to tell whether to completely
 	//reset channels, not only a few settings(for maintaining old behavior).
 	void ResetChannelSettings(CHANNELINDEX chn, BYTE resetStyle);
-
 	//For all channels.
 	void ResetChannelSettings(BYTE resetStyle);
 

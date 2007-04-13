@@ -71,7 +71,14 @@ void CSoundFile::GenerateSamplePosMap() {
 }
 */
 
-DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
+double CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
+//-------------------------------------------
+{
+	bool dummy = false;
+	return GetLength(dummy, bAdjust, bTotal);
+}
+
+double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORDERINDEX endOrder, ROWINDEX endRow)
 //----------------------------------------------------
 {
 // -> CODE#0022
@@ -109,6 +116,12 @@ DWORD CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 		UINT nSpeedCount = 0;
 		nRow = nNextRow;
 		nCurrentPattern = nNextPattern;
+		if(nCurrentPattern == endOrder && nRow == endRow)
+		{
+			targetReached = true;
+			goto EndMod;
+		}
+
 		// Check if pattern is valid
 		nPattern = Order[nCurrentPattern];
 		bool positionJumpOnThisRow=false;
@@ -365,6 +378,10 @@ EndMod:
 			}
 		}
 	}
+
+	return dwElapsedTime / 1000.0;
+
+	/*
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
 //	return (UINT)((dwElapsedTime+500.0) / 1000.0);
@@ -375,6 +392,7 @@ EndMod:
 		return (UINT)((dwElapsedTime + 500.0) / 1000.0);
 	}
 // -! NEW_FEATURE#0022
+	*/
 }
 
 
@@ -442,6 +460,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		}
 		if (psmp->uFlags & CHN_PANNING) pChn->nPan = psmp->nPan;
 	}
+
 	// Reset envelopes
 	if (bResetEnv)
 	{
@@ -2611,6 +2630,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 
 //rewbs.volOffset: moved offset code to own method as it will be used in several places now
 void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
+//---------------------------------------------------------------
 {
 
 	MODCHANNEL *pChn = &Chn[nChn];
@@ -3338,5 +3358,6 @@ void CSoundFile::PortamentoFineMPT(MODCHANNEL* pChn, int param)
 
 	pChn->m_CalculateFreq = true;
 }
+
 
 

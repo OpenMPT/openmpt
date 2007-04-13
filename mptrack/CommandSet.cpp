@@ -2268,6 +2268,11 @@ void CCommandSet::SetupCommands()
 	commands[kcSoloChnOnPatTransition].isDummy = false;
 	commands[kcSoloChnOnPatTransition].Message = "Solo channel on pattern transition";
 
+	commands[kcTimeAtRow].UID = 1780;
+	commands[kcTimeAtRow].isHidden = false;
+	commands[kcTimeAtRow].isDummy = false;
+	commands[kcTimeAtRow].Message = "Show playback time at current row";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

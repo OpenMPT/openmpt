@@ -8,8 +8,6 @@ using std::vector;
 
 class CPatternContainer;
 
-typedef size_t ROWINDEX;
-typedef size_t CHANNELINDEX;
 
 //============
 class CPattern

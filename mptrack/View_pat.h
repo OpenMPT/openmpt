@@ -291,6 +291,7 @@ protected:
 	afx_msg void OnClearSelectionFromMenu();
 	afx_msg void OnSelectInstrument(UINT nid);
 	afx_msg void OnRunScript();
+	afx_msg void OnShowTimeAtRow();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -305,6 +306,7 @@ private:
 	bool BuildRecordCtxMenu(HMENU hMenu, UINT nChn, CModDoc* pModDoc);
 	bool BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nChn, CSoundFile* pSndFile);
 	bool BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildMiscCtxMenu(HMENU hMenu, CInputHandler* ih);
 	bool BuildSelectionCtxMenu(HMENU hMenu, CInputHandler* ih);
 	bool BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler* ih);
 	bool BuildNoteInterpolationCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);

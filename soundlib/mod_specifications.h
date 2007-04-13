@@ -7,20 +7,20 @@ struct CModSpecifications
 {
 	//NOTE: If changing order, update all initializations below.
 	char fileExtension[10];
-	UINT patternsMax;
-	UINT ordersMax;
-	UINT channelsMin; 
-	UINT channelsMax;
+	PATTERNINDEX patternsMax;
+	ORDERINDEX ordersMax;
+	CHANNELINDEX channelsMin; 
+	CHANNELINDEX channelsMax;
 	//NOTE: The two above refer to the user editable pattern channels,
 	//not to the internal sound channels. Maybe there should be a separate
 	//setting for those(comment by: Relabs, January 2007).
-	UINT tempoMin;
-	UINT tempoMax;
-	UINT patternRowsMin;
-	UINT patternRowsMax;
-	UINT modNameLengthMax;	//Meaning 'usable letters', possible null character is not included.
-	UINT samplesMax;
-	UINT instrumentsMax;
+	TEMPO tempoMin;
+	TEMPO tempoMax;
+	ROWINDEX patternRowsMin;
+	ROWINDEX patternRowsMax;
+	uint16 modNameLengthMax;	//Meaning 'usable letters', possible null character is not included.
+	SAMPLEINDEX samplesMax;
+	INSTRUMENTINDEX instrumentsMax;
 };
 
 enum {
@@ -48,7 +48,7 @@ const CModSpecifications MPTM_SPECS =
 	256,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo
-	2,									//Min pattern rows
+	1,									//Min pattern rows
 	1024,								//Max pattern rows
     256,								//Max mod name length
 	4000,								//SamplesMax
@@ -70,7 +70,7 @@ const CModSpecifications MOD_SPECS =
 	256,								//Max tempo
 	64,									//Min pattern rows
 	64,									//Max pattern rows
-    25,									//Max mod name length
+    20,									//Max mod name length
 	31,									//SamplesMax
 	0,									//instrumentMax
 };
@@ -87,10 +87,10 @@ const CModSpecifications XM_SPECS =
 	32,									//Min tempo
 	256,								//Max tempo
 	4,									//Min pattern rows
-	256,									//Max pattern rows
-    25,									//Max mod name length
+	256,								//Max pattern rows
+    20,									//Max mod name length
 	31,									//SamplesMax
-	256,					//instrumentMax
+	256,								//instrumentMax
 
 };
 
@@ -106,7 +106,7 @@ const CModSpecifications S3M_SPECS =
 	256,								//Max tempo
 	64,									//Min pattern rows
 	64,									//Max pattern rows
-    25,									//Max mod name length
+    27,									//Max mod name length
 	31,									//SamplesMax
 	0,									//instrumentMax
 };
@@ -125,7 +125,7 @@ const CModSpecifications IT_SPECS =
 	256,								//Max pattern rows
     25,									//Max mod name length(in ittech.txt: "0000: ³'I'³'M'³'P'³'M'³ Song Name, max 26 characters, includes NULL   ³")
 	256,								//SamplesMax
-	256,					//instrumentMax
+	256,								//instrumentMax
 };
 
 

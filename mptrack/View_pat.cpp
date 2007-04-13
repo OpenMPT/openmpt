@@ -104,9 +104,11 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_CURSORPASTE,					OnCursorPaste)
 	ON_COMMAND(ID_PATTERN_AMPLIFY,				OnPatternAmplify)
 	ON_COMMAND(ID_CLEAR_SELECTION,				OnClearSelectionFromMenu)
+	ON_COMMAND(ID_SHOWTIMEATROW,				OnShowTimeAtRow)
 	ON_COMMAND_RANGE(ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT+MAX_INSTRUMENTS, OnSelectInstrument)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,			OnUpdateUndo)
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnSelectPlugin) //rewbs.patPlugName
+
 
 	//}}AFX_MSG_MAP
 	ON_WM_INITMENU()
@@ -1151,7 +1153,7 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 			BuildPluginCtxMenu(hMenu, nChn, pSndFile);
 		}
 		
-		//------ Header Menu ---------- :
+		//------ Channel Header Menu ---------- :
 		else if (pt.y <= m_szHeader.cy){
 			if (ih->ShiftPressed()) {
 				//Don't bring up menu if shift is pressed, else we won't get button up msg.
@@ -1183,7 +1185,10 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildGrowShrinkCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			if(BuildMiscCtxMenu(hMenu, ih))
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			BuildRowInsDelCtxMenu(hMenu, ih);
+					
 		}
 
 		ClientToScreen(&pt);
@@ -3154,6 +3159,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: TogglePendingMute((m_dwCursor&0xFFFF)>>3); return wParam;
 		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
+		case kcTimeAtRow:					OnShowTimeAtRow(); return wParam;
 		case kcSoloChnOnPatTransition:		PendingSoloChn(GetCurrentChannel()); return wParam;
 		case kcTransposeUp:					OnTransposeUp(); return wParam;
 		case kcTransposeDown:				OnTransposeDown(); return wParam;
@@ -4442,6 +4448,16 @@ bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih)
 	return true;
 }
 
+bool CViewPattern::BuildMiscCtxMenu(HMENU hMenu, CInputHandler* ih)
+//-----------------------------------------------------------------
+{
+	if (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE) return false;
+
+	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, "Show row play time\t" + ih->GetKeyTextFromCommand(kcTimeAtRow));
+	return true;
+
+}
+
 bool CViewPattern::BuildSelectionCtxMenu(HMENU hMenu, CInputHandler* ih)
 //----------------------------------------------------------------------
 {
@@ -4839,6 +4855,34 @@ bool CViewPattern::IsEditingEnabled_bmsg()
 	::DestroyMenu(hMenu);
 
 	return false;
+}
+
+
+void CViewPattern::OnShowTimeAtRow()
+//----------------------------------
+{
+	CModDoc* pModDoc = GetDocument();
+	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : 0;
+	if(!pSndFile) return;
+
+	CString msg;
+	ORDERINDEX currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+	if(pSndFile->Order[currentOrder] == m_nPattern)
+	{
+		double t = pSndFile->GetPlaybackTimeAt(currentOrder, m_nRow);
+		if(t < 0)
+			msg.Format("Unable to determine the time. Possible cause: No order %d, row %d found from play sequence", currentOrder, m_nRow);
+		else
+		{
+			const uint32 minutes = static_cast<uint32>(t/60);
+			const float seconds = t - minutes*60;
+			msg.Format("Estimate for playback time at order %d(pattern %d), row %d: %d minute(s) %.2f seconds", currentOrder, m_nPattern, m_nRow, minutes, seconds);
+		}
+	}
+	else
+		msg.Format("Unable to determine the time: pattern at current order(=%d) does not correspond to pattern at pattern view(=pattern %d).", currentOrder, m_nPattern);
+	
+	MessageBox(msg);	
 }
 
 

@@ -82,6 +82,7 @@ protected:
 	afx_msg void OnReverbChanged();
 	afx_msg void OnSurroundChanged();
 	afx_msg void OnEqualizerChanged();
+	afx_msg void OnEnSetfocusEditSongtitle();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
