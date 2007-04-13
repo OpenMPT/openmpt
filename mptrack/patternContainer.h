@@ -18,7 +18,6 @@ class CPatternContainer
 //BEGIN: TYPEDEFS
 public:
 	typedef vector<MODPATTERN> PATTERNVECTOR;
-	typedef UINT PATTERNINDEX;
 //END: TYPEDEFS
 
 

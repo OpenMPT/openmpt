@@ -13,7 +13,7 @@
 #include "CreditStatic.h"
 #include "hyperEdit.h"
 #include "bladedll.h"
-#include "commctrl.h";
+#include "commctrl.h"
 
 // rewbs.memLeak
 #define CRTDBG_MAP_ALLOC
@@ -1382,7 +1382,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", buildDateTime.c_str());
 	SetDlgItemText(IDC_EDIT2, s);
-	SetDlgItemText(IDC_EDIT3, CMainFrame::GetFullVersionString());
+	SetDlgItemText(IDC_EDIT3, CString("Open Modplug Tracker, version ") + CMainFrame::GetFullVersionString());
 
 	m_heContact.SetWindowText(
 "Contact:\r\n\
@@ -1398,7 +1398,7 @@ http://lpchip.com/modplug/viewtopic.php?t=18");
 		"|"
 		"Development:|"
 		"Robin Fernandes:  modplug@soal.org (2004-2006)|"
-		"Relabsoluness:  lk52916@mesta.net (2005-2006)|"
+		"relabsoluness@users.sourceforge.net (2005-2006)|"
 		"Eric Chavanon:  contact@ericus.org (2004-2005)|"
 		"Trevor Nunes:  modplug@plastikskouser.com (2004)|"
 		"Olivier Lapicque:  olivier@modplug.com (1997-2003)|"

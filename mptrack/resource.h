@@ -969,6 +969,7 @@
 #define ID_MOVETUNING                   36025
 #define ID_COPYTUNING                   36026
 #define ID_REMOVETUNINGCOLLECTION       36027
+#define ID_SHOWTIMEATROW				36028
 #define ID_SELECTINST                   36100
 #define ID_NETLINK_MPTFR                37001
 #define ID_PLUG_RECORDAUTOMATION        37003

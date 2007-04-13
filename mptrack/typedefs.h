@@ -1,6 +1,8 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+#include <limits>
+
 #ifdef WIN32
 	typedef __int8 int8;
 	typedef __int16 int16;
@@ -13,7 +15,18 @@
 	typedef size_t uint64;
 
 	typedef float float32;
+#endif //End WIN32 specific.
 
-#endif
+typedef uint32 ROWINDEX;
+typedef uint16 CHANNELINDEX;
+typedef uint16 ORDERINDEX;
+typedef uint16 PATTERNINDEX;
+typedef uint16 TEMPO;
+typedef uint16 SAMPLEINDEX;
+typedef uint16 INSTRUMENTINDEX;
+
+const ORDERINDEX ORDERINDEX_MAX = (std::numeric_limits<ORDERINDEX>::max)();
+const ROWINDEX ROWINDEX_MAX = (std::numeric_limits<ROWINDEX>::max)();
+
 
 #endif

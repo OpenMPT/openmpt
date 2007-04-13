@@ -250,6 +250,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	if(id != 0x2e697470) return FALSE;	// .itp
+	m_nType = MOD_TYPE_IT;
 	streamPos += sizeof(DWORD);
 
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
@@ -264,9 +265,10 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// name string
-	if (streamPos+len<=dwMemLength && len<=MAX_SAMPLES*32) {
-		memcpy(&m_szNames[0],lpStream+streamPos,len);
+	if (streamPos+len<=dwMemLength && len<=sizeof(m_szNames[0])) {
+		memcpy(m_szNames[0],lpStream+streamPos,len);
 		streamPos += len;
+		m_szNames[0][sizeof(m_szNames[0])-1] = '\0';
 	}
 
 // Song comments
@@ -654,7 +656,8 @@ mpts:
 	}
 // Leave
 
-	m_nType = MOD_TYPE_IT;
+	//m_nType = MOD_TYPE_IT; Relabs.note: Moved to the beginning of loading(April 2007)
+
 	m_nMaxPeriod = 0xF000;
 	m_nMinPeriod = 8;
 
@@ -1215,6 +1218,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
+//-------------------------------------------------
 {
 // Check song type
 

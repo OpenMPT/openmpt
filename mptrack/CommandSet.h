@@ -220,7 +220,8 @@ enum CommandID
 	kcShowMacroConfig,
 	kcChangeLoopStatus,
 	kcShowEditMenu,
-	kcEndPatternEditMisc=kcShowEditMenu,
+	kcTimeAtRow,
+	kcEndPatternEditMisc=kcTimeAtRow,
 
 	kcChannelMute,
 	kcChannelSolo,

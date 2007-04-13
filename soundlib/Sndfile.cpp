@@ -377,7 +377,12 @@ CTuningCollection CSoundFile::s_TuningsSharedStandard("Standard tunings");
 CTuningCollection CSoundFile::s_TuningsSharedLocal("Local Tunings");
 
 
-CSoundFile::CSoundFile() : m_TuningsTuneSpecific("Tune specific tunings"), PatternSize(*this), Patterns(*this), Order(*this), m_PlaybackEventer(*this)
+CSoundFile::CSoundFile() :
+	m_TuningsTuneSpecific("Tune specific tunings"),
+	PatternSize(*this), Patterns(*this),
+	Order(*this),
+	m_PlaybackEventer(*this),
+	m_pModSpecs(&IT_SPECS)
 //----------------------
 {
 	m_nType = MOD_TYPE_NONE;
@@ -690,6 +695,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	if (m_nType)
 	{
+		SetModSpecsPointer();
 		return TRUE;
 	}
 
@@ -1531,37 +1537,37 @@ bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
 			CMainFrame::GetMainFrame()->MessageBox(str , "MoveChannel(...)", MB_OK | MB_ICONINFORMATION);
 			return true;
     }
-     std::vector<UINT> newOrder;
-     //First creating new order identical to current order...
-     for(UINT i = 0; i<m_nChannels; i++)
-     {
-              newOrder.push_back(i);
-     }
-     //...and then add the move channel effect.
-     if(chnFrom < chnTo)
-     {
-                UINT temp = newOrder[chnFrom];
-                for(UINT i = chnFrom; i<chnTo; i++)
-                {
-                         newOrder[i] = newOrder[i+1];
-                }
-                newOrder[chnTo] = temp;
-     }
-     else //case chnFrom > chnTo(can't be equal, since it has been examined earlier.)
-     {
-          UINT temp = newOrder[chnFrom];
-		  for(UINT i = chnFrom; i>=chnTo+1; i--)
-          {
-                   newOrder[i] = newOrder[i-1];
-          }
-          newOrder[chnTo] = temp;
+	std::vector<CHANNELINDEX> newOrder;
+	//First creating new order identical to current order...
+	for(UINT i = 0; i<m_nChannels; i++)
+	{
+		newOrder.push_back(i);
+	}
+	//...and then add the move channel effect.
+	if(chnFrom < chnTo)
+	{
+		CHANNELINDEX temp = newOrder[chnFrom];
+		for(UINT i = chnFrom; i<chnTo; i++)
+		{
+			newOrder[i] = newOrder[i+1];
+		}
+		newOrder[chnTo] = temp;
+	}
+	else //case chnFrom > chnTo(can't be equal, since it has been examined earlier.)
+	{
+		CHANNELINDEX temp = newOrder[chnFrom];
+		for(UINT i = chnFrom; i>=chnTo+1; i--)
+		{
+			newOrder[i] = newOrder[i-1];
+		}
+		newOrder[chnTo] = temp;
      }
 
-      if(newOrder.size() != ReArrangeChannels(newOrder))
-      {
-		  CMainFrame::GetMainFrame()->MessageBox("BUG: Channel number changed in MoveChannel()" , "", MB_OK | MB_ICONINFORMATION);
-      }
-	  return false;
+	if(newOrder.size() != ReArrangeChannels(newOrder))
+	{
+		CMainFrame::GetMainFrame()->MessageBox("BUG: Channel number changed in MoveChannel()" , "", MB_OK | MB_ICONINFORMATION);
+	}
+	return false;
 }
 
 
@@ -2825,66 +2831,29 @@ string CSoundFile::GetNoteName(const CTuning::STEPTYPE& note, const int inst) co
 		return string(szNoteNames[abs(note-1)%12]) + Stringify((note-1)/12);
 }
 
-WORD CSoundFile::GetTempoMin() const {return 32;}
-WORD CSoundFile::GetTempoMax() const {return 512;}
 
-ROWINDEX CSoundFile::GetRowMax() const
-//------------------------------------
-{
-	switch(m_nType)
-	{
-		case MOD_TYPE_MPT:
-			return MPTM_SPECS.patternRowsMax;
-		case MOD_TYPE_MOD:
-			return MOD_SPECS.patternRowsMax;
-		case MOD_TYPE_XM:
-			return XM_SPECS.patternRowsMax;
-		case MOD_TYPE_IT:
-			return IT_SPECS.patternRowsMax;
-		case MOD_TYPE_S3M:
-			return S3M_SPECS.patternRowsMax;
-		default:
-			return MAX_PATTERN_ROWS;
-	}
-}
-
-ROWINDEX CSoundFile::GetRowMin() const
-//------------------------------------
-{
-	switch(m_nType)
-	{
-		case MOD_TYPE_MPT:
-			return MPTM_SPECS.patternRowsMin;
-		case MOD_TYPE_MOD:
-			return MOD_SPECS.patternRowsMin;
-		case MOD_TYPE_XM:
-			return XM_SPECS.patternRowsMin;
-		case MOD_TYPE_IT:
-			return IT_SPECS.patternRowsMin;
-		case MOD_TYPE_S3M:
-			return S3M_SPECS.patternRowsMin;
-		default:
-			return 2;
-	}
-}
-
-
-CHANNELINDEX CSoundFile::GetNumChannelMax() const
+void CSoundFile::SetModSpecsPointer()
 //-----------------------------------
 {
-	if(m_nType == MOD_TYPE_MPT) return MPTM_SPECS.channelsMax;
-	if(m_nType == MOD_TYPE_IT) return max_chans_IT;
-	if(m_nType == MOD_TYPE_XM) return max_chans_XM;
-	if(m_nType == MOD_TYPE_MOD) return max_chans_MOD;
-	if(m_nType == MOD_TYPE_S3M) return max_chans_S3M;
-	return 4;
-}
-
-CHANNELINDEX CSoundFile::GetNumChannelMin() const
-//-----------------------------------
-{
-	if(m_nType == MOD_TYPE_MPT) return MPTM_SPECS.channelsMin;
-	else return 4;
+	switch(GetModType())
+	{
+		case MOD_TYPE_MPT:
+			m_pModSpecs = &MPTM_SPECS;
+			break;
+		case MOD_TYPE_IT:
+			m_pModSpecs = &IT_SPECS;
+			break;
+		case MOD_TYPE_XM:
+			m_pModSpecs = &XM_SPECS;
+			break;
+		case MOD_TYPE_S3M:
+			m_pModSpecs = &S3M_SPECS;
+			break;
+		case MOD_TYPE_MOD:
+		default:
+			m_pModSpecs = &MOD_SPECS;
+			break;
+	}
 }
 
 void CSoundFile::ChangeModTypeTo(const int& newType)
@@ -2893,11 +2862,33 @@ void CSoundFile::ChangeModTypeTo(const int& newType)
 	const UINT oldInvalidIndex = Patterns.GetInvalidIndex();
 	const UINT oldIgnoreIndex = Patterns.GetIgnoreIndex();
 	m_nType = newType;
+	SetModSpecsPointer();
 
 	m_ModFlags.reset();
 
 	replace(Order.begin(), Order.end(), oldInvalidIndex, Patterns.GetInvalidIndex());
 	replace(Order.begin(), Order.end(), oldIgnoreIndex, Patterns.GetIgnoreIndex());
+}
+
+bool CSoundFile::SetTitle(const char* titleCandidate, size_t strSize)
+//-------------------------------------------------------------------
+{
+	if(strcmp(m_szNames[0], titleCandidate))
+	{
+		memset(m_szNames[0], 0, sizeof(m_szNames[0]));
+		memcpy(m_szNames[0], titleCandidate, min(sizeof(m_szNames[0])-1, strSize));
+		return true;
+	}
+	return false;
+}
+
+double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row)
+//----------------------------------------------------------------
+{
+	bool targetReached = false;
+	const double t = GetLength(targetReached, FALSE, TRUE, ord, row);
+	if(targetReached) return t;
+	else return -1; //Given position not found from play sequence.
 }
 
 #ifndef TRADITIONAL_MODCOMMAND

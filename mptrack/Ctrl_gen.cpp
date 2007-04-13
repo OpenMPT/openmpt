@@ -11,6 +11,7 @@
 // -> CODE#0015
 // -> DESC="channels management dlg"
 #include "Ctrl_pat.h"
+#include ".\ctrl_gen.h"
 // -! NEW_FEATURE#0015
 
 BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
@@ -33,6 +34,7 @@ BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_SAMPLEPA,			OnSamplePAChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO_RESAMPLING,	OnResamplingChanged)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		OnUpdatePosition)
+	ON_EN_SETFOCUS(IDC_EDIT_SONGTITLE,		OnEnSetfocusEditSongtitle)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -83,7 +85,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	if(m_pSndFile)
 		m_EditTitle.SetLimitText(m_pSndFile->GetModNameLengthMax());
 	else
-		m_EditTitle.SetLimitText(31);
+		m_EditTitle.SetLimitText(25);
 
 // -> CODE#0016
 // -> DESC="default tempo update"
@@ -302,20 +304,15 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 void CCtrlGeneral::OnTitleChanged()
 //---------------------------------
 {
-	CHAR s[35];
 	if ((!m_pSndFile) || (!m_EditTitle.m_hWnd) || (!m_EditTitle.GetModify())) return;
-	memset(s, 0, sizeof(s));
-	m_EditTitle.GetWindowText(s, sizeof(s));
-	s[25] = 0;
-	if (strcmp(m_pSndFile->m_szNames[0], s))
+
+	CString title;
+	m_EditTitle.GetWindowText(title);
+	if(m_pSndFile->SetTitle(title, title.GetLength()) && m_pModDoc)
 	{
-		memcpy(m_pSndFile->m_szNames[0], s, 26);
-		if (m_pModDoc)
-		{
-			m_EditTitle.SetModify(FALSE);
-			m_pModDoc->SetModified();
-			m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
-		}
+		m_EditTitle.SetModify(FALSE);
+		m_pModDoc->SetModified();
+		m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 	}
 }
 
@@ -658,6 +655,16 @@ void CCtrlGeneral::setAsDecibels(LPSTR stringToSet, double value, double valueAt
 	sprintf(stringToSet, "%c%.2f dB", sign, dB);
 	return;
 
+}
+
+
+void CCtrlGeneral::OnEnSetfocusEditSongtitle()
+//--------------------------------------------
+{
+	if(m_pSndFile)
+	{
+		m_EditTitle.SetLimitText(m_pSndFile->GetModNameLengthMax());
+	}
 }
 
 

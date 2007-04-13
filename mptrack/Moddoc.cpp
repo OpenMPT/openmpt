@@ -1923,7 +1923,7 @@ void CModDoc::OnEstimateSongLength()
 //----------------------------------
 {
 	CHAR s[256];
-	DWORD dwSongLength = m_SndFile.GetLength(FALSE, TRUE);
+	DWORD dwSongLength = m_SndFile.GetSongTime();
 	wsprintf(s, "Approximate song length: %dmn%02ds", dwSongLength/60, dwSongLength%60);
 	CMainFrame::GetMainFrame()->MessageBox(s, NULL, MB_OK|MB_ICONINFORMATION);
 }
