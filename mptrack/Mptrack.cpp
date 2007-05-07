@@ -552,6 +552,7 @@ CTrackApp::CTrackApp()
 	m_hBladeEnc = NULL;
 	m_hLameEnc = NULL;
 	m_hACMInst = NULL;
+	m_pRequestContext = NULL;
 	m_hAlternateResourceHandle = NULL;
 	m_szConfigFileName[0] = 0;
 	for (UINT i=0; i<MAX_DLS_BANKS; i++) gpDLSBanks[i] = NULL;
@@ -785,7 +786,11 @@ BOOL CTrackApp::InitInstance()
 	m_dwTimeStarted = timeGetTime();
 	m_bInitialized = TRUE;
 
-	// Check previous version number
+	if (CMainFrame::gnCheckForUpdates) {
+		UpdateCheck();
+	}
+
+	// Open settings if this is the previous execution was with an earlier version.
 	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gcsPreviousVersion < CMainFrame::GetFullVersionString()) {
 		StopSplashScreen();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
@@ -794,6 +799,185 @@ BOOL CTrackApp::InitInstance()
 	EndWaitCursor();
 	return TRUE;
 }
+
+void __stdcall CTrackApp::InternetRequestCallback( HINTERNET hInternet, DWORD_PTR userData, DWORD dwInternetStatus,
+                              LPVOID lpvStatusInformation,  DWORD dwStatusInformationLength)
+//-----------------------------------------------------------------------------------------------------
+{
+
+	REQUEST_CONTEXT *pRequestContext = (REQUEST_CONTEXT*)userData;
+	if (pRequestContext->hRequest == NULL) {
+		return;
+	}
+
+	DWORD versionBytesToRead = 10;
+
+	switch (dwInternetStatus) {
+		case WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE:
+			if (!WinHttpReceiveResponse(pRequestContext->hRequest, NULL)) {
+				CleanupInternetRequest(pRequestContext);
+				return;
+			}
+			break;
+		case WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE:
+			{
+				DWORD dwDownloaded = 0;
+				if (!WinHttpQueryDataAvailable(pRequestContext->hRequest, &dwDownloaded)) {
+					Log("Error %u in WinHttpQueryDataAvailable.\n",GetLastError());
+					CleanupInternetRequest(pRequestContext);
+					return;
+				}
+				if (dwDownloaded<versionBytesToRead) {
+					Log("Downloaded %d bytes, expected at least %d\n", dwDownloaded, versionBytesToRead);
+					CleanupInternetRequest(pRequestContext);
+					return;
+				}
+				break;
+			}
+		case WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE:
+			{
+				DWORD dwRead = 0;
+				pRequestContext->lpBuffer = new char[versionBytesToRead+1];
+				ZeroMemory(pRequestContext->lpBuffer, versionBytesToRead+1);
+
+				if (!WinHttpReadData(pRequestContext->hRequest, (LPVOID)pRequestContext->lpBuffer, versionBytesToRead, &dwRead)) {
+					Log("Error %u in WinHttpReadData.\n", GetLastError());
+					CleanupInternetRequest(pRequestContext);
+					return;
+				}
+				if (dwRead<versionBytesToRead) {
+					Log("Read %d bytes, expected at least %d\n", dwRead, versionBytesToRead);
+					CleanupInternetRequest(pRequestContext);
+					return;
+				}
+				break;
+			}
+		case WINHTTP_CALLBACK_STATUS_READ_COMPLETE: 
+			{
+				CString remoteVersion = pRequestContext->lpBuffer;
+				CString localVersion = CMainFrame::GetFullVersionString();
+				if (remoteVersion > localVersion) {
+					CString message;
+					message.Format("New version available: %s. Would you like more information?", remoteVersion);
+					if (AfxMessageBox(message, MB_ICONQUESTION|MB_YESNO ) == IDYES) {
+						CString URL;
+						URL.Format("http://openmpt.xwiki.com/xwiki/bin/view/Development/Builds?currentVersion=%s", localVersion);
+						CTrackApp::OpenURL(URL);
+					}
+				}
+				CleanupInternetRequest(pRequestContext);
+				break;
+			}
+		default:
+			Log("Unhandled callback - status %d given", dwInternetStatus);
+			break;
+	}
+
+}
+
+void CTrackApp::CleanupInternetRequest(REQUEST_CONTEXT *pRequestContext)
+//-------------------------------------------------------------------------
+{
+	if (pRequestContext != NULL) {
+		if (pRequestContext->lpBuffer != NULL) {
+			delete[] pRequestContext->lpBuffer;
+			pRequestContext->lpBuffer = NULL;
+		}
+		
+		if (pRequestContext->postData != NULL) {
+			delete[] pRequestContext->postData;
+			pRequestContext->postData = NULL;
+		}
+
+		if (pRequestContext->hRequest != NULL) {
+			WinHttpSetStatusCallback(pRequestContext->hRequest, NULL, NULL, NULL);
+			WinHttpCloseHandle(pRequestContext->hRequest);
+			pRequestContext->hRequest = NULL;
+		}
+
+		if (pRequestContext->hConnection != NULL) {
+			WinHttpCloseHandle(pRequestContext->hConnection);
+			pRequestContext->hConnection = NULL;
+		}
+
+		if (pRequestContext->hSession != NULL) {
+			WinHttpCloseHandle(pRequestContext->hSession);
+			pRequestContext->hSession = NULL;
+		}
+	}
+}
+
+void CTrackApp::UpdateCheck() 
+//---------------------------
+{
+		m_pRequestContext = new REQUEST_CONTEXT();
+		m_pRequestContext->hSession = NULL;
+		m_pRequestContext->hConnection = NULL;
+		m_pRequestContext->hRequest = NULL;
+		m_pRequestContext->lpBuffer = NULL;
+		m_pRequestContext->postData = NULL;
+
+		// Prepare post data
+		if (CMainFrame::gcsInstallGUID == "") {
+			//No GUID found in INI file - generate one.
+			GUID guid;
+			CoCreateGuid(&guid);
+			BYTE* Str;
+			UuidToString((UUID*)&guid, &Str);
+			CMainFrame::gcsInstallGUID.Format("%s", (LPTSTR)Str);
+			RpcStringFree(&Str);
+		}
+
+		CString csPostData;
+		csPostData.Format("install_id=%s&install_version=%s", CMainFrame::gcsInstallGUID, CMainFrame::GetFullVersionString());
+		int length = csPostData.GetLength();
+		m_pRequestContext->postData = new char[length+1];
+		strcpy(m_pRequestContext->postData, csPostData);
+		
+		m_pRequestContext->hSession = WinHttpOpen( L"OpenMPT/1.17", 	WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+								WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, WINHTTP_FLAG_ASYNC);
+		if (m_pRequestContext->hSession==NULL) {
+			CleanupInternetRequest(m_pRequestContext);
+			return;
+		}
+	
+		m_pRequestContext->hConnection = WinHttpConnect(m_pRequestContext->hSession, L"www.soal.org", INTERNET_DEFAULT_HTTP_PORT, 0);
+		if (m_pRequestContext->hConnection==NULL) {
+			CleanupInternetRequest(m_pRequestContext);
+			return;
+		}
+
+		m_pRequestContext->hRequest = WinHttpOpenRequest(m_pRequestContext->hConnection, L"POST", L"openmpt/OpenMPTversionCheck.php5",
+								NULL, NULL, NULL, 0);
+		if (m_pRequestContext->hRequest==NULL) {
+			CleanupInternetRequest(m_pRequestContext);
+			return;
+		}
+
+		if (!WinHttpAddRequestHeaders(m_pRequestContext->hRequest, L"Content-Type:application/x-www-form-urlencoded\r\n\r\n", 
+			-1L, WINHTTP_ADDREQ_FLAG_ADD)) {
+			CleanupInternetRequest(m_pRequestContext);
+			return;	
+		}
+
+		WINHTTP_STATUS_CALLBACK pCallback = WinHttpSetStatusCallback(m_pRequestContext->hRequest,
+                        static_cast<WINHTTP_STATUS_CALLBACK>(InternetRequestCallback),
+                        WINHTTP_CALLBACK_FLAG_ALL_COMPLETIONS,    
+                        NULL);
+		if (pCallback == WINHTTP_INVALID_STATUS_CALLBACK) {
+			Log("Error %d in WinHttpSetStatusCallback.\n", WINHTTP_INVALID_STATUS_CALLBACK);
+			CleanupInternetRequest(m_pRequestContext);
+			return;
+		}
+
+		if (!WinHttpSendRequest(m_pRequestContext->hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, m_pRequestContext->postData, length, length, (DWORD_PTR)m_pRequestContext)) {
+			CleanupInternetRequest(m_pRequestContext);
+           return;
+        }
+}
+
+
+
 
 int CTrackApp::ExitInstance()
 //---------------------------
@@ -845,6 +1029,10 @@ int CTrackApp::ExitInstance()
 
 	// Uninitialize ACM
 	UninitializeACM();
+
+	// Cleanup the internet request, in case it is still active.
+	CleanupInternetRequest(m_pRequestContext);
+	delete m_pRequestContext;
 
 	return CWinApp::ExitInstance();
 }

@@ -241,6 +241,7 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual VOID OnOK();
+	virtual VOID OnCancel();
 	afx_msg void OnAddPlugin();
 	afx_msg void OnRemovePlugin();
 	afx_msg void OnSelChanged(NMHDR *pNotifyStruct, LRESULT * result);

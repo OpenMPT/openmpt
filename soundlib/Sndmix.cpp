@@ -1618,10 +1618,7 @@ BOOL CSoundFile::ReadNote()
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				}
 				
-				if (m_pConfig->getTreatPanLikeBalance()) {
-					pChn->nNewLeftVol = (realvol * pan) >> 8;
-					pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
-				} else {
+				if (m_pConfig->getForceSoftPanning() || gdwSoundSetup & SNDMIX_SOFTPANNING) {
 					if (pan < 128) {
 						pChn->nNewLeftVol = (realvol * pan) >> 8;
 						pChn->nNewRightVol = (realvol * 128) >> 8;
@@ -1629,6 +1626,9 @@ BOOL CSoundFile::ReadNote()
 						pChn->nNewLeftVol = (realvol * 128) >> 8;
 						pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
 					}
+				} else {
+					pChn->nNewLeftVol = (realvol * pan) >> 8;
+					pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
 				}
 
 			} else {

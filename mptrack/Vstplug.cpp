@@ -1185,6 +1185,19 @@ VOID CSelectPluginDlg::OnOK()
 	}
 }
 
+VOID CSelectPluginDlg::OnCancel()
+//---------------------------
+{
+	//remember window size:
+	RECT rect;
+	GetWindowRect(&rect);
+	CMainFrame::GetMainFrame()->gnPlugWindowX = rect.left;
+	CMainFrame::GetMainFrame()->gnPlugWindowY = rect.top;
+	CMainFrame::GetMainFrame()->gnPlugWindowWidth  = rect.right - rect.left;
+	CMainFrame::GetMainFrame()->gnPlugWindowHeight = rect.bottom - rect.top;
+
+	CDialog::OnCancel();
+}
 
 VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 //---------------------------------------------------------------

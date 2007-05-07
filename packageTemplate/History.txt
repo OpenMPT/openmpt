@@ -8,6 +8,65 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+v1.17.02.46
+  + <Relabsoluness> Experimental MPTm format:
+      --> Internally, it is still very close to the IT-based format.
+      --> Order&pattern limit increased to 65000; whole range not tested :) (Note that modeffects such as position jump doesn't cover the whole range unless the #-extension can be used(haven't tested))
+  + <Relabsoluness> User definable tuning modes for instruments:
+      --> Only available for MPTm
+      --> Ratio value as well as note name for every key can be assigned invidually; gives rather free hands for experiments.
+      --> Every instrument can have it's own tuning
+      --> Tunings can be saved to file and loaded from file.
+      --> IMPORTANT: When using tunings, behavior of various modcommands such as portamento have been changed, and new behaviors are still to be decided.
+  + <Relabsoluness> In song properties, option to increase playback compatibility with original Impulse Tracker behavior. Is in no way complete; currently affects only a couple of differences. Many differences are still there.
+  + <Relabsoluness> Ability to load multiple mods/samples/instruments from corresponding load dialogs.
+      --> Known issue: Intermittent failures.
+  + <Relabsoluness> 32-bit float wav import
+  . <Relabsoluness> 24/32-bit PCM wav sample import fixed
+  + <Relabsoluness> Playback control additions: 'Solo on transition' & 'Mute on transition'. Available from pattern view context menu(right click).
+  + <Relabsoluness> Envelope points can be scaled by a factor through context menu on envelopeview(right click)
+  + <Relabsoluness> Calculator of playback time (measured from start) at the beginning of any row of any pattern (uses existing modlength calculator).
+      --> Known limitation: When the row is within pattern loop, doesn't give all possible times.
+  + <rewbs> SCx now sends note-off to VSTis at tick x.
+  + <rewbs> New mixmode (called 1.17RC3): bypass global preamp, force soft panning, provide explicit dB value for sample attenuation. WARNING: this mixmode is subject to change.
+  + <rewbs> Check for updates on startup. To disable, set CheckForUpdates=0 in mptrack.ini.
+  . <rewbs> Plugin list window remembers its position/size even on cancel.
+  . <Relabsoluness> When opening instruments, load dialog didn't remember its previous path.
+  . <Relabsoluness> In general tab, it was possible to give longer modname than the fileformat could save.
+  . <Relabsoluness> Instruments associates with VSTis no longer also need to be associated to a sample in order to play.
+  . <Relabsoluness> Trash characters to empty ITP comments should no longer appear.
+  . <Relabsoluness> Channel state should now be updated correctly when e.g. moving channels through channel manager.
+  . <Relabsoluness> It should no longer be possible to remove all channels from channel manager.
+  / <Relabsoluness> Channel states resetting when jumping between orders from orderlist.
+      --> NOTE: While this fixes a bug (behavior change) introduced in the tuning branch(?), it also changes quite prominent behavior so can annoy people - might need to be modified at some point.
+  / <Relabsoluness> Added version number to the mainframe title.
+  / <Relabsoluness> Changed the 'order message' at the bottom bar of the screen "Position x of y" to "Position x of y (x in hex of y in hex)".
+  / <Relabsoluness> Lots of smaller (internal) changes.
+
+v1.17.02.45
+  + <Relabsoluness & Alex> "Pitch to tempo lock" instrument setting: define the tempo at which your instrument loops correctly, and it will be pitched automatically to match the song's current tempo.
+  + <Relabsoluness> Notification when attempting to modify pattern but pattern record is off.
+  + <Relabsoluness> Orderlist margins: you can define how many slots to keep visible around the active pattern as the orderlist scrolls
+  . <Relabsoluness> Fixes for various unexpected pattern loop state changes.
+  . <Relabsoluness> Fixes to IT Style clear.
+  . <Relabsoluness> Memory management fixes and misc other bug fixes.
+  . <rewbs> ITP loading fixed (I broke it in v1.17.02.44)
+  . <rewbs> Time estimation fixed for tracks with pattern break+XParam.
+  . <rewbs> "Last saved with" version number was not always saved correctly - fixed
+
+v1.17.02.44
+  + <rewbs> Added release section to volume envelope (see: http://openmpt.xwiki.com/xwiki/bin/view/Manual/InstrumentReleaseEnvelope). IT only.
+  . <rewbs> Overflow fixes in file loading functions (see: http://aluigi.altervista.org/adv/mptho-adv.txt)
+  . <rewbs> Greyed out irrelevant items in the orderlist context menu.
+
+. v1.17.02.43
+  + <rewbs> You can now load up new plugins from anywhere, not just the General tab. Select "Plugin Manager..." from the view menu. This can also be assigned to a global hotkey.
+            Limitation: currently plugins added to a song in this manner with always be put in the first empty slot. In a future version you'll be able to choose the slot directly from that window.
+  + <rewbs> "Cleanup Plugins" to remove any plugs that are not associated to a channel and not used by an instrument and not used as an output for any used plugs.
+  . <rewbs> Fixed channel limits. Should be able to correctly save IT pattern data with up to 127 chans. There's only space for 64 channel headers though (channel names etc..). XMs restricted to 64 chans.
+  . <rewbs> Added channel limit check when adding chans from the pattern editor.
+  . <rewbs> Fixed instant crash with SampleTank 2.1.
+
 . v1.17.02.43
   + <rewbs> You can now load up new plugins from anywhere, not just the General tab. Select "Plugin Manager..." from the view menu. This can also be assigned to a global hotkey.
             Limitation: currently plugins added to a song in this manner with always be put in the first empty slot. In a future version you'll be able to choose the slot directly from that window.
