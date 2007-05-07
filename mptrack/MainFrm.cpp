@@ -2933,7 +2933,8 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
     if (bShow && !IsWindowVisible() && firstShow)  {
         firstShow = false;
 		WINDOWPLACEMENT wpl;
-		GetPrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), theApp.GetConfigFileName());
-		SetWindowPlacement(&wpl);
+		if (GetPrivateProfileStruct("Display", "WindowPlacement", &wpl, sizeof(WINDOWPLACEMENT), theApp.GetConfigFileName())) {
+			SetWindowPlacement(&wpl);
+		}
     }
 }

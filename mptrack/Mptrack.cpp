@@ -858,7 +858,7 @@ void __stdcall CTrackApp::InternetRequestCallback( HINTERNET hInternet, DWORD_PT
 				CString localVersion = CMainFrame::GetFullVersionString();
 				if (remoteVersion > localVersion) {
 					CString message;
-					message.Format("New version available: %s. Would you like more information?", remoteVersion);
+					message.Format("New version available: %s (you are using %). Would you like more information?", remoteVersion, localVersion);
 					if (AfxMessageBox(message, MB_ICONQUESTION|MB_YESNO ) == IDYES) {
 						CString URL;
 						URL.Format("http://openmpt.xwiki.com/xwiki/bin/view/Development/Builds?currentVersion=%s", localVersion);
