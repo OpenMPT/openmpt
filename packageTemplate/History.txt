@@ -31,6 +31,7 @@ v1.17.02.46
   + <rewbs> New mixmode (called 1.17RC3): bypass global preamp, force soft panning, provide explicit dB value for sample attenuation. WARNING: this mixmode is subject to change.
   + <rewbs> Check for updates on startup. To disable, set CheckForUpdates=0 in mptrack.ini.
   . <rewbs> Plugin list window remembers its position/size even on cancel.
+  . <rewbs> Fix odd window position on very first startup (before mptrack.ini is created).
   . <Relabsoluness> When opening instruments, load dialog didn't remember its previous path.
   . <Relabsoluness> In general tab, it was possible to give longer modname than the fileformat could save.
   . <Relabsoluness> Instruments associates with VSTis no longer also need to be associated to a sample in order to play.
