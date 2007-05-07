@@ -189,6 +189,7 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Internet"
         BEGIN
+            MENUITEM "OpenMPT Wiki",                ID_NETLINK_OPENMPTWIKI
             MENUITEM "Modplug Central &Forums",     ID_NETLINK_FORUMS
             MENUITEM "MPT-FR",                      ID_NETLINK_MPTFR
             MENUITEM "&Kvr Audio (plugins)",        ID_NETLINK_PLUGINS
@@ -943,7 +944,7 @@ BEGIN
     COMBOBOX        IDC_COMBO4,156,135,81,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     GROUPBOX        "Playback",IDC_STATIC,4,99,240,62
-    LTEXT           "Plugin levels:",IDC_STATIC,111,138,43,10
+    LTEXT           "Mix Levels:",IDC_STATIC,111,138,43,10
     GROUPBOX        "OpenMPT Version Info",IDC_STATIC,4,165,235,44
     EDITTEXT        IDC_EDIT1,67,175,166,13,ES_AUTOHSCROLL | ES_READONLY,
                     WS_EX_STATICEDGE
@@ -1399,7 +1400,7 @@ STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Sound Card"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,4,3,232,150
+    GROUPBOX        "",IDC_STATIC,4,3,232,167
     LTEXT           "Sound Device:",IDC_STATIC,9,12,79,8
     CONTROL         "",IDC_COMBO1,"ComboBoxEx32",CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP,10,23,219,96
@@ -1429,8 +1430,10 @@ BEGIN
                     WS_TABSTOP
     CONTROL         "Reverse Stereo",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,131,78,62,10
-    CONTROL         "Headphones",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Soft Panning",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,131,90,64,10
+    LTEXT           "Note: The Pre-Amp and Soft Panning settings are ignored by songs with mix levels set to 1.17RC3 or later in Song Properties.",
+                    IDC_STATIC,16,150,204,18
 END
 
 IDD_MIDIMACRO DIALOGEX 0, 0, 349, 345
@@ -2076,7 +2079,7 @@ BEGIN
     IDD_OPTIONS_SOUNDCARD, DIALOG
     BEGIN
         RIGHTMARGIN, 240
-        BOTTOMMARGIN, 156
+        BOTTOMMARGIN, 177
     END
 
     IDD_MIDIMACRO, DIALOG

@@ -897,7 +897,7 @@ public:	// for Editing
 	UINT m_nRowsPerBeat;	// rewbs.betterBPM
 	UINT m_nRowsPerMeasure;	// rewbs.betterBPM
 	BYTE m_nTempoMode;		// rewbs.betterBPM
-	BYTE m_nPlugMixMode;
+	BYTE m_nMixLevels;
     UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;

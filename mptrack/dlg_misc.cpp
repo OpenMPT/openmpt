@@ -185,18 +185,18 @@ BOOL CModTypeDlg::OnInitDialog()
 		default:						m_TempoModeBox.SetCurSel(0); break;
 	}
 
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),   plugmix_mode_117RC3);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),   plugmix_mode_117RC2);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),   plugmix_mode_117RC1);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original"),		  plugmix_mode_original);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),   plugmix_mode_Test);
-	switch(m_pSndFile->m_nPlugMixMode)
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),   mixLevels_117RC3);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),   mixLevels_117RC2);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),   mixLevels_117RC1);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original"),		  mixLevels_original);
+	//m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),   mixLevels_Test);
+	switch(m_pSndFile->m_nMixLevels)
 	{
-		//case plugmix_mode_Test:		m_PlugMixBox.SetCurSel(3); break;
-		case plugmix_mode_original:	m_PlugMixBox.SetCurSel(3); break;
-		case plugmix_mode_117RC1:	m_PlugMixBox.SetCurSel(2); break;
-		case plugmix_mode_117RC2:	m_PlugMixBox.SetCurSel(1); break;
-		case plugmix_mode_117RC3:
+		//case mixLevels_Test:		m_PlugMixBox.SetCurSel(4); break;
+		case mixLevels_original:	m_PlugMixBox.SetCurSel(3); break;
+		case mixLevels_117RC1:	m_PlugMixBox.SetCurSel(2); break;
+		case mixLevels_117RC2:	m_PlugMixBox.SetCurSel(1); break;
+		case mixLevels_117RC3:
 		default:					m_PlugMixBox.SetCurSel(0); break;
 	}
 
@@ -383,8 +383,8 @@ void CModTypeDlg::OnOK()
 
 	sel = m_PlugMixBox.GetCurSel();
 	if (sel >= 0) {
-		m_pSndFile->m_nPlugMixMode = m_PlugMixBox.GetItemData(sel);
-		m_pSndFile->m_pConfig->SetPluginMixLevels(m_pSndFile->m_nPlugMixMode);
+		m_pSndFile->m_nMixLevels = m_PlugMixBox.GetItemData(sel);
+		m_pSndFile->m_pConfig->SetPluginMixLevels(m_pSndFile->m_nMixLevels);
 		m_pSndFile->RecalculateGainForAllPlugs();
 	}
 

@@ -366,6 +366,8 @@ public:
     static HHOOK ghKbdHook;
 	static DWORD gdwNotificationType;
 	static CString gcsPreviousVersion;
+	static CString gcsInstallGUID;
+	static int gnCheckForUpdates;
 	
 	// Audio Setup
 	static DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;

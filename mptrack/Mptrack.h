@@ -14,6 +14,8 @@
 
 #include "resource.h"       // main symbols
 #include "sndfile.h"
+#include <windows.h>
+#include <winhttp.h>
 
 class CModDoc;
 class CVstPluginManager;
@@ -94,6 +96,17 @@ enum {
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Internet connection context
+
+typedef struct REQUEST_CONTEXT {
+	HINTERNET hSession; 
+	HINTERNET hConnection;
+	HINTERNET hRequest;
+	LPSTR     lpBuffer;       // Buffer for storing read data
+	LPSTR	  postData;
+} REQUEST_CONTEXT;
+
+/////////////////////////////////////////////////////////////////////////////
 // CTrackApp:
 // See mptrack.cpp for the implementation of this class
 //
@@ -107,10 +120,7 @@ class CTrackApp: public CWinApp
 protected:
 	static UINT m_nDefaultDocType;
 	static LPMIDILIBSTRUCT glpMidiLibrary;
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
 	static BOOL m_nProject;
-// -! NEW_FEATURE#0023
 
 public:
 	static MEMORYSTATUS gMemStatus;
@@ -127,6 +137,8 @@ protected:
 	CHAR m_szConfigFileName[_MAX_PATH];
 	CHAR m_szPluginCacheFileName[_MAX_PATH];
 	CHAR m_szStringsFileName[_MAX_PATH];
+	// Internet request context
+	REQUEST_CONTEXT *m_pRequestContext;
 
 public:
 	CTrackApp();
@@ -168,6 +180,10 @@ public:
 protected:
 	VOID StartSplashScreen();
 	VOID StopSplashScreen();
+	VOID UpdateCheck();
+	static void __stdcall InternetRequestCallback( HINTERNET hInternet, DWORD_PTR dwContext, DWORD dwInternetStatus,
+			                      LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
+	static void CleanupInternetRequest(REQUEST_CONTEXT *pRequestContext);
 
 // Localized strings
 public:

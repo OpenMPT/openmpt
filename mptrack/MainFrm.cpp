@@ -86,6 +86,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_MIDI_RECORD,				OnMidiRecord)
 	ON_COMMAND(ID_PLAYER_PAUSE,				OnPlayerPause)
 	ON_COMMAND_EX(IDD_TREEVIEW,				OnBarCheck)
+	ON_COMMAND_EX(ID_NETLINK_OPENMPTWIKI,	OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_MODPLUG,		OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_UT,			OnInternetLink)
 	ON_COMMAND_EX(ID_NETLINK_OSMUSIC,		OnInternetLink)
@@ -140,6 +141,8 @@ LONG CMainFrame::glTreeWindowWidth = 160;
 LONG CMainFrame::glTreeSplitRatio = 128;
 HHOOK CMainFrame::ghKbdHook = NULL;
 CString CMainFrame::gcsPreviousVersion = "";
+CString CMainFrame::gcsInstallGUID = "";
+int CMainFrame::gnCheckForUpdates = 1;
 DWORD CMainFrame::gnHotKeyMask = 0;
 // Audio Setup
 //rewbs.resamplerConf
@@ -361,7 +364,9 @@ void CMainFrame::LoadIniSettings()
 	CString iniFile = theApp.GetConfigFileName();
 	CHAR collectedString[INIBUFFERSIZE];
 
-	gcsPreviousVersion = GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
+	gcsPreviousVersion = GetPrivateProfileCString("Version", "Version", "", iniFile);
+	gcsInstallGUID = GetPrivateProfileCString("Version", "InstallGUID", "", iniFile);
+	gnCheckForUpdates = GetPrivateProfileInt("Version", "CheckForUpdates", 1, iniFile);
 	gbMdiMaximize = GetPrivateProfileLong("Display", "MDIMaximize", true, iniFile);
 	glTreeWindowWidth = GetPrivateProfileLong("Display", "MDITreeWidth", 160, iniFile);
 	glTreeSplitRatio = GetPrivateProfileLong("Display", "MDITreeRatio", 128, iniFile);
@@ -375,7 +380,7 @@ void CMainFrame::LoadIniSettings()
 	gnPlugWindowY = GetPrivateProfileInt("Display", "PlugSelectWindowY", 273, iniFile);
 	gnPlugWindowWidth = GetPrivateProfileInt("Display", "PlugSelectWindowWidth", 370, iniFile);
 	gnPlugWindowHeight = GetPrivateProfileInt("Display", "PlugSelectWindowHeight", 332, iniFile);
-	gnPlugWindowLast = GetPrivateProfileInt("Display", "PlugSelectWindowLast", 0, iniFile);
+	gnPlugWindowLast = GetPrivateProfileDWord("Display", "PlugSelectWindowLast", 0, iniFile);
 
 	CHAR s[16];
 	for (int ncol=0; ncol<MAX_MODCOLORS; ncol++) {
@@ -848,6 +853,8 @@ void CMainFrame::SaveIniSettings()
 
 	CString version = CMainFrame::GetFullVersionString();
 	WritePrivateProfileString("Version", "Version", version, iniFile);
+	WritePrivateProfileString("Version", "InstallGUID", gcsInstallGUID, iniFile);
+	WritePrivateProfileLong("Version", "CheckForUpdates", gnCheckForUpdates, iniFile);
 
     WINDOWPLACEMENT wpl;
 	wpl.length = sizeof(WINDOWPLACEMENT);
@@ -2686,6 +2693,7 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 	switch(nID)
 	{
 //	case ID_NETLINK_MODPLUG:	pszURL = "http://www.modplug.com"; break;
+	case ID_NETLINK_OPENMPTWIKI:pszURL = "http://openmpt.xwiki.com/"; break;
 	case ID_NETLINK_UT:			pszURL = "http://www.united-trackers.org"; break;
 	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
 //	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;

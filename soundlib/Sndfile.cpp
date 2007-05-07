@@ -435,7 +435,7 @@ CSoundFile::CSoundFile() :
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	m_lTotalSampleCount=0;
 
-	m_nPlugMixMode=plugmix_mode_117RC2;
+	m_nMixLevels=mixLevels_117RC3;
 	m_pConfig = new CSoundFilePlayConfig();
 	
 	BuildDefaultInstrument();
@@ -690,7 +690,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			}
 		}
 	}
-	m_pConfig->SetPluginMixLevels(m_nPlugMixMode);
+	m_pConfig->SetPluginMixLevels(m_nMixLevels);
 	RecalculateGainForAllPlugs();
 
 	if (m_nType)

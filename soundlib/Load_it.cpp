@@ -638,7 +638,7 @@ mpts:
 				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;
 				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels);		 break;
 				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
-				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
+				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nMixLevels);	 break;
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSamplePreAmp);	 break;
@@ -1044,7 +1044,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, DWORD dwMemLength)
 				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;			
 				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels);		 break;		
 				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
-				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
+				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nMixLevels);	 break;
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSamplePreAmp);	 break;
@@ -3153,11 +3153,11 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nTempoMode, 1, size, f);	
 
-	code = 'PMM.';							//write m_nPlugMixMode
+	code = 'PMM.';							//write m_nMixLevels
 	fwrite(&code, 1, sizeof(__int32), f);	
-	size = sizeof(m_nPlugMixMode);		
+	size = sizeof(m_nMixLevels);		
 	fwrite(&size, 1, sizeof(__int16), f);
-	fwrite(&m_nPlugMixMode, 1, size, f);	
+	fwrite(&m_nMixLevels, 1, size, f);	
 
 	code = 'CWV.';							//write m_dwCreatedWithVersion
 	fwrite(&code, 1, sizeof(__int32), f);	
@@ -4309,7 +4309,7 @@ BOOL CSoundFile::ReadMPT(const BYTE *lpStream, const DWORD dwMemLength)
 				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;			
 				case 'C...': fadr = reinterpret_cast<BYTE*>(&m_nChannels);		 break;		
 				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
-				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nPlugMixMode);	 break;
+				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nMixLevels);	 break;
 				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
 				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
 				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSamplePreAmp);	 break;

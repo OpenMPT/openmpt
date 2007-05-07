@@ -13,11 +13,11 @@ enum {
 };
 
 enum {
-	plugmix_mode_original = 0,
-	plugmix_mode_117RC1   = 1,
-	plugmix_mode_117RC2   = 2,
-	plugmix_mode_117RC3   = 3,
-	plugmix_mode_Test   = 4,
+	mixLevels_original = 0,
+	mixLevels_117RC1   = 1,
+	mixLevels_117RC2   = 2,
+	mixLevels_117RC3   = 3,
+	mixLevels_Test   = 4,
 };
 
 // Class used to store settings for a song file.
@@ -49,8 +49,8 @@ public:
 	void setUseGlobalPreAmp(bool);
 	bool getUseGlobalPreAmp();
 
-	void setTreatPanLikeBalance(bool);
-	bool getTreatPanLikeBalance();
+	void setForceSoftPanning(bool);
+	bool getForceSoftPanning();
 
 	void setDisplayDBValues(bool);
 	bool getDisplayDBValues();
@@ -80,7 +80,7 @@ private:
 
 	bool m_globalVolumeAppliesToMaster;
 	bool m_ignorePreAmp;
-	bool m_treatPanLikeBalance;
+	bool m_forceSoftPanning;
 	bool m_displayDBValues;
 
 	DWORD m_LastSavedWithVersion;

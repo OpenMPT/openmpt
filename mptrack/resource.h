@@ -544,7 +544,7 @@
 #define IDC_EDIT_SPEED                  2008
 #define IDC_EDIT_GLOBALVOL              2009
 #define IDC_EDIT_RESTARTPOS             2010
-#define IDC_SLIDER_SAMPLEPREAMP           2011
+#define IDC_SLIDER_SAMPLEPREAMP         2011
 #define IDC_BUTTON_MODTYPE              2012
 #define IDC_EDIT_SAMPLEPA               2013
 #define IDC_EDIT_MODTYPE                2014
@@ -969,7 +969,7 @@
 #define ID_MOVETUNING                   36025
 #define ID_COPYTUNING                   36026
 #define ID_REMOVETUNINGCOLLECTION       36027
-#define ID_SHOWTIMEATROW				36028
+#define ID_SHOWTIMEATROW                36028
 #define ID_SELECTINST                   36100
 #define ID_NETLINK_MPTFR                37001
 #define ID_PLUG_RECORDAUTOMATION        37003
@@ -1006,6 +1006,7 @@
 #define ID_ENVELOPE_TOGGLERELEASENODE   59206
 #define ID_Menu59207                    59207
 #define ID_ENVELOPE_SCALEPOINTS         59208
+#define ID_NETLINK_OPENMPTWIKI          59210
 
 // Next default values for new objects
 // 
@@ -1013,7 +1014,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        515
-#define _APS_NEXT_COMMAND_VALUE         59209
+#define _APS_NEXT_COMMAND_VALUE         59211
 #define _APS_NEXT_CONTROL_VALUE         2304
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

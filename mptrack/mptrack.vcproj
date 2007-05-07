@@ -45,13 +45,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib winhttp.lib"
 				OutputFile=".\Debug/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\xsoundlib\Debug"
 				GenerateDebugInformation="TRUE"
+				AssemblyDebug="1"
 				ProgramDatabaseFile=".\Debug/mptrack.pdb"
 				GenerateMapFile="TRUE"
 				MapFileName=".\Debug/mptrack.map"
@@ -116,8 +117,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
-				OutputFile=".\Bin/mptrack_Generic.exe"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib winhttp.lib"
+				OutputFile=".\Bin/mptrack.exe"
 				Version="5.0"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -188,7 +189,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib winhttp.lib"
 				OutputFile=".\Bin/mptrack_P3.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -260,7 +261,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib winhttp.lib"
 				OutputFile=".\Bin/mptrack_athlon32.exe"
 				Version="5.0"
 				LinkIncremental="1"
@@ -332,7 +333,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib winhttp.lib"
 				OutputFile=".\Bin/mptrack_P4-Athlon64.exe"
 				Version="5.0"
 				LinkIncremental="1"
