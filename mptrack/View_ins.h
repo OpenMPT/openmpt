@@ -98,7 +98,11 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
+#if _MSC_VER >= 1400
+	afx_msg LRESULT OnNcHitTest(CPoint point);
+#else
 	afx_msg UINT OnNcHitTest(CPoint point);
+#endif 
 	afx_msg void OnNcPaint();
 	afx_msg void OnPrevInstrument();
 	afx_msg void OnNextInstrument();

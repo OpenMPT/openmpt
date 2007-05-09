@@ -1406,7 +1406,11 @@ void CViewSample::OnNcLButtonDblClk(UINT uFlags, CPoint point)
 }
 
 
+#if _MSC_VER >= 1400
+LRESULT CViewSample::OnNcHitTest(CPoint point)
+#else
 UINT CViewSample::OnNcHitTest(CPoint point)
+#endif 
 //-----------------------------------------
 {
 	CRect rect;

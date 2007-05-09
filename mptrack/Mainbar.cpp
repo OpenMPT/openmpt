@@ -930,7 +930,11 @@ void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 }
 
 
+#if _MSC_VER >= 1400
+LRESULT CModTreeBar::OnNcHitTest(CPoint point)
+#else
 UINT CModTreeBar::OnNcHitTest(CPoint point)
+#endif 
 //-----------------------------------------
 {
 	CRect rect;
