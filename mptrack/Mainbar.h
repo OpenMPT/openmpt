@@ -116,7 +116,11 @@ protected:
 protected:
 	//{{AFX_MSG(CModTreeBar)
 	afx_msg void OnNcPaint();
+#if _MSC_VER >= 1400
+	afx_msg LRESULT OnNcHitTest(CPoint point);
+#else
 	afx_msg UINT OnNcHitTest(CPoint point);
+#endif 
 	afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
