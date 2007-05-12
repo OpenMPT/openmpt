@@ -97,8 +97,6 @@ CModDoc::CModDoc()
 	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
 	memset(PatternUndo, 0, sizeof(PatternUndo));
-	vector<BYTE> temp; temp.resize(MAX_UNDO_LEVEL, 0);
-	OrderUndo.resize(m_SndFile.Order.size(), temp);
 #ifdef _DEBUG
 	MODCHANNEL *p = m_SndFile.Chn;
 	if (((DWORD)p) & 7) Log("MODCHANNEL is not aligned (0x%08X)\n", p);
@@ -2813,11 +2811,6 @@ void CModDoc::OnPatternRestart()
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 		
 		BEGIN_CRITICAL();
-
-		m_SndFile.SetCurrentPos(0);
-		//Relabs.note: Dirty hack to try to make replay pattern to be 
-		//more like 'play song from start' - a little clean up for 
-		//these playback calls would be nice (March 2007).
 
 		// Cut instruments/samples
 		for (UINT i=0; i<MAX_CHANNELS; i++)

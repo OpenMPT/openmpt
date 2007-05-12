@@ -1568,7 +1568,7 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
-	wsprintf(s, "Build Date: %s", buildDateTime.c_str());
+	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_EDIT2, s);
 	SetDlgItemText(IDC_EDIT3, CString("Open Modplug Tracker, version ") + CMainFrame::GetFullVersionString());
 

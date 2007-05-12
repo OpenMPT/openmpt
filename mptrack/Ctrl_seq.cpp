@@ -207,7 +207,6 @@ BOOL COrderList::SetCurSel(int sel, BOOL bEdit)
 				pSndFile->m_nCurrentPattern = pSndFile->m_nNextPattern = m_nScrollPos;
 				pMainFrm->ResetNotificationBuffer(); //rewbs.toCheck
 				pSndFile->m_nNextRow = 0;
-				pSndFile->ResetChannelSettings(CHNRESET_BASIC);
 				END_CRITICAL();
 			} else
 			if (m_pParent->GetFollowSong())
@@ -217,13 +216,7 @@ BOOL COrderList::SetCurSel(int sel, BOOL bEdit)
 				pSndFile->m_nCurrentPattern = m_nScrollPos;
 				pSndFile->SetCurrentOrder(m_nScrollPos);
 				pSndFile->m_dwSongFlags |= dwPaused;
-				pSndFile->ResetChannelSettings(CHNRESET_BASIC);
-
-				//if (!(dwPaused & SONG_PATTERNLOOP)) pSndFile->GetLength(TRUE);
-				//Relabs.note: Commented above line for it seems to cause
-				//significant slowdown when changing patterns without
-				//pattern-loop enabled. What is it's purpose anyway?
-
+				if (!(dwPaused & SONG_PATTERNLOOP)) pSndFile->GetLength(TRUE);
 				if (bIsPlaying) pMainFrm->ResetNotificationBuffer();
 				END_CRITICAL();
 			}
