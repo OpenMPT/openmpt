@@ -632,10 +632,7 @@ private:
 
 };
 
-//const CHAR gszBuildDate[] = __TIMESTAMP__;
-const string buildDateTime = string(__DATE__) + string(" ") + string(__TIME__);
-
-
+const CHAR gszBuildDate[] = __DATE__ " " __TIME__;
 
 /////////////////////////////////////////////////////////////////////////////
 

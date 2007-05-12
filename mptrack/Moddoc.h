@@ -88,7 +88,6 @@ protected:
 	HWND m_hWndFollow;
 	DWORD m_dwNotifyType;
 	PATTERNUNDOBUFFER PatternUndo[MAX_UNDO_LEVEL];
-	vector<vector<BYTE> > OrderUndo;
 
 // -> CODE#0015
 // -> DESC="channels management dlg"

@@ -462,7 +462,7 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 				if (i >= nRemainingChannels)
 				{
 					m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
-					m_SndFile.SetChannelSettingsToDefault(i);
+					m_SndFile.InitChannel(i);
 				}
 			}
 		}

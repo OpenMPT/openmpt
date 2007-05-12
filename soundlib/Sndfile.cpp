@@ -1039,10 +1039,10 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 //---------------------------------------
 {
 	UINT i, nPattern;
-	BYTE resetMask = (!nPos) ? CHNRESET_TOTAL : CHNRESET_MOST;
+	BYTE resetMask = (!nPos) ? CHNRESET_SETPOS_FULL : CHNRESET_SETPOS_BASIC;
 
 	for (i=0; i<MAX_CHANNELS; i++)
-		ResetChannelSettings(i, resetMask);
+		ResetChannelState(i, resetMask);
 	
 	if (!nPos)
 	{
@@ -1341,16 +1341,10 @@ CString CSoundFile::GetInstrumentName(UINT nInstr) const
 }
 
 
-bool CSoundFile::SetChannelSettingsToDefault(UINT nch)
+bool CSoundFile::InitChannel(UINT nch)
 //-------------------------------------
 {
-    //This is used to set default setting to new channels,
-    //so that a new channel for example won't have some plug in when created - might not do all defaultings,
-    //though.
-                                       
-	if(nch > MAX_BASECHANNELS) return true;
-
-	ResetChannelSettings(nch, CHNRESET_TOTAL);
+	if(nch >= MAX_BASECHANNELS) return true;
 
 	ChnSettings[nch].nPan = 128;
 	ChnSettings[nch].nVolume = 64;
@@ -1358,43 +1352,21 @@ bool CSoundFile::SetChannelSettingsToDefault(UINT nch)
 	ChnSettings[nch].nMixPlugin = 0;
 	ChnSettings[nch].szName[0] = 0;
 
-	Chn[nch].dwFlags = ChnSettings[nch].dwFlags;
-	Chn[nch].nPan = ChnSettings[nch].nPan;
-	Chn[nch].nGlobalVol = ChnSettings[nch].nVolume;
+	ResetChannelState(nch, CHNRESET_TOTAL);
 
 	m_pModDoc->Record1Channel(nch,FALSE);
 	m_pModDoc->Record2Channel(nch,FALSE);
 	m_bChannelMuteTogglePending[nch] = false;
 
-	
 	return false;
 }
 
-void CSoundFile::ResetChannelSettings(CHANNELINDEX i, BYTE resetMask)
+void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 //-------------------------------------------------------
 {
-	//Relabs.Hack
 	if(i >= MAX_CHANNELS) return;
 	
-	if(resetMask & CHNRESET_BASIC)
-	{
-		if(i < MAX_BASECHANNELS)
-		{
-			//Chn[i].dwFlags = ChnSettings[i].dwFlags;
-			Chn[i].nPan = ChnSettings[i].nPan;
-			Chn[i].nGlobalVol = ChnSettings[i].nVolume;
-		}
-		else
-		{
-			Chn[i].dwFlags = 0;
-			Chn[i].nPan = 128;
-			Chn[i].nGlobalVol = 64;
-		}
-		
-	}
-	if(resetMask == CHNRESET_BASIC) return;
-
-	if(resetMask & CHNRESET_MOST)
+	if(resetMask & 2)
 	{
 		Chn[i].nNote = Chn[i].nNewNote = Chn[i].nNewIns = 0;
 		Chn[i].pInstrument = NULL;
@@ -1407,9 +1379,8 @@ void CSoundFile::ResetChannelSettings(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].dwFlags |= CHN_KEYOFF|CHN_NOTEFADE;
 		Chn[i].nTremorCount = 0;
 	}
-	if(resetMask == CHNRESET_MOST) return;
 
-	if(resetMask & CHNRESET_TOTAL)
+	if(resetMask & 4)
 	{
 		Chn[i].nPeriod = 0;
 		Chn[i].nPos = Chn[i].nLength = 0;
@@ -1427,15 +1398,24 @@ void CSoundFile::ResetChannelSettings(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nLeftRamp = Chn[i].nRightRamp = 0;
 		Chn[i].nVolume = 256;
 	}
-}
 
-void CSoundFile::ResetChannelSettings(BYTE resetMask)
-//-------------------------------------
-{
-	for(CHANNELINDEX i = 0; i<GetNumChannels(); i++)
-		ResetChannelSettings(i, resetMask);
+	if(resetMask & 1)
+	{
+		if(i < MAX_BASECHANNELS)
+		{
+			Chn[i].dwFlags = ChnSettings[i].dwFlags;
+			Chn[i].nPan = ChnSettings[i].nPan;
+			Chn[i].nGlobalVol = ChnSettings[i].nVolume;
+		}
+		else
+		{
+			Chn[i].dwFlags = 0;
+			Chn[i].nPan = 128;
+			Chn[i].nGlobalVol = 64;
+		}
+		
+	}
 }
-
 
 
 CHANNELINDEX CSoundFile::ReArrangeChannels(const std::vector<CHANNELINDEX>& newOrder)
@@ -1515,7 +1495,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const std::vector<CHANNELINDEX>& newO
 		}
 		else
 		{
-			SetChannelSettingsToDefault(i);
+			InitChannel(i);
 		}
 	}
 

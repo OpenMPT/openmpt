@@ -2419,7 +2419,7 @@ void CViewPattern::OnAddChannelFront()
 	BeginWaitCursor();
 	//First adding channel as the last channel...
 	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1)) {
-		pSndFile->SetChannelSettingsToDefault(pSndFile->m_nChannels-1);
+		pSndFile->InitChannel(pSndFile->m_nChannels-1);
 		//...and then moving it to right position.
 		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
 
@@ -2443,7 +2443,7 @@ void CViewPattern::OnAddChannelAfter()
 
 	BeginWaitCursor();
 	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1)) {
-		pSndFile->SetChannelSettingsToDefault(pSndFile->m_nChannels-1);
+		pSndFile->InitChannel(pSndFile->m_nChannels-1);
 		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
 
 		pModDoc->SetModified();

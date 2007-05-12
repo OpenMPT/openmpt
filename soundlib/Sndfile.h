@@ -604,9 +604,10 @@ typedef struct _MODCHANNEL
 	//<----
 } MODCHANNEL;
 
-#define CHNRESET_BASIC	1
-#define CHNRESET_MOST	3
-#define CHNRESET_TOTAL	255
+#define CHNRESET_CHNSETTINGS	1 //  1 b 
+#define CHNRESET_SETPOS_BASIC	2 // 10 b
+#define	CHNRESET_SETPOS_FULL	7 //111 b
+#define CHNRESET_TOTAL			255 //11111111b
 
 
 typedef struct _MODCHANNELSETTINGS
@@ -1001,16 +1002,9 @@ public:
 	BOOL GetPatternName(UINT nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
 	CHANNELINDEX ReArrangeChannels(const std::vector<CHANNELINDEX>& fromToArray);
 	bool MoveChannel(UINT chn_from, UINT chn_to);
-	bool SetChannelSettingsToDefault(UINT nch);
 
-	
-	//Sets default channels settings from MODCHANNELSETTINGS to current
-	//channel settings. Flag can be used to tell whether to completely
-	//reset channels, not only a few settings(for maintaining old behavior).
-	void ResetChannelSettings(CHANNELINDEX chn, BYTE resetStyle);
-	//For all channels.
-	void ResetChannelSettings(BYTE resetStyle);
-
+	bool InitChannel(UINT nch);
+	void ResetChannelState(CHANNELINDEX chn, BYTE resetStyle);
 
 	// Module Loaders
 	BOOL ReadXM(LPCBYTE lpStream, DWORD dwMemLength);
