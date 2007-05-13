@@ -27,7 +27,7 @@ public:
 	CSoundFilePlayConfig(void);
 	~CSoundFilePlayConfig(void);
 
-	void SetPluginMixLevels(int mixLevelType);
+	void SetMixLevels(int mixLevelType);
 
 //getters/setters
 	float getIntToFloat();
@@ -72,7 +72,6 @@ private:
 	float m_FloatToInt;
 	float m_VSTiAttenuation;	
 	float m_VSTiVolume;			
-	float m_VSTiGainFactor;		// always m_VSTiAttenuation * m_VSTiVolume. No public setter.
 
 	float m_normalSamplePreAmp;
 	float m_normalVSTiVol;

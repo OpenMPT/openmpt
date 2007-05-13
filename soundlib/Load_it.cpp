@@ -656,8 +656,6 @@ mpts:
 	}
 // Leave
 
-	//m_nType = MOD_TYPE_IT; Relabs.note: Moved to the beginning of loading(April 2007)
-
 	m_nMaxPeriod = 0xF000;
 	m_nMinPeriod = 8;
 

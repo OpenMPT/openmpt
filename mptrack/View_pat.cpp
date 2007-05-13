@@ -229,8 +229,6 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap)
 	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc) return FALSE;
 	pSndFile = pModDoc->GetSoundFile();
-	CRect rect;
-	UINT yofs = GetYScrollPos();
 
 	if ((bWrap) && (pSndFile->PatternSize[m_nPattern]))
 	{
@@ -295,43 +293,11 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap)
 	//end rewbs.fix3168
 
 	if ((row >= pSndFile->PatternSize[m_nPattern]) || (!m_szCell.cy)) return FALSE;
-	GetClientRect(&rect);
-	rect.top += m_szHeader.cy;
-	int numrows = (rect.bottom - rect.top - 1) / m_szCell.cy;
-	if (numrows < 1) numrows = 1;
-	if (m_nMidRow)
-	{
-		UINT newofs = row;
-		InvalidateRow();
-		if (newofs != yofs)
-		{
-			CSize sz;
-			sz.cx = 0;
-			sz.cy = (int)(newofs - yofs) * m_szCell.cy;
-			OnScrollBy(sz, TRUE);
-		}
-		m_nRow = row;
-		InvalidateRow();
-	} else
-	{
-		InvalidateRow();
-		if (row < yofs)
-		{
-			CSize sz;
-			sz.cx = 0;
-			sz.cy = (int)(row - yofs) * m_szCell.cy;
-			OnScrollBy(sz, TRUE);
-		} else
-		if (row > yofs + (UINT)numrows - 1)
-		{
-			CSize sz;
-			sz.cx = 0;
-			sz.cy = (int)(row - yofs - numrows + 1) * m_szCell.cy;
-			OnScrollBy(sz, TRUE);
-		}
-		m_nRow = row;
-		InvalidateRow();
-	}
+	// Fix: If cursor isn't on screen move both scrollbars to make it visible
+	InvalidateRow();
+	m_nRow = row;
+	UpdateScrollbarPositions(); //UpdateScrollbarPositions( false ); // default behavior is to move only vertical scrollbar
+	InvalidateRow();
 	int sel = m_dwCursor | (m_nRow << 16);
 	int sel0 = sel;
 	if ((m_dwStatus & (PATSTATUS_KEYDRAGSEL|PATSTATUS_MOUSEDRAGSEL))
@@ -373,33 +339,89 @@ BOOL CViewPattern::SetCurrentColumn(UINT ncol)
 	if ((m_dwStatus & (PATSTATUS_KEYDRAGSEL|PATSTATUS_MOUSEDRAGSEL))
 	 && (!(m_dwStatus & PATSTATUS_DRAGNDROPEDIT))) sel0 = m_dwStartSel;
 	SetCurSel(sel0, sel);
-	int xofs = GetXScrollPos();
-	int nchn = ncol >> 3;
-	if (nchn < xofs)
-	{
-		CSize size(0,0);
-		size.cx = nchn * m_szCell.cx - GetScrollPos(SB_HORZ);
-		UpdateWindow();
-		if (OnScrollBy(size, TRUE)) UpdateWindow();
-	} else
-	if (nchn > xofs)
-	{
-		CRect rect;
-		GetClientRect(&rect);
-		UINT nw = GetColumnWidth();
-		int maxcol = (rect.right - m_szHeader.cx) / nw;
-		if ((nchn >= (xofs+maxcol)) && (maxcol >= 0))
-		{
-			CSize size(0,0);
-			size.cx = (nchn - maxcol + 1) * m_szCell.cx - GetScrollPos(SB_HORZ);
-			UpdateWindow();
-			if (OnScrollBy(size, TRUE)) UpdateWindow();
-		}
-	}
+	// Fix: If cursor isn't on screen move both scrollbars to make it visible
+	UpdateScrollbarPositions();
 	UpdateIndicator();
 	return TRUE;
 }
 
+// Fix: If cursor isn't on screen move scrollbars to make it visible
+// Fix: save pattern scrollbar position when switching to other tab
+// Assume that m_nRow and m_dwCursor are valid
+// When we switching to other tab the CViewPattern object is deleted
+// and when switching back new one is created
+BOOL CViewPattern::UpdateScrollbarPositions( bool UpdateHorizontalScrollbar )
+{
+// HACK - after new CViewPattern object created SetCurrentRow() and SetCurrentColumn() are called -
+// just skip first two calls of UpdateScrollbarPositions() if pModDoc->GetOldPatternScrollbarsPos() is valid
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc)
+	{
+		CSize scroll = pModDoc->GetOldPatternScrollbarsPos();
+		if( scroll.cx >= 0 )
+		{
+			OnScrollBy( scroll );
+			scroll.cx = -1;
+			pModDoc->SetOldPatternScrollbarsPos( scroll );
+			return TRUE;
+		} else
+		if( scroll.cx >= -1 )
+		{
+			scroll.cx = -2;
+			pModDoc->SetOldPatternScrollbarsPos( scroll );
+			return TRUE;
+		}
+	}
+	CSize scroll(0,0);
+	UINT row = GetCurrentRow();
+	UINT yofs = GetYScrollPos();
+	CRect rect;
+	GetClientRect(&rect);
+	rect.top += m_szHeader.cy;
+	int numrows = (rect.bottom - rect.top - 1) / m_szCell.cy;
+	if (numrows < 1) numrows = 1;
+	if (m_nMidRow)
+	{
+		if (row != yofs)
+		{
+			scroll.cy = (int)(row - yofs) * m_szCell.cy;
+		}
+	} else
+	{
+		if (row < yofs)
+		{
+			scroll.cy = (int)(row - yofs) * m_szCell.cy;
+		} else
+		if (row > yofs + (UINT)numrows - 1)
+		{
+			scroll.cy = (int)(row - yofs - numrows + 1) * m_szCell.cy;
+		}
+	}
+
+	if( UpdateHorizontalScrollbar )
+	{
+		UINT ncol = GetCurrentColumn();
+		UINT xofs = GetXScrollPos();
+		int nchn = ncol >> 3;
+		if (nchn < xofs)
+		{
+			scroll.cx = (int)(nchn - xofs) * m_szCell.cx;
+		} else
+		if (nchn > xofs)
+		{
+			int maxcol = (rect.right - m_szHeader.cx) / m_szCell.cx;
+			if ((nchn >= (xofs+maxcol)) && (maxcol >= 0))
+			{
+				scroll.cx = (int)(nchn - xofs - maxcol + 1) * m_szCell.cx;
+			}
+		}
+	}
+	if( scroll.cx != 0 || scroll.cy != 0 )
+	{
+		OnScrollBy(scroll, TRUE);
+	}
+	return TRUE;
+}
 
 DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 //----------------------------------------------------------
@@ -622,6 +644,13 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 void CViewPattern::OnDestroy()
 //----------------------------
 {
+// Fix: save pattern scrollbar position when switching to other tab
+// When we switching to other tab the CViewPattern object is deleted
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc)
+	{
+		pModDoc->SetOldPatternScrollbarsPos(CSize(m_nXScroll*m_szCell.cx, m_nYScroll*m_szCell.cy));
+	};
 	if (m_pEffectVis)	{
 		m_pEffectVis->DoClose();
 		delete m_pEffectVis;
@@ -4884,6 +4913,7 @@ void CViewPattern::OnShowTimeAtRow()
 	
 	MessageBox(msg);	
 }
+
 
 
 

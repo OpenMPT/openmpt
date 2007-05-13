@@ -101,7 +101,8 @@ CModDoc::CModDoc()
 	MODCHANNEL *p = m_SndFile.Chn;
 	if (((DWORD)p) & 7) Log("MODCHANNEL is not aligned (0x%08X)\n", p);
 #endif
-
+// Fix: save pattern scrollbar position when switching to other tab
+	m_szOldPatternScrollbarsPos = CSize(-10,-10);
 // -> CODE#0015
 // -> DESC="channels management dlg"
 	ReinitRecordState();
@@ -134,20 +135,22 @@ BOOL CModDoc::OnNewDocument()
 	m_SndFile.Create(NULL, this, 0);
 	m_SndFile.ChangeModTypeTo(CTrackApp::GetDefaultDocType());
 
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-	if(CTrackApp::IsProject()) m_SndFile.m_dwSongFlags |= SONG_ITPROJECT;
-// -! NEW_FEATURE#0023
+	if(CTrackApp::IsProject()) {
+		m_SndFile.m_dwSongFlags |= SONG_ITPROJECT;
+	}
 
-	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT)) m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
-	 //rewbs.MacroGUI: enable embedded macros by default.
-	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT)) m_SndFile.m_dwSongFlags |= SONG_EMBEDMIDICFG;
+	if (m_SndFile.m_nType & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) {
+		m_SndFile.m_dwSongFlags |= SONG_LINEARSLIDES;
+		m_SndFile.m_dwSongFlags |= SONG_EMBEDMIDICFG;
+	}
+
+
+	// Refresh mix levels now that the correct mod type has been set
+	m_SndFile.m_nMixLevels=m_SndFile.GetModSpecifications()->defaultMixLevels;
+	m_SndFile.m_pConfig->SetMixLevels(m_SndFile.m_nMixLevels);
 
 	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	ReinitRecordState();
-// -! NEW_FEATURE#0015
 	InitializeMod();
 	SetModifiedFlag(FALSE);
 	return TRUE;
@@ -3119,3 +3122,4 @@ void CModDoc::SongProperties() {
 		SetModified();
 	}
 }
+

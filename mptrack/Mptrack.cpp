@@ -858,7 +858,7 @@ void __stdcall CTrackApp::InternetRequestCallback( HINTERNET hInternet, DWORD_PT
 				CString localVersion = CMainFrame::GetFullVersionString();
 				if (remoteVersion > localVersion) {
 					CString message;
-					message.Format("New version available: %s (you are using %). Would you like more information?", remoteVersion, localVersion);
+					message.Format("New version available: %s (you are using %s). Would you like more information?", remoteVersion, localVersion);
 					if (AfxMessageBox(message, MB_ICONQUESTION|MB_YESNO ) == IDYES) {
 						CString URL;
 						URL.Format("http://openmpt.xwiki.com/xwiki/bin/view/Development/Builds?currentVersion=%s", localVersion);
@@ -1577,16 +1577,17 @@ BOOL CAboutDlg::OnInitDialog()
 MPC forums: http://lpchip.com/modplug/\r\n\
 Robin Fernandes: mailto:modplug@soal.org\r\n\r\n\
 Updates:\r\n\
-http://lpchip.com/modplug/viewtopic.php?t=18");
+http://modplug.sourceforge.net/builds/#dev");
 
 	char *pArrCredit = { 
 		"OpenMPT / Modplug Tracker|"
-		"Copyright © 2004-2005 GPL|"
+		"Copyright © 2004-2007 GPL|"
 		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
 		"|"
-		"Development:|"
-		"Robin Fernandes:  modplug@soal.org (2004-2006)|"
-		"relabsoluness@users.sourceforge.net (2005-2006)|"
+		"Contributors:|"
+		"Robin Fernandes:  robin@soal.org (2004-2007)|"
+		"Ahti Leppan: relabsoluness@users.sourceforge.net (2005-2007)|"
+		"Sergiy Pylypenko: x.pelya.x@gmail.com (2007)|"
 		"Eric Chavanon:  contact@ericus.org (2004-2005)|"
 		"Trevor Nunes:  modplug@plastikskouser.com (2004)|"
 		"Olivier Lapicque:  olivier@modplug.com (1997-2003)|"
@@ -1605,8 +1606,8 @@ http://lpchip.com/modplug/viewtopic.php?t=18");
 		"http://tinyurl.com/4yze8||"
 		"...and to the following for ideas, testing and support:|"
 		"LPChip, Ganja, Diamond, Nofold, Goor00,|"
-		"Georg, Skilletaudio, Squirrel Havoc, Snu,|"
-		"Anboi, Sam Zen, BooT-SectoR-ViruZ, 33, Waxhead,|"
+		"Georg, Skilletaudio, Squirrel Havoc, Snu, Anboi,|"
+		"Sam Zen, BooT-SectoR-ViruZ, 33, Waxhead, Jojo,|"
 		"all at the MPC forums.|"
 		"||||||" 
 	};
