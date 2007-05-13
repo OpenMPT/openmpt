@@ -153,6 +153,8 @@ public:
 	BOOL SetCurrentColumn(UINT ncol);
 	BOOL DragToSel(DWORD dwPos, BOOL bScroll, BOOL bNoMove=FALSE);
 	BOOL SetPlayCursor(UINT nPat, UINT nRow);
+// Fix: If cursor isn't on screen move scrollbars to make it visible
+	BOOL UpdateScrollbarPositions( bool UpdateHorizontalScrollbar=true );
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //	BOOL EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
@@ -350,4 +352,5 @@ public:
 
 
 #endif
+
 

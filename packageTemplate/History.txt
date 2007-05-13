@@ -8,6 +8,18 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling me about the bug
 
+v1.17.02.47
+  ? <rewbs> An update checker was introduced in the previous version. If you had any problems with the update notification, please report a bug.
+  . <pelya> Save pattern scrollbar position when switching to other tabs
+  . <pelya> If the cursor is moved but it is not on screen, move both horizontal and vertical scrollbars to make it visible.
+  . <rewbs> Fix saturation on old modules (introduced in 1.17.02.46). Loading tracks with no saved mixlevel setting defaults to 'original'.
+            Starting new IT, MPTM, ITP or XM defaults to '117RC3'. Starting new MOD or S3M defaults to 'original'.
+  . <rewbs> Tree view FX list now starts with FX01 instead of FX00.
+  / <Relabs> Pattern skipping behavior returned to that of .45
+  . <pelya & rewbs> internal: ifdefs for compilation on vs2005
+  . <Relabs> internal: VS Edit&Continue fix (gone broken in 'RC3'branch)
+  / <Relabs> Minor modifications(cleanup of channel state reset code, removed unused orderundo-vector.)
+
 v1.17.02.46
   + <Relabsoluness> Experimental MPTm format:
       --> Internally, it is still very close to the IT-based format.
@@ -680,4 +692,4 @@ v1.17.02.44
 
 Questions/comments/bug reports?
 -------------------------------
-Visit http://www.modplug.com/forums, or write to robin@soal.org.
+Visit http://modplug.sourceforge.net/forum.

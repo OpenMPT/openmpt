@@ -83,10 +83,10 @@ public:
 	}
 
 private:
-	vector<T1> m_T1;
-	vector<T2> m_T2;
 	//Elements are collected to two arrays so that elements with the 
 	//same index are mapped to each other.
+	vector<T1> m_T1;
+	vector<T2> m_T2;
 
 	T1 m_NotFoundT1;
 	T2 m_NotFoundT2;

@@ -59,10 +59,10 @@ UINT CPatternContainer::GetIndex(const MODPATTERN* const pPat) const
 	return m_Patterns.size();
 }
 
-UINT CPatternContainer::GetInvalidIndex() const {return m_rSndFile.m_nType == MOD_TYPE_MPT ?  LIMIT_UINT_MAX : 0xFF;}
-UINT CPatternContainer::GetIgnoreIndex() const {return m_rSndFile.m_nType == MOD_TYPE_MPT ? LIMIT_UINT_MAX-1 : 0xFE;}
 //NOTE: Various methods around the code are, unsurprisingly, bounded to the way things
 //were handled with 0xFE and 0xFF, so changing these return values might cause problems.
+UINT CPatternContainer::GetInvalidIndex() const {return m_rSndFile.m_nType == MOD_TYPE_MPT ?  LIMIT_UINT_MAX : 0xFF;}
+UINT CPatternContainer::GetIgnoreIndex() const {return m_rSndFile.m_nType == MOD_TYPE_MPT ? LIMIT_UINT_MAX-1 : 0xFE;}
 
 UINT CPatternContainer::GetPatternNumberLimitMax() const
 //-------------------------------------------------------

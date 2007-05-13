@@ -672,7 +672,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 				{
 					pInfo->hEffects = InsertItem("Plugins", IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
 				}
-				wsprintf(s, "FX%d: %s", iFx, pPlugin->Info.szName);
+				wsprintf(s, "FX%d: %s", iFx+1, pPlugin->Info.szName);
 				pInfo->tiEffects[iFx] = InsertItem(s, IMAGE_WAVEOUT, IMAGE_WAVEOUT, pInfo->hEffects, TVI_LAST);
 				nFx++;
 			}

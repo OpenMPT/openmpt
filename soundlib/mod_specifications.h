@@ -21,6 +21,7 @@ struct CModSpecifications
 	uint16 modNameLengthMax;	//Meaning 'usable letters', possible null character is not included.
 	SAMPLEINDEX samplesMax;
 	INSTRUMENTINDEX instrumentsMax;
+	BYTE defaultMixLevels;
 };
 
 enum {
@@ -53,6 +54,7 @@ const CModSpecifications MPTM_SPECS =
     256,								//Max mod name length
 	4000,								//SamplesMax
 	256,								//instrumentMax
+	mixLevels_117RC3,					//defaultMixLevels
 };
 
 
@@ -73,6 +75,7 @@ const CModSpecifications MOD_SPECS =
     20,									//Max mod name length
 	31,									//SamplesMax
 	0,									//instrumentMax
+	mixLevels_original,					//defaultMixLevels
 };
 
 
@@ -91,7 +94,7 @@ const CModSpecifications XM_SPECS =
     20,									//Max mod name length
 	31,									//SamplesMax
 	256,								//instrumentMax
-
+	mixLevels_117RC3,					//defaultMixLevels
 };
 
 const CModSpecifications S3M_SPECS =
@@ -109,6 +112,7 @@ const CModSpecifications S3M_SPECS =
     27,									//Max mod name length
 	31,									//SamplesMax
 	0,									//instrumentMax
+	mixLevels_original,					//defaultMixLevels
 };
 
 const CModSpecifications IT_SPECS =
@@ -126,6 +130,7 @@ const CModSpecifications IT_SPECS =
     25,									//Max mod name length(in ittech.txt: "0000: ³'I'³'M'³'P'³'M'³ Song Name, max 26 characters, includes NULL   ³")
 	256,								//SamplesMax
 	256,								//instrumentMax
+	mixLevels_117RC3,					//defaultMixLevels
 };
 
 

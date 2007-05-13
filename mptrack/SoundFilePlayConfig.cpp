@@ -1,17 +1,14 @@
 #include "stdafx.h"
 #include ".\soundfileplayconfig.h"
 
-CSoundFilePlayConfig::CSoundFilePlayConfig(void)
-{
-	SetPluginMixLevels(mixLevels_117RC3);
+CSoundFilePlayConfig::CSoundFilePlayConfig(void) {
 	setVSTiVolume(1.0f);
 }
 
-CSoundFilePlayConfig::~CSoundFilePlayConfig(void)
-{
+CSoundFilePlayConfig::~CSoundFilePlayConfig(void) {
 }
 
-void CSoundFilePlayConfig::SetPluginMixLevels(int mixLevelType) {
+void CSoundFilePlayConfig::SetMixLevels(int mixLevelType) {
 	switch (mixLevelType)
 	{
 		// Olivier's version gives us floats in [-0.5; 0.5] and slightly saturates VSTis. 
@@ -119,7 +116,6 @@ float CSoundFilePlayConfig::getVSTiVolume() {
 
 void  CSoundFilePlayConfig::setVSTiVolume(float inVSTiVolume) {
 	m_VSTiVolume = inVSTiVolume;
-	m_VSTiGainFactor = m_VSTiAttenuation*m_VSTiVolume;
 }
 
 float CSoundFilePlayConfig::getVSTiAttenuation() {
@@ -127,8 +123,7 @@ float CSoundFilePlayConfig::getVSTiAttenuation() {
 }
 
 void  CSoundFilePlayConfig::setVSTiAttenuation(float inVSTiAttenuation) {
-	m_VSTiAttenuation=inVSTiAttenuation;
-	m_VSTiGainFactor = m_VSTiAttenuation*m_VSTiVolume;
+	m_VSTiAttenuation = inVSTiAttenuation;
 }
 
 float CSoundFilePlayConfig::getIntToFloat() {

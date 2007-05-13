@@ -819,13 +819,13 @@ public: //Misc
 	double GetPlaybackTimeAt(ORDERINDEX, ROWINDEX);
 
 	#ifndef TRADITIONAL_MODCOMMAND
-		void OnSetEffect(MODCOMMAND& mc, EFFECT_ID);
 		//When adding a modeffect to pattern, this is to be called to 
 		//do the actual adding and this can do modifications if needed.
+		void OnSetEffect(MODCOMMAND& mc, EFFECT_ID);
 
-		void OnSetEffectParam(MODCOMMAND& mc, EFFECT_PARAM);
 		//When adding a modeffect parameter to pattern, this is to be called to 
 		//do the actual adding and this can do modifications if needed.
+		void OnSetEffectParam(MODCOMMAND& mc, EFFECT_PARAM);
 	#endif
 
 	virtual bool GetModSpecificFlag(BYTE i)
@@ -865,9 +865,6 @@ private: //'Controllers'
 private: //Misc data
 	bitset<8> m_ModFlags;
 	const CModSpecifications* m_pModSpecs;
-
-
-
 
 public:	// Static Members
 	static UINT m_nXBassDepth, m_nXBassRange;
@@ -947,21 +944,15 @@ public:
 	BOOL Destroy();
 	UINT GetType() const { return m_nType; }
 
+
 	//Return the number of channels in the pattern. In 1.17.02.45
 	//it returned the number of channels with volume != 0
-	UINT GetNumChannels() const {return m_nChannels;}
-		
-		
+	UINT GetNumChannels() const {return m_nChannels;}	
+
 	BOOL SetMasterVolume(UINT vol, BOOL bAdjustAGC=FALSE);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
 	UINT GetNumPatterns() const;
 	UINT GetNumInstruments() const {return m_nInstruments;} 
-		//Relabs.note: The above method didn't seem to work
-		//reasonably nor any reference to it seemed to exist.
-		//Replaced it so that it now really returns the
-		//number of instruments, not the number of samples
-		//within the range of maximum instrument number
-
 	UINT GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
 	UINT GetCurrentPattern() const { return m_nPattern; }
@@ -969,6 +960,8 @@ public:
 	UINT GetSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;
+	const CModSpecifications * GetModSpecifications() {return m_pModSpecs;}
+
 	double GetCurrentBPM() const;
 	int FindOrder(PATTERNINDEX pat, UINT startFromOrder=0, bool direction=true);	//rewbs.playSongFromCursor
 	void DontLoopPattern(int nPat, int nRow=0);		//rewbs.playSongFromCursor

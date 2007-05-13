@@ -435,7 +435,6 @@ CSoundFile::CSoundFile() :
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	m_lTotalSampleCount=0;
 
-	m_nMixLevels=mixLevels_117RC3;
 	m_pConfig = new CSoundFilePlayConfig();
 	
 	BuildDefaultInstrument();
@@ -484,6 +483,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nMaxOrderPosition = 0;
 	m_lpszPatternNames = NULL;
 	m_lpszSongComments = NULL;
+	m_nMixLevels = mixLevels_original;	// Will be overridden if appropriate.
 	memset(Ins, 0, sizeof(Ins));
 	memset(ChnMix, 0, sizeof(ChnMix));
 	memset(Chn, 0, sizeof(Chn));
@@ -588,8 +588,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		}
 #endif
 	} else {
+		// New song
 		m_dwCreatedWithVersion = CMainFrame::GetFullVersionNumeric();
 	}
+
 	// Adjust song names
 	for (UINT iSmp=0; iSmp<MAX_SAMPLES; iSmp++)
 	{
@@ -690,7 +692,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			}
 		}
 	}
-	m_pConfig->SetPluginMixLevels(m_nMixLevels);
+
+	// Set up mix levels
+	m_pConfig->SetMixLevels(m_nMixLevels);
 	RecalculateGainForAllPlugs();
 
 	if (m_nType)
@@ -698,8 +702,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		SetModSpecsPointer();
 		return TRUE;
 	}
-
-	
 
 	return FALSE;
 }
