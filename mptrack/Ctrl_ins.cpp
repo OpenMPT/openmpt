@@ -1024,7 +1024,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	if (dwHintMask & HINT_MODTYPE)
 	{
-		BOOL bITonly = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
+		BOOL bITandMPT = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		//rewbs.instroVSTi
 		BOOL bITandXM = (((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		bool bMPTOnly = ((m_pSndFile->m_nType == MOD_TYPE_MPT) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
@@ -1034,7 +1034,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), bITandXM);
 		m_SliderAttack.EnableWindow(bITandXM);
 		m_EditName.EnableWindow(bITandXM);
-		m_EditFileName.EnableWindow(bITonly);
+		m_EditFileName.EnableWindow(bITandMPT);
 		m_CbnMidiCh.EnableWindow(bITandXM);
 		m_CbnMixPlug.EnableWindow(bITandXM);
 		m_SpinMidiPR.EnableWindow(bITandXM);
@@ -1044,32 +1044,32 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_NoteMap.EnableWindow(bITandXM);
 		m_CbnResampling.EnableWindow(bITandXM);
 		
-		m_ComboNNA.EnableWindow(bITonly);
-		m_SliderVolSwing.EnableWindow(bITonly);
-		m_SliderPanSwing.EnableWindow(bITonly);
-		m_SliderCutSwing.EnableWindow(bITonly);
-		m_SliderResSwing.EnableWindow(bITonly);
-		m_CbnFilterMode.EnableWindow(bITonly);
-		m_ComboDCT.EnableWindow(bITonly);
-		m_ComboDCA.EnableWindow(bITonly);
-		m_ComboPPC.EnableWindow(bITonly);
-		m_SpinPPS.EnableWindow(bITonly);
-		m_EditGlobalVol.EnableWindow(bITonly);
-		m_SpinGlobalVol.EnableWindow(bITonly);
-		m_EditPanning.EnableWindow(bITonly);
-		m_SpinPanning.EnableWindow(bITonly);
-		m_CheckPanning.EnableWindow(bITonly);
-		m_EditPPS.EnableWindow(bITonly);
-		m_CheckCutOff.EnableWindow(bITonly);
-		m_CheckResonance.EnableWindow(bITonly);
-		m_CheckHighpass.EnableWindow(bITonly);
-		m_SliderCutOff.EnableWindow(bITonly);
-		m_SliderResonance.EnableWindow(bITonly);
+		m_ComboNNA.EnableWindow(bITandMPT);
+		m_SliderVolSwing.EnableWindow(bITandMPT);
+		m_SliderPanSwing.EnableWindow(bITandMPT);
+		m_SliderCutSwing.EnableWindow(bITandMPT);
+		m_SliderResSwing.EnableWindow(bITandMPT);
+		m_CbnFilterMode.EnableWindow(bITandMPT);
+		m_ComboDCT.EnableWindow(bITandMPT);
+		m_ComboDCA.EnableWindow(bITandMPT);
+		m_ComboPPC.EnableWindow(bITandMPT);
+		m_SpinPPS.EnableWindow(bITandMPT);
+		m_EditGlobalVol.EnableWindow(bITandMPT);
+		m_SpinGlobalVol.EnableWindow(bITandMPT);
+		m_EditPanning.EnableWindow(bITandMPT);
+		m_SpinPanning.EnableWindow(bITandMPT);
+		m_CheckPanning.EnableWindow(bITandMPT);
+		m_EditPPS.EnableWindow(bITandMPT);
+		m_CheckCutOff.EnableWindow(bITandMPT);
+		m_CheckResonance.EnableWindow(bITandMPT);
+		m_CheckHighpass.EnableWindow(bITandMPT);
+		m_SliderCutOff.EnableWindow(bITandMPT);
+		m_SliderResonance.EnableWindow(bITandMPT);
 		m_SpinInstrument.SetRange(1, m_pSndFile->m_nInstruments);
 		m_SpinInstrument.EnableWindow((m_pSndFile->m_nInstruments) ? TRUE : FALSE);
 		m_ComboTuning.EnableWindow(bMPTOnly);
-		m_EditPitchTempoLock.EnableWindow(bMPTOnly);
-		m_CheckPitchTempoLock.EnableWindow(bMPTOnly);
+		m_EditPitchTempoLock.EnableWindow(bITandMPT);
+		m_CheckPitchTempoLock.EnableWindow(bITandMPT);
 	}
 	if (dwHintMask & (HINT_INSTRUMENT|HINT_MODTYPE))
 	{
