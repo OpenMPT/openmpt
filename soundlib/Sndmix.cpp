@@ -1420,12 +1420,12 @@ BOOL CSoundFile::ReadNote()
 			{
 				freq = GetFreqFromPeriod(period, pChn->nC4Speed, nPeriodFrac);
 			}
-			else //In this case: m_nType == MOD_TYPE_MPT
+			else //In this case: m_nType == MOD_TYPE_MPT and using custom tunings.
 			{
 				m_nRow;
 				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_nTickCount == 0))
 				{
-					pChn->m_Freq = static_cast<UINT>(pChn->nC4Speed * vibratoFactor * pChn->pHeader->pTuning->GetFrequencyRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, static_cast<CTuning::FINESTEPTYPE>(pChn->nFineTune)+pChn->m_PortamentoFineSteps));
+					pChn->m_Freq = pChn->nC4Speed * vibratoFactor * pChn->pHeader->pTuning->GetFrequencyRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, static_cast<CTuning::FINESTEPTYPE>(pChn->nFineTune)+pChn->m_PortamentoFineSteps);
 					if(!pChn->m_CalculateFreq)
 						pChn->m_ReCalculateFreqOnFirstTick = false;
 					else
@@ -1433,15 +1433,11 @@ BOOL CSoundFile::ReadNote()
 				}
 
 				freq = pChn->m_Freq;
-
-				//Doing instrument specific things.
-				if(pChn->pHeader)
-				{
-					//Pitch/Tempo lock (yet another feature from MPT23 :)
-					if(pChn->pHeader->wPitchToTempoLock)
-						freq *= static_cast<UINT>((float)m_nMusicTempo / (float)pChn->pHeader->wPitchToTempoLock);
-				}
 			}
+
+			//Applying Pitch/Tempo lock.
+            if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT) && pChn->pHeader && pChn->pHeader->wPitchToTempoLock)
+				freq *= (float)m_nMusicTempo / (float)pChn->pHeader->wPitchToTempoLock;
 
 
 			if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
