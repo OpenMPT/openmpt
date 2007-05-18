@@ -218,7 +218,7 @@ void CChannelManagerDlg::OnApply()
 	}
 	
 
-	// Redistribute channel setting & update manager internal store memory
+	// Update manager internal store memory
 	for(i = 0 ; i < nChannels ; i++){
 		if(i != newpat[i]){
 			memory[0][i] = newMemory[0][newpat[i]];
@@ -228,13 +228,14 @@ void CChannelManagerDlg::OnApply()
 		memory[3][i] = i;
 	}
 
+	/*
 	if(pActiveMod == pModDoc){
 		i = m_pSndFile->GetCurrentPos();
 		m_pSndFile->m_dwSongFlags &= ~SONG_STEP;
 		m_pSndFile->SetCurrentPos(0);
 		m_pSndFile->SetCurrentPos(i);
 	}
-	
+	*/	
 
 	END_CRITICAL();
 	EndWaitCursor();
