@@ -36,7 +36,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 
 	if(m_SndFile.m_nType == MOD_TYPE_MPT)
 	{
-		if(::MessageBox(NULL, "Convertion from MPT to any other modtype makes certain features unavailable and is not assured to work properly; Do the convertion anyway? If yes, backupping the mod might be a good idea",
+		if(::MessageBox(NULL, "Convertion from MPTm to any other modtype makes certain features unavailable and is not guaranteed to work properly; Do the convertion anyway?",
 		"Notice", MB_YESNO) != IDYES)
 			return FALSE;
 	}
@@ -710,7 +710,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 		}
 	}
 	EndWaitCursor();
-	if (nExt &&  !(m_SndFile.m_nType & MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT))
+	if (nExt &&  !((m_SndFile.m_nType & MOD_TYPE_IT) && (m_SndFile.m_dwSongFlags&SONG_ITPROJECT)))
 	{	//We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample(s) referenced by an instrument,\n"
 					"but not used in the song. Do you want to remove them ?", nExt);
