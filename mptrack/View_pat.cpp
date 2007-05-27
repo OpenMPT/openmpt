@@ -222,8 +222,21 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 }
 
 
-BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap)
-//----------------------------------------------------
+// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
+BOOL CViewPattern::SetCursorPosition(UINT nrow, UINT ncol, BOOL bWrap)
+//--------------------------------------------------------------------------
+{
+	// Set row, but do not update scroll position yet
+	// as there is another position update on the way:
+	SetCurrentRow(nrow, bWrap, false);
+	// Now set column and update scroll position:
+	SetCurrentColumn(ncol);
+	return TRUE; 
+}
+
+
+BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap, BOOL bUpdateHorizontalScrollbar)
+//-------------------------------------------------------------------------------------
 {
 	CSoundFile *pSndFile;
 	CModDoc *pModDoc = GetDocument();
@@ -296,7 +309,8 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap)
 	// Fix: If cursor isn't on screen move both scrollbars to make it visible
 	InvalidateRow();
 	m_nRow = row;
-	UpdateScrollbarPositions(); //UpdateScrollbarPositions( false ); // default behavior is to move only vertical scrollbar
+	// Fix: Horizontal scrollbar pos screwed when selecting with mouse
+	UpdateScrollbarPositions(bUpdateHorizontalScrollbar);
 	InvalidateRow();
 	int sel = m_dwCursor | (m_nRow << 16);
 	int sel0 = sel;
@@ -350,7 +364,7 @@ BOOL CViewPattern::SetCurrentColumn(UINT ncol)
 // Assume that m_nRow and m_dwCursor are valid
 // When we switching to other tab the CViewPattern object is deleted
 // and when switching back new one is created
-BOOL CViewPattern::UpdateScrollbarPositions( bool UpdateHorizontalScrollbar )
+BOOL CViewPattern::UpdateScrollbarPositions( BOOL UpdateHorizontalScrollbar )
 {
 // HACK - after new CViewPattern object created SetCurrentRow() and SetCurrentColumn() are called -
 // just skip first two calls of UpdateScrollbarPositions() if pModDoc->GetOldPatternScrollbarsPos() is valid
@@ -1012,8 +1026,8 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 					SetCurSel(m_dwStartSel, m_dwStartSel);
 				} else
 				{
-					SetCurrentRow(m_dwStartSel >> 16);
-					SetCurrentColumn(m_dwStartSel & 0xFFFF);
+					// Fix: Horizontal scrollbar pos screwed when selecting with mouse
+					SetCursorPosition( m_dwStartSel >> 16, m_dwStartSel & 0xFFFF );
 				}
 			}
 		}
@@ -1071,8 +1085,8 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 		if ((m_nMidRow) && (m_dwBeginSel == m_dwEndSel))
 		{
 			DWORD dwPos = m_dwBeginSel;
-			SetCurrentRow(dwPos >> 16);
-			SetCurrentColumn(dwPos & 0xFFFF);
+			// Fix: Horizontal scrollbar pos screwed when selecting with mouse
+			SetCursorPosition( dwPos >> 16, dwPos & 0xFFFF );
 			//UpdateIndicator();
 		}
 	}
@@ -1165,8 +1179,8 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 	 || ((m_nMenuParam & 0xFFFF) > (m_dwEndSel & 0xFFFF)))
 	{
 		if (pt.y > m_szHeader.cy) { //ensure we're not clicking header
-			SetCurrentRow(m_nMenuParam >> 16);
-			SetCurrentColumn(m_nMenuParam & 0xFFFF);
+			// Fix: Horizontal scrollbar pos screwed when selecting with mouse
+			SetCursorPosition( m_nMenuParam >> 16, m_nMenuParam & 0xFFFF );
 		}
 	}
 	UINT nChn = (m_nMenuParam & 0xFFFF) >> 3;
@@ -1299,8 +1313,8 @@ void CViewPattern::OnMouseMove(UINT, CPoint point)
 			DragToSel(dwPos, TRUE);
 		} else
 		{
-			SetCurrentRow(dwPos >> 16);
-			SetCurrentColumn(dwPos & 0xFFFF);
+			// Fix: Horizontal scrollbar pos screwed when selecting with mouse
+			SetCursorPosition( dwPos >> 16, dwPos & 0xFFFF );
 		}
 	}
 }
@@ -1514,8 +1528,8 @@ void CViewPattern::DeleteRows(UINT colmin, UINT colmax, UINT nrows)
 	//rewbs.customKeys
 	DWORD finalPos = (min(m_dwEndSel >> 16, m_dwBeginSel >> 16) << 16 | (m_dwEndSel & 0xFFFF));
 	SetCurSel(finalPos, finalPos);
-	SetCurrentColumn(finalPos & 0xFFFF);
-	SetCurrentRow(finalPos >> 16);
+	// Fix: Horizontal scrollbar pos screwed when selecting with mouse
+	SetCursorPosition( finalPos >> 16, finalPos & 0xFFFF );
 	//end rewbs.customKeys
 	
 	pModDoc->SetModified();
@@ -2347,8 +2361,8 @@ void CViewPattern::OnDropSelection()
 	if (y2<0) y2=0;
 	if (y2>=nRows) y2=nRows-1;
 	if (c2 >= 3) c2 = 4;
-	SetCurrentRow(y1);
-	SetCurrentColumn((x1<<3)|c1);
+	// Fix: Horizontal scrollbar pos screwed when selecting with mouse
+	SetCursorPosition( y1, (x1<<3)|c1 );
 	SetCurSel((y1<<16)|(x1<<3)|c1, (y2<<16)|(x2<<3)|c2);
 	InvalidatePattern();
 	CSoundFile::FreePattern(pOldPattern);
@@ -2769,7 +2783,7 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 					if (nOrd < pSndFile->Order.size()) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
 					updateOrderList = false;
 				}
-				if (nRow != m_nRow)	SetCurrentRow((nRow < pSndFile->PatternSize[nPat]) ? nRow : 0);
+				if (nRow != m_nRow)	SetCurrentRow((nRow < pSndFile->PatternSize[nPat]) ? nRow : 0, FALSE, FALSE);
 			}
 			SetPlayCursor(0xFFFF, 0);
 		} else
@@ -3064,8 +3078,8 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			if (/*(pState->nPattern == m_nPattern) && */(pState->cbStruct == sizeof(PATTERNVIEWSTATE)))
 			{
 				SetCurrentPattern(pState->nPattern);
-				SetCurrentRow(pState->nRow);
-				SetCurrentColumn(pState->nCursor);
+				// Fix: Horizontal scrollbar pos screwed when selecting with mouse
+				SetCursorPosition( pState->nRow, pState->nCursor );
 				SetCurSel(pState->dwBeginSel, pState->dwEndSel);
 			}
 		}
@@ -4913,6 +4927,7 @@ void CViewPattern::OnShowTimeAtRow()
 	
 	MessageBox(msg);	
 }
+
 
 
 

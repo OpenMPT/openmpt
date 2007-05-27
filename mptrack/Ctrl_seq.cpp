@@ -467,7 +467,12 @@ void COrderList::OnPaint()
 			int nOrder = ((nIndex >= 0) && (nIndex < pSndFile->Order.size())) ? pSndFile->Order[nIndex] : -1;
 			if ((rect.right = rect.left + m_cxFont) > rcClient.right) rect.right = rcClient.right;
 			rect.right--;
-			FillRect(dc.m_hDC, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
+			if (bHighLight) {
+				FillRect(dc.m_hDC, &rect, CMainFrame::brushHighLight);
+			} else {
+				FillRect(dc.m_hDC, &rect, CMainFrame::brushWindow);
+			}
+			
 			
 			//Drawing the shown pattern-indicator or drag position.
 			if (nIndex == ((m_bDragging) ? (int)m_nDropPos : m_nScrollPos))

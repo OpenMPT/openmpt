@@ -73,18 +73,8 @@ protected:
 	CPatternGotoDialog *m_pGotoWnd;
 	SIZE m_szHeader, m_szCell;
 	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
-
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-//	UINT CViewPattern::GetCurrentSplitInstrument() const;
-//	UINT CViewPattern::GetCurrentSplitNote() const;
-//	UINT CViewPattern::GetCurrentOctaveModifier() const;
-//	UINT CViewPattern::GetCurrentOctaveLink() const;
-//	UINT CViewPattern::GetCurrentSplitVolume() const;
-//	rewbs.merge: inverted message direction
 	UINT m_nSplitInstrument, m_nSplitNote, m_nOctaveModifier, m_nSplitVolume;
 	BOOL m_bOctaveLink;
-// -! NEW_FEATURE#0012
 
 	int m_nXScroll, m_nYScroll;
 	DWORD m_nDragItem, m_nMenuParam, m_nDetailLevel;
@@ -149,12 +139,13 @@ public:
 	void InvalidateChannelsHeaders();
 	void SetCurSel(DWORD dwBegin, DWORD dwEnd);
 	BOOL SetCurrentPattern(UINT npat, int nrow=-1);
-	BOOL SetCurrentRow(UINT nrow, BOOL bWrap=FALSE);
+	BOOL SetCurrentRow(UINT nrow, BOOL bWrap=FALSE, BOOL bUpdateHorizontalScrollbar=TRUE );
 	BOOL SetCurrentColumn(UINT ncol);
+	// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
+	BOOL SetCursorPosition(UINT nrow, UINT ncol, BOOL bWrap=FALSE );
 	BOOL DragToSel(DWORD dwPos, BOOL bScroll, BOOL bNoMove=FALSE);
 	BOOL SetPlayCursor(UINT nPat, UINT nRow);
-// Fix: If cursor isn't on screen move scrollbars to make it visible
-	BOOL UpdateScrollbarPositions( bool UpdateHorizontalScrollbar=true );
+	BOOL UpdateScrollbarPositions( BOOL bUpdateHorizontalScrollbar=TRUE );
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //	BOOL EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
@@ -352,5 +343,6 @@ public:
 
 
 #endif
+
 
 

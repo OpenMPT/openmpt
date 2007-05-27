@@ -11,12 +11,12 @@ class COrderList: public CWnd
 protected:
 	HFONT m_hFont;
 	COLORREF colorText, colorTextSel;
-	int m_cxFont, m_cyFont, m_nXScroll, m_nScrollPos, m_nDropPos;
 	//m_nXScroll  : The order at the beginning of shown orderlist?
 	//m_nScrollPos: The same as order?
-	BYTE m_nOrderlistMargins;
+	int m_cxFont, m_cyFont, m_nXScroll, m_nScrollPos, m_nDropPos;
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
+	BYTE m_nOrderlistMargins;
 	UINT m_nDragOrder;
 	BOOL m_bScrolling, m_bDragging, m_bShift;
 	CModDoc *m_pModDoc;

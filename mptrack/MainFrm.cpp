@@ -1006,8 +1006,9 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 
 		HWND hWnd = ::GetFocus();
 		if (hWnd != NULL) {
-			TCHAR szClassName[512];
-			textboxHasFocus = GetClassName(hWnd, szClassName, 6) && _tcsicmp(szClassName, _T("Edit")) == 0;		
+			TCHAR activeWindowClassName[512];
+			GetClassName(hWnd, activeWindowClassName, 6);
+			textboxHasFocus = _tcsicmp(activeWindowClassName, _T("Edit")) == 0;
 			if (textboxHasFocus) {
 				handledByTextBox = m_InputHandler->isKeyPressHandledByTextBox(wParam);
 			}
@@ -1752,7 +1753,7 @@ void CMainFrame::UpdateColors()
 		COLORREF crBkgnd = GetSysColor(COLOR_WINDOW);
 		if (brushHighLight) DeleteObject(brushHighLight);
 		brushHighLight = CreateSolidBrush(GetSysColor(COLOR_HIGHLIGHT));
-		if (brushHighLightRed) DeleteObject(brushHighLight);
+		if (brushHighLightRed) DeleteObject(brushHighLightRed);
 		brushHighLightRed = CreateSolidBrush(RGB(0xFF,0x00,0x00));
 
 		if (brushWindow) DeleteObject(brushWindow);
