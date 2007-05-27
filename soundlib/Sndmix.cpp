@@ -203,11 +203,9 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 	if (m_nMaxMixChannels > MAX_CHANNELS) m_nMaxMixChannels = MAX_CHANNELS;
 	if (gdwMixingFreq < 4000) gdwMixingFreq = 4000;
 	if (gdwMixingFreq > MAX_SAMPLE_RATE) gdwMixingFreq = MAX_SAMPLE_RATE;
-	//rewbs.resamplerConf
-	//gnVolumeRampSamples = (gdwMixingFreq * VOLUMERAMPLEN) / 100000;	
-	//if (gnVolumeRampSamples < 8) gnVolumeRampSamples = 8; //
-	gnVolumeRampSamples = CMainFrame::glVolumeRampSamples;
-	//end rewbs.resamplerConf
+	// Start with ramping disabled to avoid clicks on first read.
+	// Ramping is now set after the first read in CSoundFile::Read();
+	gnVolumeRampSamples = 0; 
 	gnDryROfsVol = gnDryLOfsVol = 0;
 #ifndef NO_REVERB
 	gnRvbROfsVol = gnRvbLOfsVol = 0;
@@ -394,6 +392,8 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		lRead -= lCount;
 		m_nBufferCount -= lCount;
 		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
+		// Turn on ramping after first read (fix http://lpchip.com/modplug/viewtopic.php?t=523 )
+		gnVolumeRampSamples = CMainFrame::glVolumeRampSamples;
 	}
 MixDone:
 	if (lRead) memset(lpBuffer, (gnBitsPerSample == 8) ? 0x80 : 0, lRead * lSampleSize);
@@ -731,19 +731,19 @@ BOOL CSoundFile::ProcessRow()
 	// Should we process tick0 effects?
 	if (!m_nMusicSpeed) m_nMusicSpeed = 1;
 	m_dwSongFlags |= SONG_FIRSTTICK;
+
+	//End of row? stop pattern step (aka "play row").
+	if (m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay+1) + m_nFrameDelay - 1) {
+		#ifdef MODPLUG_TRACKER
+		if (m_dwSongFlags & SONG_STEP) {
+			m_dwSongFlags &= ~SONG_STEP;
+			m_dwSongFlags |= SONG_PAUSED;
+		}
+		#endif // MODPLUG_TRACKER
+	}
+
 	if (m_nTickCount)
 	{
-		//End of row? stop pattern step (aka "play row").
-		if (m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay+1) + m_nFrameDelay - 1) {
-			#ifdef MODPLUG_TRACKER
-			if (m_dwSongFlags & SONG_STEP) {
-				m_dwSongFlags &= ~SONG_STEP;
-				m_dwSongFlags |= SONG_PAUSED;
-			}
-			#endif // MODPLUG_TRACKER
-		}
-
-
 		m_dwSongFlags &= ~SONG_FIRSTTICK;
 		if ((!(m_nType & MOD_TYPE_XM)) && (m_nTickCount < m_nMusicSpeed * (1 + m_nPatternDelay)))
 		{
@@ -1884,7 +1884,7 @@ int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)
 
 
 VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
-//--------------------------------------------------------
+//---------------------------------------------------------------------------
 {
 		long delta=0;
 		long step=0;
@@ -1915,6 +1915,7 @@ VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
 				m_nSamplesToGlobalVolRampDest--;
 			} else {
 				SoundBuffer[pos] = _muldiv(SoundBuffer[pos], m_nGlobalVolume, MAX_GLOBAL_VOLUME);
+				m_lHighResRampingGlobalVolume = m_nGlobalVolume<<VOLUMERAMPPRECISION;
 			}
 
 		}

@@ -1573,10 +1573,9 @@ BOOL CAboutDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT3, CString("Open Modplug Tracker, version ") + CMainFrame::GetFullVersionString());
 
 	m_heContact.SetWindowText(
-"Contact:\r\n\
-MPC forums: http://lpchip.com/modplug/\r\n\
-Robin Fernandes: mailto:modplug@soal.org\r\n\r\n\
-Updates:\r\n\
+"Contact / Discussion:\r\n\
+http://modplug.sourceforge.net/forum\r\n\
+\r\n\Updates:\r\n\
 http://modplug.sourceforge.net/builds/#dev");
 
 	char *pArrCredit = { 

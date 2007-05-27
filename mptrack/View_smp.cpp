@@ -1321,7 +1321,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				if (pins->uFlags & CHN_STEREO) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, "Convert to mono");
 			}
 			
-			::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_TRIM, "Trim\t" + ih->GetKeyTextFromCommand(kcSampleTrim));
+			::AppendMenu(hMenu, MF_STRING|(m_dwEndSel>m_dwBeginSel)?0:MF_GRAYED, 
+				ID_SAMPLE_TRIM, "Trim\t" + ih->GetKeyTextFromCommand(kcSampleTrim));
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\t" + ih->GetKeyTextFromCommand(kcEditCut));
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}

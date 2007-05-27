@@ -6,7 +6,18 @@ OpenMPT - Full Version History
 -: known issue / regression
 /: change
 ?: other
-(tx XYZ): thanks to XYZ for telling me about the bug
+(tx XYZ): thanks to XYZ for telling us about the bug
+
+v1.17.02.48
+  . <Relabs> Fix song cleanup issue (http://lpchip.com/modplug/viewtopic.php?t=1711)
+  . <Relabs> Pitch/Tempo lock fix (broken in .46 and .47) (http://lpchip.com/modplug/viewtopic.php?t=1646)
+  / <Relabs> Pattern manager channel reordering behviour changes / fixes. (http://lpchip.com/modplug/viewtopic.php?t=1148)
+  . <pelya> Fix bad horizontal scrolling in pattern editor when positioning the cursor with the mouse. (http://lpchip.com/modplug/viewtopic.php?t=1650)
+  . <rewbs> Fix odd "play row" behaviour when using 1 tick-per-row (http://lpchip.com/modplug/viewtopic.php?t=1038).
+  . <rewbs> Fix pop due to ramping when song starts with a pattern command that sets a low global volume. (http://lpchip.com/modplug/viewtopic.php?t=523)
+  . <rewbs> Fix occasional colour issues with orderlist (http://lpchip.com/modplug/viewtopic.php?t=867)
+  . <rewbs> Fix impossible horizontal scrolling in pattern editor when playing with follow song on 
+  . <rewbs> Grey out "Trim" option in sample editor context menu if there's no selection. (http://lpchip.com/modplug/viewtopic.php?t=908)
 
 v1.17.02.47
   ? <rewbs> An update checker was introduced in the previous version. If you had any problems with the update notification, please report a bug.
