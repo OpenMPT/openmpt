@@ -2814,7 +2814,8 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
 			{
 				curKc = commands[curCmd].kcList[k];
-				if ((!curKc.mod) || (curKc.code!=VK_SHIFT && curKc.code!=VK_CONTROL && curKc.code!=VK_MENU && curKc.code!=0))
+				if ((!curKc.mod) || (curKc.code!=VK_SHIFT && curKc.code!=VK_CONTROL && curKc.code!=VK_MENU && curKc.code!=0 &&
+					curKc.code!=VK_LWIN && curKc.code!=VK_RWIN )) // Feature: use Windows keys as modifier keys
 				{
 					report+="Error! " + GetCommandText((CommandID)curCmd) + " must be a modifier (shift/ctrl/alt), but is currently " + GetKeyText(inKc.mod, inKc.code) + "\r\n";
 					//replace with dummy
@@ -2880,6 +2881,7 @@ UINT CCommandSet::CodeToModifier(UINT code)
 		case VK_SHIFT:	 return HOTKEYF_SHIFT;
 		case VK_MENU:	 return HOTKEYF_ALT;
 		case VK_CONTROL: return HOTKEYF_CONTROL;
+		case VK_LWIN: case VK_RWIN: return HOTKEYF_EXT; // Feature: use Windows keys as modifier keys
 		default:		 /*DEBUG: ASSERT(false);*/ return 0;		//can only get modifier for modifier key
 	}
 	
@@ -2897,9 +2899,6 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	
 	//Clear map
 	memset(km, -1, sizeof(kcNull)*KeyMapSize);
-//	km.RemoveAll();
-//	km.InitHashTable(700423);
-	
 
     //Copy commandlist content into map:
 	for (UINT cmd=0; cmd<kcNumCommands; cmd++)
@@ -3216,6 +3215,7 @@ CString CCommandSet::GetModifierText(UINT mod)
 	if (mod & HOTKEYF_SHIFT) text.Append("Shift+");
 	if (mod & HOTKEYF_CONTROL) text.Append("Ctrl+");
 	if (mod & HOTKEYF_ALT) text.Append("Alt+");
+	if (mod & HOTKEYF_EXT) text.Append("Win+"); // Feature: use Windows keys as modifier keys
 	return text;
 }
 
