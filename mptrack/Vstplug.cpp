@@ -985,10 +985,11 @@ void CVstPluginManager::ReportPlugException(LPCSTR format,...)
 //
 
 BEGIN_MESSAGE_MAP(CSelectPluginDlg, CDialog)
-	ON_NOTIFY(TVN_SELCHANGED,	IDC_TREE1, OnSelChanged)
-	ON_NOTIFY(NM_DBLCLK,		IDC_TREE1, OnSelDblClk)
-	ON_COMMAND(IDC_BUTTON1,		OnAddPlugin)
-	ON_COMMAND(IDC_BUTTON2,		OnRemovePlugin)
+	ON_NOTIFY(TVN_SELCHANGED,	 IDC_TREE1, OnSelChanged)
+	ON_NOTIFY(NM_DBLCLK,		 IDC_TREE1, OnSelDblClk)
+	ON_COMMAND(IDC_BUTTON1,		 OnAddPlugin)
+	ON_COMMAND(IDC_BUTTON2,		 OnRemovePlugin)
+	ON_EN_CHANGE(IDC_NAMEFILTER, OnNameFilterChanged)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
@@ -996,7 +997,9 @@ END_MESSAGE_MAP()
 void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
 //-------------------------------------------------------
 {
+	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TREE1, m_treePlugins);
+	DDX_Text(pDX, IDC_NAMEFILTER, m_sNameFilter);
 }
 
 
@@ -1199,6 +1202,14 @@ VOID CSelectPluginDlg::OnCancel()
 	CDialog::OnCancel();
 }
 
+void CSelectPluginDlg::OnNameFilterChanged() 
+//-------------------------------------
+{
+	GetDlgItem(IDC_NAMEFILTER)->GetWindowText(m_sNameFilter);
+	m_sNameFilter = m_sNameFilter.MakeLower();
+	UpdatePluginsList();
+}
+
 VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 //---------------------------------------------------------------
 {
@@ -1231,17 +1242,30 @@ VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 		PVSTPLUGINLIB p = pManager->GetFirstPlugin();
 		while (p)
 		{
-			if (p->dwPluginId1 == kDmoMagic)
-			{
+			if (p->dwPluginId1 == kDmoMagic) {
 				tvis.hParent = hDmo;
-			} else
-			{
+			} else {
 				tvis.hParent = (p->bIsInstrument) ? hSynth : hVst;
 			}
+
+			// Apply name filter
+			if (m_sNameFilter != "") {
+				CString displayName = p->szLibraryName;
+				if (displayName.MakeLower().Find(m_sNameFilter) == -1) {
+					p = p->pNext;
+					continue;
+				}
+			}
+
 			tvis.hInsertAfter = TVI_SORT;
 			tvis.item.pszText = p->szLibraryName;
 			tvis.item.lParam = (LPARAM)p;
 			HTREEITEM h = m_treePlugins.InsertItem(&tvis);
+
+			//If filter is active, expand nodes.
+			if (m_sNameFilter != "") {
+				m_treePlugins.EnsureVisible(h);
+			}
 
 			//Which plugin should be selected?
 			if (m_pPlugin) {
@@ -1279,8 +1303,7 @@ VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 		}
 	}
 	m_treePlugins.SetRedraw(TRUE);
-	if (cursel)
-	{
+	if (cursel) {
 		m_treePlugins.SelectItem(cursel);
 		m_treePlugins.SetItemState(cursel, TVIS_BOLD, TVIS_BOLD);
 		m_treePlugins.EnsureVisible(cursel);
@@ -1400,11 +1423,13 @@ VOID CSelectPluginDlg::OnRemovePlugin()
 
 
 void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
+//-------------------------------------------------------
 {
 	CDialog::OnSize(nType, cx, cy);
 
 	if (m_treePlugins) {
-		m_treePlugins.MoveWindow(11,11, cx-105, cy-40, FALSE);
+		m_treePlugins.MoveWindow(11, 33, cx-105, cy-63, FALSE);
+		::MoveWindow(GetDlgItem(IDC_NAMEFILTER)->m_hWnd, 50, 11, cx-145, 21, FALSE);
 		::MoveWindow(GetDlgItem(IDC_TEXT1)->m_hWnd,	11,cy-25, cx-22, 25, FALSE);   
 		::MoveWindow(GetDlgItem(IDOK)->m_hWnd,			 cx-85, 11,    75, 23, FALSE);
 		::MoveWindow(GetDlgItem(IDCANCEL)->m_hWnd,		 cx-85, 39,    75, 23, FALSE);

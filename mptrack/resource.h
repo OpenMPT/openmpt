@@ -789,6 +789,7 @@
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302
 #define IDC_EDIT_RPB                    2303
+#define IDC_NAMEFILTER                  2304
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1015,7 +1016,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        515
 #define _APS_NEXT_COMMAND_VALUE         59211
-#define _APS_NEXT_CONTROL_VALUE         2304
+#define _APS_NEXT_CONTROL_VALUE         2305
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

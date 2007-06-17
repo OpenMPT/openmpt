@@ -232,6 +232,7 @@ protected:
 	PSNDMIXPLUGIN m_pPlugin;
 	CModDoc *m_pModDoc;
 	CTreeCtrl m_treePlugins;
+	CString m_sNameFilter;
 
 public:
 	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent); //rewbs.plugDocAware
@@ -244,6 +245,7 @@ public:
 	virtual VOID OnCancel();
 	afx_msg void OnAddPlugin();
 	afx_msg void OnRemovePlugin();
+	afx_msg void OnNameFilterChanged();
 	afx_msg void OnSelChanged(NMHDR *pNotifyStruct, LRESULT * result);
 	afx_msg void OnSelDblClk(NMHDR *pNotifyStruct, LRESULT * result);
 	DECLARE_MESSAGE_MAP()
