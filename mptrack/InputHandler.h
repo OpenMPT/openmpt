@@ -66,6 +66,10 @@ protected:
 	bool m_bNoAltMenu;
 	bool m_bDistinguishControls, m_bDistinguishShifts, m_bDistinguishAlts;
 	bool CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode);
+	bool m_bInterceptWindowsKeys, m_bInterceptNumLock, m_bInterceptCapsLock, m_bInterceptScrollLock;
+	int m_nSkipGeneratedKeypresses;
+	bool InterceptSpecialKeys( UINT nChar , UINT nFlags );
+	void SetupSpecialKeyInterception();
 
 public:
 	CCommandSet *activeCommandSet;
@@ -87,4 +91,5 @@ public:
 	bool SetXMEffects(void);
 	bool SetITEffects(void);
 };
+
 

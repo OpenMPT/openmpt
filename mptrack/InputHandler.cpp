@@ -35,6 +35,8 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 
 	//Get Keymap 
 	activeCommandSet->GenKeyMap(keyMap);
+	SetupSpecialKeyInterception(); // Feature: use Windows keys as modifier keys, intercept special keys
+	m_nSkipGeneratedKeypresses = 0;
 	
 	m_bDistinguishControls = false; 
 	m_bDistinguishShifts = false;
@@ -54,38 +56,37 @@ CInputHandler::~CInputHandler(void)
 
 
 //--------------------------------------------------------------
-
-
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam)
-
 {
 	CommandID executeCommand = kcNull;	
 	KeyEventType keyEventType;
 
-	if (code == HC_ACTION)
-	{
+	if (code == HC_ACTION)	{
 		//Get the KeyEventType (key up, key down, key repeat)
 		DWORD scancode = lParam >> 16;
-		if		((scancode & 0xC000) == 0xC000)		keyEventType = kKeyEventUp;
-		else if ((scancode & 0xC000) == 0x0000)		keyEventType = kKeyEventDown;
-		else										keyEventType = kKeyEventRepeat;
+		if	((scancode & 0xC000) == 0xC000) {
+			keyEventType = kKeyEventUp;
+		} else if ((scancode & 0xC000) == 0x0000) {
+			keyEventType = kKeyEventDown;
+		} else {
+			keyEventType = kKeyEventRepeat;
+		}
 
-		//Catch modifier change (ctrl, alt, shift) - Only check on keyDown or keyUp.
-		if (keyEventType == kKeyEventUp || keyEventType == kKeyEventDown)
-		{
+		// Catch modifier change (ctrl, alt, shift) - Only check on keyDown or keyUp.
+		// NB: we want to catch modifiers even when the input handler is locked
+		if (keyEventType == kKeyEventUp || keyEventType == kKeyEventDown) {
 			scancode =(lParam >> 16) & 0x1FF;
 			CatchModifierChange(wParam, keyEventType, scancode);
 		}
 
-		if (keyEventType == kKeyEventUp)
-			keyEventType=kKeyEventUp;
-
-		if (!Bypass())	// If bypassing, we want to catch modifiers but not execute commands
+		if (!InterceptSpecialKeys( wParam, lParam ) && !Bypass()) {
+			// only execute command when the input handler is not locked
+			// and the input is not a consequence of special key interception.
 			executeCommand = keyMap[context][modifierMask][wParam][keyEventType];
+		}
 	}
 
-	if (m_pMainFrm && executeCommand != kcNull)
-	{
+	if (m_pMainFrm && executeCommand != kcNull)	{
 		m_pMainFrm->PostMessage(WM_MOD_KEYCOMMAND, executeCommand, wParam);
 	}
 
@@ -111,6 +112,64 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 	return executeCommand;
 }
 
+// Feature: use Windows keys as modifier keys, intercept special keys
+bool CInputHandler::InterceptSpecialKeys( UINT nChar , UINT nFlags )
+{
+	KeyEventType keyEventType = GetKeyEventType( HIWORD(nFlags) );
+	enum { VK_NonExistentKey = VK_F24+1 };
+	
+	if( nChar == VK_NonExistentKey ) {
+		return true;
+	} else if( m_bInterceptWindowsKeys && ( nChar == VK_LWIN || nChar == VK_RWIN ) ) {
+		if( keyEventType == kKeyEventDown ) {
+			INPUT inp[2];
+			inp[0].type = inp[1].type = INPUT_KEYBOARD;
+			inp[0].ki.time = inp[1].ki.time = 0;
+			inp[0].ki.dwExtraInfo = inp[0].ki.dwExtraInfo = 0;
+			inp[0].ki.wVk = inp[1].ki.wVk = VK_NonExistentKey;
+			inp[0].ki.wScan = inp[1].ki.wScan = 0;
+			inp[0].ki.dwFlags = 0;
+			inp[1].ki.dwFlags = KEYEVENTF_KEYUP;
+			SendInput( 2, inp, sizeof(INPUT) );
+		}
+	}
+	
+	if( ( nChar == VK_NUMLOCK && m_bInterceptNumLock ) || 
+			( nChar == VK_CAPITAL && m_bInterceptCapsLock ) || 
+			( nChar == VK_SCROLL && m_bInterceptScrollLock ) ) {
+		if( m_nSkipGeneratedKeypresses > 0 ) {
+			m_nSkipGeneratedKeypresses -- ;
+			return true;
+		} else if( keyEventType == kKeyEventDown )	{
+			m_nSkipGeneratedKeypresses = 2;
+			INPUT inp[2];
+			inp[0].type = inp[1].type = INPUT_KEYBOARD;
+			inp[0].ki.time = inp[1].ki.time = 0;
+			inp[0].ki.dwExtraInfo = inp[0].ki.dwExtraInfo = 0;
+			inp[0].ki.wVk = inp[1].ki.wVk = nChar;
+			inp[0].ki.wScan = inp[1].ki.wScan = 0;
+			inp[0].ki.dwFlags = KEYEVENTF_KEYUP;
+			inp[1].ki.dwFlags = 0;
+			SendInput( 2, inp, sizeof(INPUT) );
+		}
+	}
+	return false;
+};
+
+void CInputHandler::SetupSpecialKeyInterception()
+{
+	m_bInterceptWindowsKeys = m_bInterceptNumLock = m_bInterceptCapsLock = m_bInterceptScrollLock = false;
+	for( int context=0; context<sizeof(keyMap)/sizeof(keyMap[0]); context++ )
+	for( int mod=0; mod<sizeof(keyMap[0])/sizeof(keyMap[0][0]); mod++ )
+	for( int key=0; key<sizeof(keyMap[0][0])/sizeof(keyMap[0][0][0]); key++ )
+	for( int kevent=0; kevent<sizeof(keyMap[0][0][0])/sizeof(keyMap[0][0][0][0]); kevent++ ) {
+		if( keyMap[context][mod][key][kevent] == kcNull ) continue;
+		if( mod == HOTKEYF_EXT ) m_bInterceptWindowsKeys = true;
+		if( key == VK_NUMLOCK ) m_bInterceptNumLock = true;
+		if( key == VK_CAPITAL ) m_bInterceptCapsLock = true;
+		if( key == VK_SCROLL ) m_bInterceptScrollLock = true;
+	};
+};
 
 //--------------------------------------------------------------
 //Deal with Modifier keypresses. Private surouting used above.
@@ -156,6 +215,9 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 */				tempModifierMask |= HOTKEYF_ALT; 
 				break;
 //			}
+		case VK_LWIN: case VK_RWIN: // Feature: use Windows keys as modifier keys
+				tempModifierMask |= HOTKEYF_EXT; 
+				break;
 	}
 
 	if (tempModifierMask)	//This keypress just changed the modifier mask
@@ -236,8 +298,8 @@ void CInputHandler::LogModifiers(UINT mask)
 	if (mask & HOTKEYF_CONTROL) Log("Ctrl On"); else Log("Ctrl --");
 	if (mask & HOTKEYF_SHIFT)   Log("\tShft On"); else Log("\tShft --");
 	if (mask & HOTKEYF_ALT)     Log("\tAlt  On\n"); else Log("\tAlt  --\n");
+	if (mask & HOTKEYF_EXT)     Log("\tWin  On\n"); else Log("\tWin  --\n"); // Feature: use Windows keys as modifier keys
 }
-
 
 KeyEventType CInputHandler::GetKeyEventType(UINT nFlags)
 {	
@@ -439,6 +501,7 @@ void CInputHandler::SetNewCommandSet(CCommandSet *newSet)
 {
 	activeCommandSet->Copy(newSet);
 	activeCommandSet->GenKeyMap(keyMap);
+	SetupSpecialKeyInterception(); // Feature: use Windows keys as modifier keys, intercept special keys
 	UpdateMainMenu();
 }
 

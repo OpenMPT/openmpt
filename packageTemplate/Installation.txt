@@ -1,5 +1,6 @@
 OpenMPT development build - Installation notes
 ----------------------------------------------
-. If you have an existing installation of OpenMPT and wish to re-use its settings, copy your mptrack.ini to this directory.
-. If not, you're done: just launch mptrack.exe.
+. If you have an existing installation of OpenMPT and wish to re-use its settings, 
+  copy your mptrack.ini and plugin.cache to the directory into which you extract the archive.
+. If not, you're done: just extract the archive and launch mptrack.exe.
 
