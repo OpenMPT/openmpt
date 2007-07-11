@@ -2189,7 +2189,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, unsigned long nSamples)
 			CString processMethod = (m_pEffect->flags & effFlagsCanReplacing) ? "processReplacing" : "process";
 			CVstPluginManager::ReportPlugException("The plugin %s threw an exception in %s. It has automatically been set to \"Bypass\".", m_pMixStruct->Info.szName, processMethod);
 			ClearVSTEvents();
-			SetEvent(processCalled);
+//			SetEvent(processCalled);
 		}
 
 		//mix outputs of multi-output VSTs:

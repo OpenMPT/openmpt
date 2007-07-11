@@ -125,6 +125,7 @@ public:
 	BOOL GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX=FALSE, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
 	LONG GetIndexFromEffect(UINT command, UINT param);
 	UINT GetEffectFromIndex(UINT ndx, int &refParam);
+	UINT GetEffectMaskFromIndex(UINT ndx);
 	BOOL GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param);
 	BOOL IsExtendedEffect(UINT ndx) const;
 	UINT MapValueToPos(UINT ndx, UINT param);

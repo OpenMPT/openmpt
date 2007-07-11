@@ -753,17 +753,21 @@ void CFindReplaceTab::OnOK()
 		m_nVol = combo->GetItemData(combo->GetCurSel());
 	}
 	// Effect
-	m_nParam = 0;
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL) && (m_pModDoc))
-	{
-		int n = -1;
-		m_nCommand = m_pModDoc->GetEffectFromIndex(combo->GetItemData(combo->GetCurSel()), n);
-		if (n >= 0) m_nParam = n;
+	int effectIndex = -1;
+	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL) && (m_pModDoc)) {
+		int n = -1; // unused parameter adjustment
+		effectIndex = combo->GetItemData(combo->GetCurSel());
+		m_nCommand = m_pModDoc->GetEffectFromIndex(effectIndex, n);
 	}
 	// Param
-	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO6)) != NULL)
-	{
-		m_nParam |= combo->GetItemData(combo->GetCurSel());
+	m_nParam = 0;
+	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO6)) != NULL) {
+		m_nParam = combo->GetItemData(combo->GetCurSel());
+
+		// Apply parameter value mask if required (e.g. SDx has mask D0).
+		if (effectIndex > -1) {
+			m_nParam |= m_pModDoc->GetEffectMaskFromIndex(effectIndex);
+		}
 	}
 	// Min/Max channels
 	if (!m_bReplace)

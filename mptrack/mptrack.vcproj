@@ -51,6 +51,7 @@
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\xsoundlib\Debug"
+				DelayLoadDLLs="winhttp.dll"
 				GenerateDebugInformation="TRUE"
 				AssemblyDebug="1"
 				ProgramDatabaseFile=".\Debug/mptrack.pdb"
@@ -95,7 +96,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/EHsc"
-				InlineFunctionExpansion="1"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
@@ -868,9 +871,6 @@
 				RelativePath=".\res\moddoc.ico">
 			</File>
 			<File
-				RelativePath=".\res\modplthingmorecontrast.bmp">
-			</File>
-			<File
 				RelativePath=".\res\MPTRACK.bmp">
 			</File>
 			<File
@@ -893,9 +893,6 @@
 			</File>
 			<File
 				RelativePath=".\Res\smptoolb.bmp">
-			</File>
-			<File
-				RelativePath=".\Res\splash.bmp">
 			</File>
 			<File
 				RelativePath=".\res\splashno.bmp">
@@ -990,6 +987,9 @@
 			</File>
 			<File
 				RelativePath=".\mod2wave.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\modcommand.h">
 			</File>
 			<File
 				RelativePath=".\moddoc.h">
