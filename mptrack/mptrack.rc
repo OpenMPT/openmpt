@@ -1133,10 +1133,10 @@ BEGIN
     CONTROL         "",IDC_TABCTRL1,"SysTabControl32",0x0,0,0,412,14
 END
 
-IDD_EDIT_FIND DIALOG  0, 0, 182, 145
+IDD_EDIT_FIND DIALOGEX 0, 0, 182, 145
 STYLE DS_SETFONT | WS_CHILD | WS_CAPTION
 CAPTION "Find"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Search for:",IDC_STATIC,4,4,174,107
     CONTROL         "Note",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
@@ -1161,8 +1161,8 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Effect Data",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,117,78,52,10
-    COMBOBOX        IDC_COMBO6,117,92,48,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
+    COMBOBOX        IDC_COMBO6,117,92,48,68,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
     CONTROL         "Find in current pattern",IDC_RADIO1,"Button",
                     BS_AUTORADIOBUTTON,6,117,88,10
     CONTROL         "Find in the whole song",IDC_RADIO2,"Button",
@@ -1264,7 +1264,6 @@ STYLE DS_SETFONT | WS_CHILD | WS_CAPTION
 CAPTION "Effect"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    LTEXT           "Value:",IDC_TEXT1,103,3,115,8
     COMBOBOX        IDC_COMBO1,0,15,102,83,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
@@ -1276,6 +1275,7 @@ BEGIN
     CONTROL         "",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | NOT WS_VISIBLE | WS_TABSTOP,134,0,43,12
     LTEXT           "Effect Type:",IDC_STATIC,54,1,19,8,NOT WS_VISIBLE
+    LTEXT           "Value:",IDC_TEXT1,103,3,23,8
 END
 
 IDD_SAMPLE_AMPLIFY DIALOGEX 0, 0, 175, 66

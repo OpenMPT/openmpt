@@ -787,7 +787,13 @@ BOOL CTrackApp::InitInstance()
 	m_bInitialized = TRUE;
 
 	if (CMainFrame::gnCheckForUpdates) {
-		UpdateCheck();
+		try {
+			UpdateCheck();
+		} catch (...) {
+			// Could not do update check. Don't compain - do nothing.
+			// Assuming winhttp.dll is set as delay-load in the project settings,
+			// we will end up here if the dll cannot be foung (e.g. on win98).
+		}
 	}
 
 	// Open settings if this is the previous execution was with an earlier version.

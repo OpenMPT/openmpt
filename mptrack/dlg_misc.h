@@ -257,6 +257,7 @@ protected:
 };
 
 
+
 //=======================================
 class CEditCommand: public CPropertySheet
 //=======================================

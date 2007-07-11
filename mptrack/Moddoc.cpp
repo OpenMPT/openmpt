@@ -2236,6 +2236,16 @@ UINT CModDoc::GetEffectFromIndex(UINT ndx, int &refParam)
 	return gFXInfo[ndx].dwEffect;
 }
 
+UINT CModDoc::GetEffectMaskFromIndex(UINT ndx)
+//-------------------------------------------------------
+{
+	if (ndx >= MAX_FXINFO) {
+		return 0;
+	}
+
+	return gFXInfo[ndx].dwParamValue;
+
+}
 
 BOOL CModDoc::GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX, DWORD *prangeMin, DWORD *prangeMax)
 //------------------------------------------------------------------------------------------
