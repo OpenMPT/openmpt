@@ -107,6 +107,7 @@ CModDoc::CModDoc()
 // -> DESC="channels management dlg"
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
+	m_ShowSavedialog = false;
 }
 
 
@@ -342,10 +343,10 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_DSM:
 	case MOD_TYPE_AMF:
 	case MOD_TYPE_PSM:
-		m_SndFile.m_nType = MOD_TYPE_S3M;
+		m_SndFile.ChangeModTypeTo(MOD_TYPE_S3M);
 		break;
 	default:
-		m_SndFile.m_nType = MOD_TYPE_IT;
+		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
 	}
 
 // -> CODE#0015
@@ -523,8 +524,9 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 		return FALSE;
 	}
-	if ((!lpszPathName) || (!lpszPathName[0]))
+	if ((!lpszPathName) || (!lpszPathName[0]) || m_ShowSavedialog)
 	{
+		m_ShowSavedialog = false;
 		_splitpath(m_strPathName, drive, path, fname, NULL);
 		if (!fname[0]) strcpy(fname, m_strTitle);
 		strcpy(s, drive);
@@ -1351,7 +1353,7 @@ void CModDoc::OnFileWaveConvert()
 // -> DESC="wav export update"
 	UINT p = 0,n = 1;
 	DWORD flags[MAX_BASECHANNELS];
-	CHAR channel[MAX_CHANNELNAME+2];
+	CHAR channel[MAX_CHANNELNAME+10];
 
 	// Channel mode : save song in multiple wav files (one for each enabled channels)
 	if(wsdlg.m_bChannelMode){
@@ -1423,8 +1425,6 @@ void CModDoc::OnFileWaveConvert()
 		if(!wsdlg.m_bChannelMode || !(flags[i] & CHN_MUTE)){
 			// rewbs.fix3239
 			m_SndFile.SetCurrentPos(0);
-			//Relabs.note: Since I removed pattern loop disabling from certain
-			//methods, making sure that pattern loop is off.
 			m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
 			if (wsdlg.m_bSelectPlay) {
 				m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
@@ -1628,7 +1628,6 @@ void CModDoc::OnPlayerPlay()
 		}
 		END_CRITICAL();
 		//m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED);
-		//Relabs.note: Added SONG_PATTERNLOOP.
 		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PAUSED|SONG_PATTERNLOOP);
 		pMainFrm->PlayMod(this, m_hWndFollow, m_dwNotifyType);
 	}
@@ -1705,7 +1704,6 @@ void CModDoc::OnPlayerPlayFromStart()
 
 		pMainFrm->PauseMod();
 		//m_SndFile.m_dwSongFlags &= ~SONG_STEP;
-		//Relabs.hack: Added SONG_PATTERNLOOP
 		m_SndFile.m_dwSongFlags &= ~(SONG_STEP|SONG_PATTERNLOOP);
 		m_SndFile.SetCurrentPos(0);
 		pMainFrm->ResetElapsedTime();
@@ -3013,29 +3011,37 @@ void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 void CModDoc::ChangeFileExtension(UINT nNewType)
 //----------------------------------------------
 {
-	CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME];
-	_splitpath(GetPathName(), drive, path, fname, NULL);
-
-	CString newPath = drive;
-	newPath += path;
-
-	//Catch case where we don't have a filename yet.
-	if (fname[0] == 0) {
-		newPath += GetTitle();
-	} else {
-		newPath += fname;
-	}
-
-	switch(nNewType)
+	//Not making path if path is empty(case only(?) for new file)
+	if(GetPathName().GetLength() > 0)
 	{
-	case MOD_TYPE_XM:  newPath += ".xm"; break;
-	case MOD_TYPE_IT:  m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? newPath+=".itp" : newPath+=".it"; break;
-	case MOD_TYPE_MPT: newPath += ".mptm"; break;
-	case MOD_TYPE_S3M: newPath += ".s3m"; break;
-	case MOD_TYPE_MOD: newPath += ".mod"; break;
-	default: ASSERT(false);		
+		CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME];
+		_splitpath(GetPathName(), drive, path, fname, NULL);
+
+		CString newPath = drive;
+		newPath += path;
+
+		//Catch case where we don't have a filename yet.
+		if (fname[0] == 0) {
+			newPath += GetTitle();
+		} else {
+			newPath += fname;
+		}
+
+		switch(nNewType)
+		{
+		case MOD_TYPE_XM:  newPath += ".xm"; break;
+		case MOD_TYPE_IT:  m_SndFile.m_dwSongFlags & SONG_ITPROJECT ? newPath+=".itp" : newPath+=".it"; break;
+		case MOD_TYPE_MPT: newPath += ".mptm"; break;
+		case MOD_TYPE_S3M: newPath += ".s3m"; break;
+		case MOD_TYPE_MOD: newPath += ".mod"; break;
+		default: ASSERT(false);		
+		}
+		SetPathName(newPath, FALSE);
+		if(GetSoundFile() && GetSoundFile()->GetType() != nNewType) m_ShowSavedialog = true;
+		//Forcing savedialog to appear after extension change - otherwise
+		//unnotified file overwriting may occur.
 	}
-	SetPathName(newPath, FALSE);
+
 	UpdateAllViews(NULL, HINT_MODTYPE);
 }
 
@@ -3090,7 +3096,6 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 			CString message;
 			message.Format("Param %d can already be controlled with macro %X", paramToUse, checkMacro);
 			CMainFrame::GetMainFrame()->MessageBox(message, "Macro exists for this param",MB_ICONINFORMATION | MB_OK);
-			//Relabs.expl: Modified to prevent notification box go 'under' ompt to block key messages.
 			return;
 		}
 	}

@@ -1053,8 +1053,10 @@ protected:
 	//CArray<CArray<bool,bool>, CArray<bool,bool> > m_isParentContext;
 	bool m_isParentContext[kCtxMaxInputContexts][kCtxMaxInputContexts];
 	bool enforceRule[kNumRules];
-
+	
 public:
+	static bool s_bShowErrorOnUnknownKeybinding;
+
 	CCommandSet(void);
 	~CCommandSet(void);
 	

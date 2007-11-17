@@ -48,15 +48,6 @@ public:
 
 	bool Shrink();
 
-#ifndef TRADITIONAL_MODCOMMAND
-	void SetModCommandEffect(ROWINDEX r, CHANNELINDEX c, EFFECT_ID eID);
-	//Sets effect eID to modcommand at position (r,c)
-
-	void SetModCommandEffectParam(ROWINDEX r, CHANNELINDEX c, EFFECT_PARAM eParam);
-	//Sets effect eParam to modcommand at position (r,c)
-
-#endif
-
 	bool WriteITPdata(FILE* f) const;
 	bool ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const DWORD datasize, const DWORD dwMemLength);
 	//Parameters:

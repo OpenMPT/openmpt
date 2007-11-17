@@ -445,7 +445,7 @@
 #define IDC_CHECK67                     1767
 #define IDC_CHECK68                     1768
 #define IDC_CHECK69                     1769
-#define IDC_IT_STANDARD                 1770
+#define IDC_IT_COMPATIBLEPLAY           1770
 #define IDC_CHECK71                     1771
 #define IDC_CHECK72                     1772
 #define IDC_CHECK73                     1773
@@ -748,7 +748,6 @@
 #define IDC_RENDERZONE                  2254
 #define IDC_PATTERN_LOOP                2255
 #define IDC_EDIT_FACTOR                 2256
-#define IDC_EDIT_TEST                   2257
 #define IDC_EDIT_ORDERLIST_MARGINS      2258
 #define IDC_STATICRATIOMAP              2259
 #define IDC_SPIN_ORDERLIST_MARGINS      2260
@@ -790,6 +789,7 @@
 #define IDC_SPIN_RPB                    2302
 #define IDC_EDIT_RPB                    2303
 #define IDC_NAMEFILTER                  2304
+#define IDC_TUNINGTYPE_DESC             2305
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -971,6 +971,10 @@
 #define ID_COPYTUNING                   36026
 #define ID_REMOVETUNINGCOLLECTION       36027
 #define ID_SHOWTIMEATROW                36028
+#define ID_PREVIOUSVSTPRESET			36029
+#define ID_NEXTVSTPRESET				36030
+#define ID_VSTPRESETBACKWARDJUMP		36031
+#define ID_VSTPRESETFORWARDJUMP			36032
 #define ID_SELECTINST                   36100
 #define ID_NETLINK_MPTFR                37001
 #define ID_PLUG_RECORDAUTOMATION        37003
@@ -1016,7 +1020,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        515
 #define _APS_NEXT_COMMAND_VALUE         59211
-#define _APS_NEXT_CONTROL_VALUE         2305
+#define _APS_NEXT_CONTROL_VALUE         2306
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

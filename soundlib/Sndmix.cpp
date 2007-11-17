@@ -99,6 +99,22 @@ const UINT PreAmpAGCTable[16] =
 	0x92, 0x94, 0x96, 0x98,
 };
 
+using CTuning::RATIOTYPE;
+
+static const RATIOTYPE TwoToPowerXPer12Table[16] =
+{
+	1.0F		   , 1.059463094359F, 1.122462048309F, 1.1892071150027F,
+	1.259921049895F, 1.334839854170F, 1.414213562373F, 1.4983070768767F,
+	1.587401051968F, 1.681792830507F, 1.781797436281F, 1.8877486253634F,
+	2.0F		   , 2.118926188719F, 2.244924096619F, 2.3784142300054F
+};
+
+inline RATIOTYPE TwoToPowerXPer12(const BYTE i)
+//-------------------------------------------
+{
+	return (i < 16) ? TwoToPowerXPer12Table[i] : 1;
+}
+
 
 // Return (a*b)/c - no divide error
 int _muldiv(long a, long b, long c)
@@ -899,7 +915,7 @@ BOOL CSoundFile::ReadNote()
 
 		//Aux variables
 		CTuning::RATIOTYPE vibratoFactor = 1;
-		CTuning::STEPTYPE arpeggioSteps = 0;
+		CTuning::NOTEINDEXTYPE arpeggioSteps = 0;
 
 		// Calc Frequency
 		if ((pChn->nPeriod)	&& (pChn->nLength))
@@ -1104,32 +1120,31 @@ BOOL CSoundFile::ReadNote()
 							break;
 						case 2:
 							arpeggioSteps = pChn->nArpeggio % 16; //Gives the latter number in the parameter.
-							pChn->m_ReCalculateFreqOnFirstTick = true;
 							break;
 					}
 					pChn->m_CalculateFreq = true;
 				}
-				else //Original
+				else
 				{
-					BYTE note = pChn->nNote;
-					bool apply = true;
-
-					if(m_nType == MOD_TYPE_IT && GetModSpecificFlag(IT_STANDARD))
+					//IT playback compatibility 01 & 02
+					if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
 					{
-						if(pChn->nArpeggio >> 4 == 0 && (pChn->nArpeggio & 0x0F) == 0)
-							apply = false;
-						//Ignoring J00.
-
-						if(apply) note = GetNoteFromPeriod(pChn->nPeriod);
-						//Using actual note instead of channel note.
+						if(pChn->nArpeggio >> 4 != 0 || (pChn->nArpeggio & 0x0F) != 0)
+						{
+							switch(m_nTickCount % 3)
+							{
+								case 1:	period = period / TwoToPowerXPer12(pChn->nArpeggio >> 4); break;
+								case 2:	period = period / TwoToPowerXPer12(pChn->nArpeggio & 0x0F); break;
+							}
+						}
 					}
-					
-					if(apply)
+					else //Original
 					{
+						BYTE note = pChn->nNote;
 						switch(m_nTickCount % 3)
 						{
-						case 1:	period = GetPeriodFromNote(note + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC4Speed); break;
-						case 2:	period = GetPeriodFromNote(note + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC4Speed); break;
+							case 1:	period = GetPeriodFromNote(note + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC4Speed); break;
+							case 2:	period = GetPeriodFromNote(note + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC4Speed); break;
 						}
 					}
 				}
@@ -1195,8 +1210,8 @@ BOOL CSoundFile::ReadNote()
 							pChn->nFineTune = envpitch;
                             pChn->m_CalculateFreq = true;
 							//Preliminary tests indicated that this behavior
-							//is very close to original(with TET12) when finestep count
-							//is 16.
+							//is very close to original(with 12TET) when finestep count
+							//is 15.
 						}
 					}
 					else //Original behavior
@@ -1246,20 +1261,6 @@ BOOL CSoundFile::ReadNote()
 
 					if(m_nTickCount + 1 == m_nMusicSpeed)
 						pChn->m_ReCalculateFreqOnFirstTick = true;
-				
-					/*
-					Code for 'step vibrato' - oscillate finesteps instead of frequency
-					(in certain cases these end up to the same result.)
-					vibratoFineSteps += static_cast<CTuning::FINESTEPTYPE>(pChn->pHeader->pTuning->GetFineStepCount() * vdelta * pChn->m_VibratoDepth / 128.0F);
-					pChn->m_CalculateFreq = true;
-			
-					pChn->m_ReCalculateFreqOnFirstTick = false;
-
-					if(m_nTickCount + 1 == m_nMusicSpeed)
-						pChn->m_ReCalculateFreqOnFirstTick = true;
-					//To remove possible vibrato frequency from the 'main' frequency.
-
-					*/
 				}
 				else //Original behavior
 				{
@@ -1422,10 +1423,9 @@ BOOL CSoundFile::ReadNote()
 			}
 			else //In this case: m_nType == MOD_TYPE_MPT and using custom tunings.
 			{
-				m_nRow;
 				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_nTickCount == 0))
 				{
-					pChn->m_Freq = pChn->nC4Speed * vibratoFactor * pChn->pHeader->pTuning->GetFrequencyRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, static_cast<CTuning::FINESTEPTYPE>(pChn->nFineTune)+pChn->m_PortamentoFineSteps);
+					pChn->m_Freq = pChn->nC4Speed * vibratoFactor * pChn->pHeader->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps);
 					if(!pChn->m_CalculateFreq)
 						pChn->m_ReCalculateFreqOnFirstTick = false;
 					else

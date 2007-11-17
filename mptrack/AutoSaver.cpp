@@ -185,7 +185,7 @@ CString CAutoSaver::BuildFileName(CModDoc* pModDoc)
 		if (pModDoc->m_bHasValidPath) { // Check that the file has a user-chosen path
 			name = pModDoc->GetPathName(); 
 		} else {						// if it doesnt, put it in executable dir
-			name = CMainFrame::m_csExecutablePath + "\\" + pModDoc->GetTitle(); 		
+			name = CMainFrame::m_csExecutableDirectoryPath + pModDoc->GetTitle(); 		
 		}
 	
 	} else {
@@ -263,7 +263,7 @@ void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
 			CString fullPath = pModDoc->GetPathName();
 			path = fullPath.Left(fullPath.GetLength()-pModDoc->GetTitle().GetLength()); //remove file name if necessary
 		} else {
-			path = CMainFrame::m_csExecutablePath + "\\";
+			path = CMainFrame::m_csExecutableDirectoryPath;
 		}
 	} else {
 		path = m_csPath;

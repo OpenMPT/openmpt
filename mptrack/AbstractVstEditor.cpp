@@ -21,6 +21,10 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_PRESET_RANDOM,		OnRandomizePreset)
 	ON_COMMAND(ID_VSTMACRO_INFO,		OnMacroInfo)
 	ON_COMMAND(ID_VSTINPUT_INFO,		OnInputInfo)
+	ON_COMMAND(ID_PREVIOUSVSTPRESET,	OnSetPreviousVSTPreset)
+	ON_COMMAND(ID_NEXTVSTPRESET,		OnSetNextVSTPreset)
+	ON_COMMAND(ID_VSTPRESETBACKWARDJUMP,OnVSTPresetBackwardJump)
+	ON_COMMAND(ID_VSTPRESETFORWARDJUMP,	OnVSTPresetForwardJump)
 	ON_COMMAND_RANGE(ID_PRESET_SET, ID_PRESET_SET+MAX_PLUGPRESETS, OnSetPreset)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnToggleEditor) //rewbs.patPlugName
@@ -36,7 +40,7 @@ CAbstractVstEditor::CAbstractVstEditor(CVstPlugin *pPlugin)
 	m_pInputMenu  = new CMenu();
 	m_pOutputMenu = new CMenu();
 	m_pMacroMenu  = new CMenu();
-	
+
 	m_pPresetMenu = new CMenu();
 	m_pPresetMenuGroup.SetSize(0);
 
@@ -137,17 +141,50 @@ VOID CAbstractVstEditor::SetupMenu()
 		UpdateOutputMenu();
 		UpdateMacroMenu();
 		UpdateOptionsMenu();
+		UpdatePresetField();
 		::SetMenu(m_hWnd, m_pMenu->m_hMenu);
 	}
 	return;
 }
 
+void CAbstractVstEditor::UpdatePresetField()
+//------------------------------------------
+{
+	if(m_pVstPlugin->GetNumPrograms() > 0 && m_pMenu->GetMenuItemCount() < 5)
+	{
+		m_pMenu->InsertMenu(4, MF_BYPOSITION, ID_VSTPRESETBACKWARDJUMP, (LPCTSTR)"<<");
+		m_pMenu->InsertMenu(5, MF_BYPOSITION, ID_PREVIOUSVSTPRESET, (LPCTSTR)"<");
+		m_pMenu->InsertMenu(6, MF_BYPOSITION, ID_NEXTVSTPRESET, (LPCTSTR)">");
+		m_pMenu->InsertMenu(7, MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, (LPCTSTR)">>");
+		m_pMenu->InsertMenu(8, MF_BYPOSITION|MF_DISABLED, 0, "");
+	}
+		
+	long index = m_pVstPlugin->GetCurrentProgram();
+	char name[256+6];
+	memset(name, ' ', 6);
+	itoa(index, name, 10);
+	size_t i = 4;
+	if(index < 1000) i = 3;
+	if(index < 100) i = 2;
+	if(index < 10) i = 1;
+	name[i] = ':'; name[i+1] = ' ';
+	
+	m_pVstPlugin->GetProgramNameIndexed(index, -1, name+i+2);
+	
+	m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, name);
+	DrawMenuBar();
+}
+
+
 void CAbstractVstEditor::OnSetPreset(UINT nID)
+//---------------------------------------------
 {
 	int nIndex=nID-ID_PRESET_SET;
 	if (nIndex>=0)
 	{
 		m_pVstPlugin->SetCurrentProgram(nIndex);
+		UpdatePresetField();
+		
 		//SetupMenu();
 	}
 }
@@ -254,8 +291,8 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	switch(wParam)
 	{
-		case kcVSTGUIPrevPreset:	OnSetPreset(-1+ID_PRESET_SET+m_pVstPlugin->GetCurrentProgram()); return wParam;
-		case kcVSTGUINextPreset:	OnSetPreset( 1+ID_PRESET_SET+m_pVstPlugin->GetCurrentProgram()); return wParam;
+		case kcVSTGUIPrevPreset:	OnSetPreviousVSTPreset(); return wParam;
+		case kcVSTGUINextPreset:	OnSetNextVSTPreset(); return wParam;
 		case kcVSTGUIRandParams:	OnRandomizePreset() ; return wParam;
 	}
 	if (wParam>=kcVSTGUIStartNotes && wParam<=kcVSTGUIEndNotes)
@@ -300,6 +337,8 @@ void CAbstractVstEditor::UpdatePresetMenu()
 	long curProg  = m_pVstPlugin->GetCurrentProgram();
 	char s[256];
 	char sname[256];
+
+	
 
 	if (m_pPresetMenu->m_hMenu)						// We rebuild menu from scratch
 	{												// So remove any exiting menus...	
@@ -601,6 +640,30 @@ int CAbstractVstEditor::GetBestInstrumentCandidate()
 void CAbstractVstEditor::OnSetInputInstrument(UINT nID)
 {
 	m_nInstrument = (nID-ID_SELECTINST);
+}
+
+void CAbstractVstEditor::OnSetPreviousVSTPreset()
+//--------------------------------------------
+{
+	OnSetPreset(-1+ID_PRESET_SET+m_pVstPlugin->GetCurrentProgram()); 
+}
+
+void CAbstractVstEditor::OnSetNextVSTPreset()
+//----------------------------------------
+{
+	OnSetPreset(1+ID_PRESET_SET+m_pVstPlugin->GetCurrentProgram());
+}
+
+void CAbstractVstEditor::OnVSTPresetBackwardJump()
+//------------------------------------------------
+{
+	OnSetPreset(max(ID_PRESET_SET+m_pVstPlugin->GetCurrentProgram()-10, ID_PRESET_SET));
+}
+
+void CAbstractVstEditor::OnVSTPresetForwardJump()
+//----------------------------------------------------
+{
+	OnSetPreset(min(10+ID_PRESET_SET+m_pVstPlugin->GetCurrentProgram(), ID_PRESET_SET+m_pVstPlugin->GetNumPrograms()-1));
 }
 
 void CAbstractVstEditor::PrepareToLearnMacro(UINT nID)

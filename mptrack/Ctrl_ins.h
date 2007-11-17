@@ -5,6 +5,8 @@
 class CNoteMapWnd;
 class CCtrlInstruments;
 
+using std::pair;
+
 
 //===============================
 class CNoteMapWnd: public CStatic

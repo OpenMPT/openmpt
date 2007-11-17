@@ -2435,18 +2435,18 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	sel -= 1;
 	CTuningCollection* tc = 0;
 	
-	if(sel < CSoundFile::s_TuningsSharedStandard.GetNumTunings())
-		tc = &CSoundFile::s_TuningsSharedStandard;
+	if(sel < CSoundFile::GetStandardTunings().GetNumTunings())
+		tc = &CSoundFile::GetStandardTunings();
 	else
 	{
-		sel -= CSoundFile::s_TuningsSharedStandard.GetNumTunings();
-		if(sel < CSoundFile::s_TuningsSharedLocal.GetNumTunings())
-			tc = &CSoundFile::s_TuningsSharedLocal;
+		sel -= CSoundFile::GetStandardTunings().GetNumTunings();
+		if(sel < CSoundFile::GetLocalTunings().GetNumTunings())
+			tc = &CSoundFile::GetLocalTunings();
 		else
 		{
-			sel -= CSoundFile::s_TuningsSharedLocal.GetNumTunings();
-			if(sel < m_pSndFile->m_TuningsTuneSpecific.GetNumTunings())
-				tc = &m_pSndFile->m_TuningsTuneSpecific;
+			sel -= CSoundFile::GetLocalTunings().GetNumTunings();
+			if(sel < m_pSndFile->GetTuneSpecificTunings().GetNumTunings())
+				tc = &m_pSndFile->GetTuneSpecificTunings();
 		}
 	}
 
@@ -2463,17 +2463,17 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	//Case: Chosen tuning editor to be displayed.
 	//Creating vector for the CTuningDialog.
 	vector<CTuningCollection*> v;
-	v.push_back(&m_pSndFile->s_TuningsSharedStandard);
-	v.push_back(&m_pSndFile->s_TuningsSharedLocal);
-	v.push_back(&m_pSndFile->m_TuningsTuneSpecific);
+	v.push_back(&m_pSndFile->GetStandardTunings());
+	v.push_back(&m_pSndFile->GetLocalTunings());
+	v.push_back(&m_pSndFile->GetTuneSpecificTunings());
 	CTuningDialog td(this, v, pInstH->pTuning);
 	td.DoModal();
-	if(td.GetModifiedStatus(&m_pSndFile->s_TuningsSharedLocal))
+	if(td.GetModifiedStatus(&m_pSndFile->GetLocalTunings()))
 	{
 		if(MsgBox(IDS_APPLY_TUNING_MODIFICATIONS, this, "", MB_OKCANCEL) == IDOK)
 			m_pSndFile->SaveStaticTunings();
 	}
-	if(td.GetModifiedStatus(&m_pSndFile->m_TuningsTuneSpecific))
+	if(td.GetModifiedStatus(&m_pSndFile->GetTuneSpecificTunings()))
 	{
 		m_pModDoc->SetModified();
 	}
@@ -2500,29 +2500,29 @@ void CCtrlInstruments::UpdateTuningComboBox()
 		return;
 	}
 
-	for(size_t i = 0; i < CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
+	for(size_t i = 0; i < CSoundFile::GetStandardTunings().GetNumTunings(); i++)
 	{
-		if(penv->pTuning == &CSoundFile::s_TuningsSharedStandard.GetTuning(i))
+		if(penv->pTuning == &CSoundFile::GetStandardTunings().GetTuning(i))
 		{
 			m_ComboTuning.SetCurSel(i+1);
 			return;
 		}
 	}
 
-	for(size_t i = 0; i < CSoundFile::s_TuningsSharedLocal.GetNumTunings(); i++)
+	for(size_t i = 0; i < CSoundFile::GetLocalTunings().GetNumTunings(); i++)
 	{
-		if(penv->pTuning == &CSoundFile::s_TuningsSharedLocal.GetTuning(i))
+		if(penv->pTuning == &CSoundFile::GetLocalTunings().GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i+CSoundFile::s_TuningsSharedStandard.GetNumTunings()+1);
+			m_ComboTuning.SetCurSel(i+CSoundFile::GetStandardTunings().GetNumTunings()+1);
 			return;
 		}
 	}
 
-	for(size_t i = 0; i < m_pSndFile->m_TuningsTuneSpecific.GetNumTunings(); i++)
+	for(size_t i = 0; i < m_pSndFile->GetTuneSpecificTunings().GetNumTunings(); i++)
 	{
-		if(penv->pTuning == &m_pSndFile->m_TuningsTuneSpecific.GetTuning(i))
+		if(penv->pTuning == &m_pSndFile->GetTuneSpecificTunings().GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i+CSoundFile::s_TuningsSharedStandard.GetNumTunings() + CSoundFile::s_TuningsSharedLocal.GetNumTunings()+1);
+			m_ComboTuning.SetCurSel(i+CSoundFile::GetStandardTunings().GetNumTunings() + CSoundFile::GetLocalTunings().GetNumTunings()+1);
 			return;
 		}
 	}
@@ -2637,17 +2637,17 @@ void CCtrlInstruments::BuildTuningComboBox()
 		m_ComboTuning.DeleteString(0);
 
 	m_ComboTuning.AddString("OMPT IT behavior"); //<-> Instrument pTuning pointer == NULL
-	for(size_t i = 0; i<CSoundFile::s_TuningsSharedStandard.GetNumTunings(); i++)
+	for(size_t i = 0; i<CSoundFile::GetStandardTunings().GetNumTunings(); i++)
 	{
-		m_ComboTuning.AddString(CSoundFile::s_TuningsSharedStandard.GetTuning(i).GetName().c_str());
+		m_ComboTuning.AddString(CSoundFile::GetStandardTunings().GetTuning(i).GetName().c_str());
 	}
-	for(size_t i = 0; i<CSoundFile::s_TuningsSharedLocal.GetNumTunings(); i++)
+	for(size_t i = 0; i<CSoundFile::GetLocalTunings().GetNumTunings(); i++)
 	{
-		m_ComboTuning.AddString(CSoundFile::s_TuningsSharedLocal.GetTuning(i).GetName().c_str());
+		m_ComboTuning.AddString(CSoundFile::GetLocalTunings().GetTuning(i).GetName().c_str());
 	}
-	for(size_t i = 0; i<m_pSndFile->m_TuningsTuneSpecific.GetNumTunings(); i++)
+	for(size_t i = 0; i<m_pSndFile->GetTuneSpecificTunings().GetNumTunings(); i++)
 	{
-		m_ComboTuning.AddString(m_pSndFile->m_TuningsTuneSpecific.GetTuning(i).GetName().c_str());
+		m_ComboTuning.AddString(m_pSndFile->GetTuneSpecificTunings().GetTuning(i).GetName().c_str());
 	}
 	m_ComboTuning.AddString("Control tunings...");
 	m_ComboTuning.SetCurSel(0);

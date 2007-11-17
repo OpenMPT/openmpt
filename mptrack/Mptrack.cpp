@@ -189,6 +189,27 @@ BYTE gEffectColors[MAX_EFFECTS] =
 	//0,/*rewbs.smoothVST*/ ,0/*rewbs.velocity*/,
 };
 
+static void ShowChangesDialog()
+//-----------------------------
+{
+	CString firstOpenMessage = "OpenMPT version " + CMainFrame::GetFullVersionString();
+	firstOpenMessage +=	". This is a development build primarily aimed for testing.\n\nChanges:\n\n"
+	"[New] Windows keys can be used as modifiers in the keyboard configuration(disables Windows start menu pop-up if used in the active keyboard configuration).\n"
+	"[New] Name filter in plugin selection dialog.\n"
+	"[Imp] Improved preset navigation in VST window.\n"
+	"[Imp] Improvements in IT compatible play.\n"
+	"[Imp] Improvements in user defined tuning modes.\n"
+	"[Fix] Fixed possible unnotified file overwriting when saving unsaved file.\n"
+	"[Fix] Fixed wrong version number in IT files saved with compatibility save.\n"
+	"[Fix] Fixed broken note preview for certain type of instruments in instrument tab.\n"
+	"[Fix] Fixed possible crash when exporting wav in channel mode with long channel name.\n"
+	"[Fix] Fixed channel position jump when clicking VST box in channel header.\n"
+	"[Fix] Fixed possible searching of wrong parameter in pattern search.\n"
+	"[Misc] Update check disabled and miscellaneous other changes.";
+
+	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT v." + CMainFrame::GetFullVersionString(), MB_ICONINFORMATION);
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // MPTRACK Command Line options
@@ -424,6 +445,7 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 }
 
 void CTrackApp::LoadRegistryDLS()
+//-------------------------------
 {
 	CHAR szFileNameX[_MAX_PATH];
 	HKEY keyX;
@@ -649,6 +671,7 @@ BOOL CTrackApp::InitInstance()
 
 	m_szConfigFileName[0] = 0;
 	m_szStringsFileName[0] = 0;
+
 	if (GetModuleFileName(NULL, m_szConfigFileName, sizeof(m_szConfigFileName)))
 	{
 		CHAR szDrive[_MAX_DRIVE]="", szDir[_MAX_PATH]="";
@@ -786,6 +809,7 @@ BOOL CTrackApp::InitInstance()
 	m_dwTimeStarted = timeGetTime();
 	m_bInitialized = TRUE;
 
+	/*
 	if (CMainFrame::gnCheckForUpdates) {
 		try {
 			UpdateCheck();
@@ -795,10 +819,12 @@ BOOL CTrackApp::InitInstance()
 			// we will end up here if the dll cannot be foung (e.g. on win98).
 		}
 	}
+	*/
 
-	// Open settings if this is the previous execution was with an earlier version.
+	// Open settings if the previous execution was with an earlier version.
 	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gcsPreviousVersion < CMainFrame::GetFullVersionString()) {
 		StopSplashScreen();
+		ShowChangesDialog();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 	}
 
@@ -1576,12 +1602,12 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_EDIT2, s);
-	SetDlgItemText(IDC_EDIT3, CString("Open Modplug Tracker, version ") + CMainFrame::GetFullVersionString());
+	SetDlgItemText(IDC_EDIT3, CString("Open Modplug Tracker, version ") + CMainFrame::GetFullVersionString() + " (development build)");
 
 	m_heContact.SetWindowText(
 "Contact / Discussion:\r\n\
 http://modplug.sourceforge.net/forum\r\n\
-\r\n\Updates:\r\n\
+\r\nUpdates:\r\n\
 http://modplug.sourceforge.net/builds/#dev");
 
 	char *pArrCredit = { 
@@ -1591,7 +1617,7 @@ http://modplug.sourceforge.net/builds/#dev");
 		"|"
 		"Contributors:|"
 		"Robin Fernandes:  robin@soal.org (2004-2007)|"
-		"Ahti Leppan: relabsoluness@users.sourceforge.net (2005-2007)|"
+		"Ahti Leppänen: aaldery@dnainternet.net (2005-2007)|"
 		"Sergiy Pylypenko: x.pelya.x@gmail.com (2007)|"
 		"Eric Chavanon:  contact@ericus.org (2004-2005)|"
 		"Trevor Nunes:  modplug@plastikskouser.com (2004)|"
@@ -1635,6 +1661,7 @@ void CTrackApp::OnAppAbout()
 //--------------------------
 {
 	if (gpAboutDlg) return;
+	ShowChangesDialog();
 	gpAboutDlg = new CAboutDlg();
 	gpAboutDlg->Create(IDD_ABOUTBOX, m_pMainWnd);
 }
@@ -2960,6 +2987,7 @@ BOOL CTrackApp::GetLocalizedString(LPCSTR pszName, LPSTR pszStr, UINT cbSize)
 
 //rewbs.crashHandler
 LRESULT CTrackApp::ProcessWndProcException(CException* e, const MSG* pMsg)
+//-----------------------------------------------------------------------
 {
 	// TODO: Add your specialized code here and/or call the base class
 	Log("Unhandled Exception\n");

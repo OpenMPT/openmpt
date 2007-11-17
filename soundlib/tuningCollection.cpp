@@ -1,17 +1,19 @@
 #include "stdafx.h"
 #include "tuningCollection.h"
 #include <algorithm>
+#include <bitset>
 
 //Serializations statics:
-const CTuningCollection::SERIALIZATION_MARKER CTuningCollection::s_SerializationBeginMarker = 0x54435348; //ascii of TCSH(TuningCollectionSerialisationHeader) in hex.
-const CTuningCollection::SERIALIZATION_MARKER CTuningCollection::s_SerializationEndMarker = 0x54435346; //ascii of TCSF(TuningCollectionSerialisationFooter) in hex.
-const CTuningCollection::SERIALIZATION_MARKER CTuningCollection::s_SerializationVersion = 2;
+const CTuningCollection::SERIALIZATION_VERSION CTuningCollection::s_SerializationVersion = 3;
 
 /*
 Version history:
-	1->2: Sizetypes of string serialisation from size_t(uint64)
+	2->3: Serialization revamp(August 2007)
+	1->2: Sizetypes of string serialisation from size_t(uint32)
 		  to uint8. (March 2007)
 */
+
+using namespace std;
 
 
 const CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SERIALIZATION_SUCCESS = false;
@@ -19,12 +21,12 @@ const CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SERIALIZAT
 
 const string CTuningCollection::s_FileExtension = ".tc";
 
-//BUG(?): These are not called before constructor for certain
+//BUG(?): These might not be called before constructor for certain
 //CTuningCollection objects - not good.
-const CTuningCollection::CEDITMASK CTuningCollection::EM_ADD = 1; //0..01
-const CTuningCollection::CEDITMASK CTuningCollection::EM_REMOVE = 2; //0..010
-const CTuningCollection::CEDITMASK CTuningCollection::EM_ALLOWALL = 0xFFFF;
-const CTuningCollection::CEDITMASK CTuningCollection::EM_CONST = 0;
+const CTuningCollection::EDITMASK CTuningCollection::EM_ADD = 1; //0..01
+const CTuningCollection::EDITMASK CTuningCollection::EM_REMOVE = 2; //0..010
+const CTuningCollection::EDITMASK CTuningCollection::EM_ALLOWALL = 0xFFFF;
+const CTuningCollection::EDITMASK CTuningCollection::EM_CONST = 0;
 
 /*
 TODOS:
@@ -33,11 +35,10 @@ TODOS:
 
 
 
-CTuningCollection::CTuningCollection(const string& name) : m_Name(name)
+CTuningCollection::CTuningCollection(const string& name) : m_Name(name), m_EditMask(0xFFFF)
 //------------------------------------
 {
 	if(m_Name.size() > GetNameLengthMax()) m_Name.resize(GetNameLengthMax());
-	m_EditMask.set();
 }
 
 
@@ -87,80 +88,33 @@ const CTuning* CTuningCollection::GetTuning(const string& name) const
 	return FindTuning(name);
 }
 
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::WriteTuningVector(ostream& outStrm) const
-//------------------------------------------------------
-{
-	if(!outStrm.good())
-		return SERIALIZATION_FAILURE;
-	
-	const size_t vs = m_Tunings.size();
-	outStrm.write(reinterpret_cast<const char*>(&vs), sizeof(vs));
-	for(CTITER i = m_Tunings.begin(); i != m_Tunings.end(); i++)
-	{
-		if((*i)->SerializeBinary(outStrm) == CTuning::SERIALIZATION_FAILURE)
-			return SERIALIZATION_FAILURE;
-	}
 
-	if(outStrm.good())
-		return SERIALIZATION_SUCCESS;
-	else
-		return SERIALIZATION_FAILURE;
-}
-
-
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::ReadTuningVector(istream& inStrm)
-//-------------------------------------
-{
-	if(!inStrm.good())
-		return SERIALIZATION_FAILURE;
-	size_t s = 0;
-	inStrm.read(reinterpret_cast<char*>(&s), sizeof(s));
-
-	//Todo: Handle the size limit better
-	if(s > 1000)
-		return SERIALIZATION_FAILURE;
-
-	for(size_t i = 0; i<s; i++)
-	{
-		if(AddTuning(inStrm))
-			return SERIALIZATION_FAILURE;
-	}
-
-	return SERIALIZATION_SUCCESS;
-}
-
-
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SerializeBinary(ostream& outStrm) const
+CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize(ostream& outStrm) const
 //--------------------------------------------------------------
 {
-	//1. Serialization begin marker:
-	outStrm.write(reinterpret_cast<const char*>(&s_SerializationBeginMarker), sizeof(s_SerializationBeginMarker));
+	using namespace srlztn;
+	const size_t tcount = m_Tunings.size();
+	CSerializationInstructions si("TC", s_SerializationVersion, OUTFLAG, 2+tcount);
+	si.AddEntry(CSerializationentry("0", CContainerstreamer<string>::NewDefaultWriter(m_Name, uint8_max), ""));
+	si.AddEntry(CSerializationentry("1", new CBinarystreamer<uint16>(m_EditMask), ""));
+	for(size_t i = 0; i<tcount; i++)
+		si.AddEntry(CSerializationentry("2", new CTuningstreamer(*m_Tunings[i]), m_Tunings[i]->GetName()));
 
-	//2. Serialization version
-	outStrm.write(reinterpret_cast<const char*>(&s_SerializationVersion), sizeof(s_SerializationVersion));
+	si.SetWritepropIncludeStartposInMap(false);
 
-	//3. Name
-	if(StringToBinaryStream<uint8>(outStrm, m_Name))
-		return SERIALIZATION_FAILURE;
-	
-	//4. Edit mask
-	__int16 em = static_cast<__int16>(m_EditMask.to_ulong());
-	outStrm.write(reinterpret_cast<const char*>(&em), sizeof(em));
-
-	//5. Tunings
-	WriteTuningVector(outStrm);
-
-	//6. Serialization end marker
-	outStrm.write(reinterpret_cast<const char*>(&s_SerializationEndMarker), sizeof(s_SerializationEndMarker));
-
-
-	if(outStrm.good())
-		return SERIALIZATION_SUCCESS;
+	string logstr;
+	CSSBSerialization ms(si);
+	const CWriteNotification& wn = ms.Serialize(outStrm);
+	if(wn.description.length() > 0)
+		MessageBox(0, wn.description.c_str(), "Tuningcollection writemessages", MB_ICONINFORMATION);
+	if(wn & SNT_FAILURE)
+		return true;
 	else
-		return SERIALIZATION_FAILURE;
+		return false;
 }
 
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SerializeBinary() const
+
+CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Serialize() const
 //-------------------------------------------------------------------------------------
 {
 	if(m_SavefilePath.length() < 1)
@@ -169,16 +123,13 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SerializeBinary(
 	if(!fout.good())
 		return SERIALIZATION_FAILURE;
 
-	if(SerializeBinary(fout) == SERIALIZATION_FAILURE)
-	{
-		fout.close();
+	if(Serialize(fout) == SERIALIZATION_FAILURE)
 		return SERIALIZATION_FAILURE;
-	}
-	fout.close();
+
 	return SERIALIZATION_SUCCESS;
 }
 
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::UnSerializeBinary()
+CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Unserialize()
 //-------------------------------------------------------------------------------------
 {
 	if(m_SavefilePath.length() < 1)
@@ -187,62 +138,111 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::UnSerializeBinar
 	if(!fin.good())
 		return SERIALIZATION_FAILURE;
 
-	if(UnSerializeBinary(fin) == SERIALIZATION_FAILURE)
-	{
-		fin.close();
+	if(Unserialize(fin) == SERIALIZATION_FAILURE)
 		return SERIALIZATION_FAILURE;
-	}
-	fin.close();
+
 	return SERIALIZATION_SUCCESS;
 }
 
 
-CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::UnSerializeBinary(istream& inStrm)
+CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Unserialize(istream& inStrm)
 //---------------------------------------------------------
 {
-	SERIALIZATION_MARKER beginMarker = 1;
-	SERIALIZATION_MARKER version = 1;
-	SERIALIZATION_MARKER endMarker = 1;
+	istream::pos_type startpos = inStrm.tellg();
+	bool oldLoadingSuccess = false;
+	if(UnserializeOLD(inStrm, oldLoadingSuccess))
+	{
+		//An old version was not recognised - trying new version.
+		inStrm.clear();
+		inStrm.seekg(startpos);
+		using namespace srlztn;
+		CSerializationInstructions si("TC", s_SerializationVersion, INFLAG, 3);
+		si.AddEntry(CSerializationentry("0", CContainerstreamer<string>::NewDefaultReader(m_Name, uint8_max), ""));
+		si.AddEntry(CSerializationentry("1", new CBinarystreamer<uint16>(m_EditMask), ""));
+		si.AddEntry(CSerializationentry("2", new CTuningstreamer(*this), ""));
+		CSSBSerialization ms(si);
+		string logstr;
+		ms.SetLogstring(logstr);
+		const CReadNotification& rn = ms.Unserialize(inStrm);
+		if(logstr.length() > 0)
+			MessageBox(0, logstr.c_str(), "Tuningcollection loadmessages", MB_ICONINFORMATION);
+		if(rn & SNT_FAILURE)
+			return true;
+		else
+			return false;
+	}
+	else
+	{
+		if(oldLoadingSuccess)
+			return false;
+		else
+			return true;
+	}
+}
 
-    //1. Serialization begin marker:
+//Returns false if stream content was recognised to be right kind of file(by beginmarker),
+//else true, and sets bool parameter to true if loading was successful
+bool CTuningCollection::UnserializeOLD(istream& inStrm, bool& loadingSuccessful)
+//------------------------------------------------------------------------------
+{
+	//s_SerializationBeginMarker = 0x54435348;  //ascii of TCSH
+	//s_SerializationEndMarker = 0x54435346; //ascii of TCSF(TuningCollectionSerialisationFooter) in hex.
+
+	int32 beginMarker, endMarker, version;
+
+	loadingSuccessful = false;
+
+	//1. begin marker:
 	inStrm.read(reinterpret_cast<char*>(&beginMarker), sizeof(beginMarker));
-	if(beginMarker != s_SerializationBeginMarker) return SERIALIZATION_FAILURE;
+	if(beginMarker != 0x54435348) return true;
 
-	//2. Serialization version
+	//2. version
 	inStrm.read(reinterpret_cast<char*>(&version), sizeof(version));
-	if(version > s_SerializationVersion) return SERIALIZATION_FAILURE;
+	if(version > 2 || version < 1)
+		return false;
 
 	//3. Name
 	if(version < 2)
 	{
-        if(StringFromBinaryStream<uint64>(inStrm, m_Name))
-			return SERIALIZATION_FAILURE;
+		if(StringFromBinaryStream<uint32>(inStrm, m_Name, 256))
+			return false;
 	}
 	else
 	{
-		if(StringFromBinaryStream<uint8>(inStrm, m_Name))
-			return SERIALIZATION_FAILURE;
+        if(StringFromBinaryStream<uint8>(inStrm, m_Name))
+			return false;
 	}
 
 	//4. Editmask
-	__int16 em = 0;
+	int16 em = 0;
 	inStrm.read(reinterpret_cast<char*>(&em), sizeof(em));
-	//Not assigning the value yet, for if it is sets some aspect const,
+	//Not assigning the value yet, for if it sets some property const,
 	//further loading might fail.
 
     //5. Tunings
-	if(ReadTuningVector(inStrm) == SERIALIZATION_FAILURE)
-		return SERIALIZATION_FAILURE;
+	{
+		size_t s = 0;
+		inStrm.read(reinterpret_cast<char*>(&s), sizeof(s));
+		if(s > 50) return false;
+		for(size_t i = 0; i<s; i++)
+		{
+			if(AddTuning(inStrm))
+				return false;
+		}
+	}
 
-	//6. Serialization end marker
+	//6. End marker
 	inStrm.read(reinterpret_cast<char*>(&endMarker), sizeof(endMarker));
-	if(endMarker != s_SerializationEndMarker) return SERIALIZATION_FAILURE;
+	if(endMarker != 0x54435346) return false;
 
 	m_EditMask = em;
 
-	if(inStrm.good()) return SERIALIZATION_SUCCESS;
-	else return SERIALIZATION_FAILURE;
-}	
+	loadingSuccessful = true;
+
+	return false;
+}
+
+
 
 bool CTuningCollection::Remove(const CTuning* pT)
 //--------------------------------------------
@@ -260,10 +260,10 @@ bool CTuningCollection::Remove(TITER removable, bool moveToTrashBin)
 	//Behavior:
 	//By default, moves tuning to carbage bin(m_DeletedTunings) so that
 	//it gets deleted in destructor. This way
-	//the tuning address remains valid until the destruction.
+	//the tuning address remains valid until the destruction of the collection.
 	//Optinally only removing the pointer without deleting or moving
-	//it to trashbin(e.g. transferring tuning to other collection)
-	if((m_EditMask & EM_REMOVE).any())
+	//it to trashbin(e.g. when transferring tuning to other collection)
+	if((m_EditMask & EM_REMOVE) != 0)
 	{
 		if(moveToTrashBin) m_DeletedTunings.push_back(*removable);
 		m_Tunings.erase(removable);
@@ -286,7 +286,7 @@ bool CTuningCollection::Remove(const size_t i)
 bool CTuningCollection::AddTuning(CTuning* const pT)
 //--------------------------------------------------
 {
-	if((m_EditMask & EM_ADD).none())
+	if((m_EditMask & EM_ADD) == 0)
 		return true;
 
 	if(pT == NULL)
@@ -298,35 +298,24 @@ bool CTuningCollection::AddTuning(CTuning* const pT)
 }
 
 
-bool CTuningCollection::AddTuning(istream& inStrm)
+bool CTuningCollection::AddTuning(istream& inStrm, const bool ignoreEditmask)
 //-------------------------------------------------
 {
-	if((m_EditMask & EM_ADD).none())
+	if(!ignoreEditmask && (m_EditMask & EM_ADD) == 0)
 		return true;
 
 	if(!inStrm.good()) return true;
 
-	DWORD beginPos = inStrm.tellg();
+	CTuning* pT = CTuningRTI::UnserializeOLD(inStrm);
+	if(pT == 0) pT = CTuning::Unserialize(inStrm);
 
-	CTuning::SERIALIZATION_MARKER sbm;
-	inStrm.read(reinterpret_cast<char*>(&sbm), sizeof(sbm));
-
-	if(sbm == CTuningRTI::s_SerializationBeginMarker)
+	if(pT == 0)
+		return true;
+	else
 	{
-		inStrm.seekg(beginPos);
-		//Returning stream to point so that serialization marker is there
-		//in tuning unserialization.
-
-		CTuning* p = new CTuningRTI;
-		if(p->UnSerializeBinary(inStrm) == CTuning::SERIALIZATION_FAILURE)
-		{
-			delete p; return true;
-		}
-		m_Tunings.push_back(p);
+		m_Tunings.push_back(pT);
 		return false;
 	}
-	if(!inStrm.good()) return true;
-	else return false;
 }
 
 //Static
@@ -351,4 +340,11 @@ bool CTuningCollection::TransferTuning(CTuningCollection* pTCsrc, CTuningCollect
 
 	return false;
 
+}
+
+string CTuningCollection::GetEditMaskString() const
+//-------------------------------------------------
+{
+	std::bitset<16> mask(m_EditMask);
+	return mask.to_string<char, char_traits<char>, allocator<char> >();
 }

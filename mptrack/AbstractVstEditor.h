@@ -20,6 +20,8 @@ public:
 	void SetLearnMacro(int inMacro);
 	int GetLearnMacro();
 
+	void UpdatePresetField();
+
 	afx_msg void OnLoadPreset();
 	afx_msg void OnSavePreset();
 	afx_msg void OnRandomizePreset();
@@ -29,6 +31,10 @@ public:
 	afx_msg void OnBypassPlug();
 	afx_msg void OnRecordAutomation();
 	afx_msg void OnPassKeypressesToPlug();
+	afx_msg void OnSetPreviousVSTPreset();
+	afx_msg void OnSetNextVSTPreset();
+	afx_msg void OnVSTPresetBackwardJump();
+	afx_msg void OnVSTPresetForwardJump();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 
 	//Overridden methods:

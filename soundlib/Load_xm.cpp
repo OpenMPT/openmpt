@@ -627,34 +627,9 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 // -! NEW_FEATURE#0027
 
 	// Song extensions
-	if( code == 'MPTS' ){
-		ptr += sizeof(__int32); // jump extension header code
-		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for song extensions
-			code = (*((__int32 *)ptr));			// read field code
-			ptr += sizeof(__int32);				// jump field code
-			size = (*((__int16 *)ptr));			// read field size
-			ptr += sizeof(__int16);				// jump field size
+	if( code == 'MPTS' )
+		LoadExtendedSongProperties(MOD_TYPE_XM, ptr, lpStream, dwMemLength);
 
-			BYTE * fadr = NULL;
-			switch (code) {						// interpret field code
-				case 'DT..': fadr = reinterpret_cast<BYTE*>(&m_nDefaultTempo);   break;
-				case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
-				case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;
-				case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
-				case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nMixLevels);	 break;
-				case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
-				case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
-				case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSamplePreAmp);	 break;
-				case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
-				case 'DGV.': fadr = reinterpret_cast<BYTE*>(&m_nDefaultGlobalVolume);	 break;
-			}
-
-			if (fadr != NULL) {					// if field code recognized
-				memcpy(fadr,ptr,size);			// read field data
-			}
-			ptr += size;						// jump field data
-		}
-	}
 
 	return TRUE;
 }
