@@ -325,9 +325,12 @@ private:
 	bool IsInterpolationPossible(UINT startRow, UINT endRow, UINT chan, UINT colType, CSoundFile* pSndFile);
 	void Interpolate(UINT type);
 
-	bool IsEditingEnabled() const {return static_cast<bool>(m_dwStatus&PATSTATUS_RECORD);}
+	
+	bool IsEditingEnabled() const {return ((m_dwStatus&PATSTATUS_RECORD) != 0);}
+
+	//Like IsEditingEnabled(), but shows some notification when editing is not enabled.
 	bool IsEditingEnabled_bmsg();
-	//Checks the editing status and does some notification when editing is not enabled.
+	
 
 public:
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);

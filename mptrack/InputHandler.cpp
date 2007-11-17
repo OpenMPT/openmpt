@@ -19,6 +19,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		
 	//Init CommandSet and Load defaults
 	activeCommandSet = new CCommandSet();
+	CCommandSet::s_bShowErrorOnUnknownKeybinding = (CMainFrame::GetMainFrame()->GetPrivateProfileLong("Misc", "ShowErrorOnUnknownKeybinding", 1, theApp.GetConfigFileName()) != 0);
 	
 	CString workingDir;
 	char wd[255];

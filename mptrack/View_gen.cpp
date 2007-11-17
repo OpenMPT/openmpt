@@ -965,6 +965,7 @@ void CViewGlobals::OnEditName1()
 		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
 		{
 			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
+			pSndFile->ChnSettings[nChn].szName[ARRAYELEMCOUNT(pSndFile->ChnSettings[nChn].szName)-1] = 0;
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
 		}
@@ -989,6 +990,7 @@ void CViewGlobals::OnEditName2()
 		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
 		{
 			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
+			pSndFile->ChnSettings[nChn].szName[ARRAYELEMCOUNT(pSndFile->ChnSettings[nChn].szName)-1] = 0;
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
 		}
@@ -1013,6 +1015,7 @@ void CViewGlobals::OnEditName3()
 		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
 		{
 			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
+			pSndFile->ChnSettings[nChn].szName[ARRAYELEMCOUNT(pSndFile->ChnSettings[nChn].szName)-1] = 0;
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
 		}
@@ -1037,6 +1040,7 @@ void CViewGlobals::OnEditName4()
 		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
 		{
 			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
+			pSndFile->ChnSettings[nChn].szName[ARRAYELEMCOUNT(pSndFile->ChnSettings[nChn].szName)-1] = 0;
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
 		}

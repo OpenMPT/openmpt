@@ -7,7 +7,7 @@
 #include "view_pat.h"
 #include "EffectVis.h"		//rewbs.fxvis
 #include "ChannelManagerDlg.h"
-#include "../soundlib/tuning_template.h"
+#include "../soundlib/tuningbase.h"
 #include <string>
 
 using std::string;
@@ -322,7 +322,7 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 	{
 		if(pTuning)
 		{
-			string noteStr = pTuning->GetNoteName(static_cast<CTuning::STEPTYPE>(note-NOTE_MIDDLEC));
+			string noteStr = pTuning->GetNoteName(note-NOTE_MIDDLEC);
 			noteStr.resize(3, ' ');
 			DrawLetter(x, y, noteStr[0]);
 			DrawLetter(x + pfnt->nNoteWidth/2, y, noteStr[1]);

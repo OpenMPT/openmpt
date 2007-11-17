@@ -182,19 +182,6 @@ bool CPattern::Shrink()
 	return false;
 }
 
-#ifndef TRADITIONAL_MODCOMMAND
-void CPattern::SetModCommandEffect(ROWINDEX r, CHANNELINDEX c, EFFECT_ID eID)
-//---------------------------------------------------------------------------
-{
-	m_rPatternContainer.GetSoundFile().OnSetEffect(GetModCommand(r,c), eID);
-}
-
-void CPattern::SetModCommandEffectParam(ROWINDEX r, CHANNELINDEX c, EFFECT_PARAM eParam)
-//---------------------------------------------------------------------------
-{
-	m_rPatternContainer.GetSoundFile().OnSetEffectParam(GetModCommand(r,c), eParam);
-}
-#endif
 
 
 bool CPattern::WriteITPdata(FILE* f) const
@@ -205,19 +192,7 @@ bool CPattern::WriteITPdata(FILE* f) const
 		for(CHANNELINDEX c = 0; c<GetNumChannels(); c++)
 		{
 			MODCOMMAND mc = GetModCommand(r,c);
-			#ifdef TRADITIONAL_MODCOMMAND
-				fwrite(&mc, sizeof(MODCOMMAND), 1, f);
-			#else
-				MODCOMMAND_ORIGINAL temp;
-				temp.command = mc.GetEffect();
-				temp.instr = mc.GetInstr();
-				temp.note = mc.GetNote();
-				temp.param = mc.GetEffectParam();
-				temp.vol = mc.GetVolParam();
-				temp.volcmd = mc.GetVolCmd();
-				fwrite(&temp, sizeof(MODCOMMAND_ORIGINAL), 1, f);
-			#endif
-			
+			fwrite(&mc, sizeof(MODCOMMAND), 1, f);
 		}
 	}
     return false;

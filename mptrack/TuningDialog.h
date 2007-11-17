@@ -42,7 +42,7 @@ public:
 
 	void RemoveValue_1(const T1& a)
 	{
-		vector<T1>::iterator iter = find(m_T1.begin(), m_T1.end(), a);
+		typename vector<T1>::iterator iter = find(m_T1.begin(), m_T1.end(), a);
 		if(iter != m_T1.end())
 		{
 			m_T2.erase(m_T2.begin() + (iter-m_T1.begin()));
@@ -52,7 +52,7 @@ public:
 
 	void RemoveValue_2(const T2& b)
 	{
-		vector<T2>::iterator iter = find(m_T2.begin(), m_T2.end(), b);
+		typename vector<T2>::iterator iter = find(m_T2.begin(), m_T2.end(), b);
 		if(iter != m_T2.end())
 		{
 			m_T1.erase(m_T1.begin() + (iter-m_T2.begin()));
@@ -62,7 +62,7 @@ public:
 
 	T2 GetMapping_12(const T1& a) const
 	{
-		vector<T1>::const_iterator iter = find(m_T1.begin(), m_T1.end(), a);
+		typename vector<T1>::const_iterator iter = find(m_T1.begin(), m_T1.end(), a);
 		if(iter != m_T1.end())
 		{
 			return m_T2[iter-m_T1.begin()];
@@ -73,7 +73,7 @@ public:
 
 	T1 GetMapping_21(const T2& b) const
 	{
-		vector<T2>::const_iterator iter = find(m_T2.begin(), m_T2.end(), b);
+		typename vector<T2>::const_iterator iter = find(m_T2.begin(), m_T2.end(), b);
 		if(iter != m_T2.end())
 		{
 			return m_T1[iter-m_T2.begin()];
@@ -102,8 +102,7 @@ private:
 	CTuningDialog& m_rParentDialog;
 public:
 	CTuningTreeCtrl(CTuningDialog* parent) : m_rParentDialog(*parent) {}
-	//Note: Parent address may be given in initialiser list so 
-	//do not use it.
+	//Note: Parent address may be given in its initializer list.
 
 	void SetDragging(bool state = true) {m_Dragging = state;}
 	bool IsDragging() {return m_Dragging;}
@@ -198,7 +197,7 @@ public:
 	BOOL OnInitDialog();
 
 	void AddTuningCollection(CTuningCollection* pTC) {if(pTC) m_TuningCollections.push_back(pTC);}
-	void UpdateRatioMapEdits(const CTuning::STEPTYPE&);
+	void UpdateRatioMapEdits(const CTuning::NOTEINDEXTYPE&);
 
 	bool GetModifiedStatus(const CTuningCollection* const pTc) const;
 
@@ -209,7 +208,9 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 private:
-	CTuning::CTUNINGTYPE GetTuningTypeFromStr(const string& str) const;
+	CTuning::TUNINGTYPE GetTuningTypeFromStr(const string& str) const;
+
+	void UpdateTuningDescription();
 
 	void UpdateView(const int UpdateMask = 0);
 	void UpdateTuningType();
@@ -222,16 +223,17 @@ private:
 
 	void OnEndDrag(HTREEITEM dragDestItem);
 
-	CTuningCollection* GetpTuningCollection(const CTuning* const) const;
 	//Returns pointer to the tuning collection where tuning given as argument
 	//belongs to.
-
-	CTuningCollection* GetpTuningCollection(HTREEITEM ti) const;
+	CTuningCollection* GetpTuningCollection(const CTuning* const) const;
+	
 	//Returns the address of corresponding tuningcollection; if it points
 	//to tuning-entry, returning the owning tuningcollection
-
-	bool IsDeletable(const CTuningCollection* const pTC) const;
+	CTuningCollection* GetpTuningCollection(HTREEITEM ti) const;
+	
 	//Checks whether tuning collection can be deleted.
+	bool IsDeletable(const CTuningCollection* const pTC) const;
+	
 
 private:
 	CTuningRatioMapWnd m_RatioMapWnd;
@@ -273,10 +275,6 @@ private:
 	CTuningTreeCtrl m_TreeCtrlTuning;
 
 private:
-	static const string s_stringTypeGEN;
-	static const string s_stringTypeRP;
-	static const string s_stringTypeTET;
-
 	typedef CTuningTreeItem TUNINGTREEITEM;
 	typedef CBijectiveMap<HTREEITEM, TUNINGTREEITEM> TREETUNING_MAP;
 	TREETUNING_MAP m_TreeItemTuningItemMap;
@@ -299,13 +297,14 @@ private:
 		TT_TUNING
 	};
 
+
+	//To indicate whether to apply changes made to 
+	//those edit boxes(they are modified by certain activities 
+	//in case which the modifications should not be applied to
+	//tuning data.
 	bool m_NoteEditApply;
 	bool m_RatioEditApply;
-	//To indicate whether to apply changes made to 
-	//to those edit boxes(they are modified by non-user 
-	//activies and in these cases the value should be applied
-	//to the tuning data.
-
+	
 	enum
 	{
 		UM_TUNINGDATA = 1, //UM <-> Update Mask
@@ -317,9 +316,9 @@ private:
 
 	bool AddTuning(CTuningCollection*, CTuning* pT = NULL);
 
-	bool m_DoErrorExit;
 	//Flag to prevent multiple exit error-messages.
-
+	bool m_DoErrorExit;
+	
 	void DoErrorExit();
 
 

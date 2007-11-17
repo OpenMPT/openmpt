@@ -9,7 +9,7 @@ DWORD COrderToPatternTable::UnSerialize(const BYTE* const src, const int memLeng
 {
 	if(memLength < sizeof(s_Version) + sizeof(size_t)) return 0;
 	WORD version = 0;
-	size_t s = 0;
+	uint32 s = 0;
 	DWORD memPos = 0;
 	memcpy(&version, src, sizeof(version));
 	memPos += sizeof(version);
@@ -55,7 +55,7 @@ bool COrderToPatternTable::Serialize(FILE* f) const
 
 	//Version
 	fwrite(&s_Version, sizeof(s_Version), 1, f);
-	const size_t s = size();
+	const uint32 s = size();
 	//Size
 	fwrite(&s, sizeof(s), 1, f);
 	//Values

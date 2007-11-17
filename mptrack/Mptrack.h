@@ -15,6 +15,7 @@
 #include "resource.h"       // main symbols
 #include "sndfile.h"
 #include <windows.h>
+#include <Specstrings.h>	// In VC2003, '__in' was undefined in winhttp.h
 #include <winhttp.h>
 
 class CModDoc;

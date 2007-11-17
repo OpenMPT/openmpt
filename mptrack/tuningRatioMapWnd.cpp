@@ -49,9 +49,9 @@ void CTuningRatioMapWnd::OnPaint()
 		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 		CRect rect;
 
-		CTuning::STEPTYPE nNotes = static_cast<CTuning::STEPTYPE>((rcClient.bottom + m_cyFont - 1) / m_cyFont);
+		NOTEINDEXTYPE nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
 		if(!m_nNote) m_nNote = m_nNoteCentre;
-		CTuning::STEPTYPE nPos = m_nNote - (nNotes/2);
+		NOTEINDEXTYPE nPos = m_nNote - (nNotes/2);
 		int ypaint = 0;
 
 		
@@ -59,12 +59,18 @@ void CTuningRatioMapWnd::OnPaint()
 		{
 			BOOL bHighLight;
 			// Note
+			NOTEINDEXTYPE noteToDraw = nPos - m_nNoteCentre;
 			s[0] = 0;
-			const string temp = m_pTuning->GetNoteName(nPos - 61).c_str();
-			if(temp.size() >= sizeofS)
-				wsprintf(s, "%s", "...");
-			else
+			
+			const bool isValidNote = m_pTuning->IsValidNote(noteToDraw);
+			string temp;
+			if(isValidNote) temp = m_pTuning->GetNoteName(noteToDraw);
+
+			if(isValidNote && temp.size() < sizeofS)
 				wsprintf(s, "%s", temp.c_str());
+			else
+				wsprintf(s, "%s", "...");
+				
 
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
 			DrawButtonRect(hdc, &rect, s, FALSE, FALSE);
@@ -81,7 +87,7 @@ void CTuningRatioMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
-			string str = Stringify(m_pTuning->GetFrequencyRatio(nPos - m_nNoteCentre));
+			string str = Stringify(m_pTuning->GetRatio(noteToDraw));
 			dc.DrawText(str.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		}
 		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);
@@ -123,18 +129,23 @@ void CTuningRatioMapWnd::OnLButtonDown(UINT, CPoint pt)
 		CRect rcClient;
 		GetClientRect(&rcClient);
 		int nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
-		UINT n = (pt.y / m_cyFont) + m_nNote - (nNotes/2);
-		m_nNote = static_cast<CTuning::STEPTYPE>(n);
-		InvalidateRect(NULL, FALSE);
-		if(m_pParent)
-			m_pParent->UpdateRatioMapEdits(GetShownCentre());
+		const UINT n = (pt.y / m_cyFont) + m_nNote - (nNotes/2);
+		const NOTEINDEXTYPE note = n - m_nNoteCentre;
+		if(m_pTuning->IsValidNote(note))
+		{
+			m_nNote = n;
+			InvalidateRect(NULL, FALSE);
+			if(m_pParent)
+				m_pParent->UpdateRatioMapEdits(GetShownCentre());
+		}
+		
 	}
 	SetFocus();
 }
 
 
 
-CTuning::STEPTYPE CTuningRatioMapWnd::GetShownCentre() const
+NOTEINDEXTYPE CTuningRatioMapWnd::GetShownCentre() const
 //--------------------------------------
 {
 	return m_nNote - m_nNoteCentre;

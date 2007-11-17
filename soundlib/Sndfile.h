@@ -8,9 +8,11 @@
 */
 #include "../mptrack/SoundFilePlayConfig.h"
 #include "tuning.h"
-#include "tuningCollection.h"
 #include "mod_specifications.h"
 #include <vector>
+#include <bitset>
+
+using std::bitset;
 
 #ifndef __SNDFILE_H
 #define __SNDFILE_H
@@ -407,8 +409,7 @@ typedef struct _MODINSTRUMENT
 	BYTE nVibRate;
 	CHAR name[22];
 
-	//Returns size which pSample is at least.
-	//Very dirty implementation.
+	//Should return the size which pSample is at least.
 	DWORD GetSampleSizeInBytes() const
 	{
 		DWORD len = nLength;
@@ -487,7 +488,7 @@ struct INSTRUMENTHEADER
 	BYTE nPitchEnvReleaseNode;
 	BYTE nPanEnvReleaseNode;
 	BYTE nVolEnvReleaseNode;
-	WORD wPitchToTempoLock; //PTL <-> Pitch/Tempo Lock
+	WORD wPitchToTempoLock;
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -587,7 +588,7 @@ typedef struct _MODCHANNEL
 	typedef UINT VOLUME;
 	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol*4 : nVolume;}
 
-	//-->Relabs.Tuning-modes-to-work-properly-with-effects-variables
+	//-->Tuning-modes-to-work-properly-with-effects-variables
 		bool m_ReCalculateFreqOnFirstTick;
 		//If true, freq should be recalculated in ReadNote() on first tick.
 		//Currently used only for vibrato things - using in other context might be 
@@ -596,7 +597,7 @@ typedef struct _MODCHANNEL
 		bool m_CalculateFreq;
 		//To tell whether to calculate frequency.
 
-		CTuning::FINESTEPTYPE m_PortamentoFineSteps;
+		CTuning::STEPINDEXTYPE m_PortamentoFineSteps;
 		long m_PortamentoTickSlide;
 
 		UINT m_Freq;
@@ -785,9 +786,10 @@ private:
 	const CSoundFile& m_rSndFile;
 };
 
+//Note: These are bit indeces.
+const BYTE MSF_IT_COMPATIBLE_PLAY = 0; //MPF <-> ModSpecificFlag
 
-const BYTE IT_STANDARD = 0;
-
+class CTuningCollection;
 
 //==============
 class CSoundFile
@@ -805,47 +807,48 @@ public: //Get details(TODO?: Move detail asking to a 'controller')
 	ROWINDEX GetRowMin() const {return m_pModSpecs->patternRowsMin;}
 	CHANNELINDEX GetNumChannelMax() const {return min(MAX_BASECHANNELS, m_pModSpecs->channelsMax);}
 	CHANNELINDEX GetNumChannelMin() const {return m_pModSpecs->channelsMin;}
-	uint16 GetModNameLengthMax() {return (GetModType() == MOD_TYPE_MPT) ? 25 : m_pModSpecs->modNameLengthMax;}
+	uint16 GetModNameLengthMax() {return (GetType() == MOD_TYPE_MPT) ? 25 : m_pModSpecs->modNameLengthMax;}
 
 	//Return true if title was changed.
 	bool SetTitle(const char*, size_t strSize);
 
 public: //Misc
-	void ChangeModTypeTo(const int& newType);
+	void ChangeModTypeTo(const MODTYPE& newType);
 	
-	MODTYPE GetModType() const {return m_nType;}
+	
 	
 	//Return value in seconds.
 	double GetPlaybackTimeAt(ORDERINDEX, ROWINDEX);
 
-	#ifndef TRADITIONAL_MODCOMMAND
-		//When adding a modeffect to pattern, this is to be called to 
-		//do the actual adding and this can do modifications if needed.
-		void OnSetEffect(MODCOMMAND& mc, EFFECT_ID);
-
-		//When adding a modeffect parameter to pattern, this is to be called to 
-		//do the actual adding and this can do modifications if needed.
-		void OnSetEffectParam(MODCOMMAND& mc, EFFECT_PARAM);
-	#endif
-
+	//
 	virtual bool GetModSpecificFlag(BYTE i)
-		{return (i < m_ModFlags.size()) ? m_ModFlags[i] : false;}
-	//
+		{return (i < 8*sizeof(m_ModFlags)) ? ((m_ModFlags & (1<<i)) != 0) : false;}
+	
 
-	virtual void SetModSpecificFlag(BYTE i, bool val)
-		{if(i < m_ModFlags.size()) m_ModFlags[i] = val;}
 	//
+	virtual void SetModSpecificFlag(BYTE i, bool val)
+	{
+		if(i < 8*sizeof(m_ModFlags))
+		{
+			m_ModFlags = (val) ? m_ModFlags |= (1 << i) : m_ModFlags &= ~(1 << i);
+		}
+	}
+	
 	
 	//Tuning-->
 public:
 	static bool LoadStaticTunings();
 	static bool SaveStaticTunings();
+	static void DeleteStaticdata();
+	static CTuningCollection& GetStandardTunings() {return *s_pTuningsSharedStandard;}
+	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
+	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
-	string GetNoteName(const CTuning::STEPTYPE&, const int inst = -1) const;
-public: //TODO: Make tunings private.
-	CTuningCollection m_TuningsTuneSpecific;
-	static CTuningCollection s_TuningsSharedStandard;
-	static CTuningCollection s_TuningsSharedLocal;
+	string GetNoteName(const CTuning::NOTEINDEXTYPE&, const int inst = -1) const;
+private:
+	CTuningCollection* m_pTuningsTuneSpecific;
+	static CTuningCollection* s_pTuningsSharedStandard;
+	static CTuningCollection* s_pTuningsSharedLocal;
 	//<--Tuning
 
 public: //Get 'controllers'
@@ -863,7 +866,7 @@ private: //'Controllers'
 	CPlaybackEventer m_PlaybackEventer;
 
 private: //Misc data
-	bitset<8> m_ModFlags;
+	uint16 m_ModFlags;
 	const CModSpecifications* m_pModSpecs;
 
 public:	// Static Members
@@ -942,7 +945,7 @@ public:
 public:
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
 	BOOL Destroy();
-	UINT GetType() const { return m_nType; }
+	MODTYPE GetType() const { return m_nType; }
 
 
 	//Return the number of channels in the pattern. In 1.17.02.45
@@ -975,11 +978,10 @@ public:
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
     
-	//Get modlength in various cases: total length, length to 
-	//specific order&row etc. Return value is in seconds.
-	//NOTE: Also seems to be used for some 'simulate playback'-purposes (Relabs, April 2007)
 	double GetLength(BOOL bAdjust, BOOL bTotal=FALSE);
 private:
+	//Get modlength in various cases: total length, length to 
+	//specific order&row etc. Return value is in seconds.
 	double GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal=FALSE, ORDERINDEX ord = ORDERINDEX_MAX, ROWINDEX row = ROWINDEX_MAX);
 
 public:
@@ -1048,6 +1050,7 @@ public:
 	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, INSTRUMENTHEADER* instruments[], UINT nInstruments);
 	void SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[], UINT nInstruments, FILE* f);
 	void SaveExtendedSongProperties(FILE* f);
+	void LoadExtendedSongProperties(const MODTYPE modtype, BYTE*& ptr, const BYTE* startpos, const size_t seachlimit);
 
 #endif // MODPLUG_NO_FILESAVE
 	// MOD Convert function
@@ -1128,8 +1131,8 @@ public:
 	void NoteChange(UINT nChn, int note, BOOL bPorta=FALSE, BOOL bResetEnv=TRUE, BOOL bManual=FALSE);
 	void InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta=FALSE,BOOL bUpdVol=TRUE,BOOL bResetEnv=TRUE);
 	// Channel Effects
-	void PortamentoUp(MODCHANNEL *pChn, UINT param);
-	void PortamentoDown(MODCHANNEL *pChn, UINT param);
+	void PortamentoUp(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
+	void PortamentoDown(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
 	void MidiPortamento(MODCHANNEL *pChn, int param);
 	void FinePortamentoUp(MODCHANNEL *pChn, UINT param);
 	void FinePortamentoDown(MODCHANNEL *pChn, UINT param);

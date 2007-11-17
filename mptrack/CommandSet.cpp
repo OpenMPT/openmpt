@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+bool CCommandSet::s_bShowErrorOnUnknownKeybinding = true;
+
 CCommandSet::CCommandSet(void)
 {
 	// Which keybinding rules to enforce?
@@ -22,7 +24,6 @@ CCommandSet::CCommandSet(void)
 	enforceRule[krCheckModifiers]				= true;
 	enforceRule[krPropagateSampleManipulation]  = true;
 //	enforceRule[krCheckContextHierarchy]		= true;
-	
 	
 	commands.SetSize(kcNumCommands);
 	SetupCommands();
@@ -3120,11 +3121,11 @@ bool CCommandSet::LoadFile(CString fileName)
 				CString err;
 				if (errorCount<10) {
 					err.Format("Line %d in key binding file %s was not understood.", l, fileName);
-					::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
+					if(s_bShowErrorOnUnknownKeybinding) ::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
 					Log(err);
 				} else if (errorCount==10) {
 					err.Format("Too many errors detected, not reporting any more.");
-					::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
+					if(s_bShowErrorOnUnknownKeybinding) ::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
 					Log(err);
 				}
 			}

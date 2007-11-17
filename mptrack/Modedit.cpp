@@ -1389,10 +1389,6 @@ BOOL CModDoc::MoveOrder(UINT nSourceNdx, UINT nDestNdx, BOOL bUpdate, BOOL bCopy
 BOOL CModDoc::ExpandPattern(UINT nPattern)
 //----------------------------------------
 {
-
-	MODCOMMAND *newPattern, *oldPattern;
-	UINT nRows, nChns;
-
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
 

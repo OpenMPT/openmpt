@@ -171,7 +171,8 @@ void CChannelManagerDlg::OnApply()
 
 	if(!m_pSndFile || !pModDoc) return;
 
-	// Stop player
+
+	// Stop player (is this necessary?)
 	CModDoc *pActiveMod = NULL;
 	HWND followSong = pMainFrm->GetFollowSong(pModDoc);
 	if(pMainFrm->IsPlaying()){
@@ -181,9 +182,7 @@ void CChannelManagerDlg::OnApply()
 
 	EnterCriticalSection(&applying);
 
-	MODCOMMAND *p = NULL,*newp = NULL;
-	MODCHANNELSETTINGS settings[MAX_BASECHANNELS];
-	UINT i,j,k,nChannels,newpat[MAX_BASECHANNELS],newMemory[4][MAX_BASECHANNELS];
+	UINT i,nChannels,newpat[MAX_BASECHANNELS],newMemory[4][MAX_BASECHANNELS];
 
 	// Count new number of channels , copy pattern pointers & manager internal store memory
 	nChannels = 0;
@@ -514,7 +513,7 @@ void CChannelManagerDlg::OnRestore(void)
 	InvalidateRect(NULL,FALSE);
 }
 
-void CChannelManagerDlg::OnTabSelchange(NMHDR* header, LRESULT* pResult)
+void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
 {
 	if(!show) return;
 
@@ -557,7 +556,7 @@ void CChannelManagerDlg::OnTabSelchange(NMHDR* header, LRESULT* pResult)
 	InvalidateRect(NULL, FALSE);
 }
 
-void DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bActivate, BOOL bEnable, DWORD dwFlags, HBRUSH markBrush)
+void DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bActivate, BOOL bEnable, DWORD dwFlags, HBRUSH /*markBrush*/)
 {
 	RECT rect;
 	rect = (*lpRect);
@@ -609,27 +608,27 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 	CRect wnd,btn;
 	GetWindowRect(&wnd);
 
-	if(button = GetDlgItem(IDC_BUTTON1)){
+	if((button = GetDlgItem(IDC_BUTTON1)) != 0){
 		button->GetWindowRect(&btn);
 		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
-	if(button = GetDlgItem(IDC_BUTTON2)){
+	if((button = GetDlgItem(IDC_BUTTON2)) != 0){
 		button->GetWindowRect(&btn);
 		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
-	if(button = GetDlgItem(IDC_BUTTON3)){
+	if((button = GetDlgItem(IDC_BUTTON3)) != 0){
 		button->GetWindowRect(&btn);
 		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
-	if(button = GetDlgItem(IDC_BUTTON4)){
+	if((button = GetDlgItem(IDC_BUTTON4)) != 0){
 		button->GetWindowRect(&btn);
 		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
-	if(button = GetDlgItem(IDC_BUTTON5)){
+	if((button = GetDlgItem(IDC_BUTTON5)) != 0){
 		button->GetWindowRect(&btn);
 		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
-	if(button = GetDlgItem(IDC_BUTTON6)){
+	if((button = GetDlgItem(IDC_BUTTON6)) != 0){
 		button->GetWindowRect(&btn);
 		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
@@ -856,9 +855,9 @@ BOOL CChannelManagerDlg::ButtonHit(CPoint point, UINT * id, CRect * invalidate)
 	CSoundFile * m_pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
 	if(pModDoc && m_pSndFile){
-		UINT nChannels = m_pSndFile->m_nChannels;
+		//UINT nChannels = m_pSndFile->m_nChannels;
 		UINT nColns = CM_NB_COLS;
-		UINT nLines = nChannels / nColns + (nChannels % nColns ? 1 : 0);
+		//UINT nLines = nChannels / nColns + (nChannels % nColns ? 1 : 0);
 
 		int x = point.x - client.left;
 		int y = point.y - client.top;
@@ -905,7 +904,7 @@ void CChannelManagerDlg::ResetState(BOOL selection, BOOL move, BOOL button, BOOL
 	if(order) nChannelsOld = 0;
 }
 
-LRESULT CChannelManagerDlg::OnMouseLeave(WPARAM wparam, LPARAM lparam)
+LRESULT CChannelManagerDlg::OnMouseLeave(WPARAM /*wparam*/, LPARAM /*lparam*/)
 {
 	if(!m_hWnd || show == FALSE) return 0;
 
@@ -917,7 +916,7 @@ LRESULT CChannelManagerDlg::OnMouseLeave(WPARAM wparam, LPARAM lparam)
 	return 0;
 }
 
-LRESULT CChannelManagerDlg::OnMouseHover(WPARAM wparam, LPARAM lparam)
+LRESULT CChannelManagerDlg::OnMouseHover(WPARAM /*wparam*/, LPARAM /*lparam*/)
 {
 	if(!m_hWnd || show == FALSE) return 0;
 
@@ -954,7 +953,7 @@ void CChannelManagerDlg::OnMouseMove(UINT nFlags,CPoint point)
 	LeaveCriticalSection(&applying);
 }
 
-void CChannelManagerDlg::OnLButtonUp(UINT nFlags,CPoint point)
+void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 {
 	if(!m_hWnd || show == FALSE) return;
 
@@ -1034,7 +1033,7 @@ void CChannelManagerDlg::OnLButtonDown(UINT nFlags,CPoint point)
 	LeaveCriticalSection(&applying);
 }
 
-void CChannelManagerDlg::OnRButtonUp(UINT nFlags,CPoint point)
+void CChannelManagerDlg::OnRButtonUp(UINT /*nFlags*/,CPoint /*point*/)
 {
 	if(!m_hWnd || show == FALSE) return;
 
@@ -1186,7 +1185,7 @@ BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	return CModControlDlg::OnMouseWheel(nFlags, zDelta, pt);
 }
 
-BOOL CCtrlPatterns::OnToolTip(UINT id, NMHDR *pNMHDR, LRESULT *pResult) 
+BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/) 
 //---------------------------------------------------------------------
 {
     TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;

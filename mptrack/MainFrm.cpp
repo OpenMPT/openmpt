@@ -260,7 +260,7 @@ CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
 CAutoSaver *CMainFrame::m_pAutoSaver = NULL; //rewbs.autosave
 CPerformanceCounter *CMainFrame::m_pPerfCounter = NULL;
 
-CString CMainFrame::m_csExecutablePath = "";
+CString CMainFrame::m_csExecutableDirectoryPath = "";
 
 static UINT indicators[] =
 {
@@ -278,15 +278,16 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 //----------------------
 {
-	char wd[255];
-	_getdcwd(_getdrive(), wd, 255);
-	m_csExecutablePath = wd;	//Assume working dir is executable path at this stage.
-
-	//Relabs.note: m_csExecutablePath doesn't give right path
-	//at least for debug builds.
-	#ifdef DEBUG
-		m_csExecutablePath += "\\bin";
-	#endif
+	{
+	char path[_MAX_PATH];
+	char exedrive[_MAX_DRIVE];
+	char exedir[_MAX_DIR];
+	GetModuleFileName(NULL, path, MAX_PATH);
+	_splitpath(path, exedrive, exedir, NULL, NULL);
+	memset(path, 0, sizeof(path));
+	_makepath(path, exedrive, exedir, NULL, NULL);
+    m_csExecutableDirectoryPath = path; //path should end with \ 
+	}
 
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = NULL;	//rewbs.customKeys
@@ -614,7 +615,6 @@ VOID CMainFrame::Initialize()
 	title += CString(" ") + GetFullVersionString();
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
-	
 
 	// Load Chords
 	theApp.LoadChords(Chords);
@@ -664,6 +664,7 @@ CMainFrame::~CMainFrame()
 	delete m_pPerfCounter;
 
 	CChannelManagerDlg::DestroySharedInstance();
+	CSoundFile::DeleteStaticdata();
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -1903,7 +1904,7 @@ BOOL CMainFrame::PauseMod(CModDoc *pModDoc)
 	if (m_pSndFile)
 	{
 		//m_pSndFile->LoopPattern(-1);
-		//Relabs.note: Commented above line - why loop should be disabled when pausing?
+		//Commented above line - why loop should be disabled when pausing?
 
 		m_pSndFile->m_dwSongFlags &= ~SONG_PAUSED;
 		if (m_pSndFile == &m_WaveFile)	{
@@ -2939,3 +2940,4 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 		}
     }
 }
+

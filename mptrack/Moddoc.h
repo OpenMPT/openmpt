@@ -89,6 +89,8 @@ protected:
 	DWORD m_dwNotifyType;
 	PATTERNUNDOBUFFER PatternUndo[MAX_UNDO_LEVEL];
 
+	bool m_ShowSavedialog;
+
 // -> CODE#0015
 // -> DESC="channels management dlg"
 	BYTE MultiRecordMask[(MAX_CHANNELS+7)/8];

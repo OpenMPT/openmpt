@@ -2361,7 +2361,7 @@ void CViewInstrument::PlayNote(UINT note)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (pMainFrm) && (note<128))
+	if ((pModDoc) && (pMainFrm) && (note > 0) && (note<128))
 	{
 		CHAR s[64];
 		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
@@ -2387,13 +2387,13 @@ void CViewInstrument::PlayNote(UINT note)
 			}
 		*/
 			INSTRUMENTHEADER *penv = pModDoc->GetSoundFile()->Headers[m_nInstrument];
-			if ((!penv) || (!penv->Keyboard[note])) return;
+			if ((!penv) || (!penv->Keyboard[note-1] && !penv->nMixPlug)) return;
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
 			m_nPlayingChannel= pModDoc->PlayNote(note, m_nInstrument, 0, FALSE); //rewbs.instViewNNA
 			s[0] = 0;
 			if ((note) && (note <= 120)) 
 			{
-				const string temp = pModDoc->GetSoundFile()->GetNoteName(static_cast<CTuning::STEPTYPE>(note), m_nInstrument);
+				const string temp = pModDoc->GetSoundFile()->GetNoteName(note, m_nInstrument);
 				if(temp.size() >= sizeofS)
 					wsprintf(s, "%s", "...");
 				else

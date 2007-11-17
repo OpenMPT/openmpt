@@ -427,7 +427,19 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		return;
 	
 	// Update Volume
-	if (bUpdVol) pChn->nVolume = (psmp) ? psmp->nVolume : 0;
+	if (bUpdVol)
+	{
+		pChn->nVolume = 0;
+		if(psmp)
+			pChn->nVolume = psmp->nVolume;
+		else
+		{
+			if(penv && penv->nMixPlug)
+				pChn->nVolume = pChn->GetVSTVolume();
+		}
+
+	}
+
 	// bInstrumentChanged is used for IT carry-on env option
 	if (penv != pChn->pHeader)
 	{
@@ -460,6 +472,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		}
 		if (psmp->uFlags & CHN_PANNING) pChn->nPan = psmp->nPan;
 	}
+
+
 
 	// Reset envelopes
 	if (bResetEnv)
@@ -588,7 +602,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 			pChn->nPortamentoDest = 0;
 		else
 		{
-			pChn->nPortamentoDest = penv->pTuning->GetFineStepCount(pChn->nNote, pChn->m_PortamentoFineSteps, note, 0);
+			pChn->nPortamentoDest = penv->pTuning->GetStepDistance(pChn->nNote, pChn->m_PortamentoFineSteps, note, 0);
 			//Here pCnh->nPortamentoDest means 'steps to slide'.
 			pChn->m_PortamentoFineSteps = -pChn->nPortamentoDest;
 		}
@@ -1029,6 +1043,24 @@ BOOL CSoundFile::ProcessEffects()
 			if ((param & 0xF0) == 0xD0)
 			{
 				nStartTick = param & 0x0F;
+
+				//IT compatibility 08. Handling of out-of-range delay command.
+				if(nStartTick >= m_nMusicSpeed && GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+				{
+					if(instr)
+					{
+						if(GetNumInstruments() < 1 && instr < MAX_SAMPLES)
+						{
+							pChn->pInstrument = &Ins[instr];
+						}
+						else
+						{	
+							if(instr < MAX_INSTRUMENTS)
+								pChn->pHeader = Headers[instr];
+						}
+					}
+					continue;
+				}
 			} else
 			if (!m_nTickCount)
 			{
@@ -1066,6 +1098,9 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			if ((!note) && (instr)) //Case: instrument with no note data. 
 			{
+				if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+					note = pChn->nNote;
+
 				if (m_nInstruments)
 				{
 					if (pChn->pInstrument) pChn->nVolume = pChn->pInstrument->nVolume;
@@ -1081,8 +1116,6 @@ BOOL CSoundFile::ProcessEffects()
 				} else //Case: Only samples are used; no instruments.
 				{
 					if (instr < MAX_SAMPLES) pChn->nVolume = Ins[instr].nVolume;
-					if (m_nType == MOD_TYPE_IT && GetModSpecificFlag(IT_STANDARD))
-						note = pChn->nNote;
 				}
 				if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) instr = 0;
 			}
@@ -1209,18 +1242,23 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PORTAUP:
-					PortamentoUp(pChn, vol << 2);
+					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+						PortamentoUp(pChn, vol << 2, true);
+					else
+						PortamentoUp(pChn, vol << 2, false);
 					break;
 
 				case VOLCMD_PORTADOWN:
-					PortamentoDown(pChn, vol << 2);
+					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+						PortamentoDown(pChn, vol << 2, true);
+					else
+						PortamentoDown(pChn, vol << 2, false);
 					break;
 				
 				case VOLCMD_VELOCITY:					//rewbs.velocity	TEMP algorithm (crappy :)
 					pChn->nVolume = vol * 28;			//Max nVolume is 255; max vol is 9; 255/9=28
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					if (m_nTickCount == nStartTick) SampleOffset(nChn, 48-(vol << 3), bPorta); //Max vol is 9; 9 << 3 = 48
-					
 					break;
 							
 				case VOLCMD_OFFSET:					//rewbs.volOff
@@ -1653,19 +1691,19 @@ void CSoundFile::resetEnvelopes(MODCHANNEL* pChn, int envToReset)
 ////////////////////////////////////////////////////////////
 // Channels effects
 
-void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param)
+void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePortamentoAsRegular)
 //---------------------------------------------------------
 {
 	MidiPortamento(pChn, param); //Send midi pitch bend event if there's a plugin
 
-	if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
+	if(GetType() == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
 	{
 		if(param)
 			pChn->nOldPortaUpDown = param;
 		else
 			param = pChn->nOldPortaUpDown;
 
-		if(param >= 0xF0)
+		if(param >= 0xF0 && !doFinePortamentoAsRegular)
 			PortamentoFineMPT(pChn, param - 0xF0);
 		else
 			PortamentoMPT(pChn, param);
@@ -1673,7 +1711,7 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param)
 	}
 
 	if (param) pChn->nOldPortaUpDown = param; else param = pChn->nOldPortaUpDown;
-	if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
+	if (!doFinePortamentoAsRegular && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
 	{
 		if (param & 0x0F)
 		{
@@ -1696,7 +1734,7 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param)
 }
 
 
-void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param)
+void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param, const bool doFinePortamentoAsRegular)
 //-----------------------------------------------------------
 {
 	MidiPortamento(pChn, -1*param); //Send midi pitch bend event if there's a plugin
@@ -1708,7 +1746,7 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param)
 		else
 			param = pChn->nOldPortaUpDown;
 
-		if(param >= 0xF0)
+		if(param >= 0xF0 && !doFinePortamentoAsRegular)
 			PortamentoFineMPT(pChn, -1*(param - 0xF0));
 		else
 			PortamentoMPT(pChn, -1*param);
@@ -1716,7 +1754,7 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param)
 	}
 
 	if (param) pChn->nOldPortaUpDown = param; else param = pChn->nOldPortaUpDown;
-	if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
+	if (!doFinePortamentoAsRegular && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM)) && ((param & 0xF0) >= 0xE0))
 	{
 		if (param & 0x0F)
 		{
@@ -1855,9 +1893,16 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 {
 	pChn->dwFlags |= CHN_PORTAMENTO;
 
+	//IT compatibility 03
+	if(!(m_dwSongFlags & SONG_ITCOMPATMODE) && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+	{
+		if(param == 0) param = pChn->nOldPortaUpDown;
+		pChn->nOldPortaUpDown = param;
+	}
+
 	if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
 	{
-		//Behavior: Param tells number of finesteps(or with glissando fullsteps)
+		//Behavior: Param tells number of finesteps(or 'fullsteps'(notes) with glissando)
 		//to slide per row(not per tick).	
 		const long old_PortamentoTickSlide = (m_nTickCount != 0) ? pChn->m_PortamentoTickSlide : 0;
 
@@ -1876,8 +1921,8 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 
 		if(pChn->dwFlags & CHN_GLISSANDO)
 		{
-			pChn->m_PortamentoTickSlide *= pChn->pHeader->pTuning->GetFineStepCount();
-			//With glissando interpreting param as fullsteps instead of finesteps.
+			pChn->m_PortamentoTickSlide *= pChn->pHeader->pTuning->GetFineStepCount() + 1;
+			//With glissando interpreting param as notes instead of finesteps.
 		}
 
 		const long slide = pChn->m_PortamentoTickSlide - old_PortamentoTickSlide;
@@ -2936,14 +2981,24 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 		if (pChn->nPatternLoopCount)
 		{
 			pChn->nPatternLoopCount--;
-			if (!pChn->nPatternLoopCount) return -1;
+			if(!pChn->nPatternLoopCount)
+			{
+				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+					pChn->nPatternLoop = m_nRow+1;
+
+				return -1;	
+			}
 		} else
 		{
 			MODCHANNEL *p = Chn;
-			for (UINT i=0; i<m_nChannels; i++, p++) if (p != pChn)
+			
+			if(!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY)))
 			{
-				// Loop already done
-				if (p->nPatternLoopCount) return -1;
+				for (UINT i=0; i<m_nChannels; i++, p++) if (p != pChn)
+				{
+					// Loop already done
+					if (p->nPatternLoopCount) return -1;
+				}
 			}
 			pChn->nPatternLoopCount = param;
 		}
@@ -3032,31 +3087,18 @@ BOOL CSoundFile::IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJum
 	// Treat only case with jumps in the same pattern
 	if (nJumpOrder > nStartOrder) return TRUE;
 
-// -> CODE#0008
-// -> DESC="#define to set pattern size"
-//	if ((nJumpOrder < nStartOrder) || (nJumpRow >= PatternSize[nStartOrder])
-//	 || (!Patterns[nStartOrder]) || (nStartRow >= 256) || (nJumpRow >= 256)) return FALSE;
-
 	if ((nJumpOrder < nStartOrder) || (nJumpRow >= PatternSize[nStartOrder])
 	 || (!(Patterns[nStartOrder])) || (nStartRow >= MAX_PATTERN_ROWS) || (nJumpRow >= MAX_PATTERN_ROWS)) return FALSE;
 	
-
 	// See if the pattern is being played backward
-//	BYTE row_hist[256];
 	BYTE row_hist[MAX_PATTERN_ROWS];
-// -! BEHAVIOUR_CHANGE#0008
 
 	memset(row_hist, 0, sizeof(row_hist));
 	UINT nRows = PatternSize[nStartOrder], row = nJumpRow;
 
-// -> CODE#0008
-// -> DESC="#define to set pattern size"
-//	if (nRows > 256) nRows = 256;
 	if (nRows > MAX_PATTERN_ROWS) nRows = MAX_PATTERN_ROWS;
 	row_hist[nStartRow] = TRUE;
-//	while ((row < 256) && (!row_hist[row]))
 	while ((row < MAX_PATTERN_ROWS) && (!row_hist[row]))
-// -! BEHAVIOUR_CHANGE#0008
 	{
 		if (row >= nRows) return TRUE;
 		row_hist[row] = TRUE;
@@ -3279,8 +3321,8 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 	// so we don't nee to worry about finding the master chan.
 
 	UINT nPlugin=0;
-	if (pChn && pChn->pHeader && pChn->pInstrument) {
-		if (respectMutes && (pChn->pInstrument->uFlags&ENV_MUTE)) { 
+	if (pChn && pChn->pHeader) {
+		if (respectMutes && pChn->pInstrument && pChn->pInstrument->uFlags&ENV_MUTE) { 
 			nPlugin = 0;
 		} else {
 			nPlugin = pChn->pHeader->nMixPlug;

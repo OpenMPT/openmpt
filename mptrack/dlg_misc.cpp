@@ -102,7 +102,6 @@ BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	ON_COMMAND(IDC_CHECK6,		OnCheck6)
-	ON_COMMAND(IDC_IT_STANDARD, OnITStandard)
 	ON_CBN_SELCHANGE(IDC_COMBO1,UpdateDialog)
 // -! NEW_FEATURE#0023
 	//}}AFX_MSG_MAP
@@ -127,7 +126,7 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 // -> DESC="IT project files (.itp)"
 	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
 // -! NEW_FEATURE#0023
-	DDX_Control(pDX, IDC_IT_STANDARD,	m_CheckBoxITStandard);
+	DDX_Control(pDX, IDC_IT_COMPATIBLEPLAY,	m_CheckBoxITCompatiblePlay);
 	//}}AFX_DATA_MAP
 }
 
@@ -219,7 +218,6 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox3.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITOLDEFFECTS) ? MF_CHECKED : 0);
 	m_CheckBox4.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITCOMPATMODE) ? MF_CHECKED : 0);
 	m_CheckBox5.SetCheck((m_pSndFile->m_dwSongFlags & SONG_EXFILTERRANGE) ? MF_CHECKED : 0);
-	m_CheckBoxITStandard.SetCheck( (m_pSndFile->GetModSpecificFlag(IT_STANDARD) && m_pSndFile->GetType() == MOD_TYPE_IT) ? MF_CHECKED : MF_UNCHECKED);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -237,7 +235,13 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox6.EnableWindow(m_TypeBox.GetCurSel() == 4 ? TRUE : FALSE);
 // -! NEW_FEATURE#0023
 
-	m_CheckBoxITStandard.EnableWindow((m_pSndFile->GetType() == MOD_TYPE_IT) ? TRUE : FALSE);
+	if(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) & (MOD_TYPE_IT | MOD_TYPE_MPT))
+	{
+		m_CheckBoxITCompatiblePlay.ShowWindow(SW_SHOW);
+		m_CheckBoxITCompatiblePlay.SetCheck((m_pSndFile->GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY)) ? MF_CHECKED : MF_UNCHECKED);
+	}
+	else
+		m_CheckBoxITCompatiblePlay.ShowWindow(SW_HIDE);
 	
 	m_TempoModeBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
@@ -297,22 +301,15 @@ void CModTypeDlg::OnCheck5()
 }
 
 
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
 void CModTypeDlg::OnCheck6()
+//--------------------------
 {
 	if (m_CheckBox6.GetCheck())
 		m_pSndFile->m_dwSongFlags |= SONG_ITPEMBEDIH;
 	else
 		m_pSndFile->m_dwSongFlags &= ~SONG_ITPEMBEDIH;
 }
-// -! NEW_FEATURE#0023
 
-void CModTypeDlg::OnITStandard()
-//------------------------------
-{
-	m_pSndFile->SetModSpecificFlag(IT_STANDARD, m_CheckBoxITStandard.GetCheck());
-}
 
 BOOL CModTypeDlg::VerifyData() 
 //---------------------------------
@@ -387,6 +384,9 @@ void CModTypeDlg::OnOK()
 		m_pSndFile->m_pConfig->SetMixLevels(m_pSndFile->m_nMixLevels);
 		m_pSndFile->RecalculateGainForAllPlugs();
 	}
+
+	if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+		m_pSndFile->SetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY, IsDlgButtonChecked(IDC_IT_COMPATIBLEPLAY) != 0);
 
 	m_pSndFile->m_nRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
 	m_pSndFile->m_nRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
@@ -474,8 +474,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 		m_RemChansList.SetItemData(m_RemChansList.AddString(label), n);
 		if (m_bChnMask[n]) m_RemChansList.SetSel(n);
 	}
-	
-	//Relabsoluness.note: Added for case in which the number of channels to remove is choosable in the dialog.
+
 	if (m_nRemove > 0) {
 		wsprintf(label, "Select %d channels to remove:", m_nRemove);
 	} else {
@@ -1280,68 +1279,30 @@ END_MESSAGE_MAP()
 void CPageEditEffect::UpdateDialog()
 //----------------------------------
 {
-	#ifdef TRADITIONAL_MODCOMMAND
-		CHAR s[128];
-		CComboBox *combo;
-		CSoundFile *pSndFile;
-		
-		if ((!m_pModDoc) || (!m_bInitialized)) return;
-		pSndFile = m_pModDoc->GetSoundFile();
-		if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
+	CHAR s[128];
+	CComboBox *combo;
+	CSoundFile *pSndFile;
+	
+	if ((!m_pModDoc) || (!m_bInitialized)) return;
+	pSndFile = m_pModDoc->GetSoundFile();
+	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
+	{
+		UINT numfx = m_pModDoc->GetNumEffects();
+		UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
+		combo->ResetContent();
+		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
+		if (!m_nCommand) combo->SetCurSel(0);
+		for (UINT i=0; i<numfx; i++)
 		{
-			UINT numfx = m_pModDoc->GetNumEffects();
-			UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
-			combo->ResetContent();
-			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-			if (!m_nCommand) combo->SetCurSel(0);
-			for (UINT i=0; i<numfx; i++)
+			if (m_pModDoc->GetEffectInfo(i, s, TRUE))
 			{
-				if (m_pModDoc->GetEffectInfo(i, s, TRUE))
-				{
-					int k = combo->AddString(s);
-					combo->SetItemData(k, i);
-					if (i == fxndx) combo->SetCurSel(k);
-				}
+				int k = combo->AddString(s);
+				combo->SetItemData(k, i);
+				if (i == fxndx) combo->SetCurSel(k);
 			}
 		}
-		UpdateRange(FALSE);
-	#else //Modcommand testing
-		CHAR s[128];
-		CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
-		CComboBox *combo2 = (CComboBox *)GetDlgItem(IDC_COMBO2);
-		CSoundFile *pSndFile;
-		
-		if ((!m_pModDoc) || (!m_bInitialized)) return;
-		pSndFile = m_pModDoc->GetSoundFile();
-		if (combo && combo2)
-		{
-			combo->ResetContent();
-			combo2->ResetContent();
-			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-			combo2->SetItemData(combo2->AddString(" None"), (DWORD)-1);
-
-            UINT numfx = m_pModDoc->GetNumEffects();
-			const UINT fxndx1 = m_pModDoc->GetIndexFromEffect(m_pModcommand->GetEffect(0), m_pModcommand->GetEffectParam(0));
-			const UINT fxndx2 = m_pModDoc->GetIndexFromEffect(m_pModcommand->GetEffect(1), m_pModcommand->GetEffectParam(1));
-
-			if(!m_pModcommand->GetEffect(0)) combo->SetCurSel(0);
-			if(!m_pModcommand->GetEffect(1)) combo2->SetCurSel(0);
-			
-			for (UINT i=0; i<numfx; i++)
-			{
-				if (m_pModDoc->GetEffectInfo(i, s, TRUE))
-				{
-					int k = combo->AddString(s);
-					combo->SetItemData(k, i);
-					int k2 = combo2->AddString(s);
-					combo2->SetItemData(k2, i);
-					if (i == fxndx1) combo->SetCurSel(k);
-					if (i == fxndx2) combo2->SetCurSel(k2);
-				}
-			}
-		}
-		UpdateRange(FALSE);
-	#endif
+	}
+	UpdateRange(FALSE);
 }
 
 

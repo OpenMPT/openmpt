@@ -14,6 +14,7 @@
 #include "sndfile.h"
 #include "aeffectx.h"
 #include "wavConverter.h"
+#include "tuningcollection.h"
 #include <vector>
 #include <algorithm>
 
@@ -152,6 +153,7 @@ MiP.			nMixPlug;
 MP..			nMidiProgram;
 MPTS	[EXT]									Extra song info tag
 MPTX	[EXT]									EXTRA INFO tag
+MSF.	[EXT]								ModSpecificFlags
 n[..			name[32];
 NNA.			nNNA;
 NM[.			NoteMap[128];
@@ -373,16 +375,15 @@ const ROWINDEX CPatternSizesMimic::operator [](const int i) const
 //////////////////////////////////////////////////////////
 // CSoundFile
 
-CTuningCollection CSoundFile::s_TuningsSharedStandard("Standard tunings");
-CTuningCollection CSoundFile::s_TuningsSharedLocal("Local Tunings");
+CTuningCollection* CSoundFile::s_pTuningsSharedStandard(0);
+CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 
 
 CSoundFile::CSoundFile() :
-	m_TuningsTuneSpecific("Tune specific tunings"),
 	PatternSize(*this), Patterns(*this),
 	Order(*this),
 	m_PlaybackEventer(*this),
-	m_pModSpecs(&IT_SPECS)
+	m_pModSpecs(&IT_MPTEXT_SPECS)
 //----------------------
 {
 	m_nType = MOD_TYPE_NONE;
@@ -407,7 +408,7 @@ CSoundFile::CSoundFile() :
 	m_bIsRendering = false;
 	m_nMaxSample = 0;
 
-	m_ModFlags.reset();
+	m_ModFlags = 0;
 
 	m_pModDoc = NULL;
 	m_dwLastSavedWithVersion=0;
@@ -436,6 +437,7 @@ CSoundFile::CSoundFile() :
 	m_lTotalSampleCount=0;
 
 	m_pConfig = new CSoundFilePlayConfig();
+	m_pTuningsTuneSpecific = new CTuningCollection("Tune specific tunings");
 	
 	BuildDefaultInstrument();
 }
@@ -445,6 +447,7 @@ CSoundFile::~CSoundFile()
 //-----------------------
 {
 	delete m_pConfig;
+	delete m_pTuningsTuneSpecific;
 	Destroy();
 }
 
@@ -1053,7 +1056,6 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 		m_nMusicTempo = m_nDefaultTempo;
 	}
 	//m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
-	//Relabs.note: Removed SONG_PATTERNLOOP - why it should be disabled here?
 	m_dwSongFlags &= ~(SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
 	for (nPattern = 0; nPattern < Order.size(); nPattern++)
 	{
@@ -1138,7 +1140,6 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 		m_nFrameDelay = 0;
 	}
 	//m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
-	//Relabs.note: Removed SONG_PATTERNLOOP
 	m_dwSongFlags &= ~(SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
 }
 
@@ -1367,7 +1368,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 //-------------------------------------------------------
 {
 	if(i >= MAX_CHANNELS) return;
-	
+
 	if(resetMask & 2)
 	{
 		Chn[i].nNote = Chn[i].nNewNote = Chn[i].nNewIns = 0;
@@ -1399,6 +1400,15 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nNewLeftVol = Chn[i].nNewRightVol = 0;
 		Chn[i].nLeftRamp = Chn[i].nRightRamp = 0;
 		Chn[i].nVolume = 256;
+
+		//-->Custom tuning related
+		Chn[i].m_ReCalculateFreqOnFirstTick = false;
+		Chn[i].m_CalculateFreq = false;
+		Chn[i].m_PortamentoFineSteps = 0;
+		Chn[i].m_PortamentoTickSlide = 0;
+		Chn[i].m_Freq = 0;
+		Chn[i].m_VibratoDepth = 0;
+		//<--Custom tuning related.
 	}
 
 	if(resetMask & 1)
@@ -2228,7 +2238,7 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 			{
 				char* pSrc = (char*)lpMemFile;
 				char* pDest = (char*)pIns->pSample;
-				CopyWavBuffer<3, 2, WavSigned24To16, MaxFinderInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+				CopyWavBuffer<3, 2, WavSigned24To16, MaxFinderSignedInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 			}
 			else //RS_PCM32S
 			{
@@ -2237,7 +2247,7 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 				if(format == 3)
 					CopyWavBuffer<4, 2, WavFloat32To16, MaxFinderFloat32>(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 				else
-					CopyWavBuffer<4, 2, WavSigned32To16, MaxFinderInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+					CopyWavBuffer<4, 2, WavSigned32To16, MaxFinderSignedInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 			}
 		}
 		break;
@@ -2277,11 +2287,11 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 				char* pDest = (char*)pIns->pSample;
 				if(nFlags == RS_STIPCM32S)
 				{
-					CopyWavBuffer<4,2,WavSigned32To16, MaxFinderInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+					CopyWavBuffer<4,2,WavSigned32To16, MaxFinderSignedInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 				}
 				if(nFlags == RS_STIPCM24S)
 				{
-					CopyWavBuffer<3,2,WavSigned24To16, MaxFinderInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+					CopyWavBuffer<3,2,WavSigned24To16, MaxFinderSignedInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
 				}
 
 			}
@@ -2721,10 +2731,18 @@ void CSoundFile::BuildDefaultInstrument()
 	//this method gets called.
 }
 
+
+void CSoundFile::DeleteStaticdata()
+//---------------------------------
+{
+	delete s_pTuningsSharedLocal; s_pTuningsSharedLocal = 0;
+	delete s_pTuningsSharedStandard; s_pTuningsSharedStandard = 0;
+}
+
 bool CSoundFile::SaveStaticTunings()
 //----------------------------------
 {
-	if(s_TuningsSharedLocal.SerializeBinary())
+	if(s_pTuningsSharedLocal->Serialize())
 	{
 		ErrorBox(IDS_ERR_TUNING_SERIALISATION, NULL);
 		return true;
@@ -2732,41 +2750,56 @@ bool CSoundFile::SaveStaticTunings()
 	return false;
 }
 
+void SimpleMessageBox(const char* message, const char* title)
+//-----------------------------------------------------------
+{
+	MessageBox(0, message, title, MB_ICONINFORMATION);
+}
+
 bool CSoundFile::LoadStaticTunings()
 //-----------------------------------
 {
-	if(s_TuningsSharedStandard.GetNumTunings() > 0) return true;
-	if(s_TuningsSharedLocal.GetNumTunings() > 0) return true;
+	if(s_pTuningsSharedLocal || s_pTuningsSharedStandard) return true;
 	//For now not allowing to reload tunings(one should be careful when reloading them
-	//since various parts may use the very addresses of tunings.
+	//since various parts may use addresses of the tuningobjects).
+
+	CTuning::MessageHandler = &SimpleMessageBox;
 	
-	const string exePath = CMainFrame::m_csExecutablePath;
-    const string baseDirectoryName = exePath + "\\tunings\\";
+	srlztn::CSSBSerialization::s_DefaultReadLogMask = CMainFrame::GetPrivateProfileLong("Misc", "ReadLogMask", srlztn::SNT_FAILURE | (1<<14) | (1<<13), theApp.GetConfigFileName());
+	srlztn::CSSBSerialization::s_DefaultWriteLogMask = CMainFrame::GetPrivateProfileLong("Misc", "WriteLogMask", srlztn::SNT_FAILURE | srlztn::SNT_NOTE | srlztn::SNT_WARNING, theApp.GetConfigFileName());
+	
+	s_pTuningsSharedStandard = new CTuningCollection("Standard tunings");
+	s_pTuningsSharedLocal = new CTuningCollection("Local tunings");
+
+	CTuning::AddCreationfunction(&CTuningRTI::CreateRTITuning);
+	
+	const string exeDir = CMainFrame::m_csExecutableDirectoryPath;
+    const string baseDirectoryName = exeDir + "tunings\\";
 	string filenameBase;
 	string filename;
 
-	s_TuningsSharedStandard.SetSavefilePath(baseDirectoryName + string("standard\\std_tunings") + CTuningCollection::s_FileExtension);
-	s_TuningsSharedLocal.SetSavefilePath(baseDirectoryName + string("local_tunings") + CTuningCollection::s_FileExtension);
+	s_pTuningsSharedStandard->SetSavefilePath(baseDirectoryName + string("standard\\std_tunings") + CTuningCollection::s_FileExtension);
+	s_pTuningsSharedLocal->SetSavefilePath(baseDirectoryName + string("local_tunings") + CTuningCollection::s_FileExtension);
 
-	s_TuningsSharedStandard.UnSerializeBinary();
-	s_TuningsSharedLocal.UnSerializeBinary();
+	s_pTuningsSharedStandard->Unserialize();
+	s_pTuningsSharedLocal->Unserialize();
 
-	//Bug?
-	if(s_TuningsSharedStandard.GetNumTunings() == 0)
+	//This condition should not be true.
+	if(s_pTuningsSharedStandard->GetNumTunings() == 0)
 	{
 		CTuningRTI* pT = new CTuningRTI;
 		//Note: Tuning collection class handles deleting.
-		pT->CreateTET(1,1);
-		if(s_TuningsSharedStandard.AddTuning(pT))
+		pT->CreateGeometric(1,1);
+		if(s_pTuningsSharedStandard->AddTuning(pT))
 			delete pT;
 	}
 
 	//Enabling adding/removing of tunings for standard collection
 	//only for debug builds.
 	#ifdef DEBUG
-		s_TuningsSharedStandard.SetConstStatus(CTuningCollection::EM_ALLOWALL);
+		s_pTuningsSharedStandard->SetConstStatus(CTuningCollection::EM_ALLOWALL);
 	#else
-		s_TuningsSharedStandard.SetConstStatus(CTuningCollection::EM_CONST);
+		s_pTuningsSharedStandard->SetConstStatus(CTuningCollection::EM_CONST);
 	#endif
 
 	INSTRUMENTHEADER::s_DefaultTuning = NULL;
@@ -2800,7 +2833,7 @@ long CSoundFile::GetSampleOffset()
 	return 0;
 }
 
-string CSoundFile::GetNoteName(const CTuning::STEPTYPE& note, const int inst) const
+string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const int inst) const
 //----------------------------------------------------------------------------------
 {
 	if(inst >= MAX_INSTRUMENTS || inst < -1) return "BUG";
@@ -2817,36 +2850,39 @@ string CSoundFile::GetNoteName(const CTuning::STEPTYPE& note, const int inst) co
 void CSoundFile::SetModSpecsPointer()
 //-----------------------------------
 {
-	switch(GetModType())
+	switch(GetType())
 	{
 		case MOD_TYPE_MPT:
 			m_pModSpecs = &MPTM_SPECS;
 			break;
 		case MOD_TYPE_IT:
-			m_pModSpecs = &IT_SPECS;
+			m_pModSpecs = &IT_MPTEXT_SPECS;
 			break;
 		case MOD_TYPE_XM:
-			m_pModSpecs = &XM_SPECS;
+			m_pModSpecs = &XM_MPTEXT_SPECS;
 			break;
 		case MOD_TYPE_S3M:
-			m_pModSpecs = &S3M_SPECS;
+			m_pModSpecs = &S3M_MPTEXT_SPECS;
 			break;
 		case MOD_TYPE_MOD:
 		default:
-			m_pModSpecs = &MOD_SPECS;
+			m_pModSpecs = &MOD_MPTEXT_SPECS;
 			break;
 	}
 }
 
-void CSoundFile::ChangeModTypeTo(const int& newType)
+void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 //---------------------------------------------------
 {
+	const MODTYPE oldtype = m_nType;
 	const UINT oldInvalidIndex = Patterns.GetInvalidIndex();
 	const UINT oldIgnoreIndex = Patterns.GetIgnoreIndex();
 	m_nType = newType;
 	SetModSpecsPointer();
 
-	m_ModFlags.reset();
+	if((oldtype == MOD_TYPE_IT && newType == MOD_TYPE_MPT) || 
+		(oldtype == MOD_TYPE_MPT && newType == MOD_TYPE_IT))
+		m_ModFlags = m_ModFlags & MSF_IT_COMPATIBLE_PLAY;
 
 	replace(Order.begin(), Order.end(), oldInvalidIndex, Patterns.GetInvalidIndex());
 	replace(Order.begin(), Order.end(), oldIgnoreIndex, Patterns.GetIgnoreIndex());
@@ -2872,31 +2908,3 @@ double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row)
 	if(targetReached) return t;
 	else return -1; //Given position not found from play sequence.
 }
-
-#ifndef TRADITIONAL_MODCOMMAND
-void CSoundFile::OnSetEffect(MODCOMMAND& mc, EFFECT_ID eID)
-//---------------------------------------------------------
-{
-	// Check for MOD/XM Speed/Tempo command
-	if(
-		(GetModType() & (MOD_TYPE_MOD|MOD_TYPE_XM)) &&
-		(eID == CMD_SPEED || eID == CMD_TEMPO)
-		)
-	{
-		UINT maxspd = (GetModType() == MOD_TYPE_XM) ? 0x1F : 0x20;
-		mc.SetEffectByID((mc.GetEffectParam() <= maxspd) ? CMD_SPEED : CMD_TEMPO);
-	}
-	else
-	{
-		mc.SetEffectByID(eID);
-	}
-}
-
-
-void CSoundFile::OnSetEffectParam(MODCOMMAND& mc, EFFECT_PARAM eParam)
-//---------------------------------------------------------
-{
-	mc.SetEffectParam(eParam);
-}
-
-#endif

@@ -1,11 +1,13 @@
 #ifndef TUNINGRATIOMAPWND_H
 #define TUNINGRATIOMAPWND_H
 
-#include "../soundlib/tuning_template.h"
+#include "../soundlib/tuningbase.h"
 
 class CTuningDialog;
 
-//This is copied from CNoteMapWnd.
+using CTuning::NOTEINDEXTYPE;
+
+//Copied from CNoteMapWnd.
 //===============================
 class CTuningRatioMapWnd: public CStatic
 //===============================
@@ -19,9 +21,9 @@ protected:
 	HFONT m_hFont;
 	int m_cxFont, m_cyFont;
 	COLORREF colorText, colorTextSel;
-	CTuning::STEPTYPE m_nNote;
+	NOTEINDEXTYPE m_nNote;
 
-	CTuning::STEPTYPE m_nNoteCentre;
+	NOTEINDEXTYPE m_nNoteCentre;
 
 
 public:
@@ -31,11 +33,11 @@ public:
 		m_pTuning(NULL),
 		m_pParent(NULL),
 		m_nNoteCentre(61),
-		m_nNote(0) {}
+		m_nNote(61) {}
 
 	VOID Init(CTuningDialog* const pParent, CTuning* const pTun) { m_pParent = pParent; m_pTuning = pTun;}
 
-	CTuning::STEPTYPE GetShownCentre() const;
+	NOTEINDEXTYPE GetShownCentre() const;
 
 protected:
 	

@@ -42,7 +42,7 @@ void CScaleEnvPointsDlg::OnOK()
 {
 	char buffer[10];
 	GetDlgItemText(IDC_EDIT_FACTOR, buffer, 9);
-	float factor = static_cast<float>(atof(buffer));
+	float factor = ConvertStrTo<float>(buffer);
 	if(factor > 0)
 	{
 		WORD (*array)[MAX_ENVPOINTS] = NULL;
@@ -69,7 +69,7 @@ void CScaleEnvPointsDlg::OnOK()
 		{
 			for(UINT i = 0; i<*arraySize; i++)
 			{
-				(*array)[i] *= factor;
+				(*array)[i] = static_cast<WORD>(factor * (*array)[i]);
 
 				//Checking that the order of points is preserved.
 				if(i > 0 && (*array)[i] <= (*array)[i-1])

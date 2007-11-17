@@ -168,7 +168,7 @@ enum
 
 #define NUM_VUMETER_PENS		32
 
-// Pattern Setup
+// Pattern Setup (contains also non-pattern related settings)
 #define PATTERN_PLAYNEWNOTE		0x01
 #define PATTERN_LARGECOMMENTS	0x02
 #define PATTERN_STDHIGHLIGHT	0x04
@@ -206,6 +206,7 @@ enum
 #define PATTERN_OLDCTXMENUSTYLE	0x800000
 #define PATTERN_SYNCMUTE		0x1000000
 #define PATTERN_AUTODELAY		0x2000000 
+
 
 // Keyboard Setup
 enum {
@@ -356,7 +357,7 @@ public:
 	CString m_csRegExt;
 	CString m_csRegSettings;
 	CString m_csRegWindow;
-	static CString m_csExecutablePath;
+	static CString m_csExecutableDirectoryPath; //To contain path of executable directory
 	// Globals
 	static UINT m_nLastOptionsPage, m_nFilterIndex;
 	static BOOL gbMdiMaximize;

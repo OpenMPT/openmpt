@@ -1,7 +1,14 @@
 #ifndef CTUNING_H
 #define CTUNING_H
 
-#include "tuning_template.h"
+#include "tuningbase.h"
+
+#ifdef BUILD_TUNINGBASE_AS_TEMPLATE
+	typedef CTuningBase<int16, uint16, float32, int32, uint32> CTuning;
+	//If changing RATIOTYPE, serialization methods may need modifications.
+#else
+	typedef CTuningBase CTuning;
+#endif
 
 
 
@@ -9,70 +16,58 @@
 class CTuningRTI : public CTuning //RTI <-> Ratio Table Implementation
 //================================
 {
-	//Class description: General tuning class with
-	//ratiotable implementation.
-
 public: 
 //BEGIN TYPEDEFS:
-	typedef RATIOTYPE (BARFUNC)(const STEPTYPE&, const STEPTYPE&);
+	typedef RATIOTYPE (BARFUNC)(const NOTEINDEXTYPE&, const STEPINDEXTYPE&);
 	//BARFUNC <-> Beyond Array Range FUNCtion.
 //END TYPEDEFS
 
 public:
 //BEGIN STATIC CONST MEMBERS:
-	static RATIOTYPE DefaultBARFUNC(const STEPTYPE&, const STEPTYPE&);
-	static const STEPTYPE s_StepMinDefault;
-	static const STEPTYPE s_RatioTableSizeDefault;
-	static const SERIALIZATION_MARKER s_SerializationBeginMarker;
-	static const SERIALIZATION_MARKER s_SerializationEndMarker;
+	static RATIOTYPE DefaultBARFUNC(const NOTEINDEXTYPE&, const STEPINDEXTYPE&);
+	static const NOTEINDEXTYPE s_StepMinDefault;
+	static const UNOTEINDEXTYPE s_RatioTableSizeDefault;
+	static const STEPINDEXTYPE s_RatioTableFineSizeMaxDefault;
 	static const SERIALIZATION_VERSION s_SerializationVersion;
 //END STATIC CONST MEMBERS
 
 
 public:
 //BEGIN TUNING INTERFACE METHODS:
-	virtual RATIOTYPE GetFrequencyRatio(const STEPTYPE& stepsFromCentre) const;
+	virtual RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const;
 
-	virtual RATIOTYPE GetFrequencyRatio(const STEPTYPE& stepsFromCentre, const FINESTEPTYPE& fineSteps) const;
+	virtual RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre, const STEPINDEXTYPE& fineSteps) const;
 
-	virtual RATIOTYPE GetFrequencyRatioFine(const FINESTEPTYPE&) {return 1;}
+	virtual UNOTEINDEXTYPE GetRatioTableSize() const {return static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());}
 
-	virtual STEPTYPE GetRatioTableSize() const {return static_cast<STEPTYPE>(m_RatioTable.size());}
+	virtual NOTEINDEXTYPE GetRatioTableBeginNote() const {return m_StepMin;}
 
-	virtual STEPTYPE GetRatioTableBeginNote() const {return m_StepMin;}
+	VRPAIR GetValidityRange() const {return VRPAIR(m_StepMin, m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1);}
 
-	VRPAIR GetValidityRange() const {return VRPAIR(static_cast<STEPTYPE>(m_StepMin), static_cast<STEPTYPE>(m_StepMin + m_RatioTable.size()));}
+	UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
 
-	virtual string GetNoteName(const STEPTYPE& x) const;
+	RATIOTYPE GetGroupRatio() const {return m_GroupRatio;}
 
-	STEPTYPE GetPeriod() const {return m_StepsInPeriod;}
+	void ProAddSI(srlztn::ABCSerializationInstructions&, const BYTE[3]) const;
 
-	RATIOTYPE GetPeriodRatio() const {return m_PeriodRatio;}
+	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& from, const NOTEINDEXTYPE& to) const
+		{return (to - from)*(static_cast<NOTEINDEXTYPE>(GetFineStepCount())+1);}
+	
+	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& noteFrom, const STEPINDEXTYPE& stepDistFrom, const NOTEINDEXTYPE& noteTo, const STEPINDEXTYPE& stepDistTo) const
+		{return GetStepDistance(noteFrom, noteTo) + stepDistTo - stepDistFrom;}
+	
+	static CTuning* CreateRTITuning(const string&, srlztn::ABCSerializationInstructions&);
 
-	virtual SERIALIZATION_RETURN_TYPE SerializeBinary(ostream&, const int mode = 0) const;
+	static uint32 GetVersion() {return s_SerializationVersion;}
 
-	virtual SERIALIZATION_RETURN_TYPE UnSerializeBinary(istream&, const int mode = 0);
-
-	FINESTEPTYPE GetFineStepCount() const {return static_cast<FINESTEPTYPE>(m_RatioTableFine.size());}
-	//To be improved.
-
-	FINESTEPTYPE GetFineStepCount(const STEPTYPE& from, const STEPTYPE& to) const
-	{return (to - from)*GetFineStepCount();}
-	//Returns the number of finesteps between fullsteps from <-> to
-	//To be improved. 
-
-	virtual FINESTEPTYPE GetFineStepCount(const STEPTYPE& fromStep, const FINESTEPTYPE& fromFineSteps, const STEPTYPE& toStep, const FINESTEPTYPE& toFineSteps) const
-	{return GetFineStepCount(fromStep, toStep) + toFineSteps - fromFineSteps;}
-	//Returns the number of finesteps between to notepoints
-	//(fullstep, finesteps).
-
-	VRPAIR SetValidityRange(const VRPAIR& rp);
+	//Try to read old version (v.3) and return pointer to new instance if succesfull, else 0.
+	static CTuningRTI* UnserializeOLD(istream& iStrm);
 	
 
 public:
 	//PUBLIC CONSTRUCTORS/DESTRUCTORS:
 	CTuningRTI(const vector<RATIOTYPE>& ratios,
-				const STEPTYPE& stepMin = s_StepMinDefault,
+				const NOTEINDEXTYPE& stepMin = s_StepMinDefault,
 				const string& name = "")
 				: CTuning(name)
 	{
@@ -81,17 +76,14 @@ public:
 		m_RatioTable = ratios;
 	}
 
-	CTuningRTI(const CTuning* const pTun);
 	//Copy tuning.
-
+	CTuningRTI(const CTuning* const pTun);
+	
 	CTuningRTI() {SetDummyValues();}
 
-	CTuningRTI(const string& name) : CTuning(name)
-	{
-		SetDummyValues();
-	}
+	CTuningRTI(const string& name) : CTuning(name) {SetDummyValues();}
 	
-	CTuningRTI(const STEPTYPE& stepMin, const string& name) : CTuning(name)
+	CTuningRTI(const NOTEINDEXTYPE& stepMin, const string& name) : CTuning(name)
 	{
 		SetDummyValues();
 		m_StepMin = stepMin;
@@ -101,78 +93,89 @@ public:
 
 //BEGIN PROTECTED VIRTUALS:
 protected:
-	bool ProSetRatio(const STEPTYPE&, const RATIOTYPE&);
-	bool ProCreateRatioPeriodic(const vector<RATIOTYPE>&, const RATIOTYPE&);
-	bool ProCreateTET(const STEPTYPE&, const RATIOTYPE&);
-	FINESTEPTYPE ProSetFineStepCount(const STEPTYPE&);
-	STEPTYPE ProSetPeriod(const STEPTYPE& p) {return m_StepsInPeriod = (p>=0) ? p : -p;}
-	RATIOTYPE ProSetPeriodRatio(const RATIOTYPE& pr) {return m_PeriodRatio = (pr >= 0) ? pr : -pr;}
+	bool ProSetRatio(const NOTEINDEXTYPE&, const RATIOTYPE&);
+	bool ProCreateGroupGeometric(const vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE ratiostartpos);
+	bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
+	void ProSetFineStepCount(const USTEPINDEXTYPE&);
 
-	virtual RATIOTYPE ProSetRatioFine(const FINESTEPTYPE&, const RATIOTYPE&) const {return 0;}
-	//For now finestepcount defines the fineratios, so
-	//this method doesn't modify the fineratios.
+	virtual NOTESTR ProGetNoteName(const NOTEINDEXTYPE& x) const;
+
+	//Not implemented.
+	VRPAIR ProSetValidityRange(const VRPAIR&);
+
+	//Note: Groupsize is restricted to interval [0, NOTEINDEXTYPE_MAX]
+	NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE& p) {return m_GroupSize = (p<=static_cast<UNOTEINDEXTYPE>(NOTEINDEXTYPE_MAX)) ? static_cast<NOTEINDEXTYPE>(p) : NOTEINDEXTYPE_MAX;}
+	RATIOTYPE ProSetGroupRatio(const RATIOTYPE& pr) {return m_GroupRatio = (pr >= 0) ? pr : -pr;}
+
+	virtual uint32 GetClassVersion() const {return GetVersion();}
+
+	virtual bool ProProcessUnserializationdata();
+	
 
 //END PROTECTED VIRTUALS
 
 protected:
 //BEGIN PROTECTED CLASS SPECIFIC METHODS:
-	bool CreateRatioTableRP(const vector<RATIOTYPE>&, const RATIOTYPE);
-	//Ratioperiodic.
-	
+	//GroupGeometric.
+	bool CreateRatioTableGG(const vector<RATIOTYPE>&, const RATIOTYPE, const VRPAIR& vr, const NOTEINDEXTYPE ratiostartpos);
+
+	//Note: Stepdiff should be in range [1, finestepcount]
+	virtual RATIOTYPE GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE stepDiff) const;
+
+	//GroupPeriodic-specific. 
+	//Get the corresponding note in [0, period-1].
+	//For example GetRefNote(-1) is to return note :'groupsize-1'.
+	NOTEINDEXTYPE GetRefNote(NOTEINDEXTYPE note) const;
+
+	virtual const string& GetDerivedClassID() const {return s_DerivedclassID;}
 
 private:
 	//PRIVATE METHODS:
+
+	//Sets dummy values for *this.
 	void SetDummyValues();
-    //Sets dummy values for *this.
-
-	RATIOTYPE GetFineStepRatio(const FINESTEPTYPE& s) const
+    
+	bool IsNoteInTable(const NOTEINDEXTYPE& s) const
 	{
-		if(GetFineStepCount() == 0)
-			return 1;
-		if(s < 0) return m_RatioTableFine[0];
-		if(s >= GetFineStepCount()) return m_RatioTableFine.back();
-		return m_RatioTableFine[s];
-	}
-
-	bool IsNoteInTable(const STEPTYPE& s) const
-	{
-		if(s < m_StepMin || s >= m_StepMin + static_cast<RATIOTYPE>(m_RatioTable.size()))
+		if(s < m_StepMin || s >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
 			return false;
-		return true;
+		else
+			return true;
 	}
 
 private:
 	//ACTUAL DATA MEMBERS
 	//NOTE: Update SetDummyValues when adding members.
 
+	//Noteratios
 	vector<RATIOTYPE> m_RatioTable;
-	//Array tells (main) tuning ratios. Centre is given by s_StepMin(see its explanation).
-
+	
+	//'Fineratios'
 	vector<RATIOTYPE> m_RatioTableFine;
-	//To contain fineratios.
+	
+	//The lowest index of note in the table
+	NOTEINDEXTYPE m_StepMin;
+	
+	//For groupgeometric tunings, tells the 'group size' and 'group ratio'
+	//m_GroupSize should always be >= 0.
+	NOTEINDEXTYPE m_GroupSize;
+	RATIOTYPE m_GroupRatio;
 
-	STEPTYPE m_StepMin;
-	//When wanting to get ratio n steps below reference, the n is negative, but the index
-	//cannot be negative when getting the ratio for the note. So simply choosing that 
-	//the maximum deviation to 'negative side' corresponds to index 0 => the centre ratio
-	//will be at m_RatioTable[m_MinStep].
-
-	STEPTYPE m_StepsInPeriod;
-	RATIOTYPE m_PeriodRatio;
-	//If tuning is ratioperiodic, meaning that if exists such
-	//n > 0 that ratio(x + n)/ratio(x) == c == constant, the tuning
-	//is considered 'ratioperiodic' with m_StepsInPeriod
-	//being n, and m_PeriodRatio = c. Are zero they tuning
-	//is not ratioperiodic.
 
 	BARFUNC* BelowRatios;
 	BARFUNC* AboveRatios;
-	//Defines the ratio to return if the ratio table runs out. Are on status
-	//'just in case for possible use'.
+	//Defines the ratio to return if the ratio table runs out.
 	
 	//<----Actual data members
 
+	mutable UNOTEINDEXTYPE m_SerHelperRatiotableSize;
+
+	static const string s_DerivedclassID;
+	
+
 }; //End: CTuningRTI declaration.
+
+
 
 
 

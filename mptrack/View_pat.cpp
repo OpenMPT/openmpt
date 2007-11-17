@@ -1080,7 +1080,8 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 		m_dwStatus &= ~PATSTATUS_DRAGNDROPEDIT;
 	}
 	if (((m_nDragItem & DRAGITEM_MASK) != DRAGITEM_CHNHEADER)
-	 && ((m_nDragItem & DRAGITEM_MASK) != DRAGITEM_PATTERNHEADER))
+	 && ((m_nDragItem & DRAGITEM_MASK) != DRAGITEM_PATTERNHEADER)
+	 && ((m_nDragItem & DRAGITEM_MASK) != DRAGITEM_PLUGNAME))
 	{
 		if ((m_nMidRow) && (m_dwBeginSel == m_dwEndSel))
 		{
@@ -3522,7 +3523,6 @@ void CViewPattern::SetSpacing(int n)
 }
 
 
-#ifdef TRADITIONAL_MODCOMMAND
 void CViewPattern::TempEnterFX(int c)
 //-----------------------------------
 {
@@ -3573,52 +3573,7 @@ void CViewPattern::TempEnterFX(int c)
 		}
 	}	// end if mainframe & moddoc exist
 }
-#else
-void CViewPattern::TempEnterFX(int e /*EFFECT_ID eID*/)
-//-----------------------------------
-{
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
 
-	if(!pSndFile || !pMainFrm)
-		return;
-	
-	EFFECT_ID eID = e;
-	
-	const ROWINDEX r = m_nRow;
-	const CHANNELINDEX c = GetChanFromCursor(m_dwCursor);
-	const MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(r, c);
-	MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
-			
-	PrepareUndo(m_dwBeginSel, m_dwEndSel);
-
-	//Checking whether to use the param of previous effect.
-	if (eID)
-	{
-		if ((eID == m_cmdOld.GetEffect()) && (!p->GetEffectParam()) && (!p->GetEffect()))
-			pSndFile->Patterns[m_nPattern].SetModCommandEffectParam(r, c, m_cmdOld.GetEffectParam());
-		else 
-			m_cmdOld.SetEffectParam(0);
-
-		m_cmdOld.SetEffectByID(eID);
-	}
-	pSndFile->Patterns[m_nPattern].SetModCommandEffect(r, c, eID);
-
-	if (IsEditingEnabled_bmsg())
-	{
-		DWORD sel = (m_nRow << 16) | m_dwCursor;
-		SetCurSel(sel, sel);
-		sel &= ~7;
-		if(oldcmd != *p)
-		{
-			pModDoc->SetModified();
-			InvalidateArea(sel, sel+5);
-			UpdateIndicator();
-		}
-	}
-}
-#endif
 
 void CViewPattern::TempEnterFXparam(int v)
 //----------------------------------------
@@ -4313,6 +4268,7 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 
 
 void CViewPattern::OnInitMenu(CMenu* pMenu)
+//-----------------------------------------
 {
 	CModScrollView::OnInitMenu(pMenu);
 
@@ -4325,6 +4281,7 @@ void CViewPattern::OnInitMenu(CMenu* pMenu)
 }
 
 void CViewPattern::TogglePluginEditor(int chan)
+//---------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument(); if (!pModDoc) return;
 	CSoundFile *pSndFile = pModDoc->GetSoundFile(); if (!pSndFile) return;
