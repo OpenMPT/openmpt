@@ -425,21 +425,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	//Playback behavior change for MPT: Don't change sample if it is in the same instrument as previous sample.
 	if(bPorta && bNewTuning && penv == pChn->pHeader)
 		return;
-	
-	// Update Volume
-	if (bUpdVol)
-	{
-		pChn->nVolume = 0;
-		if(psmp)
-			pChn->nVolume = psmp->nVolume;
-		else
-		{
-			if(penv && penv->nMixPlug)
-				pChn->nVolume = pChn->GetVSTVolume();
-		}
 
-	}
-
+	bool returnAfterVolumeAdjust = false;
 	// bInstrumentChanged is used for IT carry-on env option
 	if (penv != pChn->pHeader)
 	{
@@ -452,8 +439,25 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	{
 		// FT2 doesn't change the sample in this case,
 		// but still uses the sample info from the old one (bug?)
-		return;
+		returnAfterVolumeAdjust = true;
 	}
+	
+	// Update Volume
+	if (bUpdVol)
+	{
+		pChn->nVolume = 0;
+		if(psmp)
+			pChn->nVolume = psmp->nVolume;
+		else
+		{
+			if(penv && penv->nMixPlug)
+				pChn->nVolume = pChn->GetVSTVolume();
+		}
+	}
+
+	if(returnAfterVolumeAdjust) return;
+
+	
 	// Instrument adjust
 	pChn->nNewIns = 0;
 	
