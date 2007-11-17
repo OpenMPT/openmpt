@@ -499,6 +499,9 @@
 				RelativePath="..\soundlib\Load_mod.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\load_mptm.cpp">
+			</File>
+			<File
 				RelativePath="..\Soundlib\load_mt2.cpp">
 			</File>
 			<File
@@ -707,6 +710,9 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\tuning.cpp">
+			</File>
+			<File
+				RelativePath="..\soundlib\tuningbase.cpp">
 			</File>
 			<File
 				RelativePath="..\soundlib\tuningCollection.cpp">
@@ -1067,7 +1073,7 @@
 				RelativePath="..\soundlib\tuning.h">
 			</File>
 			<File
-				RelativePath="..\soundlib\tuning_template.h">
+				RelativePath="..\soundlib\tuningbase.h">
 			</File>
 			<File
 				RelativePath="..\soundlib\tuningcollection.h">
