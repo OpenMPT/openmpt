@@ -298,7 +298,10 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		if (dwMemPos + pih->size > dwMemLength) return TRUE;
 		if ((Headers[iIns] = new INSTRUMENTHEADER) == NULL) continue;
 		memset(Headers[iIns], 0, sizeof(INSTRUMENTHEADER));
-		Headers[iIns]->pTuning = Headers[iIns]->s_DefaultTuning;
+		Headers[iIns]->pTuning = m_defaultInstrument.pTuning;
+		Headers[iIns]->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
+		Headers[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_MIDI;
+
 		memcpy(Headers[iIns]->name, pih->name, 22);
 		if ((nsamples = pih->samples) > 0)
 		{
@@ -628,7 +631,15 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 	// Song extensions
 	if( code == 'MPTS' )
+	{
 		LoadExtendedSongProperties(MOD_TYPE_XM, ptr, lpStream, dwMemLength);
+
+		if(m_dwLastSavedWithVersion < VERSIONNUMBER(1, 17, 2, 50))
+			SetModFlag(MSF_MIDICC_BUGEMULATION, true);
+	}
+
+
+
 
 
 	return TRUE;

@@ -103,6 +103,7 @@
 #define IDD_DIALOG2                     512
 #define IDD_DIALOG3                     513
 #define IDS_ERR_TUNING_SERIALISATION    514
+#define IDD_MIDIPARAMCONTROL            515
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -425,7 +426,7 @@
 #define IDC_CHECK47                     1747
 #define IDC_CHECK48                     1748
 #define IDC_CHECK49                     1749
-#define IDC_CHECK50                     1750
+#define IDC_MIDI_TO_PLUGIN              1750
 #define IDC_CHECK51                     1751
 #define IDC_CHECK52                     1752
 #define IDC_CHECK53                     1753
@@ -790,6 +791,25 @@
 #define IDC_EDIT_RPB                    2303
 #define IDC_NAMEFILTER                  2304
 #define IDC_TUNINGTYPE_DESC             2305
+#define IDC_MIDIVOL_TO_NOTEVOL          2306
+#define IDC_PLUGIN_VELOCITYSTYLE        2307
+#define IDC_PLUGIN_VOLUMESTYLE          2308
+#define IDC_CHECKACTIVE                 2310
+#define IDC_COMBO_CONTROLLER            2311
+#define IDC_COMBO_CHANNEL               2312
+#define IDC_COMBO_PLUGIN                2313
+#define IDC_COMBO_PARAM                 2314
+#define IDC_COMBO_EVENT                 2315
+#define IDC_BUTTON_ADD                  2316
+#define IDC_BUTTON_REPLACE              2317
+#define IDC_BUTTON_REMOVE               2318
+#define IDC_CHECK_MIDILEARN             2319
+#define IDC_MIDIPLAYCONTROL             2320
+#define IDC_FLAG_EXPLANATIONS           2321
+#define IDC_FLAGEDITTITLE               2322
+#define IDC_EDIT_FLAGS                  2323
+#define IDC_CHECKCAPTURE                2324
+#define IDC_SPINMOVEMAPPING             2325
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -971,10 +991,10 @@
 #define ID_COPYTUNING                   36026
 #define ID_REMOVETUNINGCOLLECTION       36027
 #define ID_SHOWTIMEATROW                36028
-#define ID_PREVIOUSVSTPRESET			36029
-#define ID_NEXTVSTPRESET				36030
-#define ID_VSTPRESETBACKWARDJUMP		36031
-#define ID_VSTPRESETFORWARDJUMP			36032
+#define ID_PREVIOUSVSTPRESET            36029
+#define ID_NEXTVSTPRESET                36030
+#define ID_VSTPRESETBACKWARDJUMP        36031
+#define ID_VSTPRESETFORWARDJUMP         36032
 #define ID_SELECTINST                   36100
 #define ID_NETLINK_MPTFR                37001
 #define ID_PLUG_RECORDAUTOMATION        37003
@@ -1012,15 +1032,16 @@
 #define ID_Menu59207                    59207
 #define ID_ENVELOPE_SCALEPOINTS         59208
 #define ID_NETLINK_OPENMPTWIKI          59210
+#define ID_VIEW_MIDIMAPPING				59211
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        515
-#define _APS_NEXT_COMMAND_VALUE         59211
-#define _APS_NEXT_CONTROL_VALUE         2306
+#define _APS_NEXT_RESOURCE_VALUE        516
+#define _APS_NEXT_COMMAND_VALUE         59212
+#define _APS_NEXT_CONTROL_VALUE         2326
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

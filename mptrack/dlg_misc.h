@@ -12,6 +12,7 @@ class CModTypeDlg: public CDialog
 public:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5;
+	CEdit m_EditFlag;
 	CSoundFile *m_pSndFile;
 	UINT m_nChannels, m_nType;
 
@@ -26,6 +27,9 @@ public:
 	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = m_nChannels = 0; }
 	BOOL VerifyData();
 	void UpdateDialog();
+
+private:
+	void UpdateChannelCBox();
 
 protected:
 	//{{AFX_VIRTUAL(CModTypeDlg)
@@ -79,13 +83,16 @@ public:
 	BOOL m_bChnMask[MAX_CHANNELS];
 	UINT m_nChannels, m_nRemove;
 	CListBox m_RemChansList;		//rewbs.removeChansDlgCleanup
+	bool m_ShowCancel;
 
 public:
-	CRemoveChannelsDlg(CSoundFile *pSndFile, UINT nChns, CWnd *parent=NULL):CDialog(IDD_REMOVECHANNELS, parent)
+	CRemoveChannelsDlg(CSoundFile *pSndFile, UINT nChns, bool showCancel = true, CWnd *parent=NULL):CDialog(IDD_REMOVECHANNELS, parent)
 		{ m_pSndFile = pSndFile; 
 		  m_nChannels = m_pSndFile->m_nChannels; 
 		  m_nRemove = nChns; 
-		  memset(m_bChnMask, 0, sizeof(m_bChnMask)); }
+		  memset(m_bChnMask, 0, sizeof(m_bChnMask));
+		  m_ShowCancel = showCancel;
+		}
 
 protected:
 	//{{AFX_VIRTUAL(CRemoveChannelsDlg)
@@ -249,7 +256,6 @@ public:
 protected:
 	//{{AFX_MSG(CPageEditEffect)
 	afx_msg void OnCommandChanged();
-	afx_msg void OnCommand2Changed();
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

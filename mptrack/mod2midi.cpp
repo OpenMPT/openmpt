@@ -412,11 +412,11 @@ BOOL CModToMidi::DoConvert()
 	nOrder = 0;
 	nRow = 0;
 	nSpeed = m_pSndFile->m_nDefaultSpeed;
-	while ((nOrder < m_pSndFile->Order.size()) && (m_pSndFile->Order[nOrder] != m_pSndFile->Patterns.GetInvalidIndex()))
+	while ((nOrder < m_pSndFile->Order.size()) && (m_pSndFile->Order[nOrder] != m_pSndFile->Order.GetInvalidPatIndex()))
 	{
 		int pattern_break = -1;
 		UINT nPat = m_pSndFile->Order[nOrder];
-		if ((nPat >= m_pSndFile->Patterns.Size()) || (nPat == m_pSndFile->Patterns.GetIgnoreIndex()) || (!m_pSndFile->Patterns[nPat]) || (nRow >= m_pSndFile->PatternSize[nPat]))
+		if ((nPat >= m_pSndFile->Patterns.Size()) || (nPat == m_pSndFile->Order.GetIgnoreIndex()) || (!m_pSndFile->Patterns[nPat]) || (nRow >= m_pSndFile->PatternSize[nPat]))
 		{
 			nOrder++;
 			nRow = 0;

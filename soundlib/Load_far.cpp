@@ -106,7 +106,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	if (dwMemPos >= dwMemLength) return TRUE;
 	for (UINT iorder=0; iorder<MAX_ORDERS; iorder++)
 	{
-		Order[iorder] = (iorder <= pmh2->snglen) ? pmh2->orders[iorder] : Patterns.GetInvalidIndex();
+		Order[iorder] = (iorder <= pmh2->snglen) ? pmh2->orders[iorder] : Order.GetInvalidPatIndex();
 	}
 	m_nRestartPos = pmh2->loopto;
 	// Reading Patterns	

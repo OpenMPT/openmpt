@@ -355,17 +355,22 @@ public:
 
 ///////////////////////////////////////////////////
 // 4-bit DIB Drawing functions
-
 void DibBlt(HDC hdc, int x, int y, int sizex, int sizey, int srcx, int srcy, LPMODPLUGDIB lpdib);
 LPMODPLUGDIB LoadDib(LPCSTR lpszName);
 RGBQUAD rgb2quad(COLORREF c);
+
 // Other bitmap functions
 void DrawBitmapButton(HDC hdc, LPRECT lpRect, LPMODPLUGDIB lpdib, int srcx, int srcy, BOOL bPushed);
 void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText=NULL, BOOL bDisabled=FALSE, BOOL bPushed=FALSE, DWORD dwFlags=(DT_CENTER|DT_VCENTER));
+
 // Misc functions
+class CVstPlugin;
 void Log(LPCSTR format,...);
 UINT MsgBox(UINT nStringID, CWnd *p=NULL, LPCSTR lpszTitle=NULL, UINT n=MB_OK);
 void ErrorBox(UINT nStringID, CWnd*p=NULL);
+void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bool librarynames = false);
+void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plugarray);
+void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug);
 
 ///////////////////////////////////////////////////
 // Tables

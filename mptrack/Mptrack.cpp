@@ -193,19 +193,15 @@ static void ShowChangesDialog()
 //-----------------------------
 {
 	CString firstOpenMessage = "OpenMPT version " + CMainFrame::GetFullVersionString();
-	firstOpenMessage +=	". This is a development build primarily aimed for testing.\n\nChanges:\n\n"
-	"[New] Windows keys can be used as modifiers in the keyboard configuration(disables Windows start menu pop-up if used in the active keyboard configuration).\n"
-	"[New] Name filter in plugin selection dialog.\n"
-	"[Imp] Improved preset navigation in VST window.\n"
-	"[Imp] Improvements in IT compatible play.\n"
-	"[Imp] Improvements in user defined tuning modes.\n"
-	"[Fix] Fixed possible unnotified file overwriting when saving unsaved file.\n"
-	"[Fix] Fixed wrong version number in IT files saved with compatibility save.\n"
-	"[Fix] Fixed broken note preview for certain type of instruments in instrument tab.\n"
-	"[Fix] Fixed possible crash when exporting wav in channel mode with long channel name.\n"
-	"[Fix] Fixed channel position jump when clicking VST box in channel header.\n"
-	"[Fix] Fixed possible searching of wrong parameter in pattern search.\n"
-	"[Misc] Update check disabled and miscellaneous other changes.";
+	firstOpenMessage +=	". This is a development build.\n\nChanges:\n\n"
+	"[New] Ability to control plug params with MIDI controllers.\n"
+	"[New] Ability to pass MIDI to plugin.\n"
+	"[Imp] Ability to take MIDI volume into account when playing notes.\n"
+	"[Fix/Imp] Plugin volume command fix. In addition now there are options how to interpret it.\n"
+	"[Imp] Keyshortcut for preset navigation jumps in VST editor.\n"
+	"[Mod] .bak files won't be shown in load dialog with 'All modules' filter.\n"
+	"[Fix/Mod] Instrument random variation fix/behavior change.\n\n"
+	"And various other fixes and changes.";
 
 	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT v." + CMainFrame::GetFullVersionString(), MB_ICONINFORMATION);
 }
@@ -832,8 +828,8 @@ BOOL CTrackApp::InitInstance()
 	return TRUE;
 }
 
-void __stdcall CTrackApp::InternetRequestCallback( HINTERNET hInternet, DWORD_PTR userData, DWORD dwInternetStatus,
-                              LPVOID lpvStatusInformation,  DWORD dwStatusInformationLength)
+void __stdcall CTrackApp::InternetRequestCallback( HINTERNET /*hInternet*/, DWORD_PTR userData, DWORD dwInternetStatus,
+                              LPVOID /*lpvStatusInformation*/,  DWORD /*dwStatusInformationLength*/)
 //-----------------------------------------------------------------------------------------------------
 {
 
@@ -1206,7 +1202,7 @@ void CTrackApp::OnFileOpen()
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 //					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
-					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
+					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.umx;*.amf;*.psm;*.mt2|"
 // -! NEW_FEATURE#0023
 					"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha|"
 					"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
@@ -2960,7 +2956,7 @@ void Log(LPCSTR format,...)
 VOID CTrackApp::ImportLocalizedStrings()
 //--------------------------------------
 {
-	DWORD dwLangId = ((DWORD)GetUserDefaultLangID()) & 0xfff;
+	//DWORD dwLangId = ((DWORD)GetUserDefaultLangID()) & 0xfff;
 	// TODO: look up [Strings.lcid], [Strings.(lcid&0xff)] & [Strings] in mpt_intl.ini
 }
 

@@ -221,10 +221,14 @@ enum {
 #define KEYBOARD_FT2KEYS	0x10
 
 // Midi Setup
-#define MIDISETUP_RECORDVELOCITY		0x01
-#define MIDISETUP_TRANSPOSEKEYBOARD		0x02
-#define MIDISETUP_RECORDNOTEOFF			0x10
-#define MIDISETUP_AMPLIFYVELOCITY		0x40
+#define MIDISETUP_RECORDVELOCITY			0x01
+#define MIDISETUP_TRANSPOSEKEYBOARD			0x02
+#define MIDISETUP_MIDITOPLUG				0x04
+#define MIDISETUP_MIDIVOL_TO_NOTEVOL		0x08
+#define MIDISETUP_RECORDNOTEOFF				0x10
+#define MIDISETUP_RESPONDTOPLAYCONTROLMSGS	0x20
+#define MIDISETUP_AMPLIFYVELOCITY			0x40
+
 
 
 // Image List index
@@ -589,11 +593,14 @@ protected:
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT);
+	afx_msg void OnSongProperties();
 
 // -> CODE#0002
 // -> DESC="list box to choose VST plugin presets (programs)"
 	afx_msg void OnPluginManager();
 // -! NEW_FEATURE#0002
+
+	
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -617,6 +624,7 @@ protected:
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
 	afx_msg LRESULT OnSpecialKey(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	afx_msg void OnViewMIDIMapping();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
@@ -630,10 +638,11 @@ private:
 	void LoadRegistrySettings();
 	void LoadIniSettings();
 	void SaveIniSettings();
-
 };
 
 const CHAR gszBuildDate[] = __DATE__ " " __TIME__;
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 

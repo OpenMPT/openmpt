@@ -24,9 +24,10 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 
 
 	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
+	const CModSpecifications& specs = sndFile.GetModSpecifications();
 	if(sndFile.m_pModDoc == NULL) return true;
 	CModDoc& rModDoc = *sndFile.m_pModDoc;
-	if(newRowCount > sndFile.GetRowMax() || newRowCount < sndFile.GetRowMin())
+	if(newRowCount > specs.patternRowsMax || newRowCount < specs.patternRowsMin)
 		return true;
 
 	if (newRowCount == m_Rows) return false;
@@ -109,7 +110,7 @@ bool CPattern::Expand()
 
 	CModDoc& rModDoc = *sndFile.m_pModDoc;
 
-	if ((!m_ModCommands) || (m_Rows > sndFile.GetRowMax() / 2)) return true;
+	if ((!m_ModCommands) || (m_Rows > sndFile.GetModSpecifications().patternRowsMax / 2)) return true;
 
 	rModDoc.BeginWaitCursor();
 	nRows = m_Rows;
@@ -201,7 +202,7 @@ bool CPattern::WriteITPdata(FILE* f) const
 bool CPattern::ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const DWORD datasize, const DWORD dwMemLength)
 //-----------------------------------------------------------------------------------------------
 {
-	if(streamPos+datasize >= dwMemLength || datasize < sizeof(MODCOMMAND_ORIGINAL))
+	if(streamPos > dwMemLength || datasize >= dwMemLength - streamPos || datasize < sizeof(MODCOMMAND_ORIGINAL))
 		return true;
 
 	const DWORD startPos = streamPos;

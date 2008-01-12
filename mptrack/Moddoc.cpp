@@ -56,15 +56,16 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_REARRANGE_SAMPLES,	RearrangeSampleList)
 // -! NEW_FEATURE#0020
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
-	ON_COMMAND(ID_APPROX_BPM,	OnApproximateBPM)
+	ON_COMMAND(ID_APPROX_BPM,			OnApproximateBPM)
 	ON_COMMAND(ID_PATTERN_PLAY,			OnPatternPlay)				//rewbs.patPlayAllViews
 	ON_COMMAND(ID_PATTERN_PLAYNOLOOP,	OnPatternPlayNoLoop)		//rewbs.patPlayAllViews
-	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)		//rewbs.patPlayAllViews
-	ON_UPDATE_COMMAND_UI(ID_INSERT_INSTRUMENT,		OnUpdateXMITOnly)
+	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)			//rewbs.patPlayAllViews
+	ON_UPDATE_COMMAND_UI(ID_INSERT_INSTRUMENT,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_INSTRUMENTS_REMOVEALL,	OnUpdateInstrumentOnly)
 	ON_UPDATE_COMMAND_UI(ID_CLEANUP_INSTRUMENTS,	OnUpdateInstrumentOnly)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		OnUpdateXMITOnly)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_COMMENTS,			OnUpdateXMITOnly)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		OnUpdateXMITMPTOnly)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_COMMENTS,			OnUpdateXMITMPTOnly)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVEASMP3,			OnUpdateMP3Encode)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -147,7 +148,7 @@ BOOL CModDoc::OnNewDocument()
 
 
 	// Refresh mix levels now that the correct mod type has been set
-	m_SndFile.m_nMixLevels=m_SndFile.GetModSpecifications()->defaultMixLevels;
+	m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
 	m_SndFile.m_pConfig->SetMixLevels(m_SndFile.m_nMixLevels);
 
 	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
@@ -353,7 +354,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 // -> DESC="channels management dlg"
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
-	if (m_SndFile.m_dwLastSavedWithVersion>CMainFrame::GetFullVersionNumeric()) {
+	if (m_SndFile.m_dwLastSavedWithVersion > CMainFrame::GetFullVersionNumeric()) {
 		char s[256];
 		wsprintf(s, "Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%s. Current version: v%s.\r\n", 
 			CMainFrame::GetVersionString(m_SndFile.m_dwLastSavedWithVersion),
@@ -363,6 +364,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	SetModifiedFlag(FALSE); // (bModified);
 	m_bHasValidPath=true;
+
 	return TRUE;
 }
 
@@ -375,7 +377,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	CHAR fext[_MAX_EXT]="";
 	UINT nType = m_SndFile.m_nType, dwPacking = 0;
 	BOOL bOk = FALSE;
-	m_SndFile.m_dwLastSavedWithVersion=CMainFrame::GetFullVersionNumeric();
+	m_SndFile.m_dwLastSavedWithVersion = CMainFrame::GetFullVersionNumeric();
 	if (!lpszPathName) return FALSE;
 	_splitpath(lpszPathName, NULL, NULL, NULL, fext);
 	if (!lstrcmpi(fext, ".mod")) nType = MOD_TYPE_MOD; else
@@ -401,7 +403,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(lpszPathName, dwPacking); break;
 	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(lpszPathName, dwPacking); break;
 	case MOD_TYPE_IT:	bOk = (m_SndFile.m_dwSongFlags & SONG_ITPROJECT || !lstrcmpi(fext, ".itp")) ? m_SndFile.SaveITProject(lpszPathName) : m_SndFile.SaveIT(lpszPathName, dwPacking); break;
-	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveMPT(lpszPathName, dwPacking); break;
+	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(lpszPathName, dwPacking); break;
 	}
 	EndWaitCursor();
 	if (bOk)
@@ -526,7 +528,6 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	}
 	if ((!lpszPathName) || (!lpszPathName[0]) || m_ShowSavedialog)
 	{
-		m_ShowSavedialog = false;
 		_splitpath(m_strPathName, drive, path, fname, NULL);
 		if (!fname[0]) strcpy(fname, m_strTitle);
 		strcpy(s, drive);
@@ -577,6 +578,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	{
 		SetModified(FALSE);
 		m_bHasValidPath=true;
+		m_ShowSavedialog = false;
 		return TRUE;
 	} else
 	{
@@ -825,7 +827,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		}
 
 		m_SndFile.NoteChange(nChn, note, FALSE, TRUE, TRUE);
-		if (nVol > 0) pChn->nVolume = nVol;
+		if (nVol >= 0) pChn->nVolume = nVol;
 		
 		// handle sample looping.
 		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
@@ -1020,12 +1022,14 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
 // -> CODE#0012
 // -> DESC="midi keyboard split"
 BOOL CModDoc::IsChannelSolo(UINT nChn) const
+//------------------------------------------
 {
 	if (nChn >= m_SndFile.m_nChannels) return TRUE;
 	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SOLO) ? TRUE : FALSE;
 }
 
 BOOL CModDoc::SoloChannel(UINT nChn, BOOL bSolo)
+//---------------------------------------------
 {
 	if (nChn >= m_SndFile.m_nChannels) return FALSE;
 	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
@@ -1039,6 +1043,7 @@ BOOL CModDoc::SoloChannel(UINT nChn, BOOL bSolo)
 // -> CODE#0015
 // -> DESC="channels management dlg"
 BOOL CModDoc::IsChannelNoFx(UINT nChn) const
+//------------------------------------------
 {
 	if (nChn >= m_SndFile.m_nChannels) return TRUE;
 	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_NOFX) ? TRUE : FALSE;
@@ -1061,18 +1066,21 @@ BOOL CModDoc::NoFxChannel(UINT nChn, BOOL bNoFx, BOOL updateMix)
 }
 
 BOOL CModDoc::IsChannelRecord1(UINT channel)
+//------------------------------------------
 {
 	UINT m = 1 << (channel&7);
 	return (MultiRecordMask[channel>>3] & m) ? TRUE : FALSE;
 }
 
 BOOL CModDoc::IsChannelRecord2(UINT channel)
+//------------------------------------------
 {
 	UINT m = 1 << (channel&7);
 	return (MultiSplitRecordMask[channel>>3] & m) ? TRUE : FALSE;
 }
 
 BYTE CModDoc::IsChannelRecord(UINT channel)
+//-----------------------------------------
 {
 	if(IsChannelRecord1(channel)) return 1;
 	if(IsChannelRecord2(channel)) return 2;
@@ -1080,6 +1088,7 @@ BYTE CModDoc::IsChannelRecord(UINT channel)
 }
 
 void CModDoc::Record1Channel(UINT channel, BOOL select)
+//-----------------------------------------------------
 {
 	UINT m = 1 << (channel&7);
 
@@ -1094,6 +1103,7 @@ void CModDoc::Record1Channel(UINT channel, BOOL select)
 }
 
 void CModDoc::Record2Channel(UINT channel, BOOL select)
+//-----------------------------------------------------
 {
 	UINT m = 1 << (channel&7);
 
@@ -1108,6 +1118,7 @@ void CModDoc::Record2Channel(UINT channel, BOOL select)
 }
 
 void CModDoc::ReinitRecordState(BOOL unselect)
+//--------------------------------------------
 {
 	memset(MultiRecordMask, unselect ? 0 : 0xff, sizeof(MultiRecordMask));
 	memset(MultiSplitRecordMask, unselect ? 0 : 0xff, sizeof(MultiSplitRecordMask));	
@@ -1659,7 +1670,7 @@ void CModDoc::OnPlayerPause()
 				{
 					for (UINT i=0; i<m_SndFile.Order.size(); i++)
 					{
-						if (m_SndFile.Order[i] == m_SndFile.Patterns.GetInvalidIndex()) break;
+						if (m_SndFile.Order[i] == m_SndFile.Order.GetInvalidPatIndex()) break;
 						if (m_SndFile.Order[i] == nPat)
 						{
 							m_SndFile.m_nCurrentPattern = i;
@@ -1844,12 +1855,22 @@ void CModDoc::OnUpdateInstrumentOnly(CCmdUI *p)
 	if (p) p->Enable((m_SndFile.m_nInstruments) ? TRUE : FALSE);
 }
 
+void CModDoc::OnUpdateHasMIDIMappings(CCmdUI *p)
+//----------------------------------------------
+{
+	if(!p) return;
+	if(m_SndFile.GetModSpecifications().MIDIMappingDirectivesMax > 0)
+		p->Enable();
+	else
+		p->Enable(FALSE);
+}
 
-void CModDoc::OnUpdateXMITOnly(CCmdUI *p)
+
+void CModDoc::OnUpdateXMITMPTOnly(CCmdUI *p)
 //---------------------------------------
 {
-	if (p) p->Enable(((m_SndFile.m_nType == MOD_TYPE_XM) 
-		|| (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) ? TRUE : FALSE);
+	if (p)
+		p->Enable((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 }
 
 
@@ -1870,7 +1891,7 @@ void CModDoc::OnInsertPattern()
 		for (UINT i=0; i<m_SndFile.Order.size(); i++)
 		{
 			if (m_SndFile.Order[i] == pat) ord = i;
-			if (m_SndFile.Order[i] == m_SndFile.Patterns.GetInvalidIndex()) break;
+			if (m_SndFile.Order[i] == m_SndFile.Order.GetInvalidPatIndex()) break;
 		}
 		ViewPattern(pat, ord);
 	}
@@ -2690,6 +2711,7 @@ void* CModDoc::GetChildFrame()
 }
 
 HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
+//------------------------------------------------------------
 {
 	HWND followSonghWnd;
 	PATTERNVIEWSTATE *patternViewState;
@@ -2954,7 +2976,8 @@ void CModDoc::OnPatternPlayNoLoop()
 	//SwitchToView();
 }
 
-LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
+//------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -3014,8 +3037,8 @@ void CModDoc::ChangeFileExtension(UINT nNewType)
 	//Not making path if path is empty(case only(?) for new file)
 	if(GetPathName().GetLength() > 0)
 	{
-		CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME];
-		_splitpath(GetPathName(), drive, path, fname, NULL);
+		CHAR path[_MAX_PATH], drive[_MAX_PATH], fname[_MAX_FNAME], ext[_MAX_EXT];
+		_splitpath(GetPathName(), drive, path, fname, ext);
 
 		CString newPath = drive;
 		newPath += path;
@@ -3036,10 +3059,23 @@ void CModDoc::ChangeFileExtension(UINT nNewType)
 		case MOD_TYPE_MOD: newPath += ".mod"; break;
 		default: ASSERT(false);		
 		}
+	
+		if(nNewType != MOD_TYPE_IT ||
+			(nNewType == MOD_TYPE_IT &&
+				(
+					(!strcmp(ext, ".it") && (m_SndFile.m_dwSongFlags & SONG_ITPROJECT)) ||
+					(!strcmp(ext, ".itp") && !(m_SndFile.m_dwSongFlags & SONG_ITPROJECT))
+				)
+			)
+		  ) 
+			m_ShowSavedialog = true;
+			//Forcing savedialog to appear after extension change - otherwise
+			//unnotified file overwriting may occur.
+
 		SetPathName(newPath, FALSE);
-		if(GetSoundFile() && GetSoundFile()->GetType() != nNewType) m_ShowSavedialog = true;
-		//Forcing savedialog to appear after extension change - otherwise
-		//unnotified file overwriting may occur.
+
+		
+		
 	}
 
 	UpdateAllViews(NULL, HINT_MODTYPE);
@@ -3120,19 +3156,25 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 	return;
 }
 
-void CModDoc::SongProperties() {
+void CModDoc::SongProperties()
+//----------------------------
+{
 	CModTypeDlg dlg(GetSoundFile(), CMainFrame::GetMainFrame());
 	if (dlg.DoModal() == IDOK)
-	{
+	{	
 		BOOL bShowLog = FALSE;
 		ClearLog();
-		if(dlg.m_nType)	{
+		if(dlg.m_nType)
+		{
 			if (!ChangeModType(dlg.m_nType)) return;
 			bShowLog = TRUE;
 		}
-		if ((dlg.m_nChannels >= 4) && (dlg.m_nChannels != GetSoundFile()->m_nChannels)) {
-			if(ChangeNumChannels(dlg.m_nChannels)) bShowLog = TRUE;
+		if ((dlg.m_nChannels >= 4) && (dlg.m_nChannels != GetSoundFile()->m_nChannels))
+		{
+			const bool showCancelInRemoveDlg = m_SndFile.GetModSpecifications().channelsMax >= m_SndFile.GetNumChannels();
+			if(ChangeNumChannels(dlg.m_nChannels, showCancelInRemoveDlg)) bShowLog = TRUE;
 		}
+
 		if (bShowLog) ShowLog("Conversion Status", CMainFrame::GetMainFrame());
 		SetModified();
 	}

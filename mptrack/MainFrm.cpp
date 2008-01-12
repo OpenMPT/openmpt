@@ -19,6 +19,7 @@
 // -> DESC="channels management dlg"
 #include "globals.h"
 #include "ChannelManagerDlg.h"
+#include "MIDIMappingDialog.h"
 // -! NEW_FEATURE#0015
 #include <direct.h>
 
@@ -74,7 +75,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 // -> DESC="channels management dlg"
 	ON_COMMAND(ID_CHANNEL_MANAGER,			OnChannelManager)
 // -! NEW_FEATURE#0015
+	ON_COMMAND(ID_VIEW_MIDIMAPPING,			OnViewMIDIMapping)
 	//ON_COMMAND(ID_HELP,					CMDIFrameWnd::OnHelp)
+	ON_COMMAND(ID_VIEW_SONGPROPERTIES,		OnSongProperties)
 	ON_COMMAND(ID_HELP_FINDER,				CMDIFrameWnd::OnHelpFinder)
 	ON_COMMAND(ID_REPORT_BUG,				OnReportBug)	//rewbs.reportBug
 	ON_COMMAND(ID_CONTEXT_HELP,				CMDIFrameWnd::OnContextHelp)
@@ -361,9 +364,10 @@ CMainFrame::CMainFrame()
 }
 
 void CMainFrame::LoadIniSettings()
+//--------------------------------
 {
 	CString iniFile = theApp.GetConfigFileName();
-	CHAR collectedString[INIBUFFERSIZE];
+	//CHAR collectedString[INIBUFFERSIZE];
 
 	gcsPreviousVersion = GetPrivateProfileCString("Version", "Version", "", iniFile);
 	gcsInstallGUID = GetPrivateProfileCString("Version", "InstallGUID", "", iniFile);
@@ -727,8 +731,13 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
 	m_wndToolBar.Init(this);
 	m_wndTree.RecalcLayout();
+
+	RemoveControlBar(&m_wndStatusBar); //Removing statusbar because corrupted statusbar inifiledata can crash the program.
+	m_wndTree.EnableDocking(0); //To prevent a crash when there's "Docking=1" for treebar in ini-settings.
 	// Restore toobar positions
 	LoadBarState("Toolbars");
+
+	AddControlBar(&m_wndStatusBar); //Restore statusbar to mainframe.
 
 	if(m_dwPatternSetup & PATTERN_MIDIRECORD) OnMidiRecord();
 
@@ -824,10 +833,9 @@ BOOL CMainFrame::DestroyWindow()
 void CMainFrame::OnClose()
 //------------------------
 {
-	CHAR s[64];
 	CChildFrame *pMDIActive = (CChildFrame *)MDIGetActive();
 	CRect rect;
-	HKEY key;
+	//HKEY key;
 
 	BeginWaitCursor();
 	if (m_dwStatus & MODSTATUS_PLAYING) PauseMod();
@@ -940,7 +948,10 @@ void CMainFrame::SaveIniSettings()
 	WritePrivateProfileString("AutoSave", "FileNameTemplate", m_pAutoSaver->GetFilenameTemplate(), iniFile);
 
 	theApp.SaveChords(Chords);
+
+	RemoveControlBar(&m_wndStatusBar); //Remove statusbar so that its state won't get saved.
 	SaveBarState("Toolbars");
+	AddControlBar(&m_wndStatusBar); //Restore statusbar to mainframe.
 }
 
 bool CMainFrame::WritePrivateProfileLong(const CString section, const CString key, const long value, const CString iniFile)
@@ -1652,7 +1663,7 @@ DWORD CMainFrame::GetFullVersionNumeric() {
 
 	int v1, v2, v3, v4; 
 	sscanf(version, "%x, %x, %x, %x", &v1, &v2, &v3, &v4);
-	DWORD versionLong = v1<<24 | v2<<16 | v3<<8 | v4 ;
+	DWORD versionLong = VERSIONNUMBER(v1, v2, v3, v4);
 	return versionLong;
 }
 
@@ -1661,7 +1672,7 @@ CString CMainFrame::GetFullVersionString()
 {
 	return GetVersionString(GetFullVersionNumeric());
    
-};
+}
 
 CString CMainFrame::GetVersionString(DWORD v) 
 //-------------------------------------------
@@ -2012,7 +2023,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 	m_WaveFile.m_nSamples = 1;
 	m_WaveFile.Order[0] = 0;
 	m_WaveFile.Order[1] = 1;
-	m_WaveFile.Order[2] = m_WaveFile.Patterns.GetInvalidIndex();
+	m_WaveFile.Order[2] = m_WaveFile.Order.GetInvalidPatIndex();
 	m_WaveFile.Patterns.Insert(0,64);
 	m_WaveFile.Patterns.Insert(1,64);
 	if (m_WaveFile.Patterns[0])
@@ -2085,7 +2096,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample
 	}
 	m_WaveFile.Order[0] = 0;
 	m_WaveFile.Order[1] = 1;
-	m_WaveFile.Order[2] = m_WaveFile.Patterns.GetInvalidIndex();
+	m_WaveFile.Order[2] = m_WaveFile.Order.GetInvalidPatIndex();
 	m_WaveFile.Patterns.Insert(0, 64);
 	m_WaveFile.Patterns.Insert(1, 64);
 	if (m_WaveFile.Patterns[0])
@@ -2345,9 +2356,18 @@ void CMainFrame::OnViewOptions()
 }
 
 
+void CMainFrame::OnSongProperties()
+//---------------------------------
+{
+	CModDoc* pModDoc = GetActiveDoc();
+	if(pModDoc) pModDoc->SongProperties();
+}
+
+
 // -> CODE#0002
 // -> DESC="list box to choose VST plugin presets (programs)"
 void CMainFrame::OnPluginManager()
+//--------------------------------
 {
 	int nPlugslot=-1;
 	CModDoc* pModDoc = GetActiveDoc();
@@ -2379,6 +2399,7 @@ void CMainFrame::OnPluginManager()
 // -> CODE#0015
 // -> DESC="channels management dlg"
 void CMainFrame::OnChannelManager()
+//---------------------------------
 {
 	if(GetActiveDoc() && CChannelManagerDlg::sharedInstance()){
 		if(CChannelManagerDlg::sharedInstance()->IsDisplayed())
@@ -2681,6 +2702,7 @@ void CMainFrame::OnOctaveChanged()
 
 //rewbs.reportBug
 void CMainFrame::OnReportBug()
+//----------------------------
 {
 	CTrackApp::OpenURL("http://www.lpchip.com/modplug/");
 	return;
@@ -2722,7 +2744,7 @@ void CMainFrame::OnRButtonDown(UINT, CPoint pt)
 }
 
 
-LRESULT CMainFrame::OnSpecialKey(WPARAM vKey, LPARAM)
+LRESULT CMainFrame::OnSpecialKey(WPARAM /*vKey*/, LPARAM)
 //---------------------------------------------------
 {
 /*	CMDIChildWnd *pMDIActive = MDIGetActive();
@@ -2743,6 +2765,7 @@ LRESULT CMainFrame::OnSpecialKey(WPARAM vKey, LPARAM)
 
 //rewbs.customKeys
 LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+//---------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -2763,6 +2786,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcHelp: 		CMDIFrameWnd::OnHelp(); break;
 		case kcViewAddPlugin: OnPluginManager(); break;
 		case kcViewChannelManager: OnChannelManager(); break;
+		case kcViewMIDImapping: OnViewMIDIMapping(); break;
 		case kcNextDocument:	MDINext(); break;
 		case kcPrevDocument:	MDIPrev(); break;
 
@@ -2815,6 +2839,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 //end rewbs.customKeys
 
 void CMainFrame::OnInitMenu(CMenu* pMenu)
+//---------------------------------------
 {
 	m_InputHandler->SetModifierMask(0);
 	if (m_InputHandler->noAltMenu())
@@ -2826,11 +2851,13 @@ void CMainFrame::OnInitMenu(CMenu* pMenu)
 
 //end rewbs.VSTTimeInfo
 long CMainFrame::GetSampleRate()
+//------------------------------
 {
 	return CSoundFile::GetSampleRate();
 }
 
 long CMainFrame::GetTotalSampleCount()
+//------------------------------------
 {
 	if (GetModPlaying())
 		return GetModPlaying()->GetSoundFile()->m_lTotalSampleCount;
@@ -2838,8 +2865,8 @@ long CMainFrame::GetTotalSampleCount()
 }
 
 double CMainFrame::GetApproxBPM()
+//-------------------------------
 {
-	CModDoc *pPlayingModDoc = GetModPlaying();
 	CSoundFile *pSndFile = NULL;
 
 	pSndFile = GetActiveDoc()->GetSoundFile();
@@ -2850,6 +2877,7 @@ double CMainFrame::GetApproxBPM()
 }
 
 BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
+//-------------------------------------------------
 {
 	BEGIN_CRITICAL();
 	pSndFile->m_bIsRendering=true;
@@ -2862,6 +2890,7 @@ BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
 }
 
 BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
+//-------------------------------------------------
 {
 	m_dwStatus &= ~MODSTATUS_RENDERING;
 	m_pModPlaying = NULL;
@@ -2876,6 +2905,7 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 //rewbs.customKeys
 // We have swicthed focus to a new module - might need to update effect keys to reflect module type
 bool CMainFrame::UpdateEffectKeys(void)
+//-------------------------------------
 {
 	CModDoc* pModDoc = GetActiveDoc();
 	if (pModDoc)
@@ -2920,6 +2950,7 @@ bool CMainFrame::UpdateHighlights()
 
 //rewbs.fix3116
 void CMainFrame::OnKillFocus(CWnd* pNewWnd)
+//-----------------------------------------
 {
 	CMDIFrameWnd::OnKillFocus(pNewWnd);
 	
@@ -2929,7 +2960,8 @@ void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 }
 //end rewbs.fix3116
 
-void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
+void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
+//-----------------------------------------------------
 {
     static bool firstShow = true;
     if (bShow && !IsWindowVisible() && firstShow)  {
@@ -2941,3 +2973,59 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
     }
 }
 
+
+void CMainFrame::OnViewMIDIMapping()
+//----------------------------------
+{
+	CModDoc* pModDoc = GetActiveDoc();
+	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : 0;
+	if(!pSndFile) return;
+
+	const HWND oldMIDIRecondWnd = GetMidiRecordWnd();
+	CMIDIMappingDialog dlg(this, *pSndFile);
+	dlg.DoModal();
+	SetMidiRecordWnd(oldMIDIRecondWnd);
+}
+
+
+
+/////////////////////////////////////////////
+//Misc helper functions
+/////////////////////////////////////////////
+
+void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bool librarynames)
+//---------------------------------------------------------------------
+{
+	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	{
+		PSNDMIXPLUGIN p = &plugarray[iPlug];
+		CString str;
+		str.Preallocate(80);
+		str.Format("FX%d: ", iPlug+1);
+		const int size0 = str.GetLength();
+		str += (librarynames) ? p->GetLibraryName() : p->GetName();
+		if(str.GetLength() <= size0) str += "undefined";
+
+		CBox.AddString(str);
+	}
+}
+
+void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plug)
+//----------------------------------------------------------------------------
+{
+	if(plug.pMixPlugin)
+		AddPluginParameternamesToCombobox(CBox, *(CVstPlugin *)plug.pMixPlugin);
+}
+
+void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
+//-----------------------------------------------------------------------
+{
+	char s[72], sname[64];
+	UINT nParams = plug.GetNumParameters();
+	for (UINT i=0; i<nParams; i++)
+	{
+		plug.GetParamName(i, sname, sizeof(sname));
+		wsprintf(s, "%02d: %s", i, sname);
+		CBox.SetItemData(CBox.AddString(s), i);
+	}
+}

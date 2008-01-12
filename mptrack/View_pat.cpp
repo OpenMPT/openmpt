@@ -7,7 +7,7 @@
 #include "globals.h"
 #include "view_pat.h"
 #include "ctrl_pat.h"
-#include "dlsbank.h"
+
 #include "EffectVis.h"		//rewbs.fxvis
 #include "OpenGLEditor.h"		//rewbs.fxvis
 #include "PatternGotoDialog.h"
@@ -15,6 +15,7 @@
 #include ".\arrayutils.h"
 #include ".\view_pat.h"
 #include "misc_util.h"
+#include "midi.h"
 #include <cmath>
 
 #define MAX_SPACING		16
@@ -187,7 +188,7 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 	if ( (!pModDoc) || (!pSndFile) || (npat >= pSndFile->Patterns.Size()) ) return FALSE;
 	if ((m_pEditWnd) && (m_pEditWnd->IsWindowVisible())) m_pEditWnd->ShowWindow(SW_HIDE);
 	
-	if ((npat < pSndFile->Patterns.Size()-1) && (!pSndFile->Patterns[npat])) npat = 0;
+	if ((npat + 1 < pSndFile->Patterns.Size()) && (!pSndFile->Patterns[npat])) npat = 0;
 	while ((npat > 0) && (!pSndFile->Patterns[npat])) npat--;
 	if (!pSndFile->Patterns[npat])
 	{
@@ -365,6 +366,7 @@ BOOL CViewPattern::SetCurrentColumn(UINT ncol)
 // When we switching to other tab the CViewPattern object is deleted
 // and when switching back new one is created
 BOOL CViewPattern::UpdateScrollbarPositions( BOOL UpdateHorizontalScrollbar )
+//---------------------------------------------------------------------------
 {
 // HACK - after new CViewPattern object created SetCurrentRow() and SetCurrentColumn() are called -
 // just skip first two calls of UpdateScrollbarPositions() if pModDoc->GetOldPatternScrollbarsPos() is valid
@@ -480,7 +482,7 @@ DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 		}
 		rect.OffsetRect(GetColumnWidth(), 0);
 	}
-	if ((pSndFile->Patterns[m_nPattern]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT)))
+	if ((pSndFile->Patterns[m_nPattern]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 	{
 		rect.SetRect(0, 0, m_szHeader.cx, m_szHeader.cy);
 		if (rect.PtInRect(point))
@@ -741,8 +743,8 @@ void CViewPattern::OnGrowSelection()
 	if (!p) return;
 	BeginWaitCursor();
 
-	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16))?m_dwBeginSel:m_dwEndSel;
-	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16))?m_dwEndSel:m_dwBeginSel;
+	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwBeginSel : m_dwEndSel;
+	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwEndSel : m_dwBeginSel;
 	pModDoc->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->PatternSize[m_nPattern]);
 
 	int finalDest = (startSel>>16)+((endSel>>16)-(startSel>>16))*2;
@@ -1189,7 +1191,6 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 	{
 		CString MenuText;
 		CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
-		BOOL bSep = FALSE;
 
 		//------ Plugin Header Menu --------- :
 		if ((m_dwStatus & PATSTATUS_PLUGNAMESINHEADERS) && 
@@ -1245,10 +1246,10 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 //-------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	BOOL bItemSelected = m_bInItemRect;
+	//BOOL bItemSelected = m_bInItemRect;
 	if (!pModDoc) return;
 
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	//CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	m_nDragItem = GetDragItem(point, &m_rcDragItem);
 	DWORD nItemNo = m_nDragItem & 0xFFFF;
 	switch(m_nDragItem & DRAGITEM_MASK)	{
@@ -2078,7 +2079,7 @@ void CViewPattern::OnVisualizeEffect()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		//CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		UINT row0 = m_dwBeginSel >> 16, row1 = m_dwEndSel >> 16, nchn = (m_dwBeginSel & 0xFFFF) >> 3;
 		if (m_pEffectVis)
 		{
@@ -2438,7 +2439,7 @@ void CViewPattern::OnRemoveChannel()
 		return;
 	}
 
-	UINT nChn = ((m_nMenuParam&0xFFFF)>>3);
+	UINT nChn = GetChanFromCursor(m_nMenuParam);
 	CString str;
 	str.Format("Remove channel %d?\nNote: Affects all patterns and no undo", nChn+1);
 	if(CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_YESNO | MB_ICONQUESTION) == IDYES)
@@ -2875,16 +2876,21 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 }
 
 
-LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiData, LPARAM)
+LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 //--------------------------------------------------------
 {
+	const DWORD dwMidiData = dwMidiDataParam;
+	static BYTE midivolume = 127;
+
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 
 	if ((!pModDoc) || (!pMainFrm)) return 0;
 
+	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	if(!pSndFile) return 0;
+
 //Midi message from our perspective:
-//NOTE: Velocity and Note data may actually consist of 7 bits, not 8 as said here.
 //     +---------------------------+---------------------------+-------------+-------------+
 //bit: | 24.23.22.21 | 20.19.18.17 | 16.15.14.13 | 12.11.10.09 | 08.07.06.05 | 04.03.02.01 |
 //     +---------------------------+---------------------------+-------------+-------------+
@@ -2893,54 +2899,86 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiData, LPARAM)
 //(http://www.borg.com/~jglatt/tech/midispec.htm)
 
 	//Notes:
-	//. If no event is recieved, previous event is assumed.
-	//. A note-on (event=8) with velocity 0 is equivalent to a note off.
-	//. We only handle note-on and note off events.
+	//. Initial midi data handling is done in MidiInCallBack().
+	//. If no event is received, previous event is assumed.
+	//. A note-on (event=9) with velocity 0 is equivalent to a note off.
 	//. Basing the event solely on the velocity as follows is incorrect,
 	//  since a note-off can have a velocity too:
 	//  BYTE event  = (dwMidiData>>16) & 0x64;
+	//. Sample- and instrumentview handle midi mesages in their own methods.
 
-	BYTE nNote  = ((dwMidiData >> 8) & 0xFF) +1; // +1 is for MPT, where middle C is 61
-	BYTE nVol   = (dwMidiData >> 16) & 0xFF;   // At this stage nVol is a non linear value in [0;127]
-	                                           // Need to convert to linear in [0;64] - see below
-	BYTE event  = dwMidiData & 0xF0;			//Event 'contains' bits 08-05 (0xF0 == 11110000 in base 10)
-	if ((event == 0x90) && !nVol) event = 0x80;	//Convert event to note-off if req'd
+	const BYTE nByte1 = GetFromMIDIMsg_DataByte1(dwMidiData);
+	const BYTE nByte2 = GetFromMIDIMsg_DataByte2(dwMidiData);
 
-	//Event nibble: 8 if Note Off, 9 is Note on. Don't care about other events ATM.
+	const BYTE nNote  = nByte1 + 1;				// +1 is for MPT, where middle C is 61
+	int nVol   = nByte2;						// At this stage nVol is a non linear value in [0;127]
+												// Need to convert to linear in [0;64] - see below
+	BYTE event  = GetFromMIDIMsg_Event(dwMidiData);
+
+	if ((event == 0x9) && !nVol) event = 0x8;	//Convert event to note-off if req'd
 
 
-	//NOTE: Midi in code should also be updated in view_smp.cpp and view_ins.cpp
-	//Should something be done to prevent need for code copy?
+	//Try finding MIDI mapping.
+	BYTE mappedIndex = 0, paramValue = 0;
+	uint32 paramIndex = 0;
+	if(pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue)) 
+		return 0;
 
 	switch(event)
 	{
-	case 0x80: // Note Off
-		// The following method takes care of:
-		// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
-		// . Entering a note off in pattern if required
-		TempStopNote(nNote, CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF);
+		case 0x8: // Note Off
+			// The following method takes care of:
+			// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
+			// . Entering a note off in pattern if required
+			TempStopNote(nNote, ((CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) != 0));
 		break;
 
-	case 0x90: // Note On
-		if (CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
-		{
-			//Convert non linear value in [0;127] to linear value in [0;64]:
-			nVol = (CDLSBank::DLSMidiVolumeToLinear(nVol)+1023) >> 10;
-			//Amplify if requested:
-			if (CMainFrame::m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) nVol *= 2;
-			//Bound, in case of overamplification:
-			if (nVol < 1) nVol = 1;
-			if (nVol > 64) nVol = 64;
-		}
-		else
-		{	//Use default volume
-			nVol = -1;
-		}
+		case 0x9: // Note On
+			nVol = ApplyVolumeRelatedMidiSettings(dwMidiData, midivolume);
+			if(nVol < 0) nVol = -1;
+			else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
+			TempEnterNote(nNote, true, nVol);
+		break;
 
-		TempEnterNote(nNote, true, nVol);
+		case 0xB: //Controller change
+			switch(nByte1)
+			{
+				case 0x7: //Volume
+					midivolume = nByte2;
+				break;
+			}
+
+		default:
+			if(CMainFrame::m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS)
+			{
+				switch(dwMidiData & 0xFF)
+				{
+					case 0xFA: //Start song
+						if(GetDocument())
+							GetDocument()->OnPlayerPlayFromStart();
+					break;
+
+					case 0xFB: //Continue song
+						if(GetDocument())
+							GetDocument()->OnPlayerPlay();
+					break;
+
+					case 0xFC: //Stop song
+						if(GetDocument())
+							GetDocument()->OnPlayerStop();
+					break;
+				}
+			}
+
+			if(CMainFrame::m_dwMidiSetup & MIDISETUP_MIDITOPLUG
+				&& pMainFrm->GetModPlaying() == pModDoc)
+			{
+				const UINT instr = GetCurrentInstrument();
+				IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
+				if(plug) plug->MidiSend(dwMidiData);
+			}
 		break;
 	}
-
 
 	return 0;
 }
@@ -3041,8 +3079,8 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		{
 // -> CODE#0012
 // -> DESC="midi keyboard split"
-			CModDoc *pModDoc = GetDocument();
-			CSoundFile * pSndFile = pModDoc->GetSoundFile();
+			//CModDoc *pModDoc = GetDocument();
+			//CSoundFile * pSndFile = pModDoc->GetSoundFile();
 //			if (timeGetTime() - lParam >= 10)
 			int temp = timeGetTime();
 			if (temp - lParam >= 60)
@@ -3163,6 +3201,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 
 //rewbs.customKeys
 void CViewPattern::CursorJump(DWORD distance, bool direction, bool snap)
+//-----------------------------------------------------------------------
 {											  //up is true
 	switch(snap)
 	{
@@ -3177,7 +3216,8 @@ void CViewPattern::CursorJump(DWORD distance, bool direction, bool snap)
 
 }
 
-LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
+//----------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -3524,25 +3564,23 @@ void CViewPattern::SetSpacing(int n)
 
 
 void CViewPattern::TempEnterFX(int c)
-//-----------------------------------
+//---------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 
 	if ((pModDoc) && (pMainFrm))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
-		MODCOMMAND oldcmd;		// This is the command we are about to overwrite
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();	
+		
+		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
+		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
+
+		//if(p->command != 0 && !overwrite) return true;
+
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		// -- Work out where to put the new data
-		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
-		prowbase = p + m_nRow * pSndFile->m_nChannels;
-		p = prowbase + nChn;
-		oldcmd = *p;
-
-		LPCSTR lpcmd = (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands : gszS3mCommands;
+		//LPCSTR lpcmd = (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands : gszS3mCommands;
 		if (c)
 		{
 			if ((c == m_cmdOld.command) && (!p->param) && (!p->command)) p->param = m_cmdOld.param;
@@ -3584,21 +3622,25 @@ void CViewPattern::TempEnterFXparam(int v)
 	if ((pModDoc) && (pMainFrm))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
 		MODCOMMAND oldcmd;		// This is the command we are about to overwrite
-		PrepareUndo(m_dwBeginSel, m_dwEndSel);
-
-		// -- Work out where to put the new data
-		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
-		prowbase = p + m_nRow * pSndFile->m_nChannels;
-		p = prowbase + nChn;
+		
+		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
 		oldcmd = *p;
 
-//		if (v >= 0 && v <= 9)
-//		{
+		PrepareUndo(m_dwBeginSel, m_dwEndSel);
+
+		//if(enterAsAbsoluteValue) p->param = v;
+		//else p->param = (p->param << 4) | v;
+
+		p->param = (p->param << 4) | v;
+		if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
+
+/*
+		if (v >= 0 && v <= 9)
+		{
 			p->param = (p->param << 4) | v;
 			if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
-/*		}
+		}
 		else if (v >= 10 && v <= 15)
 		{
 			p->param = (p->param << 4) | (v + 0x0A);
@@ -3613,7 +3655,7 @@ void CViewPattern::TempEnterFXparam(int v)
 			p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
 		}
 
-		if (IsEditingEnabled_bmsg())
+		if (IsEditingEnabled())
 		{
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
@@ -3631,7 +3673,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 //------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	bool isSplit = (note<m_nSplitNote);
+	bool isSplit = (note < m_nSplitNote);
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pModDoc)
 	{
@@ -3645,7 +3687,9 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 		}
 		if (!ins)    ins = GetCurrentInstrument();
 		if (!ins)	 ins = m_nFoundInstrument;
-		pModDoc->NoteOff(note, TRUE, ins, (m_dwCursor & 0xFFFF) >> 3);
+		//pModDoc->NoteOff(note, TRUE, ins, (m_dwCursor & 0xFFFF) >> 3);
+		pModDoc->NoteOff(note, FALSE, ins, GetChanFromCursor(m_dwCursor));
+		
 	}
 
 	//Enter note off in pattern?
@@ -3661,11 +3705,9 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 	UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
 	PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-	int releaseChan = -1;
-
-	BYTE* activeNoteMap = isSplit?splitActiveNoteChannel:activeNoteChannel;
-	releaseChan = activeNoteMap[note];
-	if (releaseChan<0 || releaseChan>pSndFile->m_nChannels)
+	BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
+	CHANNELINDEX releaseChan = activeNoteMap[note];
+	if (releaseChan > pSndFile->GetNumChannels())
 		releaseChan = nChn;
 
 	activeNoteMap[note] = 0xFF;	//unlock channel
@@ -3681,10 +3723,10 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 								(CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY);
 
 	//Work out where to put the note off
-	UINT nRow = usePlaybackPosition?pSndFile->m_nRow:m_nRow;
+	UINT nRow = usePlaybackPosition ? pSndFile->m_nRow : m_nRow;
 
 	prowbase = p + nRow * pSndFile->m_nChannels;
-	if (releaseChan>=0 && releaseChan<pSndFile->m_nChannels) 
+	if (releaseChan < pSndFile->GetNumChannels()) 
 		p=prowbase+releaseChan;
 	else
 		p=prowbase+nChn;
@@ -3764,11 +3806,9 @@ void CViewPattern::TempStopChord(int note)
 	UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
 	PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-	int releaseChan = -1;
-
-	BYTE* activeNoteMap = isSplit?splitActiveNoteChannel:activeNoteChannel;
-	releaseChan = activeNoteMap[note];
-	if (releaseChan<0 || releaseChan>pSndFile->m_nChannels)
+	BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
+	CHANNELINDEX releaseChan = activeNoteMap[note];
+	if (releaseChan > pSndFile->GetNumChannels())
 		releaseChan = nChn;
 
 	activeNoteMap[note] = 0xFF;	//unlock channel
@@ -3848,15 +3888,12 @@ void CViewPattern::TempEnterIns(int val)
 	{
 
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
-		MODCOMMAND oldcmd;		// This is the command we are about to overwrite
-		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
+		
+		UINT nChn = GetChanFromCursor(m_dwCursor);
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		// -- Work out where to put the new ins
-		prowbase = p + m_nRow * pSndFile->m_nChannels;
-		p = prowbase + nChn;
-		oldcmd = *p;
+		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
+		MODCOMMAND oldcmd = *p;		// This is the command we are about to overwrite
 
 		UINT instr  = p->instr;
 		instr = ((instr * 10) + val) % 1000;
@@ -3887,21 +3924,20 @@ void CViewPattern::TempEnterIns(int val)
 	}
 }
 
+
 void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 //--------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
-	UINT nPlayChord = 0;
 	bool isSplit;
 
 	if ((pModDoc) && (pMainFrm))
 	{
 		UINT nRow = m_nRow;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
-		MODCOMMAND oldcmd;		// a copy of the command we are about to overwrite
-		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
+
+		UINT nChn = GetChanFromCursor(m_dwCursor);
 		BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 		UINT nPlayIns = 0;
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
@@ -3920,15 +3956,14 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 					nRow -= m_nSpacing;
 			}
 		}
-		m_dwLastNoteEntryTime=timeGetTime();
+		m_dwLastNoteEntryTime = timeGetTime();
 
-		nRow = usePlaybackPosition?pSndFile->m_nRow:m_nRow;
+		nRow = usePlaybackPosition ? pSndFile->m_nRow : m_nRow;
 
-		// -- Work out where to put the new note
-		prowbase = p + nRow * pSndFile->m_nChannels;
-	   	p = prowbase + nChn;
-	
-		oldcmd = *p;	//take backup copy of the command we're about to overwrite
+ 		// -- Work out where to put the new note
+		MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, nChn);
+		
+		MODCOMMAND oldcmd = *p;	//take backup copy of the command we're about to overwrite
 
 		// -- write note and instrument data
 		isSplit = HandleSplit(p, note);
@@ -4042,7 +4077,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 				}
 			}
 			BOOL bNotPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying())) ? FALSE : TRUE;
-			pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, -1, 0, 0, nChn);	//rewbs.vstiLive - added extra args
+			//pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, -1, 0, 0, nChn);	//rewbs.vstiLive - added extra args
+			pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, 4*vol, 0, 0, nChn);	//rewbs.vstiLive - added extra args
 /*			for (UINT kplchrd=0; kplchrd<nPlayChord; kplchrd++)
 			{
 				if (chordplaylist[kplchrd])
@@ -4220,7 +4256,6 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
-		UINT nCursor = m_dwCursor & 0x07;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODCOMMAND *p = pSndFile->Patterns[m_nPattern] +  m_nRow*pSndFile->m_nChannels + nChn;
 		MODCOMMAND oldcmd = *p;
@@ -4319,8 +4354,9 @@ void CViewPattern::OnSelectPlugin(UINT nID)
 
 	if (m_nMenuOnChan)
 	{
-		int newPlug = nID-ID_PLUGSELECT;
-		if (newPlug != pSndFile->ChnSettings[m_nMenuOnChan-1].nMixPlugin) {
+		UINT newPlug = nID-ID_PLUGSELECT;
+		if (newPlug <= MAX_MIXPLUGINS && newPlug != pSndFile->ChnSettings[m_nMenuOnChan-1].nMixPlugin)
+		{
 			pSndFile->ChnSettings[m_nMenuOnChan-1].nMixPlugin = newPlug;
 			pModDoc->SetModified();
 			InvalidateChannelsHeaders();

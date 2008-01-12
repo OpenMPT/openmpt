@@ -494,18 +494,10 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 			if ((n = (short int)m_SpinTempo.GetPos()) != 0)
 			{
 				if (n < 0)
-				{
-					if (nCurrentTempo > 0x20)
-					{
-						pSndFile->m_nMusicTempo = nCurrentTempo - 1;
-					}
-				} else
-				{
-					if (nCurrentTempo < 0xFF)
-					{
-						pSndFile->m_nMusicTempo = nCurrentTempo + 1;
-					}
-				}
+					pSndFile->SetTempo(nCurrentTempo - 1, true);
+				else
+					pSndFile->SetTempo(nCurrentTempo + 1, true);
+		
 				m_SpinTempo.SetPos(0);
 			}
 			if ((n = (short int)m_SpinSpeed.GetPos()) != 0)

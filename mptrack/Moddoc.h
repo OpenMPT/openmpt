@@ -145,7 +145,7 @@ public:
 // operations
 public:
 	BOOL ChangeModType(UINT nNewType);
-	BOOL ChangeNumChannels(UINT nNewChannels);
+	BOOL ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg = true);
 	BOOL ConvertInstrumentsToSamples();;
 	BOOL RemoveUnusedSamples();
 	BOOL RemoveUnusedInstruments();
@@ -233,6 +233,8 @@ protected:
 	BOOL InitializeMod();
 	void* GetChildFrame(); //rewbs.customKeys
 
+	void CheckUnusedChannels(BOOL mask[MAX_CHANNELS], CHANNELINDEX maxRemoveCount);
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CModDoc)
@@ -289,7 +291,8 @@ public:
 	afx_msg void OnRemoveAllInstruments();
 	afx_msg void OnEstimateSongLength();
 	afx_msg void OnApproximateBPM();
-	afx_msg void OnUpdateXMITOnly(CCmdUI *p);
+	afx_msg void OnUpdateXMITMPTOnly(CCmdUI *p);
+	afx_msg void OnUpdateHasMIDIMappings(CCmdUI *p);
 	afx_msg void OnUpdateInstrumentOnly(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMP3Encode(CCmdUI *pCmdUI);
 	afx_msg void OnPatternRestart(); //rewbs.customKeys

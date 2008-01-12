@@ -31,7 +31,7 @@ public:
 
 //BEGIN: INTERFACE METHODS
 public:
-	//MODCOMMAND* GetpModCommand(const UINT r, const UINT c) {return &m_ModCommands[r*c+c];}
+	MODCOMMAND* GetpModCommand(const UINT r, const UINT c) {return &m_ModCommands[r*GetNumChannels()+c];}
 	const MODCOMMAND* GetpModCommand(const UINT r, const UINT c) const {return &m_ModCommands[r*GetNumChannels()+c];}
 	
 	ROWINDEX GetNumRows() const {return m_Rows;}

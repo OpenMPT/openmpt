@@ -35,6 +35,7 @@ typedef uint32 ROWINDEX;
 typedef uint16 CHANNELINDEX;
 typedef uint16 ORDERINDEX;
 typedef uint16 PATTERNINDEX;
+typedef uint8  PLUGINDEX;
 typedef uint16 TEMPO;
 typedef uint16 SAMPLEINDEX;
 typedef uint16 INSTRUMENTINDEX;

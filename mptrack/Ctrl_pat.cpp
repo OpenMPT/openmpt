@@ -425,7 +425,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 				SendViewMessage(VIEWMSG_PATTERNLOOP, (SONG_PATTERNLOOP & m_pSndFile->m_dwSongFlags));
 			}
 			OnSpacingChanged();
-			OnOrderListMarginsChanged(); //mimicry
+			OnOrderListMarginsChanged();
 			
 			SendViewMessage(VIEWMSG_SETSPLITINSTRUMENT, m_nSplitInstrument);
 			SendViewMessage(VIEWMSG_SETSPLITNOTE, m_nSplitNote);
@@ -578,7 +578,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 					m_OrderList.SetCurSel(i, TRUE);
 					break;
 				}
-				if (pSndFile->Order[i] == pSndFile->Patterns.GetInvalidIndex()) break;
+				if (pSndFile->Order[i] == pSndFile->Order.GetInvalidPatIndex()) break;
 			}
 		}
 		SetCurrentPattern(lParam);
@@ -595,7 +595,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 	if (m_hWndView)
 	{
 		OnSpacingChanged();
-		OnOrderListMarginsChanged(); //mimicry...
+		OnOrderListMarginsChanged();
 		if (m_bRecord) SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 		
@@ -862,7 +862,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 			if ((pSndFile->Patterns[nCurPat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
 				rows = pSndFile->PatternSize[nCurPat];
-				if (rows < 16) rows = 16;
+				if (rows < pSndFile->GetModSpecifications().patternRowsMin) rows = pSndFile->GetModSpecifications().patternRowsMin;
 			}
 			LONG nNewPat = m_pModDoc->InsertPattern(nCurOrd+1, rows);
 			if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()))

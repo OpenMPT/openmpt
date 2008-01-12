@@ -658,6 +658,8 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_CBN_SELCHANGE(IDC_COMBO6,		OnMixPlugChanged)		//rewbs.instroVSTi
 	ON_CBN_SELCHANGE(IDC_COMBO9,		OnResamplingChanged)
 	ON_CBN_SELCHANGE(IDC_FILTERMODE,	OnFilterModeChanged)
+	ON_CBN_SELCHANGE(IDC_PLUGIN_VELOCITYSTYLE, OnPluginVelocityHandlingChanged)
+	ON_CBN_SELCHANGE(IDC_PLUGIN_VOLUMESTYLE, OnPluginVolumeHandlingChanged)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, OnEditSampleMap)
 	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_COMBOTUNING, OnCbnSelchangeCombotuning)
@@ -711,6 +713,8 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBOTUNING,			m_ComboTuning);
 	DDX_Control(pDX, IDC_CHECK_PITCHTEMPOLOCK,	m_CheckPitchTempoLock);
 	DDX_Control(pDX, IDC_EDIT_PITCHTEMPOLOCK,	m_EditPitchTempoLock);
+	DDX_Control(pDX, IDC_PLUGIN_VELOCITYSTYLE,		m_CbnPluginVelocityHandling);
+	DDX_Control(pDX, IDC_PLUGIN_VOLUMESTYLE,		m_CbnPluginVolumeHandling);
 	//}}AFX_DATA_MAP
 }
 
@@ -800,7 +804,12 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force lowpass"), FLTMODE_LOWPASS);
 	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force highpass"), FLTMODE_HIGHPASS);
 
-
+	//VST velocity/volume handling
+	m_CbnPluginVelocityHandling.AddString("Use channelvolume");
+	m_CbnPluginVelocityHandling.AddString("Process as volume");
+	m_CbnPluginVolumeHandling.AddString("MIDI volume");
+	m_CbnPluginVolumeHandling.AddString("Dry/Wet ratio");
+	m_CbnPluginVolumeHandling.AddString("None");
 
 	// Vol/Pan Swing
 	m_SliderVolSwing.SetRange(0, 64);
@@ -1173,6 +1182,10 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		{
 			m_EditName.SetWindowText("");
 			m_EditFileName.SetWindowText("");
+			m_CbnPluginVelocityHandling.EnableWindow(FALSE);
+			m_CbnPluginVolumeHandling.EnableWindow(FALSE);
+			m_CbnPluginVelocityHandling.SetCurSel(-1);
+			m_CbnPluginVolumeHandling.SetCurSel(-1);
 		}
 		m_NoteMap.InvalidateRect(NULL, FALSE);
 	}
@@ -1342,35 +1355,50 @@ BOOL CCtrlInstruments::EditSample(UINT nSample)
 BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPSTR pszText)
 //------------------------------------------------------------
 {
-	//NOTE: pszText seems to point to char array of length 256 (Noverber 2006).
+	//Note: pszText seems to point to char array of length 256 (Noverber 2006).
+	//Note2: If there's problems in getting tooltips showing for certain tools, 
+	//		 setting the tab order may have effect.
+	const bool hasInstrument = (m_pSndFile) && (m_pSndFile->Headers[m_nInstrument]);
+	if(!hasInstrument) return FALSE;
 	if ((pszText) && (uId))
 	{
 		switch(uId)
 		{
 		case IDC_EDIT1:
-			if ((m_pSndFile) && (m_pSndFile->Headers[m_nInstrument]))
 			{
-				INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
-				wsprintf(pszText, "Z%02X", penv->nIFC & 0x7f);
-				return TRUE;
-			}
+			INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
+			wsprintf(pszText, "Z%02X", penv->nIFC & 0x7f);
+			return TRUE;
 			break;
+			}
 		case IDC_EDIT_PITCHTEMPOLOCK:
 		case IDC_CHECK_PITCHTEMPOLOCK:
-			if ((m_pSndFile) && (m_pSndFile->Headers[m_nInstrument]))
 			{
-				string str = string("Tempo range: ") + Stringify(m_pSndFile->GetTempoMin()) + string(" - ") + Stringify(m_pSndFile->GetTempoMax());
-				if(str.size() >= 250) str.resize(250);
-				wsprintf(pszText, str.c_str());
-				return TRUE;
-			}
+			const CModSpecifications& specs = m_pSndFile->GetModSpecifications();
+			string str = string("Tempo range: ") + Stringify(specs.tempoMin) + string(" - ") + Stringify(specs.tempoMax);
+			if(str.size() >= 250) str.resize(250);
+			wsprintf(pszText, str.c_str());
+			return TRUE;
 			break;
+			}
 		case IDC_EDIT7: //Fade out
-			if ((m_pSndFile) && (m_pSndFile->Headers[m_nInstrument]))
+			wsprintf(pszText, "Higher value <-> Faster fade out");
+			return TRUE;
+			break;
+
+		case IDC_PLUGIN_VELOCITYSTYLE:
+		case IDC_PLUGIN_VOLUMESTYLE:
+			if(m_pSndFile->Headers[m_nInstrument]->nMixPlug < 1) return FALSE;
+			if(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
 			{
-				wsprintf(pszText, "Higher value <-> Faster fade out");
+				m_CbnPluginVelocityHandling.EnableWindow(FALSE);
+				m_CbnPluginVolumeHandling.EnableWindow(FALSE);
+				wsprintf(pszText, "To enable, clear plugin volume command bug emulation flag from song properties");
 				return TRUE;
 			}
+			else
+				return FALSE;
+			
 			break;
 		}
 	}
@@ -1910,12 +1938,25 @@ void CCtrlInstruments::OnMixPlugChanged()
 
 	if (penv)
 	{
+		if(nPlug < 1 || m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
+		{
+			m_CbnPluginVelocityHandling.EnableWindow(FALSE);
+			m_CbnPluginVolumeHandling.EnableWindow(FALSE);
+		}
+		else
+		{
+			m_CbnPluginVelocityHandling.EnableWindow();
+			m_CbnPluginVolumeHandling.EnableWindow();
+		}
+
 		if (nPlug>=0 && nPlug<MAX_MIXPLUGINS+1)
 		{
 			if ((!IsLocked()) && penv->nMixPlug != nPlug) { 
 				m_pModDoc->SetModified();
 				penv->nMixPlug = nPlug;
 			}
+			m_CbnPluginVelocityHandling.SetCurSel(penv->nPluginVelocityHandling);
+			m_CbnPluginVolumeHandling.SetCurSel(penv->nPluginVolumeHandling);
 
 			m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, this);
 			m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSNAMES, this);
@@ -1939,6 +1980,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 								
 			}
 		}
+		
 	}
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_INSVIEWPLG), false);
 }
@@ -2395,7 +2437,8 @@ BOOL CCtrlInstruments::PreTranslateMessage(MSG *pMsg)
 	return CModControlDlg::PreTranslateMessage(pMsg);
 }
 
-LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
+//--------------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -2542,8 +2585,8 @@ void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 {
 	if(IsLocked() || !m_pModDoc || !m_pSndFile || !m_nInstrument || !m_pSndFile->Headers[m_nInstrument]) return;
 
-	const WORD MINTEMPO = m_pSndFile->GetTempoMin();
-	const WORD MAXTEMPO = m_pSndFile->GetTempoMax();
+	const TEMPO MINTEMPO = m_pSndFile->GetModSpecifications().tempoMin;
+	const TEMPO MAXTEMPO = m_pSndFile->GetModSpecifications().tempoMax;
 	char buffer[7];
 	m_EditPitchTempoLock.GetWindowText(buffer, 6);
 	int ptlTempo = atoi(buffer);
@@ -2557,6 +2600,43 @@ void CCtrlInstruments::OnEnChangeEditPitchtempolock()
 	END_CRITICAL();
 	m_pModDoc->SetModified();
 }
+
+
+void CCtrlInstruments::OnPluginVelocityHandlingChanged()
+//------------------------------------------------
+{
+	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
+	if ((!IsLocked()) && (penv))
+	{
+		BYTE n = static_cast<BYTE>(m_CbnPluginVelocityHandling.GetCurSel());
+		if(n != penv->nPluginVelocityHandling)
+		{
+			penv->nPluginVelocityHandling = n;
+			m_pModDoc->SetModified();
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+		}
+	}
+}
+
+
+void CCtrlInstruments::OnPluginVolumeHandlingChanged()
+//----------------------------------------------
+{
+	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
+	if ((!IsLocked()) && (penv))
+	{
+		BYTE n = static_cast<BYTE>(m_CbnPluginVolumeHandling.GetCurSel());
+		if(n != penv->nPluginVolumeHandling)
+		{
+			penv->nPluginVolumeHandling = n;
+			m_pModDoc->SetModified();
+			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
+		}
+	}
+}
+
 
 void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 //-----------------------------------------------------
@@ -2614,15 +2694,16 @@ void CCtrlInstruments::OnEnKillfocusEditPitchtempolock()
 	m_EditPitchTempoLock.GetWindowText(buffer, 5);
 	int ptlTempo = atoi(buffer);
 	bool changed = false;
+	const CModSpecifications& specs = m_pSndFile->GetModSpecifications();
 
-	if(ptlTempo < m_pSndFile->GetTempoMin())
+	if(ptlTempo < specs.tempoMin)
 	{
-		ptlTempo = m_pSndFile->GetTempoMin();
+		ptlTempo = specs.tempoMin;
 		changed = true;
 	}
-	if(ptlTempo > m_pSndFile->GetTempoMax())
+	if(ptlTempo > specs.tempoMax)
 	{
-		ptlTempo = m_pSndFile->GetTempoMax();
+		ptlTempo = specs.tempoMax;
 		changed = true;
 
 	}

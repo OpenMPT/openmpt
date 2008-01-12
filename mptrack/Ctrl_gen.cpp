@@ -83,7 +83,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	CModControlDlg::OnInitDialog();
 	// Song Title
 	if(m_pSndFile)
-		m_EditTitle.SetLimitText(m_pSndFile->GetModNameLengthMax());
+		m_EditTitle.SetLimitText(m_pSndFile->GetModSpecifications().modNameLengthMax);
 	else
 		m_EditTitle.SetLimitText(25);
 
@@ -163,9 +163,9 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 	if (dwHint & HINT_MODSEQUENCE)
 	{
 		// Detecting max valid restart position
-		UINT i = 0;
-		for (i=0; i<m_pSndFile->Order.size(); i++) if (m_pSndFile->Order[i] == m_pSndFile->Patterns.GetInvalidIndex()) break;
-		m_SpinRestartPos.SetRange(0, i);
+		ORDERINDEX i = 0;
+		for (i=0; i<m_pSndFile->Order.size(); i++) if (m_pSndFile->Order[i] == m_pSndFile->Order.GetInvalidPatIndex()) break;
+		m_SpinRestartPos.SetRange32(0, i);
 	}
 	if (dwHint & HINT_MODGENERAL)
 	{
@@ -450,7 +450,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 			UINT n = atoi(s);
 			if(n < m_pSndFile->Order.size())
 			{
-				for (UINT i=0; i<=n; i++) if (m_pSndFile->Order[i] == m_pSndFile->Patterns.GetInvalidIndex()) return;
+				for (ORDERINDEX i=0; i<=n; i++) if (m_pSndFile->Order[i] == m_pSndFile->Order.GetInvalidPatIndex()) return;
 				if (n != m_pSndFile->m_nRestartPos)
 				{
 					m_EditRestartPos.SetModify(FALSE);
@@ -663,7 +663,7 @@ void CCtrlGeneral::OnEnSetfocusEditSongtitle()
 {
 	if(m_pSndFile)
 	{
-		m_EditTitle.SetLimitText(m_pSndFile->GetModNameLengthMax());
+		m_EditTitle.SetLimitText(m_pSndFile->GetModSpecifications().modNameLengthMax);
 	}
 }
 

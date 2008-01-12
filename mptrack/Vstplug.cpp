@@ -529,7 +529,7 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModD
 						{
 							CString cacheSection = "PluginCache";
 							CString cacheFile = theApp.GetPluginCacheFileName();
-							LPCSTR pszSection = "PluginCache";
+							//LPCSTR pszSection = "PluginCache";
 							pFound->bIsInstrument = TRUE;
 							CString flagsKey;
 							flagsKey.Format("%08X%08X.Flags", pFound->dwPluginId1, pFound->dwPluginId2);
@@ -600,7 +600,7 @@ VOID CVstPluginManager::OnIdle()
 }
 
 //rewbs.VSTCompliance: Added support for lots of opcodes
-long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt)
+long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float /*opt*/)
 //-------------------------------------------------------------------------------------------------------------
 {
 	#ifdef VST_LOG
@@ -903,7 +903,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	case audioMasterUpdateDisplay:
 		if (effect && effect->resvd1)
 		{
-			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
+//			CVstPlugin *pVstPlugin = ((CVstPlugin*)effect->resvd1);
 //            pVstPlugin->GetModDoc()->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL); //No Need.
 
 /*			CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor(); 
@@ -2005,13 +2005,14 @@ BOOL CVstPlugin::GetDefaultEffectName(LPSTR pszName)
 	return FALSE;
 }
 
-void CVstPlugin::Init(unsigned long nFreq, int bReset)
+void CVstPlugin::Init(unsigned long /*nFreq*/, int /*bReset*/)
 //----------------------------------------------------
 {
 
 }
 
-void CVstPlugin::Resume() 
+void CVstPlugin::Resume()
+//-----------------------
 {
 	long sampleRate = CSoundFile::gdwMixingFreq;
 
@@ -2529,7 +2530,7 @@ void CVstPlugin::HardAllNotesOff()
 }
 //end rewbs.VSTiNoteHoldonStopFix
 
-void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel) 
+void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT /*trackChannel*/) 
 //------------------------------------------------------------------------------------------
 {
 	//Error checking
@@ -2543,7 +2544,10 @@ void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackC
 		nParam=127;
 	}
 
-	MidiSend(nController<<16 | nParam<<8 | 0xB0|nMidiCh );
+	if(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
+		MidiSend(nController<<16 | nParam<<8 | 0xB0|nMidiCh);
+	else 
+		MidiSend(nParam<<16 | nController<<8 | 0xB0|nMidiCh);
 }
 
 short CVstPlugin::getMIDI14bitValueFromShort(short value) 
@@ -2563,10 +2567,11 @@ short CVstPlugin::getMIDI14bitValueFromShort(short value)
 	short converted = byte1<<8 | byte2; // merge
 
 	return converted;
+
 }
 
 //Bend midi pitch for given midi channel using tracker param (0x00-0xFF)
-void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel) 
+void CVstPlugin::MidiPitchBend(UINT nMidiCh, int nParam, UINT /*trackChannel*/) 
 //-------------------------------------------------------------------------
 {
 	nMidiCh--;		// move from 1-17 range to 0-16 range
@@ -2596,7 +2601,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	DWORD dwMidiCode = 0;
 	bool bankChanged = (pCh->wMidiBank != --wMidiBank) && (wMidiBank < 0x80);
 	bool progChanged = (pCh->nProgram != --nMidiProg) && (nMidiProg < 0x80);
-	bool chanChanged = nCh != m_nPreviousMidiChan;
+	//bool chanChanged = nCh != m_nPreviousMidiChan;
 	//get vol in [0,128[
 	vol = min(vol/2, 127); 
 	
@@ -4073,3 +4078,28 @@ AEffect *DmoToVst(PVSTPLUGINLIB pLib)
 	}
 	return NULL;
 }
+
+
+const char* SNDMIXPLUGIN::GetLibraryName()
+//------------------------------------
+{
+	Info.szLibraryName[63] = 0;
+    if(Info.szLibraryName[0]) return Info.szLibraryName;
+	else return 0;
+}
+
+CString SNDMIXPLUGIN::GetParamName(const UINT index) const
+//--------------------------------------------------------
+{
+	if(pMixPlugin)
+	{
+		char s[32];
+		//To check: Is the cast safe?
+		((CVstPlugin*)(pMixPlugin))->GetParamName(index, s, sizeof(s));
+		s[31] = 0;
+		return CString(s);
+	}
+	else
+		return CString();
+}
+

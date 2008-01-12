@@ -149,11 +149,12 @@ LSWV	[EXT]	nPlugMixMode
 MB..			wMidiBank;
 MC..			nMidiChannel;
 MDK.			nMidiDrumKey;
+MIMA	[EXT]									MIdi MApping directives
 MiP.			nMixPlug;
 MP..			nMidiProgram;
 MPTS	[EXT]									Extra song info tag
 MPTX	[EXT]									EXTRA INFO tag
-MSF.	[EXT]								ModSpecificFlags
+MSF.	[EXT]									Mod(Specific)Flags
 n[..			name[32];
 NNA.			nNNA;
 NM[.			NoteMap[128];
@@ -177,6 +178,8 @@ PS..			nPanSwing;
 PSB.			nPanSustainBegin;
 PSE.			nPanSustainEnd;
 PTTL			wPitchToTempoLock;
+PVEH			nPluginVelocityHandling;
+PVOH			nPluginVolumeHandling;
 R...			nResampling;
 RP..	[EXT]	nRestartPos;
 RPB.	[EXT]	nRowsPerBeat;
@@ -274,6 +277,8 @@ WRITE_MPTHEADER_sized_member(	nResampling			, USHORT		, R...							)
 WRITE_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
 WRITE_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
 WRITE_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
+WRITE_MPTHEADER_sized_member(  nPluginVelocityHandling	, BYTE			, PVEH							)
+WRITE_MPTHEADER_sized_member(	nPluginVolumeHandling	, BYTE			, PVOH							)
 WRITE_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL							)
 WRITE_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
 WRITE_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
@@ -352,6 +357,8 @@ GET_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
 GET_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
 GET_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
 GET_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL							)
+GET_MPTHEADER_sized_member(	nPluginVelocityHandling, BYTE			, PVEH							)
+GET_MPTHEADER_sized_member(	nPluginVolumeHandling	, BYTE			, PVOH							)
 GET_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
 GET_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
 GET_MPTHEADER_sized_member(	nVolEnvReleaseNode	, BYTE			, VERN							)
@@ -383,7 +390,8 @@ CSoundFile::CSoundFile() :
 	PatternSize(*this), Patterns(*this),
 	Order(*this),
 	m_PlaybackEventer(*this),
-	m_pModSpecs(&IT_MPTEXT_SPECS)
+	m_pModSpecs(&IT_MPTEXT_SPECS),
+	m_MIDIMapper(*this)
 //----------------------
 {
 	m_nType = MOD_TYPE_NONE;
@@ -429,7 +437,7 @@ CSoundFile::CSoundFile() :
 	memset(Ins, 0, sizeof(Ins));
 	memset(ChnSettings, 0, sizeof(ChnSettings));
 	memset(Headers, 0, sizeof(Headers));
-	Order.assign(MAX_ORDERS, Patterns.GetInvalidIndex());
+	Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Patterns.ClearPatterns();
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
@@ -491,7 +499,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	memset(ChnMix, 0, sizeof(ChnMix));
 	memset(Chn, 0, sizeof(Chn));
 	memset(Headers, 0, sizeof(Headers));
-	Order.assign(MAX_ORDERS, Patterns.GetInvalidIndex());
+	Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Patterns.ClearPatterns();
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
@@ -549,7 +557,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		 && (!ReadITProject(lpStream, dwMemLength))
 // -! NEW_FEATURE#0023
 		 && (!ReadIT(lpStream, dwMemLength))
-		 && (!ReadMPT(lpStream, dwMemLength))
+		 /*&& (!ReadMPT(lpStream, dwMemLength))*/
 		 && (!ReadS3M(lpStream, dwMemLength))
 		 && (!ReadWav(lpStream, dwMemLength))
 #ifndef MODPLUG_BASIC_SUPPORT
@@ -702,7 +710,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	if (m_nType)
 	{
-		SetModSpecsPointer();
+		SetModSpecsPointer(m_pModSpecs, m_nType);
 		return TRUE;
 	}
 
@@ -982,7 +990,7 @@ UINT CSoundFile::GetNumPatterns() const
 //-------------------------------------
 {
 	UINT i = 0;
-	while ((i < Order.size()) && (Order[i] < Patterns.GetInvalidIndex())) i++;
+	while ((i < Order.size()) && (Order[i] < Order.GetInvalidPatIndex())) i++;
 	return i;
 }
 
@@ -1003,7 +1011,7 @@ UINT CSoundFile::GetMaxPosition() const
 	UINT max = 0;
 	UINT i = 0;
 
-	while ((i < Order.size()) && (Order[i] != Patterns.GetInvalidIndex()))
+	while ((i < Order.size()) && (Order[i] != Order.GetInvalidPatIndex()))
 	{
 		if (Order[i] < Patterns.Size()) max += PatternSize[Order[i]];
 		i++;
@@ -1043,10 +1051,10 @@ double  CSoundFile::GetCurrentBPM() const
 void CSoundFile::SetCurrentPos(UINT nPos)
 //---------------------------------------
 {
-	UINT i, nPattern;
+	UINT nPattern;
 	BYTE resetMask = (!nPos) ? CHNRESET_SETPOS_FULL : CHNRESET_SETPOS_BASIC;
 
-	for (i=0; i<MAX_CHANNELS; i++)
+	for (CHANNELINDEX i=0; i<MAX_CHANNELS; i++)
 		ResetChannelState(i, resetMask);
 	
 	if (!nPos)
@@ -1060,8 +1068,8 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	for (nPattern = 0; nPattern < Order.size(); nPattern++)
 	{
 		UINT ord = Order[nPattern];
-		if(ord == Patterns.GetIgnoreIndex()) continue;
-		if (ord == Patterns.GetInvalidIndex()) break;
+		if(ord == Order.GetIgnoreIndex()) continue;
+		if (ord == Order.GetInvalidPatIndex()) break;
 		if (ord < Patterns.Size())
 		{
 			if (nPos < (UINT)PatternSize[ord]) break;
@@ -1113,7 +1121,7 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 //-----------------------------------------
 {
 	//while ((nPos < Order.size()) && (Order[nPos] == 0xFE)) nPos++;
-	while ((nPos < Order.size()) && (Order[nPos] == Patterns.GetIgnoreIndex())) nPos++;
+	while ((nPos < Order.size()) && (Order[nPos] == Order.GetIgnoreIndex())) nPos++;
 	if ((nPos >= Order.size()) || (Order[nPos] >= Patterns.Size())) return;
 	for (UINT j=0; j<MAX_CHANNELS; j++)
 	{
@@ -1425,24 +1433,25 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 			Chn[i].nPan = 128;
 			Chn[i].nGlobalVol = 64;
 		}
+		Chn[i].nRestorePanOnNewNote = 0;
+		Chn[i].nRestoreCutoffOnNewNote = 0;
+		Chn[i].nRestoreResonanceOnNewNote = 0;
 		
 	}
 }
 
 
-CHANNELINDEX CSoundFile::ReArrangeChannels(const std::vector<CHANNELINDEX>& newOrder)
+CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 //-------------------------------------------------------------------
 {
     //newOrder[i] tells which current channel should be placed to i:th position in
     //the new order, or if i is not an index of current channels, then new channel is
-    //added to position i - and if there is no index of some current channel in the
-    //newOrder-vector, then it gets removed.
-	//Thus this function can practically be used to add, remove, reorder, duplicate, clear etc. channels, 
-	//IF it works, that is.
+    //added to position i. If index of some current channel is missing from the
+    //newOrder-vector, then the channel gets removed.
 	
 	UINT nRemainingChannels = newOrder.size();	
 
-	if(nRemainingChannels > min(MAX_CHANNELS, MAX_BASECHANNELS) || nRemainingChannels < GetNumChannelMin()) 	
+	if(nRemainingChannels > GetModSpecifications().channelsMax || nRemainingChannels < GetModSpecifications().channelsMin) 	
 	{
 		CString str = "Error: Bad newOrder vector in CSoundFile::ReArrangeChannels(...)";	
 		CMainFrame::GetMainFrame()->MessageBox(str , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
@@ -1469,7 +1478,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const std::vector<CHANNELINDEX>& newO
 				for (UINT k=0; k<nRemainingChannels; k++, tmpdest++) //Scrolling channels.
 				{
 					if(newOrder[k] < m_nChannels) //Case: getting old channel to the new channel order.
-								*tmpdest = tmpsrc[j*m_nChannels+newOrder[k]];
+						*tmpdest = tmpsrc[j*m_nChannels+newOrder[k]];
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
 						*tmpdest = MODCOMMAND();
 							
@@ -1514,7 +1523,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const std::vector<CHANNELINDEX>& newO
 	m_nChannels = nRemainingChannels;
 	END_CRITICAL();
 
-	return m_nChannels;  
+	return static_cast<CHANNELINDEX>(m_nChannels);
 }
 
 bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
@@ -1531,7 +1540,7 @@ bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
     }
 	std::vector<CHANNELINDEX> newOrder;
 	//First creating new order identical to current order...
-	for(UINT i = 0; i<m_nChannels; i++)
+	for(CHANNELINDEX i = 0; i<GetNumChannels(); i++)
 	{
 		newOrder.push_back(i);
 	}
@@ -2727,8 +2736,8 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.nVolEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.wPitchToTempoLock = 0;
 	m_defaultInstrument.pTuning = m_defaultInstrument.s_DefaultTuning;
-	//Known issue: s_DefaultInstrument is not necessarily set yet when
-	//this method gets called.
+	m_defaultInstrument.nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_VOLUME;
+	m_defaultInstrument.nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_DRYWET;
 }
 
 
@@ -2818,6 +2827,8 @@ void CSoundFile::SetDefaultInstrumentValues(INSTRUMENTHEADER *penv)
 	penv->nPanEnvReleaseNode = m_defaultInstrument.nPanEnvReleaseNode;
 	penv->nVolEnvReleaseNode = m_defaultInstrument.nVolEnvReleaseNode;
 	penv->pTuning = m_defaultInstrument.pTuning;
+	penv->nPluginVelocityHandling = m_defaultInstrument.nPluginVelocityHandling;
+	penv->nPluginVolumeHandling = m_defaultInstrument.nPluginVolumeHandling;
 
 }
 
@@ -2847,45 +2858,80 @@ string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const int ins
 }
 
 
-void CSoundFile::SetModSpecsPointer()
-//-----------------------------------
+void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const MODTYPE type)
+//------------------------------------------------------------------------------------------
 {
-	switch(GetType())
+	switch(type)
 	{
 		case MOD_TYPE_MPT:
-			m_pModSpecs = &MPTM_SPECS;
-			break;
+			pModSpecs = &MPTM_SPECS;
+		break;
+
 		case MOD_TYPE_IT:
-			m_pModSpecs = &IT_MPTEXT_SPECS;
-			break;
+			pModSpecs = &IT_MPTEXT_SPECS;
+		break;
+
 		case MOD_TYPE_XM:
-			m_pModSpecs = &XM_MPTEXT_SPECS;
-			break;
+			pModSpecs = &XM_MPTEXT_SPECS;
+		break;
+
 		case MOD_TYPE_S3M:
-			m_pModSpecs = &S3M_MPTEXT_SPECS;
-			break;
+			pModSpecs = &S3M_MPTEXT_SPECS;
+		break;
+
 		case MOD_TYPE_MOD:
 		default:
-			m_pModSpecs = &MOD_MPTEXT_SPECS;
+			pModSpecs = &MOD_MPTEXT_SPECS;
 			break;
 	}
+}
+
+uint16 CSoundFile::GetModFlagMask(const MODTYPE oldtype, const MODTYPE newtype) const
+//-----------------------------------------------------------------------------------
+{
+	if(oldtype == MOD_TYPE_IT)
+	{
+		if(newtype == MOD_TYPE_MPT) return 65535;
+		if(newtype == MOD_TYPE_XM) return (1 << MSF_MIDICC_BUGEMULATION);
+		return 0;
+	}
+
+	if(oldtype == MOD_TYPE_MPT)
+	{
+		if(newtype == MOD_TYPE_IT) return 65535;
+		if(newtype == MOD_TYPE_XM) return (1 << MSF_MIDICC_BUGEMULATION);
+		return 0;
+	}
+
+	if(oldtype == MOD_TYPE_XM && (newtype == MOD_TYPE_IT || newtype == MOD_TYPE_MPT))
+		return (1 << MSF_MIDICC_BUGEMULATION);
+
+	return 0;
 }
 
 void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 //---------------------------------------------------
 {
 	const MODTYPE oldtype = m_nType;
-	const UINT oldInvalidIndex = Patterns.GetInvalidIndex();
-	const UINT oldIgnoreIndex = Patterns.GetIgnoreIndex();
+	const PATTERNINDEX oldInvalidIndex = Order.GetInvalidPatIndex();
+	const PATTERNINDEX oldIgnoreIndex = Order.GetIgnoreIndex();
 	m_nType = newType;
-	SetModSpecsPointer();
+	SetModSpecsPointer(m_pModSpecs, m_nType);
 
-	if((oldtype == MOD_TYPE_IT && newType == MOD_TYPE_MPT) || 
-		(oldtype == MOD_TYPE_MPT && newType == MOD_TYPE_IT))
-		m_ModFlags = m_ModFlags & MSF_IT_COMPATIBLE_PLAY;
+	m_ModFlags = m_ModFlags & GetModFlagMask(oldtype, newType);
+		
+	const CModSpecifications& specs = GetModSpecifications();
+	if(specs.ordersMax < Order.size()) 
+	{
+		Order.resize(max(MAX_PATTERNS, specs.ordersMax));
+		for(ORDERINDEX i = Order.size(); i>specs.ordersMax; --i) Order[i-1] = Order.GetInvalidPatIndex();
+	}
+	replace(Order.begin(), Order.end(), oldInvalidIndex, Order.GetInvalidPatIndex());
+	replace(Order.begin(), Order.end(), oldIgnoreIndex, Order.GetIgnoreIndex());
 
-	replace(Order.begin(), Order.end(), oldInvalidIndex, Patterns.GetInvalidIndex());
-	replace(Order.begin(), Order.end(), oldIgnoreIndex, Patterns.GetIgnoreIndex());
+	if(specs.patternsMax < Patterns.Size()) Patterns.ResizeArray(specs.patternsMax);
+	else if(Patterns.Size() < MAX_PATTERNS) Patterns.ResizeArray(MAX_PATTERNS);
+	
 }
 
 bool CSoundFile::SetTitle(const char* titleCandidate, size_t strSize)
@@ -2908,3 +2954,13 @@ double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row)
 	if(targetReached) return t;
 	else return -1; //Given position not found from play sequence.
 }
+
+
+const CModSpecifications& CSoundFile::GetModSpecifications(const MODTYPE type)
+//----------------------------------------------------------------------------
+{
+	CModSpecifications* p = 0;
+	SetModSpecsPointer(p, type);
+	return *p;
+}
+
