@@ -695,7 +695,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		BOOL bEnded = FALSE;
 		for (UINT iOrd=imin; iOrd<=imax; iOrd++)
 		{
-			if (pSndFile->Order[iOrd] == pSndFile->Patterns.GetInvalidIndex()) bEnded = TRUE;
+			if (pSndFile->Order[iOrd] == pSndFile->Order.GetInvalidPatIndex()) bEnded = TRUE;
 			if (bEnded)
 			{
 				if (pInfo->tiOrders[iOrd])
@@ -2839,7 +2839,7 @@ void CModTree::OnSoundBankProperties()
 }
 
 
-LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 {
 	if (wParam == kcNull)
 		return NULL;

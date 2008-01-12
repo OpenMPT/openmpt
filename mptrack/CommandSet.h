@@ -107,6 +107,7 @@ enum CommandID
 	kcViewChannelManager,
 	kcViewAddPlugin,
 	kcViewSongProperties,
+	kcViewMIDImapping,
 	kcHelp,
 	kcEndView=kcHelp,
 
@@ -946,6 +947,8 @@ enum CommandID
 	kcStartVSTGUICommands,
 	kcVSTGUIPrevPreset=kcStartVSTGUICommands,
 	kcVSTGUINextPreset,
+	kcVSTGUIPrevPresetJump,
+	kcVSTGUINextPresetJump,
 	kcVSTGUIRandParams,
 	kcEndVSTGUICommands=kcVSTGUIRandParams,
 

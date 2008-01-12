@@ -80,9 +80,37 @@ void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modif
 		fc = (float)CutOffToFrequency(pChn->nCutOff, flt_modifier);
 		dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)pChn->nResonance) / 20.0f);
 	} else {*/
-		int cutoff = max( min((int)pChn->nCutOff+(int)pChn->nCutSwing,127), 0); // cap cutoff
-		fc = (float)CutOffToFrequency(cutoff, flt_modifier);
-		dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)((pChn->nResonance+pChn->nResSwing)&0x7F)) / 20.0f);
+
+		int cutoff = 0;
+		if(!GetModFlag(MSF_OLDVOLSWING))
+		{
+			if(pChn->nCutSwing)
+			{
+				pChn->nCutOff += pChn->nCutSwing;
+				if(pChn->nCutOff > 127) pChn->nCutOff = 127;
+				if(pChn->nCutOff < 0) pChn->nCutOff = 0;
+				pChn->nCutSwing = 0;
+			}
+			if(pChn->nResSwing)
+			{
+				pChn->nResonance += pChn->nResSwing;
+				if(pChn->nResonance > 127) pChn->nResonance = 127;
+				if(pChn->nResonance < 0) pChn->nResonance = 0;
+				pChn->nResSwing = 0;
+			}
+			cutoff = max( min((int)pChn->nCutOff,127), 0); // cap cutoff
+			fc = (float)CutOffToFrequency(cutoff, flt_modifier);
+			dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)((pChn->nResonance)&0x7F)) / 20.0f);
+		}
+		else
+		{
+			cutoff = max( min((int)pChn->nCutOff+(int)pChn->nCutSwing,127), 0); // cap cutoff
+			fc = (float)CutOffToFrequency(cutoff, flt_modifier);
+			dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)((pChn->nResonance+pChn->nResSwing)&0x7F)) / 20.0f);
+		}
+
+		
+
 //	}
 
 	fc *= (float)(2.0*3.14159265358/fs);

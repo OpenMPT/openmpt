@@ -191,7 +191,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength)
 		m_nDefaultSpeed = 6;
 		for (UINT iOrd=0; iOrd<MAX_ORDERS; iOrd++)
 		{
-			Order[iOrd] = (iOrd < numorders) ? lpStream[dwMemPos+iOrd] : Patterns.GetInvalidIndex();
+			Order[iOrd] = (iOrd < numorders) ? lpStream[dwMemPos+iOrd] : Order.GetInvalidPatIndex();
 		}
 		dwMemPos = 294; // ???
 		for (UINT iSmp=0; iSmp<numsamples; iSmp++)
@@ -306,7 +306,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength)
 	// Setup sequence list
 	for (UINT iOrd=0; iOrd<MAX_ORDERS; iOrd++)
 	{
-		Order[iOrd] = Patterns.GetInvalidIndex();
+		Order[iOrd] = Order.GetInvalidPatIndex();
 		if (iOrd < pfh->numorders)
 		{
 			Order[iOrd] = iOrd;

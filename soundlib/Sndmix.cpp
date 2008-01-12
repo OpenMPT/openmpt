@@ -101,7 +101,7 @@ const UINT PreAmpAGCTable[16] =
 
 using CTuning::RATIOTYPE;
 
-static const RATIOTYPE TwoToPowerXPer12Table[16] =
+static const RATIOTYPE TwoToPowerXOver12Table[16] =
 {
 	1.0F		   , 1.059463094359F, 1.122462048309F, 1.1892071150027F,
 	1.259921049895F, 1.334839854170F, 1.414213562373F, 1.4983070768767F,
@@ -109,10 +109,10 @@ static const RATIOTYPE TwoToPowerXPer12Table[16] =
 	2.0F		   , 2.118926188719F, 2.244924096619F, 2.3784142300054F
 };
 
-inline RATIOTYPE TwoToPowerXPer12(const BYTE i)
+inline RATIOTYPE TwoToPowerXOver12(const BYTE i)
 //-------------------------------------------
 {
-	return (i < 16) ? TwoToPowerXPer12Table[i] : 1;
+	return (i < 16) ? TwoToPowerXOver12Table[i] : 1;
 }
 
 
@@ -633,12 +633,12 @@ BOOL CSoundFile::ProcessRow()
 		// Check if pattern is valid
 		if (!(m_dwSongFlags & SONG_PATTERNLOOP))
 		{
-			m_nPattern = (m_nCurrentPattern < Order.size()) ? Order[m_nCurrentPattern] : Patterns.GetInvalidIndex();
-			if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern])) m_nPattern = Patterns.GetIgnoreIndex();
+			m_nPattern = (m_nCurrentPattern < Order.size()) ? Order[m_nCurrentPattern] : Order.GetInvalidPatIndex();
+			if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern])) m_nPattern = Order.GetIgnoreIndex();
 			while (m_nPattern >= Patterns.Size())
 			{
 				// End of song ?
-				if ((m_nPattern == Patterns.GetInvalidIndex()) || (m_nCurrentPattern >= Order.size()))
+				if ((m_nPattern == Order.GetInvalidPatIndex()) || (m_nCurrentPattern >= Order.size()))
 				{
 
 					if (!m_nRepeatCount) return FALSE;
@@ -684,11 +684,13 @@ BOOL CSoundFile::ProcessRow()
 					m_nCurrentPattern = m_nRestartPos;
 					m_nRow = 0;					
 					//If restart pos points to +++, move along
-					while (Order[m_nCurrentPattern] == Patterns.GetIgnoreIndex()) {
+					while (Order[m_nCurrentPattern] == Order.GetIgnoreIndex()) {
 						m_nCurrentPattern++;
 					}
 					//Check for end of song or bad pattern
-					if ( (Order[m_nCurrentPattern] >= Patterns.Size()) 
+					if (m_nCurrentPattern >= Order.size()
+						||
+						(Order[m_nCurrentPattern] >= Patterns.Size()) 
 						|| (!Patterns[Order[m_nCurrentPattern]]) ) 	{
 						return FALSE;
 					}
@@ -700,11 +702,11 @@ BOOL CSoundFile::ProcessRow()
 				if (m_nCurrentPattern < Order.size()) {
 					m_nPattern = Order[m_nCurrentPattern];
 				} else {
-					m_nPattern = Patterns.GetInvalidIndex();
+					m_nPattern = Order.GetInvalidPatIndex();
 				}
 
 				if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern])) {
-					m_nPattern = Patterns.GetIgnoreIndex();
+					m_nPattern = Order.GetIgnoreIndex();
 				}
 			}
 			m_nNextPattern = m_nCurrentPattern;
@@ -908,7 +910,20 @@ BOOL CSoundFile::ReadNote()
 		// Reset channel data
 		pChn->nInc = 0;
 		pChn->nRealVolume = 0;
-		pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
+
+		if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || GetModFlag(MSF_OLDVOLSWING))
+		{
+			pChn->nRealPan = pChn->nPan + pChn->nPanSwing;
+		}
+		else
+		{
+			pChn->nPan += pChn->nPanSwing;
+			if(pChn->nPan > 256) pChn->nPan = 256;
+			if(pChn->nPan < 0) pChn->nPan = 0;
+			pChn->nPanSwing = 0;
+			pChn->nRealPan = pChn->nPan;
+		}
+
 		if (pChn->nRealPan < 0) pChn->nRealPan = 0;
 		if (pChn->nRealPan > 256) pChn->nRealPan = 256;
 		pChn->nRampLength = 0;
@@ -920,10 +935,27 @@ BOOL CSoundFile::ReadNote()
 		// Calc Frequency
 		if ((pChn->nPeriod)	&& (pChn->nLength))
 		{
-			int vol = pChn->nVolume + pChn->nVolSwing;
-			
+			int vol = pChn->nVolume;
+
+			if(pChn->nVolSwing)
+			{
+				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || GetModFlag(MSF_OLDVOLSWING))
+				{
+					vol = pChn->nVolume + pChn->nVolSwing;
+				}
+				else
+				{
+					pChn->nVolume += pChn->nVolSwing;
+					if(pChn->nVolume > 256) pChn->nVolume = 256;
+					if(pChn->nVolume < 0) pChn->nVolume = 0;
+					vol = pChn->nVolume;
+					pChn->nVolSwing = 0;
+				}
+			}
+
 			if (vol < 0) vol = 0;
 			if (vol > 256) vol = 256;
+
 			// Tremolo
 			if (pChn->dwFlags & CHN_TREMOLO)
 			{
@@ -951,6 +983,7 @@ BOOL CSoundFile::ReadNote()
 					pChn->nTremoloPos = (trempos + pChn->nTremoloSpeed) & 0x3F;
 				}
 			}
+
 			// Tremor
 			if (pChn->nCommand == CMD_TREMOR)
 			{
@@ -966,10 +999,12 @@ BOOL CSoundFile::ReadNote()
 				}
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
 			}
+
 			// Clip volume
 			if (vol < 0) vol = 0;
 			if (vol > 0x100) vol = 0x100;
 			vol <<= 6;
+
 			// Process Envelopes
 			if (pChn->pHeader)
 			{
@@ -1087,7 +1122,8 @@ BOOL CSoundFile::ReadNote()
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
 				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
 				
-				UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+				//UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+
 				//Don't let global volume affect level of sample if
 				//global volume is going to be applied to master output anyway.
 				if (pChn->dwFlags&CHN_SYNCMUTE) {
@@ -1123,18 +1159,19 @@ BOOL CSoundFile::ReadNote()
 							break;
 					}
 					pChn->m_CalculateFreq = true;
+					pChn->m_ReCalculateFreqOnFirstTick = true;
 				}
 				else
 				{
 					//IT playback compatibility 01 & 02
-					if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+					if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
 					{
 						if(pChn->nArpeggio >> 4 != 0 || (pChn->nArpeggio & 0x0F) != 0)
 						{
 							switch(m_nTickCount % 3)
 							{
-								case 1:	period = period / TwoToPowerXPer12(pChn->nArpeggio >> 4); break;
-								case 2:	period = period / TwoToPowerXPer12(pChn->nArpeggio & 0x0F); break;
+								case 1:	period = period / TwoToPowerXOver12(pChn->nArpeggio >> 4); break;
+								case 2:	period = period / TwoToPowerXOver12(pChn->nArpeggio & 0x0F); break;
 							}
 						}
 					}
@@ -1804,7 +1841,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 		 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
 	
 	// Get instrument info and plugin reference
-	MODCOMMAND *m = Patterns[m_nPattern] + m_nRow * m_nChannels + nChn;	
+	MODCOMMAND *m = Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
 	INSTRUMENTHEADER *penv = pChn->pHeader;
 	IMixPlugin *pPlugin = NULL;
 
@@ -1819,20 +1856,55 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 	}
 
 	//Do couldn't find a valid plugin
-	if (pPlugin == NULL) {
-		return;	
+	if (pPlugin == NULL) return;
+
+	if(GetModFlag(MSF_MIDICC_BUGEMULATION))
+	{
+		if (m->note) {
+			pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, m->note, pChn->nVolume, nChn);
+		} else if (m->volcmd == VOLCMD_VOLUME) {
+			pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Fine, m->vol, nChn);
+		}
+		return;
 	}
 
-	//Send Midi command
-	if (m->note) {
-		pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, m->note, pChn->nVolume, nChn);
-	} else if (m->volcmd == VOLCMD_VOLUME) {
-		//No plugs seem to respond to volume CC.
-		pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Fine, m->vol, nChn);
-		//pPlugin->SetDryRatio(m->vol*2);  //TODO: we need another field to represent volume, since this makes 
-										   //	   it difficult to restore default levels on new notes.
+
+	const bool hasVolCommand = (m->volcmd == VOLCMD_VOLUME);
+	const UINT defaultVolume = penv->nGlobalVol;
+
+	
+	//If new note, determine notevelocity to use.
+	if(m->note)
+	{
+		UINT velocity = 4*defaultVolume;
+		switch(penv->nPluginVelocityHandling)
+		{
+			case PLUGIN_VELOCITYHANDLING_CHANNEL:
+				velocity = pChn->nVolume;
+			break;
+		}
+
+		pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, m->note, velocity, nChn);
 	}
 
+	
+	const bool processVolumeAlsoOnNote = (penv->nPluginVelocityHandling == PLUGIN_VELOCITYHANDLING_VOLUME);
+
+	if((hasVolCommand && !m->note) || (m->note && processVolumeAlsoOnNote))
+	{
+		switch(penv->nPluginVolumeHandling)
+		{
+			case PLUGIN_VOLUMEHANDLING_DRYWET:
+				if(hasVolCommand) pPlugin->SetDryRatio(2*m->vol);
+				else pPlugin->SetDryRatio(2*defaultVolume);
+			break;
+
+			case PLUGIN_VOLUMEHANDLING_MIDI:
+				if(hasVolCommand) pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Coarse, min(127, 2*m->vol), nChn);
+				else pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Coarse, min(127, 2*defaultVolume), nChn);
+			break;
+		}
+	}
 }
 
 int CSoundFile::getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv)

@@ -22,14 +22,9 @@ struct CModSpecifications
 	SAMPLEINDEX samplesMax;
 	INSTRUMENTINDEX instrumentsMax;
 	BYTE defaultMixLevels;
+	BYTE MIDIMappingDirectivesMax;
 };
 
-enum {
-	max_chans_IT=127,
-	max_chans_XM=64,
-	max_chans_MOD=32,
-	max_chans_S3M=32,
-};
 
 const CModSpecifications MPTM_SPECS =
 {
@@ -46,15 +41,16 @@ const CModSpecifications MPTM_SPECS =
 	//that limit likely requires modifications(January 2007).
 
 	4,									//Channel min
-	256,								//Channel max
+	127,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo
-	1,									//Min pattern rows
+	4,									//Min pattern rows
 	1024,								//Max pattern rows
-    256,								//Max mod name length
+    25,									//Max mod name length
 	4000,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
+	200									//Max MIDI mapping directives
 };
 
 
@@ -76,6 +72,7 @@ const CModSpecifications MOD_STD_SPECS =
 	31,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
+	0,									//Max MIDI mapping directives
 };
 
 const CModSpecifications MOD_MPTEXT_SPECS =
@@ -94,6 +91,7 @@ const CModSpecifications MOD_MPTEXT_SPECS =
 	31,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
+	0									//Max MIDI mapping directives
 };
 
 const CModSpecifications XM_STD_SPECS =
@@ -112,6 +110,7 @@ const CModSpecifications XM_STD_SPECS =
 	31,									//SamplesMax
 	256,								//instrumentMax
 	mixLevels_original,					//defaultMixLevels
+	0									//Max MIDI mapping directives
 };
 
 
@@ -131,6 +130,7 @@ const CModSpecifications XM_MPTEXT_SPECS =
 	31,									//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
+	200									//Max MIDI mapping directives
 };
 
 const CModSpecifications S3M_STD_SPECS =
@@ -149,6 +149,7 @@ const CModSpecifications S3M_STD_SPECS =
 	31,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
+	0									//Max MIDI mapping directives
 };
 
 const CModSpecifications S3M_MPTEXT_SPECS =
@@ -167,6 +168,7 @@ const CModSpecifications S3M_MPTEXT_SPECS =
 	31,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
+	0									//Max MIDI mapping directives
 };
 
 const CModSpecifications IT_STD_SPECS =
@@ -185,6 +187,7 @@ const CModSpecifications IT_STD_SPECS =
 	256,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_original,					//defaultMixLevels
+	0									//Max MIDI mapping directives
 };
 
 const CModSpecifications IT_MPTEXT_SPECS =
@@ -194,7 +197,7 @@ const CModSpecifications IT_MPTEXT_SPECS =
 	240,								//Pattern max.
 	256,								//Order max.
 	4,									//Channel min
-	128,								//Channel max
+	127,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo
 	4,									//Min pattern rows
@@ -203,6 +206,7 @@ const CModSpecifications IT_MPTEXT_SPECS =
 	4000,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
+	200									//Max MIDI mapping directives
 };
 
 

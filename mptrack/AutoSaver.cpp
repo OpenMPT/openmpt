@@ -245,7 +245,8 @@ bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc)
 						   pSndFile->SaveIT(fileName, 0); 
 				break;
 			case MOD_TYPE_MPT:
-				success = pSndFile->SaveMPT(fileName, 0);
+				//Using IT save function also for MPT.
+				success = pSndFile->SaveIT(fileName, 0);
 				break;
 			//default:
 				//Do nothing
@@ -286,7 +287,7 @@ void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
 		try	{
 			CString toRemove=foundfiles[0];
 			CFile::Remove(toRemove);
-		} catch (CFileException* pEx){}
+		} catch (CFileException* /*pEx*/){}
 		foundfiles.RemoveAt(0);
 	}
 	

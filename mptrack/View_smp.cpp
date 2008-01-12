@@ -8,6 +8,7 @@
 #include "dlsbank.h"
 #include "channelManagerDlg.h"
 #include "view_smp.h"
+#include "midi.h"
 
 // Non-client toolbar
 #define SMP_LEFTBAR_CY			29
@@ -874,7 +875,7 @@ LRESULT CViewSample::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 	} else
 	if ((pnotify->dwType & MPTNOTIFY_SAMPLE) && ((pnotify->dwType & 0xFFFF) == m_nSample))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		//CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		BOOL bUpdate = FALSE;
 		for (UINT i=0; i<MAX_CHANNELS; i++)
 		{
@@ -1868,7 +1869,7 @@ void CViewSample::OnSampleTrim()
 }
 
 
-void CViewSample::OnChar(UINT nChar, UINT, UINT nFlags)
+void CViewSample::OnChar(UINT /*nChar*/, UINT, UINT /*nFlags*/)
 //-----------------------------------------------------
 {
 }
@@ -1904,7 +1905,7 @@ void CViewSample::PlayNote(UINT note)
 }
 
 
-void CViewSample::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+void CViewSample::OnKeyDown(UINT /*nChar*/, UINT /*nRepCnt*/, UINT /*nFlags*/)
 //----------------------------------------------------------------
 {
 	/*
@@ -1920,7 +1921,7 @@ void CViewSample::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 }
 
 
-void CViewSample::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
+void CViewSample::OnKeyUp(UINT /*nChar*/, UINT /*nRepCnt*/, UINT /*nFlags*/)
 //--------------------------------------------------------------
 {
 	/*
@@ -2197,33 +2198,48 @@ void CViewSample::OnZoomDown()
 }
 
 
-LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiData, LPARAM)
+LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 //-------------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	DWORD dwMidiByte1 = (dwMidiData >> 8) & 0xFF;
-	DWORD dwMidiByte2 = (dwMidiData >> 16) & 0xFF;
-	UINT note;
+	const DWORD dwMidiData = dwMidiDataParam;
+	static BYTE midivolume = 127;
 
-	if (!pModDoc) return 0;
-	switch(dwMidiData & 0xF0)
+	CModDoc *pModDoc = GetDocument();
+	BYTE midibyte1 = GetFromMIDIMsg_DataByte1(dwMidiData);
+	BYTE midibyte2 = GetFromMIDIMsg_DataByte2(dwMidiData);
+
+	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
+	if (!pSndFile) return 0;
+
+	const BYTE nNote  = midibyte1 + 1;		// +1 is for MPT, where middle C is 61
+	int nVol   = midibyte2;					
+	BYTE event  = GetFromMIDIMsg_Event(dwMidiData);
+	if ((event == 0x9) && !nVol) event = 0x8;	//Convert event to note-off if req'd
+
+	switch(event)
 	{
-	// Note Off
-	case 0x80:
-		dwMidiByte2 = 0;
-	// Note On
-	case 0x90:
-		note = (dwMidiByte1 & 0x7F)+1;
-		pModDoc->NoteOff(note, TRUE);
-		if (dwMidiByte2 & 0x7F)
-		{
-			int vol = (CDLSBank::DLSMidiVolumeToLinear(dwMidiByte2 & 0x7F)+255) >> 8;
-			if (CMainFrame::m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) vol *= 2;
-			if (vol < 1) vol = 1;
-			if (vol > 256) vol = 256;
-			pModDoc->PlayNote(note, 0, m_nSample, FALSE, vol);
-		}
+		case 0x8: // Note Off
+			midibyte2 = 0;
+
+		case 0x9: // Note On
+			pModDoc->NoteOff(nNote, true);
+			if (midibyte2 & 0x7F)
+			{
+				nVol = ApplyVolumeRelatedMidiSettings(dwMidiData, midivolume);
+				pModDoc->PlayNote(nNote, 0, m_nSample, FALSE, nVol);
+			}
+		break;
+
+		case 0xB: //Controller change
+			switch(midibyte1)
+			{
+				case 0x7: //Volume
+					midivolume = midibyte2;
+				break;
+			}
+		break;
 	}
+
 	return 0;
 }
 
@@ -2254,7 +2270,8 @@ BOOL CViewSample::PreTranslateMessage(MSG *pMsg)
 	return CModScrollView::PreTranslateMessage(pMsg);
 }
 
-LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
+//---------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -2262,7 +2279,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	CModDoc *pModDoc = GetDocument();	
 	if (!pModDoc) return NULL;
 	
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();	
+	//CSoundFile *pSndFile = pModDoc->GetSoundFile();	
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)

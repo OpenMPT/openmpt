@@ -116,12 +116,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		UINT nSpeedCount = 0;
 		nRow = nNextRow;
 		nCurrentPattern = nNextPattern;
-		if(nCurrentPattern == endOrder && nRow == endRow)
-		{
-			targetReached = true;
-			goto EndMod;
-		}
-
+		
 		// Check if pattern is valid
 		nPattern = Order[nCurrentPattern];
 		bool positionJumpOnThisRow=false;
@@ -130,13 +125,13 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		while (nPattern >= Patterns.Size())
 		{
 			// End of song ?
-			if ((nPattern == Patterns.GetInvalidIndex()) || (nCurrentPattern >= Order.size()))
+			if ((nPattern == Order.GetInvalidPatIndex()) || (nCurrentPattern >= Order.size()))
 			{
 				goto EndMod;
 			} else
 			{
 				nCurrentPattern++;
-				nPattern = (nCurrentPattern < Order.size()) ? Order[nCurrentPattern] : Patterns.GetInvalidIndex();
+				nPattern = (nCurrentPattern < Order.size()) ? Order[nCurrentPattern] : Order.GetInvalidPatIndex();
 			}
 			nNextPattern = nCurrentPattern;
 		}
@@ -144,8 +139,17 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		if ((nPattern >= Patterns.Size()) || (!Patterns[nPattern])) break;
 		// Should never happen
 		if (nRow >= PatternSize[nPattern]) nRow = 0;
+
+		//Check whether target reached.
+		if(nCurrentPattern == endOrder && nRow == endRow)
+		{
+			targetReached = true;
+			goto EndMod;
+		}
+
 		// Update next position
 		nNextRow = nRow + 1;
+
 		if (nNextRow >= PatternSize[nPattern])
 		{
 			nNextPattern = nCurrentPattern + 1;
@@ -478,7 +482,6 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	}
 
 
-
 	// Reset envelopes
 	if (bResetEnv)
 	{
@@ -710,26 +713,29 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 					// Volume Swing
 					if (penv->nVolSwing)
 					{
-						int d = ((LONG)penv->nVolSwing*(LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						int d = ((LONG)penv->nVolSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nVolSwing = (signed short)((d * pChn->nVolume + 1)/128);
 					}
 					// Pan Swing
 					if (penv->nPanSwing)
 					{
-						int d = ((LONG)penv->nPanSwing*(LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						int d = ((LONG)penv->nPanSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nPanSwing = (signed short)d;
+						pChn->nRestorePanOnNewNote = pChn->nPan+1;
 					}
 					// Cutoff Swing
 					if (penv->nCutSwing)
 					{
-						int d = ((LONG)penv->nCutSwing*(LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						int d = ((LONG)penv->nCutSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nCutSwing = (signed short)((d * pChn->nCutOff + 1)/128);
+						pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
 					}
 					// Resonance Swing
 					if (penv->nResSwing)
 					{
-						int d = ((LONG)penv->nResSwing*(LONG)((rand() & 0xFF) - 0x7F)) / 128;
-						pChn->nResSwing = (signed short)((d * pChn->nResonance + 1)/128);d;
+						int d = ((LONG)penv->nResSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						pChn->nResSwing = (signed short)((d * pChn->nResonance + 1)/128);
+						pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
 					}
 				}
 			}
@@ -804,7 +810,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 //------------------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	INSTRUMENTHEADER *penv = pChn->pHeader, *pHeader;
+	INSTRUMENTHEADER* pHeader = 0;
 	LPSTR pSample;
 	if (note > 0x80) note = 0;
 	if (note < 1) return;
@@ -1049,7 +1055,7 @@ BOOL CSoundFile::ProcessEffects()
 				nStartTick = param & 0x0F;
 
 				//IT compatibility 08. Handling of out-of-range delay command.
-				if(nStartTick >= m_nMusicSpeed && GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+				if(nStartTick >= m_nMusicSpeed && GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
 				{
 					if(instr)
 					{
@@ -1086,8 +1092,6 @@ BOOL CSoundFile::ProcessEffects()
 		// Handles note/instrument/volume changes
 		if (m_nTickCount == nStartTick) // can be delayed by a note delay effect
 		{
-
-
 			UINT note = pChn->nRowNote;
 			if (instr) pChn->nNewIns = instr;
 			// XM: Key-Off + Sample == Note Cut
@@ -1102,8 +1106,22 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			if ((!note) && (instr)) //Case: instrument with no note data. 
 			{
-				if (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
-					note = pChn->nNote;
+				//IT compatibility: Instrument with no note.
+				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+				{
+					if(m_nInstruments)
+					{
+						if(instr < MAX_INSTRUMENTS && pChn->pHeader != Headers[instr])
+							note = pChn->nNote;
+
+					}
+					else //Case: Only samples used
+					{
+						if(instr < MAX_SAMPLES && pChn->pSample != Ins[instr].pSample)
+							note = pChn->nNote;
+
+					}
+				}
 
 				if (m_nInstruments)
 				{
@@ -1125,9 +1143,12 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			// Invalid Instrument ?
 			if (instr >= MAX_INSTRUMENTS) instr = 0;
+
 			// Note Cut/Off => ignore instrument
 			if (note >= 0xFE) instr = 0;
+
 			if ((note) && (note <= 128)) pChn->nNewNote = note;
+
 			// New Note Action ?
 			if ((note) && (note <= 128) && (!bPorta))
 			{
@@ -1139,6 +1160,26 @@ BOOL CSoundFile::ProcessEffects()
 //			if (m_nInstruments) ProcessMidiOut(nChn, pChn); 
 		#endif // MODPLUG_TRACKER
 		//end rewbs.VSTnoteDelay
+
+			if(note)
+			{
+				if(pChn->nRestorePanOnNewNote > 0)
+				{
+					pChn->nPan = pChn->nRestorePanOnNewNote - 1;
+					pChn->nRestorePanOnNewNote = 0;
+				}
+				if(pChn->nRestoreResonanceOnNewNote > 0)
+				{
+					pChn->nResonance = pChn->nRestoreResonanceOnNewNote - 1;
+					pChn->nRestoreResonanceOnNewNote = 0;
+				}
+				if(pChn->nRestoreCutoffOnNewNote > 0)
+				{
+					pChn->nCutOff = pChn->nRestoreCutoffOnNewNote - 1;
+					pChn->nRestoreCutoffOnNewNote = 0;
+				}
+				
+			}
 
 			// Instrument Change ?
 			if (instr)
@@ -1182,6 +1223,7 @@ BOOL CSoundFile::ProcessEffects()
 				if (vol > 64) vol = 64;
 				pChn->nPan = vol << 2;
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
+				pChn->nRestorePanOnNewNote = 0;
 			}
 
 		//rewbs.VSTnoteDelay
@@ -1246,14 +1288,14 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PORTAUP:
-					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
 						PortamentoUp(pChn, vol << 2, true);
 					else
 						PortamentoUp(pChn, vol << 2, false);
 					break;
 
 				case VOLCMD_PORTADOWN:
-					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
 						PortamentoDown(pChn, vol << 2, true);
 					else
 						PortamentoDown(pChn, vol << 2, false);
@@ -1355,7 +1397,7 @@ BOOL CSoundFile::ProcessEffects()
 				{
 					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
 				}
-				if (param > 512) param = 512; 				// rewbs.merge: added check to avoid hyperspaced tempo!
+				if (param > GetModSpecifications().tempoMax) param = GetModSpecifications().tempoMax; // rewbs.merge: added check to avoid hyperspaced tempo!
 				SetTempo(param);
 			break;
 
@@ -1461,6 +1503,7 @@ BOOL CSoundFile::ProcessEffects()
 				pChn->nPan = 0x80;
 			}
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
+			pChn->nRestorePanOnNewNote = 0;
 			break;
 			
 		// Panning Slide
@@ -1898,7 +1941,7 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 	pChn->dwFlags |= CHN_PORTAMENTO;
 
 	//IT compatibility 03
-	if(!(m_dwSongFlags & SONG_ITCOMPATMODE) && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+	if(!(m_dwSongFlags & SONG_ITCOMPATMODE) && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
 	{
 		if(param == 0) param = pChn->nOldPortaUpDown;
 		pChn->nOldPortaUpDown = param;
@@ -2023,13 +2066,13 @@ void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param)
 	LONG newvolume = pChn->nVolume;
 	if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM|MOD_TYPE_AMF))
 	{
-		if ((param & 0x0F) == 0x0F)
+		if ((param & 0x0F) == 0x0F) //Fine upslide or slide -15
 		{
-			if (param & 0xF0)
+			if (param & 0xF0) //Fine upslide
 			{
 				FineVolumeUp(pChn, (param >> 4));
 				return;
-			} else
+			} else //Slide -15
 			{
 				if ((m_dwSongFlags & SONG_FIRSTTICK) && (!(m_dwSongFlags & SONG_FASTVOLSLIDES)))
 				{
@@ -2037,13 +2080,13 @@ void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param)
 				}
 			}
 		} else
-		if ((param & 0xF0) == 0xF0)
+		if ((param & 0xF0) == 0xF0) //Fine downslide or slide +15
 		{
-			if (param & 0x0F)
+			if (param & 0x0F) //Fine downslide
 			{
 				FineVolumeDown(pChn, (param & 0x0F));
 				return;
-			} else
+			} else //Slide +15
 			{
 				if ((m_dwSongFlags & SONG_FIRSTTICK) && (!(m_dwSongFlags & SONG_FASTVOLSLIDES)))
 				{
@@ -2060,6 +2103,7 @@ void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param)
 	}
 	if (newvolume < 0) newvolume = 0;
 	if (newvolume > 256) newvolume = 256;
+
 	pChn->nVolume = newvolume;
 }
 
@@ -2107,6 +2151,7 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 		if (nPanSlide < 0) nPanSlide = 0;
 		if (nPanSlide > 256) nPanSlide = 256;
 		pChn->nPan = nPanSlide;
+		pChn->nRestorePanOnNewNote = 0;
 	}
 }
 
@@ -2374,6 +2419,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 	{
 		UINT pos = 0, nNib = 0, nBytes = 0;
 		DWORD dwMidiCode = 0, dwByteCode = 0;
+
 		while (pos+6 <= 32)
 		{
 			CHAR cData = pszMidiMacro[pos++];
@@ -2405,7 +2451,8 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 // -! NEW_FEATURE#0015
 						if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
 							IMixPlugin *pPlugin = m_MixPlugins[nPlug-1].pMixPlugin;
-							if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))	{
+							if ((pPlugin) && (m_MixPlugins[nPlug-1].pMixState))
+							{
 								pPlugin->MidiSend(dwMidiCode);
 							}
 						}
@@ -2455,7 +2502,11 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 		case 0x00:
 			{
 				int oldcutoff = pChn->nCutOff;
-				if (dwParam < 0x80) pChn->nCutOff = dwParam;
+				if (dwParam < 0x80)
+				{
+					pChn->nCutOff = dwParam;
+					pChn->nRestoreCutoffOnNewNote = 0;
+				}
 			#ifndef NO_FILTER
 				oldcutoff -= pChn->nCutOff;
 				if (oldcutoff < 0) oldcutoff = -oldcutoff;
@@ -2468,7 +2519,12 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 		
 		// F0.F0.01.xx: Set Resonance
 		case 0x01:
-			if (dwParam < 0x80) pChn->nResonance = dwParam;
+			if (dwParam < 0x80) 
+			{
+				pChn->nRestoreResonanceOnNewNote = 0;
+				pChn->nResonance = dwParam;
+			}
+				
 		#ifndef NO_FILTER
 			SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? FALSE : TRUE);
 		#endif // NO_FILTER
@@ -2585,6 +2641,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 				}
 				//update param on all ticks
 				pChn->nCutOff = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5);
+				pChn->nRestoreCutoffOnNewNote = 0;
 			}
 		#ifndef NO_FILTER
 			oldcutoff -= pChn->nCutOff;
@@ -2608,6 +2665,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 				}
 				//update param on all ticks
 				pChn->nResonance = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5);
+				pChn->nRestoreResonanceOnNewNote = 0;
 			#ifndef NO_FILTER
 				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? FALSE : TRUE);
 			#endif // NO_FILTER	
@@ -2950,28 +3008,41 @@ void CSoundFile::SetSpeed(UINT param)
 }
 
 
-void CSoundFile::SetTempo(UINT param)
+void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 //-----------------------------------
 {
-	if (param >= 0x20 && !m_nTickCount) //rewbs.tempoSlideFix: only set if not (T0x or T1x) and tick is 0
+	const CModSpecifications& specs = GetModSpecifications();
+	if(setAsNonModcommand)
 	{
-		m_nMusicTempo = param;
+		if(param < specs.tempoMin) m_nMusicTempo = specs.tempoMin;
+		else
+		{
+			if(param > specs.tempoMax) m_nMusicTempo = specs.tempoMax;
+			else m_nMusicTempo = param;
+		}
 	}
-	// Tempo Slide
-	else if (param < 0x20 && m_nTickCount) //rewbs.tempoSlideFix: only slide if (T0x or T1x) and tick is not 0
+	else
 	{
-		if ((param & 0xF0) == 0x10)
+		if (param >= 0x20 && !m_nTickCount) //rewbs.tempoSlideFix: only set if not (T0x or T1x) and tick is 0
 		{
-			m_nMusicTempo += (param & 0x0F); //rewbs.tempoSlideFix: no *2
-// -> CODE#0016
-// -> DESC="default tempo update"
-//			if (m_nMusicTempo > 255) m_nMusicTempo = 255;
-			if (m_nMusicTempo > GetTempoMax()) m_nMusicTempo = GetTempoMax();
-// -! BEHAVIOUR_CHANGE#0016
-		} else
+			m_nMusicTempo = param;
+		}
+		// Tempo Slide
+		else if (param < 0x20 && m_nTickCount) //rewbs.tempoSlideFix: only slide if (T0x or T1x) and tick is not 0
 		{
-			m_nMusicTempo -= (param & 0x0F); //rewbs.tempoSlideFix: no *2
-			if ((LONG)m_nMusicTempo < GetTempoMin()) m_nMusicTempo = GetTempoMin();
+			if ((param & 0xF0) == 0x10)
+			{
+				m_nMusicTempo += (param & 0x0F); //rewbs.tempoSlideFix: no *2
+	// -> CODE#0016
+	// -> DESC="default tempo update"
+	//			if (m_nMusicTempo > 255) m_nMusicTempo = 255;
+				if (m_nMusicTempo > specs.tempoMax) m_nMusicTempo = specs.tempoMax;
+	// -! BEHAVIOUR_CHANGE#0016
+			} else
+			{
+				m_nMusicTempo -= (param & 0x0F); //rewbs.tempoSlideFix: no *2
+				if ((LONG)m_nMusicTempo < specs.tempoMin) m_nMusicTempo = specs.tempoMin;
+			}
 		}
 	}
 }
@@ -2987,7 +3058,7 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 			pChn->nPatternLoopCount--;
 			if(!pChn->nPatternLoopCount)
 			{
-				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY))
+				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
 					pChn->nPatternLoop = m_nRow+1;
 
 				return -1;	
@@ -2996,7 +3067,7 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 		{
 			MODCHANNEL *p = Chn;
 			
-			if(!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY)))
+			if(!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY)))
 			{
 				for (UINT i=0; i<m_nChannels; i++, p++) if (p != pChn)
 				{
@@ -3054,7 +3125,7 @@ DWORD CSoundFile::IsSongFinished(UINT nStartOrder, UINT nStartRow) const
 	for (nOrd=nStartOrder; nOrd<Order.size(); nOrd++)
 	{
 		UINT nPat = Order[nOrd];
-		if (nPat != Patterns.GetIgnoreIndex())
+		if (nPat != Order.GetIgnoreIndex())
 		{
 			if (nPat >= Patterns.Size()) break;
 			const MODPATTERN& p = Patterns[nPat];
@@ -3086,7 +3157,7 @@ DWORD CSoundFile::IsSongFinished(UINT nStartOrder, UINT nStartRow) const
 BOOL CSoundFile::IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const
 //----------------------------------------------------------------------------------------------------------
 {
-	while ((nJumpOrder < Patterns.Size()) && (Order[nJumpOrder] == Patterns.GetIgnoreIndex())) nJumpOrder++;
+	while ((nJumpOrder < Patterns.Size()) && (Order[nJumpOrder] == Order.GetIgnoreIndex())) nJumpOrder++;
 	if ((nStartOrder >= Patterns.Size()) || (nJumpOrder >= Patterns.Size())) return FALSE;
 	// Treat only case with jumps in the same pattern
 	if (nJumpOrder > nStartOrder) return TRUE;

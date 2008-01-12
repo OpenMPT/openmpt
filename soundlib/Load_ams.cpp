@@ -462,7 +462,7 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 	{
 		for (UINT i=0; i<MAX_ORDERS; i++)
 		{
-			Order[i] = Patterns.GetInvalidIndex();
+			Order[i] = Order.GetInvalidPatIndex();
 			if (dwMemPos + 2 >= dwMemLength) return TRUE;
 			if (i < psh->orders)
 			{

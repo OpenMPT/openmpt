@@ -11,6 +11,7 @@
 #include "mod_specifications.h"
 #include <vector>
 #include <bitset>
+#include "midi.h"
 
 using std::bitset;
 
@@ -381,6 +382,21 @@ enum {
 	RESPECT_MUTES         = true,
 };
 
+//Plugin velocity handling options
+enum PLUGVELOCITYHANDLING
+{
+	PLUGIN_VELOCITYHANDLING_CHANNEL = 0,
+	PLUGIN_VELOCITYHANDLING_VOLUME
+};
+
+//Plugin volumecommand handling options
+enum PLUGVOLUMEHANDLING
+{
+	PLUGIN_VOLUMEHANDLING_MIDI = 0,
+	PLUGIN_VOLUMEHANDLING_DRYWET,
+	PLUGIN_VOLUMEHANDLING_IGNORE,
+};
+
 // filtermodes
 /*enum {
 	INST_FILTERMODE_DEFAULT=0,
@@ -390,7 +406,7 @@ enum {
 };*/
 
 // Sample Struct
-typedef struct _MODINSTRUMENT
+struct MODINSTRUMENT
 {
 	UINT nLength,nLoopStart,nLoopEnd;
 		//nLength <-> Number of 'frames'?
@@ -417,7 +433,7 @@ typedef struct _MODINSTRUMENT
 		if(uFlags & CHN_STEREO) len *= 2;
 		return len;
 	}
-} MODINSTRUMENT;
+};
 
 
 // -> CODE#0027
@@ -489,6 +505,8 @@ struct INSTRUMENTHEADER
 	BYTE nPanEnvReleaseNode;
 	BYTE nVolEnvReleaseNode;
 	WORD wPitchToTempoLock;
+	BYTE nPluginVelocityHandling;
+	BYTE nPluginVolumeHandling;
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -561,6 +579,9 @@ typedef struct _MODCHANNEL
 	UINT nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
 	LONG nVolSwing, nPanSwing;
 	LONG nCutSwing, nResSwing;
+	LONG nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
+	LONG nRestoreResonanceOnNewNote; //Like above
+	LONG nRestoreCutoffOnNewNote; //Like above
 	// 8-bit members
 	BYTE nNote, nNNA;
 	BYTE nNewNote, nNewIns, nCommand, nArpeggio;
@@ -588,7 +609,7 @@ typedef struct _MODCHANNEL
 	typedef UINT VOLUME;
 	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol*4 : nVolume;}
 
-	//-->Tuning-modes-to-work-properly-with-effects-variables
+	//-->Variables used to make user-definable tuningmodes work with pattern effects.
 		bool m_ReCalculateFreqOnFirstTick;
 		//If true, freq should be recalculated in ReadNote() on first tick.
 		//Currently used only for vibrato things - using in other context might be 
@@ -611,14 +632,14 @@ typedef struct _MODCHANNEL
 #define CHNRESET_TOTAL			255 //11111111b
 
 
-typedef struct _MODCHANNELSETTINGS
+struct MODCHANNELSETTINGS
 {
 	UINT nPan;
 	UINT nVolume;
 	DWORD dwFlags;
 	UINT nMixPlugin;
 	CHAR szName[MAX_CHANNELNAME];
-} MODCHANNELSETTINGS;
+};
 
 #include "modcommand.h"
 
@@ -670,16 +691,17 @@ public:
 // -! BEHAVIOUR_CHANGE#0028
 
 
-typedef struct _SNDMIXPLUGINSTATE
+struct SNDMIXPLUGINSTATE
 {
 	DWORD dwFlags;					// MIXPLUG_XXXX
 	LONG nVolDecayL, nVolDecayR;	// Buffer click removal
 	int *pMixBuffer;				// Stereo effect send buffer
 	float *pOutBufferL;				// Temp storage for int -> float conversion
 	float *pOutBufferR;
-} SNDMIXPLUGINSTATE, *PSNDMIXPLUGINSTATE;
+};
+typedef SNDMIXPLUGINSTATE* PSNDMIXPLUGINSTATE;
 
-typedef struct _SNDMIXPLUGININFO
+struct SNDMIXPLUGININFO
 {
 	DWORD dwPluginId1;
 	DWORD dwPluginId2;
@@ -688,11 +710,15 @@ typedef struct _SNDMIXPLUGININFO
 	DWORD dwReserved[4];	// Reserved for routing info
 	CHAR szName[32];
 	CHAR szLibraryName[64];	// original DLL name
-} SNDMIXPLUGININFO, *PSNDMIXPLUGININFO; // Size should be 128 
-										
+}; // Size should be 128 							
+typedef SNDMIXPLUGININFO* PSNDMIXPLUGININFO;
 
-typedef struct _SNDMIXPLUGIN
+struct SNDMIXPLUGIN
 {
+	const char* GetName() const {return Info.szName;}
+	const char* GetLibraryName();
+	CString GetParamName(const UINT index) const;
+
 	IMixPlugin *pMixPlugin;
 	PSNDMIXPLUGINSTATE pMixState;
 	ULONG nPluginDataSize;
@@ -700,22 +726,24 @@ typedef struct _SNDMIXPLUGIN
 	SNDMIXPLUGININFO Info;
 	float fDryRatio;		    // rewbs.dryRatio [20040123]
 	long defaultProgram;		// rewbs.plugDefaultProgram
-} SNDMIXPLUGIN, *PSNDMIXPLUGIN; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
+}; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
+typedef SNDMIXPLUGIN* PSNDMIXPLUGIN;
 
 //class CSoundFile;
 class CModDoc;
 typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN, CModDoc*);
 
-typedef struct _SNDMIXSONGEQ
+struct SNDMIXSONGEQ
 {
 	ULONG nEQBands;
 	ULONG EQFreq_Gains[MAX_EQ_BANDS];
-} SNDMIXSONGEQ, *PSNDMIXSONGEQ;
+};
+typedef SNDMIXSONGEQ* PSNDMIXSONGEQ;
 
 ////////////////////////////////////////////////////////////////////////
 // Reverberation
 
-typedef struct _SNDMIX_REVERB_PROPERTIES
+struct SNDMIX_REVERB_PROPERTIES
 {
 	LONG  lRoom;                   // [-10000, 0]      default: -10000 mB
     LONG  lRoomHF;                 // [-10000, 0]      default: 0 mB
@@ -727,7 +755,8 @@ typedef struct _SNDMIX_REVERB_PROPERTIES
     FLOAT flReverbDelay;           // [0.0, 0.1]       default: 0.04 s
     FLOAT flDiffusion;             // [0.0, 100.0]     default: 100.0 %
     FLOAT flDensity;               // [0.0, 100.0]     default: 100.0 %
-} SNDMIX_REVERB_PROPERTIES, *PSNDMIX_REVERB_PROPERTIES;
+};
+typedef SNDMIX_REVERB_PROPERTIES* PSNDMIX_REVERB_PROPERTIES;
 
 #ifndef NO_REVERB
 
@@ -752,15 +781,13 @@ enum {
 };
 
 
-
-
-
-typedef struct MODMIDICFG
+struct MODMIDICFG
 {
 	CHAR szMidiGlb[9*32];
 	CHAR szMidiSFXExt[16*32];
 	CHAR szMidiZXXExt[128*32];
-} MODMIDICFG, *LPMODMIDICFG;
+};
+typedef MODMIDICFG* LPMODMIDICFG;
 
 
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
@@ -786,8 +813,13 @@ private:
 	const CSoundFile& m_rSndFile;
 };
 
-//Note: These are bit indeces.
-const BYTE MSF_IT_COMPATIBLE_PLAY = 0; //MPF <-> ModSpecificFlag
+//Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
+//If changing these, ChangeModTypeTo() might need modification.
+const BYTE MSF_IT_COMPATIBLE_PLAY	= 0;		//IT/MPT
+const BYTE MSF_OLDVOLSWING			= 1;		//IT/MPT
+const BYTE MSF_MIDICC_BUGEMULATION	= 2;		//IT/MPT/XM
+
+typedef UINT MODTYPE;
 
 class CTuningCollection;
 
@@ -795,45 +827,20 @@ class CTuningCollection;
 class CSoundFile
 //==============
 {
-public: //Typedefs
-	typedef UINT MODTYPE;
-public: //Get details(TODO?: Move detail asking to a 'controller')
-	TEMPO GetTempoMin() const {return m_pModSpecs->tempoMin;}
-	TEMPO GetTempoMax() const {return m_pModSpecs->tempoMax;}
-
-	//Using special hack for OMPTs modifed ITs and XMs.
-	ROWINDEX GetRowMax() const {return (GetType() == MOD_TYPE_IT || GetType() == MOD_TYPE_XM) ? 1024 : min(MAX_PATTERN_ROWS, m_pModSpecs->patternRowsMax);}
-
-	ROWINDEX GetRowMin() const {return m_pModSpecs->patternRowsMin;}
-	CHANNELINDEX GetNumChannelMax() const {return min(MAX_BASECHANNELS, m_pModSpecs->channelsMax);}
-	CHANNELINDEX GetNumChannelMin() const {return m_pModSpecs->channelsMin;}
-	uint16 GetModNameLengthMax() {return (GetType() == MOD_TYPE_MPT) ? 25 : m_pModSpecs->modNameLengthMax;}
-
+public:
 	//Return true if title was changed.
 	bool SetTitle(const char*, size_t strSize);
 
 public: //Misc
 	void ChangeModTypeTo(const MODTYPE& newType);
 	
-	
-	
 	//Return value in seconds.
 	double GetPlaybackTimeAt(ORDERINDEX, ROWINDEX);
 
-	//
-	virtual bool GetModSpecificFlag(BYTE i)
-		{return (i < 8*sizeof(m_ModFlags)) ? ((m_ModFlags & (1<<i)) != 0) : false;}
-	
-
-	//
-	virtual void SetModSpecificFlag(BYTE i, bool val)
-	{
-		if(i < 8*sizeof(m_ModFlags))
-		{
-			m_ModFlags = (val) ? m_ModFlags |= (1 << i) : m_ModFlags &= ~(1 << i);
-		}
-	}
-	
+	uint16 GetModFlags() const {return m_ModFlags;}
+	void SetModFlags(const uint16 v) {m_ModFlags = v;}
+	bool GetModFlag(BYTE i) const {return ((m_ModFlags & (1<<i)) != 0);}
+	void SetModFlag(BYTE i, bool val) {if(i < 8*sizeof(m_ModFlags)) {m_ModFlags = (val) ? m_ModFlags |= (1 << i) : m_ModFlags &= ~(1 << i);}}
 	
 	//Tuning-->
 public:
@@ -855,19 +862,26 @@ public: //Get 'controllers'
 	CPlaybackEventer& GetPlaybackEventer() {return m_PlaybackEventer;}
 	const CPlaybackEventer& GetPlaybackEventer() const {return m_PlaybackEventer;}
 
+	CMIDIMapper& GetMIDIMapper() {return m_MIDIMapper;}
+	const CMIDIMapper& GetMIDIMapper() const {return m_MIDIMapper;}
+
 private: //Effect functions
 	void PortamentoMPT(MODCHANNEL*, int);
 	void PortamentoFineMPT(MODCHANNEL*, int);
 
 private: //Misc private methods.
-	void SetModSpecsPointer();
+	static void SetModSpecsPointer(const CModSpecifications*& pModSpecs, const MODTYPE type);
+	uint16 GetModFlagMask(const MODTYPE oldtype, const MODTYPE newtype) const;
 
 private: //'Controllers'
 	CPlaybackEventer m_PlaybackEventer;
+	CMIDIMapper m_MIDIMapper;
 
 private: //Misc data
 	uint16 m_ModFlags;
 	const CModSpecifications* m_pModSpecs;
+
+
 
 public:	// Static Members
 	static UINT m_nXBassDepth, m_nXBassRange;
@@ -946,11 +960,12 @@ public:
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
 	BOOL Destroy();
 	MODTYPE GetType() const { return m_nType; }
+	CModDoc* GetpModDoc() {return m_pModDoc;}
 
 
 	//Return the number of channels in the pattern. In 1.17.02.45
 	//it returned the number of channels with volume != 0
-	UINT GetNumChannels() const {return m_nChannels;}	
+	CHANNELINDEX GetNumChannels() const {return static_cast<CHANNELINDEX>(m_nChannels);}	
 
 	BOOL SetMasterVolume(UINT vol, BOOL bAdjustAGC=FALSE);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
@@ -963,7 +978,10 @@ public:
 	UINT GetSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;
-	const CModSpecifications * GetModSpecifications() {return m_pModSpecs;}
+
+	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr);
+	const CModSpecifications& GetModSpecifications() {return *m_pModSpecs;}
+	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
 	double GetCurrentBPM() const;
 	int FindOrder(PATTERNINDEX pat, UINT startFromOrder=0, bool direction=true);	//rewbs.playSongFromCursor
@@ -1008,11 +1026,11 @@ public:
 	BOOL ReadMed(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadMTM(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadSTM(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadIT(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadMPT(LPCBYTE lpStream, const DWORD dwMemLength);
+	BOOL ReadIT(LPCBYTE lpStream, const DWORD dwMemLength);
+	//BOOL ReadMPT(LPCBYTE lpStream, const DWORD dwMemLength);
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	BOOL ReadITProject(LPCBYTE lpStream, DWORD dwMemLength);
+	BOOL ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength);
 // -! NEW_FEATURE#0023
 	BOOL Read669(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadUlt(LPCBYTE lpStream, DWORD dwMemLength);
@@ -1039,7 +1057,6 @@ public:
 	BOOL SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveMod(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveIT(LPCSTR lpszFileName, UINT nPacking=0);
-	BOOL SaveMPT(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveCompatIT(LPCSTR lpszFileName);
 	BOOL SaveCompatXM(LPCSTR lpszFileName);
 // -> CODE#0023
@@ -1162,7 +1179,7 @@ public:
 	// Low-Level effect processing
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);
 	// Global Effects
-	void SetTempo(UINT param);
+	void SetTempo(UINT param, bool setAsNonModcommand = false);
 	void SetSpeed(UINT param);
 	void GlobalVolSlide(UINT param);
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
@@ -1266,6 +1283,16 @@ private:
 	void BuildDefaultInstrument();
 	long GetSampleOffset();
 };
+
+
+inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
+//----------------------------------------------------------------
+{
+	if(instr > 0 && instr < MAX_INSTRUMENTS && Headers[instr] && Headers[instr]->nMixPlug && Headers[instr]->nMixPlug <= MAX_MIXPLUGINS)
+		return m_MixPlugins[Headers[instr]->nMixPlug-1].pMixPlugin;
+	else
+		return NULL;
+}
 
 
 #ifdef PLATFORM_BIG_ENDIAN

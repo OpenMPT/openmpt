@@ -2274,6 +2274,21 @@ void CCommandSet::SetupCommands()
 	commands[kcTimeAtRow].isDummy = false;
 	commands[kcTimeAtRow].Message = "Show playback time at current row";
 
+	commands[kcViewMIDImapping].UID = 1781;
+	commands[kcViewMIDImapping].isHidden = false;
+	commands[kcViewMIDImapping].isDummy = false;
+	commands[kcViewMIDImapping].Message = "View MIDI mapping";
+
+	commands[kcVSTGUIPrevPresetJump].UID = 1782;
+	commands[kcVSTGUIPrevPresetJump].isHidden = false;
+	commands[kcVSTGUIPrevPresetJump].isDummy = false;
+	commands[kcVSTGUIPrevPresetJump].Message = "Plugin preset backward jump";
+
+	commands[kcVSTGUINextPresetJump].UID = 1783;
+	commands[kcVSTGUINextPresetJump].isHidden = false;
+	commands[kcVSTGUINextPresetJump].isDummy = false;
+	commands[kcVSTGUINextPresetJump].Message = "Plugin preset forward jump";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

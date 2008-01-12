@@ -125,8 +125,8 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
+	DDX_Control(pDX, IDC_EDIT_FLAGS,	m_EditFlag);
 // -! NEW_FEATURE#0023
-	DDX_Control(pDX, IDC_IT_COMPATIBLEPLAY,	m_CheckBoxITCompatiblePlay);
 	//}}AFX_DATA_MAP
 }
 
@@ -134,7 +134,6 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 BOOL CModTypeDlg::OnInitDialog()
 //------------------------------
 {
-	CHAR s[256];
 	CDialog::OnInitDialog();
 	m_nType = m_pSndFile->m_nType;
 	m_nChannels = m_pSndFile->m_nChannels;
@@ -162,17 +161,14 @@ BOOL CModTypeDlg::OnInitDialog()
 // -! NEW_FEATURE#0023
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
+
 // -> CODE#0006
 // -> DESC="misc quantity changes"
 //	for (int i=4; i<=64; i++)
-	for (int i=4; i<=MAX_BASECHANNELS; i++)
+//	for (int i=4; i<=MAX_BASECHANNELS; i++)
 // -! BEHAVIOUR_CHANGE#0006
-	{
-		wsprintf(s, "%d Channels", i);
-		m_ChannelsBox.SetItemData(m_ChannelsBox.AddString(s), i);
-	}
-	m_ChannelsBox.SetCurSel(m_nChannels-4);
-
+	UpdateChannelCBox();
+	
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Alternative"), tempo_mode_alternative);
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Modern (accurate)"), tempo_mode_modern);
@@ -205,14 +201,48 @@ BOOL CModTypeDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT1, CMainFrame::GetVersionString(m_pSndFile->m_dwCreatedWithVersion));
 	SetDlgItemText(IDC_EDIT2, CMainFrame::GetVersionString(m_pSndFile->m_dwLastSavedWithVersion));
 
+	m_EditFlag.SetLimitText(16);
+
 	UpdateDialog();
 	return TRUE;
+}
+
+
+void CModTypeDlg::UpdateChannelCBox()
+//-----------------------------------
+{
+	const MODTYPE type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
+	CHANNELINDEX currChanSel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
+	const CHANNELINDEX minChans = m_pSndFile->GetModSpecifications(type).channelsMin;
+	const CHANNELINDEX maxChans = m_pSndFile->GetModSpecifications(type).channelsMax;
+	if(m_ChannelsBox.GetCount() < 1 
+		||
+	   m_ChannelsBox.GetItemData(0) != minChans
+		|| 
+	   m_ChannelsBox.GetItemData(m_ChannelsBox.GetCount()-1) != maxChans
+	  )
+	{
+		if(m_ChannelsBox.GetCount() < 1) currChanSel = m_nChannels;
+		char s[256];
+		m_ChannelsBox.ResetContent();
+		for (CHANNELINDEX i=minChans; i<=maxChans; i++)
+		{
+			wsprintf(s, "%d Channels", i);
+			m_ChannelsBox.SetItemData(m_ChannelsBox.AddString(s), i);
+		}
+		if(currChanSel > maxChans)
+			m_ChannelsBox.SetCurSel(m_ChannelsBox.GetCount()-1);
+		else
+			m_ChannelsBox.SetCurSel(currChanSel-minChans);
+	}
 }
 
 
 void CModTypeDlg::UpdateDialog()
 //------------------------------
 {
+	UpdateChannelCBox();
+
 	m_CheckBox1.SetCheck((m_pSndFile->m_dwSongFlags & SONG_LINEARSLIDES) ? MF_CHECKED : 0);
 	m_CheckBox2.SetCheck((m_pSndFile->m_dwSongFlags & SONG_FASTVOLSLIDES) ? MF_CHECKED : 0);
 	m_CheckBox3.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITOLDEFFECTS) ? MF_CHECKED : 0);
@@ -235,14 +265,37 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox6.EnableWindow(m_TypeBox.GetCurSel() == 4 ? TRUE : FALSE);
 // -! NEW_FEATURE#0023
 
-	if(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) & (MOD_TYPE_IT | MOD_TYPE_MPT))
+	const bool XMorITorMPT = ((m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0);
+	const bool ITorMPT = ((m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0);
+	const bool XM = m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) == MOD_TYPE_XM;
+
+	CWnd* p = GetDlgItem(IDC_EDIT_FLAGS);
+	if(p) p->ShowWindow(XMorITorMPT);
+	p = GetDlgItem(IDC_FLAG_EXPLANATIONS);
+	if(p)
 	{
-		m_CheckBoxITCompatiblePlay.ShowWindow(SW_SHOW);
-		m_CheckBoxITCompatiblePlay.SetCheck((m_pSndFile->GetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY)) ? MF_CHECKED : MF_UNCHECKED);
+		p->ShowWindow(XMorITorMPT);
+		if(ITorMPT)
+            p->SetWindowText("0: True to use various IT compatible playback changes\n"
+							 "1: True for old instrument random variation behavior\n"
+							 "2: Plugin volume command bug emulation");
+		else if(XM) p->SetWindowText("0: Unused\n1: Unused\n2: Plugin volume command bug emulation");
 	}
-	else
-		m_CheckBoxITCompatiblePlay.ShowWindow(SW_HIDE);
-	
+	p = GetDlgItem(IDC_FLAGEDITTITLE);
+	if(p) p->ShowWindow(XMorITorMPT);
+	if(XMorITorMPT)
+	{
+		char str[17] = "0000000000000000";
+		const uint16 f = m_pSndFile->GetModFlags();
+		BYTE lastTrue = 0, i;
+		for(i = 0; i<16; i++)
+		{
+			if((f & (1 << i)) != 0) {str[i] = '1'; lastTrue = i;}
+		}
+		str[max(3, lastTrue+1)] = 0;
+		SetDlgItemText(IDC_EDIT_FLAGS, str);
+	}
+
 	m_TempoModeBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
@@ -326,21 +379,20 @@ BOOL CModTypeDlg::VerifyData()
 
 	int sel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
 	int type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
-	int maxChans;
-	if (type&(MOD_TYPE_IT|MOD_TYPE_MPT)) {
-		maxChans=max_chans_IT;
-	} else if (type&MOD_TYPE_XM) {
-		maxChans=max_chans_XM;
-	} else if (type&MOD_TYPE_S3M) {
-		maxChans=max_chans_S3M;
-	} else {
-		maxChans=max_chans_MOD;
-	}
+
+	CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
+
 	if (sel > maxChans) {
 		CString error;
 		error.Format("Error: Max number of channels for this type is %d", maxChans);
 		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
 		return FALSE;
+	}
+
+	if(maxChans < m_pSndFile->GetNumChannels())
+	{
+		if(MessageBox("New modtype supports less channels than currently used, and reducing channel number is required. Continue?", "", MB_OKCANCEL) != IDOK)
+			return FALSE;
 	}
 
 	return TRUE;
@@ -385,8 +437,17 @@ void CModTypeDlg::OnOK()
 		m_pSndFile->RecalculateGainForAllPlugs();
 	}
 
-	if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
-		m_pSndFile->SetModSpecificFlag(MSF_IT_COMPATIBLE_PLAY, IsDlgButtonChecked(IDC_IT_COMPATIBLEPLAY) != 0);
+	if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
+	{
+		uint16 val = 0;
+		char str[18]; memset(str, 0, 18);
+		GetDlgItemText(IDC_EDIT_FLAGS, str, 17);
+		for(size_t i = 0; i<strlen(str); i++)
+		{
+			if(str[i] != '0') val |= (1 << i);
+		}
+		m_pSndFile->SetModFlags(val);
+	}
 
 	m_pSndFile->m_nRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
 	m_pSndFile->m_nRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
@@ -478,10 +539,11 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 	if (m_nRemove > 0) {
 		wsprintf(label, "Select %d channels to remove:", m_nRemove);
 	} else {
-		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %d)", m_pSndFile->GetNumChannelMin());
+		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %d)", m_pSndFile->GetModSpecifications().channelsMin);
 	}
 	
 	SetDlgItemText(IDC_QUESTION1, label);
+	if(GetDlgItem(IDCANCEL)) GetDlgItem(IDCANCEL)->ShowWindow(m_ShowCancel);
 
 	OnChannelChanged();
 	return TRUE;
@@ -501,7 +563,7 @@ void CRemoveChannelsDlg::OnOK()
 	{
 		m_bChnMask[aryListBoxSel[n]]++;
 	}
-	if ((nCount == m_nRemove && nCount >0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nCount + m_pSndFile->GetNumChannelMin())))
+	if ((nCount == m_nRemove && nCount >0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nCount + m_pSndFile->GetModSpecifications().channelsMin)))
 		CDialog::OnOK();
 	else
 		CDialog::OnCancel();
@@ -513,7 +575,7 @@ void CRemoveChannelsDlg::OnChannelChanged()
 {
 	UINT nr = 0;
 	nr = m_RemChansList.GetSelCount();
-	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nr + m_pSndFile->GetNumChannelMin()) && nr > 0)) ? TRUE : FALSE);
+	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nr + m_pSndFile->GetModSpecifications().channelsMin) && nr > 0)) ? TRUE : FALSE);
 }
 //end rewbs.removeChansDlgCleanup
 
@@ -798,13 +860,14 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 // -> DESC="#define to set pattern size"
 //		for (UINT irow=32; irow<=256; irow++)
 //		for (UINT irow=32; irow<=MAX_PATTERN_ROWS; irow++)
-		for (UINT irow=pSndFile->GetRowMin(); irow<=pSndFile->GetRowMax(); irow++)
+		const CModSpecifications& specs = pSndFile->GetModSpecifications();
+		for (UINT irow=specs.patternRowsMin; irow<=specs.patternRowsMax; irow++)
 // -! BEHAVIOUR_CHANGE#0008
 		{
 			wsprintf(s, "%d", irow);
 			combo->AddString(s);
 		}
-		combo->SetCurSel(nrows-pSndFile->GetRowMin());
+		combo->SetCurSel(nrows - specs.patternRowsMin);
 		wsprintf(s, "Pattern #%d:\x0d\x0a %d rows (%dK)",
 			m_nPattern,
 			pSndFile->PatternSize[m_nPattern],
@@ -1272,7 +1335,6 @@ void CPageEditVolume::OnHScroll(UINT, UINT, CScrollBar *)
 BEGIN_MESSAGE_MAP(CPageEditEffect, CPageEditCommand)
 	ON_WM_HSCROLL()
 	ON_CBN_SELCHANGE(IDC_COMBO1,	OnCommandChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	OnCommand2Changed)
 END_MESSAGE_MAP()
 
 
@@ -1373,30 +1435,6 @@ void CPageEditEffect::OnCommandChanged()
 	}
 }
 
-
-void CPageEditEffect::OnCommand2Changed()
-//--------------------------------------
-{
-	UINT value = GetDlgItemInt(IDC_COMBO2);
-
-	/*
-	CComboBox *combo;
-
-	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL) && (m_pModDoc))
-	{
-		BOOL bSet = FALSE;
-		int n = combo->GetCurSel();
-		if (n >= 0)
-		{
-			int param = -1, ndx = combo->GetItemData(n);
-			m_nCommand = (ndx >= 0) ? m_pModDoc->GetEffectFromIndex(ndx, param) : 0;
-			if (param >= 0) m_nParam = param;
-			bSet = TRUE;
-		}
-		UpdateRange(bSet);
-	}
-	*/
-}
 
 
 void CPageEditEffect::OnHScroll(UINT, UINT, CScrollBar *)
@@ -1625,7 +1663,10 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	OnPlugChanged();
 	return FALSE;
 }
+
+
 void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
+//----------------------------------------------
 {
 	if (!m_EditMacro[0])
 		return; //GUI not yet initiali
@@ -1830,7 +1871,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 
 		memcpy(&m_MidiCfg.szMidiSFXExt[sfx*32], s, 32);
 		int sfx_preset = m_pModDoc->GetMacroType(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
-		int param = m_pModDoc->MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
+		//int param = m_pModDoc->MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
 		
 		m_CbnSFxPreset.SetCurSel(sfx_preset);
 		ToggleBoxes(sfx_preset, sfx);
@@ -1891,11 +1932,11 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 }
 
 void CMidiMacroSetup::OnPlugChanged()
+//------------------------------------
 {
 	if (!m_pSndFile)
 		return;
 
-    char s[72], sname[64];
 	int plug = m_CbnMacroPlug.GetItemData(m_CbnMacroPlug.GetCurSel());
 
 	if (plug<0 || plug>MAX_MIXPLUGINS)
@@ -1909,14 +1950,7 @@ void CMidiMacroSetup::OnPlugChanged()
 		m_CbnMacroParam.SetRedraw(FALSE);
 		m_CbnMacroParam.Clear();
 		m_CbnMacroParam.ResetContent();
-		
-		UINT nParams = pVstPlugin->GetNumParameters();
-		for (UINT i=0; i<nParams; i++)
-		{
-			pVstPlugin->GetParamName(i, sname, sizeof(sname));
-			wsprintf(s, "%02d: %s", i, sname);
-			m_CbnMacroParam.SetItemData(m_CbnMacroParam.AddString(s), i);
-		}
+		AddPluginParameternamesToCombobox(m_CbnMacroParam, *pVstPlugin);
 		m_CbnMacroParam.SetRedraw(TRUE);
 		
 		int param = m_pModDoc->MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[m_CbnSFx.GetCurSel()*32]));
@@ -2210,7 +2244,7 @@ BOOL CChordEditor::OnInitDialog()
 //-------------------------------
 {
 	CMainFrame *pMainFrm;
-	CHAR s[128], stmp[32];
+	CHAR s[128];
 
 	CDialog::OnInitDialog();
 	m_Keyboard.Init(m_hWnd, 2);

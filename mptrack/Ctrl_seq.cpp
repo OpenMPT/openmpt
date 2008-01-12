@@ -105,7 +105,7 @@ BOOL COrderList::UpdateScrollInfo()
 		UINT nPage;
 		int nMax=0;
 
-		while ((nMax < pSndFile->Order.size()) && (pSndFile->Order[nMax] != pSndFile->Patterns.GetInvalidIndex())) nMax++;
+		while ((nMax < pSndFile->Order.size()) && (pSndFile->Order[nMax] != pSndFile->Order.GetInvalidPatIndex())) nMax++;
 		GetScrollInfo(SB_HORZ, &info, SIF_PAGE|SIF_RANGE);
 		info.fMask = SIF_PAGE|SIF_RANGE;
 		info.nMin = 0;
@@ -255,7 +255,7 @@ BOOL COrderList::ProcessKeyDown(UINT nChar)
 		{
 			CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 			int i = 0;
-			for (i=0; i<pSndFile->Order.size()-1; i++) if (pSndFile->Order[i+1] == pSndFile->Patterns.GetInvalidIndex()) break;
+			for (i=0; i+1<pSndFile->Order.size(); i++) if (pSndFile->Order[i+1] == pSndFile->Order.GetInvalidPatIndex()) break;
 			SetCurSel(i);
 		}
 		break;
@@ -300,19 +300,19 @@ BOOL COrderList::ProcessChar(UINT nChar)
 		if (nChar == '+')
 		{
 			ord++;
-			if(ord > pSndFile->Patterns.GetInvalidIndex())
+			if(ord > pSndFile->Order.GetInvalidPatIndex())
 				ord = 0;
 			else
 			{
-				if(ord > maxpat && ord < pSndFile->Patterns.GetIgnoreIndex())
-					ord = pSndFile->Patterns.GetIgnoreIndex();
+				if(ord > maxpat && ord < pSndFile->Order.GetIgnoreIndex())
+					ord = pSndFile->Order.GetIgnoreIndex();
 			}
 		} else
 		if (nChar == '-')
 		{
 			ord--;
-			if (ord < 0) ord = pSndFile->Patterns.GetInvalidIndex(); else
-				if ((ord > maxpat) && (ord < pSndFile->Patterns.GetIgnoreIndex())) ord = maxpat;
+			if (ord < 0) ord = pSndFile->Order.GetInvalidPatIndex(); else
+				if ((ord > maxpat) && (ord < pSndFile->Order.GetIgnoreIndex())) ord = maxpat;
 		}
 		if (ord != pSndFile->Order[m_nScrollPos])
 		{
@@ -501,14 +501,14 @@ void COrderList::OnPaint()
 			s[0] = 0;
 			if ((nOrder >= 0) && (rect.left + m_cxFont - 4 <= rcClient.right))
 			{
-				if (nOrder == pSndFile->Patterns.GetInvalidIndex()) strcpy(s, "---"); //Print the 'dots'
+				if (nOrder == pSndFile->Order.GetInvalidPatIndex()) strcpy(s, "---"); //Print the 'dots'
 				else 
 				{
 					if (nOrder < pSndFile->Patterns.Size()) wsprintf(s, "%d", nOrder);
 					else
 					{
-						if(nOrder == pSndFile->Patterns.GetIgnoreIndex()) strcpy(s, "+++");
-						else strcpy(s, "BUG");
+						if(nOrder == pSndFile->Order.GetIgnoreIndex()) strcpy(s, "+++");
+						else strcpy(s, "???");
 					}
 				}
 			}
@@ -755,12 +755,12 @@ void COrderList::OnInsertOrder()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		//Checking whether there is some pattern at the end of orderlist.
 
+		//Checking whether there is some pattern at the end of orderlist.
 		if(pSndFile->Order[pSndFile->Order.size()-1] < pSndFile->Patterns.Size())
 		{
-			if(pSndFile->Order.size() < pSndFile->Order.GetOrderNumberLimitMax())
-				pSndFile->Order.push_back(pSndFile->Patterns.GetInvalidIndex());
+			if(pSndFile->Order.size() < pSndFile->GetModSpecifications().ordersMax)
+				pSndFile->Order.push_back(pSndFile->Order.GetInvalidPatIndex());
 		}
 		for (int i=pSndFile->Order.size()-1; i>m_nScrollPos; i--) pSndFile->Order[i] = pSndFile->Order[i-1];
 		InvalidateRect(NULL, FALSE);
@@ -777,7 +777,7 @@ void COrderList::OnDeleteOrder()
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		for (int i=m_nScrollPos; i<pSndFile->Order.size()-1; i++) pSndFile->Order[i] = pSndFile->Order[i+1];
-		pSndFile->Order[pSndFile->Order.size()-1] = pSndFile->Patterns.GetInvalidIndex();
+		pSndFile->Order[pSndFile->Order.size()-1] = pSndFile->Order.GetInvalidPatIndex();
 		InvalidateRect(NULL, FALSE);
 		m_pModDoc->SetModified();
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);

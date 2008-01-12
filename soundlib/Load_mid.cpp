@@ -563,7 +563,7 @@ BOOL CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	Log("%d tracks, tempo = %dus, division = %04X TickFactor=%d\n", tracks, nTempoUsec, ((UINT)division) & 0xFFFF, nTickMultiplier);
 #endif
 	// Initializing 
-	Order.assign(Order.size(), Patterns.GetInvalidIndex());
+	Order.assign(Order.size(), Order.GetInvalidPatIndex());
 	memset(chnstate, 0, sizeof(chnstate));
 	memset(miditracks, 0, sizeof(miditracks));
 	memset(midichstate, 0, sizeof(midichstate));
@@ -1204,7 +1204,7 @@ BOOL CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 				pat++;
 				if (pat >= MAX_PATTERNS-1) break;
 				Order[pat] = pat;
-				Order[pat+1] = 0xFF;
+				Order[pat+1] = Order.GetInvalidPatIndex();
 				row = 0;
 			}
 		}

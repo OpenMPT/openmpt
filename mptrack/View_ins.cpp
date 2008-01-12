@@ -10,6 +10,7 @@
 #include "channelManagerDlg.h"
 #include "ScaleEnvPointsDlg.h"
 #include ".\view_ins.h"
+#include "midi.h"
 
 #define ENV_ZOOM				4
 #define ENV_DRAGLOOPSTART		0x100
@@ -2564,33 +2565,60 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 }
 
 
-LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiData, LPARAM)
+LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 //-----------------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	DWORD dwMidiByte1 = (dwMidiData >> 8) & 0xFF;
-	DWORD dwMidiByte2 = (dwMidiData >> 16) & 0xFF;
-	UINT note;
+	const DWORD dwMidiData = dwMidiDataParam;
+	static BYTE midivolume = 127;
 
-	if (!pModDoc) return 0;
-	switch(dwMidiData & 0xF0)
+	CModDoc *pModDoc = GetDocument();
+	BYTE midiByte1 = GetFromMIDIMsg_DataByte1(dwMidiData);
+	BYTE midiByte2 = GetFromMIDIMsg_DataByte2(dwMidiData);
+
+	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
+	if (!pSndFile) return 0;
+
+	const BYTE nNote  = midiByte1 + 1;		// +1 is for MPT, where middle C is 61
+	int nVol   = midiByte2;					
+	BYTE event  = GetFromMIDIMsg_Event(dwMidiData);
+	if ((event == 0x9) && !nVol) event = 0x8;	//Convert event to note-off if req'd
+
+	BYTE mappedIndex = 0, paramValue = 0;
+	uint32 paramIndex = 0;
+	if(pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue)) 
+		return 0;
+
+	switch(event)
 	{
-	// Note Off
-	case 0x80:
-		dwMidiByte2 = 0;
-	// Note On
-	case 0x90:
-		note = (dwMidiByte1 & 0x7F)+1;
-		pModDoc->NoteOff(note, FALSE, m_nInstrument);
-		if (dwMidiByte2 & 0x7F)
-		{
-			int vol = (CDLSBank::DLSMidiVolumeToLinear(dwMidiByte2 & 0x7F)+255) >> 8;
-			if (CMainFrame::m_dwMidiSetup & MIDISETUP_AMPLIFYVELOCITY) vol *= 2;
-			if (vol < 1) vol = 1;
-			if (vol > 256) vol = 256;
-			pModDoc->PlayNote(note, m_nInstrument, 0, FALSE, vol);
-		}
+		case 0x8: // Note Off
+			midiByte2 = 0;
+
+		case 0x9: // Note On
+			pModDoc->NoteOff(nNote, FALSE, m_nInstrument);
+			if (midiByte2 & 0x7F)
+			{
+				nVol = ApplyVolumeRelatedMidiSettings(dwMidiData, midivolume);
+				pModDoc->PlayNote(nNote, m_nInstrument, 0, FALSE, nVol);
+			}
+		break;
+
+		case 0xB: //Controller change
+			switch(midiByte1)
+			{
+				case 0x7: //Volume
+					midivolume = midiByte2;
+				break;
+			}
+		default:
+			if(CMainFrame::m_dwMidiSetup & MIDISETUP_MIDITOPLUG && CMainFrame::GetMainFrame()->GetModPlaying() == pModDoc)
+			{
+				const INSTRUMENTINDEX instr = m_nInstrument;
+				IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
+				if(plug) plug->MidiSend(dwMidiData);
+			}
+		break;
 	}
+
 	return 0;
 }
 

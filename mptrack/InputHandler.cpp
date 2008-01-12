@@ -94,8 +94,9 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 	return executeCommand;
 }
 
-//--------------------------------------------------------------
-CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd)
+
+CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &/*nFlags*/, KeyEventType keyEventType, CWnd* pSourceWnd)
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CommandID executeCommand = keyMap[context][modifierMask][nChar][keyEventType];
 
@@ -172,9 +173,10 @@ void CInputHandler::SetupSpecialKeyInterception()
 	};
 };
 
-//--------------------------------------------------------------
+
 //Deal with Modifier keypresses. Private surouting used above.
-bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode)
+bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int /*scancode*/)
+//-------------------------------------------------------------------------------------------------
 {
 	UINT tempModifierMask = 0;
 	switch(wParam)
@@ -238,7 +240,7 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 }
 
 //--------------------------------------------------------------
-DWORD CInputHandler::GetKey(CommandID c)
+DWORD CInputHandler::GetKey(CommandID /*c*/)
 {
 	return 0;// command[c].kc.code command[c].kc.mod;
 }
@@ -427,6 +429,9 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_PLUGIN_SETUP:		s="Plugin Manager...\t"; c=kcViewAddPlugin; break;
 		case ID_CHANNEL_MANAGER:	s="Channel Manager...\t"; c=kcViewChannelManager; break;
 		case ID_VIEW_SONGPROPERTIES:s="Song Properties...\t"; c=kcViewSongProperties; break; //rewbs.graph
+		case ID_VIEW_MIDIMAPPING:	s="MIDI mapping...\t"; c = kcViewMIDImapping; break;
+
+		
 /*	
 		case ID_WINDOW_NEW:			s="New Window\t"; c=kcWindowNew; break;
 		case ID_WINDOW_CASCADE:		s="Cascade\t"; c=kcWindowCascade; break;
@@ -486,6 +491,8 @@ void CInputHandler::UpdateMainMenu()
 	pMenu->ModifyMenu(ID_VIEW_OPTIONS, MF_BYCOMMAND | MF_STRING, ID_VIEW_OPTIONS, GetMenuText(ID_VIEW_OPTIONS));
 	pMenu->ModifyMenu(ID_PLUGIN_SETUP, MF_BYCOMMAND | MF_STRING, ID_PLUGIN_SETUP, GetMenuText(ID_PLUGIN_SETUP));
 	pMenu->ModifyMenu(ID_CHANNEL_MANAGER, MF_BYCOMMAND | MF_STRING, ID_CHANNEL_MANAGER, GetMenuText(ID_CHANNEL_MANAGER));
+	pMenu->ModifyMenu(ID_VIEW_SONGPROPERTIES, MF_BYCOMMAND | MF_STRING, ID_VIEW_SONGPROPERTIES, GetMenuText(ID_VIEW_SONGPROPERTIES));
+	pMenu->ModifyMenu(ID_VIEW_MIDIMAPPING, MF_BYCOMMAND | MF_STRING, ID_VIEW_MIDIMAPPING, GetMenuText(ID_VIEW_MIDIMAPPING));
 	pMenu->ModifyMenu(ID_HELP, MF_BYCOMMAND | MF_STRING, ID_HELP, GetMenuText(ID_HELP));
 /*	
 	pMenu->ModifyMenu(ID_WINDOW_NEW, MF_BYCOMMAND | MF_STRING, ID_WINDOW_NEW, GetMenuText(ID_WINDOW_NEW));

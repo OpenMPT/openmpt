@@ -26,13 +26,15 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	CHAR s[256];
 	UINT b64 = 0;
 	
-	if (nNewType == m_SndFile.m_nType){
+	if (nNewType == m_SndFile.GetType() && nNewType == MOD_TYPE_IT){
 		// Even if m_nType doesn't change, we might need to change extension in itp<->it case.
 		// This is because ITP is a HACK and doesn't genuinely change m_nType,
 		// but uses flages instead.
 		ChangeFileExtension(nNewType);
 		return TRUE;
 	}
+
+	if(nNewType == m_SndFile.GetType()) return TRUE;
 
 	if(m_SndFile.m_nType == MOD_TYPE_MPT)
 	{
@@ -308,19 +310,11 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 
 
 // Change the number of channels
-BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
+BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg)
 //------------------------------------------------
 {
-	int maxChans;
-	if (m_SndFile.m_nType&(MOD_TYPE_IT|MOD_TYPE_MPT)) {
-		maxChans=max_chans_IT;
-	} else if (m_SndFile.m_nType&MOD_TYPE_XM) {
-		maxChans=max_chans_XM;
-	} else if (m_SndFile.m_nType&MOD_TYPE_S3M) {
-		maxChans=max_chans_S3M;
-	} else {
-		maxChans=max_chans_MOD;
-	}
+	const CHANNELINDEX maxChans = m_SndFile.GetModSpecifications().channelsMax;
+
 	if (nNewChannels > maxChans) {
 		CString error;
 		error.Format("Error: Max number of channels for this type is %d", maxChans);
@@ -332,7 +326,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 	if (nNewChannels < m_SndFile.m_nChannels)
 	{
 		UINT nChnToRemove = 0;
-		UINT nFound = 0;
+		CHANNELINDEX nFound = 0;
 
 		//nNewChannels = 0 means user can choose how many channels to remove
 		if(nNewChannels > 0) {
@@ -342,32 +336,11 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels)
 			nChnToRemove = 0;
 			nFound = m_SndFile.m_nChannels;
 		}
-		CRemoveChannelsDlg rem(&m_SndFile, nChnToRemove);
-
-		// Checking for unused channels
-		for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--) //rewbs.removeChanWindowCleanup
-		{
-			rem.m_bChnMask[iRst] = TRUE;
-			for (UINT ipat=0; ipat<m_SndFile.Patterns.Size(); ipat++) if (m_SndFile.Patterns[ipat])
-			{
-				MODCOMMAND *p = m_SndFile.Patterns[ipat] + iRst;
-				UINT len = m_SndFile.PatternSize[ipat];
-				for (UINT idata=0; idata<len; idata++, p+=m_SndFile.m_nChannels)
-				{
-					if (*((LPDWORD)p))
-					{
-						rem.m_bChnMask[iRst] = FALSE;
-						break;
-					}
-				}
-				if (!rem.m_bChnMask[iRst]) break;
-			}
-			if (rem.m_bChnMask[iRst])
-			{
-				if ((--nFound) == 0) break;
-			}
-		}
+		
+		CRemoveChannelsDlg rem(&m_SndFile, nChnToRemove, showCancelInRemoveDlg);
+		CheckUnusedChannels(rem.m_bChnMask, nFound);
 		if (rem.DoModal() != IDOK) return FALSE;
+
 		// Removing selected channels
 		RemoveChannels(rem.m_bChnMask);
 	} else
@@ -416,7 +389,7 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 		{
 			if(!m_bChnMask[i]) nRemainingChannels++;
 		}
-		if(nRemainingChannels == m_SndFile.m_nChannels || nRemainingChannels < 4)
+		if(nRemainingChannels == m_SndFile.m_nChannels || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin)
 		{
 			CString str;	
 			if(nRemainingChannels == m_SndFile.m_nChannels) str.Format("No channels chosen to be removed.");
@@ -499,7 +472,7 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 		{
 			if (n >= maxpat) maxpat = n+1;
 			if (!bEnd) bPatUsed[n] = TRUE;
-		} else if (n == m_SndFile.Patterns.GetInvalidIndex()) bEnd = TRUE;
+		} else if (n == m_SndFile.Order.GetInvalidPatIndex()) bEnd = TRUE;
 	}
 	nMinToRemove = 0;
 	if (!bRemove)
@@ -562,7 +535,7 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 	}
 	while (imap < maxOrdIndex)
 	{
-		m_SndFile.Order[imap++] = m_SndFile.Patterns.GetInvalidIndex();
+		m_SndFile.Order[imap++] = m_SndFile.Order.GetInvalidPatIndex();
 	}
 	BEGIN_CRITICAL();
 	// Reorder patterns & Delete unused patterns
@@ -779,18 +752,18 @@ BOOL CModDoc::RemoveUnusedPlugs()
 	memset(usedmap, false, MAX_MIXPLUGINS);
 	
 
-	for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++) {
+	for (PLUGINDEX nPlug=0; nPlug < MAX_MIXPLUGINS; nPlug++) {
 
 		//Is the plugin assigned to a channel?
-		for (int nChn=0; nChn<m_SndFile.m_nChannels; nChn++) {
-			if (m_SndFile.ChnSettings[nChn].nMixPlugin == nPlug+1) {
+		for (CHANNELINDEX nChn = 0; nChn < m_SndFile.GetNumChannels(); nChn++) {
+			if (m_SndFile.ChnSettings[nChn].nMixPlugin == nPlug + 1u) {
 				usedmap[nPlug]=true;
 				break;
 			}
 		}
 
 		//Is the plugin used by an instrument?
-		for (int nIns=1; nIns<=m_SndFile.m_nInstruments; nIns++) {
+		for (INSTRUMENTINDEX nIns=1; nIns<=m_SndFile.GetNumInstruments(); nIns++) {
 			if (m_SndFile.Headers[nIns] && (m_SndFile.Headers[nIns]->nMixPlug == nPlug+1)) {
 				usedmap[nPlug]=true;
 				break;
@@ -1052,15 +1025,15 @@ LONG CModDoc::InsertPattern(LONG nOrd, UINT nRows)
 	//or if the last order already has a pattern.
 	if((nOrd == m_SndFile.Order.size() ||
 		m_SndFile.Order.back() < m_SndFile.Patterns.Size() ) &&
-		m_SndFile.Order.size() < m_SndFile.Order.GetOrderNumberLimitMax())
+		m_SndFile.Order.size() < m_SndFile.GetModSpecifications().ordersMax)
 	{
-		m_SndFile.Order.push_back(m_SndFile.Patterns.GetInvalidIndex());
+		m_SndFile.Order.push_back(m_SndFile.Order.GetInvalidPatIndex());
 	}
 
 	for (UINT j=0; j<m_SndFile.Order.size(); j++)
 	{
 		if (m_SndFile.Order[j] == i) break;
-		if (m_SndFile.Order[j] == m_SndFile.Patterns.GetInvalidIndex())
+		if (m_SndFile.Order[j] == m_SndFile.Order.GetInvalidPatIndex())
 		{
 			m_SndFile.Order[j] = i;
 			break;
@@ -1251,7 +1224,7 @@ BOOL CModDoc::RemoveOrder(UINT n)
 		{
 			m_SndFile.Order[i] = m_SndFile.Order[i+1];
 		}
-		m_SndFile.Order[m_SndFile.Order.size()-1] = m_SndFile.Patterns.GetInvalidIndex();
+		m_SndFile.Order[m_SndFile.Order.size()-1] = m_SndFile.Order.GetInvalidPatIndex();
 		END_CRITICAL();
 		SetModified();
 		return TRUE;
@@ -2046,6 +2019,35 @@ UINT CModDoc::DoUndo()
 	PatternUndo[MAX_UNDO_LEVEL-1].pbuffer = NULL;
 	if (!PatternUndo[0].pbuffer) UpdateAllViews(NULL, HINT_UNDO);
 	return nPattern;
+}
+
+
+void CModDoc::CheckUnusedChannels(BOOL mask[MAX_CHANNELS], CHANNELINDEX maxRemoveCount)
+//--------------------------------------------------------
+{
+	// Checking for unused channels
+	for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--) //rewbs.removeChanWindowCleanup
+	{
+		mask[iRst] = TRUE;
+		for (UINT ipat=0; ipat<m_SndFile.Patterns.Size(); ipat++) if (m_SndFile.Patterns[ipat])
+		{
+			MODCOMMAND *p = m_SndFile.Patterns[ipat] + iRst;
+			UINT len = m_SndFile.PatternSize[ipat];
+			for (UINT idata=0; idata<len; idata++, p+=m_SndFile.m_nChannels)
+			{
+				if (*((LPDWORD)p))
+				{
+					mask[iRst] = FALSE;
+					break;
+				}
+			}
+			if (!mask[iRst]) break;
+		}
+		if (mask[iRst])
+		{
+			if ((--maxRemoveCount) == 0) break;
+		}
+	}
 }
 
 

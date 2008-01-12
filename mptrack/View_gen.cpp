@@ -397,16 +397,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 	{
 		m_CbnPlugin.SetRedraw(FALSE);
 		m_CbnPlugin.ResetContent();
-		for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
-		{
-			PSNDMIXPLUGIN p = &pSndFile->m_MixPlugins[iPlug];
-			p->Info.szLibraryName[63] = 0;
-			if (p->Info.szLibraryName[0])
-				wsprintf(s, "FX%d: %s", iPlug+1, p->Info.szLibraryName);
-			else
-				wsprintf(s, "FX%d: undefined", iPlug+1);
-			m_CbnPlugin.AddString(s);
-		}
+		AddPluginNamesToCombobox(m_CbnPlugin, pSndFile->m_MixPlugins, true);
 		m_CbnPlugin.SetRedraw(TRUE);
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
@@ -1375,6 +1366,7 @@ VOID CViewGlobals::OnSetParameter()
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 VOID CViewGlobals::OnSetWetDry()
+//------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	PSNDMIXPLUGIN pPlugin;
@@ -1384,7 +1376,7 @@ VOID CViewGlobals::OnSetWetDry()
 	pSndFile = pModDoc->GetSoundFile();
 	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
 	if (pPlugin->pMixPlugin){
-		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+		//CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 		UINT value = GetDlgItemIntEx(IDC_EDIT15);
 		pPlugin->fDryRatio = (float)value / 100.0f;
 		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
@@ -1570,7 +1562,7 @@ VOID CViewGlobals::OnOutputRoutingChanged()
 
 
 
-LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CViewGlobals::OnModViewMsg(WPARAM wParam, LPARAM /*lParam*/)
 //-----------------------------------------------------------------
 {
 	switch(wParam)

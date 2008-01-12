@@ -10,6 +10,26 @@
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"
 
+
+static void CreateVerifiedProgramName(const char* rawname, const size_t rnSize,
+									  char* name, const size_t nSize,
+									  const long p)
+//-----------------------------------------------------------------------------
+{
+	if(rawname[0] < 32) 
+	{
+		wsprintf(name, "%02d - Program %d",p,p);
+	} 
+	else 
+	{
+		size_t k=0;
+		while(k < rnSize-1 && rawname[k] != 0 && rawname[k] < 'A' && k<255) k++;
+		wsprintf(name, "%02d - %s", p, &rawname[k]);
+	}
+	name[nSize-1] = 0;
+}
+
+
 BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_WM_CLOSE()
 	ON_WM_INITMENU()
@@ -150,29 +170,27 @@ VOID CAbstractVstEditor::SetupMenu()
 void CAbstractVstEditor::UpdatePresetField()
 //------------------------------------------
 {
+	
 	if(m_pVstPlugin->GetNumPrograms() > 0 && m_pMenu->GetMenuItemCount() < 5)
 	{
-		m_pMenu->InsertMenu(4, MF_BYPOSITION, ID_VSTPRESETBACKWARDJUMP, (LPCTSTR)"<<");
-		m_pMenu->InsertMenu(5, MF_BYPOSITION, ID_PREVIOUSVSTPRESET, (LPCTSTR)"<");
-		m_pMenu->InsertMenu(6, MF_BYPOSITION, ID_NEXTVSTPRESET, (LPCTSTR)">");
-		m_pMenu->InsertMenu(7, MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, (LPCTSTR)">>");
-		m_pMenu->InsertMenu(8, MF_BYPOSITION|MF_DISABLED, 0, "");
+		m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETBACKWARDJUMP, (LPCTSTR)"<<");
+		m_pMenu->AppendMenu(MF_BYPOSITION, ID_PREVIOUSVSTPRESET, (LPCTSTR)"<");
+		m_pMenu->AppendMenu(MF_BYPOSITION, ID_NEXTVSTPRESET, (LPCTSTR)">");
+		m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, (LPCTSTR)">>");
+		m_pMenu->AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, "");
 	}
-		
+	
 	long index = m_pVstPlugin->GetCurrentProgram();
-	char name[256+6];
-	memset(name, ' ', 6);
-	itoa(index, name, 10);
-	size_t i = 4;
-	if(index < 1000) i = 3;
-	if(index < 100) i = 2;
-	if(index < 10) i = 1;
-	name[i] = ':'; name[i+1] = ' ';
-	
-	m_pVstPlugin->GetProgramNameIndexed(index, -1, name+i+2);
-	
+	char name[266];
+	char rawname[256];
+	m_pVstPlugin->GetProgramNameIndexed(index, -1, rawname);
+	rawname[sizeof(rawname)-1] = 0;
+	CreateVerifiedProgramName(rawname, sizeof(rawname), name, sizeof(name), index);
+
 	m_pMenu->ModifyMenu(8, MF_BYPOSITION, 0, name);
+
 	DrawMenuBar();
+	
 }
 
 
@@ -281,7 +299,7 @@ void CAbstractVstEditor::SetTitle()
 	}
 }
 
-LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 //----------------------------------------------------------------------
 {
 	if (wParam == kcNull)
@@ -292,8 +310,12 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	switch(wParam)
 	{
 		case kcVSTGUIPrevPreset:	OnSetPreviousVSTPreset(); return wParam;
+		case kcVSTGUIPrevPresetJump:OnVSTPresetBackwardJump(); return wParam;
 		case kcVSTGUINextPreset:	OnSetNextVSTPreset(); return wParam;
+		case kcVSTGUINextPresetJump:OnVSTPresetForwardJump(); return wParam;
 		case kcVSTGUIRandParams:	OnRandomizePreset() ; return wParam;
+		
+		
 	}
 	if (wParam>=kcVSTGUIStartNotes && wParam<=kcVSTGUIEndNotes)
 	{
@@ -335,7 +357,7 @@ void CAbstractVstEditor::UpdatePresetMenu()
 {
 	long numProgs = m_pVstPlugin->GetNumPrograms();
 	long curProg  = m_pVstPlugin->GetCurrentProgram();
-	char s[256];
+	char s[266];
 	char sname[256];
 
 	
@@ -365,13 +387,8 @@ void CAbstractVstEditor::UpdatePresetMenu()
 	for (long p=0; p<numProgs; p++) {
 		m_pVstPlugin->GetProgramNameIndexed(p, -1, sname);
 
-		if(sname[0] < 32) {							// Verify name
-			wsprintf(s, "%02d - Program %d",p,p);
-		} else {
-			int k=0;
-			while(k < sizeof(sname)-1 && sname[k] != 0 && sname[k] < 'a' && sname[k] < 'z' && sname[k] < 'A' && sname[k] < 'Z' && k<255) k++;
-			wsprintf(s, "%02d - %s",p,&sname[k]);
-		}
+		sname[sizeof(sname)-1] = 0;
+		CreateVerifiedProgramName(sname, sizeof(sname), s, sizeof(s), p);
 
 		// Get menu item properties
  		bool checkedItem = (p==curProg);			
@@ -602,12 +619,15 @@ void CAbstractVstEditor::OnToggleEditor(UINT nID)
 	}
 }
 
-void CAbstractVstEditor::OnInitMenu(CMenu* pMenu) {
+void CAbstractVstEditor::OnInitMenu(CMenu* /*pMenu*/)
+//---------------------------------------------------
+{
 	//AfxMessageBox("");
 	SetupMenu();
 }
 
-bool CAbstractVstEditor::CheckInstrument(int instrument) 
+bool CAbstractVstEditor::CheckInstrument(int instrument)
+//------------------------------------------------------
 {
 	CSoundFile* pSndFile = m_pVstPlugin->GetSoundFile();
 	
