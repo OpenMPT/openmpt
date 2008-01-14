@@ -272,7 +272,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 	long returnVal=0;
 	penv->pTuning = m_defaultInstrument.pTuning;
 	penv->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-	penv->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_MIDI;
+	penv->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 	if (trkvers < 0x0200)
 	{
 		const ITOLDINSTRUMENT *pis = (const ITOLDINSTRUMENT *)p;
@@ -446,6 +446,8 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		penv->nPanSwing = pis->rp;
 		penv->nPan = (pis->dfp & 0x7F) << 2;
 		SetDefaultInstrumentValues(penv);
+		penv->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
+		penv->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 		if (penv->nPan > 256) penv->nPan = 128;
 		if (pis->dfp < 0x80) penv->dwFlags |= ENV_SETPANNING;
 	}
