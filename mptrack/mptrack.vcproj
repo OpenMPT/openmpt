@@ -499,9 +499,6 @@
 				RelativePath="..\soundlib\Load_mod.cpp">
 			</File>
 			<File
-				RelativePath="..\soundlib\load_mptm.cpp">
-			</File>
-			<File
 				RelativePath="..\Soundlib\load_mt2.cpp">
 			</File>
 			<File
@@ -541,6 +538,9 @@
 				RelativePath=".\MainFrm.cpp">
 			</File>
 			<File
+				RelativePath=".\MIDIMappingDialog.cpp">
+			</File>
+			<File
 				RelativePath=".\misc_util.cpp">
 			</File>
 			<File
@@ -572,9 +572,6 @@
 			</File>
 			<File
 				RelativePath=".\mpt_midi.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\MPT_module.cpp">
 			</File>
 			<File
 				RelativePath=".\mptrack.cpp">
@@ -986,6 +983,9 @@
 				RelativePath=".\MainFrm.h">
 			</File>
 			<File
+				RelativePath=".\MIDIMappingDialog.h">
+			</File>
+			<File
 				RelativePath=".\misc_util.h">
 			</File>
 			<File
@@ -1008,9 +1008,6 @@
 			</File>
 			<File
 				RelativePath=".\Mpdlgs.h">
-			</File>
-			<File
-				RelativePath="..\soundlib\MPT_module.h">
 			</File>
 			<File
 				RelativePath=".\mptrack.h">
