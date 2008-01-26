@@ -300,7 +300,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		memset(Headers[iIns], 0, sizeof(INSTRUMENTHEADER));
 		Headers[iIns]->pTuning = m_defaultInstrument.pTuning;
 		Headers[iIns]->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-		Headers[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_MIDI;
+		Headers[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 		memcpy(Headers[iIns]->name, pih->name, 22);
 		if ((nsamples = pih->samples) > 0)

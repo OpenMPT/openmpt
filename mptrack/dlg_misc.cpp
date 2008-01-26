@@ -276,8 +276,8 @@ void CModTypeDlg::UpdateDialog()
 	{
 		p->ShowWindow(XMorITorMPT);
 		if(ITorMPT)
-            p->SetWindowText("0: True to use various IT compatible playback changes\n"
-							 "1: True for old instrument random variation behavior\n"
+            p->SetWindowText("0: Various playback changes for IT compatibility\n"
+							 "1: Old instrument random variation behavior\n"
 							 "2: Plugin volume command bug emulation");
 		else if(XM) p->SetWindowText("0: Unused\n1: Unused\n2: Plugin volume command bug emulation");
 	}
