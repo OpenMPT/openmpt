@@ -2736,7 +2736,7 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.nVolEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.wPitchToTempoLock = 0;
 	m_defaultInstrument.pTuning = m_defaultInstrument.s_DefaultTuning;
-	m_defaultInstrument.nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_VOLUME;
+	m_defaultInstrument.nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
 	m_defaultInstrument.nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_DRYWET;
 }
 

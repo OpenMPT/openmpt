@@ -916,8 +916,8 @@ BEGIN
     RTEXT           "--",IDC_TEXT1,204,62,27,8
     GROUPBOX        "Pitch/Tempo Lock",IDC_STATIC,364,57,89,25
     GROUPBOX        "Sample Map",IDC_STATIC,461,27,62,141
-    CTEXT           "Note Velocity style",IDC_STATIC,374,101,77,10,
-                    SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "Note Velocity",IDC_STATIC,374,101,77,10,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
     CTEXT           "Volume command effect",IDC_STATIC,374,133,77,10,
                     SS_CENTERIMAGE,WS_EX_STATICEDGE
     GROUPBOX        "Tuning (experimental)",IDC_STATIC,364,28,92,28
