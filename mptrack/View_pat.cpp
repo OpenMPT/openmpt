@@ -2910,10 +2910,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	const BYTE nByte1 = GetFromMIDIMsg_DataByte1(dwMidiData);
 	const BYTE nByte2 = GetFromMIDIMsg_DataByte2(dwMidiData);
 
-	const BYTE nNote  = nByte1 + 1;				// +1 is for MPT, where middle C is 61
-	int nVol   = nByte2;						// At this stage nVol is a non linear value in [0;127]
+	const BYTE nNote = nByte1 + 1;				// +1 is for MPT, where middle C is 61
+	int nVol = nByte2;							// At this stage nVol is a non linear value in [0;127]
 												// Need to convert to linear in [0;64] - see below
-	BYTE event  = GetFromMIDIMsg_Event(dwMidiData);
+	BYTE event = GetFromMIDIMsg_Event(dwMidiData);
 
 	if ((event == 0x9) && !nVol) event = 0x8;	//Convert event to note-off if req'd
 
@@ -3241,7 +3241,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcChannelMute:					OnMuteChannel(true); return wParam;
 		case kcChannelSolo:					OnSoloChannel(true); return wParam;
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
-		case kcToggleChanMuteOnPatTransition: TogglePendingMute((m_dwCursor&0xFFFF)>>3); return wParam;
+		case kcToggleChanMuteOnPatTransition: TogglePendingMute(GetChanFromCursor(m_dwCursor)); return wParam;
 		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
 		case kcTimeAtRow:					OnShowTimeAtRow(); return wParam;
 		case kcSoloChnOnPatTransition:		PendingSoloChn(GetCurrentChannel()); return wParam;
@@ -3701,8 +3701,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 		return;
 
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
-	UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
+	UINT nChn = GetChanFromCursor(m_dwCursor);
 	PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
 	BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
@@ -3725,11 +3724,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 	//Work out where to put the note off
 	UINT nRow = usePlaybackPosition ? pSndFile->m_nRow : m_nRow;
 
-	prowbase = p + nRow * pSndFile->m_nChannels;
-	if (releaseChan < pSndFile->GetNumChannels()) 
-		p=prowbase+releaseChan;
-	else
-		p=prowbase+nChn;
+	MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, (releaseChan < pSndFile->GetNumChannels()) ? releaseChan : nChn);
 
 	//don't overwrite:
 	if (p->note || p->instr || p->volcmd) {
@@ -3802,8 +3797,7 @@ void CViewPattern::TempStopChord(int note)
 		return;
 
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
-	UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
+	UINT nChn = GetChanFromCursor(m_dwCursor);
 	PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
 	BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
@@ -3816,9 +3810,7 @@ void CViewPattern::TempStopChord(int note)
 	if  (!(CMainFrame::m_dwPatternSetup&PATTERN_KBDNOTEOFF ))
 		return;
 
-	//Work out where to put the note off
-	prowbase = p + m_nRow * pSndFile->m_nChannels;
-	p=prowbase+nChn;
+	MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
 
 	//don't overwrite:
 	if (p->note)
@@ -3863,15 +3855,11 @@ void CViewPattern::TempEnterOctave(int val)
 	{
 
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
-		MODCOMMAND oldcmd;		// This is the command we are about to overwrite
-		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
+		UINT nChn = GetChanFromCursor(m_dwCursor);
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		// -- Work out where to put the new oct
-		prowbase = p + m_nRow * pSndFile->m_nChannels;
-		p = prowbase + nChn;
-		oldcmd = *p;
+		MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
+		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
 		if (oldcmd.note)
 			TempEnterNote(((oldcmd.note-1)%12)+val*12+1);
 	}

@@ -810,6 +810,8 @@
 #define IDC_EDIT_FLAGS                  2323
 #define IDC_CHECKCAPTURE                2324
 #define IDC_SPINMOVEMAPPING             2325
+#define IDC_BUTTON_HALF                 2326
+#define IDC_BUTTON_DOUBLE               2327
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1032,7 +1034,7 @@
 #define ID_Menu59207                    59207
 #define ID_ENVELOPE_SCALEPOINTS         59208
 #define ID_NETLINK_OPENMPTWIKI          59210
-#define ID_VIEW_MIDIMAPPING				59211
+#define ID_VIEW_MIDIMAPPING             59211
 
 // Next default values for new objects
 // 
@@ -1041,7 +1043,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        516
 #define _APS_NEXT_COMMAND_VALUE         59212
-#define _APS_NEXT_CONTROL_VALUE         2326
+#define _APS_NEXT_CONTROL_VALUE         2328
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

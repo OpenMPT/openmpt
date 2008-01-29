@@ -80,17 +80,19 @@ CCtrlGeneral::CCtrlGeneral()
 BOOL CCtrlGeneral::OnInitDialog()
 //-------------------------------
 {
+	const CModSpecifications specs = m_pSndFile->GetModSpecifications();
 	CModControlDlg::OnInitDialog();
 	// Song Title
 	if(m_pSndFile)
-		m_EditTitle.SetLimitText(m_pSndFile->GetModSpecifications().modNameLengthMax);
+		m_EditTitle.SetLimitText(specs.modNameLengthMax);
 	else
 		m_EditTitle.SetLimitText(25);
 
 // -> CODE#0016
 // -> DESC="default tempo update"
 //	m_SpinTempo.SetRange(32, 255);	// 255 bpm max
-	m_SpinTempo.SetRange(32, 512);
+	//m_SpinTempo.SetRange(32, 512);
+	m_SpinTempo.SetRange(specs.tempoMin, specs.tempoMax);
 	m_SpinSpeed.SetRange(1, 64);
 // -! BEHAVIOUR_CHANGE#0016
 	m_SpinGlobalVol.SetRange(0, 128);
@@ -98,7 +100,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SpinVSTiVol.SetRange(0, 2000);
 	m_SpinRestartPos.SetRange(0, 255);
 	
-	m_SliderTempo.SetRange(0, 480);
+	m_SliderTempo.SetRange(0, specs.tempoMax - specs.tempoMin);
 	m_SliderGlobalVol.SetRange(0, MAX_SLIDER_GLOBAL_VOL);
 	m_SliderVSTiVol.SetRange(0, MAX_SLIDER_VSTI_VOL);
 	m_SliderSamplePreAmp.SetRange(0, MAX_SLIDER_SAMPLE_VOL);
@@ -190,13 +192,17 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SliderGlobalVol.SetPos(MAX_SLIDER_GLOBAL_VOL-m_pSndFile->m_nDefaultGlobalVolume);
 		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL-m_pSndFile->m_nVSTiVolume);
 		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL-m_pSndFile->m_nSamplePreAmp);
-		m_SliderTempo.SetPos(480 - m_pSndFile->m_nDefaultTempo + 32);
+		m_SliderTempo.SetPos(m_pSndFile->GetModSpecifications().tempoMax - m_pSndFile->m_nDefaultTempo);
 
 
 
 	}
 	if (dwHint & HINT_MODTYPE)
 	{
+		CModSpecifications specs = m_pSndFile->GetModSpecifications();
+		m_SpinTempo.SetRange(specs.tempoMin, specs.tempoMax);
+		m_SliderTempo.SetRange(0, specs.tempoMax - specs.tempoMin);
+
 		BOOL b = TRUE;
 		if (m_pSndFile->m_nType == MOD_TYPE_MOD) b = FALSE;
 		m_EditTempo.EnableWindow(b);
@@ -211,6 +217,8 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SpinSamplePA.EnableWindow(b);
 		m_SliderSamplePreAmp.EnableWindow(b);
 		m_SliderVSTiVol.EnableWindow(b);
+		//Note: Global volume slider is not disabled for MOD
+		//on purpose(can be used to control play volume)
 
 		// MOD Type
 		LPCSTR pszModType = "MOD (ProTracker)";
@@ -258,11 +266,15 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		CSliderCtrl* pSlider = (CSliderCtrl*) pscroll;
 
 		if (pSlider==&m_SliderTempo) {
-			int tempo = 480 - m_SliderTempo.GetPos() + 32;
-			if ((tempo >= 32) && (tempo <= 512) && (tempo != m_pSndFile->m_nDefaultTempo)) {
+			int min, max;
+			m_SpinTempo.GetRange(min, max);
+			int tempo = max - m_SliderTempo.GetPos();
+			if ((tempo >= m_pSndFile->GetModSpecifications().tempoMin) && (tempo <= m_pSndFile->GetModSpecifications().tempoMax) && (tempo != m_pSndFile->m_nDefaultTempo)) {
 				m_pSndFile->m_nDefaultTempo = tempo;
 				m_pSndFile->m_nMusicTempo = tempo;
-				m_pModDoc->SetModified();
+				if(m_pSndFile->GetType() != MOD_TYPE_MOD)
+					m_pModDoc->SetModified();
+
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
 		}
@@ -272,7 +284,9 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_pSndFile->m_nDefaultGlobalVolume)) {
 				m_pSndFile->m_nGlobalVolume = gv;
 				m_pSndFile->m_nDefaultGlobalVolume = gv;
-				m_pModDoc->SetModified();
+				if(m_pSndFile->GetType() != MOD_TYPE_MOD)
+					m_pModDoc->SetModified();
+
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
 		}
@@ -327,7 +341,8 @@ void CCtrlGeneral::OnTempoChanged()
 		if (s[0])
 		{
 			UINT n = atoi(s);
-			if ((n >= 32) && (n <= 512) && (n != m_pSndFile->m_nDefaultTempo))
+			CModSpecifications specs = m_pSndFile->GetModSpecifications();
+			if ((n >= specs.tempoMin) && (n <= specs.tempoMax) && (n != m_pSndFile->m_nDefaultTempo))
 			{
 				m_bEditsLocked=true;
 				m_EditTempo.SetModify(FALSE);

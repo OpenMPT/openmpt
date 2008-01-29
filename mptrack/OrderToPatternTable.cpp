@@ -89,8 +89,32 @@ bool COrderToPatternTable::NeedsExtraDatafield() const
 }
 
 
-PATTERNINDEX COrderToPatternTable::GetInvalidPatIndex() const {return m_rSndFile.GetType() == MOD_TYPE_MPT ?  65535 : 0xFF;}
-PATTERNINDEX COrderToPatternTable::GetIgnoreIndex() const {return m_rSndFile.GetType() == MOD_TYPE_MPT ? 65534 : 0xFE;}
+void COrderToPatternTable::OnModTypeChanged(const MODTYPE oldtype)
+//----------------------------------------------------------------
+{
+	const CModSpecifications specs = m_rSndFile.GetModSpecifications();
+
+	//Resize orderlist if needed. Because old orderlist had 256 elements, not making it
+	//smaller than that even if the modtype doesn't support that many orders.
+	if(specs.ordersMax < GetCount()) 
+	{
+		resize(max(MAX_PATTERNS, specs.ordersMax));
+		for(ORDERINDEX i = GetCount(); i>specs.ordersMax; --i) (*this)[i-1] = GetInvalidPatIndex();
+	}
+
+	//Replace items used to denote end of song/skip order.
+	replace(begin(), end(), GetInvalidPatIndex(oldtype), GetInvalidPatIndex());
+	replace(begin(), end(), GetIgnoreIndex(oldtype), GetIgnoreIndex());
+}
+
+
+PATTERNINDEX COrderToPatternTable::GetInvalidPatIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ?  65535 : 0xFF;}
+PATTERNINDEX COrderToPatternTable::GetIgnoreIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ? 65534 : 0xFE;}
+
+PATTERNINDEX COrderToPatternTable::GetInvalidPatIndex() const {return GetInvalidPatIndex(m_rSndFile.GetType());}
+PATTERNINDEX COrderToPatternTable::GetIgnoreIndex() const {return GetIgnoreIndex(m_rSndFile.GetType());}
+
+
 
 
 //--------------------------------------------------
@@ -130,4 +154,6 @@ void COrderSerialization::ProRead(INSTREAM& istrm, const uint64 /*datasize*/)
 		*iter = temp;
 	}
 }
+
+
 

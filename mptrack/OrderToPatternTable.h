@@ -32,14 +32,21 @@ public:
 
 	size_t WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize);
 
+	ORDERINDEX GetCount() const {return static_cast<ORDERINDEX>(size());}
+
 	//Deprecated function used for MPTm's created in 1.17.02.46 - 1.17.02.48.
 	DWORD Unserialize(const BYTE* const src, const DWORD memLength);
 	
 	//Returns true if the IT orderlist datafield is not sufficient to store orderlist information.
 	bool NeedsExtraDatafield() const;
 
+	void OnModTypeChanged(const MODTYPE oldtype);
+
 	PATTERNINDEX GetInvalidPatIndex() const; //To correspond 0xFF
+	static PATTERNINDEX GetInvalidPatIndex(const MODTYPE type);
+
 	PATTERNINDEX GetIgnoreIndex() const; //To correspond 0xFE
+	static PATTERNINDEX GetIgnoreIndex(const MODTYPE type);
 
 	COrderSerialization* NewReadWriteObject() {return new COrderSerialization(*this);}
 

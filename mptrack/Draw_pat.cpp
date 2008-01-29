@@ -99,12 +99,14 @@ const PATTERNFONT gSmallPatternFont =
 // CViewPattern Drawing Implementation
 
 inline PCPATTERNFONT GetCurrentPatternFont()
+//------------------------------------------
 {
 	return (CMainFrame::m_dwPatternSetup & PATTERN_SMALLFONT) ? &gSmallPatternFont : &gDefaultPatternFont;
 }
 
 
 static BYTE hilightcolor(int c0, int c1)
+//--------------------------------------
 {
 	int cf0, cf1;
 
@@ -510,14 +512,21 @@ void CViewPattern::OnDraw(CDC *pDC)
 			UINT nPrevPat = m_nPattern;
 			BOOL bPrevPatFound = FALSE;
 
+			// Display previous pattern
 			if (CMainFrame::m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
 			{
-				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-			
-				if ((nCurOrder > 0) && (nCurOrder < pSndFile->Order.size()) && (pSndFile->Order[nCurOrder] == m_nPattern))
+				const ORDERINDEX startOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
+				if(startOrder > 0)
 				{
-					nPrevPat = pSndFile->Order[nCurOrder-1];
-					bPrevPatFound = TRUE;
+					ORDERINDEX prevOrder = startOrder - 1;
+					//Skip +++ items
+					while(prevOrder > 0 && pSndFile->Order[prevOrder] == pSndFile->Order.GetIgnoreIndex()) --prevOrder;
+
+					if(startOrder < pSndFile->Order.size() && pSndFile->Order[startOrder] == m_nPattern)
+					{
+						nPrevPat = pSndFile->Order[prevOrder];
+						bPrevPatFound = TRUE;
+					}
 				}
 			}
 			if ((bPrevPatFound) && (nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat]))
@@ -556,11 +565,16 @@ void CViewPattern::OnDraw(CDC *pDC)
 		{
 			UINT nNextPat = m_nPattern;
 			BOOL bNextPatFound = FALSE;
-			UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-			
-			if ((nCurOrder+1 < pSndFile->Order.size()) && (pSndFile->Order[nCurOrder] == m_nPattern))
+			const ORDERINDEX startOrder= static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
+			ORDERINDEX nNextOrder = 1 + startOrder;
+
+			//Ignore skip items(+++) from sequence.
+			const ORDERINDEX ordCount = pSndFile->Order.GetCount();
+			while(nNextOrder < ordCount && pSndFile->Order[nNextOrder] == pSndFile->Order.GetIgnoreIndex()) nNextOrder++;
+
+			if ((nNextOrder < ordCount) && (pSndFile->Order[startOrder] == m_nPattern))
 			{
-				nNextPat = pSndFile->Order[nCurOrder+1];
+				nNextPat = pSndFile->Order[nNextOrder];
 				bNextPatFound = TRUE;
 			}
 			if ((bNextPatFound) && (nNextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nNextPat]))
@@ -1423,6 +1437,7 @@ void CViewPattern::UpdateIndicator()
 
 //rewbs.xinfo
 void CViewPattern::UpdateXInfoText()
+//----------------------------------
 {
 	UINT nChn = GetCurrentChannel();
 	CString xtraInfo;
@@ -1434,8 +1449,10 @@ void CViewPattern::UpdateXInfoText()
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		if (!pSndFile) return;
 		
-		xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
+		//xtraInfo.Format("Chan: %d; macro: %X; cutoff: %X; reso: %X; pan: %X",
+		xtraInfo.Format("Chn:%d; Vol:%X; Mac:%X; Cut:%X; Res:%X; Pan:%X",
 						nChn+1,
+						pSndFile->Chn[nChn].nGlobalVol,
 						pSndFile->Chn[nChn].nActiveMacro,
                         pSndFile->Chn[nChn].nCutOff,
                         pSndFile->Chn[nChn].nResonance,

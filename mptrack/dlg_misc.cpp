@@ -844,6 +844,11 @@ void CFindReplaceTab::OnOK()
 /////////////////////////////////////////////////////////////////////////////////////////////
 // CPatternPropertiesDlg
 
+BEGIN_MESSAGE_MAP(CPatternPropertiesDlg, CDialog)
+	ON_COMMAND(IDC_BUTTON_HALF,		OnHalfRowNumber)
+	ON_COMMAND(IDC_BUTTON_DOUBLE,	OnDoubleRowNumber)
+END_MESSAGE_MAP()
+
 BOOL CPatternPropertiesDlg::OnInitDialog()
 //----------------------------------------
 {
@@ -871,10 +876,47 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		wsprintf(s, "Pattern #%d:\x0d\x0a %d rows (%dK)",
 			m_nPattern,
 			pSndFile->PatternSize[m_nPattern],
-			(pSndFile->PatternSize[m_nPattern] * pSndFile->m_nChannels * 6)/1024);
+			(pSndFile->PatternSize[m_nPattern] * pSndFile->m_nChannels * sizeof(MODCOMMAND))/1024);
 		SetDlgItemText(IDC_TEXT1, s);
 	}
 	return TRUE;
+}
+
+
+void CPatternPropertiesDlg::OnHalfRowNumber()
+//-------------------------------------------
+{
+	CComboBox *combo;
+	CString str;
+	combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
+	if(combo->GetCount() < 1) return;
+	if(combo->GetCurSel() == CB_ERR) combo->SetCurSel(0);
+
+	combo->GetLBText(combo->GetCurSel(), str);
+	int sel = atoi(str)/2;
+	combo->GetLBText(0, str);
+	const int row0 = atoi(str);
+	if(sel < row0) sel = row0;
+	combo->SetCurSel(sel - row0);
+}
+
+
+void CPatternPropertiesDlg::OnDoubleRowNumber()
+//---------------------------------------------
+{
+	CComboBox *combo;
+	CString str;
+	combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
+	if(combo->GetCount() < 1) return;
+	if(combo->GetCurSel() == CB_ERR) combo->SetCurSel(0);
+
+	combo->GetLBText(combo->GetCurSel(), str);
+	int sel = 2*atoi(str);
+	combo->GetLBText(0, str);
+	const int row0 = atoi(str);
+	combo->GetLBText(combo->GetCount()-1, str);
+	if(sel > atoi(str)) sel = atoi(str);
+	combo->SetCurSel(sel - row0);
 }
 
 

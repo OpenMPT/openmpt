@@ -39,6 +39,7 @@ typedef uint8  PLUGINDEX;
 typedef uint16 TEMPO;
 typedef uint16 SAMPLEINDEX;
 typedef uint16 INSTRUMENTINDEX;
+typedef uint32 MODTYPE;
 
 const ORDERINDEX ORDERINDEX_MAX	= (std::numeric_limits<ORDERINDEX>::max)();
 const ROWINDEX ROWINDEX_MAX = (std::numeric_limits<ROWINDEX>::max)();

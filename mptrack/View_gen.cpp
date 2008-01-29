@@ -318,7 +318,8 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_TabCtrl.DeleteAllItems();
 		for (int iItem=0; iItem<nTabCount; iItem++)
 		{
-			wsprintf(s, "%d - %d", iItem * 4 + 1, iItem * 4 + 4);
+			const int lastItem = min(iItem * 4 + 4, MAX_BASECHANNELS);
+			wsprintf(s, "%d - %d", iItem * 4 + 1, lastItem);
 			tci.mask = TCIF_TEXT | TCIF_PARAM;
 			tci.pszText = s;
 			tci.lParam = iItem * 4;
@@ -337,58 +338,65 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_nActiveTab = nTabIndex;
 		for (int ichn=0; ichn<4; ichn++)
 		{
-			UINT nChn = nTabIndex*4+ichn;
-			BOOL bEnable = (nChn < pSndFile->m_nChannels) ? TRUE : FALSE;
-			// Text
-			s[0] = 0;
-			if (bEnable) wsprintf(s, "Channel %d", nChn+1);
-			SetDlgItemText(IDC_TEXT1+ichn, s);
-			// Mute
-			CheckDlgButton(IDC_CHECK1+ichn*2, (pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ? TRUE : FALSE);
-			// Surround
-			CheckDlgButton(IDC_CHECK2+ichn*2, (pSndFile->ChnSettings[nChn].dwFlags & CHN_SURROUND) ? TRUE : FALSE);
-			// Volume
-			int vol = pSndFile->ChnSettings[nChn].nVolume;
-			m_sbVolume[ichn].SetPos(vol);
-			SetDlgItemInt(IDC_EDIT1+ichn*2, vol);
-			// Pan
-			int pan = pSndFile->ChnSettings[nChn].nPan;
-			m_sbPan[ichn].SetPos(pan/4);
-			SetDlgItemInt(IDC_EDIT2+ichn*2, pan);
-			memcpy(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME);
-			s[MAX_CHANNELNAME-1] = 0;
-			SetDlgItemText(IDC_EDIT9+ichn, s);
-			// Channel effect
-			m_CbnEffects[ichn].SetRedraw(FALSE);
-			m_CbnEffects[ichn].ResetContent();
-			m_CbnEffects[ichn].SetItemData(m_CbnEffects[ichn].AddString("No plugin"), 0);
-			int fxsel = 0;
-			for (UINT ifx=0; ifx<MAX_MIXPLUGINS; ifx++)
+			const UINT nChn = nTabIndex*4+ichn;
+			const BOOL bEnable = (nChn < pSndFile->GetNumChannels()) ? TRUE : FALSE;
+			if(nChn < MAX_BASECHANNELS)
 			{
-				if ((pSndFile->m_MixPlugins[ifx].Info.dwPluginId1)
-				 || (pSndFile->m_MixPlugins[ifx].Info.dwPluginId2)
-				 || (pSndFile->m_MixPlugins[ifx].Info.szName[0]
-				 || (pSndFile->ChnSettings[nChn].nMixPlugin == ifx+1)))
+				// Text
+				s[0] = 0;
+				if (bEnable) wsprintf(s, "Channel %d", nChn+1);
+				SetDlgItemText(IDC_TEXT1+ichn, s);
+				// Mute
+				CheckDlgButton(IDC_CHECK1+ichn*2, (pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ? TRUE : FALSE);
+				// Surround
+				CheckDlgButton(IDC_CHECK2+ichn*2, (pSndFile->ChnSettings[nChn].dwFlags & CHN_SURROUND) ? TRUE : FALSE);
+				// Volume
+				int vol = pSndFile->ChnSettings[nChn].nVolume;
+				m_sbVolume[ichn].SetPos(vol);
+				SetDlgItemInt(IDC_EDIT1+ichn*2, vol);
+				// Pan
+				int pan = pSndFile->ChnSettings[nChn].nPan;
+				m_sbPan[ichn].SetPos(pan/4);
+				SetDlgItemInt(IDC_EDIT2+ichn*2, pan);
+				memcpy(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME);
+				s[MAX_CHANNELNAME-1] = 0;
+				SetDlgItemText(IDC_EDIT9+ichn, s);
+				// Channel effect
+				m_CbnEffects[ichn].SetRedraw(FALSE);
+				m_CbnEffects[ichn].ResetContent();
+				m_CbnEffects[ichn].SetItemData(m_CbnEffects[ichn].AddString("No plugin"), 0);
+				int fxsel = 0;
+				for (UINT ifx=0; ifx<MAX_MIXPLUGINS; ifx++)
 				{
-					wsprintf(s, "FX%d: %s", ifx+1, pSndFile->m_MixPlugins[ifx].Info.szName);
-					int n = m_CbnEffects[ichn].AddString(s);
-					m_CbnEffects[ichn].SetItemData(n, ifx+1);
-					if (pSndFile->ChnSettings[nChn].nMixPlugin == ifx+1) fxsel = n;
+					if ((pSndFile->m_MixPlugins[ifx].Info.dwPluginId1)
+					|| (pSndFile->m_MixPlugins[ifx].Info.dwPluginId2)
+					|| (pSndFile->m_MixPlugins[ifx].Info.szName[0]
+					|| (pSndFile->ChnSettings[nChn].nMixPlugin == ifx+1)))
+					{
+						wsprintf(s, "FX%d: %s", ifx+1, pSndFile->m_MixPlugins[ifx].Info.szName);
+						int n = m_CbnEffects[ichn].AddString(s);
+						m_CbnEffects[ichn].SetItemData(n, ifx+1);
+						if (pSndFile->ChnSettings[nChn].nMixPlugin == ifx+1) fxsel = n;
+					}
 				}
+				m_CbnEffects[ichn].SetRedraw(TRUE);
+				m_CbnEffects[ichn].SetCurSel(fxsel);
 			}
-			m_CbnEffects[ichn].SetRedraw(TRUE);
-			m_CbnEffects[ichn].SetCurSel(fxsel);
+			else
+				SetDlgItemText(IDC_TEXT1+ichn, "");
+
 			// Enable/Disable controls for this channel
 			BOOL bIT = ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)));
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK1+ichn*2), bEnable);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK2+ichn*2), bIT);
 			::EnableWindow(m_sbVolume[ichn].m_hWnd, bEnable);
-			::EnableWindow(m_sbPan[ichn].m_hWnd, bEnable);
+			::EnableWindow(m_sbPan[ichn].m_hWnd, bEnable && !(pSndFile->GetType() & MOD_TYPE_XM|MOD_TYPE_MOD));
 			::EnableWindow(m_spinVolume[ichn], bEnable);
-			::EnableWindow(m_spinPan[ichn], bEnable);
+			::EnableWindow(m_spinPan[ichn], bEnable && !(pSndFile->GetType() & MOD_TYPE_XM|MOD_TYPE_MOD));
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1+ichn*2), bEnable);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2+ichn*2), bEnable);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2+ichn*2), bEnable && !(pSndFile->GetType() & MOD_TYPE_XM|MOD_TYPE_MOD));
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9+ichn), ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))));
+			m_CbnEffects[ichn].EnableWindow(bEnable);
 		}
 		UnlockControls();
 	}
@@ -1622,7 +1630,7 @@ bool CViewGlobals::MovePlug(UINT src, UINT dest)
 	}
 	
 	// Update all other plugs' outputs
-	for (int nPlug=0; nPlug<src; nPlug++) {
+	for (PLUGINDEX nPlug=0; nPlug<src; nPlug++) {
 		if (pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80) {
 			if ((pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x7f) == src) {
 				pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting = ((BYTE)dest)|0x80;
@@ -1630,14 +1638,14 @@ bool CViewGlobals::MovePlug(UINT src, UINT dest)
 		}
 	}
 	// Update channels
-	for (int nChn=0; nChn<pSndFile->m_nChannels; nChn++) {
+	for (CHANNELINDEX nChn=0; nChn<pSndFile->m_nChannels; nChn++) {
 		if (pSndFile->ChnSettings[nChn].nMixPlugin == src+1) {
 			pSndFile->ChnSettings[nChn].nMixPlugin = dest+1;
 		}
 	}
 
 	// Update instruments
-	for (int nIns=1; nIns<=pSndFile->m_nInstruments; nIns++) {
+	for (INSTRUMENTINDEX nIns=1; nIns<=pSndFile->m_nInstruments; nIns++) {
 		if (pSndFile->Headers[nIns] && (pSndFile->Headers[nIns]->nMixPlug == src+1)) {
 			pSndFile->Headers[nIns]->nMixPlug = dest+1;
 		}

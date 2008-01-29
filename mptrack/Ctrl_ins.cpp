@@ -14,7 +14,7 @@
 using std::string;
 using std::vector;
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
 const pair<string, WORD> CCtrlInstruments::s_TuningNotFound("Tuning  was not found. Setting to default tuning", 7);
 
@@ -1741,9 +1741,44 @@ void CCtrlInstruments::OnSetPanningChanged()
 	INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
 	if ((!IsLocked()) && (penv))
 	{
-		BOOL b = m_CheckPanning.GetCheck();
+		const BOOL b = m_CheckPanning.GetCheck();
+
 		if (b) penv->dwFlags |= ENV_SETPANNING;
 		else penv->dwFlags &= ~ENV_SETPANNING;
+
+		if(b && m_pSndFile->GetType() & MOD_TYPE_IT|MOD_TYPE_MPT)
+		{
+			bool smpPanningInUse = false;
+			for(BYTE i = 0; i<ARRAYELEMCOUNT(penv->Keyboard); i++)
+			{
+				const SAMPLEINDEX smp = penv->Keyboard[i];
+				if(smp <= m_pSndFile->GetNumSamples() && m_pSndFile->Ins[smp].uFlags & CHN_PANNING)
+				{
+					smpPanningInUse = true;
+					break;
+				}
+			}
+			if(smpPanningInUse)
+			{
+				if(MessageBox("Some of the samples used in the instrument have \"Set Pan\" enabled. "
+						"When instrument is played with such sample, sample pan setting overrides instrument pan. "
+						"Do you wish to disable panning from those samples so that instrument pan setting is effective "
+						"for the whole instrument?",
+						"",
+						MB_YESNO) == IDYES)
+				{
+					for(BYTE i = 0; i<ARRAYELEMCOUNT(penv->Keyboard); i++)
+					{
+						const SAMPLEINDEX smp = penv->Keyboard[i];
+						if(smp <= m_pSndFile->GetNumSamples())
+							m_pSndFile->Ins[smp].uFlags &= ~CHN_PANNING;
+					}
+					m_pModDoc->SetModified();
+					m_pModDoc->UpdateAllViews(NULL, HINT_SAMPLEINFO | HINT_MODTYPE);
+				}
+			}
+		}
+
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
