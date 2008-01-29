@@ -1534,11 +1534,11 @@ bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
 	if(chnFrom == chnTo) return false;
     if(chnFrom >= m_nChannels || chnTo >= m_nChannels)
     {
-            CString str = "Error: Bad move indexes in CSoundFile::MoveChannel(...)";	
-			CMainFrame::GetMainFrame()->MessageBox(str , "MoveChannel(...)", MB_OK | MB_ICONINFORMATION);
-			return true;
+		CString str = "Error: Bad move indexes in CSoundFile::MoveChannel(...)";	
+		CMainFrame::GetMainFrame()->MessageBox(str , "MoveChannel(...)", MB_OK | MB_ICONINFORMATION);
+		return true;
     }
-	std::vector<CHANNELINDEX> newOrder;
+	vector<CHANNELINDEX> newOrder;
 	//First creating new order identical to current order...
 	for(CHANNELINDEX i = 0; i<GetNumChannels(); i++)
 	{
@@ -2913,26 +2913,15 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 //---------------------------------------------------
 {
 	const MODTYPE oldtype = m_nType;
-	const PATTERNINDEX oldInvalidIndex = Order.GetInvalidPatIndex();
-	const PATTERNINDEX oldIgnoreIndex = Order.GetIgnoreIndex();
 	m_nType = newType;
 	SetModSpecsPointer(m_pModSpecs, m_nType);
 
 	m_ModFlags = m_ModFlags & GetModFlagMask(oldtype, newType);
-		
-	const CModSpecifications& specs = GetModSpecifications();
-	if(specs.ordersMax < Order.size()) 
-	{
-		Order.resize(max(MAX_PATTERNS, specs.ordersMax));
-		for(ORDERINDEX i = Order.size(); i>specs.ordersMax; --i) Order[i-1] = Order.GetInvalidPatIndex();
-	}
-	replace(Order.begin(), Order.end(), oldInvalidIndex, Order.GetInvalidPatIndex());
-	replace(Order.begin(), Order.end(), oldIgnoreIndex, Order.GetIgnoreIndex());
 
-	if(specs.patternsMax < Patterns.Size()) Patterns.ResizeArray(specs.patternsMax);
-	else if(Patterns.Size() < MAX_PATTERNS) Patterns.ResizeArray(MAX_PATTERNS);
-	
+	Order.OnModTypeChanged(oldtype);
+	Patterns.OnModTypeChanged(oldtype);
 }
+
 
 bool CSoundFile::SetTitle(const char* titleCandidate, size_t strSize)
 //-------------------------------------------------------------------

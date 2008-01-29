@@ -54,6 +54,8 @@ public:
 	
 	void ResizeArray(const PATTERNINDEX newSize);
 
+	void OnModTypeChanged(const MODTYPE oldtype);
+
 //END: INTERFACE METHODS
 
 

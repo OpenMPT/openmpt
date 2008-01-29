@@ -159,6 +159,9 @@ public:
 protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+	afx_msg void OnHalfRowNumber();
+	afx_msg void OnDoubleRowNumber();
+	DECLARE_MESSAGE_MAP()
 };
 
 

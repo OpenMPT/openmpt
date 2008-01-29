@@ -316,7 +316,7 @@ BOOL COrderList::ProcessChar(UINT nChar)
 		}
 		if (ord != pSndFile->Order[m_nScrollPos])
 		{
-			pSndFile->Order[m_nScrollPos] = static_cast<UINT>(ord);
+			pSndFile->Order[m_nScrollPos] = static_cast<PATTERNINDEX>(ord);
 			m_pModDoc->SetModified();
 			m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
 			InvalidateSelection();
@@ -351,12 +351,17 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 
 		switch (kc)
 		{
-			case kcSwitchToOrderList: OnSwitchToView(); return true;
+            case kcSwitchToOrderList: OnSwitchToView(); return true;
 			case kcChangeLoopStatus: m_pParent->OnModCtrlMsg(CTRLMSG_PAT_LOOP, -1); return true;
 			case kcToggleFollowSong: m_pParent->OnFollowSong(); return true;
+
+			case kcChannelUnmuteAll:
+			case kcUnmuteAllChnOnPatTransition:
+				::PostMessage(m_pParent->GetViewWnd(), WM_MOD_KEYCOMMAND, kc, 0);
+				return true;
 		}
 	}
-	//end rewbs.customKeys
+	//end rewbs.customKeys 
 
 
 	switch(pMsg->message)
@@ -889,7 +894,7 @@ LRESULT COrderList::OnDragonDropping(WPARAM bDoDrop, LPARAM lParam)
 	switch(pDropInfo->dwDropType)
 	{
 	case DRAGONDROP_PATTERN:
-		pSndFile->Order[posdest] = static_cast<UINT>(pDropInfo->dwDropItem);
+		pSndFile->Order[posdest] = static_cast<PATTERNINDEX>(pDropInfo->dwDropItem);
 		break;
 
 	case DRAGONDROP_ORDER:

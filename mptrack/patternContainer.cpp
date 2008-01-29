@@ -6,10 +6,10 @@
 int CPatternContainer::Insert(const ROWINDEX rows)
 //---------------------------------------------
 {
-	size_t i = 0;
+	PATTERNINDEX i = 0;
 	for(i = 0; i<m_Patterns.size(); i++)
 		if(!m_Patterns[i]) break;
-	if(Insert(static_cast<WORD>(i), rows))
+	if(Insert(i, rows))
 		return -1;
 	else return i;
 
@@ -20,7 +20,7 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 //---------------------------------------------------------------
 {
 	const CModSpecifications& specs = m_rSndFile.GetModSpecifications();
-	if(index > m_Patterns.size() || rows > specs.patternRowsMax)
+	if(index >= specs.patternsMax || index > m_Patterns.size() || rows > specs.patternRowsMax)
 		return true;
 	if(index < m_Patterns.size() && m_Patterns[index])
 		return true;
@@ -75,3 +75,13 @@ void CPatternContainer::ResizeArray(const PATTERNINDEX newSize)
 		m_Patterns.resize(newSize, MODPATTERN(*this));
 	}
 }
+
+
+void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
+//----------------------------------------------------------
+{
+	const CModSpecifications specs = m_rSndFile.GetModSpecifications();
+	if(specs.patternsMax < Size()) ResizeArray(max(MAX_PATTERNS, specs.patternsMax));
+	else if(Size() < MAX_PATTERNS) ResizeArray(MAX_PATTERNS);
+}
+

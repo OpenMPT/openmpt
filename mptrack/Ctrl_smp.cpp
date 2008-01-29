@@ -570,8 +570,8 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_EditGlobalVol.EnableWindow(b);
 		m_SpinGlobalVol.EnableWindow(b);
 		// Panning
-		b = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
-		m_CheckPanning.EnableWindow(b);
+		b = (m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
+		m_CheckPanning.EnableWindow(b && !(m_pSndFile->GetType() & MOD_TYPE_XM));
 		m_EditPanning.EnableWindow(b);
 		m_SpinPanning.EnableWindow(b);
 	}
@@ -599,7 +599,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// Global Volume
 		SetDlgItemInt(IDC_EDIT8, pins->nGlobalVol);
 		// Panning
-		CheckDlgButton(IDC_CHECK1, (pins->uFlags & CHN_PANNING) ? MF_CHECKED : 0);
+		CheckDlgButton(IDC_CHECK1, (pins->uFlags & CHN_PANNING) ? MF_CHECKED : MF_UNCHECKED);
 		//rewbs.fix36944
 		if (m_pSndFile->m_nType == MOD_TYPE_XM) {
 			SetDlgItemInt(IDC_EDIT9, pins->nPan);		//displayed panning with XM is 0-256, just like MPT's internal engine
@@ -2236,7 +2236,7 @@ void CCtrlSamples::OnSetPanningChanged()
 {
 	if (IsLocked()) return;
 	BOOL b = FALSE;
-	if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
+	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
 	{
 		b = IsDlgButtonChecked(IDC_CHECK1);
 	}
@@ -2245,14 +2245,14 @@ void CCtrlSamples::OnSetPanningChanged()
 		if (!(m_pSndFile->Ins[m_nSample].uFlags & CHN_PANNING))
 		{
 			m_pSndFile->Ins[m_nSample].uFlags |= CHN_PANNING;
-			if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
+			m_pModDoc->SetModified();
 		}
 	} else
 	{
 		if (m_pSndFile->Ins[m_nSample].uFlags & CHN_PANNING)
 		{
 			m_pSndFile->Ins[m_nSample].uFlags &= ~CHN_PANNING;
-			if (m_pSndFile->m_nType == (MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
+			m_pModDoc->SetModified();
 		}
 	}
 }
@@ -2818,7 +2818,7 @@ BOOL CCtrlSamples::PreTranslateMessage(MSG *pMsg)
 	return CModControlDlg::PreTranslateMessage(pMsg);
 }
 
-LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 //----------------------------------------------------------------
 {
 	if (wParam == kcNull)

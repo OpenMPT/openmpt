@@ -1105,13 +1105,14 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 	{
 		dwMemPos += LoadMixPlugins(lpStream+dwMemPos, dwMemLength-dwMemPos);
 	}
-	// Checking for unused channels
+	
 	//UINT npatterns = pifh->patnum;
 	UINT npatterns = patpos.size();
 	
 	if (npatterns > GetModSpecifications().patternsMax) 
 		npatterns = GetModSpecifications().patternsMax;
 
+	// Checking for unused channels
 	for (UINT patchk=0; patchk<npatterns; patchk++)
 	{
 		memset(chnmask, 0, sizeof(chnmask));
@@ -1331,6 +1332,8 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 		LoadExtendedSongProperties(GetType(), ptr, lpStream, mptStartPos);
 	}
 
+	Patterns.ResizeArray(max(MAX_PATTERNS, npatterns));
+
 	// Reading Patterns
 	for (UINT npat=0; npat<npatterns; npat++)
 	{
@@ -1338,8 +1341,10 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 		{
 			if(Patterns.Insert(npat, 64)) 
 			{
-				MessageBox(NULL, "Error occured while loading file, error code 1101080209", "", MB_ICONERROR);
-				return FALSE;
+				CString s;
+				s.Format("Allocating patterns failed starting from pattern %u", npat);
+				MessageBox(NULL, s, "", MB_ICONERROR);
+				break;
 			}
 			continue;
 		}

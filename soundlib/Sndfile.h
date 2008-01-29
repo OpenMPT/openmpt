@@ -819,7 +819,6 @@ const BYTE MSF_IT_COMPATIBLE_PLAY	= 0;		//IT/MPT
 const BYTE MSF_OLDVOLSWING			= 1;		//IT/MPT
 const BYTE MSF_MIDICC_BUGEMULATION	= 2;		//IT/MPT/XM
 
-typedef UINT MODTYPE;
 
 class CTuningCollection;
 
@@ -965,7 +964,7 @@ public:
 
 	//Return the number of channels in the pattern. In 1.17.02.45
 	//it returned the number of channels with volume != 0
-	CHANNELINDEX GetNumChannels() const {return static_cast<CHANNELINDEX>(m_nChannels);}	
+	CHANNELINDEX GetNumChannels() const {return static_cast<CHANNELINDEX>(m_nChannels);}
 
 	BOOL SetMasterVolume(UINT vol, BOOL bAdjustAGC=FALSE);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
@@ -980,7 +979,7 @@ public:
 	UINT GetMaxPosition() const;
 
 	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr);
-	const CModSpecifications& GetModSpecifications() {return *m_pModSpecs;}
+	const CModSpecifications& GetModSpecifications() const {return *m_pModSpecs;}
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
 	double GetCurrentBPM() const;
@@ -1013,7 +1012,7 @@ public:
 	void CheckCPUUsage(UINT nCPU);
 	BOOL SetPatternName(UINT nPat, LPCSTR lpszName);
 	BOOL GetPatternName(UINT nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
-	CHANNELINDEX ReArrangeChannels(const std::vector<CHANNELINDEX>& fromToArray);
+	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX>& fromToArray);
 	bool MoveChannel(UINT chn_from, UINT chn_to);
 
 	bool InitChannel(UINT nch);

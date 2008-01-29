@@ -192,18 +192,13 @@ BYTE gEffectColors[MAX_EFFECTS] =
 static void ShowChangesDialog()
 //-----------------------------
 {
+	/*
 	CString firstOpenMessage = "OpenMPT version " + CMainFrame::GetFullVersionString();
 	firstOpenMessage +=	". This is a development build.\n\nChanges:\n\n"
-	"[New] Ability to control plug params with MIDI controllers.\n"
-	"[New] Ability to pass MIDI to plugin.\n"
-	"[Imp] Ability to take MIDI volume into account when playing notes.\n"
-	"[Fix/Imp] Plugin volume command fix. In addition now there are options how to interpret it.\n"
-	"[Imp] Keyshortcut for preset navigation jumps in VST editor.\n"
-	"[Mod] .bak files won't be shown in load dialog with 'All modules' filter.\n"
-	"[Fix/Mod] Instrument random variation fix/behavior change.\n\n"
-	"And various other fixes and changes.";
+	"TODO";
 
 	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT v." + CMainFrame::GetFullVersionString(), MB_ICONINFORMATION);
+	*/
 }
 
 

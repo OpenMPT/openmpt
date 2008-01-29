@@ -176,7 +176,7 @@ const CModSpecifications IT_STD_SPECS =
 	//TODO: Set correct values.
 	"it",								//File extension
 	240,								//Pattern max.
-	256,								//Order max.
+	200,								//Order max.
 	4,									//Channel min
 	64,									//Channel max
 	32,									//Min tempo

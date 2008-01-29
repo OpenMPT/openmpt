@@ -289,9 +289,39 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModControlDlg *pDlg = NULL;
-	UINT nID;
+	
 	
 	if (nIndex == -1) nIndex = m_TabCtrl.GetCurSel();
+
+	const UINT nID = m_TabCtrl.GetItemData(nIndex);
+	if(nID == 0) return FALSE;
+
+	switch(nID)
+	{
+		//rewbs.graph
+		case IDD_CONTROL_GRAPH:
+			nIndex = 5;
+			break;
+		//end rewbs.graph
+		case IDD_CONTROL_COMMENTS:
+			nIndex = 4;
+			break;
+		case IDD_CONTROL_GLOBALS:
+			nIndex = 0;
+			break;
+		case IDD_CONTROL_PATTERNS:
+			nIndex = 1;
+			break;
+		case IDD_CONTROL_SAMPLES:
+			nIndex = 2;
+			break;
+		case IDD_CONTROL_INSTRUMENTS:
+			nIndex = 3;
+			break;
+		default:
+			return FALSE;
+	}
+
 	if ((nIndex < 0) || (nIndex >= MAX_PAGES) || (!pMainFrm)) return FALSE;
 
 	//rewbs.varWindowSize
@@ -304,7 +334,6 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 		PostMessage(WM_MOD_CTRLMSG, CTRLMSG_ACTIVATEPAGE, lParam);
 		return TRUE;
 	}
-	if ((nID = m_TabCtrl.GetItemData(nIndex)) == 0) return FALSE;
 	if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES))
 	{
 		if (m_Pages[m_nActiveDlg])
@@ -314,11 +343,11 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 		}
 		m_nActiveDlg = -1;
 	}
-	if (m_Pages[nIndex])
+	if (m_Pages[nIndex]) //Ctrl window already created?
 	{
 		m_nActiveDlg = nIndex;
 		pDlg = m_Pages[nIndex];
-	} else
+	} else //Ctrl window is not created yet - creating one.
 	{
 		switch(nID)
 		{
