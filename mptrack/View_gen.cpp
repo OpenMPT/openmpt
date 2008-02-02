@@ -390,11 +390,11 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK1+ichn*2), bEnable);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK2+ichn*2), bIT);
 			::EnableWindow(m_sbVolume[ichn].m_hWnd, bEnable);
-			::EnableWindow(m_sbPan[ichn].m_hWnd, bEnable && !(pSndFile->GetType() & MOD_TYPE_XM|MOD_TYPE_MOD));
+			::EnableWindow(m_sbPan[ichn].m_hWnd, bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
 			::EnableWindow(m_spinVolume[ichn], bEnable);
-			::EnableWindow(m_spinPan[ichn], bEnable && !(pSndFile->GetType() & MOD_TYPE_XM|MOD_TYPE_MOD));
+			::EnableWindow(m_spinPan[ichn], bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1+ichn*2), bEnable);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2+ichn*2), bEnable && !(pSndFile->GetType() & MOD_TYPE_XM|MOD_TYPE_MOD));
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2+ichn*2), bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9+ichn), ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))));
 			m_CbnEffects[ichn].EnableWindow(bEnable);
 		}
