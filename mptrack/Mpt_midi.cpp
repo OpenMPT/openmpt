@@ -260,6 +260,12 @@ bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, BYTE& mappedIndex, uint32& para
 //----------------------------------------------------------------------------------------------------
 {
 	bool captured = false;
+
+	if(GetFromMIDIMsg_Event(midimsg) != MIDIEVENT_CONTROLLERCHANGE) return captured;
+	//For now only controllers can be mapped so if event is not controller change,
+	//no mapping will be found and thus no search is done.
+	//NOTE: The event value is not checked in code below.
+
 	const BYTE controller = GetFromMIDIMsg_DataByte1(midimsg);
 
 	const_iterator citer = std::lower_bound(Begin(), End(), controller); 

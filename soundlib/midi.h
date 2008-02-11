@@ -11,8 +11,16 @@ int ApplyVolumeRelatedMidiSettings(const DWORD& dwParam1, const BYTE midivolume)
 void ApplyTransposeKeyboardSetting(CMainFrame& rMainFrm, DWORD& dwParam1);
 inline BYTE GetFromMIDIMsg_Channel(const DWORD MIDImsg) {return static_cast<BYTE>((MIDImsg & 0xF));}
 inline BYTE GetFromMIDIMsg_Event(const DWORD MIDImsg) {return static_cast<BYTE>(((MIDImsg >> 4) & 0xF));}
-inline BYTE GetFromMIDIMsg_DataByte1(const DWORD MIDImsg) {return static_cast<BYTE>(((MIDImsg >> 8) & 0x7F));}
-inline BYTE GetFromMIDIMsg_DataByte2(const DWORD MIDImsg) {return static_cast<BYTE>(((MIDImsg >> 16) & 0x7F));}
+inline BYTE GetFromMIDIMsg_DataByte1(const DWORD MIDImsg) {return static_cast<BYTE>(((MIDImsg >> 8) & 0xFF));}
+inline BYTE GetFromMIDIMsg_DataByte2(const DWORD MIDImsg) {return static_cast<BYTE>(((MIDImsg >> 16) & 0xFF));}
+
+enum
+{
+	MIDIEVENT_NOTEOFF			= 0x8,
+	MIDIEVENT_NOTEON			= 0x9,
+	MIDIEVENT_CONTROLLERCHANGE	= 0xB,
+	MIDIEVENT_PITCHBEND			= 0xE,
+};
 
 
 //=========================
