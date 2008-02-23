@@ -610,7 +610,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{"Always center active row",		"Turn on this option to have the active row always centered in the pattern editor (requires \"Always center active row\")."},
 	{"Use large font for comments",		"With this option enabled, the song message editor will use a larger font."},
 	{"Display rows in hex",				"With this option enabled, row numbers and sequence numbers will be displayed in hexadecimal."},
-	{"Cursor wrap in pattern editor",	"When this option is active, going past the end of a pattern will move the cursor to the beginning."},
+	{"Cursor wrap in pattern editor",	"When this option is active, going past the end of a pattern row or channel will move the cursor to the beginning. When \"Continuous scroll\"-option is enabled, row wrap is disabled."},
 	{"Create backup files (*.bak)",		"When this option is active, saving a file will create a backup copy of the original."},
 	{"Drag and Drop Editing",			"Enable moving a selection in the pattern editor (copying if pressing shift while dragging)\n"},
 	{"Flat Buttons",					"Use flat buttons in toolbars"},

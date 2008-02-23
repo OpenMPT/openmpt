@@ -145,7 +145,6 @@ BEGIN
             MENUITEM "Cleanup Pa&tterns",           ID_CLEANUP_PATTERNS
             MENUITEM "Cleanup S&ong",               ID_CLEANUP_SONG
             MENUITEM "Remove &All Instruments",     ID_INSTRUMENTS_REMOVEALL
-            MENUITEM "Rearrange Samples",           ID_REARRANGE_SAMPLES
             MENUITEM "Cleanup &Plugins",            ID_CLEANUP_PLUGS
         END
         MENUITEM SEPARATOR
@@ -491,7 +490,7 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,214,71,
                     11,14
-    CONTROL         "Send midi to active instrument plugin",
+    CONTROL         "Pass MIDI to active instrument plugin (experimental)",
                     IDC_MIDI_TO_PLUGIN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     11,148,222,8
     CONTROL         "Combine midi volume to note velocity",

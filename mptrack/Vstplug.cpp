@@ -158,9 +158,19 @@ VOID CVstPluginManager::EnumerateDirectXDMOs()
 // ID100000ID200000.Flags = Plugin Flags (for now, just isInstrument).
 
 
-PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache)
-//------------------------------------------------------------------------
+
+PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const bool checkFileExistence, CString* const errStr)
+//-----------------------------------------------------------------------------------------------------------
 {
+	if(checkFileExistence && !DoesFileExist(pszDllPath))
+	{
+		if(errStr)
+		{
+			*errStr += "\nUnable to find ";
+			*errStr += pszDllPath;
+		}
+	}
+
 	PVSTPLUGINLIB pDup = m_pVstHead;
 	while (pDup)
 	{
@@ -1569,16 +1579,19 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 
 	m_nInputs = m_pEffect->numInputs;
 	m_nOutputs = m_pEffect->numOutputs;
-	m_pInputs = (float **)new char[m_nInputs*sizeof(float *)];
-	m_pOutputs = (float **)new char[m_nOutputs*sizeof(float *)];
-	m_pTempBuffer = (float **)new char[m_nOutputs*sizeof(float *)];	//rewbs.dryRatio
+	
+	//input pointer array size must be >=2 for now - the input buffer assignment might write to non allocated mem. otherwise
+	m_pInputs = (m_nInputs >= 2) ? new (float *[m_nInputs]) : new (float*[2]);
+	m_pInputs[0] = m_MixState.pOutBufferL;
+	m_pInputs[1] = m_MixState.pOutBufferR;
+
+	m_pOutputs = new (float *[m_nOutputs]);
+	m_pTempBuffer = new (float *[m_nOutputs]);	//rewbs.dryRatio
 
 	for (UINT iOut=0; iOut<m_nOutputs; iOut++)
 	{
 		m_pTempBuffer[iOut]=(float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*(2+iOut)])+7)&~7); //rewbs.dryRatio
 	}	
-	m_pInputs[0] = m_MixState.pOutBufferL;
-	m_pInputs[1] = m_MixState.pOutBufferR;
 
 #ifdef VST_LOG
 	Log("%s: vst ver %d.0, flags=%04X, %d programs, %d parameters\n",
@@ -1642,32 +1655,18 @@ CVstPlugin::~CVstPlugin()
 		FreeLibrary(m_hLibrary);
 		m_hLibrary = NULL;
 	}
-	if (m_pTempBuffer)	//rewbs.dryRatio
-	{
-		delete[] m_pTempBuffer;
-		m_pTempBuffer = NULL;
-	}
-	//Deleting inputs causes crashes on some plugs, not deleting causes crashes in other cases. :)
-	//TODO: figure out what to do here.. :)
-	if (m_nInputs && m_pInputs) //if m_nInputs == 0, then m_pInputs will have been
-	{							//initilised at 0 size, so we'll crash on delete.
-								//Even though the size is zero,
-								//new returns a non-NULL address and absence 
-								//of delete can make debugger report 
-								//of a memory leak of 0 bytes long.
-		delete[] m_pInputs;
-		m_pInputs = NULL;
-	}
-	if (m_pOutputs)
-	{
-		delete[] m_pOutputs;
-		m_pOutputs = NULL;
-	}
-	if (m_pEvList)
-	{
-		delete[] (char *)m_pEvList;
-		m_pEvList = NULL;
-	}
+
+	delete[] m_pTempBuffer;
+	m_pTempBuffer = NULL;
+
+	delete[] m_pInputs;
+	m_pInputs = NULL;
+
+	delete[] m_pOutputs;
+	m_pOutputs = NULL;
+	
+	delete[] (char *)m_pEvList;
+	m_pEvList = NULL;
 
 	CloseHandle(processCalled);
 }
@@ -4102,4 +4101,5 @@ CString SNDMIXPLUGIN::GetParamName(const UINT index) const
 	else
 		return CString();
 }
+
 

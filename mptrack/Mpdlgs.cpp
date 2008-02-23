@@ -329,7 +329,8 @@ void COptionsSoundcard::OnOK()
 		CHAR s[32];
 		m_CbnBufferLength.GetWindowText(s, sizeof(s));
 		m_nBufferLength = atoi(s);
-		if ((m_nBufferLength < 10) || (m_nBufferLength > 200)) m_nBufferLength = 100;
+		//if ((m_nBufferLength < 10) || (m_nBufferLength > 200)) m_nBufferLength = 100;
+		if ((m_nBufferLength < SNDDEV_MINBUFFERLEN) || (m_nBufferLength > SNDDEV_MAXBUFFERLEN)) m_nBufferLength = 100;
 	}
 	// Soft Panning
 	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)
@@ -1054,6 +1055,9 @@ BEGIN_MESSAGE_MAP(CMidiSetupDlg, CPropertyPage)
 	ON_COMMAND(IDC_CHECK2,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK3,			OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,			OnSettingsChanged)
+	ON_COMMAND(IDC_MIDI_TO_PLUGIN,	OnSettingsChanged)
+	ON_COMMAND(IDC_MIDIVOL_TO_NOTEVOL,	OnSettingsChanged)
+	ON_COMMAND(IDC_MIDIPLAYCONTROL,	OnSettingsChanged)
 END_MESSAGE_MAP()
 
 

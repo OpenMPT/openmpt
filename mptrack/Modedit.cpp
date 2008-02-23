@@ -1272,7 +1272,10 @@ BOOL CModDoc::RemoveSample(UINT n)
 // -> CODE#0020
 // -> DESC="rearrange sample list"
 void CModDoc::RearrangeSampleList(void)
+//-------------------------------------
 {
+	MessageBox(NULL, "Rearrange samplelist didn't work properly and has been disabled.", NULL, MB_ICONINFORMATION);
+	/*
 	BEGIN_CRITICAL();
 	UINT i,j,k,n,l,c;
 
@@ -1314,6 +1317,7 @@ void CModDoc::RearrangeSampleList(void)
 
 	SetModified();
 	UpdateAllViews(NULL, HINT_SMPNAMES);
+	*/
 }
 // -! NEW_FEATURE#0020
 
@@ -1557,7 +1561,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 				if ((c == 0x0D) && (len > 3))
 				{
 					//if ((p[len-3] == 'I') || (p[len-4] == 'S')) bS3M = TRUE;
-					if ((p[len-3] == 'I') || (p[len-4] == 'S') || (p[len-4] == 'M')) bS3M = TRUE;
+					//				IT?					S3M?				MPT?
+					if ((p[len-3] == 'I') || (p[len-4] == 'S') || (p[len-3] == 'P')) bS3M = TRUE;
 					break;
 				}
 			}
@@ -1715,7 +1720,7 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 	CHAR s[1024];
 	INSTRUMENTHEADER *penv;
 	DWORD dwMemSize;
-	UINT susBegin, susEnd, loopBegin, loopEnd, bSus, bLoop, bCarry, nPoints;
+	UINT susBegin, susEnd, loopBegin, loopEnd, bSus, bLoop, bCarry, nPoints, releaseNode;
 	WORD *pPoints;
 	BYTE *pValues;
 
@@ -1735,6 +1740,7 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 		susEnd = penv->nPanSustainEnd;
 		loopBegin = penv->nPanLoopStart;
 		loopEnd = penv->nPanLoopEnd;
+		releaseNode = penv->nPanEnvReleaseNode;
 		break;
 
 	case ENV_PITCH:
@@ -1748,6 +1754,7 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 		susEnd = penv->nPitchSustainEnd;
 		loopBegin = penv->nPitchLoopStart;
 		loopEnd = penv->nPitchLoopEnd;
+		releaseNode = penv->nPitchEnvReleaseNode;
 		break;
 
 	default:
@@ -1761,6 +1768,7 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 		susEnd = penv->nVolSustainEnd;
 		loopBegin = penv->nVolLoopStart;
 		loopEnd = penv->nVolLoopEnd;
+		releaseNode = penv->nVolEnvReleaseNode;
 		break;
 	}
 	strcpy(s, pszEnvHdr);
@@ -1770,6 +1778,11 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 		if (strlen(s) >= sizeof(s)-32) break;
 		wsprintf(s+strlen(s), "%d,%d\x0D\x0A", pPoints[i], pValues[i]);
 	}
+
+	//Writing release node
+	if(strlen(s) < sizeof(s) - 32)
+		wsprintf(s+strlen(s), "%u\x0D\x0A", releaseNode);
+
 	dwMemSize = strlen(s)+1;
 	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
 	{
@@ -1802,7 +1815,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 	if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 	{
 		INSTRUMENTHEADER *penv = m_SndFile.Headers[nIns];
-		UINT susBegin=0, susEnd=0, loopBegin=0, loopEnd=0, bSus=0, bLoop=0, bCarry=0, nPoints=0;
+		UINT susBegin=0, susEnd=0, loopBegin=0, loopEnd=0, bSus=0, bLoop=0, bCarry=0, nPoints=0, releaseNode = ENV_RELEASE_NODE_UNSET;
 		DWORD dwMemSize = GlobalSize(hCpy), dwPos = strlen(pszEnvHdr);
 		if ((dwMemSize > dwPos) && (!strnicmp(p, pszEnvHdr, dwPos-2)))
 		{
@@ -1845,6 +1858,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 				penv->nPanSustainEnd = susEnd;
 				penv->nPanLoopStart = loopBegin;
 				penv->nPanLoopEnd = loopEnd;
+				penv->nPanEnvReleaseNode = releaseNode;
 				break;
 
 			case ENV_PITCH:
@@ -1859,6 +1873,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 				penv->nPitchSustainEnd = susEnd;
 				penv->nPitchLoopStart = loopBegin;
 				penv->nPitchLoopEnd = loopEnd;
+				penv->nPitchEnvReleaseNode = releaseNode;
 				break;
 
 			default:
@@ -1873,6 +1888,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 				penv->nVolSustainEnd = susEnd;
 				penv->nVolLoopStart = loopBegin;
 				penv->nVolLoopEnd = loopEnd;
+				penv->nVolEnvReleaseNode = releaseNode;
 				break;
 			}
 			int oldn = 0;
@@ -1891,6 +1907,27 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 				oldn = n1;
 				while ((dwPos < dwMemSize) && (p[dwPos] != 0x0D)) dwPos++;
 				if (dwPos >= dwMemSize) break;
+			}
+
+			//Read releasenode information.
+			if(dwPos < dwMemSize)
+			{
+				BYTE r = static_cast<BYTE>(atoi(p + dwPos));
+				if(r == 0 || r >= nPoints) r = ENV_RELEASE_NODE_UNSET;
+				switch(nEnv)
+				{
+					case ENV_PANNING:
+						penv->nPanEnvReleaseNode = r;
+					break;
+
+					case ENV_PITCH:
+						penv->nPitchEnvReleaseNode = r;
+					break;
+
+					default:
+						penv->nVolEnvReleaseNode = r;
+					break;
+				}
 			}
 		}
 		GlobalUnlock(hCpy);
