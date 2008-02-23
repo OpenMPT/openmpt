@@ -108,6 +108,27 @@ void COrderToPatternTable::OnModTypeChanged(const MODTYPE oldtype)
 }
 
 
+ORDERINDEX COrderToPatternTable::GetNextOrderIgnoringSkips(const ORDERINDEX start) const
+//-------------------------------------------------------------------------------------
+{
+	const ORDERINDEX count = GetCount();
+	if(count == 0) return 0;
+	ORDERINDEX next = min(count-1, start+1);
+	while(next+1 < count && (*this)[next] == GetIgnoreIndex()) next++;
+	return next;
+}
+
+ORDERINDEX COrderToPatternTable::GetPreviousOrderIgnoringSkips(const ORDERINDEX start) const
+//-------------------------------------------------------------------------------------
+{
+	const ORDERINDEX count = GetCount();
+	if(start == 0 || count == 0) return 0;
+	ORDERINDEX prev = min(start-1, count-1);
+	while(prev > 0 && (*this)[prev] == GetIgnoreIndex()) prev--;
+	return prev;
+}
+
+
 PATTERNINDEX COrderToPatternTable::GetInvalidPatIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ?  65535 : 0xFF;}
 PATTERNINDEX COrderToPatternTable::GetIgnoreIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ? 65534 : 0xFE;}
 

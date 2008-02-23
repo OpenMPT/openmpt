@@ -628,25 +628,22 @@ LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 
 BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPSTR pszText) {
 //----------------------------------------------------------
+	const char moreRecentMixModeNote[] = "Use a more recent mixmode to see dB offsets.";
 	if ((pszText) && (uId))
 	{
-		if (!m_pSndFile->m_pConfig->getDisplayDBValues()) {
-			wsprintf(pszText, "Use a more recent mixmode to see dB offsets.");
-			return TRUE;
-		}
-		
+		const bool displayDBValues = m_pSndFile->m_pConfig->getDisplayDBValues();
 
 		switch(uId) 	{
 			case IDC_SLIDER_SAMPLEPREAMP:
-				setAsDecibels(pszText, m_pSndFile->m_nSamplePreAmp, m_pSndFile->m_pConfig->getNormalSamplePreAmp());
+				(displayDBValues) ? setAsDecibels(pszText, m_pSndFile->m_nSamplePreAmp, m_pSndFile->m_pConfig->getNormalSamplePreAmp()) : wsprintf(pszText, moreRecentMixModeNote);
 				return TRUE;
 				break;
 			case IDC_SLIDER_VSTIVOL:
-				setAsDecibels(pszText, m_pSndFile->m_nVSTiVolume, m_pSndFile->m_pConfig->getNormalVSTiVol());
+				(displayDBValues) ? setAsDecibels(pszText, m_pSndFile->m_nVSTiVolume, m_pSndFile->m_pConfig->getNormalVSTiVol()) : wsprintf(pszText, moreRecentMixModeNote);
 				return TRUE;
 				break;
 			case IDC_SLIDER_GLOBALVOL:
-				setAsDecibels(pszText, m_pSndFile->m_nGlobalVolume, m_pSndFile->m_pConfig->getNormalGlobalVol());
+				(displayDBValues) ? setAsDecibels(pszText, m_pSndFile->m_nGlobalVolume, m_pSndFile->m_pConfig->getNormalGlobalVol()) : wsprintf(pszText, moreRecentMixModeNote);
 				return TRUE;
 				break;
 		}

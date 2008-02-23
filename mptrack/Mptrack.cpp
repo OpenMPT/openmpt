@@ -2856,12 +2856,18 @@ BOOL CTrackApp::InitializeDXPlugins()
 	m_pPluginManager = new CVstPluginManager;
 	if (!m_pPluginManager) return FALSE;
 	nPlugins = GetPrivateProfileInt("VST Plugins", "NumPlugins", 0, m_szConfigFileName);
+	CString nonFoundPlugs;
 	for (LONG iPlug=0; iPlug<nPlugins; iPlug++)
 	{
 		s[0] = 0;
 		wsprintf(tmp, "Plugin%d", iPlug);
 		GetPrivateProfileString("VST Plugins", tmp, "", s, sizeof(s), m_szConfigFileName);
-		if (s[0]) m_pPluginManager->AddPlugin(s);
+		if (s[0]) m_pPluginManager->AddPlugin(s, TRUE, true, &nonFoundPlugs);
+	}
+	if(nonFoundPlugs.GetLength() > 0)
+	{
+		nonFoundPlugs.Insert(0, "Problems were encountered with plugins:\n");
+		MessageBox(NULL, nonFoundPlugs, "", MB_OK);
 	}
 	return FALSE;
 }

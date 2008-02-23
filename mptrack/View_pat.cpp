@@ -257,11 +257,13 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap, BOOL bUpdateHorizontalScr
 				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 				if ((nCurOrder > 0) && (nCurOrder < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[nCurOrder]))
 				{
-					UINT nPrevPat = pSndFile->Order[nCurOrder-1];
+					const ORDERINDEX prevOrd = pSndFile->Order.GetPreviousOrderIgnoringSkips(nCurOrder);
+					const PATTERNINDEX nPrevPat = pSndFile->Order[prevOrd];
 					if ((nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nPrevPat]))
 					{
-						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nCurOrder-1);
-						if (SetCurrentPattern(nPrevPat)) return SetCurrentRow(pSndFile->PatternSize[nPrevPat]-1);
+						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, prevOrd);
+						if (SetCurrentPattern(nPrevPat))
+							return SetCurrentRow(pSndFile->PatternSize[nPrevPat] + (int)row);
 					}
 				}
 				row = 0;
@@ -283,11 +285,13 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap, BOOL bUpdateHorizontalScr
 				UINT nCurOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 				if ((nCurOrder+1 < pSndFile->Order.size()) && (m_nPattern == pSndFile->Order[nCurOrder]))
 				{
-					UINT nNextPat = pSndFile->Order[nCurOrder+1];
-					if ((nNextPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nNextPat]))
+					const ORDERINDEX nextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(nCurOrder);
+					const PATTERNINDEX nextPat = pSndFile->Order[nextOrder];
+					if ((nextPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nextPat]))
 					{
-						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nCurOrder+1);
-						if (SetCurrentPattern(nNextPat)) return SetCurrentRow(0);
+						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nextOrder);
+						if (SetCurrentPattern(nextPat))
+							return SetCurrentRow(row - pSndFile->PatternSize[m_nPattern]);
 					}
 				}
 				row = pSndFile->PatternSize[m_nPattern]-1;
@@ -3951,7 +3955,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
  		// -- Work out where to put the new note
 		MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, nChn);
 		
-		MODCOMMAND oldcmd = *p;	//take backup copy of the command we're about to overwrite
+		//take backup copy of the command we're about to overwrite
+		MODCOMMAND oldcmd = *p;	
 
 		// -- write note and instrument data
 		isSplit = HandleSplit(p, note);
@@ -4369,7 +4374,7 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 		if (m_nSplitInstrument)
 			p->instr = m_nSplitInstrument;
 		else
-			p->instr = GetCurrentInstrument();
+			if(GetCurrentInstrument()) p->instr = GetCurrentInstrument();
 		if (m_bOctaveLink)
 			note += 12*(m_nOctaveModifier-9);
 		if (note>120 && note<254) note=120;

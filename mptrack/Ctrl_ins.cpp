@@ -840,7 +840,6 @@ BOOL CCtrlInstruments::OnInitDialog()
 	BuildTuningComboBox();
 	
 	CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
-	OnBnClickedCheckPitchtempolock();
 	m_EditPitchTempoLock.SetLimitText(4);
 
 	return FALSE;

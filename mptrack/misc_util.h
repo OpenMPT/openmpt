@@ -35,5 +35,8 @@ inline T ConvertStrTo(const char* str)
 	*/
 }
 
+//Return true if file with given path is found.
+bool DoesFileExist(const char* const filepath);
+
 
 #endif

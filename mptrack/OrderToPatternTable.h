@@ -8,6 +8,8 @@ using std::vector;
 class CSoundFile;
 class COrderToPatternTable;
 
+#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
+
 class COrderSerialization : public srlztn::ABCSerializationStreamer
 //=========================================================
 {
@@ -32,7 +34,7 @@ public:
 
 	size_t WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize);
 
-	ORDERINDEX GetCount() const {return static_cast<ORDERINDEX>(size());}
+	ORDERINDEX GetCount() const {return size();}
 
 	//Deprecated function used for MPTm's created in 1.17.02.46 - 1.17.02.48.
 	DWORD Unserialize(const BYTE* const src, const DWORD memLength);
@@ -48,13 +50,19 @@ public:
 	PATTERNINDEX GetIgnoreIndex() const; //To correspond 0xFE
 	static PATTERNINDEX GetIgnoreIndex(const MODTYPE type);
 
+	//Returns the previous/next order ignoring skip indeces(+++).
+	//If no previous/next order exists, return first/last order, and zero
+	//when orderlist is empty.
+	ORDERINDEX GetNextOrderIgnoringSkips(const ORDERINDEX start) const;
+	ORDERINDEX GetPreviousOrderIgnoringSkips(const ORDERINDEX start) const;
+
 	COrderSerialization* NewReadWriteObject() {return new COrderSerialization(*this);}
 
 private:
 	const CSoundFile& m_rSndFile;
 };
 
-
+#pragma warning(default:4244) 
 
 #endif
 
