@@ -177,6 +177,7 @@ void CViewGlobals::OnInitialUpdate()
 	GetDeviceScrollSizes(nMapMode, sizeTotal, sizePage, sizeLine);
 	m_rcClient.SetRect(0, 0, sizeTotal.cx, sizeTotal.cy);
 	RecalcLayout();
+
 	// Initializing scroll ranges
 	for (int ichn=0; ichn<4; ichn++)
 	{
@@ -241,6 +242,7 @@ VOID CViewGlobals::OnDestroy()
 // -> CODE#0015
 // -> DESC="channels management dlg"
 void CViewGlobals::OnDraw(CDC* pDC)
+//---------------------------------
 {
 	CView::OnDraw(pDC);
 
@@ -326,8 +328,11 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_TabCtrl.InsertItem(iItem, &tci);
 		}
 		if (nOldSel >= (UINT)nTabCount) nOldSel = 0;
-		m_TabCtrl.SetCurSel(nOldSel);
+		
+		//Changing the order of these calls seemed to fix a GUI bug (http://lpchip.com/modplug/viewtopic.php?t=1324)
 		m_TabCtrl.SetRedraw(TRUE);
+		m_TabCtrl.SetCurSel(nOldSel);
+		
 		InvalidateRect(NULL, FALSE);
 	}
 	nTabIndex = m_TabCtrl.GetCurSel();
@@ -1274,6 +1279,7 @@ void CViewGlobals::OnParamChanged()
 // -> CODE#0002
 // -> DESC="VST plugins presets"
 void CViewGlobals::OnProgramChanged()
+//-----------------------------------
 {
 	int cursel = m_CbnPreset.GetCurSel();
 	CModDoc *pModDoc = GetDocument();
@@ -1296,6 +1302,7 @@ void CViewGlobals::OnProgramChanged()
 }
 
 void CViewGlobals::OnLoadParam()
+//------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
@@ -1321,6 +1328,7 @@ void CViewGlobals::OnLoadParam()
 }
 
 void CViewGlobals::OnSaveParam()
+//------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
@@ -1467,6 +1475,7 @@ VOID CViewGlobals::OnBypassChanged()
 // -> CODE#0028
 // -> DESC="effect plugin mixing mode combo"
 void CViewGlobals::OnWetDryExpandChanged()
+//----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	PSNDMIXPLUGIN pPlugin;
