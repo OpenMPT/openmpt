@@ -25,8 +25,10 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 {
 	CHAR s[256];
 	UINT b64 = 0;
+
+	const MODTYPE oldtype = m_SndFile.GetType();
 	
-	if (nNewType == m_SndFile.GetType() && nNewType == MOD_TYPE_IT){
+	if (nNewType == oldtype && nNewType == MOD_TYPE_IT){
 		// Even if m_nType doesn't change, we might need to change extension in itp<->it case.
 		// This is because ITP is a HACK and doesn't genuinely change m_nType,
 		// but uses flages instead.
@@ -34,9 +36,21 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		return TRUE;
 	}
 
-	if(nNewType == m_SndFile.GetType()) return TRUE;
+	if(nNewType == oldtype) return TRUE;
 
-	if(m_SndFile.m_nType == MOD_TYPE_MPT)
+	const bool oldTypeIsMOD = (oldtype == MOD_TYPE_MOD), oldTypeIsXM = (oldtype == MOD_TYPE_XM),
+				oldTypeIsS3M = (oldtype == MOD_TYPE_S3M), oldTypeIsIT = (oldtype == MOD_TYPE_IT),
+				oldTypeIsMPT = (oldtype == MOD_TYPE_MPT), oldTypeIsMOD_XM = (oldTypeIsMOD || oldTypeIsXM),
+                oldTypeIsS3M_IT_MPT = (oldTypeIsS3M || oldTypeIsIT || oldTypeIsMPT);
+
+	const bool newTypeIsMOD = (nNewType == MOD_TYPE_MOD), newTypeIsXM =  (nNewType == MOD_TYPE_XM), 
+				newTypeIsS3M = (nNewType == MOD_TYPE_S3M), newTypeIsIT = (nNewType == MOD_TYPE_IT),
+				newTypeIsMPT = (nNewType == MOD_TYPE_MPT), newTypeIsMOD_XM = (newTypeIsMOD || newTypeIsXM), 
+				newTypeIsS3M_IT_MPT = (newTypeIsS3M || newTypeIsIT || newTypeIsMPT), 
+				newTypeIsXM_IT_MPT = (newTypeIsXM || newTypeIsIT || newTypeIsMPT),
+				newTypeIsIT_MPT = (newTypeIsIT || newTypeIsMPT);
+
+	if(oldTypeIsMPT)
 	{
 		if(::MessageBox(NULL, "Convertion from MPTm to any other modtype makes certain features unavailable and is not guaranteed to work properly; Do the convertion anyway?",
 		"Notice", MB_YESNO) != IDYES)
@@ -96,7 +110,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	} //End if (((m_SndFile.m_nInstruments) || (b64)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 	BeginWaitCursor();
 	// Adjust pattern data
-	if ((m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) && (nNewType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
+	if(oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
 	{
 		for (UINT nPat=0; nPat<m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 		{
@@ -152,7 +166,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			}
 		}
 	} else
-	if ((m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM)))
+		if (oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
 	{
 		for (UINT nPat=0; nPat<m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 		{
@@ -224,15 +238,15 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		}
 	}
 	// Convert XM to MOD
-	if ((m_SndFile.m_nType == MOD_TYPE_XM) && (nNewType == MOD_TYPE_MOD))
+	if (oldTypeIsXM && newTypeIsMOD)
 	{
 	} else
 	// Convert MOD to XM
-	if ((m_SndFile.m_nType == MOD_TYPE_MOD) && (nNewType == MOD_TYPE_XM))
+	if (oldTypeIsMOD && newTypeIsXM)
 	{
 	} else
-	// Convert XM to S3M/IT/MPT
-	if ((m_SndFile.m_nType == MOD_TYPE_XM) && (nNewType != MOD_TYPE_XM))
+	// Convert MOD/XM to S3M/IT/MPT
+	if (oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
 	{
 		for (UINT i=1; i<=m_SndFile.m_nSamples; i++)
 		{
@@ -240,10 +254,10 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			m_SndFile.Ins[i].RelativeTone = 0;
 			m_SndFile.Ins[i].nFineTune = 0;
 		}
-		if (nNewType & (MOD_TYPE_IT|MOD_TYPE_MPT)) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATMODE;
+		if (oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATMODE;
 	} else
 	// Convert S3M/IT/MPT to XM
-	if ((m_SndFile.m_nType != MOD_TYPE_XM) && (nNewType == MOD_TYPE_XM))
+	if (oldTypeIsS3M_IT_MPT && newTypeIsXM)
 	{
 		for (UINT i=1; i<=m_SndFile.m_nSamples; i++)
 		{
@@ -272,25 +286,25 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		if (bBrokenNoteMap) AddToLog("WARNING: Note Mapping will be lost when saving as XM\n");
 	}
 	// Too many samples ?
-	if ((nNewType == MOD_TYPE_MOD) && (m_SndFile.m_nSamples > 31))
+	if (newTypeIsMOD && (m_SndFile.m_nSamples > 31))
 	{
 		AddToLog("WARNING: Samples above 31 will be lost when saving this file as MOD!\n");
 	}
 	BEGIN_CRITICAL();
 	m_SndFile.ChangeModTypeTo(nNewType);
-	if ((!(nNewType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_XM))) && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
+	if (!newTypeIsXM_IT_MPT && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
 	{
 		AddToLog("WARNING: Linear Frequency Slides not supported by the new format.\n");
 		m_SndFile.m_dwSongFlags &= ~SONG_LINEARSLIDES;
 	}
-	if (!(nNewType & (MOD_TYPE_IT|MOD_TYPE_MPT))) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATMODE);
-	if (nNewType != MOD_TYPE_S3M) m_SndFile.m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
+	if (!newTypeIsIT_MPT) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATMODE);
+	if (!newTypeIsS3M) m_SndFile.m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
 	END_CRITICAL();
 	ChangeFileExtension(nNewType);
 
 	//rewbs.cutomKeys: update effect key commands
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
-	if	(nNewType & (MOD_TYPE_MOD|MOD_TYPE_XM)) {
+	if	(newTypeIsMOD_XM) {
 		ih->SetXMEffects();
 	} else {
 		ih->SetITEffects();

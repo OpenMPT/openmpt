@@ -110,7 +110,7 @@ typedef const BYTE * LPCBYTE;
 #define CHN_PINGPONGSUSTAIN	0x10
 #define CHN_PANNING			0x20
 #define CHN_STEREO			0x40
-#define CHN_PINGPONGFLAG	0x80
+#define CHN_PINGPONGFLAG	0x80	//When flag is on, bidiloop is processed backwards?
 // Bits 8-31:	Channel Flags
 #define CHN_MUTE			0x100
 #define CHN_KEYOFF			0x200
@@ -959,6 +959,7 @@ public:
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
 	BOOL Destroy();
 	MODTYPE GetType() const { return m_nType; }
+	inline bool TypeIsIT_MPT() const {return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;}
 	CModDoc* GetpModDoc() {return m_pModDoc;}
 
 

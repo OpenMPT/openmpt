@@ -145,7 +145,7 @@ CModToMidi::CModToMidi(LPCSTR pszPathName, CSoundFile *pSndFile, CWnd *pWndParen
 				if ((penv->nMidiProgram > 20) && (penv->nMidiProgram < 120))
 					m_InstrMap[nIns].nProgram = penv->nMidiProgram;
 				else
-					m_InstrMap[nIns].nProgram = penv->NoteMap[60] & 0x7f;
+					m_InstrMap[nIns].nProgram = (penv->NoteMap[60]-1) & 0x7f;
 			} else
 			{
 				m_InstrMap[nIns].nProgram = penv->nMidiProgram & 0x7f;
@@ -350,6 +350,10 @@ BOOL CModToMidi::DoConvert()
 	UINT nSpeed;
 	CFile f;
 
+	const CHANNELINDEX chnCount = min(64, m_pSndFile->GetNumChannels());
+	if(chnCount < m_pSndFile->GetNumChannels())
+		MessageBox("Note: Only 64 channels will be exported.");
+
 	if (!f.Open(m_szFileName, CFile::modeCreate | CFile::modeWrite))
 	{
 		return FALSE;
@@ -366,10 +370,14 @@ BOOL CModToMidi::DoConvert()
 	mthd.id = 0x6468544d; // "MThd"
 	mthd.len = BigEndian(sizeof(mthd)-8);
 	mthd.wFmt = BigEndianW(1);
-	mthd.wTrks = BigEndianW(m_pSndFile->m_nChannels); // 1 track/channel
+	mthd.wTrks = chnCount; // 1 track/channel
+	mthd.wTrks = BigEndianW(mthd.wTrks); //Convert to big endian value.
 	mthd.wDivision = BigEndianW(nPPQN);
 	if (m_bRmi) f.Write(&rmid, sizeof(rmid));
 	f.Write(&mthd, sizeof(mthd));
+
+	
+
 	// Add Song Name on track 0
 	m_pSndFile->GetTitle(s);
 	if (s[0])
@@ -388,7 +396,7 @@ BOOL CModToMidi::DoConvert()
 		Tracks[0].Write(m_pSndFile->m_lpszSongComments, strlen(m_pSndFile->m_lpszSongComments));
 	}
 	// Add channel names
-	for (UINT iInit=0; iInit<m_pSndFile->m_nChannels; iInit++)
+	for (UINT iInit=0; iInit<chnCount; iInit++)
 	{
 		PDYNMIDITRACK pTrk = &Tracks[iInit];
 		lstrcpyn(s, m_pSndFile->ChnSettings[iInit].szName, MAX_CHANNELNAME);
@@ -422,10 +430,13 @@ BOOL CModToMidi::DoConvert()
 			nRow = 0;
 			continue;
 		}
-		for (UINT nChn=0; nChn<m_pSndFile->m_nChannels; nChn++)
+		for (UINT nChn=0; nChn<chnCount; nChn++)
 		{
+			//Skip muted channels.
+			if(m_pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) continue;
+
 			PDYNMIDITRACK pTrk = &Tracks[nChn];
-			MODCOMMAND *m = m_pSndFile->Patterns[nPat] + nRow*m_pSndFile->m_nChannels + nChn;
+			MODCOMMAND *m = m_pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
 			UINT delta_time = nClock - pTrk->nLastEventClock;
 			UINT len = 0;
 
@@ -523,7 +534,7 @@ BOOL CModToMidi::DoConvert()
 		}
 	}
 	// Write midi tracks
-	for (UINT iTrk=0; iTrk<m_pSndFile->m_nChannels; iTrk++)
+	for (UINT iTrk=0; iTrk<chnCount; iTrk++)
 	{
 		tmp[0] = 0x00;
 		tmp[1] = 0xff;

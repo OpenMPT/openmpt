@@ -413,6 +413,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	MODINSTRUMENT *psmp = &Ins[instr];
 	UINT note = pChn->nNewNote;
 
+	if(note == 0 && TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY)) return;
+
 	if ((penv) && (note) && (note <= 128))
 	{
 		if (penv->NoteMap[note-1] >= 0xFE) return;
@@ -426,7 +428,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	}
 
 	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && penv && penv->pTuning);
-	//Playback behavior change for MPT: Don't change sample if it is in the same instrument as previous sample.
+	//Playback behavior change for MPT: With portamento don't change sample if it is in
+	//the same instrument as previous sample.
 	if(bPorta && bNewTuning && penv == pChn->pHeader)
 		return;
 
@@ -436,14 +439,17 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	{
 		bInstrumentChanged = TRUE;
 		pChn->pHeader = penv;
-	} else
-	// Special XM hack
-	if ((bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (penv)
-	 && (pChn->pInstrument) && (psmp != pChn->pInstrument))
-	{
-		// FT2 doesn't change the sample in this case,
-		// but still uses the sample info from the old one (bug?)
-		returnAfterVolumeAdjust = true;
+	} 
+	else 
+	{	
+		// Special XM hack
+		if ((bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (penv)
+		&& (pChn->pInstrument) && (psmp != pChn->pInstrument))
+		{
+			// FT2 doesn't change the sample in this case,
+			// but still uses the sample info from the old one (bug?)
+			returnAfterVolumeAdjust = true;
+		}
 	}
 	
 	// Update Volume
@@ -486,7 +492,9 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	if (bResetEnv)
 	{
 		if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITCOMPATMODE)
-		 || (!pChn->nLength) || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol)))
+		 || (!pChn->nLength) || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
+		 //IT compatibility tentative fix: Reset envelopes when instrument changes.
+		 || (TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY) && bInstrumentChanged))
 		{
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
 			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (penv) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
@@ -520,7 +528,15 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	} else
 	{
 		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE|CHN_VOLENV|CHN_PANENV|CHN_PITCHENV);
-		pChn->dwFlags = (pChn->dwFlags & 0xFFFFFF00) | (psmp->uFlags & 0xFF);
+
+		//IT compatibility tentative fix: Don't anymore change bidi loop direction when 
+		//no sample nor instrument is changed.
+		if(TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY) && psmp == pChn->pInstrument && !bInstrumentChanged)
+			pChn->dwFlags = (pChn->dwFlags & (0xFFFFFF00 | CHN_PINGPONGFLAG)) | (psmp->uFlags & 0xFF);
+		else
+			pChn->dwFlags = (pChn->dwFlags & 0xFFFFFF00) | (psmp->uFlags & 0xFF);
+
+
 		if (penv)
 		{
 			if (penv->dwFlags & ENV_VOLUME) pChn->dwFlags |= CHN_VOLENV;
@@ -594,11 +610,17 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		// Key Off
 		KeyOff(nChn);
 		// Note Cut
-		if (note == 0xFE)
+		if (note == NOTE_NOTECUT)
 		{
 			pChn->dwFlags |= (CHN_NOTEFADE|CHN_FASTVOLRAMP);
 			if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_nInstruments)) pChn->nVolume = 0;
 			pChn->nFadeOutVol = 0;
+
+			//IT compatibility tentative fix: Clear channel note memory on note cut.
+			if(TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+			{
+				pChn->nNote = pChn->nNewNote = 0;
+			}
 		}
 		return;
 	}
@@ -667,7 +689,10 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 			if (pChn->nTremoloType < 4) pChn->nTremoloPos = 0;
 		}
 		if (pChn->nPos >= pChn->nLength) pChn->nPos = pChn->nLoopStart;
-	} else bPorta = FALSE;
+	} 
+	else 
+		bPorta = FALSE;
+
 	if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 	 || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 	 || ((m_dwSongFlags & SONG_ITCOMPATMODE) && (pChn->nRowInstr)))
@@ -1113,13 +1138,11 @@ BOOL CSoundFile::ProcessEffects()
 					{
 						if(instr < MAX_INSTRUMENTS && pChn->pHeader != Headers[instr])
 							note = pChn->nNote;
-
 					}
 					else //Case: Only samples used
 					{
 						if(instr < MAX_SAMPLES && pChn->pSample != Ins[instr].pSample)
 							note = pChn->nNote;
-
 					}
 				}
 
@@ -1188,7 +1211,7 @@ BOOL CSoundFile::ProcessEffects()
 				InstrumentChange(pChn, instr, bPorta, TRUE);
 				pChn->nNewIns = 0;
 				// Special IT case: portamento+note causes sample change -> ignore portamento
-				if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT))
+				if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 				 && (psmp != pChn->pInstrument) && (note) && (note < 0x80))
 				{
 					bPorta = FALSE;
@@ -1406,34 +1429,6 @@ BOOL CSoundFile::ProcessEffects()
 			if (m_nTickCount) break;
 			//rewbs.volOffset: moved sample offset code to own method
 			SampleOffset(nChn, param, bPorta);
-
-
-/*			if (param) pChn->nOldOffset = param; else param = pChn->nOldOffset;
-			param <<= 8;
-			param |= (UINT)(pChn->nOldHiOffset) << 16;
-			if ((pChn->nRowNote) && (pChn->nRowNote < 0x80))
-			{
-				if (bPorta)
-					pChn->nPos = param;
-				else
-					pChn->nPos += param;
-				if (pChn->nPos >= pChn->nLength)
-				{
-					if (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
-					{
-						pChn->nPos = pChn->nLoopStart;
-						if ((m_dwSongFlags & SONG_ITOLDEFFECTS) && (pChn->nLength > 4))
-						{
-							pChn->nPos = pChn->nLength - 2;
-						}
-					}
-				}
-			} else
-			if ((param < pChn->nLength) && (m_nType & (MOD_TYPE_MTM|MOD_TYPE_DMF)))
-			{
-				pChn->nPos = param;
-			}
-*/
 			break;
 
 		// Arpeggio
