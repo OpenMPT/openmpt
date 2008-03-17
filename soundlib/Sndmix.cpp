@@ -99,7 +99,7 @@ const UINT PreAmpAGCTable[16] =
 	0x92, 0x94, 0x96, 0x98,
 };
 
-using CTuning::RATIOTYPE;
+typedef CTuning::RATIOTYPE RATIOTYPE;
 
 static const RATIOTYPE TwoToPowerXOver12Table[16] =
 {

@@ -92,6 +92,7 @@ private:
 class CSoundFile;
 inline bool operator<(const CMIDIMappingDirective& a, const CMIDIMappingDirective& b) {return a.GetController() < b.GetController();}
 inline bool operator<(const CMIDIMappingDirective& d, const BYTE& ctrlVal) {return d.GetController() < ctrlVal;}
+inline bool operator<(const BYTE& ctrlVal, const CMIDIMappingDirective& d) {return ctrlVal < d.GetController();}
 
 //===============
 class CMIDIMapper
