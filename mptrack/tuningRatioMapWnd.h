@@ -5,7 +5,7 @@
 
 class CTuningDialog;
 
-using CTuning::NOTEINDEXTYPE;
+typedef CTuning::NOTEINDEXTYPE NOTEINDEXTYPE;
 
 //Copied from CNoteMapWnd.
 //===============================

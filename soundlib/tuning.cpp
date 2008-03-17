@@ -4,11 +4,11 @@
 #include "../mptrack/serialization_utils.h"
 #include <string>
 
-using CTuningRTI::RATIOTYPE;
-using CTuningRTI::NOTEINDEXTYPE;
-using CTuningRTI::UNOTEINDEXTYPE;
-using CTuningRTI::STEPINDEXTYPE;
-using CTuningRTI::USTEPINDEXTYPE;
+typedef CTuningRTI::RATIOTYPE RATIOTYPE;
+typedef CTuningRTI::NOTEINDEXTYPE NOTEINDEXTYPE;
+typedef CTuningRTI::UNOTEINDEXTYPE UNOTEINDEXTYPE;
+typedef CTuningRTI::STEPINDEXTYPE STEPINDEXTYPE;
+typedef  CTuningRTI::USTEPINDEXTYPE USTEPINDEXTYPE;
 
 const NOTEINDEXTYPE CTuningRTI::s_StepMinDefault(-64);
 const UNOTEINDEXTYPE CTuningRTI::s_RatioTableSizeDefault(128);
@@ -77,7 +77,7 @@ bool CTuningRTI::CreateRatioTableGG(const vector<RATIOTYPE>& v, const RATIOTYPE 
 	BelowRatios = AboveRatios = DefaultBARFUNC;
 
 	m_RatioTable.resize(vr.second-vr.first+1);
-	std::copy(v.begin(), v.end(), m_RatioTable.begin() + ratiostartpos - vr.first);
+	std::copy(v.begin(), v.end(), m_RatioTable.begin() + (ratiostartpos - vr.first));
 
 	for(NOTEINDEXTYPE i = ratiostartpos-1; i>=m_StepMin && ratiostartpos > NOTEINDEXTYPE_MIN; i--)
 	{

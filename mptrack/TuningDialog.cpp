@@ -8,8 +8,8 @@
 const CTuningDialog::TUNINGTREEITEM CTuningDialog::s_notFoundItemTuning = TUNINGTREEITEM();
 const HTREEITEM CTuningDialog::s_notFoundItemTree = NULL;
 
-using CTuning::UNOTEINDEXTYPE;
-using CTuning::RATIOTYPE;
+typedef CTuning::UNOTEINDEXTYPE UNOTEINDEXTYPE;
+typedef CTuning::RATIOTYPE RATIOTYPE;
 #define TT_GENERAL CTuning::TT_GENERAL
 #define TT_GROUPGEOMETRIC CTuning::TT_GROUPGEOMETRIC
 #define TT_GEOMETRIC CTuning::TT_GEOMETRIC

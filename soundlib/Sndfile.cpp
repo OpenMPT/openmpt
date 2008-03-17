@@ -2948,7 +2948,7 @@ double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row)
 const CModSpecifications& CSoundFile::GetModSpecifications(const MODTYPE type)
 //----------------------------------------------------------------------------
 {
-	CModSpecifications* p = 0;
+	const CModSpecifications* p = 0;
 	SetModSpecsPointer(p, type);
 	return *p;
 }
