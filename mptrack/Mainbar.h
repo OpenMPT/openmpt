@@ -116,7 +116,7 @@ protected:
 protected:
 	//{{AFX_MSG(CModTreeBar)
 	afx_msg void OnNcPaint();
-#if _MSC_VER >= 1400
+#if _MFC_VER > 0x0710
 	afx_msg LRESULT OnNcHitTest(CPoint point);
 #else
 	afx_msg UINT OnNcHitTest(CPoint point);

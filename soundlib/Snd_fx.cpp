@@ -3427,8 +3427,10 @@ void CSoundFile::HandlePatternTransitionEvents()
 
 		// Channel mutes
 		for (UINT chan=0; chan<m_nChannels; chan++) {
-			if (m_bChannelMuteTogglePending[chan]) {
-				m_pModDoc->MuteChannel(chan, !m_pModDoc->IsChannelMuted(chan));
+			if (m_bChannelMuteTogglePending[chan])
+			{
+				if(m_pModDoc)
+					m_pModDoc->MuteChannel(chan, !m_pModDoc->IsChannelMuted(chan));
 				m_bChannelMuteTogglePending[chan]=false;
 			}
 		}

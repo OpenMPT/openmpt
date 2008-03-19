@@ -93,7 +93,7 @@ protected:
 public:
 	CVstPlugin(HINSTANCE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN pMixPlugin, AEffect *pEffect);
 	virtual ~CVstPlugin();
-	void Initialize(CModDoc* pModDoc);
+	void Initialize(CSoundFile* pSndFile);
 
 public:
 	PVSTPLUGINLIB GetPluginFactory() const { return m_pFactory; }
@@ -208,7 +208,7 @@ public:
 	BOOL IsValidPlugin(const VSTPLUGINLIB *pLib);
 	PVSTPLUGINLIB AddPlugin(LPCSTR pszDllPath, BOOL bCache=TRUE, const bool checkFileExistence = false, CString* const errStr = 0);
 	BOOL RemovePlugin(PVSTPLUGINLIB);
-	BOOL CreateMixPlugin(PSNDMIXPLUGIN, CModDoc*);
+	BOOL CreateMixPlugin(PSNDMIXPLUGIN, CSoundFile*);
 	VOID OnIdle();
 	static void ReportPlugException(LPCSTR format,...);
 
@@ -218,7 +218,7 @@ protected:
 protected:
 	long VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 	static long VSTCALLBACK MasterCallBack(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
-	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN, CModDoc*);
+	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN, CSoundFile*);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
 };
 

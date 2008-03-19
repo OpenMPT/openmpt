@@ -247,7 +247,9 @@ VOID CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 				LPBYTE lpStream = f.Lock();
 				if (lpStream)
 				{
-					m_SongFile.Create(lpStream, CMainFrame::GetMainFrame()->GetActiveDoc(), dwLen);
+					//m_SongFile.Create(lpStream, CMainFrame::GetMainFrame()->GetActiveDoc(), dwLen);
+					m_SongFile.Destroy();
+					m_SongFile.Create(lpStream, NULL, dwLen);
 					f.Unlock();
 				}
 			}
@@ -1530,6 +1532,7 @@ VOID CModTree::FillInstrumentLibrary()
 					 || (!lstrcmpi(s, ".s3m"))
 					 || (!lstrcmpi(s, ".xm"))
 					 || (!lstrcmpi(s, ".it"))
+					 || (!lstrcmpi(s, ".mptm"))
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 //					 || (!lstrcmpi(s, ".itp"))	ericus 03/03/2005 : temporarily deactivated 03/03/2005

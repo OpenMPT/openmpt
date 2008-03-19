@@ -45,7 +45,7 @@ typedef const BYTE * LPCBYTE;
 //#else
 // -> CODE#0006
 // -> DESC="misc quantity changes"
-#define MAX_CHANNELS		256	//200
+#define MAX_CHANNELS		256	//200 //Note: MAX_BASECHANNELS defines max pattern channels
 // -! BEHAVIOUR_CHANGE#0006
 //#endif
 // -> CODE#0006
@@ -53,7 +53,7 @@ typedef const BYTE * LPCBYTE;
 //#ifdef FASTSOUNDLIB
 //#define MAX_BASECHANNELS	64
 //#else
-#define MAX_BASECHANNELS	127
+#define MAX_BASECHANNELS	127	//Max pattern channels.
 //#endif
 // -! BEHAVIOUR_CHANGE#0006
 #define MAX_ENVPOINTS		32
@@ -731,7 +731,7 @@ typedef SNDMIXPLUGIN* PSNDMIXPLUGIN;
 
 //class CSoundFile;
 class CModDoc;
-typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN, CModDoc*);
+typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN, CSoundFile*);
 
 struct SNDMIXSONGEQ
 {
@@ -939,7 +939,7 @@ public:	// for Editing
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];		// Mix plugins
 	SNDMIXSONGEQ m_SongEQ;							// Default song EQ preset
 	CHAR CompressionTable[16];
-	bool m_bChannelMuteTogglePending[MAX_CHANNELS];
+	bool m_bChannelMuteTogglePending[MAX_BASECHANNELS];
 
 	CSoundFilePlayConfig* m_pConfig;
 	DWORD m_dwCreatedWithVersion;
