@@ -450,7 +450,7 @@ void CMainFrame::LoadIniSettings()
 	GetPrivateProfileLong("AutoSave", "Enabled", true, iniFile)?m_pAutoSaver->Enable():m_pAutoSaver->Disable();
 	m_pAutoSaver->SetSaveInterval(GetPrivateProfileLong("AutoSave", "IntervalMinutes", 10, iniFile));
 	m_pAutoSaver->SetHistoryDepth(GetPrivateProfileLong("AutoSave", "BackupHistory", 3, iniFile));
-	m_pAutoSaver->SetUseOriginalPath(GetPrivateProfileLong("AutoSave", "UseOriginalPath", true, iniFile));
+	m_pAutoSaver->SetUseOriginalPath(GetPrivateProfileLong("AutoSave", "UseOriginalPath", true, iniFile) != 0);
 	m_pAutoSaver->SetPath(GetPrivateProfileCString("AutoSave", "Path", "", iniFile));
 	m_pAutoSaver->SetFilenameTemplate(GetPrivateProfileCString("AutoSave", "FileNameTemplate", "", iniFile));
 }
@@ -961,7 +961,7 @@ bool CMainFrame::WritePrivateProfileLong(const CString section, const CString ke
 {
 	CHAR valueBuffer[INIBUFFERSIZE];
 	wsprintf(valueBuffer, "%li", value);
-	return WritePrivateProfileString(section, key, valueBuffer, iniFile);
+	return (WritePrivateProfileString(section, key, valueBuffer, iniFile) != 0);
 }
 
 
@@ -981,7 +981,7 @@ bool CMainFrame::WritePrivateProfileDWord(const CString section, const CString k
 {
 	CHAR valueBuffer[INIBUFFERSIZE];
 	wsprintf(valueBuffer, "%lu", value);
-	return WritePrivateProfileString(section, key, valueBuffer, iniFile);
+	return (WritePrivateProfileString(section, key, valueBuffer, iniFile) != 0);
 }
 
 DWORD CMainFrame::GetPrivateProfileDWord(const CString section, const CString key, const DWORD defaultValue, const CString iniFile)
@@ -996,7 +996,7 @@ DWORD CMainFrame::GetPrivateProfileDWord(const CString section, const CString ke
 
 bool CMainFrame::WritePrivateProfileCString(const CString section, const CString key, const CString value, const CString iniFile) 
 {
-	return WritePrivateProfileString(section, key, value, iniFile);
+	return (WritePrivateProfileString(section, key, value, iniFile) != 0);
 }
 
 CString CMainFrame::GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile)

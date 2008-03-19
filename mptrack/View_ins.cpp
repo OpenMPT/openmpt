@@ -1700,7 +1700,7 @@ void CViewInstrument::OnNcLButtonDblClk(UINT uFlags, CPoint point)
 }
 
 
-#if _MSC_VER >= 1400
+#if _MFC_VER > 0x0710
 LRESULT CViewInstrument::OnNcHitTest(CPoint point)
 #else
 UINT CViewInstrument::OnNcHitTest(CPoint point)

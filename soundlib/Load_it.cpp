@@ -172,8 +172,9 @@ public:
 					notFoundTunings.push_back(str);
 					string erm = string("Tuning ") + str + string(" used by the module was not found.");
 					MessageBox(0, erm.c_str(), 0, MB_ICONINFORMATION);
-					csf.m_pModDoc->SetModified(); //The tuning is changed so
-					//the modified flag is set.
+					if(csf.GetpModDoc()) //The tuning is changed so the modified flag is set.
+						csf.GetpModDoc()->SetModified();
+					
 				}
 				csf.Headers[i]->pTuning = csf.Headers[i]->s_DefaultTuning;
 

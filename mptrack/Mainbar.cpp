@@ -922,7 +922,7 @@ void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 }
 
 
-#if _MSC_VER >= 1400
+#if _MFC_VER > 0x0710
 LRESULT CModTreeBar::OnNcHitTest(CPoint point)
 #else
 UINT CModTreeBar::OnNcHitTest(CPoint point)

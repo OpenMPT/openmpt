@@ -687,15 +687,15 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	}
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
-	// Load plugins
-	if (gpMixPluginCreateProc)
+	// Load plugins only when m_pModDoc != 0.  (can be == 0 for example when examining module samples in treeview.
+	if (gpMixPluginCreateProc && GetpModDoc())
 	{
 		for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 		{
 			if ((m_MixPlugins[iPlug].Info.dwPluginId1)
 			 || (m_MixPlugins[iPlug].Info.dwPluginId2))
 			{
-				gpMixPluginCreateProc(&m_MixPlugins[iPlug], pModDoc);
+				gpMixPluginCreateProc(&m_MixPlugins[iPlug], this);
 				if (m_MixPlugins[iPlug].pMixPlugin)
 				{
 					m_MixPlugins[iPlug].pMixPlugin->RestoreAllParameters(m_MixPlugins[iPlug].defaultProgram); //rewbs.plugDefaultProgram: added param
@@ -728,16 +728,13 @@ BOOL CSoundFile::Destroy()
 		Patterns[i] = NULL;
 	}
 	m_nPatternNames = 0;
-	if (m_lpszPatternNames)
-	{
-		delete[] m_lpszPatternNames;
-		m_lpszPatternNames = NULL;
-	}
-	if (m_lpszSongComments)
-	{
-		delete[] m_lpszSongComments;
-		m_lpszSongComments = NULL;
-	}
+
+	delete[] m_lpszPatternNames;
+	m_lpszPatternNames = NULL;
+
+	delete[] m_lpszSongComments;
+	m_lpszSongComments = NULL;
+
 	for (i=1; i<MAX_SAMPLES; i++)
 	{
 		MODINSTRUMENT *pins = &Ins[i];
@@ -749,11 +746,8 @@ BOOL CSoundFile::Destroy()
 	}
 	for (i=0; i<MAX_INSTRUMENTS; i++)
 	{
-		if (Headers[i])
-		{
-			delete Headers[i];
-			Headers[i] = NULL;
-		}
+		delete Headers[i];
+		Headers[i] = NULL;
 	}
 	for (i=0; i<MAX_MIXPLUGINS; i++)
 	{
@@ -1365,8 +1359,11 @@ bool CSoundFile::InitChannel(UINT nch)
 
 	ResetChannelState(nch, CHNRESET_TOTAL);
 
-	m_pModDoc->Record1Channel(nch,FALSE);
-	m_pModDoc->Record2Channel(nch,FALSE);
+	if(m_pModDoc)
+	{
+		m_pModDoc->Record1Channel(nch,FALSE);
+		m_pModDoc->Record2Channel(nch,FALSE);
+	}
 	m_bChannelMuteTogglePending[nch] = false;
 
 	return false;
@@ -1498,11 +1495,13 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 	{
 		settings[i] = ChnSettings[i];
 		chns[i] = Chn[i];
-		recordStates[i] = m_pModDoc->IsChannelRecord(i);
+		if(m_pModDoc)
+			recordStates[i] = m_pModDoc->IsChannelRecord(i);
 		chnMutePendings[i] = m_bChannelMuteTogglePending[i];
 	}
 	
-	m_pModDoc->ReinitRecordState();
+	if(m_pModDoc)
+		m_pModDoc->ReinitRecordState();
 
 	for (UINT i=0; i<nRemainingChannels; i++)
 	{
@@ -1510,8 +1509,11 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 		{
 				ChnSettings[i] = settings[newOrder[i]];
 				Chn[i] = chns[newOrder[i]];
-				if(recordStates[newOrder[i]] == 1) m_pModDoc->Record1Channel(i,TRUE);
-				if(recordStates[newOrder[i]] == 2) m_pModDoc->Record2Channel(i,TRUE);
+				if(m_pModDoc)
+				{
+					if(recordStates[newOrder[i]] == 1) m_pModDoc->Record1Channel(i,TRUE);
+					if(recordStates[newOrder[i]] == 2) m_pModDoc->Record2Channel(i,TRUE);
+				}
 				m_bChannelMuteTogglePending[i] = chnMutePendings[newOrder[i]];
 		}
 		else

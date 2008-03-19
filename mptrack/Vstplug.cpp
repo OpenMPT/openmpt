@@ -39,13 +39,13 @@ long VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect,	long opcode,
 }
 
 
-BOOL CVstPluginManager::CreateMixPluginProc(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModDoc)
+BOOL CVstPluginManager::CreateMixPluginProc(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pSndFile)
 //-------------------------------------------------------------------------------------
 {
 	CVstPluginManager *that = theApp.GetPluginManager();
 	if (that)
 	{
-		return that->CreateMixPlugin(pMixPlugin, pModDoc);
+		return that->CreateMixPlugin(pMixPlugin, pSndFile);
 	}
 	return FALSE;
 }
@@ -408,7 +408,7 @@ BOOL CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
 }
 
 
-BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModDoc)
+BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pSndFile)
 //---------------------------------------------------------------------------------
 {
 	UINT nMatch=0;
@@ -462,7 +462,7 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModD
 			CVstPlugin *pVstPlug = new CVstPlugin(NULL, pFound, pMixPlugin, pEffect);
 			if (pVstPlug)
 			{
-				pVstPlug->Initialize(pModDoc);
+				pVstPlug->Initialize(pSndFile);
 				bOk = TRUE;
 			}
 			END_CRITICAL();
@@ -547,7 +547,7 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CModDoc *pModD
 						}
 					}
 					CVstPlugin *pVstPlug = new CVstPlugin(hLibrary, pFound, pMixPlugin, pEffect);
-					if (pVstPlug) pVstPlug->Initialize(pModDoc);
+					if (pVstPlug) pVstPlug->Initialize(pSndFile);
 				}
 			} else
 			{
@@ -1145,7 +1145,7 @@ VOID CSelectPluginDlg::OnOK()
 			// Now, create the new plugin
 			if (pManager)
 			{
-				pManager->CreateMixPlugin(m_pPlugin, m_pModDoc);
+				pManager->CreateMixPlugin(m_pPlugin, (m_pModDoc) ? m_pModDoc->GetSoundFile() : 0);
 				if (m_pPlugin->pMixPlugin)
 				{
 					CHAR s[128];
@@ -1518,7 +1518,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 }
 
 
-void CVstPlugin::Initialize(CModDoc *pModDoc)
+void CVstPlugin::Initialize(CSoundFile* pSndFile)
 //-------------------------------------------
 {
 	if (!m_pEvList)
@@ -1541,8 +1541,8 @@ void CVstPlugin::Initialize(CModDoc *pModDoc)
 	//Assuming 32bit address space...
     m_pEffect->resvd1=(long)this;
 	//rewbs.plugDocAware
-	m_pModDoc = pModDoc;
-	m_pSndFile = pModDoc->GetSoundFile();
+	m_pSndFile = pSndFile;
+	m_pModDoc = pSndFile->GetpModDoc();
 	m_nSlot = FindSlot();
 	//end rewbs.plugDocAware
 
@@ -2079,7 +2079,7 @@ void CVstPlugin::RecalculateGain()
 	float gain = 0.1f * (float)( m_pMixStruct ? (m_pMixStruct->Info.dwInputRouting>>16) & 0xff : 10 );
 	if(gain < 0.1f) gain = 1.0f;
 
-	if (m_bIsInstrument) {
+	if (m_bIsInstrument && m_pSndFile) {
 		gain /= m_pSndFile->m_pConfig->getVSTiAttenuation();
 		gain *= (m_pSndFile->m_nVSTiVolume / m_pSndFile->m_pConfig->getNormalVSTiVol());
 	}
@@ -2543,7 +2543,7 @@ void CVstPlugin::MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT /*trac
 		nParam=127;
 	}
 
-	if(m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
+	if(m_pSndFile && m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION))
 		MidiSend(nController<<16 | nParam<<8 | 0xB0|nMidiCh);
 	else 
 		MidiSend(nParam<<16 | nController<<8 | 0xB0|nMidiCh);
@@ -2710,13 +2710,15 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 }
 
 bool CVstPlugin::isPlaying(UINT note, UINT midiChn, UINT trackerChn)
+//------------------------------------------------------------------
 {
 	note--;
 	PVSTINSTCH pMidiCh = &m_MidiCh[(midiChn-1) & 0x0f];
-	return  pMidiCh->uNoteOnMap[note][trackerChn];
+	return  (pMidiCh->uNoteOnMap[note][trackerChn] != 0);
 }
 
 bool CVstPlugin::MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn)
+//---------------------------------------------------------------------------------------------
 {
 	note--;
 	PVSTINSTCH pMidiCh = &m_MidiCh[(midiChn-1) & 0x0f];
@@ -2820,7 +2822,7 @@ void CVstPlugin::SaveAllParameters()
 		 && (m_pEffect->uniqueID != 'Sytr')) //special case: imageline sytrus pretends to support chunks but gives us garbage.
 		{
 			PVOID p = NULL;
-			LONG nByteSize; 
+			LONG nByteSize = 0; 
 			
 			// Try to get whole bank
 			if (m_pEffect->uniqueID != 1984054788) { //special case: VB ffx4 pretends to get a valid bank but gives us garbage.
@@ -2839,7 +2841,7 @@ void CVstPlugin::SaveAllParameters()
 					m_pMixStruct->nPluginDataSize = nByteSize+4;
 				} else
 				{
-					if (m_pMixStruct->pPluginData) delete[] m_pMixStruct->pPluginData;
+					delete[] m_pMixStruct->pPluginData;
 					m_pMixStruct->nPluginDataSize = 0;
 					m_pMixStruct->pPluginData = new char[nByteSize+4];
 					if (m_pMixStruct->pPluginData)
@@ -3001,11 +3003,13 @@ BOOL CVstPlugin::ExecuteCommand(UINT nIndex)
 
 //rewbs.defaultPlugGui
 CAbstractVstEditor* CVstPlugin::GetEditor()
+//-----------------------------------------
 {
 	return m_pEditor;
 }
 
 bool CVstPlugin::Bypass(bool bypass)
+//-----------------------------------
 {
 	if (bypass) {
 		m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
@@ -3020,13 +3024,15 @@ bool CVstPlugin::Bypass(bool bypass)
 	return bypass;
 }
 bool CVstPlugin::Bypass()
+//-----------------------
 {
 	return Bypass(!IsBypassed());
 }
 
 bool CVstPlugin::IsBypassed()
+//---------------------------
 {
-	return m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS;
+	return ((m_pMixStruct->Info.dwInputRouting & MIXPLUG_INPUTF_BYPASS) != 0);
 }
 
 //end rewbs.defaultPlugGui
@@ -3035,6 +3041,7 @@ bool CVstPlugin::IsBypassed()
 
 //rewbs.VSTcompliance
 BOOL CVstPlugin::GetSpeakerArrangement()
+//--------------------------------------
 {
 	VstSpeakerArrangement **pSA = NULL;
 	Dispatch(effGetSpeakerArrangement, 0,0,pSA,0);
@@ -3044,7 +3051,9 @@ BOOL CVstPlugin::GetSpeakerArrangement()
 
 	return true;
 }
-void CVstPlugin::NotifySongPlaying(bool playing) {
+void CVstPlugin::NotifySongPlaying(bool playing)
+//----------------------------------------------
+{
 	m_bSongPlaying=playing;
 }
 
@@ -3095,10 +3104,11 @@ BOOL CVstPlugin::CanRecieveMidiEvents() {
 bool CVstPlugin::KeysRequired()
 //-----------------------------
 {
-	return (CVstPlugin::Dispatch(effKeysRequired, 0, 0, NULL, 0));
+	return (CVstPlugin::Dispatch(effKeysRequired, 0, 0, NULL, 0) != 0);
 }
 
 void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list) 
+//-----------------------------------------------------------------------
 {
 	// At the moment we know there will only be 1 output. 
 	// Returning NULL ptr means plugin outputs directly to master.
@@ -3107,7 +3117,7 @@ void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list)
 	CVstPlugin *pOutputPlug = NULL;
 	if (m_pMixStruct->Info.dwOutputRouting & 0x80)	{
 		UINT nOutput = m_pMixStruct->Info.dwOutputRouting & 0x7f;
-		if ((nOutput > m_nSlot) && (nOutput < MAX_MIXPLUGINS)) {
+		if (m_pSndFile && (nOutput > m_nSlot) && (nOutput < MAX_MIXPLUGINS)) {
 			pOutputPlug = (CVstPlugin*) m_pSndFile->m_MixPlugins[nOutput].pMixPlugin;
 		}
 	}
@@ -3117,7 +3127,10 @@ void CVstPlugin::GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list)
 }
 
 void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list) 
+//----------------------------------------------------------------------
 {
+	if(m_pSndFile == 0) return;
+
 	CArray<CVstPlugin*, CVstPlugin*> candidatePlugOutputs;
 	CVstPlugin* pCandidatePlug = NULL;
 	list.RemoveAll();
@@ -3139,16 +3152,15 @@ void CVstPlugin::GetInputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list)
 	return;
 }
 
-void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list) 
+void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list)
+//--------------------------------------------------------------
 {
 	list.RemoveAll();
-	
-	CModDoc* pModDoc = GetModDoc();
-	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+	if(m_pSndFile == 0) return;
 	
 	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
 	for (int nIns=0; nIns<MAX_INSTRUMENTS; nIns++) {
-		if (pSndFile->Headers[nIns] && (pSndFile->Headers[nIns]->nMixPlug==nThisMixPlug)) {
+		if (m_pSndFile->Headers[nIns] && (m_pSndFile->Headers[nIns]->nMixPlug==nThisMixPlug)) {
 			list.Add(nIns);
 		}
 	}
@@ -3157,16 +3169,16 @@ void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list)
 
 }
 
-void CVstPlugin::GetInputChannelList(CArray<UINT,UINT> &list) 
+void CVstPlugin::GetInputChannelList(CArray<UINT,UINT> &list)
+//------------------------------------------------------------
 {
+	if(m_pSndFile == 0) return;
 	list.RemoveAll();
 	
-	CModDoc* pModDoc = GetModDoc();
-	CSoundFile* pSndFile = pModDoc->GetSoundFile();
-	
 	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
-	for (int nChn=0; nChn<pSndFile->m_nChannels; nChn++) {
-		if (pSndFile->ChnSettings[nChn].nMixPlugin==nThisMixPlug) {
+	const CHANNELINDEX chnCount = m_pSndFile->GetNumChannels();
+	for (CHANNELINDEX nChn=0; nChn<chnCount; nChn++) {
+		if (m_pSndFile->ChnSettings[nChn].nMixPlugin==nThisMixPlug) {
 			list.Add(nChn);
 		}
 	}
