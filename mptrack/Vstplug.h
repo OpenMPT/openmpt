@@ -75,7 +75,7 @@ protected:
 	float **m_pOutputs;
 	int m_nEditorX, m_nEditorY;
 	int m_MixBuffer[MIXBUFFERSIZE*2+2];		// Stereo interleaved
-	float m_FloatBuffer[MIXBUFFERSIZE*32+31];	// 2ch separated + up to 32 VSTi outputs...
+	float m_FloatBuffer[MIXBUFFERSIZE*(2+32)+31];	// 2ch separated + up to 32 VSTi outputs...
 	VstMidiEvent m_ev_queue[VSTEVENT_QUEUE_LEN];
 	CModDoc* m_pModDoc;			 //rewbs.plugDocAware
 	CSoundFile* m_pSndFile;			 //rewbs.plugDocAware

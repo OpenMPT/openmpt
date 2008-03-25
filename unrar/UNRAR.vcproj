@@ -23,6 +23,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				StringPooling="TRUE"
 				RuntimeLibrary="1"
+				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\Debug/UNRAR.pch"
 				AssemblerListingLocation=".\Debug/"
@@ -66,18 +67,20 @@
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/O1"
 				Optimization="1"
 				InlineFunctionExpansion="1"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
+				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\Release/UNRAR.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="FALSE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
