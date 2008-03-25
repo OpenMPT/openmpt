@@ -1579,6 +1579,16 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 
 	m_nInputs = m_pEffect->numInputs;
 	m_nOutputs = m_pEffect->numOutputs;
+
+	//32 is the maximum output count due to the size of m_FloatBuffer.
+	//TODO: How to handle properly plugs with numOutputs > 32?
+	if(m_nOutputs > 32)
+	{
+		m_nOutputs = 32;
+		CString str;
+		str.Format("Plugin has unsupported number(=%d) of outputs; plugin may malfunction.", m_pEffect->numOutputs);
+		MessageBox(NULL, str, "Warning", MB_ICONWARNING);
+	}
 	
 	//input pointer array size must be >=2 for now - the input buffer assignment might write to non allocated mem. otherwise
 	m_pInputs = (m_nInputs >= 2) ? new (float *[m_nInputs]) : new (float*[2]);
@@ -1590,7 +1600,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 
 	for (UINT iOut=0; iOut<m_nOutputs; iOut++)
 	{
-		m_pTempBuffer[iOut]=(float *)((((DWORD)&m_FloatBuffer[MIXBUFFERSIZE*(2+iOut)])+7)&~7); //rewbs.dryRatio
+		m_pTempBuffer[iOut]=(float *)((((DWORD_PTR)&m_FloatBuffer[MIXBUFFERSIZE*(2+iOut)])+7)&~7); //rewbs.dryRatio
 	}	
 
 #ifdef VST_LOG

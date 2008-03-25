@@ -273,7 +273,7 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap, BOOL bUpdateHorizontalScr
 				if ((int)row < (int)0) row += pSndFile->PatternSize[m_nPattern];
 				row %= pSndFile->PatternSize[m_nPattern];
 			}
-		} else
+		} else //row >= 0
 		if (row >= pSndFile->PatternSize[m_nPattern])
 		{
 			if (m_dwStatus & (PATSTATUS_KEYDRAGSEL|PATSTATUS_MOUSEDRAGSEL))
@@ -289,9 +289,10 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap, BOOL bUpdateHorizontalScr
 					const PATTERNINDEX nextPat = pSndFile->Order[nextOrder];
 					if ((nextPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nextPat]))
 					{
+						const ROWINDEX newRow = row - pSndFile->PatternSize[m_nPattern];
 						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nextOrder);
 						if (SetCurrentPattern(nextPat))
-							return SetCurrentRow(row - pSndFile->PatternSize[m_nPattern]);
+							return SetCurrentRow(newRow);
 					}
 				}
 				row = pSndFile->PatternSize[m_nPattern]-1;

@@ -27,8 +27,11 @@
 				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW,ENABLE_MMX"
 				StringPooling="TRUE"
+				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
 				PrecompiledHeaderFile=".\Debug/mptrack.pch"
@@ -37,7 +40,7 @@
 				ProgramDataBaseFileName=".\Debug/"
 				BrowseInformation="1"
 				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="FALSE"
 				DebugInformationFormat="4"
 				CompileAs="0"/>
 			<Tool
@@ -92,11 +95,12 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/EHsc"
-				Optimization="3"
+				AdditionalOptions="/EHsc /O2"
+				Optimization="2"
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
 				OptimizeForWindowsApplication="TRUE"
@@ -104,7 +108,7 @@
 				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
-				BufferSecurityCheck="FALSE"
+				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="FALSE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
@@ -113,7 +117,7 @@
 				ObjectFile=".\Generic/"
 				ProgramDataBaseFileName=".\Generic/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="FALSE"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -137,8 +141,7 @@
 				TargetEnvironment="1"
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -706,21 +709,6 @@
 				RelativePath="..\soundlib\Tables.cpp">
 			</File>
 			<File
-				RelativePath="..\soundlib\tuning.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\tuningbase.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\tuningCollection.cpp">
-			</File>
-			<File
-				RelativePath=".\TuningDialog.cpp">
-			</File>
-			<File
-				RelativePath=".\tuningRatioMapWnd.cpp">
-			</File>
-			<File
 				RelativePath=".\view_com.cpp">
 			</File>
 			<File
@@ -846,6 +834,25 @@
 				</File>
 				<File
 					RelativePath=".\view_graph.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="Tuning"
+				Filter="">
+				<File
+					RelativePath="..\soundlib\tuning.cpp">
+				</File>
+				<File
+					RelativePath="..\soundlib\tuningbase.cpp">
+				</File>
+				<File
+					RelativePath="..\soundlib\tuningCollection.cpp">
+				</File>
+				<File
+					RelativePath=".\TuningDialog.cpp">
+				</File>
+				<File
+					RelativePath=".\tuningRatioMapWnd.cpp">
 				</File>
 			</Filter>
 		</Filter>
@@ -983,6 +990,9 @@
 				RelativePath=".\MainFrm.h">
 			</File>
 			<File
+				RelativePath="..\soundlib\midi.h">
+			</File>
+			<File
 				RelativePath=".\MIDIMappingDialog.h">
 			</File>
 			<File
@@ -993,6 +1003,9 @@
 			</File>
 			<File
 				RelativePath=".\mod2wave.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\mod_specifications.h">
 			</File>
 			<File
 				RelativePath="..\soundlib\modcommand.h">
@@ -1022,6 +1035,9 @@
 				RelativePath=".\OpenGLEditor.h">
 			</File>
 			<File
+				RelativePath=".\order.h">
+			</File>
+			<File
 				RelativePath=".\OrderToPatternTable.h">
 			</File>
 			<File
@@ -1032,6 +1048,9 @@
 			</File>
 			<File
 				RelativePath=".\PatternGotoDialog.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\patternset.h">
 			</File>
 			<File
 				RelativePath=".\PerformanceCounter.h">
@@ -1067,21 +1086,6 @@
 				RelativePath=".\StdAfx.h">
 			</File>
 			<File
-				RelativePath="..\soundlib\tuning.h">
-			</File>
-			<File
-				RelativePath="..\soundlib\tuningbase.h">
-			</File>
-			<File
-				RelativePath="..\soundlib\tuningcollection.h">
-			</File>
-			<File
-				RelativePath=".\TuningDialog.h">
-			</File>
-			<File
-				RelativePath=".\tuningRatioMapWnd.h">
-			</File>
-			<File
 				RelativePath=".\typedefs.h">
 			</File>
 			<File
@@ -1109,8 +1113,30 @@
 				RelativePath=".\vstplug.h">
 			</File>
 			<File
+				RelativePath="..\soundlib\wavConverter.h">
+			</File>
+			<File
 				RelativePath="..\soundlib\WindowedFIR.h">
 			</File>
+			<Filter
+				Name="tuning"
+				Filter="">
+				<File
+					RelativePath="..\soundlib\tuning.h">
+				</File>
+				<File
+					RelativePath="..\soundlib\tuningbase.h">
+				</File>
+				<File
+					RelativePath="..\soundlib\tuningcollection.h">
+				</File>
+				<File
+					RelativePath=".\TuningDialog.h">
+				</File>
+				<File
+					RelativePath=".\tuningRatioMapWnd.h">
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\mptrack.reg">
