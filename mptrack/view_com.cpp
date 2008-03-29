@@ -570,9 +570,9 @@ void CViewComments::OnShowPatterns()
 LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 //-----------------------------------------------------------------
 {
-	switch(wParam)
-	{
-		default:
+//	switch(wParam)
+//	{
+//		default:
 			return CModScrollView::OnModViewMsg(wParam, lParam);
-	}
+//	}
 }

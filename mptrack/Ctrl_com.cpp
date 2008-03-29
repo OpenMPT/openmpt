@@ -208,7 +208,7 @@ void CCtrlComments::OnCommentsChanged()
 }
 
 //rewbs.customKeys
-LRESULT CCtrlComments::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+LRESULT CCtrlComments::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 {
 	if (wParam == kcNull)
 		return NULL;

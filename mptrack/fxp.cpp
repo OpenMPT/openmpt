@@ -212,7 +212,7 @@ bool Cfxp::Save(CString fileName)
 
 bool Cfxp::ReadLE(CFile &in, long &l)
 {
-	int size=sizeof(long);
+	UINT size=sizeof(long);
 	if (in.Read(&l, size) < size)
 		return false;
 
@@ -223,7 +223,7 @@ bool Cfxp::ReadLE(CFile &in, long &l)
 
 bool Cfxp::ReadLE(CFile &in, float &f)
 {
-	int size=sizeof(float);
+	UINT size=sizeof(float);
 
 	try {
 		if (in.Read(&f, size) < size)
@@ -245,7 +245,7 @@ bool Cfxp::ReadLE(CFile &in, float &f)
 
 bool Cfxp::ReadLE(CFile &in, char *c, UINT length)
 {
-	int size=sizeof(char)*length;
+	UINT size=sizeof(char)*length;
 	return (in.Read(c, size) >= size);
 }
 

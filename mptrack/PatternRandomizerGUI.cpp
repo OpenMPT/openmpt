@@ -44,7 +44,7 @@ BOOL CPatternRandomizerGUI::OnInitDialog()
 	CRect rect;
 	GetDlgItem(IDC_RANDOM_PLACEHOLDER)->GetWindowRect(rect);
 	int hOff = 8, vOff = 86;
-	int width = 100, height = 200;
+	//int width = 100, height = 200;
 
 	m_RandomizerNote.Create(CPatternRandomizerGUINote::IDD, (CWnd*)this);
 	m_RandomizerNote.MoveWindow(hOff, vOff, rect.Width(), rect.Height());
@@ -96,7 +96,7 @@ void CPatternRandomizerGUI::setTab(CWnd *newTab) {
 }
 
 
-void CPatternRandomizerGUI::OnRandomiserTabChange(NMHDR *pNMHDR, LRESULT *pResult)
+void CPatternRandomizerGUI::OnRandomiserTabChange(NMHDR* /*pNMHDR*/, LRESULT *pResult)
 //--------------------------------------------------------------------------------
 {
 	int nActiveTab = m_RandomizerTabs.GetCurSel();
