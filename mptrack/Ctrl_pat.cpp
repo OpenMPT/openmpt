@@ -485,7 +485,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 				//Toggle loop state
 				setLoop = !(m_pSndFile->m_dwSongFlags&SONG_PATTERNLOOP);
 			} else {
-				setLoop = static_cast<bool>(lParam);
+				setLoop = (lParam != 0);
 			}
 				
 			if (setLoop) {
@@ -657,6 +657,7 @@ void CCtrlPatterns::OnSequenceNext()
 // -> CODE#0015
 // -> DESC="channels management dlg"
 void CCtrlPatterns::OnChannelManager()
+//------------------------------------
 {
 	if(CChannelManagerDlg::sharedInstance()){
 		if(CChannelManagerDlg::sharedInstance()->IsDisplayed())
@@ -758,24 +759,28 @@ void CCtrlPatterns::OnSplitInstrumentChanged()
 	}
 }
 void CCtrlPatterns::OnSplitNoteChanged()
+//--------------------------------------
 {
 	m_nSplitNote = m_CbnSplitNote.GetCurSel();
 	SendViewMessage(VIEWMSG_SETSPLITNOTE, m_nSplitNote);
 	SwitchToView();
 }
 void CCtrlPatterns::OnOctaveModifierChanged()
+//-------------------------------------------
 {
 	m_nOctaveModifier = m_CbnOctaveModifier.GetCurSel();
 	SendViewMessage(VIEWMSG_SETOCTAVEMODIFIER, m_nOctaveModifier);
 	SwitchToView();
 }
 void CCtrlPatterns::OnOctaveLink()
+//--------------------------------
 {
 	m_nOctaveLink = IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK);
 	SendViewMessage(VIEWMSG_SETOCTAVELINK, m_nOctaveLink);
 	SwitchToView();
 }
 void CCtrlPatterns::OnSplitVolumeChanged()
+//----------------------------------------
 {
 	m_nSplitVolume = m_CbnSplitVolume.GetCurSel();
 	SendViewMessage(VIEWMSG_SETSPLITVOLUME, m_nSplitVolume);
@@ -1167,9 +1172,11 @@ void CCtrlPatterns::OnDetailHi()
 
 //rewbs.introVST
 void CCtrlPatterns::TogglePluginEditor()
+//--------------------------------------
 {
 	TogglePluginEditor(false);
 }
+
 
 void CCtrlPatterns::TogglePluginEditor(bool split)
 //----------------------------------------
@@ -1195,6 +1202,7 @@ void CCtrlPatterns::ToggleSplitPluginEditor()
 }
 
 bool CCtrlPatterns::HasValidPlug(UINT instr)
+//------------------------------------------
 {
 	if ((instr) && (instr<MAX_INSTRUMENTS) && (m_pSndFile) && m_pSndFile->Headers[instr])
 	{

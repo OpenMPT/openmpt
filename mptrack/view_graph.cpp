@@ -56,7 +56,7 @@ void CViewGraph::OnInitialUpdate()
 }
 
 
-void CViewGraph::OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint)
+void CViewGraph::OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/)
 //---------------------------------------------------------------------
 {
 }
@@ -65,9 +65,9 @@ void CViewGraph::OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint)
 LRESULT CViewGraph::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 //------------------------------------------------------------
 {
-	switch(wParam)
-	{
-		default:
+//	switch(wParam)
+//	{
+//		default:
 			return CModScrollView::OnModViewMsg(wParam, lParam);
-	}
+//	}
 }

@@ -11,7 +11,12 @@
 #endif // _MSC_VER >= 1000
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
-#define WINVER	0x0401
+
+#if _MSC_VER >= 1500
+	#define _WIN32_WINNT	0x0500
+#else
+	#define WINVER	0x0401
+#endif
 
 // windows excludes
 #define NOMCX

@@ -1971,11 +1971,11 @@ VOID CVstPlugin::GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize)
 	pszName[0] = 0;
 	if ((m_pEffect) && (m_pEffect->numParams > 0) && (nIndex < (UINT)m_pEffect->numParams))
 	{
-		CHAR s[32];
+		CHAR s[64]; //Increased to 64 bytes since 32 bytes doesn't seem to suffice for all plugs.
 		s[0] = 0;
 		Dispatch(effGetParamName, nIndex, 0, s, 0);
-		s[31] = 0;
-		lstrcpyn(pszName, s, cbSize);
+		s[min(sizeof(s)-1, cbSize-1)] = 0;
+		lstrcpyn(pszName, s, min(cbSize, sizeof(s)));
 	}
 }
 
@@ -3100,6 +3100,7 @@ void CVstPlugin::UpdateMixStructPtr(PSNDMIXPLUGIN p)
 //end rewbs.VSTcompliance
 
 BOOL CVstPlugin::isInstrument() // ericus 18/02/2005
+//-----------------------------
 {
 	if(m_pEffect) return ((m_pEffect->flags & effFlagsIsSynth) || (!m_pEffect->numInputs)); // rewbs.dryRatio
 	return FALSE;
@@ -4114,10 +4115,9 @@ CString SNDMIXPLUGIN::GetParamName(const UINT index) const
 {
 	if(pMixPlugin)
 	{
-		char s[32];
-		//To check: Is the cast safe?
+		char s[64];
 		((CVstPlugin*)(pMixPlugin))->GetParamName(index, s, sizeof(s));
-		s[31] = 0;
+		s[sizeof(s)-1] = 0;
 		return CString(s);
 	}
 	else

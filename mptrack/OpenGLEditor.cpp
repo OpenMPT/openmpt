@@ -68,12 +68,12 @@ void COpenGLEditor::OnPaint()
 		SendMessage(WM_ICONERASEBKGND, (WPARAM) dc.GetSafeHdc(), 0);
 
 		// Symbol in Client-Rechteck zentrieren
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
+		//int cxIcon = GetSystemMetrics(SM_CXICON);
+		//int cyIcon = GetSystemMetrics(SM_CYICON);
 		CRect rect;
 		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
+		//int x = (rect.Width() - cxIcon + 1) / 2;
+		//int y = (rect.Height() - cyIcon + 1) / 2;
 
 		// Symbol zeichnen
 		//dc.DrawIcon(x, y, m_hIcon);
