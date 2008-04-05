@@ -432,72 +432,73 @@ BOOL CModToMidi::DoConvert()
 		}
 		for (UINT nChn=0; nChn<chnCount; nChn++)
 		{
-			//Skip muted channels.
-			if(m_pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) continue;
-
 			PDYNMIDITRACK pTrk = &Tracks[nChn];
 			MODCOMMAND *m = m_pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
 			UINT delta_time = nClock - pTrk->nLastEventClock;
 			UINT len = 0;
 
-			// Instrument change
-			if ((m->instr) && (m->instr != pTrk->nInstrument) && (m->instr < MAX_SAMPLES))
+			//Process note data only in non-muted channels.
+			if((m_pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) == 0)
 			{
-				UINT nIns = m->instr;
-				UINT nMidiCh = m_InstrMap[nIns].nChannel;
-				UINT nProgram = m_InstrMap[nIns].nProgram;
-				if ((nMidiCh) && (nMidiCh <= 16)) nMidiCh--;
-				else nMidiCh = nChn&7;
-				pTrk->nMidiChannel = nMidiCh;
-				pTrk->nMidiProgram = nProgram;
-				pTrk->nInstrument = nIns;
-				if ((nMidiCh != 9) && (nProgram != nMidiChCurPrg[nMidiCh]))
+				// Instrument change
+				if ((m->instr) && (m->instr != pTrk->nInstrument) && (m->instr < MAX_SAMPLES))
 				{
-					tmp[len] = 0xC0|nMidiCh;
-					tmp[len+1] = nProgram;
-					tmp[len+2] = 0;
-					len += 3;
-				}
-			}
-			// Note change
-			if (m->note)
-			{
-				UINT note = m->note - 1;
-				for (UINT i=0; i<128; i++)
-				{
-					if (pTrk->NoteOn[i])
+					UINT nIns = m->instr;
+					UINT nMidiCh = m_InstrMap[nIns].nChannel;
+					UINT nProgram = m_InstrMap[nIns].nProgram;
+					if ((nMidiCh) && (nMidiCh <= 16)) nMidiCh--;
+					else nMidiCh = nChn&7;
+					pTrk->nMidiChannel = nMidiCh;
+					pTrk->nMidiProgram = nProgram;
+					pTrk->nInstrument = nIns;
+					if ((nMidiCh != 9) && (nProgram != nMidiChCurPrg[nMidiCh]))
 					{
-						tmp[len] = 0x90|(pTrk->NoteOn[i]-1);
-						tmp[len+1] = i;
+						tmp[len] = 0xC0|nMidiCh;
+						tmp[len+1] = nProgram;
 						tmp[len+2] = 0;
+						len += 3;
+					}
+				}
+				// Note change
+				if (m->note)
+				{
+					UINT note = m->note - 1;
+					for (UINT i=0; i<128; i++)
+					{
+						if (pTrk->NoteOn[i])
+						{
+							tmp[len] = 0x90|(pTrk->NoteOn[i]-1);
+							tmp[len+1] = i;
+							tmp[len+2] = 0;
+							tmp[len+3] = 0;
+							len += 4;
+							pTrk->NoteOn[i] = 0;
+						}
+					}
+					if (m->note <= 120)
+					{
+						pTrk->NoteOn[note] = pTrk->nMidiChannel+1;
+						tmp[len] = 0x90|pTrk->nMidiChannel;
+						tmp[len+1] = (pTrk->nMidiChannel==9) ? pTrk->nMidiProgram : note;
+						UINT vol = 0x7f;
+						UINT nsmp = pTrk->nInstrument;
+						if (m_pSndFile->m_nInstruments)
+						{
+							if ((nsmp < MAX_INSTRUMENTS) && (m_pSndFile->Headers[nsmp]))
+							{
+								INSTRUMENTHEADER *penv = m_pSndFile->Headers[nsmp];
+								nsmp = penv->Keyboard[note];
+							} else nsmp = 0;
+						}
+						if ((nsmp) && (nsmp < MAX_SAMPLES)) vol = m_pSndFile->Ins[nsmp].nVolume;
+						if (m->volcmd == VOLCMD_VOLUME) vol = m->vol*4;
+						if (m->command == CMD_VOLUME) vol = m->param*4;
+						vol = LinearToDLSMidiVolume(vol<<8);
+						if (vol > 0x7f) vol = 0x7f;
+						tmp[len+2] = (BYTE)vol;
 						tmp[len+3] = 0;
 						len += 4;
-						pTrk->NoteOn[i] = 0;
 					}
-				}
-				if (m->note <= 120)
-				{
-					pTrk->NoteOn[note] = pTrk->nMidiChannel+1;
-					tmp[len] = 0x90|pTrk->nMidiChannel;
-					tmp[len+1] = (pTrk->nMidiChannel==9) ? pTrk->nMidiProgram : note;
-					UINT vol = 0x7f;
-					UINT nsmp = pTrk->nInstrument;
-					if (m_pSndFile->m_nInstruments)
-					{
-						if ((nsmp < MAX_INSTRUMENTS) && (m_pSndFile->Headers[nsmp]))
-						{
-							INSTRUMENTHEADER *penv = m_pSndFile->Headers[nsmp];
-							nsmp = penv->Keyboard[note];
-						} else nsmp = 0;
-					}
-					if ((nsmp) && (nsmp < MAX_SAMPLES)) vol = m_pSndFile->Ins[nsmp].nVolume;
-					if (m->volcmd == VOLCMD_VOLUME) vol = m->vol*4;
-					if (m->command == CMD_VOLUME) vol = m->param*4;
-					vol = LinearToDLSMidiVolume(vol<<8);
-					if (vol > 0x7f) vol = 0x7f;
-					tmp[len+2] = (BYTE)vol;
-					tmp[len+3] = 0;
-					len += 4;
 				}
 			}
 			// Effects

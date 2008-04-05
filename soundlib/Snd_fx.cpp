@@ -615,12 +615,13 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 			pChn->dwFlags |= (CHN_NOTEFADE|CHN_FASTVOLRAMP);
 			if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_nInstruments)) pChn->nVolume = 0;
 			pChn->nFadeOutVol = 0;
+		}
 
-			//IT compatibility tentative fix: Clear channel note memory on note cut.
-			if(TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
-			{
-				pChn->nNote = pChn->nNewNote = 0;
-			}
+		//IT compatibility tentative fix: Clear channel note memory.
+		if(TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+		{
+			pChn->nNote = 0;
+			pChn->nNewNote = 0;
 		}
 		return;
 	}
