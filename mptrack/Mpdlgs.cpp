@@ -329,8 +329,16 @@ void COptionsSoundcard::OnOK()
 		CHAR s[32];
 		m_CbnBufferLength.GetWindowText(s, sizeof(s));
 		m_nBufferLength = atoi(s);
-		//if ((m_nBufferLength < 10) || (m_nBufferLength > 200)) m_nBufferLength = 100;
-		if ((m_nBufferLength < SNDDEV_MINBUFFERLEN) || (m_nBufferLength > SNDDEV_MAXBUFFERLEN)) m_nBufferLength = 100;
+		//Check given value.
+		if(m_nBufferLength < SNDDEV_MINBUFFERLEN)
+			m_nBufferLength = SNDDEV_MINBUFFERLEN;
+		else
+		{
+			if(m_nBufferLength > SNDDEV_MAXBUFFERLEN)
+				m_nBufferLength = SNDDEV_MAXBUFFERLEN;
+		}
+		wsprintf(s, "%d ms", m_nBufferLength);
+		m_CbnBufferLength.SetWindowText(s);
 	}
 	// Soft Panning
 	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING)

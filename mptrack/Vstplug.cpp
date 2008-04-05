@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include <uuids.h>
 #include <dmoreg.h>
+#include <shlwapi.h>
 #include <medparam.h>
 #include "mptrack.h"
 #include "mainfrm.h"
@@ -162,7 +163,7 @@ VOID CVstPluginManager::EnumerateDirectXDMOs()
 PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const bool checkFileExistence, CString* const errStr)
 //-----------------------------------------------------------------------------------------------------------
 {
-	if(checkFileExistence && !DoesFileExist(pszDllPath))
+	if(checkFileExistence && (PathFileExists(pszDllPath) == FALSE))
 	{
 		if(errStr)
 		{
