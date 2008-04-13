@@ -15,8 +15,11 @@
 #include "resource.h"       // main symbols
 #include "sndfile.h"
 #include <windows.h>
-#include <Specstrings.h>	// In VC2003, '__in' was undefined in winhttp.h
-#include <winhttp.h>
+
+#ifdef UPDATECHECKENABLED
+	#include <Specstrings.h>	// In VC2003, '__in' was undefined in winhttp.h
+	#include <winhttp.h>
+#endif
 
 class CModDoc;
 class CVstPluginManager;
@@ -99,6 +102,7 @@ enum {
 /////////////////////////////////////////////////////////////////////////////
 // Internet connection context
 
+#ifdef UPDATECHECKENABLED
 typedef struct REQUEST_CONTEXT {
 	HINTERNET hSession; 
 	HINTERNET hConnection;
@@ -106,6 +110,7 @@ typedef struct REQUEST_CONTEXT {
 	LPSTR     lpBuffer;       // Buffer for storing read data
 	LPSTR	  postData;
 } REQUEST_CONTEXT;
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CTrackApp:
@@ -138,8 +143,11 @@ protected:
 	CHAR m_szConfigFileName[_MAX_PATH];
 	CHAR m_szPluginCacheFileName[_MAX_PATH];
 	CHAR m_szStringsFileName[_MAX_PATH];
+
+	#ifdef UPDATECHECKENABLED
 	// Internet request context
 	REQUEST_CONTEXT *m_pRequestContext;
+	#endif
 
 public:
 	CTrackApp();
@@ -181,10 +189,13 @@ public:
 protected:
 	VOID StartSplashScreen();
 	VOID StopSplashScreen();
-	VOID UpdateCheck();
-	static void __stdcall InternetRequestCallback( HINTERNET hInternet, DWORD_PTR dwContext, DWORD dwInternetStatus,
-			                      LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
-	static void CleanupInternetRequest(REQUEST_CONTEXT *pRequestContext);
+
+	#ifdef UPDATECHECKENABLED
+		VOID UpdateCheck();
+		static void __stdcall InternetRequestCallback( HINTERNET hInternet, DWORD_PTR dwContext, DWORD dwInternetStatus,
+									  LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
+		static void CleanupInternetRequest(REQUEST_CONTEXT *pRequestContext);
+	#endif
 
 // Localized strings
 public:

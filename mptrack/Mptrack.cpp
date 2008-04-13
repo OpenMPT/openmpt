@@ -565,7 +565,6 @@ CTrackApp::CTrackApp()
 	m_hBladeEnc = NULL;
 	m_hLameEnc = NULL;
 	m_hACMInst = NULL;
-	m_pRequestContext = NULL;
 	m_hAlternateResourceHandle = NULL;
 	m_szConfigFileName[0] = 0;
 	for (UINT i=0; i<MAX_DLS_BANKS; i++) gpDLSBanks[i] = NULL;
@@ -578,6 +577,10 @@ CTrackApp::CTrackApp()
 	strcpy(&m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM*32], "Cc p");
 	strcpy(&m_MidiCfg.szMidiSFXExt[0], "F0F000z");
 	for (int iz=0; iz<16; iz++) wsprintf(&m_MidiCfg.szMidiZXXExt[iz*32], "F0F001%02X", iz*8);
+
+	#ifdef UPDATECHECKENABLED
+		m_pRequestContext = NULL;
+	#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -823,6 +826,8 @@ BOOL CTrackApp::InitInstance()
 	return TRUE;
 }
 
+
+#ifdef UPDATECHECKENABLED
 void __stdcall CTrackApp::InternetRequestCallback( HINTERNET /*hInternet*/, DWORD_PTR userData, DWORD dwInternetStatus,
                               LPVOID /*lpvStatusInformation*/,  DWORD /*dwStatusInformationLength*/)
 //-----------------------------------------------------------------------------------------------------
@@ -999,7 +1004,7 @@ void CTrackApp::UpdateCheck()
         }
 }
 
-
+#endif
 
 
 int CTrackApp::ExitInstance()
@@ -1054,8 +1059,10 @@ int CTrackApp::ExitInstance()
 	UninitializeACM();
 
 	// Cleanup the internet request, in case it is still active.
+	#ifdef UPDATECHECKENABLED
 	CleanupInternetRequest(m_pRequestContext);
 	delete m_pRequestContext;
+	#endif
 
 	return CWinApp::ExitInstance();
 }
