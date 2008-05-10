@@ -53,9 +53,9 @@ CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL bMakeVis
 {
 	if (lpszPathName)
 	{
-		CHAR s[_MAX_EXT];
-		_splitpath(lpszPathName, NULL, NULL, NULL, s);
-		if (!stricmp(s, ".dll"))
+		TCHAR s[_MAX_EXT];
+		_tsplitpath(lpszPathName, NULL, NULL, NULL, s);
+		if (!_tcsicmp(s, _TEXT(".dll")))
 		{
 			CVstPluginManager *pPluginManager = theApp.GetPluginManager();
 			if (pPluginManager)
@@ -696,7 +696,7 @@ BOOL CTrackApp::InitInstance()
 	if (m_pszProfileName) {
 		free((void *)m_pszProfileName);
 	}
-	m_pszProfileName = strdup(m_szConfigFileName); 
+	m_pszProfileName = _tcsdup(m_szConfigFileName); 
 
 
 	LoadStdProfileSettings(10);  // Load standard INI file options (including MRU)
@@ -1483,8 +1483,8 @@ const int __SinusTable[256] =
 	 -97, -92, -86, -80, -74, -68, -62, -56, -49, -43, -37, -31, -25, -18, -12,  -6
 };
 
-#define Sinus(x)	__SinusTable[x&0xFF]
-#define Cosinus(x)	__SinusTable[(x+0x40)&0xFF]
+#define Sinus(x)	__SinusTable[(x)&0xFF]
+#define Cosinus(x)	__SinusTable[((x)+0x40)&0xFF]
 
 #define PI	3.14159265358979323f
 BOOL CPaletteBitmap::Animate()

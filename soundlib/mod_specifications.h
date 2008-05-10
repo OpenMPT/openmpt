@@ -4,6 +4,7 @@
 //Simple struct to gather various modspecifications in one place.
 //Feel free to improve.
 struct CModSpecifications
+//=======================
 {
 	//NOTE: If changing order, update all initializations below.
 	char fileExtension[5];
@@ -108,7 +109,7 @@ const CModSpecifications XM_STD_SPECS =
 	256,								//Max pattern rows
     20,									//Max mod name length
 	31,									//SamplesMax
-	256,								//instrumentMax
+	200,								//instrumentMax
 	mixLevels_original,					//defaultMixLevels
 	0									//Max MIDI mapping directives
 };
@@ -118,16 +119,16 @@ const CModSpecifications XM_MPTEXT_SPECS =
 {
 	//TODO: Set correct values.
 	"xm",								//File extension
-	64,									//Pattern max.
-	128,								//Order max.
+	240,								//Pattern max.
+	256,								//Order max.
 	4,									//Channel min
-	64,									//Channel max
+	127,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo
 	4,									//Min pattern rows
 	1024,								//Max pattern rows
     20,									//Max mod name length
-	31,									//SamplesMax
+	4000,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
 	200									//Max MIDI mapping directives
@@ -146,7 +147,7 @@ const CModSpecifications S3M_STD_SPECS =
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     27,									//Max mod name length
-	31,									//SamplesMax
+	99,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
 	0									//Max MIDI mapping directives
@@ -165,7 +166,7 @@ const CModSpecifications S3M_MPTEXT_SPECS =
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     27,									//Max mod name length
-	31,									//SamplesMax
+	99,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
 	0									//Max MIDI mapping directives
@@ -185,7 +186,7 @@ const CModSpecifications IT_STD_SPECS =
 	256,								//Max pattern rows
     25,									//Max mod name length
 	256,								//SamplesMax
-	256,								//instrumentMax
+	200,								//instrumentMax
 	mixLevels_original,					//defaultMixLevels
 	0									//Max MIDI mapping directives
 };
@@ -208,8 +209,6 @@ const CModSpecifications IT_MPTEXT_SPECS =
 	mixLevels_117RC3,					//defaultMixLevels
 	200									//Max MIDI mapping directives
 };
-
-
 
 
 

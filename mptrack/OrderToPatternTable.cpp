@@ -94,11 +94,11 @@ void COrderToPatternTable::OnModTypeChanged(const MODTYPE oldtype)
 {
 	const CModSpecifications specs = m_rSndFile.GetModSpecifications();
 
-	//Resize orderlist if needed. Because old orderlist had 256 elements, not making it
+	//Resize orderlist if needed. Because old orderlist had MAX_ORDERS(256) elements, not making it
 	//smaller than that even if the modtype doesn't support that many orders.
 	if(specs.ordersMax < GetCount()) 
 	{
-		resize(max(MAX_PATTERNS, specs.ordersMax));
+		resize(max(MAX_ORDERS, specs.ordersMax));
 		for(ORDERINDEX i = GetCount(); i>specs.ordersMax; --i) (*this)[i-1] = GetInvalidPatIndex();
 	}
 

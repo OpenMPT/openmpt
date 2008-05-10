@@ -223,7 +223,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc)
 {
 	// We do not call CModDoc::DoSave as this populates the Recent Files
 	// list with backups... hence we have duplicated code.. :(
-	bool success=false;
+	BOOL success=false;
 	CSoundFile* pSndFile = pModDoc->GetSoundFile(); 
 	
 	if (pSndFile) {
@@ -252,7 +252,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc *pModDoc)
 				//Do nothing
 		}
 	}
-	return success;
+	return (success == TRUE);
 }
 
 void CAutoSaver::CleanUpBackups(CModDoc *pModDoc)
@@ -354,7 +354,7 @@ void CAutoSaverGUI::OnOK()
 	m_pAutoSaver->SetFilenameTemplate(""); //TODO
 	m_pAutoSaver->SetHistoryDepth(GetDlgItemInt(IDC_AUTOSAVE_HISTORY));
 	m_pAutoSaver->SetSaveInterval(GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
-	m_pAutoSaver->SetUseOriginalPath(IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR));
+	m_pAutoSaver->SetUseOriginalPath(IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
 	GetDlgItemText(IDC_AUTOSAVE_PATH, tempPath);
 	if (!tempPath.IsEmpty() && (tempPath.Right(1)!="\\"))
 		tempPath.Append("\\");
@@ -385,7 +385,7 @@ void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 
 void CAutoSaverGUI::OnBnClickedAutosaveEnable()
 {
-	bool enabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE);
+	BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_INTERVAL), enabled);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_HISTORY), enabled);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_USEORIGDIR), enabled);
@@ -399,7 +399,7 @@ void CAutoSaverGUI::OnBnClickedAutosaveEnable()
 void CAutoSaverGUI::OnBnClickedAutosaveUseorigdir()
 {
 	if (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE)) {
-		bool enabled = IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR);
+		BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_PATH), !enabled);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_AUTOSAVE_BROWSE), !enabled);
 		OnSettingsChanged();
