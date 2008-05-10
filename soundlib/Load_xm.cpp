@@ -680,6 +680,9 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 		header.norder++;
 		if ((Order[i] >= header.patterns) && (Order[i] < MAX_PATTERNS)) header.patterns = Order[i]+1;
 	}*/
+	if(Order.GetCount() < MAX_ORDERS)
+		Order.resize(MAX_ORDERS, Order.GetInvalidPatIndex());
+
 	for (i=MAX_ORDERS-1; i>=0; i--) { // walk backwards over orderlist
 		if ((Order[i]!=0xFF) && (header.norder==0)) {
 			header.norder=i+1;	//find last used order

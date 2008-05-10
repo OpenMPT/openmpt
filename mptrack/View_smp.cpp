@@ -595,7 +595,9 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	int smplsize, oldsmin, oldsmax;
 	int yrange = cy/2;
 	signed char *psample = (signed char *)pSampleData;
-	int y0 = 0, xmax, posincr, posfrac, poshi;
+	//int y0 = 0, xmax, posincr, posfrac, poshi;
+	int32 y0 = 0, xmax, poshi;
+	uint64 posincr, posfrac;
 
 	if (len <= 0) return;
 	smplsize = (uFlags & CHN_16BIT) ? 2 : 1;
@@ -612,21 +614,24 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 	{
 		xmax = len>>(m_nZoom-1);
 		if (xmax > cx) xmax = cx;
-		posincr = 1<<(m_nZoom-1+16);
+		posincr = (uint64(1) << (m_nZoom-1+16));
 	} else
 	{
 		xmax = cx;
-		posincr = _muldiv(len, 0x10000, cx);
+		//posincr = _muldiv(len, 0x10000, cx);
+		posincr = uint64(len) * uint64(0x10000) / uint64(cx);
 	}
 	::MoveToEx(hdc, 0, ymed, NULL);
 	posfrac = 0;
 	poshi = 0;
 	for (int x=0; x<xmax; x++)
 	{
-		int smin, smax, scanlen;
+		//int smin, smax, scanlen;
+		int smin, smax;
+		int32 scanlen;
 
 		posfrac += posincr;
-		scanlen = (posfrac+0xffff) >> 16;
+		scanlen = static_cast<int32>((posfrac+0xffff) >> 16);
 		if (poshi >= len) poshi = len-1;
 		if (poshi+scanlen > len) scanlen = len-poshi;
 		if (scanlen < 1) scanlen = 1;
@@ -692,7 +697,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, int len, in
 		::LineTo(hdc, x, smin);
 		oldsmin = smin;
 		oldsmax = smax;
-		poshi += (posfrac>>16);
+		poshi += static_cast<int32>(posfrac>>16);
 		posfrac &= 0xffff;
 	}
 }

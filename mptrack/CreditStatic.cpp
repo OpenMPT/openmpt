@@ -113,13 +113,13 @@ void CCreditStatic::SetCredits(LPCTSTR credits,char delimiter)
     
 	ASSERT(credits);
 
-	if((str = strdup(credits)) == NULL)
+	if((str = _tcsdup(credits)) == NULL)
 		return;
 
 	m_ArrCredit.RemoveAll();
 
 	ptr1 = str;
-	while((ptr2 = strchr(ptr1,delimiter)) != NULL) {
+	while((ptr2 = _tcschr(ptr1,delimiter)) != NULL) {
 		*ptr2 = '\0';
 		m_ArrCredit.AddTail(ptr1);
 		ptr1 = ptr2+1;
