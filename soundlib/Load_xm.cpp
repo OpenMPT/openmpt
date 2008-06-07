@@ -92,7 +92,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 	m_nChannels = 0;
 	if ((!lpStream) || (dwMemLength < 0x200)) return FALSE;
-	if (strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return FALSE;
+	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return FALSE;
 	memcpy(m_szNames[0], lpStream+17, 20);
 	dwHdrSize = *((DWORD *)(lpStream+60));
 	norders = *((WORD *)(lpStream+64));
@@ -633,8 +633,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if( code == 'MPTS' )
 	{
 		LoadExtendedSongProperties(MOD_TYPE_XM, ptr, lpStream, dwMemLength);
-
-		if(m_dwLastSavedWithVersion < VERSIONNUMBER(1, 17, 2, 50))
+		if(m_dwLastSavedWithVersion < VERSIONNUMBER(0x1, 0x17, 0x2, 0x50))
 			SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 	}
 

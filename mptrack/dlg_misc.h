@@ -415,7 +415,7 @@ protected:
 	UINT m_nOctaves;
 	int m_nSelection;
 	BOOL m_bCapture, m_bCursorNotify;
-	BYTE KeyFlags[120]; // 10 octaves max
+	BYTE KeyFlags[NOTE_MAX]; // 10 octaves max
 
 public:
 	CKeyboardControl() { m_hParent = NULL; m_nOctaves = 1; m_nSelection = -1; m_bCapture = FALSE; }
@@ -423,8 +423,8 @@ public:
 public:
 	void Init(HWND parent, UINT nOctaves=1, BOOL bCursNotify=FALSE) { m_hParent = parent; 
 				m_nOctaves = nOctaves; m_bCursorNotify = bCursNotify; memset(KeyFlags, 0, sizeof(KeyFlags)); }
-	void SetFlags(UINT key, UINT flags) { if (key < 120) KeyFlags[key] = (BYTE)flags; }
-	UINT GetFlags(UINT key) const { return (key < 120) ? KeyFlags[key] : 0; }
+	void SetFlags(UINT key, UINT flags) { if (key < NOTE_MAX) KeyFlags[key] = (BYTE)flags; }
+	UINT GetFlags(UINT key) const { return (key < NOTE_MAX) ? KeyFlags[key] : 0; }
 	afx_msg void OnPaint();
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
@@ -474,7 +474,7 @@ protected:
 	CSliderCtrl m_SbOctave;
 	CSoundFile *m_pSndFile;
 	UINT m_nInstrument;
-	BYTE KeyboardMap[120];
+	BYTE KeyboardMap[NOTE_MAX];
 
 public:
 	CSampleMapDlg(CSoundFile *pSndFile, UINT nInstr, CWnd *parent=NULL):CDialog(IDD_EDITSAMPLEMAP, parent)

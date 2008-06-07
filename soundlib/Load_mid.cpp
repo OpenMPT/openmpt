@@ -392,7 +392,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	UINT nBank = dwBankProgram >> 7;
 
 	nNote &= 0x7F;
-	if (nNote >= 120) return 0;
+	if (nNote >= NOTE_MAX) return 0;
 	for (UINT i=1; i<=m_nInstruments; i++) if (Headers[i])
 	{
 		INSTRUMENTHEADER *p = Headers[i];
@@ -426,7 +426,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	penv->nDCT = (nChannel == MIDI_DRUMCHANNEL) ? DCT_SAMPLE : DCT_NOTE;
 	penv->nDNA = DNA_NOTEFADE;
 	SetDefaultInstrumentValues(penv);
-	for (UINT j=0; j<120; j++)
+	for (UINT j=0; j<NOTE_MAX; j++)
 	{
 		int mapnote = j+1;
 		if (nChannel == MIDI_DRUMCHANNEL)

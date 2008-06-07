@@ -409,7 +409,7 @@ BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 				memcpy(penv->name, pmi->szName, 32);
 				penv->nGlobalVol = 64;
 				penv->nPan = 128;
-				for (UINT i=0; i<120; i++)
+				for (UINT i=0; i<NOTE_MAX; i++)
 				{
 					penv->NoteMap[i] = i+1;
 				}

@@ -329,7 +329,7 @@ BOOL CCtrlSamples::SetCurrentSample(UINT nSmp, LONG lZoom, BOOL bUpdNum)
 	{
 		m_nSample = nSmp;
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		UpdateView((m_nSample << 20) | HINT_SAMPLEINFO, NULL);
+		UpdateView((m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, NULL);
 	}
 	if (bUpdNum)
 	{
@@ -388,7 +388,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 	SetCurrentSample((lParam > 0) ? lParam : m_nSample);
 	// Initial Update
 	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-	if (!m_bInitialized) UpdateView((m_nSample << 20) | HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
+	if (!m_bInitialized) UpdateView((m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if ((pFrame) && (m_hWndView)) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetSampleViewState());
 	SwitchToView();
@@ -511,7 +511,8 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 	}
 	if (!(dwHintMask & (HINT_SAMPLEINFO|HINT_MODTYPE))) return;
 	// 05/01/05 : ericus replaced ">> 24" by ">> 20" : 4000 samples -> 12bits [see Moddoc.h]
-	if (((dwHintMask >> 20) != (m_nSample&0x0fff)) && (!(dwHintMask & HINT_MODTYPE))) return;
+	//if (((dwHintMask >> 20) != (m_nSample&0x0fff)) && (!(dwHintMask & HINT_MODTYPE))) return;
+	if (((dwHintMask >> HINT_SHIFT_SMP) != m_nSample) && (!(dwHintMask & HINT_MODTYPE))) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	// Updating Ranges
@@ -773,7 +774,7 @@ OpenError:
 			pins->uFlags |= CHN_PANNING;
 		}
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
 		m_pModDoc->SetModified();
 	}
 	return TRUE;
@@ -802,7 +803,7 @@ BOOL CCtrlSamples::OpenSample(CSoundFile *pSndFile, UINT nSample)
 	}
 	END_CRITICAL();
 	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
 	m_pModDoc->SetModified();
 	EndWaitCursor();
 	return TRUE;
@@ -870,14 +871,14 @@ void CCtrlSamples::OnSampleNew()
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		SetCurrentSample(smp);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (smp << 20) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
+		m_pModDoc->UpdateAllViews(NULL, (smp << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
 		if ((pSndFile->m_nInstruments) && (!m_pModDoc->FindSampleParent(smp)))
 		{
 			if (MessageBox("This sample is not used by any instrument. Do you want to create a new instrument using this sample ?",
 					NULL, MB_YESNO|MB_ICONQUESTION) == IDYES)
 			{
 				UINT nins = m_pModDoc->InsertInstrument(smp);
-				m_pModDoc->UpdateAllViews(NULL, (nins << 24) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
+				m_pModDoc->UpdateAllViews(NULL, (nins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
 				m_pParent->InstrumentChanged(nins);
 			}
 		}
@@ -1065,7 +1066,7 @@ void CCtrlSamples::OnNormalize()
 		{
 			m_pModDoc->AdjustEndOfSample(m_nSample);
 			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-			m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, NULL);
+			m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 			m_pModDoc->SetModified();
 		}
 	}
@@ -1132,7 +1133,7 @@ void CCtrlSamples::OnAmplify()
 	}
 	m_pModDoc->AdjustEndOfSample(m_nSample);
 	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, NULL);
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 	m_pModDoc->SetModified();
 	EndWaitCursor();
 	SwitchToView();
@@ -1282,7 +1283,7 @@ void CCtrlSamples::OnUpsample()
 			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
 		}
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		m_pModDoc->SetModified();
 	}
 	EndWaitCursor();
@@ -1407,7 +1408,7 @@ void CCtrlSamples::OnDownsample()
 			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
 		}
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		m_pModDoc->SetModified();
 	}
 	EndWaitCursor();
@@ -1566,7 +1567,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	}
 
 	// Update sample view
-	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL); // !!!! see CODE#0006, update#3
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL); // !!!! see CODE#0006, update#3
 	m_pModDoc->SetModified();
 }
 
@@ -1643,7 +1644,7 @@ void CCtrlSamples::OnPitchShiftTimeStretchCancel()
 	OnPitchShiftTimeStretchAccept();
 
 	// Update sample view
-	m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL); // !!!! see CODE#0006, update#3
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL); // !!!! see CODE#0006, update#3
 	m_pModDoc->SetModified();
 }
 
@@ -2068,7 +2069,7 @@ void CCtrlSamples::OnReverse()
 		}
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 		m_pModDoc->SetModified();
 	}
 	EndWaitCursor();
@@ -2125,7 +2126,7 @@ void CCtrlSamples::OnSilence()
 		}
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 		m_pModDoc->SetModified();
 	}
 	EndWaitCursor();
@@ -2173,7 +2174,7 @@ void CCtrlSamples::OnNameChanged()
 	{
 		memcpy(m_pSndFile->m_szNames[m_nSample], s, 32);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
 		m_pModDoc->SetModified();
 	}
@@ -2194,7 +2195,7 @@ void CCtrlSamples::OnFileNameChanged()
 	{
 		memcpy(m_pSndFile->Ins[m_nSample].name, s, 22);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEINFO, this);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, this);
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 	}
 }
@@ -2430,7 +2431,7 @@ void CCtrlSamples::OnLoopStartChanged()
 		pins->nLoopStart = n;
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
 }
@@ -2447,7 +2448,7 @@ void CCtrlSamples::OnLoopEndChanged()
 		pins->nLoopEnd = n;
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
 }
@@ -2487,7 +2488,7 @@ void CCtrlSamples::OnSustainStartChanged()
 	{
 		pins->nSustainStart = n;
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
 }
@@ -2504,7 +2505,7 @@ void CCtrlSamples::OnSustainEndChanged()
 	{
 		pins->nSustainEnd = n;
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
 }
@@ -2783,7 +2784,7 @@ NoSample:
 	if ((nCode == SB_ENDSCROLL) || (nCode == SB_THUMBPOSITION)) SwitchToView();
 	if (bRedraw) {
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << 20) | HINT_SAMPLEDATA, this);
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
 	UnlockControls();

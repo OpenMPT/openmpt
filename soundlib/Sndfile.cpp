@@ -2612,7 +2612,7 @@ UINT CSoundFile::DetectUnusedSamples(BYTE *pbIns)
 				UINT jmax = PatternSize[ipat] * m_nChannels;
 				for (UINT j=0; j<jmax; j++, p++)
 				{
-					if ((p->note) && (p->note <= 120))
+					if ((p->note) && (p->note <= NOTE_MAX))
 					{
 						if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
 						{

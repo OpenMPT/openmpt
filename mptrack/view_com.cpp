@@ -252,7 +252,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 							for (UINT i=0; i<pSndFile->m_nInstruments; i++) if (pSndFile->Headers[i+1])
 							{
 								INSTRUMENTHEADER *penv = pSndFile->Headers[i+1];
-								for (UINT j=0; j<120; j++)
+								for (UINT j=0; j<NOTE_MAX; j++)
 								{
 									if ((UINT)penv->Keyboard[j] == (iSmp+1))
 									{
@@ -341,7 +341,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						{
 							BYTE smp_tb[(MAX_SAMPLES+7)/8];
 							memset(smp_tb, 0, sizeof(smp_tb));
-							for (UINT i=0; i<120; i++)
+							for (UINT i=0; i<NOTE_MAX; i++)
 							{
 								UINT n = penv->Keyboard[i];
 								if ((n) && (n < MAX_SAMPLES)) smp_tb[n>>3] |= (1<<(n&7));
@@ -472,7 +472,7 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 				s[31] = 0;
 				memcpy(pSndFile->m_szNames[iItem+1], s, 32);
 				// 05/01/05 : ericus replaced "<< 24" by "<< 20" : 4000 samples -> 12bits [see Moddoc.h]
-				pModDoc->UpdateAllViews(this, ((iItem+1) << 20) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
+				pModDoc->UpdateAllViews(this, ((iItem+1) << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 			}
 		} else
 		if (m_nListId == IDC_LIST_INSTRUMENTS)
@@ -482,7 +482,7 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 				INSTRUMENTHEADER *penv = pSndFile->Headers[iItem+1];
 				s[31] = 0;
 				memcpy(penv->name, s, 32);
-				pModDoc->UpdateAllViews(this, ((iItem+1) << 24) | (HINT_INSNAMES|HINT_INSTRUMENT), this);
+				pModDoc->UpdateAllViews(this, ((iItem+1) << HINT_SHIFT_INS) | (HINT_INSNAMES|HINT_INSTRUMENT), this);
 			}
 		} else
 		{

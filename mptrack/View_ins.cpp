@@ -108,7 +108,7 @@ CViewInstrument::CViewInstrument()
 	memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
 	memset(m_NcButtonState, 0, sizeof(m_NcButtonState));
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
-	memset(m_baPlayingNote, 0, sizeof(bool)*120);  //rewbs.customKeys
+	memset(m_baPlayingNote, 0, sizeof(bool)*NOTE_MAX);  //rewbs.customKeys
 	m_nPlayingChannel =-1;						   //rewbs.customKeys
 	//rewbs.envRowGrid
 	m_bGrid=true;								  
@@ -1166,7 +1166,7 @@ void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 //-----------------------------------------------------------
 {
 	if ((dwHintMask & (HINT_MPTOPTIONS|HINT_MODTYPE))
-	 || ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == (dwHintMask >> 24)))
+	 || ((dwHintMask & HINT_ENVELOPE) && (m_nInstrument == (dwHintMask >> HINT_SHIFT_INS)))
 	 || ((dwHintMask & HINT_SPEEDCHANGE))) //rewbs.envRowGrid
 	{
 		UpdateScrollSize();
@@ -1457,7 +1457,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 				InvalidateEnvelope();
 				break;
 			}
-			memset(m_baPlayingNote, 0, sizeof(bool)*120); 	//rewbs.instViewNNA
+			memset(m_baPlayingNote, 0, sizeof(bool)*NOTE_MAX); 	//rewbs.instViewNNA
 			m_nPlayingChannel=-1;							//rewbs.instViewNNA
 		}
 	} else
@@ -1791,7 +1791,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 				OnScrollBy(CSize(ENV_ZOOM+pt.x-m_rcClient.right, 0), TRUE);
 			}
 			pModDoc->SetModified();
-			pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
 		}
 	} else
@@ -2014,7 +2014,7 @@ void CViewInstrument::OnEnvLoopChanged()
 	if ((pModDoc) && (EnvSetLoop(!EnvGetLoop())))
 	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		UpdateNcButtonState();
 	}
 }
@@ -2027,7 +2027,7 @@ void CViewInstrument::OnEnvSustainChanged()
 	if ((pModDoc) && (EnvSetSustain(!EnvGetSustain())))
 	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		UpdateNcButtonState();
 	}
 }
@@ -2139,7 +2139,7 @@ void CViewInstrument::OnEnvToggleGrid()
 		m_bGridForceRedraw;
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 	
 }
 //end rewbs.envRowGrid
@@ -2219,7 +2219,7 @@ void CViewInstrument::OnEnvRemovePoint()
 			if (bOk)
 			{
 				pModDoc->SetModified();
-				pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 			}
 		}
 	}
@@ -2331,7 +2331,7 @@ void CViewInstrument::OnEnvInsertPoint()
 			if (bOk)
 			{
 				pModDoc->SetModified();
-				pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 			}
 		}
 	}
@@ -2392,7 +2392,7 @@ void CViewInstrument::PlayNote(UINT note)
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
 			m_nPlayingChannel= pModDoc->PlayNote(note, m_nInstrument, 0, FALSE); //rewbs.instViewNNA
 			s[0] = 0;
-			if ((note) && (note <= 120)) 
+			if ((note) && (note <= NOTE_MAX)) 
 			{
 				const string temp = pModDoc->GetSoundFile()->GetNoteName(note, m_nInstrument);
 				if(temp.size() >= sizeofS)
@@ -2550,7 +2550,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 	}
 	if (bUpdate)
 	{
-		pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES, NULL);
+		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES, NULL);
 		pModDoc->SetModified();
 	}
 	CMDIChildWnd *pMDIFrame = (CMDIChildWnd *)GetParentFrame();
@@ -2650,6 +2650,7 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 }
 
 LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
+//------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -2667,9 +2668,9 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcNoteOffOld:
-		case kcNoteOff:			PlayNote(255); return wParam;
+		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
 		case kcNoteCutOld:
-		case kcNoteCut:			PlayNote(254); return wParam;
+		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
 		case kcInstrumentLoad:	SendCtrlMessage(IDC_INSTRUMENT_OPEN); return wParam;
 		case kcInstrumentSave:	SendCtrlMessage(IDC_INSTRUMENT_SAVEAS); return wParam;
 		case kcInstrumentNew:	SendCtrlMessage(IDC_INSTRUMENT_NEW); return wParam;	
@@ -2705,7 +2706,7 @@ void CViewInstrument::OnEnvelopeScalepoints()
 		if (dialog.DoModal() == IDOK)
 		{
 			pModDoc->SetModified();
-			pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_ENVELOPE, NULL);
+			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		}
 	}
 

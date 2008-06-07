@@ -1050,9 +1050,6 @@
 				RelativePath=".\PatternGotoDialog.h">
 			</File>
 			<File
-				RelativePath="..\soundlib\patternset.h">
-			</File>
-			<File
 				RelativePath=".\PerformanceCounter.h">
 			</File>
 			<File

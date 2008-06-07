@@ -113,7 +113,7 @@ BOOL CNoteMapWnd::SetCurrentNote(UINT nNote)
 //------------------------------------------
 {
 	if (nNote == m_nNote) return TRUE;
-	if (nNote >= 120) return FALSE;
+	if (nNote >= NOTE_MAX) return FALSE;
 	m_nNote = nNote;
 	InvalidateRect(NULL, FALSE);
 	return TRUE;
@@ -166,7 +166,7 @@ void CNoteMapWnd::OnPaint()
 
 			string temp = pSndFile->GetNoteName(nPos+1, m_nInstrument);
 			temp.resize(4);
-			if ((nPos >= 0) && (nPos < 120)) wsprintf(s, "%s", temp.c_str());
+			if ((nPos >= 0) && (nPos < NOTE_MAX)) wsprintf(s, "%s", temp.c_str());
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
 			DrawButtonRect(hdc, &rect, s, FALSE, FALSE);
 			// Mapped Note
@@ -174,12 +174,12 @@ void CNoteMapWnd::OnPaint()
 			rect.left = rect.right;
 			rect.right = m_cxFont*2-1;
 			strcpy(s, "...");
-			if ((penv) && (nPos >= 0) && (nPos < 120) && (penv->NoteMap[nPos]))
+			if ((penv) && (nPos >= 0) && (nPos < NOTE_MAX) && (penv->NoteMap[nPos]))
 			{
 				UINT n = penv->NoteMap[nPos];
-				if (n == 0xFF) strcpy(s, "==="); else
-				if (n == 0xFE) strcpy(s, "^^^"); else
-				if (n <= 120)
+				if (n == NOTE_KEYOFF) strcpy(s, "==="); else
+				if (n == NOTE_NOTECUT) strcpy(s, "^^^"); else
+				if (n <= NOTE_MAX)
 				{
 					string temp = pSndFile->GetNoteName(n, m_nInstrument);
 					temp.resize(4);
@@ -200,7 +200,7 @@ void CNoteMapWnd::OnPaint()
 			rect.left = rcClient.left + m_cxFont*2+3;
 			rect.right = rcClient.right;
 			strcpy(s, " ..");
-			if ((penv) && (nPos >= 0) && (nPos < 120) && (penv->Keyboard[nPos]))
+			if ((penv) && (nPos >= 0) && (nPos < NOTE_MAX) && (penv->Keyboard[nPos]))
 			{
 				wsprintf(s, "%3d", penv->Keyboard[nPos]);
 			}
@@ -298,7 +298,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				{
 					BYTE smpused[(MAX_SAMPLES+7)/8];
 					memset(smpused, 0, sizeof(smpused));
-					for (UINT i=1; i<120; i++)
+					for (UINT i=1; i<NOTE_MAX; i++)
 					{
 						UINT nsmp = penv->Keyboard[i];
 						if (nsmp < MAX_SAMPLES) smpused[nsmp>>3] |= 1 << (nsmp & 7);
@@ -346,7 +346,7 @@ void CNoteMapWnd::OnMapCopy()
 		{
 			BOOL bModified = FALSE;
 			UINT n = penv->Keyboard[m_nNote];
-			for (UINT i=0; i<120; i++) if (penv->Keyboard[i] != n)
+			for (UINT i=0; i<NOTE_MAX; i++) if (penv->Keyboard[i] != n)
 			{
 				penv->Keyboard[i] = n;
 				bModified = TRUE;
@@ -374,7 +374,7 @@ void CNoteMapWnd::OnMapReset()
 		if (penv)
 		{
 			BOOL bModified = FALSE;
-			for (UINT i=0; i<120; i++) if (penv->NoteMap[i] != i+1)
+			for (UINT i=0; i<NOTE_MAX; i++) if (penv->NoteMap[i] != i+1)
 			{
 				penv->NoteMap[i] = i+1;
 				bModified = TRUE;
@@ -448,13 +448,13 @@ void CNoteMapWnd::EnterNote(UINT note)
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
-	if ((penv) && (m_nNote < 120))
+	if ((penv) && (m_nNote < NOTE_MAX))
 	{
 		if (!m_bIns && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			UINT n = penv->NoteMap[m_nNote];
 			BOOL bOk = FALSE;
-			if ((note > 0) && (note <= 120))
+			if ((note > 0) && (note <= NOTE_MAX))
 			{	
 				n = note;
 				bOk = TRUE;
@@ -480,7 +480,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	INSTRUMENTHEADER *penv = pSndFile->Headers[m_nInstrument];
-	if ((penv) && (m_nNote < 120))	{
+	if ((penv) && (m_nNote < NOTE_MAX))	{
 
 		if ((m_bIns) && (((c >= '0') && (c <= '9')) || (c == ' '))) {	//in sample # column
 		
@@ -568,7 +568,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 		if (m_nNote > 0) { m_nNote = 0; bRedraw = TRUE; }
 		break;
 	case VK_NEXT:
-		if (m_nNote+3 < 120) { m_nNote+=3; bRedraw = TRUE; } else
+		if (m_nNote+3 < NOTE_MAX) { m_nNote+=3; bRedraw = TRUE; } else
 		if (m_nNote < 119) { m_nNote = 119; bRedraw = TRUE; }
 		break;
 	case VK_TAB:
@@ -822,7 +822,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	// Pitch/Pan Separation
 	m_SpinPPS.SetRange(-32, +32);
 	// Pitch/Pan Center
-	for (UINT n=0; n<=120; n++)
+	for (UINT n=0; n<=NOTE_MAX; n++)
 	{
 		wsprintf(s, "%s%d", szNoteNames[n % 12], n/12);
 		m_ComboPPC.SetItemData(m_ComboPPC.AddString(s), n);
@@ -863,7 +863,7 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 	{
 		m_nInstrument = nIns;
 		m_NoteMap.SetCurrentInstrument(m_pModDoc, m_nInstrument);
-		UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT | HINT_ENVELOPE, NULL);
+		UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE, NULL);
 	} else
 	{
 		// Just in case
@@ -939,7 +939,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 	SetCurrentInstrument((lParam > 0) ? lParam : m_nInstrument);
 
 	// Initial Update
-	if (!m_bInitialized) UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_MODTYPE, NULL);
+	if (!m_bInitialized) UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_MODTYPE, NULL);
 
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if (pFrame) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetInstrumentViewState());
@@ -1027,7 +1027,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	if (dwHintMask & HINT_MIXPLUGINS) OnMixPlugChanged();
 	UnlockControls();
 	if (!(dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE|HINT_MODTYPE))) return;
-	if (((dwHintMask >> 24) != m_nInstrument) && (dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE)) && (!(dwHintMask & HINT_MODTYPE))) return;
+	if (((dwHintMask >> HINT_SHIFT_INS) != m_nInstrument) && (dwHintMask & (HINT_INSTRUMENT|HINT_ENVELOPE)) && (!(dwHintMask & HINT_MODTYPE))) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	if (dwHintMask & HINT_MODTYPE)
@@ -1185,6 +1185,9 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_CbnPluginVolumeHandling.EnableWindow(FALSE);
 			m_CbnPluginVelocityHandling.SetCurSel(-1);
 			m_CbnPluginVolumeHandling.SetCurSel(-1);
+			if(m_nInstrument > m_pSndFile->GetNumInstruments())
+				SetCurrentInstrument(m_pSndFile->GetNumInstruments());
+
 		}
 		m_NoteMap.InvalidateRect(NULL, FALSE);
 	}
@@ -1295,7 +1298,7 @@ OpenError:
 			if (m_pModDoc)
 			{
 				m_pModDoc->SetModified();
-				m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES);
+				m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES);
 			}
 		} else bOk = FALSE;
 	}
@@ -1328,7 +1331,7 @@ BOOL CCtrlInstruments::OpenInstrument(CSoundFile *pSndFile, UINT nInstr)
 	m_pSndFile->ReadInstrumentFromSong(m_nInstrument, pSndFile, nInstr);
 	END_CRITICAL();
 	m_pModDoc->SetModified();
-	m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES);
+	m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES | HINT_SMPNAMES);
 	if (bFirst) m_pModDoc->UpdateAllViews(NULL, HINT_MODTYPE | HINT_INSNAMES | HINT_SMPNAMES);
 	m_pModDoc->SetModified();
 	EndWaitCursor();
@@ -1465,13 +1468,13 @@ void CCtrlInstruments::OnInstrumentNew()
 			return;
 		}
 		BOOL bFirst = (pSndFile->m_nInstruments) ? FALSE : TRUE;
-		LONG smp = m_pModDoc->InsertInstrument(0);
-		if (smp > 0)
+		LONG ins = m_pModDoc->InsertInstrument(0);
+		if (ins > 0)
 		{
-			SetCurrentInstrument(smp);
-			m_pModDoc->UpdateAllViews(NULL, (smp << 24) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
+			SetCurrentInstrument(ins);
+			m_pModDoc->UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
 		}
-		if (bFirst) m_pModDoc->UpdateAllViews(NULL, (smp << 24) | HINT_MODTYPE | HINT_INSTRUMENT | HINT_INSNAMES);
+		if (bFirst) m_pModDoc->UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_MODTYPE | HINT_INSTRUMENT | HINT_INSNAMES);
 		if (m_pParent) m_pParent->InstrumentChanged(m_nInstrument);
 	}
 	SwitchToView();
@@ -1487,13 +1490,13 @@ void CCtrlInstruments::OnInstrumentDuplicate()
 		if ((pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (pSndFile->m_nInstruments > 0))
 		{
 			BOOL bFirst = (pSndFile->m_nInstruments) ? FALSE : TRUE;
-			LONG smp = m_pModDoc->InsertInstrument(0, m_nInstrument);
-			if (smp > 0)
+			LONG ins = m_pModDoc->InsertInstrument(0, m_nInstrument);
+			if (ins > 0)
 			{
-				SetCurrentInstrument(smp);
-				m_pModDoc->UpdateAllViews(NULL, (smp << 24) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
+				SetCurrentInstrument(ins);
+				m_pModDoc->UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
 			}
-			if (bFirst) m_pModDoc->UpdateAllViews(NULL, (smp << 24) | HINT_MODTYPE | HINT_INSTRUMENT | HINT_INSNAMES);
+			if (bFirst) m_pModDoc->UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_MODTYPE | HINT_INSTRUMENT | HINT_INSNAMES);
 			if (m_pParent) m_pParent->InstrumentChanged(m_nInstrument);
 		}
 	}
@@ -1658,7 +1661,7 @@ void CCtrlInstruments::OnNameChanged()
 // -! NEW_FEATURE#0023
 			memcpy(penv->name, s, 32);
 			m_pModDoc->SetModified();
-			m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSNAMES, this);
+			m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES, this);
 		}
 	}
 }
@@ -1993,7 +1996,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 			m_CbnPluginVolumeHandling.SetCurSel(penv->nPluginVolumeHandling);
 
 			m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, this);
-			m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSNAMES, this);
+			m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES, this);
 			
 			if (penv->nMixPlug)	//if we have not just set to no plugin
 			{
@@ -2007,7 +2010,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 					if (pPlug->pMixPlugin->isInstrument() && penv->nMidiChannel==0) {
 						penv->nMidiChannel=1;
 						m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
-						UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT, NULL);
+						UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT, NULL);
 					}
 					return;
 				}
@@ -2425,7 +2428,7 @@ void CCtrlInstruments::OnEditSampleMap()
 			if (dlg.DoModal() == IDOK)
 			{
 				m_pModDoc->SetModified();
-				m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSTRUMENT, this);
+				m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT, this);
 				m_NoteMap.InvalidateRect(NULL, FALSE);
 			}
 		}
@@ -2505,7 +2508,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 		pInstH->SetTuning(NULL);
 		END_CRITICAL();
 		m_pModDoc->SetModified();
-		UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT);
+		UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
 		return;
 	}
 
@@ -2533,7 +2536,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 		pInstH->SetTuning(&tc->GetTuning(sel));
 		END_CRITICAL();
 		m_pModDoc->SetModified();
-		UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT);
+		UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
 		return;
 	}
 
@@ -2559,7 +2562,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	//new tuning(s) come visible.
 	BuildTuningComboBox();
 	
-	UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT);
+	UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
 }
 
 
@@ -2611,7 +2614,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	penv->SetTuning(penv->s_DefaultTuning);
 	END_CRITICAL();
 	m_pModDoc->SetModified();
-	UpdateView((m_nInstrument << 24) | HINT_INSTRUMENT);
+	UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
 }
 
 void CCtrlInstruments::OnEnChangeEditPitchtempolock()

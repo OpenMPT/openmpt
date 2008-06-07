@@ -141,7 +141,7 @@ void UnpackMDLTrack(MODCOMMAND *pat, UINT nChannels, UINT nRows, UINT nTrack, co
 				cmd.instr = (xx & 0x02) ? lpTracks[pos++] : 0;
 				cmd.volcmd = cmd.vol = 0;
 				cmd.command = cmd.param = 0;
-				if ((cmd.note < 120-12) && (cmd.note)) cmd.note += 12;
+				if ((cmd.note < NOTE_MAX-12) && (cmd.note)) cmd.note += 12;
 				UINT volume = (xx & 0x04) ? lpTracks[pos++] : 0;
 				UINT commands = (xx & 0x08) ? lpTracks[pos++] : 0;
 				UINT command1 = commands & 0x0F;
@@ -336,7 +336,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 					for (j=0; j<lpStream[dwPos+1]; j++)
 					{
 						const BYTE *ps = lpStream+dwPos+34+14*j;
-						while ((note < (UINT)(ps[1]+12)) && (note < 120))
+						while ((note < (UINT)(ps[1]+12)) && (note < NOTE_MAX))
 						{
 							penv->NoteMap[note] = note+1;
 							if (ps[0] < MAX_SAMPLES)

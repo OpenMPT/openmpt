@@ -234,7 +234,7 @@ VOID CModTree::InsLibSetFullPath(LPCSTR pszLibPath, LPCSTR pszSongName)
 //---------------------------------------------------------------------
 {
 	strcpy(m_szInstrLibPath, pszLibPath);
-	if ((pszSongName[0]) && (stricmp(m_szSongName, pszSongName)))
+	if ((pszSongName[0]) && (_stricmp(m_szSongName, pszSongName)))
 	{
 		CMappedFile f;
 
@@ -590,22 +590,19 @@ VOID CModTree::RefreshInstrumentLibrary()
 VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 //--------------------------------------------------
 {
-	DWORD dwHintParam;
 	PMODTREEDOCINFO pInfo = DocInfo[nDocNdx];
 	CModDoc *pDoc;
 	CSoundFile *pSndFile;
 	CHAR s[256], stmp[256];
 	TV_ITEM tvi;
-	
+	const DWORD hintFlagPart = HintFlagPart(lHint);
 	if ((!pInfo) || (nDocNdx >= MODTREE_MAX_DOCUMENTS) || (!pInfo->pModDoc) || (!m_pDataTree)) return;
-	dwHintParam = lHint >> 24;
-	lHint &= 0xFFFFFF;
-	if (!lHint) return;
+	if (!hintFlagPart) return;
 	pDoc = pInfo->pModDoc;
 	pSndFile = pDoc->GetSoundFile();
 	// Create headers
 	s[0] = 0;
-	if ((lHint & (HINT_MODGENERAL|HINT_MODTYPE)) || (!pInfo->hSong))
+	if ((hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE)) || (!pInfo->hSong))
 	{
 		_splitpath(pDoc->GetPathName(), NULL, NULL, s, NULL);
 		if (!s[0]) strcpy(s, "untitled");
@@ -618,7 +615,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		pInfo->hPatterns = InsertItem("Patterns", IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
 		pInfo->hSamples = InsertItem("Samples", IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hSong, TVI_LAST);
 	}
-	if (lHint & (HINT_MODGENERAL|HINT_MODTYPE))
+	if (hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE))
 	{
 		tvi.mask |= TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
 		tvi.hItem = pInfo->hSong;
@@ -653,7 +650,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	}
 	if (!pInfo->hComments) pInfo->hComments = InsertItem("Comments", IMAGE_COMMENTS, IMAGE_COMMENTS, pInfo->hSong, TVI_LAST);
 	// Add effects
-	if (lHint & (HINT_MODGENERAL|HINT_MODTYPE|HINT_MODCHANNELS|HINT_MIXPLUGINS))
+	if (hintFlagPart & (HINT_MODGENERAL|HINT_MODTYPE|HINT_MODCHANNELS|HINT_MIXPLUGINS))
 	{
 		UINT nFx = 0;
 		for (UINT iRem=0; iRem<MAX_MIXPLUGINS; iRem++)
@@ -689,11 +686,13 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		}
 	}
 	// Add Orders
-	if ((pInfo->hOrders) && (lHint != HINT_INSNAMES) && (lHint != HINT_SMPNAMES))
+	if ((pInfo->hOrders) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_SMPNAMES))
 	{
+		const DWORD nPat = (lHint >> HINT_SHIFT_PAT);
 		pInfo->tiOrders.resize(pSndFile->Order.size(), NULL);
 		UINT imin=0, imax=pSndFile->Order.size()-1;
-		if ((lHint == HINT_PATNAMES) && (dwHintParam < pSndFile->Order.size())) imin = imax = dwHintParam;
+		const bool patNamesOnly = (hintFlagPart == HINT_PATNAMES);
+		//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < pSndFile->Order.size())) imin = imax = dwHintParam;
 		BOOL bEnded = FALSE;
 		for (UINT iOrd=imin; iOrd<=imax; iOrd++)
 		{
@@ -707,6 +706,8 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 				}
 			} else
 			{
+				if(patNamesOnly && pSndFile->Order[iOrd] != nPat)
+					continue;
 				UINT state = (iOrd == pInfo->nOrdSel) ? TVIS_BOLD : 0;
 				if (pSndFile->Order[iOrd] < pSndFile->Patterns.Size())
 				{
@@ -744,15 +745,16 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		}
 	}
 	// Add Patterns
-	if ((pInfo->hPatterns) && (lHint != HINT_INSNAMES) && (lHint != HINT_SMPNAMES))
+	if ((pInfo->hPatterns) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_SMPNAMES))
 	{
+		const DWORD nPat = (lHint >> HINT_SHIFT_PAT);
 		pInfo->tiPatterns.resize(pSndFile->Patterns.Size(), NULL);
 		UINT imin = 0, imax = pSndFile->Patterns.Size()-1;
-		if ((lHint == HINT_PATNAMES) && (dwHintParam < pSndFile->Patterns.Size())) imin = imax = dwHintParam;
+		if ((hintFlagPart == HINT_PATNAMES) && (nPat < pSndFile->Patterns.Size())) imin = imax = nPat;
 		BOOL bDelPat = FALSE;
 
 		ASSERT(pInfo->tiPatterns.size() == pSndFile->Patterns.Size());
-		for (UINT iPat=0; iPat<pInfo->tiPatterns.size(); iPat++)
+		for (UINT iPat=imin; iPat <= imax; iPat++)
 		{
 			if ((bDelPat) && (pInfo->tiPatterns[iPat]))
 			{
@@ -794,10 +796,11 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		}
 	}
 	// Add Samples
-	if ((pInfo->hSamples) && (lHint != HINT_INSNAMES) && (lHint != HINT_PATNAMES))
+	if ((pInfo->hSamples) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_PATNAMES))
 	{
+		const UINT nSmp = (lHint >> HINT_SHIFT_SMP);
 		UINT smin = 1, smax = MAX_SAMPLES-1;
-		if ((lHint == HINT_SMPNAMES) && (dwHintParam) && (dwHintParam < MAX_SAMPLES)) { smin = smax = dwHintParam; }
+		if ((hintFlagPart == HINT_SMPNAMES) && (nSmp) && (nSmp < MAX_SAMPLES)) { smin = smax = nSmp; }
 		for (UINT iSmp=smin; iSmp<=smax; iSmp++)
 		{
 			if (iSmp <= pSndFile->m_nSamples)
@@ -832,12 +835,13 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		}
 	}
 	// Add Instruments
-	if ((pInfo->hInstruments) && (lHint != HINT_SMPNAMES) && (lHint != HINT_PATNAMES))
+	if ((pInfo->hInstruments) && (hintFlagPart != HINT_SMPNAMES) && (hintFlagPart != HINT_PATNAMES))
 	{
 		UINT smin = 1, smax = MAX_INSTRUMENTS-1;
-		if ((lHint == HINT_INSNAMES) && (dwHintParam) && (dwHintParam < MAX_INSTRUMENTS))
+		const UINT nIns = (lHint >> HINT_SHIFT_INS);
+		if ((hintFlagPart == HINT_INSNAMES) && (nIns) && (nIns < MAX_INSTRUMENTS))
 		{
-			smin = smax = dwHintParam;
+			smin = smax = nIns;
 			if (((pSndFile->Headers[smin]) && (pInfo->tiInstruments[smin] == NULL))
 			 || ((!pSndFile->Headers[smin]) && (pInfo->tiInstruments[smin] != NULL)))
 			{
@@ -1204,7 +1208,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 					// Melodic
 					if (dwItemType & 0x40000000)
 					{
-						if ((!nParam) || (nParam > 120)) nParam = NOTE_MIDDLEC;
+						if ((!nParam) || (nParam > NOTE_MAX)) nParam = NOTE_MIDDLEC;
 						rgn = pDLSBank->GetRegionFromKey(instr, nParam-1);
 					}
 					pMainFrm->PlayDLSInstrument(bank, instr, rgn);
@@ -1272,21 +1276,24 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 	case MODITEM_PATTERN:
 		if ((pModDoc) && (pModDoc->RemovePattern(dwItem)))
 		{
-			pModDoc->UpdateAllViews(NULL, (dwItem << 16)|HINT_PATTERNDATA|HINT_PATNAMES);
+			//pModDoc->UpdateAllViews(NULL, (dwItem << 16)|HINT_PATTERNDATA|HINT_PATNAMES);
+			pModDoc->UpdateAllViews(NULL, (dwItem << HINT_SHIFT_PAT) | HINT_PATTERNDATA|HINT_PATNAMES);
 		}
 		break;
 
 	case MODITEM_SAMPLE:
 		if ((pModDoc) && (pModDoc->RemoveSample(dwItem)))
 		{
-			pModDoc->UpdateAllViews(NULL, (dwItem << 16) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
+			//pModDoc->UpdateAllViews(NULL, (dwItem << 16) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
+			pModDoc->UpdateAllViews(NULL, (dwItem << HINT_SHIFT_SMP) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
 		}
 		break;
 
 	case MODITEM_INSTRUMENT:
 		if ((pModDoc) && (pModDoc->RemoveInstrument(dwItem)))
 		{
-			pModDoc->UpdateAllViews(NULL, (dwItem << 16)|HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
+			//pModDoc->UpdateAllViews(NULL, (dwItem << 16)|HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
+			pModDoc->UpdateAllViews(NULL, (dwItem << HINT_SHIFT_INS) | HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
 		}
 		break;
 
@@ -1917,8 +1924,8 @@ VOID CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 void CModTree::OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint)
 //---------------------------------------------------------------------
 {
-	dwHint &= (HINT_PATNAMES|HINT_SMPNAMES|HINT_INSNAMES|HINT_MODTYPE|HINT_MODGENERAL|HINT_MODSEQUENCE|HINT_MIXPLUGINS|HINT_MPTOPTIONS|0xFF000000);
-	if ((pHint != this) && (dwHint & 0x00FFFFFF))
+	dwHint &= (HINT_PATNAMES|HINT_SMPNAMES|HINT_INSNAMES|HINT_MODTYPE|HINT_MODGENERAL|HINT_MODSEQUENCE|HINT_MIXPLUGINS|HINT_MPTOPTIONS|HINT_MASK_ITEM);
+	if ((pHint != this) && (dwHint & HINT_MASK_FLAGS))
 	{
 		for (UINT i=0; i<MODTREE_MAX_DOCUMENTS; i++)
 		{
@@ -2643,8 +2650,8 @@ void CModTree::OnSaveItem()
 
 		if(pSndFile->m_szInstrumentPath[dwItem-1][0] != '\0'){
 			int size = strlen(pSndFile->m_szInstrumentPath[dwItem-1]);
-			BOOL iti = stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-3],"iti") == 0;
-			BOOL xi  = stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-2],"xi") == 0;
+			BOOL iti = _stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-3],"iti") == 0;
+			BOOL xi  = _stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-2],"xi") == 0;
 
 			if(iti || (!iti && !xi  && pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 				pSndFile->SaveITIInstrument(dwItem, pSndFile->m_szInstrumentPath[dwItem-1]);

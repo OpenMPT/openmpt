@@ -116,6 +116,9 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		UINT nSpeedCount = 0;
 		nRow = nNextRow;
 		nCurrentPattern = nNextPattern;
+
+		if(nCurrentPattern >= Order.size())
+			goto EndMod;
 		
 		// Check if pattern is valid
 		nPattern = Order[nCurrentPattern];
@@ -180,7 +183,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			UINT param = p->param;
 			UINT note = p->note;
 			if (p->instr) { instr[nChn] = p->instr; notes[nChn] = 0; vols[nChn] = 0xFF; }
-			if ((note) && (note <= 120)) notes[nChn] = note;
+			if ((note) && (note <= NOTE_MAX)) notes[nChn] = note;
 			if (p->volcmd == VOLCMD_VOLUME)	{ vols[nChn] = p->vol; }
 			if (command) switch (command)
 			{
@@ -1066,7 +1069,7 @@ BOOL CSoundFile::ProcessEffects()
 		UINT vol = pChn->nRowVolume;
 		UINT cmd = pChn->nRowCommand;
 		UINT param = pChn->nRowParam;
-		BOOL bPorta = ((cmd != CMD_TONEPORTAMENTO) && (cmd != CMD_TONEPORTAVOL) && (volcmd != VOLCMD_TONEPORTAMENTO)) ? FALSE : TRUE;
+		bool bPorta = ((cmd != CMD_TONEPORTAMENTO) && (cmd != CMD_TONEPORTAVOL) && (volcmd != VOLCMD_TONEPORTAMENTO)) ? FALSE : TRUE;
 
 		UINT nStartTick = 0;
 
@@ -1705,6 +1708,7 @@ BOOL CSoundFile::ProcessEffects()
 }
 
 void CSoundFile::resetEnvelopes(MODCHANNEL* pChn, int envToReset)
+//---------------------------------------------------------------
 {
 	switch (envToReset) {
 		case ENV_RESET_ALL:
@@ -2837,7 +2841,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 		}
 		UINT nNote = pChn->nNewNote;
 		LONG nOldPeriod = pChn->nPeriod;
-		if ((nNote) && (nNote <= 120) && (pChn->nLength)) CheckNNA(nChn, 0, nNote, TRUE);
+		if ((nNote) && (nNote <= NOTE_MAX) && (pChn->nLength)) CheckNNA(nChn, 0, nNote, TRUE);
 		BOOL bResetEnv = FALSE;
 		if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 		{
@@ -3226,12 +3230,12 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period) const
 		return 6*12+36;
 	} else
 	{
-		for (UINT i=1; i<120; i++)
+		for (UINT i=1; i<NOTE_MAX; i++)
 		{
 			LONG n = GetPeriodFromNote(i, 0, 0);
 			if ((n > 0) && (n <= (LONG)period)) return i;
 		}
-		return 120;
+		return NOTE_MAX;
 	}
 }
 
@@ -3262,7 +3266,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) cons
 		note -= 13;
 		if (m_dwSongFlags & SONG_LINEARSLIDES)
 		{
-			LONG l = ((120 - note) << 6) - (nFineTune / 2);
+			LONG l = ((NOTE_MAX - note) << 6) - (nFineTune / 2);
 			if (l < 1) l = 1;
 			return (UINT)l;
 		} else

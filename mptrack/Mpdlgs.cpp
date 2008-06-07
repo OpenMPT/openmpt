@@ -7,8 +7,11 @@
 #include "moptions.h"
 #include "moddoc.h"
 #include "snddev.h"
+#include ".\mpdlgs.h"
 
-#pragma warning(disable:4244)
+#define str_preampChangeNote GetStrI18N(_TEXT("Note: Pre-Amp setting affects sample volume only. Changing this setting may cause undesired effects on volume balance between sample based instruments and plugin instrument."))
+
+//#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 LPCSTR szCPUNames[8] =
 {
@@ -165,11 +168,9 @@ BOOL COptionsSoundcard::OnInitDialog()
 	}
 	// Pre-Amplification
 	{
-		int n = (CMainFrame::m_nPreAmp - 64) / 8;
-		if ((n < 0) || (n > 40)) n = 16;
 		m_SliderPreAmp.SetTicFreq(5);
 		m_SliderPreAmp.SetRange(0, 40);
-		m_SliderPreAmp.SetPos(40 - n);
+		SetPreAmpSliderPosition();
 	}
 	// Sound Device
 	{
@@ -255,17 +256,35 @@ void COptionsSoundcard::UpdateStereoSep()
 }
 
 
+void COptionsSoundcard::SetPreAmpSliderPosition()
+//-----------------------------------------------
+{
+	int n = (CMainFrame::m_nPreAmp - 64) / 8;
+	if ((n < 0) || (n > 40)) n = 16;
+	m_SliderPreAmp.SetPos(40 - n);
+}
+
+
 void COptionsSoundcard::OnVScroll(UINT n, UINT pos, CScrollBar *p)
 //----------------------------------------------------------------
 {
 	CPropertyPage::OnVScroll(n, pos, p);
 	// PreAmp
 	{
-		int n = 40 - m_SliderPreAmp.GetPos();
-		if ((n >= 0) && (n <= 40)) // approximately +/- 10dB
+		if(m_PreAmpNoteShowed == true)
 		{
-			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-			if (pMainFrm) pMainFrm->SetPreAmp(64 + (n * 8));
+			int n = 40 - m_SliderPreAmp.GetPos();
+			if ((n >= 0) && (n <= 40)) // approximately +/- 10dB
+			{
+				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+				if (pMainFrm) pMainFrm->SetPreAmp(64 + (n * 8));
+			}
+		}
+		else
+		{
+			m_PreAmpNoteShowed = true;
+			MessageBox(str_preampChangeNote, _TEXT(""), MB_ICONINFORMATION);
+			SetPreAmpSliderPosition();
 		}
 	}
 }
@@ -464,7 +483,7 @@ BOOL COptionsPlayer::OnInitDialog()
 	//rewbs.resamplerConf
 	OnResamplerChanged();
 	char s[20] = "";
-	ltoa(CMainFrame::glVolumeRampSamples,s, 10);
+	_ltoa(CMainFrame::glVolumeRampSamples,s, 10);
 	m_CEditRamping.SetWindowText(s);
 	//end rewbs.resamplerConf
 	return TRUE;
@@ -499,7 +518,7 @@ void COptionsPlayer::OnHScroll(UINT nSBCode, UINT, CScrollBar *psb)
 //rewbs.resamplerConf
 void COptionsPlayer::OnWFIRTypeChanged()
 {
-	CMainFrame::gbWFIRType = m_CbnWFIRType.GetCurSel();
+	CMainFrame::gbWFIRType = static_cast<BYTE>(m_CbnWFIRType.GetCurSel());
 	OnSettingsChanged();
 }
 
@@ -1149,6 +1168,4 @@ BOOL CMidiSetupDlg::OnSetActive()
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
 	return CPropertyPage::OnSetActive();
 }
-
-
 

@@ -281,7 +281,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		memcpy(penv->filename, pis->filename, 12);
 		penv->nFadeOut = pis->fadeout << 6;
 		penv->nGlobalVol = 64;
-		for (UINT j=0; j<120; j++)
+		for (UINT j=0; j<NOTE_MAX; j++)
 		{
 			UINT note = pis->keyboard[j*2];
 			UINT ins = pis->keyboard[j*2+1];
@@ -328,7 +328,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		penv->nFadeOut = pis->fadeout << 5;
 		penv->nGlobalVol = pis->gbv >> 1;
 		if (penv->nGlobalVol > 64) penv->nGlobalVol = 64;
-		for (UINT j=0; j<120; j++)
+		for (UINT j=0; j<NOTE_MAX; j++)
 		{
 			UINT note = pis->keyboard[j*2];
 			UINT ins = pis->keyboard[j*2+1];
@@ -340,7 +340,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 		if (*((int *)pis->dummy) == 'MPTX')
 		{
 			const ITINSTRUMENTEX *pisex = (const ITINSTRUMENTEX *)pis;
-			for (UINT k=0; k<120; k++)
+			for (UINT k=0; k<NOTE_MAX; k++)
 			{
 				penv->Keyboard[k] |= ((UINT)pisex->keyboardhi[k] << 8);
 			}
@@ -1047,8 +1047,10 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 
 	patpos.resize(patpossize);
 	patpossize *= 4; // <-> patpossize *= sizeof(DWORD);
-	if(patpossize > dwMemLength - dwMemPos) return FALSE;
-	memcpy(&patpos[0], lpStream+dwMemPos, patpossize);
+	if(patpossize > dwMemLength - dwMemPos)
+		return FALSE;
+	if(patpossize > 0)
+		memcpy(&patpos[0], lpStream+dwMemPos, patpossize);
 	
 	
 	dwMemPos += pifh->patnum * 4;
@@ -1821,7 +1823,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	BYTE chnmask[MAX_BASECHANNELS];
 	MODCOMMAND lastvalue[MAX_BASECHANNELS];
 // -! BEHAVIOUR_CHANGE#0006
-	BYTE buf[512];
+	BYTE buf[8 * MAX_BASECHANNELS];
 	FILE *f;
 
 
@@ -2014,7 +2016,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	for (UINT nins=1; nins<=header.insnum; nins++)
 	{
 		BOOL bKbdEx = FALSE;
-		BYTE keyboardex[120];
+		BYTE keyboardex[NOTE_MAX];
 
 		memset(&iti, 0, sizeof(iti));
 		iti.id = 0x49504D49;	// "IMPI"
@@ -2044,7 +2046,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			iti.ifc = penv->nIFC;
 			iti.ifr = penv->nIFR;
 			iti.nos = 0;
-			for (UINT i=0; i<120; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
+			for (UINT i=0; i<NOTE_MAX; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
 			{
 				UINT smp = penv->Keyboard[i];
 				if ((smp) && (!(smpcount[smp>>3] & (1<<(smp&7)))))
@@ -2104,7 +2106,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		} else
 		// Save Empty Instrument
 		{
-			for (UINT i=0; i<120; i++) iti.keyboard[i*2] = i;
+			for (UINT i=0; i<NOTE_MAX; i++) iti.keyboard[i*2] = i;
 			iti.ppc = 5*12;
 			iti.gbv = 128;
 			iti.dfp = 0x20;
@@ -2118,8 +2120,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		fwrite(&iti, 1, sizeof(ITINSTRUMENT), f);
 		if (bKbdEx)
 		{
-			dwPos += 120;
-			fwrite(keyboardex, 1, 120, f);
+			dwPos += NOTE_MAX;
+			fwrite(keyboardex, 1, NOTE_MAX, f);
 		}
 
 		//------------ rewbs.modularInstData
@@ -2631,7 +2633,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	for (UINT nins=1; nins<=header.insnum; nins++)
 	{
 		BOOL bKbdEx = FALSE;
-		BYTE keyboardex[120];
+		BYTE keyboardex[NOTE_MAX];
 
 		memset(&iti, 0, sizeof(iti));
 		iti.id = 0x49504D49;	// "IMPI"
@@ -2660,7 +2662,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			iti.ifc = penv->nIFC;
 			iti.ifr = penv->nIFR;
 			iti.nos = 0;
-			for (UINT i=0; i<120; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
+			for (UINT i=0; i<NOTE_MAX; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
 			{
 				UINT smp = penv->Keyboard[i];
 				if ((smp) && (!(smpcount[smp>>3] & (1<<(smp&7)))))
@@ -2720,7 +2722,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		} else
 		// Save Empty Instrument
 		{
-			for (UINT i=0; i<120; i++) iti.keyboard[i*2] = i;
+			for (UINT i=0; i<NOTE_MAX; i++) iti.keyboard[i*2] = i;
 			iti.ppc = 5*12;
 			iti.gbv = 128;
 			iti.dfp = 0x20;
@@ -2734,8 +2736,8 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		fwrite(&iti, 1, sizeof(ITINSTRUMENT), f);
 		if (bKbdEx)
 		{
-			dwPos += 120;
-			fwrite(keyboardex, 1, 120, f);
+			dwPos += NOTE_MAX;
+			fwrite(keyboardex, 1, NOTE_MAX, f);
 		}
 
 		//------------ rewbs.modularInstData

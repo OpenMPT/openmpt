@@ -8,13 +8,16 @@
 #include "dlg_misc.h"
 #include "dlsbank.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+#define str_mptm_conversion_warning		GetStrI18N(_TEXT("Conversion from mptm to any other moduletype may makes certain features unavailable and is not guaranteed to work properly. Do the conversion anyway?"))
 
 
 //////////////////////////////////////////////////////////////////////
@@ -52,9 +55,36 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 
 	if(oldTypeIsMPT)
 	{
-		if(::MessageBox(NULL, "Convertion from MPTm to any other modtype makes certain features unavailable and is not guaranteed to work properly; Do the convertion anyway?",
-		"Notice", MB_YESNO) != IDYES)
+		if(::MessageBox(NULL, str_mptm_conversion_warning, 0, MB_YESNO) != IDYES)
 			return FALSE;
+
+		/*
+		Incomplete list of MPTm-only features and extensions in the old formats:
+
+		Features only available for MPTm:
+		-User definable tunings.
+		-Extended pattern range
+		-Extended sequence
+
+		Extended features in IT/XM/S3M/MOD(not all listed below are available in all of those formats):
+		-plugs
+		-Extended ranges for
+			-sample count
+			-instrument count
+			-pattern count
+			-sequence size
+			-Row count
+			-channel count
+			-tempo limits
+		-Extended sample/instrument properties.
+		-MIDI mapping directives
+		-Versioninfo
+		-channel names
+		-pattern names
+		-Alternative tempomodes
+		-For more info, see e.g. SaveExtendedSongProperties(), SaveExtendedInstrumentProperties()
+		*/
+		
 	}
 
 	// Check if conversion to 64 rows is necessary
@@ -270,7 +300,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			INSTRUMENTHEADER *penv = m_SndFile.Headers[j];
 			if (penv)
 			{
-				for (UINT k=0; k<120; k++)
+				for (UINT k=0; k<NOTE_MAX; k++)
 				{
 					if ((penv->NoteMap[k]) && (penv->NoteMap[k] != (BYTE)(k+1)))
 					{
@@ -665,7 +695,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 				UINT jmax = m_SndFile.PatternSize[ipat] * m_SndFile.m_nChannels;
 				for (UINT j=0; j<jmax; j++, p++)
 				{
-					if ((p->note) && (p->note <= 120))
+					if ((p->note) && (p->note <= NOTE_MAX))
 					{
 						if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
 						{
@@ -1460,8 +1490,8 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 						switch(note)
 						{
 						case 0:		p[1] = p[2] = p[3] = '.'; break;
-						case 0xFF:	p[1] = p[2] = p[3] = '='; break;
-						case 0xFE:	p[1] = p[2] = p[3] = '^'; break;
+						case NOTE_KEYOFF:	p[1] = p[2] = p[3] = '='; break;
+						case NOTE_NOTECUT:	p[1] = p[2] = p[3] = '^'; break;
 						default:
 							p[1] = szNoteNames[(note-1) % 12][0];
 							p[2] = szNoteNames[(note-1) % 12][1];
@@ -1604,8 +1634,8 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
 						{
 							m[col].note = 0;
-							if (s[0] == '=') m[col].note = 0xFF; else
-							if (s[0] == '^') m[col].note = 0xFE; else
+							if (s[0] == '=') m[col].note = NOTE_KEYOFF; else
+							if (s[0] == '^') m[col].note = NOTE_NOTECUT; else
 							if (s[0] != '.')
 							{
 								for (UINT i=0; i<12; i++)
@@ -1710,7 +1740,7 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 			if (bOk)
 			{
 				SetModified();
-				UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << 24), NULL);
+				UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
 			}
 		}
 		CloseClipboard();
@@ -1831,7 +1861,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 		INSTRUMENTHEADER *penv = m_SndFile.Headers[nIns];
 		UINT susBegin=0, susEnd=0, loopBegin=0, loopEnd=0, bSus=0, bLoop=0, bCarry=0, nPoints=0, releaseNode = ENV_RELEASE_NODE_UNSET;
 		DWORD dwMemSize = GlobalSize(hCpy), dwPos = strlen(pszEnvHdr);
-		if ((dwMemSize > dwPos) && (!strnicmp(p, pszEnvHdr, dwPos-2)))
+		if ((dwMemSize > dwPos) && (!_strnicmp(p, pszEnvHdr, dwPos-2)))
 		{
 			for (UINT h=0; h<8; h++)
 			{
@@ -1947,7 +1977,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 		GlobalUnlock(hCpy);
 		CloseClipboard();
 		SetModified();
-		UpdateAllViews(NULL, (nIns << 24) | HINT_ENVELOPE, NULL);
+		UpdateAllViews(NULL, (nIns << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 	}
 	EndWaitCursor();
 	return TRUE;
