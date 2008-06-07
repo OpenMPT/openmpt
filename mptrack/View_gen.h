@@ -1,6 +1,10 @@
 #ifndef _VIEW_GLOBALS_H_
 #define _VIEW_GLOBALS_H_
 
+//Note: Changing this won't increase the number of tabs in general view. Most
+//of the code use plain number 4.
+#define CHANNELS_IN_TAB	4
+
 //==================================
 class CViewGlobals: public CFormView
 //==================================
@@ -66,6 +70,14 @@ public:
 	virtual void OnDraw(CDC* pDC);
 // -! NEW_FEATURE#0015
 	//}}AFX_VIRTUAL
+
+private:
+	void OnMute(const CHANNELINDEX chnMod4, const UINT itemID);
+	void OnSurround(const CHANNELINDEX chnMod4, const UINT itemID);
+	void OnEditVol(const CHANNELINDEX chnMod4, const UINT itemID);
+	void OnEditPan(const CHANNELINDEX chnMod4, const UINT itemID);
+	void OnEditName(const CHANNELINDEX chnMod4, const UINT itemID);
+	void OnFxChanged(const CHANNELINDEX chnMod4);
 
 protected:
 	//{{AFX_MSG(CViewGlobals)

@@ -3,6 +3,8 @@
 
 //Simple struct to gather various modspecifications in one place.
 //Feel free to improve.
+
+
 struct CModSpecifications
 //=======================
 {
@@ -35,12 +37,8 @@ const CModSpecifications MPTM_SPECS =
 			-savefile format and GUI methods can handle new values(might not be a small task :).
 	 */
 	"MPTm",								//File extension
-	65000,								//Pattern max.
-	65000,								//Order max.
-	//Note: 0xFFFF == 65535 seems to be used in various places 
-	//in the code as a invalid pattern/order indicator, so going past
-	//that limit likely requires modifications(January 2007).
-
+	4000,								//Pattern max.
+	4000,								//Order max.
 	4,									//Channel min
 	127,								//Channel max
 	32,									//Min tempo

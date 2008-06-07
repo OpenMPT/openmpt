@@ -283,7 +283,7 @@ int CViewGlobals::GetDlgItemIntEx(UINT nID)
 void CViewGlobals::OnUpdate(CView* pView, LPARAM lHint, CObject*pHint)
 //--------------------------------------------------------------------
 {
-	if (((lHint & 0xFFFF) == HINT_MODCHANNELS) && ((lHint >> 24) != m_nActiveTab)) return;
+	if ((HintFlagPart(lHint) == HINT_MODCHANNELS) && ((lHint >> HINT_SHIFT_CHNTAB) != m_nActiveTab)) return;
 	if (pView != this) UpdateView(lHint, pHint);
 }
 
@@ -329,7 +329,6 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		}
 		if (nOldSel >= (UINT)nTabCount) nOldSel = 0;
 		
-		//Changing the order of these calls seemed to fix a GUI bug (http://lpchip.com/modplug/viewtopic.php?t=1324)
 		m_TabCtrl.SetRedraw(TRUE);
 		m_TabCtrl.SetCurSel(nOldSel);
 		
@@ -560,261 +559,88 @@ void CViewGlobals::OnTabSelchange(NMHDR*, LRESULT* pResult)
 	if (pResult) *pResult = 0;
 }
 
-
-void CViewGlobals::OnMute1()
-//--------------------------
+void CViewGlobals::OnMute(const CHANNELINDEX chnMod4, const UINT itemID)
+//---------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	BOOL b = (IsDlgButtonChecked(IDC_CHECK1)) ? TRUE : FALSE;
-	UINT nChn = m_nActiveTab * 4;
 	
 	if (pModDoc)
 	{
+		const BOOL b = (IsDlgButtonChecked(itemID)) ? TRUE : FALSE;
+		const UINT nChn = m_nActiveTab * 4 + chnMod4;
 		pModDoc->MuteChannel(nChn, b);
-		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
+		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 	}
 }
 
+void CViewGlobals::OnMute1() {OnMute(0, IDC_CHECK1);}
+void CViewGlobals::OnMute2() {OnMute(1, IDC_CHECK3);}
+void CViewGlobals::OnMute3() {OnMute(2, IDC_CHECK5);}
+void CViewGlobals::OnMute4() {OnMute(3, IDC_CHECK7);}
 
-void CViewGlobals::OnMute2()
-//--------------------------
+
+void CViewGlobals::OnSurround(const CHANNELINDEX chnMod4, const UINT itemID)
+//--------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	BOOL b = (IsDlgButtonChecked(IDC_CHECK3)) ? TRUE : FALSE;
-	UINT nChn = m_nActiveTab * 4 + 1;
 	
 	if (pModDoc)
 	{
-		pModDoc->MuteChannel(nChn, b);
-		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-	}
-}
-
-
-void CViewGlobals::OnMute3()
-//--------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	BOOL b = (IsDlgButtonChecked(IDC_CHECK5)) ? TRUE : FALSE;
-	UINT nChn = m_nActiveTab * 4 + 2;
-	
-	if (pModDoc)
-	{
-		pModDoc->MuteChannel(nChn, b);
-		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-	}
-}
-
-
-void CViewGlobals::OnMute4()
-//--------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	BOOL b = (IsDlgButtonChecked(IDC_CHECK7)) ? TRUE : FALSE;
-	UINT nChn = m_nActiveTab * 4 + 3;
-	
-	if (pModDoc)
-	{
-		pModDoc->MuteChannel(nChn, b);
-		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-	}
-}
-
-
-void CViewGlobals::OnSurround1()
-//------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	BOOL b = (IsDlgButtonChecked(IDC_CHECK2)) ? TRUE : FALSE;
-	UINT nChn = m_nActiveTab * 4;
-	
-	if (pModDoc)
-	{
+		const BOOL b = (IsDlgButtonChecked(itemID)) ? TRUE : FALSE;
+		const UINT nChn = m_nActiveTab * 4 + chnMod4;
 		pModDoc->SurroundChannel(nChn, b);
-		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
+		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 	}
 }
 
+void CViewGlobals::OnSurround1() {OnSurround(0, IDC_CHECK2);}
+void CViewGlobals::OnSurround2() {OnSurround(1, IDC_CHECK4);}
+void CViewGlobals::OnSurround3() {OnSurround(2, IDC_CHECK6);}
+void CViewGlobals::OnSurround4() {OnSurround(3, IDC_CHECK8);}
 
-void CViewGlobals::OnSurround2()
-//------------------------------
+void CViewGlobals::OnEditVol(const CHANNELINDEX chnMod4, const UINT itemID)
+//------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	BOOL b = (IsDlgButtonChecked(IDC_CHECK4)) ? TRUE : FALSE;
-	UINT nChn = m_nActiveTab * 4 + 1;
-	
-	if (pModDoc)
-	{
-		pModDoc->SurroundChannel(nChn, b);
-		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-	}
-}
-
-
-void CViewGlobals::OnSurround3()
-//------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	BOOL b = (IsDlgButtonChecked(IDC_CHECK6)) ? TRUE : FALSE;
-	UINT nChn = m_nActiveTab * 4 + 2;
-	
-	if (pModDoc)
-	{
-		pModDoc->SurroundChannel(nChn, b);
-		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-	}
-}
-
-
-void CViewGlobals::OnSurround4()
-//------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	BOOL b = (IsDlgButtonChecked(IDC_CHECK8)) ? TRUE : FALSE;
-	UINT nChn = m_nActiveTab * 4 + 3;
-	
-	if (pModDoc)
-	{
-		pModDoc->SurroundChannel(nChn, b);
-		pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-	}
-}
-
-
-void CViewGlobals::OnEditVol1()
-//-----------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	UINT nChn = m_nActiveTab * 4;
-	int vol = GetDlgItemIntEx(IDC_EDIT1);
+	const UINT nChn = m_nActiveTab * 4 + chnMod4;
+	const int vol = GetDlgItemIntEx(itemID);
 	if ((pModDoc) && (vol >= 0) && (vol <= 64) && (!m_nLockCount))
 	{
 		if (pModDoc->SetChannelGlobalVolume(nChn, vol))
 		{
-			m_sbVolume[0].SetPos(vol);
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
+			m_sbVolume[chnMod4].SetPos(vol);
+			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
 	}
 }
 
+void CViewGlobals::OnEditVol1() {OnEditVol(0, IDC_EDIT1);}
+void CViewGlobals::OnEditVol2() {OnEditVol(1, IDC_EDIT3);}
+void CViewGlobals::OnEditVol3() {OnEditVol(2, IDC_EDIT5);}
+void CViewGlobals::OnEditVol4() {OnEditVol(3, IDC_EDIT7);}
 
-void CViewGlobals::OnEditVol2()
-//-----------------------------
+
+void CViewGlobals::OnEditPan(const CHANNELINDEX chnMod4, const UINT itemID)
+//--------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	UINT nChn = m_nActiveTab * 4 + 1;
-	int vol = GetDlgItemIntEx(IDC_EDIT3);
-	if ((pModDoc) && (vol >= 0) && (vol <= 64) && (!m_nLockCount))
-	{
-		if (pModDoc->SetChannelGlobalVolume(nChn, vol))
-		{
-			m_sbVolume[1].SetPos(vol);
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnEditVol3()
-//-----------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	UINT nChn = m_nActiveTab * 4 + 2;
-	int vol = GetDlgItemIntEx(IDC_EDIT5);
-	if ((pModDoc) && (vol >= 0) && (vol <= 64) && (!m_nLockCount))
-	{
-		if (pModDoc->SetChannelGlobalVolume(nChn, vol))
-		{
-			m_sbVolume[2].SetPos(vol);
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnEditVol4()
-//-----------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	UINT nChn = m_nActiveTab * 4 + 3;
-	int vol = GetDlgItemIntEx(IDC_EDIT7);
-	if ((pModDoc) && (vol >= 0) && (vol <= 64) && (!m_nLockCount))
-	{
-		if (pModDoc->SetChannelGlobalVolume(nChn, vol))
-		{
-			m_sbVolume[3].SetPos(vol);
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnEditPan1()
-//-----------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	UINT nChn = m_nActiveTab * 4;
-	int pan = GetDlgItemIntEx(IDC_EDIT2);
+	const UINT nChn = m_nActiveTab * 4 + chnMod4;
+	const int pan = GetDlgItemIntEx(itemID);
 	if ((pModDoc) && (pan >= 0) && (pan <= 256) && (!m_nLockCount))
 	{
 		if (pModDoc->SetChannelDefaultPan(nChn, pan))
 		{
-			m_sbPan[0].SetPos(pan/4);
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
+			m_sbPan[chnMod4].SetPos(pan/4);
+			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
 	}
 }
 
 
-void CViewGlobals::OnEditPan2()
-//-----------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	UINT nChn = m_nActiveTab * 4 + 1;
-	int pan = GetDlgItemIntEx(IDC_EDIT4);
-	if ((pModDoc) && (pan >= 0) && (pan <= 256) && (!m_nLockCount))
-	{
-		if (pModDoc->SetChannelDefaultPan(nChn, pan))
-		{
-			m_sbPan[1].SetPos(pan/4);
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnEditPan3()
-//-----------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	UINT nChn = m_nActiveTab * 4 + 2;
-	int pan = GetDlgItemIntEx(IDC_EDIT6);
-	if ((pModDoc) && (pan >= 0) && (pan <= 256) && (!m_nLockCount))
-	{
-		if (pModDoc->SetChannelDefaultPan(nChn, pan))
-		{
-			m_sbPan[2].SetPos(pan/4);
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnEditPan4()
-//-----------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	UINT nChn = m_nActiveTab * 4 + 3;
-	int pan = GetDlgItemIntEx(IDC_EDIT8);
-	if ((pModDoc) && (pan >= 0) && (pan <= 256) && (!m_nLockCount))
-	{
-		if (pModDoc->SetChannelDefaultPan(nChn, pan))
-		{
-			m_sbPan[3].SetPos(pan/4);
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
+void CViewGlobals::OnEditPan1() {OnEditPan(0, IDC_EDIT2);}
+void CViewGlobals::OnEditPan2() {OnEditPan(1, IDC_EDIT4);}
+void CViewGlobals::OnEditPan3() {OnEditPan(2, IDC_EDIT6);}
+void CViewGlobals::OnEditPan4() {OnEditPan(3, IDC_EDIT8);}
 
 
 void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -880,7 +706,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		}
 		//end rewbs.dryRatio
 
-		if (bUpdate) pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
+		if (bUpdate) pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		UnlockControls();
 
 		if ((pScrollBar) && (pScrollBar->m_hWnd == m_sbValue.m_hWnd))
@@ -952,8 +778,8 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 }
 
 
-void CViewGlobals::OnEditName1()
-//------------------------------
+void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
+//----------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -961,179 +787,51 @@ void CViewGlobals::OnEditName1()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		CHAR s[MAX_CHANNELNAME+4];
-		UINT nChn = m_nActiveTab * 4;
+		const UINT nChn = m_nActiveTab * 4 + chnMod4;
 		
 		memset(s, 0, sizeof(s));
-		GetDlgItemText(IDC_EDIT9, s, sizeof(s));
+		GetDlgItemText(itemID, s, sizeof(s));
 		s[MAX_CHANNELNAME+1] = 0;
 		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
 		{
 			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
 			pSndFile->ChnSettings[nChn].szName[ARRAYELEMCOUNT(pSndFile->ChnSettings[nChn].szName)-1] = 0;
 			pModDoc->SetModified();
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
+			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
 	}
 }
+void CViewGlobals::OnEditName1() {OnEditName(0, IDC_EDIT9);}
+void CViewGlobals::OnEditName2() {OnEditName(1, IDC_EDIT10);}
+void CViewGlobals::OnEditName3() {OnEditName(2, IDC_EDIT11);}
+void CViewGlobals::OnEditName4() {OnEditName(3, IDC_EDIT12);}
 
 
-void CViewGlobals::OnEditName2()
-//------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if ((pModDoc) && (!m_nLockCount))
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CHAR s[MAX_CHANNELNAME+4];
-		UINT nChn = m_nActiveTab * 4 + 1;
-		
-		memset(s, 0, sizeof(s));
-		GetDlgItemText(IDC_EDIT10, s, sizeof(s));
-		s[MAX_CHANNELNAME+1] = 0;
-		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
-		{
-			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
-			pSndFile->ChnSettings[nChn].szName[ARRAYELEMCOUNT(pSndFile->ChnSettings[nChn].szName)-1] = 0;
-			pModDoc->SetModified();
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnEditName3()
-//------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if ((pModDoc) && (!m_nLockCount))
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CHAR s[MAX_CHANNELNAME+4];
-		UINT nChn = m_nActiveTab * 4 + 2;
-		
-		memset(s, 0, sizeof(s));
-		GetDlgItemText(IDC_EDIT11, s, sizeof(s));
-		s[MAX_CHANNELNAME+1] = 0;
-		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
-		{
-			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
-			pSndFile->ChnSettings[nChn].szName[ARRAYELEMCOUNT(pSndFile->ChnSettings[nChn].szName)-1] = 0;
-			pModDoc->SetModified();
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnEditName4()
-//------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if ((pModDoc) && (!m_nLockCount))
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		CHAR s[MAX_CHANNELNAME+4];
-		UINT nChn = m_nActiveTab * 4 + 3;
-		
-		memset(s, 0, sizeof(s));
-		GetDlgItemText(IDC_EDIT12, s, sizeof(s));
-		s[MAX_CHANNELNAME+1] = 0;
-		if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < pSndFile->m_nChannels) && (strncmp(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME)))
-		{
-			memcpy(pSndFile->ChnSettings[nChn].szName, s, MAX_CHANNELNAME);
-			pSndFile->ChnSettings[nChn].szName[ARRAYELEMCOUNT(pSndFile->ChnSettings[nChn].szName)-1] = 0;
-			pModDoc->SetModified();
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnFx1Changed()
-//-------------------------------
+void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
+//--------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		UINT nChn = m_nActiveTab * 4;
-		int nfx = m_CbnEffects[0].GetItemData(m_CbnEffects[0].GetCurSel());
+		UINT nChn = m_nActiveTab * 4 + chnMod4;
+		int nfx = m_CbnEffects[chnMod4].GetItemData(m_CbnEffects[chnMod4].GetCurSel());
 		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->m_nChannels)
 		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
 		{
 			pSndFile->ChnSettings[nChn].nMixPlugin = nfx;
 			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
+			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
 	}
 }
 
 
-void CViewGlobals::OnFx2Changed()
-//-------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		UINT nChn = m_nActiveTab * 4 + 1;
-		int nfx = m_CbnEffects[1].GetItemData(m_CbnEffects[1].GetCurSel());
-		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->m_nChannels)
-		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
-		{
-			pSndFile->ChnSettings[nChn].nMixPlugin = nfx;
-			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnFx3Changed()
-//-------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		UINT nChn = m_nActiveTab * 4 + 2;
-		int nfx = m_CbnEffects[2].GetItemData(m_CbnEffects[2].GetCurSel());
-		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->m_nChannels)
-		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
-		{
-			pSndFile->ChnSettings[nChn].nMixPlugin = nfx;
-			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
-
-
-void CViewGlobals::OnFx4Changed()
-//-------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		UINT nChn = m_nActiveTab * 4 + 3;
-		int nfx = m_CbnEffects[3].GetItemData(m_CbnEffects[3].GetCurSel());
-		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->m_nChannels)
-		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
-		{
-			pSndFile->ChnSettings[nChn].nMixPlugin = nfx;
-			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
-			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << 24));
-		}
-	}
-}
+void CViewGlobals::OnFx1Changed() {OnFxChanged(0);}
+void CViewGlobals::OnFx2Changed() {OnFxChanged(1);}
+void CViewGlobals::OnFx3Changed() {OnFxChanged(2);}
+void CViewGlobals::OnFx4Changed() {OnFxChanged(3);}
 
 
 void CViewGlobals::OnPluginNameChanged()
@@ -1152,7 +850,7 @@ void CViewGlobals::OnPluginNameChanged()
 		{
 			memcpy(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s, 32);
 			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
-			pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | (m_nActiveTab << 24));
+			pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
 	}
 }
@@ -1165,7 +863,7 @@ void CViewGlobals::OnPrevPlugin()
 	if ((m_nCurrentPlugin > 0) && (pModDoc))
 	{
 		m_nCurrentPlugin--;
-		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << 24));
+		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 		//OnWetDryChanged();
@@ -1181,7 +879,7 @@ void CViewGlobals::OnNextPlugin()
 	if ((m_nCurrentPlugin < MAX_MIXPLUGINS-1) && (pModDoc))
 	{
 		m_nCurrentPlugin++;
-		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << 24));
+		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 		//OnWetDryChanged();
@@ -1198,7 +896,7 @@ void CViewGlobals::OnPluginChanged()
 	if ((pModDoc) && (nPlugin >= 0) && (nPlugin < MAX_MIXPLUGINS))
 	{
 		m_nCurrentPlugin = nPlugin;
-		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << 24));
+		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 	}
 // -> CODE#0002
 // -> DESC="VST plugins presets"

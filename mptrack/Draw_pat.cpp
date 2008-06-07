@@ -183,7 +183,10 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 	{
 		InvalidateChannelsHeaders();
 	}
-	if (((dwHintMask & 0xFFFFFF) == HINT_PATTERNDATA) & (m_nPattern != (dwHintMask >> 24))) return;
+	//if (((dwHintMask & 0xFFFFFF) == HINT_PATTERNDATA) & (m_nPattern != (dwHintMask >> HINT_SHIFT_PAT))) return;
+	if ( (HintFlagPart(dwHintMask) == HINT_PATTERNDATA) && (m_nPattern != (dwHintMask >> HINT_SHIFT_PAT)) )
+			return;
+
 	if (dwHintMask & (HINT_MODTYPE|HINT_PATTERNDATA))
 	{
 		InvalidatePattern(FALSE);
@@ -193,7 +196,7 @@ void CViewPattern::UpdateView(DWORD dwHintMask, CObject *)
 // -> CODE#0008
 // -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
 //		InvalidateRow(dwHintMask >> 24);
-		InvalidateRow(dwHintMask >> 22);
+		InvalidateRow(dwHintMask >> HINT_SHIFT_ROW);
 // -! BEHAVIOUR_CHANGE#0008
 	}
 
@@ -313,11 +316,11 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 	{
 		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc);
 	} else
-	if (note == 0xFE)
+	if (note == NOTE_NOTECUT)
 	{
 		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 13*COLUMN_HEIGHT);
 	} else
-	if (note >= 0xFF)
+	if (note >= NOTE_KEYOFF)
 	{
 		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 14*COLUMN_HEIGHT);
 	} else
@@ -335,8 +338,11 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 			UINT o = (note-1) / 12; //Octave
 			UINT n = (note-1) % 12; //Note
 			m_Dib.TextBlt(x, y, pfnt->nNoteWidth, COLUMN_HEIGHT, xsrc, ysrc+(n+1)*COLUMN_HEIGHT);
-			m_Dib.TextBlt(x+pfnt->nNoteWidth, y, pfnt->nOctaveWidth, COLUMN_HEIGHT,
-							pfnt->nNumX, pfnt->nNumY+o*COLUMN_HEIGHT);
+			if(o <= 9)
+				m_Dib.TextBlt(x+pfnt->nNoteWidth, y, pfnt->nOctaveWidth, COLUMN_HEIGHT,
+								pfnt->nNumX, pfnt->nNumY+o*COLUMN_HEIGHT);
+			else
+				DrawLetter(x+pfnt->nNoteWidth, y, '?', pfnt->nOctaveWidth);
 		}
 	}
 }
@@ -409,8 +415,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 	yofs = GetYScrollPos();
 	pSndFile = pModDoc->GetSoundFile();
 	nColumnWidth = m_szCell.cx;
-	nrows = pSndFile->PatternSize[m_nPattern];
-	ncols = pSndFile->m_nChannels;
+	nrows = (pSndFile->Patterns[m_nPattern]) ? pSndFile->PatternSize[m_nPattern] : 0;
+	ncols = pSndFile->GetNumChannels();
 	xpaint = m_szHeader.cx;
 	ypaint = rcClient.top;
 	ncolhdr = xofs;
@@ -783,7 +789,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			{
 				tx_col = row_col;
 				bk_col = row_bkcol;
-				if ((CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->note) && (m->note <= 120))
+				if ((CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->note) && (m->note <= NOTE_MAX))
 				{
 					tx_col = MODCOLOR_NOTE;
 				}
@@ -1393,7 +1399,7 @@ void CViewPattern::UpdateIndicator()
 								INSTRUMENTHEADER *penv = pSndFile->Headers[m->instr];
 								memcpy(sztmp, penv->name, 32);
 								sztmp[32] = 0;
-								if ((m->note) && (m->note <= 120))
+								if ((m->note) && (m->note <= NOTE_MAX))
 								{
 									UINT nsmp = penv->Keyboard[m->note-1];
 									if ((nsmp) && (nsmp <= pSndFile->m_nSamples))

@@ -630,7 +630,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		{
 			combo->SetItemData(combo->AddString("any"), 0xFD);
 		}
-		for (UINT nNote=1; nNote<=120; nNote++)
+		for (UINT nNote=1; nNote<=NOTE_MAX; nNote++)
 		{
 			wsprintf(s, "%s%d", szNoteNames[(nNote-1) % 12], (nNote-1)/12);
 			combo->SetItemData(combo->AddString(s), nNote);
@@ -1076,7 +1076,7 @@ void CEditCommand::UpdateNote(UINT note, UINT instr)
 // -> CODE#0008
 // -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
 //		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
-		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 22) | HINT_PATTERNROW, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nRow << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
 // -! BEHAVIOUR_CHANGE#0008
 	}
 }
@@ -1099,7 +1099,7 @@ void CEditCommand::UpdateVolume(UINT volcmd, UINT vol)
 // -> CODE#0008
 // -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
 //		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
-		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 22) | HINT_PATTERNROW, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nRow << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
 // -! BEHAVIOUR_CHANGE#0008
 	}
 }
@@ -1133,7 +1133,7 @@ void CEditCommand::UpdateEffect(UINT command, UINT param)
 // -> CODE#0008
 // -> DESC"#define to set pattern max size (number of rows) limit (now set to 1024 instead of 256)"
 //		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 24) | HINT_PATTERNROW, NULL);
-		m_pModDoc->UpdateAllViews(NULL, (m_nRow << 22) | HINT_PATTERNROW, NULL);
+		m_pModDoc->UpdateAllViews(NULL, (m_nRow << HINT_SHIFT_ROW) | HINT_PATTERNROW, NULL);
 // -! BEHAVIOUR_CHANGE#0008
 	}
 }
@@ -1184,7 +1184,7 @@ void CPageEditNote::UpdateDialog()
 	{	
 		combo->ResetContent();
 		combo->SetItemData(combo->AddString("No note"), 0);
-		for (UINT i=1; i<=120; i++)
+		for (UINT i=1; i<=NOTE_MAX; i++)
 		{
 			const string temp = pSndFile->GetNoteName(i, m_nInstr);
 			if(temp.size() >= sizeofS)
@@ -1206,7 +1206,7 @@ void CPageEditNote::UpdateDialog()
 			combo->SetItemData(k, 0xFF);
 			if (m_nNote == 0xFF) combo->SetCurSel(k);
 		}
-		if (m_nNote <= 120) combo->SetCurSel(m_nNote);
+		if (m_nNote <= NOTE_MAX) combo->SetCurSel(m_nNote);
 	}
 	// Instrument
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
@@ -2096,7 +2096,7 @@ void CKeyboardControl::OnPaint()
 		if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushGray);
 		dc.Rectangle(&rect);
 		if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushWhite);
-		if ((val < 120) && (KeyFlags[val]))
+		if ((val < NOTE_MAX) && (KeyFlags[val]))
 		{
 			::SelectObject(hdc, brushRed);
 			dc.Ellipse(rect.left+2, rect.bottom - (rect.right-rect.left) + 2, rect.right-2, rect.bottom-2);
@@ -2127,7 +2127,7 @@ void CKeyboardControl::OnPaint()
 				if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushGray);
 				dc.Rectangle(&rect);
 				if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushBlack);
-				if ((val < 120) && (KeyFlags[val]))
+				if ((val < NOTE_MAX) && (KeyFlags[val]))
 				{
 					::SelectObject(hdc, brushRed);
 					dc.Ellipse(rect.left, rect.bottom - (rect.right-rect.left), rect.right, rect.bottom);
@@ -2519,7 +2519,7 @@ BOOL CSampleMapDlg::OnInitDialog()
 		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
 		if (penv)
 		{
-			for (UINT i=0; i<120; i++)
+			for (UINT i=0; i<NOTE_MAX; i++)
 			{
 				KeyboardMap[i] = penv->Keyboard[i];
 			}
@@ -2560,7 +2560,7 @@ VOID CSampleMapDlg::OnUpdateSamples()
 		BOOL bUsed = bAll;
 
 		if (!bUsed)	{
-			for (UINT j=0; j<120; j++)	{
+			for (UINT j=0; j<NOTE_MAX; j++)	{
 				if (KeyboardMap[j] == i) {
 					bUsed = TRUE;
 					break;
@@ -2672,7 +2672,7 @@ VOID CSampleMapDlg::OnOK()
 		if (penv)
 		{
 			BOOL bModified = FALSE;
-			for (UINT i=0; i<120; i++)
+			for (UINT i=0; i<NOTE_MAX; i++)
 			{
 				if (KeyboardMap[i] != penv->Keyboard[i])
 				{

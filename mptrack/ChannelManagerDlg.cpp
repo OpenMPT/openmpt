@@ -1,13 +1,15 @@
 #include "stdafx.h"
-#include "mptrack.h"
 #include "mainfrm.h"
-#include "childfrm.h"
 #include "moddoc.h"
-#include "globals.h"
-#include "dlg_misc.h"
-#include "ctrl_pat.h"
-#include "view_pat.h"
+#include "view_gen.h"
 #include "ChannelManagerDlg.h"
+//#include "mptrack.h"
+//#include "childfrm.h"
+//#include "globals.h"
+//#include "dlg_misc.h"
+//#include "ctrl_pat.h"
+//#include "view_pat.h"
+
 
 ///////////////////////////////////////////////////////////
 // CChannelManagerDlg
@@ -1114,7 +1116,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 						pModDoc->MuteChannel(n,!pModDoc->IsChannelMuted(n));
 					}
 					pModDoc->SetModified();
-					pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | (n << 24));
+					pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | ((n/CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
 					break;
 				case 1:
 					UINT r;
@@ -1132,7 +1134,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 					if(button == CM_BT_LEFT) pModDoc->NoFxChannel(n,FALSE);
 					else pModDoc->NoFxChannel(n,TRUE);
 					pModDoc->SetModified();
-					pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | (n << 24));
+					pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | ((n/CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
 					break;
 				case 3:
 					if(button == CM_BT_LEFT){
@@ -1174,36 +1176,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point,BYTE button)
 
 // -! NEW_FEATURE#0015
 
-BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-//--------------------------------------------------------------------
-{
-	// TODO: Add your message handler code here and/or call default
 
-	if (nFlags==0) {
-		PostViewMessage(VIEWMSG_DOSCROLL, zDelta);
-	}
-	return CModControlDlg::OnMouseWheel(nFlags, zDelta, pt);
-}
-
-BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/) 
-//---------------------------------------------------------------------
-{
-    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
-    UINT nID =pNMHDR->idFrom;
-    if (pTTT->uFlags & TTF_IDISHWND)
-    {
-        // idFrom is actually the HWND of the tool
-        nID = ::GetDlgCtrlID((HWND)nID);
-        if(nID)
-        {
-            pTTT->lpszText = MAKEINTRESOURCE(nID);
-            pTTT->hinst = AfxGetResourceHandle();
-            return(TRUE);
-        }
-    }
-
-	return FALSE;
-}
 void CChannelManagerDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default

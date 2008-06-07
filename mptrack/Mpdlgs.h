@@ -17,10 +17,15 @@ protected:
 	DWORD m_dwRate, m_dwSoundSetup, m_nBitsPerSample, m_nChannels;
 	DWORD m_nBufferLength;
 	DWORD m_nSoundDevice;
+	bool m_PreAmpNoteShowed;
 
 public:
 	COptionsSoundcard(DWORD rate, DWORD q, DWORD bits, DWORD chns, DWORD bufsize, DWORD sd):CPropertyPage(IDD_OPTIONS_SOUNDCARD)
-		{ m_dwRate = rate; m_dwSoundSetup = q; m_nBitsPerSample = bits; m_nChannels = chns; m_nBufferLength = bufsize; m_nSoundDevice = sd; }
+		{ m_dwRate = rate; m_dwSoundSetup = q; m_nBitsPerSample = bits; m_nChannels = chns;
+		  m_nBufferLength = bufsize; m_nSoundDevice = sd; m_PreAmpNoteShowed = false;}
+
+private:
+	void SetPreAmpSliderPosition();
 
 protected:
 	virtual BOOL OnInitDialog();

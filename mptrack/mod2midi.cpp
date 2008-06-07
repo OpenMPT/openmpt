@@ -132,7 +132,7 @@ CModToMidi::CModToMidi(LPCSTR pszPathName, CSoundFile *pSndFile, CWnd *pWndParen
 	m_pSndFile = pSndFile;
 	strcpy(m_szFileName, pszPathName);
 	_splitpath(pszPathName, NULL, NULL, NULL, fext);
-	if (!stricmp(fext, ".rmi")) m_bRmi = TRUE;
+	if (!_stricmp(fext, ".rmi")) m_bRmi = TRUE;
 	memset(m_InstrMap, 0, sizeof(m_InstrMap));
 	for (UINT nIns=1; nIns<=m_pSndFile->m_nInstruments; nIns++)
 	{
@@ -475,7 +475,7 @@ BOOL CModToMidi::DoConvert()
 							pTrk->NoteOn[i] = 0;
 						}
 					}
-					if (m->note <= 120)
+					if (m->note <= NOTE_MAX)
 					{
 						pTrk->NoteOn[note] = pTrk->nMidiChannel+1;
 						tmp[len] = 0x90|pTrk->nMidiChannel;

@@ -279,7 +279,7 @@ typedef struct AMS2SONGHEADER
 typedef struct AMS2INSTRUMENT
 {
 	BYTE samples;
-	BYTE notemap[120];
+	BYTE notemap[NOTE_MAX];
 } AMS2INSTRUMENT;
 
 typedef struct AMS2ENVELOPE
@@ -374,7 +374,7 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 			memcpy(penv->name, pinsname, insnamelen);
 			penv->name[insnamelen] = 0;
 		}
-		for (UINT inotemap=0; inotemap<120; inotemap++)
+		for (UINT inotemap=0; inotemap<NOTE_MAX; inotemap++)
 		{
 			penv->NoteMap[inotemap] = inotemap+1;
 			penv->Keyboard[inotemap] = smpmap[pins->notemap[inotemap] & 0x0F];

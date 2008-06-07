@@ -241,7 +241,7 @@ BOOL CSoundFile::ReadInstrumentFromSong(UINT nInstr, CSoundFile *pSrcSong, UINT 
 		for (UINT i=0; i<128; i++)
 		{
 			UINT n = penv->Keyboard[i];
-			if ((n) && (n <= pSrcSong->m_nSamples) && (i < 120))
+			if ((n) && (n <= pSrcSong->m_nSamples) && (i < NOTE_MAX))
 			{
 				UINT j = 0;
 				for (j=0; j<nSamples; j++)
@@ -924,11 +924,11 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 		GF1SAMPLEHEADER *psh = (GF1SAMPLEHEADER *)(lpStream+dwMemPos);
 		PatchToSample(this, nFreeSmp, lpStream+dwMemPos, dwMemLength-dwMemPos);
 		LONG nMinNote = (psh->low_freq > 100) ? PatchFreqToNote(psh->low_freq) : 0;
-		LONG nMaxNote = (psh->high_freq > 100) ? PatchFreqToNote(psh->high_freq) : 120;
+		LONG nMaxNote = (psh->high_freq > 100) ? PatchFreqToNote(psh->high_freq) : NOTE_MAX;
 		LONG nBaseNote = (psh->root_freq > 100) ? PatchFreqToNote(psh->root_freq) : -1;
-		if ((!psh->scale_factor) && (nSamples == 1)) { nMinNote = 0; nMaxNote = 120; }
+		if ((!psh->scale_factor) && (nSamples == 1)) { nMinNote = 0; nMaxNote = NOTE_MAX; }
 		// Fill Note Map
-		for (UINT k=0; k<120; k++)
+		for (UINT k=0; k<NOTE_MAX; k++)
 		{
 			if (((LONG)k == nBaseNote)
 			 || ((!penv->Keyboard[k])
@@ -971,7 +971,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	if (nMinSmp)
 	{
 		// Fill note map and missing samples
-		for (UINT k=0; k<120; k++)
+		for (UINT k=0; k<NOTE_MAX; k++)
 		{
 			if (!penv->NoteMap[k]) penv->NoteMap[k] = (BYTE)(k+1);
 			if (!penv->Keyboard[k])
@@ -1731,7 +1731,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 //-----------------------------------------------------------------------------------
 {
 	ITINSTRUMENT *pinstr = (ITINSTRUMENT *)lpMemFile;
-	WORD samplemap[120];	//rewbs.noSamplePerInstroLimit (120 was 64)
+	WORD samplemap[NOTE_MAX];	//rewbs.noSamplePerInstroLimit (120 was 64)
 	DWORD dwMemPos;
 	UINT nsmp, nsamples;
 
@@ -1873,7 +1873,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	//iti->trkvers = 0x202;
 	iti->trkvers =	0x220;	 //rewbs.ITVersion (was 0x202)
 	iti->nos = 0;
-	for (UINT i=0; i<120; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
+	for (UINT i=0; i<NOTE_MAX; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
 	{
 		UINT smp = penv->Keyboard[i];
 		if ((smp) && (!smpcount[smp]))

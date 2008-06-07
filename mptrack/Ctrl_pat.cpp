@@ -189,7 +189,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	//CHAR s[8];
 	CHAR s[10];
 	
-	for(int i = 0 ; i < 120 ; i++){
+	for(int i = 0 ; i < NOTE_MAX ; i++){
 		wsprintf(s, "%s%d", szNoteNames[i % 12], i/12);
 		int n = m_CbnSplitNote.AddString(s);
 		m_CbnSplitNote.SetItemData(n, i);
@@ -338,7 +338,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		{
 			UINT nPat;
 			if (dwHintMask&HINT_PATNAMES) {
-				nPat=(dwHintMask>>24)&0xFF;
+				nPat = (dwHintMask >> HINT_SHIFT_PAT);
 			} else {
 				nPat = SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 			}
@@ -378,7 +378,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		return m_OrderList.GetCurrentPattern();
 
 	case CTRLMSG_PATTERNCHANGED:
-		UpdateView((lParam << 24) | HINT_PATNAMES, NULL);
+		UpdateView((lParam << HINT_SHIFT_PAT) | HINT_PATNAMES, NULL);
 		break;
 
 	case CTRLMSG_PAT_PREVINSTRUMENT:
@@ -1087,7 +1087,7 @@ void CCtrlPatterns::OnPatternNameChanged()
 		{
 			 m_pSndFile->SetPatternName(nPat, s);
 			 if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
-			 m_pModDoc->UpdateAllViews(NULL, (nPat << 24) | HINT_PATNAMES, this);
+			 m_pModDoc->UpdateAllViews(NULL, (nPat << HINT_SHIFT_PAT) | HINT_PATNAMES, this);
 		}
 	}
 }
@@ -1221,3 +1221,36 @@ bool CCtrlPatterns::HasValidPlug(UINT instr)
 
 
 //end rewbs.instroVST
+
+
+BOOL CCtrlPatterns::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+//--------------------------------------------------------------------
+{
+	// TODO: Add your message handler code here and/or call default
+
+	if (nFlags==0) {
+		PostViewMessage(VIEWMSG_DOSCROLL, zDelta);
+	}
+	return CModControlDlg::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/) 
+//---------------------------------------------------------------------
+{
+    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
+    UINT nID =pNMHDR->idFrom;
+    if (pTTT->uFlags & TTF_IDISHWND)
+    {
+        // idFrom is actually the HWND of the tool
+        nID = ::GetDlgCtrlID((HWND)nID);
+        if(nID)
+        {
+            pTTT->lpszText = MAKEINTRESOURCE(nID);
+            pTTT->hinst = AfxGetResourceHandle();
+            return(TRUE);
+        }
+    }
+
+	return FALSE;
+}
+

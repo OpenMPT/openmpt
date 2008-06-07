@@ -617,7 +617,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 
 		MakeChange(m_nDragItem, paramValue);
 		m_pModDoc->SetModified();
-		m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+		m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 	}
 	else if ((m_dwStatus & FXVSTATUS_LDRAGGING))
 	{		
@@ -652,7 +652,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 
 		m_nLastDrawnRow = row;
 		m_pModDoc->SetModified();
-		m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+		m_pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 
 	}
 	//update status bar

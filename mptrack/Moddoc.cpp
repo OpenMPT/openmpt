@@ -372,14 +372,13 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 //------------------------------------------------
 {
-
 	static int greccount = 0;
-	CHAR fext[_MAX_EXT]="";
+	TCHAR fext[_MAX_EXT]="";
 	UINT nType = m_SndFile.m_nType, dwPacking = 0;
 	BOOL bOk = FALSE;
 	m_SndFile.m_dwLastSavedWithVersion = CMainFrame::GetFullVersionNumeric();
 	if (!lpszPathName) return FALSE;
-	_splitpath(lpszPathName, NULL, NULL, NULL, fext);
+	_tsplitpath(lpszPathName, NULL, NULL, NULL, fext);
 	if (!lstrcmpi(fext, ".mod")) nType = MOD_TYPE_MOD; else
 	if (!lstrcmpi(fext, ".s3m")) nType = MOD_TYPE_S3M; else
 	if (!lstrcmpi(fext, ".xm")) nType = MOD_TYPE_XM; else
@@ -421,6 +420,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 BOOL CModDoc::SaveModified()
+//--------------------------
 {
 	if((m_SndFile.m_nType & MOD_TYPE_IT) && m_SndFile.m_dwSongFlags & SONG_ITPROJECT && !(m_SndFile.m_dwSongFlags & SONG_ITPEMBEDIH)){
 
@@ -435,8 +435,8 @@ BOOL CModDoc::SaveModified()
 			for(UINT i = 0 ; i < m_SndFile.m_nInstruments ; i++){
 				if(m_SndFile.m_szInstrumentPath[i][0] != '\0'){
 					int size = strlen(m_SndFile.m_szInstrumentPath[i]);
-					BOOL iti = stricmp(&m_SndFile.m_szInstrumentPath[i][size-3],"iti") == 0;
-					BOOL xi  = stricmp(&m_SndFile.m_szInstrumentPath[i][size-2],"xi") == 0;
+					BOOL iti = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-3],"iti") == 0;
+					BOOL xi  = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-2],"xi") == 0;
 
 					if(iti || (!iti && !xi  && m_SndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 						m_SndFile.SaveITIInstrument(i+1, m_SndFile.m_szInstrumentPath[i]);
@@ -1247,7 +1247,7 @@ BOOL CModDoc::IsChildSample(UINT nIns, UINT nSmp) const
 	penv = m_SndFile.Headers[nIns];
 	if (penv)
 	{
-		for (UINT i=0; i<120; i++)
+		for (UINT i=0; i<NOTE_MAX; i++)
 		{
 			if (penv->Keyboard[i] == nSmp) return TRUE;
 		}
@@ -1265,7 +1265,7 @@ UINT CModDoc::FindSampleParent(UINT nSmp) const
 		INSTRUMENTHEADER *penv = m_SndFile.Headers[i];
 		if (penv)
 		{
-			for (UINT j=0; j<120; j++)
+			for (UINT j=0; j<NOTE_MAX; j++)
 			{
 				if (penv->Keyboard[j] == nSmp) return i;
 			}
@@ -1283,7 +1283,7 @@ UINT CModDoc::FindInstrumentChild(UINT nIns) const
 	penv = m_SndFile.Headers[nIns];
 	if (penv)
 	{
-		for (UINT i=0; i<120; i++)
+		for (UINT i=0; i<NOTE_MAX; i++)
 		{
 			UINT n = penv->Keyboard[i];
 			if ((n) && (n <= m_SndFile.m_nSamples)) return n;

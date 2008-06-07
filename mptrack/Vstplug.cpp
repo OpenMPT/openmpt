@@ -429,7 +429,7 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 				{
 					b1 = TRUE;
 				}
-				if (!strnicmp(p->szLibraryName, pMixPlugin->Info.szLibraryName, 64))
+				if (!_strnicmp(p->szLibraryName, pMixPlugin->Info.szLibraryName, 64))
 				{
 					b2 = TRUE;
 				}
@@ -1069,6 +1069,7 @@ typedef struct _PROBLEMATIC_PLUG
 	LPCSTR problem;
 } _PROBLEMATIC_PLUG, *PPROBLEMATIC_PLUG;
 
+//TODO: Check whether the list is still valid.
 #define NUM_PROBLEMPLUGS 3
 static _PROBLEMATIC_PLUG gProblemPlugs[NUM_PROBLEMPLUGS] =
 {

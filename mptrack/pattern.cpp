@@ -129,7 +129,7 @@ bool CPattern::Expand()
 	m_Rows = nRows * 2;
 	CSoundFile::FreePattern(oldPattern); oldPattern= NULL;
 	rModDoc.SetModified();
-	rModDoc.UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << 24), NULL);
+	rModDoc.UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
 	rModDoc.EndWaitCursor();
 	return false;
 }
@@ -178,7 +178,7 @@ bool CPattern::Shrink()
 	}
 	m_Rows = nRows;
 	rModDoc.SetModified();
-	rModDoc.UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << 24), NULL);
+	rModDoc.UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
 	rModDoc.EndWaitCursor();
 	return false;
 }

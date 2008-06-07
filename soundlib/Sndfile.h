@@ -68,7 +68,6 @@ typedef const BYTE * LPCBYTE;
 #define MAX_MIXPLUGINS		100	//50
 // -! BEHAVIOUR_CHANGE#0006
 #define MAX_PLUGPRESETS		1000 //rewbs.plugPresets
-#define MED_MAX_COMMENT_LENGTH 5*1024 //I think 5kB should be enough, though I admit this is a guess.
 
 #define MOD_TYPE_NONE		0x00
 #define MOD_TYPE_MOD		0x01
@@ -270,20 +269,20 @@ typedef const BYTE * LPCBYTE;
 
 
 
-// NNA types
+// NNA types (New Note Action)
 #define NNA_NOTECUT		0
 #define NNA_CONTINUE	1
 #define NNA_NOTEOFF		2
 #define NNA_NOTEFADE	3
 
-// DCT types
+// DCT types (Duplicate Check Types)
 #define DCT_NONE		0
 #define DCT_NOTE		1
 #define DCT_SAMPLE		2
 #define DCT_INSTRUMENT	3
 #define DCT_PLUGIN		4 //rewbs.VSTiNNA
 
-// DNA types
+// DNA types (Duplicate Note Action)
 #define DNA_NOTECUT		0
 #define DNA_NOTEOFF		1
 #define DNA_NOTEFADE	2
@@ -789,6 +788,13 @@ struct MODMIDICFG
 };
 typedef MODMIDICFG* LPMODMIDICFG;
 
+// Note definitions
+#define NOTE_MIDDLEC		(5*12+1)
+#define NOTE_KEYOFF			0xFF //255
+#define NOTE_NOTECUT		0xFE //254
+//(Under construction) #define NOTE_PC				0xFD //253, Param Control 'note'. Changes param value on first tick.
+//(Under construction) #define NOTE_PCS				0xFC //252,  Param Control(Smooth) 'note'. Changes param value during the whole row.
+#define NOTE_MAX			120 //Defines maximum notevalue as well as maximum number of notes.
 
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
@@ -948,7 +954,7 @@ public:	// for Editing
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	CHAR m_szInstrumentPath[MAX_INSTRUMENTS][_MAX_PATH];
-	BOOL instrumentModified[MAX_INSTRUMENTS];
+	bool instrumentModified[MAX_INSTRUMENTS];
 // -! NEW_FEATURE#0023
 
 public:

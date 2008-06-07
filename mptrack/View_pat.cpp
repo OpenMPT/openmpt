@@ -21,7 +21,7 @@
 #define MAX_SPACING		16
 #define	PLUGNAME_HEIGHT	16	//rewbs.patPlugName
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 MODCOMMAND CViewPattern::m_cmdOld;
 MODCOMMAND CViewPattern::m_cmdFind;
@@ -782,7 +782,7 @@ void CViewPattern::OnGrowSelection()
 
 	InvalidatePattern(FALSE);
 	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 	EndWaitCursor();
 	SetFocus();
 }
@@ -843,7 +843,7 @@ void CViewPattern::OnShrinkSelection()
 
 	InvalidatePattern(FALSE);
 	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 	EndWaitCursor();
 	SetFocus();
 }
@@ -914,7 +914,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 	if ((tmp & 7) == 3) tmp++;
 	InvalidateArea(m_dwBeginSel, tmp);
 	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 	EndWaitCursor();
 	SetFocus();
 }
@@ -1540,7 +1540,7 @@ void CViewPattern::DeleteRows(UINT colmin, UINT colmax, UINT nrows)
 	//end rewbs.customKeys
 	
 	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 	InvalidatePattern(FALSE);
 }
 
@@ -1602,7 +1602,7 @@ void CViewPattern::InsertRows(UINT colmin, UINT colmax) //rewbs.customKeys: adde
 	}
 	InvalidatePattern(FALSE);
 	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 }
 
 
@@ -1845,7 +1845,7 @@ void CViewPattern::OnEditFindNext()
 						// Note++
 						if (m_cmdReplace.note == 0xFD)
 						{
-							if (m->note < 120) m->note++;
+							if (m->note < NOTE_MAX) m->note++;
 						} else m->note = m_cmdReplace.note;
 					}
 					if ((m_dwReplaceFlags & PATSEARCH_INSTR))
@@ -2260,11 +2260,11 @@ BOOL CViewPattern::TransposeSelection(int transp)
 			for (UINT col=col0; col<=col1; col++)
 			{
 				int note = m[col].note;
-				if ((note) && (note <= 120))
+				if ((note) && (note <= NOTE_MAX))
 				{
 					note += transp;
 					if (note < 1) note = 1;
-					if (note > 120) note = 120;
+					if (note > NOTE_MAX) note = NOTE_MAX;
 					m[col].note = (BYTE)note;
 				}
 			}
@@ -2417,7 +2417,7 @@ void CViewPattern::OnSetSelInstrument()
 
 	if (bModified)	{
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << 24), NULL);
+		pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 	}
 	EndWaitCursor();
 }
@@ -3386,10 +3386,10 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								return wParam;
 		case kcPatternGoto:		OnEditGoto(); return wParam;
 
-		case kcNoteCut:			TempEnterNote(254, false); return wParam;
-		case kcNoteCutOld:		TempEnterNote(254, true);  return wParam;
-		case kcNoteOff:			TempEnterNote(255, false); return wParam;
-		case kcNoteOffOld:		TempEnterNote(255, true);  return wParam;
+		case kcNoteCut:			TempEnterNote(NOTE_NOTECUT, false); return wParam;
+		case kcNoteCutOld:		TempEnterNote(NOTE_NOTECUT, true);  return wParam;
+		case kcNoteOff:			TempEnterNote(NOTE_KEYOFF, false); return wParam;
+		case kcNoteOffOld:		TempEnterNote(NOTE_KEYOFF, true);  return wParam;
 
 		case kcEditUndo:		OnEditUndo(); return wParam;
 		case kcEditFind:		OnEditFind(); return wParam;
@@ -3687,7 +3687,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 		{
 			ins = m_nSplitInstrument;
 			if (m_bOctaveLink)		  note += 12*(m_nOctaveModifier-9);
-			if (note>120 && note<254) note=120;
+			if (note > NOTE_MAX && note<254) note = NOTE_MAX;
 			if (note<0)				  note=1;
 		}
 		if (!ins)    ins = GetCurrentInstrument();
@@ -3698,7 +3698,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 	}
 
 	//Enter note off in pattern?
-	if ((note < 1) || (note > 120))
+	if ((note < 1) || (note > NOTE_MAX))
 		return;
 	if ((m_dwCursor & 7) > 1 && !fromMidi)
 		return;
@@ -3782,7 +3782,7 @@ void CViewPattern::TempStopChord(int note)
 		{
 			ins = m_nSplitInstrument;
 			if (m_bOctaveLink)		  note += 12*(m_nOctaveModifier-9);
-			if (note>120 && note<254) note=120;
+			if (note > NOTE_MAX && note<254) note = NOTE_MAX;
 			if (note<0)				  note=1;
 		}
 		if (!ins)    ins = GetCurrentInstrument();
@@ -3793,7 +3793,7 @@ void CViewPattern::TempStopChord(int note)
 	}
 
 	//Enter note off in pattern?
-	if ((note < 1) || (note > 120))
+	if ((note < 1) || (note > NOTE_MAX))
 		return;
 	if ((m_dwCursor & 7) > 1)
 		return;
@@ -3934,7 +3934,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 		UINT nPlayIns = 0;
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
-		if (note>120 && note<254) note=120;
+		if (note > NOTE_MAX && note < 254) note = NOTE_MAX;
 
 		bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&		// work out whether we should use
 								(pMainFrm->GetFollowSong(pModDoc) == m_hWnd) &&	// player engine position or
@@ -4016,8 +4016,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 				SetCurSel(sel, sel);
 			}
 
-			BYTE* activeNoteMap = isSplit?splitActiveNoteChannel:activeNoteChannel;
-			if (p->note <= 120)
+			BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
+			if (p->note <= NOTE_MAX)
 				activeNoteMap[p->note]=nChn;
 
 			//Move to next channel if required
@@ -4031,7 +4031,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 					if (++n > pSndFile->m_nChannels) n = 0; //loop around
 
 					channelLocked = false;
-					for (int k=0; k<120; k++)
+					for (int k=0; k<NOTE_MAX; k++)
 					{
 						if (activeNoteChannel[k]==n  || splitActiveNoteChannel[k]==n)
 						{
@@ -4130,7 +4130,7 @@ void CViewPattern::TempEnterChord(int note)
 				nchordnote = pChords[nchord].key + baseoctave*(p->note%12) + 1;
 			else
 				nchordnote = pChords[nchord].key + baseoctave*12 + 1;
-			if (nchordnote <= 120)
+			if (nchordnote <= NOTE_MAX)
 			{
 				UINT nchordch = nChn, nchno = 0;
 				nNote = nchordnote;
@@ -4151,20 +4151,20 @@ void CViewPattern::TempEnterChord(int note)
 					UINT n = ((nchordnote-1)/12) * 12 + pChords[nchord].notes[nchno];
 					if(IsEditingEnabled())
 					{
-						if ((nchordch != nChn) && recordGroup && (currentRecordGroup == recordGroup) && (n <= 120))
+						if ((nchordch != nChn) && recordGroup && (currentRecordGroup == recordGroup) && (n <= NOTE_MAX))
 						{
 							prowbase[nchordch].note = n;
 							if (p->instr) prowbase[nchordch].instr = p->instr;
 							nchno++;
 							if (CMainFrame::m_dwPatternSetup & PATTERN_PLAYNEWNOTE)
 							{
-								if ((n) && (n<=120)) chordplaylist[nPlayChord++] = n;
+								if ((n) && (n<=NOTE_MAX)) chordplaylist[nPlayChord++] = n;
 							}
 						}
 					} else
 					{
 						nchno++;
-						if ((n) && (n<=120)) chordplaylist[nPlayChord++] = n;
+						if ((n) && (n<=NOTE_MAX)) chordplaylist[nPlayChord++] = n;
 					}
 				}
 			}
@@ -4378,7 +4378,7 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 			if(GetCurrentInstrument()) p->instr = GetCurrentInstrument();
 		if (m_bOctaveLink)
 			note += 12*(m_nOctaveModifier-9);
-		if (note>120 && note<254) note=120;
+		if (note > NOTE_MAX && note<254) note = NOTE_MAX;
 		if (note<0) note=1;
 
 		p->note = note;	
@@ -4899,12 +4899,12 @@ void CViewPattern::OnShowTimeAtRow()
 	ORDERINDEX currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 	if(pSndFile->Order[currentOrder] == m_nPattern)
 	{
-		double t = pSndFile->GetPlaybackTimeAt(currentOrder, m_nRow);
+		const double t = pSndFile->GetPlaybackTimeAt(currentOrder, m_nRow);
 		if(t < 0)
 			msg.Format("Unable to determine the time. Possible cause: No order %d, row %d found from play sequence", currentOrder, m_nRow);
 		else
 		{
-			const uint32 minutes = static_cast<uint32>(t/60);
+			const uint32 minutes = static_cast<uint32>(t/60.0);
 			const float seconds = t - minutes*60;
 			msg.Format("Estimate for playback time at order %d(pattern %d), row %d: %d minute(s) %.2f seconds", currentOrder, m_nPattern, m_nRow, minutes, seconds);
 		}

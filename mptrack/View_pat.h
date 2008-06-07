@@ -7,7 +7,6 @@ class CEffectVis;	//rewbs.fxvis
 class CPatternGotoDialog;
 class CPatternRandomizer;
 class COpenGLEditor;
-typedef CTuning CTuning; //Some trickery to avoid compiler errors.
 
 // Drag & Drop info
 #define DRAGITEM_MASK			0xFF0000
@@ -94,8 +93,8 @@ protected:
 
 // -> CODE#0012
 // -> DESC="midi keyboard split"
-	BYTE activeNoteChannel[120];
-	BYTE splitActiveNoteChannel[120];
+	BYTE activeNoteChannel[NOTE_MAX + 1];
+	BYTE splitActiveNoteChannel[NOTE_MAX + 1];
 	int oldrow,oldchn,oldsplitchn;
 // -! NEW_FEATURE#0012
 

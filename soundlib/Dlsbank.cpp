@@ -1674,7 +1674,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 		memcpy(penv->name, pins->szName, 32);
 	}
 	int nTranspose = 0;
-	for (UINT iNoteMap=0; iNoteMap<120; iNoteMap++)
+	for (UINT iNoteMap=0; iNoteMap<NOTE_MAX; iNoteMap++)
 	{
 		penv->NoteMap[iNoteMap] = (BYTE)(iNoteMap+1);
 		if (pins->ulBank & F_INSTRUMENT_DRUMS)
@@ -1752,7 +1752,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 		// Map all notes to the right sample
 		if (nSmp)
 		{
-			for (UINT iKey=0; iKey<120; iKey++)
+			for (UINT iKey=0; iKey<NOTE_MAX; iKey++)
 			{
 				if ((nRgn == nRgnMin) || ((iKey >= pRgn->uKeyMin) && (iKey <= pRgn->uKeyMax)))
 				{
