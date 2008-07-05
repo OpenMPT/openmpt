@@ -1086,6 +1086,9 @@
 				RelativePath=".\typedefs.h">
 			</File>
 			<File
+				RelativePath=".\version.h">
+			</File>
+			<File
 				RelativePath=".\view_com.h">
 			</File>
 			<File
@@ -1134,6 +1137,16 @@
 					RelativePath=".\tuningRatioMapWnd.h">
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="test"
+			Filter="">
+			<File
+				RelativePath=".\test\test.cpp">
+			</File>
+			<File
+				RelativePath=".\test\test.h">
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\mptrack.reg">

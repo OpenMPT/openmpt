@@ -20,6 +20,7 @@
 #include <fstream>
 #include <strstream>
 #include <list>
+#include "../mptrack/version.h"
 using std::map;
 using std::list;
 using std::vector;
@@ -891,7 +892,7 @@ mpts:
 	m_nMaxPeriod = 0xF000;
 	m_nMinPeriod = 8;
 
-	if(m_dwLastSavedWithVersion < VERSIONNUMBER(0x1, 0x17, 0x2, 0x50))
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
 	{
 		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 		SetModFlag(MSF_OLDVOLSWING, true);
@@ -1490,7 +1491,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 		}
 	}
 
-	if(m_dwLastSavedWithVersion < VERSIONNUMBER(0x1, 0x17, 0x2, 0x50))
+	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
 	{
 		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 		SetModFlag(MSF_OLDVOLSWING, true);

@@ -11,6 +11,7 @@
 #include "../mptrack/mptrack.h"
 #include "../mptrack/mainfrm.h"
 #include "../mptrack/moddoc.h"
+#include "../mptrack/version.h"
 #include "sndfile.h"
 #include "aeffectx.h"
 #include "wavConverter.h"
@@ -600,7 +601,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 #endif
 	} else {
 		// New song
-		m_dwCreatedWithVersion = CMainFrame::GetFullVersionNumeric();
+		m_dwCreatedWithVersion = MptVersion::num;
 	}
 
 	// Adjust song names

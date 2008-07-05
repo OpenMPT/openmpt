@@ -22,6 +22,7 @@
 #include "MIDIMappingDialog.h"
 // -! NEW_FEATURE#0015
 #include <direct.h>
+#include "version.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -598,7 +599,7 @@ void CMainFrame::LoadRegistrySettings()
 		dwDWORDSize = sizeof(DWORD);
 		DWORD dwPreviousVersion;
 		RegQueryValueEx(key, "Version", NULL, &dwREG_DWORD, (LPBYTE)&dwPreviousVersion, &dwDWORDSize);
-		gcsPreviousVersion=GetVersionString(dwPreviousVersion);
+		gcsPreviousVersion = MptVersion::ToStr(dwPreviousVersion);
 		RegCloseKey(key);
 	}
 	m_pAutoSaver = new CAutoSaver(asEnabled, asInterval, asBackupHistory, asUseOriginalPath, asPath, asFileNameTemplate);
@@ -619,7 +620,7 @@ VOID CMainFrame::Initialize()
 	#ifdef DEBUG
 		title += CString(" DEBUG");
 	#endif
-	title += CString(" ") + GetFullVersionString();
+	title += CString(" ") + MptVersion::str;
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
 
@@ -863,7 +864,7 @@ void CMainFrame::SaveIniSettings()
 {
 	CString iniFile = theApp.GetConfigFileName();
 
-	CString version = CMainFrame::GetFullVersionString();
+	CString version = MptVersion::str;
 	WritePrivateProfileString("Version", "Version", version, iniFile);
 	WritePrivateProfileString("Version", "InstallGUID", gcsInstallGUID, iniFile);
 	WritePrivateProfileLong("Version", "CheckForUpdates", gnCheckForUpdates, iniFile);
@@ -1631,69 +1632,6 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame static helpers
-
-DWORD CMainFrame::GetFullVersionNumeric() {
-	char  szFullPath[MAX_PATH];
-	DWORD dwVerHnd;
-	DWORD dwVerInfoSize;
-
-	// Get version information from the application
-	::GetModuleFileName(NULL, szFullPath, sizeof(szFullPath));
-	dwVerInfoSize = ::GetFileVersionInfoSize(szFullPath, &dwVerHnd);
-	if (!dwVerInfoSize)    {
-		return 0;
-	}
-    char* pVersionInfo = new char[dwVerInfoSize];
-    if (!pVersionInfo)    {
-		return 0;
-	}
-    char* szVer = NULL;
-    UINT uVerLength;
-    if (!(::GetFileVersionInfo((LPTSTR)szFullPath, (DWORD)dwVerHnd, 
-							   (DWORD)dwVerInfoSize, (LPVOID)pVersionInfo))) {
-		delete[] pVersionInfo;
-		return 0;
-	}   
-	if (!(::VerQueryValue(pVersionInfo, TEXT("\\StringFileInfo\\040904b0\\FileVersion"), 
-						  (LPVOID*)&szVer, &uVerLength))) {
-		delete[] pVersionInfo;
-		return 0;
-	}
-
-	//version will be like: 1, 17, 2, 38
-	CString version = szVer;	
-	delete[] pVersionInfo;
-
-	int v1, v2, v3, v4; 
-	sscanf(version, "%x, %x, %x, %x", &v1, &v2, &v3, &v4);
-	DWORD versionLong = VERSIONNUMBER(v1, v2, v3, v4);
-	return versionLong;
-}
-
-CString CMainFrame::GetFullVersionString() 
-//------------------------------------
-{
-	return GetVersionString(GetFullVersionNumeric());
-   
-}
-
-CString CMainFrame::GetVersionString(DWORD v) 
-//-------------------------------------------
-{
-	CString version;
-	if (v==0) {
-		version = "Unknown";
-	}
-	else {
-		version.Format("%X.%02X.%02X.%02X",
-						(v>>24)&0xFF,
-						(v>>16)&0xFF,
-						(v>>8)&0xFF, 
-						(v)&0xFF);
-	}
-	return version;
-}
-
 
 
 void CMainFrame::UpdateColors()

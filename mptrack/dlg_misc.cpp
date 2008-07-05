@@ -9,6 +9,7 @@
 #include "ChannelManagerDlg.h"
 #include ".\dlg_misc.h"
 #include "midi.h"
+#include "version.h"
 
 #pragma warning(disable:4244)
 
@@ -198,8 +199,8 @@ BOOL CModTypeDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT5, "Created with:");
 	SetDlgItemText(IDC_EDIT6, "Last saved with:");
 
-	SetDlgItemText(IDC_EDIT1, CMainFrame::GetVersionString(m_pSndFile->m_dwCreatedWithVersion));
-	SetDlgItemText(IDC_EDIT2, CMainFrame::GetVersionString(m_pSndFile->m_dwLastSavedWithVersion));
+	SetDlgItemText(IDC_EDIT1, MptVersion::ToStr(m_pSndFile->m_dwCreatedWithVersion));
+	SetDlgItemText(IDC_EDIT2, MptVersion::ToStr(m_pSndFile->m_dwLastSavedWithVersion));
 
 	m_EditFlag.SetLimitText(16);
 

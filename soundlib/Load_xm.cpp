@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#include "../mptrack/version.h"
 
 ////////////////////////////////////////////////////////
 // FastTracker II XM file support
@@ -633,7 +634,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if( code == 'MPTS' )
 	{
 		LoadExtendedSongProperties(MOD_TYPE_XM, ptr, lpStream, dwMemLength);
-		if(m_dwLastSavedWithVersion < VERSIONNUMBER(0x1, 0x17, 0x2, 0x50))
+		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
 			SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 	}
 

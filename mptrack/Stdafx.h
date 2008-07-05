@@ -76,8 +76,6 @@ void Log(LPCSTR format,...);
 
 #include "typedefs.h"
 
-#define VERSIONNUMBER(v1, v2, v3, v4) ((v1 << 24) + (v2 << 16) + (v3 << 8) + v4)
-
 //To mark string that should be translated in case of multilingual version.
 #define GetStrI18N(x)	(x)
 

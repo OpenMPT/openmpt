@@ -489,9 +489,6 @@ public:
 public:
 	static CMainFrame *GetMainFrame() { return (CMainFrame *)theApp.m_pMainWnd; }
 	static VOID UpdateColors();
-	static CString GetFullVersionString();
-	static DWORD GetFullVersionNumeric();
-	static CString GetVersionString(DWORD);
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }
 	static HFONT GetFixedFont() { return m_hFixedFont; }
