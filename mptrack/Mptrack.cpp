@@ -14,6 +14,8 @@
 #include "hyperEdit.h"
 #include "bladedll.h"
 #include "commctrl.h"
+#include "version.h"
+#include "test/test.h"
 
 // rewbs.memLeak
 #define CRTDBG_MAP_ALLOC
@@ -818,13 +820,18 @@ BOOL CTrackApp::InitInstance()
 	*/
 
 	// Open settings if the previous execution was with an earlier version.
-	if (!cmdInfo.m_bNoSettingsOnNewVersion && CMainFrame::gcsPreviousVersion < CMainFrame::GetFullVersionString()) {
+	if (!cmdInfo.m_bNoSettingsOnNewVersion && MptVersion::ToNum(CMainFrame::gcsPreviousVersion) < MptVersion::num) {
 		StopSplashScreen();
 		ShowChangesDialog();
 		m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 	}
 
 	EndWaitCursor();
+
+	#ifdef ENABLE_TESTS
+		MptTest::DoTests();
+	#endif
+
 	return TRUE;
 }
 
@@ -1602,7 +1609,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_EDIT2, s);
-	SetDlgItemText(IDC_EDIT3, CString("Open Modplug Tracker, version ") + CMainFrame::GetFullVersionString() + " (development build)");
+	SetDlgItemText(IDC_EDIT3, CString("Open Modplug Tracker, version ") + MptVersion::str + " (development build)");
 
 	m_heContact.SetWindowText(
 "Contact / Discussion:\r\n\

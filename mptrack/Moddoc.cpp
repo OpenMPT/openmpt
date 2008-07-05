@@ -12,6 +12,7 @@
 #include "mod2wave.h"
 #include "mod2midi.h"
 #include "vstplug.h"
+#include "version.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -354,11 +355,11 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 // -> DESC="channels management dlg"
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
-	if (m_SndFile.m_dwLastSavedWithVersion > CMainFrame::GetFullVersionNumeric()) {
+	if (m_SndFile.m_dwLastSavedWithVersion > MptVersion::num) {
 		char s[256];
 		wsprintf(s, "Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%s. Current version: v%s.\r\n", 
-			CMainFrame::GetVersionString(m_SndFile.m_dwLastSavedWithVersion),
-			CMainFrame::GetFullVersionString());
+			MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion),
+			MptVersion::str);
 		::AfxMessageBox(s);
 	}
 
@@ -376,7 +377,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	TCHAR fext[_MAX_EXT]="";
 	UINT nType = m_SndFile.m_nType, dwPacking = 0;
 	BOOL bOk = FALSE;
-	m_SndFile.m_dwLastSavedWithVersion = CMainFrame::GetFullVersionNumeric();
+	m_SndFile.m_dwLastSavedWithVersion = MptVersion::num;
 	if (!lpszPathName) return FALSE;
 	_tsplitpath(lpszPathName, NULL, NULL, NULL, fext);
 	if (!lstrcmpi(fext, ".mod")) nType = MOD_TYPE_MOD; else
