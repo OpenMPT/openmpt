@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
 extern WORD S3MFineTuneTable[16];
 
@@ -400,9 +400,9 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 
 
 #ifndef MODPLUG_NO_FILESAVE
-#pragma warning(disable:4100)
+#pragma warning(disable:4100) //unreferenced formal parameter
 
-static BYTE S3MFiller[16] =
+static const BYTE S3MFiller[16] =
 {
 	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80
@@ -417,7 +417,6 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	UINT nbo,nbi,nbp,i;
 	WORD patptr[128];
 	WORD insptr[128];
-	BYTE buffer[5*1024];
 	S3MSAMPLESTRUCT insex[128];
 
 	if ((!m_nChannels) || (!lpszFileName)) return FALSE;
@@ -498,7 +497,7 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	for (i=0; i<nbp; i++)
 	{
 		WORD len = 64;
-		memset(buffer, 0, sizeof(buffer));
+		vector<BYTE> buffer(5*1024, 0);
 		patptr[i] = ofs / 16;
 		if (Patterns[i])
 		{
@@ -552,17 +551,23 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 							buffer[len++] = command;
 							buffer[len++] = param;
 						}
-						if (len > sizeof(buffer) - 20) break;
+						if (len > buffer.size() - 20)
+						{   //Buffer running out? Make it larger.
+							buffer.resize(buffer.size() + 1024, 0);
+						}
 					}
 				}
 				buffer[len++] = 0;
-				if (len > sizeof(buffer) - 20) break;
+				if (len > buffer.size() - 20)
+				{   //Buffer running out? Make it larger.
+					buffer.resize(buffer.size() + 1024, 0);
+				}
 			}
 		}
 		buffer[0] = (len - 2) & 0xFF;
 		buffer[1] = (len - 2) >> 8;
 		len = (len+15) & (~0x0F);
-		fwrite(buffer, len, 1, f);
+		fwrite(&buffer[0], len, 1, f);
 		ofs += len;
 	}
 	// Writing samples

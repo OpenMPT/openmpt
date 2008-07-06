@@ -21,12 +21,13 @@
 // Construction/Destruction
 ///////////////////////////
 
-CAutoSaver::CAutoSaver()
+CAutoSaver::CAutoSaver() : m_bSaveInProgress(false)
 {
 }
 
 CAutoSaver::CAutoSaver(bool enabled, int saveInterval, int backupHistory,
-					   bool useOriginalPath, CString path, CString fileNameTemplate)
+					   bool useOriginalPath, CString path, CString fileNameTemplate) :
+	m_bSaveInProgress(false)
 {
 	m_nLastSave			 = timeGetTime();
 	m_bEnabled			 = enabled;
@@ -49,13 +50,18 @@ bool CAutoSaver::DoSave(DWORD curTime)
 {
 	bool success = true;
     
-	if (CheckTimer(curTime)) { //if time to save
-
+	//If time to save and not already having save in progress.
+	if (CheckTimer(curTime) && !m_bSaveInProgress) { 
+		m_bSaveInProgress = true;
 		CDocTemplate *pDocTemplate;
 		CModDoc *pModDoc;
 		POSITION posTemplate,posDocument;
 		CTrackApp *pTrackApp=(CTrackApp*)::AfxGetApp();
-		if (!pTrackApp) return false;
+		if (!pTrackApp)
+		{
+			m_bSaveInProgress = false;
+			return false;
+		}
 
 		pTrackApp->BeginWaitCursor(); //display hour glass
 
@@ -80,6 +86,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 		} //end pointless template loop (we have just 1 template)
 		m_nLastSave = timeGetTime();
 		pTrackApp->EndWaitCursor(); //end display hour glass
+		m_bSaveInProgress = false;
 	}
 	
 	return success;

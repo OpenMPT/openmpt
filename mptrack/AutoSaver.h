@@ -39,6 +39,10 @@ private:
 	
 //internal implementation members
 private:
+
+	//Flag to prevent autosave from starting new saving if previous is still in progress.
+	bool m_bSaveInProgress; 
+
 	bool m_bEnabled;
 	DWORD m_nLastSave;
 	DWORD m_nSaveInterval;
