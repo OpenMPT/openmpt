@@ -14,7 +14,12 @@
 ////////////////////////////////////////////////////////
 // FastTracker II XM file support
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
+
+#define str_MBtitle				(GetStrI18N((_TEXT("Saving XM"))))
+#define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
+#define str_pattern				(GetStrI18N((_TEXT("pattern"))))
+
 
 #pragma pack(1)
 typedef struct tagXMFILEHEADER
@@ -651,7 +656,8 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 //---------------------------------------------------------
 {
-	BYTE s[64*64*5];
+	//BYTE s[64*64*5];
+	vector<BYTE> s(64*64*5, 0);
 	XMFILEHEADER header;
 	XMINSTRUMENTHEADER xmih;
 	XMSAMPLEHEADER xmsh;
@@ -668,7 +674,7 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	lstrcpy((LPSTR)&s[1], (nPacking) ? "MOD Plugin packed   " : "FastTracker v2.00   ");
 	s[21] = 0x04;
 	s[22] = 0x01;
-	fwrite(s, 23, 1, f);
+	fwrite(&s[0], 23, 1, f);
 	// Writing song header
 	memset(&header, 0, sizeof(header));
 	header.size = sizeof(XMFILEHEADER);
@@ -761,12 +767,20 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 				if (b & 8) s[len++] = command;
 				if (b & 16) s[len++] = param;
 			}
-			if (len > sizeof(s) - 5) break;
+			if(len > s.size() - 5) //Buffer running out? Make it larger.
+				s.resize(s.size() + 10*1024, 0);
+
+			if(len > uint16_max - 5u) //Reaching the limits of file format?
+			{
+				CString str; str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, i);
+				MessageBox(0, str, str_MBtitle, MB_ICONWARNING);
+				break;
+			}
 		}
 		xmph[7] = (BYTE)(len & 0xFF);
 		xmph[8] = (BYTE)(len >> 8);
 		fwrite(xmph, 1, 9, f);
-		fwrite(s, 1, len, f);
+		fwrite(&s[0], 1, len, f);
 	} else
 	{
 		memset(&xmph, 0, sizeof(xmph));

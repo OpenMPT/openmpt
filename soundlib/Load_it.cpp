@@ -30,6 +30,10 @@ using std::ifstream;
 using std::istrstream;
 using namespace srlztn; //SeRiaLiZaTioN
 
+#define str_MBtitle				(GetStrI18N((_TEXT("Saving IT"))))
+#define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
+#define str_pattern				(GetStrI18N((_TEXT("pattern"))))
+
 static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 //--------------------------------------------------
 {
@@ -2322,9 +2326,18 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				}
 			}
 			buf[len++] = 0;
-			dwPos += len;
-			patinfo[0] += len;
-			fwrite(buf, 1, len, f);
+			if(patinfo[0] > uint16_max - len)
+			{
+				CString str; str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, npat);
+				MessageBox(0, str, str_MBtitle, MB_ICONWARNING);
+				break;
+			}
+			else
+			{
+				dwPos += len;
+				patinfo[0] += len;
+				fwrite(buf, 1, len, f);
+			}
 		}
 		fseek(f, dwPatPos, SEEK_SET);
 		fwrite(patinfo, 8, 1, f);
