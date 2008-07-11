@@ -90,7 +90,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="Generic|Win32"
+			Name="Release|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
@@ -110,12 +110,13 @@
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="FALSE"
+				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Generic/mptrack.pch"
-				AssemblerListingLocation=".\Generic/"
-				ObjectFile=".\Generic/"
-				ProgramDataBaseFileName=".\Generic/"
+				PrecompiledHeaderFile=".\Release/mptrack.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="FALSE"
 				CompileAs="0"/>
@@ -129,9 +130,9 @@
 				Version="5.0"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\xsoundlib\Generic"
+				AdditionalLibraryDirectories="..\xsoundlib\Release"
 				GenerateMapFile="FALSE"
-				MapFileName=".\Generic/mptrack.map"
+				MapFileName=".\Release/mptrack.map"
 				SubSystem="2"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -142,222 +143,6 @@
 				TypeLibraryName=".\Bin/mptrack.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="P3|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			UseOfMFC="1"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/EHsc"
-				InlineFunctionExpansion="1"
-				OptimizeForProcessor="2"
-				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
-				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
-				StringPooling="TRUE"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="FALSE"
-				EnableFunctionLevelLinking="FALSE"
-				EnableEnhancedInstructionSet="1"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\P3/mptrack.pch"
-				AssemblerListingLocation=".\P3/"
-				ObjectFile=".\P3/"
-				ProgramDataBaseFileName=".\P3/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib winhttp.lib"
-				OutputFile=".\Bin/mptrack_P3.exe"
-				Version="5.0"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\xsoundlib\P3"
-				GenerateMapFile="FALSE"
-				MapFileName=".\P3/mptrack.map"
-				SubSystem="2"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Bin/mptrack.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="Athlon32|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			UseOfMFC="1"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/EHsc"
-				InlineFunctionExpansion="1"
-				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
-				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
-				StringPooling="TRUE"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="FALSE"
-				EnableFunctionLevelLinking="FALSE"
-				EnableEnhancedInstructionSet="1"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Athlon32/mptrack.pch"
-				AssemblerListingLocation=".\Athlon32/"
-				ObjectFile=".\Athlon32/"
-				ProgramDataBaseFileName=".\Athlon32/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib winhttp.lib"
-				OutputFile=".\Bin/mptrack_athlon32.exe"
-				Version="5.0"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\xsoundlib\Athlon32"
-				GenerateMapFile="FALSE"
-				MapFileName=".\Athlon32/mptrack.map"
-				SubSystem="2"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Bin/mptrack.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="P4-Athlon64|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			UseOfMFC="1"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/EHsc"
-				InlineFunctionExpansion="2"
-				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib"
-				PreprocessorDefinitions="NDEBUG,WIN32,_WINDOWS,ENABLE_MMX,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW"
-				StringPooling="TRUE"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="FALSE"
-				EnableFunctionLevelLinking="FALSE"
-				EnableEnhancedInstructionSet="2"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\P4-Athlon64/mptrack.pch"
-				AssemblerListingLocation=".\P4-Athlon64/"
-				ObjectFile=".\P4-Athlon64/"
-				ProgramDataBaseFileName=".\P4-Athlon64/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="winmm.lib strmiids.lib dmoguids.lib xsoundlib.lib version.lib opengl32.lib glu32.lib Rpcrt4.lib winhttp.lib"
-				OutputFile=".\Bin/mptrack_P4-Athlon64.exe"
-				Version="5.0"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\xsoundlib\P4-Athlon64"
-				GenerateMapFile="FALSE"
-				MapFileName=".\P4-Athlon64/mptrack.map"
-				SubSystem="2"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Bin/mptrack.tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="perl $(TargetDir)/getVersionFromCode.pl &gt; $(TargetDir)/version"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -636,25 +421,7 @@
 			<File
 				RelativePath="..\Soundlib\Snd_rvb.cpp">
 				<FileConfiguration
-					Name="Generic|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AssemblerOutput="4"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="P3|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AssemblerOutput="4"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Athlon32|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AssemblerOutput="4"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="P4-Athlon64|Win32">
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						AssemblerOutput="4"/>
@@ -681,25 +448,7 @@
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Generic|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="P3|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Athlon32|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="P4-Athlon64|Win32">
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
