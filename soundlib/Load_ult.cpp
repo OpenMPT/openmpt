@@ -1,16 +1,16 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
+ *
+ * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *
 */
 
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 #define ULT_16BIT   0x04
 #define ULT_LOOP    0x08
@@ -21,8 +21,8 @@
 // Raw ULT header struct:
 typedef struct tagULTHEADER
 {
-	CHAR id[15];
-	CHAR songtitle[32];
+    char id[15];
+    char songtitle[32];
 	BYTE reserved;
 } ULTHEADER;
 
@@ -135,7 +135,7 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 	// Allocating Patterns
 	for (UINT nAllocPat=0; nAllocPat<nop; nAllocPat++)
 	{
-		if (nAllocPat < Patterns.Size())
+		if (nAllocPat < MAX_PATTERNS)
 		{
 			Patterns.Insert(nAllocPat, 64);
 		}

@@ -1,10 +1,9 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * Copied to OpenMPT from libmodplug.
  *
- * Authors: Olivier Lapicque <olivierl@jps.net>
+ * Authors: Olivier Lapicque <olivierl@jps.net>,
+ *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 #include "stdafx.h"
@@ -100,11 +99,11 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if ((!lpStream) || (dwMemLength < 0x200)) return FALSE;
 	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return FALSE;
 	memcpy(m_szNames[0], lpStream+17, 20);
-	dwHdrSize = *((DWORD *)(lpStream+60));
-	norders = *((WORD *)(lpStream+64));
+	dwHdrSize = LittleEndian(*((DWORD *)(lpStream+60)));
+	norders = LittleEndianW(*((WORD *)(lpStream+64)));
 	if ((!norders) || (norders > MAX_ORDERS)) return FALSE;
-	restartpos = *((WORD *)(lpStream+66));
-	channels = *((WORD *)(lpStream+68));
+	restartpos = LittleEndianW(*((WORD *)(lpStream+66)));
+	channels = LittleEndianW(*((WORD *)(lpStream+68)));
 // -> CODE#0006
 // -> DESC="misc quantity changes"
 //	if ((!channels) || (channels > 64)) return FALSE;
@@ -115,17 +114,18 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	m_nMaxPeriod = 54784;
 	m_nChannels = channels;
 	if (restartpos < norders) m_nRestartPos = restartpos;
-	patterns = *((WORD *)(lpStream+70));
+	patterns = LittleEndianW(*((WORD *)(lpStream+70)));
 	if (patterns > 256) patterns = 256;
-	instruments = *((WORD *)(lpStream+72));
+	instruments = LittleEndianW(*((WORD *)(lpStream+72)));
 	if (instruments >= MAX_INSTRUMENTS) instruments = MAX_INSTRUMENTS-1;
 	m_nInstruments = instruments;
 	m_nSamples = 0;
 	memcpy(&xmflags, lpStream+74, 2);
+	xmflags = LittleEndianW(xmflags);
 	if (xmflags & 1) m_dwSongFlags |= SONG_LINEARSLIDES;
 	if (xmflags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
-	defspeed = *((WORD *)(lpStream+76));
-	deftempo = *((WORD *)(lpStream+78));
+	defspeed = LittleEndianW(*((WORD *)(lpStream+76)));
+	deftempo = LittleEndianW(*((WORD *)(lpStream+78)));
 // -> CODE#0016
 // -> DESC="default tempo update"
 //	if ((deftempo >= 32) && (deftempo < 256)) m_nDefaultTempo = deftempo;
@@ -172,20 +172,20 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		UINT ipatmap = pattern_map[ipat];
 		DWORD dwSize = 0;
 		WORD rows=64, packsize=0;
-		dwSize = *((DWORD *)(lpStream+dwMemPos));
+		dwSize = LittleEndian(*((DWORD *)(lpStream+dwMemPos)));
 		while ((dwMemPos + dwSize >= dwMemLength) || (dwSize & 0xFFFFFF00))
 		{
 			if (dwMemPos + 4 >= dwMemLength) break;
 			dwMemPos++;
-			dwSize = *((DWORD *)(lpStream+dwMemPos));
+			dwSize = LittleEndian(*((DWORD *)(lpStream+dwMemPos)));
 		}
-		rows = *((WORD *)(lpStream+dwMemPos+5));
+		rows = LittleEndianW(*((WORD *)(lpStream+dwMemPos+5)));
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
 //		if ((!rows) || (rows > 256)) rows = 64;
 		if ((!rows) || (rows > MAX_PATTERN_ROWS)) rows = 64;
 // -> BEHAVIOUR_CHANGE#0008
-		packsize = *((WORD *)(lpStream+dwMemPos+7));
+		packsize = LittleEndianW(*((WORD *)(lpStream+dwMemPos+7)));
 		if (dwMemPos + dwSize + 4 > dwMemLength) return TRUE;
 		dwMemPos += dwSize;
 		if (dwMemPos + packsize + 4 > dwMemLength) return TRUE;
@@ -284,7 +284,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	// Wrong offset check
 	while (dwMemPos + 4 < dwMemLength)
 	{
-		DWORD d = *((DWORD *)(lpStream+dwMemPos));
+		DWORD d = LittleEndian(*((DWORD *)(lpStream+dwMemPos)));
 		if (d < 0x300) break;
 		dwMemPos++;
 	}
@@ -301,7 +301,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				
 		if (dwMemPos + sizeof(XMINSTRUMENTHEADER) >= dwMemLength) return TRUE;
 		pih = (XMINSTRUMENTHEADER *)(lpStream+dwMemPos);
-		if (dwMemPos + pih->size > dwMemLength) return TRUE;
+		if (dwMemPos + LittleEndian(pih->size) > dwMemLength) return TRUE;
 		if ((Headers[iIns] = new INSTRUMENTHEADER) == NULL) continue;
 		memset(Headers[iIns], 0, sizeof(INSTRUMENTHEADER));
 		Headers[iIns]->pTuning = m_defaultInstrument.pTuning;
@@ -313,10 +313,17 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			if (dwMemPos + sizeof(XMSAMPLEHEADER) > dwMemLength) return TRUE;
 			memcpy(&xmsh, lpStream+dwMemPos+sizeof(XMINSTRUMENTHEADER), sizeof(XMSAMPLEHEADER));
-			dwMemPos += pih->size;
+			xmsh.shsize = LittleEndian(xmsh.shsize);
+			for (int i = 0; i < 24; ++i) {
+			  xmsh.venv[i] = LittleEndianW(xmsh.venv[i]);
+			  xmsh.penv[i] = LittleEndianW(xmsh.penv[i]);
+			}
+			xmsh.volfade = LittleEndianW(xmsh.volfade);
+			xmsh.res = LittleEndianW(xmsh.res);
+			dwMemPos += LittleEndian(pih->size);
 		} else
 		{
-			if (pih->size) dwMemPos += pih->size;
+			if (LittleEndian(pih->size)) dwMemPos += LittleEndian(pih->size);
 			else dwMemPos += sizeof(XMINSTRUMENTHEADER);
 			continue;
 		}
@@ -456,6 +463,9 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			if ((dwMemPos + sizeof(xmss) > dwMemLength)
 			 || (dwMemPos + xmsh.shsize > dwMemLength)) return TRUE;
 			memcpy(&xmss, lpStream+dwMemPos, sizeof(xmss));
+			xmss.samplen = LittleEndian(xmss.samplen);
+			xmss.loopstart = LittleEndian(xmss.loopstart);
+			xmss.looplen = LittleEndian(xmss.looplen);
 			dwMemPos += xmsh.shsize;
 			flags[ins] = (xmss.type & 0x10) ? RS_PCM16D : RS_PCM8D;
 			if (xmss.type & 0x20) flags[ins] = (xmss.type & 0x10) ? RS_STPCM16D : RS_STPCM8D;
@@ -528,7 +538,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Read song comments: "TEXT"
-	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == 0x74786574))
+	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x74786574))
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
@@ -544,7 +554,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Read midi config: "MIDI"
-	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == 0x4944494D))
+	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4944494D))
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
@@ -556,7 +566,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Read pattern names: "PNAM"
-	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == 0x4d414e50))
+	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4d414e50))
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;
@@ -572,7 +582,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Read channel names: "CNAM"
-	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == 0x4d414e43))
+	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4d414e43))
 	{
 		UINT len = *((DWORD *)(lpStream+dwMemPos+4));
 		dwMemPos += 8;

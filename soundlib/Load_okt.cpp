@@ -1,10 +1,11 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
  *
- * Authors: Olivier Lapicque <olivierl@jps.net>
+ * Copied to OpenMPT from libmodplug.
+ *
+ * Authors: Olivier Lapicque <olivierl@jps.net>,
+ *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
+ *
 */
 
 //////////////////////////////////////////////
@@ -13,7 +14,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 typedef struct OKTFILEHEADER
 {

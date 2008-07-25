@@ -1,10 +1,10 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
  *
- * Authors: Olivier Lapicque <olivierl@jps.net>
+ * Copied to OpenMPT from libmodplug.
+ *
+ * Authors: Olivier Lapicque <olivierl@jps.net>,
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 #include "stdafx.h"
@@ -493,7 +493,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 	// Check for 'MMDx'
 	DWORD dwSong = BigEndian(pmmh->song);
 	if ((dwSong >= dwMemLength) || (dwSong + sizeof(MMD0SONGHEADER) >= dwMemLength)) return FALSE;
-	version = (char)((pmmh->id >> 24) & 0xFF);
+	version = (signed char)((pmmh->id >> 24) & 0xFF);
 	if ((version < '0') || (version > '3')) return FALSE;
 #ifdef MED_LOG
 	Log("\nLoading MMD%c module (flags=0x%02X)...\n", version, BigEndian(pmmh->mmdflags));
@@ -699,7 +699,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 		UINT annotxt = BigEndian(pmex->annotxt);
 		UINT annolen = BigEndian(pmex->annolen);
 		annolen = min(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
-		if ((annotxt) && (annolen) && (annotxt+annolen <= dwMemLength) ) { 
+		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) ) { 
 			m_lpszSongComments = new char[annolen+1];
 			if (m_lpszSongComments) {
 				memcpy(m_lpszSongComments, lpStream+annotxt, annolen);

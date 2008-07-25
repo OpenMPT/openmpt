@@ -1,16 +1,17 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
  *
- * Authors: Olivier Lapicque <olivierl@jps.net>
+ * Copied to OpenMPT from libmodplug.
+ *
+ * Authors: Olivier Lapicque <olivierl@jps.net>,
+ *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 extern WORD ProTrackerPeriodTable[6*12];
 
@@ -98,7 +99,7 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 		command = 0x08;
 		if (bXM)
 		{
-			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (m_nType != MOD_TYPE_XM) && (param <= 0x80))
+			if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (m_nType != MOD_TYPE_XM) && (param <= 0x80))
 			{
 				param <<= 1;
 				if (param > 255) param = 255;
@@ -170,7 +171,7 @@ typedef struct _MODMAGIC
 	BYTE nOrders;
 	BYTE nRestartPos;
 	BYTE Orders[128];
-	CHAR Magic[4];
+    char Magic[4];
 } MODMAGIC, *PMODMAGIC;
 
 #pragma pack()
@@ -184,7 +185,7 @@ BOOL IsMagic(LPCSTR s1, LPCSTR s2)
 BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	CHAR s[1024];
+    char s[1024];
 	DWORD dwMemPos, dwTotalSampleLen;
 	PMODMAGIC pMagic;
 	UINT nErr;

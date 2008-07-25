@@ -250,7 +250,7 @@ BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 			{
 				DWORD nTxtLen = dwLen;
 				if (nTxtLen > 32000) nTxtLen = 32000;
-				m_lpszSongComments = new CHAR[nTxtLen];
+				m_lpszSongComments = new char[nTxtLen];
 				if (m_lpszSongComments)
 				{
 					memcpy(m_lpszSongComments, lpStream+dwMemPos+1, nTxtLen-1);
@@ -405,7 +405,6 @@ BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 			if (penv)
 			{
 				memset(penv, 0, sizeof(INSTRUMENTHEADER));
-				penv->pTuning = penv->s_DefaultTuning;
 				memcpy(penv->name, pmi->szName, 32);
 				penv->nGlobalVol = 64;
 				penv->nPan = 128;

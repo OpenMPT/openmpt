@@ -1,8 +1,7 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
+ *
+ * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
 */
@@ -18,13 +17,13 @@ BOOL CSoundFile::ReadUMX(const BYTE *lpStream, DWORD dwMemLength)
 {
 	if ((!lpStream) || (dwMemLength < 0x800)) return FALSE;
 	// Rip Mods from UMX
-	if ((*((DWORD *)(lpStream+0x20)) < dwMemLength)
-	 && (*((DWORD *)(lpStream+0x18)) <= dwMemLength - 0x10)
-	 && (*((DWORD *)(lpStream+0x18)) >= dwMemLength - 0x200))
+	if ((LittleEndian(*((DWORD *)(lpStream+0x20))) < dwMemLength)
+	 && (LittleEndian(*((DWORD *)(lpStream+0x18))) <= dwMemLength - 0x10)
+	 && (LittleEndian(*((DWORD *)(lpStream+0x18))) >= dwMemLength - 0x200))
 	{
 		for (UINT uscan=0x40; uscan<0x500; uscan++)
 		{
-			DWORD dwScan = *((DWORD *)(lpStream+uscan));
+			DWORD dwScan = LittleEndian(*((DWORD *)(lpStream+uscan)));
 			// IT
 			if (dwScan == 0x4D504D49)
 			{

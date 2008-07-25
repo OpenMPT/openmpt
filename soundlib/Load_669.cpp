@@ -1,10 +1,11 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain. 
  *
- * Authors: Olivier Lapicque <olivierl@jps.net>
+ * Copied to OpenMPT from libmodplug.
+ *
+ * Authors: Olivier Lapicque <olivierl@jps.net>,
+ *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 ////////////////////////////////////////////////////////////
@@ -14,12 +15,12 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 typedef struct tagFILEHEADER669
 {
 	WORD sig;				// 'if' or 'JN'
-	char songmessage[108];	// Song Message
+    signed char songmessage[108];	// Song Message
 	BYTE samples;			// number of samples (1-64)
 	BYTE patterns;			// number of patterns (1-128)
 	BYTE restartpos;
@@ -47,15 +48,15 @@ BOOL CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 	DWORD dwMemPos = 0;
 
 	if ((!lpStream) || (dwMemLength < sizeof(FILEHEADER669))) return FALSE;
-	if ((pfh->sig != 0x6669) && (pfh->sig != 0x4E4A)) return FALSE;
-	b669Ext = (pfh->sig == 0x4E4A) ? TRUE : FALSE;
+	if ((LittleEndianW(pfh->sig) != 0x6669) && (LittleEndianW(pfh->sig) != 0x4E4A)) return FALSE;
+	b669Ext = (LittleEndianW(pfh->sig) == 0x4E4A) ? TRUE : FALSE;
 	if ((!pfh->samples) || (pfh->samples > 64) || (pfh->restartpos >= 128)
 	 || (!pfh->patterns) || (pfh->patterns > 128)) return FALSE;
 	DWORD dontfuckwithme = 0x1F1 + pfh->samples * sizeof(SAMPLE669) + pfh->patterns * 0x600;
 	if (dontfuckwithme > dwMemLength) return FALSE;
 	for (UINT ichk=0; ichk<pfh->samples; ichk++)
 	{
-		DWORD len = *((DWORD *)(&psmp[ichk].length));
+		DWORD len = LittleEndian(*((DWORD *)(&psmp[ichk].length)));
 		dontfuckwithme += len;
 	}
 	if (dontfuckwithme > dwMemLength) return FALSE;
@@ -71,9 +72,9 @@ BOOL CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 	m_nSamples = pfh->samples;
 	for (UINT nins=1; nins<=m_nSamples; nins++, psmp++)
 	{
-		DWORD len = *((DWORD *)(&psmp->length));
-		DWORD loopstart = *((DWORD *)(&psmp->loopstart));
-		DWORD loopend = *((DWORD *)(&psmp->loopend));
+		DWORD len = LittleEndian(*((DWORD *)(&psmp->length)));
+		DWORD loopstart = LittleEndian(*((DWORD *)(&psmp->loopstart)));
+		DWORD loopend = LittleEndian(*((DWORD *)(&psmp->loopend)));
 		if (len > MAX_SAMPLE_LENGTH) len = MAX_SAMPLE_LENGTH;
 		if ((loopend > len) && (!loopstart)) loopend = 0;
 		if (loopend > len) loopend = len;
