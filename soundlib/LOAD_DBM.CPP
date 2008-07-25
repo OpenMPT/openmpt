@@ -1,10 +1,11 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
  *
- * Authors: Olivier Lapicque <olivierl@jps.net>
+ * Copied to OpenMPT from libmodplug.
+ *
+ * Authors: Olivier Lapicque <olivierl@jps.net>,
+ *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 ///////////////////////////////////////////////////////////////
@@ -18,7 +19,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 #define DBM_FILE_MAGIC	0x304d4244
 #define DBM_ID_NAME		0x454d414e
@@ -99,7 +100,7 @@ typedef struct DBMSAMPLE
 BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	DBMFILEHEADER *pfh = (DBMFILEHEADER *)lpStream;
+	const DBMFILEHEADER *pfh = (DBMFILEHEADER *)lpStream;
 	DWORD dwMemPos;
 	UINT nOrders, nSamples, nInstruments, nPatterns;
 	
@@ -152,7 +153,6 @@ BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				nsmp = BigEndianW(pih->sampleno);
 				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Ins[nsmp] : NULL;
 				memset(penv, 0, sizeof(INSTRUMENTHEADER));
-				penv->pTuning = penv->s_DefaultTuning;
 				memcpy(penv->name, pih->name, 30);
 				if (psmp)
 				{

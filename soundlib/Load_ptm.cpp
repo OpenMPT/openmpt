@@ -1,10 +1,11 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
  *
- * Authors: Olivier Lapicque <olivierl@jps.net>
+ * Copied to OpenMPT from libmodplug.
+ *
+ * Authors: Olivier Lapicque <olivierl@jps.net>,
+ *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 //////////////////////////////////////////////
@@ -13,7 +14,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 #pragma pack(1)
 
@@ -52,7 +53,7 @@ typedef struct PTMSAMPLE
 	WORD loopbeg[2];		// start of loop
 	WORD loopend[2];		// end of loop
 	WORD gusdata[8];
-	CHAR samplename[28];	// name of sample, asciiz
+	char  samplename[28];	// name of sample, asciiz
 	DWORD ptms_id;			// sample identification, 'PTMS' or 0x534d5450
 } PTMSAMPLE;
 
@@ -64,29 +65,42 @@ typedef struct PTMSAMPLE
 BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	LPPTMFILEHEADER pfh = (LPPTMFILEHEADER)lpStream;
+	PTMFILEHEADER pfh = *(LPPTMFILEHEADER)lpStream;
 	DWORD dwMemPos;
 	UINT nOrders;
 
+	pfh.norders = LittleEndianW(pfh.norders);
+	pfh.nsamples = LittleEndianW(pfh.nsamples);
+	pfh.npatterns = LittleEndianW(pfh.npatterns);
+	pfh.nchannels = LittleEndianW(pfh.nchannels);
+	pfh.fileflags = LittleEndianW(pfh.fileflags);
+	pfh.reserved2 = LittleEndianW(pfh.reserved2);
+	pfh.ptmf_id = LittleEndian(pfh.ptmf_id);
+	for (UINT j=0; j<128; j++)
+        {
+	        pfh.patseg[j] = LittleEndianW(pfh.patseg[j]);
+	}
+
 	if ((!lpStream) || (dwMemLength < 1024)) return FALSE;
-	if ((pfh->ptmf_id != 0x464d5450) || (!pfh->nchannels) || (pfh->nchannels > 32)
-	 || (pfh->norders > 256) || (!pfh->norders)
-	 || (!pfh->nsamples) || (pfh->nsamples > 255)
-	 || (!pfh->npatterns) || (pfh->npatterns > 128)
-	 || (SIZEOF_PTMFILEHEADER+pfh->nsamples*SIZEOF_PTMSAMPLE >= (int)dwMemLength)) return FALSE;
-	memcpy(m_szNames[0], pfh->songname, 28);
+	if ((pfh.ptmf_id != 0x464d5450) || (!pfh.nchannels)
+	 || (pfh.nchannels > 32)
+	 || (pfh.norders > 256) || (!pfh.norders)
+	 || (!pfh.nsamples) || (pfh.nsamples > 255)
+	 || (!pfh.npatterns) || (pfh.npatterns > 128)
+	 || (SIZEOF_PTMFILEHEADER+pfh.nsamples*SIZEOF_PTMSAMPLE >= (int)dwMemLength)) return FALSE;
+	memcpy(m_szNames[0], pfh.songname, 28);
 	m_szNames[0][28] = 0;
 	m_nType = MOD_TYPE_PTM;
-	m_nChannels = pfh->nchannels;
-	m_nSamples = (pfh->nsamples < MAX_SAMPLES) ? pfh->nsamples : MAX_SAMPLES-1;
+	m_nChannels = pfh.nchannels;
+	m_nSamples = (pfh.nsamples < MAX_SAMPLES) ? pfh.nsamples : MAX_SAMPLES-1;
 	dwMemPos = SIZEOF_PTMFILEHEADER;
-	nOrders = (pfh->norders < MAX_ORDERS) ? pfh->norders : MAX_ORDERS-1;
-	Order.ReadAsByte(pfh->orders, nOrders, nOrders);
+	nOrders = (pfh.norders < MAX_ORDERS) ? pfh.norders : MAX_ORDERS-1;
+	Order.ReadAsByte(pfh.orders, nOrders, nOrders);
 
 	for (UINT ipan=0; ipan<m_nChannels; ipan++)
 	{
 		ChnSettings[ipan].nVolume = 64;
-		ChnSettings[ipan].nPan = ((pfh->chnpan[ipan] & 0x0F) << 4) + 4;
+		ChnSettings[ipan].nPan = ((pfh.chnpan[ipan] & 0x0F) << 4) + 4;
 	}
 	for (UINT ismp=0; ismp<m_nSamples; ismp++, dwMemPos += SIZEOF_PTMSAMPLE)
 	{
@@ -99,16 +113,16 @@ BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 		pins->nGlobalVol = 64;
 		pins->nPan = 128;
 		pins->nVolume = psmp->volume << 2;
-		pins->nC4Speed = psmp->nC4Spd << 1;
+		pins->nC4Speed = LittleEndianW(psmp->nC4Spd) << 1;
 		pins->uFlags = 0;
 		if ((psmp->sampletype & 3) == 1)
 		{
 			UINT smpflg = RS_PCM8D;
 			DWORD samplepos;
-			pins->nLength = *(LPDWORD)(psmp->length);
-			pins->nLoopStart = *(LPDWORD)(psmp->loopbeg);
-			pins->nLoopEnd = *(LPDWORD)(psmp->loopend);
-			samplepos = *(LPDWORD)(&psmp->fileofs);
+			pins->nLength = LittleEndian(*(LPDWORD)(psmp->length));
+			pins->nLoopStart = LittleEndian(*(LPDWORD)(psmp->loopbeg));
+			pins->nLoopEnd = LittleEndian(*(LPDWORD)(psmp->loopend));
+			samplepos = LittleEndian(*(LPDWORD)(&psmp->fileofs));
 			if (psmp->sampletype & 4) pins->uFlags |= CHN_LOOP;
 			if (psmp->sampletype & 8) pins->uFlags |= CHN_PINGPONGLOOP;
 			if (psmp->sampletype & 16)
@@ -126,9 +140,9 @@ BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Reading Patterns
-	for (UINT ipat=0; ipat<pfh->npatterns; ipat++)
+	for (UINT ipat=0; ipat<pfh.npatterns; ipat++)
 	{
-		dwMemPos = ((UINT)pfh->patseg[ipat]) << 4;
+		dwMemPos = ((UINT)pfh.patseg[ipat]) << 4;
 		if ((!dwMemPos) || (dwMemPos >= dwMemLength)) continue;
 		if(Patterns.Insert(ipat, 64))
 			break;

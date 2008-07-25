@@ -1,10 +1,10 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain. 
+ *
+ * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 ////////////////////////////////////////
@@ -13,7 +13,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 #define FARFILEMAGIC	0xFE524146	// "FAR"
 
@@ -61,15 +61,21 @@ typedef struct FARSAMPLE
 BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	FARHEADER1 *pmh1 = (FARHEADER1 *)lpStream;
+	if(dwMemLength < sizeof(FARHEADER1))
+		return FALSE;
+
+	FARHEADER1 farHeader;
+	memcpy(&farHeader, lpStream, sizeof(FARHEADER1));
+	FARHEADER1 *pmh1 = &farHeader;
 	FARHEADER2 *pmh2;
 	DWORD dwMemPos = sizeof(FARHEADER1);
 	UINT headerlen;
 	BYTE samplemap[8];
 
-	if ((!lpStream) || (dwMemLength < 1024) || (pmh1->id != FARFILEMAGIC)
+	if ((!lpStream) || (dwMemLength < 1024) || (LittleEndian(pmh1->id) != FARFILEMAGIC)
 	 || (pmh1->magic2[0] != 13) || (pmh1->magic2[1] != 10) || (pmh1->magic2[2] != 26)) return FALSE;
-	headerlen = pmh1->headerlen;
+	headerlen = LittleEndianW(pmh1->headerlen);
+	pmh1->stlen = LittleEndianW( pmh1->stlen ); /* inplace byteswap -- Toad */
 	if ((headerlen >= dwMemLength) || (dwMemPos + pmh1->stlen + sizeof(FARHEADER2) >= dwMemLength)) return FALSE;
 	// Globals
 	m_nType = MOD_TYPE_FAR;
@@ -80,6 +86,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	m_nDefaultSpeed = pmh1->speed;
 	m_nDefaultTempo = 80;
 	m_nDefaultGlobalVolume = 256;
+
 	memcpy(m_szNames[0], pmh1->songname, 32);
 	// Channel Setting
 	for (UINT nchpan=0; nchpan<16; nchpan++)
@@ -101,7 +108,10 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 		dwMemPos += pmh1->stlen;
 	}
 	// Reading orders
-	pmh2 = (FARHEADER2 *)(lpStream + dwMemPos);
+	if (sizeof(FARHEADER2) > dwMemLength - dwMemPos) return TRUE;
+	FARHEADER2 farHeader2;
+	memcpy(&farHeader2, lpStream + dwMemPos, sizeof(FARHEADER2));
+	pmh2 = &farHeader2;
 	dwMemPos += sizeof(FARHEADER2);
 	if (dwMemPos >= dwMemLength) return TRUE;
 	for (UINT iorder=0; iorder<MAX_ORDERS; iorder++)
@@ -112,6 +122,14 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading Patterns	
 	dwMemPos += headerlen - (869 + pmh1->stlen);
 	if (dwMemPos >= dwMemLength) return TRUE;
+
+	// byteswap pattern data.
+	for(uint16 psfix = 256; psfix--;)
+	{
+		pmh2->patsiz[psfix] = LittleEndianW( pmh2->patsiz[psfix] ) ;
+	}
+	// end byteswap of pattern data
+
 	WORD *patsiz = (WORD *)pmh2->patsiz;
 	for (UINT ipat=0; ipat<256; ipat++) if (patsiz[ipat])
 	{
@@ -228,13 +246,14 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	for (UINT ismp=0; ismp<64; ismp++, pins++) if (samplemap[ismp >> 3] & (1 << (ismp & 7)))
 	{
 		if (dwMemPos + sizeof(FARSAMPLE) > dwMemLength) return TRUE;
-		FARSAMPLE *pfs = (FARSAMPLE *)(lpStream + dwMemPos);
+		const FARSAMPLE *pfs = reinterpret_cast<const FARSAMPLE*>(lpStream + dwMemPos);
 		dwMemPos += sizeof(FARSAMPLE);
 		m_nSamples = ismp + 1;
 		memcpy(m_szNames[ismp+1], pfs->samplename, 32);
-		pins->nLength = pfs->length;
-		pins->nLoopStart = pfs->reppos;
-		pins->nLoopEnd = pfs->repend;
+		const DWORD length = LittleEndian( pfs->length );
+		pins->nLength = length;
+		pins->nLoopStart = LittleEndian(pfs->reppos) ;
+		pins->nLoopEnd = LittleEndian(pfs->repend) ;
 		pins->nFineTune = 0;
 		pins->nC4Speed = 8363*2;
 		pins->nGlobalVol = 64;
@@ -253,7 +272,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 			ReadSample(pins, (pins->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S,
 						(LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 		}
-		dwMemPos += pfs->length;
+		dwMemPos += length;
 	}
 	return TRUE;
 }

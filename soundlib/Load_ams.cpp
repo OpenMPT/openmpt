@@ -1,10 +1,10 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
+ *
+ * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 //////////////////////////////////////////////
@@ -13,13 +13,13 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 #pragma pack(1)
 
 typedef struct AMSFILEHEADER
 {
-	CHAR szHeader[7];	// "Extreme"
+	char szHeader[7];	// "Extreme"
 	BYTE verlo, verhi;	// 0x??,0x01
 	BYTE chncfg;
 	BYTE samples;
@@ -107,7 +107,7 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 		dwMemPos += tmp;
 	}
 	// Read Pattern Names
-	m_lpszPatternNames = new CHAR[pfh->patterns * 32];
+	m_lpszPatternNames = new char[pfh->patterns * 32];
 	if (!m_lpszPatternNames) return TRUE;
 	m_nPatternNames = pfh->patterns;
 	memset(m_lpszPatternNames, 0, m_nPatternNames * 32);
@@ -125,7 +125,7 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	if (dwMemPos + tmp >= dwMemLength) return TRUE;
 	if (tmp)
 	{
-		m_lpszSongComments = new CHAR[tmp+1];
+		m_lpszSongComments = new char[tmp+1];
 		if (!m_lpszSongComments) return TRUE;
 		memset(m_lpszSongComments, 0, tmp+1);
 		memcpy(m_lpszSongComments, lpStream + dwMemPos, tmp);
@@ -312,7 +312,7 @@ typedef struct AMS2SAMPLE
 BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 //------------------------------------------------------------
 {
-	AMS2FILEHEADER *pfh = (AMS2FILEHEADER *)lpStream;
+	const AMS2FILEHEADER *pfh = (AMS2FILEHEADER *)lpStream;
 	AMS2SONGHEADER *psh;
 	DWORD dwMemPos;
 	BYTE smpmap[16];
@@ -356,7 +356,6 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		if (!penv) return TRUE;
 		memset(smpmap, 0, sizeof(smpmap));
 		memset(penv, 0, sizeof(INSTRUMENTHEADER));
-		penv->pTuning = penv->s_DefaultTuning;
 		for (UINT ismpmap=0; ismpmap<pins->samples; ismpmap++)
 		{
 			if ((ismpmap >= 16) || (m_nSamples+1 >= MAX_SAMPLES)) break;
@@ -434,7 +433,7 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		UINT composernamelen = lpStream[dwMemPos];
 		if (composernamelen)
 		{
-			m_lpszSongComments = new CHAR[composernamelen+1];
+			m_lpszSongComments = new char[composernamelen+1];
 			if (m_lpszSongComments)
 			{
 				memcpy(m_lpszSongComments, lpStream+dwMemPos+1, composernamelen);
@@ -485,7 +484,7 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		{
 			if ((patnamlen) && (patnamlen < MAX_PATTERNNAME))
 			{
-				CHAR s[MAX_PATTERNNAME];
+				char s[MAX_PATTERNNAME];
 				memcpy(s, lpStream+dwMemPos+3, patnamlen);
 				s[patnamlen] = 0;
 				SetPatternName(ipat, s);
@@ -565,16 +564,16 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char packcharacter)
 {
 	UINT tmplen = dmax;
-	char *amstmp = new char[tmplen];
+	signed char *amstmp = new signed char[tmplen];
 	
 	if (!amstmp) return;
 	// Unpack Loop
 	{
-		char *p = amstmp;
+		signed char *p = amstmp;
 		UINT i=0, j=0;
 		while ((i < inputlen) && (j < tmplen))
 		{
-			char ch = psrc[i++];
+			signed char ch = psrc[i++];
 			if (ch == packcharacter)
 			{
 				BYTE ch2 = psrc[i++];
@@ -592,7 +591,7 @@ void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char pac
 	}
 	// Bit Unpack Loop
 	{
-		char *p = amstmp;
+		signed char *p = amstmp;
 		UINT bitcount = 0x80, dh;
 		UINT k=0;
 		for (UINT i=0; i<dmax; i++)
@@ -616,12 +615,12 @@ void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char pac
 	}
 	// Delta Unpack
 	{
-		char old = 0;
+		signed char old = 0;
 		for (UINT i=0; i<dmax; i++)
 		{
 			int pos = ((LPBYTE)pdest)[i];
 			if ((pos != 128) && (pos & 0x80)) pos = -(pos & 0x7F);
-			old -= (char)pos;
+			old -= (signed char)pos;
 			pdest[i] = old;
 		}
 	}

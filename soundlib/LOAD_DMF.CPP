@@ -1,10 +1,10 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
+ *
+ * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 ///////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 
 //#define DMFLOG
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 #pragma pack(1)
 
@@ -89,7 +89,7 @@ extern void Log(LPCSTR s, ...);
 BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	DMFHEADER *pfh = (DMFHEADER *)lpStream;
+	const DMFHEADER *pfh = (DMFHEADER *)lpStream;
 	DMFINFO *psi;
 	DMFSEQU *sequ;
 	DWORD dwMemPos;
@@ -121,7 +121,7 @@ BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 			if ((psi->infosize > dwMemLength) || (psi->infosize + dwMemPos + 8 > dwMemLength)) goto dmfexit;
 			if ((psi->infosize >= 8) && (!m_lpszSongComments))
 			{
-				m_lpszSongComments = new CHAR[psi->infosize];
+			    m_lpszSongComments = new char[psi->infosize];
 				if (m_lpszSongComments)
 				{
 					for (UINT i=0; i<psi->infosize-1; i++)

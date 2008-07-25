@@ -1,16 +1,16 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
+ *
+ * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ * 
 */
 
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 //////////////////////////////////////////////////////////
 // MTM file support (import only)
@@ -19,7 +19,7 @@
 
 typedef struct tagMTMSAMPLE
 {
-	CHAR samplename[22];
+    char samplename[22];
 	DWORD length;
 	DWORD reppos;
 	DWORD repend;
@@ -31,8 +31,8 @@ typedef struct tagMTMSAMPLE
 
 typedef struct tagMTMHEADER
 {
-	CHAR id[4];			// MTM file marker + version
-	CHAR songname[20];	// ASCIIZ songname
+	char id[4];			// MTM file marker + version
+	char songname[20];  // ASCIIZ songname
 	WORD numtracks;		// number of tracks saved
 	BYTE lastpattern;	// last pattern number saved
 	BYTE lastorder;		// last order number to play (songlength-1)

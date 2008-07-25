@@ -1,10 +1,10 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
+ *
+ * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 #include "stdafx.h"
@@ -120,7 +120,7 @@ BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			int slsize = pfmt->bitspersample >> 3;
 			signed short *p = (signed short *)pins->pSample;
-			char *psrc = (char *)(lpStream+dwMemPos+8+nChn*slsize+slsize-2);
+			signed char *psrc = (signed char *)(lpStream+dwMemPos+8+nChn*slsize+slsize-2);
 			for (UINT i=0; i<len; i++)
 			{
 				p[i] = *((signed short *)psrc);
@@ -133,7 +133,7 @@ BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 			signed char *psrc = (signed char *)(lpStream+dwMemPos+8+nChn);
 			for (UINT i=0; i<len; i++)
 			{
-				p[i] = (char)((*psrc) + 0x80);
+				p[i] = (signed char)((*psrc) + 0x80);
 				psrc += samplesize;
 			}
 			p[len+1] = p[len] = p[len-1];

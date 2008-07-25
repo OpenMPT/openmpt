@@ -1,8 +1,7 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
+ *
+ * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
 */
@@ -15,7 +14,7 @@
 
 //#define MDL_LOG
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 typedef struct MDLSONGHEADER
 {
@@ -328,7 +327,6 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 					if ((Headers[nins] = new INSTRUMENTHEADER) == NULL) break;
 					INSTRUMENTHEADER *penv = Headers[nins];
 					memset(penv, 0, sizeof(INSTRUMENTHEADER));
-					penv->pTuning = penv->s_DefaultTuning;
 					memcpy(penv->name, lpStream+dwPos+2, 32);
 					penv->nGlobalVol = 64;
 					penv->nPPC = 5*12;

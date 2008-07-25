@@ -1,16 +1,17 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
  *
- * Authors: Olivier Lapicque <olivierl@jps.net>
+ * Copied to OpenMPT from libmodplug.
+ *
+ * Authors: Olivier Lapicque <olivierl@jps.net>,
+ *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
+ *			OpenMPT dev(s)	(miscellaneous modifications)
 */
 
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 extern WORD S3MFineTuneTable[16];
 
@@ -207,45 +208,56 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	BYTE s[1024];
 	DWORD dwMemPos;
 	BYTE insflags[128], inspack[128];
-	S3MFILEHEADER *psfh = (S3MFILEHEADER *)lpStream;
+	S3MFILEHEADER psfh = *(S3MFILEHEADER *)lpStream;
+
+	psfh.reserved1 = LittleEndianW(psfh.reserved1);
+	psfh.ordnum = LittleEndianW(psfh.ordnum);
+	psfh.insnum = LittleEndianW(psfh.insnum);
+	psfh.patnum = LittleEndianW(psfh.patnum);
+	psfh.flags = LittleEndianW(psfh.flags);
+	psfh.cwtv = LittleEndianW(psfh.cwtv);
+	psfh.version = LittleEndianW(psfh.version);
+	psfh.scrm = LittleEndian(psfh.scrm);
+	psfh.special = LittleEndianW(psfh.special);
 
 	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER)+sizeof(S3MSAMPLESTRUCT)+64)) return FALSE;
-	if (psfh->scrm != 0x4D524353) return FALSE;
+	if (psfh.scrm != 0x4D524353) return FALSE;
 	dwMemPos = 0x60;
 	m_nType = MOD_TYPE_S3M;
 	memset(m_szNames,0,sizeof(m_szNames));
-	memcpy(m_szNames[0], psfh->name, 28);
+	memcpy(m_szNames[0], psfh.name, 28);
 	// Speed
-	m_nDefaultSpeed = psfh->speed;
+	m_nDefaultSpeed = psfh.speed;
 	if (m_nDefaultSpeed < 1) m_nDefaultSpeed = 6;
 	if (m_nDefaultSpeed > 0x1F) m_nDefaultSpeed = 0x1F;
 	// Tempo
-	m_nDefaultTempo = psfh->tempo;
+	m_nDefaultTempo = psfh.tempo;
 	if (m_nDefaultTempo < 40) m_nDefaultTempo = 40;
 	if (m_nDefaultTempo > 240) m_nDefaultTempo = 240;
 	// Global Volume
-	m_nDefaultGlobalVolume = psfh->globalvol << 2;
+	m_nDefaultGlobalVolume = psfh.globalvol << 2;
 	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > 256)) m_nDefaultGlobalVolume = 256;
-	m_nSamplePreAmp = psfh->mastervol & 0x7F;
+	m_nSamplePreAmp = psfh.mastervol & 0x7F;
 	// Channels
 	m_nChannels = 4;
 	for (UINT ich=0; ich<32; ich++)
 	{
 		ChnSettings[ich].nPan = 128;
 		ChnSettings[ich].nVolume = 64;
+
 		ChnSettings[ich].dwFlags = CHN_MUTE;
-		if (psfh->channels[ich] != 0xFF)
+		if (psfh.channels[ich] != 0xFF)
 		{
 			m_nChannels = ich+1;
-			UINT b = psfh->channels[ich] & 0x0F;
+			UINT b = psfh.channels[ich] & 0x0F;
 			ChnSettings[ich].nPan = (b & 8) ? 0xC0 : 0x40;
 			ChnSettings[ich].dwFlags = 0;
 		}
 	}
 	if (m_nChannels < 4) m_nChannels = 4;
-	if ((psfh->cwtv < 0x1320) || (psfh->flags & 0x40)) m_dwSongFlags |= SONG_FASTVOLSLIDES;
+	if ((psfh.cwtv < 0x1320) || (psfh.flags & 0x40)) m_dwSongFlags |= SONG_FASTVOLSLIDES;
 	// Reading pattern order
-	UINT iord = psfh->ordnum;
+	UINT iord = psfh.ordnum;
 	if (iord<1) iord = 1;
 	if (iord > MAX_ORDERS) iord = MAX_ORDERS;
 	if (iord)
@@ -255,17 +267,21 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	if ((iord & 1) && (lpStream[dwMemPos] == 0xFF)) dwMemPos++;
 	// Reading file pointers
-	insnum = nins = psfh->insnum;
+	insnum = nins = psfh.insnum;
 	if (insnum >= MAX_SAMPLES) insnum = MAX_SAMPLES-1;
 	m_nSamples = insnum;
-	patnum = npat = psfh->patnum;
+	patnum = npat = psfh.patnum;
 	if (patnum > MAX_PATTERNS) patnum = MAX_PATTERNS;
 	memset(ptr, 0, sizeof(ptr));
 	if (nins+npat)
 	{
 		memcpy(ptr, lpStream+dwMemPos, 2*(nins+npat));
 		dwMemPos += 2*(nins+npat);
-		if (psfh->panning_present == 252)
+		const UINT nLoopEnd = min(256, nins+npat);
+		for (UINT j = 0; j < nLoopEnd; ++j) {
+		        ptr[j] = LittleEndianW(ptr[j]);
+		}
+		if (psfh.panning_present == 252)
 		{
 			const BYTE *chnpan = lpStream+dwMemPos;
 			for (UINT i=0; i<32; i++) if (chnpan[i] & 0x20)
@@ -289,14 +305,14 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		lstrcpy(m_szNames[iSmp], (LPCSTR)&s[0x30]);
 		if ((s[0]==1) && (s[0x4E]=='R') && (s[0x4F]=='S'))
 		{
-			UINT j = *((LPDWORD)(s+0x10));
+			UINT j = LittleEndian(*((LPDWORD)(s+0x10)));
 			if (j > MAX_SAMPLE_LENGTH) j = MAX_SAMPLE_LENGTH;
 			if (j < 4) j = 0;
 			Ins[iSmp].nLength = j;
-			j = *((LPDWORD)(s+0x14));
+			j = LittleEndian(*((LPDWORD)(s+0x14)));
 			if (j >= Ins[iSmp].nLength) j = Ins[iSmp].nLength - 1;
 			Ins[iSmp].nLoopStart = j;
-			j = *((LPDWORD)(s+0x18));
+			j = LittleEndian(*((LPDWORD)(s+0x18)));
 			if (j > MAX_SAMPLE_LENGTH) j = MAX_SAMPLE_LENGTH;
 			if (j < 4) j = 0;
 			if (j > Ins[iSmp].nLength) j = Ins[iSmp].nLength;
@@ -306,11 +322,11 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			Ins[iSmp].nVolume = j << 2;
 			Ins[iSmp].nGlobalVol = 64;
 			if (s[0x1F]&1) Ins[iSmp].uFlags |= CHN_LOOP;
-			j = *((LPDWORD)(s+0x20));
+			j = LittleEndian(*((LPDWORD)(s+0x20)));
 			if (!j) j = 8363;
 			if (j < 1024) j = 1024;
 			Ins[iSmp].nC4Speed = j;
-			insfile[iSmp] = ((DWORD)*((LPWORD)(s+0x0E))) << 4;
+			insfile[iSmp] = ((DWORD)LittleEndianW(*((LPWORD)(s+0x0E)))) << 4;
 			insfile[iSmp] += ((DWORD)(BYTE)s[0x0D]) << 20;
 			if (insfile[iSmp] > dwMemLength) insfile[iSmp] &= 0xFFFF;
 			if ((Ins[iSmp].nLoopStart >= Ins[iSmp].nLoopEnd) || (Ins[iSmp].nLoopEnd - Ins[iSmp].nLoopStart < 8))
@@ -323,7 +339,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		UINT nInd = ((DWORD)ptr[nins+iPat]) << 4;
 		if (nInd + 0x40 > dwMemLength) continue;
-		WORD len = *((WORD *)(lpStream+nInd));
+		WORD len = LittleEndianW(*((WORD *)(lpStream+nInd)));
 		nInd += 2;
 		bool fail = Patterns.Insert(iPat, 64);
 		if ((!len) || (nInd + len > dwMemLength - 6)
@@ -385,7 +401,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading samples
 	for (UINT iRaw=1; iRaw<=insnum; iRaw++) if ((Ins[iRaw].nLength) && (insfile[iRaw]))
 	{
-		UINT flags = (psfh->version == 1) ? RS_PCM8S : RS_PCM8U;
+		UINT flags = (psfh.version == 1) ? RS_PCM8S : RS_PCM8U;
 		if (insflags[iRaw-1] & 4) flags += 5;
 		if (insflags[iRaw-1] & 2) flags |= RSF_STEREO;
 		if (inspack[iRaw-1] == 4) flags = RS_ADPCM4;
@@ -394,7 +410,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
-	if (psfh->flags & 0x10) m_dwSongFlags |= SONG_AMIGALIMITS;
+	if (psfh.flags & 0x10) m_dwSongFlags |= SONG_AMIGALIMITS;
 	return TRUE;
 }
 

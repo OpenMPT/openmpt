@@ -1,16 +1,16 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * This source code is public domain.
+ *
+ * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *
 */
 
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 #pragma pack(1)
 
@@ -41,8 +41,8 @@ typedef struct tagSTMSAMPLE
 // Raw STM header struct:
 typedef struct tagSTMHEADER
 {
-	CHAR songname[20];
-	CHAR trackername[8];	// !SCREAM! for ST 2.xx
+    char songname[20];
+	char trackername[8];	// !SCREAM! for ST 2.xx
 	CHAR unused;			// 0x1A
 	CHAR filetype;			// 1=song, 2=module (only 2 is supported, of course) :)
 	CHAR ver_major;			// Like 2
@@ -97,14 +97,14 @@ BOOL CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 		STMSAMPLE *pStm = &phdr->sample[nIns];  // STM sample data
 		memcpy(pIns->name, pStm->filename, 13);
 		memcpy(m_szNames[nIns+1], pStm->filename, 12);
-		pIns->nC4Speed = pStm->c2spd;
+		pIns->nC4Speed = LittleEndianW(pStm->c2spd);
 		pIns->nGlobalVol = 64;
 		pIns->nVolume = pStm->volume << 2;
 		if (pIns->nVolume > 256) pIns->nVolume = 256;
-		pIns->nLength = pStm->length;
+		pIns->nLength = LittleEndianW(pStm->length);
 		if ((pIns->nLength < 4) || (!pIns->nVolume)) pIns->nLength = 0;
-		pIns->nLoopStart = pStm->loopbeg;
-		pIns->nLoopEnd = pStm->loopend;
+		pIns->nLoopStart = LittleEndianW(pStm->loopbeg);
+		pIns->nLoopEnd = LittleEndianW(pStm->loopend);
 		if ((pIns->nLoopEnd > pIns->nLoopStart) && (pIns->nLoopEnd != 0xFFFF)) pIns->uFlags |= CHN_LOOP;
 	}
 	dwMemPos = sizeof(STMHEADER);
