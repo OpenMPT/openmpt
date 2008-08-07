@@ -55,7 +55,7 @@ const PATTERNFONT gDefaultPatternFont =
 {
 	92,13,	// Column Width & Height
 	0,0,	// Clear location
-	32,207,	// Space Location
+	130,8,	// Space Location.
 	{20, 20, 24, 9, 15},		// Element Widths
 	20,13,	// Numbers 0-F (hex)
 	30,13,	// Numbers 10-19 (dec)
@@ -78,7 +78,7 @@ const PATTERNFONT gSmallPatternFont =
 {
 	70,11,	// Column Width & Height
 	92,0,	// Clear location
-	32,207,	// Space Location
+	130,8,	// Space Location.
 	{16, 14, 18, 7, 11},		// Element Widths
 	108,13,	// Numbers 0-F (hex)
 	120,13,	// Numbers 10-19 (dec)
@@ -294,13 +294,18 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		break;
 	//end rewbs.velocity
 	case ' ':
-		srcx = pfnt->nClrX;
-		srcy = pfnt->nClrY;
+		srcx = pfnt->nSpaceX;
+		srcy = pfnt->nSpaceY;
 		break;
 	case '-':
-		srcx = pfnt->nNoteX + pfnt->nNoteWidth/2;
-		srcy = pfnt->nNoteY + COLUMN_HEIGHT;
+		srcx = pfnt->nAlphaAM_X;
+		srcy = pfnt->nAlphaAM_Y + 15 * COLUMN_HEIGHT;
 		break;
+	case 'b':
+		srcx = pfnt->nAlphaAM_X;
+		srcy = pfnt->nAlphaAM_Y + 14 * COLUMN_HEIGHT;
+		break;
+
 	}
 	m_Dib.TextBlt(x, y, sizex, COLUMN_HEIGHT, srcx+ofsx, srcy);
 }
@@ -326,12 +331,24 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 	} else
 	{
 		if(pTuning)
-		{
+		{   // Drawing custom note names
 			string noteStr = pTuning->GetNoteName(note-NOTE_MIDDLEC);
-			noteStr.resize(3, ' ');
-			DrawLetter(x, y, noteStr[0]);
-			DrawLetter(x + pfnt->nNoteWidth/2, y, noteStr[1]);
-			DrawLetter(x + pfnt->nNoteWidth, y, noteStr[2]);
+			if(noteStr.size() < 3)
+				noteStr.resize(3, ' ');
+			
+			// Hack: Manual tweaking for default/small font displays.
+			if(pfnt == &gDefaultPatternFont)
+			{
+				DrawLetter(x, y, noteStr[0], 7, 0);
+				DrawLetter(x + 7, y, noteStr[1], 6, 0);
+				DrawLetter(x + 13, y, noteStr[2], 7, 1);
+			}
+			else
+			{
+				DrawLetter(x, y, noteStr[0], 5, 0);
+				DrawLetter(x + 5, y, noteStr[1], 5, 0);
+				DrawLetter(x + 10, y, noteStr[2], 6, 0);
+			}
 		}
 		else //Original
 		{
