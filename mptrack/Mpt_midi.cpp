@@ -40,18 +40,18 @@ int ApplyVolumeRelatedMidiSettings(const DWORD& dwParam1, const BYTE midivolume)
 void ApplyTransposeKeyboardSetting(CMainFrame& rMainFrm, DWORD& dwParam1)
 //------------------------------------------------------------------------
 {
-	if ((CMainFrame::m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
-		&& ((dwParam1 & 0x0F) != 9))
+	if ( (CMainFrame::m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
+		&& (GetFromMIDIMsg_Channel(dwParam1) != 9) )
 	{
 		int nTranspose = rMainFrm.GetBaseOctave() - 4;
 		if (nTranspose)
 		{
-			int note = (dwParam1 >> 8) & 0xFF;
+			int note = GetFromMIDIMsg_DataByte1(dwParam1);
 			if (note < 0x80)
 			{
 				note += nTranspose*12;
 				if (note < 0) note = 0;
-				if (note > 119) note = 119;
+				if (note > NOTE_MAX - 1) note = NOTE_MAX - 1;
 
 				// -> CODE#0011
 				// -> DESC="bug fix about transpose midi keyboard option"
