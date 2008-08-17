@@ -22,6 +22,26 @@ enum
 	MIDIEVENT_PITCHBEND			= 0xE,
 };
 
+struct MODMIDICFG
+{
+	CHAR szMidiGlb[9*32];
+	CHAR szMidiSFXExt[16*32];
+	CHAR szMidiZXXExt[128*32];
+};
+typedef MODMIDICFG* LPMODMIDICFG;
+
+enum {
+	MIDIOUT_START=0,
+	MIDIOUT_STOP,
+	MIDIOUT_TICK,
+	MIDIOUT_NOTEON,
+	MIDIOUT_NOTEOFF,
+	MIDIOUT_VOLUME,
+	MIDIOUT_PAN,
+	MIDIOUT_BANKSEL,
+	MIDIOUT_PROGRAM,
+};
+
 
 //=========================
 class CMIDIMappingDirective

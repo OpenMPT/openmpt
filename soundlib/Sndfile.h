@@ -6,294 +6,46 @@
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
 */
+
+#ifndef __SNDFILE_H
+#define __SNDFILE_H
+
 #include "../mptrack/SoundFilePlayConfig.h"
 #include "tuning.h"
-#include "mod_specifications.h"
+#include "modspecifications.h"
 #include <vector>
 #include <bitset>
 #include "midi.h"
 
 using std::bitset;
 
-#ifndef __SNDFILE_H
-#define __SNDFILE_H
 
 #ifndef LPCBYTE
-typedef const BYTE * LPCBYTE;
+	typedef const BYTE * LPCBYTE;
 #endif
 
-// -> CODE#0008
-// -> DESC="#define to set pattern size"
-#define MAX_PATTERN_ROWS	1024
-// -! BEHAVIOUR_CHANGE#0008
-
 #define MOD_AMIGAC2			0x1AB
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-#define MAX_SAMPLE_LENGTH	0x10000000	// 0x04000000 (64MB -> now 256MB)
-// -! BEHAVIOUR_CHANGE#0006
-#define MAX_SAMPLE_RATE		100000
-#define MAX_ORDERS			256
-#define MAX_PATTERNS		240
-#define MAX_SAMPLES			4000
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-#define MAX_INSTRUMENTS		256	//200
-// -! BEHAVIOUR_CHANGE#0006
-//#ifdef FASTSOUNDLIB
-//#define MAX_CHANNELS		80
-//#else
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-#define MAX_CHANNELS		256	//200 //Note: MAX_BASECHANNELS defines max pattern channels
-// -! BEHAVIOUR_CHANGE#0006
-//#endif
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//#ifdef FASTSOUNDLIB
-//#define MAX_BASECHANNELS	64
-//#else
-#define MAX_BASECHANNELS	127	//Max pattern channels.
-//#endif
-// -! BEHAVIOUR_CHANGE#0006
-#define MAX_ENVPOINTS		32
-#define MIN_PERIOD			0x0020
-#define MAX_PERIOD			0xFFFF
-#define MAX_PATTERNNAME		32
-#define MAX_CHANNELNAME		20
 #define MAX_INFONAME		80
-#define MAX_EQ_BANDS		6
-// -> CODE#0006
-// -> DESC="misc quantity changes"
+
 #define MAX_MIXPLUGINS		100	//50
-// -! BEHAVIOUR_CHANGE#0006
 #define MAX_PLUGPRESETS		1000 //rewbs.plugPresets
+#define MAX_INSTRUMENTS		256	//200
+#define MAX_SAMPLES			4000
+#define MAX_PATTERNS		240 //Old maximum patterncount.
+#define MAX_ORDERS			256	//Old maximum ordercount.
 
-#define MOD_TYPE_NONE		0x00
-#define MOD_TYPE_MOD		0x01
-#define MOD_TYPE_S3M		0x02
-#define MOD_TYPE_XM			0x04
-#define MOD_TYPE_MED		0x08
-#define MOD_TYPE_MTM		0x10
-#define MOD_TYPE_IT			0x20
-#define MOD_TYPE_669		0x40
-#define MOD_TYPE_ULT		0x80
-#define MOD_TYPE_STM		0x100
-#define MOD_TYPE_FAR		0x200
-#define MOD_TYPE_WAV		0x400
-#define MOD_TYPE_AMF		0x800
-#define MOD_TYPE_AMS		0x1000
-#define MOD_TYPE_DSM		0x2000
-#define MOD_TYPE_MDL		0x4000
-#define MOD_TYPE_OKT		0x8000
-#define MOD_TYPE_MID		0x10000
-#define MOD_TYPE_DMF		0x20000
-#define MOD_TYPE_PTM		0x40000
-#define MOD_TYPE_DBM		0x80000
-#define MOD_TYPE_MT2		0x100000
-#define MOD_TYPE_AMF0		0x200000
-#define MOD_TYPE_PSM		0x400000
-#define MOD_TYPE_J2B		0x800000
-#define MOD_TYPE_MPT		0x1000000
-#define MOD_TYPE_UMX		0x80000000 // Fake type
-#define MAX_MODTYPE			24
+#ifdef FASTSOUNDLIB
+	#define MAX_CHANNELS		80
+#else
+	#define MAX_CHANNELS		256	//200 //Note: MAX_BASECHANNELS defines max pattern channels
+#endif
+#ifdef FASTSOUNDLIB
+	#define MAX_BASECHANNELS	64
+#else
+	#define MAX_BASECHANNELS	127	//Max pattern channels.
+#endif
 
 
-
-// Channel flags:
-// Bits 0-7:	Sample Flags
-#define CHN_16BIT			0x01
-#define CHN_LOOP			0x02
-#define CHN_PINGPONGLOOP	0x04
-#define CHN_SUSTAINLOOP		0x08
-#define CHN_PINGPONGSUSTAIN	0x10
-#define CHN_PANNING			0x20
-#define CHN_STEREO			0x40
-#define CHN_PINGPONGFLAG	0x80	//When flag is on, bidiloop is processed backwards?
-// Bits 8-31:	Channel Flags
-#define CHN_MUTE			0x100
-#define CHN_KEYOFF			0x200
-#define CHN_NOTEFADE		0x400
-#define CHN_SURROUND		0x800
-#define CHN_NOIDO			0x1000
-#define CHN_HQSRC			0x2000
-#define CHN_FILTER			0x4000
-#define CHN_VOLUMERAMP		0x8000
-#define CHN_VIBRATO			0x10000
-#define CHN_TREMOLO			0x20000
-#define CHN_PANBRELLO		0x40000
-#define CHN_PORTAMENTO		0x80000
-#define CHN_GLISSANDO		0x100000
-#define CHN_VOLENV			0x200000
-#define CHN_PANENV			0x400000
-#define CHN_PITCHENV		0x800000
-#define CHN_FASTVOLRAMP		0x1000000
-#define CHN_EXTRALOUD		0x2000000
-#define CHN_REVERB			0x4000000
-#define CHN_NOREVERB		0x8000000
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-#define CHN_SOLO			0x10000000
-// -! NEW_FEATURE#0012
-
-// -> CODE#0015
-// -> DESC="channels management dlg"
-#define CHN_NOFX			0x20000000
-// -! NEW_FEATURE#0015
-
-#define CHN_SYNCMUTE		0x40000000
-
-#define ENV_VOLUME			0x0001
-#define ENV_VOLSUSTAIN		0x0002
-#define ENV_VOLLOOP			0x0004
-#define ENV_PANNING			0x0008
-#define ENV_PANSUSTAIN		0x0010
-#define ENV_PANLOOP			0x0020
-#define ENV_PITCH			0x0040
-#define ENV_PITCHSUSTAIN	0x0080
-#define ENV_PITCHLOOP		0x0100
-#define ENV_SETPANNING		0x0200
-#define ENV_FILTER			0x0400
-#define ENV_VOLCARRY		0x0800
-#define ENV_PANCARRY		0x1000
-#define ENV_PITCHCARRY		0x2000
-#define ENV_MUTE			0x4000
-
-#define CMD_NONE				0
-#define CMD_ARPEGGIO			1
-#define CMD_PORTAMENTOUP		2
-#define CMD_PORTAMENTODOWN		3
-#define CMD_TONEPORTAMENTO		4
-#define CMD_VIBRATO				5
-#define CMD_TONEPORTAVOL		6
-#define CMD_VIBRATOVOL			7
-#define CMD_TREMOLO				8
-#define CMD_PANNING8			9
-#define CMD_OFFSET				10
-#define CMD_VOLUMESLIDE			11
-#define CMD_POSITIONJUMP		12
-#define CMD_VOLUME				13
-#define CMD_PATTERNBREAK		14
-#define CMD_RETRIG				15
-#define CMD_SPEED				16
-#define CMD_TEMPO				17
-#define CMD_TREMOR				18
-#define CMD_MODCMDEX			19
-#define CMD_S3MCMDEX			20
-#define CMD_CHANNELVOLUME		21
-#define CMD_CHANNELVOLSLIDE		22
-#define CMD_GLOBALVOLUME		23
-#define CMD_GLOBALVOLSLIDE		24
-#define CMD_KEYOFF				25
-#define CMD_FINEVIBRATO			26
-#define CMD_PANBRELLO			27
-#define CMD_XFINEPORTAUPDOWN	28
-#define CMD_PANNINGSLIDE		29
-#define CMD_SETENVPOSITION		30
-#define CMD_MIDI				31
-#define CMD_SMOOTHMIDI			32 //rewbs.smoothVST
-#define CMD_VELOCITY			33 //rewbs.velocity
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
-#define CMD_XPARAM				34
-// -! NEW_FEATURE#0010
-
-// Filter Modes
-#define FLTMODE_UNCHANGED		0xFF
-#define FLTMODE_LOWPASS			0
-#define FLTMODE_HIGHPASS		1
-#define FLTMODE_BANDPASS		2
-
-// Volume Column commands
-#define VOLCMD_VOLUME			1
-#define VOLCMD_PANNING			2
-#define VOLCMD_VOLSLIDEUP		3
-#define VOLCMD_VOLSLIDEDOWN		4
-#define VOLCMD_FINEVOLUP		5
-#define VOLCMD_FINEVOLDOWN		6
-#define VOLCMD_VIBRATOSPEED		7
-#define VOLCMD_VIBRATO			8
-#define VOLCMD_PANSLIDELEFT		9
-#define VOLCMD_PANSLIDERIGHT	10
-#define VOLCMD_TONEPORTAMENTO	11
-#define VOLCMD_PORTAUP			12
-#define VOLCMD_PORTADOWN		13
-#define VOLCMD_VELOCITY			14 //rewbs.velocity
-#define VOLCMD_OFFSET			15 //rewbs.volOff
-
-#define RSF_16BIT		0x04
-#define RSF_STEREO		0x08
-
-#define RS_PCM8S		0	// 8-bit signed
-#define RS_PCM8U		1	// 8-bit unsigned
-#define RS_PCM8D		2	// 8-bit delta values
-#define RS_ADPCM4		3	// 4-bit ADPCM-packed
-#define RS_PCM16D		4	// 16-bit delta values
-#define RS_PCM16S		5	// 16-bit signed
-#define RS_PCM16U		6	// 16-bit unsigned
-#define RS_PCM16M		7	// 16-bit motorola order
-#define RS_STPCM8S		(RS_PCM8S|RSF_STEREO)	// stereo 8-bit signed
-#define RS_STPCM8U		(RS_PCM8U|RSF_STEREO)	// stereo 8-bit unsigned
-#define RS_STPCM8D		(RS_PCM8D|RSF_STEREO)	// stereo 8-bit delta values
-#define RS_STPCM16S		(RS_PCM16S|RSF_STEREO)	// stereo 16-bit signed
-#define RS_STPCM16U		(RS_PCM16U|RSF_STEREO)	// stereo 16-bit unsigned
-#define RS_STPCM16D		(RS_PCM16D|RSF_STEREO)	// stereo 16-bit delta values
-#define RS_STPCM16M		(RS_PCM16M|RSF_STEREO)	// stereo 16-bit signed big endian
-// IT 2.14 compressed samples
-#define RS_IT2148		0x10
-#define RS_IT21416		0x14
-#define RS_IT2158		0x12
-#define RS_IT21516		0x16
-// AMS Packed Samples
-#define RS_AMS8			0x11
-#define RS_AMS16		0x15
-// DMF Huffman compression
-#define RS_DMF8			0x13
-#define RS_DMF16		0x17
-// MDL Huffman compression
-#define RS_MDL8			0x20
-#define RS_MDL16		0x24
-#define RS_PTM8DTO16	0x25
-// Stereo Interleaved Samples
-#define RS_STIPCM8S		(RS_PCM8S|0x40|RSF_STEREO)	// stereo 8-bit signed
-#define RS_STIPCM8U		(RS_PCM8U|0x40|RSF_STEREO)	// stereo 8-bit unsigned
-#define RS_STIPCM16S	(RS_PCM16S|0x40|RSF_STEREO)	// stereo 16-bit signed
-#define RS_STIPCM16U	(RS_PCM16U|0x40|RSF_STEREO)	// stereo 16-bit unsigned
-#define RS_STIPCM16M	(RS_PCM16M|0x40|RSF_STEREO)	// stereo 16-bit signed big endian
-// 24-bit signed
-#define RS_PCM24S		(RS_PCM16S|0x80)			// mono 24-bit signed
-#define RS_STIPCM24S	(RS_PCM16S|0x80|RSF_STEREO)	// stereo 24-bit signed
-// 32-bit
-#define RS_PCM32S		(RS_PCM16S|0xC0)			// mono 32-bit signed
-#define RS_STIPCM32S	(RS_PCM16S|0xC0|RSF_STEREO)	// stereo 32-bit signed
-
-
-
-// NNA types (New Note Action)
-#define NNA_NOTECUT		0
-#define NNA_CONTINUE	1
-#define NNA_NOTEOFF		2
-#define NNA_NOTEFADE	3
-
-// DCT types (Duplicate Check Types)
-#define DCT_NONE		0
-#define DCT_NOTE		1
-#define DCT_SAMPLE		2
-#define DCT_INSTRUMENT	3
-#define DCT_PLUGIN		4 //rewbs.VSTiNNA
-
-// DNA types (Duplicate Note Action)
-#define DNA_NOTECUT		0
-#define DNA_NOTEOFF		1
-#define DNA_NOTEFADE	2
-
-// Mixer Hardware-Dependent features
-#define SYSMIX_ENABLEMMX	0x01
-#define SYSMIX_SLOWCPU		0x02
-#define SYSMIX_FASTCPU		0x04
-#define SYSMIX_MMXEX		0x08
-#define SYSMIX_3DNOW		0x10
-#define SYSMIX_SSE			0x20
 
 // Module flags
 #define SONG_EMBEDMIDICFG	0x0001
@@ -313,497 +65,24 @@ typedef const BYTE * LPCBYTE;
 #define SONG_SURROUNDPAN	0x4000
 #define SONG_EXFILTERRANGE	0x8000
 #define SONG_AMIGALIMITS	0x10000
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-#define SONG_ITPROJECT		0x20000
-#define SONG_ITPEMBEDIH		0x40000
-// -! NEW_FEATURE#0023
-
-// Global Options (Renderer)
-#define SNDMIX_REVERSESTEREO	0x0001
-#define SNDMIX_NOISEREDUCTION	0x0002
-#define SNDMIX_AGC				0x0004
-#define SNDMIX_NORESAMPLING		0x0008
-//      SNDMIX_NOLINEARSRCMODE is the default
-//#define SNDMIX_HQRESAMPLER		0x0010	 //rewbs.resamplerConf: renamed SNDMIX_HQRESAMPLER to SNDMIX_SPLINESRCMODE
-#define SNDMIX_SPLINESRCMODE	0x0010
-#define SNDMIX_MEGABASS			0x0020
-#define SNDMIX_SURROUND			0x0040
-#define SNDMIX_REVERB			0x0080
-#define SNDMIX_EQ				0x0100
-#define SNDMIX_SOFTPANNING		0x0200
-//#define SNDMIX_ULTRAHQSRCMODE	0x0400 	 //rewbs.resamplerConf: renamed SNDMIX_ULTRAHQSRCMODE to SNDMIX_POLYPHASESRCMODE
-#define SNDMIX_POLYPHASESRCMODE	0x0400
-#define SNDMIX_FIRFILTERSRCMODE	0x0800   //rewbs: added SNDMIX_FIRFILTERSRCMODE
-
-//rewbs.resamplerConf: for stuff that applies to cubic spline, polyphase and FIR
-#define SNDMIX_HQRESAMPLER (SNDMIX_SPLINESRCMODE|SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE)
-
-////rewbs.resamplerConf: for stuff that applies to polyphase and FIR
-#define SNDMIX_ULTRAHQSRCMODE (SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE)
-
-// Misc Flags (can safely be turned on or off)
-#define SNDMIX_DIRECTTODISK		0x10000
-#define SNDMIX_ENABLEMMX		0x20000
-#define SNDMIX_NOBACKWARDJUMPS	0x40000
-#define SNDMIX_MAXDEFAULTPAN	0x80000	 // Used by the MOD loader
-#define SNDMIX_MUTECHNMODE		0x100000 // Notes are not played on muted channels
-#define SNDMIX_EMULATE_MIX_BUGS 0x200000 // rewbs.emulateMixBugs
-
-#define MAX_GLOBAL_VOLUME 256
-
-// Resampling modes
-enum {
-	SRCMODE_NEAREST,
-	SRCMODE_LINEAR,
-	SRCMODE_SPLINE,
-	SRCMODE_POLYPHASE,
-	SRCMODE_FIRFILTER, //rewbs.resamplerConf
-	SRCMODE_DEFAULT,
-	NUM_SRC_MODES
-};
-
-enum {
-	ENV_RESET_ALL,
-	ENV_RESET_VOL,
-	ENV_RESET_PAN,
-	ENV_RESET_PITCH,
-	ENV_RELEASE_NODE_UNSET=0xFF,
-	NOT_YET_RELEASED=-1
-};
-
-enum {
-	CHANNEL_ONLY		  = 0,
-	INSTRUMENT_ONLY       = 1,
-	PRIORITISE_INSTRUMENT = 2,
-	PRIORITISE_CHANNEL    = 3,
-	EVEN_IF_MUTED         = false,
-	RESPECT_MUTES         = true,
-};
-
-//Plugin velocity handling options
-enum PLUGVELOCITYHANDLING
-{
-	PLUGIN_VELOCITYHANDLING_CHANNEL = 0,
-	PLUGIN_VELOCITYHANDLING_VOLUME
-};
-
-//Plugin volumecommand handling options
-enum PLUGVOLUMEHANDLING
-{
-	PLUGIN_VOLUMEHANDLING_MIDI = 0,
-	PLUGIN_VOLUMEHANDLING_DRYWET,
-	PLUGIN_VOLUMEHANDLING_IGNORE,
-};
-
-// filtermodes
-/*enum {
-	INST_FILTERMODE_DEFAULT=0,
-	INST_FILTERMODE_HIGHPASS,
-	INST_FILTERMODE_LOWPASS,
-	INST_NUMFILTERMODES
-};*/
-
-// Sample Struct
-struct MODINSTRUMENT
-{
-	UINT nLength,nLoopStart,nLoopEnd;
-		//nLength <-> Number of 'frames'?
-	UINT nSustainStart, nSustainEnd;
-	LPSTR pSample;
-	UINT nC4Speed;
-	WORD nPan;
-	WORD nVolume;
-	WORD nGlobalVol;
-	WORD uFlags;
-	signed char RelativeTone;
-	signed char nFineTune;
-	BYTE nVibType;
-	BYTE nVibSweep;
-	BYTE nVibDepth;
-	BYTE nVibRate;
-	CHAR name[22];
-
-	//Should return the size which pSample is at least.
-	DWORD GetSampleSizeInBytes() const
-	{
-		DWORD len = nLength;
-		if(uFlags & CHN_16BIT) len *= 2;
-		if(uFlags & CHN_STEREO) len *= 2;
-		return len;
-	}
-};
+#define SONG_ITPROJECT		0x20000 //.itp
+#define SONG_ITPEMBEDIH		0x40000 //.itp
 
 
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
+#include "mixer.h"
+#include "modsmp.h"
+#include "modins.h"
+#include "modchannel.h"
+#include "modcommand.h"
+#include "mixplug.h"
+#include "pattern.h"
+#include "patternContainer.h"
+#include "ordertopatterntable.h"
+#include "playbackEventer.h"
 
-/*---------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------
-MODULAR STRUCT DECLARATIONS :
------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------
----------------------------------------------------------------------------------------------*/
-
-// Instrument Struct
-struct INSTRUMENTHEADER
-{
-	UINT nFadeOut;
-	DWORD dwFlags;
-	UINT nGlobalVol;
-	UINT nPan;
-	UINT nVolEnv; //Number of points in the volume envelope
-	UINT nPanEnv;
-	UINT nPitchEnv;
-	BYTE nVolLoopStart;
-	BYTE nVolLoopEnd;
-	BYTE nVolSustainBegin;
-	BYTE nVolSustainEnd;
-	BYTE nPanLoopStart;
-	BYTE nPanLoopEnd;
-	BYTE nPanSustainBegin;
-	BYTE nPanSustainEnd;
-	BYTE nPitchLoopStart;
-	BYTE nPitchLoopEnd;
-	BYTE nPitchSustainBegin;
-	BYTE nPitchSustainEnd;
-	BYTE nNNA;
-	BYTE nDCT;
-	BYTE nDNA;
-	BYTE nPanSwing;
-	BYTE nVolSwing;
-	BYTE nIFC;
-	BYTE nIFR;
-	WORD wMidiBank;
-	BYTE nMidiProgram;
-	BYTE nMidiChannel;
-	BYTE nMidiDrumKey;
-	signed char nPPS; //Pitch to Pan Separator?
-	unsigned char nPPC; //Pitch Centre?
-	WORD VolPoints[MAX_ENVPOINTS];
-	WORD PanPoints[MAX_ENVPOINTS];
-	WORD PitchPoints[MAX_ENVPOINTS];
-	BYTE VolEnv[MAX_ENVPOINTS];
-	BYTE PanEnv[MAX_ENVPOINTS];
-	BYTE PitchEnv[MAX_ENVPOINTS];
-	BYTE NoteMap[128];
-	WORD Keyboard[128];
-	CHAR name[32];
-	CHAR filename[12];
-	BYTE nMixPlug;							//rewbs.instroVSTi
-// -> CODE#0027
-// -> DESC="per-instrument volume ramping setup (refered as attack)"
-	USHORT nVolRamp;
-// -! NEW_FEATURE#0027
-	UINT nResampling;
-	BYTE nCutSwing;
-	BYTE nResSwing;
-	BYTE nFilterMode;
-	BYTE nPitchEnvReleaseNode;
-	BYTE nPanEnvReleaseNode;
-	BYTE nVolEnvReleaseNode;
-	WORD wPitchToTempoLock;
-	BYTE nPluginVelocityHandling;
-	BYTE nPluginVolumeHandling;
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	CTuning* pTuning;
-	static CTuning* s_DefaultTuning;
-
-	INSTRUMENTHEADER(CTuning* const pT = s_DefaultTuning) : pTuning(pT) {}
-
-	void SetTuning(CTuning* pT)
-	{
-		pTuning = pT;
-	}
-
-	
-
-};
-
-//INSTRUMENTHEADER;
-
-// -----------------------------------------------------------------------------------------
-// MODULAR INSTRUMENTHEADER FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
-// -----------------------------------------------------------------------------------------
+// Modular instrumentheader field access.
 extern void WriteInstrumentHeaderStruct(INSTRUMENTHEADER * input, FILE * file);
 extern BYTE * GetInstrumentHeaderFieldPointer(INSTRUMENTHEADER * input, __int32 fcode, __int16 fsize);
-
-// -! NEW_FEATURE#0027
-
-// --------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------
-
-
-// Channel Struct
-typedef struct _MODCHANNEL
-{
-	// First 32-bytes: Most used mixing information: don't change it
-	LPSTR pCurrentSample;		
-	DWORD nPos;
-	DWORD nPosLo;	// actually 16-bit
-	LONG nInc;		// 16.16
-	LONG nRightVol;
-	LONG nLeftVol;
-	LONG nRightRamp;
-	LONG nLeftRamp;
-	// 2nd cache line
-	DWORD nLength;
-	DWORD dwFlags;
-	DWORD nLoopStart;
-	DWORD nLoopEnd;
-	LONG nRampRightVol;
-	LONG nRampLeftVol;
-	LONG nFilter_Y1, nFilter_Y2, nFilter_Y3, nFilter_Y4;
-	LONG nFilter_A0, nFilter_B0, nFilter_B1, nFilter_HP;
-	LONG nROfs, nLOfs;
-	LONG nRampLength;
-	// Information not used in the mixer
-	LPSTR pSample;
-	LONG nNewRightVol, nNewLeftVol;
-	LONG nRealVolume, nRealPan;
-	LONG nVolume, nPan, nFadeOutVol;
-	LONG nPeriod, nC4Speed, nPortamentoDest;
-	INSTRUMENTHEADER *pHeader;
-	MODINSTRUMENT *pInstrument;
-	DWORD nVolEnvPosition, nPanEnvPosition, nPitchEnvPosition;
-	LONG nVolEnvValueAtReleaseJump, nPanEnvValueAtReleaseJump, nPitchEnvValueAtReleaseJump;
-	DWORD nMasterChn, nVUMeter;
-	LONG nGlobalVol, nInsVol;
-	LONG nFineTune, nTranspose;
-	LONG nPortamentoSlide, nAutoVibDepth;
-	UINT nAutoVibPos, nVibratoPos, nTremoloPos, nPanbrelloPos;
-	LONG nVolSwing, nPanSwing;
-	LONG nCutSwing, nResSwing;
-	LONG nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
-	LONG nRestoreResonanceOnNewNote; //Like above
-	LONG nRestoreCutoffOnNewNote; //Like above
-	// 8-bit members
-	BYTE nNote, nNNA;
-	BYTE nNewNote, nNewIns, nCommand, nArpeggio;
-	BYTE nOldVolumeSlide, nOldFineVolUpDown;
-	BYTE nOldPortaUpDown, nOldFinePortaUpDown;
-	BYTE nOldPanSlide, nOldChnVolSlide;
-	BYTE nVibratoType, nVibratoSpeed, nVibratoDepth;
-	BYTE nTremoloType, nTremoloSpeed, nTremoloDepth;
-	BYTE nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
-	BYTE nOldCmdEx, nOldVolParam, nOldTempo;
-	BYTE nOldOffset, nOldHiOffset;
-	BYTE nCutOff, nResonance;
-	BYTE nRetrigCount, nRetrigParam;
-	BYTE nTremorCount, nTremorParam;
-	BYTE nPatternLoop, nPatternLoopCount;
-	BYTE nRowNote, nRowInstr;
-	BYTE nRowVolCmd, nRowVolume;
-	BYTE nRowCommand, nRowParam;
-	BYTE nLeftVU, nRightVU;
-	BYTE nActiveMacro, nFilterMode;
-
-	float m_nPlugParamValueStep;  //rewbs.smoothVST 
-	float m_nPlugInitialParamValue; //rewbs.smoothVST
-
-	typedef UINT VOLUME;
-	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol*4 : nVolume;}
-
-	//-->Variables used to make user-definable tuningmodes work with pattern effects.
-		bool m_ReCalculateFreqOnFirstTick;
-		//If true, freq should be recalculated in ReadNote() on first tick.
-		//Currently used only for vibrato things - using in other context might be 
-		//problematic.
-
-		bool m_CalculateFreq;
-		//To tell whether to calculate frequency.
-
-		CTuning::STEPINDEXTYPE m_PortamentoFineSteps;
-		long m_PortamentoTickSlide;
-
-		UINT m_Freq;
-		float m_VibratoDepth;
-	//<----
-} MODCHANNEL;
-
-#define CHNRESET_CHNSETTINGS	1 //  1 b 
-#define CHNRESET_SETPOS_BASIC	2 // 10 b
-#define	CHNRESET_SETPOS_FULL	7 //111 b
-#define CHNRESET_TOTAL			255 //11111111b
-
-
-struct MODCHANNELSETTINGS
-{
-	UINT nPan;
-	UINT nVolume;
-	DWORD dwFlags;
-	UINT nMixPlugin;
-	CHAR szName[MAX_CHANNELNAME];
-};
-
-#include "modcommand.h"
-
-////////////////////////////////////////////////////////////////////
-// Mix Plugins
-#define MIXPLUG_MIXREADY			0x01	// Set when cleared
-
-class IMixPlugin
-{
-public:
-	virtual int AddRef() = 0;
-	virtual int Release() = 0;
-	virtual void SaveAllParameters() = 0;
-	virtual void RestoreAllParameters(long nProg=-1) = 0; //rewbs.plugDefaultProgram: added param
-	virtual void Process(float *pOutL, float *pOutR, unsigned long nSamples) = 0;
-	virtual void Init(unsigned long nFreq, int bReset) = 0;
-	virtual bool MidiSend(DWORD dwMidiCode) = 0;
-	virtual void MidiCC(UINT nMidiCh, UINT nController, UINT nParam, UINT trackChannel) = 0;
-	virtual void MidiPitchBend(UINT nMidiCh, int nParam, UINT trackChannel) = 0;
-	virtual void MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT note, UINT vol, UINT trackChan) = 0;
-	virtual void HardAllNotesOff() = 0;		//rewbs.VSTCompliance
-	virtual void RecalculateGain() = 0;		
-	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
-	virtual bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn) = 0; //rewbs.VSTiNNA
-	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
-	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST 
-	virtual long Dispatch(long opCode, long index, long value, void *ptr, float opt) =0; //rewbs.VSTCompliance
-	virtual void NotifySongPlaying(bool)=0;	//rewbs.VSTCompliance
-	virtual bool IsSongPlaying()=0;
-	virtual bool IsResumed()=0;
-	virtual void Resume()=0;
-	virtual void Suspend()=0;
-	virtual BOOL isInstrument()=0;
-	virtual BOOL CanRecieveMidiEvents()=0;
-	virtual void SetDryRatio(UINT param)=0;
-
-};
-
-
-												///////////////////////////////////////////////////
-												// !!! bits 8 -> 15 reserved for mixing mode !!! //
-												///////////////////////////////////////////////////
-#define MIXPLUG_INPUTF_MASTEREFFECT				0x01	// Apply to master mix
-#define MIXPLUG_INPUTF_BYPASS					0x02	// Bypass effect
-#define MIXPLUG_INPUTF_WETMIX					0x04	// Wet Mix (dry added)
-// -> CODE#0028
-// -> DESC="effect plugin mixing mode combo"
-#define MIXPLUG_INPUTF_MIXEXPAND				0x08	// [0%,100%] -> [-200%,200%]
-// -! BEHAVIOUR_CHANGE#0028
-
-
-struct SNDMIXPLUGINSTATE
-{
-	DWORD dwFlags;					// MIXPLUG_XXXX
-	LONG nVolDecayL, nVolDecayR;	// Buffer click removal
-	int *pMixBuffer;				// Stereo effect send buffer
-	float *pOutBufferL;				// Temp storage for int -> float conversion
-	float *pOutBufferR;
-};
-typedef SNDMIXPLUGINSTATE* PSNDMIXPLUGINSTATE;
-
-struct SNDMIXPLUGININFO
-{
-	DWORD dwPluginId1;
-	DWORD dwPluginId2;
-	DWORD dwInputRouting;	// MIXPLUG_INPUTF_XXXX
-	DWORD dwOutputRouting;	// 0=mix 0x80+=fx
-	DWORD dwReserved[4];	// Reserved for routing info
-	CHAR szName[32];
-	CHAR szLibraryName[64];	// original DLL name
-}; // Size should be 128 							
-typedef SNDMIXPLUGININFO* PSNDMIXPLUGININFO;
-
-struct SNDMIXPLUGIN
-{
-	const char* GetName() const {return Info.szName;}
-	const char* GetLibraryName();
-	CString GetParamName(const UINT index) const;
-
-	IMixPlugin *pMixPlugin;
-	PSNDMIXPLUGINSTATE pMixState;
-	ULONG nPluginDataSize;
-	PVOID pPluginData;
-	SNDMIXPLUGININFO Info;
-	float fDryRatio;		    // rewbs.dryRatio [20040123]
-	long defaultProgram;		// rewbs.plugDefaultProgram
-}; // rewbs.dryRatio: Hopefully this doesn't need to be a fixed size.
-typedef SNDMIXPLUGIN* PSNDMIXPLUGIN;
-
-//class CSoundFile;
-class CModDoc;
-typedef	BOOL (__cdecl *PMIXPLUGINCREATEPROC)(PSNDMIXPLUGIN, CSoundFile*);
-
-struct SNDMIXSONGEQ
-{
-	ULONG nEQBands;
-	ULONG EQFreq_Gains[MAX_EQ_BANDS];
-};
-typedef SNDMIXSONGEQ* PSNDMIXSONGEQ;
-
-////////////////////////////////////////////////////////////////////////
-// Reverberation
-
-struct SNDMIX_REVERB_PROPERTIES
-{
-	LONG  lRoom;                   // [-10000, 0]      default: -10000 mB
-    LONG  lRoomHF;                 // [-10000, 0]      default: 0 mB
-    FLOAT flDecayTime;             // [0.1, 20.0]      default: 1.0 s
-    FLOAT flDecayHFRatio;          // [0.1, 2.0]       default: 0.5
-    LONG  lReflections;            // [-10000, 1000]   default: -10000 mB
-    FLOAT flReflectionsDelay;      // [0.0, 0.3]       default: 0.02 s
-    LONG  lReverb;                 // [-10000, 2000]   default: -10000 mB
-    FLOAT flReverbDelay;           // [0.0, 0.1]       default: 0.04 s
-    FLOAT flDiffusion;             // [0.0, 100.0]     default: 100.0 %
-    FLOAT flDensity;               // [0.0, 100.0]     default: 100.0 %
-};
-typedef SNDMIX_REVERB_PROPERTIES* PSNDMIX_REVERB_PROPERTIES;
-
-#ifndef NO_REVERB
-
-#define NUM_REVERBTYPES			29
-
-LPCSTR GetReverbPresetName(UINT nPreset);
-
-#endif
-
-////////////////////////////////////////////////////////////////////
-
-enum {
-	MIDIOUT_START=0,
-	MIDIOUT_STOP,
-	MIDIOUT_TICK,
-	MIDIOUT_NOTEON,
-	MIDIOUT_NOTEOFF,
-	MIDIOUT_VOLUME,
-	MIDIOUT_PAN,
-	MIDIOUT_BANKSEL,
-	MIDIOUT_PROGRAM,
-};
-
-
-struct MODMIDICFG
-{
-	CHAR szMidiGlb[9*32];
-	CHAR szMidiSFXExt[16*32];
-	CHAR szMidiZXXExt[128*32];
-};
-typedef MODMIDICFG* LPMODMIDICFG;
-
-// Note definitions
-#define NOTE_MIDDLEC		(5*12+1)
-#define NOTE_KEYOFF			0xFF //255
-#define NOTE_NOTECUT		0xFE //254
-//(Under construction) #define NOTE_PC				0xFD //253, Param Control 'note'. Changes param value on first tick.
-//(Under construction) #define NOTE_PCS				0xFC //252,  Param Control(Smooth) 'note'. Changes param value during the whole row.
-#define NOTE_MAX			120 //Defines maximum notevalue as well as maximum number of notes.
-
-typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
-
-#include "../mptrack/pattern.h"
-#include "../mptrack/patternContainer.h"
-#include "../mptrack/ordertopatterntable.h"
-
-#include "../mptrack/playbackEventer.h"
-
 
 
 class CSoundFile;
@@ -819,11 +98,7 @@ private:
 	const CSoundFile& m_rSndFile;
 };
 
-//Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
-//If changing these, ChangeModTypeTo() might need modification.
-const BYTE MSF_IT_COMPATIBLE_PLAY	= 0;		//IT/MPT
-const BYTE MSF_OLDVOLSWING			= 1;		//IT/MPT
-const BYTE MSF_MIDICC_BUGEMULATION	= 2;		//IT/MPT/XM
+
 
 
 class CTuningCollection;
@@ -921,7 +196,7 @@ public:	// for Editing
     UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
-	//NOTE: m_nCurrentPattern and m_nNextPattern refer to order index - not pattern index.
+	//Note: m_nCurrentPattern and m_nNextPattern refer to orderindex - not patternindex.
 	bool m_bPatternTransitionOccurred;
 	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest,
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
@@ -1322,8 +597,6 @@ inline WORD BigEndianW(WORD x)	{ return (WORD)(((x >> 8) & 0xFF) | ((x << 8) & 0
 #define LittleEndianW(x)		(x)
 #endif
 
-
-
 //////////////////////////////////////////////////////////
 // WAVE format information
 
@@ -1445,32 +718,6 @@ typedef struct WAVEEXTRAHEADER
 
 #pragma pack()
 
-///////////////////////////////////////////////////////////
-// Low-level Mixing functions
-
-#define MIXBUFFERSIZE		512
-#define SCRATCH_BUFFER_SIZE 64 //Used for plug's final processing (cleanup)
-#define MIXING_ATTENUATION	4
-#define VOLUMERAMPPRECISION	12	
-#define FADESONGDELAY		100
-#define EQ_BUFFERSIZE		(MIXBUFFERSIZE)
-#define AGC_PRECISION		10
-#define AGC_UNITY			(1 << AGC_PRECISION)
-
-// Calling conventions
-#ifdef WIN32
-#define MPPASMCALL	__cdecl
-#define MPPFASTCALL	__fastcall
-#else
-#define MPPASMCALL
-#define MPPFASTCALL
-#endif
-
-#define MOD2XMFineTune(k)	((int)( (signed char)((k)<<4) ))
-#define XM2MODFineTune(k)	((int)( (k>>4)&0x0f ))
-
-int _muldiv(long a, long b, long c);
-int _muldivr(long a, long b, long c);
 
 ///////////////////////////////////////////////////////////
 // File Formats Information (name, extension, etc)

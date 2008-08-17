@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "pattern.h"
 #include "patternContainer.h"
-#include "mainfrm.h"
-#include "moddoc.h"
+#include "../mptrack/mainfrm.h"
+#include "../mptrack/moddoc.h"
 
 
 CHANNELINDEX CPattern::GetNumChannels() const

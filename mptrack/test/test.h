@@ -1,7 +1,7 @@
 #ifndef _TEST_H
 #define _TEST_H
 
-//#define ENABLE_TESTS
+#define ENABLE_TESTS
 
 namespace MptTest
 {

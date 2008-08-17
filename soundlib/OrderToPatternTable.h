@@ -1,12 +1,14 @@
 #ifndef ORDERTOPATTERNTABLE_H
 #define ORDERTOPATTERNTABLE_H
 
-#include "serialization_utils.h"
+#include "../mptrack/serialization_utils.h"
 #include <vector>
 using std::vector;
 
 class CSoundFile;
 class COrderToPatternTable;
+
+
 
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 

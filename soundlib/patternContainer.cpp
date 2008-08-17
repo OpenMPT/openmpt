@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "patternContainer.h"
 #include "sndfile.h"
-#include "mainfrm.h"
+#include "../mptrack/mainfrm.h"
 
 int CPatternContainer::Insert(const ROWINDEX rows)
 //---------------------------------------------

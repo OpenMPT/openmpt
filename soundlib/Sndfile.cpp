@@ -406,7 +406,7 @@ CSoundFile::CSoundFile() :
 	m_lpszSongComments = NULL;
 	m_nFreqFactor = m_nTempoFactor = 128;
 	m_nMasterVolume = 128;
-	m_nMinPeriod = 0x20;
+	m_nMinPeriod = MIN_PERIOD;
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
 	m_nSeqOverride = 0;

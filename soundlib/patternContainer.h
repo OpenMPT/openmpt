@@ -3,6 +3,8 @@
 #ifndef PATTERNCONTAINER_H
 #define PATTERNCONTAINER_H
 
+
+
 #include "pattern.h"
 #include <limits>
 

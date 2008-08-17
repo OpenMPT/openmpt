@@ -5,6 +5,7 @@
 
 #include "stdafx.h"
 #include "test.h"
+#include "../../soundlib/Sndfile.h"
 #include "../version.h"
 #include "../misc_util.h"
 
@@ -41,6 +42,7 @@ catch(...)  \
 	
 
 void TestVersion();
+void TestMisc();
 
 
 
@@ -49,8 +51,17 @@ void DoTests()
 //------------
 {
 	DO_TEST(TestVersion);
-
+	DO_TEST(TestMisc);
 	MessageBox(0, "Tests were run", "Testing", MB_ICONINFORMATION);
+}
+
+
+void TestMisc()
+{
+	STATIC_ASSERT(SMP_16BIT == CHN_16BIT);
+	STATIC_ASSERT(SMP_STEREO == CHN_STEREO);
+	STATIC_ASSERT( sizeof(SNDMIXPLUGININFO) == 128 ); //Comment right after the struct said: "Size should be 128"
+	VERIFY_EQUAL( (MAX_BASECHANNELS >= MPTM_SPECS.channelsMax), true );
 }
 
 void TestVersion()

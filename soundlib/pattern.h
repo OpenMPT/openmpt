@@ -8,6 +8,8 @@ using std::vector;
 
 class CPatternContainer;
 
+#define MAX_PATTERNNAME		32
+#define MAX_PATTERN_ROWS	1024
 
 //============
 class CPattern
