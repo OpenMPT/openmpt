@@ -113,6 +113,13 @@ public:
 
 public: //Misc
 	void ChangeModTypeTo(const MODTYPE& newType);
+
+	// Return true iff current module format has given note.
+	// Possible note values: [1, NOTE_MAX], [NOTE_MIN_SPECIAL, NOTE_MAX_SPECIAL]
+    bool HasNote(MODCOMMAND::NOTE) const;
+
+	// Return true iff current module format has given special note(such as note cut).
+	bool HasSpecialNote(MODCOMMAND::NOTE) const;
 	
 	//Return value in seconds.
 	double GetPlaybackTimeAt(ORDERINDEX, ROWINDEX);

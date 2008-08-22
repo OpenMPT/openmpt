@@ -160,7 +160,7 @@ DWORD CSoundFile::InitSysInfo()
 	{
 		CHAR s[64];
 		wsprintf(s, "MODCHANNEL not aligned: sizeof(MODCHANNEL) = %d", sizeof(MODCHANNEL));
-		//::MessageBox(NULL, s, NULL, MB_OK|MB_ICONEXCLAMATION); //disabled by rewbs
+		::MessageBox(NULL, s, NULL, MB_OK|MB_ICONEXCLAMATION);
 	}
 	DWORD dwFastSinc = (DWORD)(LPVOID)gFastSinc;
 	if (dwFastSinc & 7)

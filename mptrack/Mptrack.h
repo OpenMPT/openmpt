@@ -379,9 +379,24 @@ class CVstPlugin;
 void Log(LPCSTR format,...);
 UINT MsgBox(UINT nStringID, CWnd *p=NULL, LPCSTR lpszTitle=NULL, UINT n=MB_OK);
 void ErrorBox(UINT nStringID, CWnd*p=NULL);
+
+// Helper function declarations.
 void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bool librarynames = false);
 void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plugarray);
 void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug);
+
+// Append note names from zero-based range [noteStart, noteEnd] to given combobox.
+void AppendNotesToControl(CComboBox& combobox, const MODCOMMAND::NOTE noteStart, const MODCOMMAND::NOTE noteEnd);
+
+// Append note names to combobox. If pSndFile != nullPrt, appends only notes that are 
+// available in the module type.
+void AppendNotesToControl(CComboBox& combobox, const CSoundFile* const pSndFile = nullptr);
+
+// Append note names of instrument iInstr in rSndFile to combobox. 
+void AppendNotesToControl(CComboBox& combobox, const CSoundFile& rSndFile, const INSTRUMENTINDEX iInstr);
+
+// Returns note name(such as "C-5") of given note using note indecing [1, NOTE_MAX].
+const char* GetNoteStr(const MODCOMMAND::NOTE);
 
 ///////////////////////////////////////////////////
 // Tables
@@ -391,6 +406,14 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug);
 
 extern BYTE gEffectColors[MAX_EFFECTS];
 extern LPCSTR szNoteNames[12];
+extern LPCSTR szDefaultNoteNames[NOTE_MAX];
+LPCSTR const szSpecialNoteNames[NOTE_MAX_SPECIAL-NOTE_MIN_SPECIAL + 1] = {"PCs", "PC", "^^", "=="};
+LPCSTR const szSpecialNoteShortDesc[NOTE_MAX_SPECIAL-NOTE_MIN_SPECIAL + 1] = {"Param control(smooth)", "Param control", "Note Cut", "Note Off"};
+
+// Make sure that szSpecialNoteNames-array includes note string for every special note.
+STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == ARRAYELEMCOUNT(szSpecialNoteNames)); 
+STATIC_ASSERT(ARRAYELEMCOUNT(szSpecialNoteShortDesc) == ARRAYELEMCOUNT(szSpecialNoteNames)); 
+
 extern LPCSTR szHexChar;
 extern LPCSTR gszModCommands;
 extern LPCSTR gszS3mCommands;

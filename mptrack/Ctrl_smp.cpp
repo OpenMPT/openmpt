@@ -235,12 +235,8 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_SpinVibSweep.SetRange(0, 64);
 	m_SpinVibDepth.SetRange(0, 64);
 	m_SpinVibRate.SetRange(0, 64);
-	for (UINT i=BASENOTE_MIN; i<BASENOTE_MAX; i++)
-	{
-		CHAR s[32];
-		wsprintf(s, "%s%d", szNoteNames[i%12], i/12);
-		m_CbnBaseNote.AddString(s);
-	}
+
+	AppendNotesToControl(m_CbnBaseNote, BASENOTE_MIN, BASENOTE_MAX-1);
 
 // -> CODE#0029
 // -> DESC="pitch shifting - time stretching"

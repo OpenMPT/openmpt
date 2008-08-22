@@ -36,6 +36,7 @@ enum {
 	VOL_COLUMN,
 	EFFECT_COLUMN,
 	PARAM_COLUMN,
+	LAST_COLUMN = PARAM_COLUMN
 };
 
 
@@ -164,7 +165,7 @@ public:
 	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
 	void DrawNote(int x, int y, UINT note, CTuning* pTuning = NULL);
 	void DrawInstrument(int x, int y, UINT instr);
-	void DrawVolumeCommand(int x, int y, UINT volcmd, UINT vol);
+	void DrawVolumeCommand(int x, int y, const MODCOMMAND mc);
 	void DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn);
 	void UpdateAllVUMeters(MPTNOTIFICATION *pnotify);
 	void DrawDragSel(HDC hdc);

@@ -1,29 +1,25 @@
 #ifndef MODCOMMAND_H
 #define MODCOMMAND_H
 
-typedef BYTE NOTE;
-typedef BYTE INSTR_NUM;
-typedef BYTE VOLCMD;
-typedef BYTE VOLPARAM;
-typedef BYTE EFFECT_ID;
-typedef BYTE EFFECT_PARAM;
-typedef BYTE EFFECTINDEX;
-
 
 //==============
 class MODCOMMAND
 //==============
 {
 public:
-	//NOTE: Default constructor must construct empty modcommand.
-	MODCOMMAND() : 
-		note(0),
-		instr(0),
-		volcmd(0),
-		command(0),
-		vol(0),
-		param(0)
-		{}
+	typedef BYTE NOTE;
+	typedef BYTE INSTR;
+	typedef BYTE VOL;
+	typedef BYTE VOLCMD;
+	typedef BYTE COMMAND;
+	typedef BYTE PARAM;
+
+	// Defines the maximum value for column data when interpreted as 2-byte value
+	// (for example volcmd and vol). The valid value range is [0, maxColumnValue].
+	enum {maxColumnValue = 999};
+
+	// Returns empty modcommand.
+	static MODCOMMAND Empty();
 
 	inline bool operator==(const MODCOMMAND& mc) const
 	{
@@ -34,6 +30,20 @@ public:
 	{
 		return !(*this == mc);
 	}
+
+	uint16 GetValueVolCol() const {return GetValueVolCol(volcmd, vol);}
+	static uint16 GetValueVolCol(BYTE volcmd, BYTE vol) {return (volcmd << 8) + vol;}
+	void SetValueVolCol(const uint16 val) {volcmd = static_cast<BYTE>(val >> 8); vol = static_cast<BYTE>(val & 0xFF);}
+
+	uint16 GetValueEffectCol() const {return GetValueEffectCol(command, param);}
+	static uint16 GetValueEffectCol(BYTE command, BYTE param) {return (command << 8) + param;}
+	void SetValueEffectCol(const uint16 val) {command = static_cast<BYTE>(val >> 8); param = static_cast<BYTE>(val & 0xFF);}
+
+	// Clears modcommand.
+	void Clear() {memset(this, 0, sizeof(MODCOMMAND));}
+
+	// Returns true if modcommand is empty, false otherwise.
+	bool IsEmpty() const;
 
 public:
 	BYTE note;
@@ -46,6 +56,11 @@ public:
 
 typedef MODCOMMAND* LPMODCOMMAND;
 typedef MODCOMMAND MODCOMMAND_ORIGINAL;
+
+const MODCOMMAND EMPTY_MODCOMMAND = {0,0,0,0,0,0};
+
+inline bool MODCOMMAND::IsEmpty() const {return (*this == EMPTY_MODCOMMAND);}
+inline MODCOMMAND MODCOMMAND::Empty() {return EMPTY_MODCOMMAND;}
 
 
 //Effect command IDs
@@ -109,7 +124,9 @@ typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 #define NOTE_NOTECUT		0xFE //254
 #define NOTE_PC				0xFD //253, Param Control 'note'. Changes param value on first tick.
 #define NOTE_PCS			0xFC //252,  Param Control(Smooth) 'note'. Changes param value during the whole row.
-#define NOTE_MAX			120 //Defines maximum notevalue as well as maximum number of notes.
+#define NOTE_MAX			120  //Defines maximum notevalue(with indecing starting from 1) as well as maximum number of notes.
+#define NOTE_MAX_SPECIAL	NOTE_KEYOFF
+#define NOTE_MIN_SPECIAL	NOTE_PCS
 
 
 #endif

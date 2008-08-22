@@ -23,9 +23,9 @@
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-MODCOMMAND CViewPattern::m_cmdOld;
-MODCOMMAND CViewPattern::m_cmdFind;
-MODCOMMAND CViewPattern::m_cmdReplace;
+MODCOMMAND CViewPattern::m_cmdOld = {0,0,0,0,0,0};
+MODCOMMAND CViewPattern::m_cmdFind = {0,0,0,0,0,0};
+MODCOMMAND CViewPattern::m_cmdReplace = {0,0,0,0,0,0};
 DWORD CViewPattern::m_dwFindFlags = 0;
 DWORD CViewPattern::m_dwReplaceFlags = 0;
 UINT CViewPattern::m_nFindMinChn = 0;
@@ -835,7 +835,7 @@ void CViewPattern::OnShrinkSelection()
 		{
 			UINT chn = i >> 3;
 			MODCOMMAND *blank= &p[row * pSndFile->m_nChannels + chn];
-			*blank = MODCOMMAND();
+			*blank = MODCOMMAND::Empty();
 		}
 	}
 	m_dwBeginSel = startSel;
@@ -872,6 +872,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 
 	PrepareUndo(m_dwBeginSel, m_dwEndSel);
 	DWORD tmp = m_dwEndSel;
+	bool invalidateAllCols = false;
 
 	for (UINT row=(m_dwBeginSel >> 16); row<=(m_dwEndSel >> 16); row++) { // for all selected rows
 		for (UINT i=(m_dwBeginSel & 0xFFFF); i<=(m_dwEndSel & 0xFFFF); i++) if ((i & 7) < 5) { // for all selected cols
@@ -882,8 +883,17 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 			switch(i & 7) {
 				case 0:	// Clear note
 					if (rm.note) {
-						m->note = 0;
-						if (ITStyle) m->instr = 0;
+						if(m->note == NOTE_PCS || m->note == NOTE_PC)
+						{  // Clear whole row if clearing PC note
+							m->Clear();
+							invalidateAllCols = true;
+						}
+						else
+						{
+							m->note = 0;
+							if (ITStyle) m->instr = 0;
+						}
+
 					}
 					break;
 				case 1: // Clear instrument
@@ -911,7 +921,17 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 		} //end selected columns
 	} //end selected rows
 
-	if ((tmp & 7) == 3) tmp++;
+	// If selection ends on effect command column, extent invalidation area to
+	// effect param column as well.
+	if ((tmp & 7) == EFFECT_COLUMN)
+		tmp++;
+
+	// If invalidation on all columns is wanted, extent invalidation area.
+	if(invalidateAllCols)
+		tmp += LAST_COLUMN - (tmp % 8);
+
+	ASSERT(tmp % 8 <= LAST_COLUMN);
+
 	InvalidateArea(m_dwBeginSel, tmp);
 	pModDoc->SetModified();
 	pModDoc->UpdateAllViews(this, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
@@ -1774,7 +1794,7 @@ void CViewPattern::OnEditFindNext()
 				UINT ch = n % pSndFile->m_nChannels;
 				if ((ch < m_nFindMinChn) || (ch > m_nFindMaxChn)) bFound = FALSE;
 			}
-			if (((m_dwFindFlags & PATSEARCH_NOTE) && ((m->note != m_cmdFind.note) && ((m_cmdFind.note != 0xFD) || (!m->note) || (m->note & 0x80))))
+			if (((m_dwFindFlags & PATSEARCH_NOTE) && ((m->note != m_cmdFind.note) && ((m_cmdFind.note != CFindReplaceTab::findAny) || (!m->note) || (m->note & 0x80))))
 			 || ((m_dwFindFlags & PATSEARCH_INSTR) && (m->instr != m_cmdFind.instr))
 			 || ((m_dwFindFlags & PATSEARCH_VOLCMD) && (m->volcmd != m_cmdFind.volcmd))
 			 || ((m_dwFindFlags & PATSEARCH_VOLUME) && (m->vol != m_cmdFind.vol))
@@ -1782,10 +1802,21 @@ void CViewPattern::OnEditFindNext()
 			 || ((m_dwFindFlags & PATSEARCH_PARAM) && (m->param != m_cmdFind.param)))
 			{
 				bFound = FALSE;
-			} else
-			if (((m_dwFindFlags & (PATSEARCH_COMMAND|PATSEARCH_PARAM)) == PATSEARCH_COMMAND) && (bEffectEx))
+			} 
+			else
 			{
-				if ((m->param & 0xF0) != (m_cmdFind.param & 0xF0)) bFound = FALSE;
+				if (((m_dwFindFlags & (PATSEARCH_COMMAND|PATSEARCH_PARAM)) == PATSEARCH_COMMAND) && (bEffectEx))
+				{
+					if ((m->param & 0xF0) != (m_cmdFind.param & 0xF0)) bFound = FALSE;
+				}
+
+				// Ignore modcommands with PC/PCS notes when searching from volume or effect column.
+				if( (m->note == NOTE_PC || m->note == NOTE_PCS)
+					&&
+					m_dwFindFlags & (PATSEARCH_VOLCMD|PATSEARCH_VOLUME|PATSEARCH_COMMAND|PATSEARCH_PARAM))
+				{
+					bFound = FALSE;
+				}
 			}
 			// Found!
 			if (bFound)
@@ -1828,22 +1859,22 @@ void CViewPattern::OnEditFindNext()
 					if ((m_dwReplaceFlags & PATSEARCH_NOTE))
 					{
 						// -1 octave
-						if (m_cmdReplace.note == 0xFA)
+						if (m_cmdReplace.note == CFindReplaceTab::replaceMinusOctave)
 						{
 							if (m->note > 12) m->note -= 12;
 						} else
 						// +1 octave
-						if (m_cmdReplace.note == 0xFB)
+						if (m_cmdReplace.note == CFindReplaceTab::replacePlusOctave)
 						{
-							if (m->note <= 108) m->note += 12;
+							if (m->note <= NOTE_MAX - 12) m->note += 12;
 						} else
 						// Note--
-						if (m_cmdReplace.note == 0xFC)
+						if (m_cmdReplace.note == CFindReplaceTab::replaceMinusOne)
 						{
 							if (m->note > 1) m->note--;
 						} else
 						// Note++
-						if (m_cmdReplace.note == 0xFD)
+						if (m_cmdReplace.note == CFindReplaceTab::replacePlusOne)
 						{
 							if (m->note < NOTE_MAX) m->note++;
 						} else m->note = m_cmdReplace.note;
@@ -1851,12 +1882,12 @@ void CViewPattern::OnEditFindNext()
 					if ((m_dwReplaceFlags & PATSEARCH_INSTR))
 					{
 						// Instr--
-						if (m_cmdReplace.instr == 0xFC)
+						if (m_cmdReplace.instr == CFindReplaceTab::replaceMinusOne)
 						{
 							if (m->instr > 1) m->instr--;
 						} else
 						// Instr++
-						if (m_cmdReplace.instr == 0xFD)
+						if (m_cmdReplace.instr == CFindReplaceTab::replacePlusOne)
 						{
 							if (m->instr < MAX_INSTRUMENTS-1) m->instr++;
 						} else m->instr = m_cmdReplace.instr;
@@ -1896,11 +1927,7 @@ EndSearch:
 	{
 		if (m_dwFindFlags & PATSEARCH_NOTE)
 		{
-			UINT note = m_cmdFind.note;
-			if (note == 0) strcpy(szFind, "..."); else
-			if (note == 0xFE) strcpy(szFind, "^^ "); else
-			if (note == 0xFF) strcpy(szFind, "== "); else
-			wsprintf(szFind, "%s%d", szNoteNames[(note-1) % 12], (note-1)/12);
+			wsprintf(szFind, "%s", GetNoteStr(m_cmdFind.note));
 		} else strcpy(szFind, "???");
 		strcat(szFind, " ");
 		if (m_dwFindFlags & PATSEARCH_INSTR)
@@ -2024,7 +2051,6 @@ void CViewPattern::OnCursorPaste()
 		UINT nCursor = m_dwCursor & 0x07;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODCOMMAND *p = pSndFile->Patterns[m_nPattern] +  m_nRow*pSndFile->m_nChannels + nChn;
-		MODCOMMAND oldcmd = *p;
 
 		switch(nCursor)
 		{
@@ -2156,7 +2182,6 @@ void CViewPattern::Interpolate(UINT type)
 
 	//for all channels where type is selected
 	for (int chnIdx=0; chnIdx<nValidChans; chnIdx++) {
-		MODCOMMAND *pcmd = pSndFile->Patterns[m_nPattern];
 		UINT nchn = validChans[chnIdx];
 		UINT row0 = GetSelectionStartRow();
 		UINT row1 = GetSelectionEndRow();
@@ -2169,28 +2194,51 @@ void CViewPattern::Interpolate(UINT type)
 			PrepareUndo(m_dwBeginSel, m_dwEndSel);
 		}
 
-		int vsrc, vdest, vcmd, verr, distance;
+		bool doPCinterpolation = false;
+
+		int vsrc, vdest, vcmd = 0, verr = 0, distance;
 		distance = row1 - row0;
+
+		const MODCOMMAND srcCmd = *pSndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
+		const MODCOMMAND destCmd = *pSndFile->Patterns[m_nPattern].GetpModCommand(row1, nchn);
+
+		MODCOMMAND::NOTE PCnote = 0;
+		uint16 PCinst = 0, PCparam = 0;
 
 		switch(type) {
 			case NOTE_COLUMN:
-				vsrc = pcmd[row0 * pSndFile->m_nChannels + nchn].note;
-				vdest = pcmd[row1 * pSndFile->m_nChannels + nchn].note;
-				vcmd = pcmd[row0 * pSndFile->m_nChannels + nchn].instr;
-				verr = (distance * 59) / 120;
+				vsrc = srcCmd.note;
+				vdest = destCmd.note;
+				vcmd = srcCmd.instr;
+				verr = (distance * 59) / NOTE_MAX;
 				break;
 			case VOL_COLUMN:
-				vsrc = pcmd[row0 * pSndFile->m_nChannels + nchn].vol;
-				vdest = pcmd[row1 * pSndFile->m_nChannels + nchn].vol;
-				vcmd = pcmd[row0 * pSndFile->m_nChannels + nchn].volcmd;
+				vsrc = srcCmd.vol;
+				vdest = destCmd.vol;
+				vcmd = srcCmd.volcmd;
 				verr = (distance * 63) / 128;
 				break;
 			case PARAM_COLUMN:
 			case EFFECT_COLUMN:
-				vsrc = pcmd[row0 * pSndFile->m_nChannels + nchn].param;
-				vdest = pcmd[row1 * pSndFile->m_nChannels + nchn].param;
-				vcmd = pcmd[row0 * pSndFile->m_nChannels + nchn].command;
-				verr = (distance * 63) / 128;
+				if(srcCmd.note == NOTE_PC || srcCmd.note == NOTE_PCS || destCmd.note == NOTE_PCS || destCmd.note == NOTE_PC)
+				{
+					doPCinterpolation = true;
+					PCnote = (srcCmd.note == NOTE_PC || srcCmd.note == NOTE_PCS) ? srcCmd.note : destCmd.note;
+					vsrc = srcCmd.GetValueEffectCol();
+					vdest = destCmd.GetValueEffectCol();
+					PCparam = srcCmd.GetValueVolCol();
+					if(PCparam == 0) PCparam = destCmd.GetValueVolCol();
+					PCinst = srcCmd.instr;
+					if(PCinst == 0)
+						PCinst = destCmd.instr;
+				}
+				else
+				{
+					vsrc = srcCmd.param;
+					vdest = destCmd.param;
+					vcmd = srcCmd.command;
+					verr = (distance * 63) / 128;
+				}
 				break;
 			default:
 				ASSERT(false);
@@ -2198,7 +2246,8 @@ void CViewPattern::Interpolate(UINT type)
 		}
 
 		if (vdest < vsrc) verr = -verr;
-		pcmd += row0 * pSndFile->m_nChannels + nchn;
+
+		MODCOMMAND* pcmd = pSndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
 
 		for (UINT i=0; i<=distance; i++, pcmd += pSndFile->m_nChannels)	{
 
@@ -2218,10 +2267,22 @@ void CViewPattern::Interpolate(UINT type)
 					}
 					break;
 				case EFFECT_COLUMN:
-					if ((!pcmd->command) || (pcmd->command == vcmd)) {
-						int val = vsrc + ((vdest - vsrc) * (int)i + verr) / distance;
-						pcmd->param = (BYTE)val;
-						pcmd->command = vcmd;
+					if(doPCinterpolation)
+					{	// With PC/PCs notes, copy PCs note and plug index to all rows where
+						// effect interpolation is done.
+						const uint16 val = static_cast<uint16>(vsrc + i * float(vdest - vsrc) / distance);
+						pcmd->note = PCnote;
+						pcmd->instr = PCinst;
+						pcmd->SetValueVolCol(PCparam);
+						pcmd->SetValueEffectCol(val);
+					}
+					else
+					{
+						if ((!pcmd->command) || (pcmd->command == vcmd)) {
+							int val = vsrc + ((vdest - vsrc) * (int)i + verr) / distance;
+							pcmd->param = (BYTE)val;
+							pcmd->command = vcmd;
+						}
 					}
 					break;
 				default:
@@ -3390,6 +3451,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNoteCutOld:		TempEnterNote(NOTE_NOTECUT, true);  return wParam;
 		case kcNoteOff:			TempEnterNote(NOTE_KEYOFF, false); return wParam;
 		case kcNoteOffOld:		TempEnterNote(NOTE_KEYOFF, true);  return wParam;
+		case kcNotePC:			TempEnterNote(NOTE_PC); return wParam;
+		case kcNotePCS:			TempEnterNote(NOTE_PCS); return wParam;
 
 		case kcEditUndo:		OnEditUndo(); return wParam;
 		case kcEditFind:		OnEditFind(); return wParam;
@@ -3478,6 +3541,19 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	return NULL;
 }
 
+#define ENTER_PCNOTE_VALUE(v, method) \
+	{ \
+		if((v >= 0) && (v <= 9)) \
+		{	\
+			uint16 val = p->Get##method##(); \
+			/* Move existing digits to left, drop out leftmost digit and */ \
+			/* push new digit to the least meaning digit. */ \
+			val = (val % 100) * 10 + v; \
+			if(val > MODCOMMAND::maxColumnValue) val = MODCOMMAND::maxColumnValue; \
+			p->Set##method##(val); \
+		} \
+	} 
+
 void CViewPattern::TempEnterVol(int v)
 //------------------------------------
 {
@@ -3488,54 +3564,56 @@ void CViewPattern::TempEnterVol(int v)
 	{
 
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
-
-		MODCOMMAND oldcmd;		// This is the command we are about to overwrite
+		
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		// -- Work out where to put the new data
-		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
-		prowbase = p + m_nRow * pSndFile->m_nChannels;
-		p = prowbase + nChn;
-		oldcmd = *p;
+		MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
+		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
 
-		UINT volcmd = p->volcmd;
-		UINT vol = p->vol;
-		if ((v >= 0) && (v <= 9))
+		if(p->note == NOTE_PC || p->note == NOTE_PCS)
 		{
-			vol = ((vol * 10) + v) % 100;
-			if (!volcmd) volcmd = VOLCMD_VOLUME;
+			ENTER_PCNOTE_VALUE(v, ValueVolCol);
 		}
 		else
-			switch(v+kcSetVolumeStart)
-			{
-			case kcSetVolumeVol:			volcmd = VOLCMD_VOLUME; break;
-			case kcSetVolumePan:			volcmd = VOLCMD_PANNING; break;
-			case kcSetVolumeVolSlideUp:		volcmd = VOLCMD_VOLSLIDEUP; break;
-			case kcSetVolumeVolSlideDown:	volcmd = VOLCMD_VOLSLIDEDOWN; break;
-			case kcSetVolumeFineVolUp:		volcmd = VOLCMD_FINEVOLUP; break;
-			case kcSetVolumeFineVolDown:	volcmd = VOLCMD_FINEVOLDOWN; break;
-			case kcSetVolumeVibratoSpd:		volcmd = VOLCMD_VIBRATOSPEED; break;
-			case kcSetVolumeVibrato:		volcmd = VOLCMD_VIBRATO; break;
-			case kcSetVolumeXMPanLeft:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDELEFT; break;
-			case kcSetVolumeXMPanRight:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDERIGHT; break;
-			case kcSetVolumePortamento:		volcmd = VOLCMD_TONEPORTAMENTO; break;
-			case kcSetVolumeITPortaUp:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTAUP; break;
-			case kcSetVolumeITPortaDown:	if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTADOWN; break;
-			case kcSetVolumeITVelocity:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_VELOCITY; break;	//rewbs.velocity
-			case kcSetVolumeITOffset:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
-			}
-		if ((pSndFile->m_nType & MOD_TYPE_MOD) && (volcmd > VOLCMD_PANNING)) volcmd = vol = 0;
-
-		UINT max = 64;
-		if (volcmd > VOLCMD_PANNING)
 		{
-			max = (pSndFile->m_nType == MOD_TYPE_XM) ? 0x0F : 9;
-		}
+			UINT volcmd = p->volcmd;
+			UINT vol = p->vol;
+			if ((v >= 0) && (v <= 9))
+			{
+				vol = ((vol * 10) + v) % 100;
+				if (!volcmd) volcmd = VOLCMD_VOLUME;
+			}
+			else
+				switch(v+kcSetVolumeStart)
+				{
+				case kcSetVolumeVol:			volcmd = VOLCMD_VOLUME; break;
+				case kcSetVolumePan:			volcmd = VOLCMD_PANNING; break;
+				case kcSetVolumeVolSlideUp:		volcmd = VOLCMD_VOLSLIDEUP; break;
+				case kcSetVolumeVolSlideDown:	volcmd = VOLCMD_VOLSLIDEDOWN; break;
+				case kcSetVolumeFineVolUp:		volcmd = VOLCMD_FINEVOLUP; break;
+				case kcSetVolumeFineVolDown:	volcmd = VOLCMD_FINEVOLDOWN; break;
+				case kcSetVolumeVibratoSpd:		volcmd = VOLCMD_VIBRATOSPEED; break;
+				case kcSetVolumeVibrato:		volcmd = VOLCMD_VIBRATO; break;
+				case kcSetVolumeXMPanLeft:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDELEFT; break;
+				case kcSetVolumeXMPanRight:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDERIGHT; break;
+				case kcSetVolumePortamento:		volcmd = VOLCMD_TONEPORTAMENTO; break;
+				case kcSetVolumeITPortaUp:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTAUP; break;
+				case kcSetVolumeITPortaDown:	if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTADOWN; break;
+				case kcSetVolumeITVelocity:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_VELOCITY; break;	//rewbs.velocity
+				case kcSetVolumeITOffset:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
+				}
+			if ((pSndFile->m_nType & MOD_TYPE_MOD) && (volcmd > VOLCMD_PANNING)) volcmd = vol = 0;
 
-		if (vol > max) vol %= 10;
-		p->volcmd = volcmd;
-		p->vol = vol;
+			UINT max = 64;
+			if (volcmd > VOLCMD_PANNING)
+			{
+				max = (pSndFile->m_nType == MOD_TYPE_XM) ? 0x0F : 9;
+			}
+
+			if (vol > max) vol %= 10;
+			p->volcmd = volcmd;
+			p->vol = vol;
+		}
 
 		if (IsEditingEnabled_bmsg())
 		{
@@ -3574,6 +3652,8 @@ void CViewPattern::TempEnterFX(int c)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 
+	if(!IsEditingEnabled_bmsg()) return;
+
 	if ((pModDoc) && (pMainFrm))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();	
@@ -3581,38 +3661,41 @@ void CViewPattern::TempEnterFX(int c)
 		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
 		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
 
-		//if(p->command != 0 && !overwrite) return true;
-
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		//LPCSTR lpcmd = (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands : gszS3mCommands;
-		if (c)
+		if(p->note == NOTE_PC || p->note == NOTE_PCS)
 		{
-			if ((c == m_cmdOld.command) && (!p->param) && (!p->command)) p->param = m_cmdOld.param;
-			else m_cmdOld.param = 0;
-			m_cmdOld.command = c;
+			ENTER_PCNOTE_VALUE(c, ValueEffectCol);
 		}
-		p->command = c;
-
-		// Check for MOD/XM Speed/Tempo command
-		if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-		&& ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
+		else
 		{
-			UINT maxspd = (pSndFile->m_nType & MOD_TYPE_XM) ? 0x1F : 0x20;
-			p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
-		}
 
-		if (IsEditingEnabled_bmsg())
-		{
-			DWORD sel = (m_nRow << 16) | m_dwCursor;
-			SetCurSel(sel, sel);
-			sel &= ~7;
-			if(oldcmd != *p)
+			//LPCSTR lpcmd = (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands : gszS3mCommands;
+			if (c)
 			{
-				pModDoc->SetModified();
-				InvalidateArea(sel, sel+5);
-				UpdateIndicator();
+				if ((c == m_cmdOld.command) && (!p->param) && (!p->command)) p->param = m_cmdOld.param;
+				else m_cmdOld.param = 0;
+				m_cmdOld.command = c;
 			}
+			p->command = c;
+
+			// Check for MOD/XM Speed/Tempo command
+			if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+			&& ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
+			{
+				UINT maxspd = (pSndFile->m_nType & MOD_TYPE_XM) ? 0x1F : 0x20;
+				p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
+			}
+		}
+
+		DWORD sel = (m_nRow << 16) | m_dwCursor;
+		SetCurSel(sel, sel);
+		sel &= ~7;
+		if(oldcmd != *p)
+		{
+			pModDoc->SetModified();
+			InvalidateArea(sel, sel+5);
+			UpdateIndicator();
 		}
 	}	// end if mainframe & moddoc exist
 }
@@ -3627,37 +3710,41 @@ void CViewPattern::TempEnterFXparam(int v)
 	if ((pModDoc) && (pMainFrm))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND oldcmd;		// This is the command we are about to overwrite
 		
 		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
-		oldcmd = *p;
+		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
 
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		//if(enterAsAbsoluteValue) p->param = v;
-		//else p->param = (p->param << 4) | v;
-
-		p->param = (p->param << 4) | v;
-		if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
-
-/*
-		if (v >= 0 && v <= 9)
+		if(p->note == NOTE_PC || p->note == NOTE_PCS)
 		{
+			ENTER_PCNOTE_VALUE(v, ValueEffectCol);
+		}
+		else
+		{
+
 			p->param = (p->param << 4) | v;
 			if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
-		}
-		else if (v >= 10 && v <= 15)
-		{
-			p->param = (p->param << 4) | (v + 0x0A);
-			if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
-		}
-*/
-		// Check for MOD/XM Speed/Tempo command
-		if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-		 && ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
-		{
-			UINT maxspd = (pSndFile->m_nType & MOD_TYPE_XM) ? 0x1F : 0x20;
-			p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
+
+	/*
+			if (v >= 0 && v <= 9)
+			{
+				p->param = (p->param << 4) | v;
+				if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
+			}
+			else if (v >= 10 && v <= 15)
+			{
+				p->param = (p->param << 4) | (v + 0x0A);
+				if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
+			}
+	*/
+			// Check for MOD/XM Speed/Tempo command
+			if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+			 && ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
+			{
+				UINT maxspd = (pSndFile->m_nType & MOD_TYPE_XM) ? 0x1F : 0x20;
+				p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
+			}
 		}
 
 		if (IsEditingEnabled())
@@ -3930,11 +4017,27 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		UINT nRow = m_nRow;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 
+		// Check whether the module format supports the note.
+		if( pSndFile->HasNote(note) == false )
+			return;
+
 		UINT nChn = GetChanFromCursor(m_dwCursor);
 		BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 		UINT nPlayIns = 0;
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
-		if (note > NOTE_MAX && note < 254) note = NOTE_MAX;
+
+		//Param control 'note'
+		if((note == NOTE_PC || note == NOTE_PCS) && IsEditingEnabled())
+		{
+			pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, nChn)->note = note;
+			const DWORD sel = (nRow << 16) | m_dwCursor;
+			pModDoc->SetModified();
+			InvalidateArea(sel, sel+5);
+			UpdateIndicator();
+			return;
+		}
+
+		if (note > NOTE_MAX && note<254) note = NOTE_MAX;
 
 		bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&		// work out whether we should use
 								(pMainFrm->GetFollowSong(pModDoc) == m_hWnd) &&	// player engine position or
@@ -4106,7 +4209,7 @@ void CViewPattern::TempEnterChord(int note)
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
 		MODCOMMAND oldcmd;		// This is the command we are about to overwrite
-		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
+		UINT nChn = GetChanFromCursor(m_dwCursor);
 		UINT nPlayIns = 0;
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 		bool isSplit;
@@ -4256,16 +4359,12 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 
 		switch(field)
 		{
-			case 0:	p->note = 0; if (ITStyle) p->instr = 0;  break;		//Note
+			case 0: if(p->note == NOTE_PC || p->note == NOTE_PCS) p->Clear(); else {p->note = 0; if (ITStyle) p->instr = 0;}  break;		//Note
 			case 1:	p->instr = 0; break;				//instr
 			case 2:	p->vol = 0; p->volcmd = 0; break;	//Vol
 			case 3:	p->command = 0;	break;				//Effect
 			case 4:	p->param = 0; break;				//Param
-			default: p->note = 0;						//If not specified, delete them all! :)
-					 p->instr = 0;
-					 p->vol = 0; p->volcmd = 0;
-					 p->command = 0;
-					 p->param = 0;
+			default: p->Clear();						//If not specified, delete them all! :)
 		}
 
 		if(IsEditingEnabled_bmsg())
@@ -4790,28 +4889,32 @@ UINT CViewPattern::GetColTypeFromCursor(DWORD cursor) {
 bool CViewPattern::IsInterpolationPossible(UINT startRow, UINT endRow, 
 										   UINT chan, UINT colType, CSoundFile* pSndFile) {
 //---------------------------------------------------------------------------------------
-	bool result = false;
-	MODCOMMAND *pcmd = pSndFile->Patterns[m_nPattern];
-	UINT startRowCmd, endRowCmd;
-
 	if (startRow == endRow) {
 		return false;
 	}
 
+	bool result = false;
+	const MODCOMMAND startRowMC = *pSndFile->Patterns[m_nPattern].GetpModCommand(startRow, chan);
+	const MODCOMMAND endRowMC = *pSndFile->Patterns[m_nPattern].GetpModCommand(endRow, chan);
+	UINT startRowCmd, endRowCmd;
+
+	if(colType == EFFECT_COLUMN && (startRowMC.note == NOTE_PC || startRowMC.note == NOTE_PCS || endRowMC.note == NOTE_PC || endRowMC.note == NOTE_PCS))
+		return true;
+
 	switch (colType) {
 		case NOTE_COLUMN:
-			startRowCmd = pcmd[startRow*pSndFile->m_nChannels+chan].note;
-			endRowCmd = pcmd[endRow*pSndFile->m_nChannels+chan].note;
+			startRowCmd = startRowMC.note;
+			endRowCmd = endRowMC.note;
 			result = (startRowCmd>0 && endRowCmd>0);
 			break;
 		case EFFECT_COLUMN:
-			startRowCmd = pcmd[startRow*pSndFile->m_nChannels+chan].command;
-			endRowCmd = pcmd[endRow*pSndFile->m_nChannels+chan].command;
+			startRowCmd = startRowMC.command;
+			endRowCmd = endRowMC.command;
 			result = (startRowCmd == endRowCmd) && (startRowCmd>0 && endRowCmd>0);
 			break;
 		case VOL_COLUMN:
-			startRowCmd = pcmd[startRow*pSndFile->m_nChannels+chan].volcmd;
-			endRowCmd = pcmd[endRow*pSndFile->m_nChannels+chan].volcmd;
+			startRowCmd = startRowMC.volcmd;
+			endRowCmd = endRowMC.volcmd;
 			result = (startRowCmd == endRowCmd) && (startRowCmd>0 && endRowCmd>0);
 			break;
 		default:

@@ -11,7 +11,7 @@
 #include "midi.h"
 #include "version.h"
 
-#pragma warning(disable:4244)
+//#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 
 
@@ -22,7 +22,7 @@ void getXParam(BYTE command, UINT nPat, UINT nRow, UINT nChannel, CSoundFile *pS
 {
 	if(xparam == NULL || multiplier == NULL) return;
 
-	MODCOMMAND mca;
+	MODCOMMAND mca = MODCOMMAND::Empty();
 	UINT i,xp = 0, ml = 1;
 	int nCmdRow = (int)nRow;
 
@@ -620,24 +620,20 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Note
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
+		combo->InitStorage(150, 4);
 		combo->SetItemData(combo->AddString("..."), 0);
 		if (m_bReplace)
 		{
-			combo->SetItemData(combo->AddString("note-1"), 0xFC);
-			combo->SetItemData(combo->AddString("note+1"), 0xFD);
-			combo->SetItemData(combo->AddString("-1 oct"), 0xFA);
-			combo->SetItemData(combo->AddString("+1 oct"), 0xFB);
+			combo->SetItemData(combo->AddString("note-1"), replaceMinusOne);
+			combo->SetItemData(combo->AddString("note+1"), replacePlusOne);
+			combo->SetItemData(combo->AddString("-1 oct"), replaceMinusOctave);
+			combo->SetItemData(combo->AddString("+1 oct"), replacePlusOctave);
 		} else
 		{
-			combo->SetItemData(combo->AddString("any"), 0xFD);
+			combo->SetItemData(combo->AddString("any"), findAny);
 		}
-		for (UINT nNote=1; nNote<=NOTE_MAX; nNote++)
-		{
-			wsprintf(s, "%s%d", szNoteNames[(nNote-1) % 12], (nNote-1)/12);
-			combo->SetItemData(combo->AddString(s), nNote);
-		}
-		combo->SetItemData(combo->AddString("^^"), 0xFE);
-		combo->SetItemData(combo->AddString("=="), 0xFF);
+		AppendNotesToControl(*combo, pSndFile);
+
 		UINT ncount = combo->GetCount();
 		for (UINT i=0; i<ncount; i++) if (m_nNote == combo->GetItemData(i))
 		{
@@ -651,8 +647,8 @@ BOOL CFindReplaceTab::OnInitDialog()
 		combo->SetItemData(combo->AddString(".."), 0);
 		if (m_bReplace)
 		{
-			combo->SetItemData(combo->AddString("ins-1"), 0xFC);
-			combo->SetItemData(combo->AddString("ins+1"), 0xFD);
+			combo->SetItemData(combo->AddString("ins-1"), replaceMinusOne);
+			combo->SetItemData(combo->AddString("ins+1"), replacePlusOne);
 		}
 		for (UINT n=1; n<MAX_INSTRUMENTS; n++)
 		{
@@ -675,6 +671,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Volume Command
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL)
 	{
+		combo->InitStorage(m_pModDoc->GetNumVolCmds(), 15);
 		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
 		UINT count = m_pModDoc->GetNumVolCmds();
 		for (UINT n=0; n<count; n++)
@@ -693,6 +690,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Volume
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO4)) != NULL)
 	{
+		combo->InitStorage(64, 3);
 		for (UINT n=0; n<=64; n++)
 		{
 			wsprintf(s, "%02d", n);
@@ -708,6 +706,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Command
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO5)) != NULL)
 	{
+		combo->InitStorage(m_pModDoc->GetNumEffects(), 20);
 		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
 		UINT count = m_pModDoc->GetNumEffects();
 		for (UINT n=0; n<count; n++)
@@ -1174,7 +1173,6 @@ void CPageEditNote::UpdateDialog()
 //--------------------------------
 {
 	char s[64];
-	const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 	CComboBox *combo;
 	CSoundFile *pSndFile;
 
@@ -1185,29 +1183,21 @@ void CPageEditNote::UpdateDialog()
 	{	
 		combo->ResetContent();
 		combo->SetItemData(combo->AddString("No note"), 0);
-		for (UINT i=1; i<=NOTE_MAX; i++)
-		{
-			const string temp = pSndFile->GetNoteName(i, m_nInstr);
-			if(temp.size() >= sizeofS)
-				wsprintf(s, "%s", "...");
-			else
-				wsprintf(s, "%s", temp.c_str());
+		AppendNotesToControl(*combo, *pSndFile, m_nInstr);
 
-			combo->SetItemData(combo->AddString(s), i);
-		}
-		if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+		if (m_nNote <= NOTE_MAX)
+			combo->SetCurSel(m_nNote);
+		else
 		{
-			int k = combo->AddString("Note Cut");
-			combo->SetItemData(k, 0xFE);
-			if (m_nNote == 0xFE) combo->SetCurSel(k);
+			for(int i = combo->GetCount() - 1; i >= 0; --i)
+			{
+				if(combo->GetItemData(i) == m_nNote)
+				{
+					combo->SetCurSel(i);
+					break;
+				}
+			}
 		}
-		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
-		{
-			int k = combo->AddString("Note Off");
-			combo->SetItemData(k, 0xFF);
-			if (m_nNote == 0xFF) combo->SetCurSel(k);
-		}
-		if (m_nNote <= NOTE_MAX) combo->SetCurSel(m_nNote);
 	}
 	// Instrument
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
@@ -2294,18 +2284,12 @@ BOOL CChordEditor::OnInitDialog()
 	pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return TRUE;
 	// Fills the shortcut key combo box
-	for (UINT ikey=0; ikey<3*12; ikey++)
-	{
-			wsprintf(s, "%s%d", szNoteNames[ikey % 12], ikey/12);
-			m_CbnShortcut.SetItemData(m_CbnShortcut.AddString(s), ikey);
-	}
+	AppendNotesToControl(m_CbnShortcut, 0, 3*12-1);
+
 	m_CbnShortcut.SetCurSel(0);
 	// Base Note combo box
-	for (UINT ibase=0; ibase<3*12; ibase++)
-	{
-		wsprintf(s, "%s%d", szNoteNames[ibase % 12], ibase / 12);
-		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(s), ibase);
-	}
+	AppendNotesToControl(m_CbnBaseNote, 0, 3*12-1);
+
 	// Minor notes
 	for (int inotes=-1; inotes<24; inotes++)
 	{
@@ -2692,3 +2676,76 @@ VOID CSampleMapDlg::OnOK()
 }
 
 
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+
+
+const char* GetNoteStr(const MODCOMMAND::NOTE nNote)
+//--------------------------------------------------
+{
+	if(nNote == 0)
+		return "...";
+
+	if(nNote >= 1 && nNote <= NOTE_MAX)
+	{
+		return szDefaultNoteNames[nNote-1];
+	}
+	else if(nNote >= NOTE_MIN_SPECIAL && nNote <= NOTE_MAX_SPECIAL)
+	{
+		return szSpecialNoteNames[nNote - NOTE_MIN_SPECIAL];
+	}
+	else
+		return "???";
+}
+
+	
+void AppendNotesToControl(CComboBox& combobox, const MODCOMMAND::NOTE noteStart, const MODCOMMAND::NOTE noteEnd)
+//------------------------------------------------------------------------------------------------------------------
+{
+	const MODCOMMAND::NOTE upperLimit = min(ARRAYELEMCOUNT(szDefaultNoteNames)-1, noteEnd);
+	for(MODCOMMAND::NOTE note = noteStart; note <= upperLimit; ++note)
+		combobox.SetItemData(combobox.AddString(szDefaultNoteNames[note]), note);
+}
+
+
+void AppendNotesToControl(CComboBox& combobox, const CSoundFile* const pSndFile)
+//----------------------------------------------------------------------------------
+{
+	for(MODCOMMAND::NOTE nNote=1; nNote<=NOTE_MAX; nNote++)
+	{
+		combobox.SetItemData(combobox.AddString(szDefaultNoteNames[nNote-1]), nNote);
+	}
+	for(MODCOMMAND::NOTE nNote = NOTE_MIN_SPECIAL-1; nNote++ < NOTE_MAX_SPECIAL;)
+	{
+		if(pSndFile != 0)
+		{
+			if(pSndFile->HasSpecialNote(nNote) == true)
+			{
+				int k = combobox.AddString(szSpecialNoteNames[nNote-NOTE_MIN_SPECIAL]);
+				combobox.SetItemData(k, nNote);
+			}
+		}
+		else
+			combobox.SetItemData(combobox.AddString(szSpecialNoteNames[nNote-NOTE_MIN_SPECIAL]), nNote);
+	}
+}
+
+
+void AppendNotesToControl(CComboBox& combobox, const CSoundFile& rSndFile, const INSTRUMENTINDEX iInstr)
+//----------------------------------------------------------------------------------------------------------
+{
+	for (MODCOMMAND::NOTE i=1; i<=NOTE_MAX; i++)
+	{
+		combobox.SetItemData(combobox.AddString(rSndFile.GetNoteName(i, iInstr).c_str()), i);
+	}
+
+	for(MODCOMMAND::NOTE note = NOTE_MIN_SPECIAL-1; note++ < NOTE_MAX_SPECIAL;)
+	{
+		if(rSndFile.HasSpecialNote(note) == true)
+		{
+			combobox.SetItemData(combobox.AddString(szSpecialNoteShortDesc[note-NOTE_MIN_SPECIAL]), note);
+		}
+	}
+}

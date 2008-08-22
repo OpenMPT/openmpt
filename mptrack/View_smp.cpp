@@ -1903,8 +1903,10 @@ void CViewSample::PlayNote(UINT note)
 			pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend);
 			m_dwStatus |= SMPSTATUS_KEYDOWN;
 			s[0] = 0;
-			if ((note) && (note <= NOTE_MAX)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);
-			pMainFrm->SetInfoText(s);
+			if ((note) && (note <= NOTE_MAX))
+				pMainFrm->SetInfoText(szDefaultNoteNames[note-1]);
+			else
+				pMainFrm->SetInfoText(s);
 		}
 	}
 

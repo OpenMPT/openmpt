@@ -822,11 +822,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	// Pitch/Pan Separation
 	m_SpinPPS.SetRange(-32, +32);
 	// Pitch/Pan Center
-	for (UINT n=0; n<=NOTE_MAX; n++)
-	{
-		wsprintf(s, "%s%d", szNoteNames[n % 12], n/12);
-		m_ComboPPC.SetItemData(m_ComboPPC.AddString(s), n);
-	}
+	AppendNotesToControl(m_ComboPPC, 0, NOTE_MAX-1);
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"

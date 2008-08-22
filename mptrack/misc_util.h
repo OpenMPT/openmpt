@@ -6,7 +6,7 @@
 
 #define ARRAYELEMCOUNT(x) (sizeof(x)/sizeof(x[0]))
 
-//Compile time assert. 
+//Compile time assert. TODO: Replace this with better implementation(e.g. from Boost)
 #define STATIC_ASSERT(expr) typedef char ___staticAssertTypedef[(expr)];
 STATIC_ASSERT(true); //STATIC_ASSERT(false) doesn't necessarily cause error on some compilers
 					 //if used alone. Using STATIC_ASSERT(true) first should make sure it does.

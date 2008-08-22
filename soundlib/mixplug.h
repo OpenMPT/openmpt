@@ -1,6 +1,9 @@
 #ifndef MIXPLUG_H_
 #define MIXPLUG_H_
 
+typedef long PlugParamIndex;
+typedef float PlugParamValue;
+
 // Mix Plugins
 #define MIXPLUG_MIXREADY			0x01	// Set when cleared
 
@@ -22,7 +25,10 @@ public:
 	virtual void RecalculateGain() = 0;		
 	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
 	virtual bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn) = 0; //rewbs.VSTiNNA
+	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
 	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
+	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
+	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
 	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST 
 	virtual long Dispatch(long opCode, long index, long value, void *ptr, float opt) =0; //rewbs.VSTCompliance
 	virtual void NotifySongPlaying(bool)=0;	//rewbs.VSTCompliance
@@ -35,6 +41,16 @@ public:
 	virtual void SetDryRatio(UINT param)=0;
 
 };
+
+
+inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, float diff)
+//------------------------------------------------------------------------
+{
+	float val = GetParameter(nIndex) + diff;
+	if(val > 1) val = 1;
+	else if(val < 0) val = 0;
+	SetParameter(nIndex, val);
+}
 
 
 												///////////////////////////////////////////////////

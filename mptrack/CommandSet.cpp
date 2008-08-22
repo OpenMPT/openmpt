@@ -5,6 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define ENABLE_LOGGING 0
+
+#if(ENABLE_LOGGING)
+	//
+#else
+	#define Log
+#endif
+
+
 bool CCommandSet::s_bShowErrorOnUnknownKeybinding = true;
 
 CCommandSet::CCommandSet(void)
@@ -2288,6 +2297,16 @@ void CCommandSet::SetupCommands()
 	commands[kcVSTGUINextPresetJump].isHidden = false;
 	commands[kcVSTGUINextPresetJump].isDummy = false;
 	commands[kcVSTGUINextPresetJump].Message = "Plugin preset forward jump";
+
+	commands[kcNotePC].UID = 1784;
+	commands[kcNotePC].isHidden = false;
+	commands[kcNotePC].isDummy = false;
+	commands[kcNotePC].Message = "Parameter control(MPTm only)";
+
+	commands[kcNotePCS].UID = 1785;
+	commands[kcNotePCS].isHidden = false;
+	commands[kcNotePCS].isDummy = false;
+	commands[kcNotePCS].Message = "Parameter control(smooth)(MPTm only)";
 
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{

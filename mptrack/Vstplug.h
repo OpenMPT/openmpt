@@ -125,8 +125,8 @@ public:
 	//BOOL SavePreset(LPCSTR lpszFileName);
 	//BOOL LoadPreset(LPCSTR lpszFileName);
 // -! NEW_FEATURE#0002
-	FLOAT GetParameter(UINT nIndex);
-	VOID SetParameter(UINT nIndex, FLOAT fValue);
+	PlugParamValue GetParameter(PlugParamIndex nIndex);
+	VOID SetParameter(PlugParamIndex nIndex, PlugParamValue fValue);
 	VOID GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize);
 	VOID GetParamLabel(UINT nIndex, LPSTR pszLabel);
 	VOID GetParamDisplay(UINT nIndex, LPSTR pszDisplay);

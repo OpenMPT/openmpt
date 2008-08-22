@@ -1478,7 +1478,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 					if(newOrder[k] < m_nChannels) //Case: getting old channel to the new channel order.
 						*tmpdest = tmpsrc[j*m_nChannels+newOrder[k]];
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
-						*tmpdest = MODCOMMAND();
+						*tmpdest = MODCOMMAND::Empty();
 							
 				}
 			}
@@ -2954,5 +2954,38 @@ const CModSpecifications& CSoundFile::GetModSpecifications(const MODTYPE type)
 	const CModSpecifications* p = 0;
 	SetModSpecsPointer(p, type);
 	return *p;
+}
+
+
+bool CSoundFile::HasNote(MODCOMMAND::NOTE note) const
+//----------------------------------------------
+{
+	// TOFIX: This note range is not valid for all modtypes.
+	if(note >= 1 && note <= NOTE_MAX)
+		return true;
+	else
+		return HasSpecialNote(note);
+}
+
+bool CSoundFile::HasSpecialNote(MODCOMMAND::NOTE note) const
+//----------------------------------------------------------
+{
+	if(note < NOTE_MIN_SPECIAL || note > NOTE_MAX_SPECIAL)
+		return false;
+
+	if(GetType() == MOD_TYPE_MPT)
+		return true;
+
+	if(note == NOTE_PC || note == NOTE_PCS)
+		return false;
+
+	if(GetType() == MOD_TYPE_IT)
+		return true;
+	if(GetType() == MOD_TYPE_XM)
+		return (note != NOTE_NOTECUT) ? true : false;
+	if(GetType() == MOD_TYPE_S3M)
+		return (note != NOTE_KEYOFF) ? true : false;
+
+	return false;
 }
 

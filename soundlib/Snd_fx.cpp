@@ -1060,7 +1060,7 @@ BOOL CSoundFile::ProcessEffects()
 
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-	MODCOMMAND *m;
+	MODCOMMAND* m = nullptr;
 // -! NEW_FEATURE#0010
 	for (UINT nChn=0; nChn<m_nChannels; nChn++, pChn++)
 	{
@@ -1074,6 +1074,67 @@ BOOL CSoundFile::ProcessEffects()
 		UINT nStartTick = 0;
 
 		pChn->dwFlags &= ~CHN_FASTVOLRAMP;
+
+		//Process Plug Parameter Control
+		if(pChn->nRowNote == NOTE_PC)
+		{
+			const PLUGINDEX plug = pChn->nRowInstr;
+			const PlugParamIndex plugparam = MODCOMMAND::GetValueVolCol(pChn->nRowVolCmd, pChn->nRowVolume);
+			const PlugParamValue value = MODCOMMAND::GetValueEffectCol(pChn->nRowCommand, pChn->nRowParam) / PlugParamValue(MODCOMMAND::maxColumnValue);
+
+			if(plug > 0 && plug <= MAX_MIXPLUGINS && m_MixPlugins[plug-1].pMixPlugin)
+				m_MixPlugins[plug-1].pMixPlugin->SetParameter(plugparam, value);
+		}
+
+		// Handle continuous (Plug) Parameter Control.
+		// Row data is cleared after first tick so on following
+		// ticks using channels m_nPlugParamValueStep to identify
+		// the need for parameter control. The condition cmd == 0
+		// is to make sure that m_nPlugParamValueStep != 0 because 
+		// of NOTE_PCS, not because of macro.
+		if(pChn->nRowNote == NOTE_PCS || (cmd == 0 && pChn->m_nPlugParamValueStep != 0))
+		{
+			const bool isFirstTick = (m_dwSongFlags & SONG_FIRSTTICK) != 0;
+			if(isFirstTick)
+				pChn->m_RowPlug = pChn->nRowInstr;
+			const PLUGINDEX nPlug = pChn->m_RowPlug;
+			const bool hasValidPlug = (nPlug > 0 && nPlug <= MAX_MIXPLUGINS && m_MixPlugins[nPlug-1].pMixPlugin);
+			if(hasValidPlug)
+			{
+				if(isFirstTick)
+					pChn->m_RowPlugParam = MODCOMMAND::GetValueVolCol(pChn->nRowVolCmd, pChn->nRowVolume);
+				const PlugParamIndex plugparam = pChn->m_RowPlugParam;
+				if(isFirstTick)
+				{
+					PlugParamValue targetvalue = MODCOMMAND::GetValueEffectCol(pChn->nRowCommand, pChn->nRowParam) / PlugParamValue(MODCOMMAND::maxColumnValue);
+					// Hack: Use m_nPlugInitialParamValue to store the _target_ value, not initial.
+					pChn->m_nPlugInitialParamValue = targetvalue;
+					pChn->m_nPlugParamValueStep = (targetvalue - m_MixPlugins[nPlug-1].pMixPlugin->GetParameter(plugparam)) / float(m_nMusicSpeed);
+				}
+				if(m_nTickCount + 1 == m_nMusicSpeed)
+				{	// On last tick, set parameter exactly to target value.
+					// Note: m_nPlugInitialParamValue is used to store the target value,
+					//		 not the initial value as the name suggests.
+					m_MixPlugins[nPlug-1].pMixPlugin->SetParameter(plugparam, pChn->m_nPlugInitialParamValue);
+				}
+				else
+					m_MixPlugins[nPlug-1].pMixPlugin->ModifyParameter(plugparam, pChn->m_nPlugParamValueStep);
+			}
+		}
+
+		// Apart from changing parameters, parameter control notes are intended to be 'invisible'.
+		// To achieve this, clearing the note data so that rest of the process sees the row as empty row.
+		if(pChn->nRowNote == NOTE_PC || pChn->nRowNote == NOTE_PCS)
+		{
+			pChn->ClearRowCmd();
+			instr = 0;
+			volcmd = 0;
+			vol = 0;
+			cmd = 0;
+			param = 0;
+			bPorta = false;
+		}
+
 		// Process special effects (note delay, pattern delay, pattern loop)
 		if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
@@ -1126,7 +1187,7 @@ BOOL CSoundFile::ProcessEffects()
 			// XM: Key-Off + Sample == Note Cut
 			if (m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM|MOD_TYPE_MT2))
 			{
-				if ((note == 0xFF) && ((!pChn->pHeader) || (!(pChn->pHeader->dwFlags & ENV_VOLUME))))
+				if ((note == NOTE_KEYOFF) && ((!pChn->pHeader) || (!(pChn->pHeader->dwFlags & ENV_VOLUME))))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					pChn->nVolume = 0;

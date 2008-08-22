@@ -9,6 +9,9 @@
 #include "../version.h"
 #include "../misc_util.h"
 
+
+STATIC_ASSERT(sizeof(MODCOMMAND_ORIGINAL) == 6);
+
 #ifdef ENABLE_TESTS
 
 namespace MptTest

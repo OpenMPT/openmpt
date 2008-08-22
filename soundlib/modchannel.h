@@ -1,5 +1,5 @@
-#ifndef __MODCHANNEL_H
-#define __MODCHANNEL_H
+#ifndef MODCHANNEL_H
+#define MODCHANNEL_H
 
 #define MAX_GLOBAL_VOLUME	256
 #define MIN_PERIOD			0x0020
@@ -121,8 +121,13 @@ typedef struct _MODCHANNEL
 	BYTE nLeftVU, nRightVU;
 	BYTE nActiveMacro, nFilterMode;
 
-	float m_nPlugParamValueStep;  //rewbs.smoothVST 
+	float m_nPlugParamValueStep;	//rewbs.smoothVST 
 	float m_nPlugInitialParamValue; //rewbs.smoothVST
+	long m_RowPlugParam;			//NOTE_PCs memory.
+	PLUGINDEX m_RowPlug;			//NOTE_PCs memory.
+
+
+	void ClearRowCmd() {nRowNote = 0; nRowInstr = 0; nRowVolCmd = 0; nRowVolume = 0; nRowCommand = 0; nRowParam = 0;}
 
 	typedef UINT VOLUME;
 	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol*4 : nVolume;}
@@ -146,7 +151,7 @@ typedef struct _MODCHANNEL
 	// Important: Objects of this class are memset to zero in some places in the code. Before those
 	//			  are replaced with same other style of resetting the object, only types that can safely
 	//			  be memset can be used in this struct.
-
+	char pad[22];
 } MODCHANNEL;
 
 #define MAX_CHANNELNAME		20

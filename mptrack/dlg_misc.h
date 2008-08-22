@@ -133,6 +133,23 @@ public:
 	UINT m_nNote, m_nInstr, m_nVolCmd, m_nVol, m_nCommand, m_nParam, m_nMinChannel, m_nMaxChannel;
 	DWORD m_dwFlags;
 
+	enum findItem
+	{
+		findAny = NOTE_MIN_SPECIAL - 1
+	};
+
+
+	enum replaceItem
+	{
+		replaceMinusOctave = NOTE_MIN_SPECIAL - 1,
+		replacePlusOctave = NOTE_MIN_SPECIAL - 2,
+		replaceMinusOne = NOTE_MIN_SPECIAL - 3,
+		replacePlusOne = NOTE_MIN_SPECIAL - 4
+	};
+
+	// Make sure there's unused notes between NOTE_MAX and NOTE_MIN_SPECIAL.
+	STATIC_ASSERT(NOTE_MIN_SPECIAL - 4 > NOTE_MAX);
+
 public:
 	CFindReplaceTab(UINT nIDD, BOOL bReplaceTab, CModDoc *pModDoc):CPropertyPage(nIDD) { m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
 

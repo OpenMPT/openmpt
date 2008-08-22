@@ -139,8 +139,6 @@ struct INSTRUMENTHEADER
 	CTuning* pTuning;
 	static CTuning* s_DefaultTuning;
 
-	INSTRUMENTHEADER(CTuning* const pT = s_DefaultTuning) : pTuning(pT) {}
-
 	void SetTuning(CTuning* pT) {pTuning = pT;}
 };
 

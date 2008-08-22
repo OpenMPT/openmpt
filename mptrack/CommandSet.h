@@ -431,7 +431,9 @@ enum CommandID
 	kcNoteOff,
 	kcNoteCutOld,
 	kcNoteOffOld,
-	kcEndNoteMisc=kcNoteOffOld,
+	kcNotePC,
+	kcNotePCS,
+	kcEndNoteMisc=kcNotePCS,
 
 
 	//Set instruments

@@ -189,11 +189,8 @@ BOOL CCtrlPatterns::OnInitDialog()
 	//CHAR s[8];
 	CHAR s[10];
 	
-	for(int i = 0 ; i < NOTE_MAX ; i++){
-		wsprintf(s, "%s%d", szNoteNames[i % 12], i/12);
-		int n = m_CbnSplitNote.AddString(s);
-		m_CbnSplitNote.SetItemData(n, i);
-	}
+	AppendNotesToControl(m_CbnSplitNote, 0, NOTE_MAX - 1);
+	
 	m_nSplitInstrument = 0;
 	m_nSplitNote = 60;
 	m_CbnSplitNote.SetCurSel(m_nSplitNote);

@@ -19,6 +19,18 @@ static char THIS_FILE[] = __FILE__;
 
 #define str_mptm_conversion_warning		GetStrI18N(_TEXT("Conversion from mptm to any other moduletype may makes certain features unavailable and is not guaranteed to work properly. Do the conversion anyway?"))
 
+const size_t Pow10Table[10] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
+
+// Return D'th digit(character) of given value.
+// GetDigit<0>(123) == '3'
+// GetDigit<1>(123) == '2'
+// GetDigit<2>(123) == '1'
+template<BYTE D>
+inline TCHAR GetDigit(const size_t val)
+{
+	return (D > 9) ? '0' : 48 + ((val / Pow10Table[D]) % 10);
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // Module type conversion
@@ -1492,6 +1504,8 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 						case 0:		p[1] = p[2] = p[3] = '.'; break;
 						case NOTE_KEYOFF:	p[1] = p[2] = p[3] = '='; break;
 						case NOTE_NOTECUT:	p[1] = p[2] = p[3] = '^'; break;
+						case NOTE_PC: p[1] = 'P'; p[2] = 'C'; p[3] = ' '; break;
+						case NOTE_PCS: p[1] = 'P'; p[2] = 'C'; p[3] = 'S'; break;
 						default:
 							p[1] = szNoteNames[(note-1) % 12][0];
 							p[2] = szNoteNames[(note-1) % 12][1];
@@ -1519,12 +1533,22 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 					ncursor++;
 					if ((ncursor >= colmin) && (ncursor <= colmax))
 					{
-						if ((m->volcmd) && (m->volcmd <= MAX_VOLCMDS))
+						if(m->note == NOTE_PC || m->note == NOTE_PCS)
 						{
-							p[6] = gszVolCommands[m->volcmd];
-							p[7] = '0' + (m->vol / 10);
-							p[8] = '0' + (m->vol % 10);
-						} else p[6] = p[7] = p[8] = '.';
+							const uint16 val = m->GetValueVolCol();
+							p[6] = GetDigit<2>(val);
+							p[7] = GetDigit<1>(val);
+							p[8] = GetDigit<0>(val);
+						}
+						else
+						{
+							if ((m->volcmd) && (m->volcmd <= MAX_VOLCMDS))
+							{
+								p[6] = gszVolCommands[m->volcmd];
+								p[7] = '0' + (m->vol / 10);
+								p[8] = '0' + (m->vol % 10);
+							} else p[6] = p[7] = p[8] = '.';
+						}
 					} else
 					{
 						p[6] = p[7] = p[8] = ' ';
@@ -1534,18 +1558,28 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 					if (((ncursor >= colmin) && (ncursor <= colmax))
 					 || ((ncursor+1 >= colmin) && (ncursor+1 <= colmax)))
 					{
-						if (m->command)
+						if(m->note == NOTE_PC || m->note == NOTE_PCS)
 						{
-							if (m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
-								p[9] = gszS3mCommands[m->command];
-							else
-								p[9] = gszModCommands[m->command];
-						} else p[9] = '.';
-						if (m->param)
+							const uint16 val = m->GetValueEffectCol();
+							p[9] = GetDigit<2>(val);
+							p[10] = GetDigit<1>(val);
+							p[11] = GetDigit<0>(val);
+						}
+						else
 						{
-							p[10] = szHexChar[m->param >> 4];
-							p[11] = szHexChar[m->param & 0x0F];
-						} else p[10] = p[11] = '.';
+							if (m->command)
+							{
+								if (m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+									p[9] = gszS3mCommands[m->command];
+								else
+									p[9] = gszModCommands[m->command];
+							} else p[9] = '.';
+							if (m->param)
+							{
+								p[10] = szHexChar[m->param >> 4];
+								p[11] = szHexChar[m->param & 0x0F];
+							} else p[10] = p[11] = '.';
+						}
 					} else
 					{
 						p[9] = p[10] = p[11] = ' ';
@@ -1636,6 +1670,13 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 							m[col].note = 0;
 							if (s[0] == '=') m[col].note = NOTE_KEYOFF; else
 							if (s[0] == '^') m[col].note = NOTE_NOTECUT; else
+							if (s[0] == 'P')
+							{
+								if(s[2] == 'S')
+									m[col].note = NOTE_PCS;
+								else
+									m[col].note = NOTE_PC;
+							} else
 							if (s[0] != '.')
 							{
 								for (UINT i=0; i<12; i++)
@@ -1663,68 +1704,92 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 						{
 							if (s[5] != '.')
 							{
-								m[col].volcmd = 0;
-								for (UINT i=1; i<MAX_VOLCMDS; i++)
+								if(m[col].note == NOTE_PCS || m[col].note == NOTE_PC)
 								{
-									if (s[5] == gszVolCommands[i])
-									{
-										m[col].volcmd = i;
-										break;
-									}
+									char val[4];
+									memcpy(val, s+5, 3);
+									val[3] = 0;
+									m[col].SetValueVolCol(ConvertStrTo<uint16>(val));
 								}
-								m[col].vol = (s[6]-'0')*10 + (s[7]-'0');
-							} else m[col].volcmd = m[col].vol = 0;
-						}
-						if (s[8] > ' ' && (!mix || ((!ITStyleMix && origModCmd.command==0) || 
-												     (ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
-						{
-							m[col].command = 0;
-							if (s[8] != '.')
-							{
-								LPCSTR psc = (bS3M) ? gszS3mCommands : gszModCommands;
-								for (UINT i=1; i<MAX_EFFECTS; i++)
-								{
-									if ((s[8] == psc[i]) && (psc[i] != '?')) m[col].command = i;
-								}
-							}
-						}
-						// Effect value
-						if (s[9] > ' ' && (!mix || ((!ITStyleMix && origModCmd.param==0) || 
-													(ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
-						{
-							m[col].param = 0;
-							if (s[9] != '.')
-							{
-								for (UINT i=0; i<16; i++)
-								{
-									if (s[9] == szHexChar[i]) m[col].param |= (i<<4);
-									if (s[10] == szHexChar[i]) m[col].param |= i;
-								}
-							}
-						}
-						// Checking command
-						if (m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-						{
-							switch (m[col].command)
-							{
-							case CMD_SPEED:
-							case CMD_TEMPO:
-								if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
 								else
 								{
-									if ((m[col].command == CMD_SPEED) && (m[col].param > spdmax)) m[col].param = CMD_TEMPO; else
-									if ((m[col].command == CMD_TEMPO) && (m[col].param <= spdmax)) m[col].param = CMD_SPEED;
+									m[col].volcmd = 0;
+									for (UINT i=1; i<MAX_VOLCMDS; i++)
+									{
+										if (s[5] == gszVolCommands[i])
+										{
+											m[col].volcmd = i;
+											break;
+										}
+									}
+									m[col].vol = (s[6]-'0')*10 + (s[7]-'0');
 								}
-								break;
-							}
-						} else
+							} else m[col].volcmd = m[col].vol = 0;
+						}
+						
+						if(m[col].note == NOTE_PCS || m[col].note == NOTE_PC)
 						{
-							switch (m[col].command)
+							if(s[8] != '.')
 							{
-							case CMD_SPEED:
-							case CMD_TEMPO:
-								if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
-								break;
+								char val[4];
+								memcpy(val, s+8, 3);
+								val[3] = 0;
+								m[col].SetValueEffectCol(ConvertStrTo<uint16>(val));
+							}
+						}
+						else
+						{
+							if (s[8] > ' ' && (!mix || ((!ITStyleMix && origModCmd.command==0) || 
+														(ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
+							{
+								m[col].command = 0;
+								if (s[8] != '.')
+								{
+									LPCSTR psc = (bS3M) ? gszS3mCommands : gszModCommands;
+									for (UINT i=1; i<MAX_EFFECTS; i++)
+									{
+										if ((s[8] == psc[i]) && (psc[i] != '?')) m[col].command = i;
+									}
+								}
+							}
+							// Effect value
+							if (s[9] > ' ' && (!mix || ((!ITStyleMix && origModCmd.param==0) || 
+														(ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
+							{
+								m[col].param = 0;
+								if (s[9] != '.')
+								{
+									for (UINT i=0; i<16; i++)
+									{
+										if (s[9] == szHexChar[i]) m[col].param |= (i<<4);
+										if (s[10] == szHexChar[i]) m[col].param |= i;
+									}
+								}
+							}
+							// Checking command
+							if (m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
+							{
+								switch (m[col].command)
+								{
+								case CMD_SPEED:
+								case CMD_TEMPO:
+									if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
+									else
+									{
+										if ((m[col].command == CMD_SPEED) && (m[col].param > spdmax)) m[col].param = CMD_TEMPO; else
+										if ((m[col].command == CMD_TEMPO) && (m[col].param <= spdmax)) m[col].param = CMD_SPEED;
+									}
+									break;
+								}
+							} else
+							{
+								switch (m[col].command)
+								{
+								case CMD_SPEED:
+								case CMD_TEMPO:
+									if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
+									break;
+								}
 							}
 						}
 					}

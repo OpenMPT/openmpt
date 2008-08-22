@@ -1928,11 +1928,11 @@ VOID CVstPlugin::SetCurrentProgram(UINT nIndex)
 }
 
 
-FLOAT CVstPlugin::GetParameter(UINT nIndex)
-//-----------------------------------------
+PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
+//------------------------------------------------------------
 {
 	FLOAT fResult = 0;
-	if ((m_pEffect) && ((long)nIndex < m_pEffect->numParams) && (m_pEffect->getParameter))
+	if ((m_pEffect) && (nIndex < m_pEffect->numParams) && (m_pEffect->getParameter))
 	{
 		try {
 			fResult = m_pEffect->getParameter(m_pEffect, nIndex);
@@ -1951,11 +1951,11 @@ FLOAT CVstPlugin::GetParameter(UINT nIndex)
 }
 
 
-VOID CVstPlugin::SetParameter(UINT nIndex, FLOAT fValue)
-//------------------------------------------------------
+VOID CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
+//-------------------------------------------------------------------------
 {
 	try {
-		if ((m_pEffect) && ((long)nIndex < m_pEffect->numParams) && (m_pEffect->setParameter))
+		if ((m_pEffect) && (nIndex < m_pEffect->numParams) && (m_pEffect->setParameter))
 		{
 			if ((fValue >= 0.0f) && (fValue <= 1.0f))
 				m_pEffect->setParameter(m_pEffect, nIndex, fValue);
