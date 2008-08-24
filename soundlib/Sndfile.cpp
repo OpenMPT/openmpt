@@ -391,7 +391,7 @@ CSoundFile::CSoundFile() :
 	PatternSize(*this), Patterns(*this),
 	Order(*this),
 	m_PlaybackEventer(*this),
-	m_pModSpecs(&IT_MPTEXT_SPECS),
+	m_pModSpecs(&ModSpecs::it_ext),
 	m_MIDIMapper(*this)
 //----------------------
 {
@@ -2867,24 +2867,24 @@ void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const 
 	switch(type)
 	{
 		case MOD_TYPE_MPT:
-			pModSpecs = &MPTM_SPECS;
+			pModSpecs = &ModSpecs::mptm;
 		break;
 
 		case MOD_TYPE_IT:
-			pModSpecs = &IT_MPTEXT_SPECS;
+			pModSpecs = &ModSpecs::it_ext;
 		break;
 
 		case MOD_TYPE_XM:
-			pModSpecs = &XM_MPTEXT_SPECS;
+			pModSpecs = &ModSpecs::xm_ext;
 		break;
 
 		case MOD_TYPE_S3M:
-			pModSpecs = &S3M_MPTEXT_SPECS;
+			pModSpecs = &ModSpecs::s3m_ext;
 		break;
 
 		case MOD_TYPE_MOD:
 		default:
-			pModSpecs = &MOD_MPTEXT_SPECS;
+			pModSpecs = &ModSpecs::mod_ext;
 			break;
 	}
 }
@@ -2954,38 +2954,5 @@ const CModSpecifications& CSoundFile::GetModSpecifications(const MODTYPE type)
 	const CModSpecifications* p = 0;
 	SetModSpecsPointer(p, type);
 	return *p;
-}
-
-
-bool CSoundFile::HasNote(MODCOMMAND::NOTE note) const
-//----------------------------------------------
-{
-	// TOFIX: This note range is not valid for all modtypes.
-	if(note >= 1 && note <= NOTE_MAX)
-		return true;
-	else
-		return HasSpecialNote(note);
-}
-
-bool CSoundFile::HasSpecialNote(MODCOMMAND::NOTE note) const
-//----------------------------------------------------------
-{
-	if(note < NOTE_MIN_SPECIAL || note > NOTE_MAX_SPECIAL)
-		return false;
-
-	if(GetType() == MOD_TYPE_MPT)
-		return true;
-
-	if(note == NOTE_PC || note == NOTE_PCS)
-		return false;
-
-	if(GetType() == MOD_TYPE_IT)
-		return true;
-	if(GetType() == MOD_TYPE_XM)
-		return (note != NOTE_NOTECUT) ? true : false;
-	if(GetType() == MOD_TYPE_S3M)
-		return (note != NOTE_KEYOFF) ? true : false;
-
-	return false;
 }
 

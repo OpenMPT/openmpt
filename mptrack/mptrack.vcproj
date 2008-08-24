@@ -350,6 +350,9 @@
 				RelativePath=".\modedit.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\modspecifications.cpp">
+			</File>
+			<File
 				RelativePath=".\Moptions.cpp">
 			</File>
 			<File

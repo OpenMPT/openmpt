@@ -163,7 +163,7 @@ void COrderSerialization::ProRead(INSTREAM& istrm, const uint64 /*datasize*/)
 {
 	uint16 size;
 	istrm.read(reinterpret_cast<char*>(&size), 2);
-	if(size > MPTM_SPECS.ordersMax) size = MPTM_SPECS.ordersMax;
+	if(size > ModSpecs::mptm.ordersMax) size = ModSpecs::mptm.ordersMax;
 	m_rOrders.resize(size);
 	if(size == 0) {m_rOrders.assign(MAX_ORDERS, m_rOrders.GetInvalidPatIndex()); return;}
 

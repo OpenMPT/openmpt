@@ -632,7 +632,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		{
 			combo->SetItemData(combo->AddString("any"), findAny);
 		}
-		AppendNotesToControl(*combo, pSndFile);
+		AppendNotesToControl(*combo);
 
 		UINT ncount = combo->GetCount();
 		for (UINT i=0; i<ncount; i++) if (m_nNote == combo->GetItemData(i))
@@ -2713,7 +2713,9 @@ void AppendNotesToControl(CComboBox& combobox, const MODCOMMAND::NOTE noteStart,
 void AppendNotesToControl(CComboBox& combobox, const CSoundFile* const pSndFile)
 //----------------------------------------------------------------------------------
 {
-	for(MODCOMMAND::NOTE nNote=1; nNote<=NOTE_MAX; nNote++)
+	const MODCOMMAND::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : 1;
+	const MODCOMMAND::NOTE noteEnd = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMax : NOTE_MAX;
+	for(MODCOMMAND::NOTE nNote = noteStart; nNote <= noteEnd; nNote++)
 	{
 		combobox.SetItemData(combobox.AddString(szDefaultNoteNames[nNote-1]), nNote);
 	}
@@ -2721,7 +2723,7 @@ void AppendNotesToControl(CComboBox& combobox, const CSoundFile* const pSndFile)
 	{
 		if(pSndFile != 0)
 		{
-			if(pSndFile->HasSpecialNote(nNote) == true)
+			if(pSndFile->GetModSpecifications().HasNote(nNote) == true)
 			{
 				int k = combobox.AddString(szSpecialNoteNames[nNote-NOTE_MIN_SPECIAL]);
 				combobox.SetItemData(k, nNote);
@@ -2736,14 +2738,16 @@ void AppendNotesToControl(CComboBox& combobox, const CSoundFile* const pSndFile)
 void AppendNotesToControl(CComboBox& combobox, const CSoundFile& rSndFile, const INSTRUMENTINDEX iInstr)
 //----------------------------------------------------------------------------------------------------------
 {
-	for (MODCOMMAND::NOTE i=1; i<=NOTE_MAX; i++)
+	const MODCOMMAND::NOTE noteStart = rSndFile.GetModSpecifications().noteMin;
+	const MODCOMMAND::NOTE noteEnd = rSndFile.GetModSpecifications().noteMax;
+	for(MODCOMMAND::NOTE note = noteStart; note <= noteEnd; note++)
 	{
-		combobox.SetItemData(combobox.AddString(rSndFile.GetNoteName(i, iInstr).c_str()), i);
+		combobox.SetItemData(combobox.AddString(rSndFile.GetNoteName(note, iInstr).c_str()), note);
 	}
 
 	for(MODCOMMAND::NOTE note = NOTE_MIN_SPECIAL-1; note++ < NOTE_MAX_SPECIAL;)
 	{
-		if(rSndFile.HasSpecialNote(note) == true)
+		if(rSndFile.GetModSpecifications().HasNote(note) == true)
 		{
 			combobox.SetItemData(combobox.AddString(szSpecialNoteShortDesc[note-NOTE_MIN_SPECIAL]), note);
 		}

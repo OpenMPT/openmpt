@@ -1133,7 +1133,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 		UINT len = *((WORD *)(lpStream+patpos[patchk]));
 		UINT rows = *((WORD *)(lpStream+patpos[patchk]+2));
 
-		if(rows <= IT_MPTEXT_SPECS.patternRowsMax && rows > IT_STD_SPECS.patternRowsMax)
+		if(rows <= ModSpecs::it_ext.patternRowsMax && rows > ModSpecs::it.patternRowsMax)
 		{
 			interpretModplugmade = true;
 			hasModplugExtensions = true;

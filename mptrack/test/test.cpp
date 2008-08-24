@@ -10,8 +10,6 @@
 #include "../misc_util.h"
 
 
-STATIC_ASSERT(sizeof(MODCOMMAND_ORIGINAL) == 6);
-
 #ifdef ENABLE_TESTS
 
 namespace MptTest
@@ -60,11 +58,13 @@ void DoTests()
 
 
 void TestMisc()
+//-------------
 {
 	STATIC_ASSERT(SMP_16BIT == CHN_16BIT);
 	STATIC_ASSERT(SMP_STEREO == CHN_STEREO);
+	STATIC_ASSERT(sizeof(MODCOMMAND_ORIGINAL) == 6);
 	STATIC_ASSERT( sizeof(SNDMIXPLUGININFO) == 128 ); //Comment right after the struct said: "Size should be 128"
-	VERIFY_EQUAL( (MAX_BASECHANNELS >= MPTM_SPECS.channelsMax), true );
+	VERIFY_EQUAL( (MAX_BASECHANNELS >= ModSpecs::mptm.channelsMax), true );
 }
 
 void TestVersion()

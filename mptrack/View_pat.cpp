@@ -4017,8 +4017,13 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		UINT nRow = m_nRow;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 
+		if(note > pSndFile->GetModSpecifications().noteMax && note < NOTE_MIN_SPECIAL)
+			note = pSndFile->GetModSpecifications().noteMax;
+		else if( note < pSndFile->GetModSpecifications().noteMin)
+			note = pSndFile->GetModSpecifications().noteMin;
+
 		// Check whether the module format supports the note.
-		if( pSndFile->HasNote(note) == false )
+		if( pSndFile->GetModSpecifications().HasNote(note) == false )
 			return;
 
 		UINT nChn = GetChanFromCursor(m_dwCursor);
@@ -4036,8 +4041,6 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			UpdateIndicator();
 			return;
 		}
-
-		if (note > NOTE_MAX && note<254) note = NOTE_MAX;
 
 		bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&		// work out whether we should use
 								(pMainFrm->GetFollowSong(pModDoc) == m_hWnd) &&	// player engine position or

@@ -1,6 +1,9 @@
 #ifndef MOD_SPECIFICATIONS_H
 #define MOD_SPECIFICATIONS_H
 
+#include "modcommand.h"
+#include "../mptrack/SoundFilePlayConfig.h"
+
 
 //Module IDs
 #define MOD_TYPE_NONE		0x00
@@ -38,20 +41,28 @@ const BYTE MSF_IT_COMPATIBLE_PLAY	= 0;		//IT/MPT
 const BYTE MSF_OLDVOLSWING			= 1;		//IT/MPT
 const BYTE MSF_MIDICC_BUGEMULATION	= 2;		//IT/MPT/XM
 
-//Simple struct to gather various modspecifications in one place.
+
+namespace ModSpecs
+{
+
+// Struct to gather various modspecifications in one place.
 
 struct CModSpecifications
 //=======================
 {
+	// Return true iff format has given note.
+	bool HasNote(MODCOMMAND::NOTE note) const;
+
 	//NOTE: If changing order, update all initializations below.
-	char fileExtension[5];
+	char fileExtension[5];	  // File extension without dot.
+	MODCOMMAND::NOTE noteMin; // Minimum note index (indecing starts from 1)
+	MODCOMMAND::NOTE noteMax; // Maximum note index (indecing starts from 1)
+	bool hasNoteCut;		  // True iff format has notecut.
+	bool hasNoteOff;		  // True iff format has noteoff.
 	PATTERNINDEX patternsMax;
 	ORDERINDEX ordersMax;
-	CHANNELINDEX channelsMin; 
-	CHANNELINDEX channelsMax;
-	//Note: The two above refer to the user editable pattern channels,
-	//not to the internal sound channels. Maybe there should be a separate
-	//setting for those(January 2007).
+	CHANNELINDEX channelsMin; // Minimum number of editable channels in pattern.
+	CHANNELINDEX channelsMax; // Maximum number of editable channels in pattern.
 	TEMPO tempoMin;
 	TEMPO tempoMax;
 	ROWINDEX patternRowsMin;
@@ -64,7 +75,7 @@ struct CModSpecifications
 };
 
 
-const CModSpecifications MPTM_SPECS =
+const CModSpecifications mptm =
 {
 	/*
 	TODO: Proper, less arbitrarily chosen, values here.
@@ -72,6 +83,10 @@ const CModSpecifications MPTM_SPECS =
 			-savefile format and GUI methods can handle new values(might not be a small task :).
 	 */
 	"MPTm",								//File extension
+	1,									//Minimum note index
+	NOTE_MAX,							//Maximum note index
+	true,								//Has notecut.
+	true,								//Has noteoff.
 	4000,								//Pattern max.
 	4000,								//Order max.
 	4,									//Channel min
@@ -90,10 +105,14 @@ const CModSpecifications MPTM_SPECS =
 
 
 
-const CModSpecifications MOD_STD_SPECS =
+const CModSpecifications mod =
 {
 	//TODO: Set correct values.
 	"mod",								//File extension
+	37,									//Minimum note index
+	108,								//Maximum note index
+	false,								//Has notecut.
+	false,								//Has noteoff.
 	64,									//Pattern max.
 	128,								//Order max.
 	4,									//Channel min
@@ -109,10 +128,15 @@ const CModSpecifications MOD_STD_SPECS =
 	0,									//Max MIDI mapping directives
 };
 
-const CModSpecifications MOD_MPTEXT_SPECS =
+// MOD with MPT extensions.
+const CModSpecifications mod_ext =
 {
 	//TODO: Set correct values.
 	"mod",								//File extension
+	37,									//Minimum note index
+	108,								//Maximum note index
+	false,								//Has notecut.
+	false,								//Has noteoff.
 	64,									//Pattern max.
 	128,								//Order max.
 	4,									//Channel min
@@ -128,10 +152,14 @@ const CModSpecifications MOD_MPTEXT_SPECS =
 	0									//Max MIDI mapping directives
 };
 
-const CModSpecifications XM_STD_SPECS =
+const CModSpecifications xm =
 {
 	//TODO: Set correct values.
 	"xm",								//File extension
+	13,									//Minimum note index
+	108,								//Maximum note index
+	false,								//Has notecut.
+	true,								//Has noteoff.
 	64,									//Pattern max.
 	128,								//Order max.
 	4,									//Channel min
@@ -147,11 +175,15 @@ const CModSpecifications XM_STD_SPECS =
 	0									//Max MIDI mapping directives
 };
 
-
-const CModSpecifications XM_MPTEXT_SPECS =
+// XM with MPT extensions
+const CModSpecifications xm_ext =
 {
 	//TODO: Set correct values.
 	"xm",								//File extension
+	13,									//Minimum note index
+	108,								//Maximum note index
+	false,								//Has notecut.
+	true,								//Has noteoff.
 	240,								//Pattern max.
 	256,								//Order max.
 	4,									//Channel min
@@ -167,10 +199,14 @@ const CModSpecifications XM_MPTEXT_SPECS =
 	200									//Max MIDI mapping directives
 };
 
-const CModSpecifications S3M_STD_SPECS =
+const CModSpecifications s3m =
 {
 	//TODO: Set correct values.
 	"s3m",								//File extension
+	13,									//Minimum note index
+	NOTE_MAX,							//Maximum note index
+	true,								//Has notecut.
+	false,								//Has noteoff.
 	240,								//Pattern max.
 	256,								//Order max.
 	4,									//Channel min
@@ -186,10 +222,15 @@ const CModSpecifications S3M_STD_SPECS =
 	0									//Max MIDI mapping directives
 };
 
-const CModSpecifications S3M_MPTEXT_SPECS =
+// S3M with MPT extensions
+const CModSpecifications s3m_ext =
 {
 	//TODO: Set correct values.
 	"s3m",								//File extension
+	13,									//Minimum note index
+	NOTE_MAX,							//Maximum note index
+	true,								//Has notecut.
+	false,								//Has noteoff.
 	240,								//Pattern max.
 	256,								//Order max.
 	4,									//Channel min
@@ -205,10 +246,14 @@ const CModSpecifications S3M_MPTEXT_SPECS =
 	0									//Max MIDI mapping directives
 };
 
-const CModSpecifications IT_STD_SPECS =
+const CModSpecifications it =
 {
 	//TODO: Set correct values.
 	"it",								//File extension
+	1,									//Minimum note index
+	NOTE_MAX,							//Maximum note index
+	true,								//Has notecut.
+	true,								//Has noteoff.
 	240,								//Pattern max.
 	200,								//Order max.
 	4,									//Channel min
@@ -224,10 +269,14 @@ const CModSpecifications IT_STD_SPECS =
 	0									//Max MIDI mapping directives
 };
 
-const CModSpecifications IT_MPTEXT_SPECS =
+const CModSpecifications it_ext =
 {
 	//TODO: Set correct values.
 	"it",								//File extension
+	1,									//Minimum note index
+	NOTE_MAX,							//Maximum note index
+	true,								//Has notecut.
+	true,								//Has noteoff.
 	240,								//Pattern max.
 	256,								//Order max.
 	4,									//Channel min
@@ -243,7 +292,7 @@ const CModSpecifications IT_MPTEXT_SPECS =
 	200									//Max MIDI mapping directives
 };
 
-
+} //namespace ModSpecs
 
 
 #endif
