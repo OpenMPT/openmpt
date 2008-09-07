@@ -701,6 +701,7 @@
 #define IDC_CHORDDETECTWAITTIME         2206
 #define IDC_STATIC2                     2207
 #define IDC_STATIC1                     2208
+#define IDC_TEXT_PREVIEW                2208
 #define IDC_MACROPLUG                   2209
 #define IDC_MACROPARAM                  2210
 #define IDC_SAMPLE_LENGTH_NEW           2211
@@ -812,6 +813,11 @@
 #define IDC_SPINMOVEMAPPING             2325
 #define IDC_BUTTON_HALF                 2326
 #define IDC_BUTTON_DOUBLE               2327
+#define IDC_GROUPBOX_PITCH_TIME         2328
+#define IDC_TEXT_PITCH                  2329
+#define IDC_TEXT_QUALITY                2330
+#define IDC_TEXT_FFT                    2331
+#define IDC_TEXT_PERCENT                2332
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1043,7 +1049,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        516
 #define _APS_NEXT_COMMAND_VALUE         59212
-#define _APS_NEXT_CONTROL_VALUE         2328
+#define _APS_NEXT_CONTROL_VALUE         2333
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

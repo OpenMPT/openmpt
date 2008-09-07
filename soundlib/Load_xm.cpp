@@ -404,6 +404,8 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		penv->nPan = 128;
 		penv->nPPC = 5*12;
 		SetDefaultInstrumentValues(penv);
+		penv->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
+		penv->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 		if (xmsh.vtype & 1) penv->dwFlags |= ENV_VOLUME;
 		if (xmsh.vtype & 2) penv->dwFlags |= ENV_VOLSUSTAIN;
 		if (xmsh.vtype & 4) penv->dwFlags |= ENV_VOLLOOP;

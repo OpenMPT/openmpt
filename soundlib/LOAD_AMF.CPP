@@ -165,7 +165,7 @@ VOID AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels
 
 
 
-BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength)
+BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------
 {
 	const AMFFILEHEADER *pfh = (AMFFILEHEADER *)lpStream;
@@ -251,7 +251,8 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, DWORD dwMemLength)
 			MODINSTRUMENT *psmp = &Ins[iData+1];
 			if (psmp->nLength)
 			{
-				dwMemPos += ReadSample(psmp, RS_PCM8S, (LPCSTR)(lpStream+dwMemPos), dwMemLength);
+				if(dwMemPos > dwMemLength) return FALSE;
+				dwMemPos += ReadSample(psmp, RS_PCM8S, (LPCSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 			}
 		}
 		return TRUE;

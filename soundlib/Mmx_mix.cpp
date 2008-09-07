@@ -1,10 +1,11 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * OpenMPT
+ *
+ * Mmx_mix.cpp
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *          OpenMPT devs
+ *
  * Name                 Date             Description
  * Olivier Lapicque     --/--/--         Creation
  * Trevor Nunes         26/01/04         encapsulated MMX,AMD,SSE with #define flags
