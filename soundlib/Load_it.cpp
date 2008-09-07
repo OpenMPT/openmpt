@@ -1,10 +1,10 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * OpenMPT
+ *
+ * Load_it.cpp
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *          OpenMPT devs
 */
 
 #include "stdafx.h"
@@ -473,7 +473,12 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	DWORD streamPos = 0;
 	DWORD version;
 
-	if(dwMemLength < 12) return FALSE;
+	// Macro used to make sure that given amount of bytes can be read.
+	// Returns FALSE from this function if reading is not possible.
+	#define ASSERT_CAN_READ(x) \
+	if( streamPos > dwMemLength || x > dwMemLength - streamPos ) return FALSE;
+
+	ASSERT_CAN_READ(12);
 
 // Check file ID
 
@@ -494,7 +499,8 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 	// name string
-	if (streamPos+len<=dwMemLength && len<=sizeof(m_szNames[0])) {
+	ASSERT_CAN_READ(len);
+	if (len<=sizeof(m_szNames[0])) {
 		memcpy(m_szNames[0],lpStream+streamPos,len);
 		streamPos += len;
 		m_szNames[0][sizeof(m_szNames[0])-1] = '\0';
@@ -504,7 +510,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 // Song comments
 
 	// comment string length
-	if(streamPos + 4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	streamPos += sizeof(DWORD);
 	if(id > uint16_max) return FALSE;
@@ -519,13 +525,15 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		m_lpszSongComments = NULL;
 
 	// m_lpszSongComments
-	if (m_lpszSongComments && id && streamPos + id <= dwMemLength) {
+	if (m_lpszSongComments && id)
+	{
+		ASSERT_CAN_READ(id);
 		memcpy(&m_lpszSongComments[0],lpStream+streamPos,id);
 		streamPos += id;
 	}
 
 // Song global config
-	if(streamPos + 5*4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(5*4);
 
 	// m_dwSongFlags
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
@@ -555,7 +563,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 
 // Song channels data
-	if(streamPos + 2*4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(2*4);
 
 	// m_nChannels
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
@@ -571,8 +579,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// Channels' data
 	for(i=0; i<m_nChannels; i++){
-
-		if(streamPos + 3*4 + len > dwMemLength) return FALSE;
+		ASSERT_CAN_READ(3*4 + len);
 
 		// ChnSettings[i].nPan
 		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
@@ -596,23 +603,24 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 // Song mix plugins
 	// size of mix plugins data
-	if(streamPos + 4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	streamPos += sizeof(DWORD);
 
 	// mix plugins
-	if(id > dwMemLength - streamPos) return FALSE;
+	ASSERT_CAN_READ(id);
 	streamPos += LoadMixPlugins(lpStream+streamPos, id);
 
 // Song midi config
 
 	// midi cfg data length
-	if(streamPos + 4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	streamPos += sizeof(DWORD);
 
 	// midi cfg
-	if (id<=sizeof(m_MidiCfg) && id+streamPos<=dwMemLength) {
+	ASSERT_CAN_READ(id);
+	if (id<=sizeof(m_MidiCfg)) {
 		memcpy(&m_MidiCfg,lpStream+streamPos,id);
 		streamPos += id;
 	}
@@ -620,14 +628,14 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 // Song Instruments
 
 	// m_nInstruments
-	if(streamPos + 4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	m_nInstruments = id;
-	if(m_nInstruments > 256) return FALSE;
+	if(m_nInstruments > MAX_INSTRUMENTS) return FALSE;
 	streamPos += sizeof(DWORD);
 
 	// path string length (=_MAX_PATH)
-	if(streamPos + 4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	len = id;
 	if(len > _MAX_PATH) return FALSE;
@@ -635,35 +643,30 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// instruments' paths
 	for(i=0; i<m_nInstruments; i++){
-		if (len+streamPos<=dwMemLength)
-		{
-			memcpy(&m_szInstrumentPath[i][0],lpStream+streamPos,len);
-			streamPos += len;
-		}
-		else return FALSE;
+		ASSERT_CAN_READ(len);
+		memcpy(&m_szInstrumentPath[i][0],lpStream+streamPos,len);
+		streamPos += len;
 	}
 
 // Song Orders
 
 	// size of order array (=MAX_ORDERS)
-	if(streamPos + 4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	size = id;
 	if(size > MAX_ORDERS) return FALSE;
 	streamPos += sizeof(DWORD);
 
 	// order data
-	if (size+streamPos<=dwMemLength)
-	{
-		Order.ReadAsByte(lpStream+streamPos, size, dwMemLength-streamPos);
-		streamPos += size;
-	}
-	else return FALSE;
+	ASSERT_CAN_READ(size);
+	Order.ReadAsByte(lpStream+streamPos, size, dwMemLength-streamPos);
+	streamPos += size;
+
 	
 
 // Song Patterns
 
-	if(streamPos + 12 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(3*4);
 	// number of patterns (=MAX_PATTERNS)
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	size = id;
@@ -684,6 +687,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	if (len<=MAX_PATTERNNAME && m_nPatternNames<=MAX_PATTERNS) 
 	{
 		m_lpszPatternNames = new char[m_nPatternNames * len];
+		ASSERT_CAN_READ(m_nPatternNames * len);
 		memcpy(&m_lpszPatternNames[0],lpStream+streamPos,m_nPatternNames * len);
 	}
 	else return FALSE;
@@ -691,9 +695,10 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	streamPos += m_nPatternNames * len;
 
 	// modcommand data length
-	if(streamPos + 4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	n = id;
+	if(n != 6) return FALSE;
 	streamPos += sizeof(DWORD);
 
 	for(UINT npat=0; npat<size; npat++){
@@ -702,9 +707,9 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		if(Patterns[npat]) { FreePattern(Patterns[npat]); Patterns[npat] = NULL; }
 
 		// PatternSize[npat]
-		if(streamPos + 4 > dwMemLength) return FALSE;
+		ASSERT_CAN_READ(4);
 		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
-		if(id > 1024) return FALSE;
+		if(id > MAX_PATTERN_ROWS) return FALSE;
 		Patterns[npat].Resize(id);
 		streamPos += sizeof(DWORD);
 
@@ -736,14 +741,14 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	ITSAMPLESTRUCT pis;
 
 	// Read original number of samples
-	if(streamPos + 4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	if(id > MAX_SAMPLES) return FALSE;
 	m_nSamples = id;
 	streamPos += sizeof(DWORD);
 
 	// Read number of embeded samples
-	if(streamPos + 4 > dwMemLength) return FALSE;
+	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	if(id > MAX_SAMPLES) return FALSE;
 	n = id;
@@ -752,7 +757,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read samples
 	for(i=0; i<n; i++){
 
-		if(streamPos + 4 + sizeof(ITSAMPLESTRUCT) + 4 > dwMemLength) return FALSE;
+		ASSERT_CAN_READ(4 + sizeof(ITSAMPLESTRUCT) + 4);
 
 		// Sample id number
 		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
@@ -841,7 +846,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	__int16 fsize = 0;
 	BYTE * ptr = (BYTE *)(lpStream + streamPos);
 
-	if (streamPos + 4 <= dwMemLength) {
+	if (streamPos <= dwMemLength - 4) {
 		fcode = (*((__int32 *)ptr));
 	}
 
@@ -903,6 +908,8 @@ mpts:
 	}
 
 	return TRUE;
+
+	#undef ASSERT_CAN_READ
 }
 // -! NEW_FEATURE#0023
 

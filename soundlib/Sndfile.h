@@ -1,11 +1,12 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * OpenMPT
+ *
+ * Sndfile.h
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *          OpenMPT devs
 */
+
 #include "../mptrack/SoundFilePlayConfig.h"
 #include "tuning.h"
 #include "mod_specifications.h"
@@ -30,7 +31,8 @@ typedef const BYTE * LPCBYTE;
 #define MOD_AMIGAC2			0x1AB
 // -> CODE#0006
 // -> DESC="misc quantity changes"
-#define MAX_SAMPLE_LENGTH	0x10000000	// 0x04000000 (64MB -> now 256MB)
+#define MAX_SAMPLE_LENGTH	0x10000000	// 0x04000000 (64MB -> now 256MB).
+                                        // Note: Sample size in bytes can be more than 256 MB.
 // -! BEHAVIOUR_CHANGE#0006
 #define MAX_SAMPLE_RATE		100000
 #define MAX_ORDERS			256
@@ -45,7 +47,8 @@ typedef const BYTE * LPCBYTE;
 //#else
 // -> CODE#0006
 // -> DESC="misc quantity changes"
-#define MAX_CHANNELS		256	//200 //Note: MAX_BASECHANNELS defines max pattern channels
+#define MAX_CHANNELS		256	//200 //Note: This is the maximum number of sound channels,
+                                //            see MAX_BASECHANNELS for max pattern channels.
 // -! BEHAVIOUR_CHANGE#0006
 //#endif
 // -> CODE#0006
@@ -1050,7 +1053,7 @@ public:
 	BOOL ReadDMF(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadPTM(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadDBM(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadAMF(LPCBYTE lpStream, DWORD dwMemLength);
+	BOOL ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength);
 	BOOL ReadMT2(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadPSM(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadJ2B(LPCBYTE lpStream, DWORD dwMemLength);

@@ -805,7 +805,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString("Force highpass"), FLTMODE_HIGHPASS);
 
 	//VST velocity/volume handling
-	m_CbnPluginVelocityHandling.AddString("Use channelvolume");
+	m_CbnPluginVelocityHandling.AddString("Use note volume");
 	m_CbnPluginVelocityHandling.AddString("Process as volume");
 	m_CbnPluginVolumeHandling.AddString("MIDI volume");
 	m_CbnPluginVolumeHandling.AddString("Dry/Wet ratio");
@@ -1177,6 +1177,21 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 				CheckDlgButton(IDC_CHECK_PITCHTEMPOLOCK, MF_UNCHECKED);
 			
 			OnBnClickedCheckPitchtempolock();
+
+			if(m_pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
+			{
+				if(m_CbnMixPlug.GetCurSel() > 0 && m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION) == false)
+				{
+					m_CbnPluginVelocityHandling.EnableWindow(TRUE);
+					m_CbnPluginVolumeHandling.EnableWindow(TRUE);
+				}
+				else
+				{
+					m_CbnPluginVelocityHandling.EnableWindow(FALSE);
+					m_CbnPluginVolumeHandling.EnableWindow(FALSE);
+				}
+
+			}
 		} else
 		{
 			m_EditName.SetWindowText("");

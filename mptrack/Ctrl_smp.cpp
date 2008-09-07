@@ -10,10 +10,10 @@
 #include "PSRatioCalc.h" //rewbs.timeStretchMods
 #include "mpdlgs.h"
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
-#include "smbPitchShift.h"
-#include "samplerate.h"
+#ifndef NO_XSOUNDLIB
+	#include "smbPitchShift.h"
+	#include "samplerate.h"
+#endif
 
 #ifdef _DEBUG
 #include <math.h>
@@ -65,14 +65,13 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(ID_PREVINSTRUMENT,		OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 	ON_COMMAND(IDC_BUTTON1,				OnPitchShiftTimeStretch)
 	ON_COMMAND(IDC_BUTTON2,				OnEstimateSampleSize)
 	ON_COMMAND(IDC_BUTTON3,				OnPitchShiftTimeStretchAccept)
 	ON_COMMAND(IDC_BUTTON4,				OnPitchShiftTimeStretchCancel)
 	ON_COMMAND(IDC_CHECK3,				OnEnableStretchToSize)
-// -! TEST#0029
+#endif
 
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_FILENAME,	OnFileNameChanged)
@@ -140,13 +139,12 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT15,				m_EditVibDepth);
 	DDX_Control(pDX, IDC_EDIT16,				m_EditVibRate);
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 	DDX_Control(pDX, IDC_COMBO4,				m_ComboPitch);
 	DDX_Control(pDX, IDC_COMBO5,				m_ComboQuality);
 	DDX_Control(pDX, IDC_COMBO6,				m_ComboFFT);
 	DDX_Text(pDX,	 IDC_EDIT6,					m_dTimeStretchRatio); //rewbs.timeStretchMods
-// -! TEST#0029
+#endif
 
 	//}}AFX_DATA_MAP
 }
@@ -158,23 +156,23 @@ CCtrlSamples::CCtrlSamples()
 	m_nSample = 1;
 	m_nLockCount = 1;
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 	pSampleUndoBuffer = NULL;
 	UndoBufferSize = 0;
-// -! TEST#0029
+#endif
+
 }
 
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
-CCtrlSamples::~CCtrlSamples()
-{
-	if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
-	pSampleUndoBuffer = NULL;
-	UndoBufferSize = 0;
-}
-// -! TEST#0029
+
+#ifndef NO_XSOUNDLIB
+	CCtrlSamples::~CCtrlSamples()
+	{
+		if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
+		pSampleUndoBuffer = NULL;
+		UndoBufferSize = 0;
+	}
+#endif
 
 
 CRuntimeClass *CCtrlSamples::GetAssociatedViewClass()
@@ -242,8 +240,28 @@ BOOL CCtrlSamples::OnInitDialog()
 		m_CbnBaseNote.AddString(s);
 	}
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+
+#ifndef NO_XSOUNDLIB
+	m_ComboFFT.ShowWindow(SW_SHOW);
+	m_ComboPitch.ShowWindow(SW_SHOW);
+	m_ComboQuality.ShowWindow(SW_SHOW);
+	m_ComboFFT.ShowWindow(SW_SHOW);
+
+	GetDlgItem(IDC_BUTTON1)->ShowWindow(SW_SHOW); // PitchShiftTimeStretch
+	GetDlgItem(IDC_BUTTON2)->ShowWindow(SW_SHOW); // EstimateSampleSize
+	GetDlgItem(IDC_BUTTON3)->ShowWindow(SW_SHOW); // PitchShiftTimeStretchAccept
+	GetDlgItem(IDC_BUTTON4)->ShowWindow(SW_SHOW); // PitchShiftTimeStretchCancel
+	GetDlgItem(IDC_CHECK2)->ShowWindow(SW_SHOW);  // Preview mode
+	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_SHOW);  // EnableStretchToSize
+	GetDlgItem(IDC_EDIT6)->ShowWindow(SW_SHOW);   // 
+	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);  //
+	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_SHOW);  //
+	GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_SHOW);  //
+	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_SHOW);  //
+	GetDlgItem(IDC_TEXT_PREVIEW)->ShowWindow(SW_SHOW);  //
+	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);  //
+	GetDlgItem(IDC_TEXT_PERCENT)->ShowWindow(SW_SHOW);  //
+	
 	CHAR str[16];
 
 	// Pitch selection
@@ -297,7 +315,7 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	// Stretch to size check box
 	OnEnableStretchToSize();
-// -! TEST#0029
+#endif // NO_XSOUNDLIB
 
 	return TRUE;
 }
@@ -319,10 +337,9 @@ BOOL CCtrlSamples::SetCurrentSample(UINT nSmp, LONG lZoom, BOOL bUpdNum)
 	if (pSndFile->m_nSamples < 1) pSndFile->m_nSamples = 1;
 	if ((nSmp < 1) || (nSmp > pSndFile->m_nSamples)) return FALSE;
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-// -! TEST#0029
+#endif
 
 	LockControls();
 	if (m_nSample != nSmp)
@@ -666,10 +683,10 @@ BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	DWORD len;
 	BOOL bOk;
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-// -! TEST#0029
+#endif
+
 
 	BeginWaitCursor();
 	if ((!lpszFileName) || (!f.Open(lpszFileName)))
@@ -786,10 +803,10 @@ BOOL CCtrlSamples::OpenSample(CSoundFile *pSndFile, UINT nSample)
 {
 	if ((!pSndFile) || (!nSample) || (nSample > pSndFile->m_nSamples)) return FALSE;
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-// -! TEST#0029
+#endif
+
 
 	BeginWaitCursor();
 	BEGIN_CRITICAL();
@@ -819,10 +836,9 @@ void CCtrlSamples::OnSampleChanged()
 	if ((!IsLocked()) && (m_pSndFile))
 	{
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 		if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-// -! TEST#0029
+#endif
 
 		UINT n = GetDlgItemInt(IDC_EDIT_SAMPLE);
 		if ((n > 0) && (n <= m_pSndFile->m_nSamples) && (n != m_nSample))
@@ -863,10 +879,9 @@ void CCtrlSamples::OnSampleNew()
 	if (smp > 0)
 	{
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+	#ifndef NO_XSOUNDLIB
 		if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-// -! TEST#0029
+	#endif
 
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		SetCurrentSample(smp);
@@ -1416,8 +1431,7 @@ void CCtrlSamples::OnDownsample()
 }
 
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 
 #define MAX_BUFFER_LENGTH	8192
 #define CLIP_SOUND(v)		v = v < -1.0f ? -1.0f : v > 1.0f ? 1.0f : v
@@ -1998,7 +2012,8 @@ int CCtrlSamples::PitchShift(float pitch)
 
 	return 0;
 }
-// -! TEST#0029
+
+#endif // NO_XSOUNDLIB
 
 
 void CCtrlSamples::OnReverse()

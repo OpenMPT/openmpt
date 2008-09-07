@@ -1,6 +1,9 @@
 #ifndef _CONTROL_SAMPLES_H_
 #define _CONTROL_SAMPLES_H_
 
+// If defined, disables pitch shifting - time stretching.
+#define NO_XSOUNDLIB
+
 
 //=======================================
 class CCtrlSamples: public CModControlDlg
@@ -21,23 +24,21 @@ protected:
 	double m_dTimeStretchRatio; //rewbs.timeStretchMods
 	
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 	PVOID pSampleUndoBuffer;
 	UINT UndoBufferSize;
 
 	int PitchShift(float pitch);
 	int TimeStretch(double ratio);
-// -! TEST#0029
+#endif
 
 public:
 	CCtrlSamples();
 
-// -> CODE#0029
-// -> DESC="pitch shifting - time stretching"
+#ifndef NO_XSOUNDLIB
 	~CCtrlSamples();
-// -! TEST#0029
+#endif
 
 public:
 	BOOL SetCurrentSample(UINT n, LONG lZoom=-1, BOOL bUpdNum=TRUE);
@@ -94,14 +95,14 @@ protected:
 	afx_msg void OnVibRateChanged();
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
-// -> CODE#0029
-// -> DESC=""
+
+#ifndef NO_XSOUNDLIB
 	afx_msg void OnPitchShiftTimeStretch();
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
 	afx_msg void OnPitchShiftTimeStretchAccept();
 	afx_msg void OnPitchShiftTimeStretchCancel();
-// -! TEST#0029
+#endif
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

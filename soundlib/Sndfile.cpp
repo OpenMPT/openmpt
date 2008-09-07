@@ -1,10 +1,10 @@
 /*
- * This program is  free software; you can redistribute it  and modify it
- * under the terms of the GNU  General Public License as published by the
- * Free Software Foundation; either version 2  of the license or (at your
- * option) any later version.
+ * OpenMPT
+ *
+ * Sndfile.cpp
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
+ *          OpenMPT devs
 */
 
 #include "stdafx.h"
@@ -19,6 +19,8 @@
 #include <vector>
 #include <algorithm>
 
+#define str_SampleAllocationError	(GetStrI18N(_TEXT("Sample allocation error")))
+#define str_Error					(GetStrI18N(_TEXT("Error")))
 
 #ifndef NO_COPYRIGHT
 #ifndef NO_MMCMP_SUPPORT
@@ -1891,10 +1893,12 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength, const WORD format)
 //-----------------------------------------------------------------------------------------------------------------------
 {
+	if(pIns->nLength > MAX_SAMPLE_LENGTH)
+		pIns->nLength = MAX_SAMPLE_LENGTH;
+	
 	UINT len = 0, mem = pIns->nLength+6;
 
 	if ((!pIns) || (pIns->nLength < 4) || (!lpMemFile)) return 0;
-	if (pIns->nLength > MAX_SAMPLE_LENGTH) pIns->nLength = MAX_SAMPLE_LENGTH;
 	pIns->uFlags &= ~(CHN_16BIT|CHN_STEREO);
 	if (nFlags & RSF_16BIT)
 	{
@@ -1906,11 +1910,24 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		mem *= 2;
 		pIns->uFlags |= CHN_STEREO;
 	}
+
 	if ((pIns->pSample = AllocateSample(mem)) == NULL)
 	{
 		pIns->nLength = 0;
 		return 0;
 	}
+
+	// Check that allocated memory size is not less than what the modinstrument itself
+	// thinks it is.
+	if( mem < pIns->GetSampleSizeInBytes() )
+	{
+		pIns->nLength = 0;
+		FreeSample(pIns->pSample);
+		pIns->pSample = NULL;
+		MessageBox(0, str_SampleAllocationError, str_Error, MB_ICONERROR);
+		return 0;
+	}
+
 	switch(nFlags)
 	{
 	// 1: 8-bit unsigned PCM data
