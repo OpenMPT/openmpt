@@ -226,7 +226,16 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY;
 
 	if (!CToolBar::Create(parent, dwStyle)) return FALSE;
-	if (!LoadBitmap(IDB_MAINBAR)) return FALSE;
+	// 24-bit icons
+	CImageList imageList;
+	CBitmap bitmap;
+	if (!bitmap.LoadBitmap(IDB_MAINBAR)) return FALSE;
+	imageList.Create(16,16,ILC_COLORDDB|ILC_MASK,17,1);  
+	imageList.Add(&bitmap,RGB(255,0,255));  
+	SendMessage(TB_SETIMAGELIST,0,(LPARAM)imageList.m_hImageList);  
+	imageList.Detach();  
+	bitmap.Detach();
+	
 	if (!SetButtons(MainButtons, sizeof(MainButtons)/sizeof(UINT))) return FALSE;
 
 	nCurrentSpeed = 6;

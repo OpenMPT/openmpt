@@ -679,9 +679,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //-----------------------------------------------------
 {
 	if (CMDIFrameWnd::OnCreate(lpCreateStruct) == -1) return -1;
-	// Load resources
+	// Load resources - 24-bit icons
 	m_hIcon = theApp.LoadIcon(IDR_MAINFRAME);
-	m_ImageList.Create(IDB_IMAGELIST, 16, 0, RGB(0,128,128));
+	CBitmap bitmap2;
+	bitmap2.LoadBitmap(IDB_IMAGELIST);
+	m_ImageList.Create(16,16,ILC_COLORDDB|ILC_MASK,17,1);  
+	m_ImageList.Add(&bitmap2,RGB(255,0,255));  
+	SendMessage(TB_SETIMAGELIST,0,(LPARAM)m_ImageList.m_hImageList);  
+	bitmap2.Detach();
+
 	m_hGUIFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	m_hFixedFont = ::CreateFont(12,5, 0,0, 300,
 							FALSE, FALSE, FALSE,
