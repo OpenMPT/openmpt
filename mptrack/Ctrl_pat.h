@@ -1,5 +1,7 @@
 #pragma once
 
+#include "globals.h"
+
 class COrderList;
 class CCtrlPatterns;
 
@@ -26,6 +28,8 @@ public:
 	COrderList();
 	virtual ~COrderList() {}
 
+	static BYTE s_nDefaultMargins;
+
 public:
 	BOOL Init(const CRect&, CCtrlPatterns *pParent, CModDoc *, HFONT hFont);
 	void InvalidateSelection() const;
@@ -38,12 +42,30 @@ public:
 	void UpdateInfoText();
 	int GetFontWidth();
 
-	//Returns the number that was set.
-	BYTE SetOrderlistMargins(int);
-	BYTE GetOrderlistMargins() const {return m_nOrderlistMargins;}
+	// Sets target margin value and returns the effective margin value.
+	BYTE SetMargins(int);
 
-	//Should return the maximum number of shown orders.
-	BYTE GetShownOrdersMax();
+	// Returns the effective margin value.
+	BYTE GetMargins() {return GetMargins(GetMarginsMax());}
+
+	// Returns the effective margin value.
+	BYTE GetMargins(const BYTE nMaxMargins) {return min(nMaxMargins, m_nOrderlistMargins);}
+
+	// Returns maximum margin value given current window width.
+	BYTE GetMarginsMax() {return GetMarginsMax(GetLength());}
+
+	// Returns maximum margin value when shown sequence has nLength orders.
+	// For example: If length is 4 orders -> maxMargins = 4/2 - 1 = 1;
+	// if maximum is 5 -> maxMargins = (int)5/2 = 2
+	BYTE GetMarginsMax(const BYTE nLength) {return (nLength > 0 && nLength % 2 == 0) ? nLength/2 - 1 : nLength/2;}
+
+	// Returns the number of sequence items visible in the list.
+	BYTE GetLength();
+
+	// Return true iff given order is in margins given that first shown order
+	// is 'startOrder'. Begin part of the whole sequence
+	// is not interpreted to be in margins regardless of the margin value.
+	bool IsOrderInMargins(int order, int startOrder);
 
 public:
 	//{{AFX_VIRTUAL(COrderList)
@@ -120,6 +142,9 @@ protected:
 	UINT m_nSplitInstrument,m_nSplitNote,m_nOctaveModifier,m_nSplitVolume;
 	BOOL m_nOctaveLink;
 // -! NEW_FEATURE#0012
+
+public:
+	static bool s_ShowSequenceMarginsControls;
 
 public:
 	CCtrlPatterns();

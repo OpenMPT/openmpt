@@ -13,6 +13,8 @@
 //////////////////////////////////////////////////////////////
 // CCtrlPatterns
 
+bool CCtrlPatterns::s_ShowSequenceMarginsControls = false;
+
 BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlPatterns)
 	ON_WM_KEYDOWN()
@@ -170,11 +172,21 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_SpinInstrument.SetRange(-1, 1);
 	m_SpinInstrument.SetPos(0);
 
-	m_SpinOrderListMargins.SetRange(0, m_OrderList.GetShownOrdersMax());
-	m_SpinOrderListMargins.SetPos(m_OrderList.GetOrderlistMargins());
+	if(s_ShowSequenceMarginsControls == true)
+	{
+		m_SpinOrderListMargins.ShowWindow(SW_SHOW);
+		m_EditOrderListMargins.ShowWindow(SW_SHOW);
+		m_SpinOrderListMargins.SetRange(0, m_OrderList.GetMarginsMax());
+		m_SpinOrderListMargins.SetPos(m_OrderList.GetMargins());
+	}
+	else
+	{
+		m_SpinOrderListMargins.ShowWindow(SW_HIDE);
+		m_EditOrderListMargins.ShowWindow(SW_HIDE);
+	}
 
 	SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::gnPatternSpacing);
-	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetOrderlistMargins());
+	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetMargins());
 	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
 	m_OrderList.SetFocus(); 
 
@@ -254,7 +266,9 @@ void CCtrlPatterns::RecalcLayout()
 		{
 			m_OrderList.SetWindowPos(NULL, 0,0, cx, cy, SWP_NOMOVE|SWP_NOZORDER|SWP_DRAWFRAME);
 		}
-		OnOrderListMarginsChanged();
+		SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetMargins());
+		m_SpinOrderListMargins.SetRange(0, m_OrderList.GetMarginsMax());
+		m_SpinOrderListMargins.SetPos(m_OrderList.GetMargins());
 	}
 }
 
@@ -425,8 +439,6 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 				SendViewMessage(VIEWMSG_PATTERNLOOP, (SONG_PATTERNLOOP & m_pSndFile->m_dwSongFlags));
 			}
 			OnSpacingChanged();
-			OnOrderListMarginsChanged();
-			
 			SendViewMessage(VIEWMSG_SETSPLITINSTRUMENT, m_nSplitInstrument);
 			SendViewMessage(VIEWMSG_SETSPLITNOTE, m_nSplitNote);
 			SendViewMessage(VIEWMSG_SETOCTAVEMODIFIER, m_nOctaveModifier);
@@ -583,7 +595,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		}
 		SetCurrentPattern(lParam);
 	} 
-	else if ((lParam >= 0x8000) && (lParam < pSndFile->Order.size() + 0x8000)) 
+	else if ((lParam >= 0x8000) && (lParam < int(pSndFile->Order.size()) + 0x8000)) 
 	{
 		if (pSndFile)
 		{
@@ -595,7 +607,6 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 	if (m_hWndView)
 	{
 		OnSpacingChanged();
-		OnOrderListMarginsChanged();
 		if (m_bRecord) SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 		
@@ -685,17 +696,16 @@ void CCtrlPatterns::OnOrderListMarginsChanged()
 //---------------------------------------------
 {
 	BYTE i;
-	BYTE maxOrders = m_OrderList.GetShownOrdersMax();
-	if((m_EditOrderListMargins.m_hWnd) && (m_EditOrderListMargins.GetWindowTextLength() > 0))
+	if((m_EditOrderListMargins.m_hWnd) && (m_EditOrderListMargins.IsWindowVisible()) && (m_EditOrderListMargins.GetWindowTextLength() > 0))
 	{
-		i = m_OrderList.SetOrderlistMargins(GetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS));
+		i = m_OrderList.SetMargins(GetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS));
 	}
 	else
 	{
-		i = m_OrderList.GetOrderlistMargins();
+		i = m_OrderList.GetMargins();
 	}
 
-	m_SpinOrderListMargins.SetRange(0, maxOrders);
+	m_SpinOrderListMargins.SetRange(0, m_OrderList.GetMarginsMax());
 	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, i);
 
 }

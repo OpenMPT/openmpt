@@ -23,6 +23,7 @@
 // -! NEW_FEATURE#0015
 #include <direct.h>
 #include "version.h"
+#include "ctrl_pat.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -426,6 +427,8 @@ void CMainFrame::LoadIniSettings()
 	gbPatternPluginNames = GetPrivateProfileDWord("Pattern Editor", "Plugin-Names", true, iniFile);	
 	gbPatternRecord = GetPrivateProfileDWord("Pattern Editor", "Record", true, iniFile);	
 	gnAutoChordWaitTime = GetPrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", 60, iniFile);	
+	CCtrlPatterns::s_ShowSequenceMarginsControls = (0 != GetPrivateProfileDWord("Pattern Editor", "ShowSequenceMarginsControls", 0, iniFile));
+	COrderList::s_nDefaultMargins = static_cast<BYTE>(GetPrivateProfileInt("Pattern Editor", "DefaultSequenceMargins", 0, iniFile));
 
 	GetPrivateProfileString("Paths", "Songs_Directory", m_szModDir, m_szModDir, INIBUFFERSIZE, iniFile);
 	GetPrivateProfileString("Paths", "Samples_Directory", m_szSmpDir, m_szSmpDir, INIBUFFERSIZE, iniFile);
