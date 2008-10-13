@@ -818,6 +818,8 @@
 #define IDC_TEXT_QUALITY                2330
 #define IDC_TEXT_FFT                    2331
 #define IDC_TEXT_PERCENT                2332
+#define IDC_TEXT_STRETCHPARAMS          2337
+#define IDC_EDIT_STRETCHPARAMS          2338
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1049,7 +1051,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        516
 #define _APS_NEXT_COMMAND_VALUE         59212
-#define _APS_NEXT_CONTROL_VALUE         2333
+#define _APS_NEXT_CONTROL_VALUE         2339
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

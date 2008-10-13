@@ -365,6 +365,7 @@ public:
 	// Globals
 	static UINT m_nLastOptionsPage, m_nFilterIndex;
 	static BOOL gbMdiMaximize;
+	static bool gbShowHackControls;
 	static LONG glCtrlWindowHeight, glTreeWindowWidth, glTreeSplitRatio;
 	static LONG glGeneralWindowHeight, glPatternWindowHeight, glSampleWindowHeight, 
 		        glInstrumentWindowHeight, glCommentsWindowHeight, glGraphWindowHeight; //rewbs.varWindowSize

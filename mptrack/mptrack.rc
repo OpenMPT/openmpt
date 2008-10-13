@@ -675,23 +675,15 @@ FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "Toolbar1",IDC_TOOLBAR1,"ToolbarWindow32",WS_GROUP | 
                     0x4d,4,4,55,17
-    RTEXT           "Sample",IDC_STATIC,62,8,24,8
     EDITTEXT        IDC_EDIT_SAMPLE,90,6,35,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Spin6",IDC_SPIN_SAMPLE,"msctls_updown32",UDS_WRAP | 
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
                     UDS_NOTHOUSANDS,118,4,11,14
     COMBOBOX        IDC_COMBO_ZOOM,131,6,41,89,CBS_DROPDOWNLIST | WS_VSCROLL
-    CTEXT           "Length: 000000 (16-bit)",IDC_TEXT5,175,6,90,13,
-                    SS_CENTERIMAGE,WS_EX_STATICEDGE
-    CONTROL         "Toolbar2",IDC_TOOLBAR2,"ToolbarWindow32",WS_GROUP | 
-                    0x4d,268,4,136,17
-    GROUPBOX        "",IDC_STATIC,3,22,94,78
-    LTEXT           "Default Volume",IDC_STATIC,8,32,49,8
     EDITTEXT        IDC_EDIT7,57,30,36,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN7,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,87,29,
                     11,11
-    LTEXT           "Global Volume",IDC_STATIC,8,45,46,8
     EDITTEXT        IDC_EDIT8,57,43,36,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN8,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,87,42,
@@ -702,79 +694,46 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN9,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,87,56,
                     11,11
-    LTEXT           "FineTune",IDC_TEXT7,8,73,37,8
     EDITTEXT        IDC_EDIT5,48,70,45,12,ES_AUTOHSCROLL
     CONTROL         "Spin1",IDC_SPIN5,"msctls_updown32",UDS_ALIGNRIGHT | 
                     UDS_AUTOBUDDY | UDS_NOTHOUSANDS,87,69,11,11
-    LTEXT           "Transpose",IDC_TEXT6,8,86,38,8
     COMBOBOX        IDC_COMBO_BASENOTE,48,83,45,89,CBS_DROPDOWNLIST | 
                     WS_VSCROLL
-    CTEXT           "Name",IDC_STATIC,102,26,28,12,SS_CENTERIMAGE | NOT 
-                    WS_GROUP,WS_EX_STATICEDGE
     EDITTEXT        IDC_SAMPLE_NAME,129,26,135,12,ES_AUTOHSCROLL
-    CTEXT           "File",IDC_STATIC,269,26,23,13,SS_CENTERIMAGE | NOT 
-                    WS_GROUP | WS_TABSTOP,WS_EX_STATICEDGE
     EDITTEXT        IDC_SAMPLE_FILENAME,292,26,72,13,ES_AUTOHSCROLL
-    GROUPBOX        "Loop",IDC_STATIC,102,43,79,57
-    LTEXT           "Type",IDC_STATIC,107,57,17,8
     COMBOBOX        IDC_COMBO1,130,54,45,46,CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Start",IDC_STATIC,107,73,16,8
     EDITTEXT        IDC_EDIT1,130,70,45,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ALIGNRIGHT | 
                     UDS_AUTOBUDDY | UDS_NOTHOUSANDS,169,69,11,11
-    LTEXT           "End",IDC_STATIC,107,86,14,8
     EDITTEXT        IDC_EDIT2,130,83,45,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN2,"msctls_updown32",UDS_ALIGNRIGHT | 
                     UDS_AUTOBUDDY | UDS_NOTHOUSANDS,169,84,11,11
-    GROUPBOX        "Sustain Loop",IDC_STATIC,185,43,79,57
-    LTEXT           "Type",IDC_STATIC,189,57,17,8
     COMBOBOX        IDC_COMBO2,212,54,45,46,CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Start",IDC_STATIC,189,73,16,8
     EDITTEXT        IDC_EDIT3,212,70,45,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN3,"msctls_updown32",UDS_ALIGNRIGHT | 
                     UDS_AUTOBUDDY | UDS_NOTHOUSANDS,253,70,11,11
-    LTEXT           "End",IDC_STATIC,189,86,14,8
     EDITTEXT        IDC_EDIT4,212,83,45,12,ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN4,"msctls_updown32",UDS_ALIGNRIGHT | 
                     UDS_AUTOBUDDY | UDS_NOTHOUSANDS,253,83,11,11
-    GROUPBOX        "",IDC_STATIC,269,43,96,57
     COMBOBOX        IDC_COMBO3,275,59,47,70,CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Depth",IDC_STATIC,327,50,20,8
     EDITTEXT        IDC_EDIT15,327,59,32,12,ES_NUMBER
     CONTROL         "Depth",IDC_SPIN12,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,353,59,
                     11,11
-    LTEXT           "Sweep",IDC_STATIC,275,74,23,8
     EDITTEXT        IDC_EDIT14,275,83,38,12,ES_NUMBER
     CONTROL         "Sweep",IDC_SPIN11,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,305,84,
                     11,11
-    LTEXT           "Rate",IDC_STATIC,321,74,16,8
     EDITTEXT        IDC_EDIT16,321,83,38,12,ES_NUMBER
     CONTROL         "Rate",IDC_SPIN13,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,353,83,
                     11,11
-    LTEXT           "Auto-Vibrato",IDC_STATIC,275,50,41,8
-    GROUPBOX        "Pitch shifting / Time stretching",
-                    IDC_GROUPBOX_PITCH_TIME,370,22,150,78,NOT WS_VISIBLE
-    LTEXT           "Pitch",IDC_TEXT_PITCH,374,38,23,10,NOT WS_VISIBLE
-    LTEXT           "Quality",IDC_TEXT_QUALITY,374,54,23,10,NOT WS_VISIBLE
-    LTEXT           "FFT",IDC_TEXT_FFT,374,70,23,10,NOT WS_VISIBLE
-    CONTROL         "Preview mode",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
-                    BS_LEFTTEXT | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,373,
-                    83,65,11
     CONTROL         "Time stretching",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
                     BS_LEFTTEXT | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,446,
                     36,68,11
-    EDITTEXT        IDC_EDIT6,446,51,45,13,ES_RIGHT | ES_AUTOHSCROLL | NOT 
-                    WS_VISIBLE,WS_EX_RIGHT
-    CTEXT           "Static",IDC_TEXT_PREVIEW,448,69,67,10,NOT WS_VISIBLE
-    PUSHBUTTON      "Process",IDC_BUTTON1,448,80,67,16,NOT WS_VISIBLE,
-                    WS_EX_CLIENTEDGE
-    PUSHBUTTON      "...",IDC_BUTTON2,502,51,13,13,NOT WS_VISIBLE,
-                    WS_EX_CLIENTEDGE
-    PUSHBUTTON      "Keep",IDC_BUTTON3,448,82,32,13,NOT WS_VISIBLE,
-                    WS_EX_CLIENTEDGE
+    CONTROL         "Preview mode",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,373,
+                    83,65,11
     PUSHBUTTON      "Restore",IDC_BUTTON4,482,82,33,13,NOT WS_VISIBLE,
                     WS_EX_CLIENTEDGE
     COMBOBOX        IDC_COMBO4,400,35,39,61,CBS_DROPDOWNLIST | NOT 
@@ -783,7 +742,50 @@ BEGIN
                     WS_VISIBLE | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     COMBOBOX        IDC_COMBO6,400,67,39,61,CBS_DROPDOWNLIST | NOT 
                     WS_VISIBLE | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_STRETCHPARAMS,374,51,64,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT6,446,51,45,12,ES_RIGHT | ES_AUTOHSCROLL | NOT 
+                    WS_VISIBLE,WS_EX_RIGHT
+    PUSHBUTTON      "...",IDC_BUTTON2,502,51,13,13,NOT WS_VISIBLE,
+                    WS_EX_CLIENTEDGE
+    RTEXT           "Sample",IDC_STATIC,62,8,24,8
+    CTEXT           "Length: 000000 (16-bit)",IDC_TEXT5,175,6,90,13,
+                    SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CONTROL         "Toolbar2",IDC_TOOLBAR2,"ToolbarWindow32",WS_GROUP | 
+                    0x4d,268,4,136,17
+    GROUPBOX        "",IDC_STATIC,3,22,94,78
+    LTEXT           "Default Volume",IDC_STATIC,8,32,49,8
+    LTEXT           "Global Volume",IDC_STATIC,8,45,46,8
+    LTEXT           "FineTune",IDC_TEXT7,8,73,37,8
+    LTEXT           "Transpose",IDC_TEXT6,8,86,38,8
+    CTEXT           "Name",IDC_STATIC,102,26,28,12,SS_CENTERIMAGE | NOT 
+                    WS_GROUP,WS_EX_STATICEDGE
+    CTEXT           "File",IDC_STATIC,269,26,23,13,SS_CENTERIMAGE | NOT 
+                    WS_GROUP | WS_TABSTOP,WS_EX_STATICEDGE
+    GROUPBOX        "Loop",IDC_STATIC,102,43,79,57
+    LTEXT           "Type",IDC_STATIC,107,57,17,8
+    LTEXT           "Start",IDC_STATIC,107,73,16,8
+    LTEXT           "End",IDC_STATIC,107,86,14,8
+    GROUPBOX        "Sustain Loop",IDC_STATIC,185,43,79,57
+    LTEXT           "Type",IDC_STATIC,189,57,17,8
+    LTEXT           "Start",IDC_STATIC,189,73,16,8
+    LTEXT           "End",IDC_STATIC,189,86,14,8
+    GROUPBOX        "",IDC_STATIC,269,43,96,57
+    LTEXT           "Auto-Vibrato",IDC_STATIC,275,50,41,8
+    LTEXT           "Sweep",IDC_STATIC,275,74,23,8
+    LTEXT           "Depth",IDC_STATIC,327,50,20,8
+    LTEXT           "Rate",IDC_STATIC,321,74,16,8
+    GROUPBOX        "Pitch shifting / Time stretching",
+                    IDC_GROUPBOX_PITCH_TIME,370,22,150,78,NOT WS_VISIBLE
+    PUSHBUTTON      "Process",IDC_BUTTON1,448,80,67,16,NOT WS_VISIBLE,
+                    WS_EX_CLIENTEDGE
+    LTEXT           "Pitch",IDC_TEXT_PITCH,373,36,23,10,NOT WS_VISIBLE
+    LTEXT           "Quality",IDC_TEXT_QUALITY,374,54,23,10,NOT WS_VISIBLE
+    LTEXT           "FFT",IDC_TEXT_FFT,374,68,23,10,NOT WS_VISIBLE
+    CTEXT           "Static",IDC_TEXT_PREVIEW,448,69,67,10,NOT WS_VISIBLE
+    PUSHBUTTON      "Keep",IDC_BUTTON3,448,82,32,13,NOT WS_VISIBLE,
+                    WS_EX_CLIENTEDGE
     LTEXT           "%",IDC_TEXT_PERCENT,494,53,8,10,NOT WS_VISIBLE
+    LTEXT           "Parameters",IDC_TEXT_STRETCHPARAMS,385,38,39,8
 END
 
 IDD_CONTROL_INSTRUMENTS DIALOGEX 0, 0, 558, 173

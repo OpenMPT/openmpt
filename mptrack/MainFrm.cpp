@@ -133,6 +133,7 @@ DWORD CMainFrame::gdwNotificationType = MPTNOTIFY_DEFAULT;
 UINT CMainFrame::m_nFilterIndex = 0;
 UINT CMainFrame::m_nLastOptionsPage = 0;
 BOOL CMainFrame::gbMdiMaximize = FALSE;
+bool CMainFrame::gbShowHackControls = false;
 //rewbs.varWindowSize
 LONG CMainFrame::glCtrlWindowHeight = 188; //obsolete, for backwards compat only
 LONG CMainFrame::glGeneralWindowHeight = 178;
@@ -427,8 +428,8 @@ void CMainFrame::LoadIniSettings()
 	gbPatternPluginNames = GetPrivateProfileDWord("Pattern Editor", "Plugin-Names", true, iniFile);	
 	gbPatternRecord = GetPrivateProfileDWord("Pattern Editor", "Record", true, iniFile);	
 	gnAutoChordWaitTime = GetPrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", 60, iniFile);	
-	CCtrlPatterns::s_ShowSequenceMarginsControls = (0 != GetPrivateProfileDWord("Pattern Editor", "ShowSequenceMarginsControls", 0, iniFile));
-	COrderList::s_nDefaultMargins = static_cast<BYTE>(GetPrivateProfileInt("Pattern Editor", "DefaultSequenceMargins", 0, iniFile));
+	COrderList::s_nDefaultMargins = static_cast<BYTE>(GetPrivateProfileInt("Pattern Editor", "DefaultSequenceMargins", 2, iniFile));
+	gbShowHackControls = (0 != GetPrivateProfileDWord("Misc", "ShowHackControls", 0, iniFile));
 
 	GetPrivateProfileString("Paths", "Songs_Directory", m_szModDir, m_szModDir, INIBUFFERSIZE, iniFile);
 	GetPrivateProfileString("Paths", "Samples_Directory", m_szSmpDir, m_szSmpDir, INIBUFFERSIZE, iniFile);

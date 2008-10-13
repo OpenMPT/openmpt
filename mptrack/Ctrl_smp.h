@@ -1,9 +1,6 @@
 #ifndef _CONTROL_SAMPLES_H_
 #define _CONTROL_SAMPLES_H_
 
-// If defined, disables pitch shifting - time stretching.
-#define NO_XSOUNDLIB
-
 
 //=======================================
 class CCtrlSamples: public CModControlDlg
@@ -22,25 +19,25 @@ protected:
 	CButton m_CheckPanning;
 	UINT m_nSample;
 	double m_dTimeStretchRatio; //rewbs.timeStretchMods
-	
+	uint32 m_nStretchProcessStepLength;
+	uint32 m_nSequenceMs;
+	uint32 m_nSeekWindowMs;
+	uint32 m_nOverlapMs;
+	enum {nDefaultStretchChunkSize = 8192};
 
-#ifndef NO_XSOUNDLIB
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 	PVOID pSampleUndoBuffer;
 	UINT UndoBufferSize;
 
 	int PitchShift(float pitch);
 	int TimeStretch(double ratio);
-#endif
+	void UpdateTimeStretchParameterString();
+	void ReadTimeStretchParameters();
 
 public:
 	CCtrlSamples();
-
-#ifndef NO_XSOUNDLIB
 	~CCtrlSamples();
-#endif
 
-public:
 	BOOL SetCurrentSample(UINT n, LONG lZoom=-1, BOOL bUpdNum=TRUE);
 	BOOL OpenSample(LPCSTR lpszFileName);
 	BOOL OpenSample(CSoundFile *pSndFile, UINT nSample);
@@ -96,13 +93,11 @@ protected:
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 
-#ifndef NO_XSOUNDLIB
 	afx_msg void OnPitchShiftTimeStretch();
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
 	afx_msg void OnPitchShiftTimeStretchAccept();
 	afx_msg void OnPitchShiftTimeStretchCancel();
-#endif
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

@@ -144,9 +144,6 @@ protected:
 // -! NEW_FEATURE#0012
 
 public:
-	static bool s_ShowSequenceMarginsControls;
-
-public:
 	CCtrlPatterns();
 	LONG* GetSplitPosRef() {return &CMainFrame::glPatternWindowHeight;} 	//rewbs.varWindowSize
 
