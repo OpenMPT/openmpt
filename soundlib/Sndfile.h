@@ -427,14 +427,18 @@ struct MODINSTRUMENT
 	BYTE nVibRate;
 	CHAR name[22];
 
-	//Should return the size which pSample is at least.
-	DWORD GetSampleSizeInBytes() const
-	{
-		DWORD len = nLength;
-		if(uFlags & CHN_16BIT) len *= 2;
-		if(uFlags & CHN_STEREO) len *= 2;
-		return len;
-	}
+	// Return the size of one (elementary) sample in bytes.
+	uint8 GetElementarySampleSize() const {return (uFlags & CHN_16BIT) ? 2 : 1;}
+
+	// Return the number of channels in the sample.
+	uint8 GetNumChannels() const {return (uFlags & CHN_STEREO) ? 2 : 1;}
+
+	// Return the size which pSample is at least.
+	DWORD GetSampleSizeInBytes() const {return nLength * GetNumChannels() * GetElementarySampleSize();}
+
+	// Returns sample rate of the sample. The argument is needed because 
+	// the sample rate is obtained differently for different module types.
+	uint32 GetSampleRate(const MODTYPE type) const;
 };
 
 
@@ -1292,6 +1296,17 @@ private:
 	void BuildDefaultInstrument();
 	long GetSampleOffset();
 };
+
+inline uint32 MODINSTRUMENT::GetSampleRate(const MODTYPE type) const
+//------------------------------------------------------------------
+{
+	uint32 nRate;
+	if(type & (MOD_TYPE_MOD|MOD_TYPE_XM))
+		nRate = CSoundFile::TransposeToFrequency(RelativeTone, nFineTune);
+	else
+		nRate = nC4Speed;
+	return (nRate > 0) ? nRate : 8363;
+}
 
 
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)

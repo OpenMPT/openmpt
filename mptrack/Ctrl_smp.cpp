@@ -9,10 +9,14 @@
 #include "dlg_misc.h"
 #include "PSRatioCalc.h" //rewbs.timeStretchMods
 #include "mpdlgs.h"
+#include "soundtouch/SoundTouch.h"
+#include "soundtouch/TDStretch.h"
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
+#include "smbPitchShift.cpp"
+#pragma warning(default:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-#ifndef NO_XSOUNDLIB
-	#include "smbPitchShift.h"
-	#include "samplerate.h"
+#ifdef _DEBUG
+	#define new DEBUG_NEW
 #endif
 
 #ifdef _DEBUG
@@ -64,15 +68,11 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(ID_PREVINSTRUMENT,		OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
-
-#ifndef NO_XSOUNDLIB
 	ON_COMMAND(IDC_BUTTON1,				OnPitchShiftTimeStretch)
 	ON_COMMAND(IDC_BUTTON2,				OnEstimateSampleSize)
 	ON_COMMAND(IDC_BUTTON3,				OnPitchShiftTimeStretchAccept)
 	ON_COMMAND(IDC_BUTTON4,				OnPitchShiftTimeStretchCancel)
 	ON_COMMAND(IDC_CHECK3,				OnEnableStretchToSize)
-#endif
-
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_FILENAME,	OnFileNameChanged)
 	ON_EN_CHANGE(IDC_EDIT_SAMPLE,		OnSampleChanged)
@@ -138,41 +138,37 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT14,				m_EditVibSweep);
 	DDX_Control(pDX, IDC_EDIT15,				m_EditVibDepth);
 	DDX_Control(pDX, IDC_EDIT16,				m_EditVibRate);
-
-#ifndef NO_XSOUNDLIB
 	DDX_Control(pDX, IDC_COMBO4,				m_ComboPitch);
 	DDX_Control(pDX, IDC_COMBO5,				m_ComboQuality);
 	DDX_Control(pDX, IDC_COMBO6,				m_ComboFFT);
 	DDX_Text(pDX,	 IDC_EDIT6,					m_dTimeStretchRatio); //rewbs.timeStretchMods
-#endif
-
 	//}}AFX_DATA_MAP
 }
 
 
-CCtrlSamples::CCtrlSamples()
-//--------------------------
+CCtrlSamples::CCtrlSamples() : 
+//----------------------------
+	m_nStretchProcessStepLength(nDefaultStretchChunkSize),
+	m_nSequenceMs(DEFAULT_SEQUENCE_MS),
+	m_nSeekWindowMs(DEFAULT_SEEKWINDOW_MS),
+	m_nOverlapMs(DEFAULT_OVERLAP_MS)
 {
 	m_nSample = 1;
 	m_nLockCount = 1;
-
-#ifndef NO_XSOUNDLIB
 	pSampleUndoBuffer = NULL;
 	UndoBufferSize = 0;
-#endif
-
 }
 
 
 
-#ifndef NO_XSOUNDLIB
-	CCtrlSamples::~CCtrlSamples()
-	{
-		if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
-		pSampleUndoBuffer = NULL;
-		UndoBufferSize = 0;
-	}
-#endif
+CCtrlSamples::~CCtrlSamples()
+//---------------------------
+{
+	if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
+	pSampleUndoBuffer = NULL;
+	UndoBufferSize = 0;
+}
+
 
 
 CRuntimeClass *CCtrlSamples::GetAssociatedViewClass()
@@ -241,7 +237,6 @@ BOOL CCtrlSamples::OnInitDialog()
 	}
 
 
-#ifndef NO_XSOUNDLIB
 	m_ComboFFT.ShowWindow(SW_SHOW);
 	m_ComboPitch.ShowWindow(SW_SHOW);
 	m_ComboQuality.ShowWindow(SW_SHOW);
@@ -315,7 +310,6 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	// Stretch to size check box
 	OnEnableStretchToSize();
-#endif // NO_XSOUNDLIB
 
 	return TRUE;
 }
@@ -337,9 +331,7 @@ BOOL CCtrlSamples::SetCurrentSample(UINT nSmp, LONG lZoom, BOOL bUpdNum)
 	if (pSndFile->m_nSamples < 1) pSndFile->m_nSamples = 1;
 	if ((nSmp < 1) || (nSmp > pSndFile->m_nSamples)) return FALSE;
 
-#ifndef NO_XSOUNDLIB
 	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-#endif
 
 	LockControls();
 	if (m_nSample != nSmp)
@@ -511,6 +503,9 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPSTR pszText)
 				return TRUE;
 			}
 			break;
+		case IDC_EDIT_STRETCHPARAMS:
+			wsprintf(pszText, "SequenceMs SeekwindowMs OverlapMs ProcessStepLength");
+			return TRUE;
 		}
 	}
 	return FALSE;
@@ -683,10 +678,7 @@ BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	DWORD len;
 	BOOL bOk;
 
-#ifndef NO_XSOUNDLIB
 	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-#endif
-
 
 	BeginWaitCursor();
 	if ((!lpszFileName) || (!f.Open(lpszFileName)))
@@ -803,10 +795,7 @@ BOOL CCtrlSamples::OpenSample(CSoundFile *pSndFile, UINT nSample)
 {
 	if ((!pSndFile) || (!nSample) || (nSample > pSndFile->m_nSamples)) return FALSE;
 
-#ifndef NO_XSOUNDLIB
 	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-#endif
-
 
 	BeginWaitCursor();
 	BEGIN_CRITICAL();
@@ -835,10 +824,7 @@ void CCtrlSamples::OnSampleChanged()
 {
 	if ((!IsLocked()) && (m_pSndFile))
 	{
-
-#ifndef NO_XSOUNDLIB
 		if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-#endif
 
 		UINT n = GetDlgItemInt(IDC_EDIT_SAMPLE);
 		if ((n > 0) && (n <= m_pSndFile->m_nSamples) && (n != m_nSample))
@@ -878,10 +864,7 @@ void CCtrlSamples::OnSampleNew()
 	LONG smp = m_pModDoc->InsertSample(TRUE);
 	if (smp > 0)
 	{
-
-	#ifndef NO_XSOUNDLIB
 		if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-	#endif
 
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		SetCurrentSample(smp);
@@ -1431,25 +1414,68 @@ void CCtrlSamples::OnDownsample()
 }
 
 
-#ifndef NO_XSOUNDLIB
-
 #define MAX_BUFFER_LENGTH	8192
 #define CLIP_SOUND(v)		v = v < -1.0f ? -1.0f : v > 1.0f ? 1.0f : v
 
+void CCtrlSamples::ReadTimeStretchParameters()
+//--------------------------------------------
+{
+	CString str;
+	GetDlgItemText(IDC_EDIT_STRETCHPARAMS, str);
+	_stscanf(str, __TEXT("%u %u %u %u"),
+		&m_nSequenceMs, &m_nSeekWindowMs, &m_nOverlapMs, &m_nStretchProcessStepLength);
+}
+
+
+void CCtrlSamples::UpdateTimeStretchParameterString()
+//---------------------------------------------------
+{
+	CString str;
+	str.Format(__TEXT("%u %u %u %u"),
+				m_nSequenceMs,
+				m_nSeekWindowMs,
+				m_nOverlapMs,
+				m_nStretchProcessStepLength
+	          );
+	SetDlgItemText(IDC_EDIT_STRETCHPARAMS, str);
+}
+
 void CCtrlSamples::OnEnableStretchToSize()
+//----------------------------------------
 {
 	// Enable time-stretching / disable unused pitch-shifting UI elements
 	if(IsDlgButtonChecked(IDC_CHECK3)){
 		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(FALSE);
 		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(TRUE);
 		((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(TRUE); //rewbs.timeStretchMods
+		GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_COMBO5)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_COMBO6)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_COMBO4)->ShowWindow(SW_HIDE);
+		if(CMainFrame::gbShowHackControls == true)
+		{
+			GetDlgItem(IDC_TEXT_STRETCHPARAMS)->ShowWindow(SW_SHOW);
+			GetDlgItem(IDC_EDIT_STRETCHPARAMS)->ShowWindow(SW_SHOW);
+		}
 		SetDlgItemText(IDC_BUTTON1, "Time Stretch");
+		UpdateTimeStretchParameterString();
 	}
 	// Enable pitch-shifting / disable unused time-stretching UI elements
 	else{
+		ReadTimeStretchParameters();
+		GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_COMBO5)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_COMBO6)->ShowWindow(SW_SHOW);
 		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(TRUE);
 		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(FALSE);
 		((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(FALSE); //rewbs.timeStretchMods
+		GetDlgItem(IDC_TEXT_STRETCHPARAMS)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_EDIT_STRETCHPARAMS)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_COMBO4)->ShowWindow(SW_SHOW);
 		SetDlgItemText(IDC_BUTTON1, "Pitch Shift");
 	}
 }
@@ -1519,11 +1545,14 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 		UpdateData(TRUE); //Ensure m_dTimeStretchRatio is up-to-date with textbox content
 		errorcode = TimeStretch(m_dTimeStretchRatio/100.0);
 
-		//Update loop points
-		pins->nLoopStart *= m_dTimeStretchRatio/100.0;
-		pins->nLoopEnd *= m_dTimeStretchRatio/100.0;
-		pins->nSustainStart *= m_dTimeStretchRatio/100.0;
-		pins->nSustainEnd *= m_dTimeStretchRatio/100.0;
+		//Update loop points only if no error occured.
+		if(errorcode == 0)
+		{
+			pins->nLoopStart *= m_dTimeStretchRatio/100.0;
+			pins->nLoopEnd *= m_dTimeStretchRatio/100.0;
+			pins->nSustainStart *= m_dTimeStretchRatio/100.0;
+			pins->nSustainEnd *= m_dTimeStretchRatio/100.0;
+		}
 		//end rewbs.timeStretchMods
 		
 	}
@@ -1574,6 +1603,12 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 				break;
 			case 3 : wsprintf(str,"Not enough memory...");
 				break;
+			case 4 : wsprintf(str, "Action can be applied only to 16-bit samples.");
+				break;
+			case 5 : wsprintf(str, "Too low sample rate");
+				break;
+			case 6 : wsprintf(str, "Too short sample");
+				break;
 			default: wsprintf(str,"Unknown Error...");
 				break;
 		}
@@ -1586,6 +1621,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 }
 
 void CCtrlSamples::OnPitchShiftTimeStretchAccept()
+//------------------------------------------------
 {
 	// Free sample undo buffer
 	if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
@@ -1662,11 +1698,24 @@ void CCtrlSamples::OnPitchShiftTimeStretchCancel()
 	m_pModDoc->SetModified();
 }
 
+
 int CCtrlSamples::TimeStretch(double ratio)
+//-----------------------------------------
 {
 	if((!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return -1;
 	MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
 	if(!pins) return -1;
+
+	// Stretching is implemented only for 16-bit samples. Return with
+	// error if trying to use wtih non 16-bit samples.
+	if(pins->GetElementarySampleSize() != 2)
+		return 4;
+
+	// SoundTouch seems to crash with short samples. Don't know what
+	// the actual limit or whether it depends on sample rate,
+	// but simply set some semiarbitrary threshold here.
+	if(pins->nLength < 256)
+		return 6;
 
 	// Refuse processing when ratio is negative, equal to zero or equal to 1.0
 	if(ratio <= 0.0 || ratio == 1.0) return -1;
@@ -1676,41 +1725,30 @@ int CCtrlSamples::TimeStretch(double ratio)
 	if(pitch < 0.5f) return 2 + (1<<8);
 	if(pitch > 2.0f) return 2 + (2<<8);
 
+	soundtouch::SoundTouch* pSoundTouch = 0;
+	try
+	{
+		pSoundTouch = new soundtouch::SoundTouch;
+	}
+	catch(...)
+	{   // Assuming that thrown exception means that soundtouch library could not be loaded.
+		MessageBox("Failed to load soundtouch library.", 0, MB_ICONERROR);
+		return -1;
+	}
+
 	// Get number of channels & sample size
-	BYTE smpsize  = (pins->uFlags & CHN_16BIT)  ? 2 : 1;
-	UINT nChn = (pins->uFlags & CHN_STEREO) ? 2 : 1;
+	const BYTE smpsize = pins->GetElementarySampleSize();
+	const UINT nChn = pins->GetNumChannels();
 
 	// Allocate new sample
-	DWORD newsize = (DWORD)(0.5 + ratio * (double)pins->nLength);
+	const DWORD nNewSampleLength = (DWORD)(0.5 + ratio * (double)pins->nLength);
 	PVOID pSample = pins->pSample;
-	PVOID pNewSample = CSoundFile::AllocateSample(newsize * nChn * smpsize);
-	if(pNewSample == NULL) return 3;
-
-	// Apply pitch-shifting step
-	PitchShift(pitch);
-
-	// Allocate working buffers
-	UINT outputsize = (UINT)(0.5 + ratio * (double)MAX_BUFFER_LENGTH);
-	if( (outputsize & 1) && (smpsize == 2 || nChn == 2) ) outputsize++;
-
-	float * buffer = new float[MAX_BUFFER_LENGTH * nChn];
-	float * outbuf = new float[outputsize * nChn];
-
-	// Create resampler
-	int error;
-	SRC_STATE * resampler = src_new(SRC_SINC_BEST_QUALITY, nChn, &error) ;
-
-	// Fill in resampler data struct
-	SRC_DATA data;
-	data.data_in = &buffer[0];
-	data.input_frames = MAX_BUFFER_LENGTH;
-	data.data_out = &outbuf[0];
-	data.output_frames = outputsize;
-	data.src_ratio = ratio;
-	data.end_of_input = 0;
-
-	// Deduce max sample value (float conversion step)
-	float maxSampleValue = ( 1 << (smpsize * 8 - 1) ) - 1;
+	PVOID pNewSample = CSoundFile::AllocateSample(nNewSampleLength * nChn * smpsize);
+	if(pNewSample == NULL)
+	{
+		delete pSoundTouch;
+		return 3;
+	}
 
 	// Save process button text (to be used as "progress bar" indicator while processing)
 	CHAR oldText[255];
@@ -1732,16 +1770,58 @@ int CCtrlSamples::TimeStretch(double ratio)
 
 	// Show wait mouse cursor
 	BeginWaitCursor();
-	SetDlgItemText(IDC_STATIC1,"Resampling...");
+	SetDlgItemText(IDC_STATIC1, "Stretching...");
 
-	// Apply stretching (resampling) step
-	UINT pos = 0, posnew = 0;
-	UINT len = MAX_BUFFER_LENGTH;
+	UINT pos = 0;
+	UINT len = 0; //To contain length of processing step.
 
-	// Process sample buffer using MAX_BUFFER_LENGTH (max) sized chunk steps (in order to allow
-	// the processing of BIG samples...)
-	while(pos < pins->nLength){
+	// Initialize soundtouch object.
+	{	
+		const uint32 nSampleRate = pins->GetSampleRate(m_pSndFile->GetType());
+		if(nSampleRate < 300) // Too low samplerate crashes soundtouch.
+		{                     // Limiting it to value 300(quite arbitrarily chosen).
+			delete pSoundTouch;
+			return 5;         
+		}
+		pSoundTouch->setSampleRate(nSampleRate);
+		pSoundTouch->setChannels(nChn);
+		// Given ratio is time stretch ratio, and must be converted to
+		// tempo change ratio: for example time stretch ratio 2 means
+		// tempo change ratio 0.5.
+		pSoundTouch->setTempoChange( (1.0f / ratio - 1.0f) * 100.0f);
+		pSoundTouch->setSetting(SETTING_USE_QUICKSEEK, 0);
 
+		// Read settings from GUI.
+		ReadTimeStretchParameters();	
+
+		if(m_nStretchProcessStepLength == 0) m_nStretchProcessStepLength = nDefaultStretchChunkSize;
+		if(m_nStretchProcessStepLength < 64) m_nStretchProcessStepLength = nDefaultStretchChunkSize;
+		len = m_nStretchProcessStepLength;
+		
+		// Set settings to soundtouch. Zero value means 'use default', and
+        // setting value is read back after setting because not all settings are accepted.
+		if(m_nSequenceMs == 0) m_nSequenceMs = DEFAULT_SEQUENCE_MS;
+		pSoundTouch->setSetting(SETTING_SEQUENCE_MS, m_nSequenceMs);
+		m_nSequenceMs = pSoundTouch->getSetting(SETTING_SEQUENCE_MS);
+		
+		if(m_nSeekWindowMs == 0) m_nSeekWindowMs = DEFAULT_SEEKWINDOW_MS;
+		pSoundTouch->setSetting(SETTING_SEEKWINDOW_MS, m_nSeekWindowMs);
+		m_nSeekWindowMs = pSoundTouch->getSetting(SETTING_SEEKWINDOW_MS);
+		
+		if(m_nOverlapMs == 0) m_nOverlapMs = DEFAULT_OVERLAP_MS;
+		pSoundTouch->setSetting(SETTING_OVERLAP_MS, m_nOverlapMs);
+		m_nOverlapMs = pSoundTouch->getSetting(SETTING_OVERLAP_MS);
+		
+		// Update GUI with the actual SoundTouch parameters in effect.
+		UpdateTimeStretchParameterString();
+	}
+
+	// Keeps count of the sample length received from stretching process.
+	UINT nLengthCounter = 0;
+
+	// Process sample in steps.
+	while(pos < pins->nLength)
+	{
 		// Current chunk size limit test
 		if(pos + len >= pins->nLength) len = pins->nLength - pos;
 
@@ -1759,57 +1839,25 @@ int CCtrlSamples::TimeStretch(double ratio)
 		::DrawText(processButtonDC,progress,strlen(progress),&processButtonRect,DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 		::GdiFlush();
 
-		// Convert current channel's data chunk to float
-		BYTE * ptr = (BYTE *)pSample + pos * smpsize * nChn;
+		// Send sampledata for processing.
+		pSoundTouch->putSamples(reinterpret_cast<int16*>(pins->pSample + pos * smpsize * nChn), len);
 
-		for(UINT j = 0 ; j < len ; j++){
-			switch(smpsize){
-				case 2:
-					buffer[j*nChn] = ((float)(*(SHORT *)ptr)) / maxSampleValue;
-					if(nChn == 2) { ptr += 2; buffer[j*nChn+1] = ((float)(*(SHORT *)ptr)) / maxSampleValue; }
-					break;
-				case 1:
-					buffer[j*nChn] = ((float)*ptr) / maxSampleValue;
-					if(nChn == 2) { ptr++; buffer[j*nChn+1] = ((float)*ptr) / maxSampleValue; }
-					break;
-			}
-			ptr += smpsize;
-		}
-
-		// Wake up resampler...
-		if(pos + MAX_BUFFER_LENGTH >= pins->nLength) data.end_of_input = 1;
-		src_process(resampler, &data);
-
-		// New buffer limit test (seems like, whatever the size of the last chunk, the resampler return buffer size instead of processed size)
-		if(data.end_of_input && posnew + (UINT)data.output_frames_gen >= newsize) data.output_frames_gen = newsize - posnew;
-
-		// Convert resampled float buffer into new sample buffer
-		ptr = (BYTE *)pNewSample + posnew * smpsize * nChn;
-
-		for(UINT j = 0 ; j < (UINT)data.output_frames_gen ; j++){
-			// Just perform a little bit of clipping...
-			float v = outbuf[j*nChn]; CLIP_SOUND(v);
-			// ...before converting back to buffer
-			switch(smpsize){
-				case 2:
-					*(SHORT *)ptr = (SHORT)(v * maxSampleValue);
-					if(nChn == 2) { ptr += 2; v = outbuf[j*nChn+1]; CLIP_SOUND(v); *(SHORT *)ptr = (SHORT)(v * maxSampleValue); }
-					break;
-				case 1:
-					*ptr = (BYTE)(v * maxSampleValue);
-					if(nChn == 2) { ptr++; v = outbuf[j*nChn+1]; CLIP_SOUND(v); *ptr = (BYTE)(v * maxSampleValue); }
-					break;
-			}
-			ptr += smpsize;
-		}
+		// Receive some processed samples (it's not guaranteed that there is any available).
+		nLengthCounter += pSoundTouch->receiveSamples(reinterpret_cast<int16*>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
 
 		// Next buffer chunk
-		posnew += data.output_frames_gen;
-		pos += MAX_BUFFER_LENGTH;
+		pos += len;
 	}
 
-	// Update newsize with generated size
-	newsize = posnew;
+	// The input sample should now be processed. Receive remaining samples.
+	pSoundTouch->flush();
+	while(pSoundTouch->numSamples() > 0 && nNewSampleLength > nLengthCounter)
+	{
+		nLengthCounter += pSoundTouch->receiveSamples(reinterpret_cast<int16*>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
+	}
+	delete pSoundTouch; pSoundTouch = 0;
+
+	ASSERT(nNewSampleLength >= nLengthCounter);
 
 	// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
 	BEGIN_CRITICAL();
@@ -1822,16 +1870,8 @@ int CCtrlSamples::TimeStretch(double ratio)
 	}
 	pins->pSample = (LPSTR)pNewSample;
 	CSoundFile::FreeSample(pSample);
-	pins->nLength = newsize;
+	pins->nLength = min(nLengthCounter, nNewSampleLength);
 	END_CRITICAL();
-
-	// Free working buffers
-	data.data_in = data.data_out = NULL;
-	if(buffer) delete [] buffer;
-	if(outbuf) delete [] outbuf;
-
-	// Free resampler
-	if(resampler) src_delete(resampler);
 
 	// Free progress bar brushes
 	DeleteObject((HBRUSH)green);
@@ -1848,6 +1888,7 @@ int CCtrlSamples::TimeStretch(double ratio)
 }
 
 int CCtrlSamples::PitchShift(float pitch)
+//---------------------------------------
 {
 	if((!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return -1;
 	if(pitch < 0.5f) return 1 + (1<<8);
@@ -1856,6 +1897,11 @@ int CCtrlSamples::PitchShift(float pitch)
 	// Get sample struct pointer
 	MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
 	if(!pins) return 2;
+
+	// PitchShift seems to work only with 16-bit samples. Return with
+	// error if trying to use non 16-bit samples.
+	if(pins->GetElementarySampleSize() != 2)
+		return 4;
 
 	// Get number of channels & sample size
 	BYTE smpsize  = (pins->uFlags & CHN_16BIT)  ? 2 : 1;
@@ -2012,8 +2058,6 @@ int CCtrlSamples::PitchShift(float pitch)
 
 	return 0;
 }
-
-#endif // NO_XSOUNDLIB
 
 
 void CCtrlSamples::OnReverse()

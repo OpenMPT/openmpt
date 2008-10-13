@@ -13,7 +13,6 @@
 //////////////////////////////////////////////////////////////
 // CCtrlPatterns
 
-bool CCtrlPatterns::s_ShowSequenceMarginsControls = false;
 
 BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlPatterns)
@@ -172,7 +171,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_SpinInstrument.SetRange(-1, 1);
 	m_SpinInstrument.SetPos(0);
 
-	if(s_ShowSequenceMarginsControls == true)
+	if(CMainFrame::gbShowHackControls == true)
 	{
 		m_SpinOrderListMargins.ShowWindow(SW_SHOW);
 		m_EditOrderListMargins.ShowWindow(SW_SHOW);

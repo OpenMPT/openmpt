@@ -3,6 +3,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mptrack", "mptrack.vcproj",
 	ProjectSection(ProjectDependencies) = postProject
 		{1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4} = {1FF4AB04-B22F-4CB8-AA2A-0C5095B5FEE4}
 		{71531076-78C7-488D-8FD6-9D841F20AADE} = {71531076-78C7-488D-8FD6-9D841F20AADE}
+		{CF3C2CA5-5D45-4635-BBA4-C1F435E10896} = {CF3C2CA5-5D45-4635-BBA4-C1F435E10896}
 		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7} = {3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}
 	EndProjectSection
 EndProject
@@ -19,6 +20,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unzip", "..\UNZIP\unzip.vcp
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xsoundlib", "..\xsoundlib\xsoundlib.vcproj", "{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "soundtouch", "..\soundtouch\soundtouch.vcproj", "{CF3C2CA5-5D45-4635-BBA4-C1F435E10896}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -50,6 +55,10 @@ Global
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Debug.Build.0 = Debug|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Release.ActiveCfg = Release|Win32
 		{DCC2BB2F-6778-4FD3-9C00-D6CD8DC917B8}.Release.Build.0 = Release|Win32
+		{CF3C2CA5-5D45-4635-BBA4-C1F435E10896}.Debug.ActiveCfg = Debug|Win32
+		{CF3C2CA5-5D45-4635-BBA4-C1F435E10896}.Debug.Build.0 = Debug|Win32
+		{CF3C2CA5-5D45-4635-BBA4-C1F435E10896}.Release.ActiveCfg = Release|Win32
+		{CF3C2CA5-5D45-4635-BBA4-C1F435E10896}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
