@@ -1951,7 +1951,7 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOO
 		::SetTextColor(hdc, GetSysColor((bDisabled) ? COLOR_GRAYTEXT : COLOR_BTNTEXT));
 		::SetBkMode(hdc, TRANSPARENT);
 		HGDIOBJ oldfont = ::SelectObject(hdc, CMainFrame::GetGUIFont());
-		::DrawText(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE);
+		::DrawText(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
 		::SelectObject(hdc, oldfont);
 	}
 }
