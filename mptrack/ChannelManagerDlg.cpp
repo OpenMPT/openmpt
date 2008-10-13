@@ -596,7 +596,7 @@ void DrawChannelButton(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bActivate, 
 		HGDIOBJ oldfont = ::SelectObject(hdc, CMainFrame::GetGUIFont());
 
 		::SetTextColor(hdc, GetSysColor(bEnable || !bActivate ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
-		::DrawText(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE);
+		::DrawText(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
 		::SelectObject(hdc, oldfont);
 	}
 }
