@@ -1322,14 +1322,32 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					m_dwMenuParam = dwPos;
 				}
 			}
+
 			if (m_dwBeginSel >= m_dwEndSel)
 			{
 				if (pins->uFlags & CHN_16BIT) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_8BITCONVERT, "Convert to 8-bit");
 				if (pins->uFlags & CHN_STEREO) ::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, "Convert to mono");
 			}
+
+			// "Trim" menu item is responding differently if there's no selection,
+			// but a loop present: "trim around loop point"! (jojo in topic 2258)
+			std::string sTrimMenuText = "Trim";
+			bool bIsGrayed = (m_dwEndSel<=m_dwBeginSel);
+
+			if ((m_dwBeginSel == m_dwEndSel) && (pins->nLoopStart < pins->nLoopEnd))
+			{
+				// no selection => use loop points
+				sTrimMenuText += " around loop points";
+				bIsGrayed = false;
+			}
 			
-			::AppendMenu(hMenu, MF_STRING|(m_dwEndSel>m_dwBeginSel)?0:MF_GRAYED, 
-				ID_SAMPLE_TRIM, "Trim\t" + ih->GetKeyTextFromCommand(kcSampleTrim));
+			sTrimMenuText += "\t" + ih->GetKeyTextFromCommand(kcSampleTrim);
+
+			// change by jojo: "trim" menu item is also available
+			// if there's no selection, but loop points
+			//::AppendMenu(hMenu, MF_STRING|(m_dwEndSel>m_dwBeginSel)?0:MF_GRAYED, 
+			//	ID_SAMPLE_TRIM, "Trim\t" + ih->GetKeyTextFromCommand(kcSampleTrim));
+			::AppendMenu(hMenu, MF_STRING|(bIsGrayed)?MF_GRAYED:0, ID_SAMPLE_TRIM, sTrimMenuText.c_str());
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\t" + ih->GetKeyTextFromCommand(kcEditCut));
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
@@ -1825,51 +1843,60 @@ void CViewSample::OnSampleTrim()
 //------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	BeginWaitCursor();
-	if ((pModDoc) && (m_nSample < MAX_SAMPLES) && (m_dwBeginSel < m_dwEndSel))
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pins = &pSndFile->Ins[m_nSample];
-		UINT nStart = m_dwBeginSel;
-		UINT nEnd = m_dwEndSel - m_dwBeginSel;
+	//nothing loaded or invalid sample slot.
+	if(!pModDoc || m_nSample >= MAX_SAMPLES) return;
 
-		if ((pins->pSample) && (nStart+nEnd <= pins->nLength) && (nEnd >= 16))
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	MODINSTRUMENT *pins = &pSndFile->Ins[m_nSample];
+
+	if(m_dwBeginSel == m_dwEndSel) {
+		// trim around loop points if there's no selection (suggested by jojo in topic 2258)
+		m_dwBeginSel = pins->nLoopStart;
+		m_dwEndSel = pins->nLoopEnd;
+	}
+
+	if (m_dwBeginSel >= m_dwEndSel) return; // invalid selection
+
+	BeginWaitCursor();
+	UINT nStart = m_dwBeginSel;
+	UINT nEnd = m_dwEndSel - m_dwBeginSel;
+
+	if ((pins->pSample) && (nStart+nEnd <= pins->nLength) && (nEnd >= 16))
+	{
+		BEGIN_CRITICAL();
 		{
-			BEGIN_CRITICAL();
+			UINT bend = nEnd, bstart = nStart;
+			if (pins->uFlags & CHN_16BIT) { bend <<= 1; bstart <<= 1; }
+			if (pins->uFlags & CHN_STEREO) { bend <<= 1; bstart <<= 1; }
+			signed char *p = (signed char *)pins->pSample;
+			for (UINT i=0; i<bend; i++)
 			{
-				UINT bend = nEnd, bstart = nStart;
-				if (pins->uFlags & CHN_16BIT) { bend <<= 1; bstart <<= 1; }
-				if (pins->uFlags & CHN_STEREO) { bend <<= 1; bstart <<= 1; }
-				signed char *p = (signed char *)pins->pSample;
-				for (UINT i=0; i<bend; i++)
-				{
-					p[i] = p[i+bstart];
-				}
+				p[i] = p[i+bstart];
 			}
-			if (pins->nLoopStart >= nStart) pins->nLoopStart -= nStart;
-			if (pins->nLoopEnd >= nStart) pins->nLoopEnd -= nStart;
-			if (pins->nSustainStart >= nStart) pins->nSustainStart -= nStart;
-			if (pins->nSustainEnd >= nStart) pins->nSustainEnd -= nStart;
-			if (pins->nLoopEnd > nEnd) pins->nLoopEnd = nEnd;
-			if (pins->nSustainEnd > nEnd) pins->nSustainEnd = nEnd;
-			if (pins->nLoopStart >= pins->nLoopEnd)
-			{
-				pins->nLoopStart = pins->nLoopEnd = 0;
-				pins->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
-			}
-			if (pins->nSustainStart >= pins->nSustainEnd)
-			{
-				pins->nSustainStart = pins->nSustainEnd = 0;
-				pins->uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
-			}
-			pins->nLength = nEnd;
-			END_CRITICAL();
-			pModDoc->SetModified();
-			pModDoc->AdjustEndOfSample(m_nSample);
-			SetCurSel(0, 0);
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		}
+		if (pins->nLoopStart >= nStart) pins->nLoopStart -= nStart;
+		if (pins->nLoopEnd >= nStart) pins->nLoopEnd -= nStart;
+		if (pins->nSustainStart >= nStart) pins->nSustainStart -= nStart;
+		if (pins->nSustainEnd >= nStart) pins->nSustainEnd -= nStart;
+		if (pins->nLoopEnd > nEnd) pins->nLoopEnd = nEnd;
+		if (pins->nSustainEnd > nEnd) pins->nSustainEnd = nEnd;
+		if (pins->nLoopStart >= pins->nLoopEnd)
+		{
+			pins->nLoopStart = pins->nLoopEnd = 0;
+			pins->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP);
+		}
+		if (pins->nSustainStart >= pins->nSustainEnd)
+		{
+			pins->nSustainStart = pins->nSustainEnd = 0;
+			pins->uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
+		}
+		pins->nLength = nEnd;
+		END_CRITICAL();
+		pModDoc->SetModified();
+		pModDoc->AdjustEndOfSample(m_nSample);
+		SetCurSel(0, 0);
+		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 	}
 	EndWaitCursor();
 }
