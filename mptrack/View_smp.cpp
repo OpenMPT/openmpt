@@ -20,6 +20,12 @@
 #define MIN_ZOOM	0
 #define MAX_ZOOM	8
 
+// Defines the minimum length for selection for which
+// trimming will be done. This is the minimum value for
+// selection difference, so the minimum length of result
+// of trimming is nTrimLengthMin + 1.
+const uint8 nTrimLengthMin = 16;
+
 const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] = 
 {
 	ID_SAMPLE_ZOOMUP,
@@ -1176,9 +1182,32 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	pSndFile = pModDoc->GetSoundFile();
 	if (m_rcClient.PtInRect(point))
 	{
-		LONG x = ScreenToSample(point.x);
-		wsprintf(s, "Cursor: %d", x);
+		const DWORD x = ScreenToSample(point.x);
+		wsprintf(s, "Cursor: %u", x);
 		UpdateIndicator(s);
+		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+
+		if (pMainFrm && m_dwEndSel <= m_dwBeginSel)
+		{
+			if(m_nSample > 0 && m_nSample < MAX_SAMPLES && x < pSndFile->Ins[m_nSample].nLength )
+			{
+				const DWORD xLow = (x / 0x100) % 0x100;
+				const DWORD xHigh = x / 0x10000;
+				const char cOffsetChar = (pSndFile->TypeIsS3M_IT_MPT()) ? gszS3mCommands[CMD_OFFSET] : gszModCommands[CMD_OFFSET];
+				const bool bHasHighOffset = (pSndFile->TypeIsS3M_IT_MPT() || (pSndFile->GetType() == MOD_TYPE_XM));
+				const char cHighOffsetChar = (pSndFile->TypeIsS3M_IT_MPT()) ? gszS3mCommands[CMD_S3MCMDEX] : gszModCommands[CMD_XFINEPORTAUPDOWN];
+
+				if(xHigh == 0)
+					wsprintf(s, "Offset: %c%02X", cOffsetChar, xLow);
+				else if(bHasHighOffset && xHigh < 0x10)
+					wsprintf(s, "Offset: %c%02X, %cA%X", cOffsetChar, xLow, cHighOffsetChar, xHigh);
+				else
+					wsprintf(s, "Beyond offset range");
+				pMainFrm->SetInfoText(s);
+			}
+			else
+				pMainFrm->SetInfoText("");
+		}
 	} else UpdateIndicator(NULL);
 	if (m_dwStatus & SMPSTATUS_MOUSEDRAG)
 	{
@@ -1332,13 +1361,19 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			// "Trim" menu item is responding differently if there's no selection,
 			// but a loop present: "trim around loop point"! (jojo in topic 2258)
 			std::string sTrimMenuText = "Trim";
-			bool bIsGrayed = (m_dwEndSel<=m_dwBeginSel);
+			bool bIsGrayed = ( (m_dwEndSel<=m_dwBeginSel) || (m_dwEndSel - m_dwBeginSel < nTrimLengthMin)
+								|| (m_dwEndSel - m_dwBeginSel == pins->nLength)
+							  );
 
 			if ((m_dwBeginSel == m_dwEndSel) && (pins->nLoopStart < pins->nLoopEnd))
 			{
 				// no selection => use loop points
 				sTrimMenuText += " around loop points";
-				bIsGrayed = false;
+				// Check whether trim menu item can be enabled (loop not too short or long for trimming).
+				if( (pins->nLoopEnd <= pins->nLength) &&
+					(pins->nLoopEnd - pins->nLoopStart >= nTrimLengthMin) &&
+					(pins->nLoopEnd - pins->nLoopStart < pins->nLength) )
+					bIsGrayed = false;
 			}
 			
 			sTrimMenuText += "\t" + ih->GetKeyTextFromCommand(kcSampleTrim);
@@ -1862,7 +1897,7 @@ void CViewSample::OnSampleTrim()
 	UINT nStart = m_dwBeginSel;
 	UINT nEnd = m_dwEndSel - m_dwBeginSel;
 
-	if ((pins->pSample) && (nStart+nEnd <= pins->nLength) && (nEnd >= 16))
+	if ((pins->pSample) && (nStart+nEnd <= pins->nLength) && (nEnd >= nTrimLengthMin))
 	{
 		BEGIN_CRITICAL();
 		{
