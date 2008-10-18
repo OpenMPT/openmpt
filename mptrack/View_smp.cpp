@@ -1503,6 +1503,7 @@ void CViewSample::OnSetSustainLoop()
 			{
 				pins->nSustainStart = m_dwBeginSel;
 				pins->nSustainEnd = m_dwEndSel;
+				pins->uFlags |= CHN_SUSTAINLOOP;
 				pModDoc->SetModified();
 				pModDoc->AdjustEndOfSample(m_nSample);
 				// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
@@ -1914,9 +1915,9 @@ void CViewSample::PlayNote(UINT note)
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (pMainFrm))
 	{
-		if (note >= 0xFE)
+		if (note >= NOTE_NOTECUT)
 		{
-			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE);
+			pModDoc->NoteOff(0, (note == NOTE_NOTECUT) ? TRUE : FALSE);
 		} 
 		else
 		{
@@ -1926,7 +1927,9 @@ void CViewSample::PlayNote(UINT note)
 			else
 				pModDoc->NoteOff(0, TRUE);
 			DWORD loopstart = m_dwBeginSel, loopend = m_dwEndSel;
-			if (loopend - loopstart < (UINT)(4 << m_nZoom)) loopend = loopstart = 0;
+			if (loopend - loopstart < (UINT)(4 << m_nZoom))
+				loopend = loopstart = 0; // selection is too small -> no loop
+
 			pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend);
 			m_dwStatus |= SMPSTATUS_KEYDOWN;
 			s[0] = 0;
@@ -2148,7 +2151,12 @@ void CViewSample::OnSetLoopStart()
 		{
 			pins->nLoopStart = m_dwMenuParam;
 			pModDoc->SetModified();
-			pModDoc->AdjustEndOfSample(m_nSample);
+			if(pins->uFlags & CHN_LOOP)
+			{
+				/* only update sample buffer if the loop is actually enabled
+				(resets sound without any reason otherwise) - bug report 1874 */
+				pModDoc->AdjustEndOfSample(m_nSample);
+			}
 			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
@@ -2168,7 +2176,12 @@ void CViewSample::OnSetLoopEnd()
 		{
 			pins->nLoopEnd = m_dwMenuParam;
 			pModDoc->SetModified();
-			pModDoc->AdjustEndOfSample(m_nSample);
+			if(pins->uFlags & CHN_LOOP)
+			{
+				/* only update sample buffer if the loop is actually enabled
+				(resets sound without any reason otherwise) - bug report 1874 */
+				pModDoc->AdjustEndOfSample(m_nSample);
+			}
 			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
@@ -2337,8 +2350,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSampleNormalize:	PostCtrlMessage(IDC_SAMPLE_NORMALIZE); return wParam;
 		case kcSampleAmplify:	PostCtrlMessage(IDC_SAMPLE_AMPLIFY); return wParam;
 
-		case kcNoteOff:			PlayNote(255); return wParam;
-		case kcNoteCut:			PlayNote(254); return wParam;
+		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
+		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
 
 	}
 	if (wParam>=kcSampStartNotes && wParam<=kcSampEndNotes)

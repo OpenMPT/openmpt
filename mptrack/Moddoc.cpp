@@ -580,6 +580,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		SetModified(FALSE);
 		m_bHasValidPath=true;
 		m_ShowSavedialog = false;
+		UpdateAllViews(NULL, HINT_MODGENERAL); // Update treeview (e.g. filename might have changed).
 		return TRUE;
 	} else
 	{
@@ -831,12 +832,15 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		if (nVol >= 0) pChn->nVolume = nVol;
 		
 		// handle sample looping.
-		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
+		// Fix: Bug report 1700.
+		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
+		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (pChn->pInstrument != 0))
+		{
 			pChn->nPos = loopstart;
 			pChn->nPosLo = 0;
 			pChn->nLoopStart = loopstart;
 			pChn->nLoopEnd = loopend;
-			pChn->nLength = loopend;
+			pChn->nLength = min(UINT(loopend), pChn->pInstrument->nLength);
 		}
 
 		// handle extra-loud flag
@@ -1960,7 +1964,7 @@ void CModDoc::OnApproximateBPM()
 	switch(m_SndFile.m_nTempoMode) {
 		case tempo_mode_alternative: 
 			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
-			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nRowsPerBeat, bpm); 
 			break;
 
 		case tempo_mode_modern: 
@@ -1970,7 +1974,7 @@ void CModDoc::OnApproximateBPM()
 		case tempo_mode_classic: 
 		default:
 			Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
-			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
+			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nRowsPerBeat, bpm); 
 			break;
 	}
 /*

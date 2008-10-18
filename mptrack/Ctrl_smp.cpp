@@ -996,7 +996,9 @@ void CCtrlSamples::OnSamplePlay()
 {
 	if ((m_pModDoc) && (m_pSndFile))
 	{
-		if ((m_pSndFile->IsPaused()) && (m_pModDoc->IsNotePlaying(0, m_nSample, 0)))
+		// Fix (bug report 1366).
+		// if ((m_pSndFile->IsPaused()) && (m_pModDoc->IsNotePlaying(0, m_nSample, 0)))
+		if (m_pModDoc->IsNotePlaying(0, m_nSample, 0))
 		{
 			m_pModDoc->NoteOff(0, TRUE);
 		} else
@@ -2488,7 +2490,12 @@ void CCtrlSamples::OnLoopStartChanged()
 	if ((n >= 0) && (n < (LONG)pins->nLength) && ((n < (LONG)pins->nLoopEnd) || (!(pins->uFlags & CHN_LOOP))))
 	{
 		pins->nLoopStart = n;
-		m_pModDoc->AdjustEndOfSample(m_nSample);
+		if(pins->uFlags & CHN_LOOP) 
+		{
+			/* only update sample buffer if the loop is actually enabled
+			  (resets sound without any reason otherwise) - bug report 1874 */
+			m_pModDoc->AdjustEndOfSample(m_nSample);
+		}
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
@@ -2505,7 +2512,12 @@ void CCtrlSamples::OnLoopEndChanged()
 	if ((n >= 0) && (n <= (LONG)pins->nLength) && ((n > (LONG)pins->nLoopStart) || (!(pins->uFlags & CHN_LOOP))))
 	{
 		pins->nLoopEnd = n;
-		m_pModDoc->AdjustEndOfSample(m_nSample);
+		if(pins->uFlags & CHN_LOOP)
+		{
+			/* only update sample buffer if the loop is actually enabled
+			  (resets sound without any reason otherwise) - bug report 1874 */
+			m_pModDoc->AdjustEndOfSample(m_nSample);
+		}
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
