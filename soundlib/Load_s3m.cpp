@@ -10,10 +10,48 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#include "../mptrack/moddoc.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 extern WORD S3MFineTuneTable[16];
+
+static void HandleZxx(uint8& nType, MODCOMMAND* const m)
+//-------------------------------------------------------------------
+{
+	if(nType == 0)
+	{
+		CString str;
+		str.Format(GetStrI18N("The S3M file contains Zxx effect. "
+			"It can be processed in the following ways:\n"
+			"Yes   : Convert Zxx to S8x(set panning)-effects (PixPlay)\n"
+			"No    : Remove Zxx effects\n"
+			"Cancel: Keep Zxx effects\n"
+			"\nNote that options (yes) and (no) modify the loaded pattern data."
+			));
+		const int nResult = ::AfxMessageBox(str, MB_YESNOCANCEL|MB_ICONINFORMATION);
+
+		if(nResult == IDYES)
+			nType = 2;
+		else if(nResult == IDNO)
+			nType = 3;
+		else
+			nType = 1;
+	}
+	if(nType != 1)
+	{
+		if(nType == 2)
+		{
+			m->command = CMD_S3MCMDEX;
+			m->param = 0x80 + (m->param & 0xF);
+		}
+		else
+		{
+			m->command = 0;
+			m->param = 0;
+		}
+	}
+}
 
 //////////////////////////////////////////////////////
 // ScreamTracker S3M file support
@@ -335,6 +373,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Reading patterns
+	uint8 nZxxHandling = 0;
 	for (UINT iPat=0; iPat<patnum; iPat++)
 	{
 		UINT nInd = ((DWORD)ptr[nins+iPat]) << 4;
@@ -387,6 +426,10 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 						m->command = src[j++];
 						m->param = src[j++];
 						if (m->command) S3MConvert(m, FALSE);
+						if(m->command == CMD_MIDI)
+						{
+							HandleZxx(nZxxHandling, m);
+						}
 					}
 				} else
 				{
@@ -411,6 +454,12 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
 	if (psfh.flags & 0x10) m_dwSongFlags |= SONG_AMIGALIMITS;
+
+	if(nZxxHandling != 0 && nZxxHandling != 1 && GetpModDoc() != 0)
+	{
+		GetpModDoc()->SetModified();
+		GetpModDoc()->SetShowSaveDialog(true);
+	}
 	return TRUE;
 }
 

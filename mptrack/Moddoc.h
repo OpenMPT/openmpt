@@ -143,6 +143,7 @@ public:
 	CSoundFile *GetSoundFile() { return &m_SndFile; }
 	void SetPause(BOOL bPause) { m_bPaused = bPause; }
 	void SetModified(BOOL bModified=TRUE) { SetModifiedFlag(bModified); }
+	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 	void SendMessageToActiveViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 	UINT GetModType() const { return m_SndFile.m_nType; }
