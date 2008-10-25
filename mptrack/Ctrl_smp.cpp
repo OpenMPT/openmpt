@@ -1078,7 +1078,7 @@ void CCtrlSamples::OnNormalize()
 void CCtrlSamples::OnAmplify()
 //----------------------------
 {
-	static UINT snOldAmp = 100;
+	static int16 snOldAmp = 100;
 	SAMPLEVIEWSTATE viewstate;
 	DWORD dwStart, dwEnd;
 	MODINSTRUMENT *pins;

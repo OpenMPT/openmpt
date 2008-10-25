@@ -316,11 +316,11 @@ class CAmpDlg: public CDialog
 //===========================
 {
 public:
-	UINT m_nFactor;
-	BOOL m_bFadeIn, m_bFadeOut;
+	int16 m_nFactor, m_nFactorMin, m_nFactorMax;
+	bool m_bFadeIn, m_bFadeOut;
 
 public:
-	CAmpDlg(CWnd *parent, UINT nFactor=100):CDialog(IDD_SAMPLE_AMPLIFY, parent) { m_nFactor = nFactor; m_bFadeIn = m_bFadeOut = FALSE; }
+	CAmpDlg(CWnd *parent, int16 nFactor=100, int16 nFactorMin = int16_min, int16 nFactorMax = int16_max);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 };

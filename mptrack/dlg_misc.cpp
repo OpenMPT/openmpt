@@ -11,7 +11,7 @@
 #include "midi.h"
 #include "version.h"
 
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 
 
@@ -1504,6 +1504,13 @@ void CPageEditEffect::OnHScroll(UINT, UINT, CScrollBar *)
 ///////////////////////////////////////////////////////////////////////////////
 // Samples
 
+CAmpDlg::CAmpDlg(CWnd *parent, int16 nFactor, int16 nFactorMin, int16 nFactorMax) 
+//-------------------------------------------------------------------------------
+	: CDialog(IDD_SAMPLE_AMPLIFY, parent), m_nFactor(nFactor),
+	  m_nFactorMin(nFactorMin), m_nFactorMax(nFactorMax),
+	  m_bFadeIn(FALSE), m_bFadeOut(FALSE)
+{}
+
 BOOL CAmpDlg::OnInitDialog()
 //--------------------------
 {
@@ -1511,8 +1518,8 @@ BOOL CAmpDlg::OnInitDialog()
 	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1);
 	if (spin)
 	{
-		spin->SetRange(10, 800);
-		spin->SetPos(m_nFactor);
+		spin->SetRange32(m_nFactorMin, m_nFactorMax);
+		spin->SetPos32(m_nFactor);
 	}
 	SetDlgItemInt(IDC_EDIT1, m_nFactor);
 	return TRUE;
@@ -1522,9 +1529,16 @@ BOOL CAmpDlg::OnInitDialog()
 void CAmpDlg::OnOK()
 //------------------
 {
-	m_nFactor = GetDlgItemInt(IDC_EDIT1);
-	m_bFadeIn = IsDlgButtonChecked(IDC_CHECK1);
-	m_bFadeOut = IsDlgButtonChecked(IDC_CHECK2);
+	const int nVal = static_cast<int>(GetDlgItemInt(IDC_EDIT1));
+	if(nVal < m_nFactorMin || nVal > m_nFactorMax)
+	{
+		CString str; str.Format(GetStrI18N(__TEXT("Value should be within [%d, %d]")), m_nFactorMin, m_nFactorMax);
+		AfxMessageBox(str, MB_ICONINFORMATION);
+		return;
+	}
+	m_nFactor = static_cast<int16>(nVal);
+	m_bFadeIn = (IsDlgButtonChecked(IDC_CHECK1) != 0);
+	m_bFadeOut = (IsDlgButtonChecked(IDC_CHECK2) != 0);
 	CDialog::OnOK();
 }
 
