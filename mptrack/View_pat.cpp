@@ -2595,7 +2595,7 @@ void CViewPattern::OnPatternAmplify()
 //-----------------------------------
 {
 	static UINT snOldAmp = 100;
-	CAmpDlg dlg(this, snOldAmp);
+	CAmpDlg dlg(this, snOldAmp, 0);
 	CModDoc *pModDoc = GetDocument();
 	BYTE chvol[MAX_BASECHANNELS];
 
@@ -2604,7 +2604,7 @@ void CViewPattern::OnPatternAmplify()
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		BeginWaitCursor();
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
-		snOldAmp = dlg.m_nFactor;
+		snOldAmp = static_cast<UINT>(dlg.m_nFactor);
 		memset(chvol, 64, sizeof(chvol));
 		if (pSndFile->Patterns[m_nPattern])
 		{

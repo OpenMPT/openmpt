@@ -454,7 +454,7 @@ BEGIN
     LTEXT           "rows",IDC_STATIC,124,88,16,8
     CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,54,113,
                     114,43
-    CONTROL         "Set highlights to songs' time sigatures",IDC_CHECK5,
+    CONTROL         "Set highlights to songs' time signatures",IDC_CHECK5,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,63,136,10
 END
 
@@ -1310,7 +1310,7 @@ CAPTION "Amplify"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     LTEXT           "Amplify by",IDC_STATIC,13,19,37,8
-    EDITTEXT        IDC_EDIT1,54,16,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EDIT1,54,16,40,14,ES_AUTOHSCROLL
     CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
                     UDS_NOTHOUSANDS,89,17,11,14
