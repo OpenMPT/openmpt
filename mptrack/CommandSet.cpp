@@ -2289,6 +2289,16 @@ void CCommandSet::SetupCommands()
 	commands[kcVSTGUINextPresetJump].isDummy = false;
 	commands[kcVSTGUINextPresetJump].Message = "Plugin preset forward jump";
 
+	commands[kcSampleInvert].UID = 1784;
+	commands[kcSampleInvert].Message = "Invert sample phase";
+	commands[kcSampleInvert].isHidden = false;
+	commands[kcSampleInvert].isDummy = false;
+
+	commands[kcSampleSignUnsign].UID = 1785;
+	commands[kcSampleSignUnsign].Message = "Signed/Unsigned conversion";
+	commands[kcSampleSignUnsign].isHidden = false;
+	commands[kcSampleSignUnsign].isDummy = false;
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

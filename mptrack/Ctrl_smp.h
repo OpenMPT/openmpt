@@ -34,6 +34,10 @@ protected:
 	void UpdateTimeStretchParameterString();
 	void ReadTimeStretchParameters();
 
+	// Applies amplification to sample. Negative values
+	// can be used to invert phase.
+	void ApplyAmplify(LONG nAmp, bool bFadeIn = false, bool bFadeOut = false);
+
 public:
 	CCtrlSamples();
 	~CCtrlSamples();
@@ -72,6 +76,8 @@ protected:
 	afx_msg void OnDownsample();
 	afx_msg void OnReverse();
 	afx_msg void OnSilence();
+	afx_msg void OnInvert();
+	afx_msg void OnSignUnSign();
 	afx_msg void OnNameChanged();
 	afx_msg void OnFileNameChanged();
 	afx_msg void OnVolumeChanged();
