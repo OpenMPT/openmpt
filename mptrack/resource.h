@@ -587,6 +587,8 @@
 #define IDC_CHECK_EQ                    2052
 #define IDC_CHECK_AGC                   2053
 #define IDC_SAMPLE_SILENCE              2054
+#define IDC_SAMPLE_INVERT				2055
+#define IDC_SAMPLE_SIGN_UNSIGN			2056
 #define IDC_INSTRUMENT_NEW              2060
 #define IDC_INSTRUMENT_OPEN             2061
 #define IDC_INSTRUMENT_SAVEAS           2062

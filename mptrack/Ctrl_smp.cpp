@@ -65,6 +65,8 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_SAMPLE_DOWNSAMPLE,	OnDownsample)
 	ON_COMMAND(IDC_SAMPLE_REVERSE,		OnReverse)
 	ON_COMMAND(IDC_SAMPLE_SILENCE,		OnSilence)
+	ON_COMMAND(IDC_SAMPLE_INVERT,		OnInvert)
+	ON_COMMAND(IDC_SAMPLE_SIGN_UNSIGN,  OnSignUnSign)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(ID_PREVINSTRUMENT,		OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
@@ -209,6 +211,8 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ToolBar2.AddButton(IDC_SAMPLE_DOWNSAMPLE, 29);
 	m_ToolBar2.AddButton(IDC_SAMPLE_REVERSE, 11);
 	m_ToolBar2.AddButton(IDC_SAMPLE_SILENCE, 22);
+	m_ToolBar2.AddButton(IDC_SAMPLE_INVERT, 35);
+	m_ToolBar2.AddButton(IDC_SAMPLE_SIGN_UNSIGN, 36);
 	// Setup Controls
 	m_EditName.SetLimitText(32);
 	m_EditFileName.SetLimitText(22);
@@ -455,6 +459,14 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case IDC_SAMPLE_SILENCE:
 		OnSilence();
+		break;
+
+	case IDC_SAMPLE_INVERT:
+		OnInvert();
+		break;
+
+	case IDC_SAMPLE_SIGN_UNSIGN:
+		OnSignUnSign();
 		break;
 
 	case IDC_SAMPLE_NORMALIZE:
@@ -1075,20 +1087,17 @@ void CCtrlSamples::OnNormalize()
 }
 
 
-void CCtrlSamples::OnAmplify()
-//----------------------------
+void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
+//-----------------------------------------------------------------------
 {
-	static int16 snOldAmp = 100;
 	SAMPLEVIEWSTATE viewstate;
 	DWORD dwStart, dwEnd;
 	MODINSTRUMENT *pins;
-	CAmpDlg dlg(this, snOldAmp);
 	
 	memset(&viewstate, 0, sizeof(viewstate));
 	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	if ((!m_pModDoc) || (!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return;
-	if (dlg.DoModal() != IDOK) return;
-	snOldAmp = dlg.m_nFactor;
+
 	BeginWaitCursor();
 	pins = &m_pSndFile->Ins[m_nSample];
 	dwStart = viewstate.dwBeginSel;
@@ -1102,8 +1111,7 @@ void CCtrlSamples::OnAmplify()
 	}
 	if (pins->uFlags & CHN_STEREO) { dwStart *= 2; dwEnd *= 2; }
 	UINT len = dwEnd - dwStart;
-	LONG lAmp = dlg.m_nFactor;
-	if ((dlg.m_bFadeIn) && (dlg.m_bFadeOut)) lAmp *= 4;
+	if ((bFadeIn) && (bFadeOut)) lAmp *= 4;
 	if (pins->uFlags & CHN_16BIT)
 	{
 		signed short *p = ((signed short *)pins->pSample) + dwStart;
@@ -1111,8 +1119,8 @@ void CCtrlSamples::OnAmplify()
 		for (UINT i=0; i<len; i++)
 		{
 			LONG l = (p[i] * lAmp) / 100;
-			if (dlg.m_bFadeIn) l = (LONG)((l * (LONGLONG)i) / len);
-			if (dlg.m_bFadeOut) l = (LONG)((l * (LONGLONG)(len-i)) / len);
+			if (bFadeIn) l = (LONG)((l * (LONGLONG)i) / len);
+			if (bFadeOut) l = (LONG)((l * (LONGLONG)(len-i)) / len);
 			if (l < -32768) l = -32768;
 			if (l > 32767) l = 32767;
 			p[i] = (signed short)l;
@@ -1124,8 +1132,8 @@ void CCtrlSamples::OnAmplify()
 		for (UINT i=0; i<len; i++)
 		{
 			LONG l = (p[i] * lAmp) / 100;
-			if (dlg.m_bFadeIn) l = (LONG)((l * (LONGLONG)i) / len);
-			if (dlg.m_bFadeOut) l = (LONG)((l * (LONGLONG)(len-i)) / len);
+			if (bFadeIn) l = (LONG)((l * (LONGLONG)i) / len);
+			if (bFadeOut) l = (LONG)((l * (LONGLONG)(len-i)) / len);
 			if (l < -128) l = -128;
 			if (l > 127) l = 127;
 			p[i] = (signed char)l;
@@ -1137,6 +1145,17 @@ void CCtrlSamples::OnAmplify()
 	m_pModDoc->SetModified();
 	EndWaitCursor();
 	SwitchToView();
+}
+
+
+void CCtrlSamples::OnAmplify()
+//----------------------------
+{
+	static int16 snOldAmp = 100;
+	CAmpDlg dlg(this, snOldAmp);
+	if (dlg.DoModal() != IDOK) return;
+	snOldAmp = dlg.m_nFactor;
+	ApplyAmplify(dlg.m_nFactor, dlg.m_bFadeIn, dlg.m_bFadeOut);
 }
 
 
@@ -2133,6 +2152,54 @@ void CCtrlSamples::OnReverse()
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 		m_pModDoc->SetModified();
 	}
+	EndWaitCursor();
+	SwitchToView();
+}
+
+
+void CCtrlSamples::OnInvert()
+//--------------------------------
+{
+	ApplyAmplify(-100);
+}
+
+
+void CCtrlSamples::OnSignUnSign()
+//-------------------------------
+{
+	// purpose: sign/unsign a sample ("distortion")
+	SAMPLEVIEWSTATE viewstate;
+	DWORD dwStart, dwEnd;
+	MODINSTRUMENT *pins;
+	
+	memset(&viewstate, 0, sizeof(viewstate));
+	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+	if ((!m_pModDoc) || (!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return;
+	BeginWaitCursor();
+	pins = &m_pSndFile->Ins[m_nSample];
+	dwStart = viewstate.dwBeginSel;
+	dwEnd = viewstate.dwEndSel;
+	if (dwEnd > pins->nLength) dwEnd = pins->nLength;
+	if (dwStart > dwEnd) dwStart = dwEnd;
+	if (dwStart >= dwEnd)
+	{
+		dwStart = 0;
+		dwEnd = pins->nLength;
+	}
+	if (pins->uFlags & CHN_STEREO) { dwStart *= 2; dwEnd *= 2; }
+	UINT len = dwEnd - dwStart;
+	if (pins->uFlags & CHN_16BIT)
+	{
+		signed short *p = ((signed short *)pins->pSample) + dwStart;
+		for (UINT i=0; i<len; ++i) p[i] += 0x8000; //unsign
+	} else {
+		signed char *p = ((signed char *)pins->pSample) + dwStart;
+		for (UINT i=0; i<len; ++i) p[i] += 0x80; //unsign
+	}
+
+	m_pModDoc->AdjustEndOfSample(m_nSample);
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
+	m_pModDoc->SetModified();
 	EndWaitCursor();
 	SwitchToView();
 }
