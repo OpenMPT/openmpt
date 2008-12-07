@@ -2571,6 +2571,11 @@ VOID CSampleMapDlg::OnUpdateSamples()
 	}
 	m_CbnSample.ResetContent();
 	bAll = IsDlgButtonChecked(IDC_CHECK1);
+	
+	UINT nInsertPos;
+	nInsertPos = m_CbnSample.AddString("0: No sample");
+	m_CbnSample.SetItemData(nInsertPos, 0);
+
 	for (UINT i=1; i<=m_pSndFile->m_nSamples; i++)	{
 		BOOL bUsed = bAll;
 
@@ -2585,10 +2590,10 @@ VOID CSampleMapDlg::OnUpdateSamples()
 		if (bUsed) {
 			CString sampleName;
 			sampleName.Format("%d: %s", i, m_pSndFile->GetSampleName(i));
-			UINT nPos = m_CbnSample.AddString(sampleName);
+			nInsertPos = m_CbnSample.AddString(sampleName);
 			
-			m_CbnSample.SetItemData(nPos, i);
-			if (i == nOldPos) nNewPos = nPos;
+			m_CbnSample.SetItemData(nInsertPos, i);
+			if (i == nOldPos) nNewPos = nInsertPos;
 		}
 	}
 	m_CbnSample.SetCurSel(nNewPos);
@@ -2647,7 +2652,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 			wsprintf(s, "%s", temp.c_str());
 
 		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
-		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample > 0) && (nSample < MAX_SAMPLES) && (penv))
+		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample < MAX_SAMPLES) && (penv))
 		{
 			UINT iNote = nBaseOctave*12+lParam;
 			if (KeyboardMap[iNote] == nSample)

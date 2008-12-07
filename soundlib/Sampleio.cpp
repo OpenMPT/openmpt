@@ -682,6 +682,27 @@ BOOL CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
 	return TRUE;
 }
 
+///////////////////////////////////////////////////////////////
+// Save RAW
+
+BOOL CSoundFile::SaveRAWSample(UINT nSample, LPCSTR lpszFileName)
+//---------------------------------------------------------------
+{
+	MODINSTRUMENT *pins = &Ins[nSample];
+	FILE *f;
+
+	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
+
+	UINT nType;
+	if (pins->uFlags & CHN_STEREO)
+		nType = (pins->uFlags & CHN_16BIT) ? RS_STIPCM16S : RS_STIPCM8S;
+	else
+		nType = (pins->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
+	WriteSample(f, pins, nType);
+	fclose(f);
+	return TRUE;
+}
+
 /////////////////////////////////////////////////////////////
 // GUS Patches
 
