@@ -959,7 +959,7 @@ void CCtrlSamples::OnSampleOpen()
 void CCtrlSamples::OnSampleSave()
 //-------------------------------
 {
-	CHAR szFileName[_MAX_PATH] = "";
+	CHAR szFileName[_MAX_PATH] = "", ext[_MAX_EXT];
 
 	if ((!m_pSndFile) || (!m_nSample) || (!m_pSndFile->Ins[m_nSample].pSample))
 	{
@@ -979,7 +979,8 @@ void CCtrlSamples::OnSampleSave()
 	CFileDialog dlg(FALSE, "wav",
 			szFileName,
 			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-			"Wave File (*.wav)|*.wav||",
+			"Wave File (*.wav)|*.wav|"
+			"RAW Audio (*.raw)|*.raw||",
 			this);
 	if (CMainFrame::m_szCurSmpDir[0])
 	{
@@ -987,7 +988,13 @@ void CCtrlSamples::OnSampleSave()
 	}
 	if (dlg.DoModal() != IDOK) return;
 	BeginWaitCursor();
-	BOOL bOk = m_pSndFile->SaveWAVSample(m_nSample, dlg.GetPathName());
+
+	_splitpath(dlg.GetPathName(), NULL, NULL, NULL, ext);
+	BOOL bOk = FALSE;
+	if (!lstrcmpi(ext, ".raw"))
+		bOk = m_pSndFile->SaveRAWSample(m_nSample, dlg.GetPathName());
+	else
+		bOk = m_pSndFile->SaveWAVSample(m_nSample, dlg.GetPathName());
 	EndWaitCursor();
 	if (!bOk)
 	{

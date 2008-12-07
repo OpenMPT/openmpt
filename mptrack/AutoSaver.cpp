@@ -378,8 +378,9 @@ void CAutoSaverGUI::OnBnClickedAutosaveBrowse()
 	GetDlgItemText(IDC_AUTOSAVE_PATH, szPath, sizeof(szPath));
 	memset(&bi, 0, sizeof(bi));
 	bi.hwndOwner = m_hWnd;
+	bi.lpszTitle = "Select a folder to store autosaved files in...";
 	bi.pszDisplayName = szPath;
-	bi.ulFlags = BIF_RETURNONLYFSDIRS;
+	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
 	LPITEMIDLIST pid = SHBrowseForFolder(&bi);
 	if (pid != NULL)
 	{

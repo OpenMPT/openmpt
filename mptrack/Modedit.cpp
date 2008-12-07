@@ -409,6 +409,13 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 			m_SndFile.Patterns[i] = newp;
 			CSoundFile::FreePattern(p);
 		}
+
+		//if channel was removed before and is added again, mute status has to be unset! (bug 1814)
+		for (UINT i=m_SndFile.m_nChannels; i<nNewChannels; i++)
+		{
+			m_SndFile.InitChannel(i);
+		}
+	
 		m_SndFile.m_nChannels = nNewChannels;
 		END_CRITICAL();
 		EndWaitCursor();

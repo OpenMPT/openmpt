@@ -1239,6 +1239,7 @@ public:
 	BOOL ReadITISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength);
 	BOOL Read8SVXSample(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
 	BOOL SaveWAVSample(UINT nSample, LPCSTR lpszFileName);
+	BOOL SaveRAWSample(UINT nSample, LPCSTR lpszFileName);
 	// Instrument file I/O
 	BOOL ReadInstrumentFromFile(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
 	BOOL ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength);
