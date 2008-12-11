@@ -387,6 +387,7 @@ const ROWINDEX CPatternSizesMimic::operator [](const int i) const
 
 CTuningCollection* CSoundFile::s_pTuningsSharedStandard(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
+uint8 CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 
 CSoundFile::CSoundFile() :
@@ -2757,7 +2758,7 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.wPitchToTempoLock = 0;
 	m_defaultInstrument.pTuning = m_defaultInstrument.s_DefaultTuning;
 	m_defaultInstrument.nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-	m_defaultInstrument.nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_DRYWET;
+	m_defaultInstrument.nPluginVolumeHandling = CSoundFile::s_DefaultPlugVolumeHandling;
 }
 
 

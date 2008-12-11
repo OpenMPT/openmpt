@@ -2,6 +2,8 @@
 #include "sndfile.h"
 #include "ordertopatterntable.h"
 
+#define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
+
 DWORD COrderToPatternTable::Unserialize(const BYTE* const src, const DWORD memLength)
 //-------------------------------------------------------------------------
 {
@@ -17,6 +19,10 @@ DWORD COrderToPatternTable::Unserialize(const BYTE* const src, const DWORD memLe
 	if(s > 65000) return true;
 	if(memLength < memPos+s*4) return memPos;
 
+	const uint32 nOriginalSize = s;
+	if(s > MPTM_SPECS.ordersMax)
+		s = MPTM_SPECS.ordersMax;
+
 	resize(s);
 	for(size_t i = 0; i<s; i++, memPos +=4 )
 	{
@@ -24,6 +30,7 @@ DWORD COrderToPatternTable::Unserialize(const BYTE* const src, const DWORD memLe
 		memcpy(&temp, src+memPos, 4);
 		(*this)[i] = static_cast<PATTERNINDEX>(temp);
 	}
+	memPos += 4*(nOriginalSize - s);
 	return memPos;
 }
 
@@ -186,7 +193,13 @@ void COrderSerialization::ProRead(INSTREAM& istrm, const uint64 /*datasize*/)
 {
 	uint16 size;
 	istrm.read(reinterpret_cast<char*>(&size), 2);
-	if(size > MPTM_SPECS.ordersMax) size = MPTM_SPECS.ordersMax;
+	if(size > MPTM_SPECS.ordersMax)
+	{
+		// Hack: Show message here if trying to load longer sequence than what is supported.
+		CString str; str.Format(str_SequenceTruncationNote, size, MPTM_SPECS.ordersMax);
+		::MessageBox(0, str, "", MB_ICONWARNING);
+		size = MPTM_SPECS.ordersMax;
+	}
 	m_rOrders.resize(size);
 	if(size == 0) {m_rOrders.assign(MAX_ORDERS, m_rOrders.GetInvalidPatIndex()); return;}
 
