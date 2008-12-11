@@ -114,10 +114,17 @@ BOOL COrderList::UpdateScrollInfo()
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		SCROLLINFO info;
 		UINT nPage;
-		int nMax=0;
 
-		const int nSeqLength = pSndFile->Order.size();
-		while ((nMax < nSeqLength) && (pSndFile->Order[nMax] != pSndFile->Order.GetInvalidPatIndex())) nMax++;
+		int nMax = 0;
+		if(pSndFile->TypeIsIT_MPT_XM())
+		{   // For IT/MPT/XM, show sequence until the last used item...
+			nMax = pSndFile->Order.GetLengthTailTrimmed();
+		}
+		else
+		{   // ...and for MOD/S3M, cut shown sequence to first '---' item.
+			nMax = pSndFile->Order.GetLengthFirstEmpty();
+		}
+
 		GetScrollInfo(SB_HORZ, &info, SIF_PAGE|SIF_RANGE);
 		info.fMask = SIF_PAGE|SIF_RANGE;
 		info.nMin = 0;

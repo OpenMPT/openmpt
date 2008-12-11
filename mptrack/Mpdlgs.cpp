@@ -1033,6 +1033,13 @@ BOOL CEQSetupDlg::OnSetActive()
 //-----------------------------
 {
 	CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_EQ;
+	SetDlgItemText(IDC_EQ_WARNING, 
+		"Note: This EQ, when enabled from Player tab, is applied to "
+		"any and all of the modules "
+	    "that you load in OpenMPT; its settings are stored globally, "
+		"rather than in each file. This means that you should avoid "
+		"using it as part of your production process, and instead only "
+		"use it to correct deficiencies in your audio hardware.");
 	return CPropertyPage::OnSetActive();
 }
 

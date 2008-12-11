@@ -820,6 +820,7 @@
 #define IDC_TEXT_QUALITY                2330
 #define IDC_TEXT_FFT                    2331
 #define IDC_TEXT_PERCENT                2332
+#define IDC_EQ_WARNING					2333
 #define IDC_TEXT_STRETCHPARAMS          2337
 #define IDC_EDIT_STRETCHPARAMS          2338
 #define ID_FILE_NEWMOD                  32771
