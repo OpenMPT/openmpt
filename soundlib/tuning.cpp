@@ -490,7 +490,7 @@ CTuningRTI* CTuningRTI::UnserializeOLD(istream& inStrm)
 
 	//m_GroupRatio
 	inStrm.read(reinterpret_cast<char*>(&pT->m_GroupRatio), sizeof(pT->m_GroupRatio));
-	if(pT->m_GroupRatio <= 0)
+	if(pT->m_GroupRatio < 0)
 	{
 		delete pT;
 		return 0;

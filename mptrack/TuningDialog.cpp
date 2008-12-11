@@ -1187,6 +1187,7 @@ void CTuningDialog::OnMoveTuning()
 	HTREEITEM treeItemDestTC = m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTCdest));
 	DeleteTreeItem(pT);
 	m_ModifiedTCs[pTCsrc] = true;
+	m_ModifiedTCs[pTCdest] = true;
 	if(CTuningCollection::TransferTuning(pTCsrc, pTCdest, pT))
 	{
 		MsgBox(IDS_OPERATION_FAIL, this, NULL, MB_OK);

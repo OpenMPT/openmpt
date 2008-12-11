@@ -33,6 +33,8 @@ using namespace srlztn; //SeRiaLiZaTioN
 #define str_MBtitle				(GetStrI18N((_TEXT("Saving IT"))))
 #define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
 #define str_pattern				(GetStrI18N((_TEXT("pattern"))))
+#define str_PatternSetTruncationNote (GetStrI18N((_TEXT("The module contains %u patterns but only %u patterns can be loaded in this OpenMPT version."))))
+#define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
 
 static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 //--------------------------------------------------
@@ -1025,7 +1027,13 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 	else
 	{
-		if(nordsize > GetModSpecifications().ordersMax) nordsize = GetModSpecifications().ordersMax;
+		if(nordsize > GetModSpecifications().ordersMax)
+		{
+			CString str;
+			str.Format(str_SequenceTruncationNote, nordsize, GetModSpecifications().ordersMax);
+			CMainFrame::GetMainFrame()->MessageBox(str, 0, MB_ICONWARNING);
+			nordsize = GetModSpecifications().ordersMax;
+		}
 
 		if(pifh->cwtv > 0x88A && pifh->cwtv <= 0x88D)
 			dwMemPos += Order.Unserialize(lpStream+dwMemPos, dwMemLength-dwMemPos);
@@ -1055,7 +1063,14 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 	dwMemPos += pifh->smpnum * 4;
 	// Reading Patterns Offsets
 	UINT patpossize = pifh->patnum;
-	if(patpossize > GetModSpecifications().patternsMax) patpossize = GetModSpecifications().patternsMax;
+	if(patpossize > GetModSpecifications().patternsMax)
+	{
+		// Hack: Note user here if file contains more patterns than what can be read.
+		CString str;
+		str.Format(str_PatternSetTruncationNote, patpossize, GetModSpecifications().patternsMax);
+		CMainFrame::GetMainFrame()->MessageBox(str, 0, MB_ICONWARNING);
+		patpossize = GetModSpecifications().patternsMax;
+	}
 
 	patpos.resize(patpossize);
 	patpossize *= 4; // <-> patpossize *= sizeof(DWORD);

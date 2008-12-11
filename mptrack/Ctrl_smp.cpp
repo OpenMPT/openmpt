@@ -1482,11 +1482,11 @@ void CCtrlSamples::OnEnableStretchToSize()
 		GetDlgItem(IDC_COMBO6)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_COMBO4)->ShowWindow(SW_HIDE);
-		if(CMainFrame::gbShowHackControls == true)
-		{
+		//if(CMainFrame::gbShowHackControls == true)
+		//{
 			GetDlgItem(IDC_TEXT_STRETCHPARAMS)->ShowWindow(SW_SHOW);
 			GetDlgItem(IDC_EDIT_STRETCHPARAMS)->ShowWindow(SW_SHOW);
-		}
+		//}
 		SetDlgItemText(IDC_BUTTON1, "Time Stretch");
 		UpdateTimeStretchParameterString();
 	}
@@ -1768,8 +1768,10 @@ int CCtrlSamples::TimeStretch(double ratio)
 	const BYTE smpsize = pins->GetElementarySampleSize();
 	const UINT nChn = pins->GetNumChannels();
 
-	// Allocate new sample
-	const DWORD nNewSampleLength = (DWORD)(0.5 + ratio * (double)pins->nLength);
+	// Allocate new sample. Returned sample may not be exactly the size what ratio would suggest
+	// so allocate a bit more(1.03*).
+	const DWORD nNewSampleLength = (DWORD)(1.03 * ratio * (double)pins->nLength);
+	//const DWORD nNewSampleLength = (DWORD)(0.5 + ratio * (double)pins->nLength);
 	PVOID pSample = pins->pSample;
 	PVOID pNewSample = CSoundFile::AllocateSample(nNewSampleLength * nChn * smpsize);
 	if(pNewSample == NULL)
@@ -1851,7 +1853,7 @@ int CCtrlSamples::TimeStretch(double ratio)
 	while(pos < pins->nLength)
 	{
 		// Current chunk size limit test
-		if(pos + len >= pins->nLength) len = pins->nLength - pos;
+		if(len >= pins->nLength - pos) len = pins->nLength - pos;
 
 		// Show progress bar using process button painting & text label
 		CHAR progress[16];
