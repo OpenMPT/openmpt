@@ -1324,7 +1324,7 @@ BEGIN
                     WS_TABSTOP,11,49,88,10
 END
 
-IDD_SETUP_EQ DIALOG  0, 0, 240, 156
+IDD_SETUP_EQ DIALOG  0, 0, 240, 202
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Equalizer"
 FONT 8, "MS Sans Serif"
@@ -1365,6 +1365,7 @@ BEGIN
     PUSHBUTTON      "Save Preset...",IDC_BUTTON13,155,124,64,12
     CTEXT           "Right-click on a band to change its center frequency",
                     IDC_STATIC,20,140,200,8
+    LTEXT           "EQ Warning Message",IDC_EQ_WARNING,6,157,228,41
 END
 
 IDD_OPTIONS_AUTHOR DIALOG  0, 0, 240, 150

@@ -108,6 +108,29 @@ void COrderToPatternTable::OnModTypeChanged(const MODTYPE oldtype)
 }
 
 
+ORDERINDEX COrderToPatternTable::GetLengthTailTrimmed() const
+//-----------------------------------------------------------
+{
+	ORDERINDEX nEnd = GetCount();
+	if(nEnd == 0) return 0;
+	nEnd--;
+	const PATTERNINDEX iInvalid = GetInvalidPatIndex();
+	while(nEnd > 0 && (*this)[nEnd] == iInvalid)
+		nEnd--;
+	return ((*this)[nEnd] == iInvalid) ? 0 : nEnd+1;
+}
+
+
+ORDERINDEX COrderToPatternTable::GetLengthFirstEmpty() const
+//----------------------------------------------------------
+{
+	const ORDERINDEX nLength = GetCount();
+	ORDERINDEX nMax = 0;
+	while ((nMax < nLength) && ((*this)[nMax] != (*this).GetInvalidPatIndex())) nMax++;
+	return nMax;
+}
+
+
 ORDERINDEX COrderToPatternTable::GetNextOrderIgnoringSkips(const ORDERINDEX start) const
 //-------------------------------------------------------------------------------------
 {

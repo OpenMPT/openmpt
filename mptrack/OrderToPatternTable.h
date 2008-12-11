@@ -44,6 +44,12 @@ public:
 
 	void OnModTypeChanged(const MODTYPE oldtype);
 
+	// Returns length of sequence without counting trailing '---' items.
+	ORDERINDEX GetLengthTailTrimmed() const;
+
+	// Returns length of sequence stopping counting on first '---' (or at the end of sequence).
+	ORDERINDEX GetLengthFirstEmpty() const;
+
 	PATTERNINDEX GetInvalidPatIndex() const; //To correspond 0xFF
 	static PATTERNINDEX GetInvalidPatIndex(const MODTYPE type);
 
