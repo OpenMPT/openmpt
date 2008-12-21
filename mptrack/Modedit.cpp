@@ -509,6 +509,21 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 	vector<UINT> nPatRows(maxPatIndex, 0);
 	vector<MODCOMMAND*> pPatterns(maxPatIndex, NULL);
 	vector<BOOL> bPatUsed(maxPatIndex, false);
+
+	const ORDERINDEX nLengthSub0 = m_SndFile.Order.GetLengthFirstEmpty();
+	const ORDERINDEX nLengthUsed = m_SndFile.Order.GetLengthTailTrimmed();
+
+	// Flag to tell whether keeping sequence items which are after the first empty('---') order.
+	bool bKeepSubSequences = false;
+
+	if(nLengthUsed != nLengthSub0)
+	{   // There are used sequence items after first '---'; ask user whether to remove those.
+		if (CMainFrame::GetMainFrame()->MessageBox(
+			_TEXT("Do you want to remove sequence items which are after the first '---' item?"),
+			_TEXT("Sequence Cleanup"), MB_YESNO) != IDYES
+			)
+			bKeepSubSequences = true;
+	}
 	
 	CHAR s[512];
 	BOOL bEnd = FALSE, bReordered = FALSE;
@@ -522,7 +537,7 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 		if (n < maxPatIndex)
 		{
 			if (n >= maxpat) maxpat = n+1;
-			if (!bEnd) bPatUsed[n] = TRUE;
+			if (!bEnd || bKeepSubSequences) bPatUsed[n] = TRUE;
 		} else if (n == m_SndFile.Order.GetInvalidPatIndex()) bEnd = TRUE;
 	}
 	nMinToRemove = 0;
@@ -571,7 +586,7 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 		{
 			if (nPatMap[n] > maxPatIndex) nPatMap[n] = nPats++;
 			m_SndFile.Order[imap] = nPatMap[n];
-		} else if (n == 0xFF) break;
+		} else if (n == m_SndFile.Order.GetInvalidPatIndex() && (bKeepSubSequences == false)) break;
 	}
 	// Add unused patterns at the end
 	if ((!bRemove) || (!bWaste))

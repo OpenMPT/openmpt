@@ -493,7 +493,15 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	header[0x1B] = 0;
 	header[0x1C] = 0x1A;
 	header[0x1D] = 0x10;
-	nbo = (GetNumPatterns() + 15) & 0xF0;
+	// Changes to 1.17.02.53:
+	//   -Try to save whole sequence instead of stopping on first empty order.
+	//   -With more than 0xF0 orders, limit sequence to 0xF0 instead of just masking with 0xF0.
+	//TODO: Check whether the 0xF0 mask is correct.
+	//		(there are two bytes reserved from the header, so why 0xF0 mask?).
+	//nbo = (GetNumPatterns() + 15) & 0xF0;
+	nbo = Order.GetLengthTailTrimmed() + 15;
+	if(nbo > 0xF0) nbo = 0xF0;
+	nbo = nbo & 0xF0;
 	if (!nbo) nbo = 16;
 	header[0x20] = nbo & 0xFF;
 	header[0x21] = nbo >> 8;

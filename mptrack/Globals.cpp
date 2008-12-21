@@ -375,11 +375,16 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 			return FALSE;
 		}
 		if (!pDlg) return FALSE;
-		m_nActiveDlg = nIndex;
-		m_Pages[nIndex] = pDlg;
 		pDlg->SetDocument(GetDocument(), this);
 		pDlg->SetViewWnd(m_hWndView);
-		pDlg->Create(nID, this);
+		BOOL bStatus = pDlg->Create(nID, this);
+		if(bStatus == 0) // Creation failed.
+		{
+			delete pDlg;
+			return FALSE;
+		}
+		m_nActiveDlg = nIndex;
+		m_Pages[nIndex] = pDlg;
 	}
 	RecalcLayout();
 	pMainFrm->SetUserText("");
