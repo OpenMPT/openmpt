@@ -110,10 +110,10 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 		pModView->SetMDIParentFrame(m_hWnd);
 	}
 
-	ChangeViewClass(RUNTIME_CLASS(CViewGlobals), pContext);
+	const BOOL bStatus = ChangeViewClass(RUNTIME_CLASS(CViewGlobals), pContext);
 
-	// it all worked, we now have a splitter window which contain two different views
-	return TRUE;
+	// If it all worked, we now have a splitter window which contain two different views
+	return bStatus;
 }
 
 //rewbs.varWindowSize

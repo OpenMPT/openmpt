@@ -116,13 +116,13 @@ BOOL COrderList::UpdateScrollInfo()
 		UINT nPage;
 
 		int nMax = 0;
-		if(pSndFile->TypeIsIT_MPT_XM())
-		{   // For IT/MPT/XM, show sequence until the last used item...
-			nMax = pSndFile->Order.GetLengthTailTrimmed();
+		if(pSndFile->GetType() == MOD_TYPE_MOD)
+		{   // With MOD, cut shown sequence to first '---' item...
+			nMax = pSndFile->Order.GetLengthFirstEmpty();
 		}
 		else
-		{   // ...and for MOD/S3M, cut shown sequence to first '---' item.
-			nMax = pSndFile->Order.GetLengthFirstEmpty();
+		{   // ...for S3M/IT/MPT/XM, show sequence until the last used item.
+			nMax = pSndFile->Order.GetLengthTailTrimmed();
 		}
 
 		GetScrollInfo(SB_HORZ, &info, SIF_PAGE|SIF_RANGE);
@@ -179,7 +179,10 @@ BYTE COrderList::GetLength()
 	if(m_cxFont > 0)
 		return static_cast<BYTE>(rcClient.right / m_cxFont);
 	else
-		return static_cast<BYTE>(rcClient.right / GetFontWidth());
+	{
+		const int nFontWidth = GetFontWidth();
+		return (nFontWidth > 0) ? static_cast<BYTE>(rcClient.right / nFontWidth) : 0;
+	}
 }
 
 
