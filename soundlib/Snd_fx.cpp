@@ -191,7 +191,8 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			case CMD_POSITIONJUMP:
 				positionJumpOnThisRow=true;
 				nNextPattern = param;
-				if (!patternBreakOnThisRow) {
+				// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
+				if (!patternBreakOnThisRow || (GetType() == MOD_TYPE_XM)) {
 					nNextRow = 0;
 				}
 				if (bAdjust)
@@ -1597,6 +1598,8 @@ BOOL CSoundFile::ProcessEffects()
 				 //instant jumps - modifying behavior so that now position jumps
 				 //occurs also when pattern loop is enabled.
 			}
+			// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
+			if(GetType() == MOD_TYPE_XM) nBreakRow = 0;
 			break;
 
 		// Pattern Break

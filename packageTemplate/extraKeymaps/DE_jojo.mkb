@@ -19,7 +19,7 @@
 0:1361:2:67:1		//Copy: Ctrl+C (KeyDown)
 0:1361:2:45:1		//Copy: Ctrl+EINFG (KeyDown)
 0:1362:2:86:1		//Paste: Ctrl+V (KeyDown)
-0:1362:1:45:1		//Paste: Shift+EINFG (KeyDown)
+0:1686:1:86:1		//Mix Paste (old IT Style): Shift+V (KeyDown)
 0:1364:2:53:1		//SelectAll: Ctrl+5 (KeyDown)
 0:1365:2:70:1		//Find: Ctrl+F (KeyDown)
 0:1366:0:114:1		//Find Next: F3 (KeyDown)
@@ -30,6 +30,7 @@
 0:1025:1:120:1		//View Comments: Shift+F9 (KeyDown)
 0:1368:2:113:1		//Toggle Tree View: Ctrl+F2 (KeyDown)
 0:1369:2:112:1		//View Options: Ctrl+F1 (KeyDown)
+0:1781:2:114:1		//View MIDI mapping: Ctrl+F3 (KeyDown)
 0:1370:0:112:1		//Help (to do): F1 (KeyDown)
 0:1032:2:111:5		//Previous instrument: Ctrl+ (ZEHNERTASTATUR) (KeyDown|KeyHold)
 0:1032:2:38:5		//Previous instrument: Ctrl+NACH-OBEN (KeyDown|KeyHold)
@@ -69,6 +70,7 @@
 2:1685:2:9:1		//Switch to order list: Ctrl+TABULATOR (KeyDown)
 2:1662:6:80:1		//Toggle channel's plugin editor: Ctrl+Alt+P (KeyDown)
 2:1062:0:93:1		//Show note properties: ANWENDUNG (KeyDown)
+2:1780:2:80:1		//Show playback time at current row: Ctrl+P (KeyDown)
 2:1007:2:81:5		//Transpose +1: Ctrl+Q (KeyDown|KeyHold)
 2:1008:2:65:5		//Transpose -1: Ctrl+A (KeyDown|KeyHold)
 2:1009:3:81:5		//Transpose +12: Shift+Ctrl+Q (KeyDown|KeyHold)
@@ -202,12 +204,13 @@
 5:1242:0:71:1		//Vol command - Portamento: G (KeyDown)
 5:1243:0:70:1		//Vol command - Portamento Up: F (KeyDown)
 5:1244:0:69:1		//Vol command - Portamento Down: E (KeyDown)
-5:1245:1:186:1		//Vol command - Velocity: Shift+ü (KeyDown)
+5:1245:1:190:1		//Vol command - Velocity: Shift+. (KeyDown)
 5:1246:0:79:1		//Vol command - Offset: O (KeyDown)
 
 //----( Pattern Context [bottom] - FX Col (6) )------------
 6:1294:0:220:1		//FX midi macro slide: ZIRKUMFLEX (KeyDown)
-6:1295:1:186:1		//FX pseudo-velocity (experimental): Shift+ü (KeyDown)
+6:1295:1:190:1		//FX pseudo-velocity (experimental): Shift+. (KeyDown)
+6:1666:0:191:1		//FX parameter extension command: # (KeyDown)
 
 //----( Pattern Context [bottom] - Param Col (7) )------------
 7:1247:0:48:1		//FX Param digit 0: 0 (KeyDown)
@@ -240,7 +243,9 @@
 //----( Sample Context [bottom] (8) )------------
 8:1380:2:84:1		//Trim sample around loop points: Ctrl+T (KeyDown)
 8:1383:0:8:1		//Silence sample selection: RÜCK (KeyDown)
+8:1384:1:78:1		//Normalise Sample: Shift+N (KeyDown)
 8:1385:3:65:1		//Amplify Sample: Shift+Ctrl+A (KeyDown)
+8:1385:2:77:1		//Amplify Sample: Ctrl+M (KeyDown)
 8:1381:3:82:1		//Reverse sample: Shift+Ctrl+R (KeyDown)
 8:1382:0:46:1		//Delete sample selection: ENTF (KeyDown)
 8:1386:0:107:1		//Zoom Out: + (ZEHNERTASTATUR) (KeyDown)
@@ -255,6 +260,11 @@
 //----( Unknown Context (12) )------------
 
 //----( Plugin GUI Context (13) )------------
+13:1763:0:37:1		//Previous plugin preset: NACH-LINKS (KeyDown)
+13:1764:0:39:1		//Next plugin preset: NACH-RECHTS (KeyDown)
+13:1782:0:38:1		//Plugin preset backward jump: NACH-OBEN (KeyDown)
+13:1783:0:40:1		//Plugin preset forward jump: NACH-UNTEN (KeyDown)
+13:1765:2:82:1		//Randomize plugin parameters: Ctrl+R (KeyDown)
 
 //----( General Context [top] (14) )------------
 
