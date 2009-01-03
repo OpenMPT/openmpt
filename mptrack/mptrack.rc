@@ -458,12 +458,12 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,63,136,10
 END
 
-IDD_MIDISETUP DIALOGEX 0, 0, 240, 180
+IDD_MIDISETUP DIALOGEX 0, 0, 240, 191
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Midi"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,5,3,235,174
+    GROUPBOX        "",IDC_STATIC,5,14,235,174
     LTEXT           "Midi Input Device:",IDC_STATIC,13,14,67,8
     COMBOBOX        IDC_COMBO1,13,24,144,74,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
@@ -472,13 +472,13 @@ BEGIN
     COMBOBOX        IDC_COMBO2,13,54,144,73,CBS_DROPDOWNLIST | NOT 
                     WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Transpose external midi keyboard",IDC_CHECK4,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,81,126,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,82,126,9
     CONTROL         "Amplify Midi Velocity",IDC_CHECK3,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,94,113,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,93,113,9
     CONTROL         "Record note velocity",IDC_CHECK1,"Button",
-                    BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,11,108,132,10
+                    BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,11,104,132,9
     CONTROL         "Record Note Off (Instruments Only)",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,134,130,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,126,130,9
     GROUPBOX        "File import",IDC_STATIC,176,14,53,74
     LTEXT           "Speed:",IDC_STATIC,183,26,24,8
     EDITTEXT        IDC_EDIT1,183,37,39,12,ES_AUTOHSCROLL | ES_NUMBER
@@ -492,13 +492,16 @@ BEGIN
                     11,14
     CONTROL         "Pass MIDI to active instrument plugin (experimental)",
                     IDC_MIDI_TO_PLUGIN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    11,148,222,8
+                    11,148,222,9
     CONTROL         "Combine midi volume to note velocity",
                     IDC_MIDIVOL_TO_NOTEVOL,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,11,121,139,10
+                    WS_TABSTOP,11,115,139,9
     CONTROL         "Respond to play/continue/stop song messages (untested)",
                     IDC_MIDIPLAYCONTROL,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,11,161,202,9
+                    WS_TABSTOP,11,172,202,9
+    CONTROL         "Record MIDI controller changes as MIDI macro changes (in pattern)",
+                    IDC_MIDI_MACRO_CONTROL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,11,160,226,9
 END
 
 IDD_LOADRAWSAMPLE DIALOG  0, 0, 168, 84
@@ -1990,7 +1993,7 @@ BEGIN
 
     IDD_MIDISETUP, DIALOG
     BEGIN
-        BOTTOMMARGIN, 177
+        BOTTOMMARGIN, 188
     END
 
     IDD_CONTROL_COMMENTS, DIALOG

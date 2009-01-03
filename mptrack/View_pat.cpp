@@ -2953,6 +2953,21 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				break;
 			}
 
+			// Checking whether to record MIDI controller change as MIDI macro change.
+			if((CMainFrame::m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL) && IsEditingEnabled())
+			{  
+				CModDoc* const pModdoc = GetDocument();
+				if(pModDoc != 0)
+				{
+					MODCOMMAND *p = pModdoc->GetSoundFile()->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
+					if(p->command == 0 || p->command == CMD_SMOOTHMIDI)
+					{ // Write command only if there's no existing command or already a smooth midi macro command.
+						p->command = CMD_SMOOTHMIDI;
+						p->param = nByte2;
+					}
+				}
+			}
+
 		default:
 			if(CMainFrame::m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS)
 			{
@@ -3574,7 +3589,7 @@ void CViewPattern::TempEnterFX(int c)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 
-	if ((pModDoc) && (pMainFrm))
+	if ((pModDoc) && (pMainFrm) && (IsEditingEnabled_bmsg()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();	
 		
@@ -3602,8 +3617,8 @@ void CViewPattern::TempEnterFX(int c)
 			p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
 		}
 
-		if (IsEditingEnabled_bmsg())
-		{
+		//if (IsEditingEnabled_bmsg())
+		//{
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
@@ -3613,8 +3628,8 @@ void CViewPattern::TempEnterFX(int c)
 				InvalidateArea(sel, sel+5);
 				UpdateIndicator();
 			}
-		}
-	}	// end if mainframe & moddoc exist
+		//}
+	}	// end if mainframe & moddoc exist & editing enabled
 }
 
 
@@ -3624,7 +3639,7 @@ void CViewPattern::TempEnterFXparam(int v)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 
-	if ((pModDoc) && (pMainFrm))
+	if ((pModDoc) && (pMainFrm) && (IsEditingEnabled_bmsg()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODCOMMAND oldcmd;		// This is the command we are about to overwrite
@@ -3660,8 +3675,8 @@ void CViewPattern::TempEnterFXparam(int v)
 			p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
 		}
 
-		if (IsEditingEnabled())
-		{
+		//if (IsEditingEnabled())
+		//{
 			DWORD sel = (m_nRow << 16) | m_dwCursor;
 			SetCurSel(sel, sel);
 			sel &= ~7;
@@ -3671,7 +3686,7 @@ void CViewPattern::TempEnterFXparam(int v)
 				InvalidateArea(sel, sel+5);
 				UpdateIndicator();
 			}
-		}
+		//}
 	}
 }
 void CViewPattern::TempStopNote(int note, bool fromMidi)
