@@ -16,6 +16,7 @@
 #include "commctrl.h"
 #include "version.h"
 #include "test/test.h"
+#include <shlwapi.h>
 
 // rewbs.memLeak
 #define CRTDBG_MAP_ALLOC
@@ -67,11 +68,36 @@ CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL bMakeVis
 			return NULL;
 		}
 	}
+
 	CDocument *pDoc = CMultiDocTemplate::OpenDocumentFile(lpszPathName, bMakeVisible);
 	if (pDoc)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm) pMainFrm->OnDocumentCreated((CModDoc *)pDoc);
+	}
+	else //Case: pDoc == 0, opening document failed.
+	{
+		if(lpszPathName != 0)
+		{
+			if(PathFileExists(lpszPathName) == FALSE)
+			{
+				CString str;
+				str.Format(GetStrI18N(_TEXT("Unable to open \"%s\": file does not exist.")), lpszPathName);
+				AfxMessageBox(str);
+			}
+			else //Case: Valid path but opening fails.
+			{		
+				const int nOdc = AfxGetApp()->m_pDocManager->GetOpenDocumentCount();
+				CString str;
+				str.Format(GetStrI18N(_TEXT("Opening \"%s\" failed. This can happen if "
+					"no more documents can be opened or if the file type was not "
+					"recognised. If the former is true, it's "
+					"recommended to close some documents as otherwise crash is likely"
+					"(currently there are %d document(s) open).")),
+				lpszPathName, nOdc);
+				AfxMessageBox(str);
+			}
+		}
 	}
 	return pDoc;
 }
@@ -194,13 +220,22 @@ BYTE gEffectColors[MAX_EFFECTS] =
 static void ShowChangesDialog()
 //-----------------------------
 {
-	/*
-	CString firstOpenMessage = "OpenMPT version " + CMainFrame::GetFullVersionString();
-	firstOpenMessage +=	". This is a development build.\n\nChanges:\n\n"
-	"TODO";
-
-	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT v." + CMainFrame::GetFullVersionString(), MB_ICONINFORMATION);
-	*/
+	const char* const firstOpenMessage = "OpenMPT development build " MPT_VERSION_STR ".\n\n"
+				"Some notable changes since version 1.17.02.48:\n\n"
+				"    [New] Name filter in plugin selection dialog.\n"
+				"    [New] Behavior of vxx command when used with plugin instruments can now be configured in instrument tab.\n"
+				"    [New] MIDI controllers can be used to control plugin parameters(View->MIDI mapping).\n"
+				"    [New] Possibility to use more Impulse Tracker compatible playback with IT-files. Is used\n "
+				"              automatically if loaded IT-file doesn't seem to be Modplug made.\n"
+			    "    [New/Fix] A couple of new sample editing functions and various modifications/fixes in sample tab.\n"
+				"    [Mod] mptm files made with this version will be recognized as IT in 1.17.02.48.\n"
+			    "    [Mod] Automatic update check on startup is no longer available.\n"
+                "    [Fix] Copy/Paste in pattern was partly broken when working with MOD format.\n"
+				"    [Fix] Fixed wrong version in IT files saved with compatibility save.\n"
+				"\n"
+				"    For more detail, see history.txt.";
+			
+	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT v." MPT_VERSION_STR, MB_ICONINFORMATION);
 }
 
 
@@ -1522,8 +1557,10 @@ BOOL CPaletteBitmap::Animate()
 	dest = m_lpRotoZoom;
 	Dist = t;
 	Phi = t;
-	spdx =(Cosinus(Phi)+Sinus(Phi<<2))*(Dist<<9)/sizex;
-	spdy =(Sinus(Phi)+Cosinus(Phi>>2))*(Dist<<9)/sizey;
+	spdx = 70000 + Sinus(Phi) * 10000 / 256;
+	spdy = 0;
+	//spdx =(Cosinus(Phi)+Sinus(Phi<<2))*(Dist<<9)/sizex;
+	//spdy =(Sinus(Phi)+Cosinus(Phi>>2))*(Dist<<9)/sizey;
 	srcx = 0x800000 - ((spdx * sizex) >> 1) + (spdy * sizey);	
 	srcy = 0x800000 - ((spdy * sizex) >> 1) + (spdx * sizey);	
 	for (UINT y=sizey; y; y--)
@@ -1615,38 +1652,43 @@ BOOL CAboutDlg::OnInitDialog()
 "Contact / Discussion:\r\n\
 http://modplug.sourceforge.net/forum\r\n\
 \r\nUpdates:\r\n\
-http://modplug.sourceforge.net/builds/#dev");
+http://sourceforge.net/projects/modplug/");
 
-	char *pArrCredit = { 
+	const char* const pArrCredit = { 
 		"OpenMPT / Modplug Tracker|"
-		"Copyright © 2004-2007 GPL|"
+		"Copyright © 2004-2009 Contributors|"
 		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
 		"|"
 		"Contributors:|"
-		"Robin Fernandes:  robin@soal.org (2004-2007)|"
-		"Ahti Leppänen: aaldery@dnainternet.net (2005-2007)|"
-		"Sergiy Pylypenko: x.pelya.x@gmail.com (2007)|"
-		"Eric Chavanon:  contact@ericus.org (2004-2005)|"
-		"Trevor Nunes:  modplug@plastikskouser.com (2004)|"
-		"Olivier Lapicque:  olivier@modplug.com (1997-2003)|"
-		"|"
+		"Ahti Leppänen (2005-2009)|"
+		"Johannes Schultz (2008-2009)|"
+		"Robin Fernandes (2004-2007)|"
+		"Sergiy Pylypenko (2007)|"
+		"Eric Chavanon (2004-2005)|"
+		"Trevor Nunes (2004)|"
+		"Olivier Lapicque (1997-2003)|"
 		"|"
 		"Thanks to:||"
 		"Konstanty for the XMMS-Modplug resampling implementation |"
 		"http://modplug-xmms.sourceforge.net/|"
 		"Stephan M. Bernsee for pitch shifting source code|"
 		"http://www.dspdimension.com|"
-		"Erik de Castro Lopo for his resampling library|"
-		"http://www.mega-nerd.com/SRC/|"
+		"Olli Parviainen for SoundTouch Library (time stretching)|"
+		"http://www.surina.net/soundtouch/|"
 		"Hermann Seib for his example VST Host implementation|"
 		"http://www.hermannseib.com/english/vsthost.htm|"
 		"Pel K. Txnder for the scrolling credits control :)|"
-		"http://tinyurl.com/4yze8||"
-		"...and to the following for ideas, testing and support:|"
-		"LPChip, Ganja, Diamond, Nofold, Goor00,|"
-		"Georg, Skilletaudio, Squirrel Havoc, Snu, Anboi,|"
-		"Sam Zen, BooT-SectoR-ViruZ, 33, Waxhead, Jojo,|"
-		"all at the MPC forums.|"
+		"http://tinyurl.com/4yze8|"
+		"The people at Modplug forums for crucial contribution|"
+		"in the form of ideas, testing and support; thanks|"
+		"particularly to:|"
+		"LPChip, Ganja, Diamond, Nofold, Goor00, Georg|"
+		"Skilletaudio, Squirrel Havoc, Snu, Anboi|"
+		"Sam Zen, BooT-SectoR-ViruZ, 33, Waxhead|"
+		"KrazyKatz, Bvanoudtshoorn|"
+		"|||||||"
+		"VST PlugIn Technology by Steinberg Media Technologies GmbH|"
+		"ASIO Technology by Steinberg Media Technologies GmbH|"
 		"||||||" 
 	};
 

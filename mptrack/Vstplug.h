@@ -55,6 +55,8 @@ class CVstPlugin: public IMixPlugin
 	friend class CVstPluginManager;
 
 protected:
+	enum {VSTEVENT_QUEUE_LEN=256}; 
+
 	ULONG m_nRefCount;
 	CVstPlugin *m_pNext, *m_pPrev;
 	HINSTANCE m_hLibrary;

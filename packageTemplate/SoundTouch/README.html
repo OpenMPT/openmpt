@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>SoundTouch library README</title>
+  <style>
+<!--
+.normal      { font-family: Arial }
+-->
+  </style>
+</head>
+<body class="normal">
+<hr>
+<font color=red><h5>Note: This readme is shortened version of the original 
+SoundTouch readme providing documentation for the time stretching feature.<br>
+SoundTouch WWW page: http://www.surina.net/soundtouch
+</h5></font>
+<h1>SoundTouch audio processing library v1.3.1
+</h1>
+<p class="normal">SoundTouch library Copyright (c) Olli
+Parviainen 2002-2006 </p>
+<hr>
+<h2>3. About implementation &amp; Usage tips</h2>
+<h3>3.3. About algorithms</h3>
+<p><em>Time-stretching </em>means changing
+the audio stream duration without affecting it's pitch. SoundTouch
+uses WSOLA-like time-stretching routines that operate in the time
+domain. Compared to sample rate transposing, time-stretching is a
+much heavier operation and also requires a longer processing
+"window" of sound samples used by the
+processing algorithm, thus increasing the algorithm input/output
+latency. Typical i/o latency for the SoundTouch
+time-stretch algorithm is around 100 ms.</p>
+<h3>3.4 Tuning the algorithm parameters</h3>
+<p>The time-stretch algorithm has few
+parameters that can be tuned to optimize sound quality for
+certain application. The current default parameters have been
+chosen by iterative if-then analysis (read: "trial and error")
+to obtain best subjective sound quality in pop/rock music
+processing, but in applications processing different kind of
+sound the default parameter set may result into a sub-optimal
+result.</p>
+<p>The time-stretch algorithm default
+parameter values are set by these #defines in file "TDStretch.h":</p>
+<blockquote>
+  <pre>#define DEFAULT_SEQUENCE_MS     82
+#define DEFAULT_SEEKWINDOW_MS   28
+#define DEFAULT_OVERLAP_MS      12</pre>
+</blockquote>
+<p>These parameters affect to the time-stretch
+algorithm as follows:</p>
+<ul>
+  <li><strong>DEFAULT_SEQUENCE_MS</strong>: This is
+the default length of a single processing sequence in milliseconds
+which determines the how the original sound is chopped in
+the time-stretch algorithm. Larger values mean fewer sequences
+are used in processing. In principle a larger value sounds better when
+slowing down the tempo, but worse when increasing the tempo and vice
+versa.<br>
+  </li>
+  <li><strong>DEFAULT_SEEKWINDOW_MS</strong>: The seeking window
+default length in milliseconds is for the algorithm that seeks the best
+possible overlapping location. This determines from how
+wide a sample "window" the algorithm can use to find an optimal mixing
+location when the sound sequences are to be linked back together.<br>
+    <br>
+The bigger this window setting is, the higher the possibility to find a
+better mixing position becomes, but at the same time large values may
+cause a "drifting" sound artifact because neighboring sequences can be
+chosen at more uneven intervals. If there's a disturbing artifact that
+sounds as if a constant frequency was drifting around, try reducing
+this setting.<br>
+  </li>
+  <li><strong>DEFAULT_OVERLAP_MS</strong>: Overlap
+length in milliseconds. When the sound sequences are mixed back
+together to form again a continuous sound stream, this parameter
+defines how much the ends of the consecutive sequences will overlap with each other.<br>
+    <br>
+    This shouldn't be that critical parameter. If you reduce the
+DEFAULT_SEQUENCE_MS setting by a large amount, you might wish to try a
+smaller value on this.</li>
+</ul>
+<p>Notice that these parameters can also be
+set during execution time with functions "<strong>TDStretch::setParameters()</strong>"
+and "<strong>SoundTouch::setSetting()</strong>".</p>
+<p>The table below summarizes how the
+parameters can be adjusted for different applications:</p>
+<table border="1">
+  <tbody>
+    <tr>
+      <td valign="top"><strong>Parameter name</strong></td>
+      <td valign="top"><strong>Default value
+magnitude</strong></td>
+      <td valign="top"><strong>Larger value
+affects...</strong></td>
+      <td valign="top"><strong>Smaller value
+affects...</strong></td>
+      <td valign="top"><strong>Music</strong></td>
+      <td valign="top"><strong>Speech</strong></td>
+      <td valign="top"><strong>Effect in CPU burden</strong></td>
+    </tr>
+    <tr>
+      <td valign="top">
+      <pre>SEQUENCE_MS</pre>
+      </td>
+      <td valign="top">Default value is relatively
+large, chosen for slowing down music tempo</td>
+      <td valign="top">Larger value is usually
+better for slowing down tempo. Growing the value decelerates the
+"echoing" artifact when slowing down the tempo.</td>
+      <td valign="top">Smaller value might be better
+for speeding up tempo. Reducing the value accelerates the "echoing"
+artifact when slowing down the tempo </td>
+      <td valign="top">Default value usually good</td>
+      <td valign="top">A smaller value than default
+might be better</td>
+      <td valign="top">Increasing the parameter
+value reduces computation burden</td>
+    </tr>
+    <tr>
+      <td valign="top">
+      <pre>SEEKWINDOW_MS</pre>
+      </td>
+      <td valign="top">Default value is relatively
+large, chosen for slowing down music tempo</td>
+      <td valign="top">Larger value eases finding a
+good mixing position, but may cause a "drifting" artifact</td>
+      <td valign="top">Smaller reduce possibility to
+find a good mixing position, but reduce the "drifting" artifact.</td>
+      <td valign="top">Default value usually good,
+unless a "drifting" artifact is disturbing.</td>
+      <td valign="top">Default value usually good</td>
+      <td valign="top">Increasing the parameter
+value increases computation burden</td>
+    </tr>
+    <tr>
+      <td valign="top">
+      <pre>OVERLAP_MS</pre>
+      </td>
+      <td valign="top">Default value is relatively
+large, chosen to suit with above parameters.</td>
+      <td valign="top">&nbsp;</td>
+      <td valign="top">If you reduce the "sequence
+ms" setting, you might wish to try a smaller value.</td>
+      <td valign="top">&nbsp;</td>
+      <td valign="top">&nbsp;</td>
+      <td valign="top">Increasing the parameter
+value increases computation burden</td>
+    </tr>
+  </tbody>
+</table>
+<hr>
+<h2 align="left">6. LICENSE </h2>
+<p>SoundTouch audio processing library<br>
+Copyright (c) Olli Parviainen</p>
+<p>This library is free software; you can
+redistribute it and/or modify it under the terms of the GNU
+Lesser General Public License as published by the Free Software
+Foundation; either version 2.1 of the License, or (at your option)
+any later version.</p>
+<p>This library is distributed in the hope
+that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Lesser General Public License for
+more details.</p>
+<p>You should have received a copy of the GNU
+Lesser General Public License along with this library; if not,
+write to the Free Software Foundation, Inc., 59 Temple Place,
+Suite 330, Boston, MA 02111-1307 USA</p>
+<hr>
+</body>
+</html>
