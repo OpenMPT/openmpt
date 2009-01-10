@@ -602,14 +602,14 @@ BOOL CViewPattern::PrepareUndo(DWORD dwBegin, DWORD dwEnd)
 //--------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	int x,y,cx,cy;
+	UINT nChnBeg, nRowBeg, nChnEnd, nRowEnd;
 
-	x = (dwBegin & 0xFFFF) >> 3;
-	y = (dwBegin >> 16);
-	cx = ((dwEnd & 0xFFFF) >> 3) - x + 1;
-	cy = (dwEnd >> 16) - y + 1;
-	if ((x < 0) || (y < 0) || (cx < 1) || (cy < 1)) return FALSE;
-	if (pModDoc) return pModDoc->PrepareUndo(m_nPattern, x, y, cx, cy);
+	nChnBeg = GetChanFromCursor(dwBegin);
+	nRowBeg = GetRowFromCursor(dwBegin);
+	nChnEnd = GetChanFromCursor(dwEnd);
+	nRowEnd = GetRowFromCursor(dwEnd);
+	if( (nChnEnd < nChnBeg) || (nRowEnd < nRowBeg) ) return FALSE;
+	if (pModDoc) return pModDoc->PrepareUndo(m_nPattern, nChnBeg, nRowBeg, nChnEnd-nChnBeg+1, nRowEnd-nRowBeg+1);
 	return FALSE;
 }
 
@@ -2823,7 +2823,8 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 //--------------------------------------------------------------------------
 {	
 	CModDoc *pModDoc = GetDocument();
-	if (!m_bRecord || !pModDoc) {
+	//if (!m_bRecord || !pModDoc) {
+	if (!IsEditingEnabled() || !pModDoc) {
 		return 0;
 	}
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
@@ -2831,16 +2832,17 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 		return 0;
 	}
 
-	MODCOMMAND *pRow;
-	PrepareUndo(m_dwBeginSel, m_dwEndSel);
-
 	//Work out where to put the new data
-	UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
-	bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&								//work out whether we should use
-								(CMainFrame::GetMainFrame()->GetFollowSong(pModDoc) == m_hWnd) &&	//player engine position or
-								!(pSndFile->IsPaused());											//edit cursor position
-	UINT nRow = usePlaybackPosition?pSndFile->m_nRow:m_nRow;	
-	pRow = pSndFile->Patterns[m_nPattern] + nRow*pSndFile->m_nChannels + nChn;
+	const UINT nChn = GetChanFromCursor(m_dwCursor);
+	const bool bUsePlaybackPosition = IsLiveRecord(*pModDoc, *pSndFile);
+	ROWINDEX nRow = m_nRow;
+	PATTERNINDEX nPattern = m_nPattern;
+	if(bUsePlaybackPosition == true)
+		SetEditPos(*pSndFile, nRow, nPattern, pSndFile->m_nRow, pSndFile->m_nPattern);
+
+	pModDoc->PrepareUndo(nPattern, nChn, nRow, 1, 1);
+
+	MODCOMMAND *pRow = pSndFile->Patterns[nPattern].GetpModCommand(nRow, nChn);
 
 	// TODO: Is the right plugin active? Move to a chan with the right plug
 	// Probably won't do this - finish fluctuator implementation instead.
@@ -2956,15 +2958,24 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			// Checking whether to record MIDI controller change as MIDI macro change.
 			if((CMainFrame::m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL) && IsEditingEnabled())
 			{  
-				CModDoc* const pModdoc = GetDocument();
-				if(pModDoc != 0)
-				{
-					MODCOMMAND *p = pModdoc->GetSoundFile()->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
-					if(p->command == 0 || p->command == CMD_SMOOTHMIDI)
-					{ // Write command only if there's no existing command or already a smooth midi macro command.
-						p->command = CMD_SMOOTHMIDI;
-						p->param = nByte2;
-					}
+				// Note: No undo for these modifications.
+				const bool bLiveRecord = IsLiveRecord(*pModDoc, *pSndFile);
+				ROWINDEX nRow = m_nRow;
+				PATTERNINDEX nPat = m_nPattern;
+				if(bLiveRecord)
+					SetEditPos(*pSndFile, nRow, nPat, pSndFile->m_nRow, pSndFile->m_nPattern);
+
+				const CHANNELINDEX nChn = GetChanFromCursor(m_dwCursor);
+				MODCOMMAND *p = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
+				if(p->command == 0 || p->command == CMD_SMOOTHMIDI || p->command == CMD_MIDI)
+				{   // Write command only if there's no existing command or already a midi macro command.
+					p->command = CMD_SMOOTHMIDI;
+					p->param = nByte2;
+					pMainFrm->ThreadSafeSetModified(pModDoc);
+
+					// Update GUI only if not recording live.
+					if(bLiveRecord == false)
+						InvalidateRow(nRow);
 				}
 			}
 
@@ -2995,7 +3006,15 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			{
 				const UINT instr = GetCurrentInstrument();
 				IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
-				if(plug) plug->MidiSend(dwMidiData);
+				if(plug)
+				{	
+					plug->MidiSend(dwMidiData);
+					// Sending midi may modify the plug. For now, if MIDI data
+					// is not active sensing, set modified.
+					if(dwMidiData != MIDISTATUS_ACTIVESENSING)
+						pMainFrm->ThreadSafeSetModified(pModDoc);
+				}
+				
 			}
 		break;
 	}
@@ -3689,12 +3708,21 @@ void CViewPattern::TempEnterFXparam(int v)
 		//}
 	}
 }
-void CViewPattern::TempStopNote(int note, bool fromMidi)
-//------------------------------------------------------
+
+
+void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
+//-----------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	bool isSplit = (note < m_nSplitNote);
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+
+	// Get playback edit positions from play engine here in case they are needed below.
+	const ROWINDEX nRowPlayback = pSndFile->m_nRow;
+	const UINT nTick = pSndFile->m_nTickCount;
+	const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
+
+	const bool isSplit = (note < m_nSplitNote);
 	if (pModDoc)
 	{
 		UINT ins = 0;
@@ -3707,27 +3735,30 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 		}
 		if (!ins)    ins = GetCurrentInstrument();
 		if (!ins)	 ins = m_nFoundInstrument;
+		if(bChordMode == true)
+		{
+			m_dwStatus &= ~PATSTATUS_CHORDPLAYING;
+			pModDoc->NoteOff(0, TRUE, ins, m_dwCursor & 0xFFFF);
+		}
+		else
+			pModDoc->NoteOff(note, FALSE, ins, GetChanFromCursor(m_dwCursor));
 		//pModDoc->NoteOff(note, TRUE, ins, (m_dwCursor & 0xFFFF) >> 3);
-		pModDoc->NoteOff(note, FALSE, ins, GetChanFromCursor(m_dwCursor));
-		
 	}
 
 	//Enter note off in pattern?
 	if ((note < 1) || (note > NOTE_MAX))
 		return;
-	if ((m_dwCursor & 7) > 1 && !fromMidi)
+	if ((m_dwCursor & 7) > 1 && (bChordMode || !fromMidi))
 		return;
 	if (!pModDoc || !pMainFrm || !(IsEditingEnabled()))
 		return;
 
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	UINT nChn = GetChanFromCursor(m_dwCursor);
-	PrepareUndo(m_dwBeginSel, m_dwEndSel);
+	const bool bIsLiveRecord = IsLiveRecord(*pMainFrm, *pModDoc, *pSndFile);
+
+	const CHANNELINDEX nChnCursor = GetChanFromCursor(m_dwCursor);
 
 	BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
-	CHANNELINDEX releaseChan = activeNoteMap[note];
-	if (releaseChan > pSndFile->GetNumChannels())
-		releaseChan = nChn;
+	const CHANNELINDEX nChn = (activeNoteMap[note] < pSndFile->GetNumChannels()) ? activeNoteMap[note] : nChnCursor;
 
 	activeNoteMap[note] = 0xFF;	//unlock channel
 
@@ -3736,134 +3767,65 @@ void CViewPattern::TempStopNote(int note, bool fromMidi)
 	}
 
 	// -- write sdx if playing live
-	bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&		// work out whether we should use
-						(pMainFrm->GetFollowSong(pModDoc) == m_hWnd) &&	// player engine position or
-						!(pSndFile->IsPaused()) &&						// edit cursor position
-								(CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY);
+	const bool usePlaybackPosition = (!bChordMode) && (bIsLiveRecord && (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY));
 
 	//Work out where to put the note off
-	UINT nRow = usePlaybackPosition ? pSndFile->m_nRow : m_nRow;
+	ROWINDEX nRow = m_nRow;
+	PATTERNINDEX nPat = m_nPattern;
 
-	MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, (releaseChan < pSndFile->GetNumChannels()) ? releaseChan : nChn);
+	if(usePlaybackPosition)
+		SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
+
+	MODCOMMAND* p = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
 
 	//don't overwrite:
-	if (p->note || p->instr || p->volcmd) {
+	if (p->note || p->instr || p->volcmd)
+	{
 		//if there's a note in the current location and the song is playing and following,
 		//the user probably just tapped the key - let's try the next row down.
-		if (p->note==note && (m_dwStatus&PATSTATUS_FOLLOWSONG) && !(pSndFile->IsPaused())) {
-			p=pSndFile->Patterns[m_nPattern]+(nRow+1)*pSndFile->m_nChannels+releaseChan;
-			if (p->note || p->instr || p->volcmd) {
+		nRow++;
+		if (p->note==note && bIsLiveRecord && pSndFile->Patterns[nPat].IsValidRow(nRow))
+		{
+			p = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
+			if (p->note || (!bChordMode && (p->instr || p->volcmd)) )
 				return;
-			}
-		} else {
-			return;
 		}
+		else
+			return;
 	}
 
+	// Create undo-point.
+	pModDoc->PrepareUndo(nPat, nChn, nRow, 1, 1);
+
 	// -- write sdx if playing live
-	if (usePlaybackPosition && pSndFile->m_nTickCount) {	// avoid SD0 which will be mis-interpreted
+	if (usePlaybackPosition && nTick) {	// avoid SD0 which will be mis-interpreted
 		if (p->command == 0) {	//make sure we don't overwrite any existing commands.
-			p->command = (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M))?CMD_S3MCMDEX:CMD_MODCMDEX;
-			p->param   = 0xD0 + (pSndFile->m_nTickCount&0x0F); //&0x0F is to limit to max 0x0F
+			p->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
+			p->param   = 0xD0 + min(0xF, nTick);
 		}
 	}
 
 	//Enter note off
-	p->note		= 0xFF;
-	p->instr = GetCurrentInstrument(); //p->instr = 0;
+	p->note		= NOTE_KEYOFF;
+	p->instr = (bChordMode) ? 0 : GetCurrentInstrument(); //p->instr = 0;
 	//Writing the instrument as well - probably someone finds this annoying :)
 	p->volcmd	= 0;
 	p->vol		= 0;
 
 	pModDoc->SetModified();
-	DWORD sel = (nRow << 16) | (releaseChan << 3);
-	InvalidateArea(sel, sel+5);
-	UpdateIndicator();
+
+	// Update only if not recording live.
+	if(bIsLiveRecord == false)
+	{
+		DWORD sel = (nRow << 16) | (nChn << 3);
+		InvalidateArea(sel, sel+5);
+		UpdateIndicator();
+	}
 
 	return;
 
 }
 
-void CViewPattern::TempStopChord(int note)
-//---------------------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	bool isSplit = (note<m_nSplitNote);
-	if (pModDoc)
-	{
-		UINT ins = 0;
-		if (isSplit)
-		{
-			ins = m_nSplitInstrument;
-			if (m_bOctaveLink)		  note += 12*(m_nOctaveModifier-9);
-			if (note > NOTE_MAX && note<254) note = NOTE_MAX;
-			if (note<0)				  note=1;
-		}
-		if (!ins)    ins = GetCurrentInstrument();
-		if (!ins)	 ins = m_nFoundInstrument;
-
-		m_dwStatus &= ~PATSTATUS_CHORDPLAYING;
-		pModDoc->NoteOff(0, TRUE, ins, m_dwCursor & 0xFFFF);
-	}
-
-	//Enter note off in pattern?
-	if ((note < 1) || (note > NOTE_MAX))
-		return;
-	if ((m_dwCursor & 7) > 1)
-		return;
-	//if (!pModDoc || !pMainFrm || !(m_dwStatus & PATSTATUS_RECORD))
-	if (!pModDoc || !pMainFrm || !(IsEditingEnabled()))
-		return;
-
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	UINT nChn = GetChanFromCursor(m_dwCursor);
-	PrepareUndo(m_dwBeginSel, m_dwEndSel);
-
-	BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
-	CHANNELINDEX releaseChan = activeNoteMap[note];
-	if (releaseChan > pSndFile->GetNumChannels())
-		releaseChan = nChn;
-
-	activeNoteMap[note] = 0xFF;	//unlock channel
-
-	if  (!(CMainFrame::m_dwPatternSetup&PATTERN_KBDNOTEOFF ))
-		return;
-
-	MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
-
-	//don't overwrite:
-	if (p->note)
-	{
-		//if there's a note in the current location and the song is playing and following,
-		//the user probably just tapped the key - let's try the nex row down.
-		if (p->note==note && (m_dwStatus&PATSTATUS_FOLLOWSONG) && !(pSndFile->IsPaused()))
-		{
-			p=pSndFile->Patterns[m_nPattern]+(m_nRow+1)*pSndFile->m_nChannels+nChn;
-			if (p->note)
-				return;
-		}
-		else
-		{
-			return;
-		}
-
-	}
-
-	p->note		= 0xFF;
-    p->instr	= 0;
-	p->volcmd	= 0;
-	p->vol		= 0;
-	p->command	= 0;
-	p->param	= 0;
-
-	pModDoc->SetModified();
-	DWORD sel = (m_nRow << 16) | (releaseChan << 3);
-	InvalidateArea(sel, sel+5);
-	UpdateIndicator();
-
-	return;
-}
 
 void CViewPattern::TempEnterOctave(int val)
 //---------------------------------------------
@@ -3938,26 +3900,28 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
-	bool isSplit;
 
 	if ((pModDoc) && (pMainFrm))
 	{
-		UINT nRow = m_nRow;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		const ROWINDEX nRowPlayback = pSndFile->m_nRow;
+		const UINT nTick = pSndFile->m_nTickCount;
+		const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
 
-		UINT nChn = GetChanFromCursor(m_dwCursor);
+		const bool bRecordEnabled = IsEditingEnabled();
+		const UINT nChn = GetChanFromCursor(m_dwCursor);
 		BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 		UINT nPlayIns = 0;
-		PrepareUndo(m_dwBeginSel, m_dwEndSel);
+		
 		if (note > NOTE_MAX && note < 254) note = NOTE_MAX;
 
-		bool usePlaybackPosition =  (m_dwStatus & PATSTATUS_FOLLOWSONG) &&		// work out whether we should use
-								(pMainFrm->GetFollowSong(pModDoc) == m_hWnd) &&	// player engine position or
-								!(pSndFile->IsPaused()) &&						// edit cursor position
-								(CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY);
+		const bool bIsLiveRecord = IsLiveRecord(*pMainFrm, *pModDoc, *pSndFile);
+		const bool usePlaybackPosition = (bIsLiveRecord && (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY));
+
+		ROWINDEX nRow = m_nRow;
 
 		// -- Chord autodetection: step back if we just entered a note
-		if ((IsEditingEnabled()) && (recordGroup) && !usePlaybackPosition) {
+		if ((bRecordEnabled) && (recordGroup) && !bIsLiveRecord) {
 			if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) {
 				if ((timeGetTime() - m_dwLastNoteEntryTime < CMainFrame::gnAutoChordWaitTime)
 					&& (nRow>=m_nSpacing) && (!m_bLastNoteEntryBlocked))
@@ -3966,16 +3930,23 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}
 		m_dwLastNoteEntryTime = timeGetTime();
 
-		nRow = usePlaybackPosition ? pSndFile->m_nRow : m_nRow;
+		PATTERNINDEX nPat = m_nPattern;
+
+		if(usePlaybackPosition)
+			SetEditPos(*pSndFile, nRow, nPat, nRowPlayback, nPatPlayback);
 
  		// -- Work out where to put the new note
-		MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, nChn);
+		MODCOMMAND* p = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
 		
 		//take backup copy of the command we're about to overwrite
-		MODCOMMAND oldcmd = *p;	
+		const MODCOMMAND oldcmd = *p;
 
-		// -- write note and instrument data
-		isSplit = HandleSplit(p, note);
+		// If record is enabled, create undo point.
+		if(bRecordEnabled)
+			pModDoc->PrepareUndo(nPat, nChn, nRow, 1, 1);
+
+		// -- write note and instrument data.
+		const bool isSplit = HandleSplit(p, note);
 
 		// -- write vol data
 		if (vol>=0 && vol<=64 && !(isSplit && m_nSplitVolume)) {	//write valid volume, as long as there's no split volume override.
@@ -3989,37 +3960,43 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}
 
 		// -- write sdx if playing live
-		if (usePlaybackPosition && pSndFile->m_nTickCount) {	// avoid SD0 which will be mis-interpreted
+		if (usePlaybackPosition && nTick) {	// avoid SD0 which will be mis-interpreted
 			if (p->command == 0) {	//make sure we don't overwrite any existing commands.
-				p->command = (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M))?CMD_S3MCMDEX:CMD_MODCMDEX;
-				p->param   = 0xD0 + (pSndFile->m_nTickCount&0x0F); //&0x0F is to limit to max 0x0F
+				p->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
+				p->param   = 0xD0 + min(0xF, nTick);
 			}
 		}
 
 		// -- old style note cut/off: erase instrument number
-		if (oldStyle && ((p->note==254) || (p->note==255))) {
+		if (oldStyle && ((p->note==NOTE_NOTECUT) || (p->note==NOTE_KEYOFF))) {
 			p->instr=0;
 		}
-
+		
 		// -- if recording, handle post note entry behaviour (move cursor etc..)
-		if(IsEditingEnabled())
+		if(bRecordEnabled)
 		{
 			DWORD sel = (nRow << 16) | m_dwCursor;
-			SetCurSel(sel, sel);
-			sel &= ~7;
+			if(bIsLiveRecord == false)
+			{   // Update only when not recording live.
+				SetCurSel(sel, sel);
+				sel &= ~7;
+			}
+
 			if(*p != oldcmd) //has it really changed?
 			{
 				pModDoc->SetModified();
-				InvalidateArea(sel, sel+5);
-				UpdateIndicator();
+				if(bIsLiveRecord == false)
+				{   // Update only when not recording live.
+					InvalidateArea(sel, sel+5);
+					UpdateIndicator();
+				}
 			}
 
-			//Move cursor down if follow song off or song is paused
-			if ((pMainFrm->GetFollowSong(pModDoc) != m_hWnd) || (pSndFile->IsPaused())
-					|| (!(m_dwStatus & PATSTATUS_FOLLOWSONG)))
+			//Move cursor down only if not recording live.
+			if ( bIsLiveRecord == false )
 			{
 				if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) {
-					if (nRow+m_nSpacing<pSndFile->PatternSize[m_nPattern]) {
+					if (nRow+m_nSpacing<pSndFile->PatternSize[nPat]) {
 						SetCurrentRow(nRow+m_nSpacing);
 						m_bLastNoteEntryBlocked=false;
 					} else {
@@ -4041,9 +4018,9 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 				bool channelLocked;
 
 				UINT n = nChn;
-				for (UINT i=0; i<pSndFile->m_nChannels; i++)
+				for (UINT i=1; i<pSndFile->m_nChannels; i++)
 				{
-					if (++n > pSndFile->m_nChannels) n = 0; //loop around
+					if (++n >= pSndFile->m_nChannels) n = 0; //loop around
 
 					channelLocked = false;
 					for (int k=0; k<NOTE_MAX; k++)
@@ -4065,7 +4042,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}
 
 		// -- play note
-		if ((CMainFrame::m_dwPatternSetup & PATTERN_PLAYNEWNOTE) || (!IsEditingEnabled()))
+		if ((CMainFrame::m_dwPatternSetup & PATTERN_PLAYNEWNOTE) || (bRecordEnabled == false))
 		{
 			if (p->instr) nPlayIns = p->instr;
 
@@ -4100,7 +4077,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}
 
 		//-- if not recording, restore old command.
-		if (!(IsEditingEnabled()))
+		if (bRecordEnabled == false)
 		{
 			*p = oldcmd;
 		}
@@ -4932,5 +4909,19 @@ void CViewPattern::OnShowTimeAtRow()
 
 
 
-
-
+void CViewPattern::SetEditPos(const CSoundFile& rSndFile,
+							  ROWINDEX& iRow, PATTERNINDEX& iPat,
+							  const ROWINDEX iRowCandidate, const PATTERNINDEX iPatCandidate) const
+//-------------------------------------------------------------------------------------------
+{
+	if(rSndFile.Patterns.IsValidIndex(iPatCandidate) && rSndFile.Patterns[iPatCandidate].IsValidRow(iRowCandidate))
+	{ // Case: Edit position candidates are valid -- use them.
+		iPat = iPatCandidate;
+		iRow = iRowCandidate;
+	}
+	else // Case: Edit position candidates are not valid -- set edit cursor position instead.
+	{
+		iPat = m_nPattern;
+		iRow = m_nRow;
+	}
+}

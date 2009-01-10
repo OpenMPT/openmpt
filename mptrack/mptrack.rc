@@ -189,11 +189,13 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Internet"
         BEGIN
-            MENUITEM "OpenMPT Wiki",                ID_NETLINK_OPENMPTWIKI
             MENUITEM "Modplug Central &Forums",     ID_NETLINK_FORUMS
+            MENUITEM "OpenMPT Wiki",                ID_NETLINK_OPENMPTWIKI
+            MENUITEM "OpenMPT Wiki (German)",       ID_NETLINK_OPENMPTWIKI_GERMAN
+
             MENUITEM "MPT-FR",                      ID_NETLINK_MPTFR
             MENUITEM "&Kvr Audio (plugins)",        ID_NETLINK_PLUGINS
-            MENUITEM "&OSMusic.net",                ID_NETLINK_TRAXINSPACE
+            MENUITEM "The Mod Archive",             ID_NETLINK_MODARCHIVE
         END
         MENUITEM SEPARATOR
         MENUITEM "&About MPTrack...",           ID_APP_ABOUT
@@ -253,65 +255,65 @@ BEGIN
                     ES_READONLY | NOT WS_BORDER
 END
 
-IDD_OPTIONS_PLAYER DIALOGEX 0, 0, 266, 278
+IDD_OPTIONS_PLAYER DIALOGEX 0, 0, 272, 279
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Player"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Sound Quality",IDC_STATIC,1,155,256,97
+    GROUPBOX        "Sound Quality",IDC_STATIC,5,165,256,97
     CONTROL         "Automatic Gain Control",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,20,97,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,20,97,10
     CONTROL         "Noise reduction",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,32,82,10
-    LTEXT           "Resampling:",IDC_STATIC,7,169,41,8
-    COMBOBOX        IDC_COMBO1,50,167,120,56,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP,15,32,82,10
+    LTEXT           "Resampling:",IDC_STATIC,11,179,41,8
+    COMBOBOX        IDC_COMBO1,54,177,120,56,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "Bass Expansion",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,53,81,10
-    LTEXT           "Low",IDC_STATIC,12,67,14,8
+                    WS_TABSTOP,15,53,81,10
+    LTEXT           "Low",IDC_STATIC,17,67,14,8
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,27,65,62,15
-    LTEXT           "High",IDC_STATIC,90,67,16,8
-    LTEXT           "10Hz",IDC_STATIC,126,67,18,8
-    LTEXT           "Range:",IDC_STATIC,163,53,24,8
+                    TBS_NOTICKS | WS_TABSTOP,33,65,62,15
+    LTEXT           "High",IDC_STATIC,95,67,16,8
+    LTEXT           "10Hz",IDC_STATIC,131,67,18,8
+    LTEXT           "Range:",IDC_STATIC,169,53,24,8
     CONTROL         "Slider2",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,143,64,62,15
-    LTEXT           "100Hz",IDC_STATIC,205,66,23,8
+                    TBS_NOTICKS | WS_TABSTOP,149,64,62,15
+    LTEXT           "100Hz",IDC_STATIC,211,66,23,8
     CONTROL         "Reverb",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,84,62,10
-    LTEXT           "Low",IDC_STATIC,12,100,14,8
+                    WS_TABSTOP,15,84,62,10
+    LTEXT           "Low",IDC_STATIC,17,100,14,8
     CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,27,96,62,15
-    LTEXT           "High",IDC_STATIC,90,100,16,8
-    CTEXT           "Reverb Preset:",IDC_STATIC,143,90,62,8
+                    TBS_NOTICKS | WS_TABSTOP,33,96,62,15
+    LTEXT           "High",IDC_STATIC,95,100,16,8
+    CTEXT           "Reverb Preset:",IDC_STATIC,149,90,62,8
     CONTROL         "Pro-Logic Surround",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,116,99,10
-    LTEXT           "Low",IDC_STATIC,12,132,14,8
+                    WS_TABSTOP,15,116,99,10
+    LTEXT           "Low",IDC_STATIC,17,132,14,8
     CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,27,129,62,15
-    LTEXT           "High",IDC_STATIC,90,132,16,8
-    LTEXT           "5ms",IDC_STATIC,126,131,18,8
-    CTEXT           "Front/Rear Delay:",IDC_STATIC,142,118,65,8
+                    TBS_NOTICKS | WS_TABSTOP,33,129,62,15
+    LTEXT           "High",IDC_STATIC,95,132,16,8
+    LTEXT           "5ms",IDC_STATIC,131,131,18,8
+    CTEXT           "Front/Rear Delay:",IDC_STATIC,147,118,65,8
     CONTROL         "Slider2",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,143,128,62,15
-    LTEXT           "50ms",IDC_STATIC,205,131,23,8
-    COMBOBOX        IDC_COMBO2,130,97,100,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    TBS_NOTICKS | WS_TABSTOP,149,128,62,15
+    LTEXT           "50ms",IDC_STATIC,211,131,23,8
+    COMBOBOX        IDC_COMBO2,135,97,100,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    GROUPBOX        "Control",IDC_STATIC,0,5,257,150
-    EDITTEXT        IDC_WFIRCUTOFF,150,205,19,14,ES_AUTOHSCROLL | ES_NUMBER
-    COMBOBOX        IDC_WFIRTYPE,50,186,119,64,CBS_DROPDOWN | WS_VSCROLL | 
+    GROUPBOX        "Control",IDC_STATIC,5,5,257,150
+    EDITTEXT        IDC_WFIRCUTOFF,154,215,19,14,ES_AUTOHSCROLL | ES_NUMBER
+    COMBOBOX        IDC_WFIRTYPE,54,196,119,64,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "WFIR type:",IDC_STATIC,7,188,37,8
-    LTEXT           "WFIR cutoff factor:",IDC_STATIC,8,208,62,8
-    LTEXT           "%",IDC_STATIC,173,208,8,8
-    LTEXT           "Sample ramping (click avoidance):",IDC_STATIC,8,228,109,
-                    8
-    EDITTEXT        IDC_RAMPING,145,225,24,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Samples",IDC_STATIC,172,228,29,8
-    LTEXT           "(can be overridden by instrument setting)",IDC_STATIC,9,
-                    238,128,8
+    LTEXT           "WFIR type:",IDC_STATIC,11,198,37,8
+    LTEXT           "WFIR cutoff factor:",IDC_STATIC,12,218,62,8
+    LTEXT           "%",IDC_STATIC,177,218,8,8
+    LTEXT           "Sample ramping (click avoidance):",IDC_STATIC,12,238,
+                    109,8
+    EDITTEXT        IDC_RAMPING,149,235,24,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Samples",IDC_STATIC,176,238,29,8
+    LTEXT           "(can be overridden by instrument setting)",IDC_STATIC,
+                    13,248,128,8
     CONTROL         "Enable Graphic Equalizer",IDC_CHECK3,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,130,20,107,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,135,20,107,10
 END
 
 IDD_WAVECONVERT DIALOGEX 0, 0, 211, 166
@@ -367,141 +369,142 @@ BEGIN
     CTEXT           "Writing file...",IDC_TEXT1,4,4,178,9
 END
 
-IDD_OPTIONS_KEYBOARD DIALOGEX 0, 0, 266, 278
+IDD_OPTIONS_KEYBOARD DIALOGEX 0, 0, 272, 279
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Keyboard"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    COMBOBOX        IDC_KEYCATEGORY,0,16,130,204,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_KEYCATEGORY,5,16,130,204,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LISTBOX         IDC_COMMAND_LIST,0,32,130,242,LBS_NOINTEGRALHEIGHT | 
+    LISTBOX         IDC_COMMAND_LIST,5,32,130,242,LBS_NOINTEGRALHEIGHT | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CHOICECOMBO,141,16,79,51,CBS_DROPDOWN | WS_VSCROLL | 
+    COMBOBOX        IDC_CHOICECOMBO,147,16,79,51,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
-    EDITTEXT        IDC_CUSTHOTKEY,157,31,98,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_CUSTHOTKEY,163,31,98,13,ES_AUTOHSCROLL
     CONTROL         "On Key Down",IDC_CHECKKEYDOWN,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,141,44,66,14
+                    WS_TABSTOP,147,44,66,14
     CONTROL         "On Key Hold",IDC_CHECKKEYHOLD,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,141,57,66,10
+                    WS_TABSTOP,147,57,66,10
     CONTROL         "On Key Up",IDC_CHECKKEYUP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,141,68,66,8
-    PUSHBUTTON      "Restore",IDC_RESTORE,212,46,43,13
-    PUSHBUTTON      "Delete",IDC_DELETE,212,64,43,13
-    EDITTEXT        IDC_KEYREPORT,135,94,125,70,ES_MULTILINE | 
+                    WS_TABSTOP,147,68,66,8
+    PUSHBUTTON      "Restore",IDC_RESTORE,217,46,43,13
+    PUSHBUTTON      "Delete",IDC_DELETE,217,64,43,13
+    EDITTEXT        IDC_KEYREPORT,141,94,125,70,ES_MULTILINE | 
                     ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
-    PUSHBUTTON      "Y",IDC_NOTESREPEAT,230,176,12,9
-    PUSHBUTTON      "N",IDC_NONOTESREPEAT,245,176,12,9
-    EDITTEXT        IDC_CHORDDETECTWAITTIME,229,189,28,12,ES_AUTOHSCROLL | 
+    PUSHBUTTON      "Y",IDC_NOTESREPEAT,235,176,12,9
+    PUSHBUTTON      "N",IDC_NONOTESREPEAT,251,176,12,9
+    EDITTEXT        IDC_CHORDDETECTWAITTIME,235,189,28,12,ES_AUTOHSCROLL | 
                     ES_NUMBER,WS_EX_RIGHT
-    PUSHBUTTON      "it",IDC_EFFECTLETTERSIT,98,184,12,9,NOT WS_VISIBLE
-    PUSHBUTTON      "xm",IDC_EFFECTLETTERSXM,113,184,12,9,NOT WS_VISIBLE
-    PUSHBUTTON      "Load Keys...",IDC_LOAD,139,221,54,13
-    PUSHBUTTON      "Save Keys As...",IDC_SAVE,199,221,54,13
+    PUSHBUTTON      "it",IDC_EFFECTLETTERSIT,103,184,12,9,NOT WS_VISIBLE
+    PUSHBUTTON      "xm",IDC_EFFECTLETTERSXM,119,184,12,9,NOT WS_VISIBLE
+    PUSHBUTTON      "Load Keys...",IDC_LOAD,145,221,54,13
+    PUSHBUTTON      "Save Keys As...",IDC_SAVE,205,221,54,13
     CONTROL         "Debug Save",IDC_DEBUGSAVE,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_VISIBLE | WS_TABSTOP,53,199,56,10
-    EDITTEXT        IDC_KEYMAPFILE,139,249,114,13,ES_AUTOHSCROLL
-    LTEXT           "Select category:",IDC_STATIC,1,5,74,11
-    PUSHBUTTON      "Set",IDC_SET,222,46,43,13,NOT WS_VISIBLE
-    GROUPBOX        "Key setup for this command ",IDC_STATIC,134,5,127,75
-    LTEXT           "Key:",IDC_STATIC,141,33,16,8
-    GROUPBOX        "Misc",IDC_STATIC,134,167,126,40
-    GROUPBOX        "Multi Config Handling",IDC_STATIC,134,209,126,66
-    LTEXT           "Repeat notes on hold?",IDC_STATIC,138,176,74,11
-    LTEXT           "Effect letters like:",IDC_STATIC,6,185,73,11,NOT 
+                    NOT WS_VISIBLE | WS_TABSTOP,59,199,56,10
+    EDITTEXT        IDC_KEYMAPFILE,145,249,114,13,ES_AUTOHSCROLL
+    LTEXT           "Select category:",IDC_STATIC,7,5,74,11
+    PUSHBUTTON      "Set",IDC_SET,225,45,43,13,NOT WS_VISIBLE
+    GROUPBOX        "Key setup for this command ",IDC_STATIC,139,5,127,75
+    LTEXT           "Key:",IDC_STATIC,147,33,16,8
+    GROUPBOX        "Misc",IDC_STATIC,139,167,126,40
+    GROUPBOX        "Multi Config Handling",IDC_STATIC,139,209,126,66
+    LTEXT           "Repeat notes on hold?",IDC_STATIC,143,176,74,11
+    LTEXT           "Effect letters like:",IDC_STATIC,11,185,73,11,NOT 
                     WS_VISIBLE
-    LTEXT           "Chord detect interval (ms):",IDC_STATIC,138,190,88,11
+    LTEXT           "Chord detect interval (ms):",IDC_STATIC,143,190,88,11
     CONTROL         "Save to this file on OK/Apply?",IDC_AUTOSAVE,"Button",
-                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,147,262,106,
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,153,262,106,
                     10
-    LTEXT           "Config to load on startup:",IDC_STATIC,139,239,80,8
-    LTEXT           "Log:",IDC_STATIC,136,84,19,10
-    PUSHBUTTON      "Clear Log",IDC_CLEARLOG,222,85,37,9
+    LTEXT           "Config to load on startup:",IDC_STATIC,145,239,80,8
+    LTEXT           "Log:",IDC_STATIC,141,84,19,10
+    PUSHBUTTON      "Clear Log",IDC_CLEARLOG,227,85,37,9
 END
 
-IDD_OPTIONS_COLORS DIALOGEX 0, 0, 265, 278
+IDD_OPTIONS_COLORS DIALOGEX 0, 0, 272, 231
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Colors"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    COMBOBOX        IDC_COMBO1,9,26,134,109,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO1,15,25,134,109,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "Primary highlight",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,19,75,74,10
-    EDITTEXT        IDC_PRIMARYHILITE,100,74,21,12,ES_AUTOHSCROLL | 
+                    WS_TABSTOP,20,91,74,10
+    EDITTEXT        IDC_PRIMARYHILITE,101,90,21,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "Secondary highlight",IDC_CHECK4,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,19,87,80,10
-    EDITTEXT        IDC_SECONDARYHILITE,100,86,21,12,ES_AUTOHSCROLL | 
+                    BS_AUTOCHECKBOX | WS_TABSTOP,20,103,80,10
+    EDITTEXT        IDC_SECONDARYHILITE,101,102,21,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "Enable effect highlighting",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,10,53,114,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,60,114,10
     CONTROL         "Use small font",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,10,43,102,10
-    PUSHBUTTON      "MPT",IDC_BUTTON5,154,26,22,12
-    PUSHBUTTON      "FT2",IDC_BUTTON6,179,26,22,12
-    PUSHBUTTON      "IT",IDC_BUTTON7,154,40,22,12
-    PUSHBUTTON      "Buzz",IDC_BUTTON8,179,40,22,12
-    CONTROL         "Color",IDC_BUTTON1,"Button",BS_OWNERDRAW,15,174,51,15
-    CONTROL         "Color",IDC_BUTTON2,"Button",BS_OWNERDRAW,88,174,51,15
-    CONTROL         "Color",IDC_BUTTON3,"Button",BS_OWNERDRAW,158,174,51,15
-    LTEXT           "Background:",IDC_TEXT1,15,163,60,8
-    LTEXT           "Foreground:",IDC_TEXT2,88,163,62,8
-    LTEXT           "Highlight:",IDC_TEXT3,159,164,61,8
-    GROUPBOX        "",IDC_STATIC,4,7,217,191
-    LTEXT           "Select color for:",IDC_STATIC,10,15,63,8
-    LTEXT           "rows",IDC_STATIC,124,76,16,8
-    LTEXT           "Presets:",IDC_STATIC,154,15,28,8
-    LTEXT           "rows",IDC_STATIC,124,88,16,8
-    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,54,113,
+                    WS_TABSTOP,15,45,102,10
+    PUSHBUTTON      "MPT",IDC_BUTTON5,159,26,22,12
+    PUSHBUTTON      "FT2",IDC_BUTTON6,185,26,22,12
+    PUSHBUTTON      "IT",IDC_BUTTON7,210,25,22,12
+    PUSHBUTTON      "Buzz",IDC_BUTTON8,235,25,22,12
+    CONTROL         "Color",IDC_BUTTON1,"Button",BS_OWNERDRAW,25,194,51,15
+    CONTROL         "Color",IDC_BUTTON2,"Button",BS_OWNERDRAW,98,194,51,15
+    CONTROL         "Color",IDC_BUTTON3,"Button",BS_OWNERDRAW,168,194,51,15
+    LTEXT           "Background:",IDC_TEXT1,25,183,60,8
+    LTEXT           "Foreground:",IDC_TEXT2,98,183,62,8
+    LTEXT           "Highlight:",IDC_TEXT3,169,185,61,8
+    GROUPBOX        "",IDC_STATIC,5,5,260,220
+    LTEXT           "Select color for:",IDC_STATIC,15,15,63,8
+    LTEXT           "rows",IDC_STATIC,125,92,16,8
+    LTEXT           "Presets:",IDC_STATIC,159,15,28,8
+    LTEXT           "rows",IDC_STATIC,125,104,16,8
+    CONTROL         "",IDC_BUTTON4,"Button",BS_OWNERDRAW | BS_FLAT,65,130,
                     114,43
     CONTROL         "Set highlights to songs' time signatures",IDC_CHECK5,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,63,136,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,75,136,10
 END
 
-IDD_MIDISETUP DIALOGEX 0, 0, 240, 191
+IDD_MIDISETUP DIALOGEX 0, 0, 272, 281
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Midi"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,5,14,235,174
-    LTEXT           "Midi Input Device:",IDC_STATIC,13,14,67,8
-    COMBOBOX        IDC_COMBO1,13,24,144,74,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    GROUPBOX        "Midi Recording",IDC_STATIC,5,5,260,185
+    LTEXT           "Midi Input Device:",IDC_STATIC,15,20,67,8
+    COMBOBOX        IDC_COMBO1,15,30,120,74,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Midi Output Device:",IDC_STATIC,13,42,65,8,NOT 
+    LTEXT           "Midi Output Device:",IDC_STATIC,140,20,65,8,NOT 
                     WS_VISIBLE
-    COMBOBOX        IDC_COMBO2,13,54,144,73,CBS_DROPDOWNLIST | NOT 
+    COMBOBOX        IDC_COMBO2,140,30,120,73,CBS_DROPDOWNLIST | NOT 
                     WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Transpose external midi keyboard",IDC_CHECK4,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,82,126,9
+    CONTROL         "Apply Octave Transpose on external midi keyboard",
+                    IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,55,
+                    185,9
     CONTROL         "Amplify Midi Velocity",IDC_CHECK3,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,93,113,9
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,90,113,9
     CONTROL         "Record note velocity",IDC_CHECK1,"Button",
-                    BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,11,104,132,9
+                    BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,15,75,132,9
     CONTROL         "Record Note Off (Instruments Only)",IDC_CHECK2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,126,130,9
-    GROUPBOX        "File import",IDC_STATIC,176,14,53,74
-    LTEXT           "Speed:",IDC_STATIC,183,26,24,8
-    EDITTEXT        IDC_EDIT1,183,37,39,12,ES_AUTOHSCROLL | ES_NUMBER
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,120,130,9
+    GROUPBOX        "Midi file import",IDC_STATIC,5,200,260,45
+    LTEXT           "Speed:",IDC_STATIC,15,220,24,8
+    EDITTEXT        IDC_EDIT1,45,220,39,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,217,42,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,79,225,
                     11,14
-    LTEXT           "Pattern size:",IDC_STATIC,183,58,40,8
-    EDITTEXT        IDC_EDIT2,183,69,39,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Pattern size:",IDC_STATIC,115,220,40,8
+    EDITTEXT        IDC_EDIT2,165,220,39,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,214,71,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,196,222,
                     11,14
     CONTROL         "Pass MIDI to active instrument plugin (experimental)",
                     IDC_MIDI_TO_PLUGIN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    11,148,222,9
+                    15,155,222,9
     CONTROL         "Combine midi volume to note velocity",
                     IDC_MIDIVOL_TO_NOTEVOL,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,11,115,139,9
+                    WS_TABSTOP,15,105,139,9
     CONTROL         "Respond to play/continue/stop song messages (untested)",
                     IDC_MIDIPLAYCONTROL,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,11,172,202,9
+                    WS_TABSTOP,15,170,202,9
     CONTROL         "Record MIDI controller changes as MIDI macro changes (in pattern)",
                     IDC_MIDI_MACRO_CONTROL,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,11,160,226,9
+                    WS_TABSTOP,15,140,226,9
 END
 
 IDD_LOADRAWSAMPLE DIALOG  0, 0, 168, 84
@@ -1403,72 +1406,72 @@ BEGIN
                     WS_TABSTOP,WS_EX_STATICEDGE
 END
 
-IDD_OPTIONS_GENERAL DIALOGEX 0, 0, 265, 278
+IDD_OPTIONS_GENERAL DIALOGEX 0, 0, 272, 279
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Directories",IDC_STATIC,4,3,248,67
-    LTEXT           "Songs:",IDC_STATIC,11,17,36,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT1,55,17,174,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BUTTON1,234,18,12,11,NOT WS_TABSTOP
-    LTEXT           "Samples:",IDC_STATIC,11,34,41,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT2,55,34,174,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BUTTON2,234,34,12,11,NOT WS_TABSTOP
-    LTEXT           "Instruments:",IDC_STATIC,11,50,40,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT3,55,50,174,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BUTTON3,234,51,12,11,NOT WS_TABSTOP
-    GROUPBOX        "Options",IDC_STATIC,4,75,247,200
-    LTEXT           "Description",IDC_TEXT1,144,86,101,175
+    GROUPBOX        "Directories",IDC_STATIC,5,5,261,67
+    LTEXT           "Songs:",IDC_STATIC,15,20,36,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT1,59,20,174,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON1,240,20,12,11,NOT WS_TABSTOP
+    LTEXT           "Samples:",IDC_STATIC,15,37,41,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT2,59,37,174,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON2,240,36,12,11,NOT WS_TABSTOP
+    LTEXT           "Instruments:",IDC_STATIC,15,53,40,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT3,59,53,174,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BUTTON3,240,54,12,11,NOT WS_TABSTOP
+    GROUPBOX        "Options",IDC_STATIC,4,75,261,200
+    LTEXT           "Description",IDC_TEXT1,144,86,111,175
     LISTBOX         IDC_LIST1,9,86,129,181,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_TABSTOP
 END
 
-IDD_OPTIONS_SOUNDCARD DIALOGEX 0, 0, 266, 274
+IDD_OPTIONS_SOUNDCARD DIALOGEX 0, 0, 272, 276
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Sound Card"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "",IDC_STATIC,4,3,232,167
-    LTEXT           "Sound Device:",IDC_STATIC,9,12,79,8
+    GROUPBOX        "",IDC_STATIC,5,5,232,170
+    LTEXT           "Sound Device:",IDC_STATIC,11,14,79,8
     CONTROL         "",IDC_COMBO1,"ComboBoxEx32",CBS_DROPDOWNLIST | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP,10,23,219,96
-    LTEXT           "Buffer length:",IDC_STATIC,11,44,43,8
-    COMBOBOX        IDC_COMBO2,71,41,54,83,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_VSCROLL | WS_TABSTOP,11,25,219,96
+    LTEXT           "Buffer length:",IDC_STATIC,13,46,43,8
+    COMBOBOX        IDC_COMBO2,73,43,54,83,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Mixing Quality:",IDC_STATIC,11,62,57,8
-    COMBOBOX        IDC_COMBO3,71,60,54,90,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "Mixing Quality:",IDC_STATIC,13,64,57,8
+    COMBOBOX        IDC_COMBO3,73,62,54,90,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Max. Polyphony:",IDC_STATIC,11,78,57,8
-    COMBOBOX        IDC_COMBO4,71,76,54,88,CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "Max. Polyphony:",IDC_STATIC,13,80,57,8
+    COMBOBOX        IDC_COMBO4,73,78,54,88,CBS_DROPDOWNLIST | WS_TABSTOP
     CONTROL         "Enable MMX Acceleration",IDC_CHECK3,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,95,112,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,97,112,10
     CONTROL         "Use secondary buffers",IDC_CHECK4,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,131,43,99,10
-    LTEXT           "Stereo Separation:",IDC_STATIC,25,112,62,8
-    LTEXT           "100%",IDC_TEXT1,93,112,20,8
-    RTEXT           "Low",IDC_STATIC,35,127,15,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,133,45,99,10
+    LTEXT           "Stereo Separation:",IDC_STATIC,27,114,62,8
+    LTEXT           "100%",IDC_TEXT1,95,114,20,8
+    RTEXT           "Low",IDC_STATIC,37,129,15,8
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    WS_TABSTOP,57,124,83,18
-    LTEXT           "High",IDC_STATIC,147,127,16,8
-    CTEXT           "Pre-Amp",IDC_STATIC,196,76,35,8
+                    WS_TABSTOP,59,126,83,18
+    LTEXT           "High",IDC_STATIC,149,129,16,8
+    CTEXT           "Pre-Amp",IDC_STATIC,197,78,35,8
     CONTROL         "Slider2",IDC_SLIDER_PREAMP,"msctls_trackbar32",
-                    TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,200,87,
+                    TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,201,89,
                     27,62
-    COMBOBOX        IDC_COMBO5,131,60,64,80,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_COMBO5,133,62,64,80,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "Reverse Stereo",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,131,78,62,10
+                    WS_TABSTOP,133,80,62,10
     CONTROL         "Soft Panning",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,131,90,64,10
+                    WS_TABSTOP,133,92,64,10
     LTEXT           "Note: The Pre-Amp and Soft Panning settings are ignored by songs with mix levels set to 1.17RC3 or later in Song Properties.",
-                    IDC_STATIC,16,150,204,18
+                    IDC_STATIC,17,152,204,18
 END
 
 IDD_MIDIMACRO DIALOGEX 0, 0, 349, 345
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
+EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Zxx Macros Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
@@ -1781,35 +1784,35 @@ BEGIN
     LTEXT           "New:",IDC_STATIC,101,35,18,8
 END
 
-IDD_OPTIONS_AUTOSAVE DIALOGEX 0, 0, 265, 278
+IDD_OPTIONS_AUTOSAVE DIALOGEX 0, 0, 272, 279
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Auto Save"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     CONTROL         "Enable Autosave",IDC_AUTOSAVE_ENABLE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,15,70,10
-    EDITTEXT        IDC_AUTOSAVE_INTERVAL,55,29,24,12,ES_AUTOHSCROLL | 
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,15,70,10
+    EDITTEXT        IDC_AUTOSAVE_INTERVAL,59,29,24,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    EDITTEXT        IDC_AUTOSAVE_HISTORY,55,46,24,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_AUTOSAVE_HISTORY,59,46,24,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    EDITTEXT        IDC_AUTOSAVE_PATH,56,91,164,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_AUTOSAVE_BROWSE,222,92,12,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_AUTOSAVE_PATH,60,96,164,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_AUTOSAVE_BROWSE,226,97,12,11,NOT WS_TABSTOP
     LTEXT           "[filename].AutoSave.[timestamp].[extension]",IDC_STATIC,
-                    56,115,164,12,SS_CENTERIMAGE,WS_EX_CLIENTEDGE
-    GROUPBOX        "Auto Save",IDC_STATIC,4,3,248,150
-    LTEXT           "Save every:",IDC_STATIC,11,29,40,12,SS_CENTERIMAGE
-    LTEXT           "minutes",IDC_STATIC,83,29,36,12,SS_CENTERIMAGE
-    LTEXT           "Filename:",IDC_STATIC,24,115,30,12,SS_CENTERIMAGE
+                    60,120,164,12,SS_CENTERIMAGE,WS_EX_CLIENTEDGE
+    GROUPBOX        "Auto Save",IDC_STATIC,4,3,261,157
+    LTEXT           "Save every:",IDC_STATIC,15,29,40,12,SS_CENTERIMAGE
+    LTEXT           "minutes",IDC_STATIC,87,29,36,12,SS_CENTERIMAGE
+    LTEXT           "Filename:",IDC_STATIC,28,120,30,12,SS_CENTERIMAGE
     LTEXT           "(example: mySong.AutoSave.20050327.2343.it)",IDC_STATIC,
-                    56,130,157,12,SS_CENTERIMAGE
-    LTEXT           "Keep up to:",IDC_STATIC,11,46,36,12,SS_CENTERIMAGE
-    LTEXT           "backups of each file name",IDC_STATIC,83,46,87,12,
+                    60,135,157,12,SS_CENTERIMAGE
+    LTEXT           "Keep up to:",IDC_STATIC,15,46,36,12,SS_CENTERIMAGE
+    LTEXT           "backups of each file name",IDC_STATIC,87,46,87,12,
                     SS_CENTERIMAGE
-    GROUPBOX        "Location:",IDC_STATIC,11,65,228,80
+    GROUPBOX        "Location:",IDC_STATIC,15,70,240,80
     CONTROL         "Use:",IDC_AUTOSAVE_USECUSTOMDIR,"Button",
-                    BS_AUTORADIOBUTTON,24,92,31,10
+                    BS_AUTORADIOBUTTON,28,97,31,10
     CONTROL         "Use song's original directory.",IDC_AUTOSAVE_USEORIGDIR,
-                    "Button",BS_AUTORADIOBUTTON,24,78,105,10
+                    "Button",BS_AUTORADIOBUTTON,28,83,105,10
 END
 
 IDD_EDIT_GOTO DIALOGEX 0, 0, 129, 89
@@ -1968,9 +1971,11 @@ BEGIN
 
     IDD_OPTIONS_PLAYER, DIALOG
     BEGIN
+        RIGHTMARGIN, 266
         VERTGUIDE, 50
         VERTGUIDE, 169
         VERTGUIDE, 256
+        BOTTOMMARGIN, 278
     END
 
     IDD_WAVECONVERT, DIALOG
@@ -1980,20 +1985,21 @@ BEGIN
 
     IDD_OPTIONS_KEYBOARD, DIALOG
     BEGIN
-        RIGHTMARGIN, 260
+        RIGHTMARGIN, 266
         TOPMARGIN, 5
-        BOTTOMMARGIN, 274
+        BOTTOMMARGIN, 275
     END
 
     IDD_OPTIONS_COLORS, DIALOG
     BEGIN
-        RIGHTMARGIN, 240
-        BOTTOMMARGIN, 198
+        RIGHTMARGIN, 247
+        BOTTOMMARGIN, 151
     END
 
     IDD_MIDISETUP, DIALOG
     BEGIN
-        BOTTOMMARGIN, 188
+        RIGHTMARGIN, 240
+        BOTTOMMARGIN, 278
     END
 
     IDD_CONTROL_COMMENTS, DIALOG
@@ -2074,14 +2080,14 @@ BEGIN
 
     IDD_OPTIONS_GENERAL, DIALOG
     BEGIN
-        RIGHTMARGIN, 259
-        BOTTOMMARGIN, 275
+        RIGHTMARGIN, 266
+        BOTTOMMARGIN, 276
     END
 
     IDD_OPTIONS_SOUNDCARD, DIALOG
     BEGIN
-        RIGHTMARGIN, 240
-        BOTTOMMARGIN, 177
+        RIGHTMARGIN, 246
+        BOTTOMMARGIN, 179
     END
 
     IDD_MIDIMACRO, DIALOG
@@ -2160,8 +2166,8 @@ BEGIN
 
     IDD_OPTIONS_AUTOSAVE, DIALOG
     BEGIN
-        RIGHTMARGIN, 259
-        BOTTOMMARGIN, 275
+        RIGHTMARGIN, 266
+        BOTTOMMARGIN, 276
     END
 
     IDD_EDIT_GOTO, DIALOG
