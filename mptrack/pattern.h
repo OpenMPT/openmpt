@@ -36,6 +36,9 @@ public:
 	
 	ROWINDEX GetNumRows() const {return m_Rows;}
 
+	// Return true if modcommand can be accessed from given row, false otherwise.
+	bool IsValidRow(const ROWINDEX iRow) const {return (iRow < GetNumRows());}
+
 	CHANNELINDEX GetNumChannels() const;
 
 	bool Resize(const ROWINDEX newRowCount, const bool showDataLossWarning = true);

@@ -174,9 +174,9 @@ public:
 	BOOL ExecuteCommand(CommandID command);
 	void CursorJump(DWORD distance, bool direction, bool snap);
 	void TempEnterNote(int n, bool oldStyle = false, int vol = -1);
-	void TempStopNote(int note, bool fromMidi=false);
+	void TempStopNote(int note, bool fromMidi=false, const bool bChordMode=false);
 	void TempEnterChord(int n);
-	void TempStopChord(int note);
+	void TempStopChord(int note) {TempStopNote(note, false, true);}
 	void TempEnterIns(int val);
 	void TempEnterOctave(int val);
 	void TempEnterVol(int v);
@@ -324,7 +324,17 @@ private:
 	bool IsInterpolationPossible(UINT startRow, UINT endRow, UINT chan, UINT colType, CSoundFile* pSndFile);
 	void Interpolate(UINT type);
 
-	
+	// Return true if recording live (i.e. editing while following playback).
+	// rSndFile must be the CSoundFile object of given rModDoc.
+	bool IsLiveRecord(const CModDoc& rModDoc, const CSoundFile& rSndFile) const;
+	bool IsLiveRecord(const CMainFrame& rMainFrm, const CModDoc& rModDoc, const CSoundFile& rSndFile) const;
+
+	// If given edit positions are valid, sets them to iRow and iPat.
+	// If not valid, set edit cursor position.
+	void SetEditPos(const CSoundFile& rSndFile, 
+					ROWINDEX& iRow, PATTERNINDEX& iPat,
+					const ROWINDEX iRowCandidate, const PATTERNINDEX iPatCandidate) const;
+
 	bool IsEditingEnabled() const {return ((m_dwStatus&PATSTATUS_RECORD) != 0);}
 
 	//Like IsEditingEnabled(), but shows some notification when editing is not enabled.
@@ -343,6 +353,19 @@ public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };
 
+
+inline bool CViewPattern::IsLiveRecord(const CMainFrame& rMainFrm, const CModDoc& rModDoc, const CSoundFile& rSndFile) const
+//----------------------------------------------------------------------------
+{   //       (following song) && (following in correct document(?))  && (playback is on)
+	return ((m_dwStatus & PATSTATUS_FOLLOWSONG) &&	(rMainFrm.GetFollowSong(&rModDoc) == m_hWnd) && !(rSndFile.IsPaused()));
+}
+
+
+inline bool CViewPattern::IsLiveRecord(const CModDoc& rModDoc, const CSoundFile& rSndFile) const
+//----------------------------------------------------------------------------
+{
+	return IsLiveRecord(*CMainFrame::GetMainFrame(), rModDoc, rSndFile);
+}
 
 #endif
 

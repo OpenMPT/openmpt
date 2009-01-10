@@ -931,7 +931,6 @@
 #define ID_PATTERNPASTE                 32875
 #define ID_NETLINK_MODPLUG              32876
 #define ID_NETLINK_UT                   32877
-#define ID_NETLINK_TRAXINSPACE          32878
 #define ID_NETLINK_OSMUSIC              32878
 #define ID_NETLINK_HANDBOOK             32879
 #define ID_SAMPLE_TRIM                  32880
@@ -1047,6 +1046,8 @@
 #define ID_ENVELOPE_SCALEPOINTS         59208
 #define ID_NETLINK_OPENMPTWIKI          59210
 #define ID_VIEW_MIDIMAPPING             59211
+#define ID_NETLINK_OPENMPTWIKI_GERMAN   59213
+#define ID_NETLINK_MODARCHIVE           59214
 
 // Next default values for new objects
 // 
@@ -1054,7 +1055,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        516
-#define _APS_NEXT_COMMAND_VALUE         59212
+#define _APS_NEXT_COMMAND_VALUE         59215
 #define _APS_NEXT_CONTROL_VALUE         2340
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

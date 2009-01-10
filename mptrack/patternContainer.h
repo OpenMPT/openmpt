@@ -51,6 +51,9 @@ public:
 
 	//Returns the index of given pattern, Size() if not found.
 	PATTERNINDEX GetIndex(const MODPATTERN* const pPat) const;
+
+	// Return true if pattern can be accessed with operator[](iPat), false otherwise.
+	bool IsValidIndex(const PATTERNINDEX iPat) const {return (iPat < Size());}
 	
 	void ResizeArray(const PATTERNINDEX newSize);
 

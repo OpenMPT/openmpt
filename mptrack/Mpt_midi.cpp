@@ -294,6 +294,7 @@ bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, BYTE& mappedIndex, uint32& para
 				IMixPlugin* pPlug = m_rSndFile.m_MixPlugins[plugindex-1].pMixPlugin;
 				if(!pPlug) continue;
 				pPlug->SetZxxParameter(param, (midimsg >> 16) & 0x7F);
+				CMainFrame::GetMainFrame()->ThreadSafeSetModified(m_rSndFile.GetpModDoc());
 			}
 		}
 	}

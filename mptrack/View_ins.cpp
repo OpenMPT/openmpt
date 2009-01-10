@@ -2614,7 +2614,14 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			{
 				const INSTRUMENTINDEX instr = m_nInstrument;
 				IMixPlugin* plug = pSndFile->GetInstrumentPlugin(instr);
-				if(plug) plug->MidiSend(dwMidiData);
+				if(plug)
+				{
+					plug->MidiSend(dwMidiData);
+					// Sending midi may modify the plug. For now, if MIDI data
+					// is not active sensing, set modified.
+					if(dwMidiData != MIDISTATUS_ACTIVESENSING)
+						CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
+				}
 			}
 		break;
 	}
