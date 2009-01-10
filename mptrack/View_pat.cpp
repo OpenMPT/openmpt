@@ -4096,20 +4096,19 @@ void CViewPattern::TempEnterChord(int note)
 	if ((pModDoc) && (pMainFrm))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODCOMMAND *p = pSndFile->Patterns[m_nPattern], *prowbase;
-		MODCOMMAND oldcmd;		// This is the command we are about to overwrite
-		UINT nChn = (m_dwCursor & 0xFFFF) >> 3;
+		const CHANNELINDEX nChn = GetChanFromCursor(m_dwCursor);
 		UINT nPlayIns = 0;
-		PrepareUndo(m_dwBeginSel, m_dwEndSel);
-		bool isSplit;
+		// Simply backup the whole row.
+		pModDoc->PrepareUndo(m_nPattern, nChn, m_nRow, pSndFile->GetNumChannels(), 1);
 
-		// -- Work out where to put the new note
-		prowbase = p + m_nRow * pSndFile->m_nChannels;
-		p = prowbase + nChn;
-		oldcmd = *p;
+		PatternRow prowbase = pSndFile->Patterns[m_nPattern].GetRow(m_nRow);
+		MODCOMMAND* p = &prowbase[nChn];
+
+		const MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
 
 		// -- establish note data
-		isSplit = HandleSplit(p, note);
+		//const bool isSplit = HandleSplit(p, note);
+		HandleSplit(p, note);
 
 		PMPTCHORD pChords = pMainFrm->GetChords();
 		UINT baseoctave = pMainFrm->GetBaseOctave();
@@ -4117,11 +4116,12 @@ void CViewPattern::TempEnterChord(int note)
 		UINT nNote;
 		if (nchord < 3*12)
 		{
-			UINT nchordnote;
-            if (isSplit)
-				nchordnote = pChords[nchord].key + baseoctave*(p->note%12) + 1;
-			else
-				nchordnote = pChords[nchord].key + baseoctave*12 + 1;
+			UINT nchordnote = pChords[nchord].key + baseoctave*12 + 1;
+			// Rev. 244, commented the isSplit conditions below, can't see the point in it.
+            //if (isSplit)
+			//	nchordnote = pChords[nchord].key + baseoctave*(p->note%12) + 1;
+			//else
+			//	nchordnote = pChords[nchord].key + baseoctave*12 + 1;
 			if (nchordnote <= NOTE_MAX)
 			{
 				UINT nchordch = nChn, nchno = 0;
@@ -4174,8 +4174,7 @@ void CViewPattern::TempEnterChord(int note)
 				InvalidateRow();
 				UpdateIndicator();
 			}
-			if (((pMainFrm->GetFollowSong(pModDoc) != m_hWnd) || (pSndFile->IsPaused())
-			 || (!(m_dwStatus & PATSTATUS_FOLLOWSONG))))
+			if ( IsLiveRecord(*pMainFrm, *pModDoc, *pSndFile) == false )
 			{
 				if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) 
 					SetCurrentRow(m_nRow+m_nSpacing);
