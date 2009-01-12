@@ -4,6 +4,8 @@
 #include "VstPlug.h"
 #include "AbstractVstEditor.h"
 
+#ifndef NO_VST
+
 //==============================
 class COwnerVstEditor: public CAbstractVstEditor
 //==============================
@@ -29,3 +31,6 @@ public:
 	BOOL OpenEditor(CWnd *parent);
 	VOID DoClose();
 };
+
+#endif // NO_VST
+

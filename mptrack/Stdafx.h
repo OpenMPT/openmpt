@@ -72,6 +72,13 @@ typedef struct {
 #define  WAVE_FORMAT_EXTENSIBLE                 0xFFFE
 #endif // !defined(WAVE_FORMAT_EXTENSIBLE)
 
+// Define to build without ASIO support; makes build possible without ASIO SDK.
+//#define NO_ASIO 
+
+// (HACK) Define to build without VST support; makes build possible without VST SDK.
+//#define NO_VST
+				  
+
 void Log(LPCSTR format,...);
 
 #include "typedefs.h"

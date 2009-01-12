@@ -914,6 +914,7 @@ void CViewGlobals::OnPluginChanged()
 void CViewGlobals::OnSelectPlugin()
 //---------------------------------
 {
+#ifndef NO_VST
 	CModDoc *pModDoc = GetDocument();
 
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
@@ -934,6 +935,7 @@ void CViewGlobals::OnSelectPlugin()
 		//OnWetDryChanged();
 // -! NEW_FEATURE#0014
 	}
+#endif // NO_VST
 }
 
 

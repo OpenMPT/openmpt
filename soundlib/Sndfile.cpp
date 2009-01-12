@@ -13,7 +13,6 @@
 #include "../mptrack/moddoc.h"
 #include "../mptrack/version.h"
 #include "sndfile.h"
-#include "aeffectx.h"
 #include "wavConverter.h"
 #include "tuningcollection.h"
 #include <vector>

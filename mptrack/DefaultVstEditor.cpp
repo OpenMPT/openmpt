@@ -4,6 +4,8 @@
 #include "defaultvsteditor.h"
 #include ".\defaultvsteditor.h"
 
+#ifndef NO_VST
+
 CDefaultVstEditor::CDefaultVstEditor(CVstPlugin *pPlugin) : CAbstractVstEditor(pPlugin)
 //-------------------------------------------------------------------------------------
 {
@@ -185,4 +187,6 @@ void CDefaultVstEditor::UpdateParamDisplays()
 	m_nControlLock--;	// Unset lock - done with internal GUI updates.
 	
 }
+
+#endif // NO_VST
 

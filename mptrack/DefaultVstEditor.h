@@ -8,6 +8,8 @@ enum {
 	PARAM_RESOLUTION=1000,
 };
 
+#ifndef NO_VST
+
 class CDefaultVstEditor :
 	public CAbstractVstEditor
 {
@@ -45,3 +47,6 @@ private:
 
 	void UpdateParamDisplays();
 };
+
+#endif // NO_VST
+

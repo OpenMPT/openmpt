@@ -10,6 +10,7 @@
 #include "dlg_misc.h"
 #include "AbstractVstEditor.h"
 
+#ifndef NO_VST
 
 static void CreateVerifiedProgramName(const char* rawname, const size_t rnSize,
 									  char* name, const size_t nSize,
@@ -702,3 +703,6 @@ void CAbstractVstEditor::SetLearnMacro(int inMacro) {
 int CAbstractVstEditor::GetLearnMacro() {
 	return m_nLearnMacro;
 }
+
+#endif // NO_VST
+
