@@ -8,6 +8,7 @@
 //
 
 
+#ifndef NO_VST
 
 COwnerVstEditor::COwnerVstEditor(CVstPlugin *pPlugin) : CAbstractVstEditor(pPlugin)
 //-----------------------------------------
@@ -129,3 +130,5 @@ VOID COwnerVstEditor::DoClose()
 		m_pVstPlugin->Dispatch(effEditClose, 0, 0, NULL, 0);
 	}
 }
+#endif // NO_VST
+

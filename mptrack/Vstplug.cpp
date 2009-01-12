@@ -14,6 +14,7 @@
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
 #include "midi.h"
 
+#ifndef NO_VST
 
 //#define VST_LOG
 //#define ENABLE_BUZZ
@@ -4111,6 +4112,8 @@ const char* SNDMIXPLUGIN::GetLibraryName()
     if(Info.szLibraryName[0]) return Info.szLibraryName;
 	else return 0;
 }
+
+#endif // NO_VST
 
 CString SNDMIXPLUGIN::GetParamName(const UINT index) const
 //--------------------------------------------------------

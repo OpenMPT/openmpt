@@ -1,6 +1,8 @@
 //rewbs.defaultPlugGUI
 #pragma once
 
+#ifndef NO_VST
+
 class CAbstractVstEditor: public CDialog
 {
 
@@ -71,3 +73,7 @@ private:
 	void PrepareToLearnMacro(UINT nID);
 };
 //end rewbs.defaultPlugGUI
+
+#endif // NO_VST
+
+

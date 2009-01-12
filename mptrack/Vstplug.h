@@ -1,7 +1,9 @@
 #ifndef _VST_PLUGIN_MANAGER_H_
 #define _VST_PLUGIN_MANAGER_H_
 
-#include <aeffectx.h>			// VST
+#ifndef NO_VST
+	#include <aeffectx.h>			// VST
+#endif
 
 #define kBuzzMagic	'Buzz'
 #define kDmoMagic	'DXMO'
@@ -21,8 +23,9 @@ enum {
 };
 
 
-
-typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
+#ifndef NO_VST
+	typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
+#endif
 
 
 typedef struct _VSTPLUGINLIB
@@ -53,7 +56,7 @@ class CVstPlugin: public IMixPlugin
 	friend class CAbstractVstEditor;	//rewbs.defaultPlugGUI
 	friend class COwnerVstEditor;		//rewbs.defaultPlugGUI
 	friend class CVstPluginManager;
-
+#ifndef NO_VST
 protected:
 	enum {VSTEVENT_QUEUE_LEN=256}; 
 
@@ -191,6 +194,29 @@ public:
 private:
 	short getMIDI14bitValueFromShort(short value); 
 	void MidiPitchBend(UINT nMidiCh, short pitchBendPos);
+#else // case: NO_VST
+public:
+	long GetNumParameters() {return 0;}
+	VOID GetParamName(UINT, LPSTR, UINT) {}
+	void ToggleEditor() {}
+	BOOL HasEditor() {return FALSE;}
+	UINT GetNumCommands() {return 0;}
+	VOID GetPluginType(LPSTR) {}
+	long GetNumPrograms() {return 0;}
+	long GetProgramNameIndexed(long, long, char*) {return 0;}
+	VOID SetParameter(UINT, FLOAT) {}
+	VOID GetParamLabel(UINT, LPSTR) {}
+	VOID GetParamDisplay(UINT, LPSTR) {}
+	FLOAT GetParameter(UINT) {return 0;}
+	bool LoadProgram(CString) {return false;}
+	bool SaveProgram(CString) {return false;}
+	VOID SetCurrentProgram(UINT) {}
+	BOOL ExecuteCommand(UINT) {return FALSE;}
+	void SetSlot(UINT) {}
+	void UpdateMixStructPtr(void*) {}
+	bool Bypass() {return false;}
+
+#endif // NO_VST
 };
 
 
@@ -198,6 +224,7 @@ private:
 class CVstPluginManager
 //=====================
 {
+#ifndef NO_VST
 protected:
 	PVSTPLUGINLIB m_pVstHead;
 
@@ -222,6 +249,12 @@ protected:
 	static long VSTCALLBACK MasterCallBack(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN, CSoundFile*);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
+#else // NO_VST
+public:
+	PVSTPLUGINLIB AddPlugin(LPCSTR, BOOL =TRUE, const bool = false, CString* const = 0) {return 0;}
+	PVSTPLUGINLIB GetFirstPlugin() const { return 0; }
+	VOID OnIdle() {}
+#endif // NO_VST
 };
 
 

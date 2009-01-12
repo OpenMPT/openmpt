@@ -625,10 +625,16 @@ VOID CMainFrame::Initialize()
 
 	//Adding version number to the frame title
 	CString title = GetTitle();
+	title += CString(" ") + MptVersion::str;
 	#ifdef DEBUG
 		title += CString(" DEBUG");
 	#endif
-	title += CString(" ") + MptVersion::str;
+	#ifdef NO_VST
+		title += " NO_VST";
+	#endif
+	#ifdef NO_ASIO
+		title += " NO_ASIO";
+	#endif
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
 
@@ -2322,6 +2328,7 @@ void CMainFrame::OnSongProperties()
 void CMainFrame::OnPluginManager()
 //--------------------------------
 {
+#ifndef NO_VST
 	int nPlugslot=-1;
 	CModDoc* pModDoc = GetActiveDoc();
 
@@ -2345,6 +2352,7 @@ void CMainFrame::OnPluginManager()
 		CChildFrame *pActiveChild = (CChildFrame *)MDIGetActive();
 		pActiveChild->ForceRefresh();
 	}
+#endif // NO_VST
 }
 // -! NEW_FEATURE#0002
 
@@ -2951,6 +2959,7 @@ void CMainFrame::OnViewMIDIMapping()
 void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bool librarynames)
 //---------------------------------------------------------------------
 {
+#ifndef NO_VST
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
 	{
 		PSNDMIXPLUGIN p = &plugarray[iPlug];
@@ -2963,6 +2972,7 @@ void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bo
 
 		CBox.AddString(str);
 	}
+#endif // NO_VST
 }
 
 void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plug)
