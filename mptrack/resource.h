@@ -824,6 +824,7 @@
 #define IDC_TEXT_STRETCHPARAMS          2337
 #define IDC_EDIT_STRETCHPARAMS          2338
 #define IDC_MIDI_MACRO_CONTROL		    2339
+#define IDC_MIDIPLAYPATTERNONMIDIIN     2340
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1048,6 +1049,7 @@
 #define ID_VIEW_MIDIMAPPING             59211
 #define ID_NETLINK_OPENMPTWIKI_GERMAN   59213
 #define ID_NETLINK_MODARCHIVE           59214
+#define ID_PATTERN_DUPLICATECHANNEL     59216
 
 // Next default values for new objects
 // 
@@ -1055,8 +1057,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        516
-#define _APS_NEXT_COMMAND_VALUE         59215
-#define _APS_NEXT_CONTROL_VALUE         2340
+#define _APS_NEXT_COMMAND_VALUE         59217
+#define _APS_NEXT_CONTROL_VALUE         2341
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -1453,7 +1453,8 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 
 	if(nRemainingChannels > GetModSpecifications().channelsMax || nRemainingChannels < GetModSpecifications().channelsMin) 	
 	{
-		CString str = "Error: Bad newOrder vector in CSoundFile::ReArrangeChannels(...)";	
+		CString str;
+		str.Format(GetStrI18N(_TEXT("Can't apply change: Number of channels should be within [%u,%u]")), GetModSpecifications().channelsMin, GetModSpecifications().channelsMax);
 		CMainFrame::GetMainFrame()->MessageBox(str , "ReArrangeChannels", MB_OK | MB_ICONINFORMATION);
 		return 0;
 	}

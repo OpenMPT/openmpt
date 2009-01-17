@@ -268,6 +268,7 @@ protected:
 	afx_msg void OnSetSelInstrument();
 	afx_msg void OnAddChannelFront();
 	afx_msg void OnAddChannelAfter();
+	afx_msg void OnDuplicateChannel();
 	afx_msg void OnRemoveChannel();
 	afx_msg void OnRemoveChannelDialog();
 	afx_msg void OnPatternProperties();

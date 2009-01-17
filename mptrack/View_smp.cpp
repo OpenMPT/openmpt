@@ -2307,7 +2307,8 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			if (midibyte2 & 0x7F)
 			{
 				nVol = ApplyVolumeRelatedMidiSettings(dwMidiData, midivolume);
-				pModDoc->PlayNote(nNote, 0, m_nSample, FALSE, nVol);
+				//pModDoc->PlayNote(nNote, 0, m_nSample, FALSE, nVol);
+				PlayNote(nNote);
 			}
 		break;
 
