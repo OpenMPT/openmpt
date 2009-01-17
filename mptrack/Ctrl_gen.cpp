@@ -203,20 +203,21 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SpinTempo.SetRange(specs.tempoMin, specs.tempoMax);
 		m_SliderTempo.SetRange(0, specs.tempoMax - specs.tempoMin);
 
-		BOOL b = TRUE;
-		if (m_pSndFile->m_nType == MOD_TYPE_MOD) b = FALSE;
-		m_EditTempo.EnableWindow(b);
-		m_SpinTempo.EnableWindow(b);
-		m_EditSpeed.EnableWindow(b);
-		m_SpinSpeed.EnableWindow(b);
-		m_EditGlobalVol.EnableWindow(b);
-		m_SpinGlobalVol.EnableWindow(b);
-		m_EditVSTiVol.EnableWindow(b);
-		m_SpinVSTiVol.EnableWindow(b);
-		m_EditSamplePA.EnableWindow(b);
-		m_SpinSamplePA.EnableWindow(b);
-		m_SliderSamplePreAmp.EnableWindow(b);
-		m_SliderVSTiVol.EnableWindow(b);
+		const BOOL bIsNotMOD = (m_pSndFile->GetType() != MOD_TYPE_MOD);
+		const BOOL bIsNotMOD_S3M = ((bIsNotMOD) && (m_pSndFile->GetType() != MOD_TYPE_S3M));
+		m_EditTempo.EnableWindow(bIsNotMOD);
+		m_SpinTempo.EnableWindow(bIsNotMOD);
+		m_EditSpeed.EnableWindow(bIsNotMOD);
+		m_SpinSpeed.EnableWindow(bIsNotMOD);
+		m_EditGlobalVol.EnableWindow(bIsNotMOD);
+		m_SpinGlobalVol.EnableWindow(bIsNotMOD);
+		m_EditSamplePA.EnableWindow(bIsNotMOD);
+		m_SpinSamplePA.EnableWindow(bIsNotMOD);
+		m_SliderSamplePreAmp.EnableWindow(bIsNotMOD);
+		m_SliderVSTiVol.EnableWindow(bIsNotMOD_S3M);
+		m_EditVSTiVol.EnableWindow(bIsNotMOD_S3M);
+		m_SpinVSTiVol.EnableWindow(bIsNotMOD_S3M);
+		
 		//Note: Global volume slider is not disabled for MOD
 		//on purpose(can be used to control play volume)
 

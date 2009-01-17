@@ -99,6 +99,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_SETINSTRUMENT,		OnSetSelInstrument)
 	ON_COMMAND(ID_PATTERN_ADDCHANNEL_FRONT,		OnAddChannelFront)
 	ON_COMMAND(ID_PATTERN_ADDCHANNEL_AFTER,		OnAddChannelAfter)
+	ON_COMMAND(ID_PATTERN_DUPLICATECHANNEL,		OnDuplicateChannel)
 	ON_COMMAND(ID_PATTERN_REMOVECHANNEL,		OnRemoveChannel)
 	ON_COMMAND(ID_PATTERN_REMOVECHANNELDIALOG,	OnRemoveChannelDialog)
 	ON_COMMAND(ID_CURSORCOPY,					OnCursorCopy)
@@ -2505,6 +2506,46 @@ void CViewPattern::OnAddChannelAfter()
 	EndWaitCursor();
 }
 
+void CViewPattern::OnDuplicateChannel()
+//------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile* pSndFile;
+	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0)
+		return;
+
+	if(AfxMessageBox(GetStrI18N(_TEXT("This affects all patterns, proceed?")), MB_YESNO) != IDYES)
+		return;
+
+	const CHANNELINDEX nDupChn = GetChanFromCursor(m_nMenuParam);
+	if(nDupChn >= pSndFile->GetNumChannels())
+		return;
+
+	CHANNELINDEX nNumChnNew = pSndFile->GetNumChannels()+1;
+	// Create vector {0, 1,..., n-1, n, n, n+1, n+2, ..., nNumChnNew-2), where n = nDupChn.
+	vector<CHANNELINDEX> vecChns(nNumChnNew);
+	CHANNELINDEX i = 0;
+	for(i = 0; i<nDupChn+1; i++)
+		vecChns[i] = i;
+	vecChns[i] = nDupChn;
+	i++;
+	for(; i<nNumChnNew; i++)
+		vecChns[i] = i-1;
+
+	nNumChnNew = pSndFile->ReArrangeChannels(vecChns);
+
+	// Check that duplication happened and in that case update.
+	if(nNumChnNew == vecChns.size())
+	{
+		pModDoc->SetModified();
+		pModDoc->ClearUndo();
+		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
+		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
+		SetCurrentPattern(m_nPattern);
+	}
+
+}
+
 void CViewPattern::OnRunScript()
 //--------------------------------
 {
@@ -2945,6 +2986,11 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			if(nVol < 0) nVol = -1;
 			else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
 			TempEnterNote(nNote, true, nVol);
+			
+			// continue playing as soon as MIDI notes are being received (request 2813)
+			if(pSndFile->IsPaused() && CMainFrame::m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN)
+				pModDoc->OnPatternPlayNoLoop();
+				
 		break;
 
 		case 0xB: //Controller change
@@ -4659,11 +4705,14 @@ bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu)
 	//Not doing the menuentries if opted to use old style menu style.
 
 	AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "Duplicate this channel");
+
 	HMENU addChannelMenu = ::CreatePopupMenu();
 	AppendMenu(hMenu, MF_POPUP, (UINT)addChannelMenu, "Add channel\t");
 	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_FRONT, "Before this channel");
 	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_AFTER, "After this channel");
-
+	
 	HMENU removeChannelMenu = ::CreatePopupMenu();
 	AppendMenu(hMenu, MF_POPUP, (UINT)removeChannelMenu, "Remove channel\t");
 	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNEL, "Remove this channel\t");
