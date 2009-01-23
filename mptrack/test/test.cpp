@@ -7,6 +7,7 @@
 #include "test.h"
 #include "../version.h"
 #include "../misc_util.h"
+#include <limits>
 
 #ifdef ENABLE_TESTS
 
@@ -41,6 +42,7 @@ catch(...)  \
 	
 
 void TestVersion();
+void TestTypes();
 
 
 
@@ -49,6 +51,7 @@ void DoTests()
 //------------
 {
 	DO_TEST(TestVersion);
+	DO_TEST(TestTypes);
 
 	MessageBox(0, "Tests were run", "Testing", MB_ICONINFORMATION);
 }
@@ -110,6 +113,30 @@ void TestVersion()
 		VERIFY_EQUAL( version, MptVersion::str );
 		VERIFY_EQUAL( MptVersion::ToNum(version), MptVersion::num );
 	}
+}
+
+
+void TestTypes()
+//--------------
+{
+	VERIFY_EQUAL(int8_min, (std::numeric_limits<int8>::min)());
+	VERIFY_EQUAL(int8_max, (std::numeric_limits<int8>::max)());
+	VERIFY_EQUAL(uint8_max, (std::numeric_limits<uint8>::max)());
+
+	VERIFY_EQUAL(int16_min, (std::numeric_limits<int16>::min)());
+	VERIFY_EQUAL(int16_max, (std::numeric_limits<int16>::max)());
+	VERIFY_EQUAL(uint16_max, (std::numeric_limits<uint16>::max)());
+
+	VERIFY_EQUAL(int32_min, (std::numeric_limits<int32>::min)());
+	VERIFY_EQUAL(int32_max, (std::numeric_limits<int32>::max)());
+	VERIFY_EQUAL(uint32_max, (std::numeric_limits<uint32>::max)());
+
+	VERIFY_EQUAL(int64_min, (std::numeric_limits<int64>::min)());
+	VERIFY_EQUAL(int64_max, (std::numeric_limits<int64>::max)());
+	VERIFY_EQUAL(uint64_max, (std::numeric_limits<uint64>::max)());
+
+	VERIFY_EQUAL(ROWINDEX_MAX, (std::numeric_limits<ROWINDEX>::max)());
+	VERIFY_EQUAL(ORDERINDEX_MAX, (std::numeric_limits<ORDERINDEX>::max)());
 }
 
 }; //Namespace MptTest

@@ -10,6 +10,7 @@
 #include <algorithm>
 #include "misc_util.h"
 #include "typedefs.h"
+#include <limits>
 
 using std::numeric_limits;
 using std::ostringstream;

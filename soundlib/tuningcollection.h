@@ -31,15 +31,18 @@ public:
 
 //BEGIN PUBLIC STATIC CONSTS
 public:
-	static const EDITMASK EM_ADD; //true <~> allowed
-	static const EDITMASK EM_REMOVE;
-	static const EDITMASK EM_ALLOWALL;
-	static const EDITMASK EM_CONST;
+	enum 
+	{
+		EM_ADD = 1, //true <~> allowed
+		EM_REMOVE = 2,
+		EM_ALLOWALL = 0xffff,
+		EM_CONST = 0,
 
-	static const SERIALIZATION_VERSION s_SerializationVersion;
+	    s_SerializationVersion = 3,
 
-	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_SUCCESS;
-	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_FAILURE;
+		SERIALIZATION_SUCCESS = false,
+		SERIALIZATION_FAILURE = true
+	};
 
 	static const string s_FileExtension;
 

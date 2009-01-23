@@ -4,7 +4,7 @@
 #include <bitset>
 
 //Serializations statics:
-const CTuningCollection::SERIALIZATION_VERSION CTuningCollection::s_SerializationVersion = 3;
+//const CTuningCollection::SERIALIZATION_VERSION CTuningCollection::s_SerializationVersion = 3;
 
 /*
 Version history:
@@ -15,18 +15,8 @@ Version history:
 
 using namespace std;
 
-
-const CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SERIALIZATION_SUCCESS = false;
-const CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::SERIALIZATION_FAILURE = true;
-
 const string CTuningCollection::s_FileExtension = ".tc";
 
-//BUG(?): These might not be called before constructor for certain
-//CTuningCollection objects - not good.
-const CTuningCollection::EDITMASK CTuningCollection::EM_ADD = 1; //0..01
-const CTuningCollection::EDITMASK CTuningCollection::EM_REMOVE = 2; //0..010
-const CTuningCollection::EDITMASK CTuningCollection::EM_ALLOWALL = 0xFFFF;
-const CTuningCollection::EDITMASK CTuningCollection::EM_CONST = 0;
 
 /*
 TODOS:
@@ -35,7 +25,7 @@ TODOS:
 
 
 
-CTuningCollection::CTuningCollection(const string& name) : m_Name(name), m_EditMask(0xFFFF)
+CTuningCollection::CTuningCollection(const string& name) : m_Name(name), m_EditMask(EM_ALLOWALL)
 //------------------------------------
 {
 	if(m_Name.size() > GetNameLengthMax()) m_Name.resize(GetNameLengthMax());
