@@ -302,7 +302,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 		UINT id = IDYES;
 		if (!bNoWarn)
 		{
-			id = CMainFrame::GetMainFrame()->MessageBox("You are about to replace the current midi library:\n"
+			id = CMainFrame::GetMainFrame()->MessageBox("You are about to replace the current MIDI library:\n"
 												"Do you want to replace only the missing instruments? (recommended)",
 												"Warning", MB_YESNOCANCEL|MB_ICONQUESTION );
 		}
@@ -1248,9 +1248,14 @@ void CTrackApp::OnFileOpen()
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 //					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
-					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.umx;*.amf;*.psm;*.mt2|"
+					#ifndef NO_MO3_SUPPORT
+						"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.umx;*.amf;*.psm;*.mt2;*.mo3|"
+						"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz;*.mo3)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.mo3|"
+					#else
+						"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.umx;*.amf;*.psm;*.mt2|"
+						"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha|"
+					#endif
 // -! NEW_FEATURE#0023
-					"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha|"
 					"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
 					"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
 					"FastTracker Modules (*.xm)|*.xm;*.xmz|"
@@ -1677,6 +1682,8 @@ http://sourceforge.net/projects/modplug/");
 		"http://www.surina.net/soundtouch/|"
 		"Hermann Seib for his example VST Host implementation|"
 		"http://www.hermannseib.com/english/vsthost.htm|"
+		"Ian Luck for UNMO3|"
+		"http://www.un4seen.com/mo3.html|"
 		"Pel K. Txnder for the scrolling credits control :)|"
 		"http://tinyurl.com/4yze8|"
 		"The people at Modplug forums for crucial contribution|"

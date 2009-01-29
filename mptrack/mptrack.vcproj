@@ -289,6 +289,9 @@
 				RelativePath="..\soundlib\load_mid.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\Load_mo3.cpp">
+			</File>
+			<File
 				RelativePath="..\soundlib\Load_mod.cpp">
 			</File>
 			<File

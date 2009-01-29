@@ -182,6 +182,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		}
 		f.Close();
 	}
+
 	EndWaitCursor();
 	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.m_nChannels)) return FALSE;
 	// Midi Import
@@ -2464,6 +2465,37 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 			wsprintf(s, "+%dbpm (faster)", param & 0x0F);
 		else
 			wsprintf(s, "%dbpm", param);
+		break;
+
+	case CMD_TREMOR:
+		if(param)
+			wsprintf(s, "ontime %d, offtime %d", param >> 4, param & 0x0F);
+		else 
+			strcpy(s, "continue");
+		break;
+
+	case CMD_RETRIG:
+		switch(param >> 4) {
+			case  0: strcpy(s, "continue"); break;
+			case  1: strcpy(s, "vol -1"); break;
+			case  2: strcpy(s, "vol -2"); break;
+			case  3: strcpy(s, "vol -4"); break;
+			case  4: strcpy(s, "vol -8"); break;
+			case  5: strcpy(s, "vol -16"); break;
+			case  6: strcpy(s, "vol *0.66"); break;
+			case  7: strcpy(s, "vol *0.5"); break;
+			case  8: strcpy(s, "vol *1"); break;
+			case  9: strcpy(s, "vol +1"); break;
+			case 10: strcpy(s, "vol +2"); break;
+			case 11: strcpy(s, "vol +4"); break;
+			case 12: strcpy(s, "vol +8"); break;
+			case 13: strcpy(s, "vol +16"); break;
+			case 14: strcpy(s, "vol *1.5"); break;
+			case 15: strcpy(s, "vol *2"); break;
+		}
+		char spd[10];
+		wsprintf(spd, " speed %d", param & 0x0F);
+		strcat(s, spd);
 		break;
 
 	case CMD_VOLUMESLIDE:

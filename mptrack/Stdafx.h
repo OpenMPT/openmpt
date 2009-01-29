@@ -77,6 +77,9 @@ typedef struct {
 
 // (HACK) Define to build without VST support; makes build possible without VST SDK.
 //#define NO_VST
+
+// Define to build without MO3 support.
+//#define NO_MO3_SUPPORT
 				  
 
 void Log(LPCSTR format,...);

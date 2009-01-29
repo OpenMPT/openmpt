@@ -612,27 +612,27 @@ void CChannelManagerDlg::OnSize(UINT nType,int cx,int cy)
 
 	if((button = GetDlgItem(IDC_BUTTON1)) != 0){
 		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
+		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-4,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
 	if((button = GetDlgItem(IDC_BUTTON2)) != 0){
 		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
+		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-4,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
 	if((button = GetDlgItem(IDC_BUTTON3)) != 0){
 		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
+		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-4,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
 	if((button = GetDlgItem(IDC_BUTTON4)) != 0){
 		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
+		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-4,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
 	if((button = GetDlgItem(IDC_BUTTON5)) != 0){
 		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
+		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-4,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
 	if((button = GetDlgItem(IDC_BUTTON6)) != 0){
 		button->GetWindowRect(&btn);
-		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-6,0,0,SWP_NOSIZE | SWP_NOZORDER);
+		button->SetWindowPos(NULL,btn.left-wnd.left-3,wnd.Height()-btn.Height()*2-4,0,0,SWP_NOSIZE | SWP_NOZORDER);
 	}
 
 	GetClientRect(&wnd);
