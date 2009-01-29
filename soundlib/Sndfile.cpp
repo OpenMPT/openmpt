@@ -29,7 +29,11 @@
 #define UNRAR_SUPPORT
 #define UNLHA_SUPPORT
 #define ZIPPED_MOD_SUPPORT
-LPCSTR glpszModExtensions = "mod|s3m|xm|it|stm|nst|ult|669|wow|mtm|med|far|mdl|ams|dsm|amf|okt|dmf|ptm|psm|mt2|umx";
+LPCSTR glpszModExtensions = "mod|s3m|xm|it|stm|nst|ult|669|wow|mtm|med|far|mdl|ams|dsm|amf|okt|dmf|ptm|psm|mt2|umx"
+#ifndef NO_UNMO3_SUPPORT
+"|mo3"
+#endif
+;
 //Should there be mptm?
 #endif // NO_ARCHIVE_SUPPORT
 #else // NO_COPYRIGHT: EarSaver only loads mod/s3m/xm/it/wav
@@ -587,6 +591,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 #endif // MODPLUG_TRACKER
 #endif
 #endif // MODPLUG_BASIC_SUPPORT
+		 && (!ReadMO3(lpStream, dwMemLength))
 		 && (!ReadMod(lpStream, dwMemLength))) m_nType = MOD_TYPE_NONE;
 #ifdef ZIPPED_MOD_SUPPORT
 		if ((!m_lpszSongComments) && (archive.GetComments(FALSE)))

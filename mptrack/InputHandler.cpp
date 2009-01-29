@@ -396,7 +396,7 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_FILE_SAVEASMP3:		s="Save as MP3...\t"; c=kcFileSaveAsMP3; break;
 		case ID_FILE_SAVEMIDI:		s="Export as Midi...\t"; c=kcFileSaveMidi; break;
 		case ID_FILE_SAVECOMPAT:	s="Compatibility Export...\t"; c=kcFileExportCompat; break;
-		case ID_IMPORT_MIDILIB:		s="Import Midi Library...\t"; c=kcFileImportMidiLib; break;
+		case ID_IMPORT_MIDILIB:		s="Import MIDI Library...\t"; c=kcFileImportMidiLib; break;
 		case ID_ADD_SOUNDBANK:		s="Add Sound Bank...\t"; c=kcFileAddSoundBank; break;
 
 		case ID_PLAYER_PLAY:		s="Pause/Resume\t"; c= kcPlayPauseSong; break;

@@ -106,10 +106,10 @@ BEGIN
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
         MENUITEM "Save as &Wave...",            ID_FILE_SAVEASWAVE
         MENUITEM "Save as M&P3...",             ID_FILE_SAVEASMP3
-        MENUITEM "Export as M&idi...",          ID_FILE_SAVEMIDI
+        MENUITEM "Export as M&IDI...",          ID_FILE_SAVEMIDI
         MENUITEM "Export &unraped...",          ID_FILE_SAVECOMPAT
         MENUITEM SEPARATOR
-        MENUITEM "Import &midi Library...",     ID_IMPORT_MIDILIB
+        MENUITEM "Import &MIDI Library...",     ID_IMPORT_MIDILIB
         MENUITEM "Add Sound &Bank...",          ID_ADD_SOUNDBANK
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
@@ -122,7 +122,7 @@ BEGIN
         MENUITEM "P&lay from start\tF6",        ID_PLAYER_PLAYFROMSTART
         MENUITEM "&Stop\tESC",                  ID_PLAYER_STOP
         MENUITEM "P&ause\tF8",                  ID_PLAYER_PAUSE
-        MENUITEM "&Midi Record\tF9",            ID_MIDI_RECORD
+        MENUITEM "&MIDI Record\tF9",            ID_MIDI_RECORD
         MENUITEM SEPARATOR
         MENUITEM "&Estimate song length",       ID_ESTIMATESONGLENGTH
         MENUITEM "Approx. real &BPM",           ID_APPROX_BPM
@@ -150,6 +150,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Find\tCtrl+F",               ID_EDIT_FIND
         MENUITEM "Find Next\tF3",               ID_EDIT_FINDNEXT
+        MENUITEM "Go to...",                    ID_EDIT_GOTO_MENU
     END
     POPUP "&View"
     BEGIN
@@ -198,7 +199,7 @@ BEGIN
             MENUITEM "The Mod Archive",             ID_NETLINK_MODARCHIVE
         END
         MENUITEM SEPARATOR
-        MENUITEM "&About MPTrack...",           ID_APP_ABOUT
+        MENUITEM "&About OpenMPT...",           ID_APP_ABOUT
     END
 END
 
@@ -473,7 +474,7 @@ BEGIN
                     WS_VISIBLE
     COMBOBOX        IDC_COMBO2,140,30,120,73,CBS_DROPDOWNLIST | NOT 
                     WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Apply Octave Transpose on external midi keyboard",
+    CONTROL         "Apply Octave Transpose on external MIDI keyboard",
                     IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,55,
                     185,9
     CONTROL         "Amplify MIDI velocity",IDC_CHECK3,"Button",
@@ -882,11 +883,11 @@ BEGIN
                     WS_TABSTOP,461,37,62,131,WS_EX_CLIENTEDGE
     CONTROL         "Toolbar1",IDC_TOOLBAR1,"ToolbarWindow32",WS_GROUP | 
                     0x4d,4,4,76,17
-    CTEXT           "Midi / VSTi Channel",IDC_STATIC,246,116,72,12,
+    CTEXT           "MIDI / VSTi Channel",IDC_STATIC,246,116,72,12,
                     SS_CENTERIMAGE,WS_EX_STATICEDGE
-    CTEXT           "Midi Program",IDC_STATIC,246,134,72,12,SS_CENTERIMAGE,
+    CTEXT           "MIDI Program",IDC_STATIC,246,134,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    CTEXT           "Midi Bank",IDC_STATIC,245,152,72,12,SS_CENTERIMAGE,
+    CTEXT           "MIDI Bank",IDC_STATIC,245,152,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     CTEXT           "Fade Out",IDC_STATIC,8,53,72,12,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
@@ -915,7 +916,7 @@ BEGIN
     CTEXT           "Action",IDC_STATIC,246,36,59,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
     GROUPBOX        "New Note Action",IDC_STATIC,240,27,122,59
-    GROUPBOX        "Plugin / Midi",IDC_STATIC,240,88,216,80
+    GROUPBOX        "Plugin / MIDI",IDC_STATIC,240,88,216,80
     GROUPBOX        "Sample Quality",IDC_STATIC,3,118,123,50
     CTEXT           "Ramping",IDC_STATIC,7,133,39,13,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
@@ -1598,15 +1599,15 @@ END
 
 IDD_MOD2MIDI DIALOG  0, 0, 247, 87
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Midi Conversion Setup"
+CAPTION "MIDI Conversion Setup"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "",IDC_STATIC,4,4,184,80
     LTEXT           "Instrument:",IDC_STATIC,10,12,67,8
     COMBOBOX        IDC_COMBO1,23,22,158,114,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Midi Channel:",IDC_STATIC,10,39,46,8
-    LTEXT           "Midi Program / Percussion:",IDC_STATIC,81,39,97,8
+    LTEXT           "MIDI Channel:",IDC_STATIC,10,39,46,8
+    LTEXT           "MIDI Program / Percussion:",IDC_STATIC,81,39,97,8
     COMBOBOX        IDC_COMBO2,10,49,66,114,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     COMBOBOX        IDC_COMBO3,81,49,100,114,CBS_DROPDOWNLIST | WS_VSCROLL | 
@@ -2466,7 +2467,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_PATTERN_PLAYROW      "Play current row\nPlay Row"
-    ID_IMPORT_MIDILIB       "Defines the default midi library used when importing midi files"
+    ID_IMPORT_MIDILIB       "Defines the default MIDI library used when importing MIDI files"
     ID_CLEANUP_REARRANGE    "Rearrange all patterns so that they are sorted in the order list\nRearrange Patterns"
 END
 
@@ -2476,7 +2477,7 @@ BEGIN
     ID_ADD_SOUNDBANK        "Add a new DLS sound bank"
     ID_ORDERLIST_INSERT     "Insert a pattern in the order list\nInsert Pattern"
     ID_ORDERLIST_DELETE     "Remove a pattern from the order list\nRemove Pattern"
-    ID_MIDI_RECORD          "Record from an external Midi keyboard\nMidi Record"
+    ID_MIDI_RECORD          "Record from an external MIDI keyboard\nMIDI Record"
 END
 
 STRINGTABLE 
@@ -2515,7 +2516,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_SAMPLE_TRIM          "Delete everything except the current selection\nTrim Sample"
-    ID_FILE_SAVEMIDI        "Export the current song to a standard midi file"
+    ID_FILE_SAVEMIDI        "Export the current song to a standard MIDI file"
     ID_NETLINK_FORUMS       "Go to the Modplug Central Music Forums"
     ID_INSTRUMENT_SAMPLEMAP "Edit the sample map"
     ID_NETLINK_PLUGINS      "Go to KVR Audio to download plugins"
@@ -2551,6 +2552,11 @@ BEGIN
     IDS_UNSUPPORTED_TUNING_DnD 
                             "For the time being Drag and Drop is only supported for tuning instances."
     IDS_OPERATION_FAIL      "Operation failed."
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_GOTO_MENU       "Go to row / channel / pattern / order"
 END
 
 #endif    // English (U.S.) resources
@@ -2620,45 +2626,44 @@ END
 // Dialog
 //
 
-IDD_MIDIPARAMCONTROL DIALOGEX 0, 0, 388, 190
+IDD_MIDIPARAMCONTROL DIALOGEX 0, 0, 392, 202
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "MIDI mapping"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Close",IDOK,334,2,50,14
-    LISTBOX         IDC_LIST1,3,100,343,82,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+    DEFPUSHBUTTON   "Close",IDOK,335,10,50,14
+    LISTBOX         IDC_LIST1,5,115,325,82,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "",IDC_CHECKACTIVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    29,10,12,10
-    COMBOBOX        IDC_COMBO_CHANNEL,6,35,36,65,CBS_DROPDOWNLIST | 
+    CONTROL         "Active",IDC_CHECKACTIVE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,20,42,10
+    COMBOBOX        IDC_COMBO_CHANNEL,15,45,36,65,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_EVENT,51,35,104,73,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO_EVENT,61,45,104,73,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_CONTROLLER,160,35,130,90,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO_CONTROLLER,171,45,150,90,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Channel",IDC_STATIC,5,25,27,8
-    LTEXT           "Event",IDC_STATIC,51,25,20,8
-    LTEXT           "Controller",IDC_STATIC,163,23,32,8
-    LTEXT           "Plugin",IDC_STATIC,7,50,20,8
-    LTEXT           "Parameter",IDC_STATIC,164,51,34,8
-    COMBOBOX        IDC_COMBO_PLUGIN,7,60,139,76,CBS_DROPDOWNLIST | 
+    LTEXT           "Channel",IDC_STATIC,15,35,27,8
+    LTEXT           "Event",IDC_STATIC,61,35,20,8
+    LTEXT           "Controller",IDC_STATIC,171,35,32,8
+    LTEXT           "Plugin",IDC_STATIC,15,60,20,8
+    LTEXT           "Parameter",IDC_STATIC,171,60,34,8
+    COMBOBOX        IDC_COMBO_PLUGIN,15,70,150,76,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_PARAM,161,60,149,83,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO_PARAM,171,70,149,83,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "MIDI learn",IDC_CHECK_MIDILEARN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,337,25,47,11
-    PUSHBUTTON      "Add",IDC_BUTTON_ADD,344,44,40,12
-    PUSHBUTTON      "Replace",IDC_BUTTON_REPLACE,344,61,40,12
-    PUSHBUTTON      "Remove",IDC_BUTTON_REMOVE,344,78,40,12
-    EDITTEXT        IDC_EDIT1,9,77,114,12,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Active",IDC_STATIC,6,10,21,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,335,30,47,11
+    PUSHBUTTON      "Add",IDC_BUTTON_ADD,175,90,45,12
+    PUSHBUTTON      "Replace",IDC_BUTTON_REPLACE,225,90,45,12
+    PUSHBUTTON      "Remove",IDC_BUTTON_REMOVE,275,90,45,12
+    EDITTEXT        IDC_EDIT1,15,90,114,12,ES_AUTOHSCROLL | ES_READONLY
     CONTROL         "Capture",IDC_CHECKCAPTURE,"Button",BS_AUTOCHECKBOX | 
-                    BS_LEFTTEXT | WS_TABSTOP,49,9,39,10
-    GROUPBOX        "",IDC_STATIC,2,2,324,93
-    CONTROL         "",IDC_SPINMOVEMAPPING,"msctls_updown32",0x0,357,119,17,
-                    37
+                    WS_TABSTOP,65,20,39,10
+    GROUPBOX        "Current mapping",IDC_STATIC,5,5,325,105
+    CONTROL         "",IDC_SPINMOVEMAPPING,"msctls_updown32",0x0,330,115,11,
+                    80
 END
 
 IDD_TUNING DIALOGEX 0, 0, 512, 240
@@ -2730,10 +2735,10 @@ BEGIN
                     WS_EX_STATICEDGE
 END
 
-IDD_CHANNELMANAGER DIALOGEX 0, 0, 523, 230
+IDD_CHANNELMANAGER DIALOGEX 0, 0, 523, 231
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
     WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE | WS_EX_APPWINDOW
+EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Channel manager"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
@@ -2795,7 +2800,7 @@ BEGIN
     GROUPBOX        "Audio",IDC_STATIC,16,38,182,100
     COMBOBOX        IDC_COMBO1,21,48,86,30,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Midi",IDC_STATIC,219,38,182,100
+    GROUPBOX        "MIDI",IDC_STATIC,219,38,182,100
     LISTBOX         IDC_LIST3,21,63,86,68,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
                     WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_COMBO2,109,48,86,30,CBS_DROPDOWN | CBS_SORT | 
@@ -2834,9 +2839,9 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_MIDIPARAMCONTROL, DIALOG
     BEGIN
-        RIGHTMARGIN, 384
+        RIGHTMARGIN, 388
         TOPMARGIN, 2
-        BOTTOMMARGIN, 189
+        BOTTOMMARGIN, 201
     END
 
     IDD_TUNING, DIALOG

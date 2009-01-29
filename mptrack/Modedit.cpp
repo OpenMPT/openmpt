@@ -770,9 +770,8 @@ BOOL CModDoc::RemoveUnusedSamples()
 	}
 	for (UINT ilo=1; ilo<=m_SndFile.m_nSamples; ilo++) if (m_SndFile.Ins[ilo].pSample)
 	{
-		if ((m_SndFile.Ins[ilo].uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
-		 && (m_SndFile.Ins[ilo].nLength > m_SndFile.Ins[ilo].nLoopEnd + 2)
-		 && (m_SndFile.Ins[ilo].nLength > m_SndFile.Ins[ilo].nSustainEnd + 2)) nLoopOpt++;
+		if ((m_SndFile.Ins[ilo].uFlags & CHN_LOOP)
+		 && (m_SndFile.Ins[ilo].nLength > m_SndFile.Ins[ilo].nLoopEnd + 2)) nLoopOpt++;
 	}
 	if (nLoopOpt)
 	{
@@ -782,12 +781,10 @@ BOOL CModDoc::RemoveUnusedSamples()
 		{
 			for (UINT j=1; j<=m_SndFile.m_nSamples; j++)
 			{
-				if ((m_SndFile.Ins[j].uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
-				 && (m_SndFile.Ins[j].nLength > m_SndFile.Ins[j].nLoopEnd + 2)
-				 && (m_SndFile.Ins[j].nLength > m_SndFile.Ins[j].nSustainEnd + 2))
+				if ((m_SndFile.Ins[j].uFlags & CHN_LOOP)
+				 && (m_SndFile.Ins[j].nLength > m_SndFile.Ins[j].nLoopEnd + 2))
 				{
 					UINT lmax = m_SndFile.Ins[j].nLoopEnd + 2;
-					if (m_SndFile.Ins[j].nSustainEnd + 2 > lmax) lmax = m_SndFile.Ins[j].nSustainEnd + 2;
 					if ((lmax < m_SndFile.Ins[j].nLength) && (lmax >= 16)) m_SndFile.Ins[j].nLength = lmax;
 				}
 			}

@@ -1050,6 +1050,7 @@
 #define ID_NETLINK_OPENMPTWIKI_GERMAN   59213
 #define ID_NETLINK_MODARCHIVE           59214
 #define ID_PATTERN_DUPLICATECHANNEL     59216
+#define ID_EDIT_GOTO_MENU               59220
 
 // Next default values for new objects
 // 
@@ -1057,7 +1058,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        516
-#define _APS_NEXT_COMMAND_VALUE         59217
+#define _APS_NEXT_COMMAND_VALUE         59221
 #define _APS_NEXT_CONTROL_VALUE         2341
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

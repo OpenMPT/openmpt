@@ -155,7 +155,7 @@ VOID CModTree::Init()
 	if (m_pDataTree)
 	{
 		// Create Midi Library
-		m_hMidiLib = InsertItem("Midi Library", IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
+		m_hMidiLib = InsertItem("MIDI Library", IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
 		for (UINT iMidGrp=0; iMidGrp<17; iMidGrp++)
 		{
 			m_tiMidiGrp[iMidGrp] = InsertItem(szMidiGroupNames[iMidGrp], IMAGE_FOLDER, IMAGE_FOLDER, m_hMidiLib, TVI_LAST);
@@ -2163,8 +2163,8 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 			case MODITEM_HDR_MIDILIB:
 			case MODITEM_HDR_MIDIGROUP:
-				AppendMenu(hMenu, MF_STRING, ID_IMPORT_MIDILIB, "&Import Midi Library");
-				AppendMenu(hMenu, MF_STRING, ID_EXPORT_MIDILIB, "E&xport Midi Library");
+				AppendMenu(hMenu, MF_STRING, ID_IMPORT_MIDILIB, "&Import MIDI Library");
+				AppendMenu(hMenu, MF_STRING, ID_EXPORT_MIDILIB, "E&xport MIDI Library");
 				bSep = TRUE;
 				break;
 
