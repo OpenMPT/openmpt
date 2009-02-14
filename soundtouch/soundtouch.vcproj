@@ -129,6 +129,9 @@
 				RelativePath=".\AAFilter.cpp">
 			</File>
 			<File
+				RelativePath=".\BPMDetect.cpp">
+			</File>
+			<File
 				RelativePath=".\cpu_detect_x86_win.cpp">
 			</File>
 			<File
@@ -139,6 +142,9 @@
 			</File>
 			<File
 				RelativePath=".\mmx_optimized.cpp">
+			</File>
+			<File
+				RelativePath=".\PeakFinder.cpp">
 			</File>
 			<File
 				RelativePath=".\RateTransposer.cpp">
@@ -174,6 +180,9 @@
 			</File>
 			<File
 				RelativePath=".\FIRFilter.h">
+			</File>
+			<File
+				RelativePath=".\PeakFinder.h">
 			</File>
 			<File
 				RelativePath=".\RateTransposer.h">

@@ -50,11 +50,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.14 $
-//
-// $Id: SoundTouch.h,v 1.14 2006/02/05 16:44:06 Olli Exp $
-//
 ////////////////////////////////////////////////////////////////////////////////
 //
 // License :
@@ -88,10 +83,10 @@ namespace soundtouch
 {
 
 /// Soundtouch library version string
-#define SOUNDTOUCH_VERSION          "1.3.1"
+#define SOUNDTOUCH_VERSION          "1.4.0"
 
 /// SoundTouch library version id
-#define SOUNDTOUCH_VERSION_ID       010301
+#define SOUNDTOUCH_VERSION_ID       (10400)
 
 //
 // Available setting IDs for the 'setSetting' & 'get_setting' functions:
@@ -232,16 +227,16 @@ public:
     /// 'SETTING_...' defines for available setting ID's.
     /// 
     /// \return 'TRUE' if the setting was succesfully changed
-    BOOL setSetting(uint settingId,   ///< Setting ID number. see SETTING_... defines.
-                    uint value        ///< New setting value.
+    BOOL setSetting(int settingId,   ///< Setting ID number. see SETTING_... defines.
+                    int value        ///< New setting value.
                     );
 
     /// Reads a setting controlling the processing system behaviour. See the
     /// 'SETTING_...' defines for available setting ID's.
     ///
     /// \return the setting value.
-    uint getSetting(uint settingId    ///< Setting ID number, see SETTING_... defines.
-                    ) const;
+    int getSetting(int settingId    ///< Setting ID number, see SETTING_... defines.
+                   ) const;
 
     /// Returns number of samples currently unprocessed.
     virtual uint numUnprocessedSamples() const;

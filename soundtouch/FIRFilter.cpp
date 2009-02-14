@@ -20,10 +20,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.16 $
-//
-// $Id: FIRFilter.cpp,v 1.16 2006/02/05 16:44:06 Olli Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -67,6 +63,7 @@ using namespace soundtouch;
 FIRFilter::FIRFilter()
 {
     resultDivFactor = 0;
+    resultDivider = 0;
     length = 0;
     lengthDiv8 = 0;
     filterCoeffs = NULL;
@@ -90,6 +87,9 @@ uint FIRFilter::evaluateFilterStereo(SAMPLETYPE *dest, const SAMPLETYPE *src, ui
 #endif
 
     assert(length != 0);
+    assert(src != NULL);
+    assert(dest != NULL);
+    assert(filterCoeffs != NULL);
 
     end = 2 * (numSamples - length);
 
@@ -186,8 +186,8 @@ void FIRFilter::setCoefficients(const SAMPLETYPE *coeffs, uint newLength, uint u
     assert(length == newLength);
 
     resultDivFactor = uResultDivFactor;
-	//OpenMPT_change--> Fix to ambiguous pow().
-    //resultDivider = (SAMPLETYPE)pow(2, resultDivFactor);
+	//OpenMPT_change-->
+    //resultDivider = (SAMPLETYPE)::pow(2, resultDivFactor);
 	resultDivider = (1 << resultDivFactor); // == 2^resultDivFactor
 	//<--
 
@@ -215,7 +215,6 @@ uint FIRFilter::evaluate(SAMPLETYPE *dest, const SAMPLETYPE *src, uint numSample
     assert(length > 0);
     assert(lengthDiv8 * 8 == length);
     if (numSamples < length) return 0;
-    assert(resultDivFactor >= 0);
     if (numChannels == 2) 
     {
         return evaluateFilterStereo(dest, src, numSamples);
@@ -231,7 +230,7 @@ uint FIRFilter::evaluate(SAMPLETYPE *dest, const SAMPLETYPE *src, uint numSample
 void * FIRFilter::operator new(size_t s)
 {
     // Notice! don't use "new FIRFilter" directly, use "newInstance" to create a new instance instead!
-    throw std::runtime_error("Don't use 'new FIRFilter', use 'newInstance' member instead!");
+    throw std::runtime_error("Error in FIRFilter::new: Don't use 'new FIRFilter', use 'newInstance' member instead!");
     return NULL;
 }
 

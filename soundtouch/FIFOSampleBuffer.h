@@ -15,10 +15,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.9 $
+// Last changed  : $Date: 2008-02-10 18:26:55 +0200 (Sun, 10 Feb 2008) $
+// File revision : $Revision: 4 $
 //
-// $Id: FIFOSampleBuffer.h,v 1.9 2006/02/05 16:44:06 Olli Exp $
+// $Id: FIFOSampleBuffer.h 11 2008-02-10 16:26:55Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -85,7 +85,7 @@ private:
     void rewind();
 
     /// Ensures that the buffer has capacity for at least this many samples.
-    void ensureCapacity(const uint capacityRequirement);
+    void ensureCapacity(uint capacityRequirement);
 
     /// Returns current capacity.
     uint getCapacity() const;
@@ -93,7 +93,7 @@ private:
 public:
 
     /// Constructor
-    FIFOSampleBuffer(uint numChannels = 2     ///< Number of channels, 1=mono, 2=stereo.
+    FIFOSampleBuffer(int numChannels = 2     ///< Number of channels, 1=mono, 2=stereo.
                                               ///< Default is stereo.
                      );
 
@@ -160,7 +160,7 @@ public:
     virtual uint numSamples() const;
 
     /// Sets number of channels, 1 = mono, 2 = stereo.
-    void setChannels(uint numChannels);
+    void setChannels(int numChannels);
 
     /// Returns nonzero if there aren't any samples available for outputting.
     virtual int isEmpty() const;

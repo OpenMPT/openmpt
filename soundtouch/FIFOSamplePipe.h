@@ -26,10 +26,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.8 $
-//
-// $Id: FIFOSamplePipe.h,v 1.8 2006/02/05 16:44:06 Olli Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -81,7 +77,7 @@ public:
     /// Adds 'numSamples' pcs of samples from the 'samples' memory position to
     /// the sample buffer.
     virtual void putSamples(const SAMPLETYPE *samples,  ///< Pointer to samples.
-                            uint numSamples                         ///< Number of samples to insert.
+                            uint numSamples             ///< Number of samples to insert.
                             ) = 0;
 
 

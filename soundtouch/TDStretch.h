@@ -13,10 +13,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.16 $
+// Last changed  : $Date: 2009-01-25 15:43:54 +0200 (Sun, 25 Jan 2009) $
+// File revision : $Revision: 4 $
 //
-// $Id: TDStretch.h,v 1.16 2006/02/05 16:44:06 Olli Exp $
+// $Id: TDStretch.h 49 2009-01-25 13:43:54Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -61,7 +61,12 @@ namespace soundtouch
 /// and vice versa.
 ///
 /// Increasing this value reduces computational burden & vice versa.
-#define DEFAULT_SEQUENCE_MS     82
+//#define DEFAULT_SEQUENCE_MS         130
+#define DEFAULT_SEQUENCE_MS         USE_AUTO_SEQUENCE_LEN
+
+/// Giving this value for the sequence length sets automatic parameter value
+/// according to tempo setting (recommended)
+#define USE_AUTO_SEQUENCE_LEN       0
 
 /// Seeking window default length in milliseconds for algorithm that finds the best possible 
 /// overlapping location. This determines from how wide window the algorithm may look for an 
@@ -75,7 +80,12 @@ namespace soundtouch
 /// around, try reducing this setting.
 ///
 /// Increasing this value increases computational burden & vice versa.
-#define DEFAULT_SEEKWINDOW_MS   14
+//#define DEFAULT_SEEKWINDOW_MS       25
+#define DEFAULT_SEEKWINDOW_MS       USE_AUTO_SEEKWINDOW_LEN
+
+/// Giving this value for the seek window length sets automatic parameter value
+/// according to tempo setting (recommended)
+#define USE_AUTO_SEEKWINDOW_LEN     0
 
 /// Overlap length in milliseconds. When the chopped sound sequences are mixed back together, 
 /// to form a continuous sound stream, this parameter defines over how long period the two 
@@ -85,7 +95,7 @@ namespace soundtouch
 /// by a large amount, you might wish to try a smaller value on this.
 ///
 /// Increasing this value increases computational burden & vice versa.
-#define DEFAULT_OVERLAP_MS      12
+#define DEFAULT_OVERLAP_MS      8
 
 
 /// Class that does the time-stretch (tempo change) effect for the processed
@@ -93,44 +103,46 @@ namespace soundtouch
 class TDStretch : public FIFOProcessor
 {
 protected:
-    uint channels;
-    uint sampleReq;
+    int channels;
+    int sampleReq;
     float tempo;
 
     SAMPLETYPE *pMidBuffer;
     SAMPLETYPE *pRefMidBuffer;
     SAMPLETYPE *pRefMidBufferUnaligned;
-    uint overlapLength;
-    uint overlapDividerBits;
-    uint slopingDivider;
-    uint seekLength;
-    uint seekWindowLength;
-    uint maxOffset;
+    int overlapLength;
+    int seekLength;
+    int seekWindowLength;
+    int maxOffset;
+    int overlapDividerBits;
+    int slopingDivider;
     float nominalSkip;
     float skipFract;
     FIFOSampleBuffer outputBuffer;
     FIFOSampleBuffer inputBuffer;
-    BOOL bQuickseek;
+    BOOL bQuickSeek;
     BOOL bMidBufferDirty;
 
-    uint sampleRate;
-    uint sequenceMs;
-    uint seekWindowMs;
-    uint overlapMs;
+    int sampleRate;
+    int sequenceMs;
+    int seekWindowMs;
+    int overlapMs;
+    BOOL bAutoSeqSetting;
+    BOOL bAutoSeekSetting;
 
-    void acceptNewOverlapLength(uint newOverlapLength);
+    void acceptNewOverlapLength(int newOverlapLength);
 
     virtual void clearCrossCorrState();
-    void calculateOverlapLength(uint overlapMs);
+    void calculateOverlapLength(int overlapMs);
 
     virtual LONG_SAMPLETYPE calcCrossCorrStereo(const SAMPLETYPE *mixingPos, const SAMPLETYPE *compare) const;
     virtual LONG_SAMPLETYPE calcCrossCorrMono(const SAMPLETYPE *mixingPos, const SAMPLETYPE *compare) const;
 
-    virtual uint seekBestOverlapPositionStereo(const SAMPLETYPE *refPos);
-    virtual uint seekBestOverlapPositionStereoQuick(const SAMPLETYPE *refPos);
-    virtual uint seekBestOverlapPositionMono(const SAMPLETYPE *refPos);
-    virtual uint seekBestOverlapPositionMonoQuick(const SAMPLETYPE *refPos);
-    uint seekBestOverlapPosition(const SAMPLETYPE *refPos);
+    virtual int seekBestOverlapPositionStereo(const SAMPLETYPE *refPos);
+    virtual int seekBestOverlapPositionStereoQuick(const SAMPLETYPE *refPos);
+    virtual int seekBestOverlapPositionMono(const SAMPLETYPE *refPos);
+    virtual int seekBestOverlapPositionMonoQuick(const SAMPLETYPE *refPos);
+    int seekBestOverlapPosition(const SAMPLETYPE *refPos);
 
     virtual void overlapStereo(SAMPLETYPE *output, const SAMPLETYPE *input) const;
     virtual void overlapMono(SAMPLETYPE *output, const SAMPLETYPE *input) const;
@@ -141,7 +153,7 @@ protected:
     void precalcCorrReferenceMono();
     void precalcCorrReferenceStereo();
 
-    void processNominalTempo();
+    void calcSeqParameters();
 
     /// Changes the tempo of the given sound samples.
     /// Returns amount of samples returned in the "output" buffer.
@@ -155,7 +167,7 @@ public:
 
     /// Operator 'new' is overloaded so that it automatically creates a suitable instance 
     /// depending on if we've a MMX/SSE/etc-capable CPU available or not.
-    void *operator new(size_t s);
+    static void *operator new(size_t s);
 
     /// Use this function instead of "new" operator to create a new instance of this class. 
     /// This function automatically chooses a correct feature set depending on if the CPU
@@ -179,7 +191,7 @@ public:
     void clearInput();
 
     /// Sets the number of channels, 1 = mono, 2 = stereo
-    void setChannels(uint numChannels);
+    void setChannels(int numChannels);
 
     /// Enables/disables the quick position seeking algorithm. Zero to disable, 
     /// nonzero to enable
@@ -196,16 +208,16 @@ public:
     /// 'seekwindowMS' = seeking window length for scanning the best overlapping 
     ///      position
     /// 'overlapMS' = overlapping length
-    void setParameters(uint sampleRate,                             ///< Samplerate of sound being processed (Hz)
-                       uint sequenceMS = DEFAULT_SEQUENCE_MS,       ///< Single processing sequence length (ms)
-                       uint seekwindowMS = DEFAULT_SEEKWINDOW_MS,   ///< Offset seeking window length (ms)
-                       uint overlapMS = DEFAULT_OVERLAP_MS          ///< Sequence overlapping length (ms)
+    void setParameters(int sampleRate,          ///< Samplerate of sound being processed (Hz)
+                       int sequenceMS = -1,     ///< Single processing sequence length (ms)
+                       int seekwindowMS = -1,   ///< Offset seeking window length (ms)
+                       int overlapMS = -1       ///< Sequence overlapping length (ms)
                        );
 
     /// Get routine control parameters, see setParameters() function.
     /// Any of the parameters to this function can be NULL, in such case corresponding parameter
     /// value isn't returned.
-    void getParameters(uint *pSampleRate, uint *pSequenceMs, uint *pSeekWindowMs, uint *pOverlapMs);
+    void getParameters(int *pSampleRate, int *pSequenceMs, int *pSeekWindowMs, int *pOverlapMs) const;
 
     /// Adds 'numsamples' pcs of samples from the 'samples' memory position into
     /// the input of the object.
