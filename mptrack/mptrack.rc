@@ -2421,7 +2421,7 @@ BEGIN
     IDC_SAMPLE_NEW          "Create a new sample\nNew Sample"
     IDC_SAMPLE_OPEN         "Load sample from disk\nImport sample"
     IDC_SAMPLE_SAVEAS       "Save the current sample to disk\nSave sample"
-    IDC_SAMPLE_NORMALIZE    "Normalize the current sample (full scale)\nNormalize"
+	IDC_SAMPLE_NORMALIZE    "Normalize the current sample (full scale)\nNormalize (hold shift to normalize all samples)"
     IDC_SAMPLE_AMPLIFY      "Amplify selection\nAmplify"
     IDC_SAMPLE_UPSAMPLE     "Stretch selection\nUpsample"
     IDC_SAMPLE_REVERSE      "Reverse selection\nReverse"

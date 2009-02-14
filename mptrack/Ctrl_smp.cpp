@@ -1032,62 +1032,87 @@ void CCtrlSamples::OnSamplePlay()
 void CCtrlSamples::OnNormalize()
 //------------------------------
 {
-	BeginWaitCursor();
-	if ((m_pModDoc) && (m_pSndFile) && (m_pSndFile->Ins[m_nSample].pSample))
-	{
-		BOOL bOk = FALSE;
-		MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
+	if(!m_pModDoc || !m_pSndFile)
+		return;
+
+	//Default case: Normalize current sample
+	UINT iMinSample = m_nSample, iMaxSample = m_nSample;
 	
-		if (pins->uFlags & CHN_16BIT)
+	//Shift -> Normalize all samples
+	if(CMainFrame::GetInputHandler()->ShiftPressed())
+	{
+		int ans = MessageBox(GetStrI18N(TEXT("This will normalize all samples independently. Continue?")), GetStrI18N(TEXT("Normalize")), MB_YESNO | MB_ICONQUESTION);
+		if(ans == IDNO) return;
+		iMinSample = 1;
+		iMaxSample = m_pSndFile->m_nSamples;
+	}
+
+
+	BeginWaitCursor();
+	BOOL bModified = FALSE;
+
+	for(UINT iSmp = iMinSample; iSmp <= iMaxSample; iSmp++)
+	{
+		if (m_pSndFile->Ins[iSmp].pSample)
 		{
-			UINT len = pins->nLength;
-			signed short *p = (signed short *)pins->pSample;
-			if (pins->uFlags & CHN_STEREO) len *= 2;
-			int max = 1;
-			for (UINT i=0; i<len; i++)
+			BOOL bOk = FALSE;
+			MODINSTRUMENT *pins = &m_pSndFile->Ins[iSmp];
+		
+			if (pins->uFlags & CHN_16BIT)
 			{
-				if (p[i] > max) max = p[i];
-				if (-p[i] > max) max = -p[i];
-			}
-			if (max < 32767)
-			{
-				max++;
-				for (UINT j=0; j<len; j++)
+				UINT len = pins->nLength;
+				signed short *p = (signed short *)pins->pSample;
+				if (pins->uFlags & CHN_STEREO) len *= 2;
+				int max = 1;
+				for (UINT i=0; i<len; i++)
 				{
-					int l = p[j];
-					p[j] = (l << 15) / max;
+					if (p[i] > max) max = p[i];
+					if (-p[i] > max) max = -p[i];
 				}
-				bOk = TRUE;
-			}
-		} else
-		{
-			UINT len = pins->nLength;
-			signed char *p = (signed char *)pins->pSample;
-			if (pins->uFlags & CHN_STEREO) len *= 2;
-			int max = 1;
-			for (UINT i=0; i<len; i++)
-			{
-				if (p[i] > max) max = p[i];
-				if (-p[i] > max) max = -p[i];
-			}
-			if (max < 127)
-			{
-				max++;
-				for (UINT j=0; j<len; j++)
+				if (max < 32767)
 				{
-					int l = p[j];
-					p[j] = (l << 7) / max;
+					max++;
+					for (UINT j=0; j<len; j++)
+					{
+						int l = p[j];
+						p[j] = (l << 15) / max;
+					}
+					bModified = bOk = TRUE;
 				}
-				bOk = TRUE;
+			} else
+			{
+				UINT len = pins->nLength;
+				signed char *p = (signed char *)pins->pSample;
+				if (pins->uFlags & CHN_STEREO) len *= 2;
+				int max = 1;
+				for (UINT i=0; i<len; i++)
+				{
+					if (p[i] > max) max = p[i];
+					if (-p[i] > max) max = -p[i];
+				}
+				if (max < 127)
+				{
+					max++;
+					for (UINT j=0; j<len; j++)
+					{
+						int l = p[j];
+						p[j] = (l << 7) / max;
+					}
+					bModified = bOk = TRUE;
+				}
+			}
+
+			if (bOk)
+			{
+				m_pModDoc->AdjustEndOfSample(iSmp);
+				m_pModDoc->UpdateAllViews(NULL, (iSmp << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 			}
 		}
-		if (bOk)
-		{
-			m_pModDoc->AdjustEndOfSample(m_nSample);
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-			m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
-			m_pModDoc->SetModified();
-		}
+	}
+
+	if(bModified)
+	{
+		m_pModDoc->SetModified();
 	}
 	EndWaitCursor();
 	SwitchToView();
