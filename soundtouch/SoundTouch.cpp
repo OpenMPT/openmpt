@@ -41,10 +41,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.13 $
+// Last changed  : $Date: 2008-02-10 18:26:55 +0200 (Sun, 10 Feb 2008) $
+// File revision : $Revision: 4 $
 //
-// $Id: SoundTouch.cpp,v 1.13 2006/02/05 16:44:06 Olli Exp $
+// $Id: SoundTouch.cpp 11 2008-02-10 16:26:55Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -82,6 +82,10 @@
 #include "cpu_detect.h"
 
 using namespace soundtouch;
+    
+/// test if two floating point numbers are equal
+#define TEST_FLOAT_EQUAL(a, b)  (fabs(a - b) < 1e-10)
+
 
 /// Print library version string
 extern "C" void soundtouch_ac_test()
@@ -236,8 +240,8 @@ void SoundTouch::calcEffectiveRateAndTempo()
     tempo = virtualTempo / virtualPitch;
     rate = virtualPitch * virtualRate;
 
-    if (rate != oldRate) pRateTransposer->setRate(rate);
-    if (tempo != oldTempo) pTDStretch->setTempo(tempo);
+    if (!TEST_FLOAT_EQUAL(rate,oldRate)) pRateTransposer->setRate(rate);
+    if (!TEST_FLOAT_EQUAL(tempo, oldTempo)) pTDStretch->setTempo(tempo);
 
     if (rate > 1.0f) 
     {
@@ -286,7 +290,7 @@ void SoundTouch::setSampleRate(uint srate)
 
 // Adds 'numSamples' pcs of samples from the 'samples' memory position into
 // the input of the object.
-void SoundTouch::putSamples(const SAMPLETYPE *samples, uint numSamples)
+void SoundTouch::putSamples(const SAMPLETYPE *samples, uint nSamples)
 {
     if (bSrateSet == FALSE) 
     {
@@ -309,14 +313,14 @@ void SoundTouch::putSamples(const SAMPLETYPE *samples, uint numSamples)
             // (may happen if 'rate' changes from a non-zero value to zero)
             pTDStretch->moveSamples(*pRateTransposer);
         }
-        pTDStretch->putSamples(samples, numSamples);
+        pTDStretch->putSamples(samples, nSamples);
     } 
     */
     else if (rate <= 1.0f) 
     {
         // transpose the rate down, output the transposed sound to tempo changer buffer
         assert(output == pTDStretch);
-        pRateTransposer->putSamples(samples, numSamples);
+        pRateTransposer->putSamples(samples, nSamples);
         pTDStretch->moveSamples(*pRateTransposer);
     } 
     else 
@@ -324,7 +328,7 @@ void SoundTouch::putSamples(const SAMPLETYPE *samples, uint numSamples)
         assert(rate > 1.0f);
         // evaluate the tempo changer, then transpose the rate up, 
         assert(output == pRateTransposer);
-        pTDStretch->putSamples(samples, numSamples);
+        pTDStretch->putSamples(samples, nSamples);
         pRateTransposer->moveSamples(*pTDStretch);
     }
 }
@@ -366,9 +370,9 @@ void SoundTouch::flush()
 
 // Changes a setting controlling the processing system behaviour. See the
 // 'SETTING_...' defines for available setting ID's.
-BOOL SoundTouch::setSetting(uint settingId, uint value)
+BOOL SoundTouch::setSetting(int settingId, int value)
 {
-    uint sampleRate, sequenceMs, seekWindowMs, overlapMs;
+    int sampleRate, sequenceMs, seekWindowMs, overlapMs;
 
     // read current tdstretch routine parameters
     pTDStretch->getParameters(&sampleRate, &sequenceMs, &seekWindowMs, &overlapMs);
@@ -415,20 +419,20 @@ BOOL SoundTouch::setSetting(uint settingId, uint value)
 // 'SETTING_...' defines for available setting ID's.
 //
 // Returns the setting value.
-uint SoundTouch::getSetting(uint settingId) const
+int SoundTouch::getSetting(int settingId) const
 {
-    uint temp;
+    int temp;
 
     switch (settingId) 
     {
         case SETTING_USE_AA_FILTER :
-            return pRateTransposer->isAAFilterEnabled();
+            return (uint)pRateTransposer->isAAFilterEnabled();
 
         case SETTING_AA_FILTER_LENGTH :
             return pRateTransposer->getAAFilter()->getLength();
 
         case SETTING_USE_QUICKSEEK :
-            return pTDStretch->isQuickSeekEnabled();
+            return (uint)   pTDStretch->isQuickSeekEnabled();
 
         case SETTING_SEQUENCE_MS:
             pTDStretch->getParameters(NULL, &temp, NULL, NULL);

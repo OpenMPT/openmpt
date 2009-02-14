@@ -12,7 +12,7 @@
 /// NOTICE: If using Visual Studio 6.0, you'll need to install the "Visual C++ 
 /// 6.0 processor pack" update to support SSE instruction set. The update is 
 /// available for download at Microsoft Developers Network, see here:
-/// http://msdn.microsoft.com/vstudio/downloads/tools/ppack/default.aspx
+/// http://msdn.microsoft.com/en-us/vstudio/aa718349.aspx
 ///
 /// If the above URL is expired or removed, go to "http://msdn.microsoft.com" and 
 /// perform a search with keywords "processor pack".
@@ -23,10 +23,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.2 $
+// Last changed  : $Date: 2009-01-25 16:13:39 +0200 (Sun, 25 Jan 2009) $
+// File revision : $Revision: 4 $
 //
-// $Id: sse_optimized.cpp,v 1.2 2006/02/05 16:44:06 Olli Exp $
+// $Id: sse_optimized.cpp 51 2009-01-25 14:13:39Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -72,7 +72,8 @@ using namespace soundtouch;
 // Calculates cross correlation of two buffers
 double TDStretchSSE::calcCrossCorrStereo(const float *pV1, const float *pV2) const
 {
-    uint i;
+    int i;
+    float *pVec1;
     __m128 vSum, *pVec2;
 
     // Note. It means a major slow-down if the routine needs to tolerate 
@@ -103,6 +104,7 @@ double TDStretchSSE::calcCrossCorrStereo(const float *pV1, const float *pV2) con
 
     // Calculates the cross-correlation value between 'pV1' and 'pV2' vectors
     // Note: pV2 _must_ be aligned to 16-bit boundary, pV1 need not.
+    pVec1 = (float*)pV1;
     pVec2 = (__m128*)pV2;
     vSum = _mm_setzero_ps();
 
@@ -110,18 +112,18 @@ double TDStretchSSE::calcCrossCorrStereo(const float *pV1, const float *pV2) con
     for (i = 0; i < overlapLength / 8; i ++) 
     {
         // vSum += pV1[0..3] * pV2[0..3]
-        vSum = _mm_add_ps(vSum, _mm_mul_ps(_MM_LOAD(pV1),pVec2[0]));
+        vSum = _mm_add_ps(vSum, _mm_mul_ps(_MM_LOAD(pVec1),pVec2[0]));
 
         // vSum += pV1[4..7] * pV2[4..7]
-        vSum = _mm_add_ps(vSum, _mm_mul_ps(_MM_LOAD(pV1 + 4), pVec2[1]));
+        vSum = _mm_add_ps(vSum, _mm_mul_ps(_MM_LOAD(pVec1 + 4), pVec2[1]));
 
         // vSum += pV1[8..11] * pV2[8..11]
-        vSum = _mm_add_ps(vSum, _mm_mul_ps(_MM_LOAD(pV1 + 8), pVec2[2]));
+        vSum = _mm_add_ps(vSum, _mm_mul_ps(_MM_LOAD(pVec1 + 8), pVec2[2]));
 
         // vSum += pV1[12..15] * pV2[12..15]
-        vSum = _mm_add_ps(vSum, _mm_mul_ps(_MM_LOAD(pV1 + 12), pVec2[3]));
+        vSum = _mm_add_ps(vSum, _mm_mul_ps(_MM_LOAD(pVec1 + 12), pVec2[3]));
 
-        pV1 += 16;
+        pVec1 += 16;
         pVec2 += 4;
     }
 
@@ -239,6 +241,7 @@ double TDStretchSSE::calcCrossCorrStereo(const float *pV1, const float *pV2) con
 
 FIRFilterSSE::FIRFilterSSE() : FIRFilter()
 {
+    filterCoeffsAlign = NULL;
     filterCoeffsUnalign = NULL;
 }
 
@@ -246,6 +249,8 @@ FIRFilterSSE::FIRFilterSSE() : FIRFilter()
 FIRFilterSSE::~FIRFilterSSE()
 {
     delete[] filterCoeffsUnalign;
+    filterCoeffsAlign = NULL;
+    filterCoeffsUnalign = NULL;
 }
 
 
@@ -262,7 +267,7 @@ void FIRFilterSSE::setCoefficients(const float *coeffs, uint newLength, uint uRe
     // Ensure that filter coeffs array is aligned to 16-byte boundary
     delete[] filterCoeffsUnalign;
     filterCoeffsUnalign = new float[2 * newLength + 4];
-    filterCoeffsAlign = (float *)(((unsigned long)filterCoeffsUnalign + 15) & -16);
+    filterCoeffsAlign = (float *)(((unsigned long)filterCoeffsUnalign + 15) & (ulong)-16);
 
     fDivider = (float)resultDivider;
 
@@ -279,25 +284,28 @@ void FIRFilterSSE::setCoefficients(const float *coeffs, uint newLength, uint uRe
 // SSE-optimized version of the filter routine for stereo sound
 uint FIRFilterSSE::evaluateFilterStereo(float *dest, const float *source, uint numSamples) const
 {
-    int count = (numSamples - length) & -2;
+    int count = (int)((numSamples - length) & (uint)-2);
     int j;
 
     assert(count % 2 == 0);
 
     if (count < 2) return 0;
 
+    assert(source != NULL);
+    assert(dest != NULL);
     assert((length % 8) == 0);
-    assert(((unsigned long)filterCoeffsAlign) % 16 == 0);
+    assert(filterCoeffsAlign != NULL);
+    assert(((ulong)filterCoeffsAlign) % 16 == 0);
 
     // filter is evaluated for two stereo samples with each iteration, thus use of 'j += 2'
     for (j = 0; j < count; j += 2)
     {
-        const float *pSrc;
+        float *pSrc;
         const __m128 *pFil;
         __m128 sum1, sum2;
         uint i;
 
-        pSrc = source;                      // source audio data
+        pSrc = (float*)source;              // source audio data
         pFil = (__m128*)filterCoeffsAlign;  // filter coefficients. NOTE: Assumes coefficients 
                                             // are aligned to 16-byte boundary
         sum1 = sum2 = _mm_setzero_ps();

@@ -11,10 +11,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.17 $
+// Last changed  : $Date: 2008-02-10 18:26:55 +0200 (Sun, 10 Feb 2008) $
+// File revision : $Revision: 4 $
 //
-// $Id: FIRFilter.h,v 1.17 2006/02/05 16:44:06 Olli Exp $
+// $Id: FIRFilter.h 11 2008-02-10 16:26:55Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -77,7 +77,7 @@ public:
 
     /// Operator 'new' is overloaded so that it automatically creates a suitable instance 
     /// depending on if we've a MMX-capable CPU available or not.
-    void * operator new(size_t s);
+    static void * operator new(size_t s);
 
     static FIRFilter *newInstance();
 

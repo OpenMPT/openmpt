@@ -26,10 +26,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.5 $
+// Last changed  : $Date: 2008-12-25 14:20:01 +0200 (Thu, 25 Dec 2008) $
+// File revision : $Revision: 4 $
 //
-// $Id: BPMDetect.h,v 1.5 2006/02/05 16:44:06 Olli Exp $
+// $Id: BPMDetect.h 33 2008-12-25 12:20:01Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -60,8 +60,11 @@
 #include "STTypes.h"
 #include "FIFOSampleBuffer.h"
 
+namespace soundtouch
+{
+
 /// Minimum allowed BPM rate. Used to restrict accepted result above a reasonable limit.
-#define MIN_BPM 45
+#define MIN_BPM 29
 
 /// Maximum allowed BPM rate. Used to restrict accepted result below a reasonable limit.
 #define MAX_BPM 230
@@ -155,5 +158,7 @@ public:
     /// \return Beats-per-minute rate, or zero if detection failed.
     float getBpm();
 };
+
+}
 
 #endif // _BPMDetect_H_

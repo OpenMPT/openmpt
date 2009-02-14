@@ -12,7 +12,7 @@
 /// NOTICE: If using Visual Studio 6.0, you'll need to install the "Visual C++ 
 /// 6.0 processor pack" update to support compiler intrinsic syntax. The update
 /// is available for download at Microsoft Developers Network, see here:
-/// http://msdn.microsoft.com/vstudio/downloads/tools/ppack/default.aspx
+/// http://msdn.microsoft.com/en-us/vstudio/aa718349.aspx
 ///
 /// Author        : Copyright (c) Olli Parviainen
 /// Author e-mail : oparviai 'at' iki.fi
@@ -20,10 +20,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/06 18:52:43 $
-// File revision : $Revision: 1.1 $
+// Last changed  : $Date: 2009-01-25 16:13:39 +0200 (Sun, 25 Jan 2009) $
+// File revision : $Revision: 4 $
 //
-// $Id: mmx_optimized.cpp,v 1.1 2006/02/06 18:52:43 Olli Exp $
+// $Id: mmx_optimized.cpp 51 2009-01-25 14:13:39Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -77,7 +77,7 @@ long TDStretchMMX::calcCrossCorrStereo(const short *pV1, const short *pV2) const
     __m64 shifter;
     __m64 accu;
     long corr;
-    uint i;
+    int i;
    
     pVec1 = (__m64*)pV1;
     pVec2 = (__m64*)pV2;
@@ -139,7 +139,7 @@ void TDStretchMMX::overlapStereo(short *output, const short *input) const
     const __m64 *pVinput, *pVMidBuf;
     __m64 *pVdest;
     __m64 mix1, mix2, adder, shifter;
-    uint i;
+    int i;
 
     pVinput  = (const __m64*)input;
     pVMidBuf = (const __m64*)pMidBuffer;
@@ -227,7 +227,7 @@ void FIRFilterMMX::setCoefficients(const short *coeffs, uint newLength, uint uRe
     // Ensure that filter coeffs array is aligned to 16-byte boundary
     delete[] filterCoeffsUnalign;
     filterCoeffsUnalign = new short[2 * newLength + 8];
-    filterCoeffsAlign = (short *)(((uint)filterCoeffsUnalign + 15) & -16);
+    filterCoeffsAlign = (short *)(((ulong)filterCoeffsUnalign + 15) & -16);
 
     // rearrange the filter coefficients for mmx routines 
     for (i = 0;i < length; i += 4) 
@@ -247,7 +247,7 @@ void FIRFilterMMX::setCoefficients(const short *coeffs, uint newLength, uint uRe
 
 
 // mmx-optimized version of the filter routine for stereo sound
-uint FIRFilterMMX::evaluateFilterStereo(short *dest, const short *src, const uint numSamples) const
+uint FIRFilterMMX::evaluateFilterStereo(short *dest, const short *src, uint numSamples) const
 {
     // Create stack copies of the needed member variables for asm routines :
     uint i, j;

@@ -24,7 +24,7 @@
 /// NOTICE: If using Visual Studio 6.0, you'll need to install the "Visual C++ 
 /// 6.0 processor pack" update to support 3DNow! instruction set. The update is 
 /// available for download at Microsoft Developers Network, see here:
-/// http://msdn.microsoft.com/vstudio/downloads/tools/ppack/default.aspx
+/// http://msdn.microsoft.com/en-us/vstudio/aa718349.aspx
 ///
 /// If the above URL is expired or removed, go to "http://msdn.microsoft.com" and 
 /// perform a search with keywords "processor pack".
@@ -35,10 +35,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.10 $
+// Last changed  : $Date: 2009-01-25 16:13:39 +0200 (Sun, 25 Jan 2009) $
+// File revision : $Revision: 4 $
 //
-// $Id: 3dnow_win.cpp,v 1.10 2006/02/05 16:44:06 Olli Exp $
+// $Id: 3dnow_win.cpp 51 2009-01-25 14:13:39Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -82,10 +82,10 @@ using namespace soundtouch;
 //////////////////////////////////////////////////////////////////////////////
 
 #include "TDStretch.h"
-#include <limits.h>
+//#include <limits.h>
 
 // these are declared in 'TDStretch.cpp'
-extern int scanOffsets[4][24];
+// extern int scanOffsets[4][24];
 
 
 // Calculates cross correlation of two buffers
@@ -181,12 +181,15 @@ double TDStretch3DNow::calcCrossCorrStereo(const float *pV1, const float *pV2) c
 FIRFilter3DNow::FIRFilter3DNow() : FIRFilter()
 {
     filterCoeffsUnalign = NULL;
+    filterCoeffsAlign = NULL;
 }
 
 
 FIRFilter3DNow::~FIRFilter3DNow()
 {
     delete[] filterCoeffsUnalign;
+    filterCoeffsUnalign = NULL;
+    filterCoeffsAlign = NULL;
 }
 
 
@@ -203,7 +206,7 @@ void FIRFilter3DNow::setCoefficients(const float *coeffs, uint newLength, uint u
     // Ensure that filter coeffs array is aligned to 16-byte boundary
     delete[] filterCoeffsUnalign;
     filterCoeffsUnalign = new float[2 * newLength + 4];
-    filterCoeffsAlign = (float *)(((uint)filterCoeffsUnalign + 15) & -16);
+    filterCoeffsAlign = (float *)(((uint)filterCoeffsUnalign + 15) & (uint)-16);
 
     fDivider = (float)resultDivider;
 
@@ -217,10 +220,10 @@ void FIRFilter3DNow::setCoefficients(const float *coeffs, uint newLength, uint u
 
 
 // 3DNow!-optimized version of the filter routine for stereo sound
-uint FIRFilter3DNow::evaluateFilterStereo(float *dest, const float *src, const uint numSamples) const
+uint FIRFilter3DNow::evaluateFilterStereo(float *dest, const float *src, uint numSamples) const
 {
     float *filterCoeffsLocal = filterCoeffsAlign;
-    uint count = (numSamples - length) & -2;
+    uint count = (numSamples - length) & (uint)-2;
     uint lengthLocal = length / 4;
 
     assert(length != 0);

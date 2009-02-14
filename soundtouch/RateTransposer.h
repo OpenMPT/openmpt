@@ -14,10 +14,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.10 $
+// Last changed  : $Date: 2008-02-10 18:26:55 +0200 (Sun, 10 Feb 2008) $
+// File revision : $Revision: 4 $
 //
-// $Id: RateTransposer.h,v 1.10 2006/02/05 16:44:06 Olli Exp $
+// $Id: RateTransposer.h 11 2008-02-10 16:26:55Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -68,7 +68,7 @@ protected:
 
     float fRate;
 
-    uint uChannels;
+    int numChannels;
 
     /// Buffer for collecting samples to feed the anti-alias filter between
     /// two batches
@@ -82,8 +82,6 @@ protected:
 
     BOOL bUseAAFilter;
 
-    void init();
-
     virtual void resetRegisters() = 0;
 
     virtual uint transposeStereo(SAMPLETYPE *dest, 
@@ -95,8 +93,6 @@ protected:
     uint transpose(SAMPLETYPE *dest, 
                    const SAMPLETYPE *src, 
                    uint numSamples);
-
-    void flushStoreBuffer();
 
     void downsample(const SAMPLETYPE *src, 
                     uint numSamples);
@@ -117,7 +113,7 @@ public:
 
     /// Operator 'new' is overloaded so that it automatically creates a suitable instance 
     /// depending on if we're to use integer or floating point arithmetics.
-    void *operator new(size_t s);
+    static void *operator new(size_t s);
 
     /// Use this function instead of "new" operator to create a new instance of this class. 
     /// This function automatically chooses a correct implementation, depending on if 
@@ -144,7 +140,7 @@ public:
     virtual void setRate(float newRate);
 
     /// Sets the number of channels, 1 = mono, 2 = stereo
-    void setChannels(uint channels);
+    void setChannels(int channels);
 
     /// Adds 'numSamples' pcs of samples from the 'samples' memory position into
     /// the input of the object.
@@ -154,7 +150,7 @@ public:
     void clear();
 
     /// Returns nonzero if there aren't any samples available for outputting.
-    uint isEmpty();
+    int isEmpty() const;
 };
 
 }
