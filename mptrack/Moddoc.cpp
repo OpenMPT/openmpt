@@ -2420,28 +2420,28 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		if (param)
 			wsprintf(s, "note+%d note+%d", param >> 4, param & 0x0F);
 		else
-			wsprintf(s, "continue");
+			strcpy(s, "continue");
 		break;
 
 	case CMD_PORTAMENTOUP:
 		if (param)
 			wsprintf(s, "+%d", param);
 		else
-			wsprintf(s, "continue");
+			strcpy(s, "continue");
 		break;
 
 	case CMD_PORTAMENTODOWN:
 		if (param)
 			wsprintf(s, "-%d", param);
 		else
-			wsprintf(s, "continue");
+			strcpy(s, "continue");
 		break;
 
 	case CMD_TONEPORTAMENTO:
 		if (param)
 			wsprintf(s, "speed %d", param);
 		else
-			wsprintf(s, "continue");
+			strcpy(s, "continue");
 		break;
 
 	case CMD_VIBRATO:
@@ -2614,7 +2614,30 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 				{
 					switch(param & 0xF0)
 					{
+					case 0x30:
+					case 0x40:
+					case 0x50:
+						if(gFXInfo[ndx].dwEffect == CMD_S3MCMDEX)
+						{
+							switch(param & 0x0F)
+							{
+								case 0x00: case 0x04: case 0x08: case 0x0C: strcpy(s, "sine wave"); break;
+								case 0x01: case 0x05: case 0x09: case 0x0D: strcpy(s, "ramp down"); break;
+								case 0x02: case 0x06: case 0x0A: case 0x0E: strcpy(s, "square wave"); break;
+								case 0x03: case 0x07: case 0x0B: case 0x0F: strcpy(s, "random"); break;
+							}
+						}
+						break;
 					case 0x60:	if (gFXInfo[ndx].dwEffect == CMD_MODCMDEX) break;
+					case 0xB0:  
+						if (gFXInfo[ndx].dwEffect == CMD_S3MCMDEX)
+						{
+							if((param & 0x0F) == 0x00)
+								strcpy(s, "loop start");
+							else
+								strcat(s, " times");
+						}
+						break;
 					case 0xC0:
 					case 0xD0:	strcat(s, " frames"); break;
 					case 0xE0:	strcat(s, " rows"); break;
