@@ -64,9 +64,12 @@ void CTuningRatioMapWnd::OnPaint()
 			
 			const bool isValidNote = m_pTuning->IsValidNote(noteToDraw);
 			string temp;
-			if(isValidNote) temp = m_pTuning->GetNoteName(noteToDraw);
+			if(isValidNote)
+			{
+				temp = "(" + Stringify(noteToDraw) + ")   " + m_pTuning->GetNoteName(noteToDraw);
+			}
 
-			if(isValidNote && temp.size() < sizeofS)
+			if(isValidNote && temp.size()+1 < sizeofS)
 				wsprintf(s, "%s", temp.c_str());
 			else
 				wsprintf(s, "%s", "...");
