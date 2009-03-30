@@ -273,8 +273,8 @@ void CTuningDialog::UpdateView(const int updateMask)
 		}
 		else //case: m_pActiveTuning is of type general.
 		{
-			m_EditSteps.EnableWindow(false);
-			m_EditRatioPeriod.EnableWindow(false);
+			//m_EditSteps.EnableWindow(false);
+			//m_EditRatioPeriod.EnableWindow(false);
 		}
 
 		m_EditRatioPeriod.Invalidate();
@@ -1290,6 +1290,17 @@ void CTuningDialog::UpdateTuningDescription()
 				SetDlgItemText(IDC_TUNINGTYPE_DESC, "Unknown type");
 		break;
 	}
+}
+
+
+void CTuningDialog::OnOK()
+//------------------------
+{
+	// Prevent return-key from closing the window.
+	if(GetKeyState(VK_RETURN) <= -127)
+		return;
+	else
+		CDialog::OnOK();
 }
 
 

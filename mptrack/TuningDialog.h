@@ -321,6 +321,7 @@ private:
 	
 	void DoErrorExit();
 
+	virtual void OnOK();
 
 //Treectrl context menu functions.
 public:

@@ -431,7 +431,7 @@ bool CTUNINGBASE::ChangeGroupsize(const NOTEINDEXTYPE& s)
 		return true;
 
 	if(m_TuningType == TT_GROUPGEOMETRIC)
-		return CreateGroupGeometric(s, GetGroupRatio(), GetValidityRange().first);
+		return CreateGroupGeometric(s, GetGroupRatio(), 0);
 
 	if(m_TuningType == TT_GEOMETRIC)
 		return CreateGeometric(s, GetGroupRatio());
@@ -448,7 +448,7 @@ bool CTUNINGBASE::ChangeGroupRatio(const RATIOTYPE& r)
 		return true;
 
 	if(m_TuningType == TT_GROUPGEOMETRIC)
-		return CreateGroupGeometric(GetGroupSize(), r, GetValidityRange().first);
+		return CreateGroupGeometric(GetGroupSize(), r, 0);
 
 	if(m_TuningType == TT_GEOMETRIC)
 		return CreateGeometric(GetGroupSize(), r);
