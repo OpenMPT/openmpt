@@ -283,7 +283,7 @@ void COptionsSoundcard::OnVScroll(UINT n, UINT pos, CScrollBar *p)
 		else
 		{
 			m_PreAmpNoteShowed = true;
-			MessageBox(str_preampChangeNote, _TEXT(""), MB_ICONINFORMATION);
+			AfxMessageBox(str_preampChangeNote, MB_ICONINFORMATION);
 			SetPreAmpSliderPosition();
 		}
 	}

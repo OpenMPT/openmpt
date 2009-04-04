@@ -1665,7 +1665,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 			default: wsprintf(str,"Unknown Error...");
 				break;
 		}
-		::MessageBox(NULL,str,"Error",MB_ICONERROR);
+		AfxMessageBox(str, MB_ICONERROR);
 	}
 
 	// Update sample view
@@ -1759,12 +1759,26 @@ int CCtrlSamples::TimeStretch(double ratio)
 	MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
 	if(!pins) return -1;
 
+	const uint32 nSampleRate = pins->GetSampleRate(m_pSndFile->GetType());
+
+	// SoundTouch(v1.4.0) documentation says that sample rates 8000-48000 are supported.
+	// Check whether sample rate is within that range, and if not,
+	// ask user whether to proceed.
+	if(nSampleRate < 8000 || nSampleRate > 48000)
+	{
+		CString str;
+		str.Format(TEXT(GetStrI18N("Current samplerate, %u Hz, is not in the supported samplerate range 8000 Hz - 48000 Hz. Continue?")), nSampleRate);
+		if(AfxMessageBox(str, MB_ICONQUESTION|MB_YESNO) != IDYES)
+			return -1;
+
+	}
+
 	// Stretching is implemented only for 16-bit samples. Return with
 	// error if trying to use wtih non 16-bit samples.
 	if(pins->GetElementarySampleSize() != 2)
 		return 4;
 
-	// SoundTouch seems to crash with short samples. Don't know what
+	// SoundTouch(1.3.1) seems to crash with short samples. Don't know what
 	// the actual limit or whether it depends on sample rate,
 	// but simply set some semiarbitrary threshold here.
 	if(pins->nLength < 256)
@@ -1832,7 +1846,6 @@ int CCtrlSamples::TimeStretch(double ratio)
 
 	// Initialize soundtouch object.
 	{	
-		const uint32 nSampleRate = pins->GetSampleRate(m_pSndFile->GetType());
 		if(nSampleRate < 300) // Too low samplerate crashes soundtouch.
 		{                     // Limiting it to value 300(quite arbitrarily chosen).
 			delete pSoundTouch;
@@ -2209,6 +2222,9 @@ void CCtrlSamples::OnSignUnSign()
 	memset(&viewstate, 0, sizeof(viewstate));
 	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	if ((!m_pModDoc) || (!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return;
+	if( AfxMessageBox(TEXT(GetStrI18N("Apply signed/unsigned conversion(distortion)?\n\n"
+		"Note: in many cases this increases volume level significantly.")), MB_YESNO|MB_ICONQUESTION) == IDNO )
+		return;
 	BeginWaitCursor();
 	pins = &m_pSndFile->Ins[m_nSample];
 	dwStart = viewstate.dwBeginSel;
