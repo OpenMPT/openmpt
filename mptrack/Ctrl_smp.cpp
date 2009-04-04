@@ -1037,7 +1037,9 @@ void CCtrlSamples::OnNormalize()
 
 	//Default case: Normalize current sample
 	UINT iMinSample = m_nSample, iMaxSample = m_nSample;
-	
+	//If only one sample is selected, parts of it may be amplified
+	UINT iStart = 0, iEnd = 0;
+
 	//Shift -> Normalize all samples
 	if(CMainFrame::GetInputHandler()->ShiftPressed())
 	{
@@ -1045,6 +1047,13 @@ void CCtrlSamples::OnNormalize()
 		if(ans == IDNO) return;
 		iMinSample = 1;
 		iMaxSample = m_pSndFile->m_nSamples;
+	} else {
+		SAMPLEVIEWSTATE viewstate;
+		memset(&viewstate, 0, sizeof(viewstate));
+		SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+
+		iStart = viewstate.dwBeginSel;
+		iEnd = viewstate.dwEndSel;
 	}
 
 
@@ -1058,13 +1067,26 @@ void CCtrlSamples::OnNormalize()
 			BOOL bOk = FALSE;
 			MODINSTRUMENT *pins = &m_pSndFile->Ins[iSmp];
 		
+			if(iMinSample != iMaxSample) {
+				//if more than one sample is selected, always amplify the whole sample.
+				iStart = 0;
+				iEnd = pins->nLength;
+			} else {
+				//one sample: correct the boundaries, if needed
+				if (iEnd > pins->nLength) iEnd = pins->nLength;
+				if (iStart > iEnd) iStart = iEnd;
+				if (iStart == iEnd) {
+					iStart = 0;
+					iEnd = pins->nLength;
+				}
+			}
+			if (pins->uFlags & CHN_STEREO) { iStart *= 2; iEnd *= 2; }
+
 			if (pins->uFlags & CHN_16BIT)
 			{
-				UINT len = pins->nLength;
 				signed short *p = (signed short *)pins->pSample;
-				if (pins->uFlags & CHN_STEREO) len *= 2;
 				int max = 1;
-				for (UINT i=0; i<len; i++)
+				for (UINT i = iStart; i < iEnd; i++)
 				{
 					if (p[i] > max) max = p[i];
 					if (-p[i] > max) max = -p[i];
@@ -1072,7 +1094,7 @@ void CCtrlSamples::OnNormalize()
 				if (max < 32767)
 				{
 					max++;
-					for (UINT j=0; j<len; j++)
+					for (UINT j = iStart; j < iEnd; j++)
 					{
 						int l = p[j];
 						p[j] = (l << 15) / max;
@@ -1081,11 +1103,9 @@ void CCtrlSamples::OnNormalize()
 				}
 			} else
 			{
-				UINT len = pins->nLength;
 				signed char *p = (signed char *)pins->pSample;
-				if (pins->uFlags & CHN_STEREO) len *= 2;
 				int max = 1;
-				for (UINT i=0; i<len; i++)
+				for (UINT i = iStart; i < iEnd; i++)
 				{
 					if (p[i] > max) max = p[i];
 					if (-p[i] > max) max = -p[i];
@@ -1093,7 +1113,7 @@ void CCtrlSamples::OnNormalize()
 				if (max < 127)
 				{
 					max++;
-					for (UINT j=0; j<len; j++)
+					for (UINT j = iStart; j < iEnd; j++)
 					{
 						int l = p[j];
 						p[j] = (l << 7) / max;
