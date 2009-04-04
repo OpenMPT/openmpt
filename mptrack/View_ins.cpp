@@ -1268,14 +1268,14 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	//hdc = pDC->m_hDC;
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 	m_dcMemMain.FillRect(&m_rcClient, CBrush::FromHandle(CMainFrame::brushBlack));
+	if (m_bGrid)
+	{
+		DrawGrid(&m_dcMemMain, pSndFile->m_nMusicSpeed);
+	}
 	if (m_nEnv != ENV_VOLUME)
 	{
 		m_dcMemMain.MoveTo(0, ymed);
 		m_dcMemMain.LineTo(m_rcClient.right, ymed);
-	}
-	if (m_bGrid)
-	{
-		DrawGrid(&m_dcMemMain, pSndFile->m_nMusicSpeed);
 	}
 	m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 	// Drawing Loop Start/End
