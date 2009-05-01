@@ -600,6 +600,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 		// ChnSettings[i].szName
 		memcpy(&ChnSettings[i].szName[0],lpStream+streamPos,len);
+		SetNullTerminator(ChnSettings[i].szName);
 		streamPos += len;
 	}
 
@@ -647,6 +648,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	for(i=0; i<m_nInstruments; i++){
 		ASSERT_CAN_READ(len);
 		memcpy(&m_szInstrumentPath[i][0],lpStream+streamPos,len);
+		SetNullTerminator(m_szInstrumentPath[i]);
 		streamPos += len;
 	}
 
@@ -1008,7 +1010,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 	if (m_nChannels < GetModSpecifications().channelsMin) m_nChannels = GetModSpecifications().channelsMin;
 
 	// Reading Song Message
-	if ((pifh->special & 0x01) && (pifh->msglength) && (pifh->msgoffset + pifh->msglength < dwMemLength))
+	if ((pifh->special & 0x01) && (pifh->msglength) && (pifh->msglength <= dwMemLength) && (pifh->msgoffset < dwMemLength - pifh->msglength))
 	{
 		m_lpszSongComments = new char[pifh->msglength+1];
 		if (m_lpszSongComments)
@@ -1759,6 +1761,7 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			memset(&itss, 0, sizeof(itss));
 			memcpy(itss.filename, psmp->name, 12);
 			memcpy(itss.name, m_szNames[nsmp], 26);
+			SetNullTerminator(itss.name);
 
 			itss.id = 0x53504D49;
 			itss.gvl = (BYTE)psmp->nGlobalVol;
@@ -2055,6 +2058,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			memset(smpcount, 0, sizeof(smpcount));
 			memcpy(iti.filename, penv->filename, 12);
 			memcpy(iti.name, penv->name, 26);
+			SetNullTerminator(iti.name);
 			iti.mbank = penv->wMidiBank;
 			iti.mpr = penv->nMidiProgram;
 			iti.mch = penv->nMidiChannel;
@@ -2372,6 +2376,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		memset(&itss, 0, sizeof(itss));
 		memcpy(itss.filename, psmp->name, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
+		SetNullTerminator(itss.name);
 		itss.id = 0x53504D49;
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 		if (m_nInstruments)
@@ -2681,6 +2686,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			memset(smpcount, 0, sizeof(smpcount));
 			memcpy(iti.filename, penv->filename, 12);
 			memcpy(iti.name, penv->name, 26);
+			SetNullTerminator(iti.name);
 			iti.mbank = penv->wMidiBank;
 			iti.mpr = penv->nMidiProgram;
 			iti.mch = penv->nMidiChannel;
@@ -2988,6 +2994,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		memset(&itss, 0, sizeof(itss));
 		memcpy(itss.filename, psmp->name, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
+		SetNullTerminator(itss.name);
 		itss.id = 0x53504D49;
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 		if (m_nInstruments)

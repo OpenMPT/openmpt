@@ -109,8 +109,10 @@ VOID AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels
 						else param = (param&0x0F)<<4;
 						break;
 			// 0x04: Porta Up/Down
-			case 0x04:	if (param & 0x80) { command = CMD_PORTAMENTOUP; param = -(signed char)param; }
-						else { command = CMD_PORTAMENTODOWN; } break;
+			//case 0x04:	if (param & 0x80) { command = CMD_PORTAMENTOUP; param = -(signed char)param; }
+			//				else { command = CMD_PORTAMENTODOWN; } break;
+			case 0x04:      if (param & 0x80) { command = CMD_PORTAMENTOUP; param = (-(signed char)param)&0x7F; }
+                            else { command = CMD_PORTAMENTODOWN; } break;
 			// 0x06: Tone Portamento
 			case 0x06:	command = CMD_TONEPORTAMENTO; break;
 			// 0x07: Tremor
@@ -268,7 +270,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 	 || (!pfh->numsamples) || (pfh->numsamples > MAX_SAMPLES)
 	 || (pfh->numchannels < 4) || (pfh->numchannels > 32))
 		return FALSE;
-	memcpy(m_szNames[0], pfh->title, 32);
+	memcpy(m_szNames[0], pfh->title, 31);
 	dwMemPos = sizeof(AMFFILEHEADER);
 	m_nType = MOD_TYPE_AMF;
 	m_nChannels = pfh->numchannels;
@@ -330,7 +332,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 		AMFSAMPLE *psh = (AMFSAMPLE *)(lpStream + dwMemPos);
 
 		dwMemPos += sizeof(AMFSAMPLE);
-		memcpy(m_szNames[iIns+1], psh->samplename, 32);
+		memcpy(m_szNames[iIns+1], psh->samplename, 31);
 		memcpy(pins->name, psh->filename, 13);
 		pins->nLength = LittleEndian(psh->length);
 		pins->nC4Speed = LittleEndianW(psh->c2spd);

@@ -60,7 +60,7 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 	m_nType = MOD_TYPE_ULT;
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo = 125;
-	memcpy(m_szNames[0], pmh->songtitle, 32);
+	memcpy(m_szNames[0], pmh->songtitle, 31);
 	// read songtext
 	dwMemPos = sizeof(ULTHEADER);
 	if ((pmh->reserved) && (dwMemPos + pmh->reserved * 32 < dwMemLength))
@@ -89,7 +89,7 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		pus	= (ULTSAMPLE *)(lpStream+dwMemPos);
 		MODINSTRUMENT *pins = &Ins[ins];
-		memcpy(m_szNames[ins], pus->samplename, 32);
+		memcpy(m_szNames[ins], pus->samplename, 31);
 		memcpy(pins->name, pus->dosname, 12);
 		pins->nLoopStart = pus->loopstart;
 		pins->nLoopEnd = pus->loopend;

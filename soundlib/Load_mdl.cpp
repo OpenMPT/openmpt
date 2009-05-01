@@ -215,7 +215,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 		block = *((WORD *)(lpStream+dwMemPos));
 		blocklen = *((DWORD *)(lpStream+dwMemPos+2));
 		dwMemPos += 6;
-		if (dwMemPos + blocklen > dwMemLength)
+		if (blocklen > dwMemLength - dwMemPos)
 		{
 			if (dwMemPos == 11) return FALSE;
 			break;
@@ -228,7 +228,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 			Log("infoblock: %d bytes\n", blocklen);
 		#endif
 			pmib = (MDLINFOBLOCK *)(lpStream+dwMemPos);
-			memcpy(m_szNames[0], pmib->songname, 32);
+			memcpy(m_szNames[0], pmib->songname, 31);
 			norders = pmib->norders;
 			if (norders > MAX_ORDERS) norders = MAX_ORDERS;
 			m_nRestartPos = pmib->repeatpos;
@@ -328,6 +328,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 					INSTRUMENTHEADER *penv = Headers[nins];
 					memset(penv, 0, sizeof(INSTRUMENTHEADER));
 					memcpy(penv->name, lpStream+dwPos+2, 32);
+					SetNullTerminator(penv->name);
 					penv->nGlobalVol = 64;
 					penv->nPPC = 5*12;
 					SetDefaultInstrumentValues(penv);
@@ -411,7 +412,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				if ((nins >= MAX_SAMPLES) || (!nins)) continue;
 				if (m_nSamples < nins) m_nSamples = nins;
 				MODINSTRUMENT *pins = &Ins[nins];
-				memcpy(m_szNames[nins], lpStream+dwPos+1, 32);
+				memcpy(m_szNames[nins], lpStream+dwPos+1, 31);
 				memcpy(pins->name, lpStream+dwPos+33, 8);
 				const BYTE *p = lpStream+dwPos+41;
 				if (pmsh->version > 0)

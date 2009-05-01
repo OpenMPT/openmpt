@@ -1592,7 +1592,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT
 				if (pSndFile->m_nType & MOD_TYPE_XM) psmp->uFlags |= CHN_PANNING;
 			}
 		}
-		if (pins->szName[0]) memcpy(pSndFile->m_szNames[nSample], pins->szName, 32);
+		if (pins->szName[0]) memcpy(pSndFile->m_szNames[nSample], pins->szName, 31);
 		bOk = TRUE;
 	}
 	FreeWaveForm(pWaveForm);
@@ -1672,6 +1672,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 	} else
 	{
 		memcpy(penv->name, pins->szName, 32);
+		SetNullTerminator(penv->name);
 	}
 	int nTranspose = 0;
 	for (UINT iNoteMap=0; iNoteMap<NOTE_MAX; iNoteMap++)
