@@ -699,9 +699,11 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 		UINT annotxt = BigEndian(pmex->annotxt);
 		UINT annolen = BigEndian(pmex->annolen);
 		annolen = min(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
-		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) ) { 
+		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) )
+		{ 
 			m_lpszSongComments = new char[annolen+1];
-			if (m_lpszSongComments) {
+			if (m_lpszSongComments)
+			{
 				memcpy(m_lpszSongComments, lpStream+annotxt, annolen);
 				m_lpszSongComments[annolen] = 0;
 			}
@@ -709,7 +711,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 		// Song Name
 		UINT songname = BigEndian(pmex->songname);
 		UINT songnamelen = BigEndian(pmex->songnamelen);
-		if ((songname) && (songnamelen) && (songname+songnamelen <= dwMemLength))
+		if ((songname) && (songnamelen) && (songname <= dwMemLength) && (songnamelen <= dwMemLength-songname))
 		{
 			if (songnamelen > 31) songnamelen = 31;
 			memcpy(m_szNames[0], lpStream+songname, songnamelen);
@@ -722,14 +724,14 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 			UINT ientries = BigEndianW(pmex->i_ext_entries);
 			UINT ientrysz = BigEndianW(pmex->i_ext_entrsz);
 
-			if ((iinfoptr) && (ientrysz < 256) && (iinfoptr + ientries*ientrysz < dwMemLength))
+			if ((iinfoptr) && (ientrysz < 256) && (ientries*ientrysz < dwMemLength) && (iinfoptr < dwMemLength - ientries*ientrysz))
 			{
 				LPCSTR psznames = (LPCSTR)(lpStream + iinfoptr);
 				UINT maxnamelen = ientrysz;
-				if (maxnamelen > 32) maxnamelen = 32;
+				if (maxnamelen > 31) maxnamelen = 31;
 				for (UINT i=0; i<ientries; i++) if (i < m_nSamples)
 				{
-					lstrcpyn(m_szNames[i+1], psznames + i*ientrysz, maxnamelen);
+					memcpy(m_szNames[i+1], psznames + i*ientrysz, maxnamelen);
 				}
 			}
 		}
@@ -742,7 +744,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 			{
 				DWORD trknameofs = 0, trknamelen = 0;
 				DWORD trktagofs = BigEndian(ptrktags[i]);
-				if (trktagofs)
+				if (trktagofs && (trktagofs <= dwMemLength - 8) )
 				{
 					while (trktagofs+8 < dwMemLength)
 					{
@@ -757,9 +759,10 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 						trktagofs += 8;
 					}
 					if (trknamelen > MAX_CHANNELNAME) trknamelen = MAX_CHANNELNAME;
-					if ((trknameofs) && (trknameofs + trknamelen < dwMemLength))
+					if ((trknameofs) && (trknameofs < dwMemLength - trknamelen))
 					{
-						lstrcpyn(ChnSettings[i].szName, (LPCSTR)(lpStream+trknameofs), MAX_CHANNELNAME);
+						memcpy(ChnSettings[i].szName, (LPCSTR)(lpStream+trknameofs), MAX_CHANNELNAME);
+						SetNullTerminator(ChnSettings[i].szName);
 					}
 				}
 			}

@@ -38,5 +38,14 @@ inline T ConvertStrTo(const char* str)
 	*/
 }
 
+// Sets last character to null in given char array.
+// Size of the array must be known at compile time.
+template <size_t size>
+inline void SetNullTerminator(char (&buffer)[size])
+{
+	STATIC_ASSERT(size > 0);
+	buffer[size-1] = 0;
+}
+
 
 #endif

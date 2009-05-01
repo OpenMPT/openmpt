@@ -406,6 +406,7 @@ BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 			{
 				memset(penv, 0, sizeof(INSTRUMENTHEADER));
 				memcpy(penv->name, pmi->szName, 32);
+				SetNullTerminator(penv->name);
 				penv->nGlobalVol = 64;
 				penv->nPan = 128;
 				for (UINT i=0; i<NOTE_MAX; i++)
@@ -536,7 +537,7 @@ BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	#endif
 		if (iSmp < MAX_SAMPLES)
 		{
-			memcpy(m_szNames[iSmp], pms->szName, 32);
+			memcpy(m_szNames[iSmp], pms->szName, 31);
 		}
 		if (pms->dwDataLen > 0)
 		{

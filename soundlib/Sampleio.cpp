@@ -524,7 +524,7 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 				if ((dwInfoList+d+8+len <= dwFileLength) && (len))
 				{
 					DWORD dwNameLen = len;
-					if (dwNameLen > 32) dwNameLen = 32;
+					if (dwNameLen > 31) dwNameLen = 31;
 					memcpy(m_szNames[nSample], lpMemFile+dwInfoList+d+8, dwNameLen);
 					if (phdr->id_RIFF != 0x46464952)
 					{
@@ -560,12 +560,13 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 		LPSTR pszTextEx = (LPSTR)(pxh+1); 
 		if (xtrabytes >= 32)
 		{
-			memcpy(m_szNames[nSample], pszTextEx, 32);
+			memcpy(m_szNames[nSample], pszTextEx, 31);
 			pszTextEx += 32;
 			xtrabytes -= 32;
 			if (xtrabytes >= 22)
 			{
 				memcpy(pins->name, pszTextEx, 22);
+				SetNullTerminator(pins->name);
 				xtrabytes -= 22;
 			}
 		}
@@ -1875,6 +1876,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	iti->id = 0x49504D49;	// "IMPI"
 	memcpy(iti->filename, penv->filename, 12);
 	memcpy(iti->name, penv->name, 26);
+	SetNullTerminator(iti->name);
 	iti->mpr = penv->nMidiProgram;
 	iti->mch = penv->nMidiChannel;
 	iti->mbank = penv->wMidiBank; //rewbs.MidiBank
@@ -2125,7 +2127,7 @@ BOOL CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 		case IFFID_NAME:
 			{
 				UINT len = dwChunkLen;
-				if (len > 32) len = 32;
+				if (len > 31) len = 31;
 				memset(m_szNames[nSample], 0, 32);
 				memcpy(m_szNames[nSample], pChunkData, len);
 			}

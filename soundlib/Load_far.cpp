@@ -67,7 +67,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	FARHEADER1 farHeader;
 	memcpy(&farHeader, lpStream, sizeof(FARHEADER1));
 	FARHEADER1 *pmh1 = &farHeader;
-	FARHEADER2 *pmh2;
+	FARHEADER2 *pmh2 = 0;
 	DWORD dwMemPos = sizeof(FARHEADER1);
 	UINT headerlen;
 	BYTE samplemap[8];
@@ -87,7 +87,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	m_nDefaultTempo = 80;
 	m_nDefaultGlobalVolume = 256;
 
-	memcpy(m_szNames[0], pmh1->songname, 32);
+	memcpy(m_szNames[0], pmh1->songname, 31);
 	// Channel Setting
 	for (UINT nchpan=0; nchpan<16; nchpan++)
 	{
@@ -124,7 +124,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	if (dwMemPos >= dwMemLength) return TRUE;
 
 	// byteswap pattern data.
-	for(uint16 psfix = 256; psfix--;)
+	for(uint16 psfix = 0; psfix < 256; psfix++)
 	{
 		pmh2->patsiz[psfix] = LittleEndianW( pmh2->patsiz[psfix] ) ;
 	}
@@ -249,7 +249,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 		const FARSAMPLE *pfs = reinterpret_cast<const FARSAMPLE*>(lpStream + dwMemPos);
 		dwMemPos += sizeof(FARSAMPLE);
 		m_nSamples = ismp + 1;
-		memcpy(m_szNames[ismp+1], pfs->samplename, 32);
+		memcpy(m_szNames[ismp+1], pfs->samplename, 31);
 		const DWORD length = LittleEndian( pfs->length );
 		pins->nLength = length;
 		pins->nLoopStart = LittleEndian(pfs->reppos) ;
