@@ -493,4 +493,18 @@ protected:
 };
 
 
+/////////////////////////////////////////////////////////////////////////
+// Messagebox with 'don't show again'-option.
+
+// Enums for message entries. See dlg_misc.cpp for the array of entries.
+enum enMsgBoxHidableMessage
+{
+	ModCompatibilityExportTip		= 0,
+	ItCompatibilityExportTip		= 1,
+	ConfirmSignUnsignWhenPlaying	= 2,
+	enMsgBoxHidableMessage_count    = 3
+};
+
+void MsgBoxHidable(enMsgBoxHidableMessage enMsg);
+
 #endif

@@ -2710,4 +2710,90 @@ VOID CSampleMapDlg::OnOK()
 	CDialog::OnCancel();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+// Messagebox with 'don't show again'-option.
+
+//===================================
+class CMsgBoxHidable : public CDialog
+//===================================
+{
+public:
+	CMsgBoxHidable(LPCTSTR strMsg, bool checkStatus = true, CWnd* pParent = NULL);
+	enum { IDD = IDD_MSGBOX_HIDABLE };
+
+	int m_nCheckStatus;
+	LPCTSTR m_StrMsg;
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);   // DDX/DDV support
+	virtual BOOL OnInitDialog();
+};
+
+
+struct MsgBoxHidableMessage
+//=========================
+{
+	LPCTSTR strMsg;
+	uint32 nMask;
+	bool bDefaultDontShowAgainStatus; // true for don't show again, false for show again.
+};
+
+const MsgBoxHidableMessage HidableMessages[] =
+{
+	{TEXT("Tip: To create ProTracker compatible MOD-files, try compatibility export from File-menu."), 1, true},
+	{TEXT("Tip: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
+	{TEXT("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false}
+};
+
+STATIC_ASSERT(ARRAYELEMCOUNT(HidableMessages) == enMsgBoxHidableMessage_count);
+
+// Messagebox with 'don't show this again'-checkbox. Uses parameter 'enMsg'
+// to get the needed information from message array, and updates the variable that
+// controls the show/don't show-flags.
+void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
+//----------------------------------------------
+{
+	// Check whether the message should be shown.
+	if((CMainFrame::gnMsgBoxVisiblityFlags & HidableMessages[enMsg].nMask) == 0)
+		return;
+
+	const LPCTSTR strMsg = HidableMessages[enMsg].strMsg;
+	const uint32 mask = HidableMessages[enMsg].nMask;
+	const bool defaulCheckStatus = HidableMessages[enMsg].bDefaultDontShowAgainStatus;
+
+	// Show dialog.
+	CMsgBoxHidable dlg(strMsg, defaulCheckStatus);
+	dlg.DoModal();
+
+	// Update visibility flags.
+	if(dlg.m_nCheckStatus == BST_CHECKED)
+		CMainFrame::gnMsgBoxVisiblityFlags &= ~mask;
+	else
+		CMainFrame::gnMsgBoxVisiblityFlags |= mask;
+}
+
+
+CMsgBoxHidable::CMsgBoxHidable(LPCTSTR strMsg, bool checkStatus, CWnd* pParent)
+	:	CDialog(CMsgBoxHidable::IDD, pParent),
+		m_StrMsg(strMsg),
+		m_nCheckStatus((checkStatus) ? BST_CHECKED : BST_UNCHECKED)
+//----------------------------------------------------------------------------
+{}
+
+BOOL CMsgBoxHidable::OnInitDialog()
+//----------------------------------
+{
+	CDialog::OnInitDialog();
+	SetDlgItemText(IDC_MESSAGETEXT, m_StrMsg);
+	SetWindowText(AfxGetAppName());
+	return TRUE;
+}
+
+void CMsgBoxHidable::DoDataExchange(CDataExchange* pDX)
+//------------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	DDX_Check(pDX, IDC_DONTSHOWAGAIN, m_nCheckStatus);
+}
+
+
 

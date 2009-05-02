@@ -1074,7 +1074,7 @@ public:
 	UINT WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMaxLen=0);
 	BOOL SaveXM(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
-	BOOL SaveMod(LPCSTR lpszFileName, UINT nPacking=0);
+	BOOL SaveMod(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
 	BOOL SaveIT(LPCSTR lpszFileName, UINT nPacking=0);
 	BOOL SaveCompatIT(LPCSTR lpszFileName);
 	BOOL SaveCompatXM(LPCSTR lpszFileName);
