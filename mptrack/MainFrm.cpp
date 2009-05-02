@@ -166,6 +166,8 @@ int CMainFrame::gnPlugWindowWidth = 370;
 int CMainFrame::gnPlugWindowHeight = 332;
 DWORD CMainFrame::gnPlugWindowLast = 0;
 
+uint32 CMainFrame::gnMsgBoxVisiblityFlags = ~0;
+
 CRITICAL_SECTION CMainFrame::m_csAudio;
 HANDLE CMainFrame::m_hPlayThread = NULL;
 DWORD CMainFrame::m_dwPlayThreadId = 0;
@@ -391,6 +393,7 @@ void CMainFrame::LoadIniSettings()
 	gnPlugWindowWidth = GetPrivateProfileInt("Display", "PlugSelectWindowWidth", 370, iniFile);
 	gnPlugWindowHeight = GetPrivateProfileInt("Display", "PlugSelectWindowHeight", 332, iniFile);
 	gnPlugWindowLast = GetPrivateProfileDWord("Display", "PlugSelectWindowLast", 0, iniFile);
+	gnMsgBoxVisiblityFlags = GetPrivateProfileDWord("Display", "MsgBoxVisibilityFlags", ~0, iniFile);
 
 	CHAR s[16];
 	for (int ncol=0; ncol<MAX_MODCOLORS; ncol++) {
@@ -902,6 +905,7 @@ void CMainFrame::SaveIniSettings()
 	WritePrivateProfileLong("Display", "PlugSelectWindowWidth", gnPlugWindowWidth, iniFile);
 	WritePrivateProfileLong("Display", "PlugSelectWindowHeight", gnPlugWindowHeight, iniFile);
 	WritePrivateProfileLong("Display", "PlugSelectWindowLast", gnPlugWindowLast, iniFile);
+	WritePrivateProfileDWord("Display", "MsgBoxVisibilityFlags", gnMsgBoxVisiblityFlags, iniFile);
 
 	CHAR s[16];
 	for (int ncol=0; ncol<MAX_MODCOLORS; ncol++) {

@@ -2242,9 +2242,10 @@ void CCtrlSamples::OnSignUnSign()
 	memset(&viewstate, 0, sizeof(viewstate));
 	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	if ((!m_pModDoc) || (!m_pSndFile) || (!m_pSndFile->Ins[m_nSample].pSample)) return;
-	if( AfxMessageBox(TEXT(GetStrI18N("Apply signed/unsigned conversion(distortion)?\n\n"
-		"Note: in many cases this increases volume level significantly.")), MB_YESNO|MB_ICONQUESTION) == IDNO )
-		return;
+
+	if(m_pModDoc->IsNotePlaying(0, m_nSample, 0) == TRUE)
+		MsgBoxHidable(ConfirmSignUnsignWhenPlaying);
+
 	BeginWaitCursor();
 	pins = &m_pSndFile->Ins[m_nSample];
 	dwStart = viewstate.dwBeginSel;

@@ -373,8 +373,8 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 #ifndef MODPLUG_NO_FILESAVE
 #pragma warning(disable:4100)
 
-BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
-//----------------------------------------------------------
+BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompatibilityExport)
+//-------------------------------------------------------------------------------------------
 {
 	BYTE insmap[32];
 	UINT inslen[32];
@@ -418,8 +418,11 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 		bTab[25] = pins->nVolume >> 2;
 		bTab[26] = pins->nLoopStart >> 9;
 		bTab[27] = pins->nLoopStart >> 1;
-		bTab[28] = (pins->nLoopEnd - pins->nLoopStart) >> 9;
-		bTab[29] = (pins->nLoopEnd - pins->nLoopStart) >> 1;
+		UINT replen = pins->nLoopEnd - pins->nLoopStart;
+		if(bCompatibilityExport && replen < 2) // ensure PT will load it properly
+			replen = 2; 
+		bTab[28] = replen >> 9;
+		bTab[29] = replen >> 1;
 		fwrite(bTab, 30, 1, f);
 	}
 	// Writing number of patterns
@@ -501,6 +504,11 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking)
 	for (UINT ismpd=1; ismpd<=31; ismpd++) if (inslen[ismpd])
 	{
 		MODINSTRUMENT *pins = &Ins[insmap[ismpd]];
+		if(bCompatibilityExport == true)
+		{
+			if(pins->nLength > 0) pins->pSample[0] = 0;
+			if(pins->nLength > 1) pins->pSample[1] = 0;
+		}
 		UINT flags = RS_PCM8S;
 #ifndef NO_PACKING
 		if (!(pins->uFlags & (CHN_16BIT|CHN_STEREO)))

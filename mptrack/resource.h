@@ -104,6 +104,7 @@
 #define IDD_DIALOG3                     513
 #define IDS_ERR_TUNING_SERIALISATION    514
 #define IDD_MIDIPARAMCONTROL            515
+#define IDD_MSGBOX_HIDABLE              516
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -825,6 +826,8 @@
 #define IDC_EDIT_STRETCHPARAMS          2338
 #define IDC_MIDI_MACRO_CONTROL		    2339
 #define IDC_MIDIPLAYPATTERNONMIDIIN     2340
+#define IDC_DONTSHOWAGAIN               2341
+#define IDC_MESSAGETEXT                 2342
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1057,9 +1060,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        516
+#define _APS_NEXT_RESOURCE_VALUE        517
 #define _APS_NEXT_COMMAND_VALUE         59221
-#define _APS_NEXT_CONTROL_VALUE         2341
+#define _APS_NEXT_CONTROL_VALUE         2343
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

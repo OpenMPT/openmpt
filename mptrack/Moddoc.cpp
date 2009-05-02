@@ -20,6 +20,12 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+const TCHAR* const FileFilterMOD = TEXT("ProTracker Modules (*.mod)|*.mod||");
+const TCHAR* const FileFilterXM = TEXT("FastTracker Modules (*.xm)|*.xm||");
+const TCHAR* const FileFilterS3M = TEXT("ScreamTracker Modules (*.s3m)|*.s3m||");
+const TCHAR* const FileFilterIT = TEXT("Impulse Tracker Modules (*.it)|*.it||");
+const TCHAR* const FileFilterITP = TEXT("Impulse Tracker Projects (*.itp)|*.itp||");
+const TCHAR* const FileFilterMPT = TEXT("OpenMPT Modules (*.mptm)|*.mptm||");
 
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc
@@ -487,18 +493,19 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	switch(m_SndFile.GetType())
 	{
 	case MOD_TYPE_MOD:
+		MsgBoxHidable(ModCompatibilityExportTip);
 		lpszDefExt = "mod";
-		lpszFilter = "ProTracker Modules (*.mod)|*.mod||";
+		lpszFilter = FileFilterMOD;
 		strcpy(fext, ".mod");
 		break;
 	case MOD_TYPE_S3M:
 		lpszDefExt = "s3m";
-		lpszFilter = "ScreamTracker Modules (*.s3m)|*.s3m||";
+		lpszFilter = FileFilterS3M;
 		strcpy(fext, ".s3m");
 		break;
 	case MOD_TYPE_XM:
 		lpszDefExt = "xm";
-		lpszFilter = "FastTracker Modules (*.xm)|*.xm||";
+		lpszFilter = FileFilterXM;
 		strcpy(fext, ".xm");
 		break;
 	case MOD_TYPE_IT:
@@ -509,19 +516,21 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 //		strcpy(fext, ".it");
 		if(m_SndFile.m_dwSongFlags & SONG_ITPROJECT){
 			lpszDefExt = "itp";
-			lpszFilter = "Impulse Tracker Projects (*.itp)|*.itp||";
+			lpszFilter = FileFilterITP;
 			strcpy(fext, ".itp");
 		}
-		else{
+		else
+		{
+			MsgBoxHidable(ItCompatibilityExportTip);
 			lpszDefExt = "it";
-			lpszFilter = "Impulse Tracker Modules (*.it)|*.it||";
+			lpszFilter = FileFilterIT;
 			strcpy(fext, ".it");
 		}
 // -! NEW_FEATURE#0023
 		break;
 	case MOD_TYPE_MPT:
 			lpszDefExt = "mptm";
-			lpszFilter = "OpenMPT Modules (*.mptm)|*.mptm||";
+			lpszFilter = FileFilterMPT;
 			strcpy(fext, ".mptm");
 		break;
 	default:	
@@ -1561,7 +1570,7 @@ void CModDoc::OnFileMidiConvert()
 
 //HACK: This is a quick fix. Needs to be better integrated into player and GUI.
 void CModDoc::OnFileCompatibilitySave()
-//-------------------------------
+//-------------------------------------
 {
 	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
 	CHAR s[_MAX_PATH], fname[_MAX_FNAME]="";
@@ -1571,21 +1580,34 @@ void CModDoc::OnFileCompatibilitySave()
 	UINT type = m_SndFile.GetType();
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
-	switch (type) {
+	switch (type)
+	{
 		/*case MOD_TYPE_XM:
 			ext = "xm";
 			pattern = "Fast Tracker Files (*.xm)|*.xm||";
 			break;*/
+		case MOD_TYPE_MOD:
+			ext = MOD_STD_SPECS.fileExtension;
+			pattern = FileFilterMOD;
+			if( AfxMessageBox(GetStrI18N(TEXT(
+				"Compared to regular MOD save, compatibility export makes "
+				"small adjustments to the save file in order to make the file compatible with "
+				"ProTracker. Note that this feature is not complete and the "
+				"file is not guaranteed to be free of MPT-specific features.\n\n "
+				"Important: beginning of some samples may be adjusted in the process. Proceed?")), MB_ICONINFORMATION|MB_YESNO) != IDYES
+				)
+				return;
+			break;
 		case MOD_TYPE_IT:
-			ext = "it";
-			pattern = "Impulse Tracker Files (*.it)|*.it||";
+			ext = IT_STD_SPECS.fileExtension;
+			pattern = FileFilterIT;
+			::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
 			break;
 		default:
-			::MessageBox(NULL,"Compatibility export is currently only available the IT format.", "Can't do compatibility export.",MB_ICONINFORMATION | MB_OK);
+			::MessageBox(NULL,"Compatibility export is currently only available for MOD and IT modules.", "Can't do compatibility export.",MB_ICONINFORMATION | MB_OK);
 			return;
 	}
 
-	::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
 	_splitpath(GetPathName(), drive, path, fname, NULL);
 	strcpy(s, drive);
 	strcat(s, path);
@@ -1602,7 +1624,13 @@ void CModDoc::OnFileCompatibilitySave()
 	if (dlg.DoModal() != IDOK){ 
 		return;
 	}
-	switch (type) {
+	switch (type)
+	{
+		case MOD_TYPE_MOD:
+			m_SndFile.SaveMod(dlg.GetPathName(), 0, true);
+			SetModified(); // Compatibility save may adjust samples so set modified...
+			m_ShowSavedialog = true;	// ...and force save dialog to appear when saving.
+			break;
 		case MOD_TYPE_XM:
 			m_SndFile.SaveCompatXM(dlg.GetPathName());
 			break;
