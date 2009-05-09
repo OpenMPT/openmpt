@@ -177,7 +177,7 @@ BOOL CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 		if (pIns->nLength)
 		{
 			UINT nPos = ((UINT)phdr->sample[nSmp-1].reserved) << 4;
-			if ((nPos >= sizeof(STMHEADER)) && (nPos+pIns->nLength <= dwMemLength)) dwMemPos = nPos;
+			if ((nPos >= sizeof(STMHEADER)) && (nPos <= dwMemLength) && (pIns->nLength <= dwMemLength-nPos)) dwMemPos = nPos;
 			if (dwMemPos < dwMemLength)
 			{
 				dwMemPos += ReadSample(pIns, RS_PCM8S, (LPSTR)(lpStream+dwMemPos),dwMemLength-dwMemPos);

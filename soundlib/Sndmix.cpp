@@ -1276,7 +1276,10 @@ BOOL CSoundFile::ReadNote()
 				switch (pChn->nVibratoType & 0x03)
 				{
 				case 1:
-					vdelta = ModRampDownTable[vibpos];
+					if(GetModFlag(MSF_IT_COMPATIBLE_PLAY) == true)
+						vdelta = -ModRampDownTable[(vibpos+16) % 64];
+					else
+						vdelta = ModRampDownTable[vibpos];
 					break;
 				case 2:
 					vdelta = ModSquareTable[vibpos];

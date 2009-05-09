@@ -418,7 +418,7 @@ BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	#ifdef MT2DEBUG
 		if (iIns <= pfh->wInstruments) Log("  Instrument #%d at offset %04X: %d bytes\n", iIns, dwMemPos, pmi->dwDataLen);
 	#endif
-		if (((LONG)pmi->dwDataLen > 0) && (dwMemPos + pmi->dwDataLen + 40 <= dwMemLength))
+		if (((LONG)pmi->dwDataLen > 0) && (dwMemPos <= dwMemLength - 40) && (pmi->dwDataLen <= dwMemLength - (dwMemPos + 40)))
 		{
 			InstrMap[iIns-1] = pmi;
 			if (penv)

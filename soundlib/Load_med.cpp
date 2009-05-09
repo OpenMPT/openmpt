@@ -521,7 +521,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 	dwBlockArr = BigEndian(pmmh->blockarr);
 	dwSmplArr = BigEndian(pmmh->smplarr);
 	dwExpData = BigEndian(pmmh->expdata);
-	if ((dwExpData) && (dwExpData+sizeof(MMD0EXP) < dwMemLength))
+	if ((dwExpData) && (dwExpData < dwMemLength - sizeof(MMD0EXP)))
 		pmex = (MMD0EXP *)(lpStream+dwExpData);
 	else
 		pmex = NULL;
@@ -659,7 +659,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 			}
 			UINT pseq = 0;
 			
-			if ((playseqtable) && (playseqtable + nplayseq*4 < dwMemLength))
+			if ((playseqtable) && (playseqtable < dwMemLength) && (nplayseq*4 < dwMemLength - playseqtable))
 			{
 				pseq = BigEndian(((LPDWORD)(lpStream+playseqtable))[nplayseq]);
 			}
@@ -737,7 +737,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		// Track Names
 		DWORD trackinfo_ofs = BigEndian(pmex->trackinfo_ofs);
-		if ((trackinfo_ofs) && (trackinfo_ofs + m_nChannels * 4 < dwMemLength))
+		if ((trackinfo_ofs) && (trackinfo_ofs < dwMemLength) && (m_nChannels * 4 < dwMemLength - trackinfo_ofs))
 		{
 			DWORD *ptrktags = (DWORD *)(lpStream + trackinfo_ofs);
 			for (UINT i=0; i<m_nChannels; i++)
@@ -866,7 +866,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 				{
 					DWORD nameofs = BigEndian(pbi->blockname);
 					UINT namelen = BigEndian(pbi->blocknamelen);
-					if ((nameofs < dwMemLength) && (nameofs+namelen < dwMemLength))
+					if ((nameofs < dwMemLength) && (namelen < dwMemLength - nameofs))
 					{
 						SetPatternName(iBlk, (LPCSTR)(lpStream+nameofs));
 					}
