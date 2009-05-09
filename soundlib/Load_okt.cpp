@@ -113,7 +113,7 @@ BOOL CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	// PBOD
 	UINT npat = 0;
-	while ((dwMemPos+10 < dwMemLength) && (*((DWORD *)(lpStream + dwMemPos)) == 0x444F4250))
+	while ((dwMemPos < dwMemLength-10) && (*((DWORD *)(lpStream + dwMemPos)) == 0x444F4250))
 	{
 		DWORD dwPos = dwMemPos + 10;
 		UINT rows = lpStream[dwMemPos+9];
@@ -189,7 +189,7 @@ BOOL CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	// SBOD
 	UINT nsmp = 1;
-	while ((dwMemPos+10 < dwMemLength) && (*((DWORD *)(lpStream + dwMemPos)) == 0x444F4253))
+	while ((dwMemPos < dwMemLength - 10) && (*((DWORD *)(lpStream + dwMemPos)) == 0x444F4253))
 	{
 		if (nsmp < MAX_SAMPLES) ReadSample(&Ins[nsmp], RS_PCM8S, (LPSTR)(lpStream+dwMemPos+8), dwMemLength-dwMemPos-8);
 		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;

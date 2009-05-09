@@ -2495,12 +2495,6 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 			wsprintf(s, "%dbpm", param);
 		break;
 
-	case CMD_TREMOR:
-		if(param)
-			wsprintf(s, "ontime %d, offtime %d", param >> 4, param & 0x0F);
-		else 
-			strcpy(s, "continue");
-		break;
 
 	case CMD_RETRIG:
 		switch(param >> 4) {

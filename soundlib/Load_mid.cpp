@@ -590,7 +590,7 @@ BOOL CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 		pmth = (MIDITRACKHEADER *)(lpStream+dwMemPos);
 		if (dwMemPos + 8 >= dwMemLength) break;
 		DWORD len = BigEndian(pmth->len);
-		if ((pmth->id == 0x6B72544D) && (dwMemPos + 8 + len <= dwMemLength))
+		if ((pmth->id == 0x6B72544D) && (len <= dwMemLength - (dwMemPos + 8)))
 		{
 #ifdef MIDI_DETAILED_LOG
 			Log(" track%d at offset %d len=%d ", itrk, dwMemPos+8, len);

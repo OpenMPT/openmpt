@@ -980,7 +980,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;
 	if (pifh->flags & 0x10) m_dwSongFlags |= SONG_ITOLDEFFECTS;
 	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATMODE;
-	if (pifh->flags & 0x80) m_dwSongFlags |= SONG_EMBEDMIDICFG;
+	if ((pifh->flags & 0x80) || (pifh->special & 0x08)) m_dwSongFlags |= SONG_EMBEDMIDICFG;
 	if (pifh->flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
 	memcpy(m_szNames[0], pifh->songname, 26);
 	m_szNames[0][26] = 0;
@@ -1241,7 +1241,7 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 	// Reading Samples
 	m_nSamples = pifh->smpnum;
 	if (m_nSamples >= MAX_SAMPLES) m_nSamples = MAX_SAMPLES-1;
-	for (UINT nsmp=0; nsmp<pifh->smpnum; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] + sizeof(ITSAMPLESTRUCT) <= dwMemLength))
+	for (UINT nsmp=0; nsmp<pifh->smpnum; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSAMPLESTRUCT)))
 	{
 		lastSampleSize = 0; //ensure lastsamplesize = 0 if last sample is empty, else we'll skip the MPTX stuff.
 		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
@@ -1761,7 +1761,6 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			memset(&itss, 0, sizeof(itss));
 			memcpy(itss.filename, psmp->name, 12);
 			memcpy(itss.name, m_szNames[nsmp], 26);
-			SetNullTerminator(itss.name);
 
 			itss.id = 0x53504D49;
 			itss.gvl = (BYTE)psmp->nGlobalVol;
@@ -2058,7 +2057,6 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			memset(smpcount, 0, sizeof(smpcount));
 			memcpy(iti.filename, penv->filename, 12);
 			memcpy(iti.name, penv->name, 26);
-			SetNullTerminator(iti.name);
 			iti.mbank = penv->wMidiBank;
 			iti.mpr = penv->nMidiProgram;
 			iti.mch = penv->nMidiChannel;
@@ -2376,7 +2374,6 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		memset(&itss, 0, sizeof(itss));
 		memcpy(itss.filename, psmp->name, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
-		SetNullTerminator(itss.name);
 		itss.id = 0x53504D49;
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 		if (m_nInstruments)
@@ -2545,6 +2542,10 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	while (header.ordnum>0 && Order[header.ordnum-1]==0xFF) {
 		header.ordnum--;
 	}
+
+	if(header.ordnum + 1 < MAX_ORDERS)
+		header.ordnum++;
+
 	header.patnum = MAX_PATTERNS;
 	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) {
 		header.patnum--;

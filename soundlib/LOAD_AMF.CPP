@@ -174,7 +174,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 	DWORD dwMemPos;
 	
 	if ((!lpStream) || (dwMemLength < 2048)) return FALSE;
-	if ((!strncmp((LPCTSTR)lpStream, "ASYLUM Music Format V1.0", 25)) && (dwMemLength > 4096))
+	if ((!strncmp((LPCSTR)lpStream, "ASYLUM Music Format V1.0", 25)) && (dwMemLength > 4096))
 	{
 		UINT numorders, numpats, numsamples;
 
@@ -370,7 +370,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 	// Store tracks positions
 	BYTE **pTrackData = new BYTE *[realtrackcnt];
 	memset(pTrackData, 0, sizeof(pTrackData));
-	for (UINT iTrack=0; iTrack<realtrackcnt; iTrack++) if (dwMemPos + 3 <= dwMemLength)
+	for (UINT iTrack=0; iTrack<realtrackcnt; iTrack++) if (dwMemPos <= dwMemLength-3)
 	{
 		UINT nTrkSize = LittleEndianW(*(USHORT *)(lpStream+dwMemPos));
 		nTrkSize += (UINT)lpStream[dwMemPos+2] << 16;

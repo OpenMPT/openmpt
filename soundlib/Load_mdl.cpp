@@ -328,7 +328,6 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 					INSTRUMENTHEADER *penv = Headers[nins];
 					memset(penv, 0, sizeof(INSTRUMENTHEADER));
 					memcpy(penv->name, lpStream+dwPos+2, 32);
-					SetNullTerminator(penv->name);
 					penv->nGlobalVol = 64;
 					penv->nPPC = 5*12;
 					SetDefaultInstrumentValues(penv);
@@ -458,7 +457,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				{
 					DWORD dwLen = *((DWORD *)(lpStream+dwPos));
 					dwPos += 4;
-					if ((dwPos+dwLen <= dwMemLength) && (dwLen > 4))
+					if ( (dwLen <= dwMemLength) && (dwPos <= dwMemLength - dwLen) && (dwLen > 4) )
 					{
 						flags = (pins->uFlags & CHN_16BIT) ? RS_MDL16 : RS_MDL8;
 						ReadSample(pins, flags, (LPSTR)(lpStream+dwPos), dwLen);

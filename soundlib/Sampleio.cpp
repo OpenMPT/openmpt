@@ -566,7 +566,6 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 			if (xtrabytes >= 22)
 			{
 				memcpy(pins->name, pszTextEx, 22);
-				SetNullTerminator(pins->name);
 				xtrabytes -= 22;
 			}
 		}
