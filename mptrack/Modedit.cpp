@@ -2093,10 +2093,11 @@ UINT CModDoc::DoUndo()
 			MODCOMMAND *newPattern = CSoundFile::AllocatePattern(nRows, m_SndFile.m_nChannels);
 			MODCOMMAND *oldPattern = m_SndFile.Patterns[nPattern];
 			if (!newPattern) return (UINT)-1;
+			const ROWINDEX nOldRowCount = m_SndFile.Patterns[nPattern].GetNumRows();
 			m_SndFile.Patterns[nPattern].SetData(newPattern, nRows);
 			if (oldPattern)
 			{
-				memcpy(newPattern, oldPattern, m_SndFile.m_nChannels*m_SndFile.PatternSize[nPattern]*sizeof(MODCOMMAND));
+				memcpy(newPattern, oldPattern, m_SndFile.m_nChannels*nOldRowCount*sizeof(MODCOMMAND));
 				CSoundFile::FreePattern(oldPattern);
 			}
 		}
