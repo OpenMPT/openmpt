@@ -231,9 +231,9 @@ static void ShowChangesDialog()
 				"    [Mod] mptm files made with this version will be recognized as IT in 1.17.02.48.\n"
 			    "    [Mod] Automatic update check on startup is no longer available.\n"
                 "    [Fix] Copy/Paste in pattern was partly broken when working with MOD format.\n"
-				"    [Fix] Fixed wrong version in IT files saved with compatibility save.\n"
+				"    [Fix] Fixed wrong version in IT files saved with compatibility export.\n"
 				"\n"
-				"    For more detail, see history.txt.";
+				"    For more detailed list of changes, see history.txt.";
 			
 	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT v." MPT_VERSION_STR, MB_ICONINFORMATION);
 }
@@ -1264,7 +1264,7 @@ void CTrackApp::OnFileOpen()
 // -> DESC="IT project files (.itp)"
 					"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
 // -! NEW_FEATURE#0023
-					"Open MPT Modules (*.mptm)|*.mptm;*.mptmz|"
+					"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
 					"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.dsm;*.umx;*.amf;*.psm;*.mt2|"
 					"Wave Files (*.wav)|*.wav|"
 					"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
@@ -1651,7 +1651,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_EDIT2, s);
-	SetDlgItemText(IDC_EDIT3, CString("Open Modplug Tracker, version ") + MptVersion::str + " (development build)");
+	SetDlgItemText(IDC_EDIT3, CString("OpenMPT, version ") + MptVersion::str + " (development build)");
 
 	m_heContact.SetWindowText(
 "Contact / Discussion:\r\n\

@@ -1967,7 +1967,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 	int param = m_pModDoc->MacroToPlugParam(&(m_MidiCfg.szMidiSFXExt[sfx*32]));
 	CVstPlugin *pVstPlugin; 
 	char s[256];
-	message.Format("These are the parameters that can be conrolled by macro SF%X:\n\n",sfx);
+	message.Format("These are the parameters that can be controlled by macro SF%X:\n\n",sfx);
 	
 	for (UINT plug=0; plug<MAX_MIXPLUGINS; plug++)
 	{
