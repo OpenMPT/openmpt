@@ -8,15 +8,217 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling us about the bug
 
+
+v1.17.02.53 (May 2009, revision 259)
+------------------------------------
+
+General:  
+  + <jojo> Can now import MO3 files using external library. (rev. 248)
+  
+  . <jojo> Song Cleanup: Sample cleanup should no longer remove data after sustain loop end point. (rev. 248)
+  . <jojo> Misc: When adding channels from song properties, new channels are now initialized properly (bug 1814). (rev. 236)
+  . <jojo> BPM approximation showed wrong rows per beat in some cases (bug 2532) (rev. 231)
+  . <jojo> Disabled special handling of '&'-character when drawing texts to various components where the special handling should not take place. (http://lpchip.com/modplug/viewtopic.php?t=1962) (rev. 229)
+  . <re> File opening: Added a couple of return value checks to reduce the change of crash when opening lots of files (bug 2546) (rev. 239)
+  
+  / <jojo> Menu: Goto dialog can now be opened from Edit-menu. (rev. 246)
+  / <re> Pattern cleanup: Clearing sequence after first '---' item is now optional. (rev. 239)
+  / <re> When passing MIDI to plug, documents will now be set modified since MIDI data may change parameters. (rev. 243)
+  
+General tab:
+  / <jojo> General tab: VST volume slider is now disabled for S3M. (rev. 246)
+  / <jojo> General tab: Initial channel volume controls are now enabled only for IT and MPTM. (rev. 246)
+
+Pattern tab:
+  + <jojo> Added descriptions of SBx, S3x, S4x and S5x command parameters to note properties dialog. (rev. 251)
+  + <jojo> Descriptions to retrigger note command parameters in note properties dialog. (rev. 248)
+  + <jojo> Ability to start playback with incoming MIDI note (see setup->MIDI) (rev. 246)
+  + <jojo> Duplicate channel (see channel header context menu). (246)
+  + <re> MIDI controllers can now be used to input smooth MIDI macro commands to pattern (setup->MIDI). (rev. 240)
+  
+  . <re> Undo should now work with chords. (rev. 244)
+  . <re> When playing with MIDI keyboard, plugins got a constant note velocity, not the actual velocity (bug 2754) (rev. 239)
+  . <re> Undo fixes (didn't properly handle playback positions/multichannel record, set redundant undo points)(rev 243)
+  . <re> Param record in plugs GUI wrote commands even when pattern record was off. (rev 243)
+  . <re> Fixed chord detection when row spacing was enabled. (rev 243)
+  . <re> Fix to displaying wrong pattern name when using more than 255 patterns (http://lpchip.com/modplug/viewtopic.php?t=2344) (rev. 212)
+  . <re> Accidental moving when selecting order in margins shouldn't happen anymore. (rev 225)
+  . <re> Fix to possible crash when using undo after pattern resize (bug introduced in rev. 168)
+  
+  / <jojo> When applying "change instrument", won't add instrument number to note off/cut if the note doesn't have instrument already. (rev. 248)
+  / <re> Default orderlist margin value can now be controlled with "DefaultSequenceMargins" ini-settings under "Pattern Editor" context. (rev 225)
+  / <jojo & re> Sequence view: Sequence scrolling won't no longer be cut on first '---' item on IT/MPTM/XM. (rev. 237)
+  / <re> Pattern: The keyboard split 'feature' when entering chords is removed (bug 2790). (rev. 244)
+  
+Sample tab:
+  + <jojo> Can now normalize sample selections. (rev. 254)
+  + <jojo> Can now optionally normalize all samples instead of just one (click normalize with shift down) (rev. 249)
+  + <jojo & re> Status bar now displays offset value at given sample point. (rev. 232)
+  + <jojo & re> Sample amplify now accepts negative values(inverts sample phase) (request 2219) (rev. 234)
+  + <jojo & re> Signed/unsigned sample conversion. (rev. 235)
+  + <re> Added button for phase invert to toolbar. (rev. 235)
+  + <jojo> Ability to save sample as raw. (rev. 236)
+  
+  . <re> Fix to zoom-related crash when loading samples in sample tab. Occurs usually with lengthy samples. (rev. 211)
+  . <jojo> Playing sample selection didn't work properly in all cases (bug 1700). (rev. 231)
+  . <jojo> Setting loop points could affect playing of sample even if loop was disabled (bug 1874) (rev. 231)
+  
+  / <jojo> Notes from MIDI should now be played like notes from keyboard. (rev. 246)
+  / <jojo> Play sample button now stops previous note even if mod is playing (bug 1366) (rev. 231)
+  / <jojo> Sustain loop will now be enabled when setting it to sample selection. (rev. 231)
+  / <jojo> Sample editing: If possible, use loop points as trim limits if there's no selection chosen. (rev. 230)
+  / <re> Time stretching is now implemented with SoundTouch library. (rev. 228)
+  / <re> Disabled pitchshifting/time stretching of 8-bit samples(didn't seem to work). (rev. 228)
+  
+Instrument tab:
+  . <jojo> Envelope view: Middle line will now be drawn in panning and pitch/filter envelopes even if row guidelines are enabled. (rev. 254)
+  
+  / <jojo> Instrument tab: Sample map can now map "No sample". (rev. 236)
+  / <re> Changed default instrument plug volume command handling from Dry/Wet to none. Also added ini-setting with which one can set the default value used for new instruments. Ini setting is "DefaultPlugVolumeHandling" in [Misc], possible values are 0,1,2. (rev. 238)
+  
+MPTM:
+  . <re> Pattern cleanup: In some cases sequence wasn't cleaned properly for mptm. (rev. 239)
+  / <re> Changed pattern/order limit for MPTm from 65000 to 4000. (rev. 212)
+  Instrument tuning:
+      + <re> Added letter 'b' to drawable letters. (rev. 217)
+	  . <re> Creating 'group geometric' was broken (perhaps since v. 1.17.02.49) (rev. 252)
+	  . <re> Loading certain old tuning objects didn't work. (rev. 238)
+	  / <re> Notes should now be drawn more clearly when using custom tunings. (rev. 217)
+	  
+IT:
+  . <jojo & re> Macro config should now be loaded correctly also when loading IT files not made with MPT. (rev. 257)
+  . <jojo & re> Playback fix to vibrato with ramp down waveform in IT compatibility play. (rev. 257)
+  . <re> When file was saved with compatibility export, the last order was not shown in Impulse Tracker. (rev. 257)
+  
+XM:
+  . <jojo> Fix to handling a special case of Bxx and Dxx (bug 2769) (rev 241)
+  
+S3M:
+  . <re> S3M saving: Sequence of length 241-255 should now be cut to length 240 instead of ~16. (rev. 239)
+  / <re> When loading S3M files which contain Zxx-effects, user is now asked how to process them. (bug 2166) (rev. 233)
+  / <re> S3M saving: Saved sequence is no longer cut on first '---' item. (rev. 239)
+  
+MOD:
+  . <jojo & re> Fixes to MOD saving: it should now be possible to create ProTracker compatible MOD files with compatibility export. (rev. 256)
+
+Package template:
+  / <jojo> PackageTemplate: Update to DE_jojo-keymap
+
+Misc:
+  . <from libmodplug> Fix to faulty portamento handling on loading AMF.
+  . <various> Lots of smaller bug fixes.
+
+
+
+v1.17.02.52 (14 Apr 2008, revision 210)
+---------------------------------------
+  . <re> Shouldn't need winhttp anymore(at least now that updatecheck is disabled). Dependency caused problems in Win98.
+  . <re> Fix to faulty plug file existence check(introduced in 1.17.02.51)(http://lpchip.com/modplug/viewtopic.php?t=2255)
+  . <re> Sound card-options buffer length value validation.
+  . <re> In .51, muted channels were ignored completely in MIDI export. Now pattern effects are processed in muted channels.
+  . <re> IT style-playback fix
+
+
+v1.17.02.51 (29 Mar 2008, revision 208)
+---------------------------------------
+  . <re> Fix to crash when loading VST with long(>32) param name.
+  . <ma & re> Fix to possible memory corruption problem on handling VST with more than 30 outputs.
+      - VST with more than 32 outputs might still be handled poorly.
+  . <re> Fix to possible crash when browsing modules in treeview(http://lpchip.com/modplug/viewtopic.php?t=2222).
+  . <re> Fix to severe memory leak in the same section as above.
+  . <re> Fix to mptm not showing in tree view file browser.
+  . <re> Fix to MIDI drum export (http://lpchip.com/modplug/viewtopic.php?t=2024)
+  . <re> Fix to possible crash on MIDI export if exporting module with more than 64 channels.
+  / <re> MIDI export won't anymore export muted channels(http://lpchip.com/modplug/viewtopic.php?t=2017)
+  . <re> When converting MOD->S3M/IT/MPTM, finetune setting was ignored (http://lpchip.com/modplug/viewtopic.php?t=1706)
+  . <re> IT compatibility: Fix to not resetting envelopes on new instrument (http://lpchip.com/modplug/viewtopic.php?t=1869)
+  . <re> IT compatibility: Fix to bidi loop resetting (http://lpchip.com/modplug/viewtopic.php?t=788)
+  . <re> IT compatibility: Fix to note trigger after note cut(http://lpchip.com/modplug/viewtopic.php?t=2080)
+  . <re> Mixmode-tooltip in general tab was in some cases shown on unrelated controls (http://lpchip.com/modplug/viewtopic.php?t=2176)
+  . <re> Pitch/tempo lock was lost on first instrument when opening instrument tab for the first time. (http://lpchip.com/modplug/viewtopic.php?t=1823)
+  . <re> Verifying buffer length-setting read from INI-file to prevent the impression that it can be set < 10 (http://lpchip.com/modplug/viewtopic.php?t=992)
+  . <re> Pattern effectdata paste was broken for MOD (probably since .46) (http://lpchip.com/modplug/viewtopic.php?t=1938)
+  / <re> When loading plug information at startup, checking whether the plug files exist. (http://lpchip.com/modplug/viewtopic.php?t=1367)
+  . <re> Continuous pattern navigation fixes(http://lpchip.com/modplug/viewtopic.php?t=1960, http://lpchip.com/modplug/viewtopic.php?t=1959)
+  . <re> Keyboard split related fix (http://lpchip.com/modplug/viewtopic.php?t=1887)
+  . <re> Releasenode information should now be included when copying instrument envelopes (http://lpchip.com/modplug/viewtopic.php?t=1780)
+  . <ma> Potential memory corruption bug when loading VSTs
+
+  - <re> Removed buggy rearrange samples (http://lpchip.com/modplug/viewtopic.php?t=2148)
+  . <re> Fixed MIDI mapping not checking MIDI event, which could cause events like pitch bend to trigger some mapping item.
+  . <re> Extended song/instrument properties were not always loaded correctly for IT (bug introduced in 1.17.02.50)(http://lpchip.com/modplug/viewtopic.php?p=16335)
+  . <re> Fix for faulty tabs when switching between modtypes with and without instrumenttab. (http://lpchip.com/modplug/viewtopic.php?t=1614)
+  . <re> Fix for possible crash on save/load when using more than 64 channels with MPTM.
+  / <re> Modified flag is not set when sliding tempo/global volume slider for MOD file.
+  / <re> When setting instrument pan, checking whether instrument samples have set pan enabled and optionally disabling them.
+  + <re> Unmute all(on transition) shortcutkeys should now work in orderlist context.
+  / <re> Disabled Set Pan in sample tab for XM.
+  + <re> Half/double pattern rownumber buttons to pattern properties dialog.
+  / <re> Show prev/next pattern now shows pattern over +++ orderlist items.
+  + <re> Channel status in status bar now show channel volume info.
+  / <re> Disabled setting channel pan for MOD/XM in general view.
+
+
+v1.17.02.50 (26 Jan 2008, revision 198)
+---------------------------------------
+  / <re> MIDICC bug related compatibility improvement for loading old IT/MPTm files.
+  + <re> MIDI controller mapping to plug params.
+  + <re> Ability to take MIDI volume into account when playing notes.
+  + <re> Ability to pass MIDI to plug.
+  + <re> Ability to start/continue/stop play with certain MIDI messages (untested)
+  + <re> Ability to choose how volume commands behave for plugs.
+  . <re> Fixed sending wrong MIDI message in ::MidiCC.
+
+  + <re> Keyshortcuts for preset navigation jumps in VST editor.
+  . <re> Default VST editor preset field name validation in the menubar.
+
+  + <re> Added ability to edit various flags in song properties.
+  . <re> Fix for pattern duplicate for small patterns (http://lpchip.com/modplug/viewtopic.php?t=1747)
+  . <re> Fixed song properties-menu entry in mainframe(was grayed and didn't show keyshortcut)
+  . <re> Fixed crash with certain toolbar related ini-settings (http://lpchip.com/modplug/viewtopic.php?t=2033)
+  . <re> Further fixes to prevent unnotified overwriting of file.
+  / <re> .bak-files won't now be shown with "All modules" filter when loading modules.
+  . <re> Show row playtime didn't on certain cases work on first pattern row (http://lpchip.com/modplug/viewtopic.php?t=2044)
+  . <re> Fix to faulty play with certain instruments without notes in IT compatible playmode (http://lpchip.com/modplug/viewtopic.php?t=2080)
+  . <re> Pattern number box didn't open pattern properties when using MPTm. (http://lpchip.com/modplug/viewtopic.php?t=2073)
+  . <re> Fixed wrong MIDI CC names in macro editor.
+  ./ <re> Setting volume to 0(v00) in pattern didn't necessarily set volume to 0 when using volume random variation for instrument. All other random variation behaviors are changed as well; now the 'swing' is applied directly to channel values instead of using swing addition, and by default the swing effect is reset on new note. (http://lpchip.com/modplug/viewtopic.php?t=2074)
+
+  / <re> MPTm made with this version will be recognized as IT in earlier versions.
+  / <re> Various validity checks for read data in ITP loading.
+
+
+v1.17.02.49 (17 Nov 2007, revision 194)
+---------------------------------------
+  + <re> Improved VST preset navigation in VST window. Known problem: doesn't update if preset is changed from VSTs own preset navigation.
+  + <re> Improvements in IT compatibility playmode. When loading ITs, if file doesn't seem modplug made, then automatically setting IT compatibility playmode. The playmode setting can be toggled in song properties dialog, and the autodetection with an ini setting.
+  + <re> 'key binding not understood'-messages can be disabled with an ini setting.
+  . <re> Fixed wrong file version in IT compatibility save. (http://lpchip.com/modplug/viewtopic.php?t=1723)
+  . <re> Fixed possible unnotified overwriting of file occurring for example when dealing with a new file. (http://lpchip.com/modplug/viewtopic.php?t=1813)
+  . <re> Fixed broken note preview for certain type of instruments in instrument tab. (http://lpchip.com/modplug/viewtopic.php?t=1996)
+  . <re> Fixed possible crash on channel mode wav export when a channel has a long name. (http://lpchip.com/modplug/viewtopic.php?t=2005)
+  . <re> Fixed pattern position indicator jump when clicking VST-box in channel header. (http://lpchip.com/modplug/viewtopic.php?t=2014)
+  / <re> Custom tuning related
+           -file format changes
+           -changed interpretation of finesteps: now zero finesteps means that finesteps are equal to notesteps, previously zero finesteps disabled portamentos etc)
+           -Pitch slide between notes with portamentos is now specialised also for other tuning types than just geometric(changes behavior). Previously behavior was 'geometric' for all types.
+
+  . <rewbs> Fix pattern search, which could search for the wrong param. Also enable typing of desired param value rather than only selecting from listbox. (http://lpchip.com/modplug/viewtopic.php?t=1799)
+  . <rewbs> Delay-load winhttp.dll and don't die if it can't be found, e.g. on win98. (http://lpchip.com/modplug/viewtopic.php?t=1778)
+  . <rewbs> Fix a couple of pixels on D# in the pattern editor small font bitmap. (http://lpchip.com/modplug/viewtopic.php?t=1781)
+  + <rewbs> Add name filter to plugin selection dialog. Useful when you have hundreds of plugins.
+  + <Pelya> Allow Window key as a modifier in the keyboard configuration. Disables start menu pop-up when pressing the Win key if and only if it used in the active keyboard configuration.
+  + <Pelya> Disables NumLock/CapsLock/ScrollLock lamps on keyboard if and only if they are used in the active keyboard configuration. The lamps will blink anyway - can't help it until we start using DirectInput.
+
 v1.17.02.48
-  . <Relabs> Fix song cleanup issue (http://lpchip.com/modplug/viewtopic.php?t=1711)
-  . <Relabs> Pitch/Tempo lock fix (broken in .46 and .47) (http://lpchip.com/modplug/viewtopic.php?t=1646)
-  / <Relabs> Pattern manager channel reordering behviour changes / fixes. (http://lpchip.com/modplug/viewtopic.php?t=1148)
+  . <re> Fix song cleanup issue (http://lpchip.com/modplug/viewtopic.php?t=1711)
+  . <re> Pitch/Tempo lock fix (broken in .46 and .47) (http://lpchip.com/modplug/viewtopic.php?t=1646)
+  / <re> Pattern manager channel reordering behviour changes / fixes. (http://lpchip.com/modplug/viewtopic.php?t=1148)
   . <pelya> Fix bad horizontal scrolling in pattern editor when positioning the cursor with the mouse. (http://lpchip.com/modplug/viewtopic.php?t=1650)
   . <rewbs> Fix odd "play row" behaviour when using 1 tick-per-row (http://lpchip.com/modplug/viewtopic.php?t=1038).
   . <rewbs> Fix pop due to ramping when song starts with a pattern command that sets a low global volume. (http://lpchip.com/modplug/viewtopic.php?t=523)
   . <rewbs> Fix occasional colour issues with orderlist (http://lpchip.com/modplug/viewtopic.php?t=867)
-  . <rewbs> Fix impossible horizontal scrolling in pattern editor when playing with follow song on 
+  . <rewbs> Fix impossible horizontal scrolling in pattern editor when playing with follow song on
   . <rewbs> Grey out "Trim" option in sample editor context menu if there's no selection. (http://lpchip.com/modplug/viewtopic.php?t=908)
 
 v1.17.02.47
@@ -26,54 +228,54 @@ v1.17.02.47
   . <rewbs> Fix saturation on old modules (introduced in 1.17.02.46). Loading tracks with no saved mixlevel setting defaults to 'original'.
             Starting new IT, MPTM, ITP or XM defaults to '117RC3'. Starting new MOD or S3M defaults to 'original'.
   . <rewbs> Tree view FX list now starts with FX01 instead of FX00.
-  / <Relabs> Pattern skipping behavior returned to that of .45
+  / <re> Pattern skipping behavior returned to that of .45
   . <pelya & rewbs> internal: ifdefs for compilation on vs2005
-  . <Relabs> internal: VS Edit&Continue fix (gone broken in 'RC3'branch)
-  / <Relabs> Minor modifications(cleanup of channel state reset code, removed unused orderundo-vector.)
+  . <re> internal: VS Edit&Continue fix (gone broken in 'RC3'branch)
+  / <re> Minor modifications(cleanup of channel state reset code, removed unused orderundo-vector.)
 
 v1.17.02.46
-  + <Relabsoluness> Experimental MPTm format:
+  + <re> Experimental MPTm format:
       --> Internally, it is still very close to the IT-based format.
       --> Order&pattern limit increased to 65000; whole range not tested :) (Note that modeffects such as position jump doesn't cover the whole range unless the #-extension can be used(haven't tested))
-  + <Relabsoluness> User definable tuning modes for instruments:
+  + <re> User definable tuning modes for instruments:
       --> Only available for MPTm
       --> Ratio value as well as note name for every key can be assigned invidually; gives rather free hands for experiments.
       --> Every instrument can have it's own tuning
       --> Tunings can be saved to file and loaded from file.
       --> IMPORTANT: When using tunings, behavior of various modcommands such as portamento have been changed, and new behaviors are still to be decided.
-  + <Relabsoluness> In song properties, option to increase playback compatibility with original Impulse Tracker behavior. Is in no way complete; currently affects only a couple of differences. Many differences are still there.
-  + <Relabsoluness> Ability to load multiple mods/samples/instruments from corresponding load dialogs.
+  + <re> In song properties, option to increase playback compatibility with original Impulse Tracker behavior. Is in no way complete; currently affects only a couple of differences. Many differences are still there.
+  + <re> Ability to load multiple mods/samples/instruments from corresponding load dialogs.
       --> Known issue: Intermittent failures.
-  + <Relabsoluness> 32-bit float wav import
-  . <Relabsoluness> 24/32-bit PCM wav sample import fixed
-  + <Relabsoluness> Playback control additions: 'Solo on transition' & 'Mute on transition'. Available from pattern view context menu(right click).
-  + <Relabsoluness> Envelope points can be scaled by a factor through context menu on envelopeview(right click)
-  + <Relabsoluness> Calculator of playback time (measured from start) at the beginning of any row of any pattern (uses existing modlength calculator).
+  + <re> 32-bit float wav import
+  . <re> 24/32-bit PCM wav sample import fixed
+  + <re> Playback control additions: 'Solo on transition' & 'Mute on transition'. Available from pattern view context menu(right click).
+  + <re> Envelope points can be scaled by a factor through context menu on envelopeview(right click)
+  + <re> Calculator of playback time (measured from start) at the beginning of any row of any pattern (uses existing modlength calculator).
       --> Known limitation: When the row is within pattern loop, doesn't give all possible times.
   + <rewbs> SCx now sends note-off to VSTis at tick x.
   + <rewbs> New mixmode (called 1.17RC3): bypass global preamp, force soft panning, provide explicit dB value for sample attenuation. WARNING: this mixmode is subject to change.
   + <rewbs> Check for updates on startup. To disable, set CheckForUpdates=0 in mptrack.ini.
   . <rewbs> Plugin list window remembers its position/size even on cancel.
   . <rewbs> Fix odd window position on very first startup (before mptrack.ini is created).
-  . <Relabsoluness> When opening instruments, load dialog didn't remember its previous path.
-  . <Relabsoluness> In general tab, it was possible to give longer modname than the fileformat could save.
-  . <Relabsoluness> Instruments associates with VSTis no longer also need to be associated to a sample in order to play.
-  . <Relabsoluness> Trash characters to empty ITP comments should no longer appear.
-  . <Relabsoluness> Channel state should now be updated correctly when e.g. moving channels through channel manager.
-  . <Relabsoluness> It should no longer be possible to remove all channels from channel manager.
-  / <Relabsoluness> Channel states resetting when jumping between orders from orderlist.
+  . <re> When opening instruments, load dialog didn't remember its previous path.
+  . <re> In general tab, it was possible to give longer modname than the fileformat could save.
+  . <re> Instruments associates with VSTis no longer also need to be associated to a sample in order to play.
+  . <re> Trash characters to empty ITP comments should no longer appear.
+  . <re> Channel state should now be updated correctly when e.g. moving channels through channel manager.
+  . <re> It should no longer be possible to remove all channels from channel manager.
+  / <re> Channel states resetting when jumping between orders from orderlist.
       --> NOTE: While this fixes a bug (behavior change) introduced in the tuning branch(?), it also changes quite prominent behavior so can annoy people - might need to be modified at some point.
-  / <Relabsoluness> Added version number to the mainframe title.
-  / <Relabsoluness> Changed the 'order message' at the bottom bar of the screen "Position x of y" to "Position x of y (x in hex of y in hex)".
-  / <Relabsoluness> Lots of smaller (internal) changes.
+  / <re> Added version number to the mainframe title.
+  / <re> Changed the 'order message' at the bottom bar of the screen "Position x of y" to "Position x of y (x in hex of y in hex)".
+  / <re> Lots of smaller (internal) changes.
 
 v1.17.02.45
-  + <Relabsoluness & Alex> "Pitch to tempo lock" instrument setting: define the tempo at which your instrument loops correctly, and it will be pitched automatically to match the song's current tempo.
-  + <Relabsoluness> Notification when attempting to modify pattern but pattern record is off.
-  + <Relabsoluness> Orderlist margins: you can define how many slots to keep visible around the active pattern as the orderlist scrolls
-  . <Relabsoluness> Fixes for various unexpected pattern loop state changes.
-  . <Relabsoluness> Fixes to IT Style clear.
-  . <Relabsoluness> Memory management fixes and misc other bug fixes.
+  + <re & Alex> "Pitch to tempo lock" instrument setting: define the tempo at which your instrument loops correctly, and it will be pitched automatically to match the song's current tempo.
+  + <re> Notification when attempting to modify pattern but pattern record is off.
+  + <re> Orderlist margins: you can define how many slots to keep visible around the active pattern as the orderlist scrolls
+  . <re> Fixes for various unexpected pattern loop state changes.
+  . <re> Fixes to IT Style clear.
+  . <re> Memory management fixes and misc other bug fixes.
   . <rewbs> ITP loading fixed (I broke it in v1.17.02.44)
   . <rewbs> Time estimation fixed for tracks with pattern break+XParam.
   . <rewbs> "Last saved with" version number was not always saved correctly - fixed
@@ -82,14 +284,6 @@ v1.17.02.44
   + <rewbs> Added release section to volume envelope (see: http://openmpt.xwiki.com/xwiki/bin/view/Manual/InstrumentReleaseEnvelope). IT only.
   . <rewbs> Overflow fixes in file loading functions (see: http://aluigi.altervista.org/adv/mptho-adv.txt)
   . <rewbs> Greyed out irrelevant items in the orderlist context menu.
-
-. v1.17.02.43
-  + <rewbs> You can now load up new plugins from anywhere, not just the General tab. Select "Plugin Manager..." from the view menu. This can also be assigned to a global hotkey.
-            Limitation: currently plugins added to a song in this manner with always be put in the first empty slot. In a future version you'll be able to choose the slot directly from that window.
-  + <rewbs> "Cleanup Plugins" to remove any plugs that are not associated to a channel and not used by an instrument and not used as an output for any used plugs.
-  . <rewbs> Fixed channel limits. Should be able to correctly save IT pattern data with up to 127 chans. There's only space for 64 channel headers though (channel names etc..). XMs restricted to 64 chans.
-  . <rewbs> Added channel limit check when adding chans from the pattern editor.
-  . <rewbs> Fixed instant crash with SampleTank 2.1.
 
 . v1.17.02.43
   + <rewbs> You can now load up new plugins from anywhere, not just the General tab. Select "Plugin Manager..." from the view menu. This can also be assigned to a global hotkey.
@@ -115,14 +309,14 @@ v1.17.02.44
 
 
 . v 1.17.02.40
-  + <Relabsoluness> Added indicator of currently playing pattern to orderlist.
-  + <Relabsoluness> 'Loop pattern' and 'follow song' keys should now work when orderlist has focus.
+  + <re> Added indicator of currently playing pattern to orderlist.
+  + <re> 'Loop pattern' and 'follow song' keys should now work when orderlist has focus.
   + <rewbs> Removed registry dependencies. All settings will now be saved to ini file.
   . <rewbs> Correcly update orderlist position when cycling through patterns
-  . <Relabsoluness> Fixed orderlist GUI update on ctrl-transition when in patternloop mode
-  . <Relabsoluness> Moving a channel should now correctly take into account record-channels and pending mutes
-  . <Relabsoluness> Switching autodelay off in the options now works for note-offs as well.
-  . <Relabsoluness> Some mod-effects like 'pattern jump' and 'break pattern' no longer conflict with pattern loop toggling.
+  . <re> Fixed orderlist GUI update on ctrl-transition when in patternloop mode
+  . <re> Moving a channel should now correctly take into account record-channels and pending mutes
+  . <re> Switching autodelay off in the options now works for note-offs as well.
+  . <re> Some mod-effects like 'pattern jump' and 'break pattern' no longer conflict with pattern loop toggling.
   . <rewbs> Fixed bad capping of random cutoff variation (tx LPChip)
   . <rewbs> Fixed crash on loading ITP with pattern names (tx Relabsoluness)
   . <rewbs> Fixed incorrect version number in saved files (tx Relabsoluness)
@@ -131,12 +325,12 @@ v1.17.02.44
 
 
 . v 1.17.02.39
-  + <Relabsoluness> Remove and insert channels directly from pattern editor via channel header context menu
-  + <Relabsoluness> Toggle loop pattern playback mode with a shortcut key and a checkbox above the pattern editor
-  + <Relabsoluness> The automatic note delays that are inserted when recording notes live are now optional
-  . <Relabsoluness> Fixed auto note delays so they work with S3Ms too
-  . <Relabsoluness> Fixes and improvements to displayed instrument name in pattern editor
-  . <Relabsoluness> Fixes and improvements to instrument swap from context menu
+  + <re> Remove and insert channels directly from pattern editor via channel header context menu
+  + <re> Toggle loop pattern playback mode with a shortcut key and a checkbox above the pattern editor
+  + <re> The automatic note delays that are inserted when recording notes live are now optional
+  . <re> Fixed auto note delays so they work with S3Ms too
+  . <re> Fixes and improvements to displayed instrument name in pattern editor
+  . <re> Fixes and improvements to instrument swap from context menu
   . <rewbs> Plugins should never cause song to be marked as modified if their GUI is not open (tx LPChip)
   / <rewbs> Version number in executable properties now correlates with real OpenMPT version number
   / <rewbs> Restored solo/mute in pattern editor main context menu.
@@ -173,17 +367,17 @@ v1.17.02.44
  (+ <rewbs> volume commands without notes now send volume MIDI CC to plugs, but as far as I've seen, no plugs seem to respond to it.)
 
 . v 1.17.02.35
-  + <rewbs & Relabsoluness> Note delay (SDx) is written automatically during "live tracking" if there are no effects already on the existing row.
+  + <rewbs & re> Note delay (SDx) is written automatically during "live tracking" if there are no effects already on the existing row.
   + <rewbs> Preliminary parameter value recording should work a bit now with follow song on. Attempts to set correct macro if it exists. Will only overwite \xx. Does not work with certain plugs that don't give idle time back to the host during mouse down (e.g. Albino, Vanguard...), still trying to understand this. Please play with this & give feedback, but don't expect miracles yet. :)
   . <rewbs> Restored external 0-255 sample panning range with XM.
   / <rewbs> experimental: muting a channel with a VSTi playing should turn off the active note on that channel.
   / <rewbs> Midi pitch bend reset on each new note for that instrument's midi channel.
 
 . v 1.17.02.34
-  + <Relabsoluness> Added dynamic instrument list for Change Instrument item in pattern ctx menu.
+  + <re> Added dynamic instrument list for Change Instrument item in pattern ctx menu.
                     / <rewbs> Disabled it for users who have opted for the old style context menu in general settings, + other minor change.
-  + <Relabsoluness> Added "Clear selection" item in pattern ctx menu
-  / <Relabsoluness> Can now set an instrument value for notes which previously had no attached instruments.
+  + <re> Added "Clear selection" item in pattern ctx menu
+  / <re> Can now set an instrument value for notes which previously had no attached instruments.
   + <rewbs> If you load a track with unrecognized plugins, you'll be prompted to search for the plugs on kvraudio.
   . <rewbs> Fixed rare crash on playback if playing a song with missing plugins.
   / <rewbs> Minor code cleanups
