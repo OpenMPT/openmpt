@@ -230,6 +230,7 @@ enum CommandID
 	kcToggleChanMuteOnPatTransition,
 	kcUnmuteAllChnOnPatTransition,
 	kcSoloChnOnPatTransition,
+	kcChannelReset,
 	kcCopyAndLoseSelection,
 	kcTransposeUp,
 	kcTransposeDown,

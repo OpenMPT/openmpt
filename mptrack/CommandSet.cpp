@@ -2299,6 +2299,11 @@ void CCommandSet::SetupCommands()
 	commands[kcSampleSignUnsign].isHidden = false;
 	commands[kcSampleSignUnsign].isDummy = false;
 
+	commands[kcChannelReset].UID = 1786;
+	commands[kcChannelReset].isHidden = false;
+	commands[kcChannelReset].isDummy = false;
+	commands[kcChannelReset].Message = "Reset channel";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

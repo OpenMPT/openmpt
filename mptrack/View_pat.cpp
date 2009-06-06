@@ -66,6 +66,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_SPLITRECSELECT,	OnSplitRecordSelect)
 // -! NEW_FEATURE#0012
 	ON_COMMAND(ID_EDIT_UNDO,		OnEditUndo)
+	ON_COMMAND(ID_PATTERN_CHNRESET,	OnChannelReset)
 	ON_COMMAND(ID_PATTERN_MUTE,		OnMuteFromClick) //rewbs.customKeys
 	ON_COMMAND(ID_PATTERN_SOLO,		OnSoloFromClick) //rewbs.customKeys
 	ON_COMMAND(ID_PATTERN_TRANSITIONMUTE, OnTogglePendingMuteFromClick)
@@ -1218,8 +1219,8 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 		
 		//------ Standard Menu ---------- :
 		else if ((pt.x >= m_szHeader.cx) && (pt.y > m_szHeader.cy))	{
-			if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
-				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			/*if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");*/
 			if (BuildSelectionCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildEditCtxMenu(hMenu, ih, pModDoc))
@@ -1376,8 +1377,23 @@ void CViewPattern::OnSelectCurrentColumn()
 	}
 }
 
+void CViewPattern::OnChannelReset()
+//---------------------------------
+{
+	const CHANNELINDEX nChn = GetChanFromCursor(m_nMenuParam);
+	CModDoc *pModDoc = GetDocument();
+	CSoundFile* pSndFile;
+	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
+
+	const bool bIsMuted = pModDoc->IsChannelMuted(nChn);
+	if(!bIsMuted) pModDoc->MuteChannel(nChn, true);
+	pSndFile->ResetChannelState(nChn, CHNRESET_TOTAL);
+	if(!bIsMuted) pModDoc->MuteChannel(nChn, false);
+}
+
 
 void CViewPattern::OnMuteFromClick()
+//----------------------------------
 {
 	OnMuteChannel(false);
 }
@@ -3328,6 +3344,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: TogglePendingMute(GetChanFromCursor(m_dwCursor)); return wParam;
 		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
+		case kcChannelReset:				OnChannelReset(); return wParam;
 		case kcTimeAtRow:					OnShowTimeAtRow(); return wParam;
 		case kcSoloChnOnPatTransition:		PendingSoloChn(GetCurrentChannel()); return wParam;
 		case kcTransposeUp:					OnTransposeUp(); return wParam;
@@ -4486,6 +4503,8 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, "On transition: Unmute all\t" + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, "On transition: Solo\t" + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
+
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_CHNRESET, "Reset Channel\t" + ih->GetKeyTextFromCommand(kcChannelReset));
 	
 	return true;
 }
@@ -4518,11 +4537,8 @@ bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih)
 bool CViewPattern::BuildMiscCtxMenu(HMENU hMenu, CInputHandler* ih)
 //-----------------------------------------------------------------
 {
-	if (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE) return false;
-
 	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, "Show row play time\t" + ih->GetKeyTextFromCommand(kcTimeAtRow));
 	return true;
-
 }
 
 bool CViewPattern::BuildSelectionCtxMenu(HMENU hMenu, CInputHandler* ih)
@@ -4701,9 +4717,6 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih)
 bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu)
 //--------------------------------------------------------------------
 {
-	if (CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE) return false;
-	//Not doing the menuentries if opted to use old style menu style.
-
 	AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "Duplicate this channel");
@@ -4729,11 +4742,8 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(INST_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
 
-	if (CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE && (!greyed)) { 
-		// Case: User has opted to use old style menu style.
-		AppendMenu(hMenu, MF_STRING, ID_PATTERN_SETINSTRUMENT, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
-	}
-	else {
+	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE))
+	{
 		// Create the new menu and add it to the existing menu.
 		HMENU instrumentChangeMenu = ::CreatePopupMenu();
 		AppendMenu(hMenu, MF_POPUP|greyed, (UINT)instrumentChangeMenu, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
@@ -4741,32 +4751,39 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 		if(pSndFile == NULL)
 			return false;
 	
-
-		if (pSndFile->m_nInstruments)	{
-				for (UINT i=1; i<=pSndFile->m_nInstruments; i++) {
-					if (pSndFile->Headers[i] == NULL) {
+		if(!greyed)
+		{
+			if (pSndFile->m_nInstruments)
+			{
+				for (UINT i=1; i<=pSndFile->m_nInstruments; i++)
+				{
+					if (pSndFile->Headers[i] == NULL)
 						continue;
-					}
+
 					CString instString = pSndFile->GetPatternViewInstrumentName(i, true);
 					if(instString.GetLength() > 0) AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, pSndFile->GetPatternViewInstrumentName(i));
 					//Adding the entry to the list only if it has some name, since if the name is empty,
 					//it likely is some non-used instrument.
 				}
 
-			} else {
+			}
+			else
+			{
 				CHAR s[256];
 				UINT nmax = pSndFile->m_nSamples;
 				while ((nmax > 1) && (pSndFile->Ins[nmax].pSample == NULL) && (!pSndFile->m_szNames[nmax][0])) nmax--;
-				for (UINT i=1; i<=nmax; i++) if ((pSndFile->m_szNames[i][0]) || (pSndFile->Ins[i].pSample)) 	{
+				for (UINT i=1; i<=nmax; i++) if ((pSndFile->m_szNames[i][0]) || (pSndFile->Ins[i].pSample))
+				{
 					wsprintf(s, "%02d: %s", i, pSndFile->m_szNames[i]);
 					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, s);
 				}
 			}
 
-		//Add options to remove instrument from selection.
-     	AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);
-		AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, "Remove instrument");
-		AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+GetCurrentInstrument(), "Set to current instrument");
+			//Add options to remove instrument from selection.
+     		AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, "Remove instrument");
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+GetCurrentInstrument(), "Set to current instrument");
+		}
 		return true;
 	}
 	return false;

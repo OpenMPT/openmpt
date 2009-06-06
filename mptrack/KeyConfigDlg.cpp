@@ -229,9 +229,9 @@ void COptionsKeyboard::DefineCommandCategories()
 	for (int c=kcClearRow; c<=kcInsertAllRows; c++)
 		newCat->commands.Add(c);
 	newCat->separators.Add(kcInsertAllRows);			//--------------------------------------
-	for (int c=kcChannelMute; c<=kcSoloChnOnPatTransition; c++)
+	for (int c=kcChannelMute; c<=kcChannelReset; c++)
 		newCat->commands.Add(c);
-	newCat->separators.Add(kcSoloChnOnPatTransition);			//--------------------------------------
+	newCat->separators.Add(kcChannelReset);			//--------------------------------------
 	for (int c=kcTransposeUp; c<=kcTransposeOctDown; c++)
 		newCat->commands.Add(c);
 	newCat->separators.Add(kcTransposeOctDown);			//--------------------------------------
