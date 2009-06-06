@@ -220,6 +220,7 @@ BYTE gEffectColors[MAX_EFFECTS] =
 static void ShowChangesDialog()
 //-----------------------------
 {
+	/*
 	const char* const firstOpenMessage = "OpenMPT development build " MPT_VERSION_STR ".\n\n"
 				"Some notable changes since version 1.17.02.48:\n\n"
 				"    [New] Name filter in plugin selection dialog.\n"
@@ -236,6 +237,7 @@ static void ShowChangesDialog()
 				"    For more detailed list of changes, see history.txt.";
 			
 	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT v." MPT_VERSION_STR, MB_ICONINFORMATION);
+	*/
 }
 
 
@@ -1551,7 +1553,7 @@ BOOL CPaletteBitmap::Animate()
 	if (t > 256)
 		m_bFirst = FALSE;
 
-	dir = (t/256) % 2; //change dir every 256 t
+	dir = ((t/256) % 2 != 0); //change dir every 256 t
 	t = t%256;
 	if (!dir) t = (256-t);
 	
@@ -2209,9 +2211,9 @@ void CFastBitmap::SetBlendColor(COLORREF cr)
 		UINT m = (m_Dib.bmiColors[i].rgbRed >> 2)
 				+ (m_Dib.bmiColors[i].rgbGreen >> 1)
 				+ (m_Dib.bmiColors[i].rgbBlue >> 2);
-		m_Dib.bmiColors[i|0x80].rgbRed = (m + r)>>1;
-		m_Dib.bmiColors[i|0x80].rgbGreen = (m + g)>>1;
-		m_Dib.bmiColors[i|0x80].rgbBlue = (m + b)>>1;
+		m_Dib.bmiColors[i|0x80].rgbRed = static_cast<BYTE>((m + r)>>1);
+		m_Dib.bmiColors[i|0x80].rgbGreen = static_cast<BYTE>((m + g)>>1);
+		m_Dib.bmiColors[i|0x80].rgbBlue = static_cast<BYTE>((m + b)>>1);
 	}
 }
 
@@ -2921,6 +2923,17 @@ BOOL CTrackApp::InitializeDXPlugins()
 	m_pPluginManager = new CVstPluginManager;
 	if (!m_pPluginManager) return FALSE;
 	nPlugins = GetPrivateProfileInt("VST Plugins", "NumPlugins", 0, m_szConfigFileName);
+
+	#ifndef NO_VST
+		char buffer[64];
+		GetPrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, buffer, ARRAYELEMCOUNT(buffer), m_szConfigFileName);
+		strcpy(CVstPluginManager::s_szHostProductString, buffer);
+		GetPrivateProfileString("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString, buffer, ARRAYELEMCOUNT(buffer), m_szConfigFileName);
+		strcpy(CVstPluginManager::s_szHostVendorString, buffer);
+		CVstPluginManager::s_nHostVendorVersion = GetPrivateProfileInt("VST Plugins", "HostVendorVersion", CVstPluginManager::s_nHostVendorVersion, m_szConfigFileName);
+	#endif
+
+
 	CString nonFoundPlugs;
 	for (LONG iPlug=0; iPlug<nPlugins; iPlug++)
 	{
@@ -2962,6 +2975,14 @@ BOOL CTrackApp::UninitializeDXPlugins()
 	}
 	wsprintf(s, "%d", iPlug);
 	WritePrivateProfileString("VST Plugins", "NumPlugins", s, m_szConfigFileName);
+
+	#ifndef NO_VST
+		WritePrivateProfileString("VST Plugins", "HostProductString", CVstPluginManager::s_szHostProductString, m_szConfigFileName);
+		WritePrivateProfileString("VST Plugins", "HostVendorString", CVstPluginManager::s_szHostVendorString, m_szConfigFileName);
+		CMainFrame::WritePrivateProfileLong("VST Plugins", "HostVendorVersion", CVstPluginManager::s_nHostVendorVersion, m_szConfigFileName);
+	#endif
+
+
 	if (m_pPluginManager)
 	{
 		delete m_pPluginManager;

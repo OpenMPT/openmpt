@@ -13,8 +13,13 @@
 #include "VstEditor.h"				//rewbs.defaultPlugGUI
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
 #include "midi.h"
+#include "version.h"
 
 #ifndef NO_VST
+
+char CVstPluginManager::s_szHostProductString[64] = "OpenMPT";
+char CVstPluginManager::s_szHostVendorString[64] = "OpenMPT project";
+long CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
 
 //#define VST_LOG
 //#define ENABLE_BUZZ
@@ -861,16 +866,19 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	case audioMasterGetOutputSpeakerArrangement:
 		Log("VST plugin to host: Get Output Speaker Arrangement\n");
 		break;
-	case audioMasterGetVendorString:	// Prentending to be Steinberg for compat.
-		strcpy((char*)ptr,"Steinberg");
-//		strcpy((char*)ptr,"OpenMPT");
-		return 0;
-	case audioMasterGetVendorVersion:	// Prentending to be Cubase VST 7. :)
-		return 7000;					
-	case audioMasterGetProductString:	// Prentending to be Cubase VST for compat.
-		strcpy((char*)ptr,"Cubase VST");
-//		strcpy((char*)ptr,"OpenMPT");
-		return 0;
+	case audioMasterGetVendorString:	
+		strcpy((char*)ptr, s_szHostVendorString);
+		//strcpy((char*)ptr,"Steinberg");
+		//return 0;
+		return true;
+	case audioMasterGetVendorVersion:	
+		return s_nHostVendorVersion;
+		//return 7000;					
+	case audioMasterGetProductString:
+		strcpy((char*)ptr, s_szHostProductString);
+		//strcpy((char*)ptr,"Cubase VST");
+		//return 0;
+		return true;
 	case audioMasterVendorSpecific:		
 		return 0;
 	// void* in <ptr>, format not defined yet	

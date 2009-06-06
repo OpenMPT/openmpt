@@ -344,7 +344,7 @@ protected:
 	MODPLUGFASTDIB m_Dib;
 	UINT m_nTextColor, m_nBkColor;
 	LPMODPLUGDIB m_pTextDib;
-	BOOL m_nBlendOffset;
+	BYTE m_nBlendOffset;
 	BYTE m_n4BitPalette[16];
 
 public:
@@ -359,7 +359,7 @@ public:
 	void SetColor(UINT nIndex, COLORREF cr);
 	void SetAllColors(UINT nBaseIndex, UINT nColors, COLORREF *pcr);
 	void TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, LPMODPLUGDIB lpdib=NULL);
-	void SetBlendMode(UINT nBlendOfs) { m_nBlendOffset = nBlendOfs; }
+	void SetBlendMode(BYTE nBlendOfs) { m_nBlendOffset = nBlendOfs; }
 	void SetBlendColor(COLORREF cr);
 };
 
