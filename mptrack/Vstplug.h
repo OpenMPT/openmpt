@@ -249,6 +249,12 @@ protected:
 	static long VSTCALLBACK MasterCallBack(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN, CSoundFile*);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
+
+public:
+	static char s_szHostProductString[64];
+	static char s_szHostVendorString[64];
+	static long s_nHostVendorVersion;
+
 #else // NO_VST
 public:
 	PVSTPLUGINLIB AddPlugin(LPCSTR, BOOL =TRUE, const bool = false, CString* const = 0) {return 0;}
