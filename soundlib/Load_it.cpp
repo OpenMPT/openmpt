@@ -917,8 +917,8 @@ mpts:
 }
 // -! NEW_FEATURE#0023
 
-BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
-//--------------------------------------------------------------
+BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
+//----------------------------------------------------------------------
 {
 	ITFILEHEADER *pifh = (ITFILEHEADER *)lpStream;
 
@@ -3595,6 +3595,23 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nChannels, 1, size, f);		
 
+	if(TypeIsIT_MPT() && m_nChannels > 64)	//IT header has room only for 64 channels. Save the 
+	{											//settings that do not fit to the header here as an extension.
+		code = 'ChnS';
+		fwrite(&code, 1, sizeof(__int32), f);
+		size = (m_nChannels - 64)*2;
+		fwrite(&size, 1, sizeof(__int16), f);
+		for(UINT ich = 64; ich < m_nChannels; ich++)
+		{
+			BYTE panvol[2];
+			panvol[0] = ChnSettings[ich].nPan >> 2;
+			if (ChnSettings[ich].dwFlags & CHN_SURROUND) panvol[0] = 100;
+			if (ChnSettings[ich].dwFlags & CHN_MUTE) panvol[0] |= 0x80;
+			panvol[1] = ChnSettings[ich].nVolume;
+			fwrite(&panvol, sizeof(panvol), 1, f);
+		}
+	}
+ 
 	code = 'TM..';							//write m_nTempoMode
 	fwrite(&code, 1, sizeof(__int32), f);	
 	size = sizeof(m_nTempoMode);		
@@ -3675,13 +3692,13 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 }
 
 
-void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, BYTE*& ptr, const BYTE* lpStream, const size_t searchlimit)
+void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, BYTE*& ptr, const LPCBYTE lpStream, const size_t searchlimit)
 //--------------------------------------------------
 {
 	int32 code = 0;
 	int16 size = 0;
 	ptr += sizeof(int32); // jump extension header code
-	while( (DWORD)(ptr + 6 - lpStream) <= searchlimit ) //Loop until given limit.
+	while( (DWORD)((ptr + 6) - lpStream) <= searchlimit ) //Loop until given limit.
 	{ 
 		code = (*((__int32 *)ptr));			// read field code
 		ptr += sizeof(__int32);				// jump field code
@@ -3708,15 +3725,27 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, BYTE*& ptr, c
 				if(DWORD(ptr - lpStream + DWORD(size)) > searchlimit)
 					MessageBox(NULL, "Error: Bad MIMA datasizefield", NULL, MB_ICONERROR);
 				else
-				{
 					GetMIDIMapper().Unserialize(ptr, size);
-					ptr += size;
+			break;
+			case 'ChnS': 
+				if( ((ptr - lpStream) + DWORD(size) <= searchlimit) && (size <= 63*2) && (size % 2 == 0) )
+				{
+					const BYTE* pData = ptr;
+					for(__int16 i = 0; i<size/2; i++, pData += 2) if(pData[0] != 0xFF)
+					{
+						ChnSettings[i+64].nVolume = pData[1];
+						ChnSettings[i+64].nPan = 128;
+						if (pData[0] & 0x80) ChnSettings[i+64].dwFlags |= CHN_MUTE;
+						const UINT n = pData[0] & 0x7F;
+						if (n <= 64) ChnSettings[i+64].nPan = n << 2;
+						if (n == 100) ChnSettings[i+64].dwFlags |= CHN_SURROUND;
+					}
 				}
 
 			break;
 		}
 
-		if (fadr != NULL && ptr - lpStream + DWORD(size) <= searchlimit) {	// if field code recognized
+		if (fadr != NULL && (ptr - lpStream) + DWORD(size) <= searchlimit) {	// if field code recognized
 			memcpy(fadr,ptr,size);			// read field data
 		}
 		ptr += size;						// jump field data

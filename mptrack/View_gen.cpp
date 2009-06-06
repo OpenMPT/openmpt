@@ -656,13 +656,14 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 	pModDoc = GetDocument();
 	nChn = m_nActiveTab * 4;
-	if ((pModDoc) && (!IsLocked()) && (nChn < 64))
+	if ((pModDoc) && (!IsLocked()) && (nChn < MAX_BASECHANNELS))
 	{
 		BOOL bUpdate = FALSE;
 		short int pos;
 		
 		LockControls();
-		for (UINT iCh=0; iCh<4; iCh++)
+		const UINT nLoopLimit = pModDoc->GetSoundFile()->GetNumChannels() - nChn;
+		for (UINT iCh=0; iCh<nLoopLimit; iCh++)
 		{
 			// Volume sliders
 			pos = (short int)m_sbVolume[iCh].GetPos();
