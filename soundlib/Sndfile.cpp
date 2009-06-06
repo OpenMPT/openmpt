@@ -136,6 +136,7 @@ Exemple with "nPanLoopEnd" , "nPitchLoopEnd" & "VolEnv[MAX_ENVPOINTS]" members :
 		[EXT]	means external (not related) to INSTRUMENTHEADER content
 
 C...	[EXT]	nChannels
+ChnS	[EXT]	IT/MPTM: Channel settings for channels 65-127 if needed (doesn't fit to IT header).
 CS..			nCutSwing
 CWV.	[EXT]	dwCreatedWithVersion
 DCT.			nDCT;
