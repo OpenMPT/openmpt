@@ -228,6 +228,7 @@ protected:
 	afx_msg void OnEditGoto();
 	afx_msg void OnEditFindNext();
 	afx_msg void OnEditUndo();
+	afx_msg void OnChannelReset();
 	afx_msg void OnMuteFromClick(); //rewbs.customKeys
 	afx_msg void OnSoloFromClick(); //rewbs.customKeys
 	afx_msg void OnTogglePendingMuteFromClick(); //rewbs.customKeys

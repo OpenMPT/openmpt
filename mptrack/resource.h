@@ -961,6 +961,7 @@
 #define ID_PATTERN_PLAYNOLOOP           32901
 #define ID_PATTERN_OPEN_RANDOMIZER      32905
 #define ID_PATTERN_INTERPOLATE_NOTE     32906
+#define ID_PATTERN_CHNRESET				32907
 #define ID_PRESET_LOAD                  32915
 #define ID_PRESET_SAVE                  32916
 #define ID_PRESET_RANDOM                32917
