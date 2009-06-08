@@ -3804,8 +3804,12 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 			pModDoc->NoteOff(0, TRUE, ins, m_dwCursor & 0xFFFF);
 		}
 		else
-			pModDoc->NoteOff(note, FALSE, ins, GetChanFromCursor(m_dwCursor));
-		//pModDoc->NoteOff(note, TRUE, ins, (m_dwCursor & 0xFFFF) >> 3);
+		{
+			if(CMainFrame::m_dwPatternSetup & PATTERN_NOTEFADE)
+				pModDoc->NoteOff(note, TRUE, ins, GetChanFromCursor(m_dwCursor));
+			else
+				pModDoc->NoteOff(note, FALSE, ins, GetChanFromCursor(m_dwCursor));
+		}
 	}
 
 	//Enter note off in pattern?
