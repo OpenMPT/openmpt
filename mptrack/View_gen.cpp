@@ -662,7 +662,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		short int pos;
 		
 		LockControls();
-		const UINT nLoopLimit = pModDoc->GetSoundFile()->GetNumChannels() - nChn;
+		const UINT nLoopLimit = min(4, pModDoc->GetSoundFile()->GetNumChannels() - nChn);
 		for (UINT iCh=0; iCh<nLoopLimit; iCh++)
 		{
 			// Volume sliders
