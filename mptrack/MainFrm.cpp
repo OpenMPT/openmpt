@@ -425,6 +425,9 @@ void CMainFrame::LoadIniSettings()
 	gnMidiPatternLen = GetPrivateProfileLong("MIDI Settings", "MidiImportPatLen", gnMidiPatternLen, iniFile);
 
 	m_dwPatternSetup = GetPrivateProfileDWord("Pattern Editor", "PatternSetup", m_dwPatternSetup, iniFile);
+	if(gcsPreviousVersion != "" && MptVersion::ToNum(gcsPreviousVersion) < MAKE_VERSION_NUMERIC(1,17,02,50))
+		m_dwPatternSetup |= PATTERN_NOTEFADE;
+
 	m_nRowSpacing = GetPrivateProfileDWord("Pattern Editor", "RowSpacing", 16, iniFile);
 	m_nRowSpacing2 = GetPrivateProfileDWord("Pattern Editor", "RowSpacing2", 4, iniFile);
 	gbLoopSong = GetPrivateProfileDWord("Pattern Editor", "LoopSong", true, iniFile);
@@ -541,6 +544,7 @@ void CMainFrame::LoadRegistrySettings()
 		RegQueryValueEx(key, "MidiSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwMidiSetup, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiDevice", NULL, &dwREG_DWORD, (LPBYTE)&m_nMidiDevice, &dwDWORDSize);
 		RegQueryValueEx(key, "PatternSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwPatternSetup, &dwDWORDSize);
+			m_dwPatternSetup |= PATTERN_NOTEFADE; // Set flag to maintain old behaviour(was changed in 1.17.02.50).
 		RegQueryValueEx(key, "RowSpacing", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowSpacing, &dwDWORDSize);
 		RegQueryValueEx(key, "RowSpacing2", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowSpacing2, &dwDWORDSize);
 		RegQueryValueEx(key, "LoopSong", NULL, &dwREG_DWORD, (LPBYTE)&gbLoopSong, &dwDWORDSize);
