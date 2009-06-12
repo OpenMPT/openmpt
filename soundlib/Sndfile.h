@@ -1086,7 +1086,12 @@ public:
 	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, INSTRUMENTHEADER* instruments[], UINT nInstruments);
 	void SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[], UINT nInstruments, FILE* f);
 	void SaveExtendedSongProperties(FILE* f);
-	void LoadExtendedSongProperties(const MODTYPE modtype, BYTE*& ptr, const BYTE* startpos, const size_t seachlimit);
+	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = NULL);
+
+	// Reads extended instrument properties(XM/IT/MPTM). 
+	// If no errors occur and song extension tag is found, returns pointer to the beginning
+	// of the tag, else returns NULL.
+	LPCBYTE LoadExtendedInstrumentProperties(const LPCBYTE pStart, const LPCBYTE pEnd, bool* pInterpretMptMade = NULL);
 
 #endif // MODPLUG_NO_FILESAVE
 	// MOD Convert function
@@ -1513,6 +1518,20 @@ typedef struct MODFORMATINFO
 extern MODFORMATINFO gModFormatInfo[MAX_MODTYPE];
 
 #endif
+
+
+// Used in instrument/song extension reading to make sure the size field is valid.
+bool IsValidSizeField(const LPCBYTE pData, const LPCBYTE pEnd, const int16 size);
+
+// Read instrument property with 'code' and 'size' from 'ptr' to instrument 'penv'.
+// Note: (ptr, size) pair must be valid (e.g. can read 'size' bytes from 'ptr')
+void ReadInstrumentExtensionField(INSTRUMENTHEADER* penv, LPCBYTE& ptr, const int32 code, const int16 size);
+
+// Read instrument property with 'code' from 'pData' to instrument 'penv'.
+void ReadExtendedInstrumentProperty(INSTRUMENTHEADER* penv, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd);
+
+// Read extended instrument properties from 'pDataStart' to instrument 'penv'.
+void ReadExtendedInstrumentProperties(INSTRUMENTHEADER* penv, const LPCBYTE pDataStart, const size_t nMemLength);
 
 
 #endif

@@ -42,9 +42,33 @@ inline T ConvertStrTo(const char* str)
 // Size of the array must be known at compile time.
 template <size_t size>
 inline void SetNullTerminator(char (&buffer)[size])
+//-------------------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	buffer[size-1] = 0;
+}
+
+
+// Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
+// Similarly if 'val' is greater than 'upperLimit', 'val' is set to value 'upperLimit'.
+// If 'lowerLimit' > 'upperLimit', 'val' won't be modified.
+template<class T, class C>
+inline void Limit(T& val, const C lowerLimit, const C upperLimit)
+//---------------------------------------------------------------
+{
+	if(lowerLimit > upperLimit) return;
+	if(val < lowerLimit) val = lowerLimit;
+	else if(val > upperLimit) val = upperLimit;
+}
+
+
+// Like Limit, but with upperlimit only.
+template<class T, class C>
+inline void LimitMax(T& val, const C upperLimit)
+//----------------------------------------------
+{
+	if(val > upperLimit)
+		val = upperLimit;
 }
 
 
