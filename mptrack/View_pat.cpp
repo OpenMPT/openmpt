@@ -3787,8 +3787,12 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 			pModDoc->NoteOff(0, TRUE, ins, m_dwCursor & 0xFFFF);
 		}
 		else
-			pModDoc->NoteOff(note, FALSE, ins, GetChanFromCursor(m_dwCursor));
-		//pModDoc->NoteOff(note, TRUE, ins, (m_dwCursor & 0xFFFF) >> 3);
+		{
+			if(CMainFrame::m_dwPatternSetup & PATTERN_NOTEFADE)
+				pModDoc->NoteOff(note, TRUE, ins, GetChanFromCursor(m_dwCursor));
+			else
+				pModDoc->NoteOff(note, FALSE, ins, GetChanFromCursor(m_dwCursor));
+		}
 	}
 
 	//Enter note off in pattern?
@@ -4518,11 +4522,8 @@ bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler* ih)
 bool CViewPattern::BuildMiscCtxMenu(HMENU hMenu, CInputHandler* ih)
 //-----------------------------------------------------------------
 {
-	if (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE) return false;
-
 	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, "Show row play time\t" + ih->GetKeyTextFromCommand(kcTimeAtRow));
 	return true;
-
 }
 
 bool CViewPattern::BuildSelectionCtxMenu(HMENU hMenu, CInputHandler* ih)
@@ -4701,9 +4702,6 @@ bool CViewPattern::BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih)
 bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu)
 //--------------------------------------------------------------------
 {
-	if (CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE) return false;
-	//Not doing the menuentries if opted to use old style menu style.
-
 	AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DUPLICATECHANNEL, "Duplicate this channel");

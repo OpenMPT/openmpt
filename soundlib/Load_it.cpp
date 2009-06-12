@@ -847,8 +847,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 // Extra info data
 
 	__int32 fcode = 0;
-	__int16 fsize = 0;
-	BYTE * ptr = (BYTE *)(lpStream + streamPos);
+	LPCBYTE ptr = lpStream + min(streamPos, dwMemLength);
 
 	if (streamPos <= dwMemLength - 4) {
 		fcode = (*((__int32 *)ptr));
@@ -863,7 +862,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		i = 1;
 
 		// parse file
-		while( ptr + 4 <= (BYTE *)(lpStream + dwMemLength) && i <= m_nInstruments ){
+		while( uintptr_t(ptr - lpStream) <= dwMemLength - 4 && i <= m_nInstruments ){
 
 			fcode = (*((__int32 *)ptr));			// read field code
 
@@ -876,16 +875,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 				default:
 					ptr += sizeof(__int32);			// jump field code
-					if(ptr + 2 > (BYTE *)(lpStream + dwMemLength)) return FALSE;
-					fsize = (*((__int16 *)ptr));	// read field size
-					ptr += sizeof(__int16);			// jump field size
-					BYTE * fadr = GetInstrumentHeaderFieldPointer(Headers[i], fcode, fsize);
-					if(fadr && fcode != 'K[..')		// copy field data in instrument's header
-					{
-						if(ptr + fsize > (BYTE *)(lpStream + dwMemLength)) return FALSE;
-						memcpy(fadr,ptr,fsize);		// (except for keyboard mapping)
-					}
-					ptr += fsize;					// jump field
+					ReadExtendedInstrumentProperty(Headers[i], fcode, ptr, lpStream + dwMemLength);
 				break;
 			}
 		}
@@ -893,7 +883,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	//HACK: if we fail on i <= m_nInstruments above, arrive here without having set fcode as appropriate,
 	//      hence the code duplication.
-	if (ptr + 4 <= (BYTE *)(lpStream + dwMemLength)) {
+	if ( (uintptr_t)(ptr - lpStream) <= dwMemLength - 4 ) {
 		fcode = (*((__int32 *)ptr));
 	}
 
@@ -917,8 +907,8 @@ mpts:
 }
 // -! NEW_FEATURE#0023
 
-BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
-//--------------------------------------------------------------
+BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
+//----------------------------------------------------------------------
 {
 	ITFILEHEADER *pifh = (ITFILEHEADER *)lpStream;
 
@@ -1320,55 +1310,18 @@ BOOL CSoundFile::ReadIT(const BYTE *lpStream, const DWORD dwMemLength)
 	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[pifh->smpnum-1]);
 	dwMemPos = pis->samplepointer + lastSampleSize;
 
-	// Get file pointer to match the first byte of extra settings informations	__int16 size = 0;
-	__int32 code = 0;
-	__int16 size = 0;
-	BYTE * ptr = NULL;
-	if(dwMemPos < dwMemLength) {
-		ptr = (BYTE *)(lpStream + dwMemPos);
-		code = (*((__int32 *)ptr));;
+	// Load instrument and song extensions.
+	if(mptStartPos >= dwMemPos)
+	{
+		LPCBYTE ptr = LoadExtendedInstrumentProperties(lpStream + dwMemPos, lpStream + mptStartPos, &interpretModplugmade);
+		LoadExtendedSongProperties(GetType(), ptr, lpStream, mptStartPos, &interpretModplugmade);
 	}
-
-	// Instrument extensions
-	if( code == 'MPTX' ){
-		interpretModplugmade = true;
-		ptr += sizeof(__int32);							// jump extension header code
-		while( (DWORD)(ptr - lpStream) < mptStartPos ){ //Loop 'till beginning of end of file/mpt specific looking for inst. extensions
 		
-			code = (*((__int32 *)ptr));			// read field code
-			if (code == 'MPTS') {				//Reached song extensions, break out of this loop
-				break;
-			}
-			
-			ptr += sizeof(__int32);				// jump field code
-			size = (*((__int16 *)ptr));			// read field size
-			ptr += sizeof(__int16);				// jump field size
-
-			for(UINT nins=1; nins<=m_nInstruments; nins++){
-				if(Headers[nins]){
-					// get field's adress in instrument's header
-					BYTE * fadr = GetInstrumentHeaderFieldPointer(Headers[nins], code, size);
-					// copy field data in instrument's header (except for keyboard mapping)
-					if(fadr && code != 'K[..') memcpy(fadr,ptr,size);
-					// jump field
-					ptr += size;
-				}
-			}
-			//end rewbs.instroVSTi
-		}
-	}
 // -! NEW_FEATURE#0027
 
-	// Song extensions
-	if( code == 'MPTS' )
-	{
-		interpretModplugmade = true;
-		LoadExtendedSongProperties(GetType(), ptr, lpStream, mptStartPos);
-	}
-
-	Patterns.ResizeArray(max(MAX_PATTERNS, npatterns));
 
 	// Reading Patterns
+	Patterns.ResizeArray(max(MAX_PATTERNS, npatterns));
 	for (UINT npat=0; npat<npatterns; npat++)
 	{
 		if ((!patpos[npat]) || ((DWORD)patpos[npat] >= dwMemLength - 4))
@@ -3674,53 +3627,143 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	return;
 }
 
-
-void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype, BYTE*& ptr, const BYTE* lpStream, const size_t searchlimit)
-//--------------------------------------------------
+LPCBYTE CSoundFile::LoadExtendedInstrumentProperties(const LPCBYTE pStart,
+													 const LPCBYTE pEnd,
+													 bool* pInterpretMptMade)
+//---------------------------------------------------------------------------
 {
+	if( pStart == NULL || pEnd <= pStart || uintptr_t(pEnd - pStart) < 4)
+		return NULL;
+
 	int32 code = 0;
 	int16 size = 0;
-	ptr += sizeof(int32); // jump extension header code
-	while( (DWORD)(ptr + 6 - lpStream) <= searchlimit ) //Loop until given limit.
+	LPCBYTE ptr = pStart;
+
+	memcpy(&code, ptr, sizeof(code));
+
+	if(code != 'MPTX')
+		return NULL;
+
+	// Found MPTX, interpret the file MPT made.
+	if(pInterpretMptMade != NULL)
+		*pInterpretMptMade = true;
+
+	ptr += sizeof(int32);							// jump extension header code
+	while( ptr < pEnd && uintptr_t(pEnd-ptr) >= 4) //Loop 'till beginning of end of file/mpt specific looking for inst. extensions
 	{ 
-		code = (*((__int32 *)ptr));			// read field code
-		ptr += sizeof(__int32);				// jump field code
-		size = (*((__int16 *)ptr));			// read field size
-		if(size <  0) break;
-		ptr += sizeof(__int16);				// jump field size
+		memcpy(&code, ptr, sizeof(code));	// read field code
+		if (code == 'MPTS')					//Reached song extensions, break out of this loop
+			return ptr;
+		
+		ptr += sizeof(code);				// jump field code
 
-		BYTE * fadr = NULL;
-		switch (code) {						// interpret field code
-			case 'DT..': fadr = reinterpret_cast<BYTE*>(&m_nDefaultTempo);   break;
-			case 'RPB.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerBeat);    break;
-			case 'RPM.': fadr = reinterpret_cast<BYTE*>(&m_nRowsPerMeasure); break;			
-			case 'C...': if(modtype != MOD_TYPE_XM) fadr = reinterpret_cast<BYTE*>(&m_nChannels); break;		
-			case 'TM..': fadr = reinterpret_cast<BYTE*>(&m_nTempoMode);		 break;
-			case 'PMM.': fadr = reinterpret_cast<BYTE*>(&m_nMixLevels);	 break;
-			case 'CWV.': fadr = reinterpret_cast<BYTE*>(&m_dwCreatedWithVersion);	 break;
-			case 'LSWV': fadr = reinterpret_cast<BYTE*>(&m_dwLastSavedWithVersion);	 break;
-			case 'SPA.': fadr = reinterpret_cast<BYTE*>(&m_nSamplePreAmp);	 break;
-			case 'VSTV': fadr = reinterpret_cast<BYTE*>(&m_nVSTiVolume);	 break;
-			case 'DGV.': fadr = reinterpret_cast<BYTE*>(&m_nDefaultGlobalVolume);	 break;
-			case 'RP..': if(modtype != MOD_TYPE_XM) fadr = reinterpret_cast<BYTE*>(&m_nRestartPos);	 break;
-			case 'MSF.': fadr = reinterpret_cast<BYTE*>(&m_ModFlags);	 break;
-			case 'MIMA':
-				if(DWORD(ptr - lpStream + DWORD(size)) > searchlimit)
-					MessageBox(NULL, "Error: Bad MIMA datasizefield", NULL, MB_ICONERROR);
-				else
-				{
-					GetMIDIMapper().Unserialize(ptr, size);
-					ptr += size;
-				}
+		if((uintptr_t)(pEnd - ptr) < 2)
+			return NULL;
 
+		memcpy(&size, ptr, sizeof(size));	// read field size
+		ptr += sizeof(size);				// jump field size
+
+		if(IsValidSizeField(ptr, pEnd, size) == false)
+			return NULL;
+
+		for(UINT nins=1; nins<=m_nInstruments; nins++)
+		{
+			if(Headers[nins])
+				ReadInstrumentExtensionField(Headers[nins], ptr, code, size);
+		}
+	}
+
+	return NULL;
+}
+
+
+void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
+											LPCBYTE ptr,
+											const LPCBYTE lpStream,
+											const size_t searchlimit,
+											bool* pInterpretMptMade)
+//-------------------------------------------------------------------
+{
+	if(searchlimit < 6 || ptr == NULL || ptr < lpStream || uintptr_t(ptr - lpStream) > searchlimit - 4)
+		return;
+
+	const LPCBYTE pEnd = lpStream + searchlimit;
+
+	int32 code = 0;
+	int16 size = 0;
+	
+	memcpy(&code, ptr, sizeof(code));
+	
+	if(code != 'MPTS')
+		return;
+
+	// Found MPTS, interpret the file MPT made.
+	if(pInterpretMptMade != NULL)
+		*pInterpretMptMade = true;
+
+
+	// Case macros. 
+	#define CASE(id, data)	\
+		case id: fadr = reinterpret_cast<BYTE*>(&data); nMaxReadCount = min(size, sizeof(data)); break;
+	#define CASE_NOTXM(id, data) \
+		case id: if(modtype != MOD_TYPE_XM) {fadr = reinterpret_cast<BYTE*>(&data); nMaxReadCount = min(size, sizeof(data));} break;
+
+	ptr += sizeof(code); // jump extension header code
+	while( uintptr_t(ptr - lpStream) <= searchlimit-6 ) //Loop until given limit.
+	{ 
+		code = (*((int32 *)ptr));			// read field code
+		ptr += sizeof(int32);				// jump field code
+		size = (*((int16 *)ptr));			// read field size
+		ptr += sizeof(int16);				// jump field size
+
+		if(IsValidSizeField(ptr, pEnd, size) == false)
 			break;
+
+		size_t nMaxReadCount = 0;
+		BYTE * fadr = NULL;
+
+		switch (code)					// interpret field code
+		{
+			CASE('DT..', m_nDefaultTempo);
+			CASE('RPB.', m_nRowsPerBeat);
+			CASE('RPM.', m_nRowsPerMeasure);
+			CASE_NOTXM('C...', m_nChannels);
+			CASE('TM..', m_nTempoMode);
+			CASE('PMM.', m_nMixLevels);
+			CASE('CWV.', m_dwCreatedWithVersion);
+			CASE('LSWV', m_dwLastSavedWithVersion);
+			CASE('SPA.', m_nSamplePreAmp);
+			CASE('VSTV', m_nVSTiVolume);
+			CASE('DGV.', m_nDefaultGlobalVolume);
+			CASE_NOTXM('RP..', m_nRestartPos);
+			CASE('MSF.', m_ModFlags);
+			case 'MIMA': GetMIDIMapper().Unserialize(ptr, size); break;
 		}
 
-		if (fadr != NULL && ptr - lpStream + DWORD(size) <= searchlimit) {	// if field code recognized
-			memcpy(fadr,ptr,size);			// read field data
-		}
+		if (fadr != NULL)					// if field code recognized
+			memcpy(fadr,ptr,nMaxReadCount);	// read field data
+
 		ptr += size;						// jump field data
 	}
+
+	// Validate read values.
+	Limit(m_nDefaultTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
+	//m_nRowsPerBeat
+	//m_nRowsPerMeasure
+	LimitMax(m_nChannels, GetModSpecifications().channelsMax);
+    //m_nTempoMode
+	//m_nMixLevels
+	//m_dwCreatedWithVersion
+	//m_dwLastSavedWithVersion
+	//m_nSamplePreAmp
+	//m_nVSTiVolume
+	//m_nDefaultGlobalVolume);
+	//m_nRestartPos
+	//m_ModFlags
+
+
+	#undef CASE
+	#undef CASE_NOTXM
 }
 
 
