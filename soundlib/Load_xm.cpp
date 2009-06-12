@@ -611,53 +611,15 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(dwMemPos >= dwMemLength) return TRUE;
 
-	// Get file pointer to match the first byte of extra settings informations
-	BYTE * ptr = (BYTE *)(lpStream + dwMemPos);
+	bool bInterpretMptMade = false;
+	LPCBYTE ptr = lpStream + dwMemPos;
+	if(m_nInstruments)
+		ptr = LoadExtendedInstrumentProperties(ptr, lpStream+dwMemLength, &bInterpretMptMade);
 
-	// Seek for supported extended settings header
-	__int16 size = 0;
-	__int32 code = (*((__int32 *)ptr));
+	LoadExtendedSongProperties(GetType(), ptr, lpStream, dwMemLength, &bInterpretMptMade);
 
-	// Instrument extensions
-	if( code == 'MPTX' && m_nInstruments ){
-		ptr += sizeof(__int32);							// jump extension header code
-		while( (DWORD)(ptr - lpStream) < dwMemLength ){ //Loop 'till end of file looking for inst. extensions
-
-			code = (*((__int32 *)ptr));			// read field code
-			if (code == 'MPTS') {				//Reached song extensions, break out of this loop
-				break;
-			}
-			
-			ptr += sizeof(__int32);				// jump field code
-			size = (*((__int16 *)ptr));			// read field size
-			ptr += sizeof(__int16);				// jump field size
-
-			for(UINT nins=1; nins<=m_nInstruments; nins++){
-				if(Headers[nins]){
-					// get field's adress in instrument's header
-					BYTE * fadr = GetInstrumentHeaderFieldPointer(Headers[nins], code, size);
-					// copy field data in instrument's header (except for keyboard mapping)
-					if(fadr && code != 'K[..') memcpy(fadr,ptr,size);
-					// jump field
-					ptr += size;
-				}
-			}
-			//end rewbs.instroVSTi
-		}
-	}
-// -! NEW_FEATURE#0027
-
-	// Song extensions
-	if( code == 'MPTS' )
-	{
-		LoadExtendedSongProperties(MOD_TYPE_XM, ptr, lpStream, dwMemLength);
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
-			SetModFlag(MSF_MIDICC_BUGEMULATION, true);
-	}
-
-
-
-
+	if(bInterpretMptMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
+		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 
 	return TRUE;
 }

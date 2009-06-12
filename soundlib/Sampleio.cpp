@@ -1297,27 +1297,7 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(dwMemPos >= dwFileLength) return TRUE;
 
-	// Compute current file pointer position
-	BYTE * ptr = (BYTE *)(lpMemFile+dwMemPos);
-
-	// Seek for supported extended settings header
-	if( (*((__int32 *)ptr)) == 'MPTX' && penv ){
-		__int16 size;
-		__int32 code;
-		ptr += sizeof(__int32); // jump extension header code
-
- 		while( (DWORD)(ptr - lpMemFile) < dwFileLength ){
-			code = (*((__int32 *)ptr));		// read field code
-			ptr += sizeof(__int32);			// jump field code
-			size = (*((__int16 *)ptr));	// read field size
-			ptr += sizeof(__int16);			// jump field size
-
-			BYTE * fadr = GetInstrumentHeaderFieldPointer(penv, code, size);
-			if(fadr && code != 'K[..')		// copy field data in instrument's header
-				memcpy(fadr,ptr,size);		// (except for keyboard mapping)
-			ptr += size;					// jump field
-		}
-	}
+	ReadExtendedInstrumentProperties(penv, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
 
 // -! NEW_FEATURE#0027
 
@@ -1827,27 +1807,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(dwMemPos >= dwFileLength) return TRUE;
 
-	// Get file pointer to match the first byte of extra settings informations
-	ptr = (BYTE *)(lpMemFile+dwMemPos);
-
-	// Seek for supported extended settings header
-	if( (*((__int32 *)ptr)) == 'MPTX' && penv ){
-		__int16 size;
-		__int32 code;
-		ptr += sizeof(__int32); // jump extension header code
-
-		while( (DWORD)(ptr - lpMemFile) < dwFileLength ){
-			code = (*((__int32 *)ptr));		// read field code
-			ptr += sizeof(__int32);			// jump field code
-			size = (*((__int16 *)ptr));		// read field size
-			ptr += sizeof(__int16);			// jump field size
-
-			BYTE * fadr = GetInstrumentHeaderFieldPointer(penv, code, size);
-			if(fadr && code != 'K[..')		// copy field data in instrument's header
-				memcpy(fadr,ptr,size);		// (except for keyboard mapping)
-			ptr += size;					// jump field
-		}
-	}
+	ReadExtendedInstrumentProperties(penv, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
 
 // -! NEW_FEATURE#0027
 
@@ -2040,6 +2000,73 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 
 	fclose(f);
 	return TRUE;
+}
+
+
+
+bool IsValidSizeField(const LPCBYTE pData, const LPCBYTE pEnd, const int16 size)
+//------------------------------------------------------------------------------
+{
+	if(size < 0 || (uintptr_t)(pEnd - pData) < (uintptr_t)size)
+		return false;
+	else 
+		return true;
+}
+
+
+void ReadInstrumentExtensionField(INSTRUMENTHEADER* penv, LPCBYTE& ptr, const int32 code, const int16 size)
+//------------------------------------------------------------------------------------------------------------
+{
+	// get field's address in instrument's header
+	BYTE* fadr = GetInstrumentHeaderFieldPointer(penv, code, size);
+	 
+	if(fadr && code != 'K[..')	// copy field data in instrument's header
+		memcpy(fadr,ptr,size);  // (except for keyboard mapping)
+	ptr += size;				// jump field
+}
+
+
+void ReadExtendedInstrumentProperty(INSTRUMENTHEADER* penv, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd)
+//---------------------------------------------------------------------------------------------------------------
+{
+	if(pEnd < pData || uintptr_t(pEnd - pData) < 2)
+		return;
+
+	int16 size;
+	memcpy(&size, pData, sizeof(size)); // read field size
+	pData += sizeof(size);				// jump field size
+
+	if(IsValidSizeField(pData, pEnd, size) == false)
+		return;
+
+	ReadInstrumentExtensionField(penv, pData, code, size);
+}
+
+
+void ReadExtendedInstrumentProperties(INSTRUMENTHEADER* penv, const LPCBYTE pDataStart, const size_t nMemLength)
+//--------------------------------------------------------------------------------------------------------------
+{
+	if(penv == 0 || pDataStart == 0 || nMemLength < 4)
+		return;
+
+	LPCBYTE pData = pDataStart;
+	const LPCBYTE pEnd = pDataStart + nMemLength;
+
+	int32 code;
+	memcpy(&code, pData, sizeof(code));
+
+	// Seek for supported extended settings header
+	if( code == 'MPTX' )
+	{
+		pData += sizeof(code); // jump extension header code
+
+		while( (uintptr_t)(pData - pDataStart) <= nMemLength - 4)
+		{
+			memcpy(&code, pData, sizeof(code)); // read field code
+			pData += sizeof(code);				 // jump field code
+			ReadExtendedInstrumentProperty(penv, code, pData, pEnd);
+		}
+	}
 }
 
 
