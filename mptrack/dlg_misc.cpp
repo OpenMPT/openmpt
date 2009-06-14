@@ -1543,6 +1543,33 @@ void CAmpDlg::OnOK()
 }
 
 
+// Add silence to a sample
+BOOL CAddSilenceDlg::OnInitDialog()
+//---------------------------------
+{
+	CDialog::OnInitDialog();
+	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1);
+	if (spin)
+	{
+		spin->SetRange(0, int16_max);
+		spin->SetPos(m_nSamples);
+	}
+	CButton *radio2 = (CButton *)GetDlgItem(IDC_RADIO2);
+	radio2->SetCheck(m_bAddAtEnd);
+	SetDlgItemInt(IDC_EDIT1, m_nSamples);
+	return TRUE;
+}
+
+
+void CAddSilenceDlg::OnOK()
+//-------------------------
+{
+	m_nSamples = GetDlgItemInt(IDC_EDIT1);
+	m_bAddAtEnd = (IsDlgButtonChecked(IDC_RADIO2) != 0);
+	CDialog::OnOK();
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // Sound Bank Information
 

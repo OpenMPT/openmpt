@@ -19,7 +19,7 @@
 #include <shlwapi.h>
 
 // rewbs.memLeak
-#define CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 #include ".\mptrack.h"
@@ -1686,6 +1686,8 @@ http://sourceforge.net/projects/modplug/");
 		"http://www.hermannseib.com/english/vsthost.htm|"
 		"Ian Luck for UNMO3|"
 		"http://www.un4seen.com/mo3.html|"
+		"coda for sample drawing code|"
+		"http://coda.s3m.us/|"
 		"Pel K. Txnder for the scrolling credits control :)|"
 		"http://tinyurl.com/4yze8|"
 		"The people at Modplug forums for crucial contribution|"

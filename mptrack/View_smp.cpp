@@ -9,6 +9,12 @@
 #include "channelManagerDlg.h"
 #include "view_smp.h"
 #include "midi.h"
+#include "dlg_misc.h"
+#include "modsmp_ctrl.h"
+
+#define new DEBUG_NEW
+
+
 
 // Non-client toolbar
 #define SMP_LEFTBAR_CY			29
@@ -31,6 +37,8 @@ const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] =
 	ID_SAMPLE_ZOOMUP,
 	ID_SAMPLE_ZOOMDOWN,
 		ID_SEPARATOR,
+	ID_SAMPLE_DRAW,
+	ID_SAMPLE_ADDSILENCE,
 };
 
 
@@ -75,6 +83,8 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_SETSUSTAINEND,		OnSetSustainEnd)
 	ON_COMMAND(ID_SAMPLE_ZOOMUP,			OnZoomUp)
 	ON_COMMAND(ID_SAMPLE_ZOOMDOWN,			OnZoomDown)
+	ON_COMMAND(ID_SAMPLE_DRAW,				OnDrawingToggle)
+	ON_COMMAND(ID_SAMPLE_ADDSILENCE,		OnAddSilence)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
@@ -103,6 +113,7 @@ void CViewSample::OnInitialUpdate()
 //---------------------------------
 {
 	m_dwBeginSel = m_dwEndSel = 0;
+	m_bDrawingEnabled = false; // sample drawing
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 	CModScrollView::OnInitialUpdate();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -179,6 +190,7 @@ BOOL CViewSample::SetCurrentSample(UINT nSmp)
 	pModDoc->SetFollowWnd(m_hWnd, MPTNOTIFY_SAMPLE|nSmp);
 	if (nSmp == m_nSample) return FALSE;
 	m_dwBeginSel = m_dwEndSel = 0;
+	m_bDrawingEnabled = false; // sample drawing
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->SetInfoText("");
 	m_nSample = nSmp;
@@ -393,6 +405,13 @@ void CViewSample::UpdateView(DWORD dwHintMask, CObject *)
 		UpdateScrollSize();
 		UpdateNcButtonState();
 		InvalidateSample();
+	}
+	
+	// sample drawing
+	if(dwHintMask & HINT_SAMPLEINFO)
+	{
+		m_bDrawingEnabled = false;
+		UpdateNcButtonState();
 	}
 }
 
@@ -987,6 +1006,8 @@ void CViewSample::DrawNcButton(CDC *pDC, UINT nBtn)
 		{
 		case ID_SAMPLE_ZOOMUP:		nImage = 1; break;
 		case ID_SAMPLE_ZOOMDOWN:	nImage = 2; break;
+		case ID_SAMPLE_DRAW:		nImage = (dwStyle & NCBTNS_DISABLED) ? 18 : 16; break;
+		case ID_SAMPLE_ADDSILENCE:	nImage = 17; break;
 		}
 		pDC->Draw3dRect(rect.left-1, rect.top-1, SMP_LEFTBAR_CXBTN+2, SMP_LEFTBAR_CYBTN+2, c3, c4);
 		pDC->Draw3dRect(rect.left, rect.top, SMP_LEFTBAR_CXBTN, SMP_LEFTBAR_CYBTN, c1, c2);
@@ -1061,6 +1082,15 @@ void CViewSample::UpdateNcButtonState()
 			dwStyle |= NCBTNS_MOUSEOVER;
 			if (m_dwStatus & SMPSTATUS_NCLBTNDOWN) dwStyle |= NCBTNS_PUSHED;
 		}
+
+		switch(cLeftBarButtons[i])
+		{
+			case ID_SAMPLE_DRAW: 
+				if(m_bDrawingEnabled) dwStyle |= NCBTNS_CHECKED; 
+				if(pSndFile->Ins[m_nSample].GetNumChannels() > 1) dwStyle |= NCBTNS_DISABLED;
+				break;
+		}
+
 		if (dwStyle != m_NcButtonState[i])
 		{
 			m_NcButtonState[i] = dwStyle;
@@ -1163,6 +1193,41 @@ void CViewSample::ScrollToPosition(int x)    // logical coordinates
 }
 
 
+template<class T, class uT>
+T CViewSample::GetSampleValueFromPoint(const CPoint& point)
+//------------------------------------------------------------
+{
+	STATIC_ASSERT(sizeof(T) == sizeof(uT) && sizeof(T) <= 2);
+	int value = (std::numeric_limits<T>::max)() - (std::numeric_limits<uT>::max)() * point.y / (m_rcClient.bottom - m_rcClient.top);
+	Limit(value, (std::numeric_limits<T>::min)(), (std::numeric_limits<T>::max)());
+	return static_cast<T>(value);
+}
+
+
+template<class T, class uT>
+void CViewSample::SetInitialDrawPoint(void* pSample, const CPoint& point)
+//-----------------------------------------------------------------------
+{
+	T* data = reinterpret_cast<T*>(pSample);
+	data[m_dwEndDrag] = GetSampleValueFromPoint<T, uT>(point);
+}
+
+
+template<class T, class uT>
+void CViewSample::SetSampleData(void* pSample, const CPoint& point, const DWORD old )
+//-----------------------------------------------------------------------------------
+{
+	T* data = reinterpret_cast<T*>(pSample);
+	const int oldvalue = data[old];
+	const int value = GetSampleValueFromPoint<T, uT>(point);
+	for(DWORD i=old; i != m_dwEndDrag; i += (m_dwEndDrag > old ? 1 : -1))
+	{
+		data[i] = static_cast<T>((float)oldvalue + (value - oldvalue) * ((float)i - old) / ((float)m_dwEndDrag - old));
+	}
+	data[m_dwEndDrag] = static_cast<T>(value);
+}
+
+
 void CViewSample::OnMouseMove(UINT, CPoint point)
 //-----------------------------------------------
 {
@@ -1212,7 +1277,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	if (m_dwStatus & SMPSTATUS_MOUSEDRAG)
 	{
 		BOOL bAgain = FALSE;
-		DWORD len = pSndFile->Ins[m_nSample].nLength;
+		const DWORD len = pSndFile->Ins[m_nSample].nLength;
 		if (!len) return;
 		DWORD old = m_dwEndDrag;
 		if (m_nZoom)
@@ -1242,11 +1307,23 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				point.x = m_rcClient.right;
 			}
 		}
-		LONG l = ScreenToSample(point.x);
-		if (l < 0) l = 0;
-		m_dwEndDrag = l;
-		if (m_dwEndDrag > len) m_dwEndDrag = len;
-		if (old != m_dwEndDrag)
+		m_dwEndDrag = ScreenToSample(point.x);
+		if(m_bDrawingEnabled)
+		{
+			if(m_dwEndDrag < len)
+			{
+				if(pSndFile->Ins[m_nSample].GetElementarySampleSize() == 2)
+					SetSampleData<int16, uint16>(pSndFile->Ins[m_nSample].pSample, point, old);
+				else if(pSndFile->Ins[m_nSample].GetElementarySampleSize() == 1)
+					SetSampleData<int8, uint8>(pSndFile->Ins[m_nSample].pSample, point, old);
+				
+				ctrlSmp::AdjustEndOfSample(pSndFile->Ins[m_nSample], pSndFile);
+
+				InvalidateSample();
+				pModDoc->SetModified();
+			}
+		}
+		else if (old != m_dwEndDrag)
 		{
 			SetCurSel(m_dwBeginDrag, m_dwEndDrag);
 			UpdateWindow();
@@ -1275,6 +1352,17 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 		if (m_dwBeginDrag >= len) m_dwBeginDrag = len-1;
 		m_dwEndDrag = m_dwBeginDrag;
 		if (oldsel) SetCurSel(m_dwBeginDrag, m_dwEndDrag);
+		// set initial point for sample drawing
+		if (m_bDrawingEnabled)
+		{
+			if(pSndFile->Ins[m_nSample].GetElementarySampleSize() == 2)
+				SetInitialDrawPoint<int16, uint16>(pSndFile->Ins[m_nSample].pSample, point);
+			else if(pSndFile->Ins[m_nSample].GetElementarySampleSize() == 1)
+				SetInitialDrawPoint<int8, uint8>(pSndFile->Ins[m_nSample].pSample, point);
+
+			InvalidateSample();
+			pModDoc->SetModified();
+		}
 	}
 }
 
@@ -1299,7 +1387,7 @@ void CViewSample::OnLButtonDblClk(UINT, CPoint)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		DWORD len = pSndFile->Ins[m_nSample].nLength;
-		if (len) SetCurSel(0, len);
+		if (len && !m_bDrawingEnabled) SetCurSel(0, len);
 	}
 }
 
@@ -2278,6 +2366,43 @@ void CViewSample::OnZoomDown()
 	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, (m_nZoom<MAX_ZOOM) ? m_nZoom+1 : MIN_ZOOM);
 }
 
+
+void CViewSample::OnDrawingToggle()
+//---------------------------------
+{
+	m_bDrawingEnabled = !m_bDrawingEnabled;
+	UpdateNcButtonState();
+}
+
+
+void CViewSample::OnAddSilence()
+//------------------------------
+{
+	CAddSilenceDlg dlg(this);
+	if (dlg.DoModal() != IDOK) return;
+
+	CModDoc *pModDoc = GetDocument();
+	if (!pModDoc) return;
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	if (!pSndFile) return;
+
+	const ctrlSmp::SmpLength nOldLength = pSndFile->Ins[m_nSample].nLength;
+
+	if( MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples )
+	{
+		CString str; str.Format(TEXT("Can't add silence because the new sample length would exceed maximum sample length %u."), MAX_SAMPLE_LENGTH);
+		AfxMessageBox(str, MB_ICONINFORMATION);
+		return;
+	}
+	
+	ctrlSmp::InsertSilence(pSndFile->Ins[m_nSample], dlg.m_nSamples, (dlg.m_bAddAtEnd) ? pSndFile->Ins[m_nSample].nLength : 0, pSndFile);
+
+	if(nOldLength != pSndFile->Ins[m_nSample].nLength)
+	{
+		pModDoc->SetModified();
+		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
+	}
+}
 
 LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 //-------------------------------------------------------
