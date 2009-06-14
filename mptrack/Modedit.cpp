@@ -7,6 +7,7 @@
 #include "moddoc.h"
 #include "dlg_misc.h"
 #include "dlsbank.h"
+#include "modsmp_ctrl.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -995,84 +996,13 @@ BOOL CModDoc::RemoveUnusedInstruments()
 BOOL CModDoc::AdjustEndOfSample(UINT nSample)
 //-------------------------------------------
 {
-	const MODINSTRUMENT *pins;
+	MODINSTRUMENT *pins;
 	if (nSample >= MAX_SAMPLES) return FALSE;
 	pins = &m_SndFile.Ins[nSample];
 	if ((!pins->nLength) || (!pins->pSample)) return FALSE;
-	BEGIN_CRITICAL();
-	UINT len = pins->nLength;
-	if (pins->uFlags & CHN_16BIT)
-	{
-		signed short *p = (signed short *)pins->pSample;
-		if (pins->uFlags & CHN_STEREO)
-		{
-			p[(len+3)*2] = p[(len+2)*2] = p[(len+1)*2] = p[(len)*2] = p[(len-1)*2];
-			p[(len+3)*2+1] = p[(len+2)*2+1] = p[(len+1)*2+1] = p[(len)*2+1] = p[(len-1)*2+1];
-		} else
-		{
-			p[len+4] = p[len+3] = p[len+2] = p[len+1] = p[len] = p[len-1];
-		}
-		if (((pins->uFlags & (CHN_LOOP|CHN_PINGPONGLOOP|CHN_STEREO)) == CHN_LOOP)
-		 && (pins->nLoopEnd == pins->nLength)
-		 && (pins->nLoopEnd > pins->nLoopStart) && (pins->nLength > 2))
-		{
-			p[len] = p[pins->nLoopStart];
-			p[len+1] = p[pins->nLoopStart+1];
-			p[len+2] = p[pins->nLoopStart+2];
-			p[len+3] = p[pins->nLoopStart+3];
-			p[len+4] = p[pins->nLoopStart+4];
-		}
-	} else
-	{
-		signed char *p = (signed char *)pins->pSample;
-		if (pins->uFlags & CHN_STEREO)
-		{
-			p[(len+3)*2] = p[(len+2)*2] = p[(len+1)*2] = p[(len)*2] = p[(len-1)*2];
-			p[(len+3)*2+1] = p[(len+2)*2+1] = p[(len+1)*2+1] = p[(len)*2+1] = p[(len-1)*2+1];
-		} else
-		{
-			p[len+4] = p[len+3] = p[len+2] = p[len+1] = p[len] = p[len-1];
-		}
-		if (((pins->uFlags & (CHN_LOOP|CHN_PINGPONGLOOP|CHN_STEREO)) == CHN_LOOP)
-		 && (pins->nLoopEnd == pins->nLength)
-		 && (pins->nLoopEnd > pins->nLoopStart) && (pins->nLength > 2))
-		{
-			p[len] = p[pins->nLoopStart];
-			p[len+1] = p[pins->nLoopStart+1];
-			p[len+2] = p[pins->nLoopStart+2];
-			p[len+3] = p[pins->nLoopStart+3];
-			p[len+4] = p[pins->nLoopStart+4];
-		}
-	}
-	// Update channels with new loop values
-	{
-		for (UINT i=0; i<MAX_CHANNELS; i++) if ((m_SndFile.Chn[i].pInstrument == pins) && (m_SndFile.Chn[i].nLength))
-		{
-			if ((pins->nLoopStart + 3 < pins->nLoopEnd) && (pins->nLoopEnd <= pins->nLength))
-			{
-				m_SndFile.Chn[i].nLoopStart = pins->nLoopStart;
-				m_SndFile.Chn[i].nLoopEnd = pins->nLoopEnd;
-				m_SndFile.Chn[i].nLength = pins->nLoopEnd;
-				if (m_SndFile.Chn[i].nPos > m_SndFile.Chn[i].nLength)
-				{
-					m_SndFile.Chn[i].nPos = m_SndFile.Chn[i].nLoopStart;
-					m_SndFile.Chn[i].dwFlags &= ~CHN_PINGPONGFLAG;
-				}
-				DWORD d = m_SndFile.Chn[i].dwFlags & ~(CHN_PINGPONGLOOP|CHN_LOOP);
-				if (pins->uFlags & CHN_LOOP)
-				{
-					d |= CHN_LOOP;
-					if (pins->uFlags & CHN_PINGPONGLOOP) d |= CHN_PINGPONGLOOP;
-				}
-				m_SndFile.Chn[i].dwFlags = d;
-			} else
-			if (!(pins->uFlags & CHN_LOOP))
-			{
-				m_SndFile.Chn[i].dwFlags &= ~(CHN_PINGPONGLOOP|CHN_LOOP);
-			}
-		}
-	}
-	END_CRITICAL();
+
+	ctrlSmp::AdjustEndOfSample(*pins, &m_SndFile);
+
 	return TRUE;
 }
 

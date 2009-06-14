@@ -5,7 +5,7 @@
 #define SMPSTATUS_KEYDOWN		0x02
 #define SMPSTATUS_NCLBTNDOWN	0x04
 
-#define SMP_LEFTBAR_BUTTONS		3
+#define SMP_LEFTBAR_BUTTONS		5
 
 //======================================
 class CViewSample: public CModScrollView
@@ -20,6 +20,7 @@ protected:
 	DWORD m_dwMenuParam;
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	DWORD m_dwNotifyPos[MAX_CHANNELS];
+	bool m_bDrawingEnabled;
 
 public:
 	CViewSample();
@@ -41,6 +42,18 @@ public:
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
 	void UpdateNcButtonState();
+
+	// Sets sample data on sample draw.
+	template<class T, class uT>
+	void SetSampleData(void* pSample, const CPoint& point, const DWORD old);
+
+	// Sets initial draw point on sample draw.
+	template<class T, class uT>
+	void SetInitialDrawPoint(void* pSample, const CPoint& point);
+
+	// Returns sample value corresponding given point in the sample view.
+	template<class T, class uT>
+	T GetSampleValueFromPoint(const CPoint& point);
 
 public:
 	//{{AFX_VIRTUAL(CViewSample)
@@ -98,6 +111,8 @@ protected:
 	afx_msg void OnSetSustainEnd();
 	afx_msg void OnZoomUp();
 	afx_msg void OnZoomDown();
+	afx_msg void OnDrawingToggle();
+	afx_msg void OnAddSilence();
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	//}}AFX_MSG

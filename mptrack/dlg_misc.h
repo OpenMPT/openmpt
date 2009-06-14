@@ -325,6 +325,21 @@ public:
 	virtual void OnOK();
 };
 
+//===========================
+class CAddSilenceDlg: public CDialog
+//===========================
+{
+public:
+	UINT m_nSamples;
+	bool m_bAddAtEnd;
+
+public:
+	CAddSilenceDlg(CWnd *parent, UINT nSamples=32):CDialog(IDD_ADDSILENCE, parent) { m_nSamples = nSamples; m_bAddAtEnd = true; }
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+};
+
+
 
 ////////////////////////////////////////////////////////////////////////
 // Sound Banks
