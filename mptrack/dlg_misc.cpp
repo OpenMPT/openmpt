@@ -280,7 +280,9 @@ void CModTypeDlg::UpdateDialog()
             p->SetWindowText("1. Enable more IT compatible playback.\n"
 							 "2. Use old random variation behavior for instruments.\n"
 							 "3. Enable plugin volume command bug emulation.");
-		else if(XM) p->SetWindowText("1. Unused\n2. Unused\n3. Plugin volume command bug emulation");
+		else if(XM) p->SetWindowText("1. Enable more XM compatible playback.\n"
+									 "2. Unused\n"
+									 "3. Plugin volume command bug"); 
 	}
 	p = GetDlgItem(IDC_FLAGEDITTITLE);
 	if(p) p->ShowWindow(XMorITorMPT);

@@ -2917,22 +2917,15 @@ void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const 
 uint16 CSoundFile::GetModFlagMask(const MODTYPE oldtype, const MODTYPE newtype) const
 //-----------------------------------------------------------------------------------
 {
-	if(oldtype == MOD_TYPE_IT)
-	{
-		if(newtype == MOD_TYPE_MPT) return 65535;
-		if(newtype == MOD_TYPE_XM) return (1 << MSF_MIDICC_BUGEMULATION);
-		return 0;
-	}
+	const MODTYPE combined = oldtype | newtype;
 
-	if(oldtype == MOD_TYPE_MPT)
-	{
-		if(newtype == MOD_TYPE_IT) return 65535;
-		if(newtype == MOD_TYPE_XM) return (1 << MSF_MIDICC_BUGEMULATION);
-		return 0;
-	}
+	// XM <-> IT/MPT conversion.
+	if(combined == (MOD_TYPE_IT|MOD_TYPE_XM) || combined == (MOD_TYPE_MPT|MOD_TYPE_XM))
+		return (1 << MSF_COMPATIBLE_PLAY) + (1 << MSF_MIDICC_BUGEMULATION);
 
-	if(oldtype == MOD_TYPE_XM && (newtype == MOD_TYPE_IT || newtype == MOD_TYPE_MPT))
-		return (1 << MSF_MIDICC_BUGEMULATION);
+	// IT <-> MPT conversion.
+	if(combined == (MOD_TYPE_IT|MOD_TYPE_MPT))
+		return uint16_max;
 
 	return 0;
 }

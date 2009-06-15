@@ -417,7 +417,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	MODINSTRUMENT *psmp = &Ins[instr];
 	UINT note = pChn->nNewNote;
 
-	if(note == 0 && TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY)) return;
+	if(note == 0 && TypeIsIT_MPT() && GetModFlag(MSF_COMPATIBLE_PLAY)) return;
 
 	if ((penv) && (note) && (note <= 128))
 	{
@@ -498,7 +498,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITCOMPATMODE)
 		 || (!pChn->nLength) || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		 //IT compatibility tentative fix: Reset envelopes when instrument changes.
-		 || (TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY) && bInstrumentChanged))
+		 || (TypeIsIT_MPT() && GetModFlag(MSF_COMPATIBLE_PLAY) && bInstrumentChanged))
 		{
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
 			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (penv) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
@@ -535,7 +535,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 
 		//IT compatibility tentative fix: Don't anymore change bidi loop direction when 
 		//no sample nor instrument is changed.
-		if(TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY) && psmp == pChn->pInstrument && !bInstrumentChanged)
+		if(TypeIsIT_MPT() && GetModFlag(MSF_COMPATIBLE_PLAY) && psmp == pChn->pInstrument && !bInstrumentChanged)
 			pChn->dwFlags = (pChn->dwFlags & (0xFFFFFF00 | CHN_PINGPONGFLAG)) | (psmp->uFlags & 0xFF);
 		else
 			pChn->dwFlags = (pChn->dwFlags & 0xFFFFFF00) | (psmp->uFlags & 0xFF);
@@ -622,7 +622,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		}
 
 		//IT compatibility tentative fix: Clear channel note memory.
-		if(TypeIsIT_MPT() && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+		if(TypeIsIT_MPT() && GetModFlag(MSF_COMPATIBLE_PLAY))
 		{
 			pChn->nNote = 0;
 			pChn->nNewNote = 0;
@@ -1085,7 +1085,7 @@ BOOL CSoundFile::ProcessEffects()
 				nStartTick = param & 0x0F;
 
 				//IT compatibility 08. Handling of out-of-range delay command.
-				if(nStartTick >= m_nMusicSpeed && GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+				if(nStartTick >= m_nMusicSpeed && GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY))
 				{
 					if(instr)
 					{
@@ -1137,7 +1137,7 @@ BOOL CSoundFile::ProcessEffects()
 			if ((!note) && (instr)) //Case: instrument with no note data. 
 			{
 				//IT compatibility: Instrument with no note.
-				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY))
 				{
 					if(m_nInstruments)
 					{
@@ -1316,14 +1316,14 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PORTAUP:
-					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
 						PortamentoUp(pChn, vol << 2, true);
 					else
 						PortamentoUp(pChn, vol << 2, false);
 					break;
 
 				case VOLCMD_PORTADOWN:
-					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
 						PortamentoDown(pChn, vol << 2, true);
 					else
 						PortamentoDown(pChn, vol << 2, false);
@@ -1533,7 +1533,25 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Key Off
 		case CMD_KEYOFF:
-			if (!m_nTickCount) KeyOff(nChn);
+			if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
+			{
+				// This is how it's supposed to sound...
+				if (m_nTickCount == param)
+				{
+					// XM: Key-Off + Sample == Note Cut
+					if ((!pChn->pHeader) || (!(pChn->pHeader->dwFlags & ENV_VOLUME)))
+					{
+						pChn->dwFlags |= CHN_FASTVOLRAMP;
+						pChn->nVolume = 0;
+					}
+					KeyOff(nChn);
+				}
+			}
+			else
+			{
+				// This is how it's NOT supposed to sound...
+				if (!m_nTickCount) KeyOff(nChn);
+			}
 			break;
 
 		// Extra-fine porta up/down
@@ -1576,16 +1594,21 @@ BOOL CSoundFile::ProcessEffects()
 			if (!m_nTickCount)
 			{
 				pChn->nVolEnvPosition = param;
-				pChn->nPanEnvPosition = param;
-				pChn->nPitchEnvPosition = param;
-				if (pChn->pHeader)
+
+				if(!GetModFlag(MSF_COMPATIBLE_PLAY) || !(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
 				{
-					INSTRUMENTHEADER *penv = pChn->pHeader;
-					if ((pChn->dwFlags & CHN_PANENV) && (penv->nPanEnv) && (param > penv->PanPoints[penv->nPanEnv-1]))
+					pChn->nPanEnvPosition = param;
+					pChn->nPitchEnvPosition = param;
+					if (pChn->pHeader)
 					{
-						pChn->dwFlags &= ~CHN_PANENV;
+						INSTRUMENTHEADER *penv = pChn->pHeader;
+						if ((pChn->dwFlags & CHN_PANENV) && (penv->nPanEnv) && (param > penv->PanPoints[penv->nPanEnv-1]))
+						{
+							pChn->dwFlags &= ~CHN_PANENV;
+						}
 					}
 				}
+
 			}
 			break;
 
@@ -1944,7 +1967,7 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 	pChn->dwFlags |= CHN_PORTAMENTO;
 
 	//IT compatibility 03
-	if(!(m_dwSongFlags & SONG_ITCOMPATMODE) && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+	if(!(m_dwSongFlags & SONG_ITCOMPATMODE) && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
 	{
 		if(param == 0) param = pChn->nOldPortaUpDown;
 		pChn->nOldPortaUpDown = param;
@@ -3061,7 +3084,7 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 			pChn->nPatternLoopCount--;
 			if(!pChn->nPatternLoopCount)
 			{
-				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY))
 					pChn->nPatternLoop = m_nRow+1;
 
 				return -1;	
@@ -3070,7 +3093,7 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 		{
 			MODCHANNEL *p = Chn;
 			
-			if(!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY)))
+			if(!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY)))
 			{
 				for (UINT i=0; i<m_nChannels; i++, p++) if (p != pChn)
 				{

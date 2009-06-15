@@ -828,7 +828,7 @@ private:
 
 //Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
 //If changing these, ChangeModTypeTo() might need modification.
-const BYTE MSF_IT_COMPATIBLE_PLAY	= 0;		//IT/MPT
+const BYTE MSF_COMPATIBLE_PLAY		= 0;		//IT/MPT/XM
 const BYTE MSF_OLDVOLSWING			= 1;		//IT/MPT
 const BYTE MSF_MIDICC_BUGEMULATION	= 2;		//IT/MPT/XM
 
