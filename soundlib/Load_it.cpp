@@ -1490,7 +1490,7 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			{
 				SetModFlag(MSF_MIDICC_BUGEMULATION, false);
 				SetModFlag(MSF_OLDVOLSWING, false);
-				SetModFlag(MSF_IT_COMPATIBLE_PLAY, true);
+				SetModFlag(MSF_COMPATIBLE_PLAY, true);
 			}
 		}
 		return TRUE;

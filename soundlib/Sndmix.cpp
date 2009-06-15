@@ -1164,7 +1164,7 @@ BOOL CSoundFile::ReadNote()
 				else
 				{
 					//IT playback compatibility 01 & 02
-					if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModFlag(MSF_IT_COMPATIBLE_PLAY))
+					if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY))
 					{
 						if(pChn->nArpeggio >> 4 != 0 || (pChn->nArpeggio & 0x0F) != 0)
 						{
@@ -1276,7 +1276,7 @@ BOOL CSoundFile::ReadNote()
 				switch (pChn->nVibratoType & 0x03)
 				{
 				case 1:
-					if(GetModFlag(MSF_IT_COMPATIBLE_PLAY) == true)
+					if(GetModFlag(MSF_COMPATIBLE_PLAY) == true)
 						vdelta = -ModRampDownTable[(vibpos+16) % 64];
 					else
 						vdelta = ModRampDownTable[vibpos];

@@ -95,6 +95,8 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	BYTE samples_used[(MAX_SAMPLES+7)/8];
 	UINT unused_samples;
 
+	bool bMadeWithModPlug = false;
+
 	m_nChannels = 0;
 	if ((!lpStream) || (dwMemLength < 0x200)) return FALSE;
 	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return FALSE;
@@ -554,6 +556,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			}
 			dwMemPos += len;
 		}
+		bMadeWithModPlug = true;
 	}
 	// Read midi config: "MIDI"
 	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4944494D))
@@ -566,6 +569,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			m_dwSongFlags |= SONG_EMBEDMIDICFG;
 			dwMemPos += len;	//rewbs.fix36946
 		}
+		bMadeWithModPlug = true;
 	}
 	// Read pattern names: "PNAM"
 	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4d414e50))
@@ -582,6 +586,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			}
 			dwMemPos += len;
 		}
+		bMadeWithModPlug = true;
 	}
 	// Read channel names: "CNAM"
 	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x4d414e43))
@@ -598,12 +603,17 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			}
 			dwMemPos += len;
 		}
+		bMadeWithModPlug = true;
 	}
 	// Read mix plugins information
 	if (dwMemPos + 8 < dwMemLength) 
 	{
 		dwMemPos += LoadMixPlugins(lpStream+dwMemPos, dwMemLength-dwMemPos);
+		bMadeWithModPlug = true;
 	}
+
+	if(bMadeWithModPlug == false)
+		SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
