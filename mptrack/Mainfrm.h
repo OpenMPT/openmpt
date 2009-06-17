@@ -207,6 +207,8 @@ enum
 #define PATTERN_SYNCMUTE		0x1000000
 #define PATTERN_AUTODELAY		0x2000000 
 #define PATTERN_NOTEFADE		0x4000000
+#define PATTERN_ECHOPASTE       0x8000000
+#define PATTERN_POSITIONAWARETIMER	0x10000000
 
 
 // Keyboard Setup
@@ -552,6 +554,7 @@ public:
 	inline BOOL IsRendering() const { return (m_dwStatus & MODSTATUS_RENDERING); 	} //rewbs.VSTTimeInfo
 	DWORD GetElapsedTime() const { return m_dwElapsedTime; }
 	void ResetElapsedTime() { m_dwElapsedTime = 0; }
+	void SetElapsedTime(DWORD dwElapsedTime) { m_dwElapsedTime = dwElapsedTime; }
 	inline CModDoc *GetModPlaying() const { return (IsPlaying()||IsRendering()) ? m_pModPlaying : NULL; }
 	inline CSoundFile *GetSoundFilePlaying() const { return (IsPlaying()||IsRendering()) ? m_pSndFile : NULL; }  //rewbs.VSTTimeInfo
 	BOOL InitRenderer(CSoundFile*);  //rewbs.VSTTimeInfo

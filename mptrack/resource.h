@@ -1056,7 +1056,7 @@
 #define ID_NETLINK_MODARCHIVE           59214
 #define ID_PATTERN_DUPLICATECHANNEL     59216
 #define ID_EDIT_GOTO_MENU               59220
-
+#define ID_CLEANUP_COMPO				59221
 #define ID_SAMPLE_DRAW                  59224
 #define ID_SAMPLE_ADDSILENCE            59225
 // Next default values for new objects

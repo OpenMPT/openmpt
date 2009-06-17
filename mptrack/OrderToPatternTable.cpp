@@ -159,6 +159,18 @@ ORDERINDEX COrderToPatternTable::GetPreviousOrderIgnoringSkips(const ORDERINDEX 
 }
 
 
+void COrderToPatternTable::Init()
+//-------------------------------
+{
+	resize(MAX_ORDERS, GetInvalidPatIndex());
+	for(ORDERINDEX i = 0; i < GetCount(); i++)
+	{
+		(*this)[i] = GetInvalidPatIndex();
+	}
+}
+
+
+
 PATTERNINDEX COrderToPatternTable::GetInvalidPatIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ?  65535 : 0xFF;}
 PATTERNINDEX COrderToPatternTable::GetIgnoreIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ? 65534 : 0xFE;}
 

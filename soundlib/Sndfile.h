@@ -846,7 +846,7 @@ public:
 public: //Misc
 	void ChangeModTypeTo(const MODTYPE& newType);
 	
-	//Return value in seconds.
+	//Returns value in seconds. If given position won't be played at all, returns -1.
 	double GetPlaybackTimeAt(ORDERINDEX, ROWINDEX);
 
 	uint16 GetModFlags() const {return m_ModFlags;}

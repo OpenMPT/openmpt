@@ -2304,6 +2304,11 @@ void CCommandSet::SetupCommands()
 	commands[kcChannelReset].isDummy = false;
 	commands[kcChannelReset].Message = "Reset channel";
 
+	commands[kcSwitchEchoPaste].UID = 1787;
+	commands[kcSwitchEchoPaste].Message = "Switch echo paste";
+	commands[kcSwitchEchoPaste].isHidden = false;
+	commands[kcSwitchEchoPaste].isDummy = false;
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

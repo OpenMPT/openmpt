@@ -32,7 +32,7 @@ public:
 	BOOL SetZoom(UINT nZoom);
 	LONG SampleToScreen(LONG n) const;
 	DWORD ScreenToSample(LONG x) const;
-	void PlayNote(UINT note); //rewbs.customKeys
+	void PlayNote(UINT note, const uint32 nStartPos = uint32_max); //rewbs.customKeys
 	void InvalidateSample();
 	void SetCurSel(DWORD nBegin, DWORD nEnd);
 	void ScrollToPosition(int x);

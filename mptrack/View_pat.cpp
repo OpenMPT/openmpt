@@ -3509,6 +3509,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcChangeLoopStatus: SendCtrlMessage(CTRLMSG_PAT_LOOP, -1); return wParam;
 		case kcNewPattern:		 SendCtrlMessage(CTRLMSG_PAT_NEWPATTERN); return wParam;
 		case kcSwitchToOrderList: OnSwitchToOrderList();
+		case kcSwitchEchoPaste:	CMainFrame::m_dwPatternSetup ^= PATTERN_ECHOPASTE; return wParam;
 
 	}
 	//Ranges:

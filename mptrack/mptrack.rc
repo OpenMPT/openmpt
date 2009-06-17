@@ -146,6 +146,7 @@ BEGIN
             MENUITEM "Cleanup S&ong",               ID_CLEANUP_SONG
             MENUITEM "Remove &All Instruments",     ID_INSTRUMENTS_REMOVEALL
             MENUITEM "Cleanup &Plugins",            ID_CLEANUP_PLUGS
+			MENUITEM "Co&mpo Cleanup",				ID_CLEANUP_COMPO
         END
         MENUITEM SEPARATOR
         MENUITEM "&Find\tCtrl+F",               ID_EDIT_FIND
@@ -2050,6 +2051,7 @@ BEGIN
         BOTTOMMARGIN, 104
     END
 
+	ID_CLEANUP_COMPO		"Reset attributes to defaults (useful for creating sample packs)\Compo Cleanup"
     IDD_CONTROL_INSTRUMENTS, DIALOG
     BEGIN
         RIGHTMARGIN, 522

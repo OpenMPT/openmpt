@@ -1363,6 +1363,12 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 			InvalidateSample();
 			pModDoc->SetModified();
 		}
+		else
+		{
+			// ctrl + click = play from cursor pos
+			if(CMainFrame::GetInputHandler()->CtrlPressed())
+				PlayNote(NOTE_MIDDLEC, ScreenToSample(point.x));
+		}
 	}
 }
 
@@ -2031,8 +2037,8 @@ void CViewSample::OnChar(UINT /*nChar*/, UINT, UINT /*nFlags*/)
 {
 }
 
-void CViewSample::PlayNote(UINT note)
-//-----------------------------------------------------
+void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
+//------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -2049,11 +2055,17 @@ void CViewSample::PlayNote(UINT note)
 				pModDoc->NoteOff(note, TRUE);
 			else
 				pModDoc->NoteOff(0, TRUE);
+
 			DWORD loopstart = m_dwBeginSel, loopend = m_dwEndSel;
 			if (loopend - loopstart < (UINT)(4 << m_nZoom))
 				loopend = loopstart = 0; // selection is too small -> no loop
 
-			pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend);
+			if(nStartPos != uint32_max)
+				pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend, -1, nStartPos);
+			else
+				pModDoc->PlayNote(note, 0, m_nSample, FALSE, -1, loopstart, loopend);
+
+
 			m_dwStatus |= SMPSTATUS_KEYDOWN;
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX)) wsprintf(s, "%s%d", szNoteNames[(note-1)%12], (note-1)/12);

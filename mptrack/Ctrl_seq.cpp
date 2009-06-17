@@ -247,6 +247,7 @@ BOOL COrderList::SetCurSel(int sel, BOOL bEdit)
 				END_CRITICAL();
 			}
 			m_pParent->SetCurrentPattern(n);
+			m_pModDoc->SetElapsedTime(static_cast<ORDERINDEX>(m_nScrollPos), 0);
 		}
 	}
 	UpdateInfoText();

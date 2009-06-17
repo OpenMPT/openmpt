@@ -809,13 +809,54 @@ BOOL CModDoc::RemoveUnusedSamples()
 	return FALSE;
 }
 
+
+UINT CModDoc::RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS])
+//---------------------------------------------------------------
+{
+	//Remove all plugins whose keepMask[plugindex] is false.
+	UINT nRemoved=0;
+	for (PLUGINDEX nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++)
+	{
+		SNDMIXPLUGIN* pPlug = &m_SndFile.m_MixPlugins[nPlug];		
+		if (keepMask[nPlug] || !pPlug)
+		{
+			Log("Keeping mixplug addess (%d): %X\n", nPlug, &(pPlug->pMixPlugin));	
+			continue;
+		}
+
+		if (pPlug->pPluginData)
+		{
+			delete pPlug->pPluginData;
+			pPlug->pPluginData = NULL;
+		}
+		if (pPlug->pMixPlugin)
+		{
+			pPlug->pMixPlugin->Release();
+			pPlug->pMixPlugin=NULL;
+		}
+		if (pPlug->pMixState)
+		{
+			delete pPlug->pMixState;
+		}
+
+		memset(&(pPlug->Info), 0, sizeof(SNDMIXPLUGININFO));
+		Log("Zeroing range (%d) %X - %X\n", nPlug, &(pPlug->Info),  &(pPlug->Info)+sizeof(SNDMIXPLUGININFO));
+		pPlug->nPluginDataSize=0;
+		pPlug->fDryRatio=0;	
+		pPlug->defaultProgram=0;
+		nRemoved++;
+	}
+
+	return nRemoved;
+}
+
+
 BOOL CModDoc::RemoveUnusedPlugs() 
 //-------------------------------
 {
-	BYTE usedmap[MAX_MIXPLUGINS];
-	memset(usedmap, false, MAX_MIXPLUGINS);
+	bool usedmap[MAX_MIXPLUGINS];
+	memset(usedmap, false, sizeof(usedmap));
 	
-
 	for (PLUGINDEX nPlug=0; nPlug < MAX_MIXPLUGINS; nPlug++) {
 
 		//Is the plugin assigned to a channel?
@@ -849,35 +890,7 @@ BOOL CModDoc::RemoveUnusedPlugs()
 
 	}
 
-	//Remove unused plugins
-	int nRemoved=0;
-	for (int nPlug=0; nPlug<MAX_MIXPLUGINS; nPlug++) {
-		SNDMIXPLUGIN* pPlug = &m_SndFile.m_MixPlugins[nPlug];		
-		if (usedmap[nPlug] || !pPlug) {
-			Log("Keeping mixplug addess (%d): %X\n", nPlug, &(pPlug->pMixPlugin));	
-			continue;
-		}
-
-		if (pPlug->pPluginData) {
-			delete pPlug->pPluginData;
-			pPlug->pPluginData = NULL;
-		}
-		if (pPlug->pMixPlugin) {
-			pPlug->pMixPlugin->Release();
-			pPlug->pMixPlugin=NULL;
-		}
-		if (pPlug->pMixState) {
-			delete pPlug->pMixState;
-		}
-
-		memset(&(pPlug->Info), 0, sizeof(SNDMIXPLUGININFO));
-		Log("Zeroing range (%d) %X - %X\n", nPlug, &(pPlug->Info),  &(pPlug->Info)+sizeof(SNDMIXPLUGININFO));
-		pPlug->nPluginDataSize=0;
-		pPlug->fDryRatio=0;	
-		pPlug->defaultProgram=0;
-		nRemoved++;
-
-	}
+	UINT nRemoved = RemovePlugs(usedmap);
 
 	if (nRemoved) {
 		SetModified();
@@ -885,6 +898,40 @@ BOOL CModDoc::RemoveUnusedPlugs()
 
 	return nRemoved;
 }
+
+
+void CModDoc::RemoveAllInstruments(bool bConfirm)
+//-----------------------------------------------
+{
+	if (!m_SndFile.m_nInstruments)
+		return;
+
+	char removeSamples = -1;
+	if(bConfirm)
+	{
+		if (CMainFrame::GetMainFrame()->MessageBox("This will remove all the instruments in the song,\n"
+			"Do you want to continue?", "Warning", MB_YESNO | MB_ICONQUESTION) != IDYES) return;
+		if (CMainFrame::GetMainFrame()->MessageBox("Do you want to convert all instruments to samples ?\n",
+			NULL, MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			ConvertInstrumentsToSamples();
+		}
+		
+		if (::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) {
+			removeSamples = 1;
+		}
+	}
+
+	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
+	{
+		m_SndFile.DestroyInstrument(i,removeSamples);
+	}
+
+	m_SndFile.m_nInstruments = 0;
+	SetModified();
+	UpdateAllViews(NULL, HINT_MODTYPE);
+}
+
 
 BOOL CModDoc::RemoveUnusedInstruments()
 //-------------------------------------
@@ -931,7 +978,7 @@ BOOL CModDoc::RemoveUnusedInstruments()
 	}
 	EndWaitCursor();
 	if ((bReorg) && (m_SndFile.m_nInstruments > 1)
-	 && (::MessageBox(NULL, "Do you want to reorganize the remaining instruments ?", NULL, MB_YESNO | MB_ICONQUESTION) == IDYES))
+	 && (::MessageBox(NULL, "Do you want to reorganize the remaining instruments?", "Instrument Cleanup", MB_YESNO | MB_ICONQUESTION) == IDYES))
 	{
 		BeginWaitCursor();
 		BEGIN_CRITICAL();
@@ -990,6 +1037,96 @@ BOOL CModDoc::RemoveUnusedInstruments()
 		return TRUE;
 	}
 	return FALSE;
+}
+
+
+BOOL CModDoc::CompoCleanup()
+//--------------------------
+{
+	//jojo.compocleanup
+	if(::MessageBox(NULL, TEXT("WARNING: Compo cleanup will convert module to IT format, remove all patterns and reset song, sample and instrument attributes to default values. Continue?"), TEXT("Compo Cleanup"), MB_YESNO | MB_ICONWARNING) == IDNO)
+		return FALSE;
+
+	// Stop play.
+	CMainFrame::GetMainFrame()->StopMod(this);
+
+	BeginWaitCursor();
+	BEGIN_CRITICAL();
+
+	// convert to IT...
+	ChangeModType(MOD_TYPE_IT);
+	
+	// clear order list
+	m_SndFile.Order.Init();
+	m_SndFile.Order[0] = 0;
+
+	// remove all patterns
+	m_SndFile.Patterns.Init();
+	m_SndFile.Patterns.Insert(0, 64);
+	m_SndFile.SetCurrentOrder(0);
+
+	// Global vars
+	m_SndFile.m_nDefaultTempo = 125;
+	m_SndFile.m_nDefaultSpeed = 6;
+	m_SndFile.m_nDefaultGlobalVolume = 256;
+	m_SndFile.m_nSamplePreAmp = 48;
+	m_SndFile.m_nVSTiVolume = 48;
+	m_SndFile.m_nRestartPos = 0;
+
+	// Set 4 default channels.
+	m_SndFile.ReArrangeChannels(vector<CHANNELINDEX>(4, MAX_BASECHANNELS));
+
+	//remove plugs
+	bool keepMask[MAX_MIXPLUGINS]; memset(keepMask, 0, sizeof(keepMask));
+	RemovePlugs(keepMask);
+
+	// instruments
+	if(m_SndFile.m_nInstruments && ::MessageBox(NULL, "Remove instruments?", "Compo Cleanup", MB_YESNO | MB_ICONQUESTION) == IDYES)
+	{
+		// remove instruments
+		RemoveAllInstruments(false);
+	}
+	else
+	{
+		// reset instruments
+		for(UINT i = 1; i <= m_SndFile.m_nInstruments; i++)
+		{
+			m_SndFile.Headers[i]->nFadeOut = 256;
+			m_SndFile.Headers[i]->nGlobalVol = 64;
+			m_SndFile.Headers[i]->nPan = 128;
+			m_SndFile.Headers[i]->dwFlags &= ~ENV_SETPANNING;
+			m_SndFile.Headers[i]->nMixPlug = 0;
+
+			m_SndFile.Headers[i]->nVolSwing = 0;
+			m_SndFile.Headers[i]->nPanSwing = 0;
+			m_SndFile.Headers[i]->nCutSwing = 0;
+			m_SndFile.Headers[i]->nResSwing = 0;
+
+			//might be a good idea to leave those enabled...
+			/*
+			m_SndFile.Headers[i]->dwFlags &= ~ENV_VOLUME;
+			m_SndFile.Headers[i]->dwFlags &= ~ENV_PANNING;
+			m_SndFile.Headers[i]->dwFlags &= ~ENV_PITCH;
+			m_SndFile.Headers[i]->dwFlags &= ~ENV_FILTER;
+			*/
+		}
+	}
+
+	// reset samples
+	ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetCompo);
+
+	// Set modflags.
+	m_SndFile.SetModFlag(MSF_MIDICC_BUGEMULATION, false);
+	m_SndFile.SetModFlag(MSF_OLDVOLSWING, false);
+	m_SndFile.SetModFlag(MSF_COMPATIBLE_PLAY, true);
+
+	END_CRITICAL();
+	EndWaitCursor();
+
+	UpdateAllViews(NULL, HINT_MODGENERAL, this);
+
+	SetModified();
+	return TRUE;
 }
 
 
@@ -1538,6 +1675,7 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
 			UINT nrow = dwBeginSel >> 16;
 			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
+			ORDERINDEX oCurrentOrder = m_SndFile.GetCurrentOrder(); //jojo.echopaste
 			UINT col;
 			BOOL bS3M = FALSE, bOk = FALSE;
 			UINT len = 0;
@@ -1683,6 +1821,22 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 				// Next row
 				m += m_SndFile.m_nChannels;
 				nrow++;
+
+				//jojo.echopaste
+				if(CMainFrame::m_dwPatternSetup & PATTERN_ECHOPASTE)
+				{
+					while(nrow >= m_SndFile.PatternSize[nPattern])
+					{
+						nrow = 0;
+						ORDERINDEX oNextOrder = m_SndFile.Order.GetNextOrderIgnoringSkips(oCurrentOrder);
+						if((oNextOrder <= 0) || (oNextOrder >= m_SndFile.Order.size())) goto PasteDone;
+						nPattern = m_SndFile.Order[oNextOrder];
+						if(m_SndFile.Patterns.IsValidIndex(nPattern) == false) goto PasteDone;
+						m = m_SndFile.Patterns[nPattern];
+						oCurrentOrder = oNextOrder;
+					}
+				}
+			
 			}
 		PasteDone:
 			GlobalUnlock(hCpy);
