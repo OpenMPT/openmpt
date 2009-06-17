@@ -149,4 +149,25 @@ bool AdjustEndOfSample(MODINSTRUMENT& smp, CSoundFile* pSndFile)
 }
 
 
+void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag)
+//----------------------------------------------------------
+{
+	const UINT nSamples = rSndFile.GetNumSamples();
+	for(UINT i = 1; i <= nSamples; i++)
+	{
+		if(resetflag == SmpResetCompo)
+		{
+			rSndFile.Ins[i].nPan = 128;
+			rSndFile.Ins[i].nGlobalVol = 64;
+			rSndFile.Ins[i].nVolume = 256;
+			rSndFile.Ins[i].nVibDepth = 0;
+			rSndFile.Ins[i].nVibRate = 0;
+			rSndFile.Ins[i].nVibSweep = 0;
+			rSndFile.Ins[i].nVibType = 0;
+			rSndFile.Ins[i].uFlags &= ~CHN_PANNING;
+		}
+	}
+}
+
+
 } // namespace ctrlSmp

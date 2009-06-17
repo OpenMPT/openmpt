@@ -85,3 +85,16 @@ void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
 	else if(Size() < MAX_PATTERNS) ResizeArray(MAX_PATTERNS);
 }
 
+
+void CPatternContainer::Init()
+//----------------------------
+{
+	for(PATTERNINDEX i = 0; i < Size(); i++)
+	{
+		Remove(i);
+	}
+
+	ResizeArray(MAX_PATTERNS);
+}
+
+

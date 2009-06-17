@@ -57,6 +57,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_CLEANUP_PATTERNS,		OnCleanupPatterns)
 	ON_COMMAND(ID_CLEANUP_SONG,			OnCleanupSong)
 	ON_COMMAND(ID_CLEANUP_REARRANGE,	OnRearrangePatterns)
+	ON_COMMAND(ID_CLEANUP_COMPO,		OnCompoCleanup)
 	ON_COMMAND(ID_INSTRUMENTS_REMOVEALL,OnRemoveAllInstruments)
 // -> CODE#0020
 // -> DESC="rearrange sample list"
@@ -764,7 +765,7 @@ UINT CModDoc::ShowLog(LPCSTR lpszTitle, CWnd *parent)
 	return IDCANCEL;
 }
 
-UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, int nCurrentChn) //rewbs.vstiLive: added current chan param
+UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, LONG loopstart, LONG loopend, int nCurrentChn, const uint32 nStartPos) //rewbs.vstiLive: added current chan param
 //-----------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -858,6 +859,16 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			pChn->dwFlags |= CHN_EXTRALOUD;
 		} else {
 			pChn->dwFlags &= ~CHN_EXTRALOUD;
+		}
+
+		// Handle custom start position
+		if(nStartPos != uint32_max && pChn->pInstrument)
+		{
+			pChn->nPos = nStartPos;
+			// If start position is after loop end, set loop end to sample end so that the sample starts 
+			// playing.
+			if(pChn->nLoopEnd < nStartPos) 
+				pChn->nLength = pChn->nLoopEnd = pChn->pInstrument->nLength;
 		}
 
 		/*
@@ -1882,6 +1893,14 @@ void CModDoc::OnRearrangePatterns()
 	ShowLog("Pattern Rearrange", CMainFrame::GetMainFrame());
 }
 
+void CModDoc::OnCompoCleanup()
+//------------------------------
+{
+	CompoCleanup();
+	UpdateAllViews(NULL, HINT_MODTYPE);
+}
+
+
 
 void CModDoc::OnUpdateInstrumentOnly(CCmdUI *p)
 //---------------------------------------------
@@ -1951,25 +1970,7 @@ void CModDoc::OnInsertInstrument()
 void CModDoc::OnRemoveAllInstruments()
 //------------------------------------
 {
-	if (!m_SndFile.m_nInstruments) return;
-	if (CMainFrame::GetMainFrame()->MessageBox("This will remove all the instruments in the song,\n"
-		"Do you want to continue?", "Warning", MB_YESNO | MB_ICONQUESTION) != IDYES) return;
-	if (CMainFrame::GetMainFrame()->MessageBox("Do you want to convert all instruments to samples ?\n",
-		NULL, MB_YESNO | MB_ICONQUESTION) == IDYES)
-	{
-		ConvertInstrumentsToSamples();
-	}
-	char removeSamples = -1;
-	if (::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing instrument", MB_YESNO | MB_ICONQUESTION) == IDYES) {
-		removeSamples = 1;
-	}
-
-	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++) {
-		m_SndFile.DestroyInstrument(i,removeSamples);
-	}
-	m_SndFile.m_nInstruments = 0;
-	SetModified();
-	UpdateAllViews(NULL, HINT_MODTYPE);
+	RemoveAllInstruments();
 }
 
 
@@ -2651,6 +2652,11 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						}
 						break;
 					case 0x60:	if (gFXInfo[ndx].dwEffect == CMD_MODCMDEX) break;
+
+					case 0xA0:
+						wsprintf(s, "+ %u samples", 0x10000 * (param & 0x0F));
+						break;
+
 					case 0xB0:  
 						if (gFXInfo[ndx].dwEffect == CMD_S3MCMDEX)
 						{
@@ -2949,8 +2955,11 @@ void CModDoc::OnPatternRestart()
 		//end rewbs.vstCompliance
 		END_CRITICAL();
 		
-		pMainFrm->ResetElapsedTime();
-		if (pModPlaying != this) {
+		// set playback timer in the status bar
+		SetElapsedTime(static_cast<ORDERINDEX>(nOrd), nRow, true);
+
+		if (pModPlaying != this)
+		{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS); //rewbs.fix2977
 		}
 	}
@@ -2997,7 +3006,9 @@ void CModDoc::OnPatternPlay()
 		//end rewbs.VSTCompliance
 		END_CRITICAL();
 
-		pMainFrm->ResetElapsedTime();
+		// set playback timer in the status bar
+		SetElapsedTime(static_cast<ORDERINDEX>(nOrd), nRow, true);
+
 		if (pModPlaying != this) {
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
@@ -3049,7 +3060,8 @@ void CModDoc::OnPatternPlayNoLoop()
 		//rewbs.VSTCompliance
 		END_CRITICAL();
 
-		pMainFrm->ResetElapsedTime();
+		// set playback timer in the status bar
+		SetElapsedTime(static_cast<ORDERINDEX>(nOrd), nRow, true);
 		
 		if (pModPlaying != this)	{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
@@ -3260,5 +3272,24 @@ void CModDoc::SongProperties()
 		if (bShowLog) ShowLog("Conversion Status", CMainFrame::GetMainFrame());
 		SetModified();
 	}
+}
+
+
+// Sets playback timer to playback time at given position. If 'bReset' is true,
+// timer is reset if playback position timer is not enabled.
+void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool bReset)
+//-----------------------------------------------------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if(pMainFrm == NULL)
+		return;
+
+	if(CMainFrame::m_dwPatternSetup & PATTERN_POSITIONAWARETIMER)
+	{
+		double dPatternPlaytime = max(0, m_SndFile.GetPlaybackTimeAt(nOrd, nRow));
+		pMainFrm->SetElapsedTime((DWORD) (dPatternPlaytime * 1000));
+	}
+	else if(bReset)
+		pMainFrm->ResetElapsedTime();
 }
 

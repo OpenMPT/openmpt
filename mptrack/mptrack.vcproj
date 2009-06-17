@@ -358,6 +358,9 @@
 				RelativePath=".\modedit.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\modsmp_ctrl.cpp">
+			</File>
+			<File
 				RelativePath=".\Moptions.cpp">
 			</File>
 			<File
@@ -769,6 +772,9 @@
 			</File>
 			<File
 				RelativePath=".\moddoc.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\modsmp_ctrl.h">
 			</File>
 			<File
 				RelativePath=".\Moptions.h">

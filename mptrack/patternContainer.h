@@ -30,6 +30,9 @@ public:
 public:
 	CPatternContainer(CSoundFile& sndFile) : m_rSndFile(sndFile) {m_Patterns.assign(MAX_PATTERNS, MODPATTERN(*this));}
 
+	// Clears existing patterns and resizes array to default size.
+	void Init();
+
 	//Note: No memory handling here.
 	void ClearPatterns() {m_Patterns.assign(m_Patterns.size(), MODPATTERN(*this));}
 	

@@ -28,6 +28,9 @@ class COrderToPatternTable : public vector<PATTERNINDEX>
 public:
 	COrderToPatternTable(const CSoundFile& sndFile) : m_rSndFile(sndFile) {}
 
+	// Initialize default sized sequence.
+	void Init();
+
 	bool ReadAsByte(const BYTE* pFrom, const int howMany, const int memLength);
 
 	size_t WriteAsByte(FILE* f, const UINT count);

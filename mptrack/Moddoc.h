@@ -186,8 +186,11 @@ public:
 	BOOL ConvertInstrumentsToSamples();;
 	BOOL RemoveUnusedSamples();
 	BOOL RemoveUnusedInstruments();
+	void RemoveAllInstruments(bool bConfirm = true);
 	BOOL RemoveUnusedPlugs();
+	UINT RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS]);
 	BOOL RemoveUnusedPatterns(BOOL bRemove=TRUE);
+	BOOL CompoCleanup();
 	LONG InsertPattern(LONG nOrd=-1, UINT nRows=64);
 	LONG InsertSample(BOOL bLimit=FALSE);
 	LONG InsertInstrument(LONG lSample=0, LONG lDuplicate=0);
@@ -196,7 +199,7 @@ public:
 	BOOL RemovePattern(UINT n);
 	BOOL RemoveSample(UINT n);
 	BOOL RemoveInstrument(UINT n);
-	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, int nCurrentChn=-1); //rewbs.vstiLive: added current chan param
+	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, int nCurrentChn=-1, const uint32 nStartPos = uint32_max); //rewbs.vstiLive: added current chan param
 	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, UINT nCurrentChn=-1); //rewbs.vstiLive: add params
 
 // -> CODE#0020
@@ -255,6 +258,7 @@ public:
 	void TogglePluginEditor(UINT m_nCurrentPlugin);		   //rewbs.patPlugNames
 	void RecordParamChange(int slot, long param);
 	void LearnMacro(int macro, long param);
+	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool bReset = false);
 
 	BOOL RemoveChannels(BOOL bChnMask[MAX_CHANNELS]);
 
@@ -325,6 +329,7 @@ public:
 	afx_msg void OnCleanupPatterns();
 	afx_msg void OnCleanupSong();
 	afx_msg void OnRearrangePatterns();
+	afx_msg void OnCompoCleanup();
 	afx_msg void OnRemoveAllInstruments();
 	afx_msg void OnEstimateSongLength();
 	afx_msg void OnApproximateBPM();

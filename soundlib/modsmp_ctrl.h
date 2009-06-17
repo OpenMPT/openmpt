@@ -12,6 +12,11 @@ namespace ctrlSmp
 
 typedef uintptr_t SmpLength;
 
+enum ResetFlag
+{
+	SmpResetCompo = 1
+};
+
 // Insert silence to given location.
 // Note: Is currently implemented only for inserting silence to the beginning and to the end of the sample.
 // Return: Length of the new sample.
@@ -26,6 +31,9 @@ bool AdjustEndOfSample(MODINSTRUMENT& smp, CSoundFile* pSndFile = 0);
 // Note: Currently the return value is based on the sample length and the actual 
 //       allocation may be more than what this function returns.
 inline SmpLength GetSampleCapacity(MODINSTRUMENT& smp) {return smp.GetSampleSizeInBytes();}
+
+// Resets samples.
+void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag);
 
 }
 
