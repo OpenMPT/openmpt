@@ -8,6 +8,13 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling us about the bug
 
+v1.17.02.54 (June 2009, revision 274)
+-------------------------------------
+
+  . <re> Pattern tab: It's now possible to use the old note fade behaviour when playing notes (see setup->general). (rev. 267)
+  . <re> Pattern tab: Fixed wrong interpretations of "Old style pattern context menu"-option. (rev. 267)
+  . <re> Misc: Some internal fixes. (rev. 267) 
+
 
 v1.17.02.53 (May 2009, revision 259)
 ------------------------------------
