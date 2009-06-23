@@ -1833,6 +1833,7 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 						nPattern = m_SndFile.Order[oNextOrder];
 						if(m_SndFile.Patterns.IsValidIndex(nPattern) == false) goto PasteDone;
 						m = m_SndFile.Patterns[nPattern];
+						PrepareUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 						oCurrentOrder = oNextOrder;
 					}
 				}
