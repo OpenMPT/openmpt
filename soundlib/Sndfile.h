@@ -1068,6 +1068,7 @@ public:
 	BOOL ReadJ2B(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadUMX(LPCBYTE lpStream, DWORD dwMemLength);
 	BOOL ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength);
+	BOOL ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	BOOL ReadMID(LPCBYTE lpStream, DWORD dwMemLength);
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE

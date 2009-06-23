@@ -487,6 +487,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 	if ((nCurrentSpeed < 0) || (nCurrentTempo < 0)) return;
 	if ((pMainFrm = CMainFrame::GetMainFrame()) != NULL)
 	{
+		CModDoc *pModDoc = pMainFrm->GetModPlaying();
 		CSoundFile *pSndFile = pMainFrm->GetSoundFilePlaying();
 		if (pSndFile)
 		{
@@ -524,12 +525,14 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 					if (nCurrentRowsPerBeat > 1)
 					{
 						pSndFile->m_nRowsPerBeat = nCurrentRowsPerBeat - 1;
+						pModDoc->SetModified(true);
 					}
 				} else
 				{
 					if (nCurrentRowsPerBeat < 64)
 					{
 						pSndFile->m_nRowsPerBeat = nCurrentRowsPerBeat + 1;
+						pModDoc->SetModified(true);
 					}
 				}
 				m_SpinRowsPerBeat.SetPos(0);
