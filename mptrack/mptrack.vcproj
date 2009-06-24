@@ -391,13 +391,13 @@
 				RelativePath=".\OpenGLEditor.cpp">
 			</File>
 			<File
-				RelativePath=".\OrderToPatternTable.cpp">
+				RelativePath="..\soundlib\OrderToPatternTable.cpp">
 			</File>
 			<File
-				RelativePath=".\pattern.cpp">
+				RelativePath="..\soundlib\pattern.cpp">
 			</File>
 			<File
-				RelativePath=".\patternContainer.cpp">
+				RelativePath="..\soundlib\patternContainer.cpp">
 			</File>
 			<File
 				RelativePath=".\PatternGotoDialog.cpp">
@@ -406,7 +406,7 @@
 				RelativePath=".\PerformanceCounter.cpp">
 			</File>
 			<File
-				RelativePath=".\PlaybackEventer.cpp">
+				RelativePath="..\soundlib\PlaybackEventer.cpp">
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.cpp">
@@ -804,13 +804,13 @@
 				RelativePath=".\order.h">
 			</File>
 			<File
-				RelativePath=".\OrderToPatternTable.h">
+				RelativePath="..\soundlib\OrderToPatternTable.h">
 			</File>
 			<File
-				RelativePath=".\pattern.h">
+				RelativePath="..\soundlib\pattern.h">
 			</File>
 			<File
-				RelativePath=".\patternContainer.h">
+				RelativePath="..\soundlib\patternContainer.h">
 			</File>
 			<File
 				RelativePath=".\PatternGotoDialog.h">
@@ -819,7 +819,7 @@
 				RelativePath=".\PerformanceCounter.h">
 			</File>
 			<File
-				RelativePath=".\PlaybackEventer.h">
+				RelativePath="..\soundlib\PlaybackEventer.h">
 			</File>
 			<File
 				RelativePath=".\PSRatioCalc.h">
