@@ -2277,7 +2277,16 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	// E7x: Set Tremolo WaveForm
 	case 0x70:	pChn->nTremoloType = param & 0x07; break;
 	// E8x: Set 4-bit Panning
-	case 0x80:	if (!m_nTickCount) { pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP; } break;
+	//case 0x80:  if (!m_nTickCount) { pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP; } break;
+	case 0x80:	if (!m_nTickCount)
+				{ 
+					if( TypeIsIT_MPT_XM() == false || GetModFlag(MSF_COMPATIBLE_PLAY) )
+					{
+						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
+					}
+					pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP;
+				}
+				break;
 	// E9x: Retrig
 	case 0x90:	RetrigNote(nChn, param); break;
 	// EAx: Fine Volume Up
@@ -2352,7 +2361,16 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 				}
 				break;
 	// S8x: Set 4-bit Panning
-	case 0x80:	if (!m_nTickCount) { pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP; } break;
+	//case 0x80:  if (!m_nTickCount) { pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP; } break;
+	case 0x80:	if (!m_nTickCount)
+				{ 
+					if( TypeIsIT_MPT_XM() == false || GetModFlag(MSF_COMPATIBLE_PLAY) )
+					{
+						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
+					}
+					pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP;
+				}
+				break;
 	// S9x: Set Surround
 	case 0x90:	ExtendedChannelEffect(pChn, param & 0x0F); break;
 	// SAx: Set 64k Offset
