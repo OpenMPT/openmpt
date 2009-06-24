@@ -805,11 +805,11 @@ typedef MODMIDICFG* LPMODMIDICFG;
 
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 
-#include "../mptrack/pattern.h"
-#include "../mptrack/patternContainer.h"
-#include "../mptrack/ordertopatterntable.h"
+#include "pattern.h"
+#include "patternContainer.h"
+#include "ordertopatterntable.h"
 
-#include "../mptrack/playbackEventer.h"
+#include "playbackEventer.h"
 
 
 
