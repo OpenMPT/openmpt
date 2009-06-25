@@ -216,7 +216,7 @@ BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 						// Parse channels
 						for (UINT i=0; i<tracks; i++) if (!infobyte[i])
 						{
-							MODCOMMAND cmd;
+							MODCOMMAND cmd = MODCOMMAND::Empty();
 							BYTE info = lpStream[d++];
 							if (info & 0x80) infobyte[i] = lpStream[d++];
 							// Instrument

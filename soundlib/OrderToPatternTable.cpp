@@ -20,8 +20,8 @@ DWORD COrderToPatternTable::Unserialize(const BYTE* const src, const DWORD memLe
 	if(memLength < memPos+s*4) return memPos;
 
 	const uint32 nOriginalSize = s;
-	if(s > MPTM_SPECS.ordersMax)
-		s = MPTM_SPECS.ordersMax;
+	if(s > ModSpecs::mptm.ordersMax)
+		s = ModSpecs::mptm.ordersMax;
 
 	resize(s);
 	for(size_t i = 0; i<s; i++, memPos +=4 )
@@ -205,12 +205,12 @@ void COrderSerialization::ProRead(INSTREAM& istrm, const uint64 /*datasize*/)
 {
 	uint16 size;
 	istrm.read(reinterpret_cast<char*>(&size), 2);
-	if(size > MPTM_SPECS.ordersMax)
+	if(size > ModSpecs::mptm.ordersMax)
 	{
 		// Hack: Show message here if trying to load longer sequence than what is supported.
-		CString str; str.Format(str_SequenceTruncationNote, size, MPTM_SPECS.ordersMax);
+		CString str; str.Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax);
 		::MessageBox(0, str, "", MB_ICONWARNING);
-		size = MPTM_SPECS.ordersMax;
+		size = ModSpecs::mptm.ordersMax;
 	}
 	m_rOrders.resize(size);
 	if(size == 0) {m_rOrders.assign(MAX_ORDERS, m_rOrders.GetInvalidPatIndex()); return;}

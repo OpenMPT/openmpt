@@ -1,7 +1,9 @@
 #ifndef _TEST_H
 #define _TEST_H
 
-//#define ENABLE_TESTS
+#ifdef DEBUG
+	#define ENABLE_TESTS
+#endif
 
 namespace MptTest
 {

@@ -743,6 +743,7 @@ BOOL CSoundFile::ProcessRow()
 			pChn->nRightVol = pChn->nNewRightVol;
 			pChn->dwFlags &= ~(CHN_PORTAMENTO | CHN_VIBRATO | CHN_TREMOLO | CHN_PANBRELLO);
 			pChn->nCommand = 0;
+			pChn->m_nPlugParamValueStep = 0;
 		}
 
 	}
@@ -1842,14 +1843,26 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 	if (pChn->dwFlags & (CHN_MUTE|CHN_SYNCMUTE)) return;
 	if ((!m_nInstruments) || (m_nPattern >= Patterns.Size())
 		 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
-	
+
+	const MODCOMMAND::NOTE note = pChn->nRowNote;
+	const MODCOMMAND::INSTR instr = pChn->nRowInstr;
+	const MODCOMMAND::VOL vol = pChn->nRowVolume;
+	const MODCOMMAND::VOLCMD volcmd = pChn->nRowVolCmd;
+	// Debug
+	{
+		// Previously this function took modcommand directly from pattern. ASSERT is there
+		// to detect possible behaviour change now that the data is accessed from channel.
+		const MODCOMMAND mc = *Patterns[m_nPattern].GetpModCommand(m_nRow, static_cast<CHANNELINDEX>(nChn));
+		ASSERT( mc.note == NOTE_PC || mc.note == NOTE_PCS ||
+			(note == mc.note && instr == mc.instr && volcmd == mc.volcmd && vol == mc.vol));
+	}
+
 	// Get instrument info and plugin reference
-	MODCOMMAND *m = Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
 	INSTRUMENTHEADER *penv = pChn->pHeader;
 	IMixPlugin *pPlugin = NULL;
 
-	if ((m->instr) && (m->instr < MAX_INSTRUMENTS)) {
-		penv = Headers[m->instr];
+	if ((instr) && (instr < MAX_INSTRUMENTS)) {
+		penv = Headers[instr];
 	}
 	if ((penv) && (penv->nMidiChannel >= 1) && (penv->nMidiChannel <= 16)) {
 		UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
@@ -1863,21 +1876,21 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 
 	if(GetModFlag(MSF_MIDICC_BUGEMULATION))
 	{
-		if (m->note) {
-			pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, m->note, pChn->nVolume, nChn);
-		} else if (m->volcmd == VOLCMD_VOLUME) {
-			pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Fine, m->vol, nChn);
+		if (note) {
+			pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, pChn->nVolume, nChn);
+		} else if (volcmd == VOLCMD_VOLUME) {
+			pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Fine, vol, nChn);
 		}
 		return;
 	}
 
 
-	const bool hasVolCommand = (m->volcmd == VOLCMD_VOLUME);
+	const bool hasVolCommand = (volcmd == VOLCMD_VOLUME);
 	const UINT defaultVolume = penv->nGlobalVol;
 
 	
 	//If new note, determine notevelocity to use.
-	if(m->note)
+	if(note)
 	{
 		UINT velocity = 4*defaultVolume;
 		switch(penv->nPluginVelocityHandling)
@@ -1887,23 +1900,23 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 			break;
 		}
 
-		pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, m->note, velocity, nChn);
+		pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, velocity, nChn);
 	}
 
 	
 	const bool processVolumeAlsoOnNote = (penv->nPluginVelocityHandling == PLUGIN_VELOCITYHANDLING_VOLUME);
 
-	if((hasVolCommand && !m->note) || (m->note && processVolumeAlsoOnNote))
+	if((hasVolCommand && !note) || (note && processVolumeAlsoOnNote))
 	{
 		switch(penv->nPluginVolumeHandling)
 		{
 			case PLUGIN_VOLUMEHANDLING_DRYWET:
-				if(hasVolCommand) pPlugin->SetDryRatio(2*m->vol);
+				if(hasVolCommand) pPlugin->SetDryRatio(2*vol);
 				else pPlugin->SetDryRatio(2*defaultVolume);
 			break;
 
 			case PLUGIN_VOLUMEHANDLING_MIDI:
-				if(hasVolCommand) pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Coarse, min(127, 2*m->vol), nChn);
+				if(hasVolCommand) pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Coarse, min(127, 2*vol), nChn);
 				else pPlugin->MidiCC(penv->nMidiChannel, MIDICC_Volume_Coarse, min(127, 2*defaultVolume), nChn);
 			break;
 		}

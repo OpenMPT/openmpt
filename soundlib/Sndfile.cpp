@@ -398,7 +398,7 @@ CSoundFile::CSoundFile() :
 	PatternSize(*this), Patterns(*this),
 	Order(*this),
 	m_PlaybackEventer(*this),
-	m_pModSpecs(&IT_MPTEXT_SPECS),
+	m_pModSpecs(&ModSpecs::itEx),
 	m_MIDIMapper(*this)
 //----------------------
 {
@@ -413,7 +413,7 @@ CSoundFile::CSoundFile() :
 	m_lpszSongComments = NULL;
 	m_nFreqFactor = m_nTempoFactor = 128;
 	m_nMasterVolume = 128;
-	m_nMinPeriod = 0x20;
+	m_nMinPeriod = MIN_PERIOD;
 	m_nMaxPeriod = 0x7FFF;
 	m_nRepeatCount = 0;
 	m_nSeqOverride = 0;
@@ -1488,7 +1488,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 					if(newOrder[k] < m_nChannels) //Case: getting old channel to the new channel order.
 						*tmpdest = tmpsrc[j*m_nChannels+newOrder[k]];
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
-						*tmpdest = MODCOMMAND();
+						*tmpdest = MODCOMMAND::Empty();
 							
 				}
 			}
@@ -2893,24 +2893,24 @@ void CSoundFile::SetModSpecsPointer(const CModSpecifications*& pModSpecs, const 
 	switch(type)
 	{
 		case MOD_TYPE_MPT:
-			pModSpecs = &MPTM_SPECS;
+			pModSpecs = &ModSpecs::mptm;
 		break;
 
 		case MOD_TYPE_IT:
-			pModSpecs = &IT_MPTEXT_SPECS;
+			pModSpecs = &ModSpecs::itEx;
 		break;
 
 		case MOD_TYPE_XM:
-			pModSpecs = &XM_MPTEXT_SPECS;
+			pModSpecs = &ModSpecs::xmEx;
 		break;
 
 		case MOD_TYPE_S3M:
-			pModSpecs = &S3M_MPTEXT_SPECS;
+			pModSpecs = &ModSpecs::s3mEx;
 		break;
 
 		case MOD_TYPE_MOD:
 		default:
-			pModSpecs = &MOD_MPTEXT_SPECS;
+			pModSpecs = &ModSpecs::modEx;
 			break;
 	}
 }

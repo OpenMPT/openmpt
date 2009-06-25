@@ -223,7 +223,7 @@ VOID CModToMidi::FillProgramBox(BOOL bPerc)
 		for (UINT i=0; i<61; i++)
 		{
 			UINT note = i+24;
-			wsprintf(s, "%d (%s%d): %s", note, szNoteNames[note%12], note/12, szMidiPercussionNames[i]);
+			wsprintf(s, "%d (%s): %s", note, szDefaultNoteNames[note], szMidiPercussionNames[i]);
 			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), note/*+1*/); //+1 removed by rewbs because MIDI drums appear to be offset by 1
 		}
 	} else

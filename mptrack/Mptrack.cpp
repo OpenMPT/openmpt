@@ -192,19 +192,26 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 /////////////////////////////////////////////////////////////////////////////
 // Common Tables
 
-LPCSTR szNoteNames[12] =
+const LPCSTR szNoteNames[12] =
 {
 	"C-", "C#", "D-", "D#", "E-", "F-",
 	"F#", "G-", "G#", "A-", "A#", "B-"
 };
 
-LPCSTR szHexChar = "0123456789ABCDEF";
-LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ\\:#"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
-LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
-LPCSTR gszVolCommands = " vpcdabuhlrgfe:o";	//rewbs.velocity: added last : ; rewbs.volOff added last o
+const LPCTSTR szDefaultNoteNames[NOTE_MAX] = {
+	TEXT("C-0"), TEXT("C#0"), TEXT("D-0"), TEXT("D#0"), TEXT("E-0"), TEXT("F-0"), TEXT("F#0"), TEXT("G-0"), TEXT("G#0"), TEXT("A-0"), TEXT("A#0"), TEXT("B-0"),
+	TEXT("C-1"), TEXT("C#1"), TEXT("D-1"), TEXT("D#1"), TEXT("E-1"), TEXT("F-1"), TEXT("F#1"), TEXT("G-1"), TEXT("G#1"), TEXT("A-1"), TEXT("A#1"), TEXT("B-1"),
+	TEXT("C-2"), TEXT("C#2"), TEXT("D-2"), TEXT("D#2"), TEXT("E-2"), TEXT("F-2"), TEXT("F#2"), TEXT("G-2"), TEXT("G#2"), TEXT("A-2"), TEXT("A#2"), TEXT("B-2"),
+	TEXT("C-3"), TEXT("C#3"), TEXT("D-3"), TEXT("D#3"), TEXT("E-3"), TEXT("F-3"), TEXT("F#3"), TEXT("G-3"), TEXT("G#3"), TEXT("A-3"), TEXT("A#3"), TEXT("B-3"),
+	TEXT("C-4"), TEXT("C#4"), TEXT("D-4"), TEXT("D#4"), TEXT("E-4"), TEXT("F-4"), TEXT("F#4"), TEXT("G-4"), TEXT("G#4"), TEXT("A-4"), TEXT("A#4"), TEXT("B-4"),
+	TEXT("C-5"), TEXT("C#5"), TEXT("D-5"), TEXT("D#5"), TEXT("E-5"), TEXT("F-5"), TEXT("F#5"), TEXT("G-5"), TEXT("G#5"), TEXT("A-5"), TEXT("A#5"), TEXT("B-5"),
+	TEXT("C-6"), TEXT("C#6"), TEXT("D-6"), TEXT("D#6"), TEXT("E-6"), TEXT("F-6"), TEXT("F#6"), TEXT("G-6"), TEXT("G#6"), TEXT("A-6"), TEXT("A#6"), TEXT("B-6"),
+	TEXT("C-7"), TEXT("C#7"), TEXT("D-7"), TEXT("D#7"), TEXT("E-7"), TEXT("F-7"), TEXT("F#7"), TEXT("G-7"), TEXT("G#7"), TEXT("A-7"), TEXT("A#7"), TEXT("B-7"),
+	TEXT("C-8"), TEXT("C#8"), TEXT("D-8"), TEXT("D#8"), TEXT("E-8"), TEXT("F-8"), TEXT("F#8"), TEXT("G-8"), TEXT("G#8"), TEXT("A-8"), TEXT("A#8"), TEXT("B-8"),
+	TEXT("C-9"), TEXT("C#9"), TEXT("D-9"), TEXT("D#9"), TEXT("E-9"), TEXT("F-9"), TEXT("F#9"), TEXT("G-9"), TEXT("G#9"), TEXT("A-9"), TEXT("A#9"), TEXT("B-9"),
+};
 
-
-BYTE gEffectColors[MAX_EFFECTS] =
+const BYTE gEffectColors[MAX_EFFECTS] =
 {
 	0,					0,					MODCOLOR_PITCH,		MODCOLOR_PITCH,
 	MODCOLOR_PITCH,		MODCOLOR_PITCH,		MODCOLOR_VOLUME,	MODCOLOR_VOLUME,
@@ -1119,15 +1126,12 @@ int CTrackApp::ExitInstance()
 
 void CTrackApp::LoadChords(PMPTCHORD pChords)
 //-------------------------------------------
-{
-	CHAR snam[32];
-	
+{	
 	if (!m_szConfigFileName[0]) return;
 	for (UINT i=0; i<3*12; i++)
 	{
 		LONG chord;
-		wsprintf(snam, "%s%d", szNoteNames[i%12], i/12);
-		if ((chord = GetPrivateProfileInt("Chords", snam, -1, m_szConfigFileName)) >= 0)
+		if ((chord = GetPrivateProfileInt("Chords", szDefaultNoteNames[i], -1, m_szConfigFileName)) >= 0)
 		{
 			if ((chord & 0xFFFFFFC0) || (!pChords[i].notes[0]))
 			{
@@ -1144,14 +1148,13 @@ void CTrackApp::LoadChords(PMPTCHORD pChords)
 void CTrackApp::SaveChords(PMPTCHORD pChords)
 //-------------------------------------------
 {
-	CHAR s[64], snam[32];
+	CHAR s[64];
 	
 	if (!m_szConfigFileName[0]) return;
 	for (UINT i=0; i<3*12; i++)
 	{
-		wsprintf(snam, "%s%d", szNoteNames[i%12], i/12);
 		wsprintf(s, "%d", (pChords[i].key) | (pChords[i].notes[0] << 6) | (pChords[i].notes[1] << 12) | (pChords[i].notes[2] << 18));
-		if (!WritePrivateProfileString("Chords", snam, s, m_szConfigFileName)) break;
+		if (!WritePrivateProfileString("Chords", szDefaultNoteNames[i], s, m_szConfigFileName)) break;
 	}
 }
 

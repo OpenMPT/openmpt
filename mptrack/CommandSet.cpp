@@ -5,6 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define ENABLE_LOGGING 0
+
+#if(ENABLE_LOGGING)
+	//
+#else
+	#define Log
+#endif
+
+
 bool CCommandSet::s_bShowErrorOnUnknownKeybinding = true;
 
 CCommandSet::CCommandSet(void)
@@ -2309,6 +2318,16 @@ void CCommandSet::SetupCommands()
 	commands[kcSwitchEchoPaste].isHidden = false;
 	commands[kcSwitchEchoPaste].isDummy = false;
 
+	commands[kcNotePC].UID = 1788;
+	commands[kcNotePC].isHidden = false;
+	commands[kcNotePC].isDummy = false;
+	commands[kcNotePC].Message = "Parameter control(MPTm only)";
+
+	commands[kcNotePCS].UID = 1789;
+	commands[kcNotePCS].isHidden = false;
+	commands[kcNotePCS].isDummy = false;
+	commands[kcNotePCS].Message = "Parameter control(smooth)(MPTm only)";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs
@@ -2438,7 +2457,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 {
 	//World's biggest, most confusing method. :)
 	//Needs refactoring. Maybe make lots of Rule subclasses, each with their own Enforce() method?
-	bool removing = !adding; //for attempt to salvage readability.. 
+	//bool removing = !adding; //for attempt to salvage readability.. 
 	KeyCombination curKc;	// for looping through key combinations
 	KeyCombination newKc;	// for adding new key combinations
 	CString report="";
@@ -2544,7 +2563,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	{
 		KeyCombination newKcDeSel;
 		bool ruleApplies=true;
-		CommandID cmdOff;
+		CommandID cmdOff = kcNull;
 
 		switch (inCmd)
 		{
@@ -2942,7 +2961,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 		if (IsDummyCommand((CommandID)cmd))
 			continue;
 
-		for (UINT k=0; k<commands[cmd].kcList.GetSize(); k++)
+		for (INT_PTR k=0; k<commands[cmd].kcList.GetSize(); k++)
 		{
 			contexts.RemoveAll();
 			eventTypes.RemoveAll();
@@ -2969,7 +2988,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 				contexts.Add(curKc.ctx);
 			}
 
-			long label = 0;
+			//long label = 0;
 			for (int cx=0; cx<contexts.GetSize(); cx++)	{
 				for (int ke=0; ke<eventTypes.GetSize(); ke++) {
 					km[contexts[cx]][curKc.mod][curKc.code][eventTypes[ke]] = (CommandID)cmd;
@@ -2992,7 +3011,7 @@ DWORD CCommandSet::GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, K
 	BYTE ctxCode  = (BYTE)ctx;
 	BYTE modCode  = (BYTE)mod;
 	BYTE codeCode = (BYTE)code;
-	BYTE keCode   = (BYTE)ke;
+	//BYTE keCode   = (BYTE)ke;
 
 	DWORD label = ctxCode | (modCode<<8) | (codeCode<<16) | (ke<<24);
 
@@ -3187,7 +3206,7 @@ int CCommandSet::FindCmd(int uid)
 {
 	for (int i=0; i<kcNumCommands; i++)
 	{
-		if (commands[i].UID == uid)
+		if (commands[i].UID == static_cast<UINT>(uid))
 			return i;
 	}
 
@@ -3270,7 +3289,7 @@ CString CCommandSet::GetKeyText(UINT mod, UINT code)
 
 CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key)
 {
-	if (key < commands[c].kcList.GetSize())
+	if ( static_cast<INT_PTR>(key) < commands[c].kcList.GetSize())
 		return GetKeyText(commands[c].kcList[0].mod, commands[c].kcList[0].code);
 	else 
 		return "";
@@ -3396,6 +3415,7 @@ bool CCommandSet::IsExtended(UINT code)
 
 void CCommandSet::GetParentContexts(InputTargetContext child, CArray<InputTargetContext, InputTargetContext> parentList)
 {
+	UNREFERENCED_PARAMETER(child);
 	//parentList.RemoveAll();
 
 	//for (InputTargetContext parent; parent<kCtxMaxInputContexts; parent++) {
@@ -3407,6 +3427,7 @@ void CCommandSet::GetParentContexts(InputTargetContext child, CArray<InputTarget
 
 void CCommandSet::GetChildContexts(InputTargetContext parent, CArray<InputTargetContext, InputTargetContext> childList)
 {
+	UNREFERENCED_PARAMETER(parent);
 	//childList.RemoveAll();
 
 	//for (InputTargetContext child; child<kCtxMaxInputContexts; child++) {
