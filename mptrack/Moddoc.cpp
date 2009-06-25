@@ -1598,7 +1598,7 @@ void CModDoc::OnFileCompatibilitySave()
 			pattern = "Fast Tracker Files (*.xm)|*.xm||";
 			break;*/
 		case MOD_TYPE_MOD:
-			ext = MOD_STD_SPECS.fileExtension;
+			ext = ModSpecs::mod.fileExtension;
 			pattern = FileFilterMOD;
 			if( AfxMessageBox(GetStrI18N(TEXT(
 				"Compared to regular MOD save, compatibility export makes "
@@ -1610,7 +1610,7 @@ void CModDoc::OnFileCompatibilitySave()
 				return;
 			break;
 		case MOD_TYPE_IT:
-			ext = IT_STD_SPECS.fileExtension;
+			ext = ModSpecs::it.fileExtension;
 			pattern = FileFilterIT;
 			::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
 			break;

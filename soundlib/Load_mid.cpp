@@ -89,7 +89,7 @@ typedef struct MIDITRACK
 
 
 
-LPCSTR szMidiGroupNames[17] =
+extern const LPCSTR szMidiGroupNames[17] =
 {
 	"Piano",
 	"Chromatic Percussion",
@@ -111,7 +111,7 @@ LPCSTR szMidiGroupNames[17] =
 };
 
 
-LPCSTR szMidiProgramNames[128] =
+extern const LPCSTR szMidiProgramNames[128] =
 {
 	// 1-8: Piano
 	"Acoustic Grand Piano",
@@ -261,7 +261,7 @@ LPCSTR szMidiProgramNames[128] =
 
 
 // Notes 25-85
-LPCSTR szMidiPercussionNames[61] =
+extern const LPCSTR szMidiPercussionNames[61] =
 {
 	"Seq Click",
 	"Brush Tap",

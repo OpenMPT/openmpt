@@ -520,8 +520,6 @@ struct INSTRUMENTHEADER
 	CTuning* pTuning;
 	static CTuning* s_DefaultTuning;
 
-	INSTRUMENTHEADER(CTuning* const pT = s_DefaultTuning) : pTuning(pT) {}
-
 	void SetTuning(CTuning* pT)
 	{
 		pTuning = pT;
@@ -611,6 +609,10 @@ typedef struct _MODCHANNEL
 
 	float m_nPlugParamValueStep;  //rewbs.smoothVST 
 	float m_nPlugInitialParamValue; //rewbs.smoothVST
+	long m_RowPlugParam;			//NOTE_PCs memory.
+	PLUGINDEX m_RowPlug;			//NOTE_PCs memory.
+
+	void ClearRowCmd() {nRowNote = 0; nRowInstr = 0; nRowVolCmd = 0; nRowVolume = 0; nRowCommand = 0; nRowParam = 0;}
 
 	typedef UINT VOLUME;
 	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol*4 : nVolume;}
@@ -653,6 +655,9 @@ struct MODCHANNELSETTINGS
 // Mix Plugins
 #define MIXPLUG_MIXREADY			0x01	// Set when cleared
 
+typedef long PlugParamIndex;
+typedef float PlugParamValue;
+
 class IMixPlugin
 {
 public:
@@ -670,8 +675,11 @@ public:
 	virtual void RecalculateGain() = 0;		
 	virtual bool isPlaying(UINT note, UINT midiChn, UINT trackerChn) = 0; //rewbs.VSTiNNA
 	virtual bool MoveNote(UINT note, UINT midiChn, UINT sourceTrackerChn, UINT destTrackerChn) = 0; //rewbs.VSTiNNA
+	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
 	virtual void SetZxxParameter(UINT nParam, UINT nValue) = 0;
+	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
 	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST 
+	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
 	virtual long Dispatch(long opCode, long index, long value, void *ptr, float opt) =0; //rewbs.VSTCompliance
 	virtual void NotifySongPlaying(bool)=0;	//rewbs.VSTCompliance
 	virtual bool IsSongPlaying()=0;
@@ -683,6 +691,14 @@ public:
 	virtual void SetDryRatio(UINT param)=0;
 
 };
+
+inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff)
+//---------------------------------------------------------------------------------
+{
+	float val = GetParameter(nIndex) + diff;
+	Limit(val, PlugParamValue(0), PlugParamValue(1));
+	SetParameter(nIndex, val);
+}
 
 
 												///////////////////////////////////////////////////
@@ -794,14 +810,6 @@ struct MODMIDICFG
 	CHAR szMidiZXXExt[128*32];
 };
 typedef MODMIDICFG* LPMODMIDICFG;
-
-// Note definitions
-#define NOTE_MIDDLEC		(5*12+1)
-#define NOTE_KEYOFF			0xFF //255
-#define NOTE_NOTECUT		0xFE //254
-//(Under construction) #define NOTE_PC				0xFD //253, Param Control 'note'. Changes param value on first tick.
-//(Under construction) #define NOTE_PCS				0xFC //252,  Param Control(Smooth) 'note'. Changes param value during the whole row.
-#define NOTE_MAX			120 //Defines maximum notevalue as well as maximum number of notes.
 
 typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
 

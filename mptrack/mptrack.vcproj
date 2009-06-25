@@ -355,6 +355,9 @@
 				RelativePath=".\mod2wave.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\mod_specifications.cpp">
+			</File>
+			<File
 				RelativePath=".\moddoc.cpp">
 			</File>
 			<File

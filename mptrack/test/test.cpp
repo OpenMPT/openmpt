@@ -5,6 +5,7 @@
 
 #include "stdafx.h"
 #include "test.h"
+#include "../mptrack.h"
 #include "../version.h"
 #include "../misc_util.h"
 #include <limits>
@@ -53,7 +54,7 @@ void DoTests()
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
 
-	MessageBox(0, "Tests were run", "Testing", MB_ICONINFORMATION);
+	Log(TEXT("Tests were run\n"));
 }
 
 void TestVersion()
