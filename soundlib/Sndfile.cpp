@@ -2876,14 +2876,14 @@ long CSoundFile::GetSampleOffset()
 string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const int inst) const
 //----------------------------------------------------------------------------------
 {
-	if(inst >= MAX_INSTRUMENTS || inst < -1) return "BUG";
+	if(inst >= MAX_INSTRUMENTS || inst < -1 || note < 1 || note > NOTE_MAX) return "BUG";
 	if(inst == -1)
-		return string(szNoteNames[abs(note-1)%12]) + Stringify((note-1)/12);
+		return szDefaultNoteNames[note-1];
 	
 	if(m_nType == MOD_TYPE_MPT && Headers[inst] && Headers[inst]->pTuning)
 		return Headers[inst]->pTuning->GetNoteName(note-NOTE_MIDDLEC);
 	else
-		return string(szNoteNames[abs(note-1)%12]) + Stringify((note-1)/12);
+		return szDefaultNoteNames[note-1];
 }
 
 

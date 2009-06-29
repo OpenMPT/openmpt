@@ -950,7 +950,7 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 			{
 				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note+0xFF, 0, MAX_BASECHANNELS);
+				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note+NOTE_KEYOFF, 0, MAX_BASECHANNELS);
 
 			}
 		}
@@ -1017,7 +1017,7 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
 			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
 			INSTRUMENTHEADER* penv = m_SndFile.Chn[nChn].pHeader;
 			if (pPlug && penv) {
-				pPlug->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, 0xFF, 0, nChn);
+				pPlug->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, NOTE_KEYOFF, 0, nChn);
 			}
 		}
 	} else {

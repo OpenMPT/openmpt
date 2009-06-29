@@ -2647,12 +2647,12 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 
 
 	// Specific Note Off
-	if (note > 0xFF)			//rewbs.vstiLive
+	if (note > NOTE_KEYOFF)			//rewbs.vstiLive
 	{
 		dwMidiCode = 0x80|nCh; //note off, on chan nCh
 
 		note--;
-		UINT i = note - 0xFF;
+		UINT i = note - NOTE_KEYOFF;
 		if (pCh->uNoteOnMap[i][trackChannel])
 		{
 			pCh->uNoteOnMap[i][trackChannel]--;
@@ -2663,7 +2663,7 @@ void CVstPlugin::MidiCommand(UINT nMidiCh, UINT nMidiProg, WORD wMidiBank, UINT 
 	// "Hard core" All Sounds Off on this midi and tracker channel
 	// This one doesn't check the note mask - just one note off per note.
 	// Also less likely to cause a VST event buffer overflow.
-	else if (note == 0xFE)	// ^^
+	else if (note == NOTE_NOTECUT)	// ^^
 	{
 		//MidiSend(0xB0|nCh|(0x79<<8)); // reset all controllers
 		MidiSend(0xB0|nCh|(0x7b<<8));   // all notes off 

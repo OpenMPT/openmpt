@@ -939,7 +939,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 						//switch off duplicated note played on this plugin 
 						IMixPlugin *pPlugin =  m_MixPlugins[pHeader->nMixPlug-1].pMixPlugin;
 						if (pPlugin && p->nNote)
-							pPlugin->MidiCommand(p->pHeader->nMidiChannel, p->pHeader->nMidiProgram, p->pHeader->wMidiBank, p->nNote+0xFF, 0, i);
+							pPlugin->MidiCommand(p->pHeader->nMidiChannel, p->pHeader->nMidiProgram, p->pHeader->wMidiBank, p->nNote+NOTE_KEYOFF, 0, i);
 						break;
 					}
 				}
@@ -1027,7 +1027,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 				case NNA_NOTEFADE:	
 					//switch off note played on this plugin, on this tracker channel and midi channel 
 					//pPlugin->MidiCommand(pChn->pHeader->nMidiChannel, pChn->pHeader->nMidiProgram, pChn->nNote+0xFF, 0, n);
-					pPlugin->MidiCommand(pChn->pHeader->nMidiChannel, pChn->pHeader->nMidiProgram, pChn->pHeader->wMidiBank, /*pChn->nNote+*/0xFF, 0, nChn);
+					pPlugin->MidiCommand(pChn->pHeader->nMidiChannel, pChn->pHeader->nMidiProgram, pChn->pHeader->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
 					break;
 				}
 			}
@@ -3030,7 +3030,7 @@ void CSoundFile::NoteCut(UINT nChn, UINT nTick)
 			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
 				IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
 				if (pPlug) {
-					pPlug->MidiCommand(pHeader->nMidiChannel, pHeader->nMidiProgram, pHeader->wMidiBank, /*pChn->nNote+*/0xFF, 0, nChn);
+					pPlug->MidiCommand(pHeader->nMidiChannel, pHeader->nMidiProgram, pHeader->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
 				}
 			}
 		}

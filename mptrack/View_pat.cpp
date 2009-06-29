@@ -3879,7 +3879,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		{
 			ins = m_nSplitInstrument;
 			if (m_bOctaveLink)		  note += 12*(m_nOctaveModifier-9);
-			if (note > NOTE_MAX && note<254) note = NOTE_MAX;
+			if (note > NOTE_MAX && note < NOTE_NOTECUT) note = NOTE_MAX;
 			if (note<0)				  note=1;
 		}
 		if (!ins)    ins = GetCurrentInstrument();
@@ -4536,7 +4536,7 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 			if(GetCurrentInstrument()) p->instr = GetCurrentInstrument();
 		if (m_bOctaveLink)
 			note += 12*(m_nOctaveModifier-9);
-		if (note > NOTE_MAX && note<254) note = NOTE_MAX;
+		if (note > NOTE_MAX && note < NOTE_NOTECUT) note = NOTE_MAX;
 		if (note<0) note=1;
 
 		p->note = note;	
