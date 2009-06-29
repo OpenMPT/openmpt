@@ -204,10 +204,10 @@ public:
 	VOID GetPluginType(LPSTR) {}
 	long GetNumPrograms() {return 0;}
 	long GetProgramNameIndexed(long, long, char*) {return 0;}
-	VOID SetParameter(UINT, FLOAT) {}
+	VOID SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) {}
 	VOID GetParamLabel(UINT, LPSTR) {}
 	VOID GetParamDisplay(UINT, LPSTR) {}
-	FLOAT GetParameter(UINT) {return 0;}
+	PlugParamValue GetParameter(PlugParamIndex nIndex) {return 0;}
 	bool LoadProgram(CString) {return false;}
 	bool SaveProgram(CString) {return false;}
 	VOID SetCurrentProgram(UINT) {}
