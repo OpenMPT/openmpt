@@ -29,8 +29,8 @@ typedef struct _GDMHEADER
 	UINT16 TrackID;					// Composing Tracker ID code (00 = 2GDM)
 	BYTE TrackMajorVer;				// Tracker's major version
 	BYTE TrackMinorVer;				// Tracker's minor version
-	BYTE PanMap[32];					// 0-Left to 15-Right, 255-N/U
-	BYTE MastVol;						// Range: 0...64
+	BYTE PanMap[32];				// 0-Left to 15-Right, 255-N/U
+	BYTE MastVol;					// Range: 0...64
 	BYTE Tempo;						// Initial music tempo (6)
 	BYTE BPM;							// Initial music BPM (125)
 	UINT16 FormOrigin;				// Original format ID:
@@ -38,32 +38,32 @@ typedef struct _GDMHEADER
 		// (versions of 2GDM prior to v1.15 won't set this correctly)
 
 	UINT32 OrdOffset;
-	BYTE NOO;							// Number of orders in module - 1
+	BYTE NOO;						// Number of orders in module - 1
 	UINT32 PatOffset;
-	BYTE NOP;							// Number of patterns in module - 1
+	BYTE NOP;						// Number of patterns in module - 1
 	UINT32 SamHeadOffset;
 	UINT32 SamOffset;
-	BYTE NOS;							// Number of samples in module - 1
-	UINT32 MTOffset;					// Offset of song message
+	BYTE NOS;						// Number of samples in module - 1
+	UINT32 MTOffset;				// Offset of song message
 	UINT32 MTLength;
-	UINT32 SSOffset;					// Offset of scrolly script (huh?)
+	UINT32 SSOffset;				// Offset of scrolly script (huh?)
 	UINT16 SSLength;
-	UINT32 TGOffset;					// Offset of text graphic (huh?)
+	UINT32 TGOffset;				// Offset of text graphic (huh?)
 	UINT16 TGLength;
 } GDMHEADER, *PGDMHEADER;
 
 typedef struct _GDMSAMPLEHEADER
 {
-	CHAR SamName[32];
-	CHAR FileName[12];
+	CHAR SamName[32];	// sample's name
+	CHAR FileName[12];	// sample's filename
 	BYTE EmsHandle;		// useless
-	UINT32 Length;
-	UINT32 LoopBegin;
-	UINT32 LoopEnd;
-	BYTE Flags;
-	UINT16 C4Hertz;
-	BYTE Volume;
-	BYTE Pan;
+	UINT32 Length;		// length in bytes
+	UINT32 LoopBegin;	// loop start in samples
+	UINT32 LoopEnd;		// loop end in samples
+	BYTE Flags;			// misc. flags
+	UINT16 C4Hertz;		// frequency
+	BYTE Volume;		// default volume
+	BYTE Pan;			// default pan
 } GDMSAMPLEHEADER, *PGDMSAMPLEHEADER;
 
 BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
@@ -90,7 +90,7 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		return FALSE;
 	}
 
-	// todo: Is TrackID, TrackMajorVer, TrackMinorVer relevant? The only TrackID should be 0 - 2GDM.exe
+	// interesting question: Is TrackID, TrackMajorVer, TrackMinorVer relevant? The only TrackID should be 0 - 2GDM.exe, so the answer would be no.
 
 	// read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
@@ -121,7 +121,7 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
 
-	switch(pHeader->FormOrigin)
+	switch(LittleEndianW(pHeader->FormOrigin))
 	{
 	case 1:
 		m_nType = MOD_TYPE_MOD;
@@ -152,29 +152,36 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		return FALSE;
 		break;
 	}
+	UINT32 iSampleOffset  = LittleEndian(pHeader->SamOffset),
+		   iPatternsOffset = LittleEndian(pHeader->PatOffset);
+
+	const UINT32 iOrdOffset = LittleEndian(pHeader->OrdOffset), iSamHeadOffset = LittleEndian(pHeader->SamHeadOffset), 
+				 iMTOffset = LittleEndian(pHeader->MTOffset), iMTLength = LittleEndian(pHeader->MTLength),
+				 iSSOffset = LittleEndian(pHeader->SSOffset), iSSLength = LittleEndianW(pHeader->SSLength),
+				 iTGOffset = LittleEndian(pHeader->TGOffset), iTGLength = LittleEndianW(pHeader->TGLength);
+	
 
 	// check if offsets are valid. we won't read the scrolly text or text graphics, but invalid pointers would probably indicate a broken file...
-	if(	   dwMemLength < pHeader->OrdOffset || dwMemLength - pHeader->OrdOffset < pHeader->NOO
-		|| dwMemLength < pHeader->PatOffset
-		|| dwMemLength < pHeader->SamHeadOffset || dwMemLength - pHeader->SamHeadOffset < (pHeader->NOS + 1) * sizeof(GDMSAMPLEHEADER)
-		|| dwMemLength < pHeader->SamOffset
-		|| dwMemLength < pHeader->MTOffset || dwMemLength - pHeader->MTOffset < pHeader->MTLength
-		|| dwMemLength < pHeader->SSOffset ||  dwMemLength - pHeader->SSOffset < pHeader->SSLength
-		|| dwMemLength < pHeader->TGOffset || dwMemLength - pHeader->TGOffset < pHeader->TGLength)
+	if(	   dwMemLength < iOrdOffset || dwMemLength - iOrdOffset < pHeader->NOO
+		|| dwMemLength < iPatternsOffset
+		|| dwMemLength < iSamHeadOffset || dwMemLength - iSamHeadOffset < (pHeader->NOS + 1) * sizeof(GDMSAMPLEHEADER)
+		|| dwMemLength < iSampleOffset
+		|| dwMemLength < iMTOffset || dwMemLength - iMTOffset < iMTLength
+		|| dwMemLength < iSSOffset || dwMemLength - iSSOffset < iSSLength
+		|| dwMemLength < iTGOffset || dwMemLength - iTGOffset < iTGLength)
 		return FALSE;
 
 	// read orders
-	Order.ReadAsByte(lpStream + pHeader->OrdOffset, pHeader->NOO + 1, dwMemLength - pHeader->OrdOffset);
+	Order.ReadAsByte(lpStream + iOrdOffset, pHeader->NOO + 1, dwMemLength - iOrdOffset);
 
 	// read samples
 	m_nSamples = pHeader->NOS + 1;
 	
-	DWORD iSampleOffset = pHeader->SamOffset;
 	int iLZWsamples = 0;
 
 	for(UINT iSmp = 1; iSmp <= m_nSamples; iSmp++)
 	{
-		const PGDMSAMPLEHEADER pSample = (PGDMSAMPLEHEADER)(lpStream + pHeader->SamHeadOffset + (iSmp - 1) * sizeof(GDMSAMPLEHEADER));
+		const PGDMSAMPLEHEADER pSample = (PGDMSAMPLEHEADER)(lpStream + iSamHeadOffset + (iSmp - 1) * sizeof(GDMSAMPLEHEADER));
 
 		// sample header
 
@@ -182,12 +189,30 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		SetNullTerminator(m_szNames[iSmp]);
 		memcpy(Ins[iSmp].name, pSample->FileName, 12);
 
-		Ins[iSmp].nC4Speed = pSample->C4Hertz;
+		Ins[iSmp].nC4Speed = LittleEndianW(pSample->C4Hertz);
 		Ins[iSmp].nGlobalVol = 256; // not supported in this format
-		Ins[iSmp].nLength = min(pSample->Length, MAX_SAMPLE_LENGTH); // in bytes
-		Ins[iSmp].nLoopStart = min(pSample->LoopBegin, Ins[iSmp].nLength); // in samples
-		Ins[iSmp].nLoopEnd = min(pSample->LoopEnd - 1, Ins[iSmp].nLength); // dito
+		Ins[iSmp].nLength = min(LittleEndian(pSample->Length), MAX_SAMPLE_LENGTH); // in bytes
+		Ins[iSmp].nLoopStart = min(LittleEndian(pSample->LoopBegin), Ins[iSmp].nLength); // in samples
+		Ins[iSmp].nLoopEnd = min(LittleEndian(pSample->LoopEnd) - 1, Ins[iSmp].nLength); // dito
 		FrequencyToTranspose(&Ins[iSmp]); // set transpose + finetune for mod files
+
+		// fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.mod)
+		if(m_nType == MOD_TYPE_MOD)
+		{
+			while(Ins[iSmp].RelativeTone != 0)
+			{
+				if(Ins[iSmp].RelativeTone > 0)
+				{
+					Ins[iSmp].RelativeTone -= 1;
+					Ins[iSmp].nFineTune += 128;
+				}
+				else
+				{
+					Ins[iSmp].RelativeTone += 1;
+					Ins[iSmp].nFineTune -= 128;
+				}
+			}
+		}
 
 		if(pSample->Flags & 0x01) Ins[iSmp].uFlags |= CHN_LOOP; // loop sample
 
@@ -243,23 +268,21 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		// read sample data
 		ReadSample(&Ins[iSmp], iSampleFormat, reinterpret_cast<LPCSTR>(lpStream + iSampleOffset), dwMemLength - iSampleOffset);
-		iSampleOffset += min(pSample->Length, dwMemLength - iSampleOffset);
+		iSampleOffset += min(LittleEndian(pSample->Length), dwMemLength - iSampleOffset);
 
 	}
 
 	// read patterns
 	Patterns.ResizeArray(max(MAX_PATTERNS, pHeader->NOP + 1));
 
-	// position in file
-	DWORD iPatternsOffset = pHeader->PatOffset;
-
 	BOOL bS3MCommandSet = (GetBestSaveFormat() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT));
 
+	// we'll start at position iPatternsOffset and decode all patterns
 	for (PATTERNINDEX iPat = 0; iPat < pHeader->NOP + 1; iPat++)
 	{
 		
 		if(iPatternsOffset + 2 > dwMemLength) break;
-		UINT16 iPatternLength = *(UINT16 *)(lpStream + iPatternsOffset); // pattern length including the two "length" bytes
+		UINT16 iPatternLength = LittleEndianW(*(UINT16 *)(lpStream + iPatternsOffset)); // pattern length including the two "length" bytes
 		if(iPatternLength > dwMemLength || iPatternsOffset > dwMemLength - iPatternLength) break;
 
 		if(Patterns.Insert(iPat, 64)) 
@@ -510,13 +533,13 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// read song comments	
-	if(pHeader->MTLength)
+	if(iMTLength)
 	{
-		m_lpszSongComments = new char[pHeader->MTLength + 1];
+		m_lpszSongComments = new char[iMTLength + 1];
 		if (m_lpszSongComments)
 		{
-			memset(m_lpszSongComments, 0, pHeader->MTLength + 1);
-			memcpy(m_lpszSongComments, lpStream + pHeader->MTOffset, pHeader->MTLength);
+			memset(m_lpszSongComments, 0, iMTLength + 1);
+			memcpy(m_lpszSongComments, lpStream + iMTOffset, iMTLength);
 		}
 	}
 

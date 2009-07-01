@@ -599,6 +599,9 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_CheckPanning.EnableWindow(b && !(m_pSndFile->GetType() & MOD_TYPE_XM));
 		m_EditPanning.EnableWindow(b);
 		m_SpinPanning.EnableWindow(b);
+
+		b = (m_pSndFile->m_nType & MOD_TYPE_MOD) ? FALSE : TRUE;
+		m_CbnBaseNote.EnableWindow(b);
 	}
 	// Updating Values
 	if (dwHintMask & (HINT_MODTYPE|HINT_SAMPLEINFO))

@@ -1704,6 +1704,31 @@ void CViewSample::OnEditDelete()
 			p[i] = (i+cutlen < iend) ? p[i+cutlen] : (char)0;
 		}
 		len = pins->nLength;
+
+		// adjust loop points (could need some optimization)
+		if(m_dwBeginSel < pins->nLoopStart  && m_dwEndSel < pins->nLoopStart)
+		{
+			// cut part is before loop start
+			pins->nLoopStart -= m_dwEndSel - m_dwBeginSel;
+			pins->nLoopEnd -= m_dwEndSel - m_dwBeginSel;
+		}
+		else if(m_dwBeginSel < pins->nLoopStart  && m_dwEndSel < pins->nLoopEnd)
+		{
+			// cut part is partly before loop start
+			pins->nLoopStart = m_dwBeginSel;
+			pins->nLoopEnd -= m_dwEndSel - m_dwBeginSel;
+		}
+		else if(m_dwBeginSel > pins->nLoopStart && m_dwEndSel < pins->nLoopEnd)
+		{
+			// cut part is in the loop
+			pins->nLoopEnd -= m_dwEndSel - m_dwBeginSel;
+		}
+		else if(m_dwBeginSel > pins->nLoopStart && m_dwBeginSel < pins->nLoopEnd && m_dwEndSel > pins->nLoopEnd)
+		{
+			// cut part is partly before loop end
+			pins->nLoopEnd = m_dwBeginSel;
+		}
+
 		if (pins->nLoopEnd > len) pins->nLoopEnd = len;
 		if (pins->nLoopStart + 4 >= pins->nLoopEnd)
 		{
