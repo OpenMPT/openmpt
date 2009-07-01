@@ -1253,11 +1253,12 @@ void CTrackApp::OnFileOpen()
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 //					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2|"
+//					"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.bak;*.umx;*.amf;*.psm;*.mt2;*.gdm|"
 					#ifndef NO_MO3_SUPPORT
-						"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.umx;*.amf;*.psm;*.mt2;*.mo3|"
+						"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.mo3|"
 						"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz;*.mo3)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.mo3|"
 					#else
-						"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.umx;*.amf;*.psm;*.mt2|"
+						"All Modules|*.mod;*.nst;*.wow;*.s3m;*.stm;*.669;*.mtm;*.xm;*.it;*.itp;*.mptm;*.ult;*.mdz;*.s3z;*.xmz;*.itz;mod.*;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.mdr;*.med;*.ams;*.dbm;*.dsm;*.mid;*.rmi;*.smf;*.umx;*.amf;*.psm;*.mt2;*.gdm|"
 						"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha|"
 					#endif
 // -! NEW_FEATURE#0023
@@ -1270,7 +1271,7 @@ void CTrackApp::OnFileOpen()
 					"Impulse Tracker Projects (*.itp)|*.itp;*.itpz|"
 // -! NEW_FEATURE#0023
 					"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
-					"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.dsm;*.umx;*.amf;*.psm;*.mt2|"
+					"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.dsm;*.umx;*.amf;*.psm;*.mt2;*.gdm|"
 					"Wave Files (*.wav)|*.wav|"
 					"Midi Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 					"All Files (*.*)|*.*||",
