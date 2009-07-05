@@ -2543,12 +2543,13 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcSampleSave:		PostCtrlMessage(IDC_SAMPLE_SAVEAS); return wParam;
 		case kcSampleNew:		PostCtrlMessage(IDC_SAMPLE_NEW); return wParam;
 								
-		case kcSampleReverse:		PostCtrlMessage(IDC_SAMPLE_REVERSE); return wParam;
-		case kcSampleSilence:		PostCtrlMessage(IDC_SAMPLE_SILENCE); return wParam;
-		case kcSampleNormalize:		PostCtrlMessage(IDC_SAMPLE_NORMALIZE); return wParam;
-		case kcSampleAmplify:		PostCtrlMessage(IDC_SAMPLE_AMPLIFY); return wParam;
-		case kcSampleInvert:		PostCtrlMessage(IDC_SAMPLE_INVERT); return wParam;
-		case kcSampleSignUnsign:	PostCtrlMessage(IDC_SAMPLE_SIGN_UNSIGN); return wParam;
+		case kcSampleReverse:			PostCtrlMessage(IDC_SAMPLE_REVERSE); return wParam;
+		case kcSampleSilence:			PostCtrlMessage(IDC_SAMPLE_SILENCE); return wParam;
+		case kcSampleNormalize:			PostCtrlMessage(IDC_SAMPLE_NORMALIZE); return wParam;
+		case kcSampleAmplify:			PostCtrlMessage(IDC_SAMPLE_AMPLIFY); return wParam;
+		case kcSampleInvert:			PostCtrlMessage(IDC_SAMPLE_INVERT); return wParam;
+		case kcSampleSignUnsign:		PostCtrlMessage(IDC_SAMPLE_SIGN_UNSIGN); return wParam;
+		case kcSampleRemoveDCOffset:	PostCtrlMessage(IDC_SAMPLE_DCOFFSET); return wParam;
 
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;

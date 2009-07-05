@@ -762,7 +762,7 @@ BEGIN
     CTEXT           "Length: 000000 (16-bit)",IDC_TEXT5,175,6,90,13,
                     SS_CENTERIMAGE,WS_EX_STATICEDGE
     CONTROL         "Toolbar2",IDC_TOOLBAR2,"ToolbarWindow32",WS_GROUP | 
-                    0x4d,268,4,164,17
+                    0x4d,268,4,195,17
     GROUPBOX        "",IDC_STATIC,3,22,94,78
     LTEXT           "Default Volume",IDC_STATIC,8,32,49,8
     LTEXT           "Global Volume",IDC_STATIC,8,45,46,8
@@ -2487,6 +2487,11 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDC_SAMPLE_DCOFFSET     "Remove DC Offset\nRemove DC Offset and normalize (hold shift to process all samples)"
+END
+
+STRINGTABLE 
+BEGIN
     ID_ENVELOPE_SETLOOP     "Enable or disable the envelope loop"
     ID_ENVELOPE_SUSTAIN     "Enable or disable the envelope sustain"
     ID_ENVELOPE_INSERTPOINT "Insert a new point in the envelope at the current location"
@@ -2499,6 +2504,11 @@ BEGIN
     ID_PATTERN_PLAYROW      "Play current row\nPlay Row"
     ID_IMPORT_MIDILIB       "Defines the default MIDI library used when importing MIDI files"
     ID_CLEANUP_REARRANGE    "Rearrange all patterns so that they are sorted in the order list\nRearrange Patterns"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_GOTO_MENU       "Go to row / channel / pattern / order"
     ID_CLEANUP_COMPO        "Reset attributes to defaults (useful for creating sample packs)\nCompo Cleanup"
 END
 
@@ -2583,11 +2593,6 @@ BEGIN
     IDS_UNSUPPORTED_TUNING_DnD 
                             "For the time being Drag and Drop is only supported for tuning instances."
     IDS_OPERATION_FAIL      "Operation failed."
-END
-
-STRINGTABLE 
-BEGIN
-    ID_EDIT_GOTO_MENU       "Go to row / channel / pattern / order"
 END
 
 #endif    // English (U.S.) resources

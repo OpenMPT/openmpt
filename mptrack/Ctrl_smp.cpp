@@ -14,6 +14,7 @@
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 #include "smbPitchShift.cpp"
 #pragma warning(default:4244) //"conversion from 'type1' to 'type2', possible loss of data"
+#include "modsmp_ctrl.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -67,6 +68,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_SAMPLE_SILENCE,		OnSilence)
 	ON_COMMAND(IDC_SAMPLE_INVERT,		OnInvert)
 	ON_COMMAND(IDC_SAMPLE_SIGN_UNSIGN,  OnSignUnSign)
+	ON_COMMAND(IDC_SAMPLE_DCOFFSET,		OnRemoveDCOffset)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(ID_PREVINSTRUMENT,		OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
@@ -207,6 +209,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ToolBar2.AddButton(IDC_SAMPLE_PLAY, 14);
 	m_ToolBar2.AddButton(IDC_SAMPLE_NORMALIZE, 8);
 	m_ToolBar2.AddButton(IDC_SAMPLE_AMPLIFY, 9);
+	m_ToolBar2.AddButton(IDC_SAMPLE_DCOFFSET, 37);
 	m_ToolBar2.AddButton(IDC_SAMPLE_UPSAMPLE, 10);
 	m_ToolBar2.AddButton(IDC_SAMPLE_DOWNSAMPLE, 29);
 	m_ToolBar2.AddButton(IDC_SAMPLE_REVERSE, 11);
@@ -467,6 +470,10 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case IDC_SAMPLE_SIGN_UNSIGN:
 		OnSignUnSign();
+		break;
+
+	case IDC_SAMPLE_DCOFFSET:
+		OnRemoveDCOffset();
 		break;
 
 	case IDC_SAMPLE_NORMALIZE:
@@ -1046,8 +1053,8 @@ void CCtrlSamples::OnNormalize()
 	//Shift -> Normalize all samples
 	if(CMainFrame::GetInputHandler()->ShiftPressed())
 	{
-		int ans = MessageBox(GetStrI18N(TEXT("This will normalize all samples independently. Continue?")), GetStrI18N(TEXT("Normalize")), MB_YESNO | MB_ICONQUESTION);
-		if(ans == IDNO) return;
+		if(MessageBox(GetStrI18N(TEXT("This will normalize all samples independently. Continue?")), GetStrI18N(TEXT("Normalize")), MB_YESNO | MB_ICONQUESTION) == IDNO)
+			return;
 		iMinSample = 1;
 		iMaxSample = m_pSndFile->m_nSamples;
 	} else {
@@ -1200,6 +1207,89 @@ void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
 	m_pModDoc->SetModified();
 	EndWaitCursor();
 	SwitchToView();
+}
+
+
+void CCtrlSamples::OnRemoveDCOffset()
+//-----------------------------------
+{
+	if(!m_pModDoc || !m_pSndFile)
+		return;
+
+	SAMPLEVIEWSTATE viewstate;
+	UINT iMinSample = m_nSample, iMaxSample = m_nSample;
+
+	memset(&viewstate, 0, sizeof(viewstate));
+	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+
+	//Shift -> Process all samples
+	if(CMainFrame::GetInputHandler()->ShiftPressed())
+	{
+		if(MessageBox(GetStrI18N(TEXT("This will process all samples independently. Continue?")), GetStrI18N(TEXT("DC Offset Removal")), MB_YESNO | MB_ICONQUESTION) == IDNO)
+			return;
+		iMinSample = 1;
+		iMaxSample = m_pSndFile->m_nSamples;
+	}
+
+	BeginWaitCursor();
+
+	// for report / SetModified
+	UINT iModified = 0;
+	float fReportOffset = 0;
+
+	for(UINT iSmp = iMinSample; iSmp <= iMaxSample; iSmp++)
+	{
+		UINT iStart, iEnd;
+
+		if( m_pSndFile->Ins[iSmp].pSample == nullptr )
+			continue;
+
+		if (iMinSample != iMaxSample)
+		{
+			iStart = 0;
+			iEnd = m_pSndFile->Ins[iSmp].nLength;
+		}
+		else
+		{
+			iStart = viewstate.dwBeginSel;
+			iEnd = viewstate.dwEndSel;
+		}
+		const float fOffset = ctrlSmp::RemoveDCOffset(m_pSndFile->Ins[iSmp], iStart, iEnd, m_pSndFile->GetType(), m_pSndFile);
+
+		if(fOffset == 0.0f) // No offset removed.
+			continue;
+
+		fReportOffset += fOffset;
+		iModified++;
+		m_pModDoc->UpdateAllViews(NULL, (iSmp << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
+	}
+
+	EndWaitCursor();
+	SwitchToView();
+
+	// fill the statusbar with some nice information
+
+	CString dcInfo;
+	if(iModified)
+	{
+		m_pModDoc->SetModified();
+		if(iModified == 1)
+		{
+			dcInfo.Format(GetStrI18N(TEXT("Removed DC offset (%.1f%%)")), fReportOffset * 100);
+		}
+		else
+		{
+			dcInfo.Format(GetStrI18N(TEXT("Removed DC offset from %d samples (avg %0.1f%%)")), iModified, fReportOffset / iModified * 100);
+		}
+	}
+	else
+	{
+		dcInfo.SetString(GetStrI18N(TEXT("No DC offset found")));
+	}
+
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	pMainFrm->SetXInfoText(dcInfo);
+
 }
 
 

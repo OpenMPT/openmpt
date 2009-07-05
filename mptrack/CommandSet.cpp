@@ -2328,6 +2328,11 @@ void CCommandSet::SetupCommands()
 	commands[kcNotePCS].isDummy = false;
 	commands[kcNotePCS].Message = "Parameter control(smooth)(MPTm only)";
 
+	commands[kcSampleRemoveDCOffset].UID = 1790;
+	commands[kcSampleRemoveDCOffset].Message = "Remove DC Offset";
+	commands[kcSampleRemoveDCOffset].isHidden = false;
+	commands[kcSampleRemoveDCOffset].isDummy = false;
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

@@ -829,6 +829,7 @@
 #define IDC_MIDIPLAYPATTERNONMIDIIN     2340
 #define IDC_DONTSHOWAGAIN               2341
 #define IDC_MESSAGETEXT                 2342
+#define IDC_SAMPLE_DCOFFSET				2343
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1066,7 +1067,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        518
 #define _APS_NEXT_COMMAND_VALUE         59226
-#define _APS_NEXT_CONTROL_VALUE         2343
+#define _APS_NEXT_CONTROL_VALUE         2344
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
