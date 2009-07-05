@@ -170,4 +170,125 @@ void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag)
 }
 
 
+namespace
+{
+	struct OffsetData
+	{
+		double dMax, dMin, dOffset;
+	};
+
+	// Returns maximum sample amplitude for given sample type (int8/int16).
+	template <class T>
+	double GetMaxAmplitude() {return 1.0 + (std::numeric_limits<T>::max)();}
+
+	// Calculates DC offset and returns struct with DC offset, max and min values. 
+	// DC offset value is average of [-1.0, 1.0[-normalized offset values.
+	template<class T>
+	OffsetData CalculateOffset(const T* pStart, const SmpLength nLength)
+	//------------------------------------------------------------------
+	{
+		OffsetData offsetVals = {0,0,0};
+		
+		if(nLength < 1)
+			return offsetVals;
+
+		const double dMaxAmplitude = GetMaxAmplitude<T>();
+
+		double dMax = -1, dMin = 1, dSum = 0;
+
+		const T* p = pStart;
+		for (SmpLength i = 0; i < nLength; i++, p++)
+		{
+			const double dVal = double(*p) / dMaxAmplitude;
+			dSum += dVal;
+			if(dVal > dMax) dMax = dVal;
+			if(dVal < dMin) dMin = dVal;
+		}
+
+		offsetVals.dMax = dMax;
+		offsetVals.dMin = dMin;
+		offsetVals.dOffset = (-dSum / (double)(nLength));
+		return offsetVals;
+	}
+
+	template <class T>
+	void RemoveOffsetAndNormalize(T* pStart, const SmpLength nLength, const double dOffset, const double dAmplify)
+	//------------------------------------------------------------------------------------------------------------
+	{
+		T* p = pStart;
+		for (UINT i = 0; i < nLength; i++, p++)
+		{
+			double dVal = (*p) * dAmplify + dOffset;
+			Limit(dVal, (std::numeric_limits<T>::min)(), (std::numeric_limits<T>::max)());
+			*p = static_cast<T>(dVal);
+		}
+	}
+};
+
+// Remove DC offset
+float RemoveDCOffset(MODINSTRUMENT& smp,
+					 SmpLength iStart,
+					 SmpLength iEnd,
+					 const MODTYPE modtype,
+					 CSoundFile* const pSndFile)
+//----------------------------------------------
+{
+	if(smp.pSample == nullptr || smp.nLength < 1)
+		return 0;
+
+	MODINSTRUMENT* const pins = &smp;
+
+	if (iEnd > pins->nLength) iEnd = pins->nLength;
+	if (iStart > iEnd) iStart = iEnd;
+	if (iStart == iEnd)
+	{
+		iStart = 0;
+		iEnd = pins->nLength;
+	}
+
+	iStart *= pins->GetNumChannels();
+	iEnd *= pins->GetNumChannels();
+
+	const double dMaxAmplitude = (pins->GetElementarySampleSize() == 2) ? GetMaxAmplitude<int16>() : GetMaxAmplitude<int8>();
+
+	// step 1: Calculate offset.
+	OffsetData oData = {0,0,0};
+	if(pins->GetElementarySampleSize() == 2)
+		oData = CalculateOffset(reinterpret_cast<int16*>(pins->pSample) + iStart, iEnd - iStart);
+	else if(pins->GetElementarySampleSize() == 1)
+		oData = CalculateOffset(reinterpret_cast<int8*>(pins->pSample) + iStart, iEnd - iStart);
+
+	double dMin = oData.dMin, dMax = oData.dMax, dOffset = oData.dOffset;
+	
+	const float fReportOffset = (float)dOffset;
+
+	if((int)(dOffset * dMaxAmplitude) == 0)
+		return 0;
+	
+	// those will be changed...
+	dMax += dOffset;
+	dMin += dOffset;
+
+	// ... and that might cause distortion, so we will normalize this.
+	const double dAmplify = 1 / max(dMax, -dMin);
+
+	// step 2: centralize + normalize sample
+	dOffset *= dMaxAmplitude * dAmplify;
+	if(pins->GetElementarySampleSize() == 2)
+		RemoveOffsetAndNormalize( reinterpret_cast<int16*>(pins->pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
+	else if(pins->GetElementarySampleSize() == 1)
+		RemoveOffsetAndNormalize( reinterpret_cast<int8*>(pins->pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
+	
+	// step 3: adjust either global vol or default vol of this sample
+	if(modtype == MOD_TYPE_IT || modtype == MOD_TYPE_MPT)
+		pins->nGlobalVol = min((WORD)(pins->nGlobalVol / dAmplify), 64);
+	else if(modtype != MOD_TYPE_NONE)
+		pins->nVolume = min((WORD)(pins->nVolume / dAmplify), 256);
+
+	AdjustEndOfSample(smp, pSndFile);
+
+	return fReportOffset;
+}
+
+
 } // namespace ctrlSmp

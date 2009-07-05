@@ -35,6 +35,16 @@ inline SmpLength GetSampleCapacity(MODINSTRUMENT& smp) {return smp.GetSampleSize
 // Resets samples.
 void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag);
 
-}
+// Remove DC offset and normalize.
+// Return: If DC offset was removed, returns original offset value, zero otherwise.
+float RemoveDCOffset(MODINSTRUMENT& smp,
+					 SmpLength iStart,		// Start position (for partial DC offset removal).
+					 SmpLength iEnd,		// End position (for partial DC offset removal).
+					 const MODTYPE modtype,	// Used to determine whether to adjust global or default volume
+											// to keep volume level the same given the normalization.
+											// Volume adjustment is not done if this param is MOD_TYPE_NONE.
+					 CSoundFile* const pSndFile); // Passed to AdjustEndOfSample.
+
+} // Namespace ctrlSmp
 
 #endif
