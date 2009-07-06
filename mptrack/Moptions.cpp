@@ -782,12 +782,14 @@ void COptionsGeneral::OnOK()
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
+
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
 		pMainFrm->SetupDirectories(szModDir, szSmpDir, szInsDir, szVstDir, szPresetDir);
-		pMainFrm->UpdateTree(NULL, HINT_MPTOPTIONS);
+		pMainFrm->SetupMiscOptions();
 	}
+
 	CPropertyPage::OnOK();
 }
 

@@ -571,6 +571,7 @@ public:
 	void SwitchToActiveView();
 	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT bufsize, LONG wd);
 	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
+	BOOL SetupMiscOptions();
 	BOOL SetupPlayer(DWORD, DWORD, BOOL bForceUpdate=FALSE);
 	BOOL SetupMidi(DWORD d, LONG n);
 	void SetPreAmp(UINT n);

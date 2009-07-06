@@ -2208,15 +2208,22 @@ BOOL CMainFrame::SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR
 	SetDefaultDirectory(szInstrDir, DIR_INSTRUMENTS);
 	SetDefaultDirectory(szVstDir, DIR_PLUGINS);
 	SetDefaultDirectory(szPresetDir, DIR_PLUGINPRESETS);
+	return TRUE;
+}
 
-	// This shouldn't be here (misc options)
-	m_wndToolBar.EnableFlatButtons(m_dwPatternSetup & PATTERN_FLATBUTTONS);
-	UpdateAllViews(HINT_MPTOPTIONS, NULL);
-	if (m_dwPatternSetup & PATTERN_MUTECHNMODE)
+BOOL CMainFrame::SetupMiscOptions()
+//---------------------------------
+{
+	if (CMainFrame::m_dwPatternSetup & PATTERN_MUTECHNMODE)
 		CSoundFile::gdwSoundSetup |= SNDMIX_MUTECHNMODE;
 	else
 		CSoundFile::gdwSoundSetup &= ~SNDMIX_MUTECHNMODE;
-	return TRUE;
+
+	m_wndToolBar.EnableFlatButtons(m_dwPatternSetup & PATTERN_FLATBUTTONS);
+
+	UpdateTree(NULL, HINT_MPTOPTIONS);
+	UpdateAllViews(HINT_MPTOPTIONS, NULL);
+	return true;
 }
 
 
