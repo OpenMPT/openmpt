@@ -550,15 +550,15 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 			lpszFilter,
 			theApp.m_pMainWnd);
-		if (CMainFrame::m_szCurModDir[0])
-		{
-			dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurModDir;
-		}
+
+		const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_MODS);
+		if(pszWdir[0])
+			dlg.m_ofn.lpstrInitialDir = pszWdir;
+
 		if (dlg.DoModal() != IDOK) return FALSE;
 		strcpy(s, dlg.GetPathName());
+		CMainFrame::SetWorkingDirectory(s, DIR_MODS, true);
 		_splitpath(s, drive, path, fname, fext);
-		strcpy(CMainFrame::m_szCurModDir, drive);
-		strcat(CMainFrame::m_szCurModDir, path);
 	} else
 	{
 		_splitpath(lpszPathName, drive, path, fname, NULL);
@@ -1374,15 +1374,15 @@ void CModDoc::OnFileWaveConvert()
 	CFileDialog dlg(FALSE, "wav", s,
 					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					"Wave Files (*.wav)|*.wav||", pMainFrm);
-	dlg.m_ofn.lpstrInitialDir = pMainFrm->GetExportDir();
+	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_EXPORT);
 
 	CWaveConvert wsdlg(pMainFrm);
 	if (wsdlg.DoModal() != IDOK) return;
 	if (dlg.DoModal() != IDOK) return; //rewbs: made filename dialog appear after wav settings dialog
-	s[0] = 0;
-	_splitpath(dlg.GetPathName(), s, path, NULL, NULL);
-	strcat(s, path);
-	pMainFrm->SetExportDir(s);
+
+	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
+	pMainFrm->SetDefaultDirectory(dlg.GetPathName(), DIR_EXPORT, true);
+
 	strcpy(s, dlg.GetPathName());
 
 	// Saving as wave file
@@ -1505,16 +1505,17 @@ void CModDoc::OnFileMP3Convert()
 					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					"MPEG Layer III Files (*.mp3)|*.mp3|Layer3 Wave Files (*.wav)|*.wav||", pMainFrm);
 	dlg.m_ofn.nFilterIndex = 0;
-	dlg.m_ofn.lpstrInitialDir = pMainFrm->GetExportDir();
+	
+	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_EXPORT);
+
 	if (dlg.DoModal() == IDOK)
 	{
 		MPEGLAYER3WAVEFORMAT wfx;
 		HACMDRIVERID hadid;
 
-		s[0] = 0;
-		_splitpath(dlg.GetPathName(), s, path, NULL, NULL);
-		strcat(s, path);
-		pMainFrm->SetExportDir(s);
+		// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
+		pMainFrm->SetDefaultDirectory(dlg.GetPathName(), DIR_EXPORT, true);
+
 		strcpy(s, dlg.GetPathName());
 		_splitpath(s, NULL, NULL, NULL, fext);
 		if (strlen(fext) <= 1)

@@ -257,15 +257,11 @@ COLORREF CMainFrame::rgbCustomColors[MAX_MODCOLORS] =
 		0x00FF00, 0x00FFFF, 0x0000FF,
 	};
 
-// Arrays
-CHAR CMainFrame::m_szModDir[_MAX_PATH] = "";
-CHAR CMainFrame::m_szSmpDir[_MAX_PATH] = "";
-CHAR CMainFrame::m_szInsDir[_MAX_PATH] = "";
-CHAR CMainFrame::m_szKbdFile[_MAX_PATH] = "";		//rewbs.customKeys
-CHAR CMainFrame::m_szCurModDir[_MAX_PATH] = "";
-CHAR CMainFrame::m_szCurSmpDir[_MAX_PATH] = "";
-CHAR CMainFrame::m_szCurInsDir[_MAX_PATH] = "";
-//CHAR CMainFrame::m_szCurKbdFile[_MAX_PATH] = "";	//rewbs.customKeys
+// Directory Arrays (Default + Last)
+TCHAR CMainFrame::m_szDefaultDirectory[NUM_DIRS][_MAX_PATH] = {0};
+TCHAR CMainFrame::m_szWorkingDirectory[NUM_DIRS][_MAX_PATH] = {0};
+TCHAR CMainFrame::m_szKbdFile[_MAX_PATH] = "";			//rewbs.customKeys
+
 
 CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
 CAutoSaver *CMainFrame::m_pAutoSaver = NULL; //rewbs.autosave
@@ -318,8 +314,13 @@ CMainFrame::CMainFrame()
 	m_szUserText[0] = 0;
 	m_szInfoText[0] = 0;
 	m_szXInfoText[0]= 0;	//rewbs.xinfo
-	m_szPluginsDir[0] = 0;
-	m_szExportDir[0] = 0;
+
+	for(UINT i = 0; i < NUM_DIRS; i++)
+	{
+		m_szDefaultDirectory[i][0] = 0;
+		m_szWorkingDirectory[i][0] = 0;
+	}
+
 	m_dTotalCPU=0;
 	memset(gpenVuMeter, 0, sizeof(gpenVuMeter));
 	
@@ -442,10 +443,19 @@ void CMainFrame::LoadIniSettings()
 	CSoundFile::s_DefaultPlugVolumeHandling = static_cast<uint8>(GetPrivateProfileInt("Misc", "DefaultPlugVolumeHandling", PLUGIN_VOLUMEHANDLING_IGNORE, iniFile));
 	if(CSoundFile::s_DefaultPlugVolumeHandling > 2) CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
-	GetPrivateProfileString("Paths", "Songs_Directory", m_szModDir, m_szModDir, INIBUFFERSIZE, iniFile);
-	GetPrivateProfileString("Paths", "Samples_Directory", m_szSmpDir, m_szSmpDir, INIBUFFERSIZE, iniFile);
-	GetPrivateProfileString("Paths", "Instruments_Directory", m_szInsDir, m_szInsDir, INIBUFFERSIZE, iniFile);
-	GetPrivateProfileString("Paths", "Plugins_Directory", m_szPluginsDir, m_szPluginsDir, INIBUFFERSIZE, iniFile);
+	TCHAR szPath[_MAX_PATH] = "";
+	GetPrivateProfileString("Paths", "Songs_Directory", GetDefaultDirectory(DIR_MODS), szPath, INIBUFFERSIZE, iniFile);
+	SetDefaultDirectory(szPath, DIR_MODS);
+	GetPrivateProfileString("Paths", "Samples_Directory", GetDefaultDirectory(DIR_SAMPLES), szPath, INIBUFFERSIZE, iniFile);
+	SetDefaultDirectory(szPath, DIR_SAMPLES);
+	GetPrivateProfileString("Paths", "Instruments_Directory", GetDefaultDirectory(DIR_INSTRUMENTS), szPath, INIBUFFERSIZE, iniFile);
+	SetDefaultDirectory(szPath, DIR_INSTRUMENTS);
+	GetPrivateProfileString("Paths", "Plugins_Directory", GetDefaultDirectory(DIR_PLUGINS), szPath, INIBUFFERSIZE, iniFile);
+	SetDefaultDirectory(szPath, DIR_PLUGINS);
+	GetPrivateProfileString("Paths", "Plugin_Presets_Directory", GetDefaultDirectory(DIR_PLUGINPRESETS), szPath, INIBUFFERSIZE, iniFile);
+	SetDefaultDirectory(szPath, DIR_PLUGINPRESETS);
+	GetPrivateProfileString("Paths", "Export_Directory", GetDefaultDirectory(DIR_EXPORT), szPath, INIBUFFERSIZE, iniFile);
+	SetDefaultDirectory(szPath, DIR_EXPORT);
 	GetPrivateProfileString("Paths", "Key_Config_File", m_szKbdFile, m_szKbdFile, INIBUFFERSIZE, iniFile);
 
 	CSoundFile::m_nXBassDepth = GetPrivateProfileLong("Effects", "XBassDepth", 0, iniFile);
@@ -479,7 +489,6 @@ void CMainFrame::LoadRegistrySettings()
 	DWORD dwREG_DWORD = REG_DWORD;
 	DWORD dwREG_SZ = REG_SZ;
 	DWORD dwDWORDSize = sizeof(UINT);
-	DWORD dwSZSIZE = sizeof(m_szModDir);
 	DWORD dwCRSIZE = sizeof(COLORREF);
 
 
@@ -524,15 +533,23 @@ void CMainFrame::LoadRegistrySettings()
 		RegQueryValueEx(key, "BufferLength", NULL, &dwREG_DWORD, (LPBYTE)&m_nBufferLength, &dwDWORDSize);
 		if ((m_nBufferLength < 10) || (m_nBufferLength > 200)) m_nBufferLength = 100;
 		RegQueryValueEx(key, "PreAmp", NULL, &dwREG_DWORD, (LPBYTE)&m_nPreAmp, &dwDWORDSize);
-		RegQueryValueEx(key, "Songs_Directory", NULL, &dwREG_SZ, (LPBYTE)m_szModDir, &dwSZSIZE);
-		dwSZSIZE = sizeof(m_szSmpDir);
-		RegQueryValueEx(key, "Samples_Directory", NULL, &dwREG_SZ, (LPBYTE)m_szSmpDir, &dwSZSIZE);
-		dwSZSIZE = sizeof(m_szInsDir);
-		RegQueryValueEx(key, "Instruments_Directory", NULL, &dwREG_SZ, (LPBYTE)m_szInsDir, &dwSZSIZE);
-		dwSZSIZE = sizeof(m_szPluginsDir);
-		RegQueryValueEx(key, "Plugins_Directory", NULL, &dwREG_SZ, (LPBYTE)m_szPluginsDir, &dwSZSIZE);
+
+		CHAR sPath[_MAX_PATH] = "";
+		DWORD dwSZSIZE = sizeof(sPath);
+		RegQueryValueEx(key, "Songs_Directory", NULL, &dwREG_SZ, (LPBYTE)sPath, &dwSZSIZE);
+		SetDefaultDirectory(sPath, DIR_MODS);
+		dwSZSIZE = sizeof(sPath);
+		RegQueryValueEx(key, "Samples_Directory", NULL, &dwREG_SZ, (LPBYTE)sPath, &dwSZSIZE);
+		SetDefaultDirectory(sPath, DIR_SAMPLES);
+		dwSZSIZE = sizeof(sPath);
+		RegQueryValueEx(key, "Instruments_Directory", NULL, &dwREG_SZ, (LPBYTE)sPath, &dwSZSIZE);
+		SetDefaultDirectory(sPath, DIR_INSTRUMENTS);
+		dwSZSIZE = sizeof(sPath);
+		RegQueryValueEx(key, "Plugins_Directory", NULL, &dwREG_SZ, (LPBYTE)sPath, &dwSZSIZE);
+		SetDefaultDirectory(sPath, DIR_PLUGINS);
 		dwSZSIZE = sizeof(m_szKbdFile);
 		RegQueryValueEx(key, "Key_Config_File", NULL, &dwREG_SZ, (LPBYTE)m_szKbdFile, &dwSZSIZE);
+
 		RegQueryValueEx(key, "XBassDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nXBassDepth, &dwDWORDSize);
 		RegQueryValueEx(key, "XBassRange", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nXBassRange, &dwDWORDSize);
 		RegQueryValueEx(key, "ReverbDepth", NULL, &dwREG_DWORD, (LPBYTE)&CSoundFile::m_nReverbDepth, &dwDWORDSize);
@@ -658,11 +675,12 @@ VOID CMainFrame::Initialize()
 		}
 	}
 	// Default directory location
-	strcpy(m_szCurModDir, m_szModDir);
-	strcpy(m_szCurSmpDir, m_szSmpDir);
-	strcpy(m_szCurInsDir, m_szInsDir);
-//	strcpy(m_szCurKbdFile, m_szKbdFile);		//rewbs.customKeys
-	if (m_szModDir[0]) SetCurrentDirectory(m_szModDir);
+	for(UINT i = 0; i < NUM_DIRS; i++)
+	{
+		_tcscpy(m_szWorkingDirectory[i], m_szDefaultDirectory[i]);
+	}
+	if (m_szDefaultDirectory[DIR_MODS][0]) SetCurrentDirectory(m_szDefaultDirectory[DIR_MODS]);
+
 	// Create Audio Thread
 	m_hAudioWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_hNotifyWakeUp = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -948,10 +966,12 @@ void CMainFrame::SaveIniSettings()
 	WritePrivateProfileDWord("Pattern Editor", "Record", gbPatternRecord, iniFile);	
 	WritePrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);	
 
-	WritePrivateProfileString("Paths", "Songs_Directory", m_szModDir, iniFile);
-	WritePrivateProfileString("Paths", "Samples_Directory", m_szSmpDir, iniFile);
-	WritePrivateProfileString("Paths", "Instruments_Directory", m_szInsDir, iniFile);
-	WritePrivateProfileString("Paths", "Plugins_Directory", m_szPluginsDir, iniFile);
+	WritePrivateProfileString("Paths", "Songs_Directory", GetDefaultDirectory(DIR_MODS), iniFile);
+	WritePrivateProfileString("Paths", "Samples_Directory", GetDefaultDirectory(DIR_SAMPLES), iniFile);
+	WritePrivateProfileString("Paths", "Instruments_Directory", GetDefaultDirectory(DIR_INSTRUMENTS), iniFile);
+	WritePrivateProfileString("Paths", "Plugins_Directory", GetDefaultDirectory(DIR_PLUGINS), iniFile);
+	WritePrivateProfileString("Paths", "Plugin_Presets_Directory", GetDefaultDirectory(DIR_PLUGINPRESETS), iniFile);
+	WritePrivateProfileString("Paths", "Export_Directory", GetDefaultDirectory(DIR_EXPORT), iniFile);
 	WritePrivateProfileString("Paths", "Key_Config_File", m_szKbdFile, iniFile);
 
 	WritePrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_nXBassDepth, iniFile);
@@ -2179,15 +2199,16 @@ BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 }
 
 
-BOOL CMainFrame::SetupDirectories(LPCSTR songs, LPCSTR samples, LPCSTR instr)
+BOOL CMainFrame::SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir)
 //---------------------------------------------------------------------------
 {
-	strcpy(m_szModDir, songs);
-	strcpy(m_szSmpDir, samples);
-	strcpy(m_szInsDir, instr);
-	if (songs[0]) strcpy(m_szCurModDir, songs);
-	if (samples[0]) strcpy(m_szCurSmpDir, samples);
-	if (instr[0]) strcpy(m_szCurInsDir, instr);
+	// will also set working directory
+	SetDefaultDirectory(szModDir, DIR_MODS);
+	SetDefaultDirectory(szSampleDir, DIR_SAMPLES);
+	SetDefaultDirectory(szInstrDir, DIR_INSTRUMENTS);
+	SetDefaultDirectory(szVstDir, DIR_PLUGINS);
+	SetDefaultDirectory(szPresetDir, DIR_PLUGINPRESETS);
+
 	// This shouldn't be here (misc options)
 	m_wndToolBar.EnableFlatButtons(m_dwPatternSetup & PATTERN_FLATBUTTONS);
 	UpdateAllViews(HINT_MPTOPTIONS, NULL);
@@ -3002,4 +3023,57 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
 		wsprintf(s, "%02d: %s", i, sname);
 		CBox.SetItemData(CBox.AddString(s), i);
 	}
+}
+
+
+// retrieve / set default directory from given string and store it our setup variables
+// TODO: Let some magic happen to convert between absolute and relative paths. m_csExecutableDirectoryPath might be helpful
+
+void CMainFrame::SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&directories)[NUM_DIRS][_MAX_PATH], bool bStripFilename)
+//----------------------------------------------------------------------------
+{
+	TCHAR szPath[_MAX_PATH], szDir[_MAX_DIR];
+
+	if(bStripFilename)
+	{
+		_tsplitpath(szFilenameFrom, szPath, szDir, 0, 0);
+		_tcscat(szPath, szDir);
+	}
+	else
+	{
+		_tcscpy(szPath, szFilenameFrom);
+	}
+
+	_tcscpy(directories[dir], szPath);
+
+	// When updating default directory, also update the working directory.
+	if(szPath[0] && directories == m_szDefaultDirectory)
+		SetWorkingDirectory(szPath, dir);
+}
+
+void CMainFrame::SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
+//----------------------------------------------------------------------------
+{
+	SetDirectory(szFilenameFrom, dir, m_szDefaultDirectory, bStripFilename);
+}
+
+
+void CMainFrame::SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
+//----------------------------------------------------------------------------
+{
+	SetDirectory(szFilenameFrom, dir, m_szWorkingDirectory, bStripFilename);
+}
+
+
+LPCTSTR CMainFrame::GetDefaultDirectory(Directory dir)
+//----------------------------------------------------------------------------
+{
+	return m_szDefaultDirectory[dir];
+}
+
+
+LPCTSTR CMainFrame::GetWorkingDirectory(Directory dir)
+//----------------------------------------------------------------------------
+{
+	return m_szWorkingDirectory[dir];
 }
