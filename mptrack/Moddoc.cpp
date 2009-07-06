@@ -2634,49 +2634,95 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 			} else
 			{
 				wsprintf(s, "%d", param & 0x0F);
-				if ((gFXInfo[ndx].dwEffect == CMD_S3MCMDEX) || (gFXInfo[ndx].dwEffect == CMD_MODCMDEX))
+				if(gFXInfo[ndx].dwEffect == CMD_S3MCMDEX)
 				{
 					switch(param & 0xF0)
 					{
-					case 0x10:
+					case 0x10: // glissando control
 						if((param & 0x0F) == 0)
 							strcpy(s, "smooth");
 						else
 							strcpy(s, "semitones");
 						break;					
-					case 0x30:
-					case 0x40:
-					case 0x50:
-						if(gFXInfo[ndx].dwEffect == CMD_S3MCMDEX)
+					case 0x30: // vibrato waveform
+					case 0x40: // tremolo waveform
+					case 0x50: // panbrello waveform
+						switch(param & 0x0F)
 						{
-							switch(param & 0x0F)
-							{
-								case 0x00: case 0x04: case 0x08: case 0x0C: strcpy(s, "sine wave"); break;
-								case 0x01: case 0x05: case 0x09: case 0x0D: strcpy(s, "ramp down"); break;
-								case 0x02: case 0x06: case 0x0A: case 0x0E: strcpy(s, "square wave"); break;
-								case 0x03: case 0x07: case 0x0B: case 0x0F: strcpy(s, "random"); break;
-							}
+							case 0x00: case 0x04: case 0x08: case 0x0C: strcpy(s, "sine wave"); break;
+							case 0x01: case 0x05: case 0x09: case 0x0D: strcpy(s, "ramp down"); break;
+							case 0x02: case 0x06: case 0x0A: case 0x0E: strcpy(s, "square wave"); break;
+							case 0x03: case 0x07: case 0x0B: case 0x0F: strcpy(s, "random"); break;
 						}
 						break;
-					case 0x60:	if (gFXInfo[ndx].dwEffect == CMD_MODCMDEX) break;
 
-					case 0xA0:
+					case 0x60: // fine pattern delay (ticks)
+						strcat(s, " rows");
+						break;
+
+					case 0xA0: // high offset
 						wsprintf(s, "+ %u samples", 0x10000 * (param & 0x0F));
 						break;
 
-					case 0xB0:  
-						if (gFXInfo[ndx].dwEffect == CMD_S3MCMDEX)
+					case 0xB0: // pattern loop
+						if((param & 0x0F) == 0x00)
+							strcpy(s, "loop start");
+						else
+							strcat(s, " times");
+						break;
+					case 0xC0: // note cut
+					case 0xD0: // note delay
+						strcat(s, " frames");
+						break;
+					case 0xE0: // pattern delay (rows)
+						strcat(s, " rows");
+						break;
+					case 0xF0: // macro
+						wsprintf(s, "SF%X", param & 0x0F); break;
+					default:
+						break;
+					}
+				}
+				if(gFXInfo[ndx].dwEffect == CMD_MODCMDEX)
+				{
+					switch(param & 0xF0)
+					{
+					case 0x30: // glissando control
+						if((param & 0x0F) == 0)
+							strcpy(s, "smooth");
+						else
+							strcpy(s, "semitones");
+						break;					
+					case 0x40: // vibrato waveform
+					case 0x70: // tremolo waveform
+						//todo: find proper values for XM/MOD (it's not as trivial as described here, i think)
+						switch(param & 0x0F)
 						{
-							if((param & 0x0F) == 0x00)
-								strcpy(s, "loop start");
-							else
-								strcat(s, " times");
+							case 0x00: case 0x03: case 0x06: case 0x0A: case 0x0D: strcpy(s, "sine wave"); break;
+							case 0x01: case 0x04: case 0x07: case 0x0B: case 0x0E: strcpy(s, "ramp down"); break;
+							case 0x02: case 0x05: case 0x08: case 0x0C: case 0x0F: strcpy(s, "square wave"); break;
 						}
 						break;
-					case 0xC0:
-					case 0xD0:	strcat(s, " frames"); break;
-					case 0xE0:	strcat(s, " rows"); break;
-					case 0xF0:	wsprintf(s, "SF%X", param & 0x0F); break;
+					case 0x60: // pattern loop
+						if((param & 0x0F) == 0x00)
+							strcpy(s, "loop start");
+						else
+							strcat(s, " times");
+						break;
+					case 0x90: // retrigger
+						wsprintf(s, "speed %d", param & 0x0F);
+						break;
+					case 0xC0: // note cut
+					case 0xD0: // note delay
+						strcat(s, " frames");
+						break;
+					case 0xE0: // pattern delay (rows)
+						strcat(s, " rows");
+						break;
+					case 0xF0: // macro
+						wsprintf(s, "SF%X", param & 0x0F); break;
+					default:
+						break;
 					}
 				}
 			}
