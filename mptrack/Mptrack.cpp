@@ -1277,10 +1277,11 @@ void CTrackApp::OnFileOpen()
 					"All Files (*.*)|*.*||",
 					NULL);
 	dlg.m_ofn.nFilterIndex = CMainFrame::m_nFilterIndex;
-	if (CMainFrame::m_szCurModDir[0])
-	{
-		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurModDir;
-	}
+
+	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_MODS);
+	if(pszWdir[0])
+		dlg.m_ofn.lpstrInitialDir = pszWdir;
+
 	const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
 	vector<char> filenameBuffer(bufferSize, 0);
 	dlg.GetOFN().lpstrFile = &filenameBuffer[0];
@@ -1290,11 +1291,8 @@ void CTrackApp::OnFileOpen()
 		POSITION pos = dlg.GetStartPosition();
 		while(pos != NULL)
 		{
-			CHAR szDrive[_MAX_PATH], szDir[_MAX_PATH];
 			CString pathName = dlg.GetNextPathName(pos);
-			_splitpath(pathName, szDrive, szDir, NULL, NULL);
-			strcpy(CMainFrame::m_szCurModDir, szDrive);
-			strcat(CMainFrame::m_szCurModDir, szDir);
+			CMainFrame::SetWorkingDirectory(pathName, DIR_MODS, true);
 			CMainFrame::m_nFilterIndex = dlg.m_ofn.nFilterIndex;
 			OpenDocumentFile(pathName);
 		}

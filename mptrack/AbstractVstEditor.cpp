@@ -115,7 +115,11 @@ VOID CAbstractVstEditor::OnLoadPreset()
 		CFileDialog dlg(TRUE, "fxp", NULL,
 					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
 					"VST Program (*.fxp)|*.fxp||",	theApp.m_pMainWnd);
+		dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS);
+
 		if (!(dlg.DoModal() == IDOK))	return;
+
+		CMainFrame::SetWorkingDirectory(dlg.GetFileName(), DIR_PLUGINPRESETS, true);
 
 		//TODO: exception handling to distinguish errors at this level.
 		if (!(m_pVstPlugin->LoadProgram(dlg.GetFileName())))

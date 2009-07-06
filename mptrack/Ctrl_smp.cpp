@@ -774,30 +774,30 @@ OpenError:
 	EndWaitCursor();
 	if (bOk)
 	{
-		CHAR szPath[_MAX_PATH], szNewPath[_MAX_PATH];
 		MODINSTRUMENT *pins = &m_pSndFile->Ins[m_nSample];
-		_splitpath(lpszFileName, szNewPath, szPath, szName, szExt);
-		strcat(szNewPath, szPath);
-		strcpy(CMainFrame::m_szCurSmpDir, szNewPath);
+		CMainFrame::SetWorkingDirectory(lpszFileName, DIR_SAMPLES, true);
 		if (!pins->name[0])
 		{
-			memset(szPath, 0, 32);
-			strcpy(szPath, szName);
+			CHAR szFullFilename[_MAX_PATH];
+			_splitpath(lpszFileName, 0, 0, szName, szExt);
+
+			memset(szFullFilename, 0, 32);
+			strcpy(szFullFilename, szName);
 			if (m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 			{
 				// MOD/XM
-				strcat(szPath, szExt);
-				szPath[31] = 0;
-				memcpy(m_pSndFile->m_szNames[m_nSample], szPath, 32);
+				strcat(szFullFilename, szExt);
+				szFullFilename[31] = 0;
+				memcpy(m_pSndFile->m_szNames[m_nSample], szFullFilename, 32);
 			} else
 			{
 				// S3M/IT
-				szPath[31] = 0;
-				if (!m_pSndFile->m_szNames[m_nSample][0]) memcpy(m_pSndFile->m_szNames[m_nSample], szPath, 32);
-				if (strlen(szPath) < 9) strcat(szPath, szExt);
+				szFullFilename[31] = 0;
+				if (!m_pSndFile->m_szNames[m_nSample][0]) memcpy(m_pSndFile->m_szNames[m_nSample], szFullFilename, 32);
+				if (strlen(szFullFilename) < 9) strcat(szFullFilename, szExt);
 			}
-			szPath[21] = 0;
-			memcpy(pins->name, szPath, 22);
+			szFullFilename[21] = 0;
+			memcpy(pins->name, szFullFilename, 22);
 		}
 		if ((m_pSndFile->m_nType & MOD_TYPE_XM) && (!(pins->uFlags & CHN_PANNING)))
 		{
@@ -925,10 +925,11 @@ void CCtrlSamples::OnSampleOpen()
 					"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
 					"All Files (*.*)|*.*||",
 					this);
-	if (CMainFrame::m_szCurSmpDir[0])
-	{
-		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurSmpDir;
-	}
+
+	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_SAMPLES);
+	if(pszWdir[0])
+		dlg.m_ofn.lpstrInitialDir = pszWdir;
+
 	dlg.m_ofn.nFilterIndex = nLastIndex;
 	const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
 	vector<char> filenameBuffer(bufferSize, 0);
@@ -992,10 +993,11 @@ void CCtrlSamples::OnSampleSave()
 			"Wave File (*.wav)|*.wav|"
 			"RAW Audio (*.raw)|*.raw||",
 			this);
-	if (CMainFrame::m_szCurSmpDir[0])
-	{
-		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurSmpDir;
-	}
+
+	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_SAMPLES);
+	if(pszWdir[0])
+		dlg.m_ofn.lpstrInitialDir = pszWdir;
+
 	if (dlg.DoModal() != IDOK) return;
 	BeginWaitCursor();
 
@@ -1011,10 +1013,7 @@ void CCtrlSamples::OnSampleSave()
 		ErrorBox(IDS_ERR_SAVESMP, this);
 	} else
 	{
-		CHAR drive[_MAX_DRIVE], path[_MAX_PATH];
-		_splitpath(dlg.GetPathName(), drive, path, NULL, NULL);
-		strcpy(CMainFrame::m_szCurSmpDir, drive);
-		strcat(CMainFrame::m_szCurSmpDir, path);
+		CMainFrame::SetWorkingDirectory(dlg.GetPathName(), DIR_SAMPLES, true);
 	}
 	SwitchToView();
 }

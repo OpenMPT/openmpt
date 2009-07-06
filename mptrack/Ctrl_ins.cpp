@@ -1237,7 +1237,6 @@ VOID CCtrlInstruments::UpdateFilterText()
 BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 //--------------------------------------------------------
 {
-	CHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
 	CMappedFile f;
 	BOOL bFirst, bOk;
 	DWORD len;
@@ -1287,10 +1286,9 @@ OpenError:
 		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
 		if (penv)
 		{
-			CHAR szPath[_MAX_PATH], szNewPath[_MAX_PATH];
-			_splitpath(lpszFileName, szNewPath, szPath, szName, szExt);
-			strcat(szNewPath, szPath);
-			strcpy(CMainFrame::m_szCurInsDir, szNewPath);
+			TCHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
+			_tsplitpath(lpszFileName, nullptr, nullptr, szName, szExt);
+			CMainFrame::SetWorkingDirectory(lpszFileName, DIR_INSTRUMENTS, true);
 	
 			if (!penv->name[0])
 			{
@@ -1528,10 +1526,11 @@ void CCtrlInstruments::OnInstrumentOpen()
 					"Impulse Tracker Instruments (*.iti)|*.iti|"
 					"All Files (*.*)|*.*||",
 					this);
-	if (CMainFrame::m_szCurInsDir[0])
-	{
-		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurInsDir;
-	}
+
+	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_INSTRUMENTS);
+	if(pszWdir[0])
+		dlg.m_ofn.lpstrInitialDir = pszWdir;
+
 	const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size.
 	vector<char> filenameBuffer(bufferSize, 0);
 	dlg.GetOFN().lpstrFile = &filenameBuffer[0];
@@ -1601,10 +1600,11 @@ void CCtrlInstruments::OnInstrumentSave()
 			this);
 // -! BUG_FIX#0019
 
-	if (CMainFrame::m_szCurInsDir[0])
-	{
-		dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szCurInsDir;
-	}
+	
+	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_INSTRUMENTS);
+	if(pszWdir[0])
+		dlg.m_ofn.lpstrInitialDir = pszWdir;
+
 	if (dlg.DoModal() != IDOK) return;
 	BeginWaitCursor();
 	_splitpath(dlg.GetPathName(), drive, path, NULL, ext);
@@ -1625,8 +1625,11 @@ void CCtrlInstruments::OnInstrumentSave()
 	EndWaitCursor();
 	if (!bOk) ErrorBox(IDS_ERR_SAVEINS, this); else
 	{
-		strcpy(CMainFrame::m_szCurInsDir, drive);
-		strcat(CMainFrame::m_szCurInsDir, path);
+		strcpy(szFileName, drive);
+		strcat(szFileName, path);
+		
+		CMainFrame::SetWorkingDirectory(szFileName, DIR_INSTRUMENTS);
+
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 //		m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << 24) | HINT_INSTRUMENT);

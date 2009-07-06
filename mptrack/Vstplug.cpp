@@ -1376,15 +1376,11 @@ VOID CSelectPluginDlg::OnAddPlugin()
 					OFN_FILEMUSTEXIST|OFN_ENABLESIZING |OFN_HIDEREADONLY|OFN_PATHMUSTEXIST|OFN_FORCESHOWHIDDEN|OFN_ALLOWMULTISELECT,
 					"VST Plugins (*.dll)|*.dll||",
 					this);
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm)
-	{
-		LPCSTR pszDir = pMainFrm->GetPluginsDir();
-		if (pszDir[0])
-		{
-			dlg.m_ofn.lpstrInitialDir = pszDir;
-		}
-	}
+	
+	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_PLUGINS);
+	if(pszWdir[0])
+		dlg.m_ofn.lpstrInitialDir = pszWdir;
+
 	pszFileNames = new CHAR[MAX_FILEOPEN_BUFSIZE];
 	if (!pszFileNames) return;
 	pszFileNames[0] = 0;
@@ -1393,7 +1389,6 @@ VOID CSelectPluginDlg::OnAddPlugin()
 	dlg.m_ofn.nMaxFile = MAX_FILEOPEN_BUFSIZE;
 	if (dlg.DoModal() == IDOK)
 	{
-		CHAR s[_MAX_PATH], sdir[_MAX_PATH];
 		CVstPluginManager *pManager = theApp.GetPluginManager();
 		pszFileNames[MAX_FILEOPEN_BUFSIZE-1] = 0;
 		POSITION pos = dlg.GetStartPosition();
@@ -1403,16 +1398,14 @@ VOID CSelectPluginDlg::OnAddPlugin()
 		PVSTPLUGINLIB plugLib = NULL;
 		while (pos != NULL)	{
 
-			CString str = dlg.GetNextPathName(pos);
+			CString sFilename = dlg.GetNextPathName(pos);
 			if (!n)	{
-				_splitpath(str, s, sdir, NULL, NULL);
-				strcat(s, sdir);
-				if (pMainFrm) pMainFrm->SetPluginsDir(s);
+				CMainFrame::SetWorkingDirectory(sFilename, DIR_PLUGINS, true);
 			}
 			n++;
 
 			if (pManager) {
-				plugLib = pManager->AddPlugin(str, FALSE);
+				plugLib = pManager->AddPlugin(sFilename, FALSE);
 				if (plugLib) { 
 					bOk = TRUE;
 				}

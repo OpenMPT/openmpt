@@ -340,6 +340,22 @@ typedef struct _EQPRESET
 
 
 /////////////////////////////////////////////////////////////////////////
+// Default directories
+
+enum Directory
+{
+	DIR_MODS = 0,
+	DIR_SAMPLES,
+	DIR_INSTRUMENTS,
+	DIR_PLUGINS,
+	DIR_PLUGINPRESETS,
+	DIR_EXPORT,
+	NUM_DIRS
+};
+
+
+
+/////////////////////////////////////////////////////////////////////////
 // Misc. Macros
 
 
@@ -400,9 +416,8 @@ public:
 	static COLORREF rgbCustomColors[MAX_MODCOLORS];
 	static LPMODPLUGDIB bmpPatterns, bmpNotes, bmpVUMeters, bmpVisNode;
 	static HPEN gpenVuMeter[NUM_VUMETER_PENS*2];
-	// Arrays
-	static CHAR m_szModDir[_MAX_PATH], m_szSmpDir[_MAX_PATH], m_szInsDir[_MAX_PATH], m_szKbdFile[_MAX_PATH];
-	static CHAR m_szCurModDir[_MAX_PATH], m_szCurSmpDir[_MAX_PATH], m_szCurInsDir[_MAX_PATH], m_szCurKbdDir[_MAX_PATH];
+	// key config
+	static TCHAR m_szKbdFile[_MAX_PATH];
 
 	// Low-Level Audio
 public:
@@ -452,8 +467,6 @@ protected:
 	// Notification Buffer
 	MPTNOTIFICATION NotifyBuffer[MAX_UPDATE_HISTORY];
 	// Misc
-	CHAR m_szPluginsDir[_MAX_PATH];
-	CHAR m_szExportDir[_MAX_PATH];
 	bool m_bOptionsLocked; 	 	//rewbs.customKeys
 	double m_dTotalCPU;
 	CModDoc* m_pJustModifiedDoc;
@@ -480,10 +493,6 @@ public:
 	BOOL dsoundFillBuffers(LPBYTE lpBuf, DWORD dwSize);
 	BOOL DSoundDone(LPBYTE lpBuffer, DWORD dwBytes);
 	BOOL DoNotification(DWORD dwSamplesRead, DWORD dwLatency);
-	LPCSTR GetPluginsDir() const { return m_szPluginsDir; }
-	VOID SetPluginsDir(LPCSTR pszDir) { lstrcpyn(m_szPluginsDir, pszDir, sizeof(m_szPluginsDir)); }
-	LPCSTR GetExportDir() const { return m_szExportDir; }
-	VOID SetExportDir(LPCSTR pszDir) { lstrcpyn(m_szExportDir, pszDir, sizeof(m_szExportDir)); }
 
 // Midi Input Functions
 public:
@@ -517,7 +526,7 @@ public:
 	static CString GetPrivateProfileCString(const CString section, const CString key, const CString defaultValue, const CString iniFile);
 	
 
-// Misc functions
+	// Misc functions
 public:
 	VOID SetUserText(LPCSTR lpszText);
 	VOID SetInfoText(LPCSTR lpszText);
@@ -561,13 +570,26 @@ public:
 	BOOL StopRenderer(CSoundFile*);  //rewbs.VSTTimeInfo
 	void SwitchToActiveView();
 	BOOL SetupSoundCard(DWORD q, DWORD rate, UINT nbits, UINT chns, UINT bufsize, LONG wd);
-	BOOL SetupDirectories(LPCSTR s, LPCSTR s2, LPCSTR s3);
+	BOOL SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir);
 	BOOL SetupPlayer(DWORD, DWORD, BOOL bForceUpdate=FALSE);
 	BOOL SetupMidi(DWORD d, LONG n);
 	void SetPreAmp(UINT n);
 	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == m_pModPlaying) ? m_hFollowSong : NULL; }
 	BOOL SetFollowSong(CModDoc *, HWND hwnd, BOOL bFollowSong=TRUE, DWORD dwType=MPTNOTIFY_DEFAULT);
 	BOOL ResetNotificationBuffer(HWND hwnd=NULL);
+
+
+public:
+	// access to default + working directories
+	static void SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
+	static LPCTSTR GetWorkingDirectory(Directory dir);
+	static void SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
+	static LPCTSTR GetDefaultDirectory(Directory dir);
+protected:
+	static void SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&pDirs)[NUM_DIRS][_MAX_PATH], bool bStripFilename);
+	// Directory Arrays (default dir + last dir)
+	static TCHAR m_szDefaultDirectory[NUM_DIRS][_MAX_PATH];
+	static TCHAR m_szWorkingDirectory[NUM_DIRS][_MAX_PATH];
 
 
 // Overrides

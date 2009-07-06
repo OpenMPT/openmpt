@@ -150,7 +150,7 @@ VOID CModTree::Init()
 		m_dwStatus |= TREESTATUS_SINGLEEXPAND;
 	}
 	ModifyStyle(dwRemove, dwAdd);
-	strcpy(m_szInstrLibPath, CMainFrame::m_szSmpDir);
+	strcpy(m_szInstrLibPath, CMainFrame::GetDefaultDirectory(DIR_SAMPLES));
 	SetImageList(CMainFrame::GetMainFrame()->GetImageList(), TVSIL_NORMAL);
 	if (m_pDataTree)
 	{
@@ -1705,7 +1705,8 @@ BOOL CModTree::InstrumentLibraryChDir(LPCSTR lpszDir)
 	if (!GetCurrentDirectory(sizeof(s), s)) s[0] = 0;
 	if (!strcmp(lpszDir+1, ":\\"))
 	{
-		strcpy(sdrive, lpszDir);
+		sdrive[0] = lpszDir[0];
+		sdrive[1] = lpszDir[1];
 		sdrive[2] = 0;
 		lpszDir = sdrive;
 	}

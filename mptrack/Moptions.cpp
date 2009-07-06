@@ -556,14 +556,17 @@ void COptionsColors::OnPresetBuzz()
 // COptionsGeneral
 
 BEGIN_MESSAGE_MAP(COptionsGeneral, CPropertyPage)
-	ON_EN_CHANGE(IDC_EDIT1,		OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT2,		OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT3,		OnSettingsChanged)
-	ON_LBN_SELCHANGE(IDC_LIST1,	OnOptionSelChanged)
-	ON_COMMAND(IDC_BUTTON1,		OnBrowseSongs)
-	ON_COMMAND(IDC_BUTTON2,		OnBrowseSamples)
-	ON_COMMAND(IDC_BUTTON3,		OnBrowseInstruments)
-	ON_CLBN_CHKCHANGE(IDC_LIST1, OnSettingsChanged)
+	ON_EN_CHANGE(IDC_OPTIONS_DIR_MODS,			OnSettingsChanged)
+	ON_EN_CHANGE(IDC_OPTIONS_DIR_SAMPS,			OnSettingsChanged)
+	ON_EN_CHANGE(IDC_OPTIONS_DIR_INSTS,			OnSettingsChanged)
+	ON_EN_CHANGE(IDC_OPTIONS_DIR_VSTPRESETS,	OnSettingsChanged)
+	ON_LBN_SELCHANGE(IDC_LIST1,					OnOptionSelChanged)
+	ON_COMMAND(IDC_BUTTON_CHANGE_MODDIR,		OnBrowseSongs)
+	ON_COMMAND(IDC_BUTTON_CHANGE_SAMPDIR,		OnBrowseSamples)
+	ON_COMMAND(IDC_BUTTON_CHANGE_INSTRDIR,		OnBrowseInstruments)
+	ON_COMMAND(IDC_BUTTON_CHANGE_VSTDIR,		OnBrowsePlugins)
+	ON_COMMAND(IDC_BUTTON_CHANGE_VSTPRESETSDIR,	OnBrowsePresets)
+	ON_CLBN_CHKCHANGE(IDC_LIST1,				OnSettingsChanged)
 END_MESSAGE_MAP()
 
 typedef struct OPTGENDESC
@@ -711,9 +714,13 @@ BOOL COptionsGeneral::OnInitDialog()
 	}
 	m_CheckList.SetCurSel(0);
 	OnOptionSelChanged();
-	SetDlgItemText(IDC_EDIT1, CMainFrame::m_szModDir);
-	SetDlgItemText(IDC_EDIT2, CMainFrame::m_szSmpDir);
-	SetDlgItemText(IDC_EDIT3, CMainFrame::m_szInsDir);
+
+	SetDlgItemText(IDC_OPTIONS_DIR_MODS,		CMainFrame::GetDefaultDirectory(DIR_MODS));
+	SetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		CMainFrame::GetDefaultDirectory(DIR_SAMPLES));
+	SetDlgItemText(IDC_OPTIONS_DIR_INSTS,		CMainFrame::GetDefaultDirectory(DIR_INSTRUMENTS));
+	SetDlgItemText(IDC_OPTIONS_DIR_VSTS,		CMainFrame::GetDefaultDirectory(DIR_PLUGINS));
+	SetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	CMainFrame::GetDefaultDirectory(DIR_PLUGINPRESETS));
+
 	return TRUE;
 }
 
@@ -721,12 +728,16 @@ BOOL COptionsGeneral::OnInitDialog()
 void COptionsGeneral::OnOK()
 //--------------------------
 {
-	CHAR szModDir[_MAX_DIR], szSmpDir[_MAX_PATH], szInsDir[_MAX_PATH];
-	szModDir[0] = szInsDir[0] = szSmpDir[0] = 0;
-	GetDlgItemText(IDC_EDIT1, szModDir, _MAX_PATH);
-	GetDlgItemText(IDC_EDIT2, szSmpDir, _MAX_PATH);
-	GetDlgItemText(IDC_EDIT3, szInsDir, _MAX_PATH);
-	for (UINT i=0; i<OPTGEN_MAXOPTIONS; i++)
+	// Default paths
+	TCHAR szModDir[_MAX_PATH], szSmpDir[_MAX_PATH], szInsDir[_MAX_PATH], szVstDir[_MAX_PATH], szPresetDir[_MAX_PATH];
+	szModDir[0] = szInsDir[0] = szSmpDir[0] = szVstDir[0] = szPresetDir[0] = 0;
+	GetDlgItemText(IDC_OPTIONS_DIR_MODS,		szModDir, _MAX_PATH);
+	GetDlgItemText(IDC_OPTIONS_DIR_SAMPS,		szSmpDir, _MAX_PATH);
+	GetDlgItemText(IDC_OPTIONS_DIR_INSTS,		szInsDir, _MAX_PATH);
+	GetDlgItemText(IDC_OPTIONS_DIR_VSTS,		szVstDir, _MAX_PATH);
+	GetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	szPresetDir, _MAX_PATH);
+
+	for (UINT i=0; i < OPTGEN_MAXOPTIONS; i++)
 	{
 		DWORD mask = 0;
 		BOOL bCheck = m_CheckList.GetCheck(i);
@@ -774,7 +785,7 @@ void COptionsGeneral::OnOK()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm)
 	{
-		pMainFrm->SetupDirectories(szModDir, szSmpDir, szInsDir);
+		pMainFrm->SetupDirectories(szModDir, szSmpDir, szInsDir, szVstDir, szPresetDir);
 		pMainFrm->UpdateTree(NULL, HINT_MPTOPTIONS);
 	}
 	CPropertyPage::OnOK();

@@ -830,6 +830,24 @@
 #define IDC_DONTSHOWAGAIN               2341
 #define IDC_MESSAGETEXT                 2342
 #define IDC_SAMPLE_DCOFFSET				2343
+#define IDC_OPTIONS_DIR_MODS            2344
+#define IDC_OPTIONS_DIR_SAMPS           2345
+#define IDC_OPTIONS_DIR_INSTS           2346
+#define IDC_OPTIONS_DIR_VSTS            2347
+#define IDC_STATIC_MODDIR               2348
+#define IDC_STATIC_SAMPDIR              2349
+#define IDC_STATIC_INSTRDIR             2350
+#define IDC_STATIC_VSTDIR               2351
+#define IDC_BUTTON_CHANGE_MODDIR        2352
+#define IDC_BUTTON_CHANGE_SAMPDIR       2353
+#define IDC_BUTTON_CHANGE_INSTRDIR      2354
+#define IDC_BUTTON_CHANGE_VSTDIR        2355
+#define IDC_STATIC_AUTOSAVE_OPTIONS     2356
+#define IDC_STATIC_AUTOSAVE_LOCATION    2357
+#define IDC_OPTIONS_DIR_VSTPRESETS      2357
+#define IDC_BUTTON_CHANGE_VSTDIR2       2358
+#define IDC_BUTTON_CHANGE_VSTPRESETSDIR 2358
+#define IDC_STATIC_VSTPRESETDIR         2359
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1067,7 +1085,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        518
 #define _APS_NEXT_COMMAND_VALUE         59226
-#define _APS_NEXT_CONTROL_VALUE         2344
+#define _APS_NEXT_CONTROL_VALUE         2360
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
