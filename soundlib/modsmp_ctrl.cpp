@@ -279,11 +279,9 @@ float RemoveDCOffset(MODINSTRUMENT& smp,
 	else if(pins->GetElementarySampleSize() == 1)
 		RemoveOffsetAndNormalize( reinterpret_cast<int8*>(pins->pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
 	
-	// step 3: adjust either global vol or default vol of this sample
-	if(modtype == MOD_TYPE_IT || modtype == MOD_TYPE_MPT)
+	// step 3: adjust global vol (if available)
+	if((modtype & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (iStart == 0) && (iEnd = pins->nLength))
 		pins->nGlobalVol = min((WORD)(pins->nGlobalVol / dAmplify), 64);
-	else if(modtype != MOD_TYPE_NONE)
-		pins->nVolume = min((WORD)(pins->nVolume / dAmplify), 256);
 
 	AdjustEndOfSample(smp, pSndFile);
 

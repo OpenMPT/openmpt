@@ -2638,6 +2638,12 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 				{
 					switch(param & 0xF0)
 					{
+					case 0x10:
+						if((param & 0x0F) == 0)
+							strcpy(s, "smooth");
+						else
+							strcpy(s, "semitones");
+						break;					
 					case 0x30:
 					case 0x40:
 					case 0x50:
