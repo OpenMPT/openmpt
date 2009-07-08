@@ -367,9 +367,12 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			insfile[iSmp] = ((DWORD)LittleEndianW(*((LPWORD)(s+0x0E)))) << 4;
 			insfile[iSmp] += ((DWORD)(BYTE)s[0x0D]) << 20;
 			if (insfile[iSmp] > dwMemLength) insfile[iSmp] &= 0xFFFF;
-			if ((Ins[iSmp].nLoopStart >= Ins[iSmp].nLoopEnd) || (Ins[iSmp].nLoopEnd - Ins[iSmp].nLoopStart < 8))
-				Ins[iSmp].nLoopStart = Ins[iSmp].nLoopEnd = 0;
+			if ((Ins[iSmp].nLoopStart >= Ins[iSmp].nLoopEnd) || (Ins[iSmp].nLoopEnd - Ins[iSmp].nLoopStart < 1))
+ 				Ins[iSmp].nLoopStart = Ins[iSmp].nLoopEnd = 0;
+			UINT iLooplength = Ins[iSmp].nLoopEnd - Ins[iSmp].nLoopStart;
+			if(iLooplength > 0 && iLooplength < 8) Ins[iSmp].nLoopEnd = Ins[iSmp].nLoopStart + 8;
 			Ins[iSmp].nPan = 0x80;
+		//	ASSERT(iLooplength == 0 || iLooplength > 10);
 		}
 	}
 	// Reading patterns
@@ -727,4 +730,3 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 
 #pragma warning(default:4100)
 #endif // MODPLUG_NO_FILESAVE
-
