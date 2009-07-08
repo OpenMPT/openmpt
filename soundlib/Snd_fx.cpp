@@ -2432,7 +2432,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 					pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP;
 				}
 				break;
-	// S9x: Set Surround
+	// S9x: Sound Control
 	case 0x90:	ExtendedChannelEffect(pChn, param & 0x0F); break;
 	// SAx: Set 64k Offset
 	case 0xA0:	if (!m_nTickCount)
@@ -2450,7 +2450,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 	case 0xC0:	NoteCut(nChn, param); break;
 	// SDx: Note Delay
 	// SEx: Pattern Delay for x rows
-	// SFx: S3M: Funk Repeat, IT: Set Active Midi Macro
+	// SFx: S3M: Not used, IT: Set Active Midi Macro
 	case 0xF0:	pChn->nActiveMacro = param; break;
 	}
 }

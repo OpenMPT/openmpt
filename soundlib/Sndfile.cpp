@@ -29,7 +29,7 @@
 #define UNRAR_SUPPORT
 #define UNLHA_SUPPORT
 #define ZIPPED_MOD_SUPPORT
-LPCSTR glpszModExtensions = "mod|s3m|xm|it|stm|nst|ult|669|wow|mtm|med|far|mdl|ams|dsm|amf|okt|dmf|ptm|psm|mt2|umx"
+LPCSTR glpszModExtensions = "mod|s3m|xm|it|stm|nst|ult|669|wow|mtm|med|far|mdl|ams|dsm|amf|okt|dmf|ptm|psm|mt2|umx|gdm"
 #ifndef NO_UNMO3_SUPPORT
 "|mo3"
 #endif

@@ -1015,7 +1015,9 @@ void CCtrlSamples::OnSampleSave()
 			"Wave File (*.wav)|*.wav|"
 			"RAW Audio (*.raw)|*.raw||",
 			this);
-	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_SAMPLES);
+	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_SAMPLES);
+	if(pszWdir[0])
+		dlg.m_ofn.lpstrInitialDir = pszWdir;
 	if (dlg.DoModal() != IDOK) return;
 	BeginWaitCursor();
 
@@ -1051,7 +1053,6 @@ void CCtrlSamples::OnSampleSave()
 					sSampleFilename.Remove(sForbiddenChars.GetAt(i));
 				}
 
-				//sFilename.Format("%s%s%s%s", drive, path, filename, ext);
 				sFilename = dlg.GetPathName();
 				sFilename.Replace("%sample_number%", sSampleNumber);
 				sFilename.Replace("%sample_filename%", sSampleFilename);
