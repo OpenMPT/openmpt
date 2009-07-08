@@ -970,44 +970,101 @@ void CCtrlSamples::OnSampleOpen()
 void CCtrlSamples::OnSampleSave()
 //-------------------------------
 {
-	CHAR szFileName[_MAX_PATH] = "", ext[_MAX_EXT];
+	if(!m_pSndFile) return;
 
-	if ((!m_pSndFile) || (!m_nSample) || (!m_pSndFile->Ins[m_nSample].pSample))
+	CHAR szFileName[_MAX_PATH] = "";
+	BOOL bBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
+
+	if(!bBatchSave)
 	{
-		SwitchToView();
-		return;
+		// save this sample
+		if ((!m_nSample) || (!m_pSndFile->Ins[m_nSample].pSample))
+		{
+			SwitchToView();
+			return;
+		}
+		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+		{
+			memcpy(szFileName, m_pSndFile->Ins[m_nSample].name, 22);
+			szFileName[22] = 0;
+		} else
+		{
+			memcpy(szFileName, m_pSndFile->m_szNames[m_nSample], 32);
+			szFileName[32] = 0;
+		}
+		if (!szFileName[0]) strcpy(szFileName, "untitled");
 	}
-	if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+	else
 	{
-		memcpy(szFileName, m_pSndFile->Ins[m_nSample].name, 22);
-		szFileName[22] = 0;
-	} else
-	{
-		memcpy(szFileName, m_pSndFile->m_szNames[m_nSample], 32);
-		szFileName[32] = 0;
+		// save all samples
+		CString sPath = m_pSndFile->m_pModDoc->GetPathName();
+		if(sPath.IsEmpty()) sPath = "untitled";
+
+		sPath += " - %sample_number% - ";
+		if(m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_MOD))
+			sPath += "%sample_name%.wav";
+		else
+			sPath += "%sample_filename%.wav";
+		sPath += ".wav";
+		_splitpath(sPath, NULL, NULL, szFileName, NULL);
 	}
-	if (!szFileName[0]) strcpy(szFileName, "untitled");
+
 	CFileDialog dlg(FALSE, "wav",
 			szFileName,
 			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 			"Wave File (*.wav)|*.wav|"
 			"RAW Audio (*.raw)|*.raw||",
 			this);
-
-	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_SAMPLES);
-	if(pszWdir[0])
-		dlg.m_ofn.lpstrInitialDir = pszWdir;
-
+	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_SAMPLES);
 	if (dlg.DoModal() != IDOK) return;
 	BeginWaitCursor();
 
+	TCHAR ext[_MAX_EXT];
 	_splitpath(dlg.GetPathName(), NULL, NULL, NULL, ext);
+
 	BOOL bOk = FALSE;
-	if (!lstrcmpi(ext, ".raw"))
-		bOk = m_pSndFile->SaveRAWSample(m_nSample, dlg.GetPathName());
-	else
-		bOk = m_pSndFile->SaveWAVSample(m_nSample, dlg.GetPathName());
+	UINT iMinSmp = m_nSample, iMaxSmp = m_nSample;
+	CString sFilename = dlg.GetPathName(), sNumberFormat;
+	if(bBatchSave)
+	{
+		iMinSmp = 1;
+		iMaxSmp = m_pSndFile->m_nSamples;
+		sNumberFormat.Format("%s%d%s", "%.", ((int)log10((float)iMaxSmp)) + 1, "d");
+	}
+
+	const CString sForbiddenChars = "\\/:\"?<>*";
+
+	for(UINT iSmp = iMinSmp; iSmp <= iMaxSmp; iSmp++)
+	{
+		if (m_pSndFile->Ins[iSmp].pSample)
+		{
+			if(bBatchSave)
+			{
+				CString sSampleNumber, sSampleName, sSampleFilename;
+				sSampleNumber.Format(sNumberFormat, iSmp);
+
+				sSampleName = (m_pSndFile->m_szNames[iSmp]) ? m_pSndFile->m_szNames[iSmp] : "untitled";
+				sSampleFilename = (m_pSndFile->Ins[iSmp].name[0]) ? m_pSndFile->Ins[iSmp].name : m_pSndFile->m_szNames[iSmp];
+				for(UINT i = 0; i < sForbiddenChars.GetLength(); i++)
+				{
+					sSampleName.Remove(sForbiddenChars.GetAt(i));
+					sSampleFilename.Remove(sForbiddenChars.GetAt(i));
+				}
+
+				//sFilename.Format("%s%s%s%s", drive, path, filename, ext);
+				sFilename = dlg.GetPathName();
+				sFilename.Replace("%sample_number%", sSampleNumber);
+				sFilename.Replace("%sample_filename%", sSampleFilename);
+				sFilename.Replace("%sample_name%", sSampleName);
+			}
+			if (!lstrcmpi(ext, ".raw"))
+				bOk = m_pSndFile->SaveRAWSample(iSmp, sFilename);
+			else
+				bOk = m_pSndFile->SaveWAVSample(iSmp, sFilename);
+		}
+	}
 	EndWaitCursor();
+
 	if (!bOk)
 	{
 		ErrorBox(IDS_ERR_SAVESMP, this);
