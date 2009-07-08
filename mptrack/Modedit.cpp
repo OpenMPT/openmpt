@@ -57,7 +57,8 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	const bool oldTypeIsMOD = (oldtype == MOD_TYPE_MOD), oldTypeIsXM = (oldtype == MOD_TYPE_XM),
 				oldTypeIsS3M = (oldtype == MOD_TYPE_S3M), oldTypeIsIT = (oldtype == MOD_TYPE_IT),
 				oldTypeIsMPT = (oldtype == MOD_TYPE_MPT), oldTypeIsMOD_XM = (oldTypeIsMOD || oldTypeIsXM),
-                oldTypeIsS3M_IT_MPT = (oldTypeIsS3M || oldTypeIsIT || oldTypeIsMPT);
+                oldTypeIsS3M_IT_MPT = (oldTypeIsS3M || oldTypeIsIT || oldTypeIsMPT),
+                oldTypeIsIT_MPT = (oldTypeIsIT || oldTypeIsMPT);
 
 	const bool newTypeIsMOD = (nNewType == MOD_TYPE_MOD), newTypeIsXM =  (nNewType == MOD_TYPE_XM), 
 				newTypeIsS3M = (nNewType == MOD_TYPE_S3M), newTypeIsIT = (nNewType == MOD_TYPE_IT),
@@ -327,8 +328,62 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			}
 		}
 		if (bBrokenNoteMap) AddToLog("WARNING: Note Mapping will be lost when saving as XM\n");
+	} else
+	// Convert S3M to IT
+	if (oldTypeIsS3M && newTypeIsIT_MPT)
+	{
+		for (UINT nPat=0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
+		{
+			MODCOMMAND *m = m_SndFile.Patterns[nPat];
+			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len--; m++)
+			{
+				switch(m->command)
+				{
+				case CMD_PANNING8:
+					if(m->param == 0xA4)
+					{
+						// surround remap
+						m->command = CMD_S3MCMDEX;
+						m->param = 0x91;
+					}
+					else
+					{
+						m->param = min(m->param << 1, 0xFF);
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	} else
+	// Convert IT to S3M
+	if (oldTypeIsIT_MPT && newTypeIsS3M)
+	{
+		for (UINT nPat=0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
+		{
+			MODCOMMAND *m = m_SndFile.Patterns[nPat];
+			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len--; m++)
+			{
+				switch(m->command)
+				{
+				case CMD_PANNING8:
+					m->param = (m->param + 1) >> 1;
+				case CMD_S3MCMDEX:
+					if(m->param == 0x91)
+					{
+						// surround remap (this is the "official" command)
+						m->command = CMD_PANNING8;
+						m->param = 0xA4;
+					}
+				default:
+					break;
+				}
+			}
+		}
 	}
-	// Too many samples ?
+
+	// Too many samples?
 	if (newTypeIsMOD && (m_SndFile.m_nSamples > 31))
 	{
 		AddToLog("WARNING: Samples above 31 will be lost when saving this file as MOD!\n");
@@ -1067,6 +1122,9 @@ BOOL CModDoc::CompoCleanup()
 
 	// convert to IT...
 	ChangeModType(MOD_TYPE_IT);
+	m_SndFile.m_nMixLevels = mixLevels_original;
+	m_SndFile.m_nTempoMode = tempo_mode_classic;
+	m_SndFile.m_dwSongFlags = SONG_LINEARSLIDES | SONG_EXFILTERRANGE;
 	
 	// clear order list
 	m_SndFile.Order.Init();
