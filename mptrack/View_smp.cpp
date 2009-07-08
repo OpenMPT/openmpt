@@ -1087,7 +1087,7 @@ void CViewSample::UpdateNcButtonState()
 		{
 			case ID_SAMPLE_DRAW: 
 				if(m_bDrawingEnabled) dwStyle |= NCBTNS_CHECKED; 
-				if(pSndFile->Ins[m_nSample].GetNumChannels() > 1) dwStyle |= NCBTNS_DISABLED;
+				if(pSndFile->Ins[m_nSample].GetNumChannels() > 1 || pSndFile->Ins[m_nSample].pSample == nullptr) dwStyle |= NCBTNS_DISABLED;
 				break;
 		}
 

@@ -1441,6 +1441,7 @@ BOOL CModDoc::RemovePattern(UINT n)
 		BEGIN_CRITICAL();
 		LPVOID p = m_SndFile.Patterns[n];
 		m_SndFile.Patterns[n] = NULL;
+		m_SndFile.SetPatternName(n, "");
 		CSoundFile::FreePattern(p);
 		END_CRITICAL();
 		SetModified();
