@@ -986,17 +986,52 @@ BOOL CSoundFile::ReadNote()
 			}
 
 			// Tremor
-			if (pChn->nCommand == CMD_TREMOR)
+			if(pChn->nCommand == CMD_TREMOR)
 			{
-				UINT n = (pChn->nTremorParam >> 4) + (pChn->nTremorParam & 0x0F);
-				UINT ontime = pChn->nTremorParam >> 4;
-				if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) { n += 2; ontime++; }
-				UINT tremcount = (UINT)pChn->nTremorCount;
-				if (tremcount >= n) tremcount = 0;
-				if ((m_nTickCount) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
+				if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 				{
-					if (tremcount >= ontime) vol = 0;
-					pChn->nTremorCount = (BYTE)(tremcount + 1);
+					// Original IT behaviour
+					if(pChn->nTremorOn)
+						pChn->nTremorOn--;
+					if(!pChn->nTremorOn) {
+						if(pChn->nTremorOff)
+						{
+							vol = 0;
+							pChn->nTremorOff--;
+						}
+						else
+						{
+							pChn->nTremorOn = pChn->nTremorParam >> 4;
+							pChn->nTremorOff = pChn->nTremorParam & 0x0F;
+							if(m_dwSongFlags & SONG_ITOLDEFFECTS)
+							{
+								pChn->nTremorOn++;
+								pChn->nTremorOff++;
+							}
+							else
+							{
+								if (!pChn->nTremorOn) pChn->nTremorOn = 1;
+								if (!pChn->nTremorOff) pChn->nTremorOff = 1;
+							}
+						}
+					}
+				}
+				else
+				{
+					UINT n = (pChn->nTremorParam >> 4) + (pChn->nTremorParam & 0x0F);
+					UINT ontime = pChn->nTremorParam >> 4;
+					if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS))
+					{
+						n += 2;
+						ontime++;
+					}
+					UINT tremcount = (UINT)pChn->nTremorCount;
+					if (tremcount >= n) tremcount = 0;
+					if ((m_nTickCount) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
+					{
+						if (tremcount >= ontime) vol = 0;
+						pChn->nTremorCount = (BYTE)(tremcount + 1);
+					}
 				}
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
 			}
