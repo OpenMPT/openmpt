@@ -530,6 +530,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nVolSwing, nPanSwing;
 	LONG nCutSwing, nResSwing;
 	LONG nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
+	UINT nOldGlobalVolSlide;
 	// 8-bit members
 	BYTE nRestoreResonanceOnNewNote; //Like above
 	BYTE nRestoreCutoffOnNewNote; //Like above
@@ -1160,7 +1161,7 @@ public:
 	// Global Effects
 	void SetTempo(UINT param, bool setAsNonModcommand = false);
 	void SetSpeed(UINT param);
-	void GlobalVolSlide(UINT param);
+	void GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide);
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
 	BOOL IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const;
 	// Read/Write sample functions

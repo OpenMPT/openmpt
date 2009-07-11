@@ -295,13 +295,32 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				break;
 			// Global Volume
 			case CMD_GLOBALVOLUME:
+				if (m_nTickCount) break;
+
 				if (!(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
-				if (param > 128) param = 128;
-				nGlbVol = param << 1;
+				if(GetModFlag(MSF_COMPATIBLE_PLAY))
+				{
+					// both FT2 and IT ignore out-of-range values
+					if (param <= 128)
+						nGlbVol = param << 1;
+				}
+				else
+				{
+					if (param > 128) param = 128;
+					nGlbVol = param << 1;
+				}
 				break;
 			// Global Volume Slide
 			case CMD_GLOBALVOLSLIDE:
-				if (param) nOldGlbVolSlide = param; else param = nOldGlbVolSlide;
+				if(GetModFlag(MSF_COMPATIBLE_PLAY))
+				{
+					if (param) pChn->nOldGlobalVolSlide = param; else param = pChn->nOldGlobalVolSlide;
+				}
+				else
+				{
+					if (param) nOldGlbVolSlide = param; else param = nOldGlbVolSlide;
+
+				}
 				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 				{
 					param >>= 4;
@@ -727,7 +746,10 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		pChn->nLeftVU = pChn->nRightVU = 0xFF;
 		pChn->dwFlags &= ~CHN_FILTER;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
-		pChn->nRetrigCount = 0;
+		if(!GetModFlag(MSF_COMPATIBLE_PLAY))
+		{
+			pChn->nRetrigCount = 0;
+		}
 		pChn->nTremorCount = 0;
 		if (bResetEnv)
 		{
@@ -1513,6 +1535,8 @@ BOOL CSoundFile::ProcessEffects()
 				if (!(param & 0x0F)) param |= pChn->nRetrigParam & 0x0F;
 				param |= 0x100; // increment retrig count on first row
 			}
+			if(!GetModFlag(MSF_COMPATIBLE_PLAY))
+			{
 			if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF); else param = pChn->nRetrigParam;
 			//rewbs.volOffset
 			//RetrigNote(nChn, param);
@@ -1523,6 +1547,12 @@ BOOL CSoundFile::ProcessEffects()
 			else
 				RetrigNote(nChn, param);
 			//end rewbs.volOffset:
+			}
+			else
+			{
+			if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF);
+				RetrigNote(nChn, pChn->nRetrigParam);
+			}
 			break;
 
 		// Tremor
@@ -1537,13 +1567,25 @@ BOOL CSoundFile::ProcessEffects()
 			if (m_nTickCount) break;
 			
 			if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
-			if (param > 128) param = 128;
-			m_nGlobalVolume = param << 1;
+			if(GetModFlag(MSF_COMPATIBLE_PLAY))
+			{
+				// both FT2 and IT ignore out-of-range values
+				if (param <= 128)
+					m_nGlobalVolume = param << 1;
+			}
+			else
+			{
+				if (param > 128) param = 128;
+				m_nGlobalVolume = param << 1;
+			}
 			break;
 
 		// Global Volume Slide
 		case CMD_GLOBALVOLSLIDE:
-			GlobalVolSlide(param);
+			if(GetModFlag(MSF_COMPATIBLE_PLAY))
+				GlobalVolSlide(param, &pChn->nOldGlobalVolSlide);
+			else
+				GlobalVolSlide(param, &m_nOldGlbVolSlide);
 			break;
 
 		// Set 8-bit Panning
@@ -2909,26 +2951,43 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 	UINT nRetrigCount = pChn->nRetrigCount;
 	BOOL bDoRetrig = FALSE;
 
-	if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+	if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 	{
-		if (!nRetrigSpeed) nRetrigSpeed = 1;
-		if ((nRetrigCount) && (!(nRetrigCount % nRetrigSpeed))) bDoRetrig = TRUE;
-		nRetrigCount++;
-	} else
-	{
-		UINT realspeed = nRetrigSpeed;
-		if ((param & 0x100) && (pChn->nRowVolCmd == VOLCMD_VOLUME) && (pChn->nRowParam & 0xF0)) realspeed++;
-		if ((m_nTickCount) || (param & 0x100))
+		// IT retrigger behaviour
+		if (!m_nTickCount && pChn->nRowNote)
 		{
-			if (!realspeed) realspeed = 1;
-			if ((!(param & 0x100)) && (m_nMusicSpeed) && (!(m_nTickCount % realspeed))) bDoRetrig = TRUE;
-			nRetrigCount++;
-		} else if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) nRetrigCount = 0;
-		if (nRetrigCount >= realspeed)
+			pChn->nRetrigCount = param & 0xf;
+		}
+		else if (!--pChn->nRetrigCount)
 		{
-			if ((m_nTickCount) || ((param & 0x100) && (!pChn->nRowNote))) bDoRetrig = TRUE;
+			pChn->nRetrigCount = param & 0xf;
+			bDoRetrig = TRUE;
 		}
 	}
+	else
+	{
+		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
+		{
+			if (!nRetrigSpeed) nRetrigSpeed = 1;
+			if ((nRetrigCount) && (!(nRetrigCount % nRetrigSpeed))) bDoRetrig = TRUE;
+			nRetrigCount++;
+		} else
+		{
+			UINT realspeed = nRetrigSpeed;
+			if ((param & 0x100) && (pChn->nRowVolCmd == VOLCMD_VOLUME) && (pChn->nRowParam & 0xF0)) realspeed++;
+			if ((m_nTickCount) || (param & 0x100))
+			{
+				if (!realspeed) realspeed = 1;
+				if ((!(param & 0x100)) && (m_nMusicSpeed) && (!(m_nTickCount % realspeed))) bDoRetrig = TRUE;
+				nRetrigCount++;
+			} else if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) nRetrigCount = 0;
+			if (nRetrigCount >= realspeed)
+			{
+				if ((m_nTickCount) || ((param & 0x100) && (!pChn->nRowNote))) bDoRetrig = TRUE;
+			}
+		}
+	}
+
 	if (bDoRetrig)
 	{
 		UINT dv = (param >> 4) & 0x0F;
@@ -2967,7 +3026,8 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			SampleOffset(nChn, offset, false);
 		}
 	}
-	pChn->nRetrigCount = (BYTE)nRetrigCount;
+	if(!GetModFlag(MSF_COMPATIBLE_PLAY) || !(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+		pChn->nRetrigCount = (BYTE)nRetrigCount;
 }
 
 
@@ -3191,11 +3251,11 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 }
 
 
-void CSoundFile::GlobalVolSlide(UINT param)
+void CSoundFile::GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide)
 //-----------------------------------------
 {
 	LONG nGlbSlide = 0;
-	if (param) m_nOldGlbVolSlide = param; else param = m_nOldGlbVolSlide;
+	if (param) *nOldGlobalVolSlide = param; else param = *nOldGlobalVolSlide;
 	if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 	{
 		if (m_dwSongFlags & SONG_FIRSTTICK) nGlbSlide = (param >> 4) * 2;
