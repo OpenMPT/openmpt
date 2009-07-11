@@ -1135,7 +1135,7 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 		Chn[j].nCommand = 0;
 		Chn[j].nPatternLoopCount = 0;
 		Chn[j].nPatternLoop = 0;
-		Chn[j].nTremorCount = 0;
+		if(!GetModFlag(MSF_COMPATIBLE_PLAY)) Chn[j].nTremorCount = 0;
 	}
 	if (!nPos)
 	{
@@ -1395,7 +1395,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nPatternLoop = 0;
 		Chn[i].nFadeOutVol = 0;
 		Chn[i].dwFlags |= CHN_KEYOFF|CHN_NOTEFADE;
-		Chn[i].nTremorCount = 0;
+		Chn[i].nTremorCount = Chn[i].nTremorOn = Chn[i].nTremorOff = 0;
 	}
 
 	if(resetMask & 4)
