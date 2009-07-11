@@ -41,7 +41,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 0x0D:	command = CMD_PATTERNBREAK; param = ((param >> 4) * 10) + (param & 0x0F); break;
 	case 0x0E:	command = CMD_MODCMDEX; break;
 	case 0x0F:	command = (param <= (UINT)((m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? 0x1F : 0x20)) ? CMD_SPEED : CMD_TEMPO;
-				if ((param == 0xFF) && (m_nSamples == 15)) command = 0; break; //<rewbs> what the hell is this?! :)
+				if ((param == 0xFF) && (m_nSamples == 15)) command = 0; break; //<rewbs> what the hell is this?! :) //<jojo> it's the "stop tune" command! :-P
 	// Extension for XM extended effects
 	case 'G' - 55:	command = CMD_GLOBALVOLUME; break;		//16
 	case 'H' - 55:	command = CMD_GLOBALVOLSLIDE; if (param & 0xF0) param &= 0xF0; break;
@@ -285,7 +285,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		if (i >= nbpbuggy2) nbpbuggy2 = i+1;
 	}
-	for (UINT iend=norders; iend<MAX_ORDERS; iend++) Order[iend] = 0xFF;
+	for (UINT iend=norders; iend<MAX_ORDERS; iend++) Order[iend] = Order.GetInvalidPatIndex();
 	norders--;
 	m_nRestartPos = pMagic->nRestartPos;
 	if (m_nRestartPos >= 0x78) m_nRestartPos = 0;

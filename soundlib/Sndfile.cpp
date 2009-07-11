@@ -2585,7 +2585,7 @@ BOOL CSoundFile::SetPatternName(UINT nPat, LPCSTR lpszName)
 	if (!m_lpszPatternNames) m_nPatternNames = 0;
 	if (nPat >= m_nPatternNames)
 	{
-		if (!lpszName[0]) return TRUE;
+		//if (!lpszName[0]) return TRUE;
 		UINT len = (nPat+1)*MAX_PATTERNNAME;
 		CHAR *p = new CHAR[len];
 		if (!p) return FALSE;

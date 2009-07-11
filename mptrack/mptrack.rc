@@ -2579,6 +2579,7 @@ BEGIN
     ID_PATTERNDETAIL_MED    "Medium pattern detail level\nMedium pattern detail level"
     ID_PATTERNDETAIL_HI     "High pattern detail level\nHigh pattern detail level"
     ID_PATTERN_AMPLIFY      "Amplify selection\nAmplify"
+    ID_ECHOPASTE			"Toggle echo paste\nToggle echo paste"
 END
 
 STRINGTABLE 

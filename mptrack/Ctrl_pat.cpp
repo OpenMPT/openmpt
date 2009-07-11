@@ -52,6 +52,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(ID_PATTERNDETAIL_LO,			OnDetailLo)
 	ON_COMMAND(ID_PATTERNDETAIL_MED,		OnDetailMed)
 	ON_COMMAND(ID_PATTERNDETAIL_HI,			OnDetailHi)
+	ON_COMMAND(ID_ECHOPASTE,				OnToggleEchoPaste)
 	ON_CBN_SELCHANGE(IDC_COMBO_INSTRUMENT,	OnInstrumentChanged)
 // -> CODE#0012
 // -> DESC="midi keyboard split"
@@ -157,6 +158,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_ToolBar.AddButton(ID_PATTERNDETAIL_MED, 31, TBSTYLE_CHECK, TBSTATE_ENABLED);
 	m_ToolBar.AddButton(ID_PATTERNDETAIL_HI, 32, TBSTYLE_CHECK, TBSTATE_ENABLED|TBSTATE_CHECKED);
 	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
+	m_ToolBar.AddButton(ID_ECHOPASTE, 38, TBSTYLE_CHECK, ((CMainFrame::m_dwPatternSetup & PATTERN_ECHOPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 
 	// Special edit controls -> tab switch to view
 	m_EditSpacing.SetParent(this);
@@ -295,6 +297,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 // -> CODE#0007
 // -> DESC="uncheck follow song checkbox by default"
 		CheckDlgButton(IDC_PATTERN_FOLLOWSONG, (CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF) ? MF_UNCHECKED : MF_CHECKED);
+		m_ToolBar.SetState(ID_ECHOPASTE, ((CMainFrame::m_dwPatternSetup & PATTERN_ECHOPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 // -! BEHAVIOUR_CHANGE#0007
 	}
 	if (dwHintMask & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES|HINT_PATNAMES))
@@ -1175,6 +1178,13 @@ void CCtrlPatterns::OnDetailHi()
 	SwitchToView();
 }
 
+void CCtrlPatterns::OnToggleEchoPaste()
+//-------------------------------------
+{
+	CMainFrame::m_dwPatternSetup ^= PATTERN_ECHOPASTE;
+	UpdateView(HINT_MPTOPTIONS, NULL);
+	SwitchToView();
+}
 
 //rewbs.introVST
 void CCtrlPatterns::TogglePluginEditor()
