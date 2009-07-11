@@ -813,12 +813,11 @@ void COrderList::OnDeleteOrder()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		const int nSeqLengthMinusOne = pSndFile->Order.size()-1;
-		for (int i=m_nScrollPos; i<nSeqLengthMinusOne; i++) pSndFile->Order[i] = pSndFile->Order[i+1];
-		pSndFile->Order[pSndFile->Order.size()-1] = pSndFile->Order.GetInvalidPatIndex();
+
+		m_pModDoc->RemoveOrder(m_nScrollPos);
 		InvalidateRect(NULL, FALSE);
-		m_pModDoc->SetModified();
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+
 		UINT nNewOrd = pSndFile->Order[m_nScrollPos];
 		if ((nNewOrd < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nNewOrd]) && (m_pParent))
 		{
