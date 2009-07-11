@@ -983,6 +983,10 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 	if (pifh->speed) m_nDefaultSpeed = pifh->speed;
 	if (pifh->tempo) m_nDefaultTempo = pifh->tempo;
+	if(m_nDefaultTempo < 32) m_nDefaultTempo = 32; // tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
+
+	if(m_nDefaultTempo < 32) m_nDefaultTempo = 32; // tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
+
 	m_nSamplePreAmp = pifh->mv & 0x7F;
 	if (m_nSamplePreAmp<0x20) {
 		m_nSamplePreAmp=100;

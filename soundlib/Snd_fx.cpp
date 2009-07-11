@@ -749,8 +749,8 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		if(!GetModFlag(MSF_COMPATIBLE_PLAY))
 		{
 			pChn->nRetrigCount = 0;
+			pChn->nTremorCount = 0;
 		}
-		pChn->nTremorCount = 0;
 		if (bResetEnv)
 		{
 			pChn->nVolSwing = pChn->nPanSwing = 0;

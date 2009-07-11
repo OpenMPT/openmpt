@@ -2567,6 +2567,28 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 			strcpy(s, "continue");
 		break;
 
+	case CMD_TREMOR:
+		if(param)
+		{
+			BYTE ontime = param >> 4, offtime = param & 0x0F;
+			if(m_SndFile.m_dwSongFlags & SONG_ITOLDEFFECTS)
+			{
+				ontime++;
+				offtime++;
+			}
+			else
+			{
+				if(ontime == 0) ontime = 1;
+				if(offtime == 0) offtime = 1;
+			}
+			wsprintf(pszName, "ontime %d, offtime %d", ontime, offtime);
+		}
+		else
+		{
+			strcpy(s, "continue");
+		}
+		break;
+
 	case CMD_MIDI:
 		if (param < 0x80)
 		{
