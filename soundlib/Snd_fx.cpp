@@ -298,7 +298,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				if (!(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
 				if(GetModFlag(MSF_COMPATIBLE_PLAY))
 				{
-					// both FT2 and IT ignore out-of-range values
+					//IT compatibility 16. Both FT2 and IT ignore out-of-range values
 					if (param <= 128)
 						nGlbVol = param << 1;
 				}
@@ -312,6 +312,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			case CMD_GLOBALVOLSLIDE:
 				if(GetModFlag(MSF_COMPATIBLE_PLAY))
 				{
+					//IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
 					if (param) pChn->nOldGlobalVolSlide = param; else param = pChn->nOldGlobalVolSlide;
 				}
 				else
@@ -746,6 +747,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
 		if(!GetModFlag(MSF_COMPATIBLE_PLAY))
 		{
+			//IT compatibility 15. Retrigger (Tremor doesn't store anything here, so we just don't reset this as well)
 			pChn->nRetrigCount = 0;
 			pChn->nTremorCount = 0;
 		}
@@ -1164,6 +1166,15 @@ BOOL CSoundFile::ProcessEffects()
 			if ((param & 0xF0) == 0xD0)
 			{
 				nStartTick = param & 0x0F;
+				if(nStartTick == 0)
+				{
+					//IT compatibility 22. SD0 == SD1
+					if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+						nStartTick = 1;
+					//ST3 ignores notes with SD0 completely
+					else if(m_nType & MOD_TYPE_S3M|MOD_TYPE_MPT)
+						nStartTick = m_nMusicSpeed;
+				}
 
 				//IT compatibility 08. Handling of out-of-range delay command.
 				if(nStartTick >= m_nMusicSpeed && GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY))
@@ -1397,6 +1408,7 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PORTAUP:
+					//IT compatibility (one of the first - link effect memory)
 					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
 						PortamentoUp(pChn, vol << 2, true);
 					else
@@ -1404,6 +1416,7 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PORTADOWN:
+					//IT compatibility (one of the first - link effect memory)
 					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
 						PortamentoDown(pChn, vol << 2, true);
 					else
@@ -1535,21 +1548,22 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			if(!GetModFlag(MSF_COMPATIBLE_PLAY))
 			{
-			if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF); else param = pChn->nRetrigParam;
-			//rewbs.volOffset
-			//RetrigNote(nChn, param);
-			if (volcmd == VOLCMD_OFFSET)
-				RetrigNote(nChn, param, vol<<3);
-			else if (volcmd == VOLCMD_VELOCITY)
-				RetrigNote(nChn, param, 48-(vol << 3));
-			else
-				RetrigNote(nChn, param);
-			//end rewbs.volOffset:
+				if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF); else param = pChn->nRetrigParam;
+				//rewbs.volOffset
+				//RetrigNote(nChn, param);
+				if (volcmd == VOLCMD_OFFSET)
+					RetrigNote(nChn, param, vol<<3);
+				else if (volcmd == VOLCMD_VELOCITY)
+					RetrigNote(nChn, param, 48-(vol << 3));
+				else
+					RetrigNote(nChn, param);
+				//end rewbs.volOffset:
 			}
 			else
 			{
-			if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF);
-				RetrigNote(nChn, pChn->nRetrigParam);
+				//IT compatibility 15. Retrigger
+				if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF);
+					RetrigNote(nChn, pChn->nRetrigParam);
 			}
 			break;
 
@@ -1567,7 +1581,7 @@ BOOL CSoundFile::ProcessEffects()
 			if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
 			if(GetModFlag(MSF_COMPATIBLE_PLAY))
 			{
-				// both FT2 and IT ignore out-of-range values
+				//IT compatibility 16. Both FT2 and IT ignore out-of-range values
 				if (param <= 128)
 					m_nGlobalVolume = param << 1;
 			}
@@ -1580,6 +1594,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Global Volume Slide
 		case CMD_GLOBALVOLSLIDE:
+			//IT compatibility 16. Saving last global volume slide param per channel (FT2/IT)
 			if(GetModFlag(MSF_COMPATIBLE_PLAY))
 				GlobalVolSlide(param, &pChn->nOldGlobalVolSlide);
 			else
@@ -1636,7 +1651,7 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_KEYOFF:
 			if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
 			{
-				// This is how it's supposed to sound...
+				// This is how it's supposed to sound... (in FT2)
 				if (m_nTickCount == param)
 				{
 					// XM: Key-Off + Sample == Note Cut
@@ -1698,6 +1713,7 @@ BOOL CSoundFile::ProcessEffects()
 
 				if(!GetModFlag(MSF_COMPATIBLE_PLAY) || !(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
 				{
+					// FT2 only sets the position of the Volume envelope
 					pChn->nPanEnvPosition = param;
 					pChn->nPitchEnvPosition = param;
 					if (pChn->pHeader)
@@ -1905,6 +1921,10 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePor
 	{
 		DoFreqSlide(pChn, -(int)(param * 4));
 	}
+
+	//IT compatibility 23. Portamento with no note
+	if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+		pChn->nPortamentoDest = 0;
 }
 
 
@@ -1947,6 +1967,9 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param, const bool doFineP
 		DoFreqSlide(pChn, (int)(param << 2));
 	}
 
+	//IT compatibility 23. Portamento with no note
+	if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+		pChn->nPortamentoDest = 0;
 }
 
 void CSoundFile::MidiPortamento(MODCHANNEL *pChn, int param)
@@ -2381,6 +2404,7 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	//case 0x80:  if (!m_nTickCount) { pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP; } break;
 	case 0x80:	if (!m_nTickCount)
 				{ 
+					//IT compatibility (Panning always resets surround state)
 					if( TypeIsIT_MPT_XM() == false || GetModFlag(MSF_COMPATIBLE_PLAY) )
 					{
 						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
@@ -2951,7 +2975,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 
 	if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 	{
-		// IT retrigger behaviour
+		//IT compatibility 15. Retrigger
 		if (!m_nTickCount && pChn->nRowNote)
 		{
 			pChn->nRetrigCount = param & 0xf;
@@ -3075,6 +3099,16 @@ void CSoundFile::DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide)
 void CSoundFile::NoteCut(UINT nChn, UINT nTick)
 //---------------------------------------------
 {
+	if(nTick == 0)
+	{
+		//IT compatibility 22. SC0 == SC1
+		if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+			nTick = 1;
+		// ST3 doesn't cut notes with SC0
+		else if(m_nType & MOD_TYPE_S3M)
+			return;
+	}
+
 	if (m_nTickCount == nTick)
 	{
 		MODCHANNEL *pChn = &Chn[nChn];

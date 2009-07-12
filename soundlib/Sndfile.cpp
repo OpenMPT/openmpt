@@ -636,6 +636,12 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		Chn[ich].dwFlags = ChnSettings[ich].dwFlags;
 		Chn[ich].nVolume = 256;
 		Chn[ich].nCutOff = 0x7F;
+		//IT compatibility 15. Retrigger
+		if(GetModFlag(MSF_COMPATIBLE_PLAY))
+		{
+			Chn[ich].nRetrigParam = 1;
+			Chn[ich].nRetrigCount = 0;
+		}
 	}
 	// Checking instruments
 	MODINSTRUMENT *pins = Ins;
@@ -1135,7 +1141,13 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 		Chn[j].nCommand = 0;
 		Chn[j].nPatternLoopCount = 0;
 		Chn[j].nPatternLoop = 0;
-		if(!GetModFlag(MSF_COMPATIBLE_PLAY)) Chn[j].nTremorCount = 0;
+		//IT compatibility 15. Retrigger
+		if(GetModFlag(MSF_COMPATIBLE_PLAY))
+		{
+			Chn[j].nRetrigCount = 0;
+			Chn[j].nRetrigParam = 1;
+		}
+		Chn[j].nTremorCount = Chn[j].nTremorOn = Chn[j].nTremorOff = 0;
 	}
 	if (!nPos)
 	{
@@ -1395,6 +1407,12 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nPatternLoop = 0;
 		Chn[i].nFadeOutVol = 0;
 		Chn[i].dwFlags |= CHN_KEYOFF|CHN_NOTEFADE;
+		//IT compatibility 15. Retrigger
+		if(GetModFlag(MSF_COMPATIBLE_PLAY))
+		{
+			Chn[i].nRetrigParam = 1;
+			Chn[i].nRetrigCount = 0;
+		}
 		Chn[i].nTremorCount = Chn[i].nTremorOn = Chn[i].nTremorOff = 0;
 	}
 

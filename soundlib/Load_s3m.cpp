@@ -531,7 +531,7 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	header[0x30] = m_nDefaultGlobalVolume >> 2;
 	header[0x31] = m_nDefaultSpeed;
 	header[0x32] = m_nDefaultTempo;
-	header[0x33] = ((m_nSamplePreAmp < 0x20) ? 0x20 : m_nSamplePreAmp) | 0x80;	// Stereo
+	header[0x33] = min(max(0x20, m_nSamplePreAmp), 0x7F);	// Stereo
 	header[0x35] = 0xFC;
 	for (i=0; i<32; i++)
 	{
