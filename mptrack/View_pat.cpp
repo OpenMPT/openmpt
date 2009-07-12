@@ -18,7 +18,6 @@
 #include "midi.h"
 #include <cmath>
 
-#define MAX_SPACING		16
 #define	PLUGNAME_HEIGHT	16	//rewbs.patPlugName
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
@@ -4167,8 +4166,9 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			if ( bIsLiveRecord == false )
 			{
 				if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) {
-					if (nRow+m_nSpacing<pSndFile->PatternSize[nPat]) {
-						SetCurrentRow(nRow+m_nSpacing);
+
+					if (nRow + m_nSpacing < pSndFile->PatternSize[nPat] || (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)) {
+						SetCurrentRow(nRow + m_nSpacing, (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL) ? true: false);
 						m_bLastNoteEntryBlocked=false;
 					} else {
 						m_bLastNoteEntryBlocked=true;  // if the cursor is block by the end of the pattern here,

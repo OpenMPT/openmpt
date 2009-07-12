@@ -30,6 +30,9 @@ class COpenGLEditor;
 #define PATSTATUS_PLUGNAMESINHEADERS	0x2000 //rewbs.patPlugName
 #define PATSTATUS_PATTERNLOOP			0x4000
 
+// Row Spacing
+#define MAX_SPACING	64
+
 enum {
 	NOTE_COLUMN=0,
     INST_COLUMN,

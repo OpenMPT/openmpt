@@ -295,8 +295,6 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				break;
 			// Global Volume
 			case CMD_GLOBALVOLUME:
-				if (m_nTickCount) break;
-
 				if (!(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
 				if(GetModFlag(MSF_COMPATIBLE_PLAY))
 				{
