@@ -2694,7 +2694,11 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						break;
 					case 0xC0: // note cut
 					case 0xD0: // note delay
-						strcat(s, " frames");
+						//IT compatibility 22. SD0 == SD1, SC0 == SC1
+						if(((param & 0x0F) == 1) || ((param & 0x0F) == 0 && (m_SndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY)))
+							strcpy(s, "1 frame");
+						else
+							strcat(s, " frames");
 						break;
 					case 0xE0: // pattern delay (rows)
 						strcat(s, " rows");
