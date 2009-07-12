@@ -167,7 +167,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_EditOrderListMargins.SetParent(this);
 	m_EditOrderListMargins.SetLimitText(3);
 	// Spin controls
-	m_SpinSpacing.SetRange(0, 16);
+	m_SpinSpacing.SetRange(0, MAX_SPACING);
 	m_SpinSpacing.SetPos(CMainFrame::gnPatternSpacing);
 
 	m_SpinInstrument.SetRange(-1, 1);
@@ -716,7 +716,11 @@ void CCtrlPatterns::OnSpacingChanged()
 	if ((m_EditSpacing.m_hWnd) && (m_EditSpacing.GetWindowTextLength() > 0))
 	{
 		CMainFrame::gnPatternSpacing = GetDlgItemInt(IDC_EDIT_SPACING);
-		if (CMainFrame::gnPatternSpacing > 16) CMainFrame::gnPatternSpacing = 16;
+		if (CMainFrame::gnPatternSpacing > MAX_SPACING) 
+		{
+			CMainFrame::gnPatternSpacing = MAX_SPACING;
+			SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::gnPatternSpacing, FALSE);
+		}
 		SendViewMessage(VIEWMSG_SETSPACING, CMainFrame::gnPatternSpacing);
 	}
 }
