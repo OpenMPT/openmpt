@@ -1172,7 +1172,7 @@ BOOL CSoundFile::ProcessEffects()
 					if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 						nStartTick = 1;
 					//ST3 ignores notes with SD0 completely
-					else if(m_nType & MOD_TYPE_S3M|MOD_TYPE_MPT)
+					else if(m_nType & MOD_TYPE_S3M)
 						nStartTick = m_nMusicSpeed;
 				}
 
@@ -1344,6 +1344,9 @@ BOOL CSoundFile::ProcessEffects()
 				pChn->nPan = vol << 2;
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
 				pChn->nRestorePanOnNewNote = 0;
+				//IT compatibility 20. Set pan overrides random pan
+				if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+					pChn->nPanSwing = 0;
 			}
 
 		//rewbs.VSTnoteDelay
@@ -1620,6 +1623,9 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
 			pChn->nRestorePanOnNewNote = 0;
+			//IT compatibility 20. Set pan overrides random pan
+			if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+				pChn->nPanSwing = 0;
 			break;
 			
 		// Panning Slide
@@ -2494,6 +2500,10 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
 					}
 					pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP;
+
+					//IT compatibility 20. Set pan overrides random pan
+					if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+						pChn->nPanSwing = 0;
 				}
 				break;
 	// S9x: Sound Control
