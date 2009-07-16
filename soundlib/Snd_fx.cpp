@@ -1927,10 +1927,6 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePor
 	{
 		DoFreqSlide(pChn, -(int)(param * 4));
 	}
-
-	//IT compatibility 23. Portamento with no note
-	if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
-		pChn->nPortamentoDest = 0;
 }
 
 
@@ -1972,10 +1968,6 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param, const bool doFineP
 	if (!(m_dwSongFlags & SONG_FIRSTTICK)  || (m_nMusicSpeed == 1)) {  //rewbs.PortaA01fix
 		DoFreqSlide(pChn, (int)(param << 2));
 	}
-
-	//IT compatibility 23. Portamento with no note
-	if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
-		pChn->nPortamentoDest = 0;
 }
 
 void CSoundFile::MidiPortamento(MODCHANNEL *pChn, int param)
@@ -2181,6 +2173,11 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 			if (pChn->nPeriod < pChn->nPortamentoDest) pChn->nPeriod = pChn->nPortamentoDest;
 		}
 	}
+
+	//IT compatibility 23. Portamento with no note
+	if(pChn->nPeriod == pChn->nPortamentoDest && ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) && GetModFlag(MSF_COMPATIBLE_PLAY))
+		pChn->nPortamentoDest = 0;
+
 }
 
 

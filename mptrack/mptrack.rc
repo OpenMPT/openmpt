@@ -1181,7 +1181,7 @@ BEGIN
     CONTROL         "Instrument",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,60,17,49,10
     COMBOBOX        IDC_COMBO2,60,28,106,103,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
+                    WS_TABSTOP | CBS_SORT
     CONTROL         "Volume Effect",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,13,46,60,10
     COMBOBOX        IDC_COMBO3,13,58,94,77,CBS_DROPDOWNLIST | CBS_SORT | 
@@ -1189,7 +1189,7 @@ BEGIN
     CONTROL         "Volume Data",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,117,46,56,10
     COMBOBOX        IDC_COMBO4,117,58,48,77,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
+                    WS_TABSTOP | CBS_SORT
     CONTROL         "Effect",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,13,78,35,10
     COMBOBOX        IDC_COMBO5,13,92,94,71,CBS_DROPDOWNLIST | CBS_SORT | 
@@ -1222,13 +1222,13 @@ BEGIN
     CONTROL         "Instrument",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,60,31,49,10
     COMBOBOX        IDC_COMBO2,60,42,106,92,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
+                    WS_TABSTOP | CBS_SORT
     CONTROL         "Volume Effect",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,13,60,60,10
     COMBOBOX        IDC_COMBO3,13,71,94,64,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_COMBO4,117,71,48,64,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
+                    WS_TABSTOP | CBS_SORT
     CONTROL         "Volume Data",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,117,60,56,10
     CONTROL         "Effect",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
@@ -1238,7 +1238,7 @@ BEGIN
     COMBOBOX        IDC_COMBO5,13,106,94,70,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_COMBO6,117,106,48,80,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
+                    WS_TABSTOP | CBS_SORT
     CONTROL         "Replace By:",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,12,15,63,10
     CONTROL         "Replace All (No confirmation)",IDC_CHECK8,"Button",
