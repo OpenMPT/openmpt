@@ -1564,7 +1564,7 @@ BOOL CModDoc::MoveOrder(UINT nSourceNdx, UINT nDestNdx, BOOL bUpdate, BOOL bCopy
 }
 
 
-BOOL CModDoc::ExpandPattern(UINT nPattern)
+BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
 //----------------------------------------
 {
 // -> CODE#0008
@@ -1578,7 +1578,7 @@ BOOL CModDoc::ExpandPattern(UINT nPattern)
 }
 
 
-BOOL CModDoc::ShrinkPattern(UINT nPattern)
+BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 //----------------------------------------
 {
 	if ((nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
@@ -1598,7 +1598,7 @@ BOOL CModDoc::ShrinkPattern(UINT nPattern)
 
 static LPCSTR lpszClipboardPatternHdr = "ModPlug Tracker %3s\x0D\x0A";
 
-BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
+BOOL CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 //------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -1748,7 +1748,7 @@ BOOL CModDoc::CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 // -> CODE#0014
 // -> DESC="vst wet/dry slider"
 //BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
-BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix)
+BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix)
 // -! NEW_FEATURE#0014
 //---------------------------------------------------------
 {
@@ -1762,17 +1762,21 @@ BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITSty
 
 		if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 		{
-			PrepareUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+			PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 			BYTE spdmax = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 0x20 : 0x1F;
 			DWORD dwMemSize = GlobalSize(hCpy);
 			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
 			UINT nrow = dwBeginSel >> 16;
 			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
-			ORDERINDEX oCurrentOrder = m_SndFile.GetCurrentOrder(); //jojo.echopaste
 			UINT col;
 			BOOL bS3M = FALSE, bOk = FALSE;
 			UINT len = 0;
 			MODCOMMAND origModCmd;
+
+			ORDERINDEX oCurrentOrder; //jojo.echopaste
+			ROWINDEX rTemp;
+			PATTERNINDEX pTemp;
+			GetEditPosition(rTemp, pTemp, oCurrentOrder);
 
 			if ((nrow >= m_SndFile.PatternSize[nPattern]) || (ncol >= m_SndFile.m_nChannels)) goto PasteDone;
 			m += nrow * m_SndFile.m_nChannels;

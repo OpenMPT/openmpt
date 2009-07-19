@@ -3870,10 +3870,10 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	const UINT nTick = pSndFile->m_nTickCount;
 	const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
 
-	const bool isSplit = (note < m_nSplitNote);
+	const bool isSplit = (note <= m_nSplitNote);
+	UINT ins = 0;
 	if (pModDoc)
 	{
-		UINT ins = 0;
 		if (isSplit)
 		{
 			ins = m_nSplitInstrument;
@@ -3959,7 +3959,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 
 	//Enter note off
 	p->note		= NOTE_KEYOFF;
-	p->instr = (bChordMode) ? 0 : GetCurrentInstrument(); //p->instr = 0;
+	p->instr = (bChordMode) ? 0 : ins; //p->instr = 0; 
 	//Writing the instrument as well - probably someone finds this annoying :)
 	p->volcmd	= 0;
 	p->vol		= 0;
@@ -4520,7 +4520,7 @@ void CViewPattern::OnSelectPlugin(UINT nID)
 bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 //-----------------------------------------------------
 {
-	if (note>=m_nSplitNote)
+	if (note>m_nSplitNote)
 	{
 		p->note = note;	
 		UINT nins = GetCurrentInstrument();

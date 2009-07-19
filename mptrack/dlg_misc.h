@@ -534,7 +534,7 @@ enum enMsgBoxHidableMessage
 	ModCompatibilityExportTip		= 0,
 	ItCompatibilityExportTip		= 1,
 	ConfirmSignUnsignWhenPlaying	= 2,
-	enMsgBoxHidableMessage_count    = 3
+	enMsgBoxHidableMessage_count
 };
 
 void MsgBoxHidable(enMsgBoxHidableMessage enMsg);

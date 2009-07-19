@@ -3262,7 +3262,8 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 			pChn->nPatternLoopCount--;
 			if(!pChn->nPatternLoopCount)
 			{
-				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY))
+				//IT compatibility 10. Pattern loops (+ same fix for XM and MOD files)
+				if((GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY)) || (GetType() & (MOD_TYPE_MOD)))
 					pChn->nPatternLoop = m_nRow+1;
 
 				return -1;	
@@ -3270,8 +3271,9 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 		} else
 		{
 			MODCHANNEL *p = Chn;
-			
-			if(!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY)))
+
+			//IT compatibility 10. Pattern loops (+ same fix for XM and MOD files)
+			if(!((GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY)) || (GetType() & (MOD_TYPE_MOD))))
 			{
 				for (UINT i=0; i<m_nChannels; i++, p++) if (p != pChn)
 				{
