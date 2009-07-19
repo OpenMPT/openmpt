@@ -240,10 +240,10 @@ public:
 	UINT FindSampleParent(UINT nSmp) const;
 	UINT FindInstrumentChild(UINT nIns) const;
 	BOOL MoveOrder(UINT nSourceNdx, UINT nDestNdx, BOOL bUpdate=TRUE, BOOL bCopy=FALSE);
-	BOOL ExpandPattern(UINT nPattern);
-	BOOL ShrinkPattern(UINT nPattern);
-	BOOL CopyPattern(UINT nPattern, DWORD dwBeginSel, DWORD dwEndSel);
-	BOOL PastePattern(UINT nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix=FALSE);	//rewbs.mixpaste
+	BOOL ExpandPattern(PATTERNINDEX nPattern);
+	BOOL ShrinkPattern(PATTERNINDEX nPattern);
+	BOOL CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);
+	BOOL PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix=FALSE);	//rewbs.mixpaste
 
 	BOOL CopyEnvelope(UINT nIns, UINT nEnv);
 	BOOL PasteEnvelope(UINT nIns, UINT nEnv);
@@ -253,7 +253,7 @@ public:
 	BOOL CanUndo();
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
 	void UpdateAllViews(CView *pSender, LPARAM lHint=0L, CObject *pHint=NULL);
-	HWND GetEditPosition(UINT &row, UINT &pat, UINT &ord); //rewbs.customKeys
+	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord); //rewbs.customKeys
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);				   //rewbs.customKeys
 	void TogglePluginEditor(UINT m_nCurrentPlugin);		   //rewbs.patPlugNames
 	void RecordParamChange(int slot, long param);

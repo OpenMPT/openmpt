@@ -2877,7 +2877,7 @@ void* CModDoc::GetChildFrame()
 	return NULL;
 }
 
-HWND CModDoc::GetEditPosition(UINT &row, UINT &pat, UINT &ord)
+HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 //------------------------------------------------------------
 {
 	HWND followSonghWnd;
@@ -3004,7 +3004,11 @@ void CModDoc::OnPatternRestart()
 		}
                    
 		CSoundFile *pSndFile = GetSoundFile();
-		UINT nPat,nOrd,nRow;
+
+		ROWINDEX nRow;
+		PATTERNINDEX nPat;
+		ORDERINDEX nOrd;
+
 		HWND followSonghWnd;
 
 		followSonghWnd = GetEditPosition(nRow, nPat, nOrd);
@@ -3060,7 +3064,11 @@ void CModDoc::OnPatternPlay()
 		}
                    
 		CSoundFile *pSndFile = GetSoundFile();
-		UINT nRow,nPat,nOrd;
+
+		ROWINDEX nRow;
+		PATTERNINDEX nPat;
+		ORDERINDEX nOrd;
+
 		HWND followSonghWnd;
 
 		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
@@ -3111,7 +3119,11 @@ void CModDoc::OnPatternPlayNoLoop()
 		}
                    
 		CSoundFile *pSndFile = GetSoundFile();
-		UINT nPat,nOrd,nRow;
+
+		ROWINDEX nRow;
+		PATTERNINDEX nPat;
+		ORDERINDEX nOrd;
+
 		HWND followSonghWnd;
 
 		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);

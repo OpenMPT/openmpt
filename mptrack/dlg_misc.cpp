@@ -656,10 +656,10 @@ BOOL CFindReplaceTab::OnInitDialog()
 		{
 			if (pSndFile->m_nInstruments)
 			{
-				wsprintf(s, "%02d:%s", n, (pSndFile->Headers[n]) ? pSndFile->Headers[n]->name : "");
+				wsprintf(s, "%03d:%s", n, (pSndFile->Headers[n]) ? pSndFile->Headers[n]->name : "");
 			} else
 			{
-				wsprintf(s, "%02d:%s", n, pSndFile->m_szNames[n]);
+				wsprintf(s, "%03d:%s", n, pSndFile->m_szNames[n]);
 			}
 			combo->SetItemData(combo->AddString(s), n);
 		}
