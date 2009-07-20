@@ -3450,7 +3450,7 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period) const
 UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) const
 //-------------------------------------------------------------------------------
 {
-	if ((!note) || (note > 0xF0)) return 0;
+	if ((!note) || (note >= NOTE_MIN_SPECIAL)) return 0;
 	if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M|MOD_TYPE_STM|MOD_TYPE_MDL|MOD_TYPE_ULT|MOD_TYPE_WAV
 				|MOD_TYPE_FAR|MOD_TYPE_DMF|MOD_TYPE_PTM|MOD_TYPE_AMS|MOD_TYPE_DBM|MOD_TYPE_AMF|MOD_TYPE_PSM))
 	{

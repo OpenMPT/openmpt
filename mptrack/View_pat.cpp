@@ -1220,12 +1220,12 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 
 		//------ Plugin Header Menu --------- :
 		if ((m_dwStatus & PATSTATUS_PLUGNAMESINHEADERS) && 
-			(pt.y > m_szHeader.cy-PLUGNAME_HEIGHT) && (pt.y <= m_szHeader.cy)) {
+			(pt.y > m_szHeader.cy-PLUGNAME_HEIGHT) && (pt.y < m_szHeader.cy)) {
 			BuildPluginCtxMenu(hMenu, nChn, pSndFile);
 		}
 		
 		//------ Channel Header Menu ---------- :
-		else if (pt.y <= m_szHeader.cy){
+		else if (pt.y < m_szHeader.cy){
 			if (ih->ShiftPressed()) {
 				//Don't bring up menu if shift is pressed, else we won't get button up msg.
 			} else {
@@ -1237,7 +1237,7 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 		}
 		
 		//------ Standard Menu ---------- :
-		else if ((pt.x >= m_szHeader.cx) && (pt.y > m_szHeader.cy))	{
+		else if ((pt.x >= m_szHeader.cx) && (pt.y >= m_szHeader.cy))	{
 			/*if (BuildSoloMuteCtxMenu(hMenu, ih, nChn, pSndFile))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");*/
 			if (BuildSelectionCtxMenu(hMenu, ih))
