@@ -418,17 +418,17 @@ void CCommandSet::SetupCommands()
 	commands[kcVPNoteA_1].UID = 1073;
 	commands[kcVPNoteA_1].isHidden = false;
 	commands[kcVPNoteA_1].isDummy = false;
-	commands[kcVPNoteA_1].Message = "Base octave +1 A";
+	commands[kcVPNoteA_1].Message = "Base octave A";
 
 	commands[kcVPNoteAS1].UID = 1074;
 	commands[kcVPNoteAS1].isHidden = false;
 	commands[kcVPNoteAS1].isDummy = false;
-	commands[kcVPNoteAS1].Message = "Base octave +1 A#";
+	commands[kcVPNoteAS1].Message = "Base octave A#";
 
 	commands[kcVPNoteB_1].UID = 1075;
 	commands[kcVPNoteB_1].isHidden = false;
 	commands[kcVPNoteB_1].isDummy = false;
-	commands[kcVPNoteB_1].Message = "Base octave +1 B";
+	commands[kcVPNoteB_1].Message = "Base octave B";
 
 	commands[kcVPNoteC_1].UID = 1076;
 	commands[kcVPNoteC_1].isHidden = false;
@@ -478,17 +478,17 @@ void CCommandSet::SetupCommands()
 	commands[kcVPNoteA_2].UID = 1085;
 	commands[kcVPNoteA_2].isHidden = false;
 	commands[kcVPNoteA_2].isDummy = false;
-	commands[kcVPNoteA_2].Message = "Base octave +2 A";
+	commands[kcVPNoteA_2].Message = "Base octave +1 A";
 
 	commands[kcVPNoteAS2].UID = 1086;
 	commands[kcVPNoteAS2].isHidden = false;
 	commands[kcVPNoteAS2].isDummy = false;
-	commands[kcVPNoteAS2].Message = "Base octave +2 A#";
+	commands[kcVPNoteAS2].Message = "Base octave +1 A#";
 
 	commands[kcVPNoteB_2].UID = 1087;
 	commands[kcVPNoteB_2].isHidden = false;
 	commands[kcVPNoteB_2].isDummy = false;
-	commands[kcVPNoteB_2].Message = "Base octave +2 B";
+	commands[kcVPNoteB_2].Message = "Base octave +1 B";
 
 	commands[kcVPNoteC_2].UID = 1088;
 	commands[kcVPNoteC_2].isHidden = false;
@@ -538,7 +538,7 @@ void CCommandSet::SetupCommands()
 	commands[kcVPNoteA_3].UID = 1097;
 	commands[kcVPNoteA_3].isHidden = false;
 	commands[kcVPNoteA_3].isDummy = false;
-	commands[kcVPNoteA_3].Message = "Base octave +3 A";
+	commands[kcVPNoteA_3].Message = "Base octave +2 A";
 
 	commands[kcVPNoteStopC_0].UID = 1098;
 	commands[kcVPNoteStopC_0].isHidden = true;

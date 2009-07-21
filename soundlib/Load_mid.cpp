@@ -431,7 +431,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 		int mapnote = j+1;
 		if (nChannel == MIDI_DRUMCHANNEL)
 		{
-			mapnote = 61;
+			mapnote = NOTE_MIDDLEC;
 			/*mapnote = 61 + j - nNote;
 			if (mapnote < 1) mapnote = 1;
 			if (mapnote > 120) mapnote = 120;*/

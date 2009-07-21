@@ -1491,8 +1491,11 @@ void CCtrlSamples::OnUpsample()
 		pins->nLength = dwNewLen;
 		if (viewstate.dwEndSel <= viewstate.dwBeginSel)
 		{
-			if (pins->nC4Speed < 200000) pins->nC4Speed *= 2;
-			if (pins->RelativeTone < 84) pins->RelativeTone += 12;
+			if(!(m_pSndFile->m_nType & MOD_TYPE_MOD))
+			{
+				if (pins->nC4Speed < 200000) pins->nC4Speed *= 2;
+				if (pins->RelativeTone < 84) pins->RelativeTone += 12;
+			}
 		}
 		CSoundFile::FreeSample(pOriginal);
 		END_CRITICAL();
@@ -1614,8 +1617,11 @@ void CCtrlSamples::OnDownsample()
 		}
 		if (viewstate.dwEndSel <= viewstate.dwBeginSel)
 		{
-			if (pins->nC4Speed > 2000) pins->nC4Speed /= 2;
-			if (pins->RelativeTone > -84) pins->RelativeTone -= 12;
+			if(!(m_pSndFile->m_nType & MOD_TYPE_MOD))
+			{
+				if (pins->nC4Speed > 2000) pins->nC4Speed /= 2;
+				if (pins->RelativeTone > -84) pins->RelativeTone -= 12;
+			}
 		}
 		pins->nLength = dwNewLen;
 		pins->pSample = (LPSTR)pNewSample;

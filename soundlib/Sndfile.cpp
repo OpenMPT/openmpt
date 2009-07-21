@@ -704,9 +704,14 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 	// Load plugins only when m_pModDoc != 0.  (can be == 0 for example when examining module samples in treeview.
+
+	CString sNotFound;
+	BOOL bSearchIDs[MAX_MIXPLUGINS] = {false};
+	UINT iShowNotFound = 0;
+
 	if (gpMixPluginCreateProc && GetpModDoc())
 	{
-		for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+		for (UINT iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 		{
 			if ((m_MixPlugins[iPlug].Info.dwPluginId1)
 			 || (m_MixPlugins[iPlug].Info.dwPluginId2))
@@ -714,10 +719,48 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 				gpMixPluginCreateProc(&m_MixPlugins[iPlug], this);
 				if (m_MixPlugins[iPlug].pMixPlugin)
 				{
+					// plugin has been found
 					m_MixPlugins[iPlug].pMixPlugin->RestoreAllParameters(m_MixPlugins[iPlug].defaultProgram); //rewbs.plugDefaultProgram: added param
+				}
+				else
+				{
+					// plugin not found - add to list
+					BOOL bFound = false;
+					for(UINT iPlugFind = 0; iPlugFind < iPlug; iPlugFind++)
+						if(m_MixPlugins[iPlugFind].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2)
+							bFound = true;
+
+					if(bFound == false)
+					{
+						sNotFound = sNotFound + m_MixPlugins[iPlug].Info.szLibraryName + "\n";
+						bSearchIDs[iPlug] = true; // set this flag so we will find the needed plugins later when calling KVRAudio
+					}
+					iShowNotFound++;
 				}
 			}
 		}
+	}
+
+	// Display a nice message so the user sees what plugins are missing
+	if(iShowNotFound)
+	{
+		if(iShowNotFound == 1)
+		{
+			sNotFound = "The following plugin has not been found:\n\n" + sNotFound + "\nDo you want to search for it on KVRAudio?";
+		}
+		else
+		{
+			sNotFound =	"The following plugins have not been found:\n\n" + sNotFound + "\nDo you want to search for them on KVRAudio?"
+						"\nWARNING: A browser window / tab is opened for every plugin. If you do not want that, you can visit http://www.kvraudio.com/search.php";
+		}
+		if (::MessageBox(0, sNotFound, "OpenMPT - Plugins missing", MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES)
+			for (UINT iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
+				if (bSearchIDs[iPlug] == true)
+				{
+					CString sUrl;
+					sUrl.Format("http://www.kvraudio.com/search.php?q=%s&lq=db", m_MixPlugins[iPlug].Info.szLibraryName);
+					CTrackApp::OpenURL(sUrl);
+				}
 	}
 
 	// Set up mix levels

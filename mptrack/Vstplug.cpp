@@ -571,13 +571,14 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 		return bOk;
 	} else
 	{
-		CString message;
+		// MOVED to CSoundFile::Create
+		/*CString message;
 		message.Format("This track uses the plugin \"%s\", which could not be found.\n\rSearch for this plug on kvraudio?", pMixPlugin->Info.szLibraryName);
 		if (AfxMessageBox(message, MB_YESNO|MB_ICONQUESTION) == IDYES )  {
 			CString url;
 			url.Format("http://www.kvraudio.com/search.php?q=%s&lq=db", pMixPlugin->Info.szLibraryName);
 			CTrackApp::OpenURL(url);
-		}
+		}*/
 		
 	#ifdef VST_LOG
 		Log("Unknown plugin\n");
