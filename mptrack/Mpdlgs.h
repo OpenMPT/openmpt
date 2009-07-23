@@ -65,6 +65,7 @@ protected:
 	//rewbs.resamplerConf
 	afx_msg void OnWFIRTypeChanged();
 	afx_msg void OnResamplerChanged();
+	afx_msg void OnDefaultResampling();
 	//end rewbs.resamplerConf
 
 	DECLARE_MESSAGE_MAP()

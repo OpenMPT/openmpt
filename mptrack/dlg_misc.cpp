@@ -196,8 +196,8 @@ BOOL CModTypeDlg::OnInitDialog()
 		default:					m_PlugMixBox.SetCurSel(0); break;
 	}
 
-	SetDlgItemText(IDC_EDIT5, "Created with:");
-	SetDlgItemText(IDC_EDIT6, "Last saved with:");
+	SetDlgItemText(IDC_STATIC_CREATEDWITH, "Created with:");
+	SetDlgItemText(IDC_STATIC_SAVEDWITH, "Last saved with:");
 
 	SetDlgItemText(IDC_EDIT1, MptVersion::ToStr(m_pSndFile->m_dwCreatedWithVersion));
 	SetDlgItemText(IDC_EDIT2, MptVersion::ToStr(m_pSndFile->m_dwLastSavedWithVersion));
@@ -280,7 +280,7 @@ void CModTypeDlg::UpdateDialog()
             p->SetWindowText("1. Enable more IT compatible playback.\n"
 							 "2. Use old random variation behavior for instruments.\n"
 							 "3. Enable plugin volume command bug emulation.");
-		else if(XM) p->SetWindowText("1. Enable more XM compatible playback.\n"
+		else if(XM) p->SetWindowText("1. Enable more FT2 compatible playback.\n"
 									 "2. Unused\n"
 									 "3. Plugin volume command bug"); 
 	}
@@ -530,11 +530,15 @@ END_MESSAGE_MAP()
 BOOL CRemoveChannelsDlg::OnInitDialog()
 //-------------------------------------
 {
-	CHAR label[128];
+	CHAR label[20 + MAX_CHANNELNAME];
 	CDialog::OnInitDialog();
-	for (UINT n=0; n<m_nChannels; n++)
+	for (UINT n = 0; n < m_nChannels; n++)
 	{
-		wsprintf(label,"Channel %d", n+1);
+		if(m_pSndFile->ChnSettings[n].szName[0] > 0x20)
+			wsprintf(label, "Channel %d: %s", (n + 1), m_pSndFile->ChnSettings[n].szName);
+		else
+			wsprintf(label, "Channel %d", n + 1);
+
 		m_RemChansList.SetItemData(m_RemChansList.AddString(label), n);
 		if (m_bChnMask[n]) m_RemChansList.SetSel(n);
 	}

@@ -589,8 +589,8 @@
 #define IDC_CHECK_EQ                    2052
 #define IDC_CHECK_AGC                   2053
 #define IDC_SAMPLE_SILENCE              2054
-#define IDC_SAMPLE_INVERT				2055
-#define IDC_SAMPLE_SIGN_UNSIGN			2056
+#define IDC_SAMPLE_INVERT               2055
+#define IDC_SAMPLE_SIGN_UNSIGN          2056
 #define IDC_INSTRUMENT_NEW              2060
 #define IDC_INSTRUMENT_OPEN             2061
 #define IDC_INSTRUMENT_SAVEAS           2062
@@ -822,14 +822,14 @@
 #define IDC_TEXT_QUALITY                2330
 #define IDC_TEXT_FFT                    2331
 #define IDC_TEXT_PERCENT                2332
-#define IDC_EQ_WARNING					2333
+#define IDC_EQ_WARNING                  2333
 #define IDC_TEXT_STRETCHPARAMS          2337
 #define IDC_EDIT_STRETCHPARAMS          2338
-#define IDC_MIDI_MACRO_CONTROL		    2339
+#define IDC_MIDI_MACRO_CONTROL          2339
 #define IDC_MIDIPLAYPATTERNONMIDIIN     2340
 #define IDC_DONTSHOWAGAIN               2341
 #define IDC_MESSAGETEXT                 2342
-#define IDC_SAMPLE_DCOFFSET				2343
+#define IDC_SAMPLE_DCOFFSET             2343
 #define IDC_OPTIONS_DIR_MODS            2344
 #define IDC_OPTIONS_DIR_SAMPS           2345
 #define IDC_OPTIONS_DIR_INSTS           2346
@@ -848,6 +848,12 @@
 #define IDC_BUTTON_CHANGE_VSTDIR2       2358
 #define IDC_BUTTON_CHANGE_VSTPRESETSDIR 2358
 #define IDC_STATIC_VSTPRESETDIR         2359
+#define IDC_BUTTON_DEFAULT_RESAMPLING   2360
+#define IDC_STATIC_CREATEDWITH          2361
+#define IDC_STATIC_SAVEDWITH            2362
+#define IDC_STATIC_VSTNAMEFILTER        2362
+#define IDC_TEXT_CURRENT_VSTPLUG        2363
+#define IDC_STATIC_SCALE_ENV            2364
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -981,7 +987,7 @@
 #define ID_PATTERN_PLAYNOLOOP           32901
 #define ID_PATTERN_OPEN_RANDOMIZER      32905
 #define ID_PATTERN_INTERPOLATE_NOTE     32906
-#define ID_PATTERN_CHNRESET				32907
+#define ID_PATTERN_CHNRESET             32907
 #define ID_PRESET_LOAD                  32915
 #define ID_PRESET_SAVE                  32916
 #define ID_PRESET_RANDOM                32917
@@ -1075,10 +1081,11 @@
 #define ID_NETLINK_MODARCHIVE           59214
 #define ID_PATTERN_DUPLICATECHANNEL     59216
 #define ID_EDIT_GOTO_MENU               59220
-#define ID_CLEANUP_COMPO				59221
+#define ID_CLEANUP_COMPO                59221
 #define ID_SAMPLE_DRAW                  59224
 #define ID_SAMPLE_ADDSILENCE            59225
-#define ID_ECHOPASTE					59226
+#define ID_ECHOPASTE                    59226
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
@@ -1086,7 +1093,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        518
 #define _APS_NEXT_COMMAND_VALUE         59227
-#define _APS_NEXT_CONTROL_VALUE         2360
+#define _APS_NEXT_CONTROL_VALUE         2365
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

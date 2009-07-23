@@ -728,7 +728,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 					BOOL bFound = false;
 					for(UINT iPlugFind = 0; iPlugFind < iPlug; iPlugFind++)
 						if(m_MixPlugins[iPlugFind].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2)
+						{
 							bFound = true;
+							break;
+						}
 
 					if(bFound == false)
 					{
@@ -753,7 +756,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			sNotFound =	"The following plugins have not been found:\n\n" + sNotFound + "\nDo you want to search for them on KVRAudio?"
 						"\nWARNING: A browser window / tab is opened for every plugin. If you do not want that, you can visit http://www.kvraudio.com/search.php";
 		}
-		if (::MessageBox(0, sNotFound, "OpenMPT - Plugins missing", MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES)
+		if (::MessageBox(0, sNotFound, "OpenMPT - Plugins missing", MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION) == IDYES)
 			for (UINT iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 				if (bSearchIDs[iPlug] == true)
 				{

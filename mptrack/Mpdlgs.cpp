@@ -389,6 +389,7 @@ BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 	ON_COMMAND(IDC_CHECK5,		OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK6,		OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK7,		OnSettingsChanged)
+	ON_COMMAND(IDC_BUTTON_DEFAULT_RESAMPLING,	OnDefaultResampling)
 END_MESSAGE_MAP()
 
 
@@ -559,6 +560,19 @@ void COptionsPlayer::OnResamplerChanged()
 	
 	m_CEditWFIRCutoff.SetWindowText(s);
 	OnSettingsChanged();
+}
+
+void COptionsPlayer::OnDefaultResampling()
+{
+	//CMainFrame::gbWFIRType = 7; //WFIR_KAISER4T
+	//CMainFrame::gdWFIRCutoff = 0.97;
+	//CMainFrame::m_nSrcMode = SRCMODE_POLYPHASE
+	//CMainFrame::glVolumeRampSamples = 42;
+	m_CbnResampling.SetCurSel(SRCMODE_POLYPHASE);
+	OnResamplerChanged();
+	m_CEditWFIRCutoff.SetWindowText("97");
+	m_CEditRamping.SetWindowText("42");
+	
 }
 
 extern VOID SndMixInitializeTables();
