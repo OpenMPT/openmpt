@@ -1109,7 +1109,7 @@ BOOL CSoundFile::ProcessEffects()
 				m_MixPlugins[plug-1].pMixPlugin->SetParameter(plugparam, value);
 		}
 
-		// Process continuous parameter pontrol note.
+		// Process continuous parameter control note.
 		// Row data is cleared after first tick so on following
 		// ticks using channels m_nPlugParamValueStep to identify
 		// the need for parameter control. The condition cmd == 0
@@ -1216,9 +1216,15 @@ BOOL CSoundFile::ProcessEffects()
 		{
 			UINT note = pChn->nRowNote;
 			if (instr) pChn->nNewIns = instr;
-			// XM: Key-Off + Sample == Note Cut
 			if (m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM|MOD_TYPE_MT2))
 			{
+				// XM: FT2 ignores a note next to a K00 effect, and a fade-out seems to be done when no volume envelope is present (not exactly the Kxx behaviour)
+				if(cmd == CMD_KEYOFF && param == 0 && GetModFlag(MSF_COMPATIBLE_PLAY))
+				{
+					note = instr = 0;
+				}
+
+				// XM: Key-Off + Sample == Note Cut
 				if ((note == NOTE_KEYOFF) && ((!pChn->pHeader) || (!(pChn->pHeader->dwFlags & ENV_VOLUME))))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
@@ -1357,7 +1363,17 @@ BOOL CSoundFile::ProcessEffects()
 
 
 		// Volume Column Effect (except volume & panning)
-		if ((volcmd > VOLCMD_PANNING) && (m_nTickCount >= nStartTick))
+		/*	A few notes, paraphrased from ITTECH.TXT by Storlek (creator of schismtracker):
+			Ex/Fx/Gx are shared with Exx/Fxx/Gxx; Ex/Fx are 4x the 'normal' slide value
+			Gx is linked with Ex/Fx if Compat Gxx is off, just like Gxx is with Exx/Fxx
+			Gx values: 1, 4, 8, 16, 32, 64, 96, 128, 255
+			Ax/Bx/Cx/Dx values are used directly (i.e. D9 == D09), and are NOT shared with Dxx
+			(value is stored into nOldVolParam and used by A0/B0/C0/D0)
+			Hx uses the same value as Hxx and Uxx, and affects the *depth*
+			so... hxx = (hx | (oldhxx & 0xf0))  ???
+			TODO is this done correctly?
+		*/
+      	if ((volcmd > VOLCMD_PANNING) && (m_nTickCount >= nStartTick))
 		{
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
@@ -1663,8 +1679,15 @@ BOOL CSoundFile::ProcessEffects()
 					// XM: Key-Off + Sample == Note Cut
 					if ((!pChn->pHeader) || (!(pChn->pHeader->dwFlags & ENV_VOLUME)))
 					{
-						pChn->dwFlags |= CHN_FASTVOLRAMP;
-						pChn->nVolume = 0;
+						if(param == 0) // FT2 is weird....
+						{
+							pChn->dwFlags |= CHN_NOTEFADE;
+						}
+						else
+						{
+							pChn->dwFlags |= CHN_FASTVOLRAMP;
+							pChn->nVolume = 0;
+						}
 					}
 					KeyOff(nChn);
 				}
@@ -1738,12 +1761,14 @@ BOOL CSoundFile::ProcessEffects()
 		// Position Jump
 		case CMD_POSITIONJUMP:
 			nPosJump = param;
+			/* commented this out (http://lpchip.com/modplug/viewtopic.php?t=1808) - I hope it doesn't break anything else.
 			if((m_dwSongFlags & SONG_PATTERNLOOP && m_nSeqOverride == 0)) {
 				 m_nSeqOverride = param+1;
 				 //Releasing pattern loop after position jump could cause 
 				 //instant jumps - modifying behavior so that now position jumps
 				 //occurs also when pattern loop is enabled.
 			}
+			*/
 			// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 			if(GetType() == MOD_TYPE_XM) nBreakRow = 0;
 			break;

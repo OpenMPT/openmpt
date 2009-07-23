@@ -4583,19 +4583,25 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 	AppendMenu(hMenu, (pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ? 
 					   (MF_STRING|MF_CHECKED) : MF_STRING, ID_PATTERN_MUTE, 
 					   "Mute Channel\t" + ih->GetKeyTextFromCommand(kcChannelMute));
-	BOOL b, bAll;
-	b = FALSE;
-	bAll = FALSE;
-	for (UINT i=0; i<pSndFile->m_nChannels; i++) {
-		if (i != nChn) {
-			if (!(pSndFile->ChnSettings[i].dwFlags & CHN_MUTE)) b = TRUE;
-		} else {
-			if (pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) b = TRUE;
+	BOOL bSolo = false, bUnmuteAll = false;
+	BOOL bSoloPending = false, bUnmuteAllPending = false; // doesn't work perfectly yet
+
+	for (CHANNELINDEX i = 0; i < pSndFile->m_nChannels; i++) {
+		if (i != nChn)
+		{
+			if (!(pSndFile->ChnSettings[i].dwFlags & CHN_MUTE)) bSolo = bSoloPending = true;
+			if (!((~pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) && pSndFile->m_bChannelMuteTogglePending[i])) bSoloPending = true;
 		}
-		if (pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) bAll = TRUE;
+		else
+		{
+			if (pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) bSolo = bSoloPending = true;
+			if ((~pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) && pSndFile->m_bChannelMuteTogglePending[i]) bSoloPending = true;
+		}
+		if (pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) bUnmuteAll = bUnmuteAllPending = true;
+		if ((~pSndFile->ChnSettings[i].dwFlags & CHN_MUTE) && pSndFile->m_bChannelMuteTogglePending[i]) bUnmuteAllPending = true;
 	}
-	if (b) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, "Solo Channel\t" + ih->GetKeyTextFromCommand(kcChannelSolo));
-	if (bAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, "Unmute All\t" + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
+	if (bSolo) AppendMenu(hMenu, MF_STRING, ID_PATTERN_SOLO, "Solo Channel\t" + ih->GetKeyTextFromCommand(kcChannelSolo));
+	if (bUnmuteAll) AppendMenu(hMenu, MF_STRING, ID_PATTERN_UNMUTEALL, "Unmute All\t" + ih->GetKeyTextFromCommand(kcChannelUnmuteAll));
 	
 	AppendMenu(hMenu, 
 			pSndFile->m_bChannelMuteTogglePending[nChn] ? 
@@ -4605,8 +4611,8 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 			"On transition: Unmute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition) :
 			"On transition: Mute\t" + ih->GetKeyTextFromCommand(kcToggleChanMuteOnPatTransition));
 
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, "On transition: Unmute all\t" + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, "On transition: Solo\t" + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
+	if (bUnmuteAllPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITION_UNMUTEALL, "On transition: Unmute all\t" + ih->GetKeyTextFromCommand(kcUnmuteAllChnOnPatTransition));
+	if (bSoloPending) AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSITIONSOLO, "On transition: Solo\t" + ih->GetKeyTextFromCommand(kcSoloChnOnPatTransition));
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_CHNRESET, "Reset Channel\t" + ih->GetKeyTextFromCommand(kcChannelReset));
 	

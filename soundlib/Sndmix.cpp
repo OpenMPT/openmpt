@@ -973,7 +973,11 @@ BOOL CSoundFile::ReadNote()
 						vol += (ModSquareTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
 						break;
 					case 3:
-						vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
+						//IT compatibility 19. Use random values
+						if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+							vol += (((rand() & 0xFF) - 0x7F) * (int)pChn->nTremoloDepth) >> tremattn;
+						else
+							vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
 						break;
 					default:
 						vol += (ModSinusTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
@@ -1321,7 +1325,11 @@ BOOL CSoundFile::ReadNote()
 					vdelta = ModSquareTable[vibpos];
 					break;
 				case 3:
-					vdelta = ModRandomTable[vibpos];
+					//IT compatibility 19. Use random values
+					if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+						vdelta = (rand() & 0xFF) - 0x7F;
+					else
+						vdelta = ModRandomTable[vibpos];
 					break;
 				default:
 					vdelta = ModSinusTable[vibpos];
@@ -1377,7 +1385,11 @@ BOOL CSoundFile::ReadNote()
 					pdelta = ModSquareTable[panpos];
 					break;
 				case 3:
-					pdelta = ModRandomTable[panpos];
+					//IT compatibility 19. Use random values
+					if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+						pdelta = (rand() & 0xFF) - 0x7F;
+					else
+						pdelta = ModRandomTable[panpos];
 					break;
 				default:
 					pdelta = ModSinusTable[panpos];
@@ -1605,7 +1617,10 @@ BOOL CSoundFile::ReadNote()
 				// Pitch Loop ?
 				if (penv->dwFlags & ENV_PITCHLOOP)
 				{
-					if (pChn->nPitchEnvPosition >= penv->PitchPoints[penv->nPitchLoopEnd])
+					UINT pitchloopend = penv->PitchPoints[penv->nPitchLoopEnd];
+					//IT compatibility 24. Short envelope loops
+					if (m_nType != MOD_TYPE_XM && GetModFlag(MSF_COMPATIBLE_PLAY)) pitchloopend++;
+					if (pChn->nPitchEnvPosition == pitchloopend)
 						pChn->nPitchEnvPosition = penv->PitchPoints[penv->nPitchLoopStart];
 				}
 				// Pitch Sustain ?

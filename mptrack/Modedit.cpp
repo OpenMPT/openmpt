@@ -206,6 +206,16 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 					case 0xA0: 	m->command = CMD_S3MCMDEX; break;
 					}
 					break;
+				case CMD_KEYOFF:
+					if(m->note == 0)
+					{
+						m->note = (newTypeIsS3M) ? NOTE_NOTECUT : NOTE_KEYOFF;
+						m->command = CMD_S3MCMDEX;
+						if(m->param == 0)
+							m->instr = 0;
+						m->param = 0xD0 | (m->param & 0x0F);
+					}
+					break;
 				}
 			}
 		}
