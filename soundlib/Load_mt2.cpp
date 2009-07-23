@@ -193,7 +193,7 @@ BOOL CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	if ((!lpStream) || (dwMemLength < sizeof(MT2FILEHEADER))
 	 || (pfh->dwMT20 != 0x3032544D)
 	 || (pfh->wVersion < 0x0200) || (pfh->wVersion >= 0x0300)
-	 || (pfh->wChannels < 4) || (pfh->wChannels > 64)) return FALSE;
+	 || (pfh->wChannels < 1) || (pfh->wChannels > MAX_BASECHANNELS)) return FALSE;
 	pdd = NULL;
 	m_nType = MOD_TYPE_MT2;
 	m_nChannels = pfh->wChannels;

@@ -571,18 +571,10 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 		return bOk;
 	} else
 	{
-		// MOVED to CSoundFile::Create
-		/*CString message;
-		message.Format("This track uses the plugin \"%s\", which could not be found.\n\rSearch for this plug on kvraudio?", pMixPlugin->Info.szLibraryName);
-		if (AfxMessageBox(message, MB_YESNO|MB_ICONQUESTION) == IDYES )  {
-			CString url;
-			url.Format("http://www.kvraudio.com/search.php?q=%s&lq=db", pMixPlugin->Info.szLibraryName);
-			CTrackApp::OpenURL(url);
-		}*/
-		
-	#ifdef VST_LOG
-		Log("Unknown plugin\n");
-	#endif
+		// "plug not found" notification code MOVED to CSoundFile::Create
+		#ifdef VST_LOG
+			Log("Unknown plugin\n");
+		#endif
 	}
 	return FALSE;
 }
@@ -1356,10 +1348,10 @@ VOID CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	PVSTPLUGINLIB pPlug = (PVSTPLUGINLIB)m_treePlugins.GetItemData(m_treePlugins.GetSelectedItem());
 	if ((pManager) && (pManager->IsValidPlugin(pPlug)))
 	{
-		SetDlgItemText(IDC_TEXT1, pPlug->szDllPath);
+		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, pPlug->szDllPath);
 	} else
 	{
-		SetDlgItemText(IDC_TEXT1, "");
+		SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, "");
 	}
 	if (result) *result = 0;
 }
@@ -1443,13 +1435,16 @@ void CSelectPluginDlg::OnSize(UINT nType, int cx, int cy)
 	CDialog::OnSize(nType, cx, cy);
 
 	if (m_treePlugins) {
-		m_treePlugins.MoveWindow(11, 33, cx-105, cy-63, FALSE);
-		::MoveWindow(GetDlgItem(IDC_NAMEFILTER)->m_hWnd, 50, 11, cx-145, 21, FALSE);
-		::MoveWindow(GetDlgItem(IDC_TEXT1)->m_hWnd,	11,cy-25, cx-22, 25, FALSE);   
-		::MoveWindow(GetDlgItem(IDOK)->m_hWnd,			 cx-85, 11,    75, 23, FALSE);
-		::MoveWindow(GetDlgItem(IDCANCEL)->m_hWnd,		 cx-85, 39,    75, 23, FALSE);
-		::MoveWindow(GetDlgItem(IDC_BUTTON1)->m_hWnd ,	 cx-85, cy-80, 75, 23, FALSE);	
-		::MoveWindow(GetDlgItem(IDC_BUTTON2)->m_hWnd,	 cx-85, cy-52, 75, 23, FALSE);
+		m_treePlugins.MoveWindow(8, 36, cx - 104, cy - 63, FALSE);
+
+		::MoveWindow(GetDlgItem(IDC_STATIC_VSTNAMEFILTER)->m_hWnd, 8, 11, 40, 21, FALSE);
+		::MoveWindow(GetDlgItem(IDC_NAMEFILTER)->m_hWnd, 40, 8, cx - 136, 21, FALSE);
+
+		::MoveWindow(GetDlgItem(IDC_TEXT_CURRENT_VSTPLUG)->m_hWnd, 8, cy - 20, cx - 22, 25, FALSE);   
+		::MoveWindow(GetDlgItem(IDOK)->m_hWnd,			cx-85,	8,    75, 23, FALSE);
+		::MoveWindow(GetDlgItem(IDCANCEL)->m_hWnd,		cx-85,	39,    75, 23, FALSE);
+		::MoveWindow(GetDlgItem(IDC_BUTTON1)->m_hWnd ,	cx-85,	cy-80, 75, 23, FALSE);	
+		::MoveWindow(GetDlgItem(IDC_BUTTON2)->m_hWnd,	cx-85,	cy-52, 75, 23, FALSE);
 		Invalidate();
 	}
 }
