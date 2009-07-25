@@ -23,7 +23,7 @@ void ReplaceSample(MODINSTRUMENT& smp, const LPSTR pNewSample, const SmpLength n
 }
 
 
-SmpLength InsertSilence(MODINSTRUMENT& smp, const SmpLength nSilenceLength,  const SmpLength nStartFrom, CSoundFile* pSndFile)
+SmpLength InsertSilence(MODINSTRUMENT& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile)
 //----------------------------------------------------------------------------------------------------------------------------
 {
 	if(nSilenceLength == 0 || nSilenceLength >= MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength)
@@ -61,6 +61,49 @@ SmpLength InsertSilence(MODINSTRUMENT& smp, const SmpLength nSilenceLength,  con
 	}
 
 	ReplaceSample(smp, pNewSmp, nNewLength);
+	AdjustEndOfSample(smp, pSndFile);
+
+	return smp.nLength;
+}
+
+SmpLength ResizeSample(MODINSTRUMENT& smp, const SmpLength nNewLength, CSoundFile* pSndFile)
+//----------------------------------------------------------------------------------------
+{
+	// Invalid sample size
+	if(nNewLength > MAX_SAMPLE_LENGTH || nNewLength == smp.nLength)
+		return smp.nLength;
+
+	// New sample will be bigger so we'll just use "InsertSilence" as it's already there.
+	if(nNewLength > smp.nLength)
+		return InsertSilence(smp, nNewLength - smp.nLength, smp.nLength, pSndFile);
+
+	// Else: Shrink sample
+
+	const SmpLength nNewSmpBytes = nNewLength * smp.GetElementarySampleSize() * smp.GetNumChannels();
+
+	LPSTR pNewSmp = 0;
+	pNewSmp = CSoundFile::AllocateSample(nNewSmpBytes);
+	if(pNewSmp == 0) 
+		return smp.nLength; //Sample allocation failed.
+
+	// Copy over old data and replace sample by the new one
+	memcpy(pNewSmp, smp.pSample, nNewSmpBytes);
+	ReplaceSample(smp, pNewSmp, nNewLength);
+
+	// Adjust loops
+	if(smp.nLoopStart > nNewLength)
+	{
+		smp.nLoopStart = smp.nLoopEnd = 0;
+		smp.uFlags &= ~CHN_LOOP;
+	}
+	if(smp.nLoopEnd > nNewLength) smp.nLoopEnd = nNewLength;
+	if(smp.nSustainStart > nNewLength)
+	{
+		smp.nSustainStart = smp.nSustainEnd = 0;
+		smp.uFlags &= ~CHN_SUSTAINLOOP;
+	}
+	if(smp.nSustainEnd > nNewLength) smp.nSustainEnd = nNewLength;
+
 	AdjustEndOfSample(smp, pSndFile);
 
 	return smp.nLength;

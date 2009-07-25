@@ -650,7 +650,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		if (pins->pSample)
 		{
 			if (pins->nLoopEnd > pins->nLength) pins->nLoopEnd = pins->nLength;
-			if (pins->nLoopStart + 3 >= pins->nLoopEnd)
+			if (pins->nLoopStart >= pins->nLoopEnd)
 			{
 				pins->nLoopStart = 0;
 				pins->nLoopEnd = 0;
@@ -2447,7 +2447,7 @@ void CSoundFile::AdjustSampleLoop(MODINSTRUMENT *pIns)
 {
 	if ((!pIns->pSample) || (!pIns->nLength)) return;
 	if (pIns->nLoopEnd > pIns->nLength) pIns->nLoopEnd = pIns->nLength;
-	if (pIns->nLoopStart+2 >= pIns->nLoopEnd)
+	if (pIns->nLoopStart >= pIns->nLoopEnd)
 	{
 		pIns->nLoopStart = pIns->nLoopEnd = 0;
 		pIns->uFlags &= ~CHN_LOOP;

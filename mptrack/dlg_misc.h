@@ -15,6 +15,7 @@ public:
 	CEdit m_EditFlag;
 	CSoundFile *m_pSndFile;
 	UINT m_nChannels, m_nType;
+	DWORD m_dwSongFlags;
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -36,6 +37,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+	virtual void OnCancel();
 	
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CModTypeDlg)
@@ -346,12 +348,18 @@ public:
 class CAddSilenceDlg: public CDialog
 //===========================
 {
-public:
-	UINT m_nSamples;
-	bool m_bAddAtEnd;
+protected:
+	char GetEditMode();
+	afx_msg void OnEditModeChanged();
+	DECLARE_MESSAGE_MAP()
 
 public:
-	CAddSilenceDlg(CWnd *parent, UINT nSamples=32):CDialog(IDD_ADDSILENCE, parent) { m_nSamples = nSamples; m_bAddAtEnd = true; }
+	UINT m_nSamples;
+	UINT m_nLength;
+	char m_nEditOption; //0 = add at beginning, 1 = add at end, 2 = resize
+
+public:
+	CAddSilenceDlg(CWnd *parent, UINT nSamples = 32, UINT nOrigLength = 1024):CDialog(IDD_ADDSILENCE, parent) { m_nSamples = nSamples; m_nLength = nOrigLength; m_nEditOption = 2; }
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 };
