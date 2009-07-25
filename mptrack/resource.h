@@ -850,10 +850,25 @@
 #define IDC_STATIC_VSTPRESETDIR         2359
 #define IDC_BUTTON_DEFAULT_RESAMPLING   2360
 #define IDC_STATIC_CREATEDWITH          2361
+#define IDC_TEXT_CREATEDWITH            2361
 #define IDC_STATIC_SAVEDWITH            2362
 #define IDC_STATIC_VSTNAMEFILTER        2362
+#define IDC_TEXT_SAVEDWITH              2362
 #define IDC_TEXT_CURRENT_VSTPLUG        2363
 #define IDC_STATIC_SCALE_ENV            2364
+#define IDC_FRAME_MPTEXT                2365
+#define IDC_COMBO_MIXLEVELS             2366
+#define IDC_COMBO_TEMPOMODE             2367
+#define IDC_TEXT_TEMPOMODE              2368
+#define IDC_FRAME_TEMPOMODE             2369
+#define IDC_TEXT_MIXMODE                2370
+#define IDC_TEXT_ROWSPERBEAT            2371
+#define IDC_TEXT_ROWSPERMEASURE         2372
+#define IDC_FRAME_MPTVERSION            2373
+#define IDC_EDIT_CREATEDWITH            2374
+#define IDC_EDIT_SAVEDWITH              2375
+#define IDC_FRAME_MODFLAGS              2376
+#define IDC_FRAME_MODTYPE               2377
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1093,7 +1108,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        518
 #define _APS_NEXT_COMMAND_VALUE         59227
-#define _APS_NEXT_CONTROL_VALUE         2365
+#define _APS_NEXT_CONTROL_VALUE         2378
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
