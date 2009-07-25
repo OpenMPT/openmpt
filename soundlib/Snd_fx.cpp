@@ -1761,14 +1761,12 @@ BOOL CSoundFile::ProcessEffects()
 		// Position Jump
 		case CMD_POSITIONJUMP:
 			nPosJump = param;
-			/* commented this out (http://lpchip.com/modplug/viewtopic.php?t=1808) - I hope it doesn't break anything else.
 			if((m_dwSongFlags & SONG_PATTERNLOOP && m_nSeqOverride == 0)) {
 				 m_nSeqOverride = param+1;
 				 //Releasing pattern loop after position jump could cause 
 				 //instant jumps - modifying behavior so that now position jumps
 				 //occurs also when pattern loop is enabled.
 			}
-			*/
 			// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 			if(GetType() == MOD_TYPE_XM) nBreakRow = 0;
 			break;

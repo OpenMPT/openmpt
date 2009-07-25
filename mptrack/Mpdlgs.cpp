@@ -138,6 +138,8 @@ BOOL COptionsSoundcard::OnInitDialog()
 		m_CbnBufferLength.SetWindowText(s);
 // -> CODE#0006
 // -> DESC="misc quantity changes"
+		m_CbnBufferLength.AddString("1 ms");
+		m_CbnBufferLength.AddString("5 ms");
 		m_CbnBufferLength.AddString("10 ms");
 		m_CbnBufferLength.AddString("20 ms");
 // -! BEHAVIOUR_CHANGE#0006

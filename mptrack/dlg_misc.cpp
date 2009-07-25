@@ -116,8 +116,8 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CModTypeDlg)
 	DDX_Control(pDX, IDC_COMBO1,		m_TypeBox);
 	DDX_Control(pDX, IDC_COMBO2,		m_ChannelsBox);
-	DDX_Control(pDX, IDC_COMBO3,		m_TempoModeBox);
-	DDX_Control(pDX, IDC_COMBO4,		m_PlugMixBox);
+	DDX_Control(pDX, IDC_COMBO_TEMPOMODE,		m_TempoModeBox);
+	DDX_Control(pDX, IDC_COMBO_MIXLEVELS,		m_PlugMixBox);
 	DDX_Control(pDX, IDC_CHECK1,		m_CheckBox1);
 	DDX_Control(pDX, IDC_CHECK2,		m_CheckBox2);
 	DDX_Control(pDX, IDC_CHECK3,		m_CheckBox3);
@@ -196,11 +196,11 @@ BOOL CModTypeDlg::OnInitDialog()
 		default:					m_PlugMixBox.SetCurSel(0); break;
 	}
 
-	SetDlgItemText(IDC_STATIC_CREATEDWITH, "Created with:");
-	SetDlgItemText(IDC_STATIC_SAVEDWITH, "Last saved with:");
+	SetDlgItemText(IDC_TEXT_CREATEDWITH, "Created with:");
+	SetDlgItemText(IDC_TEXT_SAVEDWITH, "Last saved with:");
 
-	SetDlgItemText(IDC_EDIT1, MptVersion::ToStr(m_pSndFile->m_dwCreatedWithVersion));
-	SetDlgItemText(IDC_EDIT2, MptVersion::ToStr(m_pSndFile->m_dwLastSavedWithVersion));
+	SetDlgItemText(IDC_EDIT_CREATEDWITH, MptVersion::ToStr(m_pSndFile->m_dwCreatedWithVersion));
+	SetDlgItemText(IDC_EDIT_SAVEDWITH, MptVersion::ToStr(m_pSndFile->m_dwLastSavedWithVersion));
 
 	m_EditFlag.SetLimitText(16);
 
@@ -270,6 +270,7 @@ void CModTypeDlg::UpdateDialog()
 	const bool ITorMPT = ((m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0);
 	const bool XM = m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) == MOD_TYPE_XM;
 
+	// Misc Flags box
 	CWnd* p = GetDlgItem(IDC_EDIT_FLAGS);
 	if(p) p->ShowWindow(XMorITorMPT);
 	p = GetDlgItem(IDC_FLAG_EXPLANATIONS);
@@ -284,8 +285,9 @@ void CModTypeDlg::UpdateDialog()
 									 "2. Unused\n"
 									 "3. Plugin volume command bug"); 
 	}
-	p = GetDlgItem(IDC_FLAGEDITTITLE);
-	if(p) p->ShowWindow(XMorITorMPT);
+
+	GetDlgItem(IDC_FLAGEDITTITLE)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_FRAME_MPTEXT)->ShowWindow(XMorITorMPT);
 	if(XMorITorMPT)
 	{
 		char str[17] = "0000000000000000";
@@ -299,11 +301,37 @@ void CModTypeDlg::UpdateDialog()
 		SetDlgItemText(IDC_EDIT_FLAGS, str);
 	}
 
-	m_TempoModeBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	GetDlgItem(IDC_ROWSPERBEAT)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
-	GetDlgItem(IDC_ROWSPERMEASURE)->EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	// Mixmode Box
+	GetDlgItem(IDC_TEXT_MIXMODE)->ShowWindow(XMorITorMPT);
+	m_PlugMixBox.ShowWindow(XMorITorMPT);
+	
+	// Tempo mode box
+	m_TempoModeBox.ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_ROWSPERBEAT)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_ROWSPERMEASURE)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_TEXT_ROWSPERBEAT)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_TEXT_ROWSPERMEASURE)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_TEXT_TEMPOMODE)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_FRAME_TEMPOMODE)->ShowWindow(XMorITorMPT);
 
-	m_PlugMixBox.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	// Version info
+	GetDlgItem(IDC_FRAME_MPTVERSION)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_TEXT_CREATEDWITH)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_TEXT_SAVEDWITH)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_EDIT_CREATEDWITH)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_EDIT_SAVEDWITH)->ShowWindow(XMorITorMPT);
+
+	// Window height - some parts of the dialog won't be visible for all formats
+	RECT rWindow;
+	GetWindowRect(&rWindow);
+	
+	UINT iHeight;
+	int nItemID = (XMorITorMPT) ? IDC_FRAME_MPTVERSION : IDC_FRAME_MODFLAGS;
+	RECT rFrame;
+	GetDlgItem(nItemID)->GetWindowRect(&rFrame);
+	iHeight = rFrame.bottom - rWindow.top + 12;
+	MoveWindow(rWindow.left, rWindow.top, rWindow.right - rWindow.left, iHeight);
+
 }
 
 
@@ -530,7 +558,7 @@ END_MESSAGE_MAP()
 BOOL CRemoveChannelsDlg::OnInitDialog()
 //-------------------------------------
 {
-	CHAR label[20 + MAX_CHANNELNAME];
+	CHAR label[max(100, 20 + MAX_CHANNELNAME)];
 	CDialog::OnInitDialog();
 	for (UINT n = 0; n < m_nChannels; n++)
 	{

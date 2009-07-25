@@ -31,7 +31,7 @@ enum {
 
 #define SNDDEV_MINBUFFERS			2
 #define SNDDEV_MAXBUFFERS			16
-#define SNDDEV_MINBUFFERLEN			10		// 10ms
+#define SNDDEV_MINBUFFERLEN			1		// 1ms
 #define SNDDEV_MAXBUFFERLEN			1000	// 1sec
 
 #define SNDDEV_OPTIONS_SECONDARY	0x01	// Use secondary buffers (if available)
