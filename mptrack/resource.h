@@ -869,6 +869,12 @@
 #define IDC_EDIT_SAVEDWITH              2375
 #define IDC_FRAME_MODFLAGS              2376
 #define IDC_FRAME_MODTYPE               2377
+#define IDC_EDIT_ADDSILENCE             2378
+#define IDC_EDIT_RESIZESAMPLE           2379
+#define IDC_RADIO_ADDSILENCE_BEGIN      2380
+#define IDC_RADIO_ADDSILENCE_END        2381
+#define IDC_SPIN_ADDSILENCE             2382
+#define IDC_RADIO_RESIZETO              2384
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1108,7 +1114,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        518
 #define _APS_NEXT_COMMAND_VALUE         59227
-#define _APS_NEXT_CONTROL_VALUE         2378
+#define _APS_NEXT_CONTROL_VALUE         2385
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

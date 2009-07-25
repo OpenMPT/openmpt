@@ -20,7 +20,12 @@ enum ResetFlag
 // Insert silence to given location.
 // Note: Is currently implemented only for inserting silence to the beginning and to the end of the sample.
 // Return: Length of the new sample.
-SmpLength InsertSilence(MODINSTRUMENT& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile = 0);
+SmpLength InsertSilence(MODINSTRUMENT& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile = nullptr);
+
+// Change sample size. 
+// Note: If resized sample is bigger, silence will be added to the sample's tail.
+// Return: Length of the new sample.
+SmpLength ResizeSample(MODINSTRUMENT& smp, const SmpLength nNewLength, CSoundFile* pSndFile = nullptr);
 
 // Replaces sample in 'smp' with given sample and frees the old sample.
 void ReplaceSample(MODINSTRUMENT& smp, const LPSTR pNewSample,  const SmpLength nNewLength);

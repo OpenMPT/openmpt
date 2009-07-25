@@ -138,6 +138,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_nType = m_pSndFile->m_nType;
 	m_nChannels = m_pSndFile->m_nChannels;
+	m_dwSongFlags = m_pSndFile->m_dwSongFlags;
 	SetDlgItemInt(IDC_ROWSPERBEAT, m_pSndFile->m_nRowsPerBeat);
 	SetDlgItemInt(IDC_ROWSPERMEASURE, m_pSndFile->m_nRowsPerMeasure);
 
@@ -487,6 +488,14 @@ void CModTypeDlg::OnOK()
 	if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->Update();
 	CDialog::OnOK();
+}
+
+void CModTypeDlg::OnCancel()
+//--------------------------
+{
+	// Reset mod flags
+	m_pSndFile->m_dwSongFlags = m_dwSongFlags;
+	CDialog::OnCancel();
 }
 
 
@@ -1568,19 +1577,45 @@ void CAmpDlg::OnOK()
 
 
 // Add silence to a sample
+BEGIN_MESSAGE_MAP(CAddSilenceDlg, CDialog)
+	ON_COMMAND(IDC_RADIO_ADDSILENCE_BEGIN,		OnEditModeChanged)
+	ON_COMMAND(IDC_RADIO_ADDSILENCE_END,		OnEditModeChanged)
+	ON_COMMAND(IDC_RADIO_RESIZETO,				OnEditModeChanged)
+END_MESSAGE_MAP()
+
+
 BOOL CAddSilenceDlg::OnInitDialog()
 //---------------------------------
 {
 	CDialog::OnInitDialog();
-	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1);
+
+	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN_ADDSILENCE);
 	if (spin)
 	{
 		spin->SetRange(0, int16_max);
 		spin->SetPos(m_nSamples);
 	}
-	CButton *radio2 = (CButton *)GetDlgItem(IDC_RADIO2);
-	radio2->SetCheck(m_bAddAtEnd);
-	SetDlgItemInt(IDC_EDIT1, m_nSamples);
+
+	int iRadioButton;
+	switch(m_nEditOption)
+	{
+		case 1:
+			iRadioButton = IDC_RADIO_ADDSILENCE_BEGIN;
+			break;
+		case 2:
+		default:
+			iRadioButton = IDC_RADIO_ADDSILENCE_END;
+			break;
+		case 3:
+			iRadioButton = IDC_RADIO_RESIZETO;
+			break;
+
+	}
+	CButton *radioEnd = (CButton *)GetDlgItem(iRadioButton);
+	radioEnd->SetCheck(true);
+
+	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_nEditOption == 3) ? m_nLength : m_nSamples);
+	
 	return TRUE;
 }
 
@@ -1588,9 +1623,36 @@ BOOL CAddSilenceDlg::OnInitDialog()
 void CAddSilenceDlg::OnOK()
 //-------------------------
 {
-	m_nSamples = GetDlgItemInt(IDC_EDIT1);
-	m_bAddAtEnd = (IsDlgButtonChecked(IDC_RADIO2) != 0);
+	m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
+	m_nEditOption = GetEditMode();
 	CDialog::OnOK();
+}
+
+
+void CAddSilenceDlg::OnEditModeChanged()
+//------------------------------------------------
+{
+	char cNewEditOption = GetEditMode();
+	if(cNewEditOption != 3 && m_nEditOption == 3)
+	{
+		m_nLength = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
+		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nSamples);
+	}
+	else if(cNewEditOption == 3 && m_nEditOption != 3)
+	{
+		m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
+		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nLength);
+	}
+	m_nEditOption = cNewEditOption;
+}
+
+
+char CAddSilenceDlg::GetEditMode()
+{
+	if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_BEGIN)) return 1;
+	else if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_END)) return 2;
+	else if(IsDlgButtonChecked(IDC_RADIO_RESIZETO)) return 3;
+	return 0;
 }
 
 

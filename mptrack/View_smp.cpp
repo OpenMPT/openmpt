@@ -2415,13 +2415,13 @@ void CViewSample::OnDrawingToggle()
 void CViewSample::OnAddSilence()
 //------------------------------
 {
-	CAddSilenceDlg dlg(this);
-	if (dlg.DoModal() != IDOK) return;
-
 	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc) return;
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	if (!pSndFile) return;
+
+	CAddSilenceDlg dlg(this, 32, pSndFile->Ins[m_nSample].nLength);
+	if (dlg.DoModal() != IDOK) return;
 
 	const ctrlSmp::SmpLength nOldLength = pSndFile->Ins[m_nSample].nLength;
 
@@ -2432,7 +2432,16 @@ void CViewSample::OnAddSilence()
 		return;
 	}
 	
-	ctrlSmp::InsertSilence(pSndFile->Ins[m_nSample], dlg.m_nSamples, (dlg.m_bAddAtEnd) ? pSndFile->Ins[m_nSample].nLength : 0, pSndFile);
+	if(dlg.m_nEditOption == 3)
+	{
+		// resize
+		ctrlSmp::ResizeSample(pSndFile->Ins[m_nSample], dlg.m_nSamples, pSndFile);
+	}
+	else
+	{
+		// add silence
+		ctrlSmp::InsertSilence(pSndFile->Ins[m_nSample], dlg.m_nSamples, (dlg.m_nEditOption == 2) ? pSndFile->Ins[m_nSample].nLength : 0, pSndFile);
+	}
 
 	if(nOldLength != pSndFile->Ins[m_nSample].nLength)
 	{

@@ -370,9 +370,8 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			if ((Ins[iSmp].nLoopStart >= Ins[iSmp].nLoopEnd) || (Ins[iSmp].nLoopEnd - Ins[iSmp].nLoopStart < 1))
  				Ins[iSmp].nLoopStart = Ins[iSmp].nLoopEnd = 0;
 			UINT iLooplength = Ins[iSmp].nLoopEnd - Ins[iSmp].nLoopStart;
-			if(iLooplength > 0 && iLooplength < 8) Ins[iSmp].nLoopEnd = Ins[iSmp].nLoopStart + 8;
 			Ins[iSmp].nPan = 0x80;
-		//	ASSERT(iLooplength == 0 || iLooplength > 10);
+			//ASSERT(iLooplength == 0 || iLooplength > 4);
 		}
 	}
 	// Reading patterns
