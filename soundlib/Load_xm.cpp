@@ -9,6 +9,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 #include "../mptrack/version.h"
+#include "../mptrack/misc_util.h"
 
 ////////////////////////////////////////////////////////
 // FastTracker II XM file support
@@ -84,7 +85,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	XMSAMPLESTRUCT xmss;
 	DWORD dwMemPos, dwHdrSize;
 	WORD norders=0, restartpos=0, channels=0, patterns=0, instruments=0;
-	WORD xmflags=0, deftempo=125, defspeed=6;
+	WORD xmflags=0;
 	BYTE InstUsed[256];
 // -> CODE#0006
 // -> DESC="misc quantity changes"
@@ -100,7 +101,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	m_nChannels = 0;
 	if ((!lpStream) || (dwMemLength < 0x200)) return FALSE;
 	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return FALSE;
-	memcpy(m_szNames[0], lpStream+17, 20);
+	memcpy(m_szNames[0], lpStream + 17, 20);
 	dwHdrSize = LittleEndian(*((DWORD *)(lpStream+60)));
 	norders = LittleEndianW(*((WORD *)(lpStream+64)));
 	if ((!norders) || (norders > MAX_ORDERS)) return FALSE;
@@ -116,23 +117,19 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	m_nMaxPeriod = 54784;
 	m_nChannels = channels;
 	if (restartpos < norders) m_nRestartPos = restartpos;
-	patterns = LittleEndianW(*((WORD *)(lpStream+70)));
-	if (patterns > 256) patterns = 256;
+	patterns = CLAMP(LittleEndianW(*((WORD *)(lpStream+70))), 0, 256);
 	instruments = LittleEndianW(*((WORD *)(lpStream+72)));
 	if (instruments >= MAX_INSTRUMENTS) instruments = MAX_INSTRUMENTS-1;
 	m_nInstruments = instruments;
 	m_nSamples = 0;
-	memcpy(&xmflags, lpStream+74, 2);
+	memcpy(&xmflags, lpStream + 74, 2);
 	xmflags = LittleEndianW(xmflags);
 	if (xmflags & 1) m_dwSongFlags |= SONG_LINEARSLIDES;
 	if (xmflags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
-	defspeed = LittleEndianW(*((WORD *)(lpStream+76)));
-	deftempo = LittleEndianW(*((WORD *)(lpStream+78)));
+	m_nDefaultSpeed = CLAMP(LittleEndianW(*((WORD *)(lpStream+76))), 1, 31);
 // -> CODE#0016
 // -> DESC="default tempo update"
-//	if ((deftempo >= 32) && (deftempo < 256)) m_nDefaultTempo = deftempo;
-	if ((deftempo >= 32) && (deftempo <= 512)) m_nDefaultTempo = deftempo;
-	if ((defspeed > 0) && (defspeed < 40)) m_nDefaultSpeed = defspeed;
+	m_nDefaultTempo = CLAMP(LittleEndianW(*((WORD *)(lpStream+78))), 32, 512);
 // -! BEHAVIOUR_CHANGE#0016
 	Order.ReadAsByte(lpStream+80, norders, dwMemLength-80);
 	memset(InstUsed, 0, sizeof(InstUsed));

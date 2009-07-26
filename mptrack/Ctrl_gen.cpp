@@ -7,11 +7,12 @@
 #include "ctrl_gen.h"
 #include "view_gen.h"
 #include "math.h"
+#include "misc_util.h"
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
 #include "Ctrl_pat.h"
-#include ".\ctrl_gen.h"
+#include "ctrl_gen.h"
 // -! NEW_FEATURE#0015
 
 BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
@@ -91,9 +92,8 @@ BOOL CCtrlGeneral::OnInitDialog()
 // -> CODE#0016
 // -> DESC="default tempo update"
 //	m_SpinTempo.SetRange(32, 255);	// 255 bpm max
-	//m_SpinTempo.SetRange(32, 512);
-	m_SpinTempo.SetRange(specs.tempoMin, specs.tempoMax);
-	m_SpinSpeed.SetRange(1, 64);
+	m_SpinTempo.SetRange((short)specs.tempoMin, (short)specs.tempoMax);
+	m_SpinSpeed.SetRange((short)specs.speedMin, (short)specs.speedMax);
 // -! BEHAVIOUR_CHANGE#0016
 	m_SpinGlobalVol.SetRange(0, 128);
 	m_SpinSamplePA.SetRange(0, 2000);
@@ -341,9 +341,8 @@ void CCtrlGeneral::OnTempoChanged()
 		m_EditTempo.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = atoi(s);
-			CModSpecifications specs = m_pSndFile->GetModSpecifications();
-			if ((n >= specs.tempoMin) && (n <= specs.tempoMax) && (n != m_pSndFile->m_nDefaultTempo))
+			UINT n = CLAMP(atoi(s), m_pSndFile->GetModSpecifications().tempoMin, m_pSndFile->GetModSpecifications().tempoMax);
+			if (n != m_pSndFile->m_nDefaultTempo)
 			{
 				m_bEditsLocked=true;
 				m_EditTempo.SetModify(FALSE);
@@ -368,8 +367,8 @@ void CCtrlGeneral::OnSpeedChanged()
 		m_EditSpeed.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = atoi(s);
-			if ((n >= 1) && (n <= 64) && (n != m_pSndFile->m_nDefaultSpeed)) {
+			UINT n = CLAMP(atoi(s), m_pSndFile->GetModSpecifications().speedMin, m_pSndFile->GetModSpecifications().speedMax);
+			if (n != m_pSndFile->m_nDefaultSpeed) {
 				m_bEditsLocked=true;
 				m_EditSpeed.SetModify(FALSE);
 				m_pSndFile->m_nDefaultSpeed = n;
@@ -390,8 +389,8 @@ void CCtrlGeneral::OnVSTiVolChanged()
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized)) {
 		m_EditVSTiVol.GetWindowText(s, sizeof(s));
 		if (s[0]) {
-			int n = atoi(s);
-			if ((n >= 0) && (n <= 2000) && (n != m_pSndFile->m_nVSTiVolume)) {
+			int n = CLAMP(atoi(s), 0, 2000);
+			if (n != m_pSndFile->m_nVSTiVolume) {
 				m_bEditsLocked=true;
 				m_pSndFile->m_nVSTiVolume = n;
 				m_pSndFile->RecalculateGainForAllPlugs();
@@ -411,8 +410,8 @@ void CCtrlGeneral::OnSamplePAChanged()
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized)) {
 		m_EditSamplePA.GetWindowText(s, sizeof(s));
 		if (s[0]) {
-			int n = atoi(s);
-			if ((n >= 0) && (n <= 2000) && (n != m_pSndFile->m_nSamplePreAmp)) {
+			int n = CLAMP(atoi(s), 0, 2000);
+			if (n != m_pSndFile->m_nSamplePreAmp) {
 				m_bEditsLocked=true;
 				m_pSndFile->m_nSamplePreAmp = n;
 				m_pModDoc->SetModified();
@@ -433,21 +432,17 @@ void CCtrlGeneral::OnGlobalVolChanged()
 		m_EditGlobalVol.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = atoi(s);
-			if (n <= 128)
-			{
-				UINT n0 = m_pSndFile->m_nDefaultGlobalVolume / 2;
-				if (n != n0)
-				{ 
-					m_bEditsLocked=true;
-					m_EditGlobalVol.SetModify(FALSE);
-					m_pSndFile->m_nDefaultGlobalVolume = n << 1;
-					m_pSndFile->m_nGlobalVolume = n << 1;
-					m_pModDoc->SetModified();
-					m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
-					UpdateView(HINT_MODGENERAL, NULL);
-					m_bEditsLocked=false;
-				}
+			UINT n = CLAMP(atoi(s), 0, 128);
+			if (n != (m_pSndFile->m_nDefaultGlobalVolume >> 1))
+			{ 
+				m_bEditsLocked=true;
+				m_EditGlobalVol.SetModify(FALSE);
+				m_pSndFile->m_nDefaultGlobalVolume = n << 1;
+				m_pSndFile->m_nGlobalVolume = n << 1;
+				m_pModDoc->SetModified();
+				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
+				UpdateView(HINT_MODGENERAL, NULL);
+				m_bEditsLocked=false;
 			}
 		}
 	}
@@ -463,17 +458,16 @@ void CCtrlGeneral::OnRestartPosChanged()
 		m_EditRestartPos.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = atoi(s);
-			if(n < m_pSndFile->Order.size())
+			UINT n = CLAMP(atoi(s), 0, m_pSndFile->Order.size());
+			for (ORDERINDEX i = 0; i <= n; i++)
+				if (m_pSndFile->Order[i] == m_pSndFile->Order.GetInvalidPatIndex()) return;
+
+			if (n != m_pSndFile->m_nRestartPos)
 			{
-				for (ORDERINDEX i=0; i<=n; i++) if (m_pSndFile->Order[i] == m_pSndFile->Order.GetInvalidPatIndex()) return;
-				if (n != m_pSndFile->m_nRestartPos)
-				{
-					m_EditRestartPos.SetModify(FALSE);
-					m_pSndFile->m_nRestartPos = n;
-					m_pModDoc->SetModified();
-					m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
-				}
+				m_EditRestartPos.SetModify(FALSE);
+				m_pSndFile->m_nRestartPos = n;
+				m_pModDoc->SetModified();
+				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
 		}
 	}
@@ -490,25 +484,6 @@ void CCtrlGeneral::OnSongProperties()
 //----------------------------------
 {
 	m_pModDoc->SongProperties();
-	/*
-	CModTypeDlg dlg(m_pSndFile, this);
-	if (dlg.DoModal() == IDOK)
-	{
-		BOOL bShowLog = FALSE;
-		m_pModDoc->ClearLog();
-		if(dlg.m_nType)	{
-			if (!m_pModDoc->ChangeModType(dlg.m_nType)) return;
-			bShowLog = TRUE;
-		}
-		if ((dlg.m_nChannels >= 4) && (dlg.m_nChannels != m_pSndFile->m_nChannels)) {
-			if(m_pModDoc->ChangeNumChannels(dlg.m_nChannels)) bShowLog = TRUE;
-			if(CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
-				CChannelManagerDlg::sharedInstance()->Update();
-		}
-		if (bShowLog) m_pModDoc->ShowLog("Conversion Status", this);
-		m_pModDoc->SetModified();
-	}
-	*/
 }
 
 
@@ -732,13 +707,10 @@ VOID CVuMeter::DrawVuMeter(HDC hdc)
 	for (int ry=rect.bottom-1; ry>rect.top; ry-=2)
 	{
 		int y0 = rect.bottom - ry;
-		int n = (y0 * NUM_VUMETER_PENS) / cy;
-		if (n < 0) n = 0;
-		if (n >= NUM_VUMETER_PENS) n = NUM_VUMETER_PENS-1;
+		int n = CLAMP((y0 * NUM_VUMETER_PENS) / cy, 0, NUM_VUMETER_PENS - 1);
 		if (vu < y0)
-		{
 			n += NUM_VUMETER_PENS;
-		}
+
 		SelectObject(hdc, CMainFrame::gpenVuMeter[n]);
 		MoveToEx(hdc, rect.left, ry, NULL);
 		LineTo(hdc, rect.right, ry);

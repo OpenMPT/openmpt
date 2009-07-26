@@ -14,6 +14,7 @@
 #include "../mptrack/mptrack.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/MainFrm.h"
+#include "../mptrack/misc_util.h"
 // -! NEW_FEATURE#0022
 #include "sndfile.h"
 #include "midi.h"
@@ -954,8 +955,7 @@ BOOL CSoundFile::ReadNote()
 				}
 			}
 
-			if (vol < 0) vol = 0;
-			if (vol > 256) vol = 256;
+			vol = CLAMP(vol, 0, 256);
 
 			// Tremolo
 			if (pChn->dwFlags & CHN_TREMOLO)
@@ -994,7 +994,7 @@ BOOL CSoundFile::ReadNote()
 			{
 				if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 				{
-					// Original IT behaviour
+					// IT compatibility 12: Tremor
 					if(pChn->nTremorOn)
 						pChn->nTremorOn--;
 					if(!pChn->nTremorOn) {
@@ -1040,10 +1040,8 @@ BOOL CSoundFile::ReadNote()
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
 			}
 
-			// Clip volume
-			if (vol < 0) vol = 0;
-			if (vol > 0x100) vol = 0x100;
-			vol <<= 6;
+			// Clip volume and multiply
+			vol = CLAMP(vol, 0, 256) << 6;
 
 			// Process Envelopes
 			if (pChn->pHeader)
@@ -1073,10 +1071,7 @@ BOOL CSoundFile::ReadNote()
 						int relativeVolumeChange = (envvol-envValueAtReleaseNode)*2;
 						envvol = envValueAtReleaseJump + relativeVolumeChange;
 					}
-					if (envvol < 0) envvol = 0;
-					if (envvol > 512) 
-						envvol = 512;
-					vol = (vol * envvol) >> 8;
+					vol = (vol * CLAMP(envvol, 0, 512)) >> 8;
 				}
 				// Panning Envelope
 				if ((pChn->dwFlags & CHN_PANENV) && (penv->nPanEnv))
@@ -1111,8 +1106,8 @@ BOOL CSoundFile::ReadNote()
 					{
 						envpan += ((envpos - x1) * (y2 - envpan)) / (x2 - x1);
 					}
-					if (envpan < 0) envpan = 0;
-					if (envpan > 64) envpan = 64;
+					
+					envpan = CLAMP(envpan, 0, 64);
 					int pan = pChn->nPan;
 					if (pan >= 128)
 					{
@@ -1121,9 +1116,8 @@ BOOL CSoundFile::ReadNote()
 					{
 						pan += ((envpan - 32) * (pan)) / 32;
 					}
-					if (pan < 0) pan = 0;
-					if (pan > 256) pan = 256;
-					pChn->nRealPan = pan;
+
+					pChn->nRealPan = CLAMP(pan, 0, 256);
 				}
 				// FadeOut volume
 				if (pChn->dwFlags & CHN_NOTEFADE)
@@ -1144,9 +1138,7 @@ BOOL CSoundFile::ReadNote()
 				if ((penv->nPPS) && (pChn->nRealPan) && (pChn->nNote))
 				{
 					int pandelta = (int)pChn->nRealPan + (int)((int)(pChn->nNote - penv->nPPC - 1) * (int)penv->nPPS) / (int)8;
-					if (pandelta < 0) pandelta = 0;
-					if (pandelta > 256) pandelta = 256;
-					pChn->nRealPan = pandelta;
+					pChn->nRealPan = CLAMP(pandelta, 0, 256);
 				}
 			} else
 			{
@@ -1227,11 +1219,9 @@ BOOL CSoundFile::ReadNote()
 				}
 			}
 
+			// Preserve Amiga freq limits
 			if (m_dwSongFlags & SONG_AMIGALIMITS)
-			{
-				if (period < 113*4) period = 113*4;
-				if (period > 856*4) period = 856*4;
-			}
+				period = CLAMP(period, 113 * 4, 856 * 4);
 
 			// Pitch/Filter Envelope
 			if ((pChn->pHeader) && (pChn->dwFlags & CHN_PITCHENV) && (pChn->pHeader->nPitchEnv))
@@ -1269,8 +1259,7 @@ BOOL CSoundFile::ReadNote()
 					int envpitchdest = (((int)penv->PitchEnv[pt]) - 32) * 8;
 					envpitch += ((envpos - x1) * (envpitchdest - envpitch)) / (x2 - x1);
 				}
-				if (envpitch < -256) envpitch = -256;
-				if (envpitch > 256) envpitch = 256;
+				envpitch = CLAMP(envpitch, -256, 256);
 				// Filter Envelope: controls cutoff frequency
 				if (penv->dwFlags & ENV_FILTER)
 				{
@@ -1397,9 +1386,8 @@ BOOL CSoundFile::ReadNote()
 				pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
 				pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
 				pdelta += pChn->nRealPan;
-				if (pdelta < 0) pdelta = 0;
-				if (pdelta > 256) pdelta = 256;
-				pChn->nRealPan = pdelta;
+				
+				pChn->nRealPan = CLAMP(pdelta, 0, 256);
 			}
 			int nPeriodFrac = 0;
 			// Instrument Auto-Vibrato
@@ -1691,8 +1679,7 @@ BOOL CSoundFile::ReadNote()
 				pan *= (int)m_nStereoSeparation;
 				pan /= 128;
 				pan += 128;
-				if (pan < 0) pan = 0;
-				if (pan > 256) pan = 256;
+				pan = CLAMP(pan, 0, 256);
 #ifndef FASTSOUNDLIB
 				if (gdwSoundSetup & SNDMIX_REVERSESTEREO) pan = 256 - pan;
 #endif

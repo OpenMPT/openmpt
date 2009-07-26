@@ -571,7 +571,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	for (UINT n = 0; n < m_nChannels; n++)
 	{
-		if(m_pSndFile->ChnSettings[n].szName[0] > 0x20)
+		if(m_pSndFile->ChnSettings[n].szName[0] >= 0x20)
 			wsprintf(label, "Channel %d: %s", (n + 1), m_pSndFile->ChnSettings[n].szName);
 		else
 			wsprintf(label, "Channel %d", n + 1);
@@ -1635,11 +1635,13 @@ void CAddSilenceDlg::OnEditModeChanged()
 	char cNewEditOption = GetEditMode();
 	if(cNewEditOption != 3 && m_nEditOption == 3)
 	{
+		// switch to "add silenece"
 		m_nLength = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
 		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nSamples);
 	}
 	else if(cNewEditOption == 3 && m_nEditOption != 3)
 	{
+		// "switch to "resize"
 		m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
 		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nLength);
 	}

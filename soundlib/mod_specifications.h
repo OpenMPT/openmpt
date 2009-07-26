@@ -31,6 +31,8 @@ struct CModSpecifications
 	INSTRUMENTINDEX instrumentsMax;
 	BYTE defaultMixLevels;
 	BYTE MIDIMappingDirectivesMax;
+	UINT speedMin;
+	UINT speedMax;
 };
 
 
@@ -61,7 +63,9 @@ const CModSpecifications mptm =
 	4000,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
-	200									//Max MIDI mapping directives
+	200,								//Max MIDI mapping directives
+	1,									//Min Speed
+	255,								//Max Speed
 };
 
 
@@ -80,7 +84,7 @@ const CModSpecifications mod =
 	4,									//Channel min
 	4,									//Channel max
 	32,									//Min tempo
-	256,								//Max tempo
+	255,								//Max tempo
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     20,									//Max mod name length
@@ -88,6 +92,8 @@ const CModSpecifications mod =
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
 	0,									//Max MIDI mapping directives
+	1,									//Min Speed
+	31,									//Max Speed
 };
 
 // MOD with MPT extensions.
@@ -104,14 +110,16 @@ const CModSpecifications modEx =
 	4,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
-	256,								//Max tempo
+	255,								//Max tempo
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     20,									//Max mod name length
 	31,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
-	0									//Max MIDI mapping directives
+	0,									//Max MIDI mapping directives
+	1,									//Min Speed
+	31,									//Max Speed
 };
 
 const CModSpecifications xm =
@@ -127,14 +135,16 @@ const CModSpecifications xm =
 	4,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
-	256,								//Max tempo
+	255,								//Max tempo
 	4,									//Min pattern rows
 	256,								//Max pattern rows
     20,									//Max mod name length
 	31,									//SamplesMax
 	200,								//instrumentMax
 	mixLevels_original,					//defaultMixLevels
-	0									//Max MIDI mapping directives
+	0,									//Max MIDI mapping directives
+	1,									//Min Speed
+	31,									//Max Speed
 };
 
 // XM with MPT extensions
@@ -147,7 +157,7 @@ const CModSpecifications xmEx =
 	false,								//No notecut.
 	true,								//Has noteoff.
 	240,								//Pattern max.
-	256,								//Order max.
+	255,								//Order max.
 	4,									//Channel min
 	127,								//Channel max
 	32,									//Min tempo
@@ -158,7 +168,9 @@ const CModSpecifications xmEx =
 	4000,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
-	200									//Max MIDI mapping directives
+	200,								//Max MIDI mapping directives
+	1,									//Min Speed
+	31,									//Max Speed
 };
 
 const CModSpecifications s3m =
@@ -174,14 +186,16 @@ const CModSpecifications s3m =
 	4,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
-	256,								//Max tempo
+	255,								//Max tempo
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     27,									//Max mod name length
 	99,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
-	0									//Max MIDI mapping directives
+	0,									//Max MIDI mapping directives
+	1,									//Min Speed
+	255,								//Max Speed
 };
 
 // S3M with MPT extensions
@@ -198,14 +212,16 @@ const CModSpecifications s3mEx =
 	4,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
-	256,								//Max tempo
+	255,								//Max tempo
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     27,									//Max mod name length
 	99,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
-	0									//Max MIDI mapping directives
+	0,									//Max MIDI mapping directives
+	1,									//Min Speed
+	255,								//Max Speed
 };
 
 const CModSpecifications it =
@@ -221,14 +237,16 @@ const CModSpecifications it =
 	4,									//Channel min
 	64,									//Channel max
 	32,									//Min tempo
-	256,								//Max tempo
+	255,								//Max tempo
 	4,									//Min pattern rows
 	256,								//Max pattern rows
     25,									//Max mod name length
 	256,								//SamplesMax
 	200,								//instrumentMax
 	mixLevels_original,					//defaultMixLevels
-	0									//Max MIDI mapping directives
+	0,									//Max MIDI mapping directives
+	1,									//Min Speed
+	255,								//Max Speed
 };
 
 const CModSpecifications itEx =
@@ -251,7 +269,9 @@ const CModSpecifications itEx =
 	4000,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
-	200									//Max MIDI mapping directives
+	200,								//Max MIDI mapping directives
+	1,									//Min Speed
+	255,								//Max Speed
 };
 
 } //namespace ModSpecs

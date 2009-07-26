@@ -1448,7 +1448,7 @@ void CModDoc::OnFileWaveConvert()
 		// Channel mode
 		if(wsdlg.m_bChannelMode){
 			// Add channel number & name (if available) to path string
-			if(m_SndFile.ChnSettings[i].szName[0] > 0x20)
+			if(m_SndFile.ChnSettings[i].szName[0] >= 0x20)
 				wsprintf(channel, "-%03d_%s.wav", i+1,m_SndFile.ChnSettings[i].szName);
 			else
 				wsprintf(channel, "-%03d.wav", i+1);

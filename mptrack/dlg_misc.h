@@ -356,7 +356,7 @@ protected:
 public:
 	UINT m_nSamples;
 	UINT m_nLength;
-	char m_nEditOption; //0 = add at beginning, 1 = add at end, 2 = resize
+	char m_nEditOption; // 1 = add at beginning, 2 = add at end, 3 = resize
 
 public:
 	CAddSilenceDlg(CWnd *parent, UINT nSamples = 32, UINT nOrigLength = 1024):CDialog(IDD_ADDSILENCE, parent) { m_nSamples = nSamples; m_nLength = nOrigLength; m_nEditOption = 2; }

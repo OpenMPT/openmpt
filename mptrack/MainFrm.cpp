@@ -3053,8 +3053,8 @@ void CMainFrame::SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR
 
 	_tcscpy(directories[dir], szPath);
 
-	// When updating default directory, also update the working directory.
-	if(szPath[0] && directories == m_szDefaultDirectory)
+	// When updating default directory, also update the working directory (if it hasn't been set yet).
+	if(szPath[0] && directories == m_szDefaultDirectory && !m_szWorkingDirectory[dir][0])
 		SetWorkingDirectory(szPath, dir);
 }
 

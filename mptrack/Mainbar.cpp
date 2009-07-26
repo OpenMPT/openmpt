@@ -495,9 +495,9 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 			if ((n = (short int)m_SpinTempo.GetPos()) != 0)
 			{
 				if (n < 0)
-					pSndFile->SetTempo(nCurrentTempo - 1, true);
+					pSndFile->SetTempo(max(nCurrentTempo - 1, pSndFile->GetModSpecifications().tempoMin), true);
 				else
-					pSndFile->SetTempo(nCurrentTempo + 1, true);
+					pSndFile->SetTempo(min(nCurrentTempo + 1, pSndFile->GetModSpecifications().tempoMax), true);
 		
 				m_SpinTempo.SetPos(0);
 			}
@@ -505,16 +505,10 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 			{
 				if (n < 0)
 				{
-					if (nCurrentSpeed > 1)
-					{
-						pSndFile->m_nMusicSpeed = nCurrentSpeed - 1;
-					}
+					pSndFile->m_nMusicSpeed = max(nCurrentSpeed - 1, pSndFile->GetModSpecifications().speedMin);
 				} else
 				{
-					if (nCurrentSpeed < 0x7F)
-					{
-						pSndFile->m_nMusicSpeed = nCurrentSpeed + 1;
-					}
+					pSndFile->m_nMusicSpeed = min(nCurrentSpeed + 1, pSndFile->GetModSpecifications().speedMax);
 				}
 				m_SpinSpeed.SetPos(0);
 			}

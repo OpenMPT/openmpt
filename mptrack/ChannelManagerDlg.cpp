@@ -775,7 +775,7 @@ void CChannelManagerDlg::OnPaint()
 
 		ii = pattern[i];
 
-		if(m_pSndFile->ChnSettings[ii].szName[0] > 0x20)
+		if(m_pSndFile->ChnSettings[ii].szName[0] >= 0x20)
 	        wsprintf(s, "%d: %s", (ii+1), m_pSndFile->ChnSettings[ii].szName);
 		else
 			wsprintf(s, "Channel %d", ii+1);

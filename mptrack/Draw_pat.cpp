@@ -479,7 +479,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				const char *pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]? "[Channel %d]" : "Channel %d";
 //				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
 // -! NEW_FEATURE#0012
-				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] > 0x20))
+				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] >= 0x20))
 					pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"%d: [%s]":"%d: %s";
 				else if (m_nDetailLevel < 2) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Ch%d]":"Ch%d";
 				else if (m_nDetailLevel < 3) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Chn %d]":"Chn %d";
