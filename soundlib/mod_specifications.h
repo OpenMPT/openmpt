@@ -157,7 +157,7 @@ const CModSpecifications xmEx =
 	false,								//No notecut.
 	true,								//Has noteoff.
 	240,								//Pattern max.
-	255,								//Order max.
+	256,								//Order max.
 	4,									//Channel min
 	127,								//Channel max
 	32,									//Min tempo
