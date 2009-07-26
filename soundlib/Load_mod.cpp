@@ -419,7 +419,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		bTab[26] = pins->nLoopStart >> 9;
 		bTab[27] = pins->nLoopStart >> 1;
 		UINT replen = pins->nLoopEnd - pins->nLoopStart;
-		if(bCompatibilityExport && replen < 2) // ensure PT will load it properly
+		if(replen < 2) // ensure PT will load it properly
 			replen = 2; 
 		bTab[28] = replen >> 9;
 		bTab[29] = replen >> 1;
@@ -504,7 +504,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	for (UINT ismpd=1; ismpd<=31; ismpd++) if (inslen[ismpd])
 	{
 		MODINSTRUMENT *pins = &Ins[insmap[ismpd]];
-		if(bCompatibilityExport == true)
+		if(bCompatibilityExport == true) // first two bytes have to be 0 due to PT's one-shot loop ("no loop")
 		{
 			if(pins->nLength > 0) pins->pSample[0] = 0;
 			if(pins->nLength > 1) pins->pSample[1] = 0;

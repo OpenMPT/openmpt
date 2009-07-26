@@ -1569,6 +1569,9 @@ BOOL CSoundFile::ProcessEffects()
 			if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
 				//IT compatibility 15. Retrigger
+				if (param)
+					pChn->nRetrigParam = (BYTE)(param & 0xFF);
+
 				if (volcmd == VOLCMD_OFFSET)
 					RetrigNote(nChn, pChn->nRetrigParam, vol << 3);
 				else if (volcmd == VOLCMD_VELOCITY)
