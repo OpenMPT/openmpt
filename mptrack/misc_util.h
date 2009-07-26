@@ -72,4 +72,10 @@ inline void LimitMax(T& val, const C upperLimit)
 }
 
 
+// Like Limit, but returns value
+#ifndef CLAMP
+#define CLAMP(number, low, high) min(high, max(low, number))
+#endif
+
+
 #endif

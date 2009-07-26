@@ -13,6 +13,53 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Deutsch (Deutschland) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+#ifdef _WIN32
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MODLOADING_WARNINGS DIALOGEX 0, 0, 316, 178
+STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "module.it - Warnings"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,258,156,50,14
+    EDITTEXT        IDC_EDIT_MODLOADING_WARNINGS,6,18,300,132,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "The following problems have been encountered when loading this module:",IDC_STATIC,6,6,237,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_MODLOADING_WARNINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 171
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Deutsch (Deutschland) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
@@ -493,14 +540,14 @@ BEGIN
     CTEXT           "Not saved with song!",IDC_STATIC,262,73,60,17
     CONTROL         "",IDC_VUMETER_LEFT,"Static",SS_BLACKRECT | SS_SUNKEN,325,1,15,91
     CONTROL         "",IDC_VUMETER_RIGHT,"Static",SS_BLACKRECT | SS_SUNKEN,343,1,15,91
-    GROUPBOX        "Player Settings (not saved in song!)",IDC_STATIC,414,31,147,63,NOT WS_VISIBLE
-    CONTROL         "Bass Expansion",IDC_CHECK_BASS,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,43,65,10
-    CONTROL         "Reverb",IDC_CHECK_REVERB,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,55,46,10
-    CONTROL         "Surround",IDC_CHECK_SURROUND,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,67,48,10
-    COMBOBOX        IDC_COMBO_RESAMPLING,490,76,67,74,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_TABSTOP
-    LTEXT           "Resampling:",IDC_STATIC,491,67,43,8,NOT WS_VISIBLE
-    CONTROL         "Graphic EQ",IDC_CHECK_EQ,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,420,79,58,10
-    CONTROL         "AGC",IDC_CHECK_AGC,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,491,43,31,10
+    GROUPBOX        "Player Settings (not saved in song!)",IDC_STATIC,366,6,150,66,NOT WS_VISIBLE
+    CONTROL         "Bass Expansion",IDC_CHECK_BASS,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,372,18,65,10
+    CONTROL         "Reverb",IDC_CHECK_REVERB,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,372,30,46,10
+    CONTROL         "Surround",IDC_CHECK_SURROUND,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,372,42,48,10
+    COMBOBOX        IDC_COMBO_RESAMPLING,444,54,67,74,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_TABSTOP
+    LTEXT           "Resampling:",IDC_STATIC,444,42,43,8,NOT WS_VISIBLE
+    CONTROL         "Graphic EQ",IDC_CHECK_EQ,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,372,54,58,10
+    CONTROL         "AGC",IDC_CHECK_AGC,"Button",BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,444,18,31,10
 END
 
 IDD_CONTROL_COMMENTS DIALOGEX 0, 0, 435, 119
@@ -2312,10 +2359,9 @@ BEGIN
     LTEXT           "Static",IDC_TUNINGTYPE_DESC,109,134,179,20,0,WS_EX_STATICEDGE
 END
 
-IDD_CHANNELMANAGER DIALOGEX 0, 0, 523, 231
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "Channel manager"
+IDD_CHANNELMANAGER DIALOGEX 0, 0, 524, 231
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Channel Manager"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_TAB1,"SysTabControl32",TCS_MULTILINE,0,0,523,18,WS_EX_CLIENTEDGE
@@ -2420,6 +2466,11 @@ BEGIN
         VERTGUIDE, 299
         VERTGUIDE, 442
         BOTTOMMARGIN, 236
+    END
+
+    IDD_CHANNELMANAGER, DIALOG
+    BEGIN
+        RIGHTMARGIN, 523
     END
 
     IDD_DEFAULTPLUGINEDITOR, DIALOG

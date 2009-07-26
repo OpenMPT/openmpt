@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "sndfile.h"
 #include "../mptrack/moddoc.h"
+#include "../mptrack/misc_util.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -266,12 +267,10 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	memcpy(m_szNames[0], psfh.name, 28);
 	// Speed
 	m_nDefaultSpeed = psfh.speed;
-	if (m_nDefaultSpeed < 1) m_nDefaultSpeed = 6;
-	if (m_nDefaultSpeed > 0x1F) m_nDefaultSpeed = 0x1F;
+	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
 	// Tempo
 	m_nDefaultTempo = psfh.tempo;
-	if (m_nDefaultTempo < 40) m_nDefaultTempo = 40;
-	if (m_nDefaultTempo > 240) m_nDefaultTempo = 240;
+	m_nDefaultTempo = CLAMP(m_nDefaultTempo, 32, 255);
 	// Global Volume
 	m_nDefaultGlobalVolume = psfh.globalvol << 2;
 	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > 256)) m_nDefaultGlobalVolume = 256;
@@ -296,8 +295,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	if ((psfh.cwtv < 0x1320) || (psfh.flags & 0x40)) m_dwSongFlags |= SONG_FASTVOLSLIDES;
 	// Reading pattern order
 	UINT iord = psfh.ordnum;
-	if (iord<1) iord = 1;
-	if (iord > MAX_ORDERS) iord = MAX_ORDERS;
+	iord = CLAMP(iord, 1, MAX_ORDERS);
 	if (iord)
 	{
 		Order.ReadAsByte(lpStream+dwMemPos, iord, dwMemLength-dwMemPos);
@@ -343,27 +341,19 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		lstrcpy(m_szNames[iSmp], (LPCSTR)&s[0x30]);
 		if ((s[0]==1) && (s[0x4E]=='R') && (s[0x4F]=='S'))
 		{
-			UINT j = LittleEndian(*((LPDWORD)(s+0x10)));
-			if (j > MAX_SAMPLE_LENGTH) j = MAX_SAMPLE_LENGTH;
-			if (j < 4) j = 0;
-			Ins[iSmp].nLength = j;
-			j = LittleEndian(*((LPDWORD)(s+0x14)));
-			if (j >= Ins[iSmp].nLength) j = Ins[iSmp].nLength - 1;
-			Ins[iSmp].nLoopStart = j;
-			j = LittleEndian(*((LPDWORD)(s+0x18)));
-			if (j > MAX_SAMPLE_LENGTH) j = MAX_SAMPLE_LENGTH;
-			if (j < 4) j = 0;
-			if (j > Ins[iSmp].nLength) j = Ins[iSmp].nLength;
-			Ins[iSmp].nLoopEnd = j;
-			j = s[0x1C];
-			if (j > 64) j = 64;
-			Ins[iSmp].nVolume = j << 2;
+			Ins[iSmp].nLength = CLAMP(LittleEndian(*((LPDWORD)(s + 0x10))), 4, MAX_SAMPLE_LENGTH);
+			Ins[iSmp].nLoopStart = CLAMP(LittleEndian(*((LPDWORD)(s + 0x14))), 0, Ins[iSmp].nLength - 1);
+			Ins[iSmp].nLoopEnd = CLAMP(LittleEndian(*((LPDWORD)(s+0x18))), 4, Ins[iSmp].nLength);
+			Ins[iSmp].nVolume = CLAMP(s[0x1C], 0, 64) << 2;
 			Ins[iSmp].nGlobalVol = 64;
-			if (s[0x1F]&1) Ins[iSmp].uFlags |= CHN_LOOP;
-			j = LittleEndian(*((LPDWORD)(s+0x20)));
-			if (!j) j = 8363;
-			if (j < 1024) j = 1024;
-			Ins[iSmp].nC4Speed = j;
+			if (s[0x1F] & 1) Ins[iSmp].uFlags |= CHN_LOOP;
+
+			UINT c4speed;
+			c4speed = LittleEndian(*((LPDWORD)(s+0x20)));
+			if (!c4speed) c4speed = 8363;
+			if (c4speed < 1024) c4speed = 1024;
+			Ins[iSmp].nC4Speed = c4speed;
+
 			insfile[iSmp] = ((DWORD)LittleEndianW(*((LPWORD)(s+0x0E)))) << 4;
 			insfile[iSmp] += ((DWORD)(BYTE)s[0x0D]) << 20;
 			if (insfile[iSmp] > dwMemLength) insfile[iSmp] &= 0xFFFF;
@@ -528,9 +518,9 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	header[0x2E] = 'R';
 	header[0x2F] = 'M';
 	header[0x30] = m_nDefaultGlobalVolume >> 2;
-	header[0x31] = m_nDefaultSpeed;
-	header[0x32] = m_nDefaultTempo;
-	header[0x33] = min(max(0x20, m_nSamplePreAmp), 0x7F);	// Stereo
+	header[0x31] = CLAMP(m_nDefaultSpeed, 1, 255);
+	header[0x32] = CLAMP(m_nDefaultTempo, 32, 255);
+	header[0x33] = CLAMP(m_nSamplePreAmp, 0x10, 0x7F);	// Stereo
 	header[0x35] = 0xFC;
 	for (i=0; i<32; i++)
 	{

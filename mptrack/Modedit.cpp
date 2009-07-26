@@ -8,6 +8,7 @@
 #include "dlg_misc.h"
 #include "dlsbank.h"
 #include "modsmp_ctrl.h"
+#include "misc_util.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -418,6 +419,11 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		ih->SetITEffects();
 	}
 	//end rewbs.cutomKeys
+
+	// Check mod specifications
+	const CModSpecifications& specs = m_SndFile.GetModSpecifications();
+	m_SndFile.m_nDefaultTempo = CLAMP(m_SndFile.m_nDefaultTempo, specs.tempoMin, specs.tempoMax);
+	m_SndFile.m_nDefaultSpeed = CLAMP(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
 
 	SetModified();
 	ClearUndo();

@@ -106,6 +106,8 @@
 #define IDD_MIDIPARAMCONTROL            515
 #define IDD_MSGBOX_HIDABLE              516
 #define IDD_ADDSILENCE                  517
+#define IDD_DIALOG4                     518
+#define IDD_MODLOADING_WARNINGS         518
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -875,6 +877,7 @@
 #define IDC_RADIO_ADDSILENCE_END        2381
 #define IDC_SPIN_ADDSILENCE             2382
 #define IDC_RADIO_RESIZETO              2384
+#define IDC_EDIT_MODLOADING_WARNINGS    2385
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1112,9 +1115,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        518
+#define _APS_NEXT_RESOURCE_VALUE        519
 #define _APS_NEXT_COMMAND_VALUE         59227
-#define _APS_NEXT_CONTROL_VALUE         2385
+#define _APS_NEXT_CONTROL_VALUE         2386
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

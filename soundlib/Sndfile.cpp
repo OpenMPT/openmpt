@@ -637,7 +637,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		Chn[ich].nVolume = 256;
 		Chn[ich].nCutOff = 0x7F;
 		//IT compatibility 15. Retrigger
-		if(GetModFlag(MSF_COMPATIBLE_PLAY))
+		if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			Chn[ich].nRetrigParam = 1;
 			Chn[ich].nRetrigCount = 0;
@@ -1188,7 +1188,7 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 		Chn[j].nPatternLoopCount = 0;
 		Chn[j].nPatternLoop = 0;
 		//IT compatibility 15. Retrigger
-		if(GetModFlag(MSF_COMPATIBLE_PLAY))
+		if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			Chn[j].nRetrigCount = 0;
 			Chn[j].nRetrigParam = 1;
@@ -1454,7 +1454,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nFadeOutVol = 0;
 		Chn[i].dwFlags |= CHN_KEYOFF|CHN_NOTEFADE;
 		//IT compatibility 15. Retrigger
-		if(GetModFlag(MSF_COMPATIBLE_PLAY))
+		if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			Chn[i].nRetrigParam = 1;
 			Chn[i].nRetrigCount = 0;

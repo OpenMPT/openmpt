@@ -14,6 +14,7 @@
 #include "../mptrack/mptrack.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/MainFrm.h"
+#include "../mptrack/misc_util.h"
 // -! NEW_FEATURE#0022
 
 #pragma warning(disable:4244)
@@ -111,6 +112,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	nCurrentPattern = nNextPattern = 0;
 	nPattern = Order[0];
 	nRow = nNextRow = 0;
+
 	for (;;)
 	{
 		UINT nSpeedCount = 0;
@@ -243,16 +245,17 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				if ((param & 0xF0) == 0x10)
 				{
 					nMusicTempo += (param & 0x0F)  * (nMusicSpeed-1);  //rewbs.tempoSlideFix
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
-//					if (nMusicTempo > 255) nMusicTempo = 255;
-					if (nMusicTempo > 512) nMusicTempo = 512;
-// -! NEW_FEATURE#0010
 				} else
 				{
 					nMusicTempo -= (param & 0x0F) * (nMusicSpeed-1); //rewbs.tempoSlideFix
-					if (nMusicTempo < 32) nMusicTempo = 32;
 				}
+// -> CODE#0010
+// -> DESC="add extended parameter mechanism to pattern effects"
+				if(GetModFlag(MSF_COMPATIBLE_PLAY))
+					nMusicTempo = CLAMP(nMusicTempo, 32, 255);
+				else
+					nMusicTempo = CLAMP(nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
+// -! NEW_FEATURE#0010
 				break;
 			// Pattern Delay
 			case CMD_S3MCMDEX:	
@@ -344,8 +347,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 					if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
 					nGlbVol -= param * nMusicSpeed;
 				}
-				if (nGlbVol < 0) nGlbVol = 0;
-				if (nGlbVol > 256) nGlbVol = 256;
+				nGlbVol = CLAMP(nGlbVol, 0, 256);
 				break;
 			case CMD_CHANNELVOLUME:
 				if (param <= 64) chnvols[nChn] = param;
@@ -367,7 +369,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 					param = (param & 0x0F) * nMusicSpeed;
 					param = (chnvols[nChn] > param) ? chnvols[nChn] - param : 0;
 				} else param = ((param & 0xF0) >> 4) * nMusicSpeed + chnvols[nChn];
-				if (param > 64) param = 64;
+				param = min(param, 64);
 				chnvols[nChn] = param;
 				break;
 			}
@@ -667,9 +669,8 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		}
 	}
 
-	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose; 
-	if (note < 1) note = 1;
-	if (note > 132) note = 132;
+	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose;
+	note = CLAMP(note, 1, 132);
 	pChn->nNote = note;
 	pChn->m_CalculateFreq = true;
 
@@ -745,9 +746,9 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		pChn->nLeftVU = pChn->nRightVU = 0xFF;
 		pChn->dwFlags &= ~CHN_FILTER;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
-		if(!GetModFlag(MSF_COMPATIBLE_PLAY))
+		if(!GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
-			//IT compatibility 15. Retrigger (Tremor doesn't store anything here, so we just don't reset this as well)
+			//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
 			pChn->nRetrigCount = 0;
 			pChn->nTremorCount = 0;
 		}
@@ -1565,24 +1566,29 @@ BOOL CSoundFile::ProcessEffects()
 				if (!(param & 0x0F)) param |= pChn->nRetrigParam & 0x0F;
 				param |= 0x100; // increment retrig count on first row
 			}
-			if(!GetModFlag(MSF_COMPATIBLE_PLAY))
+			if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
+				//IT compatibility 15. Retrigger
+				if (volcmd == VOLCMD_OFFSET)
+					RetrigNote(nChn, pChn->nRetrigParam, vol << 3);
+				else if (volcmd == VOLCMD_VELOCITY)
+					RetrigNote(nChn, pChn->nRetrigParam, 48 - (vol << 3));
+				else
+					RetrigNote(nChn, pChn->nRetrigParam);
+			}
+			else
+			{
+				//MPT Retrig
 				if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF); else param = pChn->nRetrigParam;
 				//rewbs.volOffset
 				//RetrigNote(nChn, param);
 				if (volcmd == VOLCMD_OFFSET)
-					RetrigNote(nChn, param, vol<<3);
+					RetrigNote(nChn, param, vol << 3);
 				else if (volcmd == VOLCMD_VELOCITY)
-					RetrigNote(nChn, param, 48-(vol << 3));
+					RetrigNote(nChn, param, 48 - (vol << 3));
 				else
 					RetrigNote(nChn, param);
 				//end rewbs.volOffset:
-			}
-			else
-			{
-				//IT compatibility 15. Retrigger
-				if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF);
-					RetrigNote(nChn, pChn->nRetrigParam);
 			}
 			break;
 
@@ -2277,8 +2283,7 @@ void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param)
 		else newvolume += (int)((param & 0xF0) >> 2);
 		if (m_nType & MOD_TYPE_MOD) pChn->dwFlags |= CHN_FASTVOLRAMP;
 	}
-	if (newvolume < 0) newvolume = 0;
-	if (newvolume > 256) newvolume = 256;
+	newvolume = CLAMP(newvolume, 0, 256);
 
 	pChn->nVolume = newvolume;
 }
@@ -2324,8 +2329,7 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 	if (nPanSlide)
 	{
 		nPanSlide += pChn->nPan;
-		if (nPanSlide < 0) nPanSlide = 0;
-		if (nPanSlide > 256) nPanSlide = 256;
+		nPanSlide = CLAMP(nPanSlide, 0, 256);
 		pChn->nPan = nPanSlide;
 		pChn->nRestorePanOnNewNote = 0;
 	}
@@ -2390,8 +2394,7 @@ void CSoundFile::ChannelVolSlide(MODCHANNEL *pChn, UINT param)
 	if (nChnSlide)
 	{
 		nChnSlide += pChn->nGlobalVol;
-		if (nChnSlide < 0) nChnSlide = 0;
-		if (nChnSlide > 64) nChnSlide = 64;
+		nChnSlide = CLAMP(nChnSlide, 0, 64);
 		pChn->nGlobalVol = nChnSlide;
 	}
 }
@@ -3046,12 +3049,18 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 		if (dv)
 		{
 			int vol = pChn->nVolume;
-			if (retrigTable1[dv])
-				vol = (vol * retrigTable1[dv]) >> 4;
-			else
-				vol += ((int)retrigTable2[dv]) << 2;
-			if (vol < 0) vol = 0;
-			if (vol > 256) vol = 256;
+
+			// FT2 compatibility: Retrig + volume will not change volume of retrigged notes
+			if(!(m_nType & MOD_TYPE_XM) || !(pChn->nRowVolCmd == VOLCMD_VOLUME) || !GetModFlag(MSF_COMPATIBLE_PLAY))
+			{
+				if (retrigTable1[dv])
+					vol = (vol * retrigTable1[dv]) >> 4;
+				else
+					vol += ((int)retrigTable2[dv]) << 2;
+			}
+
+			vol = CLAMP(vol, 0, 256);
+
 			pChn->nVolume = vol;
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
 		}
@@ -3236,7 +3245,7 @@ void CSoundFile::SetSpeed(UINT param)
 
 
 void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
-//-----------------------------------
+//------------------------------------------------------------
 {
 	const CModSpecifications& specs = GetModSpecifications();
 	if(setAsNonModcommand)
@@ -3258,18 +3267,17 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 		else if (param < 0x20 && m_nTickCount) //rewbs.tempoSlideFix: only slide if (T0x or T1x) and tick is not 0
 		{
 			if ((param & 0xF0) == 0x10)
-			{
 				m_nMusicTempo += (param & 0x0F); //rewbs.tempoSlideFix: no *2
-	// -> CODE#0016
-	// -> DESC="default tempo update"
-	//			if (m_nMusicTempo > 255) m_nMusicTempo = 255;
-				if (m_nMusicTempo > specs.tempoMax) m_nMusicTempo = specs.tempoMax;
-	// -! BEHAVIOUR_CHANGE#0016
-			} else
-			{
+			else
 				m_nMusicTempo -= (param & 0x0F); //rewbs.tempoSlideFix: no *2
-				if ((LONG)m_nMusicTempo < specs.tempoMin) m_nMusicTempo = specs.tempoMin;
-			}
+
+		// -> CODE#0016
+		// -> DESC="default tempo update"
+			if(GetModFlag(MSF_COMPATIBLE_PLAY))
+				m_nMusicTempo = CLAMP(m_nMusicTempo, 32, 255);
+			else
+				m_nMusicTempo = CLAMP(m_nMusicTempo, specs.tempoMin, specs.tempoMax);
+		// -! BEHAVIOUR_CHANGE#0016
 		}
 	}
 }
@@ -3339,8 +3347,7 @@ void CSoundFile::GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide)
 	{
 		if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) nGlbSlide *= 2;
 		nGlbSlide += m_nGlobalVolume;
-		if (nGlbSlide < 0) nGlbSlide = 0;
-		if (nGlbSlide > 256) nGlbSlide = 256;
+		nGlbSlide = CLAMP(nGlbSlide, 0, 256);
 		m_nGlobalVolume = nGlbSlide;
 	}
 }
