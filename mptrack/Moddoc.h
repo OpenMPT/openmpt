@@ -125,6 +125,8 @@ protected:
 	DWORD m_dwNotifyType;
 	PATTERNUNDOBUFFER PatternUndo[MAX_UNDO_LEVEL];
 
+	bool bModifiedAutosave; // Modified since last autosave?
+
 	bool m_ShowSavedialog;
 
 // -> CODE#0015
@@ -142,7 +144,8 @@ public:
 	void InitPlayer();
 	CSoundFile *GetSoundFile() { return &m_SndFile; }
 	void SetPause(BOOL bPause) { m_bPaused = bPause; }
-	void SetModified(BOOL bModified=TRUE) { SetModifiedFlag(bModified); }
+	void SetModified(BOOL bModified=TRUE) { SetModifiedFlag(bModified); bModifiedAutosave = bModified; }
+	BOOL ModifiedSinceLastAutosave() { bool bRetval = bModifiedAutosave; bModifiedAutosave = false; return bRetval; } // return "IsModified" value and reset it until the next SetModified() (as this is only used for polling)
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 	void SendMessageToActiveViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);

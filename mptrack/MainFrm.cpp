@@ -3051,11 +3051,17 @@ void CMainFrame::SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR
 		_tcscpy(szPath, szFilenameFrom);
 	}
 
+	TCHAR szOldDir[sizeof(directories[dir])]; // for comparison
+	_tcscpy(szOldDir, directories[dir]);
+
 	_tcscpy(directories[dir], szPath);
 
-	// When updating default directory, also update the working directory (if it hasn't been set yet).
-	if(szPath[0] && directories == m_szDefaultDirectory && !m_szWorkingDirectory[dir][0])
-		SetWorkingDirectory(szPath, dir);
+	// When updating default directory, also update the working directory.
+	if(szPath[0] && directories == m_szDefaultDirectory)
+	{
+		if(_tcscmp(szOldDir, szPath) != 0) // update only if default directory has changed
+			SetWorkingDirectory(szPath, dir);
+	}
 }
 
 void CMainFrame::SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)

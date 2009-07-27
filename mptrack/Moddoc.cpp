@@ -1363,15 +1363,12 @@ void CModDoc::UpdateAllViews(CView *pSender, LPARAM lHint, CObject *pHint)
 void CModDoc::OnFileWaveConvert()
 //-------------------------------
 {
-	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
-	CHAR s[_MAX_PATH], fname[_MAX_FNAME]="";
+	TCHAR fname[_MAX_FNAME]="";
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
-	_splitpath(GetPathName(), drive, path, fname, NULL);
-	strcpy(s, fname);
-	strcat(s, ".wav");
-	CFileDialog dlg(FALSE, "wav", s,
+	_splitpath(GetPathName(), NULL, NULL, fname, NULL);
+	CFileDialog dlg(FALSE, "wav", fname,
 					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					"Wave Files (*.wav)|*.wav||", pMainFrm);
 	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_EXPORT);
@@ -1383,6 +1380,7 @@ void CModDoc::OnFileWaveConvert()
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
 	pMainFrm->SetDefaultDirectory(dlg.GetPathName(), DIR_EXPORT, true);
 
+	TCHAR s[_MAX_PATH];
 	strcpy(s, dlg.GetPathName());
 
 	// Saving as wave file
@@ -1492,16 +1490,12 @@ void CModDoc::OnFileWaveConvert()
 void CModDoc::OnFileMP3Convert()
 //------------------------------
 {
-	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
-	CHAR s[_MAX_PATH], fname[_MAX_FNAME]="", fext[_MAX_EXT] = "";
+	TCHAR sFName[_MAX_FNAME] = "";
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
-	_splitpath(GetPathName(), drive, path, fname, NULL);
-	strcpy(s, drive);
-	strcat(s, path);
-	strcat(s, fname);
-	CFileDialog dlg(FALSE, "mp3", s,
+	_splitpath(GetPathName(), NULL, NULL, sFName, NULL);
+	CFileDialog dlg(FALSE, "mp3", sFName,
 					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					"MPEG Layer III Files (*.mp3)|*.mp3|Layer3 Wave Files (*.wav)|*.wav||", pMainFrm);
 	dlg.m_ofn.nFilterIndex = 0;
@@ -1516,6 +1510,7 @@ void CModDoc::OnFileMP3Convert()
 		// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
 		pMainFrm->SetDefaultDirectory(dlg.GetPathName(), DIR_EXPORT, true);
 
+		TCHAR s[_MAX_PATH], fext[_MAX_EXT];
 		strcpy(s, dlg.GetPathName());
 		_splitpath(s, NULL, NULL, NULL, fext);
 		if (strlen(fext) <= 1)
