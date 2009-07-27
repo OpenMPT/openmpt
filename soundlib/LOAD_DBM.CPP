@@ -116,7 +116,7 @@ BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 	nPatterns = BigEndianW(pfh->patterns);
 	m_nType = MOD_TYPE_DBM;
 	m_nChannels = BigEndianW(pfh->channels);
-	if (m_nChannels < 4) m_nChannels = 4;
+	if (m_nChannels < 1) m_nChannels = 1;
 	if (m_nChannels > 64) m_nChannels = 64;
 	memcpy(m_szNames[0], (pfh->songname[0]) ? pfh->songname : pfh->songname2, 32);
 	m_szNames[0][31] = 0;

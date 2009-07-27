@@ -268,7 +268,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 	 || (pfh->version < 10) || (pfh->version > 14) || (!LittleEndianW(pfh->numtracks))
 	 || (!pfh->numorders) || (pfh->numorders > MAX_PATTERNS)
 	 || (!pfh->numsamples) || (pfh->numsamples > MAX_SAMPLES)
-	 || (pfh->numchannels < 4) || (pfh->numchannels > 32))
+	 || (pfh->numchannels < 1) || (pfh->numchannels > 32))
 		return FALSE;
 	memcpy(m_szNames[0], pfh->title, 31);
 	dwMemPos = sizeof(AMFFILEHEADER);

@@ -3349,10 +3349,13 @@ void CModDoc::SongProperties()
 			if (!ChangeModType(dlg.m_nType)) return;
 			bShowLog = TRUE;
 		}
-		if ((dlg.m_nChannels >= 4) && (dlg.m_nChannels != GetSoundFile()->m_nChannels))
+		
+		UINT nNewChannels = CLAMP(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
+
+		if (nNewChannels != GetSoundFile()->m_nChannels)
 		{
 			const bool showCancelInRemoveDlg = m_SndFile.GetModSpecifications().channelsMax >= m_SndFile.GetNumChannels();
-			if(ChangeNumChannels(dlg.m_nChannels, showCancelInRemoveDlg)) bShowLog = TRUE;
+			if(ChangeNumChannels(nNewChannels, showCancelInRemoveDlg)) bShowLog = TRUE;
 		}
 
 		if (bShowLog) ShowLog("Conversion Status", CMainFrame::GetMainFrame());

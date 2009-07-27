@@ -101,7 +101,7 @@ BOOL CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 	dwMemPos = sizeof(DSMFILEHEADER) + pfh->song_len;
 	m_nType = MOD_TYPE_DSM;
 	m_nChannels = psong->numtrk;
-	if (m_nChannels < 4) m_nChannels = 4;
+	if (m_nChannels < 1) m_nChannels = 1;
 	if (m_nChannels > 16) m_nChannels = 16;
 	m_nSamples = psong->numsmp;
 	if (m_nSamples > MAX_SAMPLES) m_nSamples = MAX_SAMPLES;
