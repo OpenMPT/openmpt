@@ -1965,7 +1965,7 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength, const WORD format)
 //-----------------------------------------------------------------------------------------------------------------------
 {
-	if ((!pIns) || (pIns->nLength < 4) || (!lpMemFile)) return 0;
+	if ((!pIns) || (pIns->nLength < 2) || (!lpMemFile)) return 0;
 
 	if(pIns->nLength > MAX_SAMPLE_LENGTH)
 		pIns->nLength = MAX_SAMPLE_LENGTH;

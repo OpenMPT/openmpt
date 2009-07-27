@@ -42,8 +42,7 @@ typedef struct tagXMINSTRUMENTHEADER
 	DWORD size;
 	CHAR name[22];
 	BYTE type;
-	BYTE samples;
-	BYTE samplesh;
+	WORD samples;
 } XMINSTRUMENTHEADER;
 
 
@@ -97,9 +96,11 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	UINT unused_samples;
 
 	bool bMadeWithModPlug = false;
+	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	m_nChannels = 0;
-	if ((!lpStream) || (dwMemLength < 0x200)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 0xAA)) return FALSE; // the smallest XM I know is 174 Bytes
 	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return FALSE;
 	memcpy(m_szNames[0], lpStream + 17, 20);
 	dwHdrSize = LittleEndian(*((DWORD *)(lpStream+60)));
@@ -298,8 +299,11 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		UINT samplemap[32];
 		WORD nsamples;
 				
-		if (dwMemPos + sizeof(XMINSTRUMENTHEADER) >= dwMemLength) return TRUE;
-		pih = (XMINSTRUMENTHEADER *)(lpStream+dwMemPos);
+		if (dwMemPos + sizeof(DWORD) >= dwMemLength) return TRUE;
+		DWORD ihsize = LittleEndian(*((DWORD *)(lpStream + dwMemPos)));
+		if (dwMemPos + ihsize >= dwMemLength) return TRUE;
+
+		pih = (XMINSTRUMENTHEADER *)(lpStream + dwMemPos);
 		if (dwMemPos + LittleEndian(pih->size) > dwMemLength) return TRUE;
 		if ((Headers[iIns] = new INSTRUMENTHEADER) == NULL) continue;
 		memset(Headers[iIns], 0, sizeof(INSTRUMENTHEADER));
@@ -308,14 +312,29 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		Headers[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 		memcpy(Headers[iIns]->name, pih->name, 22);
+				
 		if ((nsamples = pih->samples) > 0)
 		{
-			if (dwMemPos + sizeof(XMSAMPLEHEADER) > dwMemLength) return TRUE;
-			memcpy(&xmsh, lpStream+dwMemPos+sizeof(XMINSTRUMENTHEADER), sizeof(XMSAMPLEHEADER));
+			if (dwMemPos + sizeof(XMINSTRUMENTHEADER) + sizeof(DWORD) >= dwMemLength) return TRUE;
+			DWORD shsize = LittleEndian(*((DWORD *)(lpStream + dwMemPos + sizeof(XMINSTRUMENTHEADER))));
+
+			memset(&xmsh, 0, sizeof(XMSAMPLEHEADER));
+			
+			// *very* dirty, but it works!
+			DWORD dwReadLength = sizeof(XMSAMPLEHEADER);
+			if(ihsize == 38 && (int)(shsize - ihsize) >= 0) // BoobieSqueezer compressed - ihsize = 38, shsize = 40
+				dwReadLength = shsize - ihsize;
+
+			if (dwMemPos + sizeof(XMINSTRUMENTHEADER) + dwReadLength >= dwMemLength || shsize > sizeof(XMSAMPLEHEADER))
+				return TRUE;
+			else
+				memcpy(&xmsh, lpStream + dwMemPos + sizeof(XMINSTRUMENTHEADER), dwReadLength);
+
 			xmsh.shsize = LittleEndian(xmsh.shsize);
+
 			for (int i = 0; i < 24; ++i) {
-			  xmsh.venv[i] = LittleEndianW(xmsh.venv[i]);
-			  xmsh.penv[i] = LittleEndianW(xmsh.penv[i]);
+				xmsh.venv[i] = LittleEndianW(xmsh.venv[i]);
+				xmsh.penv[i] = LittleEndianW(xmsh.penv[i]);
 			}
 			xmsh.volfade = LittleEndianW(xmsh.volfade);
 			xmsh.res = LittleEndianW(xmsh.res);
@@ -609,8 +628,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		bMadeWithModPlug = true;
 	}
 
-	if(bMadeWithModPlug == false)
-		SetModFlag(MSF_COMPATIBLE_PLAY, true);
+	SetModFlag(MSF_COMPATIBLE_PLAY, !bMadeWithModPlug);
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
@@ -618,14 +636,14 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(dwMemPos >= dwMemLength) return TRUE;
 
-	bool bInterpretMptMade = false;
+	bool bInterpretOpenMPTMade = false; // specific for OpenMPT 1.17+ (bMadeWithModPlug is also for MPT 1.16)
 	LPCBYTE ptr = lpStream + dwMemPos;
 	if(m_nInstruments)
-		ptr = LoadExtendedInstrumentProperties(ptr, lpStream+dwMemLength, &bInterpretMptMade);
+		ptr = LoadExtendedInstrumentProperties(ptr, lpStream+dwMemLength, &bInterpretOpenMPTMade);
 
-	LoadExtendedSongProperties(GetType(), ptr, lpStream, dwMemLength, &bInterpretMptMade);
+	LoadExtendedSongProperties(GetType(), ptr, lpStream, dwMemLength, &bInterpretOpenMPTMade);
 
-	if(bInterpretMptMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
+	if(bInterpretOpenMPTMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
 		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 
 	return TRUE;
@@ -652,7 +670,7 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	fwrite("Extended Module: ", 17, 1, f);
 	fwrite(m_szNames[0], 20, 1, f);
 	s[0] = 0x1A;
-	lstrcpy((LPSTR)&s[1], (nPacking) ? "MOD Plugin packed   " : "FastTracker v2.00   ");
+	lstrcpy((LPSTR)&s[1], (nPacking) ? "MOD Plugin packed   " : "Open ModPlugTracker ");
 	s[21] = 0x04;
 	s[22] = 0x01;
 	fwrite(&s[0], 23, 1, f);

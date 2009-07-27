@@ -341,7 +341,8 @@ void CCtrlGeneral::OnTempoChanged()
 		m_EditTempo.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = CLAMP(atoi(s), m_pSndFile->GetModSpecifications().tempoMin, m_pSndFile->GetModSpecifications().tempoMax);
+			UINT n = atoi(s);
+			n = CLAMP(n, m_pSndFile->GetModSpecifications().tempoMin, m_pSndFile->GetModSpecifications().tempoMax);
 			if (n != m_pSndFile->m_nDefaultTempo)
 			{
 				m_bEditsLocked=true;
@@ -367,7 +368,8 @@ void CCtrlGeneral::OnSpeedChanged()
 		m_EditSpeed.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = CLAMP(atoi(s), m_pSndFile->GetModSpecifications().speedMin, m_pSndFile->GetModSpecifications().speedMax);
+			UINT n = atoi(s);
+			n = CLAMP(n, m_pSndFile->GetModSpecifications().speedMin, m_pSndFile->GetModSpecifications().speedMax);
 			if (n != m_pSndFile->m_nDefaultSpeed) {
 				m_bEditsLocked=true;
 				m_EditSpeed.SetModify(FALSE);
@@ -389,7 +391,8 @@ void CCtrlGeneral::OnVSTiVolChanged()
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized)) {
 		m_EditVSTiVol.GetWindowText(s, sizeof(s));
 		if (s[0]) {
-			int n = CLAMP(atoi(s), 0, 2000);
+			int n = atoi(s);
+			n = CLAMP(n, 0, 2000);
 			if (n != m_pSndFile->m_nVSTiVolume) {
 				m_bEditsLocked=true;
 				m_pSndFile->m_nVSTiVolume = n;
@@ -410,7 +413,8 @@ void CCtrlGeneral::OnSamplePAChanged()
 	if ((m_pSndFile) && (m_pModDoc) && (m_bInitialized)) {
 		m_EditSamplePA.GetWindowText(s, sizeof(s));
 		if (s[0]) {
-			int n = CLAMP(atoi(s), 0, 2000);
+			int n = atoi(s);
+			n = CLAMP(n, 0, 2000);
 			if (n != m_pSndFile->m_nSamplePreAmp) {
 				m_bEditsLocked=true;
 				m_pSndFile->m_nSamplePreAmp = n;
@@ -432,7 +436,8 @@ void CCtrlGeneral::OnGlobalVolChanged()
 		m_EditGlobalVol.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = CLAMP(atoi(s), 0, 128);
+			UINT n = atoi(s);
+			n = CLAMP(n, 0, 128);
 			if (n != (m_pSndFile->m_nDefaultGlobalVolume >> 1))
 			{ 
 				m_bEditsLocked=true;
@@ -458,7 +463,8 @@ void CCtrlGeneral::OnRestartPosChanged()
 		m_EditRestartPos.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = CLAMP(atoi(s), 0, m_pSndFile->Order.size());
+			UINT n = atoi(s);
+			n = CLAMP(n, 0, m_pSndFile->Order.size());
 			for (ORDERINDEX i = 0; i <= n; i++)
 				if (m_pSndFile->Order[i] == m_pSndFile->Order.GetInvalidPatIndex()) return;
 
