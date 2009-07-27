@@ -291,7 +291,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			ChnSettings[ich].dwFlags = 0;
 		}
 	}
-	if (m_nChannels < 4) m_nChannels = 4;
+	if (m_nChannels < 1) m_nChannels = 1;
 	if ((psfh.cwtv < 0x1320) || (psfh.flags & 0x40)) m_dwSongFlags |= SONG_FASTVOLSLIDES;
 	// Reading pattern order
 	UINT iord = psfh.ordnum;

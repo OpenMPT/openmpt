@@ -2516,7 +2516,7 @@ void CViewPattern::OnRemoveChannel()
 	CSoundFile* pSndFile;
 	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
 
-	if(pSndFile->m_nChannels <= 4)
+	if(pSndFile->m_nChannels <= pSndFile->GetModSpecifications().channelsMin)
 	{
 		CMainFrame::GetMainFrame()->MessageBox("No channel removed - channel number already at minimum.", "Remove channel", MB_OK | MB_ICONINFORMATION);
 		return;

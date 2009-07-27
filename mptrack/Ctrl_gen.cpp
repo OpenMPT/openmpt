@@ -235,7 +235,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 
 // -! NEW_FEATURE#0023
 		}
-		wsprintf(s, "%s, %d channels", pszModType, m_pSndFile->m_nChannels);
+		wsprintf(s, "%s, %d channel%s", pszModType, m_pSndFile->m_nChannels, (m_pSndFile->m_nChannels != 1) ? "s" : "");
 		m_EditModType.SetWindowText(s);
 	}
 	if (dwHint & HINT_MPTSETUP)

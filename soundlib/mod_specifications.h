@@ -9,15 +9,15 @@
 struct CModSpecifications
 //=======================
 {
-	// Return true iff format supports given note.
+	// Return true if format supports given note.
 	bool HasNote(MODCOMMAND::NOTE note) const;
 
 	//NOTE: If changing order, update all initializations below.
 	char fileExtension[6];	  // File extension without dot.
 	MODCOMMAND::NOTE noteMin; // Minimum note index (index starts from 1)
 	MODCOMMAND::NOTE noteMax; // Maximum note index (index starts from 1)
-	bool hasNoteCut;		  // True iff format has notecut.
-	bool hasNoteOff;		  // True iff format has noteoff.
+	bool hasNoteCut;		  // True if format has notecut.
+	bool hasNoteOff;		  // True if format has noteoff.
 	PATTERNINDEX patternsMax;
 	ORDERINDEX ordersMax;
 	CHANNELINDEX channelsMin; // Minimum number of editable channels in pattern.
@@ -53,7 +53,7 @@ const CModSpecifications mptm =
 	true,								//Has noteoff.
 	4000,								//Pattern max.
 	4000,								//Order max.
-	4,									//Channel min
+	1,									//Channel min
 	127,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo
@@ -132,7 +132,7 @@ const CModSpecifications xm =
 	true,								//Has noteoff.
 	64,									//Pattern max.
 	128,								//Order max.
-	4,									//Channel min
+	1,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
 	255,								//Max tempo
@@ -158,7 +158,7 @@ const CModSpecifications xmEx =
 	true,								//Has noteoff.
 	240,								//Pattern max.
 	256,								//Order max.
-	4,									//Channel min
+	1,									//Channel min
 	127,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo
@@ -183,7 +183,7 @@ const CModSpecifications s3m =
 	false,								//No noteoff.
 	240,								//Pattern max.
 	256,								//Order max.
-	4,									//Channel min
+	1,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
 	255,								//Max tempo
@@ -209,7 +209,7 @@ const CModSpecifications s3mEx =
 	false,								//No noteoff.
 	240,								//Pattern max.
 	256,								//Order max.
-	4,									//Channel min
+	1,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
 	255,								//Max tempo
@@ -234,7 +234,7 @@ const CModSpecifications it =
 	true,								//Has noteoff.
 	240,								//Pattern max.
 	200,								//Order max.
-	4,									//Channel min
+	1,									//Channel min
 	64,									//Channel max
 	32,									//Min tempo
 	255,								//Max tempo
@@ -259,7 +259,7 @@ const CModSpecifications itEx =
 	true,								//Has noteoff.
 	240,								//Pattern max.
 	256,								//Order max.
-	4,									//Channel min
+	1,									//Channel min
 	127,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo

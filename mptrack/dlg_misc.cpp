@@ -229,7 +229,7 @@ void CModTypeDlg::UpdateChannelCBox()
 		m_ChannelsBox.ResetContent();
 		for (CHANNELINDEX i=minChans; i<=maxChans; i++)
 		{
-			wsprintf(s, "%d Channels", i);
+			wsprintf(s, "%d Channel%s", i, (i != 1) ? "s" : "");
 			m_ChannelsBox.SetItemData(m_ChannelsBox.AddString(s), i);
 		}
 		if(currChanSel > maxChans)
@@ -581,7 +581,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 	}
 
 	if (m_nRemove > 0) {
-		wsprintf(label, "Select %d channels to remove:", m_nRemove);
+		wsprintf(label, "Select %d channel%s to remove:", m_nRemove, (m_nRemove != 1) ? "s" : "");
 	} else {
 		wsprintf(label, "Select channels to remove (the minimum number of remaining channels is %d)", m_pSndFile->GetModSpecifications().channelsMin);
 	}

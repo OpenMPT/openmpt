@@ -164,7 +164,7 @@ BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 				m_nChannels = patt->tracks;
 				if (m_nChannels < patt->firstpatinfo) m_nChannels = patt->firstpatinfo;
 				if (m_nChannels > 32) m_nChannels = 32;
-				if (m_nChannels < 4) m_nChannels = 4;
+				if (m_nChannels < 1) m_nChannels = 1;
 				for (UINT npat=0; npat<numpat; npat++)
 				{
 					DMFTRACK *pt = (DMFTRACK *)(lpStream+dwPos);

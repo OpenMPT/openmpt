@@ -39,16 +39,16 @@ typedef struct tagXMFILEHEADER
 
 typedef struct tagXMINSTRUMENTHEADER
 {
-	DWORD size;
+	DWORD size; // size of XMINSTRUMENTHEADER + XMSAMPLEHEADER
 	CHAR name[22];
-	BYTE type;
+	BYTE type; // should always be 0
 	WORD samples;
 } XMINSTRUMENTHEADER;
 
 
 typedef struct tagXMSAMPLEHEADER
 {
-	DWORD shsize;
+	DWORD shsize; // size of XMSAMPLESTRUCT
 	BYTE snum[96];
 	WORD venv[24];
 	WORD penv[24];
@@ -315,20 +315,17 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				
 		if ((nsamples = pih->samples) > 0)
 		{
-			if (dwMemPos + sizeof(XMINSTRUMENTHEADER) + sizeof(DWORD) >= dwMemLength) return TRUE;
-			DWORD shsize = LittleEndian(*((DWORD *)(lpStream + dwMemPos + sizeof(XMINSTRUMENTHEADER))));
+			/* we have sample, so let's read the rest of this instrument
+			   the header that is being read here is not the sample header, though,
+			   it's rather the instrument settings. */
+
+			if (dwMemPos + ihsize >= dwMemLength)
+				return TRUE;
 
 			memset(&xmsh, 0, sizeof(XMSAMPLEHEADER));
-			
-			// *very* dirty, but it works!
-			DWORD dwReadLength = sizeof(XMSAMPLEHEADER);
-			if(ihsize == 38 && (int)(shsize - ihsize) >= 0) // BoobieSqueezer compressed - ihsize = 38, shsize = 40
-				dwReadLength = shsize - ihsize;
-
-			if (dwMemPos + sizeof(XMINSTRUMENTHEADER) + dwReadLength >= dwMemLength || shsize > sizeof(XMSAMPLEHEADER))
-				return TRUE;
-			else
-				memcpy(&xmsh, lpStream + dwMemPos + sizeof(XMINSTRUMENTHEADER), dwReadLength);
+			memcpy(&xmsh,
+				lpStream + dwMemPos + sizeof(XMINSTRUMENTHEADER),
+				min(ihsize - sizeof(XMINSTRUMENTHEADER), sizeof(XMSAMPLEHEADER)));
 
 			xmsh.shsize = LittleEndian(xmsh.shsize);
 
@@ -628,7 +625,11 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		bMadeWithModPlug = true;
 	}
 
-	SetModFlag(MSF_COMPATIBLE_PLAY, !bMadeWithModPlug);
+	if(bMadeWithModPlug)
+	{
+		SetModFlag(MSF_COMPATIBLE_PLAY, false);
+		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 0, 0);
+	}
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
@@ -670,7 +671,7 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	fwrite("Extended Module: ", 17, 1, f);
 	fwrite(m_szNames[0], 20, 1, f);
 	s[0] = 0x1A;
-	lstrcpy((LPSTR)&s[1], (nPacking) ? "MOD Plugin packed   " : "Open ModPlugTracker ");
+	lstrcpy((LPSTR)&s[1], (nPacking) ? "MOD Plugin packed   " : "Open ModPlug Tracker");
 	s[21] = 0x04;
 	s[22] = 0x01;
 	fwrite(&s[0], 23, 1, f);

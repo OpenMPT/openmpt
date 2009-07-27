@@ -963,7 +963,7 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			//TODO: Check whether above interpretation is reasonable especially for 
 			//values 0x217 and 0x200 which are the values used in 1.16. 
 			if(pifh->cwtv == 0x217 && pifh->cmwt == 0x200)
-				m_dwCreatedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 0, 0);
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 0, 0);
 		}
 	}
 	
