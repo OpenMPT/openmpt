@@ -1568,7 +1568,7 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
-				//IT compatibility 15. Retrigger
+				// IT compatibility 15. Retrigger
 				if (param)
 					pChn->nRetrigParam = (BYTE)(param & 0xFF);
 
@@ -1581,7 +1581,7 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			else
 			{
-				//MPT Retrig
+				// XM Retrig
 				if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF); else param = pChn->nRetrigParam;
 				//rewbs.volOffset
 				//RetrigNote(nChn, param);
@@ -1875,7 +1875,7 @@ BOOL CSoundFile::ProcessEffects()
 			//end rewbs.fix 
 			 && ((nPosJump != (int)m_nCurrentPattern) || (nBreakRow != (int)m_nRow)))
 			{
-				if (nPosJump != (int)m_nCurrentPattern)
+				if (nPosJump != (int)m_nCurrentPattern && !((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY)))
 				{
 					for (UINT i=0; i<m_nChannels; i++) Chn[i].nPatternLoopCount = 0;
 				}

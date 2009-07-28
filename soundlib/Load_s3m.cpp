@@ -12,6 +12,9 @@
 #include "sndfile.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/misc_util.h"
+#ifndef MODPLUG_NO_FILESAVE
+#include "../mptrack/version.h"
+#endif
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -509,8 +512,13 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	header[0x25] = nbp >> 8;
 	if (m_dwSongFlags & SONG_FASTVOLSLIDES) header[0x26] |= 0x40;
 	if ((m_nMaxPeriod < 20000) || (m_dwSongFlags & SONG_AMIGALIMITS)) header[0x26] |= 0x10;
-	header[0x28] = 0x20;
-	header[0x29] = 0x13;
+
+	// Version info following: ST3.20 = 0x1320
+	// Most significant nibble: 1 = ST3, 2 = Orpheus, 3 = IT, 4 = Schism, 5 = MPT
+	// Following: One nibble = Major version, one byte = Minor version
+	MptVersion::VersionNum vVersion = MptVersion::num;
+	header[0x28] = (BYTE)((vVersion >> 16) & 0xFF); // the "17" in OpenMPT 1.17
+	header[0x29] = 0x50 | (BYTE)((vVersion >> 24) & 0x0F); // the "1" in OpenMPT 1.17 + OpenMPT Identifier 5 (works only for versions up to 15.255 :))
 	header[0x2A] = 0x02; // Version = 1 => Signed samples
 	header[0x2B] = 0x00;
 	header[0x2C] = 'S';
@@ -558,11 +566,11 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	ofs1 = ftell(f);
 	fwrite(insex, nbi, 0x50, f);
 	// Packing patterns
-	ofs += nbi*0x50;
-	for (i=0; i<nbp; i++)
+	ofs += nbi * 0x50;
+	for (i = 0; i < nbp; i++)
 	{
 		WORD len = 64;
-		vector<BYTE> buffer(5*1024, 0);
+		vector<BYTE> buffer(5 * 1024, 0);
 		patptr[i] = ofs / 16;
 		if (Patterns[i])
 		{
@@ -581,16 +589,18 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 					UINT param = m->param;
 
 					if ((note) || (m->instr)) b |= 0x20;
-					if (!note) note = 0xFF; else
-					if (note >= 0xFE) note = 0xFE; else
-					if (note < 13) note = 0; else note -= 13;
+
+					if (!note) note = 0xFF; // no note
+					else if (note >= NOTE_MIN_SPECIAL) note = 0xFE; // special notes (notecut, noteoff etc)
+					else if (note < 13) note = 0; // too low
+					else note -= 13;
+
 					if (note < 0xFE) note = (note % 12) + ((note / 12) << 4);
 					if (command == CMD_VOLUME)
 					{
 						command = 0;
-						if (param > 64) param = 64;
 						volcmd = VOLCMD_VOLUME;
-						vol = param;
+						vol = min(param, 64);
 					}
 					if (volcmd == VOLCMD_VOLUME) b |= 0x40; else
 					if (volcmd == VOLCMD_PANNING) { vol |= 0x80; b |= 0x40; }
@@ -629,9 +639,9 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 				}
 			}
 		}
-		buffer[0] = (len - 2) & 0xFF;
-		buffer[1] = (len - 2) >> 8;
-		len = (len+15) & (~0x0F);
+		buffer[0] = (len) & 0xFF;
+		buffer[1] = (len) >> 8;
+		len = (len + 15) & (~0x0F);
 		fwrite(&buffer[0], len, 1, f);
 		ofs += len;
 	}
