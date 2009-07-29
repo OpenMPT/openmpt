@@ -883,6 +883,7 @@ public:	// for Editing
 	BYTE m_nMixLevels;
     UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
+	BOOL m_bPatternBreak; // Will be set if "break to row" happened
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
 	//NOTE: m_nCurrentPattern and m_nNextPattern refer to order index - not pattern index.
 	bool m_bPatternTransitionOccurred;

@@ -607,6 +607,7 @@ enum {
 	OPTGEN_PATNOTEFADE,
 	OPTGEN_ECHOPASTE,
 	OPTGEN_POSITIONAWARETIMER,
+	OPTGEN_RESETCHANNELS,
 	OPTGEN_MAXOPTIONS
 };
 
@@ -645,6 +646,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{"Note fade on key up",				"Enable to fade/stop notes on key up in pattern tab." },
 	{"Echo paste mode",					"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
 	{"Position aware timer",			"If enabled, timer will show the playback position time if possible instead of running timer."},
+	{"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands)"},
 };
 
 
@@ -709,6 +711,7 @@ BOOL COptionsGeneral::OnInitDialog()
 		case OPTGEN_PATNOTEFADE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_NOTEFADE); break;
 		case OPTGEN_ECHOPASTE:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_ECHOPASTE); break;
 		case OPTGEN_POSITIONAWARETIMER:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_POSITIONAWARETIMER); break;
+		case OPTGEN_RESETCHANNELS:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_RESETCHANNELS); break;
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
@@ -777,6 +780,7 @@ void COptionsGeneral::OnOK()
 		case OPTGEN_PATNOTEFADE:		 mask = PATTERN_NOTEFADE; break;
 		case OPTGEN_ECHOPASTE:			 mask = PATTERN_ECHOPASTE; break;
 		case OPTGEN_POSITIONAWARETIMER:	 mask = PATTERN_POSITIONAWARETIMER; break;
+		case OPTGEN_RESETCHANNELS:		 mask = PATTERN_RESETCHANNELS; break;
 			
 		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;

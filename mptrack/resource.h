@@ -10,7 +10,7 @@
 #define IDD_PROGRESS                    106
 #define IDD_OPTIONS_KEYBOARD            108
 #define IDD_OPTIONS_COLORS              109
-#define IDD_MIDISETUP                   111
+#define IDD_OPTIONS_MIDI                111
 #define IDD_OPTIONS_PATTERN             112
 #define IDD_LOADRAWSAMPLE               113
 #define IDD_CONTROL_GLOBALS             114
@@ -106,7 +106,6 @@
 #define IDD_MIDIPARAMCONTROL            515
 #define IDD_MSGBOX_HIDABLE              516
 #define IDD_ADDSILENCE                  517
-#define IDD_DIALOG4                     518
 #define IDD_MODLOADING_WARNINGS         518
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002

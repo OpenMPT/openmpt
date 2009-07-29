@@ -643,9 +643,16 @@ BOOL CSoundFile::ProcessRow()
 				{
 
 					if (!m_nRepeatCount) return FALSE;
-					if (!m_nRestartPos)
-					{
 
+					if(CMainFrame::GetMainFrame())
+					{
+						// If channel resetting is disabled, we will emulate a pattern break
+						if(!(CMainFrame::GetMainFrame()->m_dwPatternSetup & PATTERN_RESETCHANNELS))
+							m_bPatternBreak = true;
+					}
+
+					if (!m_nRestartPos && !m_bPatternBreak)
+					{
 						//rewbs.instroVSTi: stop all VSTi at end of song, if looping.
 						StopAllVsti();
 						m_nMusicSpeed = m_nDefaultSpeed;
@@ -683,7 +690,8 @@ BOOL CSoundFile::ProcessRow()
 					//Handle Repeat position
 					if (m_nRepeatCount > 0) m_nRepeatCount--;
 					m_nCurrentPattern = m_nRestartPos;
-					m_nRow = 0;					
+					//m_nRow = 0;
+					m_bPatternBreak = false;
 					//If restart pos points to +++, move along
 					while (Order[m_nCurrentPattern] == Order.GetIgnoreIndex()) {
 						m_nCurrentPattern++;

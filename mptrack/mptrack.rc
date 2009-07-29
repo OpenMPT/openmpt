@@ -68,216 +68,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 #endif //_WIN32
 
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE 
-BEGIN
-    "#include ""afxres.h""\r\n"
-    "\0"
-END
-
-3 TEXTINCLUDE 
-BEGIN
-    "#define _AFX_NO_OLE_RESOURCES\r\n"
-    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
-    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
-    "\r\n"
-    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
-    "#ifdef _WIN32\r\n"
-    "LANGUAGE 9, 1\r\n"
-    "#pragma code_page(1252)\r\n"
-    "#endif\r\n"
-    "#include ""res\\mptrack.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
-    "#include ""afxres.rc""         // Standard components\r\n"
-    "#endif\0"
-END
-
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\mptrack.ico"
-IDR_MODULETYPE          ICON                    "res\\moddoc.ico"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Bitmap
-//
-
-IDB_MPTRACK             BITMAP                  "res\\mptrack.bmp"
-IDB_IMAGELIST           BITMAP                  "res\\img_list.bmp"
-IDB_PATTERNS            BITMAP                  "res\\patterns.bmp"
-IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
-IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
-IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
-IDB_ENVTOOLBAR          BITMAP                  "res\\envbar.bmp"
-IDB_SMPTOOLBAR          BITMAP                  "res\\smptoolb.bmp"
-IDB_VISNODE             BITMAP                  "res\\bitmap1.bmp"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_MAINFRAME MENU 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        POPUP "&New\tCtrl+N"
-        BEGIN
-            MENUITEM "&IT",                         ID_FILE_NEWIT
-            MENUITEM "&XM",                         ID_FILE_NEWXM
-            MENUITEM "&S3M",                        ID_FILE_NEWS3M
-            MENUITEM "M&OD",                        ID_FILE_NEWMOD
-            MENUITEM "IT &Project",                 ID_NEW_ITPROJECT
-            MENUITEM "&MPTM (experimental)",        ID_NEW_MPT
-        END
-        MENUITEM "&Open...\tCtrl+O",            57601
-        MENUITEM "&Close",                      ID_FILE_CLOSE
-        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
-        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
-        MENUITEM "Save as &Wave...",            ID_FILE_SAVEASWAVE
-        MENUITEM "Save as M&P3...",             ID_FILE_SAVEASMP3
-        MENUITEM "Export as M&IDI...",          ID_FILE_SAVEMIDI
-        MENUITEM "Export &unraped...",          ID_FILE_SAVECOMPAT
-        MENUITEM SEPARATOR
-        MENUITEM "Import &MIDI Library...",     ID_IMPORT_MIDILIB
-        MENUITEM "Add Sound &Bank...",          ID_ADD_SOUNDBANK
-        MENUITEM SEPARATOR
-        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
-        MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       ID_APP_EXIT
-    END
-    POPUP "P&layer"
-    BEGIN
-        MENUITEM "&Play\tF5",                   ID_PLAYER_PLAY
-        MENUITEM "P&lay from start\tF6",        ID_PLAYER_PLAYFROMSTART
-        MENUITEM "&Stop\tESC",                  ID_PLAYER_STOP
-        MENUITEM "P&ause\tF8",                  ID_PLAYER_PAUSE
-        MENUITEM "&MIDI Record\tF9",            ID_MIDI_RECORD
-        MENUITEM SEPARATOR
-        MENUITEM "&Estimate song length",       ID_ESTIMATESONGLENGTH
-        MENUITEM "Approx. real &BPM",           ID_APPROX_BPM
-    END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-        MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-        MENUITEM "&Mix Paste\tCtrl+M",          ID_EDIT_PASTE_SPECIAL
-        MENUITEM "Select &All\tCtrl+5",         ID_EDIT_SELECT_ALL
-        MENUITEM SEPARATOR
-        POPUP "C&leanup"
-        BEGIN
-            MENUITEM "&Rearrange Patterns",         ID_CLEANUP_REARRANGE
-            MENUITEM "&Cleanup Instruments",        ID_CLEANUP_INSTRUMENTS
-            MENUITEM "Clean&up Samples",            ID_CLEANUP_SAMPLES
-            MENUITEM "Cleanup Pa&tterns",           ID_CLEANUP_PATTERNS
-            MENUITEM "Cleanup S&ong",               ID_CLEANUP_SONG
-            MENUITEM "Remove &All Instruments",     ID_INSTRUMENTS_REMOVEALL
-            MENUITEM "Cleanup &Plugins",            ID_CLEANUP_PLUGS
-            MENUITEM "Co&mpo Cleanup",              ID_CLEANUP_COMPO
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "&Find\tCtrl+F",               ID_EDIT_FIND
-        MENUITEM "Find Next\tF3",               ID_EDIT_FINDNEXT
-        MENUITEM "Go to...",                    ID_EDIT_GOTO_MENU
-    END
-    POPUP "&View"
-    BEGIN
-        MENUITEM "&Globals\tAlt+G",             ID_VIEW_GLOBALS
-        MENUITEM "&Patterns\tAlt+P",            ID_VIEW_PATTERNS
-        MENUITEM "&Samples\tAlt+S",             ID_VIEW_SAMPLES
-        MENUITEM "&Instruments\tAlt+N",         ID_VIEW_INSTRUMENTS
-        MENUITEM "&Comments\tShift+F9",         ID_VIEW_COMMENTS
-        MENUITEM SEPARATOR
-        POPUP "&Toolbars"
-        BEGIN
-            MENUITEM "&Main",                       ID_VIEW_TOOLBAR
-            MENUITEM "&Tree",                       IDD_TREEVIEW
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "Set&up...",                   ID_VIEW_OPTIONS
-        MENUITEM "Add &Plugin...",              ID_PLUGIN_SETUP
-        MENUITEM "Channel &Manager...",         ID_CHANNEL_MANAGER
-        MENUITEM "Song Properties...",          ID_VIEW_SONGPROPERTIES
-        MENUITEM "MIDI mapping...",             ID_VIEW_MIDIMAPPING
-    END
-    POPUP "&Window"
-    BEGIN
-        MENUITEM "&New Window",                 ID_WINDOW_NEW
-        MENUITEM SEPARATOR
-        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
-        MENUITEM "&Tile Horizontal",            ID_WINDOW_TILE_HORZ
-        MENUITEM "Tile &Vertical",              ID_WINDOW_TILE_VERT
-        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
-        MENUITEM "S&plit",                      ID_WINDOW_SPLIT
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&Contents",                   ID_HELP_FINDER
-        MENUITEM "&Search...",                  ID_HELP_SEARCH
-        MENUITEM "&Report a bug",               ID_REPORT_BUG
-        MENUITEM SEPARATOR
-        POPUP "&Internet"
-        BEGIN
-            MENUITEM "Modplug Central &Forums",     ID_NETLINK_FORUMS
-            MENUITEM "OpenMPT Wiki",                ID_NETLINK_OPENMPTWIKI
-            MENUITEM "OpenMPT Wiki (German)",       ID_NETLINK_OPENMPTWIKI_GERMAN
-            MENUITEM "MPT-FR",                      ID_NETLINK_MPTFR
-            MENUITEM "&Kvr Audio (plugins)",        ID_NETLINK_PLUGINS
-            MENUITEM "The Mod Archive",             ID_NETLINK_MODARCHIVE
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "&About OpenMPT...",           ID_APP_ABOUT
-    END
-END
-
-IDR_TOOLBARS MENU 
-BEGIN
-    POPUP "&ToolBars"
-    BEGIN
-        MENUITEM "&Main",                       ID_VIEW_TOOLBAR
-        MENUITEM "&Tree",                       IDD_TREEVIEW
-    END
-END
-
-IDR_ENVELOPES MENU 
-BEGIN
-    POPUP "&Envelope"
-    BEGIN
-        MENUITEM "&Loop",                       ID_ENVELOPE_SETLOOP
-        MENUITEM "&Sustain",                    ID_ENVELOPE_SUSTAIN
-        MENUITEM "C&arry envelope",             ID_ENVELOPE_CARRY
-        MENUITEM "&Insert Point",               ID_ENVELOPE_INSERTPOINT
-        MENUITEM "&Remove Point",               ID_ENVELOPE_REMOVEPOINT
-        MENUITEM "&Toggle Release Node",        ID_ENVELOPE_TOGGLERELEASENODE
-        MENUITEM SEPARATOR
-        MENUITEM "&Copy envelope",              ID_EDIT_COPY
-        MENUITEM "&Paste envelope",             ID_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "Scale points...",             ID_ENVELOPE_SCALEPOINTS
-    END
-END
-
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
@@ -451,7 +241,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,75,136,10
 END
 
-IDD_MIDISETUP DIALOGEX 0, 0, 272, 281
+IDD_OPTIONS_MIDI DIALOGEX 0, 0, 272, 281
 STYLE DS_SETFONT | DS_3DLOOK | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "MIDI"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
@@ -1610,7 +1400,7 @@ BEGIN
         BOTTOMMARGIN, 151
     END
 
-    IDD_MIDISETUP, DIALOG
+    IDD_OPTIONS_MIDI, DIALOG
     BEGIN
         RIGHTMARGIN, 240
         BOTTOMMARGIN, 278
@@ -1851,6 +1641,216 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif\r\n"
+    "#include ""res\\mptrack.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\mptrack.ico"
+IDR_MODULETYPE          ICON                    "res\\moddoc.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_MPTRACK             BITMAP                  "res\\mptrack.bmp"
+IDB_IMAGELIST           BITMAP                  "res\\img_list.bmp"
+IDB_PATTERNS            BITMAP                  "res\\patterns.bmp"
+IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
+IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
+IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
+IDB_ENVTOOLBAR          BITMAP                  "res\\envbar.bmp"
+IDB_SMPTOOLBAR          BITMAP                  "res\\smptoolb.bmp"
+IDB_VISNODE             BITMAP                  "res\\bitmap1.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        POPUP "&New\tCtrl+N"
+        BEGIN
+            MENUITEM "&IT",                         ID_FILE_NEWIT
+            MENUITEM "&XM",                         ID_FILE_NEWXM
+            MENUITEM "&S3M",                        ID_FILE_NEWS3M
+            MENUITEM "M&OD",                        ID_FILE_NEWMOD
+            MENUITEM "IT &Project",                 ID_NEW_ITPROJECT
+            MENUITEM "&MPTM (experimental)",        ID_NEW_MPT
+        END
+        MENUITEM "&Open...\tCtrl+O",            57601
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM "Save as &Wave...",            ID_FILE_SAVEASWAVE
+        MENUITEM "Save as M&P3...",             ID_FILE_SAVEASMP3
+        MENUITEM "Export as M&IDI...",          ID_FILE_SAVEMIDI
+        MENUITEM "Export &unraped...",          ID_FILE_SAVECOMPAT
+        MENUITEM SEPARATOR
+        MENUITEM "Import &MIDI Library...",     ID_IMPORT_MIDILIB
+        MENUITEM "Add Sound &Bank...",          ID_ADD_SOUNDBANK
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "P&layer"
+    BEGIN
+        MENUITEM "&Play\tF5",                   ID_PLAYER_PLAY
+        MENUITEM "P&lay from start\tF6",        ID_PLAYER_PLAYFROMSTART
+        MENUITEM "&Stop\tESC",                  ID_PLAYER_STOP
+        MENUITEM "P&ause\tF8",                  ID_PLAYER_PAUSE
+        MENUITEM "&MIDI Record\tF9",            ID_MIDI_RECORD
+        MENUITEM SEPARATOR
+        MENUITEM "&Estimate song length",       ID_ESTIMATESONGLENGTH
+        MENUITEM "Approx. real &BPM",           ID_APPROX_BPM
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM "&Mix Paste\tCtrl+M",          ID_EDIT_PASTE_SPECIAL
+        MENUITEM "Select &All\tCtrl+5",         ID_EDIT_SELECT_ALL
+        MENUITEM SEPARATOR
+        POPUP "C&leanup"
+        BEGIN
+            MENUITEM "&Rearrange Patterns",         ID_CLEANUP_REARRANGE
+            MENUITEM "&Cleanup Instruments",        ID_CLEANUP_INSTRUMENTS
+            MENUITEM "Clean&up Samples",            ID_CLEANUP_SAMPLES
+            MENUITEM "Cleanup Pa&tterns",           ID_CLEANUP_PATTERNS
+            MENUITEM "Cleanup S&ong",               ID_CLEANUP_SONG
+            MENUITEM "Remove &All Instruments",     ID_INSTRUMENTS_REMOVEALL
+            MENUITEM "Cleanup &Plugins",            ID_CLEANUP_PLUGS
+            MENUITEM "Co&mpo Cleanup",              ID_CLEANUP_COMPO
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Find\tCtrl+F",               ID_EDIT_FIND
+        MENUITEM "Find Next\tF3",               ID_EDIT_FINDNEXT
+        MENUITEM "Go to...",                    ID_EDIT_GOTO_MENU
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Globals\tAlt+G",             ID_VIEW_GLOBALS
+        MENUITEM "&Patterns\tAlt+P",            ID_VIEW_PATTERNS
+        MENUITEM "&Samples\tAlt+S",             ID_VIEW_SAMPLES
+        MENUITEM "&Instruments\tAlt+N",         ID_VIEW_INSTRUMENTS
+        MENUITEM "&Comments\tShift+F9",         ID_VIEW_COMMENTS
+        MENUITEM SEPARATOR
+        POPUP "&Toolbars"
+        BEGIN
+            MENUITEM "&Main",                       ID_VIEW_TOOLBAR
+            MENUITEM "&Tree",                       IDD_TREEVIEW
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Set&up...",                   ID_VIEW_OPTIONS
+        MENUITEM "Add &Plugin...",              ID_PLUGIN_SETUP
+        MENUITEM "Channel &Manager...",         ID_CHANNEL_MANAGER
+        MENUITEM "Song Properties...",          ID_VIEW_SONGPROPERTIES
+        MENUITEM "MIDI mapping...",             ID_VIEW_MIDIMAPPING
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Window",                 ID_WINDOW_NEW
+        MENUITEM SEPARATOR
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile Horizontal",            ID_WINDOW_TILE_HORZ
+        MENUITEM "Tile &Vertical",              ID_WINDOW_TILE_VERT
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+        MENUITEM "S&plit",                      ID_WINDOW_SPLIT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Contents",                   ID_HELP_FINDER
+        MENUITEM "&Search...",                  ID_HELP_SEARCH
+        MENUITEM "&Report a bug",               ID_REPORT_BUG
+        MENUITEM SEPARATOR
+        POPUP "&Internet"
+        BEGIN
+            MENUITEM "Modplug Central &Forums",     ID_NETLINK_FORUMS
+            MENUITEM "OpenMPT Wiki",                ID_NETLINK_OPENMPTWIKI
+            MENUITEM "OpenMPT Wiki (German)",       ID_NETLINK_OPENMPTWIKI_GERMAN
+            MENUITEM "MPT-FR",                      ID_NETLINK_MPTFR
+            MENUITEM "&Kvr Audio (plugins)",        ID_NETLINK_PLUGINS
+            MENUITEM "The Mod Archive",             ID_NETLINK_MODARCHIVE
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&About OpenMPT...",           ID_APP_ABOUT
+    END
+END
+
+IDR_TOOLBARS MENU 
+BEGIN
+    POPUP "&ToolBars"
+    BEGIN
+        MENUITEM "&Main",                       ID_VIEW_TOOLBAR
+        MENUITEM "&Tree",                       IDD_TREEVIEW
+    END
+END
+
+IDR_ENVELOPES MENU 
+BEGIN
+    POPUP "&Envelope"
+    BEGIN
+        MENUITEM "&Loop",                       ID_ENVELOPE_SETLOOP
+        MENUITEM "&Sustain",                    ID_ENVELOPE_SUSTAIN
+        MENUITEM "C&arry envelope",             ID_ENVELOPE_CARRY
+        MENUITEM "&Insert Point",               ID_ENVELOPE_INSERTPOINT
+        MENUITEM "&Remove Point",               ID_ENVELOPE_REMOVEPOINT
+        MENUITEM "&Toggle Release Node",        ID_ENVELOPE_TOGGLERELEASENODE
+        MENUITEM SEPARATOR
+        MENUITEM "&Copy envelope",              ID_EDIT_COPY
+        MENUITEM "&Paste envelope",             ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "Scale points...",             ID_ENVELOPE_SCALEPOINTS
+    END
+END
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2218,55 +2218,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Bitmap
-//
-
-IDB_SPLASHNOFOLDFIN     BITMAP                  "res\\splashno.bmp"
-IDB_MAINBAR             BITMAP                  "res\\MAINBAR.BMP"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_VSTMENU MENU 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Load Preset...",             ID_PRESET_LOAD
-        MENUITEM "&Save Preset As...",          ID_PRESET_SAVE
-        MENUITEM SEPARATOR
-        MENUITEM "&Randomize Params",           ID_PRESET_RANDOM
-    END
-    POPUP "&Info"
-    BEGIN
-        MENUITEM "I&nputs",                     ID_INFO_INPUTS36015
-        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
-        MENUITEM "&Macros",                     ID_INFO_MACROS36017
-    END
-    POPUP "&Options"
-    BEGIN
-        MENUITEM "&Bypass",                     ID_PLUG_BYPASS
-        MENUITEM "Record &Params",              ID_PLUG_RECORDAUTOMATION
-    END
-END
-
-IDR_PLUGINMENU MENU 
-BEGIN
-    POPUP "File"
-    BEGIN
-        MENUITEM "Open",                        ID_FILE_OPENPRESET
-        MENUITEM "Save",                        ID_FILE_SAVEPRESET
-    END
-    POPUP "Factory preset"
-    BEGIN
-        MENUITEM SEPARATOR
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Dialog
 //
 
@@ -2506,6 +2457,55 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_SPLASHNOFOLDFIN     BITMAP                  "res\\splashno.bmp"
+IDB_MAINBAR             BITMAP                  "res\\MAINBAR.BMP"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_VSTMENU MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Load Preset...",             ID_PRESET_LOAD
+        MENUITEM "&Save Preset As...",          ID_PRESET_SAVE
+        MENUITEM SEPARATOR
+        MENUITEM "&Randomize Params",           ID_PRESET_RANDOM
+    END
+    POPUP "&Info"
+    BEGIN
+        MENUITEM "I&nputs",                     ID_INFO_INPUTS36015
+        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
+        MENUITEM "&Macros",                     ID_INFO_MACROS36017
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Bypass",                     ID_PLUG_BYPASS
+        MENUITEM "Record &Params",              ID_PLUG_RECORDAUTOMATION
+    END
+END
+
+IDR_PLUGINMENU MENU 
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "Open",                        ID_FILE_OPENPRESET
+        MENUITEM "Save",                        ID_FILE_SAVEPRESET
+    END
+    POPUP "Factory preset"
+    BEGIN
+        MENUITEM SEPARATOR
+    END
+END
 
 
 /////////////////////////////////////////////////////////////////////////////
