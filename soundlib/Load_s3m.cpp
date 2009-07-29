@@ -12,9 +12,7 @@
 #include "sndfile.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/misc_util.h"
-#ifndef MODPLUG_NO_FILESAVE
 #include "../mptrack/version.h"
-#endif
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -154,8 +152,8 @@ void CSoundFile::S3MConvert(MODCOMMAND *m, BOOL bIT) const
 }
 
 
-void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT) const
-//---------------------------------------------------------------------
+void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatible) const
+//---------------------------------------------------------------------------------------
 {
 	UINT command = *pcmd;
 	UINT param = *pprm;
@@ -186,20 +184,25 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT) const
 	case CMD_GLOBALVOLSLIDE:	command = 'W'; break;
 	case CMD_PANNING8:			
 		command = 'X';
-		if ((bIT) && (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) && (m_nType != MOD_TYPE_XM))
+		if (bIT && !(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
 		{
 			if (param == 0xA4) { command = 'S'; param = 0x91; }	else
 			if (param <= 0x80) { param <<= 1; if (param > 255) param = 255; } else
 			command = param = 0;
 		} else
-		if ((!bIT) && ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) || (m_nType == MOD_TYPE_XM)))
+		if (!bIT && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
 		{
 			param >>= 1;
 		}
 		break;
 	case CMD_PANBRELLO:			command = 'Y'; break;
 	case CMD_MIDI:				command = 'Z'; break;
-	case CMD_SMOOTHMIDI:		command = '\\'; break;  //rewbs.smoothVST
+	case CMD_SMOOTHMIDI:  //rewbs.smoothVST
+		if(bCompatible)
+			command = 'Z';
+		else
+			command = '\\';
+		break;
 	case CMD_VELOCITY:			command = ':'; break;  //rewbs.velocity
 	case CMD_XFINEPORTAUPDOWN:
 		if (param & 0x0F) switch(param & 0xF0)
@@ -261,6 +264,9 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	psfh.version = LittleEndianW(psfh.version);
 	psfh.scrm = LittleEndian(psfh.scrm);
 	psfh.special = LittleEndianW(psfh.special);
+
+	if((psfh.cwtv & 0xF000) == 0x5000) // OpenMPT Version number (Major.Minor)
+		m_dwLastSavedWithVersion = (psfh.cwtv & 0x0FFF) << 16;
 
 	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER)+sizeof(S3MSAMPLESTRUCT)+64)) return FALSE;
 	if (psfh.scrm != 0x4D524353) return FALSE;
@@ -362,7 +368,6 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			if (insfile[iSmp] > dwMemLength) insfile[iSmp] &= 0xFFFF;
 			if ((Ins[iSmp].nLoopStart >= Ins[iSmp].nLoopEnd) || (Ins[iSmp].nLoopEnd - Ins[iSmp].nLoopStart < 1))
  				Ins[iSmp].nLoopStart = Ins[iSmp].nLoopEnd = 0;
-			UINT iLooplength = Ins[iSmp].nLoopEnd - Ins[iSmp].nLoopStart;
 			Ins[iSmp].nPan = 0x80;
 			//ASSERT(iLooplength == 0 || iLooplength > 4);
 		}
@@ -515,10 +520,10 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 
 	// Version info following: ST3.20 = 0x1320
 	// Most significant nibble: 1 = ST3, 2 = Orpheus, 3 = IT, 4 = Schism, 5 = MPT
-	// Following: One nibble = Major version, one byte = Minor version
+	// Following: One nibble = Major version, one byte = Minor version (hex)
 	MptVersion::VersionNum vVersion = MptVersion::num;
 	header[0x28] = (BYTE)((vVersion >> 16) & 0xFF); // the "17" in OpenMPT 1.17
-	header[0x29] = 0x50 | (BYTE)((vVersion >> 24) & 0x0F); // the "1" in OpenMPT 1.17 + OpenMPT Identifier 5 (works only for versions up to 15.255 :))
+	header[0x29] = 0x50 | (BYTE)((vVersion >> 24) & 0x0F); // the "1" in OpenMPT 1.17 + OpenMPT Identifier 5 (works only for versions up to 15.99 :))
 	header[0x2A] = 0x02; // Version = 1 => Signed samples
 	header[0x2B] = 0x00;
 	header[0x2C] = 'S';
@@ -606,7 +611,7 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 					if (volcmd == VOLCMD_PANNING) { vol |= 0x80; b |= 0x40; }
 					if (command)
 					{
-						S3MSaveConvert(&command, &param, FALSE);
+						S3MSaveConvert(&command, &param, false, true);
 						if (command) b |= 0x80;
 					}
 					if (b & 0xE0)

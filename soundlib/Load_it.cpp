@@ -2858,7 +2858,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 				if (vol != 0xFF) b |= 4;
 				if (command)
 				{
-					S3MSaveConvert(&command, &param, TRUE);
+					S3MSaveConvert(&command, &param, true, true);
 					if (command) b |= 8;
 				}
 				// Packing information
