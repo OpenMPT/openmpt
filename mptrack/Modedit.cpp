@@ -380,6 +380,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 				{
 				case CMD_PANNING8:
 					m->param = (m->param + 1) >> 1;
+					break;
 				case CMD_S3MCMDEX:
 					if(m->param == 0x91)
 					{
@@ -387,6 +388,10 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 						m->command = CMD_PANNING8;
 						m->param = 0xA4;
 					}
+					break;
+				case CMD_SMOOTHMIDI:
+					m->command = CMD_MIDI;
+					break;
 				default:
 					break;
 				}

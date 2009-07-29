@@ -1055,7 +1055,7 @@ public:
 	UINT GetSaveFormats() const;
 	void ConvertModCommand(MODCOMMAND *) const;
 	void S3MConvert(MODCOMMAND *m, BOOL bIT) const;
-	void S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT) const;
+	void S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatible = false) const;
 	WORD ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const;
 	
 public:
