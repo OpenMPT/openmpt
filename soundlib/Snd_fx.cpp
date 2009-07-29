@@ -1846,6 +1846,8 @@ BOOL CSoundFile::ProcessEffects()
 			BOOL bNoLoop = FALSE;
 			if (nPosJump < 0) nPosJump = m_nCurrentPattern+1;
 			if (nBreakRow < 0) nBreakRow = 0;
+
+			if(nBreakRow >= 0) m_bPatternBreak = true;
 			// Modplug Tracker & ModPlugin allow backward jumps
 		#ifndef FASTSOUNDLIB
 			if ((nPosJump < (int)m_nCurrentPattern)

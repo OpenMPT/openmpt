@@ -158,7 +158,7 @@ protected:
 	CSpinButtonCtrl m_SpinSpd, m_SpinPat;
 
 public:
-	CMidiSetupDlg(DWORD d, LONG n):CPropertyPage(IDD_MIDISETUP)
+	CMidiSetupDlg(DWORD d, LONG n):CPropertyPage(IDD_OPTIONS_MIDI)
 		{ m_dwMidiSetup = d; m_nMidiDevice = n; }
 
 protected:
