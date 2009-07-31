@@ -928,7 +928,7 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	bool interpretModplugmade = false;
 	bool hasModplugExtensions = false;
 
-	if ((!lpStream) || (dwMemLength < 0x100)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 0xC0)) return FALSE;
 	if ((pifh->id != 0x4D504D49 && pifh->id != 0x2e6D7074) || (pifh->insnum > 0xFF)
 	 || (!pifh->smpnum) || (pifh->smpnum >= MAX_SAMPLES) || (!pifh->ordnum)) return FALSE;
 	if (dwMemPos + pifh->ordnum + pifh->insnum*4

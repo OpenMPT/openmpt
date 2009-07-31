@@ -746,7 +746,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		pChn->nLeftVU = pChn->nRightVU = 0xFF;
 		pChn->dwFlags &= ~CHN_FILTER;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
-		if(!GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+		if(!GetModFlag(MSF_COMPATIBLE_PLAY) || !(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
 			pChn->nRetrigCount = 0;
@@ -3018,7 +3018,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 		{
 			pChn->nRetrigCount = param & 0xf;
 		}
-		else if (!--pChn->nRetrigCount)
+		else if (!pChn->nRetrigCount || !--pChn->nRetrigCount)
 		{
 			pChn->nRetrigCount = param & 0xf;
 			bDoRetrig = TRUE;
