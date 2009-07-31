@@ -57,7 +57,7 @@ const CModSpecifications mptm =
 	127,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo
-	4,									//Min pattern rows
+	1,									//Min pattern rows
 	1024,								//Max pattern rows
     25,									//Max mod name length
 	4000,								//SamplesMax
@@ -136,7 +136,7 @@ const CModSpecifications xm =
 	32,									//Channel max
 	32,									//Min tempo
 	255,								//Max tempo
-	4,									//Min pattern rows
+	1,									//Min pattern rows
 	256,								//Max pattern rows
     20,									//Max mod name length
 	31,									//SamplesMax
@@ -162,7 +162,7 @@ const CModSpecifications xmEx =
 	127,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo
-	4,									//Min pattern rows
+	1,									//Min pattern rows
 	1024,								//Max pattern rows
     20,									//Max mod name length
 	4000,								//SamplesMax
@@ -238,7 +238,7 @@ const CModSpecifications it =
 	64,									//Channel max
 	32,									//Min tempo
 	255,								//Max tempo
-	4,									//Min pattern rows
+	1,									//Min pattern rows
 	256,								//Max pattern rows
     25,									//Max mod name length
 	256,								//SamplesMax
@@ -263,7 +263,7 @@ const CModSpecifications itEx =
 	127,								//Channel max
 	32,									//Min tempo
 	512,								//Max tempo
-	4,									//Min pattern rows
+	1,									//Min pattern rows
 	1024,								//Max pattern rows
     25,									//Max mod name length
 	4000,								//SamplesMax
