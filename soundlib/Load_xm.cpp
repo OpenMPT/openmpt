@@ -656,6 +656,17 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 //---------------------------------------------------------
 {
+	#define ASSERT_CAN_WRITE(x) \
+	if(len > s.size() - x) /*Buffer running out? Make it larger.*/ \
+		s.resize(s.size() + 10*1024, 0); \
+	\
+	if(len > uint16_max - (UINT)x) /*Reaching the limits of file format?*/ \
+	{ \
+		CString str; str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, i); \
+		MessageBox(0, str, str_MBtitle, MB_ICONWARNING); \
+		break; \
+	}
+
 	//BYTE s[64*64*5];
 	vector<BYTE> s(64*64*5, 0);
 	XMFILEHEADER header;
@@ -665,6 +676,7 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	BYTE xmph[9];
 	FILE *f;
 	int i;
+	BOOL bAddChannel; // avoid odd channel count for FT2 compatibility 
 
 	if ((!m_nChannels) || (!lpszFileName)) return FALSE;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
@@ -680,7 +692,9 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	header.size = sizeof(XMFILEHEADER);
 	header.norder = 0;
 	header.restartpos = m_nRestartPos;
-	header.channels = m_nChannels;
+	header.channels = (m_nChannels + 1) & 0xFE; // avoid odd channel count for FT2 compatibility
+	if(m_nChannels & 1) bAddChannel = true;
+
 	header.patterns = 0;
   /*for (i=0; i<MAX_ORDERS; i++) {
 		header.norder++;
@@ -767,15 +781,14 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 				if (b & 8) s[len++] = command;
 				if (b & 16) s[len++] = param;
 			}
-			if(len > s.size() - 5) //Buffer running out? Make it larger.
-				s.resize(s.size() + 10*1024, 0);
 
-			if(len > uint16_max - 5u) //Reaching the limits of file format?
+			if(bAddChannel && !(j % m_nChannels))
 			{
-				CString str; str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, i);
-				MessageBox(0, str, str_MBtitle, MB_ICONWARNING);
-				break;
+				ASSERT_CAN_WRITE(1);
+				s[len++] = 0x80;
 			}
+
+			ASSERT_CAN_WRITE(5);
 		}
 		xmph[7] = (BYTE)(len & 0xFF);
 		xmph[8] = (BYTE)(len >> 8);

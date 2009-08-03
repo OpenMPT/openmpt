@@ -1195,7 +1195,7 @@ BOOL CSoundFile::ProcessEffects()
 					continue;
 				}
 			} else
-			if (!m_nTickCount)
+			if(m_dwSongFlags & SONG_FIRSTTICK)
 			{
 				// Pattern Loop ?
 				if ((((param & 0xF0) == 0x60) && (cmd == CMD_MODCMDEX))
@@ -1467,7 +1467,7 @@ BOOL CSoundFile::ProcessEffects()
 // -> NEW_FEATURE#0010
 		// Set Volume
 		case CMD_VOLUME:
-			if (!m_nTickCount)
+			if(m_dwSongFlags & SONG_FIRSTTICK)
 			{
 				pChn->nVolume = (param < 64) ? param*4 : 256;
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
@@ -1515,13 +1515,12 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Set Speed
 		case CMD_SPEED:
-			if (!m_nTickCount) SetSpeed(param);
+			if(m_dwSongFlags & SONG_FIRSTTICK)
+				SetSpeed(param);
 			break;
 
 		// Set Tempo
 		case CMD_TEMPO:
-			//if (!m_nTickCount)   //commented out for rewbs.tempoSlideFix
-			//{
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 				m = NULL;
@@ -1552,7 +1551,8 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Arpeggio
 		case CMD_ARPEGGIO:
-			if ((m_nTickCount) || (!pChn->nPeriod) || (!pChn->nNote)) break;
+			// IT compatibility 01. Don't ignore Arpeggio if no note is playing
+			if ((m_nTickCount) || (((!pChn->nPeriod) || !pChn->nNote) && !((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY)))) break;
 			if ((!param) && (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))) break;
 			pChn->nCommand = CMD_ARPEGGIO;
 			if (param) pChn->nArpeggio = param;
@@ -1597,14 +1597,33 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Tremor
 		case CMD_TREMOR:
-			if (m_nTickCount) break;
+			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
+
+			if((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+			{
+				// IT compatibility 12. / 13. Tremor (using modified DUMB's Tremor logic here because of old effects - http://dumb.sf.net/)
+
+				if (param && !(m_dwSongFlags & SONG_ITOLDEFFECTS)) {
+					// Old effects have different length interpretation (+1 for both on and off)
+					if (param & 0xf0) param -= 0x10;
+					if (param & 0x0f) param -= 0x01;
+				}
+				pChn->nTremorCount |= 128; // set on/off flag
+
+			}
+			else
+			{
+				// XM Tremor. Logic is being processed in sndmix.cpp
+			}
+				
 			pChn->nCommand = CMD_TREMOR;
 			if (param) pChn->nTremorParam = param;
+
 			break;
 
 		// Set Global Volume
 		case CMD_GLOBALVOLUME:
-			if (m_nTickCount) break;
+			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 			
 			if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
 			if(GetModFlag(MSF_COMPATIBLE_PLAY))
@@ -1631,7 +1650,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Set 8-bit Panning
 		case CMD_PANNING8:
-			if (m_nTickCount) break;
+			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 			if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
 			if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_XM|MOD_TYPE_MT2))
 			{
@@ -1704,7 +1723,8 @@ BOOL CSoundFile::ProcessEffects()
 			else
 			{
 				// This is how it's NOT supposed to sound...
-				if (!m_nTickCount) KeyOff(nChn);
+				if(m_dwSongFlags & SONG_FIRSTTICK)
+					KeyOff(nChn);
 			}
 			break;
 
@@ -1745,7 +1765,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Set Envelope Position
 		case CMD_SETENVPOSITION:
-			if (!m_nTickCount)
+			if(m_dwSongFlags & SONG_FIRSTTICK)
 			{
 				pChn->nVolEnvPosition = param;
 
@@ -1831,7 +1851,7 @@ BOOL CSoundFile::ProcessEffects()
 	}
 
 	// Navigation Effects
-	if (!m_nTickCount)
+	if(m_dwSongFlags & SONG_FIRSTTICK)
 	{
 		// Pattern Loop
 		if (nPatLoopRow >= 0)
@@ -2435,10 +2455,9 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	// E7x: Set Tremolo WaveForm
 	case 0x70:	pChn->nTremoloType = param & 0x07; break;
 	// E8x: Set 4-bit Panning
-	//case 0x80:  if (!m_nTickCount) { pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP; } break;
-	case 0x80:	if (!m_nTickCount)
+	case 0x80:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{ 
-					//IT compatibility (Panning always resets surround state)
+					//IT compatibility 20. (Panning always resets surround state)
 					if( TypeIsIT_MPT_XM() == false || GetModFlag(MSF_COMPATIBLE_PLAY) )
 					{
 						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
@@ -2520,8 +2539,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 				}
 				break;
 	// S8x: Set 4-bit Panning
-	//case 0x80:  if (!m_nTickCount) { pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP; } break;
-	case 0x80:	if (!m_nTickCount)
+	case 0x80:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{ 
 					if( TypeIsIT_MPT_XM() == false || GetModFlag(MSF_COMPATIBLE_PLAY) )
 					{
@@ -2537,7 +2555,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 	// S9x: Sound Control
 	case 0x90:	ExtendedChannelEffect(pChn, param & 0x0F); break;
 	// SAx: Set 64k Offset
-	case 0xA0:	if (!m_nTickCount)
+	case 0xA0:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{
 					pChn->nOldHiOffset = param;
 					if ((pChn->nRowNote) && (pChn->nRowNote < 0x80))
@@ -2794,7 +2812,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 
 	if (dwMacro != 0x30463046 && dwMacro != 0x31463046) {
 		// we don't cater for external devices at tick resolution.
-		if (!m_nTickCount) {
+		if(m_dwSongFlags & SONG_FIRSTTICK) {
 			ProcessMidiMacro(nChn, pszMidiMacro, param);
 		}
 		return;
@@ -3014,7 +3032,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 	if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 	{
 		//IT compatibility 15. Retrigger
-		if (!m_nTickCount && pChn->nRowNote)
+		if ((m_dwSongFlags & SONG_FIRSTTICK) && pChn->nRowNote)
 		{
 			pChn->nRetrigCount = param & 0xf;
 		}
@@ -3264,7 +3282,7 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 	}
 	else
 	{
-		if (param >= 0x20 && !m_nTickCount) //rewbs.tempoSlideFix: only set if not (T0x or T1x) and tick is 0
+		if (param >= 0x20 && (m_dwSongFlags & SONG_FIRSTTICK)) //rewbs.tempoSlideFix: only set if not (T0x or T1x) and tick is 0
 		{
 			m_nMusicTempo = param;
 		}
