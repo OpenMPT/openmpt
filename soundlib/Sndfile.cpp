@@ -639,8 +639,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		//IT compatibility 15. Retrigger
 		if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
-			Chn[ich].nRetrigParam = 1;
-			Chn[ich].nRetrigCount = 0;
+			Chn[ich].nRetrigParam = Chn[ich].nRetrigCount = 1;
 		}
 	}
 	// Checking instruments
@@ -1193,7 +1192,7 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 			Chn[j].nRetrigCount = 0;
 			Chn[j].nRetrigParam = 1;
 		}
-		Chn[j].nTremorCount = Chn[j].nTremorOn = Chn[j].nTremorOff = 0;
+		Chn[j].nTremorCount = 0;
 	}
 	if (!nPos)
 	{
@@ -1459,7 +1458,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 			Chn[i].nRetrigParam = 1;
 			Chn[i].nRetrigCount = 0;
 		}
-		Chn[i].nTremorCount = Chn[i].nTremorOn = Chn[i].nTremorOff = 0;
+		Chn[i].nTremorCount = 0;
 	}
 
 	if(resetMask & 4)

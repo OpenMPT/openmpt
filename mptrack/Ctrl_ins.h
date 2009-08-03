@@ -47,7 +47,8 @@ protected:
 	afx_msg void OnKillFocus(CWnd *pNewWnd);
 	afx_msg BOOL OnEraseBkGnd(CDC *) { return TRUE; }
 	afx_msg void OnPaint();
-	afx_msg void OnMapCopy();
+	afx_msg void OnMapCopySample();
+	afx_msg void OnMapCopyNote();
 	afx_msg void OnMapReset();
 	afx_msg void OnEditSample(UINT nID);
 	afx_msg void OnEditSampleMap();

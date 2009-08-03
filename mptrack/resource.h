@@ -940,7 +940,7 @@
 #define ID_SAMPLE_SETLOOPEND            32831
 #define ID_SAMPLE_SETSUSTAINSTART       32832
 #define ID_SAMPLE_SETSUSTAINEND         32833
-#define ID_NOTEMAP_COPY                 32834
+#define ID_NOTEMAP_COPY_SMP             32834
 #define ID_NOTEMAP_RESET                32835
 #define ID_PATTERN_INTERPOLATE_VOLUME   32836
 #define ID_PATTERN_INTERPOLATE_EFFECT   32837
@@ -1108,6 +1108,7 @@
 #define ID_SAMPLE_DRAW                  59224
 #define ID_SAMPLE_ADDSILENCE            59225
 #define ID_ECHOPASTE                    59226
+#define ID_NOTEMAP_COPY_NOTE            59227
 
 // Next default values for new objects
 // 
@@ -1115,7 +1116,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        519
-#define _APS_NEXT_COMMAND_VALUE         59227
+#define _APS_NEXT_COMMAND_VALUE         59228
 #define _APS_NEXT_CONTROL_VALUE         2386
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

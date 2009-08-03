@@ -1000,33 +1000,21 @@ BOOL CSoundFile::ReadNote()
 			// Tremor
 			if(pChn->nCommand == CMD_TREMOR)
 			{
-				if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+				if((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
 				{
-					// IT compatibility 12: Tremor
-					if(pChn->nTremorOn)
-						pChn->nTremorOn--;
-					if(!pChn->nTremorOn) {
-						if(pChn->nTremorOff)
-						{
-							vol = 0;
-							pChn->nTremorOff--;
-						}
+					// IT compatibility 12. / 13.: Tremor
+		
+					if ((pChn->nTremorCount & 128) && pChn->nLength) {
+						if (pChn->nTremorCount == 128)
+							pChn->nTremorCount = (pChn->nTremorParam >> 4) | 192;
+						else if (pChn->nTremorCount == 192)
+							pChn->nTremorCount = (pChn->nTremorParam & 0xf) | 128;
 						else
-						{
-							pChn->nTremorOn = pChn->nTremorParam >> 4;
-							pChn->nTremorOff = pChn->nTremorParam & 0x0F;
-							if(m_dwSongFlags & SONG_ITOLDEFFECTS)
-							{
-								pChn->nTremorOn++;
-								pChn->nTremorOff++;
-							}
-							else
-							{
-								if (!pChn->nTremorOn) pChn->nTremorOn = 1;
-								if (!pChn->nTremorOff) pChn->nTremorOff = 1;
-							}
-						}
+							pChn->nTremorCount--;
 					}
+
+					if ((pChn->nTremorCount & 192) == 128)
+						vol = 0;
 				}
 				else
 				{

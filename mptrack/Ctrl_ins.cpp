@@ -31,7 +31,8 @@ BEGIN_MESSAGE_MAP(CNoteMapWnd, CStatic)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
-	ON_COMMAND(ID_NOTEMAP_COPY,			OnMapCopy)
+	ON_COMMAND(ID_NOTEMAP_COPY_NOTE,	OnMapCopyNote)
+	ON_COMMAND(ID_NOTEMAP_COPY_SMP,		OnMapCopySample)
 	ON_COMMAND(ID_NOTEMAP_RESET,		OnMapReset)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, OnEditSampleMap)
 	ON_COMMAND(ID_INSTRUMENT_DUPLICATE, OnInstrumentDuplicate)
@@ -318,7 +319,9 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 					AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 				}
 				wsprintf(s, "Map all notes to sample %d", penv->Keyboard[m_nNote]);
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY, s);
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, s);
+				wsprintf(s, "Map all notes to %s", GetNoteStr(penv->NoteMap[m_nNote]));
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, "Reset note mapping");
 				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, "Duplicate Instrument\tShift+New");
 				SetMenuDefaultItem(hMenu, ID_INSTRUMENT_SAMPLEMAP, FALSE);
@@ -332,8 +335,36 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 }
 
 
-void CNoteMapWnd::OnMapCopy()
-//---------------------------
+void CNoteMapWnd::OnMapCopyNote()
+//-------------------------------
+{
+	if (m_pModDoc)
+	{
+		CSoundFile *pSndFile;
+		INSTRUMENTHEADER *penv;
+		
+		pSndFile = m_pModDoc->GetSoundFile();
+		penv = pSndFile->Headers[m_nInstrument];
+		if (penv)
+		{
+			BOOL bModified = FALSE;
+			UINT n = penv->NoteMap[m_nNote];
+			for (UINT i=0; i<NOTE_MAX; i++) if (penv->NoteMap[i] != n)
+			{
+				penv->NoteMap[i] = n;
+				bModified = TRUE;
+			}
+			if (bModified)
+			{
+				m_pModDoc->SetModified();
+				InvalidateRect(NULL, FALSE);
+			}
+		}
+	}
+}
+
+void CNoteMapWnd::OnMapCopySample()
+//-------------------------------------
 {
 	if (m_pModDoc)
 	{
@@ -467,8 +498,8 @@ void CNoteMapWnd::EnterNote(UINT note)
 			}
 			if (bOk) 
 			{
+				PlayNote(m_nNote + 1);
 				//SetCurrentNote(m_nNote+1);
-				PlayNote(m_nNote);
 			}
 			
 		}
