@@ -488,6 +488,7 @@ extern BYTE * GetInstrumentHeaderFieldPointer(INSTRUMENTHEADER * input, __int32 
 // --------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------
 
+#pragma warning(disable : 4324) //structure was padded due to __declspec(align())
 
 // Channel Struct
 typedef struct __declspec(align(32)) _MODCHANNEL
@@ -1265,6 +1266,9 @@ private:
 	void BuildDefaultInstrument();
 	long GetSampleOffset();
 };
+
+#pragma warning(default : 4324) //structure was padded due to __declspec(align())
+
 
 inline uint32 MODINSTRUMENT::GetSampleRate(const MODTYPE type) const
 //------------------------------------------------------------------
