@@ -705,7 +705,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	// Load plugins only when m_pModDoc != 0.  (can be == 0 for example when examining module samples in treeview.
 
 	CString sNotFound;
-	BOOL bSearchIDs[MAX_MIXPLUGINS] = {false};
+	bool bSearchIDs[MAX_MIXPLUGINS] = {false};
 	UINT iShowNotFound = 0;
 
 	if (gpMixPluginCreateProc && GetpModDoc())

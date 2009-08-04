@@ -531,7 +531,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			}
 
 			if (c == ' ') {
-				if (m_nNote < 119) m_nNote++;
+				if (m_nNote < NOTE_MAX - 1) m_nNote++;
 				InvalidateRect(NULL, FALSE);
 				PlayNote(m_nNote);
 			}
@@ -582,7 +582,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	{
 	case VK_RIGHT:
 		if (!m_bIns) { m_bIns = TRUE; bRedraw = TRUE; } else
-		if (m_nNote < 119) { m_nNote++; m_bIns = FALSE; bRedraw = TRUE; }
+		if (m_nNote < NOTE_MAX - 1) { m_nNote++; m_bIns = FALSE; bRedraw = TRUE; }
 		break;
 	case VK_LEFT:
 		if (m_bIns) { m_bIns = FALSE; bRedraw = TRUE; } else
@@ -592,7 +592,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 		if (m_nNote > 0) { m_nNote--; bRedraw = TRUE; }
 		break;
 	case VK_DOWN:
-		if (m_nNote < 119) { m_nNote++; bRedraw = TRUE; }
+		if (m_nNote < NOTE_MAX - 1) { m_nNote++; bRedraw = TRUE; }
 		break;
 	case VK_PRIOR:
 		if (m_nNote > 3) { m_nNote-=3; bRedraw = TRUE; } else
@@ -600,7 +600,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 		break;
 	case VK_NEXT:
 		if (m_nNote+3 < NOTE_MAX) { m_nNote+=3; bRedraw = TRUE; } else
-		if (m_nNote < 119) { m_nNote = 119; bRedraw = TRUE; }
+		if (m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = TRUE; }
 		break;
 	case VK_TAB:
 		return true;
@@ -2130,7 +2130,7 @@ void CCtrlInstruments::OnPPCChanged()
 	if ((!IsLocked()) && (penv))
 	{
 		int n = m_ComboPPC.GetCurSel();
-		if ((n >= 0) && (n <= 119)) {
+		if ((n >= 0) && (n <= NOTE_MAX - 1)) {
 			if (penv->nPPC != n) {
 				m_pModDoc->SetModified();				
 				penv->nPPC = n;
