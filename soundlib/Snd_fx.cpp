@@ -1415,7 +1415,7 @@ BOOL CSoundFile::ProcessEffects()
 					Vibrato(pChn, vol << 4);
 					break;
 
-				case VOLCMD_VIBRATO:
+				case VOLCMD_VIBRATODEPTH:
 					Vibrato(pChn, vol);
 					break;
 

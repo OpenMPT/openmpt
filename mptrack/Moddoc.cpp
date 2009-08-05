@@ -13,6 +13,7 @@
 #include "mod2midi.h"
 #include "vstplug.h"
 #include "version.h"
+#include "modsmp_ctrl.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -617,20 +618,43 @@ BOOL CModDoc::InitializeMod()
 	// New module ?
 	if (!m_SndFile.m_nChannels)
 	{
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//		m_SndFile.m_nChannels = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 8 : 16;
-		m_SndFile.m_nChannels = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 8 : 32;
-// -! BEHAVIOUR_CHANGE#0006
-		if (m_SndFile.Order[0] >= m_SndFile.Patterns.Size())	m_SndFile.Order[0] = 0;
+		switch(GetModType())
+		{
+		case MOD_TYPE_MOD:
+			m_SndFile.m_nChannels = 8;
+			break;
+		case MOD_TYPE_S3M:
+			m_SndFile.m_nChannels = 16;
+			break;
+		default:
+			m_SndFile.m_nChannels = 32;
+			break;
+		}
+
+		if (m_SndFile.Order[0] >= m_SndFile.Patterns.Size())
+			m_SndFile.Order[0] = 0;
+
 		if (!m_SndFile.Patterns[0])
 		{
 			m_SndFile.Patterns.Insert(0, 64);
 		}
+
 		strcpy(m_SndFile.m_szNames[0], "untitled");
+
 		m_SndFile.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
 		m_SndFile.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
-		m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = 128;
+
+		if(m_SndFile.m_nMixLevels == mixLevels_original)
+		{
+			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = 256;
+			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
+		}
+		else
+		{
+			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = 128;
+			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 128;
+		}
+
 		for (UINT init=0; init<MAX_BASECHANNELS; init++)
 		{
 			m_SndFile.ChnSettings[init].dwFlags = 0;
@@ -646,10 +670,9 @@ BOOL CModDoc::InitializeMod()
 	{
 		strcpy(m_SndFile.m_szNames[1], "untitled");
 		m_SndFile.m_nSamples = 1;
-		m_SndFile.Ins[1].nVolume = 256;
-		m_SndFile.Ins[1].nGlobalVol = 64;
-		m_SndFile.Ins[1].nPan = 128;
-		m_SndFile.Ins[1].nC4Speed = 8363;
+
+		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetInit);
+
 		if ((!m_SndFile.m_nInstruments) && (m_SndFile.m_nType & MOD_TYPE_XM))
 		{
 			m_SndFile.m_nInstruments = 1;
@@ -2341,6 +2364,7 @@ BOOL CModDoc::GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX, DWORD *prangeMin, DWORD
 		case CMD_VIBRATOVOL:
 		case CMD_GLOBALVOLSLIDE:
 		case CMD_CHANNELVOLSLIDE:
+		case CMD_PANNINGSLIDE:
 			nmax = (nType & MOD_TYPE_S3MITMPT) ? 58 : 30;
 			break;
 		case CMD_PANNING8:
@@ -2376,6 +2400,7 @@ UINT CModDoc::MapValueToPos(UINT ndx, UINT param)
 	case CMD_VIBRATOVOL:
 	case CMD_GLOBALVOLSLIDE:
 	case CMD_CHANNELVOLSLIDE:
+	case CMD_PANNINGSLIDE:
 		if (m_SndFile.m_nType & MOD_TYPE_S3MITMPT)
 		{
 			if (!param) pos = 29; else
@@ -2413,6 +2438,7 @@ UINT CModDoc::MapPosToValue(UINT ndx, UINT pos)
 	case CMD_VIBRATOVOL:
 	case CMD_GLOBALVOLSLIDE:
 	case CMD_CHANNELVOLSLIDE:
+	case CMD_PANNINGSLIDE:
 		if (m_SndFile.m_nType & MOD_TYPE_S3MITMPT)
 		{
 			if (pos < 15) param = 15-pos; else
@@ -2439,6 +2465,9 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 	if ((!pszName) || (ndx >= MAX_FXINFO) || (!gFXInfo[ndx].pszName)) return FALSE;
 	wsprintf(pszName, "%s: ", gFXInfo[ndx].pszName);
 	s[0] = 0;
+
+	string sPlusChar = "+", sMinusChar = "-";
+
 	switch(gFXInfo[ndx].dwEffect)
 	{
 	case CMD_ARPEGGIO:
@@ -2522,24 +2551,39 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 	case CMD_VIBRATOVOL:
 	case CMD_GLOBALVOLSLIDE:
 	case CMD_CHANNELVOLSLIDE:
+	case CMD_PANNINGSLIDE:
+		if(gFXInfo[ndx].dwEffect == CMD_PANNINGSLIDE)
+		{
+			if(m_SndFile.m_nType & MOD_TYPE_XM)
+			{
+				sPlusChar = "-> ";
+				sMinusChar = "<- ";
+			}
+			else
+			{
+				sPlusChar = "<- ";
+				sMinusChar = "-> ";
+			}
+		}
+
 		if (!param)
 		{
 			wsprintf(s, "continue");
 		} else
 		if ((m_SndFile.m_nType & MOD_TYPE_S3MITMPT) && ((param & 0x0F) == 0x0F) && (param & 0xF0))
 		{
-			wsprintf(s, "fine +%d", param >> 4);
+			wsprintf(s, "fine %s%d", sPlusChar.c_str(), param >> 4);
 		} else
 		if ((m_SndFile.m_nType & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0) && (param & 0x0F))
 		{
-			wsprintf(s, "fine -%d", param & 0x0F);
+			wsprintf(s, "fine %s%d", sMinusChar.c_str(), param & 0x0F);
 		} else
 		if (param & 0x0F)
 		{
-			wsprintf(s, "-%d", param & 0x0F);
+			wsprintf(s, "%s%d", sMinusChar.c_str(), param & 0x0F);
 		} else
 		{
-			wsprintf(s, "+%d", param >> 4);
+			wsprintf(s, "%s%d", sPlusChar.c_str(), param >> 4);
 		}
 		break;
 
@@ -2775,19 +2819,19 @@ const MPTVOLCMDINFO gVolCmdInfo[MAX_VOLINFO] =
 {
 	{VOLCMD_VOLUME,			MOD_TYPE_NOMOD,		"v: Set Volume"},
 	{VOLCMD_PANNING,		MOD_TYPE_NOMOD,		"p: Set Panning"},
-	{VOLCMD_VOLSLIDEUP,		MOD_TYPE_XMITMPT,		"c: Volume slide up"},
-	{VOLCMD_VOLSLIDEDOWN,	MOD_TYPE_XMITMPT,		"d: Volume slide down"},
-	{VOLCMD_FINEVOLUP,		MOD_TYPE_XMITMPT,		"a: Fine volume up"},
-	{VOLCMD_FINEVOLDOWN,	MOD_TYPE_XMITMPT,		"b: Fine volume down"},
-	{VOLCMD_VIBRATOSPEED,	MOD_TYPE_XMITMPT,		"u: Vibrato speed"},
-	{VOLCMD_VIBRATO,		MOD_TYPE_XM,		"h: Vibrato depth"},
+	{VOLCMD_VOLSLIDEUP,		MOD_TYPE_XMITMPT,	"c: Volume slide up"},
+	{VOLCMD_VOLSLIDEDOWN,	MOD_TYPE_XMITMPT,	"d: Volume slide down"},
+	{VOLCMD_FINEVOLUP,		MOD_TYPE_XMITMPT,	"a: Fine volume up"},
+	{VOLCMD_FINEVOLDOWN,	MOD_TYPE_XMITMPT,	"b: Fine volume down"},
+	{VOLCMD_VIBRATOSPEED,	MOD_TYPE_XM,		"u: Vibrato speed"},
+	{VOLCMD_VIBRATODEPTH,	MOD_TYPE_XMITMPT,	"h: Vibrato depth"},
 	{VOLCMD_PANSLIDELEFT,	MOD_TYPE_XM,		"l: Pan slide left"},
 	{VOLCMD_PANSLIDERIGHT,	MOD_TYPE_XM,		"r: Pan slide right"},
-	{VOLCMD_TONEPORTAMENTO,	MOD_TYPE_XMITMPT,		"g: Tone portamento"},
+	{VOLCMD_TONEPORTAMENTO,	MOD_TYPE_XMITMPT,	"g: Tone portamento"},
 	{VOLCMD_PORTAUP,		MOD_TYPE_ITMPT,		"f: Portamento up"},
 	{VOLCMD_PORTADOWN,		MOD_TYPE_ITMPT,		"e: Portamento down"},
 	{VOLCMD_VELOCITY,		MOD_TYPE_ITMPT,		":: velocity"},		//rewbs.velocity
-	{VOLCMD_OFFSET,		MOD_TYPE_ITMPT,		"o: offset"},		//rewbs.volOff
+	{VOLCMD_OFFSET,			MOD_TYPE_ITMPT,		"o: offset"},		//rewbs.volOff
 };
 
 

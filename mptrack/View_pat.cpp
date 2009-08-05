@@ -3690,8 +3690,8 @@ void CViewPattern::TempEnterVol(int v)
 				case kcSetVolumeVolSlideDown:	volcmd = VOLCMD_VOLSLIDEDOWN; break;
 				case kcSetVolumeFineVolUp:		volcmd = VOLCMD_FINEVOLUP; break;
 				case kcSetVolumeFineVolDown:	volcmd = VOLCMD_FINEVOLDOWN; break;
-				case kcSetVolumeVibratoSpd:		volcmd = VOLCMD_VIBRATOSPEED; break;
-				case kcSetVolumeVibrato:		volcmd = VOLCMD_VIBRATO; break;
+				case kcSetVolumeVibratoSpd:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_VIBRATOSPEED; break;
+				case kcSetVolumeVibrato:		volcmd = VOLCMD_VIBRATODEPTH; break;
 				case kcSetVolumeXMPanLeft:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDELEFT; break;
 				case kcSetVolumeXMPanRight:		if (pSndFile->m_nType & MOD_TYPE_XM) volcmd = VOLCMD_PANSLIDERIGHT; break;
 				case kcSetVolumePortamento:		volcmd = VOLCMD_TONEPORTAMENTO; break;
