@@ -320,7 +320,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				}
 				wsprintf(s, "Map all notes to sample %d", penv->Keyboard[m_nNote]);
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, s);
-				wsprintf(s, "Map all notes to %s", GetNoteStr(penv->NoteMap[m_nNote]));
+				wsprintf(s, "Map all notes to %s", pSndFile->GetNoteName(penv->NoteMap[m_nNote], m_nInstrument).c_str());
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, "Reset note mapping");
 				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, "Duplicate Instrument\tShift+New");

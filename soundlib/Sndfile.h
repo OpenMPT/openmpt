@@ -809,6 +809,15 @@ public: //Misc
 	void SetModFlags(const uint16 v) {m_ModFlags = v;}
 	bool GetModFlag(BYTE i) const {return ((m_ModFlags & (1<<i)) != 0);}
 	void SetModFlag(BYTE i, bool val) {if(i < 8*sizeof(m_ModFlags)) {m_ModFlags = (val) ? m_ModFlags |= (1 << i) : m_ModFlags &= ~(1 << i);}}
+
+	// Is compatible mode for a specific tracker turned on?
+	// Hint 1: No need to poll for MOD_TYPE_MPT, as it will automatically be linked with MOD_TYPE_IT
+	// Hint 2:  Always returns true for MOD / S3M format (if that is the format of the current file)
+	bool IsCompatibleMode(MODTYPE type) {
+		if(GetType() & type & (MOD_TYPE_MOD | MOD_TYPE_S3M))
+			return true; // those formats don't have flags so we will always return true
+		return ((GetType() & ((type & MOD_TYPE_IT) ? type | MOD_TYPE_MPT : type)) && GetModFlag(MSF_COMPATIBLE_PLAY)) ? true : false;
+	}
 	
 	//Tuning-->
 public:

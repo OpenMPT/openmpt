@@ -2432,6 +2432,9 @@ void CViewSample::OnAddSilence()
 		return;
 	}
 	
+	BeginWaitCursor();
+	BEGIN_CRITICAL();
+
 	if(dlg.m_nEditOption == 3)
 	{
 		// resize
@@ -2443,8 +2446,12 @@ void CViewSample::OnAddSilence()
 		ctrlSmp::InsertSilence(pSndFile->Ins[m_nSample], dlg.m_nSamples, (dlg.m_nEditOption == 2) ? pSndFile->Ins[m_nSample].nLength : 0, pSndFile);
 	}
 
+	END_CRITICAL();
+	EndWaitCursor();
+
 	if(nOldLength != pSndFile->Ins[m_nSample].nLength)
 	{
+		SetCurSel(0, 0);
 		pModDoc->SetModified();
 		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 	}

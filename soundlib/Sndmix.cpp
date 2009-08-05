@@ -982,7 +982,7 @@ BOOL CSoundFile::ReadNote()
 						break;
 					case 3:
 						//IT compatibility 19. Use random values
-						if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+						if(IsCompatibleMode(MOD_TYPE_IT))
 							vol += (((rand() & 0xFF) - 0x7F) * (int)pChn->nTremoloDepth) >> tremattn;
 						else
 							vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
@@ -1000,7 +1000,7 @@ BOOL CSoundFile::ReadNote()
 			// Tremor
 			if(pChn->nCommand == CMD_TREMOR)
 			{
-				if((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+				if(IsCompatibleMode(MOD_TYPE_IT))
 				{
 					// IT compatibility 12. / 13.: Tremor
 		
@@ -1192,7 +1192,7 @@ BOOL CSoundFile::ReadNote()
 				else
 				{
 					//IT playback compatibility 01 & 02
-					if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY))
+					if(IsCompatibleMode(MOD_TYPE_IT))
 					{
 						if(pChn->nArpeggio >> 4 != 0 || (pChn->nArpeggio & 0x0F) != 0)
 						{
@@ -1301,7 +1301,7 @@ BOOL CSoundFile::ReadNote()
 				switch (pChn->nVibratoType & 0x03)
 				{
 				case 1:
-					if(GetModFlag(MSF_COMPATIBLE_PLAY) == true)
+					if(IsCompatibleMode(MOD_TYPE_S3M | MOD_TYPE_MOD | MOD_TYPE_IT | MOD_TYPE_XM))
 						vdelta = -ModRampDownTable[(vibpos+16) % 64];
 					else
 						vdelta = ModRampDownTable[vibpos];
@@ -1311,7 +1311,7 @@ BOOL CSoundFile::ReadNote()
 					break;
 				case 3:
 					//IT compatibility 19. Use random values
-					if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+					if(IsCompatibleMode(MOD_TYPE_IT))
 						vdelta = (rand() & 0xFF) - 0x7F;
 					else
 						vdelta = ModRandomTable[vibpos];
@@ -1371,7 +1371,7 @@ BOOL CSoundFile::ReadNote()
 					break;
 				case 3:
 					//IT compatibility 19. Use random values
-					if((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+					if(IsCompatibleMode(MOD_TYPE_IT))
 						pdelta = (rand() & 0xFF) - 0x7F;
 					else
 						pdelta = ModRandomTable[panpos];
@@ -1603,7 +1603,7 @@ BOOL CSoundFile::ReadNote()
 				{
 					UINT pitchloopend = penv->PitchPoints[penv->nPitchLoopEnd];
 					//IT compatibility 24. Short envelope loops
-					if (m_nType != MOD_TYPE_XM && GetModFlag(MSF_COMPATIBLE_PLAY)) pitchloopend++;
+					if (IsCompatibleMode(MOD_TYPE_IT)) pitchloopend++;
 					if (pChn->nPitchEnvPosition == pitchloopend)
 						pChn->nPitchEnvPosition = penv->PitchPoints[penv->nPitchLoopStart];
 				}

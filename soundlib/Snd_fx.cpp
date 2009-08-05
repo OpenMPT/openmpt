@@ -251,7 +251,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				}
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-				if(GetModFlag(MSF_COMPATIBLE_PLAY))
+				if(IsCompatibleMode(MOD_TYPE_IT | MOD_TYPE_XM))
 					nMusicTempo = CLAMP(nMusicTempo, 32, 255);
 				else
 					nMusicTempo = CLAMP(nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
@@ -299,7 +299,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			// Global Volume
 			case CMD_GLOBALVOLUME:
 				if (!(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
-				if(GetModFlag(MSF_COMPATIBLE_PLAY))
+				if(IsCompatibleMode(MOD_TYPE_IT | MOD_TYPE_XM))
 				{
 					//IT compatibility 16. Both FT2 and IT ignore out-of-range values
 					if (param <= 128)
@@ -313,7 +313,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				break;
 			// Global Volume Slide
 			case CMD_GLOBALVOLSLIDE:
-				if(GetModFlag(MSF_COMPATIBLE_PLAY))
+				if(IsCompatibleMode(MOD_TYPE_IT | MOD_TYPE_XM))
 				{
 					//IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
 					if (param) pChn->nOldGlobalVolSlide = param; else param = pChn->nOldGlobalVolSlide;
@@ -437,7 +437,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	MODINSTRUMENT *psmp = &Ins[instr];
 	UINT note = pChn->nNewNote;
 
-	if(note == 0 && TypeIsIT_MPT() && GetModFlag(MSF_COMPATIBLE_PLAY)) return;
+	if(note == 0 && IsCompatibleMode(MOD_TYPE_IT)) return;
 
 	if ((penv) && (note) && (note <= 128))
 	{
@@ -518,7 +518,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITCOMPATMODE)
 		 || (!pChn->nLength) || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		 //IT compatibility tentative fix: Reset envelopes when instrument changes.
-		 || (TypeIsIT_MPT() && GetModFlag(MSF_COMPATIBLE_PLAY) && bInstrumentChanged))
+		 || (IsCompatibleMode(MOD_TYPE_IT) && bInstrumentChanged))
 		{
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
 			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (penv) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
@@ -553,9 +553,9 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	{
 		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE|CHN_VOLENV|CHN_PANENV|CHN_PITCHENV);
 
-		//IT compatibility tentative fix: Don't anymore change bidi loop direction when 
+		//IT compatibility tentative fix: Don't change bidi loop direction when 
 		//no sample nor instrument is changed.
-		if(TypeIsIT_MPT() && GetModFlag(MSF_COMPATIBLE_PLAY) && psmp == pChn->pInstrument && !bInstrumentChanged)
+		if(IsCompatibleMode(MOD_TYPE_IT) && psmp == pChn->pInstrument && !bInstrumentChanged)
 			pChn->dwFlags = (pChn->dwFlags & (0xFFFFFF00 | CHN_PINGPONGFLAG)) | (psmp->uFlags & 0xFF);
 		else
 			pChn->dwFlags = (pChn->dwFlags & 0xFFFFFF00) | (psmp->uFlags & 0xFF);
@@ -642,7 +642,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		}
 
 		//IT compatibility tentative fix: Clear channel note memory.
-		if(TypeIsIT_MPT() && GetModFlag(MSF_COMPATIBLE_PLAY))
+		if(IsCompatibleMode(MOD_TYPE_IT))
 		{
 			pChn->nNote = 0;
 			pChn->nNewNote = 0;
@@ -746,7 +746,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		pChn->nLeftVU = pChn->nRightVU = 0xFF;
 		pChn->dwFlags &= ~CHN_FILTER;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
-		if(!GetModFlag(MSF_COMPATIBLE_PLAY) || !(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+		if(!IsCompatibleMode(MOD_TYPE_IT))
 		{
 			//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
 			pChn->nRetrigCount = 0;
@@ -1170,15 +1170,15 @@ BOOL CSoundFile::ProcessEffects()
 				if(nStartTick == 0)
 				{
 					//IT compatibility 22. SD0 == SD1
-					if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+					if(IsCompatibleMode(MOD_TYPE_IT))
 						nStartTick = 1;
 					//ST3 ignores notes with SD0 completely
-					else if(m_nType & MOD_TYPE_S3M)
+					else if(GetType() & MOD_TYPE_S3M)
 						nStartTick = m_nMusicSpeed;
 				}
 
 				//IT compatibility 08. Handling of out-of-range delay command.
-				if(nStartTick >= m_nMusicSpeed && GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY))
+				if(nStartTick >= m_nMusicSpeed && IsCompatibleMode(MOD_TYPE_IT))
 				{
 					if(instr)
 					{
@@ -1217,10 +1217,10 @@ BOOL CSoundFile::ProcessEffects()
 		{
 			UINT note = pChn->nRowNote;
 			if (instr) pChn->nNewIns = instr;
-			if (m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM|MOD_TYPE_MT2))
+			if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 			{
 				// XM: FT2 ignores a note next to a K00 effect, and a fade-out seems to be done when no volume envelope is present (not exactly the Kxx behaviour)
-				if(cmd == CMD_KEYOFF && param == 0 && GetModFlag(MSF_COMPATIBLE_PLAY))
+				if(cmd == CMD_KEYOFF && param == 0 && IsCompatibleMode(MOD_TYPE_XM))
 				{
 					note = instr = 0;
 				}
@@ -1236,7 +1236,7 @@ BOOL CSoundFile::ProcessEffects()
 			if ((!note) && (instr)) //Case: instrument with no note data. 
 			{
 				//IT compatibility: Instrument with no note.
-				if(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY))
+				if(IsCompatibleMode(MOD_TYPE_IT))
 				{
 					if(m_nInstruments)
 					{
@@ -1352,7 +1352,7 @@ BOOL CSoundFile::ProcessEffects()
 				pChn->dwFlags |= CHN_FASTVOLRAMP;
 				pChn->nRestorePanOnNewNote = 0;
 				//IT compatibility 20. Set pan overrides random pan
-				if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+				if(IsCompatibleMode(MOD_TYPE_IT))
 					pChn->nPanSwing = 0;
 			}
 
@@ -1429,7 +1429,7 @@ BOOL CSoundFile::ProcessEffects()
 
 				case VOLCMD_PORTAUP:
 					//IT compatibility (one of the first - link effect memory)
-					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+					if(IsCompatibleMode(MOD_TYPE_IT))
 						PortamentoUp(pChn, vol << 2, true);
 					else
 						PortamentoUp(pChn, vol << 2, false);
@@ -1437,7 +1437,7 @@ BOOL CSoundFile::ProcessEffects()
 
 				case VOLCMD_PORTADOWN:
 					//IT compatibility (one of the first - link effect memory)
-					if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+					if(IsCompatibleMode(MOD_TYPE_IT))
 						PortamentoDown(pChn, vol << 2, true);
 					else
 						PortamentoDown(pChn, vol << 2, false);
@@ -1552,7 +1552,7 @@ BOOL CSoundFile::ProcessEffects()
 		// Arpeggio
 		case CMD_ARPEGGIO:
 			// IT compatibility 01. Don't ignore Arpeggio if no note is playing
-			if ((m_nTickCount) || (((!pChn->nPeriod) || !pChn->nNote) && !((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY)))) break;
+			if ((m_nTickCount) || (((!pChn->nPeriod) || !pChn->nNote) && !IsCompatibleMode(MOD_TYPE_IT | MOD_TYPE_S3M))) break;
 			if ((!param) && (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))) break;
 			pChn->nCommand = CMD_ARPEGGIO;
 			if (param) pChn->nArpeggio = param;
@@ -1566,7 +1566,7 @@ BOOL CSoundFile::ProcessEffects()
 				if (!(param & 0x0F)) param |= pChn->nRetrigParam & 0x0F;
 				param |= 0x100; // increment retrig count on first row
 			}
-			if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+			if(IsCompatibleMode(MOD_TYPE_IT))
 			{
 				// IT compatibility 15. Retrigger
 				if (param)
@@ -1599,7 +1599,7 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_TREMOR:
 			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 
-			if((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+			if(IsCompatibleMode(MOD_TYPE_IT))
 			{
 				// IT compatibility 12. / 13. Tremor (using modified DUMB's Tremor logic here because of old effects - http://dumb.sf.net/)
 
@@ -1626,7 +1626,7 @@ BOOL CSoundFile::ProcessEffects()
 			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 			
 			if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
-			if(GetModFlag(MSF_COMPATIBLE_PLAY))
+			if(IsCompatibleMode(MOD_TYPE_IT | MOD_TYPE_XM))
 			{
 				//IT compatibility 16. Both FT2 and IT ignore out-of-range values
 				if (param <= 128)
@@ -1642,7 +1642,7 @@ BOOL CSoundFile::ProcessEffects()
 		// Global Volume Slide
 		case CMD_GLOBALVOLSLIDE:
 			//IT compatibility 16. Saving last global volume slide param per channel (FT2/IT)
-			if(GetModFlag(MSF_COMPATIBLE_PLAY))
+			if(IsCompatibleMode(MOD_TYPE_IT | MOD_TYPE_XM))
 				GlobalVolSlide(param, &pChn->nOldGlobalVolSlide);
 			else
 				GlobalVolSlide(param, &m_nOldGlbVolSlide);
@@ -1668,7 +1668,7 @@ BOOL CSoundFile::ProcessEffects()
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
 			pChn->nRestorePanOnNewNote = 0;
 			//IT compatibility 20. Set pan overrides random pan
-			if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+			if(IsCompatibleMode(MOD_TYPE_IT))
 				pChn->nPanSwing = 0;
 			break;
 			
@@ -1699,7 +1699,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Key Off
 		case CMD_KEYOFF:
-			if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
+			if(IsCompatibleMode(MOD_TYPE_XM))
 			{
 				// This is how it's supposed to sound... (in FT2)
 				if (m_nTickCount == param)
@@ -1769,7 +1769,7 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				pChn->nVolEnvPosition = param;
 
-				if(!GetModFlag(MSF_COMPATIBLE_PLAY) || !(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
+				if(!IsCompatibleMode(MOD_TYPE_XM))
 				{
 					// FT2 only sets the position of the Volume envelope
 					pChn->nPanEnvPosition = param;
@@ -1897,7 +1897,7 @@ BOOL CSoundFile::ProcessEffects()
 			//end rewbs.fix 
 			 && ((nPosJump != (int)m_nCurrentPattern) || (nBreakRow != (int)m_nRow)))
 			{
-				if (nPosJump != (int)m_nCurrentPattern && !((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY)))
+				if (nPosJump != (int)m_nCurrentPattern && !IsCompatibleMode(MOD_TYPE_IT))
 				{
 					for (UINT i=0; i<m_nChannels; i++) Chn[i].nPatternLoopCount = 0;
 				}
@@ -2143,7 +2143,7 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 	pChn->dwFlags |= CHN_PORTAMENTO;
 
 	//IT compatibility 03
-	if(!(m_dwSongFlags & SONG_ITCOMPATMODE) && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetModFlag(MSF_COMPATIBLE_PLAY))
+	if(!(m_dwSongFlags & SONG_ITCOMPATMODE) && IsCompatibleMode(MOD_TYPE_IT))
 	{
 		if(param == 0) param = pChn->nOldPortaUpDown;
 		pChn->nOldPortaUpDown = param;
@@ -2229,7 +2229,7 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 	}
 
 	//IT compatibility 23. Portamento with no note
-	if(pChn->nPeriod == pChn->nPortamentoDest && ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) && GetModFlag(MSF_COMPATIBLE_PLAY))
+	if(pChn->nPeriod == pChn->nPortamentoDest && IsCompatibleMode(MOD_TYPE_IT))
 		pChn->nPortamentoDest = 0;
 
 }
@@ -2458,7 +2458,7 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	case 0x80:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{ 
 					//IT compatibility 20. (Panning always resets surround state)
-					if( TypeIsIT_MPT_XM() == false || GetModFlag(MSF_COMPATIBLE_PLAY) )
+					if(IsCompatibleMode(MOD_TYPE_S3M | MOD_TYPE_MOD | MOD_TYPE_IT | MOD_TYPE_XM))
 					{
 						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
 					}
@@ -2541,14 +2541,14 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 	// S8x: Set 4-bit Panning
 	case 0x80:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{ 
-					if( TypeIsIT_MPT_XM() == false || GetModFlag(MSF_COMPATIBLE_PLAY) )
+					if(IsCompatibleMode(MOD_TYPE_S3M | MOD_TYPE_MOD | MOD_TYPE_IT | MOD_TYPE_XM))
 					{
 						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
 					}
 					pChn->nPan = (param << 4) + 8; pChn->dwFlags |= CHN_FASTVOLRAMP;
 
 					//IT compatibility 20. Set pan overrides random pan
-					if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+					if(IsCompatibleMode(MOD_TYPE_IT))
 						pChn->nPanSwing = 0;
 				}
 				break;
@@ -3029,7 +3029,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 	UINT nRetrigCount = pChn->nRetrigCount;
 	BOOL bDoRetrig = FALSE;
 
-	if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+	if(IsCompatibleMode(MOD_TYPE_IT))
 	{
 		//IT compatibility 15. Retrigger
 		if ((m_dwSongFlags & SONG_FIRSTTICK) && pChn->nRowNote)
@@ -3074,7 +3074,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			int vol = pChn->nVolume;
 
 			// FT2 compatibility: Retrig + volume will not change volume of retrigged notes
-			if(!(m_nType & MOD_TYPE_XM) || !(pChn->nRowVolCmd == VOLCMD_VOLUME) || !GetModFlag(MSF_COMPATIBLE_PLAY))
+			if(!IsCompatibleMode(MOD_TYPE_XM) || !(pChn->nRowVolCmd == VOLCMD_VOLUME))
 			{
 				if (retrigTable1[dv])
 					vol = (vol * retrigTable1[dv]) >> 4;
@@ -3110,7 +3110,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			SampleOffset(nChn, offset, false);
 		}
 	}
-	if(!GetModFlag(MSF_COMPATIBLE_PLAY) || !(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+	if(!IsCompatibleMode(MOD_TYPE_IT))
 		pChn->nRetrigCount = (BYTE)nRetrigCount;
 }
 
@@ -3164,7 +3164,7 @@ void CSoundFile::NoteCut(UINT nChn, UINT nTick)
 	if(nTick == 0)
 	{
 		//IT compatibility 22. SC0 == SC1
-		if(GetModFlag(MSF_COMPATIBLE_PLAY) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
+		if(IsCompatibleMode(MOD_TYPE_IT))
 			nTick = 1;
 		// ST3 doesn't cut notes with SC0
 		else if(m_nType & MOD_TYPE_S3M)
@@ -3296,7 +3296,7 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 
 		// -> CODE#0016
 		// -> DESC="default tempo update"
-			if(GetModFlag(MSF_COMPATIBLE_PLAY))
+			if(IsCompatibleMode(MOD_TYPE_IT | MOD_TYPE_XM))
 				m_nMusicTempo = CLAMP(m_nMusicTempo, 32, 255);
 			else
 				m_nMusicTempo = CLAMP(m_nMusicTempo, specs.tempoMin, specs.tempoMax);
@@ -3317,7 +3317,7 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 			if(!pChn->nPatternLoopCount)
 			{
 				//IT compatibility 10. Pattern loops (+ same fix for XM and MOD files)
-				if((GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY)) || (GetType() & (MOD_TYPE_MOD)))
+				if(IsCompatibleMode(MOD_TYPE_MOD | MOD_TYPE_IT | MOD_TYPE_XM))
 					pChn->nPatternLoop = m_nRow+1;
 
 				return -1;	
@@ -3327,7 +3327,7 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 			MODCHANNEL *p = Chn;
 
 			//IT compatibility 10. Pattern loops (+ same fix for XM and MOD files)
-			if(!((GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT) && GetModFlag(MSF_COMPATIBLE_PLAY)) || (GetType() & (MOD_TYPE_MOD))))
+			if(!IsCompatibleMode(MOD_TYPE_MOD | MOD_TYPE_IT | MOD_TYPE_XM))
 			{
 				for (UINT i=0; i<m_nChannels; i++, p++) if (p != pChn)
 				{
