@@ -2690,7 +2690,7 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 					case 0xC0: // note cut
 					case 0xD0: // note delay
 						//IT compatibility 22. SD0 == SD1, SC0 == SC1
-						if(((param & 0x0F) == 1) || ((param & 0x0F) == 0 && (m_SndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY)))
+						if(((param & 0x0F) == 1) || ((param & 0x0F) == 0 && m_SndFile.IsCompatibleMode(MOD_TYPE_IT)))
 							strcpy(s, "1 frame");
 						else
 							strcat(s, " frames");
