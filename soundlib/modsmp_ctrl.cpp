@@ -198,8 +198,12 @@ void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag)
 	const UINT nSamples = rSndFile.GetNumSamples();
 	for(UINT i = 1; i <= nSamples; i++)
 	{
-		if(resetflag == SmpResetCompo)
+		switch(resetflag)
 		{
+		case SmpResetInit:
+			rSndFile.Ins[i].nC4Speed = 8363;
+			// note: break is left out intentionally. keep this order or c&p the stuff from below if you change anything!
+		case SmpResetCompo:
 			rSndFile.Ins[i].nPan = 128;
 			rSndFile.Ins[i].nGlobalVol = 64;
 			rSndFile.Ins[i].nVolume = 256;
@@ -208,6 +212,9 @@ void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag)
 			rSndFile.Ins[i].nVibSweep = 0;
 			rSndFile.Ins[i].nVibType = 0;
 			rSndFile.Ins[i].uFlags &= ~CHN_PANNING;
+			break;
+		default:
+			break;
 		}
 	}
 }

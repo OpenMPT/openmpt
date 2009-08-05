@@ -909,7 +909,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 							tx_col = MODCOLOR_PANNING;
 							break;
 						case VOLCMD_VIBRATOSPEED:
-						case VOLCMD_VIBRATO:
+						case VOLCMD_VIBRATODEPTH:
 						case VOLCMD_TONEPORTAMENTO:
 						case VOLCMD_PORTAUP:
 						case VOLCMD_PORTADOWN:

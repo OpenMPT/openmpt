@@ -496,8 +496,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nRestartPos = 0;
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
-	m_nSamplePreAmp = 128;
-	m_nVSTiVolume = 128;
+	m_nSamplePreAmp = 48;
+	m_nVSTiVolume = 48;
 	m_nPatternNames = 0;
 	m_nMaxOrderPosition = 0;
 	m_lpszPatternNames = NULL;

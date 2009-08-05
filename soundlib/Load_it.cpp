@@ -1445,8 +1445,13 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					if (vol < 125) { m[ch].volcmd = VOLCMD_PORTAUP; m[ch].vol = vol - 115; } else
 					// 193-202: Portamento To
 					if ((vol >= 193) && (vol <= 202)) { m[ch].volcmd = VOLCMD_TONEPORTAMENTO; m[ch].vol = vol - 193; } else
-					// 203-212: Vibrato
-					if ((vol >= 203) && (vol <= 212)) { m[ch].volcmd = VOLCMD_VIBRATOSPEED; m[ch].vol = vol - 203; } else
+					// 203-212: Vibrato depth
+					if ((vol >= 203) && (vol <= 212)) { 
+						m[ch].volcmd = VOLCMD_VIBRATODEPTH; m[ch].vol = vol - 203;
+						// Old versions of ModPlug seemed to save this as vibrato speed instead so let's fix that
+						if(m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54) && interpretModplugmade)
+							m[ch].volcmd = VOLCMD_VIBRATOSPEED;
+					} else
 					// 213-222: Velocity //rewbs.velocity
 					if ((vol >= 213) && (vol <= 222)) { m[ch].volcmd = VOLCMD_VELOCITY; m[ch].vol = vol - 213; } else	//rewbs.velocity
 					// 223-232: Offset //rewbs.VolOffset
@@ -2215,8 +2220,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 					case VOLCMD_VOLSLIDEDOWN:	vol = 95 + ConvertVolParam(m->vol); break;
 					case VOLCMD_FINEVOLUP:		vol = 65 + ConvertVolParam(m->vol); break;
 					case VOLCMD_FINEVOLDOWN:	vol = 75 + ConvertVolParam(m->vol); break;
-					case VOLCMD_VIBRATO:		vol = 203; break;
-					case VOLCMD_VIBRATOSPEED:	vol = 203 + ConvertVolParam(m->vol); break;
+					case VOLCMD_VIBRATODEPTH:	vol = 203 + ConvertVolParam(m->vol); break;
+					case VOLCMD_VIBRATOSPEED:	vol = 0xFF /*203 + ConvertVolParam(m->vol)*/; break; // not supported!
 					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m->vol); break;
@@ -2845,8 +2850,8 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 					case VOLCMD_VOLSLIDEDOWN:	vol = 95 + ConvertVolParam(m->vol); break;
 					case VOLCMD_FINEVOLUP:		vol = 65 + ConvertVolParam(m->vol); break;
 					case VOLCMD_FINEVOLDOWN:	vol = 75 + ConvertVolParam(m->vol); break;
-					case VOLCMD_VIBRATO:		vol = 203; break;
-					case VOLCMD_VIBRATOSPEED:	vol = 203 + ConvertVolParam(m->vol); break;
+					case VOLCMD_VIBRATODEPTH:	vol = 203 + ConvertVolParam(m->vol); break;
+					case VOLCMD_VIBRATOSPEED:	vol = 0xFF; break;
 					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m->vol); break;
