@@ -628,7 +628,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if(bMadeWithModPlug)
 	{
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
-		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 0, 0);
+		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
 	}
 
 // -> CODE#0027

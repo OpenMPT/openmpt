@@ -7,7 +7,8 @@ typedef struct tagITFILEHEADER
 {
 	DWORD id;			// 0x4D504D49
 	CHAR songname[26];
-	WORD reserved1;		// 0x1004
+	CHAR highlight_minor;
+	CHAR highlight_major;
 	WORD ordnum;
 	WORD insnum;
 	WORD smpnum;
