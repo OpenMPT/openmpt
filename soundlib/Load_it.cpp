@@ -930,7 +930,7 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	if ((!lpStream) || (dwMemLength < 0xC0)) return FALSE;
 	if ((pifh->id != 0x4D504D49 && pifh->id != 0x2e6D7074) || (pifh->insnum > 0xFF)
-	 || (!pifh->smpnum) || (pifh->smpnum >= MAX_SAMPLES) || (!pifh->ordnum)) return FALSE;
+	 || (pifh->smpnum >= MAX_SAMPLES) || (!pifh->ordnum)) return FALSE;
 	if (dwMemPos + pifh->ordnum + pifh->insnum*4
 	 + pifh->smpnum*4 + pifh->patnum*4 > dwMemLength) return FALSE;
 
@@ -963,11 +963,17 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			//TODO: Check whether above interpretation is reasonable especially for 
 			//values 0x217 and 0x200 which are the values used in 1.16. 
 			if(pifh->cwtv == 0x217 && pifh->cmwt == 0x200)
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 0, 0);
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
 		}
 	}
 	
 	if(GetType() == MOD_TYPE_IT) mptStartPos = dwMemLength;
+
+	if(pifh->cwtv >= 0x213 && !(interpretModplugmade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 00)))
+	{
+		m_nRowsPerBeat = pifh->highlight_minor;
+		m_nRowsPerMeasure = pifh->highlight_major;
+	}
 
 	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;
 	if (pifh->flags & 0x10) m_dwSongFlags |= SONG_ITOLDEFFECTS;
@@ -1233,8 +1239,7 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 // -! NEW_FEATURE#0027
 
 	// Reading Samples
-	m_nSamples = pifh->smpnum;
-	if (m_nSamples >= MAX_SAMPLES) m_nSamples = MAX_SAMPLES-1;
+	m_nSamples = CLAMP(pifh->smpnum, 1, MAX_SAMPLES - 1);
 	for (UINT nsmp=0; nsmp<pifh->smpnum; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSAMPLESTRUCT)))
 	{
 		lastSampleSize = 0; //ensure lastsamplesize = 0 if last sample is empty, else we'll skip the MPTX stuff.
@@ -1311,8 +1316,11 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 
 	// Compute extra instruments settings position
-	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[pifh->smpnum-1]);
-	dwMemPos = pis->samplepointer + lastSampleSize;
+	if(pifh->smpnum)
+	{	
+		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[pifh->smpnum-1]);
+		dwMemPos = pis->samplepointer + lastSampleSize;
+	}
 
 	// Load instrument and song extensions.
 	if(mptStartPos >= dwMemPos)
@@ -1830,7 +1838,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	header.id = 0x4D504D49;
 	lstrcpyn(header.songname, m_szNames[0], 26);
 
-	header.reserved1 = 0x1004;
+	header.highlight_minor = (BYTE)(m_nRowsPerBeat & 0xFF);
+	header.highlight_major = (BYTE)(m_nRowsPerMeasure & 0xFF);
 	header.ordnum = 0;
 	//while ((header.ordnum < MAX_ORDERS) /*&& (Order[header.ordnum] < 0xFF)*/) header.ordnum++; //rewbs.AllowSaveHiddenPatterns
 	//if (header.ordnum < MAX_ORDERS) Order[header.ordnum++] = 0xFF;
@@ -2498,7 +2507,8 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	header.id = 0x4D504D49;
 	lstrcpyn(header.songname, m_szNames[0], 26);
 
-	header.reserved1 = 0x1004;
+	header.highlight_minor = (BYTE)(m_nRowsPerBeat & 0xFF);
+	header.highlight_major = (BYTE)(m_nRowsPerMeasure & 0xFF);
 	header.ordnum = 0;
 	header.ordnum=MAX_ORDERS;
 	while (header.ordnum>0 && Order[header.ordnum-1]==0xFF) {
@@ -2851,7 +2861,10 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 					case VOLCMD_FINEVOLUP:		vol = 65 + ConvertVolParam(m->vol); break;
 					case VOLCMD_FINEVOLDOWN:	vol = 75 + ConvertVolParam(m->vol); break;
 					case VOLCMD_VIBRATODEPTH:	vol = 203 + ConvertVolParam(m->vol); break;
-					case VOLCMD_VIBRATOSPEED:	vol = 0xFF; break;
+					case VOLCMD_VIBRATOSPEED:	if(command == CMD_NONE) { // illegal command -> move if possible
+													command = CMD_VIBRATO; param = ConvertVolParam(m->vol) << 4; vol = 0xFF;
+												} else { vol = 203;}
+												break;
 					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m->vol); break;
@@ -3539,17 +3552,24 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
 
-	code = 'RPB.';							//write m_nRowsPerBeat
-	fwrite(&code, 1, sizeof(__int32), f);	
-	size = sizeof(m_nRowsPerBeat);			
-	fwrite(&size, 1, sizeof(__int16), f);
-	fwrite(&m_nRowsPerBeat, 1, size, f);	
+	// Only write highlighting information if necessary for IT format
+	if(GetType() & MOD_TYPE_XM || m_nRowsPerBeat > 0xFF)
+	{
+		code = 'RPB.';							//write m_nRowsPerBeat
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nRowsPerBeat);			
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nRowsPerBeat, 1, size, f);	
+	}
 
-	code = 'RPM.';							//write m_nRowsPerMeasure
-	fwrite(&code, 1, sizeof(__int32), f);	
-	size = sizeof(m_nRowsPerMeasure);		
-	fwrite(&size, 1, sizeof(__int16), f);
-	fwrite(&m_nRowsPerMeasure, 1, size, f);	
+	if(GetType() & MOD_TYPE_XM || m_nRowsPerMeasure > 0xFF)
+	{
+		code = 'RPM.';							//write m_nRowsPerMeasure
+		fwrite(&code, 1, sizeof(__int32), f);	
+		size = sizeof(m_nRowsPerMeasure);		
+		fwrite(&size, 1, sizeof(__int16), f);
+		fwrite(&m_nRowsPerMeasure, 1, size, f);
+	}
 
 	code = 'C...';							//write m_nChannels 
 	fwrite(&code, 1, sizeof(__int32), f);	

@@ -224,6 +224,9 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 						m->param = 0xD0 | (m->param & 0x0F);
 					}
 					break;
+				case CMD_PANNINGSLIDE:
+					// swap L/R
+					m->param = ((m->param & 0x0F) << 4) | (m->param >> 4);
 				default:
 					break;
 				}
@@ -294,6 +297,12 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 						if (m->param > spdmax) m->param = spdmax;
 					}
 					break;
+				case CMD_PANNINGSLIDE:
+					// swap L/R
+					m->param = ((m->param & 0x0F) << 4) | (m->param >> 4);
+					// remove fine slides
+					if((m->param > 0xF0) || ((m->param & 0x0F) == 0x0F && m->param != 0x0F))
+						m->command = CMD_NONE;
 				default:
 					break;
 				}
