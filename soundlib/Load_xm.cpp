@@ -100,18 +100,18 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	m_nChannels = 0;
-	if ((!lpStream) || (dwMemLength < 0xAA)) return FALSE; // the smallest XM I know is 174 Bytes
-	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 0xAA)) return false; // the smallest XM I know is 174 Bytes
+	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return false;
 	memcpy(m_szNames[0], lpStream + 17, 20);
 	dwHdrSize = LittleEndian(*((DWORD *)(lpStream+60)));
 	norders = LittleEndianW(*((WORD *)(lpStream+64)));
-	if ((!norders) || (norders > MAX_ORDERS)) return FALSE;
+	if ((!norders) || (norders > MAX_ORDERS)) return false;
 	restartpos = LittleEndianW(*((WORD *)(lpStream+66)));
 	channels = LittleEndianW(*((WORD *)(lpStream+68)));
 // -> CODE#0006
 // -> DESC="misc quantity changes"
-//	if ((!channels) || (channels > 64)) return FALSE;
-	if ((!channels) || (channels > MAX_BASECHANNELS)) return FALSE;
+//	if ((!channels) || (channels > 64)) return false;
+	if ((!channels) || (channels > MAX_BASECHANNELS)) return false;
 // -! BEHAVIOUR_CHANGE#0006
 	m_nType = MOD_TYPE_XM;
 	m_nMinPeriod = 27;
@@ -139,7 +139,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		UINT i, j;
 		for (i=0; i<norders; i++)
 		{
-			if (Order[i] < patterns) InstUsed[Order[i]] = TRUE;
+			if (Order[i] < patterns) InstUsed[Order[i]] = true;
 		}
 		j = 0;
 		for (i=0; i<256; i++)
@@ -164,7 +164,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	memset(InstUsed, 0, sizeof(InstUsed));
 	dwMemPos = dwHdrSize + 60;
-	if (dwMemPos + 8 >= dwMemLength) return TRUE;
+	if (dwMemPos + 8 >= dwMemLength) return true;
 	// Reading patterns
 	memset(channels_used, 0, sizeof(channels_used));
 	for (UINT ipat=0; ipat<patterns; ipat++)
@@ -676,10 +676,10 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	BYTE xmph[9];
 	FILE *f;
 	int i;
-	BOOL bAddChannel; // avoid odd channel count for FT2 compatibility 
+	BOOL bAddChannel = false; // avoid odd channel count for FT2 compatibility 
 
-	if ((!m_nChannels) || (!lpszFileName)) return FALSE;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
+	if ((!m_nChannels) || (!lpszFileName)) return false;
+	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	fwrite("Extended Module: ", 17, 1, f);
 	fwrite(m_szNames[0], 20, 1, f);
 	s[0] = 0x1A;
@@ -692,7 +692,7 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	header.size = sizeof(XMFILEHEADER);
 	header.norder = 0;
 	header.restartpos = m_nRestartPos;
-	header.channels = (m_nChannels + 1) & 0xFE; // avoid odd channel count for FT2 compatibility
+	header.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
 	if(m_nChannels & 1) bAddChannel = true;
 
 	header.patterns = 0;
@@ -734,7 +734,7 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 		for (UINT j=m_nChannels*PatternSize[i]; j; j--,p++)
 		{
 			UINT note = p->note;
-			UINT param = ModSaveCommand(p, TRUE);
+			UINT param = ModSaveCommand(p, true);
 			UINT command = param >> 8;
 			param &= 0xFF;
 			if (note >= 0xFE) note = 97; else
@@ -1003,15 +1003,15 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	SaveExtendedSongProperties(f);
 
 	fclose(f);
-	return TRUE;
+	return true;
 }
 
 //HACK: This is a quick fix. Needs to be better integrated into player and GUI.
 BOOL CSoundFile::SaveCompatXM(LPCSTR lpszFileName) 
 //------------------------------------------------
 {
-
-	return TRUE;
+	UNREFERENCED_PARAMETER(lpszFileName);
+	return true;
 }
 
 #endif // MODPLUG_NO_FILESAVE

@@ -405,7 +405,7 @@ LPCTSTR GetNoteStr(const MODCOMMAND::NOTE);
 extern const BYTE gEffectColors[MAX_EFFECTS];
 extern const LPCSTR szNoteNames[12];
 extern const LPCTSTR szDefaultNoteNames[NOTE_MAX];
-const LPCTSTR szSpecialNoteNames[NOTE_MAX_SPECIAL-NOTE_MIN_SPECIAL + 1] = {TEXT("PCs"), TEXT("PC"), TEXT("^^"), TEXT("==")};
+const LPCTSTR szSpecialNoteNames[NOTE_MAX_SPECIAL-NOTE_MIN_SPECIAL + 1] = {TEXT("~~"), TEXT("PCs"), TEXT("PC"), TEXT("^^"), TEXT("==")};
 const LPCTSTR szSpecialNoteShortDesc[NOTE_MAX_SPECIAL-NOTE_MIN_SPECIAL + 1] = {TEXT("Param control(smooth)"), TEXT("Param control"), TEXT("Note Cut"), TEXT("Note Off")};
 
 // Make sure that special note arrays include string for every note.

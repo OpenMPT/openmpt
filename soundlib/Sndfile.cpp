@@ -637,7 +637,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		Chn[ich].nVolume = 256;
 		Chn[ich].nCutOff = 0x7F;
 		//IT compatibility 15. Retrigger
-		if(IsCompatibleMode(MOD_TYPE_IT))
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			Chn[ich].nRetrigParam = Chn[ich].nRetrigCount = 1;
 		}
@@ -1187,7 +1187,7 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 		Chn[j].nPatternLoopCount = 0;
 		Chn[j].nPatternLoop = 0;
 		//IT compatibility 15. Retrigger
-		if(IsCompatibleMode(MOD_TYPE_IT))
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			Chn[j].nRetrigCount = 0;
 			Chn[j].nRetrigParam = 1;
@@ -1453,7 +1453,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nFadeOutVol = 0;
 		Chn[i].dwFlags |= CHN_KEYOFF|CHN_NOTEFADE;
 		//IT compatibility 15. Retrigger
-		if(IsCompatibleMode(MOD_TYPE_IT))
+		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			Chn[i].nRetrigParam = 1;
 			Chn[i].nRetrigCount = 0;

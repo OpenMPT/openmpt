@@ -139,12 +139,12 @@ bool CPattern::Shrink()
 {
 	UINT nRows, nChns;
 
-	if (!m_ModCommands || m_Rows < 32) return true;
-
 	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
 	if(sndFile.m_pModDoc == NULL) return true;
 
 	CModDoc& rModDoc = *sndFile.m_pModDoc;
+
+	if (!m_ModCommands || m_Rows < sndFile.GetModSpecifications().patternRowsMin * 2) return true;
 
 	rModDoc.BeginWaitCursor();
 	nRows = m_Rows;

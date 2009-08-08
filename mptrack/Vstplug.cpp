@@ -14,7 +14,9 @@
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
 #include "midi.h"
 #include "version.h"
+#ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
 #include "Unzip32.h"				//For CRC calculation (to detect plugins with same UID)
+#endif
 
 #ifndef NO_VST
 
@@ -34,6 +36,7 @@ AEffect *Buzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzInfo
 
 AEffect *DmoToVst(PVSTPLUGINLIB pLib);
 
+#ifdef VST_USE_ALTERNATIVE_MAGIC
 class CalculateCRC32: public CZipArchive // Make Plugin ID unique for sure
 {
 	public:
@@ -55,6 +58,7 @@ class CalculateCRC32: public CZipArchive // Make Plugin ID unique for sure
 };
 
 CalculateCRC32 CRC32;
+#endif
 
 long VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect,	long opcode, long index, long value, void *ptr, float opt)
 //----------------------------------------------------------------------------------------------------------------------------
@@ -252,10 +256,12 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				flagKey.Format("%s.Flags", IDs);
 				int infoex = CMainFrame::GetPrivateProfileLong(cacheSection, flagKey, 0, cacheFile);
 				if (infoex&1) p->bIsInstrument = TRUE;
+			#ifdef VST_USE_ALTERNATIVE_MAGIC
 				if( p->dwPluginId1 == kEffectMagic )
 				{
 					p->dwPluginId1 = CRC32.calculateFilename( p->szLibraryName ); // Make Plugin ID unique for sure (for VSTs with same UID)
 				};
+			#endif
 			#ifdef VST_LOG
 				Log("Plugin \"%s\" found in PluginCache\n", p->szLibraryName);
 			#endif
@@ -321,8 +327,11 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				 && (pEffect->dispatcher))
 				{
 					pEffect->dispatcher(pEffect, effOpen, 0,0,0,0);
-					//p->dwPluginId1 = pEffect->magic;
+				#ifdef VST_USE_ALTERNATIVE_MAGIC
 					p->dwPluginId1 = CRC32.calculateFilename( p->szLibraryName ); // Make Plugin ID unique for sure
+				#else					
+					p->dwPluginId1 = pEffect->magic;
+				#endif
 					p->dwPluginId2 = pEffect->uniqueID;
 					if ((pEffect->flags & effFlagsIsSynth) || (!pEffect->numInputs)) p->bIsInstrument = TRUE;
 				#ifdef VST_LOG

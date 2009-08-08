@@ -473,7 +473,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mod2wave.cpp"
+				RelativePath=".\Mod2wave.cpp"
 				>
 			</File>
 			<File
@@ -481,11 +481,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\moddoc.cpp"
+				RelativePath=".\Moddoc.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\modedit.cpp"
+				RelativePath=".\Modedit.cpp"
 				>
 			</File>
 			<File
@@ -634,6 +634,14 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Tables.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tagging.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\tagging.h"
 				>
 			</File>
 			<File
@@ -988,6 +996,10 @@
 			</File>
 			<File
 				RelativePath="InputHandler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\IT_DEFS.H"
 				>
 			</File>
 			<File

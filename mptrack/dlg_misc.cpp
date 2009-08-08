@@ -675,7 +675,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		{
 			combo->SetItemData(combo->AddString("any"), findAny);
 		}
-		AppendNotesToControlEx(*combo);
+		AppendNotesToControlEx(*combo, pSndFile);
 
 		UINT ncount = combo->GetCount();
 		for (UINT i=0; i<ncount; i++) if (m_nNote == combo->GetItemData(i))
@@ -1241,6 +1241,7 @@ void CPageEditNote::UpdateDialog()
 				}
 			}
 		}
+
 	}
 	// Instrument
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
@@ -1794,12 +1795,12 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_CbnZxxPreset.SetCurSel(0);
 	UpdateDialog();
 
-	int offsetx=100, offsety=30, separatorx=4, separatory=2, 
+	int offsetx=108, offsety=30, separatorx=4, separatory=2, 
 		height=18, widthMacro=30, widthVal=55, widthType=135, widthBtn=60;
 	
 	for (UINT m=0; m<NMACROS; m++)
 	{
-		m_EditMacro[m].Create("", BS_FLAT | WS_CHILD | WS_VISIBLE | WS_TABSTOP /*| WS_BORDER*/,
+		m_EditMacro[m].Create("", /*BS_FLAT |*/ WS_CHILD | WS_VISIBLE | WS_TABSTOP /*| WS_BORDER*/,
 			CRect(offsetx, offsety+m*(separatory+height), offsetx+widthMacro, offsety+m*(separatory+height)+height), this, ID_PLUGSELECT+NMACROS+m);
 		m_EditMacro[m].SetFont(GetFont());
 		

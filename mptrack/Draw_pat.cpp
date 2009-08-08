@@ -337,6 +337,10 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 	{
 		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 16*COLUMN_HEIGHT);
 	} else
+	if(note >= NOTE_FADE)
+	{
+		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 17*COLUMN_HEIGHT);
+	} else
 	{
 		if(pTuning)
 		{   // Drawing custom note names

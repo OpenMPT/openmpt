@@ -81,7 +81,7 @@ bool CPatternRandomizerGUI::openEditor() {
 
 bool CPatternRandomizerGUI::isVisible() {
 //----------------------------------
-	return IsWindowVisible();
+	return (bool)IsWindowVisible();
 }
 
 

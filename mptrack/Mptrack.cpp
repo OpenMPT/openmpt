@@ -243,7 +243,7 @@ static void ShowChangesDialog()
 				"\n"
 				"    For more detailed list of changes, see history.txt.";
 			
-	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT v." MPT_VERSION_STR, MB_ICONINFORMATION);
+	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT " MPT_VERSION_STR, MB_ICONINFORMATION);
 	*/
 }
 
@@ -1655,7 +1655,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_bmp.LoadBitmap(MAKEINTRESOURCE(IDB_MPTRACK));
 	wsprintf(s, "Build Date: %s", gszBuildDate);
 	SetDlgItemText(IDC_EDIT2, s);
-	SetDlgItemText(IDC_EDIT3, CString("OpenMPT, version ") + MptVersion::str + " (development build)");
+	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::str + " (development build)");
 
 	m_heContact.SetWindowText(
 "Contact / Discussion:\r\n\
@@ -1690,9 +1690,11 @@ http://sourceforge.net/projects/modplug/");
 		"http://www.un4seen.com/mo3.html|"
 		"coda for sample drawing code|"
 		"http://coda.s3m.us/|"
+		"Storlek for all the IT compatibility hints and testcases|"
+		"http://schismtracker.org/|"
 		"Pel K. Txnder for the scrolling credits control :)|"
 		"http://tinyurl.com/4yze8|"
-		"The people at Modplug forums for crucial contribution|"
+		"|The people at Modplug forums for crucial contribution|"
 		"in the form of ideas, testing and support; thanks|"
 		"particularly to:|"
 		"LPChip, Ganja, Diamond, Nofold, Goor00, Georg|"
