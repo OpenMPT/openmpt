@@ -1,16 +1,6 @@
 #ifndef _MOD2WAVE_H_
 #define _MOD2WAVE_H_
-
-typedef struct _TAGID3INFO
-{
-	CHAR tag[3];
-	CHAR title[30];
-	CHAR artist[30];
-	CHAR album[30];
-	CHAR year[4];
-	CHAR comments[30];
-	BYTE genre;
-} TAGID3INFO, *PTAGID3INFO;
+#include "tagging.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Direct To Disk Recording
@@ -86,12 +76,12 @@ public:
 	enum { MAX_DRIVERS=32 };
 	DWORD m_dwFileLimit, m_dwSongLimit;
 	BOOL m_bSaveInfoField;
-	TAGID3INFO m_id3tag;
+	CFileTagging m_FileTags;
 
 protected:
 	CSoundFile *m_pSndFile;
 	CComboBox m_CbnFormat, m_CbnDriver, m_CbnGenre;
-	CEdit m_EditAuthor, m_EditCopyright, m_EditAlbum, m_EditYear;
+	CEdit m_EditAuthor, m_EditURL, m_EditAlbum, m_EditYear;
 	UINT m_nFormatIndex, m_nDriverIndex, m_nNumFormats, m_nNumDrivers;
 	MPEGLAYER3WAVEFORMAT Formats[MAX_FORMATS];
 	HACMDRIVERID Drivers[MAX_DRIVERS];
@@ -131,15 +121,15 @@ public:
 	BOOL m_bAbort, m_bSaveInfoField;
 	PWAVEFORMATEX m_pwfx;
 	HACMDRIVERID m_hadid;
-	TAGID3INFO m_id3tag;
+	CFileTagging m_FileTags;
 
 public:
-	CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, HACMDRIVERID hadid, PTAGID3INFO pInfo, CWnd *parent=NULL);
+	CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, HACMDRIVERID hadid, CFileTagging *pInfo, CWnd *parent=NULL);
 	BOOL OnInitDialog();
 	void OnCancel() { m_bAbort = TRUE; }
 	afx_msg void OnButton1();
 	DECLARE_MESSAGE_MAP()
-};
 
+};
 
 #endif // _MOD2WAVE_H_

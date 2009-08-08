@@ -7,45 +7,6 @@
 #include "vstplug.h"
 #include "mod2wave.h"
 
-#define NUM_GENRES		128
-
-static LPCSTR gpszGenreNames[NUM_GENRES] =
-{
-	"Blues",			"Classic Rock",			"Country",			"Dance",
-	"Disco",			"Funk",					"Grunge",			"Hip Hop",
-	"Jazz",				"Metal",				"New_Age",			"Oldies",
-	"Other",			"Pop",					"Rhythm n Blues",	"Rap",
-	"Reggae",			"Rock",					"Techno",			"Industrial",
-	"Alternative",		"Ska",					"Death Metal",		"Pranks",
-	"Soundtrack",		"Euro Techno",			"Ambient",			"Trip_Hop",
-	"Vocal",			"Jazz Funk",			"Fusion",			"Trance",
-	"Classical",		"Instrumental",			"Acid",				"House",
-	"Game",				"Sound Clip",			"Gospel",			"Noise",
-	"Alternative Rock",	"Bass",					"Soul",				"Punk",
-	"Space",			"Meditative",			"Instrumental Pop",	"Instrumental Rock",
-	"Ethnic",			"Gothic",				"Darkwave",			"Techno Industrial",
-	"Electronic",		"Pop Folk",				"Eurodance",		"Dream",
-	"Southern Rock",	"Comedy",				"Cult",				"Gangsta",
-	"Top 40",			"Christian Rap",		"Pop Funk",			"Jungle",
-	"Native_American",	"Cabaret",				"New_Wave",			"Psychadelic",
-	"Rave",				"ShowTunes",			"Trailer",			"Lo Fi",
-	"Tribal",			"Acid Punk",			"Acid Jazz",		"Polka",
-	"Retro",			"Musical",				"Rock n Roll",		"Hard_Rock",
-	"Folk",				"Folk Rock",			"National Folk",	"Swing",
-	"Fast Fusion",		"Bebob",				"Latin",			"Revival",
-	"Celtic",			"Bluegrass",			"Avantgarde",		"Gothic Rock",
-	"Progressive Rock",	"Psychedelic Rock",		"Symphonic Rock",	"Slow Rock",
-	"Big Band",			"Chorus",				"Easy Listening",	"Acoustic",
-	"Humour",			"Speech",				"Chanson",			"Opera",
-	"Chamber Music",	"Sonata",				"Symphony",			"Booty_Bass",
-	"Primus",			"Porn Groove",			"Satire",			"Slow Jam",
-	"Club",				"Tango",				"Samba",			"Folklore",
-	"Ballad",			"Power Ballad",			"Rhytmic Soul",		"Freestyle",
-	"Duet",				"Punk Rock",			"Drum Solo",		"Acapella",
-	"Euro House",		"Dance Hall",			"Goa",				"Drum n Bass",
-};
-
-
 extern UINT nMixingRates[NUMMIXRATE];
 extern LPCSTR gszChnCfgNames[3];
 
@@ -346,7 +307,7 @@ void CLayer3Convert::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2,		m_CbnDriver);
 	DDX_Control(pDX, IDC_COMBO3,		m_CbnGenre);
 	DDX_Control(pDX, IDC_EDIT3,			m_EditAuthor);
-	DDX_Control(pDX, IDC_EDIT4,			m_EditCopyright);
+	DDX_Control(pDX, IDC_EDIT4,			m_EditURL);
 	DDX_Control(pDX, IDC_EDIT5,			m_EditAlbum);
 	DDX_Control(pDX, IDC_EDIT6,			m_EditYear);
 	//}}AFX_DATA_MAP
@@ -386,10 +347,10 @@ BOOL CLayer3Convert::OnInitDialog()
 	{
 		m_CbnGenre.SetItemData(m_CbnGenre.AddString(gpszGenreNames[iGnr]), iGnr);
 	}
-	UINT nSel = m_CbnGenre.AddString("Unspecified");
-	m_CbnGenre.SetItemData(nSel, 0xff);
-	m_CbnGenre.SetCurSel(nSel);
-	m_EditYear.SetWindowText("2000");
+
+	m_EditYear.SetLimitText(4);
+	CTime tTime = CTime::GetCurrentTime();
+	m_EditYear.SetWindowText(tTime.Format("%Y"));
 	UpdateDialog();
 	return TRUE;
 }
@@ -538,35 +499,56 @@ void CLayer3Convert::OnCheck2()
 void CLayer3Convert::OnOK()
 //-------------------------
 {
-	CHAR s[40];
+	CHAR sText[256] = {0};
 
 	if (m_dwFileLimit) m_dwFileLimit = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 	if (m_dwSongLimit) m_dwSongLimit = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
 	m_nFormatIndex = m_CbnFormat.GetItemData(m_CbnFormat.GetCurSel());
 	m_nDriverIndex = m_CbnDriver.GetItemData(m_CbnDriver.GetCurSel());
 	m_bSaveInfoField = IsDlgButtonChecked(IDC_CHECK3);
-	memset(&m_id3tag, 0, sizeof(m_id3tag));
-	m_id3tag.tag[0] = 'T'; m_id3tag.tag[1] = 'A'; m_id3tag.tag[2] = 'G';
-	memset(s, 0, sizeof(s)); m_pSndFile->GetTitle(s); s[30] = 0;
-	memcpy(m_id3tag.title, s, 30);
-	memset(s, 0, sizeof(s)); m_EditAuthor.GetWindowText(s, 31);
-	memcpy(m_id3tag.artist, s, 30);
-	memset(s, 0, sizeof(s)); m_EditCopyright.GetWindowText(s, 31);
-	memcpy(m_id3tag.comments, s, 30);
-	memset(s, 0, sizeof(s)); m_EditAlbum.GetWindowText(s, 31);
-	memcpy(m_id3tag.album, s, 30);
-	strcpy(s, "2000");
-	m_EditYear.GetWindowText(s, 5);
-	if (!s[0]) strcpy(s, "2000");
-	memcpy(m_id3tag.year, s, 4);
-	m_id3tag.genre = (BYTE)m_CbnGenre.GetItemData(m_CbnGenre.GetCurSel());
-	for (UINT i=0; i<30; i++)
+
+	m_FileTags.title = m_pSndFile->GetTitle();
+
+	m_EditAuthor.GetWindowText(sText, sizeof(sText));
+	m_FileTags.artist = sText;
+
+	m_EditURL.GetWindowText(sText, sizeof(sText));
+	m_FileTags.url = sText;
+
+	m_EditAlbum.GetWindowText(sText, sizeof(sText));
+	m_FileTags.album = sText;
+
+	m_EditYear.GetWindowText(sText, min(5, sizeof(sText)));
+	m_FileTags.year = sText;
+	if(m_FileTags.year == "0")
+		m_FileTags.year = "";
+
+	m_CbnGenre.GetWindowText(sText, sizeof(sText));
+	m_FileTags.genre = sText;
+
+	if (m_pSndFile->m_lpszSongComments)
 	{
-		if (m_id3tag.title[i] == 0) m_id3tag.title[i] = ' ';
-		if (m_id3tag.artist[i] == 0) m_id3tag.artist[i] = ' ';
-		if (m_id3tag.album[i] == 0) m_id3tag.album[i] = ' ';
-		if (m_id3tag.comments[i] == 0) m_id3tag.comments[i] = ' ';
+		m_FileTags.comments = m_pSndFile->m_lpszSongComments;
+		// convert \r to \n, remove bad characters
+		for(UINT i = 0; i < m_FileTags.comments.length(); i++)
+		{
+			if(m_FileTags.comments.substr(i, 1) == "\r")
+				m_FileTags.comments.replace(i, 1, "\n");
+			if(m_FileTags.comments.substr(i, 1) < " " && m_FileTags.comments.substr(i, 1) != "\n")
+				m_FileTags.comments.replace(i, 1, " ");
+		}
+
+		/*UINT spos;
+		while((spos = m_FileTags.comments.find("\r")) != string::npos)
+		{
+			m_FileTags.comments.replace(spos, 1, "\n");
+		}*/
 	}
+	else
+	{
+		m_FileTags.comments = "";
+	}
+
 	CDialog::OnOK();
 }
 
@@ -830,7 +812,7 @@ BEGIN_MESSAGE_MAP(CDoAcmConvert, CDialog)
 END_MESSAGE_MAP()
 
 
-CDoAcmConvert::CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, HACMDRIVERID hadid, PTAGID3INFO pTag, CWnd *parent):
+CDoAcmConvert::CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pwfx, HACMDRIVERID hadid, CFileTagging *pTag, CWnd *parent):
 	CDialog(IDD_PROGRESS, parent)
 //--------------------------------------------------------------------------------------------------------------------------------------
 {
@@ -841,10 +823,9 @@ CDoAcmConvert::CDoAcmConvert(CSoundFile *sndfile, LPCSTR fname, PWAVEFORMATEX pw
 	m_pwfx = pwfx;
 	m_hadid = hadid;
 	m_bSaveInfoField = FALSE;
-	memset(&m_id3tag, 0, sizeof(m_id3tag));
 	if (pTag)
 	{
-		m_id3tag = *pTag;
+		m_FileTags = *pTag;
 		m_bSaveInfoField = TRUE;
 	}
 }
@@ -940,6 +921,12 @@ void CDoAcmConvert::OnButton1()
 		data_ofs = ftell(f);
 		fwrite(&wdh, 1, sizeof(wdh), f);
 		wfh.filesize += sizeof(wdh);
+	} else
+	if(!bSaveWave && m_bSaveInfoField)
+	{
+		// Write ID3v2.4 Tags
+		m_FileTags.WriteID3v2Tags(f);
+
 	}
 	oldsndcfg = CSoundFile::gdwSoundSetup;
 	oldrepeat = m_pSndFile->GetRepeatCount();
@@ -1034,85 +1021,7 @@ void CDoAcmConvert::OnButton1()
 	{
 		if (m_bSaveInfoField)
 		{
-			WAVEFILEHEADER list;
-			DWORD info_ofs, end_ofs;
-			DWORD zero = 0;
-			
-			info_ofs = ftell(f);
-			if (info_ofs & 1)
-			{
-				wdh.length++;
-				fwrite(&zero, 1, 1, f);
-				info_ofs++;
-			}
-			list.id_RIFF = IFFID_LIST;
-			list.id_WAVE = IFFID_INFO;
-			list.filesize = 4;
-			fwrite(&list, 1, sizeof(list), f);
-			// ICMT
-			if (m_pSndFile->m_lpszSongComments)
-			{
-				CHAR *pszComments = NULL;
-				UINT szlen = m_pSndFile->GetSongComments(NULL, 8192, 80);
-				if (szlen > 1) pszComments = new CHAR[szlen+1];
-				if (pszComments)
-				{
-					szlen = m_pSndFile->GetSongComments(pszComments, szlen, 80);
-					pszComments[szlen] = 0;
-					chunk.id_data = IFFID_ICMT;
-					chunk.length = strlen(pszComments)+1;
-					fwrite(&chunk, 1, sizeof(chunk), f);
-					fwrite(pszComments, 1, chunk.length, f);
-					list.filesize += chunk.length + sizeof(chunk);
-					if (chunk.length & 1)
-					{
-						fwrite(&zero, 1, 1, f);
-						list.filesize++;
-					}
-					delete[] pszComments;
-				}
-			}
-			for (UINT iCmt=0; iCmt<=6; iCmt++)
-			{
-				s[0] = 0;
-				switch(iCmt)
-				{
-				// INAM
-				case 0: memcpy(s, m_id3tag.title, 30); s[30] = 0; chunk.id_data = IFFID_INAM; break;
-				// IART
-				case 1: memcpy(s, m_id3tag.artist, 30); s[30] = 0; chunk.id_data = IFFID_IART; break;
-				// IPRD
-				case 2: memcpy(s, m_id3tag.album, 30); s[30] = 0; chunk.id_data = IFFID_IPRD; break;
-				// ICOP
-				case 3: memcpy(s, m_id3tag.comments, 30); s[30] = 0; chunk.id_data = IFFID_ICOP; break;
-				// IGNR
-				case 4: if (m_id3tag.genre < NUM_GENRES) strcpy(s, gpszGenreNames[m_id3tag.genre]); chunk.id_data = IFFID_IGNR; break;
-				// ISFT
-				case 5: strcpy(s, "OpenMPT"); chunk.id_data = IFFID_ISFT; break;
-				// ICRD
-				case 6: memcpy(s, m_id3tag.year, 4); s[4] = 0; strcat(s, "-01-01"); if (s[0] <= '0') s[0] = 0; chunk.id_data = IFFID_ICRD; break;
-				}
-				int l = strlen(s);
-				while ((l > 0) && (s[l-1] == ' ')) s[--l] = 0;
-				if (s[0])
-				{
-					chunk.length = strlen(s)+1;
-					fwrite(&chunk, 1, sizeof(chunk), f);
-					fwrite(s, 1, chunk.length, f);
-					list.filesize += chunk.length + sizeof(chunk);
-					if (chunk.length & 1)
-					{
-						fwrite(&zero, 1, 1, f);
-						list.filesize++;
-					}
-				}
-			}
-			// Update INFO size
-			end_ofs = ftell(f);
-			fseek(f, info_ofs, SEEK_SET);
-			fwrite(&list, 1, sizeof(list), f);
-			fseek(f, end_ofs, SEEK_SET);
-			wfh.filesize += list.filesize + 8;
+			m_FileTags.WriteWaveTags(&wdh, &wfh, f);
 		}
 		wfh.filesize += wdh.length;
 		fseek(f, 0, SEEK_SET);
@@ -1123,10 +1032,6 @@ void CDoAcmConvert::OnButton1()
 			fwrite(&wdh, 1, sizeof(wdh), f);
 		}
 	} else
-	if (m_bSaveInfoField)
-	{
-		fwrite(&m_id3tag, 1, sizeof(m_id3tag), f);
-	}
 	fclose(f);
 	if (!m_bAbort) retval = IDOK;
 OnError:

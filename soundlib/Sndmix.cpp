@@ -982,7 +982,7 @@ BOOL CSoundFile::ReadNote()
 						break;
 					case 3:
 						//IT compatibility 19. Use random values
-						if(IsCompatibleMode(MOD_TYPE_IT))
+						if(IsCompatibleMode(TRK_IMPULSETRACKER))
 							vol += (((rand() & 0xFF) - 0x7F) * (int)pChn->nTremoloDepth) >> tremattn;
 						else
 							vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
@@ -1000,7 +1000,7 @@ BOOL CSoundFile::ReadNote()
 			// Tremor
 			if(pChn->nCommand == CMD_TREMOR)
 			{
-				if(IsCompatibleMode(MOD_TYPE_IT))
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					// IT compatibility 12. / 13.: Tremor
 		
@@ -1192,7 +1192,7 @@ BOOL CSoundFile::ReadNote()
 				else
 				{
 					//IT playback compatibility 01 & 02
-					if(IsCompatibleMode(MOD_TYPE_IT))
+					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 					{
 						if(pChn->nArpeggio >> 4 != 0 || (pChn->nArpeggio & 0x0F) != 0)
 						{
@@ -1301,7 +1301,7 @@ BOOL CSoundFile::ReadNote()
 				switch (pChn->nVibratoType & 0x03)
 				{
 				case 1:
-					if(IsCompatibleMode(MOD_TYPE_S3M | MOD_TYPE_MOD | MOD_TYPE_IT | MOD_TYPE_XM))
+					if(IsCompatibleMode(TRK_ALLTRACKERS))
 						vdelta = -ModRampDownTable[(vibpos+16) % 64];
 					else
 						vdelta = ModRampDownTable[vibpos];
@@ -1311,7 +1311,7 @@ BOOL CSoundFile::ReadNote()
 					break;
 				case 3:
 					//IT compatibility 19. Use random values
-					if(IsCompatibleMode(MOD_TYPE_IT))
+					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						vdelta = (rand() & 0xFF) - 0x7F;
 					else
 						vdelta = ModRandomTable[vibpos];
@@ -1371,7 +1371,7 @@ BOOL CSoundFile::ReadNote()
 					break;
 				case 3:
 					//IT compatibility 19. Use random values
-					if(IsCompatibleMode(MOD_TYPE_IT))
+					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						pdelta = (rand() & 0xFF) - 0x7F;
 					else
 						pdelta = ModRandomTable[panpos];
@@ -1603,7 +1603,7 @@ BOOL CSoundFile::ReadNote()
 				{
 					UINT pitchloopend = penv->PitchPoints[penv->nPitchLoopEnd];
 					//IT compatibility 24. Short envelope loops
-					if (IsCompatibleMode(MOD_TYPE_IT)) pitchloopend++;
+					if (IsCompatibleMode(TRK_IMPULSETRACKER)) pitchloopend++;
 					if (pChn->nPitchEnvPosition == pitchloopend)
 						pChn->nPitchEnvPosition = penv->PitchPoints[penv->nPitchLoopStart];
 				}

@@ -18,6 +18,7 @@ struct CModSpecifications
 	MODCOMMAND::NOTE noteMax; // Maximum note index (index starts from 1)
 	bool hasNoteCut;		  // True if format has notecut.
 	bool hasNoteOff;		  // True if format has noteoff.
+	bool hasNoteFade;		  // True if format has notefade.
 	PATTERNINDEX patternsMax;
 	ORDERINDEX ordersMax;
 	CHANNELINDEX channelsMin; // Minimum number of editable channels in pattern.
@@ -51,6 +52,7 @@ const CModSpecifications mptm =
 	NOTE_MAX,							//Maximum note index
 	true,								//Has notecut.
 	true,								//Has noteoff.
+	true,								//Has notefade.
 	4000,								//Pattern max.
 	4000,								//Order max.
 	1,									//Channel min
@@ -79,6 +81,7 @@ const CModSpecifications mod =
 	108,								//Maximum note index
 	false,								//No notecut.
 	false,								//No noteoff.
+	false,								//Has notefade.
 	64,									//Pattern max.
 	128,								//Order max.
 	4,									//Channel min
@@ -105,6 +108,7 @@ const CModSpecifications modEx =
 	108,								//Maximum note index
 	false,								//No notecut.
 	false,								//No noteoff.
+	false,								//Has notefade.
 	64,									//Pattern max.
 	128,								//Order max.
 	4,									//Channel min
@@ -130,6 +134,7 @@ const CModSpecifications xm =
 	108,								//Maximum note index
 	false,								//No notecut.
 	true,								//Has noteoff.
+	false,								//Has notefade.
 	64,									//Pattern max.
 	128,								//Order max.
 	1,									//Channel min
@@ -156,6 +161,7 @@ const CModSpecifications xmEx =
 	108,								//Maximum note index
 	false,								//No notecut.
 	true,								//Has noteoff.
+	false,								//Has notefade.
 	240,								//Pattern max.
 	256,								//Order max.
 	1,									//Channel min
@@ -181,6 +187,7 @@ const CModSpecifications s3m =
 	NOTE_MAX,							//Maximum note index
 	true,								//Has notecut.
 	false,								//No noteoff.
+	false,								//Has notefade.
 	240,								//Pattern max.
 	256,								//Order max.
 	1,									//Channel min
@@ -207,6 +214,7 @@ const CModSpecifications s3mEx =
 	NOTE_MAX,							//Maximum note index
 	true,								//Has notecut.
 	false,								//No noteoff.
+	false,								//Has notefade.
 	240,								//Pattern max.
 	256,								//Order max.
 	1,									//Channel min
@@ -232,6 +240,7 @@ const CModSpecifications it =
 	NOTE_MAX,							//Maximum note index
 	true,								//Has notecut.
 	true,								//Has noteoff.
+	true,								//Has notefade.
 	240,								//Pattern max.
 	200,								//Order max.
 	1,									//Channel min
@@ -257,6 +266,7 @@ const CModSpecifications itEx =
 	NOTE_MAX,							//Maximum note index
 	true,								//Has notecut.
 	true,								//Has noteoff.
+	true,								//Has notefade.
 	240,								//Pattern max.
 	256,								//Order max.
 	1,									//Channel min

@@ -352,16 +352,16 @@
 				RelativePath=".\mod2midi.cpp">
 			</File>
 			<File
-				RelativePath=".\mod2wave.cpp">
+				RelativePath=".\Mod2wave.cpp">
 			</File>
 			<File
 				RelativePath="..\soundlib\mod_specifications.cpp">
 			</File>
 			<File
-				RelativePath=".\moddoc.cpp">
+				RelativePath=".\Moddoc.cpp">
 			</File>
 			<File
-				RelativePath=".\modedit.cpp">
+				RelativePath=".\Modedit.cpp">
 			</File>
 			<File
 				RelativePath="..\soundlib\modsmp_ctrl.cpp">
@@ -473,6 +473,12 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\Tables.cpp">
+			</File>
+			<File
+				RelativePath=".\tagging.cpp">
+			</File>
+			<File
+				RelativePath=".\tagging.h">
 			</File>
 			<File
 				RelativePath=".\view_com.cpp">
@@ -742,6 +748,9 @@
 			</File>
 			<File
 				RelativePath="InputHandler.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\IT_DEFS.H">
 			</File>
 			<File
 				RelativePath=".\KeyboardSettings.h">

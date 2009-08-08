@@ -165,6 +165,29 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
 		{
 
+			//////////////////////////
+			// Convert 8-bit Panning
+			if(m->command == CMD_PANNING8)
+			{
+				if(newTypeIsS3M)
+				{
+					m->param = (m->param + 1) >> 1;
+				}
+				else if(oldTypeIsS3M)
+				{
+					if(m->param == 0xA4)
+					{
+						// surround remap
+						m->command = (newTypeIsIT_MPT) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN;
+						m->param = 0x91;
+					}
+					else
+					{
+						m->param = min(m->param << 1, 0xFF);
+					}
+				}
+			}
+
 			/////////////////////////////////////////
 			// Convert MOD / XM to S3M / IT / MPTM
 			if(oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
@@ -211,7 +234,15 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 					case 0x60:
 					case 0x70:
 					case 0x90:
-					case 0xA0: 	m->command = CMD_S3MCMDEX; break;
+					case 0xA0:
+						m->command = CMD_S3MCMDEX;
+						// surround remap (this is the "official" command)
+						if(newTypeIsS3M && m->param == 0x91)
+						{
+							m->command = CMD_PANNING8;
+							m->param = 0xA4;
+						}
+						break;
 					}
 					break;
 				case CMD_KEYOFF:
@@ -237,6 +268,9 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			// Convert S3M / IT / MPTM to MOD / XM
 			else if (oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
 			{
+				if(m->note == NOTE_NOTECUT || m->note == NOTE_FADE)
+					m->note = NOTE_KEYOFF;
+				
 				switch(m->command)
 				{
 				case CMD_S3MCMDEX:
@@ -308,38 +342,16 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 				}
 			} // End if (oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
 
-			///////////////////////
-			// Convert S3M to IT
-			if (oldTypeIsS3M && newTypeIsIT_MPT)
-			{
-				switch(m->command)
-				{
-				case CMD_PANNING8:
-					if(m->param == 0xA4)
-					{
-						// surround remap
-						m->command = CMD_S3MCMDEX;
-						m->param = 0x91;
-					}
-					else
-					{
-						m->param = min(m->param << 1, 0xFF);
-					}
-					break;
-				default:
-					break;
-				}
-			} // End if (oldTypeIsS3M && newTypeIsIT_MPT)
 
 			///////////////////////
 			// Convert IT to S3M
 			else if (oldTypeIsIT_MPT && newTypeIsS3M)
 			{
+				if(m->note == NOTE_KEYOFF || m->note == NOTE_FADE)
+					m->note = NOTE_NOTECUT;
+
 				switch(m->command)
 				{
-				case CMD_PANNING8:
-					m->param = (m->param + 1) >> 1;
-					break;
 				case CMD_S3MCMDEX:
 					if(m->param == 0x91)
 					{
@@ -356,11 +368,29 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 				}
 			} // End if (oldTypeIsIT_MPT && newTypeIsS3M)
 
-			///////////////////////////////////////////////////
-			// Convert anything to MOD - remove volume column
+
+			////////////////////////
+			// Convert XM arpeggio
+			if(m->command == CMD_ARPEGGIO && (newTypeIsXM || oldTypeIsXM))
+			{
+				// swap notes
+				m->param = ((m->param & 0x0F) << 4) | ((m->param & 0xF0) >> 4);
+			}
+
+
+			//////////////////////////////////////////////////////////////////
+			// Convert anything to MOD - remove volume column, adjust retrig
 			if (newTypeIsMOD)
 			{
-				if(!m->command) switch(m->volcmd)
+				if(m->command) switch(m->command)
+				{
+				case CMD_RETRIG:
+					m->command = CMD_MODCMDEX;
+					m->param = 0x90 | (m->param & 0x0F);
+					break;
+				}
+
+				else switch(m->volcmd)
 				{
 				case VOLCMD_VOLUME:
 					m->command = CMD_VOLUME;
@@ -497,7 +527,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 				}
 			} // End if (newTypeIsS3M)
 
-			///////////////////////////////////////////////////
+			//////////////////////////////////////////////////
 			// Convert anything to XM - adjust volume column
 			if (newTypeIsXM)
 			{
@@ -534,6 +564,19 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			{
 				if(!m->command) switch(m->volcmd)
 				{
+				case VOLCMD_VOLSLIDEDOWN:
+				case VOLCMD_VOLSLIDEUP:
+				case VOLCMD_FINEVOLDOWN:
+				case VOLCMD_FINEVOLUP:
+				case VOLCMD_PORTADOWN:
+				case VOLCMD_PORTAUP:
+				case VOLCMD_TONEPORTAMENTO:
+				case VOLCMD_VIBRATODEPTH:
+				// OpenMPT-specific commands
+				case VOLCMD_OFFSET:
+				case VOLCMD_VELOCITY:
+					m->vol = min(m->vol, 9);
+					break;
 				case VOLCMD_PANSLIDELEFT:
 					m->command = CMD_PANNINGSLIDE;
 					m->param = m->vol << 4;
@@ -553,6 +596,9 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 					break;
 				}
 			} // End if (newTypeIsIT)
+
+			if(!m_SndFile.GetModSpecifications().HasNote(m->note))
+				m->note = 0;
 		}
 	}
 
@@ -1884,6 +1930,7 @@ BOOL CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 						case 0:		p[1] = p[2] = p[3] = '.'; break;
 						case NOTE_KEYOFF:	p[1] = p[2] = p[3] = '='; break;
 						case NOTE_NOTECUT:	p[1] = p[2] = p[3] = '^'; break;
+						case NOTE_FADE:	p[1] = p[2] = p[3] = '~'; break;
 						case NOTE_PC: p[1] = 'P'; p[2] = 'C'; p[3] = ' '; break;
 						case NOTE_PCS: p[1] = 'P'; p[2] = 'C'; p[3] = 'S'; break;
 						default:
@@ -2055,6 +2102,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 							m[col].note = 0;
 							if (s[0] == '=') m[col].note = NOTE_KEYOFF; else
 							if (s[0] == '^') m[col].note = NOTE_NOTECUT; else
+							if (s[0] == '~') m[col].note = NOTE_FADE; else
 							if (s[0] == 'P')
 							{
 								if(s[2] == 'S')

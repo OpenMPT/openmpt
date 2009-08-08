@@ -1557,7 +1557,7 @@ void CModDoc::OnFileMP3Convert()
 		m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
 
 		// Saving file
-		PTAGID3INFO pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_id3tag : NULL;
+		CFileTagging *pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_FileTags : NULL;
 		CDoAcmConvert dwcdlg(&m_SndFile, s, &wfx.wfx, hadid, pTag, pMainFrm);
 		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
 		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
@@ -2368,7 +2368,8 @@ BOOL CModDoc::GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX, DWORD *prangeMin, DWORD
 			nmax = (nType & MOD_TYPE_S3MITMPT) ? 58 : 30;
 			break;
 		case CMD_PANNING8:
-			if (nType & (MOD_TYPE_MOD|MOD_TYPE_S3M)) nmax = 0x80;
+			if (nType & (MOD_TYPE_S3M)) nmax = 0x81;
+			else nmax = 0xFF;
 			break;
 		case CMD_GLOBALVOLUME:
 			nmax = (nType & MOD_TYPE_IT | MOD_TYPE_MPT) ? 128 : 64;
@@ -2418,6 +2419,14 @@ UINT CModDoc::MapValueToPos(UINT ndx, UINT param)
 			else pos = (param >> 4) + 15;
 		}
 		break;
+	case CMD_PANNING8:
+		if(m_SndFile.m_nType & MOD_TYPE_S3M)
+		{
+			pos = CLAMP(param, 0, 0x80);
+			if(param == 0xA4)
+				pos = 0x81;
+		}
+		break;
 	}
 	return pos;
 }
@@ -2451,6 +2460,10 @@ UINT CModDoc::MapPosToValue(UINT ndx, UINT pos)
 			if (pos < 15) param = 15 - pos; else
 			param = (pos - 15) << 4;
 		}
+		break;
+	case CMD_PANNING8:
+		if(m_SndFile.m_nType & MOD_TYPE_S3M)
+			param = (pos <= 0x80) ? pos : 0xA4;
 		break;
 	}
 	return param;
@@ -2514,13 +2527,21 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 
 	case CMD_TEMPO:
 		if (param < 0x10)
-			wsprintf(s, "-%dbpm (slower)", param & 0x0F);
+			wsprintf(s, "-%d bpm (slower)", param & 0x0F);
 		else if (param < 0x20)
-			wsprintf(s, "+%dbpm (faster)", param & 0x0F);
+			wsprintf(s, "+%d bpm (faster)", param & 0x0F);
 		else
-			wsprintf(s, "%dbpm", param);
+			wsprintf(s, "%d bpm", param);
 		break;
 
+	case CMD_PANNING8:
+		wsprintf(s, "%d", param);
+		if(m_SndFile.m_nType & MOD_TYPE_S3M)
+		{
+			if(param == 0xA4)
+				strcpy(s, "Surround");
+		}
+		break;
 
 	case CMD_RETRIG:
 		switch(param >> 4) {
@@ -2734,7 +2755,7 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 					case 0xC0: // note cut
 					case 0xD0: // note delay
 						//IT compatibility 22. SD0 == SD1, SC0 == SC1
-						if(((param & 0x0F) == 1) || ((param & 0x0F) == 0 && m_SndFile.IsCompatibleMode(MOD_TYPE_IT)))
+						if(((param & 0x0F) == 1) || ((param & 0x0F) == 0 && m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER)))
 							strcpy(s, "1 frame");
 						else
 							strcat(s, " frames");

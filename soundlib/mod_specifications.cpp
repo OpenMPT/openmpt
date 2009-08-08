@@ -13,6 +13,8 @@ bool CModSpecifications::HasNote(MODCOMMAND::NOTE note) const
 			return hasNoteCut;
 		else if(note == NOTE_KEYOFF)
 			return hasNoteOff;
+		else if(note == NOTE_FADE)
+			return hasNoteFade;
 		else
 			return (memcmp(fileExtension, ModSpecs::mptm.fileExtension, 4) == 0);
 	}

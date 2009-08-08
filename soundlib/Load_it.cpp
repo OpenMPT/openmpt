@@ -990,13 +990,12 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if (m_nDefaultGlobalVolume > 256) m_nDefaultGlobalVolume = 256;
 	}
 	if (pifh->speed) m_nDefaultSpeed = pifh->speed;
-	if (pifh->tempo) m_nDefaultTempo = pifh->tempo;
-	if(m_nDefaultTempo < 32) m_nDefaultTempo = 32; // tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
-
-	m_nSamplePreAmp = pifh->mv & 0x7F;
-	if (m_nSamplePreAmp<0x20) {
+	m_nDefaultTempo = max(32, pifh->tempo); // tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
+	m_nSamplePreAmp = min(pifh->mv, 128);
+	/*if (m_nSamplePreAmp<0x20) {
 		m_nSamplePreAmp=100;
-	}
+	}*/
+
 	// Reading Channels Pan Positions
 	for (int ipan=0; ipan</*MAX_BASECHANNELS*/64; ipan++) if (pifh->chnpan[ipan] != 0xFF) //Header only has room for settings for 64 chans...		
 	{
@@ -1414,6 +1413,11 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if (ch < m_nChannels)
 				{
 					if (note < 0x80) note++;
+					if(!(m_nType & MOD_TYPE_MPT))
+					{
+						if(note > NOTE_MAX && note < 0xFD) note = NOTE_FADE;
+						else if(note == 0xFD) note = 0;
+					}
 					m[ch].note = note;
 					lastvalue[ch].note = note;
 					channels_used[ch] = TRUE;
@@ -2216,7 +2220,8 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				UINT vol = 0xFF;
 				UINT note = m->note;
 				if (note) b |= 1;
-				if ((note) && (note < 0xFE)) note--;
+				if ((note) && (note < NOTE_MIN_SPECIAL)) note--;
+				if (note == NOTE_FADE) note = 0xF6;
 				if (m->instr) b |= 2;
 				if (m->volcmd)
 				{
@@ -2525,8 +2530,8 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 
 	header.insnum = m_nInstruments;
 	header.smpnum = m_nSamples;
-	header.cwtv = 0x217;	//Value like in Modplug 1.16
-	header.cmwt = 0x200;	//Value like in Modplug 1.16
+	header.cwtv = 0x0217;	// That's how MPT 1.16 identifies, although an approriate format would be txyy (t = tracker ID, x = version major, y = version minor)
+	header.cmwt = 0x0214;	// Common compatible tracker :)
 	header.flags = 0x0001;
 	header.special = 0x0006;
 	if (m_nInstruments) header.flags |= 0x04;
@@ -2535,7 +2540,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
-	header.mv = m_nSamplePreAmp;
+	header.mv = CLAMP(m_nSamplePreAmp, 0, 128);
 	if (header.mv < 0x20) header.mv = 0x20;
 	if (header.mv > 0x7F) header.mv = 0x7F;
 	header.speed = m_nDefaultSpeed;
@@ -2651,8 +2656,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 
 		memset(&iti, 0, sizeof(iti));
 		iti.id = 0x49504D49;	// "IMPI"
-		//iti.trkvers = 0x211;
-		iti.trkvers = 0x220;	//rewbs.itVersion
+		iti.trkvers = 0x0214;
 		if (Headers[nins])
 		{
 			INSTRUMENTHEADER *penv = Headers[nins];
@@ -2846,8 +2850,10 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 				UINT param = m->param;
 				UINT vol = 0xFF;
 				UINT note = m->note;
+				if(note == NOTE_PC || note == NOTE_PCS) note = 0;
 				if (note) b |= 1;
-				if ((note) && (note < 0xFE)) note--;
+				if ((note) && (note < NOTE_MIN_SPECIAL)) note--;
+				if (note == NOTE_FADE) note = 0xF6;
 				if (m->instr) b |= 2;
 				if (m->volcmd)
 				{
@@ -2868,8 +2874,6 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m->vol); break;
-					case VOLCMD_VELOCITY:		vol = 213 + ConvertVolParam(m->vol); break; //rewbs.velocity
-					case VOLCMD_OFFSET:			vol = 223 + ConvertVolParam(m->vol); break; //rewbs.volOff
 					default:					vol = 0xFF;
 					}
 				}
@@ -3008,6 +3012,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
 		if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
 		UINT flags = RS_PCM8S;
+		/*
 #ifndef NO_PACKING
 		if (nPacking)
 		{
@@ -3019,6 +3024,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			}
 		} else
 #endif // NO_PACKING
+		*/
 		{
 			if (psmp->uFlags & CHN_STEREO)
 			{
@@ -3553,7 +3559,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
 
 	// Only write highlighting information if necessary for IT format
-	if(GetType() & MOD_TYPE_XM || m_nRowsPerBeat > 0xFF)
+	if((GetType() & MOD_TYPE_XM) || (m_dwSongFlags & SONG_ITPROJECT) || (m_nRowsPerBeat > 0xFF))
 	{
 		code = 'RPB.';							//write m_nRowsPerBeat
 		fwrite(&code, 1, sizeof(__int32), f);	
@@ -3562,7 +3568,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 		fwrite(&m_nRowsPerBeat, 1, size, f);	
 	}
 
-	if(GetType() & MOD_TYPE_XM || m_nRowsPerMeasure > 0xFF)
+	if((GetType() & MOD_TYPE_XM) || (m_dwSongFlags & SONG_ITPROJECT) || (m_nRowsPerMeasure > 0xFF))
 	{
 		code = 'RPM.';							//write m_nRowsPerMeasure
 		fwrite(&code, 1, sizeof(__int32), f);	

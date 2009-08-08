@@ -203,7 +203,12 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 		else
 			command = '\\';
 		break;
-	case CMD_VELOCITY:			command = ':'; break;  //rewbs.velocity
+	case CMD_VELOCITY:  //rewbs.velocity
+		if(bCompatible)
+			command = param = 0;
+		else
+			command = ':';
+		break;
 	case CMD_XFINEPORTAUPDOWN:
 		if (param & 0x0F) switch(param & 0xF0)
 		{
@@ -233,7 +238,10 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 	case CMD_XPARAM:
-		command = '[';
+		if(bCompatible)
+			command = param = 0;
+		else
+			command = '[';
 		break;
 // -! NEW_FEATURE#0010
 	default:	command = param = 0;

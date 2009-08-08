@@ -3548,6 +3548,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNoteCutOld:		TempEnterNote(NOTE_NOTECUT, true);  return wParam;
 		case kcNoteOff:			TempEnterNote(NOTE_KEYOFF, false); return wParam;
 		case kcNoteOffOld:		TempEnterNote(NOTE_KEYOFF, true);  return wParam;
+		case kcNoteFade:		TempEnterNote(NOTE_FADE, false); return wParam;
+		case kcNoteFadeOld:		TempEnterNote(NOTE_FADE, true);  return wParam;
 		case kcNotePC:			TempEnterNote(NOTE_PC); return wParam;
 		case kcNotePCS:			TempEnterNote(NOTE_PCS); return wParam;
 

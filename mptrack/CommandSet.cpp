@@ -1055,12 +1055,12 @@ void CCommandSet::SetupCommands()
 	commands[kcNoteCut].UID = 1200;
 	commands[kcNoteCut].isHidden = false;
 	commands[kcNoteCut].isDummy = false;
-	commands[kcNoteCut].Message = "Note cut";
+	commands[kcNoteCut].Message = "Note Cut";
 
 	commands[kcNoteOff].UID = 1201;
 	commands[kcNoteOff].isHidden = false;
 	commands[kcNoteOff].isDummy = false;
-	commands[kcNoteOff].Message = "Note off";
+	commands[kcNoteOff].Message = "Note Off";
 
 	commands[kcSetIns0].UID = 1202;
 	commands[kcSetIns0].isHidden = false;
@@ -2052,12 +2052,12 @@ void CCommandSet::SetupCommands()
 	commands[kcNoteCutOld].UID = 1667;
 	commands[kcNoteCutOld].isHidden = false;
 	commands[kcNoteCutOld].isDummy = false;
-	commands[kcNoteCutOld].Message = "Note cut (don't remember instrument)";
+	commands[kcNoteCutOld].Message = "Note Cut (don't remember instrument)";
 
 	commands[kcNoteOffOld].UID = 1668;
 	commands[kcNoteOffOld].isHidden = false;
 	commands[kcNoteOffOld].isDummy = false;
-	commands[kcNoteOffOld].Message = "Note off (don't remember instrument)";
+	commands[kcNoteOffOld].Message = "Note Off (don't remember instrument)";
 
 	commands[kcViewAddPlugin].UID = 1669;
 	commands[kcViewAddPlugin].Message = "View Plugin Manager";
@@ -2332,6 +2332,16 @@ void CCommandSet::SetupCommands()
 	commands[kcSampleRemoveDCOffset].Message = "Remove DC Offset";
 	commands[kcSampleRemoveDCOffset].isHidden = false;
 	commands[kcSampleRemoveDCOffset].isDummy = false;
+
+	commands[kcNoteFade].UID = 1791;
+	commands[kcNoteFade].Message = "Note Fade";
+	commands[kcNoteFade].isHidden = false;
+	commands[kcNoteFade].isDummy = false;
+
+	commands[kcNoteFadeOld].UID = 1792;
+	commands[kcNoteFadeOld].Message = "Note Fade (don't remember instrument)";
+	commands[kcNoteFadeOld].isHidden = false;
+	commands[kcNoteFadeOld].isDummy = false;
 
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
