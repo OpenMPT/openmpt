@@ -85,7 +85,7 @@ typedef struct DSMPATT
 #pragma pack()
 
 
-BOOL CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 //-----------------------------------------------------------
 {
 	DSMFILEHEADER *pfh = (DSMFILEHEADER *)lpStream;
@@ -96,7 +96,7 @@ BOOL CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 	if ((!lpStream) || (dwMemLength < 1024) || (pfh->id_RIFF != DSMID_RIFF)
 	 || (pfh->riff_len + 8 > dwMemLength) || (pfh->riff_len < 1024)
 	 || (pfh->id_DSMF != DSMID_DSMF) || (pfh->id_SONG != DSMID_SONG)
-	 || (pfh->song_len > dwMemLength)) return FALSE;
+	 || (pfh->song_len > dwMemLength)) return false;
 	psong = (DSMSONG *)(lpStream + sizeof(DSMFILEHEADER));
 	dwMemPos = sizeof(DSMFILEHEADER) + pfh->song_len;
 	m_nType = MOD_TYPE_DSM;
@@ -219,7 +219,7 @@ BOOL CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 			MODINSTRUMENT *psmp = &Ins[nSmp];
 			memcpy(psmp->name, pins->filename, 13);
 			psmp->nGlobalVol = 64;
-			psmp->nC4Speed = pins->c2spd;
+			psmp->nC5Speed = pins->c2spd;
 			psmp->uFlags = (WORD)((pins->flags & 1) ? CHN_LOOP : 0);
 			psmp->nLength = pins->length;
 			psmp->nLoopStart = pins->loopstart;
@@ -234,6 +234,6 @@ BOOL CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 			break;
 		}
 	}
-	return TRUE;
+	return true;
 }
 

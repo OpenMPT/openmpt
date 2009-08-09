@@ -646,9 +646,9 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
         int transp = 0;
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			wsprintf(s, "%lu", pins->nC4Speed);
+			wsprintf(s, "%lu", pins->nC5Speed);
 			m_EditFineTune.SetWindowText(s);
-			transp = CSoundFile::FrequencyToTranspose(pins->nC4Speed) >> 7;
+			transp = CSoundFile::FrequencyToTranspose(pins->nC5Speed) >> 7;
 		} else
 		{
 			SetDlgItemInt(IDC_EDIT5, (int)pins->nFineTune);
@@ -736,7 +736,7 @@ BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			pins->nVolume = 256;
 			pins->nPan = 128;
 			pins->name[0] = 0;
-			if (!pins->nC4Speed) pins->nC4Speed = 22050;
+			if (!pins->nC5Speed) pins->nC5Speed = 22050;
 			if (dlg.m_nFormat & 1)
 			{
 				pins->nLength >>= 1;
@@ -1493,7 +1493,7 @@ void CCtrlSamples::OnUpsample()
 		{
 			if(!(m_pSndFile->m_nType & MOD_TYPE_MOD))
 			{
-				if (pins->nC4Speed < 200000) pins->nC4Speed *= 2;
+				if (pins->nC5Speed < 200000) pins->nC5Speed *= 2;
 				if (pins->RelativeTone < 84) pins->RelativeTone += 12;
 			}
 		}
@@ -1619,7 +1619,7 @@ void CCtrlSamples::OnDownsample()
 		{
 			if(!(m_pSndFile->m_nType & MOD_TYPE_MOD))
 			{
-				if (pins->nC4Speed > 2000) pins->nC4Speed /= 2;
+				if (pins->nC5Speed > 2000) pins->nC5Speed /= 2;
 				if (pins->RelativeTone > -84) pins->RelativeTone -= 12;
 			}
 		}
@@ -1720,7 +1720,7 @@ void CCtrlSamples::OnEstimateSampleSize()
 	UpdateData(TRUE);
 
 	//Calculate/verify samplerate at C4.
-	long lSampleRate = pins->nC4Speed;
+	long lSampleRate = pins->nC5Speed;
 	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 		lSampleRate = (double)CSoundFile::TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
 	if(lSampleRate <= 0) 
@@ -2161,7 +2161,7 @@ int CCtrlSamples::PitchShift(float pitch)
 	while(fft > MAX_BUFFER_LENGTH) fft >>= 1;
 
 	// Get original sample rate
-	long lSampleRate = pins->nC4Speed;
+	long lSampleRate = pins->nC5Speed;
 	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) lSampleRate = CSoundFile::TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
 	if(lSampleRate <= 0) lSampleRate = 8363;
 
@@ -2643,9 +2643,9 @@ void CCtrlSamples::OnFineTuneChanged()
 	int n = GetDlgItemInt(IDC_EDIT5);
 	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
-		if ((n >= 2000) && (n <= 256000) && (n != (int)m_pSndFile->Ins[m_nSample].nC4Speed))
+		if ((n >= 2000) && (n <= 256000) && (n != (int)m_pSndFile->Ins[m_nSample].nC5Speed))
 		{
-			m_pSndFile->Ins[m_nSample].nC4Speed = n;
+			m_pSndFile->Ins[m_nSample].nC5Speed = n;
 			int transp = CSoundFile::FrequencyToTranspose(n) >> 7;
 			int basenote = 60 - transp;
 			if (basenote < BASENOTE_MIN) basenote = BASENOTE_MIN;
@@ -2677,12 +2677,12 @@ void CCtrlSamples::OnBaseNoteChanged()
 	int n = 60 - (m_CbnBaseNote.GetCurSel() + BASENOTE_MIN);
 	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
-		LONG ft = CSoundFile::FrequencyToTranspose(m_pSndFile->Ins[m_nSample].nC4Speed) & 0x7f;
+		LONG ft = CSoundFile::FrequencyToTranspose(m_pSndFile->Ins[m_nSample].nC5Speed) & 0x7f;
 		n = CSoundFile::TransposeToFrequency(n, ft);
-		if ((n >= 500) && (n <= 256000) && (n != (int)m_pSndFile->Ins[m_nSample].nC4Speed))
+		if ((n >= 500) && (n <= 256000) && (n != (int)m_pSndFile->Ins[m_nSample].nC5Speed))
 		{
 			CHAR s[32];
-			m_pSndFile->Ins[m_nSample].nC4Speed = n;
+			m_pSndFile->Ins[m_nSample].nC5Speed = n;
 			wsprintf(s, "%lu", n);
 			LockControls();
 			m_EditFineTune.SetWindowText(s);
@@ -3121,19 +3121,19 @@ NoSample:
 	{
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			LONG d = pins->nC4Speed;
+			LONG d = pins->nC5Speed;
 			if (d < 1) d = 8363;
 			d += (pos * 25);
 			if (d > 96000) d = 96000;
 			if (d < 2000) d = 2000;
-			pins->nC4Speed = d;
-			int transp = CSoundFile::FrequencyToTranspose(pins->nC4Speed) >> 7;
+			pins->nC5Speed = d;
+			int transp = CSoundFile::FrequencyToTranspose(pins->nC5Speed) >> 7;
 			int basenote = 60 - transp;
 			if (basenote < BASENOTE_MIN) basenote = BASENOTE_MIN;
 			if (basenote >= BASENOTE_MAX) basenote = BASENOTE_MAX-1;
 			basenote -= BASENOTE_MIN;
 			if (basenote != m_CbnBaseNote.GetCurSel()) m_CbnBaseNote.SetCurSel(basenote);
-			wsprintf(s, "%lu", pins->nC4Speed);
+			wsprintf(s, "%lu", pins->nC5Speed);
 			m_EditFineTune.SetWindowText(s);
 		} else
 		{

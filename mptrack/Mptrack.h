@@ -398,15 +398,15 @@ LPCTSTR GetNoteStr(const MODCOMMAND::NOTE);
 
 ///////////////////////////////////////////////////
 // Tables
-#define MAX_EFFECTS		35	//rewbs.smoothVST & rewbs.velocity: increased from 32. Wonder what this will break...
+#define MAX_EFFECTS		37	//rewbs.smoothVST & rewbs.velocity: increased from 32. Wonder what this will break...
 							//+1 for eric's multiplier
 #define MAX_VOLCMDS		16	//rewbs.voloff & rewbs.velocity: increased from 14
 
 extern const BYTE gEffectColors[MAX_EFFECTS];
 extern const LPCSTR szNoteNames[12];
 extern const LPCTSTR szDefaultNoteNames[NOTE_MAX];
-const LPCTSTR szSpecialNoteNames[NOTE_MAX_SPECIAL-NOTE_MIN_SPECIAL + 1] = {TEXT("~~"), TEXT("PCs"), TEXT("PC"), TEXT("^^"), TEXT("==")};
-const LPCTSTR szSpecialNoteShortDesc[NOTE_MAX_SPECIAL-NOTE_MIN_SPECIAL + 1] = {TEXT("Param control(smooth)"), TEXT("Param control"), TEXT("Note Cut"), TEXT("Note Off")};
+const LPCTSTR szSpecialNoteNames[NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1] = {TEXT("PCs"), TEXT("PC"), TEXT("~~"), TEXT("^^"), TEXT("==")};
+const LPCTSTR szSpecialNoteShortDesc[NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1] = {TEXT("Param Control (Smooth)"), TEXT("Param Control"), TEXT("Note Fade"), TEXT("Note Cut"), TEXT("Note Off")};
 
 // Make sure that special note arrays include string for every note.
 STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == ARRAYELEMCOUNT(szSpecialNoteNames)); 

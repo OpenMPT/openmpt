@@ -205,7 +205,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 					case 0x50:	m->param = (m->param & 0x0F) | 0x20; break;
 					case 0x60:	m->param = (m->param & 0x0F) | 0xB0; break;
 					case 0x70:	m->param = (m->param & 0x0F) | 0x40; break;
-					case 0x90:	m->command = CMD_RETRIG; m->param &= 0x0F; break;
+					case 0x90:	m->command = CMD_RETRIG; m->param = 0x80 | (m->param & 0x0F); break;
 					case 0xA0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param = (m->param << 4) | 0x0F; } else m->command = 0; break;
 					case 0xB0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param |= 0xF0; } else m->command = 0; break;
 					}
@@ -598,7 +598,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			} // End if (newTypeIsIT)
 
 			if(!m_SndFile.GetModSpecifications().HasNote(m->note))
-				m->note = 0;
+				m->note = NOTE_NONE;
 		}
 	}
 
@@ -611,7 +611,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	{
 		for (UINT i=1; i<=m_SndFile.m_nSamples; i++)
 		{
-			m_SndFile.Ins[i].nC4Speed = CSoundFile::TransposeToFrequency(m_SndFile.Ins[i].RelativeTone, m_SndFile.Ins[i].nFineTune);
+			m_SndFile.Ins[i].nC5Speed = CSoundFile::TransposeToFrequency(m_SndFile.Ins[i].RelativeTone, m_SndFile.Ins[i].nFineTune);
 			m_SndFile.Ins[i].RelativeTone = 0;
 			m_SndFile.Ins[i].nFineTune = 0;
 		}
@@ -1558,7 +1558,7 @@ LONG CModDoc::InsertSample(BOOL bLimit)
 	pins->nVolume = 256;
 	pins->nGlobalVol = 64;
 	pins->nPan = 128;
-	pins->nC4Speed = 8363;
+	pins->nC5Speed = 8363;
 	pins->RelativeTone = 0;
 	pins->nFineTune = 0;
 	pins->nVibType = 0;
@@ -1751,57 +1751,78 @@ BOOL CModDoc::RemoveSample(UINT n)
 }
 
 
-// -> CODE#0020
-// -> DESC="rearrange sample list"
-void CModDoc::RearrangeSampleList(void)
-//-------------------------------------
+void CModDoc::RearrangeSampleList()
+//---------------------------------
 {
-	MessageBox(NULL, "Rearrange samplelist didn't work properly and has been disabled.", NULL, MB_ICONINFORMATION);
-	/*
-	BEGIN_CRITICAL();
-	UINT i,j,k,n,l,c;
+	if(m_SndFile.m_nSamples < 2)
+		return;
 
-	for(n = 1 ; n <= m_SndFile.m_nSamples ; n++){
-
-		if(!m_SndFile.Ins[n].pSample){
-			
-			k = 1;
-
-			while(n+k <= m_SndFile.m_nSamples && !m_SndFile.Ins[n+k].pSample) k++;
-			if(n+k >= m_SndFile.m_nSamples) break;
-
-			c = k;
-			l = 0;
-
-			while(n+k <= m_SndFile.m_nSamples && m_SndFile.Ins[n+k].pSample){
-
-				m_SndFile.MoveSample(n+k,n+l);
-				strcpy(m_SndFile.m_szNames[n+l], m_SndFile.m_szNames[n+k]);
-				m_SndFile.m_szNames[n+k][0] = '\0';
-
-				for(i=1; i<=m_SndFile.m_nInstruments; i++){
-					if(m_SndFile.Headers[i]){
-						INSTRUMENTHEADER *p = m_SndFile.Headers[i];
-						for(j=0; j<128; j++) if(p->Keyboard[j] == n+k) p->Keyboard[j] = n+l;
-					}
-				}
-
-				k++;
-				l++;
-			}
-
-			n += l;
-			m_SndFile.m_nSamples -= c;
+	UINT nRemap = 0; // remap count
+	UINT nSampleMap[MAX_SAMPLES + 1]; // map old => new
+	for(UINT i = 0; i <= MAX_SAMPLES; i++)
+		nSampleMap[i] = i;
+	
+	// First, find out which sample slots are unused and create the new sample map
+	for(UINT i = 1 ; i <= m_SndFile.m_nSamples; i++) {
+		if(!m_SndFile.Ins[i].pSample)
+		{
+			// Move all following samples
+			nRemap++;
+			nSampleMap[i] = 0;
+			for(UINT j = i + 1; j <= m_SndFile.m_nSamples; j++)
+				nSampleMap[j]--;
 		}
 	}
+
+	if(!nRemap)
+		return;
+
+	BEGIN_CRITICAL();
+
+	// Now, move everything around
+	for(UINT i = 1; i <= m_SndFile.m_nSamples; i++)
+	{
+		if(nSampleMap[i] != i)
+		{
+			// This gotta be moved
+
+			m_SndFile.MoveSample(i, nSampleMap[i]);
+			m_SndFile.Ins[i].pSample = nullptr;
+			strcpy(m_SndFile.m_szNames[nSampleMap[i]], m_SndFile.m_szNames[i]);
+			m_SndFile.m_szNames[i][0] = '\0';
+
+			// Also update instrument mapping
+			for(UINT iInstr = 1; iInstr <= m_SndFile.m_nInstruments; iInstr++){
+				if(m_SndFile.Headers[iInstr]){
+					INSTRUMENTHEADER *p = m_SndFile.Headers[iInstr];
+					for(WORD iNote =0; iNote < 128; iNote++)
+						if(p->Keyboard[iNote] == i) p->Keyboard[iNote] = nSampleMap[i];
+				}
+			}
+		}
+	}
+
+	// Go through the patterns and remap samples (if module is in sample mode)
+	if(!m_SndFile.m_nInstruments)
+	{
+		for (UINT nPat=0; nPat<m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
+		{
+			MODCOMMAND *m = m_SndFile.Patterns[nPat];
+			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
+			{
+				m->instr = nSampleMap[m->instr];
+			}
+		}
+	}
+
+	m_SndFile.m_nSamples -= nRemap;
 
 	END_CRITICAL();
 
 	SetModified();
-	UpdateAllViews(NULL, HINT_SMPNAMES);
-	*/
+	UpdateAllViews(NULL, HINT_MODTYPE);
+
 }
-// -! NEW_FEATURE#0020
 
 
 BOOL CModDoc::RemoveInstrument(UINT n)
@@ -2099,7 +2120,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 						if (s[0] > ' ' && (!mix || ((!ITStyleMix && origModCmd.note==0) || 
 												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
 						{
-							m[col].note = 0;
+							m[col].note = NOTE_NONE;
 							if (s[0] == '=') m[col].note = NOTE_KEYOFF; else
 							if (s[0] == '^') m[col].note = NOTE_NOTECUT; else
 							if (s[0] == '~') m[col].note = NOTE_FADE; else

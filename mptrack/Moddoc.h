@@ -186,6 +186,7 @@ public:
 public:
 	BOOL ChangeModType(UINT nNewType);
 	BOOL ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg = true);
+
 	BOOL ConvertInstrumentsToSamples();;
 	BOOL RemoveUnusedSamples();
 	BOOL RemoveUnusedInstruments();
@@ -193,7 +194,9 @@ public:
 	BOOL RemoveUnusedPlugs();
 	UINT RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS]);
 	BOOL RemoveUnusedPatterns(BOOL bRemove=TRUE);
+	void RearrangeSampleList();
 	BOOL CompoCleanup();
+
 	LONG InsertPattern(LONG nOrd=-1, UINT nRows=64);
 	LONG InsertSample(BOOL bLimit=FALSE);
 	LONG InsertInstrument(LONG lSample=0, LONG lDuplicate=0);
@@ -204,11 +207,6 @@ public:
 	BOOL RemoveInstrument(UINT n);
 	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, int nCurrentChn=-1, const uint32 nStartPos = uint32_max); //rewbs.vstiLive: added current chan param
 	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, UINT nCurrentChn=-1); //rewbs.vstiLive: add params
-
-// -> CODE#0020
-// -> DESC="rearrange sample list"
-	void RearrangeSampleList(void);
-// -! NEW_FEATURE#0020
 
 	BOOL IsNotePlaying(UINT note, UINT nsmp=0, UINT nins=0);
 	BOOL MuteChannel(UINT nChn, BOOL bMute);
@@ -339,6 +337,7 @@ public:
 	afx_msg void OnUpdateXMITMPTOnly(CCmdUI *p);
 	afx_msg void OnUpdateHasMIDIMappings(CCmdUI *p);
 	afx_msg void OnUpdateInstrumentOnly(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateSampleCount(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMP3Encode(CCmdUI *pCmdUI);
 	afx_msg void OnPatternRestart(); //rewbs.customKeys
 	afx_msg void OnPatternPlay(); //rewbs.customKeys

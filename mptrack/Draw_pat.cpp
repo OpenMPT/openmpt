@@ -325,21 +325,21 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 	{
 		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 13*COLUMN_HEIGHT);
 	} else
-	if (note >= NOTE_KEYOFF)
+	if (note == NOTE_KEYOFF)
 	{
 		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 14*COLUMN_HEIGHT);
 	} else
-	if(note >= NOTE_PC)
+	if(note == NOTE_FADE)
+	{
+		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 17*COLUMN_HEIGHT);
+	} else
+	if(note == NOTE_PC)
 	{
 		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 15*COLUMN_HEIGHT);
 	} else
-	if(note >= NOTE_PCS)
+	if(note == NOTE_PCS)
 	{
 		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 16*COLUMN_HEIGHT);
-	} else
-	if(note >= NOTE_FADE)
-	{
-		m_Dib.TextBlt(x, y, dx, COLUMN_HEIGHT, xsrc, ysrc + 17*COLUMN_HEIGHT);
 	} else
 	{
 		if(pTuning)
@@ -1466,11 +1466,17 @@ void CViewPattern::UpdateIndicator()
 
 				// Ignore update if using PC or PCs notes because instrument, volcol and effect values
 				// have different meaning.
-				if(m->note != NOTE_PC && m->note != NOTE_PCS)
+				if((m->note != NOTE_PC && m->note != NOTE_PCS) || GetColTypeFromCursor(m_dwCursor) == 0)
 				{
 					switch (GetColTypeFromCursor(m_dwCursor))
 					{
+					case 0:
+						// display note
+						if(m->note >= NOTE_MIN_SPECIAL)
+							strcpy(s, szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL]);
+						break;
 					case 1:
+						// display instrument
 						if (m->instr)
 						{
 							CHAR sztmp[128] = "";
@@ -1508,10 +1514,12 @@ void CViewPattern::UpdateIndicator()
 						}
 						break;
 					case 2:
+					// display volume command
 						if (!pModDoc->GetVolCmdInfo(pModDoc->GetIndexFromVolCmd(m->volcmd), s)) s[0] = 0;
 						break;
 					case 3:
 					case 4:
+					// display effect command
 						if (!pModDoc->GetEffectName(s, m->command, m->param, FALSE, nChn)) s[0] = 0;
 						break;
 					}

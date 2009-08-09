@@ -556,6 +556,7 @@ enum enMsgBoxHidableMessage
 	ModCompatibilityExportTip		= 0,
 	ItCompatibilityExportTip		= 1,
 	ConfirmSignUnsignWhenPlaying	= 2,
+	XMCompatibilityExportTip		= 3,
 	enMsgBoxHidableMessage_count
 };
 

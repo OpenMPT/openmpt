@@ -201,7 +201,7 @@ void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag)
 		switch(resetflag)
 		{
 		case SmpResetInit:
-			rSndFile.Ins[i].nC4Speed = 8363;
+			rSndFile.Ins[i].nC5Speed = 8363;
 			// note: break is left out intentionally. keep this order or c&p the stuff from below if you change anything!
 		case SmpResetCompo:
 			rSndFile.Ins[i].nPan = 128;

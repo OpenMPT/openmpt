@@ -45,7 +45,7 @@ typedef struct AMSSAMPLEHEADER
 
 
 
-BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 //-----------------------------------------------------------
 {
 	BYTE pkinf[MAX_SAMPLES];
@@ -53,7 +53,7 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	DWORD dwMemPos;
 	UINT tmp, tmp2;
 	
-	if ((!lpStream) || (dwMemLength < 1024)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 1024)) return false;
 	if ((pfh->verhi != 0x01) || (strncmp(pfh->szHeader, "Extreme", 7))
 	 || (!pfh->patterns) || (!pfh->orders) || (!pfh->samples) || (pfh->samples > MAX_SAMPLES)
 	 || (pfh->patterns > MAX_PATTERNS) || (pfh->orders > MAX_ORDERS))
@@ -61,7 +61,7 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 		return ReadAMS2(lpStream, dwMemLength);
 	}
 	dwMemPos = sizeof(AMSFILEHEADER) + pfh->extra;
-	if (dwMemPos + pfh->samples * sizeof(AMSSAMPLEHEADER) + 256 >= dwMemLength) return FALSE;
+	if (dwMemPos + pfh->samples * sizeof(AMSSAMPLEHEADER) + 256 >= dwMemLength) return false;
 	m_nType = MOD_TYPE_AMS;
 	m_nInstruments = 0;
 	m_nChannels = (pfh->chncfg & 0x1F) + 1;
@@ -75,7 +75,7 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 		pins->nLoopEnd = psh->loopend;
 		pins->nGlobalVol = 64;
 		pins->nVolume = psh->volume << 1;
-		pins->nC4Speed = psh->samplerate;
+		pins->nC5Speed = psh->samplerate;
 		pins->nPan = (psh->finetune_and_pan & 0xF0);
 		if (pins->nPan < 0x80) pins->nPan += 0x10;
 		pins->nFineTune = MOD2XMFineTune(psh->finetune_and_pan & 0x0F);
@@ -85,7 +85,7 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	}
 	// Read Song Name
 	tmp = lpStream[dwMemPos++];
-	if (dwMemPos + tmp + 1 >= dwMemLength) return TRUE;
+	if (dwMemPos + tmp + 1 >= dwMemLength) return true;
 	tmp2 = (tmp < 32) ? tmp : 31;
 	if (tmp2) memcpy(m_szNames[0], lpStream+dwMemPos, tmp2);
 	m_szNames[0][tmp2] = 0;
@@ -93,7 +93,7 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	// Read sample names
 	for (UINT sNam=1; sNam<=m_nSamples; sNam++)
 	{
-		if (dwMemPos + 32 >= dwMemLength) return TRUE;
+		if (dwMemPos + 32 >= dwMemLength) return true;
 		tmp = lpStream[dwMemPos++];
 		tmp2 = (tmp < 32) ? tmp : 31;
 		if (tmp2) memcpy(m_szNames[sNam], lpStream+dwMemPos, tmp2);
@@ -102,18 +102,18 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	// Skip Channel names
 	for (UINT cNam=0; cNam<m_nChannels; cNam++)
 	{
-		if (dwMemPos + 32 >= dwMemLength) return TRUE;
+		if (dwMemPos + 32 >= dwMemLength) return true;
 		tmp = lpStream[dwMemPos++];
 		dwMemPos += tmp;
 	}
 	// Read Pattern Names
 	m_lpszPatternNames = new char[pfh->patterns * 32];
-	if (!m_lpszPatternNames) return TRUE;
+	if (!m_lpszPatternNames) return true;
 	m_nPatternNames = pfh->patterns;
 	memset(m_lpszPatternNames, 0, m_nPatternNames * 32);
 	for (UINT pNam=0; pNam < m_nPatternNames; pNam++)
 	{
-		if (dwMemPos + 32 >= dwMemLength) return TRUE;
+		if (dwMemPos + 32 >= dwMemLength) return true;
 		tmp = lpStream[dwMemPos++];
 		tmp2 = (tmp < 32) ? tmp : 31;
 		if (tmp2) memcpy(m_lpszPatternNames+pNam*32, lpStream+dwMemPos, tmp2);
@@ -122,11 +122,11 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	// Read Song Comments
 	tmp = *((WORD *)(lpStream+dwMemPos));
 	dwMemPos += 2;
-	if (dwMemPos + tmp >= dwMemLength) return TRUE;
+	if (dwMemPos + tmp >= dwMemLength) return true;
 	if (tmp)
 	{
 		m_lpszSongComments = new char[tmp+1];
-		if (!m_lpszSongComments) return TRUE;
+		if (!m_lpszSongComments) return true;
 		memset(m_lpszSongComments, 0, tmp+1);
 		memcpy(m_lpszSongComments, lpStream + dwMemPos, tmp);
 		dwMemPos += tmp;
@@ -140,13 +140,13 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	// Read Patterns
 	for (UINT iPat=0; iPat<pfh->patterns; iPat++)
 	{
-		if (dwMemPos + 4 >= dwMemLength) return TRUE;
+		if (dwMemPos + 4 >= dwMemLength) return true;
 		UINT len = *((DWORD *)(lpStream + dwMemPos));
 		dwMemPos += 4;
-		if ((len >= dwMemLength) || (dwMemPos + len > dwMemLength)) return TRUE;
+		if ((len >= dwMemLength) || (dwMemPos + len > dwMemLength)) return true;
 		Patterns.Insert(iPat, 64);
 		MODCOMMAND* m = Patterns[iPat];
-		if (!m) return TRUE;
+		if (!m) return true;
 		const BYTE *p = lpStream + dwMemPos;
 		UINT row = 0, i = 0;
 		while ((row < PatternSize[iPat]) && (i+2 < len))
@@ -240,11 +240,11 @@ BOOL CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	// Read Samples
 	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Ins[iSmp].nLength)
 	{
-		if (dwMemPos >= dwMemLength - 9) return TRUE;
+		if (dwMemPos >= dwMemLength - 9) return true;
 		UINT flags = (Ins[iSmp].uFlags & CHN_16BIT) ? RS_AMS16 : RS_AMS8;
 		dwMemPos += ReadSample(&Ins[iSmp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -299,7 +299,7 @@ typedef struct AMS2SAMPLE
 	DWORD loopend;
 	WORD frequency;
 	BYTE finetune;
-	WORD c4speed;
+	WORD nC5Speed;
 	CHAR transpose;
 	BYTE volume;
 	BYTE flags;
@@ -309,7 +309,7 @@ typedef struct AMS2SAMPLE
 #pragma pack()
 
 
-BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 //------------------------------------------------------------
 {
 	const AMS2FILEHEADER *pfh = (AMS2FILEHEADER *)lpStream;
@@ -416,7 +416,7 @@ BOOL CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 				psmp->nLength = pams->length;
 				psmp->nLoopStart = pams->loopstart;
 				psmp->nLoopEnd = pams->loopend;
-				psmp->nC4Speed = pams->c4speed;
+				psmp->nC5Speed = pams->nC5Speed;
 				psmp->RelativeTone = pams->transpose;
 				psmp->nVolume = pams->volume / 2;
 				packedsamples[smpmap[ismp]] = pams->flags;

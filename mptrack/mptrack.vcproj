@@ -280,6 +280,9 @@
 				RelativePath="..\soundlib\Load_gdm.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\Load_imf.cpp">
+			</File>
+			<File
 				RelativePath="..\soundlib\Load_it.cpp">
 			</File>
 			<File

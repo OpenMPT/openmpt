@@ -1496,7 +1496,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT
 			psmp->uFlags = CHN_16BIT;
 			psmp->nLoopStart = pins->Regions[nRgn].ulLoopStart;
 			psmp->nLoopEnd = pins->Regions[nRgn].ulLoopEnd;
-			psmp->nC4Speed = p->dwSampleRate;
+			psmp->nC5Speed = p->dwSampleRate;
 			psmp->nGlobalVol = 64;
 			psmp->nVolume = 256;
 			psmp->nPan = 128;
@@ -1564,15 +1564,15 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT
 				sFineTune += psmp->nFineTune;
 			}
 		#ifdef DLSINSTR_LOG
-			Log("WSMP: usUnityNote=%d.%d, %dHz (transp=%d)\n", usUnityNote, sFineTune, psmp->nC4Speed, transpose);
+			Log("WSMP: usUnityNote=%d.%d, %dHz (transp=%d)\n", usUnityNote, sFineTune, psmp->nC5Speed, transpose);
 		#endif
 			if (usUnityNote > 0x7F) usUnityNote = 60;
 			int nBaseTune = DlsFreqToTranspose(
-								psmp->nC4Speed,
+								psmp->nC5Speed,
 								sFineTune+(60 + transpose - usUnityNote)*100);
 			psmp->nFineTune = (CHAR)(nBaseTune & 0x7F);
 			psmp->RelativeTone = (CHAR)(nBaseTune >> 7);
-			psmp->nC4Speed = CSoundFile::TransposeToFrequency(psmp->RelativeTone, psmp->nFineTune);
+			psmp->nC5Speed = CSoundFile::TransposeToFrequency(psmp->RelativeTone, psmp->nFineTune);
 			if (lVolume > 256) lVolume = 256;
 			if (lVolume < 16) lVolume = 16;
 			psmp->nGlobalVol = (BYTE)(lVolume / 4);	// 0-64

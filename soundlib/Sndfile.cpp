@@ -1181,7 +1181,7 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 	for (UINT j=0; j<MAX_CHANNELS; j++)
 	{
 		Chn[j].nPeriod = 0;
-		Chn[j].nNote = 0;
+		Chn[j].nNote = NOTE_NONE;
 		Chn[j].nPortamentoDest = 0;
 		Chn[j].nCommand = 0;
 		Chn[j].nPatternLoopCount = 0;
@@ -2593,7 +2593,7 @@ int CSoundFile::FrequencyToTranspose(DWORD freq)
 void CSoundFile::FrequencyToTranspose(MODINSTRUMENT *psmp)
 //--------------------------------------------------------
 {
-	int f2t = FrequencyToTranspose(psmp->nC4Speed);
+	int f2t = FrequencyToTranspose(psmp->nC5Speed);
 	int transp = f2t >> 7;
 	int ftune = f2t & 0x7F; //0x7F == 111 1111
 	if (ftune > 80)
@@ -2777,22 +2777,22 @@ BOOL CSoundFile::DestroySample(UINT nSample)
 
 // -> CODE#0020
 // -> DESC="rearrange sample list"
-BOOL CSoundFile::MoveSample(UINT from, UINT to)
+bool CSoundFile::MoveSample(UINT from, UINT to)
 //---------------------------------------------
 {
-	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return FALSE;
-	if (!Ins[from].pSample || Ins[to].pSample) return TRUE;
+	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return false;
+	if (/*!Ins[from].pSample ||*/ Ins[to].pSample) return true;
 
 	MODINSTRUMENT *pinsf = &Ins[from];
 	MODINSTRUMENT *pinst = &Ins[to];
 
-	memcpy(pinst,pinsf,sizeof(MODINSTRUMENT));
+	memcpy(pinst, pinsf, sizeof(MODINSTRUMENT));
 
-	pinsf->pSample = NULL;
+	pinsf->pSample = nullptr;
 	pinsf->nLength = 0;
 	pinsf->uFlags &= ~(CHN_16BIT);
 
-	return TRUE;
+	return true;
 }
 // -! NEW_FEATURE#0020
 #endif // FASTSOUNDLIB

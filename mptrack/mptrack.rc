@@ -1764,6 +1764,7 @@ BEGIN
         POPUP "C&leanup"
         BEGIN
             MENUITEM "&Rearrange Patterns",         ID_CLEANUP_REARRANGE
+            MENUITEM "Rearrange Samples",           ID_REARRANGE_SAMPLES
             MENUITEM "&Cleanup Instruments",        ID_CLEANUP_INSTRUMENTS
             MENUITEM "Clean&up Samples",            ID_CLEANUP_SAMPLES
             MENUITEM "Cleanup Pa&tterns",           ID_CLEANUP_PATTERNS

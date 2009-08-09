@@ -39,7 +39,7 @@ typedef struct tagSAMPLE669
 } SAMPLE669;
 
 
-BOOL CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	BOOL b669Ext;
@@ -47,19 +47,19 @@ BOOL CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 	const SAMPLE669 *psmp = (const SAMPLE669 *)(lpStream + 0x1F1);
 	DWORD dwMemPos = 0;
 
-	if ((!lpStream) || (dwMemLength < sizeof(FILEHEADER669))) return FALSE;
-	if ((LittleEndianW(pfh->sig) != 0x6669) && (LittleEndianW(pfh->sig) != 0x4E4A)) return FALSE;
+	if ((!lpStream) || (dwMemLength < sizeof(FILEHEADER669))) return false;
+	if ((LittleEndianW(pfh->sig) != 0x6669) && (LittleEndianW(pfh->sig) != 0x4E4A)) return false;
 	b669Ext = (LittleEndianW(pfh->sig) == 0x4E4A) ? TRUE : FALSE;
 	if ((!pfh->samples) || (pfh->samples > 64) || (pfh->restartpos >= 128)
-	 || (!pfh->patterns) || (pfh->patterns > 128)) return FALSE;
+	 || (!pfh->patterns) || (pfh->patterns > 128)) return false;
 	DWORD dontfuckwithme = 0x1F1 + pfh->samples * sizeof(SAMPLE669) + pfh->patterns * 0x600;
-	if (dontfuckwithme > dwMemLength) return FALSE;
+	if (dontfuckwithme > dwMemLength) return false;
 	for (UINT ichk=0; ichk<pfh->samples; ichk++)
 	{
 		DWORD len = LittleEndian(*((DWORD *)(&psmp[ichk].length)));
 		dontfuckwithme += len;
 	}
-	if (dontfuckwithme > dwMemLength) return FALSE;
+	if (dontfuckwithme > dwMemLength) return false;
 	// That should be enough checking: this must be a 669 module.
 	m_nType = MOD_TYPE_669;
 	m_dwSongFlags |= SONG_LINEARSLIDES;
@@ -183,7 +183,7 @@ BOOL CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 		if (len > 4) ReadSample(&Ins[n], RS_PCM8U, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 		dwMemPos += len;
 	}
-	return TRUE;
+	return true;
 }
 
 

@@ -59,18 +59,20 @@ typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 
 
 // Note definitions
+#define NOTE_NONE			0
 #define NOTE_MIDDLEC		(5*12+1)
 #define NOTE_KEYOFF			0xFF //255
 #define NOTE_NOTECUT		0xFE //254
-#define NOTE_FADE			0xFB //253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
-#define NOTE_PC				0xFD //252, Param Control 'note'. Changes param value on first tick.
-#define NOTE_PCS			0xFC //251, Param Control(Smooth) 'note'. Changes param value during the whole row.
+#define NOTE_FADE			0xFD //251, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
+#define NOTE_PC				0xFC //253, Param Control 'note'. Changes param value on first tick.
+#define NOTE_PCS			0xFB //252, Param Control(Smooth) 'note'. Changes param value during the whole row.
 #define NOTE_MAX			120  //Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
 #define NOTE_MAX_SPECIAL	NOTE_KEYOFF
-#define NOTE_MIN_SPECIAL	NOTE_FADE
+#define NOTE_MIN_SPECIAL	NOTE_PCS
 
 
 // Volume Column commands
+#define VOLCMD_NONE				0
 #define VOLCMD_VOLUME			1
 #define VOLCMD_PANNING			2
 #define VOLCMD_VOLSLIDEUP		3
@@ -124,6 +126,8 @@ typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 #define CMD_SMOOTHMIDI			32 //rewbs.smoothVST
 #define CMD_VELOCITY			33 //rewbs.velocity
 #define CMD_XPARAM				34 // -> CODE#0010 -> DESC="add extended parameter mechanism to pattern effects" -! NEW_FEATURE#0010
+#define CMD_NOTESLIDEUP         35 // IMF Gxy
+#define CMD_NOTESLIDEDOWN       36 // IMF Hxy
 
 
 #endif

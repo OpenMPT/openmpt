@@ -59,16 +59,16 @@ typedef struct tagSTMHEADER
 
 
 
-BOOL CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	STMHEADER *phdr = (STMHEADER *)lpStream;
 	DWORD dwMemPos = 0;
 	
-	if ((!lpStream) || (dwMemLength < sizeof(STMHEADER))) return FALSE;
+	if ((!lpStream) || (dwMemLength < sizeof(STMHEADER))) return false;
 	if ((phdr->filetype != 2) || (phdr->unused != 0x1A)
 	 || ((_strnicmp(phdr->trackername, "!SCREAM!", 8))
-	  && (_strnicmp(phdr->trackername, "BMOD2STM", 8)))) return FALSE;
+	  && (_strnicmp(phdr->trackername, "BMOD2STM", 8)))) return false;
 	memcpy(m_szNames[0], phdr->songname, 20);
 	// Read STM header
 	m_nType = MOD_TYPE_STM;
@@ -97,7 +97,7 @@ BOOL CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 		STMSAMPLE *pStm = &phdr->sample[nIns];  // STM sample data
 		memcpy(pIns->name, pStm->filename, 13);
 		memcpy(m_szNames[nIns+1], pStm->filename, 12);
-		pIns->nC4Speed = LittleEndianW(pStm->c2spd);
+		pIns->nC5Speed = LittleEndianW(pStm->c2spd);
 		pIns->nGlobalVol = 64;
 		pIns->nVolume = pStm->volume << 2;
 		if (pIns->nVolume > 256) pIns->nVolume = 256;
@@ -112,9 +112,9 @@ BOOL CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 	UINT nPatterns = phdr->numpat;
 	for (UINT nPat=0; nPat<nPatterns; nPat++)
 	{
-		if (dwMemPos + 64*4*4 > dwMemLength) return TRUE;
+		if (dwMemPos + 64*4*4 > dwMemLength) return true;
 		if(Patterns.Insert(nPat, 64))
-			return TRUE;
+			return true;
 		MODCOMMAND *m = Patterns[nPat];
 		STMNOTE *p = (STMNOTE *)(lpStream + dwMemPos);
 		for (UINT n=0; n<64*4; n++, p++, m++)
@@ -184,6 +184,6 @@ BOOL CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 			}
 		}
 	}
-	return TRUE;
+	return true;
 }
 

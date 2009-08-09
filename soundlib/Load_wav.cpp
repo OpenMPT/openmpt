@@ -17,15 +17,15 @@
 /////////////////////////////////////////////////////////////
 // WAV file support
 
-BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	DWORD dwMemPos = 0;
 	WAVEFILEHEADER *phdr = (WAVEFILEHEADER *)lpStream;
 	WAVEFORMATHEADER *pfmt = (WAVEFORMATHEADER *)(lpStream + sizeof(WAVEFILEHEADER));
-	if ((!lpStream) || (dwMemLength < (DWORD)sizeof(WAVEFILEHEADER))) return FALSE;
+	if ((!lpStream) || (dwMemLength < (DWORD)sizeof(WAVEFILEHEADER))) return false;
 	if ((phdr->id_RIFF != IFFID_RIFF) || (phdr->id_WAVE != IFFID_WAVE)
-	 || (pfmt->id_fmt != IFFID_fmt)) return FALSE;
+	 || (pfmt->id_fmt != IFFID_fmt)) return false;
 	dwMemPos = sizeof(WAVEFILEHEADER) + 8 + pfmt->hdrlen;
 	if ((dwMemPos + 8 >= dwMemLength)
 	 || ((pfmt->format != WAVE_FORMAT_PCM) && (pfmt->format != WAVE_FORMAT_EXTENSIBLE))
@@ -34,14 +34,14 @@ BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 	 || (!pfmt->freqHz)
 	 || (pfmt->bitspersample & 7)
 	 || (pfmt->bitspersample < 8)
-	 || (pfmt->bitspersample > 32))  return FALSE;
+	 || (pfmt->bitspersample > 32))  return false;
 	WAVEDATAHEADER *pdata;
 	for (;;)
 	{
 		pdata = (WAVEDATAHEADER *)(lpStream + dwMemPos);
 		if (pdata->id_data == IFFID_data) break;
 		dwMemPos += pdata->length + 8;
-		if (dwMemPos + 8 >= dwMemLength) return FALSE;
+		if (dwMemPos + 8 >= dwMemLength) return false;
 	}
 	m_nType = MOD_TYPE_WAV;
 	m_nSamples = 0;
@@ -54,7 +54,7 @@ BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 	Order[1] = 0xFF;
 	bool fail = Patterns.Insert(0, 64);
 	fail = Patterns.Insert(1, 64);
-	if(fail) return TRUE;
+	if(fail) return true;
 	UINT samplesize = (pfmt->channels * pfmt->bitspersample) >> 3;
 	UINT len = pdata->length, bytelen;
 	if (dwMemPos + len > dwMemLength - 8) len = dwMemLength - dwMemPos - 8;
@@ -62,7 +62,7 @@ BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 	bytelen = len;
 	if (pfmt->bitspersample >= 16) bytelen *= 2;
 	if (len > MAX_SAMPLE_LENGTH) len = MAX_SAMPLE_LENGTH;
-	if (!len) return TRUE;
+	if (!len) return true;
 	// Setting up module length
 	DWORD dwTime = ((len * 50) / pfmt->freqHz) + 1;
 	DWORD framesperrow = (dwTime + 63) / 63;
@@ -98,7 +98,7 @@ BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 		pcmd[nChn].note = pcmd[0].note;
 		pcmd[nChn].instr = (BYTE)(nChn+1);
 		pins->nLength = len;
-		pins->nC4Speed = pfmt->freqHz;
+		pins->nC5Speed = pfmt->freqHz;
 		pins->nVolume = 256;
 		pins->nPan = 128;
 		pins->nGlobalVol = 64;
@@ -115,7 +115,7 @@ BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 			default: pins->nPan = 128; break;
 			}
 		}
-		if ((pins->pSample = AllocateSample(bytelen+8)) == NULL) return TRUE;
+		if ((pins->pSample = AllocateSample(bytelen+8)) == NULL) return true;
 		if (pfmt->bitspersample >= 16)
 		{
 			int slsize = pfmt->bitspersample >> 3;
@@ -139,7 +139,7 @@ BOOL CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 			p[len+1] = p[len] = p[len-1];
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -182,7 +182,7 @@ BOOL IMAADPCMUnpack16(signed short *pdest, UINT nLen, LPBYTE psrc, DWORD dwBytes
 	int value;
 
 	if ((nLen < 4) || (!pdest) || (!psrc)
-	 || (pkBlkAlign < 5) || (pkBlkAlign > dwBytes)) return FALSE;
+	 || (pkBlkAlign < 5) || (pkBlkAlign > dwBytes)) return false;
 	nPos = 0;
 	while ((nPos < nLen) && (dwBytes > 4))
 	{
@@ -216,7 +216,7 @@ BOOL IMAADPCMUnpack16(signed short *pdest, UINT nLen, LPBYTE psrc, DWORD dwBytes
 			pdest[nPos++] = (short int)value;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 

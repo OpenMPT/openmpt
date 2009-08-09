@@ -62,7 +62,7 @@ typedef struct PTMSAMPLE
 #pragma pack()
 
 
-BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	PTMFILEHEADER pfh = *(LPPTMFILEHEADER)lpStream;
@@ -81,13 +81,13 @@ BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 	        pfh.patseg[j] = LittleEndianW(pfh.patseg[j]);
 	}
 
-	if ((!lpStream) || (dwMemLength < 1024)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 1024)) return false;
 	if ((pfh.ptmf_id != 0x464d5450) || (!pfh.nchannels)
 	 || (pfh.nchannels > 32)
 	 || (pfh.norders > 256) || (!pfh.norders)
 	 || (!pfh.nsamples) || (pfh.nsamples > 255)
 	 || (!pfh.npatterns) || (pfh.npatterns > 128)
-	 || (SIZEOF_PTMFILEHEADER+pfh.nsamples*SIZEOF_PTMSAMPLE >= (int)dwMemLength)) return FALSE;
+	 || (SIZEOF_PTMFILEHEADER+pfh.nsamples*SIZEOF_PTMSAMPLE >= (int)dwMemLength)) return false;
 	memcpy(m_szNames[0], pfh.songname, 28);
 	m_szNames[0][28] = 0;
 	m_nType = MOD_TYPE_PTM;
@@ -113,7 +113,7 @@ BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 		pins->nGlobalVol = 64;
 		pins->nPan = 128;
 		pins->nVolume = psmp->volume << 2;
-		pins->nC4Speed = LittleEndianW(psmp->nC4Spd) << 1;
+		pins->nC5Speed = LittleEndianW(psmp->nC4Spd) << 1;
 		pins->uFlags = 0;
 		if ((psmp->sampletype & 3) == 1)
 		{
@@ -206,6 +206,6 @@ BOOL CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 			}
 		}
 	}
-	return TRUE;
+	return true;
 }
 

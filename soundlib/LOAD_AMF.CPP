@@ -167,13 +167,13 @@ VOID AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels
 
 
 
-BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
+bool CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------
 {
 	const AMFFILEHEADER *pfh = (AMFFILEHEADER *)lpStream;
 	DWORD dwMemPos;
 	
-	if ((!lpStream) || (dwMemLength < 2048)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 2048)) return false;
 	if ((!strncmp((LPCSTR)lpStream, "ASYLUM Music Format V1.0", 25)) && (dwMemLength > 4096))
 	{
 		UINT numorders, numpats, numsamples;
@@ -184,7 +184,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 		numsamples = 64;
 		dwMemPos += 6;
 		if ((!numpats) || (numpats > MAX_PATTERNS) || (!numorders)
-		 || (numpats*64*32 + 294 + 37*64 >= dwMemLength)) return FALSE;
+		 || (numpats*64*32 + 294 + 37*64 >= dwMemLength)) return false;
 		m_nType = MOD_TYPE_AMF0;
 		m_nChannels = 8;
 		m_nInstruments = 0;
@@ -226,7 +226,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 			const UCHAR *pin = lpStream + dwMemPos;
 			for (UINT i=0; i<8*64; i++)
 			{
-				p->note = 0;
+				p->note = NOTE_NONE;
 				if (pin[0])
 				{
 					p->note = pin[0] + 13;
@@ -253,11 +253,11 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 			MODINSTRUMENT *psmp = &Ins[iData+1];
 			if (psmp->nLength)
 			{
-				if(dwMemPos > dwMemLength) return FALSE;
+				if(dwMemPos > dwMemLength) return false;
 				dwMemPos += ReadSample(psmp, RS_PCM8S, (LPCSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 			}
 		}
-		return TRUE;
+		return true;
 	}
 	////////////////////////////
 	// DSM/AMF
@@ -269,7 +269,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 	 || (!pfh->numorders) || (pfh->numorders > MAX_PATTERNS)
 	 || (!pfh->numsamples) || (pfh->numsamples > MAX_SAMPLES)
 	 || (pfh->numchannels < 1) || (pfh->numchannels > 32))
-		return FALSE;
+		return false;
 	memcpy(m_szNames[0], pfh->title, 31);
 	dwMemPos = sizeof(AMFFILEHEADER);
 	m_nType = MOD_TYPE_AMF;
@@ -323,7 +323,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 			dwMemPos += m_nChannels * sizeof(USHORT);
 		}
 	}
-	if (dwMemPos + m_nSamples * (sizeof(AMFSAMPLE)+8) > dwMemLength) return TRUE;
+	if (dwMemPos + m_nSamples * (sizeof(AMFSAMPLE)+8) > dwMemLength) return true;
 	// Read Samples
 	UINT maxsampleseekpos = 0;
 	for (UINT iIns=0; iIns<m_nSamples; iIns++)
@@ -335,7 +335,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 		memcpy(m_szNames[iIns+1], psh->samplename, 31);
 		memcpy(pins->name, psh->filename, 13);
 		pins->nLength = LittleEndian(psh->length);
-		pins->nC4Speed = LittleEndianW(psh->c2spd);
+		pins->nC5Speed = LittleEndianW(psh->c2spd);
 		pins->nGlobalVol = 64;
 		pins->nVolume = psh->volume * 4;
 		if (pfh->version >= 11)
@@ -415,7 +415,7 @@ BOOL CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 			break;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 

@@ -152,7 +152,7 @@ void CSoundFile::S3MConvert(MODCOMMAND *m, BOOL bIT) const
 }
 
 
-void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatible) const
+void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatibilityExport) const
 //---------------------------------------------------------------------------------------
 {
 	UINT command = *pcmd;
@@ -198,13 +198,13 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 	case CMD_PANBRELLO:			command = 'Y'; break;
 	case CMD_MIDI:				command = 'Z'; break;
 	case CMD_SMOOTHMIDI:  //rewbs.smoothVST
-		if(bCompatible)
+		if(bCompatibilityExport)
 			command = 'Z';
 		else
 			command = '\\';
 		break;
 	case CMD_VELOCITY:  //rewbs.velocity
-		if(bCompatible)
+		if(bCompatibilityExport)
 			command = param = 0;
 		else
 			command = ':';
@@ -238,7 +238,7 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 	case CMD_XPARAM:
-		if(bCompatible)
+		if(bCompatibilityExport)
 			command = param = 0;
 		else
 			command = '[';
@@ -252,7 +252,7 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 }
 
 
-BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	UINT insnum,patnum,nins,npat;
@@ -276,8 +276,8 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	if((psfh.cwtv & 0xF000) == 0x5000) // OpenMPT Version number (Major.Minor)
 		m_dwLastSavedWithVersion = (psfh.cwtv & 0x0FFF) << 16;
 
-	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER)+sizeof(S3MSAMPLESTRUCT)+64)) return FALSE;
-	if (psfh.scrm != 0x4D524353) return FALSE;
+	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER)+sizeof(S3MSAMPLESTRUCT)+64)) return false;
+	if (psfh.scrm != 0x4D524353) return false;
 	dwMemPos = 0x60;
 	m_nType = MOD_TYPE_S3M;
 	memset(m_szNames,0,sizeof(m_szNames));
@@ -343,7 +343,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			}
 		}
 	}
-	if (!m_nChannels) return TRUE;
+	if (!m_nChannels) return true;
 	// Reading instrument headers
 	memset(insfile, 0, sizeof(insfile));
 	for (UINT iSmp=1; iSmp<=insnum; iSmp++)
@@ -365,11 +365,11 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			Ins[iSmp].nGlobalVol = 64;
 			if (s[0x1F] & 1) Ins[iSmp].uFlags |= CHN_LOOP;
 
-			UINT c4speed;
-			c4speed = LittleEndian(*((LPDWORD)(s+0x20)));
-			if (!c4speed) c4speed = 8363;
-			if (c4speed < 1024) c4speed = 1024;
-			Ins[iSmp].nC4Speed = c4speed;
+			UINT c5Speed;
+			c5Speed = LittleEndian(*((LPDWORD)(s+0x20)));
+			if (!c5Speed) c5Speed = 8363;
+			if (c5Speed < 1024) c5Speed = 1024;
+			Ins[iSmp].nC5Speed = c5Speed;
 
 			insfile[iSmp] = ((DWORD)LittleEndianW(*((LPWORD)(s+0x0E)))) << 4;
 			insfile[iSmp] += ((DWORD)(BYTE)s[0x0D]) << 20;
@@ -412,7 +412,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 					{
 						m->note = src[j++];
 						if (m->note < 0xF0) m->note = (m->note & 0x0F) + 12*(m->note >> 4) + 13;
-						else if (m->note == 0xFF) m->note = 0;
+						else if (m->note == 0xFF) m->note = NOTE_NONE;
 						m->instr = src[j++];
 					}
 					if (b & 0x40)
@@ -468,7 +468,7 @@ BOOL CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		GetpModDoc()->SetModified();
 		GetpModDoc()->SetShowSaveDialog(true);
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -482,7 +482,7 @@ static const BYTE S3MFiller[16] =
 };
 
 
-BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
+bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 //----------------------------------------------------------
 {
 	FILE *f;
@@ -492,8 +492,8 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	WORD insptr[128];
 	S3MSAMPLESTRUCT insex[128];
 
-	if ((!m_nChannels) || (!lpszFileName)) return FALSE;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
+	if ((!m_nChannels) || (!lpszFileName)) return false;
+	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	// Writing S3M header
 	memset(header, 0, sizeof(header));
 	memset(insex, 0, sizeof(insex));
@@ -605,7 +605,7 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 
 					if (!note) note = 0xFF; // no note
 					else if (note >= NOTE_MIN_SPECIAL) note = 0xFE; // special notes (notecut, noteoff etc)
-					else if (note < 13) note = 0; // too low
+					else if (note < 13) note = NOTE_NONE; // too low
 					else note -= 13;
 
 					if (note < 0xFE) note = (note % 12) + ((note / 12) << 4);
@@ -691,8 +691,8 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 			insex[i-1].loopend = pins->nLoopEnd;
 			insex[i-1].vol = pins->nVolume / 4;
 			insex[i-1].flags = (pins->uFlags & CHN_LOOP) ? 1 : 0;
-			if (pins->nC4Speed)
-				insex[i-1].finetune = pins->nC4Speed;
+			if (pins->nC5Speed)
+				insex[i-1].finetune = pins->nC5Speed;
 			else
 				insex[i-1].finetune = TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
 			UINT flags = RS_PCM8U;
@@ -737,7 +737,7 @@ BOOL CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	fseek(f, ofs1, SEEK_SET);
 	fwrite(insex, 0x50, nbi, f);
 	fclose(f);
-	return TRUE;
+	return true;
 }
 
 #pragma warning(default:4100)
