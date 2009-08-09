@@ -75,7 +75,7 @@ typedef struct _PSMSAMPLE
 #pragma pack()
 
 
-BOOL CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength)
 //-----------------------------------------------------------
 {
 	PSMCHUNK *pfh = (PSMCHUNK *)lpStream;
@@ -86,15 +86,15 @@ BOOL CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength)
 	UINT nPatterns;
 
 	// Chunk0: "PSM ",filesize,"FILE"
-	if (dwMemLength < 256) return FALSE;
+	if (dwMemLength < 256) return false;
 	if (pfh->id == PSM_ID_OLD)
 	{
 	#ifdef PSM_LOG
 		Log("Old PSM format not supported\n");
 	#endif
-		return FALSE;
+		return false;
 	}
-	if ((pfh->id != PSM_ID_NEW) || (pfh->len+12 > dwMemLength) || (pfh->listid != IFFID_FILE)) return FALSE;
+	if ((pfh->id != PSM_ID_NEW) || (pfh->len+12 > dwMemLength) || (pfh->listid != IFFID_FILE)) return false;
 	m_nType = MOD_TYPE_PSM;
 	m_nChannels = 16;
 	m_nSamples = 0;
@@ -148,7 +148,7 @@ BOOL CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength)
 				samplemap[m_nSamples-1] = (BYTE)m_nSamples;
 				// Init sample
 				pins->nGlobalVol = 0x40;
-				pins->nC4Speed = psmp->samplerate;
+				pins->nC5Speed = psmp->samplerate;
 				pins->nLength = psmp->length;
 				pins->nLoopStart = psmp->loopstart;
 				pins->nLoopEnd = psmp->loopend;
@@ -184,7 +184,7 @@ BOOL CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength)
 	}
 	// Step #1: convert song structure
 	PSMSONGHDR *pSong = (PSMSONGHDR *)(lpStream+dwSongPos+8);
-	if ((!dwSongPos) || (pSong->channels < 2) || (pSong->channels > 32)) return TRUE;
+	if ((!dwSongPos) || (pSong->channels < 2) || (pSong->channels > 32)) return true;
 	m_nChannels = pSong->channels;
 	// Valid song header -> convert attached chunks
 	{
@@ -372,7 +372,7 @@ BOOL CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength)
 	}
 
 	// Done (finally!)
-	return TRUE;
+	return true;
 }
 
 

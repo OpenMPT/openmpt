@@ -10,7 +10,7 @@
  * Hint 1: Most (all?) of the unsupported features were not supported in 2GDM / BWSB either.
  * Hint 2: Files will be played like their original formats would be played in MPT, so no
  *         BWSB quirks including crashes and freezes are supported. :-P
-*/
+ */
 
 #include "stdafx.h"
 #include "sndfile.h"
@@ -66,17 +66,17 @@ typedef struct _GDMSAMPLEHEADER
 	BYTE Pan;			// default pan
 } GDMSAMPLEHEADER, *PGDMSAMPLEHEADER;
 
-BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
+bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------
 {
-	if ((!lpStream) || (dwMemLength < sizeof(GDMHEADER))) return FALSE;
+	if ((!lpStream) || (dwMemLength < sizeof(GDMHEADER))) return false;
 
 	const PGDMHEADER pHeader = (PGDMHEADER)lpStream;
 
 	// is it a valid GDM file?
 	if(	(LittleEndian(pHeader->ID) != 0xFE4D4447) || //GDMþ
 		(pHeader->DOSEOF[0] != 13 || pHeader->DOSEOF[1] != 10 || pHeader->DOSEOF[2] != 26) || //CR+LF+EOF
-		(LittleEndian(pHeader->ID2) != 0x53464D47)) return FALSE; //GMFS
+		(LittleEndian(pHeader->ID2) != 0x53464D47)) return false; //GMFS
 
 	// song name
 	memset(m_szNames, 0, sizeof(m_szNames));
@@ -87,7 +87,7 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if(pHeader->FormMajorVer != 1 || pHeader->FormMinorVer != 0)
 	{
 		::MessageBox(0, TEXT("GDM file seems to be valid, but this format version is currently not supported."), TEXT("OpenMPT GDM import"), MB_ICONERROR);
-		return FALSE;
+		return false;
 	}
 
 	// interesting question: Is TrackID, TrackMajorVer, TrackMinorVer relevant? The only TrackID should be 0 - 2GDM.exe, so the answer would be no.
@@ -149,7 +149,7 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		break;
 	default:
 		::MessageBox(0, TEXT("GDM file seems to be valid, but the original format is currently not supported.\nThis should not happen."), TEXT("OpenMPT GDM import"), MB_ICONERROR);
-		return FALSE;
+		return false;
 		break;
 	}
 	UINT32 iSampleOffset  = LittleEndian(pHeader->SamOffset),
@@ -169,7 +169,7 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		|| dwMemLength < iMTOffset || dwMemLength - iMTOffset < iMTLength
 		|| dwMemLength < iSSOffset || dwMemLength - iSSOffset < iSSLength
 		|| dwMemLength < iTGOffset || dwMemLength - iTGOffset < iTGLength)
-		return FALSE;
+		return false;
 
 	// read orders
 	Order.ReadAsByte(lpStream + iOrdOffset, pHeader->NOO + 1, dwMemLength - iOrdOffset);
@@ -189,7 +189,7 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		SetNullTerminator(m_szNames[iSmp]);
 		memcpy(Ins[iSmp].name, pSample->FileName, 12);
 
-		Ins[iSmp].nC4Speed = LittleEndianW(pSample->C4Hertz);
+		Ins[iSmp].nC5Speed = LittleEndianW(pSample->C4Hertz);
 		Ins[iSmp].nGlobalVol = 256; // not supported in this format
 		Ins[iSmp].nLength = min(LittleEndian(pSample->Length), MAX_SAMPLE_LENGTH); // in bytes
 		Ins[iSmp].nLoopStart = min(LittleEndian(pSample->LoopBegin), Ins[iSmp].nLength); // in samples
@@ -322,7 +322,7 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 					bNote = (bNote & 0x7F) - 1; // this format doesn't have note cuts
 					if(bNote < 0xF0) bNote = (bNote & 0x0F) + 12 * (bNote >> 4) + 13;
-					if(bNote == 0xFF) bNote = 0;
+					if(bNote == 0xFF) bNote = NOTE_NONE;
 					m->note = bNote;
 					m->instr = bSample;
 
@@ -550,6 +550,6 @@ BOOL CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		::MessageBox(0, s, TEXT("OpenMPT GDM import"), MB_ICONWARNING);
 	}
 	
-	return TRUE;
+	return true;
 
 }

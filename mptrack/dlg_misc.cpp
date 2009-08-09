@@ -2459,10 +2459,10 @@ LRESULT CChordEditor::OnKeyboardNotify(WPARAM wParam, LPARAM nKey)
 	chord = m_CbnShortcut.GetCurSel();
 	if (chord >= 0) chord = m_CbnShortcut.GetItemData(chord);
 	if ((chord < 0) || (chord >= 3*12)) chord = 0;
-	UINT cnote = 0;
-	pChords[chord].notes[0] = 0;
-	pChords[chord].notes[1] = 0;
-	pChords[chord].notes[2] = 0;
+	UINT cnote = NOTE_NONE;
+	pChords[chord].notes[0] = NOTE_NONE;
+	pChords[chord].notes[1] = NOTE_NONE;
+	pChords[chord].notes[2] = NOTE_NONE;
 	for (UINT i=0; i<2*12; i++) if (i != (UINT)(pChords[chord].key % 12))
 	{
 		UINT n = m_Keyboard.GetFlags(i);
@@ -2851,7 +2851,8 @@ const MsgBoxHidableMessage HidableMessages[] =
 {
 	{TEXT("Tip: To create ProTracker compatible MOD-files, try compatibility export from File-menu."), 1, true},
 	{TEXT("Tip: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
-	{TEXT("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false}
+	{TEXT("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false},
+	{TEXT("Tip: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true},
 };
 
 STATIC_ASSERT(ARRAYELEMCOUNT(HidableMessages) == enMsgBoxHidableMessage_count);

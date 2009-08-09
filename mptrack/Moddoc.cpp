@@ -72,6 +72,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_INSERT_INSTRUMENT,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_INSTRUMENTS_REMOVEALL,	OnUpdateInstrumentOnly)
 	ON_UPDATE_COMMAND_UI(ID_CLEANUP_INSTRUMENTS,	OnUpdateInstrumentOnly)
+	ON_UPDATE_COMMAND_UI(ID_REARRANGE_SAMPLES,		OnUpdateSampleCount)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_COMMENTS,			OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
@@ -506,6 +507,7 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		strcpy(fext, ".s3m");
 		break;
 	case MOD_TYPE_XM:
+		MsgBoxHidable(XMCompatibilityExportTip);
 		lpszDefExt = "xm";
 		lpszFilter = FileFilterXM;
 		strcpy(fext, ".xm");
@@ -621,7 +623,7 @@ BOOL CModDoc::InitializeMod()
 		switch(GetModType())
 		{
 		case MOD_TYPE_MOD:
-			m_SndFile.m_nChannels = 8;
+			m_SndFile.m_nChannels = 4;
 			break;
 		case MOD_TYPE_S3M:
 			m_SndFile.m_nChannels = 16;
@@ -851,7 +853,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			pChn->pInstrument = pins;
 			pChn->pSample = pins->pSample;
 			pChn->nFineTune = pins->nFineTune;
-			pChn->nC4Speed = pins->nC4Speed;
+			pChn->nC5Speed = pins->nC5Speed;
 			pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
 			pChn->nLoopStart = pins->nLoopStart;
 			pChn->nLoopEnd = pins->nLoopEnd;
@@ -1622,7 +1624,7 @@ void CModDoc::OnFileCompatibilitySave()
 			if( AfxMessageBox(GetStrI18N(TEXT(
 				"Compared to regular MOD save, compatibility export makes "
 				"small adjustments to the save file in order to make the file compatible with "
-				"ProTracker. Note that this feature is not complete and the "
+				"ProTracker and other Amiga-based trackers. Note that this feature is not complete and the "
 				"file is not guaranteed to be free of MPT-specific features.\n\n "
 				"Important: beginning of some samples may be adjusted in the process. Proceed?")), MB_ICONINFORMATION|MB_YESNO) != IDYES
 				)
@@ -1631,6 +1633,11 @@ void CModDoc::OnFileCompatibilitySave()
 		case MOD_TYPE_IT:
 			ext = ModSpecs::it.fileExtension;
 			pattern = FileFilterIT;
+			::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
+			break;
+		case MOD_TYPE_XM:
+			ext = ModSpecs::xm.fileExtension;
+			pattern = FileFilterXM;
 			::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
 			break;
 		default:
@@ -1662,7 +1669,7 @@ void CModDoc::OnFileCompatibilitySave()
 			m_ShowSavedialog = true;	// ...and force save dialog to appear when saving.
 			break;
 		case MOD_TYPE_XM:
-			m_SndFile.SaveCompatXM(dlg.GetPathName());
+			m_SndFile.SaveXM(dlg.GetPathName(), 0, true);
 			break;
 		case MOD_TYPE_IT:
 			m_SndFile.SaveCompatIT(dlg.GetPathName());
@@ -1925,6 +1932,12 @@ void CModDoc::OnUpdateInstrumentOnly(CCmdUI *p)
 //---------------------------------------------
 {
 	if (p) p->Enable((m_SndFile.m_nInstruments) ? TRUE : FALSE);
+}
+
+void CModDoc::OnUpdateSampleCount(CCmdUI *p)
+//------------------------------------------
+{
+	if (p) p->Enable((m_SndFile.m_nSamples > 1) ? TRUE : FALSE);
 }
 
 void CModDoc::OnUpdateHasMIDIMappings(CCmdUI *p)

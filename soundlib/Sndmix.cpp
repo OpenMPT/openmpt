@@ -648,10 +648,10 @@ BOOL CSoundFile::ProcessRow()
 					{
 						// If channel resetting is disabled, we will emulate a pattern break
 						if(!(CMainFrame::GetMainFrame()->m_dwPatternSetup & PATTERN_RESETCHANNELS))
-							m_bPatternBreak = true;
+							m_dwSongFlags |= SONG_BREAKTOROW;
 					}
 
-					if (!m_nRestartPos && !m_bPatternBreak)
+					if (!m_nRestartPos && !(m_dwSongFlags & SONG_BREAKTOROW))
 					{
 						//rewbs.instroVSTi: stop all VSTi at end of song, if looping.
 						StopAllVsti();
@@ -691,7 +691,7 @@ BOOL CSoundFile::ProcessRow()
 					if (m_nRepeatCount > 0) m_nRepeatCount--;
 					m_nCurrentPattern = m_nRestartPos;
 					//m_nRow = 0;
-					m_bPatternBreak = false;
+					m_dwSongFlags &= ~SONG_BREAKTOROW;
 					//If restart pos points to +++, move along
 					while (Order[m_nCurrentPattern] == Order.GetIgnoreIndex()) {
 						m_nCurrentPattern++;
@@ -1166,7 +1166,7 @@ BOOL CSoundFile::ReadNote()
 			int period = pChn->nPeriod;
 			if ((pChn->dwFlags & (CHN_GLISSANDO|CHN_PORTAMENTO)) ==	(CHN_GLISSANDO|CHN_PORTAMENTO))
 			{
-				period = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC4Speed);
+				period = GetPeriodFromNote(GetNoteFromPeriod(period), pChn->nFineTune, pChn->nC5Speed);
 			}
 
 			// Arpeggio ?
@@ -1203,13 +1203,35 @@ BOOL CSoundFile::ReadNote()
 							}
 						}
 					}
-					else //Original
+					else if(IsCompatibleMode(TRK_FASTTRACKER2)) // FastTracker 2
 					{
+						// Using MilkyTracker's logic - still not perfect
 						BYTE note = pChn->nNote;
+						int arpPos = 0;
+
+						if (!(m_dwSongFlags & SONG_FIRSTTICK))
+						{
+							arpPos = (m_nTickCount - m_nMusicSpeed) % 3;
+							if(arpPos < 0) arpPos += 3;
+							switch(arpPos)
+							{
+								case 1:	note += (pChn->nArpeggio & 0x0F); break; // x/y are swapped!
+								case 2:	note += (pChn->nArpeggio >> 4); break;
+							}
+						}
+
+						if (note > 109 && arpPos != 0)
+							note = 109; // FT2's note limit
+
+						period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
+
+					}
+					else // Other trackers
+					{
 						switch(m_nTickCount % 3)
 						{
-							case 1:	period = GetPeriodFromNote(note + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC4Speed); break;
-							case 2:	period = GetPeriodFromNote(note + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC4Speed); break;
+							case 1:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio >> 4), pChn->nFineTune, pChn->nC5Speed); break;
+							case 2:	period = GetPeriodFromNote(pChn->nNote + (pChn->nArpeggio & 0x0F), pChn->nFineTune, pChn->nC5Speed); break;
 						}
 					}
 				}
@@ -1491,13 +1513,13 @@ BOOL CSoundFile::ReadNote()
 
 			if(m_nType != MOD_TYPE_MPT || !pChn->pHeader || pChn->pHeader->pTuning == NULL)
 			{
-				freq = GetFreqFromPeriod(period, pChn->nC4Speed, nPeriodFrac);
+				freq = GetFreqFromPeriod(period, pChn->nC5Speed, nPeriodFrac);
 			}
 			else //In this case: m_nType == MOD_TYPE_MPT and using custom tunings.
 			{
 				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_nTickCount == 0))
 				{
-					pChn->m_Freq = pChn->nC4Speed * vibratoFactor * pChn->pHeader->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps);
+					pChn->m_Freq = pChn->nC5Speed * vibratoFactor * pChn->pHeader->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps);
 					if(!pChn->m_CalculateFreq)
 						pChn->m_ReCalculateFreqOnFirstTick = false;
 					else

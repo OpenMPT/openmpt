@@ -97,7 +97,7 @@ typedef struct DBMSAMPLE
 #pragma pack()
 
 
-BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	const DBMFILEHEADER *pfh = (DBMFILEHEADER *)lpStream;
@@ -107,10 +107,10 @@ BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 	if ((!lpStream) || (dwMemLength <= sizeof(DBMFILEHEADER)) || (!pfh->channels)
 	 || (pfh->dbm_id != DBM_FILE_MAGIC) || (!pfh->songs) || (pfh->song_id != DBM_ID_SONG)
 	 || (pfh->name_id != DBM_ID_NAME) || (pfh->name_len != DBM_NAMELEN)
-	 || (pfh->info_id != DBM_ID_INFO) || (pfh->info_len != DBM_INFOLEN)) return FALSE;
+	 || (pfh->info_id != DBM_ID_INFO) || (pfh->info_len != DBM_INFOLEN)) return false;
 	dwMemPos = sizeof(DBMFILEHEADER);
 	nOrders = BigEndianW(pfh->orders);
-	if (dwMemPos + 2 * nOrders + 8*3 >= dwMemLength) return FALSE;
+	if (dwMemPos + 2 * nOrders + 8*3 >= dwMemLength) return false;
 	nInstruments = BigEndianW(pfh->instruments);
 	nSamples = BigEndianW(pfh->samples);
 	nPatterns = BigEndianW(pfh->patterns);
@@ -181,8 +181,8 @@ BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 					psmp->nVolume = BigEndianW(pih->volume) * 4;
 					if ((!psmp->nVolume) || (psmp->nVolume > 256)) psmp->nVolume = 256;
 					psmp->nGlobalVol = 64;
-					psmp->nC4Speed = BigEndian(pih->finetune);
-					int f2t = FrequencyToTranspose(psmp->nC4Speed);
+					psmp->nC5Speed = BigEndian(pih->finetune);
+					int f2t = FrequencyToTranspose(psmp->nC5Speed);
 					psmp->RelativeTone = f2t >> 7;
 					psmp->nFineTune = f2t & 0x7F;
 					if ((pih->looplen) && (sflags & 3))
@@ -366,6 +366,6 @@ BOOL CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 			}
 		}
 	}
-	return TRUE;
+	return true;
 }
 

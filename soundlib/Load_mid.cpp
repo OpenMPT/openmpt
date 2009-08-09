@@ -483,7 +483,7 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 #define MIDIGLOBAL_XGSYSTEMON		0x0200
 
 
-BOOL CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	const MIDIFILEHEADER *pmfh = (const MIDIFILEHEADER *)lpStream;
@@ -520,18 +520,18 @@ BOOL CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 				pmfh = (const MIDIFILEHEADER *)lpStream;
 				break;
 			}
-			if (len >= dwMemLength) return FALSE;
+			if (len >= dwMemLength) return false;
 			lpStream += len;
 			dwMemLength -= len;
 		}
 	}
 	// MIDI File Header
-	if ((dwMemLength < sizeof(MIDIFILEHEADER)+8) || (pmfh->id != 0x6468544D)) return FALSE;
+	if ((dwMemLength < sizeof(MIDIFILEHEADER)+8) || (pmfh->id != 0x6468544D)) return false;
 	dwMemPos = 8 + BigEndian(pmfh->len);
-	if (dwMemPos >= dwMemLength - 8) return FALSE;
+	if (dwMemPos >= dwMemLength - 8) return false;
 	pmth = (MIDITRACKHEADER *)(lpStream+dwMemPos);
 	tracks = BigEndianW(pmfh->wTrks);
-	if ((pmth->id != 0x6B72544D) || (!tracks)) return FALSE;
+	if ((pmth->id != 0x6B72544D) || (!tracks)) return false;
 	if (tracks > MIDI_MAXTRACKS) tracks = MIDI_MAXTRACKS;
 	// Reading File...
 	m_nType = MOD_TYPE_MID;
@@ -1215,7 +1215,7 @@ BOOL CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 #ifdef MIDI_LOG
 	Log("\n------------------ End Of File ---------------------------\n\n");
 #endif
-	return TRUE;
+	return true;
 }
 
 

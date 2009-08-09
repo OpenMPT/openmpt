@@ -274,6 +274,8 @@ typedef const BYTE * LPCBYTE;
 #define SONG_ITPROJECT		0x20000
 #define SONG_ITPEMBEDIH		0x40000
 // -! NEW_FEATURE#0023
+#define SONG_BREAKTOROW		0x80000
+#define SONG_POSJUMP		0x100000
 
 // Global Options (Renderer)
 #define SNDMIX_REVERSESTEREO	0x0001
@@ -367,7 +369,7 @@ struct MODINSTRUMENT
 		//nLength <-> Number of 'frames'?
 	UINT nSustainStart, nSustainEnd;
 	LPSTR pSample;
-	UINT nC4Speed;
+	UINT nC5Speed;
 	WORD nPan;
 	WORD nVolume;
 	WORD nGlobalVol;
@@ -525,7 +527,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nNewRightVol, nNewLeftVol;
 	LONG nRealVolume, nRealPan;
 	LONG nVolume, nPan, nFadeOutVol;
-	LONG nPeriod, nC4Speed, nPortamentoDest;
+	LONG nPeriod, nC5Speed, nPortamentoDest;
 	INSTRUMENTHEADER *pHeader;
 	MODINSTRUMENT *pInstrument;
 	DWORD nVolEnvPosition, nPanEnvPosition, nPitchEnvPosition;
@@ -547,6 +549,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nOldVolumeSlide, nOldFineVolUpDown;
 	BYTE nOldPortaUpDown, nOldFinePortaUpDown;
 	BYTE nOldPanSlide, nOldChnVolSlide;
+    UINT nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;
 	BYTE nVibratoType, nVibratoSpeed, nVibratoDepth;
 	BYTE nTremoloType, nTremoloSpeed, nTremoloDepth;
 	BYTE nPanbrelloType, nPanbrelloSpeed, nPanbrelloDepth;
@@ -567,7 +570,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	float m_nPlugInitialParamValue; //rewbs.smoothVST
 	PLUGINDEX m_RowPlug;			//NOTE_PCs memory.
 	
-	void ClearRowCmd() {nRowNote = 0; nRowInstr = 0; nRowVolCmd = 0; nRowVolume = 0; nRowCommand = 0; nRowParam = 0;}
+	void ClearRowCmd() {nRowNote = NOTE_NONE; nRowInstr = 0; nRowVolCmd = VOLCMD_NONE; nRowVolume = 0; nRowCommand = CMD_NONE; nRowParam = 0;}
 
 	typedef UINT VOLUME;
 	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol*4 : nVolume;}
@@ -900,7 +903,6 @@ public:	// for Editing
 	BYTE m_nMixLevels;
     UINT m_nMusicSpeed, m_nMusicTempo;
 	UINT m_nNextRow, m_nRow;
-	BOOL m_bPatternBreak; // Will be set if "break to row" happened
 	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
 	//NOTE: m_nCurrentPattern and m_nNextPattern refer to order index - not pattern index.
 	bool m_bPatternTransitionOccurred;
@@ -1011,50 +1013,50 @@ public:
 	void ResetChannelState(CHANNELINDEX chn, BYTE resetStyle);
 
 	// Module Loaders
-	BOOL ReadXM(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadS3M(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadMod(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadMed(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadMTM(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadSTM(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadIT(LPCBYTE lpStream, const DWORD dwMemLength);
-	//BOOL ReadMPT(LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadXM(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadS3M(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadMod(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadMed(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadMTM(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadSTM(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadIT(LPCBYTE lpStream, const DWORD dwMemLength);
+	//bool ReadMPT(LPCBYTE lpStream, const DWORD dwMemLength);
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	BOOL ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength);
 // -! NEW_FEATURE#0023
-	BOOL Read669(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadUlt(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadWav(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadDSM(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadFAR(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadAMS(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadMDL(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadOKT(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadDMF(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadPTM(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadDBM(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength);
-	BOOL ReadMT2(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadPSM(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadJ2B(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadUMX(LPCBYTE lpStream, DWORD dwMemLength);
-	BOOL ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength);
-	BOOL ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength);
-	BOOL ReadMID(LPCBYTE lpStream, DWORD dwMemLength);
+	bool Read669(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadUlt(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadWav(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadDSM(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadFAR(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadAMS(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadMDL(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadOKT(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadDMF(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadPTM(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadDBM(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMT2(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadPSM(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadJ2B(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadUMX(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMID(LPCBYTE lpStream, DWORD dwMemLength);
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
 	UINT WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMaxLen=0);
-	BOOL SaveXM(LPCSTR lpszFileName, UINT nPacking=0);
-	BOOL SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
-	BOOL SaveMod(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
-	BOOL SaveIT(LPCSTR lpszFileName, UINT nPacking=0);
-	BOOL SaveCompatIT(LPCSTR lpszFileName);
-	BOOL SaveCompatXM(LPCSTR lpszFileName);
+	bool SaveXM(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
+	bool SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
+	bool SaveMod(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
+	bool SaveIT(LPCSTR lpszFileName, UINT nPacking=0);
+	bool SaveCompatIT(LPCSTR lpszFileName);
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	BOOL SaveITProject(LPCSTR lpszFileName);
+	bool SaveITProject(LPCSTR lpszFileName);
 // -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
 	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, INSTRUMENTHEADER* instruments[], UINT nInstruments);
@@ -1073,8 +1075,8 @@ public:
 	UINT GetSaveFormats() const;
 	void ConvertModCommand(MODCOMMAND *) const;
 	void S3MConvert(MODCOMMAND *m, BOOL bIT) const;
-	void S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatible = false) const;
-	WORD ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const;
+	void S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatibilityExport = false) const;
+	WORD ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool bCompatibilityExport = false) const;
 	
 public:
 	// Real-time sound functions
@@ -1153,6 +1155,7 @@ public:
 	void FinePortamentoDown(MODCHANNEL *pChn, UINT param);
 	void ExtraFinePortamentoUp(MODCHANNEL *pChn, UINT param);
 	void ExtraFinePortamentoDown(MODCHANNEL *pChn, UINT param);
+	void NoteSlide(MODCHANNEL *pChn, UINT param, int sign);
 	void TonePortamento(MODCHANNEL *pChn, UINT param);
 	void Vibrato(MODCHANNEL *pChn, UINT param);
 	void FineVibrato(MODCHANNEL *pChn, UINT param);
@@ -1191,7 +1194,7 @@ public:
 
 // -> CODE#0020
 // -> DESC="rearrange sample list"
-	BOOL MoveSample(UINT from,UINT to);
+	bool MoveSample(UINT from,UINT to);
 // -! NEW_FEATURE#0020
 
 // -> CODE#0003
@@ -1236,8 +1239,8 @@ public:
 	BOOL ReadSampleFromSong(UINT nSample, CSoundFile *, UINT nSrcSample);
 	// Period/Note functions
 	UINT GetNoteFromPeriod(UINT period) const;
-	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) const;
-	UINT GetFreqFromPeriod(UINT period, UINT nC4Speed, int nPeriodFrac=0) const;
+	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;
+	UINT GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac=0) const;
 	// Misc functions
 	MODINSTRUMENT *GetSample(UINT n) { return Ins+n; }
 	void ResetMidiCfg();
@@ -1293,7 +1296,7 @@ inline uint32 MODINSTRUMENT::GetSampleRate(const MODTYPE type) const
 	if(type & (MOD_TYPE_MOD|MOD_TYPE_XM))
 		nRate = CSoundFile::TransposeToFrequency(RelativeTone, nFineTune);
 	else
-		nRate = nC4Speed;
+		nRate = nC5Speed;
 	return (nRate > 0) ? nRate : 8363;
 }
 

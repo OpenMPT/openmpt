@@ -12,10 +12,10 @@
 #define MODMAGIC_OFFSET	(20+31*30+130)
 
 
-BOOL CSoundFile::ReadUMX(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadUMX(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	if ((!lpStream) || (dwMemLength < 0x800)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 0x800)) return false;
 	// Rip Mods from UMX
 	if ((LittleEndian(*((DWORD *)(lpStream+0x20))) < dwMemLength)
 	 && (LittleEndian(*((DWORD *)(lpStream+0x18))) <= dwMemLength - 0x10)
@@ -50,6 +50,6 @@ BOOL CSoundFile::ReadUMX(const BYTE *lpStream, DWORD dwMemLength)
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 

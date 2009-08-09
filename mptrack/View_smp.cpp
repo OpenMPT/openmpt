@@ -273,7 +273,7 @@ void CViewSample::SetCurSel(DWORD nBegin, DWORD nEnd)
 				if (pModDoc)
 				{
 					CSoundFile *pSndFile = pModDoc->GetSoundFile();
-					LONG lSampleRate = pSndFile->Ins[m_nSample].nC4Speed;
+					LONG lSampleRate = pSndFile->Ins[m_nSample].nC5Speed;
 					if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 					{
 						lSampleRate = CSoundFile::TransposeToFrequency(pSndFile->Ins[m_nSample].RelativeTone, pSndFile->Ins[m_nSample].nFineTune);
@@ -1793,7 +1793,7 @@ void CViewSample::OnEditCopy()
 		pfmt->id_fmt = IFFID_fmt;
 		pfmt->hdrlen = 16;
 		pfmt->format = 1;
-		pfmt->freqHz = pins->nC4Speed;
+		pfmt->freqHz = pins->nC5Speed;
 		if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 		{
 			pfmt->freqHz = CSoundFile::TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
@@ -1817,7 +1817,7 @@ void CViewSample::OnEditCopy()
 			psh->smpl_id = 0x6C706D73;
 			psh->smpl_len = sizeof(WAVESMPLHEADER) - 8;
 			psh->dwSamplePeriod = 22675;
-			if (pins->nC4Speed > 256) psh->dwSamplePeriod = 1000000000 / pins->nC4Speed;
+			if (pins->nC5Speed > 256) psh->dwSamplePeriod = 1000000000 / pins->nC5Speed;
 			psh->dwBaseNote = 60;
 			if (pins->uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
 			{

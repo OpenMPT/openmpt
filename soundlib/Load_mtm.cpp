@@ -48,21 +48,21 @@ typedef struct tagMTMHEADER
 #pragma pack()
 
 
-BOOL CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 //-----------------------------------------------------------
 {
 	MTMHEADER *pmh = (MTMHEADER *)lpStream;
 	DWORD dwMemPos = 66;
 
-	if ((!lpStream) || (dwMemLength < 0x100)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 0x100)) return false;
 	if ((strncmp(pmh->id, "MTM", 3)) || (pmh->numchannels > 32)
 	 || (pmh->numsamples >= MAX_SAMPLES) || (!pmh->numsamples)
 	 || (!pmh->numtracks) || (!pmh->numchannels)
-	 || (!pmh->lastpattern) || (pmh->lastpattern > MAX_PATTERNS)) return FALSE;
+	 || (!pmh->lastpattern) || (pmh->lastpattern > MAX_PATTERNS)) return false;
 	strncpy(m_szNames[0], pmh->songname, 20);
 	m_szNames[0][20] = 0;
 	if (dwMemPos + 37*pmh->numsamples + 128 + 192*pmh->numtracks
-	 + 64 * (pmh->lastpattern+1) + pmh->commentsize >= dwMemLength) return FALSE;
+	 + 64 * (pmh->lastpattern+1) + pmh->commentsize >= dwMemLength) return false;
 	m_nType = MOD_TYPE_MTM;
 	m_nSamples = pmh->numsamples;
 	m_nChannels = pmh->numchannels;
@@ -160,6 +160,6 @@ BOOL CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 	}
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
-	return TRUE;
+	return true;
 }
 

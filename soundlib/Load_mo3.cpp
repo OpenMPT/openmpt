@@ -19,19 +19,19 @@ typedef int (WINAPI * UNMO3_DECODE)(void **data, int *len);
 typedef void (WINAPI * UNMO3_FREE)(void *data);
 
 
-BOOL CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
+bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------
 {
 	// no valid MO3 file (magic bytes: "MO3")
 	if(dwMemLength < 3 || lpStream[0] != 'M' || lpStream[1] != 'O' || lpStream[2] != '3')
-		return FALSE;
+		return false;
 
 #ifdef NO_MO3_SUPPORT
 	UNREFERENCED_PARAMETER(dwMemLength);
 	AfxMessageBox(GetStrI18N(__TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
 	return false;
 #else
-	BOOL b_result = false; // result of trying to load the module, false == fail.
+	bool b_result = false; // result of trying to load the module, false == fail.
 
 	int iLen = static_cast<int>(dwMemLength);
 	void ** mo3Stream = (void **)&lpStream;

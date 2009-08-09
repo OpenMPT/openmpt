@@ -65,14 +65,14 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 }
 
 
-WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
-//------------------------------------------------------------------
+WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool bCompatibilityExport) const
+//---------------------------------------------------------------------------------------------------------
 {
 	UINT command = m->command & 0x3F, param = m->param;
 
 	switch(command)
 	{
-	case 0:						command = param = 0; break;
+	case CMD_NONE:				command = param = 0; break;
 	case CMD_ARPEGGIO:			command = 0; break;
 	case CMD_PORTAMENTOUP:
 		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM|MOD_TYPE_MPT))
@@ -126,12 +126,37 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 	case CMD_PANNINGSLIDE:		command = 'P' - 55; break;
 	case CMD_RETRIG:			command = 'R' - 55; break;
 	case CMD_TREMOR:			command = 'T' - 55; break;
-	case CMD_XFINEPORTAUPDOWN:	command = 'X' - 55; break;
+	case CMD_XFINEPORTAUPDOWN:
+		if(bCompatibilityExport && (param & 0xF0) > 2)
+			command = param = 0;
+		else
+			command = 'X' - 55;
+		break;
 	case CMD_PANBRELLO:			command = 'Y' - 55; break;
-	case CMD_MIDI:				command = 'Z' - 55; break;
-	case CMD_SMOOTHMIDI:		command = '\\' - 56; break; //rewbs.smoothVST: 36
-	case CMD_VELOCITY:			command = ':' - 21; break; //rewbs.velocity: 37
-	case CMD_XPARAM:			command = '#' + 3; break; //rewbs.XMfixes - XParam is 38
+	case CMD_MIDI:				
+		if(bCompatibilityExport)
+			command = param = 0;
+		else
+			command = 'Z' - 55;
+		break;
+	case CMD_SMOOTHMIDI: //rewbs.smoothVST: 36
+		if(bCompatibilityExport)
+			command = param = 0;
+		else
+			command = '\\' - 56;
+		break;
+	case CMD_VELOCITY: //rewbs.velocity: 37
+		if(bCompatibilityExport)
+			command = param = 0;
+		else
+			command = ':' - 21;
+		break;
+	case CMD_XPARAM: //rewbs.XMfixes - XParam is 38
+		if(bCompatibilityExport)
+			command = param = 0;
+		else
+			command = '#' + 3;
+		break;
 	case CMD_S3MCMDEX:
 		switch(param & 0xF0)
 		{
@@ -139,7 +164,12 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, BOOL bXM) const
 		case 0x20:	command = 0x0E; param = (param & 0x0F) | 0x50; break;
 		case 0x30:	command = 0x0E; param = (param & 0x0F) | 0x40; break;
 		case 0x40:	command = 0x0E; param = (param & 0x0F) | 0x70; break;
-		case 0x90:  command = 'X' - 55; break;
+		case 0x90:  
+			if(bCompatibilityExport)
+				command = param = 0;
+			else
+				command = 'X' - 55;
+			break;
 		case 0xB0:	command = 0x0E; param = (param & 0x0F) | 0x60; break;
 		case 0xA0:
 		case 0x50:
@@ -182,7 +212,7 @@ BOOL IsMagic(LPCSTR s1, LPCSTR s2)
 }
 
 
-BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
     char s[1024];
@@ -190,7 +220,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	PMODMAGIC pMagic;
 	UINT nErr;
 
-	if ((!lpStream) || (dwMemLength < 0x600)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 0x600)) return false;
 	dwMemPos = 20;
 	m_nSamples = 31;
 	m_nChannels = 4;
@@ -257,7 +287,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		dwMemPos += sizeof(MODSAMPLE);
 	}
-	if ((m_nSamples == 15) && (dwTotalSampleLen > dwMemLength * 4)) return FALSE;
+	if ((m_nSamples == 15) && (dwTotalSampleLen > dwMemLength * 4)) return false;
 	pMagic = (PMODMAGIC)(lpStream+dwMemPos);
 	dwMemPos += sizeof(MODMAGIC);
 	if (m_nSamples == 15) dwMemPos -= 4;
@@ -290,7 +320,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	m_nRestartPos = pMagic->nRestartPos;
 	if (m_nRestartPos >= 0x78) m_nRestartPos = 0;
 	if (m_nRestartPos + 1 >= (UINT)norders) m_nRestartPos = 0;
-	if (!nbp) return FALSE;
+	if (!nbp) return false;
 	DWORD dwWowTest = dwTotalSampleLen+dwMemPos;
 	if ((IsMagic(pMagic->Magic, "M.K.")) && (dwWowTest + nbp*8*256 == dwMemLength)) m_nChannels = 8;
 	if ((nbp != nbpbuggy) && (dwWowTest + nbp*m_nChannels*256 != dwMemLength))
@@ -303,7 +333,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		nbp = nbpbuggy2;
 	}
 	if ((dwWowTest < 0x600) || (dwWowTest > dwMemLength)) nErr += 8;
-	if ((m_nSamples == 15) && (nErr >= 16)) return FALSE;
+	if ((m_nSamples == 15) && (nErr >= 16)) return false;
 	// Default settings	
 	m_nType = MOD_TYPE_MOD;
 	m_nDefaultSpeed = 6;
@@ -363,7 +393,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 #ifdef MODPLUG_TRACKER
-	return TRUE;
+	return true;
 #else
 	return (dwErrCheck) ? TRUE : FALSE;
 #endif
@@ -373,7 +403,7 @@ BOOL CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 #ifndef MODPLUG_NO_FILESAVE
 #pragma warning(disable:4100)
 
-BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompatibilityExport)
+bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompatibilityExport)
 //-------------------------------------------------------------------------------------------
 {
 	BYTE insmap[32];
@@ -382,8 +412,8 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	BYTE ord[128];
 	FILE *f;
 
-	if ((!m_nChannels) || (!lpszFileName)) return FALSE;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
+	if ((!m_nChannels) || (!lpszFileName)) return false;
+	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	memset(ord, 0, sizeof(ord));
 	memset(inslen, 0, sizeof(inslen));
 	if (m_nInstruments)
@@ -459,7 +489,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 					LPBYTE p=s;
 					for (UINT c=0; c<m_nChannels; c++,p+=4,m++)
 					{
-						UINT param = ModSaveCommand(m, FALSE);
+						UINT param = ModSaveCommand(m, false, true);
 						UINT command = param >> 8;
 						param &= 0xFF;
 						if (command > 0x0F) command = param = 0;
@@ -523,7 +553,7 @@ BOOL CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		WriteSample(f, pins, flags, inslen[ismpd]);
 	}
 	fclose(f);
-	return TRUE;
+	return true;
 }
 
 #pragma warning(default:4100)

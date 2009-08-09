@@ -180,7 +180,7 @@ void UnpackMDLTrack(MODCOMMAND *pat, UINT nChannels, UINT nRows, UINT nTrack, co
 
 
 
-BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	DWORD dwMemPos, dwPos, blocklen, dwTrackPos;
@@ -196,8 +196,8 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 	LPCBYTE pvolenv, ppanenv, ppitchenv;
 	UINT nvolenv, npanenv, npitchenv;
 
-	if ((!lpStream) || (dwMemLength < 1024)) return FALSE;
-	if ((pmsh->id != 0x4C444D44) || ((pmsh->version & 0xF0) > 0x10)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 1024)) return false;
+	if ((pmsh->id != 0x4C444D44) || ((pmsh->version & 0xF0) > 0x10)) return false;
 #ifdef MDL_LOG
 	Log("MDL v%d.%d\n", pmsh->version>>4, pmsh->version&0x0f);
 #endif
@@ -217,7 +217,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 		dwMemPos += 6;
 		if (blocklen > dwMemLength - dwMemPos)
 		{
-			if (dwMemPos == 11) return FALSE;
+			if (dwMemPos == 11) return false;
 			break;
 		}
 		switch(block)
@@ -416,11 +416,11 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				const BYTE *p = lpStream+dwPos+41;
 				if (pmsh->version > 0)
 				{
-					pins->nC4Speed = *((DWORD *)p);
+					pins->nC5Speed = *((DWORD *)p);
 					p += 4;
 				} else
 				{
-					pins->nC4Speed = *((WORD *)p);
+					pins->nC5Speed = *((WORD *)p);
 					p += 2;
 				}
 				pins->nLength = *((DWORD *)(p));
@@ -544,7 +544,7 @@ BOOL CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	m_dwSongFlags |= SONG_LINEARSLIDES;
 	m_nType = MOD_TYPE_MDL;
-	return TRUE;
+	return true;
 }
 
 

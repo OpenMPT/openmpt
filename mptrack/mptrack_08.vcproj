@@ -377,6 +377,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\Load_imf.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\Load_it.cpp"
 				>
 			</File>

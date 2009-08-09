@@ -34,6 +34,7 @@ struct CModSpecifications
 	BYTE MIDIMappingDirectivesMax;
 	UINT speedMin;
 	UINT speedMax;
+	bool hasComments;
 };
 
 
@@ -68,6 +69,7 @@ const CModSpecifications mptm =
 	200,								//Max MIDI mapping directives
 	1,									//Min Speed
 	255,								//Max Speed
+	true,								//Has song comments
 };
 
 
@@ -81,7 +83,7 @@ const CModSpecifications mod =
 	108,								//Maximum note index
 	false,								//No notecut.
 	false,								//No noteoff.
-	false,								//Has notefade.
+	false,								//No notefade.
 	64,									//Pattern max.
 	128,								//Order max.
 	4,									//Channel min
@@ -97,6 +99,7 @@ const CModSpecifications mod =
 	0,									//Max MIDI mapping directives
 	1,									//Min Speed
 	31,									//Max Speed
+	false,								//No song comments
 };
 
 // MOD with MPT extensions.
@@ -108,7 +111,7 @@ const CModSpecifications modEx =
 	108,								//Maximum note index
 	false,								//No notecut.
 	false,								//No noteoff.
-	false,								//Has notefade.
+	false,								//No notefade.
 	64,									//Pattern max.
 	128,								//Order max.
 	4,									//Channel min
@@ -124,6 +127,7 @@ const CModSpecifications modEx =
 	0,									//Max MIDI mapping directives
 	1,									//Min Speed
 	31,									//Max Speed
+	false,								//No song comments
 };
 
 const CModSpecifications xm =
@@ -134,7 +138,7 @@ const CModSpecifications xm =
 	108,								//Maximum note index
 	false,								//No notecut.
 	true,								//Has noteoff.
-	false,								//Has notefade.
+	false,								//No notefade.
 	64,									//Pattern max.
 	128,								//Order max.
 	1,									//Channel min
@@ -150,6 +154,7 @@ const CModSpecifications xm =
 	0,									//Max MIDI mapping directives
 	1,									//Min Speed
 	31,									//Max Speed
+	false,								//No song comments
 };
 
 // XM with MPT extensions
@@ -161,7 +166,7 @@ const CModSpecifications xmEx =
 	108,								//Maximum note index
 	false,								//No notecut.
 	true,								//Has noteoff.
-	false,								//Has notefade.
+	false,								//No notefade.
 	240,								//Pattern max.
 	256,								//Order max.
 	1,									//Channel min
@@ -177,17 +182,17 @@ const CModSpecifications xmEx =
 	200,								//Max MIDI mapping directives
 	1,									//Min Speed
 	31,									//Max Speed
+	true,								//Has song comments
 };
 
 const CModSpecifications s3m =
 {
-	//TODO: Set correct values.
 	"s3m",								//File extension
 	13,									//Minimum note index
-	NOTE_MAX,							//Maximum note index
+	120,								//Maximum note index
 	true,								//Has notecut.
 	false,								//No noteoff.
-	false,								//Has notefade.
+	false,								//No notefade.
 	240,								//Pattern max.
 	256,								//Order max.
 	1,									//Channel min
@@ -203,6 +208,7 @@ const CModSpecifications s3m =
 	0,									//Max MIDI mapping directives
 	1,									//Min Speed
 	255,								//Max Speed
+	false,								//No song comments
 };
 
 // S3M with MPT extensions
@@ -214,7 +220,7 @@ const CModSpecifications s3mEx =
 	NOTE_MAX,							//Maximum note index
 	true,								//Has notecut.
 	false,								//No noteoff.
-	false,								//Has notefade.
+	false,								//No notefade.
 	240,								//Pattern max.
 	256,								//Order max.
 	1,									//Channel min
@@ -230,6 +236,7 @@ const CModSpecifications s3mEx =
 	0,									//Max MIDI mapping directives
 	1,									//Min Speed
 	255,								//Max Speed
+	false,								//No song comments
 };
 
 const CModSpecifications it =
@@ -237,7 +244,7 @@ const CModSpecifications it =
 	//TODO: Set correct values.
 	"it",								//File extension
 	1,									//Minimum note index
-	NOTE_MAX,							//Maximum note index
+	120,								//Maximum note index
 	true,								//Has notecut.
 	true,								//Has noteoff.
 	true,								//Has notefade.
@@ -256,6 +263,7 @@ const CModSpecifications it =
 	0,									//Max MIDI mapping directives
 	1,									//Min Speed
 	255,								//Max Speed
+	true,								//Has song comments
 };
 
 const CModSpecifications itEx =
@@ -282,6 +290,7 @@ const CModSpecifications itEx =
 	200,								//Max MIDI mapping directives
 	1,									//Min Speed
 	255,								//Max Speed
+	true,								//Has song comments
 };
 
 } //namespace ModSpecs

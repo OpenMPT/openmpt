@@ -41,18 +41,18 @@ typedef struct OKTSAMPLE
 } OKTSAMPLE;
 
 
-BOOL CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	OKTFILEHEADER *pfh = (OKTFILEHEADER *)lpStream;
 	DWORD dwMemPos = sizeof(OKTFILEHEADER);
 	UINT nsamples = 0, npatterns = 0, norders = 0;
 
-	if ((!lpStream) || (dwMemLength < 1024)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 1024)) return false;
 	if ((pfh->okta != 0x41544B4F) || (pfh->song != 0x474E4F53)
 	 || (pfh->cmod != 0x444F4D43) || (pfh->chnsetup[0]) || (pfh->chnsetup[2])
 	 || (pfh->chnsetup[4]) || (pfh->chnsetup[6]) || (pfh->fixed8 != 0x08000000)
-	 || (pfh->samp != 0x504D4153)) return FALSE;
+	 || (pfh->samp != 0x504D4153)) return false;
 	m_nType = MOD_TYPE_OKT;
 	m_nChannels = 4 + pfh->chnsetup[1] + pfh->chnsetup[3] + pfh->chnsetup[5] + pfh->chnsetup[7];
 	if (m_nChannels > MAX_CHANNELS) m_nChannels = MAX_CHANNELS;
@@ -62,7 +62,7 @@ BOOL CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading samples
 	for (UINT smp=1; smp <= nsamples; smp++)
 	{
-		if (dwMemPos >= dwMemLength) return TRUE;
+		if (dwMemPos >= dwMemLength) return true;
 		if (smp < MAX_SAMPLES)
 		{
 			OKTSAMPLE *psmp = (OKTSAMPLE *)(lpStream + dwMemPos);
@@ -76,33 +76,33 @@ BOOL CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 			if (pins->nLoopStart + 2 < pins->nLoopEnd) pins->uFlags |= CHN_LOOP;
 			pins->nGlobalVol = 64;
 			pins->nVolume = psmp->volume << 2;
-			pins->nC4Speed = 8363;
+			pins->nC5Speed = 8363;
 		}
 		dwMemPos += sizeof(OKTSAMPLE);
 	}
 	// SPEE
-	if (dwMemPos >= dwMemLength) return TRUE;
+	if (dwMemPos >= dwMemLength) return true;
 	if (*((DWORD *)(lpStream + dwMemPos)) == 0x45455053)
 	{
 		m_nDefaultSpeed = lpStream[dwMemPos+9];
 		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
 	}
 	// SLEN
-	if (dwMemPos >= dwMemLength) return TRUE;
+	if (dwMemPos >= dwMemLength) return true;
 	if (*((DWORD *)(lpStream + dwMemPos)) == 0x4E454C53)
 	{
 		npatterns = lpStream[dwMemPos+9];
 		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
 	}
 	// PLEN
-	if (dwMemPos >= dwMemLength) return TRUE;
+	if (dwMemPos >= dwMemLength) return true;
 	if (*((DWORD *)(lpStream + dwMemPos)) == 0x4E454C50)
 	{
 		norders = lpStream[dwMemPos+9];
 		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
 	}
 	// PATT
-	if (dwMemPos >= dwMemLength) return TRUE;
+	if (dwMemPos >= dwMemLength) return true;
 	if (*((DWORD *)(lpStream + dwMemPos)) == 0x54544150)
 	{
 		UINT orderlen = norders;
@@ -121,7 +121,7 @@ BOOL CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 		if (npat < MAX_PATTERNS)
 		{
 			if(Patterns.Insert(npat, rows))
-				return TRUE;
+				return true;
 			MODCOMMAND *m = Patterns[npat];
 			UINT imax = m_nChannels*rows;
 			for (UINT i=0; i<imax; i++, m++, dwPos+=4)
@@ -195,6 +195,6 @@ BOOL CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
 		nsmp++;
 	}
-	return TRUE;
+	return true;
 }
 

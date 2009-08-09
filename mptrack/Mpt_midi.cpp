@@ -50,7 +50,7 @@ void ApplyTransposeKeyboardSetting(CMainFrame& rMainFrm, DWORD& dwParam1)
 			if (note < 0x80)
 			{
 				note += nTranspose*12;
-				if (note < 0) note = 0;
+				if (note < 0) note = NOTE_NONE;
 				if (note > NOTE_MAX - 1) note = NOTE_MAX - 1;
 
 				// -> CODE#0011

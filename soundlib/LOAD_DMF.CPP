@@ -86,7 +86,7 @@ extern void Log(LPCSTR s, ...);
 #endif
 
 
-BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	const DMFHEADER *pfh = (DMFHEADER *)lpStream;
@@ -96,8 +96,8 @@ BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 	BYTE infobyte[32];
 	BYTE smplflags[MAX_SAMPLES];
 
-	if ((!lpStream) || (dwMemLength < 1024)) return FALSE;
-	if ((pfh->id != 0x464d4444) || (!pfh->version) || (pfh->version & 0xF0)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 1024)) return false;
+	if ((pfh->id != 0x464d4444) || (!pfh->version) || (pfh->version & 0xF0)) return false;
 	dwMemPos = 66;
 	memcpy(m_szNames[0], pfh->songname, 30);
 	m_szNames[0][30] = 0;
@@ -402,7 +402,7 @@ BOOL CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 						psmp->nLength = psh->len;
 						psmp->nLoopStart = psh->loopstart;
 						psmp->nLoopEnd = psh->loopend;
-						psmp->nC4Speed = psh->c3speed;
+						psmp->nC5Speed = psh->c3speed;
 						psmp->nGlobalVol = 64;
 						psmp->nVolume = (psh->volume) ? ((WORD)psh->volume)+1 : (WORD)256;
 						psmp->uFlags = (psh->flags & 2) ? CHN_16BIT : 0;
@@ -476,11 +476,11 @@ dmfexit:
 		if (!m_nSamples)
 		{
 			m_nType = MOD_TYPE_NONE;
-			return FALSE;
+			return false;
 		}
 		m_nChannels = 4;
 	}
-	return TRUE;
+	return true;
 }
 
 

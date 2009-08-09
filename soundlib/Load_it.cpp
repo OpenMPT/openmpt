@@ -467,7 +467,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
+bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------------
 {
 	UINT i,n,nsmp;
@@ -478,14 +478,14 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	// Macro used to make sure that given amount of bytes can be read.
 	// Returns FALSE from this function if reading is not possible.
 	#define ASSERT_CAN_READ(x) \
-	if( streamPos > dwMemLength || x > dwMemLength - streamPos ) return FALSE;
+	if( streamPos > dwMemLength || x > dwMemLength - streamPos ) return false;
 
 	ASSERT_CAN_READ(12);
 
 // Check file ID
 
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
-	if(id != 0x2e697470) return FALSE;	// .itp
+	if(id != 0x2e697470) return false;	// .itp
 	m_nType = MOD_TYPE_IT;
 	streamPos += sizeof(DWORD);
 
@@ -507,7 +507,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		streamPos += len;
 		m_szNames[0][sizeof(m_szNames[0])-1] = '\0';
 	}
-	else return FALSE;
+	else return false;
 
 // Song comments
 
@@ -515,7 +515,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	streamPos += sizeof(DWORD);
-	if(id > uint16_max) return FALSE;
+	if(id > uint16_max) return false;
 
 	// allocate comment string
 	if(m_lpszSongComments) delete[] m_lpszSongComments;
@@ -542,7 +542,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	m_dwSongFlags = id;
 	streamPos += sizeof(DWORD);
 
-	if(!(m_dwSongFlags & SONG_ITPROJECT)) return FALSE;
+	if(!(m_dwSongFlags & SONG_ITPROJECT)) return false;
 
 	// m_nDefaultGlobalVolume
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
@@ -571,13 +571,13 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	m_nChannels = id;
 	streamPos += sizeof(DWORD);
-	if(m_nChannels > 127) return FALSE;
+	if(m_nChannels > 127) return false;
 
 	// channel name string length (=MAX_CHANNELNAME)
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	len = id;
 	streamPos += sizeof(DWORD);
-	if(len > MAX_CHANNELNAME) return FALSE;
+	if(len > MAX_CHANNELNAME) return false;
 
 	// Channels' data
 	for(i=0; i<m_nChannels; i++){
@@ -634,14 +634,14 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	m_nInstruments = id;
-	if(m_nInstruments > MAX_INSTRUMENTS) return FALSE;
+	if(m_nInstruments > MAX_INSTRUMENTS) return false;
 	streamPos += sizeof(DWORD);
 
 	// path string length (=_MAX_PATH)
 	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	len = id;
-	if(len > _MAX_PATH) return FALSE;
+	if(len > _MAX_PATH) return false;
 	streamPos += sizeof(DWORD);
 
 	// instruments' paths
@@ -658,7 +658,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	size = id;
-	if(size > MAX_ORDERS) return FALSE;
+	if(size > MAX_ORDERS) return false;
 	streamPos += sizeof(DWORD);
 
 	// order data
@@ -675,7 +675,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	size = id;
 	streamPos += sizeof(DWORD);
-	if(size > MAX_PATTERNS) return FALSE;
+	if(size > MAX_PATTERNS) return false;
 
 	// m_nPatternNames
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
@@ -694,7 +694,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		ASSERT_CAN_READ(m_nPatternNames * len);
 		memcpy(&m_lpszPatternNames[0],lpStream+streamPos,m_nPatternNames * len);
 	}
-	else return FALSE;
+	else return false;
 
 	streamPos += m_nPatternNames * len;
 
@@ -702,7 +702,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 	n = id;
-	if(n != 6) return FALSE;
+	if(n != 6) return false;
 	streamPos += sizeof(DWORD);
 
 	for(UINT npat=0; npat<size; npat++){
@@ -713,7 +713,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		// PatternSize[npat]
 		ASSERT_CAN_READ(4);
 		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
-		if(id > MAX_PATTERN_ROWS) return FALSE;
+		if(id > MAX_PATTERN_ROWS) return false;
 		Patterns[npat].Resize(id);
 		streamPos += sizeof(DWORD);
 
@@ -732,7 +732,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 			if(Patterns[npat].ReadITPdata(lpStream, streamPos, datasize, dwMemLength))
 			{
 				ErrorBox(IDS_ERR_FILEOPEN, NULL);
-				return FALSE;
+				return false;
 			}
 				//memcpy(Patterns[npat],lpStream+streamPos,datasize);
 				//streamPos += datasize;
@@ -747,14 +747,14 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read original number of samples
 	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
-	if(id > MAX_SAMPLES) return FALSE;
+	if(id > MAX_SAMPLES) return false;
 	m_nSamples = id;
 	streamPos += sizeof(DWORD);
 
 	// Read number of embeded samples
 	ASSERT_CAN_READ(4);
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
-	if(id > MAX_SAMPLES) return FALSE;
+	if(id > MAX_SAMPLES) return false;
 	n = id;
 	streamPos += sizeof(DWORD);
 
@@ -776,7 +776,7 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 		len = id;
 		streamPos += sizeof(DWORD);
-		if(streamPos >= dwMemLength || len > dwMemLength - streamPos) return FALSE;
+		if(streamPos >= dwMemLength || len > dwMemLength - streamPos) return false;
 
 		// Copy sample struct data
 		if(pis.id == 0x53504D49){
@@ -788,9 +788,9 @@ BOOL CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 			pins->nLoopEnd = pis.loopend;
 			pins->nSustainStart = pis.susloopbegin;
 			pins->nSustainEnd = pis.susloopend;
-			pins->nC4Speed = pis.C5Speed;
-			if(!pins->nC4Speed) pins->nC4Speed = 8363;
-			if(pis.C5Speed < 256) pins->nC4Speed = 256;
+			pins->nC5Speed = pis.C5Speed;
+			if(!pins->nC5Speed) pins->nC5Speed = 8363;
+			if(pis.C5Speed < 256) pins->nC5Speed = 256;
 			pins->nVolume = pis.vol << 2;
 			if(pins->nVolume > 256) pins->nVolume = 256;
 			pins->nGlobalVol = pis.gvl;
@@ -901,13 +901,13 @@ mpts:
 		SetModFlag(MSF_OLDVOLSWING, true);
 	}
 
-	return TRUE;
+	return true;
 
 	#undef ASSERT_CAN_READ
 }
 // -! NEW_FEATURE#0023
 
-BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
+bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 //----------------------------------------------------------------------
 {
 	ITFILEHEADER *pifh = (ITFILEHEADER *)lpStream;
@@ -928,11 +928,11 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	bool interpretModplugmade = false;
 	bool hasModplugExtensions = false;
 
-	if ((!lpStream) || (dwMemLength < 0xC0)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 0xC0)) return false;
 	if ((pifh->id != 0x4D504D49 && pifh->id != 0x2e6D7074) || (pifh->insnum > 0xFF)
-	 || (pifh->smpnum >= MAX_SAMPLES) || (!pifh->ordnum)) return FALSE;
+	 || (pifh->smpnum >= MAX_SAMPLES) || (!pifh->ordnum)) return false;
 	if (dwMemPos + pifh->ordnum + pifh->insnum*4
-	 + pifh->smpnum*4 + pifh->patnum*4 > dwMemLength) return FALSE;
+	 + pifh->smpnum*4 + pifh->patnum*4 > dwMemLength) return false;
 
 
 	DWORD mptStartPos = dwMemLength;
@@ -959,11 +959,14 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if(GetType() == MOD_TYPE_IT)
 		{
 			if(pifh->cmwt == 0x888 || pifh->cwtv == 0x888 || 
-			(pifh->cwtv == 0x217 && pifh->cmwt == 0x200)) interpretModplugmade = true;
+			(pifh->cwtv == 0x217 && pifh->cmwt == 0x200) ||
+			(pifh->cwtv == 0x214 && pifh->cmwt == 0x202)) interpretModplugmade = true;
 			//TODO: Check whether above interpretation is reasonable especially for 
 			//values 0x217 and 0x200 which are the values used in 1.16. 
 			if(pifh->cwtv == 0x217 && pifh->cmwt == 0x200)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+			if(pifh->cwtv == 0x214 && pifh->cmwt == 0x202)
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 		}
 	}
 	
@@ -973,6 +976,12 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		m_nRowsPerBeat = pifh->highlight_minor;
 		m_nRowsPerMeasure = pifh->highlight_major;
+		if(m_nRowsPerBeat + m_nRowsPerMeasure == 0)
+		{
+			// MPT 1.09, 1.07 and most likely other old MPT versions leave this blank
+			m_nRowsPerBeat = 4;
+			m_nRowsPerMeasure = 16;
+		}
 	}
 
 	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;
@@ -1076,7 +1085,7 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	patpos.resize(patpossize);
 	patpossize *= 4; // <-> patpossize *= sizeof(DWORD);
 	if(patpossize > dwMemLength - dwMemPos)
-		return FALSE;
+		return false;
 	if(patpossize > 0)
 		memcpy(&patpos[0], lpStream+dwMemPos, patpossize);
 	
@@ -1253,9 +1262,9 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			pins->nLoopEnd = pis->loopend;
 			pins->nSustainStart = pis->susloopbegin;
 			pins->nSustainEnd = pis->susloopend;
-			pins->nC4Speed = pis->C5Speed;
-			if (!pins->nC4Speed) pins->nC4Speed = 8363;
-			if (pis->C5Speed < 256) pins->nC4Speed = 256;
+			pins->nC5Speed = pis->C5Speed;
+			if (!pins->nC5Speed) pins->nC5Speed = 8363;
+			if (pis->C5Speed < 256) pins->nC5Speed = 256;
 			pins->nVolume = pis->vol << 2;
 			if (pins->nVolume > 256) pins->nVolume = 256;
 			pins->nGlobalVol = pis->gvl;
@@ -1416,7 +1425,7 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					if(!(m_nType & MOD_TYPE_MPT))
 					{
 						if(note > NOTE_MAX && note < 0xFD) note = NOTE_FADE;
-						else if(note == 0xFD) note = 0;
+						else if(note == 0xFD) note = NOTE_NONE;
 					}
 					m[ch].note = note;
 					lastvalue[ch].note = note;
@@ -1514,7 +1523,7 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				SetModFlag(MSF_COMPATIBLE_PLAY, true);
 			}
 		}
-		return TRUE;
+		return true;
 	}
 	else
 	{
@@ -1545,7 +1554,7 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		} //version condition(MPT)
 	}
 
-	return TRUE;
+	return true;
 }
 //end plastiq: code readability improvements
 
@@ -1555,22 +1564,22 @@ BOOL CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
+bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 //-------------------------------------------------
 {
 // Check song type
 
-	if(!(m_dwSongFlags & SONG_ITPROJECT)) return FALSE;
+	if(!(m_dwSongFlags & SONG_ITPROJECT)) return false;
 
 	UINT i,j = 0;
 	for(i = 0 ; i < m_nInstruments ; i++) { if(m_szInstrumentPath[i][0] != '\0' || !Headers[i+1]) j++; }
-	if(m_nInstruments && j != m_nInstruments) return FALSE;
+	if(m_nInstruments && j != m_nInstruments) return false;
 
 // Open file
 
 	FILE *f;
 
-	if((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return FALSE;
+	if((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return false;
 	
 
 // File ID
@@ -1744,7 +1753,7 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			if(psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
 			if(psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
 			if(psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
-			itss.C5Speed = psmp->nC4Speed;
+			itss.C5Speed = psmp->nC5Speed;
 			if (!itss.C5Speed) itss.C5Speed = 8363;
 			itss.length = psmp->nLength;
 			itss.loopbegin = psmp->nLoopStart;
@@ -1802,11 +1811,11 @@ BOOL CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 // Close file
 	fclose(f);
-	return TRUE;
+	return true;
 }
 // -! NEW_FEATURE#0023
 
-BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
+bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 //-------------------------------------------------------------
 {
 	DWORD dwPatNamLen, dwChnNamLen;
@@ -1830,7 +1839,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	FILE *f;
 
 
-	if ((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return FALSE;
+	if ((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return false;
 
 
 	memset(inspos, 0, sizeof(inspos));
@@ -2371,7 +2380,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
 		if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
 		if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
-		itss.C5Speed = psmp->nC4Speed;
+		itss.C5Speed = psmp->nC5Speed;
 		if (!itss.C5Speed) itss.C5Speed = 8363;
 		itss.length = psmp->nLength;
 		itss.loopbegin = psmp->nLoopStart;
@@ -2433,7 +2442,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if(GetType() == MOD_TYPE_IT)
 	{
 		fclose(f);
-		return TRUE;
+		return true;
 	}
 	
 	//hack
@@ -2459,7 +2468,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	{
 		fout.clear();
 		fout.write(reinterpret_cast<const char*>(&MPTStartPos), sizeof(MPTStartPos));
-		return FALSE;
+		return false;
 	}
 	fout.write(reinterpret_cast<const char*>(&MPTStartPos), sizeof(MPTStartPos));
 	fout.close();
@@ -2468,7 +2477,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 
 	//NO WRITING HERE ANYMORE.
 
-	return TRUE;
+	return true;
 }
 
 
@@ -2477,7 +2486,7 @@ BOOL CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 
 //HACK: This is a quick fix. Needs to be better integrated into player and GUI.
 //And need to split into subroutines and eliminate code duplication with SaveIT.
-BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName) 
+bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName) 
 //------------------------------------------------
 {
 	const int IT_MAX_CHANNELS=64;
@@ -2501,7 +2510,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	FILE *f;
 
 
-	if ((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return FALSE;
+	if ((!lpszFileName) || ((f = fopen(lpszFileName, "wb")) == NULL)) return false;
 	memset(inspos, 0, sizeof(inspos));
 	memset(patpos, 0, sizeof(patpos));
 	memset(smppos, 0, sizeof(smppos));
@@ -2530,7 +2539,9 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 
 	header.insnum = m_nInstruments;
 	header.smpnum = m_nSamples;
-	header.cwtv = 0x0217;	// That's how MPT 1.16 identifies, although an approriate format would be txyy (t = tracker ID, x = version major, y = version minor)
+
+	MptVersion::VersionNum vVersion = MptVersion::num;
+	header.cwtv = 0x5000 | (WORD)((vVersion >> 16) & 0x0FFF); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
 	header.cmwt = 0x0214;	// Common compatible tracker :)
 	header.flags = 0x0001;
 	header.special = 0x0006;
@@ -2850,7 +2861,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 				UINT param = m->param;
 				UINT vol = 0xFF;
 				UINT note = m->note;
-				if(note == NOTE_PC || note == NOTE_PCS) note = 0;
+				if(note == NOTE_PC || note == NOTE_PCS) note = NOTE_NONE;
 				if (note) b |= 1;
 				if ((note) && (note < NOTE_MIN_SPECIAL)) note--;
 				if (note == NOTE_FADE) note = 0xF6;
@@ -2996,7 +3007,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
 		if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
 		if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
-		itss.C5Speed = psmp->nC4Speed;
+		itss.C5Speed = psmp->nC5Speed;
 		if (!itss.C5Speed) itss.C5Speed = 8363;
 		itss.length = psmp->nLength;
 		itss.loopbegin = psmp->nLoopStart;
@@ -3057,7 +3068,7 @@ BOOL CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
 	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
 	fclose(f);
-	return TRUE;
+	return true;
 
 }
 
@@ -3558,24 +3569,17 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_nDefaultTempo, 1, size, f);	//write m_nDefaultTempo
 
-	// Only write highlighting information if necessary for IT format
-	if((GetType() & MOD_TYPE_XM) || (m_dwSongFlags & SONG_ITPROJECT) || (m_nRowsPerBeat > 0xFF))
-	{
-		code = 'RPB.';							//write m_nRowsPerBeat
-		fwrite(&code, 1, sizeof(__int32), f);	
-		size = sizeof(m_nRowsPerBeat);			
-		fwrite(&size, 1, sizeof(__int16), f);
-		fwrite(&m_nRowsPerBeat, 1, size, f);	
-	}
+	code = 'RPB.';							//write m_nRowsPerBeat
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nRowsPerBeat);			
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nRowsPerBeat, 1, size, f);	
 
-	if((GetType() & MOD_TYPE_XM) || (m_dwSongFlags & SONG_ITPROJECT) || (m_nRowsPerMeasure > 0xFF))
-	{
-		code = 'RPM.';							//write m_nRowsPerMeasure
-		fwrite(&code, 1, sizeof(__int32), f);	
-		size = sizeof(m_nRowsPerMeasure);		
-		fwrite(&size, 1, sizeof(__int16), f);
-		fwrite(&m_nRowsPerMeasure, 1, size, f);
-	}
+	code = 'RPM.';							//write m_nRowsPerMeasure
+	fwrite(&code, 1, sizeof(__int32), f);	
+	size = sizeof(m_nRowsPerMeasure);		
+	fwrite(&size, 1, sizeof(__int16), f);
+	fwrite(&m_nRowsPerMeasure, 1, size, f);
 
 	code = 'C...';							//write m_nChannels 
 	fwrite(&code, 1, sizeof(__int32), f);	

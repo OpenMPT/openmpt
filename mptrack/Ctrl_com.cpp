@@ -139,7 +139,7 @@ void CCtrlComments::UpdateView(DWORD dwHint, CObject *pHint)
 	}
 	if (dwHint & HINT_MODTYPE)
 	{
-		m_EditComments.SetReadOnly((m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_S3M)) ? TRUE : FALSE);
+		m_EditComments.SetReadOnly(!m_pSndFile->GetModSpecifications().hasComments);
 	}
 
 	m_EditComments.SetRedraw(TRUE);

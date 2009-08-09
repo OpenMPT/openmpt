@@ -77,7 +77,7 @@ typedef struct tagXMSAMPLESTRUCT
 #pragma pack()
 
 
-BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 //--------------------------------------------------------------
 {
 	XMSAMPLEHEADER xmsh;
@@ -186,14 +186,14 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		if ((!rows) || (rows > MAX_PATTERN_ROWS)) rows = 64;
 // -> BEHAVIOUR_CHANGE#0008
 		packsize = LittleEndianW(*((WORD *)(lpStream+dwMemPos+7)));
-		if (dwMemPos + dwSize + 4 > dwMemLength) return TRUE;
+		if (dwMemPos + dwSize + 4 > dwMemLength) return true;
 		dwMemPos += dwSize;
-		if (dwMemPos + packsize + 4 > dwMemLength) return TRUE;
+		if (dwMemPos + packsize + 4 > dwMemLength) return true;
 		MODCOMMAND *p;
 		if (ipatmap < MAX_PATTERNS)
 		{
 			if(Patterns.Insert(ipatmap, rows))
-				return TRUE;
+				return true;
 
 			if (!packsize) continue;
 			p = Patterns[ipatmap];
@@ -299,12 +299,12 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		UINT samplemap[32];
 		WORD nsamples;
 				
-		if (dwMemPos + sizeof(DWORD) >= dwMemLength) return TRUE;
+		if (dwMemPos + sizeof(DWORD) >= dwMemLength) return true;
 		DWORD ihsize = LittleEndian(*((DWORD *)(lpStream + dwMemPos)));
-		if (dwMemPos + ihsize >= dwMemLength) return TRUE;
+		if (dwMemPos + ihsize >= dwMemLength) return true;
 
 		pih = (XMINSTRUMENTHEADER *)(lpStream + dwMemPos);
-		if (dwMemPos + LittleEndian(pih->size) > dwMemLength) return TRUE;
+		if (dwMemPos + LittleEndian(pih->size) > dwMemLength) return true;
 		if ((Headers[iIns] = new INSTRUMENTHEADER) == NULL) continue;
 		memset(Headers[iIns], 0, sizeof(INSTRUMENTHEADER));
 		Headers[iIns]->pTuning = m_defaultInstrument.pTuning;
@@ -315,12 +315,12 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				
 		if ((nsamples = pih->samples) > 0)
 		{
-			/* we have sample, so let's read the rest of this instrument
+			/* we have samples, so let's read the rest of this instrument
 			   the header that is being read here is not the sample header, though,
 			   it's rather the instrument settings. */
 
 			if (dwMemPos + ihsize >= dwMemLength)
-				return TRUE;
+				return true;
 
 			memset(&xmsh, 0, sizeof(XMSAMPLEHEADER));
 			memcpy(&xmsh,
@@ -343,7 +343,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			continue;
 		}
 		memset(samplemap, 0, sizeof(samplemap));
-		if (nsamples > 32) return TRUE;
+		if (nsamples > 32) return true;
 		UINT newsamples = m_nSamples;
 		for (UINT nmap=0; nmap<nsamples; nmap++)
 		{
@@ -478,7 +478,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		for (UINT ins=0; ins<nsamples; ins++)
 		{
 			if ((dwMemPos + sizeof(xmss) > dwMemLength)
-			 || (dwMemPos + xmsh.shsize > dwMemLength)) return TRUE;
+			 || (dwMemPos + xmsh.shsize > dwMemLength)) return true;
 			memcpy(&xmss, lpStream+dwMemPos, sizeof(xmss));
 			xmss.samplen = LittleEndian(xmss.samplen);
 			xmss.loopstart = LittleEndian(xmss.loopstart);
@@ -635,7 +635,7 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 
 	// Leave if no extra instrument settings are available (end of file reached)
-	if(dwMemPos >= dwMemLength) return TRUE;
+	if(dwMemPos >= dwMemLength) return true;
 
 	bool bInterpretOpenMPTMade = false; // specific for OpenMPT 1.17+ (bMadeWithModPlug is also for MPT 1.16)
 	LPCBYTE ptr = lpStream + dwMemPos;
@@ -647,14 +647,14 @@ BOOL CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if(bInterpretOpenMPTMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
 		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 
-	return TRUE;
+	return true;
 }
 
 
 #ifndef MODPLUG_NO_FILESAVE
 
-BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
-//---------------------------------------------------------
+bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatibilityExport)
+//------------------------------------------------------------------------------------------
 {
 	#define ASSERT_CAN_WRITE(x) \
 	if(len > s.size() - x) /*Buffer running out? Make it larger.*/ \
@@ -677,6 +677,8 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	FILE *f;
 	int i;
 	BOOL bAddChannel = false; // avoid odd channel count for FT2 compatibility 
+
+	if(bCompatibilityExport) nPacking = false;
 
 	if ((!m_nChannels) || (!lpszFileName)) return false;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
@@ -716,8 +718,15 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 	if (!header.instruments) header.instruments = m_nSamples;
 	header.flags = (m_dwSongFlags & SONG_LINEARSLIDES) ? 0x01 : 0x00;
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
-	header.tempo = m_nDefaultTempo;
-	header.speed = m_nDefaultSpeed;
+	if(bCompatibilityExport)
+	{	
+		header.tempo = CLAMP(m_nDefaultTempo, 32, 255);
+	}
+	else
+	{
+		header.tempo = m_nDefaultTempo;
+	}
+	header.speed = CLAMP(m_nDefaultSpeed, 1, 31);
 	Order.WriteToByteArray(header.order, header.norder, 256);
 
 	fwrite(&header, 1, sizeof(header), f);
@@ -734,11 +743,11 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 		for (UINT j=m_nChannels*PatternSize[i]; j; j--,p++)
 		{
 			UINT note = p->note;
-			UINT param = ModSaveCommand(p, true);
+			UINT param = ModSaveCommand(p, true, bCompatibilityExport);
 			UINT command = param >> 8;
 			param &= 0xFF;
 			if (note >= 0xFE) note = 97; else
-			if ((note <= 12) || (note > 96+12)) note = 0; else
+			if ((note <= 12) || (note > 96+12)) note = NOTE_NONE; else
 			note -= 12;
 			UINT vol = 0;
 			if (p->volcmd)
@@ -919,7 +928,7 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 					xmss.loopstart *= 2;
 					xmss.samplen *= 2;
 				}
-				if (pins->uFlags & CHN_STEREO)
+				if (pins->uFlags & CHN_STEREO && !bCompatibilityExport)
 				{
 					flags[ins] = (pins->uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
 					xmss.type |= 0x20;
@@ -945,72 +954,68 @@ BOOL CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking)
 			}
 		}
 	}
-	// Writing song comments
-	if ((m_lpszSongComments) && (m_lpszSongComments[0]))
+
+	if(!bCompatibilityExport)
 	{
-		DWORD d = 0x74786574;
-		fwrite(&d, 1, 4, f);
-		d = strlen(m_lpszSongComments);
-		fwrite(&d, 1, 4, f);
-		fwrite(m_lpszSongComments, 1, d, f);
-	}
-	// Writing midi cfg
-	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
-	{
-		DWORD d = 0x4944494D;
-		fwrite(&d, 1, 4, f);
-		d = sizeof(MODMIDICFG);
-		fwrite(&d, 1, 4, f);
-		fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
-	}
-	// Writing Pattern Names
-	if ((m_nPatternNames) && (m_lpszPatternNames))
-	{
-		DWORD dwLen = m_nPatternNames * MAX_PATTERNNAME;
-		while ((dwLen >= MAX_PATTERNNAME) && (!m_lpszPatternNames[dwLen-MAX_PATTERNNAME])) dwLen -= MAX_PATTERNNAME;
-		if (dwLen >= MAX_PATTERNNAME)
+		// Writing song comments
+		if ((m_lpszSongComments) && (m_lpszSongComments[0]))
 		{
-			DWORD d = 0x4d414e50;
+			DWORD d = 0x74786574;
 			fwrite(&d, 1, 4, f);
-			fwrite(&dwLen, 1, 4, f);
-			fwrite(m_lpszPatternNames, 1, dwLen, f);
-		}
-	}
-	// Writing Channel Names
-	{
-		UINT nChnNames = 0;
-		for (UINT inam=0; inam<m_nChannels; inam++)
-		{
-			if (ChnSettings[inam].szName[0]) nChnNames = inam+1;
-		}
-		// Do it!
-		if (nChnNames)
-		{
-			DWORD dwLen = nChnNames * MAX_CHANNELNAME;
-			DWORD d = 0x4d414e43;
+			d = strlen(m_lpszSongComments);
 			fwrite(&d, 1, 4, f);
-			fwrite(&dwLen, 1, 4, f);
-			for (UINT inam=0; inam<nChnNames; inam++)
+			fwrite(m_lpszSongComments, 1, d, f);
+		}
+		// Writing midi cfg
+		if (m_dwSongFlags & SONG_EMBEDMIDICFG)
+		{
+			DWORD d = 0x4944494D;
+			fwrite(&d, 1, 4, f);
+			d = sizeof(MODMIDICFG);
+			fwrite(&d, 1, 4, f);
+			fwrite(&m_MidiCfg, 1, sizeof(MODMIDICFG), f);
+		}
+		// Writing Pattern Names
+		if ((m_nPatternNames) && (m_lpszPatternNames))
+		{
+			DWORD dwLen = m_nPatternNames * MAX_PATTERNNAME;
+			while ((dwLen >= MAX_PATTERNNAME) && (!m_lpszPatternNames[dwLen-MAX_PATTERNNAME])) dwLen -= MAX_PATTERNNAME;
+			if (dwLen >= MAX_PATTERNNAME)
 			{
-				fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
+				DWORD d = 0x4d414e50;
+				fwrite(&d, 1, 4, f);
+				fwrite(&dwLen, 1, 4, f);
+				fwrite(m_lpszPatternNames, 1, dwLen, f);
 			}
 		}
+		// Writing Channel Names
+		{
+			UINT nChnNames = 0;
+			for (UINT inam=0; inam<m_nChannels; inam++)
+			{
+				if (ChnSettings[inam].szName[0]) nChnNames = inam+1;
+			}
+			// Do it!
+			if (nChnNames)
+			{
+				DWORD dwLen = nChnNames * MAX_CHANNELNAME;
+				DWORD d = 0x4d414e43;
+				fwrite(&d, 1, 4, f);
+				fwrite(&dwLen, 1, 4, f);
+				for (UINT inam=0; inam<nChnNames; inam++)
+				{
+					fwrite(ChnSettings[inam].szName, 1, MAX_CHANNELNAME, f);
+				}
+			}
+		}
+
+		//Save hacked-on extra info
+		SaveMixPlugins(f);
+		SaveExtendedInstrumentProperties(Headers, header.instruments, f);
+		SaveExtendedSongProperties(f);
 	}
 
-	//Save hacked-on extra info
-	SaveMixPlugins(f);
-	SaveExtendedInstrumentProperties(Headers, header.instruments, f);
-	SaveExtendedSongProperties(f);
-
 	fclose(f);
-	return true;
-}
-
-//HACK: This is a quick fix. Needs to be better integrated into player and GUI.
-BOOL CSoundFile::SaveCompatXM(LPCSTR lpszFileName) 
-//------------------------------------------------
-{
-	UNREFERENCED_PARAMETER(lpszFileName);
 	return true;
 }
 

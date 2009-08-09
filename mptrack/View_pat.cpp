@@ -891,7 +891,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 						}
 						else
 						{
-							m->note = 0;
+							m->note = NOTE_NONE;
 							if (ITStyle) m->instr = 0;
 						}
 
@@ -4420,7 +4420,7 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 
 		switch(field)
 		{
-			case 0: if(p->note == NOTE_PC || p->note == NOTE_PCS) p->Clear(); else {p->note = 0; if (ITStyle) p->instr = 0;}  break;		//Note
+			case 0: if(p->note == NOTE_PC || p->note == NOTE_PCS) p->Clear(); else {p->note = NOTE_NONE; if (ITStyle) p->instr = 0;}  break;		//Note
 			case 1:	p->instr = 0; break;				//instr
 			case 2:	p->vol = 0; p->volcmd = 0; break;	//Vol
 			case 3:	p->command = 0;	break;				//Effect

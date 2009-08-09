@@ -583,13 +583,13 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 
 	if(bNewTuning)
 	{
-		pChn->nC4Speed = psmp->nC4Speed;
+		pChn->nC5Speed = psmp->nC5Speed;
 		pChn->m_CalculateFreq = true;
 		pChn->nFineTune = 0;
 	}
 	else
 	{
-		pChn->nC4Speed = psmp->nC4Speed;
+		pChn->nC5Speed = psmp->nC5Speed;
 		pChn->nFineTune = psmp->nFineTune;
 	}
 
@@ -650,8 +650,8 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		//IT compatibility tentative fix: Clear channel note memory.
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			pChn->nNote = 0;
-			pChn->nNewNote = 0;
+			pChn->nNote = NOTE_NONE;
+			pChn->nNewNote = NOTE_NONE;
 		}
 		return;
 	}
@@ -683,7 +683,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 	if ((!bPorta) || (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
 		pChn->nNewIns = 0;
 
-	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC4Speed);
+	UINT period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
 
 	if (!pins) return;
 	if (period)
@@ -871,7 +871,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	MODCHANNEL *pChn = &Chn[nChn];
 	INSTRUMENTHEADER* pHeader = 0;
 	LPSTR pSample;
-	if (note > 0x80) note = 0;
+	if (note > 0x80) note = NOTE_NONE;
 	if (note < 1) return;
 	// Always NNA cut - using
 	if ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_MT2))) || (!m_nInstruments) || (bForceCut))
@@ -1561,11 +1561,6 @@ BOOL CSoundFile::ProcessEffects()
 			if ((m_nTickCount) || (((!pChn->nPeriod) || !pChn->nNote) && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER))) break;
 			if ((!param) && (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))) break;
 			pChn->nCommand = CMD_ARPEGGIO;
-			if(IsCompatibleMode(TRK_FASTTRACKER2))
-			{
-				// Swap notes
-				param = ((param & 0x0F) << 4) | ((param & 0xF0) >> 4);
-			}
 			if (param) pChn->nArpeggio = param;
 			break;
 
@@ -1802,7 +1797,7 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_POSITIONJUMP:
 			nPosJump = param;
 			if((m_dwSongFlags & SONG_PATTERNLOOP && m_nSeqOverride == 0)) {
-				 m_nSeqOverride = param+1;
+				 m_nSeqOverride = param + 1;
 				 //Releasing pattern loop after position jump could cause 
 				 //instant jumps - modifying behavior so that now position jumps
 				 //occurs also when pattern loop is enabled.
@@ -1855,6 +1850,13 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_VELOCITY:
 			break;
 		//end rewbs.velocity
+
+		// IMF Commands
+		case CMD_NOTESLIDEUP:
+			NoteSlide(pChn, param, 1);
+		case CMD_NOTESLIDEDOWN:
+			NoteSlide(pChn, param, -1);
+			break;
 		}
 
 
@@ -1878,7 +1880,7 @@ BOOL CSoundFile::ProcessEffects()
 			if (nPosJump < 0) nPosJump = m_nCurrentPattern+1;
 			if (nBreakRow < 0) nBreakRow = 0;
 
-			if(nBreakRow >= 0) m_bPatternBreak = true;
+			if(nBreakRow >= 0) m_dwSongFlags |= SONG_BREAKTOROW;
 			// Modplug Tracker & ModPlugin allow backward jumps
 		#ifndef FASTSOUNDLIB
 			if ((nPosJump < (int)m_nCurrentPattern)
@@ -2146,6 +2148,28 @@ void CSoundFile::ExtraFinePortamentoDown(MODCHANNEL *pChn, UINT param)
 	}
 }
 
+// Implemented for IMF compatibility, can't actually save this in any formats
+// sign should be 1 (up) or -1 (down)
+void CSoundFile::NoteSlide(MODCHANNEL *pChn, UINT param, int sign)
+{
+	BYTE x, y;
+	if (m_dwSongFlags & SONG_FIRSTTICK) {
+		x = param & 0xf0;
+		if (x)
+			pChn->nNoteSlideSpeed = (x >> 4);
+		y = param & 0xf;
+		if (y)
+			pChn->nNoteSlideStep = y;
+		pChn->nNoteSlideCounter = pChn->nNoteSlideSpeed;
+	} else {
+			if (--pChn->nNoteSlideCounter == 0) {
+				pChn->nNoteSlideCounter = pChn->nNoteSlideSpeed;
+				// update it
+				pChn->nPeriod = GetPeriodFromNote
+					(sign * pChn->nNoteSlideStep + GetNoteFromPeriod(pChn->nPeriod), 8363, 0);
+			}
+	}
+}
 
 // Portamento Slide
 void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
@@ -2455,12 +2479,12 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	case 0x40:	pChn->nVibratoType = param & 0x07; break;
 	// E5x: Set FineTune
 	case 0x50:	if (m_nTickCount) break;
-				pChn->nC4Speed = S3MFineTuneTable[param];
+				pChn->nC5Speed = S3MFineTuneTable[param];
 				if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 					pChn->nFineTune = param*2;
 				else
 					pChn->nFineTune = MOD2XMFineTune(param);
-				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC4Speed);
+				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
 				break;
 	// E6x: Pattern Loop
 	// E7x: Set Tremolo WaveForm
@@ -2505,9 +2529,9 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 	case 0x10:	pChn->dwFlags &= ~CHN_GLISSANDO; if (param) pChn->dwFlags |= CHN_GLISSANDO; break;
 	// S2x: Set FineTune
 	case 0x20:	if (m_nTickCount) break;
-				pChn->nC4Speed = S3MFineTuneTable[param & 0x0F];
+				pChn->nC5Speed = S3MFineTuneTable[param & 0x0F];
 				pChn->nFineTune = MOD2XMFineTune(param);
-				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC4Speed);
+				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
 				break;
 	// S3x: Set Vibrato WaveForm
 	case 0x30:	pChn->nVibratoType = param & 0x07; break;
@@ -3511,7 +3535,7 @@ UINT CSoundFile::GetNoteFromPeriod(UINT period) const
 
 
 
-UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) const
+UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const
 //-------------------------------------------------------------------------------
 {
 	if ((!note) || (note >= NOTE_MIN_SPECIAL)) return 0;
@@ -3524,10 +3548,10 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) cons
 			return (FreqS3MTable[note % 12] << 5) >> (note / 12);
 		} else
 		{
-			if (!nC4Speed) nC4Speed = 8363;
+			if (!nC5Speed) nC5Speed = 8363;
 			//(a*b)/c
-			return _muldiv(8363, (FreqS3MTable[note % 12] << 5), nC4Speed << (note / 12));
-			//8363 * freq[note%12] / nC4Speed * 2^(5-note/12)
+			return _muldiv(8363, (FreqS3MTable[note % 12] << 5), nC5Speed << (note / 12));
+			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
 	} else
 	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
@@ -3575,7 +3599,7 @@ UINT CSoundFile::GetPeriodFromNote(UINT note, int nFineTune, UINT nC4Speed) cons
 }
 
 
-UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC4Speed, int nPeriodFrac) const
+UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) const
 //-----------------------------------------------------------------------------------
 {
 	if (!period) return 0;
@@ -3593,8 +3617,8 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC4Speed, int nPeriodFrac) 
 	{
 		if (m_dwSongFlags & SONG_LINEARSLIDES)
 		{
-			if (!nC4Speed) nC4Speed = 8363;
-			return _muldiv(nC4Speed, 1712L << 8, (period << 8)+nPeriodFrac);
+			if (!nC5Speed) nC5Speed = 8363;
+			return _muldiv(nC5Speed, 1712L << 8, (period << 8)+nPeriodFrac);
 		} else
 		{
 			return _muldiv(8363, 1712L << 8, (period << 8)+nPeriodFrac);

@@ -44,7 +44,7 @@ typedef struct tagULTSAMPLE
 #pragma pack()
 
 
-BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	ULTHEADER *pmh = (ULTHEADER *)lpStream;
@@ -53,10 +53,10 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 	DWORD dwMemPos = 0;
 
 	// try to read module header
-	if ((!lpStream) || (dwMemLength < 0x100)) return FALSE;
-	if (strncmp(pmh->id,"MAS_UTrack_V00",14)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 0x100)) return false;
+	if (strncmp(pmh->id,"MAS_UTrack_V00",14)) return false;
 	// Warning! Not supported ULT format, trying anyway
-	// if ((pmh->id[14] < '1') || (pmh->id[14] > '4')) return FALSE;
+	// if ((pmh->id[14] < '1') || (pmh->id[14] > '4')) return false;
 	m_nType = MOD_TYPE_ULT;
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo = 125;
@@ -78,13 +78,13 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		dwMemPos += len;
 	}
-	if (dwMemPos >= dwMemLength) return TRUE;
+	if (dwMemPos >= dwMemLength) return true;
 	nos = lpStream[dwMemPos++];
 	m_nSamples = nos;
 	if (m_nSamples >= MAX_SAMPLES) m_nSamples = MAX_SAMPLES-1;
 	UINT smpsize = 64;
 	if (pmh->id[14] >= '4')	smpsize += 2;
-	if (dwMemPos + nos*smpsize + 256 + 2 > dwMemLength) return TRUE;
+	if (dwMemPos + nos*smpsize + 256 + 2 > dwMemLength) return true;
 	for (UINT ins=1; ins<=nos; ins++, dwMemPos+=smpsize) if (ins<=m_nSamples)
 	{
 		pus	= (ULTSAMPLE *)(lpStream+dwMemPos);
@@ -96,10 +96,10 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 		pins->nLength = pus->sizeend - pus->sizestart;
 		pins->nVolume = pus->volume;
 		pins->nGlobalVol = 64;
-		pins->nC4Speed = 8363;
+		pins->nC5Speed = 8363;
 		if (pmh->id[14] >= '4')
 		{
-			pins->nC4Speed = pus->finetune;
+			pins->nC5Speed = pus->finetune;
 		}
 		if (pus->flags & ULT_LOOP) pins->uFlags |= CHN_LOOP;
 		if (pus->flags & ULT_BIDI) pins->uFlags |= CHN_PINGPONGLOOP;
@@ -125,7 +125,7 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 	// read pan position table for v1.5 and higher
 	if(pmh->id[14]>='3')
 	{
-		if (dwMemPos + m_nChannels > dwMemLength) return TRUE;
+		if (dwMemPos + m_nChannels > dwMemLength) return true;
 		for(UINT t=0; t<m_nChannels; t++)
 		{
 			ChnSettings[t].nPan = (lpStream[dwMemPos++] << 4) + 8;
@@ -155,7 +155,7 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 			UINT row = 0;
 			while (row < 64)
 			{
-				if (dwMemPos + 6 > dwMemLength) return TRUE;
+				if (dwMemPos + 6 > dwMemLength) return true;
 				UINT rep = 1;
 				UINT note = lpStream[dwMemPos++];
 				if (note == 0xFC)
@@ -215,10 +215,10 @@ BOOL CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading Instruments
 	for (UINT smp=1; smp<=m_nSamples; smp++) if (Ins[smp].nLength)
 	{
-		if (dwMemPos >= dwMemLength) return TRUE;
+		if (dwMemPos >= dwMemLength) return true;
 		UINT flags = (Ins[smp].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
 		dwMemPos += ReadSample(&Ins[smp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 	}
-	return TRUE;
+	return true;
 }
 

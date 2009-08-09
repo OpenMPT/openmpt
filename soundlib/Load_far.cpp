@@ -58,11 +58,11 @@ typedef struct FARSAMPLE
 #pragma pack()
 
 
-BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	if(dwMemLength < sizeof(FARHEADER1))
-		return FALSE;
+		return false;
 
 	FARHEADER1 farHeader;
 	memcpy(&farHeader, lpStream, sizeof(FARHEADER1));
@@ -73,10 +73,10 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	BYTE samplemap[8];
 
 	if ((!lpStream) || (dwMemLength < 1024) || (LittleEndian(pmh1->id) != FARFILEMAGIC)
-	 || (pmh1->magic2[0] != 13) || (pmh1->magic2[1] != 10) || (pmh1->magic2[2] != 26)) return FALSE;
+	 || (pmh1->magic2[0] != 13) || (pmh1->magic2[1] != 10) || (pmh1->magic2[2] != 26)) return false;
 	headerlen = LittleEndianW(pmh1->headerlen);
 	pmh1->stlen = LittleEndianW( pmh1->stlen ); /* inplace byteswap -- Toad */
-	if ((headerlen >= dwMemLength) || (dwMemPos + pmh1->stlen + sizeof(FARHEADER2) >= dwMemLength)) return FALSE;
+	if ((headerlen >= dwMemLength) || (dwMemPos + pmh1->stlen + sizeof(FARHEADER2) >= dwMemLength)) return false;
 	// Globals
 	m_nType = MOD_TYPE_FAR;
 	m_nChannels = 16;
@@ -108,12 +108,12 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 		dwMemPos += pmh1->stlen;
 	}
 	// Reading orders
-	if (sizeof(FARHEADER2) > dwMemLength - dwMemPos) return TRUE;
+	if (sizeof(FARHEADER2) > dwMemLength - dwMemPos) return true;
 	FARHEADER2 farHeader2;
 	memcpy(&farHeader2, lpStream + dwMemPos, sizeof(FARHEADER2));
 	pmh2 = &farHeader2;
 	dwMemPos += sizeof(FARHEADER2);
-	if (dwMemPos >= dwMemLength) return TRUE;
+	if (dwMemPos >= dwMemLength) return true;
 	for (UINT iorder=0; iorder<MAX_ORDERS; iorder++)
 	{
 		Order[iorder] = (iorder <= pmh2->snglen) ? pmh2->orders[iorder] : Order.GetInvalidPatIndex();
@@ -121,7 +121,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	m_nRestartPos = pmh2->loopto;
 	// Reading Patterns	
 	dwMemPos += headerlen - (869 + pmh1->stlen);
-	if (dwMemPos >= dwMemLength) return TRUE;
+	if (dwMemPos >= dwMemLength) return true;
 
 	// byteswap pattern data.
 	for(uint16 psfix = 0; psfix < 256; psfix++)
@@ -139,7 +139,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 			dwMemPos += patlen;
 			continue;
 		}
-		if (dwMemPos + patlen >= dwMemLength) return TRUE;
+		if (dwMemPos + patlen >= dwMemLength) return true;
 		UINT rows = (patlen - 2) >> 6;
 		if (!rows)
 		{
@@ -148,7 +148,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		if (rows > 256) rows = 256;
 		if (rows < 16) rows = 16;
-		if(Patterns.Insert(ipat, rows)) return TRUE;
+		if(Patterns.Insert(ipat, rows)) return true;
 		MODCOMMAND *m = Patterns[ipat];
 		UINT patbrk = lpStream[dwMemPos];
 		const BYTE *p = lpStream + dwMemPos + 2;
@@ -239,13 +239,13 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 		dwMemPos += patlen;
 	}
 	// Reading samples
-	if (dwMemPos + 8 >= dwMemLength) return TRUE;
+	if (dwMemPos + 8 >= dwMemLength) return true;
 	memcpy(samplemap, lpStream+dwMemPos, 8);
 	dwMemPos += 8;
 	MODINSTRUMENT *pins = &Ins[1];
 	for (UINT ismp=0; ismp<64; ismp++, pins++) if (samplemap[ismp >> 3] & (1 << (ismp & 7)))
 	{
-		if (dwMemPos + sizeof(FARSAMPLE) > dwMemLength) return TRUE;
+		if (dwMemPos + sizeof(FARSAMPLE) > dwMemLength) return true;
 		const FARSAMPLE *pfs = reinterpret_cast<const FARSAMPLE*>(lpStream + dwMemPos);
 		dwMemPos += sizeof(FARSAMPLE);
 		m_nSamples = ismp + 1;
@@ -255,7 +255,7 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 		pins->nLoopStart = LittleEndian(pfs->reppos) ;
 		pins->nLoopEnd = LittleEndian(pfs->repend) ;
 		pins->nFineTune = 0;
-		pins->nC4Speed = 8363*2;
+		pins->nC5Speed = 8363*2;
 		pins->nGlobalVol = 64;
 		pins->nVolume = pfs->volume << 4;
 		pins->uFlags = 0;
@@ -274,6 +274,6 @@ BOOL CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		dwMemPos += length;
 	}
-	return TRUE;
+	return true;
 }
 

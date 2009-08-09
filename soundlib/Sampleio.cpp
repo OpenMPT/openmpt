@@ -310,7 +310,7 @@ BOOL CSoundFile::ReadSampleFromSong(UINT nSample, CSoundFile *pSrcSong, UINT nSr
 	if ((!(m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))) && (pSrcSong->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)))
 	{
 		MODINSTRUMENT *pins = &Ins[nSample];
-		pins->nC4Speed = TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
+		pins->nC5Speed = TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
 		pins->RelativeTone = 0;
 		pins->nFineTune = 0;
 	} else
@@ -456,7 +456,7 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 	pins->nLength = pdata->length / samplesize;
 	pins->nLoopStart = pins->nLoopEnd = 0;
 	pins->nSustainStart = pins->nSustainEnd = 0;
-	pins->nC4Speed = pfmt->freqHz;
+	pins->nC5Speed = pfmt->freqHz;
 	pins->nPan = 128;
 	pins->nVolume = 256;
 	pins->nGlobalVol = 64;
@@ -600,7 +600,7 @@ BOOL CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
 	format.id_fmt = IFFID_fmt;
 	format.hdrlen = 16;
 	format.format = 1;
-	format.freqHz = pins->nC4Speed;
+	format.freqHz = pins->nC5Speed;
 	if (m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) format.freqHz = TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
 	format.channels = (pins->uFlags & CHN_STEREO) ? 2 : 1;
 	format.bitspersample = (pins->uFlags & CHN_16BIT) ? 16 : 8;
@@ -627,7 +627,7 @@ BOOL CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
 	smpl.wsiHdr.smpl_id = 0x6C706D73;
 	smpl.wsiHdr.smpl_len = sizeof(WAVESMPLHEADER) - 8;
 	smpl.wsiHdr.dwSamplePeriod = 22675;
-	if (pins->nC4Speed >= 256) smpl.wsiHdr.dwSamplePeriod = 1000000000 / pins->nC4Speed;
+	if (pins->nC5Speed >= 256) smpl.wsiHdr.dwSamplePeriod = 1000000000 / pins->nC5Speed;
 	smpl.wsiHdr.dwBaseNote = 60;
 	if (pins->uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
 	{
@@ -839,7 +839,7 @@ VOID PatchToSample(CSoundFile *that, UINT nSample, LPBYTE lpStream, DWORD dwMemL
 	pIns->nLength = psh->length;
 	pIns->nLoopStart = psh->loopstart;
 	pIns->nLoopEnd = psh->loopend;
-	pIns->nC4Speed = psh->freq;
+	pIns->nC5Speed = psh->freq;
 	pIns->RelativeTone = 0;
 	pIns->nFineTune = 0;
 	pIns->nVolume = 256;
@@ -852,7 +852,7 @@ VOID PatchToSample(CSoundFile *that, UINT nSample, LPBYTE lpStream, DWORD dwMemL
 	that->FrequencyToTranspose(pIns);
 	pIns->RelativeTone += 84 - PatchFreqToNote(psh->root_freq);
 	if (psh->scale_factor) pIns->RelativeTone -= psh->scale_frequency - 60;
-	pIns->nC4Speed = that->TransposeToFrequency(pIns->RelativeTone, pIns->nFineTune);
+	pIns->nC5Speed = that->TransposeToFrequency(pIns->RelativeTone, pIns->nFineTune);
 	if (pIns->uFlags & CHN_16BIT)
 	{
 		nSmpType = (psh->flags & 2) ? RS_PCM16U : RS_PCM16S;
@@ -1024,7 +1024,7 @@ typedef struct S3ISAMPLESTRUCT
 	BYTE reserved2;
 	BYTE pack;
 	BYTE flags;
-	DWORD C4Speed;
+	DWORD nC5Speed;
 	DWORD reserved3;
 	DWORD reserved4;
 	DWORD date;
@@ -1055,7 +1055,7 @@ BOOL CSoundFile::ReadS3ISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 	pins->nVolume = pss->volume << 2;
 	pins->uFlags = 0;
 	pins->nPan = 128;
-	pins->nC4Speed = pss->C4Speed;
+	pins->nC5Speed = pss->nC5Speed;
 	pins->RelativeTone = 0;
 	pins->nFineTune = 0;
 	if (m_nType & MOD_TYPE_XM) FrequencyToTranspose(pins);
@@ -1263,11 +1263,11 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 		sampleflags[ismp] = (psh->type & 0x10) ? RS_PCM16D : RS_PCM8D;
 		if (psh->type & 0x20) sampleflags[ismp] = (psh->type & 0x10) ? RS_STPCM16D : RS_STPCM8D;
 		pins->nFineTune = psh->finetune;
-		pins->nC4Speed = 8363;
+		pins->nC5Speed = 8363;
 		pins->RelativeTone = (int)psh->relnote;
 		if (m_nType != MOD_TYPE_XM)
 		{
-			pins->nC4Speed = TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
+			pins->nC5Speed = TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
 			pins->RelativeTone = 0;
 			pins->nFineTune = 0;
 		}
@@ -1404,11 +1404,11 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 		}
 		xsh.pan = (BYTE)pins->nPan;
 		if (pins->nPan > 0xFF) xsh.pan = 0xFF;
-		if ((m_nType & MOD_TYPE_XM) || (!pins->nC4Speed))
+		if ((m_nType & MOD_TYPE_XM) || (!pins->nC5Speed))
 			xsh.relnote = (signed char) pins->RelativeTone;
 		else
 		{
-			int f2t = FrequencyToTranspose(pins->nC4Speed);
+			int f2t = FrequencyToTranspose(pins->nC5Speed);
 			xsh.relnote = (signed char)(f2t >> 7);
 			xsh.finetune = (signed char)(f2t & 0x7F);
 		}
@@ -1499,11 +1499,11 @@ BOOL CSoundFile::ReadXISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength
 		sampleflags = (psh->type & 0x10) ? RS_PCM16D : RS_PCM8D;
 		if (psh->type & 0x20) sampleflags = (psh->type & 0x10) ? RS_STPCM16D : RS_STPCM8D;
 		pins->nFineTune = psh->finetune;
-		pins->nC4Speed = 8363;
+		pins->nC5Speed = 8363;
 		pins->RelativeTone = (int)psh->relnote;
 		if (m_nType != MOD_TYPE_XM)
 		{
-			pins->nC4Speed = TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
+			pins->nC5Speed = TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
 			pins->RelativeTone = 0;
 			pins->nFineTune = 0;
 		}
@@ -1626,7 +1626,7 @@ BOOL CSoundFile::ReadAIFFSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 	pins->nLength = dwSSNDLen / samplesize;
 	pins->nLoopStart = pins->nLoopEnd = 0;
 	pins->nSustainStart = pins->nSustainEnd = 0;
-	pins->nC4Speed = Ext2Long(pcomm->xSampleRate);
+	pins->nC5Speed = Ext2Long(pcomm->xSampleRate);
 	pins->nPan = 128;
 	pins->nVolume = 256;
 	pins->nGlobalVol = 64;
@@ -1677,9 +1677,9 @@ UINT CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 	pins->nLoopEnd = pis->loopend;
 	pins->nSustainStart = pis->susloopbegin;
 	pins->nSustainEnd = pis->susloopend;
-	pins->nC4Speed = pis->C5Speed;
-	if (!pins->nC4Speed) pins->nC4Speed = 8363;
-	if (pis->C5Speed < 256) pins->nC4Speed = 256;
+	pins->nC5Speed = pis->C5Speed;
+	if (!pins->nC5Speed) pins->nC5Speed = 8363;
+	if (pis->C5Speed < 256) pins->nC5Speed = 256;
 	pins->RelativeTone = 0;
 	pins->nFineTune = 0;
 	if (m_nType & MOD_TYPE_XM) FrequencyToTranspose(pins);
@@ -1936,7 +1936,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 		if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
 		if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
 		if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
-		itss.C5Speed = psmp->nC4Speed;
+		itss.C5Speed = psmp->nC5Speed;
 		if (!itss.C5Speed) itss.C5Speed = 8363;
 		itss.length = psmp->nLength;
 		itss.loopbegin = psmp->nLoopStart;
@@ -2134,10 +2134,10 @@ BOOL CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 	pins->nSustainEnd = 0;
 	pins->uFlags = 0;
 	pins->nVolume = (WORD)(BigEndianW((WORD)pvh->Volume) >> 8);
-	pins->nC4Speed = BigEndianW(pvh->samplesPerSec);
+	pins->nC5Speed = BigEndianW(pvh->samplesPerSec);
 	pins->name[0] = 0;
 	if ((!pins->nVolume) || (pins->nVolume > 256)) pins->nVolume = 256;
-	if (!pins->nC4Speed) pins->nC4Speed = 22050;
+	if (!pins->nC5Speed) pins->nC5Speed = 22050;
 	pins->RelativeTone = 0;
 	pins->nFineTune = 0;
 	if (m_nType & MOD_TYPE_XM) FrequencyToTranspose(pins);

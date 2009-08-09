@@ -474,7 +474,7 @@ static void MedConvert(MODCOMMAND *p, const MMD0SONGHEADER *pmsh)
 }
 
 
-BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	const MEDMODULEHEADER *pmmh;
@@ -487,14 +487,14 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 	UINT deftempo;
 	int playtransp = 0;
 
-	if ((!lpStream) || (dwMemLength < 0x200)) return FALSE;
+	if ((!lpStream) || (dwMemLength < 0x200)) return false;
 	pmmh = (MEDMODULEHEADER *)lpStream;
-	if (((pmmh->id & 0x00FFFFFF) != 0x444D4D) || (!pmmh->song)) return FALSE;
+	if (((pmmh->id & 0x00FFFFFF) != 0x444D4D) || (!pmmh->song)) return false;
 	// Check for 'MMDx'
 	DWORD dwSong = BigEndian(pmmh->song);
-	if ((dwSong >= dwMemLength) || (dwSong + sizeof(MMD0SONGHEADER) >= dwMemLength)) return FALSE;
+	if ((dwSong >= dwMemLength) || (dwSong + sizeof(MMD0SONGHEADER) >= dwMemLength)) return false;
 	version = (signed char)((pmmh->id >> 24) & 0xFF);
-	if ((version < '0') || (version > '3')) return FALSE;
+	if ((version < '0') || (version > '3')) return false;
 #ifdef MED_LOG
 	Log("\nLoading MMD%c module (flags=0x%02X)...\n", version, BigEndian(pmmh->mmdflags));
 	Log("  modlen   = %d\n", BigEndian(pmmh->modlen));
@@ -769,7 +769,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Reading samples
-	if (dwSmplArr > dwMemLength - 4*m_nSamples) return TRUE;
+	if (dwSmplArr > dwMemLength - 4*m_nSamples) return true;
 	pdwTable = (LPDWORD)(lpStream + dwSmplArr);
 	for (UINT iSmp=0; iSmp<m_nSamples; iSmp++) if (pdwTable[iSmp])
 	{
@@ -804,7 +804,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	// Reading patterns (blocks)
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;
-	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks)) return TRUE;
+	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks)) return true;
 	pdwTable = (LPDWORD)(lpStream + dwBlockArr);
 	playtransp += (version == '3') ? 24 : 48;
 	for (UINT iBlk=0; iBlk<wNumBlocks; iBlk++)
@@ -917,7 +917,7 @@ BOOL CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 		ChnSettings[iCh].nPan = (((iCh&3) == 1) || ((iCh&3) == 2)) ? 0xC0 : 0x40;
 		ChnSettings[iCh].nVolume = 64;
 	}
-	return TRUE;
+	return true;
 }
 
 
