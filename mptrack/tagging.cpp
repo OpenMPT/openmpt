@@ -87,11 +87,8 @@ void CFileTagging::WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE 
 	if(!strcmp(cFrameID, "COMM"))
 	{
 		// English language for comments - no description following (hence the text ending nullchar(s))
-		// HALP this is really lame, how is it done properly so the nullchar is not lost?
-		string sInfo;
-		sInfo = "eng"; // See http://en.wikipedia.org/wiki/ISO-639-2
-		sInfo += ID3v2_TEXTENDING;
-		sFramecontent = sInfo + sFramecontent;
+		// For language IDs, see http://en.wikipedia.org/wiki/ISO-639-2
+		sFramecontent = "eng" + (ID3v2_TEXTENDING + sFramecontent);
 	}
 	sFramecontent = ID3v2_CHARSET + sFramecontent;
 

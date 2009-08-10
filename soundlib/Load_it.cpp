@@ -984,6 +984,12 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 	}
 
+	if((pifh->cwtv & 0xF000) == 0x5000) // OpenMPT Version number (Major.Minor)
+	{
+		m_dwLastSavedWithVersion = (pifh->cwtv & 0x0FFF) << 16;
+		interpretModplugmade = true;
+	}
+
 	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;
 	if (pifh->flags & 0x10) m_dwSongFlags |= SONG_ITOLDEFFECTS;
 	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATMODE;
@@ -2854,8 +2860,9 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		for (UINT row=0; row<PatternSize[npat]; row++)
 		{
 			len = 0;
-			for (UINT ch=0; ch<nChannels; ch++, m++)
+			for (UINT ch = 0; ch < m_nChannels; ch++, m++)
 			{
+				if(ch >= nChannels) continue;
 				BYTE b = 0;
 				UINT command = m->command;
 				UINT param = m->param;
