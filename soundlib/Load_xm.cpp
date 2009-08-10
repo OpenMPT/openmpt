@@ -694,8 +694,11 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	header.size = sizeof(XMFILEHEADER);
 	header.norder = 0;
 	header.restartpos = m_nRestartPos;
+
 	header.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
 	if(m_nChannels & 1) bAddChannel = true;
+	if(bCompatibilityExport && header.channels > 32)
+		header.channels = 32;
 
 	header.patterns = 0;
   /*for (i=0; i<MAX_ORDERS; i++) {
@@ -740,14 +743,17 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		xmph[0] = 9;
 		xmph[5] = (BYTE)(PatternSize[i] & 0xFF);
 		xmph[6] = (BYTE)(PatternSize[i] >> 8);
-		for (UINT j=m_nChannels*PatternSize[i]; j; j--,p++)
+		for (UINT j = m_nChannels * PatternSize[i]; j > 0; j--, p++)
 		{
+			// Don't write more than 32 channels
+			if(bCompatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
+
 			UINT note = p->note;
 			UINT param = ModSaveCommand(p, true, bCompatibilityExport);
 			UINT command = param >> 8;
 			param &= 0xFF;
 			if (note >= 0xFE) note = 97; else
-			if ((note <= 12) || (note > 96+12)) note = NOTE_NONE; else
+			if ((note <= 12) || (note > 96+12)) note = 0; else
 			note -= 12;
 			UINT vol = 0;
 			if (p->volcmd)
@@ -791,13 +797,14 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				if (b & 16) s[len++] = param;
 			}
 
-			if(bAddChannel && !(j % m_nChannels))
+			if(bAddChannel && (j % m_nChannels == 1 || m_nChannels == 1))
 			{
 				ASSERT_CAN_WRITE(1);
 				s[len++] = 0x80;
 			}
 
 			ASSERT_CAN_WRITE(5);
+
 		}
 		xmph[7] = (BYTE)(len & 0xFF);
 		xmph[8] = (BYTE)(len >> 8);
