@@ -292,7 +292,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	// Global Volume
 	m_nDefaultGlobalVolume = psfh.globalvol << 2;
 	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > 256)) m_nDefaultGlobalVolume = 256;
-	m_nSamplePreAmp = psfh.mastervol & 0x7F;
+	m_nSamplePreAmp = psfh.mastervol & 0x7F; // Bit 8 = Stereo (we always use stereo)
 	// Channels
 	m_nChannels = 4;
 	for (UINT ich=0; ich<32; ich++)
@@ -542,7 +542,8 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	header[0x30] = m_nDefaultGlobalVolume >> 2;
 	header[0x31] = CLAMP(m_nDefaultSpeed, 1, 255);
 	header[0x32] = CLAMP(m_nDefaultTempo, 32, 255);
-	header[0x33] = CLAMP(m_nSamplePreAmp, 0x10, 0x7F);	// Stereo
+	header[0x33] = CLAMP(m_nSamplePreAmp, 0x10, 0x7F) | 0x80;	// Bit 8 = Stereo
+	header[0x34] = 0x10; // 16 Channels for UltraClick removal
 	header[0x35] = 0xFC;
 	for (i=0; i<32; i++)
 	{

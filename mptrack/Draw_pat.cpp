@@ -569,9 +569,9 @@ void CViewPattern::OnDraw(CDC *pDC)
 				const ORDERINDEX startOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 				if(startOrder > 0)
 				{
-					ORDERINDEX prevOrder = startOrder - 1;
+					ORDERINDEX prevOrder;
+					prevOrder = pSndFile->Order.GetPreviousOrderIgnoringSkips(startOrder);
 					//Skip +++ items
-					while(prevOrder > 0 && pSndFile->Order[prevOrder] == pSndFile->Order.GetIgnoreIndex()) --prevOrder;
 
 					if(startOrder < pSndFile->Order.size() && pSndFile->Order[startOrder] == m_nPattern)
 					{
@@ -617,11 +617,10 @@ void CViewPattern::OnDraw(CDC *pDC)
 			UINT nNextPat = m_nPattern;
 			BOOL bNextPatFound = FALSE;
 			const ORDERINDEX startOrder= static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
-			ORDERINDEX nNextOrder = 1 + startOrder;
-
+			ORDERINDEX nNextOrder;
+			nNextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(startOrder);
 			//Ignore skip items(+++) from sequence.
 			const ORDERINDEX ordCount = pSndFile->Order.GetCount();
-			while(nNextOrder < ordCount && pSndFile->Order[nNextOrder] == pSndFile->Order.GetIgnoreIndex()) nNextOrder++;
 
 			if ((nNextOrder < ordCount) && (pSndFile->Order[startOrder] == m_nPattern))
 			{
@@ -917,9 +916,11 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 						case VOLCMD_TONEPORTAMENTO:
 						case VOLCMD_PORTAUP:
 						case VOLCMD_PORTADOWN:
+							tx_col = MODCOLOR_PITCH;
+							break;
 						case VOLCMD_VELOCITY:	//rewbs.velocity
 						case VOLCMD_OFFSET:		//rewbs.volOff
-							tx_col = MODCOLOR_PITCH;
+							// default color
 							break;
 						}
 					}
