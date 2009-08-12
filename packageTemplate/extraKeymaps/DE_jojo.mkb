@@ -157,6 +157,8 @@
 3:1200:0:220:1		//Note Cut: ZIRKUMFLEX (KeyDown)
 3:1201:0:221:1		//Note Off: AKUT (KeyDown)
 3:1791:0:219:1		//Note Fade: ß (KeyDown)
+3:1788:0:226:1		//Parameter control(MPTm only): < (KeyDown)
+3:1789:1:226:1		//Parameter control(smooth)(MPTm only): Shift+< (KeyDown)
 
 //----( Pattern Context [bottom] - Ins Col (4) )------------
 4:1202:0:96:1		//Set instrument digit 0: 0 (ZEHNERTASTATUR) (KeyDown)
