@@ -43,6 +43,7 @@ protected:
 	afx_msg void OnShowInstruments();
 	afx_msg void OnShowPatterns();
 	afx_msg VOID OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *pLResult);
+	afx_msg void OnDblClickListItem(NMHDR *, LRESULT *);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

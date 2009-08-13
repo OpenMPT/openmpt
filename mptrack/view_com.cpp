@@ -84,7 +84,8 @@ BEGIN_MESSAGE_MAP(CViewComments, CModScrollView)
 	ON_COMMAND(IDC_LIST_SAMPLES,		OnShowSamples)
 	ON_COMMAND(IDC_LIST_INSTRUMENTS,	OnShowInstruments)
 	ON_COMMAND(IDC_LIST_PATTERNS,		OnShowPatterns)
-	ON_NOTIFY(LVN_ENDLABELEDIT,	IDC_LIST_DETAILS, OnEndLabelEdit)
+	ON_NOTIFY(LVN_ENDLABELEDIT,	IDC_LIST_DETAILS,	OnEndLabelEdit)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST_DETAILS,	OnDblClickListItem)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -565,6 +566,29 @@ void CViewComments::OnShowPatterns()
 	}
 }
 
+void CViewComments::OnDblClickListItem(NMHDR *, LRESULT *)
+//--------------------------------------------------------
+{
+	// Double click -> switch to instrument or sample tab
+	int nItem = m_ItemList.GetSelectionMark();
+	if(nItem == -1) return;
+	CModDoc *pModDoc = GetDocument();
+	if(!pModDoc) return;
+	nItem++;
+
+	switch(m_nListId)
+	{
+	case IDC_LIST_SAMPLES:
+		pModDoc->ViewSample(nItem);
+		break;
+	case IDC_LIST_INSTRUMENTS:
+		pModDoc->ViewInstrument(nItem);
+		break;
+	case IDC_LIST_PATTERNS:
+		pModDoc->ViewPattern(nItem, 0);
+		break;
+	}
+}
 
 
 LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)

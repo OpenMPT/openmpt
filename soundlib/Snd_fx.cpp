@@ -674,6 +674,8 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 			pChn->nFineTune = pins->nFineTune;
 		}
 	}
+	// IT Compatibility: Update multisample instruments frequency even if instrument is not specified
+	if(!bPorta && pins && IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nC5Speed = pins->nC5Speed;
 
 	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose;
 	note = CLAMP(note, 1, 132);
