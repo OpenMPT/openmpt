@@ -984,10 +984,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 	}
 
-	if((pifh->cwtv & 0xF000) == 0x5000) // OpenMPT Version number (Major.Minor)
+	if((pifh->cwtv & 0xF000) == 0x5000) // OpenMPT Version number (Major.Minor) - we won't interpret this as "made with modplug" as this is used by compatibility export
 	{
 		m_dwLastSavedWithVersion = (pifh->cwtv & 0x0FFF) << 16;
-		interpretModplugmade = true;
+		//interpretModplugmade = true;
 	}
 
 	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;

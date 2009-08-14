@@ -188,7 +188,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		packsize = LittleEndianW(*((WORD *)(lpStream+dwMemPos+7)));
 		if (dwMemPos + dwSize + 4 > dwMemLength) return true;
 		dwMemPos += dwSize;
-		if (dwMemPos + packsize + 4 > dwMemLength) return true;
+		if (dwMemPos + packsize > dwMemLength) return true;
 		MODCOMMAND *p;
 		if (ipatmap < MAX_PATTERNS)
 		{
