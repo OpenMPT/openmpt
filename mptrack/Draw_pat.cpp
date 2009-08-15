@@ -855,8 +855,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				}
 				// Drawing note
 				m_Dib.SetTextColor(tx_col, bk_col);
-				if(pSndFile->m_nType == MOD_TYPE_MPT && m->instr < MAX_INSTRUMENTS && pSndFile->Headers[m->instr])
-					DrawNote(xbmp+x, 0, m->note, pSndFile->Headers[m->instr]->pTuning);
+				if(pSndFile->m_nType == MOD_TYPE_MPT && m->instr < MAX_INSTRUMENTS && pSndFile->Instruments[m->instr])
+					DrawNote(xbmp+x, 0, m->note, pSndFile->Instruments[m->instr]->pTuning);
 				else //Original
 					DrawNote(xbmp+x, 0, m->note);
 			}
@@ -1483,14 +1483,14 @@ void CViewPattern::UpdateIndicator()
 							CHAR sztmp[128] = "";
 							if (pSndFile->m_nInstruments)
 							{
-								if ((m->instr <= pSndFile->m_nInstruments) && (pSndFile->Headers[m->instr]))
+								if ((m->instr <= pSndFile->m_nInstruments) && (pSndFile->Instruments[m->instr]))
 								{
-									INSTRUMENTHEADER *penv = pSndFile->Headers[m->instr];
-									memcpy(sztmp, penv->name, 32);
+									MODINSTRUMENT *pIns = pSndFile->Instruments[m->instr];
+									memcpy(sztmp, pIns->name, 32);
 									sztmp[32] = 0;
 									if ((m->note) && (m->note <= NOTE_MAX))
 									{
-										UINT nsmp = penv->Keyboard[m->note-1];
+										UINT nsmp = pIns->Keyboard[m->note-1];
 										if ((nsmp) && (nsmp <= pSndFile->m_nSamples))
 										{
 											CHAR sztmp2[64] = "";

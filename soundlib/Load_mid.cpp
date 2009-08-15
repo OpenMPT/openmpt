@@ -387,15 +387,15 @@ static int ConvertMidiTempo(int tempo_us, int *pTickMultiplier)
 UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNote)
 //--------------------------------------------------------------------------------
 {
-	INSTRUMENTHEADER *penv;
+	MODINSTRUMENT *pIns;
 	UINT nProgram = dwBankProgram & 0x7F;
 	UINT nBank = dwBankProgram >> 7;
 
 	nNote &= 0x7F;
 	if (nNote >= NOTE_MAX) return 0;
-	for (UINT i=1; i<=m_nInstruments; i++) if (Headers[i])
+	for (UINT i=1; i<=m_nInstruments; i++) if (Instruments[i])
 	{
-		INSTRUMENTHEADER *p = Headers[i];
+		MODINSTRUMENT *p = Instruments[i];
 		// Drum Kit ?
 		if (nChannel == MIDI_DRUMCHANNEL)
 		{
@@ -407,25 +407,25 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 		}
 	}
 	if ((m_nInstruments + 1 >= MAX_INSTRUMENTS) || (m_nSamples + 1 >= MAX_SAMPLES)) return 0;
-	penv = new INSTRUMENTHEADER;
-	if (!penv) return 0;
-	memset(penv, 0, sizeof(INSTRUMENTHEADER));
-	penv->pTuning = penv->s_DefaultTuning;
+	pIns = new MODINSTRUMENT;
+	if (!pIns) return 0;
+	memset(pIns, 0, sizeof(MODINSTRUMENT));
+	pIns->pTuning = pIns->s_DefaultTuning;
 	m_nSamples++;
 	m_nInstruments++;
-	Headers[m_nInstruments] = penv;
-	penv->wMidiBank = nBank;
-	penv->nMidiProgram = nProgram;
-	penv->nMidiChannel = nChannel;
-	if (nChannel == MIDI_DRUMCHANNEL) penv->nMidiDrumKey = nNote;
-	penv->nGlobalVol = 64;
-	penv->nFadeOut = 1024;
-	penv->nPan = 128;
-	penv->nPPC = 5*12;
-	penv->nNNA = NNA_NOTEOFF;
-	penv->nDCT = (nChannel == MIDI_DRUMCHANNEL) ? DCT_SAMPLE : DCT_NOTE;
-	penv->nDNA = DNA_NOTEFADE;
-	SetDefaultInstrumentValues(penv);
+	Instruments[m_nInstruments] = pIns;
+	pIns->wMidiBank = nBank;
+	pIns->nMidiProgram = nProgram;
+	pIns->nMidiChannel = nChannel;
+	if (nChannel == MIDI_DRUMCHANNEL) pIns->nMidiDrumKey = nNote;
+	pIns->nGlobalVol = 64;
+	pIns->nFadeOut = 1024;
+	pIns->nPan = 128;
+	pIns->nPPC = 5*12;
+	pIns->nNNA = NNA_NOTEOFF;
+	pIns->nDCT = (nChannel == MIDI_DRUMCHANNEL) ? DCT_SAMPLE : DCT_NOTE;
+	pIns->nDNA = DNA_NOTEFADE;
+	SetDefaultInstrumentValues(pIns);
 	for (UINT j=0; j<NOTE_MAX; j++)
 	{
 		int mapnote = j+1;
@@ -436,21 +436,21 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 			if (mapnote < 1) mapnote = 1;
 			if (mapnote > 120) mapnote = 120;*/
 		}
-		penv->Keyboard[j] = m_nSamples;
-		penv->NoteMap[j] = (BYTE)mapnote;
+		pIns->Keyboard[j] = m_nSamples;
+		pIns->NoteMap[j] = (BYTE)mapnote;
 	}
-	penv->dwFlags |= ENV_VOLUME;
-	if (nChannel != MIDI_DRUMCHANNEL) penv->dwFlags |= ENV_VOLSUSTAIN;
-	penv->nVolEnv = 4;
-	penv->VolPoints[0] = 0;
-	penv->VolEnv[0] = 64;
-	penv->VolPoints[1] = 10;
-	penv->VolEnv[1] = 64;
-	penv->VolPoints[2] = 15;
-	penv->VolEnv[2] = 48;
-	penv->VolPoints[3] = 20;
-	penv->VolEnv[3] = 0;
-	penv->nVolSustainBegin = penv->nVolSustainEnd = 1;
+	pIns->dwFlags |= ENV_VOLUME;
+	if (nChannel != MIDI_DRUMCHANNEL) pIns->dwFlags |= ENV_VOLSUSTAIN;
+	pIns->nVolEnv = 4;
+	pIns->VolPoints[0] = 0;
+	pIns->VolEnv[0] = 64;
+	pIns->VolPoints[1] = 10;
+	pIns->VolEnv[1] = 64;
+	pIns->VolPoints[2] = 15;
+	pIns->VolEnv[2] = 48;
+	pIns->VolPoints[3] = 20;
+	pIns->VolEnv[3] = 0;
+	pIns->nVolSustainBegin = pIns->nVolSustainEnd = 1;
 	// Sample
 	Samples[m_nSamples].nPan = 128;
 	Samples[m_nSamples].nVolume = 256;
@@ -458,11 +458,11 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	if (nChannel != MIDI_DRUMCHANNEL)
 	{
 		// GM Midi Name
-		strcpy(penv->name, szMidiProgramNames[nProgram]);
+		strcpy(pIns->name, szMidiProgramNames[nProgram]);
 		strcpy(m_szNames[m_nSamples], szMidiProgramNames[nProgram]);
 	} else
 	{
-		strcpy(penv->name, "Percussions");
+		strcpy(pIns->name, "Percussions");
 		if ((nNote >= 24) && (nNote <= 84))
 			strcpy(m_szNames[m_nSamples], szMidiPercussionNames[nNote-24]);
 		else

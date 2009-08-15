@@ -2198,22 +2198,22 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 			CDLSBank dlsbank;
 			if (dlsbank.Open((LPCSTR)lpDropInfo->lDropParam))
 			{
-				DLSINSTRUMENT *pIns;
+				DLSINSTRUMENT *pDlsIns;
 				UINT nIns = 0, nRgn = 0xFF;
 				// Drums
 				if (lpDropInfo->dwDropItem & 0x80)
 				{
 					UINT key = lpDropInfo->dwDropItem & 0x7F;
-					pIns = dlsbank.FindInstrument(TRUE, 0xFFFF, 0xFF, key, &nIns);
-					if (pIns) nRgn = dlsbank.GetRegionFromKey(nIns, key);
+					pDlsIns = dlsbank.FindInstrument(TRUE, 0xFFFF, 0xFF, key, &nIns);
+					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, key);
 				} else
 				// Melodic
 				{
-					pIns = dlsbank.FindInstrument(FALSE, 0xFFFF, lpDropInfo->dwDropItem, 60, &nIns);
-					if (pIns) nRgn = dlsbank.GetRegionFromKey(nIns, 60);
+					pDlsIns = dlsbank.FindInstrument(FALSE, 0xFFFF, lpDropInfo->dwDropItem, 60, &nIns);
+					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, 60);
 				}
 				bCanDrop = FALSE;
-				if (pIns)
+				if (pDlsIns)
 				{
 					BEGIN_CRITICAL();
 					bCanDrop = dlsbank.ExtractSample(pSndFile, m_nSample, nIns, nRgn);

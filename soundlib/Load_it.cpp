@@ -35,7 +35,7 @@ static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 	const INSTRUMENTINDEX iCount = sf.GetNumInstruments();
 	for(INSTRUMENTINDEX i = 1; i <= iCount; i++)
 	{
-		if(sf.Headers[i]->pTuning != 0)
+		if(sf.Instruments[i]->pTuning != 0)
 			return true;
 	}
 	return false;
@@ -63,13 +63,13 @@ void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
 		TNTS_MAP tNameToShort_Map;
 		
 		unsigned short figMap = 0;
-		for(UINT i = 1; i <= sf.GetNumInstruments(); i++) if (sf.Headers[i] != nullptr)
+		for(UINT i = 1; i <= sf.GetNumInstruments(); i++) if (sf.Instruments[i] != nullptr)
 		{
-			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Headers[i]->pTuning);
+			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Instruments[i]->pTuning);
 			if(iter != tNameToShort_Map.end())
 				continue; //Tuning already mapped.
 			
-			tNameToShort_Map[sf.Headers[i]->pTuning] = figMap;
+			tNameToShort_Map[sf.Instruments[i]->pTuning] = figMap;
 			figMap++;
 		}
 
@@ -90,7 +90,7 @@ void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
 		//Writing tuning data for instruments.
 		for(UINT i = 1; i <= sf.GetNumInstruments(); i++)
 		{
-			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Headers[i]->pTuning);
+			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Instruments[i]->pTuning);
 			if(iter == tNameToShort_Map.end()) //Should never happen
 			{
 				MessageBox(0, "Error: 210807_1", 0, MB_ICONERROR);
@@ -143,32 +143,32 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 		uint16 ui;
 		iStrm.read(reinterpret_cast<char*>(&ui), sizeof(ui));
 		MAP_ITER iter = shortToTNameMap.find(ui);
-		if(csf.Headers[i] && iter != shortToTNameMap.end())
+		if(csf.Instruments[i] && iter != shortToTNameMap.end())
 		{
 			const string str = iter->second;
 
 			if(str == string("->MPT_ORIGINAL_IT<-"))
 			{
-				csf.Headers[i]->pTuning = nullptr;
+				csf.Instruments[i]->pTuning = nullptr;
 				continue;
 			}
 
-			csf.Headers[i]->pTuning = csf.GetTuneSpecificTunings().GetTuning(str);
-			if(csf.Headers[i]->pTuning)
+			csf.Instruments[i]->pTuning = csf.GetTuneSpecificTunings().GetTuning(str);
+			if(csf.Instruments[i]->pTuning)
 				continue;
 
-			csf.Headers[i]->pTuning = csf.GetLocalTunings().GetTuning(str);
-			if(csf.Headers[i]->pTuning)
+			csf.Instruments[i]->pTuning = csf.GetLocalTunings().GetTuning(str);
+			if(csf.Instruments[i]->pTuning)
 				continue;
 
-			csf.Headers[i]->pTuning = csf.GetStandardTunings().GetTuning(str);
-			if(csf.Headers[i]->pTuning)
+			csf.Instruments[i]->pTuning = csf.GetStandardTunings().GetTuning(str);
+			if(csf.Instruments[i]->pTuning)
 				continue;
 
 			if(str == "TET12" && csf.GetStandardTunings().GetNumTunings() > 0)
-				csf.Headers[i]->pTuning = &csf.GetStandardTunings().GetTuning(0);
+				csf.Instruments[i]->pTuning = &csf.GetStandardTunings().GetTuning(0);
 
-			if(csf.Headers[i]->pTuning)
+			if(csf.Instruments[i]->pTuning)
 				continue;
 
 			//Checking if not found tuning already noticed.
@@ -183,13 +183,13 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 					csf.GetpModDoc()->SetModified();
 				
 			}
-			csf.Headers[i]->pTuning = csf.Headers[i]->s_DefaultTuning;
+			csf.Instruments[i]->pTuning = csf.Instruments[i]->s_DefaultTuning;
 
 		}
 		else //This 'else' happens probably only in case of corrupted file.
 		{
-			if(csf.Headers[i])
-				csf.Headers[i]->pTuning = INSTRUMENTHEADER::s_DefaultTuning;
+			if(csf.Instruments[i])
+				csf.Instruments[i]->pTuning = MODINSTRUMENT::s_DefaultTuning;
 		}
 
 	}
@@ -217,75 +217,75 @@ static inline UINT ConvertVolParam(UINT value)
 }
 
 
-//BOOL CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers)
-long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers) //rewbs.modularInstData
+//BOOL CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers)
+long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) //rewbs.modularInstData
 //--------------------------------------------------------------------------------
 {	
 	long returnVal=0;
-	penv->pTuning = m_defaultInstrument.pTuning;
-	penv->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-	penv->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+	pIns->pTuning = m_defaultInstrument.pTuning;
+	pIns->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
+	pIns->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 	if (trkvers < 0x0200)
 	{
 		const ITOLDINSTRUMENT *pis = (const ITOLDINSTRUMENT *)p;
-		memcpy(penv->name, pis->name, 26);
-		memcpy(penv->filename, pis->filename, 12);
-		penv->nFadeOut = pis->fadeout << 6;
-		penv->nGlobalVol = 64;
+		memcpy(pIns->name, pis->name, 26);
+		memcpy(pIns->filename, pis->filename, 12);
+		pIns->nFadeOut = pis->fadeout << 6;
+		pIns->nGlobalVol = 64;
 		for (UINT j=0; j<NOTE_MAX; j++)
 		{
 			UINT note = pis->keyboard[j*2];
 			UINT ins = pis->keyboard[j*2+1];
-			if (ins < MAX_SAMPLES) penv->Keyboard[j] = ins;
-			if (note < 128) penv->NoteMap[j] = note+1;
-			else if (note >= 0xFE) penv->NoteMap[j] = note;
+			if (ins < MAX_SAMPLES) pIns->Keyboard[j] = ins;
+			if (note < 128) pIns->NoteMap[j] = note+1;
+			else if (note >= 0xFE) pIns->NoteMap[j] = note;
 		}
-		if (pis->flags & 0x01) penv->dwFlags |= ENV_VOLUME;
-		if (pis->flags & 0x02) penv->dwFlags |= ENV_VOLLOOP;
-		if (pis->flags & 0x04) penv->dwFlags |= ENV_VOLSUSTAIN;
-		penv->nVolLoopStart = pis->vls;
-		penv->nVolLoopEnd = pis->vle;
-		penv->nVolSustainBegin = pis->sls;
-		penv->nVolSustainEnd = pis->sle;
-		penv->nVolEnv = 25;
+		if (pis->flags & 0x01) pIns->dwFlags |= ENV_VOLUME;
+		if (pis->flags & 0x02) pIns->dwFlags |= ENV_VOLLOOP;
+		if (pis->flags & 0x04) pIns->dwFlags |= ENV_VOLSUSTAIN;
+		pIns->nVolLoopStart = pis->vls;
+		pIns->nVolLoopEnd = pis->vle;
+		pIns->nVolSustainBegin = pis->sls;
+		pIns->nVolSustainEnd = pis->sle;
+		pIns->nVolEnv = 25;
 		for (UINT ev=0; ev<25; ev++)
 		{
-			if ((penv->VolPoints[ev] = pis->nodes[ev*2]) == 0xFF)
+			if ((pIns->VolPoints[ev] = pis->nodes[ev*2]) == 0xFF)
 			{
-				penv->nVolEnv = ev;
+				pIns->nVolEnv = ev;
 				break;
 			}
-			penv->VolEnv[ev] = pis->nodes[ev*2+1];
+			pIns->VolEnv[ev] = pis->nodes[ev*2+1];
 		}
-		penv->nNNA = pis->nna;
-		penv->nDCT = pis->dnc;
-		penv->nPan = 0x80;
+		pIns->nNNA = pis->nna;
+		pIns->nDCT = pis->dnc;
+		pIns->nPan = 0x80;
 	} else
 	{
 		const ITINSTRUMENT *pis = (const ITINSTRUMENT *)p;
-		memcpy(penv->name, pis->name, 26);
-		memcpy(penv->filename, pis->filename, 12);
+		memcpy(pIns->name, pis->name, 26);
+		memcpy(pIns->filename, pis->filename, 12);
 		if (pis->mpr<=128)
-			penv->nMidiProgram = pis->mpr;
-		penv->nMidiChannel = pis->mch;
-		if (penv->nMidiChannel > 16)	//rewbs.instroVSTi
+			pIns->nMidiProgram = pis->mpr;
+		pIns->nMidiChannel = pis->mch;
+		if (pIns->nMidiChannel > 16)	//rewbs.instroVSTi
 		{								//(handle old format where midichan
 										// and mixplug are 1 value)
-			penv->nMixPlug = penv->nMidiChannel-128;
-			penv->nMidiChannel = 0;		
+			pIns->nMixPlug = pIns->nMidiChannel-128;
+			pIns->nMidiChannel = 0;		
 		}
 		if (pis->mbank<=128)
-			penv->wMidiBank = pis->mbank;
-		penv->nFadeOut = pis->fadeout << 5;
-		penv->nGlobalVol = pis->gbv >> 1;
-		if (penv->nGlobalVol > 64) penv->nGlobalVol = 64;
+			pIns->wMidiBank = pis->mbank;
+		pIns->nFadeOut = pis->fadeout << 5;
+		pIns->nGlobalVol = pis->gbv >> 1;
+		if (pIns->nGlobalVol > 64) pIns->nGlobalVol = 64;
 		for (UINT j=0; j<NOTE_MAX; j++)
 		{
 			UINT note = pis->keyboard[j*2];
 			UINT ins = pis->keyboard[j*2+1];
-			if (ins < MAX_SAMPLES) penv->Keyboard[j] = ins;
-			if (note < 128) penv->NoteMap[j] = note+1;
-			else if (note >= 0xFE) penv->NoteMap[j] = note;
+			if (ins < MAX_SAMPLES) pIns->Keyboard[j] = ins;
+			if (note < 128) pIns->NoteMap[j] = note+1;
+			else if (note >= 0xFE) pIns->NoteMap[j] = note;
 		}
 		// Olivier's MPT Instrument Extension
 		if (*((int *)pis->dummy) == 'MPTX')
@@ -293,7 +293,7 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 			const ITINSTRUMENTEX *pisex = (const ITINSTRUMENTEX *)pis;
 			for (UINT k=0; k<NOTE_MAX; k++)
 			{
-				penv->Keyboard[k] |= ((UINT)pisex->keyboardhi[k] << 8);
+				pIns->Keyboard[k] |= ((UINT)pisex->keyboardhi[k] << 8);
 			}
 		}
 		//rewbs.modularInstData  
@@ -324,8 +324,8 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 						pModularInst+=1024;
 						break;*/
 					case 'PLUG':
-						penv->nMixPlug = *(pModularInst);
-						pModularInst+=sizeof(penv->nMixPlug);
+						pIns->nMixPlug = *(pModularInst);
+						pModularInst+=sizeof(pIns->nMixPlug);
 						break;
 					/*How to load more chunks?  -- see also how to save chunks
 					case: 'MYID':
@@ -344,67 +344,67 @@ long CSoundFile::ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkver
 
 			
 		// Volume Envelope 
-		if (pis->volenv.flags & 1) penv->dwFlags |= ENV_VOLUME;
-		if (pis->volenv.flags & 2) penv->dwFlags |= ENV_VOLLOOP;
-		if (pis->volenv.flags & 4) penv->dwFlags |= ENV_VOLSUSTAIN;
-		if (pis->volenv.flags & 8) penv->dwFlags |= ENV_VOLCARRY;
-		penv->nVolEnv = pis->volenv.num;
-		if (penv->nVolEnv > 25) penv->nVolEnv = 25;
-		penv->nVolLoopStart = pis->volenv.lpb;
-		penv->nVolLoopEnd = pis->volenv.lpe;
-		penv->nVolSustainBegin = pis->volenv.slb;
-		penv->nVolSustainEnd = pis->volenv.sle;
+		if (pis->volenv.flags & 1) pIns->dwFlags |= ENV_VOLUME;
+		if (pis->volenv.flags & 2) pIns->dwFlags |= ENV_VOLLOOP;
+		if (pis->volenv.flags & 4) pIns->dwFlags |= ENV_VOLSUSTAIN;
+		if (pis->volenv.flags & 8) pIns->dwFlags |= ENV_VOLCARRY;
+		pIns->nVolEnv = pis->volenv.num;
+		if (pIns->nVolEnv > 25) pIns->nVolEnv = 25;
+		pIns->nVolLoopStart = pis->volenv.lpb;
+		pIns->nVolLoopEnd = pis->volenv.lpe;
+		pIns->nVolSustainBegin = pis->volenv.slb;
+		pIns->nVolSustainEnd = pis->volenv.sle;
 		// Panning Envelope 
-		if (pis->panenv.flags & 1) penv->dwFlags |= ENV_PANNING;
-		if (pis->panenv.flags & 2) penv->dwFlags |= ENV_PANLOOP;
-		if (pis->panenv.flags & 4) penv->dwFlags |= ENV_PANSUSTAIN;
-		if (pis->panenv.flags & 8) penv->dwFlags |= ENV_PANCARRY;
-		penv->nPanEnv = pis->panenv.num;
-		if (penv->nPanEnv > 25) penv->nPanEnv = 25;
-		penv->nPanLoopStart = pis->panenv.lpb;
-		penv->nPanLoopEnd = pis->panenv.lpe;
-		penv->nPanSustainBegin = pis->panenv.slb;
-		penv->nPanSustainEnd = pis->panenv.sle;
+		if (pis->panenv.flags & 1) pIns->dwFlags |= ENV_PANNING;
+		if (pis->panenv.flags & 2) pIns->dwFlags |= ENV_PANLOOP;
+		if (pis->panenv.flags & 4) pIns->dwFlags |= ENV_PANSUSTAIN;
+		if (pis->panenv.flags & 8) pIns->dwFlags |= ENV_PANCARRY;
+		pIns->nPanEnv = pis->panenv.num;
+		if (pIns->nPanEnv > 25) pIns->nPanEnv = 25;
+		pIns->nPanLoopStart = pis->panenv.lpb;
+		pIns->nPanLoopEnd = pis->panenv.lpe;
+		pIns->nPanSustainBegin = pis->panenv.slb;
+		pIns->nPanSustainEnd = pis->panenv.sle;
 		// Pitch Envelope 
-		if (pis->pitchenv.flags & 1) penv->dwFlags |= ENV_PITCH;
-		if (pis->pitchenv.flags & 2) penv->dwFlags |= ENV_PITCHLOOP;
-		if (pis->pitchenv.flags & 4) penv->dwFlags |= ENV_PITCHSUSTAIN;
-		if (pis->pitchenv.flags & 8) penv->dwFlags |= ENV_PITCHCARRY;
-		if (pis->pitchenv.flags & 0x80) penv->dwFlags |= ENV_FILTER;
-		penv->nPitchEnv = pis->pitchenv.num;
-		if (penv->nPitchEnv > 25) penv->nPitchEnv = 25;
-		penv->nPitchLoopStart = pis->pitchenv.lpb;
-		penv->nPitchLoopEnd = pis->pitchenv.lpe;
-		penv->nPitchSustainBegin = pis->pitchenv.slb;
-		penv->nPitchSustainEnd = pis->pitchenv.sle;
+		if (pis->pitchenv.flags & 1) pIns->dwFlags |= ENV_PITCH;
+		if (pis->pitchenv.flags & 2) pIns->dwFlags |= ENV_PITCHLOOP;
+		if (pis->pitchenv.flags & 4) pIns->dwFlags |= ENV_PITCHSUSTAIN;
+		if (pis->pitchenv.flags & 8) pIns->dwFlags |= ENV_PITCHCARRY;
+		if (pis->pitchenv.flags & 0x80) pIns->dwFlags |= ENV_FILTER;
+		pIns->nPitchEnv = pis->pitchenv.num;
+		if (pIns->nPitchEnv > 25) pIns->nPitchEnv = 25;
+		pIns->nPitchLoopStart = pis->pitchenv.lpb;
+		pIns->nPitchLoopEnd = pis->pitchenv.lpe;
+		pIns->nPitchSustainBegin = pis->pitchenv.slb;
+		pIns->nPitchSustainEnd = pis->pitchenv.sle;
 		// Envelopes Data
 		for (UINT ev=0; ev<25; ev++)
 		{
-			penv->VolEnv[ev] = pis->volenv.data[ev*3];
-			penv->VolPoints[ev] = (pis->volenv.data[ev*3+2] << 8) | (pis->volenv.data[ev*3+1]);
-			penv->PanEnv[ev] = pis->panenv.data[ev*3] + 32;
-			penv->PanPoints[ev] = (pis->panenv.data[ev*3+2] << 8) | (pis->panenv.data[ev*3+1]);
-			penv->PitchEnv[ev] = pis->pitchenv.data[ev*3] + 32;
-			penv->PitchPoints[ev] = (pis->pitchenv.data[ev*3+2] << 8) | (pis->pitchenv.data[ev*3+1]);
+			pIns->VolEnv[ev] = pis->volenv.data[ev*3];
+			pIns->VolPoints[ev] = (pis->volenv.data[ev*3+2] << 8) | (pis->volenv.data[ev*3+1]);
+			pIns->PanEnv[ev] = pis->panenv.data[ev*3] + 32;
+			pIns->PanPoints[ev] = (pis->panenv.data[ev*3+2] << 8) | (pis->panenv.data[ev*3+1]);
+			pIns->PitchEnv[ev] = pis->pitchenv.data[ev*3] + 32;
+			pIns->PitchPoints[ev] = (pis->pitchenv.data[ev*3+2] << 8) | (pis->pitchenv.data[ev*3+1]);
 		}
-		penv->nNNA = pis->nna;
-		penv->nDCT = pis->dct;
-		penv->nDNA = pis->dca;
-		penv->nPPS = pis->pps;
-		penv->nPPC = pis->ppc;
-		penv->nIFC = pis->ifc;
-		penv->nIFR = pis->ifr;
-		penv->nVolSwing = pis->rv;
-		penv->nPanSwing = pis->rp;
-		penv->nPan = (pis->dfp & 0x7F) << 2;
-		SetDefaultInstrumentValues(penv);
-		penv->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-		penv->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
-		if (penv->nPan > 256) penv->nPan = 128;
-		if (pis->dfp < 0x80) penv->dwFlags |= ENV_SETPANNING;
+		pIns->nNNA = pis->nna;
+		pIns->nDCT = pis->dct;
+		pIns->nDNA = pis->dca;
+		pIns->nPPS = pis->pps;
+		pIns->nPPC = pis->ppc;
+		pIns->nIFC = pis->ifc;
+		pIns->nIFR = pis->ifr;
+		pIns->nVolSwing = pis->rv;
+		pIns->nPanSwing = pis->rp;
+		pIns->nPan = (pis->dfp & 0x7F) << 2;
+		SetDefaultInstrumentValues(pIns);
+		pIns->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
+		pIns->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+		if (pIns->nPan > 256) pIns->nPan = 128;
+		if (pis->dfp < 0x80) pIns->dwFlags |= ENV_SETPANNING;
 	}
-	if ((penv->nVolLoopStart >= 25) || (penv->nVolLoopEnd >= 25)) penv->dwFlags &= ~ENV_VOLLOOP;
-	if ((penv->nVolSustainBegin >= 25) || (penv->nVolSustainEnd >= 25)) penv->dwFlags &= ~ENV_VOLSUSTAIN;
+	if ((pIns->nVolLoopStart >= 25) || (pIns->nVolLoopEnd >= 25)) pIns->dwFlags &= ~ENV_VOLLOOP;
+	if ((pIns->nVolSustainBegin >= 25) || (pIns->nVolSustainEnd >= 25)) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
 
 	return returnVal; //return offset
 }
@@ -819,7 +819,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 				default:
 					ptr += sizeof(__int32);			// jump field code
-					ReadExtendedInstrumentProperty(Headers[i], fcode, ptr, lpStream + dwMemLength);
+					ReadExtendedInstrumentProperty(Instruments[i], fcode, ptr, lpStream + dwMemLength);
 				break;
 			}
 		}
@@ -1180,11 +1180,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		if ((inspos[nins] > 0) && (inspos[nins] < dwMemLength - sizeof(ITOLDINSTRUMENT)))
 		{
-			INSTRUMENTHEADER *penv = new INSTRUMENTHEADER;
-			if (!penv) continue;
-			Headers[nins+1] = penv;
-			memset(penv, 0, sizeof(INSTRUMENTHEADER));
-			ITInstrToMPT(lpStream + inspos[nins], penv, pifh->cmwt);
+			MODINSTRUMENT *pIns = new MODINSTRUMENT;
+			if (!pIns) continue;
+			Instruments[nins+1] = pIns;
+			memset(pIns, 0, sizeof(MODINSTRUMENT));
+			ITInstrToMPT(lpStream + inspos[nins], pIns, pifh->cmwt);
 		}
 	}
 
@@ -1525,7 +1525,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	if(!(m_dwSongFlags & SONG_ITPROJECT)) return false;
 
 	UINT i,j = 0;
-	for(i = 0 ; i < m_nInstruments ; i++) { if(m_szInstrumentPath[i][0] != '\0' || !Headers[i+1]) j++; }
+	for(i = 0 ; i < m_nInstruments ; i++) { if(m_szInstrumentPath[i][0] != '\0' || !Instruments[i+1]) j++; }
 	if(m_nInstruments && j != m_nInstruments) return false;
 
 // Open file
@@ -1675,8 +1675,8 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 	// Mark samples used in instruments
 	for(i=0; i<m_nInstruments; i++){
-		if(Headers[i+1]){
-			INSTRUMENTHEADER *p = Headers[i+1];
+		if(Instruments[i+1]){
+			MODINSTRUMENT *p = Instruments[i+1];
 			for(j=0; j<128; j++) if(p->Keyboard[j]) sampleUsed[p->Keyboard[j]] = TRUE;
 		}
 	}
@@ -1753,7 +1753,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 		// instruments' header
 		for(i=0; i<m_nInstruments; i++){
-			if(Headers[i+1]) WriteInstrumentHeaderStruct(Headers[i+1], f);
+			if(Instruments[i+1]) WriteInstrumentHeaderStruct(Instruments[i+1], f);
 			// write separator tag
 			code = 'SEP@';
 			fwrite(&code, 1, sizeof(__int32), f);
@@ -1988,86 +1988,86 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		iti.id = 0x49504D49;	// "IMPI"
 		//iti.trkvers = 0x211;
 		iti.trkvers = 0x220;	//rewbs.itVersion
-		if (Headers[nins])
+		if (Instruments[nins])
 		{
-			INSTRUMENTHEADER *penv = Headers[nins];
+			MODINSTRUMENT *pIns = Instruments[nins];
 			memset(smpcount, 0, sizeof(smpcount));
-			memcpy(iti.filename, penv->filename, 12);
-			memcpy(iti.name, penv->name, 26);
-			iti.mbank = penv->wMidiBank;
-			iti.mpr = penv->nMidiProgram;
-			iti.mch = penv->nMidiChannel;
-			iti.nna = penv->nNNA;
-			//if (penv->nDCT<DCT_PLUGIN) iti.dct = penv->nDCT; else iti.dct =0;	
-			iti.dct = penv->nDCT; //rewbs.instroVSTi: will other apps barf if they get an unknown DCT?
-			iti.dca = penv->nDNA;
-			iti.fadeout = penv->nFadeOut >> 5;
-			iti.pps = penv->nPPS;
-			iti.ppc = penv->nPPC;
-			iti.gbv = (BYTE)(penv->nGlobalVol << 1);
-			iti.dfp = (BYTE)penv->nPan >> 2;
-			if (!(penv->dwFlags & ENV_SETPANNING)) iti.dfp |= 0x80;
-			iti.rv = penv->nVolSwing;
-			iti.rp = penv->nPanSwing;
-			iti.ifc = penv->nIFC;
-			iti.ifr = penv->nIFR;
+			memcpy(iti.filename, pIns->filename, 12);
+			memcpy(iti.name, pIns->name, 26);
+			iti.mbank = pIns->wMidiBank;
+			iti.mpr = pIns->nMidiProgram;
+			iti.mch = pIns->nMidiChannel;
+			iti.nna = pIns->nNNA;
+			//if (pIns->nDCT<DCT_PLUGIN) iti.dct = pIns->nDCT; else iti.dct =0;	
+			iti.dct = pIns->nDCT; //rewbs.instroVSTi: will other apps barf if they get an unknown DCT?
+			iti.dca = pIns->nDNA;
+			iti.fadeout = pIns->nFadeOut >> 5;
+			iti.pps = pIns->nPPS;
+			iti.ppc = pIns->nPPC;
+			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
+			iti.dfp = (BYTE)pIns->nPan >> 2;
+			if (!(pIns->dwFlags & ENV_SETPANNING)) iti.dfp |= 0x80;
+			iti.rv = pIns->nVolSwing;
+			iti.rp = pIns->nPanSwing;
+			iti.ifc = pIns->nIFC;
+			iti.ifr = pIns->nIFR;
 			iti.nos = 0;
-			for (UINT i=0; i<NOTE_MAX; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
+			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 			{
-				UINT smp = penv->Keyboard[i];
+				UINT smp = pIns->Keyboard[i];
 				if ((smp) && (!(smpcount[smp>>3] & (1<<(smp&7)))))
 				{
 					smpcount[smp>>3] |= 1 << (smp&7);
 					iti.nos++;
 				}
-				iti.keyboard[i*2] = penv->NoteMap[i] - 1;
+				iti.keyboard[i*2] = pIns->NoteMap[i] - 1;
 				iti.keyboard[i*2+1] = smp;
 				if (smp > 0xff) bKbdEx = TRUE;
 				keyboardex[i] = (smp>>8);
 			} else keyboardex[i] = 0;
 			// Writing Volume envelope
-			if (penv->dwFlags & ENV_VOLUME) iti.volenv.flags |= 0x01;
-			if (penv->dwFlags & ENV_VOLLOOP) iti.volenv.flags |= 0x02;
-			if (penv->dwFlags & ENV_VOLSUSTAIN) iti.volenv.flags |= 0x04;
-			if (penv->dwFlags & ENV_VOLCARRY) iti.volenv.flags |= 0x08;
-			iti.volenv.num = (BYTE)penv->nVolEnv;
-			iti.volenv.lpb = (BYTE)penv->nVolLoopStart;
-			iti.volenv.lpe = (BYTE)penv->nVolLoopEnd;
-			iti.volenv.slb = penv->nVolSustainBegin;
-			iti.volenv.sle = penv->nVolSustainEnd;
+			if (pIns->dwFlags & ENV_VOLUME) iti.volenv.flags |= 0x01;
+			if (pIns->dwFlags & ENV_VOLLOOP) iti.volenv.flags |= 0x02;
+			if (pIns->dwFlags & ENV_VOLSUSTAIN) iti.volenv.flags |= 0x04;
+			if (pIns->dwFlags & ENV_VOLCARRY) iti.volenv.flags |= 0x08;
+			iti.volenv.num = (BYTE)pIns->nVolEnv;
+			iti.volenv.lpb = (BYTE)pIns->nVolLoopStart;
+			iti.volenv.lpe = (BYTE)pIns->nVolLoopEnd;
+			iti.volenv.slb = pIns->nVolSustainBegin;
+			iti.volenv.sle = pIns->nVolSustainEnd;
 			// Writing Panning envelope
-			if (penv->dwFlags & ENV_PANNING) iti.panenv.flags |= 0x01;
-			if (penv->dwFlags & ENV_PANLOOP) iti.panenv.flags |= 0x02;
-			if (penv->dwFlags & ENV_PANSUSTAIN) iti.panenv.flags |= 0x04;
-			if (penv->dwFlags & ENV_PANCARRY) iti.panenv.flags |= 0x08;
-			iti.panenv.num = (BYTE)penv->nPanEnv;
-			iti.panenv.lpb = (BYTE)penv->nPanLoopStart;
-			iti.panenv.lpe = (BYTE)penv->nPanLoopEnd;
-			iti.panenv.slb = penv->nPanSustainBegin;
-			iti.panenv.sle = penv->nPanSustainEnd;
+			if (pIns->dwFlags & ENV_PANNING) iti.panenv.flags |= 0x01;
+			if (pIns->dwFlags & ENV_PANLOOP) iti.panenv.flags |= 0x02;
+			if (pIns->dwFlags & ENV_PANSUSTAIN) iti.panenv.flags |= 0x04;
+			if (pIns->dwFlags & ENV_PANCARRY) iti.panenv.flags |= 0x08;
+			iti.panenv.num = (BYTE)pIns->nPanEnv;
+			iti.panenv.lpb = (BYTE)pIns->nPanLoopStart;
+			iti.panenv.lpe = (BYTE)pIns->nPanLoopEnd;
+			iti.panenv.slb = pIns->nPanSustainBegin;
+			iti.panenv.sle = pIns->nPanSustainEnd;
 			// Writing Pitch Envelope
-			if (penv->dwFlags & ENV_PITCH) iti.pitchenv.flags |= 0x01;
-			if (penv->dwFlags & ENV_PITCHLOOP) iti.pitchenv.flags |= 0x02;
-			if (penv->dwFlags & ENV_PITCHSUSTAIN) iti.pitchenv.flags |= 0x04;
-			if (penv->dwFlags & ENV_PITCHCARRY) iti.pitchenv.flags |= 0x08;
-			if (penv->dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
-			iti.pitchenv.num = (BYTE)penv->nPitchEnv;
-			iti.pitchenv.lpb = (BYTE)penv->nPitchLoopStart;
-			iti.pitchenv.lpe = (BYTE)penv->nPitchLoopEnd;
-			iti.pitchenv.slb = (BYTE)penv->nPitchSustainBegin;
-			iti.pitchenv.sle = (BYTE)penv->nPitchSustainEnd;
+			if (pIns->dwFlags & ENV_PITCH) iti.pitchenv.flags |= 0x01;
+			if (pIns->dwFlags & ENV_PITCHLOOP) iti.pitchenv.flags |= 0x02;
+			if (pIns->dwFlags & ENV_PITCHSUSTAIN) iti.pitchenv.flags |= 0x04;
+			if (pIns->dwFlags & ENV_PITCHCARRY) iti.pitchenv.flags |= 0x08;
+			if (pIns->dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
+			iti.pitchenv.num = (BYTE)pIns->nPitchEnv;
+			iti.pitchenv.lpb = (BYTE)pIns->nPitchLoopStart;
+			iti.pitchenv.lpe = (BYTE)pIns->nPitchLoopEnd;
+			iti.pitchenv.slb = (BYTE)pIns->nPitchSustainBegin;
+			iti.pitchenv.sle = (BYTE)pIns->nPitchSustainEnd;
 			// Writing Envelopes data
 			for (UINT ev=0; ev<25; ev++)
 			{
-				iti.volenv.data[ev*3] = penv->VolEnv[ev];
-				iti.volenv.data[ev*3+1] = penv->VolPoints[ev] & 0xFF;
-				iti.volenv.data[ev*3+2] = penv->VolPoints[ev] >> 8;
-				iti.panenv.data[ev*3] = penv->PanEnv[ev] - 32;
-				iti.panenv.data[ev*3+1] = penv->PanPoints[ev] & 0xFF;
-				iti.panenv.data[ev*3+2] = penv->PanPoints[ev] >> 8;
-				iti.pitchenv.data[ev*3] = penv->PitchEnv[ev] - 32;
-				iti.pitchenv.data[ev*3+1] = penv->PitchPoints[ev] & 0xFF;
-				iti.pitchenv.data[ev*3+2] = penv->PitchPoints[ev] >> 8;
+				iti.volenv.data[ev*3] = pIns->VolEnv[ev];
+				iti.volenv.data[ev*3+1] = pIns->VolPoints[ev] & 0xFF;
+				iti.volenv.data[ev*3+2] = pIns->VolPoints[ev] >> 8;
+				iti.panenv.data[ev*3] = pIns->PanEnv[ev] - 32;
+				iti.panenv.data[ev*3+1] = pIns->PanPoints[ev] & 0xFF;
+				iti.panenv.data[ev*3+2] = pIns->PanPoints[ev] >> 8;
+				iti.pitchenv.data[ev*3] = pIns->PitchEnv[ev] - 32;
+				iti.pitchenv.data[ev*3+1] = pIns->PitchPoints[ev] & 0xFF;
+				iti.pitchenv.data[ev*3+2] = pIns->PitchPoints[ev] >> 8;
 			}
 		} else
 		// Save Empty Instrument
@@ -2091,7 +2091,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		}
 
 		//------------ rewbs.modularInstData
-		if (Headers[nins])
+		if (Instruments[nins])
 		{
 			long modularInstSize = 0;
 			UINT ModInstID = 'INSM';
@@ -2104,8 +2104,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			{	//VST Slot chunk:
 				ID='PLUG';
 				fwrite(&ID, 1, sizeof(int), f);
-				INSTRUMENTHEADER *penv = Headers[nins];
-				fwrite(&(penv->nMixPlug), 1, sizeof(BYTE), f);
+				MODINSTRUMENT *pIns = Instruments[nins];
+				fwrite(&(pIns->nMixPlug), 1, sizeof(BYTE), f);
 				modularInstSize += sizeof(int)+sizeof(BYTE);
 			}
 			//How to save your own modular instrument chunk:
@@ -2321,10 +2321,10 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 		if (m_nInstruments)
 		{
-			for (UINT iu=1; iu<=m_nInstruments; iu++) if (Headers[iu])
+			for (UINT iu=1; iu<=m_nInstruments; iu++) if (Instruments[iu])
 			{
-				INSTRUMENTHEADER *penv = Headers[iu];
-				for (UINT ju=0; ju<128; ju++) if (penv->Keyboard[ju] == nsmp)
+				MODINSTRUMENT *pIns = Instruments[iu];
+				for (UINT ju=0; ju<128; ju++) if (pIns->Keyboard[ju] == nsmp)
 				{
 					itss.flags = 0x01;
 					break;
@@ -2388,7 +2388,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	}
 
 	//Save hacked-on extra info
-	SaveExtendedInstrumentProperties(Headers, header.insnum, f);
+	SaveExtendedInstrumentProperties(Instruments, header.insnum, f);
 	SaveExtendedSongProperties(f);
 
 	// Updating offsets
@@ -2633,86 +2633,86 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		memset(&iti, 0, sizeof(iti));
 		iti.id = 0x49504D49;	// "IMPI"
 		iti.trkvers = 0x0214;
-		if (Headers[nins])
+		if (Instruments[nins])
 		{
-			INSTRUMENTHEADER *penv = Headers[nins];
+			MODINSTRUMENT *pIns = Instruments[nins];
 			memset(smpcount, 0, sizeof(smpcount));
-			memcpy(iti.filename, penv->filename, 12);
-			memcpy(iti.name, penv->name, 26);
+			memcpy(iti.filename, pIns->filename, 12);
+			memcpy(iti.name, pIns->name, 26);
 			SetNullTerminator(iti.name);
-			iti.mbank = penv->wMidiBank;
-			iti.mpr = penv->nMidiProgram;
-			iti.mch = penv->nMidiChannel;
-			iti.nna = penv->nNNA;
-			if (penv->nDCT<DCT_PLUGIN) iti.dct = penv->nDCT; else iti.dct =0;	
-			iti.dca = penv->nDNA;
-			iti.fadeout = penv->nFadeOut >> 5;
-			iti.pps = penv->nPPS;
-			iti.ppc = penv->nPPC;
-			iti.gbv = (BYTE)(penv->nGlobalVol << 1);
-			iti.dfp = (BYTE)penv->nPan >> 2;
-			if (!(penv->dwFlags & ENV_SETPANNING)) iti.dfp |= 0x80;
-			iti.rv = penv->nVolSwing;
-			iti.rp = penv->nPanSwing;
-			iti.ifc = penv->nIFC;
-			iti.ifr = penv->nIFR;
+			iti.mbank = pIns->wMidiBank;
+			iti.mpr = pIns->nMidiProgram;
+			iti.mch = pIns->nMidiChannel;
+			iti.nna = pIns->nNNA;
+			if (pIns->nDCT<DCT_PLUGIN) iti.dct = pIns->nDCT; else iti.dct =0;	
+			iti.dca = pIns->nDNA;
+			iti.fadeout = pIns->nFadeOut >> 5;
+			iti.pps = pIns->nPPS;
+			iti.ppc = pIns->nPPC;
+			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
+			iti.dfp = (BYTE)pIns->nPan >> 2;
+			if (!(pIns->dwFlags & ENV_SETPANNING)) iti.dfp |= 0x80;
+			iti.rv = pIns->nVolSwing;
+			iti.rp = pIns->nPanSwing;
+			iti.ifc = pIns->nIFC;
+			iti.ifr = pIns->nIFR;
 			iti.nos = 0;
-			for (UINT i=0; i<NOTE_MAX; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
+			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 			{
-				UINT smp = penv->Keyboard[i];
+				UINT smp = pIns->Keyboard[i];
 				if ((smp) && (!(smpcount[smp>>3] & (1<<(smp&7)))))
 				{
 					smpcount[smp>>3] |= 1 << (smp&7);
 					iti.nos++;
 				}
-				iti.keyboard[i*2] = penv->NoteMap[i] - 1;
+				iti.keyboard[i*2] = pIns->NoteMap[i] - 1;
 				iti.keyboard[i*2+1] = smp;
 				if (smp > 0xff) bKbdEx = TRUE;
 				keyboardex[i] = (smp>>8);
 			} else keyboardex[i] = 0;
 			// Writing Volume envelope
-			if (penv->dwFlags & ENV_VOLUME) iti.volenv.flags |= 0x01;
-			if (penv->dwFlags & ENV_VOLLOOP) iti.volenv.flags |= 0x02;
-			if (penv->dwFlags & ENV_VOLSUSTAIN) iti.volenv.flags |= 0x04;
-			if (penv->dwFlags & ENV_VOLCARRY) iti.volenv.flags |= 0x08;
-			iti.volenv.num = (BYTE)penv->nVolEnv;
-			iti.volenv.lpb = (BYTE)penv->nVolLoopStart;
-			iti.volenv.lpe = (BYTE)penv->nVolLoopEnd;
-			iti.volenv.slb = penv->nVolSustainBegin;
-			iti.volenv.sle = penv->nVolSustainEnd;
+			if (pIns->dwFlags & ENV_VOLUME) iti.volenv.flags |= 0x01;
+			if (pIns->dwFlags & ENV_VOLLOOP) iti.volenv.flags |= 0x02;
+			if (pIns->dwFlags & ENV_VOLSUSTAIN) iti.volenv.flags |= 0x04;
+			if (pIns->dwFlags & ENV_VOLCARRY) iti.volenv.flags |= 0x08;
+			iti.volenv.num = (BYTE)pIns->nVolEnv;
+			iti.volenv.lpb = (BYTE)pIns->nVolLoopStart;
+			iti.volenv.lpe = (BYTE)pIns->nVolLoopEnd;
+			iti.volenv.slb = pIns->nVolSustainBegin;
+			iti.volenv.sle = pIns->nVolSustainEnd;
 			// Writing Panning envelope
-			if (penv->dwFlags & ENV_PANNING) iti.panenv.flags |= 0x01;
-			if (penv->dwFlags & ENV_PANLOOP) iti.panenv.flags |= 0x02;
-			if (penv->dwFlags & ENV_PANSUSTAIN) iti.panenv.flags |= 0x04;
-			if (penv->dwFlags & ENV_PANCARRY) iti.panenv.flags |= 0x08;
-			iti.panenv.num = (BYTE)penv->nPanEnv;
-			iti.panenv.lpb = (BYTE)penv->nPanLoopStart;
-			iti.panenv.lpe = (BYTE)penv->nPanLoopEnd;
-			iti.panenv.slb = penv->nPanSustainBegin;
-			iti.panenv.sle = penv->nPanSustainEnd;
+			if (pIns->dwFlags & ENV_PANNING) iti.panenv.flags |= 0x01;
+			if (pIns->dwFlags & ENV_PANLOOP) iti.panenv.flags |= 0x02;
+			if (pIns->dwFlags & ENV_PANSUSTAIN) iti.panenv.flags |= 0x04;
+			if (pIns->dwFlags & ENV_PANCARRY) iti.panenv.flags |= 0x08;
+			iti.panenv.num = (BYTE)pIns->nPanEnv;
+			iti.panenv.lpb = (BYTE)pIns->nPanLoopStart;
+			iti.panenv.lpe = (BYTE)pIns->nPanLoopEnd;
+			iti.panenv.slb = pIns->nPanSustainBegin;
+			iti.panenv.sle = pIns->nPanSustainEnd;
 			// Writing Pitch Envelope
-			if (penv->dwFlags & ENV_PITCH) iti.pitchenv.flags |= 0x01;
-			if (penv->dwFlags & ENV_PITCHLOOP) iti.pitchenv.flags |= 0x02;
-			if (penv->dwFlags & ENV_PITCHSUSTAIN) iti.pitchenv.flags |= 0x04;
-			if (penv->dwFlags & ENV_PITCHCARRY) iti.pitchenv.flags |= 0x08;
-			if (penv->dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
-			iti.pitchenv.num = (BYTE)penv->nPitchEnv;
-			iti.pitchenv.lpb = (BYTE)penv->nPitchLoopStart;
-			iti.pitchenv.lpe = (BYTE)penv->nPitchLoopEnd;
-			iti.pitchenv.slb = (BYTE)penv->nPitchSustainBegin;
-			iti.pitchenv.sle = (BYTE)penv->nPitchSustainEnd;
+			if (pIns->dwFlags & ENV_PITCH) iti.pitchenv.flags |= 0x01;
+			if (pIns->dwFlags & ENV_PITCHLOOP) iti.pitchenv.flags |= 0x02;
+			if (pIns->dwFlags & ENV_PITCHSUSTAIN) iti.pitchenv.flags |= 0x04;
+			if (pIns->dwFlags & ENV_PITCHCARRY) iti.pitchenv.flags |= 0x08;
+			if (pIns->dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
+			iti.pitchenv.num = (BYTE)pIns->nPitchEnv;
+			iti.pitchenv.lpb = (BYTE)pIns->nPitchLoopStart;
+			iti.pitchenv.lpe = (BYTE)pIns->nPitchLoopEnd;
+			iti.pitchenv.slb = (BYTE)pIns->nPitchSustainBegin;
+			iti.pitchenv.sle = (BYTE)pIns->nPitchSustainEnd;
 			// Writing Envelopes data
 			for (UINT ev=0; ev<25; ev++)
 			{
-				iti.volenv.data[ev*3] = penv->VolEnv[ev];
-				iti.volenv.data[ev*3+1] = penv->VolPoints[ev] & 0xFF;
-				iti.volenv.data[ev*3+2] = penv->VolPoints[ev] >> 8;
-				iti.panenv.data[ev*3] = penv->PanEnv[ev] - 32;
-				iti.panenv.data[ev*3+1] = penv->PanPoints[ev] & 0xFF;
-				iti.panenv.data[ev*3+2] = penv->PanPoints[ev] >> 8;
-				iti.pitchenv.data[ev*3] = penv->PitchEnv[ev] - 32;
-				iti.pitchenv.data[ev*3+1] = penv->PitchPoints[ev] & 0xFF;
-				iti.pitchenv.data[ev*3+2] = penv->PitchPoints[ev] >> 8;
+				iti.volenv.data[ev*3] = pIns->VolEnv[ev];
+				iti.volenv.data[ev*3+1] = pIns->VolPoints[ev] & 0xFF;
+				iti.volenv.data[ev*3+2] = pIns->VolPoints[ev] >> 8;
+				iti.panenv.data[ev*3] = pIns->PanEnv[ev] - 32;
+				iti.panenv.data[ev*3+1] = pIns->PanPoints[ev] & 0xFF;
+				iti.panenv.data[ev*3+2] = pIns->PanPoints[ev] >> 8;
+				iti.pitchenv.data[ev*3] = pIns->PitchEnv[ev] - 32;
+				iti.pitchenv.data[ev*3+1] = pIns->PitchPoints[ev] & 0xFF;
+				iti.pitchenv.data[ev*3+2] = pIns->PitchPoints[ev] >> 8;
 			}
 		} else
 		// Save Empty Instrument
@@ -2736,7 +2736,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		}
 
 		//------------ rewbs.modularInstData
-/*		if (Headers[nins])
+/*		if (Instruments[nins])
 		{
 			long modularInstSize = 0;
 			UINT ModInstID = 'INSM';
@@ -2749,8 +2749,8 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			{	//VST Slot chunk:
 				ID='PLUG';
 				fwrite(&ID, 1, sizeof(int), f);
-				INSTRUMENTHEADER *penv = Headers[nins];
-				fwrite(&(penv->nMixPlug), 1, sizeof(BYTE), f);
+				MODINSTRUMENT *pIns = Instruments[nins];
+				fwrite(&(pIns->nMixPlug), 1, sizeof(BYTE), f);
 				modularInstSize += sizeof(int)+sizeof(BYTE);
 			}
 */			//How to save your own modular instrument chunk:
@@ -2956,10 +2956,10 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 		if (m_nInstruments)
 		{
-			for (UINT iu=1; iu<=m_nInstruments; iu++) if (Headers[iu])
+			for (UINT iu=1; iu<=m_nInstruments; iu++) if (Instruments[iu])
 			{
-				INSTRUMENTHEADER *penv = Headers[iu];
-				for (UINT ju=0; ju<128; ju++) if (penv->Keyboard[ju] == nsmp)
+				MODINSTRUMENT *pIns = Instruments[iu];
+				for (UINT ju=0; ju<128; ju++) if (pIns->Keyboard[ju] == nsmp)
 				{
 					itss.flags = 0x01;
 					break;
@@ -3025,7 +3025,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	}
 
 	//Save hacked-on extra info
-//	SaveExtendedInstrumentProperties(Headers, header.insnum, f);
+//	SaveExtendedInstrumentProperties(Instruments, header.insnum, f);
 //	SaveExtendedSongProperties(f);
 
 	// Updating offsets
@@ -3465,7 +3465,7 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 }
 
 
-void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[], UINT nInstruments, FILE* f)
+void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], UINT nInstruments, FILE* f)
 //------------------------------------------------------------------------------------------------------------
 // Used only when saving IT and XM. 
 // ITI, ITP saves using Ericus' macros etc...
@@ -3475,7 +3475,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[
 {
 	__int32 code=0;
 
-/*	if(Headers[1] == NULL) {
+/*	if(Instruments[1] == NULL) {
 		return;
 	}*/
 
@@ -3504,7 +3504,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[
 	return;
 }
 
-void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, INSTRUMENTHEADER *instruments[], UINT nInstruments) 
+void CSoundFile::WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, MODINSTRUMENT *instruments[], UINT nInstruments) 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	fwrite(&code, 1, sizeof(__int32), f);		//write code
@@ -3690,8 +3690,8 @@ LPCBYTE CSoundFile::LoadExtendedInstrumentProperties(const LPCBYTE pStart,
 
 		for(UINT nins=1; nins<=m_nInstruments; nins++)
 		{
-			if(Headers[nins])
-				ReadInstrumentExtensionField(Headers[nins], ptr, code, size);
+			if(Instruments[nins])
+				ReadInstrumentExtensionField(Instruments[nins], ptr, code, size);
 		}
 	}
 

@@ -321,26 +321,26 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				UINT nins = lpStream[dwPos];
 				if ((nins >= MAX_INSTRUMENTS) || (!nins)) break;
 				if (m_nInstruments < nins) m_nInstruments = nins;
-				if (!Headers[nins])
+				if (!Instruments[nins])
 				{
 					UINT note = 12;
-					if ((Headers[nins] = new INSTRUMENTHEADER) == NULL) break;
-					INSTRUMENTHEADER *penv = Headers[nins];
-					memset(penv, 0, sizeof(INSTRUMENTHEADER));
-					memcpy(penv->name, lpStream+dwPos+2, 32);
-					penv->nGlobalVol = 64;
-					penv->nPPC = 5*12;
-					SetDefaultInstrumentValues(penv);
+					if ((Instruments[nins] = new MODINSTRUMENT) == NULL) break;
+					MODINSTRUMENT *pIns = Instruments[nins];
+					memset(pIns, 0, sizeof(MODINSTRUMENT));
+					memcpy(pIns->name, lpStream+dwPos+2, 32);
+					pIns->nGlobalVol = 64;
+					pIns->nPPC = 5*12;
+					SetDefaultInstrumentValues(pIns);
 					for (j=0; j<lpStream[dwPos+1]; j++)
 					{
 						const BYTE *ps = lpStream+dwPos+34+14*j;
 						while ((note < (UINT)(ps[1]+12)) && (note < NOTE_MAX))
 						{
-							penv->NoteMap[note] = note+1;
+							pIns->NoteMap[note] = note+1;
 							if (ps[0] < MAX_SAMPLES)
 							{
 								int ismp = ps[0];
-								penv->Keyboard[note] = ps[0];
+								pIns->Keyboard[note] = ps[0];
 								Samples[ismp].nVolume = ps[2];
 								Samples[ismp].nPan = ps[4] << 1;
 								Samples[ismp].nVibType = ps[11];
@@ -348,30 +348,30 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 								Samples[ismp].nVibDepth = ps[9];
 								Samples[ismp].nVibRate = ps[8];
 							}
-							penv->nFadeOut = (ps[7] << 8) | ps[6];
-							if (penv->nFadeOut == 0xFFFF) penv->nFadeOut = 0;
+							pIns->nFadeOut = (ps[7] << 8) | ps[6];
+							if (pIns->nFadeOut == 0xFFFF) pIns->nFadeOut = 0;
 							note++;
 						}
 						// Use volume envelope ?
 						if (ps[3] & 0x80)
 						{
-							penv->dwFlags |= ENV_VOLUME;
+							pIns->dwFlags |= ENV_VOLUME;
 							insvolenv[nins] = (ps[3] & 0x3F) + 1;
 						}
 						// Use panning envelope ?
 						if (ps[5] & 0x80)
 						{
-							penv->dwFlags |= ENV_PANNING;
+							pIns->dwFlags |= ENV_PANNING;
 							inspanenv[nins] = (ps[5] & 0x3F) + 1;
 						}
 					}
 				}
 				dwPos += 34 + 14*lpStream[dwPos+1];
 			}
-			for (j=1; j<=m_nInstruments; j++) if (!Headers[j])
+			for (j=1; j<=m_nInstruments; j++) if (!Instruments[j])
 			{
-				Headers[j] = new INSTRUMENTHEADER;
-				if (Headers[j]) memset(Headers[j], 0, sizeof(INSTRUMENTHEADER));
+				Instruments[j] = new MODINSTRUMENT;
+				if (Instruments[j]) memset(Instruments[j], 0, sizeof(MODINSTRUMENT));
 			}
 			break;
 		// VE: Volume Envelope
@@ -487,9 +487,9 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Set up envelopes
-	for (UINT iIns=1; iIns<=m_nInstruments; iIns++) if (Headers[iIns])
+	for (UINT iIns=1; iIns<=m_nInstruments; iIns++) if (Instruments[iIns])
 	{
-		INSTRUMENTHEADER *penv = Headers[iIns];
+		MODINSTRUMENT *pIns = Instruments[iIns];
 		// Setup volume envelope
 		if ((nvolenv) && (pvolenv) && (insvolenv[iIns]))
 		{
@@ -497,23 +497,23 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 			for (UINT nve=0; nve<nvolenv; nve++, pve+=33) if (pve[0]+1 == insvolenv[iIns])
 			{
 				WORD vtick = 1;
-				penv->nVolEnv = 15;
+				pIns->nVolEnv = 15;
 				for (UINT iv=0; iv<15; iv++)
 				{
 					if (iv) vtick += pve[iv*2+1];
-					penv->VolPoints[iv] = vtick;
-					penv->VolEnv[iv] = pve[iv*2+2];
+					pIns->VolPoints[iv] = vtick;
+					pIns->VolEnv[iv] = pve[iv*2+2];
 					if (!pve[iv*2+1])
 					{
-						penv->nVolEnv = iv+1;
+						pIns->nVolEnv = iv+1;
 						break;
 					}
 				}
-				penv->nVolSustainBegin = penv->nVolSustainEnd = pve[31] & 0x0F;
-				if (pve[31] & 0x10) penv->dwFlags |= ENV_VOLSUSTAIN;
-				if (pve[31] & 0x20) penv->dwFlags |= ENV_VOLLOOP;
-				penv->nVolLoopStart = pve[32] & 0x0F;
-				penv->nVolLoopEnd = pve[32] >> 4;
+				pIns->nVolSustainBegin = pIns->nVolSustainEnd = pve[31] & 0x0F;
+				if (pve[31] & 0x10) pIns->dwFlags |= ENV_VOLSUSTAIN;
+				if (pve[31] & 0x20) pIns->dwFlags |= ENV_VOLLOOP;
+				pIns->nVolLoopStart = pve[32] & 0x0F;
+				pIns->nVolLoopEnd = pve[32] >> 4;
 			}
 		}
 		// Setup panning envelope
@@ -523,22 +523,22 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 			for (UINT npe=0; npe<npanenv; npe++, ppe+=33) if (ppe[0]+1 == inspanenv[iIns])
 			{
 				WORD vtick = 1;
-				penv->nPanEnv = 15;
+				pIns->nPanEnv = 15;
 				for (UINT iv=0; iv<15; iv++)
 				{
 					if (iv) vtick += ppe[iv*2+1];
-					penv->PanPoints[iv] = vtick;
-					penv->PanEnv[iv] = ppe[iv*2+2];
+					pIns->PanPoints[iv] = vtick;
+					pIns->PanEnv[iv] = ppe[iv*2+2];
 					if (!ppe[iv*2+1])
 					{
-						penv->nPanEnv = iv+1;
+						pIns->nPanEnv = iv+1;
 						break;
 					}
 				}
-				if (ppe[31] & 0x10) penv->dwFlags |= ENV_PANSUSTAIN;
-				if (ppe[31] & 0x20) penv->dwFlags |= ENV_PANLOOP;
-				penv->nPanLoopStart = ppe[32] & 0x0F;
-				penv->nPanLoopEnd = ppe[32] >> 4;
+				if (ppe[31] & 0x10) pIns->dwFlags |= ENV_PANSUSTAIN;
+				if (ppe[31] & 0x20) pIns->dwFlags |= ENV_PANLOOP;
+				pIns->nPanLoopStart = ppe[32] & 0x0F;
+				pIns->nPanLoopEnd = ppe[32] >> 4;
 			}
 		}
 	}

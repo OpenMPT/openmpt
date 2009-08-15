@@ -58,16 +58,16 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 	)
 	{
 		// Loading Instrument
-		INSTRUMENTHEADER *penv = new INSTRUMENTHEADER;
-		if (!penv) return FALSE;
-		memset(penv, 0, sizeof(INSTRUMENTHEADER));
-		penv->pTuning = penv->s_DefaultTuning;
+		MODINSTRUMENT *pIns = new MODINSTRUMENT;
+		if (!pIns) return FALSE;
+		memset(pIns, 0, sizeof(MODINSTRUMENT));
+		pIns->pTuning = pIns->s_DefaultTuning;
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 //		RemoveInstrumentSamples(nInstr);
 		DestroyInstrument(nInstr,1);
 // -! BEHAVIOUR_CHANGE#0003
-		Headers[nInstr] = penv;
+		Instruments[nInstr] = pIns;
 		// Scanning free sample
 		UINT nSample = 0;
 		for (UINT iscan=1; iscan<MAX_SAMPLES; iscan++)
@@ -80,15 +80,15 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 			}
 		}
 		// Default values
-		penv->nFadeOut = 1024;
-		penv->nGlobalVol = 64;
-		penv->nPan = 128;
-		penv->nPPC = 5*12;
-		SetDefaultInstrumentValues(penv);
+		pIns->nFadeOut = 1024;
+		pIns->nGlobalVol = 64;
+		pIns->nPan = 128;
+		pIns->nPPC = 5*12;
+		SetDefaultInstrumentValues(pIns);
 		for (UINT iinit=0; iinit<128; iinit++)
 		{
-			penv->Keyboard[iinit] = nSample;
-			penv->NoteMap[iinit] = iinit+1;
+			pIns->Keyboard[iinit] = nSample;
+			pIns->NoteMap[iinit] = iinit+1;
 		}
 		if (nSample) ReadSampleFromFile(nSample, lpMemFile, dwFileLength);
 		return TRUE;
@@ -105,7 +105,7 @@ BOOL CSoundFile::DestroyInstrument(UINT nInstr, char removeSamples)
 //---------------------------------------------
 {
 	if ((!nInstr) || (nInstr > m_nInstruments)) return FALSE;
-	if (!Headers[nInstr]) return TRUE;
+	if (!Instruments[nInstr]) return TRUE;
 
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
@@ -120,16 +120,16 @@ BOOL CSoundFile::DestroyInstrument(UINT nInstr, char removeSamples)
 	instrumentModified[nInstr-1] = FALSE;
 // -! NEW_FEATURE#0023
 
-	INSTRUMENTHEADER *penv = Headers[nInstr];
-	Headers[nInstr] = NULL;
+	MODINSTRUMENT *pIns = Instruments[nInstr];
+	Instruments[nInstr] = NULL;
 	for (UINT i=0; i<MAX_CHANNELS; i++)
 	{
-		if (Chn[i].pHeader == penv)
+		if (Chn[i].pModInstrument == pIns)
 		{
-			Chn[i].pHeader = NULL;
+			Chn[i].pModInstrument = NULL;
 		}
 	}
-	delete penv;
+	delete pIns;
 	return TRUE;
 }
 
@@ -140,12 +140,12 @@ BOOL CSoundFile::IsSampleUsed(UINT nSample)
 	if ((!nSample) || (nSample > m_nSamples)) return FALSE;
 	if (m_nInstruments)
 	{
-		for (UINT i=1; i<=m_nInstruments; i++) if (Headers[i])
+		for (UINT i=1; i<=m_nInstruments; i++) if (Instruments[i])
 		{
-			INSTRUMENTHEADER *penv = Headers[i];
+			MODINSTRUMENT *pIns = Instruments[i];
 			for (UINT j=0; j<128; j++)
 			{
-				if (penv->Keyboard[j] == nSample) return TRUE;
+				if (pIns->Keyboard[j] == nSample) return TRUE;
 			}
 		}
 	} else
@@ -166,7 +166,7 @@ BOOL CSoundFile::IsSampleUsed(UINT nSample)
 BOOL CSoundFile::IsInstrumentUsed(UINT nInstr)
 //--------------------------------------------
 {
-	if ((!nInstr) || (nInstr > m_nInstruments) || (!Headers[nInstr])) return FALSE;
+	if ((!nInstr) || (nInstr > m_nInstruments) || (!Instruments[nInstr])) return FALSE;
 	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 	{
 		MODCOMMAND *m = Patterns[i];
@@ -186,17 +186,17 @@ BOOL CSoundFile::RemoveInstrumentSamples(UINT nInstr)
 	BYTE sampleused[MAX_SAMPLES/8];
 	
 	memset(sampleused, 0, sizeof(sampleused));
-	if (Headers[nInstr])
+	if (Instruments[nInstr])
 	{
-		INSTRUMENTHEADER *p = Headers[nInstr];
+		MODINSTRUMENT *p = Instruments[nInstr];
 		for (UINT r=0; r<128; r++)
 		{
 			UINT n = p->Keyboard[r];
 			if (n < MAX_SAMPLES) sampleused[n>>3] |= (1<<(n&7));
 		}
-		for (UINT smp=1; smp<MAX_INSTRUMENTS; smp++) if ((Headers[smp]) && (smp != nInstr))
+		for (UINT smp=1; smp<MAX_INSTRUMENTS; smp++) if ((Instruments[smp]) && (smp != nInstr))
 		{
-			p = Headers[smp];
+			p = Instruments[smp];
 			for (UINT r=0; r<128; r++)
 			{
 				UINT n = p->Keyboard[r];
@@ -222,25 +222,25 @@ BOOL CSoundFile::ReadInstrumentFromSong(UINT nInstr, CSoundFile *pSrcSong, UINT 
 //----------------------------------------------------------------------------------------
 {
 	if ((!pSrcSong) || (!nSrcInstr) || (nSrcInstr > pSrcSong->m_nInstruments)
-	 || (nInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Headers[nSrcInstr])) return FALSE;
+	 || (nInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Instruments[nSrcInstr])) return FALSE;
 	if (m_nInstruments < nInstr) m_nInstruments = nInstr;
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 //	RemoveInstrumentSamples(nInstr);
 	DestroyInstrument(nInstr,1);
 // -! BEHAVIOUR_CHANGE#0003
-	if (!Headers[nInstr]) Headers[nInstr] = new INSTRUMENTHEADER;
-	INSTRUMENTHEADER *penv = Headers[nInstr];
-	if (penv)
+	if (!Instruments[nInstr]) Instruments[nInstr] = new MODINSTRUMENT;
+	MODINSTRUMENT *pIns = Instruments[nInstr];
+	if (pIns)
 	{
 		WORD samplemap[32];
 		WORD samplesrc[32];
 		UINT nSamples = 0;
 		UINT nsmp = 1;
-		*penv = *pSrcSong->Headers[nSrcInstr];
+		*pIns = *pSrcSong->Instruments[nSrcInstr];
 		for (UINT i=0; i<128; i++)
 		{
-			UINT n = penv->Keyboard[i];
+			UINT n = pIns->Keyboard[i];
 			if ((n) && (n <= pSrcSong->m_nSamples) && (i < NOTE_MAX))
 			{
 				UINT j = 0;
@@ -256,20 +256,20 @@ BOOL CSoundFile::ReadInstrumentFromSong(UINT nInstr, CSoundFile *pSrcSong, UINT 
 						samplesrc[nSamples] = (WORD)n;
 						samplemap[nSamples] = (WORD)nsmp;
 						nSamples++;
-						penv->Keyboard[i] = (WORD)nsmp;
+						pIns->Keyboard[i] = (WORD)nsmp;
 						if (m_nSamples < nsmp) m_nSamples = nsmp;
 						nsmp++;
 					} else
 					{
-						penv->Keyboard[i] = 0;
+						pIns->Keyboard[i] = 0;
 					}
 				} else
 				{
-					penv->Keyboard[i] = samplemap[j];
+					pIns->Keyboard[i] = samplemap[j];
 				}
 			} else
 			{
-				penv->Keyboard[i] = 0;
+				pIns->Keyboard[i] = 0;
 			}
 		}
 		// Load Samples
@@ -896,7 +896,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	GF1PATCHFILEHEADER *phdr = (GF1PATCHFILEHEADER *)lpStream;
 	GF1INSTRUMENT *pih = (GF1INSTRUMENT *)(lpStream+sizeof(GF1PATCHFILEHEADER));
 	GF1LAYER *plh = (GF1LAYER *)(lpStream+sizeof(GF1PATCHFILEHEADER)+sizeof(GF1INSTRUMENT));
-	INSTRUMENTHEADER *penv;
+	MODINSTRUMENT *pIns;
 	DWORD dwMemPos = sizeof(GF1PATCHFILEHEADER)+sizeof(GF1INSTRUMENT)+sizeof(GF1LAYER);
 	UINT nSamples;
 
@@ -911,25 +911,25 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 //	RemoveInstrumentSamples(nInstr);
 	DestroyInstrument(nInstr,1);
 // -! BEHAVIOUR_CHANGE#0003
-	penv = new INSTRUMENTHEADER;
-	if (!penv) return FALSE;
-	memset(penv, 0, sizeof(INSTRUMENTHEADER));
-	penv->pTuning = penv->s_DefaultTuning;
-	Headers[nInstr] = penv;
+	pIns = new MODINSTRUMENT;
+	if (!pIns) return FALSE;
+	memset(pIns, 0, sizeof(MODINSTRUMENT));
+	pIns->pTuning = pIns->s_DefaultTuning;
+	Instruments[nInstr] = pIns;
 	nSamples = plh->samples;
 	if (nSamples > 16) nSamples = 16;
-	memcpy(penv->name, pih->name, 16);
-	penv->name[16] = 0;
-	penv->nFadeOut = 2048;
-	penv->nGlobalVol = 64;
-	penv->nPan = 128;
-	penv->nPPC = 60;
-	penv->nResampling = SRCMODE_DEFAULT;
-	penv->nFilterMode = FLTMODE_UNCHANGED;
+	memcpy(pIns->name, pih->name, 16);
+	pIns->name[16] = 0;
+	pIns->nFadeOut = 2048;
+	pIns->nGlobalVol = 64;
+	pIns->nPan = 128;
+	pIns->nPPC = 60;
+	pIns->nResampling = SRCMODE_DEFAULT;
+	pIns->nFilterMode = FLTMODE_UNCHANGED;
 	if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
 	{
-		penv->nNNA = NNA_NOTEOFF;
-		penv->nDNA = DNA_NOTEFADE;
+		pIns->nNNA = NNA_NOTEOFF;
+		pIns->nDNA = DNA_NOTEFADE;
 	}
 	UINT nFreeSmp = 1;
 	UINT nMinSmpNote = 0xff;
@@ -952,15 +952,15 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 		for (UINT k=0; k<NOTE_MAX; k++)
 		{
 			if (((LONG)k == nBaseNote)
-			 || ((!penv->Keyboard[k])
+			 || ((!pIns->Keyboard[k])
 			  && ((LONG)k >= nMinNote)
 			  && ((LONG)k <= nMaxNote)))
 			{
 				if (psh->scale_factor)
-					penv->NoteMap[k] = (BYTE)(k+1);
+					pIns->NoteMap[k] = (BYTE)(k+1);
 				else
-					penv->NoteMap[k] = 5*12+1;
-				penv->Keyboard[k] = nFreeSmp;
+					pIns->NoteMap[k] = 5*12+1;
+				pIns->Keyboard[k] = nFreeSmp;
 				if (k < nMinSmpNote)
 				{
 					nMinSmpNote = k;
@@ -972,17 +972,17 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 		// Create dummy envelope
 		if (!iSmp)
 		{
-			penv->dwFlags |= ENV_VOLUME;
-			if (psh->flags & 32) penv->dwFlags |= ENV_VOLSUSTAIN;
-			penv->VolEnv[0] = 64;
-			penv->VolPoints[0] = 0;
-			penv->VolEnv[1] = 64;
-			penv->VolPoints[1] = 1;
-			penv->VolEnv[2] = 32;
-			penv->VolPoints[2] = 20;
-			penv->VolEnv[3] = 0;
-			penv->VolPoints[3] = 100;
-			penv->nVolEnv = 4;
+			pIns->dwFlags |= ENV_VOLUME;
+			if (psh->flags & 32) pIns->dwFlags |= ENV_VOLSUSTAIN;
+			pIns->VolEnv[0] = 64;
+			pIns->VolPoints[0] = 0;
+			pIns->VolEnv[1] = 64;
+			pIns->VolPoints[1] = 1;
+			pIns->VolEnv[2] = 32;
+			pIns->VolPoints[2] = 20;
+			pIns->VolEnv[3] = 0;
+			pIns->VolPoints[3] = 100;
+			pIns->nVolEnv = 4;
 		}
 	*/
 		// Skip to next sample
@@ -994,13 +994,13 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 		// Fill note map and missing samples
 		for (UINT k=0; k<NOTE_MAX; k++)
 		{
-			if (!penv->NoteMap[k]) penv->NoteMap[k] = (BYTE)(k+1);
-			if (!penv->Keyboard[k])
+			if (!pIns->NoteMap[k]) pIns->NoteMap[k] = (BYTE)(k+1);
+			if (!pIns->Keyboard[k])
 			{
-				penv->Keyboard[k] = nMinSmp;
+				pIns->Keyboard[k] = nMinSmp;
 			} else
 			{
-				nMinSmp = penv->Keyboard[k];
+				nMinSmp = pIns->Keyboard[k];
 			}
 		}
 	}
@@ -1083,7 +1083,7 @@ typedef struct XIINSTRUMENTHEADER
 {
 	BYTE snum[96];
 	WORD venv[24];
-	WORD penv[24];
+	WORD pIns[24];
 	BYTE vnum, pnum;
 	BYTE vsustain, vloops, vloope, psustain, ploops, ploope;
 	BYTE vtype, ptype;
@@ -1134,16 +1134,16 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 //	RemoveInstrumentSamples(nInstr);
 	DestroyInstrument(nInstr,1);
 // -! BEHAVIOUR_CHANGE#0003
-	Headers[nInstr] = new INSTRUMENTHEADER;
-	INSTRUMENTHEADER *penv = Headers[nInstr];
-	if (!penv) return FALSE;
-	memset(penv, 0, sizeof(INSTRUMENTHEADER));
-	penv->pTuning = penv->s_DefaultTuning;
-	memcpy(penv->name, pxh->name, 22);
+	Instruments[nInstr] = new MODINSTRUMENT;
+	MODINSTRUMENT *pIns = Instruments[nInstr];
+	if (!pIns) return FALSE;
+	memset(pIns, 0, sizeof(MODINSTRUMENT));
+	pIns->pTuning = pIns->s_DefaultTuning;
+	memcpy(pIns->name, pxh->name, 22);
 	nsamples = 0;
 	for (UINT i=0; i<96; i++)
 	{
-		penv->NoteMap[i+12] = i+1+12;
+		pIns->NoteMap[i+12] = i+1+12;
 		if (pih->snum[i] > nsamples) nsamples = pih->snum[i];
 	}
 	nsamples++;
@@ -1163,57 +1163,57 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	for (UINT k=0; k<96; k++)
 	{
 		UINT n = pih->snum[k];
-		if (n < nsamples) penv->Keyboard[k+12] = samplemap[n];
+		if (n < nsamples) pIns->Keyboard[k+12] = samplemap[n];
 	}
-	penv->nFadeOut = pih->volfade;
-	if (pih->vtype & 1) penv->dwFlags |= ENV_VOLUME;
-	if (pih->vtype & 2) penv->dwFlags |= ENV_VOLSUSTAIN;
-	if (pih->vtype & 4) penv->dwFlags |= ENV_VOLLOOP;
-	if (pih->ptype & 1) penv->dwFlags |= ENV_PANNING;
-	if (pih->ptype & 2) penv->dwFlags |= ENV_PANSUSTAIN;
-	if (pih->ptype & 4) penv->dwFlags |= ENV_PANLOOP;
-	penv->nVolEnv = pih->vnum;
-	penv->nPanEnv = pih->pnum;
-	if (penv->nVolEnv > 12) penv->nVolEnv = 12;
-	if (penv->nPanEnv > 12) penv->nPanEnv = 12;
-	if (!penv->nVolEnv) penv->dwFlags &= ~ENV_VOLUME;
-	if (!penv->nPanEnv) penv->dwFlags &= ~ENV_PANNING;
-	penv->nVolSustainBegin = pih->vsustain;
-	penv->nVolSustainEnd = pih->vsustain;
-	if (pih->vsustain >= 12) penv->dwFlags &= ~ENV_VOLSUSTAIN;
-	penv->nVolLoopStart = pih->vloops;
-	penv->nVolLoopEnd = pih->vloope;
-	if (penv->nVolLoopEnd >= 12) penv->nVolLoopEnd = 0;
-	if (penv->nVolLoopStart >= penv->nVolLoopEnd) penv->dwFlags &= ~ENV_VOLLOOP;
-	penv->nPanSustainBegin = pih->psustain;
-	penv->nPanSustainEnd = pih->psustain;
-	if (pih->psustain >= 12) penv->dwFlags &= ~ENV_PANSUSTAIN;
-	penv->nPanLoopStart = pih->ploops;
-	penv->nPanLoopEnd = pih->ploope;
-	if (penv->nPanLoopEnd >= 12) penv->nPanLoopEnd = 0;
-	if (penv->nPanLoopStart >= penv->nPanLoopEnd) penv->dwFlags &= ~ENV_PANLOOP;
-	penv->nGlobalVol = 64;
-	penv->nPPC = 5*12;
-	SetDefaultInstrumentValues(penv);
+	pIns->nFadeOut = pih->volfade;
+	if (pih->vtype & 1) pIns->dwFlags |= ENV_VOLUME;
+	if (pih->vtype & 2) pIns->dwFlags |= ENV_VOLSUSTAIN;
+	if (pih->vtype & 4) pIns->dwFlags |= ENV_VOLLOOP;
+	if (pih->ptype & 1) pIns->dwFlags |= ENV_PANNING;
+	if (pih->ptype & 2) pIns->dwFlags |= ENV_PANSUSTAIN;
+	if (pih->ptype & 4) pIns->dwFlags |= ENV_PANLOOP;
+	pIns->nVolEnv = pih->vnum;
+	pIns->nPanEnv = pih->pnum;
+	if (pIns->nVolEnv > 12) pIns->nVolEnv = 12;
+	if (pIns->nPanEnv > 12) pIns->nPanEnv = 12;
+	if (!pIns->nVolEnv) pIns->dwFlags &= ~ENV_VOLUME;
+	if (!pIns->nPanEnv) pIns->dwFlags &= ~ENV_PANNING;
+	pIns->nVolSustainBegin = pih->vsustain;
+	pIns->nVolSustainEnd = pih->vsustain;
+	if (pih->vsustain >= 12) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
+	pIns->nVolLoopStart = pih->vloops;
+	pIns->nVolLoopEnd = pih->vloope;
+	if (pIns->nVolLoopEnd >= 12) pIns->nVolLoopEnd = 0;
+	if (pIns->nVolLoopStart >= pIns->nVolLoopEnd) pIns->dwFlags &= ~ENV_VOLLOOP;
+	pIns->nPanSustainBegin = pih->psustain;
+	pIns->nPanSustainEnd = pih->psustain;
+	if (pih->psustain >= 12) pIns->dwFlags &= ~ENV_PANSUSTAIN;
+	pIns->nPanLoopStart = pih->ploops;
+	pIns->nPanLoopEnd = pih->ploope;
+	if (pIns->nPanLoopEnd >= 12) pIns->nPanLoopEnd = 0;
+	if (pIns->nPanLoopStart >= pIns->nPanLoopEnd) pIns->dwFlags &= ~ENV_PANLOOP;
+	pIns->nGlobalVol = 64;
+	pIns->nPPC = 5*12;
+	SetDefaultInstrumentValues(pIns);
 	for (UINT ienv=0; ienv<12; ienv++)
 	{
-		penv->VolPoints[ienv] = (WORD)pih->venv[ienv*2];
-		penv->VolEnv[ienv] = (BYTE)pih->venv[ienv*2+1];
-		penv->PanPoints[ienv] = (WORD)pih->penv[ienv*2];
-		penv->PanEnv[ienv] = (BYTE)pih->penv[ienv*2+1];
+		pIns->VolPoints[ienv] = (WORD)pih->venv[ienv*2];
+		pIns->VolEnv[ienv] = (BYTE)pih->venv[ienv*2+1];
+		pIns->PanPoints[ienv] = (WORD)pih->pIns[ienv*2];
+		pIns->PanEnv[ienv] = (BYTE)pih->pIns[ienv*2+1];
 		if (ienv)
 		{
-			if (penv->VolPoints[ienv] < penv->VolPoints[ienv-1])
+			if (pIns->VolPoints[ienv] < pIns->VolPoints[ienv-1])
 			{
-				penv->VolPoints[ienv] &= 0xFF;
-				penv->VolPoints[ienv] += penv->VolPoints[ienv-1] & 0xFF00;
-				if (penv->VolPoints[ienv] < penv->VolPoints[ienv-1]) penv->VolPoints[ienv] += 0x100;
+				pIns->VolPoints[ienv] &= 0xFF;
+				pIns->VolPoints[ienv] += pIns->VolPoints[ienv-1] & 0xFF00;
+				if (pIns->VolPoints[ienv] < pIns->VolPoints[ienv-1]) pIns->VolPoints[ienv] += 0x100;
 			}
-			if (penv->PanPoints[ienv] < penv->PanPoints[ienv-1])
+			if (pIns->PanPoints[ienv] < pIns->PanPoints[ienv-1])
 			{
-				penv->PanPoints[ienv] &= 0xFF;
-				penv->PanPoints[ienv] += penv->PanPoints[ienv-1] & 0xFF00;
-				if (penv->PanPoints[ienv] < penv->PanPoints[ienv-1]) penv->PanPoints[ienv] += 0x100;
+				pIns->PanPoints[ienv] &= 0xFF;
+				pIns->PanPoints[ienv] += pIns->PanPoints[ienv-1] & 0xFF00;
+				if (pIns->PanPoints[ienv] < pIns->PanPoints[ienv-1]) pIns->PanPoints[ienv] += 0x100;
 			}
 		}
 	}
@@ -1297,7 +1297,7 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(dwMemPos >= dwFileLength) return TRUE;
 
-	ReadExtendedInstrumentProperties(penv, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
+	ReadExtendedInstrumentProperties(pIns, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
 
 // -! NEW_FEATURE#0027
 
@@ -1311,51 +1311,51 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	XIFILEHEADER xfh;
 	XIINSTRUMENTHEADER xih;
 	XISAMPLEHEADER xsh;
-	INSTRUMENTHEADER *penv = Headers[nInstr];
+	MODINSTRUMENT *pIns = Instruments[nInstr];
 	UINT smptable[32];
 	UINT nsamples;
 	FILE *f;
 
-	if ((!penv) || (!lpszFileName)) return FALSE;
+	if ((!pIns) || (!lpszFileName)) return FALSE;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
 	// XI File Header
 	memset(&xfh, 0, sizeof(xfh));
 	memset(&xih, 0, sizeof(xih));
 	memcpy(xfh.extxi, "Extended Instrument: ", 21);
-	memcpy(xfh.name, penv->name, 22);
+	memcpy(xfh.name, pIns->name, 22);
 	xfh.name[22] = 0x1A;
 	memcpy(xfh.trkname, "FastTracker v2.00   ", 20);
 	xfh.shsize = 0x102;
 	fwrite(&xfh, 1, sizeof(xfh), f);
 	// XI Instrument Header
-	xih.volfade = penv->nFadeOut;
-	xih.vnum = penv->nVolEnv;
-	xih.pnum = penv->nPanEnv;
+	xih.volfade = pIns->nFadeOut;
+	xih.vnum = pIns->nVolEnv;
+	xih.pnum = pIns->nPanEnv;
 	if (xih.vnum > 12) xih.vnum = 12;
 	if (xih.pnum > 12) xih.pnum = 12;
 	for (UINT ienv=0; ienv<12; ienv++)
 	{
-		xih.venv[ienv*2] = (BYTE)penv->VolPoints[ienv];
-		xih.venv[ienv*2+1] = penv->VolEnv[ienv];
-		xih.penv[ienv*2] = (BYTE)penv->PanPoints[ienv];
-		xih.penv[ienv*2+1] = penv->PanEnv[ienv];
+		xih.venv[ienv*2] = (BYTE)pIns->VolPoints[ienv];
+		xih.venv[ienv*2+1] = pIns->VolEnv[ienv];
+		xih.pIns[ienv*2] = (BYTE)pIns->PanPoints[ienv];
+		xih.pIns[ienv*2+1] = pIns->PanEnv[ienv];
 	}
-	if (penv->dwFlags & ENV_VOLUME) xih.vtype |= 1;
-	if (penv->dwFlags & ENV_VOLSUSTAIN) xih.vtype |= 2;
-	if (penv->dwFlags & ENV_VOLLOOP) xih.vtype |= 4;
-	if (penv->dwFlags & ENV_PANNING) xih.ptype |= 1;
-	if (penv->dwFlags & ENV_PANSUSTAIN) xih.ptype |= 2;
-	if (penv->dwFlags & ENV_PANLOOP) xih.ptype |= 4;
-	xih.vsustain = (BYTE)penv->nVolSustainBegin;
-	xih.vloops = (BYTE)penv->nVolLoopStart;
-	xih.vloope = (BYTE)penv->nVolLoopEnd;
-	xih.psustain = (BYTE)penv->nPanSustainBegin;
-	xih.ploops = (BYTE)penv->nPanLoopStart;
-	xih.ploope = (BYTE)penv->nPanLoopEnd;
+	if (pIns->dwFlags & ENV_VOLUME) xih.vtype |= 1;
+	if (pIns->dwFlags & ENV_VOLSUSTAIN) xih.vtype |= 2;
+	if (pIns->dwFlags & ENV_VOLLOOP) xih.vtype |= 4;
+	if (pIns->dwFlags & ENV_PANNING) xih.ptype |= 1;
+	if (pIns->dwFlags & ENV_PANSUSTAIN) xih.ptype |= 2;
+	if (pIns->dwFlags & ENV_PANLOOP) xih.ptype |= 4;
+	xih.vsustain = (BYTE)pIns->nVolSustainBegin;
+	xih.vloops = (BYTE)pIns->nVolLoopStart;
+	xih.vloope = (BYTE)pIns->nVolLoopEnd;
+	xih.psustain = (BYTE)pIns->nPanSustainBegin;
+	xih.ploops = (BYTE)pIns->nPanLoopStart;
+	xih.ploope = (BYTE)pIns->nPanLoopEnd;
 	nsamples = 0;
-	for (UINT j=0; j<96; j++) if (penv->Keyboard[j+12])
+	for (UINT j=0; j<96; j++) if (pIns->Keyboard[j+12])
 	{
-		UINT n = penv->Keyboard[j+12];
+		UINT n = pIns->Keyboard[j+12];
 		UINT k = 0;
 		for (k=0; k<nsamples; k++)	if (smptable[k] == n) break;
 		if (k == nsamples)
@@ -1427,7 +1427,7 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 
 	__int32 code = 'MPTX';
 	fwrite(&code, 1, sizeof(__int32), f);	// Write extension tag
-	WriteInstrumentHeaderStruct(penv, f);	// Write full extended header.
+	WriteInstrumentHeaderStruct(pIns, f);	// Write full extended header.
 
 
 	fclose(f);
@@ -1744,14 +1744,14 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 //	RemoveInstrumentSamples(nInstr);
 	DestroyInstrument(nInstr,1);
 // -! BEHAVIOUR_CHANGE#0003
-	Headers[nInstr] = new INSTRUMENTHEADER;
-	INSTRUMENTHEADER *penv = Headers[nInstr];
-	if (!penv) return FALSE;
-	memset(penv, 0, sizeof(INSTRUMENTHEADER));
-	penv->pTuning = penv->s_DefaultTuning;
+	Instruments[nInstr] = new MODINSTRUMENT;
+	MODINSTRUMENT *pIns = Instruments[nInstr];
+	if (!pIns) return FALSE;
+	memset(pIns, 0, sizeof(MODINSTRUMENT));
+	pIns->pTuning = pIns->s_DefaultTuning;
 	memset(samplemap, 0, sizeof(samplemap));
 	dwMemPos = 554;
-	dwMemPos += ITInstrToMPT(pinstr, penv, pinstr->trkvers);
+	dwMemPos += ITInstrToMPT(pinstr, pIns, pinstr->trkvers);
 	nsamples = pinstr->nos;
 // -> CODE#0019
 // -> DESC="correctly load ITI & XI instruments sample note map"
@@ -1786,11 +1786,11 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	{
 // -> CODE#0019
 // -> DESC="correctly load ITI & XI instruments sample note map"
-//		if ((penv->Keyboard[j]) && (penv->Keyboard[j] <= 64))
-		if (penv->Keyboard[j])
+//		if ((pIns->Keyboard[j]) && (pIns->Keyboard[j] <= 64))
+		if (pIns->Keyboard[j])
 // -! BUG_FIX#0019
 		{
-			penv->Keyboard[j] = samplemap[penv->Keyboard[j]-1];
+			pIns->Keyboard[j] = samplemap[pIns->Keyboard[j]-1];
 		}
 	}
 
@@ -1807,7 +1807,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	// Leave if no extra instrument settings are available (end of file reached)
 	if(dwMemPos >= dwFileLength) return TRUE;
 
-	ReadExtendedInstrumentProperties(penv, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
+	ReadExtendedInstrumentProperties(pIns, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
 
 // -! NEW_FEATURE#0027
 
@@ -1821,43 +1821,43 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	BYTE buffer[554];
 	ITINSTRUMENT *iti = (ITINSTRUMENT *)buffer;
 	ITSAMPLESTRUCT itss;
-	INSTRUMENTHEADER *penv = Headers[nInstr];
+	MODINSTRUMENT *pIns = Instruments[nInstr];
 	UINT smpcount[MAX_SAMPLES], smptable[MAX_SAMPLES], smpmap[MAX_SAMPLES];
 	DWORD dwPos;
 	FILE *f;
 
-	if ((!penv) || (!lpszFileName)) return FALSE;
+	if ((!pIns) || (!lpszFileName)) return FALSE;
 	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
 	memset(buffer, 0, sizeof(buffer));
 	memset(smpcount, 0, sizeof(smpcount));
 	memset(smptable, 0, sizeof(smptable));
 	memset(smpmap, 0, sizeof(smpmap));
 	iti->id = 0x49504D49;	// "IMPI"
-	memcpy(iti->filename, penv->filename, 12);
-	memcpy(iti->name, penv->name, 26);
+	memcpy(iti->filename, pIns->filename, 12);
+	memcpy(iti->name, pIns->name, 26);
 	SetNullTerminator(iti->name);
-	iti->mpr = penv->nMidiProgram;
-	iti->mch = penv->nMidiChannel;
-	iti->mbank = penv->wMidiBank; //rewbs.MidiBank
-	iti->nna = penv->nNNA;
-	iti->dct = penv->nDCT;
-	iti->dca = penv->nDNA;
-	iti->fadeout = penv->nFadeOut >> 5;
-	iti->pps = penv->nPPS;
-	iti->ppc = penv->nPPC;
-	iti->gbv = (BYTE)(penv->nGlobalVol << 1);
-	iti->dfp = (BYTE)penv->nPan >> 2;
-	if (!(penv->dwFlags & ENV_SETPANNING)) iti->dfp |= 0x80;
-	iti->rv = penv->nVolSwing;
-	iti->rp = penv->nPanSwing;
-	iti->ifc = penv->nIFC;
-	iti->ifr = penv->nIFR;
+	iti->mpr = pIns->nMidiProgram;
+	iti->mch = pIns->nMidiChannel;
+	iti->mbank = pIns->wMidiBank; //rewbs.MidiBank
+	iti->nna = pIns->nNNA;
+	iti->dct = pIns->nDCT;
+	iti->dca = pIns->nDNA;
+	iti->fadeout = pIns->nFadeOut >> 5;
+	iti->pps = pIns->nPPS;
+	iti->ppc = pIns->nPPC;
+	iti->gbv = (BYTE)(pIns->nGlobalVol << 1);
+	iti->dfp = (BYTE)pIns->nPan >> 2;
+	if (!(pIns->dwFlags & ENV_SETPANNING)) iti->dfp |= 0x80;
+	iti->rv = pIns->nVolSwing;
+	iti->rp = pIns->nPanSwing;
+	iti->ifc = pIns->nIFC;
+	iti->ifr = pIns->nIFR;
 	//iti->trkvers = 0x202;
 	iti->trkvers =	0x220;	 //rewbs.ITVersion (was 0x202)
 	iti->nos = 0;
-	for (UINT i=0; i<NOTE_MAX; i++) if (penv->Keyboard[i] < MAX_SAMPLES)
+	for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] < MAX_SAMPLES)
 	{
-		UINT smp = penv->Keyboard[i];
+		UINT smp = pIns->Keyboard[i];
 		if ((smp) && (!smpcount[smp]))
 		{
 			smpcount[smp] = 1;
@@ -1865,7 +1865,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 			smpmap[smp] = iti->nos;
 			iti->nos++;
 		}
-		iti->keyboard[i*2] = penv->NoteMap[i] - 1;
+		iti->keyboard[i*2] = pIns->NoteMap[i] - 1;
 // -> CODE#0019
 // -> DESC="correctly load ITI & XI instruments sample note map"
 //		iti->keyboard[i*2+1] = smpmap[smp] + 1;
@@ -1873,48 +1873,48 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 // -! BUG_FIX#0019
 	}
 	// Writing Volume envelope
-	if (penv->dwFlags & ENV_VOLUME) iti->volenv.flags |= 0x01;
-	if (penv->dwFlags & ENV_VOLLOOP) iti->volenv.flags |= 0x02;
-	if (penv->dwFlags & ENV_VOLSUSTAIN) iti->volenv.flags |= 0x04;
-	if (penv->dwFlags & ENV_VOLCARRY) iti->volenv.flags |= 0x08;
-	iti->volenv.num = (BYTE)penv->nVolEnv;
-	iti->volenv.lpb = (BYTE)penv->nVolLoopStart;
-	iti->volenv.lpe = (BYTE)penv->nVolLoopEnd;
-	iti->volenv.slb = penv->nVolSustainBegin;
-	iti->volenv.sle = penv->nVolSustainEnd;
+	if (pIns->dwFlags & ENV_VOLUME) iti->volenv.flags |= 0x01;
+	if (pIns->dwFlags & ENV_VOLLOOP) iti->volenv.flags |= 0x02;
+	if (pIns->dwFlags & ENV_VOLSUSTAIN) iti->volenv.flags |= 0x04;
+	if (pIns->dwFlags & ENV_VOLCARRY) iti->volenv.flags |= 0x08;
+	iti->volenv.num = (BYTE)pIns->nVolEnv;
+	iti->volenv.lpb = (BYTE)pIns->nVolLoopStart;
+	iti->volenv.lpe = (BYTE)pIns->nVolLoopEnd;
+	iti->volenv.slb = pIns->nVolSustainBegin;
+	iti->volenv.sle = pIns->nVolSustainEnd;
 	// Writing Panning envelope
-	if (penv->dwFlags & ENV_PANNING) iti->panenv.flags |= 0x01;
-	if (penv->dwFlags & ENV_PANLOOP) iti->panenv.flags |= 0x02;
-	if (penv->dwFlags & ENV_PANSUSTAIN) iti->panenv.flags |= 0x04;
-	if (penv->dwFlags & ENV_PANCARRY) iti->panenv.flags |= 0x08;
-	iti->panenv.num = (BYTE)penv->nPanEnv;
-	iti->panenv.lpb = (BYTE)penv->nPanLoopStart;
-	iti->panenv.lpe = (BYTE)penv->nPanLoopEnd;
-	iti->panenv.slb = penv->nPanSustainBegin;
-	iti->panenv.sle = penv->nPanSustainEnd;
+	if (pIns->dwFlags & ENV_PANNING) iti->panenv.flags |= 0x01;
+	if (pIns->dwFlags & ENV_PANLOOP) iti->panenv.flags |= 0x02;
+	if (pIns->dwFlags & ENV_PANSUSTAIN) iti->panenv.flags |= 0x04;
+	if (pIns->dwFlags & ENV_PANCARRY) iti->panenv.flags |= 0x08;
+	iti->panenv.num = (BYTE)pIns->nPanEnv;
+	iti->panenv.lpb = (BYTE)pIns->nPanLoopStart;
+	iti->panenv.lpe = (BYTE)pIns->nPanLoopEnd;
+	iti->panenv.slb = pIns->nPanSustainBegin;
+	iti->panenv.sle = pIns->nPanSustainEnd;
 	// Writing Pitch Envelope
-	if (penv->dwFlags & ENV_PITCH) iti->pitchenv.flags |= 0x01;
-	if (penv->dwFlags & ENV_PITCHLOOP) iti->pitchenv.flags |= 0x02;
-	if (penv->dwFlags & ENV_PITCHSUSTAIN) iti->pitchenv.flags |= 0x04;
-	if (penv->dwFlags & ENV_PITCHCARRY) iti->pitchenv.flags |= 0x08;
-	if (penv->dwFlags & ENV_FILTER) iti->pitchenv.flags |= 0x80;
-	iti->pitchenv.num = (BYTE)penv->nPitchEnv;
-	iti->pitchenv.lpb = (BYTE)penv->nPitchLoopStart;
-	iti->pitchenv.lpe = (BYTE)penv->nPitchLoopEnd;
-	iti->pitchenv.slb = (BYTE)penv->nPitchSustainBegin;
-	iti->pitchenv.sle = (BYTE)penv->nPitchSustainEnd;
+	if (pIns->dwFlags & ENV_PITCH) iti->pitchenv.flags |= 0x01;
+	if (pIns->dwFlags & ENV_PITCHLOOP) iti->pitchenv.flags |= 0x02;
+	if (pIns->dwFlags & ENV_PITCHSUSTAIN) iti->pitchenv.flags |= 0x04;
+	if (pIns->dwFlags & ENV_PITCHCARRY) iti->pitchenv.flags |= 0x08;
+	if (pIns->dwFlags & ENV_FILTER) iti->pitchenv.flags |= 0x80;
+	iti->pitchenv.num = (BYTE)pIns->nPitchEnv;
+	iti->pitchenv.lpb = (BYTE)pIns->nPitchLoopStart;
+	iti->pitchenv.lpe = (BYTE)pIns->nPitchLoopEnd;
+	iti->pitchenv.slb = (BYTE)pIns->nPitchSustainBegin;
+	iti->pitchenv.sle = (BYTE)pIns->nPitchSustainEnd;
 	// Writing Envelopes data
 	for (UINT ev=0; ev<25; ev++)
 	{
-		iti->volenv.data[ev*3] = penv->VolEnv[ev];
-		iti->volenv.data[ev*3+1] = penv->VolPoints[ev] & 0xFF;
-		iti->volenv.data[ev*3+2] = penv->VolPoints[ev] >> 8;
-		iti->panenv.data[ev*3] = penv->PanEnv[ev] - 32;
-		iti->panenv.data[ev*3+1] = penv->PanPoints[ev] & 0xFF;
-		iti->panenv.data[ev*3+2] = penv->PanPoints[ev] >> 8;
-		iti->pitchenv.data[ev*3] = penv->PitchEnv[ev] - 32;
-		iti->pitchenv.data[ev*3+1] = penv->PitchPoints[ev] & 0xFF;
-		iti->pitchenv.data[ev*3+2] = penv->PitchPoints[ev] >> 8;
+		iti->volenv.data[ev*3] = pIns->VolEnv[ev];
+		iti->volenv.data[ev*3+1] = pIns->VolPoints[ev] & 0xFF;
+		iti->volenv.data[ev*3+2] = pIns->VolPoints[ev] >> 8;
+		iti->panenv.data[ev*3] = pIns->PanEnv[ev] - 32;
+		iti->panenv.data[ev*3+1] = pIns->PanPoints[ev] & 0xFF;
+		iti->panenv.data[ev*3+2] = pIns->PanPoints[ev] >> 8;
+		iti->pitchenv.data[ev*3] = pIns->PitchEnv[ev] - 32;
+		iti->pitchenv.data[ev*3+1] = pIns->PitchPoints[ev] & 0xFF;
+		iti->pitchenv.data[ev*3+2] = pIns->PitchPoints[ev] >> 8;
 	}
 	dwPos = 554;
 	fwrite(buffer, 1, dwPos, f);
@@ -1996,7 +1996,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 
 	__int32 code = 'MPTX';
 	fwrite(&code, 1, sizeof(__int32), f);	// Write extension tag
-	WriteInstrumentHeaderStruct(penv, f);	// Write full extended header.
+	WriteInstrumentHeaderStruct(pIns, f);	// Write full extended header.
 
 	fclose(f);
 	return TRUE;
@@ -2014,11 +2014,11 @@ bool IsValidSizeField(const LPCBYTE pData, const LPCBYTE pEnd, const int16 size)
 }
 
 
-void ReadInstrumentExtensionField(INSTRUMENTHEADER* penv, LPCBYTE& ptr, const int32 code, const int16 size)
+void ReadInstrumentExtensionField(MODINSTRUMENT* pIns, LPCBYTE& ptr, const int32 code, const int16 size)
 //------------------------------------------------------------------------------------------------------------
 {
 	// get field's address in instrument's header
-	BYTE* fadr = GetInstrumentHeaderFieldPointer(penv, code, size);
+	BYTE* fadr = GetInstrumentHeaderFieldPointer(pIns, code, size);
 	 
 	if(fadr && code != 'K[..')	// copy field data in instrument's header
 		memcpy(fadr,ptr,size);  // (except for keyboard mapping)
@@ -2026,7 +2026,7 @@ void ReadInstrumentExtensionField(INSTRUMENTHEADER* penv, LPCBYTE& ptr, const in
 }
 
 
-void ReadExtendedInstrumentProperty(INSTRUMENTHEADER* penv, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd)
+void ReadExtendedInstrumentProperty(MODINSTRUMENT* pIns, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd)
 //---------------------------------------------------------------------------------------------------------------
 {
 	if(pEnd < pData || uintptr_t(pEnd - pData) < 2)
@@ -2039,14 +2039,14 @@ void ReadExtendedInstrumentProperty(INSTRUMENTHEADER* penv, const int32 code, LP
 	if(IsValidSizeField(pData, pEnd, size) == false)
 		return;
 
-	ReadInstrumentExtensionField(penv, pData, code, size);
+	ReadInstrumentExtensionField(pIns, pData, code, size);
 }
 
 
-void ReadExtendedInstrumentProperties(INSTRUMENTHEADER* penv, const LPCBYTE pDataStart, const size_t nMemLength)
+void ReadExtendedInstrumentProperties(MODINSTRUMENT* pIns, const LPCBYTE pDataStart, const size_t nMemLength)
 //--------------------------------------------------------------------------------------------------------------
 {
-	if(penv == 0 || pDataStart == 0 || nMemLength < 4)
+	if(pIns == 0 || pDataStart == 0 || nMemLength < 4)
 		return;
 
 	LPCBYTE pData = pDataStart;
@@ -2064,7 +2064,7 @@ void ReadExtendedInstrumentProperties(INSTRUMENTHEADER* penv, const LPCBYTE pDat
 		{
 			memcpy(&code, pData, sizeof(code)); // read field code
 			pData += sizeof(code);				 // jump field code
-			ReadExtendedInstrumentProperty(penv, code, pData, pEnd);
+			ReadExtendedInstrumentProperty(pIns, code, pData, pEnd);
 		}
 	}
 }

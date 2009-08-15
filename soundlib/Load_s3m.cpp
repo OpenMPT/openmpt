@@ -667,11 +667,11 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 		if (m_nInstruments)
 		{
 			pSmp = Samples;
-			if (Headers[i])
+			if (Instruments[i])
 			{
 				for (UINT j=0; j<128; j++)
 				{
-					UINT n = Headers[i]->Keyboard[j];
+					UINT n = Instruments[i]->Keyboard[j];
 					if ((n) && (n < MAX_INSTRUMENTS))
 					{
 						pSmp = &Samples[n];

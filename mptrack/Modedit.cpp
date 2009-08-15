@@ -142,12 +142,12 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		// Removing all instrument headers
 		for (UINT i1=0; i1<MAX_CHANNELS; i1++)
 		{
-			m_SndFile.Chn[i1].pHeader = NULL;
+			m_SndFile.Chn[i1].pModInstrument = NULL;
 		}
-		for (UINT i2=0; i2<m_SndFile.m_nInstruments; i2++) if (m_SndFile.Headers[i2])
+		for (UINT i2=0; i2<m_SndFile.m_nInstruments; i2++) if (m_SndFile.Instruments[i2])
 		{
-			delete m_SndFile.Headers[i2];
-			m_SndFile.Headers[i2] = NULL;
+			delete m_SndFile.Instruments[i2];
+			m_SndFile.Instruments[i2] = NULL;
 		}
 		m_SndFile.m_nInstruments = 0;
 		END_CRITICAL();
@@ -642,20 +642,20 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		BOOL bBrokenNoteMap = FALSE;
 		for (UINT j=1; j<=m_SndFile.m_nInstruments; j++)
 		{
-			INSTRUMENTHEADER *penv = m_SndFile.Headers[j];
-			if (penv)
+			MODINSTRUMENT *pIns = m_SndFile.Instruments[j];
+			if (pIns)
 			{
 				for (UINT k=0; k<NOTE_MAX; k++)
 				{
-					if ((penv->NoteMap[k]) && (penv->NoteMap[k] != (BYTE)(k+1)))
+					if ((pIns->NoteMap[k]) && (pIns->NoteMap[k] != (BYTE)(k+1)))
 					{
 						bBrokenNoteMap = TRUE;
 						break;
 					}
 				}
-				penv->dwFlags &= ~(ENV_SETPANNING|ENV_VOLCARRY|ENV_PANCARRY|ENV_PITCHCARRY|ENV_FILTER|ENV_PITCH);
-				penv->nIFC &= 0x7F;
-				penv->nIFR &= 0x7F;
+				pIns->dwFlags &= ~(ENV_SETPANNING|ENV_VOLCARRY|ENV_PANCARRY|ENV_PITCHCARRY|ENV_FILTER|ENV_PITCH);
+				pIns->nIFC &= 0x7F;
+				pIns->nIFR &= 0x7F;
 			}
 		}
 		if (bBrokenNoteMap) AddToLog("WARNING: Note Mapping will be lost when saving as XM.\n");
@@ -1034,10 +1034,10 @@ BOOL CModDoc::ConvertInstrumentsToSamples()
 			UINT note = p->note;
 			UINT newins = 0;
 			if ((note) && (note < 128)) note--; else note = 5*12;
-			if ((instr < MAX_INSTRUMENTS) && (m_SndFile.Headers[instr]))
+			if ((instr < MAX_INSTRUMENTS) && (m_SndFile.Instruments[instr]))
 			{
-				INSTRUMENTHEADER *penv = m_SndFile.Headers[instr];
-				newins = penv->Keyboard[note];
+				MODINSTRUMENT *pIns = m_SndFile.Instruments[instr];
+				newins = pIns->Keyboard[note];
 				if (newins >= MAX_SAMPLES) newins = 0;
 			}
 			p->instr = newins;
@@ -1083,20 +1083,20 @@ BOOL CModDoc::RemoveUnusedSamples()
 					{
 						if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
 						{
-							INSTRUMENTHEADER *penv = m_SndFile.Headers[p->instr];
-							if (penv)
+							MODINSTRUMENT *pIns = m_SndFile.Instruments[p->instr];
+							if (pIns)
 							{
-								UINT n = penv->Keyboard[p->note-1];
+								UINT n = pIns->Keyboard[p->note-1];
 								if (n < MAX_SAMPLES) bIns[n] = TRUE;
 							}
 						} else
 						{
 							for (UINT k=1; k<=m_SndFile.m_nInstruments; k++)
 							{
-								INSTRUMENTHEADER *penv = m_SndFile.Headers[k];
-								if (penv)
+								MODINSTRUMENT *pIns = m_SndFile.Instruments[k];
+								if (pIns)
 								{
-									UINT n = penv->Keyboard[p->note-1];
+									UINT n = pIns->Keyboard[p->note-1];
 									if (n < MAX_SAMPLES) bIns[n] = TRUE;
 								}
 							}
@@ -1230,7 +1230,7 @@ BOOL CModDoc::RemoveUnusedPlugs()
 
 		//Is the plugin used by an instrument?
 		for (INSTRUMENTINDEX nIns=1; nIns<=m_SndFile.GetNumInstruments(); nIns++) {
-			if (m_SndFile.Headers[nIns] && (m_SndFile.Headers[nIns]->nMixPlug == nPlug+1)) {
+			if (m_SndFile.Instruments[nIns] && (m_SndFile.Instruments[nIns]->nMixPlug == nPlug+1)) {
 				usedmap[nPlug]=true;
 				break;
 			}
@@ -1351,12 +1351,12 @@ BOOL CModDoc::RemoveUnusedInstruments()
 			{
 				while (nIndex<j)
 				{
-					if ((!usedmap[nIndex]) && (!m_SndFile.Headers[nIndex]))
+					if ((!usedmap[nIndex]) && (!m_SndFile.Instruments[nIndex]))
 					{
 						swapmap[nSwap] = j;
 						swapdest[nSwap] = nIndex;
-						m_SndFile.Headers[nIndex] = m_SndFile.Headers[j];
-						m_SndFile.Headers[j] = NULL;
+						m_SndFile.Instruments[nIndex] = m_SndFile.Instruments[j];
+						m_SndFile.Instruments[j] = NULL;
 						usedmap[nIndex] = 1;
 						usedmap[j] = 0;
 						nSwap++;
@@ -1367,7 +1367,7 @@ BOOL CModDoc::RemoveUnusedInstruments()
 				}
 			}
 		}
-		while ((m_SndFile.m_nInstruments > 1) && (!m_SndFile.Headers[m_SndFile.m_nInstruments])) m_SndFile.m_nInstruments--;
+		while ((m_SndFile.m_nInstruments > 1) && (!m_SndFile.Instruments[m_SndFile.m_nInstruments])) m_SndFile.m_nInstruments--;
 		END_CRITICAL();
 		if (nSwap > 0)
 		{
@@ -1455,23 +1455,23 @@ BOOL CModDoc::CompoCleanup()
 		// reset instruments
 		for(UINT i = 1; i <= m_SndFile.m_nInstruments; i++)
 		{
-			m_SndFile.Headers[i]->nFadeOut = 256;
-			m_SndFile.Headers[i]->nGlobalVol = 64;
-			m_SndFile.Headers[i]->nPan = 128;
-			m_SndFile.Headers[i]->dwFlags &= ~ENV_SETPANNING;
-			m_SndFile.Headers[i]->nMixPlug = 0;
+			m_SndFile.Instruments[i]->nFadeOut = 256;
+			m_SndFile.Instruments[i]->nGlobalVol = 64;
+			m_SndFile.Instruments[i]->nPan = 128;
+			m_SndFile.Instruments[i]->dwFlags &= ~ENV_SETPANNING;
+			m_SndFile.Instruments[i]->nMixPlug = 0;
 
-			m_SndFile.Headers[i]->nVolSwing = 0;
-			m_SndFile.Headers[i]->nPanSwing = 0;
-			m_SndFile.Headers[i]->nCutSwing = 0;
-			m_SndFile.Headers[i]->nResSwing = 0;
+			m_SndFile.Instruments[i]->nVolSwing = 0;
+			m_SndFile.Instruments[i]->nPanSwing = 0;
+			m_SndFile.Instruments[i]->nCutSwing = 0;
+			m_SndFile.Instruments[i]->nResSwing = 0;
 
 			//might be a good idea to leave those enabled...
 			/*
-			m_SndFile.Headers[i]->dwFlags &= ~ENV_VOLUME;
-			m_SndFile.Headers[i]->dwFlags &= ~ENV_PANNING;
-			m_SndFile.Headers[i]->dwFlags &= ~ENV_PITCH;
-			m_SndFile.Headers[i]->dwFlags &= ~ENV_FILTER;
+			m_SndFile.Instruments[i]->dwFlags &= ~ENV_VOLUME;
+			m_SndFile.Instruments[i]->dwFlags &= ~ENV_PANNING;
+			m_SndFile.Instruments[i]->dwFlags &= ~ENV_PITCH;
+			m_SndFile.Instruments[i]->dwFlags &= ~ENV_FILTER;
 			*/
 		}
 	}
@@ -1589,11 +1589,11 @@ LONG CModDoc::InsertSample(BOOL bLimit)
 LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 //-----------------------------------------------------------
 {
-	INSTRUMENTHEADER *pDup = NULL;
+	MODINSTRUMENT *pDup = NULL;
 	if ((m_SndFile.m_nType != MOD_TYPE_XM) && !(m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) return -1;
 	if ((lDuplicate > 0) && (lDuplicate <= (LONG)m_SndFile.m_nInstruments))
 	{
-		pDup = m_SndFile.Headers[lDuplicate];
+		pDup = m_SndFile.Instruments[lDuplicate];
 	}
 	if ((!m_SndFile.m_nInstruments) && ((m_SndFile.m_nSamples > 1) || (m_SndFile.Samples[1].pSample)))
 	{
@@ -1606,16 +1606,16 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 			for (UINT smp=1; smp<=nInstruments; smp++)
 			{
 				m_SndFile.Samples[smp].uFlags &= ~CHN_MUTE;
-				if (!m_SndFile.Headers[smp])
+				if (!m_SndFile.Instruments[smp])
 				{
-					INSTRUMENTHEADER *p = new INSTRUMENTHEADER;
+					MODINSTRUMENT *p = new MODINSTRUMENT;
 					if (!p)
 					{
 						ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
 						return -1;
 					}
 					InitializeInstrument(p, smp);
-					m_SndFile.Headers[smp] = p;
+					m_SndFile.Instruments[smp] = p;
 					lstrcpyn(p->name, m_SndFile.m_szNames[smp], sizeof(p->name));
 				}
 			}
@@ -1626,7 +1626,7 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 	UINT newins = 0;
 	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
 	{
-		if (!m_SndFile.Headers[i])
+		if (!m_SndFile.Instruments[i])
 		{
 			newins = i;
 			break;
@@ -1641,8 +1641,8 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 		}
 		newins = ++m_SndFile.m_nInstruments;
 	}
-	INSTRUMENTHEADER *penv = new INSTRUMENTHEADER;
-	if (penv)
+	MODINSTRUMENT *pIns = new MODINSTRUMENT;
+	if (pIns)
 	{
 		UINT newsmp = 0;
 		if ((lSample > 0) && (lSample < MAX_SAMPLES))
@@ -1668,7 +1668,7 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 		BEGIN_CRITICAL();
 		if (pDup)
 		{
-			*penv = *pDup;
+			*pIns = *pDup;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 			strcpy(m_SndFile.m_szInstrumentPath[newins-1],m_SndFile.m_szInstrumentPath[lDuplicate-1]);
@@ -1676,9 +1676,9 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 // -! NEW_FEATURE#0023
 		} else
 		{
-			InitializeInstrument(penv, newsmp);
+			InitializeInstrument(pIns, newsmp);
 		}
-		m_SndFile.Headers[newins] = penv;
+		m_SndFile.Instruments[newins] = pIns;
 		END_CRITICAL();
 		SetModified();
 	} else
@@ -1690,21 +1690,21 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 }
 
 
-void CModDoc::InitializeInstrument(INSTRUMENTHEADER *penv, UINT nsample)
+void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample)
 //----------------------------------------------------------------------
 {
-	memset(penv, 0, sizeof(INSTRUMENTHEADER));
-	penv->nFadeOut = 256;
-	penv->nGlobalVol = 64;
-	penv->nPan = 128;
-	penv->nPPC = 5*12;
-	m_SndFile.SetDefaultInstrumentValues(penv);
+	memset(pIns, 0, sizeof(MODINSTRUMENT));
+	pIns->nFadeOut = 256;
+	pIns->nGlobalVol = 64;
+	pIns->nPan = 128;
+	pIns->nPPC = 5*12;
+	m_SndFile.SetDefaultInstrumentValues(pIns);
 	for (UINT n=0; n<128; n++)
 	{
-		penv->Keyboard[n] = nsample;
-		penv->NoteMap[n] = n+1;
+		pIns->Keyboard[n] = nsample;
+		pIns->NoteMap[n] = n+1;
 	}
-	penv->pTuning = penv->s_DefaultTuning;
+	pIns->pTuning = pIns->s_DefaultTuning;
 }
 
 
@@ -1806,8 +1806,8 @@ void CModDoc::RearrangeSampleList()
 
 			// Also update instrument mapping
 			for(UINT iInstr = 1; iInstr <= m_SndFile.m_nInstruments; iInstr++){
-				if(m_SndFile.Headers[iInstr]){
-					INSTRUMENTHEADER *p = m_SndFile.Headers[iInstr];
+				if(m_SndFile.Instruments[iInstr]){
+					MODINSTRUMENT *p = m_SndFile.Instruments[iInstr];
 					for(WORD iNote =0; iNote < 128; iNote++)
 						if(p->Keyboard[iNote] == i) p->Keyboard[iNote] = nSampleMap[i];
 				}
@@ -1841,13 +1841,13 @@ void CModDoc::RearrangeSampleList()
 BOOL CModDoc::RemoveInstrument(UINT n)
 //------------------------------------
 {
-	if ((n) && (n <= m_SndFile.m_nInstruments) && (m_SndFile.Headers[n]))
+	if ((n) && (n <= m_SndFile.m_nInstruments) && (m_SndFile.Instruments[n]))
 	{
 		BOOL bIns = FALSE;
 		BEGIN_CRITICAL();
 		m_SndFile.DestroyInstrument(n);
 		if (n == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
-		for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Headers[i]) bIns = TRUE;
+		for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Instruments[i]) bIns = TRUE;
 		if (!bIns) m_SndFile.m_nInstruments = 0;
 		END_CRITICAL();
 		SetModified();
@@ -2311,57 +2311,57 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	HANDLE hCpy;
 	CHAR s[1024];
-	INSTRUMENTHEADER *penv;
+	MODINSTRUMENT *pIns;
 	DWORD dwMemSize;
 	UINT susBegin, susEnd, loopBegin, loopEnd, bSus, bLoop, bCarry, nPoints, releaseNode;
 	WORD *pPoints;
 	BYTE *pValues;
 
-	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Headers[nIns]) || (!pMainFrm)) return FALSE;
+	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return FALSE;
 	BeginWaitCursor();
-	penv = m_SndFile.Headers[nIns];
+	pIns = m_SndFile.Instruments[nIns];
 	switch(nEnv)
 	{
 	case ENV_PANNING:
-		pPoints = penv->PanPoints;
-		pValues = penv->PanEnv;
-		nPoints = penv->nPanEnv;
-		bLoop = (penv->dwFlags & ENV_PANLOOP) ? TRUE : FALSE;
-		bSus = (penv->dwFlags & ENV_PANSUSTAIN) ? TRUE : FALSE;
-		bCarry = (penv->dwFlags & ENV_PANCARRY) ? TRUE : FALSE;
-		susBegin = penv->nPanSustainBegin;
-		susEnd = penv->nPanSustainEnd;
-		loopBegin = penv->nPanLoopStart;
-		loopEnd = penv->nPanLoopEnd;
-		releaseNode = penv->nPanEnvReleaseNode;
+		pPoints = pIns->PanPoints;
+		pValues = pIns->PanEnv;
+		nPoints = pIns->nPanEnv;
+		bLoop = (pIns->dwFlags & ENV_PANLOOP) ? TRUE : FALSE;
+		bSus = (pIns->dwFlags & ENV_PANSUSTAIN) ? TRUE : FALSE;
+		bCarry = (pIns->dwFlags & ENV_PANCARRY) ? TRUE : FALSE;
+		susBegin = pIns->nPanSustainBegin;
+		susEnd = pIns->nPanSustainEnd;
+		loopBegin = pIns->nPanLoopStart;
+		loopEnd = pIns->nPanLoopEnd;
+		releaseNode = pIns->nPanEnvReleaseNode;
 		break;
 
 	case ENV_PITCH:
-		pPoints = penv->PitchPoints;
-		pValues = penv->PitchEnv;
-		nPoints = penv->nPitchEnv;
-		bLoop = (penv->dwFlags & ENV_PITCHLOOP) ? TRUE : FALSE;
-		bSus = (penv->dwFlags & ENV_PITCHSUSTAIN) ? TRUE : FALSE;
-		bCarry = (penv->dwFlags & ENV_PITCHCARRY) ? TRUE : FALSE;
-		susBegin = penv->nPitchSustainBegin;
-		susEnd = penv->nPitchSustainEnd;
-		loopBegin = penv->nPitchLoopStart;
-		loopEnd = penv->nPitchLoopEnd;
-		releaseNode = penv->nPitchEnvReleaseNode;
+		pPoints = pIns->PitchPoints;
+		pValues = pIns->PitchEnv;
+		nPoints = pIns->nPitchEnv;
+		bLoop = (pIns->dwFlags & ENV_PITCHLOOP) ? TRUE : FALSE;
+		bSus = (pIns->dwFlags & ENV_PITCHSUSTAIN) ? TRUE : FALSE;
+		bCarry = (pIns->dwFlags & ENV_PITCHCARRY) ? TRUE : FALSE;
+		susBegin = pIns->nPitchSustainBegin;
+		susEnd = pIns->nPitchSustainEnd;
+		loopBegin = pIns->nPitchLoopStart;
+		loopEnd = pIns->nPitchLoopEnd;
+		releaseNode = pIns->nPitchEnvReleaseNode;
 		break;
 
 	default:
-		pPoints = penv->VolPoints;
-		pValues = penv->VolEnv;
-		nPoints = penv->nVolEnv;
-		bLoop = (penv->dwFlags & ENV_VOLLOOP) ? TRUE : FALSE;
-		bSus = (penv->dwFlags & ENV_VOLSUSTAIN) ? TRUE : FALSE;
-		bCarry = (penv->dwFlags & ENV_VOLCARRY) ? TRUE : FALSE;
-		susBegin = penv->nVolSustainBegin;
-		susEnd = penv->nVolSustainEnd;
-		loopBegin = penv->nVolLoopStart;
-		loopEnd = penv->nVolLoopEnd;
-		releaseNode = penv->nVolEnvReleaseNode;
+		pPoints = pIns->VolPoints;
+		pValues = pIns->VolEnv;
+		nPoints = pIns->nVolEnv;
+		bLoop = (pIns->dwFlags & ENV_VOLLOOP) ? TRUE : FALSE;
+		bSus = (pIns->dwFlags & ENV_VOLSUSTAIN) ? TRUE : FALSE;
+		bCarry = (pIns->dwFlags & ENV_VOLCARRY) ? TRUE : FALSE;
+		susBegin = pIns->nVolSustainBegin;
+		susEnd = pIns->nVolSustainEnd;
+		loopBegin = pIns->nVolLoopStart;
+		loopEnd = pIns->nVolLoopEnd;
+		releaseNode = pIns->nVolEnvReleaseNode;
 		break;
 	}
 	strcpy(s, pszEnvHdr);
@@ -2396,7 +2396,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
-	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Headers[nIns]) || (!pMainFrm)) return FALSE;
+	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return FALSE;
 	BeginWaitCursor();
 	if (!pMainFrm->OpenClipboard())
 	{
@@ -2407,7 +2407,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 	LPCSTR p;
 	if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 	{
-		INSTRUMENTHEADER *penv = m_SndFile.Headers[nIns];
+		MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
 		UINT susBegin=0, susEnd=0, loopBegin=0, loopEnd=0, bSus=0, bLoop=0, bCarry=0, nPoints=0, releaseNode = ENV_RELEASE_NODE_UNSET;
 		DWORD dwMemSize = GlobalSize(hCpy), dwPos = strlen(pszEnvHdr);
 		if ((dwMemSize > dwPos) && (!_strnicmp(p, pszEnvHdr, dwPos-2)))
@@ -2440,48 +2440,48 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 			switch(nEnv)
 			{
 			case ENV_PANNING:
-				pPoints = penv->PanPoints;
-				pValues = penv->PanEnv;
-				penv->nPanEnv = nPoints;
-				penv->dwFlags &= ~(ENV_PANLOOP|ENV_PANSUSTAIN|ENV_PANCARRY);
-				if (bLoop) penv->dwFlags |= ENV_PANLOOP;
-				if (bSus) penv->dwFlags |= ENV_PANSUSTAIN;
-				if (bCarry) penv->dwFlags |= ENV_PANCARRY;
-				penv->nPanSustainBegin = susBegin;
-				penv->nPanSustainEnd = susEnd;
-				penv->nPanLoopStart = loopBegin;
-				penv->nPanLoopEnd = loopEnd;
-				penv->nPanEnvReleaseNode = releaseNode;
+				pPoints = pIns->PanPoints;
+				pValues = pIns->PanEnv;
+				pIns->nPanEnv = nPoints;
+				pIns->dwFlags &= ~(ENV_PANLOOP|ENV_PANSUSTAIN|ENV_PANCARRY);
+				if (bLoop) pIns->dwFlags |= ENV_PANLOOP;
+				if (bSus) pIns->dwFlags |= ENV_PANSUSTAIN;
+				if (bCarry) pIns->dwFlags |= ENV_PANCARRY;
+				pIns->nPanSustainBegin = susBegin;
+				pIns->nPanSustainEnd = susEnd;
+				pIns->nPanLoopStart = loopBegin;
+				pIns->nPanLoopEnd = loopEnd;
+				pIns->nPanEnvReleaseNode = releaseNode;
 				break;
 
 			case ENV_PITCH:
-				pPoints = penv->PitchPoints;
-				pValues = penv->PitchEnv;
-				penv->nPitchEnv = nPoints;
-				penv->dwFlags &= ~(ENV_PITCHLOOP|ENV_PITCHSUSTAIN|ENV_PITCHCARRY);
-				if (bLoop) penv->dwFlags |= ENV_PITCHLOOP;
-				if (bSus) penv->dwFlags |= ENV_PITCHSUSTAIN;
-				if (bCarry) penv->dwFlags |= ENV_PITCHCARRY;
-				penv->nPitchSustainBegin = susBegin;
-				penv->nPitchSustainEnd = susEnd;
-				penv->nPitchLoopStart = loopBegin;
-				penv->nPitchLoopEnd = loopEnd;
-				penv->nPitchEnvReleaseNode = releaseNode;
+				pPoints = pIns->PitchPoints;
+				pValues = pIns->PitchEnv;
+				pIns->nPitchEnv = nPoints;
+				pIns->dwFlags &= ~(ENV_PITCHLOOP|ENV_PITCHSUSTAIN|ENV_PITCHCARRY);
+				if (bLoop) pIns->dwFlags |= ENV_PITCHLOOP;
+				if (bSus) pIns->dwFlags |= ENV_PITCHSUSTAIN;
+				if (bCarry) pIns->dwFlags |= ENV_PITCHCARRY;
+				pIns->nPitchSustainBegin = susBegin;
+				pIns->nPitchSustainEnd = susEnd;
+				pIns->nPitchLoopStart = loopBegin;
+				pIns->nPitchLoopEnd = loopEnd;
+				pIns->nPitchEnvReleaseNode = releaseNode;
 				break;
 
 			default:
-				pPoints = penv->VolPoints;
-				pValues = penv->VolEnv;
-				penv->nVolEnv = nPoints;
-				penv->dwFlags &= ~(ENV_VOLLOOP|ENV_VOLSUSTAIN|ENV_VOLCARRY);
-				if (bLoop) penv->dwFlags |= ENV_VOLLOOP;
-				if (bSus) penv->dwFlags |= ENV_VOLSUSTAIN;
-				if (bCarry) penv->dwFlags |= ENV_VOLCARRY;
-				penv->nVolSustainBegin = susBegin;
-				penv->nVolSustainEnd = susEnd;
-				penv->nVolLoopStart = loopBegin;
-				penv->nVolLoopEnd = loopEnd;
-				penv->nVolEnvReleaseNode = releaseNode;
+				pPoints = pIns->VolPoints;
+				pValues = pIns->VolEnv;
+				pIns->nVolEnv = nPoints;
+				pIns->dwFlags &= ~(ENV_VOLLOOP|ENV_VOLSUSTAIN|ENV_VOLCARRY);
+				if (bLoop) pIns->dwFlags |= ENV_VOLLOOP;
+				if (bSus) pIns->dwFlags |= ENV_VOLSUSTAIN;
+				if (bCarry) pIns->dwFlags |= ENV_VOLCARRY;
+				pIns->nVolSustainBegin = susBegin;
+				pIns->nVolSustainEnd = susEnd;
+				pIns->nVolLoopStart = loopBegin;
+				pIns->nVolLoopEnd = loopEnd;
+				pIns->nVolEnvReleaseNode = releaseNode;
 				break;
 			}
 			int oldn = 0;
@@ -2510,15 +2510,15 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 				switch(nEnv)
 				{
 					case ENV_PANNING:
-						penv->nPanEnvReleaseNode = r;
+						pIns->nPanEnvReleaseNode = r;
 					break;
 
 					case ENV_PITCH:
-						penv->nPitchEnvReleaseNode = r;
+						pIns->nPitchEnvReleaseNode = r;
 					break;
 
 					default:
-						penv->nVolEnvReleaseNode = r;
+						pIns->nVolEnvReleaseNode = r;
 					break;
 				}
 			}

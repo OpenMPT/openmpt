@@ -250,12 +250,12 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						if (pSndFile->m_nInstruments)
 						{
 							UINT k = 0;
-							for (UINT i=0; i<pSndFile->m_nInstruments; i++) if (pSndFile->Headers[i+1])
+							for (UINT i=0; i<pSndFile->m_nInstruments; i++) if (pSndFile->Instruments[i+1])
 							{
-								INSTRUMENTHEADER *penv = pSndFile->Headers[i+1];
+								MODINSTRUMENT *pIns = pSndFile->Instruments[i+1];
 								for (UINT j=0; j<NOTE_MAX; j++)
 								{
-									if ((UINT)penv->Keyboard[j] == (iSmp+1))
+									if ((UINT)pIns->Keyboard[j] == (iSmp+1))
 									{
 										if (k) strcat(s, ",");
 										wsprintf(stmp, "%d", i+1);
@@ -327,24 +327,24 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<INSLIST_COLUMNS; iCol++)
 				{
-					INSTRUMENTHEADER *penv = pSndFile->Headers[iIns+1];
+					MODINSTRUMENT *pIns = pSndFile->Instruments[iIns+1];
 					s[0] = 0;
 					switch(iCol)
 					{
 					case INSLIST_INSTRUMENTNAME:
-						if (penv) lstrcpyn(s, penv->name, sizeof(penv->name));
+						if (pIns) lstrcpyn(s, pIns->name, sizeof(pIns->name));
 						break;
 					case INSLIST_INSTRUMENTNO:
 						wsprintf(s, "%02d", iIns+1);
 						break;
 					case INSLIST_SAMPLES:
-						if (penv)
+						if (pIns)
 						{
 							BYTE smp_tb[(MAX_SAMPLES+7)/8];
 							memset(smp_tb, 0, sizeof(smp_tb));
 							for (UINT i=0; i<NOTE_MAX; i++)
 							{
-								UINT n = penv->Keyboard[i];
+								UINT n = pIns->Keyboard[i];
 								if ((n) && (n < MAX_SAMPLES)) smp_tb[n>>3] |= (1<<(n&7));
 							}
 							UINT k = 0;
@@ -363,24 +363,24 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						}
 						break;
 					case INSLIST_ENVELOPES:
-						if (penv)
+						if (pIns)
 						{
-							if (penv->dwFlags & ENV_VOLUME) strcat(s, "Vol");
-							if (penv->dwFlags & ENV_PANNING) { if (s[0]) strcat(s, ", "); strcat(s, "Pan"); }
-							if (penv->dwFlags & ENV_PITCH) { if (s[0]) strcat(s, ", "); strcat(s, (penv->dwFlags & ENV_FILTER) ? "Filter" : "Pitch"); }
+							if (pIns->dwFlags & ENV_VOLUME) strcat(s, "Vol");
+							if (pIns->dwFlags & ENV_PANNING) { if (s[0]) strcat(s, ", "); strcat(s, "Pan"); }
+							if (pIns->dwFlags & ENV_PITCH) { if (s[0]) strcat(s, ", "); strcat(s, (pIns->dwFlags & ENV_FILTER) ? "Filter" : "Pitch"); }
 						}
 						break;
 					case INSLIST_FILENAME:
-						if (penv)
+						if (pIns)
 						{
-							memcpy(s, penv->filename, sizeof(penv->filename));
-							s[sizeof(penv->filename)] = 0;
+							memcpy(s, pIns->filename, sizeof(pIns->filename));
+							s[sizeof(pIns->filename)] = 0;
 						}
 						break;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 					case INSLIST_PATH:
-						if (penv)
+						if (pIns)
 						{
 							memcpy(s, pSndFile->m_szInstrumentPath[iIns], _MAX_PATH);
 							s[_MAX_PATH] = 0;
@@ -478,11 +478,11 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 		} else
 		if (m_nListId == IDC_LIST_INSTRUMENTS)
 		{
-			if ((iItem < pSndFile->m_nInstruments) && (pSndFile->Headers[iItem+1]))
+			if ((iItem < pSndFile->m_nInstruments) && (pSndFile->Instruments[iItem+1]))
 			{
-				INSTRUMENTHEADER *penv = pSndFile->Headers[iItem+1];
+				MODINSTRUMENT *pIns = pSndFile->Instruments[iItem+1];
 				s[31] = 0;
-				memcpy(penv->name, s, 32);
+				memcpy(pIns->name, s, 32);
 				pModDoc->UpdateAllViews(this, ((iItem+1) << HINT_SHIFT_INS) | (HINT_INSNAMES|HINT_INSTRUMENT), this);
 			}
 		} else

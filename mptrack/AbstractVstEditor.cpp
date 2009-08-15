@@ -480,7 +480,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 		if (nIns==0 && (inputPlugs.GetSize() || inputChannels.GetSize())) { 
 			m_pInputMenu->AppendMenu(MF_SEPARATOR);
 		}
-		name.Format("Ins%02d: %s", inputInstruments[nIns], pSndFile->Headers[inputInstruments[nIns]]->name);
+		name.Format("Ins%02d: %s", inputInstruments[nIns], pSndFile->Instruments[inputInstruments[nIns]]->name);
 		if (inputInstruments[nIns]==m_nInstrument)	checked=true;
 		m_pInputMenu->AppendMenu(MF_STRING|(checked?MF_CHECKED:0), ID_SELECTINST+inputInstruments[nIns], name);
 	}
@@ -644,8 +644,8 @@ bool CAbstractVstEditor::CheckInstrument(int instrument)
 {
 	CSoundFile* pSndFile = m_pVstPlugin->GetSoundFile();
 	
-	if (instrument>=0 && instrument<MAX_INSTRUMENTS && pSndFile->Headers[instrument]) {
-		return (pSndFile->Headers[instrument]->nMixPlug) == (m_pVstPlugin->m_nSlot+1);
+	if (instrument>=0 && instrument<MAX_INSTRUMENTS && pSndFile->Instruments[instrument]) {
+		return (pSndFile->Instruments[instrument]->nMixPlug) == (m_pVstPlugin->m_nSlot+1);
 	}
 	return false;
 }

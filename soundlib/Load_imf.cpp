@@ -11,7 +11,7 @@
 
 #pragma pack(1)
 
-struct imf_channel {
+struct IMFCHANNEL {
 	char name[12];	// Channelname (ASCIIZ-String, max 11 chars)
 	BYTE chorus;	// Default chorus
 	BYTE reverb;	// Default reverb
@@ -19,7 +19,7 @@ struct imf_channel {
 	BYTE status;	// Channel status: 0 = enabled, 1 = mute, 2 = disabled (ignore effects!)
 };
 
-struct imf_header {
+struct IMFHEADER {
 	char title[32];			// Songname (ASCIIZ-String, max. 31 chars)
 	UINT16 ordnum;			// Number of orders saved
 	UINT16 patnum;			// Number of patterns saved
@@ -32,7 +32,7 @@ struct imf_header {
 	BYTE amp;				// Amplification factor (mixing volume, 4..127)
 	BYTE unused2[8];
 	char im10[4];			// 'IM10'
-	struct imf_channel channels[32]; // Channel settings
+	struct IMFCHANNEL channels[32]; // Channel settings
 	BYTE orderlist[256];	// Order list (0xff = +++; blank out anything beyond ordnum)
 };
 
@@ -42,7 +42,7 @@ enum {
 	IMF_ENV_FILTER = 2,
 };
 
-struct imf_env {
+struct IMFENVELOPE {
 	BYTE points;		// Number of envelope points
 	BYTE sustain;		// Envelope sustain point
 	BYTE loop_start;	// Envelope loop start point
@@ -51,24 +51,24 @@ struct imf_env {
 	BYTE unused[3];
 };
 
-struct imf_envnodes {
+struct IMFENVNODES {
 	UINT16 tick;
 	UINT16 value;
 };
 
-struct imf_instrument {
+struct IMFINSTRUMENT {
 	char name[32];		// Inst. name (ASCIIZ-String, max. 31 chars)
 	BYTE map[120];		// Multisample settings
 	BYTE unused[8];
-	struct imf_envnodes nodes[3][16];
-	struct imf_env env[3];
+	struct IMFENVNODES nodes[3][16];
+	struct IMFENVELOPE env[3];
 	UINT16 fadeout;		// Fadeout rate (0...0FFFH)
 	UINT16 smpnum;		// Number of samples in instrument
 	char ii10[4];		// 'II10'
 };
 
-struct imf_sample {
-	char name[13];		// Sample filename (12345678.ABC) */
+struct IMFSAMPLE {
+	char filename[13];		// Sample filename (12345678.ABC) */
 	BYTE unused1[3];
 	UINT32 length;		// Length
 	UINT32 loop_start;	// Loop start
@@ -90,36 +90,36 @@ static BYTE imf_efftrans[] = {
 	CMD_NONE,
 	CMD_SPEED, // 0x01 1xx Set Tempo
 	CMD_TEMPO, // 0x02 2xx Set BPM
-	CMD_TONEPORTAMENTO, // 0x03 3xx Tone Portamento                  (*)
-	CMD_TONEPORTAVOL, // 0x04 4xy Tone Portamento + Volume Slide   (*)
-	CMD_VIBRATO, // 0x05 5xy Vibrato                          (*)
-	CMD_VIBRATOVOL, // 0x06 6xy Vibrato + Volume Slide           (*)
-	CMD_FINEVIBRATO, // 0x07 7xy Fine Vibrato                     (*)
-	CMD_TREMOLO, // 0x08 8xy Tremolo                          (*)
-	CMD_ARPEGGIO, // 0x09 9xy Arpeggio                         (*)
-	CMD_PANNING8, // 0x0A Axx Set Pan Position                
-	CMD_PANNINGSLIDE, // 0x0B Bxy Pan Slide                        (*)
+	CMD_TONEPORTAMENTO, // 0x03 3xx Tone Portamento
+	CMD_TONEPORTAVOL, // 0x04 4xy Tone Portamento + Volume Slide
+	CMD_VIBRATO, // 0x05 5xy Vibrato
+	CMD_VIBRATOVOL, // 0x06 6xy Vibrato + Volume Slide
+	CMD_FINEVIBRATO, // 0x07 7xy Fine Vibrato
+	CMD_TREMOLO, // 0x08 8xy Tremolo
+	CMD_ARPEGGIO, // 0x09 9xy Arpeggio
+	CMD_PANNING8, // 0x0A Axx Set Pan Position
+	CMD_PANNINGSLIDE, // 0x0B Bxy Pan Slide
 	CMD_VOLUME, // 0x0C Cxx Set Volume
-	CMD_VOLUMESLIDE, // 0x0D Dxy Volume Slide                     (*)
-	CMD_VOLUMESLIDE, // 0x0E Exy Fine Volume Slide                (*)
+	CMD_VOLUMESLIDE, // 0x0D Dxy Volume Slide
+	CMD_VOLUMESLIDE, // 0x0E Exy Fine Volume Slide
 	CMD_S3MCMDEX, // 0x0F Fxx Set Finetune
-	CMD_NOTESLIDEUP, // 0x10 Gxy Note Slide Up                    (*)
-	CMD_NOTESLIDEDOWN, // 0x11 Hxy Note Slide Down                  (*)
-	CMD_PORTAMENTOUP, // 0x12 Ixx Slide Up                         (*)
-	CMD_PORTAMENTODOWN, // 0x13 Jxx Slide Down                       (*)
-	CMD_PORTAMENTOUP, // 0x14 Kxx Fine Slide Up                    (*)
-	CMD_PORTAMENTODOWN, // 0x15 Lxx Fine Slide Down                  (*)
+	CMD_NOTESLIDEUP, // 0x10 Gxy Note Slide Up
+	CMD_NOTESLIDEDOWN, // 0x11 Hxy Note Slide Down
+	CMD_PORTAMENTOUP, // 0x12 Ixx Slide Up
+	CMD_PORTAMENTODOWN, // 0x13 Jxx Slide Down
+	CMD_PORTAMENTOUP, // 0x14 Kxx Fine Slide Up
+	CMD_PORTAMENTODOWN, // 0x15 Lxx Fine Slide Down
 	CMD_MIDI, // 0x16 Mxx Set Filter Cutoff - XXX
 	CMD_NONE, // 0x17 Nxy Filter Slide + Resonance - XXX
-	CMD_OFFSET, // 0x18 Oxx Set Sample Offset                (*)
+	CMD_OFFSET, // 0x18 Oxx Set Sample Offset
 	CMD_NONE, // 0x19 Pxx Set Fine Sample Offset - XXX
 	CMD_KEYOFF, // 0x1A Qxx Key Off
-	CMD_RETRIG, // 0x1B Rxy Retrig                           (*)
-	CMD_TREMOR, // 0x1C Sxy Tremor                           (*)
+	CMD_RETRIG, // 0x1B Rxy Retrig
+	CMD_TREMOR, // 0x1C Sxy Tremor
 	CMD_POSITIONJUMP, // 0x1D Txx Position Jump
 	CMD_PATTERNBREAK, // 0x1E Uxx Pattern Break
 	CMD_GLOBALVOLUME, // 0x1F Vxx Set Mastervolume
-	CMD_GLOBALVOLSLIDE, // 0x20 Wxy Mastervolume Slide               (*)
+	CMD_GLOBALVOLSLIDE, // 0x20 Wxy Mastervolume Slide
 	CMD_S3MCMDEX, // 0x21 Xxx Extended Effect
 	//      X1x Set Filter
 	//      X3x Glissando
@@ -179,7 +179,7 @@ static void import_imf_effect(MODCOMMAND *note)
 		default: // undefined
 		case 0x1: // set filter
 		case 0xf: // invert loop
-			note->command = 0;
+			note->command = CMD_NONE;
 			break;
 		case 0x3: // glissando
 			n = 0x20;
@@ -209,7 +209,7 @@ static void import_imf_effect(MODCOMMAND *note)
 		case 0x18: // sample offset
 			// O00 doesn't pick up the previous value
 			if (!note->param)
-				note->command = 0;
+				note->command = CMD_NONE;
 			break;
 		}
 		if (n)
@@ -227,7 +227,7 @@ static void import_imf_effect(MODCOMMAND *note)
 
 #ifdef _IMF_SUPPORT_FINISHED_
 
-static void load_imf_pattern(CSoundFile *song, int pat, UINT32 ignore_channels, slurp_t *fp)
+static void load_imf_pattern(CSoundFile *csf, int pat, UINT32 ignore_channels, slurp_t *fp)
 {
 	UINT16 length, nrows;
 	BYTE mask, channel;
@@ -241,11 +241,11 @@ static void load_imf_pattern(CSoundFile *song, int pat, UINT32 ignore_channels, 
 	length = LittleEndianW(length);
 	slurp_read(fp, &nrows, 2);
 	nrows = LittleEndianW(nrows);
-	
-	song->Patterns.Insert(pat, nrows);
-	//row_data = song->Patterns[pat] = csf_allocate_pattern(nrows, 64);
-	//song->PatternSize[pat] = song->PatternAllocSize[pat] = nrows;
-	row_data = song->Patterns[Pat];
+
+	csf->Patterns.Insert(pat, nrows);
+	//row_data = Patterns[pat] = csf_allocate_pattern(nrows, 64);
+	//PatternSize[pat] = PatternAllocSize[pat] = nrows;
+	row_data = csf->Patterns[pat];
 
 	row = 0;
 	while (row < nrows) {
@@ -340,7 +340,7 @@ static unsigned int envflags[3][3] = {
 	{ENV_PITCH | ENV_FILTER, ENV_PITCHSUSTAIN, ENV_PITCHLOOP},
 };
 
-static void load_imf_envelope(INSTRUMENTHEADER *ins, INSTRUMENTENVELOPE *env, imf_instrument *imfins, int e)
+static void load_imf_envelope(MODINSTRUMENT *ins, INSTRUMENTENVELOPE *env, IMFINSTRUMENT *imfins, int e)
 {
 	int n, t, v;
 	int min = 0; // minimum tick value for next node
@@ -370,13 +370,17 @@ static void load_imf_envelope(INSTRUMENTHEADER *ins, INSTRUMENTENVELOPE *env, im
 //int fmt_imf_load_song(CSoundFile *song, slurp_t *fp, UNUSED unsigned int lflags)
 bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 {
-	imf_header hdr;
+	DWORD dwMemPos;
+	IMFHEADER hdr;
 	int n, s;
-	MODINSTRUMENT *sample = Ins + 1;
-	int firstsample = 1; // first sample for the current instrument
+	MODSAMPLE *pSample = Samples + 1;
+	int firstsample = 1; // first pSample for the current instrument
 	UINT32 ignore_channels = 0; /* bit set for each channel that's completely disabled */
 
-	slurp_read(fp, &hdr, sizeof(hdr));
+	//slurp_read(fp, &hdr, sizeof(hdr));
+	if(sizeof(IMFHEADER) > dwMemLength) return false;
+	memset(hdr, 0, sizeof(IMFHEADER));
+	memcpy(hdr, lpStream, sizeof(IMFHEADER))
 	hdr.ordnum = LittleEndianW(hdr.ordnum);
 	hdr.patnum = LittleEndianW(hdr.patnum);
 	hdr.insnum = LittleEndianW(hdr.insnum);
@@ -426,12 +430,14 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		Order[n] = ((hdr.orderlist[n] == 0xff) ? Order.GetIgnoreIndex() : hdr.orderlist[n]);
 	
 	for (n = 0; n < hdr.patnum; n++)
-		load_imf_pattern(song, n, ignore_channels, fp);
+		load_imf_pattern(this, n, ignore_channels, fp);
 	
+	dwMemPos = sizeof(IMFHEADER);
+
 	for (n = 0; n < hdr.insnum; n++) {
 		// read the ins header
-		struct imf_instrument imfins;
-		INSTRUMENTHEADER *ins;
+		struct IMFINSTRUMENT imfins;
+		MODINSTRUMENT *ins;
 		slurp_read(fp, &imfins, sizeof(imfins));
 
 		imfins.smpnum = LittleEndianW(imfins.smpnum);
@@ -443,10 +449,10 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			return false;
 		}
 		
-		ins = new INSTRUMENTHEADER;
+		ins = new MODINSTRUMENT;
 		if (!ins) continue;
-		Headers[n + 1] = ins;
-		memset(ins, 0, sizeof(INSTRUMENTHEADER));
+		Instruments[n + 1] = ins;
+		memset(ins, 0, sizeof(MODINSTRUMENT));
 
 		strncpy(ins->name, imfins.name, 25);
 		ins->name[25] = 0;
@@ -481,7 +487,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			ins->nFadeOut = 8192;
 
 		for (s = 0; s < imfins.smpnum; s++) {
-			struct imf_sample imfsmp;
+			IMFSAMPLE imfsmp;
 			UINT32 blen;
 			slurp_read(fp, &imfsmp, sizeof(imfsmp));
 			
@@ -491,38 +497,37 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 				return false;
 			}
 			
-			strncpy(sample->name, imfsmp.name, 12);
-			sample->name[12] = 0;
-			strcpy(m_szNames[s + 1], sample->name);
-			blen = sample->nLength = LittleEndian(imfsmp.length);
-			sample->nLoopStart = LittleEndian(imfsmp.loop_start);
-			sample->nLoopEnd = LittleEndian(imfsmp.loop_end);
-			sample->nC5Speed = LittleEndian(imfsmp.C5Speed);
-			sample->nVolume = imfsmp.volume * 4; //mphack
-			sample->nPan = imfsmp.panning; //mphack (IT uses 0-64, IMF uses the full 0-255)
+			strncpy(pSample->filename, imfsmp.filename, 12);
+			pSample->filename[12] = 0;
+			strcpy(m_szNames[s + 1], pSample->filename);
+			blen = pSample->nLength = LittleEndian(imfsmp.length);
+			pSample->nLoopStart = LittleEndian(imfsmp.loop_start);
+			pSample->nLoopEnd = LittleEndian(imfsmp.loop_end);
+			pSample->nC5Speed = LittleEndian(imfsmp.C5Speed);
+			pSample->nVolume = imfsmp.volume * 4; //mphack
+			pSample->nPan = imfsmp.panning; //mphack (IT uses 0-64, IMF uses the full 0-255)
 			if (imfsmp.flags & 1)
-				sample->uFlags |= CHN_LOOP;
+				pSample->uFlags |= CHN_LOOP;
 			if (imfsmp.flags & 2)
-				sample->uFlags |= CHN_PINGPONGLOOP;
+				pSample->uFlags |= CHN_PINGPONGLOOP;
 			if (imfsmp.flags & 4) {
-				sample->uFlags |= CHN_16BIT;
-				sample->nLength >>= 1;
-				sample->nLoopStart >>= 1;
-				sample->nLoopEnd >>= 1;
+				pSample->uFlags |= CHN_16BIT;
+				pSample->nLength >>= 1;
+				pSample->nLoopStart >>= 1;
+				pSample->nLoopEnd >>= 1;
 			}
 			if (imfsmp.flags & 8)
-				sample->uFlags |= CHN_PANNING;
+				pSample->uFlags |= CHN_PANNING;
 			
 			if (!blen) {
 				/* leave it blank */
 			/*} else if (lflags & LOAD_NOSAMPLES) {
 				slurp_seek(fp, blen, SEEK_CUR);*/
 			} else {
-				sample->pSample = csf_allocate_sample(blen);
-				slurp_read(fp, sample->pSample, blen);
+				ReadSample(pSample, (imfsmp.flags & 4) ? RS_PCM8U : RS_PCM16U, reinterpret_cast<LPCSTR>(lpStream + iSampleOffset), blen);
 			}
 
-			sample++;
+			pSample++;
 		}
 		firstsample += imfins.smpnum;
 	}

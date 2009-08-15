@@ -1575,7 +1575,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 					MODCHANNEL *pChn = &m_pSndFile->Chn[k];
 					p->dwPos[k] = 0;
 					if ((nIns) && (nIns <= m_pSndFile->m_nInstruments) && (pChn->nLength)
-					 && (pChn->pHeader) && (pChn->pHeader == m_pSndFile->Headers[nIns])
+					 && (pChn->pModInstrument) && (pChn->pModInstrument == m_pSndFile->Instruments[nIns])
 					 && ((!(pChn->dwFlags & CHN_NOTEFADE)) || (pChn->nFadeOutVol)))
 					{
 						if (m_dwNotifyType & MPTNOTIFY_PITCHENV)
