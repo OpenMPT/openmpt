@@ -11,7 +11,7 @@ class CScaleEnvPointsDlg : public CDialog
 	DECLARE_DYNAMIC(CScaleEnvPointsDlg)
 
 public:
-	CScaleEnvPointsDlg(CWnd* pParent, INSTRUMENTHEADER* pInst, BYTE env);   // standard constructor
+	CScaleEnvPointsDlg(CWnd* pParent, MODINSTRUMENT* pInst, BYTE env);   // standard constructor
 	virtual ~CScaleEnvPointsDlg();
 
 // Dialog Data
@@ -23,7 +23,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	INSTRUMENTHEADER* m_pInstrument;
+	MODINSTRUMENT* m_pInstrument;
 	BYTE m_Env; //To tell which envelope to process.
 	CEdit m_EditFactor;
 protected:

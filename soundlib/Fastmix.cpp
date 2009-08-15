@@ -1613,9 +1613,9 @@ UINT CSoundFile::CreateStereoMix(int count)
 		
 		//rewbs.instroVSTi
 /*		UINT nMixPlugin=0;
-		if (pChannel->pHeader && pChannel->pInstrument) {	// first try intrument VST
+		if (pChannel->pModInstrument && pChannel->pInstrument) {	// first try intrument VST
 			if (!(pChannel->pInstrument->uFlags & ENV_MUTE))
-				nMixPlugin = pChannel->pHeader->nMixPlug;
+				nMixPlugin = pChannel->pModInstrument->nMixPlug;
 		}
 		if (!nMixPlugin && (nMasterCh > 0) && (nMasterCh <= m_nChannels)) { 	// Then try Channel VST
 			if(!(pChannel->dwFlags & CHN_NOFX)) 
@@ -1736,8 +1736,8 @@ UINT CSoundFile::CreateStereoMix(int count)
 UINT CSoundFile::GetResamplingFlag(const MODCHANNEL *pChannel)
 //------------------------------------------------------------
 {
-	if (pChannel->pHeader) {
-		switch (pChannel->pHeader->nResampling) {
+	if (pChannel->pModInstrument) {
+		switch (pChannel->pModInstrument->nResampling) {
 			case SRCMODE_NEAREST:	return 0;
 			case SRCMODE_LINEAR:	return MIXNDX_LINEARSRC;
 			case SRCMODE_SPLINE:	return MIXNDX_HQSRC;

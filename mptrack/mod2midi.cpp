@@ -136,19 +136,19 @@ CModToMidi::CModToMidi(LPCSTR pszPathName, CSoundFile *pSndFile, CWnd *pWndParen
 	memset(m_InstrMap, 0, sizeof(m_InstrMap));
 	for (UINT nIns=1; nIns<=m_pSndFile->m_nInstruments; nIns++)
 	{
-		INSTRUMENTHEADER *penv = m_pSndFile->Headers[nIns];
-		if ((penv) && (penv->nMidiChannel <= 16))
+		MODINSTRUMENT *pIns = m_pSndFile->Instruments[nIns];
+		if ((pIns) && (pIns->nMidiChannel <= 16))
 		{
-			m_InstrMap[nIns].nChannel = penv->nMidiChannel;
+			m_InstrMap[nIns].nChannel = pIns->nMidiChannel;
 			if (m_InstrMap[nIns].nChannel == 10)
 			{
-				if ((penv->nMidiProgram > 20) && (penv->nMidiProgram < 120))
-					m_InstrMap[nIns].nProgram = penv->nMidiProgram;
+				if ((pIns->nMidiProgram > 20) && (pIns->nMidiProgram < 120))
+					m_InstrMap[nIns].nProgram = pIns->nMidiProgram;
 				else
-					m_InstrMap[nIns].nProgram = (penv->NoteMap[60]-1) & 0x7f;
+					m_InstrMap[nIns].nProgram = (pIns->NoteMap[60]-1) & 0x7f;
 			} else
 			{
-				m_InstrMap[nIns].nProgram = penv->nMidiProgram & 0x7f;
+				m_InstrMap[nIns].nProgram = pIns->nMidiProgram & 0x7f;
 			}
 		}
 	}
@@ -169,12 +169,12 @@ BOOL CModToMidi::OnInitDialog()
 	{
 		for (UINT nIns=1; nIns<=m_pSndFile->m_nInstruments; nIns++)
 		{
-			INSTRUMENTHEADER *penv = m_pSndFile->Headers[nIns];
-			if ((penv) && (m_pSndFile->IsInstrumentUsed(nIns)))
+			MODINSTRUMENT *pIns = m_pSndFile->Instruments[nIns];
+			if ((pIns) && (m_pSndFile->IsInstrumentUsed(nIns)))
 			{
 				memset(s, 0, sizeof(s));
 				wsprintf(s, "%02d: ", nIns);
-				memcpy(s+strlen(s), penv->name, 32);
+				memcpy(s+strlen(s), pIns->name, 32);
 				m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(s), nIns);
 			}
 		}
@@ -324,10 +324,10 @@ VOID CModToMidi::OnOK()
 {
 	for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++)
 	{
-		INSTRUMENTHEADER *penv = m_pSndFile->Headers[i];
-		if (penv)
+		MODINSTRUMENT *pIns = m_pSndFile->Instruments[i];
+		if (pIns)
 		{
-			penv->nMidiProgram = m_InstrMap[i].nProgram;
+			pIns->nMidiProgram = m_InstrMap[i].nProgram;
 		}
 	}
 	CDialog::OnOK();
@@ -484,10 +484,10 @@ BOOL CModToMidi::DoConvert()
 						UINT nsmp = pTrk->nInstrument;
 						if (m_pSndFile->m_nInstruments)
 						{
-							if ((nsmp < MAX_INSTRUMENTS) && (m_pSndFile->Headers[nsmp]))
+							if ((nsmp < MAX_INSTRUMENTS) && (m_pSndFile->Instruments[nsmp]))
 							{
-								INSTRUMENTHEADER *penv = m_pSndFile->Headers[nsmp];
-								nsmp = penv->Keyboard[note];
+								MODINSTRUMENT *pIns = m_pSndFile->Instruments[nsmp];
+								nsmp = pIns->Keyboard[note];
 							} else nsmp = 0;
 						}
 						if ((nsmp) && (nsmp < MAX_SAMPLES)) vol = m_pSndFile->Samples[nsmp].nVolume;

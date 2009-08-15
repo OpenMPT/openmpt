@@ -3207,7 +3207,7 @@ void CVstPlugin::GetInputInstrumentList(CArray<UINT,UINT> &list)
 	
 	UINT nThisMixPlug = m_nSlot+1;		//m_nSlot is position in mixplug array.
 	for (int nIns=0; nIns<MAX_INSTRUMENTS; nIns++) {
-		if (m_pSndFile->Headers[nIns] && (m_pSndFile->Headers[nIns]->nMixPlug==nThisMixPlug)) {
+		if (m_pSndFile->Instruments[nIns] && (m_pSndFile->Instruments[nIns]->nMixPlug==nThisMixPlug)) {
 			list.Add(nIns);
 		}
 	}

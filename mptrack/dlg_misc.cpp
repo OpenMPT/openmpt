@@ -697,7 +697,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		{
 			if (pSndFile->m_nInstruments)
 			{
-				wsprintf(s, "%03d:%s", n, (pSndFile->Headers[n]) ? pSndFile->Headers[n]->name : "");
+				wsprintf(s, "%03d:%s", n, (pSndFile->Instruments[n]) ? pSndFile->Instruments[n]->name : "");
 			} else
 			{
 				wsprintf(s, "%03d:%s", n, pSndFile->m_szNames[n]);
@@ -1256,8 +1256,8 @@ void CPageEditNote::UpdateDialog()
 			int k = strlen(s);
 			if (pSndFile->m_nInstruments)
 			{
-				if (pSndFile->Headers[i])
-					memcpy(s+k, pSndFile->Headers[i]->name, 32);
+				if (pSndFile->Instruments[i])
+					memcpy(s+k, pSndFile->Instruments[i]->name, 32);
 			} else
 				memcpy(s+k, pSndFile->m_szNames[i], 32);
 			s[k+32] = 0;
@@ -1286,9 +1286,9 @@ void CPageEditNote::OnNoteChanged()
 			CSoundFile* pSndFile = m_pModDoc->GetSoundFile();
 			m_nInstr = combo->GetItemData(n);
 			//Checking whether note names should be recreated.
-			if(pSndFile && pSndFile->Headers[m_nInstr] && pSndFile->Headers[oldInstr])
+			if(pSndFile && pSndFile->Instruments[m_nInstr] && pSndFile->Instruments[oldInstr])
 			{
-				if(pSndFile->Headers[m_nInstr]->pTuning != pSndFile->Headers[oldInstr]->pTuning)
+				if(pSndFile->Instruments[m_nInstr]->pTuning != pSndFile->Instruments[oldInstr]->pTuning)
 					UpdateDialog();
 			}
 		}
@@ -2641,12 +2641,12 @@ BOOL CSampleMapDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	if (m_pSndFile)
 	{
-		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
-		if (penv)
+		MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+		if (pIns)
 		{
 			for (UINT i=0; i<NOTE_MAX; i++)
 			{
-				KeyboardMap[i] = penv->Keyboard[i];
+				KeyboardMap[i] = pIns->Keyboard[i];
 			}
 		}
 	}
@@ -2761,13 +2761,13 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		else
 			wsprintf(s, "%s", temp.c_str());
 
-		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
-		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample < MAX_SAMPLES) && (penv))
+		MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample < MAX_SAMPLES) && (pIns))
 		{
 			UINT iNote = nBaseOctave*12+lParam;
 			if (KeyboardMap[iNote] == nSample)
 			{
-				KeyboardMap[iNote] = penv->Keyboard[iNote];
+				KeyboardMap[iNote] = pIns->Keyboard[iNote];
 			} else
 			{
 				KeyboardMap[iNote] = (BYTE)nSample;
@@ -2798,15 +2798,15 @@ VOID CSampleMapDlg::OnOK()
 {
 	if (m_pSndFile)
 	{
-		INSTRUMENTHEADER *penv = m_pSndFile->Headers[m_nInstrument];
-		if (penv)
+		MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+		if (pIns)
 		{
 			BOOL bModified = FALSE;
 			for (UINT i=0; i<NOTE_MAX; i++)
 			{
-				if (KeyboardMap[i] != penv->Keyboard[i])
+				if (KeyboardMap[i] != pIns->Keyboard[i])
 				{
-					penv->Keyboard[i] = KeyboardMap[i];
+					pIns->Keyboard[i] = KeyboardMap[i];
 					bModified = TRUE;
 				}
 			}

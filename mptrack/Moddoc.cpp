@@ -209,25 +209,25 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		BeginWaitCursor();
 		LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
 		// Scan Instruments
-		if (lpMidiLib) for (UINT nIns=1; nIns<=m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Headers[nIns])
+		if (lpMidiLib) for (UINT nIns=1; nIns<=m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
 		{
 			LPCSTR pszMidiMapName;
-			INSTRUMENTHEADER *penv = m_SndFile.Headers[nIns];
+			MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
 			UINT nMidiCode;
 			BOOL bEmbedded = FALSE;
 
-			if (penv->nMidiChannel == 10)
-				nMidiCode = 0x80 | (penv->nMidiDrumKey & 0x7F);
+			if (pIns->nMidiChannel == 10)
+				nMidiCode = 0x80 | (pIns->nMidiDrumKey & 0x7F);
 			else
-				nMidiCode = penv->nMidiProgram & 0x7F;
+				nMidiCode = pIns->nMidiProgram & 0x7F;
 			pszMidiMapName = lpMidiLib->MidiMap[nMidiCode];
 			if (pEmbeddedBank)
 			{
 				UINT nDlsIns = 0, nDrumRgn = 0;
-				UINT nProgram = penv->nMidiProgram;
+				UINT nProgram = pIns->nMidiProgram;
 				UINT dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
 				if ((pEmbeddedBank->FindInstrument(	(nMidiCode >= 128),
-													(penv->wMidiBank & 0x3FFF),
+													(pIns->wMidiBank & 0x3FFF),
 													nProgram, dwKey, &nDlsIns))
 				 || (pEmbeddedBank->FindInstrument(	(nMidiCode >= 128),	0xFFFF,
 													(nMidiCode >= 128) ? 0xFF : nProgram,
@@ -238,7 +238,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 					{
 						if ((dwKey >= 24) && (dwKey < 100))
 						{
-							lstrcpyn(penv->name, szMidiPercussionNames[dwKey-24], sizeof(penv->name));
+							lstrcpyn(pIns->name, szMidiPercussionNames[dwKey-24], sizeof(pIns->name));
 						}
 						bEmbedded = TRUE;
 					}
@@ -264,10 +264,10 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 					if (pDLSBank)
 					{
 						UINT nDlsIns = 0, nDrumRgn = 0;
-						UINT nProgram = penv->nMidiProgram;
+						UINT nProgram = pIns->nMidiProgram;
 						UINT dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
 						if ((pDLSBank->FindInstrument(	(nMidiCode >= 128),
-														(penv->wMidiBank & 0x3FFF),
+														(pIns->wMidiBank & 0x3FFF),
 														nProgram, dwKey, &nDlsIns))
 						 || (pDLSBank->FindInstrument(	(nMidiCode >= 128), 0xFFFF,
 														(nMidiCode >= 128) ? 0xFF : nProgram,
@@ -277,7 +277,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 							pDLSBank->ExtractInstrument(&m_SndFile, nIns, nDlsIns, nDrumRgn);
 							if ((dwKey >= 24) && (dwKey < 24+61))
 							{
-								lstrcpyn(penv->name, szMidiPercussionNames[dwKey-24], sizeof(penv->name));
+								lstrcpyn(pIns->name, szMidiPercussionNames[dwKey-24], sizeof(pIns->name));
 							}
 						}
 					}
@@ -297,18 +297,18 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 							m_SndFile.ReadInstrumentFromFile(nIns, lpFile, len);
 							_splitpath(pszMidiMapName, NULL, NULL, szName, szExt);
 							strncat(szName, szExt, sizeof(szName));
-							penv = m_SndFile.Headers[nIns];
-							if (!penv->filename[0]) lstrcpyn(penv->filename, szName, sizeof(penv->filename));
-							if (!penv->name[0])
+							pIns = m_SndFile.Instruments[nIns];
+							if (!pIns->filename[0]) lstrcpyn(pIns->filename, szName, sizeof(pIns->filename));
+							if (!pIns->name[0])
 							{
 								if (nMidiCode < 128)
 								{
-									lstrcpyn(penv->name, szMidiProgramNames[nMidiCode], sizeof(penv->name));
+									lstrcpyn(pIns->name, szMidiProgramNames[nMidiCode], sizeof(pIns->name));
 								} else
 								{
 									UINT nKey = nMidiCode & 0x7F;
 									if (nKey >= 24)
-										lstrcpyn(penv->name, szMidiPercussionNames[nKey-24], sizeof(penv->name));
+										lstrcpyn(pIns->name, szMidiPercussionNames[nKey-24], sizeof(pIns->name));
 								}
 							}
 						}
@@ -678,8 +678,8 @@ BOOL CModDoc::InitializeMod()
 		if ((!m_SndFile.m_nInstruments) && (m_SndFile.m_nType & MOD_TYPE_XM))
 		{
 			m_SndFile.m_nInstruments = 1;
-			m_SndFile.Headers[1] = new INSTRUMENTHEADER;
-			InitializeInstrument(m_SndFile.Headers[1], 1);
+			m_SndFile.Instruments[1] = new MODINSTRUMENT;
+			InitializeInstrument(m_SndFile.Instruments[1], 1);
 		}
 		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT|MOD_TYPE_XM))
 		{
@@ -849,7 +849,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		else if ((nsmp) && (nsmp < MAX_SAMPLES)) {	//Or set sample
 			MODSAMPLE *pSmp = &m_SndFile.Samples[nsmp];
 			pChn->pCurrentSample = pSmp->pSample;
-			pChn->pHeader = NULL;
+			pChn->pModInstrument = NULL;
 			pChn->pModSample = pSmp;
 			pChn->pSample = pSmp->pSample;
 			pChn->nFineTune = pSmp->nFineTune;
@@ -914,22 +914,22 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		//rewbs.vstiLive
 		if (nins <= m_SndFile.m_nInstruments)
 		{
-			INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
-			if (penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
+			MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
+			if (pIns && pIns->nMidiChannel > 0 && pIns->nMidiChannel < 17) // instro sends to a midi chan
 			{
 				// UINT nPlugin = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
 				 
 				UINT nPlugin = 0;
-				if (pChn->pHeader) 
-					nPlugin = pChn->pHeader->nMixPlug;  					// first try intrument VST
+				if (pChn->pModInstrument) 
+					nPlugin = pChn->pModInstrument->nMixPlug;  					// first try intrument VST
 				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS) && (nCurrentChn >=0))
 					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin; // Then try Channel VST
 				
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-					if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, pChn->nVolume, MAX_BASECHANNELS);
-					//if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note, pChn->GetVSTVolume(), MAX_BASECHANNELS);
+					if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, note, pChn->nVolume, MAX_BASECHANNELS);
+					//if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, note, pChn->GetVSTVolume(), MAX_BASECHANNELS);
 				}
 			}
 		}
@@ -963,11 +963,11 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 	//rewbs.vstiLive
 	if (nins>0 && nins<=m_SndFile.m_nInstruments) {
 
-		INSTRUMENTHEADER *penv = m_SndFile.Headers[nins];
-		if (penv && penv->nMidiChannel > 0 && penv->nMidiChannel < 17) // instro sends to a midi chan
+		MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
+		if (pIns && pIns->nMidiChannel > 0 && pIns->nMidiChannel < 17) // instro sends to a midi chan
 		{
 
-			UINT nPlugin = penv->nMixPlug;  		// First try intrument VST
+			UINT nPlugin = pIns->nMixPlug;  		// First try intrument VST
 			if (((!nPlugin) || (nPlugin > MAX_MIXPLUGINS)) && //no good plug yet
 				(nCurrentChn<MAX_CHANNELS)) // chan OK
 				nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin;// Then try Channel VST
@@ -975,7 +975,7 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 			{
 				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-				if (pPlugin) pPlugin->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, note+NOTE_KEYOFF, 0, MAX_BASECHANNELS);
+				if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, note+NOTE_KEYOFF, 0, MAX_BASECHANNELS);
 
 			}
 		}
@@ -1011,7 +1011,7 @@ BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 		if ((pChn->nLength) && (!(pChn->dwFlags & (CHN_NOTEFADE|CHN_KEYOFF|CHN_MUTE)))
 		 && ((note == pChn->nNewNote) || (!note))
 		 && ((pChn->pModSample == &m_SndFile.Samples[nsmp]) || (!nsmp))
-		 && ((pChn->pHeader == m_SndFile.Headers[nins]) || (!nins))) return TRUE;
+		 && ((pChn->pModInstrument == m_SndFile.Instruments[nins]) || (!nins))) return TRUE;
 	}
 	return FALSE;
 }
@@ -1040,9 +1040,9 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
 		UINT nPlug = m_SndFile.GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, EVEN_IF_MUTED);
 		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))	{
 			CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[nPlug-1].pMixPlugin;
-			INSTRUMENTHEADER* penv = m_SndFile.Chn[nChn].pHeader;
-			if (pPlug && penv) {
-				pPlug->MidiCommand(penv->nMidiChannel, penv->nMidiProgram, penv->wMidiBank, NOTE_KEYOFF, 0, nChn);
+			MODINSTRUMENT* pIns = m_SndFile.Chn[nChn].pModInstrument;
+			if (pPlug && pIns) {
+				pPlug->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, NOTE_KEYOFF, 0, nChn);
 			}
 		}
 	} else {
@@ -1189,9 +1189,9 @@ BOOL CModDoc::MuteSample(UINT nSample, BOOL bMute)
 BOOL CModDoc::MuteInstrument(UINT nInstr, BOOL bMute)
 //---------------------------------------------------
 {
-	if ((nInstr < 1) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Headers[nInstr])) return FALSE;
-	if (bMute) m_SndFile.Headers[nInstr]->dwFlags |= ENV_MUTE;
-	else m_SndFile.Headers[nInstr]->dwFlags &= ~ENV_MUTE;
+	if ((nInstr < 1) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return FALSE;
+	if (bMute) m_SndFile.Instruments[nInstr]->dwFlags |= ENV_MUTE;
+	else m_SndFile.Instruments[nInstr]->dwFlags &= ~ENV_MUTE;
 	return TRUE;
 }
 
@@ -1267,8 +1267,8 @@ BOOL CModDoc::IsSampleMuted(UINT nSample) const
 BOOL CModDoc::IsInstrumentMuted(UINT nInstr) const
 //------------------------------------------------
 {
-	if ((!nInstr) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Headers[nInstr])) return FALSE;
-	return (m_SndFile.Headers[nInstr]->dwFlags & ENV_MUTE) ? TRUE : FALSE;
+	if ((!nInstr) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return FALSE;
+	return (m_SndFile.Instruments[nInstr]->dwFlags & ENV_MUTE) ? TRUE : FALSE;
 }
 
 
@@ -1293,14 +1293,14 @@ void CModDoc::SetFollowWnd(HWND hwnd, DWORD dwType)
 BOOL CModDoc::IsChildSample(UINT nIns, UINT nSmp) const
 //-----------------------------------------------------
 {
-	INSTRUMENTHEADER *penv;
+	MODINSTRUMENT *pIns;
 	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments)) return FALSE;
-	penv = m_SndFile.Headers[nIns];
-	if (penv)
+	pIns = m_SndFile.Instruments[nIns];
+	if (pIns)
 	{
 		for (UINT i=0; i<NOTE_MAX; i++)
 		{
-			if (penv->Keyboard[i] == nSmp) return TRUE;
+			if (pIns->Keyboard[i] == nSmp) return TRUE;
 		}
 	}
 	return FALSE;
@@ -1313,12 +1313,12 @@ UINT CModDoc::FindSampleParent(UINT nSmp) const
 	if ((!m_SndFile.m_nInstruments) || (!nSmp)) return 0;
 	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
 	{
-		INSTRUMENTHEADER *penv = m_SndFile.Headers[i];
-		if (penv)
+		MODINSTRUMENT *pIns = m_SndFile.Instruments[i];
+		if (pIns)
 		{
 			for (UINT j=0; j<NOTE_MAX; j++)
 			{
-				if (penv->Keyboard[j] == nSmp) return i;
+				if (pIns->Keyboard[j] == nSmp) return i;
 			}
 		}
 	}
@@ -1329,14 +1329,14 @@ UINT CModDoc::FindSampleParent(UINT nSmp) const
 UINT CModDoc::FindInstrumentChild(UINT nIns) const
 //------------------------------------------------
 {
-	INSTRUMENTHEADER *penv;
+	MODINSTRUMENT *pIns;
 	if ((!nIns) || (nIns > m_SndFile.m_nInstruments)) return 0;
-	penv = m_SndFile.Headers[nIns];
-	if (penv)
+	pIns = m_SndFile.Instruments[nIns];
+	if (pIns)
 	{
 		for (UINT i=0; i<NOTE_MAX; i++)
 		{
-			UINT n = penv->Keyboard[i];
+			UINT n = pIns->Keyboard[i];
 			if ((n) && (n <= m_SndFile.m_nSamples)) return n;
 		}
 	}

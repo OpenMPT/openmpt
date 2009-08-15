@@ -51,7 +51,7 @@ typedef struct tagXMSAMPLEHEADER
 	DWORD shsize; // size of XMSAMPLESTRUCT
 	BYTE snum[96];
 	WORD venv[24];
-	WORD penv[24];
+	WORD pIns[24];
 	BYTE vnum, pnum;
 	BYTE vsustain, vloops, vloope, psustain, ploops, ploope;
 	BYTE vtype, ptype;
@@ -305,13 +305,13 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 		pih = (XMINSTRUMENTHEADER *)(lpStream + dwMemPos);
 		if (dwMemPos + LittleEndian(pih->size) > dwMemLength) return true;
-		if ((Headers[iIns] = new INSTRUMENTHEADER) == NULL) continue;
-		memset(Headers[iIns], 0, sizeof(INSTRUMENTHEADER));
-		Headers[iIns]->pTuning = m_defaultInstrument.pTuning;
-		Headers[iIns]->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-		Headers[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+		if ((Instruments[iIns] = new MODINSTRUMENT) == NULL) continue;
+		memset(Instruments[iIns], 0, sizeof(MODINSTRUMENT));
+		Instruments[iIns]->pTuning = m_defaultInstrument.pTuning;
+		Instruments[iIns]->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
+		Instruments[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
-		memcpy(Headers[iIns]->name, pih->name, 22);
+		memcpy(Instruments[iIns]->name, pih->name, 22);
 				
 		if ((nsamples = pih->samples) > 0)
 		{
@@ -331,7 +331,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 			for (int i = 0; i < 24; ++i) {
 				xmsh.venv[i] = LittleEndianW(xmsh.venv[i]);
-				xmsh.penv[i] = LittleEndianW(xmsh.penv[i]);
+				xmsh.pIns[i] = LittleEndianW(xmsh.pIns[i]);
 			}
 			xmsh.volfade = LittleEndianW(xmsh.volfade);
 			xmsh.res = LittleEndianW(xmsh.res);
@@ -359,9 +359,9 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 						{
 							if (samplemap[xmapchk] == n) goto alreadymapped;
 						}
-						for (UINT clrs=1; clrs<iIns; clrs++) if (Headers[clrs])
+						for (UINT clrs=1; clrs<iIns; clrs++) if (Instruments[clrs])
 						{
-							INSTRUMENTHEADER *pks = Headers[clrs];
+							MODINSTRUMENT *pks = Instruments[clrs];
 							for (UINT ks=0; ks<128; ks++)
 							{
 								if (pks->Keyboard[ks] == n) pks->Keyboard[ks] = 0;
@@ -393,9 +393,9 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 							{
 								if (samplemap[mapchk] == n) samplemap[mapchk] = 0;
 							}
-							for (UINT clrs=1; clrs<iIns; clrs++) if (Headers[clrs])
+							for (UINT clrs=1; clrs<iIns; clrs++) if (Instruments[clrs])
 							{
-								INSTRUMENTHEADER *pks = Headers[clrs];
+								MODINSTRUMENT *pks = Instruments[clrs];
 								for (UINT ks=0; ks<128; ks++)
 								{
 									if (pks->Keyboard[ks] == n) pks->Keyboard[ks] = 0;
@@ -413,66 +413,66 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		m_nSamples = newsamples;
 		// Reading Volume Envelope
-		INSTRUMENTHEADER *penv = Headers[iIns];
-		penv->nMidiProgram = pih->type;
-		penv->nFadeOut = xmsh.volfade;
-		penv->nPan = 128;
-		penv->nPPC = 5*12;
-		SetDefaultInstrumentValues(penv);
-		penv->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-		penv->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
-		if (xmsh.vtype & 1) penv->dwFlags |= ENV_VOLUME;
-		if (xmsh.vtype & 2) penv->dwFlags |= ENV_VOLSUSTAIN;
-		if (xmsh.vtype & 4) penv->dwFlags |= ENV_VOLLOOP;
-		if (xmsh.ptype & 1) penv->dwFlags |= ENV_PANNING;
-		if (xmsh.ptype & 2) penv->dwFlags |= ENV_PANSUSTAIN;
-		if (xmsh.ptype & 4) penv->dwFlags |= ENV_PANLOOP;
+		MODINSTRUMENT *pIns = Instruments[iIns];
+		pIns->nMidiProgram = pih->type;
+		pIns->nFadeOut = xmsh.volfade;
+		pIns->nPan = 128;
+		pIns->nPPC = 5*12;
+		SetDefaultInstrumentValues(pIns);
+		pIns->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
+		pIns->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+		if (xmsh.vtype & 1) pIns->dwFlags |= ENV_VOLUME;
+		if (xmsh.vtype & 2) pIns->dwFlags |= ENV_VOLSUSTAIN;
+		if (xmsh.vtype & 4) pIns->dwFlags |= ENV_VOLLOOP;
+		if (xmsh.ptype & 1) pIns->dwFlags |= ENV_PANNING;
+		if (xmsh.ptype & 2) pIns->dwFlags |= ENV_PANSUSTAIN;
+		if (xmsh.ptype & 4) pIns->dwFlags |= ENV_PANLOOP;
 		if (xmsh.vnum > 12) xmsh.vnum = 12;
 		if (xmsh.pnum > 12) xmsh.pnum = 12;
-		penv->nVolEnv = xmsh.vnum;
-		if (!xmsh.vnum) penv->dwFlags &= ~ENV_VOLUME;
-		if (!xmsh.pnum) penv->dwFlags &= ~ENV_PANNING;
-		penv->nPanEnv = xmsh.pnum;
-		penv->nVolSustainBegin = penv->nVolSustainEnd = xmsh.vsustain;
-		if (xmsh.vsustain >= 12) penv->dwFlags &= ~ENV_VOLSUSTAIN;
-		penv->nVolLoopStart = xmsh.vloops;
-		penv->nVolLoopEnd = xmsh.vloope;
-		if (penv->nVolLoopEnd >= 12) penv->nVolLoopEnd = 0;
-		if (penv->nVolLoopStart >= penv->nVolLoopEnd) penv->dwFlags &= ~ENV_VOLLOOP;
-		penv->nPanSustainBegin = penv->nPanSustainEnd = xmsh.psustain;
-		if (xmsh.psustain >= 12) penv->dwFlags &= ~ENV_PANSUSTAIN;
-		penv->nPanLoopStart = xmsh.ploops;
-		penv->nPanLoopEnd = xmsh.ploope;
-		if (penv->nPanLoopEnd >= 12) penv->nPanLoopEnd = 0;
-		if (penv->nPanLoopStart >= penv->nPanLoopEnd) penv->dwFlags &= ~ENV_PANLOOP;
-		penv->nGlobalVol = 64;
+		pIns->nVolEnv = xmsh.vnum;
+		if (!xmsh.vnum) pIns->dwFlags &= ~ENV_VOLUME;
+		if (!xmsh.pnum) pIns->dwFlags &= ~ENV_PANNING;
+		pIns->nPanEnv = xmsh.pnum;
+		pIns->nVolSustainBegin = pIns->nVolSustainEnd = xmsh.vsustain;
+		if (xmsh.vsustain >= 12) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
+		pIns->nVolLoopStart = xmsh.vloops;
+		pIns->nVolLoopEnd = xmsh.vloope;
+		if (pIns->nVolLoopEnd >= 12) pIns->nVolLoopEnd = 0;
+		if (pIns->nVolLoopStart >= pIns->nVolLoopEnd) pIns->dwFlags &= ~ENV_VOLLOOP;
+		pIns->nPanSustainBegin = pIns->nPanSustainEnd = xmsh.psustain;
+		if (xmsh.psustain >= 12) pIns->dwFlags &= ~ENV_PANSUSTAIN;
+		pIns->nPanLoopStart = xmsh.ploops;
+		pIns->nPanLoopEnd = xmsh.ploope;
+		if (pIns->nPanLoopEnd >= 12) pIns->nPanLoopEnd = 0;
+		if (pIns->nPanLoopStart >= pIns->nPanLoopEnd) pIns->dwFlags &= ~ENV_PANLOOP;
+		pIns->nGlobalVol = 64;
 		for (UINT ienv=0; ienv<12; ienv++)
 		{
-			penv->VolPoints[ienv] = (WORD)xmsh.venv[ienv*2];
-			penv->VolEnv[ienv] = (BYTE)xmsh.venv[ienv*2+1];
-			penv->PanPoints[ienv] = (WORD)xmsh.penv[ienv*2];
-			penv->PanEnv[ienv] = (BYTE)xmsh.penv[ienv*2+1];
+			pIns->VolPoints[ienv] = (WORD)xmsh.venv[ienv*2];
+			pIns->VolEnv[ienv] = (BYTE)xmsh.venv[ienv*2+1];
+			pIns->PanPoints[ienv] = (WORD)xmsh.pIns[ienv*2];
+			pIns->PanEnv[ienv] = (BYTE)xmsh.pIns[ienv*2+1];
 			if (ienv)
 			{
-				if (penv->VolPoints[ienv] < penv->VolPoints[ienv-1])
+				if (pIns->VolPoints[ienv] < pIns->VolPoints[ienv-1])
 				{
-					penv->VolPoints[ienv] &= 0xFF;
-					penv->VolPoints[ienv] += penv->VolPoints[ienv-1] & 0xFF00;
-					if (penv->VolPoints[ienv] < penv->VolPoints[ienv-1]) penv->VolPoints[ienv] += 0x100;
+					pIns->VolPoints[ienv] &= 0xFF;
+					pIns->VolPoints[ienv] += pIns->VolPoints[ienv-1] & 0xFF00;
+					if (pIns->VolPoints[ienv] < pIns->VolPoints[ienv-1]) pIns->VolPoints[ienv] += 0x100;
 				}
-				if (penv->PanPoints[ienv] < penv->PanPoints[ienv-1])
+				if (pIns->PanPoints[ienv] < pIns->PanPoints[ienv-1])
 				{
-					penv->PanPoints[ienv] &= 0xFF;
-					penv->PanPoints[ienv] += penv->PanPoints[ienv-1] & 0xFF00;
-					if (penv->PanPoints[ienv] < penv->PanPoints[ienv-1]) penv->PanPoints[ienv] += 0x100;
+					pIns->PanPoints[ienv] &= 0xFF;
+					pIns->PanPoints[ienv] += pIns->PanPoints[ienv-1] & 0xFF00;
+					if (pIns->PanPoints[ienv] < pIns->PanPoints[ienv-1]) pIns->PanPoints[ienv] += 0x100;
 				}
 			}
 		}
 		for (UINT j=0; j<96; j++)
 		{
-			penv->NoteMap[j+12] = j+1+12;
+			pIns->NoteMap[j+12] = j+1+12;
 			if (xmsh.snum[j] < nsamples)
-				penv->Keyboard[j+12] = samplemap[xmsh.snum[j]];
+				pIns->Keyboard[j+12] = samplemap[xmsh.snum[j]];
 		}
 		// Reading samples
 		for (UINT ins=0; ins<nsamples; ins++)
@@ -834,39 +834,39 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		xmih.samples = 0;
 		if (m_nInstruments)
 		{
-			INSTRUMENTHEADER *penv = Headers[i];
-			if (penv)
+			MODINSTRUMENT *pIns = Instruments[i];
+			if (pIns)
 			{
-				memcpy(xmih.name, penv->name, 22);
-				xmih.type = penv->nMidiProgram;
-				xmsh.volfade = penv->nFadeOut;
-				xmsh.vnum = (BYTE)penv->nVolEnv;
-				xmsh.pnum = (BYTE)penv->nPanEnv;
+				memcpy(xmih.name, pIns->name, 22);
+				xmih.type = pIns->nMidiProgram;
+				xmsh.volfade = pIns->nFadeOut;
+				xmsh.vnum = (BYTE)pIns->nVolEnv;
+				xmsh.pnum = (BYTE)pIns->nPanEnv;
 				if (xmsh.vnum > 12) xmsh.vnum = 12;
 				if (xmsh.pnum > 12) xmsh.pnum = 12;
 				for (UINT ienv=0; ienv<12; ienv++)
 				{
-					xmsh.venv[ienv*2] = penv->VolPoints[ienv];
-					xmsh.venv[ienv*2+1] = penv->VolEnv[ienv];
-					xmsh.penv[ienv*2] = penv->PanPoints[ienv];
-					xmsh.penv[ienv*2+1] = penv->PanEnv[ienv];
+					xmsh.venv[ienv*2] = pIns->VolPoints[ienv];
+					xmsh.venv[ienv*2+1] = pIns->VolEnv[ienv];
+					xmsh.pIns[ienv*2] = pIns->PanPoints[ienv];
+					xmsh.pIns[ienv*2+1] = pIns->PanEnv[ienv];
 				}
-				if (penv->dwFlags & ENV_VOLUME) xmsh.vtype |= 1;
-				if (penv->dwFlags & ENV_VOLSUSTAIN) xmsh.vtype |= 2;
-				if (penv->dwFlags & ENV_VOLLOOP) xmsh.vtype |= 4;
-				if (penv->dwFlags & ENV_PANNING) xmsh.ptype |= 1;
-				if (penv->dwFlags & ENV_PANSUSTAIN) xmsh.ptype |= 2;
-				if (penv->dwFlags & ENV_PANLOOP) xmsh.ptype |= 4;
-				xmsh.vsustain = (BYTE)penv->nVolSustainBegin;
-				xmsh.vloops = (BYTE)penv->nVolLoopStart;
-				xmsh.vloope = (BYTE)penv->nVolLoopEnd;
-				xmsh.psustain = (BYTE)penv->nPanSustainBegin;
-				xmsh.ploops = (BYTE)penv->nPanLoopStart;
-				xmsh.ploope = (BYTE)penv->nPanLoopEnd;
-				for (UINT j=0; j<96; j++) if (penv->Keyboard[j+12]) // for all notes
+				if (pIns->dwFlags & ENV_VOLUME) xmsh.vtype |= 1;
+				if (pIns->dwFlags & ENV_VOLSUSTAIN) xmsh.vtype |= 2;
+				if (pIns->dwFlags & ENV_VOLLOOP) xmsh.vtype |= 4;
+				if (pIns->dwFlags & ENV_PANNING) xmsh.ptype |= 1;
+				if (pIns->dwFlags & ENV_PANSUSTAIN) xmsh.ptype |= 2;
+				if (pIns->dwFlags & ENV_PANLOOP) xmsh.ptype |= 4;
+				xmsh.vsustain = (BYTE)pIns->nVolSustainBegin;
+				xmsh.vloops = (BYTE)pIns->nVolLoopStart;
+				xmsh.vloope = (BYTE)pIns->nVolLoopEnd;
+				xmsh.psustain = (BYTE)pIns->nPanSustainBegin;
+				xmsh.ploops = (BYTE)pIns->nPanLoopStart;
+				xmsh.ploope = (BYTE)pIns->nPanLoopEnd;
+				for (UINT j=0; j<96; j++) if (pIns->Keyboard[j+12]) // for all notes
 				{
 					UINT k;
-					UINT sample = penv->Keyboard[j+12];
+					UINT sample = pIns->Keyboard[j+12];
 
 					// Check to see if sample mapped to this note is already accounted for in this instrument
 					for (k=0; k<xmih.samples; k++)	{
@@ -1018,7 +1018,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 
 		//Save hacked-on extra info
 		SaveMixPlugins(f);
-		SaveExtendedInstrumentProperties(Headers, header.instruments, f);
+		SaveExtendedInstrumentProperties(Instruments, header.instruments, f);
 		SaveExtendedSongProperties(f);
 	}
 

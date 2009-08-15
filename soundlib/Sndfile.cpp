@@ -88,16 +88,16 @@ static char UnpackTable[MAX_PACK_TABLES][16] =
 
 /*---------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------
-MODULAR (in/out) INSTRUMENTHEADER :
+MODULAR (in/out) MODINSTRUMENT :
 -----------------------------------------------------------------------------------------------
 
 * to update:
 ------------
 
-- both following functions need to be updated when adding a new member in INSTRUMENTHEADER :
+- both following functions need to be updated when adding a new member in MODINSTRUMENT :
 
-void WriteInstrumentHeaderStruct(INSTRUMENTHEADER * input, FILE * file);
-BYTE * GetInstrumentHeaderFieldPointer(INSTRUMENTHEADER * input, __int32 fcode, __int16 fsize);
+void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file);
+BYTE * GetInstrumentHeaderFieldPointer(MODINSTRUMENT * input, __int32 fcode, __int16 fsize);
 
 - see below for body declaration.
 
@@ -134,7 +134,7 @@ Exemple with "nPanLoopEnd" , "nPitchLoopEnd" & "VolEnv[MAX_ENVPOINTS]" members :
 						!!! SECTION TO BE UPDATED !!!
 						!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-		[EXT]	means external (not related) to INSTRUMENTHEADER content
+		[EXT]	means external (not related) to MODINSTRUMENT content
 
 C...	[EXT]	nChannels
 ChnS	[EXT]	IT/MPTM: Channel settings for channels 65-127 if needed (doesn't fit to IT header).
@@ -232,8 +232,8 @@ fsize = sizeof( type ) * arraysize;\
 fwrite(& fsize , 1 , sizeof( __int16 ) , file);\
 fwrite(&input-> name , 1 , fsize , file);
 
-// Write (in 'file') 'input' INSTRUMENTHEADER with 'code' & 'size' extra field infos for each member
-void WriteInstrumentHeaderStruct(INSTRUMENTHEADER * input, FILE * file)
+// Write (in 'file') 'input' MODINSTRUMENT with 'code' & 'size' extra field infos for each member
+void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file)
 {
 __int32 fcode;
 __int16 fsize;
@@ -309,8 +309,8 @@ case( #@code ):\
 if( fsize <= sizeof( type ) * arraysize ) pointer = (BYTE *)&input-> name ;\
 break;
 
-// Return a pointer on the wanted field in 'input' INSTRUMENTHEADER given field code & size
-BYTE * GetInstrumentHeaderFieldPointer(INSTRUMENTHEADER * input, __int32 fcode, __int16 fsize)
+// Return a pointer on the wanted field in 'input' MODINSTRUMENT given field code & size
+BYTE * GetInstrumentHeaderFieldPointer(MODINSTRUMENT * input, __int32 fcode, __int16 fsize)
 {
 if(input == NULL) return NULL;
 BYTE * pointer = NULL;
@@ -378,7 +378,7 @@ return pointer;
 // -! NEW_FEATURE#0027
 
 
-CTuning* INSTRUMENTHEADER::s_DefaultTuning = 0;
+CTuning* MODINSTRUMENT::s_DefaultTuning = 0;
 
 const ROWINDEX CPatternSizesMimic::operator [](const int i) const
 //-----------------------------------------------------------
@@ -445,7 +445,7 @@ CSoundFile::CSoundFile() :
 	memset(ChnMix, 0, sizeof(ChnMix));
 	memset(Samples, 0, sizeof(Samples));
 	memset(ChnSettings, 0, sizeof(ChnSettings));
-	memset(Headers, 0, sizeof(Headers));
+	memset(Instruments, 0, sizeof(Instruments));
 	Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Patterns.ClearPatterns();
 	memset(m_szNames, 0, sizeof(m_szNames));
@@ -507,7 +507,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	memset(Samples, 0, sizeof(Samples));
 	memset(ChnMix, 0, sizeof(ChnMix));
 	memset(Chn, 0, sizeof(Chn));
-	memset(Headers, 0, sizeof(Headers));
+	memset(Instruments, 0, sizeof(Instruments));
 	Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Patterns.ClearPatterns();
 	memset(m_szNames, 0, sizeof(m_szNames));
@@ -674,7 +674,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		if (pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
 	}
 	// Check invalid instruments
-	while ((m_nInstruments > 0) && (!Headers[m_nInstruments])) m_nInstruments--;
+	while ((m_nInstruments > 0) && (!Instruments[m_nInstruments])) m_nInstruments--;
 	// Set default values
 	if (m_nDefaultTempo < 32) m_nDefaultTempo = 125;
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
@@ -808,8 +808,8 @@ BOOL CSoundFile::Destroy()
 	}
 	for (i=0; i<MAX_INSTRUMENTS; i++)
 	{
-		delete Headers[i];
-		Headers[i] = NULL;
+		delete Instruments[i];
+		Instruments[i] = NULL;
 	}
 	for (i=0; i<MAX_MIXPLUGINS; i++)
 	{
@@ -1407,10 +1407,10 @@ CString CSoundFile::GetSampleName(UINT nSample) const
 CString CSoundFile::GetInstrumentName(UINT nInstr) const
 //-----------------------------------------------------------
 {
-	if ((nInstr >= MAX_INSTRUMENTS) || (!Headers[nInstr]))	{
+	if ((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))	{
 		return "";
 	}
-	return Headers[nInstr]->name;
+	return Instruments[nInstr]->name;
 }
 
 
@@ -1446,7 +1446,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 	{
 		Chn[i].nNote = Chn[i].nNewNote = Chn[i].nNewIns = 0;
 		Chn[i].pModSample = NULL;
-		Chn[i].pHeader = NULL;
+		Chn[i].pModInstrument = NULL;
 		Chn[i].nPortamentoDest = 0;
 		Chn[i].nCommand = 0;
 		Chn[i].nPatternLoopCount = 0;
@@ -1471,7 +1471,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nROfs = Chn[i].nLOfs = 0;
 		Chn[i].pSample = NULL;
 		Chn[i].pModSample = NULL;
-		Chn[i].pHeader = NULL;
+		Chn[i].pModInstrument = NULL;
 		Chn[i].nCutOff = 0x7F;
 		Chn[i].nResonance = 0;
 		Chn[i].nFilterMode = 0;
@@ -1653,23 +1653,23 @@ CString CSoundFile::GetPatternViewInstrumentName(UINT nInstr, bool returnEmptyIn
 //-----------------------------------------------------------------
 {
 	//Default: returnEmptyInsteadOfNoName = false;
-	if(nInstr >= MAX_INSTRUMENTS || m_nInstruments == 0 || Headers[nInstr] == 0) return "";
+	if(nInstr >= MAX_INSTRUMENTS || m_nInstruments == 0 || Instruments[nInstr] == 0) return "";
 
 	CString displayName, instrumentName, pluginName = "";
 					
 	// Use instrument name
-	instrumentName.Format("%s", Headers[nInstr]->name);
+	instrumentName.Format("%s", Instruments[nInstr]->name);
 
 	if (instrumentName == "") {
 		// if there's no instrument name, use name of sample associated with C-5.
  		//TODO: If there's no sample mapped to that note, we could check the other notes.
-		if (Headers[nInstr]->Keyboard[60] && Samples[Headers[nInstr]->Keyboard[60]].pSample) {
-			instrumentName.Format("s: %s", m_szNames[Headers[nInstr]->Keyboard[60]]); //60 is C-5
+		if (Instruments[nInstr]->Keyboard[60] && Samples[Instruments[nInstr]->Keyboard[60]].pSample) {
+			instrumentName.Format("s: %s", m_szNames[Instruments[nInstr]->Keyboard[60]]); //60 is C-5
 		}
 	}
 
 	//Get plugin name:
-	UINT nPlug=Headers[nInstr]->nMixPlug;
+	UINT nPlug=Instruments[nInstr]->nMixPlug;
 	if (nPlug>0 && nPlug<MAX_MIXPLUGINS) {
 		pluginName = m_MixPlugins[nPlug-1].Info.szName;
 	}
@@ -2707,20 +2707,20 @@ UINT CSoundFile::DetectUnusedSamples(BYTE *pbIns)
 					{
 						if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
 						{
-							INSTRUMENTHEADER *penv = Headers[p->instr];
-							if (penv)
+							MODINSTRUMENT *pIns = Instruments[p->instr];
+							if (pIns)
 							{
-								UINT n = penv->Keyboard[p->note-1];
+								UINT n = pIns->Keyboard[p->note-1];
 								if (n < MAX_SAMPLES) pbIns[n>>3] |= 1<<(n&7);
 							}
 						} else
 						{
 							for (UINT k=1; k<=m_nInstruments; k++)
 							{
-								INSTRUMENTHEADER *penv = Headers[k];
-								if (penv)
+								MODINSTRUMENT *pIns = Instruments[k];
+								if (pIns)
 								{
-									UINT n = penv->Keyboard[p->note-1];
+									UINT n = pIns->Keyboard[p->note-1];
 									if (n < MAX_SAMPLES) pbIns[n>>3] |= 1<<(n&7);
 								}
 							}
@@ -2817,7 +2817,7 @@ void CSoundFile::BuildDefaultInstrument()
 {
 // m_defaultInstrument is currently only used to get default values for extented properties. 
 // In the future we can make better use of this.
-	memset(&m_defaultInstrument, 0, sizeof(INSTRUMENTHEADER));
+	memset(&m_defaultInstrument, 0, sizeof(MODINSTRUMENT));
 	m_defaultInstrument.nResampling = SRCMODE_DEFAULT;
 	m_defaultInstrument.nFilterMode = FLTMODE_UNCHANGED;
 	m_defaultInstrument.nPPC = 5*12;
@@ -2899,24 +2899,24 @@ bool CSoundFile::LoadStaticTunings()
 		s_pTuningsSharedStandard->SetConstStatus(CTuningCollection::EM_CONST);
 	#endif
 
-	INSTRUMENTHEADER::s_DefaultTuning = NULL;
+	MODINSTRUMENT::s_DefaultTuning = NULL;
 
 	return false;
 }
 
 
 
-void CSoundFile::SetDefaultInstrumentValues(INSTRUMENTHEADER *penv) 
+void CSoundFile::SetDefaultInstrumentValues(MODINSTRUMENT *pIns) 
 //-----------------------------------------------------------------
 {
-	penv->nResampling = m_defaultInstrument.nResampling;
-	penv->nFilterMode = m_defaultInstrument.nFilterMode;
-	penv->nPitchEnvReleaseNode = m_defaultInstrument.nPitchEnvReleaseNode;
-	penv->nPanEnvReleaseNode = m_defaultInstrument.nPanEnvReleaseNode;
-	penv->nVolEnvReleaseNode = m_defaultInstrument.nVolEnvReleaseNode;
-	penv->pTuning = m_defaultInstrument.pTuning;
-	penv->nPluginVelocityHandling = m_defaultInstrument.nPluginVelocityHandling;
-	penv->nPluginVolumeHandling = m_defaultInstrument.nPluginVolumeHandling;
+	pIns->nResampling = m_defaultInstrument.nResampling;
+	pIns->nFilterMode = m_defaultInstrument.nFilterMode;
+	pIns->nPitchEnvReleaseNode = m_defaultInstrument.nPitchEnvReleaseNode;
+	pIns->nPanEnvReleaseNode = m_defaultInstrument.nPanEnvReleaseNode;
+	pIns->nVolEnvReleaseNode = m_defaultInstrument.nVolEnvReleaseNode;
+	pIns->pTuning = m_defaultInstrument.pTuning;
+	pIns->nPluginVelocityHandling = m_defaultInstrument.nPluginVelocityHandling;
+	pIns->nPluginVolumeHandling = m_defaultInstrument.nPluginVolumeHandling;
 
 }
 
@@ -2939,8 +2939,8 @@ string CSoundFile::GetNoteName(const CTuning::NOTEINDEXTYPE& note, const int ins
 	if(inst == -1)
 		return szDefaultNoteNames[note-1];
 	
-	if(m_nType == MOD_TYPE_MPT && Headers[inst] && Headers[inst]->pTuning)
-		return Headers[inst]->pTuning->GetNoteName(note-NOTE_MIDDLEC);
+	if(m_nType == MOD_TYPE_MPT && Instruments[inst] && Instruments[inst]->pTuning)
+		return Instruments[inst]->pTuning->GetNoteName(note-NOTE_MIDDLEC);
 	else
 		return szDefaultNoteNames[note-1];
 }

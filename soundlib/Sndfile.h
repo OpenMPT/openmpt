@@ -412,7 +412,7 @@ MODULAR STRUCT DECLARATIONS :
 ---------------------------------------------------------------------------------------------*/
 
 // Instrument Struct
-struct INSTRUMENTHEADER
+struct MODINSTRUMENT
 {
 	UINT nFadeOut;
 	DWORD dwFlags;
@@ -487,13 +487,13 @@ struct INSTRUMENTHEADER
 
 };
 
-//INSTRUMENTHEADER;
+//MODINSTRUMENT;
 
 // -----------------------------------------------------------------------------------------
-// MODULAR INSTRUMENTHEADER FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
+// MODULAR MODINSTRUMENT FIELD ACCESS : body content at the (near) top of Sndfile.cpp !!!
 // -----------------------------------------------------------------------------------------
-extern void WriteInstrumentHeaderStruct(INSTRUMENTHEADER * input, FILE * file);
-extern BYTE * GetInstrumentHeaderFieldPointer(INSTRUMENTHEADER * input, __int32 fcode, __int16 fsize);
+extern void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file);
+extern BYTE * GetInstrumentHeaderFieldPointer(MODINSTRUMENT * input, __int32 fcode, __int16 fsize);
 
 // -! NEW_FEATURE#0027
 
@@ -531,7 +531,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nRealVolume, nRealPan;
 	LONG nVolume, nPan, nFadeOutVol;
 	LONG nPeriod, nC5Speed, nPortamentoDest;
-	INSTRUMENTHEADER *pHeader;
+	MODINSTRUMENT *pModInstrument;
 	MODSAMPLE *pModSample;
 	DWORD nVolEnvPosition, nPanEnvPosition, nPitchEnvPosition;
 	LONG nVolEnvValueAtReleaseJump, nPanEnvValueAtReleaseJump, nPitchEnvValueAtReleaseJump;
@@ -576,7 +576,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	void ClearRowCmd() {nRowNote = NOTE_NONE; nRowInstr = 0; nRowVolCmd = VOLCMD_NONE; nRowVolume = 0; nRowCommand = CMD_NONE; nRowParam = 0;}
 
 	typedef UINT VOLUME;
-	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol*4 : nVolume;}
+	VOLUME GetVSTVolume() {return (pModInstrument) ? pModInstrument->nGlobalVol*4 : nVolume;}
 
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
 		bool m_ReCalculateFreqOnFirstTick;
@@ -917,19 +917,19 @@ public:	// for Editing
 	DWORD m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples;
 	UINT m_nMaxOrderPosition, m_nPatternNames;
 	LPSTR m_lpszSongComments, m_lpszPatternNames;
-	UINT ChnMix[MAX_CHANNELS];						// Channels to be mixed
-	MODCHANNEL Chn[MAX_CHANNELS];					// Channels
-	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS]; // Channels settings
-	CPatternContainer Patterns;						//Patterns
-	CPatternSizesMimic PatternSize;					// Mimics old PatternsSize-array(is read-only).
-	COrderToPatternTable Order;						// Order[x] gives the index of the pattern located at order x.
-	MODSAMPLE Samples[MAX_SAMPLES];					// Sample Headers
-	INSTRUMENTHEADER *Headers[MAX_INSTRUMENTS];		// Instrument Headers
-	INSTRUMENTHEADER m_defaultInstrument;			// Currently only used to get default values for extented properties. 
-	CHAR m_szNames[MAX_SAMPLES][32];				// Song and sample names
-	MODMIDICFG m_MidiCfg;							// Midi macro config table
-	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];		// Mix plugins
-	SNDMIXSONGEQ m_SongEQ;							// Default song EQ preset
+	UINT ChnMix[MAX_CHANNELS];							// Channels to be mixed
+	MODCHANNEL Chn[MAX_CHANNELS];						// Channels
+	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS];	// Channels settings
+	CPatternContainer Patterns;							//Patterns
+	CPatternSizesMimic PatternSize;						// Mimics old PatternsSize-array(is read-only).
+	COrderToPatternTable Order;							// Order[x] gives the index of the pattern located at order x.
+	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
+	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
+	MODINSTRUMENT m_defaultInstrument;					// Currently only used to get default values for extented properties. 
+	CHAR m_szNames[MAX_SAMPLES][32];					// Song and sample names
+	MODMIDICFG m_MidiCfg;								// Midi macro config table
+	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
+	SNDMIXSONGEQ m_SongEQ;								// Default song EQ preset
 	CHAR CompressionTable[16];
 	bool m_bChannelMuteTogglePending[MAX_BASECHANNELS];
 
@@ -1062,8 +1062,8 @@ public:
 	bool SaveITProject(LPCSTR lpszFileName);
 // -! NEW_FEATURE#0023
 	UINT SaveMixPlugins(FILE *f=NULL, BOOL bUpdate=TRUE);
-	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, INSTRUMENTHEADER* instruments[], UINT nInstruments);
-	void SaveExtendedInstrumentProperties(INSTRUMENTHEADER *instruments[], UINT nInstruments, FILE* f);
+	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, MODINSTRUMENT* instruments[], UINT nInstruments);
+	void SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], UINT nInstruments, FILE* f);
 	void SaveExtendedSongProperties(FILE* f);
 	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = NULL);
 
@@ -1248,7 +1248,7 @@ public:
 	MODSAMPLE *GetSample(UINT n) { return Samples+n; }
 	void ResetMidiCfg();
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
-	long ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers); //change from BOOL for rewbs.modularInstData
+	long ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers); //change from BOOL for rewbs.modularInstData
 	UINT LoadMixPlugins(const void *pData, UINT nLen);
 //	PSNDMIXPLUGIN GetSndPlugMixPlug(IMixPlugin *pPlugin); //rewbs.plugDocAware
 #ifndef NO_FILTER
@@ -1276,9 +1276,9 @@ public:
 	static void FreePattern(LPVOID pat);
 
 public:
-	int getVolEnvValueFromPosition(int position, INSTRUMENTHEADER* penv);
+	int getVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns);
     void resetEnvelopes(MODCHANNEL* pChn, int envToReset = ENV_RESET_ALL);
-	void SetDefaultInstrumentValues(INSTRUMENTHEADER *penv);
+	void SetDefaultInstrumentValues(MODINSTRUMENT *pIns);
 private:
 	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes);
 	UINT  __cdecl GetActiveInstrumentPlugin(UINT nChan, bool respectMutes);
@@ -1307,8 +1307,8 @@ inline uint32 MODSAMPLE::GetSampleRate(const MODTYPE type) const
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
 //----------------------------------------------------------------
 {
-	if(instr > 0 && instr < MAX_INSTRUMENTS && Headers[instr] && Headers[instr]->nMixPlug && Headers[instr]->nMixPlug <= MAX_MIXPLUGINS)
-		return m_MixPlugins[Headers[instr]->nMixPlug-1].pMixPlugin;
+	if(instr > 0 && instr < MAX_INSTRUMENTS && Instruments[instr] && Instruments[instr]->nMixPlug && Instruments[instr]->nMixPlug <= MAX_MIXPLUGINS)
+		return m_MixPlugins[Instruments[instr]->nMixPlug-1].pMixPlugin;
 	else
 		return NULL;
 }
@@ -1506,15 +1506,15 @@ extern MODFORMATINFO gModFormatInfo[MAX_MODTYPE];
 // Used in instrument/song extension reading to make sure the size field is valid.
 bool IsValidSizeField(const LPCBYTE pData, const LPCBYTE pEnd, const int16 size);
 
-// Read instrument property with 'code' and 'size' from 'ptr' to instrument 'penv'.
+// Read instrument property with 'code' and 'size' from 'ptr' to instrument 'pIns'.
 // Note: (ptr, size) pair must be valid (e.g. can read 'size' bytes from 'ptr')
-void ReadInstrumentExtensionField(INSTRUMENTHEADER* penv, LPCBYTE& ptr, const int32 code, const int16 size);
+void ReadInstrumentExtensionField(MODINSTRUMENT* pIns, LPCBYTE& ptr, const int32 code, const int16 size);
 
-// Read instrument property with 'code' from 'pData' to instrument 'penv'.
-void ReadExtendedInstrumentProperty(INSTRUMENTHEADER* penv, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd);
+// Read instrument property with 'code' from 'pData' to instrument 'pIns'.
+void ReadExtendedInstrumentProperty(MODINSTRUMENT* pIns, const int32 code, LPCBYTE& pData, const LPCBYTE pEnd);
 
-// Read extended instrument properties from 'pDataStart' to instrument 'penv'.
-void ReadExtendedInstrumentProperties(INSTRUMENTHEADER* penv, const LPCBYTE pDataStart, const size_t nMemLength);
+// Read extended instrument properties from 'pDataStart' to instrument 'pIns'.
+void ReadExtendedInstrumentProperties(MODINSTRUMENT* pIns, const LPCBYTE pDataStart, const size_t nMemLength);
 
 
 #endif

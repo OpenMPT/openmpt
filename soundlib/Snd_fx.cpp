@@ -433,16 +433,16 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	BOOL bInstrumentChanged = FALSE;
 
 	if (instr >= MAX_INSTRUMENTS) return;
-	INSTRUMENTHEADER *penv = Headers[instr];
+	MODINSTRUMENT *pIns = Instruments[instr];
 	MODSAMPLE *pSmp = &Samples[instr];
 	UINT note = pChn->nNewNote;
 
 	if(note == 0 && IsCompatibleMode(TRK_IMPULSETRACKER)) return;
 
-	if ((penv) && (note) && (note <= 128))
+	if ((pIns) && (note) && (note <= 128))
 	{
-		if (penv->NoteMap[note-1] >= 0xFE) return;
-		UINT n = penv->Keyboard[note-1];
+		if (pIns->NoteMap[note-1] >= 0xFE) return;
+		UINT n = pIns->Keyboard[note-1];
 		pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : NULL;
 	} else
 	if (m_nInstruments)
@@ -451,23 +451,23 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		pSmp = NULL;
 	}
 
-	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && penv && penv->pTuning);
+	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && pIns && pIns->pTuning);
 	//Playback behavior change for MPT: With portamento don't change sample if it is in
 	//the same instrument as previous sample.
-	if(bPorta && bNewTuning && penv == pChn->pHeader)
+	if(bPorta && bNewTuning && pIns == pChn->pModInstrument)
 		return;
 
 	bool returnAfterVolumeAdjust = false;
 	// bInstrumentChanged is used for IT carry-on env option
-	if (penv != pChn->pHeader)
+	if (pIns != pChn->pModInstrument)
 	{
 		bInstrumentChanged = TRUE;
-		pChn->pHeader = penv;
+		pChn->pModInstrument = pIns;
 	} 
 	else 
 	{	
 		// Special XM hack
-		if ((bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (penv)
+		if ((bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (pIns)
 		&& (pChn->pModSample) && (pSmp != pChn->pModSample))
 		{
 			// FT2 doesn't change the sample in this case,
@@ -484,7 +484,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 			pChn->nVolume = pSmp->nVolume;
 		else
 		{
-			if(penv && penv->nMixPlug)
+			if(pIns && pIns->nMixPlug)
 				pChn->nVolume = pChn->GetVSTVolume();
 		}
 	}
@@ -495,15 +495,15 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	// Instrument adjust
 	pChn->nNewIns = 0;
 	
-	if (penv && (penv->nMixPlug || pSmp))		//rewbs.VSTiNNA
-		pChn->nNNA = penv->nNNA;
+	if (pIns && (pIns->nMixPlug || pSmp))		//rewbs.VSTiNNA
+		pChn->nNNA = pIns->nNNA;
 
 	if (pSmp)
 	{
-		if (penv)
+		if (pIns)
 		{
-			pChn->nInsVol = (pSmp->nGlobalVol * penv->nGlobalVol) >> 6;
-			if (penv->dwFlags & ENV_SETPANNING) pChn->nPan = penv->nPan;
+			pChn->nInsVol = (pSmp->nGlobalVol * pIns->nGlobalVol) >> 6;
+			if (pIns->dwFlags & ENV_SETPANNING) pChn->nPan = pIns->nPan;
 		} else
 		{
 			pChn->nInsVol = pSmp->nGlobalVol;
@@ -521,17 +521,17 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		 || (IsCompatibleMode(TRK_IMPULSETRACKER) && bInstrumentChanged))
 		{
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
-			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (penv) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
+			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
 			{
-				if (!(penv->dwFlags & ENV_VOLCARRY)) resetEnvelopes(pChn, ENV_RESET_VOL);
-				if (!(penv->dwFlags & ENV_PANCARRY)) resetEnvelopes(pChn, ENV_RESET_PAN);
-				if (!(penv->dwFlags & ENV_PITCHCARRY)) resetEnvelopes(pChn, ENV_RESET_PITCH);
+				if (!(pIns->dwFlags & ENV_VOLCARRY)) resetEnvelopes(pChn, ENV_RESET_VOL);
+				if (!(pIns->dwFlags & ENV_PANCARRY)) resetEnvelopes(pChn, ENV_RESET_PAN);
+				if (!(pIns->dwFlags & ENV_PITCHCARRY)) resetEnvelopes(pChn, ENV_RESET_PITCH);
 			} else {
 				resetEnvelopes(pChn);
 			}
 			pChn->nAutoVibDepth = 0;
 			pChn->nAutoVibPos = 0;
-		} else if ((penv) && (!(penv->dwFlags & ENV_VOLUME)))	{
+		} else if ((pIns) && (!(pIns->dwFlags & ENV_VOLUME)))	{
 			resetEnvelopes(pChn);		
 		}
 	}
@@ -561,17 +561,17 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 			pChn->dwFlags = (pChn->dwFlags & 0xFFFFFF00) | (pSmp->uFlags & 0xFF);
 
 
-		if (penv)
+		if (pIns)
 		{
-			if (penv->dwFlags & ENV_VOLUME) pChn->dwFlags |= CHN_VOLENV;
-			if (penv->dwFlags & ENV_PANNING) pChn->dwFlags |= CHN_PANENV;
-			if (penv->dwFlags & ENV_PITCH) pChn->dwFlags |= CHN_PITCHENV;
-			if ((penv->dwFlags & ENV_PITCH) && (penv->dwFlags & ENV_FILTER))
+			if (pIns->dwFlags & ENV_VOLUME) pChn->dwFlags |= CHN_VOLENV;
+			if (pIns->dwFlags & ENV_PANNING) pChn->dwFlags |= CHN_PANENV;
+			if (pIns->dwFlags & ENV_PITCH) pChn->dwFlags |= CHN_PITCHENV;
+			if ((pIns->dwFlags & ENV_PITCH) && (pIns->dwFlags & ENV_FILTER))
 			{
 				if (!pChn->nCutOff) pChn->nCutOff = 0x7F;
 			}
-			if (penv->nIFC & 0x80) pChn->nCutOff = penv->nIFC & 0x7F;
-			if (penv->nIFR & 0x80) pChn->nResonance = penv->nIFR & 0x7F;
+			if (pIns->nIFC & 0x80) pChn->nCutOff = pIns->nIFC & 0x7F;
+			if (pIns->nIFR & 0x80) pChn->nResonance = pIns->nIFR & 0x7F;
 		}
 		pChn->nVolSwing = pChn->nPanSwing = 0;
 		pChn->nResSwing = pChn->nCutSwing = 0;
@@ -618,15 +618,15 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 	if (note < 1) return;
 	MODCHANNEL * const pChn = &Chn[nChn];
 	MODSAMPLE *pSmp = pChn->pModSample;
-	INSTRUMENTHEADER *penv = pChn->pHeader;
+	MODINSTRUMENT *pIns = pChn->pModInstrument;
 
-	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && penv && penv->pTuning);
+	const bool bNewTuning = (m_nType == MOD_TYPE_MPT && pIns && pIns->pTuning);
 
-	if ((penv) && (note <= 0x80))
+	if ((pIns) && (note <= 0x80))
 	{
-		UINT n = penv->Keyboard[note - 1];
+		UINT n = pIns->Keyboard[note - 1];
 		if ((n) && (n < MAX_SAMPLES)) pSmp = &Samples[n];
-		note = penv->NoteMap[note-1];
+		note = pIns->NoteMap[note-1];
 	}
 	// Key Off
 	if (note >= 0x80)
@@ -662,7 +662,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 			pChn->nPortamentoDest = 0;
 		else
 		{
-			pChn->nPortamentoDest = penv->pTuning->GetStepDistance(pChn->nNote, pChn->m_PortamentoFineSteps, note, 0);
+			pChn->nPortamentoDest = pIns->pTuning->GetStepDistance(pChn->nNote, pChn->m_PortamentoFineSteps, note, 0);
 			//Here pCnh->nPortamentoDest means 'steps to slide'.
 			pChn->m_PortamentoFineSteps = -pChn->nPortamentoDest;
 		}
@@ -764,37 +764,37 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		{
 			pChn->nVolSwing = pChn->nPanSwing = 0;
 			pChn->nResSwing = pChn->nCutSwing = 0;
-			if (penv)
+			if (pIns)
 			{
-				if (!(penv->dwFlags & ENV_VOLCARRY)) pChn->nVolEnvPosition = 0;
-				if (!(penv->dwFlags & ENV_PANCARRY)) pChn->nPanEnvPosition = 0;
-				if (!(penv->dwFlags & ENV_PITCHCARRY)) pChn->nPitchEnvPosition = 0;
+				if (!(pIns->dwFlags & ENV_VOLCARRY)) pChn->nVolEnvPosition = 0;
+				if (!(pIns->dwFlags & ENV_PANCARRY)) pChn->nPanEnvPosition = 0;
+				if (!(pIns->dwFlags & ENV_PITCHCARRY)) pChn->nPitchEnvPosition = 0;
 				if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
 				{
 					// Volume Swing
-					if (penv->nVolSwing)
+					if (pIns->nVolSwing)
 					{
-						int d = ((LONG)penv->nVolSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						int d = ((LONG)pIns->nVolSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nVolSwing = (signed short)((d * pChn->nVolume + 1)/128);
 					}
 					// Pan Swing
-					if (penv->nPanSwing)
+					if (pIns->nPanSwing)
 					{
-						int d = ((LONG)penv->nPanSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						int d = ((LONG)pIns->nPanSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nPanSwing = (signed short)d;
 						pChn->nRestorePanOnNewNote = pChn->nPan+1;
 					}
 					// Cutoff Swing
-					if (penv->nCutSwing)
+					if (pIns->nCutSwing)
 					{
-						int d = ((LONG)penv->nCutSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						int d = ((LONG)pIns->nCutSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nCutSwing = (signed short)((d * pChn->nCutOff + 1)/128);
 						pChn->nRestoreCutoffOnNewNote = pChn->nCutOff + 1;
 					}
 					// Resonance Swing
-					if (penv->nResSwing)
+					if (pIns->nResSwing)
 					{
-						int d = ((LONG)penv->nResSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
+						int d = ((LONG)pIns->nResSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
 						pChn->nResSwing = (signed short)((d * pChn->nResonance + 1)/128);
 						pChn->nRestoreResonanceOnNewNote = pChn->nResonance + 1;
 					}
@@ -806,12 +806,12 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		pChn->nLeftVol = pChn->nRightVol = 0;
 		BOOL bFlt = (m_dwSongFlags & SONG_MPTFILTERMODE) ? FALSE : TRUE;
 		// Setup Initial Filter for this note
-		if (penv)
+		if (pIns)
 		{
-			if (penv->nIFR & 0x80) { pChn->nResonance = penv->nIFR & 0x7F; bFlt = TRUE; }
-			if (penv->nIFC & 0x80) { pChn->nCutOff = penv->nIFC & 0x7F; bFlt = TRUE; }
-			if (bFlt && (penv->nFilterMode != FLTMODE_UNCHANGED)) {
-				pChn->nFilterMode = penv->nFilterMode;
+			if (pIns->nIFR & 0x80) { pChn->nResonance = pIns->nIFR & 0x7F; bFlt = TRUE; }
+			if (pIns->nIFC & 0x80) { pChn->nCutOff = pIns->nIFC & 0x7F; bFlt = TRUE; }
+			if (bFlt && (pIns->nFilterMode != FLTMODE_UNCHANGED)) {
+				pChn->nFilterMode = pIns->nFilterMode;
 			}
 		} else
 		{
@@ -826,7 +826,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 	if (bManual) pChn->dwFlags &= ~CHN_MUTE;
 	if (((pChn->dwFlags & CHN_MUTE) && (gdwSoundSetup & SNDMIX_MUTECHNMODE))
 	 || ((pChn->pModSample) && (pChn->pModSample->uFlags & CHN_MUTE) && (!bManual))
-	 || ((pChn->pHeader) && (pChn->pHeader->dwFlags & ENV_MUTE) && (!bManual)))
+	 || ((pChn->pModInstrument) && (pChn->pModInstrument->dwFlags & ENV_MUTE) && (!bManual)))
 	{
 		if (!bManual) pChn->nPeriod = 0;
 	}
@@ -871,7 +871,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 //------------------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	INSTRUMENTHEADER* pHeader = 0;
+	MODINSTRUMENT* pHeader = 0;
 	LPSTR pSample;
 	if (note > 0x80) note = NOTE_NONE;
 	if (note < 1) return;
@@ -900,10 +900,10 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	}
 	if (instr >= MAX_INSTRUMENTS) instr = 0;
 	pSample = pChn->pSample;
-	pHeader = pChn->pHeader;
+	pHeader = pChn->pModInstrument;
 	if ((instr) && (note))
 	{
-		pHeader = Headers[instr];
+		pHeader = Instruments[instr];
 		if (pHeader)
 		{
 			UINT n = 0;
@@ -916,7 +916,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 		} else pSample = NULL;
 	}
 	MODCHANNEL *p = pChn;
-	//if (!penv) return;
+	//if (!pIns) return;
 	if (pChn->dwFlags & CHN_MUTE) return;
 
 	bool applyDNAtoPlug;	//rewbs.VSTiNNA
@@ -924,15 +924,15 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	if ((i >= m_nChannels) || (p == pChn))
 	{
 		applyDNAtoPlug = false; //rewbs.VSTiNNA
-		if (((p->nMasterChn == nChn+1) || (p == pChn)) && (p->pHeader))
+		if (((p->nMasterChn == nChn+1) || (p == pChn)) && (p->pModInstrument))
 		{
 			BOOL bOk = FALSE;
 			// Duplicate Check Type
-			switch(p->pHeader->nDCT)
+			switch(p->pModInstrument->nDCT)
 			{
 			// Note
 			case DCT_NOTE:
-				if ((note) && (p->nNote == note) && (pHeader == p->pHeader)) bOk = TRUE;
+				if ((note) && (p->nNote == note) && (pHeader == p->pModInstrument)) bOk = TRUE;
 				if (pHeader && pHeader->nMixPlug) applyDNAtoPlug = true; //rewbs.VSTiNNA
 				break;
 			// Sample
@@ -941,13 +941,13 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 				break;
 			// Instrument
 			case DCT_INSTRUMENT:
-				if (pHeader == p->pHeader) bOk = TRUE;
+				if (pHeader == p->pModInstrument) bOk = TRUE;
 				//rewbs.VSTiNNA
 				if (pHeader && pHeader->nMixPlug) applyDNAtoPlug = true;
 				break;
 			// Plugin
 			case DCT_PLUGIN:
-				if (pHeader && (pHeader->nMixPlug) && (pHeader->nMixPlug == p->pHeader->nMixPlug))
+				if (pHeader && (pHeader->nMixPlug) && (pHeader->nMixPlug == p->pModInstrument->nMixPlug))
 				{
 					applyDNAtoPlug = true;
 					bOk = TRUE;
@@ -962,7 +962,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 				//rewbs.VSTiNNA
 				if (applyDNAtoPlug)
 				{
-					switch(p->pHeader->nDNA)
+					switch(p->pModInstrument->nDNA)
 					{
 					case DNA_NOTECUT:
 					case DNA_NOTEOFF:
@@ -970,13 +970,13 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 						//switch off duplicated note played on this plugin 
 						IMixPlugin *pPlugin =  m_MixPlugins[pHeader->nMixPlug-1].pMixPlugin;
 						if (pPlugin && p->nNote)
-							pPlugin->MidiCommand(p->pHeader->nMidiChannel, p->pHeader->nMidiProgram, p->pHeader->wMidiBank, p->nNote+NOTE_KEYOFF, 0, i);
+							pPlugin->MidiCommand(p->pModInstrument->nMidiChannel, p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nNote+NOTE_KEYOFF, 0, i);
 						break;
 					}
 				}
 				//end rewbs.VSTiNNA
 
-				switch(p->pHeader->nDNA)
+				switch(p->pModInstrument->nDNA)
 				{
 				// Cut
 				case DNA_NOTECUT:
@@ -1005,12 +1005,12 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 	// Do we need to apply New/Duplicate Note Action to a VSTi?
 	bool applyNNAtoPlug = false;
 	IMixPlugin *pPlugin = NULL;
-	if (pChn->pHeader && pChn->pHeader->nMidiChannel > 0 && pChn->pHeader->nMidiChannel < 17 && pChn->nNote>0 && pChn->nNote<128) // instro sends to a midi chan
+	if (pChn->pModInstrument && pChn->pModInstrument->nMidiChannel > 0 && pChn->pModInstrument->nMidiChannel < 17 && pChn->nNote>0 && pChn->nNote<128) // instro sends to a midi chan
 	{
 		UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
 		/*
 		UINT nPlugin = 0;
-		nPlugin = pChn->pHeader->nMixPlug;  		   // first try intrument VST
+		nPlugin = pChn->pModInstrument->nMixPlug;  		   // first try intrument VST
 		if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))  // Then try Channel VST
 			nPlugin = ChnSettings[nChn].nMixPlugin;			
 		*/
@@ -1021,7 +1021,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			{
 				// apply NNA to this Plug iff this plug is currently playing a note on this tracking chan
 				// (and if it is playing a note, we know that would be the last note played on this chan).
-				applyNNAtoPlug = pPlugin->isPlaying(pChn->nNote, pChn->pHeader->nMidiChannel, nChn);
+				applyNNAtoPlug = pPlugin->isPlaying(pChn->nNote, pChn->pModInstrument->nMidiChannel, nChn);
 			}
 		}
 	}
@@ -1050,15 +1050,15 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 			{
 				//Move note to the NNA channel (odd, but makes sense with DNA stuff).
 				//Actually a bad idea since it then become very hard to kill some notes.
-				//pPlugin->MoveNote(pChn->nNote, pChn->pHeader->nMidiChannel, nChn, n);
+				//pPlugin->MoveNote(pChn->nNote, pChn->pModInstrument->nMidiChannel, nChn, n);
 				switch(pChn->nNNA)
 				{
 				case NNA_NOTEOFF:
 				case NNA_NOTECUT:
 				case NNA_NOTEFADE:	
 					//switch off note played on this plugin, on this tracker channel and midi channel 
-					//pPlugin->MidiCommand(pChn->pHeader->nMidiChannel, pChn->pHeader->nMidiProgram, pChn->nNote+0xFF, 0, n);
-					pPlugin->MidiCommand(pChn->pHeader->nMidiChannel, pChn->pHeader->nMidiProgram, pChn->pHeader->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
+					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote+0xFF, 0, n);
+					pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->pModInstrument->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
 					break;
 				}
 			}
@@ -1197,7 +1197,7 @@ BOOL CSoundFile::ProcessEffects()
 						else
 						{	
 							if(instr < MAX_INSTRUMENTS)
-								pChn->pHeader = Headers[instr];
+								pChn->pModInstrument = Instruments[instr];
 						}
 					}
 					continue;
@@ -1234,7 +1234,7 @@ BOOL CSoundFile::ProcessEffects()
 				}
 
 				// XM: Key-Off + Sample == Note Cut
-				if ((note == NOTE_KEYOFF) && ((!pChn->pHeader) || (!(pChn->pHeader->dwFlags & ENV_VOLUME))))
+				if ((note == NOTE_KEYOFF) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->dwFlags & ENV_VOLUME))))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					pChn->nVolume = 0;
@@ -1248,7 +1248,7 @@ BOOL CSoundFile::ProcessEffects()
 				{
 					if(m_nInstruments)
 					{
-						if(instr < MAX_INSTRUMENTS && pChn->pHeader != Headers[instr])
+						if(instr < MAX_INSTRUMENTS && pChn->pModInstrument != Instruments[instr])
 							note = pChn->nNote;
 					}
 					else //Case: Only samples used
@@ -1713,7 +1713,7 @@ BOOL CSoundFile::ProcessEffects()
 				if (m_nTickCount == param)
 				{
 					// XM: Key-Off + Sample == Note Cut
-					if ((!pChn->pHeader) || (!(pChn->pHeader->dwFlags & ENV_VOLUME)))
+					if ((!pChn->pModInstrument) || (!(pChn->pModInstrument->dwFlags & ENV_VOLUME)))
 					{
 						if(param == 0) // FT2 is weird....
 						{
@@ -1782,10 +1782,10 @@ BOOL CSoundFile::ProcessEffects()
 					// FT2 only sets the position of the Volume envelope
 					pChn->nPanEnvPosition = param;
 					pChn->nPitchEnvPosition = param;
-					if (pChn->pHeader)
+					if (pChn->pModInstrument)
 					{
-						INSTRUMENTHEADER *penv = pChn->pHeader;
-						if ((pChn->dwFlags & CHN_PANENV) && (penv->nPanEnv) && (param > penv->PanPoints[penv->nPanEnv-1]))
+						MODINSTRUMENT *pIns = pChn->pModInstrument;
+						if ((pChn->dwFlags & CHN_PANENV) && (pIns->nPanEnv) && (param > pIns->PanPoints[pIns->nPanEnv-1]))
 						{
 							pChn->dwFlags &= ~CHN_PANENV;
 						}
@@ -1961,7 +1961,7 @@ void CSoundFile::PortamentoUp(MODCHANNEL *pChn, UINT param, const bool doFinePor
 {
 	MidiPortamento(pChn, param); //Send midi pitch bend event if there's a plugin
 
-	if(GetType() == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
+	if(GetType() == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 	{
 		if(param)
 			pChn->nOldPortaUpDown = param;
@@ -2004,7 +2004,7 @@ void CSoundFile::PortamentoDown(MODCHANNEL *pChn, UINT param, const bool doFineP
 {
 	MidiPortamento(pChn, -1*param); //Send midi pitch bend event if there's a plugin
 
-	if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
+	if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 	{
 		if(param)
 			pChn->nOldPortaUpDown = param;
@@ -2043,7 +2043,7 @@ void CSoundFile::MidiPortamento(MODCHANNEL *pChn, int param)
 //----------------------------------------------------------
 {
 	//Send midi pitch bend event if there's a plugin:
-	INSTRUMENTHEADER *pHeader = pChn->pHeader;
+	MODINSTRUMENT *pHeader = pChn->pModInstrument;
 	if (pHeader && pHeader->nMidiChannel>0 && pHeader->nMidiChannel<17) { // instro sends to a midi chan
 		UINT nPlug = pHeader->nMixPlug;
 		if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
@@ -2186,7 +2186,7 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 		pChn->nOldPortaUpDown = param;
 	}
 
-	if(m_nType == MOD_TYPE_MPT && pChn->pHeader && pChn->pHeader->pTuning)
+	if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
 	{
 		//Behavior: Param tells number of finesteps(or 'fullsteps'(notes) with glissando)
 		//to slide per row(not per tick).	
@@ -2207,7 +2207,7 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 
 		if(pChn->dwFlags & CHN_GLISSANDO)
 		{
-			pChn->m_PortamentoTickSlide *= pChn->pHeader->pTuning->GetFineStepCount() + 1;
+			pChn->m_PortamentoTickSlide *= pChn->pModInstrument->pTuning->GetFineStepCount() + 1;
 			//With glissando interpreting param as notes instead of finesteps.
 		}
 
@@ -3215,7 +3215,7 @@ void CSoundFile::NoteCut(UINT nChn, UINT nTick)
 		pChn->nVolume = 0;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
 
-		INSTRUMENTHEADER *pHeader = pChn->pHeader;
+		MODINSTRUMENT *pHeader = pChn->pModInstrument;
 		if (pHeader && pHeader->nMidiChannel>0 && pHeader->nMidiChannel<17) { // instro sends to a midi chan
 			UINT nPlug = pHeader->nMixPlug;
 			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
@@ -3236,8 +3236,8 @@ void CSoundFile::KeyOff(UINT nChn)
 	MODCHANNEL *pChn = &Chn[nChn];
 	BOOL bKeyOn = (pChn->dwFlags & CHN_KEYOFF) ? FALSE : TRUE;
 	pChn->dwFlags |= CHN_KEYOFF;
-	//if ((!pChn->pHeader) || (!(pChn->dwFlags & CHN_VOLENV)))
-	if ((pChn->pHeader) && (!(pChn->dwFlags & CHN_VOLENV)))
+	//if ((!pChn->pModInstrument) || (!(pChn->dwFlags & CHN_VOLENV)))
+	if ((pChn->pModInstrument) && (!(pChn->dwFlags & CHN_VOLENV)))
 	{
 		pChn->dwFlags |= CHN_NOTEFADE;
 	}
@@ -3262,16 +3262,16 @@ void CSoundFile::KeyOff(UINT nChn)
 			pChn->nLength = psmp->nLength;
 		}
 	}
-	if (pChn->pHeader)
+	if (pChn->pModInstrument)
 	{
-		INSTRUMENTHEADER *penv = pChn->pHeader;
-		if (((penv->dwFlags & ENV_VOLLOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (penv->nFadeOut)) {
+		MODINSTRUMENT *pIns = pChn->pModInstrument;
+		if (((pIns->dwFlags & ENV_VOLLOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut)) {
 			pChn->dwFlags |= CHN_NOTEFADE;
 		}
 	
-		if (penv->nVolEnvReleaseNode != ENV_RELEASE_NODE_UNSET) {
-			pChn->nVolEnvValueAtReleaseJump=getVolEnvValueFromPosition(pChn->nVolEnvPosition, penv);
-			pChn->nVolEnvPosition= penv->VolPoints[penv->nVolEnvReleaseNode];
+		if (pIns->nVolEnvReleaseNode != ENV_RELEASE_NODE_UNSET) {
+			pChn->nVolEnvValueAtReleaseJump=getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);
+			pChn->nVolEnvPosition= pIns->VolPoints[pIns->nVolEnvReleaseNode];
 		}
 
 	}
@@ -3688,15 +3688,15 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 //-----------------------------------------------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	// Unlike channel settings, pHeader is copied from the original chan to the NNA chan,
+	// Unlike channel settings, pModInstrument is copied from the original chan to the NNA chan,
 	// so we don't nee to worry about finding the master chan.
 
 	UINT nPlugin=0;
-	if (pChn && pChn->pHeader) {
+	if (pChn && pChn->pModInstrument) {
 		if (respectMutes && pChn->pModSample && pChn->pModSample->uFlags&ENV_MUTE) { 
 			nPlugin = 0;
 		} else {
-			nPlugin = pChn->pHeader->nMixPlug;
+			nPlugin = pChn->pModInstrument->nMixPlug;
 		}
 	}
 	return nPlugin;
@@ -3704,9 +3704,9 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 
 UINT CSoundFile::GetBestMidiChan(MODCHANNEL *pChn) {
 //--------------------------------------------------
-	if (pChn && pChn->pHeader) {
-		if (pChn->pHeader->nMidiChannel) {
-			return (pChn->pHeader->nMidiChannel-1)&0x0F;
+	if (pChn && pChn->pModInstrument) {
+		if (pChn->pModInstrument->nMidiChannel) {
+			return (pChn->pModInstrument->nMidiChannel-1)&0x0F;
 		}
 	}
 	return 0;

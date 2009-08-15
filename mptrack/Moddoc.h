@@ -200,7 +200,7 @@ public:
 	LONG InsertPattern(LONG nOrd=-1, UINT nRows=64);
 	LONG InsertSample(BOOL bLimit=FALSE);
 	LONG InsertInstrument(LONG lSample=0, LONG lDuplicate=0);
-	void InitializeInstrument(INSTRUMENTHEADER *penv, UINT nsample=0);
+	void InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample=0);
 	BOOL RemoveOrder(UINT n);
 	BOOL RemovePattern(UINT n);
 	BOOL RemoveSample(UINT n);

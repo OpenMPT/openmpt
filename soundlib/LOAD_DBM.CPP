@@ -143,36 +143,36 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 			for (UINT iIns=0; iIns<nInstruments; iIns++)
 			{
 				MODSAMPLE *psmp;
-				INSTRUMENTHEADER *penv;
+				MODINSTRUMENT *pIns;
 				DBMINSTRUMENT *pih;
 				UINT nsmp;
 
 				if (chunk_pos + sizeof(DBMINSTRUMENT) > dwMemPos) break;
-				if ((penv = new INSTRUMENTHEADER) == NULL) break;
+				if ((pIns = new MODINSTRUMENT) == NULL) break;
 				pih = (DBMINSTRUMENT *)(lpStream+chunk_pos);
 				nsmp = BigEndianW(pih->sampleno);
 				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Samples[nsmp] : NULL;
-				memset(penv, 0, sizeof(INSTRUMENTHEADER));
-				memcpy(penv->name, pih->name, 30);
+				memset(pIns, 0, sizeof(MODINSTRUMENT));
+				memcpy(pIns->name, pih->name, 30);
 				if (psmp)
 				{
 					memcpy(m_szNames[nsmp], pih->name, 30);
 					m_szNames[nsmp][30] = 0;
 				}
-				Headers[iIns+1] = penv;
-				penv->nFadeOut = 1024;	// ???
-				penv->nGlobalVol = 64;
-				penv->nPan = BigEndianW(pih->panning);
-				if ((penv->nPan) && (penv->nPan < 256))
-					penv->dwFlags = ENV_SETPANNING;
+				Instruments[iIns+1] = pIns;
+				pIns->nFadeOut = 1024;	// ???
+				pIns->nGlobalVol = 64;
+				pIns->nPan = BigEndianW(pih->panning);
+				if ((pIns->nPan) && (pIns->nPan < 256))
+					pIns->dwFlags = ENV_SETPANNING;
 				else
-					penv->nPan = 128;
-				penv->nPPC = 5*12;
-				SetDefaultInstrumentValues(penv);
+					pIns->nPan = 128;
+				pIns->nPPC = 5*12;
+				SetDefaultInstrumentValues(pIns);
 				for (UINT i=0; i<NOTE_MAX; i++)
 				{
-					penv->Keyboard[i] = nsmp;
-					penv->NoteMap[i] = i+1;
+					pIns->Keyboard[i] = nsmp;
+					pIns->NoteMap[i] = i+1;
 				}
 				// Sample Info
 				if (psmp)
@@ -212,22 +212,22 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				if (chunk_pos + sizeof(DBMENVELOPE) > dwMemPos) break;
 				peh = (DBMENVELOPE *)(lpStream+chunk_pos);
 				nins = BigEndianW(peh->instrument);
-				if ((nins) && (nins < MAX_INSTRUMENTS) && (Headers[nins]) && (peh->numpoints))
+				if ((nins) && (nins < MAX_INSTRUMENTS) && (Instruments[nins]) && (peh->numpoints))
 				{
-					INSTRUMENTHEADER *penv = Headers[nins];
+					MODINSTRUMENT *pIns = Instruments[nins];
 
-					if (peh->flags & 1) penv->dwFlags |= ENV_VOLUME;
-					if (peh->flags & 2) penv->dwFlags |= ENV_VOLSUSTAIN;
-					if (peh->flags & 4) penv->dwFlags |= ENV_VOLLOOP;
-					penv->nVolEnv = peh->numpoints + 1;
-					if (penv->nVolEnv > MAX_ENVPOINTS) penv->nVolEnv = MAX_ENVPOINTS;
-					penv->nVolLoopStart = peh->loopbegin;
-					penv->nVolLoopEnd = peh->loopend;
-					penv->nVolSustainBegin = penv->nVolSustainEnd = peh->sustain1;
-					for (UINT i=0; i<penv->nVolEnv; i++)
+					if (peh->flags & 1) pIns->dwFlags |= ENV_VOLUME;
+					if (peh->flags & 2) pIns->dwFlags |= ENV_VOLSUSTAIN;
+					if (peh->flags & 4) pIns->dwFlags |= ENV_VOLLOOP;
+					pIns->nVolEnv = peh->numpoints + 1;
+					if (pIns->nVolEnv > MAX_ENVPOINTS) pIns->nVolEnv = MAX_ENVPOINTS;
+					pIns->nVolLoopStart = peh->loopbegin;
+					pIns->nVolLoopEnd = peh->loopend;
+					pIns->nVolSustainBegin = pIns->nVolSustainEnd = peh->sustain1;
+					for (UINT i=0; i<pIns->nVolEnv; i++)
 					{
-						penv->VolPoints[i] = BigEndianW(peh->volenv[i*2]);
-						penv->VolEnv[i] = (BYTE)BigEndianW(peh->volenv[i*2+1]);
+						pIns->VolPoints[i] = BigEndianW(peh->volenv[i*2]);
+						pIns->VolEnv[i] = (BYTE)BigEndianW(peh->volenv[i*2+1]);
 					}
 				}
 				chunk_pos += sizeof(DBMENVELOPE);

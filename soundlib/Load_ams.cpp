@@ -352,51 +352,51 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		dwMemPos += 5 + panenv->points*3;
 		pitchenv = (AMS2ENVELOPE *)(lpStream+dwMemPos);
 		dwMemPos += 5 + pitchenv->points*3;
-		INSTRUMENTHEADER *penv = new INSTRUMENTHEADER;
-		if (!penv) return TRUE;
+		MODINSTRUMENT *pIns = new MODINSTRUMENT;
+		if (!pIns) return TRUE;
 		memset(smpmap, 0, sizeof(smpmap));
-		memset(penv, 0, sizeof(INSTRUMENTHEADER));
+		memset(pIns, 0, sizeof(MODINSTRUMENT));
 		for (UINT ismpmap=0; ismpmap<pSmp->samples; ismpmap++)
 		{
 			if ((ismpmap >= 16) || (m_nSamples+1 >= MAX_SAMPLES)) break;
 			m_nSamples++;
 			smpmap[ismpmap] = m_nSamples;
 		}
-		penv->nGlobalVol = 64;
-		penv->nPan = 128;
-		penv->nPPC = 60;
-		SetDefaultInstrumentValues(penv);
-		Headers[nIns] = penv;
+		pIns->nGlobalVol = 64;
+		pIns->nPan = 128;
+		pIns->nPPC = 60;
+		SetDefaultInstrumentValues(pIns);
+		Instruments[nIns] = pIns;
 		if (insnamelen)
 		{
 			if (insnamelen > 31) insnamelen = 31;
-			memcpy(penv->name, pinsname, insnamelen);
-			penv->name[insnamelen] = 0;
+			memcpy(pIns->name, pinsname, insnamelen);
+			pIns->name[insnamelen] = 0;
 		}
 		for (UINT inotemap=0; inotemap<NOTE_MAX; inotemap++)
 		{
-			penv->NoteMap[inotemap] = inotemap+1;
-			penv->Keyboard[inotemap] = smpmap[pSmp->notemap[inotemap] & 0x0F];
+			pIns->NoteMap[inotemap] = inotemap+1;
+			pIns->Keyboard[inotemap] = smpmap[pSmp->notemap[inotemap] & 0x0F];
 		}
 		// Volume Envelope
 		{
 			UINT pos = 0;
-			penv->nVolEnv = (volenv->points > 16) ? 16 : volenv->points;
-			penv->nVolSustainBegin = penv->nVolSustainEnd = volenv->sustain;
-			penv->nVolLoopStart = volenv->loopbegin;
-			penv->nVolLoopEnd = volenv->loopend;
-			for (UINT i=0; i<penv->nVolEnv; i++)
+			pIns->nVolEnv = (volenv->points > 16) ? 16 : volenv->points;
+			pIns->nVolSustainBegin = pIns->nVolSustainEnd = volenv->sustain;
+			pIns->nVolLoopStart = volenv->loopbegin;
+			pIns->nVolLoopEnd = volenv->loopend;
+			for (UINT i=0; i<pIns->nVolEnv; i++)
 			{
-				penv->VolEnv[i] = (BYTE)((volenv->info[i*3+2] & 0x7F) >> 1);
+				pIns->VolEnv[i] = (BYTE)((volenv->info[i*3+2] & 0x7F) >> 1);
 				pos += volenv->info[i*3] + ((volenv->info[i*3+1] & 1) << 8);
-				penv->VolPoints[i] = (WORD)pos;
+				pIns->VolPoints[i] = (WORD)pos;
 			}
 		}
-		penv->nFadeOut = (((lpStream[dwMemPos+2] & 0x0F) << 8) | (lpStream[dwMemPos+1])) << 3;
+		pIns->nFadeOut = (((lpStream[dwMemPos+2] & 0x0F) << 8) | (lpStream[dwMemPos+1])) << 3;
 		UINT envflags = lpStream[dwMemPos+3];
-		if (envflags & 0x01) penv->dwFlags |= ENV_VOLLOOP;
-		if (envflags & 0x02) penv->dwFlags |= ENV_VOLSUSTAIN;
-		if (envflags & 0x04) penv->dwFlags |= ENV_VOLUME;
+		if (envflags & 0x01) pIns->dwFlags |= ENV_VOLLOOP;
+		if (envflags & 0x02) pIns->dwFlags |= ENV_VOLSUSTAIN;
+		if (envflags & 0x04) pIns->dwFlags |= ENV_VOLUME;
 		dwMemPos += 5;
 		// Read Samples
 		for (UINT ismp=0; ismp<pSmp->samples; ismp++)

@@ -468,19 +468,19 @@ VOID CModTree::RefreshDlsBanks()
 				UINT nInstr = pDlsBank->GetNumInstruments();
 				for (UINT iIns=0; iIns<nInstr; iIns++)
 				{
-					DLSINSTRUMENT *pIns = pDlsBank->GetInstrument(iIns);
-					if (pIns)
+					DLSINSTRUMENT *pDlsIns = pDlsBank->GetInstrument(iIns);
+					if (pDlsIns)
 					{
-						wsprintf(szName, "%d: %s", pIns->ulInstrument & 0x7F, pIns->szName);
+						wsprintf(szName, "%d: %s", pDlsIns->ulInstrument & 0x7F, pDlsIns->szName);
 						// Drum Kit
-						if (pIns->ulBank & F_INSTRUMENT_DRUMS)
+						if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 						{
 							HTREEITEM hKit = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
-								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, pIns->ulInstrument & 0x7F, hDrums, TVI_LAST);
-							for (UINT iRgn=0; iRgn<pIns->nRegions; iRgn++)
+								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, pDlsIns->ulInstrument & 0x7F, hDrums, TVI_LAST);
+							for (UINT iRgn=0; iRgn<pDlsIns->nRegions; iRgn++)
 							{
-								UINT keymin = pIns->Regions[iRgn].uKeyMin;
-								UINT keymax = pIns->Regions[iRgn].uKeyMax;
+								UINT keymin = pDlsIns->Regions[iRgn].uKeyMin;
+								UINT keymax = pDlsIns->Regions[iRgn].uKeyMax;
 								if (keymin >= keymax)
 								{
 									wsprintf(szName, "%s%d: %s", szNoteNames[keymin%12], keymin/12,
@@ -504,7 +504,7 @@ VOID CModTree::RefreshDlsBanks()
 						// Melodic
 						{
 							HTREEITEM hbank = hBanks[0];
-							UINT mbank = (pIns->ulBank & 0x7F7F);
+							UINT mbank = (pDlsIns->ulBank & 0x7F7F);
 							UINT i;
 							for (i=0; i<nBanks; i++)
 							{
@@ -531,7 +531,7 @@ VOID CModTree::RefreshDlsBanks()
 								hBanks[j] = hbank;
 								nBanks++;
 							}
-							LPARAM lParam = 0x40000000|(iDls<<24)|((pIns->ulInstrument & 0x7F)<<16)|(iIns);
+							LPARAM lParam = 0x40000000|(iDls<<24)|((pDlsIns->ulInstrument & 0x7F)<<16)|(iIns);
 							InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
 								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hbank, TVI_LAST);
 						}
@@ -841,8 +841,8 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		if ((hintFlagPart == HINT_INSNAMES) && (nIns) && (nIns < MAX_INSTRUMENTS))
 		{
 			smin = smax = nIns;
-			if (((pSndFile->Headers[smin]) && (pInfo->tiInstruments[smin] == NULL))
-			 || ((!pSndFile->Headers[smin]) && (pInfo->tiInstruments[smin] != NULL)))
+			if (((pSndFile->Instruments[smin]) && (pInfo->tiInstruments[smin] == NULL))
+			 || ((!pSndFile->Instruments[smin]) && (pInfo->tiInstruments[smin] != NULL)))
 			{
 				smax = MAX_INSTRUMENTS-1;
 				for (UINT iRem=smin; iRem<smax; iRem++)
@@ -857,14 +857,14 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		}
 		for (UINT iSmp=smin; iSmp<=smax; iSmp++)
 		{
-			if ((iSmp <= pSndFile->m_nInstruments) && (pSndFile->Headers[iSmp]))
+			if ((iSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[iSmp]))
 			{
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-//				wsprintf(s, "%3d: %s", iSmp, pSndFile->Headers[iSmp]->name);
+//				wsprintf(s, "%3d: %s", iSmp, pSndFile->Instruments[iSmp]->name);
 				BOOL pathOk = pSndFile->m_szInstrumentPath[iSmp-1][0] != '\0';
 				BOOL instOk = pSndFile->instrumentModified[iSmp-1] == FALSE;
-				wsprintf(s, pathOk ? (instOk ? "%3d: %s" : "%3d: * %s") : "%3d: ? %s", iSmp, pSndFile->Headers[iSmp]->name);
+				wsprintf(s, pathOk ? (instOk ? "%3d: %s" : "%3d: * %s") : "%3d: ? %s", iSmp, pSndFile->Instruments[iSmp]->name);
 // -! NEW_FEATURE#0023
 				if (!pInfo->tiInstruments[iSmp])
 				{
@@ -1415,10 +1415,10 @@ VOID CModTree::FillInstrumentLibrary()
 		SetItemImage(m_hInsLib, IMAGE_FOLDERSONG, IMAGE_FOLDERSONG);
 		for (UINT iIns=1; iIns<=m_SongFile.m_nInstruments; iIns++)
 		{
-			INSTRUMENTHEADER *penv = m_SongFile.Headers[iIns];
-			if (penv)
+			MODINSTRUMENT *pIns = m_SongFile.Instruments[iIns];
+			if (pIns)
 			{
-				lstrcpyn(szPath, penv->name, 32);
+				lstrcpyn(szPath, pIns->name, 32);
 				wsprintf(s, "%3d: %s", iIns, szPath);
 				ModTreeBuildTVIParam(tvis, s, IMAGE_INSTRUMENTS);
 				InsertItem(&tvis);
@@ -1680,13 +1680,13 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 		if ((iDls < MAX_DLS_BANKS) && (CTrackApp::gpDLSBanks[iDls]))
 		{
 			CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[iDls];
-			DLSINSTRUMENT *pIns = pDLSBank->GetInstrument(lParam1 & 0xFFFF);
+			DLSINSTRUMENT *pDlsIns = pDLSBank->GetInstrument(lParam1 & 0xFFFF);
 			lParam1 = (lParam1 >> 16) & 0xFF;
 			lParam2 = (lParam2 >> 16) & 0xFF;
-			if ((pIns) && (lParam1 < (LONG)pIns->nRegions) && (lParam2 < (LONG)pIns->nRegions))
+			if ((pDlsIns) && (lParam1 < (LONG)pDlsIns->nRegions) && (lParam2 < (LONG)pDlsIns->nRegions))
 			{
-				lParam1 = pIns->Regions[lParam1].uKeyMin;
-				lParam2 = pIns->Regions[lParam2].uKeyMin;
+				lParam1 = pDlsIns->Regions[lParam1].uKeyMin;
+				lParam2 = pDlsIns->Regions[lParam2].uKeyMin;
 			}
 		}
 	}

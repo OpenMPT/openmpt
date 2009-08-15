@@ -1358,8 +1358,8 @@ bool CViewGlobals::MovePlug(UINT src, UINT dest)
 
 	// Update instruments
 	for (INSTRUMENTINDEX nIns=1; nIns<=pSndFile->m_nInstruments; nIns++) {
-		if (pSndFile->Headers[nIns] && (pSndFile->Headers[nIns]->nMixPlug == src+1)) {
-			pSndFile->Headers[nIns]->nMixPlug = static_cast<BYTE>(dest+1);
+		if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == src+1)) {
+			pSndFile->Instruments[nIns]->nMixPlug = static_cast<BYTE>(dest+1);
 		}
 	}
 

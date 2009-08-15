@@ -397,21 +397,21 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	{
 		if (dwMemPos+36 > dwMemLength) return true;
 		MT2INSTRUMENT *pmi = (MT2INSTRUMENT *)(lpStream+dwMemPos);
-		INSTRUMENTHEADER *penv = NULL;
+		MODINSTRUMENT *pIns = NULL;
 		if (iIns <= m_nInstruments)
 		{
-			penv = new INSTRUMENTHEADER;
-			Headers[iIns] = penv;
-			if (penv)
+			pIns = new MODINSTRUMENT;
+			Instruments[iIns] = pIns;
+			if (pIns)
 			{
-				memset(penv, 0, sizeof(INSTRUMENTHEADER));
-				memcpy(penv->name, pmi->szName, 32);
-				SetNullTerminator(penv->name);
-				penv->nGlobalVol = 64;
-				penv->nPan = 128;
+				memset(pIns, 0, sizeof(MODINSTRUMENT));
+				memcpy(pIns->name, pmi->szName, 32);
+				SetNullTerminator(pIns->name);
+				pIns->nGlobalVol = 64;
+				pIns->nPan = 128;
 				for (UINT i=0; i<NOTE_MAX; i++)
 				{
-					penv->NoteMap[i] = i+1;
+					pIns->NoteMap[i] = i+1;
 				}
 			}
 		}
@@ -421,12 +421,12 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 		if (((LONG)pmi->dwDataLen > 0) && (dwMemPos <= dwMemLength - 40) && (pmi->dwDataLen <= dwMemLength - (dwMemPos + 40)))
 		{
 			InstrMap[iIns-1] = pmi;
-			if (penv)
+			if (pIns)
 			{
-				penv->nFadeOut = pmi->wFadeOut;
-				penv->nNNA = pmi->wNNA & 3;
-				penv->nDCT = (pmi->wNNA>>8) & 3;
-				penv->nDNA = (pmi->wNNA>>12) & 3;
+				pIns->nFadeOut = pmi->wFadeOut;
+				pIns->nNNA = pmi->wNNA & 3;
+				pIns->nDCT = (pmi->wNNA>>8) & 3;
+				pIns->nDNA = (pmi->wNNA>>12) & 3;
 				MT2ENVELOPE *pehdr[4];
 				WORD *pedata[4];
 				if (pfh->wVersion <= 0x201)
@@ -468,41 +468,41 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 					{
 					// Volume Envelope
 					case 0:
-						if (pme->nFlags & 1) penv->dwFlags |= ENV_VOLUME;
-						if (pme->nFlags & 2) penv->dwFlags |= ENV_VOLSUSTAIN;
-						if (pme->nFlags & 4) penv->dwFlags |= ENV_VOLLOOP;
-						penv->nVolEnv = (pme->nPoints > 16) ? 16 : pme->nPoints;
-						penv->nVolSustainBegin = penv->nVolSustainEnd = pme->nSustainPos;
-						penv->nVolLoopStart = pme->nLoopStart;
-						penv->nVolLoopEnd = pme->nLoopEnd;
-						pEnvPoints = penv->VolPoints;
-						pEnvData = penv->VolEnv;
+						if (pme->nFlags & 1) pIns->dwFlags |= ENV_VOLUME;
+						if (pme->nFlags & 2) pIns->dwFlags |= ENV_VOLSUSTAIN;
+						if (pme->nFlags & 4) pIns->dwFlags |= ENV_VOLLOOP;
+						pIns->nVolEnv = (pme->nPoints > 16) ? 16 : pme->nPoints;
+						pIns->nVolSustainBegin = pIns->nVolSustainEnd = pme->nSustainPos;
+						pIns->nVolLoopStart = pme->nLoopStart;
+						pIns->nVolLoopEnd = pme->nLoopEnd;
+						pEnvPoints = pIns->VolPoints;
+						pEnvData = pIns->VolEnv;
 						break;
 
 					// Panning Envelope
 					case 1:
-						if (pme->nFlags & 1) penv->dwFlags |= ENV_PANNING;
-						if (pme->nFlags & 2) penv->dwFlags |= ENV_PANSUSTAIN;
-						if (pme->nFlags & 4) penv->dwFlags |= ENV_PANLOOP;
-						penv->nPanEnv = (pme->nPoints > 16) ? 16 : pme->nPoints;
-						penv->nPanSustainBegin = penv->nPanSustainEnd = pme->nSustainPos;
-						penv->nPanLoopStart = pme->nLoopStart;
-						penv->nPanLoopEnd = pme->nLoopEnd;
-						pEnvPoints = penv->PanPoints;
-						pEnvData = penv->PanEnv;
+						if (pme->nFlags & 1) pIns->dwFlags |= ENV_PANNING;
+						if (pme->nFlags & 2) pIns->dwFlags |= ENV_PANSUSTAIN;
+						if (pme->nFlags & 4) pIns->dwFlags |= ENV_PANLOOP;
+						pIns->nPanEnv = (pme->nPoints > 16) ? 16 : pme->nPoints;
+						pIns->nPanSustainBegin = pIns->nPanSustainEnd = pme->nSustainPos;
+						pIns->nPanLoopStart = pme->nLoopStart;
+						pIns->nPanLoopEnd = pme->nLoopEnd;
+						pEnvPoints = pIns->PanPoints;
+						pEnvData = pIns->PanEnv;
 						break;
 
 					// Pitch/Filter envelope
 					default:
-						if (pme->nFlags & 1) penv->dwFlags |= (iEnv==3) ? (ENV_PITCH|ENV_FILTER) : ENV_PITCH;
-						if (pme->nFlags & 2) penv->dwFlags |= ENV_PITCHSUSTAIN;
-						if (pme->nFlags & 4) penv->dwFlags |= ENV_PITCHLOOP;
-						penv->nPitchEnv = (pme->nPoints > 16) ? 16 : pme->nPoints;
-						penv->nPitchSustainBegin = penv->nPitchSustainEnd = pme->nSustainPos;
-						penv->nPitchLoopStart = pme->nLoopStart;
-						penv->nPitchLoopEnd = pme->nLoopEnd;
-						pEnvPoints = penv->PitchPoints;
-						pEnvData = penv->PitchEnv;
+						if (pme->nFlags & 1) pIns->dwFlags |= (iEnv==3) ? (ENV_PITCH|ENV_FILTER) : ENV_PITCH;
+						if (pme->nFlags & 2) pIns->dwFlags |= ENV_PITCHSUSTAIN;
+						if (pme->nFlags & 4) pIns->dwFlags |= ENV_PITCHLOOP;
+						pIns->nPitchEnv = (pme->nPoints > 16) ? 16 : pme->nPoints;
+						pIns->nPitchSustainBegin = pIns->nPitchSustainEnd = pme->nSustainPos;
+						pIns->nPitchLoopStart = pme->nLoopStart;
+						pIns->nPitchLoopEnd = pme->nLoopEnd;
+						pEnvPoints = pIns->PitchPoints;
+						pEnvData = pIns->PitchEnv;
 					}
 					// Envelope data
 					if ((pEnvPoints) && (pEnvData) && (pedata[iEnv]))
@@ -573,11 +573,11 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	{
 		if (dwMemPos+8 > dwMemLength) return true;
 		MT2INSTRUMENT *pmi = InstrMap[iMap];
-		INSTRUMENTHEADER *penv = NULL;
-		if (iMap<m_nInstruments) penv = Headers[iMap+1];
+		MODINSTRUMENT *pIns = NULL;
+		if (iMap<m_nInstruments) pIns = Instruments[iMap+1];
 		for (UINT iGrp=0; iGrp<pmi->wSamples; iGrp++)
 		{
-			if (penv)
+			if (pIns)
 			{
 				MT2GROUP *pmg = (MT2GROUP *)(lpStream+dwMemPos);
 				for (UINT i=0; i<96; i++)
@@ -585,7 +585,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 					if (pmi->GroupsMapping[i] == iGrp)
 					{
 						UINT nSmp = pmg->nSmpNo+1;
-						penv->Keyboard[i+12] = (BYTE)nSmp;
+						pIns->Keyboard[i+12] = (BYTE)nSmp;
 						if (nSmp <= m_nSamples)
 						{
 							Samples[nSmp].nVibType = pmi->bVibType;

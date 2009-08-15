@@ -314,7 +314,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString(" None"), 0);
 			if (m_pSndFile->m_nInstruments)	{
 				for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++) {
-					if (m_pSndFile->Headers[i] == NULL) {
+					if (m_pSndFile->Instruments[i] == NULL) {
 						continue;
 					}
 
@@ -1203,7 +1203,7 @@ void CCtrlPatterns::TogglePluginEditor(bool split)
 {
 	if ((m_nInstrument) && (m_pModDoc))
 	{
-		UINT nPlug = m_pSndFile->Headers[(split?m_nSplitInstrument:m_nInstrument)]->nMixPlug;
+		UINT nPlug = m_pSndFile->Instruments[(split?m_nSplitInstrument:m_nInstrument)]->nMixPlug;
 		if (nPlug) //if not no plugin
 		{
 			PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[nPlug-1]);
@@ -1224,9 +1224,9 @@ void CCtrlPatterns::ToggleSplitPluginEditor()
 bool CCtrlPatterns::HasValidPlug(UINT instr)
 //------------------------------------------
 {
-	if ((instr) && (instr<MAX_INSTRUMENTS) && (m_pSndFile) && m_pSndFile->Headers[instr])
+	if ((instr) && (instr<MAX_INSTRUMENTS) && (m_pSndFile) && m_pSndFile->Instruments[instr])
 	{
-		UINT nPlug = m_pSndFile->Headers[instr]->nMixPlug;
+		UINT nPlug = m_pSndFile->Instruments[instr]->nMixPlug;
 		if (nPlug) //if not no plugin
 		{
 			PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[nPlug-1]);

@@ -2749,9 +2749,9 @@ void CViewPattern::OnPatternAmplify()
 							UINT nSmp = m->instr;
 							if (pSndFile->m_nInstruments)
 							{
-								if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Headers[nSmp]))
+								if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nSmp]))
 								{
-									nSmp = pSndFile->Headers[nSmp]->Keyboard[m->note];
+									nSmp = pSndFile->Instruments[nSmp]->Keyboard[m->note];
 								} else
 								{
 									nSmp = 0;
@@ -2790,9 +2790,9 @@ void CViewPattern::OnPatternAmplify()
 								UINT nSmp = p[x].instr;
 								if (pSndFile->m_nInstruments)
 								{
-									if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Headers[nSmp]))
+									if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nSmp]))
 									{
-										nSmp = pSndFile->Headers[nSmp]->Keyboard[p[x].note];
+										nSmp = pSndFile->Instruments[nSmp]->Keyboard[p[x].note];
 									} else
 									{
 										nSmp = 0;
@@ -4869,7 +4869,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 			{
 				for (UINT i=1; i<=pSndFile->m_nInstruments; i++)
 				{
-					if (pSndFile->Headers[i] == NULL)
+					if (pSndFile->Instruments[i] == NULL)
 						continue;
 
 					CString instString = pSndFile->GetPatternViewInstrumentName(i, true);

@@ -419,11 +419,11 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	if (m_nInstruments)
 	{
 		memset(insmap, 0, sizeof(insmap));
-		for (UINT i=1; i<32; i++) if (Headers[i])
+		for (UINT i=1; i<32; i++) if (Instruments[i])
 		{
-			for (UINT j=0; j<128; j++) if (Headers[i]->Keyboard[j])
+			for (UINT j=0; j<128; j++) if (Instruments[i]->Keyboard[j])
 			{
-				insmap[i] = Headers[i]->Keyboard[j];
+				insmap[i] = Instruments[i]->Keyboard[j];
 				break;
 			}
 		}
