@@ -2486,7 +2486,7 @@ void CViewPattern::OnSetSelInstrument()
 			p = pSndFile->Patterns[m_nPattern] + r * pSndFile->m_nChannels + c;
 			// If a note or an instr is present on the row, do the change, if required.
 			// Do not set instr if note and instr are both blank.
-			if ( ((p->note > 0 && p->note < NOTE_NOTECUT) ||p->instr) && (p->instr!=nIns) ) {
+			if ( ((p->note > 0 && p->note < NOTE_MIN_SPECIAL) ||p->instr) && (p->instr!=nIns) ) {
 				p->instr = nIns;
 				bModified = TRUE;
 			}
