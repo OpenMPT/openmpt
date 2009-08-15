@@ -341,12 +341,12 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 							{
 								int ismp = ps[0];
 								penv->Keyboard[note] = ps[0];
-								Ins[ismp].nVolume = ps[2];
-								Ins[ismp].nPan = ps[4] << 1;
-								Ins[ismp].nVibType = ps[11];
-								Ins[ismp].nVibSweep = ps[10];
-								Ins[ismp].nVibDepth = ps[9];
-								Ins[ismp].nVibRate = ps[8];
+								Samples[ismp].nVolume = ps[2];
+								Samples[ismp].nPan = ps[4] << 1;
+								Samples[ismp].nVibType = ps[11];
+								Samples[ismp].nVibSweep = ps[10];
+								Samples[ismp].nVibDepth = ps[9];
+								Samples[ismp].nVibRate = ps[8];
 							}
 							penv->nFadeOut = (ps[7] << 8) | ps[6];
 							if (penv->nFadeOut == 0xFFFF) penv->nFadeOut = 0;
@@ -410,33 +410,33 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				UINT nins = lpStream[dwPos];
 				if ((nins >= MAX_SAMPLES) || (!nins)) continue;
 				if (m_nSamples < nins) m_nSamples = nins;
-				MODINSTRUMENT *pins = &Ins[nins];
+				MODSAMPLE *pSmp = &Samples[nins];
 				memcpy(m_szNames[nins], lpStream+dwPos+1, 31);
-				memcpy(pins->name, lpStream+dwPos+33, 8);
+				memcpy(pSmp->filename, lpStream+dwPos+33, 8);
 				const BYTE *p = lpStream+dwPos+41;
 				if (pmsh->version > 0)
 				{
-					pins->nC5Speed = *((DWORD *)p);
+					pSmp->nC5Speed = *((DWORD *)p);
 					p += 4;
 				} else
 				{
-					pins->nC5Speed = *((WORD *)p);
+					pSmp->nC5Speed = *((WORD *)p);
 					p += 2;
 				}
-				pins->nLength = *((DWORD *)(p));
-				pins->nLoopStart = *((DWORD *)(p+4));
-				pins->nLoopEnd = pins->nLoopStart + *((DWORD *)(p+8));
-				if (pins->nLoopEnd > pins->nLoopStart) pins->uFlags |= CHN_LOOP;
-				pins->nVolume = 256;
-				pins->nGlobalVol = 64;
+				pSmp->nLength = *((DWORD *)(p));
+				pSmp->nLoopStart = *((DWORD *)(p+4));
+				pSmp->nLoopEnd = pSmp->nLoopStart + *((DWORD *)(p+8));
+				if (pSmp->nLoopEnd > pSmp->nLoopStart) pSmp->uFlags |= CHN_LOOP;
+				pSmp->nVolume = 256;
+				pSmp->nGlobalVol = 64;
 				if (p[13] & 0x01)
 				{
-					pins->uFlags |= CHN_16BIT;
-					pins->nLength >>= 1;
-					pins->nLoopStart >>= 1;
-					pins->nLoopEnd >>= 1;
+					pSmp->uFlags |= CHN_16BIT;
+					pSmp->nLength >>= 1;
+					pSmp->nLoopStart >>= 1;
+					pSmp->nLoopEnd >>= 1;
 				}
-				if (p[13] & 0x02) pins->uFlags |= CHN_PINGPONGLOOP;
+				if (p[13] & 0x02) pSmp->uFlags |= CHN_PINGPONGLOOP;
 				smpinfo[nins] = (p[13] >> 2) & 3;
 			}
 			break;
@@ -446,21 +446,21 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 			Log("sample data: %d bytes\n", blocklen);
 		#endif
 			dwPos = dwMemPos;
-			for (i=1; i<=m_nSamples; i++) if ((Ins[i].nLength) && (!Ins[i].pSample) && (smpinfo[i] != 3) && (dwPos < dwMemLength))
+			for (i=1; i<=m_nSamples; i++) if ((Samples[i].nLength) && (!Samples[i].pSample) && (smpinfo[i] != 3) && (dwPos < dwMemLength))
 			{
-				MODINSTRUMENT *pins = &Ins[i];
-				UINT flags = (pins->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
+				MODSAMPLE *pSmp = &Samples[i];
+				UINT flags = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
 				if (!smpinfo[i])
 				{
-					dwPos += ReadSample(pins, flags, (LPSTR)(lpStream+dwPos), dwMemLength - dwPos);
+					dwPos += ReadSample(pSmp, flags, (LPSTR)(lpStream+dwPos), dwMemLength - dwPos);
 				} else
 				{
 					DWORD dwLen = *((DWORD *)(lpStream+dwPos));
 					dwPos += 4;
 					if ( (dwLen <= dwMemLength) && (dwPos <= dwMemLength - dwLen) && (dwLen > 4) )
 					{
-						flags = (pins->uFlags & CHN_16BIT) ? RS_MDL16 : RS_MDL8;
-						ReadSample(pins, flags, (LPSTR)(lpStream+dwPos), dwLen);
+						flags = (pSmp->uFlags & CHN_16BIT) ? RS_MDL16 : RS_MDL8;
+						ReadSample(pSmp, flags, (LPSTR)(lpStream+dwPos), dwLen);
 					}
 					dwPos += dwLen;
 				}

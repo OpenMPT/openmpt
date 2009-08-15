@@ -69,18 +69,18 @@ bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT nSmp=1; nSmp<=m_nSamples; nSmp++, dwMemPos += sizeof(AMSSAMPLEHEADER))
 	{
 		AMSSAMPLEHEADER *psh = (AMSSAMPLEHEADER *)(lpStream + dwMemPos);
-		MODINSTRUMENT *pins = &Ins[nSmp];
-		pins->nLength = psh->length;
-		pins->nLoopStart = psh->loopstart;
-		pins->nLoopEnd = psh->loopend;
-		pins->nGlobalVol = 64;
-		pins->nVolume = psh->volume << 1;
-		pins->nC5Speed = psh->samplerate;
-		pins->nPan = (psh->finetune_and_pan & 0xF0);
-		if (pins->nPan < 0x80) pins->nPan += 0x10;
-		pins->nFineTune = MOD2XMFineTune(psh->finetune_and_pan & 0x0F);
-		pins->uFlags = (psh->infobyte & 0x80) ? CHN_16BIT : 0;
-		if ((pins->nLoopEnd <= pins->nLength) && (pins->nLoopStart+4 <= pins->nLoopEnd)) pins->uFlags |= CHN_LOOP;
+		MODSAMPLE *pSmp = &Samples[nSmp];
+		pSmp->nLength = psh->length;
+		pSmp->nLoopStart = psh->loopstart;
+		pSmp->nLoopEnd = psh->loopend;
+		pSmp->nGlobalVol = 64;
+		pSmp->nVolume = psh->volume << 1;
+		pSmp->nC5Speed = psh->samplerate;
+		pSmp->nPan = (psh->finetune_and_pan & 0xF0);
+		if (pSmp->nPan < 0x80) pSmp->nPan += 0x10;
+		pSmp->nFineTune = MOD2XMFineTune(psh->finetune_and_pan & 0x0F);
+		pSmp->uFlags = (psh->infobyte & 0x80) ? CHN_16BIT : 0;
+		if ((pSmp->nLoopEnd <= pSmp->nLength) && (pSmp->nLoopStart+4 <= pSmp->nLoopEnd)) pSmp->uFlags |= CHN_LOOP;
 		pkinf[nSmp] = psh->infobyte;
 	}
 	// Read Song Name
@@ -238,11 +238,11 @@ bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 		dwMemPos += len;
 	}
 	// Read Samples
-	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Ins[iSmp].nLength)
+	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Samples[iSmp].nLength)
 	{
 		if (dwMemPos >= dwMemLength - 9) return true;
-		UINT flags = (Ins[iSmp].uFlags & CHN_16BIT) ? RS_AMS16 : RS_AMS8;
-		dwMemPos += ReadSample(&Ins[iSmp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
+		UINT flags = (Samples[iSmp].uFlags & CHN_16BIT) ? RS_AMS16 : RS_AMS8;
+		dwMemPos += ReadSample(&Samples[iSmp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
 	}
 	return true;
 }
@@ -342,7 +342,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		UINT insnamelen = lpStream[dwMemPos];
 		CHAR *pinsname = (CHAR *)(lpStream+dwMemPos+1);
 		dwMemPos += insnamelen + 1;
-		AMS2INSTRUMENT *pins = (AMS2INSTRUMENT *)(lpStream + dwMemPos);
+		AMS2INSTRUMENT *pSmp = (AMS2INSTRUMENT *)(lpStream + dwMemPos);
 		dwMemPos += sizeof(AMS2INSTRUMENT);
 		if (dwMemPos + 1024 >= dwMemLength) return TRUE;
 		AMS2ENVELOPE *volenv, *panenv, *pitchenv;
@@ -356,7 +356,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		if (!penv) return TRUE;
 		memset(smpmap, 0, sizeof(smpmap));
 		memset(penv, 0, sizeof(INSTRUMENTHEADER));
-		for (UINT ismpmap=0; ismpmap<pins->samples; ismpmap++)
+		for (UINT ismpmap=0; ismpmap<pSmp->samples; ismpmap++)
 		{
 			if ((ismpmap >= 16) || (m_nSamples+1 >= MAX_SAMPLES)) break;
 			m_nSamples++;
@@ -376,7 +376,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		for (UINT inotemap=0; inotemap<NOTE_MAX; inotemap++)
 		{
 			penv->NoteMap[inotemap] = inotemap+1;
-			penv->Keyboard[inotemap] = smpmap[pins->notemap[inotemap] & 0x0F];
+			penv->Keyboard[inotemap] = smpmap[pSmp->notemap[inotemap] & 0x0F];
 		}
 		// Volume Envelope
 		{
@@ -399,9 +399,9 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		if (envflags & 0x04) penv->dwFlags |= ENV_VOLUME;
 		dwMemPos += 5;
 		// Read Samples
-		for (UINT ismp=0; ismp<pins->samples; ismp++)
+		for (UINT ismp=0; ismp<pSmp->samples; ismp++)
 		{
-			MODINSTRUMENT *psmp = ((ismp < 16) && (smpmap[ismp])) ? &Ins[smpmap[ismp]] : NULL;
+			MODSAMPLE *psmp = ((ismp < 16) && (smpmap[ismp])) ? &Samples[smpmap[ismp]] : NULL;
 			UINT smpnamelen = lpStream[dwMemPos];
 			if ((psmp) && (smpnamelen) && (smpnamelen <= 22))
 			{
@@ -541,18 +541,18 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		dwMemPos += packedlen;
 	}
 	// Read Samples
-	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Ins[iSmp].nLength)
+	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Samples[iSmp].nLength)
 	{
 		if (dwMemPos >= dwMemLength - 9) return TRUE;
 		UINT flags;
 		if (packedsamples[iSmp] & 0x03)
 		{
-			flags = (Ins[iSmp].uFlags & CHN_16BIT) ? RS_AMS16 : RS_AMS8;
+			flags = (Samples[iSmp].uFlags & CHN_16BIT) ? RS_AMS16 : RS_AMS8;
 		} else
 		{
-			flags = (Ins[iSmp].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
+			flags = (Samples[iSmp].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
 		}
-		dwMemPos += ReadSample(&Ins[iSmp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
+		dwMemPos += ReadSample(&Samples[iSmp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
 	}
 	return TRUE;
 }

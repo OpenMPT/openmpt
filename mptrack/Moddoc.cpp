@@ -847,20 +847,20 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			m_SndFile.InstrumentChange(pChn, nins);
 		} 
 		else if ((nsmp) && (nsmp < MAX_SAMPLES)) {	//Or set sample
-			MODINSTRUMENT *pins = &m_SndFile.Ins[nsmp];
-			pChn->pCurrentSample = pins->pSample;
+			MODSAMPLE *pSmp = &m_SndFile.Samples[nsmp];
+			pChn->pCurrentSample = pSmp->pSample;
 			pChn->pHeader = NULL;
-			pChn->pInstrument = pins;
-			pChn->pSample = pins->pSample;
-			pChn->nFineTune = pins->nFineTune;
-			pChn->nC5Speed = pins->nC5Speed;
+			pChn->pModSample = pSmp;
+			pChn->pSample = pSmp->pSample;
+			pChn->nFineTune = pSmp->nFineTune;
+			pChn->nC5Speed = pSmp->nC5Speed;
 			pChn->nPos = pChn->nPosLo = pChn->nLength = 0;
-			pChn->nLoopStart = pins->nLoopStart;
-			pChn->nLoopEnd = pins->nLoopEnd;
-			pChn->dwFlags = pins->uFlags & (0xFF & ~CHN_MUTE);
+			pChn->nLoopStart = pSmp->nLoopStart;
+			pChn->nLoopEnd = pSmp->nLoopEnd;
+			pChn->dwFlags = pSmp->uFlags & (0xFF & ~CHN_MUTE);
 			pChn->nPan = 128;
-			if (pins->uFlags & CHN_PANNING) pChn->nPan = pins->nPan;
-			pChn->nInsVol = pins->nGlobalVol;
+			if (pSmp->uFlags & CHN_PANNING) pChn->nPan = pSmp->nPan;
+			pChn->nInsVol = pSmp->nGlobalVol;
 			pChn->nFadeOutVol = 0x10000;
 		}
 
@@ -870,13 +870,13 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		// handle sample looping.
 		// Fix: Bug report 1700.
 		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
-		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (pChn->pInstrument != 0))
+		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (pChn->pModSample != 0))
 		{
 			pChn->nPos = loopstart;
 			pChn->nPosLo = 0;
 			pChn->nLoopStart = loopstart;
 			pChn->nLoopEnd = loopend;
-			pChn->nLength = min(UINT(loopend), pChn->pInstrument->nLength);
+			pChn->nLength = min(UINT(loopend), pChn->pModSample->nLength);
 		}
 
 		// handle extra-loud flag
@@ -887,13 +887,13 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		}
 
 		// Handle custom start position
-		if(nStartPos != uint32_max && pChn->pInstrument)
+		if(nStartPos != uint32_max && pChn->pModSample)
 		{
 			pChn->nPos = nStartPos;
 			// If start position is after loop end, set loop end to sample end so that the sample starts 
 			// playing.
 			if(pChn->nLoopEnd < nStartPos) 
-				pChn->nLength = pChn->nLoopEnd = pChn->pInstrument->nLength;
+				pChn->nLength = pChn->nLoopEnd = pChn->pModSample->nLength;
 		}
 
 		/*
@@ -1010,7 +1010,7 @@ BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 	{
 		if ((pChn->nLength) && (!(pChn->dwFlags & (CHN_NOTEFADE|CHN_KEYOFF|CHN_MUTE)))
 		 && ((note == pChn->nNewNote) || (!note))
-		 && ((pChn->pInstrument == &m_SndFile.Ins[nsmp]) || (!nsmp))
+		 && ((pChn->pModSample == &m_SndFile.Samples[nsmp]) || (!nsmp))
 		 && ((pChn->pHeader == m_SndFile.Headers[nins]) || (!nins))) return TRUE;
 	}
 	return FALSE;
@@ -1181,8 +1181,8 @@ BOOL CModDoc::MuteSample(UINT nSample, BOOL bMute)
 //------------------------------------------------
 {
 	if ((nSample < 1) || (nSample > m_SndFile.m_nSamples)) return FALSE;
-	if (bMute) m_SndFile.Ins[nSample].uFlags |= CHN_MUTE;
-	else m_SndFile.Ins[nSample].uFlags &= ~CHN_MUTE;
+	if (bMute) m_SndFile.Samples[nSample].uFlags |= CHN_MUTE;
+	else m_SndFile.Samples[nSample].uFlags &= ~CHN_MUTE;
 	return TRUE;
 }
 
@@ -1260,7 +1260,7 @@ BOOL CModDoc::IsSampleMuted(UINT nSample) const
 //---------------------------------------------
 {
 	if ((!nSample) || (nSample > m_SndFile.m_nSamples)) return FALSE;
-	return (m_SndFile.Ins[nSample].uFlags & CHN_MUTE) ? TRUE : FALSE;
+	return (m_SndFile.Samples[nSample].uFlags & CHN_MUTE) ? TRUE : FALSE;
 }
 
 

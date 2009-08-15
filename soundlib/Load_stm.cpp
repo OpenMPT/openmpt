@@ -93,9 +93,9 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading samples
 	for (UINT nIns=0; nIns<31; nIns++)
 	{
-		MODINSTRUMENT *pIns = &Ins[nIns+1];
+		MODSAMPLE *pIns = &Samples[nIns+1];
 		STMSAMPLE *pStm = &phdr->sample[nIns];  // STM sample data
-		memcpy(pIns->name, pStm->filename, 13);
+		memcpy(pIns->filename, pStm->filename, 13);
 		memcpy(m_szNames[nIns+1], pStm->filename, 12);
 		pIns->nC5Speed = LittleEndianW(pStm->c2spd);
 		pIns->nGlobalVol = 64;
@@ -172,7 +172,7 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading Samples
 	for (UINT nSmp=1; nSmp<=31; nSmp++)
 	{
-		MODINSTRUMENT *pIns = &Ins[nSmp];
+		MODSAMPLE *pIns = &Samples[nSmp];
 		dwMemPos = (dwMemPos + 15) & (~15);
 		if (pIns->nLength)
 		{

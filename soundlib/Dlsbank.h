@@ -126,7 +126,7 @@ public:
 
 // Internal Loader Functions
 protected:
-	BOOL UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pchunk, DWORD dwMaxLen);
+	BOOL UpdateInstrumentDefinition(DLSINSTRUMENT *pIns, LPVOID pchunk, DWORD dwMaxLen);
 	BOOL UpdateSF2PresetData(LPVOID psf2info, LPVOID pchunk, DWORD dwMaxLen);
 	BOOL ConvertSF2ToDLS(LPVOID psf2info);
 

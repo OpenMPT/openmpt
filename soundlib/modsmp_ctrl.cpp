@@ -11,7 +11,7 @@
 namespace ctrlSmp
 {
 
-void ReplaceSample(MODINSTRUMENT& smp, const LPSTR pNewSample, const SmpLength nNewLength)
+void ReplaceSample(MODSAMPLE& smp, const LPSTR pNewSample, const SmpLength nNewLength)
 //----------------------------------------------------------------------------------------
 {
 	LPSTR const pOldSmp = smp.pSample;
@@ -23,7 +23,7 @@ void ReplaceSample(MODINSTRUMENT& smp, const LPSTR pNewSample, const SmpLength n
 }
 
 
-SmpLength InsertSilence(MODINSTRUMENT& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile)
+SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile)
 //----------------------------------------------------------------------------------------------------------------------------
 {
 	if(nSilenceLength == 0 || nSilenceLength >= MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - nSilenceLength)
@@ -66,7 +66,7 @@ SmpLength InsertSilence(MODINSTRUMENT& smp, const SmpLength nSilenceLength, cons
 	return smp.nLength;
 }
 
-SmpLength ResizeSample(MODINSTRUMENT& smp, const SmpLength nNewLength, CSoundFile* pSndFile)
+SmpLength ResizeSample(MODSAMPLE& smp, const SmpLength nNewLength, CSoundFile* pSndFile)
 //----------------------------------------------------------------------------------------
 {
 	// Invalid sample size
@@ -113,13 +113,13 @@ namespace // Unnamed namespace for local implementation functions.
 {
 
 template <class T>
-void AdjustEndOfSampleImpl(MODINSTRUMENT& smp)
+void AdjustEndOfSampleImpl(MODSAMPLE& smp)
 //--------------------------------------------
 {
-	MODINSTRUMENT* const pins = &smp;
-	const UINT len = pins->nLength;
-	T* p = reinterpret_cast<T*>(pins->pSample);
-	if (pins->uFlags & CHN_STEREO)
+	MODSAMPLE* const pSmp = &smp;
+	const UINT len = pSmp->nLength;
+	T* p = reinterpret_cast<T*>(pSmp->pSample);
+	if (pSmp->uFlags & CHN_STEREO)
 	{
 		p[(len+3)*2] = p[(len+2)*2] = p[(len+1)*2] = p[(len)*2] = p[(len-1)*2];
 		p[(len+3)*2+1] = p[(len+2)*2+1] = p[(len+1)*2+1] = p[(len)*2+1] = p[(len-1)*2+1];
@@ -127,61 +127,61 @@ void AdjustEndOfSampleImpl(MODINSTRUMENT& smp)
 	{
 		p[len+4] = p[len+3] = p[len+2] = p[len+1] = p[len] = p[len-1];
 	}
-	if (((pins->uFlags & (CHN_LOOP|CHN_PINGPONGLOOP|CHN_STEREO)) == CHN_LOOP)
-	 && (pins->nLoopEnd == pins->nLength)
-	 && (pins->nLoopEnd > pins->nLoopStart) && (pins->nLength > 2))
+	if (((pSmp->uFlags & (CHN_LOOP|CHN_PINGPONGLOOP|CHN_STEREO)) == CHN_LOOP)
+	 && (pSmp->nLoopEnd == pSmp->nLength)
+	 && (pSmp->nLoopEnd > pSmp->nLoopStart) && (pSmp->nLength > 2))
 	{
-		p[len] = p[pins->nLoopStart];
-		p[len+1] = p[pins->nLoopStart+1];
-		p[len+2] = p[pins->nLoopStart+2];
-		p[len+3] = p[pins->nLoopStart+3];
-		p[len+4] = p[pins->nLoopStart+4];
+		p[len] = p[pSmp->nLoopStart];
+		p[len+1] = p[pSmp->nLoopStart+1];
+		p[len+2] = p[pSmp->nLoopStart+2];
+		p[len+3] = p[pSmp->nLoopStart+3];
+		p[len+4] = p[pSmp->nLoopStart+4];
 	}
 }
 
 } // unnamed namespace.
 
 
-bool AdjustEndOfSample(MODINSTRUMENT& smp, CSoundFile* pSndFile)
+bool AdjustEndOfSample(MODSAMPLE& smp, CSoundFile* pSndFile)
 //--------------------------------------------------------------
 {
-	MODINSTRUMENT* const pins = &smp;
+	MODSAMPLE* const pSmp = &smp;
 
-	if ((!pins->nLength) || (!pins->pSample)) 
+	if ((!pSmp->nLength) || (!pSmp->pSample)) 
 		return false;
 
 	BEGIN_CRITICAL();
 
-	if (pins->GetElementarySampleSize() == 2)
-		AdjustEndOfSampleImpl<int16>(*pins);
-	else if(pins->GetElementarySampleSize() == 1)
-		AdjustEndOfSampleImpl<int8>(*pins);
+	if (pSmp->GetElementarySampleSize() == 2)
+		AdjustEndOfSampleImpl<int16>(*pSmp);
+	else if(pSmp->GetElementarySampleSize() == 1)
+		AdjustEndOfSampleImpl<int8>(*pSmp);
 
 	// Update channels with new loop values
 	if(pSndFile != 0)
 	{
 		CSoundFile& rSndFile = *pSndFile;
-		for (UINT i=0; i<MAX_CHANNELS; i++) if ((rSndFile.Chn[i].pInstrument == pins) && (rSndFile.Chn[i].nLength))
+		for (UINT i=0; i<MAX_CHANNELS; i++) if ((rSndFile.Chn[i].pModSample == pSmp) && (rSndFile.Chn[i].nLength))
 		{
-			if ((pins->nLoopStart + 3 < pins->nLoopEnd) && (pins->nLoopEnd <= pins->nLength))
+			if ((pSmp->nLoopStart + 3 < pSmp->nLoopEnd) && (pSmp->nLoopEnd <= pSmp->nLength))
 			{
-				rSndFile.Chn[i].nLoopStart = pins->nLoopStart;
-				rSndFile.Chn[i].nLoopEnd = pins->nLoopEnd;
-				rSndFile.Chn[i].nLength = pins->nLoopEnd;
+				rSndFile.Chn[i].nLoopStart = pSmp->nLoopStart;
+				rSndFile.Chn[i].nLoopEnd = pSmp->nLoopEnd;
+				rSndFile.Chn[i].nLength = pSmp->nLoopEnd;
 				if (rSndFile.Chn[i].nPos > rSndFile.Chn[i].nLength)
 				{
 					rSndFile.Chn[i].nPos = rSndFile.Chn[i].nLoopStart;
 					rSndFile.Chn[i].dwFlags &= ~CHN_PINGPONGFLAG;
 				}
 				DWORD d = rSndFile.Chn[i].dwFlags & ~(CHN_PINGPONGLOOP|CHN_LOOP);
-				if (pins->uFlags & CHN_LOOP)
+				if (pSmp->uFlags & CHN_LOOP)
 				{
 					d |= CHN_LOOP;
-					if (pins->uFlags & CHN_PINGPONGLOOP) d |= CHN_PINGPONGLOOP;
+					if (pSmp->uFlags & CHN_PINGPONGLOOP) d |= CHN_PINGPONGLOOP;
 				}
 				rSndFile.Chn[i].dwFlags = d;
 			} else
-			if (!(pins->uFlags & CHN_LOOP))
+			if (!(pSmp->uFlags & CHN_LOOP))
 			{
 				rSndFile.Chn[i].dwFlags &= ~(CHN_PINGPONGLOOP|CHN_LOOP);
 			}
@@ -201,17 +201,17 @@ void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag)
 		switch(resetflag)
 		{
 		case SmpResetInit:
-			rSndFile.Ins[i].nC5Speed = 8363;
+			rSndFile.Samples[i].nC5Speed = 8363;
 			// note: break is left out intentionally. keep this order or c&p the stuff from below if you change anything!
 		case SmpResetCompo:
-			rSndFile.Ins[i].nPan = 128;
-			rSndFile.Ins[i].nGlobalVol = 64;
-			rSndFile.Ins[i].nVolume = 256;
-			rSndFile.Ins[i].nVibDepth = 0;
-			rSndFile.Ins[i].nVibRate = 0;
-			rSndFile.Ins[i].nVibSweep = 0;
-			rSndFile.Ins[i].nVibType = 0;
-			rSndFile.Ins[i].uFlags &= ~CHN_PANNING;
+			rSndFile.Samples[i].nPan = 128;
+			rSndFile.Samples[i].nGlobalVol = 64;
+			rSndFile.Samples[i].nVolume = 256;
+			rSndFile.Samples[i].nVibDepth = 0;
+			rSndFile.Samples[i].nVibRate = 0;
+			rSndFile.Samples[i].nVibSweep = 0;
+			rSndFile.Samples[i].nVibType = 0;
+			rSndFile.Samples[i].uFlags &= ~CHN_PANNING;
 			break;
 		default:
 			break;
@@ -276,7 +276,7 @@ namespace
 };
 
 // Remove DC offset
-float RemoveDCOffset(MODINSTRUMENT& smp,
+float RemoveDCOffset(MODSAMPLE& smp,
 					 SmpLength iStart,
 					 SmpLength iEnd,
 					 const MODTYPE modtype,
@@ -286,27 +286,27 @@ float RemoveDCOffset(MODINSTRUMENT& smp,
 	if(smp.pSample == nullptr || smp.nLength < 1)
 		return 0;
 
-	MODINSTRUMENT* const pins = &smp;
+	MODSAMPLE* const pSmp = &smp;
 
-	if (iEnd > pins->nLength) iEnd = pins->nLength;
+	if (iEnd > pSmp->nLength) iEnd = pSmp->nLength;
 	if (iStart > iEnd) iStart = iEnd;
 	if (iStart == iEnd)
 	{
 		iStart = 0;
-		iEnd = pins->nLength;
+		iEnd = pSmp->nLength;
 	}
 
-	iStart *= pins->GetNumChannels();
-	iEnd *= pins->GetNumChannels();
+	iStart *= pSmp->GetNumChannels();
+	iEnd *= pSmp->GetNumChannels();
 
-	const double dMaxAmplitude = (pins->GetElementarySampleSize() == 2) ? GetMaxAmplitude<int16>() : GetMaxAmplitude<int8>();
+	const double dMaxAmplitude = (pSmp->GetElementarySampleSize() == 2) ? GetMaxAmplitude<int16>() : GetMaxAmplitude<int8>();
 
 	// step 1: Calculate offset.
 	OffsetData oData = {0,0,0};
-	if(pins->GetElementarySampleSize() == 2)
-		oData = CalculateOffset(reinterpret_cast<int16*>(pins->pSample) + iStart, iEnd - iStart);
-	else if(pins->GetElementarySampleSize() == 1)
-		oData = CalculateOffset(reinterpret_cast<int8*>(pins->pSample) + iStart, iEnd - iStart);
+	if(pSmp->GetElementarySampleSize() == 2)
+		oData = CalculateOffset(reinterpret_cast<int16*>(pSmp->pSample) + iStart, iEnd - iStart);
+	else if(pSmp->GetElementarySampleSize() == 1)
+		oData = CalculateOffset(reinterpret_cast<int8*>(pSmp->pSample) + iStart, iEnd - iStart);
 
 	double dMin = oData.dMin, dMax = oData.dMax, dOffset = oData.dOffset;
 	
@@ -324,14 +324,14 @@ float RemoveDCOffset(MODINSTRUMENT& smp,
 
 	// step 2: centralize + normalize sample
 	dOffset *= dMaxAmplitude * dAmplify;
-	if(pins->GetElementarySampleSize() == 2)
-		RemoveOffsetAndNormalize( reinterpret_cast<int16*>(pins->pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
-	else if(pins->GetElementarySampleSize() == 1)
-		RemoveOffsetAndNormalize( reinterpret_cast<int8*>(pins->pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
+	if(pSmp->GetElementarySampleSize() == 2)
+		RemoveOffsetAndNormalize( reinterpret_cast<int16*>(pSmp->pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
+	else if(pSmp->GetElementarySampleSize() == 1)
+		RemoveOffsetAndNormalize( reinterpret_cast<int8*>(pSmp->pSample) + iStart, iEnd - iStart, dOffset, dAmplify);
 	
 	// step 3: adjust global vol (if available)
-	if((modtype & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (iStart == 0) && (iEnd == pins->nLength * pins->GetNumChannels()))
-		pins->nGlobalVol = min((WORD)(pins->nGlobalVol / dAmplify), 64);
+	if((modtype & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (iStart == 0) && (iEnd == pSmp->nLength * pSmp->GetNumChannels()))
+		pSmp->nGlobalVol = min((WORD)(pSmp->nGlobalVol / dAmplify), 64);
 
 	AdjustEndOfSample(smp, pSndFile);
 

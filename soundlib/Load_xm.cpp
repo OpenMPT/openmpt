@@ -353,7 +353,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				n = m_nSamples;
 				while (n > 0)
 				{
-					if (!Ins[n].pSample)
+					if (!Samples[n].pSample)
 					{
 						for (UINT xmapchk=0; xmapchk < nmap; xmapchk++)
 						{
@@ -401,7 +401,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 									if (pks->Keyboard[ks] == n) pks->Keyboard[ks] = 0;
 								}
 							}
-							memset(&Ins[n], 0, sizeof(Ins[0]));
+							memset(&Samples[n], 0, sizeof(Samples[0]));
 							break;
 						}
 					}
@@ -508,35 +508,35 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			UINT imapsmp = samplemap[ins];
 			memcpy(m_szNames[imapsmp], xmss.name, 22);
 			m_szNames[imapsmp][22] = 0;
-			MODINSTRUMENT *pins = &Ins[imapsmp];
-			pins->nLength = (xmss.samplen > MAX_SAMPLE_LENGTH) ? MAX_SAMPLE_LENGTH : xmss.samplen;
-			pins->nLoopStart = xmss.loopstart;
-			pins->nLoopEnd = xmss.looplen;
-			if (pins->nLoopEnd > pins->nLength) pins->nLoopEnd = pins->nLength;
-			if (pins->nLoopStart >= pins->nLoopEnd)
+			MODSAMPLE *pSmp = &Samples[imapsmp];
+			pSmp->nLength = (xmss.samplen > MAX_SAMPLE_LENGTH) ? MAX_SAMPLE_LENGTH : xmss.samplen;
+			pSmp->nLoopStart = xmss.loopstart;
+			pSmp->nLoopEnd = xmss.looplen;
+			if (pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
+			if (pSmp->nLoopStart >= pSmp->nLoopEnd)
 			{
-				pins->nLoopStart = pins->nLoopEnd = 0;
+				pSmp->nLoopStart = pSmp->nLoopEnd = 0;
 			}
-			if (xmss.type & 3) pins->uFlags |= CHN_LOOP;
-			if (xmss.type & 2) pins->uFlags |= CHN_PINGPONGLOOP;
-			pins->nVolume = xmss.vol << 2;
-			if (pins->nVolume > 256) pins->nVolume = 256;
-			pins->nGlobalVol = 64;
+			if (xmss.type & 3) pSmp->uFlags |= CHN_LOOP;
+			if (xmss.type & 2) pSmp->uFlags |= CHN_PINGPONGLOOP;
+			pSmp->nVolume = xmss.vol << 2;
+			if (pSmp->nVolume > 256) pSmp->nVolume = 256;
+			pSmp->nGlobalVol = 64;
 			if ((xmss.res == 0xAD) && (!(xmss.type & 0x30)))
 			{
 				flags[ins] = RS_ADPCM4;
 				samplesize[ins] = (samplesize[ins]+1)/2 + 16;
 			}
-			pins->nFineTune = xmss.finetune;
-			pins->RelativeTone = (int)xmss.relnote;
-			pins->nPan = xmss.pan;
-			pins->uFlags |= CHN_PANNING;
-			pins->nVibType = xmsh.vibtype;
-			pins->nVibSweep = xmsh.vibsweep;
-			pins->nVibDepth = xmsh.vibdepth;
-			pins->nVibRate = xmsh.vibrate;
-			memcpy(pins->name, xmss.name, 22);
-			pins->name[21] = 0;
+			pSmp->nFineTune = xmss.finetune;
+			pSmp->RelativeTone = (int)xmss.relnote;
+			pSmp->nPan = xmss.pan;
+			pSmp->uFlags |= CHN_PANNING;
+			pSmp->nVibType = xmsh.vibtype;
+			pSmp->nVibSweep = xmsh.vibsweep;
+			pSmp->nVibDepth = xmsh.vibdepth;
+			pSmp->nVibRate = xmsh.vibrate;
+			memcpy(pSmp->filename, xmss.name, 22);
+			pSmp->filename[21] = 0;
 		}
 #if 0
 		if ((xmsh.reserved2 > nsamples) && (xmsh.reserved2 <= 16))
@@ -548,7 +548,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			if ((samplemap[ismpd]) && (samplesize[ismpd]) && (dwMemPos < dwMemLength))
 			{
-				ReadSample(&Ins[samplemap[ismpd]], flags[ismpd], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+				ReadSample(&Samples[samplemap[ismpd]], flags[ismpd], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 			}
 			dwMemPos += samplesize[ismpd];
 			if (dwMemPos >= dwMemLength) break;
@@ -821,7 +821,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	// Writing instruments
 	for (i=1; i<=header.instruments; i++)
 	{
-		MODINSTRUMENT *pins;
+		MODSAMPLE *pSmp;
 		WORD smptable[32];
 		BYTE flags[32];
 
@@ -894,7 +894,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		fwrite(&xmih, 1, sizeof(xmih), f);
 		if (smptable[0])
 		{
-			MODINSTRUMENT *pvib = &Ins[smptable[0]];
+			MODSAMPLE *pvib = &Samples[smptable[0]];
 			xmsh.vibtype = pvib->nVibType;
 			xmsh.vibsweep = pvib->nVibSweep;
 			xmsh.vibdepth = pvib->nVibDepth;
@@ -906,20 +906,20 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		{
 			memset(&xmss, 0, sizeof(xmss));
 			if (smptable[ins]) memcpy(xmss.name, m_szNames[smptable[ins]], 22);
-			pins = &Ins[smptable[ins]];
-			xmss.samplen = pins->nLength;
-			xmss.loopstart = pins->nLoopStart;
-			xmss.looplen = pins->nLoopEnd - pins->nLoopStart;
-			xmss.vol = pins->nVolume / 4;
-			xmss.finetune = (char)pins->nFineTune;
+			pSmp = &Samples[smptable[ins]];
+			xmss.samplen = pSmp->nLength;
+			xmss.loopstart = pSmp->nLoopStart;
+			xmss.looplen = pSmp->nLoopEnd - pSmp->nLoopStart;
+			xmss.vol = pSmp->nVolume / 4;
+			xmss.finetune = (char)pSmp->nFineTune;
 			xmss.type = 0;
-			if (pins->uFlags & CHN_LOOP) xmss.type = (pins->uFlags & CHN_PINGPONGLOOP) ? 2 : 1;
+			if (pSmp->uFlags & CHN_LOOP) xmss.type = (pSmp->uFlags & CHN_PINGPONGLOOP) ? 2 : 1;
 			flags[ins] = RS_PCM8D;
 #ifndef NO_PACKING
 			if (nPacking)
 			{
-				if ((!(pins->uFlags & (CHN_16BIT|CHN_STEREO)))
-				 && (CanPackSample(pins->pSample, pins->nLength, nPacking)))
+				if ((!(pSmp->uFlags & (CHN_16BIT|CHN_STEREO)))
+				 && (CanPackSample(pSmp->pSample, pSmp->nLength, nPacking)))
 				{
 					flags[ins] = RS_ADPCM4;
 					xmss.res = 0xAD;
@@ -927,7 +927,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			} else
 #endif
 			{
-				if (pins->uFlags & CHN_16BIT)
+				if (pSmp->uFlags & CHN_16BIT)
 				{
 					flags[ins] = RS_PCM16D;
 					xmss.type |= 0x10;
@@ -935,9 +935,9 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 					xmss.loopstart *= 2;
 					xmss.samplen *= 2;
 				}
-				if (pins->uFlags & CHN_STEREO && !bCompatibilityExport)
+				if (pSmp->uFlags & CHN_STEREO && !bCompatibilityExport)
 				{
-					flags[ins] = (pins->uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
+					flags[ins] = (pSmp->uFlags & CHN_16BIT) ? RS_STPCM16D : RS_STPCM8D;
 					xmss.type |= 0x20;
 					xmss.looplen *= 2;
 					xmss.loopstart *= 2;
@@ -945,19 +945,19 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				}
 			}
 			xmss.pan = 255;
-			if (pins->nPan < 256) xmss.pan = (BYTE)pins->nPan;
-			xmss.relnote = (signed char)pins->RelativeTone;
+			if (pSmp->nPan < 256) xmss.pan = (BYTE)pSmp->nPan;
+			xmss.relnote = (signed char)pSmp->RelativeTone;
 			fwrite(&xmss, 1, xmsh.shsize, f);
 		}
 		for (UINT ismpd=0; ismpd<xmih.samples; ismpd++)
 		{
-			pins = &Ins[smptable[ismpd]];
-			if (pins->pSample)
+			pSmp = &Samples[smptable[ismpd]];
+			if (pSmp->pSample)
 			{
 #ifndef NO_PACKING
-				if ((flags[ismpd] == RS_ADPCM4) && (xmih.samples>1)) CanPackSample(pins->pSample, pins->nLength, nPacking);
+				if ((flags[ismpd] == RS_ADPCM4) && (xmih.samples>1)) CanPackSample(pSmp->pSample, pSmp->nLength, nPacking);
 #endif // NO_PACKING
-				WriteSample(f, pins, flags[ismpd]);
+				WriteSample(f, pSmp, flags[ismpd]);
 			}
 		}
 	}

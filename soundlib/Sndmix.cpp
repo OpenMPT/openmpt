@@ -680,7 +680,7 @@ BOOL CSoundFile::ProcessRow()
 									Chn[i].nLoopEnd = 0;
 									Chn[i].pHeader = NULL;
 									Chn[i].pSample = NULL;
-									Chn[i].pInstrument = NULL;
+									Chn[i].pModSample = NULL;
 								}
 							}
 						}
@@ -1410,29 +1410,29 @@ BOOL CSoundFile::ReadNote()
 			}
 			int nPeriodFrac = 0;
 			// Instrument Auto-Vibrato
-			if ((pChn->pInstrument) && (pChn->pInstrument->nVibDepth))
+			if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
 			{
-				MODINSTRUMENT *pins = pChn->pInstrument;
+				MODSAMPLE *pSmp = pChn->pModSample;
 
-				if (pins->nVibSweep == 0)
+				if (pSmp->nVibSweep == 0)
 				{
-					pChn->nAutoVibDepth = pins->nVibDepth << 8;
+					pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
 				} else
 				{
 					if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 					{
-						pChn->nAutoVibDepth += pins->nVibSweep << 3;
+						pChn->nAutoVibDepth += pSmp->nVibSweep << 3;
 					} else
 					if (!(pChn->dwFlags & CHN_KEYOFF))
 					{
-						pChn->nAutoVibDepth += (pins->nVibDepth << 8) /	pins->nVibSweep;
+						pChn->nAutoVibDepth += (pSmp->nVibDepth << 8) /	pSmp->nVibSweep;
 					}
-					if ((pChn->nAutoVibDepth >> 8) > pins->nVibDepth)
-						pChn->nAutoVibDepth = pins->nVibDepth << 8;
+					if ((pChn->nAutoVibDepth >> 8) > pSmp->nVibDepth)
+						pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
 				}
-				pChn->nAutoVibPos += pins->nVibRate;
+				pChn->nAutoVibPos += pSmp->nVibRate;
 				int val;
-				switch(pins->nVibType)
+				switch(pSmp->nVibType)
 				{
 				case 4:	// Random
 					val = ModRandomTable[pChn->nAutoVibPos & 0x3F];
@@ -1455,12 +1455,12 @@ BOOL CSoundFile::ReadNote()
 				if(pChn->pHeader && pChn->pHeader->pTuning)
 				{
 					//Vib sweep is not taken into account here.
-					vibratoFactor += 0.05F * pins->nVibDepth * val / 4096.0F; //4096 == 64^2
+					vibratoFactor += 0.05F * pSmp->nVibDepth * val / 4096.0F; //4096 == 64^2
 					//See vibrato for explanation.
 					pChn->m_CalculateFreq = true;
 					/*
 					Finestep vibrato:
-					const float autoVibDepth = pins->nVibDepth * val / 4096.0F; //4096 == 64^2
+					const float autoVibDepth = pSmp->nVibDepth * val / 4096.0F; //4096 == 64^2
 					vibratoFineSteps += static_cast<CTuning::FINESTEPTYPE>(pChn->pHeader->pTuning->GetFineStepCount() *  autoVibDepth);
 					pChn->m_CalculateFreq = true;
 					*/

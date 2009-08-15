@@ -1560,7 +1560,7 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 					MODCHANNEL *pChn = &m_pSndFile->Chn[k];
 					p->dwPos[k] = 0;
 					if ((nSmp) && (nSmp <= m_pSndFile->m_nSamples) && (pChn->nLength)
-					 && (pChn->pSample) && (pChn->pSample == m_pSndFile->Ins[nSmp].pSample)
+					 && (pChn->pSample) && (pChn->pSample == m_pSndFile->Samples[nSmp].pSample)
 					 && ((!(pChn->dwFlags & CHN_NOTEFADE)) || (pChn->nFadeOutVol)))
 					{
 						p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->nPos);
@@ -2035,7 +2035,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 			}
 			if (bOk)
 			{
-				if ((m_WaveFile.m_nSamples > 1) || (m_WaveFile.Ins[1].uFlags & CHN_LOOP))
+				if ((m_WaveFile.m_nSamples > 1) || (m_WaveFile.Samples[1].uFlags & CHN_LOOP))
 				{
 					MODCOMMAND *m = m_WaveFile.Patterns[0];
 					m[32*4].note = 0xFF;

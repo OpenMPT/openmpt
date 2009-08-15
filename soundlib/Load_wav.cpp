@@ -94,32 +94,32 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 	// Support for Multichannel Wave
 	for (UINT nChn=0; nChn<m_nSamples; nChn++)
 	{
-		MODINSTRUMENT *pins = &Ins[nChn+1];
+		MODSAMPLE *pSmp = &Samples[nChn+1];
 		pcmd[nChn].note = pcmd[0].note;
 		pcmd[nChn].instr = (BYTE)(nChn+1);
-		pins->nLength = len;
-		pins->nC5Speed = pfmt->freqHz;
-		pins->nVolume = 256;
-		pins->nPan = 128;
-		pins->nGlobalVol = 64;
-		pins->uFlags = (WORD)((pfmt->bitspersample >= 16) ? CHN_16BIT : 0);
-		pins->uFlags |= CHN_PANNING;
+		pSmp->nLength = len;
+		pSmp->nC5Speed = pfmt->freqHz;
+		pSmp->nVolume = 256;
+		pSmp->nPan = 128;
+		pSmp->nGlobalVol = 64;
+		pSmp->uFlags = (WORD)((pfmt->bitspersample >= 16) ? CHN_16BIT : 0);
+		pSmp->uFlags |= CHN_PANNING;
 		if (m_nSamples > 1)
 		{
 			switch(nChn)
 			{
-			case 0:	pins->nPan = 0; break;
-			case 1:	pins->nPan = 256; break;
-			case 2: pins->nPan = (WORD)((m_nSamples == 3) ? 128 : 64); pcmd[nChn].command = CMD_S3MCMDEX; pcmd[nChn].param = 0x91; break;
-			case 3: pins->nPan = 192; pcmd[nChn].command = CMD_S3MCMDEX; pcmd[nChn].param = 0x91; break;
-			default: pins->nPan = 128; break;
+			case 0:	pSmp->nPan = 0; break;
+			case 1:	pSmp->nPan = 256; break;
+			case 2: pSmp->nPan = (WORD)((m_nSamples == 3) ? 128 : 64); pcmd[nChn].command = CMD_S3MCMDEX; pcmd[nChn].param = 0x91; break;
+			case 3: pSmp->nPan = 192; pcmd[nChn].command = CMD_S3MCMDEX; pcmd[nChn].param = 0x91; break;
+			default: pSmp->nPan = 128; break;
 			}
 		}
-		if ((pins->pSample = AllocateSample(bytelen+8)) == NULL) return true;
+		if ((pSmp->pSample = AllocateSample(bytelen+8)) == NULL) return true;
 		if (pfmt->bitspersample >= 16)
 		{
 			int slsize = pfmt->bitspersample >> 3;
-			signed short *p = (signed short *)pins->pSample;
+			signed short *p = (signed short *)pSmp->pSample;
 			signed char *psrc = (signed char *)(lpStream+dwMemPos+8+nChn*slsize+slsize-2);
 			for (UINT i=0; i<len; i++)
 			{
@@ -129,7 +129,7 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 			p[len+1] = p[len] = p[len-1];
 		} else
 		{
-			signed char *p = (signed char *)pins->pSample;
+			signed char *p = (signed char *)pSmp->pSample;
 			signed char *psrc = (signed char *)(lpStream+dwMemPos+8+nChn);
 			for (UINT i=0; i<len; i++)
 			{

@@ -72,26 +72,26 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 		MTMSAMPLE *pms = (MTMSAMPLE *)(lpStream + dwMemPos);
 		strncpy(m_szNames[i], pms->samplename, 22);
 		m_szNames[i][22] = 0;
-		Ins[i].nVolume = pms->volume << 2;
-		Ins[i].nGlobalVol = 64;
+		Samples[i].nVolume = pms->volume << 2;
+		Samples[i].nGlobalVol = 64;
 		DWORD len = pms->length;
 		if ((len > 4) && (len <= MAX_SAMPLE_LENGTH))
 		{
-			Ins[i].nLength = len;
-			Ins[i].nLoopStart = pms->reppos;
-			Ins[i].nLoopEnd = pms->repend;
-			if (Ins[i].nLoopEnd > Ins[i].nLength) Ins[i].nLoopEnd = Ins[i].nLength;
-			if (Ins[i].nLoopStart + 4 >= Ins[i].nLoopEnd) Ins[i].nLoopStart = Ins[i].nLoopEnd = 0;
-			if (Ins[i].nLoopEnd) Ins[i].uFlags |= CHN_LOOP;
-			Ins[i].nFineTune = MOD2XMFineTune(pms->finetune);
+			Samples[i].nLength = len;
+			Samples[i].nLoopStart = pms->reppos;
+			Samples[i].nLoopEnd = pms->repend;
+			if (Samples[i].nLoopEnd > Samples[i].nLength) Samples[i].nLoopEnd = Samples[i].nLength;
+			if (Samples[i].nLoopStart + 4 >= Samples[i].nLoopEnd) Samples[i].nLoopStart = Samples[i].nLoopEnd = 0;
+			if (Samples[i].nLoopEnd) Samples[i].uFlags |= CHN_LOOP;
+			Samples[i].nFineTune = MOD2XMFineTune(pms->finetune);
 			if (pms->attribute & 0x01)
 			{
-				Ins[i].uFlags |= CHN_16BIT;
-				Ins[i].nLength >>= 1;
-				Ins[i].nLoopStart >>= 1;
-				Ins[i].nLoopEnd >>= 1;
+				Samples[i].uFlags |= CHN_16BIT;
+				Samples[i].nLength >>= 1;
+				Samples[i].nLoopStart >>= 1;
+				Samples[i].nLoopEnd >>= 1;
 			}
-			Ins[i].nPan = 128;
+			Samples[i].nPan = 128;
 		}
 		dwMemPos += 37;
 	}
@@ -155,7 +155,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT ismp=1; ismp<=m_nSamples; ismp++)
 	{
 		if (dwMemPos >= dwMemLength) break;
-		dwMemPos += ReadSample(&Ins[ismp], (Ins[ismp].uFlags & CHN_16BIT) ? RS_PCM16U : RS_PCM8U,
+		dwMemPos += ReadSample(&Samples[ismp], (Samples[ismp].uFlags & CHN_16BIT) ? RS_PCM16U : RS_PCM8U,
 								(LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 	}
 	m_nMinPeriod = 64;

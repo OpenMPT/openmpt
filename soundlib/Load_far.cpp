@@ -242,8 +242,8 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	if (dwMemPos + 8 >= dwMemLength) return true;
 	memcpy(samplemap, lpStream+dwMemPos, 8);
 	dwMemPos += 8;
-	MODINSTRUMENT *pins = &Ins[1];
-	for (UINT ismp=0; ismp<64; ismp++, pins++) if (samplemap[ismp >> 3] & (1 << (ismp & 7)))
+	MODSAMPLE *pSmp = &Samples[1];
+	for (UINT ismp=0; ismp<64; ismp++, pSmp++) if (samplemap[ismp >> 3] & (1 << (ismp & 7)))
 	{
 		if (dwMemPos + sizeof(FARSAMPLE) > dwMemLength) return true;
 		const FARSAMPLE *pfs = reinterpret_cast<const FARSAMPLE*>(lpStream + dwMemPos);
@@ -251,25 +251,25 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 		m_nSamples = ismp + 1;
 		memcpy(m_szNames[ismp+1], pfs->samplename, 31);
 		const DWORD length = LittleEndian( pfs->length );
-		pins->nLength = length;
-		pins->nLoopStart = LittleEndian(pfs->reppos) ;
-		pins->nLoopEnd = LittleEndian(pfs->repend) ;
-		pins->nFineTune = 0;
-		pins->nC5Speed = 8363*2;
-		pins->nGlobalVol = 64;
-		pins->nVolume = pfs->volume << 4;
-		pins->uFlags = 0;
-		if ((pins->nLength > 3) && (dwMemPos + 4 < dwMemLength))
+		pSmp->nLength = length;
+		pSmp->nLoopStart = LittleEndian(pfs->reppos) ;
+		pSmp->nLoopEnd = LittleEndian(pfs->repend) ;
+		pSmp->nFineTune = 0;
+		pSmp->nC5Speed = 8363*2;
+		pSmp->nGlobalVol = 64;
+		pSmp->nVolume = pfs->volume << 4;
+		pSmp->uFlags = 0;
+		if ((pSmp->nLength > 3) && (dwMemPos + 4 < dwMemLength))
 		{
 			if (pfs->type & 1)
 			{
-				pins->uFlags |= CHN_16BIT;
-				pins->nLength >>= 1;
-				pins->nLoopStart >>= 1;
-				pins->nLoopEnd >>= 1;
+				pSmp->uFlags |= CHN_16BIT;
+				pSmp->nLength >>= 1;
+				pSmp->nLoopStart >>= 1;
+				pSmp->nLoopEnd >>= 1;
 			}
-			if ((pfs->loop & 8) && (pins->nLoopEnd > 4)) pins->uFlags |= CHN_LOOP;
-			ReadSample(pins, (pins->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S,
+			if ((pfs->loop & 8) && (pSmp->nLoopEnd > 4)) pSmp->uFlags |= CHN_LOOP;
+			ReadSample(pSmp, (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S,
 						(LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 		}
 		dwMemPos += length;

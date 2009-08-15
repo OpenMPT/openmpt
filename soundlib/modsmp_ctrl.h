@@ -21,29 +21,29 @@ enum ResetFlag
 // Insert silence to given location.
 // Note: Is currently implemented only for inserting silence to the beginning and to the end of the sample.
 // Return: Length of the new sample.
-SmpLength InsertSilence(MODINSTRUMENT& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile = nullptr);
+SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile = nullptr);
 
 // Change sample size. 
 // Note: If resized sample is bigger, silence will be added to the sample's tail.
 // Return: Length of the new sample.
-SmpLength ResizeSample(MODINSTRUMENT& smp, const SmpLength nNewLength, CSoundFile* pSndFile = nullptr);
+SmpLength ResizeSample(MODSAMPLE& smp, const SmpLength nNewLength, CSoundFile* pSndFile = nullptr);
 
 // Replaces sample in 'smp' with given sample and frees the old sample.
-void ReplaceSample(MODINSTRUMENT& smp, const LPSTR pNewSample,  const SmpLength nNewLength);
+void ReplaceSample(MODSAMPLE& smp, const LPSTR pNewSample,  const SmpLength nNewLength);
 
-bool AdjustEndOfSample(MODINSTRUMENT& smp, CSoundFile* pSndFile = 0);
+bool AdjustEndOfSample(MODSAMPLE& smp, CSoundFile* pSndFile = 0);
 
 // Returns the number of bytes allocated(at least) for sample data.
 // Note: Currently the return value is based on the sample length and the actual 
 //       allocation may be more than what this function returns.
-inline SmpLength GetSampleCapacity(MODINSTRUMENT& smp) {return smp.GetSampleSizeInBytes();}
+inline SmpLength GetSampleCapacity(MODSAMPLE& smp) {return smp.GetSampleSizeInBytes();}
 
 // Resets samples.
 void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag);
 
 // Remove DC offset and normalize.
 // Return: If DC offset was removed, returns original offset value, zero otherwise.
-float RemoveDCOffset(MODINSTRUMENT& smp,
+float RemoveDCOffset(MODSAMPLE& smp,
 					 SmpLength iStart,		// Start position (for partial DC offset removal).
 					 SmpLength iEnd,		// End position (for partial DC offset removal).
 					 const MODTYPE modtype,	// Used to determine whether to adjust global or default volume

@@ -544,7 +544,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 			SampleMap[iSmp-1] = pms;
 			if (iSmp < MAX_SAMPLES)
 			{
-				MODINSTRUMENT *psmp = &Ins[iSmp];
+				MODSAMPLE *psmp = &Samples[iSmp];
 				psmp->nGlobalVol = 64;
 				psmp->nVolume = (pms->wVolume >> 7);
 				psmp->nPan = (pms->nPan == 0x80) ? 128 : (pms->nPan^0x80);
@@ -588,10 +588,10 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 						penv->Keyboard[i+12] = (BYTE)nSmp;
 						if (nSmp <= m_nSamples)
 						{
-							Ins[nSmp].nVibType = pmi->bVibType;
-							Ins[nSmp].nVibSweep = pmi->bVibSweep;
-							Ins[nSmp].nVibDepth = pmi->bVibDepth;
-							Ins[nSmp].nVibRate = pmi->bVibRate;
+							Samples[nSmp].nVibType = pmi->bVibType;
+							Samples[nSmp].nVibSweep = pmi->bVibSweep;
+							Samples[nSmp].nVibDepth = pmi->bVibDepth;
+							Samples[nSmp].nVibRate = pmi->bVibRate;
 						}
 					}
 				}
@@ -605,7 +605,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT iData=0; iData<256; iData++) if ((iData < m_nSamples) && (SampleMap[iData]))
 	{
 		MT2SAMPLE *pms = SampleMap[iData];
-		MODINSTRUMENT *psmp = &Ins[iData+1];
+		MODSAMPLE *psmp = &Samples[iData+1];
 		if (!(pms->nFlags & 5))
 		{
 			if (psmp->nLength > 0) 

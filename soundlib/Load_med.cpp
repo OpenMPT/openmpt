@@ -613,15 +613,15 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading Samples
 	for (UINT iSHdr=0; iSHdr<m_nSamples; iSHdr++)
 	{
-		MODINSTRUMENT *pins = &Ins[iSHdr+1];
-		pins->nLoopStart = BigEndianW(pmsh->sample[iSHdr].rep) << 1;
-		pins->nLoopEnd = pins->nLoopStart + (BigEndianW(pmsh->sample[iSHdr].replen) << 1);
-		pins->nVolume = (pmsh->sample[iSHdr].svol << 2);
-		pins->nGlobalVol = 64;
-		if (pins->nVolume > 256) pins->nVolume = 256;
-		pins->RelativeTone = -12 * pmsh->sample[iSHdr].strans;
-		pins->nPan = 128;
-		if (pins->nLoopEnd) pins->uFlags |= CHN_LOOP;
+		MODSAMPLE *pSmp = &Samples[iSHdr+1];
+		pSmp->nLoopStart = BigEndianW(pmsh->sample[iSHdr].rep) << 1;
+		pSmp->nLoopEnd = pSmp->nLoopStart + (BigEndianW(pmsh->sample[iSHdr].replen) << 1);
+		pSmp->nVolume = (pmsh->sample[iSHdr].svol << 2);
+		pSmp->nGlobalVol = 64;
+		if (pSmp->nVolume > 256) pSmp->nVolume = 256;
+		pSmp->RelativeTone = -12 * pmsh->sample[iSHdr].strans;
+		pSmp->nPan = 128;
+		if (pSmp->nLoopEnd) pSmp->uFlags |= CHN_LOOP;
 	}
 	// Common Flags
 	if (!(pmsh->flags & 0x20)) m_dwSongFlags |= SONG_FASTVOLSLIDES;
@@ -790,7 +790,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			if (stype & 0x10)
 			{
-				Ins[iSmp+1].uFlags |= CHN_16BIT;
+				Samples[iSmp+1].uFlags |= CHN_16BIT;
 				len /= 2;
 				flags = (stype & 0x20) ? RS_STPCM16M : RS_PCM16M;
 			} else
@@ -799,8 +799,8 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 			}
 			if (stype & 0x20) len /= 2;
 		}
-		Ins[iSmp+1].nLength = len;
-		ReadSample(&Ins[iSmp+1], flags, psdata, dwMemLength - dwPos - 6);
+		Samples[iSmp+1].nLength = len;
+		ReadSample(&Samples[iSmp+1], flags, psdata, dwMemLength - dwPos - 6);
 	}
 	// Reading patterns (blocks)
 	if (wNumBlocks > MAX_PATTERNS) wNumBlocks = MAX_PATTERNS;

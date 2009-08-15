@@ -186,7 +186,7 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 
 #pragma pack(1)
 
-typedef struct _MODSAMPLE
+typedef struct _MODSAMPLEHEADER
 {
 	CHAR name[22];
 	WORD length;
@@ -194,7 +194,7 @@ typedef struct _MODSAMPLE
 	BYTE volume;
 	WORD loopstart;
 	WORD looplen;
-} MODSAMPLE, *PMODSAMPLE;
+} MODSAMPLEHEADER, *PMODSAMPLEHEADER;
 
 typedef struct _MODMAGIC
 {
@@ -224,7 +224,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	dwMemPos = 20;
 	m_nSamples = 31;
 	m_nChannels = 4;
-	pMagic = (PMODMAGIC)(lpStream+dwMemPos+sizeof(MODSAMPLE)*31);
+	pMagic = (PMODMAGIC)(lpStream + dwMemPos + sizeof(MODSAMPLEHEADER) * 31);
 	// Check Mod Magic
 	memcpy(s, pMagic->Magic, 4);
 	if ((IsMagic(s, "M.K.")) || (IsMagic(s, "M!K!"))
@@ -243,8 +243,8 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	dwTotalSampleLen = 0;
 	for	(UINT i=1; i<=m_nSamples; i++)
 	{
-		PMODSAMPLE pms = (PMODSAMPLE)(lpStream+dwMemPos);
-		MODINSTRUMENT *psmp = &Ins[i];
+		PMODSAMPLEHEADER pms = (PMODSAMPLEHEADER)(lpStream+dwMemPos);
+		MODSAMPLE *psmp = &Samples[i];
 		UINT loopstart, looplen;
 
 		memcpy(m_szNames[i], pms->name, 22);
@@ -285,7 +285,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 				psmp->uFlags |= CHN_LOOP;
 			}
 		}
-		dwMemPos += sizeof(MODSAMPLE);
+		dwMemPos += sizeof(MODSAMPLEHEADER);
 	}
 	if ((m_nSamples == 15) && (dwTotalSampleLen > dwMemLength * 4)) return false;
 	pMagic = (PMODMAGIC)(lpStream+dwMemPos);
@@ -348,7 +348,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		if (gdwSoundSetup & SNDMIX_MAXDEFAULTPAN)
 			ChnSettings[ich].nPan = (((ich&3)==1) || ((ich&3)==2)) ? 256 : 0;
 		else
-			ChnSettings[ich].nPan = (((ich&3)==1) || ((ich&3)==2)) ? 0xC0 : 0x40;
+			ChnSettings[ich].nPan = (((ich&3)==1) || ((ich&3)==2)) ? 0xC0 : 0x40; // this should be inverted for Amiga playback
 	}
 	// Reading channels
 	for (UINT ipat=0; ipat<nbp; ipat++)
@@ -374,7 +374,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	// Reading instruments
 	DWORD dwErrCheck = 0;
-	for (UINT ismp=1; ismp<=m_nSamples; ismp++) if (Ins[ismp].nLength)
+	for (UINT ismp=1; ismp<=m_nSamples; ismp++) if (Samples[ismp].nLength)
 	{
 		LPSTR p = (LPSTR)(lpStream+dwMemPos);
 		UINT flags = 0;
@@ -385,7 +385,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 			p += 5;
 			dwMemPos += 5;
 		}
-		DWORD dwSize = ReadSample(&Ins[ismp], flags, p, dwMemLength - dwMemPos);
+		DWORD dwSize = ReadSample(&Samples[ismp], flags, p, dwMemLength - dwMemPos);
 		if (dwSize)
 		{
 			dwMemPos += dwSize;
@@ -436,19 +436,19 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	// Writing instrument definition
 	for (UINT iins=1; iins<=31; iins++)
 	{
-		MODINSTRUMENT *pins = &Ins[insmap[iins]];
+		MODSAMPLE *pSmp = &Samples[insmap[iins]];
 		memcpy(bTab, m_szNames[iins],22);
-		inslen[iins] = pins->nLength;
+		inslen[iins] = pSmp->nLength;
 		if (inslen[iins] > 0x1fff0) inslen[iins] = 0x1fff0;
 		bTab[22] = inslen[iins] >> 9;
 		bTab[23] = inslen[iins] >> 1;
-		if (pins->RelativeTone < 0) bTab[24] = 0x08; else
-		if (pins->RelativeTone > 0) bTab[24] = 0x07; else
-		bTab[24] = (BYTE)XM2MODFineTune(pins->nFineTune);
-		bTab[25] = pins->nVolume >> 2;
-		bTab[26] = pins->nLoopStart >> 9;
-		bTab[27] = pins->nLoopStart >> 1;
-		UINT replen = pins->nLoopEnd - pins->nLoopStart;
+		if (pSmp->RelativeTone < 0) bTab[24] = 0x08; else
+		if (pSmp->RelativeTone > 0) bTab[24] = 0x07; else
+		bTab[24] = (BYTE)XM2MODFineTune(pSmp->nFineTune);
+		bTab[25] = pSmp->nVolume >> 2;
+		bTab[26] = pSmp->nLoopStart >> 9;
+		bTab[27] = pSmp->nLoopStart >> 1;
+		UINT replen = pSmp->nLoopEnd - pSmp->nLoopStart;
 		if(replen < 2) // ensure PT will load it properly
 			replen = 2; 
 		bTab[28] = replen >> 9;
@@ -533,24 +533,24 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	// Writing instruments
 	for (UINT ismpd=1; ismpd<=31; ismpd++) if (inslen[ismpd])
 	{
-		MODINSTRUMENT *pins = &Ins[insmap[ismpd]];
+		MODSAMPLE *pSmp = &Samples[insmap[ismpd]];
 		if(bCompatibilityExport == true) // first two bytes have to be 0 due to PT's one-shot loop ("no loop")
 		{
-			if(pins->nLength > 0) pins->pSample[0] = 0;
-			if(pins->nLength > 1) pins->pSample[1] = 0;
+			if(pSmp->nLength > 0) pSmp->pSample[0] = 0;
+			if(pSmp->nLength > 1) pSmp->pSample[1] = 0;
 		}
 		UINT flags = RS_PCM8S;
 #ifndef NO_PACKING
-		if (!(pins->uFlags & (CHN_16BIT|CHN_STEREO)))
+		if (!(pSmp->uFlags & (CHN_16BIT|CHN_STEREO)))
 		{
-			if ((nPacking) && (CanPackSample(pins->pSample, inslen[ismpd], nPacking)))
+			if ((nPacking) && (CanPackSample(pSmp->pSample, inslen[ismpd], nPacking)))
 			{
 				fwrite("ADPCM", 1, 5, f);
 				flags = RS_ADPCM4;
 			}
 		}
 #endif
-		WriteSample(f, pins, flags, inslen[ismpd]);
+		WriteSample(f, pSmp, flags, inslen[ismpd]);
 	}
 	fclose(f);
 	return true;

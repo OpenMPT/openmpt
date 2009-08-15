@@ -222,7 +222,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 				UINT nCol = 0;
 				for (UINT iCol=0; iCol<SMPLIST_COLUMNS; iCol++)
 				{
-					MODINSTRUMENT *pins = &pSndFile->Ins[iSmp+1];
+					MODSAMPLE *pSmp = &pSndFile->Samples[iSmp+1];
 					s[0] = 0;
 					switch(iCol)
 					{
@@ -233,17 +233,17 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						wsprintf(s, "%02d", iSmp+1);
 						break;
 					case SMPLIST_SIZE:
-						if (pins->nLength)
+						if (pSmp->nLength)
 						{
-							UINT nShift = (pins->uFlags & CHN_16BIT) ? 9 : 10;
-							if (pins->uFlags & CHN_STEREO) nShift--;
-							wsprintf(s, "%d KB", pins->nLength >> nShift);
+							UINT nShift = (pSmp->uFlags & CHN_16BIT) ? 9 : 10;
+							if (pSmp->uFlags & CHN_STEREO) nShift--;
+							wsprintf(s, "%d KB", pSmp->nLength >> nShift);
 						}
 						break;
 					case SMPLIST_TYPE:
-						if (pins->nLength)
+						if (pSmp->nLength)
 						{
-							strcpy(s, (pins->uFlags & CHN_16BIT) ? "16 Bit" : "8 Bit");
+							strcpy(s, (pSmp->uFlags & CHN_16BIT) ? "16 Bit" : "8 Bit");
 						}
 						break;
 					case SMPLIST_INSTR:
@@ -273,17 +273,17 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						}
 						break;
 					case SMPLIST_MIDDLEC:
-						if (pins->nLength)
+						if (pSmp->nLength)
 						{
 							wsprintf(s, "%d Hz", 
 								pSndFile->GetFreqFromPeriod(
-									pSndFile->GetPeriodFromNote(NOTE_MIDDLEC, pins->nFineTune, pins->nC5Speed),
-									pins->nC5Speed));
+									pSndFile->GetPeriodFromNote(NOTE_MIDDLEC, pSmp->nFineTune, pSmp->nC5Speed),
+									pSmp->nC5Speed));
 						}
 						break;
 					case SMPLIST_FILENAME:
-						memcpy(s, pins->name, sizeof(pins->name));
-						s[sizeof(pins->name)] = 0;
+						memcpy(s, pSmp->filename, sizeof(pSmp->filename));
+						s[sizeof(pSmp->filename)] = 0;
 						break;
 					}
 					lvi.mask = LVIF_TEXT;

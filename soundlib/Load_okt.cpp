@@ -66,17 +66,17 @@ bool CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 		if (smp < MAX_SAMPLES)
 		{
 			OKTSAMPLE *psmp = (OKTSAMPLE *)(lpStream + dwMemPos);
-			MODINSTRUMENT *pins = &Ins[smp];
+			MODSAMPLE *pSmp = &Samples[smp];
 
 			memcpy(m_szNames[smp], psmp->name, 20);
-			pins->uFlags = 0;
-			pins->nLength = BigEndian(psmp->length) & ~1;
-			pins->nLoopStart = BigEndianW(psmp->loopstart);
-			pins->nLoopEnd = pins->nLoopStart + BigEndianW(psmp->looplen);
-			if (pins->nLoopStart + 2 < pins->nLoopEnd) pins->uFlags |= CHN_LOOP;
-			pins->nGlobalVol = 64;
-			pins->nVolume = psmp->volume << 2;
-			pins->nC5Speed = 8363;
+			pSmp->uFlags = 0;
+			pSmp->nLength = BigEndian(psmp->length) & ~1;
+			pSmp->nLoopStart = BigEndianW(psmp->loopstart);
+			pSmp->nLoopEnd = pSmp->nLoopStart + BigEndianW(psmp->looplen);
+			if (pSmp->nLoopStart + 2 < pSmp->nLoopEnd) pSmp->uFlags |= CHN_LOOP;
+			pSmp->nGlobalVol = 64;
+			pSmp->nVolume = psmp->volume << 2;
+			pSmp->nC5Speed = 8363;
 		}
 		dwMemPos += sizeof(OKTSAMPLE);
 	}
@@ -191,7 +191,7 @@ bool CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 	UINT nsmp = 1;
 	while ((dwMemPos < dwMemLength - 10) && (*((DWORD *)(lpStream + dwMemPos)) == 0x444F4253))
 	{
-		if (nsmp < MAX_SAMPLES) ReadSample(&Ins[nsmp], RS_PCM8S, (LPSTR)(lpStream+dwMemPos+8), dwMemLength-dwMemPos-8);
+		if (nsmp < MAX_SAMPLES) ReadSample(&Samples[nsmp], RS_PCM8S, (LPSTR)(lpStream+dwMemPos+8), dwMemLength-dwMemPos-8);
 		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
 		nsmp++;
 	}
