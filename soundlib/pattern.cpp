@@ -1,15 +1,21 @@
 #include "stdafx.h"
 #include "pattern.h"
 #include "patternContainer.h"
+#include "it_defs.h"
 #include "../mptrack/mainfrm.h"
 #include "../mptrack/moddoc.h"
+#include "../mptrack/serialization_utils.h"
+#include "../mptrack/version.h"
 
+CSoundFile& CPattern::GetSoundFile() {return m_rPatternContainer.GetSoundFile();}
+const CSoundFile& CPattern::GetSoundFile() const {return m_rPatternContainer.GetSoundFile();}
 
 CHANNELINDEX CPattern::GetNumChannels() const
 //-------------------------------------------
 {
-	return m_rPatternContainer.GetSoundFile().GetNumChannels();
+	return GetSoundFile().GetNumChannels();
 }
+
 
 bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning)
 //-------------------------------------------
@@ -88,15 +94,22 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 }
 
 
-bool CPattern::ClearData()
-//------------------------
+void CPattern::ClearCommands()
+//----------------------------
+{
+	if (m_ModCommands != nullptr)
+		memset(m_ModCommands, 0, GetNumRows() * GetNumChannels() * sizeof(MODCOMMAND));
+}
+
+
+void CPattern::Deallocate()
+//-------------------------
 {
 	BEGIN_CRITICAL();
 	m_Rows = 0;
 	CSoundFile::FreePattern(m_ModCommands);
 	m_ModCommands = NULL;
 	END_CRITICAL();
-	return false;
 }
 
 bool CPattern::Expand()
@@ -230,3 +243,176 @@ bool CPattern::ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const D
 		return false;
 }
 
+
+
+
+////////////////////////////////////////////////////////////////////////
+//
+//	Pattern serialization functions
+//
+////////////////////////////////////////////////////////////////////////
+
+
+static enum maskbits
+{
+	noteBit			= (1 << 0),
+	instrBit		= (1 << 1),
+	volcmdBit		= (1 << 2),
+	volBit			= (1 << 3),
+	commandBit		= (1 << 4),
+	effectParamBit	= (1 << 5),
+	extraData		= (1 << 6)
+};
+
+void WriteData(std::ostream& oStrm, const CPattern& pat);
+void ReadData(std::istream& iStrm, CPattern& pat, const size_t nSize = 0);
+
+void WriteModPattern(std::ostream& oStrm, const CPattern& pat)
+//------------------------------------------------------------
+{
+	srlztn::Ssb ssb(oStrm);
+	ssb.BeginWrite(FileIdPattern, MptVersion::num);
+	ssb.WriteItem(pat, "data", strlen("data"), &WriteData);
+	ssb.FinishWrite();
+}
+
+
+void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
+//-------------------------------------------------------------------
+{
+	srlztn::Ssb ssb(iStrm);
+	ssb.BeginRead(FileIdPattern, MptVersion::num);
+	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+		return;
+	ssb.ReadItem(pat, "data", strlen("data"), &ReadData);
+}
+
+
+uint8 CreateDiffMask(MODCOMMAND chnMC, MODCOMMAND newMC)
+//------------------------------------------------------
+{
+	uint8 mask = 0;
+	if(chnMC.note != newMC.note)
+		mask |= noteBit;
+	if(chnMC.instr != newMC.instr)
+		mask |= instrBit;
+	if(chnMC.volcmd != newMC.volcmd)
+		mask |= volcmdBit;
+	if(chnMC.vol != newMC.vol)
+		mask |= volBit;
+	if(chnMC.command != newMC.command)
+		mask |= commandBit;
+	if(chnMC.param != newMC.param)
+		mask |= effectParamBit;
+	return mask;
+}
+
+using srlztn::Binarywrite;
+using srlztn::Binaryread;
+
+// Writes pattern data. Adapted from SaveIT.
+void WriteData(std::ostream& oStrm, const CPattern& pat)
+//------------------------------------------------------
+{
+	if(!pat)
+		return;
+
+	const ROWINDEX rows = pat.GetNumRows();
+	const CHANNELINDEX chns = pat.GetNumChannels();
+	vector<MODCOMMAND> lastChnMC(chns);
+
+	for(ROWINDEX r = 0; r<rows; r++)
+	{
+		for(CHANNELINDEX c = 0; c<chns; c++)
+		{
+			const MODCOMMAND m = *pat.GetpModCommand(r, c);
+			// Writing only commands not writting in IT-pattern writing:
+			// For now this means only NOTE_PC and NOTE_PCS.
+			if(m.note != NOTE_PCS && m.note != NOTE_PC)
+				continue;
+			uint8 diffmask = CreateDiffMask(lastChnMC[c], m);
+			uint8 chval = static_cast<uint8>(c+1);
+			if(diffmask != 0)
+				chval |= IT_bitmask_patternChanEnabled_c;
+
+			Binarywrite<uint8>(oStrm, chval);
+				
+			if(diffmask)
+			{
+				lastChnMC[c] = m;
+				Binarywrite<uint8>(oStrm, diffmask);
+				if(diffmask & noteBit) Binarywrite<uint8>(oStrm, m.note);
+				if(diffmask & instrBit) Binarywrite<uint8>(oStrm, m.instr);
+				if(diffmask & volcmdBit) Binarywrite<uint8>(oStrm, m.volcmd);
+				if(diffmask & volBit) Binarywrite<uint8>(oStrm, m.vol);
+				if(diffmask & commandBit) Binarywrite<uint8>(oStrm, m.command);
+				if(diffmask & effectParamBit) Binarywrite<uint8>(oStrm, m.param);
+			}
+		}
+		Binarywrite<uint8>(oStrm, 0); // Write end of row marker.
+	}
+}
+
+
+#define READITEM(itembit,id)		\
+if(diffmask & itembit)				\
+{									\
+	Binaryread<uint8>(iStrm, temp);	\
+	if(ch < chns)					\
+		lastChnMC[ch].id = temp;	\
+}									\
+if(ch < chns)						\
+	m.id = lastChnMC[ch].id;
+
+
+void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
+//-------------------------------------------------------------
+{
+	if (!pat) // Expecting patterns to be allocated and resized properly.
+		return;
+
+	const CHANNELINDEX chns = pat.GetNumChannels();
+	const ROWINDEX rows = pat.GetNumRows();
+
+	vector<MODCOMMAND> lastChnMC(chns);
+
+	ROWINDEX row = 0;
+	while(row < rows && iStrm.good())
+	{
+		uint8 t = 0;
+		Binaryread<uint8>(iStrm, t);
+		if(t == 0)
+		{
+			row++;
+			continue;
+		}
+
+		CHANNELINDEX ch = (t & IT_bitmask_patternChanField_c); 
+		if(ch > 0)
+			ch--;
+
+		uint8 diffmask = 0;
+		if((t & IT_bitmask_patternChanEnabled_c) != 0)
+			Binaryread<uint8>(iStrm, diffmask);
+		uint8 temp = 0;
+
+		MODCOMMAND dummy;
+		MODCOMMAND& m = (ch < chns) ? *pat.GetpModCommand(row, ch) : dummy;
+
+		READITEM(noteBit, note);
+		READITEM(instrBit, instr);
+		READITEM(volcmdBit, volcmd);
+		READITEM(volBit, vol);
+		READITEM(commandBit, command);
+		READITEM(effectParamBit, param);
+		if(diffmask & extraData)
+		{
+			//Ignore additional data.
+			uint8 temp;
+			Binaryread<uint8>(iStrm, temp);
+			iStrm.ignore(temp);
+		}
+	}
+}
+
+#undef READITEM

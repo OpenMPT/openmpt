@@ -12,6 +12,7 @@
 #include "../mptrack/mainfrm.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/version.h"
+#include "../mptrack/serialization_utils.h"
 #include "sndfile.h"
 #include "wavConverter.h"
 #include "tuningcollection.h"
@@ -2865,15 +2866,10 @@ bool CSoundFile::LoadStaticTunings()
 	//since various parts may use addresses of the tuningobjects).
 
 	CTuning::MessageHandler = &SimpleMessageBox;
-	
-	srlztn::CSSBSerialization::s_DefaultReadLogMask = CMainFrame::GetPrivateProfileLong("Misc", "ReadLogMask", srlztn::SNT_FAILURE | (1<<14) | (1<<13), theApp.GetConfigFileName());
-	srlztn::CSSBSerialization::s_DefaultWriteLogMask = CMainFrame::GetPrivateProfileLong("Misc", "WriteLogMask", srlztn::SNT_FAILURE | srlztn::SNT_NOTE | srlztn::SNT_WARNING, theApp.GetConfigFileName());
-	
+		
 	s_pTuningsSharedStandard = new CTuningCollection("Standard tunings");
 	s_pTuningsSharedLocal = new CTuningCollection("Local tunings");
 
-	CTuning::AddCreationfunction(&CTuningRTI::CreateRTITuning);
-	
 	const string exeDir = CMainFrame::m_csExecutableDirectoryPath;
     const string baseDirectoryName = exeDir + "tunings\\";
 	string filenameBase;
@@ -2882,8 +2878,8 @@ bool CSoundFile::LoadStaticTunings()
 	s_pTuningsSharedStandard->SetSavefilePath(baseDirectoryName + string("standard\\std_tunings") + CTuningCollection::s_FileExtension);
 	s_pTuningsSharedLocal->SetSavefilePath(baseDirectoryName + string("local_tunings") + CTuningCollection::s_FileExtension);
 
-	s_pTuningsSharedStandard->Unserialize();
-	s_pTuningsSharedLocal->Unserialize();
+	s_pTuningsSharedStandard->Deserialize();
+	s_pTuningsSharedLocal->Deserialize();
 
 	//This condition should not be true.
 	if(s_pTuningsSharedStandard->GetNumTunings() == 0)

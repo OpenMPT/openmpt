@@ -1,91 +1,10 @@
 #include "stdafx.h"
 #define TUNINGBASE_CPP
 #include "tuningbase.h"
+#include "../mptrack/serialization_utils.h"
 
 #ifdef TUNINGBASE_H
 
-
-
-//Utilities for reading/writing notenamemap.
-static uint8 NotenamemapKeybytes = 0;
-TEMPLATEDEC
-void CTUNINGBASE::ReadNotenamemapPair(istream& iStrm, TYPENAME NOTENAMEMAP::value_type& val, const size_t)
-//-------------------------------------------------------------------------------------------------
-{
-	uint64 key = 0;
-	if(NotenamemapKeybytes > 8) return;
-	iStrm.read(reinterpret_cast<char*>(&key), NotenamemapKeybytes);
-	TYPENAME CTuningBase::NOTENAMEMAP::key_type* p = (TYPENAME CTuningBase::NOTENAMEMAP::key_type*)(&val.first);
-	*p = static_cast<TYPENAME CTuningBase::NOTENAMEMAP::key_type>(key);
-	StringFromBinaryStream<uint8>(iStrm, val.second);
-}
-TEMPLATEDEC
-void CTUNINGBASE::WriteNotenamemappair(ostream& oStrm, const TYPENAME NOTENAMEMAP::value_type& val, const size_t)
-//------------------------------------------------------------------------
-{
-	oStrm.write(reinterpret_cast<const char*>(&val.first), sizeof(TYPENAME CTUNINGBASE::NOTENAMEMAP::key_type));
-	StringToBinaryStream<uint8>(oStrm, val.second);
-}
-
-
-//=======================================================================
-TEMPLATEDEC
-class CTuningReadInstructions : public srlztn::CSerializationInstructions
-//=======================================================================
-{
-public:
-	friend class CTUNINGBASE;
-
-	CTuningReadInstructions(const uint64 version, const size_t entrycounthint) :
-		CSerializationInstructions("", version, srlztn::INFLAG, entrycounthint),
-		m_pTuning(0)
-		{}
-
-	virtual bool CompareObjectClassID(const vector<char>& objectClassID)
-	//------------------------------------------------------------------
-	{
-		const size_t idsize = objectClassID.size();
-		if(idsize < 6) return true;
-		string str; str.resize(idsize);
-		for(size_t i = 0; i<idsize; i++) {str[i] = objectClassID[i];}
-		const size_t pos = str.find("CTB");
-		if(pos == string::npos)
-			return true;
-
-		if(!isdigit(str[3]) || !isdigit(str[4]) || !isdigit(str[5]))
-			return true;
-
-		const BYTE bytesPerNotetype = str[3] - 48;
-		const BYTE bytesPerRatiotype = str[4] - 48;
-		const BYTE bytesPerSteptype = str[5] - 48;
-		if(bytesPerNotetype == 0 || bytesPerRatiotype == 0 || bytesPerSteptype == 0
-			|| bytesPerNotetype > 8 || bytesPerRatiotype > 8 || bytesPerSteptype > 8) return true;
-
-		str.erase(pos, 6);
-
-		const size_t numCreationfunctions = CTUNINGBASE::GetCreationfunctionarray().size();
-		for(size_t i = 0; i<numCreationfunctions && !m_pTuning; i++)
-		{
-			m_pTuning = (CTUNINGBASE::GetCreationfunctionarray()[i])(str, *this);
-		}
-		if(m_pTuning)
-		{
-			BYTE sizes[3] = {bytesPerNotetype, bytesPerRatiotype, bytesPerSteptype};
-			m_pTuning->AddSI(*this, sizes);
-			return false;
-		}
-		else return true;
-	}
-
-private:
-	CTUNINGBASE* m_pTuning;
-};
-
-#ifdef BUILD_TUNINGBASE_AS_TEMPLATE
-	#define CTUNINGREADINSTRUCTIONS CTuningReadInstructions<A,B,C,D,E>
-#else
-	#define CTUNINGREADINSTRUCTIONS CTuningReadInstructions
-#endif
 
 TEMPLATEDEC
 const char* CTUNINGBASE::s_TuningDescriptionGeneral = "No ratio restrictions";
@@ -104,12 +23,6 @@ const char* CTUNINGBASE::s_TuningTypeStrGroupGeometric = "\"GroupGeometric\"";
 
 TEMPLATEDEC
 const char* CTUNINGBASE::s_TuningTypeStrGeometric = "\"Geometric\"";
-
-TEMPLATEDEC
-const BYTE CTUNINGBASE::s_Typesizes[3] = {sizeof(CTUNINGBASE::NOTEINDEXTYPE), sizeof(CTUNINGBASE::RATIOTYPE), sizeof(CTUNINGBASE::STEPINDEXTYPE)};
-
-TEMPLATEDEC
-const string CTUNINGBASE::s_ClassID = string("CTB") + Stringify(sizeof(CTUNINGBASE::NOTEINDEXTYPE)) + Stringify(sizeof(CTUNINGBASE::RATIOTYPE)) + Stringify(sizeof(CTUNINGBASE::STEPINDEXTYPE));
 
 TEMPLATEDEC
 const TYPENAME CTUNINGBASE::SERIALIZATION_VERSION CTUNINGBASE::s_SerializationVersion(5);
@@ -162,10 +75,6 @@ TEMPLATEDEC
 const TYPENAME CTUNINGBASE::TUNINGTYPE CTUNINGBASE::TT_GROUPGEOMETRIC = 1; //0...10b
 TEMPLATEDEC
 const TYPENAME CTUNINGBASE::TUNINGTYPE CTUNINGBASE::TT_GEOMETRIC = 3; //0...11b
-
-TEMPLATEDEC
-std::vector<TYPENAME CTUNINGBASE::CREATIONFUNCTION> CTUNINGBASE::s_Creationfunctions;
-
 
 
 TEMPLATEDEC
@@ -456,70 +365,6 @@ bool CTUNINGBASE::ChangeGroupRatio(const RATIOTYPE& r)
 	return true;
 }
 
-TEMPLATEDEC
-TYPENAME CTUNINGBASE::SERIALIZATION_RETURN_TYPE CTUNINGBASE::Serialize(ostream& outStrm) const
-//--------------------------------------------------------------------------------------------
-{
-	using namespace srlztn;
-
-	const string classID = CTuningBase::s_ClassID + GetDerivedClassID();
-	CSerializationInstructions instructions(classID, (GetVersion() << 24) + GetClassVersion(), OUTFLAG, 4);
-	instructions.SetWritepropUseTimestamp(false);
-	instructions.SetWritepropIncludeStartposInMap(false);
-	
-	AddSI(instructions, s_Typesizes);
-	string msg; msg.reserve(instructions.GetEntrycount() * 30);
-	CSSBSerialization sm(instructions);
-	sm.SetLogstring(msg);
-	sm.Serialize(outStrm);
-	if(msg.size() > 0) MessageHandler(msg.c_str(), "Tuning writemessages");
-
-	return 0;
-}
-
-
-TEMPLATEDEC
-CTUNINGBASE* CTUNINGBASE::Unserialize(istream& inStrm)
-//-------------------------------------------------------------------
-{
-	if(inStrm.fail())
-		return 0;
-
-	using namespace srlztn;
-
-	//Using 4 byte version in which 'largest' byte is for base class version, and
-	//rest three for derived classes.
-	CTUNINGREADINSTRUCTIONS instructions(CTuningBase::GetVersion() << 24, 4);
-	string msg; msg.reserve(instructions.GetEntrycount() * 30);
-	CSSBSerialization sm(instructions);
-	sm.SetLogstring(msg);
-	CTuningBase* pT = 0;
-	if(sm.Unserialize(inStrm) & SNT_FAILURE)
-		delete instructions.m_pTuning;
-	else
-		pT = instructions.m_pTuning;
-
-	if(msg.size() > 0) MessageHandler(msg.c_str(), "Tuning readmessages");
-	if(pT) 
-	{
-		EDITMASK temp = pT->GetEditMask();
-		pT->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
-		if(pT->ProProcessUnserializationdata())
-		{
-			MessageHandler(("Processing loaded data for tuning \"" + pT->GetName() + "\" failed.").c_str(), "Tuning load failure");
-			delete pT; pT = 0;
-		}
-		else
-		{ 
-			USTEPINDEXTYPE fsTemp = pT->m_FineStepCount;
-			pT->m_FineStepCount = 0;
-			pT->SetFineStepCount(fsTemp);
-			pT->SetEditMask(temp);
-		}
-	}
-	return pT;
-}
-
 
 TEMPLATEDEC
 const char* CTUNINGBASE::GetTuningTypeDescription(const TUNINGTYPE& type)
@@ -572,29 +417,8 @@ bool CTUNINGBASE::SetType(const TUNINGTYPE& tt)
 }
 
 
-
 TEMPLATEDEC
-void CTUNINGBASE::AddSI(srlztn::ABCSerializationInstructions& instructions, const BYTE sizes[3]) const
-//-------------------------------------------------------------------------------------------------
-{
-	using namespace srlztn;
-	NotenamemapKeybytes = sizes[0];
-	bool arwi = instructions.AreWriteInstructions();
-	if(!arwi || m_TuningName.length() > 0) //Writing name to file only when there is one.
-		instructions.AddEntry(CSerializationentry("0", CContainerstreamer<string>::NewDefaultReadWrite((string&)m_TuningName, uint8_max, uint8_max)));
-
-	instructions.AddEntry(CSerializationentry("1", new CBinarystreamer<EDITMASK>(m_EditMask)));
-	instructions.AddEntry(CSerializationentry("2", new CBinarystreamer<TUNINGTYPE>(m_TuningType)));
-	if(!arwi || m_NoteNameMap.size() > 0)
-		instructions.AddEntry(CSerializationentry("3", CContainerstreamer<NOTENAMEMAP>::NewCustomReadWrite((NOTENAMEMAP&)m_NoteNameMap, UNOTEINDEXTYPE_MAX, m_NoteNameMap.size(), &WriteNotenamemappair, &ReadNotenamemapPair), ""));
-	if(!arwi || GetFineStepCount() > 0)
-		instructions.AddEntry(CSerializationentry("4", new CBinarystreamer<USTEPINDEXTYPE>(m_FineStepCount, sizes[2]), ""));
-	ProAddSI(instructions, sizes);
-}
-
-
-TEMPLATEDEC
-bool CTUNINGBASE::UnserializeOLD(istream& inStrm)
+bool CTUNINGBASE::DeserializeOLD(istream& inStrm)
 //------------------------------------------------
 {
 	char begin[8];
@@ -640,6 +464,7 @@ bool CTUNINGBASE::UnserializeOLD(istream& inStrm)
 
 	return SERIALIZATION_SUCCESS;
 }
+
 
 #endif
 

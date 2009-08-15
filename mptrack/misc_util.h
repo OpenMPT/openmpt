@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <string>
+#include <limits>
 
 #define ARRAYELEMCOUNT(x) (sizeof(x)/sizeof(x[0]))
 

@@ -8,7 +8,6 @@
 #define TUNINGBASE_H
 
 
-
 #include <string>
 #include <vector>
 #include <cmath>
@@ -17,12 +16,13 @@
 #include <limits>
 #include "../mptrack/misc_util.h"
 #include "../mptrack/typedefs.h"
-#include "../mptrack/serialization_utils.h"
 using std::string;
 using std::vector;
 using std::istream;
 using std::ostream;
 using std::map;
+
+namespace srlztn {class Ssb;};
 
 #pragma warning(disable:4100) //"unreferenced formal parameter"
 
@@ -69,7 +69,6 @@ public:
 	typedef TRATIOTYPE RATIOTYPE;
 	typedef TSTEPINDEXTYPE STEPINDEXTYPE;
 	typedef TUSTEPINDEXTYPE USTEPINDEXTYPE;
-	typedef CTuningBase* (*CREATIONFUNCTION)(const string&, srlztn::ABCSerializationInstructions&);
 	typedef void (*MESSAGEHANDLER)(const char*, const char*);
 
 	typedef int16 SERIALIZATION_VERSION;
@@ -158,15 +157,7 @@ public:
 	bool CreateGeometric(const UNOTEINDEXTYPE& p, const RATIOTYPE& r) {return CreateGeometric(p,r,GetValidityRange());}
 	bool CreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR vr);
 
-	SERIALIZATION_RETURN_TYPE Serialize(ostream& out) const;
-
-	//Tries to read a tuning and returns pointer to a new object if succesfull, else null.
-	static CTuningBase* Unserialize(istream& in);
-
-	//Add SerializationInstructions. Sets base class instructions and calls protected virtual
-	//in which derived classes can add their owns. 'sizes' parameter tells the number of 
-	//bytes in NOTEINDEXTYPE, RATIOTYPE, STEPINDEXTYPE.
-	void AddSI(srlztn::ABCSerializationInstructions&, const BYTE sizes[3]) const;
+	virtual SERIALIZATION_RETURN_TYPE Serialize(ostream& out) const {return false;}
 
 	NOTESTR GetNoteName(const NOTEINDEXTYPE& x) const;
 
@@ -217,17 +208,13 @@ public:
 
 	static const char* GetTuningTypeDescription(const TUNINGTYPE&);
 
-	static void AddCreationfunction(CREATIONFUNCTION func) {s_Creationfunctions.push_back(func);}
-
 	bool MayEdit(const EDITMASK& em) const {return (em & m_EditMask) != 0;}
 
 	bool SetEditMask(const EDITMASK& em);
 
 	EDITMASK GetEditMask() const {return m_EditMask;}
 
-	bool UnserializeOLD(istream&);
-
-	static const vector<CREATIONFUNCTION>& GetCreationfunctionarray() {return s_Creationfunctions;}
+	bool DeserializeOLD(istream&);
 
 	virtual ~CTuningBase() {};
 
@@ -251,8 +238,6 @@ protected:
 
 	virtual NOTEINDEXTYPE ProSetGroupSize(const UNOTEINDEXTYPE&) {return 0;}
 	virtual RATIOTYPE ProSetGroupRatio(const RATIOTYPE&) {return 0;}
-
-	virtual void ProAddSI(srlztn::ABCSerializationInstructions&, const BYTE typesizes[3]) const = 0;
 
 	virtual uint32 GetClassVersion() const = 0;
 
@@ -283,11 +268,10 @@ private:
 
 
 //BEGIN: DATA MEMBERS
-private:
+protected:
 	string m_TuningName;
 	EDITMASK m_EditMask; //Behavior: true <~> allow modification
 	TUNINGTYPE m_TuningType;
-protected:
 	NOTENAMEMAP m_NoteNameMap;
 	USTEPINDEXTYPE m_FineStepCount;
 	//NOTE: If adding new members, TuningCopy might need to be modified.
@@ -319,10 +303,6 @@ public:
 
 private:
 	static void DefaultMessageHandler(const char*, const char*) {}
-
-	static vector<CREATIONFUNCTION> s_Creationfunctions;
-	static const string s_ClassID;
-	static const BYTE s_Typesizes[3];
 };
 
 #pragma warning(default:4100) //"unreferenced formal parameter"

@@ -2368,7 +2368,7 @@ void CViewInstrument::PlayNote(UINT note)
 		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 		if (note >= 0xFE)
 		{
-			pModDoc->NoteOff(0, (note == 0xFE) ? TRUE : FALSE, m_nInstrument);
+			pModDoc->NoteOff(0, (note == NOTE_NOTECUT) ? TRUE : FALSE, m_nInstrument);
 			pMainFrm->SetInfoText("");
 		} else
 		if (m_nInstrument && !m_baPlayingNote[note])
@@ -2394,7 +2394,7 @@ void CViewInstrument::PlayNote(UINT note)
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX)) 
 			{
-				const string temp = pModDoc->GetSoundFile()->GetNoteName(note, m_nInstrument);
+				const std::string temp = pModDoc->GetSoundFile()->GetNoteName(note, m_nInstrument);
 				if(temp.size() >= sizeofS)
 					wsprintf(s, "%s", "...");
 				else

@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "sndfile.h"
 #include "ordertopatterntable.h"
+#include "../mptrack/serialization_utils.h"
 
 #define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
 
-DWORD COrderToPatternTable::Unserialize(const BYTE* const src, const DWORD memLength)
+DWORD COrderToPatternTable::Deserialize(const BYTE* const src, const DWORD memLength)
 //-------------------------------------------------------------------------
 {
 	if(memLength < 2 + 4) return 0;
@@ -23,7 +24,7 @@ DWORD COrderToPatternTable::Unserialize(const BYTE* const src, const DWORD memLe
 	if(s > ModSpecs::mptm.ordersMax)
 		s = ModSpecs::mptm.ordersMax;
 
-	resize(s);
+	resize(max(s, MAX_ORDERS));
 	for(size_t i = 0; i<s; i++, memPos +=4 )
 	{
 		uint32 temp;
@@ -108,6 +109,8 @@ void COrderToPatternTable::OnModTypeChanged(const MODTYPE oldtype)
 		resize(max(MAX_ORDERS, specs.ordersMax));
 		for(ORDERINDEX i = GetCount(); i>specs.ordersMax; --i) (*this)[i-1] = GetInvalidPatIndex();
 	}
+	if (GetCount() < MAX_ORDERS)
+		resize(MAX_ORDERS, GetInvalidPatIndex());
 
 	//Replace items used to denote end of song/skip order.
 	replace(begin(), end(), GetInvalidPatIndex(oldtype), GetInvalidPatIndex());
@@ -178,51 +181,41 @@ PATTERNINDEX COrderToPatternTable::GetInvalidPatIndex() const {return GetInvalid
 PATTERNINDEX COrderToPatternTable::GetIgnoreIndex() const {return GetIgnoreIndex(m_rSndFile.GetType());}
 
 
-
-
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-
-using namespace srlztn;
-
-void COrderSerialization::ProWrite(OUTSTREAM& ostrm) const
-//--------------------------------------------------------
-{	
-    uint16 size = static_cast<uint16>(m_rOrders.size());
-	ostrm.write(reinterpret_cast<const char*>(&size), 2);
-	const COrderToPatternTable::const_iterator endIter = m_rOrders.end();
-	for(COrderToPatternTable::const_iterator citer = m_rOrders.begin(); citer != endIter; citer++)
-	{
-		const uint16 temp = static_cast<uint16>(*citer);
-		ostrm.write(reinterpret_cast<const char*>(&temp), 2);
-	}
-}
-
-
-void COrderSerialization::ProRead(INSTREAM& istrm, const uint64 /*datasize*/)
-//---------------------------------------------------------------------------
+void ReadModSequence(std::istream& iStrm, COrderToPatternTable& seq, const size_t)
+//--------------------------------------------------------------------------------
 {
 	uint16 size;
-	istrm.read(reinterpret_cast<char*>(&size), 2);
+	srlztn::Binaryread<uint16>(iStrm, size);
 	if(size > ModSpecs::mptm.ordersMax)
 	{
 		// Hack: Show message here if trying to load longer sequence than what is supported.
 		CString str; str.Format(str_SequenceTruncationNote, size, ModSpecs::mptm.ordersMax);
-		::MessageBox(0, str, "", MB_ICONWARNING);
+		AfxMessageBox(str, MB_ICONWARNING);
 		size = ModSpecs::mptm.ordersMax;
 	}
-	m_rOrders.resize(size);
-	if(size == 0) {m_rOrders.assign(MAX_ORDERS, m_rOrders.GetInvalidPatIndex()); return;}
+	seq.resize(max(size, MAX_ORDERS), seq.GetInvalidPatIndex());
+	if(size == 0)
+		{ seq.Init(); return; }
 
-	const COrderToPatternTable::const_iterator endIter = m_rOrders.end();
-	for(COrderToPatternTable::iterator iter = m_rOrders.begin(); iter != endIter; iter++)
+	for(size_t i = 0; i < size; i++)
 	{
 		uint16 temp;
-		istrm.read(reinterpret_cast<char*>(&temp), 2);
-		*iter = temp;
+		srlztn::Binaryread<uint16>(iStrm, temp);
+		seq[i] = temp;
 	}
 }
 
 
+void WriteModSequence(std::ostream& oStrm, const COrderToPatternTable& seq)
+//-------------------------------------------------------------------------
+{
+	uint16 size = seq.GetCount();
+	srlztn::Binarywrite<uint16>(oStrm, size);
+	const COrderToPatternTable::const_iterator endIter = seq.end();
+	for(COrderToPatternTable::const_iterator citer = seq.begin(); citer != endIter; citer++)
+	{
+		const uint16 temp = static_cast<uint16>(*citer);
+		srlztn::Binarywrite<uint16>(oStrm, temp);
+	}
+}
 

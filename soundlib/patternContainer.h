@@ -1,10 +1,7 @@
-#ifdef __SNDFILE_H
-
 #ifndef PATTERNCONTAINER_H
 #define PATTERNCONTAINER_H
 
 #include "pattern.h"
-#include <limits>
 
 class CSoundFile;
 typedef CPattern MODPATTERN;
@@ -28,7 +25,7 @@ public:
 
 //BEGIN: INTERFACE METHODS
 public:
-	CPatternContainer(CSoundFile& sndFile) : m_rSndFile(sndFile) {m_Patterns.assign(MAX_PATTERNS, MODPATTERN(*this));}
+	CPatternContainer(CSoundFile& sndFile) : m_rSndFile(sndFile) {m_Patterns.assign(240, MODPATTERN(*this));}
 
 	// Clears existing patterns and resizes array to default size.
 	void Init();
@@ -51,6 +48,7 @@ public:
 	PATTERNINDEX Size() const {return static_cast<PATTERNINDEX>(m_Patterns.size());}
 
 	CSoundFile& GetSoundFile() {return m_rSndFile;}
+	const CSoundFile& GetSoundFile() const {return m_rSndFile;}
 
 	//Returns the index of given pattern, Size() if not found.
 	PATTERNINDEX GetIndex(const MODPATTERN* const pPat) const;
@@ -73,5 +71,11 @@ private:
 
 };
 
+
+const char FileIdPatterns[] = "mptPc";
+
+void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t nSize = 0);
+void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc);
+
 #endif
-#endif
+

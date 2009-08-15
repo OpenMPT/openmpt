@@ -25,10 +25,10 @@ public:
 public:
 //BEGIN STATIC CONST MEMBERS:
 	static RATIOTYPE DefaultBARFUNC(const NOTEINDEXTYPE&, const STEPINDEXTYPE&);
-	static const NOTEINDEXTYPE s_StepMinDefault;
-	static const UNOTEINDEXTYPE s_RatioTableSizeDefault;
-	static const STEPINDEXTYPE s_RatioTableFineSizeMaxDefault;
-	static const SERIALIZATION_VERSION s_SerializationVersion;
+	static const NOTEINDEXTYPE s_StepMinDefault = -64;
+	static const UNOTEINDEXTYPE s_RatioTableSizeDefault = 128;
+	static const STEPINDEXTYPE s_RatioTableFineSizeMaxDefault = 1000;
+	static const SERIALIZATION_VERSION s_SerializationVersion = 4;
 //END STATIC CONST MEMBERS
 
 
@@ -48,20 +48,20 @@ public:
 
 	RATIOTYPE GetGroupRatio() const {return m_GroupRatio;}
 
-	void ProAddSI(srlztn::ABCSerializationInstructions&, const BYTE[3]) const;
-
 	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& from, const NOTEINDEXTYPE& to) const
 		{return (to - from)*(static_cast<NOTEINDEXTYPE>(GetFineStepCount())+1);}
 	
 	virtual STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& noteFrom, const STEPINDEXTYPE& stepDistFrom, const NOTEINDEXTYPE& noteTo, const STEPINDEXTYPE& stepDistTo) const
 		{return GetStepDistance(noteFrom, noteTo) + stepDistTo - stepDistFrom;}
 	
-	static CTuning* CreateRTITuning(const string&, srlztn::ABCSerializationInstructions&);
+	static CTuningBase* Deserialize(istream& inStrm);
 
 	static uint32 GetVersion() {return s_SerializationVersion;}
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else 0.
-	static CTuningRTI* UnserializeOLD(istream& iStrm);
+	static CTuningRTI* DeserializeOLD(istream& iStrm);
+
+	SERIALIZATION_RETURN_TYPE Serialize(ostream& out) const;
 	
 
 public:
@@ -174,10 +174,6 @@ private:
 	
 
 }; //End: CTuningRTI declaration.
-
-
-
-
 
 
 #endif
