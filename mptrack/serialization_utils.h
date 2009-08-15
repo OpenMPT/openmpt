@@ -2,962 +2,452 @@
 #define SERIALIZATION_UTILS_H
 
 #include <string>
-#include <fstream>
-#include <istream>
-#include <ostream>
 #include <strstream>
 #include <vector>
-#include <algorithm>
+#include <bitset>
 #include "misc_util.h"
 #include "typedefs.h"
 #include <limits>
-
-using std::numeric_limits;
-using std::ostringstream;
-using std::istream;
-using std::ostream;
-using std::vector;
-using std::string;
+#if _HAS_TR1
+	#include <type_traits>
+#endif
+#include <algorithm>
 
 namespace srlztn //SeRiaLiZaTioN
 {
 
+typedef std::ostream OutStream;
+typedef std::istream InStream;
+typedef std::iostream IoStream;
+typedef std::istrstream IstrStream;
+typedef std::ostrstream OstrStream;
+typedef OutStream::off_type Offtype;
+typedef Offtype Postype;
+typedef std::streamsize Streamsize;
 
-using std::string;
-using std::vector;
+typedef UINT_PTR	DataSize;	// Data size type.
+typedef UINT_PTR	RposType;	// Relative position type.
+typedef UINT_PTR	NumType;	// Entry count type.
+const DataSize DataSize_max = MAXUINT_PTR;
+const RposType RposType_max = MAXUINT_PTR;
+const NumType NumType_max = MAXUINT_PTR;
 
+const DataSize invalidDatasize = DataSize_max;
+const Offtype Offtype_min = (std::numeric_limits<Offtype>::min)();
+const Offtype Offtype_max = (std::numeric_limits<Offtype>::max)();
 
-inline uint64 Pow2x(const uint8& exp)
-//--------------------------------
+typedef std::basic_string<TCHAR> String;
+
+enum 
 {
-	if(exp == 0) return 1;
-	return 2 << ((exp-1));
-}
+	SNT_PROGRESS =		0x80000000, // = 1 << 31
+	SNT_FAILURE =		0x40000000, // = 1 << 30
+	SNT_NOTE =			0x20000000, // = 1 << 29
+	SNT_WARNING =		0x10000000, // = 1 << 28
+	SNT_NONE = 0,
+	SNT_ALL_ENABLED = -1,
+	SNT_DEFAULT_MASK = SNT_FAILURE | SNT_WARNING,
 
-inline uint8 Pow2xSmall(const uint8& exp) {return static_cast<uint8>(Pow2x(exp));}
+	SNRW_BADGIVEN_STREAM =								1	| SNT_FAILURE,
 
-//Note: Works only for arguments 1,2,4,8
-inline uint8 Log2(const uint16& val)
-//---------------------------------
-{
-	if(val == 1) return 0;
-	if(val == 2) return 1;
-	if(val == 4) return 2;
-	if(val == 8) return 3;
-	return 255;
-}
+	// Read failures.
+	SNR_BADSTREAM_AFTER_MAPHEADERSEEK =					2	| SNT_FAILURE,
+	SNR_STARTBYTE_MISMATCH =							3	| SNT_FAILURE,
+	SNR_BADSTREAM_AT_MAP_READ =							4	| SNT_FAILURE,
+	SNR_INSUFFICIENT_STREAM_OFFTYPE =					5	| SNT_FAILURE,
+	SNR_OBJECTCLASS_IDMISMATCH =						6	| SNT_FAILURE,
+	SNR_TOO_MANY_ENTRIES_TO_READ =						7	| SNT_FAILURE,
 
+	// Read notes and warnings.
+	SNR_ZEROENTRYCOUNT =								0x80	| SNT_NOTE, // 0x80 == 1 << 7
+	SNR_NO_ENTRYIDS_WITH_CUSTOMID_DEFINED =				0x100	| SNT_NOTE,
+	SNR_LOADING_OBJECT_WITH_LARGER_VERSION =			0x200	| SNT_NOTE,
+	
+	// Write failures.
+	SNW_INSUFFICIENT_FIXEDSIZE =						(0x10)	| SNT_FAILURE,
+	SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING =		(0x11)	| SNT_FAILURE,
+	SNW_INSUFFICIENT_MAPSIZE =							(0x12)	| SNT_FAILURE,
+	SNW_DATASIZETYPE_OVERFLOW =							(0x13)	| SNT_FAILURE,
+	SNW_MAX_WRITE_COUNT_REACHED =						(0x14)	| SNT_FAILURE,
+	SNW_SUBENTRY_FAILURE =								(0x15)	| SNT_FAILURE,
+};
 
-inline uint8 GetNeededBytecount1248(const uint64 size)
-//------------------------------------------------
-{
-	if((size >> 6) == 0) return 1;
-	if((size >> (1*8+6)) == 0) return 2;
-	if((size >> (3*8+6)) == 0) return 4;
-	return 8;
-}
-
-inline uint8 GetNeededBytecount1234(const uint32 num)
-//---------------------------------------------
-{
-	if((num >> 6) == 0) return 1;
-	if((num >> (1*8+6)) == 0) return 2;
-	if((num >> (2*8+6)) == 0) return 3;
-	return 4;
-}
-
-//Note: Indexing starts from 0
-inline bool Testbit(uint8 val, uint8 bitindex) {return ((val & (1 << bitindex)) != 0);}
-//----------------------------------------------------------------------------------------
-inline void Setbit(uint8& val, uint8 bitindex, bool newval)
-//----------------------------------------------------------
-{
-	if(newval) val |= (1 << bitindex);
-	else val &= ~(1 << bitindex);
-}
-
-
-class ABCSerializationInstructions;
-class ABCSerializationStreamer;
-
-typedef std::ostream OUTSTREAM;
-typedef std::istream INSTREAM;
-typedef std::istrstream ISTRSTREAM;
-typedef std::ostrstream OSTRSTREAM;
-typedef std::ios::off_type OFFTYPE;
-typedef std::ios::pos_type POSTYPE;
-typedef std::streamsize STREAMSIZE;
-const uint8 OUTFLAG = std::ios::out;
-const uint8 INFLAG = std::ios::in;
-const uint8 CURPOS = std::ios::cur;
-
-const uint64 invalidDatasize = uint64_max;
-const OFFTYPE OFFTYPE_MIN = (numeric_limits<OFFTYPE>::min)();
-const OFFTYPE OFFTYPE_MAX = (numeric_limits<OFFTYPE>::max)();
+bool IsPrintableId(const void* pvId, const size_t nLength); // Return true if given id is printable, false otherwise. 
+void ReadAdaptive1248(InStream& iStrm, uint64& val);
+void WriteAdaptive1248(OutStream& oStrm, const uint64& val);
 
 enum
 {
-	//SNT <-> SerializationNotificationType
-	SNT_PROGRESS = 1 << 31,
-	SNT_FAILURE = 1 << 30,
-	SNT_NOTE = 1 << 29,
-	SNT_WARNING = 1 << 28
+	IdSizeVariable = uint16_max,
+	IdSizeMaxFixedSize = (uint8_max >> 1)
 };
 
-//==============================
-class CSerializationNotification
-//==============================
-{
-public:
-	CSerializationNotification(int32 i, const string& d) :
-			ID(i), description(d) {}
-	int32 ID;
-	string description;
-	bool operator==(const CSerializationNotification& cn) const {return ID == cn.ID;}
-	operator int32() const {return ID;}
-	string ToString() const;
-};
+typedef int32 SsbStatus;
 
-class CReadNotification : public CSerializationNotification
-//=============================================================
-{
-public:
-	CReadNotification(int32 id = 0, const string& desc = "") : CSerializationNotification(id,desc) {}
-};
 
-class CWriteNotification : public CSerializationNotification
-//=============================================================
+struct ReadEntry
+//==============
 {
-public:
-	CWriteNotification(int32 id = 0, const string& desc = "") : CSerializationNotification(id,desc) {}
+	ReadEntry() : nIdpos(0), rposStart(0), nSize(invalidDatasize), nIdLength(0) {}
+
+	uintptr_t nIdpos;	// Index of id start in ID array.
+	RposType rposStart;	// Entry start position.
+	DataSize nSize;		// Entry size.
+	uint16 nIdLength;	// Length of id.
 };
 
 
+enum Rwf
+{
+	RwfWMapStartPosEntry,	// Write. True to include data start pos entry to map.
+	RwfWMapSizeEntry,		// Write. True to include data size entry to map.
+	RwfWMapDescEntry,		// Write. True to include description entry to map.
+	RwfWVersionNum,			// Write. True to include version numeric.
+	RwfRPartialIdMatch,		// Read. True to allow partial ID match.
+	RwfRMapCached,			// Read. True if map has been cached.
+	RwfRMapHasId,			// Read. True if map has IDs
+	RwfRMapHasStartpos,		// Read. True if map data start pos.
+	RwfRMapHasSize,			// Read. True if map has entry size.
+	RwfRMapHasDesc,			// Read. True if map has entry description.
+	RwfRTwoBytesDescChar,	// Read. True if map description characters are two bytes.
+	RwfRHeaderIsRead,		// Read. True when header is read.
+	RwfRwHasMap,			// Read/write. True if map exists.
+	RwfNumFlags
+};
 
 
-class CSerializationentry
-//=======================
+class Ssb
+//=======
 {
 public:
-	friend class ABCSerializationInstructions;
+	typedef void (*fpLogFunc_t)(const TCHAR*, ...);
 
-	//Streamer pointer must not be null; usually the parameter can simply be 'new SomeStreamClass' -
-	//deleting is handled by this object.
-	CSerializationentry(const string& id, ABCSerializationStreamer* streamer,
-		const string& description = "", const string readnote = "", bool deletestreamer = true)
-		: m_Description(description), m_pStreamer(streamer), m_Readnote(readnote),
-		  m_Deletestreamer(deletestreamer)
+	enum ReadRv // Read return value.
 	{
-		m_Id.resize(id.length());
-		for(size_t i = 0; i<m_Id.size(); i++) {m_Id[i] = id[i];}
-	}
-
-	const ABCSerializationStreamer& GetStreamer() const {return *m_pStreamer;}
-
-	~CSerializationentry();
-
-	OFFTYPE Write(OUTSTREAM& oStrm) const;
-	OFFTYPE Read(INSTREAM& iStrm, const uint64 datasize);
-
-	const vector<char>& GetID() const {return m_Id;}
-	const string& GetDescription() const {return m_Description;}
-	const string& GetReadnote() const {return m_Readnote;}
-
-	//Transferring ownership of streamer to new object when copying objects - copying enabled
-	//so that arrays can be constructed.
-	CSerializationentry(const CSerializationentry& e) {*this = e;}
-	CSerializationentry& operator=(const CSerializationentry& e)
-	{
-		m_Id = e.m_Id;
-		m_Description = e.m_Description;
-		m_pStreamer = e.m_pStreamer;
-		m_Deletestreamer = e.m_Deletestreamer;
-		m_Readnote = e.m_Readnote;
-		e.m_Deletestreamer = false;
-		return *this;
-	}
-
-private:
-	vector<char> m_Id;
-	string m_Description;
-	ABCSerializationStreamer* m_pStreamer;
-	mutable bool m_Deletestreamer;
-	string m_Readnote; //Note to be shown when reading this entry.
-	//Note: Remember to check whether operator= needs updating if adding/removing stuff.
-};
-
-
-class CSSBSerialization //SSB <-> Simple Structured Binary
-//=====================
-{
-private:
-	class CMappinginfo
-	{
-	public:
-		CMappinginfo(const vector<char>& i, uint64 start, uint64 size, const string& str) : id(i), startpos(start), entrysize(size), description(str) {}
-		CMappinginfo() : startpos(0), entrysize(invalidDatasize) {}
-		vector<char> id;
-		uint64 startpos;
-		uint64 entrysize;
-		string description;
-		string ToString() const
-		{
-			string temp; temp.reserve(id.size() + 60);
-			temp = "Mapinfo: ";
-			if(std::find(id.begin(), id.end(), 0) == id.end())
-				std::copy(id.begin(), id.end(), std::back_inserter(temp));
-			temp += ", " + Stringify(startpos) + ", " + Stringify(entrysize) + ", " + string(description);
-			return temp;
-		}
+		EntryRead,
+		EntryNotFound
 	};
 
-public:
+	Ssb(InStream* pIstrm, OutStream* pOstrm);
+	Ssb(IoStream& ioStrm);
+	Ssb(OutStream& oStrm);
+	Ssb(InStream& iStrm);
 
-	CSSBSerialization(ABCSerializationInstructions& si) :
-		m_pSi(&si),
-		m_pLogstring(0),
-		m_Readlogmask(s_DefaultReadLogMask),
-		m_Writelogmask(s_DefaultWriteLogMask)
-		{
-		}
+	~Ssb() {delete m_pSubEntry;}
 
-	//NOTES
-	//	-The method is to fail if the given stream is opened with ios::app flag.
-	//	-If an object contains this type of object(CSSBSerialization) in data,
-	//   this method may get called recursively.
-	const CWriteNotification& Serialize(OUTSTREAM& oStrm);
+	// Sets map ID size in writing.
+	void SetIdSize(uint16 idSize);
 
-	//NOTES:
-	//	-Given stream should be opened in binary mode.
-	//	-If an object contains this type of object in data, this method may get called recursively.
-	//	-Its uncertain whether reading objects(files) with size > OFFTYPE_MAX works.
-	const CReadNotification& Unserialize(INSTREAM& iStrm);
+	// Write header
+	void BeginWrite(const void* pId, const size_t nIdSize, const uint64& nVersion);
+	void BeginWrite(const LPCSTR pszId, const uint64& nVersion) {BeginWrite(pszId, strlen(pszId), nVersion);}
+	
+	// Read header.
+	void BeginRead(const void* pId, const size_t nLength, const uint64& nVersion);
+	void BeginRead(const LPCSTR pszId, const uint64& nVersion) {return BeginRead(pszId, strlen(pszId), nVersion);}
 
-	void SetLogstring(string& str) {m_pLogstring = &str;}
+	// Reserves space for map to current position. Call after BeginWrite and before writing any entries.
+	void ReserveMapSize(uint32 nSize);
 
-	static const char s_EntryID[3];
+	// Creates subentry for writing. Use SubEntry() to access the subentry and 
+	// when done, call ReleaseSubEntry. Don't call WriteItem() for 'this' while 
+	// subentry is active.
+	void CreateWriteSubEntry();
+
+	// Returns current write/read subentry. CreateWriteSubEntry/CreateReadSubEntry
+	// must be called before calling this.
+	Ssb& SubEntry() {return *m_pSubEntry;}
+
+	// Releases write subentry and writes corresponding map information.
+	void ReleaseWriteSubEntry(const void* pId, const size_t nIdLength);
+	void ReleaseWriteSubEntry(const LPCSTR pszId) {ReleaseWriteSubEntry(pszId, strlen(pszId));}
+
+	// If ID was found, returns pointer to Ssb object, nullptr if not found.
+	// Note: All reading on subentry must be done before calling ReadItem with 'this'.
+	Ssb* CreateReadSubEntry(const void* pId, const size_t nLength);
+	Ssb* CreateReadSubEntry(const LPCSTR pszId) {return CreateReadSubEntry(pszId, strlen(pszId));}
+
+	// After calling BeginRead(), this returns number of entries in the file.
+	NumType GetNumEntries() const {return m_nReadEntrycount;}
+
+	// When writing, returns the number of entries written.
+	// When reading, returns the number of entries read not including unrecognized entries.
+	NumType GetCounter() const {return m_nCounter;}
+
+	uint64 GetReadVersion() {return m_nReadVersion;}
+
+	// Read item using default read implementation.
+	template <class T>
+	ReadRv ReadItem(T& obj, const LPCSTR pszId) {return ReadItem(obj, pszId, strlen(pszId), srlztn::ReadItem<T>);}
+
+	template <class T>
+	ReadRv ReadItem(T& obj, const void* pId, const size_t nIdSize) {return ReadItem(obj, pId, nIdSize, srlztn::ReadItem<T>);}
+
+	// Read item using given function.
+	template <class T, class FuncObj>
+	ReadRv ReadItem(T& obj, const void* pId, const size_t nIdSize, FuncObj);
+
+	// Write item using default write implementation.
+	template <class T>
+	void WriteItem(const T& obj, const LPCSTR pszId) {WriteItem(obj, pszId, strlen(pszId), &srlztn::WriteItem<T>);}
+
+	template <class T>
+	void WriteItem(const T& obj, const void* pId, const size_t nIdSize) {WriteItem(obj, pId, nIdSize, &srlztn::WriteItem<T>);}
+
+	// Write item using given function.
+	template <class T, class FuncObj>
+	void WriteItem(const T& obj, const void* pId, const size_t nIdSize, FuncObj);
+
+	// Writes mapping.
+	void FinishWrite();
+
+	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
+	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
+
+	SsbStatus m_Status;
+	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
+	fpLogFunc_t m_fpLogFunc;			// Pointer to log function.
 
 private:
-	//Return true if reading should be terminated.
-	bool AddReadNote(const CReadNotification& newStatus, const bool addToLog = true);
-	bool AddReadNote(const CReadNotification& newStatus, const CMappinginfo* pMi);
+	// Reads map to cache.
+	void CacheMap();
 
-	//Return true if writing should be terminated.
-	bool AddWriteNote(const CWriteNotification& note, const bool addToLog = true);
+	// Compares ID in file with expected ID.
+	void CompareId(InStream& iStrm, const void* pId, const size_t nLength);
 
-	void AddToLog(const char*);
-	void AddToLog(const CReadNotification& rn, const CMappinginfo* pMi);
+	// Searches for entry with given ID. If found, returns pointer to corresponding entry, else
+	// returns nullptr.
+	const ReadEntry* Find(const void* pId, const size_t nLength);
+	const ReadEntry* Find(const LPCSTR pszId) {return Find(pszId, strlen(pszId));}
+
+	// Called after reading an object.
+	ReadRv OnReadEntry(const ReadEntry* pE, const void* pId, const size_t nIdSize, const Postype& posReadBegin);
+
+	// Called after writing an item.
+	void OnWroteItem(const void* pId, const size_t nIdSize, const Postype& posBeforeWrite);
+	
+	void AddNote(const SsbStatus s, const SsbStatus mask, const TCHAR* sz);
+
+	void AddReadNote(const SsbStatus s);
+
+	// Called after reading entry. pRe is a pointer to associated map entry if exists.
+	void AddReadNote(const ReadEntry* const pRe, const NumType nNum);
+
+	void AddWriteNote(const SsbStatus s);
+	void AddWriteNote(const void* pId,
+					  const size_t nIdLength,
+					  const NumType nEntryNum,
+					  const DataSize nBytecount,
+					  const RposType rposStart);
+
+	// Writes mapping item to mapstream.
+	void WriteMapItem(const void* pId, 
+				  const size_t nIdSize,
+				  const RposType& rposDataStart,
+				  const DataSize& nDatasize,
+				  const TCHAR* pszDesc);
+
 	void ResetReadstatus();
-	void ResetWritestatus();
+	void ResetWritestatus() {m_Status = SNT_NONE;}
 
-	static void Seekg(INSTREAM& iStrm, const POSTYPE& startpos, int64 offset);
+	void IncrementWriteCounter();
 
 private:
-	ABCSerializationInstructions* m_pSi;
-	CReadNotification m_Readnotes;
-	CWriteNotification m_Writenotes;
-	int32 m_Readlogmask;
-	int32 m_Writelogmask;
-	string* m_pLogstring;
+	SsbStatus m_Readlogmask;			// Read: Controls which read messages will be written to log.
+	SsbStatus m_Writelogmask;			// Write: Controls which write messages will be written to log.
+	
+	std::vector<char> m_Idarray;		// Read: Holds entry ids.
+	
+	InStream* m_pIstrm;					// Read: Pointer to read stream.
+	OutStream* m_pOstrm;				// Write: Pointer to write stream.
 
+	Postype m_posStart;					// Read/write: Stream position at the beginning of object.
+	std::vector<ReadEntry> mapData;		// Read: Contains map information.
+	uint64 m_nReadVersion;				// Read: Version is placed here when reading.
+	NumType m_nMaxReadEntryCount;		// Read: Limits the number of entries allowed to be read.
+	RposType m_rposMapBegin;			// Read: If map exists, rpos of map begin, else m_rposEndofHdrData.
+	Postype m_posMapEnd;				// Read: If map exists, map end position, else pos of end of hdrData.
+	Postype m_posDataBegin;				// Read: Data begin position.
+	RposType m_rposEndofHdrData;		// Read: rpos of end of header data.
+	NumType m_nReadEntrycount;			// Read: Number of entries.
 
+	uint16 m_nIdbytes;					// Read/Write: Tells map ID entry size in bytes. If size is variable, value is IdSizeVariable.
+	NumType m_nCounter;					// Read/write: Keeps count of entries written/read.
+	NumType m_nNextReadHint;			// Read: Hint where to start looking for the next read entry.
+	std::bitset<RwfNumFlags> m_Flags;	// Read/write: Various flags.
+
+	Ssb* m_pSubEntry;					// Read/Write: Pointer to SubEntry.
+	Postype m_posSubEntryStart;			// Write: Holds data position where SubEntry started.
+	uint32 m_nMapReserveSize;			// Write: Number of bytes to reserve for map if writing it before data.			
+	Postype m_posEntrycount;			// Write: Pos of entrycount field. 
+	Postype m_posMapPosField;			// Write: Pos of map position field.
+	Postype m_posMapStart;				// Write: Pos of map start.
+	OstrStream m_MapStream;				// Write: Map stream.
+
+private:
+	static const uint8 HeaderId_FlagByte = 0;
 public:
-	static const uint8 s_DefaultFlagbyte;
+	static const uint8 s_DefaultFlagbyte = 0;
 	static int32 s_DefaultReadLogMask;
 	static int32 s_DefaultWriteLogMask;
-
-private:
-
-	enum
-	{
-		HEADERID_FLAGBYTE = 0
-	};
-
+	static fpLogFunc_t s_DefaultLogFunc;
+	static const char s_EntryID[3];
+	static const uint32 s_DefaultFlags = (1 << RwfWMapStartPosEntry) +
+										 (1 << RwfWMapSizeEntry) + (1 << RwfWVersionNum) +
+										 (1 << RwfRPartialIdMatch);
 };
 
 
+template <class T, class FuncObj>
+void Ssb::WriteItem(const T& obj, const void* pId, const size_t nIdSize, FuncObj Func)
+//------------------------------------------------------------------------------------
+{
+	const Postype pos = m_pOstrm->tellp();
+	Func(*m_pOstrm, obj);
+	OnWroteItem(pId, nIdSize, pos);
+}
 
-//Returns the number of bytes that were tried to write.
+template <class T, class FuncObj>
+Ssb::ReadRv Ssb::ReadItem(T& obj, const void* pId, const size_t nIdSize, FuncObj Func)
+//------------------------------------------------------------------------------------
+{
+	const ReadEntry* pE = Find(pId, nIdSize);
+	const Postype pos = m_pIstrm->tellg();
+	if (pE != nullptr || GetFlag(RwfRMapHasId) == false)
+		Func(*m_pIstrm, obj, (pE) ? (pE->nSize) : invalidDatasize);
+	return OnReadEntry(pE, pId, nIdSize, pos);
+}
+
+
 template<class T>
-inline OFFTYPE Binarywrite(OUTSTREAM& oStrm, const T& data)
-//-------------------------------------------------------------
+inline void Binarywrite(OutStream& oStrm, const T& data)
+//------------------------------------------------------
 {
 	oStrm.write(reinterpret_cast<const char*>(&data), sizeof(data));
-	return sizeof(data);
 }
 
 //Write only given number of bytes from the beginning.
 template<class T>
-inline OFFTYPE Binarywrite(OUTSTREAM& oStrm, const T& data, const OFFTYPE bytecount)
-//-------------------------------------------------------------------------------
+inline void Binarywrite(OutStream& oStrm, const T& data, const Offtype bytecount)
+//--------------------------------------------------------------------------
 {
-	if(bytecount <= 0) return 0;
-	const size_t bc = min(bytecount, sizeof(data));
-	oStrm.write(reinterpret_cast<const char*>(&data), bc);
-	return bc;
+	oStrm.write(reinterpret_cast<const char*>(&data), min(bytecount, sizeof(data)));
 }
 
-inline uint8 WriteAdaptive12(OUTSTREAM& oStrm, const uint16 num)
-//------------------------------------------------------
+template <class T>
+inline void WriteItem(OutStream& oStrm, const T& data)
+//----------------------------------------------------
 {
-	if(num >> 7 == 0)
-	{
-		Binarywrite<uint16>(oStrm, num << 1, 1);
-		return 1;
-	}
-	else
-	{
-		Binarywrite<uint16>(oStrm, (num << 1) | 1);
-		return 2;
-	}
+	#if _HAS_TR1
+		STATIC_ASSERT(std::tr1::has_trivial_assign<T>::value == true);
+	#endif
+	Binarywrite(oStrm, data);
 }
 
+void WriteItemString(OutStream& oStrm, const std::string& str);
 
-//Format: First bit tells whether the size indicator is 1 or 2 bytes.
-inline OFFTYPE WriteAdaptive12String(OUTSTREAM& oStrm, const string& str)
-//-----------------------------------------------------------------------
-{
-	const uint16 s =(str.size() <= 32767) ? static_cast<uint16>(str.size()) : 32767;
-	WriteAdaptive12(oStrm, s);
-	oStrm.write(str.c_str(), s);
-	return (s > 127) ? s+2 : s+1;
-}
+template <>
+inline void WriteItem<std::string>(OutStream& oStrm, const std::string& str) {WriteItemString(oStrm, str);}
 
-//Returns the number of bytes that were tried to read.
+
 template<class T>
-inline OFFTYPE Binaryread(INSTREAM& iStrm, T& data)
-//-----------------------------------------------------------------------
+inline void Binaryread(InStream& iStrm, T& data)
+//----------------------------------------------
 {
 	iStrm.read(reinterpret_cast<char*>(&data), sizeof(T));
-	return sizeof(T);
 }
 
-//Read only given number of bytes to the beginning of data; data bytes is memset to 0 before reading.
-template<class T>
-inline OFFTYPE Binaryread(INSTREAM& iStrm, T& data, const OFFTYPE bytecount)
-//----------------------------------------------------------------------------------
+//Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
+template <class T>
+inline void Binaryread(InStream& iStrm, T& data, const Offtype bytecount)
+//-----------------------------------------------------------------------
 {
-	if(bytecount <= 0) return 0;
-	const size_t bc = min(bytecount, sizeof(data));
 	memset(&data, 0, sizeof(data));
-	iStrm.read(reinterpret_cast<char*>(&data), bc);
-	return bc;
-}
-
-//Read given number of bytes to string object.
-inline OFFTYPE ReadBytes(INSTREAM& iStrm, string& str, const OFFTYPE bytecount)
-//---------------------------------------------------------------------------------------------------------
-{
-	str.resize(bytecount);
-	for(OFFTYPE i = 0; i<bytecount; i++)
-		iStrm.read(&str[i], 1);
-	return bytecount;
-}
-
-inline uint8 ReadAdaptive12(INSTREAM& iStrm, uint16& val)
-//------------------------------------------------------
-{
-	val = 0;
-	Binaryread<uint16>(iStrm, val, 1);
-	if(val & 1) iStrm.read(reinterpret_cast<char*>(&val) + 1, 1);
-	val >>= 1;
-	return (val > 127) ? 2 : 1;
+	iStrm.read(reinterpret_cast<char*>(&data), min(bytecount, sizeof(data)));
 }
 
 
-
-class ABCSerializationStreamer
-//=============================
+template <class T>
+inline void ReadItem(InStream& iStrm, T& data, const DataSize /*nSize*/)
+//----------------------------------------------------------------------
 {
-public:
-	typedef CReadNotification READINFO;
-	typedef CWriteNotification WRITEINFO;
-	ABCSerializationStreamer(int flags = INFLAG|OUTFLAG) : m_Flags(static_cast<uint8>(flags)) {}
-	virtual ~ABCSerializationStreamer() {}
+	#if _HAS_TR1
+		STATIC_ASSERT(std::tr1::has_trivial_assign<T>::value == true);
+	#endif
+	Binaryread(iStrm, data);
+}
 
-	//Returns streampos increment which should be the same as bytes written.
-	OFFTYPE Write(OUTSTREAM& oStrm) const
-	{
-		const POSTYPE startpos = oStrm.tellp();
-		if(m_Flags & OUTFLAG) ProWrite(oStrm);
-		return oStrm.tellp() - startpos;
-	}
-
-	//Returns stream increment. If entrysize is known, its given as argument 'datasize', else
-	//the argument will be invalidDatasize.
-	virtual OFFTYPE Read(INSTREAM& iStrm, const uint64 datasize)
-	{
-		m_LastReadinfo = READINFO(SNT_PROGRESS, "");
-		const POSTYPE startpos = iStrm.tellg();
-		if(m_Flags & INFLAG) ProRead(iStrm, datasize);
-		else m_LastReadinfo = CReadNotification(SNT_WARNING, "Disabled readflag - no reading done.");
-		return iStrm.tellg() - startpos;
-	}
-
-	READINFO GetLastReadinfo() const {return m_LastReadinfo;}
-	WRITEINFO GetLastWriteinfo() const {return m_LastWriteinfo;}
-
-protected:
-	//NOTE: Write method must leave stream to position one byte after the last byte written.
-	//(otherwise data will probably be overwritten)
-	virtual void ProWrite(OUTSTREAM&) const = 0;
-	virtual void ProRead(INSTREAM&, const uint64) = 0;
-
-protected:
-	uint8 m_Flags;
-	READINFO m_LastReadinfo;
-	mutable WRITEINFO m_LastWriteinfo;
-
-	static const READINFO s_InfoNoReadimplementation;
-	static const WRITEINFO s_InfoNoWriteimplementation;
-};
-
-
-template<class T>
-class CBinarystreamer : public ABCSerializationStreamer
-//=====================================================
+// Read specialization for float. If data size is 8, read double and assign it to given float.
+template <>
+inline void ReadItem<float>(InStream& iStrm, float& f, const DataSize nSize)
+//--------------------------------------------------------------------------
 {
-public:
-	CBinarystreamer(const T& obj, STREAMSIZE tr = sizeof(T), STREAMSIZE tw = sizeof(T)) :
-		m_rData((T&)obj),
-		m_BytesToRead(tr),
-		m_BytesToWrite(tw)
-		{
-			if(m_BytesToRead < 0) m_BytesToRead = 0;
-			if(m_BytesToWrite < 0) m_BytesToWrite = 0;
-		}
-
-	void ProWrite(OUTSTREAM& outStrm) const
-	//-------------------------------------
+	if (nSize == 8)
 	{
-		if(m_BytesToWrite == 0) {m_LastWriteinfo = WRITEINFO(SNT_WARNING, "Bytes to write == 0"); return;}
-		const STREAMSIZE bc = (m_BytesToWrite > sizeof(T)) ? sizeof(T) : m_BytesToWrite;
-		outStrm.write(reinterpret_cast<const char*>(&m_rData), bc);
-		if(m_BytesToWrite > sizeof(T))
-			{for(size_t i = 0; i<m_BytesToWrite - sizeof(T); i++) outStrm.put(0);}
+		double d;
+		Binaryread(iStrm, d);
+		f = static_cast<float>(d);
 	}
-	void ProRead(INSTREAM& inStrm, const uint64 datasize)
-	//---------------------------------------------------------
-	{
-		if(m_BytesToRead == 0) {m_LastReadinfo = READINFO(SNT_WARNING, "Bytes to read == 0"); return;}
-		if(datasize < m_BytesToRead) {m_LastReadinfo = READINFO(SNT_WARNING, "Datasize less than bytes to read; no reading done."); return;}
-		if(std::numeric_limits<T>::is_integer)
-			ReadAsInteger(inStrm);
-		else
-			Read<T>(inStrm);
-	}
+	else
+		Binaryread(iStrm, f);
+}
 
-private:
-	void DefaultRead(INSTREAM& inStrm)
-	//--------------------------------
-	{
-		const STREAMSIZE bc = (m_BytesToRead > sizeof(T)) ? sizeof(T) : m_BytesToRead;
-		if(m_BytesToRead < sizeof(T))
-			memset(&m_rData, 0, sizeof(T));
-		inStrm.read(reinterpret_cast<char*>(&m_rData), bc);
-		if(m_BytesToRead > bc)
-		{
-			ostringstream oss;
-			oss << "Read " << bc << " bytes instead of instructed " << m_BytesToRead << " bytes"
-				<< "; possible loss of data.";
-			m_LastReadinfo = READINFO(SNT_NOTE, oss.str());
-		}
-	}
-
-	template<class C>
-	void Read(INSTREAM& inStrm)
-	//-------------------------
-	{
-		DefaultRead(inStrm);
-	}
-
-	template<>
-	void Read<float>(INSTREAM& inStrm)
-	//--------------------------------
-	{
-		if(m_BytesToRead == 8)
-		{
-			double temp;
-			inStrm.read(reinterpret_cast<char*>(&temp), sizeof(double));
-			m_rData = static_cast<float>(temp);
-			m_LastReadinfo = READINFO(SNT_NOTE, "Read double to float");
-		}
-		else
-			DefaultRead(inStrm);
-	}
-
-	template<>
-	void Read<double>(INSTREAM& inStrm)
-	//---------------------------------
-	{
-		if(m_BytesToRead == 4)
-		{
-			float temp;
-			inStrm.read(reinterpret_cast<char*>(&temp), sizeof(float));
-			m_rData = temp;
-			m_LastReadinfo = READINFO(SNT_NOTE, "Read float to double");
-		}
-		else
-			DefaultRead(inStrm);
-	}
-
-	void ReadAsInteger(INSTREAM& inStrm)
-	//----------------------------------
-	{
-		if(m_BytesToRead > 8) {m_LastReadinfo = READINFO(SNT_WARNING, "No integer reading done; bytes to read > 8."); return;}
-
-		const uint8 bc = (m_BytesToRead > sizeof(T)) ? sizeof(T) : static_cast<uint8>(m_BytesToRead);
-		if(numeric_limits<T>::is_signed)
-		{
-			#pragma warning(disable:4146) //"unary minus operator applied to unsigned type, result still unsigned"
-			int64 temp = 0;
-			inStrm.read(reinterpret_cast<char*>(&temp) + 8-bc, bc);
-			const bool isNegative = (temp < 0);
-			if(isNegative && bc != 8) temp = -temp;
-			if(bc != 8)
-			{
-				if(temp < 0)
-				{
-					temp = -Pow2x(8*bc-1);
-					m_rData = static_cast<T>(temp);
-				}
-				else
-				{
-					temp >>= (8-bc)*8;
-					m_rData = static_cast<T>(temp);
-					if(isNegative && m_rData > 0) m_rData = -m_rData;
-				}
-			}
-			else
-				m_rData = static_cast<T>(temp);
-
-			if(temp > (numeric_limits<T>::max)() || temp < (numeric_limits<T>::min)())
-			{
-				m_LastReadinfo = READINFO(SNT_WARNING, "Integer value was beyond range - read value may not be reasonable.");
-			}
-			#pragma warning(default:4146)
-		}
-		else
-		{
-			uint64 temp = 0;
-			inStrm.read(reinterpret_cast<char*>(&temp), bc);
-			m_rData = static_cast<T>(temp);
-			if(temp > (numeric_limits<T>::max)())
-				m_LastReadinfo = READINFO(SNT_WARNING, "Integer value was beyond range - read value may not be reasonable.");
-
-		}
-	}
-
-protected:
-	STREAMSIZE m_BytesToWrite;
-	STREAMSIZE m_BytesToRead;
-private:
-	T& m_rData;
-
-};
-
-
-#define size_t_MAX (std::numeric_limits<size_t>::max)()
-
-
-//Generic container streamer.
-template<class TCONT>
-class CContainerstreamer : public ABCSerializationStreamer
-//========================================================
+// Read specialization for double. If data size is 4, read float and assign it to given double.
+template <>
+inline void ReadItem<double>(InStream& iStrm, double& d, const DataSize nSize)
+//----------------------------------------------------------------------------
 {
-public:
-	typedef TCONT CONT;
-	typedef typename CONT::value_type DATATYPE;
-	typedef typename CONT::size_type SIZETYPE;
-	typedef void (*VALUETYPEWRITER)(OUTSTREAM&, const DATATYPE&, const size_t);
-	typedef void (*VALUETYPEREADER)(INSTREAM&, DATATYPE&, const size_t);
-
-	static CContainerstreamer* NewCustomWriter(const CONT& cont, VALUETYPEWRITER writer, SIZETYPE writecountlimit = size_t_MAX)
-	//---------------------------------------------------------------
+	if (nSize == 4)
 	{
-		return new CContainerstreamer(cont, 0, writecountlimit, (writer != 0) ? writer : DefaultValuetypeWriter,
-								DefaultValuetypeReader, sizeof(DATATYPE), sizeof(DATATYPE), OUTFLAG);
-
+		float f;
+		Binaryread(iStrm, f);
+		d = f;
 	}
+	else
+		Binaryread(iStrm, d);
+}
 
-	static CContainerstreamer* NewDefaultWriter(const CONT& cont, SIZETYPE writecountlimit = size_t_MAX, SIZETYPE bytesToWritePerElem = sizeof(DATATYPE))
-	//----------------------------------------------------------------
-	{
-		return new CContainerstreamer(cont, 0, writecountlimit, DefaultValuetypeWriter,
-								DefaultValuetypeReader, sizeof(DATATYPE), bytesToWritePerElem, OUTFLAG);
-	}
+void ReadItemString(InStream& iStrm, std::string& str, const DataSize); 
 
-	static CContainerstreamer* NewDefaultReader(CONT& cont, SIZETYPE maxReadCount, SIZETYPE bytesToReadPerElem = sizeof(DATATYPE))
-	//---------------------------------------------------------------
-	{
-		return new CContainerstreamer(cont, maxReadCount, 0, DefaultValuetypeWriter, DefaultValuetypeReader, bytesToReadPerElem,
-							0, INFLAG);
-	}
-
-	static CContainerstreamer* NewCustomReader(CONT& cont, SIZETYPE maxReadCount, VALUETYPEREADER reader)
-	//---------------------------------------------------------------
-	{
-		return new CContainerstreamer(cont, maxReadCount, 0, DefaultValuetypeWriter, (reader != 0) ? reader : DefaultValuetypeReader, sizeof(DATATYPE),
-							0, INFLAG);
-	}
-
-	static CContainerstreamer* NewDefaultReadWrite(CONT& cont, SIZETYPE maxReadCount, SIZETYPE writecountlimit, SIZETYPE bytesToReadPerElem = sizeof(DATATYPE), SIZETYPE bytesToWritePerElem = sizeof(DATATYPE))
-	//---------------------------------------------------------------
-	{
-		return new CContainerstreamer(cont, maxReadCount, writecountlimit, DefaultValuetypeWriter, DefaultValuetypeReader, bytesToReadPerElem, bytesToWritePerElem, INFLAG|OUTFLAG);
-	}
-
-	static CContainerstreamer* NewCustomReadWrite(CONT& cont, SIZETYPE maxReadCount, SIZETYPE writecountlimit, VALUETYPEWRITER writer, VALUETYPEREADER reader)
-	//---------------------------------------------------------------
-	{
-		return new CContainerstreamer(cont, maxReadCount, writecountlimit, (writer != 0) ? writer : DefaultValuetypeWriter, (reader != 0) ? reader : DefaultValuetypeReader, sizeof(DATATYPE), sizeof(DATATYPE), INFLAG|OUTFLAG);
-	}
-
-
-private:
-	CContainerstreamer(const CONT& cont,
-						SIZETYPE maxreadcount,
-						SIZETYPE writecountlimit,
-						VALUETYPEWRITER writer,
-						VALUETYPEREADER reader,
-						SIZETYPE bytesToReadPerElem,
-						SIZETYPE bytesToWritePerElem,
-						int flag)
-						:
-		ABCSerializationStreamer(flag),
-		WriteValuetype(writer), ReadValuetype(reader), m_BytesToRead(bytesToReadPerElem),
-			m_BytesToWrite(bytesToWritePerElem), m_WritecountLimit(writecountlimit), m_rCont((CONT&)cont),
-			m_MaxReadCount(maxreadcount) {}
-
-
-
-	virtual void ProWrite(OUTSTREAM& oStrm) const
-	//-------------------------------------------
-	{
-		size_t size = min(m_WritecountLimit, m_rCont.size());
-		const uint8 bc = GetNeededBytecount1248(size);
-		//Two first bits in the sizedata tell how many bytes it is (1,2,4,8).
-		const size_t sizeInstruction = (size << 2) |  Log2(bc);
-		oStrm.write(reinterpret_cast<const char*>(&sizeInstruction), bc);
-		typename CONT::const_iterator citer = m_rCont.begin();
-		size_t counter = 0;
-		for(;citer != m_rCont.end() && counter < size; citer++, counter++)
-		{
-			WriteValuetype(oStrm, *citer, m_BytesToWrite);
-		}
-	}
-
-	virtual void ProRead(INSTREAM& iStrm, const uint64 datasize)
-	//----------------------------------------------------------
-	{
-		if(datasize < 1)
-		{
-			m_LastReadinfo = READINFO(SNT_WARNING, "No container reading done: entrysize < 1");
-			return;
-		}
-		size_t size = 0;
-		iStrm.read(reinterpret_cast<char*>(&size), 1);
-		const uint8 bc = Pow2xSmall(static_cast<uint8>(size & 3));
-		if(bc > 1) iStrm.read(reinterpret_cast<char*>(&size)+1, min(bc-1, sizeof(size_t)-1));
-		if(bc > sizeof(size_t))
-		{
-			iStrm.ignore(bc - sizeof(size_t));
-			m_LastReadinfo = READINFO(SNT_WARNING, "Container sizetype is eight bytes, but only 4 bytes is read; possible loss of data");
-		}
-		size >>= 2;
-		if(size > GetMaxReadCount())
-		{
-			m_LastReadinfo = READINFO(SNT_WARNING, "Container contains more elements than is allowed to be read; no reading done");
-			return;
-		}
-
-		m_rCont.clear();
-		Reserve(m_rCont, size); //Reserve memory if it is possible with given container.
-		for(size_t i = 0; i<size; i++)
-		{
-			DATATYPE temp;
-			ReadValuetype(iStrm, temp, m_BytesToRead);
-			m_rCont.insert(m_rCont.end(), temp);
-		}
-	}
-
-private:
-	//Default memory reserver - does nothing.
-	template <template<class A> class TTCONT, class TTDATA>
-	void Reserve(TTCONT<TTDATA>&, const size_t) {}
-
-	//For vector, reserves memory.
-	template<class TTDATA>
-	void Reserve(vector<TTDATA>& cont, const size_t s) {cont.reserve(s);}
-
-	//For string, reserves memory.
-	template<class TTDATA>
-	void Reserve(std::basic_string<TTDATA>& str, const size_t s) {str.reserve(s);}
-
-	static void DefaultValuetypeWriter(OUTSTREAM& oStrm, const DATATYPE& data, const size_t bytesToWrite)
-		{if(bytesToWrite <= sizeof(DATATYPE)) oStrm.write(reinterpret_cast<const char*>(&data), static_cast<STREAMSIZE>(bytesToWrite));}
-
-	static void DefaultValuetypeReader(INSTREAM& iStrm, DATATYPE& data, const size_t bytesToRead)
-	{
-		if(bytesToRead <= sizeof(DATATYPE))
-		{
-			if(bytesToRead < sizeof(DATATYPE)) memset(&data, 0, sizeof(DATATYPE));
-			iStrm.read(reinterpret_cast<char*>(&data), static_cast<STREAMSIZE>(bytesToRead));
-		}
-	}
-
-	size_t GetMaxReadCount() const {return m_MaxReadCount;}
-	//------------------------------------------------------
-
-private:
-	VALUETYPEWRITER WriteValuetype;
-	VALUETYPEREADER ReadValuetype;
-	SIZETYPE m_BytesToRead; //To tell whether to read less/more bytes to data than its size
-	SIZETYPE m_BytesToWrite;
-	SIZETYPE m_WritecountLimit;  //To tell how many elements to write at max.
-	SIZETYPE m_MaxReadCount;
-	CONT& m_rCont;
-};
-
-
-inline CSerializationentry::~CSerializationentry() {if(m_Deletestreamer) delete m_pStreamer;}
-//-------------------------------------------------------------------------------------
-
-inline OFFTYPE CSerializationentry::Write(OUTSTREAM& oStrm) const {return m_pStreamer->Write(oStrm);}
-//-------------------------------------------------------------------------------------------
-
-inline OFFTYPE CSerializationentry::Read(INSTREAM& iStrm, const uint64 datasize) {return m_pStreamer->Read(iStrm, datasize);}
-//--------------------------------------------------------------------------------------------
-
-
-//Baseclass for objects implementing 'serializationinstructions' for an object.
-//Read and write instructions are in the same class.
-class ABCSerializationInstructions
-//========================================
-{
-public:
-	//-->Mainly UI methods
-	//-------------
-	public:
-		ABCSerializationInstructions(const char* objectClassID, const size_t size, const uint64 version, const uint8 flags);
-		virtual ~ABCSerializationInstructions();
-
-		uint64 GetReadVersion() const {return m_VersionRead;}
-		uint64 GetTimestamp() const {return m_Timestamp;}
-
-		void AddEntry(CSerializationentry entry);
-
-		void SetWritepropIncludeStartposInMap(const bool val) {m_StartposInMap = val;}
-		void SetWritepropIncludeDatasizeentryInMap(const bool val) {m_IncludeDatasizeentryInMap = val;}
-		void SetWritepropIncludeEntrydescriptionsInMap(const bool val) {m_IncludeEntrydescriptionsInMap = val;}
-		void SetWritepropIncludeVersionNumeric(const bool val) {m_UseVersion = val;}
-		void SetWritepropIgnoreLeadingNullsInIDComparison(const bool val) {m_IgnoreLeadingNulls = val;}
-		void SetWritepropSetFixedsizeentry(const uint32 s) {m_Fixedsizeentries = s;}
-		void SetWritepropObjectDescription(const string& str) {m_Objectdescription = str;}
-		void SetWritepropUseTimestamp(bool newval) {m_Usetimestamp = newval;}
-
-		void SetInstructionsVersion(uint64 newVersion) {m_VersionInstruction = newVersion;}
-		bool AreReadInstructions() const {return (m_Flags & INFLAG) && !(m_Flags & OUTFLAG);}
-		bool AreWriteInstructions() const {return (m_Flags & OUTFLAG) && !(m_Flags & INFLAG);}
-	//<<- UI methods
-
-
-	//-->Methods called (mainly) by serialisation when writing
-		virtual size_t GetEntrycount() const = 0;
-		bool GetIncludeEntrydescriptionsInMap() const {return m_IncludeEntrydescriptionsInMap;}
-		bool GetUseVersion() const {return m_UseVersion;}
-		bool GetUseVersionstring() const {return m_VersionStr.size() != 0;}
-		virtual CSerializationentry* SetNextentry(CSerializationentry*&) = 0;
-		virtual const CSerializationentry* SetNextentry(const CSerializationentry*&) const = 0;
-		uint8 GetCustomIDInstructionbyte() const {return m_CustomIDInstructionbyte;}
-		bool GetIncludeStartposInMap() const {return m_StartposInMap;}
-		uint32 GetHasFixedsizeentries() const {return m_Fixedsizeentries;}
-		bool GetUseTimestamp() const {return m_Usetimestamp;}
-		bool GetIgnoreLeadingNullInIDComparison() const {return m_IgnoreLeadingNulls;}
-		bool GetUseTwobyteDescriptionChar() {return false;} //Use one byte per character(for now all strings used are char strings so this is not modifiable).
-		uint8 GetBytecount_ID() const {return m_BytesPerIDtype;}
-		bool GetIncludeDatasizeEntryInMap() const {return m_IncludeDatasizeentryInMap;}
-		const vector<char>& GetObjectClassID() const {return m_ObjectClassID;}
-		bool AllowWriting() const {return (m_Flags & OUTFLAG) != 0;}
-	//<--Methods called by serialisation when writing
-
-	const string& GetVersionString() const {return m_VersionStr;}
-	const string& GetObjectDescription() const {return m_Objectdescription;}
-
-
-	//-->Methods called (mainly) by serialisation when reading
-	public:
-		//Return false if IDs match(at least to an extent that reading should continue), true otherwise.
-		virtual bool CompareObjectClassID(const vector<char>& objectClassID) {return objectClassID != m_ObjectClassID;}
-
-		//Return true if reading should be terminated.
-		virtual bool SetReadVersion(uint64 v) {m_VersionRead = v; return false;}
-		virtual bool SetVersionstring(const string& temp) {m_VersionStr = temp; return false;}
-
-		void SetObjectDescription(const string& str) {m_Objectdescription = str;}
-
-		//Returns pointer to entry if found, else returns null.
-		//Ignoreleadingnulls instructs to ignore leading nulls if compared IDs do not have the same size.
-		const CSerializationentry* Read(INSTREAM& iStrm, const uint64 size, const vector<char>& id,
-			const bool ignoreLeadingnulls, const bool mapHasIDs,
-			const uint64 entrycounter);
-
-		uint64 GetMaxReadEntrycount() const {return m_MaxReadCount;}
-		void SetTimestamp(uint64 ts) {m_Timestamp = ts;}
-		bool AllowReading() const {return (m_Flags & INFLAG) != 0;}
-
-	//<--Methods called by serialisation when reading
-
-	//-->Methods called on both(reading/writing)
-	uint64 GetInstructionVersion() const {return m_VersionInstruction;}
-
-
-
-protected:
-	//-->Pure virtuals.
-	virtual CSerializationentry* GetpBeginentry() = 0;
-	virtual const CSerializationentry* GetpBeginentry() const = 0;
-	virtual void ProAddEntry(CSerializationentry entry) = 0;
-	//<--Pure virtuals
-
-
-
-private:
-	void SetWritePropIDtypebytes(const uint8 bc);
-
-protected:
-	uint8 m_BytesPerIDtype;
-	uint8 m_CustomIDInstructionbyte;
-	bool m_IncludeEntrydescriptionsInMap;
-	bool m_Usetimestamp;
-	bool m_UseVersion;
-	bool m_StartposInMap;
-	bool m_IgnoreLeadingNulls;
-	bool m_IncludeDatasizeentryInMap;
-	uint64 m_VersionRead; //The version read in unserialization.
-	uint64 m_VersionInstruction; //The version for serialization(or version comparison when reading)
-
-	uint64 m_MaxReadCount;
-	uint32 m_Fixedsizeentries; //If != 0, intructions to used fixed size entries whose size is given by the value.
-
-	uint8 m_Flags; //To tells whether to allow reading(INFLAG) and writing(OUTFLAG)
-
-	string m_Objectdescription; //When writing, writing this if chosen to write object description.
-								//When reading, reading object description here if it exists.
-	string m_VersionStr;
-
-	vector<char> m_ObjectClassID;
-	uint64 m_Timestamp;
-
-};
-
-
-class CSerializationInstructions : public ABCSerializationInstructions
-//====================================================================
-{
-public:
-	CSerializationInstructions(const string& objectClass, const uint64 version, const uint8 flags = INFLAG|OUTFLAG,
-		const size_t entrycounthint = 5);
-
-	size_t GetEntrycount() const {return m_Entries.size();}
-	CSerializationentry* GetpBeginentry() {return (m_Entries.size() != 0) ? &m_Entries[0] : 0;}
-	const CSerializationentry* GetpBeginentry() const {return (m_Entries.size() != 0) ? &m_Entries[0] : 0;}
-	CSerializationentry* SetNextentry(CSerializationentry*& p);
-	const CSerializationentry* SetNextentry(const CSerializationentry*& p) const;
-
-protected:
-	void ProAddEntry(CSerializationentry entry) {m_Entries.push_back(entry);}
-
-private:
-	vector<CSerializationentry> m_Entries;
-};
-
-
-inline void FloatToDoubleReader(INSTREAM& iStrm, double& data, const size_t)
+template <>
+inline void ReadItem<std::string>(InStream& iStrm, std::string& str, const DataSize nSize)
 //----------------------------------------------------------------------------------------
 {
-	float temp;
-	iStrm.read(reinterpret_cast<char*>(&temp), sizeof(temp));
-	data = temp;
+	ReadItemString(iStrm, str, nSize);
 }
-
-inline void DoubleToFloatReader(INSTREAM& iStrm, float& data, const size_t)
-//----------------------------------------------------------------------------------------
-{
-	double temp;
-	iStrm.read(reinterpret_cast<char*>(&temp), sizeof(temp));
-	data = static_cast<float>(temp);
-}
-
 
 } //namespace srlztn.
 
 
-template<class T, class SIZETYPE>
-bool VectorFromBinaryStream(istream& inStrm, vector<T>& v, const SIZETYPE maxSize = (std::numeric_limits<SIZETYPE>::max)())
-//---------------------------------------------------------
-{
-	if(!inStrm.good()) return true;
-
-	SIZETYPE size;
-	inStrm.read(reinterpret_cast<char*>(&size), sizeof(size));
-
-	if(size > maxSize)
-		return true;
-
-	v.resize(size);
-	for(size_t i = 0; i<size; i++)
-	{
-		inStrm.read(reinterpret_cast<char*>(&v[i]), sizeof(T));
-	}
-	if(inStrm.good())
-		return false;
-	else
-		return true;
-}
-
 template<class SIZETYPE>
-bool StringToBinaryStream(ostream& outStream, const string& str)
-//--------------------------------------------------------------
+bool StringToBinaryStream(std::ostream& oStrm, const std::string& str)
+//--------------------------------------------------------------------
 {
-	if(!outStream.good()) return true;
+	if(!oStrm.good()) return true;
 	if((std::numeric_limits<SIZETYPE>::max)() < str.size()) return true;
-
 	SIZETYPE size = static_cast<SIZETYPE>(str.size());
-
-	outStream.write(reinterpret_cast<char*>(&size), sizeof(size));
-	outStream.write(str.c_str(), size);
-	if(outStream.good())
-		return false;
-	else
-		return true;
+	oStrm.write(reinterpret_cast<char*>(&size), sizeof(size));
+	oStrm.write(str.c_str(), size);
+	if(oStrm.good()) return false;
+	else return true;
 }
 
 
 template<class SIZETYPE>
-bool StringFromBinaryStream(istream& inStrm, string& str, const SIZETYPE maxSize = (std::numeric_limits<SIZETYPE>::max)())
-//--------------------------------------------------------------------------------------------
+bool StringFromBinaryStream(std::istream& iStrm, std::string& str, const SIZETYPE maxSize = (std::numeric_limits<SIZETYPE>::max)())
+//---------------------------------------------------------------------------------------------------------------------------------
 {
-	if(!inStrm.good()) return true;
-
+	if(!iStrm.good()) return true;
 	SIZETYPE strSize;
-	inStrm.read(reinterpret_cast<char*>(&strSize), sizeof(strSize));
-
+	iStrm.read(reinterpret_cast<char*>(&strSize), sizeof(strSize));
 	if(strSize > maxSize)
 		return true;
-
 	str.resize(strSize);
-
-	//Copying string from stream one character at a time.
 	for(SIZETYPE i = 0; i<strSize; i++)
-		inStrm.read(&str[i], 1);
-
-	if(inStrm.good())
-		return false;
-	else
-		return true;
+		iStrm.read(&str[i], 1);
+	if(iStrm.good()) return false;
+	else return true;
 }
-
 
 
 #endif

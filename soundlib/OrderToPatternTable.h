@@ -1,25 +1,14 @@
 #ifndef ORDERTOPATTERNTABLE_H
 #define ORDERTOPATTERNTABLE_H
 
-#include "../mptrack/serialization_utils.h"
 #include <vector>
 using std::vector;
 
 class CSoundFile;
-class COrderToPatternTable;
 
-#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
-class COrderSerialization : public srlztn::ABCSerializationStreamer
-//=========================================================
-{
-public:
-	COrderSerialization(COrderToPatternTable& ordertable) : m_rOrders(ordertable) {}
-	virtual void ProWrite(srlztn::OUTSTREAM& ostrm) const;
-	virtual void ProRead(srlztn::INSTREAM& istrm, const uint64 /*datasize*/);
-private:
-	COrderToPatternTable& m_rOrders;
-};
+#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data.
+
 
 //==============================================
 class COrderToPatternTable : public vector<PATTERNINDEX>
@@ -40,7 +29,7 @@ public:
 	ORDERINDEX GetCount() const {return size();}
 
 	//Deprecated function used for MPTm's created in 1.17.02.46 - 1.17.02.48.
-	DWORD Unserialize(const BYTE* const src, const DWORD memLength);
+	DWORD Deserialize(const BYTE* const src, const DWORD memLength);
 	
 	//Returns true if the IT orderlist datafield is not sufficient to store orderlist information.
 	bool NeedsExtraDatafield() const;
@@ -65,13 +54,15 @@ public:
 	ORDERINDEX GetNextOrderIgnoringSkips(const ORDERINDEX start) const;
 	ORDERINDEX GetPreviousOrderIgnoringSkips(const ORDERINDEX start) const;
 
-	COrderSerialization* NewReadWriteObject() {return new COrderSerialization(*this);}
-
 private:
 	const CSoundFile& m_rSndFile;
 };
 
-#pragma warning(default:4244) 
+#pragma warning(default:4244) //conversion from 'type1' to 'type2', possible loss of data.
+
+
+void ReadModSequence(std::istream& iStrm, COrderToPatternTable& seq, const size_t nSize = 0);
+void WriteModSequence(std::ostream& oStrm, const COrderToPatternTable& seq);
 
 #endif
 

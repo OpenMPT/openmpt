@@ -63,9 +63,9 @@ typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 #define NOTE_MIDDLEC		(5*12+1)
 #define NOTE_KEYOFF			0xFF //255
 #define NOTE_NOTECUT		0xFE //254
-#define NOTE_FADE			0xFD //251, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
-#define NOTE_PC				0xFC //253, Param Control 'note'. Changes param value on first tick.
-#define NOTE_PCS			0xFB //252, Param Control(Smooth) 'note'. Changes param value during the whole row.
+#define NOTE_FADE			0xFD //253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
+#define NOTE_PC				0xFC //252, Param Control 'note'. Changes param value on first tick.
+#define NOTE_PCS			0xFB //251, Param Control(Smooth) 'note'. Changes param value during the whole row.
 #define NOTE_MAX			120  //Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
 #define NOTE_MAX_SPECIAL	NOTE_KEYOFF
 #define NOTE_MIN_SPECIAL	NOTE_PCS

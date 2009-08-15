@@ -212,7 +212,7 @@ void CMIDIMapper::Serialize(FILE* f) const
 }
 
 
-bool CMIDIMapper::Unserialize(const BYTE* ptr, const size_t size)
+bool CMIDIMapper::Deserialize(const BYTE* ptr, const size_t size)
 //----------------------------------------------------------------------------
 {
 	m_Directives.clear();

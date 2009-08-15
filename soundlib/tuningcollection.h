@@ -2,9 +2,15 @@
 #define TUNINGCOLLECTION_H
 
 #include "tuning.h"
-#include "../mptrack/serialization_utils.h"
 #include <vector>
 #include <string>
+
+class CTuningCollection;
+
+namespace CTuningS11n
+{
+	void ReadTuning(istream& iStrm, CTuningCollection& Tc, const size_t);
+};
 
 
 //=====================
@@ -88,8 +94,8 @@ public:
 	//Serialization/unserialisation
 	bool Serialize(ostream&) const;
 	bool Serialize() const;
-	bool Unserialize(istream&);
-	bool Unserialize();
+	bool Deserialize(istream&);
+	bool Deserialize();
 
 	//Transfer tuning pT from pTCsrc to pTCdest
 	static bool TransferTuning(CTuningCollection* pTCsrc, CTuningCollection* pTCdest, CTuning* pT);
@@ -113,6 +119,8 @@ private:
 	
 //END: DATA MEMBERS
 
+	friend void CTuningS11n::ReadTuning(istream& iStrm, CTuningCollection& Tc, const size_t);
+
 //BEGIN PRIVATE METHODS
 private:
 	CTuning* FindTuning(const string& name) const;
@@ -126,61 +134,9 @@ private:
 	CTuningCollection& operator=(const CTuningCollection&) {}
 	CTuningCollection(const CTuningCollection&) {}
 
-	bool UnserializeOLD(istream&, bool& loadingSuccessful);
+	bool DeserializeOLD(istream&, bool& loadingSuccessful);
 
 //END PRIVATE METHODS.
-};
-
-using srlztn::INSTREAM;
-using srlztn::OUTSTREAM;
-using srlztn::OUTFLAG;
-using srlztn::INFLAG;
-using srlztn::ABCSerializationStreamer;
-using srlztn::SNT_NOTE;
-using srlztn::SNT_PROGRESS;
-
-class CTuningstreamer : public ABCSerializationStreamer
-//=====================================================
-{
-public:
-	CTuningstreamer(const CTuning& t) : ABCSerializationStreamer(OUTFLAG), m_pTuning(&t), m_pTC(0) {}
-	CTuningstreamer(CTuningCollection& rTC) : ABCSerializationStreamer(INFLAG), m_pTuning(0), m_pTC(&rTC) {}
-		
-	void ProWrite(OUTSTREAM& oStrm) const
-	{
-		m_pTuning->Serialize(oStrm);
-	}
-	void ProRead(INSTREAM& iStrm, const uint64)
-	{
-		if(m_pTC->AddTuning(iStrm, true))
-			m_LastReadinfo = READINFO(SNT_NOTE, "Loading tuning failed");
-		else
-			m_LastReadinfo = READINFO(SNT_PROGRESS, "Done reading tuning " + m_pTC->GetTuning(m_pTC->GetNumTunings()-1).GetName());
-	}
-private:
-	const CTuning* m_pTuning;
-	CTuningCollection* m_pTC;
-};
-
-class CTuningCollectionStreamer : public ABCSerializationStreamer
-//=====================================================
-{
-public:
-	CTuningCollectionStreamer(CTuningCollection& tc) : ABCSerializationStreamer(INFLAG|OUTFLAG), m_rTC(tc) {}
-		
-	void ProWrite(OUTSTREAM& oStrm) const
-	{
-		if(m_rTC.Serialize(oStrm))
-			m_LastWriteinfo = WRITEINFO(srlztn::SNT_WARNING, "Writing tuningcollection failed");
-	}
-	void ProRead(INSTREAM& iStrm, const uint64)
-	{
-		if(m_rTC.Unserialize(iStrm))
-			m_LastReadinfo = READINFO(srlztn::SNT_WARNING, "Reading tuningcollection failed");
-
-	}
-private:
-	CTuningCollection& m_rTC;
 };
 
 

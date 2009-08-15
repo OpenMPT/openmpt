@@ -8,11 +8,14 @@
 */
 
 #include "../mptrack/SoundFilePlayConfig.h"
-#include "tuning.h"
+#include "../mptrack/misc_util.h"
 #include "mod_specifications.h"
 #include <vector>
 #include <bitset>
 #include "midi.h"
+
+class CTuningBase;
+typedef CTuningBase CTuning;
 
 using std::bitset;
 
@@ -584,7 +587,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 		bool m_CalculateFreq;
 		//To tell whether to calculate frequency.
 
-		CTuning::STEPINDEXTYPE m_PortamentoFineSteps;
+		int32 m_PortamentoFineSteps;
 		long m_PortamentoTickSlide;
 
 		UINT m_Freq;
@@ -838,7 +841,7 @@ public:
 	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
-	string GetNoteName(const CTuning::NOTEINDEXTYPE&, const int inst = -1) const;
+	std::string GetNoteName(const int16&, const int inst = -1) const;
 private:
 	CTuningCollection* m_pTuningsTuneSpecific;
 	static CTuningCollection* s_pTuningsSharedStandard;

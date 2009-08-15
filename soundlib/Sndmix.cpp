@@ -18,6 +18,7 @@
 // -! NEW_FEATURE#0022
 #include "sndfile.h"
 #include "midi.h"
+#include "tuning.h"
 
 #ifdef MODPLUG_TRACKER
 #define ENABLE_STEREOVU
@@ -1626,7 +1627,7 @@ BOOL CSoundFile::ReadNote()
 					UINT pitchloopend = penv->PitchPoints[penv->nPitchLoopEnd];
 					//IT compatibility 24. Short envelope loops
 					if (IsCompatibleMode(TRK_IMPULSETRACKER)) pitchloopend++;
-					if (pChn->nPitchEnvPosition == pitchloopend)
+					if (pChn->nPitchEnvPosition >= pitchloopend)
 						pChn->nPitchEnvPosition = penv->PitchPoints[penv->nPitchLoopStart];
 				}
 				// Pitch Sustain ?

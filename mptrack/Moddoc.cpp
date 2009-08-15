@@ -2492,7 +2492,7 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 	wsprintf(pszName, "%s: ", gFXInfo[ndx].pszName);
 	s[0] = 0;
 
-	string sPlusChar = "+", sMinusChar = "-";
+	std::string sPlusChar = "+", sMinusChar = "-";
 
 	switch(gFXInfo[ndx].dwEffect)
 	{

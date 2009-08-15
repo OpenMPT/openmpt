@@ -678,8 +678,8 @@ void CTuningDialog::OnBnClickedButtonImport()
 	if(ext == CTuning::s_FileExtension)
 	{
 		ifstream fin(dlg.GetPathName(), ios::binary);
-		CTuning* pT = CTuningRTI::UnserializeOLD(fin);
-		if(pT == 0) {fin.clear(); fin.seekg(0); pT = CTuning::Unserialize(fin);}
+		CTuning* pT = CTuningRTI::DeserializeOLD(fin);
+		if(pT == 0) {fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
 		fin.close();
 		if(pT)
 		{
@@ -700,7 +700,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			//directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
 			pNewTCol->SetSavefilePath(static_cast<LPCTSTR>(dlg.GetPathName()));
-			failure = pNewTCol->Unserialize();
+			failure = pNewTCol->Deserialize();
 			if(failure)
 			{
 				delete pNewTCol; pNewTCol = 0;

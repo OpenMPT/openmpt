@@ -1,918 +1,890 @@
 #include "stdafx.h"
 #include "serialization_utils.h"
 #include <algorithm>
-#include <ctime>
-#include <list>
-using std::list;
 
-using namespace srlztn;
+namespace srlztn
+{
+
+// Indexing starts from 0.
+inline bool Testbit(uint8 val, uint8 bitindex) {return ((val & (1 << bitindex)) != 0);}
+
+inline void Setbit(uint8& val, uint8 bitindex, bool newval)
+//----------------------------------------------------------
+{
+	if(newval) val |= (1 << bitindex);
+	else val &= ~(1 << bitindex);
+}
 
 
+bool IsPrintableId(const void* pvId, const size_t nLength)
+//--------------------------------------------------------
+{
+	const char* pId = static_cast<const char*>(pvId);
+	for(size_t i = 0; i < nLength; i++)
+	{
+		if (pId[i] <= 0 || isprint(pId[i]) == 0)
+			return false;
+	}
+	return true;
+}
 
-uint8 WriteAdaptive1234(OUTSTREAM& oStrm, const uint32 num)
+
+uint8 GetByteReq1248(const uint64 size)
+//-------------------------------------
+{
+	if((size >> 6) == 0) return 1;
+	if((size >> (1*8+6)) == 0) return 2;
+	if((size >> (3*8+6)) == 0) return 4;
+	return 8;
+}
+
+
+uint8 GetByteReq1234(const uint32 num)
+//------------------------------------
+{
+	if((num >> 6) == 0) return 1;
+	if((num >> (1*8+6)) == 0) return 2;
+	if((num >> (2*8+6)) == 0) return 3;
+	return 4;
+}
+
+
+void WriteAdaptive12(OutStream& oStrm, const uint16 num)
 //------------------------------------------------------
 {
-	const uint8 bc = GetNeededBytecount1234(num);
-	const uint32 sizeInstruction = (num << 2) |  (bc - 1);
+	if(num >> 7 == 0)
+		Binarywrite<uint16>(oStrm, num << 1, 1);
+	else
+		Binarywrite<uint16>(oStrm, (num << 1) | 1);
+}
+
+
+void WriteAdaptive1234(OutStream& oStrm, const uint32 num)
+//--------------------------------------------------------
+{
+	const uint8 bc = GetByteReq1234(num);
+	const uint32 sizeInstruction = (num << 2) | (bc - 1);
 	Binarywrite<uint32>(oStrm, sizeInstruction, bc);
-	return bc;
 }
 
-uint8 WriteAdaptive1248(OUTSTREAM& oStrm, const uint64& num)
-//------------------------------------------------------
+
+//Format: First bit tells whether the size indicator is 1 or 2 bytes.
+void WriteAdaptive12String(OutStream& oStrm, const std::string& str)
+//------------------------------------------------------------------
 {
-	const uint8 bc = GetNeededBytecount1248(num);
-	const uint64 sizeInstruction = (num << 2) |  Log2(bc);
+	uint16 s = static_cast<uint16>(str.size());
+	LimitMax(s, uint16(uint16_max / 2));
+	WriteAdaptive12(oStrm, s);
+	oStrm.write(str.c_str(), s);
+}
+
+
+// Works only for arguments 1,2,4,8
+uint8 Log2(const uint8& val)
+//--------------------------
+{
+	if(val == 1) return 0;
+	else if(val == 2) return 1;
+	else if(val == 4) return 2;
+	else return 3;
+}
+
+void WriteAdaptive1248(OutStream& oStrm, const uint64& num)
+//---------------------------------------------------------
+{
+	const uint8 bc = GetByteReq1248(num);
+	const uint64 sizeInstruction = (num << 2) | Log2(bc);
 	Binarywrite<uint64>(oStrm, sizeInstruction, bc);
-	return bc;
 }
 
 
-
-uint8 ReadAdaptive1234(INSTREAM& iStrm, uint32& val)
-//------------------------------------------------
+void ReadAdaptive12(InStream& iStrm, uint16& val)
+//-----------------------------------------------
 {
-	val = 0;
+	Binaryread<uint16>(iStrm, val, 1);
+	if(val & 1) iStrm.read(reinterpret_cast<char*>(&val) + 1, 1);
+	val >>= 1;
+}
+
+
+void ReadAdaptive1234(InStream& iStrm, uint32& val)
+//-------------------------------------------------
+{
 	Binaryread<uint32>(iStrm, val, 1);
 	const uint8 bc = 1 + static_cast<uint8>(val & 3);
 	if(bc > 1) iStrm.read(reinterpret_cast<char*>(&val)+1, bc-1);
 	val >>= 2;
-	return bc;
 }
 
-uint8 ReadAdaptive1248(INSTREAM& iStrm, uint64& val)
-//------------------------------------------------
+const uint8 pow2xTable[] = {1, 2, 4, 8, 16, 32, 64, 128};
+
+// Returns 2^n. n must be within {0,...,7}.
+inline uint8 Pow2xSmall(const uint8& exp) {ASSERT(exp <= 7); return pow2xTable[exp];}
+
+void ReadAdaptive1248(InStream& iStrm, uint64& val)
+//-------------------------------------------------
 {
-	val = 0;
 	Binaryread<uint64>(iStrm, val, 1);
 	const uint8 bc = Pow2xSmall(static_cast<uint8>(val & 3));
 	if(bc > 1) iStrm.read(reinterpret_cast<char*>(&val)+1, bc-1);
 	val >>= 2;
-	return bc;
 }
 
 
-//SNR <-> Serialization Note Read
-const CReadNotification SNR_BADGIVEN_STREAM(1 | SNT_FAILURE, "Bad stream given for reading");
-const CReadNotification SNR_BADSTREAM_AFTER_MAPHEADERSEEK(1<<1 | SNT_FAILURE, "Stream was bad after seeking map");
-const CReadNotification SNR_BAD_MAPBEGINPOS(1<<2 | SNT_FAILURE, "Bad map begin position");
-const CReadNotification SNR_NO_READING_ALLOWED_BY_INSTRUCTIONS(1<<3 | SNT_FAILURE, "Instructions do not allow reading");
-const CReadNotification SNR_FRAMEWORKID_MISMATCH(1<<4 | SNT_FAILURE, "FrameworkID mismatch");
-const CReadNotification SNR_FAULTY_HEADERSIZEINDICATOR(1<<5 | SNT_FAILURE, "Faulty headersize indicator");
-const CReadNotification SNR_BADSTREAM_AT_MAP_READ(1<<6 | SNT_FAILURE, "Bad stream when reading map");
-const CReadNotification SNR_MAPINFO_SIZE_ERROR(1<<7 | SNT_WARNING, "Read entrycount != mapcontainer size");
-const CReadNotification SNR_ZEROENTRYCOUNT(1<<8 | SNT_NOTE, "Entrycount is informed to be zero");
-const CReadNotification SNR_INSUFFICIENT_STREAM_OFFTYPE(1<<9 | SNT_FAILURE, "Map contains larger position than what OFFTYPE can handle");
-const CReadNotification SNR_OBJECTCLASS_IDMISMATCH(1<<10 | SNT_FAILURE, "Objectclass ID mismatch");
-const CReadNotification SNR_NO_ENTRYIDS_WITH_CUSTOMID_DEFINED(1<<11 | SNT_NOTE, "CustomID headerdata entry exists, but instructs to use no entryIDs");
-const CReadNotification SNR_IGNORED_HEADERDATA(1<<12 | SNT_NOTE, "Ignored headerdata");
-const CReadNotification SNR_LOADING_OBJECT_WITH_LARGER_VERSION(1<<13 | SNT_NOTE, "Object version > Instruction version");
-const CReadNotification SNR_UNKNOWN_DATAENTRY(1<<14 | SNT_NOTE, "Unknown dataentry");
-const CReadNotification SNR_TOO_MANY_ENTRIES_TO_READ(1 << 15 | SNT_FAILURE, "Object informs to contain more entries than is allowed to be read.");
-const CReadNotification SNR_READ_TERMINATED_AFTER_READING_VERSIONNUMERIC(1 << 16 | SNT_NOTE, "Reading terminated after reading versionnumeric.");
-const CReadNotification SNR_READ_TERMINATED_AFTER_READING_VERSIONSTRING(1 << 17 | SNT_NOTE, "Reading terminated after reading versionstring.");
-
-
-const CWriteNotification SNW_BADGIVEN_STREAM(1 | SNT_FAILURE, "Bad stream given for writing");
-const CWriteNotification SNW_DATASIZETYPE_OVERFLOW(1<<1 | SNT_FAILURE, "Datasize for a entry is larger than what can be handled by datasizetype.");
-//1 << 2 unused
-const CWriteNotification SNW_WRITING_NOT_ALLOWED(1 << 3 | SNT_FAILURE, "Instructions do not allow writing");
-const CWriteNotification SNW_INSUFFICIENT_FIXEDSIZE(1<<4 | SNT_FAILURE, "An entry data was longer than fixedsize parameter");
-const CWriteNotification SNW_WRITECOUNT_STREAMPOSINCREMENT_INCONSISTENCY(1<<5 | SNT_FAILURE, "Streamer informed it wrote number of bytes which was different from streamsize increment");
-const CWriteNotification SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING(1<<6 | SNT_FAILURE, "IDsize changes while it should be fixed");
-const CWriteNotification SNW_BADSTREAM_AT_END(1<<7 | SNT_FAILURE, "Stream was bad at the end.");
-const CWriteNotification SNW_ZERO_IDINSTRUCTION_BYTE(1<<8 | SNT_WARNING, "Custom ID instruction byte is zero");
-
-
-const char CSSBSerialization::s_EntryID[3] = {'2','2','8'};
-const uint8 CSSBSerialization::s_DefaultFlagbyte = 0;
-int32 CSSBSerialization::s_DefaultReadLogMask = static_cast<int32>(uint32_max); //Enable all notes
-int32 CSSBSerialization::s_DefaultWriteLogMask = static_cast<int32>(uint32_max); //Enable all notes
-
-const ABCSerializationStreamer::READINFO ABCSerializationStreamer::s_InfoNoReadimplementation(SNT_WARNING, "No readmethod implementation");
-const ABCSerializationStreamer::WRITEINFO ABCSerializationStreamer::s_InfoNoWriteimplementation(SNT_WARNING, "No writemethod implementation");
-
-string CSerializationNotification::ToString() const
-//-------------------------------------------------
+void WriteItemString(OutStream& oStrm, const std::string& str)
+//------------------------------------------------------------
 {
-	string str;
-	str.reserve(50);
-	if(ID & SNT_PROGRESS) str += "Progress: ";
-	if(ID & SNT_FAILURE) str += "Error: ";
-	if(ID & SNT_NOTE) str += "Note: ";
-	if(ID & SNT_WARNING) str += "Warning: ";
-	if(str.size() == 0) str += "Unknown: ";
-	str += "ID " + Stringify(ID) + "; ";
-	str += description;
+	uint32 id = (std::min)(str.size(), (uint32_max >> 4)) << 4;
+	id |= 12; // 12 == 1100b
+	Binarywrite<uint32>(oStrm, id);
+	id >>= 4;
+	if(id > 0)
+		oStrm.write(str.c_str(), id);
+}
+
+
+void ReadItemString(InStream& iStrm, std::string& str, const DataSize)
+//--------------------------------------------------------------------
+{
+	// bits 0,1: Bytes per char type: 1,2,3,4.
+	// bits 2,3: Bytes in size indicator, 1,2,3,4
+	uint32 id = 0;
+	Binaryread(iStrm, id, 1);
+	const uint8 nSizeBytes = (id & 12) >> 2; // 12 == 1100b
+	if (nSizeBytes > 0)
+		iStrm.read(reinterpret_cast<char*>(&id) + 1, min(3, nSizeBytes));
+	// Limit to 1 MB.
+	str.resize(min(id >> 4, 1000000));
+	for(size_t i = 0; i < str.size(); i++)
+		iStrm.read(&str[i], 1);
+
+	id = (id >> 4) - str.size();
+	if(id > 0)
+		iStrm.ignore(id);
+}
+
+
+String IdToString(const void* const pvId, const size_t nLength)
+//-------------------------------------------------------------
+{
+	const char* pId = static_cast<const char*>(pvId);
+	if (nLength == 0)
+		return "";
+	String str;
+	if (IsPrintableId(pId, nLength))
+		std::copy(pId, pId + nLength, std::back_inserter<String>(str));
+	else if (nLength <= 4) // Interpret ID as integer value.
+	{
+		int32 val = 0;
+		memcpy(&val, pId, nLength);
+		char buf[36];
+		_itoa(val, buf, 10);
+		str = buf;
+	}
 	return str;
 }
 
+const char Ssb::s_EntryID[3] = {'2','2','8'};
+int32 Ssb::s_DefaultReadLogMask = SNT_DEFAULT_MASK;
+int32 Ssb::s_DefaultWriteLogMask = SNT_DEFAULT_MASK;
+Ssb::fpLogFunc_t Ssb::s_DefaultLogFunc = nullptr;
 
-bool CSSBSerialization::AddReadNote(const CReadNotification& note, const bool addToLog)
-//-------------------------------------------------------------------------------------
+const TCHAR tstrWriteHeader[] = TEXT("Write header with ID = %s\n");
+const TCHAR tstrWriteProgress[] = TEXT("Wrote entry: {num, id, rpos, size} = {%u, %s, %u, %u}\n");
+const TCHAR tstrWritingMap[] = TEXT("Writing map to rpos: %u\n");
+const TCHAR tstrMapEntryWrite[] = TEXT("Writing map entry: id=%s, rpos=%u, size=%u\n");
+const TCHAR strWriteNote[] = TEXT("Write note: ");
+const TCHAR tstrEndOfStream[] = TEXT("End of stream(rpos): %u\n");
+
+const TCHAR tstrReadingHeader[] = TEXT("Read header with expected ID = %s\n");
+const TCHAR strNoMapInFile[] = TEXT("No map in the file.\n");
+const TCHAR strIdMismatch[] = TEXT("ID mismatch, terminating read.\n");
+const TCHAR strIdMatch[] = TEXT("ID match, continuing reading.\n");
+const TCHAR tstrReadingMap[] = TEXT("Reading map from rpos: %u\n");
+const TCHAR tstrEndOfMap[] = TEXT("End of map(rpos): %u\n");
+const TCHAR tstrReadProgress[] = TEXT("Read entry: {num, id, rpos, size, desc} = {%u, %s, %u, %s, %s}\n");
+const TCHAR tstrNoEntryFound[] = TEXT("No entry with id %s found.\n");
+const TCHAR tstrCantFindSubEntry[] = TEXT("Unable to find subentry with id=%s\n");
+const TCHAR strReadNote[] = TEXT("Read note: ");
+
+
+#define SSB_INITIALIZATION_LIST					\
+	m_Readlogmask(s_DefaultReadLogMask),		\
+	m_Writelogmask(s_DefaultWriteLogMask),		\
+	m_fpLogFunc(s_DefaultLogFunc),				\
+	m_nCounter(0),								\
+	m_nNextReadHint(0),							\
+	m_nReadVersion(0),							\
+	m_nFixedEntrySize(0),						\
+	m_nIdbytes(IdSizeVariable),					\
+	m_nReadEntrycount(0),						\
+	m_nMaxReadEntryCount(16000),				\
+	m_pSubEntry(nullptr),						\
+	m_rposMapBegin(0),							\
+	m_posStart(0),								\
+	m_posSubEntryStart(0),						\
+	m_posDataBegin(0),							\
+	m_posMapStart(0),							\
+	m_rposEndofHdrData(0),						\
+	m_posMapEnd(0),								\
+	m_posEntrycount(0),							\
+	m_posMapPosField(0),						\
+	m_nMapReserveSize(0),						\
+	m_Flags(s_DefaultFlags),					\
+	m_Status(SNT_NONE)
+
+
+Ssb::Ssb(InStream* pIstrm, OutStream* pOstrm) :
+		m_pOstrm(pOstrm),
+		m_pIstrm(pIstrm),
+		SSB_INITIALIZATION_LIST
+//-----------------------------------------------
+{}
+
+Ssb::Ssb(IoStream& ioStrm) :
+		m_pOstrm(&ioStrm),
+		m_pIstrm(&ioStrm),
+		SSB_INITIALIZATION_LIST
+//------------------------------
+{}
+
+Ssb::Ssb(OutStream& oStrm) :
+		m_pOstrm(&oStrm),
+		m_pIstrm(nullptr),
+		SSB_INITIALIZATION_LIST
+//------------------------------
+{}
+
+
+Ssb::Ssb(InStream& iStrm) :
+		m_pIstrm(&iStrm),
+		m_pOstrm(nullptr),
+		SSB_INITIALIZATION_LIST
+//------------------------------
+{}
+
+#undef SSB_INITIALIZATION_LIST
+
+void Ssb::AddNote(const SsbStatus s, const SsbStatus mask, const TCHAR* sz)
+//-------------------------------------------------------------------------
 {
-	m_Readnotes.ID |= note.ID;
-	if(addToLog && (note & m_Readlogmask))
+	m_Status |= s;
+	if ((s & mask) != 0 && m_fpLogFunc)
+		m_fpLogFunc("%s: 0x%x\n", sz, s);
+}
+
+void Ssb::AddWriteNote(const SsbStatus s) {AddNote(s, m_Writelogmask, strWriteNote);}
+void Ssb::AddReadNote(const SsbStatus s) {AddNote(s, m_Readlogmask, strReadNote);}
+
+
+void Ssb::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
+//-------------------------------------------------------------------
+{
+	m_Status |= SNT_PROGRESS;
+
+	if ((m_Readlogmask & SNT_PROGRESS) != 0 && m_fpLogFunc)
 	{
-		AddToLog(note.ToString().c_str());
-	}
-	return (note & SNT_FAILURE) ? true : false;
+		TCHAR buffer[256];
+		wsprintf(buffer,
+				 tstrReadProgress,
+				 nNum,
+				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  IdToString(&m_Idarray[pRe->nIdpos], pRe->nIdLength).c_str() : "",
+				 (pRe) ? pRe->rposStart : 0,
+				 (pRe && pRe->nSize != invalidDatasize) ? Stringify(pRe->nSize).c_str() : "",
+				 "");
+		m_fpLogFunc(buffer);
+	}	
 }
 
 
-bool CSSBSerialization::AddReadNote(const CReadNotification& note, const CMappinginfo* pMi)
-//----------------------------------------------------------------------------------------
+// Called after writing an entry.
+void Ssb::AddWriteNote(const void* pId, const size_t nIdSize, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
+//----------------------------------------------------------------------------
 {
-	if(note == SNR_UNKNOWN_DATAENTRY)
+	m_Status |= SNT_PROGRESS;
+	if ((m_Writelogmask & SNT_PROGRESS) != 0 && m_fpLogFunc)
 	{
-		m_Readnotes.ID |= note.ID;
-		if(note.ID & m_Readlogmask)
+		if (nIdSize < 30)
 		{
-			string logmsg = "Note: Unknown dataentry found; ";
-
-			if(pMi == 0)
-				logmsg += "No map entry found.";
-			else
-			{
-				//Adding ID only if it does not contain null-character.
-				if(std::find(pMi->id.begin(), pMi->id.end(), 0) == pMi->id.end())
-				{
-					logmsg += "id = ";
-					const size_t s = logmsg.length();
-					logmsg.resize(s + pMi->id.size(), '.');
-					std::copy(pMi->id.begin(), pMi->id.end(), logmsg.begin()+s);
-				}
-
-				if(pMi->description.length() > 0)
-					logmsg += "; entry description: " + pMi->description;
-				else
-					logmsg += "; there's no description for the entry";
-
-				AddToLog(logmsg.c_str());
-			}
+			TCHAR buffer[256];
+			wsprintf(buffer, tstrWriteProgress, nEntryNum, IdToString(pId, nIdSize).c_str(), rposStart, nBytecount);
+			m_fpLogFunc(buffer);
 		}
-		return false;
 	}
+}
+
+
+void Ssb::ResetReadstatus()
+//-------------------------
+{
+	m_Status = SNT_NONE;
+	m_Idarray.reserve(32);
+	m_Idarray.push_back(0);
+}
+
+
+void Ssb::WriteMapItem( const void* pId, 
+						const size_t nIdSize,
+						const RposType& rposDataStart,
+						const DataSize& nDatasize,
+						const TCHAR* pszDesc)
+//----------------------------------------------
+{
+	if (m_fpLogFunc)
+		m_fpLogFunc(tstrMapEntryWrite,
+					(nIdSize > 0) ? IdToString(pId, nIdSize).c_str() : "",
+					rposDataStart,
+					nDatasize);
+
+	if(m_nIdbytes > 0)
+	{
+		if (m_nIdbytes != IdSizeVariable && nIdSize != m_nIdbytes)
+			{ AddWriteNote(SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING); return; }
+
+		if (m_nIdbytes == IdSizeVariable) //Variablesize ID?
+			WriteAdaptive12(m_MapStream, static_cast<uint16>(nIdSize));
+
+		if(nIdSize > 0)
+			m_MapStream.write(reinterpret_cast<const char*>(pId), static_cast<Streamsize>(nIdSize));
+	}
+
+	if (GetFlag(RwfWMapStartPosEntry)) //Startpos
+		WriteAdaptive1248(m_MapStream, rposDataStart);
+	if (GetFlag(RwfWMapSizeEntry)) //Entrysize
+		WriteAdaptive1248(m_MapStream, nDatasize);
+	if (GetFlag(RwfWMapDescEntry)) //Entry descriptions
+		WriteAdaptive12String(m_MapStream, String(pszDesc));
+}
+
+
+void Ssb::ReserveMapSize(uint32 nSize)
+//------------------------------------
+{
+	OutStream& oStrm = *m_pOstrm;
+	m_nMapReserveSize = nSize;
+	if (nSize > 0)
+	{
+		m_posMapStart = oStrm.tellp();
+		for(size_t i = 0; i < m_nMapReserveSize; i++)
+			oStrm.put(0);
+	}
+}
+
+
+void Ssb::SetIdSize(uint16 nSize)
+//-------------------------------
+{
+	if (nSize == IdSizeVariable || nSize > IdSizeMaxFixedSize)
+		m_nIdbytes = IdSizeVariable;
 	else
+		m_nIdbytes = nSize;
+}
+
+
+void Ssb::CreateWriteSubEntry()
+//-----------------------------
+{
+	m_posSubEntryStart = m_pOstrm->tellp();
+	delete m_pSubEntry;
+	m_pSubEntry = new Ssb(*m_pOstrm);
+	m_pSubEntry->m_fpLogFunc = m_fpLogFunc;
+}
+
+
+Ssb* Ssb::CreateReadSubEntry(const void* pId, const size_t nLength)
+//-----------------------------------------------------------------
+{
+	const ReadEntry* pE = Find(pId, nLength);
+	if (pE && pE->rposStart != 0)
 	{
-		CReadNotification n = note;
-		if(pMi)
-		{
-			n.description += string("; ") + pMi->ToString();
-		}
-		return AddReadNote(n);
+		m_nCounter++;
+		delete m_pSubEntry;
+		m_pSubEntry = new Ssb(*m_pIstrm);
+		m_pSubEntry->m_fpLogFunc = m_fpLogFunc;
+		m_pIstrm->seekg(m_posStart + Postype(pE->rposStart));
+		return m_pSubEntry;
 	}
+	else if (m_fpLogFunc)
+		m_fpLogFunc(tstrCantFindSubEntry, IdToString(pId, nLength).c_str());
 
+	return nullptr;
 }
 
 
-bool CSSBSerialization::AddWriteNote(const CWriteNotification& note, const bool addToLog)
-//------------------------------------------------
+void Ssb::IncrementWriteCounter()
+//-------------------------------
 {
-	m_Writenotes.ID |= note.ID;
-	if(addToLog && (note & m_Writelogmask))
+	m_nCounter++;
+	if (m_nCounter >= (uint16_max >> 2))
 	{
-		AddToLog(note.ToString().c_str());
+		FinishWrite();
+		AddWriteNote(SNW_MAX_WRITE_COUNT_REACHED);
 	}
-
-	return (note & SNT_FAILURE) ? true : false;
-}
-
-void CSSBSerialization::ResetReadstatus()
-//---------------------------------------
-{
-	m_Readnotes.ID = 0;
-	m_Readnotes.description.clear();
-}
-
-void CSSBSerialization::ResetWritestatus()
-//----------------------------------------
-{
-	m_Writenotes.ID = 0;
-	m_Writenotes.description.clear();
 }
 
 
-
-const CWriteNotification& CSSBSerialization::Serialize(OUTSTREAM& oStrm)
-//-------------------------------------------------
+void Ssb::ReleaseWriteSubEntry(const void* pId, const size_t nIdLength)
+//---------------------------------------------------------------------
 {
+	if ((m_pSubEntry->m_Status & SNT_FAILURE) != 0)
+		m_Status |= SNW_SUBENTRY_FAILURE;
+
+	delete m_pSubEntry; m_pSubEntry = nullptr;
+	WriteMapItem(pId, nIdLength, m_posSubEntryStart - m_posStart, m_pOstrm->tellp() - m_posSubEntryStart, "");
+	IncrementWriteCounter();
+}
+
+
+void Ssb::BeginWrite(const void* pId, const size_t nIdSize, const uint64& nVersion)
+//---------------------------------------------------------------------------------
+{
+	OutStream& oStrm = *m_pOstrm;
+
+	if (m_fpLogFunc)
+		m_fpLogFunc(tstrWriteHeader, IdToString(pId, nIdSize).c_str());
+
 	ResetWritestatus();
 
-	if(!m_pSi->AllowWriting())
-	{
-		AddWriteNote(SNW_WRITING_NOT_ALLOWED);
-		return m_Writenotes;
-	}
+	if(!oStrm.good())
+		{ AddWriteNote(SNRW_BADGIVEN_STREAM); return; }
 
-	if(!oStrm.good() && AddWriteNote(SNW_BADGIVEN_STREAM))
-		return m_Writenotes;
-
-	const POSTYPE startpos = oStrm.tellp();
-
-	//Framework identifier.
+	// Start bytes.
 	oStrm.write(s_EntryID, sizeof(s_EntryID));
 
-	//Objectclass('filetype') identifier
+	m_posStart = oStrm.tellp() - Offtype(sizeof(s_EntryID));
+
+	// Object ID.
 	{
-	uint8 idsize = static_cast<uint8>(m_pSi->GetObjectClassID().size());
-	Binarywrite<uint8>(oStrm, idsize);
-	if(idsize > 0) oStrm.write(&m_pSi->GetObjectClassID()[0], idsize);
+		uint8 idsize = static_cast<uint8>(nIdSize);
+		Binarywrite<uint8>(oStrm, idsize);
+		if(idsize > 0) oStrm.write(reinterpret_cast<const char*>(pId), nIdSize);
 	}
 
-	//Forming header.
+	// Form header.
 	uint8 header = 0;
 
-	//0,1 : Bytes per IDtype, 0,1,2,4
-	header = (m_pSi->GetBytecount_ID() != 4) ? (m_pSi->GetBytecount_ID() & 3) : 3;
+	SetFlag(RwfWMapStartPosEntry, GetFlag(RwfWMapStartPosEntry) && m_nFixedEntrySize == 0);
+	SetFlag(RwfWMapSizeEntry, GetFlag(RwfWMapSizeEntry) && m_nFixedEntrySize == 0);
 
-	//2   : Startpos in map?
-	Setbit(header, 2, m_pSi->GetIncludeStartposInMap());
+	header = (m_nIdbytes != 4) ? (m_nIdbytes & 3) : 3;	//0,1 : Bytes per IDtype, 0,1,2,4
+	Setbit(header, 2, GetFlag(RwfWMapStartPosEntry));	//2   : Startpos in map?
+	Setbit(header, 3, GetFlag(RwfWMapSizeEntry));		//3   : Datasize in map?
+	Setbit(header, 4, GetFlag(RwfWVersionNum));			//4   : Version numeric field?
+	Setbit(header, 7, GetFlag(RwfWMapDescEntry));		//7   : Entrydescriptions in map?
 
-	//3   : Datasize in map?
-	Setbit(header, 3, m_pSi->GetIncludeDatasizeEntryInMap());
-
-	//4   : Has version numeric field?
-	Setbit(header, 4, m_pSi->GetUseVersion());
-
-	//5   : Has version string field?
-	Setbit(header, 5, m_pSi->GetUseVersionstring());
-
-	//6   : Bytes per descriptioncharacter(1,2)
-	Setbit(header, 6, m_pSi->GetUseTwobyteDescriptionChar());
-
-	//7   : Entrydescriptions in map?
-	Setbit(header, 7, m_pSi->GetIncludeEntrydescriptionsInMap());
-
-	uint16 IDbytecount = m_pSi->GetBytecount_ID();
-
-	//Writing header
+	// Write header
 	Binarywrite<uint8>(oStrm, header);
 
-	//Various flags to modify default settings(with default settings its not needed).
+	// Additional options.
 	uint8 tempU8 = 0;
-	Setbit(tempU8, 0, m_pSi->GetCustomIDInstructionbyte() != 0);
-	Setbit(tempU8, 1, m_pSi->GetHasFixedsizeentries() != 0);
-	Setbit(tempU8, 2, m_pSi->GetObjectDescription().size() != 0);
-	Setbit(tempU8, 3, m_pSi->GetUseTimestamp());
-	Setbit(tempU8, 4, m_pSi->GetIgnoreLeadingNullInIDComparison());
-
+	Setbit(tempU8, 0, (m_nIdbytes == IdSizeVariable) || (m_nIdbytes == 3) || (m_nIdbytes > 4));
+	Setbit(tempU8, 1, m_nFixedEntrySize != 0);
+	
 	const uint8 flags = tempU8;
 	if(flags != s_DefaultFlagbyte)
 	{
 		WriteAdaptive1234(oStrm, 2); //Headersize - now it is 2.
-        Binarywrite<uint8>(oStrm, HEADERID_FLAGBYTE);
+        Binarywrite<uint8>(oStrm, HeaderId_FlagByte);
 		Binarywrite<uint8>(oStrm, flags);
 	}
 	else
 		WriteAdaptive1234(oStrm, 0);
 
-	//Version(numeric)?
-	if(Testbit(header, 4))
-		WriteAdaptive1248(oStrm, m_pSi->GetInstructionVersion());
+	if(Testbit(header, 4)) // Version(numeric)?
+		WriteAdaptive1248(oStrm, nVersion);
 
-	//Version(string)?
-	if(Testbit(header, 5))
+	if(Testbit(flags, 0)) // Custom IDbytecount?
 	{
-		Binarywrite<size_t>(oStrm, m_pSi->GetVersionString().size(), 1);
-		oStrm.write(m_pSi->GetVersionString().c_str(), static_cast<uint8>(m_pSi->GetVersionString().size()));
+		uint8 n = (m_nIdbytes == IdSizeVariable) ? 1 : static_cast<uint8>((m_nIdbytes << 1));
+		Binarywrite<uint8>(oStrm, n);
 	}
 
-	//Custom IDbytecount?
-	if(Testbit(flags, 0))
-	{
-		Binarywrite<uint8>(oStrm, m_pSi->GetCustomIDInstructionbyte());
-		IDbytecount = m_pSi->GetCustomIDInstructionbyte() >> 1;
-		if(IDbytecount == 0)
-		{
-			if(m_pSi->GetCustomIDInstructionbyte() & 1) IDbytecount = uint16_max; //Variablesize ID.
-			else AddWriteNote(SNW_ZERO_IDINSTRUCTION_BYTE);
-		}
-	}
+	if(Testbit(flags, 1)) // Fixedsize entries?
+		WriteAdaptive1234(oStrm, m_nFixedEntrySize);
 
-	//Fixedsize entries
-	const uint32 fixedsizeentries = m_pSi->GetHasFixedsizeentries();
-	if(Testbit(flags, 1))
-		WriteAdaptive1234(oStrm, m_pSi->GetHasFixedsizeentries());
+	//Entrycount. Reserve two bytes(max uint16_max / 4 entries), actual value is written after writing data.
+	m_posEntrycount = oStrm.tellp();
+	Binarywrite<uint16>(oStrm, 0);
 
-	//Object description?
-	if(Testbit(flags, 2))
-		WriteAdaptive12String(oStrm, m_pSi->GetObjectDescription());
+	SetFlag(RwfRwHasMap, (m_nIdbytes != 0 || GetFlag(RwfWMapStartPosEntry) || GetFlag(RwfWMapSizeEntry) || GetFlag(RwfWMapDescEntry)));
 
-	//Timestamp?
-	if(Testbit(flags, 3))
-		Binarywrite<uint64>(oStrm, time(0), 5);
-
-
-	const bool hasDatastartposEntryInMap = m_pSi->GetIncludeStartposInMap() && fixedsizeentries == 0;
-	const bool hasDatasizeEntryInMap = m_pSi->GetIncludeDatasizeEntryInMap() && fixedsizeentries == 0;
-
-
-	//Entrycount
-	WriteAdaptive1248(oStrm, m_pSi->GetEntrycount());
-
-	//Mapping begin pos(reserve space - actual value is written after writing data)
-	const POSTYPE mappingpositionindicatorfieldpos = oStrm.tellp();
-
-	//Writing always 4 bytes even though the size is adaptive(changing this requires modifications elsewhere
-	//as well.)
-	Binarywrite<uint32>(oStrm, OFFTYPE_MAX);
-
-	const bool hasMap = (IDbytecount != 0 || hasDatastartposEntryInMap || hasDatasizeEntryInMap || m_pSi->GetIncludeEntrydescriptionsInMap());
-
-	std::vector<CMappinginfo> mappings;
-	if(hasMap)
-		mappings.resize(m_pSi->GetEntrycount(), CMappinginfo());
-
-	//Writing data
-	size_t counter = 0;
-	const CSerializationentry* pEntry = 0;
-	while(m_pSi->SetNextentry(pEntry))
-	{
-		const POSTYPE entrystartposInStream = oStrm.tellp();
-		const POSTYPE entrystartposInObject = oStrm.tellp() - startpos;
-		OFFTYPE bytecount = pEntry->Write(oStrm);
-		const uint64 datasize = bytecount;
-		if(static_cast<uint64>(oStrm.tellp()-entrystartposInStream) != bytecount && AddWriteNote(SNW_WRITECOUNT_STREAMPOSINCREMENT_INCONSISTENCY))
-			return m_Writenotes;
-
-		if(pEntry->GetStreamer().GetLastWriteinfo().description.size())
-			AddWriteNote(pEntry->GetStreamer().GetLastWriteinfo());
-
-		if(hasDatasizeEntryInMap && datasize > (uint32_max >> 2) && AddWriteNote(SNW_DATASIZETYPE_OVERFLOW))
-			return m_Writenotes;
-
-		if(fixedsizeentries)
-		{
-			if(static_cast<uint32>(bytecount) <= fixedsizeentries)
-			{
-				char fillc = 0;
-				for(uint32 i = 0; i<fixedsizeentries-bytecount; i++)
-					oStrm.write(&fillc, 1);
-			}
-			else
-				if(AddWriteNote(SNW_INSUFFICIENT_FIXEDSIZE))
-					return m_Writenotes;
-		}
-		if(!hasMap)
-			continue;
-
-		mappings[counter] = CMappinginfo(pEntry->GetID(), entrystartposInObject, datasize, pEntry->GetDescription());
-
-		counter++;
-	}
-
-	//Mapping data
-	const uint64 mapstartposRelative = oStrm.tellp() - startpos;
-	if(hasMap) //Write map
-	{
-		vector<CMappinginfo>::const_iterator mapiter = mappings.begin();
-		vector<CMappinginfo>::const_iterator mapiterEnd = mappings.end();
-		for(mapiter; mapiter != mapiterEnd; mapiter++)
-		{
-			if((m_pSi->GetCustomIDInstructionbyte() & 3) == 0 && mapiter->id.size() != IDbytecount
-				&& AddWriteNote(SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING))
-				return m_Writenotes;
-
-			if(IDbytecount > 0)
-			{
-				if((m_pSi->GetCustomIDInstructionbyte() & 1) != 0) //Variablesize ID?
-					WriteAdaptive12(oStrm, static_cast<uint16>(mapiter->id.size()));
-
-				if(mapiter->id.size() > 0)
-					oStrm.write(&mapiter->id[0], static_cast<STREAMSIZE>(mapiter->id.size()));
-			}
-
-			if(hasDatastartposEntryInMap) //Startpos
-				WriteAdaptive1248(oStrm, mapiter->startpos);
-			if(hasDatasizeEntryInMap) //Entrysize
-				WriteAdaptive1248(oStrm, mapiter->entrysize);
-
-			if(Testbit(header, 7)) //Entry descriptions?
-			{
-				WriteAdaptive12String(oStrm, mapiter->description);
-			}
-		}
-	}
-	//Writing mappingstartposition.
-	const POSTYPE endposStrm = oStrm.tellp();
-	oStrm.seekp(mappingpositionindicatorfieldpos);
-	Binarywrite<uint64>(oStrm, mapstartposRelative << 2 | 2, 4);
-	oStrm.seekp(endposStrm); //Setting endpos to end of stream.
-	if(oStrm.fail()) AddWriteNote(SNW_BADSTREAM_AT_END);
-	return m_Writenotes;
+	m_posMapPosField = oStrm.tellp();
+	if (GetFlag(RwfRwHasMap)) //Mapping begin pos(reserve space - actual value is written after writing data)
+		Binarywrite<uint64>(oStrm, 0);
 }
 
-const CReadNotification& CSSBSerialization::Unserialize(INSTREAM& iStrm)
-//-------------------------------------------------
+
+Ssb::ReadRv Ssb::OnReadEntry(const ReadEntry* pE, const void* pId, const size_t nIdSize, const Postype& posReadBegin)
+//-------------------------------------------------------------------------------------------------------------------
 {
-	ResetReadstatus();
-
-	if(!m_pSi->AllowReading())
-		{AddReadNote(SNR_NO_READING_ALLOWED_BY_INSTRUCTIONS); return m_Readnotes;}
-
-	if(!iStrm.good() && AddReadNote(SNR_BADGIVEN_STREAM))
-		return m_Readnotes;
-
-	const POSTYPE startpos = iStrm.tellg();
-
-	//Framework entryidentifier.
+	if (pE != nullptr)
+		AddReadNote(pE, m_nCounter);
+	else if (GetFlag(RwfRMapHasId) == false) // Not ID's in map.
 	{
-	char temp[sizeof(s_EntryID)];
-	Binaryread<char[sizeof(s_EntryID)]>(iStrm, temp);
-	if(memcmp(temp, s_EntryID, sizeof(s_EntryID)) && AddReadNote(SNR_FRAMEWORKID_MISMATCH))
-		return m_Readnotes;
+		ReadEntry e;
+		e.rposStart = posReadBegin - m_posStart;
+		e.nSize = m_pIstrm->tellg() - posReadBegin;
+		AddReadNote(&e, m_nCounter);
 	}
-
-	//Filetype identifier
+	else // Entry not found.
 	{
+		if (m_fpLogFunc)
+			m_fpLogFunc(tstrNoEntryFound, IdToString(pId, nIdSize).c_str());
+		return EntryNotFound;
+	}
+	m_nCounter++;
+	return EntryRead;
+}
+
+
+void Ssb::OnWroteItem(const void* pId, const size_t nIdSize, const Postype& posBeforeWrite)
+//-----------------------------------------------------------------------------------------
+{
+	RposType nEntrySize = m_pOstrm->tellp() - posBeforeWrite;
+
+	if(GetFlag(RwfRMapHasSize) && nEntrySize > (uint64_max >> 2))
+		{ AddWriteNote(SNW_DATASIZETYPE_OVERFLOW); return; }
+
+	// Handle fixed size entries:
+	if (m_nFixedEntrySize > 0)
+	{
+		if(nEntrySize <= m_nFixedEntrySize)
+		{
+			for(uint32 i = 0; i<m_nFixedEntrySize-nEntrySize; i++)
+				m_pOstrm->put(0);
+			nEntrySize = m_nFixedEntrySize;
+		}
+		else
+			{ AddWriteNote(SNW_INSUFFICIENT_FIXEDSIZE); return; }
+	}
+	if (GetFlag(RwfRwHasMap))
+		WriteMapItem(pId, nIdSize, posBeforeWrite - m_posStart, nEntrySize, "");
+
+	if (m_fpLogFunc != nullptr)
+		AddWriteNote(pId, nIdSize, m_nCounter, nEntrySize, posBeforeWrite - m_posStart);
+	IncrementWriteCounter();
+}
+
+
+void Ssb::CompareId(InStream& iStrm, const void* pId, const size_t nIdlength)
+//---------------------------------------------------------------------------
+{
 	uint8 tempU8 = 0;
 	Binaryread<uint8>(iStrm, tempU8);
-	vector<char> buf(tempU8, 0);
-	if(tempU8) iStrm.read(&buf[0], tempU8);
-	if(m_pSi->CompareObjectClassID(buf) && AddReadNote(SNR_OBJECTCLASS_IDMISMATCH))
-		return m_Readnotes;
+	char buffer[256];
+	if(tempU8)
+		iStrm.read(buffer, tempU8);
+
+	if (tempU8 == nIdlength && nIdlength > 0 && memcmp(buffer, pId, nIdlength) == 0)
+		return; // Match.
+	else if (GetFlag(RwfRPartialIdMatch) && tempU8 > nIdlength && nIdlength > 0
+			&& memcmp(buffer, pId, nIdlength) == 0 && buffer[nIdlength] == 0)
+		return; // Partial match.
+
+	AddReadNote(SNR_OBJECTCLASS_IDMISMATCH);
+}
+
+
+void Ssb::BeginRead(const void* pId, const size_t nLength, const uint64& nVersion)
+//---------------------------------------------------------------------------------
+{
+	InStream& iStrm = *m_pIstrm;
+
+	if (m_fpLogFunc)
+		m_fpLogFunc(tstrReadingHeader, IdToString(pId, nLength).c_str());
+
+	ResetReadstatus();
+
+	if (!iStrm.good())
+		{ AddReadNote(SNRW_BADGIVEN_STREAM); return; }
+
+	m_posStart = iStrm.tellg();
+
+	// Start bytes.
+	{
+		char temp[sizeof(s_EntryID)];
+		Binaryread<char[sizeof(s_EntryID)]>(iStrm, temp);
+		if (memcmp(temp, s_EntryID, sizeof(s_EntryID)))
+		{
+			AddReadNote(SNR_STARTBYTE_MISMATCH);
+			return;
+		}
+	}
+	
+	// Compare IDs.
+	CompareId(iStrm, pId, nLength);
+	if ((m_Status & SNT_FAILURE) != 0)
+	{
+		if (m_fpLogFunc)
+			m_fpLogFunc(strIdMismatch);
+		return;
 	}
 
-	//Header
+	if (m_fpLogFunc)
+		m_fpLogFunc(strIdMatch);
+	
+	// Header
 	uint8 tempU8;
 	Binaryread<uint8>(iStrm, tempU8);
 	const uint8 header = tempU8;
-	const uint8 bytesPerID = ((header & 3) == 3) ? 4 : (header & 3);
-	const bool hasVersionnumeric = Testbit(header, 4);
-	const bool hasVersionstring = Testbit(header, 5);
-	const uint8 bytesPerDescchar = 1 + Testbit(header, 6);
+	m_nIdbytes = ((header & 3) == 3) ? 4 : (header & 3);
+	if (Testbit(header, 6))
+		SetFlag(RwfRTwoBytesDescChar, true);
 
-	//Read headerdata size
+	// Read headerdata size
 	uint32 tempU32 = 0;
 	ReadAdaptive1234(iStrm, tempU32);
 	const uint32 headerdatasize = tempU32;
 
-	//If headerdatasize != 0, read known headerdata and ignore rest.
+	// If headerdatasize != 0, read known headerdata and ignore rest.
 	uint8 flagbyte = s_DefaultFlagbyte;
-	if(headerdatasize > 0)
+	if(headerdatasize >= 2)
 	{
-		uint32 headerbytesread = 0;
-		while(headerbytesread < headerdatasize)
-		{
-			headerbytesread += Binaryread<uint8>(iStrm, tempU8);
-			if(tempU8 == HEADERID_FLAGBYTE)
-			{
-				headerbytesread += Binaryread<uint8>(iStrm, tempU8);
-				flagbyte = tempU8;
-				continue;
-			}
+		Binaryread<uint8>(iStrm, tempU8);
+		if(tempU8 == HeaderId_FlagByte)
+			Binaryread<uint8>(iStrm, flagbyte);
 
-			iStrm.ignore(headerdatasize - headerbytesread);
-			headerbytesread = headerdatasize;
-			AddReadNote(SNR_IGNORED_HEADERDATA);
-			break;
-		}
-		if(headerdatasize != headerbytesread && AddReadNote(SNR_FAULTY_HEADERSIZEINDICATOR))
-			return m_Readnotes;
+		iStrm.ignore( (tempU8 == HeaderId_FlagByte) ? headerdatasize - 2 : headerdatasize - 1);
 	}
 
 	uint64 tempU64 = 0;
 
-	//Read version numeric if available.
-	if(hasVersionnumeric)
+	// Read version numeric if available.
+	if (Testbit(header, 4))
 	{
 		ReadAdaptive1248(iStrm, tempU64);
-		if(m_pSi->SetReadVersion(tempU64))
-		{
-			AddReadNote(SNR_READ_TERMINATED_AFTER_READING_VERSIONNUMERIC);
-			return m_Readnotes;
-		}
-		if(tempU64 > m_pSi->GetInstructionVersion())
+		m_nReadVersion = tempU64;
+		if(tempU64 > nVersion)
 			AddReadNote(SNR_LOADING_OBJECT_WITH_LARGER_VERSION);
 	}
 
-	//Read version string if available.
-	if(hasVersionstring)
+	if (Testbit(header, 5))
 	{
         Binaryread<uint8>(iStrm, tempU8);
-		string temp;
-		ReadBytes(iStrm, temp, tempU8);
-		if(m_pSi->SetVersionstring(temp))
-		{
-			AddReadNote(SNR_READ_TERMINATED_AFTER_READING_VERSIONSTRING);
-			return m_Readnotes;
-		}
+		iStrm.ignore(tempU8);
 	}
 
-	std::pair<bool, uint8> IDsize(0,bytesPerID); //First: Variable ID size?, second value is the size of fixed size ID - ignored if first entry is true.
-	if(Testbit(flagbyte, 0)) //Custom ID?
+	if(Testbit(flagbyte, 0)) // Custom ID?
 	{
 		Binaryread<uint8>(iStrm, tempU8);
-		IDsize.first = (tempU8 & 1) != 0;
-		IDsize.second = tempU8 >> 1;
-		if(IDsize.first == 0 && IDsize.second == 0)
+		if ((tempU8 & 1) != 0)
+			m_nIdbytes = IdSizeVariable;
+		else
+			m_nIdbytes = (tempU8 >> 1);
+		if(m_nIdbytes == 0)
 			AddReadNote(SNR_NO_ENTRYIDS_WITH_CUSTOMID_DEFINED);
 	}
 
-	uint32 fixedsizeentries = 0; //If != 0, means that corresponding fixed size entries expected.
-	if(Testbit(flagbyte, 1)) //Fixedsize entries?
-		ReadAdaptive1234(iStrm, fixedsizeentries);
+	m_nFixedEntrySize = 0;
+	if(Testbit(flagbyte, 1)) // Fixedsize entries?
+		ReadAdaptive1234(iStrm, m_nFixedEntrySize);
 
+	SetFlag(RwfRMapHasStartpos, Testbit(header, 2));
+	SetFlag(RwfRMapHasSize, Testbit(header, 3));
+	SetFlag(RwfRMapHasId, (m_nIdbytes > 0));
+	SetFlag(RwfRMapHasDesc, Testbit(header, 7));
+	SetFlag(RwfRwHasMap, GetFlag(RwfRMapHasId) || GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || GetFlag(RwfRMapHasDesc));
+	
+	if (GetFlag(RwfRwHasMap) == false && m_fpLogFunc)
+		m_fpLogFunc(strNoMapInFile);
 
-	if(Testbit(flagbyte, 2)) //Object description?
+	if (Testbit(flagbyte, 2)) // Object description?
 	{
 		uint16 size = 0;
 		ReadAdaptive12(iStrm, size);
-		if(bytesPerDescchar == 1)
-		{
-			string temp;
-			ReadBytes(iStrm, temp, size);
-			m_pSi->SetObjectDescription(temp);
-		}
-		else
-		{
-            iStrm.ignore(size * bytesPerDescchar);
-		}
+		iStrm.ignore(size * (GetFlag(RwfRTwoBytesDescChar)) ? 2 : 1);
 	}
 
-    if(Testbit(flagbyte, 3)) //Simple timestamp
-	{
-		Binaryread<uint64>(iStrm, tempU64, 5);
-		m_pSi->SetTimestamp(tempU64);
-	}
+    if(Testbit(flagbyte, 3))
+		iStrm.ignore(8);
 
-	//Read entrycount
+	// Read entrycount
 	ReadAdaptive1248(iStrm, tempU64);
-	const uint64 entrycount = tempU64;
-	if(entrycount == 0)
+	if(tempU64 > m_nMaxReadEntryCount)
+		{ AddReadNote(SNR_TOO_MANY_ENTRIES_TO_READ); return; }
+
+	m_nReadEntrycount = static_cast<NumType>(tempU64);
+	if(m_nReadEntrycount == 0)
 		AddReadNote(SNR_ZEROENTRYCOUNT);
 
-	if(entrycount > m_pSi->GetMaxReadEntrycount())
+	// Read map rpos if map exists.
+	if (GetFlag(RwfRwHasMap))
 	{
-		AddReadNote(SNR_TOO_MANY_ENTRIES_TO_READ);
-		return m_Readnotes;
+		ReadAdaptive1248(iStrm, tempU64);
+		if(tempU64 > Offtype_max)
+			{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 	}
+	m_rposEndofHdrData = iStrm.tellg() - m_posStart;
+	m_rposMapBegin = (GetFlag(RwfRwHasMap)) ? static_cast<RposType>(tempU64) : m_rposEndofHdrData;
 
-	//Read map position start
-	ReadAdaptive1248(iStrm, tempU64);
-	if(tempU64 > OFFTYPE_MAX && AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE))
-		return m_Readnotes;
-	const uint64 mapbeginpos = tempU64;
-	if(mapbeginpos < iStrm.tellg() - startpos && AddReadNote(SNR_BAD_MAPBEGINPOS))
-		return m_Readnotes;
+	if (GetFlag(RwfRwHasMap) == false)
+		m_posMapEnd = m_posStart + m_rposEndofHdrData;
 
-	const POSTYPE databeginpos = iStrm.tellg();
+	SetFlag(RwfRHeaderIsRead, true);
+}
 
 
-	std::list<CMappinginfo> mapinfos;
-	const bool hasStartposInMap = Testbit(header, 2) && fixedsizeentries == 0;
-	const bool hasSizedataInMap = Testbit(header, 3) && fixedsizeentries == 0;
-	const bool hasIDsInMap = (IDsize.first == true || IDsize.second != 0);
-	const bool hasEntrydescriptionsInMap = Testbit(header, 7);
-	const bool hasMap = hasIDsInMap || hasStartposInMap || hasSizedataInMap || hasEntrydescriptionsInMap;
-
-	//Goto map if it exists
-	if(hasMap)
+void Ssb::CacheMap()
+//------------------
+{
+	InStream& iStrm = *m_pIstrm;
+	if(GetFlag(RwfRwHasMap) || m_nFixedEntrySize > 0)
 	{
-		Seekg(iStrm, startpos, mapbeginpos);
+		iStrm.seekg(m_posStart + m_rposMapBegin);
 
-		if(iStrm.fail() && AddReadNote(SNR_BADSTREAM_AFTER_MAPHEADERSEEK))
-			return m_Readnotes;
+		if(iStrm.fail())
+			{ AddReadNote(SNR_BADSTREAM_AFTER_MAPHEADERSEEK); return; }
+
+		if (m_fpLogFunc)
+			m_fpLogFunc(tstrReadingMap, m_rposMapBegin);
+
+		mapData.resize(m_nReadEntrycount);
+		m_Idarray.reserve(m_nReadEntrycount * 4);
 
 		//Read map
-		for(uint64 i = 0; i<entrycount; i++)
+		for(NumType i = 0; i<m_nReadEntrycount; i++)
 		{
-			if(iStrm.fail() && AddReadNote(SNR_BADSTREAM_AT_MAP_READ))
-				return m_Readnotes;
+			if(iStrm.fail())
+				{ AddReadNote(SNR_BADSTREAM_AT_MAP_READ); return; }
 
-			CMappinginfo mi;
-			if(IDsize.first == true) //Variablesize ID
+			// Read ID.
+			uint16 nIdsize = m_nIdbytes;
+			if(nIdsize == IdSizeVariable) //Variablesize ID
+				ReadAdaptive12(iStrm, nIdsize);
+			const size_t nOldEnd = m_Idarray.size();
+			if(nIdsize > 0)
 			{
-				uint16 idsize;
-				ReadAdaptive12(iStrm, idsize);
-				mi.id.resize(idsize);
-				iStrm.read(&mi.id[0], idsize);
+				m_Idarray.resize(nOldEnd + nIdsize);
+				iStrm.read(&m_Idarray[nOldEnd], nIdsize);
 			}
-			else //Fixed size ID, or not id at all.
-			{
-				if(IDsize.second != 0)
-				{
-					mi.id.resize(IDsize.second);
-					iStrm.read(&mi.id[0], IDsize.second);
-				}
-			}
+			mapData[i].nIdLength = nIdsize;
+			mapData[i].nIdpos = nOldEnd;
 
-			if(hasStartposInMap)
+			// Read position.
+			if(GetFlag(RwfRMapHasStartpos))
 			{
+				uint64 tempU64;
 				ReadAdaptive1248(iStrm, tempU64);
-				mi.startpos = tempU64;
-				if(mi.startpos > OFFTYPE_MAX && AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE))
-					return m_Readnotes;
-
+				if(tempU64 > Offtype_max)
+					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
+				mapData[i].rposStart = static_cast<RposType>(tempU64);
 			}
-			if(hasSizedataInMap) //Using datasize field in map?
+
+			// Read entry size.
+			if (m_nFixedEntrySize > 0)
+				mapData[i].nSize = m_nFixedEntrySize;
+			else if(GetFlag(RwfRMapHasSize)) // Map has datasize field.
 			{
+				uint64 tempU64;
 				ReadAdaptive1248(iStrm, tempU64);
-				mi.entrysize = tempU64;
+				if(tempU64 > Offtype_max)
+					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
+				mapData[i].nSize = static_cast<DataSize>(tempU64);
 			}
 
+			// If there's no entry startpos in map, count start pos from datasizes.
+			// Here readentry.rposStart is set to relative position from databegin.
+			if (mapData[i].nSize != invalidDatasize && GetFlag(RwfRMapHasStartpos) == false)
+				mapData[i].rposStart = (i > 0) ? mapData[i-1].rposStart + mapData[i-1].nSize : 0;
 
-			if(hasEntrydescriptionsInMap) //Map has entrydescriptions?
+			if(GetFlag(RwfRMapHasDesc)) //Map has entrydescriptions?
 			{
 				uint16 size = 0;
 				ReadAdaptive12(iStrm, size);
-
-				if(bytesPerDescchar != 1)
-				{
-					iStrm.ignore(size * bytesPerDescchar); //Ignoring.
-					mi.description = "Note: Entrydescription had twobytecharacters - ignored.";
-				}
+				if(GetFlag(RwfRTwoBytesDescChar))
+					iStrm.ignore(size * 2);
 				else
-				{
-					string temp;
-					ReadBytes(iStrm, temp, size);
-					mi.description = temp;
-				}
+					iStrm.ignore(size);
 			}
-
-			mapinfos.push_back(mi);
 		}
+		m_posMapEnd = iStrm.tellg();
+		if (m_fpLogFunc)
+			m_fpLogFunc(tstrEndOfMap, m_posMapEnd - m_posStart);
 	}
-	if(hasMap && mapinfos.size() != entrycount && AddReadNote(SNR_MAPINFO_SIZE_ERROR))
-		return m_Readnotes;
 
-	const uint64 mapendposRelative = (hasMap) ? iStrm.tellg()-startpos : mapbeginpos;
-	//If no map exists, tells the position of first byte after the data(i.e. outside
-	//the object).
+	SetFlag(RwfRMapCached, true);
+	m_posDataBegin = (m_rposMapBegin == m_rposEndofHdrData) ? m_posMapEnd : m_posStart + Postype(m_rposEndofHdrData);
+	m_pIstrm->seekg(m_posDataBegin);
 
-	//Goto data and read it
-	list<CMappinginfo>::iterator iter = mapinfos.begin();
-	const list<CMappinginfo>::iterator iterend = mapinfos.end();
-	iStrm.seekg(databeginpos);
-	const bool ignoreleadingnullsInIDComparison = Testbit(flagbyte, 4);
-	for(uint32 counter = 0; counter < entrycount; counter++)
+	// If there are no positions in the map but there are entry sizes, rposStart will
+	// be relative to data start. Now that posDataBegin is known, make them relative to 
+	// startpos.
+	if (GetFlag(RwfRMapHasStartpos) == false && (GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0))
 	{
-		POSTYPE dataitemStartposStrm = iStrm.tellg();
-		if(!hasStartposInMap && !hasSizedataInMap && fixedsizeentries == 0) //No dataposition hints in map - trying plain 'in order'-read.
-		{
-			const CSerializationentry* pE = m_pSi->Read(iStrm, invalidDatasize, hasMap ? iter->id : vector<char>(), ignoreleadingnullsInIDComparison, hasIDsInMap, counter);
-			if(pE && pE->GetReadnote().size() > 0 && m_Readlogmask & SNT_NOTE) AddToLog(pE->GetReadnote().c_str());
-			if(pE)
-				AddReadNote(pE->GetStreamer().GetLastReadinfo(), (hasMap) ? &(*iter) : 0);
-			else
-				AddReadNote(SNR_UNKNOWN_DATAENTRY, (hasMap) ? &(*iter) : 0);
-
-			if(hasMap) iter++;
-			continue;
-		}
-
-		uint64 datasize = invalidDatasize;
-		if(fixedsizeentries > 0)
-		{
-			Seekg(iStrm, startpos + databeginpos, counter * fixedsizeentries);
-			datasize = fixedsizeentries;
-		}
-		else
-		{
-			if(hasMap && iter->startpos != 0) Seekg(iStrm, startpos, iter->startpos);
-			if(hasMap) datasize = iter->entrysize;
-		}
-
-		const CSerializationentry* pE = 0;
-		if(!hasMap)
-		{
-			pE = m_pSi->Read(iStrm, datasize, vector<char>(), ignoreleadingnullsInIDComparison, hasIDsInMap, counter);
-		}
-		else
-		{
-			pE = m_pSi->Read(iStrm, datasize, iter->id, ignoreleadingnullsInIDComparison, hasIDsInMap, counter);
-		}
-
-		if(pE && pE->GetReadnote().size() > 0 && m_Readlogmask & SNT_NOTE) AddToLog(("Entry note: " + pE->GetReadnote()).c_str());
-		if(pE) AddReadNote(pE->GetStreamer().GetLastReadinfo(), (hasMap) ? &(*iter) : 0);
-		else AddReadNote(SNR_UNKNOWN_DATAENTRY, (hasMap) ? &(*iter) : 0);
-
-		iStrm.clear();
-
-		if(!hasStartposInMap && hasSizedataInMap)
-			Seekg(iStrm, dataitemStartposStrm, iter->entrysize);
-
-		if(hasMap) iter++;
-
-
+		for(size_t i = 0; i < m_nReadEntrycount; i++)
+			mapData[i].rposStart += (m_posDataBegin - m_posStart);
 	}
-	Seekg(iStrm, startpos, mapendposRelative); //Returning stream to the end of the objectstream.
-	return m_Readnotes;
-}
-
-void CSSBSerialization::AddToLog(const char* str)
-//-------------------------------------------
-{
-	if(m_pLogstring) *m_pLogstring += str + string("\n");
 }
 
 
-void CSSBSerialization::Seekg(INSTREAM& iStrm, const POSTYPE& startpos, int64 offset)
-//--------------------------------------------------------------------------------------------------
+const ReadEntry* Ssb::Find(const void* pId, const size_t nIdLength)
+//-----------------------------------------------------------------
 {
-	int64 curoff = startpos - iStrm.tellg() + offset;
-	if(curoff <= OFFTYPE_MAX && curoff >= OFFTYPE_MIN)
+	m_pIstrm->clear();
+	if (GetFlag(RwfRMapCached) == false)
+		CacheMap();
+	
+	if (m_nFixedEntrySize > 0 && GetFlag(RwfRMapHasStartpos) == false && GetFlag(RwfRMapHasSize) == false)
+		m_pIstrm->seekg(m_posDataBegin + Postype(m_nFixedEntrySize * m_nCounter));
+
+	if (GetFlag(RwfRMapHasId) == true)
 	{
-		iStrm.seekg(static_cast<OFFTYPE>(curoff), CURPOS);
+		const size_t nEntries = mapData.size();
+		for(size_t i0 = 0; i0 < nEntries; i0++)
+		{
+			const size_t i = (i0 + m_nNextReadHint) % nEntries;
+			if (mapData[i].nIdLength == nIdLength && mapData[i].nIdpos < m_Idarray.size() &&
+				memcmp(&m_Idarray[mapData[i].nIdpos], pId, mapData[i].nIdLength) == 0)
+			{
+				m_nNextReadHint = (i + 1) % nEntries;
+				if (mapData[i].rposStart != 0)
+					m_pIstrm->seekg(m_posStart + Postype(mapData[i].rposStart));
+				return &mapData[i];
+			}
+		}
 	}
+	return nullptr;
+}
+
+
+void Ssb::FinishWrite()
+//---------------------
+{
+	OutStream& oStrm = *m_pOstrm;
+	const Postype posDataEnd = oStrm.tellp();
+	if (m_posMapStart != Postype(0) && ((uint32)m_MapStream.pcount() > m_nMapReserveSize))
+		{ AddWriteNote(SNW_INSUFFICIENT_MAPSIZE); return; }
+		
+	if (m_posMapStart < 1)
+		m_posMapStart = oStrm.tellp();
 	else
-	{
-		if(offset >= 0)
-		{
-			while(offset > OFFTYPE_MAX) {iStrm.seekg(OFFTYPE_MAX, CURPOS); offset -= OFFTYPE_MAX;}
-			iStrm.seekg(static_cast<OFFTYPE>(offset), CURPOS);
-		}
-		else
-		{
-			while(offset < OFFTYPE_MIN) {iStrm.seekg(OFFTYPE_MIN, CURPOS); offset -= OFFTYPE_MIN;}
-			iStrm.seekg(static_cast<OFFTYPE>(offset), CURPOS);
-		}
-	}
-}
+		oStrm.seekp(m_posMapStart);
 
+	if (m_fpLogFunc)
+		m_fpLogFunc(tstrWritingMap, uint32(m_posMapStart - m_posStart));
 
+	if(GetFlag(RwfRwHasMap)) //Write map
+		oStrm.write(m_MapStream.str(), m_MapStream.pcount());
 
-ABCSerializationInstructions::ABCSerializationInstructions(const char* objectClassID,
-								const size_t size, const uint64 version, const uint8 flags) :
-	m_CustomIDInstructionbyte(0),
-	m_BytesPerIDtype(1),
-	m_IncludeEntrydescriptionsInMap(true),
-	m_Usetimestamp(false),
-	m_UseVersion(true),
-	m_StartposInMap(false),
-	m_IncludeDatasizeentryInMap(true),
-	m_IgnoreLeadingNulls(false),
-	m_VersionRead(0),
-	m_VersionInstruction(version),
-	m_Fixedsizeentries(0),
-	m_Flags(flags),
-	m_Timestamp(0),
-	m_MaxReadCount(1000)
-//------------------------------------------------------------------
-{
-	m_ObjectClassID.resize(size);
-	std::copy(objectClassID, objectClassID+size, m_ObjectClassID.begin());
-}
+	const Postype posMapEnd = oStrm.tellp();
+	
+	// Write entry count.
+	oStrm.seekp(m_posEntrycount);
+	Binarywrite<size_t>(oStrm, (m_nCounter << 2) | 1, 2);
 
-
-ABCSerializationInstructions::~ABCSerializationInstructions() {}
-//------------------------------------------------------------------
-
-
-
-const srlztn::CSerializationentry* ABCSerializationInstructions::Read(INSTREAM& iStrm,
-							const uint64 size, const vector<char>& id,
-							const bool ignoreLeadingnulls, const bool mapHasIDs,
-							const uint64 entrycounter)
-//---------------------------------------------------------------
-{
-	CSerializationentry* p = 0;
-	for(size_t i = 0; SetNextentry(p); i++)
-	{
-		if(!mapHasIDs) //Trying reading in order if no map ids.
-		{
-			if(i == entrycounter)
-			{
-				p->Read(iStrm, size);
-				return p;
-			}
-			else continue;
-		}
-
-		if(!ignoreLeadingnulls)
-		{
-			if(p->GetID() == id)
-			{
-				p->Read(iStrm, size);
-				return p;
-			}
-		}
-		else //Ignore leading nulls when comparing.
-		{
-			const vector<char>& largerID = (p->GetID().size() > id.size()) ? p->GetID() : id;
-			const vector<char>& smallerID = (p->GetID().size() > id.size()) ? id : p->GetID();
-			bool gotonext = false;
-			for(size_t j = smallerID.size(); j<largerID.size(); j++)
-			{
-				if(largerID[j] != 0)
-					{gotonext = true; break;}
-			}
-			if(gotonext) continue;
-			for(size_t j = 0; j<smallerID.size(); j++)
-			{
-				if(largerID[j] != smallerID[j])
-					{gotonext = true; break;}
-			}
-			if(gotonext) continue;
-			p->Read(iStrm, size);
-			return p;
-		}
-	}
-	return 0;
-}
-
-void ABCSerializationInstructions::AddEntry(CSerializationentry entry)
-//----------------------------------------------------------
-{
-	if(AreWriteInstructions() && entry.GetDescription().size() > 0) SetWritepropIncludeEntrydescriptionsInMap(true);
-	CSerializationentry* p = 0;
-	SetNextentry(p);
-	if(p == 0) //First entry?
-	{
-		if(m_Flags & OUTFLAG)
-		{
-			SetWritePropIDtypebytes((entry.GetID().size() > uint8_max) ? 255 : static_cast<uint8>(entry.GetID().size()));
-			if(entry.GetDescription().size() == 0) SetWritepropIncludeEntrydescriptionsInMap(false);
-		}
-		ProAddEntry(entry);
-		return;
+	if (GetFlag(RwfRwHasMap))
+	{	// Write map start position.
+		oStrm.seekp(m_posMapPosField);
+		const uint64 rposMap = m_posMapStart - m_posStart;
+		Binarywrite<uint64>(oStrm, rposMap << 2 | 3);
 	}
 
-	if(m_Flags & OUTFLAG)
-	{
-		uint16 maxIDbytes = static_cast<uint16>(p->m_Id.size());
+	// Seek to end.
+	oStrm.seekp(max(posMapEnd, posDataEnd)); 
 
-		bool bytecountvaries = false;
-		while(SetNextentry(p))
-		{
-			if(!bytecountvaries && p->m_Id.size() != maxIDbytes)
-			{
-				bytecountvaries = true;
-			}
-			maxIDbytes = max(maxIDbytes, static_cast<uint16>(p->m_Id.size()));
-		}
-		if(entry.GetID().size() != maxIDbytes)
-		{
-			if(entry.GetID().size() > maxIDbytes) maxIDbytes = static_cast<uint16>(entry.GetID().size());
-			bytecountvaries = true;
-		}
-		if(bytecountvaries)
-		{
-			m_CustomIDInstructionbyte = 0;
-			if(maxIDbytes <= (uint16_max >> 1))
-				m_CustomIDInstructionbyte = 1;
-			else
-				return; //Should never reach here
-		}
-		else
-			SetWritePropIDtypebytes((maxIDbytes > uint8_max) ? 255 : static_cast<uint8>(maxIDbytes));
-	}
-	ProAddEntry(entry);
+	if (m_fpLogFunc)
+		m_fpLogFunc(tstrEndOfStream, uint32(oStrm.tellp() - m_posStart));
 }
 
-
-
-
-
-
-void ABCSerializationInstructions::SetWritePropIDtypebytes(const uint8 bc)
-//-------------------------------------------------------------
-{
-	m_BytesPerIDtype = bc;
-	if(m_BytesPerIDtype > 2 && m_BytesPerIDtype != 4) //Using custom IDbytecount.
-	{
-		if(bc >> 7 != 0) m_CustomIDInstructionbyte = 1; //Too large fixed size ID - setting variable IDsize
-		else m_CustomIDInstructionbyte = bc << 1;
-	}
-
-}
-
-CSerializationInstructions::CSerializationInstructions(const string& objectClass,
-			const uint64 version, const uint8 flags, const size_t entrycounthint)
-	: ABCSerializationInstructions(objectClass.c_str(), objectClass.size(), version, flags)
-//-----------------------------------------------------------------------------------------
-{
-	m_Entries.reserve(entrycounthint);
-}
-
-
-
-
-
-CSerializationentry* CSerializationInstructions::SetNextentry(CSerializationentry*& p)
-//---------------------------------------------------------------------
-{
-	if(m_Entries.size() == 0) return 0;
-	if(p == 0) return p = &m_Entries[0];
-
-	if(static_cast<size_t>(++p - &m_Entries[0]) < m_Entries.size())
-		return p;
-	else
-		return 0;
-}
-
-
-const CSerializationentry* CSerializationInstructions::SetNextentry(const CSerializationentry*& p) const
-//--------------------------------------------------------------------------------------------
-{
-	if(m_Entries.size() == 0) return 0;
-	if(p == 0) return p = &m_Entries[0];
-
-	if(static_cast<size_t>(++p - &m_Entries[0]) < m_Entries.size())
-		return p;
-	else
-		return 0;
-}
-
+} // namespace srlztn 
 

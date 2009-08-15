@@ -2755,7 +2755,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		UINT nSample = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
 		UINT nBaseOctave = m_SbOctave.GetPos() & 7;
 		
-		const string temp = m_pSndFile->GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
+		const std::string temp = m_pSndFile->GetNoteName(lParam+1+12*nBaseOctave, m_nInstrument).c_str();
         if(temp.size() >= sizeofS)
 			wsprintf(s, "%s", "...");
 		else

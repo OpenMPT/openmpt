@@ -16,6 +16,7 @@
 #include "../mptrack/MainFrm.h"
 #include "../mptrack/misc_util.h"
 // -! NEW_FEATURE#0022
+#include "tuning.h"
 
 #pragma warning(disable:4244)
 

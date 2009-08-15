@@ -9,14 +9,8 @@
 #include "dlg_misc.h"
 #include "tuningDialog.h"
 #include "misc_util.h"
-#include <vector>
-#include <string>
-using std::string;
-using std::vector;
 
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
-
-const pair<string, WORD> CCtrlInstruments::s_TuningNotFound("Tuning  was not found. Setting to default tuning", 7);
 
 /////////////////////////////////////////////////////////////////////////
 // CNoteMapWnd
@@ -2652,9 +2646,9 @@ void CCtrlInstruments::UpdateTuningComboBox()
 		}
 	}
 
-	string str = s_TuningNotFound.first;
-	str.insert(s_TuningNotFound.second, m_pSndFile->Headers[m_nInstrument]->pTuning->GetName());
-	MessageBox(str.c_str());
+	CString str;
+	str.Format(TEXT("Tuning %s was not found. Setting to default tuning."), m_pSndFile->Headers[m_nInstrument]->pTuning->GetName().c_str());
+	MessageBox(str);
 	BEGIN_CRITICAL();
 	penv->SetTuning(penv->s_DefaultTuning);
 	END_CRITICAL();

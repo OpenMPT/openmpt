@@ -7,9 +7,9 @@
 using std::vector;
 
 class CPatternContainer;
+class CSoundFile;
 
 typedef MODCOMMAND* PatternRow;
-
 
 //============
 class CPattern
@@ -49,7 +49,15 @@ public:
 
 	bool Resize(const ROWINDEX newRowCount, const bool showDataLossWarning = true);
 
-	bool ClearData();
+	// Deallocates pattern data. 
+	void Deallocate();
+
+	// Removes all modcommands from the pattern.
+	void ClearCommands();
+
+	// Returns associated soundfile.
+	CSoundFile& GetSoundFile();
+	const CSoundFile& GetSoundFile() const;
 
 	bool SetData(MODCOMMAND* p, const ROWINDEX rows) {m_ModCommands = p; m_Rows = rows; return false;}
 
@@ -67,6 +75,15 @@ public:
 	//Returns true on error.
 
 //END: INTERFACE METHODS
+
+	typedef MODCOMMAND* iterator;
+	typedef const MODCOMMAND *const_iterator;
+
+	iterator Begin() {return m_ModCommands;}
+	const_iterator Begin() const {return m_ModCommands;}
+
+	iterator End() {return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr;}
+	const_iterator End() const {return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr;}
 
 	CPattern(CPatternContainer& patCont) : m_ModCommands(0), m_Rows(64), m_rPatternContainer(patCont) {}
 
@@ -86,6 +103,11 @@ private:
 //END: DATA
 };
 
+
+const char FileIdPattern[] = "mptP";
+
+void ReadModPattern(std::istream& iStrm, CPattern& patc, const size_t nSize = 0);
+void WriteModPattern(std::ostream& oStrm, const CPattern& patc);
 
 
 #endif

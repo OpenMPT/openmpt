@@ -10,14 +10,29 @@ typedef CTuningRTI::UNOTEINDEXTYPE UNOTEINDEXTYPE;
 typedef CTuningRTI::STEPINDEXTYPE STEPINDEXTYPE;
 typedef  CTuningRTI::USTEPINDEXTYPE USTEPINDEXTYPE;
 
-const NOTEINDEXTYPE CTuningRTI::s_StepMinDefault(-64);
-const UNOTEINDEXTYPE CTuningRTI::s_RatioTableSizeDefault(128);
-const STEPINDEXTYPE CTuningRTI::s_RatioTableFineSizeMaxDefault(1000);
-
-const CTuning::SERIALIZATION_VERSION CTuningRTI::s_SerializationVersion(4);
-
 const string CTuningRTI::s_DerivedclassID = "RTI";
 
+namespace CTuningS11n
+{
+	void ReadStr(srlztn::InStream& iStrm, std::string& str, const size_t);
+	void ReadNoteMap(srlztn::InStream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t);
+	void ReadRatioTable(srlztn::InStream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t);
+
+	void WriteNoteMap(srlztn::OutStream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m);
+	void WriteStr(srlztn::OutStream& oStrm, const std::string& str);
+
+	struct RatioWriter
+	//================
+	{
+		RatioWriter(uint16 nWriteCount = s_nDefaultWriteCount) : m_nWriteCount(nWriteCount) {}
+
+		void operator()(srlztn::OutStream& oStrm, const std::vector<float>& v);
+		uint16 m_nWriteCount;
+		static const uint16 s_nDefaultWriteCount = (uint16_max >> 2);
+	};
+};
+
+using namespace CTuningS11n;
 
 
 /*
@@ -26,10 +41,6 @@ Version changes:
 	2->3: The type for the size_type in the serialisation changed
 		  from default(size_t, uint32) to unsigned STEPTYPE. (March 2007)
 */
-
-template<class T>
-static inline T Abs(T& val) {return (val >= 0) ? val : -val;}
-//---------------------------------------------------------
 
 
 static RATIOTYPE Pow(const RATIOTYPE r, const STEPINDEXTYPE s)
@@ -343,79 +354,65 @@ CTuningRTI::NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
 	if(!IsOfType(TT_GROUPGEOMETRIC)) return 0;
 
 	if(note >= 0) return note % GetGroupSize();
-	else return (GetGroupSize() -  (Abs(note) % GetGroupSize())) % GetGroupSize();
+	else return (GetGroupSize() -  (abs(note) % GetGroupSize())) % GetGroupSize();
 }
 
-CTuning* CTuningRTI::CreateRTITuning(const string& id, srlztn::ABCSerializationInstructions&)
-//----------------------------------------------------------------------------------------
+
+CTuningBase* CTuningRTI::Deserialize(istream& iStrm)
+//--------------------------------------------------
 {
-	if(id == s_DerivedclassID)
-		return new CTuningRTI;
-	else
-		return 0;
+	if(iStrm.fail())
+		return nullptr;
 
-}
+	CTuningRTI* pTuning = new CTuningRTI;
 
-void CTuningRTI::ProAddSI(srlztn::ABCSerializationInstructions& instr, const BYTE typesizes[3]) const
-//-----------------------------------------------------------------
-{
-	using namespace srlztn;
-	if(instr.AreReadInstructions()) instr.SetInstructionsVersion(instr.GetInstructionVersion() + GetVersion());
+	srlztn::Ssb ssb(iStrm);
+	ssb.BeginRead("CTB244RTI", (CTuningBase::GetVersion() << 24) + GetVersion());
+	ssb.ReadItem(pTuning->m_TuningName, "0", 1, ReadStr);
+	ssb.ReadItem(pTuning->m_EditMask, "1");
+	ssb.ReadItem(pTuning->m_TuningType, "2");
+	ssb.ReadItem(pTuning->m_NoteNameMap, "3", 1, ReadNoteMap);
+	ssb.ReadItem(pTuning->m_FineStepCount, "4");
 
-	typedef vector<RATIOTYPE> RV;
-	//Note ratios
-	if(instr.AreReadInstructions())
+	// RTI entries.
+	ssb.ReadItem(pTuning->m_RatioTable, "RTI0", 4, ReadRatioTable);
+	ssb.ReadItem(pTuning->m_StepMin, "RTI1");
+	ssb.ReadItem(pTuning->m_GroupSize, "RTI2");
+	ssb.ReadItem(pTuning->m_GroupRatio, "RTI3");
+	ssb.ReadItem(pTuning->m_SerHelperRatiotableSize, "RTI4");
+
+	if ((ssb.m_Status & srlztn::SNT_FAILURE) == 0) 
 	{
-		if(typesizes[1] == 4)
-			instr.AddEntry(CSerializationentry("RTI0", CContainerstreamer<RV>::NewDefaultReader((RV&)m_RatioTable, NOTEINDEXTYPE_MAX), ""));
-		if(typesizes[1] == 8)
-			instr.AddEntry(CSerializationentry("RTI0", CContainerstreamer<RV>::NewCustomReader((RV&)m_RatioTable, NOTEINDEXTYPE_MAX, &srlztn::DoubleToFloatReader), "", "File contains double ratios, but reading them to floats."));
-
-
-		//Group size.
-		instr.AddEntry(CSerializationentry("RTI2", new CBinarystreamer<NOTEINDEXTYPE>(m_GroupSize, typesizes[0]), "Groupsize"));
-
-		//Group ratio
-		instr.AddEntry(CSerializationentry("RTI3", new CBinarystreamer<RATIOTYPE>(m_GroupRatio, typesizes[1]), "Groupratio"));
-
-		//Ratiotablesize
-		m_SerHelperRatiotableSize = 0;
-		instr.AddEntry(CSerializationentry("RTI4", new CBinarystreamer<UNOTEINDEXTYPE>(m_SerHelperRatiotableSize, typesizes[0]), "Ratiotable size"));
-	}
-	else //Writing instructions
-	{
-		const TUNINGTYPE tt = GetType();
-		if(GetGroupRatio() > 0)
-			instr.AddEntry(CSerializationentry("RTI3", new CBinarystreamer<RATIOTYPE>(m_GroupRatio, typesizes[1])));
-		if(tt == TT_GROUPGEOMETRIC)
-			instr.AddEntry(CSerializationentry("RTI0", CContainerstreamer<vector<RATIOTYPE> >::NewDefaultWriter(m_RatioTable, GetGroupSize())));
-		if(tt == TT_GENERAL)
-			instr.AddEntry(CSerializationentry("RTI0", CContainerstreamer<vector<RATIOTYPE> >::NewDefaultWriter(m_RatioTable)));
-		if(tt == TT_GEOMETRIC)
-			instr.AddEntry(CSerializationentry("RTI2", new CBinarystreamer<NOTEINDEXTYPE>(m_GroupSize, typesizes[0])));
-			//For Groupgeometric this data is in the number of ratios in ratiotable.
-
-		if(tt == TT_GEOMETRIC || tt == TT_GROUPGEOMETRIC)
+		EDITMASK temp = pTuning->GetEditMask();
+		pTuning->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
+		if (pTuning->ProProcessUnserializationdata())
 		{
-			m_SerHelperRatiotableSize = static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());
-			instr.AddEntry(CSerializationentry("RTI4", new CBinarystreamer<UNOTEINDEXTYPE>(m_SerHelperRatiotableSize, typesizes[0])));
+			MessageHandler(("Processing loaded data for tuning \"" + pTuning->GetName() + "\" failed.").c_str(), "Tuning load failure");
+			delete pTuning; pTuning = nullptr;
+		}
+		else
+		{ 
+			USTEPINDEXTYPE fsTemp = pTuning->m_FineStepCount;
+			pTuning->m_FineStepCount = 0;
+			pTuning->SetFineStepCount(fsTemp);
+			pTuning->SetEditMask(temp);
 		}
 	}
-
-	//m_StepMin
-	instr.AddEntry(CSerializationentry("RTI1", new CBinarystreamer<NOTEINDEXTYPE>(m_StepMin, typesizes[0])));
+	else
+		{delete pTuning; pTuning = nullptr;}
+	return pTuning;
 }
 
 
 bool CTuningRTI::ProProcessUnserializationdata()
 //----------------------------------------------
 {
-	if(m_GroupSize < 0) {m_GroupSize = 0; return true;}
-	if(m_RatioTable.size() > static_cast<size_t>(NOTEINDEXTYPE_MAX)) return true;
-	if(IsOfType(TT_GROUPGEOMETRIC))
+	if (m_GroupSize < 0) {m_GroupSize = 0; return true;}
+	if (m_RatioTable.size() > static_cast<size_t>(NOTEINDEXTYPE_MAX)) return true;
+	if (IsOfType(TT_GROUPGEOMETRIC))
 	{
-		if(m_SerHelperRatiotableSize < 1 || m_SerHelperRatiotableSize > NOTEINDEXTYPE_MAX) return true;
-		if(GetType() == TT_GEOMETRIC)
+		if (m_SerHelperRatiotableSize < 1 || m_SerHelperRatiotableSize > NOTEINDEXTYPE_MAX) return true;
+		if (GetType() == TT_GEOMETRIC)
 			return CTuning::CreateGeometric(GetGroupSize(), GetGroupRatio(), VRPAIR(m_StepMin, m_StepMin+m_SerHelperRatiotableSize-1));
 		else
 		{
@@ -425,12 +422,36 @@ bool CTuningRTI::ProProcessUnserializationdata()
 	return false;
 }
 
-CTuningRTI* CTuningRTI::UnserializeOLD(istream& inStrm)
+
+template<class T, class SIZETYPE>
+bool VectorFromBinaryStream(std::istream& inStrm, std::vector<T>& v, const SIZETYPE maxSize = (std::numeric_limits<SIZETYPE>::max)())
+//---------------------------------------------------------
+{
+	if(!inStrm.good()) return true;
+
+	SIZETYPE size;
+	inStrm.read(reinterpret_cast<char*>(&size), sizeof(size));
+
+	if(size > maxSize)
+		return true;
+
+	v.resize(size);
+	for(size_t i = 0; i<size; i++)
+	{
+		inStrm.read(reinterpret_cast<char*>(&v[i]), sizeof(T));
+	}
+	if(inStrm.good())
+		return false;
+	else
+		return true;
+}
+
+
+CTuningRTI* CTuningRTI::DeserializeOLD(istream& inStrm)
 //-----------------------------------------------------------
 {
 	if(!inStrm.good())
 		return 0;
-
 
 	char begin[8];
 	char end[8];
@@ -454,8 +475,8 @@ CTuningRTI* CTuningRTI::UnserializeOLD(istream& inStrm)
 
 	CTuningRTI* pT = new CTuningRTI;
 
-	//Baseclass Unserialization
-	if(pT->CTuning::UnserializeOLD(inStrm) == SERIALIZATION_FAILURE)
+	//Baseclass deserialization
+	if(pT->CTuning::DeserializeOLD(inStrm) == SERIALIZATION_FAILURE)
 	{
 		delete pT;
 		return 0;
@@ -511,3 +532,117 @@ CTuningRTI* CTuningRTI::UnserializeOLD(istream& inStrm)
 
 
 
+CTUNINGBASE::SERIALIZATION_RETURN_TYPE CTuningRTI::Serialize(ostream& outStrm) const
+//----------------------------------------------------------------------------------
+{
+	srlztn::Ssb ssb(outStrm);
+	ssb.BeginWrite("CTB244RTI", (GetVersion() << 24) + GetClassVersion());
+	if (m_TuningName.length() > 0)
+		ssb.WriteItem(m_TuningName, "0", 1, WriteStr);
+	ssb.WriteItem(m_EditMask, "1");
+	ssb.WriteItem(m_TuningType, "2");
+	if (m_NoteNameMap.size() > 0)
+		ssb.WriteItem(m_NoteNameMap, "3", 1, WriteNoteMap);
+	if (GetFineStepCount() > 0)
+		ssb.WriteItem(m_FineStepCount, "4");
+
+	const TUNINGTYPE tt = GetType();
+	if (GetGroupRatio() > 0)
+		ssb.WriteItem(m_GroupRatio, "RTI3");
+	if (tt == TT_GROUPGEOMETRIC)
+		ssb.WriteItem(m_RatioTable, "RTI0", 4, RatioWriter(GetGroupSize()));
+	if (tt == TT_GENERAL)
+		ssb.WriteItem(m_RatioTable, "RTI0", 4, RatioWriter());
+	if (tt == TT_GEOMETRIC)
+		ssb.WriteItem(m_GroupSize, "RTI2");
+
+	if(tt == TT_GEOMETRIC || tt == TT_GROUPGEOMETRIC)
+	{	//For Groupgeometric this data is the number of ratios in ratiotable.
+		m_SerHelperRatiotableSize = static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());
+		ssb.WriteItem(m_SerHelperRatiotableSize, "RTI4");
+	}
+
+	//m_StepMin
+	ssb.WriteItem(m_StepMin, "RTI1");
+
+	ssb.FinishWrite();
+
+	return ((ssb.m_Status & srlztn::SNT_FAILURE) != 0) ? SERIALIZATION_FAILURE : SERIALIZATION_SUCCESS;
+}
+
+
+namespace CTuningS11n
+{
+
+void RatioWriter::operator()(srlztn::OutStream& oStrm, const std::vector<float>& v)
+//---------------------------------------------------------------------------------
+{
+	const size_t nWriteCount = min(v.size(), m_nWriteCount);
+	srlztn::WriteAdaptive1248(oStrm, nWriteCount);
+	for(size_t i = 0; i < nWriteCount; i++)
+		srlztn::Binarywrite(oStrm, v[i]);
+}
+
+
+void ReadNoteMap(srlztn::InStream& iStrm, CTuningBase::NOTENAMEMAP& m, const size_t)
+//----------------------------------------------------------------------------------
+{
+	uint64 val;
+	srlztn::ReadAdaptive1248(iStrm, val);
+	LimitMax(val, 256); // Read 256 at max.
+	for(size_t i = 0; i < val; i++)
+	{
+		int16 key;
+		srlztn::Binaryread<int16>(iStrm, key);
+		std::string str;
+		StringFromBinaryStream<uint8>(iStrm, str);
+		m[key] = str;
+	}
+}
+
+
+void ReadRatioTable(srlztn::InStream& iStrm, vector<CTuningRTI::RATIOTYPE>& v, const size_t)
+//------------------------------------------------------------------------------------------
+{
+	uint64 val;
+	srlztn::ReadAdaptive1248(iStrm, val);
+	v.resize( static_cast<size_t>(min(val, 256))); // Read 256 vals at max.
+	for(size_t i = 0; i < v.size(); i++)
+		srlztn::Binaryread(iStrm, v[i]);
+}
+
+
+void ReadStr(srlztn::InStream& iStrm, std::string& str, const size_t)
+//-------------------------------------------------------------------
+{
+	uint64 val;
+	srlztn::ReadAdaptive1248(iStrm, val);
+	size_t nSize = (val > 255) ? 255 : static_cast<size_t>(val); // Read 255 characters at max.
+	str.resize(nSize);
+	for(size_t i = 0; i < nSize; i++)
+		srlztn::Binaryread(iStrm, str[i]);
+}
+
+
+void WriteNoteMap(srlztn::OutStream& oStrm, const CTUNINGBASE::NOTENAMEMAP& m)
+//---------------------------------------------------------------------------
+{
+	srlztn::WriteAdaptive1248(oStrm, m.size());
+	CTUNINGBASE::NNM_CITER iter = m.begin();
+	CTUNINGBASE::NNM_CITER end = m.end();
+	for(; iter != end; iter++)
+	{
+		srlztn::Binarywrite<int16>(oStrm, iter->first);
+		StringToBinaryStream<uint8>(oStrm, iter->second);
+	}
+}
+
+
+void WriteStr(srlztn::OutStream& oStrm, const std::string& str)
+//-----------------------------------------------------------------
+{
+	srlztn::WriteAdaptive1248(oStrm, str.size());
+	oStrm.write(str.c_str(), str.size());
+}
+
+} // namespace CTuningS11n.

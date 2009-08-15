@@ -17,18 +17,11 @@
 #include "it_defs.h"
 #include "tuningcollection.h"
 #include "../mptrack/moddoc.h"
+#include "../mptrack/serialization_utils.h"
 #include <fstream>
 #include <strstream>
 #include <list>
 #include "../mptrack/version.h"
-using std::map;
-using std::list;
-using std::vector;
-using std::string;
-using std::ofstream;
-using std::ifstream;
-using std::istrstream;
-using namespace srlztn; //SeRiaLiZaTioN
 
 #define str_MBtitle				(GetStrI18N((_TEXT("Saving IT"))))
 #define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
@@ -48,213 +41,164 @@ static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 	return false;
 }
 
+void ReadTuningCollection(istream& iStrm, CTuningCollection& tc, const size_t) {tc.Deserialize(iStrm);}
+void WriteTuningCollection(ostream& oStrm, const CTuningCollection& tc) {tc.Serialize(oStrm);}
 
-
-
-
-class CInstrumentTuningMapStreamer : public srlztn::ABCSerializationStreamer
-//=========================================================================
+void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
+//-------------------------------------------------------
 {
-public:
-	CInstrumentTuningMapStreamer(CSoundFile& csf) : ABCSerializationStreamer(OUTFLAG|INFLAG), m_rSoundfile(csf) {}
-	void ProWrite(OUTSTREAM& fout) const
-	//----------------------------
+	if(sf.GetNumInstruments() > 0)
 	{
-		if(m_rSoundfile.GetNumInstruments() > 0)
-		{
-			//Writing instrument tuning data: first creating
-			//tuning name <-> tuning id number map,
-			//and then writing the tuning id for every instrument.
-			//For example if there are 6 instruments and
-			//first half use tuning 'T1', and the other half 
-			//tuning 'T2', the output would be something like
-			//T1 1 T2 2 1 1 1 2 2 2
+		//Writing instrument tuning data: first creating
+		//tuning name <-> tuning id number map,
+		//and then writing the tuning id for every instrument.
+		//For example if there are 6 instruments and
+		//first half use tuning 'T1', and the other half 
+		//tuning 'T2', the output would be something like
+		//T1 1 T2 2 1 1 1 2 2 2
 
-			//Creating the tuning address <-> tuning id number map.
-			typedef map<CTuning*, uint16> TNTS_MAP;
-			typedef TNTS_MAP::iterator TNTS_MAP_ITER;
-			TNTS_MAP tNameToShort_Map;
+		//Creating the tuning address <-> tuning id number map.
+		typedef map<CTuning*, uint16> TNTS_MAP;
+		typedef TNTS_MAP::iterator TNTS_MAP_ITER;
+		TNTS_MAP tNameToShort_Map;
+		
+		unsigned short figMap = 0;
+		for(UINT i = 1; i <= sf.GetNumInstruments(); i++) if (sf.Headers[i] != nullptr)
+		{
+			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Headers[i]->pTuning);
+			if(iter != tNameToShort_Map.end())
+				continue; //Tuning already mapped.
 			
-			unsigned short figMap = 0;
-			for(UINT i = 1; i <= m_rSoundfile.GetNumInstruments(); i++)
-			{
-				if(m_rSoundfile.Headers[i] == NULL)
-				{
-					MessageBox(0, "Error: 210807_2", "Error", MB_ICONERROR);
-					return;
-				}
-					
-				TNTS_MAP_ITER iter = tNameToShort_Map.find(m_rSoundfile.Headers[i]->pTuning);
-				if(iter != tNameToShort_Map.end())
-					continue; //Tuning already mapped.
-				
-				tNameToShort_Map[m_rSoundfile.Headers[i]->pTuning] = figMap;
-				figMap++;
-			}
-
-			//...and write the map with tuning names replacing
-			//the addresses.
-			const uint16 tuningMapSize = static_cast<uint16>(tNameToShort_Map.size());
-			fout.write(reinterpret_cast<const char*>(&tuningMapSize), sizeof(tuningMapSize));
-			for(TNTS_MAP_ITER iter = tNameToShort_Map.begin(); iter != tNameToShort_Map.end(); iter++)
-			{
-				if(iter->first)
-					StringToBinaryStream<uint8>(fout, iter->first->GetName());
-				else //Case: Using original IT tuning.
-					StringToBinaryStream<uint8>(fout, "->MPT_ORIGINAL_IT<-");
-
-				fout.write(reinterpret_cast<const char*>(&(iter->second)), sizeof(iter->second));
-			}
-
-			//Writing tuning data for instruments.
-			for(UINT i = 1; i <= m_rSoundfile.GetNumInstruments(); i++)
-			{
-				TNTS_MAP_ITER iter = tNameToShort_Map.find(m_rSoundfile.Headers[i]->pTuning);
-				if(iter == tNameToShort_Map.end()) //Should never happen
-				{
-					MessageBox(0, "Error: 210807_1", 0, MB_ICONERROR);
-					return;
-				}
-				fout.write(reinterpret_cast<const char*>(&iter->second), sizeof(iter->second));
-			}
+			tNameToShort_Map[sf.Headers[i]->pTuning] = figMap;
+			figMap++;
 		}
-	}
-	void ProRead(INSTREAM& iStrm, const uint64)
-	//----------------------------
-	{
-		ReadInstrumentTunings(m_rSoundfile, iStrm, false);
-	}
 
-	static void ReadInstrumentTunings(CSoundFile& csf, INSTREAM& fin, const bool oldTuningmapRead)
-	//---------------------------------------------------------------
-	{
-		typedef map<WORD, string> MAP;
-		typedef MAP::iterator MAP_ITER;
-		MAP shortToTNameMap;
-		if(oldTuningmapRead)
-			ReadTuningMap<uint32, uint32>(fin, shortToTNameMap, 100);
-		else
-			ReadTuningMap<uint16, uint8>(fin, shortToTNameMap);
-
-		//Read & set tunings for instruments
-		list<string> notFoundTunings;
-		for(UINT i = 1; i<=csf.GetNumInstruments(); i++)
+		//...and write the map with tuning names replacing
+		//the addresses.
+		const uint16 tuningMapSize = static_cast<uint16>(tNameToShort_Map.size());
+		oStrm.write(reinterpret_cast<const char*>(&tuningMapSize), sizeof(tuningMapSize));
+		for(TNTS_MAP_ITER iter = tNameToShort_Map.begin(); iter != tNameToShort_Map.end(); iter++)
 		{
-			uint16 ui;
-			fin.read(reinterpret_cast<char*>(&ui), sizeof(ui));
-			MAP_ITER iter = shortToTNameMap.find(ui);
-			if(csf.Headers[i] && iter != shortToTNameMap.end())
-			{
-				const string str = iter->second;
+			if(iter->first)
+				StringToBinaryStream<uint8>(oStrm, iter->first->GetName());
+			else //Case: Using original IT tuning.
+				StringToBinaryStream<uint8>(oStrm, "->MPT_ORIGINAL_IT<-");
 
-				if(str == string("->MPT_ORIGINAL_IT<-"))
-				{
-					csf.Headers[i]->pTuning = NULL;
-					continue;
-				}
-
-				csf.Headers[i]->pTuning = csf.GetTuneSpecificTunings().GetTuning(str);
-				if(csf.Headers[i]->pTuning)
-					continue;
-
-				csf.Headers[i]->pTuning = csf.GetLocalTunings().GetTuning(str);
-				if(csf.Headers[i]->pTuning)
-					continue;
-
-				csf.Headers[i]->pTuning = csf.GetStandardTunings().GetTuning(str);
-				if(csf.Headers[i]->pTuning)
-					continue;
-
-				if(str == "TET12" && csf.GetStandardTunings().GetNumTunings() > 0)
-					csf.Headers[i]->pTuning = &csf.GetStandardTunings().GetTuning(0);
-
-				if(csf.Headers[i]->pTuning)
-					continue;
-
-				//Checking if not found tuning already noticed.
-				list<string>::iterator iter;
-				iter = find(notFoundTunings.begin(), notFoundTunings.end(), str);
-				if(iter == notFoundTunings.end())
-				{
-					notFoundTunings.push_back(str);
-					string erm = string("Tuning ") + str + string(" used by the module was not found.");
-					MessageBox(0, erm.c_str(), 0, MB_ICONINFORMATION);
-					if(csf.GetpModDoc()) //The tuning is changed so the modified flag is set.
-						csf.GetpModDoc()->SetModified();
-					
-				}
-				csf.Headers[i]->pTuning = csf.Headers[i]->s_DefaultTuning;
-
-			}
-			else //This 'else' happens probably only in case of corrupted file.
-			{
-				if(csf.Headers[i])
-					csf.Headers[i]->pTuning = INSTRUMENTHEADER::s_DefaultTuning;
-			}
-
+			srlztn::Binarywrite<uint16>(oStrm, iter->second);
 		}
-		//End read&set instrument tunings
-	}
 
-	template<class TUNNUMTYPE, class STRSIZETYPE>
-	static bool ReadTuningMap(istream& fin, map<uint16, string>& shortToTNameMap, const size_t maxNum = 500)
-	//----------------------------------------------------------------------------------------
-	{
-		typedef map<uint16, string> MAP;
-		typedef MAP::iterator MAP_ITER;
-		TUNNUMTYPE numTuning = 0;
-		fin.read(reinterpret_cast<char*>(&numTuning), sizeof(numTuning));
-		if(numTuning > maxNum)
-			return true;
-
-		for(size_t i = 0; i<numTuning; i++)
+		//Writing tuning data for instruments.
+		for(UINT i = 1; i <= sf.GetNumInstruments(); i++)
 		{
-			string temp;
-			uint16 ui;
-			if(StringFromBinaryStream<STRSIZETYPE>(fin, temp, 255))
-				return true;
-
-			fin.read(reinterpret_cast<char*>(&ui), sizeof(ui));
-			shortToTNameMap[ui] = temp;
+			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Headers[i]->pTuning);
+			if(iter == tNameToShort_Map.end()) //Should never happen
+			{
+				MessageBox(0, "Error: 210807_1", 0, MB_ICONERROR);
+				return;
+			}
+			srlztn::Binarywrite(oStrm, iter->second);
 		}
-		if(fin.good())
-			return false;
-		else
-			return true;
 	}
+}
 
-private:
-	CSoundFile& m_rSoundfile;
-};
-
-
-
-
-static CSerializationInstructions CreateSerializationInstructions(CSoundFile& sf, uint8 flag)
-//----------------------------------------------------------------------------
+template<class TUNNUMTYPE, class STRSIZETYPE>
+static bool ReadTuningMap(istream& iStrm, map<uint16, string>& shortToTNameMap, const size_t maxNum = 500)
+//--------------------------------------------------------------------------------------------------------
 {
-	CSerializationInstructions si("mptm", 1, flag, 3);
-	//Adding entries always for reading, and for writing only when there is something to write.
+	typedef map<uint16, string> MAP;
+	typedef MAP::iterator MAP_ITER;
+	TUNNUMTYPE numTuning = 0;
+	iStrm.read(reinterpret_cast<char*>(&numTuning), sizeof(numTuning));
+	if(numTuning > maxNum)
+		return true;
 
-	//0: Tunespecific tunings
-	if(flag & INFLAG || sf.GetTuneSpecificTunings().GetNumTunings() > 0) 
-		si.AddEntry(CSerializationentry("0", new CTuningCollectionStreamer(sf.GetTuneSpecificTunings())));
+	for(size_t i = 0; i<numTuning; i++)
+	{
+		string temp;
+		uint16 ui;
+		if(StringFromBinaryStream<STRSIZETYPE>(iStrm, temp, 255))
+			return true;
 
-	//1: Used definable tunings?
-	if(flag & INFLAG || AreNonDefaultTuningsUsed(sf))
-		si.AddEntry(CSerializationentry("1", new CInstrumentTuningMapStreamer(sf)));
+		iStrm.read(reinterpret_cast<char*>(&ui), sizeof(ui));
+		shortToTNameMap[ui] = temp;
+	}
+	if(iStrm.good())
+		return false;
+	else
+		return true;
+}
 
-	//2: Extended order range?
-	if(flag & INFLAG || sf.Order.NeedsExtraDatafield())
-		si.AddEntry(CSerializationentry("2", sf.Order.NewReadWriteObject()));
+void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
+//-------------------------------------------------------------------
+{
+	typedef map<WORD, string> MAP;
+	typedef MAP::iterator MAP_ITER;
+	MAP shortToTNameMap;
+	ReadTuningMap<uint16, uint8>(iStrm, shortToTNameMap);
 
-	return si;
+	//Read & set tunings for instruments
+	std::list<string> notFoundTunings;
+	for(UINT i = 1; i<=csf.GetNumInstruments(); i++)
+	{
+		uint16 ui;
+		iStrm.read(reinterpret_cast<char*>(&ui), sizeof(ui));
+		MAP_ITER iter = shortToTNameMap.find(ui);
+		if(csf.Headers[i] && iter != shortToTNameMap.end())
+		{
+			const string str = iter->second;
+
+			if(str == string("->MPT_ORIGINAL_IT<-"))
+			{
+				csf.Headers[i]->pTuning = nullptr;
+				continue;
+			}
+
+			csf.Headers[i]->pTuning = csf.GetTuneSpecificTunings().GetTuning(str);
+			if(csf.Headers[i]->pTuning)
+				continue;
+
+			csf.Headers[i]->pTuning = csf.GetLocalTunings().GetTuning(str);
+			if(csf.Headers[i]->pTuning)
+				continue;
+
+			csf.Headers[i]->pTuning = csf.GetStandardTunings().GetTuning(str);
+			if(csf.Headers[i]->pTuning)
+				continue;
+
+			if(str == "TET12" && csf.GetStandardTunings().GetNumTunings() > 0)
+				csf.Headers[i]->pTuning = &csf.GetStandardTunings().GetTuning(0);
+
+			if(csf.Headers[i]->pTuning)
+				continue;
+
+			//Checking if not found tuning already noticed.
+			std::list<std::string>::iterator iter;
+			iter = find(notFoundTunings.begin(), notFoundTunings.end(), str);
+			if(iter == notFoundTunings.end())
+			{
+				notFoundTunings.push_back(str);
+				string erm = string("Tuning ") + str + string(" used by the module was not found.");
+				MessageBox(0, erm.c_str(), 0, MB_ICONINFORMATION);
+				if(csf.GetpModDoc()) //The tuning is changed so the modified flag is set.
+					csf.GetpModDoc()->SetModified();
+				
+			}
+			csf.Headers[i]->pTuning = csf.Headers[i]->s_DefaultTuning;
+
+		}
+		else //This 'else' happens probably only in case of corrupted file.
+		{
+			if(csf.Headers[i])
+				csf.Headers[i]->pTuning = INSTRUMENTHEADER::s_DefaultTuning;
+		}
+
+	}
+	//End read&set instrument tunings
 }
 
 
 
-
-#pragma warning(disable:4244)
+#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
 BYTE autovibit2xm[8] =
 { 0, 3, 1, 4, 2, 0, 0, 0 };
@@ -972,7 +916,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	
 	if(GetType() == MOD_TYPE_IT) mptStartPos = dwMemLength;
 
-	if(pifh->cwtv >= 0x213 && !(interpretModplugmade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 00)))
+	if(pifh->cwtv >= 0x213 && !(interpretModplugmade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 01)))
 	{
 		m_nRowsPerBeat = pifh->highlight_minor;
 		m_nRowsPerMeasure = pifh->highlight_major;
@@ -1052,7 +996,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 
 		if(pifh->cwtv > 0x88A && pifh->cwtv <= 0x88D)
-			dwMemPos += Order.Unserialize(lpStream+dwMemPos, dwMemLength-dwMemPos);
+			dwMemPos += Order.Deserialize(lpStream+dwMemPos, dwMemLength-dwMemPos);
 		else
 		{	
 			Order.ReadAsByte(lpStream + dwMemPos, nordsize, dwMemLength - dwMemPos);
@@ -1539,23 +1483,26 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if(version > 0x889)
 		{
 			const char* const cpcMPTStart = reinterpret_cast<const char*>(lpStream + mptStartPos);
-			istrstream fin(cpcMPTStart, dwMemLength-mptStartPos);
+			std::istrstream iStrm(cpcMPTStart, dwMemLength-mptStartPos);
 
 			if(version >= 0x88D)
 			{
-				CSerializationInstructions si = CreateSerializationInstructions(*this, INFLAG);
-				string msg;
-				CSSBSerialization ms(si);
-				ms.SetLogstring(msg);
-				CReadNotification rn = ms.Unserialize(fin);
-				if(msg.length() > 0) MessageBox(0, msg.c_str(), "MPTm load messages", (rn.ID & SNT_FAILURE) ? MB_ICONERROR : MB_ICONINFORMATION);
+				srlztn::Ssb ssb(iStrm);
+				ssb.BeginRead("mptm", 1);
+				ssb.ReadItem(GetTuneSpecificTunings(), "0", 1, &ReadTuningCollection);
+				ssb.ReadItem(*this, "1", 1, &ReadTuningMap);
+				ssb.ReadItem(Order, "2", 1, &ReadModSequence);
+				ssb.ReadItem(Patterns, FileIdPatterns, strlen(FileIdPatterns), &ReadModPatterns);
+
+				if (ssb.m_Status & srlztn::SNT_FAILURE)
+					AfxMessageBox("Unknown error occured.", MB_ICONERROR);
 			}
 			else //Loading for older files.
 			{
-				if(GetTuneSpecificTunings().Unserialize(fin))
+				if(GetTuneSpecificTunings().Deserialize(iStrm))
 					MessageBox(0, "Error occured - loading failed while trying to load tune specific tunings.", "", MB_ICONERROR);
 				else
-					CInstrumentTuningMapStreamer::ReadInstrumentTunings(*this, fin, (version < 0x88C) ? true : false);
+					ReadTuningMap(iStrm, *this);
 			}
 		} //version condition(MPT)
 	}
@@ -2192,6 +2139,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 	}
 	// Writing Patterns
+	bool bNeedsMptPatSave = false;
 	for (UINT npat=0; npat<header.patnum; npat++)
 	{
 		DWORD dwPatPos = dwPos;
@@ -2229,6 +2177,10 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			UINT len = 0;
 			for (UINT ch=0; ch<m_nChannels; ch++, m++)
 			{
+				// Skip mptm-specific notes.
+				if(GetType() == MOD_TYPE_MPT && (m->note == NOTE_PC || m->note == NOTE_PCS))
+					{bNeedsMptPatSave = true; continue;}
+
 				BYTE b = 0;
 				UINT command = m->command;
 				UINT param = m->param;
@@ -2456,18 +2408,25 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	//--------------------
 
 	fseek(f, 0, SEEK_END);
-	ofstream fout(f);
+	std::ofstream fout(f);
 	const DWORD MPTStartPos = fout.tellp();
 
-	//Begin: Tuning related things
-	CSerializationInstructions si = CreateSerializationInstructions(*this, OUTFLAG);
-	string msg;
-	CSSBSerialization ms(si);
-	ms.SetLogstring(msg);
-	CWriteNotification wn = ms.Serialize(fout);
-	if(msg.length() > 0) MessageBox(0, msg.c_str(), "MPTm save messages", (wn.ID & SNT_FAILURE) ? MB_ICONERROR : MB_ICONINFORMATION);
-	
-	//End: Tuning related things.
+	srlztn::Ssb ssb(fout);
+	ssb.BeginWrite("mptm", MptVersion::num);
+
+	if (GetTuneSpecificTunings().GetNumTunings() > 0)
+		ssb.WriteItem(GetTuneSpecificTunings(), "0", 1, &WriteTuningCollection);
+	if (AreNonDefaultTuningsUsed(*this))
+		ssb.WriteItem(*this, "1", 1, &WriteTuningMap);
+	if (Order.NeedsExtraDatafield())
+		ssb.WriteItem(Order, "2", 1, &WriteModSequence);
+	if (bNeedsMptPatSave)
+		ssb.WriteItem(Patterns, FileIdPatterns, strlen(FileIdPatterns), &WriteModPatterns);
+
+	ssb.FinishWrite();
+
+	if (ssb.m_Status & srlztn::SNT_FAILURE)
+		AfxMessageBox("Error occured in writing.", MB_ICONERROR);
 
 	//Last 4 bytes should tell where the hack mpt things begin.
 	if(!fout.good())
@@ -3800,7 +3759,7 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
 			CASE('DGV.', m_nDefaultGlobalVolume);
 			CASE_NOTXM('RP..', m_nRestartPos);
 			CASE('MSF.', m_ModFlags);
-			case 'MIMA': GetMIDIMapper().Unserialize(ptr, size); break;
+			case 'MIMA': GetMIDIMapper().Deserialize(ptr, size); break;
 			case 'ChnS': 
 				if( (size <= 63*2) && (size % 2 == 0) )
 				{

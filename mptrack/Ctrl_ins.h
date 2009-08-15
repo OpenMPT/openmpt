@@ -5,8 +5,6 @@
 class CNoteMapWnd;
 class CCtrlInstruments;
 
-using std::pair;
-
 
 //===============================
 class CNoteMapWnd: public CStatic
@@ -85,8 +83,6 @@ protected:
 	CComboBox m_ComboTuning;
 	void UpdateTuningComboBox();
 	void BuildTuningComboBox();
-	static const pair<string, WORD> s_TuningNotFound;
-	//first <-> string, second <-> place where to put tuning name.
 
 	//Pitch/Tempo lock
 	CEdit m_EditPitchTempoLock;
