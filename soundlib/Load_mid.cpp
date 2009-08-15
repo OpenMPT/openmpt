@@ -452,9 +452,9 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	penv->VolEnv[3] = 0;
 	penv->nVolSustainBegin = penv->nVolSustainEnd = 1;
 	// Sample
-	Ins[m_nSamples].nPan = 128;
-	Ins[m_nSamples].nVolume = 256;
-	Ins[m_nSamples].nGlobalVol = 64;
+	Samples[m_nSamples].nPan = 128;
+	Samples[m_nSamples].nVolume = 256;
+	Samples[m_nSamples].nGlobalVol = 64;
 	if (nChannel != MIDI_DRUMCHANNEL)
 	{
 		// GM Midi Name

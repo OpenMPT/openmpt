@@ -352,32 +352,32 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		UINT nInd = ((DWORD)ptr[iSmp-1])*16;
 		if ((!nInd) || (nInd + 0x50 > dwMemLength)) continue;
 		memcpy(s, lpStream+nInd, 0x50);
-		memcpy(Ins[iSmp].name, s+1, 12);
+		memcpy(Samples[iSmp].filename, s+1, 12);
 		insflags[iSmp-1] = s[0x1F];
 		inspack[iSmp-1] = s[0x1E];
 		s[0x4C] = 0;
 		lstrcpy(m_szNames[iSmp], (LPCSTR)&s[0x30]);
 		if ((s[0]==1) && (s[0x4E]=='R') && (s[0x4F]=='S'))
 		{
-			Ins[iSmp].nLength = CLAMP(LittleEndian(*((LPDWORD)(s + 0x10))), 4, MAX_SAMPLE_LENGTH);
-			Ins[iSmp].nLoopStart = CLAMP(LittleEndian(*((LPDWORD)(s + 0x14))), 0, Ins[iSmp].nLength - 1);
-			Ins[iSmp].nLoopEnd = CLAMP(LittleEndian(*((LPDWORD)(s+0x18))), 4, Ins[iSmp].nLength);
-			Ins[iSmp].nVolume = CLAMP(s[0x1C], 0, 64) << 2;
-			Ins[iSmp].nGlobalVol = 64;
-			if (s[0x1F] & 1) Ins[iSmp].uFlags |= CHN_LOOP;
+			Samples[iSmp].nLength = CLAMP(LittleEndian(*((LPDWORD)(s + 0x10))), 4, MAX_SAMPLE_LENGTH);
+			Samples[iSmp].nLoopStart = CLAMP(LittleEndian(*((LPDWORD)(s + 0x14))), 0, Samples[iSmp].nLength - 1);
+			Samples[iSmp].nLoopEnd = CLAMP(LittleEndian(*((LPDWORD)(s+0x18))), 4, Samples[iSmp].nLength);
+			Samples[iSmp].nVolume = CLAMP(s[0x1C], 0, 64) << 2;
+			Samples[iSmp].nGlobalVol = 64;
+			if (s[0x1F] & 1) Samples[iSmp].uFlags |= CHN_LOOP;
 
 			UINT c5Speed;
 			c5Speed = LittleEndian(*((LPDWORD)(s+0x20)));
 			if (!c5Speed) c5Speed = 8363;
 			if (c5Speed < 1024) c5Speed = 1024;
-			Ins[iSmp].nC5Speed = c5Speed;
+			Samples[iSmp].nC5Speed = c5Speed;
 
 			insfile[iSmp] = ((DWORD)LittleEndianW(*((LPWORD)(s+0x0E)))) << 4;
 			insfile[iSmp] += ((DWORD)(BYTE)s[0x0D]) << 20;
 			if (insfile[iSmp] > dwMemLength) insfile[iSmp] &= 0xFFFF;
-			if ((Ins[iSmp].nLoopStart >= Ins[iSmp].nLoopEnd) || (Ins[iSmp].nLoopEnd - Ins[iSmp].nLoopStart < 1))
- 				Ins[iSmp].nLoopStart = Ins[iSmp].nLoopEnd = 0;
-			Ins[iSmp].nPan = 0x80;
+			if ((Samples[iSmp].nLoopStart >= Samples[iSmp].nLoopEnd) || (Samples[iSmp].nLoopEnd - Samples[iSmp].nLoopStart < 1))
+ 				Samples[iSmp].nLoopStart = Samples[iSmp].nLoopEnd = 0;
+			Samples[iSmp].nPan = 0x80;
 			//ASSERT(iLooplength == 0 || iLooplength > 4);
 		}
 	}
@@ -451,14 +451,14 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Reading samples
-	for (UINT iRaw=1; iRaw<=insnum; iRaw++) if ((Ins[iRaw].nLength) && (insfile[iRaw]))
+	for (UINT iRaw=1; iRaw<=insnum; iRaw++) if ((Samples[iRaw].nLength) && (insfile[iRaw]))
 	{
 		UINT flags = (psfh.version == 1) ? RS_PCM8S : RS_PCM8U;
 		if (insflags[iRaw-1] & 4) flags += 5;
 		if (insflags[iRaw-1] & 2) flags |= RSF_STEREO;
 		if (inspack[iRaw-1] == 4) flags = RS_ADPCM4;
 		dwMemPos = insfile[iRaw];
-		dwMemPos += ReadSample(&Ins[iRaw], flags, (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+		dwMemPos += ReadSample(&Samples[iRaw], flags, (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 	}
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
@@ -663,10 +663,10 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	// Writing samples
 	for (i=1; i<=nbi; i++)
 	{
-		MODINSTRUMENT *pins = &Ins[i];
+		MODSAMPLE *pSmp = &Samples[i];
 		if (m_nInstruments)
 		{
-			pins = Ins;
+			pSmp = Samples;
 			if (Headers[i])
 			{
 				for (UINT j=0; j<128; j++)
@@ -674,35 +674,35 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 					UINT n = Headers[i]->Keyboard[j];
 					if ((n) && (n < MAX_INSTRUMENTS))
 					{
-						pins = &Ins[n];
+						pSmp = &Samples[n];
 						break;
 					}
 				}
 			}
 		}
-		memcpy(insex[i-1].dosname, pins->name, 12);
+		memcpy(insex[i-1].dosname, pSmp->filename, 12);
 		memcpy(insex[i-1].name, m_szNames[i], 28);
 		memcpy(insex[i-1].scrs, "SCRS", 4);
 		insex[i-1].hmem = (BYTE)((DWORD)ofs >> 20);
 		insex[i-1].memseg = (WORD)((DWORD)ofs >> 4);
-		if (pins->pSample)
+		if (pSmp->pSample)
 		{
 			insex[i-1].type = 1;
-			insex[i-1].length = pins->nLength;
-			insex[i-1].loopbegin = pins->nLoopStart;
-			insex[i-1].loopend = pins->nLoopEnd;
-			insex[i-1].vol = pins->nVolume / 4;
-			insex[i-1].flags = (pins->uFlags & CHN_LOOP) ? 1 : 0;
-			if (pins->nC5Speed)
-				insex[i-1].finetune = pins->nC5Speed;
+			insex[i-1].length = pSmp->nLength;
+			insex[i-1].loopbegin = pSmp->nLoopStart;
+			insex[i-1].loopend = pSmp->nLoopEnd;
+			insex[i-1].vol = pSmp->nVolume / 4;
+			insex[i-1].flags = (pSmp->uFlags & CHN_LOOP) ? 1 : 0;
+			if (pSmp->nC5Speed)
+				insex[i-1].finetune = pSmp->nC5Speed;
 			else
-				insex[i-1].finetune = TransposeToFrequency(pins->RelativeTone, pins->nFineTune);
+				insex[i-1].finetune = TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
 			UINT flags = RS_PCM8U;
 #ifndef NO_PACKING
 			if (nPacking)
 			{
-				if ((!(pins->uFlags & (CHN_16BIT|CHN_STEREO)))
-				 && (CanPackSample(pins->pSample, pins->nLength, nPacking)))
+				if ((!(pSmp->uFlags & (CHN_16BIT|CHN_STEREO)))
+				 && (CanPackSample(pSmp->pSample, pSmp->nLength, nPacking)))
 				{
 					insex[i-1].pack = 4;
 					flags = RS_ADPCM4;
@@ -710,18 +710,18 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 			} else
 #endif // NO_PACKING
 			{
-				if (pins->uFlags & CHN_16BIT)
+				if (pSmp->uFlags & CHN_16BIT)
 				{
 					insex[i-1].flags |= 4;
 					flags = RS_PCM16U;
 				}
-				if (pins->uFlags & CHN_STEREO)
+				if (pSmp->uFlags & CHN_STEREO)
 				{
 					insex[i-1].flags |= 2;
-					flags = (pins->uFlags & CHN_16BIT) ? RS_STPCM16U : RS_STPCM8U;
+					flags = (pSmp->uFlags & CHN_16BIT) ? RS_STPCM16U : RS_STPCM8U;
 				}
 			}
-			DWORD len = WriteSample(f, pins, flags);
+			DWORD len = WriteSample(f, pSmp, flags);
 			if (len & 0x0F)
 			{
 				fwrite(S3MFiller, 0x10 - (len & 0x0F), 1, f);

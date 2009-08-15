@@ -79,14 +79,14 @@ bool CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 		if ((loopend > len) && (!loopstart)) loopend = 0;
 		if (loopend > len) loopend = len;
 		if (loopstart + 4 >= loopend) loopstart = loopend = 0;
-		Ins[nins].nLength = len;
-		Ins[nins].nLoopStart = loopstart;
-		Ins[nins].nLoopEnd = loopend;
-		if (loopend) Ins[nins].uFlags |= CHN_LOOP;
+		Samples[nins].nLength = len;
+		Samples[nins].nLoopStart = loopstart;
+		Samples[nins].nLoopEnd = loopend;
+		if (loopend) Samples[nins].uFlags |= CHN_LOOP;
 		memcpy(m_szNames[nins], psmp->filename, 13);
-		Ins[nins].nVolume = 256;
-		Ins[nins].nGlobalVol = 64;
-		Ins[nins].nPan = 128;
+		Samples[nins].nVolume = 256;
+		Samples[nins].nGlobalVol = 64;
+		Samples[nins].nPan = 128;
 	}
 	// Song Message
 	m_lpszSongComments = new char[109];
@@ -178,9 +178,9 @@ bool CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 	// Reading Samples
 	for (UINT n=1; n<=m_nSamples; n++)
 	{
-		UINT len = Ins[n].nLength;
+		UINT len = Samples[n].nLength;
 		if (dwMemPos >= dwMemLength) break;
-		if (len > 4) ReadSample(&Ins[n], RS_PCM8U, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
+		if (len > 4) ReadSample(&Samples[n], RS_PCM8U, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 		dwMemPos += len;
 	}
 	return true;

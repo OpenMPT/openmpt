@@ -142,7 +142,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 			if (nInstruments >= MAX_INSTRUMENTS) nInstruments = MAX_INSTRUMENTS-1;
 			for (UINT iIns=0; iIns<nInstruments; iIns++)
 			{
-				MODINSTRUMENT *psmp;
+				MODSAMPLE *psmp;
 				INSTRUMENTHEADER *penv;
 				DBMINSTRUMENT *pih;
 				UINT nsmp;
@@ -151,7 +151,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				if ((penv = new INSTRUMENTHEADER) == NULL) break;
 				pih = (DBMINSTRUMENT *)(lpStream+chunk_pos);
 				nsmp = BigEndianW(pih->sampleno);
-				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Ins[nsmp] : NULL;
+				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Samples[nsmp] : NULL;
 				memset(penv, 0, sizeof(INSTRUMENTHEADER));
 				memcpy(penv->name, pih->name, 30);
 				if (psmp)
@@ -339,7 +339,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 			m_nSamples = nSamples;
 			for (UINT iSmp=1; iSmp<=nSamples; iSmp++)
 			{
-				MODINSTRUMENT *pins;
+				MODSAMPLE *pSmp;
 				DBMSAMPLE *psh;
 				DWORD samplesize;
 				DWORD sampleflags;
@@ -349,17 +349,17 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				chunk_pos += 8;
 				samplesize = BigEndian(psh->samplesize);
 				sampleflags = BigEndian(psh->flags);
-				pins = &Ins[iSmp];
-				pins->nLength = samplesize;
+				pSmp = &Samples[iSmp];
+				pSmp->nLength = samplesize;
 				if (sampleflags & 2)
 				{
-					pins->uFlags |= CHN_16BIT;
+					pSmp->uFlags |= CHN_16BIT;
 					samplesize <<= 1;
 				}
 				if ((chunk_pos+samplesize > dwMemPos) || (samplesize > dwMemLength)) break;
 				if (sampleflags & 3)
 				{
-					ReadSample(pins, (pins->uFlags & CHN_16BIT) ? RS_PCM16M : RS_PCM8S,
+					ReadSample(pSmp, (pSmp->uFlags & CHN_16BIT) ? RS_PCM16M : RS_PCM8S,
 								(LPSTR)(psh->sampledata), samplesize);
 				}
 				chunk_pos += samplesize;

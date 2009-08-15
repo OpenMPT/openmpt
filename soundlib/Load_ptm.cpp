@@ -104,38 +104,38 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 	}
 	for (UINT ismp=0; ismp<m_nSamples; ismp++, dwMemPos += SIZEOF_PTMSAMPLE)
 	{
-		MODINSTRUMENT *pins = &Ins[ismp+1];
+		MODSAMPLE *pSmp = &Samples[ismp+1];
 		PTMSAMPLE *psmp = (PTMSAMPLE *)(lpStream+dwMemPos);
 
 		lstrcpyn(m_szNames[ismp+1], psmp->samplename, 28);
-		memcpy(pins->name, psmp->filename, 12);
-		pins->name[12] = 0;
-		pins->nGlobalVol = 64;
-		pins->nPan = 128;
-		pins->nVolume = psmp->volume << 2;
-		pins->nC5Speed = LittleEndianW(psmp->nC4Spd) << 1;
-		pins->uFlags = 0;
+		memcpy(pSmp->filename, psmp->filename, 12);
+		pSmp->filename[12] = 0;
+		pSmp->nGlobalVol = 64;
+		pSmp->nPan = 128;
+		pSmp->nVolume = psmp->volume << 2;
+		pSmp->nC5Speed = LittleEndianW(psmp->nC4Spd) << 1;
+		pSmp->uFlags = 0;
 		if ((psmp->sampletype & 3) == 1)
 		{
 			UINT smpflg = RS_PCM8D;
 			DWORD samplepos;
-			pins->nLength = LittleEndian(*(LPDWORD)(psmp->length));
-			pins->nLoopStart = LittleEndian(*(LPDWORD)(psmp->loopbeg));
-			pins->nLoopEnd = LittleEndian(*(LPDWORD)(psmp->loopend));
+			pSmp->nLength = LittleEndian(*(LPDWORD)(psmp->length));
+			pSmp->nLoopStart = LittleEndian(*(LPDWORD)(psmp->loopbeg));
+			pSmp->nLoopEnd = LittleEndian(*(LPDWORD)(psmp->loopend));
 			samplepos = LittleEndian(*(LPDWORD)(&psmp->fileofs));
-			if (psmp->sampletype & 4) pins->uFlags |= CHN_LOOP;
-			if (psmp->sampletype & 8) pins->uFlags |= CHN_PINGPONGLOOP;
+			if (psmp->sampletype & 4) pSmp->uFlags |= CHN_LOOP;
+			if (psmp->sampletype & 8) pSmp->uFlags |= CHN_PINGPONGLOOP;
 			if (psmp->sampletype & 16)
 			{
-				pins->uFlags |= CHN_16BIT;
-				pins->nLength >>= 1;
-				pins->nLoopStart >>= 1;
-				pins->nLoopEnd >>= 1;
+				pSmp->uFlags |= CHN_16BIT;
+				pSmp->nLength >>= 1;
+				pSmp->nLoopStart >>= 1;
+				pSmp->nLoopEnd >>= 1;
 				smpflg = RS_PTM8DTO16;
 			}
-			if ((pins->nLength) && (samplepos) && (samplepos < dwMemLength))
+			if ((pSmp->nLength) && (samplepos) && (samplepos < dwMemLength))
 			{
-				ReadSample(pins, smpflg, (LPSTR)(lpStream+samplepos), dwMemLength-samplepos);
+				ReadSample(pSmp, smpflg, (LPSTR)(lpStream+samplepos), dwMemLength-samplepos);
 			}
 		}
 	}

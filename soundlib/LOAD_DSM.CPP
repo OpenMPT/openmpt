@@ -28,7 +28,7 @@ typedef struct DSMNOTE
 } DSMNOTE;
 
 
-typedef struct DSMINST
+typedef struct DSMSAMPLE
 {
 	DWORD id_INST;
 	DWORD inst_len;
@@ -43,7 +43,7 @@ typedef struct DSMINST
 	WORD c2spd;
 	WORD reserved2;
 	CHAR samplename[28];
-} DSMINST;
+} DSMSAMPLE;
 
 
 typedef struct DSMFILEHEADER
@@ -128,7 +128,7 @@ bool CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 	while (dwMemPos < dwMemLength - 8)
 	{
 		DSMPATT *ppatt = (DSMPATT *)(lpStream + dwMemPos);
-		DSMINST *pins = (DSMINST *)(lpStream+dwMemPos);
+		DSMSAMPLE *pSmp = (DSMSAMPLE *)(lpStream+dwMemPos);
 		// Reading Patterns
 		if (ppatt->id_PATT == DSMID_PATT)
 		{
@@ -210,23 +210,23 @@ bool CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 			nPat++;
 		} else
 		// Reading Samples
-		if ((nSmp <= m_nSamples) && (pins->id_INST == DSMID_INST))
+		if ((nSmp <= m_nSamples) && (pSmp->id_INST == DSMID_INST))
 		{
-			if (dwMemPos + pins->inst_len >= dwMemLength - 8) break;
-			DWORD dwPos = dwMemPos + sizeof(DSMINST);
-			dwMemPos += 8 + pins->inst_len;
-			memcpy(m_szNames[nSmp], pins->samplename, 28);
-			MODINSTRUMENT *psmp = &Ins[nSmp];
-			memcpy(psmp->name, pins->filename, 13);
+			if (dwMemPos + pSmp->inst_len >= dwMemLength - 8) break;
+			DWORD dwPos = dwMemPos + sizeof(DSMSAMPLE);
+			dwMemPos += 8 + pSmp->inst_len;
+			memcpy(m_szNames[nSmp], pSmp->samplename, 28);
+			MODSAMPLE *psmp = &Samples[nSmp];
+			memcpy(psmp->filename, pSmp->filename, 13);
 			psmp->nGlobalVol = 64;
-			psmp->nC5Speed = pins->c2spd;
-			psmp->uFlags = (WORD)((pins->flags & 1) ? CHN_LOOP : 0);
-			psmp->nLength = pins->length;
-			psmp->nLoopStart = pins->loopstart;
-			psmp->nLoopEnd = pins->loopend;
-			psmp->nVolume = (WORD)(pins->volume << 2);
+			psmp->nC5Speed = pSmp->c2spd;
+			psmp->uFlags = (WORD)((pSmp->flags & 1) ? CHN_LOOP : 0);
+			psmp->nLength = pSmp->length;
+			psmp->nLoopStart = pSmp->loopstart;
+			psmp->nLoopEnd = pSmp->loopend;
+			psmp->nVolume = (WORD)(pSmp->volume << 2);
 			if (psmp->nVolume > 256) psmp->nVolume = 256;
-			UINT smptype = (pins->flags & 2) ? RS_PCM8S : RS_PCM8U;
+			UINT smptype = (pSmp->flags & 2) ? RS_PCM8S : RS_PCM8U;
 			ReadSample(psmp, smptype, (LPCSTR)(lpStream+dwPos), dwMemLength - dwPos);
 			nSmp++;
 		} else

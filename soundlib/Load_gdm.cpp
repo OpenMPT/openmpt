@@ -32,7 +32,7 @@ typedef struct _GDMHEADER
 	BYTE PanMap[32];				// 0-Left to 15-Right, 255-N/U
 	BYTE MastVol;					// Range: 0...64
 	BYTE Tempo;						// Initial music tempo (6)
-	BYTE BPM;							// Initial music BPM (125)
+	BYTE BPM;						// Initial music BPM (125)
 	UINT16 FormOrigin;				// Original format ID:
 		// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
 		// (versions of 2GDM prior to v1.15 won't set this correctly)
@@ -177,8 +177,6 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// read samples
 	m_nSamples = pHeader->NOS + 1;
 	
-	int iLZWsamples = 0;
-
 	for(UINT iSmp = 1; iSmp <= m_nSamples; iSmp++)
 	{
 		const PGDMSAMPLEHEADER pSample = (PGDMSAMPLEHEADER)(lpStream + iSamHeadOffset + (iSmp - 1) * sizeof(GDMSAMPLEHEADER));
@@ -187,52 +185,52 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		memcpy(m_szNames[iSmp], pSample->SamName, 32);
 		SetNullTerminator(m_szNames[iSmp]);
-		memcpy(Ins[iSmp].name, pSample->FileName, 12);
+		memcpy(Samples[iSmp].filename, pSample->FileName, 12);
 
-		Ins[iSmp].nC5Speed = LittleEndianW(pSample->C4Hertz);
-		Ins[iSmp].nGlobalVol = 256; // not supported in this format
-		Ins[iSmp].nLength = min(LittleEndian(pSample->Length), MAX_SAMPLE_LENGTH); // in bytes
-		Ins[iSmp].nLoopStart = min(LittleEndian(pSample->LoopBegin), Ins[iSmp].nLength); // in samples
-		Ins[iSmp].nLoopEnd = min(LittleEndian(pSample->LoopEnd) - 1, Ins[iSmp].nLength); // dito
-		FrequencyToTranspose(&Ins[iSmp]); // set transpose + finetune for mod files
+		Samples[iSmp].nC5Speed = LittleEndianW(pSample->C4Hertz);
+		Samples[iSmp].nGlobalVol = 256; // not supported in this format
+		Samples[iSmp].nLength = min(LittleEndian(pSample->Length), MAX_SAMPLE_LENGTH); // in bytes
+		Samples[iSmp].nLoopStart = min(LittleEndian(pSample->LoopBegin), Samples[iSmp].nLength); // in samples
+		Samples[iSmp].nLoopEnd = min(LittleEndian(pSample->LoopEnd) - 1, Samples[iSmp].nLength); // dito
+		FrequencyToTranspose(&Samples[iSmp]); // set transpose + finetune for mod files
 
 		// fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.mod)
 		if(m_nType == MOD_TYPE_MOD)
 		{
-			while(Ins[iSmp].RelativeTone != 0)
+			while(Samples[iSmp].RelativeTone != 0)
 			{
-				if(Ins[iSmp].RelativeTone > 0)
+				if(Samples[iSmp].RelativeTone > 0)
 				{
-					Ins[iSmp].RelativeTone -= 1;
-					Ins[iSmp].nFineTune += 128;
+					Samples[iSmp].RelativeTone -= 1;
+					Samples[iSmp].nFineTune += 128;
 				}
 				else
 				{
-					Ins[iSmp].RelativeTone += 1;
-					Ins[iSmp].nFineTune -= 128;
+					Samples[iSmp].RelativeTone += 1;
+					Samples[iSmp].nFineTune -= 128;
 				}
 			}
 		}
 
-		if(pSample->Flags & 0x01) Ins[iSmp].uFlags |= CHN_LOOP; // loop sample
+		if(pSample->Flags & 0x01) Samples[iSmp].uFlags |= CHN_LOOP; // loop sample
 
 		if(pSample->Flags & 0x04)
 		{
-			Ins[iSmp].nVolume = min(pSample->Volume << 2, 256); // 0...64, 255 = no default volume
+			Samples[iSmp].nVolume = min(pSample->Volume << 2, 256); // 0...64, 255 = no default volume
 		}
 		else
 		{
-			Ins[iSmp].nVolume = 256; // default volume
+			Samples[iSmp].nVolume = 256; // default volume
 		}
 
 		if(pSample->Flags & 0x08) // default panning is used
 		{
-			Ins[iSmp].uFlags |= CHN_PANNING;
-			Ins[iSmp].nPan = (pSample->Pan > 15) ? 128 : min((pSample->Pan << 4) + 8, 256); // 0...15, 16 = surround (not supported), 255 = no default panning
+			Samples[iSmp].uFlags |= CHN_PANNING;
+			Samples[iSmp].nPan = (pSample->Pan > 15) ? 128 : min((pSample->Pan << 4) + 8, 256); // 0...15, 16 = surround (not supported), 255 = no default panning
 		}
 		else
 		{
-			Ins[iSmp].nPan = 128;
+			Samples[iSmp].nPan = 128;
 		}
 
 		/* note: apparently (and according to zilym), 2GDM doesn't handle 16 bit or stereo samples properly.
@@ -262,12 +260,12 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			}
 		}
 
-		// according to zilym, LZW support has never been finished, so this is also practically useless.
-		if(pSample->Flags & 0x10)
-			iLZWsamples++;
+		// according to zilym, LZW support has never been finished, so this is also practically useless. Just ignore the flag.
+		// if(pSample->Flags & 0x10) {...}
 
 		// read sample data
-		ReadSample(&Ins[iSmp], iSampleFormat, reinterpret_cast<LPCSTR>(lpStream + iSampleOffset), dwMemLength - iSampleOffset);
+		ReadSample(&Samples[iSmp], iSampleFormat, reinterpret_cast<LPCSTR>(lpStream + iSampleOffset), dwMemLength - iSampleOffset);
+			
 		iSampleOffset += min(LittleEndian(pSample->Length), dwMemLength - iSampleOffset);
 
 	}
@@ -380,7 +378,6 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 								{
 								case 0x0:
 									// set filter
-									command = CMD_MODCMDEX;
 									break;
 								case 0x1:
 									// fine porta up
@@ -541,13 +538,6 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			memset(m_lpszSongComments, 0, iMTLength + 1);
 			memcpy(m_lpszSongComments, lpStream + iMTOffset, iMTLength);
 		}
-	}
-
-	if(iLZWsamples)
-	{
-		TCHAR s[128];
-		wsprintf(s, TEXT("%d samples are LZW compressed. LZW compression is currently not supported.\nPlease send this file to the OpenMPT team."), iLZWsamples);
-		::MessageBox(0, s, TEXT("OpenMPT GDM import"), MB_ICONWARNING);
 	}
 	
 	return true;

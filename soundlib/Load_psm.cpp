@@ -140,32 +140,32 @@ bool CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength)
 			if ((len >= sizeof(PSMSAMPLE)) && (m_nSamples+1 < MAX_SAMPLES))
 			{
 				m_nSamples++;
-				MODINSTRUMENT *pins = &Ins[m_nSamples];
+				MODSAMPLE *pSmp = &Samples[m_nSamples];
 				PSMSAMPLE *psmp = (PSMSAMPLE *)pdata;
 				smpnames[m_nSamples] = psmp->smpid;
 				memcpy(m_szNames[m_nSamples], psmp->samplename, 31);
 				m_szNames[m_nSamples][31] = 0;
 				samplemap[m_nSamples-1] = (BYTE)m_nSamples;
 				// Init sample
-				pins->nGlobalVol = 0x40;
-				pins->nC5Speed = psmp->samplerate;
-				pins->nLength = psmp->length;
-				pins->nLoopStart = psmp->loopstart;
-				pins->nLoopEnd = psmp->loopend;
-				pins->nPan = 128;
-				pins->nVolume = (psmp->defvol+1) * 2;
-				pins->uFlags = (psmp->flags & 0x80) ? CHN_LOOP : 0;
-				if (pins->nLoopStart > 0) pins->nLoopStart--;
+				pSmp->nGlobalVol = 0x40;
+				pSmp->nC5Speed = psmp->samplerate;
+				pSmp->nLength = psmp->length;
+				pSmp->nLoopStart = psmp->loopstart;
+				pSmp->nLoopEnd = psmp->loopend;
+				pSmp->nPan = 128;
+				pSmp->nVolume = (psmp->defvol+1) * 2;
+				pSmp->uFlags = (psmp->flags & 0x80) ? CHN_LOOP : 0;
+				if (pSmp->nLoopStart > 0) pSmp->nLoopStart--;
 				// Point to sample data
 				pdata += 0x60;
 				len -= 0x60;
 				// Load sample data
-				if ((pins->nLength > 3) && (len > 3))
+				if ((pSmp->nLength > 3) && (len > 3))
 				{
-					ReadSample(pins, RS_PCM8D, (LPCSTR)pdata, len);
+					ReadSample(pSmp, RS_PCM8D, (LPCSTR)pdata, len);
 				} else
 				{
-					pins->nLength = 0;
+					pSmp->nLength = 0;
 				}
 			}
 			break;

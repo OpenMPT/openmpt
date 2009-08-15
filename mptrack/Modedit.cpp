@@ -624,9 +624,9 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	{
 		for (UINT i=1; i<=m_SndFile.m_nSamples; i++)
 		{
-			m_SndFile.Ins[i].nC5Speed = CSoundFile::TransposeToFrequency(m_SndFile.Ins[i].RelativeTone, m_SndFile.Ins[i].nFineTune);
-			m_SndFile.Ins[i].RelativeTone = 0;
-			m_SndFile.Ins[i].nFineTune = 0;
+			m_SndFile.Samples[i].nC5Speed = CSoundFile::TransposeToFrequency(m_SndFile.Samples[i].RelativeTone, m_SndFile.Samples[i].nFineTune);
+			m_SndFile.Samples[i].RelativeTone = 0;
+			m_SndFile.Samples[i].nFineTune = 0;
 		}
 		if (oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATMODE;
 	} else
@@ -636,8 +636,8 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	{
 		for (UINT i=1; i<=m_SndFile.m_nSamples; i++)
 		{
-			CSoundFile::FrequencyToTranspose(&m_SndFile.Ins[i]);
-			if (!(m_SndFile.Ins[i].uFlags & CHN_PANNING)) m_SndFile.Ins[i].nPan = 128;
+			CSoundFile::FrequencyToTranspose(&m_SndFile.Samples[i]);
+			if (!(m_SndFile.Samples[i].uFlags & CHN_PANNING)) m_SndFile.Samples[i].nPan = 128;
 		}
 		BOOL bBrokenNoteMap = FALSE;
 		for (UINT j=1; j<=m_SndFile.m_nInstruments; j++)
@@ -1057,7 +1057,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 	
 
 	BeginWaitCursor();
-	for (UINT i=m_SndFile.m_nSamples; i>=1; i--) if (m_SndFile.Ins[i].pSample)
+	for (UINT i=m_SndFile.m_nSamples; i>=1; i--) if (m_SndFile.Samples[i].pSample)
 	{
 		if (!m_SndFile.IsSampleUsed(i))
 		{
@@ -1107,7 +1107,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 		}
 		for (UINT ichk=1; ichk<MAX_SAMPLES; ichk++)
 		{
-			if ((!bIns[ichk]) && (m_SndFile.Ins[ichk].pSample)) nExt++;
+			if ((!bIns[ichk]) && (m_SndFile.Samples[ichk].pSample)) nExt++;
 		}
 	}
 	EndWaitCursor();
@@ -1119,7 +1119,7 @@ BOOL CModDoc::RemoveUnusedSamples()
 		{
 			for (UINT j=1; j<MAX_SAMPLES; j++)
 			{
-				if ((!bIns[j]) && (m_SndFile.Ins[j].pSample))
+				if ((!bIns[j]) && (m_SndFile.Samples[j].pSample))
 				{
 					BEGIN_CRITICAL();
 					m_SndFile.DestroySample(j);
@@ -1130,10 +1130,10 @@ BOOL CModDoc::RemoveUnusedSamples()
 			}
 		}
 	}
-	for (UINT ilo=1; ilo<=m_SndFile.m_nSamples; ilo++) if (m_SndFile.Ins[ilo].pSample)
+	for (UINT ilo=1; ilo<=m_SndFile.m_nSamples; ilo++) if (m_SndFile.Samples[ilo].pSample)
 	{
-		if ((m_SndFile.Ins[ilo].uFlags & CHN_LOOP)
-		 && (m_SndFile.Ins[ilo].nLength > m_SndFile.Ins[ilo].nLoopEnd + 2)) nLoopOpt++;
+		if ((m_SndFile.Samples[ilo].uFlags & CHN_LOOP)
+		 && (m_SndFile.Samples[ilo].nLength > m_SndFile.Samples[ilo].nLoopEnd + 2)) nLoopOpt++;
 	}
 	if (nLoopOpt)
 	{
@@ -1143,11 +1143,11 @@ BOOL CModDoc::RemoveUnusedSamples()
 		{
 			for (UINT j=1; j<=m_SndFile.m_nSamples; j++)
 			{
-				if ((m_SndFile.Ins[j].uFlags & CHN_LOOP)
-				 && (m_SndFile.Ins[j].nLength > m_SndFile.Ins[j].nLoopEnd + 2))
+				if ((m_SndFile.Samples[j].uFlags & CHN_LOOP)
+				 && (m_SndFile.Samples[j].nLength > m_SndFile.Samples[j].nLoopEnd + 2))
 				{
-					UINT lmax = m_SndFile.Ins[j].nLoopEnd + 2;
-					if ((lmax < m_SndFile.Ins[j].nLength) && (lmax >= 16)) m_SndFile.Ins[j].nLength = lmax;
+					UINT lmax = m_SndFile.Samples[j].nLoopEnd + 2;
+					if ((lmax < m_SndFile.Samples[j].nLength) && (lmax >= 16)) m_SndFile.Samples[j].nLength = lmax;
 				}
 			}
 		} else nLoopOpt = 0;
@@ -1497,12 +1497,12 @@ BOOL CModDoc::CompoCleanup()
 BOOL CModDoc::AdjustEndOfSample(UINT nSample)
 //-------------------------------------------
 {
-	MODINSTRUMENT *pins;
+	MODSAMPLE *pSmp;
 	if (nSample >= MAX_SAMPLES) return FALSE;
-	pins = &m_SndFile.Ins[nSample];
-	if ((!pins->nLength) || (!pins->pSample)) return FALSE;
+	pSmp = &m_SndFile.Samples[nSample];
+	if ((!pSmp->nLength) || (!pSmp->pSample)) return FALSE;
 
-	ctrlSmp::AdjustEndOfSample(*pins, &m_SndFile);
+	ctrlSmp::AdjustEndOfSample(*pSmp, &m_SndFile);
 
 	return TRUE;
 }
@@ -1554,7 +1554,7 @@ LONG CModDoc::InsertSample(BOOL bLimit)
 	UINT i = 1;
 	for (i=1; i<=m_SndFile.m_nSamples; i++)
 	{
-		if ((!m_SndFile.m_szNames[i][0]) && (m_SndFile.Ins[i].pSample == NULL))
+		if ((!m_SndFile.m_szNames[i][0]) && (m_SndFile.Samples[i].pSample == NULL))
 		{
 			if ((!m_SndFile.m_nInstruments) || (!m_SndFile.IsSampleUsed(i)))
 			break;
@@ -1567,19 +1567,19 @@ LONG CModDoc::InsertSample(BOOL bLimit)
 		return -1;
 	}
 	if (!m_SndFile.m_szNames[i][0]) strcpy(m_SndFile.m_szNames[i], "untitled");
-	MODINSTRUMENT *pins = &m_SndFile.Ins[i];
-	pins->nVolume = 256;
-	pins->nGlobalVol = 64;
-	pins->nPan = 128;
-	pins->nC5Speed = 8363;
-	pins->RelativeTone = 0;
-	pins->nFineTune = 0;
-	pins->nVibType = 0;
-	pins->nVibSweep = 0;
-	pins->nVibDepth = 0;
-	pins->nVibRate = 0;
-	pins->uFlags &= ~(CHN_PANNING|CHN_SUSTAINLOOP);
-	if (m_SndFile.m_nType == MOD_TYPE_XM) pins->uFlags |= CHN_PANNING;
+	MODSAMPLE *pSmp = &m_SndFile.Samples[i];
+	pSmp->nVolume = 256;
+	pSmp->nGlobalVol = 64;
+	pSmp->nPan = 128;
+	pSmp->nC5Speed = 8363;
+	pSmp->RelativeTone = 0;
+	pSmp->nFineTune = 0;
+	pSmp->nVibType = 0;
+	pSmp->nVibSweep = 0;
+	pSmp->nVibDepth = 0;
+	pSmp->nVibRate = 0;
+	pSmp->uFlags &= ~(CHN_PANNING|CHN_SUSTAINLOOP);
+	if (m_SndFile.m_nType == MOD_TYPE_XM) pSmp->uFlags |= CHN_PANNING;
 	if (i > m_SndFile.m_nSamples) m_SndFile.m_nSamples = i;
 	SetModified();
 	return i;
@@ -1595,7 +1595,7 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 	{
 		pDup = m_SndFile.Headers[lDuplicate];
 	}
-	if ((!m_SndFile.m_nInstruments) && ((m_SndFile.m_nSamples > 1) || (m_SndFile.Ins[1].pSample)))
+	if ((!m_SndFile.m_nInstruments) && ((m_SndFile.m_nSamples > 1) || (m_SndFile.Samples[1].pSample)))
 	{
 		if (pDup) return -1;
 		UINT n = CMainFrame::GetMainFrame()->MessageBox("Convert existing samples to instruments first?", NULL, MB_YESNOCANCEL|MB_ICONQUESTION);
@@ -1605,7 +1605,7 @@ LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 			if (nInstruments >= MAX_INSTRUMENTS) nInstruments = MAX_INSTRUMENTS-1;
 			for (UINT smp=1; smp<=nInstruments; smp++)
 			{
-				m_SndFile.Ins[smp].uFlags &= ~CHN_MUTE;
+				m_SndFile.Samples[smp].uFlags &= ~CHN_MUTE;
 				if (!m_SndFile.Headers[smp])
 				{
 					INSTRUMENTHEADER *p = new INSTRUMENTHEADER;
@@ -1755,7 +1755,7 @@ BOOL CModDoc::RemoveSample(UINT n)
 		m_SndFile.m_szNames[n][0] = 0;
 		while ((m_SndFile.m_nSamples > 1)
 		 && (!m_SndFile.m_szNames[m_SndFile.m_nSamples][0])
-		 && (!m_SndFile.Ins[m_SndFile.m_nSamples].pSample)) m_SndFile.m_nSamples--;
+		 && (!m_SndFile.Samples[m_SndFile.m_nSamples].pSample)) m_SndFile.m_nSamples--;
 		END_CRITICAL();
 		SetModified();
 		return TRUE;
@@ -1777,7 +1777,7 @@ void CModDoc::RearrangeSampleList()
 	
 	// First, find out which sample slots are unused and create the new sample map
 	for(UINT i = 1 ; i <= m_SndFile.m_nSamples; i++) {
-		if(!m_SndFile.Ins[i].pSample)
+		if(!m_SndFile.Samples[i].pSample)
 		{
 			// Move all following samples
 			nRemap++;
@@ -1800,7 +1800,7 @@ void CModDoc::RearrangeSampleList()
 			// This gotta be moved
 
 			m_SndFile.MoveSample(i, nSampleMap[i]);
-			m_SndFile.Ins[i].pSample = nullptr;
+			m_SndFile.Samples[i].pSample = nullptr;
 			strcpy(m_SndFile.m_szNames[nSampleMap[i]], m_SndFile.m_szNames[i]);
 			m_SndFile.m_szNames[i][0] = '\0';
 

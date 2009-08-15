@@ -499,36 +499,36 @@ DLSINSTRUMENT *CDLSBank::FindInstrument(BOOL bDrum, UINT nBank, DWORD dwProgram,
 	if ((!m_pInstruments) || (!m_nInstruments)) return NULL;
 	for (UINT iIns=0; iIns<m_nInstruments; iIns++)
 	{
-		DLSINSTRUMENT *pins = &m_pInstruments[iIns];
-		UINT insbank = ((pins->ulBank & 0x7F00) >> 1) | (pins->ulBank & 0x7F);
+		DLSINSTRUMENT *pIns = &m_pInstruments[iIns];
+		UINT insbank = ((pIns->ulBank & 0x7F00) >> 1) | (pIns->ulBank & 0x7F);
 		if ((nBank >= 0x4000) || (insbank == nBank))
 		{
 			if (bDrum)
 			{
-				if (pins->ulBank & F_INSTRUMENT_DRUMS)
+				if (pIns->ulBank & F_INSTRUMENT_DRUMS)
 				{
-					if ((dwProgram >= 0x80) || (dwProgram == (pins->ulInstrument & 0x7F)))
+					if ((dwProgram >= 0x80) || (dwProgram == (pIns->ulInstrument & 0x7F)))
 					{
-						for (UINT iRgn=0; iRgn<pins->nRegions; iRgn++)
+						for (UINT iRgn=0; iRgn<pIns->nRegions; iRgn++)
 						{
 							if ((!dwKey) || (dwKey >= 0x80)
-							 || ((dwKey >= pins->Regions[iRgn].uKeyMin)
-							  && (dwKey <= pins->Regions[iRgn].uKeyMax)))
+							 || ((dwKey >= pIns->Regions[iRgn].uKeyMin)
+							  && (dwKey <= pIns->Regions[iRgn].uKeyMax)))
 							{
 								if (pInsNo) *pInsNo = iIns;
-								return pins;
+								return pIns;
 							}
 						}
 					}
 				}
 			} else
 			{
-				if (!(pins->ulBank & F_INSTRUMENT_DRUMS))
+				if (!(pIns->ulBank & F_INSTRUMENT_DRUMS))
 				{
-					if ((dwProgram >= 0x80) || (dwProgram == (pins->ulInstrument & 0x7F)))
+					if ((dwProgram >= 0x80) || (dwProgram == (pIns->ulInstrument & 0x7F)))
 					{
 						if (pInsNo) *pInsNo = iIns;
-						return pins;
+						return pIns;
 					}
 				}
 			}
@@ -541,7 +541,7 @@ DLSINSTRUMENT *CDLSBank::FindInstrument(BOOL bDrum, UINT nBank, DWORD dwProgram,
 ///////////////////////////////////////////////////////////////
 // Update DLS instrument definition from an IFF chunk
 
-BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, DWORD dwMaxLen)
+BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pIns, LPVOID pvchunk, DWORD dwMaxLen)
 //--------------------------------------------------------------------------------------------
 {
 	IFFCHUNK *pchunk = (IFFCHUNK *)pvchunk;
@@ -560,14 +560,14 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, D
 			}
 			if (dwPos + p->len + 8 <= plist->len + 12)
 			{
-				UpdateInstrumentDefinition(pins, p, p->len+8);
+				UpdateInstrumentDefinition(pIns, p, p->len+8);
 			}
 			dwPos += p->len + 8;
 		}
 		switch(plist->listid)
 		{
 		case IFFID_rgn:
-			if (pins->nRegions < DLSMAXREGIONS) pins->nRegions++;
+			if (pIns->nRegions < DLSMAXREGIONS) pIns->nRegions++;
 			break;
 		}
 	} else
@@ -575,41 +575,41 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, D
 		switch(pchunk->id)
 		{
 		case IFFID_insh:
-			pins->ulBank = ((INSHCHUNK *)pchunk)->ulBank;
-			pins->ulInstrument = ((INSHCHUNK *)pchunk)->ulInstrument;
-			//Log("%3d regions, bank 0x%04X instrument %3d\n", ((INSHCHUNK *)pchunk)->cRegions, pins->ulBank, pins->ulInstrument);
+			pIns->ulBank = ((INSHCHUNK *)pchunk)->ulBank;
+			pIns->ulInstrument = ((INSHCHUNK *)pchunk)->ulInstrument;
+			//Log("%3d regions, bank 0x%04X instrument %3d\n", ((INSHCHUNK *)pchunk)->cRegions, pIns->ulBank, pIns->ulInstrument);
 			break;
 
 		case IFFID_rgnh:
-			if (pins->nRegions < DLSMAXREGIONS)
+			if (pIns->nRegions < DLSMAXREGIONS)
 			{
 				RGNHCHUNK *p = (RGNHCHUNK *)pchunk;
-				DLSREGION *pregion = &pins->Regions[pins->nRegions];
+				DLSREGION *pregion = &pIns->Regions[pIns->nRegions];
 				pregion->uKeyMin = (BYTE)p->RangeKey.usLow;
 				pregion->uKeyMax = (BYTE)p->RangeKey.usHigh;
 				pregion->fuOptions = (BYTE)(p->usKeyGroup & DLSREGION_KEYGROUPMASK);
 				if (p->fusOptions & F_RGN_OPTION_SELFNONEXCLUSIVE) pregion->fuOptions |= DLSREGION_SELFNONEXCLUSIVE;
-				//Log("  Region %d: fusOptions=0x%02X usKeyGroup=0x%04X ", pins->nRegions, p->fusOptions, p->usKeyGroup);
+				//Log("  Region %d: fusOptions=0x%02X usKeyGroup=0x%04X ", pIns->nRegions, p->fusOptions, p->usKeyGroup);
 				//Log("KeyRange[%3d,%3d] ", p->RangeKey.usLow, p->RangeKey.usHigh);
 			}
 			break;
 
 		case IFFID_wlnk:
-			if (pins->nRegions < DLSMAXREGIONS)
+			if (pIns->nRegions < DLSMAXREGIONS)
 			{
-				DLSREGION *pregion = &pins->Regions[pins->nRegions];
+				DLSREGION *pregion = &pIns->Regions[pIns->nRegions];
 				WLNKCHUNK *p = (WLNKCHUNK *)pchunk;
 				pregion->nWaveLink = (WORD)p->ulTableIndex;
 				if ((pregion->nWaveLink < 16384) && (pregion->nWaveLink >= m_nMaxWaveLink)) m_nMaxWaveLink = pregion->nWaveLink + 1;
-				//Log("  WaveLink %d: fusOptions=0x%02X usPhaseGroup=0x%04X ", pins->nRegions, p->fusOptions, p->usPhaseGroup);
+				//Log("  WaveLink %d: fusOptions=0x%02X usPhaseGroup=0x%04X ", pIns->nRegions, p->fusOptions, p->usPhaseGroup);
 				//Log("ulChannel=%d ulTableIndex=%4d\n", p->ulChannel, p->ulTableIndex);
 			}
 			break;
 
 		case IFFID_wsmp:
-			if (pins->nRegions < DLSMAXREGIONS)
+			if (pIns->nRegions < DLSMAXREGIONS)
 			{
-				DLSREGION *pregion = &pins->Regions[pins->nRegions];
+				DLSREGION *pregion = &pIns->Regions[pIns->nRegions];
 				WSMPCHUNK *p = (WSMPCHUNK *)pchunk;
 				pregion->fuOptions |= DLSREGION_OVERRIDEWSMP;
 				pregion->uUnityNote = (BYTE)p->usUnityNote;
@@ -618,7 +618,7 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, D
 				if (lVolume > 256) lVolume = 256;
 				if (lVolume < 4) lVolume = 4;
 				pregion->usVolume = (WORD)lVolume;
-				//Log("  WaveSample %d: usUnityNote=%2d sFineTune=%3d ", pins->nRegions, p->usUnityNote, p->sFineTune);
+				//Log("  WaveSample %d: usUnityNote=%2d sFineTune=%3d ", pIns->nRegions, p->usUnityNote, p->sFineTune);
 				//Log("fulOptions=0x%04X loops=%d\n", p->fulOptions, p->cSampleLoops);
 				if ((p->cSampleLoops) && (p->cbSize + sizeof(WSMPSAMPLELOOP) <= p->len))
 				{
@@ -639,12 +639,12 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, D
 			if (m_nEnvelopes < DLSMAXENVELOPES)
 			{
 				ART1CHUNK *p = (ART1CHUNK *)pchunk;
-				if (pins->ulBank & F_INSTRUMENT_DRUMS)
+				if (pIns->ulBank & F_INSTRUMENT_DRUMS)
 				{
-					if (pins->nRegions >= DLSMAXREGIONS) break;
+					if (pIns->nRegions >= DLSMAXREGIONS) break;
 				} else
 				{
-					pins->nMelodicEnv = m_nEnvelopes + 1;
+					pIns->nMelodicEnv = m_nEnvelopes + 1;
 				}
 				if (p->cbSize+p->cConnectionBlocks*sizeof(CONNECTIONBLOCK) > p->len) break;
 				DLSENVELOPE *penv = &m_Envelopes[m_nEnvelopes];
@@ -682,7 +682,7 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, D
 							if (attacktime < 0) attacktime = 0;
 							if (attacktime > 20000) attacktime = 20000;
 							if (attacktime >= 20) penv->wVolAttack = (WORD)(attacktime / 20);
-							//Log("%3d: Envelope Attack Time set to %d (%d time cents)\n", (DWORD)(pins->ulInstrument & 0x7F)|((pins->ulBank >> 16) & 0x8000), attacktime, pblk->lScale);
+							//Log("%3d: Envelope Attack Time set to %d (%d time cents)\n", (DWORD)(pIns->ulInstrument & 0x7F)|((pIns->ulBank >> 16) & 0x8000), attacktime, pblk->lScale);
 						}
 						break;
 
@@ -694,7 +694,7 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, D
 							LONG decaytime = DLS32BitTimeCentsToMilliseconds(pblk->lScale);
 							if (decaytime > 20000) decaytime = 20000;
 							if (decaytime >= 20) penv->wVolDecay = (WORD)(decaytime / 20);
-							//Log("%3d: Envelope Decay Time set to %d (%d time cents)\n", (DWORD)(pins->ulInstrument & 0x7F)|((pins->ulBank >> 16) & 0x8000), decaytime, pblk->lScale);
+							//Log("%3d: Envelope Decay Time set to %d (%d time cents)\n", (DWORD)(pIns->ulInstrument & 0x7F)|((pIns->ulBank >> 16) & 0x8000), decaytime, pblk->lScale);
 						}
 						break;
 
@@ -706,7 +706,7 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, D
 							LONG releasetime = DLS32BitTimeCentsToMilliseconds(pblk->lScale);
 							if (releasetime > 20000) releasetime = 20000;
 							if (releasetime >= 20) penv->wVolRelease = (WORD)(releasetime / 20);
-							//Log("%3d: Envelope Release Time set to %d (%d time cents)\n", (DWORD)(pins->ulInstrument & 0x7F)|((pins->ulBank >> 16) & 0x8000), penv->wVolRelease, pblk->lScale);
+							//Log("%3d: Envelope Release Time set to %d (%d time cents)\n", (DWORD)(pIns->ulInstrument & 0x7F)|((pIns->ulBank >> 16) & 0x8000), penv->wVolRelease, pblk->lScale);
 						}
 						break;
 
@@ -716,7 +716,7 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, D
 						{
 							LONG l = pblk->lScale / (1000*512);
 							if ((l >= 0) || (l <= 128)) penv->nVolSustainLevel = (BYTE)l;
-							//Log("%3d: Envelope Sustain Level set to %d (%d)\n", (DWORD)(pins->ulInstrument & 0x7F)|((pins->ulBank >> 16) & 0x8000), l, pblk->lScale);
+							//Log("%3d: Envelope Sustain Level set to %d (%d)\n", (DWORD)(pIns->ulInstrument & 0x7F)|((pIns->ulBank >> 16) & 0x8000), l, pblk->lScale);
 						}
 						break;
 
@@ -731,9 +731,9 @@ BOOL CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pins, LPVOID pvchunk, D
 		case IFFID_INAM:
 			{
 				UINT len = (pchunk->len < 32) ? pchunk->len : 31;
-				if (len) memcpy(pins->szName, ((LPCSTR)pchunk)+8, len);
-				pins->szName[31] = 0;
-				//Log("%s\n", (DWORD)pins->szName);
+				if (len) memcpy(pIns->szName, ((LPCSTR)pchunk)+8, len);
+				pIns->szName[31] = 0;
+				//Log("%s\n", (DWORD)pIns->szName);
 			}
 			break;
 	#if 0
@@ -774,16 +774,16 @@ BOOL CDLSBank::UpdateSF2PresetData(LPVOID pvsf2, LPVOID pvchunk, DWORD dwMaxLen)
 			Log("phdr: %d instruments\n", m_nInstruments);
 		#endif
 			SFPRESETHEADER *psfh = (SFPRESETHEADER *)(pchunk+1);
-			DLSINSTRUMENT *pins = m_pInstruments;
-			for (UINT i=0; i<m_nInstruments; i++, psfh++, pins++)
+			DLSINSTRUMENT *pIns = m_pInstruments;
+			for (UINT i=0; i<m_nInstruments; i++, psfh++, pIns++)
 			{
-				memcpy(pins->szName, psfh->achPresetName, 20);
-				pins->szName[20] = 0;
-				pins->ulInstrument = psfh->wPreset & 0x7F;
-				pins->ulBank = (psfh->wBank >= 128) ? F_INSTRUMENT_DRUMS : (psfh->wBank << 8);
-				pins->wPresetBagNdx = psfh->wPresetBagNdx;
-				pins->wPresetBagNum = 1;
-				if (psfh[1].wPresetBagNdx > pins->wPresetBagNdx) pins->wPresetBagNum = (WORD)(psfh[1].wPresetBagNdx - pins->wPresetBagNdx);
+				memcpy(pIns->szName, psfh->achPresetName, 20);
+				pIns->szName[20] = 0;
+				pIns->ulInstrument = psfh->wPreset & 0x7F;
+				pIns->ulBank = (psfh->wBank >= 128) ? F_INSTRUMENT_DRUMS : (psfh->wBank << 8);
+				pIns->wPresetBagNdx = psfh->wPresetBagNdx;
+				pIns->wPresetBagNum = 1;
+				if (psfh[1].wPresetBagNdx > pIns->wPresetBagNdx) pIns->wPresetBagNum = (WORD)(psfh[1].wPresetBagNdx - pIns->wPresetBagNdx);
 			}
 		}
 		break;
@@ -908,12 +908,12 @@ BOOL CDLSBank::ConvertSF2ToDLS(LPVOID pvsf2info)
 //----------------------------------------------
 {
 	SF2LOADERINFO *psf2;
-	DLSINSTRUMENT *pins;
+	DLSINSTRUMENT *pIns;
 
 	if ((!m_pInstruments) || (!m_pSamplesEx)) return FALSE;
 	psf2 = (SF2LOADERINFO *)pvsf2info;
-	pins = m_pInstruments;
-	for (UINT nIns=0; nIns<m_nInstruments; nIns++, pins++)
+	pIns = m_pInstruments;
+	for (UINT nIns=0; nIns<m_nInstruments; nIns++, pIns++)
 	{
 		DLSENVELOPE env;
 		UINT nInstrNdx = 0;
@@ -925,9 +925,9 @@ BOOL CDLSBank::ConvertSF2ToDLS(LPVOID pvsf2info)
 		env.nVolSustainLevel = 128;
 		env.nDefPan = 128;
 		// Load Preset Bags
-		for (UINT ipbagcnt=0; ipbagcnt<(UINT)pins->wPresetBagNum; ipbagcnt++)
+		for (UINT ipbagcnt=0; ipbagcnt<(UINT)pIns->wPresetBagNum; ipbagcnt++)
 		{
-			UINT ipbagndx = pins->wPresetBagNdx + ipbagcnt;
+			UINT ipbagndx = pIns->wPresetBagNdx + ipbagcnt;
 			if ((ipbagndx+1 >= psf2->nPresetBags) || (!psf2->pPresetBags)) break;
 			// Load generators for each preset bag
 			SFPRESETBAG *pbag = psf2->pPresetBags + ipbagndx;
@@ -963,34 +963,34 @@ BOOL CDLSBank::ConvertSF2ToDLS(LPVOID pvsf2info)
 				default:
 					Log("Ins %3d: bag %3d gen %3d: ", nIns, ipbagndx, ipgenndx);
 					Log("genoper=%d amount=0x%04X ", pgen->sfGenOper, pgen->genAmount);
-					Log((pins->ulBank & F_INSTRUMENT_DRUMS) ? "(drum)\n" : "\n");
+					Log((pSmp->ulBank & F_INSTRUMENT_DRUMS) ? "(drum)\n" : "\n");
 #endif
 				}
 			}
 		}
 		// Envelope
-		if ((m_nEnvelopes < DLSMAXENVELOPES) && (!(pins->ulBank & F_INSTRUMENT_DRUMS)))
+		if ((m_nEnvelopes < DLSMAXENVELOPES) && (!(pIns->ulBank & F_INSTRUMENT_DRUMS)))
 		{
 			m_Envelopes[m_nEnvelopes] = env;
 			m_nEnvelopes++;
-			pins->nMelodicEnv = m_nEnvelopes;
+			pIns->nMelodicEnv = m_nEnvelopes;
 		}
 		// Load Instrument Bags
 		if ((!nInstrNdx) || (nInstrNdx >= psf2->nInsts) || (!psf2->pInsts)) continue;
 		nInstrNdx--;
-		pins->nRegions = psf2->pInsts[nInstrNdx+1].wInstBagNdx - psf2->pInsts[nInstrNdx].wInstBagNdx;
-		//Log("\nIns %3d, %2d regions:\n", nIns, pins->nRegions);
-		if (pins->nRegions > DLSMAXREGIONS) pins->nRegions = DLSMAXREGIONS;
-		DLSREGION *pRgn = pins->Regions;
-		for (UINT nRgn=0; nRgn<pins->nRegions; nRgn++, pRgn++)
+		pIns->nRegions = psf2->pInsts[nInstrNdx+1].wInstBagNdx - psf2->pInsts[nInstrNdx].wInstBagNdx;
+		//Log("\nIns %3d, %2d regions:\n", nIns, pSmp->nRegions);
+		if (pIns->nRegions > DLSMAXREGIONS) pIns->nRegions = DLSMAXREGIONS;
+		DLSREGION *pRgn = pIns->Regions;
+		for (UINT nRgn=0; nRgn<pIns->nRegions; nRgn++, pRgn++)
 		{
 			UINT ibagcnt = psf2->pInsts[nInstrNdx].wInstBagNdx + nRgn;
 			if ((ibagcnt >= psf2->nInstBags) || (!psf2->pInstBags)) break;
 			// Create a new envelope for drums
 			DLSENVELOPE *penv = &env;
-			if (pins->ulBank & F_INSTRUMENT_DRUMS)
+			if (pIns->ulBank & F_INSTRUMENT_DRUMS)
 			{
-				if ((m_nEnvelopes < DLSMAXENVELOPES) && (!(pins->ulBank & F_INSTRUMENT_DRUMS)))
+				if ((m_nEnvelopes < DLSMAXENVELOPES) && (!(pIns->ulBank & F_INSTRUMENT_DRUMS)))
 				{
 					m_Envelopes[m_nEnvelopes] = env;
 					penv = &m_Envelopes[m_nEnvelopes];
@@ -998,9 +998,9 @@ BOOL CDLSBank::ConvertSF2ToDLS(LPVOID pvsf2info)
 					pRgn->uPercEnv = (WORD)m_nEnvelopes;
 				}
 			} else
-			if (pins->nMelodicEnv)
+			if (pIns->nMelodicEnv)
 			{
-				penv = &m_Envelopes[pins->nMelodicEnv-1];
+				penv = &m_Envelopes[pIns->nMelodicEnv-1];
 			}
 			// Region Default Values
 			LONG lAttn = lAttenuation;
@@ -1049,7 +1049,7 @@ BOOL CDLSBank::ConvertSF2ToDLS(LPVOID pvsf2info)
 					lAttn = -(int)value;
 					break;
 				case SF2_GEN_SAMPLEID:
-					//if (nIns == 9) Log("Region %d/%d: SampleID = %d\n", nRgn, pins->nRegions, value);
+					//if (nIns == 9) Log("Region %d/%d: SampleID = %d\n", nRgn, pSmp->nRegions, value);
 					if ((m_pSamplesEx) && ((UINT)value < m_nSamplesEx))
 					{
 						pRgn->nWaveLink = value;
@@ -1243,9 +1243,9 @@ BOOL CDLSBank::Open(LPCSTR lpszFileName)
 					{
 						if ((psublist->listid == IFFID_ins) && (nInsDef < m_nInstruments) && (m_pInstruments))
 						{
-							DLSINSTRUMENT *pins = &m_pInstruments[nInsDef];
+							DLSINSTRUMENT *pIns = &m_pInstruments[nInsDef];
 							//Log("Instrument %d:\n", nInsDef);
-							UpdateInstrumentDefinition(pins, (IFFCHUNK *)psublist, psublist->len + 8);
+							UpdateInstrumentDefinition(pIns, (IFFCHUNK *)psublist, psublist->len + 8);
 							nInsDef++;
 						}
 					} else
@@ -1342,13 +1342,13 @@ BOOL CDLSBank::Open(LPCSTR lpszFileName)
 UINT CDLSBank::GetRegionFromKey(UINT nIns, UINT nKey)
 //---------------------------------------------------
 {
-	DLSINSTRUMENT *pins;
+	DLSINSTRUMENT *pIns;
 	
 	if ((!m_pInstruments) || (nIns >= m_nInstruments)) return 0;
-	pins = &m_pInstruments[nIns];
-	for (UINT rgn=0; rgn<pins->nRegions; rgn++)
+	pIns = &m_pInstruments[nIns];
+	for (UINT rgn=0; rgn<pIns->nRegions; rgn++)
 	{
-		if ((nKey >= pins->Regions[rgn].uKeyMin) && (nKey <= pins->Regions[rgn].uKeyMax))
+		if ((nKey >= pIns->Regions[rgn].uKeyMin) && (nKey <= pIns->Regions[rgn].uKeyMax))
 		{
 			return rgn;
 		}
@@ -1368,7 +1368,7 @@ BOOL CDLSBank::FreeWaveForm(LPBYTE p)
 BOOL CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen)
 //-------------------------------------------------------------------------------
 {
-	DLSINSTRUMENT *pins;
+	DLSINSTRUMENT *pIns;
 	DWORD dwOffset;
 	UINT nWaveLink;
 	FILE *f;
@@ -1384,15 +1384,15 @@ BOOL CDLSBank::ExtractWaveForm(UINT nIns, UINT nRgn, LPBYTE *ppWave, DWORD *pLen
 	}
 	*ppWave = NULL;
 	*pLen = 0;
-	pins = &m_pInstruments[nIns];
-	if (nRgn >= pins->nRegions)
+	pIns = &m_pInstruments[nIns];
+	if (nRgn >= pIns->nRegions)
 	{
 	#ifdef DLSBANK_LOG
-		Log("invalid waveform region: nIns=%d nRgn=%d pins->nRegions=%d\n", nIns, nRgn, pins->nRegions);
+		Log("invalid waveform region: nIns=%d nRgn=%d pSmp->nRegions=%d\n", nIns, nRgn, pSmp->nRegions);
 	#endif
 		return FALSE;
 	}
-	nWaveLink = pins->Regions[nRgn].nWaveLink;
+	nWaveLink = pIns->Regions[nRgn].nWaveLink;
 	if (nWaveLink >= m_nWaveForms)
 	{
 	#ifdef DLSBANK_LOG
@@ -1469,22 +1469,22 @@ static int DlsFreqToTranspose(ULONG freq, int nMidiFTune)
 BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT nRgn, int transpose)
 //---------------------------------------------------------------------------------------------------
 {
-	DLSINSTRUMENT *pins;
+	DLSINSTRUMENT *pIns;
 	LPBYTE pWaveForm = NULL;
 	DWORD dwLen = 0, dwWSMPOffset = 0;
 	BOOL bOk, bWaveForm;
 	
 	if ((!m_pInstruments) || (nIns >= m_nInstruments) || (!pSndFile)) return FALSE;
-	pins = &m_pInstruments[nIns];
-	if (nRgn >= pins->nRegions) return FALSE;
+	pIns = &m_pInstruments[nIns];
+	if (nRgn >= pIns->nRegions) return FALSE;
 	if (!ExtractWaveForm(nIns, nRgn, &pWaveForm, &dwLen)) return FALSE;
 	if ((!pWaveForm) || (dwLen < 16)) return FALSE;
 	bOk = FALSE;
 	if (m_nType & SOUNDBANK_TYPE_SF2)
 	{
 		pSndFile->DestroySample(nSample);
-		UINT nWaveLink = pins->Regions[nRgn].nWaveLink;
-		MODINSTRUMENT *psmp = &pSndFile->Ins[nSample];
+		UINT nWaveLink = pIns->Regions[nRgn].nWaveLink;
+		MODSAMPLE *psmp = &pSndFile->Samples[nSample];
 		if (pSndFile->m_nSamples < nSample) pSndFile->m_nSamples = nSample;
 		if ((nWaveLink < m_nSamplesEx) && (m_pSamplesEx))
 		{
@@ -1494,8 +1494,8 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT
 		#endif
 			psmp->nLength = dwLen / 2;
 			psmp->uFlags = CHN_16BIT;
-			psmp->nLoopStart = pins->Regions[nRgn].ulLoopStart;
-			psmp->nLoopEnd = pins->Regions[nRgn].ulLoopEnd;
+			psmp->nLoopStart = pIns->Regions[nRgn].ulLoopStart;
+			psmp->nLoopEnd = pIns->Regions[nRgn].ulLoopEnd;
 			psmp->nC5Speed = p->dwSampleRate;
 			psmp->nGlobalVol = 64;
 			psmp->nVolume = 256;
@@ -1511,8 +1511,8 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT
 	}
 	if (bWaveForm)
 	{
-		MODINSTRUMENT *psmp = &pSndFile->Ins[nSample];
-		DLSREGION *pRgn = &pins->Regions[nRgn];
+		MODSAMPLE *psmp = &pSndFile->Samples[nSample];
+		DLSREGION *pRgn = &pIns->Regions[nRgn];
 		psmp->uFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 		if (pRgn->fuOptions & DLSREGION_SAMPLELOOP) psmp->uFlags |= CHN_LOOP;
 		if (pRgn->fuOptions & DLSREGION_SUSTAINLOOP) psmp->uFlags |= CHN_SUSTAINLOOP;
@@ -1577,7 +1577,7 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT
 			if (lVolume < 16) lVolume = 16;
 			psmp->nGlobalVol = (BYTE)(lVolume / 4);	// 0-64
 		}
-		if (pins->ulBank & F_INSTRUMENT_DRUMS)
+		if (pIns->ulBank & F_INSTRUMENT_DRUMS)
 		{
 			if ((pRgn->uPercEnv) && (pRgn->uPercEnv <= m_nEnvelopes))
 			{
@@ -1586,13 +1586,13 @@ BOOL CDLSBank::ExtractSample(CSoundFile *pSndFile, UINT nSample, UINT nIns, UINT
 			}
 		} else
 		{
-			if ((pins->nMelodicEnv) && (pins->nMelodicEnv <= m_nEnvelopes))
+			if ((pIns->nMelodicEnv) && (pIns->nMelodicEnv <= m_nEnvelopes))
 			{
-				psmp->nPan = m_Envelopes[pins->nMelodicEnv-1].nDefPan;
+				psmp->nPan = m_Envelopes[pIns->nMelodicEnv-1].nDefPan;
 				if (pSndFile->m_nType & MOD_TYPE_XM) psmp->uFlags |= CHN_PANNING;
 			}
 		}
-		if (pins->szName[0]) memcpy(pSndFile->m_szNames[nSample], pins->szName, 31);
+		if (pIns->szName[0]) memcpy(pSndFile->m_szNames[nSample], pIns->szName, 31);
 		bOk = TRUE;
 	}
 	FreeWaveForm(pWaveForm);
@@ -1604,32 +1604,32 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 //-------------------------------------------------------------------------------------------
 {
 	BYTE RgnToSmp[DLSMAXREGIONS];
-	DLSINSTRUMENT *pins;
+	DLSINSTRUMENT *pIns;
 	INSTRUMENTHEADER *penv;
 	UINT nSample, nRgnMin, nRgnMax, nEnv;
 	
 	if ((!m_pInstruments) || (nIns >= m_nInstruments) || (!pSndFile)) return FALSE;
-	pins = &m_pInstruments[nIns];
-	if (pins->ulBank & F_INSTRUMENT_DRUMS)
+	pIns = &m_pInstruments[nIns];
+	if (pIns->ulBank & F_INSTRUMENT_DRUMS)
 	{
-		if (nDrumRgn >= pins->nRegions) return FALSE;
+		if (nDrumRgn >= pIns->nRegions) return FALSE;
 		nRgnMin = nDrumRgn;
 		nRgnMax = nDrumRgn+1;
-		nEnv = pins->Regions[nDrumRgn].uPercEnv;
+		nEnv = pIns->Regions[nDrumRgn].uPercEnv;
 	} else
 	{
-		if (!pins->nRegions) return FALSE;
+		if (!pIns->nRegions) return FALSE;
 		nRgnMin = 0;
-		nRgnMax = pins->nRegions;
-		nEnv = pins->nMelodicEnv;
+		nRgnMax = pIns->nRegions;
+		nEnv = pIns->nMelodicEnv;
 	}
 #ifdef DLSINSTR_LOG
-	Log("DLS Instrument #%d: %s\n", nIns, pins->szName);
-	Log("  Bank=0x%04X Instrument=0x%04X\n", pins->ulBank, pins->ulInstrument);
-	Log("  %2d regions, nMelodicEnv=%d\n", pins->nRegions, pins->nMelodicEnv);
-	for (UINT iDbg=0; iDbg<pins->nRegions; iDbg++)
+	Log("DLS Instrument #%d: %s\n", nIns, pSmp->szName);
+	Log("  Bank=0x%04X Instrument=0x%04X\n", pSmp->ulBank, pSmp->ulInstrument);
+	Log("  %2d regions, nMelodicEnv=%d\n", pSmp->nRegions, pSmp->nMelodicEnv);
+	for (UINT iDbg=0; iDbg<pSmp->nRegions; iDbg++)
 	{
-		DLSREGION *prgn = &pins->Regions[iDbg];
+		DLSREGION *prgn = &pSmp->Regions[iDbg];
 		Log(" Region %d:\n", iDbg);
 		Log("  WaveLink = %d (loop [%5d, %5d])\n", prgn->nWaveLink, prgn->ulLoopStart, prgn->ulLoopEnd);
 		Log("  Key Range: [%2d, %2d]\n", prgn->uKeyMin, prgn->uKeyMax);
@@ -1651,14 +1651,14 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 // -! BEHAVIOUR_CHANGE#0003
 	}
 	// Initializes Instrument
-	if (pins->ulBank & F_INSTRUMENT_DRUMS)
+	if (pIns->ulBank & F_INSTRUMENT_DRUMS)
 	{
 		CHAR s[64] = "";
-		UINT key = pins->Regions[nDrumRgn].uKeyMin;
+		UINT key = pIns->Regions[nDrumRgn].uKeyMin;
 		if ((key >= 24) && (key <= 84)) lstrcpy(s, szMidiPercussionNames[key-24]);
-		if (pins->szName[0])
+		if (pIns->szName[0])
 		{
-			wsprintf(&s[strlen(s)], " (%s", pins->szName);
+			wsprintf(&s[strlen(s)], " (%s", pIns->szName);
 			int n = strlen(s);
 			while ((n) && (s[n-1] == ' '))
 			{
@@ -1671,32 +1671,32 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 		strcpy(penv->name, s);
 	} else
 	{
-		memcpy(penv->name, pins->szName, 32);
+		memcpy(penv->name, pIns->szName, 32);
 		SetNullTerminator(penv->name);
 	}
 	int nTranspose = 0;
 	for (UINT iNoteMap=0; iNoteMap<NOTE_MAX; iNoteMap++)
 	{
 		penv->NoteMap[iNoteMap] = (BYTE)(iNoteMap+1);
-		if (pins->ulBank & F_INSTRUMENT_DRUMS)
+		if (pIns->ulBank & F_INSTRUMENT_DRUMS)
 		{
 			if (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MID|MOD_TYPE_MPT))
 			{
-				if (iNoteMap < pins->Regions[nDrumRgn].uKeyMin) penv->NoteMap[iNoteMap] = (BYTE)(pins->Regions[nDrumRgn].uKeyMin + 1);
-				if (iNoteMap > pins->Regions[nDrumRgn].uKeyMax) penv->NoteMap[iNoteMap] = (BYTE)(pins->Regions[nDrumRgn].uKeyMax + 1);
+				if (iNoteMap < pIns->Regions[nDrumRgn].uKeyMin) penv->NoteMap[iNoteMap] = (BYTE)(pIns->Regions[nDrumRgn].uKeyMin + 1);
+				if (iNoteMap > pIns->Regions[nDrumRgn].uKeyMax) penv->NoteMap[iNoteMap] = (BYTE)(pIns->Regions[nDrumRgn].uKeyMax + 1);
 			} else
-			if (iNoteMap == pins->Regions[nDrumRgn].uKeyMin)
+			if (iNoteMap == pIns->Regions[nDrumRgn].uKeyMin)
 			{
-				nTranspose = pins->Regions[nDrumRgn].uKeyMin - 60;
+				nTranspose = pIns->Regions[nDrumRgn].uKeyMin - 60;
 			}
 		}
 	}
 	penv->nFadeOut = 1024;
 	penv->nGlobalVol = 64;	// Maximum
 	penv->nPan = 128;		// Center Pan
-	penv->nMidiProgram = (BYTE)(pins->ulInstrument & 0x7F);
-	penv->nMidiChannel = (BYTE)((pins->ulBank & F_INSTRUMENT_DRUMS) ? 10 : 0);
-	penv->wMidiBank = (WORD)(((pins->ulBank & 0x7F00) >> 1) | (pins->ulBank & 0x7F));
+	penv->nMidiProgram = (BYTE)(pIns->ulInstrument & 0x7F);
+	penv->nMidiChannel = (BYTE)((pIns->ulBank & F_INSTRUMENT_DRUMS) ? 10 : 0);
+	penv->wMidiBank = (WORD)(((pIns->ulBank & 0x7F00) >> 1) | (pIns->ulBank & 0x7F));
 	penv->nPPC = 60;		// C-5
 	penv->nNNA = NNA_NOTEOFF;
 	penv->nDCT = DCT_NOTE;
@@ -1714,13 +1714,13 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 	{
 		BOOL bDupRgn;
 		UINT nSmp;
-		DLSREGION *pRgn = &pins->Regions[nRgn];
+		DLSREGION *pRgn = &pIns->Regions[nRgn];
 		// Elimitate Duplicate Regions
 		nSmp = 0;
 		bDupRgn = FALSE;
 		for (UINT iDup=nRgnMin; iDup<nRgn; iDup++)
 		{
-			DLSREGION *pRgn2 = &pins->Regions[iDup];
+			DLSREGION *pRgn2 = &pIns->Regions[iDup];
 			if (((pRgn2->nWaveLink == pRgn->nWaveLink)
 			  && (pRgn2->ulLoopEnd == pRgn->ulLoopEnd)
 			  && (pRgn2->ulLoopStart == pRgn->ulLoopStart))
@@ -1742,7 +1742,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 				nSmp = RgnToSmp[nRgn-1];
 			} else
 			{
-				while ((nSample < MAX_SAMPLES) && ((pSndFile->Ins[nSample].pSample) || (pSndFile->m_szNames[nSample][0]))) nSample++;
+				while ((nSample < MAX_SAMPLES) && ((pSndFile->Samples[nSample].pSample) || (pSndFile->m_szNames[nSample][0]))) nSample++;
 				if (nSample >= MAX_SAMPLES) break;
 				if (nSample > pSndFile->m_nSamples) pSndFile->m_nSamples = nSample;
 				nSmp = nSample;
@@ -1881,7 +1881,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 			penv->nVolEnv = (BYTE)nPoint;
 		}
 	}
-	if (pins->ulBank & F_INSTRUMENT_DRUMS)
+	if (pIns->ulBank & F_INSTRUMENT_DRUMS)
 	{
 		// Create a default envelope for drums
 		penv->dwFlags &= ~ENV_VOLSUSTAIN;

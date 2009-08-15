@@ -88,26 +88,26 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 	for (UINT ins=1; ins<=nos; ins++, dwMemPos+=smpsize) if (ins<=m_nSamples)
 	{
 		pus	= (ULTSAMPLE *)(lpStream+dwMemPos);
-		MODINSTRUMENT *pins = &Ins[ins];
+		MODSAMPLE *pSmp = &Samples[ins];
 		memcpy(m_szNames[ins], pus->samplename, 31);
-		memcpy(pins->name, pus->dosname, 12);
-		pins->nLoopStart = pus->loopstart;
-		pins->nLoopEnd = pus->loopend;
-		pins->nLength = pus->sizeend - pus->sizestart;
-		pins->nVolume = pus->volume;
-		pins->nGlobalVol = 64;
-		pins->nC5Speed = 8363;
+		memcpy(pSmp->filename, pus->dosname, 12);
+		pSmp->nLoopStart = pus->loopstart;
+		pSmp->nLoopEnd = pus->loopend;
+		pSmp->nLength = pus->sizeend - pus->sizestart;
+		pSmp->nVolume = pus->volume;
+		pSmp->nGlobalVol = 64;
+		pSmp->nC5Speed = 8363;
 		if (pmh->id[14] >= '4')
 		{
-			pins->nC5Speed = pus->finetune;
+			pSmp->nC5Speed = pus->finetune;
 		}
-		if (pus->flags & ULT_LOOP) pins->uFlags |= CHN_LOOP;
-		if (pus->flags & ULT_BIDI) pins->uFlags |= CHN_PINGPONGLOOP;
+		if (pus->flags & ULT_LOOP) pSmp->uFlags |= CHN_LOOP;
+		if (pus->flags & ULT_BIDI) pSmp->uFlags |= CHN_PINGPONGLOOP;
 		if (pus->flags & ULT_16BIT)
 		{
-			pins->uFlags |= CHN_16BIT;
-			pins->nLoopStart >>= 1;
-			pins->nLoopEnd >>= 1;
+			pSmp->uFlags |= CHN_16BIT;
+			pSmp->nLoopStart >>= 1;
+			pSmp->nLoopEnd >>= 1;
 		}
 	}
 	Order.ReadAsByte(lpStream+dwMemPos, 256, dwMemLength-dwMemPos);
@@ -213,11 +213,11 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 		}
 	}
 	// Reading Instruments
-	for (UINT smp=1; smp<=m_nSamples; smp++) if (Ins[smp].nLength)
+	for (UINT smp=1; smp<=m_nSamples; smp++) if (Samples[smp].nLength)
 	{
 		if (dwMemPos >= dwMemLength) return true;
-		UINT flags = (Ins[smp].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
-		dwMemPos += ReadSample(&Ins[smp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
+		UINT flags = (Samples[smp].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
+		dwMemPos += ReadSample(&Samples[smp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
 	}
 	return true;
 }

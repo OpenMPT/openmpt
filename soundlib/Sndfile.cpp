@@ -443,7 +443,7 @@ CSoundFile::CSoundFile() :
 
 	memset(Chn, 0, sizeof(Chn));
 	memset(ChnMix, 0, sizeof(ChnMix));
-	memset(Ins, 0, sizeof(Ins));
+	memset(Samples, 0, sizeof(Samples));
 	memset(ChnSettings, 0, sizeof(ChnSettings));
 	memset(Headers, 0, sizeof(Headers));
 	Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
@@ -504,7 +504,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_lpszPatternNames = NULL;
 	m_lpszSongComments = NULL;
 	m_nMixLevels = mixLevels_original;	// Will be overridden if appropriate.
-	memset(Ins, 0, sizeof(Ins));
+	memset(Samples, 0, sizeof(Samples));
 	memset(ChnMix, 0, sizeof(ChnMix));
 	memset(Chn, 0, sizeof(Chn));
 	memset(Headers, 0, sizeof(Headers));
@@ -644,34 +644,34 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		}
 	}
 	// Checking instruments
-	MODINSTRUMENT *pins = Ins;
-	for (UINT iIns=0; iIns<MAX_INSTRUMENTS; iIns++, pins++)
+	MODSAMPLE *pSmp = Samples;
+	for (UINT iIns=0; iIns<MAX_INSTRUMENTS; iIns++, pSmp++)
 	{
-		if (pins->pSample)
+		if (pSmp->pSample)
 		{
-			if (pins->nLoopEnd > pins->nLength) pins->nLoopEnd = pins->nLength;
-			if (pins->nLoopStart >= pins->nLoopEnd)
+			if (pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
+			if (pSmp->nLoopStart >= pSmp->nLoopEnd)
 			{
-				pins->nLoopStart = 0;
-				pins->nLoopEnd = 0;
+				pSmp->nLoopStart = 0;
+				pSmp->nLoopEnd = 0;
 			}
-			if (pins->nSustainEnd > pins->nLength) pins->nSustainEnd = pins->nLength;
-			if (pins->nSustainStart + 3 >= pins->nSustainEnd)
+			if (pSmp->nSustainEnd > pSmp->nLength) pSmp->nSustainEnd = pSmp->nLength;
+			if (pSmp->nSustainStart + 3 >= pSmp->nSustainEnd)
 			{
-				pins->nSustainStart = 0;
-				pins->nSustainEnd = 0;
+				pSmp->nSustainStart = 0;
+				pSmp->nSustainEnd = 0;
 			}
 		} else
 		{
-			pins->nLength = 0;
-			pins->nLoopStart = 0;
-			pins->nLoopEnd = 0;
-			pins->nSustainStart = 0;
-			pins->nSustainEnd = 0;
+			pSmp->nLength = 0;
+			pSmp->nLoopStart = 0;
+			pSmp->nLoopEnd = 0;
+			pSmp->nSustainStart = 0;
+			pSmp->nSustainEnd = 0;
 		}
-		if (!pins->nLoopEnd) pins->uFlags &= ~CHN_LOOP;
-		if (!pins->nSustainEnd) pins->uFlags &= ~CHN_SUSTAINLOOP;
-		if (pins->nGlobalVol > 64) pins->nGlobalVol = 64;
+		if (!pSmp->nLoopEnd) pSmp->uFlags &= ~CHN_LOOP;
+		if (!pSmp->nSustainEnd) pSmp->uFlags &= ~CHN_SUSTAINLOOP;
+		if (pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
 	}
 	// Check invalid instruments
 	while ((m_nInstruments > 0) && (!Headers[m_nInstruments])) m_nInstruments--;
@@ -799,11 +799,11 @@ BOOL CSoundFile::Destroy()
 
 	for (i=1; i<MAX_SAMPLES; i++)
 	{
-		MODINSTRUMENT *pins = &Ins[i];
-		if (pins->pSample)
+		MODSAMPLE *pSmp = &Samples[i];
+		if (pSmp->pSample)
 		{
-			FreeSample(pins->pSample);
-			pins->pSample = NULL;
+			FreeSample(pSmp->pSample);
+			pSmp->pSample = NULL;
 		}
 	}
 	for (i=0; i<MAX_INSTRUMENTS; i++)
@@ -1445,7 +1445,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 	if(resetMask & 2)
 	{
 		Chn[i].nNote = Chn[i].nNewNote = Chn[i].nNewIns = 0;
-		Chn[i].pInstrument = NULL;
+		Chn[i].pModSample = NULL;
 		Chn[i].pHeader = NULL;
 		Chn[i].nPortamentoDest = 0;
 		Chn[i].nCommand = 0;
@@ -1470,7 +1470,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nLoopEnd = 0;
 		Chn[i].nROfs = Chn[i].nLOfs = 0;
 		Chn[i].pSample = NULL;
-		Chn[i].pInstrument = NULL;
+		Chn[i].pModSample = NULL;
 		Chn[i].pHeader = NULL;
 		Chn[i].nCutOff = 0x7F;
 		Chn[i].nResonance = 0;
@@ -1663,7 +1663,7 @@ CString CSoundFile::GetPatternViewInstrumentName(UINT nInstr, bool returnEmptyIn
 	if (instrumentName == "") {
 		// if there's no instrument name, use name of sample associated with C-5.
  		//TODO: If there's no sample mapped to that note, we could check the other notes.
-		if (Headers[nInstr]->Keyboard[60] && Ins[Headers[nInstr]->Keyboard[60]].pSample) {
+		if (Headers[nInstr]->Keyboard[60] && Samples[Headers[nInstr]->Keyboard[60]].pSample) {
 			instrumentName.Format("s: %s", m_szNames[Headers[nInstr]->Keyboard[60]]); //60 is C-5
 		}
 	}
@@ -1747,13 +1747,13 @@ BOOL CSoundFile::CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *re
 
 #ifndef MODPLUG_NO_FILESAVE
 
-UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMaxLen)
+UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen)
 //-----------------------------------------------------------------------------------
 {
 	UINT len = 0, bufcount;
 	char buffer[4096];
-	signed char *pSample = (signed char *)pins->pSample;
-	UINT nLen = pins->nLength;
+	signed char *pSample = (signed char *)pSmp->pSample;
+	UINT nLen = pSmp->nLength;
 	
 	if ((nMaxLen) && (nLen > nMaxLen)) nLen = nMaxLen;
 // -> CODE#0023
@@ -1807,7 +1807,7 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 			{
 				int s_new = *p;
 				p++;
-				if (pins->uFlags & CHN_STEREO)
+				if (pSmp->uFlags & CHN_STEREO)
 				{
 					s_new = (s_new + (*p) + 1) >> 1;
 					p++;
@@ -1918,14 +1918,14 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 		bufcount = 0;
 		{
 			signed char *p = pSample;
-			int sinc = (pins->uFlags & CHN_16BIT) ? 2 : 1;
+			int sinc = (pSmp->uFlags & CHN_16BIT) ? 2 : 1;
 			int s_old = 0, s_ofs = (nFlags == RS_PCM8U) ? 0x80 : 0;
-			if (pins->uFlags & CHN_16BIT) p++;
+			if (pSmp->uFlags & CHN_16BIT) p++;
 			for (UINT j=0; j<len; j++)
 			{
 				int s_new = (signed char)(*p);
 				p += sinc;
-				if (pins->uFlags & CHN_STEREO)
+				if (pSmp->uFlags & CHN_STEREO)
 				{
 					s_new = (s_new + ((int)*p) + 1) >> 1;
 					p += sinc;
@@ -1962,41 +1962,41 @@ UINT CSoundFile::WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMa
 //	5 = signed 16-bit PCM data
 //	6 = unsigned 16-bit PCM data
 
-UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength, const WORD format)
+UINT CSoundFile::ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR lpMemFile, DWORD dwMemLength, const WORD format)
 //-----------------------------------------------------------------------------------------------------------------------
 {
-	if ((!pIns) || (pIns->nLength < 2) || (!lpMemFile)) return 0;
+	if ((!pSmp) || (pSmp->nLength < 2) || (!lpMemFile)) return 0;
 
-	if(pIns->nLength > MAX_SAMPLE_LENGTH)
-		pIns->nLength = MAX_SAMPLE_LENGTH;
+	if(pSmp->nLength > MAX_SAMPLE_LENGTH)
+		pSmp->nLength = MAX_SAMPLE_LENGTH;
 	
-	UINT len = 0, mem = pIns->nLength+6;
+	UINT len = 0, mem = pSmp->nLength+6;
 
-	pIns->uFlags &= ~(CHN_16BIT|CHN_STEREO);
+	pSmp->uFlags &= ~(CHN_16BIT|CHN_STEREO);
 	if (nFlags & RSF_16BIT)
 	{
 		mem *= 2;
-		pIns->uFlags |= CHN_16BIT;
+		pSmp->uFlags |= CHN_16BIT;
 	}
 	if (nFlags & RSF_STEREO)
 	{
 		mem *= 2;
-		pIns->uFlags |= CHN_STEREO;
+		pSmp->uFlags |= CHN_STEREO;
 	}
 
-	if ((pIns->pSample = AllocateSample(mem)) == NULL)
+	if ((pSmp->pSample = AllocateSample(mem)) == NULL)
 	{
-		pIns->nLength = 0;
+		pSmp->nLength = 0;
 		return 0;
 	}
 
 	// Check that allocated memory size is not less than what the modinstrument itself
 	// thinks it is.
-	if( mem < pIns->GetSampleSizeInBytes() )
+	if( mem < pSmp->GetSampleSizeInBytes() )
 	{
-		pIns->nLength = 0;
-		FreeSample(pIns->pSample);
-		pIns->pSample = NULL;
+		pSmp->nLength = 0;
+		FreeSample(pSmp->pSample);
+		pSmp->pSample = NULL;
 		MessageBox(0, str_SampleAllocationError, str_Error, MB_ICONERROR);
 		return 0;
 	}
@@ -2006,9 +2006,9 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	// 1: 8-bit unsigned PCM data
 	case RS_PCM8U:
 		{
-			len = pIns->nLength;
-			if (len > dwMemLength) len = pIns->nLength = dwMemLength;
-			LPSTR pSample = pIns->pSample;
+			len = pSmp->nLength;
+			if (len > dwMemLength) len = pSmp->nLength = dwMemLength;
+			LPSTR pSample = pSmp->pSample;
 			for (UINT j=0; j<len; j++) pSample[j] = (char)(lpMemFile[j] - 0x80); 
 		}
 		break;
@@ -2016,9 +2016,9 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	// 2: 8-bit ADPCM data with linear table
 	case RS_PCM8D:
 		{
-			len = pIns->nLength;
+			len = pSmp->nLength;
 			if (len > dwMemLength) break;
-			LPSTR pSample = pIns->pSample;
+			LPSTR pSample = pSmp->pSample;
 			const char *p = (const char *)lpMemFile;
 			int delta = 0;
 			for (UINT j=0; j<len; j++)
@@ -2032,11 +2032,11 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	// 3: 4-bit ADPCM data
 	case RS_ADPCM4:
 		{
-			len = (pIns->nLength + 1) / 2;
+			len = (pSmp->nLength + 1) / 2;
 			if (len > dwMemLength - 16) break;
 			memcpy(CompressionTable, lpMemFile, 16);
 			lpMemFile += 16;
-			LPSTR pSample = pIns->pSample;
+			LPSTR pSample = pSmp->pSample;
 			char delta = 0;
 			for (UINT j=0; j<len; j++)
 			{
@@ -2055,9 +2055,9 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	// 4: 16-bit ADPCM data with linear table
 	case RS_PCM16D:
 		{
-			len = pIns->nLength * 2;
+			len = pSmp->nLength * 2;
 			if (len > dwMemLength) break;
-			short int *pSample = (short int *)pIns->pSample;
+			short int *pSample = (short int *)pSmp->pSample;
 			short int *p = (short int *)lpMemFile;
 			int delta16 = 0;
 			for (UINT j=0; j<len; j+=2)
@@ -2070,17 +2070,17 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 
 	// 5: 16-bit signed PCM data
 	case RS_PCM16S:
-		len = pIns->nLength * 2;
-		if (len <= dwMemLength) memcpy(pIns->pSample, lpMemFile, len);
+		len = pSmp->nLength * 2;
+		if (len <= dwMemLength) memcpy(pSmp->pSample, lpMemFile, len);
 		break;
 
 	// 16-bit signed mono PCM motorola byte order
 	case RS_PCM16M:
-		len = pIns->nLength * 2;
+		len = pSmp->nLength * 2;
 		if (len > dwMemLength) len = dwMemLength & ~1;
 		if (len > 1)
 		{
-			char *pSample = (char *)pIns->pSample;
+			char *pSample = (char *)pSmp->pSample;
 			char *pSrc = (char *)lpMemFile;
 			for (UINT j=0; j<len; j+=2)
 			{
@@ -2093,9 +2093,9 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	// 6: 16-bit unsigned PCM data
 	case RS_PCM16U:
 		{
-			len = pIns->nLength * 2;
+			len = pSmp->nLength * 2;
 			if (len > dwMemLength) break;
-			short int *pSample = (short int *)pIns->pSample;
+			short int *pSample = (short int *)pSmp->pSample;
 			short int *pSrc = (short int *)lpMemFile;
 			for (UINT j=0; j<len; j+=2) *pSample++ = (*(pSrc++)) - 0x8000;
 		}
@@ -2103,10 +2103,10 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 
 	// 16-bit signed stereo big endian
 	case RS_STPCM16M:
-		len = pIns->nLength * 2;
+		len = pSmp->nLength * 2;
 		if (len*2 <= dwMemLength)
 		{
-			char *pSample = (char *)pIns->pSample;
+			char *pSample = (char *)pSmp->pSample;
 			char *pSrc = (char *)lpMemFile;
 			for (UINT j=0; j<len; j+=2)
 			{
@@ -2124,9 +2124,9 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	case RS_STPCM8U:
 	case RS_STPCM8D:
 		{
-			len = pIns->nLength;
+			len = pSmp->nLength;
 			char *psrc = (char *)lpMemFile;
-			char *pSample = (char *)pIns->pSample;
+			char *pSample = (char *)pSmp->pSample;
 			if (len*2 > dwMemLength) break;
 			for (UINT c=0; c<2; c++)
 			{
@@ -2159,9 +2159,9 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	case RS_STPCM16U:
 	case RS_STPCM16D:
 		{
-			len = pIns->nLength;
+			len = pSmp->nLength;
 			short int *psrc = (short int *)lpMemFile;
-			short int *pSample = (short int *)pIns->pSample;
+			short int *pSample = (short int *)pSmp->pSample;
 			if (len*4 > dwMemLength) break;
 			for (UINT c=0; c<2; c++)
 			{
@@ -2197,9 +2197,9 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		len = dwMemLength;
 		if (len < 4) break;
 		if ((nFlags == RS_IT2148) || (nFlags == RS_IT2158))
-			ITUnpack8Bit(pIns->pSample, pIns->nLength, (LPBYTE)lpMemFile, dwMemLength, (nFlags == RS_IT2158));
+			ITUnpack8Bit(pSmp->pSample, pSmp->nLength, (LPBYTE)lpMemFile, dwMemLength, (nFlags == RS_IT2158));
 		else
-			ITUnpack16Bit(pIns->pSample, pIns->nLength, (LPBYTE)lpMemFile, dwMemLength, (nFlags == RS_IT21516));
+			ITUnpack16Bit(pSmp->pSample, pSmp->nLength, (LPBYTE)lpMemFile, dwMemLength, (nFlags == RS_IT21516));
 		break;
 
 #ifndef MODPLUG_BASIC_SUPPORT
@@ -2210,10 +2210,10 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		{
 			int iadd = 0;
 			if (nFlags == RS_STIPCM8U) { iadd = -0x80; }
-			len = pIns->nLength;
+			len = pSmp->nLength;
 			if (len*2 > dwMemLength) len = dwMemLength >> 1;
 			LPBYTE psrc = (LPBYTE)lpMemFile;
-			LPBYTE pSample = (LPBYTE)pIns->pSample;
+			LPBYTE pSample = (LPBYTE)pSmp->pSample;
 			for (UINT j=0; j<len; j++)
 			{
 				pSample[j*2] = (char)(psrc[0] + iadd);
@@ -2230,10 +2230,10 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		{
 			int iadd = 0;
 			if (nFlags == RS_STIPCM16U) iadd = -32768;
-			len = pIns->nLength;
+			len = pSmp->nLength;
 			if (len*4 > dwMemLength) len = dwMemLength >> 2;
 			short int *psrc = (short int *)lpMemFile;
-			short int *pSample = (short int *)pIns->pSample;
+			short int *pSample = (short int *)pSmp->pSample;
 			for (UINT j=0; j<len; j++)
 			{
 				pSample[j*2] = (short int)(psrc[0] + iadd);
@@ -2251,11 +2251,11 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		if (dwMemLength > 9)
 		{
 			const char *psrc = lpMemFile;
-			char packcharacter = lpMemFile[8], *pdest = (char *)pIns->pSample;
+			char packcharacter = lpMemFile[8], *pdest = (char *)pSmp->pSample;
 			len += *((LPDWORD)(lpMemFile+4));
 			if (len > dwMemLength) len = dwMemLength;
-			UINT dmax = pIns->nLength;
-			if (pIns->uFlags & CHN_16BIT) dmax <<= 1;
+			UINT dmax = pSmp->nLength;
+			if (pSmp->uFlags & CHN_16BIT) dmax <<= 1;
 			AMSUnpack(psrc+9, len-9, pdest, dmax, packcharacter);
 		}
 		break;
@@ -2263,9 +2263,9 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	// PTM 8bit delta to 16-bit sample
 	case RS_PTM8DTO16:
 		{
-			len = pIns->nLength * 2;
+			len = pSmp->nLength * 2;
 			if (len > dwMemLength) break;
-			signed char *pSample = (signed char *)pIns->pSample;
+			signed char *pSample = (signed char *)pSmp->pSample;
 			signed char delta8 = 0;
 			for (UINT j=0; j<len; j++)
 			{
@@ -2281,13 +2281,13 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		len = dwMemLength;
 		if (len >= 4)
 		{
-			LPBYTE pSample = (LPBYTE)pIns->pSample;
+			LPBYTE pSample = (LPBYTE)pSmp->pSample;
 			LPBYTE ibuf = (LPBYTE)lpMemFile;
 			DWORD bitbuf = *((DWORD *)ibuf);
 			UINT bitnum = 32;
 			BYTE dlt = 0, lowbyte = 0;
 			ibuf += 4;
-			for (UINT j=0; j<pIns->nLength; j++)
+			for (UINT j=0; j<pSmp->nLength; j++)
 			{
 				BYTE hibyte;
 				BYTE sign;
@@ -2320,10 +2320,10 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 		len = dwMemLength;
 		if (len >= 4)
 		{
-			UINT maxlen = pIns->nLength;
-			if (pIns->uFlags & CHN_16BIT) maxlen <<= 1;
+			UINT maxlen = pSmp->nLength;
+			if (pSmp->uFlags & CHN_16BIT) maxlen <<= 1;
 			LPBYTE ibuf = (LPBYTE)lpMemFile, ibufmax = (LPBYTE)(lpMemFile+dwMemLength);
-			len = DMFUnpack((LPBYTE)pIns->pSample, ibuf, ibufmax, maxlen);
+			len = DMFUnpack((LPBYTE)pSmp->pSample, ibuf, ibufmax, maxlen);
 		}
 		break;
 
@@ -2331,25 +2331,25 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	// Mono PCM 24/32-bit signed & 32 bit float -> load sample, and normalize it to 16-bit
 	case RS_PCM24S:
 	case RS_PCM32S:
-		len = pIns->nLength * 3;
-		if (nFlags == RS_PCM32S) len += pIns->nLength;
+		len = pSmp->nLength * 3;
+		if (nFlags == RS_PCM32S) len += pSmp->nLength;
 		if (len > dwMemLength) break;
 		if (len > 4*8)
 		{
 			if(nFlags == RS_PCM24S)
 			{
 				char* pSrc = (char*)lpMemFile;
-				char* pDest = (char*)pIns->pSample;
-				CopyWavBuffer<3, 2, WavSigned24To16, MaxFinderSignedInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+				char* pDest = (char*)pSmp->pSample;
+				CopyWavBuffer<3, 2, WavSigned24To16, MaxFinderSignedInt<3> >(pSrc, len, pDest, pSmp->GetSampleSizeInBytes());
 			}
 			else //RS_PCM32S
 			{
 				char* pSrc = (char*)lpMemFile;
-				char* pDest = (char*)pIns->pSample;
+				char* pDest = (char*)pSmp->pSample;
 				if(format == 3)
-					CopyWavBuffer<4, 2, WavFloat32To16, MaxFinderFloat32>(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+					CopyWavBuffer<4, 2, WavFloat32To16, MaxFinderFloat32>(pSrc, len, pDest, pSmp->GetSampleSizeInBytes());
 				else
-					CopyWavBuffer<4, 2, WavSigned32To16, MaxFinderSignedInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+					CopyWavBuffer<4, 2, WavSigned32To16, MaxFinderSignedInt<4> >(pSrc, len, pDest, pSmp->GetSampleSizeInBytes());
 			}
 		}
 		break;
@@ -2359,41 +2359,41 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	case RS_STIPCM32S:
 		if(format == 3 && nFlags == RS_STIPCM32S) //Microsoft IEEE float
 		{
-			len = pIns->nLength * 6;
-			//pIns->nLength tells(?) the number of frames there
+			len = pSmp->nLength * 6;
+			//pSmp->nLength tells(?) the number of frames there
 			//are. One 'frame' of 1 byte(== 8 bit) mono data requires
 			//1 byte of space, while one frame of 3 byte(24 bit) 
 			//stereo data requires 3*2 = 6 bytes. This is(?)
 			//why there is factor 6.
 
-			len += pIns->nLength * 2;
+			len += pSmp->nLength * 2;
 			//Compared to 24 stereo, 32 bit stereo needs 16 bits(== 2 bytes)
 			//more per frame.
 
 			if(len > dwMemLength) break;
 			char* pSrc = (char*)lpMemFile;
-			char* pDest = (char*)pIns->pSample;
+			char* pDest = (char*)pSmp->pSample;
 			if (len > 8*8)
 			{
-				CopyWavBuffer<4, 2, WavFloat32To16, MaxFinderFloat32>(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+				CopyWavBuffer<4, 2, WavFloat32To16, MaxFinderFloat32>(pSrc, len, pDest, pSmp->GetSampleSizeInBytes());
 			}
 		}
 		else
 		{
-			len = pIns->nLength * 6;
-			if (nFlags == RS_STIPCM32S) len += pIns->nLength * 2;
+			len = pSmp->nLength * 6;
+			if (nFlags == RS_STIPCM32S) len += pSmp->nLength * 2;
 			if (len > dwMemLength) break;
 			if (len > 8*8)
 			{
 				char* pSrc = (char*)lpMemFile;
-				char* pDest = (char*)pIns->pSample;
+				char* pDest = (char*)pSmp->pSample;
 				if(nFlags == RS_STIPCM32S)
 				{
-					CopyWavBuffer<4,2,WavSigned32To16, MaxFinderSignedInt<4> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+					CopyWavBuffer<4,2,WavSigned32To16, MaxFinderSignedInt<4> >(pSrc, len, pDest, pSmp->GetSampleSizeInBytes());
 				}
 				if(nFlags == RS_STIPCM24S)
 				{
-					CopyWavBuffer<3,2,WavSigned24To16, MaxFinderSignedInt<3> >(pSrc, len, pDest, pIns->GetSampleSizeInBytes());
+					CopyWavBuffer<3,2,WavSigned24To16, MaxFinderSignedInt<3> >(pSrc, len, pDest, pSmp->GetSampleSizeInBytes());
 				}
 
 			}
@@ -2403,10 +2403,10 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 	// 16-bit signed big endian interleaved stereo
 	case RS_STIPCM16M:
 		{
-			len = pIns->nLength;
+			len = pSmp->nLength;
 			if (len*4 > dwMemLength) len = dwMemLength >> 2;
 			LPCBYTE psrc = (LPCBYTE)lpMemFile;
-			short int *pSample = (short int *)pIns->pSample;
+			short int *pSample = (short int *)pSmp->pSample;
 			for (UINT j=0; j<len; j++)
 			{
 				pSample[j*2] = (signed short)(((UINT)psrc[0] << 8) | (psrc[1]));
@@ -2423,41 +2423,41 @@ UINT CSoundFile::ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR lpMemFile, 
 
 	// Default: 8-bit signed PCM data
 	default:
-		len = pIns->nLength;
-		if (len > dwMemLength) len = pIns->nLength = dwMemLength;
-		memcpy(pIns->pSample, lpMemFile, len);
+		len = pSmp->nLength;
+		if (len > dwMemLength) len = pSmp->nLength = dwMemLength;
+		memcpy(pSmp->pSample, lpMemFile, len);
 	}
 	if (len > dwMemLength)
 	{
-		if (pIns->pSample)
+		if (pSmp->pSample)
 		{
-			pIns->nLength = 0;
-			FreeSample(pIns->pSample);
-			pIns->pSample = NULL;
+			pSmp->nLength = 0;
+			FreeSample(pSmp->pSample);
+			pSmp->pSample = NULL;
 		}
 		return 0;
 	}
-	AdjustSampleLoop(pIns);
+	AdjustSampleLoop(pSmp);
 	return len;
 }
 
 
-void CSoundFile::AdjustSampleLoop(MODINSTRUMENT *pIns)
+void CSoundFile::AdjustSampleLoop(MODSAMPLE *pSmp)
 //----------------------------------------------------
 {
-	if ((!pIns->pSample) || (!pIns->nLength)) return;
-	if (pIns->nLoopEnd > pIns->nLength) pIns->nLoopEnd = pIns->nLength;
-	if (pIns->nLoopStart >= pIns->nLoopEnd)
+	if ((!pSmp->pSample) || (!pSmp->nLength)) return;
+	if (pSmp->nLoopEnd > pSmp->nLength) pSmp->nLoopEnd = pSmp->nLength;
+	if (pSmp->nLoopStart >= pSmp->nLoopEnd)
 	{
-		pIns->nLoopStart = pIns->nLoopEnd = 0;
-		pIns->uFlags &= ~CHN_LOOP;
+		pSmp->nLoopStart = pSmp->nLoopEnd = 0;
+		pSmp->uFlags &= ~CHN_LOOP;
 	}
-	UINT len = pIns->nLength;
-	if (pIns->uFlags & CHN_16BIT)
+	UINT len = pSmp->nLength;
+	if (pSmp->uFlags & CHN_16BIT)
 	{
-		short int *pSample = (short int *)pIns->pSample;
+		short int *pSample = (short int *)pSmp->pSample;
 		// Adjust end of sample
-		if (pIns->uFlags & CHN_STEREO)
+		if (pSmp->uFlags & CHN_STEREO)
 		{
 			pSample[len*2+6] = pSample[len*2+4] = pSample[len*2+2] = pSample[len*2] = pSample[len*2-2];
 			pSample[len*2+7] = pSample[len*2+5] = pSample[len*2+3] = pSample[len*2+1] = pSample[len*2-1];
@@ -2465,37 +2465,37 @@ void CSoundFile::AdjustSampleLoop(MODINSTRUMENT *pIns)
 		{
 			pSample[len+4] = pSample[len+3] = pSample[len+2] = pSample[len+1] = pSample[len] = pSample[len-1];
 		}
-		if ((pIns->uFlags & (CHN_LOOP|CHN_PINGPONGLOOP|CHN_STEREO)) == CHN_LOOP)
+		if ((pSmp->uFlags & (CHN_LOOP|CHN_PINGPONGLOOP|CHN_STEREO)) == CHN_LOOP)
 		{
 			// Fix bad loops
-			if ((pIns->nLoopEnd+3 >= pIns->nLength) || (m_nType & MOD_TYPE_S3M))
+			if ((pSmp->nLoopEnd+3 >= pSmp->nLength) || (m_nType & MOD_TYPE_S3M))
 			{
-				pSample[pIns->nLoopEnd] = pSample[pIns->nLoopStart];
-				pSample[pIns->nLoopEnd+1] = pSample[pIns->nLoopStart+1];
-				pSample[pIns->nLoopEnd+2] = pSample[pIns->nLoopStart+2];
-				pSample[pIns->nLoopEnd+3] = pSample[pIns->nLoopStart+3];
-				pSample[pIns->nLoopEnd+4] = pSample[pIns->nLoopStart+4];
+				pSample[pSmp->nLoopEnd] = pSample[pSmp->nLoopStart];
+				pSample[pSmp->nLoopEnd+1] = pSample[pSmp->nLoopStart+1];
+				pSample[pSmp->nLoopEnd+2] = pSample[pSmp->nLoopStart+2];
+				pSample[pSmp->nLoopEnd+3] = pSample[pSmp->nLoopStart+3];
+				pSample[pSmp->nLoopEnd+4] = pSample[pSmp->nLoopStart+4];
 			}
 		}
 	} else
 	{
-		LPSTR pSample = pIns->pSample;
+		LPSTR pSample = pSmp->pSample;
 #ifndef FASTSOUNDLIB
 		// Crappy samples (except chiptunes) ?
-		if ((pIns->nLength > 0x100) && (m_nType & (MOD_TYPE_MOD|MOD_TYPE_S3M))
-		 && (!(pIns->uFlags & CHN_STEREO)))
+		if ((pSmp->nLength > 0x100) && (m_nType & (MOD_TYPE_MOD|MOD_TYPE_S3M))
+		 && (!(pSmp->uFlags & CHN_STEREO)))
 		{
-			int smpend = pSample[pIns->nLength-1], smpfix = 0, kscan;
-			for (kscan=pIns->nLength-1; kscan>0; kscan--)
+			int smpend = pSample[pSmp->nLength-1], smpfix = 0, kscan;
+			for (kscan=pSmp->nLength-1; kscan>0; kscan--)
 			{
 				smpfix = pSample[kscan-1];
 				if (smpfix != smpend) break;
 			}
 			int delta = smpfix - smpend;
-			if (((!(pIns->uFlags & CHN_LOOP)) || (kscan > (int)pIns->nLoopEnd))
+			if (((!(pSmp->uFlags & CHN_LOOP)) || (kscan > (int)pSmp->nLoopEnd))
 			 && ((delta < -8) || (delta > 8)))
 			{
-				while (kscan<(int)pIns->nLength)
+				while (kscan<(int)pSmp->nLength)
 				{
 					if (!(kscan & 7))
 					{
@@ -2509,7 +2509,7 @@ void CSoundFile::AdjustSampleLoop(MODINSTRUMENT *pIns)
 		}
 #endif
 		// Adjust end of sample
-		if (pIns->uFlags & CHN_STEREO)
+		if (pSmp->uFlags & CHN_STEREO)
 		{
 			pSample[len*2+6] = pSample[len*2+4] = pSample[len*2+2] = pSample[len*2] = pSample[len*2-2];
 			pSample[len*2+7] = pSample[len*2+5] = pSample[len*2+3] = pSample[len*2+1] = pSample[len*2-1];
@@ -2517,15 +2517,15 @@ void CSoundFile::AdjustSampleLoop(MODINSTRUMENT *pIns)
 		{
 			pSample[len+4] = pSample[len+3] = pSample[len+2] = pSample[len+1] = pSample[len] = pSample[len-1];
 		}
-		if ((pIns->uFlags & (CHN_LOOP|CHN_PINGPONGLOOP|CHN_STEREO)) == CHN_LOOP)
+		if ((pSmp->uFlags & (CHN_LOOP|CHN_PINGPONGLOOP|CHN_STEREO)) == CHN_LOOP)
 		{
-			if ((pIns->nLoopEnd+3 >= pIns->nLength) || (m_nType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
+			if ((pSmp->nLoopEnd+3 >= pSmp->nLength) || (m_nType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 			{
-				pSample[pIns->nLoopEnd] = pSample[pIns->nLoopStart];
-				pSample[pIns->nLoopEnd+1] = pSample[pIns->nLoopStart+1];
-				pSample[pIns->nLoopEnd+2] = pSample[pIns->nLoopStart+2];
-				pSample[pIns->nLoopEnd+3] = pSample[pIns->nLoopStart+3];
-				pSample[pIns->nLoopEnd+4] = pSample[pIns->nLoopStart+4];
+				pSample[pSmp->nLoopEnd] = pSample[pSmp->nLoopStart];
+				pSample[pSmp->nLoopEnd+1] = pSample[pSmp->nLoopStart+1];
+				pSample[pSmp->nLoopEnd+2] = pSample[pSmp->nLoopStart+2];
+				pSample[pSmp->nLoopEnd+3] = pSample[pSmp->nLoopStart+3];
+				pSample[pSmp->nLoopEnd+4] = pSample[pSmp->nLoopStart+4];
 			}
 		}
 	}
@@ -2591,7 +2591,7 @@ int CSoundFile::FrequencyToTranspose(DWORD freq)
 }
 
 
-void CSoundFile::FrequencyToTranspose(MODINSTRUMENT *psmp)
+void CSoundFile::FrequencyToTranspose(MODSAMPLE *psmp)
 //--------------------------------------------------------
 {
 	int f2t = FrequencyToTranspose(psmp->nC5Speed);
@@ -2731,7 +2731,7 @@ UINT CSoundFile::DetectUnusedSamples(BYTE *pbIns)
 		}
 		for (UINT ichk=1; ichk<=m_nSamples; ichk++)
 		{
-			if ((0 == (pbIns[ichk>>3]&(1<<(ichk&7)))) && (Ins[ichk].pSample)) nExt++;
+			if ((0 == (pbIns[ichk>>3]&(1<<(ichk&7)))) && (Samples[ichk].pSample)) nExt++;
 		}
 	}
 	return nExt;
@@ -2744,7 +2744,7 @@ BOOL CSoundFile::RemoveSelectedSamples(BOOL *pbIns)
 	if (!pbIns) return FALSE;
 	for (UINT j=1; j<MAX_SAMPLES; j++)
 	{
-		if ((!pbIns[j]) && (Ins[j].pSample))
+		if ((!pbIns[j]) && (Samples[j].pSample))
 		{
 			DestroySample(j);
 			if ((j == m_nSamples) && (j > 1)) m_nSamples--;
@@ -2758,12 +2758,12 @@ BOOL CSoundFile::DestroySample(UINT nSample)
 //------------------------------------------
 {
 	if ((!nSample) || (nSample >= MAX_SAMPLES)) return FALSE;
-	if (!Ins[nSample].pSample) return TRUE;
-	MODINSTRUMENT *pins = &Ins[nSample];
-	LPSTR pSample = pins->pSample;
-	pins->pSample = NULL;
-	pins->nLength = 0;
-	pins->uFlags &= ~(CHN_16BIT);
+	if (!Samples[nSample].pSample) return TRUE;
+	MODSAMPLE *pSmp = &Samples[nSample];
+	LPSTR pSample = pSmp->pSample;
+	pSmp->pSample = NULL;
+	pSmp->nLength = 0;
+	pSmp->uFlags &= ~(CHN_16BIT);
 	for (UINT i=0; i<MAX_CHANNELS; i++)
 	{
 		if (Chn[i].pSample == pSample)
@@ -2782,12 +2782,12 @@ bool CSoundFile::MoveSample(UINT from, UINT to)
 //---------------------------------------------
 {
 	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return false;
-	if (/*!Ins[from].pSample ||*/ Ins[to].pSample) return true;
+	if (/*!Ins[from].pSample ||*/ Samples[to].pSample) return true;
 
-	MODINSTRUMENT *pinsf = &Ins[from];
-	MODINSTRUMENT *pinst = &Ins[to];
+	MODSAMPLE *pinsf = &Samples[from];
+	MODSAMPLE *pinst = &Samples[to];
 
-	memcpy(pinst, pinsf, sizeof(MODINSTRUMENT));
+	memcpy(pinst, pinsf, sizeof(MODSAMPLE));
 
 	pinsf->pSample = nullptr;
 	pinsf->nLength = 0;

@@ -2759,7 +2759,7 @@ void CViewPattern::OnPatternAmplify()
 							}
 							if ((nSmp) && (nSmp <= pSndFile->m_nSamples))
 							{
-								chvol[j] = (BYTE)(pSndFile->Ins[nSmp].nVolume >> 2);
+								chvol[j] = (BYTE)(pSndFile->Samples[nSmp].nVolume >> 2);
 								break;
 							}
 							else
@@ -2801,7 +2801,7 @@ void CViewPattern::OnPatternAmplify()
 								if ((nSmp) && (nSmp <= pSndFile->m_nSamples))
 								{
 									p[x].volcmd = VOLCMD_VOLUME;
-									p[x].vol = pSndFile->Ins[nSmp].nVolume >> 2;
+									p[x].vol = pSndFile->Samples[nSmp].nVolume >> 2;
 								}
 							}
 							if (p[x].volcmd == VOLCMD_VOLUME) chvol[x] = (BYTE)p[x].vol;
@@ -4883,8 +4883,8 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 			{
 				CHAR s[256];
 				UINT nmax = pSndFile->m_nSamples;
-				while ((nmax > 1) && (pSndFile->Ins[nmax].pSample == NULL) && (!pSndFile->m_szNames[nmax][0])) nmax--;
-				for (UINT i=1; i<=nmax; i++) if ((pSndFile->m_szNames[i][0]) || (pSndFile->Ins[i].pSample))
+				while ((nmax > 1) && (pSndFile->Samples[nmax].pSample == NULL) && (!pSndFile->m_szNames[nmax][0])) nmax--;
+				for (UINT i=1; i<=nmax; i++) if ((pSndFile->m_szNames[i][0]) || (pSndFile->Samples[i].pSample))
 				{
 					wsprintf(s, "%02d: %s", i, pSndFile->m_szNames[i]);
 					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, s);

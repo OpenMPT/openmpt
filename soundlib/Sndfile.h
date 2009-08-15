@@ -366,7 +366,7 @@ enum PLUGVOLUMEHANDLING
 };*/
 
 // Sample Struct
-struct MODINSTRUMENT
+struct MODSAMPLE
 {
 	UINT nLength,nLoopStart,nLoopEnd;
 		//nLength <-> Number of 'frames'?
@@ -383,7 +383,7 @@ struct MODINSTRUMENT
 	BYTE nVibSweep;
 	BYTE nVibDepth;
 	BYTE nVibRate;
-	CHAR name[22];
+	CHAR filename[22];
 
 	// Return the size of one (elementary) sample in bytes.
 	uint8 GetElementarySampleSize() const {return (uFlags & CHN_16BIT) ? 2 : 1;}
@@ -532,7 +532,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nVolume, nPan, nFadeOutVol;
 	LONG nPeriod, nC5Speed, nPortamentoDest;
 	INSTRUMENTHEADER *pHeader;
-	MODINSTRUMENT *pInstrument;
+	MODSAMPLE *pModSample;
 	DWORD nVolEnvPosition, nPanEnvPosition, nPitchEnvPosition;
 	LONG nVolEnvValueAtReleaseJump, nPanEnvValueAtReleaseJump, nPitchEnvValueAtReleaseJump;
 	DWORD nMasterChn, nVUMeter;
@@ -578,7 +578,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	typedef UINT VOLUME;
 	VOLUME GetVSTVolume() {return (pHeader) ? pHeader->nGlobalVol*4 : nVolume;}
 
-	//-->Variables used to make user-definable tuningmodes work with pattern effects.
+	//-->Variables used to make user-definable tuning modes work with pattern effects.
 		bool m_ReCalculateFreqOnFirstTick;
 		//If true, freq should be recalculated in ReadNote() on first tick.
 		//Currently used only for vibrato things - using in other context might be 
@@ -923,7 +923,7 @@ public:	// for Editing
 	CPatternContainer Patterns;						//Patterns
 	CPatternSizesMimic PatternSize;					// Mimics old PatternsSize-array(is read-only).
 	COrderToPatternTable Order;						// Order[x] gives the index of the pattern located at order x.
-	MODINSTRUMENT Ins[MAX_SAMPLES];					// Instruments
+	MODSAMPLE Samples[MAX_SAMPLES];					// Sample Headers
 	INSTRUMENTHEADER *Headers[MAX_INSTRUMENTS];		// Instrument Headers
 	INSTRUMENTHEADER m_defaultInstrument;			// Currently only used to get default values for extented properties. 
 	CHAR m_szNames[MAX_SAMPLES][32];				// Song and sample names
@@ -1051,7 +1051,7 @@ public:
 	bool ReadMID(LPCBYTE lpStream, DWORD dwMemLength);
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
-	UINT WriteSample(FILE *f, MODINSTRUMENT *pins, UINT nFlags, UINT nMaxLen=0);
+	UINT WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen=0);
 	bool SaveXM(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
 	bool SaveS3M(LPCSTR lpszFileName, UINT nPacking=0);
 	bool SaveMod(LPCSTR lpszFileName, UINT nPacking=0, const bool bCompatibilityExport = false);
@@ -1192,7 +1192,7 @@ public:
 	char GetDeltaValue(char prev, UINT n) const { return (char)(prev + CompressionTable[n & 0x0F]); }
 	UINT PackSample(int &sample, int next);
 	BOOL CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *result=NULL);
-	UINT ReadSample(MODINSTRUMENT *pIns, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength, const WORD format = 1);
+	UINT ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR pMemFile, DWORD dwMemLength, const WORD format = 1);
 	BOOL DestroySample(UINT nSample);
 
 // -> CODE#0020
@@ -1210,7 +1210,7 @@ public:
 	BOOL RemoveInstrumentSamples(UINT nInstr);
 	UINT DetectUnusedSamples(BYTE *); // bitmask
 	BOOL RemoveSelectedSamples(BOOL *);
-	void AdjustSampleLoop(MODINSTRUMENT *pIns);
+	void AdjustSampleLoop(MODSAMPLE *pSmp);
 	// Samples file I/O
 	BOOL ReadSampleFromFile(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength);
 	BOOL ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset=NULL);
@@ -1245,7 +1245,7 @@ public:
 	UINT GetPeriodFromNote(UINT note, int nFineTune, UINT nC5Speed) const;
 	UINT GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac=0) const;
 	// Misc functions
-	MODINSTRUMENT *GetSample(UINT n) { return Ins+n; }
+	MODSAMPLE *GetSample(UINT n) { return Samples+n; }
 	void ResetMidiCfg();
 	UINT MapMidiInstrument(DWORD dwProgram, UINT nChannel, UINT nNote);
 	long ITInstrToMPT(const void *p, INSTRUMENTHEADER *penv, UINT trkvers); //change from BOOL for rewbs.modularInstData
@@ -1263,7 +1263,7 @@ public:
 public:
 	static DWORD TransposeToFrequency(int transp, int ftune=0);
 	static int FrequencyToTranspose(DWORD freq);
-	static void FrequencyToTranspose(MODINSTRUMENT *psmp);
+	static void FrequencyToTranspose(MODSAMPLE *psmp);
 
 	// System-Dependant functions
 public:
@@ -1292,7 +1292,7 @@ private:
 #pragma warning(default : 4324) //structure was padded due to __declspec(align())
 
 
-inline uint32 MODINSTRUMENT::GetSampleRate(const MODTYPE type) const
+inline uint32 MODSAMPLE::GetSampleRate(const MODTYPE type) const
 //------------------------------------------------------------------
 {
 	uint32 nRate;

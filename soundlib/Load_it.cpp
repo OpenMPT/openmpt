@@ -724,46 +724,46 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 		// Copy sample struct data
 		if(pis.id == 0x53504D49){
-			MODINSTRUMENT *pins = &Ins[nsmp];
-			memcpy(pins->name, pis.filename, 12);
-			pins->uFlags = 0;
-			pins->nLength = 0;
-			pins->nLoopStart = pis.loopbegin;
-			pins->nLoopEnd = pis.loopend;
-			pins->nSustainStart = pis.susloopbegin;
-			pins->nSustainEnd = pis.susloopend;
-			pins->nC5Speed = pis.C5Speed;
-			if(!pins->nC5Speed) pins->nC5Speed = 8363;
-			if(pis.C5Speed < 256) pins->nC5Speed = 256;
-			pins->nVolume = pis.vol << 2;
-			if(pins->nVolume > 256) pins->nVolume = 256;
-			pins->nGlobalVol = pis.gvl;
-			if(pins->nGlobalVol > 64) pins->nGlobalVol = 64;
-			if(pis.flags & 0x10) pins->uFlags |= CHN_LOOP;
-			if(pis.flags & 0x20) pins->uFlags |= CHN_SUSTAINLOOP;
-			if(pis.flags & 0x40) pins->uFlags |= CHN_PINGPONGLOOP;
-			if(pis.flags & 0x80) pins->uFlags |= CHN_PINGPONGSUSTAIN;
-			pins->nPan = (pis.dfp & 0x7F) << 2;
-			if(pins->nPan > 256) pins->nPan = 256;
-			if(pis.dfp & 0x80) pins->uFlags |= CHN_PANNING;
-			pins->nVibType = autovibit2xm[pis.vit & 7];
-			pins->nVibRate = pis.vis;
-			pins->nVibDepth = pis.vid & 0x7F;
-			pins->nVibSweep = (pis.vir + 3) / 4;
+			MODSAMPLE *pSmp = &Samples[nsmp];
+			memcpy(pSmp->filename, pis.filename, 12);
+			pSmp->uFlags = 0;
+			pSmp->nLength = 0;
+			pSmp->nLoopStart = pis.loopbegin;
+			pSmp->nLoopEnd = pis.loopend;
+			pSmp->nSustainStart = pis.susloopbegin;
+			pSmp->nSustainEnd = pis.susloopend;
+			pSmp->nC5Speed = pis.C5Speed;
+			if(!pSmp->nC5Speed) pSmp->nC5Speed = 8363;
+			if(pis.C5Speed < 256) pSmp->nC5Speed = 256;
+			pSmp->nVolume = pis.vol << 2;
+			if(pSmp->nVolume > 256) pSmp->nVolume = 256;
+			pSmp->nGlobalVol = pis.gvl;
+			if(pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
+			if(pis.flags & 0x10) pSmp->uFlags |= CHN_LOOP;
+			if(pis.flags & 0x20) pSmp->uFlags |= CHN_SUSTAINLOOP;
+			if(pis.flags & 0x40) pSmp->uFlags |= CHN_PINGPONGLOOP;
+			if(pis.flags & 0x80) pSmp->uFlags |= CHN_PINGPONGSUSTAIN;
+			pSmp->nPan = (pis.dfp & 0x7F) << 2;
+			if(pSmp->nPan > 256) pSmp->nPan = 256;
+			if(pis.dfp & 0x80) pSmp->uFlags |= CHN_PANNING;
+			pSmp->nVibType = autovibit2xm[pis.vit & 7];
+			pSmp->nVibRate = pis.vis;
+			pSmp->nVibDepth = pis.vid & 0x7F;
+			pSmp->nVibSweep = (pis.vir + 3) / 4;
 			if(pis.length){
-				pins->nLength = pis.length;
-				if (pins->nLength > MAX_SAMPLE_LENGTH) pins->nLength = MAX_SAMPLE_LENGTH;
+				pSmp->nLength = pis.length;
+				if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
 				UINT flags = (pis.cvt & 1) ? RS_PCM8S : RS_PCM8U;
 				if (pis.flags & 2){
 					flags += 5;
 					if (pis.flags & 4) flags |= RSF_STEREO;
-					pins->uFlags |= CHN_16BIT;
+					pSmp->uFlags |= CHN_16BIT;
 				} 
 				else{
 					if (pis.flags & 4) flags |= RSF_STEREO;
 				}
 				// Read sample data
-				ReadSample(&Ins[nsmp], flags, (LPSTR)(lpStream+streamPos), len);
+				ReadSample(&Samples[nsmp], flags, (LPSTR)(lpStream+streamPos), len);
 				streamPos += len;
 				memcpy(m_szNames[nsmp], pis.name, 26);
 			}
@@ -1204,42 +1204,42 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
 		if (pis->id == 0x53504D49)
 		{
-			MODINSTRUMENT *pins = &Ins[nsmp+1];
-			memcpy(pins->name, pis->filename, 12);
-			pins->uFlags = 0;
-			pins->nLength = 0;
-			pins->nLoopStart = pis->loopbegin;
-			pins->nLoopEnd = pis->loopend;
-			pins->nSustainStart = pis->susloopbegin;
-			pins->nSustainEnd = pis->susloopend;
-			pins->nC5Speed = pis->C5Speed;
-			if (!pins->nC5Speed) pins->nC5Speed = 8363;
-			if (pis->C5Speed < 256) pins->nC5Speed = 256;
-			pins->nVolume = pis->vol << 2;
-			if (pins->nVolume > 256) pins->nVolume = 256;
-			pins->nGlobalVol = pis->gvl;
-			if (pins->nGlobalVol > 64) pins->nGlobalVol = 64;
-			if (pis->flags & 0x10) pins->uFlags |= CHN_LOOP;
-			if (pis->flags & 0x20) pins->uFlags |= CHN_SUSTAINLOOP;
-			if (pis->flags & 0x40) pins->uFlags |= CHN_PINGPONGLOOP;
-			if (pis->flags & 0x80) pins->uFlags |= CHN_PINGPONGSUSTAIN;
-			pins->nPan = (pis->dfp & 0x7F) << 2;
-			if (pins->nPan > 256) pins->nPan = 256;
-			if (pis->dfp & 0x80) pins->uFlags |= CHN_PANNING;
-			pins->nVibType = autovibit2xm[pis->vit & 7];
-			pins->nVibRate = pis->vis;
-			pins->nVibDepth = pis->vid & 0x7F;
-			pins->nVibSweep = (pis->vir + 3) / 4;
+			MODSAMPLE *pSmp = &Samples[nsmp+1];
+			memcpy(pSmp->filename, pis->filename, 12);
+			pSmp->uFlags = 0;
+			pSmp->nLength = 0;
+			pSmp->nLoopStart = pis->loopbegin;
+			pSmp->nLoopEnd = pis->loopend;
+			pSmp->nSustainStart = pis->susloopbegin;
+			pSmp->nSustainEnd = pis->susloopend;
+			pSmp->nC5Speed = pis->C5Speed;
+			if (!pSmp->nC5Speed) pSmp->nC5Speed = 8363;
+			if (pis->C5Speed < 256) pSmp->nC5Speed = 256;
+			pSmp->nVolume = pis->vol << 2;
+			if (pSmp->nVolume > 256) pSmp->nVolume = 256;
+			pSmp->nGlobalVol = pis->gvl;
+			if (pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
+			if (pis->flags & 0x10) pSmp->uFlags |= CHN_LOOP;
+			if (pis->flags & 0x20) pSmp->uFlags |= CHN_SUSTAINLOOP;
+			if (pis->flags & 0x40) pSmp->uFlags |= CHN_PINGPONGLOOP;
+			if (pis->flags & 0x80) pSmp->uFlags |= CHN_PINGPONGSUSTAIN;
+			pSmp->nPan = (pis->dfp & 0x7F) << 2;
+			if (pSmp->nPan > 256) pSmp->nPan = 256;
+			if (pis->dfp & 0x80) pSmp->uFlags |= CHN_PANNING;
+			pSmp->nVibType = autovibit2xm[pis->vit & 7];
+			pSmp->nVibRate = pis->vis;
+			pSmp->nVibDepth = pis->vid & 0x7F;
+			pSmp->nVibSweep = (pis->vir + 3) / 4;
 			if ((pis->samplepointer) && (pis->samplepointer < dwMemLength) && (pis->length))
 			{
-				pins->nLength = pis->length;
-				if (pins->nLength > MAX_SAMPLE_LENGTH) pins->nLength = MAX_SAMPLE_LENGTH;
+				pSmp->nLength = pis->length;
+				if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
 				UINT flags = (pis->cvt & 1) ? RS_PCM8S : RS_PCM8U;
 				if (pis->flags & 2)
 				{
 					flags += 5;
 					if (pis->flags & 4) flags |= RSF_STEREO;
-					pins->uFlags |= CHN_16BIT;
+					pSmp->uFlags |= CHN_16BIT;
 					// IT 2.14 16-bit packed sample ?
 					if (pis->flags & 8) flags = ((pifh->cmwt >= 0x215) && (pis->cvt & 4)) ? RS_IT21516 : RS_IT21416;
 				} else
@@ -1252,7 +1252,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 //				ReadSample(&Ins[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
-				lastSampleSize = ReadSample(&Ins[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
+				lastSampleSize = ReadSample(&Samples[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
 // -! NEW_FEATURE#0027
 			}
 		}
@@ -1683,7 +1683,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 	// Count samples not used in any instrument
 	i = 0;
-	for(j=1; j<=m_nSamples; j++) if(!sampleUsed[j] && Ins[j].pSample) i++;
+	for(j=1; j<=m_nSamples; j++) if(!sampleUsed[j] && Samples[j].pSample) i++;
 
 	id = i;
 	fwrite(&id, 1, sizeof(id), f);
@@ -1691,11 +1691,11 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	// Write samples not used in any instrument
 	ITSAMPLESTRUCT itss;
 	for(UINT nsmp=1; nsmp<=m_nSamples; nsmp++){
-		if(!sampleUsed[nsmp] && Ins[nsmp].pSample){
+		if(!sampleUsed[nsmp] && Samples[nsmp].pSample){
 
-			MODINSTRUMENT *psmp = &Ins[nsmp];
+			MODSAMPLE *psmp = &Samples[nsmp];
 			memset(&itss, 0, sizeof(itss));
-			memcpy(itss.filename, psmp->name, 12);
+			memcpy(itss.filename, psmp->filename, 12);
 			memcpy(itss.name, m_szNames[nsmp], 26);
 
 			itss.id = 0x53504D49;
@@ -2313,9 +2313,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	// Writing Sample Data
 	for (UINT nsmp=1; nsmp<=header.smpnum; nsmp++)
 	{
-		MODINSTRUMENT *psmp = &Ins[nsmp];
+		MODSAMPLE *psmp = &Samples[nsmp];
 		memset(&itss, 0, sizeof(itss));
-		memcpy(itss.filename, psmp->name, 12);
+		memcpy(itss.filename, psmp->filename, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
 		itss.id = 0x53504D49;
 		itss.gvl = (BYTE)psmp->nGlobalVol;
@@ -2947,9 +2947,9 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	// Writing Sample Data
 	for (UINT nsmp=1; nsmp<=header.smpnum; nsmp++)
 	{
-		MODINSTRUMENT *psmp = &Ins[nsmp];
+		MODSAMPLE *psmp = &Samples[nsmp];
 		memset(&itss, 0, sizeof(itss));
-		memcpy(itss.filename, psmp->name, 12);
+		memcpy(itss.filename, psmp->filename, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
 		SetNullTerminator(itss.name);
 		itss.id = 0x53504D49;
