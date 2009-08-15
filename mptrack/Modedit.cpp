@@ -186,7 +186,20 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 						m->param = min(m->param << 1, 0xFF);
 					}
 				}
-			}
+			} // End if(m->command == CMD_PANNING8)
+
+			//////////////////////////
+			// Convert param control
+			if(oldTypeIsMPT)
+			{
+				if(m->note == NOTE_PC || m->note == NOTE_PCS)
+				{
+					m->param = min(MODCOMMAND::maxColumnValue, m->GetValueEffectCol()) * 0x7F / MODCOMMAND::maxColumnValue;
+					m->command = (m->note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI;
+					m->volcmd = VOLCMD_NONE;
+					m->note = NOTE_NONE;
+				}
+			} // End if(oldTypeIsMPT)
 
 			/////////////////////////////////////////
 			// Convert MOD / XM to S3M / IT / MPTM
