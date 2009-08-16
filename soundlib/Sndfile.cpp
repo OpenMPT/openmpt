@@ -593,8 +593,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 #endif // MODPLUG_TRACKER
 #endif
 #endif // MODPLUG_BASIC_SUPPORT
-		 && (!ReadMO3(lpStream, dwMemLength))
 		 && (!ReadGDM(lpStream, dwMemLength))
+		 && (!ReadIMF(lpStream, dwMemLength))
+		 && (!ReadMO3(lpStream, dwMemLength))
 		 && (!ReadMod(lpStream, dwMemLength))) m_nType = MOD_TYPE_NONE;
 #ifdef ZIPPED_MOD_SUPPORT
 		if ((!m_lpszSongComments) && (archive.GetComments(FALSE)))

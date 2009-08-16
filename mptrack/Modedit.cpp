@@ -162,8 +162,11 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	for (UINT nPat=0; nPat<m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 	{
 		MODCOMMAND *m = m_SndFile.Patterns[nPat];
+		BYTE cEffectMemory[MAX_CHANNELS][MAX_EFFECTS] = {0}; // for -> MOD/XM conversion
+		UINT nChannel = m_SndFile.m_nChannels - 1;
 		for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
 		{
+			nChannel = (nChannel + 1) % m_SndFile.m_nChannels; // 0...Channels - 1
 
 			//////////////////////////
 			// Convert 8-bit Panning
@@ -286,6 +289,13 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 				
 				switch(m->command)
 				{
+				case CMD_ARPEGGIO:
+					// No effect memory in XM / MOD
+					if(m->param == 0)
+						m->param = cEffectMemory[nChannel][CMD_ARPEGGIO];
+					else
+						cEffectMemory[nChannel][CMD_ARPEGGIO] = m->param;
+					break;
 				case CMD_S3MCMDEX:
 					m->command = CMD_MODCMDEX;
 					switch(m->param & 0xF0)
@@ -391,8 +401,8 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			}
 
 
-			//////////////////////////////////////////////////////////////////
-			// Convert anything to MOD - remove volume column, adjust retrig
+			/////////////////////////////////////////////////////////////////////////////////
+			// Convert anything to MOD - remove volume column, adjust retrig, effect memory
 			if (newTypeIsMOD)
 			{
 				if(m->command) switch(m->command)
@@ -401,6 +411,17 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 					m->command = CMD_MODCMDEX;
 					m->param = 0x90 | (m->param & 0x0F);
 					break;
+				case CMD_PORTAMENTOUP:
+				case CMD_PORTAMENTODOWN:
+				case CMD_TONEPORTAVOL:
+				case CMD_VIBRATOVOL:
+				case CMD_VOLUMESLIDE:
+					// ProTracker doesn't have effect memory for these commands, so let's try to fix them
+					if(m->param == 0)
+						m->param = cEffectMemory[nChannel][m->command];
+					else
+						cEffectMemory[nChannel][m->command] = m->param;
+					break;				
 				}
 
 				else switch(m->volcmd)
