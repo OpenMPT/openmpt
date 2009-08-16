@@ -29,7 +29,7 @@
 #define MMNODRV
 #define MMNOMCI
 
-//#define _CRT_SECURE_NO_WARNINGS		// Define to disable the "This function or variable may be unsafe" warnings.
+#define _CRT_SECURE_NO_WARNINGS		// Define to disable the "This function or variable may be unsafe" warnings.
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES			1
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT	1
 

@@ -696,7 +696,7 @@ void Ssb::BeginRead(const void* pId, const size_t nLength, const uint64& nVersio
 	}
 
     if(Testbit(flagbyte, 3))
-		iStrm.ignore(8);
+		iStrm.ignore(5);
 
 	// Read entrycount
 	ReadAdaptive1248(iStrm, tempU64);

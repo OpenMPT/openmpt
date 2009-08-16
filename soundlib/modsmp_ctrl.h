@@ -21,15 +21,16 @@ enum ResetFlag
 // Insert silence to given location.
 // Note: Is currently implemented only for inserting silence to the beginning and to the end of the sample.
 // Return: Length of the new sample.
-SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile = nullptr);
+SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const SmpLength nStartFrom, CSoundFile* pSndFile);
 
 // Change sample size. 
 // Note: If resized sample is bigger, silence will be added to the sample's tail.
 // Return: Length of the new sample.
-SmpLength ResizeSample(MODSAMPLE& smp, const SmpLength nNewLength, CSoundFile* pSndFile = nullptr);
+SmpLength ResizeSample(MODSAMPLE& smp, const SmpLength nNewLength, CSoundFile* pSndFile);
 
 // Replaces sample in 'smp' with given sample and frees the old sample.
-void ReplaceSample(MODSAMPLE& smp, const LPSTR pNewSample,  const SmpLength nNewLength);
+// If valid CSoundFile pointer is given, the sample will be replaced also from the sounds channels.
+void ReplaceSample(MODSAMPLE& smp, const LPSTR pNewSample,  const SmpLength nNewLength, CSoundFile* pSndFile);
 
 bool AdjustEndOfSample(MODSAMPLE& smp, CSoundFile* pSndFile = 0);
 
@@ -52,5 +53,18 @@ float RemoveDCOffset(MODSAMPLE& smp,
 					 CSoundFile* const pSndFile); // Passed to AdjustEndOfSample.
 
 } // Namespace ctrlSmp
+
+namespace ctrlChn
+{
+
+// Replaces sample from sound channels by given sample.
+void ReplaceSample( MODCHANNEL (&Chn)[MAX_CHANNELS],
+					LPCSTR pOldSample,
+					LPSTR pNewSample,
+					const ctrlSmp::SmpLength nNewLength,
+					DWORD orFlags = 0,
+					DWORD andFlags = MAXDWORD);
+
+} // namespace ctrlChn
 
 #endif
