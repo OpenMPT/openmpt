@@ -1,7 +1,7 @@
 /*
  * Purpose: Load IMF (Imago Orpheus) modules
  * Authors: Storlek (Original author - http://schismtracker.org/)
- *			Johannes Schultz (OpenMPT Port)
+ *			Johannes Schultz (OpenMPT Port, tweaks)
  *
  * Thanks to Storlek for allowing me to use this code!
  */
@@ -232,7 +232,6 @@ static unsigned int envflags[3][3] = {
 
 static void load_imf_envelope(MODINSTRUMENT *ins, INSTRUMENTENVELOPE *env, IMFINSTRUMENT *imfins, int e)
 {
-	UINT n;
 	UINT min = 0; // minimum tick value for next node
 	int shift = (e == IMF_ENV_VOL) ? 0 : 2;
 
@@ -242,7 +241,7 @@ static void load_imf_envelope(MODINSTRUMENT *ins, INSTRUMENTENVELOPE *env, IMFIN
 	env->nSustainStart = env->nSustainEnd = imfins->env[e].sustain;
 	env->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 
-	for (n = 0; n < env->nNodes; n++) {
+	for (UINT n = 0; n < env->nNodes; n++) {
 		UINT16 nTick, nValue;
 		nTick = LittleEndianW(imfins->nodes[e][n].tick);
 		nValue = LittleEndianW(imfins->nodes[e][n].value) >> shift;
@@ -302,7 +301,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nSamples = 0; // Will be incremented later
 	m_nInstruments = 0;
 	
-	m_nChannels = 32;
+	m_nChannels = 0;
 	for (CHANNELINDEX nChn = 0; nChn < 32; nChn++) {
 		ChnSettings[nChn].nPan = hdr.channels[nChn].panning * 64 / 255;
 		ChnSettings[nChn].nPan *= 4;
@@ -313,9 +312,11 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		// TODO: reverb/chorus?
 		switch (hdr.channels[nChn].status) {
 		case 0: // enabled; don't worry about it
+			m_nChannels = nChn + 1;
 			break;
 		case 1: // mute
 			ChnSettings[nChn].dwFlags |= CHN_MUTE;
+			m_nChannels = nChn + 1;
 			break;
 		case 2: // disabled
 			ChnSettings[nChn].dwFlags |= CHN_MUTE;
@@ -326,6 +327,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			return false;
 		}
 	}
+	if(!m_nChannels) return false;
 	
 	for (ORDERINDEX nOrd = 0; nOrd < hdr.ordnum; nOrd++)
 		Order[nOrd] = ((hdr.orderlist[nOrd] == 0xff) ? Order.GetIgnoreIndex() : hdr.orderlist[nOrd]);
@@ -360,7 +362,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			dwMemPos += 1;
 			if (mask == 0) {
 				row++;
-				row_data += 32;
+				row_data += m_nChannels;
 				continue;
 			}
 
@@ -449,7 +451,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// read instruments
 	for (INSTRUMENTINDEX nIns = 0; nIns < hdr.insnum; nIns++) {
 		IMFINSTRUMENT imfins;
-		MODINSTRUMENT *ins;
+		MODINSTRUMENT *pIns;
 		ASSERT_CAN_READ(sizeof(IMFINSTRUMENT));
 		memset(&imfins, 0, sizeof(IMFINSTRUMENT));
 		memcpy(&imfins, lpStream + dwMemPos, sizeof(IMFINSTRUMENT));
@@ -465,42 +467,33 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			return false;
 		}
 		
-		ins = new MODINSTRUMENT;
-		if (!ins) continue;
-		Instruments[nIns + 1] = ins;
-		memset(ins, 0, sizeof(MODINSTRUMENT));
+		pIns = new MODINSTRUMENT;
+		if (!pIns) continue;
+		Instruments[nIns + 1] = pIns;
+		memset(pIns, 0, sizeof(MODINSTRUMENT));
+		pIns->nPPC = 5 * 12;
+		SetDefaultInstrumentValues(pIns);
 
-		strncpy(ins->name, imfins.name, 25);
-		ins->name[25] = 0;
+		strncpy(pIns->name, imfins.name, 31);
+		pIns->name[31] = 0;
 
 		if (imfins.smpnum) {
 			for (BYTE cNote = 0; cNote < 120; cNote++) {
-				ins->NoteMap[cNote] = cNote + 1;
-				ins->Keyboard[cNote] = firstsample + imfins.map[cNote];
+				pIns->NoteMap[cNote] = cNote + 1;
+				pIns->Keyboard[cNote] = firstsample + imfins.map[cNote];
 			}
 		}
 
-		/* Fadeout:
-		IT1 - 64
-		IT2 - 256
-		FT2 - 4095
-		IMF - 4095
-		MPT - god knows what, all the loaders are inconsistent
-		Schism - 128 presented (!); 8192? internal
+		pIns->nFadeOut = imfins.fadeout;
+		pIns->nGlobalVol = 128;
 
-		IMF and XM have the same range and modplug's XM loader doesn't do any bit shifting with it,
-		so I'll do the same here for now. I suppose I should get this nonsense straightened
-		out at some point, though. */
-		ins->nFadeOut = imfins.fadeout;
-		ins->nGlobalVol = 128;
-
-		load_imf_envelope(ins, &ins->VolEnv, &imfins, IMF_ENV_VOL);
-		load_imf_envelope(ins, &ins->PanEnv, &imfins, IMF_ENV_PAN);
-		load_imf_envelope(ins, &ins->PitchEnv, &imfins, IMF_ENV_FILTER);
+		load_imf_envelope(pIns, &pIns->VolEnv, &imfins, IMF_ENV_VOL);
+		load_imf_envelope(pIns, &pIns->PanEnv, &imfins, IMF_ENV_PAN);
+		load_imf_envelope(pIns, &pIns->PitchEnv, &imfins, IMF_ENV_FILTER);
 
 		// hack to get === to stop notes (from modplug's xm loader)
-		if (!(ins->dwFlags & ENV_VOLUME) && !ins->nFadeOut)
-			ins->nFadeOut = 8192;
+		if (!(pIns->dwFlags & ENV_VOLUME) && !pIns->nFadeOut)
+			pIns->nFadeOut = 8192;
 
 		// read this instrument's samples
 		for (SAMPLEINDEX nSmp = 0; nSmp < imfins.smpnum; nSmp++) {
@@ -520,7 +513,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			
 			strncpy(pSample->filename, imfsmp.filename, 12);
 			pSample->filename[12] = 0;
-			strcpy(m_szNames[nSmp + 1], pSample->filename);
+			strcpy(m_szNames[m_nSamples], pSample->filename);
 			blen = pSample->nLength = LittleEndian(imfsmp.length);
 			pSample->nLoopStart = LittleEndian(imfsmp.loop_start);
 			pSample->nLoopEnd = LittleEndian(imfsmp.loop_end);

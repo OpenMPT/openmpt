@@ -26,13 +26,13 @@ typedef struct _GENERALVIEWSTATE
 typedef struct PATTERNVIEWSTATE
 {
 	DWORD cbStruct;
-	UINT nPattern;
-	UINT nRow;
+	PATTERNINDEX nPattern;
+	ROWINDEX nRow;
 	UINT nCursor;
 	DWORD dwBeginSel;
 	DWORD dwEndSel;
 	UINT nDetailLevel;
-	UINT nOrder;		//rewbs.playSongFromCursor
+	ORDERINDEX nOrder;		//rewbs.playSongFromCursor
 } PATTERNVIEWSTATE;
 
 typedef struct SAMPLEVIEWSTATE
