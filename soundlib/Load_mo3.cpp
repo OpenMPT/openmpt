@@ -23,11 +23,15 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------
 {
 	// no valid MO3 file (magic bytes: "MO3")
-	if(dwMemLength < 3 || lpStream[0] != 'M' || lpStream[1] != 'O' || lpStream[2] != '3')
+	if(dwMemLength < 4 || lpStream[0] != 'M' || lpStream[1] != 'O' || lpStream[2] != '3')
 		return false;
 
 #ifdef NO_MO3_SUPPORT
-	UNREFERENCED_PARAMETER(dwMemLength);
+	/* As of August 2009, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
+	so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
+	(avoid messagebox with .MOD files that have a song name starting with "MO3" */
+	if(lpStream[3] > 31) return false;
+
 	AfxMessageBox(GetStrI18N(__TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
 	return false;
 #else

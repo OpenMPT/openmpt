@@ -66,6 +66,8 @@ typedef struct _GDMSAMPLEHEADER
 	BYTE Pan;			// default pan
 } GDMSAMPLEHEADER, *PGDMSAMPLEHEADER;
 
+#pragma pack()
+
 bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------
 {
