@@ -162,8 +162,12 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	for (UINT nPat=0; nPat<m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 	{
 		MODCOMMAND *m = m_SndFile.Patterns[nPat];
-		BYTE cEffectMemory[MAX_CHANNELS][MAX_EFFECTS] = {0}; // for -> MOD/XM conversion
+
+		// This is used for -> MOD/XM conversion
+		BYTE cEffectMemory[MAX_CHANNELS][MAX_EFFECTS];
+		memset(&cEffectMemory, 0, sizeof(BYTE) * MAX_CHANNELS * MAX_EFFECTS);
 		UINT nChannel = m_SndFile.m_nChannels - 1;
+
 		for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
 		{
 			nChannel = (nChannel + 1) % m_SndFile.m_nChannels; // 0...Channels - 1
@@ -1529,7 +1533,7 @@ BOOL CModDoc::AdjustEndOfSample(UINT nSample)
 }
 
 
-LONG CModDoc::InsertPattern(LONG nOrd, UINT nRows)
+LONG CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 //------------------------------------------------
 {
 	const int i = m_SndFile.Patterns.Insert(nRows);
@@ -1816,16 +1820,15 @@ void CModDoc::RearrangeSampleList()
 	// Now, move everything around
 	for(UINT i = 1; i <= m_SndFile.m_nSamples; i++)
 	{
-		if(nSampleMap[i] != i)
+		if(nSampleMap[i] && nSampleMap[i] != i)
 		{
 			// This gotta be moved
-
 			m_SndFile.MoveSample(i, nSampleMap[i]);
 			m_SndFile.Samples[i].pSample = nullptr;
 			strcpy(m_SndFile.m_szNames[nSampleMap[i]], m_SndFile.m_szNames[i]);
 			m_SndFile.m_szNames[i][0] = '\0';
 
-			// Also update instrument mapping
+			// Also update instrument mapping (if module is in instrument mode)
 			for(UINT iInstr = 1; iInstr <= m_SndFile.m_nInstruments; iInstr++){
 				if(m_SndFile.Instruments[iInstr]){
 					MODINSTRUMENT *p = m_SndFile.Instruments[iInstr];
@@ -1839,12 +1842,12 @@ void CModDoc::RearrangeSampleList()
 	// Go through the patterns and remap samples (if module is in sample mode)
 	if(!m_SndFile.m_nInstruments)
 	{
-		for (UINT nPat=0; nPat<m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
+		for (UINT nPat=0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 		{
 			MODCOMMAND *m = m_SndFile.Patterns[nPat];
 			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
 			{
-				m->instr = nSampleMap[m->instr];
+				if(nSampleMap[m->instr]) m->instr = nSampleMap[m->instr];
 			}
 		}
 	}
