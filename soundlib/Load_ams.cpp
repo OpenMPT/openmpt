@@ -381,15 +381,15 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		// Volume Envelope
 		{
 			UINT pos = 0;
-			pIns->nVolEnv = (volenv->points > 16) ? 16 : volenv->points;
-			pIns->nVolSustainBegin = pIns->nVolSustainEnd = volenv->sustain;
-			pIns->nVolLoopStart = volenv->loopbegin;
-			pIns->nVolLoopEnd = volenv->loopend;
-			for (UINT i=0; i<pIns->nVolEnv; i++)
+			pIns->VolEnv.nNodes = (volenv->points > 16) ? 16 : volenv->points;
+			pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = volenv->sustain;
+			pIns->VolEnv.nLoopStart = volenv->loopbegin;
+			pIns->VolEnv.nLoopEnd = volenv->loopend;
+			for (UINT i=0; i<pIns->VolEnv.nNodes; i++)
 			{
-				pIns->VolEnv[i] = (BYTE)((volenv->info[i*3+2] & 0x7F) >> 1);
+				pIns->VolEnv.Values[i] = (BYTE)((volenv->info[i*3+2] & 0x7F) >> 1);
 				pos += volenv->info[i*3] + ((volenv->info[i*3+1] & 1) << 8);
-				pIns->VolPoints[i] = (WORD)pos;
+				pIns->VolEnv.Ticks[i] = (WORD)pos;
 			}
 		}
 		pIns->nFadeOut = (((lpStream[dwMemPos+2] & 0x0F) << 8) | (lpStream[dwMemPos+1])) << 3;

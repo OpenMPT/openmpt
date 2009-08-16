@@ -113,8 +113,8 @@ VOID CAbstractVstEditor::OnLoadPreset()
 	if (m_pVstPlugin)
 	{
 		CFileDialog dlg(TRUE, "fxp", NULL,
-					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-					"VST Program (*.fxp)|*.fxp||",	theApp.m_pMainWnd);
+			OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
+			"VST Program (*.fxp)|*.fxp||",	theApp.m_pMainWnd);
 		const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS);
 		if(pszWdir[0])
 			dlg.m_ofn.lpstrInitialDir = pszWdir;
@@ -122,10 +122,11 @@ VOID CAbstractVstEditor::OnLoadPreset()
 
 		if (!(dlg.DoModal() == IDOK))	return;
 
-		CMainFrame::SetWorkingDirectory(dlg.GetFileName(), DIR_PLUGINPRESETS, true);
+		CString sFile = dlg.GetPathName();
+		CMainFrame::SetWorkingDirectory(sFile, DIR_PLUGINPRESETS, true);
 
 		//TODO: exception handling to distinguish errors at this level.
-		if (!(m_pVstPlugin->LoadProgram(dlg.GetFileName())))
+		if (!(m_pVstPlugin->LoadProgram(sFile)))
 			::AfxMessageBox("Error loading preset. Are you sure it is for this plugin?");
 	}
 }
@@ -136,17 +137,18 @@ VOID CAbstractVstEditor::OnSavePreset()
 	if (m_pVstPlugin)
 	{
 		CFileDialog dlg(FALSE, "fxp", NULL,
-					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-					"VST Program (*.fxp)|*.fxp||",	theApp.m_pMainWnd);
+			OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
+			"VST Program (*.fxp)|*.fxp||",	theApp.m_pMainWnd);
 		const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS);
 		if(pszWdir[0])
 			dlg.m_ofn.lpstrInitialDir = pszWdir;
 		if (!(dlg.DoModal() == IDOK))	return;
 
-		CMainFrame::SetWorkingDirectory(dlg.GetFileName(), DIR_PLUGINPRESETS, true);
+		CString sFile = dlg.GetPathName();
+		CMainFrame::SetWorkingDirectory(sFile, DIR_PLUGINPRESETS, true);
 
 		//TODO: exception handling
-		if (!(m_pVstPlugin->SaveProgram(dlg.GetFileName())))
+		if (!(m_pVstPlugin->SaveProgram(sFile)))
 			::AfxMessageBox("Error saving preset.");
 	}
 	return;

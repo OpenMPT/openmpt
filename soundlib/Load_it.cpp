@@ -243,19 +243,19 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		if (pis->flags & 0x01) pIns->dwFlags |= ENV_VOLUME;
 		if (pis->flags & 0x02) pIns->dwFlags |= ENV_VOLLOOP;
 		if (pis->flags & 0x04) pIns->dwFlags |= ENV_VOLSUSTAIN;
-		pIns->nVolLoopStart = pis->vls;
-		pIns->nVolLoopEnd = pis->vle;
-		pIns->nVolSustainBegin = pis->sls;
-		pIns->nVolSustainEnd = pis->sle;
-		pIns->nVolEnv = 25;
+		pIns->VolEnv.nLoopStart = pis->vls;
+		pIns->VolEnv.nLoopEnd = pis->vle;
+		pIns->VolEnv.nSustainStart = pis->sls;
+		pIns->VolEnv.nSustainEnd = pis->sle;
+		pIns->VolEnv.nNodes = 25;
 		for (UINT ev=0; ev<25; ev++)
 		{
-			if ((pIns->VolPoints[ev] = pis->nodes[ev*2]) == 0xFF)
+			if ((pIns->VolEnv.Ticks[ev] = pis->nodes[ev*2]) == 0xFF)
 			{
-				pIns->nVolEnv = ev;
+				pIns->VolEnv.nNodes = ev;
 				break;
 			}
-			pIns->VolEnv[ev] = pis->nodes[ev*2+1];
+			pIns->VolEnv.Values[ev] = pis->nodes[ev*2+1];
 		}
 		pIns->nNNA = pis->nna;
 		pIns->nDCT = pis->dnc;
@@ -348,44 +348,44 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		if (pis->volenv.flags & 2) pIns->dwFlags |= ENV_VOLLOOP;
 		if (pis->volenv.flags & 4) pIns->dwFlags |= ENV_VOLSUSTAIN;
 		if (pis->volenv.flags & 8) pIns->dwFlags |= ENV_VOLCARRY;
-		pIns->nVolEnv = pis->volenv.num;
-		if (pIns->nVolEnv > 25) pIns->nVolEnv = 25;
-		pIns->nVolLoopStart = pis->volenv.lpb;
-		pIns->nVolLoopEnd = pis->volenv.lpe;
-		pIns->nVolSustainBegin = pis->volenv.slb;
-		pIns->nVolSustainEnd = pis->volenv.sle;
+		pIns->VolEnv.nNodes = pis->volenv.num;
+		if (pIns->VolEnv.nNodes > 25) pIns->VolEnv.nNodes = 25;
+		pIns->VolEnv.nLoopStart = pis->volenv.lpb;
+		pIns->VolEnv.nLoopEnd = pis->volenv.lpe;
+		pIns->VolEnv.nSustainStart = pis->volenv.slb;
+		pIns->VolEnv.nSustainEnd = pis->volenv.sle;
 		// Panning Envelope 
 		if (pis->panenv.flags & 1) pIns->dwFlags |= ENV_PANNING;
 		if (pis->panenv.flags & 2) pIns->dwFlags |= ENV_PANLOOP;
 		if (pis->panenv.flags & 4) pIns->dwFlags |= ENV_PANSUSTAIN;
 		if (pis->panenv.flags & 8) pIns->dwFlags |= ENV_PANCARRY;
-		pIns->nPanEnv = pis->panenv.num;
-		if (pIns->nPanEnv > 25) pIns->nPanEnv = 25;
-		pIns->nPanLoopStart = pis->panenv.lpb;
-		pIns->nPanLoopEnd = pis->panenv.lpe;
-		pIns->nPanSustainBegin = pis->panenv.slb;
-		pIns->nPanSustainEnd = pis->panenv.sle;
+		pIns->PanEnv.nNodes = pis->panenv.num;
+		if (pIns->PanEnv.nNodes > 25) pIns->PanEnv.nNodes = 25;
+		pIns->PanEnv.nLoopStart = pis->panenv.lpb;
+		pIns->PanEnv.nLoopEnd = pis->panenv.lpe;
+		pIns->PanEnv.nSustainStart = pis->panenv.slb;
+		pIns->PanEnv.nSustainEnd = pis->panenv.sle;
 		// Pitch Envelope 
 		if (pis->pitchenv.flags & 1) pIns->dwFlags |= ENV_PITCH;
 		if (pis->pitchenv.flags & 2) pIns->dwFlags |= ENV_PITCHLOOP;
 		if (pis->pitchenv.flags & 4) pIns->dwFlags |= ENV_PITCHSUSTAIN;
 		if (pis->pitchenv.flags & 8) pIns->dwFlags |= ENV_PITCHCARRY;
 		if (pis->pitchenv.flags & 0x80) pIns->dwFlags |= ENV_FILTER;
-		pIns->nPitchEnv = pis->pitchenv.num;
-		if (pIns->nPitchEnv > 25) pIns->nPitchEnv = 25;
-		pIns->nPitchLoopStart = pis->pitchenv.lpb;
-		pIns->nPitchLoopEnd = pis->pitchenv.lpe;
-		pIns->nPitchSustainBegin = pis->pitchenv.slb;
-		pIns->nPitchSustainEnd = pis->pitchenv.sle;
+		pIns->PitchEnv.nNodes = pis->pitchenv.num;
+		if (pIns->PitchEnv.nNodes > 25) pIns->PitchEnv.nNodes = 25;
+		pIns->PitchEnv.nLoopStart = pis->pitchenv.lpb;
+		pIns->PitchEnv.nLoopEnd = pis->pitchenv.lpe;
+		pIns->PitchEnv.nSustainStart = pis->pitchenv.slb;
+		pIns->PitchEnv.nSustainEnd = pis->pitchenv.sle;
 		// Envelopes Data
 		for (UINT ev=0; ev<25; ev++)
 		{
-			pIns->VolEnv[ev] = pis->volenv.data[ev*3];
-			pIns->VolPoints[ev] = (pis->volenv.data[ev*3+2] << 8) | (pis->volenv.data[ev*3+1]);
-			pIns->PanEnv[ev] = pis->panenv.data[ev*3] + 32;
-			pIns->PanPoints[ev] = (pis->panenv.data[ev*3+2] << 8) | (pis->panenv.data[ev*3+1]);
-			pIns->PitchEnv[ev] = pis->pitchenv.data[ev*3] + 32;
-			pIns->PitchPoints[ev] = (pis->pitchenv.data[ev*3+2] << 8) | (pis->pitchenv.data[ev*3+1]);
+			pIns->VolEnv.Values[ev] = pis->volenv.data[ev*3];
+			pIns->VolEnv.Ticks[ev] = (pis->volenv.data[ev*3+2] << 8) | (pis->volenv.data[ev*3+1]);
+			pIns->PanEnv.Values[ev] = pis->panenv.data[ev*3] + 32;
+			pIns->PanEnv.Ticks[ev] = (pis->panenv.data[ev*3+2] << 8) | (pis->panenv.data[ev*3+1]);
+			pIns->PitchEnv.Values[ev] = pis->pitchenv.data[ev*3] + 32;
+			pIns->PitchEnv.Ticks[ev] = (pis->pitchenv.data[ev*3+2] << 8) | (pis->pitchenv.data[ev*3+1]);
 		}
 		pIns->nNNA = pis->nna;
 		pIns->nDCT = pis->dct;
@@ -403,8 +403,8 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		if (pIns->nPan > 256) pIns->nPan = 128;
 		if (pis->dfp < 0x80) pIns->dwFlags |= ENV_SETPANNING;
 	}
-	if ((pIns->nVolLoopStart >= 25) || (pIns->nVolLoopEnd >= 25)) pIns->dwFlags &= ~ENV_VOLLOOP;
-	if ((pIns->nVolSustainBegin >= 25) || (pIns->nVolSustainEnd >= 25)) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
+	if ((pIns->VolEnv.nLoopStart >= 25) || (pIns->VolEnv.nLoopEnd >= 25)) pIns->dwFlags &= ~ENV_VOLLOOP;
+	if ((pIns->VolEnv.nSustainStart >= 25) || (pIns->VolEnv.nSustainEnd >= 25)) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
 
 	return returnVal; //return offset
 }
@@ -2030,44 +2030,44 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			if (pIns->dwFlags & ENV_VOLLOOP) iti.volenv.flags |= 0x02;
 			if (pIns->dwFlags & ENV_VOLSUSTAIN) iti.volenv.flags |= 0x04;
 			if (pIns->dwFlags & ENV_VOLCARRY) iti.volenv.flags |= 0x08;
-			iti.volenv.num = (BYTE)pIns->nVolEnv;
-			iti.volenv.lpb = (BYTE)pIns->nVolLoopStart;
-			iti.volenv.lpe = (BYTE)pIns->nVolLoopEnd;
-			iti.volenv.slb = pIns->nVolSustainBegin;
-			iti.volenv.sle = pIns->nVolSustainEnd;
+			iti.volenv.num = (BYTE)pIns->VolEnv.nNodes;
+			iti.volenv.lpb = (BYTE)pIns->VolEnv.nLoopStart;
+			iti.volenv.lpe = (BYTE)pIns->VolEnv.nLoopEnd;
+			iti.volenv.slb = pIns->VolEnv.nSustainStart;
+			iti.volenv.sle = pIns->VolEnv.nSustainEnd;
 			// Writing Panning envelope
 			if (pIns->dwFlags & ENV_PANNING) iti.panenv.flags |= 0x01;
 			if (pIns->dwFlags & ENV_PANLOOP) iti.panenv.flags |= 0x02;
 			if (pIns->dwFlags & ENV_PANSUSTAIN) iti.panenv.flags |= 0x04;
 			if (pIns->dwFlags & ENV_PANCARRY) iti.panenv.flags |= 0x08;
-			iti.panenv.num = (BYTE)pIns->nPanEnv;
-			iti.panenv.lpb = (BYTE)pIns->nPanLoopStart;
-			iti.panenv.lpe = (BYTE)pIns->nPanLoopEnd;
-			iti.panenv.slb = pIns->nPanSustainBegin;
-			iti.panenv.sle = pIns->nPanSustainEnd;
+			iti.panenv.num = (BYTE)pIns->PanEnv.nNodes;
+			iti.panenv.lpb = (BYTE)pIns->PanEnv.nLoopStart;
+			iti.panenv.lpe = (BYTE)pIns->PanEnv.nLoopEnd;
+			iti.panenv.slb = pIns->PanEnv.nSustainStart;
+			iti.panenv.sle = pIns->PanEnv.nSustainEnd;
 			// Writing Pitch Envelope
 			if (pIns->dwFlags & ENV_PITCH) iti.pitchenv.flags |= 0x01;
 			if (pIns->dwFlags & ENV_PITCHLOOP) iti.pitchenv.flags |= 0x02;
 			if (pIns->dwFlags & ENV_PITCHSUSTAIN) iti.pitchenv.flags |= 0x04;
 			if (pIns->dwFlags & ENV_PITCHCARRY) iti.pitchenv.flags |= 0x08;
 			if (pIns->dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
-			iti.pitchenv.num = (BYTE)pIns->nPitchEnv;
-			iti.pitchenv.lpb = (BYTE)pIns->nPitchLoopStart;
-			iti.pitchenv.lpe = (BYTE)pIns->nPitchLoopEnd;
-			iti.pitchenv.slb = (BYTE)pIns->nPitchSustainBegin;
-			iti.pitchenv.sle = (BYTE)pIns->nPitchSustainEnd;
+			iti.pitchenv.num = (BYTE)pIns->PitchEnv.nNodes;
+			iti.pitchenv.lpb = (BYTE)pIns->PitchEnv.nLoopStart;
+			iti.pitchenv.lpe = (BYTE)pIns->PitchEnv.nLoopEnd;
+			iti.pitchenv.slb = (BYTE)pIns->PitchEnv.nSustainStart;
+			iti.pitchenv.sle = (BYTE)pIns->PitchEnv.nSustainEnd;
 			// Writing Envelopes data
 			for (UINT ev=0; ev<25; ev++)
 			{
-				iti.volenv.data[ev*3] = pIns->VolEnv[ev];
-				iti.volenv.data[ev*3+1] = pIns->VolPoints[ev] & 0xFF;
-				iti.volenv.data[ev*3+2] = pIns->VolPoints[ev] >> 8;
-				iti.panenv.data[ev*3] = pIns->PanEnv[ev] - 32;
-				iti.panenv.data[ev*3+1] = pIns->PanPoints[ev] & 0xFF;
-				iti.panenv.data[ev*3+2] = pIns->PanPoints[ev] >> 8;
-				iti.pitchenv.data[ev*3] = pIns->PitchEnv[ev] - 32;
-				iti.pitchenv.data[ev*3+1] = pIns->PitchPoints[ev] & 0xFF;
-				iti.pitchenv.data[ev*3+2] = pIns->PitchPoints[ev] >> 8;
+				iti.volenv.data[ev*3] = pIns->VolEnv.Values[ev];
+				iti.volenv.data[ev*3+1] = pIns->VolEnv.Ticks[ev] & 0xFF;
+				iti.volenv.data[ev*3+2] = pIns->VolEnv.Ticks[ev] >> 8;
+				iti.panenv.data[ev*3] = pIns->PanEnv.Values[ev] - 32;
+				iti.panenv.data[ev*3+1] = pIns->PanEnv.Ticks[ev] & 0xFF;
+				iti.panenv.data[ev*3+2] = pIns->PanEnv.Ticks[ev] >> 8;
+				iti.pitchenv.data[ev*3] = pIns->PitchEnv.Values[ev] - 32;
+				iti.pitchenv.data[ev*3+1] = pIns->PitchEnv.Ticks[ev] & 0xFF;
+				iti.pitchenv.data[ev*3+2] = pIns->PitchEnv.Ticks[ev] >> 8;
 			}
 		} else
 		// Save Empty Instrument
@@ -2675,44 +2675,44 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			if (pIns->dwFlags & ENV_VOLLOOP) iti.volenv.flags |= 0x02;
 			if (pIns->dwFlags & ENV_VOLSUSTAIN) iti.volenv.flags |= 0x04;
 			if (pIns->dwFlags & ENV_VOLCARRY) iti.volenv.flags |= 0x08;
-			iti.volenv.num = (BYTE)pIns->nVolEnv;
-			iti.volenv.lpb = (BYTE)pIns->nVolLoopStart;
-			iti.volenv.lpe = (BYTE)pIns->nVolLoopEnd;
-			iti.volenv.slb = pIns->nVolSustainBegin;
-			iti.volenv.sle = pIns->nVolSustainEnd;
+			iti.volenv.num = (BYTE)pIns->VolEnv.nNodes;
+			iti.volenv.lpb = (BYTE)pIns->VolEnv.nLoopStart;
+			iti.volenv.lpe = (BYTE)pIns->VolEnv.nLoopEnd;
+			iti.volenv.slb = pIns->VolEnv.nSustainStart;
+			iti.volenv.sle = pIns->VolEnv.nSustainEnd;
 			// Writing Panning envelope
 			if (pIns->dwFlags & ENV_PANNING) iti.panenv.flags |= 0x01;
 			if (pIns->dwFlags & ENV_PANLOOP) iti.panenv.flags |= 0x02;
 			if (pIns->dwFlags & ENV_PANSUSTAIN) iti.panenv.flags |= 0x04;
 			if (pIns->dwFlags & ENV_PANCARRY) iti.panenv.flags |= 0x08;
-			iti.panenv.num = (BYTE)pIns->nPanEnv;
-			iti.panenv.lpb = (BYTE)pIns->nPanLoopStart;
-			iti.panenv.lpe = (BYTE)pIns->nPanLoopEnd;
-			iti.panenv.slb = pIns->nPanSustainBegin;
-			iti.panenv.sle = pIns->nPanSustainEnd;
+			iti.panenv.num = (BYTE)pIns->PanEnv.nNodes;
+			iti.panenv.lpb = (BYTE)pIns->PanEnv.nLoopStart;
+			iti.panenv.lpe = (BYTE)pIns->PanEnv.nLoopEnd;
+			iti.panenv.slb = pIns->PanEnv.nSustainStart;
+			iti.panenv.sle = pIns->PanEnv.nSustainEnd;
 			// Writing Pitch Envelope
 			if (pIns->dwFlags & ENV_PITCH) iti.pitchenv.flags |= 0x01;
 			if (pIns->dwFlags & ENV_PITCHLOOP) iti.pitchenv.flags |= 0x02;
 			if (pIns->dwFlags & ENV_PITCHSUSTAIN) iti.pitchenv.flags |= 0x04;
 			if (pIns->dwFlags & ENV_PITCHCARRY) iti.pitchenv.flags |= 0x08;
 			if (pIns->dwFlags & ENV_FILTER) iti.pitchenv.flags |= 0x80;
-			iti.pitchenv.num = (BYTE)pIns->nPitchEnv;
-			iti.pitchenv.lpb = (BYTE)pIns->nPitchLoopStart;
-			iti.pitchenv.lpe = (BYTE)pIns->nPitchLoopEnd;
-			iti.pitchenv.slb = (BYTE)pIns->nPitchSustainBegin;
-			iti.pitchenv.sle = (BYTE)pIns->nPitchSustainEnd;
+			iti.pitchenv.num = (BYTE)pIns->PitchEnv.nNodes;
+			iti.pitchenv.lpb = (BYTE)pIns->PitchEnv.nLoopStart;
+			iti.pitchenv.lpe = (BYTE)pIns->PitchEnv.nLoopEnd;
+			iti.pitchenv.slb = (BYTE)pIns->PitchEnv.nSustainStart;
+			iti.pitchenv.sle = (BYTE)pIns->PitchEnv.nSustainEnd;
 			// Writing Envelopes data
 			for (UINT ev=0; ev<25; ev++)
 			{
-				iti.volenv.data[ev*3] = pIns->VolEnv[ev];
-				iti.volenv.data[ev*3+1] = pIns->VolPoints[ev] & 0xFF;
-				iti.volenv.data[ev*3+2] = pIns->VolPoints[ev] >> 8;
-				iti.panenv.data[ev*3] = pIns->PanEnv[ev] - 32;
-				iti.panenv.data[ev*3+1] = pIns->PanPoints[ev] & 0xFF;
-				iti.panenv.data[ev*3+2] = pIns->PanPoints[ev] >> 8;
-				iti.pitchenv.data[ev*3] = pIns->PitchEnv[ev] - 32;
-				iti.pitchenv.data[ev*3+1] = pIns->PitchPoints[ev] & 0xFF;
-				iti.pitchenv.data[ev*3+2] = pIns->PitchPoints[ev] >> 8;
+				iti.volenv.data[ev*3] = pIns->VolEnv.Values[ev];
+				iti.volenv.data[ev*3+1] = pIns->VolEnv.Ticks[ev] & 0xFF;
+				iti.volenv.data[ev*3+2] = pIns->VolEnv.Ticks[ev] >> 8;
+				iti.panenv.data[ev*3] = pIns->PanEnv.Values[ev] - 32;
+				iti.panenv.data[ev*3+1] = pIns->PanEnv.Ticks[ev] & 0xFF;
+				iti.panenv.data[ev*3+2] = pIns->PanEnv.Ticks[ev] >> 8;
+				iti.pitchenv.data[ev*3] = pIns->PitchEnv.Values[ev] - 32;
+				iti.pitchenv.data[ev*3+1] = pIns->PitchEnv.Ticks[ev] & 0xFF;
+				iti.pitchenv.data[ev*3+2] = pIns->PitchEnv.Ticks[ev] >> 8;
 			}
 		} else
 		// Save Empty Instrument
@@ -3494,9 +3494,9 @@ void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], 
    	WriteInstrumentPropertyForAllInstruments('CS..', sizeof(m_defaultInstrument.nCutSwing),   f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('RS..', sizeof(m_defaultInstrument.nResSwing),   f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('FM..', sizeof(m_defaultInstrument.nFilterMode), f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(m_defaultInstrument.nPitchEnvReleaseNode ), f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(m_defaultInstrument.nPanEnvReleaseNode), f, instruments, nInstruments);
-	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(m_defaultInstrument.nVolEnvReleaseNode), f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('PERN', sizeof(m_defaultInstrument.PitchEnv.nReleaseNode ), f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('AERN', sizeof(m_defaultInstrument.PanEnv.nReleaseNode), f, instruments, nInstruments);
+	WriteInstrumentPropertyForAllInstruments('VERN', sizeof(m_defaultInstrument.VolEnv.nReleaseNode), f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(m_defaultInstrument.wPitchToTempoLock),  f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(m_defaultInstrument.nPluginVelocityHandling),  f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(m_defaultInstrument.nPluginVolumeHandling),  f, instruments, nInstruments);

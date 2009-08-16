@@ -411,6 +411,19 @@ MODULAR STRUCT DECLARATIONS :
 -----------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------*/
 
+// Instrument Envelopes
+struct INSTRUMENTENVELOPE
+{
+	WORD Ticks[MAX_ENVPOINTS];
+	BYTE Values[MAX_ENVPOINTS];
+	UINT nNodes;
+	BYTE nLoopStart;
+	BYTE nLoopEnd;
+	BYTE nSustainStart;
+	BYTE nSustainEnd;
+	BYTE nReleaseNode;
+};
+
 // Instrument Struct
 struct MODINSTRUMENT
 {
@@ -418,21 +431,14 @@ struct MODINSTRUMENT
 	DWORD dwFlags;
 	UINT nGlobalVol;
 	UINT nPan;
-	UINT nVolEnv; //Number of points in the volume envelope
-	UINT nPanEnv;
-	UINT nPitchEnv;
-	BYTE nVolLoopStart;
-	BYTE nVolLoopEnd;
-	BYTE nVolSustainBegin;
-	BYTE nVolSustainEnd;
-	BYTE nPanLoopStart;
-	BYTE nPanLoopEnd;
-	BYTE nPanSustainBegin;
-	BYTE nPanSustainEnd;
-	BYTE nPitchLoopStart;
-	BYTE nPitchLoopEnd;
-	BYTE nPitchSustainBegin;
-	BYTE nPitchSustainEnd;
+
+	INSTRUMENTENVELOPE VolEnv;
+	INSTRUMENTENVELOPE PanEnv;
+	INSTRUMENTENVELOPE PitchEnv;
+
+	BYTE NoteMap[128];
+	WORD Keyboard[128];
+
 	BYTE nNNA;
 	BYTE nDCT;
 	BYTE nDNA;
@@ -440,22 +446,17 @@ struct MODINSTRUMENT
 	BYTE nVolSwing;
 	BYTE nIFC;
 	BYTE nIFR;
+
 	WORD wMidiBank;
 	BYTE nMidiProgram;
 	BYTE nMidiChannel;
 	BYTE nMidiDrumKey;
 	signed char nPPS; //Pitch to Pan Separator?
 	unsigned char nPPC; //Pitch Centre?
-	WORD VolPoints[MAX_ENVPOINTS];
-	WORD PanPoints[MAX_ENVPOINTS];
-	WORD PitchPoints[MAX_ENVPOINTS];
-	BYTE VolEnv[MAX_ENVPOINTS];
-	BYTE PanEnv[MAX_ENVPOINTS];
-	BYTE PitchEnv[MAX_ENVPOINTS];
-	BYTE NoteMap[128];
-	WORD Keyboard[128];
+
 	CHAR name[32];
 	CHAR filename[12];
+
 	BYTE nMixPlug;							//rewbs.instroVSTi
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
@@ -465,9 +466,6 @@ struct MODINSTRUMENT
 	BYTE nCutSwing;
 	BYTE nResSwing;
 	BYTE nFilterMode;
-	BYTE nPitchEnvReleaseNode;
-	BYTE nPanEnvReleaseNode;
-	BYTE nVolEnvReleaseNode;
 	WORD wPitchToTempoLock;
 	BYTE nPluginVelocityHandling;
 	BYTE nPluginVolumeHandling;

@@ -1045,23 +1045,23 @@ BOOL CSoundFile::ReadNote()
 			{
 				MODINSTRUMENT *pIns = pChn->pModInstrument;
 				// Volume Envelope
-				if ((pChn->dwFlags & CHN_VOLENV) && (pIns->nVolEnv))
+				if ((pChn->dwFlags & CHN_VOLENV) && (pIns->VolEnv.nNodes))
 				{
 					int envvol = getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);
 					
 					// if we are in the release portion of the envelope,
 					// rescale envelope factor so that it is proportional to the release point
 					// and release envelope beginning.
-					if (pIns->nVolEnvReleaseNode != ENV_RELEASE_NODE_UNSET
-						&& pChn->nVolEnvPosition>=pIns->VolPoints[pIns->nVolEnvReleaseNode]
+					if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
+						&& pChn->nVolEnvPosition>=pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
 						&& pChn->nVolEnvValueAtReleaseJump != NOT_YET_RELEASED) {
 						int envValueAtReleaseJump = pChn->nVolEnvValueAtReleaseJump;
-						int envValueAtReleaseNode = pIns->VolEnv[pIns->nVolEnvReleaseNode] << 2;
+						int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] << 2;
 
 						//If we have just hit the release node, force the current env value
 						//to be that of the release node. This works around the case where 
 						// we have another node at the same position as the release node.
-						if (pChn->nVolEnvPosition==pIns->VolPoints[pIns->nVolEnvReleaseNode]) {
+						if (pChn->nVolEnvPosition==pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]) {
 							envvol=envValueAtReleaseNode;
 						}
 
@@ -1071,19 +1071,19 @@ BOOL CSoundFile::ReadNote()
 					vol = (vol * CLAMP(envvol, 0, 512)) >> 8;
 				}
 				// Panning Envelope
-				if ((pChn->dwFlags & CHN_PANENV) && (pIns->nPanEnv))
+				if ((pChn->dwFlags & CHN_PANENV) && (pIns->PanEnv.nNodes))
 				{
 					int envpos = pChn->nPanEnvPosition;
-					UINT pt = pIns->nPanEnv - 1;
-					for (UINT i=0; i<(UINT)(pIns->nPanEnv-1); i++)
+					UINT pt = pIns->PanEnv.nNodes - 1;
+					for (UINT i=0; i<(UINT)(pIns->PanEnv.nNodes-1); i++)
 					{
-						if (envpos <= pIns->PanPoints[i])
+						if (envpos <= pIns->PanEnv.Ticks[i])
 						{
 							pt = i;
 							break;
 						}
 					}
-					int x2 = pIns->PanPoints[pt], y2 = pIns->PanEnv[pt];
+					int x2 = pIns->PanEnv.Ticks[pt], y2 = pIns->PanEnv.Values[pt];
 					int x1, envpan;
 					if (envpos >= x2)
 					{
@@ -1092,8 +1092,8 @@ BOOL CSoundFile::ReadNote()
 					} else
 					if (pt)
 					{
-						envpan = pIns->PanEnv[pt-1];
-						x1 = pIns->PanPoints[pt-1];
+						envpan = pIns->PanEnv.Values[pt-1];
+						x1 = pIns->PanEnv.Ticks[pt-1];
 					} else
 					{
 						envpan = 128;
@@ -1243,30 +1243,30 @@ BOOL CSoundFile::ReadNote()
 				period = CLAMP(period, 113 * 4, 856 * 4);
 
 			// Pitch/Filter Envelope
-			if ((pChn->pModInstrument) && (pChn->dwFlags & CHN_PITCHENV) && (pChn->pModInstrument->nPitchEnv))
+			if ((pChn->pModInstrument) && (pChn->dwFlags & CHN_PITCHENV) && (pChn->pModInstrument->PitchEnv.nNodes))
 			{
 				MODINSTRUMENT *pIns = pChn->pModInstrument;
 				int envpos = pChn->nPitchEnvPosition;
-				UINT pt = pIns->nPitchEnv - 1;
-				for (UINT i=0; i<(UINT)(pIns->nPitchEnv-1); i++)
+				UINT pt = pIns->PitchEnv.nNodes - 1;
+				for (UINT i=0; i<(UINT)(pIns->PitchEnv.nNodes-1); i++)
 				{
-					if (envpos <= pIns->PitchPoints[i])
+					if (envpos <= pIns->PitchEnv.Ticks[i])
 					{
 						pt = i;
 						break;
 					}
 				}
-				int x2 = pIns->PitchPoints[pt];
+				int x2 = pIns->PitchEnv.Ticks[pt];
 				int x1, envpitch;
 				if (envpos >= x2)
 				{
-					envpitch = (((int)pIns->PitchEnv[pt]) - 32) * 8;
+					envpitch = (((int)pIns->PitchEnv.Values[pt]) - 32) * 8;
 					x1 = x2;
 				} else
 				if (pt)
 				{
-					envpitch = (((int)pIns->PitchEnv[pt-1]) - 32) * 8;
-					x1 = pIns->PitchPoints[pt-1];
+					envpitch = (((int)pIns->PitchEnv.Values[pt-1]) - 32) * 8;
+					x1 = pIns->PitchEnv.Ticks[pt-1];
 				} else
 				{
 					envpitch = 0;
@@ -1275,7 +1275,7 @@ BOOL CSoundFile::ReadNote()
 				if (envpos > x2) envpos = x2;
 				if ((x2 > x1) && (envpos > x1))
 				{
-					int envpitchdest = (((int)pIns->PitchEnv[pt]) - 32) * 8;
+					int envpitchdest = (((int)pIns->PitchEnv.Values[pt]) - 32) * 8;
 					envpitch += ((envpos - x1) * (envpitchdest - envpitch)) / (x2 - x1);
 				}
 				envpitch = CLAMP(envpitch, -256, 256);
@@ -1561,13 +1561,13 @@ BOOL CSoundFile::ReadNote()
 				// Volume Loop ?
 				if (pIns->dwFlags & ENV_VOLLOOP)
 				{
-					UINT volloopend = pIns->VolPoints[pIns->nVolLoopEnd];
+					UINT volloopend = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopEnd];
 					if (m_nType != MOD_TYPE_XM) volloopend++;
 					if (pChn->nVolEnvPosition == volloopend)
 					{
-						pChn->nVolEnvPosition = pIns->VolPoints[pIns->nVolLoopStart];
-						if ((pIns->nVolLoopEnd == pIns->nVolLoopStart) && (!pIns->VolEnv[pIns->nVolLoopStart])
-						 && ((!(m_nType & MOD_TYPE_XM)) || (pIns->nVolLoopEnd+1 == (int)pIns->nVolEnv)))
+						pChn->nVolEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopStart];
+						if ((pIns->VolEnv.nLoopEnd == pIns->VolEnv.nLoopStart) && (!pIns->VolEnv.Values[pIns->VolEnv.nLoopStart])
+						 && ((!(m_nType & MOD_TYPE_XM)) || (pIns->VolEnv.nLoopEnd+1 == (int)pIns->VolEnv.nNodes)))
 						{
 							pChn->dwFlags |= CHN_NOTEFADE;
 							pChn->nFadeOutVol = 0;
@@ -1577,15 +1577,15 @@ BOOL CSoundFile::ReadNote()
 				// Volume Sustain ?
 				if ((pIns->dwFlags & ENV_VOLSUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
-					if (pChn->nVolEnvPosition == (UINT)pIns->VolPoints[pIns->nVolSustainEnd]+1)
-						pChn->nVolEnvPosition = pIns->VolPoints[pIns->nVolSustainBegin];
+					if (pChn->nVolEnvPosition == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd]+1)
+						pChn->nVolEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
 				} else
 				// End of Envelope ?
-				if (pChn->nVolEnvPosition > pIns->VolPoints[pIns->nVolEnv - 1])
+				if (pChn->nVolEnvPosition > pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1])
 				{
 					if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
-					pChn->nVolEnvPosition = pIns->VolPoints[pIns->nVolEnv - 1];
-					if ((!pIns->VolEnv[pIns->nVolEnv-1]) && ((nChn >= m_nChannels) || (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
+					pChn->nVolEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1];
+					if ((!pIns->VolEnv.Values[pIns->VolEnv.nNodes-1]) && ((nChn >= m_nChannels) || (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
 					{
 						pChn->dwFlags |= CHN_NOTEFADE;
 						pChn->nFadeOutVol = 0;
@@ -1599,21 +1599,21 @@ BOOL CSoundFile::ReadNote()
 				pChn->nPanEnvPosition++;
 				if (pIns->dwFlags & ENV_PANLOOP)
 				{
-					UINT panloopend = pIns->PanPoints[pIns->nPanLoopEnd];
+					UINT panloopend = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopEnd];
 					if (m_nType != MOD_TYPE_XM) panloopend++;
 					if (pChn->nPanEnvPosition == panloopend)
-						pChn->nPanEnvPosition = pIns->PanPoints[pIns->nPanLoopStart];
+						pChn->nPanEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopStart];
 				}
 				// Panning Sustain ?
-				if ((pIns->dwFlags & ENV_PANSUSTAIN) && (pChn->nPanEnvPosition == (UINT)pIns->PanPoints[pIns->nPanSustainEnd]+1)
+				if ((pIns->dwFlags & ENV_PANSUSTAIN) && (pChn->nPanEnvPosition == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd]+1)
 				 && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
 					// Panning sustained
-					pChn->nPanEnvPosition = pIns->PanPoints[pIns->nPanSustainBegin];
+					pChn->nPanEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nSustainStart];
 				} else
 				{
-					if (pChn->nPanEnvPosition > pIns->PanPoints[pIns->nPanEnv - 1])
-						pChn->nPanEnvPosition = pIns->PanPoints[pIns->nPanEnv - 1];
+					if (pChn->nPanEnvPosition > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1])
+						pChn->nPanEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1];
 				}
 			}
 			// Pitch Envelope
@@ -1624,21 +1624,21 @@ BOOL CSoundFile::ReadNote()
 				// Pitch Loop ?
 				if (pIns->dwFlags & ENV_PITCHLOOP)
 				{
-					UINT pitchloopend = pIns->PitchPoints[pIns->nPitchLoopEnd];
+					UINT pitchloopend = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopEnd];
 					//IT compatibility 24. Short envelope loops
 					if (IsCompatibleMode(TRK_IMPULSETRACKER)) pitchloopend++;
 					if (pChn->nPitchEnvPosition >= pitchloopend)
-						pChn->nPitchEnvPosition = pIns->PitchPoints[pIns->nPitchLoopStart];
+						pChn->nPitchEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
 				}
 				// Pitch Sustain ?
 				if ((pIns->dwFlags & ENV_PITCHSUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
-					if (pChn->nPitchEnvPosition == (UINT)pIns->PitchPoints[pIns->nPitchSustainEnd]+1)
-						pChn->nPitchEnvPosition = pIns->PitchPoints[pIns->nPitchSustainBegin];
+					if (pChn->nPitchEnvPosition == (UINT)pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainEnd]+1)
+						pChn->nPitchEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainStart];
 				} else
 				{
-					if (pChn->nPitchEnvPosition > pIns->PitchPoints[pIns->nPitchEnv - 1])
-						pChn->nPitchEnvPosition = pIns->PitchPoints[pIns->nPitchEnv - 1];
+					if (pChn->nPitchEnvPosition > pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1])
+						pChn->nPitchEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1];
 				}
 			}
 		}
@@ -1982,32 +1982,32 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 int CSoundFile::getVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns)
 //------------------------------------------------------------------------------
 {
-	UINT pt = pIns->nVolEnv - 1;
+	UINT pt = pIns->VolEnv.nNodes - 1;
 
 	//Checking where current 'tick' is relative to the 
 	//envelope points.
-	for (UINT i=0; i<(UINT)(pIns->nVolEnv-1); i++)
+	for (UINT i=0; i<(UINT)(pIns->VolEnv.nNodes-1); i++)
 	{
-		if (position <= pIns->VolPoints[i])
+		if (position <= pIns->VolEnv.Ticks[i])
 		{
 			pt = i;
 			break;
 		}
 	}
 
-	int x2 = pIns->VolPoints[pt];
+	int x2 = pIns->VolEnv.Ticks[pt];
 	int x1, envvol;
 	if (position >= x2) //Case: current 'tick' is on a envelope point.
 	{
-		envvol = pIns->VolEnv[pt] << 2;
+		envvol = pIns->VolEnv.Values[pt] << 2;
 		x1 = x2;
 	}
 	else //Case: current 'tick' is between two envelope points.
 	{
 		if (pt)
 		{
-			envvol = pIns->VolEnv[pt-1] << 2;
-			x1 = pIns->VolPoints[pt-1];
+			envvol = pIns->VolEnv.Values[pt-1] << 2;
+			x1 = pIns->VolEnv.Ticks[pt-1];
 		} else
 		{
 			envvol = 0;
@@ -2018,7 +2018,7 @@ int CSoundFile::getVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns)
 		{
 			//Linear approximation between the points;
 			//f(x+d) ~ f(x) + f'(x)*d, where f'(x) = (y2-y1)/(x2-x1)
-			envvol += ((position - x1) * (((int)pIns->VolEnv[pt]<<2) - envvol)) / (x2 - x1);
+			envvol += ((position - x1) * (((int)pIns->VolEnv.Values[pt]<<2) - envvol)) / (x2 - x1);
 		}
 	}
 	return envvol;

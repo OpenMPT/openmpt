@@ -441,16 +441,16 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 	}
 	pIns->dwFlags |= ENV_VOLUME;
 	if (nChannel != MIDI_DRUMCHANNEL) pIns->dwFlags |= ENV_VOLSUSTAIN;
-	pIns->nVolEnv = 4;
-	pIns->VolPoints[0] = 0;
-	pIns->VolEnv[0] = 64;
-	pIns->VolPoints[1] = 10;
-	pIns->VolEnv[1] = 64;
-	pIns->VolPoints[2] = 15;
-	pIns->VolEnv[2] = 48;
-	pIns->VolPoints[3] = 20;
-	pIns->VolEnv[3] = 0;
-	pIns->nVolSustainBegin = pIns->nVolSustainEnd = 1;
+	pIns->VolEnv.nNodes = 4;
+	pIns->VolEnv.Ticks[0] = 0;
+	pIns->VolEnv.Values[0] = 64;
+	pIns->VolEnv.Ticks[1] = 10;
+	pIns->VolEnv.Values[1] = 64;
+	pIns->VolEnv.Ticks[2] = 15;
+	pIns->VolEnv.Values[2] = 48;
+	pIns->VolEnv.Ticks[3] = 20;
+	pIns->VolEnv.Values[3] = 0;
+	pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = 1;
 	// Sample
 	Samples[m_nSamples].nPan = 128;
 	Samples[m_nSamples].nVolume = 256;

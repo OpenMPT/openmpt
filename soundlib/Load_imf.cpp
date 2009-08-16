@@ -389,6 +389,8 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if (memcmp(hdr.im10, "IM10", 4) != 0)
 		return false;
 
+	ChangeModTypeTo(MOD_TYPE_IT);
+
 	// song name
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memcpy(m_szNames[0], hdr.title, 25);
@@ -402,7 +404,6 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nDefaultTempo = hdr.bpm;
 	m_nDefaultGlobalVolume = hdr.master << 1;
 	m_nSamplePreAmp = hdr.amp;
-	m_nVSTiVolume = 48; // not supported
 	
 	for (n = 0; n < 32; n++) {
 		Chn[n].nPan = hdr.channels[n].panning * 64 / 255;
@@ -489,7 +490,9 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		for (s = 0; s < imfins.smpnum; s++) {
 			IMFSAMPLE imfsmp;
 			UINT32 blen;
-			slurp_read(fp, &imfsmp, sizeof(imfsmp));
+			if(dwMemPos + sizeof(IMFSAMPLE) > dwMemLength) break;
+			memset(imfsmp, 0, sizeof(IMFSAMPLE));
+			memcpy(imfsmp, lpStream + dwMemPos, sizeof(IMFSAMPLE));
 			
 			if (memcmp(imfsmp.is10, "IS10", 4) != 0) {
 				//printf("is10 says %02x %02x %02x %02x!\n",
@@ -528,6 +531,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			}
 
 			pSample++;
+			dwMemPos += sizeof(IMFSAMPLE);
 		}
 		firstsample += imfins.smpnum;
 	}

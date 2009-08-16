@@ -50,18 +50,18 @@ void CScaleEnvPointsDlg::OnOK()
 		switch(m_Env)
 		{
 			case ENV_VOLUME:
-				array = &m_pInstrument->VolPoints;
-				arraySize = &m_pInstrument->nVolEnv;
+				array = &m_pInstrument->VolEnv.Ticks;
+				arraySize = &m_pInstrument->VolEnv.nNodes;
 			break;
 
 			case ENV_PANNING:
-				array = &m_pInstrument->PanPoints;
-				arraySize = &m_pInstrument->nPanEnv;
+				array = &m_pInstrument->PanEnv.Ticks;
+				arraySize = &m_pInstrument->PanEnv.nNodes;
 			break;
 
 			case ENV_PITCH:
-				array = &m_pInstrument->PitchPoints;
-				arraySize = &m_pInstrument->nPitchEnv;
+				array = &m_pInstrument->PitchEnv.Ticks;
+				arraySize = &m_pInstrument->PitchEnv.nNodes;
 			break;
 		}
 

@@ -1785,7 +1785,7 @@ BOOL CSoundFile::ProcessEffects()
 					if (pChn->pModInstrument)
 					{
 						MODINSTRUMENT *pIns = pChn->pModInstrument;
-						if ((pChn->dwFlags & CHN_PANENV) && (pIns->nPanEnv) && (param > pIns->PanPoints[pIns->nPanEnv-1]))
+						if ((pChn->dwFlags & CHN_PANENV) && (pIns->PanEnv.nNodes) && (param > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes-1]))
 						{
 							pChn->dwFlags &= ~CHN_PANENV;
 						}
@@ -3269,9 +3269,9 @@ void CSoundFile::KeyOff(UINT nChn)
 			pChn->dwFlags |= CHN_NOTEFADE;
 		}
 	
-		if (pIns->nVolEnvReleaseNode != ENV_RELEASE_NODE_UNSET) {
+		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET) {
 			pChn->nVolEnvValueAtReleaseJump=getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);
-			pChn->nVolEnvPosition= pIns->VolPoints[pIns->nVolEnvReleaseNode];
+			pChn->nVolEnvPosition= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
 		}
 
 	}
