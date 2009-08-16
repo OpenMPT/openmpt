@@ -974,15 +974,15 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 		{
 			pIns->dwFlags |= ENV_VOLUME;
 			if (psh->flags & 32) pIns->dwFlags |= ENV_VOLSUSTAIN;
-			pIns->VolEnv[0] = 64;
-			pIns->VolPoints[0] = 0;
-			pIns->VolEnv[1] = 64;
-			pIns->VolPoints[1] = 1;
-			pIns->VolEnv[2] = 32;
-			pIns->VolPoints[2] = 20;
-			pIns->VolEnv[3] = 0;
-			pIns->VolPoints[3] = 100;
-			pIns->nVolEnv = 4;
+			pIns->VolEnv.Values[0] = 64;
+			pIns->VolEnv.Ticks[0] = 0;
+			pIns->VolEnv.Values[1] = 64;
+			pIns->VolEnv.Ticks[1] = 1;
+			pIns->VolEnv.Values[2] = 32;
+			pIns->VolEnv.Ticks[2] = 20;
+			pIns->VolEnv.Values[3] = 0;
+			pIns->VolEnv.Ticks[3] = 100;
+			pIns->VolEnv.nNodes = 4;
 		}
 	*/
 		// Skip to next sample
@@ -1172,48 +1172,48 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	if (pih->ptype & 1) pIns->dwFlags |= ENV_PANNING;
 	if (pih->ptype & 2) pIns->dwFlags |= ENV_PANSUSTAIN;
 	if (pih->ptype & 4) pIns->dwFlags |= ENV_PANLOOP;
-	pIns->nVolEnv = pih->vnum;
-	pIns->nPanEnv = pih->pnum;
-	if (pIns->nVolEnv > 12) pIns->nVolEnv = 12;
-	if (pIns->nPanEnv > 12) pIns->nPanEnv = 12;
-	if (!pIns->nVolEnv) pIns->dwFlags &= ~ENV_VOLUME;
-	if (!pIns->nPanEnv) pIns->dwFlags &= ~ENV_PANNING;
-	pIns->nVolSustainBegin = pih->vsustain;
-	pIns->nVolSustainEnd = pih->vsustain;
+	pIns->VolEnv.nNodes = pih->vnum;
+	pIns->PanEnv.nNodes = pih->pnum;
+	if (pIns->VolEnv.nNodes > 12) pIns->VolEnv.nNodes = 12;
+	if (pIns->PanEnv.nNodes > 12) pIns->PanEnv.nNodes = 12;
+	if (!pIns->VolEnv.nNodes) pIns->dwFlags &= ~ENV_VOLUME;
+	if (!pIns->PanEnv.nNodes) pIns->dwFlags &= ~ENV_PANNING;
+	pIns->VolEnv.nSustainStart = pih->vsustain;
+	pIns->VolEnv.nSustainEnd = pih->vsustain;
 	if (pih->vsustain >= 12) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
-	pIns->nVolLoopStart = pih->vloops;
-	pIns->nVolLoopEnd = pih->vloope;
-	if (pIns->nVolLoopEnd >= 12) pIns->nVolLoopEnd = 0;
-	if (pIns->nVolLoopStart >= pIns->nVolLoopEnd) pIns->dwFlags &= ~ENV_VOLLOOP;
-	pIns->nPanSustainBegin = pih->psustain;
-	pIns->nPanSustainEnd = pih->psustain;
+	pIns->VolEnv.nLoopStart = pih->vloops;
+	pIns->VolEnv.nLoopEnd = pih->vloope;
+	if (pIns->VolEnv.nLoopEnd >= 12) pIns->VolEnv.nLoopEnd = 0;
+	if (pIns->VolEnv.nLoopStart >= pIns->VolEnv.nLoopEnd) pIns->dwFlags &= ~ENV_VOLLOOP;
+	pIns->PanEnv.nSustainStart = pih->psustain;
+	pIns->PanEnv.nSustainEnd = pih->psustain;
 	if (pih->psustain >= 12) pIns->dwFlags &= ~ENV_PANSUSTAIN;
-	pIns->nPanLoopStart = pih->ploops;
-	pIns->nPanLoopEnd = pih->ploope;
-	if (pIns->nPanLoopEnd >= 12) pIns->nPanLoopEnd = 0;
-	if (pIns->nPanLoopStart >= pIns->nPanLoopEnd) pIns->dwFlags &= ~ENV_PANLOOP;
+	pIns->PanEnv.nLoopStart = pih->ploops;
+	pIns->PanEnv.nLoopEnd = pih->ploope;
+	if (pIns->PanEnv.nLoopEnd >= 12) pIns->PanEnv.nLoopEnd = 0;
+	if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->dwFlags &= ~ENV_PANLOOP;
 	pIns->nGlobalVol = 64;
 	pIns->nPPC = 5*12;
 	SetDefaultInstrumentValues(pIns);
 	for (UINT ienv=0; ienv<12; ienv++)
 	{
-		pIns->VolPoints[ienv] = (WORD)pih->venv[ienv*2];
-		pIns->VolEnv[ienv] = (BYTE)pih->venv[ienv*2+1];
-		pIns->PanPoints[ienv] = (WORD)pih->pIns[ienv*2];
-		pIns->PanEnv[ienv] = (BYTE)pih->pIns[ienv*2+1];
+		pIns->VolEnv.Ticks[ienv] = (WORD)pih->venv[ienv*2];
+		pIns->VolEnv.Values[ienv] = (BYTE)pih->venv[ienv*2+1];
+		pIns->PanEnv.Ticks[ienv] = (WORD)pih->pIns[ienv*2];
+		pIns->PanEnv.Values[ienv] = (BYTE)pih->pIns[ienv*2+1];
 		if (ienv)
 		{
-			if (pIns->VolPoints[ienv] < pIns->VolPoints[ienv-1])
+			if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1])
 			{
-				pIns->VolPoints[ienv] &= 0xFF;
-				pIns->VolPoints[ienv] += pIns->VolPoints[ienv-1] & 0xFF00;
-				if (pIns->VolPoints[ienv] < pIns->VolPoints[ienv-1]) pIns->VolPoints[ienv] += 0x100;
+				pIns->VolEnv.Ticks[ienv] &= 0xFF;
+				pIns->VolEnv.Ticks[ienv] += pIns->VolEnv.Ticks[ienv-1] & 0xFF00;
+				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1]) pIns->VolEnv.Ticks[ienv] += 0x100;
 			}
-			if (pIns->PanPoints[ienv] < pIns->PanPoints[ienv-1])
+			if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv-1])
 			{
-				pIns->PanPoints[ienv] &= 0xFF;
-				pIns->PanPoints[ienv] += pIns->PanPoints[ienv-1] & 0xFF00;
-				if (pIns->PanPoints[ienv] < pIns->PanPoints[ienv-1]) pIns->PanPoints[ienv] += 0x100;
+				pIns->PanEnv.Ticks[ienv] &= 0xFF;
+				pIns->PanEnv.Ticks[ienv] += pIns->PanEnv.Ticks[ienv-1] & 0xFF00;
+				if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv-1]) pIns->PanEnv.Ticks[ienv] += 0x100;
 			}
 		}
 	}
@@ -1329,16 +1329,16 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	fwrite(&xfh, 1, sizeof(xfh), f);
 	// XI Instrument Header
 	xih.volfade = pIns->nFadeOut;
-	xih.vnum = pIns->nVolEnv;
-	xih.pnum = pIns->nPanEnv;
+	xih.vnum = pIns->VolEnv.nNodes;
+	xih.pnum = pIns->PanEnv.nNodes;
 	if (xih.vnum > 12) xih.vnum = 12;
 	if (xih.pnum > 12) xih.pnum = 12;
 	for (UINT ienv=0; ienv<12; ienv++)
 	{
-		xih.venv[ienv*2] = (BYTE)pIns->VolPoints[ienv];
-		xih.venv[ienv*2+1] = pIns->VolEnv[ienv];
-		xih.pIns[ienv*2] = (BYTE)pIns->PanPoints[ienv];
-		xih.pIns[ienv*2+1] = pIns->PanEnv[ienv];
+		xih.venv[ienv*2] = (BYTE)pIns->VolEnv.Ticks[ienv];
+		xih.venv[ienv*2+1] = pIns->VolEnv.Values[ienv];
+		xih.pIns[ienv*2] = (BYTE)pIns->PanEnv.Ticks[ienv];
+		xih.pIns[ienv*2+1] = pIns->PanEnv.Values[ienv];
 	}
 	if (pIns->dwFlags & ENV_VOLUME) xih.vtype |= 1;
 	if (pIns->dwFlags & ENV_VOLSUSTAIN) xih.vtype |= 2;
@@ -1346,12 +1346,12 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	if (pIns->dwFlags & ENV_PANNING) xih.ptype |= 1;
 	if (pIns->dwFlags & ENV_PANSUSTAIN) xih.ptype |= 2;
 	if (pIns->dwFlags & ENV_PANLOOP) xih.ptype |= 4;
-	xih.vsustain = (BYTE)pIns->nVolSustainBegin;
-	xih.vloops = (BYTE)pIns->nVolLoopStart;
-	xih.vloope = (BYTE)pIns->nVolLoopEnd;
-	xih.psustain = (BYTE)pIns->nPanSustainBegin;
-	xih.ploops = (BYTE)pIns->nPanLoopStart;
-	xih.ploope = (BYTE)pIns->nPanLoopEnd;
+	xih.vsustain = (BYTE)pIns->VolEnv.nSustainStart;
+	xih.vloops = (BYTE)pIns->VolEnv.nLoopStart;
+	xih.vloope = (BYTE)pIns->VolEnv.nLoopEnd;
+	xih.psustain = (BYTE)pIns->PanEnv.nSustainStart;
+	xih.ploops = (BYTE)pIns->PanEnv.nLoopStart;
+	xih.ploope = (BYTE)pIns->PanEnv.nLoopEnd;
 	nsamples = 0;
 	for (UINT j=0; j<96; j++) if (pIns->Keyboard[j+12])
 	{
@@ -1877,44 +1877,44 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	if (pIns->dwFlags & ENV_VOLLOOP) iti->volenv.flags |= 0x02;
 	if (pIns->dwFlags & ENV_VOLSUSTAIN) iti->volenv.flags |= 0x04;
 	if (pIns->dwFlags & ENV_VOLCARRY) iti->volenv.flags |= 0x08;
-	iti->volenv.num = (BYTE)pIns->nVolEnv;
-	iti->volenv.lpb = (BYTE)pIns->nVolLoopStart;
-	iti->volenv.lpe = (BYTE)pIns->nVolLoopEnd;
-	iti->volenv.slb = pIns->nVolSustainBegin;
-	iti->volenv.sle = pIns->nVolSustainEnd;
+	iti->volenv.num = (BYTE)pIns->VolEnv.nNodes;
+	iti->volenv.lpb = (BYTE)pIns->VolEnv.nLoopStart;
+	iti->volenv.lpe = (BYTE)pIns->VolEnv.nLoopEnd;
+	iti->volenv.slb = pIns->VolEnv.nSustainStart;
+	iti->volenv.sle = pIns->VolEnv.nSustainEnd;
 	// Writing Panning envelope
 	if (pIns->dwFlags & ENV_PANNING) iti->panenv.flags |= 0x01;
 	if (pIns->dwFlags & ENV_PANLOOP) iti->panenv.flags |= 0x02;
 	if (pIns->dwFlags & ENV_PANSUSTAIN) iti->panenv.flags |= 0x04;
 	if (pIns->dwFlags & ENV_PANCARRY) iti->panenv.flags |= 0x08;
-	iti->panenv.num = (BYTE)pIns->nPanEnv;
-	iti->panenv.lpb = (BYTE)pIns->nPanLoopStart;
-	iti->panenv.lpe = (BYTE)pIns->nPanLoopEnd;
-	iti->panenv.slb = pIns->nPanSustainBegin;
-	iti->panenv.sle = pIns->nPanSustainEnd;
+	iti->panenv.num = (BYTE)pIns->PanEnv.nNodes;
+	iti->panenv.lpb = (BYTE)pIns->PanEnv.nLoopStart;
+	iti->panenv.lpe = (BYTE)pIns->PanEnv.nLoopEnd;
+	iti->panenv.slb = pIns->PanEnv.nSustainStart;
+	iti->panenv.sle = pIns->PanEnv.nSustainEnd;
 	// Writing Pitch Envelope
 	if (pIns->dwFlags & ENV_PITCH) iti->pitchenv.flags |= 0x01;
 	if (pIns->dwFlags & ENV_PITCHLOOP) iti->pitchenv.flags |= 0x02;
 	if (pIns->dwFlags & ENV_PITCHSUSTAIN) iti->pitchenv.flags |= 0x04;
 	if (pIns->dwFlags & ENV_PITCHCARRY) iti->pitchenv.flags |= 0x08;
 	if (pIns->dwFlags & ENV_FILTER) iti->pitchenv.flags |= 0x80;
-	iti->pitchenv.num = (BYTE)pIns->nPitchEnv;
-	iti->pitchenv.lpb = (BYTE)pIns->nPitchLoopStart;
-	iti->pitchenv.lpe = (BYTE)pIns->nPitchLoopEnd;
-	iti->pitchenv.slb = (BYTE)pIns->nPitchSustainBegin;
-	iti->pitchenv.sle = (BYTE)pIns->nPitchSustainEnd;
+	iti->pitchenv.num = (BYTE)pIns->PitchEnv.nNodes;
+	iti->pitchenv.lpb = (BYTE)pIns->PitchEnv.nLoopStart;
+	iti->pitchenv.lpe = (BYTE)pIns->PitchEnv.nLoopEnd;
+	iti->pitchenv.slb = (BYTE)pIns->PitchEnv.nSustainStart;
+	iti->pitchenv.sle = (BYTE)pIns->PitchEnv.nSustainEnd;
 	// Writing Envelopes data
 	for (UINT ev=0; ev<25; ev++)
 	{
-		iti->volenv.data[ev*3] = pIns->VolEnv[ev];
-		iti->volenv.data[ev*3+1] = pIns->VolPoints[ev] & 0xFF;
-		iti->volenv.data[ev*3+2] = pIns->VolPoints[ev] >> 8;
-		iti->panenv.data[ev*3] = pIns->PanEnv[ev] - 32;
-		iti->panenv.data[ev*3+1] = pIns->PanPoints[ev] & 0xFF;
-		iti->panenv.data[ev*3+2] = pIns->PanPoints[ev] >> 8;
-		iti->pitchenv.data[ev*3] = pIns->PitchEnv[ev] - 32;
-		iti->pitchenv.data[ev*3+1] = pIns->PitchPoints[ev] & 0xFF;
-		iti->pitchenv.data[ev*3+2] = pIns->PitchPoints[ev] >> 8;
+		iti->volenv.data[ev*3] = pIns->VolEnv.Values[ev];
+		iti->volenv.data[ev*3+1] = pIns->VolEnv.Ticks[ev] & 0xFF;
+		iti->volenv.data[ev*3+2] = pIns->VolEnv.Ticks[ev] >> 8;
+		iti->panenv.data[ev*3] = pIns->PanEnv.Values[ev] - 32;
+		iti->panenv.data[ev*3+1] = pIns->PanEnv.Ticks[ev] & 0xFF;
+		iti->panenv.data[ev*3+2] = pIns->PanEnv.Ticks[ev] >> 8;
+		iti->pitchenv.data[ev*3] = pIns->PitchEnv.Values[ev] - 32;
+		iti->pitchenv.data[ev*3+1] = pIns->PitchEnv.Ticks[ev] & 0xFF;
+		iti->pitchenv.data[ev*3+2] = pIns->PitchEnv.Ticks[ev] >> 8;
 	}
 	dwPos = 554;
 	fwrite(buffer, 1, dwPos, f);

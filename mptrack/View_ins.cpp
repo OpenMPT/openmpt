@@ -225,13 +225,13 @@ UINT CViewInstrument::EnvGetTick(int nPoint) const
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (nPoint < (int)pIns->nVolEnv) return pIns->VolPoints[nPoint];
+				if (nPoint < (int)pIns->VolEnv.nNodes) return pIns->VolEnv.Ticks[nPoint];
 				break;
 			case ENV_PANNING:
-				if (nPoint < (int)pIns->nPanEnv) return pIns->PanPoints[nPoint];
+				if (nPoint < (int)pIns->PanEnv.nNodes) return pIns->PanEnv.Ticks[nPoint];
 				break;
 			case ENV_PITCH:
-				if (nPoint < (int)pIns->nPitchEnv) return pIns->PitchPoints[nPoint];
+				if (nPoint < (int)pIns->PitchEnv.nNodes) return pIns->PitchEnv.Ticks[nPoint];
 				break;
 			}
 		}
@@ -253,13 +253,13 @@ UINT CViewInstrument::EnvGetValue(int nPoint) const
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (nPoint < (int)pIns->nVolEnv) return pIns->VolEnv[nPoint];
+				if (nPoint < (int)pIns->VolEnv.nNodes) return pIns->VolEnv.Values[nPoint];
 				break;
 			case ENV_PANNING:
-				if (nPoint < (int)pIns->nPanEnv) return pIns->PanEnv[nPoint];
+				if (nPoint < (int)pIns->PanEnv.nNodes) return pIns->PanEnv.Values[nPoint];
 				break;
 			case ENV_PITCH:
-				if (nPoint < (int)pIns->nPitchEnv) return pIns->PitchEnv[nPoint];
+				if (nPoint < (int)pIns->PitchEnv.nNodes) return pIns->PitchEnv.Values[nPoint];
 				break;
 			}
 		}
@@ -285,19 +285,19 @@ BOOL CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				maxpoints = pIns->nVolEnv;
-				pPoints = pIns->VolPoints;
-				pData = pIns->VolEnv;
+				maxpoints = pIns->VolEnv.nNodes;
+				pPoints = pIns->VolEnv.Ticks;
+				pData = pIns->VolEnv.Values;
 				break;
 			case ENV_PANNING:
-				maxpoints = pIns->nPanEnv;
-				pPoints = pIns->PanPoints;
-				pData = pIns->PanEnv;
+				maxpoints = pIns->PanEnv.nNodes;
+				pPoints = pIns->PanEnv.Ticks;
+				pData = pIns->PanEnv.Values;
 				break;
 			case ENV_PITCH:
-				maxpoints = pIns->nPitchEnv;
-				pPoints = pIns->PitchPoints;
-				pData = pIns->PitchEnv;
+				maxpoints = pIns->PitchEnv.nNodes;
+				pPoints = pIns->PitchEnv.Ticks;
+				pData = pIns->PitchEnv.Values;
 				break;
 			}
 			if (!nPoint) nTick = 0;
@@ -345,13 +345,13 @@ UINT CViewInstrument::EnvGetNumPoints() const
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (pIns->nVolEnv) return pIns->nVolEnv;
+				if (pIns->VolEnv.nNodes) return pIns->VolEnv.nNodes;
 				break;
 			case ENV_PANNING:
-				if (pIns->nPanEnv) return pIns->nPanEnv;
+				if (pIns->PanEnv.nNodes) return pIns->PanEnv.nNodes;
 				break;
 			case ENV_PITCH:
-				if (pIns->nPitchEnv) return pIns->nPitchEnv;
+				if (pIns->PitchEnv.nNodes) return pIns->PitchEnv.nNodes;
 				break;
 			}
 		}
@@ -465,9 +465,9 @@ UINT CViewInstrument::EnvGetLoopStart() const
 		{
 			switch(m_nEnv)
 			{
-			case ENV_VOLUME:	return pIns->nVolLoopStart;
-			case ENV_PANNING:	return pIns->nPanLoopStart;
-			case ENV_PITCH:		return pIns->nPitchLoopStart;
+			case ENV_VOLUME:	return pIns->VolEnv.nLoopStart;
+			case ENV_PANNING:	return pIns->PanEnv.nLoopStart;
+			case ENV_PITCH:		return pIns->PitchEnv.nLoopStart;
 			}
 		}
 	}
@@ -487,9 +487,9 @@ UINT CViewInstrument::EnvGetLoopEnd() const
 		{
 			switch(m_nEnv)
 			{
-			case ENV_VOLUME:	return pIns->nVolLoopEnd;
-			case ENV_PANNING:	return pIns->nPanLoopEnd;
-			case ENV_PITCH:		return pIns->nPitchLoopEnd;
+			case ENV_VOLUME:	return pIns->VolEnv.nLoopEnd;
+			case ENV_PANNING:	return pIns->PanEnv.nLoopEnd;
+			case ENV_PITCH:		return pIns->PitchEnv.nLoopEnd;
 			}
 		}
 	}
@@ -509,9 +509,9 @@ UINT CViewInstrument::EnvGetSustainStart() const
 		{
 			switch(m_nEnv)
 			{
-			case ENV_VOLUME:	return pIns->nVolSustainBegin;
-			case ENV_PANNING:	return pIns->nPanSustainBegin;
-			case ENV_PITCH:		return pIns->nPitchSustainBegin;
+			case ENV_VOLUME:	return pIns->VolEnv.nSustainStart;
+			case ENV_PANNING:	return pIns->PanEnv.nSustainStart;
+			case ENV_PITCH:		return pIns->PitchEnv.nSustainStart;
 			}
 		}
 	}
@@ -531,9 +531,9 @@ UINT CViewInstrument::EnvGetSustainEnd() const
 		{
 			switch(m_nEnv)
 			{
-			case ENV_VOLUME:	return pIns->nVolSustainEnd;
-			case ENV_PANNING:	return pIns->nPanSustainEnd;
-			case ENV_PITCH:		return pIns->nPitchSustainEnd;
+			case ENV_VOLUME:	return pIns->VolEnv.nSustainEnd;
+			case ENV_PANNING:	return pIns->PanEnv.nSustainEnd;
+			case ENV_PITCH:		return pIns->PitchEnv.nSustainEnd;
 			}
 		}
 	}
@@ -610,26 +610,26 @@ BOOL CViewInstrument::EnvSetLoopStart(int nPoint)
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (nPoint != pIns->nVolLoopStart)
+				if (nPoint != pIns->VolEnv.nLoopStart)
 				{
-					pIns->nVolLoopStart = (BYTE)nPoint;
-					if (pIns->nVolLoopEnd < nPoint) pIns->nVolLoopEnd = (BYTE)nPoint;
+					pIns->VolEnv.nLoopStart = (BYTE)nPoint;
+					if (pIns->VolEnv.nLoopEnd < nPoint) pIns->VolEnv.nLoopEnd = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
 			case ENV_PANNING:
-				if (nPoint != pIns->nPanLoopStart)
+				if (nPoint != pIns->PanEnv.nLoopStart)
 				{
-					pIns->nPanLoopStart = (BYTE)nPoint;
-					if (pIns->nPanLoopEnd < nPoint) pIns->nPanLoopEnd = (BYTE)nPoint;
+					pIns->PanEnv.nLoopStart = (BYTE)nPoint;
+					if (pIns->PanEnv.nLoopEnd < nPoint) pIns->PanEnv.nLoopEnd = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
 			case ENV_PITCH:
-				if (nPoint != pIns->nPitchLoopStart)
+				if (nPoint != pIns->PitchEnv.nLoopStart)
 				{
-					pIns->nPitchLoopStart = (BYTE)nPoint;
-					if (pIns->nPitchLoopEnd < nPoint) pIns->nPitchLoopEnd = (BYTE)nPoint;
+					pIns->PitchEnv.nLoopStart = (BYTE)nPoint;
+					if (pIns->PitchEnv.nLoopEnd < nPoint) pIns->PitchEnv.nLoopEnd = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
@@ -653,26 +653,26 @@ BOOL CViewInstrument::EnvSetLoopEnd(int nPoint)
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (nPoint != pIns->nVolLoopEnd)
+				if (nPoint != pIns->VolEnv.nLoopEnd)
 				{
-					pIns->nVolLoopEnd = (BYTE)nPoint;
-					if (pIns->nVolLoopStart > nPoint) pIns->nVolLoopStart = (BYTE)nPoint;
+					pIns->VolEnv.nLoopEnd = (BYTE)nPoint;
+					if (pIns->VolEnv.nLoopStart > nPoint) pIns->VolEnv.nLoopStart = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
 			case ENV_PANNING:
-				if (nPoint != pIns->nPanLoopEnd)
+				if (nPoint != pIns->PanEnv.nLoopEnd)
 				{
-					pIns->nPanLoopEnd = (BYTE)nPoint;
-					if (pIns->nPanLoopStart > nPoint) pIns->nPanLoopStart = (BYTE)nPoint;
+					pIns->PanEnv.nLoopEnd = (BYTE)nPoint;
+					if (pIns->PanEnv.nLoopStart > nPoint) pIns->PanEnv.nLoopStart = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
 			case ENV_PITCH:
-				if (nPoint != pIns->nPitchLoopEnd)
+				if (nPoint != pIns->PitchEnv.nLoopEnd)
 				{
-					pIns->nPitchLoopEnd = (BYTE)nPoint;
-					if (pIns->nPitchLoopStart > nPoint) pIns->nPitchLoopStart = (BYTE)nPoint;
+					pIns->PitchEnv.nLoopEnd = (BYTE)nPoint;
+					if (pIns->PitchEnv.nLoopStart > nPoint) pIns->PitchEnv.nLoopStart = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
@@ -696,26 +696,26 @@ BOOL CViewInstrument::EnvSetSustainStart(int nPoint)
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (nPoint != pIns->nVolSustainBegin)
+				if (nPoint != pIns->VolEnv.nSustainStart)
 				{
-					pIns->nVolSustainBegin = (BYTE)nPoint;
-					if ((pIns->nVolSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->nVolSustainEnd = (BYTE)nPoint;
+					pIns->VolEnv.nSustainStart = (BYTE)nPoint;
+					if ((pIns->VolEnv.nSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->VolEnv.nSustainEnd = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
 			case ENV_PANNING:
-				if (nPoint != pIns->nPanSustainBegin)
+				if (nPoint != pIns->PanEnv.nSustainStart)
 				{
-					pIns->nPanSustainBegin = (BYTE)nPoint;
-					if ((pIns->nPanSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->nPanSustainEnd = (BYTE)nPoint;
+					pIns->PanEnv.nSustainStart = (BYTE)nPoint;
+					if ((pIns->PanEnv.nSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->PanEnv.nSustainEnd = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
 			case ENV_PITCH:
-				if (nPoint != pIns->nPitchSustainBegin)
+				if (nPoint != pIns->PitchEnv.nSustainStart)
 				{
-					pIns->nPitchSustainBegin = (BYTE)nPoint;
-					if ((pIns->nPitchSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->nPitchSustainEnd = (BYTE)nPoint;
+					pIns->PitchEnv.nSustainStart = (BYTE)nPoint;
+					if ((pIns->PitchEnv.nSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->PitchEnv.nSustainEnd = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
@@ -739,26 +739,26 @@ BOOL CViewInstrument::EnvSetSustainEnd(int nPoint)
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (nPoint != pIns->nVolSustainEnd)
+				if (nPoint != pIns->VolEnv.nSustainEnd)
 				{
-					pIns->nVolSustainEnd = (BYTE)nPoint;
-					if ((pIns->nVolSustainBegin > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->nVolSustainBegin = (BYTE)nPoint;
+					pIns->VolEnv.nSustainEnd = (BYTE)nPoint;
+					if ((pIns->VolEnv.nSustainStart > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->VolEnv.nSustainStart = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
 			case ENV_PANNING:
-				if (nPoint != pIns->nPanSustainEnd)
+				if (nPoint != pIns->PanEnv.nSustainEnd)
 				{
-					pIns->nPanSustainEnd = (BYTE)nPoint;
-					if ((pIns->nPanSustainBegin > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->nPanSustainBegin = (BYTE)nPoint;
+					pIns->PanEnv.nSustainEnd = (BYTE)nPoint;
+					if ((pIns->PanEnv.nSustainStart > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->PanEnv.nSustainStart = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
 			case ENV_PITCH:
-				if (nPoint != pIns->nPitchSustainEnd)
+				if (nPoint != pIns->PitchEnv.nSustainEnd)
 				{
-					pIns->nPitchSustainEnd = (BYTE)nPoint;
-					if ((pIns->nPitchSustainBegin > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->nPitchSustainBegin = (BYTE)nPoint;
+					pIns->PitchEnv.nSustainEnd = (BYTE)nPoint;
+					if ((pIns->PitchEnv.nSustainStart > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->PitchEnv.nSustainStart = (BYTE)nPoint;
 					return TRUE;
 				}
 				break;
@@ -899,13 +899,13 @@ BOOL CViewInstrument::EnvSetVolEnv(BOOL bEnable)
 			if (bEnable)
 			{
 				pIns->dwFlags |= ENV_VOLUME;
-				if (!pIns->nVolEnv)
+				if (!pIns->VolEnv.nNodes)
 				{
-					pIns->VolEnv[0] = 64;
-					pIns->VolEnv[1] = 64;
-					pIns->VolPoints[0] = 0;
-					pIns->VolPoints[1] = 10;
-					pIns->nVolEnv = 2;
+					pIns->VolEnv.Values[0] = 64;
+					pIns->VolEnv.Values[1] = 64;
+					pIns->VolEnv.Ticks[0] = 0;
+					pIns->VolEnv.Ticks[1] = 10;
+					pIns->VolEnv.nNodes = 2;
 					InvalidateRect(NULL, FALSE);
 				}
 			} else
@@ -932,13 +932,13 @@ BOOL CViewInstrument::EnvSetPanEnv(BOOL bEnable)
 			if (bEnable)
 			{
 				pIns->dwFlags |= ENV_PANNING;
-				if (!pIns->nPanEnv)
+				if (!pIns->PanEnv.nNodes)
 				{
-					pIns->PanEnv[0] = 32;
-					pIns->PanEnv[1] = 32;
-					pIns->PanPoints[0] = 0;
-					pIns->PanPoints[1] = 10;
-					pIns->nPanEnv = 2;
+					pIns->PanEnv.Values[0] = 32;
+					pIns->PanEnv.Values[1] = 32;
+					pIns->PanEnv.Ticks[0] = 0;
+					pIns->PanEnv.Ticks[1] = 10;
+					pIns->PanEnv.nNodes = 2;
 					InvalidateRect(NULL, FALSE);
 				}
 			} else
@@ -966,13 +966,13 @@ BOOL CViewInstrument::EnvSetPitchEnv(BOOL bEnable)
 			{
 				pIns->dwFlags |= ENV_PITCH;
 				pIns->dwFlags &= ~ENV_FILTER;
-				if (!pIns->nPitchEnv)
+				if (!pIns->PitchEnv.nNodes)
 				{
-					pIns->PitchEnv[0] = 32;
-					pIns->PitchEnv[1] = 32;
-					pIns->PitchPoints[0] = 0;
-					pIns->PitchPoints[1] = 10;
-					pIns->nPitchEnv = 2;
+					pIns->PitchEnv.Values[0] = 32;
+					pIns->PitchEnv.Values[1] = 32;
+					pIns->PitchEnv.Ticks[0] = 0;
+					pIns->PitchEnv.Ticks[1] = 10;
+					pIns->PitchEnv.nNodes = 2;
 					InvalidateRect(NULL, FALSE);
 				}
 			} else
@@ -999,13 +999,13 @@ BOOL CViewInstrument::EnvSetFilterEnv(BOOL bEnable)
 			if ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 			{
 				pIns->dwFlags |= (ENV_PITCH|ENV_FILTER);
-				if (!pIns->nPitchEnv)
+				if (!pIns->PitchEnv.nNodes)
 				{
-					pIns->PitchEnv[0] = 64;
-					pIns->PitchEnv[1] = 64;
-					pIns->PitchPoints[0] = 0;
-					pIns->PitchPoints[1] = 10;
-					pIns->nPitchEnv = 2;
+					pIns->PitchEnv.Values[0] = 64;
+					pIns->PitchEnv.Values[1] = 64;
+					pIns->PitchEnv.Ticks[0] = 0;
+					pIns->PitchEnv.Ticks[1] = 10;
+					pIns->PitchEnv.nNodes = 2;
 					InvalidateRect(NULL, FALSE);
 				}
 			} else
@@ -1360,11 +1360,11 @@ BYTE CViewInstrument::EnvGetReleaseNode()
 		if (pIns) {
 			switch(m_nEnv) {
 				case ENV_VOLUME:
-					return pIns->nVolEnvReleaseNode;
+					return pIns->VolEnv.nReleaseNode;
 				case ENV_PANNING:
-					return pIns->nPanEnvReleaseNode;
+					return pIns->PanEnv.nReleaseNode;
 				case ENV_PITCH:
-					return pIns->nPitchEnvReleaseNode;
+					return pIns->PitchEnv.nReleaseNode;
 				default:
 					return ENV_RELEASE_NODE_UNSET;
 			}
@@ -1383,11 +1383,11 @@ WORD CViewInstrument::EnvGetReleaseNodeValue()
 		if (pIns) {
 			switch(m_nEnv) {
 				case ENV_VOLUME:
-					return pIns->VolEnv[EnvGetReleaseNode()];
+					return pIns->VolEnv.Values[EnvGetReleaseNode()];
 				case ENV_PANNING:
-					return pIns->PanEnv[EnvGetReleaseNode()];
+					return pIns->PanEnv.Values[EnvGetReleaseNode()];
 				case ENV_PITCH:
-					return pIns->PitchEnv[EnvGetReleaseNode()];
+					return pIns->PitchEnv.Values[EnvGetReleaseNode()];
 				default:
 					return 0;
 			}
@@ -1406,11 +1406,11 @@ WORD CViewInstrument::EnvGetReleaseNodeTick()
 		if (pIns) {
 			switch(m_nEnv) {
 				case ENV_VOLUME:
-					return pIns->VolPoints[EnvGetReleaseNode()];
+					return pIns->VolEnv.Ticks[EnvGetReleaseNode()];
 				case ENV_PANNING:
-					return pIns->PanPoints[EnvGetReleaseNode()];
+					return pIns->PanEnv.Ticks[EnvGetReleaseNode()];
 				case ENV_PITCH:
-					return pIns->PitchPoints[EnvGetReleaseNode()];
+					return pIns->PitchEnv.Ticks[EnvGetReleaseNode()];
 				default:
 					return 0;
 			}
@@ -2056,24 +2056,24 @@ void CViewInstrument::OnEnvToggleReleasNode()
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 		switch(m_nEnv) {
 			case ENV_VOLUME:
-				if (pIns->nVolEnvReleaseNode == node) {
-					pIns->nVolEnvReleaseNode = ENV_RELEASE_NODE_UNSET;
+				if (pIns->VolEnv.nReleaseNode == node) {
+					pIns->VolEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 				} else { 
-					pIns->nVolEnvReleaseNode = node;
+					pIns->VolEnv.nReleaseNode = node;
 				}
 				break;
 			case ENV_PANNING:
-				if (pIns->nPanEnvReleaseNode == node) {
-					pIns->nPanEnvReleaseNode = ENV_RELEASE_NODE_UNSET;
+				if (pIns->PanEnv.nReleaseNode == node) {
+					pIns->PanEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 				} else { 
-					pIns->nPanEnvReleaseNode = node;
+					pIns->PanEnv.nReleaseNode = node;
 				}
 				break;
 			case ENV_PITCH:
-				if (pIns->nPitchEnvReleaseNode == node) {
-					pIns->nPitchEnvReleaseNode = ENV_RELEASE_NODE_UNSET;
+				if (pIns->PitchEnv.nReleaseNode == node) {
+					pIns->PitchEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 				} else { 
-					pIns->nPitchEnvReleaseNode = node;
+					pIns->PitchEnv.nReleaseNode = node;
 				}
 				break;			
 		}
@@ -2159,59 +2159,59 @@ void CViewInstrument::OnEnvRemovePoint()
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (pIns->nVolEnv > 1)
+				if (pIns->VolEnv.nNodes > 1)
 				{
-					pIns->nVolEnv--;
-					for (UINT i=nPoint; i<pIns->nVolEnv; i++)
+					pIns->VolEnv.nNodes--;
+					for (UINT i=nPoint; i<pIns->VolEnv.nNodes; i++)
 					{
-						pIns->VolPoints[i] = pIns->VolPoints[i+1];
-						pIns->VolEnv[i] = pIns->VolEnv[i+1];
+						pIns->VolEnv.Ticks[i] = pIns->VolEnv.Ticks[i+1];
+						pIns->VolEnv.Values[i] = pIns->VolEnv.Values[i+1];
 					}
-					if (nPoint >= pIns->nVolEnv) nPoint = pIns->nVolEnv-1;
-					if (pIns->nVolLoopStart > nPoint) pIns->nVolLoopStart--;
-					if (pIns->nVolLoopEnd > nPoint) pIns->nVolLoopEnd--;
-					if (pIns->nVolSustainBegin > nPoint) pIns->nVolSustainBegin--;
-					if (pIns->nVolSustainEnd > nPoint) pIns->nVolSustainEnd--;
-					if (pIns->nVolEnvReleaseNode>nPoint && pIns->nVolEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->nVolEnvReleaseNode--;
-					pIns->VolPoints[0] = 0;
+					if (nPoint >= pIns->VolEnv.nNodes) nPoint = pIns->VolEnv.nNodes-1;
+					if (pIns->VolEnv.nLoopStart > nPoint) pIns->VolEnv.nLoopStart--;
+					if (pIns->VolEnv.nLoopEnd > nPoint) pIns->VolEnv.nLoopEnd--;
+					if (pIns->VolEnv.nSustainStart > nPoint) pIns->VolEnv.nSustainStart--;
+					if (pIns->VolEnv.nSustainEnd > nPoint) pIns->VolEnv.nSustainEnd--;
+					if (pIns->VolEnv.nReleaseNode>nPoint && pIns->VolEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->VolEnv.nReleaseNode--;
+					pIns->VolEnv.Ticks[0] = 0;
 					bOk = TRUE;
 				}
 				break;
 			case ENV_PANNING:
-				if (pIns->nPanEnv > 1)
+				if (pIns->PanEnv.nNodes > 1)
 				{
-					pIns->nPanEnv--;
-					for (UINT i=nPoint; i<pIns->nPanEnv; i++)
+					pIns->PanEnv.nNodes--;
+					for (UINT i=nPoint; i<pIns->PanEnv.nNodes; i++)
 					{
-						pIns->PanPoints[i] = pIns->PanPoints[i+1];
-						pIns->PanEnv[i] = pIns->PanEnv[i+1];
+						pIns->PanEnv.Ticks[i] = pIns->PanEnv.Ticks[i+1];
+						pIns->PanEnv.Values[i] = pIns->PanEnv.Values[i+1];
 					}
-					if (nPoint >= pIns->nPanEnv) nPoint = pIns->nPanEnv-1;
-					if (pIns->nPanLoopStart > nPoint) pIns->nPanLoopStart--;
-					if (pIns->nPanLoopEnd > nPoint) pIns->nPanLoopEnd--;
-					if (pIns->nPanSustainBegin > nPoint) pIns->nPanSustainBegin--;
-					if (pIns->nPanSustainEnd > nPoint) pIns->nPanSustainEnd--;
-					if (pIns->nPanEnvReleaseNode>nPoint && pIns->nPanEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->nPanEnvReleaseNode--;
-					pIns->PanPoints[0] = 0;
+					if (nPoint >= pIns->PanEnv.nNodes) nPoint = pIns->PanEnv.nNodes-1;
+					if (pIns->PanEnv.nLoopStart > nPoint) pIns->PanEnv.nLoopStart--;
+					if (pIns->PanEnv.nLoopEnd > nPoint) pIns->PanEnv.nLoopEnd--;
+					if (pIns->PanEnv.nSustainStart > nPoint) pIns->PanEnv.nSustainStart--;
+					if (pIns->PanEnv.nSustainEnd > nPoint) pIns->PanEnv.nSustainEnd--;
+					if (pIns->PanEnv.nReleaseNode>nPoint && pIns->PanEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->PanEnv.nReleaseNode--;
+					pIns->PanEnv.Ticks[0] = 0;
 					bOk = TRUE;
 				}
 				break;
 			case ENV_PITCH:
-				if (pIns->nPitchEnv > 1)
+				if (pIns->PitchEnv.nNodes > 1)
 				{
-					pIns->nPitchEnv--;
-					for (UINT i=nPoint; i<pIns->nPitchEnv; i++)
+					pIns->PitchEnv.nNodes--;
+					for (UINT i=nPoint; i<pIns->PitchEnv.nNodes; i++)
 					{
-						pIns->PitchPoints[i] = pIns->PitchPoints[i+1];
-						pIns->PitchEnv[i] = pIns->PitchEnv[i+1];
+						pIns->PitchEnv.Ticks[i] = pIns->PitchEnv.Ticks[i+1];
+						pIns->PitchEnv.Values[i] = pIns->PitchEnv.Values[i+1];
 					}
-					if (nPoint >= pIns->nPitchEnv) nPoint = pIns->nPitchEnv-1;
-					if (pIns->nPitchLoopStart > nPoint) pIns->nPitchLoopStart--;
-					if (pIns->nPitchLoopEnd > nPoint) pIns->nPitchLoopEnd--;
-					if (pIns->nPitchSustainBegin > nPoint) pIns->nPitchSustainBegin--;
-					if (pIns->nPitchSustainEnd > nPoint) pIns->nPitchSustainEnd--;
-					if (pIns->nPitchEnvReleaseNode>nPoint && pIns->nPitchEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->nPitchEnvReleaseNode--;
-					pIns->PitchPoints[0] = 0;
+					if (nPoint >= pIns->PitchEnv.nNodes) nPoint = pIns->PitchEnv.nNodes-1;
+					if (pIns->PitchEnv.nLoopStart > nPoint) pIns->PitchEnv.nLoopStart--;
+					if (pIns->PitchEnv.nLoopEnd > nPoint) pIns->PitchEnv.nLoopEnd--;
+					if (pIns->PitchEnv.nSustainStart > nPoint) pIns->PitchEnv.nSustainStart--;
+					if (pIns->PitchEnv.nSustainEnd > nPoint) pIns->PitchEnv.nSustainEnd--;
+					if (pIns->PitchEnv.nReleaseNode>nPoint && pIns->PitchEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->PitchEnv.nReleaseNode--;
+					pIns->PitchEnv.Ticks[0] = 0;
 					bOk = TRUE;
 				}
 				break;
@@ -2247,83 +2247,83 @@ void CViewInstrument::OnEnvInsertPoint()
 			if (nTick >= 0) switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (pIns->nVolEnv < maxpoints)
+				if (pIns->VolEnv.nNodes < maxpoints)
 				{
-					if (!pIns->nVolEnv)
+					if (!pIns->VolEnv.nNodes)
 					{
-						pIns->VolPoints[0] = 0;
-						pIns->VolEnv[0] = 64;
-						pIns->nVolEnv = 1;
+						pIns->VolEnv.Ticks[0] = 0;
+						pIns->VolEnv.Values[0] = 64;
+						pIns->VolEnv.nNodes = 1;
 					}
 					UINT i = 0;
-					for (i=0; i<pIns->nVolEnv; i++) if (nTick <= pIns->VolPoints[i]) break;
-					for (UINT j=pIns->nVolEnv; j>i; j--)
+					for (i=0; i<pIns->VolEnv.nNodes; i++) if (nTick <= pIns->VolEnv.Ticks[i]) break;
+					for (UINT j=pIns->VolEnv.nNodes; j>i; j--)
 					{
-						pIns->VolPoints[j] = pIns->VolPoints[j-1];
-						pIns->VolEnv[j] = pIns->VolEnv[j-1];
+						pIns->VolEnv.Ticks[j] = pIns->VolEnv.Ticks[j-1];
+						pIns->VolEnv.Values[j] = pIns->VolEnv.Values[j-1];
 					}
-					pIns->VolPoints[i] = (WORD)nTick;
-					pIns->VolEnv[i] = (BYTE)nValue;
-					pIns->nVolEnv++;
-					if (pIns->nVolLoopStart >= i) pIns->nVolLoopStart++;
-					if (pIns->nVolLoopEnd >= i) pIns->nVolLoopEnd++;
-					if (pIns->nVolSustainBegin >= i) pIns->nVolSustainBegin++;
-					if (pIns->nVolSustainEnd >= i) pIns->nVolSustainEnd++;
-					if (pIns->nVolEnvReleaseNode>=i && pIns->nVolEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->nVolEnvReleaseNode++;
+					pIns->VolEnv.Ticks[i] = (WORD)nTick;
+					pIns->VolEnv.Values[i] = (BYTE)nValue;
+					pIns->VolEnv.nNodes++;
+					if (pIns->VolEnv.nLoopStart >= i) pIns->VolEnv.nLoopStart++;
+					if (pIns->VolEnv.nLoopEnd >= i) pIns->VolEnv.nLoopEnd++;
+					if (pIns->VolEnv.nSustainStart >= i) pIns->VolEnv.nSustainStart++;
+					if (pIns->VolEnv.nSustainEnd >= i) pIns->VolEnv.nSustainEnd++;
+					if (pIns->VolEnv.nReleaseNode>=i && pIns->VolEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->VolEnv.nReleaseNode++;
 					bOk = TRUE;
 				}
 				break;
 			case ENV_PANNING:
-				if (pIns->nPanEnv < maxpoints)
+				if (pIns->PanEnv.nNodes < maxpoints)
 				{
-					if (!pIns->nPanEnv)
+					if (!pIns->PanEnv.nNodes)
 					{
-						pIns->PanPoints[0] = 0;
-						pIns->PanEnv[0] = 32;
-						pIns->nPanEnv = 1;
+						pIns->PanEnv.Ticks[0] = 0;
+						pIns->PanEnv.Values[0] = 32;
+						pIns->PanEnv.nNodes = 1;
 					}
 					UINT i = 0;
-					for (i=0; i<pIns->nPanEnv; i++) if (nTick <= pIns->PanPoints[i]) break;
-					for (UINT j=pIns->nPanEnv; j>i; j--)
+					for (i=0; i<pIns->PanEnv.nNodes; i++) if (nTick <= pIns->PanEnv.Ticks[i]) break;
+					for (UINT j=pIns->PanEnv.nNodes; j>i; j--)
 					{
-						pIns->PanPoints[j] = pIns->PanPoints[j-1];
-						pIns->PanEnv[j] = pIns->PanEnv[j-1];
+						pIns->PanEnv.Ticks[j] = pIns->PanEnv.Ticks[j-1];
+						pIns->PanEnv.Values[j] = pIns->PanEnv.Values[j-1];
 					}
-					pIns->PanPoints[i] = (WORD)nTick;
-					pIns->PanEnv[i] =(BYTE)nValue;
-					pIns->nPanEnv++;
-					if (pIns->nPanLoopStart >= i) pIns->nPanLoopStart++;
-					if (pIns->nPanLoopEnd >= i) pIns->nPanLoopEnd++;
-					if (pIns->nPanSustainBegin >= i) pIns->nPanSustainBegin++;
-					if (pIns->nPanSustainEnd >= i) pIns->nPanSustainEnd++;
-					if (pIns->nPanEnvReleaseNode>=i && pIns->nPanEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->nPanEnvReleaseNode++;
+					pIns->PanEnv.Ticks[i] = (WORD)nTick;
+					pIns->PanEnv.Values[i] =(BYTE)nValue;
+					pIns->PanEnv.nNodes++;
+					if (pIns->PanEnv.nLoopStart >= i) pIns->PanEnv.nLoopStart++;
+					if (pIns->PanEnv.nLoopEnd >= i) pIns->PanEnv.nLoopEnd++;
+					if (pIns->PanEnv.nSustainStart >= i) pIns->PanEnv.nSustainStart++;
+					if (pIns->PanEnv.nSustainEnd >= i) pIns->PanEnv.nSustainEnd++;
+					if (pIns->PanEnv.nReleaseNode>=i && pIns->PanEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->PanEnv.nReleaseNode++;
 					bOk = TRUE;
 				}
 				break;
 			case ENV_PITCH:
-				if (pIns->nPitchEnv < maxpoints)
+				if (pIns->PitchEnv.nNodes < maxpoints)
 				{
-					if (!pIns->nPitchEnv)
+					if (!pIns->PitchEnv.nNodes)
 					{
-						pIns->PitchPoints[0] = 0;
-						pIns->PitchEnv[0] = 32;
-						pIns->nPitchEnv = 1;
+						pIns->PitchEnv.Ticks[0] = 0;
+						pIns->PitchEnv.Values[0] = 32;
+						pIns->PitchEnv.nNodes = 1;
 					}
 					UINT i = 0;
-					for (i=0; i<pIns->nPitchEnv; i++) if (nTick <= pIns->PitchPoints[i]) break;
-					for (UINT j=pIns->nPitchEnv; j>i; j--)
+					for (i=0; i<pIns->PitchEnv.nNodes; i++) if (nTick <= pIns->PitchEnv.Ticks[i]) break;
+					for (UINT j=pIns->PitchEnv.nNodes; j>i; j--)
 					{
-						pIns->PitchPoints[j] = pIns->PitchPoints[j-1];
-						pIns->PitchEnv[j] = pIns->PitchEnv[j-1];
+						pIns->PitchEnv.Ticks[j] = pIns->PitchEnv.Ticks[j-1];
+						pIns->PitchEnv.Values[j] = pIns->PitchEnv.Values[j-1];
 					}
-					pIns->PitchPoints[i] = (WORD)nTick;
-					pIns->PitchEnv[i] = (BYTE)nValue;
-					pIns->nPitchEnv++;
-					if (pIns->nPitchLoopStart >= i) pIns->nPitchLoopStart++;
-					if (pIns->nPitchLoopEnd >= i) pIns->nPitchLoopEnd++;
-					if (pIns->nPitchSustainBegin >= i) pIns->nPitchSustainBegin++;
-					if (pIns->nPitchSustainEnd >= i) pIns->nPitchSustainEnd++;
-					if (pIns->nPitchEnvReleaseNode>=i && pIns->nPitchEnvReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->nPitchEnvReleaseNode++;
+					pIns->PitchEnv.Ticks[i] = (WORD)nTick;
+					pIns->PitchEnv.Values[i] = (BYTE)nValue;
+					pIns->PitchEnv.nNodes++;
+					if (pIns->PitchEnv.nLoopStart >= i) pIns->PitchEnv.nLoopStart++;
+					if (pIns->PitchEnv.nLoopEnd >= i) pIns->PitchEnv.nLoopEnd++;
+					if (pIns->PitchEnv.nSustainStart >= i) pIns->PitchEnv.nSustainStart++;
+					if (pIns->PitchEnv.nSustainEnd >= i) pIns->PitchEnv.nSustainEnd++;
+					if (pIns->PitchEnv.nReleaseNode>=i && pIns->PitchEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->PitchEnv.nReleaseNode++;
 					bOk = TRUE;
 				}
 				break;

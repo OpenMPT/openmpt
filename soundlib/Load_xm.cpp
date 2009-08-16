@@ -429,42 +429,42 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		if (xmsh.ptype & 4) pIns->dwFlags |= ENV_PANLOOP;
 		if (xmsh.vnum > 12) xmsh.vnum = 12;
 		if (xmsh.pnum > 12) xmsh.pnum = 12;
-		pIns->nVolEnv = xmsh.vnum;
+		pIns->VolEnv.nNodes = xmsh.vnum;
 		if (!xmsh.vnum) pIns->dwFlags &= ~ENV_VOLUME;
 		if (!xmsh.pnum) pIns->dwFlags &= ~ENV_PANNING;
-		pIns->nPanEnv = xmsh.pnum;
-		pIns->nVolSustainBegin = pIns->nVolSustainEnd = xmsh.vsustain;
+		pIns->PanEnv.nNodes = xmsh.pnum;
+		pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = xmsh.vsustain;
 		if (xmsh.vsustain >= 12) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
-		pIns->nVolLoopStart = xmsh.vloops;
-		pIns->nVolLoopEnd = xmsh.vloope;
-		if (pIns->nVolLoopEnd >= 12) pIns->nVolLoopEnd = 0;
-		if (pIns->nVolLoopStart >= pIns->nVolLoopEnd) pIns->dwFlags &= ~ENV_VOLLOOP;
-		pIns->nPanSustainBegin = pIns->nPanSustainEnd = xmsh.psustain;
+		pIns->VolEnv.nLoopStart = xmsh.vloops;
+		pIns->VolEnv.nLoopEnd = xmsh.vloope;
+		if (pIns->VolEnv.nLoopEnd >= 12) pIns->VolEnv.nLoopEnd = 0;
+		if (pIns->VolEnv.nLoopStart >= pIns->VolEnv.nLoopEnd) pIns->dwFlags &= ~ENV_VOLLOOP;
+		pIns->PanEnv.nSustainStart = pIns->PanEnv.nSustainEnd = xmsh.psustain;
 		if (xmsh.psustain >= 12) pIns->dwFlags &= ~ENV_PANSUSTAIN;
-		pIns->nPanLoopStart = xmsh.ploops;
-		pIns->nPanLoopEnd = xmsh.ploope;
-		if (pIns->nPanLoopEnd >= 12) pIns->nPanLoopEnd = 0;
-		if (pIns->nPanLoopStart >= pIns->nPanLoopEnd) pIns->dwFlags &= ~ENV_PANLOOP;
+		pIns->PanEnv.nLoopStart = xmsh.ploops;
+		pIns->PanEnv.nLoopEnd = xmsh.ploope;
+		if (pIns->PanEnv.nLoopEnd >= 12) pIns->PanEnv.nLoopEnd = 0;
+		if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->dwFlags &= ~ENV_PANLOOP;
 		pIns->nGlobalVol = 64;
 		for (UINT ienv=0; ienv<12; ienv++)
 		{
-			pIns->VolPoints[ienv] = (WORD)xmsh.venv[ienv*2];
-			pIns->VolEnv[ienv] = (BYTE)xmsh.venv[ienv*2+1];
-			pIns->PanPoints[ienv] = (WORD)xmsh.pIns[ienv*2];
-			pIns->PanEnv[ienv] = (BYTE)xmsh.pIns[ienv*2+1];
+			pIns->VolEnv.Ticks[ienv] = (WORD)xmsh.venv[ienv*2];
+			pIns->VolEnv.Values[ienv] = (BYTE)xmsh.venv[ienv*2+1];
+			pIns->PanEnv.Ticks[ienv] = (WORD)xmsh.pIns[ienv*2];
+			pIns->PanEnv.Values[ienv] = (BYTE)xmsh.pIns[ienv*2+1];
 			if (ienv)
 			{
-				if (pIns->VolPoints[ienv] < pIns->VolPoints[ienv-1])
+				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1])
 				{
-					pIns->VolPoints[ienv] &= 0xFF;
-					pIns->VolPoints[ienv] += pIns->VolPoints[ienv-1] & 0xFF00;
-					if (pIns->VolPoints[ienv] < pIns->VolPoints[ienv-1]) pIns->VolPoints[ienv] += 0x100;
+					pIns->VolEnv.Ticks[ienv] &= 0xFF;
+					pIns->VolEnv.Ticks[ienv] += pIns->VolEnv.Ticks[ienv-1] & 0xFF00;
+					if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1]) pIns->VolEnv.Ticks[ienv] += 0x100;
 				}
-				if (pIns->PanPoints[ienv] < pIns->PanPoints[ienv-1])
+				if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv-1])
 				{
-					pIns->PanPoints[ienv] &= 0xFF;
-					pIns->PanPoints[ienv] += pIns->PanPoints[ienv-1] & 0xFF00;
-					if (pIns->PanPoints[ienv] < pIns->PanPoints[ienv-1]) pIns->PanPoints[ienv] += 0x100;
+					pIns->PanEnv.Ticks[ienv] &= 0xFF;
+					pIns->PanEnv.Ticks[ienv] += pIns->PanEnv.Ticks[ienv-1] & 0xFF00;
+					if (pIns->PanEnv.Ticks[ienv] < pIns->PanEnv.Ticks[ienv-1]) pIns->PanEnv.Ticks[ienv] += 0x100;
 				}
 			}
 		}
@@ -840,16 +840,16 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				memcpy(xmih.name, pIns->name, 22);
 				xmih.type = pIns->nMidiProgram;
 				xmsh.volfade = pIns->nFadeOut;
-				xmsh.vnum = (BYTE)pIns->nVolEnv;
-				xmsh.pnum = (BYTE)pIns->nPanEnv;
+				xmsh.vnum = (BYTE)pIns->VolEnv.nNodes;
+				xmsh.pnum = (BYTE)pIns->PanEnv.nNodes;
 				if (xmsh.vnum > 12) xmsh.vnum = 12;
 				if (xmsh.pnum > 12) xmsh.pnum = 12;
 				for (UINT ienv=0; ienv<12; ienv++)
 				{
-					xmsh.venv[ienv*2] = pIns->VolPoints[ienv];
-					xmsh.venv[ienv*2+1] = pIns->VolEnv[ienv];
-					xmsh.pIns[ienv*2] = pIns->PanPoints[ienv];
-					xmsh.pIns[ienv*2+1] = pIns->PanEnv[ienv];
+					xmsh.venv[ienv*2] = pIns->VolEnv.Ticks[ienv];
+					xmsh.venv[ienv*2+1] = pIns->VolEnv.Values[ienv];
+					xmsh.pIns[ienv*2] = pIns->PanEnv.Ticks[ienv];
+					xmsh.pIns[ienv*2+1] = pIns->PanEnv.Values[ienv];
 				}
 				if (pIns->dwFlags & ENV_VOLUME) xmsh.vtype |= 1;
 				if (pIns->dwFlags & ENV_VOLSUSTAIN) xmsh.vtype |= 2;
@@ -857,12 +857,12 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				if (pIns->dwFlags & ENV_PANNING) xmsh.ptype |= 1;
 				if (pIns->dwFlags & ENV_PANSUSTAIN) xmsh.ptype |= 2;
 				if (pIns->dwFlags & ENV_PANLOOP) xmsh.ptype |= 4;
-				xmsh.vsustain = (BYTE)pIns->nVolSustainBegin;
-				xmsh.vloops = (BYTE)pIns->nVolLoopStart;
-				xmsh.vloope = (BYTE)pIns->nVolLoopEnd;
-				xmsh.psustain = (BYTE)pIns->nPanSustainBegin;
-				xmsh.ploops = (BYTE)pIns->nPanLoopStart;
-				xmsh.ploope = (BYTE)pIns->nPanLoopEnd;
+				xmsh.vsustain = (BYTE)pIns->VolEnv.nSustainStart;
+				xmsh.vloops = (BYTE)pIns->VolEnv.nLoopStart;
+				xmsh.vloope = (BYTE)pIns->VolEnv.nLoopEnd;
+				xmsh.psustain = (BYTE)pIns->PanEnv.nSustainStart;
+				xmsh.ploops = (BYTE)pIns->PanEnv.nLoopStart;
+				xmsh.ploope = (BYTE)pIns->PanEnv.nLoopEnd;
 				for (UINT j=0; j<96; j++) if (pIns->Keyboard[j+12]) // for all notes
 				{
 					UINT k;

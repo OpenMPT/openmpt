@@ -219,15 +219,15 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 					if (peh->flags & 1) pIns->dwFlags |= ENV_VOLUME;
 					if (peh->flags & 2) pIns->dwFlags |= ENV_VOLSUSTAIN;
 					if (peh->flags & 4) pIns->dwFlags |= ENV_VOLLOOP;
-					pIns->nVolEnv = peh->numpoints + 1;
-					if (pIns->nVolEnv > MAX_ENVPOINTS) pIns->nVolEnv = MAX_ENVPOINTS;
-					pIns->nVolLoopStart = peh->loopbegin;
-					pIns->nVolLoopEnd = peh->loopend;
-					pIns->nVolSustainBegin = pIns->nVolSustainEnd = peh->sustain1;
-					for (UINT i=0; i<pIns->nVolEnv; i++)
+					pIns->VolEnv.nNodes = peh->numpoints + 1;
+					if (pIns->VolEnv.nNodes > MAX_ENVPOINTS) pIns->VolEnv.nNodes = MAX_ENVPOINTS;
+					pIns->VolEnv.nLoopStart = peh->loopbegin;
+					pIns->VolEnv.nLoopEnd = peh->loopend;
+					pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = peh->sustain1;
+					for (UINT i=0; i<pIns->VolEnv.nNodes; i++)
 					{
-						pIns->VolPoints[i] = BigEndianW(peh->volenv[i*2]);
-						pIns->VolEnv[i] = (BYTE)BigEndianW(peh->volenv[i*2+1]);
+						pIns->VolEnv.Ticks[i] = BigEndianW(peh->volenv[i*2]);
+						pIns->VolEnv.Values[i] = (BYTE)BigEndianW(peh->volenv[i*2+1]);
 					}
 				}
 				chunk_pos += sizeof(DBMENVELOPE);

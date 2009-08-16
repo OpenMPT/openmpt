@@ -1703,9 +1703,9 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 	pIns->nDNA = DNA_NOTEFADE;
 	pIns->nResampling = SRCMODE_DEFAULT;
 	pIns->nFilterMode = FLTMODE_UNCHANGED;
-	pIns->nPanEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
-	pIns->nPitchEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
-	pIns->nVolEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
+	pIns->PanEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
+	pIns->PitchEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
+	pIns->VolEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
 	pSndFile->Instruments[nInstr] = pIns;
 	nSample = 1;
 	UINT nLoadedSmp = 0;
@@ -1776,17 +1776,17 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 			// Delay section
 			// -> DLS level 2
 			// Attack section
-			pIns->VolPoints[nPoint] = 0;
+			pIns->VolEnv.Ticks[nPoint] = 0;
 			if (part->wVolAttack)
 			{
-				pIns->VolEnv[nPoint] = (BYTE)(64/(part->wVolAttack/2+2)+8);//	/-----
-				pIns->VolPoints[nPoint+1] = part->wVolAttack;				//	|
+				pIns->VolEnv.Values[nPoint] = (BYTE)(64/(part->wVolAttack/2+2)+8);//	/-----
+				pIns->VolEnv.Ticks[nPoint+1] = part->wVolAttack;				//	|
 			} else
 			{
-				pIns->VolEnv[nPoint] = 64;							//	|-----
-				pIns->VolPoints[nPoint+1] = 1;						//	|
+				pIns->VolEnv.Values[nPoint] = 64;							//	|-----
+				pIns->VolEnv.Ticks[nPoint+1] = 1;						//	|
 			}
-			pIns->VolEnv[nPoint+1] = 64;
+			pIns->VolEnv.Values[nPoint+1] = 64;
 			nPoint += 2;
 			// Hold section
 			// -> DLS Level 2
@@ -1795,7 +1795,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 			{
 				if (part->nVolSustainLevel < 128)
 				{
-					LONG lStartTime = pIns->VolPoints[nPoint-1];
+					LONG lStartTime = pIns->VolEnv.Ticks[nPoint-1];
 					LONG lSusLevel = - DLS32BitRelativeLinearToGain(part->nVolSustainLevel << 9) / 65536;
 					LONG lDecayTime = 1;
 					if (lSusLevel > 0)
@@ -1812,10 +1812,10 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 								if ((ltime > 1) && (ltime < lDecayTime))
 								{
 									ltime += lStartTime;
-									if (ltime > pIns->VolPoints[nPoint-1])
+									if (ltime > pIns->VolEnv.Ticks[nPoint-1])
 									{
-										pIns->VolPoints[nPoint] = (WORD)ltime;
-										pIns->VolEnv[nPoint] = (BYTE)(lFactor / 2);
+										pIns->VolEnv.Ticks[nPoint] = (WORD)ltime;
+										pIns->VolEnv.Values[nPoint] = (BYTE)(lFactor / 2);
 										nPoint++;
 									}
 								}
@@ -1823,10 +1823,10 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 						}
 					}
 
-					if (lStartTime + lDecayTime > (LONG)pIns->VolPoints[nPoint-1])
+					if (lStartTime + lDecayTime > (LONG)pIns->VolEnv.Ticks[nPoint-1])
 					{
-						pIns->VolEnv[nPoint] = (BYTE)((part->nVolSustainLevel+1) / 2);
-						pIns->VolPoints[nPoint] = (WORD)(lStartTime+lDecayTime);
+						pIns->VolEnv.Values[nPoint] = (BYTE)((part->nVolSustainLevel+1) / 2);
+						pIns->VolEnv.Ticks[nPoint] = (WORD)(lStartTime+lDecayTime);
 						nPoint++;
 					}
 				}
@@ -1834,17 +1834,17 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 			} else
 			{
 				pIns->dwFlags |= ENV_VOLSUSTAIN;
-				pIns->VolPoints[nPoint] = (WORD)(pIns->VolPoints[nPoint-1]+1);
-				pIns->VolEnv[nPoint] = pIns->VolEnv[nPoint-1];
+				pIns->VolEnv.Ticks[nPoint] = (WORD)(pIns->VolEnv.Ticks[nPoint-1]+1);
+				pIns->VolEnv.Values[nPoint] = pIns->VolEnv.Values[nPoint-1];
 				nPoint++;
 			}
-			pIns->nVolSustainBegin = pIns->nVolSustainEnd = (BYTE)(nPoint - 1);
+			pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = (BYTE)(nPoint - 1);
 			// Release section
-			if ((part->wVolRelease) && (pIns->VolEnv[nPoint-1] > 1))
+			if ((part->wVolRelease) && (pIns->VolEnv.Values[nPoint-1] > 1))
 			{
 				LONG lReleaseTime = part->wVolRelease;
-				LONG lStartTime = pIns->VolPoints[nPoint-1];
-				LONG lStartFactor = pIns->VolEnv[nPoint-1];
+				LONG lStartTime = pIns->VolEnv.Ticks[nPoint-1];
+				LONG lStartFactor = pIns->VolEnv.Values[nPoint-1];
 				LONG lSusLevel = - DLS32BitRelativeLinearToGain(lStartFactor << 10) / 65536;
 				LONG lDecayEndTime = (lReleaseTime * lSusLevel) / 960;
 				lReleaseTime -= lDecayEndTime;
@@ -1859,26 +1859,26 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 						if ((ltime > 1) && (ltime < lReleaseTime))
 						{
 							ltime += lStartTime;
-							if (ltime > pIns->VolPoints[nPoint-1])
+							if (ltime > pIns->VolEnv.Ticks[nPoint-1])
 							{
-								pIns->VolPoints[nPoint] = (WORD)ltime;
-								pIns->VolEnv[nPoint] = (BYTE)lFactor;
+								pIns->VolEnv.Ticks[nPoint] = (WORD)ltime;
+								pIns->VolEnv.Values[nPoint] = (BYTE)lFactor;
 								nPoint++;
 							}
 						}
 					}
 				}
 				if (lReleaseTime < 1) lReleaseTime = 1;
-				pIns->VolPoints[nPoint] = (WORD)(lStartTime + lReleaseTime);
-				pIns->VolEnv[nPoint] = 0;
+				pIns->VolEnv.Ticks[nPoint] = (WORD)(lStartTime + lReleaseTime);
+				pIns->VolEnv.Values[nPoint] = 0;
 				nPoint++;
 			} else
 			{
-				pIns->VolPoints[nPoint] = (BYTE)(pIns->VolPoints[nPoint-1] + 1);
-				pIns->VolEnv[nPoint] = 0;
+				pIns->VolEnv.Ticks[nPoint] = (BYTE)(pIns->VolEnv.Ticks[nPoint-1] + 1);
+				pIns->VolEnv.Values[nPoint] = 0;
 				nPoint++;
 			}
-			pIns->nVolEnv = (BYTE)nPoint;
+			pIns->VolEnv.nNodes = (BYTE)nPoint;
 		}
 	}
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
@@ -1888,15 +1888,15 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 		if (!(pIns->dwFlags & ENV_VOLUME))
 		{
 			pIns->dwFlags |= ENV_VOLUME;
-			pIns->VolPoints[0] = 0;
-			pIns->VolEnv[0] = 64;
-			pIns->VolPoints[1] = 5;
-			pIns->VolEnv[1] = 64;
-			pIns->VolPoints[2] = 10;
-			pIns->VolEnv[2] = 32;
-			pIns->VolPoints[3] = 20;	// 1 second max. for drums
-			pIns->VolEnv[3] = 0;
-			pIns->nVolEnv = 4;
+			pIns->VolEnv.Ticks[0] = 0;
+			pIns->VolEnv.Values[0] = 64;
+			pIns->VolEnv.Ticks[1] = 5;
+			pIns->VolEnv.Values[1] = 64;
+			pIns->VolEnv.Ticks[2] = 10;
+			pIns->VolEnv.Values[2] = 32;
+			pIns->VolEnv.Ticks[3] = 20;	// 1 second max. for drums
+			pIns->VolEnv.Values[3] = 0;
+			pIns->VolEnv.nNodes = 4;
 		}
 	}
 	return TRUE;

@@ -471,12 +471,12 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 						if (pme->nFlags & 1) pIns->dwFlags |= ENV_VOLUME;
 						if (pme->nFlags & 2) pIns->dwFlags |= ENV_VOLSUSTAIN;
 						if (pme->nFlags & 4) pIns->dwFlags |= ENV_VOLLOOP;
-						pIns->nVolEnv = (pme->nPoints > 16) ? 16 : pme->nPoints;
-						pIns->nVolSustainBegin = pIns->nVolSustainEnd = pme->nSustainPos;
-						pIns->nVolLoopStart = pme->nLoopStart;
-						pIns->nVolLoopEnd = pme->nLoopEnd;
-						pEnvPoints = pIns->VolPoints;
-						pEnvData = pIns->VolEnv;
+						pIns->VolEnv.nNodes = (pme->nPoints > 16) ? 16 : pme->nPoints;
+						pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = pme->nSustainPos;
+						pIns->VolEnv.nLoopStart = pme->nLoopStart;
+						pIns->VolEnv.nLoopEnd = pme->nLoopEnd;
+						pEnvPoints = pIns->VolEnv.Ticks;
+						pEnvData = pIns->VolEnv.Values;
 						break;
 
 					// Panning Envelope
@@ -484,12 +484,12 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 						if (pme->nFlags & 1) pIns->dwFlags |= ENV_PANNING;
 						if (pme->nFlags & 2) pIns->dwFlags |= ENV_PANSUSTAIN;
 						if (pme->nFlags & 4) pIns->dwFlags |= ENV_PANLOOP;
-						pIns->nPanEnv = (pme->nPoints > 16) ? 16 : pme->nPoints;
-						pIns->nPanSustainBegin = pIns->nPanSustainEnd = pme->nSustainPos;
-						pIns->nPanLoopStart = pme->nLoopStart;
-						pIns->nPanLoopEnd = pme->nLoopEnd;
-						pEnvPoints = pIns->PanPoints;
-						pEnvData = pIns->PanEnv;
+						pIns->PanEnv.nNodes = (pme->nPoints > 16) ? 16 : pme->nPoints;
+						pIns->PanEnv.nSustainStart = pIns->PanEnv.nSustainEnd = pme->nSustainPos;
+						pIns->PanEnv.nLoopStart = pme->nLoopStart;
+						pIns->PanEnv.nLoopEnd = pme->nLoopEnd;
+						pEnvPoints = pIns->PanEnv.Ticks;
+						pEnvData = pIns->PanEnv.Values;
 						break;
 
 					// Pitch/Filter envelope
@@ -497,12 +497,12 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 						if (pme->nFlags & 1) pIns->dwFlags |= (iEnv==3) ? (ENV_PITCH|ENV_FILTER) : ENV_PITCH;
 						if (pme->nFlags & 2) pIns->dwFlags |= ENV_PITCHSUSTAIN;
 						if (pme->nFlags & 4) pIns->dwFlags |= ENV_PITCHLOOP;
-						pIns->nPitchEnv = (pme->nPoints > 16) ? 16 : pme->nPoints;
-						pIns->nPitchSustainBegin = pIns->nPitchSustainEnd = pme->nSustainPos;
-						pIns->nPitchLoopStart = pme->nLoopStart;
-						pIns->nPitchLoopEnd = pme->nLoopEnd;
-						pEnvPoints = pIns->PitchPoints;
-						pEnvData = pIns->PitchEnv;
+						pIns->PitchEnv.nNodes = (pme->nPoints > 16) ? 16 : pme->nPoints;
+						pIns->PitchEnv.nSustainStart = pIns->PitchEnv.nSustainEnd = pme->nSustainPos;
+						pIns->PitchEnv.nLoopStart = pme->nLoopStart;
+						pIns->PitchEnv.nLoopEnd = pme->nLoopEnd;
+						pEnvPoints = pIns->PitchEnv.Ticks;
+						pEnvData = pIns->PitchEnv.Values;
 					}
 					// Envelope data
 					if ((pEnvPoints) && (pEnvData) && (pedata[iEnv]))

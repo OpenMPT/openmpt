@@ -121,10 +121,10 @@ BYTE * GetInstrumentHeaderFieldPointer(MODINSTRUMENT * input, __int32 fcode, __i
 - use only caracters used in full member name, ordered as they appear in it
 - match caracter attribute (small,capital)
 
-Exemple with "nPanLoopEnd" , "nPitchLoopEnd" & "VolEnv[MAX_ENVPOINTS]" members : 
-- use 'PLE.' for nPanLoopEnd
-- use 'PiLE' for nPitchLoopEnd
-- use 'VE[.' for VolEnv[MAX_ENVPOINTS]
+Example with "PanEnv.nLoopEnd" , "PitchEnv.nLoopEnd" & "VolEnv.Values[MAX_ENVPOINTS]" members : 
+- use 'PLE.' for PanEnv.nLoopEnd
+- use 'PiLE' for PitchEnv.nLoopEnd
+- use 'VE[.' for VolEnv.Values[MAX_ENVPOINTS]
 
 
 * In use CODE tag dictionnary (alphabetical order): [ see in Sndfile.cpp ]
@@ -167,24 +167,24 @@ n[..			name[32];
 NNA.			nNNA;
 NM[.			NoteMap[128];
 P...			nPan;
-PE..			nPanEnv;
-PE[.			PanEnv[MAX_ENVPOINTS];
-PiE.			nPitchEnv;
-PiE[			PitchEnv[MAX_ENVPOINTS];
-PiLE			nPitchLoopEnd;
-PiLS			nPitchLoopStart;
-PiP[			PitchPoints[MAX_ENVPOINTS];
-PiSB			nPitchSustainBegin;
-PiSE			nPitchSustainEnd;
-PLE.			nPanLoopEnd;
-PLS.			nPanLoopStart;
+PE..			PanEnv.nNodes;
+PE[.			PanEnv.Values[MAX_ENVPOINTS];
+PiE.			PitchEnv.nNodes;
+PiE[			PitchEnv.Values[MAX_ENVPOINTS];
+PiLE			PitchEnv.nLoopEnd;
+PiLS			PitchEnv.nLoopStart;
+PiP[			PitchEnv.Ticks[MAX_ENVPOINTS];
+PiSB			PitchEnv.nSustainStart;
+PiSE			PitchEnv.nSustainEnd;
+PLE.			PanEnv.nLoopEnd;
+PLS.			PanEnv.nLoopStart;
 PMM.	[EXT]	nPlugMixMode;
-PP[.			PanPoints[MAX_ENVPOINTS];
+PP[.			PanEnv.Ticks[MAX_ENVPOINTS];
 PPC.			nPPC;
 PPS.			nPPS;
 PS..			nPanSwing;
-PSB.			nPanSustainBegin;
-PSE.			nPanSustainEnd;
+PSB.			PanEnv.nSustainStart;
+PSE.			PanEnv.nSustainEnd;
 PTTL			wPitchToTempoLock;
 PVEH			nPluginVelocityHandling;
 PVOH			nPluginVolumeHandling;
@@ -196,19 +196,19 @@ RS..			nResSwing;
 SEP@	[EXT]									chunk SEPARATOR tag
 SPA.	[EXT]	m_nSamplePreAmp;
 TM..	[EXT]	nTempoMode;
-VE..			nVolEnv;
-VE[.			VolEnv[MAX_ENVPOINTS];
-VLE.			nVolLoopEnd;
-VLS.			nVolLoopStart;
-VP[.			VolPoints[MAX_ENVPOINTS];
+VE..			VolEnv.nNodes;
+VE[.			VolEnv.Values[MAX_ENVPOINTS];
+VLE.			VolEnv.nLoopEnd;
+VLS.			VolEnv.nLoopStart;
+VP[.			VolEnv.Ticks[MAX_ENVPOINTS];
 VR..			nVolRamp;
 VS..			nVolSwing;
-VSB.			nVolSustainBegin;
-VSE.			nVolSustainEnd;
+VSB.			VolEnv.nSustainStart;
+VSE.			VolEnv.nSustainEnd;
 VSTV	[EXT]	nVSTiVolume;
-PERN			nPitchEnvReleaseNode
-AERN			nPanEnvReleaseNode
-VERN			nVolEnvReleaseNode
+PERN			PitchEnv.nReleaseNode
+AERN			PanEnv.nReleaseNode
+VERN			VolEnv.nReleaseNode
 -----------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------*/
 
@@ -237,60 +237,60 @@ void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file)
 {
 __int32 fcode;
 __int16 fsize;
-WRITE_MPTHEADER_sized_member(	nFadeOut			, UINT			, FO..							)
-WRITE_MPTHEADER_sized_member(	dwFlags				, DWORD			, dF..							)
-WRITE_MPTHEADER_sized_member(	nGlobalVol			, UINT			, GV..							)
-WRITE_MPTHEADER_sized_member(	nPan				, UINT			, P...							)
-WRITE_MPTHEADER_sized_member(	nVolEnv				, UINT			, VE..							)
-WRITE_MPTHEADER_sized_member(	nPanEnv				, UINT			, PE..							)
-WRITE_MPTHEADER_sized_member(	nPitchEnv			, UINT			, PiE.							)
-WRITE_MPTHEADER_sized_member(	nVolLoopStart		, BYTE			, VLS.							)
-WRITE_MPTHEADER_sized_member(	nVolLoopEnd			, BYTE			, VLE.							)
-WRITE_MPTHEADER_sized_member(	nVolSustainBegin	, BYTE			, VSB.							)
-WRITE_MPTHEADER_sized_member(	nVolSustainEnd		, BYTE			, VSE.							)
-WRITE_MPTHEADER_sized_member(	nPanLoopStart		, BYTE			, PLS.							)
-WRITE_MPTHEADER_sized_member(	nPanLoopEnd			, BYTE			, PLE.							)
-WRITE_MPTHEADER_sized_member(	nPanSustainBegin	, BYTE			, PSB.							)
-WRITE_MPTHEADER_sized_member(	nPanSustainEnd		, BYTE			, PSE.							)
-WRITE_MPTHEADER_sized_member(	nPitchLoopStart		, BYTE			, PiLS							)
-WRITE_MPTHEADER_sized_member(	nPitchLoopEnd		, BYTE			, PiLE							)
-WRITE_MPTHEADER_sized_member(	nPitchSustainBegin	, BYTE			, PiSB							)
-WRITE_MPTHEADER_sized_member(	nPitchSustainEnd	, BYTE			, PiSE							)
-WRITE_MPTHEADER_sized_member(	nNNA				, BYTE			, NNA.							)
-WRITE_MPTHEADER_sized_member(	nDCT				, BYTE			, DCT.							)
-WRITE_MPTHEADER_sized_member(	nDNA				, BYTE			, DNA.							)
-WRITE_MPTHEADER_sized_member(	nPanSwing			, BYTE			, PS..							)
-WRITE_MPTHEADER_sized_member(	nVolSwing			, BYTE			, VS..							)
-WRITE_MPTHEADER_sized_member(	nIFC				, BYTE			, IFC.							)
-WRITE_MPTHEADER_sized_member(	nIFR				, BYTE			, IFR.							)
-WRITE_MPTHEADER_sized_member(	wMidiBank			, WORD			, MB..							)
-WRITE_MPTHEADER_sized_member(	nMidiProgram		, BYTE			, MP..							)
-WRITE_MPTHEADER_sized_member(	nMidiChannel		, BYTE			, MC..							)
-WRITE_MPTHEADER_sized_member(	nMidiDrumKey		, BYTE			, MDK.							)
-WRITE_MPTHEADER_sized_member(	nPPS				, signed char	, PPS.							)
-WRITE_MPTHEADER_sized_member(	nPPC				, unsigned char	, PPC.							)
-WRITE_MPTHEADER_array_member(	VolPoints			, WORD			, VP[.		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	PanPoints			, WORD			, PP[.		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	PitchPoints			, WORD			, PiP[		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	VolEnv				, BYTE			, VE[.		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	PanEnv				, BYTE			, PE[.		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	PitchEnv			, BYTE			, PiE[		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	NoteMap				, BYTE			, NM[.		, 128				)
-WRITE_MPTHEADER_array_member(	Keyboard			, WORD			, K[..		, 128				)
-WRITE_MPTHEADER_array_member(	name				, CHAR			, n[..		, 32				)
-WRITE_MPTHEADER_array_member(	filename			, CHAR			, fn[.		, 12				)
-WRITE_MPTHEADER_sized_member(	nMixPlug			, BYTE			, MiP.							)
-WRITE_MPTHEADER_sized_member(	nVolRamp			, USHORT		, VR..							)
-WRITE_MPTHEADER_sized_member(	nResampling			, USHORT		, R...							)
-WRITE_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
-WRITE_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
-WRITE_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
-WRITE_MPTHEADER_sized_member(  nPluginVelocityHandling	, BYTE			, PVEH							)
+WRITE_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
+WRITE_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
+WRITE_MPTHEADER_sized_member(	nGlobalVol				, UINT			, GV..							)
+WRITE_MPTHEADER_sized_member(	nPan					, UINT			, P...							)
+WRITE_MPTHEADER_sized_member(	VolEnv.nNodes			, UINT			, VE..							)
+WRITE_MPTHEADER_sized_member(	PanEnv.nNodes			, UINT			, PE..							)
+WRITE_MPTHEADER_sized_member(	PitchEnv.nNodes			, UINT			, PiE.							)
+WRITE_MPTHEADER_sized_member(	VolEnv.nLoopStart		, BYTE			, VLS.							)
+WRITE_MPTHEADER_sized_member(	VolEnv.nLoopEnd			, BYTE			, VLE.							)
+WRITE_MPTHEADER_sized_member(	VolEnv.nSustainStart	, BYTE			, VSB.							)
+WRITE_MPTHEADER_sized_member(	VolEnv.nSustainEnd		, BYTE			, VSE.							)
+WRITE_MPTHEADER_sized_member(	PanEnv.nLoopStart		, BYTE			, PLS.							)
+WRITE_MPTHEADER_sized_member(	PanEnv.nLoopEnd			, BYTE			, PLE.							)
+WRITE_MPTHEADER_sized_member(	PanEnv.nSustainStart	, BYTE			, PSB.							)
+WRITE_MPTHEADER_sized_member(	PanEnv.nSustainEnd		, BYTE			, PSE.							)
+WRITE_MPTHEADER_sized_member(	PitchEnv.nLoopStart		, BYTE			, PiLS							)
+WRITE_MPTHEADER_sized_member(	PitchEnv.nLoopEnd		, BYTE			, PiLE							)
+WRITE_MPTHEADER_sized_member(	PitchEnv.nSustainStart	, BYTE			, PiSB							)
+WRITE_MPTHEADER_sized_member(	PitchEnv.nSustainEnd	, BYTE			, PiSE							)
+WRITE_MPTHEADER_sized_member(	nNNA					, BYTE			, NNA.							)
+WRITE_MPTHEADER_sized_member(	nDCT					, BYTE			, DCT.							)
+WRITE_MPTHEADER_sized_member(	nDNA					, BYTE			, DNA.							)
+WRITE_MPTHEADER_sized_member(	nPanSwing				, BYTE			, PS..							)
+WRITE_MPTHEADER_sized_member(	nVolSwing				, BYTE			, VS..							)
+WRITE_MPTHEADER_sized_member(	nIFC					, BYTE			, IFC.							)
+WRITE_MPTHEADER_sized_member(	nIFR					, BYTE			, IFR.							)
+WRITE_MPTHEADER_sized_member(	wMidiBank				, WORD			, MB..							)
+WRITE_MPTHEADER_sized_member(	nMidiProgram			, BYTE			, MP..							)
+WRITE_MPTHEADER_sized_member(	nMidiChannel			, BYTE			, MC..							)
+WRITE_MPTHEADER_sized_member(	nMidiDrumKey			, BYTE			, MDK.							)
+WRITE_MPTHEADER_sized_member(	nPPS					, signed char	, PPS.							)
+WRITE_MPTHEADER_sized_member(	nPPC					, unsigned char	, PPC.							)
+WRITE_MPTHEADER_array_member(	VolEnv.Ticks			, WORD			, VP[.		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	PanEnv.Ticks			, WORD			, PP[.		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	PitchEnv.Ticks			, WORD			, PiP[		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	VolEnv.Values			, BYTE			, VE[.		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	PanEnv.Values			, BYTE			, PE[.		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	PitchEnv.Values			, BYTE			, PiE[		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	NoteMap					, BYTE			, NM[.		, 128				)
+WRITE_MPTHEADER_array_member(	Keyboard				, WORD			, K[..		, 128				)
+WRITE_MPTHEADER_array_member(	name					, CHAR			, n[..		, 32				)
+WRITE_MPTHEADER_array_member(	filename				, CHAR			, fn[.		, 12				)
+WRITE_MPTHEADER_sized_member(	nMixPlug				, BYTE			, MiP.							)
+WRITE_MPTHEADER_sized_member(	nVolRamp				, USHORT		, VR..							)
+WRITE_MPTHEADER_sized_member(	nResampling				, USHORT		, R...							)
+WRITE_MPTHEADER_sized_member(	nCutSwing				, BYTE			, CS..							)
+WRITE_MPTHEADER_sized_member(	nResSwing				, BYTE			, RS..							)
+WRITE_MPTHEADER_sized_member(	nFilterMode				, BYTE			, FM..							)
+WRITE_MPTHEADER_sized_member(	nPluginVelocityHandling	, BYTE			, PVEH							)
 WRITE_MPTHEADER_sized_member(	nPluginVolumeHandling	, BYTE			, PVOH							)
-WRITE_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL							)
-WRITE_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
-WRITE_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
-WRITE_MPTHEADER_sized_member(	nVolEnvReleaseNode	, BYTE			, VERN							)
+WRITE_MPTHEADER_sized_member(	wPitchToTempoLock		, WORD			, PTTL							)
+WRITE_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, BYTE			, PERN							)
+WRITE_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, BYTE		    , AERN							)
+WRITE_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, BYTE			, VERN							)
 }
 
 // --------------------------------------------------------------------------------------------
@@ -316,60 +316,60 @@ if(input == NULL) return NULL;
 BYTE * pointer = NULL;
 
 switch(fcode){
-GET_MPTHEADER_sized_member(	nFadeOut			, UINT			, FO..							)
-GET_MPTHEADER_sized_member(	dwFlags				, DWORD			, dF..							)
-GET_MPTHEADER_sized_member(	nGlobalVol			, UINT			, GV..							)
-GET_MPTHEADER_sized_member(	nPan				, UINT			, P...							)
-GET_MPTHEADER_sized_member(	nVolEnv				, UINT			, VE..							)
-GET_MPTHEADER_sized_member(	nPanEnv				, UINT			, PE..							)
-GET_MPTHEADER_sized_member(	nPitchEnv			, UINT			, PiE.							)
-GET_MPTHEADER_sized_member(	nVolLoopStart		, BYTE			, VLS.							)
-GET_MPTHEADER_sized_member(	nVolLoopEnd			, BYTE			, VLE.							)
-GET_MPTHEADER_sized_member(	nVolSustainBegin	, BYTE			, VSB.							)
-GET_MPTHEADER_sized_member(	nVolSustainEnd		, BYTE			, VSE.							)
-GET_MPTHEADER_sized_member(	nPanLoopStart		, BYTE			, PLS.							)
-GET_MPTHEADER_sized_member(	nPanLoopEnd			, BYTE			, PLE.							)
-GET_MPTHEADER_sized_member(	nPanSustainBegin	, BYTE			, PSB.							)
-GET_MPTHEADER_sized_member(	nPanSustainEnd		, BYTE			, PSE.							)
-GET_MPTHEADER_sized_member(	nPitchLoopStart		, BYTE			, PiLS							)
-GET_MPTHEADER_sized_member(	nPitchLoopEnd		, BYTE			, PiLE							)
-GET_MPTHEADER_sized_member(	nPitchSustainBegin	, BYTE			, PiSB							)
-GET_MPTHEADER_sized_member(	nPitchSustainEnd	, BYTE			, PiSE							)
-GET_MPTHEADER_sized_member(	nNNA				, BYTE			, NNA.							)
-GET_MPTHEADER_sized_member(	nDCT				, BYTE			, DCT.							)
-GET_MPTHEADER_sized_member(	nDNA				, BYTE			, DNA.							)
-GET_MPTHEADER_sized_member(	nPanSwing			, BYTE			, PS..							)
-GET_MPTHEADER_sized_member(	nVolSwing			, BYTE			, VS..							)
-GET_MPTHEADER_sized_member(	nIFC				, BYTE			, IFC.							)
-GET_MPTHEADER_sized_member(	nIFR				, BYTE			, IFR.							)
-GET_MPTHEADER_sized_member(	wMidiBank			, WORD			, MB..							)
-GET_MPTHEADER_sized_member(	nMidiProgram		, BYTE			, MP..							)
-GET_MPTHEADER_sized_member(	nMidiChannel		, BYTE			, MC..							)
-GET_MPTHEADER_sized_member(	nMidiDrumKey		, BYTE			, MDK.							)
-GET_MPTHEADER_sized_member(	nPPS				, signed char	, PPS.							)
-GET_MPTHEADER_sized_member(	nPPC				, unsigned char	, PPC.							)
-GET_MPTHEADER_array_member(	VolPoints			, WORD			, VP[.		, MAX_ENVPOINTS		)
-GET_MPTHEADER_array_member(	PanPoints			, WORD			, PP[.		, MAX_ENVPOINTS		)
-GET_MPTHEADER_array_member(	PitchPoints			, WORD			, PiP[		, MAX_ENVPOINTS		)
-GET_MPTHEADER_array_member(	VolEnv				, BYTE			, VE[.		, MAX_ENVPOINTS		)
-GET_MPTHEADER_array_member(	PanEnv				, BYTE			, PE[.		, MAX_ENVPOINTS		)
-GET_MPTHEADER_array_member(	PitchEnv			, BYTE			, PiE[		, MAX_ENVPOINTS		)
-GET_MPTHEADER_array_member(	NoteMap				, BYTE			, NM[.		, 128				)
-GET_MPTHEADER_array_member(	Keyboard			, WORD			, K[..		, 128				)
-GET_MPTHEADER_array_member(	name				, CHAR			, n[..		, 32				)
-GET_MPTHEADER_array_member(	filename			, CHAR			, fn[.		, 12				)
-GET_MPTHEADER_sized_member(	nMixPlug			, BYTE			, MiP.							)
-GET_MPTHEADER_sized_member(	nVolRamp			, USHORT		, VR..							)
-GET_MPTHEADER_sized_member(	nResampling			, UINT			, R...							)
-GET_MPTHEADER_sized_member(	nCutSwing			, BYTE			, CS..							)
-GET_MPTHEADER_sized_member(	nResSwing			, BYTE			, RS..							)
-GET_MPTHEADER_sized_member(	nFilterMode			, BYTE			, FM..							)
-GET_MPTHEADER_sized_member(	wPitchToTempoLock	, WORD			, PTTL							)
-GET_MPTHEADER_sized_member(	nPluginVelocityHandling, BYTE			, PVEH							)
+GET_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
+GET_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
+GET_MPTHEADER_sized_member(	nGlobalVol				, UINT			, GV..							)
+GET_MPTHEADER_sized_member(	nPan					, UINT			, P...							)
+GET_MPTHEADER_sized_member(	VolEnv.nNodes			, UINT			, VE..							)
+GET_MPTHEADER_sized_member(	PanEnv.nNodes			, UINT			, PE..							)
+GET_MPTHEADER_sized_member(	PitchEnv.nNodes			, UINT			, PiE.							)
+GET_MPTHEADER_sized_member(	VolEnv.nLoopStart		, BYTE			, VLS.							)
+GET_MPTHEADER_sized_member(	VolEnv.nLoopEnd			, BYTE			, VLE.							)
+GET_MPTHEADER_sized_member(	VolEnv.nSustainStart	, BYTE			, VSB.							)
+GET_MPTHEADER_sized_member(	VolEnv.nSustainEnd		, BYTE			, VSE.							)
+GET_MPTHEADER_sized_member(	PanEnv.nLoopStart		, BYTE			, PLS.							)
+GET_MPTHEADER_sized_member(	PanEnv.nLoopEnd			, BYTE			, PLE.							)
+GET_MPTHEADER_sized_member(	PanEnv.nSustainStart	, BYTE			, PSB.							)
+GET_MPTHEADER_sized_member(	PanEnv.nSustainEnd		, BYTE			, PSE.							)
+GET_MPTHEADER_sized_member(	PitchEnv.nLoopStart		, BYTE			, PiLS							)
+GET_MPTHEADER_sized_member(	PitchEnv.nLoopEnd		, BYTE			, PiLE							)
+GET_MPTHEADER_sized_member(	PitchEnv.nSustainStart	, BYTE			, PiSB							)
+GET_MPTHEADER_sized_member(	PitchEnv.nSustainEnd	, BYTE			, PiSE							)
+GET_MPTHEADER_sized_member(	nNNA					, BYTE			, NNA.							)
+GET_MPTHEADER_sized_member(	nDCT					, BYTE			, DCT.							)
+GET_MPTHEADER_sized_member(	nDNA					, BYTE			, DNA.							)
+GET_MPTHEADER_sized_member(	nPanSwing				, BYTE			, PS..							)
+GET_MPTHEADER_sized_member(	nVolSwing				, BYTE			, VS..							)
+GET_MPTHEADER_sized_member(	nIFC					, BYTE			, IFC.							)
+GET_MPTHEADER_sized_member(	nIFR					, BYTE			, IFR.							)
+GET_MPTHEADER_sized_member(	wMidiBank				, WORD			, MB..							)
+GET_MPTHEADER_sized_member(	nMidiProgram			, BYTE			, MP..							)
+GET_MPTHEADER_sized_member(	nMidiChannel			, BYTE			, MC..							)
+GET_MPTHEADER_sized_member(	nMidiDrumKey			, BYTE			, MDK.							)
+GET_MPTHEADER_sized_member(	nPPS					, signed char	, PPS.							)
+GET_MPTHEADER_sized_member(	nPPC					, unsigned char	, PPC.							)
+GET_MPTHEADER_array_member(	VolEnv.Ticks			, WORD			, VP[.		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	PanEnv.Ticks			, WORD			, PP[.		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	PitchEnv.Ticks			, WORD			, PiP[		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	VolEnv.Values			, BYTE			, VE[.		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	PanEnv.Values			, BYTE			, PE[.		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	PitchEnv.Values			, BYTE			, PiE[		, MAX_ENVPOINTS		)
+GET_MPTHEADER_array_member(	NoteMap					, BYTE			, NM[.		, 128				)
+GET_MPTHEADER_array_member(	Keyboard				, WORD			, K[..		, 128				)
+GET_MPTHEADER_array_member(	name					, CHAR			, n[..		, 32				)
+GET_MPTHEADER_array_member(	filename				, CHAR			, fn[.		, 12				)
+GET_MPTHEADER_sized_member(	nMixPlug				, BYTE			, MiP.							)
+GET_MPTHEADER_sized_member(	nVolRamp				, USHORT		, VR..							)
+GET_MPTHEADER_sized_member(	nResampling				, UINT			, R...							)
+GET_MPTHEADER_sized_member(	nCutSwing				, BYTE			, CS..							)
+GET_MPTHEADER_sized_member(	nResSwing				, BYTE			, RS..							)
+GET_MPTHEADER_sized_member(	nFilterMode				, BYTE			, FM..							)
+GET_MPTHEADER_sized_member(	wPitchToTempoLock		, WORD			, PTTL							)
+GET_MPTHEADER_sized_member(	nPluginVelocityHandling	, BYTE			, PVEH							)
 GET_MPTHEADER_sized_member(	nPluginVolumeHandling	, BYTE			, PVOH							)
-GET_MPTHEADER_sized_member(	nPitchEnvReleaseNode, BYTE			, PERN							)
-GET_MPTHEADER_sized_member(	nPanEnvReleaseNode  , BYTE		    , AERN							)
-GET_MPTHEADER_sized_member(	nVolEnvReleaseNode	, BYTE			, VERN							)
+GET_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, BYTE			, PERN							)
+GET_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, BYTE		    , AERN							)
+GET_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, BYTE			, VERN							)
 }
 
 return pointer;
@@ -2824,9 +2824,9 @@ void CSoundFile::BuildDefaultInstrument()
 	m_defaultInstrument.nGlobalVol=64;
 	m_defaultInstrument.nPan = 0x20 << 2;
 	m_defaultInstrument.nIFC = 0xFF;
-	m_defaultInstrument.nPanEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
-	m_defaultInstrument.nPitchEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
-	m_defaultInstrument.nVolEnvReleaseNode=ENV_RELEASE_NODE_UNSET;
+	m_defaultInstrument.PanEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
+	m_defaultInstrument.PitchEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
+	m_defaultInstrument.VolEnv.nReleaseNode=ENV_RELEASE_NODE_UNSET;
 	m_defaultInstrument.wPitchToTempoLock = 0;
 	m_defaultInstrument.pTuning = m_defaultInstrument.s_DefaultTuning;
 	m_defaultInstrument.nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
@@ -2911,9 +2911,9 @@ void CSoundFile::SetDefaultInstrumentValues(MODINSTRUMENT *pIns)
 {
 	pIns->nResampling = m_defaultInstrument.nResampling;
 	pIns->nFilterMode = m_defaultInstrument.nFilterMode;
-	pIns->nPitchEnvReleaseNode = m_defaultInstrument.nPitchEnvReleaseNode;
-	pIns->nPanEnvReleaseNode = m_defaultInstrument.nPanEnvReleaseNode;
-	pIns->nVolEnvReleaseNode = m_defaultInstrument.nVolEnvReleaseNode;
+	pIns->PitchEnv.nReleaseNode = m_defaultInstrument.PitchEnv.nReleaseNode;
+	pIns->PanEnv.nReleaseNode = m_defaultInstrument.PanEnv.nReleaseNode;
+	pIns->VolEnv.nReleaseNode = m_defaultInstrument.VolEnv.nReleaseNode;
 	pIns->pTuning = m_defaultInstrument.pTuning;
 	pIns->nPluginVelocityHandling = m_defaultInstrument.nPluginVelocityHandling;
 	pIns->nPluginVolumeHandling = m_defaultInstrument.nPluginVolumeHandling;
