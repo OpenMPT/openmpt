@@ -2606,7 +2606,7 @@ void CModTree::OnSetItemPath()
 		dlg.m_ofn.nMaxFile = _MAX_PATH;
 
 		if(dlg.DoModal() == IDOK){
-			strcpy(&pSndFile->m_szInstrumentPath[dwItem-1][0],pszFileNames);
+			strcpy(pSndFile->m_szInstrumentPath[dwItem-1], pszFileNames);
 			OnRefreshTree();
 		}
 
@@ -2642,7 +2642,7 @@ void CModTree::OnSaveItem()
 			dlg.m_ofn.lpstrFile = pszFileNames;
 			dlg.m_ofn.nMaxFile = _MAX_PATH;
 
-			if(dlg.DoModal() == IDOK) strcpy(&pSndFile->m_szInstrumentPath[dwItem-1][0],pszFileNames);
+			if(dlg.DoModal() == IDOK) strcpy(pSndFile->m_szInstrumentPath[dwItem-1], pszFileNames);
 
 			dlg.m_ofn.lpstrFile = NULL;
 			dlg.m_ofn.nMaxFile = 0;

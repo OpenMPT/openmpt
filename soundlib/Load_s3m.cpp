@@ -255,6 +255,8 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
+	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER)+sizeof(S3MSAMPLESTRUCT)+64)) return false;
+
 	UINT insnum,patnum,nins,npat;
 	DWORD insfile[128];
 	WORD ptr[256];
@@ -273,7 +275,6 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	psfh.scrm = LittleEndian(psfh.scrm);
 	psfh.special = LittleEndianW(psfh.special);
 
-	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER)+sizeof(S3MSAMPLESTRUCT)+64)) return false;
 	if (psfh.scrm != 0x4D524353) return false;
 
 	if((psfh.cwtv & 0xF000) == 0x5000) // OpenMPT Version number (Major.Minor)

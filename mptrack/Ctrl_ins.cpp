@@ -1295,7 +1295,7 @@ BOOL CCtrlInstruments::OpenInstrument(LPCSTR lpszFileName)
 // -> DESC="IT project files (.itp)"
 		int n = strlen(lpszFileName);
 		if(n >= _MAX_PATH) n = _MAX_PATH-1;
-		strncpy(&m_pSndFile->m_szInstrumentPath[m_nInstrument-1][0],lpszFileName,n);
+		strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument-1],lpszFileName,n);
 		m_pSndFile->m_szInstrumentPath[m_nInstrument-1][n] = '\0';
 		m_pSndFile->instrumentModified[m_nInstrument-1] = FALSE;
 // -! NEW_FEATURE#0023
@@ -1643,7 +1643,7 @@ void CCtrlInstruments::OnInstrumentSave()
 // -> DESC="IT project files (.itp)"
 	int n = strlen(dlg.GetPathName());
 	if(n > _MAX_PATH) n = _MAX_PATH;
-	strncpy(&m_pSndFile->m_szInstrumentPath[m_nInstrument-1][0],dlg.GetPathName(),n);
+	strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument-1],dlg.GetPathName(),n);
 	m_pSndFile->instrumentModified[m_nInstrument-1] = FALSE;
 // -! NEW_FEATURE#0023
 
@@ -2030,13 +2030,12 @@ void CCtrlInstruments::OnMixPlugChanged()
 			if ((!IsLocked()) && pIns->nMixPlug != nPlug) { 
 				m_pModDoc->SetModified();
 				pIns->nMixPlug = nPlug;
+				m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, this);
+				m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES, this);
 			}
 			m_CbnPluginVelocityHandling.SetCurSel(pIns->nPluginVelocityHandling);
 			m_CbnPluginVolumeHandling.SetCurSel(pIns->nPluginVolumeHandling);
 
-			m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, this);
-			m_pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES, this);
-			
 			if (pIns->nMixPlug)	//if we have not just set to no plugin
 			{
 				PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[pIns->nMixPlug-1]);
@@ -2653,7 +2652,6 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	pIns->SetTuning(pIns->s_DefaultTuning);
 	END_CRITICAL();
 	m_pModDoc->SetModified();
-	UpdateView((m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT);
 }
 
 void CCtrlInstruments::OnEnChangeEditPitchtempolock()

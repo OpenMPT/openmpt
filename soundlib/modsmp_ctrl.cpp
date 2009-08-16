@@ -11,15 +11,17 @@
 namespace ctrlSmp
 {
 
-void ReplaceSample(MODSAMPLE& smp, const LPSTR pNewSample, const SmpLength nNewLength)
-//----------------------------------------------------------------------------------------
+void ReplaceSample(MODSAMPLE& smp, const LPSTR pNewSample, const SmpLength nNewLength, CSoundFile* pSndFile)
+//----------------------------------------------------------------------------------------------------------
 {
 	LPSTR const pOldSmp = smp.pSample;
 	BEGIN_CRITICAL();
+		if (pSndFile != nullptr)
+			ctrlChn::ReplaceSample(pSndFile->Chn, pOldSmp, pNewSample, nNewLength);
 		smp.pSample = pNewSample;
 		smp.nLength = nNewLength;
-	END_CRITICAL();
-	CSoundFile::FreeSample(pOldSmp);
+		CSoundFile::FreeSample(pOldSmp);	
+	END_CRITICAL();	
 }
 
 
@@ -60,7 +62,7 @@ SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const Sm
 			AfxMessageBox(TEXT("Unsupported start position in InsertSilence."));
 	}
 
-	ReplaceSample(smp, pNewSmp, nNewLength);
+	ReplaceSample(smp, pNewSmp, nNewLength, pSndFile);
 	AdjustEndOfSample(smp, pSndFile);
 
 	return smp.nLength;
@@ -88,7 +90,7 @@ SmpLength ResizeSample(MODSAMPLE& smp, const SmpLength nNewLength, CSoundFile* p
 
 	// Copy over old data and replace sample by the new one
 	memcpy(pNewSmp, smp.pSample, nNewSmpBytes);
-	ReplaceSample(smp, pNewSmp, nNewLength);
+	ReplaceSample(smp, pNewSmp, nNewLength, pSndFile);
 
 	// Adjust loops
 	if(smp.nLoopStart > nNewLength)
@@ -340,3 +342,32 @@ float RemoveDCOffset(MODSAMPLE& smp,
 
 
 } // namespace ctrlSmp
+
+
+
+namespace ctrlChn
+{
+
+void ReplaceSample( MODCHANNEL (&Chn)[MAX_CHANNELS],
+					LPCSTR pOldSample,
+					LPSTR pNewSample,
+					const ctrlSmp::SmpLength nNewLength,
+					DWORD orFlags /* = 0*/,
+					DWORD andFlags /* = MAXDWORD*/)
+{
+	for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	{
+		if (Chn[i].pSample == pOldSample)
+		{
+			Chn[i].pSample = pNewSample;
+			Chn[i].pCurrentSample = pNewSample;
+			if (Chn[i].nPos > nNewLength)
+				Chn[i].nPos = 0;
+			Chn[i].nLength = nNewLength;
+			Chn[i].dwFlags |= orFlags;
+			Chn[i].dwFlags &= andFlags;
+		}
+	}
+}
+
+} // namespace ctrlChn

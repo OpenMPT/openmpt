@@ -9,7 +9,7 @@
 // CScaleEnvPointsDlg dialog
 
 IMPLEMENT_DYNAMIC(CScaleEnvPointsDlg, CDialog)
-CScaleEnvPointsDlg::CScaleEnvPointsDlg(CWnd* pParent, MODINSTRUMENT* pInst, BYTE env)
+CScaleEnvPointsDlg::CScaleEnvPointsDlg(CWnd* pParent, MODINSTRUMENT* pInst, UINT env)
 	: CDialog(CScaleEnvPointsDlg::IDD, pParent),
 	  m_pInstrument(pInst),
 	  m_Env(env)
