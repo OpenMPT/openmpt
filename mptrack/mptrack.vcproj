@@ -638,7 +638,13 @@
 				RelativePath="res\bitmap1.bmp">
 			</File>
 			<File
+				RelativePath=".\res\built-inTunings.tc">
+			</File>
+			<File
 				RelativePath=".\res\colors.bmp">
+			</File>
+			<File
+				RelativePath=".\res\defaultKeyBindings.mkb">
 			</File>
 			<File
 				RelativePath=".\res\dragging.cur">

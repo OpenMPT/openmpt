@@ -835,14 +835,14 @@ public:
 	static bool LoadStaticTunings();
 	static bool SaveStaticTunings();
 	static void DeleteStaticdata();
-	static CTuningCollection& GetStandardTunings() {return *s_pTuningsSharedStandard;}
+	static CTuningCollection& GetBuiltInTunings() {return *s_pTuningsSharedBuiltIn;}
 	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
 	std::string GetNoteName(const int16&, const int inst = -1) const;
 private:
 	CTuningCollection* m_pTuningsTuneSpecific;
-	static CTuningCollection* s_pTuningsSharedStandard;
+	static CTuningCollection* s_pTuningsSharedBuiltIn;
 	static CTuningCollection* s_pTuningsSharedLocal;
 	//<--Tuning
 

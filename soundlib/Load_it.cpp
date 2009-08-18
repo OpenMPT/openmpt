@@ -161,12 +161,12 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 			if(csf.Instruments[i]->pTuning)
 				continue;
 
-			csf.Instruments[i]->pTuning = csf.GetStandardTunings().GetTuning(str);
+			csf.Instruments[i]->pTuning = csf.GetBuiltInTunings().GetTuning(str);
 			if(csf.Instruments[i]->pTuning)
 				continue;
 
-			if(str == "TET12" && csf.GetStandardTunings().GetNumTunings() > 0)
-				csf.Instruments[i]->pTuning = &csf.GetStandardTunings().GetTuning(0);
+			if(str == "TET12" && csf.GetBuiltInTunings().GetNumTunings() > 0)
+				csf.Instruments[i]->pTuning = &csf.GetBuiltInTunings().GetTuning(0);
 
 			if(csf.Instruments[i]->pTuning)
 				continue;

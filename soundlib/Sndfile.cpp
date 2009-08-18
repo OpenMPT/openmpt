@@ -390,7 +390,7 @@ const ROWINDEX CPatternSizesMimic::operator [](const int i) const
 //////////////////////////////////////////////////////////
 // CSoundFile
 
-CTuningCollection* CSoundFile::s_pTuningsSharedStandard(0);
+CTuningCollection* CSoundFile::s_pTuningsSharedBuiltIn(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 uint8 CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
@@ -2839,7 +2839,7 @@ void CSoundFile::DeleteStaticdata()
 //---------------------------------
 {
 	delete s_pTuningsSharedLocal; s_pTuningsSharedLocal = 0;
-	delete s_pTuningsSharedStandard; s_pTuningsSharedStandard = 0;
+	delete s_pTuningsSharedBuiltIn; s_pTuningsSharedBuiltIn = 0;
 }
 
 bool CSoundFile::SaveStaticTunings()
@@ -2862,42 +2862,45 @@ void SimpleMessageBox(const char* message, const char* title)
 bool CSoundFile::LoadStaticTunings()
 //-----------------------------------
 {
-	if(s_pTuningsSharedLocal || s_pTuningsSharedStandard) return true;
+	if(s_pTuningsSharedLocal || s_pTuningsSharedBuiltIn) return true;
 	//For now not allowing to reload tunings(one should be careful when reloading them
 	//since various parts may use addresses of the tuningobjects).
 
 	CTuning::MessageHandler = &SimpleMessageBox;
-		
-	s_pTuningsSharedStandard = new CTuningCollection("Standard tunings");
+
+	s_pTuningsSharedBuiltIn = new CTuningCollection;
 	s_pTuningsSharedLocal = new CTuningCollection("Local tunings");
 
-	const string exeDir = CMainFrame::m_csExecutableDirectoryPath;
-    const string baseDirectoryName = exeDir + "tunings\\";
-	string filenameBase;
-	string filename;
-
-	s_pTuningsSharedStandard->SetSavefilePath(baseDirectoryName + string("standard\\std_tunings") + CTuningCollection::s_FileExtension);
-	s_pTuningsSharedLocal->SetSavefilePath(baseDirectoryName + string("local_tunings") + CTuningCollection::s_FileExtension);
-
-	s_pTuningsSharedStandard->Deserialize();
-	s_pTuningsSharedLocal->Deserialize();
-
-	//This condition should not be true.
-	if(s_pTuningsSharedStandard->GetNumTunings() == 0)
+	// Load built-in tunings.
+	const char* pData = nullptr;
+	HGLOBAL hglob = nullptr;
+	size_t nSize = 0;
+	if (LoadResource(MAKEINTRESOURCE(IDR_BUILTIN_TUNINGS), TEXT("TUNING"), pData, nSize, hglob) != nullptr)
 	{
+		std::istrstream iStrm(pData, nSize);
+		s_pTuningsSharedBuiltIn->Deserialize(iStrm);
+		FreeResource(hglob);
+	}
+	if(s_pTuningsSharedBuiltIn->GetNumTunings() == 0)
+	{
+		ASSERT(false);
 		CTuningRTI* pT = new CTuningRTI;
 		//Note: Tuning collection class handles deleting.
 		pT->CreateGeometric(1,1);
-		if(s_pTuningsSharedStandard->AddTuning(pT))
+		if(s_pTuningsSharedBuiltIn->AddTuning(pT))
 			delete pT;
 	}
+		
+	// Load local tunings.
+	s_pTuningsSharedLocal->SetSavefilePath(std::string(CMainFrame::m_csExecutableDirectoryPath + "tunings\\local_tunings" + CTuningCollection::s_FileExtension.c_str()));
+	s_pTuningsSharedLocal->Deserialize();
 
-	//Enabling adding/removing of tunings for standard collection
-	//only for debug builds.
+	// Enabling adding/removing of tunings for standard collection
+	// only for debug builds.
 	#ifdef DEBUG
-		s_pTuningsSharedStandard->SetConstStatus(CTuningCollection::EM_ALLOWALL);
+		s_pTuningsSharedBuiltIn->SetConstStatus(CTuningCollection::EM_ALLOWALL);
 	#else
-		s_pTuningsSharedStandard->SetConstStatus(CTuningCollection::EM_CONST);
+		s_pTuningsSharedBuiltIn->SetConstStatus(CTuningCollection::EM_CONST);
 	#endif
 
 	MODINSTRUMENT::s_DefaultTuning = NULL;

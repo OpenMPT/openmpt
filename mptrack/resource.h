@@ -47,6 +47,9 @@
 #define IDS_ERR_NO_TUNING_SELECTION     208
 #define IDS_UNSUPPORTED_TUNING_DnD      209
 #define IDS_OPERATION_FAIL              210
+#define IDS_CANT_OPEN_KEYBINDING_FILE   211
+#define IDS_UNABLE_TO_LOAD_KEYBINDINGS  212
+#define IDS_CANT_OPEN_FILE_FOR_WRITING  213
 #define IDB_MAINBAR                     300
 #define IDB_IMAGELIST                   301
 #define IDB_PATTERNS                    302
@@ -107,6 +110,8 @@
 #define IDD_MSGBOX_HIDABLE              516
 #define IDD_ADDSILENCE                  517
 #define IDD_MODLOADING_WARNINGS         518
+#define IDR_DEFAULT_KEYBINDINGS         519
+#define IDR_BUILTIN_TUNINGS             520
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -1116,7 +1121,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        519
+#define _APS_NEXT_RESOURCE_VALUE        521
 #define _APS_NEXT_COMMAND_VALUE         59229
 #define _APS_NEXT_CONTROL_VALUE         2386
 #define _APS_NEXT_SYMED_VALUE           901

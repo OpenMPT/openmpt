@@ -1101,6 +1101,7 @@ public:
 	void GenKeyMap(KeyMap &km);		// Generate a keymap from this command set
 	bool SaveFile(CString FileName, bool debug);
 	bool LoadFile(CString FileName);
+	bool LoadFile(std::istream& iStrm, LPCTSTR szFilename);
 
 	static DWORD GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, KeyEventType ke);
 	

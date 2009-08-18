@@ -2553,11 +2553,11 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	sel -= 1;
 	CTuningCollection* tc = 0;
 	
-	if(sel < CSoundFile::GetStandardTunings().GetNumTunings())
-		tc = &CSoundFile::GetStandardTunings();
+	if(sel < CSoundFile::GetBuiltInTunings().GetNumTunings())
+		tc = &CSoundFile::GetBuiltInTunings();
 	else
 	{
-		sel -= CSoundFile::GetStandardTunings().GetNumTunings();
+		sel -= CSoundFile::GetBuiltInTunings().GetNumTunings();
 		if(sel < CSoundFile::GetLocalTunings().GetNumTunings())
 			tc = &CSoundFile::GetLocalTunings();
 		else
@@ -2581,7 +2581,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	//Case: Chosen tuning editor to be displayed.
 	//Creating vector for the CTuningDialog.
 	vector<CTuningCollection*> v;
-	v.push_back(&m_pSndFile->GetStandardTunings());
+	v.push_back(&m_pSndFile->GetBuiltInTunings());
 	v.push_back(&m_pSndFile->GetLocalTunings());
 	v.push_back(&m_pSndFile->GetTuneSpecificTunings());
 	CTuningDialog td(this, v, pInstH->pTuning);
@@ -2618,9 +2618,9 @@ void CCtrlInstruments::UpdateTuningComboBox()
 		return;
 	}
 
-	for(size_t i = 0; i < CSoundFile::GetStandardTunings().GetNumTunings(); i++)
+	for(size_t i = 0; i < CSoundFile::GetBuiltInTunings().GetNumTunings(); i++)
 	{
-		if(pIns->pTuning == &CSoundFile::GetStandardTunings().GetTuning(i))
+		if(pIns->pTuning == &CSoundFile::GetBuiltInTunings().GetTuning(i))
 		{
 			m_ComboTuning.SetCurSel(i+1);
 			return;
@@ -2631,7 +2631,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	{
 		if(pIns->pTuning == &CSoundFile::GetLocalTunings().GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i+CSoundFile::GetStandardTunings().GetNumTunings()+1);
+			m_ComboTuning.SetCurSel(i+CSoundFile::GetBuiltInTunings().GetNumTunings()+1);
 			return;
 		}
 	}
@@ -2640,7 +2640,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	{
 		if(pIns->pTuning == &m_pSndFile->GetTuneSpecificTunings().GetTuning(i))
 		{
-			m_ComboTuning.SetCurSel(i+CSoundFile::GetStandardTunings().GetNumTunings() + CSoundFile::GetLocalTunings().GetNumTunings()+1);
+			m_ComboTuning.SetCurSel(i+CSoundFile::GetBuiltInTunings().GetNumTunings() + CSoundFile::GetLocalTunings().GetNumTunings()+1);
 			return;
 		}
 	}
@@ -2792,9 +2792,9 @@ void CCtrlInstruments::BuildTuningComboBox()
 		m_ComboTuning.DeleteString(0);
 
 	m_ComboTuning.AddString("OMPT IT behavior"); //<-> Instrument pTuning pointer == NULL
-	for(size_t i = 0; i<CSoundFile::GetStandardTunings().GetNumTunings(); i++)
+	for(size_t i = 0; i<CSoundFile::GetBuiltInTunings().GetNumTunings(); i++)
 	{
-		m_ComboTuning.AddString(CSoundFile::GetStandardTunings().GetTuning(i).GetName().c_str());
+		m_ComboTuning.AddString(CSoundFile::GetBuiltInTunings().GetTuning(i).GetName().c_str());
 	}
 	for(size_t i = 0; i<CSoundFile::GetLocalTunings().GetNumTunings(); i++)
 	{
