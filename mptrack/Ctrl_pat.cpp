@@ -408,7 +408,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case CTRLMSG_SETCURRENTORDER:
 		//Set orderlist selection and refresh GUI if change successful
-		m_OrderList.SetCurSel(lParam, FALSE);
+		m_OrderList.SetCurSel((ORDERINDEX)lParam, FALSE);
 		break;
 
 	case CTRLMSG_FORCEREFRESH:
@@ -417,7 +417,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_GETCURRENTORDER:
-		return m_OrderList.GetCurSel();
+		return m_OrderList.GetCurSel(true).nOrdLo;
 
 	case CTRLMSG_SETCURRENTINSTRUMENT:
 	case CTRLMSG_PAT_SETINSTRUMENT:
@@ -472,11 +472,11 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_PREVORDER:
-		m_OrderList.SetCurSel(m_OrderList.GetCurSel()-1, TRUE);
+		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).nOrdLo - 1, TRUE);
 		break;
 	
 	case CTRLMSG_NEXTORDER:
-		m_OrderList.SetCurSel(m_OrderList.GetCurSel()+1, TRUE);
+		m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).nOrdLo + 1, TRUE);
 		break;
 
 	//rewbs.customKeys
@@ -582,7 +582,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 	{
 		if (pSndFile)
 		{
-			for (UINT i=0; i<pSndFile->Order.size(); i++)
+			for (ORDERINDEX i=0; i<pSndFile->Order.size(); i++)
 			{
 				if (pSndFile->Order[i] == (UINT)lParam)
 				{
@@ -599,7 +599,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		if (pSndFile)
 		{
 			lParam &= 0x7FFF;
-			m_OrderList.SetCurSel(lParam);
+			m_OrderList.SetCurSel((ORDERINDEX)lParam);
 			SetCurrentPattern(pSndFile->Order[lParam]);
 		}
 	}
@@ -652,7 +652,7 @@ void CCtrlPatterns::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CCtrlPatterns::OnSequencePrev()
 //----------------------------------
 {
-	m_OrderList.SetCurSel(m_OrderList.GetCurSel()-1);
+	m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).nOrdLo - 1);
 	m_OrderList.SetFocus();
 }
 
@@ -660,7 +660,7 @@ void CCtrlPatterns::OnSequencePrev()
 void CCtrlPatterns::OnSequenceNext()
 //----------------------------------
 {
-	m_OrderList.SetCurSel(m_OrderList.GetCurSel()+1);
+	m_OrderList.SetCurSel(m_OrderList.GetCurSel(true).nOrdLo + 1);
 	m_OrderList.SetFocus();
 }
 
@@ -844,18 +844,18 @@ void CCtrlPatterns::OnPatternNew()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		UINT nCurOrd = m_OrderList.GetCurSel();
-		UINT pat = pSndFile->Order[nCurOrd];
-		UINT rows = 64;
+		ORDERINDEX nCurOrd = m_OrderList.GetCurSel(true).nOrdLo;
+		PATTERNINDEX pat = pSndFile->Order[nCurOrd];
+		ROWINDEX rows = 64;
 		if ((pat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[pat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			rows = pSndFile->PatternSize[pat];
 			if (rows < 32) rows = 32;
 		}
-		LONG nNewPat = m_pModDoc->InsertPattern(nCurOrd+1, rows);
+		PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nCurOrd + 1, rows);
 		if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()))
 		{
-			m_OrderList.SetCurSel(nCurOrd+1);
+			m_OrderList.SetCurSel(nCurOrd + 1);
 			m_OrderList.InvalidateRect(NULL, FALSE);
 			SetCurrentPattern(nNewPat);
 			m_pModDoc->SetModified();
@@ -869,34 +869,66 @@ void CCtrlPatterns::OnPatternNew()
 void CCtrlPatterns::OnPatternDuplicate()
 //--------------------------------------
 {
+	// duplicates one or more patterns.
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		UINT nCurOrd = m_OrderList.GetCurSel();
-		UINT nCurPat = pSndFile->Order[nCurOrd];
-		UINT rows = 64;
-		if (nCurPat < pSndFile->Patterns.Size())
+		ORD_SELECTION selection = m_OrderList.GetCurSel(false);
+		ORDERINDEX nInsertCount = selection.nOrdHi - selection.nOrdLo;
+		ORDERINDEX nInsertWhere = selection.nOrdLo + nInsertCount + 1;
+		bool bSuccess = false;
+		// has this pattern been duplicated already? (for multiselect)
+		PATTERNINDEX pReplaceIndex[MAX_PATTERNS]; // TODO I think this is a bit much...
+		memset(&pReplaceIndex, PATTERNINDEX_INVALID, sizeof(PATTERNINDEX) * MAX_PATTERNS);
+
+		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
 		{
-			if ((pSndFile->Patterns[nCurPat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
+			PATTERNINDEX nCurPat = pSndFile->Order[selection.nOrdLo + i];
+			ROWINDEX rows = 64;
+			if (nCurPat < pSndFile->Patterns.Size() && pReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
 			{
-				rows = pSndFile->PatternSize[nCurPat];
-				if (rows < pSndFile->GetModSpecifications().patternRowsMin) rows = pSndFile->GetModSpecifications().patternRowsMin;
+				if ((pSndFile->Patterns[nCurPat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
+				{
+					rows = pSndFile->PatternSize[nCurPat];
+					if (rows < pSndFile->GetModSpecifications().patternRowsMin) rows = pSndFile->GetModSpecifications().patternRowsMin;
+				}
+				PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nInsertWhere + i, rows);
+				if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()))
+				{
+					MODCOMMAND *pSrc = pSndFile->Patterns[nCurPat];
+					MODCOMMAND *pDest = pSndFile->Patterns[nNewPat];
+					UINT n = pSndFile->PatternSize[nCurPat];
+					if (pSndFile->PatternSize[nNewPat] < n) n = pSndFile->PatternSize[nNewPat];
+					n *= pSndFile->m_nChannels;
+					if (n) memcpy(pDest, pSrc, n * sizeof(MODCOMMAND));
+					bSuccess = true;
+					pReplaceIndex[nCurPat] = nNewPat; // mark as duplicated
+				}
+				else
+				{
+					break;
+				}
 			}
-			LONG nNewPat = m_pModDoc->InsertPattern(nCurOrd+1, rows);
-			if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()))
+			else
 			{
-				MODCOMMAND *pSrc = pSndFile->Patterns[nCurPat];
-				MODCOMMAND *pDest = pSndFile->Patterns[nNewPat];
-				UINT n = pSndFile->PatternSize[nCurPat];
-				if (pSndFile->PatternSize[nNewPat] < n) n = pSndFile->PatternSize[nNewPat];
-				n *= pSndFile->m_nChannels;
-				if (n) memcpy(pDest, pSrc, n * sizeof(MODCOMMAND));
-				m_OrderList.SetCurSel(nCurOrd+1);
-				m_OrderList.InvalidateRect(NULL, FALSE);
-				SetCurrentPattern(nNewPat);
-				m_pModDoc->SetModified();
-				m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE|HINT_PATNAMES, this);
+				// invalid pattern, or it has been duplicated before (multiselect)
+				for (int j = pSndFile->Order.size() - 1; j > selection.nOrdLo + i + nInsertCount + 1; j--) pSndFile->Order[j] = pSndFile->Order[j - 1];
+				PATTERNINDEX nNewPat; 
+				if(nCurPat < pSndFile->Patterns.Size() && pReplaceIndex[nCurPat] != PATTERNINDEX_INVALID)
+					nNewPat = pReplaceIndex[nCurPat]; // take care of patterns that have been duplicated before
+				else
+					nNewPat= pSndFile->Order[selection.nOrdLo + i];
+				pSndFile->Order[selection.nOrdLo + i + nInsertCount + 1] = nNewPat;
 			}
+		}
+		if(bSuccess)
+		{
+			m_OrderList.InvalidateRect(NULL, FALSE);
+			m_OrderList.SetCurSel(nInsertWhere);
+			SetCurrentPattern(pSndFile->Order[nInsertWhere]);
+			m_pModDoc->SetModified();
+			m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE|HINT_PATNAMES, this);
+			if(selection.nOrdHi != selection.nOrdLo) m_OrderList.m_nScrollPos2nd = nInsertWhere + nInsertCount;
 		}
 	}
 	SwitchToView();

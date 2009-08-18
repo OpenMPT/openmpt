@@ -1046,6 +1046,81 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 }
 
 
+
+
+void CModDoc::RearrangeSampleList()
+//---------------------------------
+{
+	if(m_SndFile.m_nSamples < 2)
+		return;
+
+	UINT nRemap = 0; // remap count
+	UINT nSampleMap[MAX_SAMPLES + 1]; // map old => new
+	for(UINT i = 0; i <= MAX_SAMPLES; i++)
+		nSampleMap[i] = i;
+
+	// First, find out which sample slots are unused and create the new sample map
+	for(UINT i = 1 ; i <= m_SndFile.m_nSamples; i++) {
+		if(!m_SndFile.Samples[i].pSample)
+		{
+			// Move all following samples
+			nRemap++;
+			nSampleMap[i] = 0;
+			for(UINT j = i + 1; j <= m_SndFile.m_nSamples; j++)
+				nSampleMap[j]--;
+		}
+	}
+
+	if(!nRemap)
+		return;
+
+	BEGIN_CRITICAL();
+
+	// Now, move everything around
+	for(UINT i = 1; i <= m_SndFile.m_nSamples; i++)
+	{
+		if(nSampleMap[i] && nSampleMap[i] != i)
+		{
+			// This gotta be moved
+			m_SndFile.MoveSample(i, nSampleMap[i]);
+			m_SndFile.Samples[i].pSample = nullptr;
+			strcpy(m_SndFile.m_szNames[nSampleMap[i]], m_SndFile.m_szNames[i]);
+			m_SndFile.m_szNames[i][0] = '\0';
+
+			// Also update instrument mapping (if module is in instrument mode)
+			for(UINT iInstr = 1; iInstr <= m_SndFile.m_nInstruments; iInstr++){
+				if(m_SndFile.Instruments[iInstr]){
+					MODINSTRUMENT *p = m_SndFile.Instruments[iInstr];
+					for(WORD iNote =0; iNote < 128; iNote++)
+						if(p->Keyboard[iNote] == i) p->Keyboard[iNote] = nSampleMap[i];
+				}
+			}
+		}
+	}
+
+	// Go through the patterns and remap samples (if module is in sample mode)
+	if(!m_SndFile.m_nInstruments)
+	{
+		for (UINT nPat=0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
+		{
+			MODCOMMAND *m = m_SndFile.Patterns[nPat];
+			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
+			{
+				if(nSampleMap[m->instr]) m->instr = nSampleMap[m->instr];
+			}
+		}
+	}
+
+	m_SndFile.m_nSamples -= nRemap;
+
+	END_CRITICAL();
+
+	SetModified();
+	UpdateAllViews(NULL, HINT_MODTYPE);
+
+}
+
+
 BOOL CModDoc::ConvertInstrumentsToSamples()
 //-----------------------------------------
 {
@@ -1533,8 +1608,8 @@ BOOL CModDoc::AdjustEndOfSample(UINT nSample)
 }
 
 
-LONG CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
-//------------------------------------------------
+PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
+//------------------------------------------------------------------
 {
 	const int i = m_SndFile.Patterns.Insert(nRows);
 	if(i < 0)
@@ -1573,8 +1648,8 @@ LONG CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 }
 
 
-LONG CModDoc::InsertSample(BOOL bLimit)
-//-------------------------------------
+SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
+//--------------------------------------------
 {
 	UINT i = 1;
 	for (i=1; i<=m_SndFile.m_nSamples; i++)
@@ -1611,7 +1686,7 @@ LONG CModDoc::InsertSample(BOOL bLimit)
 }
 
 
-LONG CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
+INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 //-----------------------------------------------------------
 {
 	MODINSTRUMENT *pDup = NULL;
@@ -1733,44 +1808,44 @@ void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample)
 }
 
 
-BOOL CModDoc::RemoveOrder(UINT n)
+bool CModDoc::RemoveOrder(ORDERINDEX n)
 //-------------------------------
 {
 	if (n < m_SndFile.Order.size())
 	{
 		BEGIN_CRITICAL();
-		for (UINT i=n; i<m_SndFile.Order.size()-1; i++)
+		for (ORDERINDEX i=n; i<m_SndFile.Order.size()-1; i++)
 		{
 			m_SndFile.Order[i] = m_SndFile.Order[i+1];
 		}
 		m_SndFile.Order[m_SndFile.Order.size()-1] = m_SndFile.Order.GetInvalidPatIndex();
 		END_CRITICAL();
 		SetModified();
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CModDoc::RemovePattern(UINT n)
+bool CModDoc::RemovePattern(PATTERNINDEX n)
 //---------------------------------
 {
 	if ((n < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[n]))
 	{
 		BEGIN_CRITICAL();
 		LPVOID p = m_SndFile.Patterns[n];
-		m_SndFile.Patterns[n] = NULL;
+		m_SndFile.Patterns[n] = nullptr;
 		m_SndFile.SetPatternName(n, "");
 		CSoundFile::FreePattern(p);
 		END_CRITICAL();
 		SetModified();
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CModDoc::RemoveSample(UINT n)
+bool CModDoc::RemoveSample(SAMPLEINDEX n)
 //--------------------------------
 {
 	if ((n) && (n <= m_SndFile.m_nSamples))
@@ -1783,86 +1858,13 @@ BOOL CModDoc::RemoveSample(UINT n)
 		 && (!m_SndFile.Samples[m_SndFile.m_nSamples].pSample)) m_SndFile.m_nSamples--;
 		END_CRITICAL();
 		SetModified();
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 
-void CModDoc::RearrangeSampleList()
-//---------------------------------
-{
-	if(m_SndFile.m_nSamples < 2)
-		return;
-
-	UINT nRemap = 0; // remap count
-	UINT nSampleMap[MAX_SAMPLES + 1]; // map old => new
-	for(UINT i = 0; i <= MAX_SAMPLES; i++)
-		nSampleMap[i] = i;
-	
-	// First, find out which sample slots are unused and create the new sample map
-	for(UINT i = 1 ; i <= m_SndFile.m_nSamples; i++) {
-		if(!m_SndFile.Samples[i].pSample)
-		{
-			// Move all following samples
-			nRemap++;
-			nSampleMap[i] = 0;
-			for(UINT j = i + 1; j <= m_SndFile.m_nSamples; j++)
-				nSampleMap[j]--;
-		}
-	}
-
-	if(!nRemap)
-		return;
-
-	BEGIN_CRITICAL();
-
-	// Now, move everything around
-	for(UINT i = 1; i <= m_SndFile.m_nSamples; i++)
-	{
-		if(nSampleMap[i] && nSampleMap[i] != i)
-		{
-			// This gotta be moved
-			m_SndFile.MoveSample(i, nSampleMap[i]);
-			m_SndFile.Samples[i].pSample = nullptr;
-			strcpy(m_SndFile.m_szNames[nSampleMap[i]], m_SndFile.m_szNames[i]);
-			m_SndFile.m_szNames[i][0] = '\0';
-
-			// Also update instrument mapping (if module is in instrument mode)
-			for(UINT iInstr = 1; iInstr <= m_SndFile.m_nInstruments; iInstr++){
-				if(m_SndFile.Instruments[iInstr]){
-					MODINSTRUMENT *p = m_SndFile.Instruments[iInstr];
-					for(WORD iNote =0; iNote < 128; iNote++)
-						if(p->Keyboard[iNote] == i) p->Keyboard[iNote] = nSampleMap[i];
-				}
-			}
-		}
-	}
-
-	// Go through the patterns and remap samples (if module is in sample mode)
-	if(!m_SndFile.m_nInstruments)
-	{
-		for (UINT nPat=0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
-		{
-			MODCOMMAND *m = m_SndFile.Patterns[nPat];
-			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
-			{
-				if(nSampleMap[m->instr]) m->instr = nSampleMap[m->instr];
-			}
-		}
-	}
-
-	m_SndFile.m_nSamples -= nRemap;
-
-	END_CRITICAL();
-
-	SetModified();
-	UpdateAllViews(NULL, HINT_MODTYPE);
-
-}
-
-
-BOOL CModDoc::RemoveInstrument(UINT n)
+bool CModDoc::RemoveInstrument(INSTRUMENTINDEX n)
 //------------------------------------
 {
 	if ((n) && (n <= m_SndFile.m_nInstruments) && (m_SndFile.Instruments[n]))
@@ -1875,31 +1877,32 @@ BOOL CModDoc::RemoveInstrument(UINT n)
 		if (!bIns) m_SndFile.m_nInstruments = 0;
 		END_CRITICAL();
 		SetModified();
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CModDoc::MoveOrder(UINT nSourceNdx, UINT nDestNdx, BOOL bUpdate, BOOL bCopy)
+bool CModDoc::MoveOrder(UINT nSourceNdx, UINT nDestNdx, bool bUpdate, bool bCopy)
 //-------------------------------------------------------------------------------
 {
-	if ((nSourceNdx >= m_SndFile.Order.size()) || (nDestNdx >= m_SndFile.Order.size())) return FALSE;
-	UINT n = m_SndFile.Order[nSourceNdx];
+	if ((nSourceNdx >= m_SndFile.Order.size()) || (nDestNdx >= m_SndFile.Order.size())) return false;
+	if (nDestNdx >= m_SndFile.GetModSpecifications().ordersMax) return false;
+	ORDERINDEX n = m_SndFile.Order[nSourceNdx];
 	// Delete source
 	if (!bCopy)
 	{
-		for (UINT i=nSourceNdx; i<m_SndFile.Order.size()-1; i++) m_SndFile.Order[i] = m_SndFile.Order[i+1];
+		for (ORDERINDEX i = nSourceNdx; i < m_SndFile.Order.size() - 1; i++) m_SndFile.Order[i] = m_SndFile.Order[i+1];
 		if (nSourceNdx < nDestNdx) nDestNdx--;
 	}
 	// Insert at dest
-	for (UINT j=m_SndFile.Order.size()-1; j>nDestNdx; j--) m_SndFile.Order[j] = m_SndFile.Order[j-1];
+	for (ORDERINDEX j = m_SndFile.Order.size() - 1; j > nDestNdx; j--) m_SndFile.Order[j] = m_SndFile.Order[j-1];
 	m_SndFile.Order[nDestNdx] = n;
 	if (bUpdate)
 	{
 		UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 	}
-	return TRUE;
+	return true;
 }
 
 

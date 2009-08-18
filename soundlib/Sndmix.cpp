@@ -855,9 +855,7 @@ BOOL CSoundFile::ReadNote()
 			//if(!(pChn->dwFlags & CHN_MUTE))	//removed by rewbs: fix http://www.modplug.com/forum/viewtopic.php?t=3358
 				nchn32++;
 		}
-		if(nchn32 < 1) nchn32 = 1;
-		if(nchn32 > 31) nchn32 = 31;
-
+		nchn32 = CLAMP(nchn32, 1, 31);
 		
 		DWORD mastervol;
 
