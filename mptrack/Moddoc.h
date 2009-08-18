@@ -197,14 +197,14 @@ public:
 	void RearrangeSampleList();
 	BOOL CompoCleanup();
 
-	LONG InsertPattern(ORDERINDEX nOrd = -1, ROWINDEX nRows = 64);
-	LONG InsertSample(BOOL bLimit=FALSE);
-	LONG InsertInstrument(LONG lSample=0, LONG lDuplicate=0);
+	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = -1, ROWINDEX nRows = 64);
+	SAMPLEINDEX InsertSample(bool bLimit = false);
+	INSTRUMENTINDEX InsertInstrument(LONG lSample=0, LONG lDuplicate=0);
 	void InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample=0);
-	BOOL RemoveOrder(UINT n);
-	BOOL RemovePattern(UINT n);
-	BOOL RemoveSample(UINT n);
-	BOOL RemoveInstrument(UINT n);
+	bool RemoveOrder(ORDERINDEX n);
+	bool RemovePattern(PATTERNINDEX n);
+	bool RemoveSample(SAMPLEINDEX n);
+	bool RemoveInstrument(INSTRUMENTINDEX n);
 	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, int nCurrentChn=-1, const uint32 nStartPos = uint32_max); //rewbs.vstiLive: added current chan param
 	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, UINT nCurrentChn=-1); //rewbs.vstiLive: add params
 
@@ -240,7 +240,7 @@ public:
 	BOOL IsChildSample(UINT nIns, UINT nSmp) const;
 	UINT FindSampleParent(UINT nSmp) const;
 	UINT FindInstrumentChild(UINT nIns) const;
-	BOOL MoveOrder(UINT nSourceNdx, UINT nDestNdx, BOOL bUpdate=TRUE, BOOL bCopy=FALSE);
+	bool MoveOrder(UINT nSourceNdx, UINT nDestNdx, bool bUpdate = true, bool bCopy = false);
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
 	BOOL CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);

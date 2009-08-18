@@ -59,7 +59,7 @@ bool CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 		DWORD len = LittleEndian(*((DWORD *)(&psmp[ichk].length)));
 		dontfuckwithme += len;
 	}
-	if (dontfuckwithme > dwMemLength) return false;
+	if (dontfuckwithme  - 0x1F1 > dwMemLength) return false;
 	// That should be enough checking: this must be a 669 module.
 	m_nType = MOD_TYPE_669;
 	m_dwSongFlags |= SONG_LINEARSLIDES;

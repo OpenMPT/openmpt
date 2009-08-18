@@ -1870,7 +1870,7 @@ BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 		{
 			if (bDoDrop)
 			{
-				if (dwItemDrag != dwItemDrop) pModDoc->MoveOrder(dwItemDrag, dwItemDrop, TRUE);
+				if (dwItemDrag != dwItemDrop) pModDoc->MoveOrder(dwItemDrag, dwItemDrop, true);
 			}
 			return TRUE;
 		}

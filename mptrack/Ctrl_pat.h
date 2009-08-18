@@ -5,6 +5,12 @@
 class COrderList;
 class CCtrlPatterns;
 
+struct ORD_SELECTION
+{
+	ORDERINDEX nOrdLo;
+	ORDERINDEX nOrdHi;
+};
+
 //===========================
 class COrderList: public CWnd
 //===========================
@@ -13,14 +19,17 @@ class COrderList: public CWnd
 protected:
 	HFONT m_hFont;
 	COLORREF colorText, colorTextSel;
-	//m_nXScroll  : The order at the beginning of shown orderlist?
-	//m_nScrollPos: The same as order?
-	int m_cxFont, m_cyFont, m_nXScroll, m_nScrollPos, m_nDropPos;
+	int m_cxFont, m_cyFont;
+	//m_nXScroll  : The order at the beginning of shown orderlist
+	//m_nScrollPos: The same as order
+	//m_nScrollPos2nd: 2nd selection point if multiple orders are selected
+	//	               (not neccessarily the higher order - GetCurSel() is taking care of that.)
+	ORDERINDEX m_nXScroll, m_nScrollPos, m_nScrollPos2nd, m_nDropPos;
+	bool m_bScrolling, m_bDragging, m_bShift;
+	ORDERINDEX m_nDragOrder;
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
 	BYTE m_nOrderlistMargins;
-	UINT m_nDragOrder;
-	BOOL m_bScrolling, m_bDragging, m_bShift;
 	CModDoc *m_pModDoc;
 	CCtrlPatterns *m_pParent;
 
@@ -33,9 +42,9 @@ public:
 public:
 	BOOL Init(const CRect&, CCtrlPatterns *pParent, CModDoc *, HFONT hFont);
 	void InvalidateSelection() const;
-	int GetCurSel() const { return m_nScrollPos; }
 	UINT GetCurrentPattern() const;
-	BOOL SetCurSel(int sel, BOOL bEdit=TRUE);
+	ORD_SELECTION GetCurSel(bool bIgnoreSelection) const;
+	bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false);
 	BOOL ProcessKeyDown(UINT nChar);
 	BOOL ProcessChar(UINT nChar);
 	BOOL UpdateScrollInfo();
