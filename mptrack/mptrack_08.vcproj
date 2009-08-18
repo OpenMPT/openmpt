@@ -1236,6 +1236,14 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\res\built-inTunings.tc"
+			>
+		</File>
+		<File
+			RelativePath=".\res\defaultKeybindings.mkb"
+			>
+		</File>
+		<File
 			RelativePath=".\mptrack.reg"
 			>
 		</File>

@@ -78,5 +78,7 @@ inline void LimitMax(T& val, const C upperLimit)
 #define CLAMP(number, low, high) min(high, max(low, number))
 #endif
 
+ 
+LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
 
 #endif

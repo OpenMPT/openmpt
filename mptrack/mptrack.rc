@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -55,12 +55,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Deutsch (Deutschland) resources
+#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -2204,14 +2204,19 @@ BEGIN
     IDS_UNSUPPORTED_TUNING_DnD 
                             "For the time being Drag and Drop is only supported for tuning instances."
     IDS_OPERATION_FAIL      "Operation failed."
+    IDS_CANT_OPEN_KEYBINDING_FILE 
+                            "Can't open keybindings file %1 for reading. Default keybindings will be used."
+    IDS_UNABLE_TO_LOAD_KEYBINDINGS 
+                            "Loading keybindings failed. The keyboard won't work properly."
+    IDS_CANT_OPEN_FILE_FOR_WRITING "Can't open file for writing."
 END
 
-#endif    // Englisch (USA) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (GB) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2565,7 +2570,21 @@ END
 //
 
 1                       RT_MANIFEST             "res\\rt_manif.bin"
-#endif    // Englisch (GB) resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// KEYBINDINGS
+//
+
+IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// TUNING
+//
+
+IDR_BUILTIN_TUNINGS     TUNING                  "res\\built-inTunings.tc"
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

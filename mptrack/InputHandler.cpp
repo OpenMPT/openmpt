@@ -8,6 +8,8 @@
 #include "mainfrm.h"
 #include <direct.h>
 #include ".\inputhandler.h"
+#include <strstream>
+#include <Shlwapi.h>
 
 #define TRANSITIONBIT 0x8000
 #define REPEATBIT 0x4000
@@ -21,17 +23,43 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	activeCommandSet = new CCommandSet();
 	CCommandSet::s_bShowErrorOnUnknownKeybinding = (CMainFrame::GetMainFrame()->GetPrivateProfileLong("Misc", "ShowErrorOnUnknownKeybinding", 1, theApp.GetConfigFileName()) != 0);
 	
-	CString workingDir;
-	char wd[255];
-	_getdcwd(_getdrive(), wd, 255);
-	workingDir = wd;
-	if (!CMainFrame::m_szKbdFile[0]) {
-		strcpy(CMainFrame::m_szKbdFile, workingDir + "\\default.mkb");
-	}
-	if (!(activeCommandSet->LoadFile(CMainFrame::m_szKbdFile))) {
-		if (!(activeCommandSet->LoadFile(workingDir + "\\default.mkb"))) {
-			AfxMessageBox("Warning! OpenMPT has not been able to locate a keymap file. Please locate one in the settings.\r\nUntil you do so, the keyboard will not work in OpenMPT.");
+	CString sDefaultPath = CMainFrame::m_csExecutableDirectoryPath + TEXT("Keybindings.mkb");
+	if (sDefaultPath.GetLength() > MAX_PATH - 1)
+		sDefaultPath = "";
+
+	const bool bNoExistingKbdFileSetting = (CMainFrame::m_szKbdFile[0] == 0);
+
+	// 1. Try to load keybindings from the path saved in the settings.
+	// 2. If the setting doesn't exist or the loading fails, try to load from default location.
+	// 3. If neither one of these worked, load default keybindings from resources.
+	// 4. If there were no keybinging setting already, create a keybinding file to default location
+	//    and set it's path to settings.
+
+	if (bNoExistingKbdFileSetting || !(activeCommandSet->LoadFile(CMainFrame::m_szKbdFile)))
+	{
+		if (bNoExistingKbdFileSetting)
+			_tcscpy(CMainFrame::m_szKbdFile, sDefaultPath);
+		bool bSuccess = false;
+		if (PathFileExists(sDefaultPath) == TRUE)
+			bSuccess = activeCommandSet->LoadFile(sDefaultPath);
+		if (bSuccess == false)
+		{
+			// Load keybindings from resources.
+			Log("Loading keybindings from resources\n");
+			const char* pData = nullptr;
+			HGLOBAL hglob = nullptr;
+			size_t nSize = 0;
+			if (LoadResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"), pData, nSize, hglob) != nullptr)
+			{
+				std::istrstream iStrm(pData, nSize);
+				bSuccess = activeCommandSet->LoadFile(iStrm, TEXT("\"executable resource\""));
+				FreeResource(hglob);
+				if (bSuccess && bNoExistingKbdFileSetting)
+					activeCommandSet->SaveFile(CMainFrame::m_szKbdFile, false);
+			}
 		}
+		if (bSuccess == false)
+			AfxMessageBox(IDS_UNABLE_TO_LOAD_KEYBINDINGS, MB_ICONERROR);
 	}
 
 	//Get Keymap 
@@ -148,7 +176,7 @@ bool CInputHandler::InterceptSpecialKeys( UINT nChar , UINT nFlags )
 			inp[0].type = inp[1].type = INPUT_KEYBOARD;
 			inp[0].ki.time = inp[1].ki.time = 0;
 			inp[0].ki.dwExtraInfo = inp[0].ki.dwExtraInfo = 0;
-			inp[0].ki.wVk = inp[1].ki.wVk = nChar;
+			inp[0].ki.wVk = inp[1].ki.wVk = static_cast<WORD>(nChar);
 			inp[0].ki.wScan = inp[1].ki.wScan = 0;
 			inp[0].ki.dwFlags = KEYEVENTF_KEYUP;
 			inp[1].ki.dwFlags = 0;
@@ -339,12 +367,12 @@ bool CInputHandler::ShiftPressed(void)
 
 bool CInputHandler::CtrlPressed(void)
 {
-	return (modifierMask & HOTKEYF_CONTROL);
+	return ((modifierMask & HOTKEYF_CONTROL) != 0);
 }
 
 bool CInputHandler::AltPressed(void)
 {
-	return (modifierMask & HOTKEYF_ALT);
+	return ((modifierMask & HOTKEYF_ALT) != 0);
 }
 
 void CInputHandler::Bypass(bool b)

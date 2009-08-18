@@ -50,6 +50,10 @@
 //#include <afxdhtml.h>
 #pragma warning(default:4201)
 
+#include <string>
+#include <fstream>
+#include <strstream>
+
 #ifndef OFN_FORCESHOWHIDDEN
 #define OFN_FORCESHOWHIDDEN		0x10000000
 #endif

@@ -2,8 +2,10 @@
 
 #include "stdafx.h"
 #include ".\commandset.h"
+#include "resource.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 
 #define ENABLE_LOGGING 0
 
@@ -3074,7 +3076,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 
 	if( (outStream  = fopen( fileName, "w" )) == NULL )
 	{
-		::MessageBox(NULL, "Can't open file for writing.", "", MB_ICONEXCLAMATION|MB_OK);
+		AfxMessageBox(IDS_CANT_OPEN_FILE_FOR_WRITING, MB_ICONEXCLAMATION|MB_OK);
 		return false;
 	}
 	fprintf(outStream, "//-------- OpenMPT key binding definition file  -------\n"); 
@@ -3111,10 +3113,9 @@ ctx:UID:Description:Modifier:Key:EventMask
 	return true;
 }
 
-bool CCommandSet::LoadFile(CString fileName)
-{
 
-	FILE *inStream;
+bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
+{
 	KeyCombination kc;
 	CommandID cmd=kcNumCommands;
 	char s[1024];
@@ -3124,17 +3125,8 @@ bool CCommandSet::LoadFile(CString fileName)
 	int l=0;
 
 	pTempCS = new CCommandSet();
-	
-
-	if( (inStream  = fopen( fileName, "r" )) == NULL )
-	{
-		::MessageBox(NULL, "Can't open file keyboard config file " + fileName + "  for reading.", "", MB_ICONEXCLAMATION|MB_OK);
-		delete pTempCS;
-		return false;
-	}
-
 	int errorCount=0;
-	while(fgets(s,1024,inStream))
+	while(iStrm.getline(s, sizeof(s)))
 	{
 		//::MessageBox(NULL, s, "", MB_ICONEXCLAMATION|MB_OK);
 		curLine = s;
@@ -3189,7 +3181,7 @@ bool CCommandSet::LoadFile(CString fileName)
 				errorCount++;
 				CString err;
 				if (errorCount<10) {
-					err.Format("Line %d in key binding file %s was not understood.", l, fileName);
+					err.Format("Line %d in key binding file %s was not understood.", l, szFilename);
 					if(s_bShowErrorOnUnknownKeybinding) ::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
 					Log(err);
 				} else if (errorCount==10) {
@@ -3214,6 +3206,19 @@ bool CCommandSet::LoadFile(CString fileName)
 	return true;
 }
 
+bool CCommandSet::LoadFile(CString fileName)
+{
+	std::ifstream fin(fileName);
+	if (fin.fail())
+	{
+		CString strMsg;
+		AfxFormatString1(strMsg, IDS_CANT_OPEN_KEYBINDING_FILE, fileName);
+		AfxMessageBox(strMsg, MB_ICONEXCLAMATION|MB_OK);
+		return false;
+	}
+	else
+		return LoadFile(fin, fileName);
+}
 
 
 //Could do better search algo but this is not perf critical.
