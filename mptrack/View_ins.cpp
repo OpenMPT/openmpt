@@ -268,10 +268,10 @@ UINT CViewInstrument::EnvGetValue(int nPoint) const
 }
 
 
-BOOL CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
+bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 //------------------------------------------------------------------
 {
-	BOOL bOk = FALSE;
+	bool bOk = false;
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
@@ -282,24 +282,14 @@ BOOL CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 			LPWORD pPoints = NULL;
 			LPBYTE pData = NULL;
 			UINT maxpoints = 0;
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:
-				maxpoints = pIns->VolEnv.nNodes;
-				pPoints = pIns->VolEnv.Ticks;
-				pData = pIns->VolEnv.Values;
-				break;
-			case ENV_PANNING:
-				maxpoints = pIns->PanEnv.nNodes;
-				pPoints = pIns->PanEnv.Ticks;
-				pData = pIns->PanEnv.Values;
-				break;
-			case ENV_PITCH:
-				maxpoints = pIns->PitchEnv.nNodes;
-				pPoints = pIns->PitchEnv.Ticks;
-				pData = pIns->PitchEnv.Values;
-				break;
-			}
+
+			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+			if(envelope == nullptr) return false;
+
+			maxpoints = envelope->nNodes;
+			pPoints = envelope->Ticks;
+			pData = envelope->Values;
+
 			if (!nPoint) nTick = 0;
 			if ((nPoint < (int)maxpoints) && (pPoints) && (pData))
 			{
@@ -313,7 +303,7 @@ BOOL CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 					if (nTick != pPoints[nPoint])
 					{
 						pPoints[nPoint] = (WORD)nTick;
-						bOk = TRUE;
+						bOk = true;
 					}
 				}
 				if (nValue >= 0)
@@ -322,7 +312,7 @@ BOOL CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 					if (nValue != pData[nPoint])
 					{
 						pData[nPoint] = (BYTE)nValue;
-						bOk = TRUE;
+						bOk = true;
 					}
 				}
 			}
@@ -335,28 +325,9 @@ BOOL CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 UINT CViewInstrument::EnvGetNumPoints() const
 //-------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:
-				if (pIns->VolEnv.nNodes) return pIns->VolEnv.nNodes;
-				break;
-			case ENV_PANNING:
-				if (pIns->PanEnv.nNodes) return pIns->PanEnv.nNodes;
-				break;
-			case ENV_PITCH:
-				if (pIns->PitchEnv.nNodes) return pIns->PitchEnv.nNodes;
-				break;
-			}
-		}
-	}
-	return 0;
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return 0;
+	return envelope->nNodes;
 }
 
 
@@ -369,7 +340,7 @@ UINT CViewInstrument::EnvGetLastPoint() const
 }
 
 
-BOOL CViewInstrument::EnvGetLoop() const
+bool CViewInstrument::EnvGetLoop() const
 //--------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -382,22 +353,22 @@ BOOL CViewInstrument::EnvGetLoop() const
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (pIns->dwFlags & ENV_VOLLOOP) return TRUE;
+				if (pIns->dwFlags & ENV_VOLLOOP) return true;
 				break;
 			case ENV_PANNING:
-				if (pIns->dwFlags & ENV_PANLOOP) return TRUE;
+				if (pIns->dwFlags & ENV_PANLOOP) return true;
 				break;
 			case ENV_PITCH:
-				if (pIns->dwFlags & ENV_PITCHLOOP) return TRUE;
+				if (pIns->dwFlags & ENV_PITCHLOOP) return true;
 				break;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvGetSustain() const
+bool CViewInstrument::EnvGetSustain() const
 //-----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -410,22 +381,22 @@ BOOL CViewInstrument::EnvGetSustain() const
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (pIns->dwFlags & ENV_VOLSUSTAIN) return TRUE;
+				if (pIns->dwFlags & ENV_VOLSUSTAIN) return true;
 				break;
 			case ENV_PANNING:
-				if (pIns->dwFlags & ENV_PANSUSTAIN) return TRUE;
+				if (pIns->dwFlags & ENV_PANSUSTAIN) return true;
 				break;
 			case ENV_PITCH:
-				if (pIns->dwFlags & ENV_PITCHSUSTAIN) return TRUE;
+				if (pIns->dwFlags & ENV_PITCHSUSTAIN) return true;
 				break;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvGetCarry() const
+bool CViewInstrument::EnvGetCarry() const
 //---------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -438,110 +409,58 @@ BOOL CViewInstrument::EnvGetCarry() const
 			switch(m_nEnv)
 			{
 			case ENV_VOLUME:
-				if (pIns->dwFlags & ENV_VOLCARRY) return TRUE;
+				if (pIns->dwFlags & ENV_VOLCARRY) return true;
 				break;
 			case ENV_PANNING:
-				if (pIns->dwFlags & ENV_PANCARRY) return TRUE;
+				if (pIns->dwFlags & ENV_PANCARRY) return true;
 				break;
 			case ENV_PITCH:
-				if (pIns->dwFlags & ENV_PITCHCARRY) return TRUE;
+				if (pIns->dwFlags & ENV_PITCHCARRY) return true;
 				break;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
 UINT CViewInstrument::EnvGetLoopStart() const
 //-------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:	return pIns->VolEnv.nLoopStart;
-			case ENV_PANNING:	return pIns->PanEnv.nLoopStart;
-			case ENV_PITCH:		return pIns->PitchEnv.nLoopStart;
-			}
-		}
-	}
-	return 0;
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return 0;
+	return envelope->nLoopStart;
 }
 
 
 UINT CViewInstrument::EnvGetLoopEnd() const
 //-----------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:	return pIns->VolEnv.nLoopEnd;
-			case ENV_PANNING:	return pIns->PanEnv.nLoopEnd;
-			case ENV_PITCH:		return pIns->PitchEnv.nLoopEnd;
-			}
-		}
-	}
-	return 0;
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return 0;
+	return envelope->nLoopEnd;
 }
 
 
 UINT CViewInstrument::EnvGetSustainStart() const
 //----------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:	return pIns->VolEnv.nSustainStart;
-			case ENV_PANNING:	return pIns->PanEnv.nSustainStart;
-			case ENV_PITCH:		return pIns->PitchEnv.nSustainStart;
-			}
-		}
-	}
-	return 0;
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return 0;
+	return envelope->nSustainStart;
 }
 
 
 UINT CViewInstrument::EnvGetSustainEnd() const
 //--------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:	return pIns->VolEnv.nSustainEnd;
-			case ENV_PANNING:	return pIns->PanEnv.nSustainEnd;
-			case ENV_PITCH:		return pIns->PitchEnv.nSustainEnd;
-			}
-		}
-	}
-	return 0;
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return 0;
+	return envelope->nSustainEnd;
 }
 
 
-BOOL CViewInstrument::EnvGetVolEnv() const
+bool CViewInstrument::EnvGetVolEnv() const
 //----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -549,13 +468,13 @@ BOOL CViewInstrument::EnvGetVolEnv() const
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) return (pIns->dwFlags & ENV_VOLUME) ? TRUE : FALSE;
+		if (pIns) return (pIns->dwFlags & ENV_VOLUME) ? true : false;
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvGetPanEnv() const
+bool CViewInstrument::EnvGetPanEnv() const
 //----------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -563,13 +482,13 @@ BOOL CViewInstrument::EnvGetPanEnv() const
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) return (pIns->dwFlags & ENV_PANNING) ? TRUE : FALSE;
+		if (pIns) return (pIns->dwFlags & ENV_PANNING) ? true : false;
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvGetPitchEnv() const
+bool CViewInstrument::EnvGetPitchEnv() const
 //------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -577,13 +496,13 @@ BOOL CViewInstrument::EnvGetPitchEnv() const
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) return ((pIns->dwFlags & (ENV_PITCH|ENV_FILTER)) == ENV_PITCH) ? TRUE : FALSE;
+		if (pIns) return ((pIns->dwFlags & (ENV_PITCH|ENV_FILTER)) == ENV_PITCH) ? true : false;
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvGetFilterEnv() const
+bool CViewInstrument::EnvGetFilterEnv() const
 //-------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -591,185 +510,95 @@ BOOL CViewInstrument::EnvGetFilterEnv() const
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) return ((pIns->dwFlags & (ENV_PITCH|ENV_FILTER)) == (ENV_PITCH|ENV_FILTER)) ? TRUE : FALSE;
+		if (pIns) return ((pIns->dwFlags & (ENV_PITCH|ENV_FILTER)) == (ENV_PITCH|ENV_FILTER)) ? true : false;
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvSetLoopStart(int nPoint)
+bool CViewInstrument::EnvSetLoopStart(int nPoint)
 //-----------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (nPoint >= 0) && (nPoint <= (int)EnvGetLastPoint()))
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return false;
+	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
+
+	if (nPoint != envelope->nLoopStart)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:
-				if (nPoint != pIns->VolEnv.nLoopStart)
-				{
-					pIns->VolEnv.nLoopStart = (BYTE)nPoint;
-					if (pIns->VolEnv.nLoopEnd < nPoint) pIns->VolEnv.nLoopEnd = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			case ENV_PANNING:
-				if (nPoint != pIns->PanEnv.nLoopStart)
-				{
-					pIns->PanEnv.nLoopStart = (BYTE)nPoint;
-					if (pIns->PanEnv.nLoopEnd < nPoint) pIns->PanEnv.nLoopEnd = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			case ENV_PITCH:
-				if (nPoint != pIns->PitchEnv.nLoopStart)
-				{
-					pIns->PitchEnv.nLoopStart = (BYTE)nPoint;
-					if (pIns->PitchEnv.nLoopEnd < nPoint) pIns->PitchEnv.nLoopEnd = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			}
-		}
+		envelope->nLoopStart = (BYTE)nPoint;
+		if (envelope->nLoopEnd < nPoint) envelope->nLoopEnd = (BYTE)nPoint;
+		return true;
+	} else
+	{
+		return false;
 	}
-	return FALSE;
 }
 
 
-BOOL CViewInstrument::EnvSetLoopEnd(int nPoint)
+bool CViewInstrument::EnvSetLoopEnd(int nPoint)
 //---------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (nPoint >= 0) && (nPoint <= (int)EnvGetLastPoint()))
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return false;
+	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
+
+	if (nPoint != envelope->nLoopEnd)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:
-				if (nPoint != pIns->VolEnv.nLoopEnd)
-				{
-					pIns->VolEnv.nLoopEnd = (BYTE)nPoint;
-					if (pIns->VolEnv.nLoopStart > nPoint) pIns->VolEnv.nLoopStart = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			case ENV_PANNING:
-				if (nPoint != pIns->PanEnv.nLoopEnd)
-				{
-					pIns->PanEnv.nLoopEnd = (BYTE)nPoint;
-					if (pIns->PanEnv.nLoopStart > nPoint) pIns->PanEnv.nLoopStart = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			case ENV_PITCH:
-				if (nPoint != pIns->PitchEnv.nLoopEnd)
-				{
-					pIns->PitchEnv.nLoopEnd = (BYTE)nPoint;
-					if (pIns->PitchEnv.nLoopStart > nPoint) pIns->PitchEnv.nLoopStart = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			}
-		}
+		envelope->nLoopEnd = (BYTE)nPoint;
+		if (envelope->nLoopStart > nPoint) envelope->nLoopStart = (BYTE)nPoint;
+		return true;
+	} else
+	{
+		return false;
 	}
-	return FALSE;
 }
 
 
-BOOL CViewInstrument::EnvSetSustainStart(int nPoint)
+bool CViewInstrument::EnvSetSustainStart(int nPoint)
 //--------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (nPoint >= 0) && (nPoint <= (int)EnvGetLastPoint()))
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return false;
+	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
+
+	// We won't do any security checks here as GetEnvelopePtr() does that for us.
+	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
+
+	if (nPoint != envelope->nSustainStart)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:
-				if (nPoint != pIns->VolEnv.nSustainStart)
-				{
-					pIns->VolEnv.nSustainStart = (BYTE)nPoint;
-					if ((pIns->VolEnv.nSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->VolEnv.nSustainEnd = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			case ENV_PANNING:
-				if (nPoint != pIns->PanEnv.nSustainStart)
-				{
-					pIns->PanEnv.nSustainStart = (BYTE)nPoint;
-					if ((pIns->PanEnv.nSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->PanEnv.nSustainEnd = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			case ENV_PITCH:
-				if (nPoint != pIns->PitchEnv.nSustainStart)
-				{
-					pIns->PitchEnv.nSustainStart = (BYTE)nPoint;
-					if ((pIns->PitchEnv.nSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->PitchEnv.nSustainEnd = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			}
-		}
+		envelope->nSustainStart = (BYTE)nPoint;
+		if ((envelope->nSustainEnd < nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) envelope->nSustainEnd = (BYTE)nPoint;
+		return true;
+	} else
+	{
+		return false;
 	}
-	return FALSE;
 }
 
 
-BOOL CViewInstrument::EnvSetSustainEnd(int nPoint)
+bool CViewInstrument::EnvSetSustainEnd(int nPoint)
 //------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (nPoint >= 0) && (nPoint <= (int)EnvGetLastPoint()))
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return false;
+	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
+
+	// We won't do any security checks here as GetEnvelopePtr() does that for us.
+	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
+
+	if (nPoint != envelope->nSustainEnd)
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:
-				if (nPoint != pIns->VolEnv.nSustainEnd)
-				{
-					pIns->VolEnv.nSustainEnd = (BYTE)nPoint;
-					if ((pIns->VolEnv.nSustainStart > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->VolEnv.nSustainStart = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			case ENV_PANNING:
-				if (nPoint != pIns->PanEnv.nSustainEnd)
-				{
-					pIns->PanEnv.nSustainEnd = (BYTE)nPoint;
-					if ((pIns->PanEnv.nSustainStart > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->PanEnv.nSustainStart = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			case ENV_PITCH:
-				if (nPoint != pIns->PitchEnv.nSustainEnd)
-				{
-					pIns->PitchEnv.nSustainEnd = (BYTE)nPoint;
-					if ((pIns->PitchEnv.nSustainStart > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) pIns->PitchEnv.nSustainStart = (BYTE)nPoint;
-					return TRUE;
-				}
-				break;
-			}
-		}
+		envelope->nSustainEnd = (BYTE)nPoint;
+		if ((envelope->nSustainStart > nPoint) || (pSndFile->m_nType & MOD_TYPE_XM)) envelope->nSustainStart = (BYTE)nPoint;
+		return true;
+	} else
+	{
+		return false;
 	}
-	return FALSE;
 }
 
 
-BOOL CViewInstrument::EnvSetLoop(BOOL bLoop)
+bool CViewInstrument::EnvSetLoop(bool bLoop)
 //------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -786,29 +615,29 @@ BOOL CViewInstrument::EnvSetLoop(BOOL bLoop)
 			case ENV_PANNING:	dwMask = ENV_PANLOOP; break;
 			case ENV_PITCH:		dwMask = ENV_PITCHLOOP; break;
 			}
-			if (!dwMask) return FALSE;
+			if (!dwMask) return false;
 			if (bLoop)
 			{
 				if (!(pIns->dwFlags & dwMask))
 				{
 					pIns->dwFlags |= dwMask;
-					return TRUE;
+					return true;
 				}
 			} else
 			{
 				if (pIns->dwFlags & dwMask)
 				{
 					pIns->dwFlags &= ~dwMask;
-					return TRUE;
+					return true;
 				}
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvSetSustain(BOOL bSustain)
+bool CViewInstrument::EnvSetSustain(bool bSustain)
 //------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -825,29 +654,29 @@ BOOL CViewInstrument::EnvSetSustain(BOOL bSustain)
 			case ENV_PANNING:	dwMask = ENV_PANSUSTAIN; break;
 			case ENV_PITCH:		dwMask = ENV_PITCHSUSTAIN; break;
 			}
-			if (!dwMask) return FALSE;
+			if (!dwMask) return false;
 			if (bSustain)
 			{
 				if (!(pIns->dwFlags & dwMask))
 				{
 					pIns->dwFlags |= dwMask;
-					return TRUE;
+					return true;
 				}
 			} else
 			{
 				if (pIns->dwFlags & dwMask)
 				{
 					pIns->dwFlags &= ~dwMask;
-					return TRUE;
+					return true;
 				}
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvSetCarry(BOOL bCarry)
+bool CViewInstrument::EnvSetCarry(bool bCarry)
 //--------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -864,29 +693,29 @@ BOOL CViewInstrument::EnvSetCarry(BOOL bCarry)
 			case ENV_PANNING:	dwMask = ENV_PANCARRY; break;
 			case ENV_PITCH:		dwMask = ENV_PITCHCARRY; break;
 			}
-			if (!dwMask) return FALSE;
+			if (!dwMask) return false;
 			if (bCarry)
 			{
 				if (!(pIns->dwFlags & dwMask))
 				{
 					pIns->dwFlags |= dwMask;
-					return TRUE;
+					return true;
 				}
 			} else
 			{
 				if (pIns->dwFlags & dwMask)
 				{
 					pIns->dwFlags &= ~dwMask;
-					return TRUE;
+					return true;
 				}
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvSetVolEnv(BOOL bEnable)
+bool CViewInstrument::EnvSetVolEnv(bool bEnable)
 //----------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -912,14 +741,14 @@ BOOL CViewInstrument::EnvSetVolEnv(BOOL bEnable)
 			{
 				pIns->dwFlags &= ~ENV_VOLUME;
 			}
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvSetPanEnv(BOOL bEnable)
+bool CViewInstrument::EnvSetPanEnv(bool bEnable)
 //----------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -945,14 +774,14 @@ BOOL CViewInstrument::EnvSetPanEnv(BOOL bEnable)
 			{
 				pIns->dwFlags &= ~ENV_PANNING;
 			}
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvSetPitchEnv(BOOL bEnable)
+bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 //------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -979,14 +808,14 @@ BOOL CViewInstrument::EnvSetPitchEnv(BOOL bEnable)
 			{
 				pIns->dwFlags &= ~(ENV_PITCH|ENV_FILTER);
 			}
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CViewInstrument::EnvSetFilterEnv(BOOL bEnable)
+bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 //-------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -1012,10 +841,10 @@ BOOL CViewInstrument::EnvSetFilterEnv(BOOL bEnable)
 			{
 				pIns->dwFlags &= ~(ENV_PITCH|ENV_FILTER);
 			}
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -1351,72 +1180,27 @@ void CViewInstrument::OnDraw(CDC *pDC)
 }
 
 BYTE CViewInstrument::EnvGetReleaseNode()
-//--------------------------------------
+//---------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc) {
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) {
-			switch(m_nEnv) {
-				case ENV_VOLUME:
-					return pIns->VolEnv.nReleaseNode;
-				case ENV_PANNING:
-					return pIns->PanEnv.nReleaseNode;
-				case ENV_PITCH:
-					return pIns->PitchEnv.nReleaseNode;
-				default:
-					return ENV_RELEASE_NODE_UNSET;
-			}
-		}
-	}
-	return ENV_RELEASE_NODE_UNSET;
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return ENV_RELEASE_NODE_UNSET;
+	return envelope->nReleaseNode;
 }
 
 WORD CViewInstrument::EnvGetReleaseNodeValue()
-//--------------------------------------
+//--------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc) {
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) {
-			switch(m_nEnv) {
-				case ENV_VOLUME:
-					return pIns->VolEnv.Values[EnvGetReleaseNode()];
-				case ENV_PANNING:
-					return pIns->PanEnv.Values[EnvGetReleaseNode()];
-				case ENV_PITCH:
-					return pIns->PitchEnv.Values[EnvGetReleaseNode()];
-				default:
-					return 0;
-			}
-		}
-	}
-	return 0;
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return 0;
+	return envelope->Values[EnvGetReleaseNode()];
 }
 
 WORD CViewInstrument::EnvGetReleaseNodeTick()
-//--------------------------------------
+//-------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc) {
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) {
-			switch(m_nEnv) {
-				case ENV_VOLUME:
-					return pIns->VolEnv.Ticks[EnvGetReleaseNode()];
-				case ENV_PANNING:
-					return pIns->PanEnv.Ticks[EnvGetReleaseNode()];
-				case ENV_PITCH:
-					return pIns->PitchEnv.Ticks[EnvGetReleaseNode()];
-				default:
-					return 0;
-			}
-		}
-	}
-	return 0;
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return 0;
+	return envelope->Ticks[EnvGetReleaseNode()];
 }
 
 
@@ -1914,6 +1698,14 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			SetCapture();
 			m_dwStatus |= INSSTATUS_DRAGGING;
 		}
+		else
+		{
+			if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
+			{
+				m_ptMenu = pt;
+				OnEnvInsertPoint();
+			}
+		}
 	}
 }
 
@@ -2054,29 +1846,16 @@ void CViewInstrument::OnEnvToggleReleasNode()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		switch(m_nEnv) {
-			case ENV_VOLUME:
-				if (pIns->VolEnv.nReleaseNode == node) {
-					pIns->VolEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
-				} else { 
-					pIns->VolEnv.nReleaseNode = node;
-				}
-				break;
-			case ENV_PANNING:
-				if (pIns->PanEnv.nReleaseNode == node) {
-					pIns->PanEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
-				} else { 
-					pIns->PanEnv.nReleaseNode = node;
-				}
-				break;
-			case ENV_PITCH:
-				if (pIns->PitchEnv.nReleaseNode == node) {
-					pIns->PitchEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
-				} else { 
-					pIns->PitchEnv.nReleaseNode = node;
-				}
-				break;			
+
+		INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+		if(envelope == nullptr) return;
+
+		if (envelope->nReleaseNode == node) {
+			envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
+		} else { 
+			envelope->nReleaseNode = node;
 		}
+
 		pModDoc->SetModified();
 		InvalidateRect(NULL, FALSE);
 	}
@@ -2154,73 +1933,27 @@ void CViewInstrument::OnEnvRemovePoint()
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
-			BOOL bOk = FALSE;
+			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+			if(envelope == nullptr || envelope->nNodes == 0) return;
+
 			UINT nPoint = m_nDragItem - 1;
-			switch(m_nEnv)
+
+			envelope->nNodes--;
+			for (UINT i=nPoint; i<envelope->nNodes; i++)
 			{
-			case ENV_VOLUME:
-				if (pIns->VolEnv.nNodes > 1)
-				{
-					pIns->VolEnv.nNodes--;
-					for (UINT i=nPoint; i<pIns->VolEnv.nNodes; i++)
-					{
-						pIns->VolEnv.Ticks[i] = pIns->VolEnv.Ticks[i+1];
-						pIns->VolEnv.Values[i] = pIns->VolEnv.Values[i+1];
-					}
-					if (nPoint >= pIns->VolEnv.nNodes) nPoint = pIns->VolEnv.nNodes-1;
-					if (pIns->VolEnv.nLoopStart > nPoint) pIns->VolEnv.nLoopStart--;
-					if (pIns->VolEnv.nLoopEnd > nPoint) pIns->VolEnv.nLoopEnd--;
-					if (pIns->VolEnv.nSustainStart > nPoint) pIns->VolEnv.nSustainStart--;
-					if (pIns->VolEnv.nSustainEnd > nPoint) pIns->VolEnv.nSustainEnd--;
-					if (pIns->VolEnv.nReleaseNode>nPoint && pIns->VolEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->VolEnv.nReleaseNode--;
-					pIns->VolEnv.Ticks[0] = 0;
-					bOk = TRUE;
-				}
-				break;
-			case ENV_PANNING:
-				if (pIns->PanEnv.nNodes > 1)
-				{
-					pIns->PanEnv.nNodes--;
-					for (UINT i=nPoint; i<pIns->PanEnv.nNodes; i++)
-					{
-						pIns->PanEnv.Ticks[i] = pIns->PanEnv.Ticks[i+1];
-						pIns->PanEnv.Values[i] = pIns->PanEnv.Values[i+1];
-					}
-					if (nPoint >= pIns->PanEnv.nNodes) nPoint = pIns->PanEnv.nNodes-1;
-					if (pIns->PanEnv.nLoopStart > nPoint) pIns->PanEnv.nLoopStart--;
-					if (pIns->PanEnv.nLoopEnd > nPoint) pIns->PanEnv.nLoopEnd--;
-					if (pIns->PanEnv.nSustainStart > nPoint) pIns->PanEnv.nSustainStart--;
-					if (pIns->PanEnv.nSustainEnd > nPoint) pIns->PanEnv.nSustainEnd--;
-					if (pIns->PanEnv.nReleaseNode>nPoint && pIns->PanEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->PanEnv.nReleaseNode--;
-					pIns->PanEnv.Ticks[0] = 0;
-					bOk = TRUE;
-				}
-				break;
-			case ENV_PITCH:
-				if (pIns->PitchEnv.nNodes > 1)
-				{
-					pIns->PitchEnv.nNodes--;
-					for (UINT i=nPoint; i<pIns->PitchEnv.nNodes; i++)
-					{
-						pIns->PitchEnv.Ticks[i] = pIns->PitchEnv.Ticks[i+1];
-						pIns->PitchEnv.Values[i] = pIns->PitchEnv.Values[i+1];
-					}
-					if (nPoint >= pIns->PitchEnv.nNodes) nPoint = pIns->PitchEnv.nNodes-1;
-					if (pIns->PitchEnv.nLoopStart > nPoint) pIns->PitchEnv.nLoopStart--;
-					if (pIns->PitchEnv.nLoopEnd > nPoint) pIns->PitchEnv.nLoopEnd--;
-					if (pIns->PitchEnv.nSustainStart > nPoint) pIns->PitchEnv.nSustainStart--;
-					if (pIns->PitchEnv.nSustainEnd > nPoint) pIns->PitchEnv.nSustainEnd--;
-					if (pIns->PitchEnv.nReleaseNode>nPoint && pIns->PitchEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->PitchEnv.nReleaseNode--;
-					pIns->PitchEnv.Ticks[0] = 0;
-					bOk = TRUE;
-				}
-				break;
+				envelope->Ticks[i] = envelope->Ticks[i + 1];
+				envelope->Values[i] = envelope->Values[i + 1];
 			}
-			if (bOk)
-			{
-				pModDoc->SetModified();
-				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
-			}
+			if (nPoint >= envelope->nNodes) nPoint = envelope->nNodes-1;
+			if (envelope->nLoopStart > nPoint) envelope->nLoopStart--;
+			if (envelope->nLoopEnd > nPoint) envelope->nLoopEnd--;
+			if (envelope->nSustainStart > nPoint) envelope->nSustainStart--;
+			if (envelope->nSustainEnd > nPoint) envelope->nSustainEnd--;
+			if (envelope->nReleaseNode>nPoint && envelope->nReleaseNode!=ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode--;
+			envelope->Ticks[0] = 0;
+
+			pModDoc->SetModified();
+			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		}
 	}
 }
@@ -2236,100 +1969,58 @@ void CViewInstrument::OnEnvInsertPoint()
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
-			BOOL bOk = FALSE;
 			int nTick = ScreenToTick(m_ptMenu.x);
 			int nValue = ScreenToValue(m_ptMenu.y);
+			if(nTick < 0) return;
+
 			UINT maxpoints = (pSndFile->m_nType == MOD_TYPE_XM) ? 12 : 25;
 			//To check: Should there be MAX_ENVPOINTS?
 
-			if (nValue < 0) nValue = 0;
-			if (nValue > 64) nValue = 64;
-			if (nTick >= 0) switch(m_nEnv)
+			nValue = CLAMP(nValue, 0, 64);
+
+			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+			if(envelope == nullptr) return;
+			BYTE cDefaultValue;
+
+			switch(m_nEnv)
 			{
-			case ENV_VOLUME:
-				if (pIns->VolEnv.nNodes < maxpoints)
-				{
-					if (!pIns->VolEnv.nNodes)
-					{
-						pIns->VolEnv.Ticks[0] = 0;
-						pIns->VolEnv.Values[0] = 64;
-						pIns->VolEnv.nNodes = 1;
-					}
-					UINT i = 0;
-					for (i=0; i<pIns->VolEnv.nNodes; i++) if (nTick <= pIns->VolEnv.Ticks[i]) break;
-					for (UINT j=pIns->VolEnv.nNodes; j>i; j--)
-					{
-						pIns->VolEnv.Ticks[j] = pIns->VolEnv.Ticks[j-1];
-						pIns->VolEnv.Values[j] = pIns->VolEnv.Values[j-1];
-					}
-					pIns->VolEnv.Ticks[i] = (WORD)nTick;
-					pIns->VolEnv.Values[i] = (BYTE)nValue;
-					pIns->VolEnv.nNodes++;
-					if (pIns->VolEnv.nLoopStart >= i) pIns->VolEnv.nLoopStart++;
-					if (pIns->VolEnv.nLoopEnd >= i) pIns->VolEnv.nLoopEnd++;
-					if (pIns->VolEnv.nSustainStart >= i) pIns->VolEnv.nSustainStart++;
-					if (pIns->VolEnv.nSustainEnd >= i) pIns->VolEnv.nSustainEnd++;
-					if (pIns->VolEnv.nReleaseNode>=i && pIns->VolEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->VolEnv.nReleaseNode++;
-					bOk = TRUE;
-				}
-				break;
-			case ENV_PANNING:
-				if (pIns->PanEnv.nNodes < maxpoints)
-				{
-					if (!pIns->PanEnv.nNodes)
-					{
-						pIns->PanEnv.Ticks[0] = 0;
-						pIns->PanEnv.Values[0] = 32;
-						pIns->PanEnv.nNodes = 1;
-					}
-					UINT i = 0;
-					for (i=0; i<pIns->PanEnv.nNodes; i++) if (nTick <= pIns->PanEnv.Ticks[i]) break;
-					for (UINT j=pIns->PanEnv.nNodes; j>i; j--)
-					{
-						pIns->PanEnv.Ticks[j] = pIns->PanEnv.Ticks[j-1];
-						pIns->PanEnv.Values[j] = pIns->PanEnv.Values[j-1];
-					}
-					pIns->PanEnv.Ticks[i] = (WORD)nTick;
-					pIns->PanEnv.Values[i] =(BYTE)nValue;
-					pIns->PanEnv.nNodes++;
-					if (pIns->PanEnv.nLoopStart >= i) pIns->PanEnv.nLoopStart++;
-					if (pIns->PanEnv.nLoopEnd >= i) pIns->PanEnv.nLoopEnd++;
-					if (pIns->PanEnv.nSustainStart >= i) pIns->PanEnv.nSustainStart++;
-					if (pIns->PanEnv.nSustainEnd >= i) pIns->PanEnv.nSustainEnd++;
-					if (pIns->PanEnv.nReleaseNode>=i && pIns->PanEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->PanEnv.nReleaseNode++;
-					bOk = TRUE;
-				}
-				break;
-			case ENV_PITCH:
-				if (pIns->PitchEnv.nNodes < maxpoints)
-				{
-					if (!pIns->PitchEnv.nNodes)
-					{
-						pIns->PitchEnv.Ticks[0] = 0;
-						pIns->PitchEnv.Values[0] = 32;
-						pIns->PitchEnv.nNodes = 1;
-					}
-					UINT i = 0;
-					for (i=0; i<pIns->PitchEnv.nNodes; i++) if (nTick <= pIns->PitchEnv.Ticks[i]) break;
-					for (UINT j=pIns->PitchEnv.nNodes; j>i; j--)
-					{
-						pIns->PitchEnv.Ticks[j] = pIns->PitchEnv.Ticks[j-1];
-						pIns->PitchEnv.Values[j] = pIns->PitchEnv.Values[j-1];
-					}
-					pIns->PitchEnv.Ticks[i] = (WORD)nTick;
-					pIns->PitchEnv.Values[i] = (BYTE)nValue;
-					pIns->PitchEnv.nNodes++;
-					if (pIns->PitchEnv.nLoopStart >= i) pIns->PitchEnv.nLoopStart++;
-					if (pIns->PitchEnv.nLoopEnd >= i) pIns->PitchEnv.nLoopEnd++;
-					if (pIns->PitchEnv.nSustainStart >= i) pIns->PitchEnv.nSustainStart++;
-					if (pIns->PitchEnv.nSustainEnd >= i) pIns->PitchEnv.nSustainEnd++;
-					if (pIns->PitchEnv.nReleaseNode>=i && pIns->PitchEnv.nReleaseNode!=ENV_RELEASE_NODE_UNSET) pIns->PitchEnv.nReleaseNode++;
-					bOk = TRUE;
-				}
-				break;
+				case ENV_VOLUME:
+					cDefaultValue = 64;
+					break;
+				case ENV_PANNING:
+					cDefaultValue = 32;
+					break;
+				case ENV_PITCH:
+					cDefaultValue = (pIns->dwFlags & ENV_FILTER) ? 64 : 32;
+					break;
+				default:
+					return;
 			}
-			if (bOk)
+
+			if (envelope->nNodes < maxpoints)
 			{
+				if (!envelope->nNodes)
+				{
+					envelope->Ticks[0] = 0;
+					envelope->Values[0] = cDefaultValue;
+					envelope->nNodes = 1;
+				}
+				UINT i = 0;
+				for (i = 0; i < envelope->nNodes; i++) if (nTick <= envelope->Ticks[i]) break;
+				for (UINT j = envelope->nNodes; j > i; j--)
+				{
+					envelope->Ticks[j] = envelope->Ticks[j - 1];
+					envelope->Values[j] = envelope->Values[j - 1];
+				}
+				envelope->Ticks[i] = (WORD)nTick;
+				envelope->Values[i] = (BYTE)nValue;
+				envelope->nNodes++;
+				if (envelope->nLoopStart >= i) envelope->nLoopStart++;
+				if (envelope->nLoopEnd >= i) envelope->nLoopEnd++;
+				if (envelope->nSustainStart >= i) envelope->nSustainStart++;
+				if (envelope->nSustainEnd >= i) envelope->nSustainEnd++;
+				if (envelope->nReleaseNode >= i && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode++;
+
 				pModDoc->SetModified();
 				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 			}
@@ -2718,4 +2409,35 @@ void CViewInstrument::OnEnvelopeScalepoints()
 	}
 
 	
+}
+
+INSTRUMENTENVELOPE *CViewInstrument::GetEnvelopePtr() const
+//---------------------------------------------------------
+{
+	// Get a pointer to the currently selected envelope.
+	// First do some standard checks...
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return nullptr;
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	if(pSndFile == nullptr) return nullptr;
+	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+	if(pIns == nullptr) return nullptr;
+			
+	// Now for the real thing.
+	INSTRUMENTENVELOPE *envelope = nullptr;
+
+	switch(m_nEnv)
+	{
+	case ENV_VOLUME:
+		envelope = &pIns->VolEnv;
+		break;
+	case ENV_PANNING:
+		envelope = &pIns->PanEnv;
+		break;
+	case ENV_PITCH:
+		envelope = &pIns->PitchEnv;
+		break;
+	}
+
+	return envelope;
 }

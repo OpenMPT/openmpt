@@ -873,13 +873,14 @@ void CCtrlPatterns::OnPatternDuplicate()
 	if (m_pModDoc)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+
 		ORD_SELECTION selection = m_OrderList.GetCurSel(false);
 		ORDERINDEX nInsertCount = selection.nOrdHi - selection.nOrdLo;
 		ORDERINDEX nInsertWhere = selection.nOrdLo + nInsertCount + 1;
 		bool bSuccess = false;
 		// has this pattern been duplicated already? (for multiselect)
-		PATTERNINDEX pReplaceIndex[MAX_PATTERNS]; // TODO I think this is a bit much...
-		memset(&pReplaceIndex, PATTERNINDEX_INVALID, sizeof(PATTERNINDEX) * MAX_PATTERNS);
+		vector<PATTERNINDEX> pReplaceIndex;
+		pReplaceIndex.resize(pSndFile->Patterns.Size(), PATTERNINDEX_INVALID);
 
 		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
 		{
@@ -887,13 +888,12 @@ void CCtrlPatterns::OnPatternDuplicate()
 			ROWINDEX rows = 64;
 			if (nCurPat < pSndFile->Patterns.Size() && pReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
 			{
-				if ((pSndFile->Patterns[nCurPat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
-				{
-					rows = pSndFile->PatternSize[nCurPat];
-					if (rows < pSndFile->GetModSpecifications().patternRowsMin) rows = pSndFile->GetModSpecifications().patternRowsMin;
-				}
+				rows = pSndFile->PatternSize[nCurPat];
+				if (rows < pSndFile->GetModSpecifications().patternRowsMin) rows = pSndFile->GetModSpecifications().patternRowsMin;
+				if (rows > pSndFile->GetModSpecifications().patternRowsMax) rows = pSndFile->GetModSpecifications().patternRowsMax;
+
 				PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nInsertWhere + i, rows);
-				if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()))
+				if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nCurPat] != nullptr))
 				{
 					MODCOMMAND *pSrc = pSndFile->Patterns[nCurPat];
 					MODCOMMAND *pDest = pSndFile->Patterns[nNewPat];
