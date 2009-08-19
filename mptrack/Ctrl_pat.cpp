@@ -850,10 +850,10 @@ void CCtrlPatterns::OnPatternNew()
 		if ((pat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[pat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			rows = pSndFile->PatternSize[pat];
-			if (rows < 32) rows = 32;
+			rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
 		}
 		PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nCurOrd + 1, rows);
-		if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()))
+		if ((nNewPat != PATTERNINDEX_INVALID) && (nNewPat < pSndFile->Patterns.Size()))
 		{
 			m_OrderList.SetCurSel(nCurOrd + 1);
 			m_OrderList.InvalidateRect(NULL, FALSE);
@@ -889,11 +889,10 @@ void CCtrlPatterns::OnPatternDuplicate()
 			if (nCurPat < pSndFile->Patterns.Size() && pReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
 			{
 				rows = pSndFile->PatternSize[nCurPat];
-				if (rows < pSndFile->GetModSpecifications().patternRowsMin) rows = pSndFile->GetModSpecifications().patternRowsMin;
-				if (rows > pSndFile->GetModSpecifications().patternRowsMax) rows = pSndFile->GetModSpecifications().patternRowsMax;
+				rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
 
 				PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nInsertWhere + i, rows);
-				if ((nNewPat >= 0) && (nNewPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nCurPat] != nullptr))
+				if ((nNewPat != PATTERNINDEX_INVALID) && (nNewPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nCurPat] != nullptr))
 				{
 					MODCOMMAND *pSrc = pSndFile->Patterns[nCurPat];
 					MODCOMMAND *pDest = pSndFile->Patterns[nNewPat];

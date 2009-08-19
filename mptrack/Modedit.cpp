@@ -159,13 +159,13 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	/////////////////////////////
 	// Converting pattern data
 
-	for (UINT nPat=0; nPat<m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
+	for (UINT nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 	{
 		MODCOMMAND *m = m_SndFile.Patterns[nPat];
 
 		// This is used for -> MOD/XM conversion
-		BYTE cEffectMemory[MAX_CHANNELS][MAX_EFFECTS];
-		memset(&cEffectMemory, 0, sizeof(BYTE) * MAX_CHANNELS * MAX_EFFECTS);
+		BYTE cEffectMemory[MAX_BASECHANNELS][MAX_EFFECTS];
+		memset(&cEffectMemory, 0, sizeof(BYTE) * MAX_BASECHANNELS * MAX_EFFECTS);
 		UINT nChannel = m_SndFile.m_nChannels - 1;
 
 		for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
@@ -1613,7 +1613,7 @@ PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 {
 	const int i = m_SndFile.Patterns.Insert(nRows);
 	if(i < 0)
-		return -1;
+		return PATTERNINDEX_INVALID;
 
 	//Increasing orderlist size if given order is beyond current limit,
 	//or if the last order already has a pattern.

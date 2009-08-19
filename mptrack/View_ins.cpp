@@ -62,6 +62,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_MBUTTONDOWN()
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_NCLBUTTONUP()
 	ON_WM_NCLBUTTONDBLCLK()
@@ -1700,6 +1701,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 		}
 		else
 		{
+			// Shift-Click: Insert envelope point here
 			if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
 			{
 				m_ptMenu = pt;
@@ -1754,6 +1756,17 @@ void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
 			pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON,pt.x,pt.y,this);
 		}
 	}
+}
+
+void CViewInstrument::OnMButtonDown(UINT, CPoint pt)
+//--------------------------------------------------
+{
+	// Middle mouse button: Remove envelope point
+	if(EnvGetLastPoint() <= 1) return;
+	m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
+	if(m_nDragItem == 0) return;
+	m_ptMenu = pt;
+	OnEnvRemovePoint();
 }
 
 

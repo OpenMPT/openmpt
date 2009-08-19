@@ -916,9 +916,10 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 			combo->AddString(s);
 		}
 		combo->SetCurSel(nrows - specs.patternRowsMin);
-		wsprintf(s, "Pattern #%d:\x0d\x0a %d rows (%dK)",
+		wsprintf(s, "Pattern #%d:\x0d\x0a %d row%s (%dK)",
 			m_nPattern,
 			pSndFile->PatternSize[m_nPattern],
+			(pSndFile->PatternSize[m_nPattern] == 1) ? "" : "s",
 			(pSndFile->PatternSize[m_nPattern] * pSndFile->m_nChannels * sizeof(MODCOMMAND))/1024);
 		SetDlgItemText(IDC_TEXT1, s);
 	}
