@@ -111,6 +111,7 @@ protected:
 	afx_msg void OnLButtonDown(UINT, CPoint);
 	afx_msg void OnLButtonUp(UINT, CPoint);
 	afx_msg void OnRButtonDown(UINT, CPoint);
+	afx_msg void OnMButtonDown(UINT, CPoint);
 	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
 	afx_msg void OnNcLButtonDown(UINT, CPoint);
 	afx_msg void OnNcLButtonUp(UINT, CPoint);
