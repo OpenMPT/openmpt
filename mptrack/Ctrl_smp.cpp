@@ -884,7 +884,7 @@ void CCtrlSamples::OnSampleNew()
 //------------------------------
 {
 	LONG smp = m_pModDoc->InsertSample(TRUE);
-	if (smp > 0)
+	if (smp != SAMPLEINDEX_INVALID)
 	{
 		if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
 

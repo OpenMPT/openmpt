@@ -15,8 +15,8 @@
 
 //#define PSM_LOG
 
-#define PSM_ID_NEW	0x204d5350
-#define PSM_ID_OLD	0xfe4d5350
+#define PSM_ID_NEW	0x204d5350 // "PSM "
+#define PSM_ID_OLD	0xfe4d5350 // "PSMþ"
 #define IFFID_FILE	0x454c4946
 #define IFFID_TITL	0x4c544954
 #define IFFID_SDFT	0x54464453
@@ -226,6 +226,7 @@ bool CSoundFile::ReadPSM(LPCBYTE lpStream, DWORD dwMemLength)
 						}
 					}
 					UINT iOrd = 0;
+					Order.resize(MAX_ORDERS, Order.GetInvalidPatIndex());
 					while ((pos+5<len) && (iOrd < MAX_ORDERS))
 					{
 						DWORD dwName = *(DWORD *)(pdata+pos);

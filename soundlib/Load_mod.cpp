@@ -291,7 +291,6 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	pMagic = (PMODMAGIC)(lpStream+dwMemPos);
 	dwMemPos += sizeof(MODMAGIC);
 	if (m_nSamples == 15) dwMemPos -= 4;
-	Order.assign(Order.size(), 0);
 	Order.ReadAsByte(pMagic->Orders, 128, 128);
 
 	UINT nbp, nbpbuggy, nbpbuggy2, norders;
@@ -315,7 +314,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		if (i >= nbpbuggy2) nbpbuggy2 = i+1;
 	}
-	for (UINT iend=norders; iend<MAX_ORDERS; iend++) Order[iend] = Order.GetInvalidPatIndex();
+	for (UINT iend = norders; iend < 0x80; iend++) Order[iend] = Order.GetInvalidPatIndex();
 	norders--;
 	m_nRestartPos = pMagic->nRestartPos;
 	if (m_nRestartPos >= 0x78) m_nRestartPos = 0;

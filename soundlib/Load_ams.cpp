@@ -103,8 +103,12 @@ bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	for (UINT cNam=0; cNam<m_nChannels; cNam++)
 	{
 		if (dwMemPos + 32 >= dwMemLength) return true;
-		tmp = lpStream[dwMemPos++];
-		dwMemPos += tmp;
+		BYTE chnnamlen = lpStream[dwMemPos++];
+		if ((chnnamlen) && (chnnamlen < MAX_CHANNELNAME))
+		{
+			memcpy(ChnSettings[cNam].szName, lpStream + dwMemPos + 1, chnnamlen);
+		}
+		dwMemPos += chnnamlen;
 	}
 	// Read Pattern Names
 	m_lpszPatternNames = new char[pfh->patterns * 32];
@@ -132,10 +136,10 @@ bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 		dwMemPos += tmp;
 	}
 	// Read Order List
-	for (UINT iOrd=0; iOrd<pfh->orders; iOrd++, dwMemPos += 2)
+	Order.resize(pfh->orders, Order.GetInvalidPatIndex());
+	for (UINT iOrd=0; iOrd < pfh->orders; iOrd++, dwMemPos += 2)
 	{
-		UINT n = *((WORD *)(lpStream+dwMemPos));
-		Order[iOrd] = n;
+		Order[iOrd] = (PATTERNINDEX)*((WORD *)(lpStream + dwMemPos));
 	}
 	// Read Patterns
 	for (UINT iPat=0; iPat<pfh->patterns; iPat++)
@@ -459,15 +463,12 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 	}
 	// Order List
 	{
-		for (UINT i=0; i<MAX_ORDERS; i++)
+		if ((dwMemPos + 2 * psh->orders) >= dwMemLength) return TRUE;
+		Order.resize(psh->orders, Order.GetInvalidPatIndex());
+		for (UINT iOrd = 0; iOrd < psh->orders; iOrd++)
 		{
-			Order[i] = Order.GetInvalidPatIndex();
-			if (dwMemPos + 2 >= dwMemLength) return TRUE;
-			if (i < psh->orders)
-			{
-				Order[i] = lpStream[dwMemPos];
-				dwMemPos += 2;
-			}
+			Order[iOrd] = (PATTERNINDEX)*((WORD *)(lpStream + dwMemPos));
+			dwMemPos += 2;
 		}
 	}
 	// Pattern Data

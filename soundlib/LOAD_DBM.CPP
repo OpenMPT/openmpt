@@ -120,10 +120,11 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 	if (m_nChannels > 64) m_nChannels = 64;
 	memcpy(m_szNames[0], (pfh->songname[0]) ? pfh->songname : pfh->songname2, 32);
 	m_szNames[0][31] = 0;
+	Order.resize(nOrders, Order.GetInvalidPatIndex());
 	for (UINT iOrd=0; iOrd < nOrders; iOrd++)
 	{
-		Order[iOrd] = lpStream[dwMemPos+iOrd*2+1];
-		if (iOrd >= MAX_ORDERS-2) break;
+		if (iOrd >= MAX_ORDERS) break;
+		Order[iOrd] = (PATTERNINDEX)BigEndianW(*((WORD *)(lpStream + dwMemPos + iOrd * 2)));
 	}
 	dwMemPos += 2*nOrders;
 	while (dwMemPos + 10 < dwMemLength)

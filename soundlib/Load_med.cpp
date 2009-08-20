@@ -670,19 +670,20 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 				UINT n = BigEndianW(pmps->length);
 				if (pseq+n <= dwMemLength)
 				{
+					Order.resize(nOrders++);
 					for (UINT i=0; i<n; i++)
 					{
-						UINT seqval = pmps->seq[i] >> 8;
+						WORD seqval = BigEndian(pmps->seq[i]);
 						if ((seqval < wNumBlocks) && (nOrders < MAX_ORDERS-1))
 						{
-							Order[nOrders++] = seqval;
+							Order[nOrders++] = (ORDERINDEX)seqval;
 						}
 					}
 				}
 			}
 		}
 		playtransp = pmsh2->playtransp;
-		while (nOrders < MAX_ORDERS) Order[nOrders++] = 0xFF;
+		while (nOrders < MAX_ORDERS) Order[nOrders++] = Order.GetInvalidPatIndex();
 	}
 	// Reading Expansion structure
 	if (pmex)

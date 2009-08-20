@@ -508,7 +508,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	memset(ChnMix, 0, sizeof(ChnMix));
 	memset(Chn, 0, sizeof(Chn));
 	memset(Instruments, 0, sizeof(Instruments));
-	Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
+	//Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
+	Order.resize(1, Order.GetInvalidPatIndex());
 	Patterns.ClearPatterns();
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
@@ -706,7 +707,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 	// Load plugins only when m_pModDoc != 0.  (can be == 0 for example when examining module samples in treeview.
 
-	CString sNotFound;
+	string sNotFound;
 	bool bSearchIDs[MAX_MIXPLUGINS] = {false};
 	UINT iShowNotFound = 0;
 
@@ -757,7 +758,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			sNotFound =	"The following plugins have not been found:\n\n" + sNotFound + "\nDo you want to search for them on KVRAudio?"
 						"\nWARNING: A browser window / tab is opened for every plugin. If you do not want that, you can visit http://www.kvraudio.com/search.php";
 		}
-		if (::MessageBox(0, sNotFound, "OpenMPT - Plugins missing", MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION) == IDYES)
+		if (::MessageBox(0, sNotFound.c_str(), "OpenMPT - Plugins missing", MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION) == IDYES)
 			for (UINT iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 				if (bSearchIDs[iPlug] == true)
 				{
@@ -774,6 +775,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	if (m_nType)
 	{
 		SetModSpecsPointer(m_pModSpecs, m_nType);
+		Order.resize(GetModSpecifications().ordersMax, Order.GetInvalidPatIndex());
 		return TRUE;
 	}
 

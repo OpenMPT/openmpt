@@ -570,15 +570,12 @@ void COrderList::OnPaint()
 			s[0] = 0;
 			if ((nOrder >= 0) && (rect.left + m_cxFont - 4 <= rcClient.right))
 			{
-				if (nOrder == pSndFile->Order.GetInvalidPatIndex()) strcpy(s, "---"); //Print the 'dots'
-				else 
+				if (nIndex < pSndFile->Order.GetCount())
 				{
-					if (nOrder < pSndFile->Patterns.Size()) wsprintf(s, "%d", nOrder);
-					else
-					{
-						if(nOrder == pSndFile->Order.GetIgnoreIndex()) strcpy(s, "+++");
-						else strcpy(s, "???");
-					}
+					if (nOrder == pSndFile->Order.GetInvalidPatIndex()) strcpy(s, "---");
+					else if (nOrder == pSndFile->Order.GetIgnoreIndex()) strcpy(s, "+++");
+					else if (nOrder < pSndFile->Patterns.Size()) wsprintf(s, "%d", nOrder);
+					else strcpy(s, "???");
 				}
 			}
 			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
@@ -912,7 +909,7 @@ void COrderList::OnInsertOrder()
 		ORD_SELECTION selection = GetCurSel(false);	
 		ORDERINDEX nInsertCount = selection.nOrdHi - selection.nOrdLo, nInsertEnd = selection.nOrdHi;
 
-		for(int i = 0; i <= nInsertCount; i++)
+		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
 		{
 
 			//Checking whether there is some pattern at the end of orderlist.
@@ -922,7 +919,7 @@ void COrderList::OnInsertOrder()
 					pSndFile->Order.push_back(pSndFile->Order.GetInvalidPatIndex());
 			}
 
-			for (int i=pSndFile->Order.size() - 1; i>nInsertEnd; i--) pSndFile->Order[i] = pSndFile->Order[i - 1];
+			for(int j = pSndFile->Order.size() - 1; j > nInsertEnd; j--) pSndFile->Order[j] = pSndFile->Order[j - 1];
 		}
 		// now that there is enough space in the order list, overwrite the orders
 		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
@@ -930,8 +927,8 @@ void COrderList::OnInsertOrder()
 			if(nInsertEnd + i + 1 < pSndFile->GetModSpecifications().ordersMax)
 				pSndFile->Order[nInsertEnd + i + 1] = pSndFile->Order[nInsertEnd - nInsertCount + i];
 		}
-		m_nScrollPos = nInsertEnd + 1;
-		m_nScrollPos2nd = m_nScrollPos + nInsertCount;
+		m_nScrollPos = min(nInsertEnd + 1, pSndFile->Order.GetCount() - 1);
+		m_nScrollPos2nd = min(m_nScrollPos + nInsertCount, pSndFile->Order.GetCount() - 1);
 		InvalidateRect(NULL, FALSE);
 		m_pModDoc->SetModified();
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);

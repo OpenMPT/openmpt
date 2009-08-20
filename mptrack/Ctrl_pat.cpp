@@ -877,6 +877,8 @@ void CCtrlPatterns::OnPatternDuplicate()
 		ORD_SELECTION selection = m_OrderList.GetCurSel(false);
 		ORDERINDEX nInsertCount = selection.nOrdHi - selection.nOrdLo;
 		ORDERINDEX nInsertWhere = selection.nOrdLo + nInsertCount + 1;
+		if (nInsertWhere >= pSndFile->GetModSpecifications().ordersMax)
+			return;
 		bool bSuccess = false;
 		// has this pattern been duplicated already? (for multiselect)
 		vector<PATTERNINDEX> pReplaceIndex;
@@ -917,14 +919,15 @@ void CCtrlPatterns::OnPatternDuplicate()
 					nNewPat = pReplaceIndex[nCurPat]; // take care of patterns that have been duplicated before
 				else
 					nNewPat= pSndFile->Order[selection.nOrdLo + i];
-				pSndFile->Order[selection.nOrdLo + i + nInsertCount + 1] = nNewPat;
+				if (selection.nOrdLo + i + nInsertCount + 1 < pSndFile->Order.GetCount())
+					pSndFile->Order[selection.nOrdLo + i + nInsertCount + 1] = nNewPat;
 			}
 		}
 		if(bSuccess)
 		{
 			m_OrderList.InvalidateRect(NULL, FALSE);
 			m_OrderList.SetCurSel(nInsertWhere);
-			SetCurrentPattern(pSndFile->Order[nInsertWhere]);
+			SetCurrentPattern(pSndFile->Order[min(nInsertWhere, pSndFile->Order.GetCount()-1)]);
 			m_pModDoc->SetModified();
 			m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE|HINT_PATNAMES, this);
 			if(selection.nOrdHi != selection.nOrdLo) m_OrderList.m_nScrollPos2nd = nInsertWhere + nInsertCount;

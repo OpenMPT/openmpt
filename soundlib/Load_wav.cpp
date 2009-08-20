@@ -50,8 +50,8 @@ bool CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
 	m_nDefaultSpeed = 8;
 	m_nDefaultTempo = 125;
 	m_dwSongFlags |= SONG_LINEARSLIDES; // For no resampling
+	Order.resize(MAX_ORDERS, Order.GetInvalidPatIndex());
 	Order[0] = 0;
-	Order[1] = 0xFF;
 	bool fail = Patterns.Insert(0, 64);
 	fail = Patterns.Insert(1, 64);
 	if(fail) return true;

@@ -1987,7 +1987,7 @@ void CModDoc::OnInsertSample()
 //----------------------------
 {
 	LONG smp = InsertSample();
-	if (smp >= 0) ViewSample(smp);
+	if (smp != SAMPLEINDEX_INVALID) ViewSample(smp);
 }
 
 
@@ -1995,7 +1995,7 @@ void CModDoc::OnInsertInstrument()
 //--------------------------------
 {
 	LONG ins = InsertInstrument();
-	if (ins >= 0) ViewInstrument(ins);
+	if (ins != INSTRUMENTINDEX_INVALID) ViewInstrument(ins);
 }
 
 

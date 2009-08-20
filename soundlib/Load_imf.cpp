@@ -329,8 +329,9 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 	if(!m_nChannels) return false;
 	
+	Order.resize(hdr.ordnum);
 	for (ORDERINDEX nOrd = 0; nOrd < hdr.ordnum; nOrd++)
-		Order[nOrd] = ((hdr.orderlist[nOrd] == 0xff) ? Order.GetIgnoreIndex() : hdr.orderlist[nOrd]);
+		Order[nOrd] = ((hdr.orderlist[nOrd] == 0xff) ? Order.GetIgnoreIndex() : (PATTERNINDEX)hdr.orderlist[nOrd]);
 	
 	// read patterns
 	for (PATTERNINDEX nPat = 0; nPat < hdr.patnum; nPat++)
