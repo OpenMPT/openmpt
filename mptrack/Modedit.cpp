@@ -1661,10 +1661,10 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 		}
 	}
 	if (((bLimit) && (i >= 200) && (!m_SndFile.m_nInstruments))
-	 || (i >= MAX_SAMPLES))
+	 || (i >= m_SndFile.GetModSpecifications().samplesMax))
 	{
 		ErrorBox(IDS_ERR_TOOMANYSMP, CMainFrame::GetMainFrame());
-		return -1;
+		return SAMPLEINDEX_INVALID;
 	}
 	if (!m_SndFile.m_szNames[i][0]) strcpy(m_SndFile.m_szNames[i], "untitled");
 	MODSAMPLE *pSmp = &m_SndFile.Samples[i];
@@ -1690,7 +1690,8 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 //-----------------------------------------------------------
 {
 	MODINSTRUMENT *pDup = NULL;
-	if ((m_SndFile.m_nType != MOD_TYPE_XM) && !(m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) return -1;
+	INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax - 1;
+	if ((m_SndFile.m_nType != MOD_TYPE_XM) && !(m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) return INSTRUMENTINDEX_INVALID;
 	if ((lDuplicate > 0) && (lDuplicate <= (LONG)m_SndFile.m_nInstruments))
 	{
 		pDup = m_SndFile.Instruments[lDuplicate];
@@ -1702,7 +1703,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 		if (n == IDYES)
 		{
 			UINT nInstruments = m_SndFile.m_nSamples;
-			if (nInstruments >= MAX_INSTRUMENTS) nInstruments = MAX_INSTRUMENTS-1;
+			if (nInstruments > nInstrumentMax) nInstruments = nInstrumentMax;
 			for (UINT smp=1; smp<=nInstruments; smp++)
 			{
 				m_SndFile.Samples[smp].uFlags &= ~CHN_MUTE;
@@ -1721,7 +1722,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 			}
 			m_SndFile.m_nInstruments = nInstruments;
 		} else
-		if (n != IDNO) return -1;
+		if (n != IDNO) return INSTRUMENTINDEX_INVALID;
 	}
 	UINT newins = 0;
 	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
@@ -1734,10 +1735,10 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 	}
 	if (!newins)
 	{
-		if (m_SndFile.m_nInstruments >= MAX_INSTRUMENTS-1)
+		if (m_SndFile.m_nInstruments >= nInstrumentMax)
 		{
 			ErrorBox(IDS_ERR_TOOMANYINS, CMainFrame::GetMainFrame());
-			return -1;
+			return INSTRUMENTINDEX_INVALID;
 		}
 		newins = ++m_SndFile.m_nInstruments;
 	}
@@ -1745,7 +1746,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 	if (pIns)
 	{
 		UINT newsmp = 0;
-		if ((lSample > 0) && (lSample < MAX_SAMPLES))
+		if ((lSample > 0) && (lSample < m_SndFile.GetModSpecifications().samplesMax))
 		{
 			newsmp = lSample;
 		} else
@@ -1762,7 +1763,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 			if (!newsmp)
 			{
 				int inssmp = InsertSample();
-				if (inssmp > 0) newsmp = inssmp;
+				if (inssmp != SAMPLEINDEX_INVALID) newsmp = inssmp;
 			}
 		}
 		BEGIN_CRITICAL();
@@ -1784,7 +1785,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 	} else
 	{
 		ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
-		return -1;
+		return INSTRUMENTINDEX_INVALID;
 	}
 	return newins;
 }

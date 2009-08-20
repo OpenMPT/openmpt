@@ -145,8 +145,9 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 			{
 				UINT nseq = sequ->seqsize >> 1;
 				if (nseq >= MAX_ORDERS-1) nseq = MAX_ORDERS-1;
+				Order.resize(nseq, Order.GetInvalidPatIndex());
 				if (sequ->loopstart < nseq) m_nRestartPos = sequ->loopstart;
-				for (UINT i=0; i<nseq; i++) Order[i] = (BYTE)sequ->sequ[i];
+				for (UINT i = 0; i < nseq; i++) Order[i] = (PATTERNINDEX)sequ->sequ[i];
 			}
 			dwMemPos += sequ->seqsize + 8;
 			break;

@@ -191,10 +191,7 @@ bool CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 		m_nSamples = 31;
 		m_nDefaultTempo = 125;
 		m_nDefaultSpeed = 6;
-		for (UINT iOrd=0; iOrd<MAX_ORDERS; iOrd++)
-		{
-			Order[iOrd] = (iOrd < numorders) ? lpStream[dwMemPos+iOrd] : Order.GetInvalidPatIndex();
-		}
+		Order.ReadAsByte(lpStream + dwMemPos, numorders, dwMemLength - dwMemPos);
 		dwMemPos = 294; // ???
 		for (UINT iSmp=0; iSmp<numsamples; iSmp++)
 		{
@@ -307,21 +304,18 @@ bool CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 		dwMemPos += 2;
 	}
 	// Setup sequence list
-	for (UINT iOrd=0; iOrd<MAX_ORDERS; iOrd++)
+	Order.resize(pfh->numorders, Order.GetInvalidPatIndex());
+	for (UINT iOrd=0; iOrd < pfh->numorders; iOrd++)
 	{
-		Order[iOrd] = Order.GetInvalidPatIndex();
-		if (iOrd < pfh->numorders)
+		Order[iOrd] = iOrd;
+		Patterns[iOrd].Resize(64);
+		if (pfh->version >= 14)
 		{
-			Order[iOrd] = iOrd;
-			Patterns[iOrd].Resize(64);
-			if (pfh->version >= 14)
-			{
-				Patterns[iOrd].Resize(LittleEndianW(*(USHORT *)(lpStream+dwMemPos)));
-				dwMemPos += 2;
-			}
-			ptracks[iOrd] = (USHORT *)(lpStream+dwMemPos);
-			dwMemPos += m_nChannels * sizeof(USHORT);
+			Patterns[iOrd].Resize(LittleEndianW(*(USHORT *)(lpStream+dwMemPos)));
+			dwMemPos += 2;
 		}
+		ptracks[iOrd] = (USHORT *)(lpStream+dwMemPos);
+		dwMemPos += m_nChannels * sizeof(USHORT);
 	}
 	if (dwMemPos + m_nSamples * (sizeof(AMFSAMPLE)+8) > dwMemLength) return true;
 	// Read Samples

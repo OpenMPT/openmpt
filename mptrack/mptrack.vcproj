@@ -481,9 +481,6 @@
 				RelativePath=".\tagging.cpp">
 			</File>
 			<File
-				RelativePath=".\tagging.h">
-			</File>
-			<File
 				RelativePath=".\view_com.cpp">
 			</File>
 			<File
@@ -868,6 +865,9 @@
 			</File>
 			<File
 				RelativePath=".\StdAfx.h">
+			</File>
+			<File
+				RelativePath=".\tagging.h">
 			</File>
 			<File
 				RelativePath=".\typedefs.h">

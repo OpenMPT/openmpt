@@ -1503,7 +1503,7 @@ void CCtrlInstruments::OnInstrumentNew()
 		}
 		BOOL bFirst = (pSndFile->m_nInstruments) ? FALSE : TRUE;
 		LONG ins = m_pModDoc->InsertInstrument(0);
-		if (ins > 0)
+		if (ins != INSTRUMENTINDEX_INVALID)
 		{
 			SetCurrentInstrument(ins);
 			m_pModDoc->UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);
@@ -1525,7 +1525,7 @@ void CCtrlInstruments::OnInstrumentDuplicate()
 		{
 			BOOL bFirst = (pSndFile->m_nInstruments) ? FALSE : TRUE;
 			LONG ins = m_pModDoc->InsertInstrument(0, m_nInstrument);
-			if (ins > 0)
+			if (ins != INSTRUMENTINDEX_INVALID)
 			{
 				SetCurrentInstrument(ins);
 				m_pModDoc->UpdateAllViews(NULL, (ins << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE);

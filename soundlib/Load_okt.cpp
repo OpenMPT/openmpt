@@ -107,6 +107,7 @@ bool CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		UINT orderlen = norders;
 		if (orderlen >= MAX_ORDERS) orderlen = MAX_ORDERS-1;
+		Order.resize(orderlen);
 		for (UINT i=0; i<orderlen; i++) Order[i] = lpStream[dwMemPos+10+i];
 		for (UINT j=orderlen; j>1; j--) { if (Order[j-1]) break; Order[j-1] = 0xFF; }
 		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;

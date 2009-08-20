@@ -245,7 +245,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				else
 					m_nChannels = i+1;
 			}
-			for (j=0; j<norders; j++) Order[j] = pmib->seq[j];
+			Order.ReadAsByte(pmib->seq, norders, sizeof(pmib->seq));
 			break;
 		// ME: song message
 		case 0x454D:

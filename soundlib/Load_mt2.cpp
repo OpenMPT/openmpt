@@ -204,9 +204,10 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	{
 		m_nDefaultTempo = 110250 / pfh->wSamplesPerTick;
 	}
-	for (UINT iOrd=0; iOrd<MAX_ORDERS; iOrd++)
+	Order.resize(pfh->nOrders, Order.GetInvalidPatIndex());
+	for (UINT iOrd=0; iOrd < pfh->nOrders; iOrd++)
 	{
-		Order[iOrd] = (BYTE)((iOrd < pfh->nOrders) ? pfh->Orders[iOrd] : 0xFF);
+		Order[iOrd] = (PATTERNINDEX)pfh->Orders[iOrd];
 	}
 	memcpy(m_szNames[0], pfh->szSongName, 32);
 	m_szNames[0][31] = 0;

@@ -563,7 +563,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	Log("%d tracks, tempo = %dus, division = %04X TickFactor=%d\n", tracks, nTempoUsec, ((UINT)division) & 0xFFFF, nTickMultiplier);
 #endif
 	// Initializing 
-	Order.assign(Order.size(), Order.GetInvalidPatIndex());
+	Order.resize(MAX_ORDERS, Order.GetInvalidPatIndex());
 	memset(chnstate, 0, sizeof(chnstate));
 	memset(miditracks, 0, sizeof(miditracks));
 	memset(midichstate, 0, sizeof(midichstate));

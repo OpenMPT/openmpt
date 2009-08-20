@@ -114,10 +114,8 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	pmh2 = &farHeader2;
 	dwMemPos += sizeof(FARHEADER2);
 	if (dwMemPos >= dwMemLength) return true;
-	for (UINT iorder=0; iorder<MAX_ORDERS; iorder++)
-	{
-		Order[iorder] = (iorder <= pmh2->snglen) ? pmh2->orders[iorder] : Order.GetInvalidPatIndex();
-	}
+
+	Order.ReadAsByte(pmh2->orders, pmh2->snglen, sizeof(pmh2->orders));
 	m_nRestartPos = pmh2->loopto;
 	// Reading Patterns	
 	dwMemPos += headerlen - (869 + pmh1->stlen);

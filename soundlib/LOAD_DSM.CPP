@@ -110,10 +110,8 @@ bool CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 	m_nDefaultGlobalVolume = psong->globalvol << 2;
 	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > 256)) m_nDefaultGlobalVolume = 256;
 	m_nSamplePreAmp = psong->mastervol & 0x7F;
-	for (UINT iOrd=0; iOrd<MAX_ORDERS; iOrd++)
-	{
-		Order[iOrd] = (BYTE)((iOrd < psong->numord) ? psong->orders[iOrd] : 0xFF);
-	}
+	Order.ReadAsByte(psong->orders, psong->numord, sizeof(psong->orders));
+
 	for (UINT iPan=0; iPan<16; iPan++)
 	{
 		ChnSettings[iPan].nPan = 0x80;
