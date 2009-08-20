@@ -31,6 +31,8 @@ public:
 		return !(*this == mc);
 	}
 
+	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) {note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol);}
+
 	uint16 GetValueVolCol() const {return GetValueVolCol(volcmd, vol);}
 	static uint16 GetValueVolCol(BYTE volcmd, BYTE vol) {return (volcmd << 8) + vol;}
 	void SetValueVolCol(const uint16 val) {volcmd = static_cast<BYTE>(val >> 8); vol = static_cast<BYTE>(val & 0xFF);}

@@ -52,6 +52,7 @@ BEGIN_MESSAGE_MAP(CMIDIMappingDialog, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_REMOVE, OnBnClickedButtonRemove)
 	ON_MESSAGE(WM_MOD_MIDIMSG,		OnMidiMsg)
 	ON_NOTIFY(UDN_DELTAPOS, IDC_SPINMOVEMAPPING, OnDeltaposSpinmovemapping)
+	ON_BN_CLICKED(IDC_CHECK_PATRECORD, OnBnClickedCheckPatRecord)
 END_MESSAGE_MAP()
 
 
@@ -77,10 +78,15 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	if (m_rMIDIMapper.GetCount() > 0)
+		m_Setting = m_rMIDIMapper.GetDirective(0);
+
 	m_ChannelCBox.SetCurSel(m_Setting.GetChannel());
 
-	CheckDlgButton(IDC_CHECKACTIVE, m_Setting.IsActive() ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECKCAPTURE, m_Setting.GetCaptureMIDI() ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECKACTIVE, m_Setting.IsActive() ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECKCAPTURE, m_Setting.GetCaptureMIDI() ? BST_CHECKED : BST_UNCHECKED);
+	GetDlgItem(IDC_CHECK_PATRECORD)->ShowWindow((m_rSndFile.GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
+	CheckDlgButton(IDC_CHECK_PATRECORD, m_Setting.GetAllowPatternEdit() ? BST_CHECKED : BST_UNCHECKED);
 
 	m_EventCBox.SetCurSel(0);
 	
@@ -164,6 +170,14 @@ void CMIDIMappingDialog::OnBnClickedCheckCapture()
 //------------------------------------------------
 {
 	m_Setting.SetCaptureMIDI(IsDlgButtonChecked(IDC_CHECKCAPTURE) == BST_CHECKED);
+	UpdateString();
+}
+
+
+void CMIDIMappingDialog::OnBnClickedCheckPatRecord()
+//--------------------------------------------------
+{
+	m_Setting.SetAllowPatternEdit(IsDlgButtonChecked(IDC_CHECK_PATRECORD) == BST_CHECKED);
 	UpdateString();
 }
 
