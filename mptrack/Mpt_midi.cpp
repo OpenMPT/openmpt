@@ -192,7 +192,8 @@ void CMIDIMapper::Serialize(FILE* f) const
 		uint8 temp8 = citer->IsActive(); //bit 0
 		if(citer->GetCaptureMIDI()) temp8 |= (1 << 1); //bit 1
 		//bits 2-4: Mapping type: 0 for plug param control.
-        //bit 5: if(citer->GetAllowPatternEdit()) temp8 |= (1 << 4);
+        //bit 5: 
+		if(citer->GetAllowPatternEdit()) temp8 |= (1 << 5);
 		//bits 6-7: Size: 5, 6, 8, 12
 
 		BYTE parambytes = 4;
@@ -238,7 +239,7 @@ bool CMIDIMapper::Deserialize(const BYTE* ptr, const size_t size)
 		CMIDIMappingDirective s;
 		s.SetActive((i8 & 1) != 0);
 		s.SetCaptureMIDI((i8 & (1 << 1)) != 0);
-		s.SetAllowPatternEdit((i8 & (1 << 4)) != 0);
+		s.SetAllowPatternEdit((i8 & (1 << 5)) != 0);
 		memcpy(&i16, ptr, 2); ptr += 2; //Channel, event, MIDIbyte1.
 		memcpy(&i8, ptr, 1); ptr++;		//Plugindex
 		const BYTE remainingbytes = psize - 4;

@@ -55,6 +55,13 @@ struct RowMask
 };
 const RowMask DefaultRowMask = {true, true, true, true, true};
 
+struct ModCommandPos
+{
+	PATTERNINDEX nPat;
+	ROWINDEX nRow;
+	CHANNELINDEX nChn;
+};
+
 
 //////////////////////////////////////////////////////////////////
 // Pattern editing class
@@ -323,9 +330,9 @@ private:
 	UINT GetSelectionEndChan();
 	UINT ListChansWhereColSelected(UINT colType, CArray<UINT,UINT> &chans);
 
-	UINT GetRowFromCursor(DWORD cursor);
-	UINT GetChanFromCursor(DWORD cursor);
-	UINT GetColTypeFromCursor(DWORD cursor);
+	static ROWINDEX GetRowFromCursor(DWORD cursor);
+	static CHANNELINDEX GetChanFromCursor(DWORD cursor);
+	static UINT GetColTypeFromCursor(DWORD cursor);
 
 	bool IsInterpolationPossible(UINT startRow, UINT endRow, UINT chan, UINT colType, CSoundFile* pSndFile);
 	void Interpolate(UINT type);
@@ -340,6 +347,13 @@ private:
 	void SetEditPos(const CSoundFile& rSndFile, 
 					ROWINDEX& iRow, PATTERNINDEX& iPat,
 					const ROWINDEX iRowCandidate, const PATTERNINDEX iPatCandidate) const;
+
+	// Returns edit position.
+	ModCommandPos GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const;
+
+	// Returns pointer to modcommand at given position. If the position is not valid, returns pointer
+	// to a dummy command.
+	MODCOMMAND* GetModCommand(CSoundFile& rSf, const ModCommandPos& pos);
 
 	bool IsEditingEnabled() const {return ((m_dwStatus&PATSTATUS_RECORD) != 0);}
 

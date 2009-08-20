@@ -882,6 +882,7 @@
 #define IDC_SPIN_ADDSILENCE             2382
 #define IDC_RADIO_RESIZETO              2384
 #define IDC_EDIT_MODLOADING_WARNINGS    2385
+#define IDC_CHECK_PATRECORD             2386
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1123,7 +1124,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        521
 #define _APS_NEXT_COMMAND_VALUE         59229
-#define _APS_NEXT_CONTROL_VALUE         2386
+#define _APS_NEXT_CONTROL_VALUE         2387
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -3001,6 +3001,30 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 }
 
 
+ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const
+//-----------------------------------------------------------------------------------
+{
+	ModCommandPos editpos;
+	if(bLiveRecord)
+		SetEditPos(rSf, editpos.nRow, editpos.nPat, rSf.m_nRow, rSf.m_nPattern);
+	else
+		{editpos.nPat = m_nPattern; editpos.nRow = m_nRow;}
+	editpos.nChn = GetChanFromCursor(m_dwCursor);
+	return editpos;
+}
+
+
+MODCOMMAND* CViewPattern::GetModCommand(CSoundFile& rSf, const ModCommandPos& pos)
+//--------------------------------------------------------------------------------
+{
+	static MODCOMMAND m;
+	if (rSf.Patterns.IsValidIndex(pos.nPat) && pos.nRow < rSf.Patterns[pos.nPat].GetNumRows() && pos.nChn < rSf.GetNumChannels())
+		return rSf.Patterns[pos.nPat].GetpModCommand(pos.nRow, pos.nChn);
+	else
+		return &m;
+}
+
+
 LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 //--------------------------------------------------------
 {
@@ -3043,10 +3067,25 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	if ((event == 0x9) && !nVol) event = 0x8;	//Convert event to note-off if req'd
 
 
-	//Try finding MIDI mapping.
-	BYTE mappedIndex = 0, paramValue = 0;
+	// Handle MIDI mapping.
+	uint8 mappedIndex = uint8_max, paramValue = uint8_max;
 	uint32 paramIndex = 0;
-	if(pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue)) 
+	const bool bCaptured = pSndFile->GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue); 
+
+	// Write parameter control commands if needed.
+	if (paramValue != uint8_max && IsEditingEnabled() && pSndFile->GetType() == MOD_TYPE_MPT)
+	{
+		// Note: There's no undo for these modifications.
+		const bool bLiveRecord = IsLiveRecord(*pModDoc, *pSndFile);
+		ModCommandPos editpos = GetEditPos(*pSndFile, bLiveRecord);
+		MODCOMMAND* p = GetModCommand(*pSndFile, editpos);
+		p->Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * MODCOMMAND::maxColumnValue)/127));
+		if(bLiveRecord == false)
+			InvalidateRow(editpos.nRow);
+		pMainFrm->ThreadSafeSetModified(pModDoc);
+	}
+
+	if (bCaptured)
 		return 0;
 
 	switch(event)
@@ -3079,17 +3118,13 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			}
 
 			// Checking whether to record MIDI controller change as MIDI macro change.
-			if((CMainFrame::m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL) && IsEditingEnabled())
+			// Don't write this if command was already written by MIDI mapping.
+			if((paramValue == uint8_max || pSndFile->GetType() != MOD_TYPE_MPT) && IsEditingEnabled() && (CMainFrame::m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL))
 			{  
-				// Note: No undo for these modifications.
+				// Note: There's no undo for these modifications.
 				const bool bLiveRecord = IsLiveRecord(*pModDoc, *pSndFile);
-				ROWINDEX nRow = m_nRow;
-				PATTERNINDEX nPat = m_nPattern;
-				if(bLiveRecord)
-					SetEditPos(*pSndFile, nRow, nPat, pSndFile->m_nRow, pSndFile->m_nPattern);
-
-				const CHANNELINDEX nChn = GetChanFromCursor(m_dwCursor);
-				MODCOMMAND *p = pSndFile->Patterns[nPat].GetpModCommand(nRow, nChn);
+				ModCommandPos editpos = GetEditPos(*pSndFile, bLiveRecord);
+				MODCOMMAND* p = GetModCommand(*pSndFile, editpos);
 				if(p->command == 0 || p->command == CMD_SMOOTHMIDI || p->command == CMD_MIDI)
 				{   // Write command only if there's no existing command or already a midi macro command.
 					p->command = CMD_SMOOTHMIDI;
@@ -3098,7 +3133,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 					// Update GUI only if not recording live.
 					if(bLiveRecord == false)
-						InvalidateRow(nRow);
+						InvalidateRow(editpos.nRow);
 				}
 			}
 
@@ -4941,20 +4976,15 @@ UINT CViewPattern::ListChansWhereColSelected(UINT colType, CArray<UINT,UINT> &ch
 	return chans.GetCount();
 }
 
-UINT CViewPattern::GetRowFromCursor(DWORD cursor) {
-//-----------------------------------------------
-	return cursor >> 16;
-}
+ROWINDEX CViewPattern::GetRowFromCursor(DWORD cursor) {return cursor >> 16;}
+//---------------------------------------------------
+	
+CHANNELINDEX CViewPattern::GetChanFromCursor(DWORD cursor) {return static_cast<CHANNELINDEX>((cursor & 0xFFFF) >> 3);}
+//-------------------------------------------------------
 
-UINT CViewPattern::GetChanFromCursor(DWORD cursor) {
-//------------------------------------------------
-	return (cursor & 0xFFFF) >> 3;
-}
+UINT CViewPattern::GetColTypeFromCursor(DWORD cursor) {return cursor & 0x07;}
+//---------------------------------------------------
 
-UINT CViewPattern::GetColTypeFromCursor(DWORD cursor) {
-//--------------------------------------------------
-	return cursor & 0x07;
-}
 
 bool CViewPattern::IsInterpolationPossible(UINT startRow, UINT endRow, 
 										   UINT chan, UINT colType, CSoundFile* pSndFile) {
