@@ -95,14 +95,22 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	BYTE samples_used[(MAX_SAMPLES+7)/8];
 	UINT unused_samples;
 
-	bool bMadeWithModPlug = false;
+	bool bMadeWithModPlug = false, bProbablyMadeWithModPlug = false;
 	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	m_nChannels = 0;
 	if ((!lpStream) || (dwMemLength < 0xAA)) return false; // the smallest XM I know is 174 Bytes
 	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return false;
+
 	memcpy(m_szNames[0], lpStream + 17, 20);
+	// look for null-terminated song name - that's most likely a tune made with modplug
+	for(int i = 0; i < 20; i++)
+		if(lpStream[17 + i] == 0) bProbablyMadeWithModPlug = true;
+
+	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
+	if (!memcmp((LPCSTR)lpStream + 0x26, "Open ModPlug Tracker", 20)) bMadeWithModPlug = true;
+
 	dwHdrSize = LittleEndian(*((DWORD *)(lpStream+60)));
 	norders = LittleEndianW(*((WORD *)(lpStream+64)));
 	if ((!norders) || (norders > MAX_ORDERS)) return false;
@@ -328,6 +336,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				min(ihsize - sizeof(XMINSTRUMENTHEADER), sizeof(XMSAMPLEHEADER)));
 
 			xmsh.shsize = LittleEndian(xmsh.shsize);
+			if(xmsh.shsize == 0 && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
 
 			for (int i = 0; i < 24; ++i) {
 				xmsh.venv[i] = LittleEndianW(xmsh.venv[i]);

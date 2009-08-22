@@ -645,6 +645,21 @@ BOOL CSoundFile::ProcessRow()
 
 					if (!m_nRepeatCount) return FALSE;
 
+					ORDERINDEX nRestartPosOverride = m_nRestartPos;
+					if(!m_nRestartPos && m_nCurrentPattern <= Order.size())
+					{
+						// if we're in a subtune and there's no restart position, go to the first order of the subtune
+						for(ORDERINDEX iOrd = m_nCurrentPattern - 1; iOrd > 0; iOrd--)
+						{
+							if(Order[iOrd] == Order.GetInvalidPatIndex())
+							{
+								// Jump back to first order of this subtune
+								nRestartPosOverride = iOrd + 1;
+								break;
+							}
+						}
+					}
+
 					if(CMainFrame::GetMainFrame())
 					{
 						// If channel resetting is disabled, we will emulate a pattern break
@@ -652,7 +667,7 @@ BOOL CSoundFile::ProcessRow()
 							m_dwSongFlags |= SONG_BREAKTOROW;
 					}
 
-					if (!m_nRestartPos && !(m_dwSongFlags & SONG_BREAKTOROW))
+					if (!nRestartPosOverride && !(m_dwSongFlags & SONG_BREAKTOROW))
 					{
 						//rewbs.instroVSTi: stop all VSTi at end of song, if looping.
 						StopAllVsti();
@@ -690,7 +705,7 @@ BOOL CSoundFile::ProcessRow()
 
 					//Handle Repeat position
 					if (m_nRepeatCount > 0) m_nRepeatCount--;
-					m_nCurrentPattern = m_nRestartPos;
+					m_nCurrentPattern = nRestartPosOverride;
 					//m_nRow = 0;
 					m_dwSongFlags &= ~SONG_BREAKTOROW;
 					//If restart pos points to +++, move along
