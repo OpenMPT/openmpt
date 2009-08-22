@@ -2096,7 +2096,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 			{
 				pVstPlugin->GetParamName(param, s, 256);
 				paramName = s;
-				line.Format("FX%d: %s\t Param %d (%x): %s\n", plug, plugName, param, param+80, paramName);
+				line.Format("FX%d: %s\t Param %d (%x): %s\n", plug + 1, plugName, param, param+80, paramName);
 				message += line;
 			}
 		}

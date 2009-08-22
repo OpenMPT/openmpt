@@ -6,12 +6,14 @@
  * and partly reverse-engineered.
  *
  * What's playing?
- *  - Epic Pinball - Seems to be working perfectly, apart from some portas? (esp. Deep Sea, Shareware Info - Linear freq slides needed!?)
+ *  - Epic Pinball - Seems to be working perfectly with linear freq slides enabled
  *  - Extreme Pinball - Default tempo / speed / restart position of subtunes is missing.
  *    I'm using the last default values, restart position is still completely missing
- *  - Jazz Jackrabbit - Hmm, I don't like some of the portas, but apart from that it's great. (same problem as Epic Pinball)
+ *  - Jazz Jackrabbit - Hmm, I don't like some of the portas (BONUS.PSM - the guitar portamento is too "deep"), but apart from that it's great.
  *  - One Must Fall! - Perfect! (I modelled the volume slide and portamento conversion after this, as I got the original MTM files)
  *  - Silverball - Currently not supported (old PSM16 format)
+ *
+ * Effect conversion should be about right, however I have my doubts wheter linear freq slides are used or not.
  */
 
 #include "stdafx.h"
@@ -55,7 +57,7 @@ struct PSMSAMPLEHEADERTEST // apparently, this is wrong.
 struct PSMSAMPLEHEADER // Use this instead
 {
 	BYTE flags;
-	CHAR sampleFormat[8];
+	CHAR fileName[8];
 	DWORD sampleID;			// INS0...INS9 (only last digit of sample ID, i.e. sample 1 and sample 11 are equal)
 	CHAR sampleName[33];
 	CHAR unknown1[6];		// 00 00 00 00 00 FF
@@ -71,13 +73,6 @@ struct PSMSAMPLEHEADER // Use this instead
 };
 
 #pragma pack()
-
-BYTE convert_psm_param(BYTE param)
-{
-	// special conversion of some PSM parameters. is this done correctly?
-	return param >> 1;
-	//return (param + 1) >> 1;
-}
 
 bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------------------
@@ -97,7 +92,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// Yep, this seems to be a valid file.
 	m_nType = MOD_TYPE_PSM;
-	//m_dwSongFlags |= SONG_LINEARSLIDES; // TODO
+	m_dwSongFlags |= SONG_LINEARSLIDES; // Seems to be correct for Epic Pinball and Jazz Jackrabbit?
 	m_nChannels = 0;
 
 	dwMemPos += 12;
@@ -142,8 +137,11 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			// Pattern ID (something like "P0  " or "P13 ") follows
 			if(memcmp(lpStream + dwMemPos + 4, "P", 1)) return false;
+			char patternID[4];
+			memcpy(patternID, lpStream + dwMemPos + 5, 3);
+			patternID[3] = 0;
 			patternOffsets.push_back(dwMemPos + 8);
-			patternIDs.push_back(*(DWORD *)(lpStream + dwMemPos + 4));
+			patternIDs.push_back(atoi(patternID));
 			numPatterns++;
 
 			// Convert later as we have to know how many channels there are.
@@ -177,12 +175,12 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					{
 					case 0x45544144: // "DATE" - Song date (YYMMDD)
 						if(subChunkSize < 6) break;
+
 						CHAR cDate[7];
 						memcpy(cDate, lpStream + dwChunkPos, 6);
 						cDate[6] = 0;
 						sComment += "\r\nDate: ";
 						sComment += cDate;
-						// We don't care about the date.
 						break;
 
 					case 0x484C504F: // "OPLH" - Order list, channel + module settings
@@ -199,12 +197,20 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							{
 								switch(lpStream[dwSettingsOffset])
 								{
+								case 0x00: // Seems to be the End item
+									dwSettingsOffset += 1;
+									break;
+
 								case 0x01: // Order list item
 									if(dwSettingsOffset - dwChunkPos + 5 > subChunkSize) return false;
 									// Pattern name follows - find pattern (this is the orderlist)
 									for(PATTERNINDEX i = 0; i < patternIDs.size(); i++)
 									{
-										if(patternIDs[i] == *(DWORD *)(lpStream + dwSettingsOffset + 1))
+										char patternID[4];
+										memcpy(patternID, lpStream + dwSettingsOffset + 2, 3);
+										patternID[3] = 0;
+										DWORD nPattern = atoi(patternID);
+										if(patternIDs[i] == nPattern)
 										{
 											Order.push_back(i);
 											break;
@@ -213,9 +219,17 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 									dwSettingsOffset += 5;
 									break;
 
-								case 0x04: // "end?" "04 03 00 00" in most cases (not Extreme Pinball - maybe restart positions are dumped here?)
-									if(dwSettingsOffset - dwChunkPos + 4 > subChunkSize) return false;
-									dwSettingsOffset += 4;
+								case 0x04:
+									/* It looks like the 2nd number of this chunk could be the restart position,
+									   where position = ((number < 15) ? 0 : (number - 15)) */
+									#ifdef DEBUG
+									{
+										char s[32];
+										wsprintf(s, " - restart %d", (lpStream[dwSettingsOffset + 1] < 15) ? 0 : lpStream[dwSettingsOffset + 1] - 15);
+										sComment += s;
+										dwSettingsOffset += 3;
+									}
+									#endif
 									break;
 
 								case 0x07: // Default Speed
@@ -243,12 +257,8 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 									if(dwSettingsOffset - dwChunkPos + 3 > subChunkSize) break;
 									dwSettingsOffset += 3;
 									break;
-
-								case 0x00: // "end?"
-									dwSettingsOffset += 1;
-									break;
 								
-								default: // How the hell should this happen? I've listened through all existing PSM files. :)
+								default: // How the hell should this happen? I've listened through all existing (original) PSM files. :)
 									CString s;
 									s.Format("Please report to the OpenMPT team: Unknown chunk %d found at position %d (in the OPLH chunk of this PSM file)", lpStream[dwSettingsOffset], dwSettingsOffset);
 									MessageBox(NULL, s, TEXT("OpenMPT PSM import"), MB_ICONERROR);
@@ -288,7 +298,9 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
 				m_nSamples = max(m_nSamples, smp);
 				memcpy(m_szNames[smp], pSample->sampleName, 31);
-				m_szNames[0][31] = 0;
+				m_szNames[smp][31] = 0;
+				memcpy(Samples[smp].filename, pSample->fileName, 8);
+				Samples[smp].filename[8] = 0;
 
 				Samples[smp].nGlobalVol = 0x40;
 				Samples[smp].nC5Speed = LittleEndianW(pSample->C5Freq);
@@ -317,7 +329,6 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	if(m_nChannels == 0)
 		return false;
-
 	// Now that we know the number of channels, we can go through all the patterns.
 	for(PATTERNINDEX i = 0; i < numPatterns; i++)
 	{
@@ -350,7 +361,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(dwRowOffset + 1 > dwMemLength) return false;
 				BYTE mask = lpStream[dwRowOffset];
 				// Point to the correct channel
-				MODCOMMAND *m = row_data + min(m_nChannels, lpStream[dwRowOffset + 1]);
+				MODCOMMAND *m = row_data + min(m_nChannels - 1, lpStream[dwRowOffset + 1]);
 				dwRowOffset += 2;
 
 				if(mask & 0x80)
@@ -358,7 +369,10 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					if(dwRowOffset + 1 > dwMemLength) return false;
 					// Note present
 					BYTE bNote = lpStream[dwRowOffset];
-					bNote = (bNote & 0x0F) + 12 * (bNote >> 4) + 13;
+					if(bNote == 0xFF)
+						bNote = NOTE_NOTECUT;
+					else
+						bNote = (bNote & 0x0F) + 12 * (bNote >> 4) + 13;
 					m->note = bNote;
 					dwRowOffset++;
 				}
@@ -376,7 +390,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					if(dwRowOffset + 1 > dwMemLength) return false;
 					// Volume present
 					m->volcmd = VOLCMD_VOLUME;
-					m->vol = (min(lpStream[dwRowOffset], 127)) >> 1;
+					m->vol = (min(lpStream[dwRowOffset], 127) + 1) >> 1;
 					dwRowOffset++;
 				}
 
@@ -409,29 +423,29 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					// Portamento
 					case 0x0B: // fine portamento up
 						command = CMD_PORTAMENTOUP;
-						param = 0xF0 | convert_psm_param(param);
+						param = 0xF0 | (param >> 1);
 						break;
 					case 0x0C: // portamento up
 						command = CMD_PORTAMENTOUP;
-						param = convert_psm_param(param);
+						param >>= 1;
 						break;
 					case 0x0D: // fine portamento down
 						command = CMD_PORTAMENTODOWN;
-						param = 0xF0 | convert_psm_param(param);
+						param = 0xF0 | (param >> 1);
 						break;
 					case 0x0E: // portamento down
 						command = CMD_PORTAMENTODOWN;
-						param = convert_psm_param(param);
+						param >>= 1;
 						break;					
 					case 0x0F: // tone portamento
 						command = CMD_TONEPORTAMENTO;
-						param = convert_psm_param(param);
+						param >>= 2;
 						break;
-					case 0x10: // glissando control
+					case 0x11: // glissando control
 						command = CMD_S3MCMDEX;
 						param = 0x10 | (param & 0x01);
 						break;
-					case 0x11: // tone portamento + volslide up
+					case 0x10: // tone portamento + volslide up
 						command = CMD_TONEPORTAVOL;
 						param = param & 0xF0;
 						break;
@@ -472,9 +486,8 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						param = lpStream[dwRowOffset + 2];
 						dwRowOffset += 2;
 						break;
-					case 0x2A: // set finetune
-						command = CMD_S3MCMDEX;
-						param = 0x40 | (param & 0x0F);
+					case 0x2A: // retrigger
+						command = CMD_RETRIG;
 						break;
 					case 0x2B: // note cut
 						command = CMD_S3MCMDEX;
@@ -488,9 +501,11 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					// Position change
 					case 0x33: // position jump
 						command = CMD_POSITIONJUMP;
+						param >>= 1;
 						break;
 					case 0x34: // pattern break
 						command = CMD_PATTERNBREAK;
+						param >>= 1;
 						break;
 					case 0x35: // loop pattern
 						command = CMD_S3MCMDEX;
@@ -514,16 +529,22 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						command = CMD_ARPEGGIO;
 						break;
 					case 0x48: // set finetune
-						command = CMD_MODCMDEX;
-						param = 0x50 | (param & 0x0F);
+						command = CMD_S3MCMDEX;
+						param = 0x20 | (param & 0x0F);
 						break;
 					case 0x49: // set balance
 						command = CMD_S3MCMDEX;
 						param = 0x80 | (param & 0x0F);
 						break;
 
+					case CMD_MODCMDEX:
+						// for some strange home-made tunes
+						command = CMD_S3MCMDEX;
+						break;
+
 					default:
-						//ASSERT(false);
+						ASSERT(false);
+						//command = CMD_NONE;
 						break;
 
 					}
