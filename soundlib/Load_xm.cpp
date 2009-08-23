@@ -109,7 +109,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		if(lpStream[17 + i] == 0) bProbablyMadeWithModPlug = true;
 
 	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
-	if (!memcmp((LPCSTR)lpStream + 0x26, "Open ModPlug Tracker", 20)) bMadeWithModPlug = true;
+	if (!memcmp((LPCSTR)lpStream + 0x26, "OpenMPT ", 8)) bMadeWithModPlug = true;
 
 	dwHdrSize = LittleEndian(*((DWORD *)(lpStream+60)));
 	norders = LittleEndianW(*((WORD *)(lpStream+64)));
@@ -180,20 +180,20 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		UINT ipatmap = pattern_map[ipat];
 		DWORD dwSize = 0;
 		WORD rows=64, packsize=0;
-		dwSize = LittleEndian(*((DWORD *)(lpStream+dwMemPos)));
-		while ((dwMemPos + dwSize >= dwMemLength) || (dwSize & 0xFFFFFF00))
+		dwSize = LittleEndian(*((DWORD *)(lpStream + dwMemPos)));
+		/*while ((dwMemPos + dwSize >= dwMemLength) || (dwSize & 0xFFFFFF00))
 		{
 			if (dwMemPos + 4 >= dwMemLength) break;
 			dwMemPos++;
 			dwSize = LittleEndian(*((DWORD *)(lpStream+dwMemPos)));
-		}
-		rows = LittleEndianW(*((WORD *)(lpStream+dwMemPos+5)));
+		}*/
+		rows = LittleEndianW(*((WORD *)(lpStream + dwMemPos + 5)));
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
 //		if ((!rows) || (rows > 256)) rows = 64;
 		if ((!rows) || (rows > MAX_PATTERN_ROWS)) rows = 64;
 // -> BEHAVIOUR_CHANGE#0008
-		packsize = LittleEndianW(*((WORD *)(lpStream+dwMemPos+7)));
+		packsize = LittleEndianW(*((WORD *)(lpStream + dwMemPos + 7)));
 		if (dwMemPos + dwSize + 4 > dwMemLength) return true;
 		dwMemPos += dwSize;
 		if (dwMemPos + packsize > dwMemLength) return true;
@@ -694,9 +694,9 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	fwrite("Extended Module: ", 17, 1, f);
 	fwrite(m_szNames[0], 20, 1, f);
 	s[0] = 0x1A;
-	lstrcpy((LPSTR)&s[1], (nPacking) ? "MOD Plugin packed   " : "Open ModPlug Tracker");
-	s[21] = 0x04;
-	s[22] = 0x01;
+	lstrcpy((LPSTR)&s[1], (nPacking) ? "MOD Plugin packed   " : "OpenMPT " MPT_VERSION_STR "  ");
+	s[21] = 0x04; // Version number
+	s[22] = 0x01; // XM Format v1.04
 	fwrite(&s[0], 23, 1, f);
 	// Writing song header
 	memset(&header, 0, sizeof(header));
