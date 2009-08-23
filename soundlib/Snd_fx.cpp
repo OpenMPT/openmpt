@@ -1420,7 +1420,10 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_VIBRATOSPEED:
-					Vibrato(pChn, vol << 4);
+					if(IsCompatibleMode(TRK_FASTTRACKER2))
+						pChn->nVibratoSpeed = vol & 0x0F;
+					else
+						Vibrato(pChn, vol << 4);
 					break;
 
 				case VOLCMD_VIBRATODEPTH:
@@ -2386,6 +2389,8 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 		{
 			if (param & 0x0F) nPanSlide = -(int)((param & 0x0F) << 2);
 			else nPanSlide = (int)((param & 0xF0) >> 2);
+			if(IsCompatibleMode(TRK_FASTTRACKER2))
+				nPanSlide >>= 2;
 		}
 	}
 	if (nPanSlide)
