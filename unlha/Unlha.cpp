@@ -69,6 +69,8 @@ CLhaArchive::CLhaArchive(LPBYTE lpStream, DWORD dwMemLength, LPCSTR lpszExtensio
 	m_lpOutputFile = 0;
 	m_dwOutputLen = 0;
 	m_pDecoderData = NULL;
+
+	gpHufData = NULL;
 }
 
 

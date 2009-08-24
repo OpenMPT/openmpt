@@ -26,10 +26,10 @@ LPBYTE CLhaArchive::open_with_make_path(const char *, int size)
 }
 
 
-const char *methods[10] =
+const char *methods[12] =
 {
-	"-lh0-", "-lh1-", "-lh2-", "-lh3-", "-lh4-",
-	"-lh5-", "-lzs-", "-lz5-", "-lz4-", NULL
+	"-lh0-", "-lh1-", "-lh2-", "-lh3-", "-lh4-", "-lh5-",
+	"-lh6-", "-lh7-", "-lzs-", "-lz5-", "-lz4-", NULL
 };
 
 
