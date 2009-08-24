@@ -1148,6 +1148,14 @@ public:
 	void CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut);
 	void NoteChange(UINT nChn, int note, BOOL bPorta=FALSE, BOOL bResetEnv=TRUE, BOOL bManual=FALSE);
 	void InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta=FALSE,BOOL bUpdVol=TRUE,BOOL bResetEnv=TRUE);
+
+	// Channel Effects
+	void KeyOff(UINT nChn);
+	// Global Effects
+	void SetTempo(UINT param, bool setAsNonModcommand = false);
+	void SetSpeed(UINT param);
+
+private:
 	// Channel Effects
 	void PortamentoUp(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
 	void PortamentoDown(MODCHANNEL *pChn, UINT param, const bool fineAsRegular = false);
@@ -1170,7 +1178,6 @@ public:
 	void RetrigNote(UINT nChn, UINT param, UINT offset=0);  //rewbs.volOffset: added last param
 	void SampleOffset(UINT nChn, UINT param, bool bPorta);	//rewbs.volOffset: moved offset code to own method
 	void NoteCut(UINT nChn, UINT nTick);
-	void KeyOff(UINT nChn);
 	int PatternLoop(MODCHANNEL *, UINT param);
 	void ExtendedMODCommands(UINT nChn, UINT param);
 	void ExtendedS3MCommands(UINT nChn, UINT param);
@@ -1180,12 +1187,14 @@ public:
 	void SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modifier=256) const;
 	// Low-Level effect processing
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);
-	// Global Effects
-	void SetTempo(UINT param, bool setAsNonModcommand = false);
-	void SetSpeed(UINT param);
 	void GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide);
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
 	BOOL IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const;
+public:
+
+	// Write pattern effect functions
+	bool TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn = CHANNELINDEX_INVALID, bool bAllowMultipleEffects = true, bool bAllowNextRow = false, bool bRetry = true);
+	
 	// Read/Write sample functions
 	char GetDeltaValue(char prev, UINT n) const { return (char)(prev + CompressionTable[n & 0x0F]); }
 	UINT PackSample(int &sample, int next);

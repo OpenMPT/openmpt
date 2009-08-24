@@ -77,17 +77,9 @@ struct PSMNEWSAMPLEHEADER // Sinaria sample header (and possibly other games)
 };
 #pragma pack()
 
-BYTE convert_psm_porta(BYTE param, bool bNewFormat)
+inline BYTE convert_psm_porta(BYTE param, bool bNewFormat)
 {
-	if(bNewFormat)
-	{
-		return param;
-	}
-	else
-	{
-		if(param < 4) return param | 0xF0;
-		else return (param >> 2);
-	}
+	return ((bNewFormat) ? (param) : ((param < 4) ? (param | 0xF0) : (param >> 2)));
 }
 
 bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
@@ -109,7 +101,6 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// Yep, this seems to be a valid file.
 	m_nType = MOD_TYPE_PSM;
-	//m_dwSongFlags |= SONG_LINEARSLIDES; // TODO
 	m_nChannels = 0;
 
 	dwMemPos += 12;
@@ -207,6 +198,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 									break;
 								}
 							}
+							// Sinaria song dates
 							if(version == 800211 || version == 940902 || version == 940903 ||
 								version == 940906 || version == 940914 || version == 941213)
 								bNewFormat = true;

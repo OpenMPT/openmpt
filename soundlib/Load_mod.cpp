@@ -41,7 +41,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 0x0D:	command = CMD_PATTERNBREAK; param = ((param >> 4) * 10) + (param & 0x0F); break;
 	case 0x0E:	command = CMD_MODCMDEX; break;
 	case 0x0F:	command = (param <= (UINT)((m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? 0x1F : 0x20)) ? CMD_SPEED : CMD_TEMPO;
-				if ((param == 0xFF) && (m_nSamples == 15)) command = 0; break; //<rewbs> what the hell is this?! :) //<jojo> it's the "stop tune" command! :-P
+				if ((param == 0xFF) && (m_nSamples == 15) && (m_nType & MOD_TYPE_MOD)) command = 0; break; //<rewbs> what the hell is this?! :) //<jojo> it's the "stop tune" command! :-P
 	// Extension for XM extended effects
 	case 'G' - 55:	command = CMD_GLOBALVOLUME; break;		//16
 	case 'H' - 55:	command = CMD_GLOBALVOLSLIDE; if (param & 0xF0) param &= 0xF0; break;
@@ -97,16 +97,24 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 	case CMD_TREMOLO:			command = 0x07; break;
 	case CMD_PANNING8:			
 		command = 0x08;
-		if (bXM)
+		if(m_nType & MOD_TYPE_S3M)
 		{
-			if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (m_nType != MOD_TYPE_XM) && (param <= 0x80))
+			if(param <= 0x80)
 			{
-				param <<= 1;
-				if (param > 255) param = 255;
+				param = min(param << 1, 0xFF);
 			}
-		} else
-		{
-			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) || (m_nType == MOD_TYPE_XM)) param >>= 1;
+			else if(param == 0xA4)
+			{
+				if(bCompatibilityExport || !bXM)
+				{
+					command = param = 0;
+				}
+				else
+				{
+					command = 'X' - 55;
+					param = 91;
+				}
+			}
 		}
 		break;
 	case CMD_OFFSET:			command = 0x09; break;
@@ -115,8 +123,8 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 	case CMD_VOLUME:			command = 0x0C; break;
 	case CMD_PATTERNBREAK:		command = 0x0D; param = ((param / 10) << 4) | (param % 10); break;
 	case CMD_MODCMDEX:			command = 0x0E; break;
-	case CMD_SPEED:				command = 0x0F; if (param > 0x20) param = 0x20; break;
-	case CMD_TEMPO:				if (param >= 0x20) { command = 0x0F; break; }
+	case CMD_SPEED:				command = 0x0F; param = min(param, (bXM) ? 0x1F : 0x20); break;
+	case CMD_TEMPO:				command = 0x0F; param = max(param, (bXM) ? 0x20 : 0x21); break;
 	case CMD_GLOBALVOLUME:		command = 'G' - 55; break;
 	case CMD_GLOBALVOLSLIDE:	command = 'H' - 55; break;
 	case CMD_KEYOFF:			command = 'K' - 55; break;
@@ -355,7 +363,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		if (ipat < MAX_PATTERNS)
 		{
 			if(Patterns.Insert(ipat, 64)) break;
-			if (dwMemPos + m_nChannels*256 >= dwMemLength) break;
+			if (dwMemPos + m_nChannels * 256 > dwMemLength) break;
 			MODCOMMAND *m = Patterns[ipat];
 			LPCBYTE p = lpStream + dwMemPos;
 			for (UINT j=m_nChannels*64; j; m++,p+=4,j--)
@@ -371,18 +379,21 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		dwMemPos += m_nChannels*256;
 	}
-	// Reading instruments
+
+	// Reading samples
 	DWORD dwErrCheck = 0;
-	for (UINT ismp=1; ismp<=m_nSamples; ismp++) if (Samples[ismp].nLength)
+	for (UINT ismp = 1; ismp <= m_nSamples; ismp++) if (Samples[ismp].nLength)
 	{
-		LPSTR p = (LPSTR)(lpStream+dwMemPos);
+		LPSTR p = (LPSTR)(lpStream + dwMemPos);
 		UINT flags = 0;
-		if (dwMemPos + 5 >= dwMemLength) break;
-		if (!_strnicmp(p, "ADPCM", 5))
+		if (dwMemPos + 5 <= dwMemLength)
 		{
-			flags = 3;
-			p += 5;
-			dwMemPos += 5;
+			if (!_strnicmp(p, "ADPCM", 5))
+			{
+				flags = 3;
+				p += 5;
+				dwMemPos += 5;
+			}
 		}
 		DWORD dwSize = ReadSample(&Samples[ismp], flags, p, dwMemLength - dwMemPos);
 		if (dwSize)
@@ -394,7 +405,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 #ifdef MODPLUG_TRACKER
 	return true;
 #else
-	return (dwErrCheck) ? TRUE : FALSE;
+	return (dwErrCheck) ? true : false;
 #endif
 }
 
