@@ -3040,3 +3040,152 @@ const CModSpecifications& CSoundFile::GetModSpecifications(const MODTYPE type)
 	return *p;
 }
 
+/* Try to write an (volume) effect in a given channel or any channel of a pattern in a specific row.
+   Usage: nPat - Pattern that should be modified
+          nRow - Row that should be modified
+		  nEffect - (Volume) Effect that should be written
+		  nParam - Effect that should be written
+          bIsVolumeEffect  - Indicates whether the given effect is a volume effect or not
+		  nChn - Channel that should be modified - use CHANNELINDEX_INVALID to allow all channels of the given row
+		  bAllowMultipleEffects - If false, No effect will be written if an effect of the same type is already present in the channel(s)
+		  bAllowNextRow - Indicates whether it is allowed to use the next row if there's no space for the effect
+		  bRetry - For internal use only. Indicates whether an effect "rewrite" has already taken place (for recursive calls)
+*/ 
+bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn, bool bAllowMultipleEffects, bool bAllowNextRow, bool bRetry)
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+{
+	// NOTE: Effect remapping is only implemented for a few basic effects.
+	CHANNELINDEX nScanChnMin = nChn, nScanChnMax = nChn;
+	MODCOMMAND *p = Patterns[nPat], *m;
+
+	// Scan all channels
+	if(nChn == CHANNELINDEX_INVALID)
+	{
+		nScanChnMin = 0;
+		nScanChnMax = m_nChannels - 1;
+	}
+
+	// Scan channel(s) for same effect type - if an effect of the same type is already present, exit.
+	if(bAllowMultipleEffects == false)
+	{
+		for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++)
+		{
+			m = p + nRow * m_nChannels + i;
+			if(!bIsVolumeEffect && m->command == nEffect)
+				return true;
+			if(bIsVolumeEffect && m->volcmd == nEffect)
+				return true;
+		}
+	}
+
+	// Easy case: check if there's some space left to put the effect somewhere
+	for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++)
+	{
+		m = p + nRow * m_nChannels + i;
+		if(!bIsVolumeEffect && m->command == CMD_NONE)
+		{
+			m->command = nEffect;
+			m->param = nParam;
+			return true;
+		}
+		if(bIsVolumeEffect && m->volcmd == VOLCMD_NONE)
+		{
+			m->volcmd = nEffect;
+			m->vol = nParam;
+			return true;
+		}
+	}
+
+	// Ok, apparently there's no space. If we haven't tried already, try to map it to the volume column or effect column instead.
+	if(bRetry == true) {
+		// Move some effects that also work in the volume column, so there's place for our new effect.
+		if(!bIsVolumeEffect)
+		{
+			for(CHANNELINDEX i = nScanChnMin; i <= nScanChnMax; i++)
+			{
+				m = p + nRow * m_nChannels + i;
+				switch(m->command)
+				{
+				case CMD_VOLUME:
+					m->volcmd = VOLCMD_VOLUME;
+					m->vol = m->param;
+					m->command = nEffect;
+					m->param = nParam;
+					return true;
+
+				case CMD_PANNING8:
+					if(m_nType & MOD_TYPE_S3M && nParam > 0x80)
+						break;
+
+					m->volcmd = VOLCMD_VOLUME;
+					m->command = nEffect;
+
+					if(m_nType & MOD_TYPE_S3M)
+					{
+						m->vol = m->param >> 1;
+					}
+					else
+					{
+						m->vol = (m->param >> 2) + 1;
+					}
+
+					m->param = nParam;
+					return true;
+				}
+			}
+		}
+
+		// Let's try it again by writing into the "other" effect column.
+		BYTE nNewEffect = CMD_NONE;
+		if(bIsVolumeEffect)
+		{
+			switch(nEffect)
+			{
+			case VOLCMD_PANNING:
+				nNewEffect = CMD_PANNING8;
+				if(m_nType & MOD_TYPE_S3M)
+					nParam <<= 1;
+				else
+					nParam = min(nParam << 2, 0xFF);
+				break;
+			case VOLCMD_VOLUME:
+				nNewEffect = CMD_VOLUME;
+				break;
+			}
+		} else
+		{
+			switch(nEffect)
+			{
+			case CMD_PANNING8:
+				nNewEffect = VOLCMD_PANNING;
+				if(m_nType & MOD_TYPE_S3M)
+				{
+					if(nParam <= 0x80)
+						nParam >>= 1;
+					else
+						nNewEffect = CMD_NONE;
+				}
+				else
+				{
+					nParam = (nParam >> 2) + 1;
+				}
+				break;
+			case CMD_VOLUME:
+				nNewEffect = CMD_VOLUME;
+				break;
+			}
+		}
+		if(nNewEffect != CMD_NONE)
+		{
+			if(TryWriteEffect(nPat, nRow, nNewEffect, nParam, !bIsVolumeEffect, nChn, bAllowMultipleEffects, bAllowNextRow, false) == true) return true;
+		}
+	}
+
+	// Try in the next row if possible (this may also happen if we already retried)
+	if(bAllowNextRow && (nRow + 1 < Patterns[nPat].GetNumRows()))
+	{
+		return TryWriteEffect(nPat, nRow + 1, nEffect, nParam, bIsVolumeEffect, nChn, bAllowMultipleEffects, bAllowNextRow, bRetry);
+	}
+
+	return false;
+}
