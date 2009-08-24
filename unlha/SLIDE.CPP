@@ -43,17 +43,19 @@ void CLhaArchive::decode(LzInterfacing *pinterface)
 	{
 	case 1:		decode_start_dyn(); break;
 	case 2:		decode_start_st0(); break;
-	case 3:		decode_start_st1(); break;
-	case 4:		decode_start_st1(); break;
-	case 5:		decode_start_lzs(); break;
-	case 6:		decode_start_lz5(text); break;
+	case 3:		decode_start_st1(12); break;
+	case 4:		decode_start_st1(13); break;
+	case 5:		decode_start_st1(15); break;
+	case 6:		decode_start_st1(16); break;
+	case 7:		decode_start_lzs(); break;
+	case 8:		decode_start_lz5(text); break;
 	default:	decode_start_fix(); break;
 	}
 #ifdef LHADEBUG
 	Log("Starting Decode (original size=%d)...\n", pinterface->original);
 #endif
 	dicsiz1 = dicsiz - 1;
-	offset = (pinterface->method == 6) ? 0x100 - 2 : 0x100 - 3;
+	offset = (pinterface->method == 8) ? 0x100 - 2 : 0x100 - 3;
 	count = 0;
 	loc = 0;
 	while (count < pinterface->original)
@@ -64,8 +66,10 @@ void CLhaArchive::decode(LzInterfacing *pinterface)
 		case 2:		c = decode_c_st0(); break;
 		case 3:		c = decode_c_st1(); break;
 		case 4:		c = decode_c_st1(); break;
-		case 5:		c = decode_c_lzs(); break;
-		case 6:		c = decode_c_lz5(); break;
+		case 5:		c = decode_c_st1(); break;
+		case 6:		c = decode_c_st1(); break;
+		case 7:		c = decode_c_lzs(); break;
+		case 8:		c = decode_c_lz5(); break;
 		default:	c = decode_c_dyn(); break;
 		}
 		if (c <= 255)
@@ -86,8 +90,10 @@ void CLhaArchive::decode(LzInterfacing *pinterface)
 			case 2:		d = decode_p_st0(); break;
 			case 3:		d = decode_p_st1(); break;
 			case 4:		d = decode_p_st1(); break;
-			case 5:		d = decode_p_lzs(); break;
-			case 6:		d = decode_p_lz5(); break;
+			case 5:		d = decode_p_st1(); break;
+			case 6:		d = decode_p_st1(); break;
+			case 7:		d = decode_p_lzs(); break;
+			case 8:		d = decode_p_lz5(); break;
 			default:	d = decode_p_st0(); break;
 			}
 			int j = c - offset;

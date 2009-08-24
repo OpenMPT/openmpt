@@ -11,7 +11,7 @@
 
 
 /* from slide.c */
-#define MAX_DICBIT    13 
+#define MAX_DICBIT    16 // 13 
 #define MAX_DICSIZ (1 << MAX_DICBIT)
 #define MATCHBIT   8    /* bits for MAXMATCH - THRESHOLD */
 

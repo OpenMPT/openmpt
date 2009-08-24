@@ -513,10 +513,9 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	//TODO: Check whether the 0xF0 mask is correct.
 	//		(there are two bytes reserved from the header, so why 0xF0 mask?).
 	//nbo = (GetNumPatterns() + 15) & 0xF0;
-	nbo = Order.GetLengthTailTrimmed() + 15;
+	nbo = Order.GetLengthTailTrimmed();
 	if(nbo > 0xF0) nbo = 0xF0;
-	nbo = nbo & 0xF0;
-	if (!nbo) nbo = 16;
+	if (!nbo) nbo = 1;
 	header[0x20] = nbo & 0xFF;
 	header[0x21] = nbo >> 8;
 	nbi = m_nInstruments;

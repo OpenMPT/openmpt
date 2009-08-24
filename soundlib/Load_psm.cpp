@@ -38,7 +38,7 @@ struct PSMSONGHEADER
 
 };
 
-struct PSMSAMPLEHEADER // Regular sample header
+struct PSMOLDSAMPLEHEADER // Regular sample header
 {
 	BYTE flags;
 	CHAR fileName[8];		// Filename of the original module (without extension)
@@ -49,14 +49,15 @@ struct PSMSAMPLEHEADER // Regular sample header
 	DWORD sampleLength;
 	DWORD loopStart;
 	DWORD loopEnd;			// FF FF FF FF = end of sample
-	WORD unknown3;
+	BYTE unknown3;
+	BYTE defaulPan;			// unused?
 	BYTE defaultVolume;
 	DWORD unknown4;
 	WORD C5Freq;
 	CHAR unknown5[21];		// 00 ... 00
 };
 
-struct PSMSAMPLEHEADERSINARIA // Sinaria sample header
+struct PSMNEWSAMPLEHEADER // Sinaria sample header (and possibly other games)
 {
 	BYTE flags;
 	CHAR fileName[8];		// Filename of the original module (without extension)
@@ -68,20 +69,25 @@ struct PSMSAMPLEHEADERSINARIA // Sinaria sample header
 	DWORD loopStart;
 	DWORD loopEnd;
 	WORD unknown3;
-	BYTE unknown4;
+	BYTE defaultPan;		// unused?
 	BYTE defaultVolume;
-	DWORD unknown5;
+	DWORD unknown4;
 	WORD C5Freq;
-	CHAR unknown6[16];		// 00 ... 00
+	CHAR unknown5[16];		// 00 ... 00
 };
 #pragma pack()
 
-BYTE convert_psm_effect(BYTE param, bool bIsSinaria)
+BYTE convert_psm_porta(BYTE param, bool bNewFormat)
 {
-	if(bIsSinaria)
+	if(bNewFormat)
+	{
 		return param;
+	}
 	else
-		return (param >> 2);
+	{
+		if(param < 4) return param | 0xF0;
+		else return (param >> 2);
+	}
 }
 
 bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
@@ -91,7 +97,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
 
 	DWORD dwMemPos = 0;
-	bool bIsSinaria = false; // The game "Sinaria" uses a slightly modified PSM structure
+	bool bNewFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
 
 	ASSERT_CAN_READ(12);
 	PSMHEADER shdr;
@@ -148,11 +154,11 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			// Pattern ID (something like "P0  " or "P13 ") follows
 			if(memcmp(lpStream + dwMemPos + 4, "P", 1)) return false;
-			if(!memcmp(lpStream + dwMemPos + 4, "PATT", 4)) bIsSinaria = true;
+			if(!memcmp(lpStream + dwMemPos + 4, "PATT", 4)) bNewFormat = true;
 			char patternID[4];
-			memcpy(patternID, lpStream + dwMemPos + 5 + (bIsSinaria ? 3 : 0), 3);
+			memcpy(patternID, lpStream + dwMemPos + 5 + (bNewFormat ? 3 : 0), 3);
 			patternID[3] = 0;
-			patternOffsets.push_back(dwMemPos + 8 + (bIsSinaria ? 4 : 0));
+			patternOffsets.push_back(dwMemPos + 8 + (bNewFormat ? 4 : 0));
 			patternIDs.push_back(atoi(patternID));
 			numPatterns++;
 
@@ -185,23 +191,46 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 					switch(subChunkID)
 					{
-					case 0x45544144: // "DATE" - Song date (YYMMDD)
-						if(subChunkSize < 6) break;
+					case 0x45544144: // "DATE" - Conversion date (YYMMDD)
+						if(subChunkSize != 6) break;
 
+						{
+							int version;
+							for(DWORD i = 0; i < subChunkSize; i++)
+							{
+								if(lpStream[dwChunkPos + i] >= '0' && lpStream[dwChunkPos + i] <= '9')
+								{
+									version = (version * 10) + (lpStream[dwChunkPos + i] - '0');
+								} else
+								{
+									version = 0;
+									break;
+								}
+							}
+							if(version == 800211 || version == 940902 || version == 940903 ||
+								version == 940906 || version == 940914 || version == 941213)
+								bNewFormat = true;
+						}
+						#ifdef DEBUG
 						CHAR cDate[7];
 						memcpy(cDate, lpStream + dwChunkPos, 6);
 						cDate[6] = 0;
-						sComment += " - Date: ";
+						sComment += " - Build Date: ";
 						sComment += cDate;
+						if(bNewFormat) sComment += " (New Format)";
+						else sComment += " (Old Format)";
+						#endif
 						break;
 
 					case 0x484C504F: // "OPLH" - Order list, channel + module settings
 						{
 							if(subChunkSize < 9) return false;
-							// First two bytes = "Memory alloc, roughly ordlen + 10, if too small, song freezes"
+							// First two bytes = Number of chunks that follow
+							//WORD nTotalChunks = LittleEndian(*(WORD *)(lpStream + dwChunkPos));
 							
 							// Now, the interesting part begins!
 							DWORD dwSettingsOffset = dwChunkPos + 2;
+							WORD nChunkCount = 0, nFirstOrderChunk = (WORD)-1;
 							while(dwSettingsOffset - dwChunkPos + 1 < subChunkSize)
 							{
 								switch(lpStream[dwSettingsOffset])
@@ -216,7 +245,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 									for(PATTERNINDEX i = 0; i < patternIDs.size(); i++)
 									{
 										char patternID[4];
-										memcpy(patternID, lpStream + dwSettingsOffset + 2 + (bIsSinaria ? 3 : 0), 3);
+										memcpy(patternID, lpStream + dwSettingsOffset + 2 + (bNewFormat ? 3 : 0), 3);
 										patternID[3] = 0;
 										DWORD nPattern = atoi(patternID);
 										if(patternIDs[i] == nPattern)
@@ -225,23 +254,25 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 											break;
 										}
 									}
-									dwSettingsOffset += 5 + (bIsSinaria ? 4 : 0);
+									if(nFirstOrderChunk == (WORD)-1) nFirstOrderChunk = nChunkCount;
+									dwSettingsOffset += 5 + (bNewFormat ? 4 : 0);
 									break;
 
-								case 0x04:
-									/* It looks like the 2nd number of this chunk could be the restart position,
-									   where position = ((number < 15) ? 0 : (number - 15)) */
-
-									//uint32 pos = lpStream[dwSettingsOffset + 1] | (lpStream[dwSettingsOffset + 2] << 8);
-
-									// NOTE: This should not be global! (Extreme Pinball!!!)
-									#ifdef DEBUG
+								case 0x04: // Restart position
 									{
-										char s[32];
-										wsprintf(s, " - restart %d", (lpStream[dwSettingsOffset + 1] < 15) ? 0 : lpStream[dwSettingsOffset + 1] - 15);
-										sComment += s;
+										// NOTE: This should not be global! (Extreme Pinball!!!)
+										WORD nRestartChunk = LittleEndian(*(WORD *)(lpStream + dwSettingsOffset + 1));
+										ORDERINDEX nRestartPosition = 0;
+										if(nRestartChunk == 0) nRestartPosition = 0;
+										else if(nRestartChunk >= nFirstOrderChunk) nRestartPosition = (ORDERINDEX)(nRestartChunk - nFirstOrderChunk);
+										#ifdef DEBUG
+										{
+											char s[32];
+											wsprintf(s, " - restart pos %d", nRestartPosition);
+											sComment += s;
+										}
+										#endif
 									}
-									#endif
 									dwSettingsOffset += 3;
 									break;
 
@@ -277,7 +308,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 										switch(lpStream[dwSettingsOffset + 3])
 										{
 										case 0:
-											ChnSettings[nChn].nPan = lpStream[dwSettingsOffset + 2];
+											ChnSettings[nChn].nPan = lpStream[dwSettingsOffset + 2] ^ 128;
 											break;
 
 										case 2:
@@ -309,6 +340,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 									break;
 
 								}
+								nChunkCount++;
 							}
 							Order.push_back(Order.GetInvalidPatIndex());
 						}
@@ -322,7 +354,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							switch(lpStream[dwChunkPos + i])
 							{
 							case 0:
-								ChnSettings[i >> 1].nPan = lpStream[dwChunkPos + i + 1] - 128;
+								ChnSettings[i >> 1].nPan = lpStream[dwChunkPos + i + 1] ^ 128;
 								break;
 
 							case 2:
@@ -357,10 +389,10 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			break;
 
 		case 0x504D5344: // DSMP - Samples
-			if(!bIsSinaria)
+			if(!bNewFormat)
 			{
-				if(chunkSize < sizeof(PSMSAMPLEHEADER)) return false;
-				PSMSAMPLEHEADER *pSample = (PSMSAMPLEHEADER *)(lpStream + dwMemPos);
+				if(chunkSize < sizeof(PSMOLDSAMPLEHEADER)) return false;
+				PSMOLDSAMPLEHEADER *pSample = (PSMOLDSAMPLEHEADER *)(lpStream + dwMemPos);
 				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
 				m_nSamples = max(m_nSamples, smp);
 				memcpy(m_szNames[smp], pSample->sampleName, 31);
@@ -379,12 +411,12 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(Samples[smp].nLoopEnd == 0xFFFFFF) Samples[smp].nLoopEnd = Samples[smp].nLength;
 
 				// Delta-encoded samples
-				ReadSample(&Samples[smp], RS_PCM8D, (LPCSTR)(lpStream + dwMemPos + sizeof(PSMSAMPLEHEADER)), Samples[smp].nLength);
+				ReadSample(&Samples[smp], RS_PCM8D, (LPCSTR)(lpStream + dwMemPos + sizeof(PSMOLDSAMPLEHEADER)), Samples[smp].nLength);
 			} else
 			{
 				// Sinaria uses a slightly different sample header
-				if(chunkSize < sizeof(PSMSAMPLEHEADERSINARIA)) return false;
-				PSMSAMPLEHEADERSINARIA *pSample = (PSMSAMPLEHEADERSINARIA *)(lpStream + dwMemPos);
+				if(chunkSize < sizeof(PSMNEWSAMPLEHEADER)) return false;
+				PSMNEWSAMPLEHEADER *pSample = (PSMNEWSAMPLEHEADER *)(lpStream + dwMemPos);
 				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
 				m_nSamples = max(m_nSamples, smp);
 				memcpy(m_szNames[smp], pSample->sampleName, 31);
@@ -403,7 +435,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(Samples[smp].nLoopEnd == 0xFFFFFF) Samples[smp].nLoopEnd = Samples[smp].nLength;
 
 				// Delta-encoded samples
-				ReadSample(&Samples[smp], RS_PCM8D, (LPCSTR)(lpStream + dwMemPos + sizeof(PSMSAMPLEHEADERSINARIA)), Samples[smp].nLength);
+				ReadSample(&Samples[smp], RS_PCM8D, (LPCSTR)(lpStream + dwMemPos + sizeof(PSMNEWSAMPLEHEADER)), Samples[smp].nLength);
 			}
 
 			break;
@@ -419,24 +451,24 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if(m_nChannels == 0)
 		return false;
 	// Now that we know the number of channels, we can go through all the patterns.
-	for(PATTERNINDEX i = 0; i < numPatterns; i++)
+	for(PATTERNINDEX nPat = 0; nPat < numPatterns; nPat++)
 	{
-		DWORD dwPatternOffset = patternOffsets[i];
+		DWORD dwPatternOffset = patternOffsets[nPat];
 		if(dwPatternOffset + 2 > dwMemLength) return false;
 		WORD patternSize = LittleEndianW(*(WORD *)(lpStream + dwPatternOffset));
 		dwPatternOffset += 2;
 
-		if(Patterns.Insert(i, patternSize))
+		if(Patterns.Insert(nPat, patternSize))
 		{
 			CString s;
-			s.Format(TEXT("Allocating patterns failed starting from pattern %u"), i);
+			s.Format(TEXT("Allocating patterns failed starting from pattern %u"), nPat);
 			MessageBox(NULL, s, TEXT("OpenMPT PSM import"), MB_ICONERROR);
 			break;
 		}
 
 		// Read pattern.
 		MODCOMMAND *row_data;
-		row_data = Patterns[i];
+		row_data = Patterns[nPat];
 
 		for(int nRow = 0; nRow < patternSize; nRow++)
 		{
@@ -458,15 +490,15 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					if(dwRowOffset + 1 > dwMemLength) return false;
 					// Note present
 					BYTE bNote = lpStream[dwRowOffset];
-					if(!bIsSinaria)
+					if(!bNewFormat)
 					{
 						if(bNote == 0xFF)
 							bNote = NOTE_NOTECUT;
 						else
-							bNote = (bNote & 0x0F) + 12 * (bNote >> 4) + 13;
+							if(bNote < 129) bNote = (bNote & 0x0F) + 12 * (bNote >> 4) + 13;
 					} else
 					{
-						bNote += 36;
+						if(bNote < 85) bNote += 36;
 					}
 					m->note = bNote;
 					dwRowOffset++;
@@ -500,41 +532,45 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					// Volslides
 					case 0x01: // fine volslide up
 						command = CMD_VOLUMESLIDE;
-						param = (param << 3) | 0x0F;
+						if (bNewFormat) param = (param << 4) | 0x0F;
+						else param = ((param & 0x1E) << 3) | 0x0F;
 						break;
 					case 0x02: // volslide up
 						command = CMD_VOLUMESLIDE;
-						param = (param << 3);
+						if (bNewFormat) param = 0xF0 & (param << 4);
+						else param = 0xF0 & (param << 3);
 						break;
 					case 0x03: // fine volslide down
 						command = CMD_VOLUMESLIDE;
-						param = 0xF0 | (param >> 1);
+						if (bNewFormat) param |= 0xF0;
+						else param = 0xF0 | (param >> 1);
 						break;
 					case 0x04: // volslide down
 						command = CMD_VOLUMESLIDE;
-						param >>= 1;
+						if (bNewFormat) param &= 0x0F;
+						else param = (param >> 1) & 0x0F;
 						break;
 
 					// Portamento
 					case 0x0B: // fine portamento up
 						command = CMD_PORTAMENTOUP;
-						param = 0xF0 | convert_psm_effect(param, bIsSinaria);
+						param = 0xF0 | convert_psm_porta(param, bNewFormat);
 						break;
 					case 0x0C: // portamento up
 						command = CMD_PORTAMENTOUP;
-						param = convert_psm_effect(param, bIsSinaria);
+						param = convert_psm_porta(param, bNewFormat);
 						break;
 					case 0x0D: // fine portamento down
 						command = CMD_PORTAMENTODOWN;
-						param = 0xF0 | convert_psm_effect(param, bIsSinaria);
+						param = 0xF0 | convert_psm_porta(param, bNewFormat);
 						break;
 					case 0x0E: // portamento down
 						command = CMD_PORTAMENTODOWN;
-						param = convert_psm_effect(param, bIsSinaria);
+						param = convert_psm_porta(param, bNewFormat);
 						break;					
 					case 0x0F: // tone portamento
 						command = CMD_TONEPORTAMENTO;
-						param = convert_psm_effect(param, bIsSinaria);
+						if(!bNewFormat) param >>= 2;
 						break;
 					case 0x11: // glissando control
 						command = CMD_S3MCMDEX;

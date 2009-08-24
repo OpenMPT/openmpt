@@ -4,7 +4,7 @@
 
 #define NP (MAX_DICBIT + 1)
 #define NT (USHRT_BIT + 3)
-#define PBIT 4  /* smallest integer such that (1 << PBIT) > NP */
+//#define PBIT 4  /* smallest integer such that (1 << PBIT) > NP */
 #define TBIT 5  /* smallest integer such that (1 << TBIT) > NT */
 #define NPT 0x80
 
@@ -16,7 +16,9 @@ typedef struct _HUFDATA
 	   t_freq[2 * NT - 1];
 } HUFDATA;
 
-HUFDATA *gpHufData = NULL;
+//HUFDATA *gpHufData = NULL;
+
+#define gpHufData (*((HUFDATA **)&m_pHufData))
 
 VOID CLhaArchive::InitHufTables()
 {
@@ -104,7 +106,7 @@ unsigned short CLhaArchive::decode_c_st1()
 		blocksize = getbits(16);
 		read_pt_len(NT, TBIT, 3);
 		read_c_len();
-		read_pt_len(NP, PBIT, -1);
+		read_pt_len(np, pbit, -1);
 	}
 	blocksize--;
 	j = gpHufData->c_table[bitbuf >> 4];
@@ -125,21 +127,28 @@ unsigned short CLhaArchive::decode_p_st1()
 	unsigned short j, mask;
 
 	j = gpHufData->pt_table[bitbuf >> (16 - 8)];
-	if (j < NP) fillbuf(gpHufData->pt_len[j]);
+	if (j < np) fillbuf(gpHufData->pt_len[j]);
 	else {
 		fillbuf(8);  mask = 1 << (16 - 1);
 		do {
 			j = (bitbuf & mask) ? right[j] : left[j];
 			mask >>= 1;
-		} while (j >= NP);
+		} while (j >= np);
 		fillbuf(gpHufData->pt_len[j] - 8);
 	}
 	if (j != 0) j = (1 << (j - 1)) + getbits(j - 1);
 	return j;
 }
 
-void CLhaArchive::decode_start_st1()
+void CLhaArchive::decode_start_st1(int dicbit)
 {
+	switch (dicbit)
+	{
+	case 12:
+	case 13: pbit = 4; np = 14; break;
+	case 15: pbit = 5; np = 16; break;
+	case 16: pbit = 5; np = 17; break;
+	}
 	init_getbits();
 	blocksize = 0;
 }

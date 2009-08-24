@@ -16,7 +16,7 @@ int CLhaArchive::decode_lzhuf(DWORD &infp, LPBYTE outfp, long original_size, lon
 	switch (method)
 	{
 	case 0:
-	case 8:
+	case 10:
 		{
 			int len1 = m_dwOutputLen - (int)(outfp - m_lpOutputFile);
 			int len2 = m_dwStreamLen - infp;
@@ -30,14 +30,22 @@ int CLhaArchive::decode_lzhuf(DWORD &infp, LPBYTE outfp, long original_size, lon
 			crc = 0;
 		}
 		break;
-	case 6:	// -lzs-
+	case 8:	// -lzs-
 		LzInterface.dicbit = 11;
 		decode(&LzInterface);
 		break;
 	case 1: // -lh1-
 	case 4: // -lh4-
-	case 7: // -lz5-
+	case 9: // -lz5-
 		LzInterface.dicbit = 12;
+		decode(&LzInterface);
+		break;
+	case 6: // -lh6-
+		LzInterface.dicbit = 15;
+		decode(&LzInterface);
+		break;
+	case 7: // -lh7-
+		LzInterface.dicbit = 16;
 	default:
 		decode(&LzInterface);
 	}

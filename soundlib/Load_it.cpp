@@ -230,7 +230,7 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		const ITOLDINSTRUMENT *pis = (const ITOLDINSTRUMENT *)p;
 		memcpy(pIns->name, pis->name, 26);
 		memcpy(pIns->filename, pis->filename, 12);
-		pIns->nFadeOut = pis->fadeout << 6;
+		pIns->nFadeOut = pis->fadeout << 7;
 		pIns->nGlobalVol = 64;
 		for (UINT j=0; j<NOTE_MAX; j++)
 		{
@@ -260,6 +260,10 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		pIns->nNNA = pis->nna;
 		pIns->nDCT = pis->dnc;
 		pIns->nPan = 0x80;
+
+		pIns->VolEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
+		pIns->PanEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
+		pIns->PitchEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 	} else
 	{
 		const ITINSTRUMENT *pis = (const ITINSTRUMENT *)p;
@@ -276,7 +280,7 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		}
 		if (pis->mbank<=128)
 			pIns->wMidiBank = pis->mbank;
-		pIns->nFadeOut = pis->fadeout << 5;
+		pIns->nFadeOut = pis->fadeout << 5; // should be 6?
 		pIns->nGlobalVol = pis->gbv >> 1;
 		if (pIns->nGlobalVol > 64) pIns->nGlobalVol = 64;
 		for (UINT j=0; j<NOTE_MAX; j++)
@@ -1281,7 +1285,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Load instrument and song extensions.
-	if(mptStartPos >= dwMemPos)
+	if(mptStartPos >= dwMemPos && mptStartPos < dwMemLength)
 	{
 		LPCBYTE ptr = LoadExtendedInstrumentProperties(lpStream + dwMemPos, lpStream + mptStartPos, &interpretModplugmade);
 		LoadExtendedSongProperties(GetType(), ptr, lpStream, mptStartPos, &interpretModplugmade);
@@ -2001,7 +2005,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			//if (pIns->nDCT<DCT_PLUGIN) iti.dct = pIns->nDCT; else iti.dct =0;	
 			iti.dct = pIns->nDCT; //rewbs.instroVSTi: will other apps barf if they get an unknown DCT?
 			iti.dca = pIns->nDNA;
-			iti.fadeout = pIns->nFadeOut >> 5;
+			iti.fadeout = pIns->nFadeOut >> 5; // should be 6?
 			iti.pps = pIns->nPPS;
 			iti.ppc = pIns->nPPC;
 			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);

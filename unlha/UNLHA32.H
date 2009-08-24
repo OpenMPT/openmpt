@@ -72,9 +72,10 @@ protected:
 	unsigned short *freq;
 	unsigned char *buf;
 	unsigned short bufsiz, blocksize;
-	unsigned int np;
+	unsigned int np, pbit;
+	void * m_pHufData;
 	int flag, flagcnt, matchpos, prev_char;
-	unsigned short dicsiz, dicbit, maxmatch, loc;
+	unsigned int dicsiz, dicbit, maxmatch, loc;
 	unsigned short left[2 * NC - 1], right[2 * NC - 1];
 
 protected:
@@ -113,7 +114,7 @@ protected:
 protected:
 	// huf.cpp
 	VOID InitHufTables();
-	void decode_start_st1();
+	void decode_start_st1(int dicbit);
 	void read_pt_len(short nn, short nbit, short i_special);
 	void read_c_len();
 	unsigned short decode_c_st1();
