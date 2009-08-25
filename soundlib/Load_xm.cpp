@@ -108,9 +108,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	for(int i = 0; i < 20; i++)
 		if(lpStream[17 + i] == 0) bProbablyMadeWithModPlug = true;
 
-	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
-	if (!memcmp((LPCSTR)lpStream + 0x26, "OpenMPT ", 8)) bMadeWithModPlug = true;
-
 	dwHdrSize = LittleEndian(*((DWORD *)(lpStream+60)));
 	norders = LittleEndianW(*((WORD *)(lpStream+64)));
 	if ((!norders) || (norders > MAX_ORDERS)) return false;
@@ -121,6 +118,23 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 //	if ((!channels) || (channels > 64)) return false;
 	if ((!channels) || (channels > MAX_BASECHANNELS)) return false;
 // -! BEHAVIOUR_CHANGE#0006
+
+	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
+	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v 2.00  ", 20))
+	{
+		bMadeWithModPlug = true;
+		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, 00);
+	}
+
+	if (!memcmp((LPCSTR)lpStream + 0x26, "OpenMPT ", 8))
+	{
+		//bMadeWithModPlug = true; // Don't set it - it's also used by compatibility export
+		CHAR sVersion[13];
+		memcpy(sVersion, lpStream + 0x26 + 8, 12);
+		sVersion[12] = 0;
+		m_dwLastSavedWithVersion = MptVersion::ToNum(sVersion);
+	}
+
 	m_nType = MOD_TYPE_XM;
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
@@ -637,7 +651,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if(bMadeWithModPlug)
 	{
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
-		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+		if(!m_dwLastSavedWithVersion) m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
 	}
 
 // -> CODE#0027

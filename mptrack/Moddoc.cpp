@@ -2742,6 +2742,11 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 					case 0x30: // vibrato waveform
 					case 0x40: // tremolo waveform
 					case 0x50: // panbrello waveform
+						if(((param & 0x0F) > 0x03) && m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER))
+						{
+							strcpy(s, "ignore");
+							break;
+						}
 						switch(param & 0x0F)
 						{
 							case 0x00: case 0x04: case 0x08: case 0x0C: strcpy(s, "sine wave"); break;

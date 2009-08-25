@@ -186,18 +186,10 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						if(subChunkSize != 6) break;
 
 						{
-							int version;
-							for(DWORD i = 0; i < subChunkSize; i++)
-							{
-								if(lpStream[dwChunkPos + i] >= '0' && lpStream[dwChunkPos + i] <= '9')
-								{
-									version = (version * 10) + (lpStream[dwChunkPos + i] - '0');
-								} else
-								{
-									version = 0;
-									break;
-								}
-							}
+							CHAR cversion[7];
+							memcpy(cversion, lpStream + dwChunkPos, 6);
+							cversion[6] = 0;
+							int version = atoi(cversion);
 							// Sinaria song dates
 							if(version == 800211 || version == 940902 || version == 940903 ||
 								version == 940906 || version == 940914 || version == 941213)

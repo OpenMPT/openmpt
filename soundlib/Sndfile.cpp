@@ -1190,6 +1190,7 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 		Chn[j].nCommand = 0;
 		Chn[j].nPatternLoopCount = 0;
 		Chn[j].nPatternLoop = 0;
+		Chn[j].nVibratoPos = Chn[j].nTremoloPos = Chn[j].nPanbrelloPos = 0;
 		//IT compatibility 15. Retrigger
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
@@ -1482,6 +1483,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nNewLeftVol = Chn[i].nNewRightVol = 0;
 		Chn[i].nLeftRamp = Chn[i].nRightRamp = 0;
 		Chn[i].nVolume = 256;
+		Chn[i].nVibratoPos = Chn[i].nTremoloPos = Chn[i].nPanbrelloPos = 0;
 
 		//-->Custom tuning related
 		Chn[i].m_ReCalculateFreqOnFirstTick = false;
