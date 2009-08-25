@@ -68,6 +68,9 @@ extern short int ModSinusTable[64];
 extern short int ModRampDownTable[64];
 extern short int ModSquareTable[64];
 extern short int ModRandomTable[64];
+extern short int ITSinusTable[64];
+extern short int ITRampDownTable[64];
+extern short int ITSquareTable[64];
 extern DWORD LinearSlideUpTable[256];
 extern DWORD LinearSlideDownTable[256];
 extern DWORD FineLinearSlideUpTable[16];
@@ -983,16 +986,16 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->dwFlags & CHN_TREMOLO)
 			{
 				UINT trempos = pChn->nTremoloPos & 0x3F;
-				if (vol > 0)
+				if (vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					int tremattn = (m_nType & MOD_TYPE_XM) ? 5 : 6;
 					switch (pChn->nTremoloType & 0x03)
 					{
 					case 1:
-						vol += (ModRampDownTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
+						vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[trempos] : ModRampDownTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
 						break;
 					case 2:
-						vol += (ModSquareTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
+						vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[trempos] : ModSquareTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
 						break;
 					case 3:
 						//IT compatibility 19. Use random values
@@ -1002,12 +1005,12 @@ BOOL CSoundFile::ReadNote()
 							vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
 						break;
 					default:
-						vol += (ModSinusTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
+						vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[trempos] : ModSinusTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
 					}
 				}
 				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
-					pChn->nTremoloPos = (trempos + pChn->nTremoloSpeed) & 0x3F;
+					pChn->nTremoloPos = (pChn->nTremoloPos + pChn->nTremoloSpeed) & 0x3F;
 				}
 			}
 
@@ -1337,13 +1340,10 @@ BOOL CSoundFile::ReadNote()
 				switch (pChn->nVibratoType & 0x03)
 				{
 				case 1:
-					if(IsCompatibleMode(TRK_ALLTRACKERS))
-						vdelta = -ModRampDownTable[(vibpos+16) % 64];
-					else
-						vdelta = ModRampDownTable[vibpos];
+					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[(vibpos + 48) % 64] : ModRampDownTable[vibpos];
 					break;
 				case 2:
-					vdelta = ModSquareTable[vibpos];
+					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[(vibpos + 48) % 64] : ModSquareTable[vibpos];
 					break;
 				case 3:
 					//IT compatibility 19. Use random values
@@ -1353,7 +1353,7 @@ BOOL CSoundFile::ReadNote()
 						vdelta = ModRandomTable[vibpos];
 					break;
 				default:
-					vdelta = ModSinusTable[vibpos];
+					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[(vibpos + 48) % 64] : ModSinusTable[vibpos];
 				}
 
 				if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
@@ -1385,11 +1385,14 @@ BOOL CSoundFile::ReadNote()
 							if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
 						}
 					}
-					period += vdelta;
+					if(IsCompatibleMode(TRK_ALLTRACKERS))
+						period -= vdelta;
+					else
+						period += vdelta;
 				}
 				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
-					pChn->nVibratoPos = (vibpos + pChn->nVibratoSpeed) & 0x3F;
+					pChn->nVibratoPos = (pChn->nVibratoPos + pChn->nVibratoSpeed) & 0x3F;
 				}
 			}
 			// Panbrello
@@ -1400,10 +1403,10 @@ BOOL CSoundFile::ReadNote()
 				switch (pChn->nPanbrelloType & 0x03)
 				{
 				case 1:
-					pdelta = ModRampDownTable[panpos];
+					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[panpos] : ModRampDownTable[panpos];
 					break;
 				case 2:
-					pdelta = ModSquareTable[panpos];
+					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[panpos] : ModSquareTable[panpos];
 					break;
 				case 3:
 					//IT compatibility 19. Use random values
@@ -1413,10 +1416,10 @@ BOOL CSoundFile::ReadNote()
 						pdelta = ModRandomTable[panpos];
 					break;
 				default:
-					pdelta = ModSinusTable[panpos];
+					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[panpos] : ModSinusTable[panpos];
 				}
 				pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
-				pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
+				pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 3);
 				pdelta += pChn->nRealPan;
 				
 				pChn->nRealPan = CLAMP(pdelta, 0, 256);

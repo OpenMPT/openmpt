@@ -718,7 +718,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 			pChn->nPos = 0;
 			pChn->nPosLo = 0;
 			if (pChn->nVibratoType < 4) pChn->nVibratoPos = ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))) ? 0x10 : 0;
-			if (pChn->nTremoloType < 4) pChn->nTremoloPos = 0;
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->nTremoloType < 4) pChn->nTremoloPos = 0;
 		}
 		if (pChn->nPos >= pChn->nLength) pChn->nPos = pChn->nLoopStart;
 	} 
@@ -2541,11 +2541,11 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
 				break;
 	// S3x: Set Vibrato WaveForm
-	case 0x30:	pChn->nVibratoType = param & 0x07; break;
+	case 0x30:	if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nVibratoType = param & 0x07; break;
 	// S4x: Set Tremolo WaveForm
-	case 0x40:	pChn->nTremoloType = param & 0x07; break;
+	case 0x40:	if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nTremoloType = param & 0x07; break;
 	// S5x: Set Panbrello WaveForm
-	case 0x50:	pChn->nPanbrelloType = param & 0x07; break;
+	case 0x50:	if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPanbrelloType = param & 0x07; break;
 	// S6x: Pattern Delay for x frames
 	case 0x60:	m_nFrameDelay = param; break;
 	// S7x: Envelope Control
