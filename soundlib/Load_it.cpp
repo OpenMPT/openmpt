@@ -1285,7 +1285,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Load instrument and song extensions.
-	if(mptStartPos >= dwMemPos && mptStartPos < dwMemLength)
+	if(mptStartPos >= dwMemPos)
 	{
 		LPCBYTE ptr = LoadExtendedInstrumentProperties(lpStream + dwMemPos, lpStream + mptStartPos, &interpretModplugmade);
 		LoadExtendedSongProperties(GetType(), ptr, lpStream, mptStartPos, &interpretModplugmade);
