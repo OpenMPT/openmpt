@@ -21,6 +21,8 @@ public:
 // Dialog Data
 	enum { IDD = IDD_MIDIPARAMCONTROL };
 
+	CMIDIMappingDirective m_Setting;
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
@@ -49,7 +51,7 @@ private:
 
 	CSpinButtonCtrl m_SpinMoveMapping;
 
-	CMIDIMappingDirective m_Setting;
+	
 public:
 	afx_msg void OnLbnSelchangeList1();
 	

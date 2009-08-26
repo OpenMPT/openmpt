@@ -55,6 +55,9 @@ public:
 
 	// Return true if pattern can be accessed with operator[](iPat), false otherwise.
 	bool IsValidIndex(const PATTERNINDEX iPat) const {return (iPat < Size());}
+
+	// Return true if IsValidIndex() is true and the corresponding pattern has allocated modcommand array, false otherwise.
+	bool IsValidPat(const PATTERNINDEX iPat) const {return IsValidIndex(iPat) && (*this)[iPat];}
 	
 	void ResizeArray(const PATTERNINDEX newSize);
 

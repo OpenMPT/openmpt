@@ -65,6 +65,7 @@ LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		m_ChannelCBox.SetCurSel(1+GetFromMIDIMsg_Channel(dwMidiDataParam));
 		m_EventCBox.SetCurSel(0);
 		m_ControllerCBox.SetCurSel(GetFromMIDIMsg_DataByte1(dwMidiDataParam));
+		OnCbnSelchangeComboChannel();
 		OnCbnSelchangeComboEvent();
 		OnCbnSelchangeComboController();
 		UpdateString();
@@ -78,16 +79,6 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	if (m_rMIDIMapper.GetCount() > 0)
-		m_Setting = m_rMIDIMapper.GetDirective(0);
-
-	m_ChannelCBox.SetCurSel(m_Setting.GetChannel());
-
-	CheckDlgButton(IDC_CHECKACTIVE, m_Setting.IsActive() ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(IDC_CHECKCAPTURE, m_Setting.GetCaptureMIDI() ? BST_CHECKED : BST_UNCHECKED);
-	GetDlgItem(IDC_CHECK_PATRECORD)->ShowWindow((m_rSndFile.GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
-	CheckDlgButton(IDC_CHECK_PATRECORD, m_Setting.GetAllowPatternEdit() ? BST_CHECKED : BST_UNCHECKED);
-
 	m_EventCBox.SetCurSel(0);
 	
 	//Add controller names.
@@ -97,14 +88,13 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 		temp.Format("%3d %s", i, MidiCCNames[i]);
 		m_ControllerCBox.AddString(temp);
 	}
-	m_ControllerCBox.SetCurSel(m_Setting.GetController());
 
 	//Add Pluginnames
 	AddPluginNamesToCombobox(m_PluginCBox, m_rSndFile.m_MixPlugins);
 	m_PluginCBox.SetCurSel(m_Setting.GetPlugIndex()-1);
 
 	//Add plugin parameter names
-	AddPluginParameternamesToCombobox(m_PlugParamCBox, m_rSndFile.m_MixPlugins[0]);
+	AddPluginParameternamesToCombobox(m_PlugParamCBox, m_rSndFile.m_MixPlugins[(m_Setting.GetPlugIndex() <= MAX_MIXPLUGINS) ? m_Setting.GetPlugIndex() - 1 : 0]);
 	m_PlugParamCBox.SetCurSel(m_Setting.GetParamIndex());
     
 	//Add directives to list.
@@ -113,16 +103,26 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	{
 		m_List.AddString(CreateListString(*iter));
 	}
-	if(m_rMIDIMapper.GetCount() > 0)
+	if(m_rMIDIMapper.GetCount() > 0 && m_Setting.IsDefault())
 	{
 		m_List.SetCurSel(0);
 		OnLbnSelchangeList1();
-		m_Setting = m_rMIDIMapper.GetDirective(0);
+	}
+	else
+	{
+		m_ChannelCBox.SetCurSel(m_Setting.GetChannel());
+		m_ControllerCBox.SetCurSel(m_Setting.GetController());
+		CheckDlgButton(IDC_CHECKACTIVE, m_Setting.IsActive() ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(IDC_CHECKCAPTURE, m_Setting.GetCaptureMIDI() ? BST_CHECKED : BST_UNCHECKED);
+		GetDlgItem(IDC_CHECK_PATRECORD)->ShowWindow((m_rSndFile.GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
+		CheckDlgButton(IDC_CHECK_PATRECORD, m_Setting.GetAllowPatternEdit() ? BST_CHECKED : BST_UNCHECKED);
 	}
 
 	UpdateString();
 
 	CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd());
+
+	CheckDlgButton(IDC_CHECK_MIDILEARN, BST_CHECKED);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 }

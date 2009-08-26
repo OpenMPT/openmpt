@@ -3018,7 +3018,7 @@ MODCOMMAND* CViewPattern::GetModCommand(CSoundFile& rSf, const ModCommandPos& po
 //--------------------------------------------------------------------------------
 {
 	static MODCOMMAND m;
-	if (rSf.Patterns.IsValidIndex(pos.nPat) && pos.nRow < rSf.Patterns[pos.nPat].GetNumRows() && pos.nChn < rSf.GetNumChannels())
+	if (rSf.Patterns.IsValidPat(pos.nPat) && pos.nRow < rSf.Patterns[pos.nPat].GetNumRows() && pos.nChn < rSf.GetNumChannels())
 		return rSf.Patterns[pos.nPat].GetpModCommand(pos.nRow, pos.nChn);
 	else
 		return &m;
@@ -5125,7 +5125,7 @@ void CViewPattern::SetEditPos(const CSoundFile& rSndFile,
 							  const ROWINDEX iRowCandidate, const PATTERNINDEX iPatCandidate) const
 //-------------------------------------------------------------------------------------------
 {
-	if(rSndFile.Patterns.IsValidIndex(iPatCandidate) && rSndFile.Patterns[iPatCandidate].IsValidRow(iRowCandidate))
+	if(rSndFile.Patterns.IsValidPat(iPatCandidate) && rSndFile.Patterns[iPatCandidate].IsValidRow(iRowCandidate))
 	{ // Case: Edit position candidates are valid -- use them.
 		iPat = iPatCandidate;
 		iRow = iRowCandidate;

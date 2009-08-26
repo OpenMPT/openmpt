@@ -14,6 +14,7 @@
 #include "defaultvsteditor.h"		//rewbs.defaultPlugGUI
 #include "midi.h"
 #include "version.h"
+#include "midimappingdialog.h"
 #ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
 #include "Unzip32.h"				//For CRC calculation (to detect plugins with same UID)
 #endif
@@ -675,6 +676,18 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 			//Record param change
 			if (pVstPlugin->m_bRecordAutomation) {
 				pModDoc->RecordParamChange(pVstPlugin->GetSlot(), index);
+			}
+
+			if (CMainFrame::GetInputHandler()->ShiftPressed())
+			{
+				CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
+				CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
+				const HWND oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
+				CMIDIMappingDialog dlg(pVstEditor, *pModDoc->GetSoundFile());
+				dlg.m_Setting.SetParamIndex(index);
+				dlg.m_Setting.SetPlugIndex(pVstPlugin->GetSlot()+1);
+				dlg.DoModal();
+				CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
 			}
 
 			// Learn macro
