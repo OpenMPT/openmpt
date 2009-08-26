@@ -985,10 +985,10 @@ BOOL CSoundFile::ReadNote()
 			// Tremolo
 			if (pChn->dwFlags & CHN_TREMOLO)
 			{
-				UINT trempos = pChn->nTremoloPos & 0x3F;
+				UINT trempos = pChn->nTremoloPos;
 				if (vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
-					int tremattn = (m_nType & MOD_TYPE_XM) ? 5 : 6;
+					const int tremattn = (m_nType & MOD_TYPE_XM || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
 					switch (pChn->nTremoloType & 0x03)
 					{
 					case 1:
@@ -1000,7 +1000,7 @@ BOOL CSoundFile::ReadNote()
 					case 3:
 						//IT compatibility 19. Use random values
 						if(IsCompatibleMode(TRK_IMPULSETRACKER))
-							vol += (((rand() & 0xFF) - 0x7F) * (int)pChn->nTremoloDepth) >> tremattn;
+							vol += (((rand() & 0x7F) - 0x40) * (int)pChn->nTremoloDepth) >> tremattn;
 						else
 							vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
 						break;
@@ -1010,7 +1010,10 @@ BOOL CSoundFile::ReadNote()
 				}
 				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
-					pChn->nTremoloPos = (pChn->nTremoloPos + pChn->nTremoloSpeed) & 0x3F;
+					if(IsCompatibleMode(TRK_IMPULSETRACKER))
+						pChn->nTremoloPos = (pChn->nTremoloPos + 4 * pChn->nTremoloSpeed) & 0xFF;
+					else
+						pChn->nTremoloPos = (pChn->nTremoloPos + pChn->nTremoloSpeed) & 0x3F;
 				}
 			}
 
@@ -1340,20 +1343,20 @@ BOOL CSoundFile::ReadNote()
 				switch (pChn->nVibratoType & 0x03)
 				{
 				case 1:
-					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[(vibpos + 48) % 64] : ModRampDownTable[vibpos];
+					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[vibpos] : ModRampDownTable[vibpos];
 					break;
 				case 2:
-					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[(vibpos + 48) % 64] : ModSquareTable[vibpos];
+					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[vibpos] : ModSquareTable[vibpos];
 					break;
 				case 3:
 					//IT compatibility 19. Use random values
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						vdelta = (rand() & 0xFF) - 0x7F;
+						vdelta = (rand() & 0x7F) - 0x40;
 					else
 						vdelta = ModRandomTable[vibpos];
 					break;
 				default:
-					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[(vibpos + 48) % 64] : ModSinusTable[vibpos];
+					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[vibpos] : ModSinusTable[vibpos];
 				}
 
 				if(m_nType == MOD_TYPE_MPT && pChn->pModInstrument && pChn->pModInstrument->pTuning)
@@ -1369,7 +1372,22 @@ BOOL CSoundFile::ReadNote()
 				}
 				else //Original behavior
 				{
-					UINT vdepth = ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
+					UINT vdepth;
+					if(IsCompatibleMode(TRK_IMPULSETRACKER))
+					{
+						if(m_dwSongFlags & SONG_ITOLDEFFECTS)
+						{
+							vdepth = 5;
+							vdelta = -vdelta;
+						} else
+						{
+							vdepth = 6;
+						}
+					}
+					else
+					{
+						vdepth = ((!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITOLDEFFECTS)) ? 6 : 7;
+					}
 					vdelta = (vdelta * (int)pChn->nVibratoDepth) >> vdepth;
 					if ((m_dwSongFlags & SONG_LINEARSLIDES) && (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 					{
@@ -1385,20 +1403,24 @@ BOOL CSoundFile::ReadNote()
 							if (l & 0x03) vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
 						}
 					}
-					if(IsCompatibleMode(TRK_ALLTRACKERS))
-						period -= vdelta;
-					else
-						period += vdelta;
+					period += vdelta;
 				}
 				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
-					pChn->nVibratoPos = (pChn->nVibratoPos + pChn->nVibratoSpeed) & 0x3F;
+					if(IsCompatibleMode(TRK_IMPULSETRACKER))
+						pChn->nVibratoPos = (vibpos + 4 * pChn->nVibratoSpeed) & 0xFF;
+					else
+						pChn->nVibratoPos = (vibpos + pChn->nVibratoSpeed) & 0x3F;
 				}
 			}
 			// Panbrello
 			if (pChn->dwFlags & CHN_PANBRELLO)
 			{
-				UINT panpos = ((pChn->nPanbrelloPos+0x10) >> 2) & 0x3F;
+				UINT panpos;
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+					panpos = pChn->nPanbrelloPos & 0xFF;
+				else
+					panpos = ((pChn->nPanbrelloPos + 0x10) >> 2) & 0x3F;
 				LONG pdelta;
 				switch (pChn->nPanbrelloType & 0x03)
 				{
@@ -1411,7 +1433,7 @@ BOOL CSoundFile::ReadNote()
 				case 3:
 					//IT compatibility 19. Use random values
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						pdelta = (rand() & 0xFF) - 0x7F;
+						pdelta = (rand() & 0x7f) - 0x40;
 					else
 						pdelta = ModRandomTable[panpos];
 					break;
@@ -1419,7 +1441,7 @@ BOOL CSoundFile::ReadNote()
 					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[panpos] : ModSinusTable[panpos];
 				}
 				pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
-				pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> (IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 3);
+				pdelta = ((pdelta * (int)pChn->nPanbrelloDepth) + 2) >> 3;
 				pdelta += pChn->nRealPan;
 				
 				pChn->nRealPan = CLAMP(pdelta, 0, 256);
