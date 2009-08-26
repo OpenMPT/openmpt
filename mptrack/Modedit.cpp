@@ -2304,7 +2304,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 						ORDERINDEX oNextOrder = m_SndFile.Order.GetNextOrderIgnoringSkips(oCurrentOrder);
 						if((oNextOrder <= 0) || (oNextOrder >= m_SndFile.Order.size())) goto PasteDone;
 						nPattern = m_SndFile.Order[oNextOrder];
-						if(m_SndFile.Patterns.IsValidIndex(nPattern) == false) goto PasteDone;
+						if(m_SndFile.Patterns.IsValidPat(nPattern) == false) goto PasteDone;
 						m = m_SndFile.Patterns[nPattern];
 						PrepareUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 						oCurrentOrder = oNextOrder;
