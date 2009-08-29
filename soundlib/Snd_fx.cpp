@@ -1233,8 +1233,8 @@ BOOL CSoundFile::ProcessEffects()
 					note = instr = 0;
 				}
 
-				// XM: Key-Off + Sample == Note Cut
-				if ((note == NOTE_KEYOFF) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->dwFlags & ENV_VOLUME))))
+				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number is present!)
+				if ((note == NOTE_KEYOFF) && (!pChn->pModInstrument || !IsCompatibleMode(TRK_FASTTRACKER2)) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->dwFlags & ENV_VOLUME))))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					pChn->nVolume = 0;

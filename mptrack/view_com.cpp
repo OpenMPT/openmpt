@@ -97,13 +97,30 @@ CViewComments::CViewComments()
 //----------------------------
 {
 	m_nCurrentListId = 0;
-	m_nListId = IDC_LIST_SAMPLES;
+	m_nListId = 0;//IDC_LIST_SAMPLES;
 }
 
 
 void CViewComments::OnInitialUpdate()
 //-----------------------------------
 {
+	if(m_nListId == 0)
+	{
+		m_nListId = IDC_LIST_SAMPLES;
+
+		// For XM, set the instrument list as the default list
+		CModDoc *pModDoc = GetDocument();
+		CSoundFile *pSndFile;
+		if(pModDoc)
+		{
+			pSndFile= pModDoc->GetSoundFile();
+			if(pSndFile && (pSndFile->m_nType & MOD_TYPE_XM))
+			{
+				m_nListId = IDC_LIST_INSTRUMENTS;
+			}
+		}
+	}
+
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	CRect rect;
 
