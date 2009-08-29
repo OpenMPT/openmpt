@@ -3119,7 +3119,7 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 					if(m_nType & MOD_TYPE_S3M && nParam > 0x80)
 						break;
 
-					m->volcmd = VOLCMD_VOLUME;
+					m->volcmd = VOLCMD_PANNING;
 					m->command = nEffect;
 
 					if(m_nType & MOD_TYPE_S3M)
