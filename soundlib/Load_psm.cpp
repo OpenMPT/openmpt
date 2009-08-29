@@ -15,6 +15,7 @@
  *  - Sinaria - Seems to work (never played the game, so I can't really tell...)
  *
  * Effect conversion should be about right...
+ * If OpenMPT will ever support subtunes properly, the subtune crap should be rewritten completely.
  */
 
 #include "stdafx.h"

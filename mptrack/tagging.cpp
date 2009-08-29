@@ -1,5 +1,5 @@
 /*
- * Purpose: File tagging (ID3v2, RIFF + more in the future)
+ * Purpose: File tagging (ID3v2, RIFF + more iIn the future)
  * Authors: OpenMPT Devs
 */
 
@@ -23,15 +23,15 @@ CFileTagging::CFileTagging()
 // Convert Integer to Synchsafe Integer (see ID3v2.4 specs)
 // Basically, it's a BigEndian integer, but the MSB of all bytes is 0.
 // Thus, a 32-bit integer turns into a 28-bit integer.
-UINT32 CFileTagging::intToSynchsafe(UINT32 in)
+UINT32 CFileTagging::intToSynchsafe(UINT32 iIn)
 {
-	in = LittleEndian(in);
-	UINT32 out = 0;
+	iIn = LittleEndian(iIn);
+	UINT32 iOut = 0, iSteps = 0;
 	do {
-		out <<= 8;
-		out |= (in & 0x7F);
-	} while(in >>= 7);
-	return BigEndian(out);
+		iOut |= (iIn & 0x7F) << iSteps;
+		iSteps += 8;
+	} while(iIn >>= 7);
+	return BigEndian(iOut);
 }
 
 // Write Tags
@@ -53,7 +53,7 @@ void CFileTagging::WriteID3v2Tags(FILE *f)
 	tHeader.flags = 0x00; // No flags
 	fwrite(&tHeader, 1, sizeof(tHeader), f);
 
-	// Write TIT2 (Title), TCOM / TPE1 (Composer), TALB (Album), TCON (Genre), TYER (Date), WXXX (URL), COMM (Comment), TENC (Encoder)
+	// Write TIT2 (Title), TCOM / TPE1 (Composer), TALB (Album), TCON (Genre), TYER (Date), WXXX (URL), TENC (Encoder), COMM (Comment)
 	WriteID3v2Frame("TIT2", title, f);
 	WriteID3v2Frame("TPE1", artist, f);
 	WriteID3v2Frame("TCOM", artist, f);
@@ -61,8 +61,8 @@ void CFileTagging::WriteID3v2Tags(FILE *f)
 	WriteID3v2Frame("TCON", genre, f);
 	WriteID3v2Frame("TYER", year, f);
 	WriteID3v2Frame("WXXX", url, f);
-	WriteID3v2Frame("COMM", comments, f);
 	WriteID3v2Frame("TENC", encoder, f);
+	WriteID3v2Frame("COMM", comments, f);
 
 	// Write Padding
 	for(UINT i = 0; i < ID3v2_PADDING; i++)
