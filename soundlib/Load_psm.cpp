@@ -8,12 +8,11 @@
  *
  * What's playing?
  *  - Epic Pinball - Perfect! (the old tunes in PSM16 format are not supported)
- *  - Extreme Pinball - Default tempo / speed / restart position of subtunes is missing.
- *    I'm using the last default values, restart position is still completely missing
+ *  - Extreme Pinball - Perfect! (subtunes included!)
  *  - Jazz Jackrabbit - Perfect!
- *  - One Must Fall! - Perfect! (I modelled the volume slide and portamento conversion after this, as I got the original MTM files)
+ *  - One Must Fall! - Perfect! (it helped a lot to have the original MTM files...)
  *  - Silverball - Currently not supported (old PSM16 format)
- *  - Sinaria - Seems to work more or less (never played the game, so I can't really tell...)
+ *  - Sinaria - Seems to work (never played the game, so I can't really tell...)
  *
  * Effect conversion should be about right...
  */
@@ -77,6 +76,26 @@ struct PSMNEWSAMPLEHEADER // Sinaria sample header (and possibly other games)
 };
 #pragma pack()
 
+struct PSMSUBSONG // For internal use (pattern conversion)
+{
+	BYTE channelPanning[MAX_BASECHANNELS], channelVolume[MAX_BASECHANNELS];
+	bool channelSurround[MAX_BASECHANNELS];
+	BYTE defaultTempo, defaultSpeed;
+	CHAR songName[10];
+	ORDERINDEX startOrder, endOrder, restartPos;
+
+	PSMSUBSONG() {
+		memset(channelPanning, 128, sizeof(channelPanning));
+		memset(channelVolume, 64, sizeof(channelVolume));
+		memset(channelSurround, false, sizeof(channelSurround));
+		memset(songName, 0, sizeof(songName));
+		defaultTempo = 125;
+		defaultSpeed = 6;
+		startOrder = endOrder = restartPos = ORDERINDEX_INVALID;
+	}
+};
+
+// Portamento effect conversion (depending on format version)
 inline BYTE convert_psm_porta(BYTE param, bool bNewFormat)
 {
 	return ((bNewFormat) ? (param) : ((param < 4) ? (param | 0xF0) : (param >> 2)));
@@ -100,7 +119,8 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		) return false;
 
 	// Yep, this seems to be a valid file.
-	m_nType = MOD_TYPE_PSM;
+	m_nType = MOD_TYPE_IT;
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nChannels = 0;
 
 	dwMemPos += 12;
@@ -110,14 +130,17 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nVSTiVolume = m_nSamplePreAmp = 48; // not supported in this format, so use a good default value
 
 	// pattern offset and identifier
-	PATTERNINDEX numPatterns = 0;
-	vector<DWORD> patternOffsets;
-	vector<DWORD> patternIDs;
+	PATTERNINDEX numPatterns = 0; // used for setting up the orderlist - final pattern count
+	vector<DWORD> patternOffsets; // pattern offsets (sorted as they occour in the file)
+	vector<DWORD> patternIDs; // pattern IDs (sorted as they occour in the file)
+	vector<DWORD> orderOffsets; // combine the upper two vectors to get the offsets for each order item
 	patternOffsets.clear();
 	patternIDs.clear();
+	orderOffsets.clear();
 	Order.clear();
-
-	std::string sComment; // we will store some information about the tune here
+	// subsong setup
+	vector<PSMSUBSONG> subsongs;
+	bool bSubsongPanningDiffers = false; // do we have subsongs with different panning positions?
 
 	while(dwMemPos + 8 < dwMemLength)
 	{
@@ -141,39 +164,37 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			break;
 
 		case 0x444F4250: // "PBOD" - Pattern data of a single pattern
-			if(chunkSize < 4 || chunkSize != LittleEndian(*(DWORD *)(lpStream + dwMemPos))) return false; // same value twice
+			if(chunkSize < 8 || chunkSize != LittleEndian(*(DWORD *)(lpStream + dwMemPos))) return false; // same value twice
 
-			// Pattern ID (something like "P0  " or "P13 ") follows
+			// Pattern ID (something like "P0  " or "P13 ", or "PATT0   " in Sinaria) follows
 			if(memcmp(lpStream + dwMemPos + 4, "P", 1)) return false;
 			if(!memcmp(lpStream + dwMemPos + 4, "PATT", 4)) bNewFormat = true;
+			if(bNewFormat && chunkSize < 12) return false; // 4 additional bytes
+
 			char patternID[4];
 			memcpy(patternID, lpStream + dwMemPos + 5 + (bNewFormat ? 3 : 0), 3);
 			patternID[3] = 0;
-			patternOffsets.push_back(dwMemPos + 8 + (bNewFormat ? 4 : 0));
 			patternIDs.push_back(atoi(patternID));
-			numPatterns++;
+			patternOffsets.push_back(dwMemPos + 8 + (bNewFormat ? 4 : 0));
 
 			// Convert later as we have to know how many channels there are.
 			break;
 
-		case 0x474E4F53: // "SONG" - Information about this file (channel count etc)
-			// We will not check for the "song type", because it is not ALWAYS "MAINSONG " (Extreme Pinball seems to use other song types for the sub songs)
-			// However, the last char always seems to be a space char.
+		case 0x474E4F53: // "SONG" - Subsong information (channel count etc)
 			{
 				if(chunkSize < sizeof(PSMSONGHEADER)) return false;
 				PSMSONGHEADER *pSong = (PSMSONGHEADER *)(lpStream + dwMemPos);
-				if(pSong->compression != 0x01) return false;
-				m_nChannels = max(m_nChannels, pSong->numChannels); // subsongs *might* have different channel count
+				if(pSong->compression != 0x01) return false; // no compression for PSM files
+				m_nChannels = CLAMP(pSong->numChannels, m_nChannels, MAX_BASECHANNELS); // subsongs *might* have different channel count
 
-				CHAR cSongName[10];
-				memcpy(cSongName, &pSong->songType, 9);
-				cSongName[9] = 0;
-				sComment += "\r\nSubsong: ";
-				sComment += cSongName;
+				PSMSUBSONG subsong;
+				subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
+				memcpy(subsong.songName, &pSong->songType, 9); // subsong name
+				subsong.songName[9] = 0;
 
 				DWORD dwChunkPos = dwMemPos + sizeof(PSMSONGHEADER);
 
-				// Sub chunks
+				// "Sub sub chunks"
 				while(dwChunkPos + 8 < dwMemPos + chunkSize)
 				{
 					DWORD subChunkID = LittleEndian(*(DWORD *)(lpStream + dwChunkPos));
@@ -190,20 +211,11 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							memcpy(cversion, lpStream + dwChunkPos, 6);
 							cversion[6] = 0;
 							int version = atoi(cversion);
-							// Sinaria song dates
+							// Sinaria song dates (just to go sure...)
 							if(version == 800211 || version == 940902 || version == 940903 ||
 								version == 940906 || version == 940914 || version == 941213)
 								bNewFormat = true;
 						}
-						#ifdef DEBUG
-						CHAR cDate[7];
-						memcpy(cDate, lpStream + dwChunkPos, 6);
-						cDate[6] = 0;
-						sComment += " - Build Date: ";
-						sComment += cDate;
-						if(bNewFormat) sComment += " (New Format)";
-						else sComment += " (Old Format)";
-						#endif
 						break;
 
 					case 0x484C504F: // "OPLH" - Order list, channel + module settings
@@ -215,6 +227,8 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							// Now, the interesting part begins!
 							DWORD dwSettingsOffset = dwChunkPos + 2;
 							WORD nChunkCount = 0, nFirstOrderChunk = (WORD)-1;
+
+							// "Sub sub sub chunks" (grrrr, silly format)
 							while(dwSettingsOffset - dwChunkPos + 1 < subChunkSize)
 							{
 								switch(lpStream[dwSettingsOffset])
@@ -226,57 +240,62 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 								case 0x01: // Order list item
 									if(dwSettingsOffset - dwChunkPos + 5 > subChunkSize) return false;
 									// Pattern name follows - find pattern (this is the orderlist)
-									for(PATTERNINDEX i = 0; i < patternIDs.size(); i++)
 									{
-										char patternID[4];
+										char patternID[4]; // temporary
 										memcpy(patternID, lpStream + dwSettingsOffset + 2 + (bNewFormat ? 3 : 0), 3);
 										patternID[3] = 0;
 										DWORD nPattern = atoi(patternID);
-										if(patternIDs[i] == nPattern)
+
+										// seek which pattern has this ID
+										for(uint32 i = 0; i < patternIDs.size(); i++)
 										{
-											Order.push_back(i);
-											break;
+											if(patternIDs[i] == nPattern)
+											{
+												// found the right pattern, copy offset + start / end positions.
+												if(subsong.startOrder == ORDERINDEX_INVALID)
+													subsong.startOrder = (ORDERINDEX)orderOffsets.size();
+												subsong.endOrder = (ORDERINDEX)orderOffsets.size();
+
+												// every pattern in the order will be unique, so store the pointer + pattern ID
+												orderOffsets.push_back(patternOffsets[i]);
+												Order.push_back(numPatterns);
+												numPatterns++;
+												break;
+											}
 										}
 									}
+									// decide whether this is the first order chunk or not (for finding out the correct restart position)
 									if(nFirstOrderChunk == (WORD)-1) nFirstOrderChunk = nChunkCount;
 									dwSettingsOffset += 5 + (bNewFormat ? 4 : 0);
 									break;
 
 								case 0x04: // Restart position
 									{
-										// NOTE: This should not be global! (Extreme Pinball!!!)
 										WORD nRestartChunk = LittleEndian(*(WORD *)(lpStream + dwSettingsOffset + 1));
 										ORDERINDEX nRestartPosition = 0;
-										if(nRestartChunk == 0) nRestartPosition = 0;
-										else if(nRestartChunk >= nFirstOrderChunk) nRestartPosition = (ORDERINDEX)(nRestartChunk - nFirstOrderChunk);
-										#ifdef DEBUG
-										{
-											char s[32];
-											wsprintf(s, " - restart pos %d", nRestartPosition);
-											sComment += s;
-										}
-										#endif
+										if(nRestartChunk >= nFirstOrderChunk) nRestartPosition = (ORDERINDEX)(nRestartChunk - nFirstOrderChunk);
+										subsong.restartPos += nRestartPosition;
+										m_nRestartPos = subsong.restartPos;
 									}
 									dwSettingsOffset += 3;
 									break;
 
 								case 0x07: // Default Speed
 									if(dwSettingsOffset - dwChunkPos + 2 > subChunkSize) break;
-									// Same note as above!
-									m_nDefaultSpeed =  lpStream[dwSettingsOffset + 1];
+									m_nDefaultSpeed = subsong.defaultSpeed = lpStream[dwSettingsOffset + 1];
 									dwSettingsOffset += 2;
 									break;
 
 								case 0x08: // Default Tempo
 									if(dwSettingsOffset - dwChunkPos + 2 > subChunkSize) break;
-									// Same note as above!
-									m_nDefaultTempo =  lpStream[dwSettingsOffset + 1];
+									m_nDefaultTempo =  subsong.defaultTempo =  lpStream[dwSettingsOffset + 1];
 									dwSettingsOffset += 2;
 									break;
 
 								case 0x0C: // Sample map table (???)
 									if(dwSettingsOffset - dwChunkPos + 7 > subChunkSize) break;
 
+									// Never seems to be different, so...
 									if (lpStream[dwSettingsOffset + 1] != 0x00 || lpStream[dwSettingsOffset + 2] != 0xFF ||
 										lpStream[dwSettingsOffset + 3] != 0x00 || lpStream[dwSettingsOffset + 4] != 0x00 ||
 										lpStream[dwSettingsOffset + 5] != 0x01 || lpStream[dwSettingsOffset + 6] != 0x00)
@@ -287,31 +306,44 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 								case 0x0D: // Channel panning table
 									if(dwSettingsOffset - dwChunkPos + 4 > subChunkSize) break;
 
+									if(lpStream[dwSettingsOffset + 1] < MAX_BASECHANNELS)
 									{
-										CHANNELINDEX nChn = min(lpStream[dwSettingsOffset + 1], pSong->numChannels);
+										CHANNELINDEX nChn = lpStream[dwSettingsOffset + 1];
 										switch(lpStream[dwSettingsOffset + 3])
 										{
-										case 0:
-											ChnSettings[nChn].nPan = lpStream[dwSettingsOffset + 2] ^ 128;
+										case 0: // use panning
+											ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = lpStream[dwSettingsOffset + 2] ^ 128;
+											ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+											subsong.channelSurround[nChn] = false;
 											break;
 
-										case 2:
-											ChnSettings[nChn].nPan = 128;
+										case 2: // surround
+											ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = 128;
 											ChnSettings[nChn].dwFlags |= CHN_SURROUND;
+											subsong.channelSurround[nChn] = true;
 											break;
 
-										case 4:
-											ChnSettings[nChn].nPan = 128;
+										case 4: // center
+											ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = 128;
+											ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+											subsong.channelSurround[nChn] = false;
 											break;
 
+										}
+										if(bSubsongPanningDiffers == false && subsongs.size() > 0)
+										{
+											if(subsongs.back().channelPanning[nChn] != subsong.channelPanning[nChn]
+												|| subsongs.back().channelSurround[nChn] != subsong.channelSurround[nChn])
+												bSubsongPanningDiffers = true;
 										}
 									}
 									dwSettingsOffset += 4;
 									break;
 
-								case 0x0E: // Channel volume table
+								case 0x0E: // Channel volume table (0...255)
 									if(dwSettingsOffset - dwChunkPos + 3 > subChunkSize) break;
-									ChnSettings[min(lpStream[dwSettingsOffset + 1], pSong->numChannels)].nVolume = (lpStream[dwSettingsOffset + 2] >> 2) + 1;
+									if(lpStream[dwSettingsOffset + 1] < MAX_BASECHANNELS)
+										ChnSettings[lpStream[dwSettingsOffset + 1]].nVolume = subsong.channelVolume[lpStream[dwSettingsOffset + 1]] = (lpStream[dwSettingsOffset + 2] >> 2) + 1;
 
 									dwSettingsOffset += 3;
 									break;
@@ -320,12 +352,15 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 									CString s;
 									s.Format("Please report to the OpenMPT team: Unknown chunk %d found at position %d (in the OPLH chunk of this PSM file)", lpStream[dwSettingsOffset], dwSettingsOffset);
 									MessageBox(NULL, s, TEXT("OpenMPT PSM import"), MB_ICONERROR);
+									// anyway, in such cases, we have to quit as we don't know how big the chunk really is.
 									return false;
 									break;
 
 								}
 								nChunkCount++;
 							}
+							// separate subsongs by "---" patterns
+							orderOffsets.push_back(nullptr);
 							Order.push_back(Order.GetInvalidPatIndex());
 						}
 						break;
@@ -334,20 +369,26 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						if(subChunkSize & 1) return false;
 						for(DWORD i = 0; i < subChunkSize; i += 2)
 						{
-							if((i >> 1) >= m_nChannels) break;
+							CHANNELINDEX nChn = (CHANNELINDEX)(i >> 1);
+							if(nChn >= m_nChannels) break;
 							switch(lpStream[dwChunkPos + i])
 							{
-							case 0:
-								ChnSettings[i >> 1].nPan = lpStream[dwChunkPos + i + 1] ^ 128;
+							case 0: // use panning
+								ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = lpStream[dwChunkPos + i + 1] ^ 128;
+								ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+								subsong.channelSurround[nChn] = false;
 								break;
 
-							case 2:
-								ChnSettings[i >> 1].nPan = 128;
-								ChnSettings[i >> 1].dwFlags |= CHN_SURROUND;
+							case 2: // surround
+								ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = 128;
+								ChnSettings[nChn].dwFlags |= CHN_SURROUND;
+								subsong.channelSurround[nChn] = true;
 								break;
 
-							case 4:
-								ChnSettings[i >> 1].nPan = 128;
+							case 4: // center
+								ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = 128;
+								ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+								subsong.channelSurround[nChn] = false;
 								break;
 							}
 						}
@@ -368,6 +409,9 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 					dwChunkPos += subChunkSize;
 				}
+
+				// attach this subsong to the subsong list - finally, all "sub sub sub ..." chunks are parsed.
+				subsongs.push_back(subsong);
 			}
 
 			break;
@@ -375,6 +419,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		case 0x504D5344: // DSMP - Samples
 			if(!bNewFormat)
 			{
+				// original header
 				if(chunkSize < sizeof(PSMOLDSAMPLEHEADER)) return false;
 				PSMOLDSAMPLEHEADER *pSample = (PSMOLDSAMPLEHEADER *)(lpStream + dwMemPos);
 				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
@@ -434,10 +479,14 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	if(m_nChannels == 0)
 		return false;
+
 	// Now that we know the number of channels, we can go through all the patterns.
-	for(PATTERNINDEX nPat = 0; nPat < numPatterns; nPat++)
+	// This is a bit stupid since we will even read duplicate patterns twice, but hey, we do this just once... so who cares?
+	PATTERNINDEX nPat = 0;
+	for(ORDERINDEX nOrd = 0; nOrd < Order.size(); nOrd++)
 	{
-		DWORD dwPatternOffset = patternOffsets[nPat];
+		if(orderOffsets[nOrd] == nullptr) continue;
+		DWORD dwPatternOffset = orderOffsets[nOrd];
 		if(dwPatternOffset + 2 > dwMemLength) return false;
 		WORD patternSize = LittleEndianW(*(WORD *)(lpStream + dwPatternOffset));
 		dwPatternOffset += 2;
@@ -659,11 +708,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						break;
 
 					default:
-						#ifdef DEBUG
-						ASSERT(false);
-						#else
 						command = CMD_NONE;
-						#endif
 						break;
 
 					}
@@ -679,16 +724,51 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			row_data += m_nChannels;
 			dwPatternOffset += rowSize;
 		}
-
+		nPat++;
 	}
 
-	if(!sComment.empty())
+	// write subsong "configuration" to patterns
+	for(uint32 i = 0; i < subsongs.size(); i++)
 	{
-		m_lpszSongComments = new char[sComment.length() + 1];
-		if (m_lpszSongComments)
+		PATTERNINDEX startPattern = Order[subsongs[i].startOrder], endPattern = Order[subsongs[i].endOrder];
+		if(startPattern == PATTERNINDEX_INVALID || endPattern == PATTERNINDEX_INVALID) continue; // what, invalid subtune?
+
+		// set the subsong name to all pattern names
+		for(PATTERNINDEX nPat = startPattern; nPat <= endPattern; nPat++)
 		{
-			memset(m_lpszSongComments, 0, sComment.length() + 1);
-			memcpy(m_lpszSongComments, sComment.c_str(), sComment.length());
+			SetPatternName(nPat, subsongs[i].songName);
+		}
+		
+		// subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
+		if(bSubsongPanningDiffers)
+		{
+			for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+			{
+				if(subsongs[i].channelSurround[nChn] == true)
+					TryWriteEffect(startPattern, 0, CMD_S3MCMDEX, 0x91, false, nChn, false, true);
+				else
+					TryWriteEffect(startPattern, 0, CMD_PANNING8, subsongs[i].channelPanning[nChn], false, nChn, false, true);
+			}
+		}
+		// write default tempo/speed to pattern
+		TryWriteEffect(startPattern, 0, CMD_SPEED, subsongs[i].defaultSpeed, false, CHANNELINDEX_INVALID, false, true);
+		TryWriteEffect(startPattern, 0, CMD_TEMPO, subsongs[i].defaultTempo, false, CHANNELINDEX_INVALID, false, true);
+
+		// don't write channel volume for now, as it's always set to 100% anyway
+
+		// there's a restart pos, so let's try to insert a Bxx command in the last pattern
+		if(subsongs[i].restartPos != ORDERINDEX_INVALID)
+		{
+			ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
+			MODCOMMAND *row_data;
+			row_data = Patterns[endPattern];
+			for(uint32 nCell = 0; nCell < m_nChannels * Patterns[endPattern].GetNumRows(); nCell++)
+			{
+				if(row_data->command == CMD_PATTERNBREAK || row_data->command == CMD_POSITIONJUMP)
+					lastRow = nCell / m_nChannels;
+				row_data++;
+			}
+			TryWriteEffect(endPattern, lastRow, CMD_POSITIONJUMP, (BYTE)subsongs[i].restartPos, false, CHANNELINDEX_INVALID, false, true);
 		}
 	}
 

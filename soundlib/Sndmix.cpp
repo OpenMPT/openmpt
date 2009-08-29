@@ -1445,6 +1445,7 @@ BOOL CSoundFile::ReadNote()
 				pdelta += pChn->nRealPan;
 				
 				pChn->nRealPan = CLAMP(pdelta, 0, 256);
+				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPan = pChn->nRealPan;
 			}
 			int nPeriodFrac = 0;
 			// Instrument Auto-Vibrato

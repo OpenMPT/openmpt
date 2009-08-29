@@ -354,9 +354,9 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_STM:
 	case MOD_TYPE_DSM:
 	case MOD_TYPE_AMF:
-	case MOD_TYPE_PSM:
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_S3M);
 		break;
+	case MOD_TYPE_PSM:
 	default:
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
 	}
