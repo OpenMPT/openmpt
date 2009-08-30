@@ -1,5 +1,5 @@
 /*
- * Purpose: File tagging (ID3v2, RIFF + more iIn the future)
+ * Purpose: File tagging (ID3v2, RIFF + more in the future)
  * Authors: OpenMPT Devs
 */
 
