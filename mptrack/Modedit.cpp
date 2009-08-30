@@ -396,14 +396,21 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			} // End if (oldTypeIsIT_MPT && newTypeIsS3M)
 
 
-			////////////////////////
-			// Convert XM arpeggio
-			if(m->command == CMD_ARPEGGIO && (newTypeIsXM || oldTypeIsXM))
-			{
-				// swap notes
-				m->param = ((m->param & 0x0F) << 4) | ((m->param & 0xF0) >> 4);
-			}
 
+			///////////////////////////////////////////////////
+			// Convert MOD to anything - adjust effect memory
+			if (oldTypeIsMOD)
+			{
+				switch(m->command)
+				{
+				case CMD_TONEPORTAVOL: // lacks memory -> 500 is the same as 300
+					if(m->param == 0x00) m->command = CMD_TONEPORTAMENTO;
+					break;
+				case CMD_VIBRATOVOL: // lacks memory -> 600 is the same as 400
+					if(m->param == 0x00) m->command = CMD_VIBRATO;
+					break;
+				}
+			} // End if (oldTypeIsMOD && newTypeIsXM)
 
 			/////////////////////////////////////////////////////////////////////////////////
 			// Convert anything to MOD - remove volume column, adjust retrig, effect memory
@@ -664,19 +671,30 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			CSoundFile::FrequencyToTranspose(&m_SndFile.Samples[i]);
 			if (!(m_SndFile.Samples[i].uFlags & CHN_PANNING)) m_SndFile.Samples[i].nPan = 128;
 		}
-		BOOL bBrokenNoteMap = FALSE;
-		for (UINT j=1; j<=m_SndFile.m_nInstruments; j++)
+		bool bBrokenNoteMap = false, bBrokenSustainLoop = false;
+		for (UINT j = 1; j <= m_SndFile.m_nInstruments; j++)
 		{
 			MODINSTRUMENT *pIns = m_SndFile.Instruments[j];
 			if (pIns)
 			{
-				for (UINT k=0; k<NOTE_MAX; k++)
+				for (UINT k = 0; k < NOTE_MAX; k++)
 				{
 					if ((pIns->NoteMap[k]) && (pIns->NoteMap[k] != (BYTE)(k+1)))
 					{
-						bBrokenNoteMap = TRUE;
+						bBrokenNoteMap = true;
 						break;
 					}
+				}
+				// Convert sustain loops to sustain "points"
+				if(pIns->VolEnv.nSustainStart != pIns->VolEnv.nSustainEnd)
+				{
+					pIns->VolEnv.nSustainEnd = pIns->VolEnv.nSustainStart;
+					bBrokenSustainLoop = true;
+				}
+				if(pIns->PanEnv.nSustainStart != pIns->PanEnv.nSustainEnd)
+				{
+					pIns->PanEnv.nSustainEnd = pIns->PanEnv.nSustainStart;
+					bBrokenSustainLoop = true;
 				}
 				pIns->dwFlags &= ~(ENV_SETPANNING|ENV_VOLCARRY|ENV_PANCARRY|ENV_PITCHCARRY|ENV_FILTER|ENV_PITCH);
 				pIns->nIFC &= 0x7F;
@@ -684,6 +702,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			}
 		}
 		if (bBrokenNoteMap) AddToLog("WARNING: Note Mapping will be lost when saving as XM.\n");
+		if (bBrokenSustainLoop) AddToLog("WARNING: Sustain loops were converted to sustain points.\n");
 	}
 
 	if(newTypeIsMOD)
