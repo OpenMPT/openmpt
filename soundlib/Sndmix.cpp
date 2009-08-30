@@ -951,8 +951,7 @@ BOOL CSoundFile::ReadNote()
 			pChn->nRealPan = pChn->nPan;
 		}
 
-		if (pChn->nRealPan < 0) pChn->nRealPan = 0;
-		if (pChn->nRealPan > 256) pChn->nRealPan = 256;
+		pChn->nRealPan = CLAMP(pChn->nRealPan, 0, 256);
 		pChn->nRampLength = 0;
 
 		//Aux variables
@@ -1231,7 +1230,7 @@ BOOL CSoundFile::ReadNote()
 
 						if (!(m_dwSongFlags & SONG_FIRSTTICK))
 						{
-							arpPos = (m_nTickCount - m_nMusicSpeed) % 3;
+							arpPos = ((int)m_nTickCount - (int)m_nMusicSpeed) % 3;
 							if(arpPos < 0) arpPos += 3;
 							switch(arpPos)
 							{
@@ -1445,7 +1444,7 @@ BOOL CSoundFile::ReadNote()
 				pdelta += pChn->nRealPan;
 				
 				pChn->nRealPan = CLAMP(pdelta, 0, 256);
-				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPan = pChn->nRealPan;
+				//if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPan = pChn->nRealPan; // TODO
 			}
 			int nPeriodFrac = 0;
 			// Instrument Auto-Vibrato
