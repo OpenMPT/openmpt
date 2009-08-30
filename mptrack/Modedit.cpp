@@ -1060,7 +1060,7 @@ void CModDoc::RearrangeSampleList()
 		nSampleMap[i] = i;
 
 	// First, find out which sample slots are unused and create the new sample map
-	for(UINT i = 1 ; i <= m_SndFile.m_nSamples; i++) {
+	for(SAMPLEINDEX i = 1 ; i <= m_SndFile.m_nSamples; i++) {
 		if(!m_SndFile.Samples[i].pSample)
 		{
 			// Move all following samples
@@ -1077,21 +1077,21 @@ void CModDoc::RearrangeSampleList()
 	BEGIN_CRITICAL();
 
 	// Now, move everything around
-	for(UINT i = 1; i <= m_SndFile.m_nSamples; i++)
+	for(SAMPLEINDEX i = 1; i <= m_SndFile.m_nSamples; i++)
 	{
-		if(nSampleMap[i] && nSampleMap[i] != i)
+		if(nSampleMap[i] != i)
 		{
 			// This gotta be moved
 			m_SndFile.MoveSample(i, nSampleMap[i]);
 			m_SndFile.Samples[i].pSample = nullptr;
 			strcpy(m_SndFile.m_szNames[nSampleMap[i]], m_SndFile.m_szNames[i]);
-			m_SndFile.m_szNames[i][0] = '\0';
+			memset(m_SndFile.m_szNames[i], 0, sizeof(m_SndFile.m_szNames[i]));
 
 			// Also update instrument mapping (if module is in instrument mode)
-			for(UINT iInstr = 1; iInstr <= m_SndFile.m_nInstruments; iInstr++){
+			for(INSTRUMENTINDEX iInstr = 1; iInstr <= m_SndFile.m_nInstruments; iInstr++){
 				if(m_SndFile.Instruments[iInstr]){
 					MODINSTRUMENT *p = m_SndFile.Instruments[iInstr];
-					for(WORD iNote =0; iNote < 128; iNote++)
+					for(WORD iNote = 0; iNote < 128; iNote++)
 						if(p->Keyboard[iNote] == i) p->Keyboard[iNote] = nSampleMap[i];
 				}
 			}
@@ -1101,12 +1101,12 @@ void CModDoc::RearrangeSampleList()
 	// Go through the patterns and remap samples (if module is in sample mode)
 	if(!m_SndFile.m_nInstruments)
 	{
-		for (UINT nPat=0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
+		for (PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 		{
 			MODCOMMAND *m = m_SndFile.Patterns[nPat];
-			for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
+			for(UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
 			{
-				if(nSampleMap[m->instr]) m->instr = nSampleMap[m->instr];
+				if(m->instr <= m_SndFile.m_nSamples) m->instr = nSampleMap[m->instr];
 			}
 		}
 	}
@@ -1698,7 +1698,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 	}
 	if ((!m_SndFile.m_nInstruments) && ((m_SndFile.m_nSamples > 1) || (m_SndFile.Samples[1].pSample)))
 	{
-		if (pDup) return -1;
+		if (pDup) return INSTRUMENTINDEX_INVALID;
 		UINT n = CMainFrame::GetMainFrame()->MessageBox("Convert existing samples to instruments first?", NULL, MB_YESNOCANCEL|MB_ICONQUESTION);
 		if (n == IDYES)
 		{
@@ -1713,7 +1713,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 					if (!p)
 					{
 						ErrorBox(IDS_ERR_OUTOFMEMORY, CMainFrame::GetMainFrame());
-						return -1;
+						return INSTRUMENTINDEX_INVALID;
 					}
 					InitializeInstrument(p, smp);
 					m_SndFile.Instruments[smp] = p;

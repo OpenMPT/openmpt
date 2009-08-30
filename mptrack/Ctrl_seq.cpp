@@ -307,10 +307,10 @@ BOOL COrderList::ProcessKeyDown(UINT nChar)
 	switch(nChar)
 	{
 	case VK_UP:
-	case VK_LEFT:	SetCurSel(m_nScrollPos - 1); break;
+	case VK_LEFT:	SetCurSelTo2ndSel(); SetCurSel(m_nScrollPos - 1); break;
 	case VK_DOWN:
-	case VK_RIGHT:	SetCurSel(m_nScrollPos + 1); break;
-	case VK_HOME:	SetCurSel(0); break;
+	case VK_RIGHT:	SetCurSelTo2ndSel(); SetCurSel(m_nScrollPos + 1); break;
+	case VK_HOME:	SetCurSelTo2ndSel(); SetCurSel(0); break;
 	case VK_END:
 		if (m_pModDoc)
 		{
@@ -318,6 +318,7 @@ BOOL COrderList::ProcessKeyDown(UINT nChar)
 			ORDERINDEX i = 0;
 			const int nSeqLength = pSndFile->Order.size();
 			for (i=0; i+1 < nSeqLength; i++) if (pSndFile->Order[i+1] == pSndFile->Order.GetInvalidPatIndex()) break;
+			SetCurSelTo2ndSel();
 			SetCurSel(i);
 		}
 		break;
@@ -928,7 +929,10 @@ void COrderList::OnInsertOrder()
 				pSndFile->Order[nInsertEnd + i + 1] = pSndFile->Order[nInsertEnd - nInsertCount + i];
 		}
 		m_nScrollPos = min(nInsertEnd + 1, pSndFile->Order.GetCount() - 1);
-		m_nScrollPos2nd = min(m_nScrollPos + nInsertCount, pSndFile->Order.GetCount() - 1);
+		if(nInsertCount > 0)
+			m_nScrollPos2nd = min(m_nScrollPos + nInsertCount, pSndFile->Order.GetCount() - 1);
+		else
+			m_nScrollPos2nd = ORDERINDEX_INVALID;
 		InvalidateRect(NULL, FALSE);
 		m_pModDoc->SetModified();
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);

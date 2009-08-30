@@ -44,6 +44,9 @@ public:
 	void InvalidateSelection() const;
 	UINT GetCurrentPattern() const;
 	ORD_SELECTION GetCurSel(bool bIgnoreSelection) const;
+	// make the current selection the secondary selection (used for keyboard orderlist navigation)
+	inline void SetCurSelTo2ndSel()
+		{if(m_bShift && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos; else if(!m_bShift && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;};
 	bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false);
 	BOOL ProcessKeyDown(UINT nChar);
 	BOOL ProcessChar(UINT nChar);
@@ -71,7 +74,7 @@ public:
 	// Returns the number of sequence items visible in the list.
 	BYTE GetLength();
 
-	// Return true iff given order is in margins given that first shown order
+	// Return true if given order is in margins given that first shown order
 	// is 'startOrder'. Begin part of the whole sequence
 	// is not interpreted to be in margins regardless of the margin value.
 	bool IsOrderInMargins(int order, int startOrder);
