@@ -114,7 +114,7 @@ void CViewComments::OnInitialUpdate()
 		if(pModDoc)
 		{
 			pSndFile= pModDoc->GetSoundFile();
-			if(pSndFile && (pSndFile->m_nType & MOD_TYPE_XM))
+			if(pSndFile && (pSndFile->m_nType & MOD_TYPE_XM) && pSndFile->m_nInstruments > 0)
 			{
 				m_nListId = IDC_LIST_INSTRUMENTS;
 			}
