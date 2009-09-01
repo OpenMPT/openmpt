@@ -1689,6 +1689,7 @@ http://sourceforge.net/projects/modplug/");
 		"coda for sample drawing code|"
 		"http://coda.s3m.us/|"
 		"Storlek for all the IT compatibility hints and testcases|"
+		"as well as the IMF loader|"
 		"http://schismtracker.org/|"
 		"Pel K. Txnder for the scrolling credits control :)|"
 		"http://tinyurl.com/4yze8|"

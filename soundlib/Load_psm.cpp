@@ -283,13 +283,13 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 								case 0x07: // Default Speed
 									if(dwSettingsOffset - dwChunkPos + 2 > subChunkSize) break;
-									m_nDefaultSpeed = subsong.defaultSpeed = lpStream[dwSettingsOffset + 1];
+									subsong.defaultSpeed = lpStream[dwSettingsOffset + 1];
 									dwSettingsOffset += 2;
 									break;
 
 								case 0x08: // Default Tempo
 									if(dwSettingsOffset - dwChunkPos + 2 > subChunkSize) break;
-									m_nDefaultTempo =  subsong.defaultTempo =  lpStream[dwSettingsOffset + 1];
+									subsong.defaultTempo =  lpStream[dwSettingsOffset + 1];
 									dwSettingsOffset += 2;
 									break;
 
@@ -313,20 +313,17 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 										switch(lpStream[dwSettingsOffset + 3])
 										{
 										case 0: // use panning
-											ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = lpStream[dwSettingsOffset + 2] ^ 128;
-											ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+											subsong.channelPanning[nChn] = lpStream[dwSettingsOffset + 2] ^ 128;
 											subsong.channelSurround[nChn] = false;
 											break;
 
 										case 2: // surround
-											ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = 128;
-											ChnSettings[nChn].dwFlags |= CHN_SURROUND;
+											subsong.channelPanning[nChn] = 128;
 											subsong.channelSurround[nChn] = true;
 											break;
 
 										case 4: // center
-											ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = 128;
-											ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+											subsong.channelPanning[nChn] = 128;
 											subsong.channelSurround[nChn] = false;
 											break;
 
@@ -341,10 +338,10 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 									dwSettingsOffset += 4;
 									break;
 
-								case 0x0E: // Channel volume table (0...255)
+								case 0x0E: // Channel volume table (0...255) - apparently always 255
 									if(dwSettingsOffset - dwChunkPos + 3 > subChunkSize) break;
 									if(lpStream[dwSettingsOffset + 1] < MAX_BASECHANNELS)
-										ChnSettings[lpStream[dwSettingsOffset + 1]].nVolume = subsong.channelVolume[lpStream[dwSettingsOffset + 1]] = (lpStream[dwSettingsOffset + 2] >> 2) + 1;
+										subsong.channelVolume[lpStream[dwSettingsOffset + 1]] = (lpStream[dwSettingsOffset + 2] >> 2) + 1;
 
 									dwSettingsOffset += 3;
 									break;
@@ -375,20 +372,17 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							switch(lpStream[dwChunkPos + i])
 							{
 							case 0: // use panning
-								ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = lpStream[dwChunkPos + i + 1] ^ 128;
-								ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+								subsong.channelPanning[nChn] = lpStream[dwChunkPos + i + 1] ^ 128;
 								subsong.channelSurround[nChn] = false;
 								break;
 
 							case 2: // surround
-								ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = 128;
-								ChnSettings[nChn].dwFlags |= CHN_SURROUND;
+								subsong.channelPanning[nChn] = 128;
 								subsong.channelSurround[nChn] = true;
 								break;
 
 							case 4: // center
-								ChnSettings[nChn].nPan = subsong.channelPanning[nChn] = 128;
-								ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+								subsong.channelPanning[nChn] = 128;
 								subsong.channelSurround[nChn] = false;
 								break;
 							}
@@ -478,8 +472,22 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		dwMemPos += chunkSize;
 	}
 
-	if(m_nChannels == 0)
+	if(m_nChannels == 0 || subsongs.size() == 0)
 		return false;
+
+	// Make the default variables of the first subsong global
+	m_nDefaultSpeed = subsongs[0].defaultSpeed;
+	m_nDefaultTempo = subsongs[0].defaultTempo;
+	m_nRestartPos = subsongs[0].restartPos;
+	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+	{
+		ChnSettings[nChn].nVolume = subsongs[0].channelVolume[nChn];
+		ChnSettings[nChn].nPan = subsongs[0].channelPanning[nChn];
+		if(subsongs[0].channelSurround[nChn])
+			ChnSettings[nChn].dwFlags |= CHN_SURROUND;
+		else
+			ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
+	}
 
 	// Now that we know the number of channels, we can go through all the patterns.
 	// This is a bit stupid since we will even read duplicate patterns twice, but hey, we do this just once... so who cares?
@@ -582,7 +590,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					case 0x04: // volslide down
 						command = CMD_VOLUMESLIDE;
 						if (bNewFormat) param &= 0x0F;
-						else param = (param >> 1) & 0x0F;
+						else if(param < 2) param |= 0xF0; else param = (param >> 1) & 0x0F;
 						break;
 
 					// Portamento
@@ -728,48 +736,51 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		nPat++;
 	}
 
-	// write subsong "configuration" to patterns
-	for(uint32 i = 0; i < subsongs.size(); i++)
+	if(subsongs.size() > 1)
 	{
-		PATTERNINDEX startPattern = Order[subsongs[i].startOrder], endPattern = Order[subsongs[i].endOrder];
-		if(startPattern == PATTERNINDEX_INVALID || endPattern == PATTERNINDEX_INVALID) continue; // what, invalid subtune?
+		// write subsong "configuration" to patterns (only if there are multiple subsongs)
+		for(uint32 i = 0; i < subsongs.size(); i++)
+		{
+			PATTERNINDEX startPattern = Order[subsongs[i].startOrder], endPattern = Order[subsongs[i].endOrder];
+			if(startPattern == PATTERNINDEX_INVALID || endPattern == PATTERNINDEX_INVALID) continue; // what, invalid subtune?
 
-		// set the subsong name to all pattern names
-		for(PATTERNINDEX nPat = startPattern; nPat <= endPattern; nPat++)
-		{
-			SetPatternName(nPat, subsongs[i].songName);
-		}
-		
-		// subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
-		if(bSubsongPanningDiffers)
-		{
-			for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+			// set the subsong name to all pattern names
+			for(PATTERNINDEX nPat = startPattern; nPat <= endPattern; nPat++)
 			{
-				if(subsongs[i].channelSurround[nChn] == true)
-					TryWriteEffect(startPattern, 0, CMD_S3MCMDEX, 0x91, false, nChn, false, true);
-				else
-					TryWriteEffect(startPattern, 0, CMD_PANNING8, subsongs[i].channelPanning[nChn], false, nChn, false, true);
+				SetPatternName(nPat, subsongs[i].songName);
 			}
-		}
-		// write default tempo/speed to pattern
-		TryWriteEffect(startPattern, 0, CMD_SPEED, subsongs[i].defaultSpeed, false, CHANNELINDEX_INVALID, false, true);
-		TryWriteEffect(startPattern, 0, CMD_TEMPO, subsongs[i].defaultTempo, false, CHANNELINDEX_INVALID, false, true);
 
-		// don't write channel volume for now, as it's always set to 100% anyway
-
-		// there's a restart pos, so let's try to insert a Bxx command in the last pattern
-		if(subsongs[i].restartPos != ORDERINDEX_INVALID)
-		{
-			ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
-			MODCOMMAND *row_data;
-			row_data = Patterns[endPattern];
-			for(uint32 nCell = 0; nCell < m_nChannels * Patterns[endPattern].GetNumRows(); nCell++)
+			// subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
+			if(bSubsongPanningDiffers)
 			{
-				if(row_data->command == CMD_PATTERNBREAK || row_data->command == CMD_POSITIONJUMP)
-					lastRow = nCell / m_nChannels;
-				row_data++;
+				for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+				{
+					if(subsongs[i].channelSurround[nChn] == true)
+						TryWriteEffect(startPattern, 0, CMD_S3MCMDEX, 0x91, false, nChn, false, true);
+					else
+						TryWriteEffect(startPattern, 0, CMD_PANNING8, subsongs[i].channelPanning[nChn], false, nChn, false, true);
+				}
 			}
-			TryWriteEffect(endPattern, lastRow, CMD_POSITIONJUMP, (BYTE)subsongs[i].restartPos, false, CHANNELINDEX_INVALID, false, true);
+			// write default tempo/speed to pattern
+			TryWriteEffect(startPattern, 0, CMD_SPEED, subsongs[i].defaultSpeed, false, CHANNELINDEX_INVALID, false, true);
+			TryWriteEffect(startPattern, 0, CMD_TEMPO, subsongs[i].defaultTempo, false, CHANNELINDEX_INVALID, false, true);
+
+			// don't write channel volume for now, as it's always set to 100% anyway
+
+			// there's a restart pos, so let's try to insert a Bxx command in the last pattern
+			if(subsongs[i].restartPos != ORDERINDEX_INVALID)
+			{
+				ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
+				MODCOMMAND *row_data;
+				row_data = Patterns[endPattern];
+				for(uint32 nCell = 0; nCell < m_nChannels * Patterns[endPattern].GetNumRows(); nCell++)
+				{
+					if(row_data->command == CMD_PATTERNBREAK || row_data->command == CMD_POSITIONJUMP)
+						lastRow = nCell / m_nChannels;
+					row_data++;
+				}
+				TryWriteEffect(endPattern, lastRow, CMD_POSITIONJUMP, (BYTE)subsongs[i].restartPos, false, CHANNELINDEX_INVALID, false, true);
+			}
 		}
 	}
 
