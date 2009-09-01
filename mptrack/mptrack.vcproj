@@ -367,6 +367,9 @@
 				RelativePath=".\Modedit.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\ModSequence.cpp">
+			</File>
+			<File
 				RelativePath="..\soundlib\modsmp_ctrl.cpp">
 			</File>
 			<File
@@ -395,9 +398,6 @@
 			</File>
 			<File
 				RelativePath=".\OpenGLEditor.cpp">
-			</File>
-			<File
-				RelativePath="..\soundlib\OrderToPatternTable.cpp">
 			</File>
 			<File
 				RelativePath="..\soundlib\pattern.cpp">
@@ -795,6 +795,9 @@
 				RelativePath=".\moddoc.h">
 			</File>
 			<File
+				RelativePath="..\soundlib\ModSequence.h">
+			</File>
+			<File
 				RelativePath="..\soundlib\modsmp_ctrl.h">
 			</File>
 			<File
@@ -817,12 +820,6 @@
 			</File>
 			<File
 				RelativePath=".\OpenGLEditor.h">
-			</File>
-			<File
-				RelativePath=".\order.h">
-			</File>
-			<File
-				RelativePath="..\soundlib\OrderToPatternTable.h">
 			</File>
 			<File
 				RelativePath="..\soundlib\pattern.h">
@@ -850,6 +847,9 @@
 			</File>
 			<File
 				RelativePath=".\serialization_utils.h">
+			</File>
+			<File
+				RelativePath="..\soundlib\Snd_defs.h">
 			</File>
 			<File
 				RelativePath="..\Soundlib\snddev.h">

@@ -31,26 +31,26 @@ const uint64 uint64_max = 18446744073709551615;
 typedef float float32;
 
 
-typedef uint32 ROWINDEX;
-	const ROWINDEX ROWINDEX_MAX = uint32_max;
-typedef uint16 CHANNELINDEX;
-	const CHANNELINDEX CHANNELINDEX_MAX	= uint16_max;
-	const CHANNELINDEX CHANNELINDEX_INVALID	= CHANNELINDEX_MAX;
-typedef uint16 ORDERINDEX;
-	const ORDERINDEX ORDERINDEX_MAX	= uint16_max;
-	const ORDERINDEX ORDERINDEX_INVALID	= ORDERINDEX_MAX;
-typedef uint16 PATTERNINDEX;
-	const PATTERNINDEX PATTERNINDEX_MAX	= uint16_max;
-	const PATTERNINDEX PATTERNINDEX_INVALID	= PATTERNINDEX_MAX;
-typedef uint8  PLUGINDEX;
-typedef uint16 TEMPO;
-typedef uint16 SAMPLEINDEX;
-	const SAMPLEINDEX SAMPLEINDEX_MAX	= uint16_max;
-	const SAMPLEINDEX SAMPLEINDEX_INVALID	= SAMPLEINDEX_MAX;
-typedef uint16 INSTRUMENTINDEX;
-	const SAMPLEINDEX INSTRUMENTINDEX_MAX	= uint16_max;
-	const SAMPLEINDEX INSTRUMENTINDEX_INVALID	= INSTRUMENTINDEX_MAX;
-typedef uint32 MODTYPE;
+#if !_HAS_TR1
+	namespace std
+	{ 
+		namespace tr1
+		{
+			template <class T> struct has_trivial_assign {static const bool value = false;};
+
+			#define SPECIALIZE_TRIVIAL_ASSIGN(type) template <> struct has_trivial_assign<type> {static const bool value = true;}
+			SPECIALIZE_TRIVIAL_ASSIGN(int8);
+			SPECIALIZE_TRIVIAL_ASSIGN(uint8);
+			SPECIALIZE_TRIVIAL_ASSIGN(int16);
+			SPECIALIZE_TRIVIAL_ASSIGN(uint16);
+			SPECIALIZE_TRIVIAL_ASSIGN(int32);
+			SPECIALIZE_TRIVIAL_ASSIGN(uint32);
+			SPECIALIZE_TRIVIAL_ASSIGN(int64);
+			SPECIALIZE_TRIVIAL_ASSIGN(uint64);
+			#undef SPECIALIZE_TRIVIAL_ASSIGN
+		};
+	};
+#endif
 
 
 #endif

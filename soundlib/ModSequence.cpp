@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "sndfile.h"
-#include "ordertopatterntable.h"
+#include "ModSequence.h"
 #include "../mptrack/serialization_utils.h"
 
 #define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))

@@ -1,6 +1,7 @@
 #ifndef MOD_SPECIFICATIONS_H
 #define MOD_SPECIFICATIONS_H
 
+#include "Snd_defs.h"
 #include "modcommand.h"						// 
 #include "../mptrack/SoundFilePlayConfig.h" // mixlevel constants.
 

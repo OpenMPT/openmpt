@@ -2,6 +2,7 @@
 #define PATTERNCONTAINER_H
 
 #include "pattern.h"
+#include "Snd_defs.h"
 
 class CSoundFile;
 typedef CPattern MODPATTERN;
@@ -25,7 +26,7 @@ public:
 
 //BEGIN: INTERFACE METHODS
 public:
-	CPatternContainer(CSoundFile& sndFile) : m_rSndFile(sndFile) {m_Patterns.assign(240, MODPATTERN(*this));}
+	CPatternContainer(CSoundFile& sndFile) : m_rSndFile(sndFile) {m_Patterns.assign(MAX_PATTERNS, MODPATTERN(*this));}
 
 	// Clears existing patterns and resizes array to default size.
 	void Init();
