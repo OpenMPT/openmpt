@@ -81,4 +81,33 @@ inline void LimitMax(T& val, const C upperLimit)
  
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
 
+namespace utilImpl
+{
+	template <bool bMemcpy>
+	struct ArrayCopyImpl {};
+
+	template <>
+	struct ArrayCopyImpl<true>
+	{
+		template <class T>
+		static void Do(T* pDst, const T* pSrc, const size_t n) {memcpy(pDst, pSrc, sizeof(T) * n);}
+	};
+
+	template <>
+	struct ArrayCopyImpl<false>
+	{
+		template <class T>
+		static void Do(T* pDst, const T* pSrc, const size_t n) {std::copy(pSrc, pSrc + n, pDst);}
+	};
+} // namespace utilImpl
+
+
+// Copies n elements from array pSrc to array pDst.
+// If the source and destination arrays overlap, behaviour is undefined.
+template <class T>
+void ArrayCopy(T* pDst, const T* pSrc, const size_t n)
+{
+	utilImpl::ArrayCopyImpl<std::tr1::has_trivial_assign<T>::value>::Do(pDst, pSrc, n);
+}
+
 #endif

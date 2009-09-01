@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "modcommand.h"
+#include "Snd_defs.h"
 
 using std::vector;
 
