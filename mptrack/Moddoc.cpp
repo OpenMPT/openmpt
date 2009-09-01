@@ -2077,7 +2077,7 @@ typedef struct MPTEFFECTINFO
 #define MOD_TYPE_XMIT	(MOD_TYPE_XM|MOD_TYPE_IT)
 #define MOD_TYPE_XMITMPT (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)
 #define MOD_TYPE_ITMPT (MOD_TYPE_IT|MOD_TYPE_MPT)
-#define MAX_FXINFO		66					//rewbs.smoothVST, increased from 64... I wonder what this will break?
+#define MAX_FXINFO		68					//rewbs.smoothVST, increased from 64... I wonder what this will break?
 
 
 const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
@@ -2153,8 +2153,10 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_S3MCMDEX,		0xF0,0x70,	0,	MOD_TYPE_ITMPT,	"Instr. control"},
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMITMPT,	"X param"}
+	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMITMPT,	"X param"},
 // -! NEW_FEATURE#0010
+	{CMD_NOTESLIDEUP,	0x00,0x00,	0,	0,	"Note Slide Up"}, // .IMF effect
+	{CMD_NOTESLIDEDOWN,	0x00,0x00,	0,	0,	"Note Slide Down"}, // .IMF effect
 };
 
 

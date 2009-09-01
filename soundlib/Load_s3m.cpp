@@ -527,7 +527,6 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 		nbo = 2;
 	else if (nbo & 1) // number of orders must be even
 		nbo++;
-	nbo = (nbo + 15) & 0xF0; // TODO why does it not work otherwise? nbo should be multiple of 2, not 16!
 	if(nbo > 0xF0) nbo = 0xF0; // sequence too long
 	header[0x20] = nbo & 0xFF;
 	header[0x21] = nbo >> 8;
@@ -560,7 +559,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	header[0x31] = CLAMP(m_nDefaultSpeed, 1, 255);
 	header[0x32] = CLAMP(m_nDefaultTempo, 32, 255);
 	header[0x33] = CLAMP(m_nSamplePreAmp, 0x10, 0x7F) | 0x80;	// Bit 8 = Stereo
-	header[0x34] = 0x10; // 16 Channels for UltraClick removal
+	header[0x34] = 0x08; // 8 Channels for UltraClick removal (default)
 	header[0x35] = 0xFC; // Write pan positions
 	for (i=0; i<32; i++)
 	{
@@ -571,7 +570,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 		} else header[0x40+i] = 0xFF;
 	}
 	fwrite(header, 0x60, 1, f);
-	Order.WriteAsByte(f, nbo);
+	nbo = Order.WriteAsByte(f, nbo);
 	memset(patptr, 0, sizeof(patptr));
 	memset(insptr, 0, sizeof(insptr));
 	UINT ofs0 = 0x60 + nbo;
@@ -595,6 +594,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	{
 		fwrite(S3MFiller, 0x10 - ((nbi*2+nbp*2) & 0x0F), 1, f);
 	}
+	fseek(f, ofs1, SEEK_SET);
 	ofs1 = ftell(f);
 	fwrite(insex, nbi, 0x50, f);
 	// Packing patterns
