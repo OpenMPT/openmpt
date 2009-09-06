@@ -76,7 +76,7 @@ public:
 	static MODCOMMAND m_cmdFind, m_cmdReplace, m_cmdOld;
 	static DWORD m_dwFindFlags, m_dwReplaceFlags;
 	static UINT m_nFindMinChn, m_nFindMaxChn;
-	signed char m_cInstrRelChange; // relative instrument change (quick'n'dirty fix)
+	signed char m_cInstrRelChange; // relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
 
 protected:
 	CFastBitmap m_Dib;

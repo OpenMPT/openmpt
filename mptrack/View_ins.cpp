@@ -1974,7 +1974,6 @@ void CViewInstrument::OnEnvToggleReleasNode()
 	if ((pModDoc) && (node>0) && (node <= EnvGetLastPoint()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 
 		INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
 		if(envelope == nullptr) return;
