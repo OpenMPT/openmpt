@@ -84,7 +84,7 @@ enum CommandID
 	kcEditPaste,
 	kcEditMixPaste,
 	kcEditMixPasteITStyle,
-	kcSwitchEchoPaste,
+	kcSwitchOverflowPaste,
 	kcEditSelectAll,
 	kcEditFind,
 	kcEditFindNext,

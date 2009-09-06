@@ -1113,7 +1113,7 @@
 #define ID_CLEANUP_COMPO                59221
 #define ID_SAMPLE_DRAW                  59224
 #define ID_SAMPLE_ADDSILENCE            59225
-#define ID_ECHOPASTE                    59226
+#define ID_OVERFLOWPASTE                59226
 #define ID_NOTEMAP_COPY_NOTE            59227
 #define ID_CLEANUP_REARRANGESAMPLES     59228
 

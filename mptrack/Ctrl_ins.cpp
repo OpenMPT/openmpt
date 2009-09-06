@@ -314,7 +314,10 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				}
 				wsprintf(s, "Map all notes to sample %d", pIns->Keyboard[m_nNote]);
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, s);
-				wsprintf(s, "Map all notes to %s", pSndFile->GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
+				if(pIns->NoteMap[m_nNote] < NOTE_MIN_SPECIAL)
+					wsprintf(s, "Map all notes to %s", pSndFile->GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
+				else
+					wsprintf(s, "Map all notes to %s", szSpecialNoteNames[pIns->NoteMap[m_nNote] - NOTE_MIN_SPECIAL]);
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, "Reset note mapping");
 				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, "Duplicate Instrument\tShift+New");

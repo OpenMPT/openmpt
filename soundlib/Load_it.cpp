@@ -230,7 +230,7 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		const ITOLDINSTRUMENT *pis = (const ITOLDINSTRUMENT *)p;
 		memcpy(pIns->name, pis->name, 26);
 		memcpy(pIns->filename, pis->filename, 12);
-		pIns->nFadeOut = pis->fadeout << 7;
+		pIns->nFadeOut = pis->fadeout << 6;
 		pIns->nGlobalVol = 64;
 		for (UINT j=0; j<NOTE_MAX; j++)
 		{

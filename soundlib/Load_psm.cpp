@@ -776,7 +776,10 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				for(uint32 nCell = 0; nCell < m_nChannels * Patterns[endPattern].GetNumRows(); nCell++)
 				{
 					if(row_data->command == CMD_PATTERNBREAK || row_data->command == CMD_POSITIONJUMP)
+					{
 						lastRow = nCell / m_nChannels;
+						break;
+					}
 					row_data++;
 				}
 				TryWriteEffect(endPattern, lastRow, CMD_POSITIONJUMP, (BYTE)subsongs[i].restartPos, false, CHANNELINDEX_INVALID, false, true);

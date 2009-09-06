@@ -1324,7 +1324,7 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	memcpy(xfh.extxi, "Extended Instrument: ", 21);
 	memcpy(xfh.name, pIns->name, 22);
 	xfh.name[22] = 0x1A;
-	memcpy(xfh.trkname, "FastTracker v2.00   ", 20);
+	memcpy(xfh.trkname, "Created by OpenMPT  ", 20);
 	xfh.shsize = 0x102;
 	fwrite(&xfh, 1, sizeof(xfh), f);
 	// XI Instrument Header

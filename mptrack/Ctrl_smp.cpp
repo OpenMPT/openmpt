@@ -618,7 +618,7 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		DWORD d;
 		
 		// Length / Type
-		wsprintf(s, "%d-bit %s, len: %d", (pSmp->uFlags & CHN_16BIT) ? 16 : 8, (pSmp->uFlags & CHN_STEREO) ? "stereo" : "mono", pSmp->nLength);
+		wsprintf(s, "%d-bit %s, len: %d", pSmp->GetElementarySampleSize() * 8, (pSmp->uFlags & CHN_STEREO) ? "stereo" : "mono", pSmp->nLength);
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
 		memcpy(s, m_pSndFile->m_szNames[m_nSample], 32);

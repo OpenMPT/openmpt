@@ -667,10 +667,10 @@ BOOL CFindReplaceTab::OnInitDialog()
 		combo->SetItemData(combo->AddString("..."), 0);
 		if (m_bReplace)
 		{
-			combo->SetItemData(combo->AddString("note-1"), replaceMinusOne);
-			combo->SetItemData(combo->AddString("note+1"), replacePlusOne);
-			combo->SetItemData(combo->AddString("-1 oct"), replaceMinusOctave);
-			combo->SetItemData(combo->AddString("+1 oct"), replacePlusOctave);
+			combo->SetItemData(combo->AddString("note-1"), replaceNoteMinusOne);
+			combo->SetItemData(combo->AddString("note+1"), replaceNotePlusOne);
+			combo->SetItemData(combo->AddString("-1 oct"), replaceNoteMinusOctave);
+			combo->SetItemData(combo->AddString("+1 oct"), replaceNotePlusOctave);
 		} else
 		{
 			combo->SetItemData(combo->AddString("any"), findAny);
@@ -690,8 +690,8 @@ BOOL CFindReplaceTab::OnInitDialog()
 		combo->SetItemData(combo->AddString(".."), 0);
 		if (m_bReplace)
 		{
-			combo->SetItemData(combo->AddString("ins-1"), replaceMinusOne);
-			combo->SetItemData(combo->AddString("ins+1"), replacePlusOne);
+			combo->SetItemData(combo->AddString("ins-1"), replaceInstrumentMinusOne);
+			combo->SetItemData(combo->AddString("ins+1"), replaceInstrumentPlusOne);
 		}
 		for (UINT n=1; n<MAX_INSTRUMENTS; n++)
 		{
@@ -705,10 +705,13 @@ BOOL CFindReplaceTab::OnInitDialog()
 			combo->SetItemData(combo->AddString(s), n);
 		}
 		UINT ncount = combo->GetCount();
-		for (UINT i=0; i<ncount; i++) if (m_nInstr == combo->GetItemData(i))
+		for (UINT i=0; i<ncount; i++)
 		{
-			combo->SetCurSel(i);
-			break;
+			if (m_nInstr == combo->GetItemData(i) || (cInstrRelChange == -1 && combo->GetItemData(i) == replaceInstrumentMinusOne) || (cInstrRelChange == 1 && combo->GetItemData(i) == replaceInstrumentPlusOne))
+			{
+				combo->SetCurSel(i);
+				break;
+			}
 		}
 	}
 	// Volume Command
@@ -844,7 +847,19 @@ void CFindReplaceTab::OnOK()
 	// Instrument
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
-		m_nInstr = combo->GetItemData(combo->GetCurSel());
+		switch(combo->GetItemData(combo->GetCurSel()))
+		{
+		case replaceInstrumentMinusOne:
+			cInstrRelChange = -1;
+			break;
+		case replaceInstrumentPlusOne:
+			cInstrRelChange = 1;
+			break;
+		default:
+			m_nInstr = combo->GetItemData(combo->GetCurSel());
+			cInstrRelChange = 0;
+			break;
+		}
 	}
 	// Volume Command
 	if (((combo = (CComboBox *)GetDlgItem(IDC_COMBO3)) != NULL) && (m_pModDoc))
@@ -1230,7 +1245,10 @@ void CPageEditNote::UpdateDialog()
 		AppendNotesToControlEx(*combo, pSndFile, m_nInstr);
 
 		if (m_nNote <= NOTE_MAX)
-			combo->SetCurSel(m_nNote);
+		{
+			const MODCOMMAND::NOTE noteStart = (pSndFile != nullptr) ? pSndFile->GetModSpecifications().noteMin : 1;
+			combo->SetCurSel(m_nNote - (noteStart - 1));
+		}
 		else
 		{
 			for(int i = combo->GetCount() - 1; i >= 0; --i)
@@ -1248,21 +1266,31 @@ void CPageEditNote::UpdateDialog()
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
 		combo->ResetContent();
-		combo->SetItemData(combo->AddString("No Instrument"), 0);
-		UINT max = pSndFile->m_nInstruments;
-		if (!max) max = pSndFile->m_nSamples;
-		for (UINT i=1; i<=max; i++)
+
+		if(m_nNote == NOTE_PC || m_nNote == NOTE_PCS)
 		{
-			wsprintf(s, "%02d:", i);
-			int k = strlen(s);
-			if (pSndFile->m_nInstruments)
+			// control plugin param note
+			combo->SetItemData(combo->AddString("No Effect"), 0);
+			AddPluginNamesToCombobox(*combo, pSndFile->m_MixPlugins, false);
+		} else
+		{
+			// instrument / sample
+			combo->SetItemData(combo->AddString("No Instrument"), 0);
+			UINT max = max(pSndFile->m_nInstruments, pSndFile->m_nSamples); // instrument / sample mode
+			for (UINT i = 1; i <= max; i++)
 			{
-				if (pSndFile->Instruments[i])
-					memcpy(s+k, pSndFile->Instruments[i]->name, 32);
-			} else
-				memcpy(s+k, pSndFile->m_szNames[i], 32);
-			s[k+32] = 0;
-			combo->SetItemData(combo->AddString(s), i);
+				wsprintf(s, "%02d: ", i);
+				int k = strlen(s);
+				// instrument / sample
+				if (pSndFile->m_nInstruments)
+				{
+					if (pSndFile->Instruments[i])
+						memcpy(s+k, pSndFile->Instruments[i]->name, 32);
+				} else
+					memcpy(s+k, pSndFile->m_szNames[i], 32);
+				s[k+32] = 0;
+				combo->SetItemData(combo->AddString(s), i);
+			}
 		}
 		combo->SetCurSel(m_nInstr);
 	}
@@ -1272,6 +1300,8 @@ void CPageEditNote::UpdateDialog()
 void CPageEditNote::OnNoteChanged()
 //---------------------------------
 {
+	bool bWasParamControl = (m_nNote == NOTE_PC || m_nNote == NOTE_PCS) ? true : false;
+
 	CComboBox *combo;
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
@@ -1294,6 +1324,10 @@ void CPageEditNote::OnNoteChanged()
 			}
 		}
 	}
+	bool bIsNowParamControl = (m_nNote == NOTE_PC || m_nNote == NOTE_PCS) ? true : false;
+	if(bWasParamControl != bIsNowParamControl)
+		UpdateDialog();
+
 	if (m_pParent) m_pParent->UpdateNote(m_nNote, m_nInstr);
 }
 
@@ -1324,7 +1358,7 @@ void CPageEditVolume::UpdateDialog()
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		if (pSndFile->m_nType == MOD_TYPE_MOD)
+		if (pSndFile->m_nType == MOD_TYPE_MOD || m_bIsParamControl)
 		{
 			combo->EnableWindow(FALSE);
 			return;
@@ -1427,18 +1461,27 @@ void CPageEditEffect::UpdateDialog()
 	pSndFile = m_pModDoc->GetSoundFile();
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
 	{
-		UINT numfx = m_pModDoc->GetNumEffects();
-		UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
 		combo->ResetContent();
-		combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
-		if (!m_nCommand) combo->SetCurSel(0);
-		for (UINT i=0; i<numfx; i++)
+		if(m_bIsParamControl)
 		{
-			if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+			// plugin param control note
+			AddPluginParameternamesToCombobox(*combo, pSndFile->m_MixPlugins[m_nPlugin]);
+			combo->SetCurSel(m_nPluginParam);
+		} else
+		{
+			// process as effect
+			UINT numfx = m_pModDoc->GetNumEffects();
+			UINT fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
+			combo->SetItemData(combo->AddString(" None"), (DWORD)-1);
+			if (!m_nCommand) combo->SetCurSel(0);
+			for (UINT i=0; i<numfx; i++)
 			{
-				int k = combo->AddString(s);
-				combo->SetItemData(k, i);
-				if (i == fxndx) combo->SetCurSel(k);
+				if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+				{
+					int k = combo->AddString(s);
+					combo->SetItemData(k, i);
+					if (i == fxndx) combo->SetCurSel(k);
+				}
 			}
 		}
 	}
