@@ -227,7 +227,7 @@ protected:
 	afx_msg void OnUpdateRecord(CCmdUI *pCmdUI);
 	afx_msg void TogglePluginEditor(); //rewbs.instroVST
 	afx_msg void ToggleSplitPluginEditor(); //rewbs.instroVST
-	afx_msg void OnToggleEchoPaste();
+	afx_msg void OnToggleOverflowPaste();
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

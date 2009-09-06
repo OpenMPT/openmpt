@@ -69,6 +69,8 @@ public:
 	bool EnvSetPanEnv(bool bEnable);
 	bool EnvSetPitchEnv(bool bEnable);
 	bool EnvSetFilterEnv(bool bEnable);
+	UINT EnvInsertPoint();
+	bool EnvRemovePoint();
 	int TickToScreen(int nTick) const;
 	int PointToScreen(int nPoint) const;
 	int ScreenToTick(int x) const;

@@ -133,6 +133,7 @@ protected:
 
 public:
 	UINT m_nNote, m_nInstr, m_nVolCmd, m_nVol, m_nCommand, m_nParam, m_nMinChannel, m_nMaxChannel;
+	signed char cInstrRelChange;
 	DWORD m_dwFlags;
 
 	enum findItem
@@ -143,10 +144,13 @@ public:
 
 	enum replaceItem
 	{
-		replaceMinusOctave = NOTE_MIN_SPECIAL - 1,
-		replacePlusOctave = NOTE_MIN_SPECIAL - 2,
-		replaceMinusOne = NOTE_MIN_SPECIAL - 3,
-		replacePlusOne = NOTE_MIN_SPECIAL - 4
+		replaceNotePlusOne = NOTE_MAX + 1,
+		replaceNoteMinusOne = NOTE_MAX + 2,
+		replaceNotePlusOctave = NOTE_MAX + 3,
+		replaceNoteMinusOctave = NOTE_MAX + 4,
+
+		replaceInstrumentPlusOne = MAX_INSTRUMENTS + 1,
+		replaceInstrumentMinusOne = MAX_INSTRUMENTS + 2,
 	};
 
 	// Make sure there's unused notes between NOTE_MAX and NOTE_MIN_SPECIAL.
@@ -235,10 +239,11 @@ class CPageEditVolume: public CPageEditCommand
 {
 protected:
 	UINT m_nVolCmd, m_nVolume;
+	bool m_bIsParamControl;
 
 public:
 	CPageEditVolume(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITVOLUME) {}
-	void Init(MODCOMMAND &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; }
+	void Init(MODCOMMAND &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = (m.note == NOTE_PC || m.note == NOTE_PCS) ? true : false;}
 	void UpdateDialog();
 	void UpdateRanges();
 
@@ -256,7 +261,9 @@ class CPageEditEffect: public CPageEditCommand
 //============================================
 {
 protected:
-	UINT m_nCommand, m_nParam;
+	UINT m_nCommand, m_nParam, m_nPlugin;
+	UINT m_nPluginParam;
+	bool m_bIsParamControl;
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 	UINT m_nXParam, m_nMultiplier;
@@ -268,7 +275,7 @@ public:
 	CPageEditEffect(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITEFFECT) {}
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m;}
+	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = (m.note == NOTE_PC || m.note == NOTE_PCS) ? true : false; m_nPlugin = m.instr; m_nPluginParam = MODCOMMAND::GetValueVolCol(m.volcmd, m.vol);}
 	void XInit(UINT xparam = 0, UINT multiplier = 1) { m_nXParam = xparam; m_nMultiplier = multiplier; }
 // -! NEW_FEATURE#0010
 	void UpdateDialog();

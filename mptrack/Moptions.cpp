@@ -605,7 +605,7 @@ enum {
 	OPTGEN_SYNCMUTE,
 	OPTGEN_AUTODELAY,
 	OPTGEN_PATNOTEFADE,
-	OPTGEN_ECHOPASTE,
+	OPTGEN_OVERFLOWPASTE,
 	OPTGEN_POSITIONAWARETIMER,
 	OPTGEN_RESETCHANNELS,
 	OPTGEN_MAXOPTIONS
@@ -625,7 +625,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{"Ignored muted channels",			"Notes will not be played on muted channels (unmuting will only start on a new note)."},
 	{"Quick cursor paste Auto-Repeat",	"Leaving the space bar pressed will auto-repeat the action"},
 	{"No loud samples",					"Disable loud playback of samples in the sample/instrument editor"},
-	{"Show Prev/Next patterns",			"Displays grayed-out version of the previous/next patterns in the pattern editor"},
+	{"Show Prev/Next patterns",			"Displays grayed-out version of the previous/next patterns in the pattern editor. Does not work if \"always center active row\" is disabled."},
 	{"Continuous scroll",				"Jumps to the next pattern when moving past the end of a pattern"},
 	{"Record note off",					"Record note off when a key is released on the PC keyboard (Only works in instrument mode)."},
 	{"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."}, 	//rewbs.noFollow
@@ -644,7 +644,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{"Maintain sample sync on mute",	"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
 	{"Automatic delay commands",	    "Automatically insert appropriate note-delay commands when recording notes during live playback."},
 	{"Note fade on key up",				"Enable to fade/stop notes on key up in pattern tab." },
-	{"Echo paste mode",					"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
+	{"Overflow paste mode",				"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
 	{"Position aware timer",			"If enabled, timer will show the playback position time if possible instead of running timer."},
 	{"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands)"},
 };
@@ -709,7 +709,7 @@ BOOL COptionsGeneral::OnInitDialog()
 
 		case OPTGEN_AUTODELAY:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY); break;
 		case OPTGEN_PATNOTEFADE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_NOTEFADE); break;
-		case OPTGEN_ECHOPASTE:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_ECHOPASTE); break;
+		case OPTGEN_OVERFLOWPASTE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE); break;
 		case OPTGEN_POSITIONAWARETIMER:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_POSITIONAWARETIMER); break;
 		case OPTGEN_RESETCHANNELS:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_RESETCHANNELS); break;
 		}
@@ -774,13 +774,13 @@ void COptionsGeneral::OnOK()
 //		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
 // rewbs: this options is now available under song settings. It is therefore saved with the song.
 // -! NEW_FEATURE#0022		
-		case OPTGEN_PATTERNCTXMENUSTYLE: mask = PATTERN_OLDCTXMENUSTYLE; break;
-		case OPTGEN_SYNCMUTE:			 mask = PATTERN_SYNCMUTE; break;
-		case OPTGEN_AUTODELAY:			 mask = PATTERN_AUTODELAY; break;
-		case OPTGEN_PATNOTEFADE:		 mask = PATTERN_NOTEFADE; break;
-		case OPTGEN_ECHOPASTE:			 mask = PATTERN_ECHOPASTE; break;
-		case OPTGEN_POSITIONAWARETIMER:	 mask = PATTERN_POSITIONAWARETIMER; break;
-		case OPTGEN_RESETCHANNELS:		 mask = PATTERN_RESETCHANNELS; break;
+		case OPTGEN_PATTERNCTXMENUSTYLE:	mask = PATTERN_OLDCTXMENUSTYLE; break;
+		case OPTGEN_SYNCMUTE:				mask = PATTERN_SYNCMUTE; break;
+		case OPTGEN_AUTODELAY:				mask = PATTERN_AUTODELAY; break;
+		case OPTGEN_PATNOTEFADE:			mask = PATTERN_NOTEFADE; break;
+		case OPTGEN_OVERFLOWPASTE:			mask = PATTERN_OVERFLOWPASTE; break;
+		case OPTGEN_POSITIONAWARETIMER:		mask = PATTERN_POSITIONAWARETIMER; break;
+		case OPTGEN_RESETCHANNELS:			mask = PATTERN_RESETCHANNELS; break;
 			
 		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;

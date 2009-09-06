@@ -2315,10 +2315,10 @@ void CCommandSet::SetupCommands()
 	commands[kcChannelReset].isDummy = false;
 	commands[kcChannelReset].Message = "Reset channel";
 
-	commands[kcSwitchEchoPaste].UID = 1787;
-	commands[kcSwitchEchoPaste].Message = "Switch echo paste";
-	commands[kcSwitchEchoPaste].isHidden = false;
-	commands[kcSwitchEchoPaste].isDummy = false;
+	commands[kcSwitchOverflowPaste].UID = 1787;
+	commands[kcSwitchOverflowPaste].Message = "Toggle overflow paste";
+	commands[kcSwitchOverflowPaste].isHidden = false;
+	commands[kcSwitchOverflowPaste].isDummy = false;
 
 	commands[kcNotePC].UID = 1788;
 	commands[kcNotePC].isHidden = false;

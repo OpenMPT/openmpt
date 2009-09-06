@@ -2315,7 +2315,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 				nrow++;
 
 				//jojo.echopaste
-				if(CMainFrame::m_dwPatternSetup & PATTERN_ECHOPASTE)
+				if(CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE)
 				{
 					while(nrow >= m_SndFile.PatternSize[nPattern])
 					{

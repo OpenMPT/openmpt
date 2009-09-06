@@ -29,6 +29,7 @@ DWORD CViewPattern::m_dwFindFlags = 0;
 DWORD CViewPattern::m_dwReplaceFlags = 0;
 UINT CViewPattern::m_nFindMinChn = 0;
 UINT CViewPattern::m_nFindMaxChn = 0;
+signed char cInstrRelChange = 0;
 
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
 
@@ -1688,6 +1689,7 @@ void CViewPattern::OnEditFind()
 		pageReplace.m_nCommand = m_cmdReplace.command;
 		pageReplace.m_nParam = m_cmdReplace.param;
 		pageReplace.m_dwFlags = m_dwReplaceFlags;
+		pageReplace.cInstrRelChange = m_cInstrRelChange;
 		dlg.AddPage(&pageFind);
 		dlg.AddPage(&pageReplace);
 		if (dlg.DoModal() == IDOK)
@@ -1708,6 +1710,7 @@ void CViewPattern::OnEditFind()
 			m_cmdReplace.command = pageReplace.m_nCommand;
 			m_cmdReplace.param = pageReplace.m_nParam;
 			m_dwReplaceFlags = pageReplace.m_dwFlags;
+			m_cInstrRelChange = pageReplace.cInstrRelChange;
 			m_bContinueSearch = FALSE;
 			OnEditFindNext();
 		}
@@ -1866,7 +1869,7 @@ void CViewPattern::OnEditFindNext()
 				if (!(m_dwReplaceFlags & PATSEARCH_REPLACE)) goto EndSearch;
 				if (!(m_dwReplaceFlags & PATSEARCH_REPLACEALL))
 				{
-					UINT ans = MessageBox("Replace this occurrence ?", "Replace", MB_YESNOCANCEL);
+					UINT ans = MessageBox("Replace this occurrence?", "Replace", MB_YESNOCANCEL);
 					if (ans == IDYES) bReplace = TRUE; else
 					if (ans == IDNO) bReplace = FALSE; else goto EndSearch;
 				}
@@ -1875,22 +1878,22 @@ void CViewPattern::OnEditFindNext()
 					if ((m_dwReplaceFlags & PATSEARCH_NOTE))
 					{
 						// -1 octave
-						if (m_cmdReplace.note == CFindReplaceTab::replaceMinusOctave)
+						if (m_cmdReplace.note == CFindReplaceTab::replaceNoteMinusOctave)
 						{
 							if (m->note > 12) m->note -= 12;
 						} else
 						// +1 octave
-						if (m_cmdReplace.note == CFindReplaceTab::replacePlusOctave)
+						if (m_cmdReplace.note == CFindReplaceTab::replaceNotePlusOctave)
 						{
 							if (m->note <= NOTE_MAX - 12) m->note += 12;
 						} else
 						// Note--
-						if (m_cmdReplace.note == CFindReplaceTab::replaceMinusOne)
+						if (m_cmdReplace.note == CFindReplaceTab::replaceNoteMinusOne)
 						{
 							if (m->note > 1) m->note--;
 						} else
 						// Note++
-						if (m_cmdReplace.note == CFindReplaceTab::replacePlusOne)
+						if (m_cmdReplace.note == CFindReplaceTab::replaceNotePlusOne)
 						{
 							if (m->note < NOTE_MAX) m->note++;
 						} else m->note = m_cmdReplace.note;
@@ -1898,15 +1901,12 @@ void CViewPattern::OnEditFindNext()
 					if ((m_dwReplaceFlags & PATSEARCH_INSTR))
 					{
 						// Instr--
-						if (m_cmdReplace.instr == CFindReplaceTab::replaceMinusOne)
-						{
+						if (m_cInstrRelChange == -1)
 							if (m->instr > 1) m->instr--;
-						} else
 						// Instr++
-						if (m_cmdReplace.instr == CFindReplaceTab::replacePlusOne)
-						{
-							if (m->instr < MAX_INSTRUMENTS-1) m->instr++;
-						} else m->instr = m_cmdReplace.instr;
+						else if (m_cInstrRelChange == 1)
+							if (m->instr < MAX_INSTRUMENTS - 1) m->instr++;
+						else m->instr = m_cmdReplace.instr;
 					}
 					if ((m_dwReplaceFlags & PATSEARCH_VOLCMD))
 					{
@@ -3609,7 +3609,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcChangeLoopStatus: SendCtrlMessage(CTRLMSG_PAT_LOOP, -1); return wParam;
 		case kcNewPattern:		 SendCtrlMessage(CTRLMSG_PAT_NEWPATTERN); return wParam;
 		case kcSwitchToOrderList: OnSwitchToOrderList();
-		case kcSwitchEchoPaste:	CMainFrame::m_dwPatternSetup ^= PATTERN_ECHOPASTE; return wParam;
+		case kcSwitchOverflowPaste:	CMainFrame::m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
 
 	}
 	//Ranges:

@@ -642,16 +642,18 @@ BOOL CSoundFile::ProcessRow()
 			if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern])) m_nPattern = Order.GetIgnoreIndex();
 			while (m_nPattern >= Patterns.Size())
 			{
-				// End of song ?
+				// End of song?
 				if ((m_nPattern == Order.GetInvalidPatIndex()) || (m_nCurrentPattern >= Order.size()))
 				{
 
 					if (!m_nRepeatCount) return FALSE;
 
 					ORDERINDEX nRestartPosOverride = m_nRestartPos;
-					if(!m_nRestartPos && m_nCurrentPattern <= Order.size())
+					if(!m_nRestartPos && m_nCurrentPattern <= Order.size() && m_nCurrentPattern > 0)
 					{
-						// if we're in a subtune and there's no restart position, go to the first order of the subtune
+						/* Subtune detection. Subtunes are separated by "---" order items, so if we're in a
+						   subtune and there's no restart position, we go to the first order of the subtune
+						   (i.e. the first order after the previous "---" item) */
 						for(ORDERINDEX iOrd = m_nCurrentPattern - 1; iOrd > 0; iOrd--)
 						{
 							if(Order[iOrd] == Order.GetInvalidPatIndex())
@@ -709,7 +711,6 @@ BOOL CSoundFile::ProcessRow()
 					//Handle Repeat position
 					if (m_nRepeatCount > 0) m_nRepeatCount--;
 					m_nCurrentPattern = nRestartPosOverride;
-					//m_nRow = 0;
 					m_dwSongFlags &= ~SONG_BREAKTOROW;
 					//If restart pos points to +++, move along
 					while (Order[m_nCurrentPattern] == Order.GetIgnoreIndex()) {

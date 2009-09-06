@@ -1204,6 +1204,116 @@ WORD CViewInstrument::EnvGetReleaseNodeTick()
 	return envelope->Ticks[EnvGetReleaseNode()];
 }
 
+bool CViewInstrument::EnvRemovePoint()
+//--------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if ((pModDoc) && (m_nDragItem) && (m_nDragItem-1 <= EnvGetLastPoint()))
+	{
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		if (pIns)
+		{
+			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+			if(envelope == nullptr || envelope->nNodes == 0) return false;
+
+			UINT nPoint = m_nDragItem - 1;
+
+			envelope->nNodes--;
+			for (UINT i=nPoint; i<envelope->nNodes; i++)
+			{
+				envelope->Ticks[i] = envelope->Ticks[i + 1];
+				envelope->Values[i] = envelope->Values[i + 1];
+			}
+			if (nPoint >= envelope->nNodes) nPoint = envelope->nNodes-1;
+			if (envelope->nLoopStart > nPoint) envelope->nLoopStart--;
+			if (envelope->nLoopEnd > nPoint) envelope->nLoopEnd--;
+			if (envelope->nSustainStart > nPoint) envelope->nSustainStart--;
+			if (envelope->nSustainEnd > nPoint) envelope->nSustainEnd--;
+			if (envelope->nReleaseNode>nPoint && envelope->nReleaseNode!=ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode--;
+			envelope->Ticks[0] = 0;
+
+			pModDoc->SetModified();
+			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+			return true;
+		}
+	}
+	return false;
+}
+
+// Insert point. Returns 0 if error occured, else point ID + 1.
+UINT CViewInstrument::EnvInsertPoint()
+//------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if (pModDoc)
+	{
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+		if (pIns)
+		{
+			int nTick = ScreenToTick(m_ptMenu.x);
+			int nValue = ScreenToValue(m_ptMenu.y);
+			if(nTick < 0) return false;
+
+			UINT maxpoints = (pSndFile->m_nType == MOD_TYPE_XM) ? 12 : 25;
+			//To check: Should there be MAX_ENVPOINTS?
+
+			nValue = CLAMP(nValue, 0, 64);
+
+			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+			if(envelope == nullptr) return false;
+			BYTE cDefaultValue;
+
+			switch(m_nEnv)
+			{
+			case ENV_VOLUME:
+				cDefaultValue = 64;
+				break;
+			case ENV_PANNING:
+				cDefaultValue = 32;
+				break;
+			case ENV_PITCH:
+				cDefaultValue = (pIns->dwFlags & ENV_FILTER) ? 64 : 32;
+				break;
+			default:
+				return false;
+			}
+
+			if (envelope->nNodes < maxpoints)
+			{
+				if (!envelope->nNodes)
+				{
+					envelope->Ticks[0] = 0;
+					envelope->Values[0] = cDefaultValue;
+					envelope->nNodes = 1;
+				}
+				UINT i = 0;
+				for (i = 0; i < envelope->nNodes; i++) if (nTick <= envelope->Ticks[i]) break;
+				for (UINT j = envelope->nNodes; j > i; j--)
+				{
+					envelope->Ticks[j] = envelope->Ticks[j - 1];
+					envelope->Values[j] = envelope->Values[j - 1];
+				}
+				envelope->Ticks[i] = (WORD)nTick;
+				envelope->Values[i] = (BYTE)nValue;
+				envelope->nNodes++;
+				if (envelope->nLoopStart >= i) envelope->nLoopStart++;
+				if (envelope->nLoopEnd >= i) envelope->nLoopEnd++;
+				if (envelope->nSustainStart >= i) envelope->nSustainStart++;
+				if (envelope->nSustainEnd >= i) envelope->nSustainEnd++;
+				if (envelope->nReleaseNode >= i && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode++;
+
+				pModDoc->SetModified();
+				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+				return i + 1;
+			}
+		}
+	}
+	return 0;
+}
+
+
 
 void CViewInstrument::DrawPositionMarks(HDC hdc)
 //----------------------------------------------
@@ -1705,7 +1815,13 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
 			{
 				m_ptMenu = pt;
-				OnEnvInsertPoint();
+				m_nDragItem = EnvInsertPoint(); // returns point ID + 1 if successful, else 0.
+				if(m_nDragItem > 0)
+				{
+					// Drag point if successful
+					SetCapture();
+					m_dwStatus |= INSSTATUS_DRAGGING;
+				}
 			}
 		}
 	}
@@ -1939,106 +2055,13 @@ void CViewInstrument::OnEnvToggleGrid()
 void CViewInstrument::OnEnvRemovePoint()
 //--------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (m_nDragItem) && (m_nDragItem-1 <= EnvGetLastPoint()))
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
-			if(envelope == nullptr || envelope->nNodes == 0) return;
-
-			UINT nPoint = m_nDragItem - 1;
-
-			envelope->nNodes--;
-			for (UINT i=nPoint; i<envelope->nNodes; i++)
-			{
-				envelope->Ticks[i] = envelope->Ticks[i + 1];
-				envelope->Values[i] = envelope->Values[i + 1];
-			}
-			if (nPoint >= envelope->nNodes) nPoint = envelope->nNodes-1;
-			if (envelope->nLoopStart > nPoint) envelope->nLoopStart--;
-			if (envelope->nLoopEnd > nPoint) envelope->nLoopEnd--;
-			if (envelope->nSustainStart > nPoint) envelope->nSustainStart--;
-			if (envelope->nSustainEnd > nPoint) envelope->nSustainEnd--;
-			if (envelope->nReleaseNode>nPoint && envelope->nReleaseNode!=ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode--;
-			envelope->Ticks[0] = 0;
-
-			pModDoc->SetModified();
-			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
-		}
-	}
+	EnvRemovePoint();
 }
-
 
 void CViewInstrument::OnEnvInsertPoint()
 //--------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
-		{
-			int nTick = ScreenToTick(m_ptMenu.x);
-			int nValue = ScreenToValue(m_ptMenu.y);
-			if(nTick < 0) return;
-
-			UINT maxpoints = (pSndFile->m_nType == MOD_TYPE_XM) ? 12 : 25;
-			//To check: Should there be MAX_ENVPOINTS?
-
-			nValue = CLAMP(nValue, 0, 64);
-
-			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
-			if(envelope == nullptr) return;
-			BYTE cDefaultValue;
-
-			switch(m_nEnv)
-			{
-				case ENV_VOLUME:
-					cDefaultValue = 64;
-					break;
-				case ENV_PANNING:
-					cDefaultValue = 32;
-					break;
-				case ENV_PITCH:
-					cDefaultValue = (pIns->dwFlags & ENV_FILTER) ? 64 : 32;
-					break;
-				default:
-					return;
-			}
-
-			if (envelope->nNodes < maxpoints)
-			{
-				if (!envelope->nNodes)
-				{
-					envelope->Ticks[0] = 0;
-					envelope->Values[0] = cDefaultValue;
-					envelope->nNodes = 1;
-				}
-				UINT i = 0;
-				for (i = 0; i < envelope->nNodes; i++) if (nTick <= envelope->Ticks[i]) break;
-				for (UINT j = envelope->nNodes; j > i; j--)
-				{
-					envelope->Ticks[j] = envelope->Ticks[j - 1];
-					envelope->Values[j] = envelope->Values[j - 1];
-				}
-				envelope->Ticks[i] = (WORD)nTick;
-				envelope->Values[i] = (BYTE)nValue;
-				envelope->nNodes++;
-				if (envelope->nLoopStart >= i) envelope->nLoopStart++;
-				if (envelope->nLoopEnd >= i) envelope->nLoopEnd++;
-				if (envelope->nSustainStart >= i) envelope->nSustainStart++;
-				if (envelope->nSustainEnd >= i) envelope->nSustainEnd++;
-				if (envelope->nReleaseNode >= i && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode++;
-
-				pModDoc->SetModified();
-				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
-			}
-		}
-	}
+	EnvInsertPoint();
 }
 
 
