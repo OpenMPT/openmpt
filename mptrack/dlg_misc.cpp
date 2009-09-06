@@ -847,6 +847,8 @@ void CFindReplaceTab::OnOK()
 	// Instrument
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO2)) != NULL)
 	{
+		m_nInstr = 0;
+		cInstrRelChange = 0;
 		switch(combo->GetItemData(combo->GetCurSel()))
 		{
 		case replaceInstrumentMinusOne:
@@ -857,7 +859,6 @@ void CFindReplaceTab::OnOK()
 			break;
 		default:
 			m_nInstr = combo->GetItemData(combo->GetCurSel());
-			cInstrRelChange = 0;
 			break;
 		}
 	}

@@ -25,8 +25,8 @@
 MODCOMMAND CViewPattern::m_cmdOld = {0,0,0,0,0,0};
 MODCOMMAND CViewPattern::m_cmdFind = {0,0,0,0,0,0};
 MODCOMMAND CViewPattern::m_cmdReplace = {0,0,0,0,0,0};
-DWORD CViewPattern::m_dwFindFlags = 0;
-DWORD CViewPattern::m_dwReplaceFlags = 0;
+DWORD CViewPattern::m_dwFindFlags = PATSEARCH_FULLSEARCH;
+DWORD CViewPattern::m_dwReplaceFlags = PATSEARCH_REPLACEALL;
 UINT CViewPattern::m_nFindMinChn = 0;
 UINT CViewPattern::m_nFindMaxChn = 0;
 signed char cInstrRelChange = 0;
@@ -1901,11 +1901,11 @@ void CViewPattern::OnEditFindNext()
 					if ((m_dwReplaceFlags & PATSEARCH_INSTR))
 					{
 						// Instr--
-						if (m_cInstrRelChange == -1)
-							if (m->instr > 1) m->instr--;
+						if (m_cInstrRelChange == -1 && m->instr > 1)
+							m->instr--;
 						// Instr++
-						else if (m_cInstrRelChange == 1)
-							if (m->instr < MAX_INSTRUMENTS - 1) m->instr++;
+						else if (m_cInstrRelChange == 1 && m->instr > 0 && m->instr < (MAX_INSTRUMENTS - 1))
+							m->instr++;
 						else m->instr = m_cmdReplace.instr;
 					}
 					if ((m_dwReplaceFlags & PATSEARCH_VOLCMD))
