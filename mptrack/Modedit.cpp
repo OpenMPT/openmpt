@@ -1067,8 +1067,8 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 
 
 
-void CModDoc::RearrangeSampleList()
-//---------------------------------
+void CModDoc::RearrangeSamples()
+//------------------------------
 {
 	if(m_SndFile.m_nSamples < 2)
 		return;
@@ -1103,7 +1103,7 @@ void CModDoc::RearrangeSampleList()
 			// This gotta be moved
 			m_SndFile.MoveSample(i, nSampleMap[i]);
 			m_SndFile.Samples[i].pSample = nullptr;
-			strcpy(m_SndFile.m_szNames[nSampleMap[i]], m_SndFile.m_szNames[i]);
+			if(nSampleMap[i] > 0) strcpy(m_SndFile.m_szNames[nSampleMap[i]], m_SndFile.m_szNames[i]);
 			memset(m_SndFile.m_szNames[i], 0, sizeof(m_SndFile.m_szNames[i]));
 
 			// Also update instrument mapping (if module is in instrument mode)

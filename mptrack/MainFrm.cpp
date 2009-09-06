@@ -2008,6 +2008,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 	m_WaveFile.m_nChannels = 4;
 	m_WaveFile.m_nInstruments = 1;
 	m_WaveFile.m_nSamples = 1;
+	m_WaveFile.Order.resize(3);
 	m_WaveFile.Order[0] = 0;
 	m_WaveFile.Order[1] = 1;
 	m_WaveFile.Order[2] = m_WaveFile.Order.GetInvalidPatIndex();

@@ -194,7 +194,7 @@ public:
 	BOOL RemoveUnusedPlugs();
 	UINT RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS]);
 	BOOL RemoveUnusedPatterns(BOOL bRemove=TRUE);
-	void RearrangeSampleList();
+	void RearrangeSamples();
 	BOOL CompoCleanup();
 
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = -1, ROWINDEX nRows = 64);

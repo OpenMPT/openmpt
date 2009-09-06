@@ -62,7 +62,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_INSTRUMENTS_REMOVEALL,OnRemoveAllInstruments)
 // -> CODE#0020
 // -> DESC="rearrange sample list"
-	ON_COMMAND(ID_REARRANGE_SAMPLES,	RearrangeSampleList)
+	ON_COMMAND(ID_REARRANGE_SAMPLES,	RearrangeSamples)
 // -! NEW_FEATURE#0020
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
 	ON_COMMAND(ID_APPROX_BPM,			OnApproximateBPM)
@@ -1641,7 +1641,7 @@ void CModDoc::OnFileCompatibilitySave()
 			::MessageBox(NULL,"Warning: the exported file will not contain any of MPT's file-format hacks.", "Compatibility export warning.",MB_ICONINFORMATION | MB_OK);
 			break;
 		default:
-			::MessageBox(NULL,"Compatibility export is currently only available for MOD and IT modules.", "Can't do compatibility export.",MB_ICONINFORMATION | MB_OK);
+			::MessageBox(NULL,"Compatibility export is currently only available for MOD, XM and IT modules.", "Can't do compatibility export.",MB_ICONINFORMATION | MB_OK);
 			return;
 	}
 
