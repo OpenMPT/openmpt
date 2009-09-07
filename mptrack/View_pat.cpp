@@ -1032,31 +1032,39 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 			DragToSel(m_dwEndSel, TRUE);
 		} else */
 		{
-			m_dwStartSel = GetPositionFromPoint(point);
-			if (((m_dwStartSel & 0xFFFF) >> 3) < pModDoc->GetNumChannels())
+			if(CMainFrame::GetInputHandler()->ShiftPressed())
 			{
-				m_dwStatus |= PATSTATUS_MOUSEDRAGSEL;
+				// Shift pressed -> set 2nd selection point
+				DragToSel(GetPositionFromPoint(point), TRUE);
+			} else
+			{
+				// Set first selection point
+				m_dwStartSel = GetPositionFromPoint(point);
+				if (((m_dwStartSel & 0xFFFF) >> 3) < pModDoc->GetNumChannels())
+				{
+					m_dwStatus |= PATSTATUS_MOUSEDRAGSEL;
 
-				if (m_dwStatus & PATSTATUS_CTRLDRAGSEL)
-				{
-					SetCurSel(m_dwStartSel, m_dwStartSel);
-				}
-				if ((CMainFrame::m_dwPatternSetup & PATTERN_DRAGNDROPEDIT)
-				&& ((m_dwBeginSel != m_dwEndSel) || (m_dwStatus & PATSTATUS_CTRLDRAGSEL))
-				&& ((m_dwStartSel >> 16) >= (m_dwBeginSel >> 16))
-				&& ((m_dwStartSel >> 16) <= (m_dwEndSel >> 16))
-				&& ((m_dwStartSel & 0xFFFF) >= (m_dwBeginSel & 0xFFFF))
-				&& ((m_dwStartSel & 0xFFFF) <= (m_dwEndSel & 0xFFFF)))
-				{
-					m_dwStatus |= PATSTATUS_DRAGNDROPEDIT;
-				} else
-				if (CMainFrame::m_dwPatternSetup & PATTERN_CENTERROW)
-				{
-					SetCurSel(m_dwStartSel, m_dwStartSel);
-				} else
-				{
-					// Fix: Horizontal scrollbar pos screwed when selecting with mouse
-					SetCursorPosition( m_dwStartSel >> 16, m_dwStartSel & 0xFFFF );
+					if (m_dwStatus & PATSTATUS_CTRLDRAGSEL)
+					{
+						SetCurSel(m_dwStartSel, m_dwStartSel);
+					}
+					if ((CMainFrame::m_dwPatternSetup & PATTERN_DRAGNDROPEDIT)
+					&& ((m_dwBeginSel != m_dwEndSel) || (m_dwStatus & PATSTATUS_CTRLDRAGSEL))
+					&& ((m_dwStartSel >> 16) >= (m_dwBeginSel >> 16))
+					&& ((m_dwStartSel >> 16) <= (m_dwEndSel >> 16))
+					&& ((m_dwStartSel & 0xFFFF) >= (m_dwBeginSel & 0xFFFF))
+					&& ((m_dwStartSel & 0xFFFF) <= (m_dwEndSel & 0xFFFF)))
+					{
+						m_dwStatus |= PATSTATUS_DRAGNDROPEDIT;
+					} else
+					if (CMainFrame::m_dwPatternSetup & PATTERN_CENTERROW)
+					{
+						SetCurSel(m_dwStartSel, m_dwStartSel);
+					} else
+					{
+						// Fix: Horizontal scrollbar pos screwed when selecting with mouse
+						SetCursorPosition( m_dwStartSel >> 16, m_dwStartSel & 0xFFFF );
+					}
 				}
 			}
 		}
