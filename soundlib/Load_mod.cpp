@@ -546,8 +546,8 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		MODSAMPLE *pSmp = &Samples[insmap[ismpd]];
 		if(bCompatibilityExport == true) // first two bytes have to be 0 due to PT's one-shot loop ("no loop")
 		{
-			if(pSmp->nLength > 0) pSmp->pSample[0] = 0;
-			if(pSmp->nLength > 1) pSmp->pSample[1] = 0;
+			int iOverwriteLen = 2 * pSmp->GetElementarySampleSize() * ((pSmp->uFlags & CHN_STEREO) ? 2 : 1);
+			memset(pSmp->pSample, 0, min(iOverwriteLen, pSmp->GetSampleSizeInBytes()));
 		}
 		UINT flags = RS_PCM8S;
 #ifndef NO_PACKING
