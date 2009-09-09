@@ -1256,9 +1256,6 @@ UINT CViewInstrument::EnvInsertPoint()
 			int nValue = ScreenToValue(m_ptMenu.y);
 			if(nTick < 0) return false;
 
-			UINT maxpoints = (pSndFile->m_nType == MOD_TYPE_XM) ? 12 : 25;
-			//To check: Should there be MAX_ENVPOINTS?
-
 			nValue = CLAMP(nValue, 0, 64);
 
 			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
@@ -1280,7 +1277,7 @@ UINT CViewInstrument::EnvInsertPoint()
 				return false;
 			}
 
-			if (envelope->nNodes < maxpoints)
+			if (envelope->nNodes < pSndFile->GetModSpecifications().envelopePointsMax)
 			{
 				if (!envelope->nNodes)
 				{
@@ -1973,8 +1970,6 @@ void CViewInstrument::OnEnvToggleReleasNode()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (node>0) && (node <= EnvGetLastPoint()))
 	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-
 		INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
 		if(envelope == nullptr) return;
 

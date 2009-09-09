@@ -216,11 +216,31 @@ static inline UINT ConvertVolParam(UINT value)
 	return (value > 9)  ? 9 : value;
 }
 
+// Convert IT/MPTM envelope data into MPT's internal envelope format - To be used by ITInstrToMPT()
+void ITEnvToMPT(const ITENVELOPE *itEnv, INSTRUMENTENVELOPE *mptEnv, const BYTE envOffset, const int iEnvMax)
+//-----------------------------------------------------------------------------------------------------------
+{
+	mptEnv->nNodes = min(itEnv->num, iEnvMax);
+	mptEnv->nLoopStart = itEnv->lpb;
+	mptEnv->nLoopEnd = itEnv->lpe;
+	mptEnv->nSustainStart = itEnv->slb;
+	mptEnv->nSustainEnd = itEnv->sle;
+
+	// Attention: Full MPTM envelope is stored in extended instrument properties
+	for (UINT ev = 0; ev < 25; ev++)
+	{
+		mptEnv->Values[ev] = itEnv->data[ev * 3] + envOffset;
+		mptEnv->Ticks[ev] = (itEnv->data[ev * 3 + 2] << 8) | (itEnv->data[ev * 3 + 1]);
+	}
+}
 
 //BOOL CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers)
 long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) //rewbs.modularInstData
 //--------------------------------------------------------------------------------
 {	
+	// Envelope point count. Limited to 25 in IT format.
+	const int iEnvMax = (m_nType & MOD_TYPE_MPT) ? MAX_ENVPOINTS : 25;
+
 	long returnVal=0;
 	pIns->pTuning = m_defaultInstrument.pTuning;
 	pIns->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
@@ -257,6 +277,7 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 			}
 			pIns->VolEnv.Values[ev] = pis->nodes[ev*2+1];
 		}
+
 		pIns->nNNA = pis->nna;
 		pIns->nDCT = pis->dnc;
 		pIns->nPan = 0x80;
@@ -283,7 +304,7 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		pIns->nFadeOut = pis->fadeout << 5; // should be 6?
 		pIns->nGlobalVol = pis->gbv >> 1;
 		if (pIns->nGlobalVol > 64) pIns->nGlobalVol = 64;
-		for (UINT j=0; j<NOTE_MAX; j++)
+		for (UINT j = 0; j < 120; j++)
 		{
 			UINT note = pis->keyboard[j*2];
 			UINT ins = pis->keyboard[j*2+1];
@@ -295,7 +316,7 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		if (*((int *)pis->dummy) == 'MPTX')
 		{
 			const ITINSTRUMENTEX *pisex = (const ITINSTRUMENTEX *)pis;
-			for (UINT k=0; k<NOTE_MAX; k++)
+			for (UINT k = 0; k < 120; k++)
 			{
 				pIns->Keyboard[k] |= ((UINT)pisex->keyboardhi[k] << 8);
 			}
@@ -352,45 +373,21 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		if (pis->volenv.flags & 2) pIns->dwFlags |= ENV_VOLLOOP;
 		if (pis->volenv.flags & 4) pIns->dwFlags |= ENV_VOLSUSTAIN;
 		if (pis->volenv.flags & 8) pIns->dwFlags |= ENV_VOLCARRY;
-		pIns->VolEnv.nNodes = pis->volenv.num;
-		if (pIns->VolEnv.nNodes > 25) pIns->VolEnv.nNodes = 25;
-		pIns->VolEnv.nLoopStart = pis->volenv.lpb;
-		pIns->VolEnv.nLoopEnd = pis->volenv.lpe;
-		pIns->VolEnv.nSustainStart = pis->volenv.slb;
-		pIns->VolEnv.nSustainEnd = pis->volenv.sle;
+		ITEnvToMPT(&pis->volenv, &pIns->VolEnv, 0, iEnvMax);
 		// Panning Envelope 
 		if (pis->panenv.flags & 1) pIns->dwFlags |= ENV_PANNING;
 		if (pis->panenv.flags & 2) pIns->dwFlags |= ENV_PANLOOP;
 		if (pis->panenv.flags & 4) pIns->dwFlags |= ENV_PANSUSTAIN;
 		if (pis->panenv.flags & 8) pIns->dwFlags |= ENV_PANCARRY;
-		pIns->PanEnv.nNodes = pis->panenv.num;
-		if (pIns->PanEnv.nNodes > 25) pIns->PanEnv.nNodes = 25;
-		pIns->PanEnv.nLoopStart = pis->panenv.lpb;
-		pIns->PanEnv.nLoopEnd = pis->panenv.lpe;
-		pIns->PanEnv.nSustainStart = pis->panenv.slb;
-		pIns->PanEnv.nSustainEnd = pis->panenv.sle;
+		ITEnvToMPT(&pis->panenv, &pIns->PanEnv, 32, iEnvMax);
 		// Pitch Envelope 
 		if (pis->pitchenv.flags & 1) pIns->dwFlags |= ENV_PITCH;
 		if (pis->pitchenv.flags & 2) pIns->dwFlags |= ENV_PITCHLOOP;
 		if (pis->pitchenv.flags & 4) pIns->dwFlags |= ENV_PITCHSUSTAIN;
 		if (pis->pitchenv.flags & 8) pIns->dwFlags |= ENV_PITCHCARRY;
 		if (pis->pitchenv.flags & 0x80) pIns->dwFlags |= ENV_FILTER;
-		pIns->PitchEnv.nNodes = pis->pitchenv.num;
-		if (pIns->PitchEnv.nNodes > 25) pIns->PitchEnv.nNodes = 25;
-		pIns->PitchEnv.nLoopStart = pis->pitchenv.lpb;
-		pIns->PitchEnv.nLoopEnd = pis->pitchenv.lpe;
-		pIns->PitchEnv.nSustainStart = pis->pitchenv.slb;
-		pIns->PitchEnv.nSustainEnd = pis->pitchenv.sle;
-		// Envelopes Data
-		for (UINT ev=0; ev<25; ev++)
-		{
-			pIns->VolEnv.Values[ev] = pis->volenv.data[ev*3];
-			pIns->VolEnv.Ticks[ev] = (pis->volenv.data[ev*3+2] << 8) | (pis->volenv.data[ev*3+1]);
-			pIns->PanEnv.Values[ev] = pis->panenv.data[ev*3] + 32;
-			pIns->PanEnv.Ticks[ev] = (pis->panenv.data[ev*3+2] << 8) | (pis->panenv.data[ev*3+1]);
-			pIns->PitchEnv.Values[ev] = pis->pitchenv.data[ev*3] + 32;
-			pIns->PitchEnv.Ticks[ev] = (pis->pitchenv.data[ev*3+2] << 8) | (pis->pitchenv.data[ev*3+1]);
-		}
+		ITEnvToMPT(&pis->pitchenv, &pIns->PitchEnv, 32, iEnvMax);
+
 		pIns->nNNA = pis->nna;
 		pIns->nDCT = pis->dct;
 		pIns->nDNA = pis->dca;
@@ -407,8 +404,9 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		if (pIns->nPan > 256) pIns->nPan = 128;
 		if (pis->dfp < 0x80) pIns->dwFlags |= ENV_SETPANNING;
 	}
-	if ((pIns->VolEnv.nLoopStart >= 25) || (pIns->VolEnv.nLoopEnd >= 25)) pIns->dwFlags &= ~ENV_VOLLOOP;
-	if ((pIns->VolEnv.nSustainStart >= 25) || (pIns->VolEnv.nSustainEnd >= 25)) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
+
+	if ((pIns->VolEnv.nLoopStart >= iEnvMax) || (pIns->VolEnv.nLoopEnd >= iEnvMax)) pIns->dwFlags &= ~ENV_VOLLOOP;
+	if ((pIns->VolEnv.nSustainStart >= iEnvMax) || (pIns->VolEnv.nSustainEnd >= iEnvMax)) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
 
 	return returnVal; //return offset
 }
@@ -3504,7 +3502,20 @@ void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], 
 	WriteInstrumentPropertyForAllInstruments('PTTL', sizeof(m_defaultInstrument.wPitchToTempoLock),  f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('PVEH', sizeof(m_defaultInstrument.nPluginVelocityHandling),  f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('PVOH', sizeof(m_defaultInstrument.nPluginVolumeHandling),  f, instruments, nInstruments);
-		
+
+	if(m_nType & MOD_TYPE_MPT)
+	{
+		// write full envelope information for MPTM files (more env points)
+		WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(m_defaultInstrument.VolEnv.Ticks ), f, instruments, nInstruments);
+		WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(m_defaultInstrument.VolEnv.Values), f, instruments, nInstruments);
+
+		WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(m_defaultInstrument.PanEnv.Ticks), f, instruments, nInstruments);
+		WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(m_defaultInstrument.PanEnv.Values),  f, instruments, nInstruments);
+
+		WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(m_defaultInstrument.PitchEnv.Ticks),  f, instruments, nInstruments);
+		WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(m_defaultInstrument.PitchEnv.Values),  f, instruments, nInstruments);
+	}
+
 	return;
 }
 
