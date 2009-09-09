@@ -51,7 +51,7 @@ typedef struct tagXMSAMPLEHEADER
 	DWORD shsize; // size of XMSAMPLESTRUCT
 	BYTE snum[96];
 	WORD venv[24];
-	WORD pIns[24];
+	WORD penv[24];
 	BYTE vnum, pnum;
 	BYTE vsustain, vloops, vloope, psustain, ploops, ploope;
 	BYTE vtype, ptype;
@@ -354,7 +354,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 			for (int i = 0; i < 24; ++i) {
 				xmsh.venv[i] = LittleEndianW(xmsh.venv[i]);
-				xmsh.pIns[i] = LittleEndianW(xmsh.pIns[i]);
+				xmsh.penv[i] = LittleEndianW(xmsh.penv[i]);
 			}
 			xmsh.volfade = LittleEndianW(xmsh.volfade);
 			xmsh.res = LittleEndianW(xmsh.res);
@@ -473,8 +473,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			pIns->VolEnv.Ticks[ienv] = (WORD)xmsh.venv[ienv*2];
 			pIns->VolEnv.Values[ienv] = (BYTE)xmsh.venv[ienv*2+1];
-			pIns->PanEnv.Ticks[ienv] = (WORD)xmsh.pIns[ienv*2];
-			pIns->PanEnv.Values[ienv] = (BYTE)xmsh.pIns[ienv*2+1];
+			pIns->PanEnv.Ticks[ienv] = (WORD)xmsh.penv[ienv*2];
+			pIns->PanEnv.Values[ienv] = (BYTE)xmsh.penv[ienv*2+1];
 			if (ienv)
 			{
 				if (pIns->VolEnv.Ticks[ienv] < pIns->VolEnv.Ticks[ienv-1])
@@ -871,8 +871,8 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				{
 					xmsh.venv[ienv*2] = pIns->VolEnv.Ticks[ienv];
 					xmsh.venv[ienv*2+1] = pIns->VolEnv.Values[ienv];
-					xmsh.pIns[ienv*2] = pIns->PanEnv.Ticks[ienv];
-					xmsh.pIns[ienv*2+1] = pIns->PanEnv.Values[ienv];
+					xmsh.penv[ienv*2] = pIns->PanEnv.Ticks[ienv];
+					xmsh.penv[ienv*2+1] = pIns->PanEnv.Values[ienv];
 				}
 				if (pIns->dwFlags & ENV_VOLUME) xmsh.vtype |= 1;
 				if (pIns->dwFlags & ENV_VOLSUSTAIN) xmsh.vtype |= 2;

@@ -36,6 +36,7 @@ struct CModSpecifications
 	UINT speedMin;
 	UINT speedMax;
 	bool hasComments;
+	int envelopePointsMax;
 };
 
 
@@ -71,6 +72,7 @@ const CModSpecifications mptm =
 	1,									//Min Speed
 	255,								//Max Speed
 	true,								//Has song comments
+	240,								//Envelope point count
 };
 
 
@@ -101,6 +103,7 @@ const CModSpecifications mod =
 	1,									//Min Speed
 	31,									//Max Speed
 	false,								//No song comments
+	0,									//Envelope point count
 };
 
 // MOD with MPT extensions.
@@ -129,6 +132,7 @@ const CModSpecifications modEx =
 	1,									//Min Speed
 	31,									//Max Speed
 	false,								//No song comments
+	0,									//Envelope point count
 };
 
 const CModSpecifications xm =
@@ -156,6 +160,7 @@ const CModSpecifications xm =
 	1,									//Min Speed
 	31,									//Max Speed
 	false,								//No song comments
+	12,									//Envelope point count
 };
 
 // XM with MPT extensions
@@ -184,6 +189,7 @@ const CModSpecifications xmEx =
 	1,									//Min Speed
 	31,									//Max Speed
 	true,								//Has song comments
+	12,									//Envelope point count
 };
 
 const CModSpecifications s3m =
@@ -210,6 +216,7 @@ const CModSpecifications s3m =
 	1,									//Min Speed
 	255,								//Max Speed
 	false,								//No song comments
+	0,									//Envelope point count
 };
 
 // S3M with MPT extensions
@@ -238,6 +245,7 @@ const CModSpecifications s3mEx =
 	1,									//Min Speed
 	255,								//Max Speed
 	false,								//No song comments
+	0,									//Envelope point count
 };
 
 const CModSpecifications it =
@@ -265,6 +273,7 @@ const CModSpecifications it =
 	1,									//Min Speed
 	255,								//Max Speed
 	true,								//Has song comments
+	25,									//Envelope point count
 };
 
 const CModSpecifications itEx =
@@ -292,6 +301,7 @@ const CModSpecifications itEx =
 	1,									//Min Speed
 	255,								//Max Speed
 	true,								//Has song comments
+	25,									//Envelope point count
 };
 
 } //namespace ModSpecs

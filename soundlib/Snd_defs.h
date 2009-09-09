@@ -71,7 +71,7 @@ const SEQUENCEINDEX MAX_SEQUENCES = 10;
 #define MAX_BASECHANNELS	127	// Max pattern channels.
 //#endif
 // -! BEHAVIOUR_CHANGE#0006
-#define MAX_ENVPOINTS		32
+#define MAX_ENVPOINTS		240
 #define MIN_PERIOD			0x0020
 #define MAX_PERIOD			0xFFFF
 #define MAX_PATTERNNAME		32
