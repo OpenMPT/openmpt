@@ -296,6 +296,10 @@ protected:
 	virtual void SetModifiedFlag(BOOL bModified=TRUE);
 	//}}AFX_VIRTUAL
 
+	// for mod conversion
+	bool UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv);
+
+
 // Implementation
 public:
 	virtual ~CModDoc();

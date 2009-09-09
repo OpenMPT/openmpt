@@ -654,7 +654,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	// Convert MOD/XM to S3M/IT/MPT
 	if (oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
 	{
-		for (UINT i=1; i<=m_SndFile.m_nSamples; i++)
+		for (SAMPLEINDEX i=1; i<=m_SndFile.m_nSamples; i++)
 		{
 			m_SndFile.Samples[i].nC5Speed = CSoundFile::TransposeToFrequency(m_SndFile.Samples[i].RelativeTone, m_SndFile.Samples[i].nFineTune);
 			m_SndFile.Samples[i].RelativeTone = 0;
@@ -666,13 +666,13 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	// Convert S3M/IT/MPT to XM
 	if (oldTypeIsS3M_IT_MPT && newTypeIsXM)
 	{
-		for (UINT i=1; i<=m_SndFile.m_nSamples; i++)
+		for (SAMPLEINDEX i=1; i<=m_SndFile.m_nSamples; i++)
 		{
 			CSoundFile::FrequencyToTranspose(&m_SndFile.Samples[i]);
 			if (!(m_SndFile.Samples[i].uFlags & CHN_PANNING)) m_SndFile.Samples[i].nPan = 128;
 		}
 		bool bBrokenNoteMap = false, bBrokenSustainLoop = false;
-		for (UINT j = 1; j <= m_SndFile.m_nInstruments; j++)
+		for (INSTRUMENTINDEX j = 1; j <= m_SndFile.m_nInstruments; j++)
 		{
 			MODINSTRUMENT *pIns = m_SndFile.Instruments[j];
 			if (pIns)
@@ -747,11 +747,42 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	m_SndFile.m_nDefaultTempo = CLAMP(m_SndFile.m_nDefaultTempo, specs.tempoMin, specs.tempoMax);
 	m_SndFile.m_nDefaultSpeed = CLAMP(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
 
+	bool bTrimmedEnvelopes = false;
+	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.m_nInstruments; i++)
+	{
+		bTrimmedEnvelopes |= UpdateEnvelopes(&m_SndFile.Instruments[i]->VolEnv);
+		bTrimmedEnvelopes |= UpdateEnvelopes(&m_SndFile.Instruments[i]->PanEnv);
+		bTrimmedEnvelopes |= UpdateEnvelopes(&m_SndFile.Instruments[i]->PitchEnv);
+	}
+	if(bTrimmedEnvelopes == true)
+		AddToLog("WARNING: Instrument envelopes have been shortened.\n");
+
 	SetModified();
 	ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODGENERAL);
 	EndWaitCursor();
 	return TRUE;
+}
+
+bool CModDoc::UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv)
+//-------------------------------------------------------
+{
+	// shorten instrument envelope if necessary (for mod conversion)
+	const int iEnvMax = m_SndFile.GetModSpecifications().envelopePointsMax;
+	bool bResult = false;
+
+	#define TRIMENV(i) if(i > iEnvMax) {i = iEnvMax; bResult = true;}
+
+	TRIMENV(mptEnv->nNodes);
+	TRIMENV(mptEnv->nLoopStart);
+	TRIMENV(mptEnv->nLoopEnd);
+	TRIMENV(mptEnv->nSustainStart);
+	TRIMENV(mptEnv->nSustainEnd);
+	TRIMENV(mptEnv->nReleaseNode);
+
+	#undef TRIMENV
+
+	return bResult;
 }
 
 
