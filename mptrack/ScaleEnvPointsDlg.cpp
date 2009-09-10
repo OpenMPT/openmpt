@@ -45,36 +45,20 @@ void CScaleEnvPointsDlg::OnOK()
 	float factor = ConvertStrTo<float>(buffer);
 	if(factor > 0)
 	{
-		WORD (*array)[MAX_ENVPOINTS] = NULL;
-		UINT* arraySize = NULL;
+		INSTRUMENTENVELOPE *pEnv = nullptr;
 		switch(m_Env)
 		{
-			case ENV_VOLUME:
-				array = &m_pInstrument->VolEnv.Ticks;
-				arraySize = &m_pInstrument->VolEnv.nNodes;
-			break;
-
-			case ENV_PANNING:
-				array = &m_pInstrument->PanEnv.Ticks;
-				arraySize = &m_pInstrument->PanEnv.nNodes;
-			break;
-
-			case ENV_PITCH:
-				array = &m_pInstrument->PitchEnv.Ticks;
-				arraySize = &m_pInstrument->PitchEnv.nNodes;
-			break;
+			case ENV_PANNING:	pEnv = &m_pInstrument->PanEnv;		break;
+			case ENV_PITCH:		pEnv = &m_pInstrument->PitchEnv;	break;
+			default:			pEnv = &m_pInstrument->VolEnv;		break;
 		}
-
-		if(array && arraySize)
+		for(UINT i = 0; i< pEnv->nNodes; i++)
 		{
-			for(UINT i = 0; i<*arraySize; i++)
-			{
-				(*array)[i] = static_cast<WORD>(factor * (*array)[i]);
+			pEnv->Ticks[i] = static_cast<WORD>(factor * pEnv->Ticks[i]);
 
-				//Checking that the order of points is preserved.
-				if(i > 0 && (*array)[i] <= (*array)[i-1])
-					(*array)[i] = (*array)[i-1]+1;
-			}
+			//Checking that the order of points is preserved.
+			if(i > 0 && pEnv->Ticks[i] <= pEnv->Ticks[i - 1])
+				pEnv->Ticks[i] = pEnv->Ticks[i - 1] + 1;
 		}
 	}
 

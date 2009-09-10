@@ -2388,71 +2388,51 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	HANDLE hCpy;
-	CHAR s[1024];
+	CHAR s[4096];
 	MODINSTRUMENT *pIns;
 	DWORD dwMemSize;
-	UINT susBegin, susEnd, loopBegin, loopEnd, bSus, bLoop, bCarry, nPoints, releaseNode;
-	WORD *pPoints;
-	BYTE *pValues;
+	UINT bSus, bLoop, bCarry;
 
 	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return FALSE;
 	BeginWaitCursor();
 	pIns = m_SndFile.Instruments[nIns];
+	
+	INSTRUMENTENVELOPE *pEnv = nullptr;
+
 	switch(nEnv)
 	{
 	case ENV_PANNING:
-		pPoints = pIns->PanEnv.Ticks;
-		pValues = pIns->PanEnv.Values;
-		nPoints = pIns->PanEnv.nNodes;
-		bLoop = (pIns->dwFlags & ENV_PANLOOP) ? TRUE : FALSE;
-		bSus = (pIns->dwFlags & ENV_PANSUSTAIN) ? TRUE : FALSE;
-		bCarry = (pIns->dwFlags & ENV_PANCARRY) ? TRUE : FALSE;
-		susBegin = pIns->PanEnv.nSustainStart;
-		susEnd = pIns->PanEnv.nSustainEnd;
-		loopBegin = pIns->PanEnv.nLoopStart;
-		loopEnd = pIns->PanEnv.nLoopEnd;
-		releaseNode = pIns->PanEnv.nReleaseNode;
+		pEnv = &pIns->PanEnv;
+		bLoop = (pIns->dwFlags & ENV_PANLOOP) ? 1 : 0;
+		bSus = (pIns->dwFlags & ENV_PANSUSTAIN) ? 1 : 0;
+		bCarry = (pIns->dwFlags & ENV_PANCARRY) ? 1 : 0;
 		break;
 
 	case ENV_PITCH:
-		pPoints = pIns->PitchEnv.Ticks;
-		pValues = pIns->PitchEnv.Values;
-		nPoints = pIns->PitchEnv.nNodes;
-		bLoop = (pIns->dwFlags & ENV_PITCHLOOP) ? TRUE : FALSE;
-		bSus = (pIns->dwFlags & ENV_PITCHSUSTAIN) ? TRUE : FALSE;
-		bCarry = (pIns->dwFlags & ENV_PITCHCARRY) ? TRUE : FALSE;
-		susBegin = pIns->PitchEnv.nSustainStart;
-		susEnd = pIns->PitchEnv.nSustainEnd;
-		loopBegin = pIns->PitchEnv.nLoopStart;
-		loopEnd = pIns->PitchEnv.nLoopEnd;
-		releaseNode = pIns->PitchEnv.nReleaseNode;
+		pEnv = &pIns->PitchEnv;
+		bLoop = (pIns->dwFlags & ENV_PITCHLOOP) ? 1 : 0;
+		bSus = (pIns->dwFlags & ENV_PITCHSUSTAIN) ? 1 : 0;
+		bCarry = (pIns->dwFlags & ENV_PITCHCARRY) ? 1 : 0;
 		break;
 
 	default:
-		pPoints = pIns->VolEnv.Ticks;
-		pValues = pIns->VolEnv.Values;
-		nPoints = pIns->VolEnv.nNodes;
-		bLoop = (pIns->dwFlags & ENV_VOLLOOP) ? TRUE : FALSE;
-		bSus = (pIns->dwFlags & ENV_VOLSUSTAIN) ? TRUE : FALSE;
-		bCarry = (pIns->dwFlags & ENV_VOLCARRY) ? TRUE : FALSE;
-		susBegin = pIns->VolEnv.nSustainStart;
-		susEnd = pIns->VolEnv.nSustainEnd;
-		loopBegin = pIns->VolEnv.nLoopStart;
-		loopEnd = pIns->VolEnv.nLoopEnd;
-		releaseNode = pIns->VolEnv.nReleaseNode;
+		pEnv = &pIns->VolEnv;
+		bLoop = (pIns->dwFlags & ENV_VOLLOOP) ? 1 : 0;
+		bSus = (pIns->dwFlags & ENV_VOLSUSTAIN) ? 1 : 0;
+		bCarry = (pIns->dwFlags & ENV_VOLCARRY) ? 1 : 0;
 		break;
 	}
 	strcpy(s, pszEnvHdr);
-	wsprintf(s+strlen(s), pszEnvFmt, nPoints, susBegin, susEnd, loopBegin, loopEnd, bSus, bLoop, bCarry);
-	for (UINT i=0; i<nPoints; i++)
+	wsprintf(s + strlen(s), pszEnvFmt, pEnv->nNodes, pEnv->nSustainStart, pEnv->nSustainEnd, pEnv->nLoopStart, pEnv->nLoopEnd, bSus, bLoop, bCarry);
+	for (UINT i = 0; i < pEnv->nNodes; i++)
 	{
 		if (strlen(s) >= sizeof(s)-32) break;
-		wsprintf(s+strlen(s), "%d,%d\x0D\x0A", pPoints[i], pValues[i]);
+		wsprintf(s+strlen(s), "%d,%d\x0D\x0A", pEnv->Ticks[i], pEnv->Values[i]);
 	}
 
 	//Writing release node
 	if(strlen(s) < sizeof(s) - 32)
-		wsprintf(s+strlen(s), "%u\x0D\x0A", releaseNode);
+		wsprintf(s+strlen(s), "%u\x0D\x0A", pEnv->nReleaseNode);
 
 	dwMemSize = strlen(s)+1;
 	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
@@ -2486,6 +2466,8 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 	if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 	{
 		MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
+		INSTRUMENTENVELOPE *pEnv = nullptr;
+
 		UINT susBegin=0, susEnd=0, loopBegin=0, loopEnd=0, bSus=0, bLoop=0, bCarry=0, nPoints=0, releaseNode = ENV_RELEASE_NODE_UNSET;
 		DWORD dwMemSize = GlobalSize(hCpy), dwPos = strlen(pszEnvHdr);
 		if ((dwMemSize > dwPos) && (!_strnicmp(p, pszEnvHdr, dwPos-2)))
@@ -2508,60 +2490,45 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 				}
 				while ((dwPos < dwMemSize) && ((p[dwPos] >= '0') && (p[dwPos] <= '9'))) dwPos++;
 			}
-			if (nPoints > 31) nPoints = 31;
+			nPoints = min(nPoints, m_SndFile.GetModSpecifications().envelopePointsMax);
 			if (susEnd >= nPoints) susEnd = 0;
 			if (susBegin > susEnd) susBegin = susEnd;
 			if (loopEnd >= nPoints) loopEnd = 0;
 			if (loopBegin > loopEnd) loopBegin = loopEnd;
-			WORD *pPoints;
-			BYTE *pValues;
+
 			switch(nEnv)
 			{
 			case ENV_PANNING:
-				pPoints = pIns->PanEnv.Ticks;
-				pValues = pIns->PanEnv.Values;
-				pIns->PanEnv.nNodes = nPoints;
+				pEnv = &pIns->PanEnv;
 				pIns->dwFlags &= ~(ENV_PANLOOP|ENV_PANSUSTAIN|ENV_PANCARRY);
 				if (bLoop) pIns->dwFlags |= ENV_PANLOOP;
 				if (bSus) pIns->dwFlags |= ENV_PANSUSTAIN;
 				if (bCarry) pIns->dwFlags |= ENV_PANCARRY;
-				pIns->PanEnv.nSustainStart = susBegin;
-				pIns->PanEnv.nSustainEnd = susEnd;
-				pIns->PanEnv.nLoopStart = loopBegin;
-				pIns->PanEnv.nLoopEnd = loopEnd;
-				pIns->PanEnv.nReleaseNode = releaseNode;
 				break;
 
 			case ENV_PITCH:
-				pPoints = pIns->PitchEnv.Ticks;
-				pValues = pIns->PitchEnv.Values;
-				pIns->PitchEnv.nNodes = nPoints;
+				pEnv = &pIns->PitchEnv;
 				pIns->dwFlags &= ~(ENV_PITCHLOOP|ENV_PITCHSUSTAIN|ENV_PITCHCARRY);
 				if (bLoop) pIns->dwFlags |= ENV_PITCHLOOP;
 				if (bSus) pIns->dwFlags |= ENV_PITCHSUSTAIN;
 				if (bCarry) pIns->dwFlags |= ENV_PITCHCARRY;
-				pIns->PitchEnv.nSustainStart = susBegin;
-				pIns->PitchEnv.nSustainEnd = susEnd;
-				pIns->PitchEnv.nLoopStart = loopBegin;
-				pIns->PitchEnv.nLoopEnd = loopEnd;
-				pIns->PitchEnv.nReleaseNode = releaseNode;
 				break;
 
 			default:
-				pPoints = pIns->VolEnv.Ticks;
-				pValues = pIns->VolEnv.Values;
-				pIns->VolEnv.nNodes = nPoints;
+				pEnv = &pIns->VolEnv;
 				pIns->dwFlags &= ~(ENV_VOLLOOP|ENV_VOLSUSTAIN|ENV_VOLCARRY);
 				if (bLoop) pIns->dwFlags |= ENV_VOLLOOP;
 				if (bSus) pIns->dwFlags |= ENV_VOLSUSTAIN;
 				if (bCarry) pIns->dwFlags |= ENV_VOLCARRY;
-				pIns->VolEnv.nSustainStart = susBegin;
-				pIns->VolEnv.nSustainEnd = susEnd;
-				pIns->VolEnv.nLoopStart = loopBegin;
-				pIns->VolEnv.nLoopEnd = loopEnd;
-				pIns->VolEnv.nReleaseNode = releaseNode;
 				break;
 			}
+			pEnv->nNodes = nPoints;
+			pEnv->nSustainStart = susBegin;
+			pEnv->nSustainEnd = susEnd;
+			pEnv->nLoopStart = loopBegin;
+			pEnv->nLoopEnd = loopEnd;
+			pEnv->nReleaseNode = releaseNode;
+
 			int oldn = 0;
 			for (UINT i=0; i<nPoints; i++)
 			{
@@ -2573,8 +2540,8 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 				if (dwPos >= dwMemSize) break;
 				int n2 = atoi(p+dwPos);
 				if ((n1 < oldn) || (n1 > 0x3FFF)) n1 = oldn+1;
-				pPoints[i] = (WORD)n1;
-				pValues[i] = (BYTE)n2;
+				pEnv->Ticks[i] = (WORD)n1;
+				pEnv->Values[i] = (BYTE)n2;
 				oldn = n1;
 				while ((dwPos < dwMemSize) && (p[dwPos] != 0x0D)) dwPos++;
 				if (dwPos >= dwMemSize) break;
@@ -2585,20 +2552,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 			{
 				BYTE r = static_cast<BYTE>(atoi(p + dwPos));
 				if(r == 0 || r >= nPoints) r = ENV_RELEASE_NODE_UNSET;
-				switch(nEnv)
-				{
-					case ENV_PANNING:
-						pIns->PanEnv.nReleaseNode = r;
-					break;
-
-					case ENV_PITCH:
-						pIns->PitchEnv.nReleaseNode = r;
-					break;
-
-					default:
-						pIns->VolEnv.nReleaseNode = r;
-					break;
-				}
+				pEnv->nReleaseNode = r;
 			}
 		}
 		GlobalUnlock(hCpy);
