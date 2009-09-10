@@ -252,15 +252,13 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case SMPLIST_SIZE:
 						if (pSmp->nLength)
 						{
-							UINT nShift = (pSmp->uFlags & CHN_16BIT) ? 9 : 10;
-							if (pSmp->uFlags & CHN_STEREO) nShift--;
-							wsprintf(s, "%d KB", pSmp->nLength >> nShift);
+							wsprintf(s, "%d KB", pSmp->GetSampleSizeInBytes() >> 10);
 						}
 						break;
 					case SMPLIST_TYPE:
 						if (pSmp->nLength)
 						{
-							strcpy(s, (pSmp->uFlags & CHN_16BIT) ? "16 Bit" : "8 Bit");
+							wsprintf(s, "%d Bit", pSmp->GetElementarySampleSize() << 3);
 						}
 						break;
 					case SMPLIST_INSTR:

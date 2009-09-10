@@ -119,22 +119,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if ((!channels) || (channels > MAX_BASECHANNELS)) return false;
 // -! BEHAVIOUR_CHANGE#0006
 
-	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
-	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v 2.00  ", 20))
-	{
-		bMadeWithModPlug = true;
-		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, 00);
-	}
-
-	if (!memcmp((LPCSTR)lpStream + 0x26, "OpenMPT ", 8))
-	{
-		//bMadeWithModPlug = true; // Don't set it - it's also used by compatibility export
-		CHAR sVersion[13];
-		memcpy(sVersion, lpStream + 0x26 + 8, 12);
-		sVersion[12] = 0;
-		m_dwLastSavedWithVersion = MptVersion::ToNum(sVersion);
-	}
-
 	m_nType = MOD_TYPE_XM;
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
@@ -334,7 +318,10 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		Instruments[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 		memcpy(Instruments[iIns]->name, pih->name, 22);
-				
+		// look for null-terminated instr name - that's most likely a tune made with modplug
+		for(int i = 0; i < 22; i++)
+			if(pih->name[i] == 0) bProbablyMadeWithModPlug = true;
+
 		if ((nsamples = pih->samples) > 0)
 		{
 			/* we have samples, so let's read the rest of this instrument
@@ -560,6 +547,9 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			pSmp->nVibRate = xmsh.vibrate;
 			memcpy(pSmp->filename, xmss.name, 22);
 			pSmp->filename[21] = 0;
+			// look for null-terminated sample name - that's most likely a tune made with modplug
+			for(int i = 0; i < 22; i++)
+				if(xmss.name[i] == 0) bProbablyMadeWithModPlug = true;
 		}
 #if 0
 		if ((xmsh.reserved2 > nsamples) && (xmsh.reserved2 <= 16))
@@ -646,6 +636,25 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		dwMemPos += LoadMixPlugins(lpStream+dwMemPos, dwMemLength-dwMemPos);
 		bMadeWithModPlug = true;
+	}
+
+	// Check various things to find out whether this has been made with MPT.
+	// Null chars in names -> most likely made with MPT, which disguises as FT2
+	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
+	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v 2.00  ", 20))
+	{
+		// Early MPT 1.0 alpha/beta versions
+		bMadeWithModPlug = true;
+		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, 00);
+	}
+
+	if (!memcmp((LPCSTR)lpStream + 0x26, "OpenMPT ", 8))
+	{
+		//bMadeWithModPlug = true; // Don't set it - it's also used by compatibility export
+		CHAR sVersion[13];
+		memcpy(sVersion, lpStream + 0x26 + 8, 12);
+		sVersion[12] = 0;
+		m_dwLastSavedWithVersion = MptVersion::ToNum(sVersion);
 	}
 
 	if(bMadeWithModPlug)
@@ -862,7 +871,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			{
 				memcpy(xmih.name, pIns->name, 22);
 				xmih.type = pIns->nMidiProgram;
-				xmsh.volfade = pIns->nFadeOut;
+				xmsh.volfade = min(pIns->nFadeOut, 0xFFF); // FFF is maximum in FT2
 				xmsh.vnum = (BYTE)pIns->VolEnv.nNodes;
 				xmsh.pnum = (BYTE)pIns->PanEnv.nNodes;
 				if (xmsh.vnum > 12) xmsh.vnum = 12;

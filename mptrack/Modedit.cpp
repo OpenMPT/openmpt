@@ -768,7 +768,7 @@ bool CModDoc::UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv)
 //-------------------------------------------------------
 {
 	// shorten instrument envelope if necessary (for mod conversion)
-	const int iEnvMax = m_SndFile.GetModSpecifications().envelopePointsMax;
+	const UINT iEnvMax = m_SndFile.GetModSpecifications().envelopePointsMax;
 	bool bResult = false;
 
 	#define TRIMENV(i) if(i > iEnvMax) {i = iEnvMax; bResult = true;}
