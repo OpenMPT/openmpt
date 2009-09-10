@@ -301,7 +301,7 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		}
 		if (pis->mbank<=128)
 			pIns->wMidiBank = pis->mbank;
-		pIns->nFadeOut = pis->fadeout << 5; // should be 6?
+		pIns->nFadeOut = pis->fadeout << 5;
 		pIns->nGlobalVol = pis->gbv >> 1;
 		if (pIns->nGlobalVol > 64) pIns->nGlobalVol = 64;
 		for (UINT j = 0; j < 120; j++)
@@ -2003,7 +2003,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			//if (pIns->nDCT<DCT_PLUGIN) iti.dct = pIns->nDCT; else iti.dct =0;	
 			iti.dct = pIns->nDCT; //rewbs.instroVSTi: will other apps barf if they get an unknown DCT?
 			iti.dca = pIns->nDNA;
-			iti.fadeout = pIns->nFadeOut >> 5; // should be 6?
+			iti.fadeout = min(pIns->nFadeOut >> 5 , 256);
 			iti.pps = pIns->nPPS;
 			iti.ppc = pIns->nPPC;
 			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
@@ -2648,7 +2648,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			iti.nna = pIns->nNNA;
 			if (pIns->nDCT<DCT_PLUGIN) iti.dct = pIns->nDCT; else iti.dct =0;	
 			iti.dca = pIns->nDNA;
-			iti.fadeout = pIns->nFadeOut >> 5;
+			iti.fadeout = min(pIns->nFadeOut >> 5 , 256);
 			iti.pps = pIns->nPPS;
 			iti.ppc = pIns->nPPC;
 			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
@@ -2991,30 +2991,10 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
 		if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
 		UINT flags = RS_PCM8S;
-		/*
-#ifndef NO_PACKING
-		if (nPacking)
+		if (psmp->uFlags & CHN_16BIT)
 		{
-			if ((!(psmp->uFlags & (CHN_16BIT|CHN_STEREO)))
-			 && (CanPackSample(psmp->pSample, psmp->nLength, nPacking)))
-			{
-				flags = RS_ADPCM4;
-				itss.cvt = 0xFF;
-			}
-		} else
-#endif // NO_PACKING
-		*/
-		{
-			if (psmp->uFlags & CHN_STEREO)
-			{
-				flags = RS_STPCM8S;
-				itss.flags |= 0x04;
-			}
-			if (psmp->uFlags & CHN_16BIT)
-			{
-				itss.flags |= 0x02;
-				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
-			}
+			itss.flags |= 0x02;
+			flags = RS_PCM16S;
 		}
 		itss.samplepointer = dwPos;
 		fseek(f, smppos[nsmp-1], SEEK_SET);

@@ -33,10 +33,10 @@ struct CModSpecifications
 	INSTRUMENTINDEX instrumentsMax;
 	BYTE defaultMixLevels;
 	BYTE MIDIMappingDirectivesMax;
-	UINT speedMin;
-	UINT speedMax;
-	bool hasComments;
-	int envelopePointsMax;
+	UINT speedMin;			// Minimum ticks per frame
+	UINT speedMax;			// Maximum ticks per frame
+	bool hasComments;		// True if format has a comments field
+	UINT envelopePointsMax;	// Maximum number of points of each envelope
 };
 
 
@@ -103,7 +103,7 @@ const CModSpecifications mod =
 	1,									//Min Speed
 	31,									//Max Speed
 	false,								//No song comments
-	0,									//Envelope point count
+	0,									//No instrument envelopes
 };
 
 // MOD with MPT extensions.
@@ -132,7 +132,7 @@ const CModSpecifications modEx =
 	1,									//Min Speed
 	31,									//Max Speed
 	false,								//No song comments
-	0,									//Envelope point count
+	0,									//No instrument envelopes
 };
 
 const CModSpecifications xm =
@@ -216,7 +216,7 @@ const CModSpecifications s3m =
 	1,									//Min Speed
 	255,								//Max Speed
 	false,								//No song comments
-	0,									//Envelope point count
+	0,									//No instrument envelopes
 };
 
 // S3M with MPT extensions
@@ -245,7 +245,7 @@ const CModSpecifications s3mEx =
 	1,									//Min Speed
 	255,								//Max Speed
 	false,								//No song comments
-	0,									//Envelope point count
+	0,									//No instrument envelopes
 };
 
 const CModSpecifications it =
@@ -266,8 +266,8 @@ const CModSpecifications it =
 	1,									//Min pattern rows
 	256,								//Max pattern rows
     25,									//Max mod name length
-	256,								//SamplesMax
-	200,								//instrumentMax
+	99,									//SamplesMax
+	99,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
 	0,									//Max MIDI mapping directives
 	1,									//Min Speed

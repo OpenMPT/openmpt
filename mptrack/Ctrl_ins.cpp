@@ -801,7 +801,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_ComboDCA.AddString("Note Off");
 	m_ComboDCA.AddString("Note Fade");
 	// FadeOut Volume
-	m_SpinFadeOut.SetRange(0, 32000);
+	m_SpinFadeOut.SetRange(0, 8192);
 	// Global Volume
 	m_SpinGlobalVol.SetRange(0, 64);
 	// Panning
@@ -1072,7 +1072,13 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_SpinMidiPR.EnableWindow(bITandXM);
 		m_SpinMidiBK.EnableWindow(bITandXM);	//rewbs.MidiBank
 		//end rewbs.instroVSTi
+
 		m_SpinFadeOut.EnableWindow(bITandXM);
+		if(m_pSndFile->m_nType & MOD_TYPE_XM)
+			m_SpinFadeOut.SetRange(0, 4095);
+		else
+			m_SpinFadeOut.SetRange(0, 8192);
+
 		m_NoteMap.EnableWindow(bITandXM);
 		m_CbnResampling.EnableWindow(bITandXM);
 		

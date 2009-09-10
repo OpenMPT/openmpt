@@ -8,6 +8,7 @@
 0:1346:2:79:1		//File/Open: Ctrl+O (KeyDown)
 0:1348:2:87:5		//File/Close: Ctrl+W (KeyDown|KeyHold)
 0:1349:2:83:1		//File/Save: Ctrl+S (KeyDown)
+0:1350:3:83:1		//File/Save As: Shift+Ctrl+S (KeyDown)
 0:1693:0:166:1		//Previous Document:  (KeyDown)
 0:1694:0:167:1		//Next Document:  (KeyDown)
 0:1030:0:116:1		//Play song/Pause song: F5 (KeyDown)
