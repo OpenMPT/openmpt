@@ -778,7 +778,7 @@ bool CModDoc::UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv)
 	TRIMENV(mptEnv->nLoopEnd);
 	TRIMENV(mptEnv->nSustainStart);
 	TRIMENV(mptEnv->nSustainEnd);
-	TRIMENV(mptEnv->nReleaseNode);
+	if(mptEnv->nReleaseNode != ENV_RELEASE_NODE_UNSET) TRIMENV(mptEnv->nReleaseNode);
 
 	#undef TRIMENV
 
