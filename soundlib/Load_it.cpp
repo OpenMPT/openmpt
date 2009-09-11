@@ -2190,7 +2190,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				UINT note = m->note;
 				if (note) b |= 1;
 				if ((note) && (note < NOTE_MIN_SPECIAL)) note--;
-				if (note == NOTE_FADE) note = 0xF6;
+				if (note == NOTE_FADE && GetType() != MOD_TYPE_MPT) note = 0xF6;
 				if (m->instr) b |= 2;
 				if (m->volcmd)
 				{
