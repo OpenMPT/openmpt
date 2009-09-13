@@ -849,7 +849,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		else if ((nsmp) && (nsmp < MAX_SAMPLES)) {	//Or set sample
 			MODSAMPLE *pSmp = &m_SndFile.Samples[nsmp];
 			pChn->pCurrentSample = pSmp->pSample;
-			pChn->pModInstrument = NULL;
+			pChn->pModInstrument = nullptr;
 			pChn->pModSample = pSmp;
 			pChn->pSample = pSmp->pSample;
 			pChn->nFineTune = pSmp->nFineTune;
@@ -864,13 +864,13 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 			pChn->nFadeOutVol = 0x10000;
 		}
 
-		m_SndFile.NoteChange(nChn, note, FALSE, TRUE, TRUE);
+		m_SndFile.NoteChange(nChn, note, false, true, true);
 		if (nVol >= 0) pChn->nVolume = nVol;
 		
 		// handle sample looping.
 		// Fix: Bug report 1700.
 		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
-		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (pChn->pModSample != 0))
+		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (pChn->pModSample != nullptr))
 		{
 			pChn->nPos = loopstart;
 			pChn->nPosLo = 0;

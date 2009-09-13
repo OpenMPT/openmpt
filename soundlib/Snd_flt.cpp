@@ -70,7 +70,7 @@ DWORD CSoundFile::CutOffToFrequency(UINT nCutOff, int flt_modifier) const
 
 
 // Simple 2-poles resonant filter
-void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modifier) const
+void CSoundFile::SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier) const
 //----------------------------------------------------------------------------------------
 {
 	float fs = (float)gdwMixingFreq;

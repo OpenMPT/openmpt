@@ -806,7 +806,7 @@ BOOL CSoundFile::Destroy()
 		if (pSmp->pSample)
 		{
 			FreeSample(pSmp->pSample);
-			pSmp->pSample = NULL;
+			pSmp->pSample = nullptr;
 		}
 	}
 	for (i=0; i<MAX_INSTRUMENTS; i++)
@@ -1449,8 +1449,8 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 	if(resetMask & 2)
 	{
 		Chn[i].nNote = Chn[i].nNewNote = Chn[i].nNewIns = 0;
-		Chn[i].pModSample = NULL;
-		Chn[i].pModInstrument = NULL;
+		Chn[i].pModSample = nullptr;
+		Chn[i].pModInstrument = nullptr;
 		Chn[i].nPortamentoDest = 0;
 		Chn[i].nCommand = 0;
 		Chn[i].nPatternLoopCount = 0;
@@ -1473,9 +1473,9 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 		Chn[i].nLoopStart = 0;
 		Chn[i].nLoopEnd = 0;
 		Chn[i].nROfs = Chn[i].nLOfs = 0;
-		Chn[i].pSample = NULL;
-		Chn[i].pModSample = NULL;
-		Chn[i].pModInstrument = NULL;
+		Chn[i].pSample = nullptr;
+		Chn[i].pModSample = nullptr;
+		Chn[i].pModInstrument = nullptr;
 		Chn[i].nCutOff = 0x7F;
 		Chn[i].nResonance = 0;
 		Chn[i].nFilterMode = 0;
@@ -2001,7 +2001,7 @@ UINT CSoundFile::ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR lpMemFile, DWOR
 	{
 		pSmp->nLength = 0;
 		FreeSample(pSmp->pSample);
-		pSmp->pSample = NULL;
+		pSmp->pSample = nullptr;
 		MessageBox(0, str_SampleAllocationError, str_Error, MB_ICONERROR);
 		return 0;
 	}
@@ -2438,7 +2438,7 @@ UINT CSoundFile::ReadSample(MODSAMPLE *pSmp, UINT nFlags, LPCSTR lpMemFile, DWOR
 		{
 			pSmp->nLength = 0;
 			FreeSample(pSmp->pSample);
-			pSmp->pSample = NULL;
+			pSmp->pSample = nullptr;
 		}
 		return 0;
 	}
@@ -2766,7 +2766,7 @@ BOOL CSoundFile::DestroySample(UINT nSample)
 	if (!Samples[nSample].pSample) return TRUE;
 	MODSAMPLE *pSmp = &Samples[nSample];
 	LPSTR pSample = pSmp->pSample;
-	pSmp->pSample = NULL;
+	pSmp->pSample = nullptr;
 	pSmp->nLength = 0;
 	pSmp->uFlags &= ~(CHN_16BIT);
 	for (UINT i=0; i<MAX_CHANNELS; i++)
