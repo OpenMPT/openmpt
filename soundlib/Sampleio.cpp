@@ -126,7 +126,7 @@ BOOL CSoundFile::DestroyInstrument(UINT nInstr, char removeSamples)
 	{
 		if (Chn[i].pModInstrument == pIns)
 		{
-			Chn[i].pModInstrument = NULL;
+			Chn[i].pModInstrument = nullptr;
 		}
 	}
 	delete pIns;
@@ -450,7 +450,7 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 	if (pSmp->pSample)
 	{
 		FreeSample(pSmp->pSample);
-		pSmp->pSample = NULL;
+		pSmp->pSample = nullptr;
 		pSmp->nLength = 0;
 	}
 	pSmp->nLength = pdata->length / samplesize;
@@ -1620,7 +1620,7 @@ BOOL CSoundFile::ReadAIFFSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 	if (pSmp->pSample)
 	{
 		FreeSample(pSmp->pSample);
-		pSmp->pSample = NULL;
+		pSmp->pSample = nullptr;
 		pSmp->nLength = 0;
 	}
 	pSmp->nLength = dwSSNDLen / samplesize;

@@ -538,7 +538,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	// Invalid sample ?
 	if (!pSmp)
 	{
-		pChn->pModSample = NULL;
+		pChn->pModSample = nullptr;
 		pChn->nInsVol = 0;
 		return;
 	}
@@ -612,7 +612,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 }
 
 
-void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BOOL bManual)
+void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bool bManual)
 //-----------------------------------------------------------------------------------------
 {
 	if (note < 1) return;
@@ -677,6 +677,10 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 	// IT Compatibility: Update multisample instruments frequency even if instrument is not specified
 	if(!bPorta && pSmp && IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nC5Speed = pSmp->nC5Speed;
 
+	// XM Compatibility: Ignore notes with portamento if there was no note
+	if(bPorta && (pChn->nPeriod == 0) && IsCompatibleMode(TRK_FASTTRACKER2))
+		return;
+
 	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose;
 	note = CLAMP(note, 1, 132);
 	pChn->nNote = note;
@@ -723,7 +727,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 		if (pChn->nPos >= pChn->nLength) pChn->nPos = pChn->nLoopStart;
 	} 
 	else 
-		bPorta = FALSE;
+		bPorta = false;
 
 	if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 	 || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
@@ -804,12 +808,12 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 			pChn->nAutoVibPos = 0;
 		}
 		pChn->nLeftVol = pChn->nRightVol = 0;
-		BOOL bFlt = (m_dwSongFlags & SONG_MPTFILTERMODE) ? FALSE : TRUE;
+		bool bFlt = (m_dwSongFlags & SONG_MPTFILTERMODE) ? false : true;
 		// Setup Initial Filter for this note
 		if (pIns)
 		{
-			if (pIns->nIFR & 0x80) { pChn->nResonance = pIns->nIFR & 0x7F; bFlt = TRUE; }
-			if (pIns->nIFC & 0x80) { pChn->nCutOff = pIns->nIFC & 0x7F; bFlt = TRUE; }
+			if (pIns->nIFR & 0x80) { pChn->nResonance = pIns->nIFR & 0x7F; bFlt = true; }
+			if (pIns->nIFC & 0x80) { pChn->nCutOff = pIns->nIFC & 0x7F; bFlt = true; }
 			if (bFlt && (pIns->nFilterMode != FLTMODE_UNCHANGED)) {
 				pChn->nFilterMode = pIns->nFilterMode;
 			}
@@ -819,7 +823,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, BOOL bPorta, BOOL bResetEnv, BO
 			pChn->nCutSwing = pChn->nResSwing = 0;
 		}
 #ifndef NO_FILTER
-		if ((pChn->nCutOff < 0x7F) && (bFlt)) SetupChannelFilter(pChn, TRUE);
+		if ((pChn->nCutOff < 0x7F) && (bFlt)) SetupChannelFilter(pChn, true);
 #endif // NO_FILTER
 	}
 	// Special case for MPT
@@ -913,7 +917,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 				note = pHeader->NoteMap[note-1];
 				if ((n) && (n < MAX_SAMPLES)) pSample = Samples[n].pSample;
 			}
-		} else pSample = NULL;
+		} else pSample = nullptr;
 	}
 	MODCHANNEL *p = pChn;
 	//if (!pIns) return;
@@ -1337,7 +1341,7 @@ BOOL CSoundFile::ProcessEffects()
 					InstrumentChange(pChn, pChn->nNewIns, bPorta, FALSE, (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? FALSE : TRUE);
 					pChn->nNewIns = 0;
 				}
-				NoteChange(nChn, note, bPorta, (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? FALSE : TRUE);
+				NoteChange(nChn, note, bPorta, (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? false : true);
 				if ((bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
@@ -2780,7 +2784,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 				if (oldcutoff < 0) oldcutoff = -oldcutoff;
 				if ((pChn->nVolume > 0) || (oldcutoff < 0x10)
 				|| (!(pChn->dwFlags & CHN_FILTER)) || (!(pChn->nLeftVol|pChn->nRightVol)))
-					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? FALSE : TRUE);
+					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 			#endif // NO_FILTER
 			}
 			break;
@@ -2794,7 +2798,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 			}
 				
 		#ifndef NO_FILTER
-			SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? FALSE : TRUE);
+			SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 		#endif // NO_FILTER
 			break;
 
@@ -2804,7 +2808,7 @@ void CSoundFile::ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param)
 			{
 				pChn->nFilterMode = (dwParam>>4);
 			#ifndef NO_FILTER
-				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? FALSE : TRUE);
+				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 			#endif // NO_FILTER
 			}
 			break;
@@ -2916,7 +2920,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 			if (oldcutoff < 0) oldcutoff = -oldcutoff;
 			if ((pChn->nVolume > 0) || (oldcutoff < 0x10)
 			|| (!(pChn->dwFlags & CHN_FILTER)) || (!(pChn->nLeftVol|pChn->nRightVol)))
-				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? FALSE : TRUE);
+				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 		#endif // NO_FILTER
 		} break;
 	
@@ -2935,7 +2939,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 				pChn->nResonance = (BYTE) (pChn->m_nPlugInitialParamValue + (m_nTickCount+1)*pChn->m_nPlugParamValueStep + 0.5);
 				pChn->nRestoreResonanceOnNewNote = 0;
 			#ifndef NO_FILTER
-				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? FALSE : TRUE);
+				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 			#endif // NO_FILTER	
 			}
 
@@ -2947,7 +2951,7 @@ void CSoundFile::ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT par
 			{
 				pChn->nFilterMode = (dwParam>>4);
 			#ifndef NO_FILTER
-				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? FALSE : TRUE);
+				SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true);
 			#endif // NO_FILTER
 			}
 			break;
@@ -3044,13 +3048,22 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 			pChn->nPos += param;
 		if (pChn->nPos >= pChn->nLength)
 		{
+			// Offset beyond sample size
 			if (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
 			{
-				pChn->nPos = pChn->nLoopStart;
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+					pChn->nPos = 0; // IT Compatibility: Reset to beginning of sample
+				else
+					pChn->nPos = pChn->nLoopStart;
 				if ((m_dwSongFlags & SONG_ITOLDEFFECTS) && (pChn->nLength > 4))
 				{
 					pChn->nPos = pChn->nLength - 2;
 				}
+			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
+			{
+				// XM Compatibility: Don't play note
+				pChn->dwFlags |= CHN_FASTVOLRAMP;
+				pChn->nVolume = pChn->nPeriod = 0;
 			}
 		}
 	} else
@@ -3139,7 +3152,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			if ((pChn->nRowInstr) && (param < 0x100)) { InstrumentChange(pChn, pChn->nRowInstr, FALSE, FALSE); bResetEnv = TRUE; }
 			if (param < 0x100) bResetEnv = TRUE;
 		}
-		NoteChange(nChn, nNote, FALSE, bResetEnv);
+		NoteChange(nChn, nNote, false, bResetEnv);
 		if (m_nInstruments) {
 			ProcessMidiOut(nChn, pChn);	//Send retrig to Midi
 		}

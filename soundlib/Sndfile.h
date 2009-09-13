@@ -796,7 +796,7 @@ public:
 	BOOL ProcessEffects();
 	UINT GetNNAChannel(UINT nChn) const;
 	void CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut);
-	void NoteChange(UINT nChn, int note, BOOL bPorta=FALSE, BOOL bResetEnv=TRUE, BOOL bManual=FALSE);
+	void NoteChange(UINT nChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false);
 	void InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta=FALSE,BOOL bUpdVol=TRUE,BOOL bResetEnv=TRUE);
 
 	// Channel Effects
@@ -834,7 +834,7 @@ private:
 	void ExtendedChannelEffect(MODCHANNEL *, UINT param);
 	void ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param=0);
 	void ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param=0); //rewbs.smoothVST
-	void SetupChannelFilter(MODCHANNEL *pChn, BOOL bReset, int flt_modifier=256) const;
+	void SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier = 256) const;
 	// Low-Level effect processing
 	void DoFreqSlide(MODCHANNEL *pChn, LONG nFreqSlide);
 	void GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide);

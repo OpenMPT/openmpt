@@ -698,9 +698,9 @@ BOOL CSoundFile::ProcessRow()
 									Chn[i].dwFlags = ChnSettings[i].dwFlags;
 									Chn[i].nLoopStart = 0;
 									Chn[i].nLoopEnd = 0;
-									Chn[i].pModInstrument = NULL;
-									Chn[i].pSample = NULL;
-									Chn[i].pModSample = NULL;
+									Chn[i].pModInstrument = nullptr;
+									Chn[i].pSample = nullptr;
+									Chn[i].pModSample = nullptr;
 								}
 							}
 						}
@@ -1302,7 +1302,7 @@ BOOL CSoundFile::ReadNote()
 				if (pIns->dwFlags & ENV_FILTER)
 				{
 #ifndef NO_FILTER
-					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? FALSE : TRUE, envpitch);
+					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true, envpitch);
 #endif // NO_FILTER
 				} else
 				// Pitch Envelope

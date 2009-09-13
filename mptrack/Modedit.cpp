@@ -142,7 +142,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		// Removing all instrument headers
 		for (UINT i1=0; i1<MAX_CHANNELS; i1++)
 		{
-			m_SndFile.Chn[i1].pModInstrument = NULL;
+			m_SndFile.Chn[i1].pModInstrument = nullptr;
 		}
 		for (UINT i2=0; i2<m_SndFile.m_nInstruments; i2++) if (m_SndFile.Instruments[i2])
 		{
