@@ -1946,7 +1946,7 @@ EndSearch:
 	m_bContinueSearch = TRUE;
 	EndWaitCursor();
 	// Display search results
-	m_dwReplaceFlags &= ~PATSEARCH_REPLACEALL;
+	//m_dwReplaceFlags &= ~PATSEARCH_REPLACEALL;
 	if (!nFound)
 	{
 		if (m_dwFindFlags & PATSEARCH_NOTE)

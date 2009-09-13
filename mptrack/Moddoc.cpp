@@ -1388,6 +1388,12 @@ void CModDoc::UpdateAllViews(CView *pSender, LPARAM lHint, CObject *pHint)
 void CModDoc::OnFileWaveConvert()
 //-------------------------------
 {
+	OnFileWaveConvert(0, 0);
+}
+
+void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
+//-------------------------------------------------------------------------
+{
 	TCHAR fname[_MAX_FNAME]="";
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
@@ -1398,7 +1404,7 @@ void CModDoc::OnFileWaveConvert()
 					"Wave Files (*.wav)|*.wav||", pMainFrm);
 	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_EXPORT);
 
-	CWaveConvert wsdlg(pMainFrm);
+	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder);
 	if (wsdlg.DoModal() != IDOK) return;
 	if (dlg.DoModal() != IDOK) return; //rewbs: made filename dialog appear after wav settings dialog
 
@@ -1409,9 +1415,7 @@ void CModDoc::OnFileWaveConvert()
 	strcpy(s, dlg.GetPathName());
 
 	// Saving as wave file
-// -> CODE#0024
-// -> DESC="wav export update"
-	UINT p = 0,n = 1;
+	UINT p = 0, n = 1;
 	DWORD flags[MAX_BASECHANNELS];
 	CHAR channel[MAX_CHANNELNAME+10];
 
@@ -1434,37 +1438,11 @@ void CModDoc::OnFileWaveConvert()
 	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 	dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
 	//if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
-// -! NEW_FEATURE#0024
 
 	BOOL bplaying = FALSE;
 	UINT pos = m_SndFile.GetCurrentPos();
 	bplaying = TRUE;
 	pMainFrm->PauseMod();
-
-// rewbs.fix3239: moved position definition into loop below
-/*  m_SndFile.SetCurrentPos(0);
-	if (wsdlg.m_bSelectPlay)
-	{
-		m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
-		m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
-		m_SndFile.GetLength(TRUE, FALSE);
-		m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
-	}
-*/
-//end rewbs.fix3239: moved position definition into loop below
-	// Saving file
-
-// -> CODE#0024
-// -> DESC="wav export update"
-//		CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
-//		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
-//		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
-//		dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
-//		if (wsdlg.m_bHighQuality)
-//		{
-//			CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
-//		}
-//		dwcdlg.DoModal();
 
 	for(UINT i = 0 ; i < n ; i++){
 
@@ -1504,7 +1482,6 @@ void CModDoc::OnFileWaveConvert()
 	if(wsdlg.m_bChannelMode){
 		for(UINT i = 0 ; i < n ; i++) m_SndFile.ChnSettings[i].dwFlags = flags[i];
 	}
-// -! NEW_FEATURE#0024
 
 	m_SndFile.SetCurrentPos(pos);
 	m_SndFile.GetLength(TRUE);

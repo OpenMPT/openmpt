@@ -14,7 +14,7 @@ public:
 	ULONGLONG m_dwFileLimit;
 	DWORD m_dwSongLimit;
 	BOOL m_bSelectPlay, m_bNormalize, m_bHighQuality, m_bGivePlugsIdleTime;
-	UINT m_nMinOrder, m_nMaxOrder;
+	ORDERINDEX m_nMinOrder, m_nMaxOrder;
 	CComboBox m_CbnSampleRate, m_CbnSampleFormat;
 	CEdit m_EditMinOrder, m_EditMaxOrder;
 
@@ -24,7 +24,7 @@ public:
 // -! NEW_FEATURE#0024
 
 public:
-	CWaveConvert(CWnd *parent);
+	CWaveConvert(CWnd *parent, ORDERINDEX nMinOrder = ORDERINDEX_INVALID, ORDERINDEX nMaxOrder = ORDERINDEX_INVALID);
 
 public:
 	void UpdateDialog();
