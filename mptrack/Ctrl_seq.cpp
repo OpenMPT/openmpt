@@ -43,6 +43,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_CONTROLTAB,			OnSwitchToView)
 	ON_COMMAND(ID_ORDERLIST_INSERT,		OnInsertOrder)
 	ON_COMMAND(ID_ORDERLIST_DELETE,		OnDeleteOrder)
+	ON_COMMAND(ID_ORDERLIST_RENDER,		OnRenderOrder)
 	ON_COMMAND(ID_PATTERN_PROPERTIES,	OnPatternProperties)
 	ON_COMMAND(ID_PLAYER_PLAY,			OnPlayerPlay)
 	ON_COMMAND(ID_PLAYER_PAUSE,			OnPlayerPause)
@@ -831,6 +832,9 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_PROPERTIES, "&Properties...");
 		}
 	}
+	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
+	AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_RENDER, "Render to &Wave");
+
 	ClientToScreen(&pt);
 	::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 	::DestroyMenu(hMenu);
@@ -937,6 +941,13 @@ void COrderList::OnInsertOrder()
 		m_pModDoc->SetModified();
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
 	}
+}
+
+void COrderList::OnRenderOrder()
+//------------------------------
+{
+	ORD_SELECTION selection = GetCurSel(false);
+	m_pModDoc->OnFileWaveConvert(selection.nOrdLo, selection.nOrdHi);
 }
 
 

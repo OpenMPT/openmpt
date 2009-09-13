@@ -57,14 +57,24 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 END_MESSAGE_MAP()
 
 
-CWaveConvert::CWaveConvert(CWnd *parent):CDialog(IDD_WAVECONVERT, parent)
-//-----------------------------------------------------------------------
+CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder):
+	CDialog(IDD_WAVECONVERT, parent)
+//-----------------------------------------------------------------------------------
 {
 	m_bGivePlugsIdleTime = false;
 	m_bNormalize = FALSE;
 	m_bHighQuality = FALSE;
 	m_bSelectPlay = FALSE;
-	m_nMinOrder = m_nMaxOrder = 0;
+	if(nMinOrder != ORDERINDEX_INVALID && nMaxOrder != ORDERINDEX_INVALID)
+	{
+		// render selection
+		m_nMinOrder = nMinOrder;
+		m_nMaxOrder = nMaxOrder;
+		m_bSelectPlay = true;
+	} else
+	{
+		m_nMinOrder = m_nMaxOrder = 0;
+	}
 	m_dwFileLimit = 0;
 	m_dwSongLimit = 0;
 	memset(&WaveFormat, 0, sizeof(WaveFormat));
@@ -110,6 +120,8 @@ BOOL CWaveConvert::OnInitDialog()
 
 	SetDlgItemInt(IDC_EDIT3, m_nMinOrder);
 	SetDlgItemInt(IDC_EDIT4, m_nMaxOrder);
+	
+
 	for (UINT i=0; i<NUMMIXRATE; i++)
 	{
 		UINT n = nMixingRates[i];

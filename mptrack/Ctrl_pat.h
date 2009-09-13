@@ -101,6 +101,7 @@ protected:
 	afx_msg void OnSwitchToView();
 	afx_msg void OnInsertOrder();
 	afx_msg void OnDeleteOrder();
+	afx_msg void OnRenderOrder();
 	afx_msg void OnPatternProperties();
 	afx_msg void OnPlayerPlay();
 	afx_msg void OnPlayerPause();

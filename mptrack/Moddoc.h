@@ -268,6 +268,8 @@ public:
 	CSize GetOldPatternScrollbarsPos() const { return m_szOldPatternScrollbarsPos; };
 	void SetOldPatternScrollbarsPos( CSize s ){ m_szOldPatternScrollbarsPos = s; };
 
+	void OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder);
+
 // protected members
 protected:
 	CSize m_szOldPatternScrollbarsPos;

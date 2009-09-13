@@ -402,6 +402,9 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 		}
 	}
 	SetCurrentSample((lParam > 0) ? lParam : m_nSample);
+
+	m_nFinetuneStep = CMainFrame::GetPrivateProfileLong("Sample Editor", "FinetuneStep", 25, theApp.GetConfigFileName());
+
 	// Initial Update
 	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 	if (!m_bInitialized) UpdateView((m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
@@ -3121,12 +3124,10 @@ NoSample:
 	{
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			LONG d = pSmp->nC5Speed;
+			UINT d = pSmp->nC5Speed;
 			if (d < 1) d = 8363;
-			d += (pos * 25);
-			if (d > 96000) d = 96000;
-			if (d < 2000) d = 2000;
-			pSmp->nC5Speed = d;
+			d += (pos * m_nFinetuneStep);
+			pSmp->nC5Speed = CLAMP(d, 579, 139921); // B-8, C-1
 			int transp = CSoundFile::FrequencyToTranspose(pSmp->nC5Speed) >> 7;
 			int basenote = 60 - transp;
 			if (basenote < BASENOTE_MIN) basenote = BASENOTE_MIN;
