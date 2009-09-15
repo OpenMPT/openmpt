@@ -167,7 +167,7 @@ BOOL CModToMidi::OnInitDialog()
 	m_nCurrInstr = 1;
 	if (m_pSndFile->m_nInstruments)
 	{
-		for (UINT nIns=1; nIns<=m_pSndFile->m_nInstruments; nIns++)
+		for(INSTRUMENTINDEX nIns = 1; nIns <= m_pSndFile->m_nInstruments; nIns++)
 		{
 			MODINSTRUMENT *pIns = m_pSndFile->Instruments[nIns];
 			if ((pIns) && (m_pSndFile->IsInstrumentUsed(nIns)))
@@ -180,15 +180,15 @@ BOOL CModToMidi::OnInitDialog()
 		}
 	} else
 	{
-		for (UINT nIns=1; nIns<=m_pSndFile->m_nSamples; nIns++)
+		for(SAMPLEINDEX nSmp = 1; nSmp <= m_pSndFile->m_nSamples; nSmp++)
 		{
-			if ((m_pSndFile->Samples[nIns].pSample)
-			 && (m_pSndFile->IsSampleUsed(nIns)))
+			if ((m_pSndFile->Samples[nSmp].pSample)
+			 && (m_pSndFile->IsSampleUsed(nSmp)))
 			{
 				memset(s, 0, sizeof(s));
-				wsprintf(s, "%02d: ", nIns);
-				memcpy(s+strlen(s), m_pSndFile->m_szNames[nIns], 32);
-				m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(s), nIns);
+				wsprintf(s, "%02d: ", nSmp);
+				memcpy(s+strlen(s), m_pSndFile->m_szNames[nSmp], 32);
+				m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(s), nSmp);
 			}
 		}
 	}

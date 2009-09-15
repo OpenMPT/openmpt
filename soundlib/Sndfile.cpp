@@ -1337,10 +1337,10 @@ void CSoundFile::DontLoopPattern(int nPat, int nRow)
 	//m_nSeqOverride = 0;
 }
 
-int CSoundFile::FindOrder(PATTERNINDEX pat, UINT startFromOrder, bool direction)
-//----------------------------------------------------------------------
+ORDERINDEX CSoundFile::FindOrder(PATTERNINDEX pat, UINT startFromOrder, bool direction)
+//-------------------------------------------------------------------------------------
 {
-	int foundAtOrder = -1;
+	int foundAtOrder = ORDERINDEX_INVALID;
 	int candidateOrder = 0;
 
 	for (UINT p=0; p<Order.size(); p++) 	{
@@ -1708,15 +1708,15 @@ UINT CSoundFile::PackSample(int &sample, int next)
 }
 
 
-BOOL CSoundFile::CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *result)
-//-----------------------------------------------------------------------------------
+bool CSoundFile::CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *result/*=NULL*/)
+//--------------------------------------------------------------------------------------------
 {
 	int pos, old, oldpos, besttable = 0;
 	DWORD dwErr, dwTotal, dwResult;
 	int i,j;
 	
 	if (result) *result = 0;
-	if ((!pSample) || (nLen < 1024)) return FALSE;
+	if ((!pSample) || (nLen < 1024)) return false;
 	// Try packing with different tables
 	dwResult = 0;
 	for (j=1; j<MAX_PACK_TABLES; j++)
@@ -1746,7 +1746,7 @@ BOOL CSoundFile::CanPackSample(LPSTR pSample, UINT nLen, UINT nPacking, BYTE *re
 	{
 		if (dwResult > 100) *result	= 100; else *result = (BYTE)dwResult;
 	}
-	return (dwResult >= nPacking) ? TRUE : FALSE;
+	return (dwResult >= nPacking) ? true : false;
 }
 #endif // NO_PACKING
 
@@ -2743,10 +2743,10 @@ UINT CSoundFile::DetectUnusedSamples(BYTE *pbIns)
 }
 
 
-BOOL CSoundFile::RemoveSelectedSamples(BOOL *pbIns)
+bool CSoundFile::RemoveSelectedSamples(bool *pbIns)
 //-------------------------------------------------
 {
-	if (!pbIns) return FALSE;
+	if (!pbIns) return false;
 	for (UINT j=1; j<MAX_SAMPLES; j++)
 	{
 		if ((!pbIns[j]) && (Samples[j].pSample))
@@ -2755,15 +2755,15 @@ BOOL CSoundFile::RemoveSelectedSamples(BOOL *pbIns)
 			if ((j == m_nSamples) && (j > 1)) m_nSamples--;
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 
-BOOL CSoundFile::DestroySample(UINT nSample)
-//------------------------------------------
+bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
+//-------------------------------------------------
 {
-	if ((!nSample) || (nSample >= MAX_SAMPLES)) return FALSE;
-	if (!Samples[nSample].pSample) return TRUE;
+	if ((!nSample) || (nSample >= MAX_SAMPLES)) return false;
+	if (!Samples[nSample].pSample) return true;
 	MODSAMPLE *pSmp = &Samples[nSample];
 	LPSTR pSample = pSmp->pSample;
 	pSmp->pSample = nullptr;
@@ -2778,13 +2778,13 @@ BOOL CSoundFile::DestroySample(UINT nSample)
 		}
 	}
 	FreeSample(pSample);
-	return TRUE;
+	return true;
 }
 
 // -> CODE#0020
 // -> DESC="rearrange sample list"
-bool CSoundFile::MoveSample(UINT from, UINT to)
-//---------------------------------------------
+bool CSoundFile::MoveSample(SAMPLEINDEX from, SAMPLEINDEX to)
+//-----------------------------------------------------------
 {
 	if (!from || from >= MAX_SAMPLES || !to || to >= MAX_SAMPLES) return false;
 	if (/*!Ins[from].pSample ||*/ Samples[to].pSample) return true;

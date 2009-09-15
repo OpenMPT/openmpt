@@ -3083,7 +3083,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 	MODCHANNEL *pChn = &Chn[nChn];
 	UINT nRetrigSpeed = param & 0x0F;
 	UINT nRetrigCount = pChn->nRetrigCount;
-	BOOL bDoRetrig = FALSE;
+	bool bDoRetrig = false;
 
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
@@ -3095,7 +3095,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 		else if (!pChn->nRetrigCount || !--pChn->nRetrigCount)
 		{
 			pChn->nRetrigCount = param & 0xf;
-			bDoRetrig = TRUE;
+			bDoRetrig = true;
 		}
 	}
 	else
@@ -3103,7 +3103,7 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			if (!nRetrigSpeed) nRetrigSpeed = 1;
-			if ((nRetrigCount) && (!(nRetrigCount % nRetrigSpeed))) bDoRetrig = TRUE;
+			if ((nRetrigCount) && (!(nRetrigCount % nRetrigSpeed))) bDoRetrig = true;
 			nRetrigCount++;
 		} else
 		{
@@ -3112,12 +3112,12 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			if ((m_nTickCount) || (param & 0x100))
 			{
 				if (!realspeed) realspeed = 1;
-				if ((!(param & 0x100)) && (m_nMusicSpeed) && (!(m_nTickCount % realspeed))) bDoRetrig = TRUE;
+				if ((!(param & 0x100)) && (m_nMusicSpeed) && (!(m_nTickCount % realspeed))) bDoRetrig = true;
 				nRetrigCount++;
 			} else if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) nRetrigCount = 0;
 			if (nRetrigCount >= realspeed)
 			{
-				if ((m_nTickCount) || ((param & 0x100) && (!pChn->nRowNote))) bDoRetrig = TRUE;
+				if ((m_nTickCount) || ((param & 0x100) && (!pChn->nRowNote))) bDoRetrig = true;
 			}
 		}
 	}
@@ -3152,12 +3152,13 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			if ((pChn->nRowInstr) && (param < 0x100)) { InstrumentChange(pChn, pChn->nRowInstr, FALSE, FALSE); bResetEnv = TRUE; }
 			if (param < 0x100) bResetEnv = TRUE;
 		}
-		NoteChange(nChn, nNote, false, bResetEnv);
+		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER) ? true : false, bResetEnv);
 		if (m_nInstruments) {
 			ProcessMidiOut(nChn, pChn);	//Send retrig to Midi
 		}
 		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!pChn->nRowNote) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
 		if (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) nRetrigCount = 0;
+		if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPos = pChn->nPosLo = 0;
 
 		if (offset)									//rewbs.volOffset: apply offset on retrig
 		{

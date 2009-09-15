@@ -1799,6 +1799,11 @@ void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
 BOOL CMidiMacroSetup::OnInitDialog()
 //----------------------------------
 {
+	m_pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
+	if (m_pModDoc) m_pSndFile = CMainFrame::GetMainFrame()->GetActiveDoc()->GetSoundFile();
+	if (!m_pSndFile)
+		return FALSE;
+
 	CHAR s[128];
 	CDialog::OnInitDialog();
 	CheckDlgButton(IDC_CHECK1, m_bEmbed);
@@ -1837,7 +1842,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_CbnZxxPreset.AddString("Z80-ZFF controls cutoff");
 	m_CbnZxxPreset.AddString("Z80-ZFF controls filter mode");
 	m_CbnZxxPreset.AddString("Z80-Z9F controls resonance+mode");
-	m_CbnZxxPreset.SetCurSel(0);
+	m_CbnZxxPreset.SetCurSel(m_pModDoc->GetZxxType(m_MidiCfg.szMidiZXXExt));
 	UpdateDialog();
 
 	int offsetx=108, offsety=30, separatorx=4, separatory=2, 
@@ -1863,10 +1868,6 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	}
 	UpdateMacroList();
 
-	m_pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
-	if (m_pModDoc) m_pSndFile = CMainFrame::GetMainFrame()->GetActiveDoc()->GetSoundFile();
-	if (!m_pSndFile)
-		return FALSE;
 	for (UINT plug=0; plug<MAX_MIXPLUGINS; plug++)
 	{
 		PSNDMIXPLUGIN p = &(m_pSndFile->m_MixPlugins[plug]);
@@ -2034,39 +2035,10 @@ void CMidiMacroSetup::OnZxxPresetChanged()
 {
 	UINT zxx_preset = m_CbnZxxPreset.GetCurSel();
 
-	if (zxx_preset)
+	if (zxx_preset && m_pModDoc != nullptr)
 	{
-		BeginWaitCursor();
-		for (UINT i=0; i<128; i++)
-		{
-			switch(zxx_preset)
-			{
-			case 1:
-				if (i<16) wsprintf(&m_MidiCfg.szMidiZXXExt[i*32], "F0F001%02X", i*8);
-				else m_MidiCfg.szMidiZXXExt[i*32] = 0;
-				break;
-
-			case 2:
-				wsprintf(&m_MidiCfg.szMidiZXXExt[i*32], "F0F001%02X", i);
-				break;
-
-			case 3:
-				wsprintf(&m_MidiCfg.szMidiZXXExt[i*32], "F0F000%02X", i);
-				break;
-
-			case 4:
-				wsprintf(&m_MidiCfg.szMidiZXXExt[i*32], "F0F002%02X", i);
-				break;
-
-			case 5:
-				if (i<16) wsprintf(&m_MidiCfg.szMidiZXXExt[i*32], "F0F001%02X", i*8);
-				else if (i<32) wsprintf(&m_MidiCfg.szMidiZXXExt[i*32], "F0F002%02X", (i-16)*8);
-				else m_MidiCfg.szMidiZXXExt[i*32] = 0;
-				break;
-			}
-		}
+		m_pModDoc->CreateZxxFromType(m_MidiCfg.szMidiZXXExt, zxx_preset);
 		UpdateDialog();
-		EndWaitCursor();
 	}
 }
 

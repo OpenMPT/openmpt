@@ -975,8 +975,8 @@ void CCtrlSamples::OnSampleSave()
 {
 	if(!m_pSndFile) return;
 
-	CHAR szFileName[_MAX_PATH] = "";
-	BOOL bBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
+	TCHAR szFileName[_MAX_PATH];
+	bool bBatchSave = CMainFrame::GetInputHandler()->ShiftPressed();
 
 	if(!bBatchSave)
 	{
@@ -993,8 +993,7 @@ void CCtrlSamples::OnSampleSave()
 		} else
 		{
 			memcpy(szFileName, m_pSndFile->m_szNames[m_nSample], 32);
-			szFileName[32] = 0;
-		}
+			szFileName[32] = 0;		}
 		if (!szFileName[0]) strcpy(szFileName, "untitled");
 	}
 	else
@@ -1011,6 +1010,7 @@ void CCtrlSamples::OnSampleSave()
 		sPath += ".wav";
 		_splitpath(sPath, NULL, NULL, szFileName, NULL);
 	}
+	SanitizeFilename(szFileName);
 
 	CFileDialog dlg(FALSE, "wav",
 			szFileName,
@@ -1027,7 +1027,7 @@ void CCtrlSamples::OnSampleSave()
 	TCHAR ext[_MAX_EXT];
 	_splitpath(dlg.GetPathName(), NULL, NULL, NULL, ext);
 
-	BOOL bOk = FALSE;
+	bool bOk = false;
 	UINT iMinSmp = m_nSample, iMaxSmp = m_nSample;
 	CString sFilename = dlg.GetPathName(), sNumberFormat;
 	if(bBatchSave)
@@ -1037,24 +1037,20 @@ void CCtrlSamples::OnSampleSave()
 		sNumberFormat.Format("%s%d%s", "%.", ((int)log10((float)iMaxSmp)) + 1, "d");
 	}
 
-	const CString sForbiddenChars = "\\/:\"?<>*";
-
 	for(UINT iSmp = iMinSmp; iSmp <= iMaxSmp; iSmp++)
 	{
 		if (m_pSndFile->Samples[iSmp].pSample)
 		{
 			if(bBatchSave)
 			{
-				CString sSampleNumber, sSampleName, sSampleFilename;
+				CString sSampleNumber;
+				TCHAR sSampleName[64], sSampleFilename[64];
 				sSampleNumber.Format(sNumberFormat, iSmp);
 
-				sSampleName = (m_pSndFile->m_szNames[iSmp]) ? m_pSndFile->m_szNames[iSmp] : "untitled";
-				sSampleFilename = (m_pSndFile->Samples[iSmp].filename[0]) ? m_pSndFile->Samples[iSmp].filename : m_pSndFile->m_szNames[iSmp];
-				for(UINT i = 0; i < sForbiddenChars.GetLength(); i++)
-				{
-					sSampleName.Remove(sForbiddenChars.GetAt(i));
-					sSampleFilename.Remove(sForbiddenChars.GetAt(i));
-				}
+				strcpy(sSampleName, (m_pSndFile->m_szNames[iSmp]) ? m_pSndFile->m_szNames[iSmp] : "untitled");
+				strcpy(sSampleFilename, (m_pSndFile->Samples[iSmp].filename[0]) ? m_pSndFile->Samples[iSmp].filename : m_pSndFile->m_szNames[iSmp]);
+				SanitizeFilename(sSampleName);
+				SanitizeFilename(sSampleFilename);
 
 				sFilename = dlg.GetPathName();
 				sFilename.Replace("%sample_number%", sSampleNumber);

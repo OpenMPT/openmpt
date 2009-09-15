@@ -110,4 +110,29 @@ void ArrayCopy(T* pDst, const T* pSrc, const size_t n)
 	utilImpl::ArrayCopyImpl<std::tr1::has_trivial_assign<T>::value>::Do(pDst, pSrc, n);
 }
 
+// Sanitize a filename (remove special chars)
+template <size_t size>
+inline void SanitizeFilename(char (&buffer)[size])
+{
+	STATIC_ASSERT(size > 0);
+	for(int i = 0; i < size; i++)
+	{
+		if(	buffer[i] == '\\' ||
+			buffer[i] == '\"' ||
+			buffer[i] == '/'  ||
+			buffer[i] == ':'  ||
+			buffer[i] == '?'  ||
+			buffer[i] == '<'  ||
+			buffer[i] == '>'  ||
+			buffer[i] == '*')
+		{
+			for(int j = i + 1; j < size; j++)
+			{
+				buffer[j - 1] = buffer[j];
+			}
+			buffer[size - 1] = 0;
+		}
+	}
+}
+
 #endif

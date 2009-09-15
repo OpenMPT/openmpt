@@ -14,10 +14,10 @@
 
 #pragma warning(disable:4244)
 
-BOOL CSoundFile::ReadSampleFromFile(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//-------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
+//--------------------------------------------------------------------------------------------
 {
-	if ((!nSample) || (nSample >= MAX_SAMPLES)) return FALSE;
+	if ((!nSample) || (nSample >= MAX_SAMPLES)) return false;
 	if ((!ReadWAVSample(nSample, lpMemFile, dwFileLength))
 	 && (!ReadXISample(nSample, lpMemFile, dwFileLength))
 	 && (!ReadAIFFSample(nSample, lpMemFile, dwFileLength))
@@ -25,30 +25,30 @@ BOOL CSoundFile::ReadSampleFromFile(UINT nSample, LPBYTE lpMemFile, DWORD dwFile
 	 && (!ReadPATSample(nSample, lpMemFile, dwFileLength))
 	 && (!Read8SVXSample(nSample, lpMemFile, dwFileLength))
 	 && (!ReadS3ISample(nSample, lpMemFile, dwFileLength)))
-		return FALSE;
-	return TRUE;
+		return false;
+	return true;
 }
 
 
-BOOL CSoundFile::ReadInstrumentFromFile(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
-//----------------------------------------------------------------------------------------
+bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
+//---------------------------------------------------------------------------------------------------
 {
-	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return FALSE;
+	if ((!nInstr) || (nInstr >= MAX_INSTRUMENTS)) return false;
 	if ((!ReadXIInstrument(nInstr, lpMemFile, dwFileLength))
 	 && (!ReadPATInstrument(nInstr, lpMemFile, dwFileLength))
 	 && (!ReadITIInstrument(nInstr, lpMemFile, dwFileLength))
 	// Generic read
-	 && (!ReadSampleAsInstrument(nInstr, lpMemFile, dwFileLength))) return FALSE;
+	 && (!ReadSampleAsInstrument(nInstr, lpMemFile, dwFileLength))) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
-	return TRUE;
+	return true;
 }
 
 
-BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
-//----------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
+//---------------------------------------------------------------------------------------------------
 {
 	LPDWORD psig = (LPDWORD)lpMemFile;
-	if ((!lpMemFile) || (dwFileLength < 128)) return FALSE;
+	if ((!lpMemFile) || (dwFileLength < 128)) return false;
 	if (((psig[0] == 0x46464952) && (psig[2] == 0x45564157))	// RIFF....WAVE signature
 	 || ((psig[0] == 0x5453494C) && (psig[2] == 0x65766177))	// LIST....wave
 	 || (psig[76/4] == 0x53524353)								// S3I signature
@@ -59,7 +59,7 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 	{
 		// Loading Instrument
 		MODINSTRUMENT *pIns = new MODINSTRUMENT;
-		if (!pIns) return FALSE;
+		if (!pIns) return false;
 		memset(pIns, 0, sizeof(MODINSTRUMENT));
 		pIns->pTuning = pIns->s_DefaultTuning;
 // -> CODE#0003
@@ -91,21 +91,20 @@ BOOL CSoundFile::ReadSampleAsInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwF
 			pIns->NoteMap[iinit] = iinit+1;
 		}
 		if (nSample) ReadSampleFromFile(nSample, lpMemFile, dwFileLength);
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 // BOOL CSoundFile::DestroyInstrument(UINT nInstr)
-BOOL CSoundFile::DestroyInstrument(UINT nInstr, char removeSamples)
-// -! BEHAVIOUR_CHANGE#0003
-//---------------------------------------------
+bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
+//----------------------------------------------------------------------------
 {
-	if ((!nInstr) || (nInstr > m_nInstruments)) return FALSE;
-	if (!Instruments[nInstr]) return TRUE;
+	if ((!nInstr) || (nInstr > m_nInstruments)) return false;
+	if (!Instruments[nInstr]) return true;
 
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
@@ -117,7 +116,7 @@ BOOL CSoundFile::DestroyInstrument(UINT nInstr, char removeSamples)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	m_szInstrumentPath[nInstr-1][0] = '\0';
-	instrumentModified[nInstr-1] = FALSE;
+	instrumentModified[nInstr-1] = false;
 // -! NEW_FEATURE#0023
 
 	MODINSTRUMENT *pIns = Instruments[nInstr];
@@ -130,14 +129,14 @@ BOOL CSoundFile::DestroyInstrument(UINT nInstr, char removeSamples)
 		}
 	}
 	delete pIns;
-	return TRUE;
+	return true;
 }
 
 
-BOOL CSoundFile::IsSampleUsed(UINT nSample)
-//-----------------------------------------
+bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample)
+//------------------------------------------------
 {
-	if ((!nSample) || (nSample > m_nSamples)) return FALSE;
+	if ((!nSample) || (nSample > m_nSamples)) return false;
 	if (m_nInstruments)
 	{
 		for (UINT i=1; i<=m_nInstruments; i++) if (Instruments[i])
@@ -145,7 +144,7 @@ BOOL CSoundFile::IsSampleUsed(UINT nSample)
 			MODINSTRUMENT *pIns = Instruments[i];
 			for (UINT j=0; j<128; j++)
 			{
-				if (pIns->Keyboard[j] == nSample) return TRUE;
+				if (pIns->Keyboard[j] == nSample) return true;
 			}
 		}
 	} else
@@ -155,33 +154,33 @@ BOOL CSoundFile::IsSampleUsed(UINT nSample)
 			MODCOMMAND *m = Patterns[i];
 			for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
 			{
-				if (m->instr == nSample) return TRUE;
+				if (m->instr == nSample) return true;
 			}
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CSoundFile::IsInstrumentUsed(UINT nInstr)
-//--------------------------------------------
+bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr)
+//-------------------------------------------------------
 {
-	if ((!nInstr) || (nInstr > m_nInstruments) || (!Instruments[nInstr])) return FALSE;
+	if ((!nInstr) || (nInstr > m_nInstruments) || (!Instruments[nInstr])) return false;
 	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 	{
 		MODCOMMAND *m = Patterns[i];
 		for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
 		{
-			if (m->instr == nInstr) return TRUE;
+			if (m->instr == nInstr) return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
 // Removing all unused samples
-BOOL CSoundFile::RemoveInstrumentSamples(UINT nInstr)
-//---------------------------------------------------
+bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
+//--------------------------------------------------------------
 {
 	BYTE sampleused[MAX_SAMPLES/8];
 	
@@ -194,23 +193,23 @@ BOOL CSoundFile::RemoveInstrumentSamples(UINT nInstr)
 			UINT n = p->Keyboard[r];
 			if (n < MAX_SAMPLES) sampleused[n>>3] |= (1<<(n&7));
 		}
-		for (UINT smp=1; smp<MAX_INSTRUMENTS; smp++) if ((Instruments[smp]) && (smp != nInstr))
+		for (SAMPLEINDEX nSmp=1; nSmp<MAX_INSTRUMENTS; nSmp++) if ((Instruments[nSmp]) && (nSmp != nInstr))
 		{
-			p = Instruments[smp];
+			p = Instruments[nSmp];
 			for (UINT r=0; r<128; r++)
 			{
 				UINT n = p->Keyboard[r];
 				if (n < MAX_SAMPLES) sampleused[n>>3] &= ~(1<<(n&7));
 			}
 		}
-		for (UINT d=1; d<=m_nSamples; d++) if (sampleused[d>>3] & (1<<(d&7)))
+		for (SAMPLEINDEX d = 1; d <= m_nSamples; d++) if (sampleused[d>>3] & (1<<(d&7)))
 		{
 			DestroySample(d);
 			m_szNames[d][0] = 0;
 		}
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -218,11 +217,11 @@ BOOL CSoundFile::RemoveInstrumentSamples(UINT nInstr)
 // I/O From another song
 //
 
-BOOL CSoundFile::ReadInstrumentFromSong(UINT nInstr, CSoundFile *pSrcSong, UINT nSrcInstr)
-//----------------------------------------------------------------------------------------
+bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX nInstr, CSoundFile *pSrcSong, UINT nSrcInstr)
+//---------------------------------------------------------------------------------------------------
 {
 	if ((!pSrcSong) || (!nSrcInstr) || (nSrcInstr > pSrcSong->m_nInstruments)
-	 || (nInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Instruments[nSrcInstr])) return FALSE;
+	 || (nInstr >= MAX_INSTRUMENTS) || (!pSrcSong->Instruments[nSrcInstr])) return false;
 	if (m_nInstruments < nInstr) m_nInstruments = nInstr;
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
@@ -277,16 +276,16 @@ BOOL CSoundFile::ReadInstrumentFromSong(UINT nInstr, CSoundFile *pSrcSong, UINT 
 		{
 			ReadSampleFromSong(samplemap[k], pSrcSong, samplesrc[k]);
 		}
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 
-BOOL CSoundFile::ReadSampleFromSong(UINT nSample, CSoundFile *pSrcSong, UINT nSrcSample)
-//--------------------------------------------------------------------------------------
+bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX nSample, CSoundFile *pSrcSong, UINT nSrcSample)
+//---------------------------------------------------------------------------------------------
 {
-	if ((!pSrcSong) || (!nSrcSample) || (nSrcSample > pSrcSong->m_nSamples) || (nSample >= MAX_SAMPLES)) return FALSE;
+	if ((!pSrcSong) || (!nSrcSample) || (nSrcSample > pSrcSong->m_nSamples) || (nSample >= MAX_SAMPLES)) return false;
 	MODSAMPLE *psmp = &pSrcSong->Samples[nSrcSample];
 	UINT nSize = psmp->nLength;
 	if (psmp->uFlags & CHN_16BIT) nSize *= 2;
@@ -318,7 +317,7 @@ BOOL CSoundFile::ReadSampleFromSong(UINT nSample, CSoundFile *pSrcSong, UINT nSr
 	{
 		FrequencyToTranspose(&Samples[nSample]);
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -330,8 +329,8 @@ BOOL CSoundFile::ReadSampleFromSong(UINT nSample, CSoundFile *pSrcSong, UINT nSr
 
 extern BOOL IMAADPCMUnpack16(signed short *pdest, UINT nLen, LPBYTE psrc, DWORD dwBytes, UINT pkBlkAlign);
 
-BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset)
-//------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD *pdwWSMPOffset)
+//-------------------------------------------------------------------------------------------------------------
 {
 	DWORD dwMemPos = 0, dwDataPos;
 	WAVEFILEHEADER *phdr = (WAVEFILEHEADER *)lpMemFile;
@@ -341,9 +340,9 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 	WAVEEXTRAHEADER *pxh;
 	DWORD dwInfoList, dwFact, dwSamplesPerBlock;
 	
-	if ((!nSample) || (!lpMemFile) || (dwFileLength < (DWORD)(sizeof(WAVEFILEHEADER)+sizeof(WAVEFORMATHEADER)))) return FALSE;
+	if ((!nSample) || (!lpMemFile) || (dwFileLength < (DWORD)(sizeof(WAVEFILEHEADER)+sizeof(WAVEFORMATHEADER)))) return false;
 	if (((phdr->id_RIFF != IFFID_RIFF) && (phdr->id_RIFF != IFFID_LIST))
-	 || ((phdr->id_WAVE != IFFID_WAVE) && (phdr->id_WAVE != IFFID_wave))) return FALSE;
+	 || ((phdr->id_WAVE != IFFID_WAVE) && (phdr->id_WAVE != IFFID_wave))) return false;
 	dwMemPos = sizeof(WAVEFILEHEADER);
 	dwDataPos = 0;
 	pfmt = NULL;
@@ -410,7 +409,7 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 		}
 		dwMemPos += dwLen + 8;
 	}
-	if ((!pdata) || (!pfmt) || (pdata->length < 4)) return FALSE;
+	if ((!pdata) || (!pfmt) || (pdata->length < 4)) return false;
 	if ((pfmtpk) && (pfmt))
 	{
 		if (pfmt->format != 1)
@@ -419,7 +418,7 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 			pfmt = pfmtpk;
 			pfmtpk = tmp;
 			if ((pfmtpk->format != 0x11) || (pfmtpk->bitspersample != 4)
-			 || (pfmtpk->channels != 1)) return FALSE;
+			 || (pfmtpk->channels != 1)) return false;
 		} else pfmtpk = NULL;
 	}
 	// WAVE_FORMAT_PCM, WAVE_FORMAT_IEEE_FLOAT, WAVE_FORMAT_EXTENSIBLE
@@ -430,7 +429,7 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 	 || (pfmt->bitspersample & 7)
 	 || (!pfmt->bitspersample)
 	 || (pfmt->bitspersample > 32)
-	) return FALSE;
+	) return false;
 
 	DestroySample(nSample);
 	UINT nType = RS_PCM8U;
@@ -570,14 +569,14 @@ BOOL CSoundFile::ReadWAVSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 			}
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 
 ///////////////////////////////////////////////////////////////
 // Save WAV
 
-BOOL CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
+bool CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
 //---------------------------------------------------------------
 {
 	LPCSTR lpszMPT = "Modplug Tracker\0";
@@ -590,7 +589,7 @@ BOOL CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
 	MODSAMPLE *pSmp = &Samples[nSample];
 	FILE *f;
 
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
+	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	memset(&extra, 0, sizeof(extra));
 	memset(&smpl, 0, sizeof(smpl));
 	header.id_RIFF = IFFID_RIFF;
@@ -679,19 +678,19 @@ BOOL CSoundFile::SaveWAVSample(UINT nSample, LPCSTR lpszFileName)
 	extra.nVibRate = pSmp->nVibRate;
 	fwrite(&extra, 1, sizeof(extra), f);
 	fclose(f);
-	return TRUE;
+	return true;
 }
 
 ///////////////////////////////////////////////////////////////
 // Save RAW
 
-BOOL CSoundFile::SaveRAWSample(UINT nSample, LPCSTR lpszFileName)
+bool CSoundFile::SaveRAWSample(UINT nSample, LPCSTR lpszFileName)
 //---------------------------------------------------------------
 {
 	MODSAMPLE *pSmp = &Samples[nSample];
 	FILE *f;
 
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
+	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 
 	UINT nType;
 	if (pSmp->uFlags & CHN_STEREO)
@@ -700,7 +699,7 @@ BOOL CSoundFile::SaveRAWSample(UINT nSample, LPCSTR lpszFileName)
 		nType = (pSmp->uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
 	WriteSample(f, pSmp, nType);
 	fclose(f);
-	return TRUE;
+	return true;
 }
 
 /////////////////////////////////////////////////////////////
@@ -867,8 +866,8 @@ VOID PatchToSample(CSoundFile *that, UINT nSample, LPBYTE lpStream, DWORD dwMemL
 }
 
 
-BOOL CSoundFile::ReadPATSample(UINT nSample, LPBYTE lpStream, DWORD dwMemLength)
-//------------------------------------------------------------------------------
+bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, LPBYTE lpStream, DWORD dwMemLength)
+//-------------------------------------------------------------------------------------
 {
 	DWORD dwMemPos = sizeof(GF1PATCHFILEHEADER)+sizeof(GF1INSTRUMENT)+sizeof(GF1LAYER);
 	GF1PATCHFILEHEADER *phdr = (GF1PATCHFILEHEADER *)lpStream;
@@ -877,7 +876,7 @@ BOOL CSoundFile::ReadPATSample(UINT nSample, LPBYTE lpStream, DWORD dwMemLength)
 	if ((!lpStream) || (dwMemLength < 512)
 	 || (phdr->gf1p != 0x50314647) || (phdr->atch != 0x48435441)
 	 || (phdr->version[3] != 0) || (phdr->id[9] != 0) || (phdr->instrum < 1)
-	 || (!phdr->samples) || (!pinshdr->layers)) return FALSE;
+	 || (!phdr->samples) || (!pinshdr->layers)) return false;
 	DestroySample(nSample);
 	PatchToSample(this, nSample, lpStream+dwMemPos, dwMemLength-dwMemPos);
 	if (pinshdr->name[0] > ' ')
@@ -885,13 +884,13 @@ BOOL CSoundFile::ReadPATSample(UINT nSample, LPBYTE lpStream, DWORD dwMemLength)
 		memcpy(m_szNames[nSample], pinshdr->name, 16);
 		m_szNames[nSample][16] = 0;
 	}
-	return TRUE;
+	return true;
 }
 
 
 // PAT Instrument
-BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------------------------
+bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpStream, DWORD dwMemLength)
+//--------------------------------------------------------------------------------------------
 {
 	GF1PATCHFILEHEADER *phdr = (GF1PATCHFILEHEADER *)lpStream;
 	GF1INSTRUMENT *pih = (GF1INSTRUMENT *)(lpStream+sizeof(GF1PATCHFILEHEADER));
@@ -904,7 +903,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	 || (phdr->gf1p != 0x50314647) || (phdr->atch != 0x48435441)
 	 || (phdr->version[3] != 0) || (phdr->id[9] != 0)
 	 || (phdr->instrum < 1) || (!phdr->samples)
-	 || (!pih->layers) || (!plh->samples)) return FALSE;
+	 || (!pih->layers) || (!plh->samples)) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
@@ -912,7 +911,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 	DestroyInstrument(nInstr,1);
 // -! BEHAVIOUR_CHANGE#0003
 	pIns = new MODINSTRUMENT;
-	if (!pIns) return FALSE;
+	if (!pIns) return false;
 	memset(pIns, 0, sizeof(MODINSTRUMENT));
 	pIns->pTuning = pIns->s_DefaultTuning;
 	Instruments[nInstr] = pIns;
@@ -1004,7 +1003,7 @@ BOOL CSoundFile::ReadPATInstrument(UINT nInstr, LPBYTE lpStream, DWORD dwMemLeng
 			}
 		}
 	}
-	return TRUE;
+	return true;
 }
 
 
@@ -1032,8 +1031,8 @@ typedef struct S3ISAMPLESTRUCT
 	DWORD scrs;
 } S3ISAMPLESTRUCT;
 
-BOOL CSoundFile::ReadS3ISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//--------------------------------------------------------------------------------
+bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
+//---------------------------------------------------------------------------------------
 {
 	S3ISAMPLESTRUCT *pss = (S3ISAMPLESTRUCT *)lpMemFile;
 	MODSAMPLE *pSmp = &Samples[nSample];
@@ -1042,7 +1041,7 @@ BOOL CSoundFile::ReadS3ISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 
 	if ((!lpMemFile) || (dwFileLength < sizeof(S3ISAMPLESTRUCT))
 	 || (pss->id != 0x01) || (((DWORD)pss->offset << 4) >= dwFileLength)
-	 || (pss->scrs != 0x53524353)) return FALSE;
+	 || (pss->scrs != 0x53524353)) return false;
 	DestroySample(nSample);
 	dwMemPos = pss->offset << 4;
 	memcpy(pSmp->filename, pss->filename, 12);
@@ -1063,7 +1062,7 @@ BOOL CSoundFile::ReadS3ISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 	flags = (pss->flags & 0x04) ? RS_PCM16U : RS_PCM8U;
 	if (pss->flags & 0x02) flags |= RSF_STEREO;
 	ReadSample(pSmp, flags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
-	return TRUE;
+	return true;
 }
 
 
@@ -1112,8 +1111,8 @@ typedef struct XISAMPLEHEADER
 
 
 
-BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
-//----------------------------------------------------------------------------------
+bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
+//---------------------------------------------------------------------------------------------
 {
 	XIFILEHEADER *pxh = (XIFILEHEADER *)lpMemFile;
 	XIINSTRUMENTHEADER *pih = (XIINSTRUMENTHEADER *)(lpMemFile+sizeof(XIFILEHEADER));
@@ -1123,11 +1122,11 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 	DWORD dwMemPos = sizeof(XIFILEHEADER)+sizeof(XIINSTRUMENTHEADER);
 	UINT nsamples;
 
-	if ((!lpMemFile) || (dwFileLength < sizeof(XIFILEHEADER)+sizeof(XIINSTRUMENTHEADER))) return FALSE;
-	if (dwMemPos + pxh->shsize - 0x102 >= dwFileLength) return FALSE;
-	if (memcmp(pxh->extxi, "Extended Instrument", 19)) return FALSE;
+	if ((!lpMemFile) || (dwFileLength < sizeof(XIFILEHEADER)+sizeof(XIINSTRUMENTHEADER))) return false;
+	if (dwMemPos + pxh->shsize - 0x102 >= dwFileLength) return false;
+	if (memcmp(pxh->extxi, "Extended Instrument", 19)) return false;
 	dwMemPos += pxh->shsize - 0x102;
-	if ((dwMemPos < sizeof(XIFILEHEADER)) || (dwMemPos >= dwFileLength)) return FALSE;
+	if ((dwMemPos < sizeof(XIFILEHEADER)) || (dwMemPos >= dwFileLength)) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
@@ -1136,7 +1135,7 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 // -! BEHAVIOUR_CHANGE#0003
 	Instruments[nInstr] = new MODINSTRUMENT;
 	MODINSTRUMENT *pIns = Instruments[nInstr];
-	if (!pIns) return FALSE;
+	if (!pIns) return false;
 	memset(pIns, 0, sizeof(MODINSTRUMENT));
 	pIns->pTuning = pIns->s_DefaultTuning;
 	memcpy(pIns->name, pxh->name, 22);
@@ -1295,18 +1294,18 @@ BOOL CSoundFile::ReadXIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLen
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 
 	// Leave if no extra instrument settings are available (end of file reached)
-	if(dwMemPos >= dwFileLength) return TRUE;
+	if(dwMemPos >= dwFileLength) return true;
 
 	ReadExtendedInstrumentProperties(pIns, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
 
 // -! NEW_FEATURE#0027
 
-	return TRUE;
+	return true;
 }
 
 
-BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
-//-----------------------------------------------------------------
+bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
+//----------------------------------------------------------------------------
 {
 	XIFILEHEADER xfh;
 	XIINSTRUMENTHEADER xih;
@@ -1316,8 +1315,8 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	UINT nsamples;
 	FILE *f;
 
-	if ((!pIns) || (!lpszFileName)) return FALSE;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
+	if ((!pIns) || (!lpszFileName)) return false;
+	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	// XI File Header
 	memset(&xfh, 0, sizeof(xfh));
 	memset(&xih, 0, sizeof(xih));
@@ -1431,12 +1430,12 @@ BOOL CSoundFile::SaveXIInstrument(UINT nInstr, LPCSTR lpszFileName)
 
 
 	fclose(f);
-	return TRUE;
+	return true;
 }
 
 
-BOOL CSoundFile::ReadXISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//-------------------------------------------------------------------------------
+bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
+//--------------------------------------------------------------------------------------
 {
 	XIFILEHEADER *pxh = (XIFILEHEADER *)lpMemFile;
 	XIINSTRUMENTHEADER *pih = (XIINSTRUMENTHEADER *)(lpMemFile+sizeof(XIFILEHEADER));
@@ -1445,10 +1444,10 @@ BOOL CSoundFile::ReadXISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength
 	MODSAMPLE *pSmp = &Samples[nSample];
 	UINT nsamples;
 
-	if ((!lpMemFile) || (dwFileLength < sizeof(XIFILEHEADER)+sizeof(XIINSTRUMENTHEADER))) return FALSE;
-	if (memcmp(pxh->extxi, "Extended Instrument", 19)) return FALSE;
+	if ((!lpMemFile) || (dwFileLength < sizeof(XIFILEHEADER)+sizeof(XIINSTRUMENTHEADER))) return false;
+	if (memcmp(pxh->extxi, "Extended Instrument", 19)) return false;
 	dwMemPos += pxh->shsize - 0x102;
-	if ((dwMemPos < sizeof(XIFILEHEADER)) || (dwMemPos >= dwFileLength)) return FALSE;
+	if ((dwMemPos < sizeof(XIFILEHEADER)) || (dwMemPos >= dwFileLength)) return false;
 	DestroySample(nSample);
 	nsamples = 0;
 	for (UINT i=0; i<96; i++)
@@ -1516,9 +1515,9 @@ BOOL CSoundFile::ReadXISample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength
 		memcpy(pSmp->filename, psh->name, 22);
 		pSmp->filename[21] = 0;
 	}
-	if (dwMemPos >= dwFileLength) return TRUE;
+	if (dwMemPos >= dwFileLength) return true;
 	ReadSample(pSmp, sampleflags, (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
-	return TRUE;
+	return true;
 }
 
 
@@ -1580,8 +1579,8 @@ static DWORD Ext2Long(LPBYTE p)
 
 
 
-BOOL CSoundFile::ReadAIFFSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//---------------------------------------------------------------------------------
+bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength)
+//----------------------------------------------------------------------------------------
 {
 	DWORD dwMemPos = sizeof(AIFFFILEHEADER);
 	DWORD dwFORMLen, dwCOMMLen, dwSSNDLen;
@@ -1590,22 +1589,22 @@ BOOL CSoundFile::ReadAIFFSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 	AIFFSSND *psnd;
 	UINT nType;
 
-	if ((!lpMemFile) || (dwFileLength < (DWORD)sizeof(AIFFFILEHEADER))) return FALSE;
+	if ((!lpMemFile) || (dwFileLength < (DWORD)sizeof(AIFFFILEHEADER))) return false;
 	dwFORMLen = BigEndian(phdr->dwLen);
 	if ((phdr->dwFORM != 0x4D524F46) || (phdr->dwAIFF != 0x46464941)
-	 || (dwFORMLen > dwFileLength) || (dwFORMLen < (DWORD)sizeof(AIFFCOMM))) return FALSE;
+	 || (dwFORMLen > dwFileLength) || (dwFORMLen < (DWORD)sizeof(AIFFCOMM))) return false;
 	pcomm = (AIFFCOMM *)(lpMemFile+dwMemPos);
 	dwCOMMLen = BigEndian(pcomm->dwLen);
-	if ((pcomm->dwCOMM != 0x4D4D4F43) || (dwCOMMLen < 0x12) || (dwCOMMLen >= dwFileLength)) return FALSE;
-	if ((pcomm->wChannels != 0x0100) && (pcomm->wChannels != 0x0200)) return FALSE;
-	if ((pcomm->wSampleSize != 0x0800) && (pcomm->wSampleSize != 0x1000)) return FALSE;
+	if ((pcomm->dwCOMM != 0x4D4D4F43) || (dwCOMMLen < 0x12) || (dwCOMMLen >= dwFileLength)) return false;
+	if ((pcomm->wChannels != 0x0100) && (pcomm->wChannels != 0x0200)) return false;
+	if ((pcomm->wSampleSize != 0x0800) && (pcomm->wSampleSize != 0x1000)) return false;
 	dwMemPos += dwCOMMLen + 8;
-	if (dwMemPos + sizeof(AIFFSSND) >= dwFileLength) return FALSE;
+	if (dwMemPos + sizeof(AIFFSSND) >= dwFileLength) return false;
 	psnd = (AIFFSSND *)(lpMemFile+dwMemPos);
 	dwSSNDLen = BigEndian(psnd->dwLen);
-	if ((psnd->dwSSND != 0x444E5353) || (dwSSNDLen >= dwFileLength) || (dwSSNDLen < 8)) return FALSE;
+	if ((psnd->dwSSND != 0x444E5353) || (dwSSNDLen >= dwFileLength) || (dwSSNDLen < 8)) return false;
 	dwMemPos += sizeof(AIFFSSND);
-	if (dwMemPos >= dwFileLength) return FALSE;
+	if (dwMemPos >= dwFileLength) return false;
 	DestroySample(nSample);
 	if (pcomm->wChannels == 0x0100)
 	{
@@ -1641,7 +1640,7 @@ BOOL CSoundFile::ReadAIFFSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 	m_szNames[nSample][0] = 0;
 	if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
 	ReadSample(pSmp, nType, (LPSTR)(lpMemFile+dwMemPos), dwFileLength-dwMemPos);
-	return TRUE;
+	return true;
 }
 
 
@@ -1651,9 +1650,8 @@ BOOL CSoundFile::ReadAIFFSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 //BOOL CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset)
-UINT CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset)
-// -! NEW_FEATURE#0027
-//------------------------------------------------------------------------------------------------
+UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFileLength, DWORD dwOffset)
+//-------------------------------------------------------------------------------------------------------
 {
 	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)lpMemFile;
 	MODSAMPLE *pSmp = &Samples[nSample];
@@ -1728,8 +1726,8 @@ UINT CSoundFile::ReadITSSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLengt
 }
 
 
-BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
-//-----------------------------------------------------------------------------------
+bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
+//----------------------------------------------------------------------------------------------
 {
 	ITINSTRUMENT *pinstr = (ITINSTRUMENT *)lpMemFile;
 	WORD samplemap[NOTE_MAX];	//rewbs.noSamplePerInstroLimit (120 was 64)
@@ -1737,7 +1735,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	UINT nsmp, nsamples;
 
 	if ((!lpMemFile) || (dwFileLength < sizeof(ITINSTRUMENT))
-	 || (pinstr->id != 0x49504D49)) return FALSE;
+	 || (pinstr->id != 0x49504D49)) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
@@ -1746,7 +1744,7 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 // -! BEHAVIOUR_CHANGE#0003
 	Instruments[nInstr] = new MODINSTRUMENT;
 	MODINSTRUMENT *pIns = Instruments[nInstr];
-	if (!pIns) return FALSE;
+	if (!pIns) return false;
 	memset(pIns, 0, sizeof(MODINSTRUMENT));
 	pIns->pTuning = pIns->s_DefaultTuning;
 	memset(samplemap, 0, sizeof(samplemap));
@@ -1805,18 +1803,18 @@ BOOL CSoundFile::ReadITIInstrument(UINT nInstr, LPBYTE lpMemFile, DWORD dwFileLe
 	ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)ptr;
 	dwMemPos += pis->samplepointer - dwMemPos + lastSampleSize;
 	// Leave if no extra instrument settings are available (end of file reached)
-	if(dwMemPos >= dwFileLength) return TRUE;
+	if(dwMemPos >= dwFileLength) return true;
 
 	ReadExtendedInstrumentProperties(pIns, lpMemFile + dwMemPos, dwFileLength - dwMemPos);
 
 // -! NEW_FEATURE#0027
 
-	return TRUE;
+	return true;
 }
 
 
-BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
-//------------------------------------------------------------------
+bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
+//-----------------------------------------------------------------------------
 {
 	BYTE buffer[554];
 	ITINSTRUMENT *iti = (ITINSTRUMENT *)buffer;
@@ -1826,8 +1824,8 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	DWORD dwPos;
 	FILE *f;
 
-	if ((!pIns) || (!lpszFileName)) return FALSE;
-	if ((f = fopen(lpszFileName, "wb")) == NULL) return FALSE;
+	if ((!pIns) || (!lpszFileName)) return false;
+	if ((f = fopen(lpszFileName, "wb")) == NULL) return false;
 	memset(buffer, 0, sizeof(buffer));
 	memset(smpcount, 0, sizeof(smpcount));
 	memset(smptable, 0, sizeof(smptable));
@@ -1999,7 +1997,7 @@ BOOL CSoundFile::SaveITIInstrument(UINT nInstr, LPCSTR lpszFileName)
 	WriteInstrumentHeaderStruct(pIns, f);	// Write full extended header.
 
 	fclose(f);
-	return TRUE;
+	return true;
 }
 
 
@@ -2112,8 +2110,8 @@ typedef struct IFFBODY
 
 
 
-BOOL CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength)
-//--------------------------------------------------------------------------------
+bool CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLength)
+//---------------------------------------------------------------------------------
 {
 	IFF8SVXFILEHEADER *pfh = (IFF8SVXFILEHEADER *)lpMemFile;
 	IFFVHDR *pvh = (IFFVHDR *)(lpMemFile + 12);
@@ -2122,7 +2120,7 @@ BOOL CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 	
 	if ((!lpMemFile) || (dwFileLength < sizeof(IFFVHDR)+12) || (pfh->dwFORM != IFFID_FORM)
 	 || (pfh->dw8SVX != IFFID_8SVX) || (BigEndian(pfh->dwSize) >= dwFileLength)
-	 || (pvh->dwVHDR != IFFID_VHDR) || (BigEndian(pvh->dwSize) >= dwFileLength)) return FALSE;
+	 || (pvh->dwVHDR != IFFID_VHDR) || (BigEndian(pvh->dwSize) >= dwFileLength)) return false;
 	DestroySample(nSample);
 	// Default values
 	pSmp->nGlobalVol = 64;
@@ -2174,7 +2172,7 @@ BOOL CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 		}
 		dwMemPos += dwChunkLen + 8;
 	}
-	return TRUE;
+	return true;
 }
 
 
