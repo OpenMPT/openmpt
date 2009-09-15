@@ -1388,7 +1388,7 @@ void CModDoc::UpdateAllViews(CView *pSender, LPARAM lHint, CObject *pHint)
 void CModDoc::OnFileWaveConvert()
 //-------------------------------
 {
-	OnFileWaveConvert(0, 0);
+	OnFileWaveConvert(ORDERINDEX_INVALID, ORDERINDEX_INVALID);
 }
 
 void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
@@ -2935,7 +2935,7 @@ void* CModDoc::GetChildFrame()
 }
 
 HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
-//------------------------------------------------------------
+//------------------------------------------------------------------------------
 {
 	HWND followSonghWnd;
 	PATTERNVIEWSTATE *patternViewState;
@@ -2976,7 +2976,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 
 	//ensure order correlates with pattern.
 	if (pSndFile->Order[ord]!=pat) {
-		int tentativeOrder = pSndFile->FindOrder(pat);
+		ORDERINDEX tentativeOrder = pSndFile->FindOrder(pat);
 		if (tentativeOrder != -1) {	//ensure a valid order exists.
 			ord = tentativeOrder;
 		}
@@ -3039,6 +3039,67 @@ int CModDoc::FindMacroForParam(long param) {
 	}
 
 	return -1;
+}
+
+// Retrieve Zxx (Z80-ZFF) type from current macro configuration
+int CModDoc::GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32])
+//-----------------------------------------------------------
+{
+	// Compare with all possible preset patterns
+	for(int i = 1; i <= 5; i++)
+	{
+		// Prepare pattern to compare
+		CHAR szPatterns[128 * 32];
+		CreateZxxFromType(szPatterns, i);
+
+		bool bFound = true;
+		for(int j = 0; j < 128; j++)
+		{
+			if(strncmp(&szPatterns[j * 32], &szMidiZXXExt[j * 32], 32))
+				bFound = false;
+		}
+		if(bFound) return i;
+	}
+	return 0; // Type 0 - Custom setup
+}
+
+// Create Zxx (Z80 - ZFF) from one out of five presets
+void CModDoc::CreateZxxFromType(CHAR (&szMidiZXXExt)[128 * 32], int iZxxType)
+//---------------------------------------------------------------------------
+{
+	for(int i = 0; i < 128; i++)
+	{
+		switch(iZxxType)
+		{
+		case 1:
+			// Type 1 - Z80 - Z8F controls resonance
+			if (i < 16) wsprintf(&szMidiZXXExt[i * 32], "F0F001%02X", i * 8);
+			else szMidiZXXExt[i * 32] = 0;
+			break;
+
+		case 2:
+			// Type 2 - Z80 - ZFF controls resonance
+			wsprintf(&szMidiZXXExt[i * 32], "F0F001%02X", i);
+			break;
+
+		case 3:
+			// Type 3 - Z80 - ZFF controls cutoff
+			wsprintf(&szMidiZXXExt[i * 32], "F0F000%02X", i);
+			break;
+
+		case 4:
+			// Type 4 - Z80 - ZFF controls filter mode
+			wsprintf(&szMidiZXXExt[i * 32], "F0F002%02X", i);
+			break;
+
+		case 5:
+			// Type 5 - Z80 - Z9F controls resonance + filter mode
+			if (i < 16) wsprintf(&szMidiZXXExt[i * 32], "F0F001%02X", i * 8);
+			else if (i < 32) wsprintf(&szMidiZXXExt[i * 32], "F0F002%02X", (i - 16) * 8);
+			else szMidiZXXExt[i * 32] = 0;
+			break;
+		}
+	}
 }
 
 

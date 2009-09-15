@@ -1433,7 +1433,7 @@ void CModDoc::RemoveAllInstruments(bool bConfirm)
 		}
 	}
 
-	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
+	for (INSTRUMENTINDEX i = 1; i <= m_SndFile.m_nInstruments; i++)
 	{
 		m_SndFile.DestroyInstrument(i,removeSamples);
 	}
@@ -1453,7 +1453,7 @@ BOOL CModDoc::RemoveUnusedInstruments()
 	CHAR s[512];
 	UINT nRemoved = 0;
 	UINT nSwap, nIndex;
-	BOOL bReorg = FALSE;
+	bool bReorg = false;
 
 	if (!m_SndFile.m_nInstruments) return FALSE;
 
@@ -1469,7 +1469,7 @@ BOOL CModDoc::RemoveUnusedInstruments()
 	BeginWaitCursor();
 	memset(usedmap, 0, sizeof(usedmap));
 
-	for (UINT i=m_SndFile.m_nInstruments; i>=1; i--)
+	for(INSTRUMENTINDEX i = m_SndFile.m_nInstruments; i >= 1; i--)
 	{
 		if (!m_SndFile.IsInstrumentUsed(i))
 		{
@@ -1477,9 +1477,9 @@ BOOL CModDoc::RemoveUnusedInstruments()
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 //			m_SndFile.DestroyInstrument(i);
-			m_SndFile.DestroyInstrument(i,removeSamples);
+			m_SndFile.DestroyInstrument(i, removeSamples);
 // -! BEHAVIOUR_CHANGE#0003
-			if ((i == m_SndFile.m_nInstruments) && (i>1)) m_SndFile.m_nInstruments--; else bReorg = TRUE;
+			if ((i == m_SndFile.m_nInstruments) && (i>1)) m_SndFile.m_nInstruments--; else bReorg = true;
 			END_CRITICAL();
 			nRemoved++;
 		} else
@@ -1701,8 +1701,8 @@ PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 //--------------------------------------------
 {
-	UINT i = 1;
-	for (i=1; i<=m_SndFile.m_nSamples; i++)
+	SAMPLEINDEX i = 1;
+	for(i = 1; i <= m_SndFile.m_nSamples; i++)
 	{
 		if ((!m_SndFile.m_szNames[i][0]) && (m_SndFile.Samples[i].pSample == NULL))
 		{
@@ -1802,7 +1802,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 		} else
 		if (!pDup)
 		{
-			for (UINT k=1; k<=m_SndFile.m_nSamples; k++)
+			for(SAMPLEINDEX k = 1; k <= m_SndFile.m_nSamples; k++)
 			{
 				if (!m_SndFile.IsSampleUsed(k))
 				{

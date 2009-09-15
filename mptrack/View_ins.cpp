@@ -1614,6 +1614,11 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 //------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return;
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	if(pSndFile == nullptr) return;
+	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+
 	BOOL bSplitCursor = FALSE;
 	CHAR s[256];
 
@@ -1632,7 +1637,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 	if (nVal > 64) nVal = 64;
 	if (nTick < 0) nTick = 0;
 	if (nTick <= EnvGetReleaseNodeTick() + 1 || EnvGetReleaseNode() == ENV_RELEASE_NODE_UNSET) {
-		int displayVal = (m_nEnv != ENV_VOLUME) ? nVal-32 : nVal;
+		int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && (pIns->dwFlags & ENV_FILTER))) ? nVal - 32 : nVal;
 		wsprintf(s, "Tick %d, [%d]", nTick, displayVal);
 	} else {
 		int displayVal = (nVal - EnvGetReleaseNodeValue()) * 2;

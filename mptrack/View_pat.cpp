@@ -3542,15 +3542,15 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNextPattern:	{	UINT n = m_nPattern + 1;
             					while ((n < pSndFile->Patterns.Size()) && (!pSndFile->Patterns[n])) n++;
 								SetCurrentPattern((n < pSndFile->Patterns.Size()) ? n : 0);
-								int currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-								int newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, true);
+								ORDERINDEX currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+								ORDERINDEX newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, true);
 								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
 								return wParam; }
 		case kcPrevPattern: {	UINT n = (m_nPattern) ? m_nPattern - 1 : pSndFile->Patterns.Size()-1;
 								while ((n > 0) && (!pSndFile->Patterns[n])) n--;
 								SetCurrentPattern(n);
-								int currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
-								int newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, false);
+								ORDERINDEX currentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
+								ORDERINDEX newOrder = pSndFile->FindOrder(m_nPattern, currentOrder, false);
 								SendCtrlMessage(CTRLMSG_SETCURRENTORDER, newOrder);
 								return wParam; }
 		case kcSelectWithCopySelect:

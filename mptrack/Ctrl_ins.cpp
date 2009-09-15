@@ -1603,7 +1603,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 void CCtrlInstruments::OnInstrumentSave()
 //---------------------------------------
 {
-	CHAR szFileName[_MAX_PATH] = "", drive[_MAX_DRIVE], path[_MAX_PATH], ext[_MAX_EXT];
+	TCHAR szFileName[_MAX_PATH] = "", drive[_MAX_DRIVE], path[_MAX_PATH], ext[_MAX_EXT];
 	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
 	
 	if (!pIns) return;
@@ -1616,6 +1616,8 @@ void CCtrlInstruments::OnInstrumentSave()
 		memcpy(szFileName, pIns->name, 22);
 		szFileName[22] = 0;
 	}
+	SanitizeFilename(szFileName);
+
 // -> CODE#0019
 // -> DESC="correctly load ITI & XI instruments sample note map"
 //	CFileDialog dlg(FALSE, (m_pSndFile->m_nType & MOD_TYPE_IT) ? "iti" : "xi",
