@@ -883,6 +883,8 @@
 #define IDC_RADIO_RESIZETO              2384
 #define IDC_EDIT_MODLOADING_WARNINGS    2385
 #define IDC_CHECK_PATRECORD             2386
+#define IDC_LOAD_COLORSCHEME            2387
+#define IDC_SAVE_COLORSCHEME            2388
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1116,7 +1118,7 @@
 #define ID_OVERFLOWPASTE                59226
 #define ID_NOTEMAP_COPY_NOTE            59227
 #define ID_CLEANUP_REARRANGESAMPLES     59228
-#define ID_ORDERLIST_RENDER				59229
+#define ID_ORDERLIST_RENDER             59229
 
 // Next default values for new objects
 // 
@@ -1125,7 +1127,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        521
 #define _APS_NEXT_COMMAND_VALUE         59230
-#define _APS_NEXT_CONTROL_VALUE         2387
+#define _APS_NEXT_CONTROL_VALUE         2389
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

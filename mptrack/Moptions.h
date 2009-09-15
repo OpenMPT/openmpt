@@ -81,6 +81,8 @@ protected:
 	afx_msg void OnPresetFT2();
 	afx_msg void OnPresetIT();
 	afx_msg void OnPresetBuzz();
+	afx_msg void OnLoadColorScheme();
+	afx_msg void OnSaveColorScheme();
 	afx_msg void OnPreviewChanged();
 	DECLARE_MESSAGE_MAP();
 };
