@@ -117,21 +117,23 @@ static MPTCOLORDEF gColorDefs[] =
 
 BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_WM_DRAWITEM()
-	ON_CBN_SELCHANGE(IDC_COMBO1,	OnColorSelChanged)
-	ON_EN_CHANGE(IDC_PRIMARYHILITE,OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,		OnColorSelChanged)
+	ON_EN_CHANGE(IDC_PRIMARYHILITE,		OnSettingsChanged)
 	ON_EN_CHANGE(IDC_SECONDARYHILITE,	OnSettingsChanged)
-	ON_COMMAND(IDC_BUTTON1,			OnSelectColor1)
-	ON_COMMAND(IDC_BUTTON2,			OnSelectColor2)
-	ON_COMMAND(IDC_BUTTON3,			OnSelectColor3)
-	ON_COMMAND(IDC_BUTTON5,			OnPresetMPT)
-	ON_COMMAND(IDC_BUTTON6,			OnPresetFT2)
-	ON_COMMAND(IDC_BUTTON7,			OnPresetIT)
-	ON_COMMAND(IDC_BUTTON8,			OnPresetBuzz)
-	ON_COMMAND(IDC_CHECK1,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK2,			OnPreviewChanged)
-	ON_COMMAND(IDC_CHECK3,			OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK4,			OnPreviewChanged)
-	ON_COMMAND(IDC_CHECK5,			OnHiliteTimeSigsChanged)
+	ON_COMMAND(IDC_BUTTON1,				OnSelectColor1)
+	ON_COMMAND(IDC_BUTTON2,				OnSelectColor2)
+	ON_COMMAND(IDC_BUTTON3,				OnSelectColor3)
+	ON_COMMAND(IDC_BUTTON5,				OnPresetMPT)
+	ON_COMMAND(IDC_BUTTON6,				OnPresetFT2)
+	ON_COMMAND(IDC_BUTTON7,				OnPresetIT)
+	ON_COMMAND(IDC_BUTTON8,				OnPresetBuzz)
+	ON_COMMAND(IDC_LOAD_COLORSCHEME,	OnLoadColorScheme)
+	ON_COMMAND(IDC_SAVE_COLORSCHEME,	OnSaveColorScheme)
+	ON_COMMAND(IDC_CHECK1,				OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK2,				OnPreviewChanged)
+	ON_COMMAND(IDC_CHECK3,				OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK4,				OnPreviewChanged)
+	ON_COMMAND(IDC_CHECK5,				OnHiliteTimeSigsChanged)
 END_MESSAGE_MAP()
 
 
@@ -538,7 +540,7 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_TEXTCURROW] = 0x00000000;
 	CustomColors[MODCOLOR_BACKSELECTED] = 0x00000000;
 	CustomColors[MODCOLOR_TEXTSELECTED] = 0x00ccd7dd;
-	//CustomColors[MODCOLOR_SAMPLE] = 0x0000ff00;
+	CustomColors[MODCOLOR_SAMPLE] = 0x0000ff00;
 	CustomColors[MODCOLOR_BACKPLAYCURSOR] = 0x007a99a9;
 	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = 0x00000000;
 	CustomColors[MODCOLOR_BACKHILIGHT] = 0x00b5c5ce;
@@ -548,9 +550,53 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_PANNING] = 0x00686800;
 	CustomColors[MODCOLOR_PITCH] = 0x00006262;
 	CustomColors[MODCOLOR_GLOBALS] = 0x00000066;
-	//CustomColors[MODCOLOR_ENVELOPES] = 0x000000ff;
+	CustomColors[MODCOLOR_ENVELOPES] = 0x000000ff;
 	OnPreviewChanged();
 }
+
+void COptionsColors::OnLoadColorScheme()
+//--------------------------------------
+{
+	CFileDialog dlg(TRUE, NULL, NULL,
+		OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
+		"OpenMPT Color Schemes|*.mptcolor|"
+		"All Files (*.*)|*.*||",
+		this);
+	if (dlg.DoModal() != IDOK) return;
+
+	
+	TCHAR sFilename[MAX_PATH];
+	strcpy(sFilename, dlg.GetPathName());
+
+	for(int i = 0; i < MAX_MODCOLORS; i++)
+	{
+		TCHAR sKeyName[16];
+		wsprintf(sKeyName, "Color%02d", i);
+		CustomColors[i] = CMainFrame::GetPrivateProfileLong("Colors", sKeyName, CustomColors[i], sFilename);
+	}
+	OnPreviewChanged();
+}
+
+void COptionsColors::OnSaveColorScheme()
+//--------------------------------------
+{
+	CFileDialog dlg(FALSE, "mptcolor", NULL,
+		OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
+		"OpenMPT Color Schemes|*.mptcolor|",
+		this);
+	if (dlg.DoModal() != IDOK) return;
+
+	TCHAR sFilename[MAX_PATH];
+	strcpy(sFilename, dlg.GetPathName());
+
+	for(int i = 0; i < MAX_MODCOLORS; i++)
+	{
+		TCHAR sKeyName[16];
+		wsprintf(sKeyName, "Color%02d", i);
+		CMainFrame::WritePrivateProfileLong("Colors", sKeyName, CustomColors[i], sFilename);
+	}
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////
 // COptionsGeneral
