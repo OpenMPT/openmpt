@@ -688,8 +688,12 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	if ((pInfo->hOrders) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_SMPNAMES))
 	{
 		const DWORD nPat = (lHint >> HINT_SHIFT_PAT);
-		pInfo->tiOrders.resize(pSndFile->Order.size(), NULL);
-		UINT imin=0, imax=pSndFile->Order.size()-1;
+		// If there are items past the new sequence length, delete them.
+		for(size_t i = pSndFile->Order.GetLength(); i < pInfo->tiOrders.size(); i++) if (pInfo->tiOrders[i])
+			{DeleteItem(pInfo->tiOrders[i]); pInfo->tiOrders[i] = NULL;}
+		if (pInfo->tiOrders.size() < pSndFile->Order.GetLength()) // Resize tiOrders if needed.
+			pInfo->tiOrders.resize(pSndFile->Order.GetLength(), NULL);
+		UINT imin=0, imax = pSndFile->Order.GetLastIndex();
 		const bool patNamesOnly = (hintFlagPart == HINT_PATNAMES);
 		//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < pSndFile->Order.size())) imin = imax = dwHintParam;
 		BOOL bEnded = FALSE;
@@ -1260,53 +1264,53 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 //--------------------------------------------
 {
 	DWORD dwItemType = GetModItem(hItem);
-	DWORD dwItem = dwItemType >> 16;
+	WORD nItem = WORD(dwItemType >> 16);
 	PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
 	CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
 	switch(dwItemType & 0xFFFF)
 	{
 	case MODITEM_ORDER:
-		if ((pModDoc) && (pModDoc->RemoveOrder(dwItem)))
+		if ((pModDoc) && (pModDoc->RemoveOrder(nItem)))
 		{
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 		}
 		break;
 
 	case MODITEM_PATTERN:
-		if ((pModDoc) && (pModDoc->RemovePattern(dwItem)))
+		if ((pModDoc) && (pModDoc->RemovePattern(nItem)))
 		{
 			//pModDoc->UpdateAllViews(NULL, (dwItem << 16)|HINT_PATTERNDATA|HINT_PATNAMES);
-			pModDoc->UpdateAllViews(NULL, (dwItem << HINT_SHIFT_PAT) | HINT_PATTERNDATA|HINT_PATNAMES);
+			pModDoc->UpdateAllViews(NULL, (UINT(nItem) << HINT_SHIFT_PAT) | HINT_PATTERNDATA|HINT_PATNAMES);
 		}
 		break;
 
 	case MODITEM_SAMPLE:
-		if ((pModDoc) && (pModDoc->RemoveSample(dwItem)))
+		if ((pModDoc) && (pModDoc->RemoveSample(nItem)))
 		{
 			//pModDoc->UpdateAllViews(NULL, (dwItem << 16) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
-			pModDoc->UpdateAllViews(NULL, (dwItem << HINT_SHIFT_SMP) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
+			pModDoc->UpdateAllViews(NULL, (UINT(nItem) << HINT_SHIFT_SMP) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
 		}
 		break;
 
 	case MODITEM_INSTRUMENT:
-		if ((pModDoc) && (pModDoc->RemoveInstrument(dwItem)))
+		if ((pModDoc) && (pModDoc->RemoveInstrument(nItem)))
 		{
 			//pModDoc->UpdateAllViews(NULL, (dwItem << 16)|HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
-			pModDoc->UpdateAllViews(NULL, (dwItem << HINT_SHIFT_INS) | HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
+			pModDoc->UpdateAllViews(NULL, (UINT(nItem) << HINT_SHIFT_INS) | HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
 		}
 		break;
 
 	case MODITEM_MIDIINSTRUMENT:
-		SetMidiInstrument(dwItem, "");
+		SetMidiInstrument(nItem, "");
 		RefreshMidiLibrary();
 		break;
 	case MODITEM_MIDIPERCUSSION:
-		SetMidiPercussion(dwItem, "");
+		SetMidiPercussion(nItem, "");
 		RefreshMidiLibrary();
 		break;
 
 	case MODITEM_DLSBANK_FOLDER:
-		CTrackApp::RemoveDLSBank(dwItem);
+		CTrackApp::RemoveDLSBank(nItem);
 		RefreshDlsBanks();
 		break;
 
@@ -2147,7 +2151,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					if (pSndFile) {
 						PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[dwItemNo];
 						if (pPlugin) {
-							bool bypassed = pPlugin->Info.dwInputRouting&MIXPLUG_INPUTF_BYPASS;
+							bool bypassed = ((pPlugin->Info.dwInputRouting&MIXPLUG_INPUTF_BYPASS) != 0);
 							AppendMenu(hMenu, (bypassed?MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Bypass");
 						}
 					}

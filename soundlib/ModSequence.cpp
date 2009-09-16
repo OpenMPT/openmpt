@@ -1,28 +1,306 @@
 #include "stdafx.h"
 #include "sndfile.h"
 #include "ModSequence.h"
+#include "../mptrack/version.h"
 #include "../mptrack/serialization_utils.h"
 
 #define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
 
-DWORD COrderToPatternTable::Deserialize(const BYTE* const src, const DWORD memLength)
-//-------------------------------------------------------------------------
+#define new DEBUG_NEW
+
+
+ModSequence::ModSequence(const CSoundFile& rSf,
+						 PATTERNINDEX* pArray,
+						 ORDERINDEX nSize,
+						 ORDERINDEX nCapacity, 
+						 const bool bDeletableArray) : 
+		m_pSndFile(&rSf),
+		m_pArray(pArray),
+		m_nSize(nSize),
+		m_nCapacity(nCapacity),
+		m_bDeletableArray(bDeletableArray),
+		m_nInvalidIndex(0xFF),
+		m_nIgnoreIndex(0xFE)
+//-------------------------------------------------------
+{}
+
+
+ModSequence::ModSequence(const CSoundFile& rSf, ORDERINDEX nSize) : 
+	m_pSndFile(&rSf),
+	m_bDeletableArray(true),
+	m_nInvalidIndex(GetInvalidPatIndex(MOD_TYPE_MPT)),
+	m_nIgnoreIndex(GetIgnoreIndex(MOD_TYPE_MPT))
+//-------------------------------------------------------------------
+{
+	m_nSize = nSize;
+	m_nCapacity = m_nSize;
+	m_pArray = new PATTERNINDEX[m_nCapacity];
+	std::fill(begin(), end(), GetInvalidPatIndex(MOD_TYPE_MPT));
+}
+
+
+ModSequence::ModSequence(const ModSequence& seq) :
+	m_pSndFile(seq.m_pSndFile),
+	m_bDeletableArray(false),
+	m_nInvalidIndex(0xFF),
+	m_nIgnoreIndex(0xFE),
+	m_nSize(0),
+	m_nCapacity(0),
+	m_pArray(nullptr)
+//------------------------------------------
+{
+	*this = seq;
+}
+
+
+bool ModSequence::NeedsExtraDatafield() const
+//-------------------------------------------
+{
+	if(m_pSndFile->GetType() == MOD_TYPE_MPT && m_pSndFile->Patterns.Size() > 0xFD)
+		return true;
+	else
+		return false;
+}
+
+
+void ModSequence::OnModTypeChanged(const MODTYPE oldtype)
+//-------------------------------------------------------
+{
+	const CModSpecifications specs = m_pSndFile->GetModSpecifications();
+
+	m_nInvalidIndex = GetInvalidPatIndex(m_pSndFile->GetType());
+	m_nIgnoreIndex = GetIgnoreIndex(m_pSndFile->GetType());
+
+	//Resize orderlist if needed. Because old orderlist had MAX_ORDERS(256) elements, not making it
+	//smaller than that even if the modtype doesn't support that many orders.
+	if (specs.ordersMax < GetLength()) 
+	{
+		resize(max(MAX_ORDERS, specs.ordersMax));
+		std::fill(begin() + specs.ordersMax, end(), GetInvalidPatIndex());
+	}
+	if (GetLength() < MAX_ORDERS)
+		resize(MAX_ORDERS, GetInvalidPatIndex(oldtype));
+
+	//Replace items used to denote end of song/skip order.
+	Replace(GetInvalidPatIndex(oldtype),  GetInvalidPatIndex());
+	Replace(GetIgnoreIndex(oldtype),  GetIgnoreIndex());
+}
+
+
+ORDERINDEX ModSequence::GetLengthTailTrimmed() const
+//--------------------------------------------------
+{
+	ORDERINDEX nEnd = GetLength();
+	if(nEnd == 0) return 0;
+	nEnd--;
+	const PATTERNINDEX iInvalid = GetInvalidPatIndex();
+	while(nEnd > 0 && (*this)[nEnd] == iInvalid)
+		nEnd--;
+	return ((*this)[nEnd] == iInvalid) ? 0 : nEnd+1;
+}
+
+
+ORDERINDEX ModSequence::GetLengthFirstEmpty() const
+//-------------------------------------------------
+{
+	return static_cast<ORDERINDEX>(std::find(begin(), end(), GetInvalidPatIndex()) - begin());
+}
+
+
+ORDERINDEX ModSequence::GetNextOrderIgnoringSkips(const ORDERINDEX start) const
+//-----------------------------------------------------------------------------
+{
+	const ORDERINDEX nLength = GetLength();
+	if(nLength == 0) return 0;
+	ORDERINDEX next = min(nLength-1, start+1);
+	while(next+1 < nLength && (*this)[next] == GetIgnoreIndex()) next++;
+	return next;
+}
+
+
+ORDERINDEX ModSequence::GetPreviousOrderIgnoringSkips(const ORDERINDEX start) const
+//---------------------------------------------------------------------------------
+{
+	const ORDERINDEX nLength = GetLength();
+	if(start == 0 || nLength == 0) return 0;
+	ORDERINDEX prev = min(start-1, nLength-1);
+	while(prev > 0 && (*this)[prev] == GetIgnoreIndex()) prev--;
+	return prev;
+}
+
+
+void ModSequence::Init()
+//----------------------
+{
+	resize(MAX_ORDERS);
+	std::fill(begin(), end(), GetInvalidPatIndex());
+}
+
+
+void ModSequence::Append(PATTERNINDEX nPat)
+//-----------------------------------------
+{
+	resize(m_nSize + 1, nPat);
+}
+
+
+void ModSequence::resize(ORDERINDEX nNewSize, PATTERNINDEX nFill)
+//---------------------------------------------------------------
+{
+	if (nNewSize == m_nSize) return;
+	if (nNewSize <= m_nCapacity)
+	{
+		if (nNewSize > m_nSize)
+			std::fill(begin() + m_nSize, begin() + nNewSize, nFill);
+		m_nSize = nNewSize;
+	}
+	else
+	{
+		const PATTERNINDEX* const pOld = m_pArray;
+		m_nCapacity = nNewSize + 100;
+		m_pArray = new PATTERNINDEX[m_nCapacity];
+		ArrayCopy(m_pArray, pOld, m_nSize);
+		std::fill(m_pArray + m_nSize, m_pArray + nNewSize, nFill);
+		m_nSize = nNewSize;
+		if (m_bDeletableArray)
+			delete[] pOld;
+		m_bDeletableArray = true;
+	}
+}
+
+
+void ModSequence::clear()
+//-----------------------
+{
+	m_nSize = 0;
+}
+
+
+ModSequence& ModSequence::operator=(const ModSequence& seq)
+//---------------------------------------------------------
+{
+	if (&seq == this)
+		return *this;
+	m_nIgnoreIndex = seq.m_nIgnoreIndex;
+	m_nInvalidIndex = seq.m_nInvalidIndex;
+	resize(seq.GetLength());
+	ArrayCopy(begin(), seq.begin(), m_nSize);
+	m_sName = seq.m_sName;
+	return *this;
+}
+
+
+
+/////////////////////////////////////
+// ModSequenceSet
+/////////////////////////////////////
+
+
+ModSequenceSet::ModSequenceSet(const CSoundFile& sndFile)
+	: ModSequence(sndFile, m_Cache, s_nCacheSize, s_nCacheSize, NoArrayDelete),
+	  m_nCurrentSeq(0)
+//-------------------------------------------------------------------
+{
+	m_Sequences.push_back(ModSequence(sndFile, s_nCacheSize));
+}
+
+
+const ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq)
+//----------------------------------------------------------------
+{
+	if (nSeq == GetCurrentSequenceIndex())
+		CopyCacheToStorage();
+	return m_Sequences[nSeq];
+}
+
+
+void ModSequenceSet::CopyCacheToStorage()
+//---------------------------------------
+{
+	m_Sequences[m_nCurrentSeq] = *this;
+}
+
+
+void ModSequenceSet::CopyStorageToCache()
+//---------------------------------------
+{
+	const ModSequence& rSeq = m_Sequences[m_nCurrentSeq];
+	if (rSeq.GetLength() <= s_nCacheSize)
+	{
+		PATTERNINDEX* pOld = m_pArray;
+		m_pArray = m_Cache;
+		m_nSize = rSeq.GetLength();
+		m_nCapacity = s_nCacheSize;
+		m_sName = rSeq.m_sName;
+		ArrayCopy(m_pArray, rSeq.m_pArray, m_nSize);
+		if (m_bDeletableArray)
+			delete[] pOld;
+		m_bDeletableArray = false;
+	}
+	else
+		ModSequence::operator=(rSeq);
+}
+
+
+void ModSequenceSet::SetSequence(SEQUENCEINDEX n)
+//-----------------------------------------------
+{
+	CopyCacheToStorage();
+	m_nCurrentSeq = n;
+	CopyStorageToCache();
+}
+
+
+void ModSequenceSet::AddSequence(bool bDuplicate)
+//-----------------------------------------------
+{
+	m_Sequences.push_back(ModSequence(*m_pSndFile, s_nCacheSize)); 
+	if (bDuplicate)
+	{
+		m_Sequences.back() = *this;
+		m_Sequences.back().m_sName = ""; // Don't copy sequence name.
+	}
+	SetSequence(GetNumSequences() - 1);
+}
+
+
+void ModSequenceSet::RemoveSequence(SEQUENCEINDEX i)
+//--------------------------------------------------
+{
+	// Do nothing if index is invalid or if there's only one sequence left.
+	if (i >= m_Sequences.size() || m_Sequences.size() <= 1) 
+		return;
+	const bool bSequenceChanges = (i == m_nCurrentSeq);
+	m_Sequences.erase(m_Sequences.begin() + i);
+	if (i < m_nCurrentSeq || m_nCurrentSeq >= GetNumSequences())
+		m_nCurrentSeq--;
+	if (bSequenceChanges)
+		CopyStorageToCache();
+}
+
+
+/////////////////////////////////////
+// Read/Write
+/////////////////////////////////////
+
+
+DWORD ModSequence::Deserialize(const BYTE* const src, const DWORD memLength)
+//--------------------------------------------------------------------------
 {
 	if(memLength < 2 + 4) return 0;
 	uint16 version = 0;
-	uint32 s = 0;
+	uint16 s = 0;
 	DWORD memPos = 0;
 	memcpy(&version, src, sizeof(version));
 	memPos += sizeof(version);
 	if(version != 0) return memPos;
     memcpy(&s, src+memPos, sizeof(s));
-	memPos += sizeof(s);
+	memPos += 4;
 	if(s > 65000) return true;
 	if(memLength < memPos+s*4) return memPos;
 
-	const uint32 nOriginalSize = s;
-	if(s > ModSpecs::mptm.ordersMax)
-		s = ModSpecs::mptm.ordersMax;
+	const uint16 nOriginalSize = s;
+	LimitMax(s, ModSpecs::mptm.ordersMax);
 
 	resize(max(s, MAX_ORDERS));
 	for(size_t i = 0; i<s; i++, memPos +=4 )
@@ -36,11 +314,11 @@ DWORD COrderToPatternTable::Deserialize(const BYTE* const src, const DWORD memLe
 }
 
 
-size_t COrderToPatternTable::WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize)
+size_t ModSequence::WriteToByteArray(BYTE* dest, const UINT numOfBytes, const UINT destSize)
 //-----------------------------------------------------------------------------
 {
-	if(numOfBytes > destSize) return true;
-	if(size() < numOfBytes) resize(numOfBytes, 0xFF);
+	if(numOfBytes > destSize || numOfBytes > MAX_ORDERS) return true;
+	if(GetLength() < numOfBytes) resize(ORDERINDEX(numOfBytes), 0xFF);
 	UINT i = 0;
 	for(i = 0; i<numOfBytes; i++)
 	{
@@ -50,10 +328,10 @@ size_t COrderToPatternTable::WriteToByteArray(BYTE* dest, const UINT numOfBytes,
 }
 
 
-size_t COrderToPatternTable::WriteAsByte(FILE* f, const UINT count)
-//---------------------------------------------------------------
+size_t ModSequence::WriteAsByte(FILE* f, const uint16 count)
+//----------------------------------------------------------
 {
-	if(size() < count) resize(count, GetInvalidPatIndex());
+	if(GetLength() < count) resize(count);
 
 	size_t i = 0;
 	
@@ -72,14 +350,15 @@ size_t COrderToPatternTable::WriteAsByte(FILE* f, const UINT count)
 	return i; //Returns the number of bytes written.
 }
 
-bool COrderToPatternTable::ReadAsByte(const BYTE* pFrom, const int howMany, const int memLength)
-//-------------------------------------------------------------------------
+
+bool ModSequence::ReadAsByte(const BYTE* pFrom, const int howMany, const int memLength)
+//-------------------------------------------------------------------------------------
 {
 	if(howMany < 0 || howMany > memLength) return true;
-	if(m_rSndFile.GetType() != MOD_TYPE_MPT && howMany > MAX_ORDERS) return true;
+	if(m_pSndFile->GetType() != MOD_TYPE_MPT && howMany > MAX_ORDERS) return true;
 	
-	if(size() < static_cast<size_t>(howMany))
-		resize(howMany, GetInvalidPatIndex());
+	if(GetLength() < static_cast<size_t>(howMany))
+		resize(ORDERINDEX(howMany));
 	
 	for(int i = 0; i<howMany; i++, pFrom++)
 		(*this)[i] = *pFrom;
@@ -87,102 +366,8 @@ bool COrderToPatternTable::ReadAsByte(const BYTE* pFrom, const int howMany, cons
 }
 
 
-bool COrderToPatternTable::NeedsExtraDatafield() const
-//----------------------------------------------
-{
-	if(m_rSndFile.GetType() == MOD_TYPE_MPT && m_rSndFile.Patterns.Size() > 0xFD)
-		return true;
-	else
-		return false;
-}
-
-
-void COrderToPatternTable::OnModTypeChanged(const MODTYPE oldtype)
-//----------------------------------------------------------------
-{
-	const CModSpecifications specs = m_rSndFile.GetModSpecifications();
-
-	//Resize orderlist if needed. Because old orderlist had MAX_ORDERS(256) elements, not making it
-	//smaller than that even if the modtype doesn't support that many orders.
-	if(specs.ordersMax < GetCount()) 
-	{
-		resize(max(MAX_ORDERS, specs.ordersMax));
-		for(ORDERINDEX i = GetCount(); i>specs.ordersMax; --i) (*this)[i-1] = GetInvalidPatIndex();
-	}
-	if (GetCount() < MAX_ORDERS)
-		resize(MAX_ORDERS, GetInvalidPatIndex());
-
-	//Replace items used to denote end of song/skip order.
-	replace(begin(), end(), GetInvalidPatIndex(oldtype), GetInvalidPatIndex());
-	replace(begin(), end(), GetIgnoreIndex(oldtype), GetIgnoreIndex());
-}
-
-
-ORDERINDEX COrderToPatternTable::GetLengthTailTrimmed() const
-//-----------------------------------------------------------
-{
-	ORDERINDEX nEnd = GetCount();
-	if(nEnd == 0) return 0;
-	nEnd--;
-	const PATTERNINDEX iInvalid = GetInvalidPatIndex();
-	while(nEnd > 0 && (*this)[nEnd] == iInvalid)
-		nEnd--;
-	return ((*this)[nEnd] == iInvalid) ? 0 : nEnd+1;
-}
-
-
-ORDERINDEX COrderToPatternTable::GetLengthFirstEmpty() const
-//----------------------------------------------------------
-{
-	const ORDERINDEX nLength = GetCount();
-	ORDERINDEX nMax = 0;
-	while ((nMax < nLength) && ((*this)[nMax] != (*this).GetInvalidPatIndex())) nMax++;
-	return nMax;
-}
-
-
-ORDERINDEX COrderToPatternTable::GetNextOrderIgnoringSkips(const ORDERINDEX start) const
-//-------------------------------------------------------------------------------------
-{
-	const ORDERINDEX count = GetCount();
-	if(count == 0) return 0;
-	ORDERINDEX next = min(count-1, start+1);
-	while(next+1 < count && (*this)[next] == GetIgnoreIndex()) next++;
-	return next;
-}
-
-ORDERINDEX COrderToPatternTable::GetPreviousOrderIgnoringSkips(const ORDERINDEX start) const
-//-------------------------------------------------------------------------------------
-{
-	const ORDERINDEX count = GetCount();
-	if(start == 0 || count == 0) return 0;
-	ORDERINDEX prev = min(start-1, count-1);
-	while(prev > 0 && (*this)[prev] == GetIgnoreIndex()) prev--;
-	return prev;
-}
-
-
-void COrderToPatternTable::Init()
-//-------------------------------
-{
-	resize(MAX_ORDERS, GetInvalidPatIndex());
-	for(ORDERINDEX i = 0; i < GetCount(); i++)
-	{
-		(*this)[i] = GetInvalidPatIndex();
-	}
-}
-
-
-
-PATTERNINDEX COrderToPatternTable::GetInvalidPatIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ?  65535 : 0xFF;}
-PATTERNINDEX COrderToPatternTable::GetIgnoreIndex(const MODTYPE type) {return type == MOD_TYPE_MPT ? 65534 : 0xFE;}
-
-PATTERNINDEX COrderToPatternTable::GetInvalidPatIndex() const {return GetInvalidPatIndex(m_rSndFile.GetType());}
-PATTERNINDEX COrderToPatternTable::GetIgnoreIndex() const {return GetIgnoreIndex(m_rSndFile.GetType());}
-
-
-void ReadModSequence(std::istream& iStrm, COrderToPatternTable& seq, const size_t)
-//--------------------------------------------------------------------------------
+void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
+//-----------------------------------------------------------------------------
 {
 	uint16 size;
 	srlztn::Binaryread<uint16>(iStrm, size);
@@ -193,7 +378,7 @@ void ReadModSequence(std::istream& iStrm, COrderToPatternTable& seq, const size_
 		AfxMessageBox(str, MB_ICONWARNING);
 		size = ModSpecs::mptm.ordersMax;
 	}
-	seq.resize(max(size, MAX_ORDERS), seq.GetInvalidPatIndex());
+	seq.resize(max(size, MAX_ORDERS));
 	if(size == 0)
 		{ seq.Init(); return; }
 
@@ -206,16 +391,91 @@ void ReadModSequence(std::istream& iStrm, COrderToPatternTable& seq, const size_
 }
 
 
-void WriteModSequence(std::ostream& oStrm, const COrderToPatternTable& seq)
+void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
 //-------------------------------------------------------------------------
 {
-	uint16 size = seq.GetCount();
+	const uint16 size = seq.GetLength();
 	srlztn::Binarywrite<uint16>(oStrm, size);
-	const COrderToPatternTable::const_iterator endIter = seq.end();
-	for(COrderToPatternTable::const_iterator citer = seq.begin(); citer != endIter; citer++)
+	const ModSequenceSet::const_iterator endIter = seq.end();
+	for(ModSequenceSet::const_iterator citer = seq.begin(); citer != endIter; citer++)
 	{
 		const uint16 temp = static_cast<uint16>(*citer);
 		srlztn::Binarywrite<uint16>(oStrm, temp);
 	}
+}
+
+
+void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
+//----------------------------------------------------------------
+{
+	srlztn::Ssb ssb(oStrm);
+	ssb.BeginWrite(FileIdSequence, MptVersion::num);
+	ssb.WriteItem((LPCSTR)seq.m_sName, "n");
+	const uint16 nLength = seq.GetLengthTailTrimmed();
+	ssb.WriteItem<uint16>(nLength, "l");
+	ssb.WriteItem(seq.m_pArray, "a", 1, srlztn::ArrayWriter<uint16>(nLength));
+	ssb.FinishWrite();
+}
+
+
+void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
+//-----------------------------------------------------------------------
+{
+	srlztn::Ssb ssb(iStrm);
+	ssb.BeginRead(FileIdSequence, MptVersion::num);
+	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+		return;
+	std::string str;
+	ssb.ReadItem(str, "n");
+	seq.m_sName = str.c_str();
+	uint16 nSize = MAX_ORDERS;
+	ssb.ReadItem<uint16>(nSize, "l");
+	LimitMax(nSize, ModSpecs::mptm.ordersMax);
+	seq.resize(max(nSize, ModSequenceSet::s_nCacheSize));
+	ssb.ReadItem(seq.m_pArray, "a", 1, srlztn::ArrayReader<uint16>(nSize));
+}
+
+
+void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
+//--------------------------------------------------------------------
+{
+	srlztn::Ssb ssb(oStrm);
+	ssb.BeginWrite(FileIdSequences, MptVersion::num);
+	const uint8 nSeqs = seq.GetNumSequences();
+	const uint8 nCurrent = seq.GetCurrentSequenceIndex();
+	ssb.WriteItem(nSeqs, "n");
+	ssb.WriteItem(nCurrent, "c");
+	for(uint8 i = 0; i < nSeqs; i++)
+	{
+		if (i == seq.GetCurrentSequenceIndex())
+			ssb.WriteItem(seq, &i, sizeof(i), &WriteModSequence);
+		else
+			ssb.WriteItem(seq.m_Sequences[i], &i, sizeof(i), &WriteModSequence);
+	}
+	ssb.FinishWrite();
+}
+
+
+void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
+//---------------------------------------------------------------------------
+{
+	srlztn::Ssb ssb(iStrm);
+	ssb.BeginRead(FileIdSequences, MptVersion::num);
+	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
+		return;
+	uint8 nSeqs;
+	uint8 nCurrent;
+	ssb.ReadItem(nSeqs, "n");
+	if (nSeqs == 0)
+		return;
+	LimitMax(nSeqs, MAX_SEQUENCES);
+	ssb.ReadItem(nCurrent, "c");
+	if (seq.GetNumSequences() < nSeqs)
+		seq.m_Sequences.resize(nSeqs, ModSequence(*seq.m_pSndFile, seq.s_nCacheSize));
+
+	for(uint8 i = 0; i < nSeqs; i++)
+		ssb.ReadItem(seq.m_Sequences[i], &i, sizeof(i), &ReadModSequence);
+	seq.m_nCurrentSeq = (nCurrent < seq.GetNumSequences()) ? nCurrent : 0;
+	seq.CopyStorageToCache();
 }
 

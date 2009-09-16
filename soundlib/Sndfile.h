@@ -574,9 +574,9 @@ public:	// for Editing
 	UINT ChnMix[MAX_CHANNELS];							// Channels to be mixed
 	MODCHANNEL Chn[MAX_CHANNELS];						// Channels
 	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS];	// Channels settings
-	CPatternContainer Patterns;							//Patterns
+	CPatternContainer Patterns;							// Patterns
 	CPatternSizesMimic PatternSize;						// Mimics old PatternsSize-array(is read-only).
-	COrderToPatternTable Order;							// Order[x] gives the index of the pattern located at order x.
+	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x.
 	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
 	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
 	MODINSTRUMENT m_defaultInstrument;					// Currently only used to get default values for extented properties. 
@@ -624,7 +624,7 @@ public:
 	UINT GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
 	UINT GetCurrentPattern() const { return m_nPattern; }
-	UINT GetCurrentOrder() const { return m_nCurrentPattern; }
+	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(m_nCurrentPattern); }
 	UINT GetSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;

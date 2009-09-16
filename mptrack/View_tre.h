@@ -61,7 +61,7 @@ struct MODTREEDOCINFO
 		if(pSndFile != NULL)
 		{
 			tiPatterns.resize(pSndFile->Patterns.Size(), NULL);
-			tiOrders.resize(pSndFile->Order.size(), NULL);
+			tiOrders.resize(pSndFile->Order.GetLength(), NULL);
 		}
 		memset(tiSamples, 0, sizeof(tiSamples));
 		memset(tiInstruments, 0, sizeof(tiInstruments));

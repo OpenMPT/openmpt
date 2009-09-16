@@ -259,7 +259,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 												// every pattern in the order will be unique, so store the pointer + pattern ID
 												orderOffsets.push_back(patternOffsets[i]);
-												Order.push_back(numPatterns);
+												Order.Append(numPatterns);
 												numPatterns++;
 												break;
 											}
@@ -359,7 +359,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							}
 							// separate subsongs by "---" patterns
 							orderOffsets.push_back(nullptr);
-							Order.push_back(Order.GetInvalidPatIndex());
+							Order.Append();
 						}
 						break;
 

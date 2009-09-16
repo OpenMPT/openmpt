@@ -446,7 +446,7 @@ CSoundFile::CSoundFile() :
 	memset(Samples, 0, sizeof(Samples));
 	memset(ChnSettings, 0, sizeof(ChnSettings));
 	memset(Instruments, 0, sizeof(Instruments));
-	Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
+	Order.Init();
 	Patterns.ClearPatterns();
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
@@ -509,7 +509,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	memset(Chn, 0, sizeof(Chn));
 	memset(Instruments, 0, sizeof(Instruments));
 	//Order.assign(MAX_ORDERS, Order.GetInvalidPatIndex());
-	Order.resize(1, Order.GetInvalidPatIndex());
+	Order.resize(1);
 	Patterns.ClearPatterns();
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
@@ -772,10 +772,10 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_pConfig->SetMixLevels(m_nMixLevels);
 	RecalculateGainForAllPlugs();
 
-	if (m_nType)
+	if (m_nType && m_nType != MOD_TYPE_MPT)
 	{
 		SetModSpecsPointer(m_pModSpecs, m_nType);
-		Order.resize(GetModSpecifications().ordersMax, Order.GetInvalidPatIndex());
+		Order.resize(GetModSpecifications().ordersMax);
 		return TRUE;
 	}
 

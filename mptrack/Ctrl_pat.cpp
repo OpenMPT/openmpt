@@ -66,6 +66,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(IDC_PATINSTROPLUGGUI2,		ToggleSplitPluginEditor) //rewbs.instroVST
 	ON_EN_CHANGE(IDC_EDIT_SPACING,			OnSpacingChanged)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		OnPatternNameChanged)
+	ON_EN_CHANGE(IDC_EDIT_SEQUENCE_NAME,	OnSequenceNameChanged)
 	ON_EN_KILLFOCUS(IDC_EDIT_ORDERLIST_MARGINS, OnOrderListMarginsChanged)
 	ON_UPDATE_COMMAND_UI(IDC_PATTERN_RECORD,OnUpdateRecord)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
@@ -278,6 +279,9 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 	m_OrderList.UpdateView(dwHintMask, pObj);
 	if (!m_pSndFile) return;
 
+	if (dwHintMask & HINT_MODSEQUENCE)
+		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_pSndFile->Order.m_sName);
+
 	//rewbs.instroVST
 	if (dwHintMask & (HINT_MIXPLUGINS|HINT_MODTYPE))
 	{
@@ -289,6 +293,10 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
             ::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI2), true);
 		else
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI2), false);
+
+		// Show/hide multisequence controls according the current modtype.
+		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->ShowWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
+		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->ShowWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
 	}
 	//end rewbs.instroVST
 	if (dwHintMask & HINT_MPTOPTIONS)
@@ -611,7 +619,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		
 		//Restore all save pattern state, except pattern number which we might have just set.
 		PATTERNVIEWSTATE* patternViewState = pFrame->GetPatternViewState();
-		patternViewState->nPattern = SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
+		patternViewState->nPattern = static_cast<PATTERNINDEX>(SendViewMessage(VIEWMSG_GETCURRENTPATTERN));
 		if (pFrame) SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)patternViewState);
 		
 		SwitchToView();
@@ -919,7 +927,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 					nNewPat = pReplaceIndex[nCurPat]; // take care of patterns that have been duplicated before
 				else
 					nNewPat= pSndFile->Order[selection.nOrdLo + i];
-				if (selection.nOrdLo + i + nInsertCount + 1 < pSndFile->Order.GetCount())
+				if (selection.nOrdLo + i + nInsertCount + 1 < pSndFile->Order.GetLength())
 					pSndFile->Order[selection.nOrdLo + i + nInsertCount + 1] = nNewPat;
 			}
 		}
@@ -927,7 +935,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 		{
 			m_OrderList.InvalidateRect(NULL, FALSE);
 			m_OrderList.SetCurSel(nInsertWhere);
-			SetCurrentPattern(pSndFile->Order[min(nInsertWhere, pSndFile->Order.GetCount()-1)]);
+			SetCurrentPattern(pSndFile->Order[min(nInsertWhere, pSndFile->Order.GetLastIndex())]);
 			m_pModDoc->SetModified();
 			m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE|HINT_PATNAMES, this);
 			if(selection.nOrdHi != selection.nOrdLo) m_OrderList.m_nScrollPos2nd = nInsertWhere + nInsertCount;
@@ -1135,6 +1143,22 @@ void CCtrlPatterns::OnPatternNameChanged()
 			 m_pSndFile->SetPatternName(nPat, s);
 			 if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 			 m_pModDoc->UpdateAllViews(NULL, (nPat << HINT_SHIFT_PAT) | HINT_PATNAMES, this);
+		}
+	}
+}
+
+
+void CCtrlPatterns::OnSequenceNameChanged()
+//-----------------------------------------
+{
+	if (m_pSndFile)
+	{
+		CString str;
+		GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, str);
+		if (str != m_pSndFile->Order.m_sName)
+		{
+			m_pSndFile->Order.m_sName = str;
+			m_pModDoc->SetModified();
 		}
 	}
 }

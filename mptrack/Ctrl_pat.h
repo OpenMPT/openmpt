@@ -47,12 +47,14 @@ public:
 	// make the current selection the secondary selection (used for keyboard orderlist navigation)
 	inline void SetCurSelTo2ndSel()
 		{if(m_bShift && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos; else if(!m_bShift && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;};
-	bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false);
+	bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false);
 	BOOL ProcessKeyDown(UINT nChar);
 	BOOL ProcessChar(UINT nChar);
 	BOOL UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
+
+	ORDERINDEX GetOrderFromPoint(const CRect& rect, const CPoint& pt) const;
 
 	// Sets target margin value and returns the effective margin value.
 	BYTE SetMargins(int);
@@ -113,6 +115,7 @@ protected:
 	afx_msg void OnPatternPaste();
 	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam);
 	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM lParam);
+	afx_msg void OnSelectSequence(UINT nid);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -218,6 +221,7 @@ protected:
 	afx_msg void OnNextInstrument();
 	afx_msg void OnSpacingChanged();
 	afx_msg void OnPatternNameChanged();
+	afx_msg void OnSequenceNameChanged();
 	afx_msg void OnOrderListMarginsChanged();
 	afx_msg void OnSetupZxxMacros();
 	afx_msg void OnChordEditor();

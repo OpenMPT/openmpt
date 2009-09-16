@@ -344,11 +344,13 @@ inline void WriteItem(OutStream& oStrm, const T& data)
 	Binarywrite(oStrm, data);
 }
 
-void WriteItemString(OutStream& oStrm, const std::string& str);
+void WriteItemString(OutStream& oStrm, const char* const pStr, const size_t nSize);
 
 template <>
-inline void WriteItem<std::string>(OutStream& oStrm, const std::string& str) {WriteItemString(oStrm, str);}
+inline void WriteItem<std::string>(OutStream& oStrm, const std::string& str) {WriteItemString(oStrm, str.c_str(), str.length());}
 
+template <>
+inline void WriteItem<LPCSTR>(OutStream& oStrm, const LPCSTR& psz) {WriteItemString(oStrm, psz, strlen(psz));}
 
 template<class T>
 inline void Binaryread(InStream& iStrm, T& data)
@@ -415,6 +417,25 @@ inline void ReadItem<std::string>(InStream& iStrm, std::string& str, const DataS
 {
 	ReadItemString(iStrm, str, nSize);
 }
+
+
+template <class T>
+struct ArrayWriter
+//================
+{
+	ArrayWriter(size_t nCount) : m_nCount(nCount) {}
+	void operator()(srlztn::OutStream& oStrm, const T* pData) {oStrm.write(reinterpret_cast<const char*>(pData), m_nCount * sizeof(T));} 
+	size_t m_nCount;
+};
+
+template <class T>
+struct ArrayReader
+//================
+{
+	ArrayReader(size_t nCount) : m_nCount(nCount) {}
+	void operator()(srlztn::InStream& iStrm, T* pData, const size_t) {iStrm.read(reinterpret_cast<char*>(pData), m_nCount * sizeof(T));} 
+	size_t m_nCount;
+};
 
 } //namespace srlztn.
 

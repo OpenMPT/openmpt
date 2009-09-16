@@ -1004,8 +1004,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			Order.ReadAsByte(lpStream + dwMemPos, nordsize, dwMemLength - dwMemPos);
 			dwMemPos += pifh->ordnum;
 			//Replacing 0xFF and 0xFE with new corresponding indexes
-			replace(Order.begin(), Order.end(), static_cast<PATTERNINDEX>(0xFE), Order.GetIgnoreIndex());
-			replace(Order.begin(), Order.end(), static_cast<PATTERNINDEX>(0xFF), Order.GetInvalidPatIndex());
+			Order.Replace(0xFE, Order.GetIgnoreIndex());
+			Order.Replace(0xFF, Order.GetInvalidPatIndex());
 		}
 	}
 
@@ -1493,8 +1493,9 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				ssb.BeginRead("mptm", 1);
 				ssb.ReadItem(GetTuneSpecificTunings(), "0", 1, &ReadTuningCollection);
 				ssb.ReadItem(*this, "1", 1, &ReadTuningMap);
-				ssb.ReadItem(Order, "2", 1, &ReadModSequence);
+				ssb.ReadItem(Order, "2", 1, &ReadModSequenceOld);
 				ssb.ReadItem(Patterns, FileIdPatterns, strlen(FileIdPatterns), &ReadModPatterns);
+				ssb.ReadItem(Order, FileIdSequences, strlen(FileIdSequences), &ReadModSequences);
 
 				if (ssb.m_Status & srlztn::SNT_FAILURE)
 					AfxMessageBox("Unknown error occured.", MB_ICONERROR);
@@ -2421,9 +2422,10 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (AreNonDefaultTuningsUsed(*this))
 		ssb.WriteItem(*this, "1", 1, &WriteTuningMap);
 	if (Order.NeedsExtraDatafield())
-		ssb.WriteItem(Order, "2", 1, &WriteModSequence);
+		ssb.WriteItem(Order, "2", 1, &WriteModSequenceOld);
 	if (bNeedsMptPatSave)
 		ssb.WriteItem(Patterns, FileIdPatterns, strlen(FileIdPatterns), &WriteModPatterns);
+	ssb.WriteItem(Order, FileIdSequences, strlen(FileIdSequences), &WriteModSequences);
 
 	ssb.FinishWrite();
 
@@ -3463,6 +3465,9 @@ void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], 
 
 	code = 'MPTX';							// write extension header code
 	fwrite(&code, 1, sizeof(__int32), f);		
+
+	if (nInstruments == 0)
+		return;
 	
 	WriteInstrumentPropertyForAllInstruments('VR..', sizeof(m_defaultInstrument.nVolRamp),    f, instruments, nInstruments);
 	WriteInstrumentPropertyForAllInstruments('MiP.', sizeof(m_defaultInstrument.nMixPlug),    f, instruments, nInstruments);
