@@ -50,6 +50,8 @@
 #define IDS_CANT_OPEN_KEYBINDING_FILE   211
 #define IDS_UNABLE_TO_LOAD_KEYBINDINGS  212
 #define IDS_CANT_OPEN_FILE_FOR_WRITING  213
+#define IDS_CONFIRM_SEQUENCE_DELETE     214
+#define IDS_PATTERN_CLEANUP_UNAVAILABLE 215
 #define IDB_MAINBAR                     300
 #define IDB_IMAGELIST                   301
 #define IDB_PATTERNS                    302
@@ -885,6 +887,8 @@
 #define IDC_CHECK_PATRECORD             2386
 #define IDC_LOAD_COLORSCHEME            2387
 #define IDC_SAVE_COLORSCHEME            2388
+#define IDC_EDIT_SEQUENCE_NAME          2389
+#define IDC_STATIC_SEQUENCE_NAME        2390
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1078,6 +1082,7 @@
 #define ID_CLEAR_SELECTION              38000
 #define ID_PLUG_PASSKEYS                38001
 #define ID_VIEW_SONGPROPERTIES          38002
+#define ID_SEQUENCE_ITEM                38003
 #define ID_GROW_SELECTION               40001
 #define ID_SHRINK_SELECTION             40002
 #define ID_RUN_SCRIPT                   40003
@@ -1127,7 +1132,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        521
 #define _APS_NEXT_COMMAND_VALUE         59230
-#define _APS_NEXT_CONTROL_VALUE         2389
+#define _APS_NEXT_CONTROL_VALUE         2391
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

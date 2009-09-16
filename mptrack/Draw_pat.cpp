@@ -620,7 +620,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			ORDERINDEX nNextOrder;
 			nNextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(startOrder);
 			//Ignore skip items(+++) from sequence.
-			const ORDERINDEX ordCount = pSndFile->Order.GetCount();
+			const ORDERINDEX ordCount = pSndFile->Order.GetLength();
 
 			if ((nNextOrder < ordCount) && (pSndFile->Order[startOrder] == m_nPattern))
 			{

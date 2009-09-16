@@ -2977,7 +2977,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	//ensure order correlates with pattern.
 	if (pSndFile->Order[ord]!=pat) {
 		ORDERINDEX tentativeOrder = pSndFile->FindOrder(pat);
-		if (tentativeOrder != -1) {	//ensure a valid order exists.
+		if (tentativeOrder != ORDERINDEX_INVALID) {	//ensure a valid order exists.
 			ord = tentativeOrder;
 		}
 	}

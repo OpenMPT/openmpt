@@ -54,6 +54,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_ORDERLIST_COPY,		OnDuplicatePattern)
 	ON_COMMAND(ID_PATTERNCOPY,			OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,			OnPatternPaste)
+	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, OnSelectSequence)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,	OnDragonDropping)
 	ON_MESSAGE(WM_HELPHITTEST,			OnHelpHitTest)
 	//}}AFX_MSG_MAP
@@ -84,6 +85,13 @@ COrderList::COrderList()
 	m_bScrolling = false;
 	m_bDragging = false;
 	m_bShift = false;
+}
+
+
+ORDERINDEX COrderList::GetOrderFromPoint(const CRect& rect, const CPoint& pt) const
+//---------------------------------------------------------------------------------
+{
+	return static_cast<ORDERINDEX>(m_nXScroll + (pt.x - rect.left) / m_cxFont);
 }
 
 
@@ -216,18 +224,20 @@ ORD_SELECTION COrderList::GetCurSel(bool bIgnoreSelection) const
 		else
 			result.nOrdHi = m_nScrollPos2nd;
 	}
+	LimitMax(result.nOrdLo, m_pModDoc->GetSoundFile()->Order.GetLastIndex());
+	LimitMax(result.nOrdHi, m_pModDoc->GetSoundFile()->Order.GetLastIndex());
 	return result;
 }
 
-bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick)
-//----------------------------------------------------------------------
+bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bIgnoreCurSel)
+//------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	ORDERINDEX *nOrder = (bShiftClick) ? &m_nScrollPos2nd : &m_nScrollPos;
 
-	if ((sel < 0) || (sel >= int(pSndFile->Order.size())) || (!m_pParent) || (!pMainFrm)) return false;
-	if (sel == *nOrder) return true;
+	if ((sel < 0) || (sel >= pSndFile->Order.GetLength()) || (!m_pParent) || (!pMainFrm)) return false;
+	if (!bIgnoreCurSel && sel == *nOrder) return true;
 	const BYTE nShownLength = GetLength();
 	InvalidateSelection();
 	*nOrder = sel;
@@ -281,7 +291,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick)
 				END_CRITICAL();
 			}
 			m_pParent->SetCurrentPattern(n);
-			m_pModDoc->SetElapsedTime(static_cast<ORDERINDEX>(m_nScrollPos), 0);
+			m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
 		}
 	}
 	UpdateInfoText();
@@ -294,7 +304,7 @@ UINT COrderList::GetCurrentPattern() const
 //----------------------------------------
 {
 	CSoundFile* pSndFile = m_pModDoc ? m_pModDoc->GetSoundFile() : NULL;
-	if ((pSndFile) && (m_nScrollPos < pSndFile->Patterns.Size()))
+	if ((pSndFile) && (m_nScrollPos < pSndFile->Order.GetLength()))
 	{
 		return pSndFile->Order[m_nScrollPos];
 	}
@@ -316,11 +326,11 @@ BOOL COrderList::ProcessKeyDown(UINT nChar)
 		if (m_pModDoc)
 		{
 			CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-			ORDERINDEX i = 0;
-			const int nSeqLength = pSndFile->Order.size();
-			for (i=0; i+1 < nSeqLength; i++) if (pSndFile->Order[i+1] == pSndFile->Order.GetInvalidPatIndex()) break;
+			ORDERINDEX nLast = pSndFile->Order.GetLengthFirstEmpty();
+			if (nLast)
+				nLast--;
 			SetCurSelTo2ndSel();
-			SetCurSel(i);
+			SetCurSel(nLast);
 		}
 		break;
 	case VK_DELETE:	OnDeleteOrder(); break;
@@ -484,7 +494,7 @@ void COrderList::UpdateInfoText()
 			m_nScrollPos, pSndFile->GetNumPatterns(), m_nScrollPos, pSndFile->GetNumPatterns());
 		}
 		
-		if (m_nScrollPos < int(pSndFile->Order.size()))
+		if (m_nScrollPos < pSndFile->Order.GetLength())
 		{
 			UINT nPat = pSndFile->Order[m_nScrollPos];
 			if ((nPat < pSndFile->Patterns.Size()) && (nPat < pSndFile->m_nPatternNames))
@@ -535,7 +545,7 @@ void COrderList::OnPaint()
 		while (rect.left < rcClient.right)
 		{
 			bool bHighLight = ((bFocus) && (nIndex >= selection.nOrdLo && nIndex <= selection.nOrdHi)) ? true : false;
-			ORDERINDEX nOrder = ((nIndex >= 0) && (nIndex < int(pSndFile->Order.size()))) ? pSndFile->Order[nIndex] : -1;
+			const PATTERNINDEX nPat = ((nIndex >= 0) && (nIndex < pSndFile->Order.GetLength())) ? pSndFile->Order[nIndex] : PATTERNINDEX_INVALID;
 			if ((rect.right = rect.left + m_cxFont) > rcClient.right) rect.right = rcClient.right;
 			rect.right--;
 			if (bHighLight) {
@@ -546,7 +556,7 @@ void COrderList::OnPaint()
 			
 			
 			//Drawing the shown pattern-indicator or drag position.
-			if (nIndex == ((m_bDragging) ? (int)m_nDropPos : m_nScrollPos))
+			if (nIndex == ((m_bDragging) ? m_nDropPos : m_nScrollPos))
 			{
 				rect.InflateRect(-1, -1);
 				dc.DrawFocusRect(&rect);
@@ -555,7 +565,7 @@ void COrderList::OnPaint()
 			MoveToEx(dc.m_hDC, rect.right, rect.top, NULL);
 			LineTo(dc.m_hDC, rect.right, rect.bottom);
 			//Drawing the 'ctrl-transition' indicator
-			if (nIndex == (int)pSndFile->m_nSeqOverride-1)
+			if (nIndex == pSndFile->m_nSeqOverride-1)
 			{
 				MoveToEx(dc.m_hDC, rect.left+4, rect.bottom-4, NULL);
 				LineTo(dc.m_hDC, rect.right-4, rect.bottom-4);
@@ -564,21 +574,18 @@ void COrderList::OnPaint()
             CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
             //Drawing 'playing'-indicator.
-			if(nIndex == (int)pSndFile->GetCurrentOrder() && pMainFrm->IsPlaying() )
+			if(nIndex == pSndFile->GetCurrentOrder() && pMainFrm->IsPlaying() )
 			{
 				MoveToEx(dc.m_hDC, rect.left+4, rect.top+2, NULL);
 				LineTo(dc.m_hDC, rect.right-4, rect.top+2);
 			}
 			s[0] = 0;
-			if ((nOrder >= 0) && (rect.left + m_cxFont - 4 <= rcClient.right))
+			if ((nIndex < pSndFile->Order.GetLength()) && (rect.left + m_cxFont - 4 <= rcClient.right))
 			{
-				if (nIndex < pSndFile->Order.GetCount())
-				{
-					if (nOrder == pSndFile->Order.GetInvalidPatIndex()) strcpy(s, "---");
-					else if (nOrder == pSndFile->Order.GetIgnoreIndex()) strcpy(s, "+++");
-					else if (nOrder < pSndFile->Patterns.Size()) wsprintf(s, "%d", nOrder);
-					else strcpy(s, "???");
-				}
+				if (nPat == pSndFile->Order.GetInvalidPatIndex()) strcpy(s, "---");
+				else if (nPat == pSndFile->Order.GetIgnoreIndex()) strcpy(s, "+++");
+				else if (nPat < pSndFile->Patterns.Size()) wsprintf(s, "%u", nPat);
+				else strcpy(s, "???");
 			}
 			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
 			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
@@ -626,8 +633,8 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 			if (m_pModDoc)
 			{
 				CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-				ORDERINDEX nOrder = m_nXScroll + (pt.x - rect.left) / m_cxFont;
-				if ((nOrder >= 0) && (nOrder < int(pSndFile->Order.size())))
+				ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
+				if ((nOrder >= 0) && (nOrder < pSndFile->Order.GetLength()))
 				{
 					if (pSndFile->m_nSeqOverride == static_cast<UINT>(nOrder)+1) {
 						pSndFile->m_nSeqOverride=0;
@@ -642,7 +649,7 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 			// mark pattern (+skip to)
 			const int oldXScroll = m_nXScroll;
 
-			ORDERINDEX nOrder = m_nXScroll + (pt.x - rect.left) / m_cxFont;
+			ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
 			ORD_SELECTION selection = GetCurSel(false);					
 
 			// check if cursor is in selection - if it is, only react on MouseUp as the user might want to drag those orders
@@ -678,7 +685,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 		ReleaseCapture();
 		if (rect.PtInRect(pt))
 		{
-			int n = m_nXScroll + (pt.x - rect.left) / m_cxFont;
+			ORDERINDEX n = GetOrderFromPoint(rect, pt);
 			if ((n >= 0) && (n == m_nDropPos) && (m_pModDoc))
 			{
 				// drag multiple orders (not quite as easy...)
@@ -719,7 +726,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 			}
 			else
 			{
-				ORDERINDEX nOrder = m_nXScroll + (pt.x - rect.left) / m_cxFont;
+				ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
 				ORD_SELECTION selection = GetCurSel(false);
 
 				// this should actually have equal signs but that breaks multiselect: nOrder >= selection.nOrdLo && nOrder <= section.nOrdHi
@@ -728,7 +735,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 					// Remove selection if we didn't drag anything but multiselect was active
 					m_nScrollPos2nd = ORDERINDEX_INVALID;
 					SetFocus();
-					SetCurSel(m_nXScroll + (pt.x - rect.left) / m_cxFont);
+					SetCurSel(GetOrderFromPoint(rect, pt));
 				}
 			}
 		}
@@ -752,8 +759,8 @@ void COrderList::OnMouseMove(UINT nFlags, CPoint pt)
 		if (rect.PtInRect(pt))
 		{
 			CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-			n = m_nXScroll + (pt.x - rect.left) / m_cxFont;
-			if (n >= int(pSndFile->Order.size()) || n >= pSndFile->GetModSpecifications().ordersMax) n = ORDERINDEX_INVALID;
+			n = GetOrderFromPoint(rect, pt);
+			if (n >= pSndFile->Order.GetLength() || n >= pSndFile->GetModSpecifications().ordersMax) n = ORDERINDEX_INVALID;
 		}
 		if (n != (int)m_nDropPos)
 		{
@@ -775,6 +782,43 @@ void COrderList::OnMouseMove(UINT nFlags, CPoint pt)
 }
 
 
+void COrderList::OnSelectSequence(UINT nid)
+//-----------------------------------------
+{
+	BEGIN_CRITICAL();
+	CMainFrame::GetMainFrame()->ResetNotificationBuffer();
+	const SEQUENCEINDEX nId = static_cast<SEQUENCEINDEX>(nid - ID_SEQUENCE_ITEM);
+	CSoundFile& rSf = *m_pModDoc->GetSoundFile();
+	if (nId == MAX_SEQUENCES + 1)
+	{
+		CString strParam; strParam.Format(TEXT("%u: %s"), rSf.Order.GetCurrentSequenceIndex(), rSf.Order.m_sName);
+		CString str;
+		AfxFormatString1(str, IDS_CONFIRM_SEQUENCE_DELETE, strParam);
+		if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) == IDYES)
+			rSf.Order.RemoveSequence();
+		else
+		{
+			END_CRITICAL();
+			return;
+		}
+	}
+	else if (nId == MAX_SEQUENCES)
+		rSf.Order.AddSequence();
+	else if (nId < rSf.Order.GetNumSequences())
+		rSf.Order.SetSequence(nId);
+	ORDERINDEX nPosCandidate = rSf.Order.GetLengthTailTrimmed() - 1;
+	SetCurSel(min(m_nScrollPos, nPosCandidate), true, false, true);
+	if (m_pParent)
+		m_pParent->SetCurrentPattern(rSf.Order[m_nScrollPos]);
+
+	UpdateScrollInfo();
+	END_CRITICAL();
+	UpdateView(HINT_MODSEQUENCE);
+	m_pModDoc->SetModified();
+	m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+}
+
+
 void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 //----------------------------------------------------
 {
@@ -791,7 +835,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 
 	bool bMultiSelection = (m_nScrollPos2nd != ORDERINDEX_INVALID);
 
-	if(!bMultiSelection) SetCurSel(m_nXScroll + (pt.x - rect.left) / m_cxFont);
+	if(!bMultiSelection) SetCurSel(GetOrderFromPoint(rect, pt));
 	SetFocus();
 	HMENU hMenu = ::CreatePopupMenu();
 	if(!hMenu) return;
@@ -826,10 +870,30 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Pattern");
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNCOPY, "&Copy Pattern");
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNPASTE, "P&aste Pattern");
-		if ((m_pModDoc) && (m_pModDoc->GetSoundFile()->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
+		if (pSndFile->TypeIsIT_MPT_XM())
 		{
 			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-			AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_PROPERTIES, "&Properties...");
+			AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERN_PROPERTIES, "&Pattern properties...");
+		}
+		if (pSndFile->GetType() == MOD_TYPE_MPT)
+		{
+			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
+
+			HMENU menuSequence = ::CreatePopupMenu();
+			AppendMenu(hMenu, MF_POPUP, (UINT_PTR)menuSequence, TEXT("Sequences"));
+			
+			const SEQUENCEINDEX numSequences = pSndFile->Order.GetNumSequences();
+			for(SEQUENCEINDEX i = 0; i < numSequences; i++)
+			{
+				CString str;
+				str.Format(TEXT("%u: %s"), i, (LPCTSTR)pSndFile->Order.GetSequence(i).m_sName);
+				const UINT flags = (pSndFile->Order.GetCurrentSequenceIndex() == i) ? MF_STRING|MF_CHECKED : MF_STRING;
+				AppendMenu(menuSequence, flags, ID_SEQUENCE_ITEM + i, str);
+			}
+			if (pSndFile->Order.GetNumSequences() < MAX_SEQUENCES)
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, TEXT("Create new sequence"));
+			if (pSndFile->Order.GetNumSequences() > 1)
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, TEXT("Delete current sequence"));
 		}
 	}
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
@@ -857,7 +921,7 @@ void COrderList::OnLButtonDblClk(UINT, CPoint)
 void COrderList::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar*)
 //--------------------------------------------------------------
 {
-	ORDERINDEX nNewPos = m_nXScroll;
+	UINT nNewPos = m_nXScroll;
 	UINT smin, smax;
 	
 	GetScrollRange(SB_HORZ, (LPINT)&smin, (LPINT)&smax);
@@ -874,9 +938,9 @@ void COrderList::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar*)
 	case SB_ENDSCROLL:		m_bScrolling = false; break;
 	}
 	if (nNewPos > smax) nNewPos = smax;
-	if (nNewPos != (UINT)m_nXScroll)
+	if (nNewPos != m_nXScroll)
 	{
-		m_nXScroll = nNewPos;
+		m_nXScroll = static_cast<ORDERINDEX>(nNewPos);
 		SetScrollPos(SB_HORZ, m_nXScroll);
 		InvalidateRect(NULL, FALSE);
 	}
@@ -886,17 +950,17 @@ void COrderList::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar*)
 void COrderList::OnSize(UINT nType, int cx, int cy)
 //-------------------------------------------------
 {
-	ORDERINDEX nPos;
+	int nPos;
 	int smin, smax;
 
 	CWnd::OnSize(nType, cx, cy);
 	UpdateScrollInfo();
 	GetScrollRange(SB_HORZ, &smin, &smax);
-	nPos = (ORDERINDEX)GetScrollPos(SB_HORZ);
+	nPos = GetScrollPos(SB_HORZ);
 	if (nPos > smax) nPos = smax;
 	if (m_nXScroll != nPos)
 	{
-		m_nXScroll = nPos;
+		m_nXScroll = static_cast<ORDERINDEX>(nPos);
 		SetScrollPos(SB_HORZ, m_nXScroll);
 		InvalidateRect(NULL, FALSE);
 	}
@@ -916,25 +980,26 @@ void COrderList::OnInsertOrder()
 
 		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
 		{
-
 			//Checking whether there is some pattern at the end of orderlist.
-			if(pSndFile->Order[pSndFile->Order.size() - 1] < pSndFile->Patterns.Size())
+			if (pSndFile->Order.GetLength() < 1 || pSndFile->Order.Last() < pSndFile->Patterns.Size())
 			{
-				if(pSndFile->Order.size() < pSndFile->GetModSpecifications().ordersMax)
-					pSndFile->Order.push_back(pSndFile->Order.GetInvalidPatIndex());
+				if(pSndFile->Order.GetLength() < pSndFile->GetModSpecifications().ordersMax)
+					pSndFile->Order.Append();
 			}
-
-			for(int j = pSndFile->Order.size() - 1; j > nInsertEnd; j--) pSndFile->Order[j] = pSndFile->Order[j - 1];
+			for(int j = pSndFile->Order.GetLastIndex(); j > nInsertEnd; j--)
+				pSndFile->Order[j] = pSndFile->Order[j - 1];
 		}
 		// now that there is enough space in the order list, overwrite the orders
 		for(ORDERINDEX i = 0; i <= nInsertCount; i++)
 		{
-			if(nInsertEnd + i + 1 < pSndFile->GetModSpecifications().ordersMax)
+			if(nInsertEnd + i + 1 < pSndFile->GetModSpecifications().ordersMax
+			   && 
+			   nInsertEnd + i + 1 < pSndFile->Order.GetLength())
 				pSndFile->Order[nInsertEnd + i + 1] = pSndFile->Order[nInsertEnd - nInsertCount + i];
 		}
-		m_nScrollPos = min(nInsertEnd + 1, pSndFile->Order.GetCount() - 1);
+		m_nScrollPos = min(nInsertEnd + 1, pSndFile->Order.GetLastIndex());
 		if(nInsertCount > 0)
-			m_nScrollPos2nd = min(m_nScrollPos + nInsertCount, pSndFile->Order.GetCount() - 1);
+			m_nScrollPos2nd = min(m_nScrollPos + nInsertCount, pSndFile->Order.GetLastIndex());
 		else
 			m_nScrollPos2nd = ORDERINDEX_INVALID;
 		InvalidateRect(NULL, FALSE);
@@ -1053,7 +1118,7 @@ LRESULT COrderList::OnDragonDropping(WPARAM bDoDrop, LPARAM lParam)
 //-----------------------------------------------------------------
 {
 	LPDRAGONDROP pDropInfo = (LPDRAGONDROP)lParam;
-	UINT posdest;
+	ORDERINDEX posdest;
 	BOOL bCanDrop;
 	CSoundFile *pSndFile;
 	CPoint pt;
@@ -1073,8 +1138,8 @@ LRESULT COrderList::OnDragonDropping(WPARAM bDoDrop, LPARAM lParam)
 	GetCursorPos(&pt);
 	ScreenToClient(&pt);
 	if (pt.x < 0) pt.x = 0;
-	posdest = m_nXScroll + (pt.x / m_cxFont);
-	if (posdest >= pSndFile->Order.size()) return FALSE;
+	posdest = static_cast<ORDERINDEX>(m_nXScroll + (pt.x / m_cxFont));
+	if (posdest >= pSndFile->Order.GetLength()) return FALSE;
 	switch(pDropInfo->dwDropType)
 	{
 	case DRAGONDROP_PATTERN:

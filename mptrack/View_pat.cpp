@@ -2853,9 +2853,6 @@ void CViewPattern::OnPatternAmplify()
 }
 
 
-
-
-
 LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 //------------------------------------------------------------
 {
@@ -2897,7 +2894,7 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 		}
 		*/
 
-		if (pSndFile->Order[nOrd] != nPat) {
+		if (nOrd >= pSndFile->Order.GetLength() || pSndFile->Order[nOrd] != nPat) {
 			//order doesn't correlate with pattern, so mark it as invalid
 			nOrd = 0xFFFF;
 		}

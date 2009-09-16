@@ -940,6 +940,12 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 //----------------------------------------------
 {
+	if (GetSoundFile()->GetType() == MOD_TYPE_MPT && GetSoundFile()->Order.GetNumSequences() > 1)
+	{   // Multiple sequences are not taken into account in the code below. For now just make
+		// removing unused patterns disabled in this case.
+		AfxMessageBox(IDS_PATTERN_CLEANUP_UNAVAILABLE, MB_ICONINFORMATION);
+		return FALSE;
+	}
 	const UINT maxPatIndex = m_SndFile.Patterns.Size();
 	const UINT maxOrdIndex = m_SndFile.Order.size();
 	vector<UINT> nPatMap(maxPatIndex, 0);
@@ -1668,10 +1674,10 @@ PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 	//Increasing orderlist size if given order is beyond current limit,
 	//or if the last order already has a pattern.
 	if((nOrd == m_SndFile.Order.size() ||
-		m_SndFile.Order.back() < m_SndFile.Patterns.Size() ) &&
-		m_SndFile.Order.size() < m_SndFile.GetModSpecifications().ordersMax)
+		m_SndFile.Order.Last() < m_SndFile.Patterns.Size() ) &&
+		m_SndFile.Order.GetLength() < m_SndFile.GetModSpecifications().ordersMax)
 	{
-		m_SndFile.Order.push_back(m_SndFile.Order.GetInvalidPatIndex());
+		m_SndFile.Order.Append();
 	}
 
 	for (UINT j=0; j<m_SndFile.Order.size(); j++)
