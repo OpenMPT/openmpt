@@ -24,16 +24,16 @@
 #pragma pack(1)
 typedef struct tagXMFILEHEADER
 {
-	DWORD size;
-	WORD norder;
-	WORD restartpos;
-	WORD channels;
-	WORD patterns;
-	WORD instruments;
-	WORD flags;
-	WORD speed;
-	WORD tempo;
-	BYTE order[256];
+	WORD xmversion;		// current: 0x0104
+	DWORD size;			// header size
+	WORD orders;		// number of orders
+	WORD restartpos;	// restart position
+	WORD channels;		// number of channels
+	WORD patterns;		// number of patterns
+	WORD instruments;	// number of instruments
+	WORD flags;			// song flags
+	WORD speed;			// default speed
+	WORD tempo;			// default tempo
 } XMFILEHEADER;
 
 
@@ -57,8 +57,13 @@ typedef struct tagXMSAMPLEHEADER
 	BYTE vtype, ptype;
 	BYTE vibtype, vibsweep, vibdepth, vibrate;
 	WORD volfade;
-	WORD res;
-	BYTE reserved1[20];
+	// midi extensions (not read by MPT)
+	BYTE midienabled;		// 0/1
+	BYTE midichannel;		// 0...15
+	WORD midiprogram;		// 0...127
+	WORD pitchwheelrange;	// 0...36 (halftones)
+	BYTE mutecomputer;		// 0/1
+	BYTE reserved1[15];
 } XMSAMPLEHEADER;
 
 typedef struct tagXMSAMPLESTRUCT
@@ -77,138 +82,80 @@ typedef struct tagXMSAMPLESTRUCT
 #pragma pack()
 
 
-bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
-//--------------------------------------------------------------
+// Read .XM patterns
+DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XMFILEHEADER *xmheader, CSoundFile *pSndFile)
+//-------------------------------------------------------------------------------------------------------------------------
 {
-	XMSAMPLEHEADER xmsh;
-	XMSAMPLESTRUCT xmss;
-	DWORD dwMemPos, dwHdrSize;
-	WORD norders=0, restartpos=0, channels=0, patterns=0, instruments=0;
-	WORD xmflags=0;
-	BYTE InstUsed[256];
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//	BYTE channels_used[MAX_CHANNELS];
-	BYTE channels_used[MAX_BASECHANNELS];
-// -! BEHAVIOUR_CHANGE#0006
+	BYTE patterns_used[256];
 	BYTE pattern_map[256];
-	BYTE samples_used[(MAX_SAMPLES+7)/8];
-	UINT unused_samples;
 
-	bool bMadeWithModPlug = false, bProbablyMadeWithModPlug = false;
-	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
-
-	m_nChannels = 0;
-	if ((!lpStream) || (dwMemLength < 0xAA)) return false; // the smallest XM I know is 174 Bytes
-	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return false;
-
-	memcpy(m_szNames[0], lpStream + 17, 20);
-	// look for null-terminated song name - that's most likely a tune made with modplug
-	for(int i = 0; i < 20; i++)
-		if(lpStream[17 + i] == 0) bProbablyMadeWithModPlug = true;
-
-	dwHdrSize = LittleEndian(*((DWORD *)(lpStream+60)));
-	norders = LittleEndianW(*((WORD *)(lpStream+64)));
-	if ((!norders) || (norders > MAX_ORDERS)) return false;
-	restartpos = LittleEndianW(*((WORD *)(lpStream+66)));
-	channels = LittleEndianW(*((WORD *)(lpStream+68)));
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//	if ((!channels) || (channels > 64)) return false;
-	if ((!channels) || (channels > MAX_BASECHANNELS)) return false;
-// -! BEHAVIOUR_CHANGE#0006
-
-	m_nType = MOD_TYPE_XM;
-	m_nMinPeriod = 27;
-	m_nMaxPeriod = 54784;
-	m_nChannels = channels;
-	if (restartpos < norders) m_nRestartPos = restartpos;
-	patterns = CLAMP(LittleEndianW(*((WORD *)(lpStream+70))), 0, 256);
-	instruments = LittleEndianW(*((WORD *)(lpStream+72)));
-	if (instruments >= MAX_INSTRUMENTS) instruments = MAX_INSTRUMENTS-1;
-	m_nInstruments = instruments;
-	m_nSamples = 0;
-	memcpy(&xmflags, lpStream + 74, 2);
-	xmflags = LittleEndianW(xmflags);
-	if (xmflags & 1) m_dwSongFlags |= SONG_LINEARSLIDES;
-	if (xmflags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
-	m_nDefaultSpeed = CLAMP(LittleEndianW(*((WORD *)(lpStream+76))), 1, 31);
-// -> CODE#0016
-// -> DESC="default tempo update"
-	m_nDefaultTempo = CLAMP(LittleEndianW(*((WORD *)(lpStream+78))), 32, 512);
-// -! BEHAVIOUR_CHANGE#0016
-	Order.ReadAsByte(lpStream+80, norders, dwMemLength-80);
-	memset(InstUsed, 0, sizeof(InstUsed));
-	if (patterns > MAX_PATTERNS)
+	memset(patterns_used, 0, sizeof(patterns_used));
+	if (xmheader->patterns > MAX_PATTERNS)
 	{
 		UINT i, j;
-		for (i=0; i<norders; i++)
+		for (i = 0; i < xmheader->orders; i++)
 		{
-			if (Order[i] < patterns) InstUsed[Order[i]] = true;
+			if (pSndFile->Order[i] < xmheader->patterns) patterns_used[pSndFile->Order[i]] = true;
 		}
 		j = 0;
-		for (i=0; i<256; i++)
+		for (i = 0; i < 256; i++)
 		{
-			if (InstUsed[i]) pattern_map[i] = j++;
+			if (patterns_used[i]) pattern_map[i] = j++;
 		}
-		for (i=0; i<256; i++)
+		for (i = 0; i < 256; i++)
 		{
-			if (!InstUsed[i])
+			if (!patterns_used[i])
 			{
 				pattern_map[i] = (j < MAX_PATTERNS) ? j : 0xFE;
 				j++;
 			}
 		}
-		for (i=0; i<norders; i++)
+		for (i = 0; i < xmheader->orders; i++)
 		{
-			Order[i] = pattern_map[Order[i]];
+			pSndFile->Order[i] = pattern_map[pSndFile->Order[i]];
 		}
 	} else
 	{
-		for (UINT i=0; i<256; i++) pattern_map[i] = i;
+		for (UINT i = 0; i < 256; i++) pattern_map[i] = i;
 	}
-	memset(InstUsed, 0, sizeof(InstUsed));
-	dwMemPos = dwHdrSize + 60;
-	if (dwMemPos + 8 >= dwMemLength) return true;
+	if (dwMemPos + 8 >= dwMemLength) return dwMemPos;
 	// Reading patterns
-	memset(channels_used, 0, sizeof(channels_used));
-	for (UINT ipat=0; ipat<patterns; ipat++)
+	for (UINT ipat = 0; ipat < xmheader->patterns; ipat++)
 	{
 		UINT ipatmap = pattern_map[ipat];
 		DWORD dwSize = 0;
-		WORD rows=64, packsize=0;
+		WORD rows = 64, packsize = 0;
 		dwSize = LittleEndian(*((DWORD *)(lpStream + dwMemPos)));
-		/*while ((dwMemPos + dwSize >= dwMemLength) || (dwSize & 0xFFFFFF00))
+
+		if(xmheader->xmversion == 0x0102)
 		{
-			if (dwMemPos + 4 >= dwMemLength) break;
-			dwMemPos++;
-			dwSize = LittleEndian(*((DWORD *)(lpStream+dwMemPos)));
-		}*/
-		rows = LittleEndianW(*((WORD *)(lpStream + dwMemPos + 5)));
-// -> CODE#0008
-// -> DESC="#define to set pattern size"
-//		if ((!rows) || (rows > 256)) rows = 64;
+			rows = *((BYTE *)(lpStream + dwMemPos + 5)) + 1;
+			packsize = LittleEndianW(*((WORD *)(lpStream + dwMemPos + 6)));
+		}
+		else
+		{
+			rows = LittleEndianW(*((WORD *)(lpStream + dwMemPos + 5)));
+			packsize = LittleEndianW(*((WORD *)(lpStream + dwMemPos + 7)));
+		}
+
 		if ((!rows) || (rows > MAX_PATTERN_ROWS)) rows = 64;
-// -> BEHAVIOUR_CHANGE#0008
-		packsize = LittleEndianW(*((WORD *)(lpStream + dwMemPos + 7)));
-		if (dwMemPos + dwSize + 4 > dwMemLength) return true;
+		if (dwMemPos + dwSize + 4 > dwMemLength) return 0;
 		dwMemPos += dwSize;
-		if (dwMemPos + packsize > dwMemLength) return true;
+		if (dwMemPos + packsize > dwMemLength) return 0;
 		MODCOMMAND *p;
 		if (ipatmap < MAX_PATTERNS)
 		{
-			if(Patterns.Insert(ipatmap, rows))
+			if(pSndFile->Patterns.Insert(ipatmap, rows))
 				return true;
 
 			if (!packsize) continue;
-			p = Patterns[ipatmap];
+			p = pSndFile->Patterns[ipatmap];
 		} else p = NULL;
 		const BYTE *src = lpStream+dwMemPos;
 		UINT j=0;
 		for (UINT row=0; row<rows; row++)
 		{
-			for (UINT chn=0; chn<m_nChannels; chn++)
+			for (UINT chn=0; chn < xmheader->channels; chn++)
 			{
 				if ((p) && (j < packsize))
 				{
@@ -231,10 +178,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 					}
 					if (p->note == 97) p->note = 0xFF; else
 					if ((p->note) && (p->note < 97)) p->note += 12;
-					if (p->note) channels_used[chn] = 1;
-					if (p->command | p->param) ConvertModCommand(p);
+					if (p->command | p->param) pSndFile->ConvertModCommand(p);
 					if (p->instr == 0xff) p->instr = 0;
-					if (p->instr) InstUsed[p->instr] = TRUE;
 					if ((vol >= 0x10) && (vol <= 0x50))
 					{
 						p->volcmd = VOLCMD_VOLUME;
@@ -287,17 +232,77 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		}
 		dwMemPos += packsize;
 	}
-	// Wrong offset check
-	while (dwMemPos + 4 < dwMemLength)
+	return dwMemPos;
+}
+
+bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
+//--------------------------------------------------------------
+{
+	XMFILEHEADER xmheader;
+	XMSAMPLEHEADER xmsh;
+	XMSAMPLESTRUCT xmss;
+	DWORD dwMemPos;
+	BYTE samples_used[(MAX_SAMPLES + 7) / 8]; // for removing unused samples
+	UINT unused_samples; // dito
+
+	bool bMadeWithModPlug = false, bProbablyMadeWithModPlug = false, bIsFT2 = false;
+	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
+
+	m_nChannels = 0;
+	if ((!lpStream) || (dwMemLength < 0xAA)) return false; // the smallest XM I know is 174 Bytes
+	if (_strnicmp((LPCSTR)lpStream, "Extended Module", 15)) return false;
+
+	memcpy(m_szNames[0], lpStream + 17, 20);
+	// look for null-terminated song name - that's most likely a tune made with modplug
+	for(int i = 0; i < 20; i++)
+		if(lpStream[17 + i] == 0) bProbablyMadeWithModPlug = true;
+
+	// load and convert header
+	memcpy(&xmheader, lpStream + 58, sizeof(XMFILEHEADER));
+	xmheader.size = LittleEndian(xmheader.size);
+	xmheader.xmversion = LittleEndianW(xmheader.xmversion);
+	xmheader.orders = LittleEndianW(xmheader.orders);
+	xmheader.restartpos = LittleEndianW(xmheader.restartpos);
+	xmheader.channels = LittleEndianW(xmheader.channels);
+	xmheader.patterns = LittleEndianW(xmheader.patterns);
+	xmheader.instruments = LittleEndianW(xmheader.instruments);
+	xmheader.flags = LittleEndianW(xmheader.flags);
+	xmheader.speed = LittleEndianW(xmheader.speed);
+	xmheader.tempo = LittleEndianW(xmheader.tempo);
+
+	m_nType = MOD_TYPE_XM;
+	m_nMinPeriod = 27;
+	m_nMaxPeriod = 54784;
+
+	if ((!xmheader.orders) || (xmheader.orders > MAX_ORDERS)) return false;
+	if ((!xmheader.channels) || (xmheader.channels > MAX_BASECHANNELS)) return false;
+	if (xmheader.channels > 32) bMadeWithModPlug = true;
+	m_nRestartPos = xmheader.restartpos;
+	m_nChannels = xmheader.channels;
+	m_nInstruments = min(xmheader.instruments, MAX_INSTRUMENTS - 1);
+	m_nSamples = 0;
+	m_nDefaultSpeed = CLAMP(xmheader.speed, 1, 31);
+	m_nDefaultTempo = CLAMP(xmheader.tempo, 32, 512);
+
+	if(xmheader.flags & 1) m_dwSongFlags |= SONG_LINEARSLIDES;
+	if(xmheader.flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
+
+	Order.ReadAsByte(lpStream + 80, xmheader.orders, dwMemLength - 80);
+
+	dwMemPos = xmheader.size + 60;
+
+	if(xmheader.xmversion >= 0x0104)
 	{
-		DWORD d = LittleEndian(*((DWORD *)(lpStream+dwMemPos)));
-		if (d < 0x300) break;
-		dwMemPos++;
+		if (dwMemPos + 8 >= dwMemLength) return true;
+		dwMemPos = ReadXMPatterns(lpStream, dwMemLength, dwMemPos, &xmheader, this);
+		if(dwMemPos == 0) return true;
 	}
+
 	memset(samples_used, 0, sizeof(samples_used));
 	unused_samples = 0;
 	// Reading instruments
-	for (UINT iIns=1; iIns<=instruments; iIns++)
+	for (INSTRUMENTINDEX iIns = 1; iIns <= m_nInstruments; iIns++)
 	{
 		XMINSTRUMENTHEADER *pih;
 		BYTE flags[32];
@@ -318,9 +323,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		Instruments[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 		memcpy(Instruments[iIns]->name, pih->name, 22);
-		// look for null-terminated instr name - that's most likely a tune made with modplug
-		for(int i = 0; i < 22; i++)
-			if(pih->name[i] == 0) bProbablyMadeWithModPlug = true;
 
 		if ((nsamples = pih->samples) > 0)
 		{
@@ -344,7 +346,12 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				xmsh.penv[i] = LittleEndianW(xmsh.penv[i]);
 			}
 			xmsh.volfade = LittleEndianW(xmsh.volfade);
-			xmsh.res = LittleEndianW(xmsh.res);
+			xmsh.midiprogram = LittleEndianW(xmsh.midiprogram);
+			xmsh.pitchwheelrange = LittleEndianW(xmsh.pitchwheelrange);
+
+			if(xmsh.midichannel != 0 || xmsh.midienabled != 0 || xmsh.midiprogram != 0 || xmsh.mutecomputer != 0 || xmsh.pitchwheelrange != 0)
+				bIsFT2 = true; // definitely not MPT. (or any other tracker)
+
 			dwMemPos += LittleEndian(pih->size);
 		} else
 		{
@@ -547,9 +554,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			pSmp->nVibRate = xmsh.vibrate;
 			memcpy(pSmp->filename, xmss.name, 22);
 			pSmp->filename[21] = 0;
-			// look for null-terminated sample name - that's most likely a tune made with modplug
-			for(int i = 0; i < 22; i++)
-				if(xmss.name[i] == 0) bProbablyMadeWithModPlug = true;
 		}
 #if 0
 		if ((xmsh.reserved2 > nsamples) && (xmsh.reserved2 <= 16))
@@ -557,16 +561,35 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			dwMemPos += (((UINT)xmsh.reserved2) - nsamples) * xmsh.shsize;
 		}
 #endif
-		for (UINT ismpd=0; ismpd<nsamples; ismpd++)
+		if(xmheader.xmversion >= 0x0104)
 		{
-			if ((samplemap[ismpd]) && (samplesize[ismpd]) && (dwMemPos < dwMemLength))
+			for (UINT ismpd = 0; ismpd < nsamples; ismpd++)
 			{
-				ReadSample(&Samples[samplemap[ismpd]], flags[ismpd], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+				if ((samplemap[ismpd]) && (samplesize[ismpd]) && (dwMemPos < dwMemLength))
+				{
+					ReadSample(&Samples[samplemap[ismpd]], flags[ismpd], (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+				}
+				dwMemPos += samplesize[ismpd];
+				if (dwMemPos >= dwMemLength) break;
 			}
-			dwMemPos += samplesize[ismpd];
+		}
+	}
+
+	if(xmheader.xmversion < 0x0104)
+	{
+		// Load Patterns and Samples (Version 1.02 and 1.03)
+		if (dwMemPos + 8 >= dwMemLength) return true;
+		dwMemPos = ReadXMPatterns(lpStream, dwMemLength, dwMemPos, &xmheader, this);
+		if(dwMemPos == 0) return true;
+
+		for(SAMPLEINDEX iSmp = 1; iSmp <= m_nSamples; iSmp++)
+		{
+			ReadSample(&Samples[iSmp], (Samples[iSmp].uFlags & CHN_16BIT) ? RS_PCM16D : RS_PCM8D, (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+			dwMemPos += Samples[iSmp].GetSampleSizeInBytes();
 			if (dwMemPos >= dwMemLength) break;
 		}
 	}
+
 	// Read song comments: "TEXT"
 	if ((dwMemPos + 8 < dwMemLength) && (LittleEndian(*((DWORD *)(lpStream+dwMemPos))) == 0x74786574))
 	{
@@ -640,7 +663,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 	// Check various things to find out whether this has been made with MPT.
 	// Null chars in names -> most likely made with MPT, which disguises as FT2
-	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug) bMadeWithModPlug = true;
+	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug && !bIsFT2) bMadeWithModPlug = true;
 	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v 2.00  ", 20))
 	{
 		// Early MPT 1.0 alpha/beta versions
@@ -701,7 +724,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 
 	//BYTE s[64*64*5];
 	vector<BYTE> s(64*64*5, 0);
-	XMFILEHEADER header;
+	XMFILEHEADER xmheader;
 	XMINSTRUMENTHEADER xmih;
 	XMSAMPLEHEADER xmsh;
 	XMSAMPLESTRUCT xmss;
@@ -718,21 +741,22 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	fwrite(m_szNames[0], 20, 1, f);
 	s[0] = 0x1A;
 	lstrcpy((LPSTR)&s[1], (nPacking) ? "MOD Plugin packed   " : "OpenMPT " MPT_VERSION_STR "  ");
-	s[21] = 0x04; // Version number
-	s[22] = 0x01; // XM Format v1.04
-	fwrite(&s[0], 23, 1, f);
+	fwrite(&s[0], 21, 1, f);
+
 	// Writing song header
-	memset(&header, 0, sizeof(header));
-	header.size = sizeof(XMFILEHEADER);
-	header.norder = 0;
-	header.restartpos = m_nRestartPos;
+	memset(&xmheader, 0, sizeof(xmheader));
+	xmheader.xmversion = LittleEndianW(0x0104); // XM Format v1.04
+	xmheader.size = sizeof(XMFILEHEADER) - 2; // minus the version field
+	xmheader.restartpos = LittleEndianW(m_nRestartPos);
 
-	header.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
+	xmheader.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
 	if(m_nChannels & 1) bAddChannel = true;
-	if(bCompatibilityExport && header.channels > 32)
-		header.channels = 32;
+	if(bCompatibilityExport && xmheader.channels > 32)
+		xmheader.channels = 32;
+	if(xmheader.channels > MAX_BASECHANNELS) xmheader.channels = MAX_BASECHANNELS;
+	xmheader.channels = LittleEndianW(xmheader.channels);
 
-	header.patterns = 0;
+	xmheader.patterns = 0;
   /*for (i=0; i<MAX_ORDERS; i++) {
 		header.norder++;
 		if ((Order[i] >= header.patterns) && (Order[i] < MAX_PATTERNS)) header.patterns = Order[i]+1;
@@ -740,33 +764,37 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	if(Order.GetLength() < MAX_ORDERS)
 		Order.resize(MAX_ORDERS);
 
-	for (i=MAX_ORDERS-1; i>=0; i--) { // walk backwards over orderlist
-		if ((Order[i]!=0xFF) && (header.norder==0)) {
-			header.norder=i+1;	//find last used order
-		}
-		if ((Order[i] >= header.patterns) && (Order[i] < MAX_PATTERNS)) {
-			header.patterns = Order[i]+1;	//find last pattern
-		}
-	}
+	WORD nOrders = Order.GetLengthTailTrimmed(), nPatterns = 0;
+	xmheader.orders = LittleEndianW(nOrders);
+	xmheader.size = LittleEndian(xmheader.size + nOrders);
 
-	header.instruments = m_nInstruments;
-	if (!header.instruments) header.instruments = m_nSamples;
-	header.flags = (m_dwSongFlags & SONG_LINEARSLIDES) ? 0x01 : 0x00;
-	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
-	if(bCompatibilityExport)
-	{	
-		header.tempo = CLAMP(m_nDefaultTempo, 32, 255);
+	for (i = 0; i < nOrders; i++) { // walk over orderlist and find last used pattern
+		if((Order[i] >= nPatterns) && (Order[i] < MAX_PATTERNS)) {
+			nPatterns = Order[i] + 1;
+		}
 	}
+	xmheader.patterns = LittleEndianW(nPatterns);
+
+	if(m_nInstruments > 0)
+		xmheader.instruments = LittleEndianW(m_nInstruments);
 	else
-	{
-		header.tempo = m_nDefaultTempo;
-	}
-	header.speed = CLAMP(m_nDefaultSpeed, 1, 31);
-	Order.WriteToByteArray(header.order, header.norder, 256);
+		xmheader.instruments = LittleEndianW(m_nSamples);
 
-	fwrite(&header, 1, sizeof(header), f);
+	xmheader.flags = (m_dwSongFlags & SONG_LINEARSLIDES) ? 0x01 : 0x00;
+	if (m_dwSongFlags & SONG_EXFILTERRANGE) xmheader.flags |= 0x1000;
+	xmheader.flags = LittleEndianW(xmheader.flags);
+
+	if(bCompatibilityExport)
+		xmheader.tempo = LittleEndianW(CLAMP(m_nDefaultTempo, 32, 255));
+	else
+		xmheader.tempo = LittleEndianW(CLAMP(m_nDefaultTempo, 32, 512));
+	xmheader.speed = LittleEndianW(CLAMP(m_nDefaultSpeed, 1, 31));
+
+	fwrite(&xmheader, 1, sizeof(xmheader), f);
+	Order.WriteAsByte(f, nOrders);
+
 	// Writing patterns
-	for (i=0; i<header.patterns; i++) if (Patterns[i])
+	for (i = 0; i < nPatterns; i++) if (Patterns[i])
 	{
 		MODCOMMAND *p = Patterns[i];
 		UINT len = 0;
@@ -851,7 +879,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		fwrite(xmph, 1, 9, f);
 	}
 	// Writing instruments
-	for (i=1; i<=header.instruments; i++)
+	for (i = 1; i <= xmheader.instruments; i++)
 	{
 		MODSAMPLE *pSmp;
 		WORD smptable[32];
@@ -860,7 +888,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		memset(&smptable, 0, sizeof(smptable));
 		memset(&xmih, 0, sizeof(xmih));
 		memset(&xmsh, 0, sizeof(xmsh));
-		xmih.size = sizeof(xmih) + sizeof(xmsh);
+		xmih.size = LittleEndian(sizeof(xmih) + sizeof(xmsh));
 		memcpy(xmih.name, m_szNames[i], 22);
 		xmih.type = 0;
 		xmih.samples = 0;
@@ -871,17 +899,17 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			{
 				memcpy(xmih.name, pIns->name, 22);
 				xmih.type = pIns->nMidiProgram;
-				xmsh.volfade = min(pIns->nFadeOut, 0xFFF); // FFF is maximum in FT2
+				xmsh.volfade = LittleEndianW(min(pIns->nFadeOut, 0xFFF)); // FFF is maximum in FT2
 				xmsh.vnum = (BYTE)pIns->VolEnv.nNodes;
 				xmsh.pnum = (BYTE)pIns->PanEnv.nNodes;
 				if (xmsh.vnum > 12) xmsh.vnum = 12;
 				if (xmsh.pnum > 12) xmsh.pnum = 12;
 				for (UINT ienv=0; ienv<12; ienv++)
 				{
-					xmsh.venv[ienv*2] = pIns->VolEnv.Ticks[ienv];
-					xmsh.venv[ienv*2+1] = pIns->VolEnv.Values[ienv];
-					xmsh.penv[ienv*2] = pIns->PanEnv.Ticks[ienv];
-					xmsh.penv[ienv*2+1] = pIns->PanEnv.Values[ienv];
+					xmsh.venv[ienv*2] = LittleEndianW(pIns->VolEnv.Ticks[ienv]);
+					xmsh.venv[ienv*2+1] = LittleEndianW(pIns->VolEnv.Values[ienv]);
+					xmsh.penv[ienv*2] = LittleEndianW(pIns->PanEnv.Ticks[ienv]);
+					xmsh.penv[ienv*2+1] = LittleEndianW(pIns->PanEnv.Values[ienv]);
 				}
 				if (pIns->dwFlags & ENV_VOLUME) xmsh.vtype |= 1;
 				if (pIns->dwFlags & ENV_VOLSUSTAIN) xmsh.vtype |= 2;
@@ -914,15 +942,13 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 					if (xmih.samples >= 32) break;
 					xmsh.snum[j] = k;	//record sample table offset in instrument's note map
 				}
-//				xmsh.reserved2 = xmih.samples;
 			}
 		} else
 		{
 			xmih.samples = 1;
-//			xmsh.reserved2 = 1;
 			smptable[0] = i;
 		}
-		xmsh.shsize = (xmih.samples) ? 40 : 0;
+		xmsh.shsize = LittleEndianW((xmih.samples) ? 40 : 0);
 		fwrite(&xmih, 1, sizeof(xmih), f);
 		if (smptable[0])
 		{
@@ -932,9 +958,11 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			xmsh.vibdepth = pvib->nVibDepth;
 			xmsh.vibrate = pvib->nVibRate;
 		}
-		fwrite(&xmsh, 1, xmih.size - sizeof(xmih), f);
+		WORD samples = xmih.samples;
+		xmih.samples = LittleEndianW(xmih.samples);
+		fwrite(&xmsh, 1, sizeof(xmsh), f);
 		if (!xmih.samples) continue;
-		for (UINT ins=0; ins<xmih.samples; ins++)
+		for (UINT ins = 0; ins < samples; ins++)
 		{
 			memset(&xmss, 0, sizeof(xmss));
 			if (smptable[ins]) memcpy(xmss.name, m_szNames[smptable[ins]], 22);
@@ -979,6 +1007,9 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			xmss.pan = 255;
 			if (pSmp->nPan < 256) xmss.pan = (BYTE)pSmp->nPan;
 			xmss.relnote = (signed char)pSmp->RelativeTone;
+			xmss.samplen = LittleEndianW(xmss.samplen);
+			xmss.loopstart = LittleEndianW(xmss.loopstart);
+			xmss.looplen = LittleEndianW(xmss.looplen);
 			fwrite(&xmss, 1, xmsh.shsize, f);
 		}
 		for (UINT ismpd=0; ismpd<xmih.samples; ismpd++)
@@ -1050,7 +1081,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 
 		//Save hacked-on extra info
 		SaveMixPlugins(f);
-		SaveExtendedInstrumentProperties(Instruments, header.instruments, f);
+		SaveExtendedInstrumentProperties(Instruments, xmheader.instruments, f);
 		SaveExtendedSongProperties(f);
 	}
 
