@@ -181,8 +181,8 @@ public:
 	int MacroToPlugParam(CString value); //rewbs.xinfo
 	int MacroToMidiCC(CString value);
 	int FindMacroForParam(long param);
-	int GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32]);
-	void CreateZxxFromType(CHAR (&szMidiZXXExt)[128 * 32], int iZxxType);
+	static int GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32]);
+	static void CreateZxxFromType(CHAR (&szMidiZXXExt)[128 * 32], int iZxxType);
 	void SongProperties();
 // operations
 public:

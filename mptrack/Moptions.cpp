@@ -562,8 +562,8 @@ void COptionsColors::OnLoadColorScheme()
 		"OpenMPT Color Schemes|*.mptcolor|"
 		"All Files (*.*)|*.*||",
 		this);
+	dlg.m_ofn.lpstrInitialDir = CMainFrame::m_csExecutableDirectoryPath;
 	if (dlg.DoModal() != IDOK) return;
-
 	
 	TCHAR sFilename[MAX_PATH];
 	strcpy(sFilename, dlg.GetPathName());
@@ -584,6 +584,7 @@ void COptionsColors::OnSaveColorScheme()
 		OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 		"OpenMPT Color Schemes|*.mptcolor|",
 		this);
+	dlg.m_ofn.lpstrInitialDir = CMainFrame::m_csExecutableDirectoryPath;
 	if (dlg.DoModal() != IDOK) return;
 
 	TCHAR sFilename[MAX_PATH];
