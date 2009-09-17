@@ -954,9 +954,9 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		{
 			MODSAMPLE *pvib = &Samples[smptable[0]];
 			xmsh.vibtype = pvib->nVibType;
-			xmsh.vibsweep = pvib->nVibSweep;
-			xmsh.vibdepth = pvib->nVibDepth;
-			xmsh.vibrate = pvib->nVibRate;
+			xmsh.vibsweep = min(pvib->nVibSweep, 0xFF);
+			xmsh.vibdepth = min(pvib->nVibDepth, 0x0F);
+			xmsh.vibrate = min(pvib->nVibRate, 0x3F);
 		}
 		WORD samples = xmih.samples;
 		xmih.samples = LittleEndianW(xmih.samples);
