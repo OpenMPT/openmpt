@@ -228,14 +228,24 @@ BOOL CCtrlSamples::OnInitDialog()
 		m_SpinPanning.SetRange(0, 64);
 	}
 	//end rewbs.fix36944
+
+	// Auto vibrato
 	m_ComboAutoVib.AddString("Sine");
 	m_ComboAutoVib.AddString("Square");
 	m_ComboAutoVib.AddString("Ramp Up");
 	m_ComboAutoVib.AddString("Ramp Down");
 	m_ComboAutoVib.AddString("Random");
-	m_SpinVibSweep.SetRange(0, 64);
-	m_SpinVibDepth.SetRange(0, 64);
-	m_SpinVibRate.SetRange(0, 64);
+	m_SpinVibSweep.SetRange(0, 255);
+	if(m_pSndFile->m_nType & MOD_TYPE_XM)
+	{
+		m_SpinVibDepth.SetRange(0, 15);
+		m_SpinVibRate.SetRange(0, 63);
+	} else
+	{
+		m_SpinVibDepth.SetRange(0, 32);
+		m_SpinVibRate.SetRange(0, 64);
+	}
+
 	for (UINT i=BASENOTE_MIN; i<BASENOTE_MAX; i++)
 	{
 		CHAR s[32];

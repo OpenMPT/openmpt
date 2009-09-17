@@ -897,7 +897,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		}
 	}
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-	AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_RENDER, "Render to &Wave");
+	AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_RENDER, "Render to &Wave");
 
 	ClientToScreen(&pt);
 	::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);

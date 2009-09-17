@@ -1448,19 +1448,28 @@ BOOL CSoundFile::ReadNote()
 				//if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPan = pChn->nRealPan; // TODO
 			}
 			int nPeriodFrac = 0;
-			// Instrument Auto-Vibrato
+			// Sample Auto-Vibrato
 			if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
 			{
 				MODSAMPLE *pSmp = pChn->pModSample;
 
-				if (pSmp->nVibSweep == 0)
+				if (pSmp->nVibSweep == 0 && !IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
 				} else
 				{
 					if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
 					{
-						pChn->nAutoVibDepth += pSmp->nVibSweep << 3;
+						if(IsCompatibleMode(TRK_IMPULSETRACKER))
+						{
+							// TODO
+							pChn->nAutoVibDepth += pSmp->nVibSweep << 3;
+						} else
+						{
+							/* Note: changed bitshift from 3 to 1 as the variable is not divided by 4 in the IT loader anymore
+							   - so we divide sweep by 4 here. */
+							pChn->nAutoVibDepth += pSmp->nVibSweep << 1;
+						}
 					} else
 					if (!(pChn->dwFlags & CHN_KEYOFF))
 					{
