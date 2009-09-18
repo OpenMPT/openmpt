@@ -1017,13 +1017,13 @@ BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 }
 
 
-BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
+bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 //----------------------------------------------
 {
 	DWORD muteType = (CMainFrame::m_dwPatternSetup&PATTERN_SYNCMUTE)? CHN_SYNCMUTE:CHN_MUTE;
 
 	if (nChn >= m_SndFile.m_nChannels) {
-		return FALSE;
+		return false;
 	}
 
 	//Mark channel as muted in channel settings
@@ -1067,43 +1067,43 @@ BOOL CModDoc::MuteChannel(UINT nChn, BOOL doMute)
 		CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
 	}
 
-	return TRUE;
+	return true;
 }
 
 // -> CODE#0012
 // -> DESC="midi keyboard split"
-BOOL CModDoc::IsChannelSolo(UINT nChn) const
-//------------------------------------------
+bool CModDoc::IsChannelSolo(CHANNELINDEX nChn) const
+//--------------------------------------------------
 {
-	if (nChn >= m_SndFile.m_nChannels) return TRUE;
-	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SOLO) ? TRUE : FALSE;
+	if (nChn >= m_SndFile.m_nChannels) return true;
+	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SOLO) ? true : false;
 }
 
-BOOL CModDoc::SoloChannel(UINT nChn, BOOL bSolo)
-//---------------------------------------------
+bool CModDoc::SoloChannel(CHANNELINDEX nChn, bool bSolo)
+//------------------------------------------------------
 {
-	if (nChn >= m_SndFile.m_nChannels) return FALSE;
+	if (nChn >= m_SndFile.m_nChannels) return false;
 	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 	if (bSolo)	m_SndFile.ChnSettings[nChn].dwFlags |= CHN_SOLO;
 	else		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SOLO;
-	return TRUE;
+	return true;
 }
 // -! NEW_FEATURE#0012
 
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
-BOOL CModDoc::IsChannelNoFx(UINT nChn) const
+bool CModDoc::IsChannelNoFx(CHANNELINDEX nChn) const
 //------------------------------------------
 {
-	if (nChn >= m_SndFile.m_nChannels) return TRUE;
-	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_NOFX) ? TRUE : FALSE;
+	if (nChn >= m_SndFile.m_nChannels) return true;
+	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_NOFX) ? true : false;
 }
 
-BOOL CModDoc::NoFxChannel(UINT nChn, BOOL bNoFx, BOOL updateMix)
-//--------------------------------------------------------------
+bool CModDoc::NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix)
+//----------------------------------------------------------------------
 {
-	if (nChn >= m_SndFile.m_nChannels) return FALSE;
+	if (nChn >= m_SndFile.m_nChannels) return false;
 	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 	if (bNoFx){
 		m_SndFile.ChnSettings[nChn].dwFlags |= CHN_NOFX;
@@ -1113,33 +1113,33 @@ BOOL CModDoc::NoFxChannel(UINT nChn, BOOL bNoFx, BOOL updateMix)
 		m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_NOFX;
 		if(updateMix) m_SndFile.Chn[nChn].dwFlags &= ~CHN_NOFX;
 	}
-	return TRUE;
+	return true;
 }
 
-BOOL CModDoc::IsChannelRecord1(UINT channel)
-//------------------------------------------
+bool CModDoc::IsChannelRecord1(CHANNELINDEX channel)
+//--------------------------------------------------
 {
 	UINT m = 1 << (channel&7);
-	return (MultiRecordMask[channel>>3] & m) ? TRUE : FALSE;
+	return (MultiRecordMask[channel>>3] & m) ? true : false;
 }
 
-BOOL CModDoc::IsChannelRecord2(UINT channel)
-//------------------------------------------
+bool CModDoc::IsChannelRecord2(CHANNELINDEX channel)
+//--------------------------------------------------
 {
 	UINT m = 1 << (channel&7);
-	return (MultiSplitRecordMask[channel>>3] & m) ? TRUE : FALSE;
+	return (MultiSplitRecordMask[channel>>3] & m) ? true : false;
 }
 
-BYTE CModDoc::IsChannelRecord(UINT channel)
-//-----------------------------------------
+BYTE CModDoc::IsChannelRecord(CHANNELINDEX channel)
+//-------------------------------------------------
 {
 	if(IsChannelRecord1(channel)) return 1;
 	if(IsChannelRecord2(channel)) return 2;
 	return 0;
 }
 
-void CModDoc::Record1Channel(UINT channel, BOOL select)
-//-----------------------------------------------------
+void CModDoc::Record1Channel(CHANNELINDEX channel, bool select)
+//-------------------------------------------------------------
 {
 	UINT m = 1 << (channel&7);
 
@@ -1153,8 +1153,8 @@ void CModDoc::Record1Channel(UINT channel, BOOL select)
 	}
 }
 
-void CModDoc::Record2Channel(UINT channel, BOOL select)
-//-----------------------------------------------------
+void CModDoc::Record2Channel(CHANNELINDEX channel, bool select)
+//-------------------------------------------------------------
 {
 	UINT m = 1 << (channel&7);
 
@@ -1168,7 +1168,7 @@ void CModDoc::Record2Channel(UINT channel, BOOL select)
 	}
 }
 
-void CModDoc::ReinitRecordState(BOOL unselect)
+void CModDoc::ReinitRecordState(bool unselect)
 //--------------------------------------------
 {
 	memset(MultiRecordMask, unselect ? 0 : 0xff, sizeof(MultiRecordMask));
@@ -1177,31 +1177,31 @@ void CModDoc::ReinitRecordState(BOOL unselect)
 // -! NEW_FEATURE#0015
 
 
-BOOL CModDoc::MuteSample(UINT nSample, BOOL bMute)
-//------------------------------------------------
+bool CModDoc::MuteSample(SAMPLEINDEX nSample, bool bMute)
+//-------------------------------------------------------
 {
-	if ((nSample < 1) || (nSample > m_SndFile.m_nSamples)) return FALSE;
+	if ((nSample < 1) || (nSample > m_SndFile.m_nSamples)) return false;
 	if (bMute) m_SndFile.Samples[nSample].uFlags |= CHN_MUTE;
 	else m_SndFile.Samples[nSample].uFlags &= ~CHN_MUTE;
-	return TRUE;
+	return true;
 }
 
-BOOL CModDoc::MuteInstrument(UINT nInstr, BOOL bMute)
-//---------------------------------------------------
+bool CModDoc::MuteInstrument(INSTRUMENTINDEX nInstr, bool bMute)
+//--------------------------------------------------------------
 {
-	if ((nInstr < 1) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return FALSE;
+	if ((nInstr < 1) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return false;
 	if (bMute) m_SndFile.Instruments[nInstr]->dwFlags |= ENV_MUTE;
 	else m_SndFile.Instruments[nInstr]->dwFlags &= ~ENV_MUTE;
-	return TRUE;
+	return true;
 }
 
 
-BOOL CModDoc::SurroundChannel(UINT nChn, BOOL bSurround)
-//------------------------------------------------------
+bool CModDoc::SurroundChannel(CHANNELINDEX nChn, bool bSurround)
+//--------------------------------------------------------------
 {
 	DWORD d = (bSurround) ? CHN_SURROUND : 0;
 	
-	if (nChn >= m_SndFile.m_nChannels) return FALSE;
+	if (nChn >= m_SndFile.m_nChannels) return false;
 	if (!(m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) d = 0;
 	if (d != (m_SndFile.ChnSettings[nChn].dwFlags & CHN_SURROUND))
 	{
@@ -1212,68 +1212,68 @@ BOOL CModDoc::SurroundChannel(UINT nChn, BOOL bSurround)
 	}
 	if (d)	m_SndFile.Chn[nChn].dwFlags |= CHN_SURROUND;
 	else	m_SndFile.Chn[nChn].dwFlags &= ~CHN_SURROUND;
-	return TRUE;
+	return true;
 }
 
 
-BOOL CModDoc::SetChannelGlobalVolume(UINT nChn, UINT nVolume)
-//-----------------------------------------------------------
+bool CModDoc::SetChannelGlobalVolume(CHANNELINDEX nChn, UINT nVolume)
+//-------------------------------------------------------------------
 {
-	BOOL bOk = FALSE;
-	if ((nChn >= m_SndFile.m_nChannels) || (nVolume > 64)) return FALSE;
+	bool bOk = false;
+	if ((nChn >= m_SndFile.m_nChannels) || (nVolume > 64)) return false;
 	if (m_SndFile.ChnSettings[nChn].nVolume != nVolume)
 	{
 		m_SndFile.ChnSettings[nChn].nVolume = nVolume;
 		if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
-		bOk = TRUE;
+		bOk = true;
 	}
 	m_SndFile.Chn[nChn].nGlobalVol = nVolume;
 	return bOk;
 }
 
 
-BOOL CModDoc::SetChannelDefaultPan(UINT nChn, UINT nPan)
-//------------------------------------------------------
+bool CModDoc::SetChannelDefaultPan(CHANNELINDEX nChn, UINT nPan)
+//--------------------------------------------------------------
 {
-	BOOL bOk = FALSE;
-	if ((nChn >= m_SndFile.m_nChannels) || (nPan > 256)) return FALSE;
+	bool bOk = false;
+	if ((nChn >= m_SndFile.m_nChannels) || (nPan > 256)) return false;
 	if (m_SndFile.ChnSettings[nChn].nPan != nPan)
 	{
 		m_SndFile.ChnSettings[nChn].nPan = nPan;
 		if (m_SndFile.m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
-		bOk = TRUE;
+		bOk = true;
 	}
 	m_SndFile.Chn[nChn].nPan = nPan;
 	return bOk;
 }
 
 
-BOOL CModDoc::IsChannelMuted(UINT nChn) const
-//-------------------------------------------
+bool CModDoc::IsChannelMuted(CHANNELINDEX nChn) const
+//---------------------------------------------------
 {
-	if (nChn >= m_SndFile.m_nChannels) return TRUE;
-	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE) ? TRUE : FALSE;
+	if (nChn >= m_SndFile.m_nChannels) return true;
+	return (m_SndFile.ChnSettings[nChn].dwFlags & CHN_MUTE) ? true : false;
 }
 
 
-BOOL CModDoc::IsSampleMuted(UINT nSample) const
-//---------------------------------------------
+bool CModDoc::IsSampleMuted(SAMPLEINDEX nSample) const
+//----------------------------------------------------
 {
-	if ((!nSample) || (nSample > m_SndFile.m_nSamples)) return FALSE;
-	return (m_SndFile.Samples[nSample].uFlags & CHN_MUTE) ? TRUE : FALSE;
+	if ((!nSample) || (nSample > m_SndFile.m_nSamples)) return false;
+	return (m_SndFile.Samples[nSample].uFlags & CHN_MUTE) ? true : false;
 }
 
 
-BOOL CModDoc::IsInstrumentMuted(UINT nInstr) const
-//------------------------------------------------
+bool CModDoc::IsInstrumentMuted(INSTRUMENTINDEX nInstr) const
+//-----------------------------------------------------------
 {
-	if ((!nInstr) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return FALSE;
-	return (m_SndFile.Instruments[nInstr]->dwFlags & ENV_MUTE) ? TRUE : FALSE;
+	if ((!nInstr) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return false;
+	return (m_SndFile.Instruments[nInstr]->dwFlags & ENV_MUTE) ? true : false;
 }
 
 
-UINT CModDoc::GetPatternSize(UINT nPat) const
-//-------------------------------------------
+UINT CModDoc::GetPatternSize(PATTERNINDEX nPat) const
+//---------------------------------------------------
 {
 	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat])) return m_SndFile.PatternSize[nPat];
 	return 0;

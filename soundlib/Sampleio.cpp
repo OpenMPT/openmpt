@@ -1362,9 +1362,9 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 			if (!k)
 			{
 				xih.vibtype = Samples[n].nVibType;
-				xih.vibsweep = Samples[n].nVibSweep;
-				xih.vibdepth = Samples[n].nVibDepth;
-				xih.vibrate = Samples[n].nVibRate;
+				xih.vibsweep = min(Samples[n].nVibSweep, 255);
+				xih.vibdepth = min(Samples[n].nVibDepth, 15);
+				xih.vibrate = min(Samples[n].nVibRate, 63);
 			}
 			if (nsamples < 32) smptable[nsamples++] = n;
 			k = nsamples - 1;
@@ -1693,7 +1693,7 @@ UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	if (pSmp->nPan > 256) pSmp->nPan = 256;
 	if (pis->dfp & 0x80) pSmp->uFlags |= CHN_PANNING;
 	pSmp->nVibType = autovibit2xm[pis->vit & 7];
-	pSmp->nVibSweep = (pis->vir + 3) / 4;
+	pSmp->nVibSweep = pis->vir;
 	pSmp->nVibDepth = pis->vid;
 	pSmp->nVibRate = pis->vis;
 	UINT flags = (pis->cvt & 1) ? RS_PCM8S : RS_PCM8U;
@@ -1944,9 +1944,9 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 		itss.vol = psmp->nVolume >> 2;
 		itss.dfp = psmp->nPan >> 2;
 		itss.vit = autovibxm2it[psmp->nVibType & 7];
-		itss.vir = (psmp->nVibSweep < 64) ? psmp->nVibSweep*4 : 255;
-		itss.vid = psmp->nVibDepth;
-		itss.vis = psmp->nVibRate;
+		itss.vir = min(psmp->nVibSweep, 255);
+		itss.vid = min(psmp->nVibDepth, 32);
+		itss.vis = min(psmp->nVibRate, 64);
 		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
 		itss.cvt = 0x01;
 		smpsize = psmp->nLength;

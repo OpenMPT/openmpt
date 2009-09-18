@@ -150,8 +150,8 @@ public:
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 	void SendMessageToActiveViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 	UINT GetModType() const { return m_SndFile.m_nType; }
-	BOOL GetNumInstruments() const { return m_SndFile.m_nInstruments; }
-	BOOL GetNumSamples() const { return m_SndFile.m_nSamples; }
+	INSTRUMENTINDEX GetNumInstruments() const { return m_SndFile.m_nInstruments; }
+	SAMPLEINDEX GetNumSamples() const { return m_SndFile.m_nSamples; }
 	BOOL AddToLog(LPCSTR lpszLog);
 	LPCSTR GetLog() const { return m_lpszLog; }
 	BOOL ClearLog();
@@ -211,33 +211,33 @@ public:
 	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, UINT nCurrentChn=-1); //rewbs.vstiLive: add params
 
 	BOOL IsNotePlaying(UINT note, UINT nsmp=0, UINT nins=0);
-	BOOL MuteChannel(UINT nChn, BOOL bMute);
-	BOOL MuteSample(UINT nSample, BOOL bMute);
-	BOOL MuteInstrument(UINT nInstr, BOOL bMute);
+	bool MuteChannel(CHANNELINDEX nChn, bool bMute);
+	bool MuteSample(SAMPLEINDEX nSample, bool bMute);
+	bool MuteInstrument(INSTRUMENTINDEX nInstr, bool bMute);
 // -> CODE#0012
 // -> DESC="midi keyboard split"
-	BOOL SoloChannel(UINT nChn, BOOL bSolo);
-	BOOL IsChannelSolo(UINT nChn) const;
+	bool SoloChannel(CHANNELINDEX nChn, bool bSolo);
+	bool IsChannelSolo(CHANNELINDEX nChn) const;
 // -! NEW_FEATURE#0012
-	BOOL SurroundChannel(UINT nChn, BOOL bSurround);
-	BOOL SetChannelGlobalVolume(UINT nChn, UINT nVolume);
-	BOOL SetChannelDefaultPan(UINT nChn, UINT nPan);
-	BOOL IsChannelMuted(UINT nChn) const;
-	BOOL IsSampleMuted(UINT nSample) const;
-	BOOL IsInstrumentMuted(UINT nInstr) const;
+	bool SurroundChannel(CHANNELINDEX nChn, bool bSurround);
+	bool SetChannelGlobalVolume(CHANNELINDEX nChn, UINT nVolume);
+	bool SetChannelDefaultPan(CHANNELINDEX nChn, UINT nPan);
+	bool IsChannelMuted(CHANNELINDEX nChn) const;
+	bool IsSampleMuted(SAMPLEINDEX nSample) const;
+	bool IsInstrumentMuted(INSTRUMENTINDEX nInstr) const;
 // -> CODE#0015
 // -> DESC="channels management dlg"
-	BOOL NoFxChannel(UINT nChn, BOOL bNoFx, BOOL updateMix = TRUE);
-	BOOL IsChannelNoFx(UINT nChn) const;
-	BOOL IsChannelRecord1(UINT channel);
-	BOOL IsChannelRecord2(UINT channel);
-	BYTE IsChannelRecord(UINT channel);
-	void Record1Channel(UINT channel, BOOL select = TRUE);
-	void Record2Channel(UINT channel, BOOL select = TRUE);
-	void ReinitRecordState(BOOL unselect = TRUE);
+	bool NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix = true);
+	bool IsChannelNoFx(CHANNELINDEX nChn) const;
+	bool IsChannelRecord1(CHANNELINDEX channel);
+	bool IsChannelRecord2(CHANNELINDEX channel);
+	BYTE IsChannelRecord(CHANNELINDEX channel);
+	void Record1Channel(CHANNELINDEX channel, bool select = true);
+	void Record2Channel(CHANNELINDEX channel, bool select = true);
+	void ReinitRecordState(bool unselect = true);
 // -! NEW_FEATURE#0015
-	UINT GetNumChannels() const { return m_SndFile.m_nChannels; }
-	UINT GetPatternSize(UINT nPat) const;
+	CHANNELINDEX GetNumChannels() const { return m_SndFile.m_nChannels; }
+	UINT GetPatternSize(PATTERNINDEX nPat) const;
 	BOOL AdjustEndOfSample(UINT nSample);
 	BOOL IsChildSample(UINT nIns, UINT nSmp) const;
 	UINT FindSampleParent(UINT nSmp) const;

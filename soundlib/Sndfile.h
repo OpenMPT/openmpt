@@ -40,6 +40,7 @@ struct MODSAMPLE
 	BYTE nVibSweep;
 	BYTE nVibDepth;
 	BYTE nVibRate;
+	CHAR name[32];
 	CHAR filename[22];
 
 	// Return the size of one (elementary) sample in bytes.
@@ -545,7 +546,10 @@ public:	// Static Members
 
 public:	// for Editing
 	CModDoc* m_pModDoc;
-	UINT m_nType, m_nChannels, m_nSamples, m_nInstruments;
+	UINT m_nType;
+	CHANNELINDEX m_nChannels;
+	SAMPLEINDEX m_nSamples;
+	INSTRUMENTINDEX m_nInstruments;
 	UINT m_nDefaultSpeed, m_nDefaultTempo, m_nDefaultGlobalVolume;
 	DWORD m_dwSongFlags;							// Song flags SONG_XXXX
 	bool m_bIsRendering;
