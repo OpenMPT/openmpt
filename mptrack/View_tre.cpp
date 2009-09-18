@@ -2537,8 +2537,8 @@ void CModTree::OnSoloTreeItem()
 	pModDoc = GetDocumentFromItem(hItem);
 	if (pModDoc)
 	{
-		UINT nSamples = pModDoc->GetNumSamples();
-		UINT nInstruments = pModDoc->GetNumInstruments();
+		SAMPLEINDEX nSamples = pModDoc->GetNumSamples();
+		INSTRUMENTINDEX nInstruments = pModDoc->GetNumInstruments();
 		if ((dwItemType == MODITEM_SAMPLE) && (!nInstruments))
 		{
 			for (UINT i=1; i<=nSamples; i++)
@@ -2568,8 +2568,8 @@ void CModTree::OnUnmuteAllTreeItem()
 	pModDoc = GetDocumentFromItem(hItem);
 	if (pModDoc)
 	{
-		UINT nSamples = pModDoc->GetNumSamples();
-		UINT nInstruments = pModDoc->GetNumInstruments();
+		SAMPLEINDEX nSamples = pModDoc->GetNumSamples();
+		INSTRUMENTINDEX nInstruments = pModDoc->GetNumInstruments();
 		if ((dwItemType == MODITEM_SAMPLE) || (dwItemType == MODITEM_INSTRUMENT))
 		{
 			for (UINT i=1; i<=nSamples; i++)
