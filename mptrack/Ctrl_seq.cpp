@@ -659,6 +659,7 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 				SetCurSel(nOrder, true, ih->ShiftPressed());
 			}
 			m_bDragging = IsOrderInMargins(m_nScrollPos, oldXScroll) ? false : true;
+
 			if(m_bDragging == true)
 			{
 				m_nDragOrder = GetCurSel(true).nOrdLo;
@@ -695,8 +696,8 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				// drop before or after the selection
 				bool bMoveBack = !(m_nDragOrder < (UINT)m_nDropPos);
 				// don't do anything if drop position is inside the selection
-				if(m_nDropPos >= selection.nOrdLo && m_nDropPos <= selection.nOrdHi) return;
-				// drag or order or multiple orders?
+				if(m_nDropPos >= selection.nOrdLo && m_nDropPos <= selection.nOrdHi || m_nDragOrder == m_nDropPos) return;
+				// drag one order or multiple orders?
 				bool bMultiSelection = (selection.nOrdLo != selection.nOrdHi);
 
 				for(int i = 0; i <= nMoveCount; i++)
