@@ -407,11 +407,11 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 			wsprintf(s, "Midi%d", iMidi);
 		else
 			wsprintf(s, "Perc%d", iMidi & 0x7F);
-		if ((glpMidiLibrary->MidiMap[iMidi][1] == ':') && (lpszConfigFile[1] == ':')
+		/*if ((glpMidiLibrary->MidiMap[iMidi][1] == ':') && (lpszConfigFile[1] == ':')
 		 && ((glpMidiLibrary->MidiMap[iMidi][0]|0x20) == (lpszConfigFile[0]|0x20)))
 		{
 			strcpy(szFileName, glpMidiLibrary->MidiMap[iMidi]+2);
-		} else
+		} else*/
 		{
 			strcpy(szFileName, glpMidiLibrary->MidiMap[iMidi]);
 		}
@@ -669,6 +669,129 @@ void Terminate_AppThread()
 	exit(-1);
 }
 
+void CTrackApp::MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH], TCHAR sNewFileName[_MAX_PATH])
+//-----------------------------------------------------------------------------------------------------------------
+{
+	// copy a config file from the exe directory to the new config dirs
+	TCHAR sOldPath[_MAX_PATH], sNewPath[_MAX_PATH];
+	strcpy(sOldPath, m_szExePath);
+	if(sSubDir[0])
+		strcat(sOldPath, sSubDir);
+	strcat(sOldPath, sFileName);
+
+	strcpy(sNewPath, m_szConfigDirectory);
+	if(sSubDir[0])
+		strcat(sNewPath, sSubDir);
+	if(sNewFileName[0])
+		strcat(sNewPath, sNewFileName);
+	else
+		strcat(sNewPath, sFileName);
+
+	if(PathFileExists(sNewPath) == 0 && PathFileExists(sOldPath) != 0)
+	{
+		MoveFile(sOldPath, sNewPath);
+	}
+}
+
+
+void CTrackApp::SetupPaths()
+//--------------------------
+{
+	if(GetModuleFileName(NULL, m_szExePath, _MAX_PATH))
+	{
+		TCHAR szDrive[_MAX_DRIVE] = "", szDir[_MAX_PATH] = "";
+		_splitpath(m_szExePath, szDrive, szDir, NULL, NULL);
+		strcpy(m_szExePath, szDrive);
+		strcat(m_szExePath, szDir);
+	}
+
+	m_szConfigDirectory[0] = 0;
+	// Try to find a nice directory where we should store our settings (default: %APPDATA%)
+	bool bIsAppDir = false;
+	if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, m_szConfigDirectory)))
+	{
+		if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, m_szConfigDirectory)))
+		{
+			strcpy(m_szConfigDirectory, m_szExePath);
+			bIsAppDir = true;
+		}
+	}
+
+	// Check if the user prefers to use the app's directory
+	strcpy(m_szConfigFileName, m_szExePath); // config file
+	strcat(m_szConfigFileName, "mptrack.ini");
+	if(GetPrivateProfileInt("Paths", "UseAppDataDirectory", 1, m_szConfigFileName) == 0)
+	{
+		strcpy(m_szConfigDirectory, m_szExePath);
+		bIsAppDir = true;
+	}
+
+	if(!bIsAppDir)
+	{
+		// Store our app settings in %APPDATA% or "My Files"
+		strcat(m_szConfigDirectory, "\\OpenMPT\\");
+
+		// Path doesn't exist yet, so it has to be created
+		if(PathIsDirectory(m_szConfigDirectory) == 0)
+		{
+			CreateDirectory(m_szConfigDirectory, 0);
+		}
+
+		// Move files if necessary.
+		MoveConfigFile("mptrack.ini");
+		MoveConfigFile("plugin.cache");
+		MoveConfigFile("mpt_intl.ini");
+		MoveConfigFile("default.mkb", "", "Keybindings.mkb");
+	}
+	
+	// Create tunings dir
+	strcpy(m_szTuningsDirectory, m_szConfigDirectory);
+	strcat(m_szTuningsDirectory, "tunings\\");
+
+	if(PathIsDirectory(m_szTuningsDirectory) == 0)
+	{
+		CreateDirectory(m_szTuningsDirectory, 0);
+	}
+
+	if(!bIsAppDir)
+	{
+		// Import old tunings
+		TCHAR sOldTunings[_MAX_PATH];
+		strcpy(sOldTunings, m_szExePath);
+		strcat(sOldTunings, "tunings\\");
+
+		if(PathIsDirectory(sOldTunings) != 0)
+		{
+			TCHAR sSearchPattern[_MAX_PATH];
+			strcpy(sSearchPattern, sOldTunings);
+			strcat(sSearchPattern, "*.*");
+			WIN32_FIND_DATA FindFileData;
+			HANDLE hFind;
+			hFind = FindFirstFile(sSearchPattern, &FindFileData);
+			if(hFind != INVALID_HANDLE_VALUE) 
+			{
+				do 
+				{
+					MoveConfigFile(FindFileData.cFileName, "tunings\\");
+				} while(FindNextFile(hFind, &FindFileData) != 0);
+			}
+			FindClose(hFind);
+			RemoveDirectory(sOldTunings);
+		}
+	}
+
+	// Set up default file locations
+	strcpy(m_szConfigFileName, m_szConfigDirectory); // config file
+	strcat(m_szConfigFileName, "mptrack.ini");
+
+	strcpy(m_szStringsFileName, m_szConfigDirectory); // I18N file
+	strcat(m_szStringsFileName, "mpt_intl.ini");
+
+	strcpy(m_szPluginCacheFileName, m_szConfigDirectory); // plugin cache
+	strcat(m_szPluginCacheFileName, "plugin.cache");
+
+}
+
 BOOL CTrackApp::InitInstance()
 //----------------------------
 {
@@ -711,34 +834,8 @@ BOOL CTrackApp::InitInstance()
 	// Disabled by rewbs for smoothVST. Might cause minor perf issues due to increased cache misses?
 #endif
 
-	m_szConfigFileName[0] = 0;
-	m_szStringsFileName[0] = 0;
-
-	if (GetModuleFileName(NULL, m_szConfigFileName, sizeof(m_szConfigFileName)))
-	{
-		CHAR szDrive[_MAX_DRIVE]="", szDir[_MAX_PATH]="";
-		_splitpath(m_szConfigFileName, szDrive, szDir, NULL, NULL);
-		m_szConfigFileName[0] = 0;
-		lstrcpyn(m_szConfigFileName, szDrive, sizeof(m_szConfigFileName));
-		strncat(m_szConfigFileName, szDir, sizeof(m_szConfigFileName));
-		m_szConfigFileName[sizeof(m_szConfigFileName)-1] = 0;
-		strncat(m_szConfigFileName, "mptrack.ini", sizeof(m_szConfigFileName));
-		m_szConfigFileName[sizeof(m_szConfigFileName)-1] = 0;
-
-		m_szPluginCacheFileName[0] = 0;
-		lstrcpyn(m_szPluginCacheFileName, szDrive, sizeof(m_szPluginCacheFileName));
-		strncat(m_szPluginCacheFileName, szDir, sizeof(m_szPluginCacheFileName));
-		m_szPluginCacheFileName[sizeof(m_szPluginCacheFileName)-1] = 0;
-		strncat(m_szPluginCacheFileName, "plugin.cache", sizeof(m_szPluginCacheFileName));
-		m_szPluginCacheFileName[sizeof(m_szPluginCacheFileName)-1] = 0;
-
-		m_szStringsFileName[0] = 0;
-		lstrcpyn(m_szStringsFileName, szDrive, sizeof(m_szStringsFileName));
-		strncat(m_szStringsFileName, szDir, sizeof(m_szStringsFileName));
-		m_szStringsFileName[sizeof(m_szStringsFileName)-1] = 0;
-		strncat(m_szStringsFileName, "mpt_intl.ini", sizeof(m_szStringsFileName));
-		m_szStringsFileName[sizeof(m_szStringsFileName)-1] = 0;
-	}
+	// Set up paths to store configuration in
+	SetupPaths();
 
 	//Force use of custom ini file rather than windowsDir\executableName.ini
 	if (m_pszProfileName) {

@@ -23,7 +23,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	activeCommandSet = new CCommandSet();
 	CCommandSet::s_bShowErrorOnUnknownKeybinding = (CMainFrame::GetMainFrame()->GetPrivateProfileLong("Misc", "ShowErrorOnUnknownKeybinding", 1, theApp.GetConfigFileName()) != 0);
 	
-	CString sDefaultPath = CMainFrame::m_csExecutableDirectoryPath + TEXT("Keybindings.mkb");
+	CString sDefaultPath = CString(theApp.GetConfigPath()) + TEXT("Keybindings.mkb");
 	if (sDefaultPath.GetLength() > MAX_PATH - 1)
 		sDefaultPath = "";
 

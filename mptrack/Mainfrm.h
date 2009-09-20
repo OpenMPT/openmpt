@@ -383,7 +383,6 @@ public:
 	CString m_csRegExt;
 	CString m_csRegSettings;
 	CString m_csRegWindow;
-	static CString m_csExecutableDirectoryPath; //To contain path of executable directory
 	// Globals
 	static UINT m_nLastOptionsPage, m_nFilterIndex;
 	static BOOL gbMdiMaximize;
