@@ -190,6 +190,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::gnPatternSpacing);
 	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetMargins());
 	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
+	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_pSndFile->Order.m_sName);
 	m_OrderList.SetFocus(); 
 
 	UpdateView(HINT_MODTYPE|HINT_PATNAMES, NULL);
