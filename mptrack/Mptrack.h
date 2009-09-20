@@ -140,9 +140,12 @@ protected:
 	HANDLE m_hAlternateResourceHandle;
 	// Default macro configuration
 	MODMIDICFG m_MidiCfg;
-	CHAR m_szConfigFileName[_MAX_PATH];
-	CHAR m_szPluginCacheFileName[_MAX_PATH];
-	CHAR m_szStringsFileName[_MAX_PATH];
+	TCHAR m_szExePath[_MAX_PATH];
+	TCHAR m_szConfigDirectory[_MAX_PATH];
+	TCHAR m_szTuningsDirectory[_MAX_PATH];
+	TCHAR m_szConfigFileName[_MAX_PATH];
+	TCHAR m_szPluginCacheFileName[_MAX_PATH];
+	TCHAR m_szStringsFileName[_MAX_PATH];
 
 	#ifdef UPDATECHECKENABLED
 	// Internet request context
@@ -184,6 +187,8 @@ public:
 	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCSTR GetConfigFileName() const { return m_szConfigFileName; }
 	LPCSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
+	LPCSTR GetConfigPath() const { return m_szConfigDirectory; }
+	void SetupPaths();
 
 // Splash Screen
 protected:
@@ -261,6 +266,8 @@ public:
 
 private:
 	static void LoadRegistryDLS();
+
+	void MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH] = "", TCHAR sNewFileName[_MAX_PATH] = "");
 };
 
 

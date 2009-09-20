@@ -267,8 +267,6 @@ CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
 CAutoSaver *CMainFrame::m_pAutoSaver = NULL; //rewbs.autosave
 CPerformanceCounter *CMainFrame::m_pPerfCounter = NULL;
 
-CString CMainFrame::m_csExecutableDirectoryPath = "";
-
 static UINT indicators[] =
 {
 	ID_SEPARATOR,           // status line indicator
@@ -285,17 +283,6 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 //----------------------
 {
-	{
-	char path[_MAX_PATH];
-	char exedrive[_MAX_DRIVE];
-	char exedir[_MAX_DIR];
-	GetModuleFileName(NULL, path, MAX_PATH);
-	_splitpath(path, exedrive, exedir, NULL, NULL);
-	memset(path, 0, sizeof(path));
-	_makepath(path, exedrive, exedir, NULL, NULL);
-    m_csExecutableDirectoryPath = path; //path should end with \ 
-	}
-
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = NULL;	//rewbs.customKeys
 	m_bOptionsLocked = false;	//rewbs.customKeys
