@@ -2896,7 +2896,7 @@ bool CSoundFile::LoadStaticTunings()
 	}
 		
 	// Load local tunings.
-	s_pTuningsSharedLocal->SetSavefilePath(std::string(std::string(theApp.GetConfigPath()) + "tunings\\local_tunings" + CTuningCollection::s_FileExtension.c_str()));
+	s_pTuningsSharedLocal->SetSavefilePath(std::string(std::string(theApp.GetTuningsPath()) + "local_tunings" + CTuningCollection::s_FileExtension.c_str()));
 	s_pTuningsSharedLocal->Deserialize();
 
 	// Enabling adding/removing of tunings for standard collection
