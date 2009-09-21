@@ -187,6 +187,7 @@ public:
 	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCSTR GetConfigFileName() const { return m_szConfigFileName; }
 	LPCSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
+	LPCSTR GetTuningsPath() const { return m_szTuningsDirectory; }
 	LPCSTR GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths();
 

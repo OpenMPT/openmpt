@@ -1871,12 +1871,10 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
-	header.mv = m_nSamplePreAmp;
-	if (header.mv < 0x20) header.mv = 0x20;
-	if (header.mv > 0x7F) header.mv = 0x7F;
+	header.mv = CLAMP(m_nSamplePreAmp, 0, 128);
 	header.speed = m_nDefaultSpeed;
- 	header.tempo = min(m_nDefaultTempo,255);  //Limit this one to 255, we save the real one as an extension below.
-	header.sep = 128;
+ 	header.tempo = min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
+	header.sep = 128; // pan separation
 	dwHdrPos = sizeof(header) + header.ordnum;
 	// Channel Pan and Volume
 	memset(header.chnpan, 0xFF, 64);
@@ -2521,11 +2519,9 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
 	header.mv = CLAMP(m_nSamplePreAmp, 0, 128);
-	if (header.mv < 0x20) header.mv = 0x20;
-	if (header.mv > 0x7F) header.mv = 0x7F;
 	header.speed = m_nDefaultSpeed;
- 	header.tempo = min(m_nDefaultTempo,255);  //Limit this one to 255, we save the real one as an extension below.
-	header.sep = 128;
+ 	header.tempo = min(m_nDefaultTempo, 255);  //Limit this one to 255, we save the real one as an extension below.
+	header.sep = 128; // pan separation
 	dwHdrPos = sizeof(header) + header.ordnum;
 	// Channel Pan and Volume
 	memset(header.chnpan, 0xFF, 64);

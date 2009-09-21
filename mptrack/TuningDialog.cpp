@@ -629,6 +629,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 			NULL,
 			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 			 filter.c_str(), this);
+	dlg.m_ofn.lpstrInitialDir = theApp.GetTuningsPath();
 
 	bool failure = true;
 	
@@ -668,6 +669,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
 					filter.c_str(),
 					this);
+	dlg.m_ofn.lpstrInitialDir = theApp.GetTuningsPath();
 
 	if (dlg.DoModal() != IDOK) return;
 
