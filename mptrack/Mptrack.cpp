@@ -2255,9 +2255,9 @@ void CFastBitmap::Init(LPMODPLUGDIB lpTextDib)
 	m_Dib.bmiHeader.biClrUsed = 0;
 	m_Dib.bmiHeader.biClrImportant = 256; // MAX_MODPALETTECOLORS;
 	m_n4BitPalette[0] = (BYTE)m_nTextColor;
-	m_n4BitPalette[4] = MODSYSCOLOR_LO;
-	m_n4BitPalette[12] = MODSYSCOLOR_MED;
-	m_n4BitPalette[14] = MODSYSCOLOR_HI;
+	m_n4BitPalette[4] = MODCOLOR_SEPSHADOW;
+	m_n4BitPalette[12] = MODCOLOR_SEPFACE;
+	m_n4BitPalette[14] = MODCOLOR_SEPHILITE;
 	m_n4BitPalette[15] = (BYTE)m_nBkColor;
 }
 

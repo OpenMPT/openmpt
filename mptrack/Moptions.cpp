@@ -105,6 +105,7 @@ static MPTCOLORDEF gColorDefs[] =
 	{"Play Cursor",		0,	MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, 0, "Background:", "Foreground:", NULL},
 	{"Note Highlight",	0,	MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME, "Note:", "Instrument:", "Volume:"},
 	{"Effect Highlight",0,	MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS, "Panning Effects:", "Pitch Effects:", "Global Effects:"},
+	{"Channel Separator",0,	MODCOLOR_SEPSHADOW, MODCOLOR_SEPFACE, MODCOLOR_SEPHILITE, "Shadow:", "Face:", "Highlight:"},
 	{"Sample Editor",	1,	MODCOLOR_SAMPLE, 0, 0, "Sample Data:", NULL, NULL},
 	{"Instrument Editor",2,	MODCOLOR_ENVELOPES, 0, 0, "Envelopes:", NULL, NULL},
 	{"VU-Meters",		0,	MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, "Hi:", "Med:", "Lo:"}
@@ -483,6 +484,9 @@ void COptionsColors::OnPresetMPT()
 	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0x80, 0x80);
 	CustomColors[MODCOLOR_PITCH] = RGB(0x80, 0x80, 0x00);
 	CustomColors[MODCOLOR_GLOBALS] = RGB(0x80, 0x00, 0x00);
+	CustomColors[MODCOLOR_SEPSHADOW] = GetSysColor(COLOR_BTNSHADOW);
+	CustomColors[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
+	CustomColors[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
 	OnPreviewChanged();
 }
 
@@ -491,20 +495,25 @@ void COptionsColors::OnPresetFT2()
 //--------------------------------
 {
 	CustomColors[MODCOLOR_BACKNORMAL] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0xE0, 0xE0, 0x40);
-	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x70, 0x70, 0x70);
-	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0xF0, 0xF0, 0x50);
-	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x40, 0x40, 0xA0);
+	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x49, 0x75, 0x82);
+	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0xFF, 0xFF, 0x5F);
+	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x28, 0x28, 0x28);
 	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xFF, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x50, 0x50, 0x70);
-	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0xE0, 0xE0, 0x40);
-	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x40, 0x40, 0x80);
-	CustomColors[MODCOLOR_NOTE] = RGB(0xE0, 0xE0, 0x40);
-	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0xFF, 0xFF, 0x00);
-	CustomColors[MODCOLOR_VOLUME] = RGB(0x00, 0xFF, 0x00);
-	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_PITCH] = RGB(0xFF, 0xFF, 0x00);
-	CustomColors[MODCOLOR_GLOBALS] = RGB(0xFF, 0x40, 0x40);
+	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x49, 0x75, 0x82);
+	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0xFF, 0xFF, 0xFF);
+	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x27, 0x41, 0x47);
+	CustomColors[MODCOLOR_NOTE] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_VOLUME] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_PANNING] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_PITCH] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_GLOBALS] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x18, 0x28, 0x2C);
+	CustomColors[MODCOLOR_SEPFACE] = RGB(0x49, 0x75, 0x82);
+	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x8A, 0xDB, 0xF3);
 	OnPreviewChanged();
 }
 
@@ -513,20 +522,25 @@ void COptionsColors::OnPresetIT()
 //-------------------------------
 {
 	CustomColors[MODCOLOR_BACKNORMAL] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0x00, 0xE0, 0x00);
-	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x70, 0x70, 0x70);
-	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0x00, 0xE0, 0x00);
-	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0xE0, 0xE0, 0xE0);
-	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x80, 0x80, 0x00);
-	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x00, 0xE0, 0x00);
-	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x40, 0x68, 0x40);
-	CustomColors[MODCOLOR_NOTE] = RGB(0x00, 0xFF, 0x00);
-	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0xFF, 0xFF, 0x00);
-	CustomColors[MODCOLOR_VOLUME] = RGB(0x00, 0xFF, 0x00);
-	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_PITCH] = RGB(0xFF, 0xFF, 0x00);
-	CustomColors[MODCOLOR_GLOBALS] = RGB(0xFF, 0x40, 0x40);
+	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0x45, 0x9A, 0x49);
+	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x10, 0x35, 0x00);
+	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0xEB, 0xEB, 0xCB);
+	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x20, 0x55, 0x00);
+	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xEB, 0xEB, 0xCB);
+	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x59, 0x41, 0x3C);
+	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x45, 0x9A, 0x49);
+	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x59, 0x41, 0x3C);
+	CustomColors[MODCOLOR_NOTE] = RGB(0x45, 0x9A, 0x49);
+	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0x38, 0x9E, 0x75);
+	CustomColors[MODCOLOR_VOLUME] = RGB(0xA2, 0xA2, 0xA2);
+	CustomColors[MODCOLOR_PANNING] = RGB(0x18, 0x75, 0x2C);
+	CustomColors[MODCOLOR_PITCH] = RGB(0x45, 0x9A, 0x49);
+	CustomColors[MODCOLOR_GLOBALS] = RGB(0x45, 0x9A, 0x49);
+	CustomColors[MODCOLOR_SAMPLE] = RGB(0x8E, 0x14, 0x55);
+	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xA2, 0xA2, 0xA2);
+	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0xB6, 0x96, 0x79);
+	CustomColors[MODCOLOR_SEPFACE] = RGB(0xB6, 0x96, 0x79);
+	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xB6, 0x96, 0x79);
 	OnPreviewChanged();
 }
 
@@ -540,7 +554,6 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_TEXTCURROW] = 0x00000000;
 	CustomColors[MODCOLOR_BACKSELECTED] = 0x00000000;
 	CustomColors[MODCOLOR_TEXTSELECTED] = 0x00ccd7dd;
-	CustomColors[MODCOLOR_SAMPLE] = 0x0000ff00;
 	CustomColors[MODCOLOR_BACKPLAYCURSOR] = 0x007a99a9;
 	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = 0x00000000;
 	CustomColors[MODCOLOR_BACKHILIGHT] = 0x00b5c5ce;
@@ -550,7 +563,11 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_PANNING] = 0x00686800;
 	CustomColors[MODCOLOR_PITCH] = 0x00006262;
 	CustomColors[MODCOLOR_GLOBALS] = 0x00000066;
+	CustomColors[MODCOLOR_SAMPLE] = 0x0000ff00;
 	CustomColors[MODCOLOR_ENVELOPES] = 0x000000ff;
+	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x80, 0x80, 0x80);
+	CustomColors[MODCOLOR_SEPFACE] = RGB(0xD4, 0xD0, 0xC8);
+	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xFF, 0xFF, 0xFF);
 	OnPreviewChanged();
 }
 
