@@ -124,9 +124,6 @@ void CViewPattern::UpdateColors()
 	BYTE r,g,b;
 
 	m_Dib.SetAllColors(0, MAX_MODCOLORS, CMainFrame::rgbCustomColors);
-	m_Dib.SetColor(MODSYSCOLOR_LO, GetSysColor(COLOR_BTNSHADOW));
-	m_Dib.SetColor(MODSYSCOLOR_MED, GetSysColor(COLOR_BTNFACE));
-	m_Dib.SetColor(MODSYSCOLOR_HI, GetSysColor(COLOR_BTNHIGHLIGHT));
 	r = hilightcolor(GetRValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKHILIGHT]),
 					GetRValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKNORMAL]));
 	g = hilightcolor(GetGValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKHILIGHT]),

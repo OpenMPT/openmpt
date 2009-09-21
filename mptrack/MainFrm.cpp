@@ -364,8 +364,14 @@ void CMainFrame::LoadIniSettings()
 {
 	CString iniFile = theApp.GetConfigFileName();
 	//CHAR collectedString[INIBUFFERSIZE];
+	MptVersion::VersionNum vIniVersion;
 
 	gcsPreviousVersion = GetPrivateProfileCString("Version", "Version", "", iniFile);
+	if(gcsPreviousVersion == "")
+		vIniVersion = MPT_VERSION_NUMERIC;
+	else
+		vIniVersion = MptVersion::ToNum(gcsPreviousVersion);
+
 	gcsInstallGUID = GetPrivateProfileCString("Version", "InstallGUID", "", iniFile);
 	gnCheckForUpdates = GetPrivateProfileInt("Version", "CheckForUpdates", 1, iniFile);
 	gbMdiMaximize = GetPrivateProfileLong("Display", "MDIMaximize", true, iniFile);
@@ -385,9 +391,15 @@ void CMainFrame::LoadIniSettings()
 	gnMsgBoxVisiblityFlags = GetPrivateProfileDWord("Display", "MsgBoxVisibilityFlags", uint32_max, iniFile);
 
 	CHAR s[16];
-	for (int ncol=0; ncol<MAX_MODCOLORS; ncol++) {
+	for (int ncol = 0; ncol < MAX_MODCOLORS; ncol++) {
 		wsprintf(s, "Color%02d", ncol);
 		rgbCustomColors[ncol] = GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
+	}
+	if(rgbCustomColors[MODCOLOR_SEPSHADOW] == rgbCustomColors[MODCOLOR_SEPFACE] == rgbCustomColors[MODCOLOR_SEPHILITE] == 0 && vIniVersion < MAKE_VERSION_NUMERIC(1,17,03,02))
+	{
+		rgbCustomColors[MODCOLOR_SEPSHADOW] = GetSysColor(COLOR_BTNSHADOW);
+		rgbCustomColors[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
+		rgbCustomColors[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
 	}
 
 	m_nWaveDevice = GetPrivateProfileLong("Sound Settings", "WaveDevice", (SNDDEV_DSOUND<<8), iniFile);
@@ -414,9 +426,9 @@ void CMainFrame::LoadIniSettings()
 	gnMidiPatternLen = GetPrivateProfileLong("MIDI Settings", "MidiImportPatLen", gnMidiPatternLen, iniFile);
 
 	m_dwPatternSetup = GetPrivateProfileDWord("Pattern Editor", "PatternSetup", m_dwPatternSetup, iniFile);
-	if(gcsPreviousVersion != "" && MptVersion::ToNum(gcsPreviousVersion) < MAKE_VERSION_NUMERIC(1,17,02,50))
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1,17,02,50))
 		m_dwPatternSetup |= PATTERN_NOTEFADE;
-	if(gcsPreviousVersion != "" && MptVersion::ToNum(gcsPreviousVersion) < MAKE_VERSION_NUMERIC(1,17,03,01))
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1,17,03,01))
 		m_dwPatternSetup |= PATTERN_RESETCHANNELS;
 
 	m_nRowSpacing = GetPrivateProfileDWord("Pattern Editor", "RowSpacing", 16, iniFile);
