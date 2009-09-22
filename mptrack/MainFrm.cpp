@@ -255,6 +255,8 @@ COLORREF CMainFrame::rgbCustomColors[MAX_MODCOLORS] =
 		0x800000, 0x808000,	0x008000, 0x808000, 0x008080, 0x000080, 0xFF0000,
 		// VU-Meters
 		0x00FF00, 0x00FFFF, 0x0000FF,
+		// Channel separators
+		GetSysColor(COLOR_BTNSHADOW), GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_BTNHIGHLIGHT),
 	};
 
 // Directory Arrays (Default + Last)

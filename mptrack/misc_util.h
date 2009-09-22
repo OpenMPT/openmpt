@@ -135,4 +135,30 @@ inline void SanitizeFilename(char (&buffer)[size])
 	}
 }
 
+// Convert a 0-terminated string to a space-padded string
+template <size_t size>
+void NullToSpaceString(char (&buffer)[size])
+{
+	size_t pos = size;
+	while (pos-- > 0)
+		if (buffer[pos] == 0)
+			buffer[pos] = 32;
+	buffer[size - 1] = 0;
+}
+// Convert a space-padded string to a 0-terminated string
+template <size_t size>
+void SpaceToNullString(char (&buffer)[size])
+{
+	// First, remove any Nulls
+	NullToSpaceString(buffer);
+	size_t pos = size;
+	while (pos-- > 0)
+	{
+		if (buffer[pos] == 32)
+			buffer[pos] = 0;
+		else if(buffer[pos] != 0)
+			break;
+	}
+	buffer[size - 1] = 0;
+}
 #endif

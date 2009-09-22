@@ -1635,6 +1635,8 @@ void CModDoc::OnFileCompatibilitySave()
 	CFileDialog dlg(FALSE, ext, s,
 					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
 					pattern, pMainFrm);
+	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_MODS);
+
 	if (dlg.DoModal() != IDOK){ 
 		return;
 	}

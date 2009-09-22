@@ -742,6 +742,8 @@ void CTrackApp::SetupPaths()
 		MoveConfigFile("plugin.cache");
 		MoveConfigFile("mpt_intl.ini");
 		MoveConfigFile("default.mkb", "", "Keybindings.mkb");
+		MoveConfigFile("Keybindings.mkb");
+		// TODO - Check the old ini settings here
 	}
 	
 	// Create tunings dir
