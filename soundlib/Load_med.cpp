@@ -673,7 +673,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 					Order.resize(nOrders++);
 					for (UINT i=0; i<n; i++)
 					{
-						WORD seqval = BigEndian(pmps->seq[i]);
+						WORD seqval = BigEndianW(pmps->seq[i]);
 						if ((seqval < wNumBlocks) && (nOrders < MAX_ORDERS-1))
 						{
 							Order[nOrders++] = (ORDERINDEX)seqval;
