@@ -106,6 +106,7 @@ static MPTCOLORDEF gColorDefs[] =
 	{"Note Highlight",	0,	MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME, "Note:", "Instrument:", "Volume:"},
 	{"Effect Highlight",0,	MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS, "Panning Effects:", "Pitch Effects:", "Global Effects:"},
 	{"Channel Separator",0,	MODCOLOR_SEPSHADOW, MODCOLOR_SEPFACE, MODCOLOR_SEPHILITE, "Shadow:", "Face:", "Highlight:"},
+	{"Next/Prev Pattern",0,	MODCOLOR_BLENDCOLOR, 0, 0, "Blend color:", NULL, NULL},
 	{"Sample Editor",	1,	MODCOLOR_SAMPLE, 0, 0, "Sample Data:", NULL, NULL},
 	{"Instrument Editor",2,	MODCOLOR_ENVELOPES, 0, 0, "Envelopes:", NULL, NULL},
 	{"VU-Meters",		0,	MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, "Hi:", "Med:", "Lo:"}
@@ -487,6 +488,7 @@ void COptionsColors::OnPresetMPT()
 	CustomColors[MODCOLOR_SEPSHADOW] = GetSysColor(COLOR_BTNSHADOW);
 	CustomColors[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
 	CustomColors[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
+	CustomColors[MODCOLOR_BLENDCOLOR] = GetSysColor(COLOR_BTNFACE);
 	OnPreviewChanged();
 }
 
@@ -514,6 +516,7 @@ void COptionsColors::OnPresetFT2()
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x18, 0x28, 0x2C);
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0x49, 0x75, 0x82);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x8A, 0xDB, 0xF3);
+	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x27, 0x41, 0x47);
 	OnPreviewChanged();
 }
 
@@ -541,6 +544,7 @@ void COptionsColors::OnPresetIT()
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0xB6, 0x96, 0x79);
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0xB6, 0x96, 0x79);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xB6, 0x96, 0x79);
+	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x35, 0x27, 0x24);
 	OnPreviewChanged();
 }
 
@@ -568,6 +572,7 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x80, 0x80, 0x80);
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0xD4, 0xD0, 0xC8);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xFF, 0xFF, 0xFF);
+	CustomColors[MODCOLOR_BLENDCOLOR] = 0x00d0dbe1;
 	OnPreviewChanged();
 }
 

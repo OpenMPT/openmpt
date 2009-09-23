@@ -131,7 +131,7 @@ void CViewPattern::UpdateColors()
 	b = hilightcolor(GetBValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKHILIGHT]),
 					GetBValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKNORMAL]));
 	m_Dib.SetColor(MODCOLOR_2NDHIGHLIGHT, RGB(r,g,b));
-	m_Dib.SetBlendColor(GetSysColor(COLOR_BTNFACE));
+	m_Dib.SetBlendColor(CMainFrame::rgbCustomColors[MODCOLOR_BLENDCOLOR]);
 }
 
 
