@@ -1418,7 +1418,7 @@ CString CSoundFile::GetInstrumentName(UINT nInstr) const
 }
 
 
-bool CSoundFile::InitChannel(UINT nch)
+bool CSoundFile::InitChannel(CHANNELINDEX nch)
 //-------------------------------------
 {
 	if(nch >= MAX_BASECHANNELS) return true;
@@ -1427,6 +1427,7 @@ bool CSoundFile::InitChannel(UINT nch)
 	ChnSettings[nch].nVolume = 64;
 	ChnSettings[nch].dwFlags = 0;
 	ChnSettings[nch].nMixPlugin = 0;
+	ChnSettings[nch].bIsSticky = false;
 	ChnSettings[nch].szName[0] = 0;
 
 	ResetChannelState(nch, CHNRESET_TOTAL);
@@ -1608,8 +1609,8 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 	return static_cast<CHANNELINDEX>(m_nChannels);
 }
 
-bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
-//-----------------------------------------------------
+bool CSoundFile::MoveChannel(CHANNELINDEX chnFrom, CHANNELINDEX chnTo)
+//--------------------------------------------------------------------
 {
     //Implementation of move channel using ReArrangeChannels(...). So this function
     //only creates correct newOrder-vector used in the ReArrangeChannels(...).
@@ -1630,7 +1631,7 @@ bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
 	if(chnFrom < chnTo)
 	{
 		CHANNELINDEX temp = newOrder[chnFrom];
-		for(UINT i = chnFrom; i<chnTo; i++)
+		for(CHANNELINDEX i = chnFrom; i<chnTo; i++)
 		{
 			newOrder[i] = newOrder[i+1];
 		}
@@ -1639,7 +1640,7 @@ bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
 	else //case chnFrom > chnTo(can't be equal, since it has been examined earlier.)
 	{
 		CHANNELINDEX temp = newOrder[chnFrom];
-		for(UINT i = chnFrom; i>=chnTo+1; i--)
+		for(CHANNELINDEX i = chnFrom; i>=chnTo+1; i--)
 		{
 			newOrder[i] = newOrder[i-1];
 		}

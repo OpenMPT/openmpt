@@ -66,6 +66,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_SPLITRECSELECT,	OnSplitRecordSelect)
 // -! NEW_FEATURE#0012
 	ON_COMMAND(ID_EDIT_UNDO,		OnEditUndo)
+	ON_COMMAND(ID_PATTERN_CHNTOGGLESTICKY, OnChannelTogglySticky)
 	ON_COMMAND(ID_PATTERN_CHNRESET,	OnChannelReset)
 	ON_COMMAND(ID_PATTERN_MUTE,		OnMuteFromClick) //rewbs.customKeys
 	ON_COMMAND(ID_PATTERN_SOLO,		OnSoloFromClick) //rewbs.customKeys
@@ -133,6 +134,7 @@ CViewPattern::CViewPattern()
 	m_nDetailLevel = 4;
 	m_pEditWnd = NULL;
 	m_pGotoWnd = NULL;
+	memset(m_nChannelOrder, 0, sizeof(m_nChannelOrder));
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 }
@@ -147,6 +149,7 @@ void CViewPattern::OnInitialUpdate()
 // -> DESC="midi keyboard split"
 	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
 	memset(activeNoteChannel, 0xFF, sizeof(activeNoteChannel));
+	ResetStickyChannels();
 	oldrow = -1;
 	oldchn = -1;
 	oldsplitchn = -1;
@@ -1403,6 +1406,17 @@ void CViewPattern::OnSelectCurrentColumn()
 		}
 		SetCurSel(dwBeginSel, dwEndSel);
 	}
+}
+
+void CViewPattern::OnChannelTogglySticky()
+//---------------------------------------
+{
+	// Toggle "sticky" state (channel will always be visible)
+	const CHANNELINDEX nChn = GetChanFromCursor(m_nMenuParam);
+	CSoundFile* pSndFile;
+	if(GetDocument() == nullptr || (pSndFile = GetDocument()->GetSoundFile()) == nullptr) return;
+	pSndFile->ChnSettings[nChn].bIsSticky = !pSndFile->ChnSettings[nChn].bIsSticky;
+	ResetStickyChannels();
 }
 
 void CViewPattern::OnChannelReset()
@@ -3006,8 +3020,8 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 }
 
 
-ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const
-//-----------------------------------------------------------------------------------
+ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord)
+//-----------------------------------------------------------------------------
 {
 	ModCommandPos editpos;
 	if(bLiveRecord)
@@ -4658,6 +4672,8 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_CHNRESET, "Reset Channel\t" + ih->GetKeyTextFromCommand(kcChannelReset));
 	
+	AppendMenu(hMenu, MF_STRING | (pSndFile->ChnSettings[nChn].bIsSticky ? MF_CHECKED : 0), ID_PATTERN_CHNTOGGLESTICKY, "Sticky Channel");
+
 	return true;
 }
 
@@ -4984,7 +5000,7 @@ UINT CViewPattern::ListChansWhereColSelected(UINT colType, CArray<UINT,UINT> &ch
 ROWINDEX CViewPattern::GetRowFromCursor(DWORD cursor) {return cursor >> 16;}
 //---------------------------------------------------
 	
-CHANNELINDEX CViewPattern::GetChanFromCursor(DWORD cursor) {return static_cast<CHANNELINDEX>((cursor & 0xFFFF) >> 3);}
+CHANNELINDEX CViewPattern::GetChanFromCursor(DWORD cursor) {return m_nChannelOrder[(cursor & 0xFFFF) >> 3];}
 //-------------------------------------------------------
 
 UINT CViewPattern::GetColTypeFromCursor(DWORD cursor) {return cursor & 0x07;}
@@ -5140,4 +5156,34 @@ void CViewPattern::SetEditPos(const CSoundFile& rSndFile,
 		iPat = m_nPattern;
 		iRow = m_nRow;
 	}
+}
+
+void CViewPattern::ResetStickyChannels()
+//--------------------------------------
+{
+	// precalc sticky channels, i.e. channels that are always visible
+	CSoundFile *pSndFile;
+	if(GetDocument() == nullptr || (pSndFile = GetDocument()->GetSoundFile()) == nullptr) return;
+
+	CHANNELINDEX iChn = 0;
+	for(CHANNELINDEX i = 0; i < pSndFile->m_nChannels; i++)
+	{
+		if(pSndFile->ChnSettings[i].bIsSticky == true)
+		{
+			m_nChannelOrder[iChn] = i;
+			iChn++;
+		}
+	}
+	m_nStickyChannelCount = iChn;
+	for(CHANNELINDEX i = 0; i < pSndFile->m_nChannels; i++)
+	{
+		if(pSndFile->ChnSettings[i].bIsSticky == false)
+		{
+			m_nChannelOrder[iChn] = i;
+			iChn++;
+		}
+	}
+	ASSERT(iChn == pSndFile->m_nChannels);
+	InvalidateChannelsHeaders();
+	InvalidatePattern();
 }

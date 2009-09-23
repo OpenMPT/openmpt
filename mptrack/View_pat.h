@@ -110,6 +110,9 @@ protected:
 	int oldrow,oldchn,oldsplitchn;
 // -! NEW_FEATURE#0012
 
+	CHANNELINDEX m_nChannelOrder[MAX_BASECHANNELS]; // for sticky channels
+	CHANNELINDEX m_nStickyChannelCount;
+
 // -> CODE#0018
 // -> DESC="route PC keyboard inputs to midi in mechanism"
 	int ignorekey;
@@ -240,6 +243,7 @@ protected:
 	afx_msg void OnEditGoto();
 	afx_msg void OnEditFindNext();
 	afx_msg void OnEditUndo();
+	afx_msg void OnChannelTogglySticky();
 	afx_msg void OnChannelReset();
 	afx_msg void OnMuteFromClick(); //rewbs.customKeys
 	afx_msg void OnSoloFromClick(); //rewbs.customKeys
@@ -331,9 +335,9 @@ private:
 	UINT GetSelectionEndChan();
 	UINT ListChansWhereColSelected(UINT colType, CArray<UINT,UINT> &chans);
 
-	static ROWINDEX GetRowFromCursor(DWORD cursor);
-	static CHANNELINDEX GetChanFromCursor(DWORD cursor);
-	static UINT GetColTypeFromCursor(DWORD cursor);
+	ROWINDEX GetRowFromCursor(DWORD cursor);
+	CHANNELINDEX GetChanFromCursor(DWORD cursor);
+	UINT GetColTypeFromCursor(DWORD cursor);
 
 	bool IsInterpolationPossible(UINT startRow, UINT endRow, UINT chan, UINT colType, CSoundFile* pSndFile);
 	void Interpolate(UINT type);
@@ -350,7 +354,7 @@ private:
 					const ROWINDEX iRowCandidate, const PATTERNINDEX iPatCandidate) const;
 
 	// Returns edit position.
-	ModCommandPos GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const;
+	ModCommandPos GetEditPos(CSoundFile& rSf, const bool bLiveRecord);
 
 	// Returns pointer to modcommand at given position. If the position is not valid, returns pointer
 	// to a dummy command.
@@ -360,6 +364,8 @@ private:
 
 	//Like IsEditingEnabled(), but shows some notification when editing is not enabled.
 	bool IsEditingEnabled_bmsg();
+
+	void ResetStickyChannels();
 	
 
 public:

@@ -259,10 +259,11 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 
 struct MODCHANNELSETTINGS
 {
-	UINT nPan;
-	UINT nVolume;
-	DWORD dwFlags;
+	UINT nPan;			// 0...256
+	UINT nVolume;		// 0...64
+	DWORD dwFlags;		// Suround/Mute
 	UINT nMixPlugin;
+	bool bIsSticky;		// Channel will always be visible in the pattern editor
 	CHAR szName[MAX_CHANNELNAME];
 };
 
@@ -668,9 +669,9 @@ public:
 	BOOL SetPatternName(UINT nPat, LPCSTR lpszName);
 	BOOL GetPatternName(UINT nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
 	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX>& fromToArray);
-	bool MoveChannel(UINT chn_from, UINT chn_to);
+	bool MoveChannel(CHANNELINDEX chnFrom, CHANNELINDEX chnTo);
 
-	bool InitChannel(UINT nch);
+	bool InitChannel(CHANNELINDEX nch);
 	void ResetChannelState(CHANNELINDEX chn, BYTE resetStyle);
 
 	// Module Loaders

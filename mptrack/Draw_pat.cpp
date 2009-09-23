@@ -446,16 +446,24 @@ void CViewPattern::OnDraw(CDC *pDC)
 	HDC hdc;
 	UINT xofs, yofs, nColumnWidth, ncols, nrows, ncolhdr;
 	int xpaint, ypaint, mixPlug;
+	static CHANNELINDEX nOldChannels;
 
+	if ((pModDoc = GetDocument()) == nullptr) return;
+	pSndFile = pModDoc->GetSoundFile();
+	if(pSndFile != nullptr && nOldChannels != pSndFile->m_nChannels)
+	{
+		// number of channels changed -> recalc
+		ResetStickyChannels();
+		nOldChannels = pSndFile->m_nChannels;
+	}
+	
 	ASSERT(pDC);
 	UpdateSizes();
-	if ((pModDoc = GetDocument()) == NULL) return;
 	GetClientRect(&rcClient);
 	hdc = pDC->m_hDC;
 	oldpen = ::SelectObject(hdc, CMainFrame::penDarkGray);
 	xofs = GetXScrollPos();
 	yofs = GetYScrollPos();
-	pSndFile = pModDoc->GetSoundFile();
 	nColumnWidth = m_szCell.cx;
 	nrows = (pSndFile->Patterns[m_nPattern]) ? pSndFile->PatternSize[m_nPattern] : 0;
 	ncols = pSndFile->GetNumChannels();
@@ -475,16 +483,22 @@ void CViewPattern::OnDraw(CDC *pDC)
 			rect.SetRect(xpaint, ypaint, xpaint+nColumnWidth, ypaint + m_szHeader.cy);
 			if (ncolhdr < ncols)
 			{
+				CHANNELINDEX nRealChannel;
+				if(ncolhdr - xofs < m_nStickyChannelCount) // sticky channel
+					nRealChannel = m_nChannelOrder[ncolhdr - xofs];
+				else
+					nRealChannel = m_nChannelOrder[ncolhdr]; // normal channel
+				ASSERT(nRealChannel < MAX_BASECHANNELS);
 // -> CODE#0012
 // -> DESC="midi keyboard split"
-				const char *pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]? "[Channel %d]" : "Channel %d";
+				const char *pszfmt = pSndFile->m_bChannelMuteTogglePending[nRealChannel]? "[Channel %d]" : "Channel %d";
 //				const char *pszfmt = pModDoc->IsChannelRecord(ncolhdr) ? "Channel %d " : "Channel %d";
 // -! NEW_FEATURE#0012
-				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && ((BYTE)pSndFile->ChnSettings[ncolhdr].szName[0] >= 0x20))
-					pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"%d: [%s]":"%d: %s";
-				else if (m_nDetailLevel < 2) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Ch%d]":"Ch%d";
-				else if (m_nDetailLevel < 3) pszfmt = pSndFile->m_bChannelMuteTogglePending[ncolhdr]?"[Chn %d]":"Chn %d";
-				wsprintf(s, pszfmt, ncolhdr+1, pSndFile->ChnSettings[ncolhdr].szName);
+				if ((pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && ((BYTE)pSndFile->ChnSettings[nRealChannel].szName[0] >= 0x20))
+					pszfmt = pSndFile->m_bChannelMuteTogglePending[nRealChannel]?"%d: [%s]":"%d: %s";
+				else if (m_nDetailLevel < 2) pszfmt = pSndFile->m_bChannelMuteTogglePending[nRealChannel]?"[Ch%d]":"Ch%d";
+				else if (m_nDetailLevel < 3) pszfmt = pSndFile->m_bChannelMuteTogglePending[nRealChannel]?"[Chn %d]":"Chn %d";
+				wsprintf(s, pszfmt, nRealChannel + 1, pSndFile->ChnSettings[nRealChannel].szName);
 // -> CODE#0012
 // -> DESC="midi keyboard split"
 //				DrawButtonRect(hdc, &rect, s,
@@ -492,15 +506,15 @@ void CViewPattern::OnDraw(CDC *pDC)
 //					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 //				rect.bottom = rect.top + COLHDR_HEIGHT;
 				DrawButtonRect(hdc, &rect, s,
-					(pSndFile->ChnSettings[ncolhdr].dwFlags & CHN_MUTE) ? TRUE : FALSE,
-					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE,
-					pModDoc->IsChannelRecord(ncolhdr) ? DT_RIGHT : DT_CENTER);
+					(pSndFile->ChnSettings[nRealChannel].dwFlags & CHN_MUTE) ? TRUE : FALSE,
+					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & 0xFFFF) == nRealChannel)) ? TRUE : FALSE,
+					pModDoc->IsChannelRecord(nRealChannel) ? DT_RIGHT : DT_CENTER);
 				rect.bottom = rect.top + COLHDR_HEIGHT;
 
 				CRect insRect;
 				insRect.SetRect(xpaint, ypaint, xpaint+nColumnWidth / 8 + 3, ypaint + 16);
 //				if (MultiRecordMask[ncolhdr>>3] & (1 << (ncolhdr&7)))
-				if (pModDoc->IsChannelRecord1(ncolhdr))
+				if (pModDoc->IsChannelRecord1(nRealChannel))
 				{
 //					rect.DeflateRect(1, 1);
 //					InvertRect(hdc, &rect);
@@ -512,7 +526,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
 					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
 				}
-				else if (pModDoc->IsChannelRecord2(ncolhdr))
+				else if (pModDoc->IsChannelRecord2(nRealChannel))
 				{
 					FrameRect(hdc,&rect,CMainFrame::brushGray);
 					InvertRect(hdc, &rect);
@@ -525,8 +539,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 
 				if (m_dwStatus & PATSTATUS_VUMETERS)
 				{
-					OldVUMeters[ncolhdr] = 0;
-					DrawChannelVUMeter(hdc, rect.left + 1, rect.bottom, ncolhdr);
+					OldVUMeters[nRealChannel] = 0;
+					DrawChannelVUMeter(hdc, rect.left + 1, rect.bottom, nRealChannel);
 					rect.top+=VUMETERS_HEIGHT;
 					rect.bottom+=VUMETERS_HEIGHT;
 				}
@@ -534,14 +548,14 @@ void CViewPattern::OnDraw(CDC *pDC)
 				{
 					rect.top+=PLUGNAME_HEIGHT;
 					rect.bottom+=PLUGNAME_HEIGHT;
-					mixPlug=pSndFile->ChnSettings[ncolhdr].nMixPlugin;
+					mixPlug=pSndFile->ChnSettings[nRealChannel].nMixPlugin;
 					if (mixPlug) {
 						wsprintf(s, "%d: %s", mixPlug, (pSndFile->m_MixPlugins[mixPlug-1]).pMixPlugin?(pSndFile->m_MixPlugins[mixPlug-1]).Info.szName:"[empty]");
 					} else {
 						wsprintf(s, "---");
 					}
 					DrawButtonRect(hdc, &rect, s, FALSE, 
-						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & 0xFFFF) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
+						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & 0xFFFF) == nRealChannel)) ? TRUE : FALSE, DT_CENTER);
 				}
 			} else break;
 			ncolhdr++;
@@ -797,7 +811,13 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			MODCOMMAND *m;
 			int x, bk_col, tx_col, col_sel, fx_col;
 
-			m = (pPattern) ? &pPattern[row*ncols+col] : &m0;
+			CHANNELINDEX nRealChannel;
+			if(col - xofs < m_nStickyChannelCount) // sticky channel
+				nRealChannel = m_nChannelOrder[col - xofs];
+			else // normal channel
+				nRealChannel = m_nChannelOrder[col];
+
+			m = (pPattern) ? &pPattern[row*ncols+nRealChannel] : &m0;
 			dwSpeedUpMask = 0;
 			if ((bSpeedUp) && (bColSel[col] & 0x40) && (pPattern) && (row))
 			{
