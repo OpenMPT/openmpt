@@ -2193,7 +2193,7 @@ void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx) {
 		m_CbnMacroCC.ShowWindow(TRUE);
 		m_CbnMacroPlug.ShowWindow(FALSE);
 		m_CbnMacroPlug.ShowWindow(FALSE);
-		SetDlgItemText(IDC_GENMACROLABEL, "Midi CC");
+		SetDlgItemText(IDC_GENMACROLABEL, "MIDI CC");
 		m_CbnMacroCC.SetCurSel(m_pModDoc->MacroToMidiCC(&(m_MidiCfg.szMidiSFXExt[sfx*32])));
 	} else {
 		m_CbnMacroCC.EnableWindow(FALSE);
