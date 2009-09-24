@@ -286,7 +286,7 @@ const CModSpecifications itEx =
 	true,								//Has noteoff.
 	true,								//Has notefade.
 	240,								//Pattern max.
-	256,								//Order max.
+	255,								//Order max.
 	1,									//Channel min
 	127,								//Channel max
 	32,									//Min tempo
