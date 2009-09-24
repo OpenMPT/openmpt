@@ -698,6 +698,7 @@ public:
 	bool ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMT2(LPCBYTE lpStream, DWORD dwMemLength);
 	bool ReadPSM(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadPSM16(LPCBYTE lpStream, DWORD dwMemLength);
 	bool ReadJ2B(LPCBYTE lpStream, DWORD dwMemLength);
 	bool ReadUMX(LPCBYTE lpStream, DWORD dwMemLength);
 	bool ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength);

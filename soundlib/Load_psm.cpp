@@ -1,5 +1,5 @@
 /*
- * Purpose: Load new PSM (ProTracker Studio) modules
+ * Purpose: Load PSM16 and new PSM (ProTracker Studio) modules
  * Authors: Johannes Schultz
  *
  * This is partly based on http://www.shikadi.net/moddingwiki/ProTracker_Studio_Module
@@ -7,11 +7,11 @@
  * gave me a few clues. :)
  *
  * What's playing?
- *  - Epic Pinball - Perfect! (the old tunes in PSM16 format are not supported)
+ *  - Epic Pinball - Perfect! (I don't have an old version with the PSM16 tunes to compare, though - some of them differ from the new PSM tunes)
  *  - Extreme Pinball - Perfect! (subtunes included!)
  *  - Jazz Jackrabbit - Perfect!
  *  - One Must Fall! - Perfect! (it helped a lot to have the original MTM files...)
- *  - Silverball - Currently not supported (old PSM16 format)
+ *  - Silverball - Seems to work (I don't have all tables so I can't compare)
  *  - Sinaria - Seems to work (never played the game, so I can't really tell...)
  *
  * Effect conversion should be about right...
@@ -23,7 +23,14 @@
 
 #pragma pack(1)
 
-struct PSMHEADER
+////////////////////////////////////////////////////////////
+//
+//  New PSM support starts here. PSM16 structs are below.
+//
+
+
+
+struct PSMNEWHEADER
 {
 	DWORD formatID;			// "PSM " (new format)
 	DWORD fileSize;			// Filesize - 12
@@ -98,6 +105,7 @@ struct PSMSUBSONG // For internal use (pattern conversion)
 
 // Portamento effect conversion (depending on format version)
 inline BYTE convert_psm_porta(BYTE param, bool bNewFormat)
+//--------------------------------------------------------
 {
 	return ((bNewFormat) ? (param) : ((param < 4) ? (param | 0xF0) : (param >> 2)));
 }
@@ -111,12 +119,16 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	DWORD dwMemPos = 0;
 	bool bNewFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
 
-	ASSERT_CAN_READ(12);
-	PSMHEADER shdr;
-	memcpy(&shdr, lpStream, sizeof(PSMHEADER));
-	if(LittleEndian(shdr.formatID) != 0x204d5350 // "PSM "
-		|| LittleEndian(shdr.fileSize) != dwMemLength - 12
-		|| LittleEndian(shdr.fileInfoID) != 0x454C4946 // "FILE"
+	ASSERT_CAN_READ(sizeof(PSMNEWHEADER));
+	PSMNEWHEADER *shdr = (PSMNEWHEADER *)lpStream;
+
+	if(LittleEndian(shdr->formatID) == 0xFE4D5350) // "PSMþ" - PSM16 format
+		return ReadPSM16(lpStream, dwMemLength);
+
+	// Check header
+	if(LittleEndian(shdr->formatID) != 0x204D5350 // "PSM "
+		|| LittleEndian(shdr->fileSize) != dwMemLength - 12
+		|| LittleEndian(shdr->fileInfoID) != 0x454C4946 // "FILE"
 		) return false;
 
 	// Yep, this seems to be a valid file.
@@ -727,7 +739,6 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 					dwRowOffset += 2;
 				}
-
 			}
 
 			row_data += m_nChannels;
@@ -790,4 +801,400 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	return true;
 
 	#undef ASSERT_CAN_READ
+}
+
+////////////////////////////////
+//
+//  PSM16 support starts here.
+//
+
+#pragma pack(1)
+
+struct PSM16HEADER
+{
+	DWORD formatID;			// "PSMþ" (PSM16)
+	CHAR  songName[59];		// Song title, padded with nulls
+	BYTE  lineEnd;			// $1A
+	BYTE  songType;			// Song Type bitfield
+	BYTE  formatVersion;	// $10
+	BYTE  patternVersion;   // 0 or 1
+	BYTE  songSpeed;		//
+	BYTE  songTempo;		// 32 ... 255
+	BYTE  masterVolume;		// 0 ... 255
+	WORD  songLength;		// 0 ... 255 (number of patterns to play in the song)
+	WORD  songOrders;		// 0 ... 255 (same as previous value as no subsongs are present)
+	WORD  numPatterns;		// 1 ... 255
+	WORD  numSamples;		// 1 ... 255
+	WORD  numChannelsPlay;	// 0 ... 32 (max. number of channels to play)
+	WORD  numChannelsReal;	// 0 ... 32 (max. number of channels to process)
+	DWORD orderOffset;
+	DWORD panOffset;
+	DWORD patOffset;
+	DWORD smpOffset;
+	DWORD commentsOffset;
+	DWORD patSize;			// Size of all patterns
+	CHAR  filler[40];
+};
+
+struct PSM16SMPHEADER
+{
+	CHAR  filename[13];	// null-terminated
+	CHAR  name[24];		// dito
+	DWORD offset;		// in file
+	DWORD memoffset;	// not used
+	WORD  sampleNumber;	// 1 ... 255
+	BYTE  flags;		// sample flag bitfield
+	DWORD length;		// in bytes
+	DWORD loopStart;	// in samples?
+	DWORD loopEnd;		// in samples?
+	CHAR  finetune;		// 0 ... 15 (useless?)
+	BYTE  volume;		// default volume
+	WORD  c2freq;
+};
+
+struct PSM16PATHEADER
+{
+	WORD size;		// includes header bytes
+	BYTE numRows;	// 1 ... 64
+	BYTE numChans;	// 1 ... 31
+};
+
+#pragma pack()
+
+
+bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
+//-----------------------------------------------------------------------
+{
+	#define ASSERT_CAN_READ(x) \
+		if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
+
+	DWORD dwMemPos = 0;
+
+	ASSERT_CAN_READ(sizeof(PSM16HEADER));
+	PSM16HEADER *shdr = (PSM16HEADER *)lpStream;
+
+	// Check header
+	if((LittleEndian(shdr->formatID) != 0xFE4D5350) // "PSMþ"
+		|| (shdr->lineEnd != 0x1A)
+		|| (shdr->formatVersion != 0x10 && shdr->formatVersion != 0x01) // why is this sometimes 0x01?
+		|| (shdr->patternVersion != 0) // 255ch pattern version not supported (did anyone use this?)
+		|| ((shdr->songType & 3) != 0)
+		|| (min(shdr->numChannelsPlay, shdr->numChannelsReal) == 0)
+		) return false;
+
+	// Seems to be valid!
+
+	m_nType = MOD_TYPE_S3M;
+	m_nChannels = max(shdr->numChannelsPlay, shdr->numChannelsReal);
+	m_nMasterVolume = shdr->masterVolume;
+	m_nDefaultGlobalVolume = 256;
+	m_nDefaultSpeed = shdr->songSpeed;
+	m_nDefaultTempo = shdr->songTempo;
+
+	memset(m_szNames, 0, sizeof(m_szNames));
+	memcpy(m_szNames[0], shdr->songName, 31);
+	m_szNames[0][31] = 0;
+
+	// Read orders
+	dwMemPos = LittleEndian(shdr->orderOffset);
+	ASSERT_CAN_READ((DWORD)LittleEndianW(shdr->songOrders) + 2);
+	if(LittleEndian(shdr->orderOffset) > 4 && LittleEndian(*(DWORD *)(lpStream + dwMemPos - 4)) == 0x44524f50) // PORD
+	{
+		Order.ReadAsByte(lpStream + dwMemPos, LittleEndianW(shdr->songOrders), dwMemLength - dwMemPos);
+	}
+
+	// Read pan positions
+	dwMemPos = LittleEndian(shdr->panOffset);
+	ASSERT_CAN_READ(32);
+	if(LittleEndian(shdr->panOffset) > 4 && LittleEndian(*(DWORD *)(lpStream + dwMemPos - 4)) == 0x4E415050) // PPAN
+	{
+		for(CHANNELINDEX i = 0; i < 32; i++)
+		{
+			ChnSettings[i].nPan = lpStream[dwMemPos + i] << 4;
+			ChnSettings[i].nVolume = 64;
+			ChnSettings[i].dwFlags = (i >= shdr->numChannelsPlay) ? CHN_MUTE : 0;
+		}
+	}
+
+	// Read samples
+	dwMemPos = LittleEndian(shdr->smpOffset);
+	ASSERT_CAN_READ(0);
+	if(LittleEndian(shdr->smpOffset) > 4 && LittleEndian(*(DWORD *)(lpStream + dwMemPos - 4)) == 0x48415350) // PSAH
+	{
+		SAMPLEINDEX iSmpCount = 0;
+		m_nSamples = LittleEndianW(shdr->numSamples);
+		while(iSmpCount < LittleEndianW(shdr->numSamples))
+		{
+			ASSERT_CAN_READ(sizeof(PSM16SMPHEADER));
+			PSM16SMPHEADER *smphdr = (PSM16SMPHEADER *)(lpStream + dwMemPos);
+			dwMemPos += sizeof(PSM16SMPHEADER);
+
+			SAMPLEINDEX iSmp = LittleEndianW(smphdr->sampleNumber);
+			m_nSamples = max(m_nSamples, iSmp);
+
+			memcpy(m_szNames[iSmp], smphdr->name, 24);
+			m_szNames[iSmp][24] = 0;
+			memcpy(Samples[iSmp].filename, smphdr->filename, 13);
+			Samples[iSmp].filename[13] = 0;
+
+			Samples[iSmp].nLength = LittleEndian(smphdr->length);
+			Samples[iSmp].nLoopStart = LittleEndian(smphdr->loopStart);
+			Samples[iSmp].nLoopEnd = LittleEndian(smphdr->loopEnd);
+			Samples[iSmp].nC5Speed = LittleEndianW(smphdr->c2freq);
+			Samples[iSmp].nVolume = smphdr->volume << 2;
+			Samples[iSmp].nGlobalVol = 256;
+
+			UINT iSampleFormat = RS_PCM8S;
+			if(smphdr->flags & 0x04) // 16-Bit
+			{
+				Samples[iSmp].uFlags |= CHN_16BIT;
+				Samples[iSmp].nLength >>= 1;
+				iSampleFormat = RS_PCM16S;
+			}
+			if(smphdr->flags & 0x08) // Signed/Unsigned
+			{
+				if(Samples[iSmp].uFlags & CHN_16BIT)
+					iSampleFormat = RS_PCM16U;
+				else
+					iSampleFormat = RS_PCM8U;
+			}
+			if(smphdr->flags & 0x10) // Delta/Raw
+			{
+				if(Samples[iSmp].uFlags & CHN_16BIT)
+					iSampleFormat = RS_PCM16D;
+				else
+					iSampleFormat = RS_PCM8D;
+			}
+			if(smphdr->flags & 0x20) // Bidi Loop
+			{
+				Samples[iSmp].uFlags |= CHN_PINGPONGLOOP;
+			}
+			if(smphdr->flags & 0x80) // Loop
+			{
+				Samples[iSmp].uFlags |= CHN_LOOP;
+			}
+			if((smphdr->flags & 0x7F) == 0)
+				iSampleFormat = RS_PCM8D;
+
+			ReadSample(&Samples[iSmp], iSampleFormat, reinterpret_cast<LPCSTR>(lpStream + LittleEndianW(smphdr->offset)), dwMemLength - LittleEndianW(smphdr->offset));
+
+			iSmpCount++;
+		}
+	}
+
+	// Read patterns
+	dwMemPos = LittleEndian(shdr->patOffset);
+	ASSERT_CAN_READ(LittleEndian(shdr->patSize));
+	if(LittleEndian(shdr->patOffset) > 4 && LittleEndian(*(DWORD *)(lpStream + dwMemPos - 4)) == 0x54415050) // PPAT
+	{
+		DWORD dwPatEndPos = LittleEndian(shdr->patOffset) + LittleEndian(shdr->patSize);
+
+		for(PATTERNINDEX nPat = 0; nPat < LittleEndianW(shdr->numPatterns); nPat++)
+		{
+			ASSERT_CAN_READ(sizeof(PSM16PATHEADER));
+			PSM16PATHEADER *phdr = (PSM16PATHEADER *)(lpStream + dwMemPos);
+			ASSERT_CAN_READ(LittleEndianW(phdr->size));
+
+			DWORD dwNextPattern = dwMemPos + ((LittleEndianW(phdr->size) + 15) & ~15);
+			dwMemPos += sizeof(PSM16PATHEADER);
+
+			if(Patterns.Insert(nPat, phdr->numRows))
+			{
+				CString s;
+				s.Format(TEXT("Allocating patterns failed starting from pattern %u"), nPat);
+				MessageBox(NULL, s, TEXT("OpenMPT PSM16 import"), MB_ICONERROR);
+				break;
+			}
+
+			MODCOMMAND *row_data;
+			ROWINDEX iRow = 0;
+
+			while(dwMemPos < dwNextPattern && iRow < phdr->numRows)
+			{
+				ASSERT_CAN_READ(1);
+				BYTE bChnFlag = lpStream[dwMemPos++];
+				if(bChnFlag == 0)
+				{
+					iRow++;
+					continue;
+				}
+
+				row_data = Patterns[nPat] + iRow * m_nChannels + min(bChnFlag & 0x1F, m_nChannels - 1);
+
+				if(bChnFlag & 0x80)
+				{
+					// note + instr present
+					ASSERT_CAN_READ(2);
+					row_data->note = lpStream[dwMemPos++] + 37;
+					row_data->instr = lpStream[dwMemPos++];
+				}
+				if(bChnFlag & 0x40)
+				{
+					// volume present
+					ASSERT_CAN_READ(1);
+					row_data->volcmd = VOLCMD_VOLUME;
+					row_data->vol = lpStream[dwMemPos++];
+				}
+				if(bChnFlag & 0x20)
+				{
+					// effect present - convert
+					ASSERT_CAN_READ(2);
+					BYTE command = lpStream[dwMemPos++], param = lpStream[dwMemPos++];
+
+					switch(command)
+					{
+					// Volslides
+					case 0x01: // fine volslide up
+						command = CMD_VOLUMESLIDE;
+						param = (param << 4) | 0x0F;
+						break;
+					case 0x02: // volslide up
+						command = CMD_VOLUMESLIDE;
+						param = (param << 4) & 0xF0;
+						break;
+					case 0x03: // fine voslide down
+						command = CMD_VOLUMESLIDE;
+						param = 0xF0 | param;
+						break;
+					case 0x04: // volslide down
+						command = CMD_VOLUMESLIDE;
+						param = param & 0x0F;
+						break;
+
+					// Portamento
+					case 0x0A: // fine portamento up
+						command = CMD_PORTAMENTOUP;
+						param |= 0xF0;
+						break;
+					case 0x0B: // portamento down
+						command = CMD_PORTAMENTOUP;
+						break;
+					case 0x0C: // fine portamento down
+						command = CMD_PORTAMENTODOWN;
+						param |= 0xF0;
+						break;
+					case 0x0D: // portamento down
+						command = CMD_PORTAMENTODOWN;
+						break;
+					case 0x0E: // tone portamento
+						command = CMD_TONEPORTAMENTO;
+						break;
+					case 0x0F: // glissando control
+						command = CMD_S3MCMDEX;
+						param |= 0x10;
+						break;
+					case 0x10: // tone portamento + volslide up
+						command = CMD_TONEPORTAVOL;
+						param <<= 4;
+						break;
+					case 0x11: // tone portamento + volslide down
+						command = CMD_TONEPORTAVOL;
+						param &= 0x0F;
+						break;
+
+					// Vibrato
+					case 0x14: // vibrato
+						command = CMD_VIBRATO;
+						break;
+					case 0x15: // vibrato waveform
+						command = CMD_S3MCMDEX;
+						param |= 0x30;
+						break;
+					case 0x16: // vibrato + volslide up
+						command = CMD_VIBRATOVOL;
+						param <<= 4;
+						break;
+					case 0x17: // vibrato + volslide down
+						command = CMD_VIBRATOVOL;
+						param &= 0x0F;
+						break;
+
+					// Tremolo
+					case 0x1E: // tremolo
+						command = CMD_TREMOLO;
+						break;
+					case 0x1F: // tremolo waveform
+						command = CMD_S3MCMDEX;
+						param |= 0x40;
+						break;
+
+					// Sample commands
+					case 0x28: // 3-byte offset - we only support the middle byte.
+						ASSERT_CAN_READ(2);
+						command = CMD_OFFSET;
+						param = lpStream[dwMemPos++];
+						dwMemPos++;
+						break;
+					case 0x29: // retrigger
+						command = CMD_RETRIG;
+						param &= 0x0F;
+						break;
+					case 0x2A: // note cut
+						command = CMD_S3MCMDEX;
+						param |= 0xC0;
+						break;
+					case 0x2B: // note delay
+						command = CMD_S3MCMDEX;
+						param |= 0xD0;
+						break;
+
+					// Position change
+					case 0x32: // position jump
+						command = CMD_POSITIONJUMP;
+						break;
+					case 0x33: // pattern break
+						command = CMD_PATTERNBREAK;
+						break;
+					case 0x34: // loop pattern
+						command = CMD_S3MCMDEX;
+						param |= 0xB0;
+						break;
+					case 0x35: // pattern delay
+						command = CMD_S3MCMDEX;
+						param |= 0xE0;
+						break;
+
+					// speed change
+					case 0x3C: // set speed
+						command = CMD_SPEED;
+						break;
+					case 0x3D: // set tempo
+						command = CMD_TEMPO;
+						break;
+
+					// misc commands
+					case 0x46: // arpeggio
+						command = CMD_ARPEGGIO;
+						break;
+					case 0x47: // set finetune
+						command = CMD_S3MCMDEX;
+						param |= 0x20;
+						break;
+					case 0x48: // set balance (panning?)
+						command = CMD_PANNING8;
+						param = (param << 4) + 8;
+						break;
+
+					default:
+						command = CMD_NONE;
+						break;
+					}
+
+					row_data->command = command;
+					row_data->param = param;
+				}
+			}
+			// Pattern break for short patterns (so saving the modules as S3M won't break it)
+			if(phdr->numRows != 64)
+				TryWriteEffect(nPat, phdr->numRows - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, false);
+
+			dwMemPos = dwNextPattern;
+			if(dwMemPos > dwPatEndPos) break;
+		}
+	}
+
+	return true;
+
+	#undef ASSERT_CAN_READ
+
 }

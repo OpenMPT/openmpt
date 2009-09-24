@@ -616,6 +616,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			const ORDERINDEX startOrder= static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
 			ORDERINDEX nNextOrder;
 			nNextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(startOrder);
+			if(nNextOrder == startOrder) nNextOrder = ORDERINDEX_INVALID;
 			//Ignore skip items(+++) from sequence.
 			const ORDERINDEX ordCount = pSndFile->Order.GetLength();
 

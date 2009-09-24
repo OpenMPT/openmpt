@@ -590,6 +590,8 @@ void COptionsColors::OnLoadColorScheme()
 	TCHAR sFilename[MAX_PATH];
 	strcpy(sFilename, dlg.GetPathName());
 
+	// Ensure that all colours are reset (for outdated colour schemes)
+	OnPresetMPT();
 	for(int i = 0; i < MAX_MODCOLORS; i++)
 	{
 		TCHAR sKeyName[16];
