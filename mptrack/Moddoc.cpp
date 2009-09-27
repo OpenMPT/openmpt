@@ -3159,7 +3159,7 @@ void CModDoc::OnPatternRestart()
 		END_CRITICAL();
 		
 		// set playback timer in the status bar
-		SetElapsedTime(static_cast<ORDERINDEX>(nOrd), nRow, true);
+		SetElapsedTime(nOrd, nRow, true);
 
 		if (pModPlaying != this)
 		{
@@ -3214,7 +3214,7 @@ void CModDoc::OnPatternPlay()
 		END_CRITICAL();
 
 		// set playback timer in the status bar
-		SetElapsedTime(static_cast<ORDERINDEX>(nOrd), nRow, true);
+		SetElapsedTime(nOrd, nRow, true);
 
 		if (pModPlaying != this) {
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
@@ -3272,7 +3272,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		END_CRITICAL();
 
 		// set playback timer in the status bar
-		SetElapsedTime(static_cast<ORDERINDEX>(nOrd), nRow, true);
+		SetElapsedTime(nOrd, nRow, true);
 		
 		if (pModPlaying != this)	{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977

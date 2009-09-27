@@ -134,8 +134,9 @@ void CMIDIMappingDialog::OnLbnSelchangeList1()
 	if(i < 0 || (size_t)i >= m_rMIDIMapper.GetCount()) return;
 	m_Setting = m_rMIDIMapper.GetDirective(i);
 	CMIDIMappingDirective& activeSetting = m_Setting;
-	CheckDlgButton(IDC_CHECKACTIVE, activeSetting.IsActive() ? MF_CHECKED : MF_UNCHECKED);
-	CheckDlgButton(IDC_CHECKCAPTURE, activeSetting.GetCaptureMIDI() ? MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECKACTIVE, activeSetting.IsActive() ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECKCAPTURE, activeSetting.GetCaptureMIDI() ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK_PATRECORD, activeSetting.GetAllowPatternEdit() ? BST_CHECKED : BST_UNCHECKED);
 	
 	m_ChannelCBox.SetCurSel(activeSetting.GetChannel());
 

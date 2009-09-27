@@ -2080,10 +2080,10 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 		{
 			UINT nDefault = 0;
 			BOOL bSep = FALSE;
-			DWORD dwItemType, dwItemNo;
+			DWORD dwItemType;
 
 			dwItemType = GetModItem(hItem);
-			dwItemNo = dwItemType >> 16;
+			const uint16 nItemNo = HIWORD(dwItemType);
 			dwItemType &= 0xFFFF;
 			SelectItem(hItem);
 			switch(dwItemType)
@@ -2111,7 +2111,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					if ((pModDoc) && (!pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-						AppendMenu(hMenu, (pModDoc->IsSampleMuted(dwItemNo) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Sample");
+						AppendMenu(hMenu, (pModDoc->IsSampleMuted(nItemNo) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Sample");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "&Solo Sample");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, "&Unmute all");
 					}
@@ -2128,7 +2128,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					if ((pModDoc) && (pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-						AppendMenu(hMenu, (pModDoc->IsInstrumentMuted(dwItemNo) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Instrument");
+						AppendMenu(hMenu, (pModDoc->IsInstrumentMuted(nItemNo) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Instrument");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "&Solo Instrument");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, "&Unmute all");
 // -> CODE#0023
@@ -2149,7 +2149,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					CModDoc *pModDoc = GetDocumentFromItem(hItem);
 					CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 					if (pSndFile) {
-						PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[dwItemNo];
+						PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[nItemNo];
 						if (pPlugin) {
 							bool bypassed = ((pPlugin->Info.dwInputRouting&MIXPLUG_INPUTF_BYPASS) != 0);
 							AppendMenu(hMenu, (bypassed?MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Bypass");
@@ -2490,29 +2490,29 @@ void CModTree::OnMuteTreeItem()
 //-----------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
-	DWORD dwItemType, dwItemNo;
+	DWORD dwItemType;
 	CModDoc *pModDoc;
 
 	dwItemType = GetModItem(hItem);
-	dwItemNo = dwItemType >> 16;
+	const uint16 nItemNo = HIWORD(dwItemType);
 	dwItemType &= 0xFFFF;
 	pModDoc = GetDocumentFromItem(hItem);
 	if (pModDoc)
 	{
 		if ((dwItemType == MODITEM_SAMPLE) && (!pModDoc->GetNumInstruments()))
 		{
-			pModDoc->MuteSample(dwItemNo, (pModDoc->IsSampleMuted(dwItemNo)) ? FALSE : TRUE);
+			pModDoc->MuteSample(nItemNo, (pModDoc->IsSampleMuted(nItemNo)) ? FALSE : TRUE);
 		} else
 		if ((dwItemType == MODITEM_INSTRUMENT) && (pModDoc->GetNumInstruments()))
 		{
-			pModDoc->MuteInstrument(dwItemNo, (pModDoc->IsInstrumentMuted(dwItemNo)) ? FALSE : TRUE);
+			pModDoc->MuteInstrument(nItemNo, (pModDoc->IsInstrumentMuted(nItemNo)) ? FALSE : TRUE);
 		}
 
 		if ((dwItemType == MODITEM_EFFECT))
 		{
 			CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 			if (pSndFile) {
-				PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[dwItemNo];
+				PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[nItemNo];
 				if (pPlugin) {
 					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 					if (pVstPlugin) pVstPlugin->Bypass();
@@ -2528,11 +2528,11 @@ void CModTree::OnSoloTreeItem()
 //-----------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
-	DWORD dwItemType, dwItemNo;
+	DWORD dwItemType;
 	CModDoc *pModDoc;
 
 	dwItemType = GetModItem(hItem);
-	dwItemNo = dwItemType >> 16;
+	const uint16 nItemNo = HIWORD(dwItemType);
 	dwItemType &= 0xFFFF;
 	pModDoc = GetDocumentFromItem(hItem);
 	if (pModDoc)
@@ -2541,16 +2541,16 @@ void CModTree::OnSoloTreeItem()
 		INSTRUMENTINDEX nInstruments = pModDoc->GetNumInstruments();
 		if ((dwItemType == MODITEM_SAMPLE) && (!nInstruments))
 		{
-			for (UINT i=1; i<=nSamples; i++)
+			for (SAMPLEINDEX i=1; i<=nSamples; i++)
 			{
-				pModDoc->MuteSample(i, (i == dwItemNo) ? FALSE : TRUE);
+				pModDoc->MuteSample(i, (i == nItemNo) ? FALSE : TRUE);
 			}
 		} else
 		if ((dwItemType == MODITEM_INSTRUMENT) && (nInstruments))
 		{
-			for (UINT i=1; i<=nInstruments; i++)
+			for (INSTRUMENTINDEX i=1; i<=nInstruments; i++)
 			{
-				pModDoc->MuteInstrument(i, (i == dwItemNo) ? FALSE : TRUE);
+				pModDoc->MuteInstrument(i, (i == nItemNo) ? FALSE : TRUE);
 			}
 		}
 	}
@@ -2572,11 +2572,11 @@ void CModTree::OnUnmuteAllTreeItem()
 		INSTRUMENTINDEX nInstruments = pModDoc->GetNumInstruments();
 		if ((dwItemType == MODITEM_SAMPLE) || (dwItemType == MODITEM_INSTRUMENT))
 		{
-			for (UINT i=1; i<=nSamples; i++)
+			for (SAMPLEINDEX i=1; i<=nSamples; i++)
 			{
 				pModDoc->MuteSample(i, FALSE);
 			}
-			for (UINT j=1; j<=nInstruments; j++)
+			for (INSTRUMENTINDEX j=1; j<=nInstruments; j++)
 			{
 				pModDoc->MuteInstrument(j, FALSE);
 			}
@@ -2623,14 +2623,14 @@ void CModTree::OnSaveItem()
 {
 	HTREEITEM hItem = GetSelectedItem();
 	DWORD dwItemType = GetModItem(hItem);
-	DWORD dwItem = dwItemType >> 16;
+	const uint16 nItem = HIWORD(dwItemType);
 	dwItemType &= 0xFFFF;
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
 	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
-	if(pSndFile && dwItem){
+	if(pSndFile && nItem){
 
-		if(pSndFile->m_szInstrumentPath[dwItem-1][0] == '\0'){
+		if(pSndFile->m_szInstrumentPath[nItem-1][0] == '\0'){
 			CHAR pszFileNames[_MAX_PATH];
 
 			CFileDialog dlg(FALSE, (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? "iti" : "xi", NULL, 
@@ -2646,23 +2646,23 @@ void CModTree::OnSaveItem()
 			dlg.m_ofn.lpstrFile = pszFileNames;
 			dlg.m_ofn.nMaxFile = _MAX_PATH;
 
-			if(dlg.DoModal() == IDOK) strcpy(pSndFile->m_szInstrumentPath[dwItem-1], pszFileNames);
+			if(dlg.DoModal() == IDOK) strcpy(pSndFile->m_szInstrumentPath[nItem-1], pszFileNames);
 
 			dlg.m_ofn.lpstrFile = NULL;
 			dlg.m_ofn.nMaxFile = 0;
 		}
 
-		if(pSndFile->m_szInstrumentPath[dwItem-1][0] != '\0'){
-			int size = strlen(pSndFile->m_szInstrumentPath[dwItem-1]);
-			BOOL iti = _stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-3],"iti") == 0;
-			BOOL xi  = _stricmp(&pSndFile->m_szInstrumentPath[dwItem-1][size-2],"xi") == 0;
+		if(pSndFile->m_szInstrumentPath[nItem-1][0] != '\0'){
+			int size = strlen(pSndFile->m_szInstrumentPath[nItem-1]);
+			BOOL iti = _stricmp(&pSndFile->m_szInstrumentPath[nItem-1][size-3],"iti") == 0;
+			BOOL xi  = _stricmp(&pSndFile->m_szInstrumentPath[nItem-1][size-2],"xi") == 0;
 
 			if(iti || (!iti && !xi  && pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
-				pSndFile->SaveITIInstrument(dwItem, pSndFile->m_szInstrumentPath[dwItem-1]);
+				pSndFile->SaveITIInstrument(nItem, pSndFile->m_szInstrumentPath[nItem-1]);
 			if(xi  || (!xi  && !iti && pSndFile->m_nType == MOD_TYPE_XM))
-				pSndFile->SaveXIInstrument(dwItem, pSndFile->m_szInstrumentPath[dwItem-1]);
+				pSndFile->SaveXIInstrument(nItem, pSndFile->m_szInstrumentPath[nItem-1]);
 
-			pSndFile->instrumentModified[dwItem-1] = FALSE;
+			pSndFile->instrumentModified[nItem-1] = FALSE;
 		}
 
 		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);

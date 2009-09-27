@@ -2787,7 +2787,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 				KeyboardMap[iNote] = pIns->Keyboard[iNote];
 			} else
 			{
-				KeyboardMap[iNote] = (BYTE)nSample;
+				KeyboardMap[iNote] = (WORD)nSample;
 			}
 /* rewbs.note: I don't think we need this with cust keys.
 // -> CODE#0009
