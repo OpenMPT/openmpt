@@ -535,7 +535,7 @@ protected:
 	CSliderCtrl m_SbOctave;
 	CSoundFile *m_pSndFile;
 	UINT m_nInstrument;
-	BYTE KeyboardMap[NOTE_MAX];
+	WORD KeyboardMap[NOTE_MAX];
 
 public:
 	CSampleMapDlg(CSoundFile *pSndFile, UINT nInstr, CWnd *parent=NULL):CDialog(IDD_EDITSAMPLEMAP, parent)
