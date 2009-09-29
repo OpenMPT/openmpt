@@ -1045,10 +1045,10 @@ void CSoundFile::SetAGC(BOOL b)
 }
 
 
-UINT CSoundFile::GetNumPatterns() const
+ORDERINDEX CSoundFile::GetNumPatterns() const
 //-------------------------------------
 {
-	UINT i = 0;
+	ORDERINDEX i = 0;
 	while ((i < Order.size()) && (Order[i] < Order.GetInvalidPatIndex())) i++;
 	return i;
 }

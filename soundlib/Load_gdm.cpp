@@ -96,7 +96,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
-	for(int i = 0; i < 32; i++)
+	for(CHANNELINDEX i = 0; i < 32; i++)
 	{
 		if(pHeader->PanMap[i] < 16)
 		{		

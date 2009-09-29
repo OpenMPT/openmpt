@@ -4180,7 +4180,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}
 
 		// -- old style note cut/off: erase instrument number
-		if (oldStyle && ((p->note==NOTE_NOTECUT) || (p->note==NOTE_KEYOFF))) {
+		if (oldStyle && ((p->note == NOTE_NOTECUT) || (p->note == NOTE_KEYOFF) || (p->note == NOTE_FADE))) {
 			p->instr=0;
 		}
 		
