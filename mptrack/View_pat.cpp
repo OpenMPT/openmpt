@@ -2293,10 +2293,13 @@ void CViewPattern::Interpolate(UINT type)
 				case EFFECT_COLUMN:
 					if(doPCinterpolation)
 					{	// With PC/PCs notes, copy PCs note and plug index to all rows where
-						// effect interpolation is done.
+						// effect interpolation is done, if no PC note is there.
 						const uint16 val = static_cast<uint16>(vsrc + ((vdest - vsrc) * (int)i + verr) / distance);
-						pcmd->note = PCnote;
-						pcmd->instr = PCinst;
+						if(pcmd->note != NOTE_PC && pcmd->note != NOTE_PCS)
+						{
+							pcmd->note = PCnote;
+							pcmd->instr = PCinst;
+						}
 						pcmd->SetValueVolCol(PCparam);
 						pcmd->SetValueEffectCol(val);
 					}

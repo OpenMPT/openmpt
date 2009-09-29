@@ -2349,7 +2349,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 						
 						if(m[col].note == NOTE_PCS || m[col].note == NOTE_PC)
 						{
-							if(s[8] != '.')
+							if(s[8] != '.' && s[8] > ' ')
 							{
 								char val[4];
 								memcpy(val, s+8, 3);
