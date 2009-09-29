@@ -847,7 +847,7 @@ struct PSM16SMPHEADER
 	DWORD length;		// in bytes
 	DWORD loopStart;	// in samples?
 	DWORD loopEnd;		// in samples?
-	CHAR  finetune;		// 0 ... 15 (useless?)
+	CHAR  finetune;		// 0 ... 15 (useless? also, why is this almost always 70?)
 	BYTE  volume;		// default volume
 	WORD  c2freq;
 };

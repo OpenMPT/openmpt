@@ -38,9 +38,9 @@ public:
 	//ignoring request.
 	bool Insert(const PATTERNINDEX index, const ROWINDEX rows);
 	
-	//Insert pattern to position with the lowest index, and return that index, -1
+	//Insert pattern to position with the lowest index, and return that index, PATTERNINDEX_INVALID
 	//on failure.
-	int Insert(const ROWINDEX rows);
+	PATTERNINDEX Insert(const ROWINDEX rows);
 
 	//Remove pattern from given position. Currently it actually makes the pattern
 	//'invisible' - the pattern data is cleared but the actual pattern object won't get removed.

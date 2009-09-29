@@ -623,9 +623,9 @@ public:
 
 	BOOL SetMasterVolume(UINT vol, BOOL bAdjustAGC=FALSE);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
-	UINT GetNumPatterns() const;
-	UINT GetNumInstruments() const {return m_nInstruments;} 
-	UINT GetNumSamples() const { return m_nSamples; }
+	ORDERINDEX GetNumPatterns() const;
+	INSTRUMENTINDEX GetNumInstruments() const {return m_nInstruments;} 
+	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
 	UINT GetCurrentPattern() const { return m_nPattern; }
 	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(m_nCurrentPattern); }

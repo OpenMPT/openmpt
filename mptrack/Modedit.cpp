@@ -104,11 +104,22 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		// Merge multiple sequences
 		m_SndFile.Order.SetSequence(0);
 		m_SndFile.Order.resize(m_SndFile.Order.GetLengthTailTrimmed());
-		SEQUENCEINDEX removedSequences = 0;
+		SEQUENCEINDEX removedSequences = 0; // sequence count
+		vector <SEQUENCEINDEX> patternsFixed; // pattern fixed by other sequence already?
+		patternsFixed.resize(m_SndFile.Patterns.Size(), SEQUENCEINDEX_INVALID);
+		// Set up vector
+		for(ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.GetLengthTailTrimmed(); nOrd++)
+		{
+			PATTERNINDEX nPat = m_SndFile.Order[nOrd];
+			if(!m_SndFile.Patterns.IsValidPat(nPat)) continue;
+			patternsFixed[nPat] = 0;
+		}
+
 		while(m_SndFile.Order.GetNumSequences() > 1)
 		{
 			removedSequences++;
-			if(m_SndFile.Order.GetLengthTailTrimmed() + 1 + m_SndFile.Order.GetSequence(1).GetLengthTailTrimmed() > m_SndFile.GetModSpecifications(nNewType).ordersMax)
+			const ORDERINDEX nFirstOrder = m_SndFile.Order.GetLengthTailTrimmed() + 1; // +1 for separator item
+			if(nFirstOrder + m_SndFile.Order.GetSequence(1).GetLengthTailTrimmed() > m_SndFile.GetModSpecifications(nNewType).ordersMax)
 			{
 				wsprintf(s, "WARNING: Cannot merge Sequence %d (too long!)\n", removedSequences);
 				AddToLog(s);
@@ -118,7 +129,43 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 			m_SndFile.Order.Append(m_SndFile.Order.GetInvalidPatIndex()); // Separator item
 			for(ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.GetSequence(1).GetLengthTailTrimmed(); nOrd++)
 			{
-				m_SndFile.Order.Append(m_SndFile.Order.GetSequence(1)[nOrd]);
+				PATTERNINDEX nPat = m_SndFile.Order.GetSequence(1)[nOrd];
+				m_SndFile.Order.Append(nPat);
+
+				// Try to fix patterns (Bxx commands)
+				if(!m_SndFile.Patterns.IsValidPat(nPat)) continue;
+
+				MODCOMMAND *m = m_SndFile.Patterns[nPat];
+				for (UINT len = 0; len < m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; m++, len++)
+				{
+					if(m->command == CMD_POSITIONJUMP)
+					{
+						if(patternsFixed[nPat] != SEQUENCEINDEX_INVALID && patternsFixed[nPat] != removedSequences)
+						{
+							// Oops, some other sequence uses this pattern already.
+							const PATTERNINDEX nNewPat = m_SndFile.Patterns.Insert(m_SndFile.PatternSize[nPat]);
+							if(nNewPat != SEQUENCEINDEX_INVALID)
+							{
+								// could create new pattern - copy data over and continue from here.
+								m_SndFile.Order[nFirstOrder + nOrd] = nNewPat;
+								MODCOMMAND *pSrc = m_SndFile.Patterns[nPat];
+								MODCOMMAND *pDest = m_SndFile.Patterns[nNewPat];
+								memcpy(pDest, pSrc, m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels * sizeof(MODCOMMAND));
+								m = pDest + len;
+								patternsFixed.resize(max(nNewPat + 1, patternsFixed.size()), SEQUENCEINDEX_INVALID);
+								nPat = nNewPat;
+							} else
+							{
+								// cannot create new pattern: notify the user
+								wsprintf(s, "CONFLICT: Pattern break commands in Pattern %d might be broken since it has been used in several sequences!", nPat);
+								AddToLog(s);
+							}
+						}
+						m->param += nFirstOrder;
+						patternsFixed[nPat] = removedSequences;
+					}
+				}
+
 			}
 			m_SndFile.Order.RemoveSequence(1);
 		}
