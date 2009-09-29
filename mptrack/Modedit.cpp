@@ -80,6 +80,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		-User definable tunings.
 		-Extended pattern range
 		-Extended sequence
+		-Multiple sequences
 
 		Extended features in IT/XM/S3M/MOD(not all listed below are available in all of those formats):
 		-plugs
@@ -100,6 +101,27 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		-For more info, see e.g. SaveExtendedSongProperties(), SaveExtendedInstrumentProperties()
 		*/
 		
+		// Merge multiple sequences
+		m_SndFile.Order.SetSequence(0);
+		m_SndFile.Order.resize(m_SndFile.Order.GetLengthTailTrimmed());
+		SEQUENCEINDEX removedSequences = 0;
+		while(m_SndFile.Order.GetNumSequences() > 1)
+		{
+			removedSequences++;
+			if(m_SndFile.Order.GetLengthTailTrimmed() + 1 + m_SndFile.Order.GetSequence(1).GetLengthTailTrimmed() > m_SndFile.GetModSpecifications(nNewType).ordersMax)
+			{
+				wsprintf(s, "WARNING: Cannot merge Sequence %d (too long!)\n", removedSequences);
+				AddToLog(s);
+				m_SndFile.Order.RemoveSequence(1);
+				continue;
+			}
+			m_SndFile.Order.Append(m_SndFile.Order.GetInvalidPatIndex()); // Separator item
+			for(ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.GetSequence(1).GetLengthTailTrimmed(); nOrd++)
+			{
+				m_SndFile.Order.Append(m_SndFile.Order.GetSequence(1)[nOrd]);
+			}
+			m_SndFile.Order.RemoveSequence(1);
+		}
 	}
 
 	// Check if conversion to 64 rows is necessary
