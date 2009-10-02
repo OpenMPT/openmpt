@@ -326,7 +326,9 @@ typedef struct MPTNOTIFICATION
 {
 	DWORD dwType;
 	DWORD dwLatency;
-	UINT nOrder, nPattern, nRow;			// Always valid
+	ORDERINDEX nOrder;			// Always valid
+	PATTERNINDEX nPattern;		// dito
+	ROWINDEX nRow;				// dito
 	DWORD dwPos[MAX_CHANNELS];	// sample/envelope pos for each channel if >= 0
 } MPTNOTIFICATION, *PMPTNOTIFICATION;
 

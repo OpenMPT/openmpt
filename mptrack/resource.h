@@ -889,6 +889,7 @@
 #define IDC_SAVE_COLORSCHEME            2388
 #define IDC_EDIT_SEQUENCE_NAME          2389
 #define IDC_STATIC_SEQUENCE_NAME        2390
+#define IDC_STATIC_SEQUENCE_NAME_FRAME  2391
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1132,7 +1133,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        521
 #define _APS_NEXT_COMMAND_VALUE         59230
-#define _APS_NEXT_CONTROL_VALUE         2391
+#define _APS_NEXT_CONTROL_VALUE         2392
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -296,6 +296,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI2), false);
 
 		// Show/hide multisequence controls according the current modtype.
+		GetDlgItem(IDC_STATIC_SEQUENCE_NAME_FRAME)->ShowWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
 		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->ShowWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
 		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->ShowWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
 	}
@@ -608,6 +609,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		if (pSndFile)
 		{
 			lParam &= 0x7FFF;
+			m_OrderList.OnSelectSequence(pSndFile->Order.GetCurrentSequenceIndex()); // new sequence already set in view_tre.cpp, GetModItem()
 			m_OrderList.SetCurSel((ORDERINDEX)lParam);
 			SetCurrentPattern(pSndFile->Order[lParam]);
 		}

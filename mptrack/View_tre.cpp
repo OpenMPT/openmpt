@@ -296,7 +296,8 @@ VOID CModTree::AddDocument(CModDoc *pModDoc)
 		if (pInfo)
 		{
 			pInfo->pModDoc = pModDoc;
-			pInfo->nOrdSel = (UINT)-1;
+			pInfo->nSeqSel = SEQUENCEINDEX_INVALID;
+			pInfo->nOrdSel = ORDERINDEX_INVALID;
 			DocInfo[nNewNdx] = pInfo;
 			UpdateView(nNewNdx, HINT_MODTYPE);
 			if (pInfo->hSong)
@@ -688,61 +689,113 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	if ((pInfo->hOrders) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_SMPNAMES))
 	{
 		const DWORD nPat = (lHint >> HINT_SHIFT_PAT);
-		// If there are items past the new sequence length, delete them.
-		for(size_t i = pSndFile->Order.GetLength(); i < pInfo->tiOrders.size(); i++) if (pInfo->tiOrders[i])
-			{DeleteItem(pInfo->tiOrders[i]); pInfo->tiOrders[i] = NULL;}
-		if (pInfo->tiOrders.size() < pSndFile->Order.GetLength()) // Resize tiOrders if needed.
-			pInfo->tiOrders.resize(pSndFile->Order.GetLength(), NULL);
-		UINT imin=0, imax = pSndFile->Order.GetLastIndex();
-		const bool patNamesOnly = (hintFlagPart == HINT_PATNAMES);
-		//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < pSndFile->Order.size())) imin = imax = dwHintParam;
-		BOOL bEnded = FALSE;
-		for (UINT iOrd=imin; iOrd<=imax; iOrd++)
+		// If there are too many sequences, delete them.
+		for(size_t nSeq = pSndFile->Order.GetNumSequences(); nSeq < pInfo->tiSequences.size(); nSeq++) if (pInfo->tiSequences[nSeq])
 		{
-			if (pSndFile->Order[iOrd] == pSndFile->Order.GetInvalidPatIndex()) bEnded = TRUE;
-			if (bEnded)
+			for(size_t nOrd = 0; nOrd < pInfo->tiOrders[nSeq].size(); nOrd++) if (pInfo->tiOrders[nSeq][nOrd])
 			{
-				if (pInfo->tiOrders[iOrd])
+				DeleteItem(pInfo->tiOrders[nSeq][nOrd]); pInfo->tiOrders[nSeq][nOrd] = NULL;
+			}
+			DeleteItem(pInfo->tiSequences[nSeq]); pInfo->tiSequences[nSeq] = NULL;
+		}
+		if (pInfo->tiSequences.size() < pSndFile->Order.GetNumSequences()) // Resize tiSequences if needed.
+		{
+			pInfo->tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
+			pInfo->tiOrders.resize(pSndFile->Order.GetNumSequences());
+		}
+
+		/* // number of sequences changed: wipe tree first (is this necessary?)
+		if(pInfo->tiOrders.size() != pSndFile->Order.GetNumSequences())
+		{
+			for(size_t nSeq = 0; nSeq < pInfo->tiOrders.size(); nSeq++)
+			{
+				for(size_t nOrd = 0; nOrd < pInfo->tiOrders[nSeq].size(); nOrd++) if (pInfo->tiOrders[nSeq][nOrd])
 				{
-					DeleteItem(pInfo->tiOrders[iOrd]);
-					pInfo->tiOrders[iOrd] = NULL;
+					DeleteItem(pInfo->tiOrders[nSeq][nOrd]); pInfo->tiOrders[nSeq][nOrd] = NULL;
 				}
-			} else
+				DeleteItem(pInfo->tiSequences[nSeq]); pInfo->tiSequences[nSeq] = NULL;
+			}
+			pInfo->tiOrders.resize(pSndFile->Order.GetNumSequences());
+			pInfo->tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
+		}*/
+
+		HTREEITEM hAncestorNode = pInfo->hOrders;
+
+		// go through all sequences
+		for(SEQUENCEINDEX nSeq = 0; nSeq < pSndFile->Order.GetNumSequences(); nSeq++)
+		{
+			// TODO update sequence names
+			if(pSndFile->Order.GetNumSequences() > 1)
 			{
-				if(patNamesOnly && pSndFile->Order[iOrd] != nPat)
-					continue;
-				UINT state = (iOrd == pInfo->nOrdSel) ? TVIS_BOLD : 0;
-				if (pSndFile->Order[iOrd] < pSndFile->Patterns.Size())
+				// more than one sequence -> add folder
+				if(pInfo->tiSequences[nSeq] == NULL)
 				{
-					stmp[0] = 0;
-					pSndFile->GetPatternName(pSndFile->Order[iOrd], stmp, sizeof(stmp));
-					if (stmp[0])
+					CString sSeqName = pSndFile->Order.GetSequence(nSeq).m_sName;
+					if(sSeqName.IsEmpty()) sSeqName.Format("Sequence %d", nSeq);
+					pInfo->tiSequences[nSeq] = InsertItem(sSeqName, IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hOrders, TVI_LAST);
+				}
+				hAncestorNode = pInfo->tiSequences[nSeq];
+			}
+
+			// If there are items past the new sequence length, delete them.
+			for(size_t nOrd = pSndFile->Order.GetSequence(nSeq).GetLength(); nOrd < pInfo->tiOrders[nSeq].size(); nOrd++) if (pInfo->tiOrders[nSeq][nOrd])
+			{
+				DeleteItem(pInfo->tiOrders[nSeq][nOrd]); pInfo->tiOrders[nSeq][nOrd] = NULL;
+			}
+			if (pInfo->tiOrders[nSeq].size() < pSndFile->Order.GetSequence(nSeq).GetLength()) // Resize tiOrders if needed.
+				pInfo->tiOrders[nSeq].resize(pSndFile->Order.GetSequence(nSeq).GetLength(), NULL);
+			UINT imin = 0, imax = pSndFile->Order.GetSequence(nSeq).GetLastIndex();
+			const bool patNamesOnly = (hintFlagPart == HINT_PATNAMES);
+
+			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < pSndFile->Order.size())) imin = imax = dwHintParam;
+			bool bEnded = false;
+			for (UINT iOrd=imin; iOrd<=imax; iOrd++)
+			{
+				if (pSndFile->Order.GetSequence(nSeq)[iOrd] == pSndFile->Order.GetInvalidPatIndex()) bEnded = true;
+				if (bEnded)
+				{
+					if (pInfo->tiOrders[nSeq][iOrd])
 					{
-						wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %d: %s" : "[%02d] %d: %s",
-							iOrd, pSndFile->Order[iOrd], stmp);
-					} else
-					{
-						wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] Pattern %d" : "[%02d] Pattern %d",
-							iOrd, pSndFile->Order[iOrd]);
+						DeleteItem(pInfo->tiOrders[nSeq][iOrd]);
+						pInfo->tiOrders[nSeq][iOrd] = NULL;
 					}
 				} else
 				{
-					wsprintf(s, "[%02d] Skip", iOrd);
-				}
-				if (pInfo->tiOrders[iOrd])
-				{
-					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
-					tvi.state = 0;
-					tvi.stateMask = TVIS_BOLD;
-					tvi.hItem = pInfo->tiOrders[iOrd];
-					tvi.pszText = stmp;
-					tvi.cchTextMax = sizeof(stmp);
-					GetItem(&tvi);
-					if ((strcmp(s, stmp)) || (tvi.state != state))
-						SetItem(pInfo->tiOrders[iOrd], TVIF_TEXT | TVIF_STATE, s, 0, 0, state, TVIS_BOLD, 0);
-				} else
-				{
-					pInfo->tiOrders[iOrd] = InsertItem(s, IMAGE_PARTITION, IMAGE_PARTITION,	pInfo->hOrders, TVI_LAST);
+					if(patNamesOnly && pSndFile->Order.GetSequence(nSeq)[iOrd] != nPat)
+						continue;
+					UINT state = (iOrd == pInfo->nOrdSel && nSeq == pInfo->nSeqSel) ? TVIS_BOLD : 0;
+					if (pSndFile->Order.GetSequence(nSeq)[iOrd] < pSndFile->Patterns.Size())
+					{
+						stmp[0] = 0;
+						pSndFile->GetPatternName(pSndFile->Order.GetSequence(nSeq)[iOrd], stmp, sizeof(stmp));
+						if (stmp[0])
+						{
+							wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %d: %s" : "[%02d] %d: %s",
+								iOrd, pSndFile->Order.GetSequence(nSeq)[iOrd], stmp);
+						} else
+						{
+							wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] Pattern %d" : "[%02d] Pattern %d",
+								iOrd, pSndFile->Order.GetSequence(nSeq)[iOrd]);
+						}
+					} else
+					{
+						wsprintf(s, "[%02d] Skip", iOrd);
+					}
+					if (pInfo->tiOrders[nSeq][iOrd])
+					{
+						tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
+						tvi.state = 0;
+						tvi.stateMask = TVIS_BOLD;
+						tvi.hItem = pInfo->tiOrders[nSeq][iOrd];
+						tvi.pszText = stmp;
+						tvi.cchTextMax = sizeof(stmp);
+						GetItem(&tvi);
+						if ((strcmp(s, stmp)) || (tvi.state != state))
+							SetItem(pInfo->tiOrders[nSeq][iOrd], TVIF_TEXT | TVIF_STATE, s, 0, 0, state, TVIS_BOLD, 0);
+					} else
+					{
+						pInfo->tiOrders[nSeq][iOrd] = InsertItem(s, IMAGE_PARTITION, IMAGE_PARTITION, hAncestorNode, TVI_LAST);
+					}
 				}
 			}
 		}
@@ -899,7 +952,7 @@ DWORD CModTree::GetModItem(HTREEITEM hItem)
 //-----------------------------------------
 {
 	LPARAM lParam;
-	HTREEITEM hItemParent, hRootParent;
+	HTREEITEM hItemParent, hItemParentParent, hRootParent;
 
 	if (!hItem) return 0;
 	// First, test root items
@@ -908,9 +961,10 @@ DWORD CModTree::GetModItem(HTREEITEM hItem)
 	// Test DLS Banks
 	lParam = GetItemData(hItem);
 	hItemParent = GetParentItem(hItem);
+	hItemParentParent = GetParentItem(hItemParent);
 	hRootParent = hItemParent;
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
-	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
+	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
 	if ((hRootParent != NULL) && (m_pDataTree))
 	{
 		HTREEITEM h;
@@ -971,13 +1025,29 @@ DWORD CModTree::GetModItem(HTREEITEM hItem)
 			if (hItem == pSong->hSamples) return MODITEM_HDR_SAMPLES;
 			if (hItem == pSong->hInstruments) return MODITEM_HDR_INSTRUMENTS;
 			if (hItem == pSong->hComments) return MODITEM_COMMENTS;
-			// Order List ?
-			if (hItemParent == pSong->hOrders)
+			// Order List? (either "order list" or "sequence x" item as parent)
+			if ((hItemParent == pSong->hOrders && pSong->tiSequences.size() == 1) || (hItemParentParent == pSong->hOrders))
 			{
-				ASSERT(pSong->tiOrders.size() == pSndFile->Order.size());
-				for (UINT i=0; i<pSong->tiOrders.size(); i++)
+				// find sequence this item belongs to
+				for(SEQUENCEINDEX nSeq = 0; nSeq < pSong->tiOrders.size(); nSeq++)
 				{
-					if (hItem == pSong->tiOrders[i]) return (MODITEM_ORDER | (i << 16));
+					ASSERT(pSong->tiOrders[nSeq].size() == pSndFile->Order.size());
+					for(ORDERINDEX nOrd = 0; nOrd < pSong->tiOrders[nSeq].size(); nOrd++)
+					{
+						if (hItem == pSong->tiOrders[nSeq][nOrd])
+						{
+							if(pSong->pModDoc->GetSoundFile() != nullptr)
+							{
+								pSong->pModDoc->GetSoundFile()->Order.SetSequence(nSeq);
+								// TODO this is buggy
+								//OnSelectSequence must be called? Or send a message?
+							}
+							//if(nSeq != pSong->nSeqSel) // sequence change
+							//	return (MODITEM_ORDER_SEQUENCE | (nOrd << 16));
+							//else // same sequence
+							return (MODITEM_ORDER | (nOrd << 16));
+						}
+					}
 				}
 			}
 			// Pattern ?
@@ -1568,7 +1638,13 @@ VOID CModTree::FillInstrumentLibrary()
 					  || (!lstrcmpi(s, ".dmf"))
 					  || (!lstrcmpi(s, ".mt2"))
 					  || (!lstrcmpi(s, ".med"))
-					  || (!lstrcmpi(s, ".wow")))))
+					  || (!lstrcmpi(s, ".wow"))
+					  || (!lstrcmpi(s, ".gdm"))
+					  || (!lstrcmpi(s, ".imf"))
+#ifndef NO_MO3_SUPPORT
+					  || (!lstrcmpi(s, ".mo3"))
+#endif
+					  )))
 					{
 						if (m_pDataTree)
 						{
@@ -1910,10 +1986,12 @@ VOID CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 {
 	for (UINT i=0; i<MODTREE_MAX_DOCUMENTS; i++) if ((DocInfo[i]) && (DocInfo[i]->pModDoc == pModDoc))
 	{
-		UINT nNewOrd = (pNotify) ? pNotify->nOrder : (UINT)-1;
-		if (nNewOrd != DocInfo[i]->nOrdSel)
+		ORDERINDEX nNewOrd = (pNotify) ? pNotify->nOrder : ORDERINDEX_INVALID;
+		SEQUENCEINDEX nNewSeq = (pModDoc->GetSoundFile() != nullptr) ? pModDoc->GetSoundFile()->Order.GetCurrentSequenceIndex() : SEQUENCEINDEX_INVALID;
+		if (nNewOrd != DocInfo[i]->nOrdSel || nNewSeq != DocInfo[i]->nSeqSel)
 		{
 			DocInfo[i]->nOrdSel = nNewOrd;
+			DocInfo[i]->nSeqSel = nNewSeq;
 			UpdateView(i, HINT_MODSEQUENCE);
 		}
 		break;
