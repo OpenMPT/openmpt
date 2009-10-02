@@ -44,24 +44,32 @@ enum {
 struct MODTREEDOCINFO
 {
 	CModDoc *pModDoc;
-	UINT nOrdSel;
+	SEQUENCEINDEX nSeqSel;
+	ORDERINDEX nOrdSel;
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
 	vector<HTREEITEM> tiPatterns;
 	HTREEITEM tiSamples[MAX_SAMPLES];
 	HTREEITEM tiInstruments[MAX_INSTRUMENTS];
-	vector<HTREEITEM> tiOrders;
+	vector<vector<HTREEITEM>> tiOrders;
+	vector<HTREEITEM> tiSequences;
 	HTREEITEM tiEffects[MAX_MIXPLUGINS];
 
 	
 	MODTREEDOCINFO(const CSoundFile* const pSndFile)
 	{
 		pModDoc = NULL;
-		nOrdSel = 0;
+		nSeqSel = SEQUENCEINDEX_INVALID;
+		nOrdSel = ORDERINDEX_INVALID;
 		hSong = hPatterns = hSamples = hInstruments = hComments = hOrders = hEffects = NULL;
 		if(pSndFile != NULL)
 		{
 			tiPatterns.resize(pSndFile->Patterns.Size(), NULL);
-			tiOrders.resize(pSndFile->Order.GetLength(), NULL);
+			tiOrders.resize(pSndFile->Order.GetNumSequences());
+			for(SEQUENCEINDEX i = 0; i < tiOrders.size(); i++)
+			{
+				//tiOrders[i].resize(pSndFile->Order.GetSequence(i)->GetLength(), NULL);
+			}
+			tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
 		}
 		memset(tiSamples, 0, sizeof(tiSamples));
 		memset(tiInstruments, 0, sizeof(tiInstruments));

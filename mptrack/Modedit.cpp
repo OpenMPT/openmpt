@@ -1736,9 +1736,9 @@ BOOL CModDoc::AdjustEndOfSample(UINT nSample)
 PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 //------------------------------------------------------------------
 {
-	const int i = m_SndFile.Patterns.Insert(nRows);
-	if(i < 0)
-		return PATTERNINDEX_INVALID;
+	const PATTERNINDEX i = m_SndFile.Patterns.Insert(nRows);
+	if(i == PATTERNINDEX_INVALID)
+		return i;
 
 	//Increasing orderlist size if given order is beyond current limit,
 	//or if the last order already has a pattern.
