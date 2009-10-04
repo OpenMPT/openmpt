@@ -912,12 +912,8 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 			}
 		}
 	}
-	// Setup channel pan positions
-	for (UINT iCh=0; iCh<m_nChannels; iCh++)
-	{
-		ChnSettings[iCh].nPan = (((iCh&3) == 1) || ((iCh&3) == 2)) ? 0xC0 : 0x40;
-		ChnSettings[iCh].nVolume = 64;
-	}
+	// Setup channel pan positions and volume
+	SetupMODPanning(true);
 	return true;
 }
 

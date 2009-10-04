@@ -516,12 +516,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	ResetMidiCfg();
 	//for (UINT npt=0; npt<Patterns.Size(); npt++) PatternSize[npt] = 64;
-	for (UINT nch=0; nch<MAX_BASECHANNELS; nch++)
+	for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{
-		ChnSettings[nch].nPan = 128;
-		ChnSettings[nch].nVolume = 64;
-		ChnSettings[nch].dwFlags = 0;
-		ChnSettings[nch].szName[0] = 0;
+		InitChannel(nChn);
 	}
 	if (lpStream)
 	{
@@ -1337,19 +1334,21 @@ void CSoundFile::DontLoopPattern(int nPat, int nRow)
 	//m_nSeqOverride = 0;
 }
 
-ORDERINDEX CSoundFile::FindOrder(PATTERNINDEX pat, UINT startFromOrder, bool direction)
+ORDERINDEX CSoundFile::FindOrder(PATTERNINDEX nPat, UINT startFromOrder, bool direction)
 //-------------------------------------------------------------------------------------
 {
-	int foundAtOrder = ORDERINDEX_INVALID;
-	int candidateOrder = 0;
+	ORDERINDEX foundAtOrder = ORDERINDEX_INVALID;
+	ORDERINDEX candidateOrder = 0;
 
-	for (UINT p=0; p<Order.size(); p++) 	{
-		if (direction) {
-			candidateOrder = (startFromOrder+p)%Order.size();		//wrap around MAX_ORDERS
+	for (ORDERINDEX p = 0; p < Order.size(); p++)
+	{
+		if (direction)
+		{
+			candidateOrder = (startFromOrder + p) % Order.size();			//wrap around MAX_ORDERS
 		} else {
-			candidateOrder = (startFromOrder-p+Order.size())%Order.size();	//wrap around 0 and MAX_ORDERS
+			candidateOrder = (startFromOrder - p + Order.size()) % Order.size();	//wrap around 0 and MAX_ORDERS
 		}
-		if (Order[candidateOrder] == pat) {
+		if (Order[candidateOrder] == nPat) {
 			foundAtOrder = candidateOrder;
 			break;
 		}
@@ -1418,25 +1417,25 @@ CString CSoundFile::GetInstrumentName(UINT nInstr) const
 }
 
 
-bool CSoundFile::InitChannel(UINT nch)
-//-------------------------------------
+bool CSoundFile::InitChannel(CHANNELINDEX nChn)
+//---------------------------------------------
 {
-	if(nch >= MAX_BASECHANNELS) return true;
+	if(nChn >= MAX_BASECHANNELS) return true;
 
-	ChnSettings[nch].nPan = 128;
-	ChnSettings[nch].nVolume = 64;
-	ChnSettings[nch].dwFlags = 0;
-	ChnSettings[nch].nMixPlugin = 0;
-	ChnSettings[nch].szName[0] = 0;
+	ChnSettings[nChn].nPan = 128;
+	ChnSettings[nChn].nVolume = 64;
+	ChnSettings[nChn].dwFlags = 0;
+	ChnSettings[nChn].nMixPlugin = 0;
+	ChnSettings[nChn].szName[0] = 0;
 
-	ResetChannelState(nch, CHNRESET_TOTAL);
+	ResetChannelState(nChn, CHNRESET_TOTAL);
 
 	if(m_pModDoc)
 	{
-		m_pModDoc->Record1Channel(nch,FALSE);
-		m_pModDoc->Record2Channel(nch,FALSE);
+		m_pModDoc->Record1Channel(nChn, false);
+		m_pModDoc->Record2Channel(nChn, false);
 	}
-	m_bChannelMuteTogglePending[nch] = false;
+	m_bChannelMuteTogglePending[nChn] = false;
 
 	return false;
 }
@@ -1525,7 +1524,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
     //added to position i. If index of some current channel is missing from the
     //newOrder-vector, then the channel gets removed.
 	
-	UINT nRemainingChannels = newOrder.size();	
+	CHANNELINDEX nRemainingChannels = newOrder.size();	
 
 	if(nRemainingChannels > GetModSpecifications().channelsMax || nRemainingChannels < GetModSpecifications().channelsMin) 	
 	{
@@ -1536,13 +1535,12 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 	}
 
 	BEGIN_CRITICAL();
-	UINT i = 0;
-	for (i=0; i<Patterns.Size(); i++) 
+	for (PATTERNINDEX nPat = 0; nPat < Patterns.Size(); nPat++) 
 	{
-		if (Patterns[i])
+		if (Patterns[nPat])
 		{
-			MODCOMMAND *p = Patterns[i];
-			MODCOMMAND *newp = CSoundFile::AllocatePattern(PatternSize[i], nRemainingChannels);
+			MODCOMMAND *p = Patterns[nPat];
+			MODCOMMAND *newp = CSoundFile::AllocatePattern(PatternSize[nPat], nRemainingChannels);
 			if (!newp)
 			{
 				END_CRITICAL();
@@ -1550,18 +1548,18 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 				return 0;
 			}
 			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
-			for (UINT j=0; j<PatternSize[i]; j++) //Scrolling rows
+			for (ROWINDEX nRow = 0; nRow<PatternSize[nPat]; nRow++) //Scrolling rows
 			{
-				for (UINT k=0; k<nRemainingChannels; k++, tmpdest++) //Scrolling channels.
+				for (CHANNELINDEX nChn = 0; nChn < nRemainingChannels; nChn++, tmpdest++) //Scrolling channels.
 				{
-					if(newOrder[k] < m_nChannels) //Case: getting old channel to the new channel order.
-						*tmpdest = tmpsrc[j*m_nChannels+newOrder[k]];
+					if(newOrder[nChn] < m_nChannels) //Case: getting old channel to the new channel order.
+						*tmpdest = tmpsrc[nRow*m_nChannels+newOrder[nChn]];
 					else //Case: figure newOrder[k] is not the index of any current channel, so adding a new channel.
 						*tmpdest = MODCOMMAND::Empty();
 							
 				}
 			}
-			Patterns[i] = newp;
+			Patterns[nPat] = newp;
 			CSoundFile::FreePattern(p);
 		}
 	}
@@ -1571,36 +1569,38 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 	UINT recordStates[MAX_BASECHANNELS];
 	bool chnMutePendings[MAX_BASECHANNELS];
 
-	for(i = 0 ; i < m_nChannels ; i++)
+	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
 	{
-		settings[i] = ChnSettings[i];
-		chns[i] = Chn[i];
+		settings[nChn] = ChnSettings[nChn];
+		chns[nChn] = Chn[nChn];
 		if(m_pModDoc)
-			recordStates[i] = m_pModDoc->IsChannelRecord(i);
-		chnMutePendings[i] = m_bChannelMuteTogglePending[i];
+			recordStates[nChn] = m_pModDoc->IsChannelRecord(nChn);
+		chnMutePendings[nChn] = m_bChannelMuteTogglePending[nChn];
 	}
 	
 	if(m_pModDoc)
 		m_pModDoc->ReinitRecordState();
 
-	for (UINT i=0; i<nRemainingChannels; i++)
+	for (CHANNELINDEX nChn = 0; nChn < nRemainingChannels; nChn++)
 	{
-		if(newOrder[i] < m_nChannels)
+		if(newOrder[nChn] < m_nChannels)
 		{
-				ChnSettings[i] = settings[newOrder[i]];
-				Chn[i] = chns[newOrder[i]];
+				ChnSettings[nChn] = settings[newOrder[nChn]];
+				Chn[nChn] = chns[newOrder[nChn]];
 				if(m_pModDoc)
 				{
-					if(recordStates[newOrder[i]] == 1) m_pModDoc->Record1Channel(i,TRUE);
-					if(recordStates[newOrder[i]] == 2) m_pModDoc->Record2Channel(i,TRUE);
+					if(recordStates[newOrder[nChn]] == 1) m_pModDoc->Record1Channel(nChn, true);
+					if(recordStates[newOrder[nChn]] == 2) m_pModDoc->Record2Channel(nChn, true);
 				}
-				m_bChannelMuteTogglePending[i] = chnMutePendings[newOrder[i]];
+				m_bChannelMuteTogglePending[nChn] = chnMutePendings[newOrder[nChn]];
 		}
 		else
 		{
-			InitChannel(i);
+			InitChannel(nChn);
 		}
 	}
+	// Reset MOD panning (won't affect other module formats)
+	SetupMODPanning();
 
 	m_nChannels = nRemainingChannels;
 	END_CRITICAL();
@@ -2747,12 +2747,12 @@ bool CSoundFile::RemoveSelectedSamples(bool *pbIns)
 //-------------------------------------------------
 {
 	if (!pbIns) return false;
-	for (UINT j=1; j<MAX_SAMPLES; j++)
+	for (SAMPLEINDEX nSmp=1; nSmp<MAX_SAMPLES; nSmp++)
 	{
-		if ((!pbIns[j]) && (Samples[j].pSample))
+		if ((!pbIns[nSmp]) && (Samples[nSmp].pSample))
 		{
-			DestroySample(j);
-			if ((j == m_nSamples) && (j > 1)) m_nSamples--;
+			DestroySample(nSmp);
+			if ((nSmp == m_nSamples) && (nSmp > 1)) m_nSamples--;
 		}
 	}
 	return true;
@@ -3004,6 +3004,7 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 	const MODTYPE oldtype = m_nType;
 	m_nType = newType;
 	SetModSpecsPointer(m_pModSpecs, m_nType);
+	SetupMODPanning(); // Setup LRRL panning scheme if needed
 
 	m_ModFlags = m_ModFlags & GetModFlagMask(oldtype, newType);
 
@@ -3190,4 +3191,20 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 	}
 
 	return false;
+}
+
+void CSoundFile::SetupMODPanning(bool bForceSetup)
+//------------------------------------------------
+{
+	// Setup LRRL panning, max channel volume
+	if((m_nType & MOD_TYPE_MOD) == 0 && bForceSetup == false) return;
+
+	for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
+	{
+		ChnSettings[nChn].nVolume = 64;
+		if (gdwSoundSetup & SNDMIX_MAXDEFAULTPAN)
+			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 256 : 0;
+		else
+			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
+	}
 }

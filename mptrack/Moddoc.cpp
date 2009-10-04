@@ -657,16 +657,15 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 128;
 		}
 
-		for (UINT init=0; init<MAX_BASECHANNELS; init++)
+		for (CHANNELINDEX nChn=0; nChn < MAX_BASECHANNELS; nChn++)
 		{
-			m_SndFile.ChnSettings[init].dwFlags = 0;
-			m_SndFile.ChnSettings[init].nVolume = 64;
-			if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT))
-				m_SndFile.ChnSettings[init].nPan = 128;
-			else
-				m_SndFile.ChnSettings[init].nPan = (init & 0x01) ? 64 : 192;
-			m_SndFile.Chn[init].nGlobalVol = 64;
+			m_SndFile.ChnSettings[nChn].dwFlags = 0;
+			m_SndFile.ChnSettings[nChn].nVolume = 64;
+			m_SndFile.ChnSettings[nChn].nPan = 128;
+			m_SndFile.Chn[nChn].nGlobalVol = 64;
 		}
+		// Setup LRRL panning scheme for MODs
+		m_SndFile.SetupMODPanning();
 	}
 	if (!m_SndFile.m_nSamples)
 	{

@@ -45,8 +45,10 @@ enum {
 struct MODTREEDOCINFO
 {
 	CModDoc *pModDoc;
+	// Module information
 	SEQUENCEINDEX nSeqSel;
 	ORDERINDEX nOrdSel;
+	// Tree state variables
 	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
 	vector<HTREEITEM> tiPatterns;
 	HTREEITEM tiSamples[MAX_SAMPLES];

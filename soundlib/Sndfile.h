@@ -638,7 +638,7 @@ public:
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
 	double GetCurrentBPM() const;
-	ORDERINDEX FindOrder(PATTERNINDEX pat, UINT startFromOrder=0, bool direction=true);	//rewbs.playSongFromCursor
+	ORDERINDEX FindOrder(PATTERNINDEX nPat, UINT startFromOrder=0, bool direction = true);	//rewbs.playSongFromCursor
 	void DontLoopPattern(int nPat, int nRow=0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
 	void SetCurrentOrder(UINT nOrder);
@@ -670,7 +670,7 @@ public:
 	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX>& fromToArray);
 	bool MoveChannel(UINT chn_from, UINT chn_to);
 
-	bool InitChannel(UINT nch);
+	bool InitChannel(CHANNELINDEX nChn);
 	void ResetChannelState(CHANNELINDEX chn, BYTE resetStyle);
 
 	// Module Loaders
@@ -705,6 +705,9 @@ public:
 	bool ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMID(LPCBYTE lpStream, DWORD dwMemLength);
+
+	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
+
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
 	UINT WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen=0);
