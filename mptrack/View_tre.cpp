@@ -6,7 +6,6 @@
 #include "dlsbank.h"
 #include "dlg_misc.h"
 #include "vstplug.h"
-#include ".\view_tre.h"
 
 #ifndef TVS_SINGLEEXPAND
 #define TVS_SINGLEEXPAND	0x400
@@ -704,6 +703,8 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			pInfo->tiOrders.resize(pSndFile->Order.GetNumSequences());
 		}
 
+		// TODO what to do when seq count changed from 2 to 1 or from 1 to 2?
+
 		/* // number of sequences changed: wipe tree first (is this necessary?)
 		if(pInfo->tiOrders.size() != pSndFile->Order.GetNumSequences())
 		{
@@ -728,11 +729,14 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			if(pSndFile->Order.GetNumSequences() > 1)
 			{
 				// more than one sequence -> add folder
+				CString sSeqName = pSndFile->Order.GetSequence(nSeq).m_sName;
+				if(sSeqName.IsEmpty()) sSeqName.Format("Sequence %d", nSeq);
 				if(pInfo->tiSequences[nSeq] == NULL)
 				{
-					CString sSeqName = pSndFile->Order.GetSequence(nSeq).m_sName;
-					if(sSeqName.IsEmpty()) sSeqName.Format("Sequence %d", nSeq);
 					pInfo->tiSequences[nSeq] = InsertItem(sSeqName, IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hOrders, TVI_LAST);
+				} else
+				{
+
 				}
 				hAncestorNode = pInfo->tiSequences[nSeq];
 			}
@@ -861,7 +865,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		{
 			if (iSmp <= pSndFile->m_nSamples)
 			{
-				BOOL bSamplePresent = (pSndFile->Samples[iSmp].pSample) ? TRUE : FALSE;
+				bool bSamplePresent = (pSndFile->Samples[iSmp].pSample) ? true : false;
 				UINT nImage = (bSamplePresent) ? IMAGE_SAMPLES : IMAGE_NOSAMPLE;
 				wsprintf(s, "%3d: %s", iSmp, pSndFile->m_szNames[iSmp]);
 				if (!pInfo->tiSamples[iSmp])
@@ -948,7 +952,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 }
 
 
-DWORD CModTree::GetModItem(HTREEITEM hItem)
+uint64 CModTree::GetModItem(HTREEITEM hItem)
 //-----------------------------------------
 {
 	LPARAM lParam;
@@ -1025,8 +1029,8 @@ DWORD CModTree::GetModItem(HTREEITEM hItem)
 			if (hItem == pSong->hSamples) return MODITEM_HDR_SAMPLES;
 			if (hItem == pSong->hInstruments) return MODITEM_HDR_INSTRUMENTS;
 			if (hItem == pSong->hComments) return MODITEM_COMMENTS;
-			// Order List? (either "order list" or "sequence x" item as parent)
-			if ((hItemParent == pSong->hOrders && pSong->tiSequences.size() == 1) || (hItemParentParent == pSong->hOrders))
+			// Order List or Sequence item?
+			if ((hItemParent == pSong->hOrders) || (hItemParentParent == pSong->hOrders))
 			{
 				// find sequence this item belongs to
 				for(SEQUENCEINDEX nSeq = 0; nSeq < pSong->tiOrders.size(); nSeq++)
@@ -1036,16 +1040,10 @@ DWORD CModTree::GetModItem(HTREEITEM hItem)
 					{
 						if (hItem == pSong->tiOrders[nSeq][nOrd])
 						{
-							if(pSong->pModDoc->GetSoundFile() != nullptr)
-							{
-								pSong->pModDoc->GetSoundFile()->Order.SetSequence(nSeq);
-								// TODO this is buggy
-								//OnSelectSequence must be called? Or send a message?
-							}
-							//if(nSeq != pSong->nSeqSel) // sequence change
-							//	return (MODITEM_ORDER_SEQUENCE | (nOrd << 16));
-							//else // same sequence
-							return (MODITEM_ORDER | (nOrd << 16));
+							return (MODITEM_ORDER | (nOrd << 16) | (((uint64)nSeq) << 32));
+						} else if(hItem == pSong->tiSequences[nSeq])
+						{
+							return (MODITEM_SEQUENCE | (nSeq << 16));
 						}
 					}
 				}
@@ -1111,11 +1109,11 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 {
 	if (hItem)
 	{
-		DWORD dwItemType = GetModItem(hItem);
-		DWORD dwItem = dwItemType >> 16;
+		uint64 qwItemType = GetModItem(hItem);
+		DWORD dwItem = (DWORD)(qwItemType >> 16);
 		PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
 		CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
-		switch(dwItemType & 0xFFFF)
+		switch(qwItemType & 0xFFFF)
 		{
 		case MODITEM_COMMENTS:
 			if (pModDoc) pModDoc->ActivateView(IDD_CONTROL_COMMENTS, 0);
@@ -1155,7 +1153,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 			return TRUE;
 
 		default:
-			if (dwItemType & 0x8000)
+			if (qwItemType & 0x8000)
 			{
 				PlayItem(hItem);
 				return TRUE;
@@ -1171,11 +1169,11 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 {
 	if (hItem)
 	{
-		DWORD dwItemType = GetModItem(hItem);
-		DWORD dwItem = dwItemType >> 16;
+		uint64 qwItemType = GetModItem(hItem);
+		DWORD dwItem = (DWORD)(qwItemType >> 16);
 		PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
 		CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
-		switch(dwItemType & 0xFFFF)
+		switch(qwItemType & 0xFFFF)
 		{
 		case MODITEM_SAMPLE:
 			if (pModDoc)
@@ -1234,7 +1232,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if (pMainFrm)
 				{
-					if ((dwItemType & 0xFFFF) == MODITEM_INSLIB_INSTRUMENT)
+					if ((qwItemType & 0xFFFF) == MODITEM_INSLIB_INSTRUMENT)
 					{
 						pMainFrm->PlaySoundFile(&m_SongFile, n, 0, nParam);
 					} else
@@ -1265,21 +1263,21 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 			break;
 
 		default:
-			if (dwItemType & 0x8000)
+			if (qwItemType & 0x8000)
 			{
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				UINT bank = (dwItemType & 0x3F000000) >> 24;
+				UINT bank = (qwItemType & 0x3F000000) >> 24;
 				if ((bank < MAX_DLS_BANKS) && (CTrackApp::gpDLSBanks[bank]) && (pMainFrm))
 				{
 					CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[bank];
-					UINT rgn = 0, instr = (dwItemType & 0x00007FFF);
+					UINT rgn = 0, instr = (qwItemType & 0x00007FFF);
 					// Drum 
-					if (dwItemType & 0x80000000)
+					if (qwItemType & 0x80000000)
 					{
-						rgn = (dwItemType & 0x007F0000) >> 16;
+						rgn = (qwItemType & 0x007F0000) >> 16;
 					} else
 					// Melodic
-					if (dwItemType & 0x40000000)
+					if (qwItemType & 0x40000000)
 					{
 						if ((!nParam) || (nParam > NOTE_MAX)) nParam = NOTE_MIDDLEC;
 						rgn = pDLSBank->GetRegionFromKey(instr, nParam-1);
@@ -1333,54 +1331,54 @@ BOOL CModTree::SetMidiPercussion(UINT nPerc, LPCSTR lpszFileName)
 BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 //--------------------------------------------
 {
-	DWORD dwItemType = GetModItem(hItem);
-	WORD nItem = WORD(dwItemType >> 16);
+	uint64 qwItemType = GetModItem(hItem);
+	DWORD dwItem = (DWORD)(qwItemType >> 16);
 	PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
 	CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
-	switch(dwItemType & 0xFFFF)
+	switch(qwItemType & 0xFFFF)
 	{
 	case MODITEM_ORDER:
-		if ((pModDoc) && (pModDoc->RemoveOrder(nItem)))
+		if ((pModDoc) && (pModDoc->RemoveOrder((ORDERINDEX)dwItem)))
 		{
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 		}
 		break;
 
 	case MODITEM_PATTERN:
-		if ((pModDoc) && (pModDoc->RemovePattern(nItem)))
+		if ((pModDoc) && (pModDoc->RemovePattern((PATTERNINDEX)dwItem)))
 		{
 			//pModDoc->UpdateAllViews(NULL, (dwItem << 16)|HINT_PATTERNDATA|HINT_PATNAMES);
-			pModDoc->UpdateAllViews(NULL, (UINT(nItem) << HINT_SHIFT_PAT) | HINT_PATTERNDATA|HINT_PATNAMES);
+			pModDoc->UpdateAllViews(NULL, (UINT(dwItem) << HINT_SHIFT_PAT) | HINT_PATTERNDATA|HINT_PATNAMES);
 		}
 		break;
 
 	case MODITEM_SAMPLE:
-		if ((pModDoc) && (pModDoc->RemoveSample(nItem)))
+		if ((pModDoc) && (pModDoc->RemoveSample((SAMPLEINDEX)dwItem)))
 		{
 			//pModDoc->UpdateAllViews(NULL, (dwItem << 16) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
-			pModDoc->UpdateAllViews(NULL, (UINT(nItem) << HINT_SHIFT_SMP) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
+			pModDoc->UpdateAllViews(NULL, (UINT(dwItem) << HINT_SHIFT_SMP) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
 		}
 		break;
 
 	case MODITEM_INSTRUMENT:
-		if ((pModDoc) && (pModDoc->RemoveInstrument(nItem)))
+		if ((pModDoc) && (pModDoc->RemoveInstrument((INSTRUMENTINDEX)dwItem)))
 		{
 			//pModDoc->UpdateAllViews(NULL, (dwItem << 16)|HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
-			pModDoc->UpdateAllViews(NULL, (UINT(nItem) << HINT_SHIFT_INS) | HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
+			pModDoc->UpdateAllViews(NULL, (UINT(dwItem) << HINT_SHIFT_INS) | HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
 		}
 		break;
 
 	case MODITEM_MIDIINSTRUMENT:
-		SetMidiInstrument(nItem, "");
+		SetMidiInstrument(dwItem, "");
 		RefreshMidiLibrary();
 		break;
 	case MODITEM_MIDIPERCUSSION:
-		SetMidiPercussion(nItem, "");
+		SetMidiPercussion(dwItem, "");
 		RefreshMidiLibrary();
 		break;
 
 	case MODITEM_DLSBANK_FOLDER:
-		CTrackApp::RemoveDLSBank(nItem);
+		CTrackApp::RemoveDLSBank(dwItem);
 		RefreshDlsBanks();
 		break;
 
@@ -1408,12 +1406,12 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 //------------------------------------------
 {
-	DWORD dwItemType = GetModItem(hItem);
+	uint64 qwItemType = GetModItem(hItem);
 	//DWORD dwItem = dwItemType >> 16;
 	//PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
 	//CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
 
-	switch(dwItemType & 0xFFFF)
+	switch(qwItemType & 0xFFFF)
 	{
 	case MODITEM_INSLIB_SONG:
 		{
@@ -1853,9 +1851,9 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 	PMODTREEDOCINFO pInfo = DocInfo[m_nDragDocNdx];
 	pdropinfo->pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
 	pdropinfo->dwDropType = DRAGONDROP_NOTHING;
-	pdropinfo->dwDropItem = m_dwItemDrag >> 16;
+	pdropinfo->dwDropItem = (DWORD)(m_qwItemDrag >> 16);
 	pdropinfo->lDropParam = 0;
-	switch(m_dwItemDrag & 0xFFFF)
+	switch(m_qwItemDrag & 0xFFFF)
 	{
 	case MODITEM_ORDER:
 		pdropinfo->dwDropType = DRAGONDROP_ORDER;
@@ -1883,7 +1881,7 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 			if (s[0] >= '0') n += (s[0] - '0');
 			if ((s[1] >= '0') && (s[1] <= '9')) n = n*10 + (s[1] - '0');
 			if ((s[2] >= '0') && (s[2] <= '9'))  n = n*10 + (s[2] - '0');
-			pdropinfo->dwDropType = ((m_dwItemDrag & 0xFFFF) == MODITEM_INSLIB_SAMPLE) ? DRAGONDROP_SAMPLE : DRAGONDROP_INSTRUMENT;
+			pdropinfo->dwDropType = ((m_qwItemDrag & 0xFFFF) == MODITEM_INSLIB_SAMPLE) ? DRAGONDROP_SAMPLE : DRAGONDROP_INSTRUMENT;
 			pdropinfo->dwDropItem = n;
 			pdropinfo->pModDoc = NULL;
 			pdropinfo->lDropParam = (LPARAM)&m_SongFile;
@@ -1918,14 +1916,14 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 		break;
 
 	default:
-		if (m_dwItemDrag & 0xC0000000)
+		if (m_qwItemDrag & 0xC0000000)
 		{
 			pdropinfo->dwDropType = DRAGONDROP_DLS;
 			// dwDropItem = DLS Bank #
-			pdropinfo->dwDropItem = (m_dwItemDrag & 0x3F000000) >> 24;	// bank #
+			pdropinfo->dwDropItem = (DWORD)((m_qwItemDrag & 0x3F000000) >> 24);	// bank #
 			// Melodic: (Instrument)
 			// Drums:	(0x80000000) | (Region << 16) | (Instrument)
-			pdropinfo->lDropParam = (m_dwItemDrag & 0x80FF7FFF); // 
+			pdropinfo->lDropParam = (LPARAM)((m_qwItemDrag & 0x80FF7FFF)); // 
 			break;
 		}
 	}
@@ -1936,13 +1934,13 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 //---------------------------------------------------
 {
-	DWORD dwItemDrop = GetModItem(hItem);
-	DWORD dwItemDrag = m_dwItemDrag >> 16;
-	DWORD dwDragType = m_dwItemDrag & 0xFFFF;
-	DWORD dwDropType = dwItemDrop & 0xFFFF;
+	uint64 qwItemDrop = GetModItem(hItem);
+	DWORD dwItemDrag = (DWORD)(m_qwItemDrag >> 16);
+	DWORD dwDragType = m_qwItemDrag & 0xFFFF;
+	DWORD dwDropType = (DWORD)(qwItemDrop & 0xFFFF);
 	PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
 	CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
-	dwItemDrop >>= 16;
+	qwItemDrop >>= 16;
 	switch(dwDropType)
 	{
 	case MODITEM_ORDER:
@@ -1950,7 +1948,7 @@ BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 		{
 			if (bDoDrop)
 			{
-				if (dwItemDrag != dwItemDrop) pModDoc->MoveOrder(dwItemDrag, dwItemDrop, true);
+				if (dwItemDrag != qwItemDrop) pModDoc->MoveOrder((ORDERINDEX)dwItemDrag, (ORDERINDEX)qwItemDrop, true);
 			}
 			return TRUE;
 		}
@@ -1969,9 +1967,9 @@ BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 				CHAR szFullPath[_MAX_PATH] = "";
 				InsLibGetFullPath(m_hItemDrag, szFullPath);
 				if (dwDropType == MODITEM_MIDIINSTRUMENT)
-					SetMidiInstrument(dwItemDrop, szFullPath);
+					SetMidiInstrument((DWORD)qwItemDrop, szFullPath);
 				else
-					SetMidiPercussion(dwItemDrop, szFullPath);
+					SetMidiPercussion((DWORD)qwItemDrop, szFullPath);
 			}
 			return TRUE;
 		}
@@ -2046,9 +2044,9 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, BOOL bLeft, LRESULT *pResult)
 		{
 			if (!ItemHasChildren(m_hItemDrag)) SelectItem(m_hItemDrag);
 		}
-		m_dwItemDrag = GetModItem(m_hItemDrag);
+		m_qwItemDrag = GetModItem(m_hItemDrag);
 		m_nDragDocNdx = m_nDocNdx;
-		switch(m_dwItemDrag & 0xFFFF)
+		switch(m_qwItemDrag & 0xFFFF)
 		{
 		case MODITEM_ORDER:
 		case MODITEM_PATTERN:
@@ -2062,7 +2060,7 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, BOOL bLeft, LRESULT *pResult)
 			bDrag = TRUE;
 			break;
 		default:
-			if (m_dwItemDrag & 0x8000) bDrag = TRUE;
+			if (m_qwItemDrag & 0x8000) bDrag = TRUE;
 		}
 		if (bDrag)
 		{
@@ -2158,13 +2156,13 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 		{
 			UINT nDefault = 0;
 			BOOL bSep = FALSE;
-			DWORD dwItemType;
+			uint64 qwItemType;
 
-			dwItemType = GetModItem(hItem);
-			const uint16 nItemNo = HIWORD(dwItemType);
-			dwItemType &= 0xFFFF;
+			qwItemType = GetModItem(hItem);
+			const DWORD dwItemNo = (DWORD)(qwItemType >> 16);
+			qwItemType &= 0xFFFF;
 			SelectItem(hItem);
-			switch(dwItemType)
+			switch(qwItemType)
 			{
 			case MODITEM_COMMENTS:
 				nDefault = ID_MODTREE_EXECUTE;
@@ -2176,7 +2174,15 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, "&Edit Pattern");
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE,
-								(dwItemType == MODITEM_ORDER) ? "&Delete from list" : "&Delete Pattern");
+								(qwItemType == MODITEM_ORDER) ? "&Delete from list" : "&Delete Pattern");
+				break;
+
+			case MODITEM_SEQUENCE:
+				// TODO: Right-click menu for sequences
+				//nDefault = ID_MODTREE_EXECUTE;
+				//AppendMenu(hMenu, MF_STRING, nDefault, "&Switch to Seqeuence");
+				//AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Sequence");
+				//AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "D&uplicate Sequence");
 				break;
 
 			case MODITEM_SAMPLE:
@@ -2189,7 +2195,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					if ((pModDoc) && (!pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-						AppendMenu(hMenu, (pModDoc->IsSampleMuted(nItemNo) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Sample");
+						AppendMenu(hMenu, (pModDoc->IsSampleMuted((SAMPLEINDEX)dwItemNo) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Sample");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "&Solo Sample");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, "&Unmute all");
 					}
@@ -2206,7 +2212,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					if ((pModDoc) && (pModDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-						AppendMenu(hMenu, (pModDoc->IsInstrumentMuted(nItemNo) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Instrument");
+						AppendMenu(hMenu, (pModDoc->IsInstrumentMuted((INSTRUMENTINDEX)dwItemNo) ? MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Mute Instrument");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, "&Solo Instrument");
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, "&Unmute all");
 // -> CODE#0023
@@ -2227,7 +2233,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					CModDoc *pModDoc = GetDocumentFromItem(hItem);
 					CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 					if (pSndFile) {
-						PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[nItemNo];
+						PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[dwItemNo];
 						if (pPlugin) {
 							bool bypassed = ((pPlugin->Info.dwInputRouting&MIXPLUG_INPUTF_BYPASS) != 0);
 							AppendMenu(hMenu, (bypassed?MF_CHECKED:0)|MF_STRING, ID_MODTREE_MUTE, "&Bypass");
@@ -2286,7 +2292,7 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				break;
 
 			default:
-				if (dwItemType & 0x8000)
+				if (qwItemType & 0x8000)
 				{
 					nDefault = ID_MODTREE_PLAY;
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, "&Play Instrument");
@@ -2294,9 +2300,9 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				break;
 			}
 			if (nDefault) SetMenuDefaultItem(hMenu, nDefault, FALSE);
-			if ((dwItemType == MODITEM_INSLIB_FOLDER)
-			 || (dwItemType == MODITEM_INSLIB_SONG)
-			 || (dwItemType == MODITEM_HDR_INSTRUMENTLIB))
+			if ((qwItemType == MODITEM_INSLIB_FOLDER)
+			 || (qwItemType == MODITEM_INSLIB_SONG)
+			 || (qwItemType == MODITEM_HDR_INSTRUMENTLIB))
 			{
 				if ((bSep) || (nDefault)) AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 				AppendMenu(hMenu, (m_bShowAllFiles) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_MODTREE_SHOWALLFILES, "Show All Files");
@@ -2325,8 +2331,8 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 		HTREEITEM hItem = HitTest(pt, &flags);
 		if (hItem != NULL)
 		{
-			DWORD dwItem = GetModItem(hItem);
-			switch(dwItem & 0xFFFF)
+			uint64 qwItem = GetModItem(hItem);
+			switch(qwItem & 0xFFFF)
 			{
 			case MODITEM_INSLIB_FOLDER:
 			case MODITEM_INSLIB_SONG:
@@ -2341,8 +2347,8 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 					if (pFrame)
 					{
 						pFrame->SendMessage(WM_MOD_INSTRSELECTED,
-											((dwItem & 0xffff) == MODITEM_INSTRUMENT) ? TRUE : FALSE,
-											dwItem >> 16);
+							((qwItem & 0xffff) == MODITEM_INSTRUMENT) ? TRUE : FALSE,
+							(LPARAM)(qwItem >> 16));
 					}
 				}
 				break;
@@ -2415,7 +2421,7 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 		// Bug?
 		if (!(nFlags & (MK_LBUTTON|MK_RBUTTON)))
 		{
-			m_dwItemDrag = 0;
+			m_qwItemDrag = 0;
 			m_hItemDrag = NULL;
 			OnEndDrag(TREESTATUS_DRAGGING);
 			return;
@@ -2568,29 +2574,29 @@ void CModTree::OnMuteTreeItem()
 //-----------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
-	DWORD dwItemType;
+	uint64 qwItemType;
 	CModDoc *pModDoc;
 
-	dwItemType = GetModItem(hItem);
-	const uint16 nItemNo = HIWORD(dwItemType);
-	dwItemType &= 0xFFFF;
+	qwItemType = GetModItem(hItem);
+	const DWORD dwItemNo = (DWORD)(qwItemType >> 16);
+	qwItemType &= 0xFFFF;
 	pModDoc = GetDocumentFromItem(hItem);
 	if (pModDoc)
 	{
-		if ((dwItemType == MODITEM_SAMPLE) && (!pModDoc->GetNumInstruments()))
+		if ((qwItemType == MODITEM_SAMPLE) && (!pModDoc->GetNumInstruments()))
 		{
-			pModDoc->MuteSample(nItemNo, (pModDoc->IsSampleMuted(nItemNo)) ? FALSE : TRUE);
+			pModDoc->MuteSample((SAMPLEINDEX)dwItemNo, (pModDoc->IsSampleMuted((SAMPLEINDEX)dwItemNo)) ? false : true);
 		} else
-		if ((dwItemType == MODITEM_INSTRUMENT) && (pModDoc->GetNumInstruments()))
+		if ((qwItemType == MODITEM_INSTRUMENT) && (pModDoc->GetNumInstruments()))
 		{
-			pModDoc->MuteInstrument(nItemNo, (pModDoc->IsInstrumentMuted(nItemNo)) ? FALSE : TRUE);
+			pModDoc->MuteInstrument((INSTRUMENTINDEX)dwItemNo, (pModDoc->IsInstrumentMuted((INSTRUMENTINDEX)dwItemNo)) ? false : true);
 		}
 
-		if ((dwItemType == MODITEM_EFFECT))
+		if ((qwItemType == MODITEM_EFFECT))
 		{
 			CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 			if (pSndFile) {
-				PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[nItemNo];
+				PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[dwItemNo];
 				if (pPlugin) {
 					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 					if (pVstPlugin) pVstPlugin->Bypass();
@@ -2606,29 +2612,29 @@ void CModTree::OnSoloTreeItem()
 //-----------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
-	DWORD dwItemType;
+	uint64 qwItemType;
 	CModDoc *pModDoc;
 
-	dwItemType = GetModItem(hItem);
-	const uint16 nItemNo = HIWORD(dwItemType);
-	dwItemType &= 0xFFFF;
+	qwItemType = GetModItem(hItem);
+	const DWORD dwItemNo = (DWORD)(qwItemType >> 16);
+	qwItemType &= 0xFFFF;
 	pModDoc = GetDocumentFromItem(hItem);
 	if (pModDoc)
 	{
 		SAMPLEINDEX nSamples = pModDoc->GetNumSamples();
 		INSTRUMENTINDEX nInstruments = pModDoc->GetNumInstruments();
-		if ((dwItemType == MODITEM_SAMPLE) && (!nInstruments))
+		if ((qwItemType == MODITEM_SAMPLE) && (!nInstruments))
 		{
 			for (SAMPLEINDEX i=1; i<=nSamples; i++)
 			{
-				pModDoc->MuteSample(i, (i == nItemNo) ? FALSE : TRUE);
+				pModDoc->MuteSample(i, (i == dwItemNo) ? false : true);
 			}
 		} else
-		if ((dwItemType == MODITEM_INSTRUMENT) && (nInstruments))
+		if ((qwItemType == MODITEM_INSTRUMENT) && (nInstruments))
 		{
 			for (INSTRUMENTINDEX i=1; i<=nInstruments; i++)
 			{
-				pModDoc->MuteInstrument(i, (i == nItemNo) ? FALSE : TRUE);
+				pModDoc->MuteInstrument(i, (i == dwItemNo) ? false : true);
 			}
 		}
 	}
@@ -2639,16 +2645,16 @@ void CModTree::OnUnmuteAllTreeItem()
 //----------------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
-	DWORD dwItemType;
+	uint64 qwItemType;
 	CModDoc *pModDoc;
 
-	dwItemType = GetModItem(hItem) & 0xFFFF;
+	qwItemType = GetModItem(hItem) & 0xFFFF;
 	pModDoc = GetDocumentFromItem(hItem);
 	if (pModDoc)
 	{
 		SAMPLEINDEX nSamples = pModDoc->GetNumSamples();
 		INSTRUMENTINDEX nInstruments = pModDoc->GetNumInstruments();
-		if ((dwItemType == MODITEM_SAMPLE) || (dwItemType == MODITEM_INSTRUMENT))
+		if ((qwItemType == MODITEM_SAMPLE) || (qwItemType == MODITEM_INSTRUMENT))
 		{
 			for (SAMPLEINDEX i=1; i<=nSamples; i++)
 			{
@@ -2668,9 +2674,9 @@ void CModTree::OnUnmuteAllTreeItem()
 void CModTree::OnSetItemPath()
 {
 	HTREEITEM hItem = GetSelectedItem();
-	DWORD dwItemType = GetModItem(hItem);
-	DWORD dwItem = dwItemType >> 16;
-	dwItemType &= 0xFFFF;
+	uint64 qwItemType = GetModItem(hItem);
+	DWORD dwItem = (DWORD)(qwItemType >> 16);
+	qwItemType &= 0xFFFF;
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
 	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
@@ -2700,15 +2706,15 @@ void CModTree::OnSetItemPath()
 void CModTree::OnSaveItem()
 {
 	HTREEITEM hItem = GetSelectedItem();
-	DWORD dwItemType = GetModItem(hItem);
-	const uint16 nItem = HIWORD(dwItemType);
-	dwItemType &= 0xFFFF;
+	uint64 qwItemType = GetModItem(hItem);
+	const DWORD dwItem = HIWORD(qwItemType);
+	qwItemType &= 0xFFFF;
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
 	CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 
-	if(pSndFile && nItem){
+	if(pSndFile && dwItem){
 
-		if(pSndFile->m_szInstrumentPath[nItem-1][0] == '\0'){
+		if(pSndFile->m_szInstrumentPath[dwItem-1][0] == '\0'){
 			CHAR pszFileNames[_MAX_PATH];
 
 			CFileDialog dlg(FALSE, (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? "iti" : "xi", NULL, 
@@ -2724,23 +2730,23 @@ void CModTree::OnSaveItem()
 			dlg.m_ofn.lpstrFile = pszFileNames;
 			dlg.m_ofn.nMaxFile = _MAX_PATH;
 
-			if(dlg.DoModal() == IDOK) strcpy(pSndFile->m_szInstrumentPath[nItem-1], pszFileNames);
+			if(dlg.DoModal() == IDOK) strcpy(pSndFile->m_szInstrumentPath[dwItem - 1], pszFileNames);
 
 			dlg.m_ofn.lpstrFile = NULL;
 			dlg.m_ofn.nMaxFile = 0;
 		}
 
-		if(pSndFile->m_szInstrumentPath[nItem-1][0] != '\0'){
-			int size = strlen(pSndFile->m_szInstrumentPath[nItem-1]);
-			BOOL iti = _stricmp(&pSndFile->m_szInstrumentPath[nItem-1][size-3],"iti") == 0;
-			BOOL xi  = _stricmp(&pSndFile->m_szInstrumentPath[nItem-1][size-2],"xi") == 0;
+		if(pSndFile->m_szInstrumentPath[dwItem - 1][0] != '\0'){
+			int size = strlen(pSndFile->m_szInstrumentPath[dwItem - 1]);
+			BOOL iti = _stricmp(&pSndFile->m_szInstrumentPath[dwItem - 1][size-3],"iti") == 0;
+			BOOL xi  = _stricmp(&pSndFile->m_szInstrumentPath[dwItem - 1][size-2],"xi") == 0;
 
 			if(iti || (!iti && !xi  && pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
-				pSndFile->SaveITIInstrument(nItem, pSndFile->m_szInstrumentPath[nItem-1]);
+				pSndFile->SaveITIInstrument((INSTRUMENTINDEX)dwItem, pSndFile->m_szInstrumentPath[dwItem - 1]);
 			if(xi  || (!xi  && !iti && pSndFile->m_nType == MOD_TYPE_XM))
-				pSndFile->SaveXIInstrument(nItem, pSndFile->m_szInstrumentPath[nItem-1]);
+				pSndFile->SaveXIInstrument((INSTRUMENTINDEX)dwItem, pSndFile->m_szInstrumentPath[dwItem - 1]);
 
-			pSndFile->instrumentModified[nItem-1] = FALSE;
+			pSndFile->instrumentModified[dwItem - 1] = FALSE;
 		}
 
 		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
@@ -2799,8 +2805,8 @@ DROPEFFECT CModTree::OnDragOver(COleDataObject*, DWORD, CPoint point)
 {
 	UINT flags;
 	HTREEITEM hItem = HitTest(point, &flags);
-	DWORD dwItemType = GetModItem(hItem);
-	switch(dwItemType & 0xFFFF)
+	uint64 qwItemType = GetModItem(hItem);
+	switch(qwItemType & 0xFFFF)
 	{
 	case MODITEM_MIDIINSTRUMENT:
 	case MODITEM_MIDIPERCUSSION:
@@ -2810,7 +2816,7 @@ DROPEFFECT CModTree::OnDragOver(COleDataObject*, DWORD, CPoint point)
 			EnsureVisible(hItem);
 		}
 		m_hItemDrag = hItem;
-		m_dwItemDrag = dwItemType;
+		m_qwItemDrag = qwItemType;
 		return DROPEFFECT_LINK;
 	// Folders:
 	case MODITEM_HDR_MIDILIB:
@@ -2842,8 +2848,8 @@ BOOL CModTree::OnDrop(COleDataObject* pDataObject, DROPEFFECT, CPoint)
 		DragQueryFile(hDropInfo, 0, szFileName, _MAX_PATH);
 		if (szFileName[0])
 		{
-			DWORD dwItem = m_dwItemDrag >> 16;
-			switch(m_dwItemDrag & 0xFFFF)
+			DWORD dwItem = (DWORD)(m_qwItemDrag >> 16);
+			switch(m_qwItemDrag & 0xFFFF)
 			{
 			case MODITEM_MIDIINSTRUMENT:
 				bOk = SetMidiInstrument(dwItem, szFileName);
@@ -2918,10 +2924,10 @@ void CModTree::OnSoundBankProperties()
 //------------------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
-	DWORD dwItemType = GetModItem(hItem);
-	if ((dwItemType & 0xFFFF) == MODITEM_DLSBANK_FOLDER)
+	uint64 qwItemType = GetModItem(hItem);
+	if ((qwItemType & 0xFFFF) == MODITEM_DLSBANK_FOLDER)
 	{
-		UINT nBank = dwItemType >> 16;
+		UINT nBank = (UINT)(qwItemType >> 16);
 		if ((nBank < MAX_DLS_BANKS) && (CTrackApp::gpDLSBanks[nBank]))
 		{
 			CSoundBankProperties dlg(CTrackApp::gpDLSBanks[nBank], this);

@@ -1022,13 +1022,18 @@ BOOL CModDoc::RemoveUnusedPatterns(BOOL bRemove)
 	vector<MODCOMMAND*> pPatterns(maxPatIndex, NULL);
 	vector<BOOL> bPatUsed(maxPatIndex, false);
 
-	const ORDERINDEX nLengthSub0 = m_SndFile.Order.GetLengthFirstEmpty();
-	const ORDERINDEX nLengthUsed = m_SndFile.Order.GetLengthTailTrimmed();
+	bool bSubtunesDetected = false;
+	// detect subtunes (separated by "---")
+	for(SEQUENCEINDEX nSeq = 0; nSeq < m_SndFile.Order.GetNumSequences(); nSeq++)
+	{
+		if(m_SndFile.Order.GetSequence(nSeq).GetLengthFirstEmpty() != m_SndFile.Order.GetSequence(nSeq).GetLengthTailTrimmed())
+			bSubtunesDetected = true;
+	}
 
 	// Flag to tell whether keeping sequence items which are after the first empty('---') order.
 	bool bKeepSubSequences = false;
 
-	if(nLengthUsed != nLengthSub0)
+	if(bSubtunesDetected)
 	{   // There are used sequence items after first '---'; ask user whether to remove those.
 		if (CMainFrame::GetMainFrame()->MessageBox(
 			_TEXT("Do you want to remove sequence items which are after the first '---' item?"),
@@ -2009,8 +2014,8 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX n)
 }
 
 
-bool CModDoc::MoveOrder(UINT nSourceNdx, UINT nDestNdx, bool bUpdate, bool bCopy)
-//-------------------------------------------------------------------------------
+bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate, bool bCopy)
+//-------------------------------------------------------------------------------------------
 {
 	if ((nSourceNdx >= m_SndFile.Order.size()) || (nDestNdx >= m_SndFile.Order.size())) return false;
 	if (nDestNdx >= m_SndFile.GetModSpecifications().ordersMax) return false;

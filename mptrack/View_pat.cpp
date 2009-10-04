@@ -3707,6 +3707,7 @@ void CViewPattern::TempEnterVol(int v)
 	{
 
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		if(pSndFile->m_nType & MOD_TYPE_MOD) return; // no volume column
 		
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
@@ -3745,7 +3746,7 @@ void CViewPattern::TempEnterVol(int v)
 				case kcSetVolumeITVelocity:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_VELOCITY; break;	//rewbs.velocity
 				case kcSetVolumeITOffset:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
 				}
-			if ((pSndFile->m_nType & MOD_TYPE_MOD) && (volcmd > VOLCMD_PANNING)) volcmd = vol = 0;
+			//if ((pSndFile->m_nType & MOD_TYPE_MOD) && (volcmd > VOLCMD_PANNING)) volcmd = vol = 0;
 
 			UINT max = 64;
 			if (volcmd > VOLCMD_PANNING)

@@ -337,7 +337,8 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 
 				}
 
-			} else {
+			} else
+			{
 				UINT nmax = m_pSndFile->m_nSamples;
 				while ((nmax > 1) && (m_pSndFile->Samples[nmax].pSample == NULL) && (!m_pSndFile->m_szNames[nmax][0])) nmax--;
 				for (UINT i=1; i<=nmax; i++) if ((m_pSndFile->m_szNames[i][0]) || (m_pSndFile->Samples[i].pSample)) 	{
@@ -413,7 +414,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_SETCURRENTPATTERN:
-		SetCurrentPattern(lParam);
+		SetCurrentPattern((PATTERNINDEX)lParam);
 		break;
 
 	case CTRLMSG_SETCURRENTORDER:
@@ -535,10 +536,10 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
-void CCtrlPatterns::SetCurrentPattern(UINT nPat)
-//----------------------------------------------
+void CCtrlPatterns::SetCurrentPattern(PATTERNINDEX nPat)
+//------------------------------------------------------
 {
-	SendViewMessage(VIEWMSG_SETCURRENTPATTERN, nPat);
+	SendViewMessage(VIEWMSG_SETCURRENTPATTERN, (LPARAM)nPat);
 }
 
 
@@ -576,10 +577,7 @@ BOOL CCtrlPatterns::SetCurrentInstrument(UINT nIns)
 void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 //-----------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	CSoundFile* pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
-
-	if ((pModDoc) && (m_pParent))
+	if ((m_pModDoc) && (m_pParent))
 	{
 		int nIns = m_pParent->GetInstrumentChange();
 		if (nIns > 0)
@@ -588,30 +586,37 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		}
 		m_pParent->InstrumentChanged(-1);
 	}
-	if ((lParam >= 0) && (lParam < m_pSndFile->Patterns.Size()))
+	if (!(lParam & 0x8000) && m_pSndFile)
 	{
-		if (pSndFile)
+		// Pattern item
+		PATTERNINDEX nPat = (PATTERNINDEX)(lParam & 0x7FFF);
+		if(m_pSndFile->Patterns.IsValidIndex(nPat))
 		{
-			for (ORDERINDEX i=0; i<pSndFile->Order.size(); i++)
+			for (SEQUENCEINDEX nSeq = 0; nSeq < m_pSndFile->Order.GetNumSequences(); nSeq++)
 			{
-				if (pSndFile->Order[i] == (UINT)lParam)
+				for (ORDERINDEX nOrd = 0; nOrd < m_pSndFile->Order.GetSequence(nSeq).GetLengthTailTrimmed(); nOrd++)
 				{
-					m_OrderList.SetCurSel(i, TRUE);
-					break;
+					if (m_pSndFile->Order.GetSequence(nSeq)[nOrd] == nPat)
+					{
+						m_OrderList.SelectSequence(nSeq);
+						m_OrderList.SetCurSel(nOrd, true);
+						break;
+					}
 				}
-				if (pSndFile->Order[i] == pSndFile->Order.GetInvalidPatIndex()) break;
 			}
 		}
-		SetCurrentPattern(lParam);
+		SetCurrentPattern(nPat);
 	} 
-	else if ((lParam >= 0x8000) && (lParam < int(pSndFile->Order.size()) + 0x8000)) 
+	else if ((lParam & 0x8000) && m_pSndFile)
 	{
-		if (pSndFile)
+		// Order item
+		ORDERINDEX nOrd = (ORDERINDEX)(lParam & 0x7FFF);
+		SEQUENCEINDEX nSeq = (SEQUENCEINDEX)(lParam >> 16);
+		if((nSeq < m_pSndFile->Order.GetNumSequences()) && (nOrd < m_pSndFile->Order.GetSequence(nSeq).size()))
 		{
-			lParam &= 0x7FFF;
-			m_OrderList.OnSelectSequence(pSndFile->Order.GetCurrentSequenceIndex()); // new sequence already set in view_tre.cpp, GetModItem()
-			m_OrderList.SetCurSel((ORDERINDEX)lParam);
-			SetCurrentPattern(pSndFile->Order[lParam]);
+			m_OrderList.SelectSequence(nSeq);
+			m_OrderList.SetCurSel(nOrd);
+			SetCurrentPattern(m_pSndFile->Order[nOrd]);
 		}
 	}
 	if (m_hWndView)
