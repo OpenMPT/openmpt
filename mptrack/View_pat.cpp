@@ -3999,12 +3999,27 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	if (usePlaybackPosition && nTick) {	// avoid SD0 which will be mis-interpreted
 		if (p->command == 0) {	//make sure we don't overwrite any existing commands.
 			p->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
-			p->param   = 0xD0 + min(0xF, nTick);
+			p->param   = 0xD0 | min(0xF, nTick);
 		}
 	}
 
 	//Enter note off
-	p->note		= NOTE_KEYOFF;
+	if(pModDoc->GetSoundFile()->GetModSpecifications().hasNoteOff) // ===
+		p->note = NOTE_KEYOFF;
+	else if(pModDoc->GetSoundFile()->GetModSpecifications().hasNoteCut) // ^^^
+		p->note = NOTE_NOTECUT;
+	else { // we don't have anything to cut (MOD format) - use volume or ECx
+		if(usePlaybackPosition && nTick) // ECx
+		{
+			p->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
+			p->param   = 0xC0 | min(0xF, nTick);
+		} else // C00
+		{
+			p->note = NOTE_NONE;
+			p->command = CMD_VOLUME;
+			p->param = 0;
+		}
+	}
 	p->instr = (bChordMode) ? 0 : ins; //p->instr = 0; 
 	//Writing the instrument as well - probably someone finds this annoying :)
 	p->volcmd	= 0;

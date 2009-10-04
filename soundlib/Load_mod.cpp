@@ -348,15 +348,9 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	m_nMinPeriod = 14 << 2;
 	m_nMaxPeriod = 3424 << 2;
 	memcpy(m_szNames, lpStream, 20);
-	// Setting channels pan
-	for (UINT ich=0; ich<m_nChannels; ich++)
-	{
-		ChnSettings[ich].nVolume = 64;
-		if (gdwSoundSetup & SNDMIX_MAXDEFAULTPAN)
-			ChnSettings[ich].nPan = (((ich&3)==1) || ((ich&3)==2)) ? 256 : 0;
-		else
-			ChnSettings[ich].nPan = (((ich&3)==1) || ((ich&3)==2)) ? 0xC0 : 0x40; // this should be inverted for Amiga playback
-	}
+	// Setup channel pan positions and volume
+	SetupMODPanning();
+
 	// Reading channels
 	for (UINT ipat=0; ipat<nbp; ipat++)
 	{

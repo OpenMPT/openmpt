@@ -152,7 +152,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 								MODCOMMAND *pDest = m_SndFile.Patterns[nNewPat];
 								memcpy(pDest, pSrc, m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels * sizeof(MODCOMMAND));
 								m = pDest + len;
-								patternsFixed.resize(max(nNewPat + 1, patternsFixed.size()), SEQUENCEINDEX_INVALID);
+								patternsFixed.resize(max(nNewPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
 								nPat = nNewPat;
 							} else
 							{
@@ -923,6 +923,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 		}
 	
 		m_SndFile.m_nChannels = nNewChannels;
+		m_SndFile.SetupMODPanning();
 		END_CRITICAL();
 		EndWaitCursor();
 	}
@@ -1939,34 +1940,37 @@ void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample)
 }
 
 
-bool CModDoc::RemoveOrder(ORDERINDEX n)
-//-------------------------------
+bool CModDoc::RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd)
+//------------------------------------------------------------
 {
-	if (n < m_SndFile.Order.size())
+	if (nSeq >= m_SndFile.Order.GetNumSequences() || nOrd >= m_SndFile.Order.GetSequence(nSeq).size())
+		return false;
+
+	BEGIN_CRITICAL();
+	SEQUENCEINDEX nOldSeq = m_SndFile.Order.GetCurrentSequenceIndex();
+	m_SndFile.Order.SetSequence(nSeq);
+	for (ORDERINDEX i = nOrd; i < m_SndFile.Order.GetSequence(nSeq).size() - 1; i++)
 	{
-		BEGIN_CRITICAL();
-		for (ORDERINDEX i=n; i<m_SndFile.Order.size()-1; i++)
-		{
-			m_SndFile.Order[i] = m_SndFile.Order[i+1];
-		}
-		m_SndFile.Order[m_SndFile.Order.size()-1] = m_SndFile.Order.GetInvalidPatIndex();
-		END_CRITICAL();
-		SetModified();
-		return true;
+		m_SndFile.Order[i] = m_SndFile.Order[i + 1];
 	}
-	return false;
+	m_SndFile.Order[m_SndFile.Order.GetLastIndex()] = m_SndFile.Order.GetInvalidPatIndex();
+	m_SndFile.Order.SetSequence(nOldSeq);
+	END_CRITICAL();
+	SetModified();
+	return true;
 }
 
 
-bool CModDoc::RemovePattern(PATTERNINDEX n)
-//---------------------------------
+
+bool CModDoc::RemovePattern(PATTERNINDEX nPat)
+//--------------------------------------------
 {
-	if ((n < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[n]))
+	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat]))
 	{
 		BEGIN_CRITICAL();
-		LPVOID p = m_SndFile.Patterns[n];
-		m_SndFile.Patterns[n] = nullptr;
-		m_SndFile.SetPatternName(n, "");
+		LPVOID p = m_SndFile.Patterns[nPat];
+		m_SndFile.Patterns[nPat] = nullptr;
+		m_SndFile.SetPatternName(nPat, "");
 		CSoundFile::FreePattern(p);
 		END_CRITICAL();
 		SetModified();
@@ -1976,14 +1980,14 @@ bool CModDoc::RemovePattern(PATTERNINDEX n)
 }
 
 
-bool CModDoc::RemoveSample(SAMPLEINDEX n)
-//--------------------------------
+bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
+//------------------------------------------
 {
-	if ((n) && (n <= m_SndFile.m_nSamples))
+	if ((nSmp) && (nSmp <= m_SndFile.m_nSamples))
 	{
 		BEGIN_CRITICAL();
-		m_SndFile.DestroySample(n);
-		m_SndFile.m_szNames[n][0] = 0;
+		m_SndFile.DestroySample(nSmp);
+		m_SndFile.m_szNames[nSmp][0] = 0;
 		while ((m_SndFile.m_nSamples > 1)
 		 && (!m_SndFile.m_szNames[m_SndFile.m_nSamples][0])
 		 && (!m_SndFile.Samples[m_SndFile.m_nSamples].pSample)) m_SndFile.m_nSamples--;
@@ -1995,15 +1999,15 @@ bool CModDoc::RemoveSample(SAMPLEINDEX n)
 }
 
 
-bool CModDoc::RemoveInstrument(INSTRUMENTINDEX n)
-//------------------------------------
+bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
+//--------------------------------------------------
 {
-	if ((n) && (n <= m_SndFile.m_nInstruments) && (m_SndFile.Instruments[n]))
+	if ((nIns) && (nIns <= m_SndFile.m_nInstruments) && (m_SndFile.Instruments[nIns]))
 	{
 		BOOL bIns = FALSE;
 		BEGIN_CRITICAL();
-		m_SndFile.DestroyInstrument(n);
-		if (n == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
+		m_SndFile.DestroyInstrument(nIns);
+		if (nIns == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
 		for (UINT i=1; i<MAX_INSTRUMENTS; i++) if (m_SndFile.Instruments[i]) bIns = TRUE;
 		if (!bIns) m_SndFile.m_nInstruments = 0;
 		END_CRITICAL();

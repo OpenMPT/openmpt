@@ -266,7 +266,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 	InvalidateSelection();
 	if ((m_pParent) && (m_pModDoc) && (bEdit))
 	{
-		UINT n = pSndFile->Order[m_nScrollPos];
+		PATTERNINDEX n = pSndFile->Order[m_nScrollPos];
 		if ((n < pSndFile->Patterns.Size()) && (pSndFile->Patterns[n]) && !bShiftClick)
 		{
 			BOOL bIsPlaying = (pMainFrm->GetModPlaying() == m_pModDoc);
@@ -1000,7 +1000,7 @@ void COrderList::OnDeleteOrder()
 
 		for(int i = 0; i <= (selection.nOrdHi - selection.nOrdLo); i++)
 		{
-			m_pModDoc->RemoveOrder(selection.nOrdLo);
+			m_pModDoc->RemoveOrder(pSndFile->Order.GetCurrentSequenceIndex(), selection.nOrdLo);
 		}
 		InvalidateRect(NULL, FALSE);
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);

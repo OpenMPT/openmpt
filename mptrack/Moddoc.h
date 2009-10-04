@@ -203,10 +203,10 @@ public:
 	SAMPLEINDEX InsertSample(bool bLimit = false);
 	INSTRUMENTINDEX InsertInstrument(LONG lSample = 0, LONG lDuplicate = 0);
 	void InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample=0);
-	bool RemoveOrder(ORDERINDEX n);
-	bool RemovePattern(PATTERNINDEX n);
-	bool RemoveSample(SAMPLEINDEX n);
-	bool RemoveInstrument(INSTRUMENTINDEX n);
+	bool RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd);
+	bool RemovePattern(PATTERNINDEX nPat);
+	bool RemoveSample(SAMPLEINDEX nSmp);
+	bool RemoveInstrument(INSTRUMENTINDEX nIns);
 	UINT PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol=-1, LONG loopstart=0, LONG loopend=0, int nCurrentChn=-1, const uint32 nStartPos = uint32_max); //rewbs.vstiLive: added current chan param
 	BOOL NoteOff(UINT note, BOOL bFade=FALSE, UINT nins=-1, UINT nCurrentChn=-1); //rewbs.vstiLive: add params
 

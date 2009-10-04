@@ -742,64 +742,51 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			}
 
 			// If there are items past the new sequence length, delete them.
-			for(size_t nOrd = pSndFile->Order.GetSequence(nSeq).GetLength(); nOrd < pInfo->tiOrders[nSeq].size(); nOrd++) if (pInfo->tiOrders[nSeq][nOrd])
+			for(size_t nOrd = pSndFile->Order.GetSequence(nSeq).GetLengthTailTrimmed(); nOrd < pInfo->tiOrders[nSeq].size(); nOrd++) if (pInfo->tiOrders[nSeq][nOrd])
 			{
 				DeleteItem(pInfo->tiOrders[nSeq][nOrd]); pInfo->tiOrders[nSeq][nOrd] = NULL;
 			}
-			if (pInfo->tiOrders[nSeq].size() < pSndFile->Order.GetSequence(nSeq).GetLength()) // Resize tiOrders if needed.
-				pInfo->tiOrders[nSeq].resize(pSndFile->Order.GetSequence(nSeq).GetLength(), NULL);
-			UINT imin = 0, imax = pSndFile->Order.GetSequence(nSeq).GetLastIndex();
+			if (pInfo->tiOrders[nSeq].size() < pSndFile->Order.GetSequence(nSeq).GetLengthTailTrimmed()) // Resize tiOrders if needed.
+				pInfo->tiOrders[nSeq].resize(pSndFile->Order.GetSequence(nSeq).GetLengthTailTrimmed(), NULL);
 			const bool patNamesOnly = (hintFlagPart == HINT_PATNAMES);
 
 			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < pSndFile->Order.size())) imin = imax = dwHintParam;
-			bool bEnded = false;
-			for (UINT iOrd=imin; iOrd<=imax; iOrd++)
+			for (ORDERINDEX iOrd = 0; iOrd < pSndFile->Order.GetSequence(nSeq).GetLengthTailTrimmed(); iOrd++)
 			{
-				if (pSndFile->Order.GetSequence(nSeq)[iOrd] == pSndFile->Order.GetInvalidPatIndex()) bEnded = true;
-				if (bEnded)
+				if(patNamesOnly && pSndFile->Order.GetSequence(nSeq)[iOrd] != nPat)
+					continue;
+				UINT state = (iOrd == pInfo->nOrdSel && nSeq == pInfo->nSeqSel) ? TVIS_BOLD : 0;
+				if (pSndFile->Order.GetSequence(nSeq)[iOrd] < pSndFile->Patterns.Size())
 				{
-					if (pInfo->tiOrders[nSeq][iOrd])
+					stmp[0] = 0;
+					pSndFile->GetPatternName(pSndFile->Order.GetSequence(nSeq)[iOrd], stmp, sizeof(stmp));
+					if (stmp[0])
 					{
-						DeleteItem(pInfo->tiOrders[nSeq][iOrd]);
-						pInfo->tiOrders[nSeq][iOrd] = NULL;
+						wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %d: %s" : "[%02d] %d: %s",
+							iOrd, pSndFile->Order.GetSequence(nSeq)[iOrd], stmp);
+					} else
+					{
+						wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] Pattern %d" : "[%02d] Pattern %d",
+							iOrd, pSndFile->Order.GetSequence(nSeq)[iOrd]);
 					}
 				} else
 				{
-					if(patNamesOnly && pSndFile->Order.GetSequence(nSeq)[iOrd] != nPat)
-						continue;
-					UINT state = (iOrd == pInfo->nOrdSel && nSeq == pInfo->nSeqSel) ? TVIS_BOLD : 0;
-					if (pSndFile->Order.GetSequence(nSeq)[iOrd] < pSndFile->Patterns.Size())
-					{
-						stmp[0] = 0;
-						pSndFile->GetPatternName(pSndFile->Order.GetSequence(nSeq)[iOrd], stmp, sizeof(stmp));
-						if (stmp[0])
-						{
-							wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] %d: %s" : "[%02d] %d: %s",
-								iOrd, pSndFile->Order.GetSequence(nSeq)[iOrd], stmp);
-						} else
-						{
-							wsprintf(s, (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY) ? "[%02Xh] Pattern %d" : "[%02d] Pattern %d",
-								iOrd, pSndFile->Order.GetSequence(nSeq)[iOrd]);
-						}
-					} else
-					{
-						wsprintf(s, "[%02d] Skip", iOrd);
-					}
-					if (pInfo->tiOrders[nSeq][iOrd])
-					{
-						tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
-						tvi.state = 0;
-						tvi.stateMask = TVIS_BOLD;
-						tvi.hItem = pInfo->tiOrders[nSeq][iOrd];
-						tvi.pszText = stmp;
-						tvi.cchTextMax = sizeof(stmp);
-						GetItem(&tvi);
-						if ((strcmp(s, stmp)) || (tvi.state != state))
-							SetItem(pInfo->tiOrders[nSeq][iOrd], TVIF_TEXT | TVIF_STATE, s, 0, 0, state, TVIS_BOLD, 0);
-					} else
-					{
-						pInfo->tiOrders[nSeq][iOrd] = InsertItem(s, IMAGE_PARTITION, IMAGE_PARTITION, hAncestorNode, TVI_LAST);
-					}
+					wsprintf(s, "[%02d] Skip", iOrd);
+				}
+				if (pInfo->tiOrders[nSeq][iOrd])
+				{
+					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
+					tvi.state = 0;
+					tvi.stateMask = TVIS_BOLD;
+					tvi.hItem = pInfo->tiOrders[nSeq][iOrd];
+					tvi.pszText = stmp;
+					tvi.cchTextMax = sizeof(stmp);
+					GetItem(&tvi);
+					if ((strcmp(s, stmp)) || (tvi.state != state))
+						SetItem(pInfo->tiOrders[nSeq][iOrd], TVIF_TEXT | TVIF_STATE, s, 0, 0, state, TVIS_BOLD, 0);
+				} else
+				{
+					pInfo->tiOrders[nSeq][iOrd] = InsertItem(s, IMAGE_PARTITION, IMAGE_PARTITION, hAncestorNode, TVI_LAST);
 				}
 			}
 		}
@@ -1035,7 +1022,6 @@ uint64 CModTree::GetModItem(HTREEITEM hItem)
 				// find sequence this item belongs to
 				for(SEQUENCEINDEX nSeq = 0; nSeq < pSong->tiOrders.size(); nSeq++)
 				{
-					ASSERT(pSong->tiOrders[nSeq].size() == pSndFile->Order.size());
 					for(ORDERINDEX nOrd = 0; nOrd < pSong->tiOrders[nSeq].size(); nOrd++)
 					{
 						if (hItem == pSong->tiOrders[nSeq][nOrd])
@@ -1338,7 +1324,7 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 	switch(qwItemType & 0xFFFF)
 	{
 	case MODITEM_ORDER:
-		if ((pModDoc) && (pModDoc->RemoveOrder((ORDERINDEX)dwItem)))
+		if ((pModDoc) && (pModDoc->RemoveOrder((SEQUENCEINDEX)(dwItem >> 16), (ORDERINDEX)(dwItem & 0xFFFF))))
 		{
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 		}
