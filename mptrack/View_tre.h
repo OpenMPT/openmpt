@@ -32,6 +32,7 @@ enum {
 	MODITEM_INSLIB_SONG,
 	MODITEM_DLSBANK_FOLDER,
 	MODITEM_DLSBANK_INSTRUMENT,
+	MODITEM_SEQUENCE,
 };
 
 #define TREESTATUS_RDRAG			0x01
@@ -109,7 +110,7 @@ protected:
 	CModTree *m_pDataTree;
 	DWORD m_dwStatus;
 	HWND m_hDropWnd;
-	DWORD m_dwItemDrag;
+	uint64 m_qwItemDrag;
 	BOOL m_bShowAllFiles;
 	UINT m_nDocNdx, m_nDragDocNdx;
 	HTREEITEM m_hItemDrag, m_hItemDrop;
@@ -135,7 +136,7 @@ public:
 	VOID RefreshInstrumentLibrary();
 	VOID EmptyInstrumentLibrary();
 	VOID FillInstrumentLibrary();
-	DWORD GetModItem(HTREEITEM hItem);
+	uint64 GetModItem(HTREEITEM hItem);
 	BOOL SetMidiInstrument(UINT nIns, LPCSTR lpszFileName);
 	BOOL SetMidiPercussion(UINT nPerc, LPCSTR lpszFileName);
 	BOOL ExecuteItem(HTREEITEM hItem);

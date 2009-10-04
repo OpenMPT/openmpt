@@ -242,7 +242,7 @@ public:
 	BOOL IsChildSample(UINT nIns, UINT nSmp) const;
 	UINT FindSampleParent(UINT nSmp) const;
 	UINT FindInstrumentChild(UINT nIns) const;
-	bool MoveOrder(UINT nSourceNdx, UINT nDestNdx, bool bUpdate = true, bool bCopy = false);
+	bool MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate = true, bool bCopy = false);
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
 	BOOL CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);

@@ -81,6 +81,9 @@ public:
 	// is not interpreted to be in margins regardless of the margin value.
 	bool IsOrderInMargins(int order, int startOrder);
 
+	// Set given sqeuence and update orderlist display.
+	void SelectSequence(const SEQUENCEINDEX nSeq);
+
 public:
 	//{{AFX_VIRTUAL(COrderList)
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
@@ -164,7 +167,7 @@ public:
 	LONG* GetSplitPosRef() {return &CMainFrame::glPatternWindowHeight;} 	//rewbs.varWindowSize
 
 public:
-	void SetCurrentPattern(UINT nPat);
+	void SetCurrentPattern(PATTERNINDEX nPat);
 	BOOL SetCurrentInstrument(UINT nIns);
 	BOOL GetFollowSong() { return IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG); }
 	BOOL GetLoopPattern() {return IsDlgButtonChecked(IDC_PATTERN_LOOP);}

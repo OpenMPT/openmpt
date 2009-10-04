@@ -786,37 +786,7 @@ void COrderList::OnMouseMove(UINT nFlags, CPoint pt)
 void COrderList::OnSelectSequence(UINT nid)
 //-----------------------------------------
 {
-	BEGIN_CRITICAL();
-	CMainFrame::GetMainFrame()->ResetNotificationBuffer();
-	const SEQUENCEINDEX nId = static_cast<SEQUENCEINDEX>(nid - ID_SEQUENCE_ITEM);
-	CSoundFile& rSf = *m_pModDoc->GetSoundFile();
-	if (nId == MAX_SEQUENCES + 1)
-	{
-		CString strParam; strParam.Format(TEXT("%u: %s"), rSf.Order.GetCurrentSequenceIndex(), rSf.Order.m_sName);
-		CString str;
-		AfxFormatString1(str, IDS_CONFIRM_SEQUENCE_DELETE, strParam);
-		if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) == IDYES)
-			rSf.Order.RemoveSequence();
-		else
-		{
-			END_CRITICAL();
-			return;
-		}
-	}
-	else if (nId == MAX_SEQUENCES)
-		rSf.Order.AddSequence();
-	else if (nId < rSf.Order.GetNumSequences())
-		rSf.Order.SetSequence(nId);
-	ORDERINDEX nPosCandidate = rSf.Order.GetLengthTailTrimmed() - 1;
-	SetCurSel(min(m_nScrollPos, nPosCandidate), true, false, true);
-	if (m_pParent)
-		m_pParent->SetCurrentPattern(rSf.Order[m_nScrollPos]);
-
-	UpdateScrollInfo();
-	END_CRITICAL();
-	UpdateView(HINT_MODSEQUENCE);
-	m_pModDoc->SetModified();
-	m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+	SelectSequence(static_cast<SEQUENCEINDEX>(nid - ID_SEQUENCE_ITEM));
 }
 
 
@@ -1167,4 +1137,39 @@ BYTE COrderList::SetMargins(int i)
 {
 	m_nOrderlistMargins = static_cast<BYTE>(i);
 	return GetMargins();
+}
+
+void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
+//-------------------------------------------------------
+{
+	BEGIN_CRITICAL();
+	CMainFrame::GetMainFrame()->ResetNotificationBuffer();
+	CSoundFile& rSf = *m_pModDoc->GetSoundFile();
+	if (nSeq == MAX_SEQUENCES + 1)
+	{
+		CString strParam; strParam.Format(TEXT("%u: %s"), rSf.Order.GetCurrentSequenceIndex(), rSf.Order.m_sName);
+		CString str;
+		AfxFormatString1(str, IDS_CONFIRM_SEQUENCE_DELETE, strParam);
+		if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) == IDYES)
+			rSf.Order.RemoveSequence();
+		else
+		{
+			END_CRITICAL();
+			return;
+		}
+	}
+	else if (nSeq == MAX_SEQUENCES)
+		rSf.Order.AddSequence();
+	else if (nSeq < rSf.Order.GetNumSequences())
+		rSf.Order.SetSequence(nSeq);
+	ORDERINDEX nPosCandidate = rSf.Order.GetLengthTailTrimmed() - 1;
+	SetCurSel(min(m_nScrollPos, nPosCandidate), true, false, true);
+	if (m_pParent)
+		m_pParent->SetCurrentPattern(rSf.Order[m_nScrollPos]);
+
+	UpdateScrollInfo();
+	END_CRITICAL();
+	UpdateView(HINT_MODSEQUENCE);
+	m_pModDoc->SetModified();
+	m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
 }
