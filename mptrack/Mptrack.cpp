@@ -93,8 +93,8 @@ CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL bMakeVis
 					"no more documents can be opened or if the file type was not "
 					"recognised. If the former is true, it's "
 					"recommended to close some documents as otherwise crash is likely"
-					"(currently there are %d document(s) open).")),
-				lpszPathName, nOdc);
+					"(currently there %s %d document%s open).")),
+					lpszPathName, (nOdc == 1) ? "is" : "are", nOdc, (nOdc == 1) ? "" : "s");
 				AfxMessageBox(str);
 			}
 		}
