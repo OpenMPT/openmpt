@@ -899,8 +899,14 @@
 #define IDC_CHK_REARRANGE_SAMPLES       2397
 #define IDC_CHK_REMOVE_INSTRUMENTS      2398
 #define IDC_CHK_SAMPLEPACK              2399
+#define IDC_CHK_RESET_VARIABLES         2399
 #define IDC_BTN_CLEANUP_SONG            2400
 #define IDC_BTN_COMPO_CLEANUP           2401
+#define IDC_CHK_REMOVE_ORDERS           2402
+#define IDC_CHK_REMOVE_PATTERNS         2403
+#define IDC_CHK_REMOVE_SAMPLES          2404
+#define IDC_CHK_REMOVE_PLUGINS          2405
+#define IDC_CHK_OPTIMIZE_SAMPLES        2406
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1145,7 +1151,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        522
 #define _APS_NEXT_COMMAND_VALUE         59231
-#define _APS_NEXT_CONTROL_VALUE         2402
+#define _APS_NEXT_CONTROL_VALUE         2407
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
