@@ -7,7 +7,6 @@
 #include "ChildFrm.h"
 #include "vstplug.h"
 #include "ChannelManagerDlg.h"
-#include ".\dlg_misc.h"
 #include "midi.h"
 #include "version.h"
 

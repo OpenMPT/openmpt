@@ -84,6 +84,8 @@ protected:
 	void UpdateTuningComboBox();
 	void BuildTuningComboBox();
 
+	void UpdatePluginList();
+
 	//Pitch/Tempo lock
 	CEdit m_EditPitchTempoLock;
 	CButton m_CheckPitchTempoLock;

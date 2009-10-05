@@ -189,15 +189,8 @@ public:
 	BOOL ChangeModType(UINT nNewType);
 	BOOL ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg = true);
 
-	BOOL ConvertInstrumentsToSamples();;
-	BOOL RemoveUnusedSamples();
-	BOOL RemoveUnusedInstruments();
-	void RemoveAllInstruments(bool bConfirm = true);
-	BOOL RemoveUnusedPlugs();
+	BOOL ConvertInstrumentsToSamples();
 	UINT RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS]);
-	BOOL RemoveUnusedPatterns(BOOL bRemove=TRUE);
-	void RearrangeSamples();
-	BOOL CompoCleanup();
 
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = -1, ROWINDEX nRows = 64);
 	SAMPLEINDEX InsertSample(bool bLimit = false);
@@ -242,7 +235,7 @@ public:
 	BOOL IsChildSample(UINT nIns, UINT nSmp) const;
 	UINT FindSampleParent(UINT nSmp) const;
 	UINT FindInstrumentChild(UINT nIns) const;
-	bool MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate = true, bool bCopy = false);
+	bool MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate = true, bool bCopy = false, SEQUENCEINDEX nSourceSeq = SEQUENCEINDEX_INVALID, SEQUENCEINDEX nDestSeq = SEQUENCEINDEX_INVALID);
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
 	BOOL CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);
@@ -332,20 +325,11 @@ public:
 	afx_msg void OnInsertPattern();
 	afx_msg void OnInsertSample();
 	afx_msg void OnInsertInstrument();
-	afx_msg void OnCleanupSamples();
-	afx_msg void OnCleanupInstruments();
-	afx_msg void OnCleanupPlugs();
-	afx_msg void OnCleanupPatterns();
-	afx_msg void OnCleanupSong();
-	afx_msg void OnRearrangePatterns();
-	afx_msg void OnCompoCleanup();
-	afx_msg void OnRemoveAllInstruments();
+	afx_msg void OnShowCleanup();
 	afx_msg void OnEstimateSongLength();
 	afx_msg void OnApproximateBPM();
 	afx_msg void OnUpdateXMITMPTOnly(CCmdUI *p);
 	afx_msg void OnUpdateHasMIDIMappings(CCmdUI *p);
-	afx_msg void OnUpdateInstrumentOnly(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateSampleCount(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateMP3Encode(CCmdUI *pCmdUI);
 	afx_msg void OnPatternRestart(); //rewbs.customKeys
 	afx_msg void OnPatternPlay(); //rewbs.customKeys

@@ -36,6 +36,29 @@ BEGIN
     LTEXT           "The following problems have been encountered when loading this module:",IDC_STATIC,6,6,237,8
 END
 
+IDD_CLEANUP_SONG DIALOGEX 0, 0, 298, 161
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Cleanup"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,240,6,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,240,24,50,14
+    GROUPBOX        "Items to be cleaned up",IDC_STATIC,6,6,228,90
+    CONTROL         "Remove unused patterns",IDC_CHK_CLEANUP_PATTERNS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,24,102,12
+    CONTROL         "Rearrange patterns",IDC_CHK_REARRANGE_PATTERNS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,126,24,102,12
+    CONTROL         "Remove unused samples",IDC_CHK_CLEANUP_SAMPLES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,42,102,12
+    CONTROL         "Rearrange samples",IDC_CHK_REARRANGE_SAMPLES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,126,42,102,12
+    CONTROL         "Remove unused instruments",IDC_CHK_CLEANUP_INSTRUMENTS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,60,102,12
+    CONTROL         "Remove all instruments",IDC_CHK_REMOVE_INSTRUMENTS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,126,60,102,12
+    CONTROL         "Remove unused plugins",IDC_CHK_CLEANUP_PLUGINS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,78,102,12
+    CONTROL         "Turn into samplepack",IDC_CHK_SAMPLEPACK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,126,78,102,12
+    GROUPBOX        "Presets",IDC_STATIC,6,102,228,48
+    PUSHBUTTON      "Remove all unused stuff",IDC_BTN_CLEANUP_SONG,18,120,96,18
+    PUSHBUTTON      "Compo cleanup",IDC_BTN_COMPO_CLEANUP,126,120,96,18
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -51,6 +74,14 @@ BEGIN
         RIGHTMARGIN, 309
         TOPMARGIN, 7
         BOTTOMMARGIN, 171
+    END
+
+    IDD_CLEANUP_SONG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 291
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 154
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -1766,18 +1797,7 @@ BEGIN
         MENUITEM "&Mix Paste\tCtrl+M",          ID_EDIT_PASTE_SPECIAL
         MENUITEM "Select &All\tCtrl+5",         ID_EDIT_SELECT_ALL
         MENUITEM SEPARATOR
-        POPUP "C&leanup"
-        BEGIN
-            MENUITEM "&Rearrange Patterns",         ID_CLEANUP_REARRANGE
-            MENUITEM "Rearrange Samples",           ID_REARRANGE_SAMPLES
-            MENUITEM "&Cleanup Instruments",        ID_CLEANUP_INSTRUMENTS
-            MENUITEM "Clean&up Samples",            ID_CLEANUP_SAMPLES
-            MENUITEM "Cleanup Pa&tterns",           ID_CLEANUP_PATTERNS
-            MENUITEM "Cleanup S&ong",               ID_CLEANUP_SONG
-            MENUITEM "Remove &All Instruments",     ID_INSTRUMENTS_REMOVEALL
-            MENUITEM "Cleanup &Plugins",            ID_CLEANUP_PLUGS
-            MENUITEM "Co&mpo Cleanup",              ID_CLEANUP_COMPO
-        END
+        MENUITEM "C&leanup...",                 ID_EDIT_CLEANUP
         MENUITEM SEPARATOR
         MENUITEM "&Find\tCtrl+F",               ID_EDIT_FIND
         MENUITEM "Find Next\tF3",               ID_EDIT_FINDNEXT

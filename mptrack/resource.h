@@ -114,6 +114,7 @@
 #define IDD_MODLOADING_WARNINGS         518
 #define IDR_DEFAULT_KEYBINDINGS         519
 #define IDR_BUILTIN_TUNINGS             520
+#define IDD_CLEANUP_SONG                521
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -890,6 +891,16 @@
 #define IDC_EDIT_SEQUENCE_NAME          2389
 #define IDC_STATIC_SEQUENCE_NAME        2390
 #define IDC_STATIC_SEQUENCE_NAME_FRAME  2391
+#define IDC_CHK_CLEANUP_PATTERNS        2392
+#define IDC_CHK_CLEANUP_SAMPLES         2393
+#define IDC_CHK_CLEANUP_INSTRUMENTS     2394
+#define IDC_CHK_CLEANUP_PLUGINS         2395
+#define IDC_CHK_REARRANGE_PATTERNS      2396
+#define IDC_CHK_REARRANGE_SAMPLES       2397
+#define IDC_CHK_REMOVE_INSTRUMENTS      2398
+#define IDC_CHK_SAMPLEPACK              2399
+#define IDC_BTN_CLEANUP_SONG            2400
+#define IDC_BTN_COMPO_CLEANUP           2401
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1125,15 +1136,16 @@
 #define ID_NOTEMAP_COPY_NOTE            59227
 #define ID_CLEANUP_REARRANGESAMPLES     59228
 #define ID_ORDERLIST_RENDER             59229
+#define ID_EDIT_CLEANUP                 59230
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        521
-#define _APS_NEXT_COMMAND_VALUE         59230
-#define _APS_NEXT_CONTROL_VALUE         2392
+#define _APS_NEXT_RESOURCE_VALUE        522
+#define _APS_NEXT_COMMAND_VALUE         59231
+#define _APS_NEXT_CONTROL_VALUE         2402
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
