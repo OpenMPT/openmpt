@@ -932,33 +932,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 		}
 	}
 
-	//rewbs.instroVSTi
-	//Update plugin list
-	m_CbnMixPlug.Clear();
-	m_CbnMixPlug.ResetContent();
-	CHAR s[64];
-	for (UINT plug=0; plug<=MAX_MIXPLUGINS; plug++)
-	{
-		s[0] = 0;
-		if (!plug) 
-		{ 
-			strcpy(s, "No plugin");
-		} 
-		else
-		{
-			PSNDMIXPLUGIN p = &(m_pSndFile->m_MixPlugins[plug-1]);
-			p->Info.szLibraryName[63] = 0;
-			if (p->Info.szLibraryName[0])
-				wsprintf(s, "FX%d: %s", plug, p->Info.szName);
-			else
-				wsprintf(s, "FX%d: undefined", plug);
-		}
-
-		m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(s), plug);
-	}
-	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
-	if ((pIns) && (pIns->nMixPlug < MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
-	//end rewbs.instroVSTi
+	UpdatePluginList();
 
 	SetCurrentInstrument((lParam > 0) ? lParam : m_nInstrument);
 
@@ -1236,6 +1210,11 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		}
 		m_NoteMap.InvalidateRect(NULL, FALSE);
 	}
+	if(dwHintMask & (HINT_MIXPLUGINS|HINT_MODTYPE))
+	{
+		UpdatePluginList();
+	}
+
 	if (!m_bInitialized)
 	{
 		// First update
@@ -2817,4 +2796,34 @@ void CCtrlInstruments::BuildTuningComboBox()
 	}
 	m_ComboTuning.AddString("Control tunings...");
 	m_ComboTuning.SetCurSel(0);
+}
+
+void CCtrlInstruments::UpdatePluginList()
+//---------------------------------------
+{
+	//Update plugin list
+	m_CbnMixPlug.Clear();
+	m_CbnMixPlug.ResetContent();
+	CHAR s[64];
+	for (PLUGINDEX nPlug = 0; nPlug <= MAX_MIXPLUGINS; nPlug++)
+	{
+		s[0] = 0;
+		if (!nPlug) 
+		{ 
+			strcpy(s, "No plugin");
+		} 
+		else
+		{
+			PSNDMIXPLUGIN p = &(m_pSndFile->m_MixPlugins[nPlug-1]);
+			p->Info.szLibraryName[63] = 0;
+			if (p->Info.szLibraryName[0])
+				wsprintf(s, "FX%d: %s", nPlug, p->Info.szName);
+			else
+				wsprintf(s, "FX%d: undefined", nPlug);
+		}
+
+		m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(s), nPlug);
+	}
+	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
+	if ((pIns) && (pIns->nMixPlug < MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
 }

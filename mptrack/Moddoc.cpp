@@ -14,6 +14,7 @@
 #include "vstplug.h"
 #include "version.h"
 #include "modsmp_ctrl.h"
+#include "CleanupSong.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -52,27 +53,14 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_INSERT_PATTERN,		OnInsertPattern)
 	ON_COMMAND(ID_INSERT_SAMPLE,		OnInsertSample)
 	ON_COMMAND(ID_INSERT_INSTRUMENT,	OnInsertInstrument)
-	ON_COMMAND(ID_CLEANUP_SAMPLES,		OnCleanupSamples)
-	ON_COMMAND(ID_CLEANUP_INSTRUMENTS,	OnCleanupInstruments)
-	ON_COMMAND(ID_CLEANUP_PLUGS,		OnCleanupPlugs)
-	ON_COMMAND(ID_CLEANUP_PATTERNS,		OnCleanupPatterns)
-	ON_COMMAND(ID_CLEANUP_SONG,			OnCleanupSong)
-	ON_COMMAND(ID_CLEANUP_REARRANGE,	OnRearrangePatterns)
-	ON_COMMAND(ID_CLEANUP_COMPO,		OnCompoCleanup)
-	ON_COMMAND(ID_INSTRUMENTS_REMOVEALL,OnRemoveAllInstruments)
-// -> CODE#0020
-// -> DESC="rearrange sample list"
-	ON_COMMAND(ID_REARRANGE_SAMPLES,	RearrangeSamples)
-// -! NEW_FEATURE#0020
+	ON_COMMAND(ID_EDIT_CLEANUP,			OnShowCleanup)
+
 	ON_COMMAND(ID_ESTIMATESONGLENGTH,	OnEstimateSongLength)
 	ON_COMMAND(ID_APPROX_BPM,			OnApproximateBPM)
 	ON_COMMAND(ID_PATTERN_PLAY,			OnPatternPlay)				//rewbs.patPlayAllViews
 	ON_COMMAND(ID_PATTERN_PLAYNOLOOP,	OnPatternPlayNoLoop)		//rewbs.patPlayAllViews
 	ON_COMMAND(ID_PATTERN_RESTART,		OnPatternRestart)			//rewbs.patPlayAllViews
 	ON_UPDATE_COMMAND_UI(ID_INSERT_INSTRUMENT,		OnUpdateXMITMPTOnly)
-	ON_UPDATE_COMMAND_UI(ID_INSTRUMENTS_REMOVEALL,	OnUpdateInstrumentOnly)
-	ON_UPDATE_COMMAND_UI(ID_CLEANUP_INSTRUMENTS,	OnUpdateInstrumentOnly)
-	ON_UPDATE_COMMAND_UI(ID_REARRANGE_SAMPLES,		OnUpdateSampleCount)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_COMMENTS,			OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
@@ -1835,88 +1823,13 @@ void CModDoc::OnEditGraph()
 //end rewbs.graph
 
 
-void CModDoc::OnCleanupSamples()
-//------------------------------
-{
-	ClearLog();
-	RemoveUnusedSamples();
-	UpdateAllViews(NULL, HINT_MODTYPE);
-	ShowLog("Sample Cleanup", CMainFrame::GetMainFrame());
-}
-
-
-void CModDoc::OnCleanupInstruments()
-//----------------------------------
-{
-	ClearLog();
-	RemoveUnusedInstruments();
-	UpdateAllViews(NULL, HINT_MODTYPE);
-	ShowLog("Instrument Cleanup", CMainFrame::GetMainFrame());
-}
-
-void CModDoc::OnCleanupPlugs()
-//----------------------------------
-{
-	ClearLog();
-	RemoveUnusedPlugs();
-	UpdateAllViews(NULL, HINT_MODTYPE);
-	ShowLog("Plugin Cleanup", CMainFrame::GetMainFrame());
-}
-
-
-
-void CModDoc::OnCleanupPatterns()
-//-------------------------------
-{
-	ClearLog();
-	RemoveUnusedPatterns();
-	UpdateAllViews(NULL, HINT_MODTYPE|HINT_MODSEQUENCE);
-	ShowLog("Pattern Cleanup", CMainFrame::GetMainFrame());
-}
-
-
-void CModDoc::OnCleanupSong()
+void CModDoc::OnShowCleanup()
 //---------------------------
 {
-	ClearLog();
-	RemoveUnusedPatterns();
-	RemoveUnusedInstruments();
-	RemoveUnusedSamples();
-	RemoveUnusedPlugs();
-	UpdateAllViews(NULL, HINT_MODTYPE|HINT_MODSEQUENCE);
-	ShowLog("Song Cleanup", CMainFrame::GetMainFrame());
+	CModCleanupDlg dlg(this, CMainFrame::GetMainFrame());
+	dlg.DoModal();
 }
 
-
-void CModDoc::OnRearrangePatterns()
-//---------------------------------
-{
-	ClearLog();
-	RemoveUnusedPatterns(FALSE);
-	UpdateAllViews(NULL, HINT_MODTYPE|HINT_MODSEQUENCE);
-	ShowLog("Pattern Rearrange", CMainFrame::GetMainFrame());
-}
-
-void CModDoc::OnCompoCleanup()
-//------------------------------
-{
-	CompoCleanup();
-	UpdateAllViews(NULL, HINT_MODTYPE);
-}
-
-
-
-void CModDoc::OnUpdateInstrumentOnly(CCmdUI *p)
-//---------------------------------------------
-{
-	if (p) p->Enable((m_SndFile.m_nInstruments) ? TRUE : FALSE);
-}
-
-void CModDoc::OnUpdateSampleCount(CCmdUI *p)
-//------------------------------------------
-{
-	if (p) p->Enable((m_SndFile.m_nSamples > 1) ? TRUE : FALSE);
-}
 
 void CModDoc::OnUpdateHasMIDIMappings(CCmdUI *p)
 //----------------------------------------------
@@ -1976,12 +1889,6 @@ void CModDoc::OnInsertInstrument()
 	if (ins != INSTRUMENTINDEX_INVALID) ViewInstrument(ins);
 }
 
-
-void CModDoc::OnRemoveAllInstruments()
-//------------------------------------
-{
-	RemoveAllInstruments();
-}
 
 
 void CModDoc::OnEstimateSongLength()

@@ -190,6 +190,9 @@
 				RelativePath=".\ChildFrm.cpp">
 			</File>
 			<File
+				RelativePath=".\CleanupSong.cpp">
+			</File>
+			<File
 				RelativePath=".\ColourEdit.cpp">
 			</File>
 			<File
@@ -709,6 +712,9 @@
 			</File>
 			<File
 				RelativePath=".\ChildFrm.h">
+			</File>
+			<File
+				RelativePath=".\CleanupSong.h">
 			</File>
 			<File
 				RelativePath=".\ColourEdit.h">
