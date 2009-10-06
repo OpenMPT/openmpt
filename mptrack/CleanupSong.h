@@ -10,21 +10,25 @@
 
 enum ENUM_CLEANUP_OPTIONS
 {
-	// remove unused
+	// patterns
 	CU_CLEANUP_PATTERNS = 0,
-	CU_CLEANUP_SAMPLES,
-	CU_CLEANUP_INSTRUMENTS,
-	CU_CLEANUP_PLUGINS,
-	// remove all
 	CU_REMOVE_PATTERNS,
-	CU_REMOVE_ORDERS,
-	CU_REMOVE_SAMPLES,
-	CU_REMOVE_INSTRUMENTS,
-	CU_REMOVE_PLUGINS,
-	// misc
 	CU_REARRANGE_PATTERNS,
+	// orders
+	CU_MERGE_SEQUENCES,
+	CU_REMOVE_ORDERS,
+	// samples
+	CU_CLEANUP_SAMPLES,
+	CU_REMOVE_SAMPLES,
 	CU_REARRANGE_SAMPLES,
 	CU_OPTIMIZE_SAMPLES,
+	// instruments
+	CU_CLEANUP_INSTRUMENTS,
+	CU_REMOVE_INSTRUMENTS,
+	// plugins
+	CU_CLEANUP_PLUGINS,
+	CU_REMOVE_PLUGINS,
+	// misc
 	CU_RESET_VARIABLES,
 
 	CU_MAX_CLEANUP_OPTIONS
@@ -40,20 +44,25 @@ private:
 	static bool m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS]; // Checkbox state
 	static const WORD m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS]; // Checkbox -> Control ID LUT
 
-	// Actual cleanup implementations
+	// Actual cleanup implementations:
+	// Patterns
 	bool RemoveUnusedPatterns(bool bRemove = true); // Remove unused patterns / rearrange patterns
-	bool RemoveUnusedSamples(); // Remove unused samples
-	bool RemoveUnusedInstruments(); // Remove unused instruments
-	bool RemoveUnusedPlugins(); // Remove ununsed plugins
-	// Zap
 	bool RemoveAllPatterns();
+	// Orders
+	bool MergeSequences();
 	bool RemoveAllOrders();
+	// Samples
+	bool RemoveUnusedSamples(); // Remove unused samples
 	bool RemoveAllSamples();
-	bool RemoveAllInstruments(bool bConfirm = true);
-	bool RemoveAllPlugins();
-	// Misc
 	bool RearrangeSamples(); // Rearrange sample list
 	bool OptimizeSamples(); // Remove unused sample data
+	// Instruments
+	bool RemoveUnusedInstruments(); // Remove unused instruments
+	bool RemoveAllInstruments(bool bConfirm = true);
+	// Plugins
+	bool RemoveUnusedPlugins(); // Remove ununsed plugins
+	bool RemoveAllPlugins();
+	// Misc
 	bool ResetVariables(); // Turn module into samplepack (convert to IT, remove patterns, etc.)
 
 public:
@@ -65,6 +74,8 @@ protected:
 	virtual void OnOK();
 	virtual void OnCancel();
 	//}}AFX_VIRTUAL
+
+	BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 
 	//{{AFX_MSG(CModCleanupDlg)
 	afx_msg void OnPresetCleanupSong();

@@ -100,75 +100,6 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 		-Alternative tempomodes
 		-For more info, see e.g. SaveExtendedSongProperties(), SaveExtendedInstrumentProperties()
 		*/
-		
-		// Merge multiple sequences
-		m_SndFile.Order.SetSequence(0);
-		m_SndFile.Order.resize(m_SndFile.Order.GetLengthTailTrimmed());
-		SEQUENCEINDEX removedSequences = 0; // sequence count
-		vector <SEQUENCEINDEX> patternsFixed; // pattern fixed by other sequence already?
-		patternsFixed.resize(m_SndFile.Patterns.Size(), SEQUENCEINDEX_INVALID);
-		// Set up vector
-		for(ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.GetLengthTailTrimmed(); nOrd++)
-		{
-			PATTERNINDEX nPat = m_SndFile.Order[nOrd];
-			if(!m_SndFile.Patterns.IsValidPat(nPat)) continue;
-			patternsFixed[nPat] = 0;
-		}
-
-		while(m_SndFile.Order.GetNumSequences() > 1)
-		{
-			removedSequences++;
-			const ORDERINDEX nFirstOrder = m_SndFile.Order.GetLengthTailTrimmed() + 1; // +1 for separator item
-			if(nFirstOrder + m_SndFile.Order.GetSequence(1).GetLengthTailTrimmed() > m_SndFile.GetModSpecifications(nNewType).ordersMax)
-			{
-				wsprintf(s, "WARNING: Cannot merge Sequence %d (too long!)\n", removedSequences);
-				AddToLog(s);
-				m_SndFile.Order.RemoveSequence(1);
-				continue;
-			}
-			m_SndFile.Order.Append(m_SndFile.Order.GetInvalidPatIndex()); // Separator item
-			for(ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.GetSequence(1).GetLengthTailTrimmed(); nOrd++)
-			{
-				PATTERNINDEX nPat = m_SndFile.Order.GetSequence(1)[nOrd];
-				m_SndFile.Order.Append(nPat);
-
-				// Try to fix patterns (Bxx commands)
-				if(!m_SndFile.Patterns.IsValidPat(nPat)) continue;
-
-				MODCOMMAND *m = m_SndFile.Patterns[nPat];
-				for (UINT len = 0; len < m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; m++, len++)
-				{
-					if(m->command == CMD_POSITIONJUMP)
-					{
-						if(patternsFixed[nPat] != SEQUENCEINDEX_INVALID && patternsFixed[nPat] != removedSequences)
-						{
-							// Oops, some other sequence uses this pattern already.
-							const PATTERNINDEX nNewPat = m_SndFile.Patterns.Insert(m_SndFile.PatternSize[nPat]);
-							if(nNewPat != SEQUENCEINDEX_INVALID)
-							{
-								// could create new pattern - copy data over and continue from here.
-								m_SndFile.Order[nFirstOrder + nOrd] = nNewPat;
-								MODCOMMAND *pSrc = m_SndFile.Patterns[nPat];
-								MODCOMMAND *pDest = m_SndFile.Patterns[nNewPat];
-								memcpy(pDest, pSrc, m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels * sizeof(MODCOMMAND));
-								m = pDest + len;
-								patternsFixed.resize(max(nNewPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
-								nPat = nNewPat;
-							} else
-							{
-								// cannot create new pattern: notify the user
-								wsprintf(s, "CONFLICT: Pattern break commands in Pattern %d might be broken since it has been used in several sequences!", nPat);
-								AddToLog(s);
-							}
-						}
-						m->param += nFirstOrder;
-						patternsFixed[nPat] = removedSequences;
-					}
-				}
-
-			}
-			m_SndFile.Order.RemoveSequence(1);
-		}
 	}
 
 	// Check if conversion to 64 rows is necessary
@@ -802,6 +733,9 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	END_CRITICAL();
 	ChangeFileExtension(nNewType);
 
+	// Multisequences not suppported by other formats
+	if(!(m_SndFile.m_nType & MOD_TYPE_MPT)) MergeSequences();
+
 	//rewbs.cutomKeys: update effect key commands
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
 	if	(newTypeIsMOD_XM) {
@@ -825,6 +759,22 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 	}
 	if(bTrimmedEnvelopes == true)
 		AddToLog("WARNING: Instrument envelopes have been shortened.\n");
+
+	// Order list too long -> remove unnecessary order items first.
+	if(m_SndFile.Order.GetLengthTailTrimmed() > specs.ordersMax)
+	{
+		for(ORDERINDEX nOrd = m_SndFile.Order.GetLengthTailTrimmed() - 1; nOrd >= 0; nOrd--)
+		{
+			if(m_SndFile.Patterns.IsValidPat(m_SndFile.Order[nOrd]) == false)
+			{
+				for(ORDERINDEX nMoveOrd = nOrd; nMoveOrd < m_SndFile.Order.GetLengthTailTrimmed(); nMoveOrd++)
+				{
+					m_SndFile.Order[nMoveOrd] = m_SndFile.Order[nMoveOrd + 1];
+				}
+			}
+		}
+		m_SndFile.Order.resize(specs.ordersMax);
+	}
 
 	SetModified();
 	ClearUndo();
@@ -1371,22 +1321,34 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate, bool bCopy, SEQUENCEINDEX nSourceSeq, SEQUENCEINDEX nDestSeq)
 //---------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if ((nSourceNdx >= m_SndFile.Order.size()) || (nDestNdx >= m_SndFile.Order.size())) return false;
+	if (max(nSourceNdx, nDestNdx) >= m_SndFile.Order.size()) return false;
 	if (nDestNdx >= m_SndFile.GetModSpecifications().ordersMax) return false;
-	ORDERINDEX n = m_SndFile.Order[nSourceNdx];
+
+	if(nSourceSeq == SEQUENCEINDEX_INVALID) nSourceSeq = m_SndFile.Order.GetCurrentSequenceIndex();
+	if(nDestSeq == SEQUENCEINDEX_INVALID) nDestSeq = m_SndFile.Order.GetCurrentSequenceIndex();
+	if (max(nSourceSeq, nDestSeq) >= m_SndFile.Order.GetNumSequences()) return false;
+	PATTERNINDEX nSourcePat = m_SndFile.Order.GetSequence(nSourceSeq)[nSourceNdx];
+
+	// save current working sequence
+	SEQUENCEINDEX nWorkingSeq = m_SndFile.Order.GetCurrentSequenceIndex();
+
 	// Delete source
 	if (!bCopy)
 	{
-		for (ORDERINDEX i = nSourceNdx; i < m_SndFile.Order.size() - 1; i++) m_SndFile.Order[i] = m_SndFile.Order[i+1];
+		m_SndFile.Order.SetSequence(nSourceSeq);
+		for (ORDERINDEX i = nSourceNdx; i < m_SndFile.Order.size() - 1; i++) m_SndFile.Order[i] = m_SndFile.Order[i + 1];
 		if (nSourceNdx < nDestNdx) nDestNdx--;
 	}
 	// Insert at dest
-	for (ORDERINDEX j = m_SndFile.Order.size() - 1; j > nDestNdx; j--) m_SndFile.Order[j] = m_SndFile.Order[j-1];
-	m_SndFile.Order[nDestNdx] = n;
+	m_SndFile.Order.SetSequence(nDestSeq);
+	for (ORDERINDEX nOrd = m_SndFile.Order.size() - 1; nOrd > nDestNdx; nOrd--) m_SndFile.Order[nOrd] = m_SndFile.Order[nOrd - 1];
+	m_SndFile.Order[nDestNdx] = nSourcePat;
 	if (bUpdate)
 	{
 		UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 	}
+
+	m_SndFile.Order.SetSequence(nWorkingSeq);
 	return true;
 }
 
@@ -2147,4 +2109,80 @@ void CModDoc::CheckUnusedChannels(BOOL mask[MAX_CHANNELS], CHANNELINDEX maxRemov
 	}
 }
 
+// Merge multiple sequences
+bool CModDoc::MergeSequences()
+//----------------------------
+{
+	if(m_SndFile.Order.GetNumSequences() <= 1) return false;
+
+	CHAR s[256];
+	m_SndFile.Order.SetSequence(0);
+	m_SndFile.Order.resize(m_SndFile.Order.GetLengthTailTrimmed());
+	SEQUENCEINDEX removedSequences = 0; // sequence count
+	vector <SEQUENCEINDEX> patternsFixed; // pattern fixed by other sequence already?
+	patternsFixed.resize(m_SndFile.Patterns.Size(), SEQUENCEINDEX_INVALID);
+	// Set up vector
+	for(ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.GetLengthTailTrimmed(); nOrd++)
+	{
+		PATTERNINDEX nPat = m_SndFile.Order[nOrd];
+		if(!m_SndFile.Patterns.IsValidPat(nPat)) continue;
+		patternsFixed[nPat] = 0;
+	}
+
+	while(m_SndFile.Order.GetNumSequences() > 1)
+	{
+		removedSequences++;
+		const ORDERINDEX nFirstOrder = m_SndFile.Order.GetLengthTailTrimmed() + 1; // +1 for separator item
+		if(nFirstOrder + m_SndFile.Order.GetSequence(1).GetLengthTailTrimmed() > m_SndFile.GetModSpecifications().ordersMax)
+		{
+			wsprintf(s, "WARNING: Cannot merge Sequence %d (too long!)\n", removedSequences);
+			AddToLog(s);
+			m_SndFile.Order.RemoveSequence(1);
+			continue;
+		}
+		m_SndFile.Order.Append(m_SndFile.Order.GetInvalidPatIndex()); // Separator item
+		for(ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.GetSequence(1).GetLengthTailTrimmed(); nOrd++)
+		{
+			PATTERNINDEX nPat = m_SndFile.Order.GetSequence(1)[nOrd];
+			m_SndFile.Order.Append(nPat);
+
+			// Try to fix patterns (Bxx commands)
+			if(!m_SndFile.Patterns.IsValidPat(nPat)) continue;
+
+			MODCOMMAND *m = m_SndFile.Patterns[nPat];
+			for (UINT len = 0; len < m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; m++, len++)
+			{
+				if(m->command == CMD_POSITIONJUMP)
+				{
+					if(patternsFixed[nPat] != SEQUENCEINDEX_INVALID && patternsFixed[nPat] != removedSequences)
+					{
+						// Oops, some other sequence uses this pattern already.
+						const PATTERNINDEX nNewPat = m_SndFile.Patterns.Insert(m_SndFile.PatternSize[nPat]);
+						if(nNewPat != SEQUENCEINDEX_INVALID)
+						{
+							// could create new pattern - copy data over and continue from here.
+							m_SndFile.Order[nFirstOrder + nOrd] = nNewPat;
+							MODCOMMAND *pSrc = m_SndFile.Patterns[nPat];
+							MODCOMMAND *pDest = m_SndFile.Patterns[nNewPat];
+							memcpy(pDest, pSrc, m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels * sizeof(MODCOMMAND));
+							m = pDest + len;
+							patternsFixed.resize(max(nNewPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
+							nPat = nNewPat;
+						} else
+						{
+							// cannot create new pattern: notify the user
+							wsprintf(s, "CONFLICT: Pattern break commands in Pattern %d might be broken since it has been used in several sequences!", nPat);
+							AddToLog(s);
+						}
+					}
+					m->param += nFirstOrder;
+					patternsFixed[nPat] = removedSequences;
+				}
+			}
+
+		}
+		m_SndFile.Order.RemoveSequence(1);
+	}
+	return true;
+}
 
