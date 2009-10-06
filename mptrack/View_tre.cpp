@@ -771,8 +771,17 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 					}
 				} else
 				{
-					wsprintf(s, "[%02d] Skip", iOrd);
+					if(pSndFile->Order.GetSequence(nSeq)[iOrd] == pSndFile->Order.GetIgnoreIndex())
+					{
+						// +++ Item
+						wsprintf(s, "[%02d] Skip", iOrd);
+					} else
+					{
+						// --- Item
+						wsprintf(s, "[%02d] Stop", iOrd);
+					}
 				}
+
 				if (pInfo->tiOrders[nSeq][iOrd])
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
@@ -1930,11 +1939,27 @@ BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 	switch(dwDropType)
 	{
 	case MODITEM_ORDER:
+	case MODITEM_SEQUENCE:
 		if ((dwDragType == MODITEM_ORDER) && (pModDoc) && (m_nDocNdx == m_nDragDocNdx))
 		{
 			if (bDoDrop)
 			{
-				if (dwItemDrag != qwItemDrop) pModDoc->MoveOrder((ORDERINDEX)dwItemDrag, (ORDERINDEX)qwItemDrop, true);
+				SEQUENCEINDEX nSeqFrom = (SEQUENCEINDEX)(dwItemDrag >> 16), nSeqTo = (SEQUENCEINDEX)(qwItemDrop >> 16);
+				ORDERINDEX nOrdFrom = (ORDERINDEX)(dwItemDrag & 0xFFFF), nOrdTo = (ORDERINDEX)(qwItemDrop & 0xFFFF);
+				if(dwDropType == MODITEM_SEQUENCE)
+				{
+					// drop on sequence -> attach
+					nSeqTo = (SEQUENCEINDEX)(qwItemDrop & 0xFFFF);
+					nOrdTo = pModDoc->GetSoundFile()->Order.GetSequence(nSeqTo).GetLengthTailTrimmed();
+				}
+
+				if (nSeqFrom != nSeqTo || nOrdFrom != nOrdTo)
+				{
+					if(pModDoc->MoveOrder(nOrdFrom, nOrdTo, true, false, nSeqFrom, nSeqTo) == true)
+					{
+						pModDoc->SetModified();
+					}
+				}
 			}
 			return TRUE;
 		}
@@ -2607,20 +2632,19 @@ void CModTree::OnSoloTreeItem()
 	pModDoc = GetDocumentFromItem(hItem);
 	if (pModDoc)
 	{
-		SAMPLEINDEX nSamples = pModDoc->GetNumSamples();
 		INSTRUMENTINDEX nInstruments = pModDoc->GetNumInstruments();
 		if ((qwItemType == MODITEM_SAMPLE) && (!nInstruments))
 		{
-			for (SAMPLEINDEX i=1; i<=nSamples; i++)
+			for (SAMPLEINDEX nSmp = 1; nSmp <= pModDoc->GetNumSamples(); nSmp++)
 			{
-				pModDoc->MuteSample(i, (i == dwItemNo) ? false : true);
+				pModDoc->MuteSample(nSmp, (nSmp == dwItemNo) ? false : true);
 			}
 		} else
 		if ((qwItemType == MODITEM_INSTRUMENT) && (nInstruments))
 		{
-			for (INSTRUMENTINDEX i=1; i<=nInstruments; i++)
+			for (INSTRUMENTINDEX nIns = 1; nIns <= nInstruments; nIns++)
 			{
-				pModDoc->MuteInstrument(i, (i == dwItemNo) ? false : true);
+				pModDoc->MuteInstrument(nIns, (nIns == dwItemNo) ? false : true);
 			}
 		}
 	}
@@ -2638,17 +2662,15 @@ void CModTree::OnUnmuteAllTreeItem()
 	pModDoc = GetDocumentFromItem(hItem);
 	if (pModDoc)
 	{
-		SAMPLEINDEX nSamples = pModDoc->GetNumSamples();
-		INSTRUMENTINDEX nInstruments = pModDoc->GetNumInstruments();
 		if ((qwItemType == MODITEM_SAMPLE) || (qwItemType == MODITEM_INSTRUMENT))
 		{
-			for (SAMPLEINDEX i=1; i<=nSamples; i++)
+			for (SAMPLEINDEX nSmp = 1; nSmp <= pModDoc->GetNumSamples(); nSmp++)
 			{
-				pModDoc->MuteSample(i, FALSE);
+				pModDoc->MuteSample(nSmp, FALSE);
 			}
-			for (INSTRUMENTINDEX j=1; j<=nInstruments; j++)
+			for (INSTRUMENTINDEX nIns = 1; nIns <= pModDoc->GetNumInstruments(); nIns++)
 			{
-				pModDoc->MuteInstrument(j, FALSE);
+				pModDoc->MuteInstrument(nIns, FALSE);
 			}
 		}
 	}

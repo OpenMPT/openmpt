@@ -4486,6 +4486,8 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 			case 4:	p->param = 0; break;				//Param
 			default: p->Clear();						//If not specified, delete them all! :)
 		}
+		if((field == 3 || field == 4) && (p->note == NOTE_PC || p->note == NOTE_PCS))
+			p->command = p->param = 0;
 
 		if(IsEditingEnabled_bmsg())
 		{

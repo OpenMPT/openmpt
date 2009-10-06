@@ -18,31 +18,30 @@
 // Default checkbox state
 bool CModCleanupDlg::m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS] =
 {
-	// remove unused
-	true,	true,		// pat/smp
-	true,	true,		// ins/plg
-	// remove all
-	false,	false,		// pat/ord
-	false,	false,		// smp/ins
-	false,				// plg
-	// misc
-	true,	true,		// pat/smp
-	true,	false,		// opt/reset
+	true,	false,	true,			// patterns	
+	false,	false,					// orders
+	true,	false,	false,	true,	// samples
+	true,	false,					// instruments
+	true,	false,					// plugins
+	false,							// misc
 };
 
 // Checkbox -> Control ID LUT
 WORD const CModCleanupDlg::m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS] =
 {
-	// remove unused
-	IDC_CHK_CLEANUP_PATTERNS,		IDC_CHK_CLEANUP_SAMPLES,		
-	IDC_CHK_CLEANUP_INSTRUMENTS,	IDC_CHK_CLEANUP_PLUGINS,		
-	// remove all
-	IDC_CHK_REMOVE_PATTERNS,		IDC_CHK_REMOVE_ORDERS,
-	IDC_CHK_REMOVE_SAMPLES,			IDC_CHK_REMOVE_INSTRUMENTS,
-	IDC_CHK_REMOVE_PLUGINS,
+	// patterns
+	IDC_CHK_CLEANUP_PATTERNS,		IDC_CHK_REMOVE_PATTERNS,	IDC_CHK_REARRANGE_PATTERNS,
+	// orders
+	IDC_CHK_MERGE_SEQUENCES,		IDC_CHK_REMOVE_ORDERS,
+	// samples
+	IDC_CHK_CLEANUP_SAMPLES,		IDC_CHK_REMOVE_SAMPLES,		IDC_CHK_REARRANGE_SAMPLES,
+	IDC_CHK_OPTIMIZE_SAMPLES,
+	// instruments
+	IDC_CHK_CLEANUP_INSTRUMENTS,	IDC_CHK_REMOVE_INSTRUMENTS,
+	// plugins
+	IDC_CHK_CLEANUP_PLUGINS,		IDC_CHK_REMOVE_PLUGINS,
 	// misc
-	IDC_CHK_REARRANGE_PATTERNS,		IDC_CHK_REARRANGE_SAMPLES,
-	IDC_CHK_OPTIMIZE_SAMPLES,		IDC_CHK_RESET_VARIABLES,
+	IDC_CHK_RESET_VARIABLES,
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -52,6 +51,9 @@ BEGIN_MESSAGE_MAP(CModCleanupDlg, CDialog)
 	//{{AFX_MSG_MAP(CModTypeDlg)
 	ON_COMMAND(IDC_BTN_CLEANUP_SONG,			OnPresetCleanupSong)
 	ON_COMMAND(IDC_BTN_COMPO_CLEANUP,			OnPresetCompoCleanup)
+
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModCleanupDlg::OnToolTipNotify)
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModCleanupDlg::OnToolTipNotify)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -67,14 +69,18 @@ BOOL CModCleanupDlg::OnInitDialog()
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return FALSE;
 
-	GetDlgItem(m_nCleanupIDtoDlgID[CU_CLEANUP_INSTRUMENTS])->EnableWindow((pSndFile->m_nInstruments > 0) ? TRUE :FALSE);
+	GetDlgItem(m_nCleanupIDtoDlgID[CU_MERGE_SEQUENCES])->EnableWindow((pSndFile->m_nType & MOD_TYPE_MPT) ? TRUE : FALSE);
 
-	GetDlgItem(m_nCleanupIDtoDlgID[CU_REMOVE_INSTRUMENTS])->EnableWindow((pSndFile->m_nInstruments > 0) ? TRUE :FALSE);
-	GetDlgItem(m_nCleanupIDtoDlgID[CU_REMOVE_SAMPLES])->EnableWindow((pSndFile->m_nSamples > 0) ? TRUE :FALSE);
+	GetDlgItem(m_nCleanupIDtoDlgID[CU_REMOVE_SAMPLES])->EnableWindow((pSndFile->m_nSamples > 0) ? TRUE : FALSE);
+	GetDlgItem(m_nCleanupIDtoDlgID[CU_REARRANGE_SAMPLES])->EnableWindow((pSndFile->m_nSamples > 1) ? TRUE : FALSE);
 
-	GetDlgItem(m_nCleanupIDtoDlgID[CU_REARRANGE_SAMPLES])->EnableWindow((pSndFile->m_nSamples > 1) ? TRUE :FALSE);
+	GetDlgItem(m_nCleanupIDtoDlgID[CU_CLEANUP_INSTRUMENTS])->EnableWindow((pSndFile->m_nInstruments > 0) ? TRUE : FALSE);
+	GetDlgItem(m_nCleanupIDtoDlgID[CU_REMOVE_INSTRUMENTS])->EnableWindow((pSndFile->m_nInstruments > 0) ? TRUE : FALSE);
+
+	EnableToolTips(TRUE);
 	return TRUE;
 }
+
 
 void CModCleanupDlg::OnOK()
 //-------------------------
@@ -88,6 +94,7 @@ void CModCleanupDlg::OnOK()
 	m_pModDoc->ClearLog();
 
 	// Orders
+	if(m_bCheckBoxes[CU_MERGE_SEQUENCES]) bModified |= MergeSequences();
 	if(m_bCheckBoxes[CU_REMOVE_ORDERS]) bModified |= RemoveAllOrders();
 
 	// Patterns
@@ -136,43 +143,134 @@ void CModCleanupDlg::OnCancel()
 void CModCleanupDlg::OnPresetCleanupSong()
 //----------------------------------------
 {
-	// remove unused
+	// patterns
 	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_CLEANUP_SAMPLES, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_CLEANUP_INSTRUMENTS, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_CLEANUP_PLUGINS, MF_CHECKED);
-	// remove all
 	CheckDlgButton(IDC_CHK_REMOVE_PATTERNS, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REARRANGE_PATTERNS, MF_UNCHECKED);
+	// orders
+	CheckDlgButton(IDC_CHK_MERGE_SEQUENCES, MF_UNCHECKED);
 	CheckDlgButton(IDC_CHK_REMOVE_ORDERS, MF_UNCHECKED);
+	// samples
+	CheckDlgButton(IDC_CHK_CLEANUP_SAMPLES, MF_CHECKED);
 	CheckDlgButton(IDC_CHK_REMOVE_SAMPLES, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_INSTRUMENTS, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, MF_UNCHECKED);
-	// misc
-	CheckDlgButton(IDC_CHK_REARRANGE_PATTERNS, MF_CHECKED);
 	CheckDlgButton(IDC_CHK_REARRANGE_SAMPLES, MF_CHECKED);
 	CheckDlgButton(IDC_CHK_OPTIMIZE_SAMPLES, MF_CHECKED);
+	// instruments
+	CheckDlgButton(IDC_CHK_CLEANUP_INSTRUMENTS, MF_CHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_INSTRUMENTS, MF_UNCHECKED);
+	// plugins
+	CheckDlgButton(IDC_CHK_CLEANUP_PLUGINS, MF_CHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, MF_UNCHECKED);
+	// misc
 	CheckDlgButton(IDC_CHK_SAMPLEPACK, MF_UNCHECKED);
 }
 
 void CModCleanupDlg::OnPresetCompoCleanup()
 //----------------------------------------
 {
-	// remove unused
+	// patterns
 	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_CLEANUP_SAMPLES, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_CLEANUP_INSTRUMENTS, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_CLEANUP_PLUGINS, MF_UNCHECKED);
-	// remove all
 	CheckDlgButton(IDC_CHK_REMOVE_PATTERNS, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_ORDERS, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_SAMPLES, MF_UNCHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_INSTRUMENTS, MF_CHECKED);
-	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, MF_CHECKED);
-	// misc
 	CheckDlgButton(IDC_CHK_REARRANGE_PATTERNS, MF_UNCHECKED);
+	// orders
+	CheckDlgButton(IDC_CHK_MERGE_SEQUENCES, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_ORDERS, MF_CHECKED);
+	// samples
+	CheckDlgButton(IDC_CHK_CLEANUP_SAMPLES, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_SAMPLES, MF_UNCHECKED);
 	CheckDlgButton(IDC_CHK_REARRANGE_SAMPLES, MF_CHECKED);
 	CheckDlgButton(IDC_CHK_OPTIMIZE_SAMPLES, MF_UNCHECKED);
+	// instruments
+	CheckDlgButton(IDC_CHK_CLEANUP_INSTRUMENTS, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_INSTRUMENTS, MF_CHECKED);
+	// plugins
+	CheckDlgButton(IDC_CHK_CLEANUP_PLUGINS, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHK_REMOVE_PLUGINS, MF_CHECKED);
+	// misc
 	CheckDlgButton(IDC_CHK_SAMPLEPACK, MF_CHECKED);
+}
+
+BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
+{
+	UNREFERENCED_PARAMETER(id);
+	UNREFERENCED_PARAMETER(pResult);
+
+	// need to handle both ANSI and UNICODE versions of the message
+	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
+	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
+	CStringA strTipText = "";
+	UINT_PTR nID = pNMHDR->idFrom;
+	if (pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
+		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
+	{
+		// idFrom is actually the HWND of the tool
+		nID = ::GetDlgCtrlID((HWND)nID);
+	}
+
+	switch(nID)
+	{
+	// patterns
+	case IDC_CHK_CLEANUP_PATTERNS:
+		strTipText = "Remove all unused patterns and rearrange them.";
+		break;
+	case IDC_CHK_REMOVE_PATTERNS:
+		strTipText = "Remove all patterns.";
+		break;
+	case IDC_CHK_REARRANGE_PATTERNS:
+		strTipText = "Number the patterns given by their order in the sequence.";
+		break;
+	// orders
+	case IDC_CHK_REMOVE_ORDERS:
+		strTipText = "Reset the order list.";
+		break;
+	case IDC_CHK_MERGE_SEQUENCES:
+		strTipText = "Merge multiple sequences into one.";
+		break;
+	// samples
+	case IDC_CHK_CLEANUP_SAMPLES:
+		strTipText = "Remove all unused samples.";
+		break;
+	case IDC_CHK_REMOVE_SAMPLES:
+		strTipText = "Remove all samples.";
+		break;
+	case IDC_CHK_REARRANGE_SAMPLES:
+		strTipText = "Reorder sample list by removing empty samples.";
+		break;
+	case IDC_CHK_OPTIMIZE_SAMPLES:
+		strTipText = "Remove unused data after the sample loop end.";
+		break;
+	// instruments
+	case IDC_CHK_CLEANUP_INSTRUMENTS:
+		strTipText = "Remove all unused instruments.";
+		break;
+	case IDC_CHK_REMOVE_INSTRUMENTS:
+		strTipText = "Remove all instruments and convert them to samples.";
+		break;
+	// plugins
+	case IDC_CHK_CLEANUP_PLUGINS:
+		strTipText = "Remove all unused plugins.";
+		break;
+	case IDC_CHK_REMOVE_PLUGINS:
+		strTipText = "Remove all plugins.";
+		break;
+	// misc
+	case IDC_CHK_SAMPLEPACK:
+		strTipText = "Convert the module to .IT and reset song, sample and instrument variables";
+		break;
+	}
+
+	if (pNMHDR->code == TTN_NEEDTEXTA)
+	{
+		strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
+			strTipText.GetLength() + 1);
+	}
+	else
+	{
+		::MultiByteToWideChar(CP_ACP , 0, strTipText, strTipText.GetLength() + 1,
+			pTTTW->szText, sizeof(pTTTW->szText)/(sizeof pTTTW->szText[0]));
+	}
+
+	return TRUE;
 }
 
 
@@ -807,8 +905,12 @@ bool CModCleanupDlg::RemoveAllOrders()
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
-	pSndFile->Order.Init();
 	pSndFile->Order.SetSequence(0);
+	while(pSndFile->Order.GetNumSequences() > 1)
+	{
+		pSndFile->Order.RemoveSequence(1);
+	}
+	pSndFile->Order.Init();
 	pSndFile->Order[0] = 0;
 	pSndFile->SetCurrentOrder(0);
 	return true;
@@ -875,4 +977,11 @@ bool CModCleanupDlg::RemoveAllPlugins()
 	bool keepMask[MAX_MIXPLUGINS]; memset(keepMask, false, sizeof(keepMask));
 	m_pModDoc->RemovePlugs(keepMask);
 	return true;
+}
+
+// Remove all plugins
+bool CModCleanupDlg::MergeSequences()
+//-------------------------------------
+{
+	return m_pModDoc->MergeSequences();
 }

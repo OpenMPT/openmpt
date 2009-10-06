@@ -258,6 +258,8 @@ public:
 
 	BOOL RemoveChannels(BOOL bChnMask[MAX_CHANNELS]);
 
+	bool MergeSequences();
+
 	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 // Fix: save pattern scrollbar position when switching to other tab
 	CSize GetOldPatternScrollbarsPos() const { return m_szOldPatternScrollbarsPos; };
