@@ -1359,8 +1359,8 @@ ORDERINDEX CSoundFile::FindOrder(PATTERNINDEX nPat, UINT startFromOrder, bool di
 //end rewbs.playSongFromCursor
 
 
-UINT CSoundFile::GetBestSaveFormat() const
-//----------------------------------------
+MODTYPE CSoundFile::GetBestSaveFormat() const
+//-------------------------------------------
 {
 	if ((!m_nSamples) || (!m_nChannels)) return MOD_TYPE_NONE;
 	if (!m_nType) return MOD_TYPE_NONE;
@@ -1376,8 +1376,8 @@ UINT CSoundFile::GetBestSaveFormat() const
 }
 
 
-UINT CSoundFile::GetSaveFormats() const
-//-------------------------------------
+MODTYPE CSoundFile::GetSaveFormats() const
+//----------------------------------------
 {
 	UINT n = 0;
 	if ((!m_nSamples) || (!m_nChannels) || (m_nType == MOD_TYPE_NONE)) return 0;
@@ -2650,7 +2650,7 @@ BOOL CSoundFile::SetPatternName(UINT nPat, LPCSTR lpszName)
 	CHAR szName[MAX_PATTERNNAME] = "";
 	if (nPat >= Patterns.Size()) return FALSE;
 	if (lpszName) lstrcpyn(szName, lpszName, MAX_PATTERNNAME);
-	szName[MAX_PATTERNNAME-1] = 0;
+	SpaceToNullString(szName); //szName[MAX_PATTERNNAME-1] = 0;
 	if (!m_lpszPatternNames) m_nPatternNames = 0;
 	if (nPat >= m_nPatternNames)
 	{

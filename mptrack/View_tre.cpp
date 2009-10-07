@@ -688,6 +688,25 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	if ((pInfo->hOrders) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_SMPNAMES))
 	{
 		const DWORD nPat = (lHint >> HINT_SHIFT_PAT);
+
+		// only one seq remaining: update parent item || previously only one sequence
+		if((pInfo->tiSequences.size() > 1 && pSndFile->Order.GetNumSequences() == 1) || (pInfo->tiSequences.size() == 1 && pSndFile->Order.GetNumSequences() > 1))
+		{
+			if(pInfo->tiOrders.size() != pSndFile->Order.GetNumSequences())
+			{
+				for(size_t nSeq = 0; nSeq < pInfo->tiOrders.size(); nSeq++)
+				{
+					for(size_t nOrd = 0; nOrd < pInfo->tiOrders[nSeq].size(); nOrd++) if (pInfo->tiOrders[nSeq][nOrd])
+					{
+						DeleteItem(pInfo->tiOrders[nSeq][nOrd]); pInfo->tiOrders[nSeq][nOrd] = NULL;
+					}
+					DeleteItem(pInfo->tiSequences[nSeq]); pInfo->tiSequences[nSeq] = NULL;
+				}
+				pInfo->tiOrders.resize(pSndFile->Order.GetNumSequences());
+				pInfo->tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
+			}
+		}
+
 		// If there are too many sequences, delete them.
 		for(size_t nSeq = pSndFile->Order.GetNumSequences(); nSeq < pInfo->tiSequences.size(); nSeq++) if (pInfo->tiSequences[nSeq])
 		{
@@ -702,23 +721,6 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			pInfo->tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
 			pInfo->tiOrders.resize(pSndFile->Order.GetNumSequences());
 		}
-
-		// TODO what to do when seq count changed from 2 to 1 or from 1 to 2?
-
-		/* // number of sequences changed: wipe tree first (is this necessary?)
-		if(pInfo->tiOrders.size() != pSndFile->Order.GetNumSequences())
-		{
-			for(size_t nSeq = 0; nSeq < pInfo->tiOrders.size(); nSeq++)
-			{
-				for(size_t nOrd = 0; nOrd < pInfo->tiOrders[nSeq].size(); nOrd++) if (pInfo->tiOrders[nSeq][nOrd])
-				{
-					DeleteItem(pInfo->tiOrders[nSeq][nOrd]); pInfo->tiOrders[nSeq][nOrd] = NULL;
-				}
-				DeleteItem(pInfo->tiSequences[nSeq]); pInfo->tiSequences[nSeq] = NULL;
-			}
-			pInfo->tiOrders.resize(pSndFile->Order.GetNumSequences());
-			pInfo->tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
-		}*/
 
 		HTREEITEM hAncestorNode = pInfo->hOrders;
 
