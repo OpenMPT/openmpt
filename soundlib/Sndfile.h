@@ -730,8 +730,8 @@ public:
 
 #endif // MODPLUG_NO_FILESAVE
 	// MOD Convert function
-	UINT GetBestSaveFormat() const;
-	UINT GetSaveFormats() const;
+	MODTYPE GetBestSaveFormat() const;
+	MODTYPE GetSaveFormats() const;
 	void ConvertModCommand(MODCOMMAND *) const;
 	void S3MConvert(MODCOMMAND *m, BOOL bIT) const;
 	void S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatibilityExport = false) const;

@@ -1265,7 +1265,46 @@ void CTrackApp::SaveChords(PMPTCHORD pChords)
 void CTrackApp::OnFileNew()
 //-------------------------
 {
-	if (m_bInitialized) OnFileNewIT();
+	if (!m_bInitialized) return;
+
+	// Default module type
+	MODTYPE nNewType = MOD_TYPE_IT;
+	bool bIsProject = false;
+
+	// Get active document to make the new module of the same type
+	CModDoc *pModDoc = CMainFrame::GetMainFrame()->GetActiveDoc();
+	if(pModDoc != nullptr)
+	{
+		CSoundFile *pSndFile = pModDoc->GetSoundFile();
+		if(pSndFile != nullptr)
+		{
+			nNewType = pSndFile->GetBestSaveFormat();
+			bIsProject = ((pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0) ? true: false;
+		}
+	}
+
+	switch(nNewType)
+	{
+	case MOD_TYPE_MOD:
+		OnFileNewMOD();
+		break;
+	case MOD_TYPE_S3M:
+		OnFileNewS3M();
+		break;
+	case MOD_TYPE_XM:
+		OnFileNewXM();
+		break;
+	case MOD_TYPE_IT:
+		if(bIsProject)
+			OnFileNewITProject();
+		else
+			OnFileNewIT();
+		break;
+	case MOD_TYPE_MPT:
+	default:
+		OnFileNewMPT();
+		break;
+	}
 }
 
 

@@ -773,6 +773,10 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 				}
 			}
 		}
+		if(m_SndFile.Order.GetLengthTailTrimmed() > specs.ordersMax)
+		{
+			AddToLog("WARNING: Order list has been trimmed!");
+		}
 		m_SndFile.Order.resize(specs.ordersMax);
 	}
 
