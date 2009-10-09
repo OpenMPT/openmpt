@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding = "Windows-1252"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.00"
+	Version="7.10"
 	Name="zlibstat"
+	ProjectGUID="{3F7D3110-B3DD-4DE1-B608-C3F491009625}"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -23,7 +24,7 @@
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
 				PreprocessorDefinitions="WIN32;ZLIB_WINAPI"
 				ExceptionHandling="FALSE"
-				RuntimeLibrary="5"
+				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\zlibstatDebug/zlibstat.pch"
 				AssemblerListingLocation=".\zlibstatDebug/"
 				ObjectFile=".\zlibstatDebug/"
@@ -51,6 +52,12 @@
 				Culture="1036"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseAxp|Win32"
@@ -93,6 +100,12 @@
 				Name="VCResourceCompilerTool"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
@@ -108,7 +121,7 @@
 				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;ASMV;ASMINF"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
-				RuntimeLibrary="4"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\zlibstat/zlibstat.pch"
 				AssemblerListingLocation=".\zlibstat/"
@@ -136,6 +149,12 @@
 				Culture="1036"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="ReleaseWithoutAsm|Win32"
@@ -179,8 +198,16 @@
 				Culture="1036"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 	</Configurations>
+	<References>
+	</References>
 	<Files>
 		<Filter
 			Name="Source Files"

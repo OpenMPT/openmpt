@@ -53,7 +53,7 @@ struct MODTREEDOCINFO
 	vector<HTREEITEM> tiPatterns;
 	HTREEITEM tiSamples[MAX_SAMPLES];
 	HTREEITEM tiInstruments[MAX_INSTRUMENTS];
-	vector<vector<HTREEITEM>> tiOrders;
+	vector<vector<HTREEITEM> > tiOrders;
 	vector<HTREEITEM> tiSequences;
 	HTREEITEM tiEffects[MAX_MIXPLUGINS];
 
