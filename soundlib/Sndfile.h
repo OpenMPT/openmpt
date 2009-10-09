@@ -699,14 +699,16 @@ public:
 	bool ReadMT2(LPCBYTE lpStream, DWORD dwMemLength);
 	bool ReadPSM(LPCBYTE lpStream, DWORD dwMemLength);
 	bool ReadPSM16(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadJ2B(LPCBYTE lpStream, DWORD dwMemLength);
 	bool ReadUMX(LPCBYTE lpStream, DWORD dwMemLength);
 	bool ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMID(LPCBYTE lpStream, DWORD dwMemLength);
 
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
+	bool Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStream, DWORD dwMemLength, bool bIsAM);
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
@@ -737,6 +739,9 @@ public:
 	void S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatibilityExport = false) const;
 	WORD ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool bCompatibilityExport = false) const;
 	
+	static void MODExx2S3MSxx(MODCOMMAND *m);
+	static void S3MSxx2MODExx(MODCOMMAND *m);
+
 public:
 	// Real-time sound functions
 	VOID SuspendPlugins(); //rewbs.VSTCompliance
