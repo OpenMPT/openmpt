@@ -261,8 +261,9 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 
 	if (pNMHDR->code == TTN_NEEDTEXTA)
 	{
-		strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
-			strTipText.GetLength() + 1);
+		//strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
+		//	strTipText.GetLength() + 1);
+		strncpy(pTTTA->szText, strTipText, strTipText.GetLength() + 1);
 	}
 	else
 	{
