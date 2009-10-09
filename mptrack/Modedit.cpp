@@ -215,20 +215,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 				switch(m->command)
 				{
 				case CMD_MODCMDEX:
-					m->command = CMD_S3MCMDEX;
-					switch(m->param & 0xF0)
-					{
-					case 0x10:	m->command = CMD_PORTAMENTOUP; m->param |= 0xF0; break;
-					case 0x20:	m->command = CMD_PORTAMENTODOWN; m->param |= 0xF0; break;
-					case 0x30:	m->param = (m->param & 0x0F) | 0x10; break;
-					case 0x40:	m->param = (m->param & 0x0F) | 0x30; break;
-					case 0x50:	m->param = (m->param & 0x0F) | 0x20; break;
-					case 0x60:	m->param = (m->param & 0x0F) | 0xB0; break;
-					case 0x70:	m->param = (m->param & 0x0F) | 0x40; break;
-					case 0x90:	m->command = CMD_RETRIG; m->param = 0x80 | (m->param & 0x0F); break;
-					case 0xA0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param = (m->param << 4) | 0x0F; } else m->command = 0; break;
-					case 0xB0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param |= 0xF0; } else m->command = 0; break;
-					}
+					CSoundFile::MODExx2S3MSxx(m);
 					break;
 				case CMD_VOLUME:
 					if (!m->volcmd)
@@ -301,20 +288,7 @@ BOOL CModDoc::ChangeModType(UINT nNewType)
 						cEffectMemory[nChannel][CMD_ARPEGGIO] = m->param;
 					break;
 				case CMD_S3MCMDEX:
-					m->command = CMD_MODCMDEX;
-					switch(m->param & 0xF0)
-					{
-					case 0x10:	m->param = (m->param & 0x0F) | 0x30; break;
-					case 0x20:	m->param = (m->param & 0x0F) | 0x50; break;
-					case 0x30:	m->param = (m->param & 0x0F) | 0x40; break;
-					case 0x40:	m->param = (m->param & 0x0F) | 0x70; break;
-					case 0x50:	
-					case 0x60:	
-					case 0x70:
-					case 0x90:
-					case 0xA0:	m->command = CMD_XFINEPORTAUPDOWN; break;
-					case 0xB0:	m->param = (m->param & 0x0F) | 0x60; break;
-					}
+					CSoundFile::S3MSxx2MODExx(m);
 					break;
 				case CMD_VOLUMESLIDE:
 					if ((m->param & 0xF0) && ((m->param & 0x0F) == 0x0F))

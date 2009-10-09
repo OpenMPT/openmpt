@@ -593,6 +593,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 #endif // MODPLUG_BASIC_SUPPORT
 		 && (!ReadGDM(lpStream, dwMemLength))
 		 && (!ReadIMF(lpStream, dwMemLength))
+		 && (!ReadAM(lpStream, dwMemLength))
+		 && (!ReadJ2B(lpStream, dwMemLength))
 		 && (!ReadMO3(lpStream, dwMemLength))
 		 && (!ReadMod(lpStream, dwMemLength))) m_nType = MOD_TYPE_NONE;
 #ifdef ZIPPED_MOD_SUPPORT
@@ -3193,6 +3195,7 @@ bool CSoundFile::TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, 
 	return false;
 }
 
+
 void CSoundFile::SetupMODPanning(bool bForceSetup)
 //------------------------------------------------
 {
@@ -3206,5 +3209,49 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 256 : 0;
 		else
 			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
+	}
+}
+
+// Convert an Exx command (MOD) to Sxx command (S3M)
+void CSoundFile::MODExx2S3MSxx(MODCOMMAND *m)
+//-------------------------------------------
+{
+	if(m->command != CMD_MODCMDEX) return;
+	m->command = CMD_S3MCMDEX;
+	switch(m->param & 0xF0)
+	{
+	case 0x10:	m->command = CMD_PORTAMENTOUP; m->param |= 0xF0; break;
+	case 0x20:	m->command = CMD_PORTAMENTODOWN; m->param |= 0xF0; break;
+	case 0x30:	m->param = (m->param & 0x0F) | 0x10; break;
+	case 0x40:	m->param = (m->param & 0x0F) | 0x30; break;
+	case 0x50:	m->param = (m->param & 0x0F) | 0x20; break;
+	case 0x60:	m->param = (m->param & 0x0F) | 0xB0; break;
+	case 0x70:	m->param = (m->param & 0x0F) | 0x40; break;
+	case 0x90:	m->command = CMD_RETRIG; m->param = 0x80 | (m->param & 0x0F); break;
+	case 0xA0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param = (m->param << 4) | 0x0F; } else m->command = 0; break;
+	case 0xB0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param |= 0xF0; } else m->command = 0; break;
+		// rest are the same
+	}
+}
+
+// Convert an Sxx command (S3M) to Exx command (MOD)
+void CSoundFile::S3MSxx2MODExx(MODCOMMAND *m)
+//-------------------------------------------
+{
+	if(m->command != CMD_S3MCMDEX) return;
+	m->command = CMD_MODCMDEX;
+	switch(m->param & 0xF0)
+	{
+	case 0x10:	m->param = (m->param & 0x0F) | 0x30; break;
+	case 0x20:	m->param = (m->param & 0x0F) | 0x50; break;
+	case 0x30:	m->param = (m->param & 0x0F) | 0x40; break;
+	case 0x40:	m->param = (m->param & 0x0F) | 0x70; break;
+	case 0x50:	
+	case 0x60:	
+	case 0x70:
+	case 0x90:
+	case 0xA0:	m->command = CMD_XFINEPORTAUPDOWN; break;
+	case 0xB0:	m->param = (m->param & 0x0F) | 0x60; break;
+		// rest are the same
 	}
 }

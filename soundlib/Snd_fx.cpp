@@ -3051,8 +3051,12 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 			// Offset beyond sample size
 			if (!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)))
 			{
+				// IT Compatibility: Offset
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
-					pChn->nPos = 0; // IT Compatibility: Reset to beginning of sample
+					if(m_dwSongFlags & SONG_ITOLDEFFECTS)
+						pChn->nPos = pChn->nLength; // Old FX: Clip to end of sample
+					else
+						pChn->nPos = 0; // Reset to beginning of sample
 				else
 					pChn->nPos = pChn->nLoopStart;
 				if ((m_dwSongFlags & SONG_ITOLDEFFECTS) && (pChn->nLength > 4))

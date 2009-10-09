@@ -256,10 +256,10 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 
 // Module flags
 #define SONG_EMBEDMIDICFG	0x0001
-#define SONG_FASTVOLSLIDES	0x0002
-#define SONG_ITOLDEFFECTS	0x0004
-#define SONG_ITCOMPATMODE	0x0008
-#define SONG_LINEARSLIDES	0x0010
+#define SONG_FASTVOLSLIDES	0x0002 // Old Scream Tracker 3.0 volume slides
+#define SONG_ITOLDEFFECTS	0x0004 // Old Impulse Tracker effect implementations
+#define SONG_ITCOMPATMODE	0x0008 // IT "Compatible Gxx"
+#define SONG_LINEARSLIDES	0x0010 // Linear slides vs. Amiga slides
 #define SONG_PATTERNLOOP	0x0020
 #define SONG_STEP			0x0040
 #define SONG_PAUSED			0x0080
