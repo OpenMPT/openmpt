@@ -708,7 +708,7 @@ public:
 	bool ReadMID(LPCBYTE lpStream, DWORD dwMemLength);
 
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
-	bool Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStream, DWORD dwMemLength, bool bIsAM);
+	bool Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStream, DWORD dwMemLength, bool bIsAM); // used by ReadAM(...) to convert AM(FF) patterns
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE

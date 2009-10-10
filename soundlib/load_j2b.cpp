@@ -1,9 +1,9 @@
 /*
- * Purpose: Load RIFF AM and RIFF AMFF modules.
- * Note:    J2B is a compressed variant of RIFF AM and RIFF AMFF files used in Jazz Jackrabbit 2
- * Authors: Johannes Schultz
- *          Chris Moeller (foo_dumb)
- *          Luigi Elettrico (J2B To IT Convertor Class)
+ * Purpose: Load RIFF AM and RIFF AMFF modules (Galaxy Sound System).
+ * Note:    J2B is a compressed variant of RIFF AM and RIFF AMFF files used in Jazz Jackrabbit 2.
+ *          It seems like no other game used the AM(FF) format.
+ * Authors: Johannes Schultz (OpenMPT port)
+ *          Chris Moeller (foo_dumb - this is almost a complete port of his code, thanks)
  *
  */
 
@@ -17,12 +17,12 @@
 // header for compressed j2b files
 struct J2BHEADER
 {
-	DWORD signature; // MUSE
-	DWORD deadbeaf;  // 0xDEADBEAF or 0xDEADBABE
-	DWORD j2blength;
-	DWORD crc32;
-	DWORD packed_length;
-	DWORD unpacked_length;
+	DWORD signature;		// MUSE
+	DWORD deadbeaf;			// 0xDEADBEAF (AM) or 0xDEADBABE (AMFF)
+	DWORD j2blength;		// complete filesize
+	DWORD crc32;			// checksum of the compressed data block
+	DWORD packed_length;	// length of the compressed data block
+	DWORD unpacked_length;	// length of the decompressed module
 };
 
 // am(ff) stuff
@@ -97,7 +97,7 @@ struct AMCHUNK_SAMPLE
 bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStream, DWORD dwMemLength, bool bIsAM)
 //----------------------------------------------------------------------------------------------------------------
 {
-	// version 0 = AMFF, else = AM
+	// version false = AMFF, true = AM
 	#define ASSERT_CAN_READ(x) \
 	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
 
@@ -252,7 +252,6 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		ASSERT_CAN_READ(LittleEndian(chunkheader->chunksize));
 
 		DWORD dwChunkEnd = dwMemPos + LittleEndian(chunkheader->chunksize);
-		if(bIsAM && (LittleEndian(chunkheader->chunksize) & 1)) dwChunkEnd++;
 
 		switch(LittleEndian(chunkheader->signature))
 		{
@@ -437,6 +436,8 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		}
 		dwMemPos = dwChunkEnd;
+		// RIFF AM has a padding byte
+		if(bIsAM && (LittleEndian(chunkheader->chunksize) & 1)) dwMemPos++;
 	}
 
 	return true;
@@ -468,36 +469,16 @@ bool CSoundFile::ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength)
 	dwMemPos += sizeof(J2BHEADER);
 
 	// header is valid, now unpack the RIFF AM file using inflate
-	z_stream strm;
-	strm.zalloc = Z_NULL;
-	strm.zfree = Z_NULL;
-	strm.opaque = Z_NULL;
-	strm.avail_in = 0;
-	strm.next_in = Z_NULL;
-	if(inflateInit(&strm) != Z_OK)
-		return false;
-
-	Bytef* bOutput = new Bytef[LittleEndian(header->unpacked_length) + 1];
-
-	strm.avail_in = dwMemLength - dwMemPos;
-	strm.next_in = (Bytef *)(lpStream + dwMemPos);
-	strm.avail_out = LittleEndian(header->unpacked_length);
-	strm.next_out = bOutput;
-
-	int nRetVal = inflate(&strm, Z_NO_FLUSH);
-	(void)inflateEnd(&strm);
-
-	if(strm.avail_in != 0 || nRetVal == Z_STREAM_ERROR || nRetVal == Z_NEED_DICT || nRetVal == Z_DATA_ERROR || nRetVal == Z_MEM_ERROR || nRetVal != Z_STREAM_END)
-	{
-		return false;
-	}
+	DWORD destSize = LittleEndian(header->unpacked_length);
+	Bytef *bOutput = new Bytef[destSize];
+	int nRetVal = uncompress(bOutput, &destSize, &lpStream[dwMemPos], LittleEndian(header->unpacked_length));
 
 	bool bResult = false;
 
-	if(strm.total_out == LittleEndian(header->unpacked_length))
+	if(destSize == LittleEndian(header->unpacked_length) && nRetVal == Z_OK)
 	{
 		// Success, now load the RIFF AM(FF) module.
-		bResult = ReadAM(bOutput, strm.total_out);
+		bResult = ReadAM(bOutput, destSize);
 	}
 	delete[] bOutput;
 

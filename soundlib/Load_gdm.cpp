@@ -275,7 +275,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// read patterns
 	Patterns.ResizeArray(max(MAX_PATTERNS, pHeader->NOP + 1));
 
-	BOOL bS3MCommandSet = (GetBestSaveFormat() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT));
+	bool bS3MCommandSet = (GetBestSaveFormat() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0 ? true : false;
 
 	// we'll start at position iPatternsOffset and decode all patterns
 	for (PATTERNINDEX iPat = 0; iPat < pHeader->NOP + 1; iPat++)
