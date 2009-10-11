@@ -30,27 +30,27 @@ protected:
 	~CChannelManagerDlg(void);
 
 	CRITICAL_SECTION applying;
-	UINT memory[4][MAX_BASECHANNELS];
-	UINT pattern[MAX_BASECHANNELS];
-	BOOL removed[MAX_BASECHANNELS];
-	BOOL select[MAX_BASECHANNELS];
-	BOOL state[MAX_BASECHANNELS];
+	CHANNELINDEX memory[4][MAX_BASECHANNELS];
+	CHANNELINDEX pattern[MAX_BASECHANNELS];
+	bool removed[MAX_BASECHANNELS];
+	bool select[MAX_BASECHANNELS];
+	bool state[MAX_BASECHANNELS];
 	CRect move[MAX_BASECHANNELS];
 	void * parentCtrl;
-	BOOL mouseTracking;
-	int nChannelsOld;
-	BOOL rightButton;
-	BOOL leftButton;
+	bool mouseTracking;
+	CHANNELINDEX nChannelsOld;
+	bool rightButton;
+	bool leftButton;
 	int currentTab;
-	BOOL moveRect;
+	bool moveRect;
 	HBITMAP bkgnd;
 	int omx,omy;
-	BOOL show;
+	bool show;
 	int mx,my;
 
-	BOOL ButtonHit(CPoint point, UINT * id, CRect * invalidate);
+	bool ButtonHit(CPoint point, CHANNELINDEX * id, CRect * invalidate);
 	void MouseEvent(UINT nFlags,CPoint point, BYTE button);
-	void ResetState(BOOL selection = TRUE, BOOL move = TRUE, BOOL button = TRUE, BOOL internal = TRUE, BOOL order = FALSE);
+	void ResetState(bool bSelection = true, bool bMove = true, bool bButton = true, bool bInternal = true, bool bOrder = false);
 
 	//{{AFX_VIRTUAL(CChannelManagerDlg)
 	BOOL OnInitDialog();
