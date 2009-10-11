@@ -8,7 +8,6 @@
 #include "ctrl_pat.h"
 #include "view_pat.h"
 #include "ChannelManagerDlg.h"
-#include ".\ctrl_pat.h"
 
 //////////////////////////////////////////////////////////////
 // CCtrlPatterns
