@@ -256,7 +256,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		UINT loopstart, looplen;
 
 		memcpy(m_szNames[i], pms->name, 22);
-		m_szNames[i][22] = 0;
+		SpaceToNullStringFixed(m_szNames[i], 22);
 		psmp->uFlags = 0;
 		psmp->nLength = BigEndianW(pms->length)*2;
 		dwTotalSampleLen += psmp->nLength;
@@ -347,7 +347,8 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	m_nDefaultTempo = 125;
 	m_nMinPeriod = 14 << 2;
 	m_nMaxPeriod = 3424 << 2;
-	memcpy(m_szNames, lpStream, 20);
+	memcpy(m_szNames[0], lpStream, 20);
+	SpaceToNullStringFixed(m_szNames[0], 20);
 	// Setup channel pan positions and volume
 	SetupMODPanning();
 

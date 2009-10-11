@@ -250,6 +250,8 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		const ITOLDINSTRUMENT *pis = (const ITOLDINSTRUMENT *)p;
 		memcpy(pIns->name, pis->name, 26);
 		memcpy(pIns->filename, pis->filename, 12);
+		SpaceToNullStringFixed(pIns->name, 26);
+		SpaceToNullStringFixed(pIns->filename, 12);
 		pIns->nFadeOut = pis->fadeout << 6;
 		pIns->nGlobalVol = 64;
 		for (UINT j=0; j<NOTE_MAX; j++)
@@ -290,6 +292,8 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 		const ITINSTRUMENT *pis = (const ITINSTRUMENT *)p;
 		memcpy(pIns->name, pis->name, 26);
 		memcpy(pIns->filename, pis->filename, 12);
+		SpaceToNullStringFixed(pIns->name, 26);
+		SpaceToNullStringFixed(pIns->filename, 12);
 		if (pis->mpr<=128)
 			pIns->nMidiProgram = pis->mpr;
 		pIns->nMidiChannel = pis->mch;
@@ -941,8 +945,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATMODE;
 	if ((pifh->flags & 0x80) || (pifh->special & 0x08)) m_dwSongFlags |= SONG_EMBEDMIDICFG;
 	if (pifh->flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
+
 	memcpy(m_szNames[0], pifh->songname, 26);
-	m_szNames[0][26] = 0;
+	SpaceToNullStringFixed(m_szNames[0], 26);
+
 	// Global Volume
 	if (pifh->globalvol)
 	{
@@ -1208,6 +1214,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			MODSAMPLE *pSmp = &Samples[nsmp+1];
 			memcpy(pSmp->filename, pis->filename, 12);
+			SpaceToNullStringFixed(pSmp->filename, 12);
 			pSmp->uFlags = 0;
 			pSmp->nLength = 0;
 			pSmp->nLoopStart = pis->loopbegin;
@@ -1258,17 +1265,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 // -! NEW_FEATURE#0027
 			}
 		}
-		memcpy(m_szNames[nsmp+1], pis->name, 26);
+		memcpy(m_szNames[nsmp + 1], pis->name, 26);
+		SpaceToNullStringFixed(m_szNames[nsmp + 1], 26);
 	}
 
-	for (UINT ncu=0; ncu<MAX_BASECHANNELS; ncu++)
-	{
-		if (ncu>=m_nChannels)
-		{
-			ChnSettings[ncu].nVolume = 64;
-			ChnSettings[ncu].dwFlags &= ~CHN_MUTE;
-		}
-	}
 	m_nMinPeriod = 8;
 	m_nMaxPeriod = 0xF000;
 
@@ -1309,11 +1309,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 		UINT len = *((WORD *)(lpStream+patpos[npat]));
 		UINT rows = *((WORD *)(lpStream+patpos[npat]+2));
-// -> CODE#0008
-// -> DESC="#define to set pattern size"
-//		if ((rows < 4) || (rows > 256)) continue;
 		if ((rows < GetModSpecifications().patternRowsMin) || (rows > GetModSpecifications().patternRowsMax)) continue;
-// -> BEHAVIOUR_CHANGE#0008
 		if (patpos[npat]+8+len > dwMemLength) continue;
 
 		if(Patterns.Insert(npat, rows)) continue;

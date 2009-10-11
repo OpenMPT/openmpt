@@ -266,6 +266,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	m_nType = MOD_TYPE_S3M;
 	memset(m_szNames,0,sizeof(m_szNames));
 	memcpy(m_szNames[0], psfh.name, 28);
+	SpaceToNullStringFixed(m_szNames[0], 28);
 	// Speed
 	m_nDefaultSpeed = psfh.speed;
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
@@ -335,12 +336,17 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		UINT nInd = ((DWORD)ptr[iSmp-1])*16;
 		if ((!nInd) || (nInd + 0x50 > dwMemLength)) continue;
+
 		memcpy(s, lpStream+nInd, 0x50);
 		memcpy(Samples[iSmp].filename, s+1, 12);
+		SpaceToNullStringFixed(Samples[iSmp].filename, 12);
+
 		insflags[iSmp-1] = s[0x1F];
 		inspack[iSmp-1] = s[0x1E];
 		s[0x4C] = 0;
 		lstrcpy(m_szNames[iSmp], (LPCSTR)&s[0x30]);
+		SpaceToNullStringFixed(m_szNames[iSmp], 28);
+
 		if ((s[0]==1) && (s[0x4E]=='R') && (s[0x4F]=='S'))
 		{
 			Samples[iSmp].nLength = CLAMP(LittleEndian(*((LPDWORD)(s + 0x10))), 4, MAX_SAMPLE_LENGTH);

@@ -229,6 +229,8 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 		#endif
 			pmib = (MDLINFOBLOCK *)(lpStream+dwMemPos);
 			memcpy(m_szNames[0], pmib->songname, 31);
+			SpaceToNullStringFixed(m_szNames[0], 31);
+
 			norders = pmib->norders;
 			if (norders > MAX_ORDERS) norders = MAX_ORDERS;
 			m_nRestartPos = pmib->repeatpos;
@@ -328,6 +330,8 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 					MODINSTRUMENT *pIns = Instruments[nins];
 					memset(pIns, 0, sizeof(MODINSTRUMENT));
 					memcpy(pIns->name, lpStream+dwPos+2, 32);
+					SpaceToNullStringFixed(pIns->name, 31);
+
 					pIns->nGlobalVol = 64;
 					pIns->nPPC = 5*12;
 					SetDefaultInstrumentValues(pIns);
@@ -413,6 +417,8 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				MODSAMPLE *pSmp = &Samples[nins];
 				memcpy(m_szNames[nins], lpStream+dwPos+1, 31);
 				memcpy(pSmp->filename, lpStream+dwPos+33, 8);
+				SpaceToNullStringFixed(m_szNames[nins], 31);
+				SpaceToNullStringFixed(pSmp->filename, 8);
 				const BYTE *p = lpStream+dwPos+41;
 				if (pmsh->version > 0)
 				{

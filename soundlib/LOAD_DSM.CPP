@@ -121,6 +121,7 @@ bool CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 		}
 	}
 	memcpy(m_szNames[0], psong->songname, 28);
+	SpaceToNullStringFixed(m_szNames[0], 28);
 	nPat = 0;
 	nSmp = 1;
 	while (dwMemPos < dwMemLength - 8)
@@ -214,8 +215,10 @@ bool CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
 			DWORD dwPos = dwMemPos + sizeof(DSMSAMPLE);
 			dwMemPos += 8 + pSmp->inst_len;
 			memcpy(m_szNames[nSmp], pSmp->samplename, 28);
+			SpaceToNullStringFixed(m_szNames[nSmp], 28);
 			MODSAMPLE *psmp = &Samples[nSmp];
 			memcpy(psmp->filename, pSmp->filename, 13);
+			SpaceToNullStringFixed(psmp->filename, 13);
 			psmp->nGlobalVol = 64;
 			psmp->nC5Speed = pSmp->c2spd;
 			psmp->uFlags = (WORD)((pSmp->flags & 1) ? CHN_LOOP : 0);

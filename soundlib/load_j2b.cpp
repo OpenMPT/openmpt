@@ -238,6 +238,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	bool bIsAM; // false: AMFF, true: AM
 
+	ASSERT_CAN_READ(4);
 	if(LittleEndian(*(DWORD *)(lpStream + dwMemPos)) == 0x46464D41) bIsAM = false; // "AMFF"
 	else if(LittleEndian(*(DWORD *)(lpStream + dwMemPos)) == 0x20204D41) bIsAM = true; // "AM  "
 	else return false;
@@ -266,7 +267,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				ASSERT_CAN_READ_CHUNK(mainchunk->channels);
 
 				memcpy(m_szNames[0], mainchunk->songname, 32);
-				SetNullTerminator(m_szNames[0]);
+				SpaceToNullStringFixed(m_szNames[0], 31);
 				m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATMODE;
 				if(!(mainchunk->flags & 0x01)) m_dwSongFlags |= SONG_LINEARSLIDES;
 				if(mainchunk->channels < 1) return false;
@@ -277,30 +278,25 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				m_nSamplePreAmp = m_nVSTiVolume = 48;
 				m_nType = MOD_TYPE_IT;
 
+				// It seems like there's no way to differentiate between
+				// Muted and Surround channels (they're all 0xA0) - might
+				// be a limitation in mod2j2b.
 				for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
 				{
+					ChnSettings[nChn].nVolume = 64;
+					ChnSettings[nChn].nPan = 128;
 					if(bIsAM)
 					{
 						if(lpStream[dwMemPos + nChn] > 128)
-						{
-							ChnSettings[nChn].nPan = 128;
-							ChnSettings[nChn].nVolume = 0;
-						} else
-						{
+							ChnSettings[nChn].dwFlags = CHN_MUTE;
+						else
 							ChnSettings[nChn].nPan = lpStream[dwMemPos + nChn] << 1;
-							ChnSettings[nChn].nVolume = 64;
-						}
 					} else
 					{
 						if(lpStream[dwMemPos + nChn] >= 128)
-						{
-							ChnSettings[nChn].nPan = 128;
-							ChnSettings[nChn].nVolume = 0;
-						} else
-						{
+							ChnSettings[nChn].dwFlags = CHN_MUTE;
+						else
 							ChnSettings[nChn].nPan = lpStream[dwMemPos + nChn] << 2;
-							ChnSettings[nChn].nVolume = 64;
-						}
 					}
 				}
 				dwMemPos += mainchunk->channels;
@@ -330,7 +326,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				m_nSamples = max(m_nSamples, nSmp);
 
 				memcpy(m_szNames[nSmp], inschunk->name, 28);
-				m_szNames[nSmp][28] = 0;
+				SpaceToNullStringFixed(m_szNames[nSmp], 28);
 
 				ASSERT_CAN_READ_CHUNK(sizeof(AMFFCHUNK_SAMPLE));
 				AMFFCHUNK_SAMPLE *smpchunk = (AMFFCHUNK_SAMPLE *)(lpStream + dwMemPos);
@@ -339,7 +335,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(smpchunk->signature != 0x504D4153) break; // SAMP
 
 				memcpy(m_szNames[nSmp], smpchunk->name, 28);
-				m_szNames[nSmp][28] = 0;
+				SpaceToNullStringFixed(m_szNames[nSmp], 28);
 				
 				Samples[nSmp].nPan = smpchunk->pan << 2;
 				Samples[nSmp].nVolume = smpchunk->volume << 2;
@@ -389,7 +385,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				m_nSamples = max(m_nSamples, nSmp);
 
 				memcpy(m_szNames[nSmp], instheadchunk->name, 32);
-				m_szNames[nSmp][32] = 0;
+				SpaceToNullStringFixed(m_szNames[nSmp], 31);
 
 				ASSERT_CAN_READ_CHUNK(sizeof(RIFFCHUNK));
 				instchunk = (RIFFCHUNK *)(lpStream + dwMemPos);
@@ -407,7 +403,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(smpchunk->signature != 0x504D4153) break; // SAMP
 
 				memcpy(m_szNames[nSmp], smpchunk->name, 32);
-				m_szNames[nSmp][32] = 0;
+				SpaceToNullStringFixed(m_szNames[nSmp], 31);
 
 				if(LittleEndianW(smpchunk->pan) > 0x7FFF || LittleEndianW(smpchunk->volume) > 0x7FFF)
 					break;
@@ -429,7 +425,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(LittleEndianW(smpchunk->flags) & 0x20)
 					Samples[nSmp].uFlags |= CHN_PANNING;
 
-				dwMemPos += LittleEndian(smpchunk->headsize);
+				dwMemPos += LittleEndian(smpchunk->headsize) + 12; // doesn't include the 3 first DWORDs
 				dwMemPos += ReadSample(&Samples[nSmp], (LittleEndianW(smpchunk->flags) & 0x04) ? RS_PCM16S : RS_PCM8S, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 			}
 			break;
@@ -471,7 +467,7 @@ bool CSoundFile::ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// header is valid, now unpack the RIFF AM file using inflate
 	DWORD destSize = LittleEndian(header->unpacked_length);
 	Bytef *bOutput = new Bytef[destSize];
-	int nRetVal = uncompress(bOutput, &destSize, &lpStream[dwMemPos], LittleEndian(header->unpacked_length));
+	int nRetVal = uncompress(bOutput, &destSize, &lpStream[dwMemPos], LittleEndian(header->packed_length));
 
 	bool bResult = false;
 

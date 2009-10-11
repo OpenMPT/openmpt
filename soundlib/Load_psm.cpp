@@ -169,7 +169,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 		case 0x4C544954: // "TITL" - Song Title
 			memcpy(m_szNames[0], lpStream + dwMemPos, (chunkSize < 31) ? chunkSize : 31);
-			m_szNames[0][31] = 0;
+			SpaceToNullStringFixed(m_szNames[0], 31);
 			break;
 
 		case 0x54464453: // "SDFT" - Format info (song data starts here)
@@ -203,7 +203,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				PSMSUBSONG subsong;
 				subsong.restartPos = (ORDERINDEX)Order.size(); // restart order "offset": current orderlist length
 				memcpy(subsong.songName, &pSong->songType, 9); // subsong name
-				subsong.songName[9] = 0;
+				SpaceToNullStringFixed(subsong.songName, 9);
 
 				DWORD dwChunkPos = dwMemPos + sizeof(PSMSONGHEADER);
 
@@ -432,9 +432,9 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
 				m_nSamples = max(m_nSamples, smp);
 				memcpy(m_szNames[smp], pSample->sampleName, 31);
-				m_szNames[smp][31] = 0;
+				SpaceToNullStringFixed(m_szNames[smp], 31);
 				memcpy(Samples[smp].filename, pSample->fileName, 8);
-				Samples[smp].filename[8] = 0;
+				SpaceToNullStringFixed(Samples[smp].filename, 8);
 
 				Samples[smp].nGlobalVol = 0x40;
 				Samples[smp].nC5Speed = LittleEndianW(pSample->C5Freq);
@@ -456,9 +456,9 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				SAMPLEINDEX smp = (SAMPLEINDEX)(LittleEndianW(pSample->sampleNumber) + 1);
 				m_nSamples = max(m_nSamples, smp);
 				memcpy(m_szNames[smp], pSample->sampleName, 31);
-				m_szNames[smp][31] = 0;
+				SpaceToNullStringFixed(m_szNames[smp], 31);
 				memcpy(Samples[smp].filename, pSample->fileName, 8);
-				Samples[smp].filename[8] = 0;
+				SpaceToNullStringFixed(Samples[smp].filename, 8);
 
 				Samples[smp].nGlobalVol = 0x40;
 				Samples[smp].nC5Speed = LittleEndianW(pSample->C5Freq);
@@ -893,7 +893,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	memset(m_szNames, 0, sizeof(m_szNames));
 	memcpy(m_szNames[0], shdr->songName, 31);
-	m_szNames[0][31] = 0;
+	SpaceToNullStringFixed(m_szNames[0], 31);
 
 	// Read orders
 	dwMemPos = LittleEndian(shdr->orderOffset);
@@ -933,9 +933,9 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 			m_nSamples = max(m_nSamples, iSmp);
 
 			memcpy(m_szNames[iSmp], smphdr->name, 24);
-			m_szNames[iSmp][24] = 0;
+			SpaceToNullStringFixed(m_szNames[iSmp], 24);
 			memcpy(Samples[iSmp].filename, smphdr->filename, 13);
-			Samples[iSmp].filename[13] = 0;
+			SpaceToNullStringFixed(Samples[iSmp].filename, 13);
 
 			Samples[iSmp].nLength = LittleEndian(smphdr->length);
 			Samples[iSmp].nLoopStart = LittleEndian(smphdr->loopStart);

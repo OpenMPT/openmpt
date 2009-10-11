@@ -88,6 +88,7 @@ bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 	if (dwMemPos + tmp + 1 >= dwMemLength) return true;
 	tmp2 = (tmp < 32) ? tmp : 31;
 	if (tmp2) memcpy(m_szNames[0], lpStream+dwMemPos, tmp2);
+	SpaceToNullStringFixed(m_szNames[0], tmp2);
 	m_szNames[0][tmp2] = 0;
 	dwMemPos += tmp;
 	// Read sample names
@@ -97,9 +98,10 @@ bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 		tmp = lpStream[dwMemPos++];
 		tmp2 = (tmp < 32) ? tmp : 31;
 		if (tmp2) memcpy(m_szNames[sNam], lpStream+dwMemPos, tmp2);
+		SpaceToNullStringFixed(m_szNames[sNam], tmp2);
 		dwMemPos += tmp;
 	}
-	// Skip Channel names
+	// Read Channel names
 	for (UINT cNam=0; cNam<m_nChannels; cNam++)
 	{
 		if (dwMemPos + 32 >= dwMemLength) return true;
@@ -107,6 +109,7 @@ bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 		if ((chnnamlen) && (chnnamlen < MAX_CHANNELNAME))
 		{
 			memcpy(ChnSettings[cNam].szName, lpStream + dwMemPos + 1, chnnamlen);
+			SpaceToNullStringFixed(ChnSettings[cNam].szName, chnnamlen);
 		}
 		dwMemPos += chnnamlen;
 	}
@@ -331,8 +334,8 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 	dwMemPos += sizeof(AMS2SONGHEADER);
 	if (pfh->titlelen)
 	{
-		memcpy(m_szNames, pfh->szTitle, pfh->titlelen);
-		m_szNames[0][pfh->titlelen] = 0;
+		memcpy(m_szNames[0], pfh->szTitle, pfh->titlelen);
+		SpaceToNullStringFixed(m_szNames[0], pfh->titlelen);
 	}
 	m_nType = MOD_TYPE_AMS;
 	m_nChannels = 32;
@@ -410,6 +413,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 			if ((psmp) && (smpnamelen) && (smpnamelen <= 22))
 			{
 				memcpy(m_szNames[smpmap[ismp]], lpStream+dwMemPos+1, smpnamelen);
+				SpaceToNullStringFixed(m_szNames[smpmap[ismp]], smpnamelen);
 			}
 			dwMemPos += smpnamelen + 1;
 			if (psmp)
@@ -452,6 +456,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 			if ((chnnamlen) && (chnnamlen < MAX_CHANNELNAME))
 			{
 				memcpy(ChnSettings[i].szName, lpStream+dwMemPos+1, chnnamlen);
+				SpaceToNullStringFixed(ChnSettings[i].szName, chnnamlen);
 			}
 			dwMemPos += chnnamlen + 1;
 			if (dwMemPos + chnnamlen + 256 >= dwMemLength) return TRUE;
@@ -487,7 +492,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 			{
 				char s[MAX_PATTERNNAME];
 				memcpy(s, lpStream+dwMemPos+3, patnamlen);
-				s[patnamlen] = 0;
+				SpaceToNullStringFixed(s, patnamlen);
 				SetPatternName(ipat, s);
 			}
 			if(Patterns.Insert(ipat, numrows)) return TRUE;
