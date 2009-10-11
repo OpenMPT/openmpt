@@ -1836,6 +1836,8 @@ http://sourceforge.net/projects/modplug/");
 		"Storlek for all the IT compatibility hints and testcases|"
 		"as well as the IMF loader|"
 		"http://schismtracker.org/|"
+		"kode54 for the PSM and J2B loaders|"
+		"http://kode54.foobar2000.org/|"
 		"Pel K. Txnder for the scrolling credits control :)|"
 		"http://tinyurl.com/4yze8|"
 		"|The people at Modplug forums for crucial contribution|"

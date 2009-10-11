@@ -69,6 +69,7 @@ bool CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
 			MODSAMPLE *pSmp = &Samples[smp];
 
 			memcpy(m_szNames[smp], psmp->name, 20);
+			SpaceToNullStringFixed(m_szNames[smp], 20);
 			pSmp->uFlags = 0;
 			pSmp->nLength = BigEndian(psmp->length) & ~1;
 			pSmp->nLoopStart = BigEndianW(psmp->loopstart);

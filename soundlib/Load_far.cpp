@@ -88,6 +88,8 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 	m_nDefaultGlobalVolume = 256;
 
 	memcpy(m_szNames[0], pmh1->songname, 31);
+	SpaceToNullStringFixed(m_szNames[0], 31);
+
 	// Channel Setting
 	for (UINT nchpan=0; nchpan<16; nchpan++)
 	{
@@ -248,6 +250,7 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
 		dwMemPos += sizeof(FARSAMPLE);
 		m_nSamples = ismp + 1;
 		memcpy(m_szNames[ismp+1], pfs->samplename, 31);
+		SpaceToNullStringFixed(m_szNames[ismp + 1], 31);
 		const DWORD length = LittleEndian( pfs->length );
 		pSmp->nLength = length;
 		pSmp->nLoopStart = LittleEndian(pfs->reppos) ;

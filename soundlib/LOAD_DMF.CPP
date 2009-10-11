@@ -100,7 +100,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 	if ((pfh->id != 0x464d4444) || (!pfh->version) || (pfh->version & 0xF0)) return false;
 	dwMemPos = 66;
 	memcpy(m_szNames[0], pfh->songname, 30);
-	m_szNames[0][30] = 0;
+	SpaceToNullStringFixed(m_szNames[0], 30);
 	m_nType = MOD_TYPE_DMF;
 	m_nChannels = 0;
 #ifdef DMFLOG
@@ -395,7 +395,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 						{
 							UINT rlen = (namelen < 32) ? namelen : 31;
 							memcpy(m_szNames[iSmp], lpStream+dwPos+1, rlen);
-							m_szNames[iSmp][rlen] = 0;
+							SpaceToNullStringFixed(m_szNames[iSmp], rlen);
 						}
 						dwPos += namelen + 1;
 						DMFSAMPLE *psh = (DMFSAMPLE *)(lpStream+dwPos);
@@ -439,7 +439,7 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
 					pksize = *((LPDWORD)(lpStream+dwPos));
 				#ifdef DMFLOG
 					Log("sample %d: pos=0x%X pksize=%d ", iSmp, dwPos, pksize);
-					Log("len=%d flags=0x%X [%08X]\n", Ins[iSmp].nLength, smplflags[ismpd], *((LPDWORD)(lpStream+dwPos+4)));
+					Log("len=%d flags=0x%X [%08X]\n", Samples[iSmp].nLength, smplflags[ismpd], *((LPDWORD)(lpStream+dwPos+4)));
 				#endif
 					dwPos += 4;
 					if (pksize > dwMemLength - dwPos)

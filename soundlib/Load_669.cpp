@@ -68,9 +68,12 @@ bool CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 	m_nDefaultTempo = 125;
 	m_nDefaultSpeed = 6;
 	m_nChannels = 8;
+
 	memcpy(m_szNames[0], pfh->songmessage, 16);
+	SpaceToNullStringFixed(m_szNames[0], 16);
+
 	m_nSamples = pfh->samples;
-	for (UINT nins=1; nins<=m_nSamples; nins++, psmp++)
+	for (SAMPLEINDEX nSmp = 1; nSmp <= m_nSamples; nSmp++, psmp++)
 	{
 		DWORD len = LittleEndian(*((DWORD *)(&psmp->length)));
 		DWORD loopstart = LittleEndian(*((DWORD *)(&psmp->loopstart)));
@@ -79,14 +82,15 @@ bool CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
 		if ((loopend > len) && (!loopstart)) loopend = 0;
 		if (loopend > len) loopend = len;
 		if (loopstart + 4 >= loopend) loopstart = loopend = 0;
-		Samples[nins].nLength = len;
-		Samples[nins].nLoopStart = loopstart;
-		Samples[nins].nLoopEnd = loopend;
-		if (loopend) Samples[nins].uFlags |= CHN_LOOP;
-		memcpy(m_szNames[nins], psmp->filename, 13);
-		Samples[nins].nVolume = 256;
-		Samples[nins].nGlobalVol = 64;
-		Samples[nins].nPan = 128;
+		Samples[nSmp].nLength = len;
+		Samples[nSmp].nLoopStart = loopstart;
+		Samples[nSmp].nLoopEnd = loopend;
+		if (loopend) Samples[nSmp].uFlags |= CHN_LOOP;
+		memcpy(m_szNames[nSmp], psmp->filename, 13);
+		SpaceToNullStringFixed(m_szNames[nSmp], 13);
+		Samples[nSmp].nVolume = 256;
+		Samples[nSmp].nGlobalVol = 64;
+		Samples[nSmp].nPan = 128;
 	}
 	// Song Message
 	m_lpszSongComments = new char[109];

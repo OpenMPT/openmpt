@@ -257,6 +257,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	// look for null-terminated song name - that's most likely a tune made with modplug
 	for(int i = 0; i < 20; i++)
 		if(lpStream[17 + i] == 0) bProbablyMadeWithModPlug = true;
+	SpaceToNullStringFixed(m_szNames[0], 20);
 
 	// load and convert header
 	memcpy(&xmheader, lpStream + 58, sizeof(XMFILEHEADER));
@@ -323,6 +324,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		Instruments[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 		memcpy(Instruments[iIns]->name, pih->name, 22);
+		SpaceToNullStringFixed(Instruments[iIns]->name, 22);
 
 		if ((nsamples = pih->samples) > 0)
 		{
@@ -524,7 +526,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			if (!xmss.looplen) xmss.type &= ~3;
 			UINT imapsmp = samplemap[ins];
 			memcpy(m_szNames[imapsmp], xmss.name, 22);
-			m_szNames[imapsmp][22] = 0;
+			SpaceToNullStringFixed(m_szNames[imapsmp], 22);
 			MODSAMPLE *pSmp = &Samples[imapsmp];
 			pSmp->nLength = (xmss.samplen > MAX_SAMPLE_LENGTH) ? MAX_SAMPLE_LENGTH : xmss.samplen;
 			pSmp->nLoopStart = xmss.loopstart;
@@ -553,7 +555,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			pSmp->nVibDepth = xmsh.vibdepth;
 			pSmp->nVibRate = xmsh.vibrate;
 			memcpy(pSmp->filename, xmss.name, 22);
-			pSmp->filename[21] = 0;
+			SpaceToNullStringFixed(pSmp->filename, 21);
 		}
 #if 0
 		if ((xmsh.reserved2 > nsamples) && (xmsh.reserved2 <= 16))

@@ -139,6 +139,7 @@ inline void SanitizeFilename(char (&buffer)[size])
 template <size_t size>
 void NullToSpaceString(char (&buffer)[size])
 {
+	STATIC_ASSERT(size > 0);
 	size_t pos = size;
 	while (pos-- > 0)
 		if (buffer[pos] == 0)
@@ -149,6 +150,7 @@ void NullToSpaceString(char (&buffer)[size])
 template <size_t size>
 void SpaceToNullString(char (&buffer)[size])
 {
+	STATIC_ASSERT(size > 0);
 	// First, remove any Nulls
 	NullToSpaceString(buffer);
 	size_t pos = size;
@@ -160,5 +162,23 @@ void SpaceToNullString(char (&buffer)[size])
 			break;
 	}
 	buffer[size - 1] = 0;
+}
+
+// Convert a space-padded string to a 0-terminated string.
+// Additional parameter to specifify the max length of the final string,
+// not including null char (useful for e.g. mod loaders)
+template <size_t size>
+void SpaceToNullStringFixed(char (&buffer)[size], const size_t length)
+//--------------------------------------------------------------------
+{
+	STATIC_ASSERT(size > 0);
+	ASSERT(length < size);
+	// Remove Nulls in string
+	SpaceToNullString(buffer);
+	// Overwrite trailing chars
+	for(size_t pos = length; pos < size; pos++)
+	{
+		buffer[pos] = 0;
+	}
 }
 #endif

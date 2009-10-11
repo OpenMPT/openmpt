@@ -80,11 +80,6 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		(pHeader->DOSEOF[0] != 13 || pHeader->DOSEOF[1] != 10 || pHeader->DOSEOF[2] != 26) || //CR+LF+EOF
 		(LittleEndian(pHeader->ID2) != 0x53464D47)) return false; //GMFS
 
-	// song name
-	memset(m_szNames, 0, sizeof(m_szNames));
-	memcpy(m_szNames[0], pHeader->SongTitle, 32);
-	SetNullTerminator(m_szNames[0]);
-
 	// there are no other format versions...
 	if(pHeader->FormMajorVer != 1 || pHeader->FormMinorVer != 0)
 	{
@@ -93,6 +88,11 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// interesting question: Is TrackID, TrackMajorVer, TrackMinorVer relevant? The only TrackID should be 0 - 2GDM.exe, so the answer would be no.
+
+	// song name
+	memset(m_szNames, 0, sizeof(m_szNames));
+	memcpy(m_szNames[0], pHeader->SongTitle, 32);
+	SpaceToNullStringFixed(m_szNames[0], 31);
 
 	// read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
 	m_nChannels = 32;
@@ -179,15 +179,16 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// read samples
 	m_nSamples = pHeader->NOS + 1;
 	
-	for(UINT iSmp = 1; iSmp <= m_nSamples; iSmp++)
+	for(SAMPLEINDEX iSmp = 1; iSmp <= m_nSamples; iSmp++)
 	{
 		const PGDMSAMPLEHEADER pSample = (PGDMSAMPLEHEADER)(lpStream + iSamHeadOffset + (iSmp - 1) * sizeof(GDMSAMPLEHEADER));
 
 		// sample header
 
 		memcpy(m_szNames[iSmp], pSample->SamName, 32);
-		SetNullTerminator(m_szNames[iSmp]);
+		SpaceToNullStringFixed(m_szNames[iSmp], 31);
 		memcpy(Samples[iSmp].filename, pSample->FileName, 12);
+		SpaceToNullStringFixed(Samples[iSmp].filename, 12);
 
 		Samples[iSmp].nC5Speed = LittleEndianW(pSample->C4Hertz);
 		Samples[iSmp].nGlobalVol = 256; // not supported in this format

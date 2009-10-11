@@ -119,7 +119,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 	if (m_nChannels < 1) m_nChannels = 1;
 	if (m_nChannels > 64) m_nChannels = 64;
 	memcpy(m_szNames[0], (pfh->songname[0]) ? pfh->songname : pfh->songname2, 32);
-	m_szNames[0][31] = 0;
+	SpaceToNullStringFixed(m_szNames[0], 31);
 	Order.resize(nOrders, Order.GetInvalidPatIndex());
 	for (UINT iOrd=0; iOrd < nOrders; iOrd++)
 	{
@@ -155,10 +155,11 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Samples[nsmp] : NULL;
 				memset(pIns, 0, sizeof(MODINSTRUMENT));
 				memcpy(pIns->name, pih->name, 30);
+				SpaceToNullStringFixed(pIns->name, 30);
 				if (psmp)
 				{
 					memcpy(m_szNames[nsmp], pih->name, 30);
-					m_szNames[nsmp][30] = 0;
+					SpaceToNullStringFixed(m_szNames[nsmp], 30);
 				}
 				Instruments[iIns+1] = pIns;
 				pIns->nFadeOut = 1024;	// ???
