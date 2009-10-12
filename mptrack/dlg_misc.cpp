@@ -756,7 +756,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		UINT count = m_pModDoc->GetNumEffects();
 		for (UINT n=0; n<count; n++)
 		{
-			m_pModDoc->GetEffectInfo(n, s, TRUE);
+			m_pModDoc->GetEffectInfo(n, s, true);
 			if (s[0]) combo->SetItemData(combo->AddString(s), n);
 		}
 		combo->SetCurSel(0);
@@ -1476,7 +1476,7 @@ void CPageEditEffect::UpdateDialog()
 			if (!m_nCommand) combo->SetCurSel(0);
 			for (UINT i=0; i<numfx; i++)
 			{
-				if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+				if (m_pModDoc->GetEffectInfo(i, s, true))
 				{
 					int k = combo->AddString(s);
 					combo->SetItemData(k, i);
@@ -1497,7 +1497,7 @@ void CPageEditEffect::UpdateRange(BOOL bSet)
 	{
 		DWORD rangeMin = 0, rangeMax = 0;
 		LONG fxndx = m_pModDoc->GetIndexFromEffect(m_nCommand, m_nParam);
-		BOOL bEnable = ((fxndx >= 0) && (m_pModDoc->GetEffectInfo(fxndx, NULL, FALSE, &rangeMin, &rangeMax)));
+		bool bEnable = ((fxndx >= 0) && (m_pModDoc->GetEffectInfo(fxndx, NULL, false, &rangeMin, &rangeMax)));
 		if (bEnable)
 		{
 			slider->EnableWindow(TRUE);

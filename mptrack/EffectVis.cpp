@@ -752,7 +752,7 @@ BOOL CEffectVis::OnInitDialog()
 	int k;
 	for (UINT i=0; i<numfx; i++)
 	{
-		if (m_pModDoc->GetEffectInfo(i, s, TRUE))
+		if (m_pModDoc->GetEffectInfo(i, s, true))
 		{
 			k =m_cmbEffectList.AddString(s);
 			m_cmbEffectList.SetItemData(k, i);

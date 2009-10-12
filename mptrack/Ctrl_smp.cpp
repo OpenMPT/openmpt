@@ -2652,7 +2652,7 @@ void CCtrlSamples::OnFineTuneChanged()
 	int n = GetDlgItemInt(IDC_EDIT5);
 	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
-		if ((n >= 2000) && (n <= 256000) && (n != (int)m_pSndFile->Samples[m_nSample].nC5Speed))
+		if ((n > 0) && (n <= (m_pSndFile->m_nType & MOD_TYPE_S3M) ? 65535 : 9999999) && (n != (int)m_pSndFile->Samples[m_nSample].nC5Speed))
 		{
 			m_pSndFile->Samples[m_nSample].nC5Speed = n;
 			int transp = CSoundFile::FrequencyToTranspose(n) >> 7;
@@ -2688,7 +2688,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 	{
 		LONG ft = CSoundFile::FrequencyToTranspose(m_pSndFile->Samples[m_nSample].nC5Speed) & 0x7f;
 		n = CSoundFile::TransposeToFrequency(n, ft);
-		if ((n >= 500) && (n <= 256000) && (n != (int)m_pSndFile->Samples[m_nSample].nC5Speed))
+		if ((n > 0) && (n <= (m_pSndFile->m_nType & MOD_TYPE_S3M) ? 65535 : 9999999) && (n != (int)m_pSndFile->Samples[m_nSample].nC5Speed))
 		{
 			CHAR s[32];
 			m_pSndFile->Samples[m_nSample].nC5Speed = n;
@@ -3133,7 +3133,7 @@ NoSample:
 			UINT d = pSmp->nC5Speed;
 			if (d < 1) d = 8363;
 			d += (pos * m_nFinetuneStep);
-			pSmp->nC5Speed = CLAMP(d, 579, 139921); // B-8, C-1
+			pSmp->nC5Speed = CLAMP(d, 1, 9999999); // 9999999 is max. in Impulse Tracker
 			int transp = CSoundFile::FrequencyToTranspose(pSmp->nC5Speed) >> 7;
 			int basenote = 60 - transp;
 			if (basenote < BASENOTE_MIN) basenote = BASENOTE_MIN;

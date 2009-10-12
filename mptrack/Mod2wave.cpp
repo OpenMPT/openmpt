@@ -62,9 +62,9 @@ CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX nMinOrder, ORDERINDEX nMaxOr
 //-----------------------------------------------------------------------------------
 {
 	m_bGivePlugsIdleTime = false;
-	m_bNormalize = FALSE;
-	m_bHighQuality = FALSE;
-	m_bSelectPlay = FALSE;
+	m_bNormalize = false;
+	m_bHighQuality = false;
+	m_bSelectPlay = false;
 	if(nMinOrder != ORDERINDEX_INVALID && nMaxOrder != ORDERINDEX_INVALID)
 	{
 		// render selection
@@ -235,13 +235,13 @@ void CWaveConvert::OnOK()
 {
 	if (m_dwFileLimit) m_dwFileLimit = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 	if (m_dwSongLimit) m_dwSongLimit = GetDlgItemInt(IDC_EDIT2, NULL, FALSE);
-	m_bSelectPlay = IsDlgButtonChecked(IDC_RADIO2) ? TRUE : FALSE;
-	m_nMinOrder = GetDlgItemInt(IDC_EDIT3, NULL, FALSE);
-	m_nMaxOrder = GetDlgItemInt(IDC_EDIT4, NULL, FALSE);
-	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = FALSE;
-	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? TRUE : FALSE; //rewbs.resamplerConf - we don't want this anymore.
-	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) ? TRUE : FALSE;
-	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) ? TRUE : FALSE;
+	m_bSelectPlay = IsDlgButtonChecked(IDC_RADIO2) ? true : false;
+	m_nMinOrder = (ORDERINDEX)GetDlgItemInt(IDC_EDIT3, NULL, FALSE);
+	m_nMaxOrder = (ORDERINDEX)GetDlgItemInt(IDC_EDIT4, NULL, FALSE);
+	if (m_nMaxOrder < m_nMinOrder) m_bSelectPlay = false;
+	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? true : false; //rewbs.resamplerConf - we don't want this anymore.
+	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) ? true : false;
+	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) ? true : false;
 	if (m_bGivePlugsIdleTime) {
 		if (MessageBox("You only need slow render if you are experiencing dropped notes with a Kontakt based sampler with Direct-From-Disk enabled.\nIt will make rendering *very* slow.\n\nAre you sure you want to enable slow render?",
 			"Really enable slow render?", MB_YESNO) == IDNO ) {
@@ -260,7 +260,7 @@ void CWaveConvert::OnOK()
 	WaveFormat.Format.wFormatTag = WAVE_FORMAT_PCM;
 	WaveFormat.Format.nSamplesPerSec = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
 	if (WaveFormat.Format.nSamplesPerSec < 11025) WaveFormat.Format.nSamplesPerSec = 11025;
-	if (WaveFormat.Format.nSamplesPerSec > 96000) WaveFormat.Format.nSamplesPerSec = 96000; //ericus' fix: 44100 -> 96000
+	if (WaveFormat.Format.nSamplesPerSec > MAX_SAMPLE_RATE) WaveFormat.Format.nSamplesPerSec = MAX_SAMPLE_RATE;
 	WaveFormat.Format.nChannels = (WORD)(dwFormat >> 8);
 	if ((WaveFormat.Format.nChannels != 1) && (WaveFormat.Format.nChannels != 4)) WaveFormat.Format.nChannels = 2;
 	WaveFormat.Format.wBitsPerSample = (WORD)(dwFormat & 0xFF);
@@ -627,7 +627,7 @@ void CDoWaveConvert::OnButton1()
 		if (oldVol > 128) m_pSndFile->SetMasterVolume(128);
 	} else
 	{
-		m_bNormalize = FALSE;
+		m_bNormalize = false;
 	}
 	m_pSndFile->ResetChannels();
 	CSoundFile::InitPlayer(TRUE);

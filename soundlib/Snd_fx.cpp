@@ -2522,7 +2522,7 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	case 0xC0:	NoteCut(nChn, param); break;
 	// EDx: Note Delay
 	// EEx: Pattern Delay
-	// EFx: MOD: Invert Loop, XM: Set Active Midi Macro
+	// EFx: MOD: Invert Loop / Funk Repeat, XM: Set Active Midi Macro
 	case 0xF0:	pChn->nActiveMacro = param;	break;
 	}
 }
@@ -3150,11 +3150,11 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 		UINT nNote = pChn->nNewNote;
 		LONG nOldPeriod = pChn->nPeriod;
 		if ((nNote) && (nNote <= NOTE_MAX) && (pChn->nLength)) CheckNNA(nChn, 0, nNote, TRUE);
-		BOOL bResetEnv = FALSE;
+		bool bResetEnv = false;
 		if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 		{
-			if ((pChn->nRowInstr) && (param < 0x100)) { InstrumentChange(pChn, pChn->nRowInstr, FALSE, FALSE); bResetEnv = TRUE; }
-			if (param < 0x100) bResetEnv = TRUE;
+			if ((pChn->nRowInstr) && (param < 0x100)) { InstrumentChange(pChn, pChn->nRowInstr, FALSE, FALSE); bResetEnv = true; }
+			if (param < 0x100) bResetEnv = true;
 		}
 		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER) ? true : false, bResetEnv);
 		if (m_nInstruments) {

@@ -148,6 +148,8 @@ BOOL CModDoc::OnNewDocument()
 	// Refresh mix levels now that the correct mod type has been set
 	m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
 	m_SndFile.m_pConfig->SetMixLevels(m_SndFile.m_nMixLevels);
+	// ...and the order length
+	m_SndFile.Order.resize(m_SndFile.GetModSpecifications().ordersMax);
 
 	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
 	ReinitRecordState();
@@ -1962,7 +1964,7 @@ typedef struct MPTEFFECTINFO
 #define MOD_TYPE_XMIT	(MOD_TYPE_XM|MOD_TYPE_IT)
 #define MOD_TYPE_XMITMPT (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)
 #define MOD_TYPE_ITMPT (MOD_TYPE_IT|MOD_TYPE_MPT)
-#define MAX_FXINFO		68					//rewbs.smoothVST, increased from 64... I wonder what this will break?
+#define MAX_FXINFO		69
 
 
 const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
@@ -2012,6 +2014,7 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_MODCMDEX,		0xF0,0xD0,	0,	MOD_TYPE_MODXM,	"Note delay"},
 	{CMD_MODCMDEX,		0xF0,0xE0,	0,	MOD_TYPE_MODXM,	"Pattern delay"},
 	{CMD_MODCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_XM,	"Set active macro"},
+	{CMD_MODCMDEX,		0xF0,0xF0,	0,	MOD_TYPE_MOD,	"Invert Loop"},
 	// Extended S3M/IT effects
 	{CMD_S3MCMDEX,		0xF0,0x10,	0,	MOD_TYPE_S3MITMPT,	"Glissando control"},
 	{CMD_S3MCMDEX,		0xF0,0x20,	0,	MOD_TYPE_S3M,	"Set finetune"},
@@ -2059,23 +2062,26 @@ BOOL CModDoc::IsExtendedEffect(UINT ndx) const
 }
 
 
-BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL bXX, int nChn) //rewbs.xinfo: added chan arg
-//---------------------------------------------------------------------------------------------
+bool CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool bXX, CHANNELINDEX nChn) //rewbs.xinfo: added chan arg
+//------------------------------------------------------------------------------------------------------
 {
-	BOOL bSupported;
-	int fxndx = -1;
+	bool bSupported;
+	UINT fxndx = MAX_FXINFO;
 	pszDescription[0] = 0;
-	UINT i = 0;
-	for (i=0; i<MAX_FXINFO; i++)
+	for (UINT i = 0; i < MAX_FXINFO; i++)
 	{
 		if ((command == gFXInfo[i].dwEffect) // Effect
 		 && ((param & gFXInfo[i].dwParamMask) == gFXInfo[i].dwParamValue)) // Value
 		{
 			fxndx = i;
-			break;
+			// if format is compatible, everything is fine. if not, let's still search
+			// for another command. this fixes searching for the EFx command, which
+			// does different things in MOD format.
+			if((m_SndFile.m_nType & gFXInfo[i].dwFormats) != 0)
+				break;
 		}
 	}
-	if (fxndx < 0) return FALSE;
+	if (fxndx == MAX_FXINFO) return false;
 	bSupported = ((m_SndFile.m_nType & gFXInfo[fxndx].dwFormats) != 0);
 	if (gFXInfo[fxndx].pszName)
 	{
@@ -2084,13 +2090,13 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 			strcpy(pszDescription, " xx: ");
 			LPCSTR pszCmd = (m_SndFile.m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands : gszS3mCommands;
 			pszDescription[0] = pszCmd[command];
-			if ((gFXInfo[fxndx].dwParamMask & 0xF0) == 0xF0) pszDescription[1] = szHexChar[gFXInfo[i].dwParamValue >> 4];
-			if ((gFXInfo[fxndx].dwParamMask & 0x0F) == 0x0F) pszDescription[2] = szHexChar[gFXInfo[i].dwParamValue & 0x0F];
+			if ((gFXInfo[fxndx].dwParamMask & 0xF0) == 0xF0) pszDescription[1] = szHexChar[gFXInfo[fxndx].dwParamValue >> 4];
+			if ((gFXInfo[fxndx].dwParamMask & 0x0F) == 0x0F) pszDescription[2] = szHexChar[gFXInfo[fxndx].dwParamValue & 0x0F];
 		}
 		strcat(pszDescription, gFXInfo[fxndx].pszName);
 		//rewbs.xinfo
 		//Get channel specific info
-		if (nChn>=0 && nChn<m_SndFile.m_nChannels)
+		if (nChn < m_SndFile.m_nChannels)
 		{
 			CString chanSpec = "";
 			CString macroText= "_no macro_";
@@ -2098,15 +2104,15 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 			{
 			case CMD_MODCMDEX:
 			case CMD_S3MCMDEX:
-				if ((param&0xF0) == 0xF0)	//Set Macro
+				if ((param & 0xF0) == 0xF0 && !(m_SndFile.m_nType & MOD_TYPE_MOD))	//Set Macro
 				{
-					macroText = &m_SndFile.m_MidiCfg.szMidiSFXExt[(param&0x0F)*32];
-					chanSpec.Format(" to %d: ", param&0x0F);
+					macroText = &m_SndFile.m_MidiCfg.szMidiSFXExt[(param & 0x0F) * 32];
+					chanSpec.Format(" to %d: ", param & 0x0F);
 				}
 				break;
 			case CMD_MIDI:
 			case CMD_SMOOTHMIDI:
-				if (param<0x80)
+				if (param < 0x80 && nChn != CHANNELINDEX_INVALID)
 				{
 					macroText = &m_SndFile.m_MidiCfg.szMidiSFXExt[m_SndFile.Chn[nChn].nActiveMacro*32];
 					chanSpec.Format(": currently %d: ", m_SndFile.Chn[nChn].nActiveMacro);
@@ -2170,15 +2176,18 @@ BOOL CModDoc::GetEffectName(LPSTR pszDescription, UINT command, UINT param, BOOL
 LONG CModDoc::GetIndexFromEffect(UINT command, UINT param)
 //--------------------------------------------------------
 {
-	for (UINT i=0; i<MAX_FXINFO; i++)
+	UINT ndx = MAX_FXINFO;
+	for (UINT i = 0; i < MAX_FXINFO; i++)
 	{
 		if ((command == gFXInfo[i].dwEffect) // Effect
 		 && ((param & gFXInfo[i].dwParamMask) == gFXInfo[i].dwParamValue)) // Value
 		{
-			return i;
+			ndx = i;
+			if((m_SndFile.m_nType & gFXInfo[i].dwFormats) != 0)
+				break; // found fitting format; this is correct for sure
 		}
 	}
-	return -1;
+	return ndx;
 }
 
 
@@ -2220,7 +2229,7 @@ UINT CModDoc::GetEffectMaskFromIndex(UINT ndx)
 
 }
 
-BOOL CModDoc::GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX, DWORD *prangeMin, DWORD *prangeMax)
+bool CModDoc::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DWORD *prangeMax)
 //------------------------------------------------------------------------------------------
 {
 	if (s) s[0] = 0;
@@ -2370,12 +2379,12 @@ UINT CModDoc::MapPosToValue(UINT ndx, UINT pos)
 }
 
 
-BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
+bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 //----------------------------------------------------------------
 {
 	CHAR s[64];
 	if (pszName) pszName[0] = 0;
-	if ((!pszName) || (ndx >= MAX_FXINFO) || (!gFXInfo[ndx].pszName)) return FALSE;
+	if ((!pszName) || (ndx >= MAX_FXINFO) || (!gFXInfo[ndx].pszName)) return false;
 	wsprintf(pszName, "%s: ", gFXInfo[ndx].pszName);
 	s[0] = 0;
 
@@ -2530,7 +2539,7 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 	case CMD_TREMOR:
 		if(param)
 		{
-			BYTE ontime = param >> 4, offtime = param & 0x0F;
+			BYTE ontime = (BYTE)(param >> 4), offtime = (BYTE)(param & 0x0F);
 			if(m_SndFile.m_dwSongFlags & SONG_ITOLDEFFECTS)
 			{
 				ontime++;
@@ -2669,6 +2678,7 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						strcat(s, " rows");
 						break;
 					case 0xF0: // macro
+						if(m_SndFile.m_nType & MOD_TYPE_MOD)
 						wsprintf(s, "SF%X", param & 0x0F); break;
 					default:
 						break;
@@ -2710,8 +2720,12 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 					case 0xE0: // pattern delay (rows)
 						strcat(s, " rows");
 						break;
-					case 0xF0: // macro
-						wsprintf(s, "SF%X", param & 0x0F); break;
+					case 0xF0:
+						if(m_SndFile.m_nType & MOD_TYPE_MOD)
+							wsprintf(s, "Speed %d", param & 0x0F); // invert loop
+						else
+							wsprintf(s, "SF%X", param & 0x0F); // macro
+						break;
 					default:
 						break;
 					}
@@ -2724,7 +2738,7 @@ BOOL CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		}
 	}
 	strcat(pszName, s);
-	return TRUE;
+	return true;
 }
 
 
