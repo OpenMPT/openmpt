@@ -34,6 +34,7 @@ extern DWORD LinearSlideDownTable[256];
 extern signed char retrigTable1[16];
 extern signed char retrigTable2[16];
 extern short int ModRandomTable[64];
+extern BYTE ModEFxTable[16];
 
 
 ////////////////////////////////////////////////////////////
@@ -1869,9 +1870,10 @@ BOOL CSoundFile::ProcessEffects()
 			break;
 		}
 
+		// MOD Effect (called every row)
+		InvertLoop(&Chn[nChn]);
 
-
-	}
+	} // for(...) end
 
 	// Navigation Effects
 	if(m_dwSongFlags & SONG_FIRSTTICK)
@@ -2522,8 +2524,12 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	case 0xC0:	NoteCut(nChn, param); break;
 	// EDx: Note Delay
 	// EEx: Pattern Delay
-	// EFx: MOD: Invert Loop / Funk Repeat, XM: Set Active Midi Macro
-	case 0xF0:	pChn->nActiveMacro = param;	break;
+	case 0xF0:	
+		if((m_nType & MOD_TYPE_MOD) != 0) // MOD: Invert Loop
+			pChn->nEFxSpeed = param;
+		else // XM: Set Active Midi Macro
+			pChn->nActiveMacro = param;
+		break;
 	}
 }
 
@@ -2676,6 +2682,25 @@ void CSoundFile::ExtendedChannelEffect(MODCHANNEL *pChn, UINT param)
 		pChn->dwFlags |= CHN_PINGPONGFLAG;
 		break;
 	}
+}
+
+
+inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
+//--------------------------------------------------
+{
+	// EFx implementation for MOD files (PT 1.1A and up: Invert Loop)
+	// This effect trashes samples.
+	if((m_nType & MOD_TYPE_MOD) == 0 || pChn->nEFxSpeed == 0) return;
+
+	pChn->nEFxDelay += ModEFxTable[pChn->nEFxSpeed];
+	if(pChn->nEFxDelay < 0x80) return;
+	pChn->nEFxDelay = 0;
+	if (++pChn->nEFxOffset >= pChn->nLoopEnd - pChn->nLoopStart)
+		pChn->nEFxOffset = 0;
+
+	// TRASH IT!!! (Yes, the sample!)
+	if(pChn->pSample != nullptr && (pChn->dwFlags & CHN_LOOP))
+		pChn->pSample[pChn->nLoopStart + pChn->nEFxOffset] = ~pChn->pSample[pChn->nLoopStart + pChn->nEFxOffset];
 }
 
 
@@ -3797,6 +3822,3 @@ void CSoundFile::PortamentoFineMPT(MODCHANNEL* pChn, int param)
 
 	pChn->m_CalculateFreq = true;
 }
-
-
-
