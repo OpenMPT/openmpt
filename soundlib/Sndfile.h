@@ -200,6 +200,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nCutSwing, nResSwing;
 	LONG nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
 	UINT nOldGlobalVolSlide;
+	DWORD nEFxOffset; // offset memory for either Funk Repeat or Invert Loop (EFx, .MOD only)
 	// 8-bit members
 	BYTE nRestoreResonanceOnNewNote; //Like above
 	BYTE nRestoreCutoffOnNewNote; //Like above
@@ -223,6 +224,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nRowCommand, nRowParam;
 	BYTE nLeftVU, nRightVU;
 	BYTE nActiveMacro, nFilterMode;
+	BYTE nEFxDelay; // memory for either Funk Repeat or Invert Loop (EFx, .MOD only)
 
 	uint16 m_RowPlugParam;			//NOTE_PCs memory.
 	float m_nPlugParamValueStep;  //rewbs.smoothVST 

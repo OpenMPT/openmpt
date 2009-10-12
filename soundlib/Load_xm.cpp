@@ -276,7 +276,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	m_nMinPeriod = 27;
 	m_nMaxPeriod = 54784;
 
-	if ((!xmheader.orders) || (xmheader.orders > MAX_ORDERS)) return false;
+	if (xmheader.orders > MAX_ORDERS) return false;
 	if ((!xmheader.channels) || (xmheader.channels > MAX_BASECHANNELS)) return false;
 	if (xmheader.channels > 32) bMadeWithModPlug = true;
 	m_nRestartPos = xmheader.restartpos;

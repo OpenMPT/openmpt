@@ -78,6 +78,7 @@ extern DWORD FineLinearSlideDownTable[16];
 extern signed char ft2VibratoTable[256];	// -64 .. +64
 extern int MixSoundBuffer[MIXBUFFERSIZE*4];
 extern int MixRearBuffer[MIXBUFFERSIZE*2];
+extern BYTE ModEFxTable[16];
 
 #ifndef NO_REVERB
 extern UINT gnReverbSend;
@@ -1690,6 +1691,25 @@ BOOL CSoundFile::ReadNote()
 				}
 			}
 		}
+
+		// .MOD EFx implementation
+		if((m_nType & MOD_TYPE_MOD) && pChn->nRowCommand == CMD_MODCMDEX && (pChn->nRowParam & 0xF0) == 0xF0)
+		{
+			pChn->nEFxDelay += ModEFxTable[pChn->nRowParam & 0x0F];
+			if((pChn->dwFlags & CHN_LOOP) && (pChn->nEFxDelay & 0x80))
+			{
+				// invert loop code (PT 1.1A and up)
+				pChn->nEFxDelay = 0;
+
+				if (++pChn->nEFxOffset >= pChn->nLoopEnd - pChn->nLoopStart)
+					pChn->nEFxOffset = 0;
+
+				// TRASH IT!!! (Yes, the sample!)
+				pChn->pSample[pChn->nLoopStart + pChn->nEFxOffset] = ~pChn->pSample[pChn->nLoopStart + pChn->nEFxOffset];
+			} 
+		}
+		
+
 #ifdef MODPLUG_PLAYER
 		// Limit CPU -> > 80% -> don't ramp
 		if ((gnCPUUsage >= 80) && (!pChn->nRealVolume))

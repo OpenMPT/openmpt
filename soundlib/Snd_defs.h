@@ -47,7 +47,7 @@ typedef uint32 MODTYPE;
 #define MAX_SAMPLE_LENGTH	0x10000000	// 0x04000000 (64MB -> now 256MB).
                                         // Note: Sample size in bytes can be more than 256 MB.
 // -! BEHAVIOUR_CHANGE#0006
-#define MAX_SAMPLE_RATE		100000
+#define MAX_SAMPLE_RATE		192000
 #define MAX_ORDERS			256
 #define MAX_PATTERNS		240
 #define MAX_SAMPLES			4000

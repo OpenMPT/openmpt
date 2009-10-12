@@ -21,11 +21,11 @@ typedef struct tagITFILEHEADER
 	BYTE mv;
 	BYTE speed;
 	BYTE tempo;
-	BYTE sep;
-	BYTE zero;
+	BYTE sep;		// panning separation (0...128)
+	BYTE pwd;		// pitch wheel depth
 	WORD msglength;
 	DWORD msgoffset;
-	DWORD reserved2;
+	DWORD reserved;
 	BYTE chnpan[64];
 	BYTE chnvol[64];
 } ITFILEHEADER;

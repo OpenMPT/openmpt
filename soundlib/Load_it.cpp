@@ -1805,17 +1805,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 
 	header.highlight_minor = (BYTE)(m_nRowsPerBeat & 0xFF);
 	header.highlight_major = (BYTE)(m_nRowsPerMeasure & 0xFF);
-	header.ordnum = 0;
-	//while ((header.ordnum < MAX_ORDERS) /*&& (Order[header.ordnum] < 0xFF)*/) header.ordnum++; //rewbs.AllowSaveHiddenPatterns
-	//if (header.ordnum < MAX_ORDERS) Order[header.ordnum++] = 0xFF;
-	//Ericus' implementation is better.
-// -> CODE#0013
-// -> DESC="load/save the whole pattern order list"
-//	while ((header.ordnum < MAX_ORDERS) && (Order[header.ordnum] < 0xFF)) header.ordnum++;
-//	if (header.ordnum < MAX_ORDERS) Order[header.ordnum++] = 0xFF;
-	header.ordnum = MAX_ORDERS;
-	if(Order.size() < MAX_ORDERS) Order.resize(MAX_ORDERS, Order.GetInvalidPatIndex());
-	
+
 	if(GetType() == MOD_TYPE_MPT)
 	{
 		if(!Order.NeedsExtraDatafield()) header.ordnum = Order.size();
@@ -1823,12 +1813,13 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 
 		//Crop unused orders from the end.
 		while(header.ordnum > 1 && Order[header.ordnum - 1] == Order.GetInvalidPatIndex()) header.ordnum--;
+	} else
+	{
+		// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
+		// Interestingly, this can exceed IT's 256 order limit.
+		header.ordnum = min(Order.GetLengthTailTrimmed(), ModSpecs::itEx.ordersMax) + 1;
 	}
-		
-	
-	if(GetType() != MOD_TYPE_MPT)
-		Order[MAX_ORDERS-1] = 0xFF;
-// -! CODE#0013
+
 
 	header.insnum = m_nInstruments;
 	header.smpnum = m_nSamples;
@@ -2486,14 +2477,10 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 
 	header.highlight_minor = (BYTE)(m_nRowsPerBeat & 0xFF);
 	header.highlight_major = (BYTE)(m_nRowsPerMeasure & 0xFF);
-	header.ordnum = 0;
-	header.ordnum=MAX_ORDERS;
-	while (header.ordnum>0 && Order[header.ordnum-1]==0xFF) {
-		header.ordnum--;
-	}
 
-	if(header.ordnum + 1 < MAX_ORDERS)
-		header.ordnum++;
+	// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
+	// Interestingly, this can exceed IT's 256 order limit.
+	header.ordnum = min(Order.GetLengthTailTrimmed(), ModSpecs::it.ordersMax) + 1;
 
 	header.patnum = MAX_PATTERNS;
 	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) {

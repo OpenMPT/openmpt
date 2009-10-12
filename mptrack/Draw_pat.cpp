@@ -1519,7 +1519,7 @@ void CViewPattern::UpdateIndicator()
 					case 3:
 					case 4:
 					// display effect command
-						if (!pModDoc->GetEffectName(s, m->command, m->param, FALSE, nChn)) s[0] = 0;
+						if (!pModDoc->GetEffectName(s, m->command, m->param, false, nChn)) s[0] = 0;
 						break;
 					}
 				}

@@ -707,12 +707,13 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	// Load plugins only when m_pModDoc != 0.  (can be == 0 for example when examining module samples in treeview.
 
 	string sNotFound;
-	bool bSearchIDs[MAX_MIXPLUGINS] = {false};
+	bool bSearchIDs[MAX_MIXPLUGINS];
+	memset(bSearchIDs, false, MAX_MIXPLUGINS * sizeof(bool));
 	UINT iShowNotFound = 0;
 
 	if (gpMixPluginCreateProc && GetpModDoc())
 	{
-		for (UINT iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
+		for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 		{
 			if ((m_MixPlugins[iPlug].Info.dwPluginId1)
 			 || (m_MixPlugins[iPlug].Info.dwPluginId2))
@@ -726,8 +727,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 				else
 				{
 					// plugin not found - add to list
-					BOOL bFound = false;
-					for(UINT iPlugFind = 0; iPlugFind < iPlug; iPlugFind++)
+					bool bFound = false;
+					for(PLUGINDEX iPlugFind = 0; iPlugFind < iPlug; iPlugFind++)
 						if(m_MixPlugins[iPlugFind].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2)
 						{
 							bFound = true;
@@ -746,6 +747,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	}
 
 	// Display a nice message so the user sees what plugins are missing
+	// TODO: Use IDD_MODLOADING_WARNINGS dialog (NON-MODAL!) to display all warnings that are encountered when loading a module.
 	if(iShowNotFound)
 	{
 		if(iShowNotFound == 1)
@@ -758,7 +760,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 						"\nWARNING: A browser window / tab is opened for every plugin. If you do not want that, you can visit http://www.kvraudio.com/search.php";
 		}
 		if (::MessageBox(0, sNotFound.c_str(), "OpenMPT - Plugins missing", MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION) == IDYES)
-			for (UINT iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
+			for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
 				if (bSearchIDs[iPlug] == true)
 				{
 					CString sUrl;
@@ -771,7 +773,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_pConfig->SetMixLevels(m_nMixLevels);
 	RecalculateGainForAllPlugs();
 
-	if (m_nType && m_nType != MOD_TYPE_MPT)
+	if (m_nType && (m_nType != MOD_TYPE_MPT))
 	{
 		SetModSpecsPointer(m_pModSpecs, m_nType);
 		Order.resize(GetModSpecifications().ordersMax);

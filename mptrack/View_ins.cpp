@@ -741,6 +741,11 @@ bool CViewInstrument::EnvSetVolEnv(bool bEnable)
 			} else
 			{
 				pIns->dwFlags &= ~ENV_VOLUME;
+				for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+				{
+					if(pSndFile->Chn[nChn].pModInstrument == pIns)
+						pSndFile->Chn[nChn].dwFlags &= ~CHN_VOLENV;
+				}
 			}
 			return true;
 		}
@@ -774,6 +779,11 @@ bool CViewInstrument::EnvSetPanEnv(bool bEnable)
 			} else
 			{
 				pIns->dwFlags &= ~ENV_PANNING;
+				for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+				{
+					if(pSndFile->Chn[nChn].pModInstrument == pIns)
+						pSndFile->Chn[nChn].dwFlags &= ~CHN_PANENV;
+				}
 			}
 			return true;
 		}
@@ -808,6 +818,11 @@ bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 			} else
 			{
 				pIns->dwFlags &= ~(ENV_PITCH|ENV_FILTER);
+				for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+				{
+					if(pSndFile->Chn[nChn].pModInstrument == pIns)
+						pSndFile->Chn[nChn].dwFlags &= ~CHN_PITCHENV;
+				}
 			}
 			return true;
 		}
@@ -841,6 +856,12 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 			} else
 			{
 				pIns->dwFlags &= ~(ENV_PITCH|ENV_FILTER);
+				// prevent filter envelop from turning into a pitch envelope :)
+				for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+				{
+					if(pSndFile->Chn[nChn].pModInstrument == pIns)
+						pSndFile->Chn[nChn].dwFlags &= ~CHN_PITCHENV;
+				}
 			}
 			return true;
 		}

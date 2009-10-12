@@ -162,13 +162,13 @@ public:
 	HWND GetFollowWnd() const { return m_hWndFollow; }
 	void SetFollowWnd(HWND hwnd, DWORD dwType);
 	// Effects Description
-	BOOL GetEffectName(LPSTR s, UINT command, UINT param, BOOL bXX=FALSE, int nChn=-1); // bXX: Nxx: ...
+	bool GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool bXX = false, CHANNELINDEX nChn = CHANNELINDEX_INVALID); // bXX: Nxx: ...
 	UINT GetNumEffects() const;
-	BOOL GetEffectInfo(UINT ndx, LPSTR s, BOOL bXX=FALSE, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
+	bool GetEffectInfo(UINT ndx, LPSTR s, bool bXX = false, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
 	LONG GetIndexFromEffect(UINT command, UINT param);
 	UINT GetEffectFromIndex(UINT ndx, int &refParam);
 	UINT GetEffectMaskFromIndex(UINT ndx);
-	BOOL GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param);
+	bool GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param);
 	BOOL IsExtendedEffect(UINT ndx) const;
 	UINT MapValueToPos(UINT ndx, UINT param);
 	UINT MapPosToValue(UINT ndx, UINT pos);

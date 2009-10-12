@@ -717,7 +717,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 			insex[i-1].vol = pSmp->nVolume / 4;
 			insex[i-1].flags = (pSmp->uFlags & CHN_LOOP) ? 1 : 0;
 			if (pSmp->nC5Speed)
-				insex[i-1].finetune = pSmp->nC5Speed;
+				insex[i-1].finetune = min(pSmp->nC5Speed, 0xFFFF);
 			else
 				insex[i-1].finetune = TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
 			UINT flags = RS_PCM8U;

@@ -101,6 +101,12 @@ WORD ProTrackerTunedPeriods[16*12] =
 	1724,1628,1536,1450,1368,1292,1220,1150,1086,1026,968,914 
 };
 
+// Table for Invert Loop and Funk Repeat effects (EFx, .MOD only)
+BYTE ModEFxTable[16] =
+{
+	 0,  5,  6,  7,  8, 10, 11, 13,
+	16, 19, 22, 26, 32, 43, 64, 128
+}; 
 
 // S3M C-4 periods
 WORD FreqS3MTable[16] = 
