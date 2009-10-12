@@ -638,6 +638,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		Chn[ich].dwFlags = ChnSettings[ich].dwFlags;
 		Chn[ich].nVolume = 256;
 		Chn[ich].nCutOff = 0x7F;
+		Chn[ich].nEFxSpeed = 0;
 		//IT compatibility 15. Retrigger
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
@@ -1467,6 +1468,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 			Chn[i].nRetrigCount = 0;
 		}
 		Chn[i].nTremorCount = 0;
+		Chn[i].nEFxSpeed = 0;
 	}
 
 	if(resetMask & 4)

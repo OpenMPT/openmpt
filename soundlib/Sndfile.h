@@ -200,7 +200,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nCutSwing, nResSwing;
 	LONG nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
 	UINT nOldGlobalVolSlide;
-	DWORD nEFxOffset; // offset memory for either Funk Repeat or Invert Loop (EFx, .MOD only)
+	DWORD nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
 	// 8-bit members
 	BYTE nRestoreResonanceOnNewNote; //Like above
 	BYTE nRestoreCutoffOnNewNote; //Like above
@@ -224,7 +224,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nRowCommand, nRowParam;
 	BYTE nLeftVU, nRightVU;
 	BYTE nActiveMacro, nFilterMode;
-	BYTE nEFxDelay; // memory for either Funk Repeat or Invert Loop (EFx, .MOD only)
+	BYTE nEFxSpeed, nEFxDelay; // memory for Invert Loop (EFx, .MOD only)
 
 	uint16 m_RowPlugParam;			//NOTE_PCs memory.
 	float m_nPlugParamValueStep;  //rewbs.smoothVST 
@@ -725,12 +725,12 @@ public:
 	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, MODINSTRUMENT* instruments[], UINT nInstruments);
 	void SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], UINT nInstruments, FILE* f);
 	void SaveExtendedSongProperties(FILE* f);
-	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = NULL);
+	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = false);
 
 	// Reads extended instrument properties(XM/IT/MPTM). 
 	// If no errors occur and song extension tag is found, returns pointer to the beginning
 	// of the tag, else returns NULL.
-	LPCBYTE LoadExtendedInstrumentProperties(const LPCBYTE pStart, const LPCBYTE pEnd, bool* pInterpretMptMade = NULL);
+	LPCBYTE LoadExtendedInstrumentProperties(const LPCBYTE pStart, const LPCBYTE pEnd, bool* pInterpretMptMade = false);
 
 #endif // MODPLUG_NO_FILESAVE
 	// MOD Convert function
@@ -847,6 +847,7 @@ private:
 	void ExtendedMODCommands(UINT nChn, UINT param);
 	void ExtendedS3MCommands(UINT nChn, UINT param);
 	void ExtendedChannelEffect(MODCHANNEL *, UINT param);
+	inline void InvertLoop(MODCHANNEL* pChn);
 	void ProcessMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param=0);
 	void ProcessSmoothMidiMacro(UINT nChn, LPCSTR pszMidiMacro, UINT param=0); //rewbs.smoothVST
 	void SetupChannelFilter(MODCHANNEL *pChn, bool bReset, int flt_modifier = 256) const;
