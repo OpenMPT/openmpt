@@ -3259,3 +3259,459 @@ void CSoundFile::S3MSxx2MODExx(MODCOMMAND *m)
 		// rest are the same
 	}
 }
+
+// Convert a mod command from one format to another. 
+void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewType)
+//--------------------------------------------------------------------------------
+{
+	// helper variables
+	const bool oldTypeIsMOD = (nOldType == MOD_TYPE_MOD), oldTypeIsXM = (nOldType == MOD_TYPE_XM),
+		oldTypeIsS3M = (nOldType == MOD_TYPE_S3M), oldTypeIsIT = (nOldType == MOD_TYPE_IT),
+		oldTypeIsMPT = (nOldType == MOD_TYPE_MPT), oldTypeIsMOD_XM = (oldTypeIsMOD || oldTypeIsXM),
+		oldTypeIsS3M_IT_MPT = (oldTypeIsS3M || oldTypeIsIT || oldTypeIsMPT),
+		oldTypeIsIT_MPT = (oldTypeIsIT || oldTypeIsMPT);
+
+	const bool newTypeIsMOD = (nNewType == MOD_TYPE_MOD), newTypeIsXM =  (nNewType == MOD_TYPE_XM), 
+		newTypeIsS3M = (nNewType == MOD_TYPE_S3M), newTypeIsIT = (nNewType == MOD_TYPE_IT),
+		newTypeIsMPT = (nNewType == MOD_TYPE_MPT), newTypeIsMOD_XM = (newTypeIsMOD || newTypeIsXM), 
+		newTypeIsS3M_IT_MPT = (newTypeIsS3M || newTypeIsIT || newTypeIsMPT), 
+		newTypeIsIT_MPT = (newTypeIsIT || newTypeIsMPT);
+
+	//////////////////////////
+	// Convert 8-bit Panning
+	if(m->command == CMD_PANNING8)
+	{
+		if(newTypeIsS3M)
+		{
+			m->param = (m->param + 1) >> 1;
+		}
+		else if(oldTypeIsS3M)
+		{
+			if(m->param == 0xA4)
+			{
+				// surround remap
+				m->command = (nNewType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN;
+				m->param = 0x91;
+			}
+			else
+			{
+				m->param = min(m->param << 1, 0xFF);
+			}
+		}
+	} // End if(m->command == CMD_PANNING8)
+
+	//////////////////////////
+	// Convert param control
+	if(oldTypeIsMPT)
+	{
+		if(m->note == NOTE_PC || m->note == NOTE_PCS)
+		{
+			m->param = (BYTE)(min(MODCOMMAND::maxColumnValue, m->GetValueEffectCol()) * 0x7F / MODCOMMAND::maxColumnValue);
+			m->command = (m->note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI; // might be removed later
+			m->volcmd = VOLCMD_NONE;
+			m->note = NOTE_NONE;
+		}
+	} // End if(oldTypeIsMPT)
+
+	/////////////////////////////////////////
+	// Convert MOD / XM to S3M / IT / MPTM
+	if(oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
+	{
+		switch(m->command)
+		{
+		case CMD_MODCMDEX:
+			MODExx2S3MSxx(m);
+			break;
+		case CMD_VOLUME:
+			if (!m->volcmd)
+			{
+				m->volcmd = VOLCMD_VOLUME;
+				m->vol = m->param;
+				if (m->vol > 0x40) m->vol = 0x40;
+				m->command = m->param = 0;
+			}
+			break;
+		case CMD_PORTAMENTOUP:
+			if (m->param > 0xDF) m->param = 0xDF;
+			break;
+		case CMD_PORTAMENTODOWN:
+			if (m->param > 0xDF) m->param = 0xDF;
+			break;
+		case CMD_XFINEPORTAUPDOWN:
+			switch(m->param & 0xF0)
+			{
+			case 0x10:	m->command = CMD_PORTAMENTOUP; m->param = (m->param & 0x0F) | 0xE0; break;
+			case 0x20:	m->command = CMD_PORTAMENTODOWN; m->param = (m->param & 0x0F) | 0xE0; break;
+			case 0x50:
+			case 0x60:
+			case 0x70:
+			case 0x90:
+			case 0xA0:
+				m->command = CMD_S3MCMDEX;
+				// surround remap (this is the "official" command)
+				if(nNewType & MOD_TYPE_S3M && m->param == 0x91)
+				{
+					m->command = CMD_PANNING8;
+					m->param = 0xA4;
+				}
+				break;
+			}
+			break;
+		case CMD_KEYOFF:
+			if(m->note == 0)
+			{
+				m->note = (newTypeIsS3M) ? NOTE_NOTECUT : NOTE_KEYOFF;
+				m->command = CMD_S3MCMDEX;
+				if(m->param == 0)
+					m->instr = 0;
+				m->param = 0xD0 | (m->param & 0x0F);
+			}
+			break;
+		case CMD_PANNINGSLIDE:
+			// swap L/R
+			m->param = ((m->param & 0x0F) << 4) | (m->param >> 4);
+		default:
+			break;
+		}
+	} // End if(oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
+
+
+	/////////////////////////////////////////
+	// Convert S3M / IT / MPTM to MOD / XM
+	else if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
+	{
+		if(m->note == NOTE_NOTECUT || m->note == NOTE_FADE)
+			m->note = NOTE_KEYOFF;
+
+		switch(m->command)
+		{
+		case CMD_S3MCMDEX:
+			S3MSxx2MODExx(m);
+			break;
+		case CMD_VOLUMESLIDE:
+			if ((m->param & 0xF0) && ((m->param & 0x0F) == 0x0F))
+			{
+				m->command = CMD_MODCMDEX;
+				m->param = (m->param >> 4) | 0xA0;
+			} else
+				if ((m->param & 0x0F) && ((m->param & 0xF0) == 0xF0))
+				{
+					m->command = CMD_MODCMDEX;
+					m->param = (m->param & 0x0F) | 0xB0;
+				}
+				break;
+		case CMD_PORTAMENTOUP:
+			if (m->param >= 0xF0)
+			{
+				m->command = CMD_MODCMDEX;
+				m->param = (m->param & 0x0F) | 0x10;
+			} else
+				if (m->param >= 0xE0)
+				{
+					m->command = CMD_MODCMDEX;
+					m->param = (((m->param & 0x0F)+3) >> 2) | 0x10;
+				} else m->command = CMD_PORTAMENTOUP;
+			break;
+		case CMD_PORTAMENTODOWN:
+			if (m->param >= 0xF0)
+			{
+				m->command = CMD_MODCMDEX;
+				m->param = (m->param & 0x0F) | 0x20;
+			} else
+				if (m->param >= 0xE0)
+				{
+					m->command = CMD_MODCMDEX;
+					m->param = (((m->param & 0x0F)+3) >> 2) | 0x20;
+				} else m->command = CMD_PORTAMENTODOWN;
+			break;
+		case CMD_SPEED:
+			{
+				m->param = min(m->param, (nNewType == MOD_TYPE_XM) ? 0x1F : 0x20);
+			}
+			break;
+		case CMD_TEMPO:
+			if(m->param < 0x20) m->command = CMD_NONE; // no tempo slides
+			break;
+		case CMD_PANNINGSLIDE:
+			// swap L/R
+			m->param = ((m->param & 0x0F) << 4) | (m->param >> 4);
+			// remove fine slides
+			if((m->param > 0xF0) || ((m->param & 0x0F) == 0x0F && m->param != 0x0F))
+				m->command = CMD_NONE;
+		default:
+			break;
+		}
+	} // End if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
+
+
+	///////////////////////
+	// Convert IT to S3M
+	else if (oldTypeIsIT_MPT && newTypeIsS3M)
+	{
+		if(m->note == NOTE_KEYOFF || m->note == NOTE_FADE)
+			m->note = NOTE_NOTECUT;
+
+		switch(m->command)
+		{
+		case CMD_S3MCMDEX:
+			if(m->param == 0x91)
+			{
+				// surround remap (this is the "official" command)
+				m->command = CMD_PANNING8;
+				m->param = 0xA4;
+			}
+			break;
+		case CMD_SMOOTHMIDI:
+			m->command = CMD_MIDI;
+			break;
+		default:
+			break;
+		}
+	} // End if (oldTypeIsIT_MPT && newTypeIsS3M)
+
+
+
+	///////////////////////////////////////////////////////////////////////
+	// Convert MOD to anything - adjust effect memory, remove Invert Loop
+	if (oldTypeIsMOD)
+	{
+		switch(m->command)
+		{
+		case CMD_TONEPORTAVOL: // lacks memory -> 500 is the same as 300
+			if(m->param == 0x00) m->command = CMD_TONEPORTAMENTO;
+			break;
+		case CMD_VIBRATOVOL: // lacks memory -> 600 is the same as 400
+			if(m->param == 0x00) m->command = CMD_VIBRATO;
+			break;
+
+		case CMD_MODCMDEX: // This would turn into "Set Active Macro", so let's better remove it
+			if((m->param & 0xF0) == 0xF0) m->command = CMD_NONE;
+			break;
+		}
+	} // End if (oldTypeIsMOD && newTypeIsXM)
+
+	/////////////////////////////////////////////////////////////////////
+	// Convert anything to MOD - remove volume column, remove Set Macro
+	if (newTypeIsMOD)
+	{
+		if(m->command) switch(m->command)
+		{
+				case CMD_RETRIG: // MOD only has E9x
+					m->command = CMD_MODCMDEX;
+					m->param = 0x90 | (m->param & 0x0F);
+					break;
+				case CMD_MODCMDEX: // This would turn into "Invert Loop", so let's better remove it
+					if((m->param & 0xF0) == 0xF0) m->command = CMD_NONE;
+					break;
+		}
+
+		else switch(m->volcmd)
+		{
+				case VOLCMD_VOLUME:
+					m->command = CMD_VOLUME;
+					m->param = m->vol;
+					break;
+				case VOLCMD_PANNING:
+					m->command = CMD_PANNING8;
+					m->param = CLAMP(m->vol << 2, 0, 0xFF);
+					break;
+				case VOLCMD_VOLSLIDEDOWN:
+					m->command = CMD_VOLUMESLIDE;
+					m->param = m->vol;
+					break;
+				case VOLCMD_VOLSLIDEUP:
+					m->command = CMD_VOLUMESLIDE;
+					m->param = m->vol << 4;
+					break;
+				case VOLCMD_FINEVOLDOWN:
+					m->command = CMD_MODCMDEX;
+					m->param = 0xB0 | m->vol;
+					break;
+				case VOLCMD_FINEVOLUP:
+					m->command = CMD_MODCMDEX;
+					m->param = 0xA0 | m->vol;
+					break;
+				case VOLCMD_PORTADOWN:
+					m->command = CMD_PORTAMENTODOWN;
+					m->param = m->vol << 2;
+					break;
+				case VOLCMD_PORTAUP:
+					m->command = CMD_PORTAMENTOUP;
+					m->param = m->vol << 2;
+					break;
+				case VOLCMD_TONEPORTAMENTO:
+					m->command = CMD_TONEPORTAMENTO;
+					m->param = m->vol << 2;
+					break;
+				case VOLCMD_VIBRATODEPTH:
+					m->command = CMD_VIBRATO;
+					m->param = m->vol;
+					break;
+				case VOLCMD_VIBRATOSPEED:
+					m->command = CMD_VIBRATO;
+					m->param = m->vol << 4;
+					break;
+					// OpenMPT-specific commands
+				case VOLCMD_OFFSET:
+					m->command = CMD_OFFSET;
+					m->param = m->vol << 3;
+					break;
+				case VOLCMD_VELOCITY:
+					m->command = CMD_VOLUME;
+					m->param = m->vol * 7;
+					break;
+				default:
+					break;
+		}
+		m->volcmd = CMD_NONE;
+	} // End if (newTypeIsMOD)
+
+	///////////////////////////////////////////////////
+	// Convert anything to S3M - adjust volume column
+	if (newTypeIsS3M)
+	{
+		if(!m->command) switch(m->volcmd)
+		{
+				case VOLCMD_VOLSLIDEDOWN:
+					m->command = CMD_VOLUMESLIDE;
+					m->param = m->vol;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_VOLSLIDEUP:
+					m->command = CMD_VOLUMESLIDE;
+					m->param = m->vol << 4;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_FINEVOLDOWN:
+					m->command = CMD_VOLUMESLIDE;
+					m->param = 0xF0 | m->vol;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_FINEVOLUP:
+					m->command = CMD_VOLUMESLIDE;
+					m->param = (m->vol << 4) | 0x0F;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_PORTADOWN:
+					m->command = CMD_PORTAMENTODOWN;
+					m->param = m->vol << 2;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_PORTAUP:
+					m->command = CMD_PORTAMENTOUP;
+					m->param = m->vol << 2;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_TONEPORTAMENTO:
+					m->command = CMD_TONEPORTAMENTO;
+					m->param = m->vol << 2;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_VIBRATODEPTH:
+					m->command = CMD_VIBRATO;
+					m->param = m->vol;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_VIBRATOSPEED:
+					m->command = CMD_VIBRATO;
+					m->param = m->vol << 4;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_PANSLIDELEFT:
+					m->command = CMD_PANNINGSLIDE;
+					m->param = m->vol << 4;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_PANSLIDERIGHT:
+					m->command = CMD_PANNINGSLIDE;
+					m->param = m->vol;
+					m->volcmd = CMD_NONE;
+					break;
+					// OpenMPT-specific commands
+				case VOLCMD_OFFSET:
+					m->command = CMD_OFFSET;
+					m->param = m->vol << 3;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_VELOCITY:
+					m->volcmd = CMD_VOLUME;
+					m->vol *= 7;
+					break;
+				default:
+					break;
+		}
+	} // End if (newTypeIsS3M)
+
+	//////////////////////////////////////////////////
+	// Convert anything to XM - adjust volume column
+	if (newTypeIsXM)
+	{
+		if(!m->command) switch(m->volcmd)
+		{
+				case VOLCMD_PORTADOWN:
+					m->command = CMD_PORTAMENTODOWN;
+					m->param = m->vol << 2;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_PORTAUP:
+					m->command = CMD_PORTAMENTOUP;
+					m->param = m->vol << 2;
+					m->volcmd = CMD_NONE;
+					break;
+					// OpenMPT-specific commands
+				case VOLCMD_OFFSET:
+					m->command = CMD_OFFSET;
+					m->param = m->vol << 3;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_VELOCITY:
+					m->volcmd = CMD_VOLUME;
+					m->vol *= 7;
+					break;
+				default:
+					break;
+		}
+	} // End if (newTypeIsXM)
+
+	///////////////////////////////////////////////////
+	// Convert anything to IT - adjust volume column
+	if (newTypeIsIT_MPT)
+	{
+		if(!m->command) switch(m->volcmd)
+		{
+				case VOLCMD_VOLSLIDEDOWN:
+				case VOLCMD_VOLSLIDEUP:
+				case VOLCMD_FINEVOLDOWN:
+				case VOLCMD_FINEVOLUP:
+				case VOLCMD_PORTADOWN:
+				case VOLCMD_PORTAUP:
+				case VOLCMD_TONEPORTAMENTO:
+				case VOLCMD_VIBRATODEPTH:
+					// OpenMPT-specific commands
+				case VOLCMD_OFFSET:
+				case VOLCMD_VELOCITY:
+					m->vol = min(m->vol, 9);
+					break;
+				case VOLCMD_PANSLIDELEFT:
+					m->command = CMD_PANNINGSLIDE;
+					m->param = m->vol << 4;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_PANSLIDERIGHT:
+					m->command = CMD_PANNINGSLIDE;
+					m->param = m->vol;
+					m->volcmd = CMD_NONE;
+					break;
+				case VOLCMD_VIBRATOSPEED:
+					m->command = CMD_VIBRATO;
+					m->param = m->vol << 4;
+					m->volcmd = CMD_NONE;
+					break;
+				default:
+					break;
+		}
+	} // End if (newTypeIsIT)
+
+	if(!CSoundFile::GetModSpecifications(nNewType).HasNote(m->note))
+		m->note = NOTE_NONE;
+}

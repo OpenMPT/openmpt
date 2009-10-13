@@ -908,6 +908,7 @@
 #define IDC_CHK_REMOVE_PLUGINS          2405
 #define IDC_CHK_OPTIMIZE_SAMPLES        2406
 #define IDC_CHK_MERGE_SEQUENCES         2408
+#define IDC_CHECK_PT1X                  2409
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1152,7 +1153,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        522
 #define _APS_NEXT_COMMAND_VALUE         59231
-#define _APS_NEXT_CONTROL_VALUE         2409
+#define _APS_NEXT_CONTROL_VALUE         2410
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

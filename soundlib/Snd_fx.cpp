@@ -1249,7 +1249,7 @@ BOOL CSoundFile::ProcessEffects()
 			if ((!note) && (instr)) //Case: instrument with no note data. 
 			{
 				//IT compatibility: Instrument with no note.
-				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				if(IsCompatibleMode(TRK_IMPULSETRACKER) || (m_dwSongFlags & SONG_PT1XMODE))
 				{
 					if(m_nInstruments)
 					{
@@ -2526,9 +2526,15 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	// EEx: Pattern Delay
 	case 0xF0:	
 		if((m_nType & MOD_TYPE_MOD) != 0) // MOD: Invert Loop
+		{
 			pChn->nEFxSpeed = param;
+			pChn->pEFxSample = pChn->pModSample;
+			if(m_dwSongFlags & SONG_FIRSTTICK) InvertLoop(pChn);
+		}	
 		else // XM: Set Active Midi Macro
+		{
 			pChn->nActiveMacro = param;
+		}
 		break;
 	}
 }
@@ -2633,7 +2639,7 @@ void CSoundFile::ExtendedChannelEffect(MODCHANNEL *pChn, UINT param)
 //------------------------------------------------------------------
 {
 	// S9x and X9x commands (S3M/XM/IT only)
-	if (m_nTickCount) return;
+	if(!(m_dwSongFlags & SONG_FIRSTTICK)) return;
 	switch(param & 0x0F)
 	{
 	// S90: Surround Off
@@ -2689,18 +2695,23 @@ inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
 //--------------------------------------------------
 {
 	// EFx implementation for MOD files (PT 1.1A and up: Invert Loop)
-	// This effect trashes samples.
+	// This effect trashes samples. Thanks to bubsy for making this work. :)
 	if((m_nType & MOD_TYPE_MOD) == 0 || pChn->nEFxSpeed == 0) return;
 
-	pChn->nEFxDelay += ModEFxTable[pChn->nEFxSpeed];
-	if(pChn->nEFxDelay < 0x80) return;
+	pChn->nEFxDelay += ModEFxTable[pChn->nEFxSpeed & 0x0F];
+
+	if(pChn->nEFxDelay < 0x80) return; // only applied if the "delay" reaches 128
 	pChn->nEFxDelay = 0;
-	if (++pChn->nEFxOffset >= pChn->nLoopEnd - pChn->nLoopStart)
+
+	// we obviously also need a sample for this
+	MODSAMPLE *pModSample = pChn->pEFxSample;
+	if(pModSample == nullptr || pModSample->pSample == nullptr || !(pModSample->uFlags & CHN_LOOP)) return;
+
+	if (++pChn->nEFxOffset >= pModSample->nLoopEnd - pModSample->nLoopStart)
 		pChn->nEFxOffset = 0;
 
 	// TRASH IT!!! (Yes, the sample!)
-	if(pChn->pSample != nullptr && (pChn->dwFlags & CHN_LOOP))
-		pChn->pSample[pChn->nLoopStart + pChn->nEFxOffset] = ~pChn->pSample[pChn->nLoopStart + pChn->nEFxOffset];
+	pModSample->pSample[pModSample->nLoopStart + pChn->nEFxOffset] = ~pModSample->pSample[pModSample->nLoopStart + pChn->nEFxOffset];
 }
 
 

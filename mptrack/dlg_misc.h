@@ -11,7 +11,7 @@ class CModTypeDlg: public CDialog
 {
 public:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
-	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5;
+	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x;
 	CEdit m_EditFlag;
 	CSoundFile *m_pSndFile;
 	UINT m_nChannels, m_nType;
@@ -50,6 +50,7 @@ protected:
 // -> DESC="IT project files (.itp)"
 	afx_msg void OnCheck6();
 // -! NEW_FEATURE#0023
+	afx_msg void OnCheckPT1x();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

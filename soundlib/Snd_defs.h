@@ -177,7 +177,7 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define FLTMODE_UNCHANGED		0xFF
 #define FLTMODE_LOWPASS			0
 #define FLTMODE_HIGHPASS		1
-#define FLTMODE_BANDPASS		2
+#define FLTMODE_BANDPASS		2		// unused
 
 
 #define RSF_16BIT		0x04
@@ -255,30 +255,31 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define SYSMIX_SSE			0x20
 
 // Module flags
-#define SONG_EMBEDMIDICFG	0x0001
-#define SONG_FASTVOLSLIDES	0x0002 // Old Scream Tracker 3.0 volume slides
-#define SONG_ITOLDEFFECTS	0x0004 // Old Impulse Tracker effect implementations
-#define SONG_ITCOMPATMODE	0x0008 // IT "Compatible Gxx"
-#define SONG_LINEARSLIDES	0x0010 // Linear slides vs. Amiga slides
-#define SONG_PATTERNLOOP	0x0020
-#define SONG_STEP			0x0040
-#define SONG_PAUSED			0x0080
-#define SONG_FADINGSONG		0x0100
-#define SONG_ENDREACHED		0x0200
-#define SONG_GLOBALFADE		0x0400
-#define SONG_CPUVERYHIGH	0x0800
-#define SONG_FIRSTTICK		0x1000
-#define SONG_MPTFILTERMODE	0x2000
-#define SONG_SURROUNDPAN	0x4000
-#define SONG_EXFILTERRANGE	0x8000
-#define SONG_AMIGALIMITS	0x10000
+#define SONG_EMBEDMIDICFG	0x0001		// Embed macros in file
+#define SONG_FASTVOLSLIDES	0x0002		// Old Scream Tracker 3.0 volume slides
+#define SONG_ITOLDEFFECTS	0x0004		// Old Impulse Tracker effect implementations
+#define SONG_ITCOMPATMODE	0x0008		// IT "Compatible Gxx"
+#define SONG_LINEARSLIDES	0x0010		// Linear slides vs. Amiga slides
+#define SONG_PATTERNLOOP	0x0020		// Loop current pattern (pattern editor)
+#define SONG_STEP			0x0040		// Song is in "step" mode (pattern editor)
+#define SONG_PAUSED			0x0080		// Song is paused
+#define SONG_FADINGSONG		0x0100		// Song is fading out
+#define SONG_ENDREACHED		0x0200		// Song is finished
+#define SONG_GLOBALFADE		0x0400		// Song is fading out
+#define SONG_CPUVERYHIGH	0x0800		// High CPU usage
+#define SONG_FIRSTTICK		0x1000		// Is set when the current tick is the first tick of the row
+#define SONG_MPTFILTERMODE	0x2000		// Local filter mode (reset filter on each note)
+#define SONG_SURROUNDPAN	0x4000		// Pan in the rear channels
+#define SONG_EXFILTERRANGE	0x8000		// Cutoff Filter has double frequency range (up to ~10Khz)
+#define SONG_AMIGALIMITS	0x10000		// Enforce amiga frequency limits
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-#define SONG_ITPROJECT		0x20000
-#define SONG_ITPEMBEDIH		0x40000
+#define SONG_ITPROJECT		0x20000		// Is a project file
+#define SONG_ITPEMBEDIH		0x40000		// Embed instrument headers in project file
 // -! NEW_FEATURE#0023
-#define SONG_BREAKTOROW		0x80000
-#define SONG_POSJUMP		0x100000
+#define SONG_BREAKTOROW		0x80000		// Break to row command encountered (internal flag, do not touch)
+#define SONG_POSJUMP		0x100000	// Position jump encountered (internal flag, do not touch)
+#define SONG_PT1XMODE		0x200000	// ProTracker 1.x playback mode
 
 // Global Options (Renderer)
 #define SNDMIX_REVERSESTEREO	0x0001
@@ -307,7 +308,7 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define SNDMIX_DIRECTTODISK		0x10000
 #define SNDMIX_ENABLEMMX		0x20000
 #define SNDMIX_NOBACKWARDJUMPS	0x40000
-#define SNDMIX_MAXDEFAULTPAN	0x80000	 // Used by the MOD loader
+#define SNDMIX_MAXDEFAULTPAN	0x80000	 // Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000 // Notes are not played on muted channels
 #define SNDMIX_EMULATE_MIX_BUGS 0x200000 // rewbs.emulateMixBugs
 
