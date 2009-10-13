@@ -186,7 +186,7 @@ public:
 	void SongProperties();
 // operations
 public:
-	BOOL ChangeModType(UINT nNewType);
+	BOOL ChangeModType(MODTYPE wType);
 	BOOL ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg = true);
 
 	BOOL ConvertInstrumentsToSamples();

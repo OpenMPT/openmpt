@@ -102,6 +102,7 @@ BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	ON_COMMAND(IDC_CHECK6,		OnCheck6)
+	ON_COMMAND(IDC_CHECK_PT1X,	OnCheckPT1x)
 	ON_CBN_SELCHANGE(IDC_COMBO1,UpdateDialog)
 // -! NEW_FEATURE#0023
 	//}}AFX_MSG_MAP
@@ -125,6 +126,7 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
+	DDX_Control(pDX, IDC_CHECK_PT1X,	m_CheckBoxPT1x);
 	DDX_Control(pDX, IDC_EDIT_FLAGS,	m_EditFlag);
 // -! NEW_FEATURE#0023
 	//}}AFX_DATA_MAP
@@ -249,6 +251,7 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox3.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITOLDEFFECTS) ? MF_CHECKED : 0);
 	m_CheckBox4.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITCOMPATMODE) ? MF_CHECKED : 0);
 	m_CheckBox5.SetCheck((m_pSndFile->m_dwSongFlags & SONG_EXFILTERRANGE) ? MF_CHECKED : 0);
+	m_CheckBoxPT1x.SetCheck((m_pSndFile->m_dwSongFlags & SONG_PT1XMODE) ? MF_CHECKED : 0);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -260,6 +263,7 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox3.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 	m_CheckBox4.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
 	m_CheckBox5.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+	m_CheckBoxPT1x.EnableWindow((m_pSndFile->m_nType & (MOD_TYPE_MOD)) ? TRUE : FALSE);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -392,6 +396,15 @@ void CModTypeDlg::OnCheck6()
 		m_pSndFile->m_dwSongFlags |= SONG_ITPEMBEDIH;
 	else
 		m_pSndFile->m_dwSongFlags &= ~SONG_ITPEMBEDIH;
+}
+
+void CModTypeDlg::OnCheckPT1x()
+//-----------------------------
+{
+	if (m_CheckBoxPT1x.GetCheck())
+		m_pSndFile->m_dwSongFlags |= SONG_PT1XMODE;
+	else
+		m_pSndFile->m_dwSongFlags &= ~SONG_PT1XMODE;
 }
 
 
