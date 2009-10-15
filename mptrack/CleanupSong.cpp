@@ -441,7 +441,7 @@ NotEmpty:
 	EndWaitCursor();
 	if ((nPatRemoved) || (bReordered))
 	{
-		m_pModDoc->ClearUndo();
+		m_pModDoc->ClearPatternUndo();
 		if (nPatRemoved)
 		{
 			wsprintf(s, "%d pattern%s removed.\n", nPatRemoved, (nPatRemoved == 1) ? "" : "s");

@@ -178,8 +178,8 @@ void CViewSample::UpdateScrollSize()
 }
 
 
-BOOL CViewSample::SetCurrentSample(UINT nSmp)
-//-------------------------------------------
+BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
+//--------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;

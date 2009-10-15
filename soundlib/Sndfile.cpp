@@ -3469,6 +3469,25 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		}
 	} // End if (oldTypeIsIT_MPT && newTypeIsS3M)
 
+	///////////////////////////////////
+	// MOD <-> XM: Speed/Tempo update
+	if(oldTypeIsMOD && newTypeIsXM)
+	{
+		switch(m->command)
+		{
+		case CMD_SPEED:
+			m->param = min(m->param, 0x1F);
+			break;
+		}
+	} else if(oldTypeIsXM && newTypeIsMOD)
+	{
+		switch(m->command)
+		{
+		case CMD_TEMPO:
+			m->param = max(m->param, 0x21);
+			break;
+		}
+	}
 
 
 	///////////////////////////////////////////////////////////////////////

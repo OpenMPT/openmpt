@@ -17,7 +17,7 @@ protected:
 	CSpinButtonCtrl m_SpinFineTune, m_SpinSample;
 	CComboBox m_ComboAutoVib, m_ComboLoopType, m_ComboSustainType, m_ComboZoom, m_CbnBaseNote;
 	CButton m_CheckPanning;
-	UINT m_nSample;
+	SAMPLEINDEX m_nSample;
 	double m_dTimeStretchRatio; //rewbs.timeStretchMods
 	uint32 m_nStretchProcessStepLength;
 	uint32 m_nSequenceMs;

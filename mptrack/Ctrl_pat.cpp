@@ -377,7 +377,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 	}
 	if (dwHintMask & (HINT_MODTYPE|HINT_UNDO))
 	{
-		m_ToolBar.EnableButton(ID_EDIT_UNDO, m_pModDoc->CanUndo());
+		m_ToolBar.EnableButton(ID_EDIT_UNDO, m_pModDoc->CanPatternUndo());
 	}
 }
 
@@ -1166,6 +1166,7 @@ void CCtrlPatterns::OnSequenceNameChanged()
 		{
 			m_pSndFile->Order.m_sName = str;
 			m_pModDoc->SetModified();
+			m_pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES, this);
 		}
 	}
 }
