@@ -346,7 +346,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	SetModified();
-	ClearUndo();
+	ClearPatternUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODGENERAL);
 	EndWaitCursor();
 	return TRUE;
@@ -447,7 +447,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 		EndWaitCursor();
 	}
 	SetModified();
-	ClearUndo();
+	ClearPatternUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE);
 	return TRUE;
 }
@@ -520,7 +520,7 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 		END_CRITICAL();
 		EndWaitCursor();
 		SetModified();
-		ClearUndo();
+		ClearPatternUndo();
 		UpdateAllViews(NULL, HINT_MODTYPE);
 		return FALSE;
 }
@@ -1121,7 +1121,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 
 		if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 		{
-			PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+			PreparePatternUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 			BYTE spdmax = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 0x20 : 0x1F;
 			DWORD dwMemSize = GlobalSize(hCpy);
 			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
@@ -1321,7 +1321,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 						nPattern = m_SndFile.Order[oNextOrder];
 						if(m_SndFile.Patterns.IsValidPat(nPattern) == false) goto PasteDone;
 						m = m_SndFile.Patterns[nPattern];
-						PrepareUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+						PreparePatternUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 						oCurrentOrder = oNextOrder;
 					}
 				}
@@ -1531,10 +1531,10 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
-// Undo Functions
+// Pattern Undo Functions
 
-BOOL CModDoc::ClearUndo()
-//-----------------------
+BOOL CModDoc::ClearPatternUndo()
+//------------------------------
 {
 	for (UINT i=0; i<MAX_UNDO_LEVEL; i++)
 	{
@@ -1547,15 +1547,15 @@ BOOL CModDoc::ClearUndo()
 }
 
 
-BOOL CModDoc::CanUndo()
-//---------------------
+BOOL CModDoc::CanPatternUndo()
+//----------------------------
 {
 	return (PatternUndo[0].pbuffer) ? TRUE : FALSE;
 }
 
 
-BOOL CModDoc::PrepareUndo(UINT pattern, UINT x, UINT y, UINT cx, UINT cy)
-//-----------------------------------------------------------------------
+BOOL CModDoc::PreparePatternUndo(UINT pattern, UINT x, UINT y, UINT cx, UINT cy)
+//------------------------------------------------------------------------------
 {
 	MODCOMMAND *pUndo, *pPattern;
 	UINT nRows;
@@ -1604,8 +1604,8 @@ BOOL CModDoc::PrepareUndo(UINT pattern, UINT x, UINT y, UINT cx, UINT cy)
 }
 
 
-UINT CModDoc::DoUndo()
-//--------------------
+UINT CModDoc::DoPatternUndo()
+//---------------------------
 {
 	MODCOMMAND *pUndo, *pPattern;
 	UINT nPattern, nRows;

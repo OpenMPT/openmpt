@@ -113,7 +113,7 @@ struct MODINSTRUMENT
 	unsigned char nPPC; //Pitch Centre?
 
 	CHAR name[32];
-	CHAR filename[12];
+	CHAR filename[32];
 
 	BYTE nMixPlug;							//rewbs.instroVSTi
 // -> CODE#0027
@@ -566,8 +566,9 @@ public:	// for Editing
 	BYTE m_nTempoMode;		// rewbs.betterBPM
 	BYTE m_nMixLevels;
     UINT m_nMusicSpeed, m_nMusicTempo;
-	UINT m_nNextRow, m_nRow;
-	UINT m_nPattern,m_nCurrentPattern,m_nNextPattern,m_nRestartPos, m_nSeqOverride;
+	ROWINDEX m_nNextRow, m_nRow;
+	PATTERNINDEX m_nPattern;
+	ORDERINDEX m_nCurrentPattern, m_nNextPattern, m_nRestartPos, m_nSeqOverride;
 	//NOTE: m_nCurrentPattern and m_nNextPattern refer to order index - not pattern index.
 	bool m_bPatternTransitionOccurred;
 	UINT m_nMasterVolume, m_nGlobalVolume, m_nSamplesToGlobalVolRampDest,

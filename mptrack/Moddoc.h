@@ -36,7 +36,8 @@
 #define HINT_UNDO			0x10000
 #define HINT_MIXPLUGINS		0x20000
 #define HINT_SPEEDCHANGE	0x40000	//rewbs.envRowGrid
-#define HINT_MAXHINTFLAG	HINT_SPEEDCHANGE
+#define HINT_SEQNAMES		0x80000
+#define HINT_MAXHINTFLAG	HINT_SEQNAMES
 //Bits 0-18 are reserved.
 #define HINT_MASK_FLAGS		(2*HINT_MAXHINTFLAG - 1) //When applied to hint parameter, should give the flag part.
 #define HINT_MASK_ITEM		(~HINT_MASK_FLAGS) //To nullify update hintbits from hint parameter.
@@ -89,6 +90,7 @@ STATIC_ASSERT( ((-1 << HINT_SHIFT_CHNTAB) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT
 // Undo
 #define MAX_UNDO_LEVEL		100
 
+// Pattern Undo
 typedef struct PATTERNUNDOBUFFER
 {
 	UINT pattern, patternsize;
@@ -243,10 +245,10 @@ public:
 
 	BOOL CopyEnvelope(UINT nIns, UINT nEnv);
 	BOOL PasteEnvelope(UINT nIns, UINT nEnv);
-	BOOL ClearUndo();
-	BOOL PrepareUndo(UINT pattern, UINT x, UINT y, UINT cx, UINT cy);
-	UINT DoUndo();
-	BOOL CanUndo();
+	BOOL ClearPatternUndo();
+	BOOL PreparePatternUndo(UINT pattern, UINT x, UINT y, UINT cx, UINT cy);
+	UINT DoPatternUndo();
+	BOOL CanPatternUndo();
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
 	void UpdateAllViews(CView *pSender, LPARAM lHint=0L, CObject *pHint=NULL);
 	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord); //rewbs.customKeys

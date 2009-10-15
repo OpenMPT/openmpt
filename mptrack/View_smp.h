@@ -15,7 +15,8 @@ protected:
 	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
 	SIZE m_sizeTotal;
-	UINT m_nSample, m_nZoom, m_nScrollPos, m_nScrollFactor, m_nBtnMouseOver;
+	SAMPLEINDEX m_nSample;
+	UINT m_nZoom, m_nScrollPos, m_nScrollFactor, m_nBtnMouseOver;
 	DWORD m_dwStatus, m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
 	DWORD m_dwMenuParam;
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
@@ -28,7 +29,7 @@ public:
 
 public:
 	void UpdateScrollSize();
-	BOOL SetCurrentSample(UINT nSmp);
+	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
 	BOOL SetZoom(UINT nZoom);
 	LONG SampleToScreen(LONG n) const;
 	DWORD ScreenToSample(LONG x) const;

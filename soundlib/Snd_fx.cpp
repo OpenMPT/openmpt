@@ -1172,6 +1172,9 @@ BOOL CSoundFile::ProcessEffects()
 			bPorta = false;
 		}
 
+		// Process Invert Loop (MOD Effect, called every row)
+		InvertLoop(&Chn[nChn]);
+
 		// Process special effects (note delay, pattern delay, pattern loop)
 		if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
@@ -1869,9 +1872,6 @@ BOOL CSoundFile::ProcessEffects()
 			NoteSlide(pChn, param, -1);
 			break;
 		}
-
-		// MOD Effect (called every row)
-		InvertLoop(&Chn[nChn]);
 
 	} // for(...) end
 
@@ -2695,17 +2695,16 @@ inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
 //--------------------------------------------------
 {
 	// EFx implementation for MOD files (PT 1.1A and up: Invert Loop)
-	// This effect trashes samples. Thanks to bubsy for making this work. :)
+	// This effect trashes samples. Thanks to 8bitbubsy for making this work. :)
 	if((m_nType & MOD_TYPE_MOD) == 0 || pChn->nEFxSpeed == 0) return;
-
-	pChn->nEFxDelay += ModEFxTable[pChn->nEFxSpeed & 0x0F];
-
-	if(pChn->nEFxDelay < 0x80) return; // only applied if the "delay" reaches 128
-	pChn->nEFxDelay = 0;
 
 	// we obviously also need a sample for this
 	MODSAMPLE *pModSample = pChn->pEFxSample;
 	if(pModSample == nullptr || pModSample->pSample == nullptr || !(pModSample->uFlags & CHN_LOOP)) return;
+
+	pChn->nEFxDelay += ModEFxTable[pChn->nEFxSpeed & 0x0F];
+	if((pChn->nEFxDelay & 0x80) == 0) return; // only applied if the "delay" reaches 128
+	pChn->nEFxDelay = 0;
 
 	if (++pChn->nEFxOffset >= pModSample->nLoopEnd - pModSample->nLoopStart)
 		pChn->nEFxOffset = 0;

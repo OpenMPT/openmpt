@@ -113,7 +113,7 @@ CModDoc::CModDoc()
 CModDoc::~CModDoc()
 //-----------------
 {
-	ClearUndo();
+	ClearPatternUndo();
 	ClearLog();
 }
 

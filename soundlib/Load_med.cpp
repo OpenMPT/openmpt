@@ -810,7 +810,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 	if ((!dwBlockArr) || (dwBlockArr > dwMemLength - 4*wNumBlocks)) return true;
 	pdwTable = (LPDWORD)(lpStream + dwBlockArr);
 	playtransp += (version == '3') ? 24 : 48;
-	for (UINT iBlk=0; iBlk<wNumBlocks; iBlk++)
+	for (PATTERNINDEX iBlk=0; iBlk<wNumBlocks; iBlk++)
 	{
 		UINT dwPos = BigEndian(pdwTable[iBlk]);
 		if ((!dwPos) || (dwPos >= dwMemLength) || (dwPos >= dwMemLength - 8)) continue;

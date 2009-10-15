@@ -727,19 +727,29 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		// go through all sequences
 		for(SEQUENCEINDEX nSeq = 0; nSeq < pSndFile->Order.GetNumSequences(); nSeq++)
 		{
-			// TODO update sequence names
 			if(pSndFile->Order.GetNumSequences() > 1)
 			{
 				// more than one sequence -> add folder
 				CString sSeqName = pSndFile->Order.GetSequence(nSeq).m_sName;
 				if(sSeqName.IsEmpty()) sSeqName.Format("Sequence %d", nSeq);
+				UINT state = (nSeq == pSndFile->Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;
+
 				if(pInfo->tiSequences[nSeq] == NULL)
 				{
 					pInfo->tiSequences[nSeq] = InsertItem(sSeqName, IMAGE_FOLDER, IMAGE_FOLDER, pInfo->hOrders, TVI_LAST);
-				} else
-				{
-
 				}
+				// Update bold item
+				strcpy(stmp, sSeqName);
+				tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
+				tvi.state = 0;
+				tvi.stateMask = TVIS_BOLD;
+				tvi.hItem = pInfo->tiSequences[nSeq];
+				tvi.pszText = stmp;
+				tvi.cchTextMax = sizeof(stmp);
+				GetItem(&tvi);
+				if(tvi.state != state || tvi.pszText != sSeqName)
+					SetItem(pInfo->tiSequences[nSeq], TVIF_TEXT | TVIF_STATE, sSeqName, 0, 0, state, TVIS_BOLD, 0);
+
 				hAncestorNode = pInfo->tiSequences[nSeq];
 			}
 
@@ -2017,7 +2027,7 @@ VOID CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 void CModTree::OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint)
 //---------------------------------------------------------------------
 {
-	dwHint &= (HINT_PATNAMES|HINT_SMPNAMES|HINT_INSNAMES|HINT_MODTYPE|HINT_MODGENERAL|HINT_MODSEQUENCE|HINT_MIXPLUGINS|HINT_MPTOPTIONS|HINT_MASK_ITEM);
+	dwHint &= (HINT_PATNAMES|HINT_SMPNAMES|HINT_INSNAMES|HINT_MODTYPE|HINT_MODGENERAL|HINT_MODSEQUENCE|HINT_MIXPLUGINS|HINT_MPTOPTIONS|HINT_MASK_ITEM|HINT_SEQNAMES);
 	if ((pHint != this) && (dwHint & HINT_MASK_FLAGS))
 	{
 		for (UINT i=0; i<MODTREE_MAX_DOCUMENTS; i++)
