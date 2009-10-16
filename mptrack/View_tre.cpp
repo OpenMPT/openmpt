@@ -277,7 +277,7 @@ VOID CModTree::OnOptionsChanged()
 VOID CModTree::AddDocument(CModDoc *pModDoc)
 //------------------------------------------
 {
-	UINT nNewNdx = 0xFFFF;
+	UINT nNewNdx = MODTREE_MAX_DOCUMENTS;
 	// Check if document is already in the list
 	for (UINT i=0; i<MODTREE_MAX_DOCUMENTS; i++)
 	{
@@ -313,18 +313,14 @@ VOID CModTree::AddDocument(CModDoc *pModDoc)
 VOID CModTree::RemoveDocument(CModDoc *pModDoc)
 //---------------------------------------------
 {
-	for (UINT i=0; i<MODTREE_MAX_DOCUMENTS; i++)
+	UINT nDocNdx = GetDocumentIDFromModDoc(pModDoc);
+	if(nDocNdx >= MODTREE_MAX_DOCUMENTS) return;
+	if (DocInfo[nDocNdx]->hSong)
 	{
-		if ((DocInfo[i]) && (DocInfo[i]->pModDoc == pModDoc))
-		{
-			if (DocInfo[i]->hSong)
-			{
-				DeleteItem(DocInfo[i]->hSong);
-			}
-			delete DocInfo[i];
-			DocInfo[i] = NULL;
-		}
+		DeleteItem(DocInfo[nDocNdx]->hSong);
 	}
+	delete DocInfo[nDocNdx];
+	DocInfo[nDocNdx] = NULL;
 }
 
 
@@ -346,6 +342,20 @@ CModDoc *CModTree::GetDocumentFromItem(HTREEITEM hItem)
 		}
 	}
 	return NULL;
+}
+
+
+UINT CModTree::GetDocumentIDFromModDoc(CModDoc *pModDoc)
+//------------------------------------------------------
+{
+	// returns document ID (to access DocInfo[] info)
+	UINT nDocNdx = MODTREE_MAX_DOCUMENTS;
+	for (UINT i = 0; i < MODTREE_MAX_DOCUMENTS; i++)
+	{
+		if (DocInfo[i] && DocInfo[i]->pModDoc == pModDoc)
+			nDocNdx = i;
+	}
+	return nDocNdx;
 }
 
 
@@ -866,38 +876,40 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	// Add Samples
 	if ((pInfo->hSamples) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_PATNAMES))
 	{
-		const UINT nSmp = (lHint >> HINT_SHIFT_SMP);
-		UINT smin = 1, smax = MAX_SAMPLES-1;
+		const SAMPLEINDEX nSmp = (SAMPLEINDEX)(lHint >> HINT_SHIFT_SMP);
+		SAMPLEINDEX smin = 1, smax = MAX_SAMPLES - 1;
 		if ((hintFlagPart == HINT_SMPNAMES) && (nSmp) && (nSmp < MAX_SAMPLES)) { smin = smax = nSmp; }
-		for (UINT iSmp=smin; iSmp<=smax; iSmp++)
+		for(SAMPLEINDEX nSmp = smin; nSmp <= smax; nSmp++)
 		{
-			if (iSmp <= pSndFile->m_nSamples)
+			if (nSmp <= pSndFile->m_nSamples)
 			{
-				bool bSamplePresent = (pSndFile->Samples[iSmp].pSample) ? true : false;
-				UINT nImage = (bSamplePresent) ? IMAGE_SAMPLES : IMAGE_NOSAMPLE;
-				wsprintf(s, "%3d: %s", iSmp, pSndFile->m_szNames[iSmp]);
-				if (!pInfo->tiSamples[iSmp])
+				bool bSamplePresent = (pSndFile->Samples[nSmp].pSample) ? true : false;
+				int nImage = (bSamplePresent) ? IMAGE_SAMPLES : IMAGE_NOSAMPLE;
+				if(pInfo->pModDoc->IsSampleMuted(nSmp) && bSamplePresent) nImage = IMAGE_SAMPLEMUTE;
+
+				wsprintf(s, "%3d: %s", nSmp, pSndFile->m_szNames[nSmp]);
+				if (!pInfo->tiSamples[nSmp])
 				{
-					pInfo->tiSamples[iSmp] = InsertItem(s, nImage, nImage, pInfo->hSamples, TVI_LAST);
+					pInfo->tiSamples[nSmp] = InsertItem(s, nImage, nImage, pInfo->hSamples, TVI_LAST);
 				} else
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
-					tvi.hItem = pInfo->tiSamples[iSmp];
+					tvi.hItem = pInfo->tiSamples[nSmp];
 					tvi.pszText = stmp;
 					tvi.cchTextMax = sizeof(stmp);
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
-					if ((strcmp(s, stmp)) || (tvi.iImage != (int)nImage))
+					if ((strcmp(s, stmp)) || (tvi.iImage != nImage))
 					{
-						SetItem(pInfo->tiSamples[iSmp], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
+						SetItem(pInfo->tiSamples[nSmp], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
 					}
 				}
 			} else
 			{
-				if (pInfo->tiSamples[iSmp])
+				if (pInfo->tiSamples[nSmp])
 				{
-					DeleteItem(pInfo->tiSamples[iSmp]);
-					pInfo->tiSamples[iSmp] = NULL;
+					DeleteItem(pInfo->tiSamples[nSmp]);
+					pInfo->tiSamples[nSmp] = NULL;
 				}
 			}
 		}
@@ -905,8 +917,8 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	// Add Instruments
 	if ((pInfo->hInstruments) && (hintFlagPart != HINT_SMPNAMES) && (hintFlagPart != HINT_PATNAMES))
 	{
-		UINT smin = 1, smax = MAX_INSTRUMENTS-1;
-		const UINT nIns = (lHint >> HINT_SHIFT_INS);
+		INSTRUMENTINDEX smin = 1, smax = MAX_INSTRUMENTS - 1;
+		const INSTRUMENTINDEX nIns = (INSTRUMENTINDEX)(lHint >> HINT_SHIFT_INS);
 		if ((hintFlagPart == HINT_INSNAMES) && (nIns) && (nIns < MAX_INSTRUMENTS))
 		{
 			smin = smax = nIns;
@@ -924,35 +936,44 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 				}
 			}
 		}
-		for (UINT iSmp=smin; iSmp<=smax; iSmp++)
+		for (INSTRUMENTINDEX nIns = smin; nIns <= smax; nIns++)
 		{
-			if ((iSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[iSmp]))
+			if ((nIns <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nIns]))
 			{
-// -> CODE#0023
-// -> DESC="IT project files (.itp)"
-//				wsprintf(s, "%3d: %s", iSmp, pSndFile->Instruments[iSmp]->name);
-				BOOL pathOk = pSndFile->m_szInstrumentPath[iSmp-1][0] != '\0';
-				BOOL instOk = pSndFile->instrumentModified[iSmp-1] == FALSE;
-				wsprintf(s, pathOk ? (instOk ? "%3d: %s" : "%3d: * %s") : "%3d: ? %s", iSmp, pSndFile->Instruments[iSmp]->name);
-// -! NEW_FEATURE#0023
-				if (!pInfo->tiInstruments[iSmp])
+				if((pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0)
 				{
-					pInfo->tiInstruments[iSmp] = InsertItem(s, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, pInfo->hInstruments, TVI_LAST);
+					// path info for ITP instruments
+					BOOL pathOk = pSndFile->m_szInstrumentPath[nIns-1][0] != '\0';
+					BOOL instOk = pSndFile->instrumentModified[nIns-1] == FALSE;
+					wsprintf(s, pathOk ? (instOk ? "%3d: %s" : "%3d: * %s") : "%3d: ? %s", nIns, pSndFile->Instruments[nIns]->name);
 				} else
 				{
-					tvi.mask = TVIF_TEXT | TVIF_HANDLE;
-					tvi.hItem = pInfo->tiInstruments[iSmp];
+					wsprintf(s, "%3d: %s", nIns, pSndFile->Instruments[nIns]->name);
+				}
+
+				int nImage = IMAGE_INSTRUMENTS;
+				if(pInfo->pModDoc->IsInstrumentMuted(nIns)) nImage = IMAGE_INSTRMUTE;
+
+				if (!pInfo->tiInstruments[nIns])
+				{
+					pInfo->tiInstruments[nIns] = InsertItem(s, nImage, nImage, pInfo->hInstruments, TVI_LAST);
+				} else
+				{
+					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
+					tvi.hItem = pInfo->tiInstruments[nIns];
 					tvi.pszText = stmp;
 					tvi.cchTextMax = sizeof(stmp);
+					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
-					if (strcmp(s, stmp)) SetItem(pInfo->tiInstruments[iSmp], TVIF_TEXT, s, 0, 0, 0, 0, 0);
+					if ((strcmp(s, stmp)) || (tvi.iImage != nImage))
+						SetItem(pInfo->tiInstruments[nIns], TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE, s, nImage, nImage, 0, 0, 0);
 				}
 			} else
 			{
-				if (pInfo->tiInstruments[iSmp])
+				if (pInfo->tiInstruments[nIns])
 				{
-					DeleteItem(pInfo->tiInstruments[iSmp]);
-					pInfo->tiInstruments[iSmp] = NULL;
+					DeleteItem(pInfo->tiInstruments[nIns]);
+					pInfo->tiInstruments[nIns] = NULL;
 				}
 			}
 		}
@@ -2005,17 +2026,16 @@ BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 VOID CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 //----------------------------------------------------------------------
 {
-	for (UINT i=0; i<MODTREE_MAX_DOCUMENTS; i++) if ((DocInfo[i]) && (DocInfo[i]->pModDoc == pModDoc))
+	UINT nDocNdx = GetDocumentIDFromModDoc(pModDoc);
+	if(nDocNdx >= MODTREE_MAX_DOCUMENTS) return;
+
+	ORDERINDEX nNewOrd = (pNotify) ? pNotify->nOrder : ORDERINDEX_INVALID;
+	SEQUENCEINDEX nNewSeq = (pModDoc->GetSoundFile() != nullptr) ? pModDoc->GetSoundFile()->Order.GetCurrentSequenceIndex() : SEQUENCEINDEX_INVALID;
+	if (nNewOrd != DocInfo[nDocNdx]->nOrdSel || nNewSeq != DocInfo[nDocNdx]->nSeqSel)
 	{
-		ORDERINDEX nNewOrd = (pNotify) ? pNotify->nOrder : ORDERINDEX_INVALID;
-		SEQUENCEINDEX nNewSeq = (pModDoc->GetSoundFile() != nullptr) ? pModDoc->GetSoundFile()->Order.GetCurrentSequenceIndex() : SEQUENCEINDEX_INVALID;
-		if (nNewOrd != DocInfo[i]->nOrdSel || nNewSeq != DocInfo[i]->nSeqSel)
-		{
-			DocInfo[i]->nOrdSel = nNewOrd;
-			DocInfo[i]->nSeqSel = nNewSeq;
-			UpdateView(i, HINT_MODSEQUENCE);
-		}
-		break;
+		DocInfo[nDocNdx]->nOrdSel = nNewOrd;
+		DocInfo[nDocNdx]->nSeqSel = nNewSeq;
+		UpdateView(nDocNdx, HINT_MODSEQUENCE);
 	}
 }
 
@@ -2604,15 +2624,18 @@ void CModTree::OnMuteTreeItem()
 	const DWORD dwItemNo = (DWORD)(qwItemType >> 16);
 	qwItemType &= 0xFFFF;
 	pModDoc = GetDocumentFromItem(hItem);
+
 	if (pModDoc)
 	{
 		if ((qwItemType == MODITEM_SAMPLE) && (!pModDoc->GetNumInstruments()))
 		{
 			pModDoc->MuteSample((SAMPLEINDEX)dwItemNo, (pModDoc->IsSampleMuted((SAMPLEINDEX)dwItemNo)) ? false : true);
+			UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_SMPNAMES | HINT_SAMPLEINFO);
 		} else
 		if ((qwItemType == MODITEM_INSTRUMENT) && (pModDoc->GetNumInstruments()))
 		{
 			pModDoc->MuteInstrument((INSTRUMENTINDEX)dwItemNo, (pModDoc->IsInstrumentMuted((INSTRUMENTINDEX)dwItemNo)) ? false : true);
+			UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_INSNAMES | HINT_INSTRUMENT);
 		}
 
 		if ((qwItemType == MODITEM_EFFECT))
@@ -2650,6 +2673,7 @@ void CModTree::OnSoloTreeItem()
 			for (SAMPLEINDEX nSmp = 1; nSmp <= pModDoc->GetNumSamples(); nSmp++)
 			{
 				pModDoc->MuteSample(nSmp, (nSmp == dwItemNo) ? false : true);
+				UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_SMPNAMES | HINT_SAMPLEINFO);
 			}
 		} else
 		if ((qwItemType == MODITEM_INSTRUMENT) && (nInstruments))
@@ -2657,6 +2681,7 @@ void CModTree::OnSoloTreeItem()
 			for (INSTRUMENTINDEX nIns = 1; nIns <= nInstruments; nIns++)
 			{
 				pModDoc->MuteInstrument(nIns, (nIns == dwItemNo) ? false : true);
+				UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_INSNAMES | HINT_INSTRUMENT);
 			}
 		}
 	}
@@ -2678,11 +2703,13 @@ void CModTree::OnUnmuteAllTreeItem()
 		{
 			for (SAMPLEINDEX nSmp = 1; nSmp <= pModDoc->GetNumSamples(); nSmp++)
 			{
-				pModDoc->MuteSample(nSmp, FALSE);
+				pModDoc->MuteSample(nSmp, false);
+				UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_SMPNAMES | HINT_SAMPLEINFO);
 			}
 			for (INSTRUMENTINDEX nIns = 1; nIns <= pModDoc->GetNumInstruments(); nIns++)
 			{
-				pModDoc->MuteInstrument(nIns, FALSE);
+				pModDoc->MuteInstrument(nIns, false);
+				UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_INSNAMES | HINT_INSTRUMENT);
 			}
 		}
 	}

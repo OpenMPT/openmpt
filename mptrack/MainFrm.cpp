@@ -399,12 +399,6 @@ void CMainFrame::LoadIniSettings()
 		wsprintf(s, "Color%02d", ncol);
 		rgbCustomColors[ncol] = GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
 	}
-	if(rgbCustomColors[MODCOLOR_SEPSHADOW] == rgbCustomColors[MODCOLOR_SEPFACE] == rgbCustomColors[MODCOLOR_SEPHILITE] == 0 && vIniVersion < MAKE_VERSION_NUMERIC(1,17,03,03))
-	{
-		rgbCustomColors[MODCOLOR_SEPSHADOW] = GetSysColor(COLOR_BTNSHADOW);
-		rgbCustomColors[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
-		rgbCustomColors[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
-	}
 
 	m_nWaveDevice = GetPrivateProfileLong("Sound Settings", "WaveDevice", (SNDDEV_DSOUND<<8), iniFile);
 	m_dwSoundSetup = GetPrivateProfileDWord("Sound Settings", "SoundSetup", SOUNDSETUP_SECONDARY, iniFile);
