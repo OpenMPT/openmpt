@@ -262,6 +262,8 @@ enum {
 	IMAGE_WAVEOUT,
 	IMAGE_ASIO,
 	IMAGE_GRAPH,
+	IMAGE_SAMPLEMUTE,
+	IMAGE_INSTRMUTE
 };
 
 //////////////////////////////////////////////////////////////////////////

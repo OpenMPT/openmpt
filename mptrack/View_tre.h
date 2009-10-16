@@ -174,6 +174,7 @@ protected:
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	void ModTreeBuildTVIParam(TV_INSERTSTRUCT &tvis, LPCSTR lpszName, int iImage);
 	CModDoc *GetDocumentFromItem(HTREEITEM hItem);
+	UINT GetDocumentIDFromModDoc(CModDoc *pModDoc);
 
 // Generated message map functions
 protected:
