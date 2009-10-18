@@ -170,47 +170,37 @@ enum
 #define NUM_VUMETER_PENS		32
 
 // Pattern Setup (contains also non-pattern related settings)
-#define PATTERN_PLAYNEWNOTE			0x01
-#define PATTERN_LARGECOMMENTS		0x02
-#define PATTERN_STDHIGHLIGHT		0x04
-#define PATTERN_SMALLFONT			0x08
-#define PATTERN_CENTERROW			0x10
-#define PATTERN_WRAP				0x20
-#define PATTERN_EFFECTHILIGHT		0x40
-#define PATTERN_HEXDISPLAY			0x80
-#define PATTERN_FLATBUTTONS			0x100
-#define PATTERN_CREATEBACKUP		0x200
-#define PATTERN_SINGLEEXPAND		0x400
-#define PATTERN_AUTOSPACEBAR		0x800
-#define PATTERN_NOEXTRALOUD			0x1000
-#define PATTERN_DRAGNDROPEDIT		0x2000
-#define PATTERN_2NDHIGHLIGHT		0x4000
-#define PATTERN_MUTECHNMODE			0x8000
-#define PATTERN_SHOWPREVIOUS		0x10000
-#define PATTERN_CONTSCROLL			0x20000
-#define PATTERN_KBDNOTEOFF			0x40000
-#define PATTERN_FOLLOWSONGOFF		0x80000 //rewbs.noFollow
-
-// -> CODE#0017
-// -> DESC="midi in record mode setup option"
-#define PATTERN_MIDIRECORD			0x100000
-// -! BEHAVIOUR_CHANGE#0017
-
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-#define	PATTERN_ALTERNTIVEBPMSPEED	0x200000
-// rewbs: this options is now available under song settings. It is therefore saved with the song.
-// -! NEW_FEATURE#0022
-
-#define PATTERN_HILITETIMESIGS		0x400000
-
-#define PATTERN_OLDCTXMENUSTYLE		0x800000
-#define PATTERN_SYNCMUTE			0x1000000
-#define PATTERN_AUTODELAY			0x2000000 
-#define PATTERN_NOTEFADE			0x4000000
-#define PATTERN_OVERFLOWPASTE		0x8000000
-#define PATTERN_POSITIONAWARETIMER	0x10000000
-#define PATTERN_RESETCHANNELS		0x20000000
+#define PATTERN_PLAYNEWNOTE			0x01		// play new notes while recording
+#define PATTERN_LARGECOMMENTS		0x02		// use large font in comments
+#define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight
+#define PATTERN_SMALLFONT			0x08		// use small font in pattern editor
+#define PATTERN_CENTERROW			0x10		// always center active row
+#define PATTERN_WRAP				0x20		// wrap around cursor in editor
+#define PATTERN_EFFECTHILIGHT		0x40		// effect syntax highlighting
+#define PATTERN_HEXDISPLAY			0x80		// display row number in hex
+#define PATTERN_FLATBUTTONS			0x100		// flat toolbar buttons
+#define PATTERN_CREATEBACKUP		0x200		// create .bak files when saving
+#define PATTERN_SINGLEEXPAND		0x400		// single click to expand tree
+#define PATTERN_AUTOSPACEBAR		0x800		// space bar repeats previous action
+#define PATTERN_NOEXTRALOUD			0x1000		// no loud samples in sample editor
+#define PATTERN_DRAGNDROPEDIT		0x2000		// enable drag and drop editing
+#define PATTERN_2NDHIGHLIGHT		0x4000		// activate secondary highlight
+#define PATTERN_MUTECHNMODE			0x8000		// ignore muted channels
+#define PATTERN_SHOWPREVIOUS		0x10000		// show prev/next patterns
+#define PATTERN_CONTSCROLL			0x20000		// continous pattern scrolling
+#define PATTERN_KBDNOTEOFF			0x40000		// Record note-off events
+#define PATTERN_FOLLOWSONGOFF		0x80000		// follow song off by default
+#define PATTERN_MIDIRECORD			0x100000	// MIDI Record on by default
+//#define	PATTERN_ALTERNTIVEBPMSPEED	0x200000	// deprecated
+#define PATTERN_HILITETIMESIGS		0x400000	// highlight on song signature
+#define PATTERN_OLDCTXMENUSTYLE		0x800000	// mpt 1.16 pattern context menu style
+#define PATTERN_SYNCMUTE			0x1000000	// maintain sample sync on mute
+#define PATTERN_AUTODELAY			0x2000000	// automatically insert delay commands in pattern when entering notes
+#define PATTERN_NOTEFADE			0x4000000	// alt. note fade behaviour when entering notes
+#define PATTERN_OVERFLOWPASTE		0x8000000	// continue paste in the next pattern instead of cutting off
+#define PATTERN_POSITIONAWARETIMER	0x10000000	// try to set the timer in the statusbar when jumping around in modules
+#define PATTERN_RESETCHANNELS		0x20000000	// reset channels when looping
+#define PATTERN_LIVEUPDATETREE		0x40000000	// update active sample / instr icons in treeview
 
 
 // Keyboard Setup
@@ -263,7 +253,9 @@ enum {
 	IMAGE_ASIO,
 	IMAGE_GRAPH,
 	IMAGE_SAMPLEMUTE,
-	IMAGE_INSTRMUTE
+	IMAGE_INSTRMUTE,
+	IMAGE_SAMPLEACTIVE,
+	IMAGE_INSTRACTIVE,
 };
 
 //////////////////////////////////////////////////////////////////////////

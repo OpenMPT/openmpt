@@ -70,6 +70,7 @@ STATIC_ASSERT( (HINT_MASK_ITEM & HINT_MASK_FLAGS) == 0 );
 #define HINT_BITS_SAMPLE	12
 #define HINT_BITS_INST		8
 #define HINT_BITS_CHNTAB	8
+#define HINT_BITS_SEQUENCE	6
 
 //Defines bit shift values used for setting/retrieving the additional hint data to/from hint parameter.
 #define HINT_SHIFT_PAT		(32 - HINT_BITS_PATTERN)
@@ -77,6 +78,7 @@ STATIC_ASSERT( (HINT_MASK_ITEM & HINT_MASK_FLAGS) == 0 );
 #define HINT_SHIFT_SMP		(32 - HINT_BITS_SAMPLE)
 #define HINT_SHIFT_INS		(32 - HINT_BITS_INST)
 #define HINT_SHIFT_CHNTAB	(32 - HINT_BITS_CHNTAB)
+#define HINT_SHIFT_SEQUENCE	(32 - HINT_BITS_SEQUENCE)
 
 //Check that hint bit counts are not too large given the number of hint flags.
 STATIC_ASSERT( ((-1 << HINT_SHIFT_PAT) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_PAT) ); 
@@ -84,6 +86,7 @@ STATIC_ASSERT( ((-1 << HINT_SHIFT_ROW) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_RO
 STATIC_ASSERT( ((-1 << HINT_SHIFT_SMP) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_SMP) ); 
 STATIC_ASSERT( ((-1 << HINT_SHIFT_INS) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_INS) ); 
 STATIC_ASSERT( ((-1 << HINT_SHIFT_CHNTAB) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_CHNTAB) ); 
+STATIC_ASSERT( ((-1 << HINT_SHIFT_SEQUENCE) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_SEQUENCE) ); 
 
 
 

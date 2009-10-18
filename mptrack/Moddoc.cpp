@@ -199,7 +199,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		BeginWaitCursor();
 		LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
 		// Scan Instruments
-		if (lpMidiLib) for (UINT nIns=1; nIns<=m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
+		if (lpMidiLib) for (INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.m_nInstruments; nIns++) if (m_SndFile.Instruments[nIns])
 		{
 			LPCSTR pszMidiMapName;
 			MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
@@ -433,7 +433,7 @@ BOOL CModDoc::SaveModified()
 
 		if(unsavedInstrument && ::MessageBox(NULL,"Do you want to save modified instruments ?",NULL,MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES){
 
-			for(UINT i = 0 ; i < m_SndFile.m_nInstruments ; i++){
+			for(INSTRUMENTINDEX i = 0 ; i < m_SndFile.m_nInstruments ; i++){
 				if(m_SndFile.m_szInstrumentPath[i][0] != '\0'){
 					int size = strlen(m_SndFile.m_szInstrumentPath[i]);
 					BOOL iti = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-3],"iti") == 0;
@@ -1707,13 +1707,13 @@ void CModDoc::OnPlayerPause()
 					m_SndFile.m_nRow = nRow;
 				} else
 				{
-					for (UINT i=0; i<m_SndFile.Order.size(); i++)
+					for (ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.size(); nOrd++)
 					{
-						if (m_SndFile.Order[i] == m_SndFile.Order.GetInvalidPatIndex()) break;
-						if (m_SndFile.Order[i] == nPat)
+						if (m_SndFile.Order[nOrd] == m_SndFile.Order.GetInvalidPatIndex()) break;
+						if (m_SndFile.Order[nOrd] == nPat)
 						{
-							m_SndFile.m_nCurrentPattern = i;
-							m_SndFile.m_nNextPattern = i;
+							m_SndFile.m_nCurrentPattern = nOrd;
+							m_SndFile.m_nNextPattern = nOrd;
 							m_SndFile.m_nNextRow = nNextRow;
 							m_SndFile.m_nRow = nRow;
 							break;

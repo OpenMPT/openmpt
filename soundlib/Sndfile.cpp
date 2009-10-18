@@ -1112,7 +1112,7 @@ double  CSoundFile::GetCurrentBPM() const
 void CSoundFile::SetCurrentPos(UINT nPos)
 //---------------------------------------
 {
-	UINT nPattern;
+	ORDERINDEX nPattern;
 	BYTE resetMask = (!nPos) ? CHNRESET_SETPOS_FULL : CHNRESET_SETPOS_BASIC;
 
 	for (CHANNELINDEX i=0; i<MAX_CHANNELS; i++)
@@ -1178,13 +1178,13 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 
 
 
-void CSoundFile::SetCurrentOrder(UINT nPos)
-//-----------------------------------------
+void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
+//-----------------------------------------------
 {
 	//while ((nPos < Order.size()) && (Order[nPos] == 0xFE)) nPos++;
-	while ((nPos < Order.size()) && (Order[nPos] == Order.GetIgnoreIndex())) nPos++;
-	if ((nPos >= Order.size()) || (Order[nPos] >= Patterns.Size())) return;
-	for (UINT j=0; j<MAX_CHANNELS; j++)
+	while ((nOrder < Order.size()) && (Order[nOrder] == Order.GetIgnoreIndex())) nOrder++;
+	if ((nOrder >= Order.size()) || (Order[nOrder] >= Patterns.Size())) return;
+	for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 	{
 		Chn[j].nPeriod = 0;
 		Chn[j].nNote = NOTE_NONE;
@@ -1201,12 +1201,12 @@ void CSoundFile::SetCurrentOrder(UINT nPos)
 		}
 		Chn[j].nTremorCount = 0;
 	}
-	if (!nPos)
+	if (!nOrder)
 	{
 		SetCurrentPos(0);
 	} else
 	{
-		m_nNextPattern = nPos;
+		m_nNextPattern = nOrder;
 		m_nRow = m_nNextRow = 0;
 		m_nPattern = 0;
 		m_nTickCount = m_nMusicSpeed;
@@ -1304,8 +1304,8 @@ void CSoundFile::ResetChannels()
 
 
 
-void CSoundFile::LoopPattern(int nPat, int nRow)
-//----------------------------------------------
+void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
+//------------------------------------------------------------
 {
 	if ((nPat < 0) || (nPat >= Patterns.Size()) || (!Patterns[nPat]))
 	{
@@ -1324,8 +1324,8 @@ void CSoundFile::LoopPattern(int nPat, int nRow)
 	}
 }
 //rewbs.playSongFromCursor
-void CSoundFile::DontLoopPattern(int nPat, int nRow)
-//----------------------------------------------
+void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
+//----------------------------------------------------------------
 {
 	if ((nPat < 0) || (nPat >= Patterns.Size()) || (!Patterns[nPat])) nPat = 0;
 	if ((nRow < 0) || (nRow >= (int)PatternSize[nPat])) nRow = 0;

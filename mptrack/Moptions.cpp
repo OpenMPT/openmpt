@@ -661,17 +661,8 @@ enum {
 	OPTGEN_SHOWPREVIOUS,
 	OPTGEN_CONTSCROLL,
 	OPTGEN_KBDNOTEOFF,
-	OPTGEN_FOLLOWSONGOFF,	//rewbs.noFollow
-// -> CODE#0017
-// -> DESC="midi in record mode setup option"
+	OPTGEN_FOLLOWSONGOFF,
 	OPTGEN_MIDIRECORD,
-// -! BEHAVIOUR_CHANGE#0017
-
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-//	OPTGEN_ALTERNTIVEBPMSPEED,
-// rewbs: this options is now available under song settings. It is therefore saved with the song.
-// -! NEW_FEATURE#0022
 	OPTGEN_PATTERNCTXMENUSTYLE,
 	OPTGEN_SYNCMUTE,
 	OPTGEN_AUTODELAY,
@@ -679,6 +670,7 @@ enum {
 	OPTGEN_OVERFLOWPASTE,
 	OPTGEN_POSITIONAWARETIMER,
 	OPTGEN_RESETCHANNELS,
+	OPTGEN_LIVEUPDATETREE,
 	OPTGEN_MAXOPTIONS
 };
 
@@ -699,18 +691,8 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{"Show Prev/Next patterns",			"Displays grayed-out version of the previous/next patterns in the pattern editor. Does not work if \"always center active row\" is disabled."},
 	{"Continuous scroll",				"Jumps to the next pattern when moving past the end of a pattern"},
 	{"Record note off",					"Record note off when a key is released on the PC keyboard (Only works in instrument mode)."},
-	{"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."}, 	//rewbs.noFollow
-// -> CODE#0017
-// -> DESC="midi in record mode setup option"
+	{"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."},
 	{"Midi record",						"Enable midi in record by default."},
-// -! BEHAVIOUR_CHANGE#0017
-
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-//	{"Alternative BPM/Speed",			"Alternative BPM/Speed interpretation where speed represents the number of tempo ticks per pattern row."}, 
-// rewbs: this options is now available under song settings. It is therefore saved with the song.
-// -! NEW_FEATURE#0022
-
 	{"Old style pattern context menu",	"Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
 	{"Maintain sample sync on mute",	"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
 	{"Automatic delay commands",	    "Automatically insert appropriate note-delay commands when recording notes during live playback."},
@@ -718,6 +700,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{"Overflow paste mode",				"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
 	{"Position aware timer",			"If enabled, timer will show the playback position time if possible instead of running timer."},
 	{"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands)"},
+	{"Update sample status in tree",	"If enabled, active samples and instruments will be indicated by a differnt icon in the treeview."}
 };
 
 
@@ -763,26 +746,16 @@ BOOL COptionsGeneral::OnInitDialog()
 		case OPTGEN_SHOWPREVIOUS:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SHOWPREVIOUS); break;
 		case OPTGEN_CONTSCROLL:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL); break;
 		case OPTGEN_KBDNOTEOFF:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_KBDNOTEOFF); break;
-		case OPTGEN_FOLLOWSONGOFF:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF); break;	//rewbs.noFollow
-
-// -> CODE#0017
-// -> DESC="midi in record mode setup option"
+		case OPTGEN_FOLLOWSONGOFF:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF); break;
 		case OPTGEN_MIDIRECORD:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_MIDIRECORD); break;
-// -! BEHAVIOUR_CHANGE#0017
-
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-//		case OPTGEN_ALTERNTIVEBPMSPEED:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED); break;
-// rewbs: this options is now available under song settings. It is therefore saved with the song.
-// -! NEW_FEATURE#0022
-		case OPTGEN_PATTERNCTXMENUSTYLE: bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE); break;
-		case OPTGEN_SYNCMUTE:			 bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SYNCMUTE); break;
-
+		case OPTGEN_PATTERNCTXMENUSTYLE:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE); break;
+		case OPTGEN_SYNCMUTE:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SYNCMUTE); break;
 		case OPTGEN_AUTODELAY:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY); break;
 		case OPTGEN_PATNOTEFADE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_NOTEFADE); break;
 		case OPTGEN_OVERFLOWPASTE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE); break;
 		case OPTGEN_POSITIONAWARETIMER:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_POSITIONAWARETIMER); break;
-		case OPTGEN_RESETCHANNELS:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_RESETCHANNELS); break;
+		case OPTGEN_RESETCHANNELS:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_RESETCHANNELS); break;
+		case OPTGEN_LIVEUPDATETREE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_LIVEUPDATETREE); break;
 		}
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
@@ -832,26 +805,16 @@ void COptionsGeneral::OnOK()
 		case OPTGEN_SHOWPREVIOUS:		mask = PATTERN_SHOWPREVIOUS; break;
 		case OPTGEN_CONTSCROLL:			mask = PATTERN_CONTSCROLL; break;
 		case OPTGEN_KBDNOTEOFF:			mask = PATTERN_KBDNOTEOFF; break;
-		case OPTGEN_FOLLOWSONGOFF:		mask = PATTERN_FOLLOWSONGOFF; break;	//rewbs.noFollow
-		
-
-// -> CODE#0017
-// -> DESC="midi in record mode setup option"
+		case OPTGEN_FOLLOWSONGOFF:		mask = PATTERN_FOLLOWSONGOFF; break;
 		case OPTGEN_MIDIRECORD:			mask = PATTERN_MIDIRECORD; break;
-// -! BEHAVIOUR_CHANGE#0017
-
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-//		case OPTGEN_ALTERNTIVEBPMSPEED:	mask = PATTERN_ALTERNTIVEBPMSPEED; break;
-// rewbs: this options is now available under song settings. It is therefore saved with the song.
-// -! NEW_FEATURE#0022		
 		case OPTGEN_PATTERNCTXMENUSTYLE:	mask = PATTERN_OLDCTXMENUSTYLE; break;
-		case OPTGEN_SYNCMUTE:				mask = PATTERN_SYNCMUTE; break;
-		case OPTGEN_AUTODELAY:				mask = PATTERN_AUTODELAY; break;
-		case OPTGEN_PATNOTEFADE:			mask = PATTERN_NOTEFADE; break;
-		case OPTGEN_OVERFLOWPASTE:			mask = PATTERN_OVERFLOWPASTE; break;
-		case OPTGEN_POSITIONAWARETIMER:		mask = PATTERN_POSITIONAWARETIMER; break;
-		case OPTGEN_RESETCHANNELS:			mask = PATTERN_RESETCHANNELS; break;
+		case OPTGEN_SYNCMUTE:			mask = PATTERN_SYNCMUTE; break;
+		case OPTGEN_AUTODELAY:			mask = PATTERN_AUTODELAY; break;
+		case OPTGEN_PATNOTEFADE:		mask = PATTERN_NOTEFADE; break;
+		case OPTGEN_OVERFLOWPASTE:		mask = PATTERN_OVERFLOWPASTE; break;
+		case OPTGEN_POSITIONAWARETIMER:	mask = PATTERN_POSITIONAWARETIMER; break;
+		case OPTGEN_RESETCHANNELS:		mask = PATTERN_RESETCHANNELS; break;
+		case OPTGEN_LIVEUPDATETREE:		mask = PATTERN_LIVEUPDATETREE; break;
 			
 		} 
 		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;

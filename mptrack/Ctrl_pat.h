@@ -154,7 +154,8 @@ protected:
 	CPatEdit m_EditSpacing, m_EditPatName, m_EditOrderListMargins;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinOrderListMargins;
 	CModControlBar m_ToolBar;
-	UINT m_nInstrument, m_nDetailLevel;
+	INSTRUMENTINDEX m_nInstrument;
+	UINT m_nDetailLevel;
 	BOOL m_bRecord, m_bVUMeters, m_bPluginNames;
 // -> CODE#0012
 // -> DESC="midi keyboard split"

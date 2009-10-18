@@ -152,6 +152,7 @@ VOID AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels
 			case 0x17:	param = (param+64)&0x7F;
 						if (m->command) { if (!m->volcmd) { m->volcmd = VOLCMD_PANNING;  m->vol = param/2; } command = 0; }
 						else { command = CMD_PANNING8; }
+						break;
 			// Unknown effects
 			default:	command = param = 0;
 			}
