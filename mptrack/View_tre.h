@@ -56,7 +56,8 @@ struct MODTREEDOCINFO
 	vector<vector<HTREEITEM> > tiOrders;
 	vector<HTREEITEM> tiSequences;
 	HTREEITEM tiEffects[MAX_MIXPLUGINS];
-
+	bool bIsSamplePlaying[MAX_SAMPLES];
+	bool bIsInstrPlaying[MAX_INSTRUMENTS];
 	
 	MODTREEDOCINFO(const CSoundFile* const pSndFile)
 	{
@@ -77,6 +78,8 @@ struct MODTREEDOCINFO
 		memset(tiSamples, 0, sizeof(tiSamples));
 		memset(tiInstruments, 0, sizeof(tiInstruments));
 		memset(tiEffects, 0, sizeof(tiEffects));
+		memset(bIsSamplePlaying, false, MAX_SAMPLES * sizeof(bool));
+		memset(bIsInstrPlaying, false, MAX_INSTRUMENTS * sizeof(bool));
 	}
 };
 

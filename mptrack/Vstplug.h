@@ -148,8 +148,8 @@ public:
 	bool Bypass();  //rewbs.defaultPlugGUI
 	bool IsBypassed();  //rewbs.defaultPlugGUI
 
-	BOOL isInstrument(); // ericus 18/02/2005
-	BOOL CanRecieveMidiEvents();
+	bool isInstrument(); // ericus 18/02/2005
+	bool CanRecieveMidiEvents();
 	bool KeysRequired();
 
 	void GetOutputPlugList(CArray<CVstPlugin*,CVstPlugin*> &list);

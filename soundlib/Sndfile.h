@@ -306,8 +306,8 @@ public:
 	virtual bool IsResumed()=0;
 	virtual void Resume()=0;
 	virtual void Suspend()=0;
-	virtual BOOL isInstrument()=0;
-	virtual BOOL CanRecieveMidiEvents()=0;
+	virtual bool isInstrument()=0;
+	virtual bool CanRecieveMidiEvents()=0;
 	virtual void SetDryRatio(UINT param)=0;
 
 };
@@ -643,9 +643,9 @@ public:
 
 	double GetCurrentBPM() const;
 	ORDERINDEX FindOrder(PATTERNINDEX nPat, UINT startFromOrder=0, bool direction = true);	//rewbs.playSongFromCursor
-	void DontLoopPattern(int nPat, int nRow=0);		//rewbs.playSongFromCursor
+	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);		//rewbs.playSongFromCursor
 	void SetCurrentPos(UINT nPos);
-	void SetCurrentOrder(UINT nOrder);
+	void SetCurrentOrder(ORDERINDEX nOrder);
 	void GetTitle(LPSTR s) const { lstrcpyn(s,m_szNames[0],32); }
 	LPCSTR GetTitle() const { return m_szNames[0]; }
 	CString GetSampleName(UINT nSample) const;
@@ -667,7 +667,7 @@ public:
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
 	BOOL IsPaused() const {	return (m_dwSongFlags & SONG_PAUSED) ? TRUE : FALSE; }
-	void LoopPattern(int nPat, int nRow=0);
+	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 	void CheckCPUUsage(UINT nCPU);
 	BOOL SetPatternName(UINT nPat, LPCSTR lpszName);
 	BOOL GetPatternName(UINT nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;

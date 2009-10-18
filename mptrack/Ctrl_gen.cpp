@@ -463,7 +463,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 		m_EditRestartPos.GetWindowText(s, sizeof(s));
 		if (s[0])
 		{
-			UINT n = atoi(s);
+			ORDERINDEX n = (ORDERINDEX)atoi(s);
 			n = CLAMP(n, 0, m_pSndFile->Order.size());
 			for (ORDERINDEX i = 0; i <= n; i++)
 				if (m_pSndFile->Order[i] == m_pSndFile->Order.GetInvalidPatIndex()) return;

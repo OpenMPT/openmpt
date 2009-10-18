@@ -3148,17 +3148,18 @@ void CVstPlugin::UpdateMixStructPtr(PSNDMIXPLUGIN p)
 
 //end rewbs.VSTcompliance
 
-BOOL CVstPlugin::isInstrument() // ericus 18/02/2005
+bool CVstPlugin::isInstrument() // ericus 18/02/2005
 //-----------------------------
 {
-	if(m_pEffect) return ((m_pEffect->flags & effFlagsIsSynth) || (!m_pEffect->numInputs)); // rewbs.dryRatio
-	return FALSE;
+	if(m_pEffect) return ((m_pEffect->flags & effFlagsIsSynth) || (!m_pEffect->numInputs)) ? true : false; // rewbs.dryRatio
+	return false;
 }
 
-BOOL CVstPlugin::CanRecieveMidiEvents() {
-//---------------------------------------
+bool CVstPlugin::CanRecieveMidiEvents()
+//-------------------------------------
+{
 	CString s = "receiveVstMidiEvent";
-	return (CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0));
+	return (CVstPlugin::Dispatch(effCanDo, 0, 0, (char*)(LPCTSTR)s, 0)) ? true : false;
 }
 
 bool CVstPlugin::KeysRequired()

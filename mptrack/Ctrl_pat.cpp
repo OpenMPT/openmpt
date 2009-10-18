@@ -1166,7 +1166,7 @@ void CCtrlPatterns::OnSequenceNameChanged()
 		{
 			m_pSndFile->Order.m_sName = str;
 			m_pModDoc->SetModified();
-			m_pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES, this);
+			m_pModDoc->UpdateAllViews(NULL, (m_pSndFile->Order.GetCurrentSequenceIndex() << HINT_SHIFT_SEQUENCE) | HINT_SEQNAMES, this);
 		}
 	}
 }

@@ -699,22 +699,19 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	{
 		const DWORD nPat = (lHint >> HINT_SHIFT_PAT);
 
-		// only one seq remaining: update parent item || previously only one sequence
+		// (only one seq remaining || previously only one sequence): update parent item
 		if((pInfo->tiSequences.size() > 1 && pSndFile->Order.GetNumSequences() == 1) || (pInfo->tiSequences.size() == 1 && pSndFile->Order.GetNumSequences() > 1))
 		{
-			if(pInfo->tiOrders.size() != pSndFile->Order.GetNumSequences())
+			for(size_t nSeq = 0; nSeq < pInfo->tiOrders.size(); nSeq++)
 			{
-				for(size_t nSeq = 0; nSeq < pInfo->tiOrders.size(); nSeq++)
+				for(size_t nOrd = 0; nOrd < pInfo->tiOrders[nSeq].size(); nOrd++) if (pInfo->tiOrders[nSeq][nOrd])
 				{
-					for(size_t nOrd = 0; nOrd < pInfo->tiOrders[nSeq].size(); nOrd++) if (pInfo->tiOrders[nSeq][nOrd])
-					{
-						DeleteItem(pInfo->tiOrders[nSeq][nOrd]); pInfo->tiOrders[nSeq][nOrd] = NULL;
-					}
-					DeleteItem(pInfo->tiSequences[nSeq]); pInfo->tiSequences[nSeq] = NULL;
+					if(pInfo->tiOrders[nSeq][nOrd]) DeleteItem(pInfo->tiOrders[nSeq][nOrd]); pInfo->tiOrders[nSeq][nOrd] = NULL;
 				}
-				pInfo->tiOrders.resize(pSndFile->Order.GetNumSequences());
-				pInfo->tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
+				if(pInfo->tiSequences[nSeq]) DeleteItem(pInfo->tiSequences[nSeq]); pInfo->tiSequences[nSeq] = NULL;
 			}
+			pInfo->tiOrders.resize(pSndFile->Order.GetNumSequences());
+			pInfo->tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
 		}
 
 		// If there are too many sequences, delete them.
@@ -734,8 +731,11 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 
 		HTREEITEM hAncestorNode = pInfo->hOrders;
 
+		SEQUENCEINDEX nSeqMin = 0, nSeqMax = pSndFile->Order.GetNumSequences() - 1;
+		SEQUENCEINDEX nHintParam = lHint >> HINT_SHIFT_SEQUENCE;
+		if ((hintFlagPart == HINT_SEQNAMES) && (nHintParam <= nSeqMax)) nSeqMin = nSeqMax = nHintParam;
 		// go through all sequences
-		for(SEQUENCEINDEX nSeq = 0; nSeq < pSndFile->Order.GetNumSequences(); nSeq++)
+		for(SEQUENCEINDEX nSeq = nSeqMin; nSeq <= nSeqMax; nSeq++)
 		{
 			if(pSndFile->Order.GetNumSequences() > 1)
 			{
@@ -885,7 +885,8 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			{
 				bool bSamplePresent = (pSndFile->Samples[nSmp].pSample) ? true : false;
 				int nImage = (bSamplePresent) ? IMAGE_SAMPLES : IMAGE_NOSAMPLE;
-				if(pInfo->pModDoc->IsSampleMuted(nSmp) && bSamplePresent) nImage = IMAGE_SAMPLEMUTE;
+				if(pInfo->bIsSamplePlaying[nSmp - 1] && bSamplePresent) nImage = IMAGE_SAMPLEACTIVE;
+				if(pInfo->pModDoc->IsSampleMuted(nSmp)) nImage = IMAGE_SAMPLEMUTE;
 
 				wsprintf(s, "%3d: %s", nSmp, pSndFile->m_szNames[nSmp]);
 				if (!pInfo->tiSamples[nSmp])
@@ -952,6 +953,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 				}
 
 				int nImage = IMAGE_INSTRUMENTS;
+				if(pInfo->bIsInstrPlaying[nIns - 1]) nImage = IMAGE_INSTRACTIVE;
 				if(pInfo->pModDoc->IsInstrumentMuted(nIns)) nImage = IMAGE_INSTRMUTE;
 
 				if (!pInfo->tiInstruments[nIns])
@@ -2037,7 +2039,47 @@ VOID CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 		DocInfo[nDocNdx]->nSeqSel = nNewSeq;
 		UpdateView(nDocNdx, HINT_MODSEQUENCE);
 	}
+
+	// Update sample / instrument playing status icons (will only detect instruments with samples, though)
+
+	if((CMainFrame::m_dwPatternSetup & PATTERN_LIVEUPDATETREE) == 0) return;
+	// TODO: Is there a way to find out if the treeview is actually visible? Or if the Sample and Instrument folders are collapsed?
+	/*static int nUpdateCount = 0;
+	nUpdateCount++;
+	if(nUpdateCount < 5) return; // don't update too often
+	nUpdateCount = 0;*/
+
+	memset(DocInfo[nDocNdx]->bIsSamplePlaying, false, MAX_SAMPLES * sizeof(bool));
+	memset(DocInfo[nDocNdx]->bIsInstrPlaying, false, MAX_INSTRUMENTS * sizeof(bool));
+
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	if(pSndFile == nullptr) return;
+
+	for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+	{
+		if(pSndFile->Chn[nChn].nPos > 0)
+		{
+			for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
+			{
+				if(pSndFile->Chn[nChn].pModSample == &pSndFile->Samples[nSmp])
+				{
+					DocInfo[nDocNdx]->bIsSamplePlaying[nSmp - 1] = true;
+					break;
+				}
+			}
+			for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->m_nInstruments; nIns++)
+			{
+				if(pSndFile->Chn[nChn].pModInstrument == pSndFile->Instruments[nIns])
+				{
+					DocInfo[nDocNdx]->bIsInstrPlaying[nIns - 1] = true;
+					break;
+				}
+			}
+		}
+	}
+	UpdateView(nDocNdx, HINT_SAMPLEINFO | HINT_INSTRUMENT);
 }
+
 
 
 /////////////////////////////////////////////////////////////////////////////

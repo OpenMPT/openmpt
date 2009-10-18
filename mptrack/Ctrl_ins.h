@@ -71,7 +71,7 @@ protected:
 	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutSwing, m_SliderResSwing, 
 		        m_SliderCutOff, m_SliderResonance;
 	CNoteMapWnd m_NoteMap;
-	UINT m_nInstrument;
+	INSTRUMENTINDEX m_nInstrument;
 
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
