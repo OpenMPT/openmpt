@@ -642,6 +642,7 @@ END_MESSAGE_MAP()
 
 typedef struct OPTGENDESC
 {
+	DWORD dwFlagID;
 	LPCSTR pszListName, pszDescription;
 } OPTGENDESC;
 
@@ -676,33 +677,32 @@ enum {
 
 static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 {
-	{"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
-	{"Always center active row",		"Turn on this option to have the active row always centered in the pattern editor (requires \"Always center active row\")."},
-	{"Use large font for comments",		"With this option enabled, the song message editor will use a larger font."},
-	{"Display rows in hex",				"With this option enabled, row numbers and sequence numbers will be displayed in hexadecimal."},
-	{"Cursor wrap in pattern editor",	"When this option is active, going past the end of a pattern row or channel will move the cursor to the beginning. When \"Continuous scroll\"-option is enabled, row wrap is disabled."},
-	{"Create backup files (*.bak)",		"When this option is active, saving a file will create a backup copy of the original."},
-	{"Drag and Drop Editing",			"Enable moving a selection in the pattern editor (copying if pressing shift while dragging)\n"},
-	{"Flat Buttons",					"Use flat buttons in toolbars"},
-	{"Single click to expand tree",		"Single-clicking in the left tree view will expand a branch"},
-	{"Ignored muted channels",			"Notes will not be played on muted channels (unmuting will only start on a new note)."},
-	{"Quick cursor paste Auto-Repeat",	"Leaving the space bar pressed will auto-repeat the action"},
-	{"No loud samples",					"Disable loud playback of samples in the sample/instrument editor"},
-	{"Show Prev/Next patterns",			"Displays grayed-out version of the previous/next patterns in the pattern editor. Does not work if \"always center active row\" is disabled."},
-	{"Continuous scroll",				"Jumps to the next pattern when moving past the end of a pattern"},
-	{"Record note off",					"Record note off when a key is released on the PC keyboard (Only works in instrument mode)."},
-	{"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."},
-	{"Midi record",						"Enable midi in record by default."},
-	{"Old style pattern context menu",	"Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
-	{"Maintain sample sync on mute",	"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
-	{"Automatic delay commands",	    "Automatically insert appropriate note-delay commands when recording notes during live playback."},
-	{"Note fade on key up",				"Enable to fade/stop notes on key up in pattern tab." },
-	{"Overflow paste mode",				"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
-	{"Position aware timer",			"If enabled, timer will show the playback position time if possible instead of running timer."},
-	{"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands)"},
-	{"Update sample status in tree",	"If enabled, active samples and instruments will be indicated by a differnt icon in the treeview."}
+	{PATTERN_PLAYNEWNOTE,	"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
+	{PATTERN_CENTERROW,		"Always center active row",			"Turn on this option to have the active row always centered in the pattern editor (requires \"Always center active row\")."},
+	{PATTERN_LARGECOMMENTS,	"Use large font for comments",		"With this option enabled, the song message editor will use a larger font."},
+	{PATTERN_HEXDISPLAY,	"Display rows in hex",				"With this option enabled, row numbers and sequence numbers will be displayed in hexadecimal."},
+	{PATTERN_WRAP,			"Cursor wrap in pattern editor",	"When this option is active, going past the end of a pattern row or channel will move the cursor to the beginning. When \"Continuous scroll\"-option is enabled, row wrap is disabled."},
+	{PATTERN_CREATEBACKUP,	"Create backup files (*.bak)",		"When this option is active, saving a file will create a backup copy of the original."},
+	{PATTERN_DRAGNDROPEDIT,	"Drag and Drop Editing",			"Enable moving a selection in the pattern editor (copying if pressing shift while dragging)\n"},
+	{PATTERN_FLATBUTTONS,	"Flat Buttons",						"Use flat buttons in toolbars"},
+	{PATTERN_SINGLEEXPAND,	"Single click to expand tree",		"Single-clicking in the left tree view will expand a branch"},
+	{PATTERN_MUTECHNMODE,	"Ignored muted channels",			"Notes will not be played on muted channels (unmuting will only start on a new note)."},
+	{PATTERN_AUTOSPACEBAR,	"Quick cursor paste Auto-Repeat",	"Leaving the space bar pressed will auto-repeat the action"},
+	{PATTERN_NOEXTRALOUD,	"No loud samples",					"Disable loud playback of samples in the sample/instrument editor"},
+	{PATTERN_SHOWPREVIOUS,	"Show Prev/Next patterns",			"Displays grayed-out version of the previous/next patterns in the pattern editor. Does not work if \"always center active row\" is disabled."},
+	{PATTERN_CONTSCROLL,	"Continuous scroll",				"Jumps to the next pattern when moving past the end of a pattern"},
+	{PATTERN_KBDNOTEOFF,	"Record note off",					"Record note off when a key is released on the PC keyboard (Only works in instrument mode)."},
+	{PATTERN_FOLLOWSONGOFF,	"Follow song off by default",		"Ensure follow song is off when opening or starting a new song."},
+	{PATTERN_MIDIRECORD,	"Midi record",						"Enable midi in record by default."},
+	{PATTERN_OLDCTXMENUSTYLE, "Old style pattern context menu", "Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
+	{PATTERN_SYNCMUTE,		"Maintain sample sync on mute",		"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
+	{PATTERN_AUTODELAY,		"Automatic delay commands",			"Automatically insert appropriate note-delay commands when recording notes during live playback."},
+	{PATTERN_NOTEFADE,		"Note fade on key up",				"Enable to fade/stop notes on key up in pattern tab." },
+	{PATTERN_OVERFLOWPASTE,	"Overflow paste mode",				"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
+	{PATTERN_POSITIONAWARETIMER, "Position aware timer",		"If enabled, timer will show the playback position time if possible instead of running timer."},
+	{PATTERN_RESETCHANNELS,	"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands)"},
+	{PATTERN_LIVEUPDATETREE,"Update sample status in tree",		"If enabled, active samples and instruments will be indicated by a differnt icon in the treeview."}
 };
-
 
 void COptionsGeneral::DoDataExchange(CDataExchange* pDX)
 //------------------------------------------------------
@@ -720,43 +720,15 @@ BOOL COptionsGeneral::OnInitDialog()
 	CHAR sname[32], s[256];
 
 	CPropertyPage::OnInitDialog();
-	for (UINT i=0; i<OPTGEN_MAXOPTIONS; i++)
+	for (UINT i = 0; i < OPTGEN_MAXOPTIONS; i++)
 	{
-		BOOL bCheck;
+		bool bCheck;
 		wsprintf(sname, "Setup.Gen.Opt%d.Name", i+1);
 		if ((theApp.GetLocalizedString(sname, s, sizeof(s))) && (s[0]))
 			m_CheckList.AddString(s);
 		else
 			m_CheckList.AddString(gOptGenDesc[i].pszListName);
-		bCheck = FALSE;
-		switch(i)
-		{
-		case OPTGEN_PLAYNEWNOTES:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_PLAYNEWNOTE); break;
-		case OPTGEN_CENTERROW:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_CENTERROW); break;
-		case OPTGEN_LARGECOMMENTSFONT:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_LARGECOMMENTS); break;
-		case OPTGEN_HEXROWDISP:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY); break;
-		case OPTGEN_CURSORWRAP:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_WRAP); break;
-		case OPTGEN_CREATEBACKUP:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_CREATEBACKUP); break;
-		case OPTGEN_DRAGNDROPEDIT:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_DRAGNDROPEDIT); break;
-		case OPTGEN_FLATBUTTONS:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_FLATBUTTONS); break;
-		case OPTGEN_SINGLEEXPAND:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SINGLEEXPAND); break;
-		case OPTGEN_MUTECHNMODE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_MUTECHNMODE); break;
-		case OPTGEN_AUTOSPACEBAR:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_AUTOSPACEBAR); break;
-		case OPTGEN_NOEXTRALOUD:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_NOEXTRALOUD); break;
-		case OPTGEN_SHOWPREVIOUS:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SHOWPREVIOUS); break;
-		case OPTGEN_CONTSCROLL:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL); break;
-		case OPTGEN_KBDNOTEOFF:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_KBDNOTEOFF); break;
-		case OPTGEN_FOLLOWSONGOFF:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF); break;
-		case OPTGEN_MIDIRECORD:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_MIDIRECORD); break;
-		case OPTGEN_PATTERNCTXMENUSTYLE:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE); break;
-		case OPTGEN_SYNCMUTE:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_SYNCMUTE); break;
-		case OPTGEN_AUTODELAY:			bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY); break;
-		case OPTGEN_PATNOTEFADE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_NOTEFADE); break;
-		case OPTGEN_OVERFLOWPASTE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE); break;
-		case OPTGEN_POSITIONAWARETIMER:	bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_POSITIONAWARETIMER); break;
-		case OPTGEN_RESETCHANNELS:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_RESETCHANNELS); break;
-		case OPTGEN_LIVEUPDATETREE:		bCheck = (CMainFrame::m_dwPatternSetup & PATTERN_LIVEUPDATETREE); break;
-		}
+		bCheck = (CMainFrame::m_dwPatternSetup & gOptGenDesc[i].dwFlagID) != 0 ? true : false;
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
 	m_CheckList.SetCurSel(0);
@@ -784,40 +756,13 @@ void COptionsGeneral::OnOK()
 	GetDlgItemText(IDC_OPTIONS_DIR_VSTS,		szVstDir, _MAX_PATH);
 	GetDlgItemText(IDC_OPTIONS_DIR_VSTPRESETS,	szPresetDir, _MAX_PATH);
 
-	for (UINT i=0; i < OPTGEN_MAXOPTIONS; i++)
+	for (UINT i = 0; i < OPTGEN_MAXOPTIONS; i++)
 	{
-		DWORD mask = 0;
 		BOOL bCheck = m_CheckList.GetCheck(i);
-		switch(i)
-		{
-		case OPTGEN_PLAYNEWNOTES:		mask = PATTERN_PLAYNEWNOTE; break;
-		case OPTGEN_CENTERROW:			mask = PATTERN_CENTERROW; break;
-		case OPTGEN_LARGECOMMENTSFONT:	mask = PATTERN_LARGECOMMENTS; break;		
-		case OPTGEN_HEXROWDISP:			mask = PATTERN_HEXDISPLAY; break;
-		case OPTGEN_CURSORWRAP:			mask = PATTERN_WRAP; break;
-		case OPTGEN_CREATEBACKUP:		mask = PATTERN_CREATEBACKUP; break;
-		case OPTGEN_DRAGNDROPEDIT:		mask = PATTERN_DRAGNDROPEDIT; break;
-		case OPTGEN_FLATBUTTONS:		mask = PATTERN_FLATBUTTONS; break;
-		case OPTGEN_SINGLEEXPAND:		mask = PATTERN_SINGLEEXPAND; break;
-		case OPTGEN_MUTECHNMODE:		mask = PATTERN_MUTECHNMODE; break;
-		case OPTGEN_AUTOSPACEBAR:		mask = PATTERN_AUTOSPACEBAR; break;
-		case OPTGEN_NOEXTRALOUD:		mask = PATTERN_NOEXTRALOUD; break;
-		case OPTGEN_SHOWPREVIOUS:		mask = PATTERN_SHOWPREVIOUS; break;
-		case OPTGEN_CONTSCROLL:			mask = PATTERN_CONTSCROLL; break;
-		case OPTGEN_KBDNOTEOFF:			mask = PATTERN_KBDNOTEOFF; break;
-		case OPTGEN_FOLLOWSONGOFF:		mask = PATTERN_FOLLOWSONGOFF; break;
-		case OPTGEN_MIDIRECORD:			mask = PATTERN_MIDIRECORD; break;
-		case OPTGEN_PATTERNCTXMENUSTYLE:	mask = PATTERN_OLDCTXMENUSTYLE; break;
-		case OPTGEN_SYNCMUTE:			mask = PATTERN_SYNCMUTE; break;
-		case OPTGEN_AUTODELAY:			mask = PATTERN_AUTODELAY; break;
-		case OPTGEN_PATNOTEFADE:		mask = PATTERN_NOTEFADE; break;
-		case OPTGEN_OVERFLOWPASTE:		mask = PATTERN_OVERFLOWPASTE; break;
-		case OPTGEN_POSITIONAWARETIMER:	mask = PATTERN_POSITIONAWARETIMER; break;
-		case OPTGEN_RESETCHANNELS:		mask = PATTERN_RESETCHANNELS; break;
-		case OPTGEN_LIVEUPDATETREE:		mask = PATTERN_LIVEUPDATETREE; break;
-			
-		} 
-		if (bCheck) CMainFrame::m_dwPatternSetup |= mask; else CMainFrame::m_dwPatternSetup &= ~mask;
+
+		if(bCheck) CMainFrame::m_dwPatternSetup |= gOptGenDesc[i].dwFlagID;
+		else CMainFrame::m_dwPatternSetup &= ~gOptGenDesc[i].dwFlagID;
+
 		m_CheckList.SetCheck(i, (bCheck) ? TRUE : FALSE);
 	}
 
