@@ -158,6 +158,7 @@ public:
 	VOID OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
 	BOOL CanDrop(HTREEITEM hItem, BOOL bDoDrop);
 	VOID UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify);
+	bool IsItemExpanded(HTREEITEM hItem);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

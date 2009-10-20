@@ -2043,41 +2043,54 @@ VOID CModTree::UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify)
 	// Update sample / instrument playing status icons (will only detect instruments with samples, though)
 
 	if((CMainFrame::m_dwPatternSetup & PATTERN_LIVEUPDATETREE) == 0) return;
-	// TODO: Is there a way to find out if the treeview is actually visible? Or if the Sample and Instrument folders are collapsed?
+	// TODO: Is there a way to find out if the treeview is actually visible?
 	/*static int nUpdateCount = 0;
 	nUpdateCount++;
 	if(nUpdateCount < 5) return; // don't update too often
 	nUpdateCount = 0;*/
 
+	// check whether the lists are actually visible (don't waste resources)
+	bool bUpdateSamples = IsItemExpanded(DocInfo[nDocNdx]->hSamples), bUpdateInstruments = IsItemExpanded(DocInfo[nDocNdx]->hInstruments);
+
 	memset(DocInfo[nDocNdx]->bIsSamplePlaying, false, MAX_SAMPLES * sizeof(bool));
 	memset(DocInfo[nDocNdx]->bIsInstrPlaying, false, MAX_INSTRUMENTS * sizeof(bool));
+
+	if((bUpdateSamples == false) && (bUpdateInstruments == false)) return;
 
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return;
 
 	for(CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
 	{
-		if(pSndFile->Chn[nChn].nPos > 0)
+		if(pSndFile->Chn[nChn].pCurrentSample != nullptr)
 		{
-			for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
+			if(bUpdateSamples)
 			{
-				if(pSndFile->Chn[nChn].pModSample == &pSndFile->Samples[nSmp])
+				for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
 				{
-					DocInfo[nDocNdx]->bIsSamplePlaying[nSmp - 1] = true;
-					break;
+					if(pSndFile->Chn[nChn].pModSample == &pSndFile->Samples[nSmp])
+					{
+						DocInfo[nDocNdx]->bIsSamplePlaying[nSmp - 1] = true;
+						break;
+					}
 				}
 			}
-			for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->m_nInstruments; nIns++)
+			if(bUpdateInstruments)
 			{
-				if(pSndFile->Chn[nChn].pModInstrument == pSndFile->Instruments[nIns])
+				for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->m_nInstruments; nIns++)
 				{
-					DocInfo[nDocNdx]->bIsInstrPlaying[nIns - 1] = true;
-					break;
+					if(pSndFile->Chn[nChn].pModInstrument == pSndFile->Instruments[nIns])
+					{
+						DocInfo[nDocNdx]->bIsInstrPlaying[nIns - 1] = true;
+						break;
+					}
 				}
 			}
 		}
 	}
-	UpdateView(nDocNdx, HINT_SAMPLEINFO | HINT_INSTRUMENT);
+	// what should be updated?
+	DWORD dwHintFlags = (bUpdateSamples ? HINT_SAMPLEINFO : 0) | (bUpdateInstruments ? HINT_INSTRUMENT : 0);
+	if(dwHintFlags != 0) UpdateView(nDocNdx, dwHintFlags);
 }
 
 
@@ -3057,4 +3070,19 @@ void CModTree::OnSetFocus(CWnd* pOldWnd)
 {
 	CTreeCtrl::OnSetFocus(pOldWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus=true;
+}
+
+
+bool CModTree::IsItemExpanded(HTREEITEM hItem)
+//--------------------------------------------
+{
+	// checks if a treeview item is expanded.
+	if(hItem == NULL) return false;
+	TV_ITEM tvi;
+	tvi.mask = TVIF_HANDLE | TVIF_STATE;
+	tvi.state = 0;
+	tvi.stateMask = TVIS_EXPANDED;
+	tvi.hItem = hItem;
+	GetItem(&tvi);
+	return (tvi.state & TVIS_EXPANDED) != 0 ? true : false;
 }
