@@ -17,7 +17,8 @@ protected:
 	POINT m_ptMenu;
 	RECT m_rcClient;
 	bool m_baPlayingNote[128]; //rewbs.instViewNNA
-	UINT m_nInstrument, m_nEnv, m_nDragItem, m_nBtnMouseOver, m_nPlayingChannel;
+	INSTRUMENTINDEX m_nInstrument;
+	UINT m_nEnv, m_nDragItem, m_nBtnMouseOver, m_nPlayingChannel;
 	DWORD m_dwStatus;
 	DWORD m_NcButtonState[ENV_LEFTBAR_BUTTONS];
 	DWORD m_dwNotifyPos[MAX_CHANNELS];

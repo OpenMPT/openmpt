@@ -291,7 +291,7 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				} else
 				{
 					pdata = (const WORD *)(lpStream + dwPos);
-					Patterns[i].Resize(64);
+					Patterns[i].Resize(64, false);
 					if (m_nChannels < 32) m_nChannels = 32;
 					dwPos += 2*32;
 					ch = 32;

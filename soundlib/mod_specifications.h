@@ -12,6 +12,8 @@ struct CModSpecifications
 {
 	// Return true if format supports given note.
 	bool HasNote(MODCOMMAND::NOTE note) const;
+	bool HasVolCommand(MODCOMMAND::VOLCMD volcmd) const;
+	bool HasCommand(MODCOMMAND::COMMAND cmd) const;
 
 	//NOTE: If changing order, update all initializations below.
 	char fileExtension[6];	  // File extension without dot.
@@ -37,6 +39,8 @@ struct CModSpecifications
 	UINT speedMax;			// Maximum ticks per frame
 	bool hasComments;		// True if format has a comments field
 	UINT envelopePointsMax;	// Maximum number of points of each envelope
+	char commands[MAX_EFFECTS + 1]; // An array holding all commands this format supports; commands that are not supported are marked with "?"
+	char volcommands[MAX_VOLCMDS + 1]; // dito, but for volume column
 };
 
 
@@ -73,6 +77,8 @@ const CModSpecifications mptm =
 	255,								//Max Speed
 	true,								//Has song comments
 	240,								//Envelope point count
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
+	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
 };
 
 
@@ -104,6 +110,8 @@ const CModSpecifications mod =
 	31,									//Max Speed
 	false,								//No song comments
 	0,									//No instrument envelopes
+	" 0123456789ABCD?FF?E???????????????",	// Supported Effects
+	" ???????????????",					// Supported Volume Column commands
 };
 
 // MOD with MPT extensions.
@@ -133,6 +141,8 @@ const CModSpecifications modEx =
 	31,									//Max Speed
 	false,								//No song comments
 	0,									//No instrument envelopes
+	" 0123456789ABCD?FF?E???????????????",	// Supported Effects
+	" ???????????????",					// Supported Volume Column commands
 };
 
 const CModSpecifications xm =
@@ -161,6 +171,8 @@ const CModSpecifications xm =
 	31,									//Max Speed
 	false,								//No song comments
 	12,									//Envelope point count
+	" 0123456789ABCDRFFTE???GHK?YXPLZ\\:#",	// Supported Effects
+	" vpcdabuhlrg????",					// Supported Volume Column commands
 };
 
 // XM with MPT extensions
@@ -190,6 +202,8 @@ const CModSpecifications xmEx =
 	31,									//Max Speed
 	true,								//Has song comments
 	12,									//Envelope point count
+	" 0123456789ABCDRFFTE???GHK?YXPLZ\\:#",	// Supported Effects
+	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
 };
 
 const CModSpecifications s3m =
@@ -217,6 +231,8 @@ const CModSpecifications s3m =
 	255,								//Max Speed
 	false,								//No song comments
 	0,									//No instrument envelopes
+	" JFEGHLKRXODB?CQATI?SMNVW?U????????",	// Supported Effects
+	" vp?????????????",					// Supported Volume Column commands
 };
 
 // S3M with MPT extensions
@@ -246,6 +262,8 @@ const CModSpecifications s3mEx =
 	255,								//Max Speed
 	false,								//No song comments
 	0,									//No instrument envelopes
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
+	" vp?????????????",					// Supported Volume Column commands
 };
 
 const CModSpecifications it =
@@ -274,6 +292,8 @@ const CModSpecifications it =
 	255,								//Max Speed
 	true,								//Has song comments
 	25,									//Envelope point count
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z???",	// Supported Effects
+	" vpcdab?h??gfe??",					// Supported Volume Column commands
 };
 
 const CModSpecifications itEx =
@@ -302,6 +322,8 @@ const CModSpecifications itEx =
 	255,								//Max Speed
 	true,								//Has song comments
 	25,									//Envelope point count
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
+	" vpcdab?h??gfe:o",					// Supported Volume Column commands
 };
 
 } //namespace ModSpecs

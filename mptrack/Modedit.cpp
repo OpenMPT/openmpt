@@ -68,6 +68,8 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 				newTypeIsXM_IT_MPT = (newTypeIsXM || newTypeIsIT || newTypeIsMPT),
 				newTypeIsIT_MPT = (newTypeIsIT || newTypeIsMPT);
 
+	const CModSpecifications& specs = m_SndFile.GetModSpecifications(nNewType);
+
 	if(oldTypeIsMPT)
 	{
 		if(::MessageBox(NULL, str_mptm_conversion_warning, 0, MB_YESNO) != IDYES)
@@ -126,7 +128,12 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		UINT i = 0;
 		for (i=0; i<m_SndFile.Patterns.Size(); i++) if ((m_SndFile.Patterns[i]) && (m_SndFile.PatternSize[i] != 64))
 		{
-			m_SndFile.Patterns[i].Resize(64);
+			if(m_SndFile.PatternSize[i] < 64)
+			{
+				// try to save short patterns by inserting a pattern break.
+				m_SndFile.TryWriteEffect(i, m_SndFile.PatternSize[i] - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, true);
+			}
+			m_SndFile.Patterns[i].Resize(64, false);
 			if (b64 < 5)
 			{
 				wsprintf(s, "WARNING: Pattern %d resized to 64 rows\n", i);
@@ -285,6 +292,27 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	{
 		AddToLog("WARNING: Samples above 31 will be lost when saving as MOD!\n");
 	}
+
+	// Order list too long? -> remove unnecessary order items first.
+	if(m_SndFile.Order.GetLengthTailTrimmed() > specs.ordersMax)
+	{
+		for(ORDERINDEX nOrd = m_SndFile.Order.GetLengthTailTrimmed() - 1; nOrd > 0; nOrd--)
+		{
+			if(m_SndFile.Patterns.IsValidPat(m_SndFile.Order[nOrd]) == false)
+			{
+				for(ORDERINDEX nMoveOrd = nOrd; nMoveOrd < m_SndFile.Order.GetLengthTailTrimmed() - 1; nMoveOrd++)
+				{
+					m_SndFile.Order[nMoveOrd] = m_SndFile.Order[nMoveOrd + 1];
+				}
+				m_SndFile.Order[m_SndFile.Order.GetLengthTailTrimmed() - 1] = m_SndFile.Order.GetInvalidPatIndex();
+			}
+		}
+		if(m_SndFile.Order.GetLengthTailTrimmed() > specs.ordersMax)
+		{
+			AddToLog("WARNING: Order list has been trimmed!\n");
+		}
+	}
+
 	BEGIN_CRITICAL();
 	m_SndFile.ChangeModTypeTo(nNewType);
 	if (!newTypeIsXM_IT_MPT && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
@@ -311,7 +339,6 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	//end rewbs.cutomKeys
 
 	// Check mod specifications
-	const CModSpecifications& specs = m_SndFile.GetModSpecifications();
 	m_SndFile.m_nDefaultTempo = CLAMP(m_SndFile.m_nDefaultTempo, specs.tempoMin, specs.tempoMax);
 	m_SndFile.m_nDefaultSpeed = CLAMP(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
 
@@ -324,26 +351,6 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 	if(bTrimmedEnvelopes == true)
 		AddToLog("WARNING: Instrument envelopes have been shortened.\n");
-
-	// Order list too long -> remove unnecessary order items first.
-	if(m_SndFile.Order.GetLengthTailTrimmed() > specs.ordersMax)
-	{
-		for(ORDERINDEX nOrd = m_SndFile.Order.GetLengthTailTrimmed() - 1; nOrd >= 0; nOrd--)
-		{
-			if(m_SndFile.Patterns.IsValidPat(m_SndFile.Order[nOrd]) == false)
-			{
-				for(ORDERINDEX nMoveOrd = nOrd; nMoveOrd < m_SndFile.Order.GetLengthTailTrimmed(); nMoveOrd++)
-				{
-					m_SndFile.Order[nMoveOrd] = m_SndFile.Order[nMoveOrd + 1];
-				}
-			}
-		}
-		if(m_SndFile.Order.GetLengthTailTrimmed() > specs.ordersMax)
-		{
-			AddToLog("WARNING: Order list has been trimmed!");
-		}
-		m_SndFile.Order.resize(specs.ordersMax);
-	}
 
 	SetModified();
 	ClearPatternUndo();
@@ -1122,13 +1129,14 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 		if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 		{
 			PreparePatternUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
-			BYTE spdmax = (m_SndFile.m_nType & MOD_TYPE_MOD) ? 0x20 : 0x1F;
+			TEMPO spdmax = m_SndFile.GetModSpecifications().speedMax;
 			DWORD dwMemSize = GlobalSize(hCpy);
 			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
 			UINT nrow = dwBeginSel >> 16;
 			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
 			UINT col;
-			BOOL bS3M = FALSE, bOk = FALSE;
+			bool bS3MCommands = false, bOk = false;
+			MODTYPE origFormat = MOD_TYPE_MOD;
 			UINT len = 0;
 			MODCOMMAND origModCmd;
 
@@ -1147,13 +1155,15 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 				if (!c) goto PasteDone;
 				if ((c == 0x0D) && (len > 3))
 				{
-					//if ((p[len-3] == 'I') || (p[len-4] == 'S')) bS3M = TRUE;
-					//				IT?					S3M?				MPT?
-					if ((p[len-3] == 'I') || (p[len-4] == 'S') || (p[len-3] == 'P')) bS3M = TRUE;
+					if(p[len - 3] == 'I') origFormat = MOD_TYPE_IT;
+					if(p[len - 3] == 'P') origFormat = MOD_TYPE_MPT;
+					if(p[len - 4] == 'S') origFormat = MOD_TYPE_S3M;
+					if(p[len - 3] == 'X') origFormat = MOD_TYPE_XM;
 					break;
 				}
 			}
-			bOk = TRUE;
+			bS3MCommands = (origFormat & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) != 0 ? true : false;
+			bOk = true;
 			while ((nrow < m_SndFile.PatternSize[nPattern]) && (len + 11 < dwMemSize))
 			{
 				// Search for column separator
@@ -1255,7 +1265,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 								m[col].command = 0;
 								if (s[8] != '.')
 								{
-									LPCSTR psc = (bS3M) ? gszS3mCommands : gszModCommands;
+									LPCSTR psc = (bS3MCommands) ? gszS3mCommands : gszModCommands;
 									for (UINT i=1; i<MAX_EFFECTS; i++)
 									{
 										if ((s[8] == psc[i]) && (psc[i] != '?')) m[col].command = i;
@@ -1283,7 +1293,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 								{
 								case CMD_SPEED:
 								case CMD_TEMPO:
-									if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
+									if (!bS3MCommands) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
 									else
 									{
 										if ((m[col].command == CMD_SPEED) && (m[col].param > spdmax)) m[col].param = CMD_TEMPO; else
@@ -1297,12 +1307,15 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 								{
 								case CMD_SPEED:
 								case CMD_TEMPO:
-									if (!bS3M) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
+									if (!bS3MCommands) m[col].command = (m[col].param <= spdmax) ? CMD_SPEED : CMD_TEMPO;
 									break;
 								}
 							}
 						}
 					}
+					// convert some commands, if necessary.
+					if(origFormat != m_SndFile.m_nType) m_SndFile.ConvertCommand(&(m[col]), origFormat, m_SndFile.m_nType);
+
 					len += 12;
 					col++;
 				}

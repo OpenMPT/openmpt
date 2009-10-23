@@ -3827,8 +3827,7 @@ void CViewPattern::TempEnterFX(int c)
 			if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 			&& ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
 			{
-				UINT maxspd = (pSndFile->m_nType & MOD_TYPE_XM) ? 0x1F : 0x20;
-				p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
+				p->command = (p->param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
 			}
 		}
 
@@ -3886,8 +3885,7 @@ void CViewPattern::TempEnterFXparam(int v)
 			if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 			 && ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
 			{
-				UINT maxspd = (pSndFile->m_nType & MOD_TYPE_XM) ? 0x1F : 0x20;
-				p->command = (p->param <= maxspd) ? CMD_SPEED : CMD_TEMPO;
+				p->command = (p->param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO;
 			}
 		}
 

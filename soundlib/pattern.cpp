@@ -18,7 +18,7 @@ CHANNELINDEX CPattern::GetNumChannels() const
 
 
 bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning)
-//-------------------------------------------
+//-------------------------------------------------------------------------------
 {
 	if(m_ModCommands == NULL)
 	{
@@ -69,7 +69,7 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 			{
 				END_CRITICAL();
 				rModDoc.EndWaitCursor();
-				if (CMainFrame::GetMainFrame()->MessageBox("Data at the end of the pattern will be lost.\nDo you want to continue",
+				if (CMainFrame::GetMainFrame()->MessageBox("Data at the end of the pattern will be lost.\nDo you want to continue?",
 									"Shrink Pattern", MB_YESNO|MB_ICONQUESTION) == IDYES) bOk = TRUE;
 				rModDoc.BeginWaitCursor();
 				BEGIN_CRITICAL();

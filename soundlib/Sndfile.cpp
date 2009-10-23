@@ -3733,4 +3733,11 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 
 	if(!CSoundFile::GetModSpecifications(nNewType).HasNote(m->note))
 		m->note = NOTE_NONE;
+
+	// ensure the commands really exist in this format
+	if(CSoundFile::GetModSpecifications(nNewType).HasCommand(m->command) == false)
+		m->command = CMD_NONE;
+	if(CSoundFile::GetModSpecifications(nNewType).HasVolCommand(m->volcmd) == false)
+		m->volcmd = CMD_NONE;
+
 }
