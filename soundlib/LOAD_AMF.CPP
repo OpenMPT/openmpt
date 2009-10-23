@@ -311,7 +311,7 @@ bool CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 	for (UINT iOrd=0; iOrd < pfh->numorders; iOrd++)
 	{
 		Order[iOrd] = iOrd;
-		Patterns[iOrd].Resize(64);
+		Patterns[iOrd].Resize(64, false);
 		if (pfh->version >= 14)
 		{
 			Patterns[iOrd].Resize(LittleEndianW(*(USHORT *)(lpStream+dwMemPos)));

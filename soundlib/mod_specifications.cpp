@@ -21,4 +21,20 @@ bool CModSpecifications::HasNote(MODCOMMAND::NOTE note) const
 	return false;
 }
 
+bool CModSpecifications::HasVolCommand(MODCOMMAND::VOLCMD volcmd) const
+//---------------------------------------------------------------------
+{
+	if(volcmd >= MAX_VOLCMDS) return false;
+	if(volcommands[volcmd] == '?') return false;
+	return true;
+}
+
+bool CModSpecifications::HasCommand(MODCOMMAND::COMMAND cmd) const
+//----------------------------------------------------------------
+{
+	if(cmd >= MAX_EFFECTS) return false;
+	if(commands[cmd] == '?') return false;
+	return true;
+}
+
 

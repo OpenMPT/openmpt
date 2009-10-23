@@ -2721,10 +2721,17 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						strcat(s, " rows");
 						break;
 					case 0xF0:
-						if(m_SndFile.m_nType & MOD_TYPE_MOD)
-							wsprintf(s, "Speed %d", param & 0x0F); // invert loop
-						else
-							wsprintf(s, "SF%X", param & 0x0F); // macro
+						if(m_SndFile.m_nType & MOD_TYPE_MOD) // invert loop
+						{
+							if((param & 0x0F) == 0)
+								strcpy(s, "Stop");
+							else
+								wsprintf(s, "Speed %d", param & 0x0F); 
+						}
+						else // macro
+						{
+							wsprintf(s, "SF%X", param & 0x0F);
+						}
 						break;
 					default:
 						break;

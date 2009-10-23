@@ -90,6 +90,7 @@ typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 #define VOLCMD_PORTADOWN		13
 #define VOLCMD_VELOCITY			14 //rewbs.velocity
 #define VOLCMD_OFFSET			15 //rewbs.volOff
+#define MAX_VOLCMDS				16
 
 
 // Effect column commands
@@ -130,6 +131,7 @@ typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 #define CMD_XPARAM				34 // -> CODE#0010 -> DESC="add extended parameter mechanism to pattern effects" -! NEW_FEATURE#0010
 #define CMD_NOTESLIDEUP         35 // IMF Gxy
 #define CMD_NOTESLIDEDOWN       36 // IMF Hxy
+#define MAX_EFFECTS				37
 
 
 #endif

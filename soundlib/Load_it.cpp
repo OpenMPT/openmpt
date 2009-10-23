@@ -664,7 +664,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		ASSERT_CAN_READ(4);
 		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 		if(id > MAX_PATTERN_ROWS) return false;
-		Patterns[npat].Resize(id);
+		Patterns[npat].Resize(id, false);
 		streamPos += sizeof(DWORD);
 
 		// Try to allocate & read only sized patterns

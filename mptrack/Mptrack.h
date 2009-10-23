@@ -406,9 +406,6 @@ LPCTSTR GetNoteStr(const MODCOMMAND::NOTE);
 
 ///////////////////////////////////////////////////
 // Tables
-#define MAX_EFFECTS		37	//rewbs.smoothVST & rewbs.velocity: increased from 32. Wonder what this will break...
-							//+1 for eric's multiplier
-#define MAX_VOLCMDS		16	//rewbs.voloff & rewbs.velocity: increased from 14
 
 extern const BYTE gEffectColors[MAX_EFFECTS];
 extern const LPCSTR szNoteNames[12];
@@ -422,8 +419,8 @@ STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == ARRAYELEMCOUNT(szSpecia
 STATIC_ASSERT(ARRAYELEMCOUNT(szSpecialNoteShortDesc) == ARRAYELEMCOUNT(szSpecialNoteNames)); 
 
 const LPCSTR szHexChar = "0123456789ABCDEF";
-const LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ\\:#"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
-const LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
+const LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ\\:#??"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
+const LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#??"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
 const LPCSTR gszVolCommands = " vpcdabuhlrgfe:o";	//rewbs.velocity: added last : ; rewbs.volOff added last o
 
 // Defined in load_mid.cpp
