@@ -275,6 +275,8 @@ protected:
 	CTreeCtrl m_treePlugins;
 	CString m_sNameFilter;
 
+	HTREEITEM AddTreeItem(LPSTR szTitle, int iImage, bool bSort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
+
 public:
 	CSelectPluginDlg(CModDoc *pModDoc, int nPlugSlot, CWnd *parent); //rewbs.plugDocAware
 	VOID DoClose();

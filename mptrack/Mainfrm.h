@@ -256,6 +256,9 @@ enum {
 	IMAGE_INSTRMUTE,
 	IMAGE_SAMPLEACTIVE,
 	IMAGE_INSTRACTIVE,
+	IMAGE_NOPLUGIN,
+	IMAGE_EFFECTPLUGIN,
+	IMAGE_PLUGININSTRUMENT,
 };
 
 //////////////////////////////////////////////////////////////////////////
