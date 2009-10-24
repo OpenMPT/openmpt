@@ -595,7 +595,7 @@ void CDoWaveConvert::OnButton1()
 	WAVEDATAHEADER datahdr, fmthdr;
 	MSG msg;
 	BYTE buffer[WAVECONVERTBUFSIZE];
-	CHAR s[64];
+	CHAR s[80];
 	HWND progress = ::GetDlgItem(m_hWnd, IDC_PROGRESS1);
 	UINT ok = IDOK, pos;
 	ULONGLONG ullSamples, ullMaxSamples;
@@ -661,20 +661,27 @@ void CDoWaveConvert::OnButton1()
 		ULONGLONG l = (ULONGLONG)m_dwSongLimit * m_pWaveFormat->nSamplesPerSec;
 		if (l < ullMaxSamples) ullMaxSamples = l;
 	}
+
+	// calculate maximum samples
+	ULONGLONG max = ullMaxSamples;
+	ULONGLONG l = ((ULONGLONG)m_pSndFile->GetSongTime()) * m_pWaveFormat->nSamplesPerSec;
+	if (m_nMaxPatterns > 0)
+	{
+		DWORD dwOrds = m_pSndFile->GetNumPatterns();
+		if ((m_nMaxPatterns < dwOrds) && (dwOrds > 0)) l = (l*m_nMaxPatterns) / dwOrds;
+	}
+	if (l < max) max = l;
+
 	if (progress != NULL)
 	{
-		ULONGLONG max = ullMaxSamples;
-		ULONGLONG l = ((ULONGLONG)m_pSndFile->GetSongTime()) * m_pWaveFormat->nSamplesPerSec;
-		if (m_nMaxPatterns > 0)
-		{
-			DWORD dwOrds = m_pSndFile->GetNumPatterns();
-			if ((m_nMaxPatterns < dwOrds) && (dwOrds > 0)) l = (l*m_nMaxPatterns) / dwOrds;
-		}
-		if (l < max) max = l;
 		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, (DWORD)(max >> 14)));
 	}
+
 	// Process the conversion
 	UINT nBytesPerSample = (CSoundFile::gnBitsPerSample * CSoundFile::gnChannels) / 8;
+	// For calculating the remaining time
+	DWORD dwStartTime = timeGetTime();
+
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n=0; ; n++)
 	{
@@ -735,7 +742,14 @@ void CDoWaveConvert::OnButton1()
 		if (!(n % 10))
 		{
 			DWORD l = (DWORD)(ullSamples / CSoundFile::gdwMixingFreq);
-			wsprintf(s, "Writing file... (%uKB, %umn%02us)", datahdr.length >> 10, l / 60, l % 60);
+
+			DWORD timeRemaining = 0; // estimated remainig time
+			if((ullSamples > 0) && (ullSamples < max))
+			{
+				timeRemaining = static_cast<DWORD>(((timeGetTime() - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
+			}
+
+			wsprintf(s, "Writing file... (%uKB, %umn%02us, %umn%02us remaining)", datahdr.length >> 10, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
 			SetDlgItemText(IDC_TEXT1, s);
 		}
 		if ((progress != NULL) && ((DWORD)(ullSamples >> 14) != pos))
@@ -857,7 +871,7 @@ void CDoAcmConvert::OnButton1()
 //-----------------------------
 {
 	BOOL bSaveWave;
-	CHAR s[64], fext[_MAX_EXT];
+	CHAR s[80], fext[_MAX_EXT];
 	WAVEFILEHEADER wfh;
 	WAVEDATAHEADER wdh, chunk;
 	ACMSTREAMHEADER ash;
@@ -868,7 +882,8 @@ void CDoAcmConvert::OnButton1()
 	MSG msg;
 	LPBYTE pcmBuffer, dstBuffer;
 	UINT retval = IDCANCEL, pos, n;
-	DWORD oldsndcfg, dwDstBufSize, dwMaxSamples, dwSamples, pcmBufSize, data_ofs;
+	DWORD dwDstBufSize, pcmBufSize, data_ofs;
+	uint64 ullMaxSamples, ullSamples;
 	int oldrepeat;
 	BOOL bPrepared, bFinished;
 	FILE *f;
@@ -940,7 +955,7 @@ void CDoAcmConvert::OnButton1()
 		m_FileTags.WriteID3v2Tags(f);
 
 	}
-	oldsndcfg = CSoundFile::gdwSoundSetup;
+	static DWORD oldsndcfg = CSoundFile::gdwSoundSetup;
 	oldrepeat = m_pSndFile->GetRepeatCount();
 	CSoundFile::gdwMixingFreq = wfxSrc.nSamplesPerSec;
 	CSoundFile::gnBitsPerSample = 16;
@@ -954,20 +969,26 @@ void CDoAcmConvert::OnButton1()
 	// Setting up file limits and progress range
 	if ((!m_dwFileLimit) || (m_dwFileLimit > 512000)) m_dwFileLimit = 512000;
 	m_dwFileLimit <<= 10;
-	dwMaxSamples = 60*60*wfxSrc.nSamplesPerSec; // 1 hour
+	ullMaxSamples = uint64_max; //60*60*wfxSrc.nSamplesPerSec; // 1 hour
 	if (m_dwSongLimit)
 	{
-		DWORD l = m_dwSongLimit * wfxSrc.nSamplesPerSec;
-		if (l < dwMaxSamples) dwMaxSamples = l;
+		uint64 l = m_dwSongLimit * wfxSrc.nSamplesPerSec;
+		if (l < ullMaxSamples) ullMaxSamples = l;
 	}
+
+	// calculate maximum samples
+	uint64 max = ullMaxSamples;
+	uint64 l = m_pSndFile->GetSongTime() * wfxSrc.nSamplesPerSec;
+	if (l < max) max = l;
 	if (progress != NULL)
 	{
-		DWORD max = dwMaxSamples;
-		DWORD l = m_pSndFile->GetSongTime() * wfxSrc.nSamplesPerSec;
-		if (l < max) max = l;
 		::SendMessage(progress, PBM_SETRANGE, 0, MAKELPARAM(0, max >> 14));
 	}
-	dwSamples = 0;
+
+	// For calculating the remaining time
+	DWORD dwStartTime = timeGetTime();
+
+	ullSamples = 0;
 	pos = 0;
 	pcmBufSize = WAVECONVERTBUFSIZE;
 	bFinished = FALSE;
@@ -981,7 +1002,7 @@ void CDoAcmConvert::OnButton1()
 			lRead = m_pSndFile->Read(pcmBuffer + WAVECONVERTBUFSIZE - pcmBufSize, pcmBufSize);
 			if (!lRead) bFinished = TRUE;
 		}
-		dwSamples += lRead;
+		ullSamples += lRead;
 		ash.cbSrcLength = lRead * wfxSrc.nBlockAlign + WAVECONVERTBUFSIZE - pcmBufSize;
 		ash.cbDstLengthUsed = 0;
 		if (theApp.AcmStreamConvert(has, &ash, (lRead) ? ACM_STREAMCONVERTF_BLOCKALIGN : ACM_STREAMCONVERTF_END) != MMSYSERR_NOERROR) break;
@@ -1007,16 +1028,23 @@ void CDoAcmConvert::OnButton1()
 			if (!lWrite) break;
 			wdh.length += lWrite;
 		}
-		if ((!lRead) || (dwSamples >= dwMaxSamples) || (wdh.length >= m_dwFileLimit)) break;
+		if ((!lRead) || (ullSamples >= ullMaxSamples) || (wdh.length >= m_dwFileLimit)) break;
 		if (!(n % 10))
 		{
-			DWORD l = dwSamples / wfxSrc.nSamplesPerSec;
-			wsprintf(s, "Writing file... (%uKB, %umn%02us)", wdh.length >> 10, l / 60, l % 60);
+			DWORD l = (DWORD)(ullSamples / wfxSrc.nSamplesPerSec);
+
+			DWORD timeRemaining = 0; // estimated remainig time
+			if((ullSamples > 0) && (ullSamples < max))
+			{
+				timeRemaining = static_cast<DWORD>(((timeGetTime() - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
+			}
+
+			wsprintf(s, "Writing file... (%uKB, %umn%02us) %umn%02us remaining)", wdh.length >> 10, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
 			SetDlgItemText(IDC_TEXT1, s);
 		}
-		if ((progress != NULL) && ((dwSamples >> 14) != pos))
+		if ((progress != NULL) && ((ullSamples >> 14) != pos))
 		{
-			pos = dwSamples >> 14;
+			pos = (DWORD)(ullSamples >> 14);
 			::SendMessage(progress, PBM_SETPOS, pos, 0);
 		}
 		if (m_bAbort) break;
