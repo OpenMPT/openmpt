@@ -16,7 +16,8 @@
 #include "version.h"
 #include "midimappingdialog.h"
 #ifdef VST_USE_ALTERNATIVE_MAGIC	//Pelya's plugin ID fix. Breaks fx presets, so let's avoid it for now.
-#include "Unzip32.h"				//For CRC calculation (to detect plugins with same UID)
+#define ZLIB_WINAPI
+#include "../zlib/zlib.h"			//For CRC32 calculation (to detect plugins with same UID)
 #endif
 
 #ifndef NO_VST
@@ -38,27 +39,17 @@ AEffect *Buzz2Vst(CMachineInterface *pBuzzMachine, const CMachineInfo *pBuzzInfo
 AEffect *DmoToVst(PVSTPLUGINLIB pLib);
 
 #ifdef VST_USE_ALTERNATIVE_MAGIC
-class CalculateCRC32: public CZipArchive // Make Plugin ID unique for sure
+UINT32 CalculateCRC32fromFilename(const char * s)
+//-----------------------------------------------
 {
-	public:
-	DWORD calculate( BYTE *s, int len )
-	{
-		CZipArchive::crc32val = 0xFFFFFFFFL;
-		CZipArchive::UpdateCRC( s, len );
-		return CZipArchive::crc32val;
-	};
-	DWORD calculateFilename( const char * s )
-	{
-		char fn[_MAX_PATH];
-		strncpy( fn, s, sizeof(fn) );
-		fn[sizeof(fn)-1] = 0;
-		int f;
-		for( f=0; fn[f] != 0; f++ ) fn[f] = toupper( fn[f] );
-		return calculate( (BYTE *)fn, f );
-	};
-};
+	char fn[_MAX_PATH];
+	strncpy(fn, s, sizeof(fn));
+	fn[sizeof(fn)-1] = 0;
+	int f;
+	for(f = 0; fn[f] != 0; f++) fn[f] = toupper(fn[f]);
+	return crc32(0, (BYTE *)fn, f);
 
-CalculateCRC32 CRC32;
+}
 #endif
 
 long VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect,	long opcode, long index, long value, void *ptr, float opt)
@@ -260,7 +251,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 			#ifdef VST_USE_ALTERNATIVE_MAGIC
 				if( p->dwPluginId1 == kEffectMagic )
 				{
-					p->dwPluginId1 = CRC32.calculateFilename( p->szLibraryName ); // Make Plugin ID unique for sure (for VSTs with same UID)
+					p->dwPluginId1 = CalculateCRC32fromFilename(p->szLibraryName); // Make Plugin ID unique for sure (for VSTs with same UID)
 				};
 			#endif
 			#ifdef VST_LOG
@@ -329,7 +320,7 @@ PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const
 				{
 					pEffect->dispatcher(pEffect, effOpen, 0,0,0,0);
 				#ifdef VST_USE_ALTERNATIVE_MAGIC
-					p->dwPluginId1 = CRC32.calculateFilename( p->szLibraryName ); // Make Plugin ID unique for sure
+					p->dwPluginId1 = CalculateCRC32fromFilename(p->szLibraryName); // Make Plugin ID unique for sure
 				#else					
 					p->dwPluginId1 = pEffect->magic;
 				#endif
@@ -1276,41 +1267,23 @@ void CSelectPluginDlg::OnNameFilterChanged()
 VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 //---------------------------------------------------------------
 {
-	TVINSERTSTRUCT tvis;
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 	HTREEITEM cursel, hDmo, hVst, hSynth;
 
 	m_treePlugins.SetRedraw(FALSE);
 	m_treePlugins.DeleteAllItems();
-	memset(&tvis, 0, sizeof(tvis));
-	tvis.hParent = TVI_ROOT;
-	tvis.hInsertAfter = TVI_FIRST;
-	tvis.item.mask = TVIF_IMAGE | TVIF_PARAM | TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_TEXT;
-	tvis.item.pszText = "VST Instruments";
-	tvis.item.iImage = IMAGE_FOLDER;
-	tvis.item.iSelectedImage = IMAGE_FOLDER;
-	tvis.item.lParam = NULL;
-	hSynth = m_treePlugins.InsertItem(&tvis);
-	tvis.item.pszText = "DirectX Media Audio Effects";
-	hDmo = m_treePlugins.InsertItem(&tvis);
-	tvis.item.pszText = "VST Audio Effects";
-	hVst = m_treePlugins.InsertItem(&tvis);
-	tvis.item.pszText = " No plugin (empty slot)";
-	tvis.item.iImage = IMAGE_WAVEOUT;
-	tvis.item.iSelectedImage = IMAGE_WAVEOUT;
-	cursel = m_treePlugins.InsertItem(&tvis);
+
+	hSynth = AddTreeItem("VST Instruments", IMAGE_FOLDER, false);
+	hDmo = AddTreeItem("DirectX Media Audio Effects", IMAGE_FOLDER, false);
+	hVst = AddTreeItem("VST Audio Effects", IMAGE_FOLDER, false);
+	cursel = AddTreeItem("No plugin (empty slot)", IMAGE_NOPLUGIN, false);
+
 	if (pManager)
 	{
 		PVSTPLUGINLIB pCurrent = NULL;
 		PVSTPLUGINLIB p = pManager->GetFirstPlugin();
 		while (p)
 		{
-			if (p->dwPluginId1 == kDmoMagic) {
-				tvis.hParent = hDmo;
-			} else {
-				tvis.hParent = (p->bIsInstrument) ? hSynth : hVst;
-			}
-
 			// Apply name filter
 			if (m_sNameFilter != "") {
 				CString displayName = p->szLibraryName;
@@ -1320,34 +1293,41 @@ VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 				}
 			}
 
-			tvis.hInsertAfter = TVI_SORT;
-			tvis.item.pszText = p->szLibraryName;
-			tvis.item.lParam = (LPARAM)p;
-			HTREEITEM h = m_treePlugins.InsertItem(&tvis);
-
-			//If filter is active, expand nodes.
-			if (m_sNameFilter != "") {
-				m_treePlugins.EnsureVisible(h);
+			HTREEITEM hParent;
+			if (p->dwPluginId1 == kDmoMagic) {
+				hParent = hDmo;
+			} else {
+				hParent = (p->bIsInstrument) ? hSynth : hVst;
 			}
 
+			HTREEITEM h = AddTreeItem(p->szLibraryName, p->bIsInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, hParent, (LPARAM)p);
+
+			//If filter is active, expand nodes.
+			if (m_sNameFilter != "") m_treePlugins.EnsureVisible(h);
+
 			//Which plugin should be selected?
-			if (m_pPlugin) {
+			if (m_pPlugin)
+			{
 				
 				//forced selection (e.g. just after add plugin)
-				if (forceSelect != 0) {
-					if (p->dwPluginId2 == forceSelect) {
+				if (forceSelect != 0)
+				{
+					if (p->dwPluginId2 == forceSelect)
+					{
 						pCurrent = p;
 					}
 				}
 
 				//Current slot's plugin
-				else if (m_pPlugin->pMixPlugin) {
+				else if (m_pPlugin->pMixPlugin)
+				{
 					CVstPlugin *pVstPlug = (CVstPlugin *)m_pPlugin->pMixPlugin;
 					if (pVstPlug->GetPluginFactory() == p) pCurrent = p;
 				} 
 				
 				//Plugin with matching ID to current slot's plug
-				else if (/* (!pCurrent) && */ m_pPlugin->Info.dwPluginId1 !=0 || m_pPlugin->Info.dwPluginId2 != 0 )	{
+				else if (/* (!pCurrent) && */ m_pPlugin->Info.dwPluginId1 !=0 || m_pPlugin->Info.dwPluginId2 != 0)
+				{
 					if ((p->dwPluginId1 == m_pPlugin->Info.dwPluginId1)
 					 && (p->dwPluginId2 == m_pPlugin->Info.dwPluginId2)) {
 						pCurrent = p;
@@ -1355,7 +1335,8 @@ VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 				}
                 
 				//Last selected plugin
-				else {
+				else
+				{
 					if (p->dwPluginId2 == CMainFrame::GetMainFrame()->gnPlugWindowLast) {
 						pCurrent = p;
 					}
@@ -1373,6 +1354,21 @@ VOID CSelectPluginDlg::UpdatePluginsList(DWORD forceSelect/*=0*/)
 	}
 }
 
+HTREEITEM CSelectPluginDlg::AddTreeItem(LPSTR szTitle, int iImage, bool bSort, HTREEITEM hParent, LPARAM lParam)
+//--------------------------------------------------------------------------------------------------------------
+{
+	TVINSERTSTRUCT tvis;
+	memset(&tvis, 0, sizeof(tvis));
+
+	tvis.hParent = hParent;
+	tvis.hInsertAfter = (bSort) ? TVI_SORT : TVI_FIRST;
+	tvis.item.mask = TVIF_IMAGE | TVIF_PARAM | TVIF_TEXT | TVIF_SELECTEDIMAGE | TVIF_TEXT;
+	tvis.item.pszText = szTitle;
+	tvis.item.iImage = tvis.item.iSelectedImage = iImage;
+	tvis.item.lParam = lParam;
+	return m_treePlugins.InsertItem(&tvis);
+}
+
 
 VOID CSelectPluginDlg::OnSelDblClk(NMHDR *, LRESULT *result)
 //----------------------------------------------------------
@@ -1385,7 +1381,8 @@ VOID CSelectPluginDlg::OnSelDblClk(NMHDR *, LRESULT *result)
 	HTREEITEM hSel = m_treePlugins.GetSelectedItem();
 	int nImage, nSelectedImage;
 	m_treePlugins.GetItemImage(hSel, nImage, nSelectedImage);
-	if ((hSel) && (nImage == IMAGE_WAVEOUT)) OnOK();
+	
+	if ((hSel) && (nImage != IMAGE_FOLDER)) OnOK();
 	if (result) *result = 0;
 }
 
