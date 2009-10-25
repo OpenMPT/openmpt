@@ -137,6 +137,47 @@ void ModSequence::Init()
 }
 
 
+void ModSequence::Remove(ORDERINDEX nPosBegin, ORDERINDEX nPosEnd)
+//----------------------------------------------------------------
+{
+	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
+	if (nPosEnd < nPosBegin || nPosEnd >= nLengthTt)
+		return;
+	const ORDERINDEX nMoveCount = nLengthTt - (nPosEnd + 1);
+	// Move orders left.
+	if (nMoveCount > 0)
+		memmove(m_pArray + nPosBegin, m_pArray + nPosEnd + 1, sizeof(PATTERNINDEX) * nMoveCount);
+	// Clear tail orders.
+	std::fill(m_pArray + nPosBegin + nMoveCount, m_pArray + nLengthTt, GetInvalidPatIndex());
+}
+
+
+ORDERINDEX ModSequence::Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX nFill)
+//------------------------------------------------------------------------------------
+{
+	if (nPos >= m_pSndFile->GetModSpecifications().ordersMax || nCount == 0)
+		return (nCount = 0);
+	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
+	// Limit number of orders to be inserted.
+	LimitMax(nCount, ORDERINDEX(m_pSndFile->GetModSpecifications().ordersMax - nPos));
+	// Calculate new length.
+	const ORDERINDEX nNewLength = min(nLengthTt + nCount, m_pSndFile->GetModSpecifications().ordersMax);
+	// Resize if needed.
+	if (nNewLength > GetLength())
+		resize(nNewLength);
+	// Calculate how many orders would need to be moved(nNeededSpace) and how many can actually
+	// be moved(nFreeSpace).
+	const ORDERINDEX nNeededSpace = nLengthTt - nPos;
+	const ORDERINDEX nFreeSpace = GetLength() - (nPos + nCount);
+	// Move orders nCount steps right starting from nPos.
+	if (nPos < nLengthTt)
+		memmove(m_pArray + nPos + nCount, m_pArray + nPos, min(nFreeSpace, nNeededSpace) * sizeof(PATTERNINDEX));
+	// Set nFill to new orders.
+	std::fill(begin() + nPos, begin() + nPos + nCount, nFill);
+	return nCount;
+}
+
+
 void ModSequence::Append(PATTERNINDEX nPat)
 //-----------------------------------------
 {
@@ -209,8 +250,9 @@ const ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq)
 //----------------------------------------------------------------
 {
 	if (nSeq == GetCurrentSequenceIndex())
-		CopyCacheToStorage();
-	return m_Sequences[nSeq];
+		return *this;
+	else
+		return m_Sequences[nSeq];
 }
 
 

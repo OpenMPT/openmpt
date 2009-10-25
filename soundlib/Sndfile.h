@@ -727,12 +727,12 @@ public:
 	void WriteInstrumentPropertyForAllInstruments(__int32 code,  __int16 size, FILE* f, MODINSTRUMENT* instruments[], UINT nInstruments);
 	void SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], UINT nInstruments, FILE* f);
 	void SaveExtendedSongProperties(FILE* f);
-	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = false);
+	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = nullptr);
 
 	// Reads extended instrument properties(XM/IT/MPTM). 
 	// If no errors occur and song extension tag is found, returns pointer to the beginning
 	// of the tag, else returns NULL.
-	LPCBYTE LoadExtendedInstrumentProperties(const LPCBYTE pStart, const LPCBYTE pEnd, bool* pInterpretMptMade = false);
+	LPCBYTE LoadExtendedInstrumentProperties(const LPCBYTE pStart, const LPCBYTE pEnd, bool* pInterpretMptMade = nullptr);
 
 #endif // MODPLUG_NO_FILESAVE
 	// MOD Convert function

@@ -57,6 +57,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, OnSelectSequence)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,	OnDragonDropping)
 	ON_MESSAGE(WM_HELPHITTEST,			OnHelpHitTest)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -455,6 +456,169 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 }
 
 
+static const char szClipboardOrdersHdr[] = "OpenMPT %3s\x0D\x0A";
+static const char szClipboardOrdCountFieldHdr[]	= "OrdNum: %u\x0D\x0A";
+static const char szClipboardOrdersFieldHdr[]	= "OrdLst: ";
+
+
+void COrderList::OnEditCut()
+//--------------------------
+{
+	OnEditCopy();
+	OnDeleteOrder();
+}
+
+
+void COrderList::OnEditPaste()
+//----------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CSoundFile* pSf = m_pModDoc->GetSoundFile();
+	if (!pMainFrm)
+		return;
+	BeginWaitCursor();
+	if (pMainFrm->OpenClipboard())
+	{
+		HGLOBAL hCpy = ::GetClipboardData(CF_TEXT);
+		LPCSTR p;
+
+		if ((hCpy) && ((p = (LPCSTR)GlobalLock(hCpy)) != NULL))
+		{
+			const DWORD dwMemSize = GlobalSize(hCpy);
+
+			if (dwMemSize > sizeof(szClipboardOrdersHdr) &&
+				memcmp(p, "OpenMPT ", 8) == 0 &&
+				memcmp(p + 11, "\x0D\x0A", 2) == 0)
+			{
+				char buf[8];
+				p += sizeof(szClipboardOrdersHdr) - 1;
+				std::istrstream iStrm(p, dwMemSize - sizeof(szClipboardOrdersHdr) + 1);
+				ORDERINDEX nCount = 0;
+				std::vector<PATTERNINDEX> vecPat;
+				while (iStrm.get(buf, sizeof(buf), '\n'))
+				{
+					if (memcmp(buf, "OrdNum:", 8) == 0) // Read expected order count.
+						iStrm >> nCount;
+					else if (memcmp(buf, "OrdLst:", 8) != 0)
+					{	// Unrecognized data -> skip line.
+						iStrm.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
+						continue;
+					}
+					else // Read orders.
+					{
+						LimitMax(nCount, pSf->GetModSpecifications().ordersMax);
+						vecPat.reserve(nCount);
+						char bufItem[16];
+						while (iStrm.peek() >= 32 && iStrm.getline(bufItem, sizeof(bufItem), ' '))
+						{
+							if (vecPat.size() >= pSf->GetModSpecifications().ordersMax)
+								break;
+							if (!(isdigit(bufItem[0]) || bufItem[0] == '+' || bufItem[0] == '-'))
+								continue;
+							PATTERNINDEX nPat = pSf->Order.GetInvalidPatIndex();
+							if (bufItem[0] == '+')
+								nPat = pSf->Order.GetIgnoreIndex();
+							else if (isdigit(bufItem[0]))
+							{
+								nPat = ConvertStrTo<PATTERNINDEX>(bufItem);
+								if (nPat >= pSf->GetModSpecifications().patternsMax)
+									nPat = pSf->Order.GetInvalidPatIndex();
+							}
+							vecPat.push_back(nPat);
+						}
+						nCount = pSf->Order.Insert(m_nScrollPos, (ORDERINDEX)vecPat.size());
+						for (ORDERINDEX nOrd = 0; nOrd < nCount; nOrd++)
+							pSf->Order[m_nScrollPos + nOrd] = vecPat[nOrd];
+					}
+					m_pModDoc->SetModified();
+					m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+				}
+			}
+			GlobalUnlock(hCpy);
+		}
+		CloseClipboard();
+	}
+	EndWaitCursor();
+}
+
+
+void COrderList::OnEditCopy()
+//---------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if ((!pMainFrm)) return;
+	
+	const ORD_SELECTION ordsel = GetCurSel(false);
+
+	DWORD dwMemSize;
+	HGLOBAL hCpy;
+	
+	BeginWaitCursor();
+	dwMemSize = sizeof(szClipboardOrdersHdr) + sizeof(szClipboardOrdersFieldHdr) + sizeof(szClipboardOrdCountFieldHdr);
+	dwMemSize += ordsel.GetSelCount() * 6 + 8;
+	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
+	{
+		LPCSTR pszFormatName;
+		EmptyClipboard();
+		switch(m_pModDoc->GetSoundFile()->GetType())
+		{
+			case MOD_TYPE_S3M:	pszFormatName = "S3M"; break;
+			case MOD_TYPE_XM:	pszFormatName = "XM"; break;
+			case MOD_TYPE_IT:	pszFormatName = "IT"; break;
+			case MOD_TYPE_MPT:	pszFormatName = "MPT"; break;
+			default:			pszFormatName = "MOD"; break;
+		}
+		LPSTR p = (LPSTR)GlobalLock(hCpy);
+		if (p)
+		{
+			const ModSequence& seq = m_pModDoc->GetSoundFile()->Order;
+			wsprintf(p, szClipboardOrdersHdr, pszFormatName);
+			p += strlen(p);
+			wsprintf(p, szClipboardOrdCountFieldHdr, ordsel.GetSelCount());
+			strcat(p, szClipboardOrdersFieldHdr);
+			p += strlen(p);
+			for(ORDERINDEX i = ordsel.nOrdLo; i <= ordsel.nOrdHi; i++)
+			{
+				std::string str;
+				if (seq[i] == seq.GetInvalidPatIndex()) 
+					str = "-";
+				else if (seq[i] == seq.GetIgnoreIndex())
+					str = "+";
+				else
+					str = Stringify(seq[i]);
+				memcpy(p, str.c_str(), str.size());
+				p += str.size();
+				*p++ = ' ';
+			}
+			*p++ = 0x0D;
+			*p++ = 0x0A;
+			*p = 0;
+		}
+		GlobalUnlock(hCpy);
+		SetClipboardData(CF_TEXT, (HANDLE) hCpy);
+		CloseClipboard();
+	}
+	EndWaitCursor();
+}
+
+
+LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
+//-------------------------------------------------------
+{
+	if (wParam == kcNull)
+		return 0;
+	
+	switch(wParam)
+	{
+		case kcEditCopy:		OnEditCopy();			return wParam;
+		case kcEditCut:			OnEditCut();			return wParam;
+		case kcEditPaste:		OnEditPaste(); 			return wParam;
+	}
+	
+	return 0;
+}
+
+
 void COrderList::UpdateView(DWORD dwHintMask, CObject *pObj)
 //----------------------------------------------------------
 {
@@ -604,6 +768,7 @@ void COrderList::OnSetFocus(CWnd *pWnd)
 	CWnd::OnSetFocus(pWnd);
 	InvalidateSelection();
 	UpdateInfoText();
+	CMainFrame::GetMainFrame()->m_pOrderlistHasFocus = this;
 }
 
 
@@ -613,6 +778,7 @@ void COrderList::OnKillFocus(CWnd *pWnd)
 	CWnd::OnKillFocus(pWnd);
 	InvalidateSelection();
 	m_bShift = FALSE;
+	CMainFrame::GetMainFrame()->m_pOrderlistHasFocus = nullptr;
 }
 
 
@@ -998,10 +1164,8 @@ void COrderList::OnDeleteOrder()
 		// remove selection
 		m_nScrollPos2nd = ORDERINDEX_INVALID;
 
-		for(int i = 0; i <= (selection.nOrdHi - selection.nOrdLo); i++)
-		{
-			m_pModDoc->RemoveOrder(pSndFile->Order.GetCurrentSequenceIndex(), selection.nOrdLo);
-		}
+		pSndFile->Order.Remove(selection.nOrdLo, selection.nOrdHi);
+
 		InvalidateRect(NULL, FALSE);
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
 

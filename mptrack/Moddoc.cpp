@@ -149,7 +149,7 @@ BOOL CModDoc::OnNewDocument()
 	m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
 	m_SndFile.m_pConfig->SetMixLevels(m_SndFile.m_nMixLevels);
 	// ...and the order length
-	m_SndFile.Order.resize(m_SndFile.GetModSpecifications().ordersMax);
+	m_SndFile.Order.resize(min(MAX_ORDERS, m_SndFile.GetModSpecifications().ordersMax));
 
 	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
 	ReinitRecordState();
@@ -1105,22 +1105,22 @@ bool CModDoc::NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix)
 	return true;
 }
 
-bool CModDoc::IsChannelRecord1(CHANNELINDEX channel)
-//--------------------------------------------------
+
+bool CModDoc::IsChannelRecord1(CHANNELINDEX channel) const
+//--------------------------------------------------------
 {
-	UINT m = 1 << (channel&7);
-	return (MultiRecordMask[channel>>3] & m) ? true : false;
+	return m_bsMultiRecordMask[channel];
 }
 
-bool CModDoc::IsChannelRecord2(CHANNELINDEX channel)
-//--------------------------------------------------
+
+bool CModDoc::IsChannelRecord2(CHANNELINDEX channel) const
+//--------------------------------------------------------
 {
-	UINT m = 1 << (channel&7);
-	return (MultiSplitRecordMask[channel>>3] & m) ? true : false;
+	return m_bsMultiSplitRecordMask[channel];
 }
 
-BYTE CModDoc::IsChannelRecord(CHANNELINDEX channel)
-//-------------------------------------------------
+BYTE CModDoc::IsChannelRecord(CHANNELINDEX channel) const
+//-------------------------------------------------------
 {
 	if(IsChannelRecord1(channel)) return 1;
 	if(IsChannelRecord2(channel)) return 2;
@@ -1130,38 +1130,46 @@ BYTE CModDoc::IsChannelRecord(CHANNELINDEX channel)
 void CModDoc::Record1Channel(CHANNELINDEX channel, bool select)
 //-------------------------------------------------------------
 {
-	UINT m = 1 << (channel&7);
-
-	if(!select){
-		if(MultiRecordMask[channel>>3] & m) MultiRecordMask[channel>>3] ^= m;
-		if(MultiSplitRecordMask[channel>>3] & m) MultiSplitRecordMask[channel>>3] ^= m;
+	if (!select)
+	{
+		m_bsMultiRecordMask.reset(channel);
+		m_bsMultiSplitRecordMask.reset(channel);
 	}
-	else{
-		MultiRecordMask[channel>>3] ^= m;
-		if(MultiSplitRecordMask[channel>>3] & m) MultiSplitRecordMask[channel>>3] ^= m;
+	else
+	{
+		m_bsMultiRecordMask.flip(channel);
+		m_bsMultiSplitRecordMask.reset(channel);
 	}
 }
 
 void CModDoc::Record2Channel(CHANNELINDEX channel, bool select)
 //-------------------------------------------------------------
 {
-	UINT m = 1 << (channel&7);
-
-	if(!select){
-		if(MultiRecordMask[channel>>3] & m) MultiRecordMask[channel>>3] ^= m;
-		if(MultiSplitRecordMask[channel>>3] & m) MultiSplitRecordMask[channel>>3] ^= m;
+	if (!select)
+	{
+		m_bsMultiRecordMask.reset(channel);
+		m_bsMultiSplitRecordMask.reset(channel);
 	}
-	else{
-		MultiSplitRecordMask[channel>>3] ^= m;
-		if(MultiRecordMask[channel>>3] & m) MultiRecordMask[channel>>3] ^= m;
+	else
+	{
+		m_bsMultiSplitRecordMask.flip(channel);
+		m_bsMultiRecordMask.reset(channel);
 	}
 }
 
 void CModDoc::ReinitRecordState(bool unselect)
 //--------------------------------------------
 {
-	memset(MultiRecordMask, unselect ? 0 : 0xff, sizeof(MultiRecordMask));
-	memset(MultiSplitRecordMask, unselect ? 0 : 0xff, sizeof(MultiSplitRecordMask));	
+	if (unselect)
+	{
+		m_bsMultiRecordMask.reset();
+		m_bsMultiSplitRecordMask.reset();
+	}
+	else
+	{
+		m_bsMultiRecordMask.set();
+		m_bsMultiSplitRecordMask.set();
+	}
 }
 // -! NEW_FEATURE#0015
 

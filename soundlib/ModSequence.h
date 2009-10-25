@@ -37,6 +37,16 @@ public:
 	void Append() {Append(GetInvalidPatIndex());}	// Appends InvalidPatIndex.
 	void Append(PATTERNINDEX nPat);					// Appends given patindex.
 
+	// Inserts nCount orders starting from nPos using nFill as the pattern index for all inserted orders.
+	// Sequence will automatically grow if needed and if it can't grow enough, some tail 
+	// orders will be discarded.
+	// Return: Number of orders inserted.
+	ORDERINDEX Insert(ORDERINDEX nPos, ORDERINDEX nCount) {return Insert(nPos, nCount, GetInvalidPatIndex());}
+	ORDERINDEX Insert(ORDERINDEX nPos, ORDERINDEX nCount, PATTERNINDEX nFill);
+
+	// Removes orders from range [nPosBegin, nPosEnd].
+	void Remove(ORDERINDEX nPosBegin, ORDERINDEX nPosEnd);
+
 	void clear();
 	void resize(ORDERINDEX nNewSize) {resize(nNewSize, GetInvalidPatIndex());}
 	void resize(ORDERINDEX nNewSize, PATTERNINDEX nFill);

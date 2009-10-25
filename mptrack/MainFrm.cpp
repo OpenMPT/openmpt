@@ -289,6 +289,7 @@ CMainFrame::CMainFrame()
 {
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
 	m_pNoteMapHasFocus = NULL;	//rewbs.customKeys
+	m_pOrderlistHasFocus = nullptr;
 	m_bOptionsLocked = false;	//rewbs.customKeys
 
 	m_pJustModifiedDoc = NULL;
@@ -2523,7 +2524,7 @@ void CMainFrame::OnTimer(UINT)
 		pModDoc->m_bModifiedChanged=false;
 	}*/
 	if (m_pJustModifiedDoc) {
-		m_pJustModifiedDoc->SetModifiedFlag(true);
+		m_pJustModifiedDoc->SetModified(true);
 		m_pJustModifiedDoc = NULL;
 	}
 
@@ -2720,7 +2721,7 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 //	case ID_NETLINK_UT:			pszURL = "http://www.united-trackers.org"; break;
 //	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
 //	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
-	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
+//	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
 	case ID_NETLINK_FORUMS:		pszURL = "http://www.lpchip.com/modplug"; break;
 	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com"; break;
 	case ID_NETLINK_MODARCHIVE: pszURL = "http://modarchive.org/"; break;
@@ -2828,6 +2829,8 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				return m_wndTree.PostMessageToModTree(WM_MOD_KEYCOMMAND, wParam, lParam);
 			if (m_pNoteMapHasFocus)
 				return m_pNoteMapHasFocus->PostMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
+			if (m_pOrderlistHasFocus)
+				return m_pOrderlistHasFocus->PostMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 
 			//Else send it to the active view
 			CView* pView = GetActiveView();
