@@ -9,6 +9,7 @@ struct ORD_SELECTION
 {
 	ORDERINDEX nOrdLo;
 	ORDERINDEX nOrdHi;
+	ORDERINDEX GetSelCount() const {return nOrdHi - nOrdLo + 1;}
 };
 
 //===========================
@@ -84,7 +85,11 @@ public:
 	// Set given sqeuence and update orderlist display.
 	void SelectSequence(const SEQUENCEINDEX nSeq);
 
-public:
+	// Clipboard.
+	void OnEditCopy();
+	void OnEditCut();
+	void OnEditPaste();
+
 	//{{AFX_VIRTUAL(COrderList)
 	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
@@ -119,6 +124,7 @@ protected:
 	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam);
 	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM lParam);
 	afx_msg void OnSelectSequence(UINT nid);
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

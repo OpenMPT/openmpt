@@ -226,6 +226,7 @@ void CCreditStatic::OnPaint()
 
 BOOL CCreditStatic::OnEraseBkgnd(CDC* pDC) 
 {
+	UNREFERENCED_PARAMETER(pDC);
 	return TRUE;
 	
 //	return CStatic::OnEraseBkgnd(pDC);
@@ -539,8 +540,8 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
 	CFont* pOldFont = NULL;
 	BOOL bSuccess = FALSE;
 	
-	BOOL bUnderline;
-	BOOL bItalic;
+	BYTE bUnderline;
+	BYTE bItalic;
     int rmcode = 0;
 
 	if (!m_szWork.IsEmpty()) {
@@ -668,7 +669,7 @@ void CCreditStatic::MoveCredit(CDC* pDC, CRect& m_ScrollRect, CRect& m_ClientRec
 		}
 		CRect r(m_ClientRect);
 		r.top = r.bottom-m_nClip;
-		int x = memDC.DrawText((const char *)m_szWork,m_szWork.GetLength()-rmcode,&r,DT_TOP|DT_CENTER|
+		memDC.DrawText((const char *)m_szWork,m_szWork.GetLength()-rmcode,&r,DT_TOP|DT_CENTER|
 					DT_NOPREFIX | DT_SINGLELINE);	
 		m_bDrawText=FALSE;
 	}
@@ -737,8 +738,8 @@ void CCreditStatic::DrawCredit(CDC* pDC, CRect& m_ScrollRect)
 		BOOL bSuccess = FALSE;
 		BOOL bIsBitmap = FALSE;
 		
-		BOOL bUnderline;
-		BOOL bItalic;
+		BYTE bUnderline;
+		BYTE bItalic;
 		int rmcode = 0;
         CBitmap bitmap;
 
@@ -839,7 +840,7 @@ void CCreditStatic::DrawCredit(CDC* pDC, CRect& m_ScrollRect)
 			CSize size;
 			if(m_szWork.GetLength()-rmcode != 0) 
 			{
-				int x = memDC.DrawText((const char *)m_szWork,m_szWork.GetLength()-rmcode,&r,DT_TOP|DT_CENTER|
+				memDC.DrawText((const char *)m_szWork,m_szWork.GetLength()-rmcode,&r,DT_TOP|DT_CENTER|
 						DT_NOPREFIX | DT_SINGLELINE);	
 				size = memDC.GetTextExtent((LPCTSTR)m_szWork,m_szWork.GetLength()-rmcode);
 			}
@@ -923,7 +924,7 @@ BOOL CCreditStatic::SetBkImage(LPCTSTR lpszResourceName)
         LOGPALETTE *pLP = (LOGPALETTE *) new BYTE[nSize];
 
         pLP->palVersion = 0x300;
-        pLP->palNumEntries = nColors;
+        pLP->palNumEntries = (WORD)nColors;
 
         for( int i=0; i < nColors; i++)
         {

@@ -544,6 +544,7 @@ public:
 	static CInputHandler* GetInputHandler() { return m_InputHandler; }  	//rewbs.customKeys
 	bool m_bModTreeHasFocus;  	//rewbs.customKeys
 	CWnd *m_pNoteMapHasFocus;  	//rewbs.customKeys
+	CWnd* m_pOrderlistHasFocus;
 	long GetSampleRate();  		//rewbs.VSTTimeInfo
 	long GetTotalSampleCount(); //rewbs.VSTTimeInfo
 	double GetApproxBPM();		//rewbs.VSTTimeInfo

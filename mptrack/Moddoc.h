@@ -38,7 +38,7 @@
 #define HINT_SPEEDCHANGE	0x40000	//rewbs.envRowGrid
 #define HINT_SEQNAMES		0x80000
 #define HINT_MAXHINTFLAG	HINT_SEQNAMES
-//Bits 0-18 are reserved.
+//Bits 0-19 are reserved.
 #define HINT_MASK_FLAGS		(2*HINT_MAXHINTFLAG - 1) //When applied to hint parameter, should give the flag part.
 #define HINT_MASK_ITEM		(~HINT_MASK_FLAGS) //To nullify update hintbits from hint parameter.
 #define HintFlagPart(x)		((x) & HINT_MASK_FLAGS)
@@ -136,8 +136,8 @@ protected:
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
-	BYTE MultiRecordMask[(MAX_CHANNELS+7)/8];
-	BYTE MultiSplitRecordMask[(MAX_CHANNELS+7)/8];
+	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;
+	std::bitset<MAX_BASECHANNELS> m_bsMultiSplitRecordMask;
 // -! NEW_FEATURE#0015
 
 protected: // create from serialization only
@@ -227,9 +227,9 @@ public:
 // -> DESC="channels management dlg"
 	bool NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix = true);
 	bool IsChannelNoFx(CHANNELINDEX nChn) const;
-	bool IsChannelRecord1(CHANNELINDEX channel);
-	bool IsChannelRecord2(CHANNELINDEX channel);
-	BYTE IsChannelRecord(CHANNELINDEX channel);
+	bool IsChannelRecord1(CHANNELINDEX channel) const;
+	bool IsChannelRecord2(CHANNELINDEX channel) const;
+	BYTE IsChannelRecord(CHANNELINDEX channel) const;
 	void Record1Channel(CHANNELINDEX channel, bool select = true);
 	void Record2Channel(CHANNELINDEX channel, bool select = true);
 	void ReinitRecordState(bool unselect = true);
