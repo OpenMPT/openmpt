@@ -265,7 +265,7 @@ struct MODCHANNELSETTINGS
 	UINT nPan;
 	UINT nVolume;
 	DWORD dwFlags;
-	UINT nMixPlugin;
+	PLUGINDEX nMixPlugin;
 	CHAR szName[MAX_CHANNELNAME];
 };
 

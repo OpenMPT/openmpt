@@ -2499,7 +2499,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
 	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
-	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
+	//if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
 	header.mv = CLAMP(m_nSamplePreAmp, 0, 128);
 	header.speed = m_nDefaultSpeed;

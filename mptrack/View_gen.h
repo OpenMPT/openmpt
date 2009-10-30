@@ -29,7 +29,8 @@ protected:
 	CSpinButtonCtrl m_spinVolume[4], m_spinPan[4];
 	CButton m_BtnSelect, m_BtnEdit;
 	int m_nActiveTab, m_nLockCount;
-	UINT m_nCurrentPlugin, m_nCurrentParam;
+	PLUGINDEX m_nCurrentPlugin;
+	UINT m_nCurrentParam;
 // -> CODE#0002
 // -> DESC="VST plugins presets"
 	UINT m_nCurrentPreset;
@@ -56,7 +57,7 @@ public:
 	BOOL IsLocked() const { return (m_nLockCount > 0); }
 	int GetDlgItemIntEx(UINT nID);
 	void BuildEmptySlotList(CArray<UINT, UINT> &emptySlots);
-	bool MovePlug(UINT src, UINT dest);
+	bool MovePlug(PLUGINDEX src, PLUGINDEX dest);
 
 public:
 	//{{AFX_VIRTUAL(CViewGlobals)

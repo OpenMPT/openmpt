@@ -759,13 +759,6 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	xmheader.channels = LittleEndianW(xmheader.channels);
 
 	xmheader.patterns = 0;
-  /*for (i=0; i<MAX_ORDERS; i++) {
-		header.norder++;
-		if ((Order[i] >= header.patterns) && (Order[i] < MAX_PATTERNS)) header.patterns = Order[i]+1;
-	}*/
-	if(Order.GetLength() < MAX_ORDERS)
-		Order.resize(MAX_ORDERS);
-
 	WORD nOrders = Order.GetLengthTailTrimmed(), nPatterns = 0;
 	xmheader.orders = LittleEndianW(nOrders);
 	xmheader.size = LittleEndian(xmheader.size + nOrders);
@@ -783,7 +776,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 		xmheader.instruments = LittleEndianW(m_nSamples);
 
 	xmheader.flags = (m_dwSongFlags & SONG_LINEARSLIDES) ? 0x01 : 0x00;
-	if (m_dwSongFlags & SONG_EXFILTERRANGE) xmheader.flags |= 0x1000;
+	if ((m_dwSongFlags & SONG_EXFILTERRANGE) && !bCompatibilityExport) xmheader.flags |= 0x1000;
 	xmheader.flags = LittleEndianW(xmheader.flags);
 
 	if(bCompatibilityExport)

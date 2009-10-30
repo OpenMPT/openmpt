@@ -1314,8 +1314,8 @@ void CViewGlobals::OnMovePlugToSlot()
 
 }
 
-bool CViewGlobals::MovePlug(UINT src, UINT dest)
-//----------------------------------------------
+bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest)
+//--------------------------------------------------------
 {
 	//AfxMessageBox("Moving %d to %d", src, dest);
 	CModDoc *pModDoc = GetDocument();
@@ -1363,6 +1363,17 @@ bool CViewGlobals::MovePlug(UINT src, UINT dest)
 		}
 	}
 
+	// Update patterns (param control notes)
+	for (PATTERNINDEX nPat = 0; nPat < pSndFile->Patterns.Size(); nPat++) if (pSndFile->Patterns[nPat])
+	{
+		MODCOMMAND *m = pSndFile->Patterns[nPat];
+		for (UINT len = pSndFile->PatternSize[nPat] * pSndFile->m_nChannels; len; m++, len--)
+		{
+			if((m->note == NOTE_PC || m->note == NOTE_PCS) && m->instr == src + 1)
+				m->instr = dest + 1;
+		}
+	}
+
 	END_CRITICAL();
 
 	pModDoc->SetModified();
@@ -1405,7 +1416,7 @@ void CViewGlobals::OnInsertSlot()
 			//possible mem leak here...
 		}
 
-		for (int nSlot=MAX_MIXPLUGINS-1; nSlot>(int)m_nCurrentPlugin; nSlot--) {
+		for (PLUGINDEX nSlot = MAX_MIXPLUGINS-1; nSlot > (PLUGINDEX)m_nCurrentPlugin; nSlot--) {
 			if (pSndFile->m_MixPlugins[nSlot-1].pMixPlugin) {
 				MovePlug(nSlot-1, nSlot);
 			}

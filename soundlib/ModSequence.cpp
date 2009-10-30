@@ -71,15 +71,13 @@ void ModSequence::OnModTypeChanged(const MODTYPE oldtype)
 	m_nInvalidIndex = GetInvalidPatIndex(m_pSndFile->GetType());
 	m_nIgnoreIndex = GetIgnoreIndex(m_pSndFile->GetType());
 
-	//Resize orderlist if needed. Because old orderlist had MAX_ORDERS(256) elements, not making it
-	//smaller than that even if the modtype doesn't support that many orders.
+	//Resize orderlist if needed.
 	if (specs.ordersMax < GetLength()) 
 	{
-		resize(max(MAX_ORDERS, specs.ordersMax));
-		std::fill(begin() + specs.ordersMax, end(), GetInvalidPatIndex());
+		resize(specs.ordersMax);
+		/*resize(max(MAX_ORDERS, specs.ordersMax));
+		std::fill(begin() + specs.ordersMax, end(), GetInvalidPatIndex());*/
 	}
-	if (GetLength() < MAX_ORDERS)
-		resize(MAX_ORDERS, GetInvalidPatIndex(oldtype));
 
 	//Replace items used to denote end of song/skip order.
 	Replace(GetInvalidPatIndex(oldtype),  GetInvalidPatIndex());

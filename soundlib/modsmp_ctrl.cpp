@@ -215,6 +215,12 @@ void ResetSamples(CSoundFile& rSndFile, ResetFlag resetflag)
 			rSndFile.Samples[i].nVibType = 0;
 			rSndFile.Samples[i].uFlags &= ~CHN_PANNING;
 			break;
+		case SmpResetVibrato:
+			rSndFile.Samples[i].nVibDepth = 0;
+			rSndFile.Samples[i].nVibRate = 0;
+			rSndFile.Samples[i].nVibSweep = 0;
+			rSndFile.Samples[i].nVibType = 0;
+			break;
 		default:
 			break;
 		}

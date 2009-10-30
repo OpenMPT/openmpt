@@ -542,8 +542,8 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 	header[0x22] = nbi & 0xFF;
 	header[0x23] = nbi >> 8;
 	nbp = 0;
-	for (i=0; Patterns[i]; i++) { nbp = i+1; if (nbp >= MAX_PATTERNS) break; }
-	for (i=0; i<MAX_ORDERS; i++) if ((Order[i] < MAX_PATTERNS) && (Order[i] >= nbp)) nbp = Order[i] + 1;
+	for (i = 0; Patterns[i]; i++) { nbp = i+1; if (nbp >= MAX_PATTERNS) break; }
+	for (ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++) if ((Order[nOrd] < MAX_PATTERNS) && (Order[nOrd] >= nbp)) nbp = Order[nOrd] + 1;
 	header[0x24] = nbp & 0xFF;
 	header[0x25] = nbp >> 8;
 	if (m_dwSongFlags & SONG_FASTVOLSLIDES) header[0x26] |= 0x40;

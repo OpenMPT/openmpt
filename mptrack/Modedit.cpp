@@ -166,7 +166,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	/////////////////////////////
 	// Converting pattern data
 
-	for (UINT nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
+	for (PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++) if (m_SndFile.Patterns[nPat])
 	{
 		MODCOMMAND *m = m_SndFile.Patterns[nPat];
 
@@ -222,30 +222,46 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	// Converting instrument / sample / etc. data
 
 
-	// Convert MOD/XM to S3M/IT/MPT
-	if (oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
+	// Do some sample conversion
+	for (SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.m_nSamples; nSmp++)
 	{
-		for (SAMPLEINDEX i=1; i<=m_SndFile.m_nSamples; i++)
+		// No Sustain loops for MOD/S3M
+		if(newTypeIsMOD || newTypeIsS3M)
 		{
-			m_SndFile.Samples[i].nC5Speed = CSoundFile::TransposeToFrequency(m_SndFile.Samples[i].RelativeTone, m_SndFile.Samples[i].nFineTune);
-			m_SndFile.Samples[i].RelativeTone = 0;
-			m_SndFile.Samples[i].nFineTune = 0;
+			m_SndFile.Samples[nSmp].nSustainStart = m_SndFile.Samples[nSmp].nSustainEnd = 0;
 		}
-		if (oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATMODE;
-	} else
 
-	// Convert S3M/IT/MPT to XM
-	if (oldTypeIsS3M_IT_MPT && newTypeIsXM)
-	{
-		for (SAMPLEINDEX i=1; i<=m_SndFile.m_nSamples; i++)
+		// Transpose to Frequency (MOD/XM to S3M/IT/MPT)
+		if (oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
 		{
-			CSoundFile::FrequencyToTranspose(&m_SndFile.Samples[i]);
-			if (!(m_SndFile.Samples[i].uFlags & CHN_PANNING)) m_SndFile.Samples[i].nPan = 128;
+			m_SndFile.Samples[nSmp].nC5Speed = CSoundFile::TransposeToFrequency(m_SndFile.Samples[nSmp].RelativeTone, m_SndFile.Samples[nSmp].nFineTune);
+			m_SndFile.Samples[nSmp].RelativeTone = 0;
+			m_SndFile.Samples[nSmp].nFineTune = 0;
 		}
-		bool bBrokenNoteMap = false, bBrokenSustainLoop = false;
-		for (INSTRUMENTINDEX j = 1; j <= m_SndFile.m_nInstruments; j++)
+
+		// Frequency to Transpose (S3M/IT/MPT to MOD/XM)
+		if (oldTypeIsS3M_IT_MPT && newTypeIsXM)
 		{
-			MODINSTRUMENT *pIns = m_SndFile.Instruments[j];
+			CSoundFile::FrequencyToTranspose(&m_SndFile.Samples[nSmp]);
+			if (!(m_SndFile.Samples[nSmp].uFlags & CHN_PANNING)) m_SndFile.Samples[nSmp].nPan = 128;
+		}
+	}
+
+	// No Vibrato for MOD/S3M
+	if(newTypeIsMOD || newTypeIsS3M)
+	{
+		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetVibrato);
+	}
+
+	if (oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATMODE;
+
+	// Convert IT/MPT to XM (instruments)
+	if (oldTypeIsIT_MPT && newTypeIsXM)
+	{
+		bool bBrokenNoteMap = false, bBrokenSustainLoop = false;
+		for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.m_nInstruments; nIns++)
+		{
+			MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
 			if (pIns)
 			{
 				for (UINT k = 0; k < NOTE_MAX; k++)
@@ -285,12 +301,12 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		m_SndFile.m_nSamplePreAmp = 48;
 		m_SndFile.m_nVSTiVolume = 48;
 		AddToLog("WARNING: Default speed, tempo and global volume will be lost.\n");
-	}
 
-	// Too many samples?
-	if (newTypeIsMOD && (m_SndFile.m_nSamples > 31))
-	{
-		AddToLog("WARNING: Samples above 31 will be lost when saving as MOD!\n");
+		// Too many samples?
+		if(m_SndFile.m_nSamples > 31)
+		{
+			AddToLog("WARNING: Samples above 31 will be lost when saving as MOD!\n");
+		}
 	}
 
 	// Order list too long? -> remove unnecessary order items first.
