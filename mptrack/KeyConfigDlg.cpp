@@ -376,7 +376,6 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 //----------------------------------------
 {
 	CommandID nCmd  = (CommandID)m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel() );
-	int nCat = m_cmbCategory.GetItemData( m_cmbCategory.GetCurSel() );
 	CString str;
 
 	//Separator
@@ -407,7 +406,6 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 		m_bKeyUp.EnableWindow(TRUE);
 		
 		m_nCurHotKey = nCmd;
-		BOOL bEnable = FALSE;
 		char s[20];
 			
 		m_cmbKeyChoice.ResetContent();

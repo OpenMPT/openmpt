@@ -11,7 +11,7 @@ public:
 	CMoveFXSlotDialog(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CMoveFXSlotDialog();
 	void SetupMove(UINT currentSlot, CArray<UINT, UINT> &emptySlots);
-	UINT m_nToSlot;
+	PLUGINDEX m_nToSlot;
 	
 
 

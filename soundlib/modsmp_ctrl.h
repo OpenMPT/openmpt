@@ -15,7 +15,8 @@ typedef uintptr_t SmpLength;
 enum ResetFlag
 {
 	SmpResetCompo = 1,
-	SmpResetInit = 2,
+	SmpResetInit,
+	SmpResetVibrato,
 };
 
 // Insert silence to given location.
