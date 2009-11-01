@@ -2,6 +2,13 @@
 #define _CONTROL_SAMPLES_H_
 
 
+struct SELECTIONPOINTS
+{
+	UINT nStart;
+	UINT nEnd;
+	bool bSelected;	// does sample selection exist or not?
+};
+
 //=======================================
 class CCtrlSamples: public CModControlDlg
 //=======================================
@@ -27,8 +34,6 @@ protected:
 	enum {nDefaultStretchChunkSize = 8192};
 
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
-	PVOID pSampleUndoBuffer;
-	UINT UndoBufferSize;
 
 	int PitchShift(float pitch);
 	int TimeStretch(double ratio);
@@ -38,6 +43,7 @@ protected:
 	// Applies amplification to sample. Negative values
 	// can be used to invert phase.
 	void ApplyAmplify(LONG nAmp, bool bFadeIn = false, bool bFadeOut = false);
+	SELECTIONPOINTS GetSelectionPoints();
 
 public:
 	CCtrlSamples();
@@ -104,8 +110,6 @@ protected:
 	afx_msg void OnPitchShiftTimeStretch();
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
-	afx_msg void OnPitchShiftTimeStretchAccept();
-	afx_msg void OnPitchShiftTimeStretchCancel();
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

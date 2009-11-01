@@ -611,7 +611,7 @@ BOOL CViewPattern::PrepareUndo(DWORD dwBegin, DWORD dwEnd)
 	nChnEnd = GetChanFromCursor(dwEnd);
 	nRowEnd = GetRowFromCursor(dwEnd);
 	if( (nChnEnd < nChnBeg) || (nRowEnd < nRowBeg) ) return FALSE;
-	if (pModDoc) return pModDoc->PreparePatternUndo(m_nPattern, nChnBeg, nRowBeg, nChnEnd-nChnBeg+1, nRowEnd-nRowBeg+1);
+	if (pModDoc) return pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, nChnBeg, nRowBeg, nChnEnd-nChnBeg+1, nRowEnd-nRowBeg+1);
 	return FALSE;
 }
 
@@ -752,7 +752,7 @@ void CViewPattern::OnGrowSelection()
 
 	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwBeginSel : m_dwEndSel;
 	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwEndSel : m_dwBeginSel;
-	pModDoc->PreparePatternUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->PatternSize[m_nPattern]);
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->PatternSize[m_nPattern]);
 
 	int finalDest = (startSel>>16)+((endSel>>16)-(startSel>>16))*2;
 	for (int row=finalDest; row>(int)(startSel >> 16); row-=2)
@@ -802,7 +802,7 @@ void CViewPattern::OnShrinkSelection()
 
 	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16))?m_dwBeginSel:m_dwEndSel;
 	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16))?m_dwEndSel:m_dwBeginSel;
-	pModDoc->PreparePatternUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->PatternSize[m_nPattern]);
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->PatternSize[m_nPattern]);
 
 	int finalDest = (startSel>>16)+((endSel>>16)-(startSel>>16))/2;
 
@@ -1560,7 +1560,7 @@ void CViewPattern::DeleteRows(UINT colmin, UINT colmax, UINT nrows)
 	maxrow = pSndFile->PatternSize[m_nPattern];
 	if (colmax >= pSndFile->m_nChannels) colmax = pSndFile->m_nChannels-1;
 	if (colmin > colmax) return;
-	pModDoc->PreparePatternUndo(m_nPattern, 0,0, pSndFile->m_nChannels, maxrow);
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0,0, pSndFile->m_nChannels, maxrow);
 	for (UINT r=row; r<maxrow; r++)
 	{
 		MODCOMMAND *m = pSndFile->Patterns[m_nPattern] + r * pSndFile->m_nChannels + colmin;
@@ -1626,7 +1626,7 @@ void CViewPattern::InsertRows(UINT colmin, UINT colmax) //rewbs.customKeys: adde
 	maxrow = pSndFile->PatternSize[m_nPattern];
 	if (colmax >= pSndFile->m_nChannels) colmax = pSndFile->m_nChannels-1;
 	if (colmin > colmax) return;
-	pModDoc->PreparePatternUndo(m_nPattern, 0,0, pSndFile->m_nChannels, maxrow);
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0,0, pSndFile->m_nChannels, maxrow);
 
 	for (UINT r=maxrow; r>row; )
 	{
@@ -2384,7 +2384,7 @@ void CViewPattern::OnDropSelection()
 	dx = (int)((m_dwDragPos & 0xFFF8) >> 3) - (int)((m_dwStartSel & 0xFFF8) >> 3);
 	dy = (int)(m_dwDragPos >> 16) - (int)(m_dwStartSel >> 16);
 	if ((!dx) && (!dy)) return;
-	pModDoc->PreparePatternUndo(m_nPattern, 0,0, nChannels, nRows);
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0,0, nChannels, nRows);
 	pNewPattern = CSoundFile::AllocatePattern(nRows, nChannels);
 	if (!pNewPattern) return;
 	x1 = (m_dwBeginSel & 0xFFF8) >> 3;
@@ -2563,7 +2563,7 @@ void CViewPattern::OnAddChannelFront()
 		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
 
 		pModDoc->SetModified();
-		pModDoc->ClearPatternUndo();
+		pModDoc->GetPatternUndo()->ClearUndo();
 		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS); //refresh channel headers
 		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE); //updates(?) the channel number to general tab display
 		SetCurrentPattern(m_nPattern);
@@ -2586,7 +2586,7 @@ void CViewPattern::OnAddChannelAfter()
 		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
 
 		pModDoc->SetModified();
-		pModDoc->ClearPatternUndo();
+		pModDoc->GetPatternUndo()->ClearUndo();
 		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
 		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
 		SetCurrentPattern(m_nPattern);
@@ -2626,7 +2626,7 @@ void CViewPattern::OnDuplicateChannel()
 	if(nNumChnNew == vecChns.size())
 	{
 		pModDoc->SetModified();
-		pModDoc->ClearPatternUndo();
+		pModDoc->GetPatternUndo()->ClearUndo();
 		pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
 		pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);
 		SetCurrentPattern(m_nPattern);
@@ -2696,7 +2696,7 @@ void CViewPattern::OnUpdateUndo(CCmdUI *pCmdUI)
 	CModDoc *pModDoc = GetDocument();
 	if ((pCmdUI) && (pModDoc))
 	{
-		pCmdUI->Enable(pModDoc->CanPatternUndo());
+		pCmdUI->Enable(pModDoc->GetPatternUndo()->CanUndo());
 	}
 }
 
@@ -2707,7 +2707,7 @@ void CViewPattern::OnEditUndo()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc && IsEditingEnabled_bmsg())
 	{
-		UINT nPat = pModDoc->DoPatternUndo();
+		PATTERNINDEX nPat = pModDoc->GetPatternUndo()->Undo();
 		if (nPat < pModDoc->GetSoundFile()->Patterns.Size())
 		{
 			pModDoc->SetModified();
@@ -2966,7 +2966,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 	if(bUsePlaybackPosition == true)
 		SetEditPos(*pSndFile, nRow, nPattern, pSndFile->m_nRow, pSndFile->m_nPattern);
 
-	pModDoc->PreparePatternUndo(nPattern, nChn, nRow, 1, 1);
+	pModDoc->GetPatternUndo()->PrepareUndo(nPattern, nChn, nRow, 1, 1);
 
 	MODCOMMAND *pRow = pSndFile->Patterns[nPattern].GetpModCommand(nRow, nChn);
 
@@ -3991,7 +3991,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	}
 
 	// Create undo-point.
-	pModDoc->PreparePatternUndo(nPat, nChn, nRow, 1, 1);
+	pModDoc->GetPatternUndo()->PrepareUndo(nPat, nChn, nRow, 1, 1);
 
 	// -- write sdx if playing live
 	if (usePlaybackPosition && nTick) {	// avoid SD0 which will be mis-interpreted
@@ -4139,7 +4139,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		//Param control 'note'
 		if((note == NOTE_PC || note == NOTE_PCS) && bRecordEnabled)
 		{
-			pModDoc->PreparePatternUndo(m_nPattern, nChn, nRow, 1, 1);
+			pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, nChn, nRow, 1, 1);
 			pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, nChn)->note = note;
 			const DWORD sel = (nRow << 16) | m_dwCursor;
 			pModDoc->SetModified();
@@ -4172,7 +4172,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 
 		// If record is enabled, create undo point.
 		if(bRecordEnabled)
-			pModDoc->PreparePatternUndo(nPat, nChn, nRow, 1, 1);
+			pModDoc->GetPatternUndo()->PrepareUndo(nPat, nChn, nRow, 1, 1);
 
 		// -- write note and instrument data.
 		const bool isSplit = HandleSplit(p, note);
@@ -4329,7 +4329,7 @@ void CViewPattern::TempEnterChord(int note)
 		const CHANNELINDEX nChn = GetChanFromCursor(m_dwCursor);
 		UINT nPlayIns = 0;
 		// Simply backup the whole row.
-		pModDoc->PreparePatternUndo(m_nPattern, nChn, m_nRow, pSndFile->GetNumChannels(), 1);
+		pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, nChn, m_nRow, pSndFile->GetNumChannels(), 1);
 
 		PatternRow prowbase = pSndFile->Patterns[m_nPattern].GetRow(m_nRow);
 		MODCOMMAND* p = &prowbase[nChn];
@@ -4823,7 +4823,7 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih, CModDoc* pMo
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_MIXPASTE, "Mix Paste\t" + ih->GetKeyTextFromCommand(kcEditMixPaste));
 
-	DWORD greyed = pModDoc->CanPatternUndo()?FALSE:MF_GRAYED;
+	DWORD greyed = pModDoc->GetPatternUndo()->CanUndo()?FALSE:MF_GRAYED;
 	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
 		AppendMenu(hMenu, MF_STRING|greyed, ID_EDIT_UNDO, "Undo\t" + ih->GetKeyTextFromCommand(kcEditUndo));
 	}

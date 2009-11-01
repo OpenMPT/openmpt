@@ -1,5 +1,5 @@
 /*
- * MODINSTRUMENT related functions.
+ * MODSAMPLE related functions.
  */
 
 #include "stdafx.h"
@@ -32,7 +32,7 @@ SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const Sm
 		return smp.nLength;
 
 	const SmpLength nOldBytes = smp.GetSampleSizeInBytes();
-	const SmpLength nSilenceBytes = nSilenceLength * smp.GetElementarySampleSize() * smp.GetNumChannels();
+	const SmpLength nSilenceBytes = nSilenceLength * smp.GetBytesPerSample();
 	const SmpLength nNewSmpBytes = nOldBytes + nSilenceBytes;
 	const SmpLength nNewLength = smp.nLength + nSilenceLength;
 
@@ -62,6 +62,9 @@ SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const Sm
 			AfxMessageBox(TEXT("Unsupported start position in InsertSilence."));
 	}
 
+	if(smp.nLoopStart >= nStartFrom) smp.nLoopStart += nSilenceLength;
+	if(smp.nLoopEnd >= nStartFrom) smp.nLoopEnd += nSilenceLength;
+
 	ReplaceSample(smp, pNewSmp, nNewLength, pSndFile);
 	AdjustEndOfSample(smp, pSndFile);
 
@@ -81,7 +84,7 @@ SmpLength ResizeSample(MODSAMPLE& smp, const SmpLength nNewLength, CSoundFile* p
 
 	// Else: Shrink sample
 
-	const SmpLength nNewSmpBytes = nNewLength * smp.GetElementarySampleSize() * smp.GetNumChannels();
+	const SmpLength nNewSmpBytes = nNewLength * smp.GetBytesPerSample();
 
 	LPSTR pNewSmp = 0;
 	pNewSmp = CSoundFile::AllocateSample(nNewSmpBytes);
@@ -344,6 +347,113 @@ float RemoveDCOffset(MODSAMPLE& smp,
 	AdjustEndOfSample(smp, pSndFile);
 
 	return fReportOffset;
+}
+
+
+template <class T>
+void ReverseSampleImpl(T* pStart, const SmpLength nLength)
+//--------------------------------------------------------
+{
+	for(SmpLength i = 0; i < nLength / 2; i++)
+	{
+		std::swap(pStart[i], pStart[nLength - 1 - i]);
+	}
+}
+
+// Reverse sample data
+bool ReverseSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile)
+//-----------------------------------------------------------------------------------------
+{
+	if(pSmp->pSample == nullptr) return false;
+	if(iEnd == 0 || iStart > pSmp->nLength || iEnd > pSmp->nLength)
+	{
+		iStart = 0;
+		iEnd = pSmp->nLength;
+	}
+
+	if(iEnd - iStart < 2) return false;
+
+	if(pSmp->GetBytesPerSample() == 8)		// unused (yet)
+		ReverseSampleImpl(reinterpret_cast<int64*>(pSmp->pSample) + iStart, iEnd - iStart);
+	else if(pSmp->GetBytesPerSample() == 4)	// 16 bit stereo
+		ReverseSampleImpl(reinterpret_cast<int32*>(pSmp->pSample) + iStart, iEnd - iStart);
+	else if(pSmp->GetBytesPerSample() == 2)	// 16 bit mono / 8 bit stereo
+		ReverseSampleImpl(reinterpret_cast<int16*>(pSmp->pSample) + iStart, iEnd - iStart);
+	else if(pSmp->GetBytesPerSample() == 1)	// 8 bit mono
+		ReverseSampleImpl(reinterpret_cast<int8*>(pSmp->pSample) + iStart, iEnd - iStart);
+	else
+		return false;
+
+	AdjustEndOfSample(*pSmp, pSndFile);
+	return true;
+}
+
+
+template <class T>
+void UnsignSampleImpl(T* pStart, T nOffset, const SmpLength nLength)
+//---------------------------------------------------------------------
+{
+	for(SmpLength i = 0; i < nLength; i++)
+	{
+		pStart[i] += nOffset;
+	}
+}
+
+// Virtually unsign sample data
+bool UnsignSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile)
+//----------------------------------------------------------------------------------------
+{
+	if(pSmp->pSample == nullptr) return false;
+	if(iEnd == 0 || iStart > pSmp->nLength || iEnd > pSmp->nLength)
+	{
+		iStart = 0;
+		iEnd = pSmp->nLength;
+	}
+	iStart *= pSmp->GetNumChannels();
+	iEnd *= pSmp->GetNumChannels();
+	if(pSmp->GetElementarySampleSize() == 2)
+		UnsignSampleImpl(reinterpret_cast<int16*>(pSmp->pSample) + iStart, (int16)-0x8000, iEnd - iStart);
+	else if(pSmp->GetElementarySampleSize() == 1)
+		UnsignSampleImpl(reinterpret_cast<int8*>(pSmp->pSample) + iStart, (int8)-0x80, iEnd - iStart);
+	else
+		return false;
+
+	AdjustEndOfSample(*pSmp, pSndFile);
+	return true;
+}
+
+
+template <class T>
+void InvertSampleImpl(T* pStart, const SmpLength nLength)
+//-------------------------------------------------------
+{
+	for(SmpLength i = 0; i < nLength; i++)
+	{
+		pStart[i] = ~pStart[i];
+	}
+}
+
+// Invert sample data (flip by 180 degrees)
+bool InvertSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile)
+//----------------------------------------------------------------------------------------
+{
+	if(pSmp->pSample == nullptr) return false;
+	if(iEnd == 0 || iStart > pSmp->nLength || iEnd > pSmp->nLength)
+	{
+		iStart = 0;
+		iEnd = pSmp->nLength;
+	}
+	iStart *= pSmp->GetNumChannels();
+	iEnd *= pSmp->GetNumChannels();
+	if(pSmp->GetElementarySampleSize() == 2)
+		InvertSampleImpl(reinterpret_cast<int16*>(pSmp->pSample) + iStart, iEnd - iStart);
+	else if(pSmp->GetElementarySampleSize() == 1)
+		InvertSampleImpl(reinterpret_cast<int8*>(pSmp->pSample) + iStart, iEnd - iStart);
+	else
+		return false;
+
+	AdjustEndOfSample(*pSmp, pSndFile);
+	return true;
 }
 
 

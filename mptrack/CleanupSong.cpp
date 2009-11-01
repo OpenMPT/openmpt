@@ -441,7 +441,7 @@ NotEmpty:
 	EndWaitCursor();
 	if ((nPatRemoved) || (bReordered))
 	{
-		m_pModDoc->ClearPatternUndo();
+		m_pModDoc->GetPatternUndo()->ClearUndo();
 		if (nPatRemoved)
 		{
 			wsprintf(s, "%d pattern%s removed.\n", nPatRemoved, (nPatRemoved == 1) ? "" : "s");
@@ -535,6 +535,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 					if ((j == pSndFile->m_nSamples) && (j > 1)) pSndFile->m_nSamples--;
 					END_CRITICAL();
 					nRemoved++;
+					m_pModDoc->GetSampleUndo()->ClearUndo(j);
 				}
 			}
 			wsprintf(s, "%d unused sample%s removed\n" ,nRemoved, (nRemoved == 1) ? "" : "s");
@@ -573,7 +574,11 @@ bool CModCleanupDlg::OptimizeSamples()
 				&& (pSndFile->Samples[nSmp].nLength > pSndFile->Samples[nSmp].nLoopEnd + 2))
 			{
 				UINT lmax = pSndFile->Samples[nSmp].nLoopEnd + 2;
-				if ((lmax < pSndFile->Samples[nSmp].nLength) && (lmax >= 16)) pSndFile->Samples[nSmp].nLength = lmax;
+				if ((lmax < pSndFile->Samples[nSmp].nLength) && (lmax >= 2))
+				{
+					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, lmax, pSndFile->Samples[nSmp].nLength);
+					ctrlSmp::ResizeSample(pSndFile->Samples[nSmp], lmax, pSndFile);
+				}
 			}
 		}
 		wsprintf(s, "%d sample loop%s optimized\n" ,nLoopOpt, (nLoopOpt == 1) ? "" : "s");
@@ -650,6 +655,9 @@ bool CModCleanupDlg::RearrangeSamples()
 			}
 		}
 	}
+
+	// Too lazy to fix sample undo...
+	m_pModDoc->GetSampleUndo()->ClearUndo();
 
 	pSndFile->m_nSamples -= nRemap;
 
@@ -927,7 +935,8 @@ bool CModCleanupDlg::RemoveAllSamples()
 	if (pSndFile->m_nSamples == 0) return false;
 	for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
 	{
-		if (pSndFile->Samples[nSmp].pSample)
+		m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete, 0, pSndFile->Samples[nSmp].nLength);
+		if(pSndFile->Samples[nSmp].pSample)
 		{
 			BEGIN_CRITICAL();
 			pSndFile->DestroySample(nSmp);
@@ -961,6 +970,8 @@ bool CModCleanupDlg::RemoveAllInstruments(bool bConfirm)
 			removeSamples = 1;
 		}
 	}
+
+	if(removeSamples == -1) m_pModDoc->GetSampleUndo()->ClearUndo();
 
 	for (INSTRUMENTINDEX i = 1; i <= pSndFile->m_nInstruments; i++)
 	{

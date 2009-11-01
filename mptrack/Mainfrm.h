@@ -406,6 +406,9 @@ public:
 	static BOOL gbPatternVUMeters, gbPatternPluginNames, gbPatternRecord;
 	static DWORD m_dwPatternSetup, m_dwMidiSetup, m_nRowSpacing, m_nRowSpacing2, m_nKeyboardCfg, gnHotKeyMask;
 	static bool m_bHideUnavailableCtxMenuItems;
+	// Sample Editor Setup
+	static UINT m_nSampleUndoMaxBuffer;
+
 	// GDI
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont, m_hLargeFixedFont;

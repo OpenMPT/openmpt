@@ -377,7 +377,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 	}
 	if (dwHintMask & (HINT_MODTYPE|HINT_UNDO))
 	{
-		m_ToolBar.EnableButton(ID_EDIT_UNDO, m_pModDoc->CanPatternUndo());
+		m_ToolBar.EnableButton(ID_EDIT_UNDO, m_pModDoc->GetPatternUndo()->CanUndo());
 	}
 }
 

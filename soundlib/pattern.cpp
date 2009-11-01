@@ -132,7 +132,7 @@ bool CPattern::Expand()
 	if (!newPattern) return true;
 
 	const UINT nPattern = m_rPatternContainer.GetIndex(this);
-	rModDoc.PreparePatternUndo(nPattern, 0,0, nChns, nRows);
+	rModDoc.GetPatternUndo()->PrepareUndo(nPattern, 0,0, nChns, nRows);
 	oldPattern = m_ModCommands;
 	for (UINT y=0; y<nRows; y++)
 	{
@@ -163,7 +163,7 @@ bool CPattern::Shrink()
 	nRows = m_Rows;
 	nChns = sndFile.m_nChannels;
 	const UINT nPattern = m_rPatternContainer.GetIndex(this);
-	rModDoc.PreparePatternUndo(nPattern, 0,0, nChns, nRows);
+	rModDoc.GetPatternUndo()->PrepareUndo(nPattern, 0,0, nChns, nRows);
 	nRows /= 2;
 	for (UINT y=0; y<nRows; y++)
 	{

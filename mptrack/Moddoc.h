@@ -11,7 +11,7 @@
 
 #include "sndfile.h"
 #include "misc_util.h"
-
+#include "Undo.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,20 +89,6 @@ STATIC_ASSERT( ((-1 << HINT_SHIFT_CHNTAB) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT
 STATIC_ASSERT( ((-1 << HINT_SHIFT_SEQUENCE) & HINT_MASK_ITEM) == (-1 << HINT_SHIFT_SEQUENCE) ); 
 
 
-
-// Undo
-#define MAX_UNDO_LEVEL		100
-
-// Pattern Undo
-typedef struct PATTERNUNDOBUFFER
-{
-	UINT pattern, patternsize;
-	UINT column, row;
-	UINT cx, cy;
-	MODCOMMAND *pbuffer;
-} PATTERNUNDOBUFFER, *PPATTERNUNDOBUFFER;
-
-
 //parametered macro presets:
 enum
 {
@@ -128,7 +114,6 @@ protected:
 	BOOL m_bPaused;
 	HWND m_hWndFollow;
 	DWORD m_dwNotifyType;
-	PATTERNUNDOBUFFER PatternUndo[MAX_UNDO_LEVEL];
 
 	bool bModifiedAutosave; // Modified since last autosave?
 
@@ -139,6 +124,9 @@ protected:
 	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;
 	std::bitset<MAX_BASECHANNELS> m_bsMultiSplitRecordMask;
 // -! NEW_FEATURE#0015
+
+	CPatternUndo m_PatternUndo;
+	CSampleUndo m_SampleUndo;
 
 protected: // create from serialization only
 	CModDoc();
@@ -189,6 +177,10 @@ public:
 	static int GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32]);
 	static void CreateZxxFromType(CHAR (&szMidiZXXExt)[128 * 32], int iZxxType);
 	void SongProperties();
+
+	CPatternUndo *GetPatternUndo() { return &m_PatternUndo; }
+	CSampleUndo *GetSampleUndo() { return &m_SampleUndo; }
+	
 // operations
 public:
 	BOOL ChangeModType(MODTYPE wType);
@@ -243,15 +235,14 @@ public:
 	bool MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate = true, bool bCopy = false, SEQUENCEINDEX nSourceSeq = SEQUENCEINDEX_INVALID, SEQUENCEINDEX nDestSeq = SEQUENCEINDEX_INVALID);
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
+
+	// Copy&Paste
 	BOOL CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);
 	BOOL PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix=FALSE);	//rewbs.mixpaste
 
 	BOOL CopyEnvelope(UINT nIns, UINT nEnv);
 	BOOL PasteEnvelope(UINT nIns, UINT nEnv);
-	BOOL ClearPatternUndo();
-	BOOL PreparePatternUndo(UINT pattern, UINT x, UINT y, UINT cx, UINT cy);
-	UINT DoPatternUndo();
-	BOOL CanPatternUndo();
+
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
 	void UpdateAllViews(CView *pSender, LPARAM lHint=0L, CObject *pHint=NULL);
 	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord); //rewbs.customKeys

@@ -252,7 +252,10 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case SMPLIST_SIZE:
 						if (pSmp->nLength)
 						{
-							wsprintf(s, "%d KB", pSmp->GetSampleSizeInBytes() >> 10);
+							if(pSmp->GetSampleSizeInBytes() >= 1024)
+								wsprintf(s, "%d KB", pSmp->GetSampleSizeInBytes() >> 10);
+							else
+								wsprintf(s, "%d B", pSmp->GetSampleSizeInBytes());
 						}
 						break;
 					case SMPLIST_TYPE:
