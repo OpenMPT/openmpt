@@ -653,6 +653,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Undo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\view_com.cpp"
 				>
 			</File>
@@ -1164,6 +1168,10 @@
 			</File>
 			<File
 				RelativePath=".\typedefs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Undo.h"
 				>
 			</File>
 			<File

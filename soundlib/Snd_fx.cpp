@@ -1173,7 +1173,7 @@ BOOL CSoundFile::ProcessEffects()
 		}
 
 		// Process Invert Loop (MOD Effect, called every row)
-		InvertLoop(&Chn[nChn]);
+		if((m_dwSongFlags & SONG_FIRSTTICK) == 0) InvertLoop(&Chn[nChn]);
 
 		// Process special effects (note delay, pattern delay, pattern loop)
 		if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))

@@ -49,8 +49,11 @@ struct MODSAMPLE
 	// Return the number of channels in the sample.
 	uint8 GetNumChannels() const {return (uFlags & CHN_STEREO) ? 2 : 1;}
 
+	// Return the number of bytes per sampling point. (Channels * Elementary Sample Size)
+	uint8 GetBytesPerSample() const {return GetElementarySampleSize() * GetNumChannels();}
+
 	// Return the size which pSample is at least.
-	DWORD GetSampleSizeInBytes() const {return nLength * GetNumChannels() * GetElementarySampleSize();}
+	DWORD GetSampleSizeInBytes() const {return nLength * GetBytesPerSample();}
 
 	// Returns sample rate of the sample. The argument is needed because 
 	// the sample rate is obtained differently for different module types.

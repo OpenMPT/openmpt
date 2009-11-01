@@ -369,7 +369,8 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		AddToLog("WARNING: Instrument envelopes have been shortened.\n");
 
 	SetModified();
-	ClearPatternUndo();
+	GetPatternUndo()->ClearUndo();
+	GetSampleUndo()->ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODGENERAL);
 	EndWaitCursor();
 	return TRUE;
@@ -470,7 +471,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 		EndWaitCursor();
 	}
 	SetModified();
-	ClearPatternUndo();
+	GetPatternUndo()->ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE);
 	return TRUE;
 }
@@ -543,7 +544,7 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 		END_CRITICAL();
 		EndWaitCursor();
 		SetModified();
-		ClearPatternUndo();
+		GetPatternUndo()->ClearUndo();
 		UpdateAllViews(NULL, HINT_MODTYPE);
 		return FALSE;
 }
@@ -1144,7 +1145,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 
 		if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 		{
-			PreparePatternUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+			GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 			TEMPO spdmax = m_SndFile.GetModSpecifications().speedMax;
 			DWORD dwMemSize = GlobalSize(hCpy);
 			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
@@ -1350,7 +1351,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 						nPattern = m_SndFile.Order[oNextOrder];
 						if(m_SndFile.Patterns.IsValidPat(nPattern) == false) goto PasteDone;
 						m = m_SndFile.Patterns[nPattern];
-						PreparePatternUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+						GetPatternUndo()->PrepareUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 						oCurrentOrder = oNextOrder;
 					}
 				}
@@ -1556,126 +1557,6 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 	}
 	EndWaitCursor();
 	return TRUE;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// Pattern Undo Functions
-
-BOOL CModDoc::ClearPatternUndo()
-//------------------------------
-{
-	for (UINT i=0; i<MAX_UNDO_LEVEL; i++)
-	{
-		if (PatternUndo[i].pbuffer) delete[] PatternUndo[i].pbuffer;
-		PatternUndo[i].cx = 0;
-		PatternUndo[i].cy = 0;
-		PatternUndo[i].pbuffer = NULL;
-	}
-	return TRUE;
-}
-
-
-BOOL CModDoc::CanPatternUndo()
-//----------------------------
-{
-	return (PatternUndo[0].pbuffer) ? TRUE : FALSE;
-}
-
-
-BOOL CModDoc::PreparePatternUndo(UINT pattern, UINT x, UINT y, UINT cx, UINT cy)
-//------------------------------------------------------------------------------
-{
-	MODCOMMAND *pUndo, *pPattern;
-	UINT nRows;
-	BOOL bUpdate;
-
-	if ((pattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[pattern])) return FALSE;
-	nRows = m_SndFile.PatternSize[pattern];
-	pPattern = m_SndFile.Patterns[pattern];
-	if ((y >= nRows) || (cx < 1) || (cy < 1) || (x >= m_SndFile.m_nChannels)) return FALSE;
-	if (y+cy >= nRows) cy = nRows-y;
-	if (x+cx >= m_SndFile.m_nChannels) cx = m_SndFile.m_nChannels - x;
-	BeginWaitCursor();
-	pUndo = new MODCOMMAND[cx*cy];
-	if (!pUndo)
-	{
-		EndWaitCursor();
-		return FALSE;
-	}
-	bUpdate = (PatternUndo[0].pbuffer) ? FALSE : TRUE;
-	if (PatternUndo[MAX_UNDO_LEVEL-1].pbuffer)
-	{
-		delete[] PatternUndo[MAX_UNDO_LEVEL-1].pbuffer;
-		PatternUndo[MAX_UNDO_LEVEL-1].pbuffer = NULL;
-	}
-	for (UINT i=MAX_UNDO_LEVEL-1; i>=1; i--)
-	{
-		PatternUndo[i] = PatternUndo[i-1];
-	}
-	PatternUndo[0].pattern = pattern;
-	PatternUndo[0].patternsize = m_SndFile.PatternSize[pattern];
-	PatternUndo[0].column = x;
-	PatternUndo[0].row = y;
-	PatternUndo[0].cx = cx;
-	PatternUndo[0].cy = cy;
-	PatternUndo[0].pbuffer = pUndo;
-	pPattern += x + y*m_SndFile.m_nChannels;
-	for (UINT iy=0; iy<cy; iy++)
-	{
-		memcpy(pUndo, pPattern, cx*sizeof(MODCOMMAND));
-		pUndo += cx;
-		pPattern += m_SndFile.m_nChannels;
-	}
-	EndWaitCursor();
-	if (bUpdate) UpdateAllViews(NULL, HINT_UNDO);
-	return TRUE;
-}
-
-
-UINT CModDoc::DoPatternUndo()
-//---------------------------
-{
-	MODCOMMAND *pUndo, *pPattern;
-	UINT nPattern, nRows;
-
-	if ((!PatternUndo[0].pbuffer) || (PatternUndo[0].pattern >= m_SndFile.Patterns.Size())) return (UINT)-1;
-	nPattern = PatternUndo[0].pattern;
-	nRows = PatternUndo[0].patternsize;
-	if (PatternUndo[0].column + PatternUndo[0].cx <= m_SndFile.m_nChannels)
-	{
-		if ((!m_SndFile.Patterns[nPattern]) || (m_SndFile.PatternSize[nPattern] < nRows))
-		{
-			MODCOMMAND *newPattern = CSoundFile::AllocatePattern(nRows, m_SndFile.m_nChannels);
-			MODCOMMAND *oldPattern = m_SndFile.Patterns[nPattern];
-			if (!newPattern) return (UINT)-1;
-			const ROWINDEX nOldRowCount = m_SndFile.Patterns[nPattern].GetNumRows();
-			m_SndFile.Patterns[nPattern].SetData(newPattern, nRows);
-			if (oldPattern)
-			{
-				memcpy(newPattern, oldPattern, m_SndFile.m_nChannels*nOldRowCount*sizeof(MODCOMMAND));
-				CSoundFile::FreePattern(oldPattern);
-			}
-		}
-		pUndo = PatternUndo[0].pbuffer;
-		pPattern = m_SndFile.Patterns[nPattern];
-		if (!m_SndFile.Patterns[nPattern]) return (UINT)-1;
-		pPattern += PatternUndo[0].column + (PatternUndo[0].row * m_SndFile.m_nChannels);
-		for (UINT iy=0; iy<PatternUndo[0].cy; iy++)
-		{
-			memcpy(pPattern, pUndo, PatternUndo[0].cx * sizeof(MODCOMMAND));
-			pPattern += m_SndFile.m_nChannels;
-			pUndo += PatternUndo[0].cx;
-		}
-	}		
-	delete[] PatternUndo[0].pbuffer;
-	for (UINT i=0; i<MAX_UNDO_LEVEL-1; i++)
-	{
-		PatternUndo[i] = PatternUndo[i+1];
-	}
-	PatternUndo[MAX_UNDO_LEVEL-1].pbuffer = NULL;
-	if (!PatternUndo[0].pbuffer) UpdateAllViews(NULL, HINT_UNDO);
-	return nPattern;
 }
 
 

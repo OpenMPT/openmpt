@@ -95,7 +95,10 @@ CModDoc::CModDoc()
 	m_bPaused = TRUE;
 	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
-	memset(PatternUndo, 0, sizeof(PatternUndo));
+
+	m_PatternUndo.SetParent(this);
+	m_SampleUndo.SetParent(this);
+
 #ifdef _DEBUG
 	MODCHANNEL *p = m_SndFile.Chn;
 	if (((DWORD)p) & 7) Log("MODCHANNEL is not aligned (0x%08X)\n", p);
@@ -113,7 +116,6 @@ CModDoc::CModDoc()
 CModDoc::~CModDoc()
 //-----------------
 {
-	ClearPatternUndo();
 	ClearLog();
 }
 
@@ -149,7 +151,7 @@ BOOL CModDoc::OnNewDocument()
 	m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
 	m_SndFile.m_pConfig->SetMixLevels(m_SndFile.m_nMixLevels);
 	// ...and the order length
-	m_SndFile.Order.resize(min(MAX_ORDERS, m_SndFile.GetModSpecifications().ordersMax));
+	m_SndFile.Order.resize(m_SndFile.GetModSpecifications().ordersMax);
 
 	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
 	ReinitRecordState();

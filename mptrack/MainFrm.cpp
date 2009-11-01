@@ -204,6 +204,7 @@ DWORD CMainFrame::m_dwPatternSetup = PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
 								   | PATTERN_SHOWPREVIOUS | PATTERN_CONTSCROLL | PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE;
 DWORD CMainFrame::m_nRowSpacing = 16;
 DWORD CMainFrame::m_nRowSpacing2 = 4;
+UINT CMainFrame::m_nSampleUndoMaxBuffer = 100;
 
 // GDI
 HICON CMainFrame::m_hIcon = NULL;
@@ -442,6 +443,8 @@ void CMainFrame::LoadIniSettings()
 	gbShowHackControls = (0 != GetPrivateProfileDWord("Misc", "ShowHackControls", 0, iniFile));
 	CSoundFile::s_DefaultPlugVolumeHandling = static_cast<uint8>(GetPrivateProfileInt("Misc", "DefaultPlugVolumeHandling", PLUGIN_VOLUMEHANDLING_IGNORE, iniFile));
 	if(CSoundFile::s_DefaultPlugVolumeHandling > 2) CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+
+	m_nSampleUndoMaxBuffer = GetPrivateProfileLong("Sample Editor" , "UndoBufferSize", m_nSampleUndoMaxBuffer, iniFile) << 20;
 
 	TCHAR szPath[_MAX_PATH] = "";
 	GetPrivateProfileString("Paths", "Songs_Directory", GetDefaultDirectory(DIR_MODS), szPath, INIBUFFERSIZE, iniFile);

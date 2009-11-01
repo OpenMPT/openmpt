@@ -1654,25 +1654,23 @@ BOOL CAddSilenceDlg::OnInitDialog()
 		spin->SetPos(m_nSamples);
 	}
 
-	int iRadioButton;
+	int iRadioButton = IDC_RADIO_ADDSILENCE_END;
 	switch(m_nEditOption)
 	{
-		case 1:
+		case addsilence_at_beginning:
 			iRadioButton = IDC_RADIO_ADDSILENCE_BEGIN;
 			break;
-		case 2:
-		default:
+		case addsilence_at_end:
 			iRadioButton = IDC_RADIO_ADDSILENCE_END;
 			break;
-		case 3:
+		case addsilence_resize:
 			iRadioButton = IDC_RADIO_RESIZETO;
 			break;
-
 	}
 	CButton *radioEnd = (CButton *)GetDlgItem(iRadioButton);
 	radioEnd->SetCheck(true);
 
-	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_nEditOption == 3) ? m_nLength : m_nSamples);
+	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_nEditOption == addsilence_resize) ? m_nLength : m_nSamples);
 	
 	return TRUE;
 }
@@ -1690,16 +1688,15 @@ void CAddSilenceDlg::OnOK()
 void CAddSilenceDlg::OnEditModeChanged()
 //------------------------------------------------
 {
-	char cNewEditOption = GetEditMode();
-	if(cNewEditOption != 3 && m_nEditOption == 3)
+	enmAddSilenceOptions cNewEditOption = GetEditMode();
+	if(cNewEditOption != addsilence_resize && m_nEditOption == addsilence_resize)
 	{
 		// switch to "add silenece"
 		m_nLength = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
 		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nSamples);
-	}
-	else if(cNewEditOption == 3 && m_nEditOption != 3)
+	} else if(cNewEditOption == addsilence_resize && m_nEditOption != addsilence_resize)
 	{
-		// "switch to "resize"
+		// switch to "resize"
 		m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
 		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nLength);
 	}
@@ -1707,12 +1704,12 @@ void CAddSilenceDlg::OnEditModeChanged()
 }
 
 
-char CAddSilenceDlg::GetEditMode()
+enmAddSilenceOptions CAddSilenceDlg::GetEditMode()
 {
-	if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_BEGIN)) return 1;
-	else if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_END)) return 2;
-	else if(IsDlgButtonChecked(IDC_RADIO_RESIZETO)) return 3;
-	return 0;
+	if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_BEGIN)) return addsilence_at_beginning;
+	else if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_END)) return addsilence_at_end;
+	else if(IsDlgButtonChecked(IDC_RADIO_RESIZETO)) return addsilence_resize;
+	return addsilence_at_end;
 }
 
 

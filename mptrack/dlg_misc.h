@@ -352,19 +352,27 @@ public:
 	virtual void OnOK();
 };
 
+
+enum enmAddSilenceOptions
+{
+	addsilence_at_beginning = 1,	// Add at beginning of sample
+	addsilence_at_end,				// Add at end of sample
+	addsilence_resize,				// Resize sample
+};
+
 //===========================
 class CAddSilenceDlg: public CDialog
 //===========================
 {
 protected:
-	char GetEditMode();
+	enmAddSilenceOptions GetEditMode();
 	afx_msg void OnEditModeChanged();
 	DECLARE_MESSAGE_MAP()
 
 public:
 	UINT m_nSamples;	// Add x samples (also containes the return value in all cases)
 	UINT m_nLength;		// Set size to x samples (init value: current sample size)
-	char m_nEditOption;	// 1 = add at beginning, 2 = add at end, 3 = resize
+	enmAddSilenceOptions m_nEditOption;	// See above
 
 public:
 	CAddSilenceDlg(CWnd *parent, UINT nSamples = 32, UINT nOrigLength = 64) : CDialog(IDD_ADDSILENCE, parent)
@@ -373,12 +381,11 @@ public:
 		if(nOrigLength > 0)
 		{
 			m_nLength = nOrigLength;
-			m_nEditOption = 2;
-		}
-		else
+			m_nEditOption = addsilence_at_end;
+		} else
 		{
 			m_nLength = 64;
-			m_nEditOption = 3;
+			m_nEditOption = addsilence_resize;
 		}
 	}
 

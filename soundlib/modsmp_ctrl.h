@@ -53,6 +53,15 @@ float RemoveDCOffset(MODSAMPLE& smp,
 											// Volume adjustment is not done if this param is MOD_TYPE_NONE.
 					 CSoundFile* const pSndFile); // Passed to AdjustEndOfSample.
 
+// Reverse sample data
+bool ReverseSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+
+// Virtually unsign sample data
+bool UnsignSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+
+// Invert sample data (flip by 180 degrees)
+bool InvertSample(MODSAMPLE *pSmp, SmpLength iStart, SmpLength iEnd, CSoundFile *pSndFile);
+
 } // Namespace ctrlSmp
 
 namespace ctrlChn

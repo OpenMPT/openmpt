@@ -74,8 +74,6 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		OnNextInstrument)
 	ON_COMMAND(IDC_BUTTON1,				OnPitchShiftTimeStretch)
 	ON_COMMAND(IDC_BUTTON2,				OnEstimateSampleSize)
-	ON_COMMAND(IDC_BUTTON3,				OnPitchShiftTimeStretchAccept)
-	ON_COMMAND(IDC_BUTTON4,				OnPitchShiftTimeStretchCancel)
 	ON_COMMAND(IDC_CHECK3,				OnEnableStretchToSize)
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_FILENAME,	OnFileNameChanged)
@@ -159,8 +157,6 @@ CCtrlSamples::CCtrlSamples() :
 {
 	m_nSample = 1;
 	m_nLockCount = 1;
-	pSampleUndoBuffer = NULL;
-	UndoBufferSize = 0;
 }
 
 
@@ -168,9 +164,6 @@ CCtrlSamples::CCtrlSamples() :
 CCtrlSamples::~CCtrlSamples()
 //---------------------------
 {
-	if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
-	pSampleUndoBuffer = NULL;
-	UndoBufferSize = 0;
 }
 
 
@@ -261,18 +254,13 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	GetDlgItem(IDC_BUTTON1)->ShowWindow(SW_SHOW); // PitchShiftTimeStretch
 	GetDlgItem(IDC_BUTTON2)->ShowWindow(SW_SHOW); // EstimateSampleSize
-	GetDlgItem(IDC_BUTTON3)->ShowWindow(SW_SHOW); // PitchShiftTimeStretchAccept
-	GetDlgItem(IDC_BUTTON4)->ShowWindow(SW_SHOW); // PitchShiftTimeStretchCancel
-	GetDlgItem(IDC_CHECK2)->ShowWindow(SW_SHOW);  // Preview mode
 	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_SHOW);  // EnableStretchToSize
 	GetDlgItem(IDC_EDIT6)->ShowWindow(SW_SHOW);   // 
 	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);  //
 	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_SHOW);  //
 	GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_SHOW);  //
 	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_SHOW);  //
-	GetDlgItem(IDC_TEXT_PREVIEW)->ShowWindow(SW_SHOW);  //
 	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);  //
-	GetDlgItem(IDC_TEXT_PERCENT)->ShowWindow(SW_SHOW);  //
 	
 	CHAR str[16];
 
@@ -315,10 +303,6 @@ BOOL CCtrlSamples::OnInitDialog()
 		combo->SetCurSel(3);
 	}
 
-	//Disable preview buttons
-	((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_HIDE);
-	((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_HIDE);
-
 	// Stretch ratio
 	SetDlgItemInt(IDC_EDIT6,100,FALSE);
 
@@ -347,8 +331,6 @@ BOOL CCtrlSamples::SetCurrentSample(UINT nSmp, LONG lZoom, BOOL bUpdNum)
 	pSndFile = pModDoc->GetSoundFile();
 	if (pSndFile->m_nSamples < 1) pSndFile->m_nSamples = 1;
 	if ((nSmp < 1) || (nSmp > pSndFile->m_nSamples)) return FALSE;
-
-	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
 
 	LockControls();
 	if (m_nSample != nSmp)
@@ -713,8 +695,6 @@ BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	DWORD len;
 	BOOL bOk;
 
-	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-
 	BeginWaitCursor();
 	if ((!lpszFileName) || (!f.Open(lpszFileName)))
 	{
@@ -727,6 +707,9 @@ BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	lpFile = f.Lock(len);
 	if (!lpFile) goto OpenError;
 	BEGIN_CRITICAL();
+
+	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+
 	if (m_pSndFile->ReadSampleFromFile(m_nSample, lpFile, len))
 	{
 		bOk = TRUE;
@@ -779,6 +762,9 @@ BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 				bOk = TRUE;
 			}
 			END_CRITICAL();
+		} else
+		{
+			m_pModDoc->GetSampleUndo()->RemoveLastUndoStep(m_nSample);
 		}
 	}
 	f.Unlock();
@@ -830,10 +816,9 @@ BOOL CCtrlSamples::OpenSample(CSoundFile *pSndFile, UINT nSample)
 {
 	if ((!pSndFile) || (!nSample) || (nSample > pSndFile->m_nSamples)) return FALSE;
 
-	if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-
 	BeginWaitCursor();
 	BEGIN_CRITICAL();
+	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 	m_pSndFile->DestroySample(m_nSample);
 	m_pSndFile->ReadSampleFromSong(m_nSample, pSndFile, nSample);
 	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
@@ -859,8 +844,6 @@ void CCtrlSamples::OnSampleChanged()
 {
 	if ((!IsLocked()) && (m_pSndFile))
 	{
-		if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-
 		UINT n = GetDlgItemInt(IDC_EDIT_SAMPLE);
 		if ((n > 0) && (n <= m_pSndFile->m_nSamples) && (n != m_nSample))
 		{
@@ -899,8 +882,6 @@ void CCtrlSamples::OnSampleNew()
 	LONG smp = m_pModDoc->InsertSample(TRUE);
 	if (smp != SAMPLEINDEX_INVALID)
 	{
-		if(pSampleUndoBuffer) OnPitchShiftTimeStretchCancel();
-
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		SetCurrentSample(smp);
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
@@ -1156,6 +1137,9 @@ void CCtrlSamples::OnNormalize()
 					iEnd = pSmp->nLength;
 				}
 			}
+
+			m_pModDoc->GetSampleUndo()->PrepareUndo(iSmp, sundo_update, iStart, iEnd);
+
 			if (pSmp->uFlags & CHN_STEREO) { iStart *= 2; iEnd *= 2; }
 
 			if (pSmp->uFlags & CHN_16BIT)
@@ -1218,31 +1202,23 @@ void CCtrlSamples::OnNormalize()
 void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
 //-----------------------------------------------------------------------
 {
-	SAMPLEVIEWSTATE viewstate;
-	DWORD dwStart, dwEnd;
 	MODSAMPLE *pSmp;
 	
-	memset(&viewstate, 0, sizeof(viewstate));
-	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	if ((!m_pModDoc) || (!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return;
 
 	BeginWaitCursor();
 	pSmp = &m_pSndFile->Samples[m_nSample];
-	dwStart = viewstate.dwBeginSel;
-	dwEnd = viewstate.dwEndSel;
-	if (dwEnd > pSmp->nLength) dwEnd = pSmp->nLength;
-	if (dwStart > dwEnd) dwStart = dwEnd;
-	if (dwStart >= dwEnd)
-	{
-		dwStart = 0;
-		dwEnd = pSmp->nLength;
-	}
-	if (pSmp->uFlags & CHN_STEREO) { dwStart *= 2; dwEnd *= 2; }
-	UINT len = dwEnd - dwStart;
+
+	SELECTIONPOINTS selection = GetSelectionPoints();
+
+	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_update, selection.nStart, selection.nEnd);
+
+	if (pSmp->uFlags & CHN_STEREO) { selection.nStart *= 2; selection.nEnd *= 2; }
+	UINT len = selection.nEnd - selection.nStart;
 	if ((bFadeIn) && (bFadeOut)) lAmp *= 4;
 	if (pSmp->uFlags & CHN_16BIT)
 	{
-		signed short *p = ((signed short *)pSmp->pSample) + dwStart;
+		signed short *p = ((signed short *)pSmp->pSample) + selection.nStart;
 
 		for (UINT i=0; i<len; i++)
 		{
@@ -1255,7 +1231,7 @@ void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
 		}
 	} else
 	{
-		signed char *p = ((signed char *)pSmp->pSample) + dwStart;
+		signed char *p = ((signed char *)pSmp->pSample) + selection.nStart;
 
 		for (UINT i=0; i<len; i++)
 		{
@@ -1282,11 +1258,7 @@ void CCtrlSamples::OnRemoveDCOffset()
 	if(!m_pModDoc || !m_pSndFile)
 		return;
 
-	SAMPLEVIEWSTATE viewstate;
 	UINT iMinSample = m_nSample, iMaxSample = m_nSample;
-
-	memset(&viewstate, 0, sizeof(viewstate));
-	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 
 	//Shift -> Process all samples
 	if(CMainFrame::GetInputHandler()->ShiftPressed())
@@ -1317,9 +1289,13 @@ void CCtrlSamples::OnRemoveDCOffset()
 		}
 		else
 		{
-			iStart = viewstate.dwBeginSel;
-			iEnd = viewstate.dwEndSel;
+			SELECTIONPOINTS selection = GetSelectionPoints();
+			iStart = selection.nStart;
+			iEnd = selection.nEnd;
 		}
+
+		m_pModDoc->GetSampleUndo()->PrepareUndo(iSmp, sundo_update, iStart, iEnd);
+
 		const float fOffset = ctrlSmp::RemoveDCOffset(m_pSndFile->Samples[iSmp], iStart, iEnd, m_pSndFile->GetType(), m_pSndFile);
 
 		if(fOffset == 0.0f) // No offset removed.
@@ -1379,24 +1355,25 @@ const int gSinc2x16Odd[16] =
 void CCtrlSamples::OnUpsample()
 //-----------------------------
 {
-	SAMPLEVIEWSTATE viewstate;
 	MODSAMPLE *pSmp;
 	DWORD dwStart, dwEnd, dwNewLen;
 	UINT smplsize, newsmplsize;
 	PVOID pOriginal, pNewSample;
 
-	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	if ((!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return;
 	BeginWaitCursor();
 	pSmp = &m_pSndFile->Samples[m_nSample];
-	dwStart = viewstate.dwBeginSel;
-	dwEnd = viewstate.dwEndSel;
+	SELECTIONPOINTS selection = GetSelectionPoints();
+
+	dwStart = selection.nStart;
+	dwEnd = selection.nEnd;
 	if (dwEnd > pSmp->nLength) dwEnd = pSmp->nLength;
 	if (dwStart >= dwEnd)
 	{
 		dwStart = 0;
 		dwEnd = pSmp->nLength;
 	}
+
 	smplsize = (pSmp->uFlags & CHN_16BIT) ? 2 : 1;
 	if (pSmp->uFlags & CHN_STEREO) smplsize *= 2;
 	newsmplsize = (pSmp->uFlags & CHN_STEREO) ? 4 : 2;
@@ -1406,6 +1383,8 @@ void CCtrlSamples::OnUpsample()
 	if (dwNewLen+4 <= MAX_SAMPLE_LENGTH) pNewSample = CSoundFile::AllocateSample((dwNewLen+4)*newsmplsize);
 	if (pNewSample)
 	{
+		m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+
 		UINT nCh = (pSmp->uFlags & CHN_STEREO) ? 2 : 1;
 		for (UINT iCh=0; iCh<nCh; iCh++)
 		{
@@ -1495,10 +1474,7 @@ void CCtrlSamples::OnUpsample()
 				m_pSndFile->Chn[iFix].dwFlags |= CHN_16BIT;
 			}
 		}
-		pSmp->uFlags |= CHN_16BIT;
-		pSmp->pSample = (LPSTR)pNewSample;
-		pSmp->nLength = dwNewLen;
-		if (viewstate.dwEndSel <= viewstate.dwBeginSel)
+		if (selection.bSelected == false)
 		{
 			if(!(m_pSndFile->m_nType & MOD_TYPE_MOD))
 			{
@@ -1506,11 +1482,19 @@ void CCtrlSamples::OnUpsample()
 				if (pSmp->RelativeTone < 84) pSmp->RelativeTone += 12;
 			}
 		}
+		pSmp->uFlags |= CHN_16BIT;
+		pSmp->pSample = (LPSTR)pNewSample;
+		pSmp->nLength = dwNewLen;
+
 		CSoundFile::FreeSample(pOriginal);
 		END_CRITICAL();
 		m_pModDoc->AdjustEndOfSample(m_nSample);
-		if (viewstate.dwEndSel > viewstate.dwBeginSel)
+		if (selection.bSelected == true)
 		{
+			SAMPLEVIEWSTATE viewstate;
+			memset(&viewstate, 0, sizeof(viewstate));
+			SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+
 			viewstate.dwBeginSel = dwStart;
 			viewstate.dwEndSel = dwEnd + (dwEnd-dwStart);
 			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
@@ -1527,18 +1511,18 @@ void CCtrlSamples::OnUpsample()
 void CCtrlSamples::OnDownsample()
 //-------------------------------
 {
-	SAMPLEVIEWSTATE viewstate;
 	MODSAMPLE *pSmp;
 	DWORD dwStart, dwEnd, dwRemove, dwNewLen;
 	UINT smplsize;
 	PVOID pOriginal, pNewSample;
 
-	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	if ((!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return;
 	BeginWaitCursor();
 	pSmp = &m_pSndFile->Samples[m_nSample];
-	dwStart = viewstate.dwBeginSel;
-	dwEnd = viewstate.dwEndSel;
+	SELECTIONPOINTS selection = GetSelectionPoints();
+
+	dwStart = selection.nStart;
+	dwEnd = selection.nEnd;
 	if (dwEnd > pSmp->nLength) dwEnd = pSmp->nLength;
 	if (dwStart >= dwEnd)
 	{
@@ -1555,6 +1539,9 @@ void CCtrlSamples::OnDownsample()
 	if ((dwNewLen > 32) && (dwRemove)) pNewSample = CSoundFile::AllocateSample((dwNewLen+4)*smplsize);
 	if (pNewSample)
 	{
+
+		m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+
 		UINT nCh = (pSmp->uFlags & CHN_STEREO) ? 2 : 1;
 		for (UINT iCh=0; iCh<nCh; iCh++)
 		{
@@ -1624,7 +1611,7 @@ void CCtrlSamples::OnDownsample()
 				m_pSndFile->Chn[iFix].nLength = 0;
 			}
 		}
-		if (viewstate.dwEndSel <= viewstate.dwBeginSel)
+		if (selection.bSelected == false)
 		{
 			if(!(m_pSndFile->m_nType & MOD_TYPE_MOD))
 			{
@@ -1637,8 +1624,12 @@ void CCtrlSamples::OnDownsample()
 		CSoundFile::FreeSample(pOriginal);
 		END_CRITICAL();
 		m_pModDoc->AdjustEndOfSample(m_nSample);
-		if (viewstate.dwEndSel > viewstate.dwBeginSel)
+		if (selection.bSelected == true)
 		{
+			SAMPLEVIEWSTATE viewstate;
+			memset(&viewstate, 0, sizeof(viewstate));
+			SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+
 			viewstate.dwBeginSel = dwStart;
 			viewstate.dwEndSel = dwStart + dwRemove;
 			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
@@ -1682,40 +1673,21 @@ void CCtrlSamples::OnEnableStretchToSize()
 //----------------------------------------
 {
 	// Enable time-stretching / disable unused pitch-shifting UI elements
-	if(IsDlgButtonChecked(IDC_CHECK3)){
-		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(FALSE);
-		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(TRUE);
-		((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(TRUE); //rewbs.timeStretchMods
-		GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_COMBO5)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_COMBO6)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_COMBO4)->ShowWindow(SW_HIDE);
-		//if(CMainFrame::gbShowHackControls == true)
-		//{
-			GetDlgItem(IDC_TEXT_STRETCHPARAMS)->ShowWindow(SW_SHOW);
-			GetDlgItem(IDC_EDIT_STRETCHPARAMS)->ShowWindow(SW_SHOW);
-		//}
-		SetDlgItemText(IDC_BUTTON1, "Time Stretch");
-		UpdateTimeStretchParameterString();
-	}
-	// Enable pitch-shifting / disable unused time-stretching UI elements
-	else{
-		ReadTimeStretchParameters();
-		GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_COMBO5)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_COMBO6)->ShowWindow(SW_SHOW);
-		((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(TRUE);
-		((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(FALSE);
-		((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(FALSE); //rewbs.timeStretchMods
-		GetDlgItem(IDC_TEXT_STRETCHPARAMS)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_EDIT_STRETCHPARAMS)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_COMBO4)->ShowWindow(SW_SHOW);
-		SetDlgItemText(IDC_BUTTON1, "Pitch Shift");
-	}
+	bool bTimeStretch = IsDlgButtonChecked(IDC_CHECK3) ? true : false;
+	if(!bTimeStretch) ReadTimeStretchParameters();
+	((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(bTimeStretch ? false : true);
+	((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(bTimeStretch ? true : false);
+	((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(bTimeStretch ? true : false); //rewbs.timeStretchMods
+	GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
+	GetDlgItem(IDC_COMBO5)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
+	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
+	GetDlgItem(IDC_COMBO6)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
+	GetDlgItem(IDC_TEXT_STRETCHPARAMS)->ShowWindow(bTimeStretch ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_EDIT_STRETCHPARAMS)->ShowWindow(bTimeStretch ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
+	GetDlgItem(IDC_COMBO4)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
+	SetDlgItemText(IDC_BUTTON1, "Time Stretch");
+	if(bTimeStretch) UpdateTimeStretchParameterString();
 }
 
 void CCtrlSamples::OnEstimateSampleSize()
@@ -1758,25 +1730,6 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
 	if(!pSmp || pSmp->nLength == 0) goto error;
 
-	// Preview management
-	if(IsDlgButtonChecked(IDC_CHECK2)){
-		// Free previous undo buffer
-		if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
-		// Allocate sample undo buffer
-		BYTE smpsize  = (pSmp->uFlags & CHN_16BIT)  ? 2 : 1;
-		UINT nChn = (pSmp->uFlags & CHN_STEREO) ? 2 : 1;
-		UndoBufferSize = pSmp->nLength * nChn * smpsize;
-		pSampleUndoBuffer = CSoundFile::AllocateSample(UndoBufferSize);
-		// Not enough memory...
-		if(pSampleUndoBuffer == NULL){
-			UndoBufferSize = 0;
-			errorcode = 3;
-			goto error;
-		}
-		// Copy sample to sample undo buffer
-		memcpy(pSampleUndoBuffer,pSmp->pSample,UndoBufferSize);
-	}
-
 	// Time stretching
 	if(IsDlgButtonChecked(IDC_CHECK3)){
 		//rewbs.timeStretchMods
@@ -1811,24 +1764,6 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 		errorcode = PitchShift(pitch);
 	}
 
-	// Preview management
-	if(errorcode == 0 && IsDlgButtonChecked(IDC_CHECK2)){
-		((CButton *)GetDlgItem(IDC_BUTTON1))->ShowWindow(SW_HIDE);
-		((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_SHOW);
-		((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_SHOW);
-		SetDlgItemText(IDC_STATIC1,"Preview...");
-		
-		//rewbs.timeStretchMods
-		//Disable all pitch shift / timestrech buttons until accepted or restored:
-		GetDlgItem(IDC_COMBO5)->EnableWindow(FALSE);
-		GetDlgItem(IDC_COMBO6)->EnableWindow(FALSE);
-		GetDlgItem(IDC_CHECK3)->EnableWindow(FALSE);
-		GetDlgItem(IDC_COMBO4)->EnableWindow(FALSE);
-		GetDlgItem(IDC_EDIT6)->EnableWindow(FALSE);
-		GetDlgItem(IDC_BUTTON2)->EnableWindow(FALSE);
-		//end rewbs.timeStretchMods
-	}
-
 	// Error management
 	error:
 
@@ -1841,8 +1776,6 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 				break;
 			case 3 : wsprintf(str,"Not enough memory...");
 				break;
-			case 4 : wsprintf(str, "Action can be applied only to 16-bit samples.");
-				break;
 			case 5 : wsprintf(str, "Too low sample rate");
 				break;
 			case 6 : wsprintf(str, "Too short sample");
@@ -1852,84 +1785,6 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 		}
 		AfxMessageBox(str, MB_ICONERROR);
 	}
-
-	// Update sample view
-	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL); // !!!! see CODE#0006, update#3
-	m_pModDoc->SetModified();
-}
-
-void CCtrlSamples::OnPitchShiftTimeStretchAccept()
-//------------------------------------------------
-{
-	// Free sample undo buffer
-	if(pSampleUndoBuffer) CSoundFile::FreeSample(pSampleUndoBuffer);
-	pSampleUndoBuffer = NULL;
-	UndoBufferSize = 0;
-
-	// Restore UI buttons
-	((CButton *)GetDlgItem(IDC_BUTTON1))->ShowWindow(SW_SHOW);
-	((CButton *)GetDlgItem(IDC_BUTTON3))->ShowWindow(SW_HIDE);
-	((CButton *)GetDlgItem(IDC_BUTTON4))->ShowWindow(SW_HIDE);
-	SetDlgItemText(IDC_STATIC1,"");
-	//rewbs.timeStretchMods
-	//Disable all pitch shift / timestrech buttons until accepted or restored:
-	GetDlgItem(IDC_COMBO5)->EnableWindow(TRUE);
-	GetDlgItem(IDC_COMBO6)->EnableWindow(TRUE);
-	GetDlgItem(IDC_CHECK3)->EnableWindow(TRUE);
-	if (IsDlgButtonChecked(IDC_CHECK3))
-	{
-		GetDlgItem(IDC_EDIT6)->EnableWindow(TRUE);
-		GetDlgItem(IDC_BUTTON2)->EnableWindow(TRUE);
-	}
-	else
-	{
-		GetDlgItem(IDC_COMBO4)->EnableWindow(TRUE);
-	}
-	//end rewbs.timeStretchMods
-}
-
-void CCtrlSamples::OnPitchShiftTimeStretchCancel()
-{
-	if((!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return;
-	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
-	if(!pSmp) return;
-
-	// Save processed sample buffer pointer
-	PVOID oldbuffer = pSmp->pSample;
-	BYTE smpsize  = (pSmp->uFlags & CHN_16BIT)  ? 2 : 1;
-	UINT nChn = (pSmp->uFlags & CHN_STEREO) ? 2 : 1;
-
-	// Restore undo buffer pointer & update song data
-	BEGIN_CRITICAL();
-	for(UINT i=0 ; i < MAX_CHANNELS ; i++){
-		if((PVOID)m_pSndFile->Chn[i].pSample == oldbuffer){
-			m_pSndFile->Chn[i].pSample = (LPSTR)pSampleUndoBuffer;
-			m_pSndFile->Chn[i].pCurrentSample = (LPSTR)pSampleUndoBuffer;
-			m_pSndFile->Chn[i].nLength = 0;
-		}
-	}
-	pSmp->pSample = (LPSTR)pSampleUndoBuffer;
-	pSmp->nLength = UndoBufferSize / (smpsize * nChn);
-	
-	//rewbs.timeStretchMods
-	// Restore loop points, if they were time stretched:
-	// Note: m_dTimeStretchRatio will not have changed since we disable  
-	//       GUI controls until preview is accepted/restored.
-	if(IsDlgButtonChecked(IDC_CHECK3)) {
-		pSmp->nLoopStart /= m_dTimeStretchRatio/100.0;
-		pSmp->nLoopEnd /= m_dTimeStretchRatio/100.0;
-		pSmp->nSustainStart /= m_dTimeStretchRatio/100.0;
-		pSmp->nSustainEnd /= m_dTimeStretchRatio/100.0;
-	}
-	//end rewbs.timeStretchMods
-
-	END_CRITICAL();
-
-	// Set processed sample buffer pointer as undo sample buffer pointer
-	pSampleUndoBuffer = oldbuffer;
-
-	// Free sample undo buffer & restore UI buttons
-	OnPitchShiftTimeStretchAccept();
 
 	// Update sample view
 	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL); // !!!! see CODE#0006, update#3
@@ -1958,11 +1813,6 @@ int CCtrlSamples::TimeStretch(double ratio)
 
 	}
 
-	// Stretching is implemented only for 16-bit samples. Return with
-	// error if trying to use wtih non 16-bit samples.
-	if(pSmp->GetElementarySampleSize() != 2)
-		return 4;
-
 	// SoundTouch(1.3.1) seems to crash with short samples. Don't know what
 	// the actual limit or whether it depends on sample rate,
 	// but simply set some semiarbitrary threshold here.
@@ -1989,14 +1839,21 @@ int CCtrlSamples::TimeStretch(double ratio)
 	}
 
 	// Get number of channels & sample size
-	const BYTE smpsize = pSmp->GetElementarySampleSize();
+	BYTE smpsize = pSmp->GetElementarySampleSize();
 	const UINT nChn = pSmp->GetNumChannels();
+
+	// Stretching is implemented only for 16-bit samples.
+	if(smpsize != 2)
+	{
+		// This has to be converted to 16-bit first.
+		OnUpsample();
+		smpsize = pSmp->GetElementarySampleSize();
+	}
 
 	// Allocate new sample. Returned sample may not be exactly the size what ratio would suggest
 	// so allocate a bit more(1.03*).
 	const DWORD nNewSampleLength = (DWORD)(1.03 * ratio * (double)pSmp->nLength);
 	//const DWORD nNewSampleLength = (DWORD)(0.5 + ratio * (double)pSmp->nLength);
-	PVOID pSample = pSmp->pSample;
 	PVOID pNewSample = CSoundFile::AllocateSample(nNewSampleLength * nChn * smpsize);
 	if(pNewSample == NULL)
 	{
@@ -2112,19 +1969,9 @@ int CCtrlSamples::TimeStretch(double ratio)
 
 	ASSERT(nNewSampleLength >= nLengthCounter);
 
+	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 	// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
-	BEGIN_CRITICAL();
-	for(UINT i=0 ; i < MAX_CHANNELS ; i++){
-		if((PVOID)m_pSndFile->Chn[i].pSample == pSample){
-			m_pSndFile->Chn[i].pSample = (LPSTR)pNewSample;
-			m_pSndFile->Chn[i].pCurrentSample = (LPSTR)pNewSample;
-			m_pSndFile->Chn[i].nLength = 0;
-		}
-	}
-	pSmp->pSample = (LPSTR)pNewSample;
-	CSoundFile::FreeSample(pSample);
-	pSmp->nLength = min(nLengthCounter, nNewSampleLength);
-	END_CRITICAL();
+	ctrlSmp::ReplaceSample(*pSmp, (LPSTR)pNewSample, min(nLengthCounter, nNewSampleLength), m_pSndFile);
 
 	// Free progress bar brushes
 	DeleteObject((HBRUSH)green);
@@ -2151,14 +1998,9 @@ int CCtrlSamples::PitchShift(float pitch)
 	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
 	if(!pSmp) return 2;
 
-	// PitchShift seems to work only with 16-bit samples. Return with
-	// error if trying to use non 16-bit samples.
-	if(pSmp->GetElementarySampleSize() != 2)
-		return 4;
-
 	// Get number of channels & sample size
-	BYTE smpsize  = (pSmp->uFlags & CHN_16BIT)  ? 2 : 1;
-	UINT nChn = (pSmp->uFlags & CHN_STEREO) ? 2 : 1;
+	BYTE smpsize = pSmp->GetElementarySampleSize();
+	UINT nChn = pSmp->GetNumChannels();
 
 	// Get selected oversampling - quality - (also refered as FFT overlapping) factor
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO5);
@@ -2199,9 +2041,20 @@ int CCtrlSamples::PitchShift(float pitch)
 	BeginWaitCursor();
 	SetDlgItemText(IDC_STATIC1,"Pitch shifting...");
 
+
+	// PitchShift seems to work only with 16-bit samples.
+	if(smpsize != 2)
+	{
+		// This has to be converted to 16-bit first.
+		OnUpsample();
+		smpsize = pSmp->GetElementarySampleSize();
+	}
+
 	// Allocate working buffers
 	float * buffer = new float[MAX_BUFFER_LENGTH + fft];
 	float * outbuf = new float[MAX_BUFFER_LENGTH + fft];
+
+	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 
 	// Process each channel separately
 	for(UINT i = 0 ; i < nChn ; i++){
@@ -2316,73 +2169,18 @@ int CCtrlSamples::PitchShift(float pitch)
 void CCtrlSamples::OnReverse()
 //----------------------------
 {
-	SAMPLEVIEWSTATE viewstate;
-	MODSAMPLE *pSmp;
-	DWORD dwBeginSel, dwEndSel;
-	LPVOID pSample;
-	UINT rlen, smplsize;
-	
-	memset(&viewstate, 0, sizeof(viewstate));
-	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
-	if ((!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return;
-	BeginWaitCursor();
-	dwBeginSel = viewstate.dwBeginSel;
-	dwEndSel = viewstate.dwEndSel;
-	pSmp = &m_pSndFile->Samples[m_nSample];
-	rlen = pSmp->nLength;
-	pSample = pSmp->pSample;
-	smplsize = (pSmp->uFlags & CHN_16BIT) ? 2 : 1;
-	if (pSmp->uFlags & CHN_STEREO) smplsize *= 2;
-	if ((dwEndSel > dwBeginSel) && (dwEndSel <= rlen))
+	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
+
+	SELECTIONPOINTS selection = GetSelectionPoints();
+
+	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_reverse, selection.nStart, selection.nEnd);
+	if(ctrlSmp::ReverseSample(pSmp, selection.nStart, selection.nEnd, m_pSndFile) == true)
 	{
-		rlen = dwEndSel - dwBeginSel;
-		pSample = ((LPBYTE)pSmp->pSample) +  dwBeginSel * smplsize;
-	}
-	if (rlen >= 2)
-	{
-		
-		if (smplsize == 4)
-		{
-			UINT len = rlen / 2;
-			UINT max = rlen - 1;
-			int *p = (int *)pSample;
-
-			for (UINT i=0; i<len; i++)
-			{
-				int tmp = p[max-i];
-				p[max-i] = p[i];
-				p[i] = tmp;
-			}
-		} else
-		if (smplsize == 2)
-		{
-			UINT len = rlen / 2;
-			UINT max = rlen - 1;
-			signed short *p = (signed short *)pSample;
-
-			for (UINT i=0; i<len; i++)
-			{
-				signed short tmp = p[max-i];
-				p[max-i] = p[i];
-				p[i] = tmp;
-			}
-		} else
-		{
-			UINT len = rlen / 2;
-			UINT max = rlen - 1;
-			signed char *p = (signed char *)pSample;
-
-			for (UINT i=0; i<len; i++)
-			{
-				signed char tmp = p[max-i];
-				p[max-i] = p[i];
-				p[i] = tmp;
-			}
-		}
-		m_pModDoc->AdjustEndOfSample(m_nSample);
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 		m_pModDoc->SetModified();
+	} else
+	{
+		m_pModDoc->GetSampleUndo()->RemoveLastUndoStep(m_nSample);
 	}
 	EndWaitCursor();
 	SwitchToView();
@@ -2390,22 +2188,31 @@ void CCtrlSamples::OnReverse()
 
 
 void CCtrlSamples::OnInvert()
-//--------------------------------
+//---------------------------
 {
-	ApplyAmplify(-100);
+	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
+
+	SELECTIONPOINTS selection = GetSelectionPoints();
+
+	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_invert, selection.nStart, selection.nEnd);
+	if(ctrlSmp::InvertSample(pSmp, selection.nStart, selection.nEnd, m_pSndFile) == true)
+	{
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
+		m_pModDoc->SetModified();
+	} else
+	{
+		m_pModDoc->GetSampleUndo()->RemoveLastUndoStep(m_nSample);
+	}
+	EndWaitCursor();
+	SwitchToView();
 }
 
 
 void CCtrlSamples::OnSignUnSign()
 //-------------------------------
 {
-	// purpose: sign/unsign a sample ("distortion")
-	SAMPLEVIEWSTATE viewstate;
-	DWORD dwStart, dwEnd;
 	MODSAMPLE *pSmp;
 	
-	memset(&viewstate, 0, sizeof(viewstate));
-	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	if ((!m_pModDoc) || (!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return;
 
 	if(m_pModDoc->IsNotePlaying(0, m_nSample, 0) == TRUE)
@@ -2413,29 +2220,17 @@ void CCtrlSamples::OnSignUnSign()
 
 	BeginWaitCursor();
 	pSmp = &m_pSndFile->Samples[m_nSample];
-	dwStart = viewstate.dwBeginSel;
-	dwEnd = viewstate.dwEndSel;
-	if (dwEnd > pSmp->nLength) dwEnd = pSmp->nLength;
-	if (dwStart > dwEnd) dwStart = dwEnd;
-	if (dwStart >= dwEnd)
-	{
-		dwStart = 0;
-		dwEnd = pSmp->nLength;
-	}
-	if (pSmp->uFlags & CHN_STEREO) { dwStart *= 2; dwEnd *= 2; }
-	UINT len = dwEnd - dwStart;
-	if (pSmp->uFlags & CHN_16BIT)
-	{
-		signed short *p = ((signed short *)pSmp->pSample) + dwStart;
-		for (UINT i=0; i<len; ++i) p[i] += 0x8000; //unsign
-	} else {
-		signed char *p = ((signed char *)pSmp->pSample) + dwStart;
-		for (UINT i=0; i<len; ++i) p[i] += 0x80; //unsign
-	}
+	SELECTIONPOINTS selection = GetSelectionPoints();
 
-	m_pModDoc->AdjustEndOfSample(m_nSample);
-	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
-	m_pModDoc->SetModified();
+	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_unsign, selection.nStart, selection.nEnd);
+	if(ctrlSmp::UnsignSample(pSmp, selection.nStart, selection.nEnd, m_pSndFile) == true)
+	{
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
+		m_pModDoc->SetModified();
+	} else
+	{
+		m_pModDoc->GetSampleUndo()->RemoveLastUndoStep(m_nSample);
+	}
 	EndWaitCursor();
 	SwitchToView();
 }
@@ -2444,55 +2239,54 @@ void CCtrlSamples::OnSignUnSign()
 void CCtrlSamples::OnSilence()
 //----------------------------
 {
-	SAMPLEVIEWSTATE viewstate;
 	MODSAMPLE *pSmp;
-	DWORD dwBeginSel, dwEndSel;
 	
-	memset(&viewstate, 0, sizeof(viewstate));
-	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
 	if ((!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return;
 	BeginWaitCursor();
-	dwBeginSel = viewstate.dwBeginSel;
-	dwEndSel = viewstate.dwEndSel;
-	pSmp = &m_pSndFile->Samples[m_nSample];
-	if (dwEndSel > pSmp->nLength) dwEndSel = pSmp->nLength;
-	if (dwEndSel > dwBeginSel+1)
+	SELECTIONPOINTS selection = GetSelectionPoints();
+
+	// never apply silence to a sample that has no selection
+	if(selection.bSelected == true)
 	{
-		int len = dwEndSel - dwBeginSel;
+		pSmp = &m_pSndFile->Samples[m_nSample];
+		m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_update, selection.nStart, selection.nEnd);
+
+		int len = selection.nEnd - selection.nStart;
 		if (pSmp->uFlags & CHN_STEREO)
 		{
 			int smplsize = (pSmp->uFlags & CHN_16BIT) ? 4 : 2;
-			signed char *p = ((signed char *)pSmp->pSample) + dwBeginSel*smplsize;
+			signed char *p = ((signed char *)pSmp->pSample) + selection.nStart * smplsize;
 			memset(p, 0, len*smplsize);
 		} else
-		if (pSmp->uFlags & CHN_16BIT)
-		{
-			short int *p = ((short int *)pSmp->pSample) + dwBeginSel;
-			int dest = (dwEndSel < pSmp->nLength) ? p[len-1] : 0;
-			int base = (dwBeginSel) ? p[0] : 0;
-			int delta = dest - base;
-			for (int i=0; i<len; i++)
+			if (pSmp->uFlags & CHN_16BIT)
 			{
-				int n = base + (int)(((LONGLONG)delta * (LONGLONG)i) / (len-1));
-				p[i] = (signed short)n;
-			}
-		} else
-		{
-			signed char *p = ((signed char *)pSmp->pSample) + dwBeginSel;
-			int dest = (dwEndSel < pSmp->nLength) ? p[len-1] : 0;
-			int base = (dwBeginSel) ? p[0] : 0;
-			int delta = dest - base;
-			for (int i=0; i<len; i++)
+				short int *p = ((short int *)pSmp->pSample) + selection.nStart;
+				int dest = (selection.nEnd < pSmp->nLength) ? p[len-1] : 0;
+				int base = (selection.nStart) ? p[0] : 0;
+				int delta = dest - base;
+				for (int i=0; i<len; i++)
+				{
+					int n = base + (int)(((LONGLONG)delta * (LONGLONG)i) / (len-1));
+					p[i] = (signed short)n;
+				}
+			} else
 			{
-				int n = base + (delta * i) / (len-1);
-				p[i] = (signed char)n;
+				signed char *p = ((signed char *)pSmp->pSample) + selection.nStart;
+				int dest = (selection.nEnd < pSmp->nLength) ? p[len-1] : 0;
+				int base = (selection.nStart) ? p[0] : 0;
+				int delta = dest - base;
+				for (int i=0; i<len; i++)
+				{
+					int n = base + (delta * i) / (len-1);
+					p[i] = (signed char)n;
+				}
 			}
-		}
-		m_pModDoc->AdjustEndOfSample(m_nSample);
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
-		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
-		m_pModDoc->SetModified();
+			m_pModDoc->AdjustEndOfSample(m_nSample);
+			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+			m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
+			m_pModDoc->SetModified();
 	}
+
 	EndWaitCursor();
 	SwitchToView();
 }
@@ -3207,3 +3001,31 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	return 0;
 }
 //end rewbs.customKeys
+
+
+// Return currently selected part of the sample.
+// The whole sample size will be returned if no part of the sample is selected.
+// However, point.bSelected indicates whether a sample selection exists or not.
+SELECTIONPOINTS CCtrlSamples::GetSelectionPoints()
+//------------------------------------------------
+{
+	SELECTIONPOINTS points;
+	SAMPLEVIEWSTATE viewstate;
+	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
+
+	memset(&viewstate, 0, sizeof(viewstate));
+	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+	points.nStart = viewstate.dwBeginSel;
+	points.nEnd = viewstate.dwEndSel;
+	if(points.nEnd > pSmp->nLength) points.nEnd = pSmp->nLength;
+	if(points.nStart > points.nEnd) points.nStart = points.nEnd;
+	points.bSelected = true;
+	if(points.nStart >= points.nEnd)
+	{
+		points.nStart = 0;
+		points.nEnd = pSmp->nLength;
+		points.bSelected = false;
+	}
+	return points;
+}
+

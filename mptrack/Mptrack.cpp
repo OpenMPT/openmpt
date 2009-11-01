@@ -828,6 +828,9 @@ BOOL CTrackApp::InitInstance()
 	// Allow allocations of at least 16MB
 	if (gMemStatus.dwTotalPhys < 16*1024*1024) gMemStatus.dwTotalPhys = 16*1024*1024;
 
+	CMainFrame::m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
+	if(CMainFrame::m_nSampleUndoMaxBuffer < 1) CMainFrame::m_nSampleUndoMaxBuffer = 1;
+
 	ASSERT(NULL == m_pDocManager);
 	m_pDocManager = new CModDocManager();
 

@@ -97,6 +97,7 @@ protected:
 	afx_msg void OnEditCut();
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
+	afx_msg void OnEditUndo();
 	afx_msg void OnSetLoop();
 	afx_msg void OnSetSustainLoop();
 	afx_msg void On8BitConvert();
