@@ -829,7 +829,7 @@ BOOL CTrackApp::InitInstance()
 	if (gMemStatus.dwTotalPhys < 16*1024*1024) gMemStatus.dwTotalPhys = 16*1024*1024;
 
 	CMainFrame::m_nSampleUndoMaxBuffer = gMemStatus.dwTotalPhys / 10; // set sample undo buffer size
-	if(CMainFrame::m_nSampleUndoMaxBuffer < 1) CMainFrame::m_nSampleUndoMaxBuffer = 1;
+	if(CMainFrame::m_nSampleUndoMaxBuffer < (1 << 20)) CMainFrame::m_nSampleUndoMaxBuffer = (1 << 20);
 
 	ASSERT(NULL == m_pDocManager);
 	m_pDocManager = new CModDocManager();

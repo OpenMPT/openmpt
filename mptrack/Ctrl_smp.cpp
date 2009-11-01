@@ -306,9 +306,6 @@ BOOL CCtrlSamples::OnInitDialog()
 	// Stretch ratio
 	SetDlgItemInt(IDC_EDIT6,100,FALSE);
 
-	// Processing state text label
-	SetDlgItemText(IDC_STATIC1,"");
-
 	// Stretch to size check box
 	OnEnableStretchToSize();
 
@@ -1686,7 +1683,7 @@ void CCtrlSamples::OnEnableStretchToSize()
 	GetDlgItem(IDC_EDIT_STRETCHPARAMS)->ShowWindow(bTimeStretch ? SW_SHOW : SW_HIDE);
 	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
 	GetDlgItem(IDC_COMBO4)->ShowWindow(bTimeStretch ? SW_HIDE : SW_SHOW);
-	SetDlgItemText(IDC_BUTTON1, "Time Stretch");
+	SetDlgItemText(IDC_BUTTON1, bTimeStretch ? "Time Stretch" : "Pitch Shift");
 	if(bTimeStretch) UpdateTimeStretchParameterString();
 }
 
@@ -1700,7 +1697,7 @@ void CCtrlSamples::OnEstimateSampleSize()
 	//Ensure m_dTimeStretchRatio is up-to-date with textbox content
 	UpdateData(TRUE);
 
-	//Calculate/verify samplerate at C4.
+	//Calculate/verify samplerate at C5.
 	long lSampleRate = pSmp->nC5Speed;
 	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 		lSampleRate = (double)CSoundFile::TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
@@ -1801,18 +1798,6 @@ int CCtrlSamples::TimeStretch(double ratio)
 
 	const uint32 nSampleRate = pSmp->GetSampleRate(m_pSndFile->GetType());
 
-	// SoundTouch(v1.4.0) documentation says that sample rates 8000-48000 are supported.
-	// Check whether sample rate is within that range, and if not,
-	// ask user whether to proceed.
-	if(nSampleRate < 8000 || nSampleRate > 48000)
-	{
-		CString str;
-		str.Format(TEXT(GetStrI18N("Current samplerate, %u Hz, is not in the supported samplerate range 8000 Hz - 48000 Hz. Continue?")), nSampleRate);
-		if(AfxMessageBox(str, MB_ICONQUESTION|MB_YESNO) != IDYES)
-			return -1;
-
-	}
-
 	// SoundTouch(1.3.1) seems to crash with short samples. Don't know what
 	// the actual limit or whether it depends on sample rate,
 	// but simply set some semiarbitrary threshold here.
@@ -1850,6 +1835,18 @@ int CCtrlSamples::TimeStretch(double ratio)
 		smpsize = pSmp->GetElementarySampleSize();
 	}
 
+	// SoundTouch(v1.4.0) documentation says that sample rates 8000-48000 are supported.
+	// Check whether sample rate is within that range, and if not,
+	// ask user whether to proceed.
+	if(nSampleRate < 8000 || nSampleRate > 48000)
+	{
+		CString str;
+		str.Format(TEXT(GetStrI18N("Current samplerate, %u Hz, is not in the supported samplerate range 8000 Hz - 48000 Hz. Continue?")), nSampleRate);
+		if(AfxMessageBox(str, MB_ICONQUESTION|MB_YESNO) != IDYES)
+			return -1;
+
+	}
+
 	// Allocate new sample. Returned sample may not be exactly the size what ratio would suggest
 	// so allocate a bit more(1.03*).
 	const DWORD nNewSampleLength = (DWORD)(1.03 * ratio * (double)pSmp->nLength);
@@ -1881,7 +1878,6 @@ int CCtrlSamples::TimeStretch(double ratio)
 
 	// Show wait mouse cursor
 	BeginWaitCursor();
-	SetDlgItemText(IDC_STATIC1, "Stretching...");
 
 	UINT pos = 0;
 	UINT len = 0; //To contain length of processing step.
@@ -1981,7 +1977,6 @@ int CCtrlSamples::TimeStretch(double ratio)
 	SetDlgItemText(IDC_BUTTON1, oldText);
 
 	// Restore mouse cursor
-	SetDlgItemText(IDC_STATIC1,"");
 	EndWaitCursor();
 
 	return 0;
@@ -2011,14 +2006,6 @@ int CCtrlSamples::PitchShift(float pitch)
 	UINT fft = 1 << (combo->GetCurSel() + 8);
 	while(fft > MAX_BUFFER_LENGTH) fft >>= 1;
 
-	// Get original sample rate
-	long lSampleRate = pSmp->nC5Speed;
-	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) lSampleRate = CSoundFile::TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
-	if(lSampleRate <= 0) lSampleRate = 8363;
-
-	// Deduce max sample value (float conversion step)
-	float maxSampleValue = ( 1 << (smpsize * 8 - 1) ) - 1;
-
 	// Save process button text (to be used as "progress bar" indicator while processing)
 	CHAR oldText[255];
 	GetDlgItemText(IDC_BUTTON1, oldText, 255);
@@ -2039,7 +2026,6 @@ int CCtrlSamples::PitchShift(float pitch)
 
 	// Show wait mouse cursor
 	BeginWaitCursor();
-	SetDlgItemText(IDC_STATIC1,"Pitch shifting...");
 
 
 	// PitchShift seems to work only with 16-bit samples.
@@ -2049,6 +2035,12 @@ int CCtrlSamples::PitchShift(float pitch)
 		OnUpsample();
 		smpsize = pSmp->GetElementarySampleSize();
 	}
+
+	// Get original sample rate
+	long lSampleRate = pSmp->GetSampleRate(m_pSndFile->GetType());
+
+	// Deduce max sample value (float conversion step)
+	float maxSampleValue = ( 1 << (smpsize * 8 - 1) ) - 1;
 
 	// Allocate working buffers
 	float * buffer = new float[MAX_BUFFER_LENGTH + fft];
@@ -2159,7 +2151,6 @@ int CCtrlSamples::PitchShift(float pitch)
 	SetDlgItemText(IDC_BUTTON1, oldText);
 
 	// Restore mouse cursor
-	SetDlgItemText(IDC_STATIC1,"");
 	EndWaitCursor();
 
 	return 0;
