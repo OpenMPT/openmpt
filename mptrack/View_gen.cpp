@@ -823,7 +823,7 @@ void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
 		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < pSndFile->m_nChannels)
 		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
 		{
-			pSndFile->ChnSettings[nChn].nMixPlugin = nfx;
+			pSndFile->ChnSettings[nChn].nMixPlugin = (PLUGINDEX)nfx;
 			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
@@ -898,7 +898,7 @@ void CViewGlobals::OnPluginChanged()
 	int nPlugin = m_CbnPlugin.GetCurSel();
 	if ((pModDoc) && (nPlugin >= 0) && (nPlugin < MAX_MIXPLUGINS))
 	{
-		m_nCurrentPlugin = nPlugin;
+		m_nCurrentPlugin = (PLUGINDEX)nPlugin;
 		pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS | HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 	}
 // -> CODE#0002
@@ -1314,12 +1314,35 @@ void CViewGlobals::OnMovePlugToSlot()
 
 }
 
-bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest)
-//--------------------------------------------------------
+
+// Functor for adjusting plug indexes in modcommands. Adjusts all instrument column values in 
+// range [m_nInstrMin, m_nInstrMax] by m_nDiff.
+struct PlugIndexModifier
+//======================
 {
+	PlugIndexModifier(PLUGINDEX nMin, PLUGINDEX nMax, int nDiff) :
+		m_nInstrMin(nMin), m_nInstrMax(nMax), m_nDiff(nDiff) {}
+	void operator()(MODCOMMAND& m)
+	{
+		if (m.IsInstrPlug() && m.instr >= m_nInstrMin && m.instr <= m_nInstrMax)
+			m.instr = (MODCOMMAND::INSTR)((int)m.instr + m_nDiff);
+	}
+	int m_nDiff;
+	MODCOMMAND::INSTR m_nInstrMin;
+	MODCOMMAND::INSTR m_nInstrMax;
+};
+
+
+bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
+//-------------------------------------------------------------------------
+{
+	if (src == dest)
+		return false;
 	//AfxMessageBox("Moving %d to %d", src, dest);
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile* pSndFile = pModDoc->GetSoundFile();
+
+	BeginWaitCursor();
 	
 	BEGIN_CRITICAL();
 		
@@ -1363,23 +1386,19 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest)
 		}
 	}
 
-	// Update patterns (param control notes)
-	for (PATTERNINDEX nPat = 0; nPat < pSndFile->Patterns.Size(); nPat++) if (pSndFile->Patterns[nPat])
-	{
-		MODCOMMAND *m = pSndFile->Patterns[nPat];
-		for (UINT len = pSndFile->PatternSize[nPat] * pSndFile->m_nChannels; len; m++, len--)
-		{
-			if((m->note == NOTE_PC || m->note == NOTE_PCS) && m->instr == src + 1)
-				m->instr = dest + 1;
-		}
-	}
+	// Update MODCOMMANDs so that they won't be referring to old indexes (e.g. with NOTE_PC).
+	if (bAdjustPat && pSndFile->GetType() == MOD_TYPE_MPT)
+		pSndFile->Patterns.ForEachModCommand(PlugIndexModifier(src + 1, src + 1, int(dest) - int(src)));
 
 	END_CRITICAL();
 
 	pModDoc->SetModified();
 
+	EndWaitCursor();
+
 	return true;
 }
+
 
 void CViewGlobals::BuildEmptySlotList(CArray<UINT, UINT> &emptySlots) 
 //-------------------------------------------------------------------
@@ -1416,9 +1435,14 @@ void CViewGlobals::OnInsertSlot()
 			//possible mem leak here...
 		}
 
-		for (PLUGINDEX nSlot = MAX_MIXPLUGINS-1; nSlot > (PLUGINDEX)m_nCurrentPlugin; nSlot--) {
+		// Update MODCOMMANDs so that they won't be referring to old indexes (e.g. with NOTE_PC).
+		if (pSndFile->GetType() == MOD_TYPE_MPT)
+			pSndFile->Patterns.ForEachModCommand(PlugIndexModifier(m_nCurrentPlugin + 1, MAX_MIXPLUGINS - 1, 1));
+
+
+		for (PLUGINDEX nSlot = MAX_MIXPLUGINS-1; nSlot > m_nCurrentPlugin; nSlot--) {
 			if (pSndFile->m_MixPlugins[nSlot-1].pMixPlugin) {
-				MovePlug(nSlot-1, nSlot);
+				MovePlug(nSlot-1, nSlot, NoPatternAdjust);
 			}
 		}
 

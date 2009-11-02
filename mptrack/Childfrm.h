@@ -17,7 +17,7 @@ class CChildFrame;
 typedef struct _GENERALVIEWSTATE
 {
 	DWORD cbStruct;
-	DWORD nPlugin;
+	PLUGINDEX nPlugin;
 	DWORD nParam;
 	DWORD nTab;
 } GENERALVIEWSTATE;

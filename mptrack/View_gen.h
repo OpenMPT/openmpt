@@ -42,6 +42,8 @@ protected:
 	CSpinButtonCtrl m_SpinMixGain;			// update#02
 // -! NEW_FEATURE#0028
 
+	enum {AdjustPattern = true, NoPatternAdjust = false};
+
 protected:
 	CViewGlobals():CFormView(IDD_VIEW_GLOBALS) { m_nLockCount = 1; }
 	DECLARE_SERIAL(CViewGlobals)
@@ -57,7 +59,7 @@ public:
 	BOOL IsLocked() const { return (m_nLockCount > 0); }
 	int GetDlgItemIntEx(UINT nID);
 	void BuildEmptySlotList(CArray<UINT, UINT> &emptySlots);
-	bool MovePlug(PLUGINDEX src, PLUGINDEX dest);
+	bool MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat = AdjustPattern);
 
 public:
 	//{{AFX_VIRTUAL(CViewGlobals)
