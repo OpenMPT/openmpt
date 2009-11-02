@@ -110,7 +110,7 @@ CViewInstrument::CViewInstrument()
 	memset(m_NcButtonState, 0, sizeof(m_NcButtonState));
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
 	memset(m_baPlayingNote, 0, sizeof(bool)*NOTE_MAX);  //rewbs.customKeys
-	m_nPlayingChannel =-1;						   //rewbs.customKeys
+	m_nPlayingChannel = UINT_MAX;						   //rewbs.customKeys
 	//rewbs.envRowGrid
 	m_bGrid=true;								  
 	m_bGridForceRedraw=false;
@@ -152,8 +152,8 @@ void CViewInstrument::UpdateScrollSize()
 }
 
 
-BOOL CViewInstrument::SetCurrentInstrument(UINT nIns, UINT nEnv)
-//--------------------------------------------------------------
+BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, UINT nEnv)
+//-------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	DWORD dwNotify;
@@ -1042,7 +1042,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 	}
 
 
-	if (windowResized || m_bGridForceRedraw || (cachedScrollPos != m_GridScrollPos) || (speed != m_GridSpeed)) {
+	if (windowResized || m_bGridForceRedraw || (cachedScrollPos != m_GridScrollPos) || (speed != (UINT)m_GridSpeed)) {
 
 		m_GridSpeed = speed;
 		m_GridScrollPos = cachedScrollPos;
@@ -1161,7 +1161,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	{
 		maxpoint--;
 		m_dcMemMain.SelectObject(CMainFrame::penEnvelope);
-		int releaseNode = EnvGetReleaseNode();	
+		UINT releaseNode = EnvGetReleaseNode();
 		for (UINT i=0; i<=maxpoint; i++)
 		{
 			int x = (EnvGetTick(i) + 1) * ENV_ZOOM - nScrollPos;
@@ -1175,7 +1175,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 			} else {
 				m_dcMemMain.MoveTo(x, y);
 			}
-			if (i==releaseNode) {
+			if (i == releaseNode) {
 				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushHighLightRed));
 				m_dcMemMain.SelectObject(CMainFrame::penEnvelopeHighlight);
 			} else {
@@ -1371,7 +1371,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 				break;
 			}
 			memset(m_baPlayingNote, 0, sizeof(bool)*NOTE_MAX); 	//rewbs.instViewNNA
-			m_nPlayingChannel=-1;							//rewbs.instViewNNA
+			m_nPlayingChannel = UINT_MAX;						//rewbs.instViewNNA
 		}
 	} else
 	if ((pnotify->dwType & dwType) && ((pnotify->dwType & 0xFFFF) == m_nInstrument))
@@ -1639,6 +1639,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return;
 	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+	if (pIns == nullptr) return;
 
 	BOOL bSplitCursor = FALSE;
 	CHAR s[256];
@@ -1991,7 +1992,7 @@ void CViewInstrument::OnEnvCarryChanged()
 void CViewInstrument::OnEnvToggleReleasNode() 
 //---------------------------------------------------
 {
-	int node = m_nDragItem-1;
+	UINT node = m_nDragItem-1;
 
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (node>0) && (node <= EnvGetLastPoint()))
@@ -2002,7 +2003,7 @@ void CViewInstrument::OnEnvToggleReleasNode()
 		if (envelope->nReleaseNode == node) {
 			envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 		} else { 
-			envelope->nReleaseNode = node;
+			envelope->nReleaseNode = static_cast<BYTE>(node);
 		}
 
 		pModDoc->SetModified();
@@ -2137,11 +2138,11 @@ void CViewInstrument::PlayNote(UINT note)
 			MODINSTRUMENT *pIns = pModDoc->GetSoundFile()->Instruments[m_nInstrument];
 			if ((!pIns) || (!pIns->Keyboard[note-1] && !pIns->nMixPlug)) return;
 			m_baPlayingNote[note] = true;											//rewbs.instViewNNA
-			m_nPlayingChannel= pModDoc->PlayNote(note, m_nInstrument, 0, FALSE); //rewbs.instViewNNA
+			m_nPlayingChannel = pModDoc->PlayNote(note, m_nInstrument, 0, FALSE); //rewbs.instViewNNA
 			s[0] = 0;
 			if ((note) && (note <= NOTE_MAX)) 
 			{
-				const std::string temp = pModDoc->GetSoundFile()->GetNoteName(note, m_nInstrument);
+				const std::string temp = pModDoc->GetSoundFile()->GetNoteName(static_cast<int16>(note), m_nInstrument);
 				if(temp.size() >= sizeofS)
 					wsprintf(s, "%s", "...");
 				else

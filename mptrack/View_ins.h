@@ -41,7 +41,7 @@ public:
 
 public:
 	void UpdateScrollSize();
-	BOOL SetCurrentInstrument(UINT nIns, UINT m_nEnv=0);
+	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, UINT m_nEnv=0);
 	INSTRUMENTENVELOPE *GetEnvelopePtr() const;
 	UINT EnvGetTick(int nPoint) const;
 	UINT EnvGetValue(int nPoint) const;

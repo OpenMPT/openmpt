@@ -151,7 +151,7 @@ BOOL CModDoc::OnNewDocument()
 	m_SndFile.m_nMixLevels = m_SndFile.GetModSpecifications().defaultMixLevels;
 	m_SndFile.m_pConfig->SetMixLevels(m_SndFile.m_nMixLevels);
 	// ...and the order length
-	m_SndFile.Order.resize(m_SndFile.GetModSpecifications().ordersMax);
+	m_SndFile.Order.resize(min(ModSequenceSet::s_nCacheSize, m_SndFile.GetModSpecifications().ordersMax));
 
 	theApp.GetDefaultMidiMacro(&m_SndFile.m_MidiCfg);
 	ReinitRecordState();
@@ -281,7 +281,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 					if (f.Open(pszMidiMapName, CFile::modeRead))
 					{
-						DWORD len = f.GetLength();
+						DWORD len = static_cast<DWORD>(f.GetLength());
 						LPBYTE lpFile;
 						if ((len) && ((lpFile = (LPBYTE)GlobalAllocPtr(GHND, len)) != NULL))
 						{
@@ -831,7 +831,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		pChn->nResonance = 0;
 		pChn->nVolume = 256;
 		pChn->nMasterChn = 0;	//remove NNA association
-		pChn->nNewNote = note;
+		pChn->nNewNote = static_cast<BYTE>(note);
 
 		if (nins) {									//Set instrument
 			m_SndFile.resetEnvelopes(pChn);
@@ -1043,7 +1043,7 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 
 	//mute any NNA'd channels
 	for (UINT i=m_SndFile.m_nChannels; i<MAX_CHANNELS; i++) {
-		if (m_SndFile.Chn[i].nMasterChn == nChn+1)	{
+		if (m_SndFile.Chn[i].nMasterChn == nChn + 1u)	{
 			if (doMute) { 
 				m_SndFile.Chn[i].dwFlags |= muteType;
 			} else {
@@ -1432,7 +1432,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	}
 
 	CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
-	dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
+	dwcdlg.m_dwFileLimit = static_cast<DWORD>(wsdlg.m_dwFileLimit);
 	dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 	dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
@@ -2220,7 +2220,7 @@ UINT CModDoc::GetEffectFromIndex(UINT ndx, int &refParam)
 		}
 	}
 	if (gFXInfo[ndx].dwFlags) {
-		if (refParam > gFXInfo[ndx].dwFlags) {
+		if (refParam > static_cast<int>(gFXInfo[ndx].dwFlags)) {
 			refParam = gFXInfo[ndx].dwFlags;	//used for Zxx macro control: limit to 7F max.
 		}
 	}
@@ -2852,6 +2852,7 @@ BOOL CModDoc::GetVolCmdInfo(UINT ndx, LPSTR s, DWORD *prangeMin, DWORD *prangeMa
 
 //rewbs.customKeys
 void* CModDoc::GetChildFrame()
+//----------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return 0;

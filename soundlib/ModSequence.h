@@ -140,12 +140,11 @@ public:
 
 	ModSequenceSet& operator=(const ModSequence& seq) {ModSequence::operator=(seq); return *this;}
 
+	static const ORDERINDEX s_nCacheSize = MAX_ORDERS;
 
 private:
 	void CopyCacheToStorage();
 	void CopyStorageToCache();
-
-	static const ORDERINDEX s_nCacheSize = MAX_ORDERS;
 
 	PATTERNINDEX m_Cache[s_nCacheSize];		// Local cache array.
 	std::vector<ModSequence> m_Sequences;	// Array of sequences.

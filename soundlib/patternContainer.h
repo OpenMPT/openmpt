@@ -46,6 +46,13 @@ public:
 	//'invisible' - the pattern data is cleared but the actual pattern object won't get removed.
 	bool Remove(const PATTERNINDEX index);
 
+	// Applies function object for modcommands in patterns in given range.
+	// Return: Copy of the function object.
+	template <class Func>
+	Func ForEachModCommand(PATTERNINDEX nStartPat, PATTERNINDEX nLastPat, Func func);
+	template <class Func>
+	Func ForEachModCommand(Func func) {return ForEachModCommand(0, Size() - 1, func);}
+
 	PATTERNINDEX Size() const {return static_cast<PATTERNINDEX>(m_Patterns.size());}
 
 	CSoundFile& GetSoundFile() {return m_rSndFile;}
@@ -74,6 +81,18 @@ private:
 //END: DATA MEMBERS
 
 };
+
+
+template <class Func>
+Func CPatternContainer::ForEachModCommand(PATTERNINDEX nStartPat, PATTERNINDEX nLastPat, Func func)
+//-------------------------------------------------------------------------------------------------
+{
+	if (nStartPat > nLastPat || nLastPat >= Size())
+		return func;
+	for (PATTERNINDEX nPat = nStartPat; nPat <= nLastPat; nPat++) if (m_Patterns[nPat])
+		std::for_each(m_Patterns[nPat].Begin(), m_Patterns[nPat].End(), func);
+	return func;
+}
 
 
 const char FileIdPatterns[] = "mptPc";

@@ -2,6 +2,19 @@
 #define MODCOMMAND_H
 
 
+// Note definitions
+#define NOTE_NONE			0
+#define NOTE_MIDDLEC		(5*12+1)
+#define NOTE_KEYOFF			0xFF //255
+#define NOTE_NOTECUT		0xFE //254
+#define NOTE_FADE			0xFD //253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
+#define NOTE_PC				0xFC //252, Param Control 'note'. Changes param value on first tick.
+#define NOTE_PCS			0xFB //251, Param Control(Smooth) 'note'. Changes param value during the whole row.
+#define NOTE_MAX			120  //Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
+#define NOTE_MAX_SPECIAL	NOTE_KEYOFF
+#define NOTE_MIN_SPECIAL	NOTE_PCS
+
+
 //==============
 class MODCOMMAND
 //==============
@@ -21,15 +34,8 @@ public:
 	// Returns empty modcommand.
 	static MODCOMMAND Empty() {MODCOMMAND m = {0,0,0,0,0,0}; return m;}
 
-	inline bool operator==(const MODCOMMAND& mc) const
-	{
-		return (memcmp(this, &mc, sizeof(MODCOMMAND)) == 0);
-	}
-
-	inline bool operator !=(const MODCOMMAND& mc) const
-	{
-		return !(*this == mc);
-	}
+	bool operator==(const MODCOMMAND& mc) const { return (memcmp(this, &mc, sizeof(MODCOMMAND)) == 0); }
+	bool operator!=(const MODCOMMAND& mc) const { return !(*this == mc); }
 
 	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) {note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol);}
 
@@ -45,7 +51,10 @@ public:
 	void Clear() {memset(this, 0, sizeof(MODCOMMAND));}
 
 	// Returns true if modcommand is empty, false otherwise.
-	inline bool MODCOMMAND::IsEmpty() const {return (*this == Empty());}
+	bool IsEmpty() const {return (*this == Empty());}
+
+	// Returns true if instrument column represents plugin index.
+	bool IsInstrPlug() const {return note == NOTE_PC || note == NOTE_PCS;}
 
 public:
 	BYTE note;
@@ -58,19 +67,6 @@ public:
 
 typedef MODCOMMAND* LPMODCOMMAND;
 typedef MODCOMMAND MODCOMMAND_ORIGINAL;
-
-
-// Note definitions
-#define NOTE_NONE			0
-#define NOTE_MIDDLEC		(5*12+1)
-#define NOTE_KEYOFF			0xFF //255
-#define NOTE_NOTECUT		0xFE //254
-#define NOTE_FADE			0xFD //253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
-#define NOTE_PC				0xFC //252, Param Control 'note'. Changes param value on first tick.
-#define NOTE_PCS			0xFB //251, Param Control(Smooth) 'note'. Changes param value during the whole row.
-#define NOTE_MAX			120  //Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
-#define NOTE_MAX_SPECIAL	NOTE_KEYOFF
-#define NOTE_MIN_SPECIAL	NOTE_PCS
 
 
 // Volume Column commands
