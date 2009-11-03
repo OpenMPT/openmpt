@@ -41,9 +41,14 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_WM_HSCROLL()
 	ON_WM_SIZE()
 	ON_COMMAND(ID_CONTROLTAB,			OnSwitchToView)
+
 	ON_COMMAND(ID_ORDERLIST_INSERT,		OnInsertOrder)
 	ON_COMMAND(ID_ORDERLIST_DELETE,		OnDeleteOrder)
 	ON_COMMAND(ID_ORDERLIST_RENDER,		OnRenderOrder)
+	ON_COMMAND(ID_ORDERLIST_EDIT_COPY,	OnEditCopy)
+	ON_COMMAND(ID_ORDERLIST_EDIT_CUT,	OnEditCut)
+	ON_COMMAND(ID_ORDERLIST_EDIT_PASTE,	OnEditPaste)
+
 	ON_COMMAND(ID_PATTERN_PROPERTIES,	OnPatternProperties)
 	ON_COMMAND(ID_PLAYER_PLAY,			OnPlayerPlay)
 	ON_COMMAND(ID_PLAYER_PAUSE,			OnPlayerPause)
@@ -989,11 +994,17 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 
 	DWORD greyed = bPatternExists ? 0 : MF_GRAYED;
 
+	CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
+
 	if(bMultiSelection)
 	{
 		// several patterns are selected.
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Patterns\tIns");
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Patterns\tDel");
+		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY, "&Copy Orders\t" + ih->GetKeyTextFromCommand(kcEditCopy));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_CUT, "&C&ut Orders\t" + ih->GetKeyTextFromCommand(kcEditCut));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_PASTE, "&Paste Orders\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Patterns");
 	}
@@ -1007,6 +1018,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Pattern");
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNCOPY, "&Copy Pattern");
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNPASTE, "P&aste Pattern");
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_PASTE, "&Paste Orders\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 		if (pSndFile->TypeIsIT_MPT_XM())
 		{
 			AppendMenu(hMenu, MF_SEPARATOR, NULL, "");

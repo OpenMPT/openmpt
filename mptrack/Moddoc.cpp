@@ -1372,6 +1372,16 @@ LRESULT CModDoc::ActivateView(UINT nIdView, DWORD dwParam)
 }
 
 
+// Activate document's window.
+void CModDoc::ActivateWindow()
+//----------------------------
+{
+	
+	CChildFrame *pChildFrm = (CChildFrame *)GetChildFrame();
+	if(pChildFrm) pChildFrm->MDIActivate();
+}
+
+
 void CModDoc::UpdateAllViews(CView *pSender, LPARAM lHint, CObject *pHint)
 //------------------------------------------------------------------------
 {

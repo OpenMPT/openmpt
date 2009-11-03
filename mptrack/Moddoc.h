@@ -154,6 +154,9 @@ public:
 	void ViewInstrument(UINT nIns);
 	HWND GetFollowWnd() const { return m_hWndFollow; }
 	void SetFollowWnd(HWND hwnd, DWORD dwType);
+
+	void ActivateWindow();
+
 	// Effects Description
 	bool GetEffectName(LPSTR pszDescription, UINT command, UINT param, bool bXX = false, CHANNELINDEX nChn = CHANNELINDEX_INVALID); // bXX: Nxx: ...
 	UINT GetNumEffects() const;
@@ -189,7 +192,7 @@ public:
 	BOOL ConvertInstrumentsToSamples();
 	UINT RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS]);
 
-	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = -1, ROWINDEX nRows = 64);
+	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);
 	SAMPLEINDEX InsertSample(bool bLimit = false);
 	INSTRUMENTINDEX InsertInstrument(LONG lSample = 0, LONG lDuplicate = 0);
 	void InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample=0);

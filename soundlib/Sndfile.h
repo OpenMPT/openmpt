@@ -971,7 +971,7 @@ private:
 
 
 inline uint32 MODSAMPLE::GetSampleRate(const MODTYPE type) const
-//------------------------------------------------------------------
+//--------------------------------------------------------------
 {
 	uint32 nRate;
 	if(type & (MOD_TYPE_MOD|MOD_TYPE_XM))
@@ -983,7 +983,7 @@ inline uint32 MODSAMPLE::GetSampleRate(const MODTYPE type) const
 
 
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr)
-//----------------------------------------------------------------
+//-----------------------------------------------------------------------
 {
 	if(instr > 0 && instr < MAX_INSTRUMENTS && Instruments[instr] && Instruments[instr]->nMixPlug && Instruments[instr]->nMixPlug <= MAX_MIXPLUGINS)
 		return m_MixPlugins[Instruments[instr]->nMixPlug-1].pMixPlugin;
