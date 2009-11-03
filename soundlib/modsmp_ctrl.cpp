@@ -15,9 +15,20 @@ void ReplaceSample(MODSAMPLE& smp, const LPSTR pNewSample, const SmpLength nNewL
 //----------------------------------------------------------------------------------------------------------
 {
 	LPSTR const pOldSmp = smp.pSample;
+	DWORD dwOrFlags = 0;
+	DWORD dwAndFlags = MAXDWORD;
+	if(smp.uFlags & CHN_16BIT)
+		dwOrFlags |= CHN_16BIT;
+	else
+		dwAndFlags &= ~CHN_16BIT;
+	if(smp.uFlags & CHN_STEREO)
+		dwOrFlags |= CHN_STEREO;
+	else
+		dwAndFlags &= ~CHN_STEREO;
+
 	BEGIN_CRITICAL();
 		if (pSndFile != nullptr)
-			ctrlChn::ReplaceSample(pSndFile->Chn, pOldSmp, pNewSample, nNewLength);
+			ctrlChn::ReplaceSample(pSndFile->Chn, pOldSmp, pNewSample, nNewLength, dwOrFlags, dwAndFlags);
 		smp.pSample = pNewSample;
 		smp.nLength = nNewLength;
 		CSoundFile::FreeSample(pOldSmp);	

@@ -1145,6 +1145,9 @@
 #define ID_CLEANUP_REARRANGESAMPLES     59228
 #define ID_ORDERLIST_RENDER             59229
 #define ID_EDIT_CLEANUP                 59230
+#define ID_ORDERLIST_EDIT_COPY			59231
+#define ID_ORDERLIST_EDIT_CUT			59232
+#define ID_ORDERLIST_EDIT_PASTE			59233
 
 // Next default values for new objects
 // 
@@ -1152,7 +1155,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        522
-#define _APS_NEXT_COMMAND_VALUE         59231
+#define _APS_NEXT_COMMAND_VALUE         59234
 #define _APS_NEXT_CONTROL_VALUE         2410
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

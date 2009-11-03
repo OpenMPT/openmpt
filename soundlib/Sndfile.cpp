@@ -774,7 +774,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_pConfig->SetMixLevels(m_nMixLevels);
 	RecalculateGainForAllPlugs();
 
-	if (m_nType && (m_nType != MOD_TYPE_MPT))
+	if (m_nType)
 	{
 		SetModSpecsPointer(m_pModSpecs, m_nType);
 		Order.resize(GetModSpecifications().ordersMax);

@@ -1184,6 +1184,10 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 			InstrumentLibraryChDir(GetItemText(hItem));
 			return TRUE;
 
+		case MODITEM_HDR_SONG:
+			if (pModDoc) pModDoc->ActivateWindow();
+			return TRUE;
+
 		default:
 			if (qwItemType & 0x8000)
 			{
@@ -2451,6 +2455,10 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 							(LPARAM)(qwItem >> 16));
 					}
 				}
+				break;
+
+			case MODITEM_HDR_SONG:
+				ExecuteItem(hItem);
 				break;
 			}
 		}

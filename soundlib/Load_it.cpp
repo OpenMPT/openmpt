@@ -1816,8 +1816,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	} else
 	{
 		// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
-		// Interestingly, this can exceed IT's 256 order limit.
+		// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
 		header.ordnum = min(Order.GetLengthTailTrimmed(), ModSpecs::itEx.ordersMax) + 1;
+		if(header.ordnum < 2) header.ordnum = 2;
 	}
 
 
@@ -2479,8 +2480,9 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	header.highlight_major = (BYTE)(m_nRowsPerMeasure & 0xFF);
 
 	// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
-	// Interestingly, this can exceed IT's 256 order limit.
+	// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
 	header.ordnum = min(Order.GetLengthTailTrimmed(), ModSpecs::it.ordersMax) + 1;
+	if(header.ordnum < 2) header.ordnum = 2;
 
 	header.patnum = MAX_PATTERNS;
 	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) {
