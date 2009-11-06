@@ -214,9 +214,9 @@ typedef struct _MODMAGIC
 
 #pragma pack()
 
-BOOL IsMagic(LPCSTR s1, LPCSTR s2)
+bool IsMagic(LPCSTR s1, LPCSTR s2)
 {
-	return ((*(DWORD *)s1) == (*(DWORD *)s2)) ? TRUE : FALSE;
+	return ((*(DWORD *)s1) == (*(DWORD *)s2)) ? true : false;
 }
 
 
@@ -246,6 +246,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	if ((s[0]=='T') && (s[1]=='D') && (s[2]=='Z') && (s[3]>='4') && (s[3]<='9')) m_nChannels = s[3] - '0'; else
 	if (IsMagic(s,"16CN")) m_nChannels = 16; else
 	if (IsMagic(s,"32CN")) m_nChannels = 32; else m_nSamples = 15;
+	bool bFLT8 = IsMagic(s, "FLT8") ? true : false;
 	// Load Samples
 	nErr = 0;
 	dwTotalSampleLen = 0;
@@ -321,8 +322,24 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 			if (iord<norders) nbpbuggy = nbp;
 		}
 		if (i >= nbpbuggy2) nbpbuggy2 = i+1;
+
+		// from mikmod: if the file says FLT8, but the orderlist has odd numbers, it's probably really an FLT4
+		if(bFLT8 && (Order[iord] & 1))
+		{
+			m_nChannels = 4;
+			bFLT8 = false;
+		}
 	}
-	for (UINT iend = norders; iend < 0x80; iend++) Order[iend] = Order.GetInvalidPatIndex();
+
+	if(bFLT8)
+	{
+		// FLT8 has only equal order items, so divide by two.
+		for(ORDERINDEX nOrd = 0; nOrd < Order.GetLength(); nOrd++)
+			Order[nOrd] >>= 1;
+	}
+
+	for(UINT iend = norders; iend < 0x80; iend++) Order[iend] = Order.GetInvalidPatIndex();
+
 	norders--;
 	m_nRestartPos = pMagic->nRestartPos;
 	if (m_nRestartPos >= 0x78) m_nRestartPos = 0;
@@ -352,27 +369,53 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	// Setup channel pan positions and volume
 	SetupMODPanning();
 
-	// Reading channels
-	for (UINT ipat=0; ipat<nbp; ipat++)
+	const CHANNELINDEX nMaxChn = (bFLT8) ? 4 : m_nChannels; // 4 channels per pattern in FLT8 format.
+	if(bFLT8) nbp++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
+
+	// Reading patterns
+	for (PATTERNINDEX ipat = 0; ipat < nbp; ipat++)
 	{
 		if (ipat < MAX_PATTERNS)
 		{
-			if(Patterns.Insert(ipat, 64)) break;
-			if (dwMemPos + m_nChannels * 256 > dwMemLength) break;
-			MODCOMMAND *m = Patterns[ipat];
-			LPCBYTE p = lpStream + dwMemPos;
-			for (UINT j=m_nChannels*64; j; m++,p+=4,j--)
+			if (dwMemPos + nMaxChn * 256 > dwMemLength) break;
+
+			MODCOMMAND *m;
+			if(bFLT8)
 			{
-				BYTE A0=p[0], A1=p[1], A2=p[2], A3=p[3];
-				UINT n = ((((UINT)A0 & 0x0F) << 8) | (A1));
-				if ((n) && (n != 0xFFF)) m->note = GetNoteFromPeriod(n << 2);
-				m->instr = ((UINT)A2 >> 4) | (A0 & 0x10);
-				m->command = A2 & 0x0F;
-				m->param = A3;
-				if ((m->command) || (m->param)) ConvertModCommand(m);
+				if((ipat & 1) == 0)
+				{
+					// only create "even" patterns
+					if(Patterns.Insert(ipat >> 1, 64)) break;
+				}
+				m = Patterns[ipat >> 1];
+			} else
+			{
+				if(Patterns.Insert(ipat, 64)) break;
+				m = Patterns[ipat];
+			}
+
+			const BYTE *p = lpStream + dwMemPos;
+			for(ROWINDEX nRow = 0; nRow < 64; nRow++)
+			{
+				if(bFLT8)
+				{
+					// FLT8: either write to channel 1 to 4 (even patterns) or 5 to 8 (odd patterns).
+					m = Patterns[ipat >> 1] + nRow * 8 + ((ipat & 1) ? 4 : 0);
+				}
+				for(CHANNELINDEX nChn = 0; nChn < nMaxChn; nChn++, m++, p += 4)
+				{
+					BYTE A0 = p[0], A1 = p[1], A2 = p[2], A3 = p[3];
+					UINT n = ((((UINT)A0 & 0x0F) << 8) | (A1));
+					if ((n) && (n != 0xFFF)) m->note = GetNoteFromPeriod(n << 2);
+					m->instr = ((UINT)A2 >> 4) | (A0 & 0x10);
+					m->command = A2 & 0x0F;
+					m->param = A3;
+					if ((m->command) || (m->param)) ConvertModCommand(m);
+
+				}
 			}
 		}
-		dwMemPos += m_nChannels*256;
+		dwMemPos += nMaxChn * 256;
 	}
 
 	// Reading samples
