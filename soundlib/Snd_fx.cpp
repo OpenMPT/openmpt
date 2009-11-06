@@ -1670,6 +1670,7 @@ BOOL CSoundFile::ProcessEffects()
 		// Set 8-bit Panning
 		case CMD_PANNING8:
 			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
+			if ((m_dwSongFlags & SONG_PT1XMODE)) break;
 			if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
 			if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_XM|MOD_TYPE_MOD|MOD_TYPE_MT2))
 			{
@@ -2504,7 +2505,7 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	// E7x: Set Tremolo WaveForm
 	case 0x70:	pChn->nTremoloType = param & 0x07; break;
 	// E8x: Set 4-bit Panning
-	case 0x80:	if(m_dwSongFlags & SONG_FIRSTTICK)
+	case 0x80:	if((m_dwSongFlags & SONG_FIRSTTICK) && !(m_dwSongFlags & SONG_PT1XMODE))
 				{ 
 					//IT compatibility 20. (Panning always resets surround state)
 					if(IsCompatibleMode(TRK_ALLTRACKERS))
