@@ -115,6 +115,7 @@
 #define IDR_DEFAULT_KEYBINDINGS         519
 #define IDR_BUILTIN_TUNINGS             520
 #define IDD_CLEANUP_SONG                521
+#define IDD_CHANNEL_NAME                522
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -909,6 +910,8 @@
 #define IDC_CHK_OPTIMIZE_SAMPLES        2406
 #define IDC_CHK_MERGE_SEQUENCES         2408
 #define IDC_CHECK_PT1X                  2409
+#define IDC_STATIC_CHANNEL_NAME         2410
+#define IDC_EDIT_CHANNEL_NAME           2411
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1145,18 +1148,19 @@
 #define ID_CLEANUP_REARRANGESAMPLES     59228
 #define ID_ORDERLIST_RENDER             59229
 #define ID_EDIT_CLEANUP                 59230
-#define ID_ORDERLIST_EDIT_COPY			59231
-#define ID_ORDERLIST_EDIT_CUT			59232
-#define ID_ORDERLIST_EDIT_PASTE			59233
+#define ID_ORDERLIST_EDIT_COPY          59231
+#define ID_ORDERLIST_EDIT_CUT           59232
+#define ID_ORDERLIST_EDIT_PASTE         59233
+#define ID_CHANNEL_RENAME				59234
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        522
-#define _APS_NEXT_COMMAND_VALUE         59234
-#define _APS_NEXT_CONTROL_VALUE         2410
+#define _APS_NEXT_RESOURCE_VALUE        523
+#define _APS_NEXT_COMMAND_VALUE         59235
+#define _APS_NEXT_CONTROL_VALUE         2412
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

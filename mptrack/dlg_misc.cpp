@@ -635,6 +635,43 @@ void CRemoveChannelsDlg::OnChannelChanged()
 }
 //end rewbs.removeChansDlgCleanup
 
+
+///////////////////////////////////////////////////////////
+// CChannelRenameDlg
+
+BOOL CChannelRenameDlg::OnInitDialog()
+//------------------------------------
+{
+	CDialog::OnInitDialog();
+
+	CHAR s[32];
+	wsprintf(s, "Set name for channel %d:", m_nChannel);
+	SetDlgItemText(IDC_STATIC_CHANNEL_NAME, s);
+	SetDlgItemText(IDC_EDIT_CHANNEL_NAME, m_sName);
+	((CEdit*)(GetDlgItem(IDC_EDIT_CHANNEL_NAME)))->LimitText(MAX_CHANNELNAME - 1); 
+
+	return TRUE;
+}
+
+
+void CChannelRenameDlg::OnOK()
+//----------------------------
+{
+	CHAR sNewName[MAX_CHANNELNAME];
+	GetDlgItemText(IDC_EDIT_CHANNEL_NAME, sNewName, MAX_CHANNELNAME);
+	if(!strcmp(sNewName, m_sName))
+	{
+		bChanged = false;
+		CDialog::OnCancel();
+	} else
+	{
+		strcpy(m_sName, sNewName);
+		bChanged = true;
+		CDialog::OnOK();
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Find/Replace Dialog
 

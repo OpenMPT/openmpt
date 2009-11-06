@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_MBUTTONDOWN()
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
 	ON_WM_HSCROLL()
@@ -384,15 +385,17 @@ BOOL COrderList::ProcessChar(UINT nChar)
 				ord = 0;
 			else
 			{
-				if(ord > maxpat && ord < pSndFile->Order.GetIgnoreIndex())
-					ord = pSndFile->Order.GetIgnoreIndex();
+				const PATTERNINDEX nFirstInvalid = pSndFile->GetModSpecifications().hasIgnoreIndex ? pSndFile->Order.GetIgnoreIndex() : pSndFile->Order.GetInvalidPatIndex();
+				if(ord > maxpat && ord < nFirstInvalid)
+					ord = nFirstInvalid;
 			}
 		} else
 		if (nChar == '-')
 		{
+			const PATTERNINDEX nFirstInvalid = pSndFile->GetModSpecifications().hasIgnoreIndex ? pSndFile->Order.GetIgnoreIndex() : pSndFile->Order.GetInvalidPatIndex();
 			ord--;
 			if (ord < 0) ord = pSndFile->Order.GetInvalidPatIndex(); else
-				if ((ord > maxpat) && (ord < pSndFile->Order.GetIgnoreIndex())) ord = maxpat;
+				if ((ord > maxpat) && (ord < nFirstInvalid)) ord = maxpat;
 		}
 		if (ord != pSndFile->Order[m_nScrollPos])
 		{
@@ -714,7 +717,7 @@ void COrderList::OnPaint()
 		while (rect.left < rcClient.right)
 		{
 			bool bHighLight = ((bFocus) && (nIndex >= selection.nOrdLo && nIndex <= selection.nOrdHi)) ? true : false;
-			const PATTERNINDEX nPat = ((nIndex >= 0) && (nIndex < pSndFile->Order.GetLength())) ? pSndFile->Order[nIndex] : PATTERNINDEX_INVALID;
+			const PATTERNINDEX nPat = (nIndex < pSndFile->Order.GetLength()) ? pSndFile->Order[nIndex] : PATTERNINDEX_INVALID;
 			if ((rect.right = rect.left + m_cxFont) > rcClient.right) rect.right = rcClient.right;
 			rect.right--;
 			if (bHighLight) {
@@ -800,21 +803,7 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 		if (ih->CtrlPressed())
 		{
 			// queue pattern
-			//m_nScrollPos2nd = ORDERINDEX_INVALID;
-			if (m_pModDoc)
-			{
-				CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-				ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
-				if ((nOrder >= 0) && (nOrder < pSndFile->Order.GetLength()))
-				{
-					if (pSndFile->m_nSeqOverride == static_cast<UINT>(nOrder)+1) {
-						pSndFile->m_nSeqOverride=0;
-					} else {
-						pSndFile->m_nSeqOverride = nOrder+1;
-					}
-					InvalidateRect(NULL, FALSE);
-				}
-			}
+			QueuePattern(pt);
 		} else
 		{
 			// mark pattern (+skip to)
@@ -858,7 +847,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 		if (rect.PtInRect(pt))
 		{
 			ORDERINDEX n = GetOrderFromPoint(rect, pt);
-			if ((n >= 0) && (n == m_nDropPos) && (m_pModDoc))
+			if ((n != ORDERINDEX_INVALID) && (n == m_nDropPos) && (m_pModDoc))
 			{
 				// drag multiple orders (not quite as easy...)
 				ORD_SELECTION selection = GetCurSel(false);
@@ -934,9 +923,9 @@ void COrderList::OnMouseMove(UINT nFlags, CPoint pt)
 			n = GetOrderFromPoint(rect, pt);
 			if (n >= pSndFile->Order.GetLength() || n >= pSndFile->GetModSpecifications().ordersMax) n = ORDERINDEX_INVALID;
 		}
-		if (n != (int)m_nDropPos)
+		if (n != m_nDropPos)
 		{
-			if (n >= 0)
+			if (n != ORDERINDEX_INVALID)
 			{
 				m_nDropPos = n;
 				InvalidateRect(NULL, FALSE);
@@ -1064,6 +1053,14 @@ void COrderList::OnLButtonDblClk(UINT, CPoint)
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		m_pParent->SetCurrentPattern(pSndFile->Order[m_nScrollPos]);
 	}
+}
+
+
+void COrderList::OnMButtonDown(UINT nFlags, CPoint pt)
+//----------------------------------------------------
+{
+	UNREFERENCED_PARAMETER(nFlags);
+	QueuePattern(pt);
 }
 
 
@@ -1348,4 +1345,29 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 	UpdateView(HINT_MODSEQUENCE);
 	m_pModDoc->SetModified();
 	m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+}
+
+
+void COrderList::QueuePattern(CPoint pt)
+//--------------------------------------
+{
+	CRect rect;
+	GetClientRect(&rect);
+
+	if(!rect.PtInRect(pt)) return;
+	if (m_pModDoc == nullptr) return;
+	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	if(pSndFile == nullptr) return;
+
+	ORDERINDEX nOrder = GetOrderFromPoint(rect, pt);
+
+	if (nOrder < pSndFile->Order.GetLength())
+	{
+		if (pSndFile->m_nSeqOverride == static_cast<UINT>(nOrder) + 1) {
+			pSndFile->m_nSeqOverride = 0;
+		} else {
+			pSndFile->m_nSeqOverride = nOrder + 1;
+		}
+		InvalidateRect(NULL, FALSE);
+	}
 }

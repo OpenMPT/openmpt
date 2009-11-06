@@ -329,6 +329,18 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 	}
 
+	// If not supported, remove "+++" separator order items.
+	if(CSoundFile::GetModSpecifications(nNewType).hasIgnoreIndex == false)
+	{
+		for(ORDERINDEX nOrd = m_SndFile.Order.GetLengthTailTrimmed() - 1; nOrd > 0; nOrd--)
+		{
+			if(m_SndFile.Order[nOrd] == m_SndFile.Order.GetIgnoreIndex())
+			{
+				m_SndFile.Order.Remove(nOrd, nOrd);
+			}
+		}
+	}
+
 	BEGIN_CRITICAL();
 	m_SndFile.ChangeModTypeTo(nNewType);
 	if (!newTypeIsXM_IT_MPT && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))

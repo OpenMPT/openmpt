@@ -636,7 +636,7 @@ bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
 	} else
 	{
 		UINT nOrders, nSections;
-		UINT nTrks = BigEndianW(pmsh2->numtracks);
+		WORD nTrks = BigEndianW(pmsh2->numtracks);
 		if ((nTrks >= 4) && (nTrks <= 32)) m_nChannels = nTrks;
 		DWORD playseqtable = BigEndian(pmsh2->playseqtable);
 		UINT numplayseqs = BigEndianW(pmsh2->numpseqs);

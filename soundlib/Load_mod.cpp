@@ -507,7 +507,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	UINT nbp=0, norders=128;
 	for (UINT iord=0; iord<128; iord++)
 	{
-		if (Order[iord] == 0xFF)
+		if (Order[iord] == Order.GetInvalidPatIndex())
 		{
 			norders = iord;
 			break;

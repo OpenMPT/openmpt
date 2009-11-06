@@ -54,6 +54,7 @@ public:
 	BOOL UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
+	void QueuePattern(CPoint pt);
 
 	ORDERINDEX GetOrderFromPoint(const CRect& rect, const CPoint& pt) const;
 
@@ -105,6 +106,7 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT, CPoint);
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnLButtonUp(UINT, CPoint);
+	afx_msg void OnMButtonDown(UINT, CPoint);
 	afx_msg void OnMouseMove(UINT, CPoint);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar*);
 	afx_msg void OnSize(UINT nType, int cx, int cy);

@@ -41,6 +41,7 @@ struct CModSpecifications
 	UINT envelopePointsMax;	// Maximum number of points of each envelope
 	char commands[MAX_EFFECTS + 1]; // An array holding all commands this format supports; commands that are not supported are marked with "?"
 	char volcommands[MAX_VOLCMDS + 1]; // dito, but for volume column
+	bool hasIgnoreIndex;	// Does "+++" pattern exist?
 };
 
 
@@ -79,6 +80,7 @@ const CModSpecifications mptm =
 	240,								//Envelope point count
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
 	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
+	true,								// Has "+++" pattern
 };
 
 
@@ -112,6 +114,7 @@ const CModSpecifications mod =
 	0,									//No instrument envelopes
 	" 0123456789ABCD?FF?E???????????????",	// Supported Effects
 	" ???????????????",					// Supported Volume Column commands
+	false,								// Doesn't have "+++" pattern
 };
 
 // MOD with MPT extensions.
@@ -143,6 +146,7 @@ const CModSpecifications modEx =
 	0,									//No instrument envelopes
 	" 0123456789ABCD?FF?E???????????????",	// Supported Effects
 	" ???????????????",					// Supported Volume Column commands
+	false,								// Doesn't have "+++" pattern
 };
 
 const CModSpecifications xm =
@@ -154,8 +158,8 @@ const CModSpecifications xm =
 	false,								//No notecut.
 	true,								//Has noteoff.
 	false,								//No notefade.
-	64,									//Pattern max.
-	128,								//Order max.
+	255,								//Pattern max.
+	255,								//Order max.
 	1,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
@@ -173,6 +177,7 @@ const CModSpecifications xm =
 	12,									//Envelope point count
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\:#",	// Supported Effects
 	" vpcdabuhlrg????",					// Supported Volume Column commands
+	false,								// Doesn't have "+++" pattern
 };
 
 // XM with MPT extensions
@@ -185,7 +190,7 @@ const CModSpecifications xmEx =
 	false,								//No notecut.
 	true,								//Has noteoff.
 	false,								//No notefade.
-	240,								//Pattern max.
+	255,								//Pattern max.
 	256,								//Order max.
 	1,									//Channel min
 	127,								//Channel max
@@ -204,18 +209,20 @@ const CModSpecifications xmEx =
 	12,									//Envelope point count
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\:#",	// Supported Effects
 	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
+	false,								// Doesn't have "+++" pattern
 };
 
 const CModSpecifications s3m =
 {
+	//TODO: Set correct values.
 	"s3m",								//File extension
 	13,									//Minimum note index
 	120,								//Maximum note index
 	true,								//Has notecut.
 	false,								//No noteoff.
 	false,								//No notefade.
-	240,								//Pattern max.
-	256,								//Order max.
+	99,									//Pattern max.
+	255,								//Order max.
 	1,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
@@ -233,6 +240,7 @@ const CModSpecifications s3m =
 	0,									//No instrument envelopes
 	" JFEGHLKRXODB?CQATI?SMNVW?U????????",	// Supported Effects
 	" vp?????????????",					// Supported Volume Column commands
+	true,								// Has "+++" pattern
 };
 
 // S3M with MPT extensions
@@ -246,7 +254,7 @@ const CModSpecifications s3mEx =
 	false,								//No noteoff.
 	false,								//No notefade.
 	240,								//Pattern max.
-	256,								//Order max.
+	255,								//Order max.
 	1,									//Channel min
 	32,									//Channel max
 	32,									//Min tempo
@@ -264,6 +272,7 @@ const CModSpecifications s3mEx =
 	0,									//No instrument envelopes
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
 	" vp?????????????",					// Supported Volume Column commands
+	true,								// Has "+++" pattern
 };
 
 const CModSpecifications it =
@@ -294,6 +303,7 @@ const CModSpecifications it =
 	25,									//Envelope point count
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z???",	// Supported Effects
 	" vpcdab?h??gfe??",					// Supported Volume Column commands
+	true,								// Has "+++" pattern
 };
 
 const CModSpecifications itEx =
@@ -324,6 +334,7 @@ const CModSpecifications itEx =
 	25,									//Envelope point count
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
 	" vpcdab?h??gfe:o",					// Supported Volume Column commands
+	true,								// Has "+++" pattern
 };
 
 } //namespace ModSpecs

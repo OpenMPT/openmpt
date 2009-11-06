@@ -758,17 +758,21 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	if(xmheader.channels > MAX_BASECHANNELS) xmheader.channels = MAX_BASECHANNELS;
 	xmheader.channels = LittleEndianW(xmheader.channels);
 
-	xmheader.patterns = 0;
-	WORD nOrders = Order.GetLengthTailTrimmed(), nPatterns = 0;
-	xmheader.orders = LittleEndianW(nOrders);
-	xmheader.size = LittleEndian(xmheader.size + nOrders);
-
-	for (i = 0; i < nOrders; i++) { // walk over orderlist and find last used pattern
-		if((Order[i] >= nPatterns) && (Order[i] < MAX_PATTERNS)) {
-			nPatterns = Order[i] + 1;
+	// Find out number of orders and patterns used.
+	// +++ and --- patterns are not taken into consideration as FastTracker does not support them.
+	ORDERINDEX nMaxOrds = 0;
+	PATTERNINDEX nPatterns = 0;
+	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
+	{
+		if(Patterns.IsValidIndex(Order[nOrd])) 
+		{
+			nMaxOrds++;
+			if(Order[nOrd] >= nPatterns) nPatterns = Order[nOrd] + 1;
 		}
 	}
-	xmheader.patterns = LittleEndianW(nPatterns);
+	xmheader.orders = LittleEndianW((WORD)nMaxOrds);
+	xmheader.patterns = LittleEndianW((WORD)nPatterns);
+	xmheader.size = LittleEndian((DWORD)(xmheader.size + nMaxOrds));
 
 	if(m_nInstruments > 0)
 		xmheader.instruments = LittleEndianW(m_nInstruments);
@@ -786,7 +790,15 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	xmheader.speed = LittleEndianW(CLAMP(m_nDefaultSpeed, 1, 31));
 
 	fwrite(&xmheader, 1, sizeof(xmheader), f);
-	Order.WriteAsByte(f, nOrders);
+	// write order list (wihout +++ and ---, explained above)
+	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
+	{
+		if(Patterns.IsValidIndex(Order[nOrd])) 
+		{
+			BYTE nOrdval = static_cast<BYTE>(Order[nOrd]);
+			fwrite(&nOrdval, 1, sizeof(BYTE), f);
+		}
+	}
 
 	// Writing patterns
 	for (i = 0; i < nPatterns; i++) if (Patterns[i])
