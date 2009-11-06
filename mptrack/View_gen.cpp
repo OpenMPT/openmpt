@@ -362,9 +362,13 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 				int pan = pSndFile->ChnSettings[nChn].nPan;
 				m_sbPan[ichn].SetPos(pan/4);
 				SetDlgItemInt(IDC_EDIT2+ichn*2, pan);
+
+				// Channel name
 				memcpy(s, pSndFile->ChnSettings[nChn].szName, MAX_CHANNELNAME);
-				s[MAX_CHANNELNAME-1] = 0;
-				SetDlgItemText(IDC_EDIT9+ichn, s);
+				s[MAX_CHANNELNAME - 1] = 0;
+				SetDlgItemText(IDC_EDIT9 + ichn, s);
+				((CEdit*)(GetDlgItem(IDC_EDIT9 + ichn)))->LimitText(MAX_CHANNELNAME - 1);
+
 				// Channel effect
 				m_CbnEffects[ichn].SetRedraw(FALSE);
 				m_CbnEffects[ichn].ResetContent();

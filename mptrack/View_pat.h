@@ -298,6 +298,7 @@ protected:
 	afx_msg void OnSelectInstrument(UINT nid);
 	afx_msg void OnRunScript();
 	afx_msg void OnShowTimeAtRow();
+	afx_msg void OnRenameChannel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -324,6 +325,7 @@ private:
 	bool BuildTransposeCtxMenu(HMENU hMenu, CInputHandler* ih);
 	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
 	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih);
+	bool BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile* pSndFile);
 
 	UINT GetSelectionStartRow();
 	UINT GetSelectionEndRow();

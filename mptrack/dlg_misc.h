@@ -111,6 +111,33 @@ protected:
 
 
 /////////////////////////////////////////////////////////////////////////
+// Channel rename dialog
+
+//=====================================
+class CChannelRenameDlg: public CDialog
+//=====================================
+{
+protected:
+	CHANNELINDEX m_nChannel;
+
+public:
+	CHAR m_sName[MAX_CHANNELNAME];
+	bool bChanged;
+
+public:
+	CChannelRenameDlg(CWnd *parent, CHAR *sName, CHANNELINDEX nChannel) : CDialog(IDD_CHANNEL_NAME, parent)
+	{
+		strcpy(m_sName, sName);
+		m_nChannel = nChannel;
+		bChanged = false;
+	}
+
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+};
+
+
+/////////////////////////////////////////////////////////////////////////
 // Search/Replace
 
 #define PATSEARCH_NOTE			0x01

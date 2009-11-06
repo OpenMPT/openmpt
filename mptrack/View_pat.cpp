@@ -108,6 +108,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_AMPLIFY,				OnPatternAmplify)
 	ON_COMMAND(ID_CLEAR_SELECTION,				OnClearSelectionFromMenu)
 	ON_COMMAND(ID_SHOWTIMEATROW,				OnShowTimeAtRow)
+	ON_COMMAND(ID_CHANNEL_RENAME,				OnRenameChannel)
 	ON_COMMAND_RANGE(ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT+MAX_INSTRUMENTS, OnSelectInstrument)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,			OnUpdateUndo)
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnSelectPlugin) //rewbs.patPlugName
@@ -1242,6 +1243,7 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 					AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 				BuildRecordCtxMenu(hMenu, nChn, pModDoc);
 				BuildChannelControlCtxMenu(hMenu);
+				BuildChannelMiscCtxMenu(hMenu, pSndFile);
 			}
 		}
 		
@@ -2533,13 +2535,13 @@ void CViewPattern::OnRemoveChannel()
 		return;
 	}
 
-	UINT nChn = GetChanFromCursor(m_nMenuParam);
+	CHANNELINDEX nChn = GetChanFromCursor(m_nMenuParam);
 	CString str;
 	str.Format("Remove channel %d?\nNote: Affects all patterns and no undo", nChn+1);
 	if(CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_YESNO | MB_ICONQUESTION) == IDYES)
 	{
 		BOOL chnMask[MAX_CHANNELS];
-		for(UINT i = 0; i<MAX_CHANNELS; chnMask[i] = FALSE, i++) {}
+		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; chnMask[i] = FALSE, i++) {}
 		chnMask[nChn] = TRUE;
 		pModDoc->RemoveChannels(chnMask);
 		SetCurrentPattern(m_nPattern); //Updating the screen.
@@ -4961,6 +4963,16 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 }
 
 
+bool CViewPattern::BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile* pSndFile)
+//---------------------------------------------------------------------------
+{
+	if((pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) == 0) return false;
+	AppendMenu(hMenu, MF_SEPARATOR, 0, 0);
+	AppendMenu(hMenu, MF_STRING, ID_CHANNEL_RENAME, "Rename channel");
+	return true;
+}
+
+
 UINT CViewPattern::GetSelectionStartRow() {
 //-----------------------------------------
 	return min(GetRowFromCursor(m_dwBeginSel), GetRowFromCursor(m_dwEndSel));
@@ -5159,4 +5171,21 @@ void CViewPattern::SetEditPos(const CSoundFile& rSndFile,
 		iPat = m_nPattern;
 		iRow = m_nRow;
 	}
+}
+
+
+void CViewPattern::OnRenameChannel()
+//----------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return;
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	if(pSndFile == nullptr) return;
+
+	CHANNELINDEX nChn = GetChanFromCursor(m_nMenuParam);
+	CChannelRenameDlg dlg(this, pSndFile->ChnSettings[nChn].szName, nChn + 1);
+	if(dlg.DoModal() != IDOK || dlg.bChanged == false) return;
+
+	strcpy(pSndFile->ChnSettings[nChn].szName, dlg.m_sName);
+	pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS);
 }
