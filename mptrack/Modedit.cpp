@@ -1157,7 +1157,6 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 
 		if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 		{
-			GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 			TEMPO spdmax = m_SndFile.GetModSpecifications().speedMax;
 			DWORD dwMemSize = GlobalSize(hCpy);
 			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
@@ -1165,7 +1164,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
 			UINT col;
 			bool bS3MCommands = false, bOk = false;
-			MODTYPE origFormat = MOD_TYPE_MOD;
+			MODTYPE origFormat = MOD_TYPE_IT;
 			UINT len = 0;
 			MODCOMMAND origModCmd;
 
@@ -1176,6 +1175,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 
 			if ((nrow >= m_SndFile.PatternSize[nPattern]) || (ncol >= m_SndFile.m_nChannels)) goto PasteDone;
 			m += nrow * m_SndFile.m_nChannels;
+			
 			// Search for signature
 			for (;;)
 			{
@@ -1188,11 +1188,15 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 					if(p[len - 3] == 'P') origFormat = MOD_TYPE_MPT;
 					if(p[len - 4] == 'S') origFormat = MOD_TYPE_S3M;
 					if(p[len - 3] == 'X') origFormat = MOD_TYPE_XM;
+					if(p[len - 3] == 'O') origFormat = MOD_TYPE_MOD;
 					break;
 				}
 			}
 			bS3MCommands = (origFormat & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) != 0 ? true : false;
 			bOk = true;
+
+			GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+
 			while ((nrow < m_SndFile.PatternSize[nPattern]) && (len + 11 < dwMemSize))
 			{
 				// Search for column separator
@@ -1359,11 +1363,11 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 					{
 						nrow = 0;
 						ORDERINDEX oNextOrder = m_SndFile.Order.GetNextOrderIgnoringSkips(oCurrentOrder);
-						if((oNextOrder <= 0) || (oNextOrder >= m_SndFile.Order.size())) goto PasteDone;
+						if((oNextOrder == 0) || (oNextOrder >= m_SndFile.Order.size())) goto PasteDone;
 						nPattern = m_SndFile.Order[oNextOrder];
 						if(m_SndFile.Patterns.IsValidPat(nPattern) == false) goto PasteDone;
 						m = m_SndFile.Patterns[nPattern];
-						GetPatternUndo()->PrepareUndo(nPattern, 0,0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+						GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 						oCurrentOrder = oNextOrder;
 					}
 				}
