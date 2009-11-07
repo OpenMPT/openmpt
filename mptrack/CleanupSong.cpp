@@ -862,21 +862,13 @@ bool CModCleanupDlg::ResetVariables()
 		pSndFile->Instruments[i]->nFadeOut = 256;
 		pSndFile->Instruments[i]->nGlobalVol = 64;
 		pSndFile->Instruments[i]->nPan = 128;
-		pSndFile->Instruments[i]->dwFlags &= ~ENV_SETPANNING;
+		pSndFile->Instruments[i]->dwFlags &= ~INS_SETPANNING;
 		pSndFile->Instruments[i]->nMixPlug = 0;
 
 		pSndFile->Instruments[i]->nVolSwing = 0;
 		pSndFile->Instruments[i]->nPanSwing = 0;
 		pSndFile->Instruments[i]->nCutSwing = 0;
 		pSndFile->Instruments[i]->nResSwing = 0;
-
-		//might be a good idea to leave those enabled...
-		/*
-		pSndFile->Instruments[i]->dwFlags &= ~ENV_VOLUME;
-		pSndFile->Instruments[i]->dwFlags &= ~ENV_PANNING;
-		pSndFile->Instruments[i]->dwFlags &= ~ENV_PITCH;
-		pSndFile->Instruments[i]->dwFlags &= ~ENV_FILTER;
-		*/
 	}
 
 	// reset samples

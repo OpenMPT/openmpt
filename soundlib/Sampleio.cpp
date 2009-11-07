@@ -1165,32 +1165,32 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWOR
 		if (n < nsamples) pIns->Keyboard[k+12] = samplemap[n];
 	}
 	pIns->nFadeOut = pih->volfade;
-	if (pih->vtype & 1) pIns->dwFlags |= ENV_VOLUME;
-	if (pih->vtype & 2) pIns->dwFlags |= ENV_VOLSUSTAIN;
-	if (pih->vtype & 4) pIns->dwFlags |= ENV_VOLLOOP;
-	if (pih->ptype & 1) pIns->dwFlags |= ENV_PANNING;
-	if (pih->ptype & 2) pIns->dwFlags |= ENV_PANSUSTAIN;
-	if (pih->ptype & 4) pIns->dwFlags |= ENV_PANLOOP;
+	if (pih->vtype & 1) pIns->VolEnv.dwFlags |= ENV_ENABLED;
+	if (pih->vtype & 2) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
+	if (pih->vtype & 4) pIns->VolEnv.dwFlags |= ENV_LOOP;
+	if (pih->ptype & 1) pIns->PanEnv.dwFlags |= ENV_ENABLED;
+	if (pih->ptype & 2) pIns->PanEnv.dwFlags |= ENV_SUSTAIN;
+	if (pih->ptype & 4) pIns->PanEnv.dwFlags |= ENV_LOOP;
 	pIns->VolEnv.nNodes = pih->vnum;
 	pIns->PanEnv.nNodes = pih->pnum;
 	if (pIns->VolEnv.nNodes > 12) pIns->VolEnv.nNodes = 12;
 	if (pIns->PanEnv.nNodes > 12) pIns->PanEnv.nNodes = 12;
-	if (!pIns->VolEnv.nNodes) pIns->dwFlags &= ~ENV_VOLUME;
-	if (!pIns->PanEnv.nNodes) pIns->dwFlags &= ~ENV_PANNING;
+	if (!pIns->VolEnv.nNodes) pIns->VolEnv.dwFlags &= ~ENV_ENABLED;
+	if (!pIns->PanEnv.nNodes) pIns->PanEnv.dwFlags &= ~ENV_ENABLED;
 	pIns->VolEnv.nSustainStart = pih->vsustain;
 	pIns->VolEnv.nSustainEnd = pih->vsustain;
-	if (pih->vsustain >= 12) pIns->dwFlags &= ~ENV_VOLSUSTAIN;
+	if (pih->vsustain >= 12) pIns->VolEnv.dwFlags &= ~ENV_SUSTAIN;
 	pIns->VolEnv.nLoopStart = pih->vloops;
 	pIns->VolEnv.nLoopEnd = pih->vloope;
 	if (pIns->VolEnv.nLoopEnd >= 12) pIns->VolEnv.nLoopEnd = 0;
-	if (pIns->VolEnv.nLoopStart >= pIns->VolEnv.nLoopEnd) pIns->dwFlags &= ~ENV_VOLLOOP;
+	if (pIns->VolEnv.nLoopStart >= pIns->VolEnv.nLoopEnd) pIns->VolEnv.dwFlags &= ~ENV_LOOP;
 	pIns->PanEnv.nSustainStart = pih->psustain;
 	pIns->PanEnv.nSustainEnd = pih->psustain;
-	if (pih->psustain >= 12) pIns->dwFlags &= ~ENV_PANSUSTAIN;
+	if (pih->psustain >= 12) pIns->PanEnv.dwFlags &= ~ENV_SUSTAIN;
 	pIns->PanEnv.nLoopStart = pih->ploops;
 	pIns->PanEnv.nLoopEnd = pih->ploope;
 	if (pIns->PanEnv.nLoopEnd >= 12) pIns->PanEnv.nLoopEnd = 0;
-	if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->dwFlags &= ~ENV_PANLOOP;
+	if (pIns->PanEnv.nLoopStart >= pIns->PanEnv.nLoopEnd) pIns->PanEnv.dwFlags &= ~ENV_LOOP;
 	pIns->nGlobalVol = 64;
 	pIns->nPPC = 5*12;
 	SetDefaultInstrumentValues(pIns);
@@ -1339,12 +1339,12 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 		xih.pIns[ienv*2] = (BYTE)pIns->PanEnv.Ticks[ienv];
 		xih.pIns[ienv*2+1] = pIns->PanEnv.Values[ienv];
 	}
-	if (pIns->dwFlags & ENV_VOLUME) xih.vtype |= 1;
-	if (pIns->dwFlags & ENV_VOLSUSTAIN) xih.vtype |= 2;
-	if (pIns->dwFlags & ENV_VOLLOOP) xih.vtype |= 4;
-	if (pIns->dwFlags & ENV_PANNING) xih.ptype |= 1;
-	if (pIns->dwFlags & ENV_PANSUSTAIN) xih.ptype |= 2;
-	if (pIns->dwFlags & ENV_PANLOOP) xih.ptype |= 4;
+	if (pIns->VolEnv.dwFlags & ENV_ENABLED) xih.vtype |= 1;
+	if (pIns->VolEnv.dwFlags & ENV_SUSTAIN) xih.vtype |= 2;
+	if (pIns->VolEnv.dwFlags & ENV_LOOP) xih.vtype |= 4;
+	if (pIns->PanEnv.dwFlags & ENV_ENABLED) xih.ptype |= 1;
+	if (pIns->PanEnv.dwFlags & ENV_SUSTAIN) xih.ptype |= 2;
+	if (pIns->PanEnv.dwFlags & ENV_LOOP) xih.ptype |= 4;
 	xih.vsustain = (BYTE)pIns->VolEnv.nSustainStart;
 	xih.vloops = (BYTE)pIns->VolEnv.nLoopStart;
 	xih.vloope = (BYTE)pIns->VolEnv.nLoopEnd;
@@ -1845,7 +1845,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 	iti->ppc = pIns->nPPC;
 	iti->gbv = (BYTE)(pIns->nGlobalVol << 1);
 	iti->dfp = (BYTE)pIns->nPan >> 2;
-	if (!(pIns->dwFlags & ENV_SETPANNING)) iti->dfp |= 0x80;
+	if (!(pIns->dwFlags & INS_SETPANNING)) iti->dfp |= 0x80;
 	iti->rv = pIns->nVolSwing;
 	iti->rp = pIns->nPanSwing;
 	iti->ifc = pIns->nIFC;
@@ -1871,31 +1871,31 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 // -! BUG_FIX#0019
 	}
 	// Writing Volume envelope
-	if (pIns->dwFlags & ENV_VOLUME) iti->volenv.flags |= 0x01;
-	if (pIns->dwFlags & ENV_VOLLOOP) iti->volenv.flags |= 0x02;
-	if (pIns->dwFlags & ENV_VOLSUSTAIN) iti->volenv.flags |= 0x04;
-	if (pIns->dwFlags & ENV_VOLCARRY) iti->volenv.flags |= 0x08;
+	if (pIns->VolEnv.dwFlags & ENV_ENABLED) iti->volenv.flags |= 0x01;
+	if (pIns->VolEnv.dwFlags & ENV_LOOP) iti->volenv.flags |= 0x02;
+	if (pIns->VolEnv.dwFlags & ENV_SUSTAIN) iti->volenv.flags |= 0x04;
+	if (pIns->VolEnv.dwFlags & ENV_CARRY) iti->volenv.flags |= 0x08;
 	iti->volenv.num = (BYTE)pIns->VolEnv.nNodes;
 	iti->volenv.lpb = (BYTE)pIns->VolEnv.nLoopStart;
 	iti->volenv.lpe = (BYTE)pIns->VolEnv.nLoopEnd;
 	iti->volenv.slb = pIns->VolEnv.nSustainStart;
 	iti->volenv.sle = pIns->VolEnv.nSustainEnd;
 	// Writing Panning envelope
-	if (pIns->dwFlags & ENV_PANNING) iti->panenv.flags |= 0x01;
-	if (pIns->dwFlags & ENV_PANLOOP) iti->panenv.flags |= 0x02;
-	if (pIns->dwFlags & ENV_PANSUSTAIN) iti->panenv.flags |= 0x04;
-	if (pIns->dwFlags & ENV_PANCARRY) iti->panenv.flags |= 0x08;
+	if (pIns->PanEnv.dwFlags & ENV_ENABLED) iti->panenv.flags |= 0x01;
+	if (pIns->PanEnv.dwFlags & ENV_LOOP) iti->panenv.flags |= 0x02;
+	if (pIns->PanEnv.dwFlags & ENV_SUSTAIN) iti->panenv.flags |= 0x04;
+	if (pIns->PanEnv.dwFlags & ENV_CARRY) iti->panenv.flags |= 0x08;
 	iti->panenv.num = (BYTE)pIns->PanEnv.nNodes;
 	iti->panenv.lpb = (BYTE)pIns->PanEnv.nLoopStart;
 	iti->panenv.lpe = (BYTE)pIns->PanEnv.nLoopEnd;
 	iti->panenv.slb = pIns->PanEnv.nSustainStart;
 	iti->panenv.sle = pIns->PanEnv.nSustainEnd;
 	// Writing Pitch Envelope
-	if (pIns->dwFlags & ENV_PITCH) iti->pitchenv.flags |= 0x01;
-	if (pIns->dwFlags & ENV_PITCHLOOP) iti->pitchenv.flags |= 0x02;
-	if (pIns->dwFlags & ENV_PITCHSUSTAIN) iti->pitchenv.flags |= 0x04;
-	if (pIns->dwFlags & ENV_PITCHCARRY) iti->pitchenv.flags |= 0x08;
-	if (pIns->dwFlags & ENV_FILTER) iti->pitchenv.flags |= 0x80;
+	if (pIns->PitchEnv.dwFlags & ENV_ENABLED) iti->pitchenv.flags |= 0x01;
+	if (pIns->PitchEnv.dwFlags & ENV_LOOP) iti->pitchenv.flags |= 0x02;
+	if (pIns->PitchEnv.dwFlags & ENV_SUSTAIN) iti->pitchenv.flags |= 0x04;
+	if (pIns->PitchEnv.dwFlags & ENV_CARRY) iti->pitchenv.flags |= 0x08;
+	if (pIns->PitchEnv.dwFlags & ENV_FILTER) iti->pitchenv.flags |= 0x80;
 	iti->pitchenv.num = (BYTE)pIns->PitchEnv.nNodes;
 	iti->pitchenv.lpb = (BYTE)pIns->PitchEnv.nLoopStart;
 	iti->pitchenv.lpe = (BYTE)pIns->PitchEnv.nLoopEnd;

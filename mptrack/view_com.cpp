@@ -383,9 +383,9 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					case INSLIST_ENVELOPES:
 						if (pIns)
 						{
-							if (pIns->dwFlags & ENV_VOLUME) strcat(s, "Vol");
-							if (pIns->dwFlags & ENV_PANNING) { if (s[0]) strcat(s, ", "); strcat(s, "Pan"); }
-							if (pIns->dwFlags & ENV_PITCH) { if (s[0]) strcat(s, ", "); strcat(s, (pIns->dwFlags & ENV_FILTER) ? "Filter" : "Pitch"); }
+							if (pIns->VolEnv.dwFlags & ENV_ENABLED) strcat(s, "Vol");
+							if (pIns->PanEnv.dwFlags & ENV_ENABLED) { if (s[0]) strcat(s, ", "); strcat(s, "Pan"); }
+							if (pIns->PitchEnv.dwFlags & ENV_ENABLED) { if (s[0]) strcat(s, ", "); strcat(s, (pIns->PitchEnv.dwFlags & ENV_FILTER) ? "Filter" : "Pitch"); }
 						}
 						break;
 					case INSLIST_FILENAME:

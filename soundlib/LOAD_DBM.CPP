@@ -166,7 +166,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				pIns->nGlobalVol = 64;
 				pIns->nPan = BigEndianW(pih->panning);
 				if ((pIns->nPan) && (pIns->nPan < 256))
-					pIns->dwFlags = ENV_SETPANNING;
+					pIns->dwFlags = INS_SETPANNING;
 				else
 					pIns->nPan = 128;
 				pIns->nPPC = 5*12;
@@ -218,9 +218,9 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 				{
 					MODINSTRUMENT *pIns = Instruments[nins];
 
-					if (peh->flags & 1) pIns->dwFlags |= ENV_VOLUME;
-					if (peh->flags & 2) pIns->dwFlags |= ENV_VOLSUSTAIN;
-					if (peh->flags & 4) pIns->dwFlags |= ENV_VOLLOOP;
+					if (peh->flags & 1) pIns->VolEnv.dwFlags |= ENV_ENABLED;
+					if (peh->flags & 2) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
+					if (peh->flags & 4) pIns->VolEnv.dwFlags |= ENV_LOOP;
 					pIns->VolEnv.nNodes = peh->numpoints + 1;
 					if (pIns->VolEnv.nNodes > MAX_ENVPOINTS) pIns->VolEnv.nNodes = MAX_ENVPOINTS;
 					pIns->VolEnv.nLoopStart = peh->loopbegin;

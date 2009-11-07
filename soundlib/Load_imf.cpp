@@ -135,6 +135,7 @@ static BYTE imf_efftrans[] = {
 };
 
 static void import_imf_effect(MODCOMMAND *note)
+//---------------------------------------------
 {
 	BYTE n;
 	// fix some of them
@@ -224,17 +225,13 @@ static void import_imf_effect(MODCOMMAND *note)
 	}
 }
 
-static unsigned int envflags[3][3] = {
-	{ENV_VOLUME,             ENV_VOLSUSTAIN,   ENV_VOLLOOP},
-	{ENV_PANNING,            ENV_PANSUSTAIN,   ENV_PANLOOP},
-	{ENV_PITCH | ENV_FILTER, ENV_PITCHSUSTAIN, ENV_PITCHLOOP},
-};
-
-static void load_imf_envelope(MODINSTRUMENT *ins, INSTRUMENTENVELOPE *env, IMFINSTRUMENT *imfins, int e)
+static void load_imf_envelope(INSTRUMENTENVELOPE *env, IMFINSTRUMENT *imfins, int e)
+//----------------------------------------------------------------------------------
 {
 	UINT min = 0; // minimum tick value for next node
 	int shift = (e == IMF_ENV_VOL) ? 0 : 2;
 
+	env->dwFlags = ((imfins->env[e].flags & 1) ? ENV_ENABLED : 0) | ((imfins->env[e].flags & 2) ? ENV_SUSTAIN : 0) | ((imfins->env[e].flags & 4) ? ENV_LOOP : 0);
 	env->nNodes = CLAMP(imfins->env[e].points, 2, 25);
 	env->nLoopStart = imfins->env[e].loop_start;
 	env->nLoopEnd = imfins->env[e].loop_end;
@@ -249,16 +246,10 @@ static void load_imf_envelope(MODINSTRUMENT *ins, INSTRUMENTENVELOPE *env, IMFIN
 		env->Values[n] = (BYTE)min(nValue, 64);
 		min = nTick + 1;
 	}
-	// this would be less retarded if the envelopes all had their own flags...
-	if (imfins->env[e].flags & 1)
-		ins->dwFlags |= envflags[e][0];
-	if (imfins->env[e].flags & 2)
-		ins->dwFlags |= envflags[e][1];
-	if (imfins->env[e].flags & 4)
-		ins->dwFlags |= envflags[e][2];
 }
 
 bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
+//-----------------------------------------------------------------------
 {
 	#define ASSERT_CAN_READ(x) \
 	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
@@ -487,12 +478,13 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		pIns->nFadeOut = imfins.fadeout;
 		pIns->nGlobalVol = 128;
 
-		load_imf_envelope(pIns, &pIns->VolEnv, &imfins, IMF_ENV_VOL);
-		load_imf_envelope(pIns, &pIns->PanEnv, &imfins, IMF_ENV_PAN);
-		load_imf_envelope(pIns, &pIns->PitchEnv, &imfins, IMF_ENV_FILTER);
+		load_imf_envelope(&pIns->VolEnv, &imfins, IMF_ENV_VOL);
+		load_imf_envelope(&pIns->PanEnv, &imfins, IMF_ENV_PAN);
+		load_imf_envelope(&pIns->PitchEnv, &imfins, IMF_ENV_FILTER);
+		if((pIns->PitchEnv.dwFlags & ENV_ENABLED) != 0) pIns->PitchEnv.dwFlags |= ENV_FILTER;
 
 		// hack to get === to stop notes (from modplug's xm loader)
-		if (!(pIns->dwFlags & ENV_VOLUME) && !pIns->nFadeOut)
+		if (!(pIns->VolEnv.dwFlags & ENV_ENABLED) && !pIns->nFadeOut)
 			pIns->nFadeOut = 8192;
 
 		// read this instrument's samples

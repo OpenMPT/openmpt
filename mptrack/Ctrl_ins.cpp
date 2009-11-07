@@ -1101,7 +1101,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			SetDlgItemInt(IDC_EDIT8, pIns->nGlobalVol);
 			// Panning
 			SetDlgItemInt(IDC_EDIT9, pIns->nPan);
-			m_CheckPanning.SetCheck((pIns->dwFlags & ENV_SETPANNING) ? TRUE : FALSE);
+			m_CheckPanning.SetCheck((pIns->dwFlags & INS_SETPANNING) ? TRUE : FALSE);
 			// Midi
 			if (pIns->nMidiProgram>0 && pIns->nMidiProgram<=128)
 				SetDlgItemInt(IDC_EDIT10, pIns->nMidiProgram);
@@ -1774,8 +1774,8 @@ void CCtrlInstruments::OnSetPanningChanged()
 	{
 		const BOOL b = m_CheckPanning.GetCheck();
 
-		if (b) pIns->dwFlags |= ENV_SETPANNING;
-		else pIns->dwFlags &= ~ENV_SETPANNING;
+		if (b) pIns->dwFlags |= INS_SETPANNING;
+		else pIns->dwFlags &= ~INS_SETPANNING;
 
 		if(b && m_pSndFile->GetType() & MOD_TYPE_IT|MOD_TYPE_MPT)
 		{

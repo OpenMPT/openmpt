@@ -156,28 +156,29 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define CHN_NOFX			0x20000000 // -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
 #define CHN_SYNCMUTE		0x40000000
 
-#define ENV_VOLUME			0x0001
-#define ENV_VOLSUSTAIN		0x0002
-#define ENV_VOLLOOP			0x0004
-#define ENV_PANNING			0x0008
-#define ENV_PANSUSTAIN		0x0010
-#define ENV_PANLOOP			0x0020
-#define ENV_PITCH			0x0040
-#define ENV_PITCHSUSTAIN	0x0080
-#define ENV_PITCHLOOP		0x0100
-#define ENV_SETPANNING		0x0200
-#define ENV_FILTER			0x0400
-#define ENV_VOLCARRY		0x0800
-#define ENV_PANCARRY		0x1000
-#define ENV_PITCHCARRY		0x2000
-#define ENV_MUTE			0x4000
+// instrument envelope-specific flags
+#define ENV_LOOP			0x01	// env loop
+#define ENV_SUSTAIN			0x02	// env sustain
+#define ENV_CARRY			0x04	// env carry
+#define ENV_ENABLED			0x08	// env is enabled
+#define ENV_FILTER			0x10	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
 
+// instrument-specific flags
+#define INS_SETPANNING		0x01	// panning enabled
+#define INS_MUTE			0x02	// instrumentd is muted
+
+// envelope types in instrument editor
+enum enmEnvelopeTypes
+{
+	ENV_VOLUME = 1,
+	ENV_PANNING = 2,
+	ENV_PITCH = 3,
+};
 
 // Filter Modes
 #define FLTMODE_UNCHANGED		0xFF
 #define FLTMODE_LOWPASS			0
 #define FLTMODE_HIGHPASS		1
-#define FLTMODE_BANDPASS		2		// unused
 
 
 #define RSF_16BIT		0x04

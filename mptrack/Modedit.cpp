@@ -283,7 +283,10 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 					pIns->PanEnv.nSustainEnd = pIns->PanEnv.nSustainStart;
 					bBrokenSustainLoop = true;
 				}
-				pIns->dwFlags &= ~(ENV_SETPANNING|ENV_VOLCARRY|ENV_PANCARRY|ENV_PITCHCARRY|ENV_FILTER|ENV_PITCH);
+				pIns->VolEnv.dwFlags &= ~ENV_CARRY;
+				pIns->PanEnv.dwFlags &= ~ENV_CARRY;
+				pIns->PitchEnv.dwFlags &= ~(ENV_CARRY|ENV_ENABLED|ENV_FILTER);
+				pIns->dwFlags &= ~INS_SETPANNING;
 				pIns->nIFC &= 0x7F;
 				pIns->nIFR &= 0x7F;
 			}
@@ -1402,7 +1405,6 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 	CHAR s[4096];
 	MODINSTRUMENT *pIns;
 	DWORD dwMemSize;
-	UINT bSus, bLoop, bCarry;
 
 	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return FALSE;
 	BeginWaitCursor();
@@ -1414,27 +1416,17 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 	{
 	case ENV_PANNING:
 		pEnv = &pIns->PanEnv;
-		bLoop = (pIns->dwFlags & ENV_PANLOOP) ? 1 : 0;
-		bSus = (pIns->dwFlags & ENV_PANSUSTAIN) ? 1 : 0;
-		bCarry = (pIns->dwFlags & ENV_PANCARRY) ? 1 : 0;
 		break;
-
 	case ENV_PITCH:
 		pEnv = &pIns->PitchEnv;
-		bLoop = (pIns->dwFlags & ENV_PITCHLOOP) ? 1 : 0;
-		bSus = (pIns->dwFlags & ENV_PITCHSUSTAIN) ? 1 : 0;
-		bCarry = (pIns->dwFlags & ENV_PITCHCARRY) ? 1 : 0;
 		break;
-
 	default:
 		pEnv = &pIns->VolEnv;
-		bLoop = (pIns->dwFlags & ENV_VOLLOOP) ? 1 : 0;
-		bSus = (pIns->dwFlags & ENV_VOLSUSTAIN) ? 1 : 0;
-		bCarry = (pIns->dwFlags & ENV_VOLCARRY) ? 1 : 0;
 		break;
 	}
+
 	strcpy(s, pszEnvHdr);
-	wsprintf(s + strlen(s), pszEnvFmt, pEnv->nNodes, pEnv->nSustainStart, pEnv->nSustainEnd, pEnv->nLoopStart, pEnv->nLoopEnd, bSus, bLoop, bCarry);
+	wsprintf(s + strlen(s), pszEnvFmt, pEnv->nNodes, pEnv->nSustainStart, pEnv->nSustainEnd, pEnv->nLoopStart, pEnv->nLoopEnd, (pEnv->dwFlags & ENV_SUSTAIN) ? 1 : 0, (pEnv->dwFlags & ENV_LOOP) ? 1 : 0, (pEnv->dwFlags & ENV_CARRY) ? 1 : 0);
 	for (UINT i = 0; i < pEnv->nNodes; i++)
 	{
 		if (strlen(s) >= sizeof(s)-32) break;
@@ -1511,26 +1503,12 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 			{
 			case ENV_PANNING:
 				pEnv = &pIns->PanEnv;
-				pIns->dwFlags &= ~(ENV_PANLOOP|ENV_PANSUSTAIN|ENV_PANCARRY);
-				if (bLoop) pIns->dwFlags |= ENV_PANLOOP;
-				if (bSus) pIns->dwFlags |= ENV_PANSUSTAIN;
-				if (bCarry) pIns->dwFlags |= ENV_PANCARRY;
 				break;
-
 			case ENV_PITCH:
 				pEnv = &pIns->PitchEnv;
-				pIns->dwFlags &= ~(ENV_PITCHLOOP|ENV_PITCHSUSTAIN|ENV_PITCHCARRY);
-				if (bLoop) pIns->dwFlags |= ENV_PITCHLOOP;
-				if (bSus) pIns->dwFlags |= ENV_PITCHSUSTAIN;
-				if (bCarry) pIns->dwFlags |= ENV_PITCHCARRY;
 				break;
-
 			default:
 				pEnv = &pIns->VolEnv;
-				pIns->dwFlags &= ~(ENV_VOLLOOP|ENV_VOLSUSTAIN|ENV_VOLCARRY);
-				if (bLoop) pIns->dwFlags |= ENV_VOLLOOP;
-				if (bSus) pIns->dwFlags |= ENV_VOLSUSTAIN;
-				if (bCarry) pIns->dwFlags |= ENV_VOLCARRY;
 				break;
 			}
 			pEnv->nNodes = nPoints;
@@ -1539,6 +1517,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 			pEnv->nLoopStart = loopBegin;
 			pEnv->nLoopEnd = loopEnd;
 			pEnv->nReleaseNode = releaseNode;
+			pEnv->dwFlags = (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0);
 
 			int oldn = 0;
 			for (UINT i=0; i<nPoints; i++)

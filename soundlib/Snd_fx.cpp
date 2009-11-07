@@ -504,7 +504,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		if (pIns)
 		{
 			pChn->nInsVol = (pSmp->nGlobalVol * pIns->nGlobalVol) >> 6;
-			if (pIns->dwFlags & ENV_SETPANNING) pChn->nPan = pIns->nPan;
+			if (pIns->dwFlags & INS_SETPANNING) pChn->nPan = pIns->nPan;
 		} else
 		{
 			pChn->nInsVol = pSmp->nGlobalVol;
@@ -524,15 +524,16 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 			pChn->dwFlags |= CHN_FASTVOLRAMP;
 			if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!bInstrumentChanged) && (pIns) && (!(pChn->dwFlags & (CHN_KEYOFF|CHN_NOTEFADE))))
 			{
-				if (!(pIns->dwFlags & ENV_VOLCARRY)) resetEnvelopes(pChn, ENV_RESET_VOL);
-				if (!(pIns->dwFlags & ENV_PANCARRY)) resetEnvelopes(pChn, ENV_RESET_PAN);
-				if (!(pIns->dwFlags & ENV_PITCHCARRY)) resetEnvelopes(pChn, ENV_RESET_PITCH);
+				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) resetEnvelopes(pChn, ENV_RESET_VOL);
+				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) resetEnvelopes(pChn, ENV_RESET_PAN);
+				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) resetEnvelopes(pChn, ENV_RESET_PITCH);
 			} else {
 				resetEnvelopes(pChn);
 			}
 			pChn->nAutoVibDepth = 0;
 			pChn->nAutoVibPos = 0;
-		} else if ((pIns) && (!(pIns->dwFlags & ENV_VOLUME)))	{
+		} else if ((pIns) && (!(pIns->VolEnv.dwFlags & ENV_ENABLED)))
+		{
 			resetEnvelopes(pChn);		
 		}
 	}
@@ -564,10 +565,10 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 
 		if (pIns)
 		{
-			if (pIns->dwFlags & ENV_VOLUME) pChn->dwFlags |= CHN_VOLENV;
-			if (pIns->dwFlags & ENV_PANNING) pChn->dwFlags |= CHN_PANENV;
-			if (pIns->dwFlags & ENV_PITCH) pChn->dwFlags |= CHN_PITCHENV;
-			if ((pIns->dwFlags & ENV_PITCH) && (pIns->dwFlags & ENV_FILTER))
+			if (pIns->VolEnv.dwFlags & ENV_ENABLED) pChn->dwFlags |= CHN_VOLENV;
+			if (pIns->PanEnv.dwFlags & ENV_ENABLED) pChn->dwFlags |= CHN_PANENV;
+			if (pIns->PitchEnv.dwFlags & ENV_ENABLED) pChn->dwFlags |= CHN_PITCHENV;
+			if ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && (pIns->PitchEnv.dwFlags & ENV_FILTER))
 			{
 				if (!pChn->nCutOff) pChn->nCutOff = 0x7F;
 			}
@@ -771,9 +772,9 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			pChn->nResSwing = pChn->nCutSwing = 0;
 			if (pIns)
 			{
-				if (!(pIns->dwFlags & ENV_VOLCARRY)) pChn->nVolEnvPosition = 0;
-				if (!(pIns->dwFlags & ENV_PANCARRY)) pChn->nPanEnvPosition = 0;
-				if (!(pIns->dwFlags & ENV_PITCHCARRY)) pChn->nPitchEnvPosition = 0;
+				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->nVolEnvPosition = 0;
+				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->nPanEnvPosition = 0;
+				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) pChn->nPitchEnvPosition = 0;
 				if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
 				{
 					// Volume Swing
@@ -831,7 +832,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 	if (bManual) pChn->dwFlags &= ~CHN_MUTE;
 	if (((pChn->dwFlags & CHN_MUTE) && (gdwSoundSetup & SNDMIX_MUTECHNMODE))
 	 || ((pChn->pModSample) && (pChn->pModSample->uFlags & CHN_MUTE) && (!bManual))
-	 || ((pChn->pModInstrument) && (pChn->pModInstrument->dwFlags & ENV_MUTE) && (!bManual)))
+	 || ((pChn->pModInstrument) && (pChn->pModInstrument->dwFlags & INS_MUTE) && (!bManual)))
 	{
 		if (!bManual) pChn->nPeriod = 0;
 	}
@@ -1242,7 +1243,7 @@ BOOL CSoundFile::ProcessEffects()
 				}
 
 				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number or volume effect is present!)
-				if ((note == NOTE_KEYOFF) && ((!instr && !vol && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2)) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->dwFlags & ENV_VOLUME))))
+				if ((note == NOTE_KEYOFF) && ((!instr && !vol && cmd != CMD_VOLUME) || !IsCompatibleMode(TRK_FASTTRACKER2)) && ((!pChn->pModInstrument) || (!(pChn->pModInstrument->VolEnv.dwFlags & ENV_ENABLED))))
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					pChn->nVolume = 0;
@@ -1725,7 +1726,7 @@ BOOL CSoundFile::ProcessEffects()
 				if (m_nTickCount == param)
 				{
 					// XM: Key-Off + Sample == Note Cut
-					if ((!pChn->pModInstrument) || (!(pChn->pModInstrument->dwFlags & ENV_VOLUME)))
+					if ((!pChn->pModInstrument) || (!(pChn->pModInstrument->VolEnv.dwFlags & ENV_ENABLED)))
 					{
 						if(param == 0) // FT2 is weird....
 						{
@@ -3325,7 +3326,7 @@ void CSoundFile::KeyOff(UINT nChn)
 	if (pChn->pModInstrument)
 	{
 		MODINSTRUMENT *pIns = pChn->pModInstrument;
-		if (((pIns->dwFlags & ENV_VOLLOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut)) {
+		if (((pIns->VolEnv.dwFlags & ENV_LOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut)) {
 			pChn->dwFlags |= CHN_NOTEFADE;
 		}
 	
@@ -3753,7 +3754,7 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 
 	UINT nPlugin=0;
 	if (pChn && pChn->pModInstrument) {
-		if (respectMutes && pChn->pModSample && pChn->pModSample->uFlags&ENV_MUTE) { 
+		if (respectMutes && pChn->pModSample && pChn->pModSample->uFlags&INS_MUTE) { 
 			nPlugin = 0;
 		} else {
 			nPlugin = pChn->pModInstrument->nMixPlug;

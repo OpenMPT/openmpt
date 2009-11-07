@@ -1299,7 +1299,7 @@ BOOL CSoundFile::ReadNote()
 				}
 				envpitch = CLAMP(envpitch, -256, 256);
 				// Filter Envelope: controls cutoff frequency
-				if (pIns->dwFlags & ENV_FILTER)
+				if (pIns->PitchEnv.dwFlags & ENV_FILTER)
 				{
 #ifndef NO_FILTER
 					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true, envpitch);
@@ -1607,7 +1607,7 @@ BOOL CSoundFile::ReadNote()
 				// Increase position
 				pChn->nVolEnvPosition++;
 				// Volume Loop ?
-				if (pIns->dwFlags & ENV_VOLLOOP)
+				if (pIns->VolEnv.dwFlags & ENV_LOOP)
 				{
 					UINT volloopend = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopEnd];
 					if (m_nType != MOD_TYPE_XM) volloopend++;
@@ -1623,7 +1623,7 @@ BOOL CSoundFile::ReadNote()
 					}
 				}
 				// Volume Sustain ?
-				if ((pIns->dwFlags & ENV_VOLSUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
+				if ((pIns->VolEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
 					if (pChn->nVolEnvPosition == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd]+1)
 						pChn->nVolEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
@@ -1645,7 +1645,7 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->dwFlags & CHN_PANENV)
 			{
 				pChn->nPanEnvPosition++;
-				if (pIns->dwFlags & ENV_PANLOOP)
+				if (pIns->PanEnv.dwFlags & ENV_LOOP)
 				{
 					UINT panloopend = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopEnd];
 					if (m_nType != MOD_TYPE_XM) panloopend++;
@@ -1653,7 +1653,7 @@ BOOL CSoundFile::ReadNote()
 						pChn->nPanEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopStart];
 				}
 				// Panning Sustain ?
-				if ((pIns->dwFlags & ENV_PANSUSTAIN) && (pChn->nPanEnvPosition == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd]+1)
+				if ((pIns->PanEnv.dwFlags & ENV_SUSTAIN) && (pChn->nPanEnvPosition == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd]+1)
 				 && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
 					// Panning sustained
@@ -1670,7 +1670,7 @@ BOOL CSoundFile::ReadNote()
 				// Increase position
 				pChn->nPitchEnvPosition++;
 				// Pitch Loop ?
-				if (pIns->dwFlags & ENV_PITCHLOOP)
+				if (pIns->PitchEnv.dwFlags & ENV_LOOP)
 				{
 					UINT pitchloopend = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopEnd];
 					//IT compatibility 24. Short envelope loops
@@ -1679,7 +1679,7 @@ BOOL CSoundFile::ReadNote()
 						pChn->nPitchEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
 				}
 				// Pitch Sustain ?
-				if ((pIns->dwFlags & ENV_PITCHSUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
+				if ((pIns->PitchEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
 					if (pChn->nPitchEnvPosition == (UINT)pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainEnd]+1)
 						pChn->nPitchEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainStart];
