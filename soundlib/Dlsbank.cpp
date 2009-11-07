@@ -1772,7 +1772,7 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 		// Volume Envelope
 		if ((part->wVolAttack) || (part->wVolDecay < 20*50) || (part->nVolSustainLevel) || (part->wVolRelease < 20*50))
 		{
-			pIns->dwFlags |= ENV_VOLUME;
+			pIns->VolEnv.dwFlags |= ENV_ENABLED;
 			// Delay section
 			// -> DLS level 2
 			// Attack section
@@ -1830,10 +1830,10 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 						nPoint++;
 					}
 				}
-				pIns->dwFlags |= ENV_VOLSUSTAIN;
+				pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
 			} else
 			{
-				pIns->dwFlags |= ENV_VOLSUSTAIN;
+				pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
 				pIns->VolEnv.Ticks[nPoint] = (WORD)(pIns->VolEnv.Ticks[nPoint-1]+1);
 				pIns->VolEnv.Values[nPoint] = pIns->VolEnv.Values[nPoint-1];
 				nPoint++;
@@ -1884,10 +1884,10 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 	{
 		// Create a default envelope for drums
-		pIns->dwFlags &= ~ENV_VOLSUSTAIN;
-		if (!(pIns->dwFlags & ENV_VOLUME))
+		pIns->VolEnv.dwFlags &= ~ENV_SUSTAIN;
+		if (!(pIns->VolEnv.dwFlags & ENV_ENABLED))
 		{
-			pIns->dwFlags |= ENV_VOLUME;
+			pIns->VolEnv.dwFlags |= ENV_ENABLED;
 			pIns->VolEnv.Ticks[0] = 0;
 			pIns->VolEnv.Values[0] = 64;
 			pIns->VolEnv.Ticks[1] = 5;

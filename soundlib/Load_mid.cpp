@@ -439,8 +439,8 @@ UINT CSoundFile::MapMidiInstrument(DWORD dwBankProgram, UINT nChannel, UINT nNot
 		pIns->Keyboard[j] = m_nSamples;
 		pIns->NoteMap[j] = (BYTE)mapnote;
 	}
-	pIns->dwFlags |= ENV_VOLUME;
-	if (nChannel != MIDI_DRUMCHANNEL) pIns->dwFlags |= ENV_VOLSUSTAIN;
+	pIns->VolEnv.dwFlags |= ENV_ENABLED;
+	if (nChannel != MIDI_DRUMCHANNEL) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
 	pIns->VolEnv.nNodes = 4;
 	pIns->VolEnv.Ticks[0] = 0;
 	pIns->VolEnv.Values[0] = 64;

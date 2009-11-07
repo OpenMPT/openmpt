@@ -401,9 +401,9 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		}
 		pIns->nFadeOut = (((lpStream[dwMemPos+2] & 0x0F) << 8) | (lpStream[dwMemPos+1])) << 3;
 		UINT envflags = lpStream[dwMemPos+3];
-		if (envflags & 0x01) pIns->dwFlags |= ENV_VOLLOOP;
-		if (envflags & 0x02) pIns->dwFlags |= ENV_VOLSUSTAIN;
-		if (envflags & 0x04) pIns->dwFlags |= ENV_VOLUME;
+		if (envflags & 0x01) pIns->VolEnv.dwFlags |= ENV_LOOP;
+		if (envflags & 0x02) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
+		if (envflags & 0x04) pIns->VolEnv.dwFlags |= ENV_ENABLED;
 		dwMemPos += 5;
 		// Read Samples
 		for (UINT ismp=0; ismp<pSmp->samples; ismp++)

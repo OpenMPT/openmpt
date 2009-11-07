@@ -95,6 +95,30 @@ void ConvertMDLCommand(MODCOMMAND *m, UINT eff, UINT data)
 }
 
 
+// Convert MDL envelope data (env points and flags)
+void ConvertMDLEnvelope(const unsigned char *pMDLEnv, INSTRUMENTENVELOPE *pMPTEnv)
+//--------------------------------------------------------------------------------
+{
+	WORD nCurTick = 1;
+	pMPTEnv->nNodes = 15;
+	for (UINT nTick = 0; nTick < 15; nTick++)
+	{
+		if (nTick) nCurTick += pMDLEnv[nTick * 2 + 1];
+		pMPTEnv->Ticks[nTick] = nCurTick;
+		pMPTEnv->Values[nTick] = pMDLEnv[nTick * 2 + 2];
+		if (!pMDLEnv[nTick * 2 + 1]) // last point reached
+		{
+			pMPTEnv->nNodes = nTick + 1;
+			break;
+		}
+	}
+	pMPTEnv->nSustainStart = pMPTEnv->nSustainEnd = pMDLEnv[31] & 0x0F;
+	pMPTEnv->dwFlags |= ((pMDLEnv[31] & 0x10) ? ENV_SUSTAIN : 0) | ((pMDLEnv[31] & 0x20) ? ENV_LOOP : 0);
+	pMPTEnv->nLoopStart = pMDLEnv[32] & 0x0F;
+	pMPTEnv->nLoopEnd = pMDLEnv[32] >> 4;
+}
+
+
 void UnpackMDLTrack(MODCOMMAND *pat, UINT nChannels, UINT nRows, UINT nTrack, const BYTE *lpTracks)
 //-------------------------------------------------------------------------------------------------
 {
@@ -359,13 +383,13 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 						// Use volume envelope ?
 						if (ps[3] & 0x80)
 						{
-							pIns->dwFlags |= ENV_VOLUME;
+							pIns->VolEnv.dwFlags |= ENV_ENABLED;
 							insvolenv[nins] = (ps[3] & 0x3F) + 1;
 						}
 						// Use panning envelope ?
 						if (ps[5] & 0x80)
 						{
-							pIns->dwFlags |= ENV_PANNING;
+							pIns->PanEnv.dwFlags |= ENV_ENABLED;
 							inspanenv[nins] = (ps[5] & 0x3F) + 1;
 						}
 					}
@@ -495,56 +519,24 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 	// Set up envelopes
 	for (UINT iIns=1; iIns<=m_nInstruments; iIns++) if (Instruments[iIns])
 	{
-		MODINSTRUMENT *pIns = Instruments[iIns];
 		// Setup volume envelope
 		if ((nvolenv) && (pvolenv) && (insvolenv[iIns]))
 		{
 			LPCBYTE pve = pvolenv;
-			for (UINT nve=0; nve<nvolenv; nve++, pve+=33) if (pve[0]+1 == insvolenv[iIns])
+			for (UINT nve = 0; nve < nvolenv; nve++, pve += 33)
 			{
-				WORD vtick = 1;
-				pIns->VolEnv.nNodes = 15;
-				for (UINT iv=0; iv<15; iv++)
-				{
-					if (iv) vtick += pve[iv*2+1];
-					pIns->VolEnv.Ticks[iv] = vtick;
-					pIns->VolEnv.Values[iv] = pve[iv*2+2];
-					if (!pve[iv*2+1])
-					{
-						pIns->VolEnv.nNodes = iv+1;
-						break;
-					}
-				}
-				pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = pve[31] & 0x0F;
-				if (pve[31] & 0x10) pIns->dwFlags |= ENV_VOLSUSTAIN;
-				if (pve[31] & 0x20) pIns->dwFlags |= ENV_VOLLOOP;
-				pIns->VolEnv.nLoopStart = pve[32] & 0x0F;
-				pIns->VolEnv.nLoopEnd = pve[32] >> 4;
+				if (pve[0] + 1 == insvolenv[iIns])
+					ConvertMDLEnvelope(pve, &Instruments[iIns]->VolEnv);
 			}
 		}
 		// Setup panning envelope
 		if ((npanenv) && (ppanenv) && (inspanenv[iIns]))
 		{
 			LPCBYTE ppe = ppanenv;
-			for (UINT npe=0; npe<npanenv; npe++, ppe+=33) if (ppe[0]+1 == inspanenv[iIns])
+			for (UINT npe = 0; npe < npanenv; npe++, ppe += 33)
 			{
-				WORD vtick = 1;
-				pIns->PanEnv.nNodes = 15;
-				for (UINT iv=0; iv<15; iv++)
-				{
-					if (iv) vtick += ppe[iv*2+1];
-					pIns->PanEnv.Ticks[iv] = vtick;
-					pIns->PanEnv.Values[iv] = ppe[iv*2+2];
-					if (!ppe[iv*2+1])
-					{
-						pIns->PanEnv.nNodes = iv+1;
-						break;
-					}
-				}
-				if (ppe[31] & 0x10) pIns->dwFlags |= ENV_PANSUSTAIN;
-				if (ppe[31] & 0x20) pIns->dwFlags |= ENV_PANLOOP;
-				pIns->PanEnv.nLoopStart = ppe[32] & 0x0F;
-				pIns->PanEnv.nLoopEnd = ppe[32] >> 4;
+				if (ppe[0] + 1 == inspanenv[iIns])
+					ConvertMDLEnvelope(ppe, &Instruments[iIns]->PanEnv);
 			}
 		}
 	}

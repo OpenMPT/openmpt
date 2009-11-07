@@ -75,14 +75,15 @@ MODULAR STRUCT DECLARATIONS :
 // Instrument Envelopes
 struct INSTRUMENTENVELOPE
 {
-	WORD Ticks[MAX_ENVPOINTS];
-	BYTE Values[MAX_ENVPOINTS];
-	UINT nNodes;
-	BYTE nLoopStart;
-	BYTE nLoopEnd;
-	BYTE nSustainStart;
-	BYTE nSustainEnd;
-	BYTE nReleaseNode;
+	DWORD dwFlags;				// envelope flags
+	WORD Ticks[MAX_ENVPOINTS];	// envelope point position (x axis)
+	BYTE Values[MAX_ENVPOINTS];	// envelope point value (y axis)
+	UINT nNodes;				// amount of nodes used
+	BYTE nLoopStart;			// loop start node
+	BYTE nLoopEnd;				// loop end node
+	BYTE nSustainStart;			// sustain start node
+	BYTE nSustainEnd;			// sustain end node
+	BYTE nReleaseNode;			// release node
 };
 
 // Instrument Struct

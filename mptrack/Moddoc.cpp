@@ -1189,8 +1189,8 @@ bool CModDoc::MuteInstrument(INSTRUMENTINDEX nInstr, bool bMute)
 //--------------------------------------------------------------
 {
 	if ((nInstr < 1) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return false;
-	if (bMute) m_SndFile.Instruments[nInstr]->dwFlags |= ENV_MUTE;
-	else m_SndFile.Instruments[nInstr]->dwFlags &= ~ENV_MUTE;
+	if (bMute) m_SndFile.Instruments[nInstr]->dwFlags |= INS_MUTE;
+	else m_SndFile.Instruments[nInstr]->dwFlags &= ~INS_MUTE;
 	return true;
 }
 
@@ -1267,7 +1267,7 @@ bool CModDoc::IsInstrumentMuted(INSTRUMENTINDEX nInstr) const
 //-----------------------------------------------------------
 {
 	if ((!nInstr) || (nInstr > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nInstr])) return false;
-	return (m_SndFile.Instruments[nInstr]->dwFlags & ENV_MUTE) ? true : false;
+	return (m_SndFile.Instruments[nInstr]->dwFlags & INS_MUTE) ? true : false;
 }
 
 

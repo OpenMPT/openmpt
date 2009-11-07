@@ -18,7 +18,8 @@ protected:
 	RECT m_rcClient;
 	bool m_baPlayingNote[128]; //rewbs.instViewNNA
 	INSTRUMENTINDEX m_nInstrument;
-	UINT m_nEnv, m_nDragItem, m_nBtnMouseOver, m_nPlayingChannel;
+	enmEnvelopeTypes m_nEnv;
+	UINT m_nDragItem, m_nBtnMouseOver, m_nPlayingChannel;
 	DWORD m_dwStatus;
 	DWORD m_NcButtonState[ENV_LEFTBAR_BUTTONS];
 	DWORD m_dwNotifyPos[MAX_CHANNELS];
@@ -39,37 +40,64 @@ public:
 	CViewInstrument();
 	DECLARE_SERIAL(CViewInstrument)
 
-public:
-	void UpdateScrollSize();
-	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, UINT m_nEnv=0);
-	INSTRUMENTENVELOPE *GetEnvelopePtr() const;
+protected:
+	////////////////////////
+	// Envelope get stuff
+
+	// Flags
+	bool EnvGetFlag(const DWORD dwFlag) const;
+	bool EnvGetLoop() const {return EnvGetFlag(ENV_LOOP);};
+	bool EnvGetSustain() const {return EnvGetFlag(ENV_SUSTAIN);};
+	bool EnvGetCarry() const {return EnvGetFlag(ENV_CARRY);};
+
+	// Misc.
 	UINT EnvGetTick(int nPoint) const;
 	UINT EnvGetValue(int nPoint) const;
 	UINT EnvGetLastPoint() const;
 	UINT EnvGetNumPoints() const;
+
+	// Get loop points
 	UINT EnvGetLoopStart() const;
 	UINT EnvGetLoopEnd() const;
 	UINT EnvGetSustainStart() const;
 	UINT EnvGetSustainEnd() const;
-	bool EnvGetLoop() const;
-	bool EnvGetSustain() const;
-	bool EnvGetCarry() const;
+
+	// Get envelope status
 	bool EnvGetVolEnv() const;
 	bool EnvGetPanEnv() const;
 	bool EnvGetPitchEnv() const;
 	bool EnvGetFilterEnv() const;
+
+	////////////////////////
+	// Envelope set stuff
+
+	// Flags
+	bool EnvSetFlag(const DWORD dwFlag, const bool bEnable) const;
+	bool EnvSetLoop(bool bEnable) const {return EnvSetFlag(ENV_LOOP, bEnable);};
+	bool EnvSetSustain(bool bEnable) const {return EnvSetFlag(ENV_SUSTAIN, bEnable);};
+	bool EnvSetCarry(bool bEnable) const {return EnvSetFlag(ENV_CARRY, bEnable);};
+
+	// Misc.
 	bool EnvSetValue(int nPoint, int nTick=-1, int nValue=-1);
+
+	// Set loop points
 	bool EnvSetLoopStart(int nPoint);
 	bool EnvSetLoopEnd(int nPoint);
 	bool EnvSetSustainStart(int nPoint);
 	bool EnvSetSustainEnd(int nPoint);
-	bool EnvSetLoop(bool bLoop);
-	bool EnvSetSustain(bool bSustain);
-	bool EnvSetCarry(bool bCarry);
+
+	// Set envelope status
+	bool EnvToggleEnv(INSTRUMENTENVELOPE *pEnv, CSoundFile *pSndFile, MODINSTRUMENT *pIns, bool bEnable, BYTE cDefaultValue, DWORD dwChanFlag, DWORD dwExtraFlags = 0);
 	bool EnvSetVolEnv(bool bEnable);
 	bool EnvSetPanEnv(bool bEnable);
 	bool EnvSetPitchEnv(bool bEnable);
 	bool EnvSetFilterEnv(bool bEnable);
+
+	////////////////////////
+	// Misc stuff
+	void UpdateScrollSize();
+	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes m_nEnv = ENV_VOLUME);
+	INSTRUMENTENVELOPE *GetEnvelopePtr() const;
 	UINT EnvInsertPoint();
 	bool EnvRemovePoint();
 	int TickToScreen(int nTick) const;

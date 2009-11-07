@@ -291,6 +291,9 @@ WRITE_MPTHEADER_sized_member(	wPitchToTempoLock		, WORD			, PTTL							)
 WRITE_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, BYTE			, PERN							)
 WRITE_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, BYTE		    , AERN							)
 WRITE_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, BYTE			, VERN							)
+WRITE_MPTHEADER_sized_member(	PitchEnv.dwFlags		, DWORD			, PFLG							)
+WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags			, DWORD		    , AFLG							)
+WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags			, DWORD			, VFLG							)
 }
 
 // --------------------------------------------------------------------------------------------
@@ -370,6 +373,9 @@ GET_MPTHEADER_sized_member(	nPluginVolumeHandling	, BYTE			, PVOH							)
 GET_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, BYTE			, PERN							)
 GET_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, BYTE		    , AERN							)
 GET_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, BYTE			, VERN							)
+GET_MPTHEADER_sized_member(	PitchEnv.dwFlags     	, BYTE			, PFLG							)
+GET_MPTHEADER_sized_member(	PanEnv.dwFlags     		, BYTE		    , AFLG							)
+GET_MPTHEADER_sized_member(	VolEnv.dwFlags     		, BYTE			, VFLG							)
 }
 
 return pointer;
