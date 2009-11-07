@@ -525,7 +525,10 @@ void COrderList::OnEditPaste()
 								continue;
 							PATTERNINDEX nPat = pSf->Order.GetInvalidPatIndex();
 							if (bufItem[0] == '+')
+							{
 								nPat = pSf->Order.GetIgnoreIndex();
+								if(!pSf->GetModSpecifications().hasIgnoreIndex) continue;
+							}
 							else if (isdigit(bufItem[0]))
 							{
 								nPat = ConvertStrTo<PATTERNINDEX>(bufItem);
