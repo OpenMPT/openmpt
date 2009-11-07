@@ -80,8 +80,30 @@ void ConvertMDLCommand(MODCOMMAND *m, UINT eff, UINT data)
 		}
 		break;
 	case 0x0F:	command = CMD_SPEED; break;
-	case 0x10:	if ((param & 0xF0) != 0xE0) { command = CMD_VOLUMESLIDE; if ((param & 0xF0) == 0xF0) param = ((param << 4) | 0x0F); else param >>= 2; } break;
-	case 0x20:	if ((param & 0xF0) != 0xE0) { command = CMD_VOLUMESLIDE; if ((param & 0xF0) != 0xF0) param >>= 2; } break;
+	case 0x10:
+		if ((param & 0xF0) != 0xE0) {
+			command = CMD_VOLUMESLIDE;
+			if ((param & 0xF0) == 0xF0) {
+				param = ((param << 4) | 0x0F);
+			} else {
+				param >>= 2;
+				if (param > 0xF)
+					param = 0xF;
+				param <<= 4;
+			}
+		}
+		break;
+	case 0x20:
+		if ((param & 0xF0) != 0xE0) {
+			command = CMD_VOLUMESLIDE;
+			if ((param & 0xF0) != 0xF0) {
+				param >>= 2;
+				if (param > 0xF)
+					param = 0xF;
+			}
+		}
+		break;
+
 	case 0x30:	command = CMD_RETRIG; break;
 	case 0x40:	command = CMD_TREMOLO; break;
 	case 0x50:	command = CMD_TREMOR; break;
@@ -392,6 +414,10 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 							pIns->PanEnv.dwFlags |= ENV_ENABLED;
 							inspanenv[nins] = (ps[5] & 0x3F) + 1;
 						}
+
+						// taken from load_xm.cpp - seems to fix wakingup.mdl
+						if (!(pIns->VolEnv.dwFlags & ENV_ENABLED) && !pIns->nFadeOut)
+							pIns->nFadeOut = 8192;		
 					}
 				}
 				dwPos += 34 + 14*lpStream[dwPos+1];
@@ -457,7 +483,6 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 				pSmp->nLoopStart = *((DWORD *)(p+4));
 				pSmp->nLoopEnd = pSmp->nLoopStart + *((DWORD *)(p+8));
 				if (pSmp->nLoopEnd > pSmp->nLoopStart) pSmp->uFlags |= CHN_LOOP;
-				pSmp->nVolume = 256;
 				pSmp->nGlobalVol = 64;
 				if (p[13] & 0x01)
 				{

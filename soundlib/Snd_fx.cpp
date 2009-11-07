@@ -3754,7 +3754,7 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 
 	UINT nPlugin=0;
 	if (pChn && pChn->pModInstrument) {
-		if (respectMutes && pChn->pModSample && pChn->pModSample->uFlags&INS_MUTE) { 
+		if (respectMutes && pChn->pModSample && (pChn->pModSample->uFlags & CHN_MUTE)) { 
 			nPlugin = 0;
 		} else {
 			nPlugin = pChn->pModInstrument->nMixPlug;

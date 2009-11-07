@@ -130,7 +130,7 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define CHN_PINGPONGSUSTAIN	0x10
 #define CHN_PANNING			0x20
 #define CHN_STEREO			0x40
-#define CHN_PINGPONGFLAG	0x80	//When flag is on, bidiloop is processed backwards?
+#define CHN_PINGPONGFLAG	0x80	//When flag is on, sample is processed backwards
 // Bits 8-31:	Channel Flags
 #define CHN_MUTE			0x100
 #define CHN_KEYOFF			0x200
@@ -157,10 +157,10 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define CHN_SYNCMUTE		0x40000000
 
 // instrument envelope-specific flags
-#define ENV_LOOP			0x01	// env loop
-#define ENV_SUSTAIN			0x02	// env sustain
-#define ENV_CARRY			0x04	// env carry
-#define ENV_ENABLED			0x08	// env is enabled
+#define ENV_ENABLED			0x01	// env is enabled
+#define ENV_LOOP			0x02	// env loop
+#define ENV_SUSTAIN			0x04	// env sustain
+#define ENV_CARRY			0x08	// env carry
 #define ENV_FILTER			0x10	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
 
 // instrument-specific flags
