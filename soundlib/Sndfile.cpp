@@ -127,8 +127,8 @@ Example with "PanEnv.nLoopEnd" , "PitchEnv.nLoopEnd" & "VolEnv.Values[MAX_ENVPOI
 - use 'VE[.' for VolEnv.Values[MAX_ENVPOINTS]
 
 
-* In use CODE tag dictionnary (alphabetical order): [ see in Sndfile.cpp ]
---------------------------------------------------------------------------
+* In use CODE tag dictionary (alphabetical order): [ see in Sndfile.cpp ]
+-------------------------------------------------------------------------
 
 						!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 						!!! SECTION TO BE UPDATED !!!
@@ -209,6 +209,9 @@ VSTV	[EXT]	nVSTiVolume;
 PERN			PitchEnv.nReleaseNode
 AERN			PanEnv.nReleaseNode
 VERN			VolEnv.nReleaseNode
+PFLG			PitchEnv.dwFlag
+AFLG			PanEnv.dwFlags
+VFLG			VolEnv.dwFlags
 -----------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------*/
 

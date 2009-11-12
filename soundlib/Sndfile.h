@@ -205,7 +205,6 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
 	UINT nOldGlobalVolSlide;
 	DWORD nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
-	MODSAMPLE *pEFxSample; // sample memory for Invert Loop (EFx, .MOD only)
 	// 8-bit members
 	BYTE nRestoreResonanceOnNewNote; //Like above
 	BYTE nRestoreCutoffOnNewNote; //Like above

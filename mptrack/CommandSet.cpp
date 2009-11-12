@@ -2345,6 +2345,11 @@ void CCommandSet::SetupCommands()
 	commands[kcNoteFadeOld].isHidden = false;
 	commands[kcNoteFadeOld].isDummy = false;
 
+	commands[kcEditPasteFlood].UID = 1793;
+	commands[kcEditPasteFlood].Message = "Paste Flood";
+	commands[kcEditPasteFlood].isHidden = false;
+	commands[kcEditPasteFlood].isDummy = false;
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

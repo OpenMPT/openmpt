@@ -230,6 +230,7 @@ protected:
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditMixPaste();		//rewbs.mixPaste
 	afx_msg void OnEditMixPasteITStyle();		//rewbs.mixPaste
+	afx_msg void OnEditPasteFlood();
 	afx_msg void OnClearSelection(bool ITStyle=false, RowMask sb = DefaultRowMask); //rewbs.customKeys
 	afx_msg void OnGrowSelection();   //rewbs.customKeys
 	afx_msg void OnShrinkSelection(); //rewbs.customKeys
