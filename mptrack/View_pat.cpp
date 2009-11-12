@@ -53,7 +53,8 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_CUT,			OnEditCut)
 	ON_COMMAND(ID_EDIT_COPY,		OnEditCopy)
 	ON_COMMAND(ID_EDIT_PASTE,		OnEditPaste)
-	ON_COMMAND(ID_EDIT_MIXPASTE,	OnEditMixPaste)		//rewbs.mixPaste
+	ON_COMMAND(ID_EDIT_MIXPASTE,	OnEditMixPaste)
+	ON_COMMAND(ID_EDIT_PASTEFLOOD,	OnEditPasteFlood)
 	ON_COMMAND(ID_EDIT_SELECT_ALL,	OnEditSelectAll)
 	ON_COMMAND(ID_EDIT_SELECTCOLUMN,OnEditSelectColumn)
 	ON_COMMAND(ID_EDIT_SELECTCOLUMN2,OnSelectCurrentColumn)
@@ -1004,8 +1005,22 @@ void CViewPattern::OnEditMixPasteITStyle()
 	}
 }
 
+
 //end rewbs.mixPaste
 
+
+void CViewPattern::OnEditPasteFlood()
+//-----------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+
+	if (pModDoc && IsEditingEnabled_bmsg())
+	{
+		pModDoc->PastePattern(m_nPattern, m_dwBeginSel, false, false, true);
+		InvalidatePattern(FALSE);
+		SetFocus();
+	}
+}
 
 
 void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
@@ -3613,6 +3628,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcEditMixPaste:	OnEditMixPaste(); return wParam;
 		case kcEditMixPasteITStyle:	OnEditMixPasteITStyle(); return wParam;
+		case kcEditPasteFlood:	OnEditPasteFlood(); return wParam;
 		case kcEditSelectAll:	OnEditSelectAll(); return wParam;
 		case kcTogglePluginEditor: TogglePluginEditor((m_dwCursor & 0xFFFF) >> 3); return wParam;
 		case kcToggleFollowSong: SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG); return wParam;
@@ -4824,6 +4840,7 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih, CModDoc* pMo
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_MIXPASTE, "Mix Paste\t" + ih->GetKeyTextFromCommand(kcEditMixPaste));
+	AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTEFLOOD, "Paste Flood\t" + ih->GetKeyTextFromCommand(kcEditPasteFlood));
 
 	DWORD greyed = pModDoc->GetPatternUndo()->CanUndo()?FALSE:MF_GRAYED;
 	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {

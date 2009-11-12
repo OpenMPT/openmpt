@@ -240,8 +240,8 @@ public:
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
 
 	// Copy&Paste
-	BOOL CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);
-	BOOL PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix=FALSE);	//rewbs.mixpaste
+	bool CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);
+	bool PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bool ITStyleMix = false, bool PasteFlood = false);
 
 	BOOL CopyEnvelope(UINT nIns, UINT nEnv);
 	BOOL PasteEnvelope(UINT nIns, UINT nEnv);

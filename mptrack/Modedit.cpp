@@ -995,8 +995,8 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 
 static LPCSTR lpszClipboardPatternHdr = "ModPlug Tracker %3s\x0D\x0A";
 
-BOOL CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel)
-//------------------------------------------------------------------------
+bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel)
+//--------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	DWORD dwMemSize;
@@ -1004,7 +1004,7 @@ BOOL CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 	UINT nrows = (dwEndSel >> 16) - (dwBeginSel >> 16) + 1;
 	UINT ncols = ((dwEndSel & 0xFFFF) >> 3) - ((dwBeginSel & 0xFFFF) >> 3) + 1;
 
-	if ((!pMainFrm) || (nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
+	if ((!pMainFrm) || (nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return false;
 	BeginWaitCursor();
 	dwMemSize = strlen(lpszClipboardPatternHdr) + 1;
 	dwMemSize += nrows * (ncols * 12 + 2);
@@ -1138,20 +1138,16 @@ BOOL CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 		CloseClipboard();
 	}
 	EndWaitCursor();
-	return TRUE;
+	return true;
 }
 
 
-//rewbs.mixpaste: using eric's method, as it is fat more elegant.
-// -> CODE#0014
-// -> DESC="vst wet/dry slider"
 //BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
-BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BOOL ITStyleMix)
-// -! NEW_FEATURE#0014
-//---------------------------------------------------------
+bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bool ITStyleMix, bool PasteFlood)
+//-------------------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if ((!pMainFrm) || (nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
+	if ((!pMainFrm) || (nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return false;
 	BeginWaitCursor();
 	if (pMainFrm->OpenClipboard())
 	{
@@ -1168,11 +1164,11 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 			UINT col;
 			bool bS3MCommands = false, bOk = false;
 			MODTYPE origFormat = MOD_TYPE_IT;
-			UINT len = 0;
+			UINT len = 0, startLen;
 			MODCOMMAND origModCmd;
 
 			ORDERINDEX oCurrentOrder; //jojo.echopaste
-			ROWINDEX rTemp;
+			ROWINDEX rTemp, startRow;
 			PATTERNINDEX pTemp;
 			GetEditPosition(rTemp, pTemp, oCurrentOrder);
 
@@ -1199,15 +1195,24 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 			bOk = true;
 
 			GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+			startLen = len;
+			startRow = nrow;
 
-			while ((nrow < m_SndFile.PatternSize[nPattern]) && (len + 11 < dwMemSize))
+			while ((nrow < m_SndFile.PatternSize[nPattern]))
 			{
-				// Search for column separator
-				while (p[len] != '|')
+				// Search for column separator or end of paste data
+				while ((len + 11 >= dwMemSize) || p[len] != '|')
 				{
-					if (len + 11 >= dwMemSize) goto PasteDone;
-					if (!p[len]) goto PasteDone;
-					len++;
+					if (len + 11 >= dwMemSize || !p[len])
+					{
+						if((PasteFlood == true) && (nrow != startRow)) // prevent infinite loop with malformed clipboard data
+							len = startLen; // paste from beginning
+						else
+							goto PasteDone;
+					} else
+					{
+						len++;
+					}
 				}
 				col = ncol;
 				// Paste columns
@@ -1359,8 +1364,9 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 				m += m_SndFile.m_nChannels;
 				nrow++;
 
-				//jojo.echopaste
-				if(CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE)
+				// Overflow paste. Continue pasting in next pattern if enabled.
+				// If Paste Flood is enabled, this won't be called due to obvious reasons.
+				if((CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && !PasteFlood)
 				{
 					while(nrow >= m_SndFile.PatternSize[nPattern])
 					{
@@ -1387,7 +1393,7 @@ BOOL CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, BOOL mix, BO
 		CloseClipboard();
 	}
 	EndWaitCursor();
-	return TRUE;
+	return true;
 }
 
 

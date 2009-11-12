@@ -246,7 +246,7 @@ UINT CViewInstrument::EnvGetValue(int nPoint) const
 {
 	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
-	if(nPoint < (int)envelope->nNodes) return envelope->Values[nPoint];
+	if(nPoint >= 0 && nPoint < (int)envelope->nNodes) return envelope->Values[nPoint];
 	return 0;
 }
 

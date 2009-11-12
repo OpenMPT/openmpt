@@ -2530,7 +2530,6 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 		if((m_nType & MOD_TYPE_MOD) != 0) // MOD: Invert Loop
 		{
 			pChn->nEFxSpeed = param;
-			pChn->pEFxSample = pChn->pModSample;
 			if(m_dwSongFlags & SONG_FIRSTTICK) InvertLoop(pChn);
 		}	
 		else // XM: Set Active Midi Macro
@@ -2701,7 +2700,7 @@ inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
 	if((m_nType & MOD_TYPE_MOD) == 0 || pChn->nEFxSpeed == 0) return;
 
 	// we obviously also need a sample for this
-	MODSAMPLE *pModSample = pChn->pEFxSample;
+	MODSAMPLE *pModSample = pChn->pModSample;
 	if(pModSample == nullptr || pModSample->pSample == nullptr || !(pModSample->uFlags & CHN_LOOP)) return;
 
 	pChn->nEFxDelay += ModEFxTable[pChn->nEFxSpeed & 0x0F];
