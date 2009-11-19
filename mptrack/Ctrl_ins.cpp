@@ -777,10 +777,10 @@ BOOL CCtrlInstruments::OnInitDialog()
 	if ((!m_pModDoc) || (!m_pSndFile)) return TRUE;
 	m_NoteMap.Init(this);
 	m_ToolBar.Init();
-	m_ToolBar.AddButton(IDC_INSTRUMENT_NEW, 7);
-	m_ToolBar.AddButton(IDC_INSTRUMENT_OPEN, 12);
-	m_ToolBar.AddButton(IDC_INSTRUMENT_SAVEAS, 13);
-	m_ToolBar.AddButton(IDC_INSTRUMENT_PLAY, 14);
+	m_ToolBar.AddButton(IDC_INSTRUMENT_NEW, TIMAGE_INSTR_NEW);
+	m_ToolBar.AddButton(IDC_INSTRUMENT_OPEN, TIMAGE_OPEN);
+	m_ToolBar.AddButton(IDC_INSTRUMENT_SAVEAS, TIMAGE_SAVE);
+	m_ToolBar.AddButton(IDC_INSTRUMENT_PLAY, TIMAGE_PREVIEW);
 	m_SpinInstrument.SetRange(0, 0);
 	m_SpinInstrument.EnableWindow(FALSE);
 	m_EditName.SetLimitText(32);
