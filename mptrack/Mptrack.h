@@ -268,7 +268,9 @@ public:
 private:
 	static void LoadRegistryDLS();
 
-	void MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH] = "", TCHAR sNewFileName[_MAX_PATH] = "");
+	#ifdef WIN32	// Legacy stuff
+	bool MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH] = "", TCHAR sNewFileName[_MAX_PATH] = "");
+	#endif
 };
 
 

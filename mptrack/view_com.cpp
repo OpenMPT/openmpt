@@ -138,9 +138,9 @@ void CViewComments::OnInitialUpdate()
 	m_ItemList.Create(WS_CHILD|WS_VISIBLE|LVS_REPORT|LVS_SINGLESEL|LVS_EDITLABELS|LVS_NOSORTHEADER, rect, this, IDC_LIST_DETAILS);
 	m_ItemList.ModifyStyleEx(0, WS_EX_STATICEDGE);
 	// Add ToolBar Buttons
-	m_ToolBar.AddButton(IDC_LIST_SAMPLES, 23);
-	m_ToolBar.AddButton(IDC_LIST_INSTRUMENTS, 24);
-	//m_ToolBar.AddButton(IDC_LIST_PATTERNS, 25);
+	m_ToolBar.AddButton(IDC_LIST_SAMPLES, TIMAGE_TAB_SAMPLES);
+	m_ToolBar.AddButton(IDC_LIST_INSTRUMENTS, TIMAGE_TAB_INSTRUMENTS);
+	//m_ToolBar.AddButton(IDC_LIST_PATTERNS, TIMAGE_TAB_PATTERNS);
 	m_ToolBar.SetIndent(4);
 	UpdateButtonState();
 	OnUpdate(NULL, HINT_MODTYPE, NULL);

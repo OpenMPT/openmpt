@@ -194,21 +194,21 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboZoom.SetCurSel(0);
 	// File ToolBar
 	m_ToolBar1.Init();
-	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, 6);
-	m_ToolBar1.AddButton(IDC_SAMPLE_OPEN, 12);
-	m_ToolBar1.AddButton(IDC_SAMPLE_SAVEAS, 13);
+	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, TIMAGE_SAMPLE_NEW);
+	m_ToolBar1.AddButton(IDC_SAMPLE_OPEN, TIMAGE_OPEN);
+	m_ToolBar1.AddButton(IDC_SAMPLE_SAVEAS, TIMAGE_SAVE);
 	// Edit ToolBar
 	m_ToolBar2.Init();
-	m_ToolBar2.AddButton(IDC_SAMPLE_PLAY, 14);
-	m_ToolBar2.AddButton(IDC_SAMPLE_NORMALIZE, 8);
-	m_ToolBar2.AddButton(IDC_SAMPLE_AMPLIFY, 9);
-	m_ToolBar2.AddButton(IDC_SAMPLE_DCOFFSET, 37);
-	m_ToolBar2.AddButton(IDC_SAMPLE_UPSAMPLE, 10);
-	m_ToolBar2.AddButton(IDC_SAMPLE_DOWNSAMPLE, 29);
-	m_ToolBar2.AddButton(IDC_SAMPLE_REVERSE, 11);
-	m_ToolBar2.AddButton(IDC_SAMPLE_SILENCE, 22);
-	m_ToolBar2.AddButton(IDC_SAMPLE_INVERT, 35);
-	m_ToolBar2.AddButton(IDC_SAMPLE_SIGN_UNSIGN, 36);
+	m_ToolBar2.AddButton(IDC_SAMPLE_PLAY, TIMAGE_PREVIEW);
+	m_ToolBar2.AddButton(IDC_SAMPLE_NORMALIZE, TIMAGE_SAMPLE_NORMALIZE);
+	m_ToolBar2.AddButton(IDC_SAMPLE_AMPLIFY, TIMAGE_SAMPLE_AMPLIFY);
+	m_ToolBar2.AddButton(IDC_SAMPLE_DCOFFSET, TIMAGE_SAMPLE_DCOFFSET);
+	m_ToolBar2.AddButton(IDC_SAMPLE_UPSAMPLE, TIMAGE_SAMPLE_UPSAMPLE);
+	m_ToolBar2.AddButton(IDC_SAMPLE_DOWNSAMPLE, TIMAGE_SAMPLE_DOWNSAMPLE);
+	m_ToolBar2.AddButton(IDC_SAMPLE_REVERSE, TIMAGE_SAMPLE_REVERSE);
+	m_ToolBar2.AddButton(IDC_SAMPLE_SILENCE, TIMAGE_SAMPLE_SILENCE);
+	m_ToolBar2.AddButton(IDC_SAMPLE_INVERT, TIMAGE_SAMPLE_INVERT);
+	m_ToolBar2.AddButton(IDC_SAMPLE_SIGN_UNSIGN, TIMAGE_SAMPLE_UNSIGN);
 	// Setup Controls
 	m_EditName.SetLimitText(32);
 	m_EditFileName.SetLimitText(22);

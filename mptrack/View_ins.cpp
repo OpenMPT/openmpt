@@ -109,8 +109,8 @@ CViewInstrument::CViewInstrument()
 	memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
 	memset(m_NcButtonState, 0, sizeof(m_NcButtonState));
 	m_bmpEnvBar.Create(IDB_ENVTOOLBAR, 20, 0, RGB(192,192,192));
-	memset(m_baPlayingNote, 0, sizeof(bool)*NOTE_MAX);  //rewbs.customKeys
-	m_nPlayingChannel = UINT_MAX;						   //rewbs.customKeys
+	memset(m_baPlayingNote, 0, sizeof(bool)*NOTE_MAX);	//rewbs.customKeys
+	m_nPlayingChannel = CHANNELINDEX_INVALID;			//rewbs.customKeys
 	//rewbs.envRowGrid
 	m_bGrid=true;								  
 	m_bGridForceRedraw=false;
@@ -1105,7 +1105,7 @@ LRESULT CViewInstrument::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 				break;
 			}
 			memset(m_baPlayingNote, 0, sizeof(bool)*NOTE_MAX); 	//rewbs.instViewNNA
-			m_nPlayingChannel = UINT_MAX;						//rewbs.instViewNNA
+			m_nPlayingChannel = CHANNELINDEX_INVALID;			//rewbs.instViewNNA
 		}
 	} else
 	if ((pnotify->dwType & dwType) && ((pnotify->dwType & 0xFFFF) == m_nInstrument))
