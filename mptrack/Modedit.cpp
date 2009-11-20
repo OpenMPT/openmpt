@@ -1403,8 +1403,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bo
 static LPCSTR pszEnvHdr = "Modplug Tracker Envelope\x0D\x0A";
 static LPCSTR pszEnvFmt = "%d,%d,%d,%d,%d,%d,%d,%d\x0D\x0A";
 
-BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
-//----------------------------------------------
+bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
+//----------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	HANDLE hCpy;
@@ -1412,7 +1412,7 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 	MODINSTRUMENT *pIns;
 	DWORD dwMemSize;
 
-	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return FALSE;
+	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return false;
 	BeginWaitCursor();
 	pIns = m_SndFile.Instruments[nIns];
 	
@@ -1454,21 +1454,21 @@ BOOL CModDoc::CopyEnvelope(UINT nIns, UINT nEnv)
 		CloseClipboard();
 	}
 	EndWaitCursor();
-	return TRUE;
+	return true;
 }
 
 
-BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
-//-----------------------------------------------
+bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
+//-----------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
-	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return FALSE;
+	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return false;
 	BeginWaitCursor();
 	if (!pMainFrm->OpenClipboard())
 	{
 		EndWaitCursor();
-		return FALSE;
+		return false;
 	}
 	HGLOBAL hCpy = ::GetClipboardData(CF_TEXT);
 	LPCSTR p;
@@ -1523,7 +1523,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 			pEnv->nLoopStart = loopBegin;
 			pEnv->nLoopEnd = loopEnd;
 			pEnv->nReleaseNode = releaseNode;
-			pEnv->dwFlags = (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0);
+			pEnv->dwFlags = (pEnv->dwFlags & ~(ENV_LOOP|ENV_SUSTAIN|ENV_CARRY)) | (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0);
 
 			int oldn = 0;
 			for (UINT i=0; i<nPoints; i++)
@@ -1557,7 +1557,7 @@ BOOL CModDoc::PasteEnvelope(UINT nIns, UINT nEnv)
 		UpdateAllViews(NULL, (nIns << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 	}
 	EndWaitCursor();
-	return TRUE;
+	return true;
 }
 
 
