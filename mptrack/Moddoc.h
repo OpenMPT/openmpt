@@ -243,8 +243,8 @@ public:
 	bool CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);
 	bool PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bool ITStyleMix = false, bool PasteFlood = false);
 
-	BOOL CopyEnvelope(UINT nIns, UINT nEnv);
-	BOOL PasteEnvelope(UINT nIns, UINT nEnv);
+	bool CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv);
+	bool PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv);
 
 	LRESULT ActivateView(UINT nIdView, DWORD dwParam);
 	void UpdateAllViews(CView *pSender, LPARAM lHint=0L, CObject *pHint=NULL);
