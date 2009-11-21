@@ -271,6 +271,9 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 					else patloop[nChn] = dwElapsedTime;
 				}
 				break;
+			case CMD_XFINEPORTAUPDOWN:
+				if (((param & 0xF0) == 0xA0) && !IsCompatibleMode(TRK_FASTTRACKER2)) pChn->nOldHiOffset = param & 0x0F;
+				break;
 			}
 			if (!bAdjust) continue;
 			switch(command)
@@ -1761,7 +1764,8 @@ BOOL CSoundFile::ProcessEffects()
 			case 0x60: 
 			case 0x70:
 			case 0x90: 
-			case 0xA0: ExtendedS3MCommands(nChn, param); break;
+			case 0xA0: if(!IsCompatibleMode(TRK_FASTTRACKER2)) ExtendedS3MCommands(nChn, param);
+						break;
 			}
 			break;
 
