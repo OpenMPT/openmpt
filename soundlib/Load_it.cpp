@@ -965,18 +965,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	SpaceToNullStringFixed(m_szNames[0], 26);
 
 	// Global Volume
-	if (pifh->globalvol)
-	{
-		m_nDefaultGlobalVolume = pifh->globalvol << 1;
-		if (!m_nDefaultGlobalVolume) m_nDefaultGlobalVolume = 256;
-		if (m_nDefaultGlobalVolume > 256) m_nDefaultGlobalVolume = 256;
-	}
+	m_nDefaultGlobalVolume = pifh->globalvol << 1;
+	if (m_nDefaultGlobalVolume > 256) m_nDefaultGlobalVolume = 256;
 	if (pifh->speed) m_nDefaultSpeed = pifh->speed;
 	m_nDefaultTempo = max(32, pifh->tempo); // tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
 	m_nSamplePreAmp = min(pifh->mv, 128);
-	/*if (m_nSamplePreAmp<0x20) {
-		m_nSamplePreAmp=100;
-	}*/
 
 	// Reading Channels Pan Positions
 	for (int ipan=0; ipan</*MAX_BASECHANNELS*/64; ipan++) if (pifh->chnpan[ipan] != 0xFF) //Header only has room for settings for 64 chans...		
@@ -1474,8 +1467,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	static char autodetectITplaymode = -1;
 	if(GetType() == MOD_TYPE_IT)
 	{
+#ifdef MODPLUG_TRACKER
 		if(autodetectITplaymode == -1)
 			autodetectITplaymode = CMainFrame::GetPrivateProfileLong("Misc", "AutodetectITplaystyle", 1, theApp.GetConfigFileName());
+#endif
 
 		if(autodetectITplaymode)
 		{
@@ -2344,7 +2339,10 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
 			}
 		}
-		itss.samplepointer = dwPos;
+		if ((psmp->pSample) && (psmp->nLength))
+			itss.samplepointer = dwPos;
+		else
+			itss.samplepointer = itss.flags = 0;
 		fseek(f, smppos[nsmp-1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 		fseek(f, dwPos, SEEK_SET);
@@ -2920,7 +2918,10 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			itss.flags |= 0x02;
 			flags = RS_PCM16S;
 		}
-		itss.samplepointer = dwPos;
+		if ((psmp->pSample) && (psmp->nLength))
+			itss.samplepointer = dwPos;
+		else
+			itss.samplepointer = itss.flags = 0;
 		fseek(f, smppos[nsmp-1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 		fseek(f, dwPos, SEEK_SET);
