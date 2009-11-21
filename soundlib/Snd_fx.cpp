@@ -261,6 +261,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			// Pattern Delay
 			case CMD_S3MCMDEX:	
 				if ((param & 0xF0) == 0x60) { nSpeedCount = param & 0x0F; break; } else
+				if ((param & 0xF0) == 0xA0) { pChn->nOldHiOffset = param & 0x0F; break; } else
 				if ((param & 0xF0) == 0xB0) { param &= 0x0F; param |= 0x60; }
 			case CMD_MODCMDEX:
 				if ((param & 0xF0) == 0xE0) nSpeedCount = (param & 0x0F) * nMusicSpeed; else
