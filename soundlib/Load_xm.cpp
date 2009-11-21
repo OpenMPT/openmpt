@@ -770,6 +770,8 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			if(Order[nOrd] >= nPatterns) nPatterns = Order[nOrd] + 1;
 		}
 	}
+	if(!bCompatibilityExport) nMaxOrds = Order.GetLengthTailTrimmed(); // should really be removed at some point
+
 	xmheader.orders = LittleEndianW((WORD)nMaxOrds);
 	xmheader.patterns = LittleEndianW((WORD)nPatterns);
 	xmheader.size = LittleEndian((DWORD)(xmheader.size + nMaxOrds));
@@ -793,7 +795,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	// write order list (wihout +++ and ---, explained above)
 	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
 	{
-		if(Patterns.IsValidIndex(Order[nOrd])) 
+		if(Patterns.IsValidIndex(Order[nOrd]) || !bCompatibilityExport) 
 		{
 			BYTE nOrdval = static_cast<BYTE>(Order[nOrd]);
 			fwrite(&nOrdval, 1, sizeof(BYTE), f);
