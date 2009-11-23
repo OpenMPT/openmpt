@@ -344,6 +344,20 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 	}
 
+	// Fix channel settings (pan/vol)
+	for(CHANNELINDEX nChn = 0; nChn < m_SndFile.m_nChannels; nChn++)
+	{
+		if(newTypeIsMOD_XM || newTypeIsS3M)
+		{
+			m_SndFile.ChnSettings->nVolume = 64;
+			m_SndFile.ChnSettings->dwFlags &= ~CHN_SURROUND;
+		}
+		if(newTypeIsXM)
+		{
+			m_SndFile.ChnSettings->nPan = 128;
+		}
+	}
+
 	BEGIN_CRITICAL();
 	m_SndFile.ChangeModTypeTo(nNewType);
 	if (!newTypeIsXM_IT_MPT && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))

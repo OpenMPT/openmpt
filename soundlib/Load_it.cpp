@@ -3413,15 +3413,25 @@ void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], 
 
 	if(m_nType & MOD_TYPE_MPT)
 	{
+		UINT maxNodes = 0;
+		for(INSTRUMENTINDEX nIns = 1; nIns <= m_nInstruments; nIns++) if(Instruments[nIns] != nullptr)
+		{
+			maxNodes = max(maxNodes, Instruments[nIns]->VolEnv.nNodes);
+			maxNodes = max(maxNodes, Instruments[nIns]->PanEnv.nNodes);
+			maxNodes = max(maxNodes, Instruments[nIns]->PitchEnv.nNodes);
+		}
 		// write full envelope information for MPTM files (more env points)
-		WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(m_defaultInstrument.VolEnv.Ticks ), f, instruments, nInstruments);
-		WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(m_defaultInstrument.VolEnv.Values), f, instruments, nInstruments);
+		if(maxNodes > 25)
+		{
+			WriteInstrumentPropertyForAllInstruments('VP[.', sizeof(m_defaultInstrument.VolEnv.Ticks ), f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('VE[.', sizeof(m_defaultInstrument.VolEnv.Values), f, instruments, nInstruments);
 
-		WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(m_defaultInstrument.PanEnv.Ticks), f, instruments, nInstruments);
-		WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(m_defaultInstrument.PanEnv.Values),  f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PP[.', sizeof(m_defaultInstrument.PanEnv.Ticks), f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PE[.', sizeof(m_defaultInstrument.PanEnv.Values),  f, instruments, nInstruments);
 
-		WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(m_defaultInstrument.PitchEnv.Ticks),  f, instruments, nInstruments);
-		WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(m_defaultInstrument.PitchEnv.Values),  f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiP[', sizeof(m_defaultInstrument.PitchEnv.Ticks),  f, instruments, nInstruments);
+			WriteInstrumentPropertyForAllInstruments('PiE[', sizeof(m_defaultInstrument.PitchEnv.Values),  f, instruments, nInstruments);
+		}
 	}
 
 	return;
