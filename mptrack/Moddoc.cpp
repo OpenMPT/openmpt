@@ -2268,9 +2268,10 @@ bool CModDoc::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DWORD
 		switch(gFXInfo[ndx].dwEffect)
 		{
 		case CMD_ARPEGGIO:
-			if (nType & MOD_TYPE_MOD) nmin = 1;
+			if (nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) nmin = 1;
 			break;
 		case CMD_VOLUME:
+		case CMD_CHANNELVOLUME:
 			nmax = 0x40;
 			break;
 		case CMD_SPEED:

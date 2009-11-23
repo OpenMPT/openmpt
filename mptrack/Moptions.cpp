@@ -701,7 +701,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{PATTERN_OVERFLOWPASTE,	"Overflow paste mode",				"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
 	{PATTERN_POSITIONAWARETIMER, "Position aware timer",		"If enabled, timer will show the playback position time if possible instead of running timer."},
 	{PATTERN_RESETCHANNELS,	"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands)"},
-	{PATTERN_LIVEUPDATETREE,"Update sample status in tree",		"If enabled, active samples and instruments will be indicated by a differnt icon in the treeview."}
+	{PATTERN_LIVEUPDATETREE,"Update sample status in tree",		"If enabled, active samples and instruments will be indicated by a different icon in the treeview."}
 };
 
 void COptionsGeneral::DoDataExchange(CDataExchange* pDX)
