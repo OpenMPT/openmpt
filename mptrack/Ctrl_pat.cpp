@@ -608,11 +608,14 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		// Order item
 		ORDERINDEX nOrd = (ORDERINDEX)(lParam & 0x7FFF);
 		SEQUENCEINDEX nSeq = (SEQUENCEINDEX)(lParam >> 16);
-		if((nSeq < m_pSndFile->Order.GetNumSequences()) && (nOrd < m_pSndFile->Order.GetSequence(nSeq).size()))
+		if(nSeq < m_pSndFile->Order.GetNumSequences())
 		{
 			m_OrderList.SelectSequence(nSeq);
-			m_OrderList.SetCurSel(nOrd);
-			SetCurrentPattern(m_pSndFile->Order[nOrd]);
+			if((nOrd < m_pSndFile->Order.GetSequence(nSeq).size()))
+			{
+				m_OrderList.SetCurSel(nOrd);
+				SetCurrentPattern(m_pSndFile->Order[nOrd]);
+			}
 		}
 	}
 	if (m_hWndView)

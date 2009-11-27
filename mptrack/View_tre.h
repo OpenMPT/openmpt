@@ -204,6 +204,8 @@ protected:
 	afx_msg void OnMuteTreeItem();
 	afx_msg void OnSoloTreeItem();
 	afx_msg void OnUnmuteAllTreeItem();
+	afx_msg void OnDuplicateTreeItem();
+	afx_msg void OnInsertTreeItem();
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
