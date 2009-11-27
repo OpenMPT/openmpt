@@ -962,6 +962,27 @@ enum CommandID
 	kcVSTGUIRandParams,
 	kcEndVSTGUICommands=kcVSTGUIRandParams,
 
+	kcStartOrderlistCommands,
+	kcStartOrderlistNavigation=kcStartOrderlistCommands,
+	kcOrderlistNavigateLeft=kcStartOrderlistNavigation,
+	kcOrderlistNavigateRight,
+	kcOrderlistNavigateFirst,
+	kcOrderlistNavigateLast,
+	kcEndOrderlistNavigation= kcOrderlistNavigateLast,
+		// with selection key(must match order above)
+	kcStartOrderlistNavigationSelect,
+	kcOrderlistNavigateLeftSelect=kcStartOrderlistNavigationSelect,
+	kcOrderlistNavigateRightSelect,
+	kcOrderlistNavigateFirstSelect,
+	kcOrderlistNavigateLastSelect,
+	kcEndOrderlistNavigationSelect = kcOrderlistNavigateLastSelect,
+
+	kcOrderlistEditDelete,
+	kcOrderlistEditInsert,
+	kcOrderlistEditPattern,
+	kcOrderlistSwitchToPatternView,
+	kcEndOrderlistCommands=kcOrderlistSwitchToPatternView,
+
 	kcNumCommands,
 };
 

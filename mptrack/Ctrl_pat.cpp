@@ -699,10 +699,7 @@ void CCtrlPatterns::OnChannelManager()
 void CCtrlPatterns::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 //------------------------------------------------------------------
 {
-	if (!m_OrderList.ProcessKeyDown(nChar))
-	{
-		CModControlDlg::OnKeyDown(nChar, nRepCnt, nFlags);
-	}
+	CModControlDlg::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 

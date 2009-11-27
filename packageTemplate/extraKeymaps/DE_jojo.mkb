@@ -24,7 +24,7 @@
 0:1361:2:45:1		//Copy: Ctrl+EINFG (KeyDown)
 0:1362:2:86:1		//Paste: Ctrl+V (KeyDown)
 0:1363:3:86:1		//Mix Paste: Shift+Ctrl+V (KeyDown)
-0:1686:1:86:1		//Mix Paste (old IT Style): Shift+V (KeyDown)
+0:1793:1:86:1		//Paste Flood: Shift+V (KeyDown)
 0:1364:2:53:1		//SelectAll: Ctrl+5 (KeyDown)
 0:1365:2:70:1		//Find: Ctrl+F (KeyDown)
 0:1366:0:114:1		//Find Next: F3 (KeyDown)
@@ -292,4 +292,14 @@
 
 //----( Comments Context [top] (18) )------------
 
-//----( Unknown Context (19) )------------
+//----( Orderlist (19) )------------
+19:1794:0:37:5		//Previous Order: NACH-LINKS (KeyDown|KeyHold)
+19:1794:0:38:5		//Previous Order: NACH-OBEN (KeyDown|KeyHold)
+19:1795:0:39:5		//Next Order: NACH-RECHTS (KeyDown|KeyHold)
+19:1795:0:40:5		//Next Order: NACH-UNTEN (KeyDown|KeyHold)
+19:1796:0:36:5		//First Order: POS1 (KeyDown|KeyHold)
+19:1797:0:35:5		//Last Order: ENDE (KeyDown|KeyHold)
+19:1802:0:46:5		//Delete Order: ENTF (KeyDown|KeyHold)
+19:1803:0:45:5		//Insert Order: EINFG (KeyDown|KeyHold)
+19:1804:0:13:5		//Edit Pattern: EINGABE (KeyDown|KeyHold)
+19:1805:0:9:5		//Switch to pattern editor: TABULATOR (KeyDown|KeyHold)

@@ -26,7 +26,7 @@ protected:
 	//m_nScrollPos2nd: 2nd selection point if multiple orders are selected
 	//	               (not neccessarily the higher order - GetCurSel() is taking care of that.)
 	ORDERINDEX m_nXScroll, m_nScrollPos, m_nScrollPos2nd, m_nDropPos;
-	bool m_bScrolling, m_bDragging, m_bShift;
+	bool m_bScrolling, m_bDragging;
 	ORDERINDEX m_nDragOrder;
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
@@ -46,10 +46,11 @@ public:
 	UINT GetCurrentPattern() const;
 	ORD_SELECTION GetCurSel(bool bIgnoreSelection) const;
 	// make the current selection the secondary selection (used for keyboard orderlist navigation)
-	inline void SetCurSelTo2ndSel()
-		{if(m_bShift && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos; else if(!m_bShift && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;};
+	inline void SetCurSelTo2ndSel(bool isSelectionKeyPressed)
+	{	if(isSelectionKeyPressed && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos;
+		else if(!isSelectionKeyPressed && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;
+	};
 	bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false);
-	BOOL ProcessKeyDown(UINT nChar);
 	BOOL ProcessChar(UINT nChar);
 	BOOL UpdateScrollInfo();
 	void UpdateInfoText();
@@ -85,6 +86,9 @@ public:
 
 	// Set given sqeuence and update orderlist display.
 	void SelectSequence(const SEQUENCEINDEX nSeq);
+
+	// Little helper function to avoid copypasta
+	bool IsSelectionKeyPressed() {return CMainFrame::GetInputHandler()->SelectionPressed();}
 
 	// Clipboard.
 	void OnEditCopy();
@@ -245,6 +249,7 @@ protected:
 	afx_msg void TogglePluginEditor(); //rewbs.instroVST
 	afx_msg void ToggleSplitPluginEditor(); //rewbs.instroVST
 	afx_msg void OnToggleOverflowPaste();
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

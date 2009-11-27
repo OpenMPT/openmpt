@@ -2350,6 +2350,66 @@ void CCommandSet::SetupCommands()
 	commands[kcEditPasteFlood].isHidden = false;
 	commands[kcEditPasteFlood].isDummy = false;
 
+	commands[kcOrderlistNavigateLeft].UID = 1794;
+	commands[kcOrderlistNavigateLeft].Message = "Previous Order";
+	commands[kcOrderlistNavigateLeft].isHidden = false;
+	commands[kcOrderlistNavigateLeft].isDummy = false;
+
+	commands[kcOrderlistNavigateRight].UID = 1795;
+	commands[kcOrderlistNavigateRight].Message = "Next Order";
+	commands[kcOrderlistNavigateRight].isHidden = false;
+	commands[kcOrderlistNavigateRight].isDummy = false;
+
+	commands[kcOrderlistNavigateFirst].UID = 1796;
+	commands[kcOrderlistNavigateFirst].Message = "First Order";
+	commands[kcOrderlistNavigateFirst].isHidden = false;
+	commands[kcOrderlistNavigateFirst].isDummy = false;
+
+	commands[kcOrderlistNavigateLast].UID = 1797;
+	commands[kcOrderlistNavigateLast].Message = "Last Order";
+	commands[kcOrderlistNavigateLast].isHidden = false;
+	commands[kcOrderlistNavigateLast].isDummy = false;
+
+	commands[kcOrderlistNavigateLeftSelect].UID = 1798;
+	commands[kcOrderlistNavigateLeftSelect].Message = "kcOrderlistNavigateLeftSelect";
+	commands[kcOrderlistNavigateLeftSelect].isHidden = true;
+	commands[kcOrderlistNavigateLeftSelect].isDummy = false;
+
+	commands[kcOrderlistNavigateRightSelect].UID = 1799;
+	commands[kcOrderlistNavigateRightSelect].Message = "kcOrderlistNavigateRightSelect";
+	commands[kcOrderlistNavigateRightSelect].isHidden = true;
+	commands[kcOrderlistNavigateRightSelect].isDummy = false;
+
+	commands[kcOrderlistNavigateFirstSelect].UID = 1800;
+	commands[kcOrderlistNavigateFirstSelect].Message = "kcOrderlistNavigateFirstSelect";
+	commands[kcOrderlistNavigateFirstSelect].isHidden = true;
+	commands[kcOrderlistNavigateFirstSelect].isDummy = false;
+
+	commands[kcOrderlistNavigateLastSelect].UID = 1801;
+	commands[kcOrderlistNavigateLastSelect].Message = "kcOrderlistNavigateLastSelect";
+	commands[kcOrderlistNavigateLastSelect].isHidden = true;
+	commands[kcOrderlistNavigateLastSelect].isDummy = false;
+
+	commands[kcOrderlistEditDelete].UID = 1802;
+	commands[kcOrderlistEditDelete].Message = "Delete Order";
+	commands[kcOrderlistEditDelete].isHidden = false;
+	commands[kcOrderlistEditDelete].isDummy = false;
+
+	commands[kcOrderlistEditInsert].UID = 1803;
+	commands[kcOrderlistEditInsert].Message = "Insert Order";
+	commands[kcOrderlistEditInsert].isHidden = false;
+	commands[kcOrderlistEditInsert].isDummy = false;
+
+	commands[kcOrderlistEditPattern].UID = 1804;
+	commands[kcOrderlistEditPattern].Message = "Edit Pattern";
+	commands[kcOrderlistEditPattern].isHidden = false;
+	commands[kcOrderlistEditPattern].isDummy = false;
+
+	commands[kcOrderlistSwitchToPatternView].UID = 1805;
+	commands[kcOrderlistSwitchToPatternView].Message = "Switch to pattern editor";
+	commands[kcOrderlistSwitchToPatternView].isHidden = false;
+	commands[kcOrderlistSwitchToPatternView].isDummy = false;
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs
@@ -2508,7 +2568,28 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				}
 			}
 		}
-		// When we get a new slection key, we need to make sure that 
+		// Same applies for orderlist navigation
+		else if (inCmd>=kcStartOrderlistCommands&& inCmd<=kcEndOrderlistNavigationSelect)
+		{//Check that it is a nav cmd
+			CommandID cmdNavSelection = (CommandID)(kcStartOrderlistNavigationSelect+ (inCmd-kcStartOrderlistNavigation));
+			for (int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
+			{//for all selection modifiers
+				curKc=commands[kcSelect].kcList[kSel];
+				newKc=inKc;
+				newKc.mod|=curKc.mod;	//Add selection modifier's modifiers to this command
+				if (adding)
+				{
+					Log("Enforcing rule krAllowNavigationWithSelection - adding key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection);
+					Add(newKc, cmdNavSelection, false);
+				}
+				else
+				{					
+					Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", kSel, newKc.mod, cmdNavSelection); 
+					Remove(newKc, cmdNavSelection);
+				}
+			}
+		}
+		// When we get a new selection key, we need to make sure that 
 		// all navigation commands will work with this selection key pressed
 		else if (inCmd==kcSelect)
 		{// check that is is a selection
@@ -2517,6 +2598,25 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
 				{// for all keys for this command
 					CommandID cmdNavSelection = (CommandID)(kcStartPatNavigationSelect + (curCmd-kcStartPatNavigation));
+					newKc=commands[curCmd].kcList[k]; // get all properties from the current nav cmd key
+					newKc.mod|=inKc.mod;			  // and the new selection modifier
+					if (adding)
+					{
+						Log("Enforcing rule krAllowNavigationWithSelection - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);
+						Add(newKc, cmdNavSelection, false);
+					}
+					else
+					{	
+						Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, cmdNavSelection);				
+						Remove(newKc, cmdNavSelection);
+					}
+				}
+			} // end all nav commands
+			for (int curCmd=kcStartOrderlistNavigation; curCmd<=kcEndOrderlistNavigation; curCmd++)
+			{// for all nav commands
+				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
+				{// for all keys for this command
+					CommandID cmdNavSelection = (CommandID)(kcStartOrderlistNavigationSelect+ (curCmd-kcStartOrderlistNavigation));
 					newKc=commands[curCmd].kcList[k]; // get all properties from the current nav cmd key
 					newKc.mod|=inKc.mod;			  // and the new selection modifier
 					if (adding)
@@ -2556,11 +2656,44 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				}
 			}
 		}
+		// Same for orderlist navigation
+		if (inCmd>=kcStartOrderlistNavigation&& inCmd<=kcEndOrderlistNavigation)
+		{//if this is a navigation command
+			for (int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
+			{//for all deselection modifiers
+				newKcSel=commands[kcSelect].kcList[kSel];	// get all properties from the selection key
+				newKcSel.mod|=inKc.mod;						// add modifiers from the new nav command
+				if (adding)	{
+					Log("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav\n"); 
+					Add(newKcSel, kcSelectWithNav, false);
+				}
+				else {	
+					Log("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav\n"); 				
+					Remove(newKcSel, kcSelectWithNav);
+				}
+			}
+		}
 		// When we get a new selection key, we need to ensure it will work even when
 		// any navigation key is pressed
 		else if (inCmd==kcSelect)
 		{
 			for (int curCmd=kcStartPatNavigation; curCmd<=kcEndPatNavigation; curCmd++)
+			{//for all nav commands
+				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
+				{// for all keys for this command
+					newKcSel=inKc; // get all properties from the selection key
+					newKcSel.mod|=commands[curCmd].kcList[k].mod; //add the nav keys' modifiers
+					if (adding)	{
+						Log("Enforcing rule krAllowSelectionWithNavigation - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);
+						Add(newKcSel, kcSelectWithNav, false);
+					}
+					else {	
+						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.mod, kcSelectWithNav);				
+						Remove(newKcSel, kcSelectWithNav);
+					}
+				}
+			} // end all nav commands
+			for (int curCmd=kcStartOrderlistNavigation; curCmd<=kcEndOrderlistNavigation; curCmd++)
 			{//for all nav commands
 				for (int k=0; k<commands[curCmd].kcList.GetSize(); k++)
 				{// for all keys for this command
@@ -2999,14 +3132,20 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 			//ASSERT(eventTypes.GetSize()>0);
 
 			//Handle super-contexts (contexts that represent a set of sub contexts)
-			if (curKc.ctx == kCtxViewPatterns) {
+			if (curKc.ctx == kCtxViewPatterns)
+			{
 				contexts.Add(kCtxViewPatternsNote);
 				contexts.Add(kCtxViewPatternsIns);
 				contexts.Add(kCtxViewPatternsVol);
 				contexts.Add(kCtxViewPatternsFX);
 				contexts.Add(kCtxViewPatternsFXparam);
 			}
-			else {
+			else if(curKc.ctx == kCtxCtrlPatterns)
+			{
+				contexts.Add(kCtxCtrlOrderlist);
+			}
+			else
+			{
 				contexts.Add(curKc.ctx);
 			}
 
@@ -3259,6 +3398,7 @@ CString CCommandSet::GetContextText(InputTargetContext ctx)
 		case kCtxCtrlSamples:			return "Sample Context [top]";
 		case kCtxCtrlInstruments:		return "Instrument Context [top]";
 		case kCtxCtrlComments:			return "Comments Context [top]";
+		case kCtxCtrlOrderlist:			return "Orderlist";
 		case kCtxVSTGUI:				return "Plugin GUI Context";
 	    case kCtxUnknownContext:
 		default:						return "Unknown Context";
@@ -3494,12 +3634,14 @@ void CCommandSet::SetupContextHierarchy()
 	m_isParentContext[kCtxCtrlInstruments][kCtxAllContexts] = true;
 	m_isParentContext[kCtxCtrlComments][kCtxAllContexts] = true;
 	m_isParentContext[kCtxCtrlSamples][kCtxAllContexts] = true;
+	m_isParentContext[kCtxCtrlOrderlist][kCtxAllContexts] = true;
 
 	m_isParentContext[kCtxViewPatternsNote][kCtxViewPatterns] = true;
 	m_isParentContext[kCtxViewPatternsIns][kCtxViewPatterns] = true;
 	m_isParentContext[kCtxViewPatternsVol][kCtxViewPatterns] = true;
 	m_isParentContext[kCtxViewPatternsFX][kCtxViewPatterns] = true;
 	m_isParentContext[kCtxViewPatternsFXparam][kCtxViewPatterns] = true;
+	m_isParentContext[kCtxCtrlOrderlist][kCtxCtrlPatterns] = true;
 
 }
 

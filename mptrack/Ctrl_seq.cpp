@@ -91,7 +91,6 @@ COrderList::COrderList()
 	m_nOrderlistMargins = s_nDefaultMargins;
 	m_bScrolling = false;
 	m_bDragging = false;
-	m_bShift = false;
 }
 
 
@@ -319,48 +318,6 @@ UINT COrderList::GetCurrentPattern() const
 }
 
 
-BOOL COrderList::ProcessKeyDown(UINT nChar)
-//-----------------------------------------
-{
-	switch(nChar)
-	{
-	case VK_UP:
-	case VK_LEFT:	SetCurSelTo2ndSel(); SetCurSel(m_nScrollPos - 1); break;
-	case VK_DOWN:
-	case VK_RIGHT:	SetCurSelTo2ndSel(); SetCurSel(m_nScrollPos + 1); break;
-	case VK_HOME:	SetCurSelTo2ndSel(); SetCurSel(0); break;
-	case VK_END:
-		if (m_pModDoc)
-		{
-			CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-			ORDERINDEX nLast = pSndFile->Order.GetLengthFirstEmpty();
-			if (nLast)
-				nLast--;
-			SetCurSelTo2ndSel();
-			SetCurSel(nLast);
-		}
-		break;
-	case VK_DELETE:	OnDeleteOrder(); break;
-	case VK_INSERT: OnInsertOrder(); break;
-	case VK_TAB:	OnSwitchToView(); break;
-	case VK_RETURN:	OnLButtonDblClk(0, CPoint(0,0)); OnSwitchToView(); break;
-
-	//rewbs.customKeys: these are now global commands handled via the inputInhandler
-/*	case VK_F5:		OnPlayerPlay(); break;
-	case VK_F6:		OnPlayerPlayFromStart(); break;
-	case VK_F7:		OnPatternPlayFromStart(); break;
-	case VK_ESCAPE:
-	case VK_F8:		OnPlayerPause(); break;
-*/
-	default:
-		return FALSE;
-	}
-
-	return TRUE;
-
-}
-
-
 BOOL COrderList::ProcessChar(UINT nChar)
 //--------------------------------------
 {
@@ -425,42 +382,89 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 		UINT nRepCnt = LOWORD(pMsg->lParam);
 		UINT nFlags = HIWORD(pMsg->lParam);
 		KeyEventType kT = ih->GetKeyEventType(nFlags);
+
+		InputTargetContext ctx = (InputTargetContext)(kCtxCtrlOrderlist);
+		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			return true; // Mapped to a command, no need to pass message on.
+
 		//HACK: masquerade as kCtxViewPatternsNote context until we implement appropriate
 		//      command propagation to kCtxCtrlOrderlist context.
-		//InputTargetContext ctx = (InputTargetContext)(kCtxCtrlOrderlist);
-		InputTargetContext ctx = (InputTargetContext)(kCtxViewPatternsNote);
-		
-		CommandID kc = ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT);
 
-		switch (kc)
-		{
-            case kcSwitchToOrderList: OnSwitchToView(); return true;
-			case kcChangeLoopStatus: m_pParent->OnModCtrlMsg(CTRLMSG_PAT_LOOP, -1); return true;
-			case kcToggleFollowSong: m_pParent->OnFollowSong(); return true;
+		ctx = (InputTargetContext)(kCtxViewPatternsNote);
+		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			return true; // Mapped to a command, no need to pass message on.
 
-			case kcChannelUnmuteAll:
-			case kcUnmuteAllChnOnPatTransition:
-				::PostMessage(m_pParent->GetViewWnd(), WM_MOD_KEYCOMMAND, kc, 0);
-				return true;
-		}
 	}
 	//end rewbs.customKeys 
 
 
 	switch(pMsg->message)
 	{
-	case WM_KEYUP:
-		if ((pMsg->wParam == VK_SHIFT) || (pMsg->wParam == VK_LSHIFT) || (pMsg->wParam == VK_RSHIFT)) m_bShift = FALSE;
-		break;
-	case WM_KEYDOWN:
-		if ((pMsg->wParam == VK_SHIFT) || (pMsg->wParam == VK_LSHIFT) || (pMsg->wParam == VK_RSHIFT)) m_bShift = TRUE;
-		if (ProcessKeyDown(pMsg->wParam)) return TRUE;
-		break;
 	case WM_CHAR:
-		if (ProcessChar(pMsg->wParam)) return TRUE;
+		if (ProcessChar(pMsg->wParam)) return true;
 		break;
 	}
 	return CWnd::PreTranslateMessage(pMsg);
+}
+
+
+LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
+//-------------------------------------------------------
+{
+	if (wParam == kcNull)
+		return 0;
+
+	switch(wParam)
+	{
+	case kcEditCopy:
+		OnEditCopy(); return wParam;
+	case kcEditCut:
+		OnEditCut(); return wParam;
+	case kcEditPaste:
+		OnEditPaste(); return wParam;
+
+	case kcOrderlistNavigateLeftSelect:
+	case kcOrderlistNavigateLeft:
+		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLeftSelect); SetCurSel(m_nScrollPos - 1); return wParam;
+	case kcOrderlistNavigateRightSelect:
+	case kcOrderlistNavigateRight:
+		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateRightSelect); SetCurSel(m_nScrollPos + 1); return wParam;
+	case kcOrderlistNavigateFirstSelect:
+	case kcOrderlistNavigateFirst:
+		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateFirstSelect); SetCurSel(0); return wParam;
+	case kcOrderlistNavigateLastSelect:
+	case kcOrderlistNavigateLast:
+		if((m_pModDoc != nullptr) && (m_pModDoc->GetSoundFile() != nullptr))
+		{
+			SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLast);
+			ORDERINDEX nLast = m_pModDoc->GetSoundFile()->Order.GetLengthTailTrimmed();
+			if(nLast > 0) nLast--;
+			SetCurSel(nLast);
+		}
+		return wParam;
+	case kcOrderlistEditDelete:
+		OnDeleteOrder(); return wParam;
+	case kcOrderlistEditInsert:
+		OnInsertOrder(); return wParam;
+	case kcOrderlistSwitchToPatternView:
+		OnSwitchToView(); return wParam;
+	case kcOrderlistEditPattern:
+		OnLButtonDblClk(0, CPoint(0,0)); OnSwitchToView(); return wParam;
+
+	// kCtxViewPatternsNote messages
+	case kcSwitchToOrderList:
+		OnSwitchToView();
+		return wParam;
+	case kcChangeLoopStatus:
+		m_pParent->OnModCtrlMsg(CTRLMSG_PAT_LOOP, -1); return wParam;
+	case kcToggleFollowSong: m_pParent->OnFollowSong(); return wParam;
+
+	case kcChannelUnmuteAll:
+	case kcUnmuteAllChnOnPatTransition:
+		::PostMessage(m_pParent->GetViewWnd(), WM_MOD_KEYCOMMAND, wParam, 0); return wParam;
+	}
+
+	return 0;
 }
 
 
@@ -613,23 +617,6 @@ void COrderList::OnEditCopy()
 }
 
 
-LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
-//-------------------------------------------------------
-{
-	if (wParam == kcNull)
-		return 0;
-	
-	switch(wParam)
-	{
-		case kcEditCopy:		OnEditCopy();			return wParam;
-		case kcEditCut:			OnEditCut();			return wParam;
-		case kcEditPaste:		OnEditPaste(); 			return wParam;
-	}
-	
-	return 0;
-}
-
-
 void COrderList::UpdateView(DWORD dwHintMask, CObject *pObj)
 //----------------------------------------------------------
 {
@@ -645,7 +632,6 @@ void COrderList::OnSwitchToView()
 //-------------------------------
 {
 	if (m_pParent) m_pParent->PostViewMessage(VIEWMSG_SETFOCUS);
-	m_bShift = FALSE;
 }
 
 
@@ -788,7 +774,6 @@ void COrderList::OnKillFocus(CWnd *pWnd)
 {
 	CWnd::OnKillFocus(pWnd);
 	InvalidateSelection();
-	m_bShift = FALSE;
 	CMainFrame::GetMainFrame()->m_pOrderlistHasFocus = nullptr;
 }
 
@@ -842,6 +827,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 {
 	CRect rect;
 	GetClientRect(&rect);
+	bool bSelection = IsSelectionKeyPressed();
 
 	if (m_bDragging)
 	{
@@ -865,13 +851,13 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 
 				for(int i = 0; i <= nMoveCount; i++)
 				{
-					if(!m_pModDoc->MoveOrder(nMovePos, m_nDropPos, true, m_bShift)) return;
-					if((bMoveBack ^ m_bShift) == true && bMultiSelection)
+					if(!m_pModDoc->MoveOrder(nMovePos, m_nDropPos, true, bSelection)) return;
+					if((bMoveBack ^ bSelection) == true && bMultiSelection)
 					{
 						nMovePos++;
 						m_nDropPos++;
 					}
-					if(bMoveBack && m_bShift && bMultiSelection) {
+					if(bMoveBack && bSelection && bMultiSelection) {
 						nMovePos += 2;
 						m_nDropPos++;
 					}
@@ -881,10 +867,10 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 					// adjust selection
 					m_nScrollPos2nd = m_nDropPos - 1;
 					m_nDropPos -= nMoveCount + (bMoveBack ? 0 : 1);
-					SetCurSel((bMoveBack && (!m_bShift)) ? m_nDropPos - 1 : m_nDropPos);
+					SetCurSel((bMoveBack && (!bSelection)) ? m_nDropPos - 1 : m_nDropPos);
 				} else
 				{
-					SetCurSel(((m_nDragOrder < (UINT)m_nDropPos) && (!m_bShift)) ? m_nDropPos - 1 : m_nDropPos);
+					SetCurSel(((m_nDragOrder < (UINT)m_nDropPos) && (!bSelection)) ? m_nDropPos - 1 : m_nDropPos);
 				}
 				m_pModDoc->SetModified();
 			}
