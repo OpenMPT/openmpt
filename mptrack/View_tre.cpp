@@ -1081,15 +1081,10 @@ uint64 CModTree::GetModItem(HTREEITEM hItem)
 				// find sequence this item belongs to
 				for(SEQUENCEINDEX nSeq = 0; nSeq < pSong->tiOrders.size(); nSeq++)
 				{
+					if(hItem == pSong->tiSequences[nSeq]) return (MODITEM_SEQUENCE | (nSeq << 16));
 					for(ORDERINDEX nOrd = 0; nOrd < pSong->tiOrders[nSeq].size(); nOrd++)
 					{
-						if (hItem == pSong->tiOrders[nSeq][nOrd])
-						{
-							return (MODITEM_ORDER | (nOrd << 16) | (((uint64)nSeq) << 32));
-						} else if(hItem == pSong->tiSequences[nSeq])
-						{
-							return (MODITEM_SEQUENCE | (nSeq << 16));
-						}
+						if (hItem == pSong->tiOrders[nSeq][nOrd]) return (MODITEM_ORDER | (nOrd << 16) | (((uint64)nSeq) << 32));
 					}
 				}
 			}
@@ -2319,9 +2314,12 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			case MODITEM_HDR_ORDERS:
 				{
 					CModDoc *pModDoc = GetDocumentFromItem(hItem);
-					if(pModDoc && (pModDoc->GetModType() == MOD_TYPE_MPT))
+					CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+					if(pModDoc && pSndFile && (pModDoc->GetModType() == MOD_TYPE_MPT))
 					{
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Sequence");
+						if(pSndFile->Order.GetNumSequences() == 1) // this is a sequence
+							AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "D&uplicate Sequence");
 					}
 				}
 				break;
@@ -2832,7 +2830,7 @@ void CModTree::OnDuplicateTreeItem()
 	pModDoc = GetDocumentFromItem(hItem);
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 
-	if (pModDoc && pSndFile && (qwItemType == MODITEM_SEQUENCE))
+	if (pModDoc && pSndFile && ((qwItemType == MODITEM_SEQUENCE) || (qwItemType == MODITEM_HDR_ORDERS)))
 	{
 		pSndFile->Order.SetSequence((SEQUENCEINDEX)dwItemNo);
 		pSndFile->Order.AddSequence(true);

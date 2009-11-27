@@ -264,12 +264,26 @@
 
 //----( Unknown Context (12) )------------
 
-//----( General Context [top] (13) )------------
+//----( Plugin GUI Context (13) )------------
 
-//----( Pattern Context [top] (14) )------------
+//----( General Context [top] (14) )------------
 
-//----( Sample Context [top] (15) )------------
+//----( Pattern Context [top] (15) )------------
 
-//----( Instrument Context [top] (16) )------------
+//----( Sample Context [top] (16) )------------
 
-//----( Comments Context [top] (17) )------------
+//----( Instrument Context [top] (17) )------------
+
+//----( Comments Context [top] (18) )------------
+
+//----( Orderlist (19) )------------
+19:1794:0:37:5		//Previous Order: LEFT (KeyDown|KeyHold)
+19:1794:0:38:5		//Previous Order: UP (KeyDown|KeyHold)
+19:1795:0:39:5		//Next Order: RIGHT (KeyDown|KeyHold)
+19:1795:0:40:5		//Next Order: DOWN (KeyDown|KeyHold)
+19:1796:0:36:5		//First Order: HOME (KeyDown|KeyHold)
+19:1797:0:35:5		//Last Order: END (KeyDown|KeyHold)
+19:1802:0:46:5		//Delete Order: DELETE (KeyDown|KeyHold)
+19:1803:0:45:5		//Insert Order: INSERT (KeyDown|KeyHold)
+19:1804:0:13:5		//Edit Pattern: ENTER (KeyDown|KeyHold)
+19:1805:0:9:5		//Switch to pattern editor: TAB (KeyDown|KeyHold)

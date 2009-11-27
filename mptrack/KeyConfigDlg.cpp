@@ -204,7 +204,15 @@ void COptionsKeyboard::DefineCommandCategories()
 	commandCategories.Add(*newCat);
 	delete newCat;
 
-	newCat = new CommandCategory("  Pattern [Top]", kCtxCtrlPatterns);
+	newCat = new CommandCategory("  Pattern Editor [Top]", kCtxCtrlPatterns);
+	commandCategories.Add(*newCat);
+	delete newCat;
+
+	newCat = new CommandCategory("  Pattern Editor - Orderlist", kCtxCtrlOrderlist);
+
+	for (int c=kcStartOrderlistCommands; c<=kcEndOrderlistCommands; c++)
+		newCat->commands.Add(c);
+
 	commandCategories.Add(*newCat);
 	delete newCat;
 
