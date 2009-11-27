@@ -520,6 +520,10 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnPatternNew();
 		break;
 
+	case CTRLMSG_PAT_DUPPATTERN:
+		OnPatternDuplicate();
+		break;
+
 	case CTRLMSG_SETUPMACROS:
 		OnSetupZxxMacros();
 		break;
@@ -1262,7 +1266,7 @@ void CCtrlPatterns::TogglePluginEditor()
 
 
 void CCtrlPatterns::TogglePluginEditor(bool split)
-//----------------------------------------
+//------------------------------------------------
 {
 	if ((m_nInstrument) && (m_pModDoc))
 	{
@@ -1279,7 +1283,7 @@ void CCtrlPatterns::TogglePluginEditor(bool split)
 }
 
 void CCtrlPatterns::ToggleSplitPluginEditor()
-//----------------------------------------
+//-------------------------------------------
 {
 	TogglePluginEditor(true);
 }
