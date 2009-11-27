@@ -217,6 +217,7 @@ enum CommandID
 	kcSetSpacing9,
 	kcSwitchToOrderList,
 	kcNewPattern,
+	kcDuplicatePattern,
 	kcTogglePluginEditor,
 	kcShowNoteProperties,
 	kcShowPatternProperties,

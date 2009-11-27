@@ -2410,6 +2410,11 @@ void CCommandSet::SetupCommands()
 	commands[kcOrderlistSwitchToPatternView].isHidden = false;
 	commands[kcOrderlistSwitchToPatternView].isDummy = false;
 
+	commands[kcDuplicatePattern].UID = 1806;
+	commands[kcDuplicatePattern].Message = "Duplicate pattern";
+	commands[kcDuplicatePattern].isHidden = false;
+	commands[kcDuplicatePattern].isDummy = false;
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs
