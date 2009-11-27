@@ -73,6 +73,8 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_MUTE,			OnMuteTreeItem)
 	ON_COMMAND(ID_MODTREE_SOLO,			OnSoloTreeItem)
 	ON_COMMAND(ID_MODTREE_UNMUTEALL,	OnUnmuteAllTreeItem)
+	ON_COMMAND(ID_MODTREE_DUPLICATE,	OnDuplicateTreeItem)
+	ON_COMMAND(ID_MODTREE_INSERT,		OnInsertTreeItem)
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -700,6 +702,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	if ((pInfo->hOrders) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_SMPNAMES))
 	{
 		const DWORD nPat = (lHint >> HINT_SHIFT_PAT);
+		bool adjustParentNode = false;	// adjust sequence name of "Sequence" node?
 
 		// (only one seq remaining || previously only one sequence): update parent item
 		if((pInfo->tiSequences.size() > 1 && pSndFile->Order.GetNumSequences() == 1) || (pInfo->tiSequences.size() == 1 && pSndFile->Order.GetNumSequences() > 1))
@@ -714,6 +717,7 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			}
 			pInfo->tiOrders.resize(pSndFile->Order.GetNumSequences());
 			pInfo->tiSequences.resize(pSndFile->Order.GetNumSequences(), NULL);
+			adjustParentNode = true;
 		}
 
 		// If there are too many sequences, delete them.
@@ -736,6 +740,15 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		SEQUENCEINDEX nSeqMin = 0, nSeqMax = pSndFile->Order.GetNumSequences() - 1;
 		SEQUENCEINDEX nHintParam = lHint >> HINT_SHIFT_SEQUENCE;
 		if ((hintFlagPart == HINT_SEQNAMES) && (nHintParam <= nSeqMax)) nSeqMin = nSeqMax = nHintParam;
+
+		// Adjust caption of the "Sequence" node (if only one sequence exists, it should be labeled with the sequence name)
+		if(((hintFlagPart == HINT_SEQNAMES) && pSndFile->Order.GetNumSequences() == 1) || adjustParentNode)
+		{
+			CString sSeqName = pSndFile->Order.GetSequence(0).m_sName;
+			if(sSeqName.IsEmpty() || pSndFile->Order.GetNumSequences() > 1) sSeqName = "Sequence";
+			SetItem(pInfo->hOrders, TVIF_TEXT, sSeqName, 0, 0, 0, 0, 0);
+		}
+
 		// go through all sequences
 		for(SEQUENCEINDEX nSeq = nSeqMin; nSeq <= nSeqMax; nSeq++)
 		{
@@ -1151,6 +1164,10 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 			if (pModDoc) pModDoc->ActivateView(IDD_CONTROL_COMMENTS, 0);
 			return TRUE;
 		
+		case MODITEM_SEQUENCE:
+			if (pModDoc) pModDoc->ActivateView(IDD_CONTROL_PATTERNS, (dwItem << 16) | 0x8000);
+			return TRUE;
+
 		case MODITEM_ORDER:
 			if (pModDoc) pModDoc->ActivateView(IDD_CONTROL_PATTERNS, dwItem | 0x8000);
 			return TRUE;
@@ -1370,9 +1387,18 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 	uint64 qwItemType = GetModItem(hItem);
 	DWORD dwItem = (DWORD)(qwItemType >> 16);
 	PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
-	CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
+	CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : nullptr;
+	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 	switch(qwItemType & 0xFFFF)
 	{
+	case MODITEM_SEQUENCE:
+		if (pModDoc && pSndFile)
+		{
+			pSndFile->Order.RemoveSequence((SEQUENCEINDEX)(dwItem & 0xFFFF));
+			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+		}
+		break;
+
 	case MODITEM_ORDER:
 		if ((pModDoc) && (pModDoc->RemoveOrder((SEQUENCEINDEX)(dwItem >> 16), (ORDERINDEX)(dwItem & 0xFFFF))))
 		{
@@ -2282,11 +2308,22 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 				break;
 
 			case MODITEM_SEQUENCE:
-				// TODO: Right-click menu for sequences
-				//nDefault = ID_MODTREE_EXECUTE;
+				//nDefault = ID_MODTREE_EXECUTE; // don't do it, double-clicking sequences shouldn't switch to the automatically!
 				//AppendMenu(hMenu, MF_STRING, nDefault, "&Switch to Seqeuence");
-				//AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Sequence");
-				//AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "D&uplicate Sequence");
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Sequence");
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "D&uplicate Sequence");
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Sequence");
+				break;
+
+
+			case MODITEM_HDR_ORDERS:
+				{
+					CModDoc *pModDoc = GetDocumentFromItem(hItem);
+					if(pModDoc && (pModDoc->GetModType() == MOD_TYPE_MPT))
+					{
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Sequence");
+					}
+				}
 				break;
 
 			case MODITEM_SAMPLE:
@@ -2781,9 +2818,55 @@ void CModTree::OnUnmuteAllTreeItem()
 }
 
 
+void CModTree::OnDuplicateTreeItem()
+//----------------------------------
+{
+	HTREEITEM hItem = GetSelectedItem();
+	uint64 qwItemType;
+	CModDoc *pModDoc;
+
+	qwItemType = GetModItem(hItem);
+	const DWORD dwItemNo = (DWORD)(qwItemType >> 16);
+	qwItemType &= 0xFFFF;
+
+	pModDoc = GetDocumentFromItem(hItem);
+	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+
+	if (pModDoc && pSndFile && (qwItemType == MODITEM_SEQUENCE))
+	{
+		pSndFile->Order.SetSequence((SEQUENCEINDEX)dwItemNo);
+		pSndFile->Order.AddSequence(true);
+		UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE);
+		pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
+	}
+}
+
+
+void CModTree::OnInsertTreeItem()
+//-------------------------------
+{
+	HTREEITEM hItem = GetSelectedItem();
+	uint64 qwItemType;
+	CModDoc *pModDoc;
+
+	qwItemType = GetModItem(hItem) & 0xFFFF;
+
+	pModDoc = GetDocumentFromItem(hItem);
+	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+
+	if (pModDoc && pSndFile && ((qwItemType == MODITEM_SEQUENCE) || (qwItemType == MODITEM_HDR_ORDERS)))
+	{
+		pSndFile->Order.AddSequence(false);
+		UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE);
+		pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
+	}
+}
+
+
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 void CModTree::OnSetItemPath()
+//----------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 	uint64 qwItemType = GetModItem(hItem);
@@ -2816,6 +2899,7 @@ void CModTree::OnSetItemPath()
 }
 
 void CModTree::OnSaveItem()
+//-------------------------
 {
 	HTREEITEM hItem = GetSelectedItem();
 	uint64 qwItemType = GetModItem(hItem);

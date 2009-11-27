@@ -4210,7 +4210,9 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		if (usePlaybackPosition && nTick) {	// avoid SD0 which will be mis-interpreted
 			if (p->command == 0) {	//make sure we don't overwrite any existing commands.
 				p->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
-				p->param   = 0xD0 + min(0xF, nTick);
+				UINT maxSpeed = 0x0F;
+				if(pSndFile->m_nMusicSpeed > 0) maxSpeed = min(0x0F, pSndFile->m_nMusicSpeed - 1);
+				p->param   = 0xD0 + min(maxSpeed, nTick);
 			}
 		}
 
