@@ -1209,14 +1209,13 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// In order to properly compute the position, in file, of eventual extended settings
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
 	// setting will follow this sample in the file
-	UINT lastSampleSize = 0;
+	UINT lastSampleOffset = 0;
 // -! NEW_FEATURE#0027
 
 	// Reading Samples
 	m_nSamples = CLAMP(pifh->smpnum, 1, MAX_SAMPLES - 1);
 	for (UINT nsmp=0; nsmp<pifh->smpnum; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSAMPLESTRUCT)))
 	{
-		lastSampleSize = 0; //ensure lastsamplesize = 0 if last sample is empty, else we'll skip the MPTX stuff.
 		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
 		if (pis->id == 0x53504D49)
 		{
@@ -1269,7 +1268,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 //				ReadSample(&Ins[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
-				lastSampleSize = ReadSample(&Samples[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
+				if(pis->samplepointer)
+					lastSampleOffset = pis->samplepointer + ReadSample(&Samples[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
 // -! NEW_FEATURE#0027
 			}
 		}
@@ -1284,11 +1284,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 
 	// Compute extra instruments settings position
-	if(pifh->smpnum)
-	{	
-		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[pifh->smpnum-1]);
-		dwMemPos = pis->samplepointer + lastSampleSize;
-	}
+	if(lastSampleOffset > 0) dwMemPos = lastSampleOffset;
 
 	// Load instrument and song extensions.
 	if(mptStartPos >= dwMemPos)
@@ -2339,10 +2335,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
 			}
 		}
-		if ((psmp->pSample) && (psmp->nLength))
-			itss.samplepointer = dwPos;
-		else
-			itss.samplepointer = itss.flags = 0;
+		itss.samplepointer = dwPos;
+		if (!(psmp->pSample) || !(psmp->nLength))
+			itss.flags = 0;
 		fseek(f, smppos[nsmp-1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 		fseek(f, dwPos, SEEK_SET);
@@ -2918,10 +2913,9 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			itss.flags |= 0x02;
 			flags = RS_PCM16S;
 		}
-		if ((psmp->pSample) && (psmp->nLength))
-			itss.samplepointer = dwPos;
-		else
-			itss.samplepointer = itss.flags = 0;
+		itss.samplepointer = dwPos;
+		if (!(psmp->pSample) || !(psmp->nLength))
+			itss.flags = 0;
 		fseek(f, smppos[nsmp-1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 		fseek(f, dwPos, SEEK_SET);
@@ -3374,7 +3368,7 @@ UINT CSoundFile::LoadMixPlugins(const void *pData, UINT nLen)
 
 void CSoundFile::SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], UINT nInstruments, FILE* f)
 //------------------------------------------------------------------------------------------------------------
-// Used only when saving IT and XM. 
+// Used only when saving IT, XM and MPTM. 
 // ITI, ITP saves using Ericus' macros etc...
 // The reason is that ITs and XMs save [code][size][ins1.Value][ins2.Value]...
 // whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
