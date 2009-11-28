@@ -2415,6 +2415,66 @@ void CCommandSet::SetupCommands()
 	commands[kcDuplicatePattern].isHidden = false;
 	commands[kcDuplicatePattern].isDummy = false;
 
+	commands[kcOrderlistPat0].UID = 1807;
+	commands[kcOrderlistPat0].isHidden = false;
+	commands[kcOrderlistPat0].isDummy = false;
+	commands[kcOrderlistPat0].Message = "Pattern index digit 0";
+
+	commands[kcOrderlistPat1].UID = 1808;
+	commands[kcOrderlistPat1].isHidden = false;
+	commands[kcOrderlistPat1].isDummy = false;
+	commands[kcOrderlistPat1].Message = "Pattern index digit 1";
+
+	commands[kcOrderlistPat2].UID = 1809;
+	commands[kcOrderlistPat2].isHidden = false;
+	commands[kcOrderlistPat2].isDummy = false;
+	commands[kcOrderlistPat2].Message = "Pattern index digit 2";
+
+	commands[kcOrderlistPat3].UID = 1810;
+	commands[kcOrderlistPat3].isHidden = false;
+	commands[kcOrderlistPat3].isDummy = false;
+	commands[kcOrderlistPat3].Message = "Pattern index digit 3";
+
+	commands[kcOrderlistPat4].UID = 1811;
+	commands[kcOrderlistPat4].isHidden = false;
+	commands[kcOrderlistPat4].isDummy = false;
+	commands[kcOrderlistPat4].Message = "Pattern index digit 4";
+
+	commands[kcOrderlistPat5].UID = 1812;
+	commands[kcOrderlistPat5].isHidden = false;
+	commands[kcOrderlistPat5].isDummy = false;
+	commands[kcOrderlistPat5].Message = "Pattern index digit 5";
+
+	commands[kcOrderlistPat6].UID = 1813;
+	commands[kcOrderlistPat6].isHidden = false;
+	commands[kcOrderlistPat6].isDummy = false;
+	commands[kcOrderlistPat6].Message = "Pattern index digit 6";
+
+	commands[kcOrderlistPat7].UID = 1814;
+	commands[kcOrderlistPat7].isHidden = false;
+	commands[kcOrderlistPat7].isDummy = false;
+	commands[kcOrderlistPat7].Message = "Pattern index digit 7";
+
+	commands[kcOrderlistPat8].UID = 1815;
+	commands[kcOrderlistPat8].isHidden = false;
+	commands[kcOrderlistPat8].isDummy = false;
+	commands[kcOrderlistPat8].Message = "Pattern index digit 8";
+
+	commands[kcOrderlistPat9].UID = 1816;
+	commands[kcOrderlistPat9].isHidden = false;
+	commands[kcOrderlistPat9].isDummy = false;
+	commands[kcOrderlistPat9].Message = "Pattern index digit 9";
+
+	commands[kcOrderlistPatPlus].UID = 1817;
+	commands[kcOrderlistPatPlus].isHidden = false;
+	commands[kcOrderlistPatPlus].isDummy = false;
+	commands[kcOrderlistPatPlus].Message = "Increase pattern index ";
+
+	commands[kcOrderlistPatMinus].UID = 1818;
+	commands[kcOrderlistPatMinus].isHidden = false;
+	commands[kcOrderlistPatMinus].isDummy = false;
+	commands[kcOrderlistPatMinus].Message = "Decrease pattern index";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs
@@ -2574,7 +2634,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			}
 		}
 		// Same applies for orderlist navigation
-		else if (inCmd>=kcStartOrderlistCommands&& inCmd<=kcEndOrderlistNavigationSelect)
+		else if (inCmd>=kcStartOrderlistNavigation && inCmd<=kcEndOrderlistNavigation)
 		{//Check that it is a nav cmd
 			CommandID cmdNavSelection = (CommandID)(kcStartOrderlistNavigationSelect+ (inCmd-kcStartOrderlistNavigation));
 			for (int kSel=0; kSel<commands[kcSelect].kcList.GetSize(); kSel++)
@@ -3232,6 +3292,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 	fprintf(outStream, "//-Format is:                                                          -\n"); 	
 	fprintf(outStream, "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n"); 
 	fprintf(outStream, "//----------------------------------------------------------------------\n"); 
+	fprintf(outStream, "version:%d\n", KEYMAP_VERSION);
 
 	for (int ctx=0; ctx<kCtxMaxInputContexts; ctx++)
 	{
@@ -3272,9 +3333,13 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 	int commentStart;
 	CCommandSet *pTempCS;
 	int l=0;
+	int fileVersion = 0;
 
 	pTempCS = new CCommandSet();
+
 	int errorCount=0;
+	CString errText = "";
+
 	while(iStrm.getline(s, sizeof(s)))
 	{
 		//::MessageBox(NULL, s, "", MB_ICONEXCLAMATION|MB_OK);
@@ -3289,12 +3354,29 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 		
 		if (!curLine.IsEmpty() && curLine.Compare("\n") !=0)
 		{
+			bool ignoreLine = false;
+			
 			//ctx:UID:Description:Modifier:Key:EventMask
 			int spos = 0;
 
 			//context
 			token=curLine.Tokenize(":",spos);
 			kc.ctx = (InputTargetContext) atoi(token);
+
+			// this line indicates the version of this keymap file instead. (e.g. "version:1")
+			if((token.Trim().CompareNoCase("version") == 0) && (spos != -1))
+			{
+				fileVersion = atoi(curLine.Mid(spos));
+				if(fileVersion > KEYMAP_VERSION)
+				{
+					CString err;
+					err.Format("Key binding file %s has version %d. Your version of OpenMPT only supports loading files up to version %d.", szFilename, fileVersion, KEYMAP_VERSION);
+					errText += err + "\n";
+					Log(err);
+				}
+				spos = -1;
+				ignoreLine = true;
+			}
 
 			//UID
 			if (spos != -1)
@@ -3324,30 +3406,36 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 				kc.event = (KeyEventType) atoi(token);
 			}
 
-			//Error checking (TODO):
-			if (cmd<0 || cmd>=kcNumCommands || spos==-1)
+			if(!ignoreLine)
 			{
-				errorCount++;
-				CString err;
-				if (errorCount<10) {
-					err.Format("Line %d in key binding file %s was not understood.", l, szFilename);
-					if(s_bShowErrorOnUnknownKeybinding) ::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
-					Log(err);
-				} else if (errorCount==10) {
-					err.Format("Too many errors detected, not reporting any more.");
-					if(s_bShowErrorOnUnknownKeybinding) ::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
-					Log(err);
+				//Error checking (TODO):
+				if (cmd<0 || cmd>=kcNumCommands || spos==-1)
+				{
+					errorCount++;
+					CString err;
+					if (errorCount<10) {
+						err.Format("Line %d in key binding file %s was not understood.", l, szFilename);
+						errText += err + "\n";
+						Log(err);
+					} else if (errorCount==10) {
+						err = "Too many errors detected, not reporting any more.";
+						errText += err + "\n";
+						Log(err);
+					}
 				}
-			}
-			else
-			{
-				pTempCS->Add(kc, cmd, true);
+				else
+				{
+					pTempCS->Add(kc, cmd, true);
+				}
 			}
 
 		}
 
 		l++;
 	}
+	if(s_bShowErrorOnUnknownKeybinding && !errText.IsEmpty()) ::MessageBox(NULL, errText, "", MB_ICONEXCLAMATION|MB_OK);
+
+	if(fileVersion < KEYMAP_VERSION) UpgradeKeymap(pTempCS, fileVersion);
 
 	Copy(pTempCS);
 	delete pTempCS;
@@ -3367,6 +3455,111 @@ bool CCommandSet::LoadFile(CString fileName)
 	}
 	else
 		return LoadFile(fin, fileName);
+}
+
+
+// Fix outdated keymap files
+void CCommandSet::UpgradeKeymap(CCommandSet *pCommands, int oldVersion)
+//---------------------------------------------------------------------
+{
+	KeyCombination kc;
+
+	// no orderlist context
+	if(oldVersion == 0)
+	{
+		kc.ctx = kCtxCtrlOrderlist;
+		kc.event = (KeyEventType) (kKeyEventDown | kKeyEventRepeat);
+		kc.mod = 0;
+
+		kc.code = VK_DELETE;
+		pCommands->Add(kc, kcOrderlistEditDelete, false);
+
+		kc.code = VK_INSERT;
+		pCommands->Add(kc, kcOrderlistEditInsert, false);
+
+		kc.code = VK_RETURN;
+		pCommands->Add(kc, kcOrderlistEditPattern, false);
+
+		kc.code = VK_TAB;
+		pCommands->Add(kc, kcOrderlistSwitchToPatternView, false);
+
+		kc.code = VK_LEFT;
+		pCommands->Add(kc, kcOrderlistNavigateLeft, false);
+		kc.code = VK_UP;
+		pCommands->Add(kc, kcOrderlistNavigateLeft, false);
+
+		kc.code = VK_RIGHT;
+		pCommands->Add(kc, kcOrderlistNavigateRight, false);
+		kc.code = VK_DOWN;
+		pCommands->Add(kc, kcOrderlistNavigateRight, false);
+
+		kc.code = VK_HOME;
+		pCommands->Add(kc, kcOrderlistNavigateFirst, false);
+
+		kc.code = VK_END;
+		pCommands->Add(kc, kcOrderlistNavigateLast, false);
+
+		kc.code = VK_ADD;
+		pCommands->Add(kc, kcOrderlistPatPlus, false);
+		kc.code = VK_OEM_PLUS;
+		pCommands->Add(kc, kcOrderlistPatPlus, false);
+
+		kc.code = VK_SUBTRACT;
+		pCommands->Add(kc, kcOrderlistPatMinus, false);
+		kc.code = VK_OEM_MINUS;
+		pCommands->Add(kc, kcOrderlistPatMinus, false);
+
+		kc.code = '0';
+		pCommands->Add(kc, kcOrderlistPat0, false);
+		kc.code = VK_NUMPAD0;
+		pCommands->Add(kc, kcOrderlistPat0, false);
+
+		kc.code = '1';
+		pCommands->Add(kc, kcOrderlistPat1, false);
+		kc.code = VK_NUMPAD1;
+		pCommands->Add(kc, kcOrderlistPat1, false);
+
+		kc.code = '2';
+		pCommands->Add(kc, kcOrderlistPat2, false);
+		kc.code = VK_NUMPAD2;
+		pCommands->Add(kc, kcOrderlistPat2, false);
+
+		kc.code = '3';
+		pCommands->Add(kc, kcOrderlistPat3, false);
+		kc.code = VK_NUMPAD3;
+		pCommands->Add(kc, kcOrderlistPat3, false);
+
+		kc.code = '4';
+		pCommands->Add(kc, kcOrderlistPat4, false);
+		kc.code = VK_NUMPAD4;
+		pCommands->Add(kc, kcOrderlistPat4, false);
+
+		kc.code = '5';
+		pCommands->Add(kc, kcOrderlistPat5, false);
+		kc.code = VK_NUMPAD5;
+		pCommands->Add(kc, kcOrderlistPat5, false);
+
+		kc.code = '6';
+		pCommands->Add(kc, kcOrderlistPat6, false);
+		kc.code = VK_NUMPAD6;
+		pCommands->Add(kc, kcOrderlistPat6, false);
+
+		kc.code = '7';
+		pCommands->Add(kc, kcOrderlistPat7, false);
+		kc.code = VK_NUMPAD7;
+		pCommands->Add(kc, kcOrderlistPat7, false);
+
+		kc.code = '8';
+		pCommands->Add(kc, kcOrderlistPat8, false);
+		kc.code = VK_NUMPAD8;
+		pCommands->Add(kc, kcOrderlistPat8, false);
+
+		kc.code = '9';
+		pCommands->Add(kc, kcOrderlistPat9, false);
+		kc.code = VK_NUMPAD9;
+		pCommands->Add(kc, kcOrderlistPat9, false);
+
+	}
 }
 
 

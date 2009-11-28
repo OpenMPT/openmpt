@@ -212,6 +212,8 @@ void COptionsKeyboard::DefineCommandCategories()
 
 	for (int c=kcStartOrderlistCommands; c<=kcEndOrderlistCommands; c++)
 		newCat->commands.Add(c);
+	newCat->separators.Add(kcEndOrderlistNavigation);			//--------------------------------------
+	newCat->separators.Add(kcEndOrderlistEdit);			//--------------------------------------
 
 	commandCategories.Add(*newCat);
 	delete newCat;
