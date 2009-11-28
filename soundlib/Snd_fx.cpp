@@ -727,8 +727,9 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			}
 			pChn->nPos = 0;
 			pChn->nPosLo = 0;
-			if (pChn->nVibratoType < 4) pChn->nVibratoPos = ((!IsCompatibleMode(TRK_IMPULSETRACKER)) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))) ? 0x10 : 0;
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->nTremoloType < 4) pChn->nTremoloPos = 0;
+			// Handle "retrigger" waveform type
+			if (pChn->nVibratoType < 4) pChn->nVibratoPos = ((!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER)) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))) ? 0x10 : 0;
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER) && pChn->nTremoloType < 4) pChn->nTremoloPos = 0;
 		}
 		if (pChn->nPos >= pChn->nLength) pChn->nPos = pChn->nLoopStart;
 	} 

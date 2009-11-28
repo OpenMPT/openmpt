@@ -73,8 +73,17 @@ SmpLength InsertSilence(MODSAMPLE& smp, const SmpLength nSilenceLength, const Sm
 			AfxMessageBox(TEXT("Unsupported start position in InsertSilence."));
 	}
 
-	if(smp.nLoopStart >= nStartFrom) smp.nLoopStart += nSilenceLength;
-	if(smp.nLoopEnd >= nStartFrom) smp.nLoopEnd += nSilenceLength;
+	// Set loop points automatically
+	if(nOldBytes == 0)
+	{
+		smp.nLoopStart = 0;
+		smp.nLoopEnd = nNewLength;
+		smp.uFlags |= CHN_LOOP;
+	} else
+	{
+		if(smp.nLoopStart >= nStartFrom) smp.nLoopStart += nSilenceLength;
+		if(smp.nLoopEnd >= nStartFrom) smp.nLoopEnd += nSilenceLength;
+	}
 
 	ReplaceSample(smp, pNewSmp, nNewLength, pSndFile);
 	AdjustEndOfSample(smp, pSndFile);
