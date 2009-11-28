@@ -2304,6 +2304,15 @@ bool CModDoc::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DWORD
 		case CMD_GLOBALVOLUME:
 			nmax = (nType & MOD_TYPE_IT | MOD_TYPE_MPT) ? 128 : 64;
 			break;
+
+		case CMD_MODCMDEX:
+			// adjust waveform types for XM/MOD
+			if(gFXInfo[ndx].dwParamValue == 0x40 || gFXInfo[ndx].dwParamValue == 0x70) nmax = gFXInfo[ndx].dwParamValue | 0x07;
+			break;
+		case CMD_S3MCMDEX:
+			// adjust waveform types for IT/S3M
+			if(gFXInfo[ndx].dwParamValue >= 0x30 && gFXInfo[ndx].dwParamValue <= 0x50) nmax = gFXInfo[ndx].dwParamValue | (m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER) ? 0x03 : 0x07);
+			break;
 		}
 		*prangeMin = nmin;
 		*prangeMax = nmax;
@@ -2659,17 +2668,22 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 					case 0x30: // vibrato waveform
 					case 0x40: // tremolo waveform
 					case 0x50: // panbrello waveform
-						if(((param & 0x0F) > 0x03) && m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER))
+						if(((param & 0x0F) > 0x03) && m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER))
 						{
 							strcpy(s, "ignore");
 							break;
 						}
 						switch(param & 0x0F)
 						{
-							case 0x00: case 0x04: case 0x08: case 0x0C: strcpy(s, "sine wave"); break;
-							case 0x01: case 0x05: case 0x09: case 0x0D: strcpy(s, "ramp down"); break;
-							case 0x02: case 0x06: case 0x0A: case 0x0E: strcpy(s, "square wave"); break;
-							case 0x03: case 0x07: case 0x0B: case 0x0F: strcpy(s, "random"); break;
+							case 0x00: strcpy(s, "sine wave"); break;
+							case 0x01: strcpy(s, "ramp down"); break;
+							case 0x02: strcpy(s, "square wave"); break;
+							case 0x03: strcpy(s, "random"); break;
+							case 0x04: strcpy(s, "sine wave (continue)"); break;
+							case 0x05: strcpy(s, "ramp down (continue)"); break;
+							case 0x06: strcpy(s, "square wave (continue)"); break;
+							case 0x07: strcpy(s, "random (continue)"); break;
+							default: strcpy(s, "ignore"); break;
 						}
 						break;
 
@@ -2717,12 +2731,17 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						break;					
 					case 0x40: // vibrato waveform
 					case 0x70: // tremolo waveform
-						//todo: find proper values for XM/MOD (it's not as trivial as described here, i think)
 						switch(param & 0x0F)
 						{
-							case 0x00: case 0x03: case 0x06: case 0x0A: case 0x0D: strcpy(s, "sine wave"); break;
-							case 0x01: case 0x04: case 0x07: case 0x0B: case 0x0E: strcpy(s, "ramp down"); break;
-							case 0x02: case 0x05: case 0x08: case 0x0C: case 0x0F: strcpy(s, "square wave"); break;
+							case 0x00: case 0x08: strcpy(s, "sine wave"); break;
+							case 0x01: case 0x09: strcpy(s, "ramp down"); break;
+							case 0x02: case 0x0A: strcpy(s, "square wave"); break;
+							case 0x03: case 0x0B: strcpy(s, "square wave"); break;
+
+							case 0x04: case 0x0C: strcpy(s, "sine wave (continue)"); break;
+							case 0x05: case 0x0D: strcpy(s, "ramp down (continue)"); break;
+							case 0x06: case 0x0E: strcpy(s, "square wave (continue)"); break;
+							case 0x07: case 0x0F: strcpy(s, "square wave (continue)"); break;
 						}
 						break;
 					case 0x60: // pattern loop
