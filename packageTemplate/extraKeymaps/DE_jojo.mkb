@@ -75,6 +75,7 @@ version:1
 2:1002:2:13:5		//Play row: Ctrl+EINGABE (KeyDown|KeyHold)
 2:1317:4:18:1		//Set row jump on note entry: Alt (KeyDown)
 2:1685:2:9:1		//Switch to order list: Ctrl+TABULATOR (KeyDown)
+2:1806:2:68:1		//Duplicate pattern: Ctrl+D (KeyDown)
 2:1662:6:80:1		//Toggle channel's plugin editor: Ctrl+Alt+P (KeyDown)
 2:1062:0:93:1		//Show note properties: ANWENDUNG (KeyDown)
 2:1780:2:80:1		//Show playback time at current row: Ctrl+P (KeyDown)
