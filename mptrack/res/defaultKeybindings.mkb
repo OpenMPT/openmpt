@@ -2,6 +2,7 @@
 //-Format is:                                                          -
 //- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -
 //----------------------------------------------------------------------
+version:1
 
 //----( Global Context (0) )------------
 0:1347:2:78:1		//File/New: Ctrl+N (KeyDown)
@@ -278,13 +279,37 @@
 //----( Comments Context [top] (18) )------------
 
 //----( Orderlist (19) )------------
+19:1802:0:46:5		//Delete Order: DELETE (KeyDown|KeyHold)
+19:1803:0:45:5		//Insert Order: INSERT (KeyDown|KeyHold)
+19:1804:0:13:5		//Edit Pattern: ENTER (KeyDown|KeyHold)
+19:1805:0:9:5		//Switch to pattern editor: TAB (KeyDown|KeyHold)
 19:1794:0:37:5		//Previous Order: LEFT (KeyDown|KeyHold)
 19:1794:0:38:5		//Previous Order: UP (KeyDown|KeyHold)
 19:1795:0:39:5		//Next Order: RIGHT (KeyDown|KeyHold)
 19:1795:0:40:5		//Next Order: DOWN (KeyDown|KeyHold)
 19:1796:0:36:5		//First Order: HOME (KeyDown|KeyHold)
 19:1797:0:35:5		//Last Order: END (KeyDown|KeyHold)
-19:1802:0:46:5		//Delete Order: DELETE (KeyDown|KeyHold)
-19:1803:0:45:5		//Insert Order: INSERT (KeyDown|KeyHold)
-19:1804:0:13:5		//Edit Pattern: ENTER (KeyDown|KeyHold)
-19:1805:0:9:5		//Switch to pattern editor: TAB (KeyDown|KeyHold)
+19:1807:0:48:5		//Pattern index digit 0: 0 (KeyDown|KeyHold)
+19:1807:0:96:5		//Pattern index digit 0: NUM 0 (KeyDown|KeyHold)
+19:1808:0:49:5		//Pattern index digit 1: 1 (KeyDown|KeyHold)
+19:1808:0:97:5		//Pattern index digit 1: NUM 1 (KeyDown|KeyHold)
+19:1809:0:50:5		//Pattern index digit 2: 2 (KeyDown|KeyHold)
+19:1809:0:98:5		//Pattern index digit 2: NUM 2 (KeyDown|KeyHold)
+19:1810:0:51:5		//Pattern index digit 3: 3 (KeyDown|KeyHold)
+19:1810:0:99:5		//Pattern index digit 3: NUM 3 (KeyDown|KeyHold)
+19:1811:0:52:5		//Pattern index digit 4: 4 (KeyDown|KeyHold)
+19:1811:0:100:5		//Pattern index digit 4: NUM 4 (KeyDown|KeyHold)
+19:1812:0:53:5		//Pattern index digit 5: 5 (KeyDown|KeyHold)
+19:1812:0:101:5		//Pattern index digit 5: NUM 5 (KeyDown|KeyHold)
+19:1813:0:54:5		//Pattern index digit 6: 6 (KeyDown|KeyHold)
+19:1813:0:102:5		//Pattern index digit 6: NUM 6 (KeyDown|KeyHold)
+19:1814:0:55:5		//Pattern index digit 7: 7 (KeyDown|KeyHold)
+19:1814:0:103:5		//Pattern index digit 7: NUM 7 (KeyDown|KeyHold)
+19:1815:0:56:5		//Pattern index digit 8: 8 (KeyDown|KeyHold)
+19:1815:0:104:5		//Pattern index digit 8: NUM 8 (KeyDown|KeyHold)
+19:1816:0:57:5		//Pattern index digit 9: 9 (KeyDown|KeyHold)
+19:1816:0:105:5		//Pattern index digit 9: NUM 9 (KeyDown|KeyHold)
+19:1817:0:107:5		//Increase pattern index : NUM PLUS (KeyDown|KeyHold)
+19:1817:0:187:5		//Increase pattern index : + (KeyDown|KeyHold)
+19:1818:0:109:1		//Decrease pattern index: NUM SUB (KeyDown)
+19:1818:0:189:1		//Decrease pattern index: - (KeyDown)

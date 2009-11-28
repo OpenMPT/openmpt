@@ -51,7 +51,6 @@ public:
 		else if(!isSelectionKeyPressed && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;
 	};
 	bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false);
-	BOOL ProcessChar(UINT nChar);
 	BOOL UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
@@ -94,6 +93,9 @@ public:
 	void OnEditCopy();
 	void OnEditCut();
 	void OnEditPaste();
+
+	// Helper function for entering pattern number
+	void EnterPatternNum(int enterNum);
 
 	//{{AFX_VIRTUAL(COrderList)
 	virtual BOOL PreTranslateMessage(MSG *pMsg);

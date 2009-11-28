@@ -6,6 +6,8 @@
 
 //#define VK_ALT 0x12
 
+#define KEYMAP_VERSION 1	// Version of the .mkb format
+
 enum InputTargetContext
 {
 	kCtxUnknownContext = -1,	
@@ -964,7 +966,15 @@ enum CommandID
 	kcEndVSTGUICommands=kcVSTGUIRandParams,
 
 	kcStartOrderlistCommands,
-	kcStartOrderlistNavigation=kcStartOrderlistCommands,
+		// Orderlist edit
+	kcStartOrderlistEdit=kcStartOrderlistCommands,
+	kcOrderlistEditDelete=kcStartOrderlistEdit,
+	kcOrderlistEditInsert,
+	kcOrderlistEditPattern,
+	kcOrderlistSwitchToPatternView,
+	kcEndOrderlistEdit=kcOrderlistSwitchToPatternView,
+		// Orderlist navigation
+	kcStartOrderlistNavigation,
 	kcOrderlistNavigateLeft=kcStartOrderlistNavigation,
 	kcOrderlistNavigateRight,
 	kcOrderlistNavigateFirst,
@@ -977,12 +987,22 @@ enum CommandID
 	kcOrderlistNavigateFirstSelect,
 	kcOrderlistNavigateLastSelect,
 	kcEndOrderlistNavigationSelect = kcOrderlistNavigateLastSelect,
-
-	kcOrderlistEditDelete,
-	kcOrderlistEditInsert,
-	kcOrderlistEditPattern,
-	kcOrderlistSwitchToPatternView,
-	kcEndOrderlistCommands=kcOrderlistSwitchToPatternView,
+		// Orderlist pattern list edit
+	kcStartOrderlistNum,
+	kcOrderlistPat0=kcStartOrderlistNum,
+	kcOrderlistPat1,
+	kcOrderlistPat2,
+	kcOrderlistPat3,
+	kcOrderlistPat4,
+	kcOrderlistPat5,
+	kcOrderlistPat6,
+	kcOrderlistPat7,
+	kcOrderlistPat8,
+	kcOrderlistPat9,
+	kcOrderlistPatPlus,
+	kcOrderlistPatMinus,
+	kcEndOrderlistNum=kcOrderlistPatMinus,
+	kcEndOrderlistCommands=kcEndOrderlistNum,
 
 	kcNumCommands,
 };
@@ -1125,6 +1145,7 @@ public:
 	bool SaveFile(CString FileName, bool debug);
 	bool LoadFile(CString FileName);
 	bool LoadFile(std::istream& iStrm, LPCTSTR szFilename);
+	void UpgradeKeymap(CCommandSet *pCommands, int oldVersion);
 
 	static DWORD GetKeymapLabel(InputTargetContext ctx, UINT mod, UINT code, KeyEventType ke);
 	

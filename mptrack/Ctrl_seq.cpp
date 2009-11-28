@@ -318,55 +318,6 @@ UINT COrderList::GetCurrentPattern() const
 }
 
 
-BOOL COrderList::ProcessChar(UINT nChar)
-//--------------------------------------
-{
-	if (m_pModDoc)
-	{
-		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		int ord = pSndFile->Order[m_nScrollPos];
-		int maxpat = 0;
-		for (int i=0; i<pSndFile->Patterns.Size(); i++) if (pSndFile->Patterns[i]) maxpat = i;
-		if ((nChar >= '0') && (nChar <= '9'))
-		{
-			if (ord >= pSndFile->Patterns.Size()) ord = 0;
-
-			ord = ord * 10 + (nChar - '0');
-			if ((ord >= 100) && (ord > maxpat)) ord %= 100;
-			if ((ord >= 10) && (ord > maxpat)) ord %= 10;
-		} else
-		if (nChar == '+')
-		{
-			ord++;
-			if(ord > pSndFile->Order.GetInvalidPatIndex())
-				ord = 0;
-			else
-			{
-				const PATTERNINDEX nFirstInvalid = pSndFile->GetModSpecifications().hasIgnoreIndex ? pSndFile->Order.GetIgnoreIndex() : pSndFile->Order.GetInvalidPatIndex();
-				if(ord > maxpat && ord < nFirstInvalid)
-					ord = nFirstInvalid;
-			}
-		} else
-		if (nChar == '-')
-		{
-			const PATTERNINDEX nFirstInvalid = pSndFile->GetModSpecifications().hasIgnoreIndex ? pSndFile->Order.GetIgnoreIndex() : pSndFile->Order.GetInvalidPatIndex();
-			ord--;
-			if (ord < 0) ord = pSndFile->Order.GetInvalidPatIndex(); else
-				if ((ord > maxpat) && (ord < nFirstInvalid)) ord = maxpat;
-		}
-		if (ord != pSndFile->Order[m_nScrollPos])
-		{
-			pSndFile->Order[m_nScrollPos] = static_cast<PATTERNINDEX>(ord);
-			m_pModDoc->SetModified();
-			m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
-			InvalidateSelection();
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-
-
 BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 //---------------------------------------------
 {
@@ -397,13 +348,6 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 	}
 	//end rewbs.customKeys 
 
-
-	switch(pMsg->message)
-	{
-	case WM_CHAR:
-		if (ProcessChar(pMsg->wParam)) return true;
-		break;
-	}
 	return CWnd::PreTranslateMessage(pMsg);
 }
 
@@ -423,6 +367,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	case kcEditPaste:
 		OnEditPaste(); return wParam;
 
+	// Orderlist navigation
 	case kcOrderlistNavigateLeftSelect:
 	case kcOrderlistNavigateLeft:
 		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLeftSelect); SetCurSel(m_nScrollPos - 1); return wParam;
@@ -442,6 +387,8 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 			SetCurSel(nLast);
 		}
 		return wParam;
+
+	// Orderlist edit
 	case kcOrderlistEditDelete:
 		OnDeleteOrder(); return wParam;
 	case kcOrderlistEditInsert:
@@ -450,6 +397,23 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		OnSwitchToView(); return wParam;
 	case kcOrderlistEditPattern:
 		OnLButtonDblClk(0, CPoint(0,0)); OnSwitchToView(); return wParam;
+
+	// Enter pattern number
+	case kcOrderlistPat0:
+	case kcOrderlistPat1:
+	case kcOrderlistPat2:
+	case kcOrderlistPat3:
+	case kcOrderlistPat4:
+	case kcOrderlistPat5:
+	case kcOrderlistPat6:
+	case kcOrderlistPat7:
+	case kcOrderlistPat8:
+	case kcOrderlistPat9:
+		EnterPatternNum(wParam - kcOrderlistPat0); return wParam;
+	case kcOrderlistPatMinus:
+		EnterPatternNum(10); return wParam;
+	case kcOrderlistPatPlus:
+		EnterPatternNum(11); return wParam;
 
 	// kCtxViewPatternsNote messages
 	case kcSwitchToOrderList:
@@ -462,9 +426,71 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	case kcChannelUnmuteAll:
 	case kcUnmuteAllChnOnPatTransition:
 		::PostMessage(m_pParent->GetViewWnd(), WM_MOD_KEYCOMMAND, wParam, 0); return wParam;
+
+	case kcDuplicatePattern:
+		OnDuplicatePattern(); return wParam;
+	case kcNewPattern:
+		OnCreateNewPattern(); return wParam;
 	}
 
 	return 0;
+}
+
+
+// Helper function to enter pattern index into the orderlist.
+// Call with param 0...9 (enter digit), 10 (decrease) or 11 (increase).
+void COrderList::EnterPatternNum(int enterNum)
+//--------------------------------------------
+{
+	if (m_pModDoc == nullptr) return;
+	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	if(pSndFile == nullptr) return;
+
+	PATTERNINDEX nCurNdx = (m_nScrollPos < pSndFile->Order.GetLength()) ? pSndFile->Order[m_nScrollPos] : pSndFile->Order.GetInvalidPatIndex();
+	PATTERNINDEX nMaxNdx = 0;
+	for(PATTERNINDEX nPat = 0; nPat < pSndFile->Patterns.Size(); nPat++)
+		if (pSndFile->Patterns.IsValidPat(nPat)) nMaxNdx = nPat;
+
+	if (enterNum >= 0 && enterNum <= 9) // enter 0...9
+	{
+		if (nCurNdx >= pSndFile->Patterns.Size()) nCurNdx = 0;
+
+		nCurNdx = nCurNdx * 10 + static_cast<PATTERNINDEX>(enterNum);
+		if ((nCurNdx >= 1000) && (nCurNdx > nMaxNdx)) nCurNdx %= 1000;
+		if ((nCurNdx >= 100) && (nCurNdx > nMaxNdx)) nCurNdx %= 100;
+		if ((nCurNdx >= 10) && (nCurNdx > nMaxNdx)) nCurNdx %= 10;
+	} else if (enterNum == 11) // increase pattern index
+	{
+		if(nCurNdx >= pSndFile->Order.GetInvalidPatIndex())
+		{
+			nCurNdx = 0;
+		}
+		else
+		{
+			nCurNdx++;
+			const PATTERNINDEX nFirstInvalid = pSndFile->GetModSpecifications().hasIgnoreIndex ? pSndFile->Order.GetIgnoreIndex() : pSndFile->Order.GetInvalidPatIndex();
+			if(nCurNdx > nMaxNdx && nCurNdx < nFirstInvalid)
+				nCurNdx = nFirstInvalid;
+		}
+	} else if (enterNum == 10) // decrease pattern index
+	{
+		const PATTERNINDEX nFirstInvalid = pSndFile->GetModSpecifications().hasIgnoreIndex ? pSndFile->Order.GetIgnoreIndex() : pSndFile->Order.GetInvalidPatIndex();
+		if (nCurNdx == 0)
+			nCurNdx = pSndFile->Order.GetInvalidPatIndex();
+		else
+		{
+			nCurNdx--;
+			if ((nCurNdx > nMaxNdx) && (nCurNdx < nFirstInvalid)) nCurNdx = nMaxNdx;
+		}
+	}
+	// apply
+	if (nCurNdx != pSndFile->Order[m_nScrollPos])
+	{
+		pSndFile->Order[m_nScrollPos] = nCurNdx;
+		m_pModDoc->SetModified();
+		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
+		InvalidateSelection();
+	}
 }
 
 
@@ -977,23 +1003,23 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	if(bMultiSelection)
 	{
 		// several patterns are selected.
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Patterns\tIns");
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Patterns\tDel");
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Patterns\t" + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Patterns\t" + ih->GetKeyTextFromCommand(kcOrderlistEditDelete));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_COPY, "&Copy Orders\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_CUT, "&C&ut Orders\t" + ih->GetKeyTextFromCommand(kcEditCut));
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_PASTE, "&Paste Orders\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Patterns");
+		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Patterns\t" + ih->GetKeyTextFromCommand(kcDuplicatePattern));
 	}
 	else
 	{
 		// only one pattern is selected
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Pattern\tIns");
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Pattern\tDel");
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, "&Insert Pattern\t" + ih->GetKeyTextFromCommand(kcOrderlistEditInsert));
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, "&Remove Pattern\t" + ih->GetKeyTextFromCommand(kcOrderlistEditDelete));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
-		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_NEW, "Create &New Pattern");
-		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Pattern");
+		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_NEW, "Create &New Pattern\t" + ih->GetKeyTextFromCommand(kcNewPattern));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, "&Duplicate Pattern\t" + ih->GetKeyTextFromCommand(kcDuplicatePattern));
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNCOPY, "&Copy Pattern");
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNPASTE, "P&aste Pattern");
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_EDIT_PASTE, "&Paste Orders\t" + ih->GetKeyTextFromCommand(kcEditPaste));
