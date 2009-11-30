@@ -1217,6 +1217,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	for (UINT nsmp=0; nsmp<pifh->smpnum; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSAMPLESTRUCT)))
 	{
 		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
+		lastSampleOffset = smppos[nsmp] + sizeof(ITSAMPLESTRUCT);
 		if (pis->id == 0x53504D49)
 		{
 			MODSAMPLE *pSmp = &Samples[nsmp+1];
