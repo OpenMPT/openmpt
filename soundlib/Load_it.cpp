@@ -1209,7 +1209,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// In order to properly compute the position, in file, of eventual extended settings
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
 	// setting will follow this sample in the file
-	UINT lastSampleOffset = 0;
+	UINT lastSampleOffset = smppos[pifh->smpnum - 1] + sizeof(ITSAMPLESTRUCT);
 // -! NEW_FEATURE#0027
 
 	// Reading Samples
@@ -1217,7 +1217,6 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	for (UINT nsmp=0; nsmp<pifh->smpnum; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSAMPLESTRUCT)))
 	{
 		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
-		lastSampleOffset = smppos[nsmp] + sizeof(ITSAMPLESTRUCT);
 		if (pis->id == 0x53504D49)
 		{
 			MODSAMPLE *pSmp = &Samples[nsmp+1];
