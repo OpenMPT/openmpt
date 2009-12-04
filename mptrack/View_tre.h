@@ -142,6 +142,8 @@ public:
 	VOID EmptyInstrumentLibrary();
 	VOID FillInstrumentLibrary();
 	uint64 GetModItem(HTREEITEM hItem);
+	inline uint32 GetModItemType(const uint64 modItem) {return static_cast<uint32>(modItem & 0xFFFF);};	// return "item type" part of mod item variable ( & 0xFFFF )
+	inline uint32 GetModItemID(const uint64 modItem) {return static_cast<uint32>(modItem >> 16);};		// return "item ID" part of mod item variable ( >> 16 )
 	BOOL SetMidiInstrument(UINT nIns, LPCSTR lpszFileName);
 	BOOL SetMidiPercussion(UINT nPerc, LPCSTR lpszFileName);
 	BOOL ExecuteItem(HTREEITEM hItem);
@@ -206,6 +208,7 @@ protected:
 	afx_msg void OnUnmuteAllTreeItem();
 	afx_msg void OnDuplicateTreeItem();
 	afx_msg void OnInsertTreeItem();
+	afx_msg void OnSwitchToTreeItem();	// hack for sequence items to avoid double-click action
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

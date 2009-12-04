@@ -1155,6 +1155,7 @@
 #define ID_EDIT_PASTEFLOOD				59235
 #define ID_MODTREE_DUPLICATE            59236
 #define ID_MODTREE_INSERT				59237
+#define ID_MODTREE_SWITCHTO				59238
 
 // Next default values for new objects
 // 
@@ -1162,7 +1163,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        523
-#define _APS_NEXT_COMMAND_VALUE         59238
+#define _APS_NEXT_COMMAND_VALUE         59239
 #define _APS_NEXT_CONTROL_VALUE         2412
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

@@ -569,9 +569,9 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_GLOBALS] = RGB(0x66, 0x00, 0x00);
 	CustomColors[MODCOLOR_SAMPLE] = RGB(0x00, 0xFF, 0x00);
 	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xFF, 0x00, 0x00);
-	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x9A, 0x87, 0x63);
-	CustomColors[MODCOLOR_SEPFACE] = RGB(0xE1, 0xDB, 0xD0);
-	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xFF, 0xFF, 0xFF);
+	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0xAC, 0xA8, 0xA1);
+	CustomColors[MODCOLOR_SEPFACE] = RGB(0xD6, 0xD0, 0xC6);
+	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xEC, 0xE8, 0xE1);
 	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0xE1, 0xDB, 0xD0);
 	OnPreviewChanged();
 }
