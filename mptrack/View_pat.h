@@ -84,8 +84,8 @@ protected:
 	CPatternGotoDialog *m_pGotoWnd;
 	SIZE m_szHeader, m_szCell;
 	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
-	UINT m_nSplitInstrument, m_nSplitNote, m_nOctaveModifier, m_nSplitVolume;
-	BOOL m_bOctaveLink;
+
+	SplitKeyboardSettings m_SplitKeyboardSettings;
 
 	int m_nXScroll, m_nYScroll;
 	DWORD m_nDragItem, m_nMenuParam, m_nDetailLevel;
@@ -308,6 +308,7 @@ public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
 private:
 
+	void SetSplitKeyboardSettings();
 	bool HandleSplit(MODCOMMAND* p, int note);
 	bool BuildChannelControlCtxMenu(HMENU hMenu);
 	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, CSoundFile* pSndFile);

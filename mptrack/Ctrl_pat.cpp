@@ -53,16 +53,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(ID_PATTERNDETAIL_HI,			OnDetailHi)
 	ON_COMMAND(ID_OVERFLOWPASTE,			OnToggleOverflowPaste)
 	ON_CBN_SELCHANGE(IDC_COMBO_INSTRUMENT,	OnInstrumentChanged)
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-	ON_CBN_SELCHANGE(IDC_COMBO_SPLITINSTRUMENT,	OnSplitInstrumentChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO_SPLITNOTE,		OnSplitNoteChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO_OCTAVEMODIFIER,	OnOctaveModifierChanged)
-	ON_COMMAND(IDC_PATTERN_OCTAVELINK,			OnOctaveLink)
-	ON_CBN_SELCHANGE(IDC_COMBO_SPLITVOLUME,		OnSplitVolumeChanged)
-// -! NEW_FEATURE#0012
 	ON_COMMAND(IDC_PATINSTROPLUGGUI,		TogglePluginEditor) //rewbs.instroVST
-	ON_COMMAND(IDC_PATINSTROPLUGGUI2,		ToggleSplitPluginEditor) //rewbs.instroVST
 	ON_EN_CHANGE(IDC_EDIT_SPACING,			OnSpacingChanged)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		OnPatternNameChanged)
 	ON_EN_CHANGE(IDC_EDIT_SEQUENCE_NAME,	OnSequenceNameChanged)
@@ -81,12 +72,6 @@ void CCtrlPatterns::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON1,				m_BtnNext);
 	DDX_Control(pDX, IDC_BUTTON2,				m_BtnPrev);
 	DDX_Control(pDX, IDC_COMBO_INSTRUMENT,		m_CbnInstrument);
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-    DDX_Control(pDX, IDC_COMBO_SPLITINSTRUMENT,	m_CbnSplitInstrument);
-	DDX_Control(pDX, IDC_COMBO_SPLITNOTE,		m_CbnSplitNote);
-	DDX_Control(pDX, IDC_COMBO_OCTAVEMODIFIER,	m_CbnOctaveModifier);
-	DDX_Control(pDX, IDC_COMBO_SPLITVOLUME,		m_CbnSplitVolume);
 	DDX_Control(pDX, IDC_EDIT_SPACING,			m_EditSpacing);
 	DDX_Control(pDX, IDC_EDIT_ORDERLIST_MARGINS,m_EditOrderListMargins);
 	DDX_Control(pDX, IDC_EDIT_PATTERNNAME,		m_EditPatName);
@@ -192,47 +177,6 @@ BOOL CCtrlPatterns::OnInitDialog()
 	UpdateView(HINT_MODTYPE|HINT_PATNAMES, NULL);
 	RecalcLayout();
 
-	
-
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-	//rewbs.merge: fix buffer overrun:
-	//CHAR s[8];
-	CHAR s[10];
-	
-	AppendNotesToControl(m_CbnSplitNote, 0, NOTE_MAX - 1);
-	
-	m_nSplitInstrument = 0;
-	m_nSplitNote = 60;
-	m_CbnSplitNote.SetCurSel(m_nSplitNote);
-
-	
-	for(int i = -9 ; i < 10 ; i++){
-		wsprintf(s,i < 0 ? "Oct.  - %d" : i > 0 ? "Oct. + %d" : "Oct. + 0", abs(i));
-		int n = m_CbnOctaveModifier.AddString(s);
-		m_CbnOctaveModifier.SetItemData(n, i);
-	}
-	
-	m_nOctaveModifier = 9;
-	m_CbnOctaveModifier.SetCurSel(m_nOctaveModifier);
-	m_nOctaveLink = TRUE;
-	CheckDlgButton(IDC_PATTERN_OCTAVELINK, m_nOctaveLink ? MF_CHECKED : MF_UNCHECKED);
-
-	m_CbnSplitVolume.AddString("--");
-	m_CbnSplitVolume.SetItemData(0, 0);
-	for(int i = 1; i<65 ; i++){
-		wsprintf(s,"%d",i);
-		int n = m_CbnSplitVolume.AddString(s);
-		m_CbnSplitVolume.SetItemData(n, i);
-	}
-
-	m_nSplitVolume = 0;
-	m_CbnSplitVolume.SetCurSel(m_nSplitVolume);
-
-
-
-// -! NEW_FEATURE#0012
-
 	m_bInitialized = TRUE;
 	UnlockControls();
 
@@ -286,10 +230,6 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
             ::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
 		else
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
-		if (HasValidPlug(m_nSplitInstrument))
-            ::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI2), true);
-		else
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI2), false);
 
 		// Show/hide multisequence controls according the current modtype.
 		GetDlgItem(IDC_STATIC_SEQUENCE_NAME_FRAME)->ShowWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
@@ -314,10 +254,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			UINT nPos = 0;
 			m_CbnInstrument.SetRedraw(FALSE);
 			m_CbnInstrument.ResetContent();
-			m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(" None"), 0);
-			m_CbnSplitInstrument.SetRedraw(FALSE);
-			m_CbnSplitInstrument.ResetContent();
-			m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString(" None"), 0);
+			m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(" No Instrument"), 0);
 			if (m_pSndFile->m_nInstruments)	{
 				for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++) {
 					if (m_pSndFile->Instruments[i] == NULL) {
@@ -328,8 +265,6 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 					UINT n = m_CbnInstrument.AddString(displayName);
 					if (n == m_nInstrument) nPos = n;
 					m_CbnInstrument.SetItemData(n, i);
-					m_CbnSplitInstrument.AddString(displayName);
-					m_CbnSplitInstrument.SetItemData(n, i);
 
 				}
 
@@ -342,17 +277,10 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 					UINT n = m_CbnInstrument.AddString(s);
 					if (n == m_nInstrument) nPos = n;
 					m_CbnInstrument.SetItemData(n, i);
-					m_CbnSplitInstrument.AddString(s);
-					m_CbnSplitInstrument.SetItemData(n, i);
 				}
 			}
 			m_CbnInstrument.SetCurSel(nPos);
 			m_CbnInstrument.SetRedraw(TRUE);
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-			m_CbnSplitInstrument.SetCurSel(nPos);
-			m_CbnSplitInstrument.SetRedraw(TRUE);
-// -! NEW_FEATURE#0012
 		}
 		if (dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
 		{
@@ -445,11 +373,6 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 				SendViewMessage(VIEWMSG_PATTERNLOOP, (SONG_PATTERNLOOP & m_pSndFile->m_dwSongFlags));
 			}
 			OnSpacingChanged();
-			SendViewMessage(VIEWMSG_SETSPLITINSTRUMENT, m_nSplitInstrument);
-			SendViewMessage(VIEWMSG_SETSPLITNOTE, m_nSplitNote);
-			SendViewMessage(VIEWMSG_SETOCTAVEMODIFIER, m_nOctaveModifier);
-			SendViewMessage(VIEWMSG_SETOCTAVELINK, m_nOctaveLink);
-			SendViewMessage(VIEWMSG_SETSPLITVOLUME, m_nSplitVolume);	
 			SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);
 			SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 			SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
@@ -764,58 +687,6 @@ void CCtrlPatterns::OnInstrumentChanged()
 		//rewbs.instroVST
 	}
 }
-
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-void CCtrlPatterns::OnSplitInstrumentChanged()
-//---------------------------------------
-{
-	int n = m_CbnSplitInstrument.GetCurSel();
-	if ((m_pSndFile) && (n >= 0))
-	{
-		n = m_CbnSplitInstrument.GetItemData(n);
-		int nmax = (m_pSndFile->m_nInstruments) ? m_pSndFile->m_nInstruments : m_pSndFile->m_nSamples;
-		if ((n >= 0) && (n <= nmax) && (n != (int)m_nSplitInstrument))
-		{
-			m_nSplitInstrument = n;
-		}
-		SendViewMessage(VIEWMSG_SETSPLITINSTRUMENT, m_nSplitInstrument);
-		if (HasValidPlug(m_nSplitInstrument))
-            ::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI2), true);
-		else
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI2), false);
-		SwitchToView();
-	}
-}
-void CCtrlPatterns::OnSplitNoteChanged()
-//--------------------------------------
-{
-	m_nSplitNote = m_CbnSplitNote.GetCurSel();
-	SendViewMessage(VIEWMSG_SETSPLITNOTE, m_nSplitNote);
-	SwitchToView();
-}
-void CCtrlPatterns::OnOctaveModifierChanged()
-//-------------------------------------------
-{
-	m_nOctaveModifier = m_CbnOctaveModifier.GetCurSel();
-	SendViewMessage(VIEWMSG_SETOCTAVEMODIFIER, m_nOctaveModifier);
-	SwitchToView();
-}
-void CCtrlPatterns::OnOctaveLink()
-//--------------------------------
-{
-	m_nOctaveLink = IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK);
-	SendViewMessage(VIEWMSG_SETOCTAVELINK, m_nOctaveLink);
-	SwitchToView();
-}
-void CCtrlPatterns::OnSplitVolumeChanged()
-//----------------------------------------
-{
-	m_nSplitVolume = m_CbnSplitVolume.GetCurSel();
-	SendViewMessage(VIEWMSG_SETSPLITVOLUME, m_nSplitVolume);
-	SwitchToView();
-}
-// -! NEW_FEATURE#0012
 
 
 void CCtrlPatterns::OnPrevInstrument()
@@ -1257,20 +1128,13 @@ void CCtrlPatterns::OnToggleOverflowPaste()
 	SwitchToView();
 }
 
-//rewbs.introVST
+
 void CCtrlPatterns::TogglePluginEditor()
 //--------------------------------------
 {
-	TogglePluginEditor(false);
-}
-
-
-void CCtrlPatterns::TogglePluginEditor(bool split)
-//------------------------------------------------
-{
 	if ((m_nInstrument) && (m_pModDoc))
 	{
-		UINT nPlug = m_pSndFile->Instruments[(split?m_nSplitInstrument:m_nInstrument)]->nMixPlug;
+		UINT nPlug = m_pSndFile->Instruments[m_nInstrument]->nMixPlug;
 		if (nPlug) //if not no plugin
 		{
 			PSNDMIXPLUGIN pPlug = &(m_pSndFile->m_MixPlugins[nPlug-1]);
@@ -1282,11 +1146,6 @@ void CCtrlPatterns::TogglePluginEditor(bool split)
 	}
 }
 
-void CCtrlPatterns::ToggleSplitPluginEditor()
-//-------------------------------------------
-{
-	TogglePluginEditor(true);
-}
 
 bool CCtrlPatterns::HasValidPlug(UINT instr)
 //------------------------------------------

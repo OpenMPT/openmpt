@@ -558,6 +558,38 @@ protected:
 
 
 /////////////////////////////////////////////////////////////////////////
+// Keyboard Split Settings (pattern editor)
+
+//=========================================
+class CSplitKeyboadSettings: public CDialog
+//=========================================
+{
+protected:
+	CComboBox m_CbnSplitInstrument,m_CbnSplitNote,m_CbnOctaveModifier,m_CbnSplitVolume;
+	CSoundFile *m_pSndFile;
+
+public:
+	SplitKeyboardSettings *m_pOptions;
+
+	CSplitKeyboadSettings(CWnd *parent, CSoundFile *pSndFile, SplitKeyboardSettings *pOptions):CDialog(IDD_KEYBOARD_SPLIT, parent)
+	{
+		m_pSndFile = pSndFile;
+		m_pOptions = pOptions;
+	}
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual void OnCancel();
+
+	afx_msg void OnOctaveModifierChanged();
+
+	DECLARE_MESSAGE_MAP()
+};
+
+
+/////////////////////////////////////////////////////////////////////////
 // Sample Map
 
 //=================================

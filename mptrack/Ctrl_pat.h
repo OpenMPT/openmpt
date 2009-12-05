@@ -161,21 +161,12 @@ protected:
 	COrderList m_OrderList;
 	CButton m_BtnPrev, m_BtnNext;
 	CComboBox m_CbnInstrument;
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-	CComboBox m_CbnSplitInstrument,m_CbnSplitNote,m_CbnOctaveModifier,m_CbnSplitVolume;
-// -! NEW_FEATURE#0012
 	CPatEdit m_EditSpacing, m_EditPatName, m_EditOrderListMargins;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinOrderListMargins;
 	CModControlBar m_ToolBar;
 	INSTRUMENTINDEX m_nInstrument;
 	UINT m_nDetailLevel;
 	BOOL m_bRecord, m_bVUMeters, m_bPluginNames;
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-	UINT m_nSplitInstrument,m_nSplitNote,m_nOctaveModifier,m_nSplitVolume;
-	BOOL m_nOctaveLink;
-// -! NEW_FEATURE#0012
 
 public:
 	CCtrlPatterns();
@@ -227,14 +218,6 @@ protected:
 	afx_msg void OnChangeLoopStatus();
 	afx_msg void OnSwitchToView();
 	afx_msg void OnInstrumentChanged();
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-	afx_msg void OnSplitInstrumentChanged();
-	afx_msg void OnSplitNoteChanged();
-	afx_msg void OnOctaveModifierChanged();
-	afx_msg void OnOctaveLink();
-	afx_msg void OnSplitVolumeChanged();
-// -! NEW_FEATURE#0012
 	afx_msg void OnPrevInstrument();
 	afx_msg void OnNextInstrument();
 	afx_msg void OnSpacingChanged();
@@ -249,14 +232,12 @@ protected:
 	afx_msg void OnEditUndo();
 	afx_msg void OnUpdateRecord(CCmdUI *pCmdUI);
 	afx_msg void TogglePluginEditor(); //rewbs.instroVST
-	afx_msg void ToggleSplitPluginEditor(); //rewbs.instroVST
 	afx_msg void OnToggleOverflowPaste();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
-	void TogglePluginEditor(bool); //rewbs.instroVST
 	bool HasValidPlug(UINT instr);
 public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);

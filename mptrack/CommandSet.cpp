@@ -2475,6 +2475,11 @@ void CCommandSet::SetupCommands()
 	commands[kcOrderlistPatMinus].isDummy = false;
 	commands[kcOrderlistPatMinus].Message = "Decrease pattern index";
 
+	commands[kcShowSplitKeyboardSettings].UID = 1819;
+	commands[kcShowSplitKeyboardSettings].isHidden = false;
+	commands[kcShowSplitKeyboardSettings].isDummy = false;
+	commands[kcShowSplitKeyboardSettings].Message = "Split Keyboard Settings dialog";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

@@ -224,6 +224,7 @@ enum CommandID
 	kcShowNoteProperties,
 	kcShowPatternProperties,
 	kcShowMacroConfig,
+	kcShowSplitKeyboardSettings,
 	kcChangeLoopStatus,
 	kcShowEditMenu,
 	kcTimeAtRow,

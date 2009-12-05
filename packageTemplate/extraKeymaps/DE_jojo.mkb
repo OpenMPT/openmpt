@@ -78,6 +78,7 @@ version:1
 2:1806:2:68:1		//Duplicate pattern: Ctrl+D (KeyDown)
 2:1662:6:80:1		//Toggle channel's plugin editor: Ctrl+Alt+P (KeyDown)
 2:1062:0:93:1		//Show note properties: ANWENDUNG (KeyDown)
+2:1819:2:69:1		//Split Keyboard Settings dialog: Ctrl+E (KeyDown)
 2:1780:2:80:1		//Show playback time at current row: Ctrl+P (KeyDown)
 2:1786:2:82:1		//Reset channel: Ctrl+R (KeyDown)
 2:1007:2:81:5		//Transpose +1: Ctrl+Q (KeyDown|KeyHold)
