@@ -231,10 +231,9 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		else
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
 
-		// Show/hide multisequence controls according the current modtype.
-		GetDlgItem(IDC_STATIC_SEQUENCE_NAME_FRAME)->ShowWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
-		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->ShowWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
-		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->ShowWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
+		// Enable/disablemultisequence controls according the current modtype.
+		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
+		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
 	}
 	//end rewbs.instroVST
 	if (dwHintMask & HINT_MPTOPTIONS)

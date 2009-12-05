@@ -139,7 +139,7 @@ bool CMainFrame::gbShowHackControls = false;
 //rewbs.varWindowSize
 LONG CMainFrame::glCtrlWindowHeight = 188; //obsolete, for backwards compat only
 LONG CMainFrame::glGeneralWindowHeight = 178;
-LONG CMainFrame::glPatternWindowHeight = 232;
+LONG CMainFrame::glPatternWindowHeight = 152;
 LONG CMainFrame::glSampleWindowHeight = 188;
 LONG CMainFrame::glInstrumentWindowHeight = 300;
 LONG CMainFrame::glCommentsWindowHeight = 288;

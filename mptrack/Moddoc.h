@@ -103,6 +103,17 @@ enum
 };
 
 
+// pattern paste modes
+enum enmPatternPasteModes
+{
+	pm_overwrite = 0,
+	pm_mixpaste,
+	pm_mixpaste_it,
+	pm_pasteflood,
+	pm_pushforwardpaste,
+};
+
+
 /////////////////////////////////////////////////////////////////////////
 // Split Keyboard Settings (pattern editor)
 
@@ -255,7 +266,7 @@ public:
 
 	// Copy&Paste
 	bool CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel);
-	bool PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bool ITStyleMix = false, bool PasteFlood = false);
+	bool PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPasteModes pasteMode);
 
 	bool CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv);
 	bool PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv);
