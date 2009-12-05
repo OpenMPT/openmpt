@@ -85,8 +85,6 @@ protected:
 	SIZE m_szHeader, m_szCell;
 	UINT m_nPattern, m_nRow, m_nMidRow, m_nPlayPat, m_nPlayRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 
-	SplitKeyboardSettings m_SplitKeyboardSettings;
-
 	int m_nXScroll, m_nYScroll;
 	DWORD m_nDragItem, m_nMenuParam, m_nDetailLevel;
 	BOOL m_bDragging, m_bInItemRect, m_bRecord, m_bContinueSearch, m_bWholePatternFitsOnScreen;

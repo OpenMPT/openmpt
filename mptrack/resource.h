@@ -708,7 +708,6 @@
 #define IDC_COMMAND_LIST                2129
 #define IDC_STATIC8                     2200
 #define IDC_PATINSTROPLUGGUI            2201
-#define IDC_PATINSTROPLUGGUI2           2202
 #define IDC_WFIRCUTOFF                  2202
 #define IDC_WFIRTYPE                    2203
 #define IDC_RAMPING                     2204
