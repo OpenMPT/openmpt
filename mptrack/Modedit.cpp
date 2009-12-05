@@ -439,7 +439,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 
 	if (nNewChannels > maxChans) {
 		CString error;
-		error.Format("Error: Max number of channels for this type is %d", maxChans);
+		error.Format("Error: Max number of channels for this file type is %d", maxChans);
 		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
 		return FALSE;
 	}
@@ -1156,9 +1156,8 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 }
 
 
-//BOOL CModDoc::PastePattern(UINT nPattern, DWORD dwBeginSel)
-bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bool ITStyleMix, bool PasteFlood)
-//-------------------------------------------------------------------------------------------------------------
+bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPasteModes pasteMode)
+//-------------------------------------------------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if ((!pMainFrm) || (nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return false;
@@ -1180,6 +1179,10 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bo
 			MODTYPE origFormat = MOD_TYPE_IT;
 			UINT len = 0, startLen;
 			MODCOMMAND origModCmd;
+
+			bool doOverflowPaste = (CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && (pasteMode != pm_pasteflood) && (pasteMode != pm_pushforwardpaste);
+			bool doITStyleMix = (pasteMode == pm_mixpaste_it);
+			bool doMixPaste = ((pasteMode == pm_mixpaste) || doITStyleMix);
 
 			ORDERINDEX oCurrentOrder; //jojo.echopaste
 			ROWINDEX rTemp, startRow;
@@ -1219,7 +1222,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bo
 				{
 					if (len + 11 >= dwMemSize || !p[len])
 					{
-						if((PasteFlood == true) && (nrow != startRow)) // prevent infinite loop with malformed clipboard data
+						if((pasteMode == pm_pasteflood) && (nrow != startRow)) // prevent infinite loop with malformed clipboard data
 							len = startLen; // paste from beginning
 						else
 							goto PasteDone;
@@ -1235,11 +1238,21 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bo
 					origModCmd = m[col]; // ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
 					                     // so that we can refer back to check if there was anything in e.g. the note column before we pasted.
 					LPSTR s = p+len+1;
+
 					if (col < m_SndFile.m_nChannels)
 					{
+						// push channel data below paste point first.
+						if(pasteMode == pm_pushforwardpaste)
+						{
+							for(ROWINDEX nPushRow = m_SndFile.PatternSize[nPattern] - 1 - nrow; nPushRow > 0; nPushRow--)
+							{
+								m[col + nPushRow * m_SndFile.m_nChannels] = m[col + (nPushRow - 1) * m_SndFile.m_nChannels];
+							}
+						}
+
 						// Note
-						if (s[0] > ' ' && (!mix || ((!ITStyleMix && origModCmd.note==0) || 
-												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
+						if (s[0] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.note==0) || 
+												     (doITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
 						{
 							m[col].note = NOTE_NONE;
 							if (s[0] == '=') m[col].note = NOTE_KEYOFF; else
@@ -1263,8 +1276,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bo
 							}
 						}
 						// Instrument
-						if (s[3] > ' ' && (!mix || ( (!ITStyleMix && origModCmd.instr==0) || 
-												     (ITStyleMix  && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0) ) ))
+						if (s[3] > ' ' && (!doMixPaste || ( (!doITStyleMix && origModCmd.instr==0) || 
+												     (doITStyleMix  && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0) ) ))
 
 						{
 							if ((s[3] >= '0') && (s[3] <= ('0'+(MAX_SAMPLES/10))))
@@ -1273,8 +1286,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bo
 							} else m[col].instr = 0;
 						}
 						// Volume
-						if (s[5] > ' ' && (!mix || ((!ITStyleMix && origModCmd.volcmd==0) || 
-												     (ITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
+						if (s[5] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.volcmd==0) || 
+												     (doITStyleMix && origModCmd.note==0 && origModCmd.instr==0 && origModCmd.volcmd==0))))
 
 						{
 							if (s[5] != '.')
@@ -1314,8 +1327,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bo
 						}
 						else
 						{
-							if (s[8] > ' ' && (!mix || ((!ITStyleMix && origModCmd.command==0) || 
-														(ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
+							if (s[8] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.command==0) || 
+														(doITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
 							{
 								m[col].command = 0;
 								if (s[8] != '.')
@@ -1328,8 +1341,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bo
 								}
 							}
 							// Effect value
-							if (s[9] > ' ' && (!mix || ((!ITStyleMix && origModCmd.param==0) || 
-														(ITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
+							if (s[9] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.param==0) || 
+														(doITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
 							{
 								m[col].param = 0;
 								if (s[9] != '.')
@@ -1380,7 +1393,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, bool mix, bo
 
 				// Overflow paste. Continue pasting in next pattern if enabled.
 				// If Paste Flood is enabled, this won't be called due to obvious reasons.
-				if((CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && !PasteFlood)
+				if(doOverflowPaste)
 				{
 					while(nrow >= m_SndFile.PatternSize[nPattern])
 					{

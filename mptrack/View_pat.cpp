@@ -56,6 +56,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_PASTE,		OnEditPaste)
 	ON_COMMAND(ID_EDIT_MIXPASTE,	OnEditMixPaste)
 	ON_COMMAND(ID_EDIT_PASTEFLOOD,	OnEditPasteFlood)
+	ON_COMMAND(ID_EDIT_PUSHFORWARDPASTE,OnEditPushForwardPaste)
 	ON_COMMAND(ID_EDIT_SELECT_ALL,	OnEditSelectAll)
 	ON_COMMAND(ID_EDIT_SELECTCOLUMN,OnEditSelectColumn)
 	ON_COMMAND(ID_EDIT_SELECTCOLUMN2,OnSelectCurrentColumn)
@@ -961,64 +962,6 @@ void CViewPattern::OnEditCopy()
 	if (pModDoc)
 	{
 		pModDoc->CopyPattern(m_nPattern, m_dwBeginSel, m_dwEndSel);
-		SetFocus();
-	}
-}
-
-
-void CViewPattern::OnEditPaste()
-//------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if (pModDoc && IsEditingEnabled_bmsg())
-	{
-		pModDoc->PastePattern(m_nPattern, m_dwBeginSel, false);
-		InvalidatePattern(FALSE);
-		SetFocus();
-	}
-}
-
-//rewbs.mixPaste
-void CViewPattern::OnEditMixPaste()
-//------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if (pModDoc && IsEditingEnabled_bmsg())
-	{
-		pModDoc->PastePattern(m_nPattern, m_dwBeginSel, true);
-		InvalidatePattern(FALSE);
-		SetFocus();
-	}
-}
-
-void CViewPattern::OnEditMixPasteITStyle()
-//----------------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if (pModDoc && IsEditingEnabled_bmsg() )
-	{
-		pModDoc->PastePattern(m_nPattern, m_dwBeginSel, true, true);
-		InvalidatePattern(FALSE);
-		SetFocus();
-	}
-}
-
-
-//end rewbs.mixPaste
-
-
-void CViewPattern::OnEditPasteFlood()
-//-----------------------------------
-{
-	CModDoc *pModDoc = GetDocument();
-
-	if (pModDoc && IsEditingEnabled_bmsg())
-	{
-		pModDoc->PastePattern(m_nPattern, m_dwBeginSel, false, false, true);
-		InvalidatePattern(FALSE);
 		SetFocus();
 	}
 }
@@ -3370,7 +3313,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_PASTEPATTERN:
 		{
 			CModDoc *pModDoc = GetDocument();
-			if (pModDoc) pModDoc->PastePattern(m_nPattern, 0, false);
+			if (pModDoc) pModDoc->PastePattern(m_nPattern, 0, pm_overwrite);
 		}
 		break;
 
@@ -4838,6 +4781,7 @@ bool CViewPattern::BuildEditCtxMenu(HMENU hMenu, CInputHandler* ih, CModDoc* pMo
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTE, "Paste\t" + ih->GetKeyTextFromCommand(kcEditPaste));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_MIXPASTE, "Mix Paste\t" + ih->GetKeyTextFromCommand(kcEditMixPaste));
 	AppendMenu(hMenu, MF_STRING, ID_EDIT_PASTEFLOOD, "Paste Flood\t" + ih->GetKeyTextFromCommand(kcEditPasteFlood));
+	AppendMenu(hMenu, MF_STRING, ID_EDIT_PUSHFORWARDPASTE, "Push Forward Paste\t" + ih->GetKeyTextFromCommand(kcEditPushForwardPaste));
 
 	DWORD greyed = pModDoc->GetPatternUndo()->CanUndo()?FALSE:MF_GRAYED;
 	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE)) {
@@ -5215,4 +5159,18 @@ void CViewPattern::SetSplitKeyboardSettings()
 
 	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pSndFile, pModDoc->GetSplitKeyboardSettings());
 	dlg.DoModal();
+}
+
+
+void CViewPattern::ExecutePaste(enmPatternPasteModes pasteMode)
+//-------------------------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+
+	if (pModDoc && IsEditingEnabled_bmsg())
+	{
+		pModDoc->PastePattern(m_nPattern, m_dwBeginSel, pasteMode);
+		InvalidatePattern(FALSE);
+		SetFocus();
+	}
 }

@@ -2480,6 +2480,11 @@ void CCommandSet::SetupCommands()
 	commands[kcShowSplitKeyboardSettings].isDummy = false;
 	commands[kcShowSplitKeyboardSettings].Message = "Split Keyboard Settings dialog";
 
+	commands[kcEditPushForwardPaste].UID = 1820;
+	commands[kcEditPushForwardPaste].isHidden = false;
+	commands[kcEditPushForwardPaste].isDummy = false;
+	commands[kcEditPushForwardPaste].Message = "Push Forward Paste";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

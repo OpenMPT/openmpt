@@ -199,6 +199,8 @@ public:
 
 	void TogglePluginEditor(int chan); //rewbs.patPlugName
 
+	void ExecutePaste(enmPatternPasteModes pasteMode);
+
 public:
 	//{{AFX_VIRTUAL(CViewPattern)
 	virtual void OnDraw(CDC *);
@@ -225,10 +227,13 @@ protected:
 	afx_msg void OnKillFocus(CWnd *pNewWnd);
 	afx_msg void OnEditCut();
 	afx_msg void OnEditCopy();
-	afx_msg void OnEditPaste();
-	afx_msg void OnEditMixPaste();		//rewbs.mixPaste
-	afx_msg void OnEditMixPasteITStyle();		//rewbs.mixPaste
-	afx_msg void OnEditPasteFlood();
+
+	afx_msg void OnEditPaste() {ExecutePaste(pm_overwrite);};
+	afx_msg void OnEditMixPaste() {ExecutePaste(pm_mixpaste);};
+	afx_msg void OnEditMixPasteITStyle() {ExecutePaste(pm_mixpaste_it);};
+	afx_msg void OnEditPasteFlood() {ExecutePaste(pm_pasteflood);};
+	afx_msg void OnEditPushForwardPaste() {ExecutePaste(pm_pushforwardpaste);};
+
 	afx_msg void OnClearSelection(bool ITStyle=false, RowMask sb = DefaultRowMask); //rewbs.customKeys
 	afx_msg void OnGrowSelection();   //rewbs.customKeys
 	afx_msg void OnShrinkSelection(); //rewbs.customKeys
