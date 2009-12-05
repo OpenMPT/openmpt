@@ -103,15 +103,6 @@ enum {
 	VIEWMSG_SETCURRENTSAMPLE,
 	// Instrument-Specific
 	VIEWMSG_SETCURRENTINSTRUMENT,
-// -> CODE#0012
-// -> DESC="midi keyboard split"
-// rewbs.merge: swapped message direction
-	VIEWMSG_SETSPLITINSTRUMENT,
-	VIEWMSG_SETSPLITNOTE,
-	VIEWMSG_SETOCTAVEMODIFIER,
-	VIEWMSG_SETOCTAVELINK,
-	VIEWMSG_SETSPLITVOLUME,
-// -! CODE#0012
 	VIEWMSG_DOSCROLL,
 
 };
@@ -204,18 +195,6 @@ enum
 #define PATTERN_LIVEUPDATETREE		0x40000000	// update active sample / instr icons in treeview
 
 
-// Keyboard Setup
-enum {
-	KEYBOARD_CUSTOM=0,
-	KEYBOARD_FT2,
-	KEYBOARD_IT,
-	KEYBOARD_MPT,
-	KEYBOARD_MED
-};
-
-#define KEYBOARD_MASK		0x0F
-#define KEYBOARD_FT2KEYS	0x10
-
 // Midi Setup
 #define MIDISETUP_RECORDVELOCITY			0x01
 #define MIDISETUP_TRANSPOSEKEYBOARD			0x02
@@ -306,45 +285,6 @@ enum {
 	TIMAGE_PATTERN_OVERFLOWPASTE,
 };
 
-//////////////////////////////////////////////////////////////////////////
-// MPT Hot Keys
-
-enum {
-	MPTHOTKEY_TOGGLEEDIT=0,
-	MPTHOTKEY_PLAYROW,
-	MPTHOTKEY_CURSORCOPY,
-	MPTHOTKEY_CURSORPASTE,
-	MPTHOTKEY_MUTECHANNEL,
-	MPTHOTKEY_SOLOCHANNEL,
-	MPTHOTKEY_SELECTCOLUMN,
-	MPTHOTKEY_TRANSPOSEUP,
-	MPTHOTKEY_TRANSPOSEDOWN,
-	MPTHOTKEY_TRANSPOSEOCTUP,
-	MPTHOTKEY_TRANSPOSEOCTDOWN,
-	MPTHOTKEY_PATTERNAMPLIFY,
-	MPTHOTKEY_REPLACEINSTRUMENT,
-	MPTHOTKEY_INTERPOLATEVOLUME,
-	MPTHOTKEY_INTERPOLATEEFFECT,
-	MPTHOTKEY_VISUALIZEEFFECT,		//rewbs.fxvis
-	MAX_MPTHOTKEYS
-};
-
-typedef struct MPTHOTKEY
-{
-	UINT nID;			// WM_COMMAND Id - description is also loaded from the string id
-	DWORD nMPTHotKey;	// Default hot key
-	DWORD nFT2HotKey;
-	DWORD nITHotKey;
-	LPCSTR pszName;
-} MPTHOTKEY, *PMPTHOTKEY;
-
-#define MPTF_CTRL	(HOTKEYF_CONTROL<<16)
-#define MPTF_ALT	(HOTKEYF_ALT<<16)
-#define MPTF_SHIFT	(HOTKEYF_SHIFT<<16)
-#define MPTF_EXT	(HOTKEYF_EXT<<16)
-
-extern MPTHOTKEY gDefaultHotKeys[MAX_MPTHOTKEYS];
-
 
 /////////////////////////////////////////////////////////////////////////
 // Player position notification
@@ -399,6 +339,17 @@ enum Directory
 	NUM_DIRS
 };
 
+
+/////////////////////////////////////////////////////////////////////////
+// Split Keyboard Settings (pattern editor)
+
+#define SPLIT_OCTAVE_RANGE 9
+struct SplitKeyboardSettings
+{
+	UINT splitInstrument, splitNote, splitVolume;
+	int octaveModifier;	// determines by how many octaves the notes should be transposed up or down
+	bool octaveLink;	// apply octaveModifier
+};
 
 
 /////////////////////////////////////////////////////////////////////////

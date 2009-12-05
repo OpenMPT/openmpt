@@ -8,84 +8,7 @@
 
 #pragma warning(disable:4244)
 
-/////////////////////////////////////////////////////////
-// CEditKey
-/*
-BEGIN_MESSAGE_MAP(CEditKey, CEdit)
-	ON_WM_KEYDOWN()
-END_MESSAGE_MAP()
 
-
-void CEditKey::OnKeyDown(UINT nChar, UINT, UINT nFlags)
-//-----------------------------------------------------
-{
-	CHAR s[16];
-	if (!m_pParent) return;
-	if (nChar == VK_TAB)
-	{
-		Default();
-	} else
-	if (nChar == VK_LEFT)
-	{
-		m_pParent->ActivateEdit((m_nId) ? m_nId-1 : 11);
-	} else
-	if (nChar == VK_RIGHT)
-	{
-		m_pParent->ActivateEdit((m_nId < 11) ? m_nId+1 : 0);
-	} else
-	{
-		if (nFlags & 0x4000) return;
-		if (m_pParent->SetKey(m_nId, nChar, nFlags))
-		{
-			s[0] = s[1] = 0;
-			if (nChar != VK_SPACE) CMainFrame::GetKeyName(nFlags << 16, s, sizeof(s)-1);
-			SetWindowText(s);
-			m_pParent->ActivateEdit((m_nId+1)%12);
-		}
-	}
-}
-
-
-BOOL CEditKey::PreTranslateMessage(MSG *pMsg)
-//-------------------------------------------
-{
-	if ((pMsg) && (pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_RETURN)) return TRUE;
-	return CEdit::PreTranslateMessage(pMsg);
-}
-
-const UINT wEditId[12+2] =
-{
-	IDC_EDIT1,	IDC_EDIT2,	IDC_EDIT3,	IDC_EDIT4,
-	IDC_EDIT5,	IDC_EDIT6,	IDC_EDIT7,	IDC_EDIT8,
-	IDC_EDIT9,	IDC_EDIT10,	IDC_EDIT12,	IDC_EDIT13,
-	IDC_EDIT14, IDC_EDIT15
-};
-
-
-*/
-// Id, MPT, FT2, IT
-MPTHOTKEY gDefaultHotKeys[MAX_MPTHOTKEYS] =
-{
-	{IDC_PATTERN_RECORD,		VK_SPACE|MPTF_CTRL,	VK_SPACE,			VK_SPACE|MPTF_CTRL,	"Toggle record mode"},
-	{ID_PATTERN_PLAYROW,		VK_RETURN|MPTF_CTRL,VK_RETURN|MPTF_CTRL,'8',				"Play current row"},
-	{ID_CURSORCOPY,				VK_RETURN,			VK_RETURN,			VK_RETURN,			"Quick cursor copy"},
-	{ID_CURSORPASTE,			VK_SPACE,			VK_RETURN|MPTF_SHIFT,VK_SPACE,			"Quick cursor paste"},
-	{ID_PATTERN_MUTE,			0xffff,				0xffff,				VK_F9|MPTF_ALT,		"Mute current channel"},
-	{ID_PATTERN_SOLO,			0xffff,				0xffff,				VK_F10|MPTF_ALT,	"Solo current channel"},
-	{ID_EDIT_SELECTCOLUMN2,		'L'|MPTF_CTRL,		'L'|MPTF_CTRL,		'L'|MPTF_ALT,		"Select current column"},
-	{ID_TRANSPOSE_UP,			'Q'|MPTF_CTRL,		'Q'|MPTF_CTRL,		'Q'|MPTF_ALT,		"Transpose +1"},
-	{ID_TRANSPOSE_DOWN,			'A'|MPTF_CTRL,		'A'|MPTF_CTRL,		'A'|MPTF_ALT,		"Transpose -1"},
-	{ID_TRANSPOSE_OCTUP,		'Q'|MPTF_CTRL|MPTF_SHIFT, 'Q'|MPTF_CTRL|MPTF_SHIFT,	'Q'|MPTF_CTRL|MPTF_ALT,	"Transpose +12"},
-	{ID_TRANSPOSE_OCTDOWN,		'A'|MPTF_CTRL|MPTF_SHIFT, 'A'|MPTF_CTRL|MPTF_SHIFT,	'A'|MPTF_CTRL|MPTF_ALT,	"Transpose -12"},
-	{ID_PATTERN_AMPLIFY,		'M'|MPTF_CTRL,		'M'|MPTF_CTRL,		'J'|MPTF_ALT,		"Amplify selection"},
-	{ID_PATTERN_SETINSTRUMENT,	'I'|MPTF_CTRL,		'I'|MPTF_CTRL,		'S'|MPTF_ALT,		"Replace instrument"},
-	{ID_PATTERN_INTERPOLATE_VOLUME,'J'|MPTF_CTRL,	'J'|MPTF_CTRL,		'K'|MPTF_ALT,		"Interpolate volume"},
-	{ID_PATTERN_INTERPOLATE_EFFECT,'K'|MPTF_CTRL,	'K'|MPTF_CTRL,		'X'|MPTF_ALT,		"Interpolate effect"},
-	{ID_PATTERN_VISUALIZE_EFFECT,'B'|MPTF_CTRL,	'B'|MPTF_CTRL,		'B'|MPTF_ALT,		"Visualize effect"},	//rewbs.fxvis
-};
-
-//rewbs.customKeys: moved COptionsKeyboard to a separate file.
-//					removed CNotifyHotKey
 //////////////////////////////////////////////////////////////
 // COptionsColors
 
@@ -485,6 +408,9 @@ void COptionsColors::OnPresetMPT()
 	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0x80, 0x80);
 	CustomColors[MODCOLOR_PITCH] = RGB(0x80, 0x80, 0x00);
 	CustomColors[MODCOLOR_GLOBALS] = RGB(0x80, 0x00, 0x00);
+	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xFF, 0x00);
+	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xFF, 0x00);
+	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xFF, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = GetSysColor(COLOR_BTNSHADOW);
 	CustomColors[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
 	CustomColors[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
@@ -513,6 +439,9 @@ void COptionsColors::OnPresetFT2()
 	CustomColors[MODCOLOR_GLOBALS] = RGB(0xFF, 0xFF, 0x82);
 	CustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0xFF, 0x82);
 	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xFF, 0xFF, 0x82);
+	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x4B, 0x7C, 0x89);
+	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0x5F, 0x98, 0xA7);
+	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xEA, 0x1C, 0x78);
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x18, 0x28, 0x2C);
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0x49, 0x75, 0x82);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x8A, 0xDB, 0xF3);
@@ -541,6 +470,9 @@ void COptionsColors::OnPresetIT()
 	CustomColors[MODCOLOR_GLOBALS] = RGB(0x45, 0x9A, 0x49);
 	CustomColors[MODCOLOR_SAMPLE] = RGB(0x8E, 0x14, 0x55);
 	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xA2, 0xA2, 0xA2);
+	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x25, 0x7D, 0x00);
+	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xEC, 0x99, 0x00);
+	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0xB6, 0x96, 0x79);
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0xB6, 0x96, 0x79);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xB6, 0x96, 0x79);
@@ -569,6 +501,9 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_GLOBALS] = RGB(0x66, 0x00, 0x00);
 	CustomColors[MODCOLOR_SAMPLE] = RGB(0x00, 0xFF, 0x00);
 	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xFF, 0x00, 0x00);
+	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0xAC, 0xA8, 0xA1);
 	CustomColors[MODCOLOR_SEPFACE] = RGB(0xD6, 0xD0, 0xC6);
 	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xEC, 0xE8, 0xE1);

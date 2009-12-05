@@ -116,6 +116,7 @@
 #define IDR_BUILTIN_TUNINGS             520
 #define IDD_CLEANUP_SONG                521
 #define IDD_CHANNEL_NAME                522
+#define IDD_KEYBOARD_SPLIT              523
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -1151,18 +1152,18 @@
 #define ID_ORDERLIST_EDIT_COPY          59231
 #define ID_ORDERLIST_EDIT_CUT           59232
 #define ID_ORDERLIST_EDIT_PASTE         59233
-#define ID_CHANNEL_RENAME				59234
-#define ID_EDIT_PASTEFLOOD				59235
+#define ID_CHANNEL_RENAME               59234
+#define ID_EDIT_PASTEFLOOD              59235
 #define ID_MODTREE_DUPLICATE            59236
-#define ID_MODTREE_INSERT				59237
-#define ID_MODTREE_SWITCHTO				59238
+#define ID_MODTREE_INSERT               59237
+#define ID_MODTREE_SWITCHTO             59238
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        523
+#define _APS_NEXT_RESOURCE_VALUE        524
 #define _APS_NEXT_COMMAND_VALUE         59239
 #define _APS_NEXT_CONTROL_VALUE         2412
 #define _APS_NEXT_SYMED_VALUE           901

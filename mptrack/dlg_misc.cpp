@@ -2674,6 +2674,120 @@ void CChordEditor::OnNote3Changed()
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// Keyboard Split Settings (pattern editor)
+
+BEGIN_MESSAGE_MAP(CSplitKeyboadSettings, CDialog)
+	ON_CBN_SELCHANGE(IDC_COMBO_OCTAVEMODIFIER,	OnOctaveModifierChanged)
+END_MESSAGE_MAP()
+
+
+void CSplitKeyboadSettings::DoDataExchange(CDataExchange* pDX)
+//------------------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CSplitKeyboadSettings)
+	DDX_Control(pDX, IDC_COMBO_SPLITINSTRUMENT,	m_CbnSplitInstrument);
+	DDX_Control(pDX, IDC_COMBO_SPLITNOTE,		m_CbnSplitNote);
+	DDX_Control(pDX, IDC_COMBO_OCTAVEMODIFIER,	m_CbnOctaveModifier);
+	DDX_Control(pDX, IDC_COMBO_SPLITVOLUME,		m_CbnSplitVolume);
+	//}}AFX_DATA_MAP
+}
+
+
+BOOL CSplitKeyboadSettings::OnInitDialog()
+//----------------------------------------
+{
+	if(!m_pSndFile) return FALSE;
+
+	CDialog::OnInitDialog();
+
+	CHAR s[64];
+
+	// Split Notes
+	AppendNotesToControl(m_CbnSplitNote, 0, NOTE_MAX - 1);
+	m_CbnSplitNote.SetCurSel(m_pOptions->splitNote);
+
+	// Octave modifier
+	for(int i = -SPLIT_OCTAVE_RANGE; i < SPLIT_OCTAVE_RANGE + 1; i++){
+		wsprintf(s,i < 0 ? "Octave -%d" : i > 0 ? "Octave +%d" : "No Change", abs(i));
+		int n = m_CbnOctaveModifier.AddString(s);
+		m_CbnOctaveModifier.SetItemData(n, i);
+	}
+
+	m_CbnOctaveModifier.SetCurSel(m_pOptions->octaveModifier + SPLIT_OCTAVE_RANGE);
+	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_pOptions->octaveLink && m_pOptions->octaveModifier != 0) ? MF_CHECKED : MF_UNCHECKED);
+
+	// Volume
+	m_CbnSplitVolume.AddString("No Change");
+	m_CbnSplitVolume.SetItemData(0, 0);
+	for(int i = 1; i <= 64 ; i++){
+		wsprintf(s,"%d",i);
+		int n = m_CbnSplitVolume.AddString(s);
+		m_CbnSplitVolume.SetItemData(n, i);
+	}
+	m_CbnSplitVolume.SetCurSel(m_pOptions->splitVolume);
+
+	// Instruments
+	m_CbnSplitInstrument.ResetContent();
+	m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString("No Instrument"), 0);
+
+	if (m_pSndFile->m_nInstruments)	{
+		for (INSTRUMENTINDEX nIns = 1; nIns <= m_pSndFile->m_nInstruments; nIns++)
+		{
+			if (m_pSndFile->Instruments[nIns] == nullptr) {
+				continue;
+			}
+
+			CString displayName = m_pSndFile->GetPatternViewInstrumentName(nIns);
+			int n = m_CbnSplitInstrument.AddString(displayName);
+			m_CbnSplitInstrument.SetItemData(n, nIns);
+		}
+	} else
+	{
+		for (SAMPLEINDEX nSmp = 1; nSmp <= m_pSndFile->m_nSamples; nSmp++)
+		{
+			if ((m_pSndFile->m_szNames[nSmp][0]) || (m_pSndFile->Samples[nSmp].pSample))
+			{
+				wsprintf(s, "%02d: %s", nSmp, m_pSndFile->m_szNames[nSmp]);
+				int n = m_CbnSplitInstrument.AddString(s);
+				m_CbnSplitInstrument.SetItemData(n, nSmp);
+			}
+		}
+	}
+	m_CbnSplitInstrument.SetCurSel(m_pOptions->splitInstrument);
+
+	return TRUE;
+}
+
+
+void CSplitKeyboadSettings::OnOK()
+//--------------------------------
+{
+	CDialog::OnOK();
+
+	m_pOptions->splitNote = m_CbnSplitNote.GetCurSel();
+	m_pOptions->octaveModifier = m_CbnOctaveModifier.GetCurSel() - SPLIT_OCTAVE_RANGE;
+	m_pOptions->octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE) ? true : false;
+	m_pOptions->splitVolume = m_CbnSplitVolume.GetCurSel();
+	m_pOptions->splitInstrument = m_CbnSplitInstrument.GetItemData(m_CbnSplitInstrument.GetCurSel());
+}
+
+
+void CSplitKeyboadSettings::OnCancel()
+//------------------------------------
+{
+	CDialog::OnCancel();
+}
+
+
+void CSplitKeyboadSettings::OnOctaveModifierChanged()
+//---------------------------------------------------
+{
+	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_CbnOctaveModifier.GetCurSel() != 9) ? MF_CHECKED : MF_UNCHECKED);
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Sample Map
