@@ -341,18 +341,6 @@ enum Directory
 
 
 /////////////////////////////////////////////////////////////////////////
-// Split Keyboard Settings (pattern editor)
-
-#define SPLIT_OCTAVE_RANGE 9
-struct SplitKeyboardSettings
-{
-	UINT splitInstrument, splitNote, splitVolume;
-	int octaveModifier;	// determines by how many octaves the notes should be transposed up or down
-	bool octaveLink;	// apply octaveModifier
-};
-
-
-/////////////////////////////////////////////////////////////////////////
 // Misc. Macros
 
 

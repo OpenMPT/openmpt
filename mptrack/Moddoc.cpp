@@ -99,6 +99,12 @@ CModDoc::CModDoc()
 	m_PatternUndo.SetParent(this);
 	m_SampleUndo.SetParent(this);
 
+	m_SplitKeyboardSettings.splitInstrument = 0;
+	m_SplitKeyboardSettings.splitNote = NOTE_MIDDLEC - 1;
+	m_SplitKeyboardSettings.splitVolume = 0;
+	m_SplitKeyboardSettings.octaveModifier = 0;
+	m_SplitKeyboardSettings.octaveLink = false;
+
 #ifdef _DEBUG
 	MODCHANNEL *p = m_SndFile.Chn;
 	if (((DWORD)p) & 7) Log("MODCHANNEL is not aligned (0x%08X)\n", p);

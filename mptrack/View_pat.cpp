@@ -31,6 +31,7 @@ UINT CViewPattern::m_nFindMinChn = 0;
 UINT CViewPattern::m_nFindMaxChn = 0;
 signed char cInstrRelChange = 0;
 
+
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
 
 BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
@@ -178,13 +179,6 @@ void CViewPattern::OnInitialUpdate()
 	m_nFoundInstrument = 0;
 	m_nLastPlayedRow = 0;
 	m_nLastPlayedOrder = 0;
-
-	// Set up keyboard split
-	m_SplitKeyboardSettings.splitInstrument = 0;
-	m_SplitKeyboardSettings.splitNote = NOTE_MIDDLEC - 1;
-	m_SplitKeyboardSettings.splitVolume = 0;
-	m_SplitKeyboardSettings.octaveModifier = 0;
-	m_SplitKeyboardSettings.octaveLink = false;
 }
 
 
@@ -3921,16 +3915,16 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 	const UINT nTick = pSndFile->m_nTickCount;
 	const PATTERNINDEX nPatPlayback = pSndFile->m_nPattern;
 
-	const bool isSplit = (note <= m_SplitKeyboardSettings.splitNote);
+	const bool isSplit = (note <= pModDoc->GetSplitKeyboardSettings()->splitNote);
 	UINT ins = 0;
 	if (pModDoc)
 	{
 		if (isSplit)
 		{
-			ins = m_SplitKeyboardSettings.splitInstrument;
-			if (m_SplitKeyboardSettings.octaveLink) note += 12 * m_SplitKeyboardSettings.octaveModifier;
-			if (note > NOTE_MAX && note < NOTE_NOTECUT) note = NOTE_MAX;
-			if (note<0)				  note=1;
+			ins = pModDoc->GetSplitKeyboardSettings()->splitInstrument;
+			if (pModDoc->GetSplitKeyboardSettings()->octaveLink) note += 12 *pModDoc->GetSplitKeyboardSettings()->octaveModifier;
+			if (note > NOTE_MAX && note < NOTE_MIN_SPECIAL) note = NOTE_MAX;
+			if (note < 0) note = 1;
 		}
 		if (!ins)    ins = GetCurrentInstrument();
 		if (!ins)	 ins = m_nFoundInstrument;
@@ -4184,17 +4178,24 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		// -- write note and instrument data.
 		const bool isSplit = HandleSplit(p, note);
 
+		// Nice idea actually: Use lower section of the keyboard to play chords
+		/*if(isSplit)
+		{
+			TempEnterChord(note);
+			return;
+		}*/
+
 		// -- write vol data
-		if (vol >= 0 && vol <= 64 && !(isSplit && m_SplitKeyboardSettings.splitVolume))	//write valid volume, as long as there's no split volume override.
+		if (vol >= 0 && vol <= 64 && !(isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume))	//write valid volume, as long as there's no split volume override.
 		{
 			p->volcmd=VOLCMD_VOLUME;
 			p->vol = vol;
-		} else if (isSplit && m_SplitKeyboardSettings.splitVolume)	//cater for split volume override.
+		} else if (isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume)	//cater for split volume override.
 		{
-			if (m_SplitKeyboardSettings.splitVolume > 0 && m_SplitKeyboardSettings.splitVolume <= 64)
+			if (pModDoc->GetSplitKeyboardSettings()->splitVolume > 0 && pModDoc->GetSplitKeyboardSettings()->splitVolume <= 64)
 			{
 				p->volcmd=VOLCMD_VOLUME;
-				p->vol = m_SplitKeyboardSettings.splitVolume;
+				p->vol = pModDoc->GetSplitKeyboardSettings()->splitVolume;
 			}
 		}
 
@@ -4593,7 +4594,9 @@ void CViewPattern::OnSelectPlugin(UINT nID)
 bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 //-----------------------------------------------------
 {
-	if (note > m_SplitKeyboardSettings.splitNote)
+	CModDoc *pModDoc = GetDocument(); if (!pModDoc) return false;
+
+	if (note > pModDoc->GetSplitKeyboardSettings()->splitNote)
 	{
 		p->note = note;	
 		UINT nins = GetCurrentInstrument();
@@ -4603,14 +4606,14 @@ bool CViewPattern::HandleSplit(MODCOMMAND* p, int note)
 	}
 	else
 	{
-		if (m_SplitKeyboardSettings.splitInstrument)
-			p->instr = m_SplitKeyboardSettings.splitInstrument;
+		if (pModDoc->GetSplitKeyboardSettings()->splitInstrument)
+			p->instr = pModDoc->GetSplitKeyboardSettings()->splitInstrument;
 		else
 			if(GetCurrentInstrument()) p->instr = GetCurrentInstrument();
-		if (m_SplitKeyboardSettings.octaveLink)
-			note += 12 * m_SplitKeyboardSettings.octaveModifier;
-		if (note > NOTE_MAX && note < NOTE_NOTECUT) note = NOTE_MAX;
-		if (note<0) note=1;
+		if (pModDoc->GetSplitKeyboardSettings()->octaveLink)
+			note += 12 * pModDoc->GetSplitKeyboardSettings()->octaveModifier;
+		if (note > NOTE_MAX && note < NOTE_MIN_SPECIAL) note = NOTE_MAX;
+		if (note < 0) note = 1;
 
 		p->note = note;	
 		return true;
@@ -5210,6 +5213,6 @@ void CViewPattern::SetSplitKeyboardSettings()
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return;
 
-	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pSndFile, &m_SplitKeyboardSettings);
+	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pSndFile, pModDoc->GetSplitKeyboardSettings());
 	dlg.DoModal();
 }

@@ -103,6 +103,18 @@ enum
 };
 
 
+/////////////////////////////////////////////////////////////////////////
+// Split Keyboard Settings (pattern editor)
+
+#define SPLIT_OCTAVE_RANGE 9
+struct SplitKeyboardSettings
+{
+	UINT splitInstrument, splitNote, splitVolume;
+	int octaveModifier;	// determines by how many octaves the notes should be transposed up or down
+	bool octaveLink;	// apply octaveModifier
+};
+
+
 //=============================
 class CModDoc: public CDocument
 //=============================
@@ -127,6 +139,7 @@ protected:
 
 	CPatternUndo m_PatternUndo;
 	CSampleUndo m_SampleUndo;
+	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
 
 protected: // create from serialization only
 	CModDoc();
@@ -183,6 +196,7 @@ public:
 
 	CPatternUndo *GetPatternUndo() { return &m_PatternUndo; }
 	CSampleUndo *GetSampleUndo() { return &m_SampleUndo; }
+	SplitKeyboardSettings *GetSplitKeyboardSettings() { return &m_SplitKeyboardSettings; }
 	
 // operations
 public:
