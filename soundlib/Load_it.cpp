@@ -1246,6 +1246,9 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			pSmp->nVibRate = pis->vis;
 			pSmp->nVibDepth = pis->vid & 0x7F;
 			pSmp->nVibSweep = pis->vir; //(pis->vir + 3) / 4;
+
+			if(pis->samplepointer) lastSampleOffset = pis->samplepointer; // MPTX hack
+
 			if ((pis->samplepointer) && (pis->samplepointer < dwMemLength) && (pis->length))
 			{
 				pSmp->nLength = pis->length;
@@ -1268,8 +1271,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 //				ReadSample(&Ins[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
-				if(pis->samplepointer)
-					lastSampleOffset = pis->samplepointer + ReadSample(&Samples[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
+				lastSampleOffset = pis->samplepointer + ReadSample(&Samples[nsmp+1], flags, (LPSTR)(lpStream+pis->samplepointer), dwMemLength - pis->samplepointer);
 // -! NEW_FEATURE#0027
 			}
 		}

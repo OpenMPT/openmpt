@@ -912,6 +912,7 @@
 #define IDC_CHECK_PT1X                  2409
 #define IDC_STATIC_CHANNEL_NAME         2410
 #define IDC_EDIT_CHANNEL_NAME           2411
+#define IDC_STATIC_PATTERNNAME          2412
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1157,6 +1158,7 @@
 #define ID_MODTREE_INSERT               59237
 #define ID_MODTREE_SWITCHTO             59238
 #define ID_EDIT_PUSHFORWARDPASTE        59239
+#define ID_EDIT_SPLITKEYBOARDSETTINGS   59240
 
 // Next default values for new objects
 // 
@@ -1164,8 +1166,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        524
-#define _APS_NEXT_COMMAND_VALUE         59240
-#define _APS_NEXT_CONTROL_VALUE         2412
+#define _APS_NEXT_COMMAND_VALUE         59241
+#define _APS_NEXT_CONTROL_VALUE         2413
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

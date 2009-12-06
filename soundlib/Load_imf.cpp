@@ -476,7 +476,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 
 		pIns->nFadeOut = imfins.fadeout;
-		pIns->nGlobalVol = 128;
+		pIns->nGlobalVol = 64;
 
 		load_imf_envelope(&pIns->VolEnv, &imfins, IMF_ENV_VOL);
 		load_imf_envelope(&pIns->PanEnv, &imfins, IMF_ENV_PAN);

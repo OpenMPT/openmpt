@@ -440,11 +440,13 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_EDIT_COPY:			s="&Copy\t"; c=kcEditCopy; break;
 		case ID_EDIT_PASTE:			s="&Paste\t"; c=kcEditPaste; break;
 		case ID_EDIT_PASTE_SPECIAL:	s="&Mix Paste\t"; c=kcEditMixPaste; break;
-		case ID_EDIT_PASTEFLOOD:	s="&Paste Flood\t"; c=kcEditPasteFlood; break;
-		case ID_EDIT_PUSHFORWARDPASTE:	s="&Push Forward Paste\t"; c=kcEditPushForwardPaste; break;
+		case ID_EDIT_PASTEFLOOD:	s="Paste Fl&ood\t"; c=kcEditPasteFlood; break;
+		case ID_EDIT_PUSHFORWARDPASTE:	s="Push For&ward Paste\t"; c=kcEditPushForwardPaste; break;
 		case ID_EDIT_SELECT_ALL:	s="&Select All\t"; c=kcEditSelectAll; break;
 		case ID_EDIT_FIND:			s="&Find\t"; c=kcEditFind; break;
 		case ID_EDIT_FINDNEXT:		s="Find &Next\t"; c=kcEditFindNext; break;
+		case ID_EDIT_GOTO_MENU:		s="&Goto\t"; c=kcPatternGoto; break;
+		case ID_EDIT_SPLITKEYBOARDSETTINGS:	s="Split &Keyboard Settings\t"; c=kcShowSplitKeyboardSettings; break;
 
 		case ID_VIEW_GLOBALS:		s="&General\t"; c=kcViewGeneral; break;
 		case ID_VIEW_SAMPLES:		s="&Samples\t"; c=kcViewSamples; break;
@@ -460,7 +462,6 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_CHANNEL_MANAGER:	s="Ch&annel Manager...\t"; c=kcViewChannelManager; break;
 		case ID_VIEW_SONGPROPERTIES:s="Song P&roperties...\t"; c=kcViewSongProperties; break; //rewbs.graph
 		case ID_VIEW_MIDIMAPPING:	s="&MIDI mapping...\t"; c = kcViewMIDImapping; break;
-
 
 		/*	
 		case ID_WINDOW_NEW:			s="&New Window\t"; c=kcWindowNew; break;
@@ -512,6 +513,8 @@ void CInputHandler::UpdateMainMenu()
 	pMenu->ModifyMenu(ID_EDIT_SELECT_ALL, MF_BYCOMMAND | MF_STRING, ID_EDIT_SELECT_ALL, GetMenuText(ID_EDIT_SELECT_ALL));
 	pMenu->ModifyMenu(ID_EDIT_FIND, MF_BYCOMMAND | MF_STRING, ID_EDIT_FIND, GetMenuText(ID_EDIT_FIND));
 	pMenu->ModifyMenu(ID_EDIT_FINDNEXT, MF_BYCOMMAND | MF_STRING, ID_EDIT_FINDNEXT, GetMenuText(ID_EDIT_FINDNEXT));
+	pMenu->ModifyMenu(ID_EDIT_GOTO_MENU, MF_BYCOMMAND | MF_STRING, ID_EDIT_GOTO_MENU, GetMenuText(ID_EDIT_GOTO_MENU));
+	pMenu->ModifyMenu(ID_EDIT_SPLITKEYBOARDSETTINGS, MF_BYCOMMAND | MF_STRING, ID_EDIT_SPLITKEYBOARDSETTINGS, GetMenuText(ID_EDIT_SPLITKEYBOARDSETTINGS));
 	
 	pMenu->ModifyMenu(ID_VIEW_GLOBALS, MF_BYCOMMAND | MF_STRING, ID_VIEW_GLOBALS, GetMenuText(ID_VIEW_GLOBALS));
 	pMenu->ModifyMenu(ID_VIEW_SAMPLES, MF_BYCOMMAND | MF_STRING, ID_VIEW_SAMPLES, GetMenuText(ID_VIEW_SAMPLES));
