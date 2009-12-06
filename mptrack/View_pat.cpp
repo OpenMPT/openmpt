@@ -2699,115 +2699,145 @@ void CViewPattern::OnPatternAmplify()
 		if (pSndFile->Patterns[m_nPattern])
 		{
 			MODCOMMAND *p = pSndFile->Patterns[m_nPattern];
-			for (UINT j=0; j<pSndFile->m_nChannels; j++)
+
+			CHANNELINDEX firstChannel = (m_dwBeginSel & 0xFFFF) >> 3, lastChannel = (m_dwEndSel & 0xFFFF) >> 3;
+			ROWINDEX firstRow = (m_dwBeginSel >> 16), lastRow = (m_dwEndSel >> 16);
+			firstChannel = CLAMP(firstChannel, 0, pSndFile->m_nChannels - 1);
+			lastChannel = CLAMP(lastChannel, 0, pSndFile->m_nChannels - 1);
+			firstRow = CLAMP(firstRow, 0, pSndFile->PatternSize[m_nPattern] - 1);
+			lastRow = CLAMP(lastRow, 0, pSndFile->PatternSize[m_nPattern] - 1);
+
+			for (CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++)
 			{
-				for (UINT i=0; i<pSndFile->PatternSize[m_nPattern]; i++)
+				for (ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
 				{
-					if ((i >= (m_dwBeginSel >> 16)) && (i <= (m_dwEndSel >> 16)))
+					MODCOMMAND *m = p + nRow * pSndFile->m_nChannels + nChn;
+					if ((m->command == CMD_VOLUME) && (m->param <= 64))
 					{
-						MODCOMMAND *m = p + i*pSndFile->m_nChannels+j;
-						if ((m->command == CMD_VOLUME) && (m->param <= 64))
+						chvol[nChn] = m->param;
+						break;
+					}
+					if (m->volcmd == VOLCMD_VOLUME)
+					{
+						chvol[nChn] = m->vol;
+						break;
+					}
+					if ((m->note) && (m->note <= NOTE_MAX) && (m->instr))
+					{
+						UINT nSmp = m->instr;
+						if (pSndFile->m_nInstruments)
 						{
-							chvol[j] = m->param;
+							if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nSmp]))
+							{
+								nSmp = pSndFile->Instruments[nSmp]->Keyboard[m->note];
+								if(!nSmp) chvol[nChn] = 64;	// hack for instruments without samples
+							} else
+							{
+								nSmp = 0;
+							}
+						}
+						if ((nSmp) && (nSmp <= pSndFile->m_nSamples))
+						{
+							chvol[nChn] = (BYTE)(pSndFile->Samples[nSmp].nVolume >> 2);
 							break;
 						}
-						if (m->volcmd == VOLCMD_VOLUME)
-						{
-							chvol[j] = m->vol;
-							break;
-						}
-						if ((m->note) && (m->note < 0x80) && (m->instr))
-						{
-							UINT nSmp = m->instr;
-							if (pSndFile->m_nInstruments)
+						else
+						{	//nonexistant sample and no volume present in patten? assume volume=64.
+							if(pSndFile->GetType() == MOD_TYPE_MOD)
 							{
-								if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nSmp]))
-								{
-									nSmp = pSndFile->Instruments[nSmp]->Keyboard[m->note];
-								} else
-								{
-									nSmp = 0;
-								}
-							}
-							if ((nSmp) && (nSmp <= pSndFile->m_nSamples))
+								m->command = CMD_VOLUME;
+								m->param = 64;
+							} else
 							{
-								chvol[j] = (BYTE)(pSndFile->Samples[nSmp].nVolume >> 2);
-								break;
-							}
-							else
-							{	//nonexistant sample and no volume present in patten? assume volume=64.
 								m->volcmd = VOLCMD_VOLUME;
-								chvol[j] = 64;
 								m->vol = 64;
-								break;
 							}
+							chvol[nChn] = 64;
+							break;
 						}
 					}
 				}
 			}
-			for (UINT y=0; y<pSndFile->PatternSize[m_nPattern]; y++)
+
+			// adjust min/max channel if they're only partly selected (i.e. volume column is not covered)
+			if(((firstChannel << 3) | 2) < (m_dwBeginSel & 0xFFFF)) firstChannel++;
+			if(((lastChannel << 3) | 2) > (m_dwEndSel & 0xFFFF)) lastChannel--;
+
+			for (ROWINDEX nRow = firstRow; nRow <= lastRow; nRow++)
 			{
-				if ((y >= (m_dwBeginSel >> 16)) && (y <= (m_dwEndSel >> 16)))
+				p = pSndFile->Patterns[m_nPattern] + nRow * pSndFile->m_nChannels;
+				int cy = lastRow - firstRow + 1; // total rows (for fading)
+				for (CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++)
 				{
-					int cy = (m_dwEndSel>>16) - (m_dwBeginSel>>16) + 1;
-					int y0 = (m_dwBeginSel>>16);
-					for (UINT x=0; x<pSndFile->m_nChannels; x++)
+					if ((!p[nChn].volcmd) && (p[nChn].command != CMD_VOLUME)
+					 && (p[nChn].note) && (p[nChn].note <= NOTE_MAX) && (p[nChn].instr))
 					{
-						UINT col = (x<<3) | 2;
-						if ((col >= (m_dwBeginSel & 0xFFFF)) && (col <= (m_dwEndSel & 0xFFFF)))
+						UINT nSmp = p[nChn].instr;
+						bool overrideSampleVol = false;
+						if (pSndFile->m_nInstruments)
 						{
-							if ((!p[x].volcmd) && (p[x].command != CMD_VOLUME)
-							 && (p[x].note) && (p[x].note < 0x80) && (p[x].instr))
+							if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nSmp]))
 							{
-								UINT nSmp = p[x].instr;
-								if (pSndFile->m_nInstruments)
+								nSmp = pSndFile->Instruments[nSmp]->Keyboard[p[nChn].note];
+								// hack for instruments without samples
+								if(!nSmp)
 								{
-									if ((nSmp <= pSndFile->m_nInstruments) && (pSndFile->Instruments[nSmp]))
-									{
-										nSmp = pSndFile->Instruments[nSmp]->Keyboard[p[x].note];
-									} else
-									{
-										nSmp = 0;
-									}
+									nSmp = 1;
+									overrideSampleVol = true;
 								}
-								if ((nSmp) && (nSmp <= pSndFile->m_nSamples))
-								{
-									p[x].volcmd = VOLCMD_VOLUME;
-									p[x].vol = pSndFile->Samples[nSmp].nVolume >> 2;
-								}
-							}
-							if (p[x].volcmd == VOLCMD_VOLUME) chvol[x] = (BYTE)p[x].vol;
-							if (((dlg.m_bFadeIn) || (dlg.m_bFadeOut)) && (p[x].command != CMD_VOLUME) && (!p[x].volcmd))
+							} else
 							{
-								p[x].volcmd = VOLCMD_VOLUME;
-								p[x].vol = chvol[x];
-							}
-							if (p[x].volcmd == VOLCMD_VOLUME)
-							{
-								int vol = p[x].vol * dlg.m_nFactor;
-								if (dlg.m_bFadeIn) vol = (vol * (y+1-y0)) / cy;
-								if (dlg.m_bFadeOut) vol = (vol * (cy+y0-y)) / cy;
-								vol = (vol+50) / 100;
-								if (vol > 64) vol = 64;
-								p[x].vol = (BYTE)vol;
+								nSmp = 0;
 							}
 						}
-						col = (x<<3) | 3;
-						if ((col >= (m_dwBeginSel & 0xFFFF)) && (col <= (m_dwEndSel & 0xFFFF)))
+						if ((nSmp) && (nSmp <= pSndFile->m_nSamples))
 						{
-							if ((p[x].command == CMD_VOLUME) && (p[x].param <= 64))
+							if(pSndFile->GetType() == MOD_TYPE_MOD)
 							{
-								int vol = p[x].param * dlg.m_nFactor;
-								if (dlg.m_bFadeIn) vol = (vol * (y+1-y0)) / cy;
-								if (dlg.m_bFadeOut) vol = (vol * (cy+y0-y)) / cy;
-								vol = (vol+50) / 100;
-								if (vol > 64) vol = 64;
-								p[x].param = (BYTE)vol;
+								p[nChn].command = CMD_VOLUME;
+								p[nChn].param = (overrideSampleVol) ? 64 : pSndFile->Samples[nSmp].nVolume >> 2;
+							} else
+							{
+								p[nChn].volcmd = VOLCMD_VOLUME;
+								p[nChn].vol = (overrideSampleVol) ? 64 : pSndFile->Samples[nSmp].nVolume >> 2;
 							}
 						}
 					}
+					if (p[nChn].volcmd == VOLCMD_VOLUME) chvol[nChn] = (BYTE)p[nChn].vol;
+					if (((dlg.m_bFadeIn) || (dlg.m_bFadeOut)) && (p[nChn].command != CMD_VOLUME) && (!p[nChn].volcmd))
+					{
+						if(pSndFile->GetType() == MOD_TYPE_MOD)
+						{
+							p[nChn].command = CMD_VOLUME;
+							p[nChn].param = chvol[nChn];
+						} else
+						{
+							p[nChn].volcmd = VOLCMD_VOLUME;
+							p[nChn].vol = chvol[nChn];
+						}
+					}
+					if (p[nChn].volcmd == VOLCMD_VOLUME)
+					{
+						int vol = p[nChn].vol * dlg.m_nFactor;
+						if (dlg.m_bFadeIn) vol = (vol * (nRow+1-firstRow)) / cy;
+						if (dlg.m_bFadeOut) vol = (vol * (cy+firstRow-nRow)) / cy;
+						vol = (vol+50) / 100;
+						if (vol > 64) vol = 64;
+						p[nChn].vol = (BYTE)vol;
+					}
+					if ((((nChn << 3) | 3) >= (m_dwBeginSel & 0xFFFF)) && (((nChn << 3) | 3) <= (m_dwEndSel & 0xFFFF)))
+					{
+						if ((p[nChn].command == CMD_VOLUME) && (p[nChn].param <= 64))
+						{
+							int vol = p[nChn].param * dlg.m_nFactor;
+							if (dlg.m_bFadeIn) vol = (vol * (nRow + 1 - firstRow)) / cy;
+							if (dlg.m_bFadeOut) vol = (vol * (cy + firstRow - nRow)) / cy;
+							vol = (vol + 50) / 100;
+							if (vol > 64) vol = 64;
+							p[nChn].param = (BYTE)vol;
+						}
+					}
 				}
-				p += pSndFile->m_nChannels;
 			}
 		}
 		pModDoc->SetModified();

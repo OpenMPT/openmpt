@@ -1849,7 +1849,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Midi Controller
 		case CMD_MIDI:
-			if (m_nTickCount) break;
+			if(!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 			if (param < 0x80){
 				ProcessMidiMacro(nChn, &m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro << 5], param);
 			} else {
@@ -3351,7 +3351,6 @@ void CSoundFile::KeyOff(UINT nChn)
 void CSoundFile::SetSpeed(UINT param)
 //-----------------------------------
 {
-	UINT max = (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) ? 256 : 128;
 	// Modplug Tracker and Mod-Plugin don't do this check
 #ifndef MODPLUG_TRACKER
 #ifndef FASTSOUNDLIB
@@ -3366,7 +3365,7 @@ void CSoundFile::SetSpeed(UINT param)
 #endif // FASTSOUNDLIB
 #endif // MODPLUG_TRACKER
 	//if ((m_nType & MOD_TYPE_S3M) && (param > 0x80)) param -= 0x80;
-	if ((param) && (param <= max)) m_nMusicSpeed = param;
+	if ((param) && (param <= GetModSpecifications().speedMax)) m_nMusicSpeed = param;
 }
 
 
