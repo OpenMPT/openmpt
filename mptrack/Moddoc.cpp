@@ -639,6 +639,7 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.Patterns.Insert(0, 64);
 		}
 
+		memset(m_SndFile.m_szNames, 0, sizeof(m_SndFile.m_szNames));
 		strcpy(m_SndFile.m_szNames[0], "untitled");
 
 		m_SndFile.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
@@ -3388,11 +3389,7 @@ UINT CModDoc::FindAvailableChannel()
 void CModDoc::RecordParamChange(int plugSlot, long paramIndex) 
 //------------------------------------------------------
 {
-	CVstPlugin *pPlug = (CVstPlugin*)m_SndFile.m_MixPlugins[plugSlot].pMixPlugin;
-	if (pPlug) {
-		UINT value = pPlug->GetZxxParameter(paramIndex);
-		SendMessageToActiveViews(WM_MOD_RECORDPARAM, paramIndex, value);
-	}
+	SendMessageToActiveViews(WM_MOD_RECORDPARAM, plugSlot, paramIndex);
 }
 
 void CModDoc::LearnMacro(int macroToSet, long paramToUse)

@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "view_pat.h"
 #include "ctrl_pat.h"
+#include "vstplug.h"	// for writing plug params to pattern
 
 #include "EffectVis.h"		//rewbs.fxvis
 #include "OpenGLEditor.h"		//rewbs.fxvis
@@ -915,6 +916,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 				case 3: // Clear Command
 					if (rm.command) {
 						m->command = 0;
+						if(m->note == NOTE_PC || m->note == NOTE_PCS) m->SetValueEffectCol(0);
 					}
 					break;
 				case 4:	// Clear Command Param
@@ -2936,8 +2938,9 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 
 }
 
-LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
-//--------------------------------------------------------------------------
+// record plugin parameter changes into current pattern
+LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex)
+//-------------------------------------------------------------------------------
 {	
 	CModDoc *pModDoc = GetDocument();
 	//if (!m_bRecord || !pModDoc) {
@@ -2964,35 +2967,52 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM paramIndex, LPARAM value)
 	// TODO: Is the right plugin active? Move to a chan with the right plug
 	// Probably won't do this - finish fluctuator implementation instead.
 
-	//Figure out which plug param (if any) is controllable using the active macro on this channel.
-	long activePlugParam  = -1;
-	BYTE activeMacro      = pSndFile->Chn[nChn].nActiveMacro;
-	CString activeMacroString = &(pSndFile->m_MidiCfg.szMidiSFXExt[activeMacro*32]);
-	if (pModDoc->GetMacroType(activeMacroString) == sfx_plug) {
-		activePlugParam = pModDoc->MacroToPlugParam(activeMacroString);
-	}
-	//If the wrong macro is active, see if we can find the right one.
-	//If we can, activate it for this chan by writing appropriate SFx command it.
-	if (activePlugParam != paramIndex) { 
-		int foundMacro = pModDoc->FindMacroForParam(paramIndex);
-		if (foundMacro >= 0) {
-			pSndFile->Chn[nChn].nActiveMacro = foundMacro;
-			if (pRow->command == 0 || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) { //we overwrite existing Zxx and \xx only.
-				pRow->command = (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))?CMD_S3MCMDEX:CMD_MODCMDEX;;
-				pRow->param = 0xF0 + (foundMacro&0x0F);
-				InvalidateRow();
-			}
+	CVstPlugin *pPlug = (CVstPlugin*)pSndFile->m_MixPlugins[plugSlot].pMixPlugin;
+	if (pPlug == nullptr) return 0;
 
+	if(pSndFile->GetType() == MOD_TYPE_MPT)
+	{
+		// MPTM: Use PC Notes
+
+		// only overwrite existing PC Notes
+		if(pRow->IsEmpty() || pRow->note == NOTE_PC || pRow->note == NOTE_PCS)
+		{
+			pRow->Set(NOTE_PCS, plugSlot + 1, paramIndex, static_cast<uint16>(pPlug->GetParameter(paramIndex) * MODCOMMAND::maxColumnValue));
+			InvalidateRow();
 		}
-	}
+	} else
+	{
+		// Other formats: Use MIDI macros
 
+		//Figure out which plug param (if any) is controllable using the active macro on this channel.
+		long activePlugParam  = -1;
+		BYTE activeMacro      = pSndFile->Chn[nChn].nActiveMacro;
+		CString activeMacroString = &(pSndFile->m_MidiCfg.szMidiSFXExt[activeMacro*32]);
+		if (pModDoc->GetMacroType(activeMacroString) == sfx_plug) {
+			activePlugParam = pModDoc->MacroToPlugParam(activeMacroString);
+		}
+		//If the wrong macro is active, see if we can find the right one.
+		//If we can, activate it for this chan by writing appropriate SFx command it.
+		if (activePlugParam != paramIndex) { 
+			int foundMacro = pModDoc->FindMacroForParam(paramIndex);
+			if (foundMacro >= 0) {
+				pSndFile->Chn[nChn].nActiveMacro = foundMacro;
+				if (pRow->command == 0 || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) { //we overwrite existing Zxx and \xx only.
+					pRow->command = (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))?CMD_S3MCMDEX:CMD_MODCMDEX;;
+					pRow->param = 0xF0 + (foundMacro&0x0F);
+					InvalidateRow();
+				}
 
+			}
+		}
 
-	//Write the data, but we only overwrite if the command is a macro anyway.
-	if (pRow->command == 0 || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) {
-		pRow->command = CMD_SMOOTHMIDI;
-		pRow->param = value;
-		InvalidateRow();
+		//Write the data, but we only overwrite if the command is a macro anyway.
+		if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) {
+			pRow->command = CMD_SMOOTHMIDI;
+			pRow->param = pPlug->GetZxxParameter(paramIndex);
+			InvalidateRow();
+		}
+
 	}
 
 	return 0;
@@ -4471,7 +4491,7 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 			default: p->Clear();						//If not specified, delete them all! :)
 		}
 		if((field == 3 || field == 4) && (p->note == NOTE_PC || p->note == NOTE_PCS))
-			p->command = p->param = 0;
+			p->SetValueEffectCol(0);
 
 		if(IsEditingEnabled_bmsg())
 		{
