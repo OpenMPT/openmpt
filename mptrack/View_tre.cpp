@@ -746,7 +746,10 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 		if(((hintFlagPart == HINT_SEQNAMES) && pSndFile->Order.GetNumSequences() == 1) || adjustParentNode)
 		{
 			CString sSeqName = pSndFile->Order.GetSequence(0).m_sName;
-			if(sSeqName.IsEmpty() || pSndFile->Order.GetNumSequences() > 1) sSeqName = "Sequence";
+			if(sSeqName.IsEmpty() || pSndFile->Order.GetNumSequences() > 1)
+				sSeqName = "Sequence";
+			else
+				sSeqName = "Sequence: " + sSeqName;
 			SetItem(pInfo->hOrders, TVIF_TEXT, sSeqName, 0, 0, 0, 0, 0);
 		}
 

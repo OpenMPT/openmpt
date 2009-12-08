@@ -1159,6 +1159,7 @@
 #define ID_MODTREE_SWITCHTO             59238
 #define ID_EDIT_PUSHFORWARDPASTE        59239
 #define ID_EDIT_SPLITKEYBOARDSETTINGS   59240
+#define ID_EDIT_PASTESPECIAL            59241
 
 // Next default values for new objects
 // 
@@ -1166,7 +1167,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        524
-#define _APS_NEXT_COMMAND_VALUE         59241
+#define _APS_NEXT_COMMAND_VALUE         59242
 #define _APS_NEXT_CONTROL_VALUE         2413
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

@@ -68,6 +68,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 // -> CODE#0012
 // -> DESC="midi keyboard split"
 	ON_COMMAND(ID_EDIT_SPLITRECSELECT,	OnSplitRecordSelect)
+	ON_COMMAND(ID_EDIT_SPLITKEYBOARDSETTINGS,	SetSplitKeyboardSettings)
 // -! NEW_FEATURE#0012
 	ON_COMMAND(ID_EDIT_UNDO,		OnEditUndo)
 	ON_COMMAND(ID_PATTERN_CHNRESET,	OnChannelReset)

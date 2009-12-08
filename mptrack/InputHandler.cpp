@@ -411,7 +411,7 @@ CString CInputHandler::GetKeyTextFromCommand(CommandID c)
 CString CInputHandler::GetMenuText(UINT id)
 {
 	CString s;
-	CommandID c;
+	CommandID c = kcNull;
 
 	switch(id)
 	{
@@ -439,14 +439,16 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_EDIT_CUT:			s="Cu&t\t"; c=kcEditCut; break;
 		case ID_EDIT_COPY:			s="&Copy\t"; c=kcEditCopy; break;
 		case ID_EDIT_PASTE:			s="&Paste\t"; c=kcEditPaste; break;
-		case ID_EDIT_PASTE_SPECIAL:	s="&Mix Paste\t"; c=kcEditMixPaste; break;
-		case ID_EDIT_PASTEFLOOD:	s="Paste Fl&ood\t"; c=kcEditPasteFlood; break;
-		case ID_EDIT_PUSHFORWARDPASTE:	s="Push For&ward Paste\t"; c=kcEditPushForwardPaste; break;
-		case ID_EDIT_SELECT_ALL:	s="&Select All\t"; c=kcEditSelectAll; break;
+		case ID_EDIT_SELECT_ALL:	s="Select &All\t"; c=kcEditSelectAll; break;
+		case ID_EDIT_CLEANUP:		s="C&leanup"; break;
 		case ID_EDIT_FIND:			s="&Find\t"; c=kcEditFind; break;
 		case ID_EDIT_FINDNEXT:		s="Find &Next\t"; c=kcEditFindNext; break;
 		case ID_EDIT_GOTO_MENU:		s="&Goto\t"; c=kcPatternGoto; break;
 		case ID_EDIT_SPLITKEYBOARDSETTINGS:	s="Split &Keyboard Settings\t"; c=kcShowSplitKeyboardSettings; break;
+			// "Paste Special" sub menu
+		case ID_EDIT_PASTE_SPECIAL:	s="&Mix Paste\t"; c=kcEditMixPaste; break;
+		case ID_EDIT_PASTEFLOOD:	s="Paste Fl&ood\t"; c=kcEditPasteFlood; break;
+		case ID_EDIT_PUSHFORWARDPASTE:	s="&Push Forward Paste\t"; c=kcEditPushForwardPaste; break;
 
 		case ID_VIEW_GLOBALS:		s="&General\t"; c=kcViewGeneral; break;
 		case ID_VIEW_SAMPLES:		s="&Samples\t"; c=kcViewSamples; break;
