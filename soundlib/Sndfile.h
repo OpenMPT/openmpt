@@ -220,7 +220,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nOldCmdEx, nOldVolParam, nOldTempo;
 	BYTE nOldOffset, nOldHiOffset;
 	BYTE nCutOff, nResonance;
-	BYTE nRetrigCount, nRetrigParam;
+	int nRetrigCount, nRetrigParam;
 	BYTE nTremorCount, nTremorParam;
 	BYTE nPatternLoop, nPatternLoopCount;
 	BYTE nRowNote, nRowInstr;
@@ -846,7 +846,7 @@ private:
 	void FineVolumeDown(MODCHANNEL *pChn, UINT param);
 	void Tremolo(MODCHANNEL *pChn, UINT param);
 	void Panbrello(MODCHANNEL *pChn, UINT param);
-	void RetrigNote(UINT nChn, UINT param, UINT offset=0);  //rewbs.volOffset: added last param
+	void RetrigNote(UINT nChn, int param, UINT offset=0);  //rewbs.volOffset: added last param
 	void SampleOffset(UINT nChn, UINT param, bool bPorta);	//rewbs.volOffset: moved offset code to own method
 	void NoteCut(UINT nChn, UINT nTick);
 	int PatternLoop(MODCHANNEL *, UINT param);
