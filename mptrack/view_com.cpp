@@ -180,7 +180,10 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 		m_ToolBar.UpdateStyle();
 		lHint &= ~HINT_MPTOPTIONS;
 	}
-	lHint &= ~(HINT_SAMPLEDATA|HINT_PATTERNDATA|HINT_ENVELOPE);
+	lHint &= (HINT_MODTYPE
+		|HINT_SMPNAMES|HINT_SAMPLEINFO
+		|HINT_INSNAMES|HINT_INSTRUMENT
+		/*|HINT_PATNAMES|HINT_PATTERNROW*/); // pattern stuff currently unused
 	if (!lHint) return;
 	m_ItemList.SetRedraw(FALSE);
 	// Add sample headers

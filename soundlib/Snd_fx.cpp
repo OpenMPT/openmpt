@@ -3122,13 +3122,13 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 }
 //end rewbs.volOffset:
 
-void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffset: added offset param.
-//-------------------------------------------------------------
+void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset: added offset param.
+//------------------------------------------------------------
 {
 	// Retrig: bit 8 is set if it's the new XM retrig
 	MODCHANNEL *pChn = &Chn[nChn];
-	UINT nRetrigSpeed = param & 0x0F;
-	UINT nRetrigCount = pChn->nRetrigCount;
+	int nRetrigSpeed = param & 0x0F;
+	int nRetrigCount = pChn->nRetrigCount;
 	bool bDoRetrig = false;
 
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
@@ -3144,7 +3144,25 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			bDoRetrig = true;
 		}
 	}
-	else
+	else if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100))
+	{
+		// buggy-like-hell FT2 Rxy retrig!
+
+		if(m_dwSongFlags & SONG_FIRSTTICK)
+		{
+			// FT2 bug: if a retrig (Rxy) occours together with a volume command, the first retrig interval is increased by one tick
+			if(pChn->nRowVolCmd == VOLCMD_VOLUME) nRetrigCount = -1;
+			if(pChn->nRowNote != NOTE_NONE && pChn->nRowNote <= GetModSpecifications().noteMax) nRetrigCount++;
+		}
+		if (nRetrigCount >= nRetrigSpeed)
+		{
+			if (!(m_dwSongFlags & SONG_FIRSTTICK) || (pChn->nRowNote == NOTE_NONE)) 
+			{
+				bDoRetrig = true;
+				nRetrigCount = 0;
+			}
+		}
+	} else
 	{
 		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
@@ -3153,9 +3171,10 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			nRetrigCount++;
 		} else
 		{
-			UINT realspeed = nRetrigSpeed;
+			int realspeed = nRetrigSpeed;
+			// FT2 bug: if a retrig (Rxy) occours together with a volume command, the first retrig interval is increased by one tick
 			if ((param & 0x100) && (pChn->nRowVolCmd == VOLCMD_VOLUME) && (pChn->nRowParam & 0xF0)) realspeed++;
-			if ((m_nTickCount) || (param & 0x100))
+			if (!(m_dwSongFlags & SONG_FIRSTTICK) || (param & 0x100))
 			{
 				if (!realspeed) realspeed = 1;
 				if ((!(param & 0x100)) && (m_nMusicSpeed) && (!(m_nTickCount % realspeed))) bDoRetrig = true;
@@ -3213,6 +3232,10 @@ void CSoundFile::RetrigNote(UINT nChn, UINT param, UINT offset)	//rewbs.VolOffse
 			SampleOffset(nChn, offset, false);
 		}
 	}
+
+	// buggy-like-hell FT2 Rxy retrig!
+	if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100)) nRetrigCount++;
+
 	if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		pChn->nRetrigCount = (BYTE)nRetrigCount;
 }
