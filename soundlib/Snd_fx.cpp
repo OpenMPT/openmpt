@@ -768,7 +768,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 		if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 			//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
-			pChn->nRetrigCount = 0;
+			if(!IsCompatibleMode(TRK_FASTTRACKER2)) pChn->nRetrigCount = 0;
 			pChn->nTremorCount = 0;
 		}
 		if (bResetEnv)
@@ -785,15 +785,29 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 					// Volume Swing
 					if (pIns->nVolSwing)
 					{
-						int d = ((LONG)pIns->nVolSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
-						pChn->nVolSwing = (signed short)((d * pChn->nVolume + 1)/128);
+						if(IsCompatibleMode(TRK_IMPULSETRACKER))
+						{
+							double d = 2 * (((double) rand()) / RAND_MAX) - 1;
+							pChn->nVolSwing = d * pIns->nVolSwing / 100.0 * pChn->nVolume;
+						} else
+						{
+							int d = ((LONG)pIns->nVolSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
+							pChn->nVolSwing = (signed short)((d * pChn->nVolume + 1)/128);
+						}
 					}
 					// Pan Swing
 					if (pIns->nPanSwing)
 					{
-						int d = ((LONG)pIns->nPanSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
-						pChn->nPanSwing = (signed short)d;
-						pChn->nRestorePanOnNewNote = pChn->nPan+1;
+						if(IsCompatibleMode(TRK_IMPULSETRACKER))
+						{
+							double d = 2 * (((double) rand()) / RAND_MAX) - 1;
+							pChn->nPanSwing = d * pIns->nPanSwing * 4;
+						} else
+						{
+							int d = ((LONG)pIns->nPanSwing * (LONG)((rand() & 0xFF) - 0x7F)) / 128;
+							pChn->nPanSwing = (signed short)d;
+							pChn->nRestorePanOnNewNote = pChn->nPan + 1;
+						}
 					}
 					// Cutoff Swing
 					if (pIns->nCutSwing)
@@ -2500,7 +2514,7 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	// E4x: Set Vibrato WaveForm
 	case 0x40:	pChn->nVibratoType = param & 0x07; break;
 	// E5x: Set FineTune
-	case 0x50:	if (m_nTickCount) break;
+	case 0x50:	if(!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 				pChn->nC5Speed = S3MFineTuneTable[param];
 				if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 					pChn->nFineTune = param*2;
@@ -2536,7 +2550,11 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 		if((m_nType & MOD_TYPE_MOD) != 0) // MOD: Invert Loop
 		{
 			pChn->nEFxSpeed = param;
-			if(m_dwSongFlags & SONG_FIRSTTICK) InvertLoop(pChn);
+			if(m_dwSongFlags & SONG_FIRSTTICK)
+			{
+				//if((pChn->nRowInstr != 0) && (m_nTickCount == 0)) pChn->nEFxOffset = 0;	// reset offset (except when in pattern delay) TODO
+				InvertLoop(pChn);
+			}
 		}	
 		else // XM: Set Active Midi Macro
 		{
@@ -2559,7 +2577,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 	// S1x: Set Glissando Control
 	case 0x10:	pChn->dwFlags &= ~CHN_GLISSANDO; if (param) pChn->dwFlags |= CHN_GLISSANDO; break;
 	// S2x: Set FineTune
-	case 0x20:	if (m_nTickCount) break;
+	case 0x20:	if(!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 				pChn->nC5Speed = S3MFineTuneTable[param & 0x0F];
 				pChn->nFineTune = MOD2XMFineTune(param);
 				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
@@ -2573,7 +2591,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 	// S6x: Pattern Delay for x frames
 	case 0x60:	m_nFrameDelay = param; break;
 	// S7x: Envelope Control
-	case 0x70:	if (m_nTickCount) break;
+	case 0x70:	if(!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 				switch(param)
 				{
 				case 0:
@@ -3150,8 +3168,9 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 
 		if(m_dwSongFlags & SONG_FIRSTTICK)
 		{
-			// FT2 bug: if a retrig (Rxy) occours together with a volume command, the first retrig interval is increased by one tick
-			if(pChn->nRowVolCmd == VOLCMD_VOLUME) nRetrigCount = -1;
+			// here are some really stupid things FT2 does
+			if(pChn->nRowInstr > 0 && pChn->nRowNote == NOTE_NONE) nRetrigCount = 1;
+			if(pChn->nRowVolCmd == VOLCMD_VOLUME) nRetrigCount = -1;	// not correct yet
 			if(pChn->nRowNote != NOTE_NONE && pChn->nRowNote <= GetModSpecifications().noteMax) nRetrigCount++;
 		}
 		if (nRetrigCount >= nRetrigSpeed)
@@ -3164,6 +3183,8 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 		}
 	} else
 	{
+		// old routines
+
 		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
 			if (!nRetrigSpeed) nRetrigSpeed = 1;
