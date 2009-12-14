@@ -1,0 +1,25 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example3", "muparser_example3.vcproj", "{92844256-A384-4C27-A858-E3FA42DB2E39}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug DLL|Win32 = Debug DLL|Win32
+		Debug Static|Win32 = Debug Static|Win32
+		Release DLL|Win32 = Release DLL|Win32
+		Release Static|Win32 = Release Static|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{92844256-A384-4C27-A858-E3FA42DB2E39}.Debug DLL|Win32.ActiveCfg = Debug DLL|Win32
+		{92844256-A384-4C27-A858-E3FA42DB2E39}.Debug DLL|Win32.Build.0 = Debug DLL|Win32
+		{92844256-A384-4C27-A858-E3FA42DB2E39}.Debug Static|Win32.ActiveCfg = Debug DLL|Win32
+		{92844256-A384-4C27-A858-E3FA42DB2E39}.Debug Static|Win32.Build.0 = Debug DLL|Win32
+		{92844256-A384-4C27-A858-E3FA42DB2E39}.Release DLL|Win32.ActiveCfg = Release DLL|Win32
+		{92844256-A384-4C27-A858-E3FA42DB2E39}.Release DLL|Win32.Build.0 = Release DLL|Win32
+		{92844256-A384-4C27-A858-E3FA42DB2E39}.Release Static|Win32.ActiveCfg = Release DLL|Win32
+		{92844256-A384-4C27-A858-E3FA42DB2E39}.Release Static|Win32.Build.0 = Release DLL|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
