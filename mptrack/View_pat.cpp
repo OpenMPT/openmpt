@@ -3929,10 +3929,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 		}
 		else
 		{
-			if(CMainFrame::m_dwPatternSetup & PATTERN_NOTEFADE)
-				pModDoc->NoteOff(note, TRUE, ins, GetChanFromCursor(m_dwCursor));
-			else
-				pModDoc->NoteOff(note, FALSE, ins, GetChanFromCursor(m_dwCursor));
+			pModDoc->NoteOff(note, ((CMainFrame::m_dwPatternSetup & PATTERN_NOTEFADE) || pSndFile->GetNumInstruments() == 0) ? TRUE : FALSE, ins, GetChanFromCursor(m_dwCursor));
 		}
 	}
 

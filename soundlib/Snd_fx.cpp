@@ -1310,10 +1310,10 @@ BOOL CSoundFile::ProcessEffects()
 			// Note Cut/Off/Fade => ignore instrument
 			if (note >= NOTE_MIN_SPECIAL) instr = 0;
 
-			if ((note) && (note <= 128)) pChn->nNewNote = note;
+			if ((note) && (note <= NOTE_MAX)) pChn->nNewNote = note;
 
 			// New Note Action ?
-			if ((note) && (note <= 128) && (!bPorta))
+			if ((note) && (note <= NOTE_MAX) && (!bPorta))
 			{
 				CheckNNA(nChn, instr, note, FALSE);
 			}
@@ -2550,11 +2550,7 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 		if((m_nType & MOD_TYPE_MOD) != 0) // MOD: Invert Loop
 		{
 			pChn->nEFxSpeed = param;
-			if(m_dwSongFlags & SONG_FIRSTTICK)
-			{
-				//if((pChn->nRowInstr != 0) && (m_nTickCount == 0)) pChn->nEFxOffset = 0;	// reset offset (except when in pattern delay) TODO
-				InvertLoop(pChn);
-			}
+			if(m_dwSongFlags & SONG_FIRSTTICK) InvertLoop(pChn);
 		}	
 		else // XM: Set Active Midi Macro
 		{

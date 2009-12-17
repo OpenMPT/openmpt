@@ -2917,6 +2917,7 @@ NoSample:
 		{
 			UINT d = pSmp->nC5Speed;
 			if (d < 1) d = 8363;
+			if(d < m_nFinetuneStep) d = m_nFinetuneStep;
 			d += (pos * m_nFinetuneStep);
 			pSmp->nC5Speed = CLAMP(d, 1, 9999999); // 9999999 is max. in Impulse Tracker
 			int transp = CSoundFile::FrequencyToTranspose(pSmp->nC5Speed) >> 7;
