@@ -132,7 +132,6 @@ BOOL CMainFrame::gbPatternRecord = TRUE;
 BOOL CMainFrame::gbPatternVUMeters = FALSE;
 BOOL CMainFrame::gbPatternPluginNames = TRUE;
 DWORD CMainFrame::gdwNotificationType = MPTNOTIFY_DEFAULT;
-UINT CMainFrame::m_nFilterIndex = 0;
 UINT CMainFrame::m_nLastOptionsPage = 0;
 BOOL CMainFrame::gbMdiMaximize = FALSE;
 bool CMainFrame::gbShowHackControls = false;
@@ -2418,45 +2417,40 @@ void CMainFrame::OnChannelManager()
 void CMainFrame::OnAddDlsBank()
 //-----------------------------
 {
-	CFileDialog dlg(TRUE,
-					".dls",
-					NULL,
-					OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
-					"All Sound Banks|*.dls;*.sbk;*.sf2;*.mss|"
-					"Downloadable Sounds Banks (*.dls)|*.dls;*.mss|"
-					"SoundFont 2.0 Banks (*.sf2)|*.sbk;*.sf2|"
-					"All Files (*.*)|*.*||",
-					this);
-	if (dlg.DoModal() == IDOK)
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "dls", "",
+		"All Sound Banks|*.dls;*.sbk;*.sf2;*.mss|"
+		"Downloadable Sounds Banks (*.dls)|*.dls;*.mss|"
+		"SoundFont 2.0 Banks (*.sf2)|*.sbk;*.sf2|"
+		"All Files (*.*)|*.*||",
+		"",
+		true);
+	if(files.abort) return;
+
+	BeginWaitCursor();
+	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
-		BeginWaitCursor();
-		CTrackApp::AddDLSBank(dlg.GetPathName());
-		m_wndTree.RefreshDlsBanks();
-		EndWaitCursor();
+		CTrackApp::AddDLSBank(files.filenames[counter].c_str());
 	}
+	m_wndTree.RefreshDlsBanks();
+	EndWaitCursor();
 }
 
 
 void CMainFrame::OnImportMidiLib()
 //--------------------------------
 {
-	CFileDialog dlg(TRUE,
-					NULL,
-					NULL,
-					OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
-					"Text and INI files (*.txt,*.ini)|*.txt;*.ini;*.dls;*.sf2;*.sbk|"
-					"Downloadable Sound Banks (*.dls)|*.dls;*.mss|"
-					"SoundFont 2.0 banks (*.sf2)|*.sbk;*.sf2|"
-					"Gravis UltraSound (ultrasnd.ini)|ultrasnd.ini|"
-					"All Files (*.*)|*.*||",
-					this);
-	if (dlg.DoModal() == IDOK)
-	{
-		BeginWaitCursor();
-		CTrackApp::ImportMidiConfig(dlg.GetPathName());
-		m_wndTree.RefreshMidiLibrary();
-		EndWaitCursor();
-	}
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
+		"Text and INI files (*.txt,*.ini)|*.txt;*.ini;*.dls;*.sf2;*.sbk|"
+		"Downloadable Sound Banks (*.dls)|*.dls;*.mss|"
+		"SoundFont 2.0 banks (*.sf2)|*.sbk;*.sf2|"
+		"Gravis UltraSound (ultrasnd.ini)|ultrasnd.ini|"
+		"All Files (*.*)|*.*||");
+	if(files.abort) return;
+
+	BeginWaitCursor();
+	CTrackApp::ImportMidiConfig(files.first_file.c_str());
+	m_wndTree.RefreshMidiLibrary();
+	EndWaitCursor();
 }
 
 

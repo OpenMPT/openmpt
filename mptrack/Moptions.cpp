@@ -514,16 +514,10 @@ void COptionsColors::OnPresetBuzz()
 void COptionsColors::OnLoadColorScheme()
 //--------------------------------------
 {
-	CFileDialog dlg(TRUE, NULL, NULL,
-		OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
-		"OpenMPT Color Schemes|*.mptcolor|"
-		"All Files (*.*)|*.*||",
-		this);
-	dlg.m_ofn.lpstrInitialDir = theApp.GetConfigPath();
-	if (dlg.DoModal() != IDOK) return;
-	
-	TCHAR sFilename[MAX_PATH];
-	strcpy(sFilename, dlg.GetPathName());
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "mptcolor", "",
+		"OpenMPT Color Schemes|*.mptcolor||",
+		theApp.GetConfigPath());
+	if(files.abort) return;
 
 	// Ensure that all colours are reset (for outdated colour schemes)
 	OnPresetMPT();
@@ -531,7 +525,7 @@ void COptionsColors::OnLoadColorScheme()
 	{
 		TCHAR sKeyName[16];
 		wsprintf(sKeyName, "Color%02d", i);
-		CustomColors[i] = CMainFrame::GetPrivateProfileLong("Colors", sKeyName, CustomColors[i], sFilename);
+		CustomColors[i] = CMainFrame::GetPrivateProfileLong("Colors", sKeyName, CustomColors[i], files.first_file.c_str());
 	}
 	OnPreviewChanged();
 }
@@ -539,21 +533,16 @@ void COptionsColors::OnLoadColorScheme()
 void COptionsColors::OnSaveColorScheme()
 //--------------------------------------
 {
-	CFileDialog dlg(FALSE, "mptcolor", NULL,
-		OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-		"OpenMPT Color Schemes|*.mptcolor|",
-		this);
-	dlg.m_ofn.lpstrInitialDir = theApp.GetConfigPath();
-	if (dlg.DoModal() != IDOK) return;
-
-	TCHAR sFilename[MAX_PATH];
-	strcpy(sFilename, dlg.GetPathName());
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mptcolor", "",
+		"OpenMPT Color Schemes|*.mptcolor||",
+		theApp.GetConfigPath());
+	if(files.abort) return;
 
 	for(int i = 0; i < MAX_MODCOLORS; i++)
 	{
 		TCHAR sKeyName[16];
 		wsprintf(sKeyName, "Color%02d", i);
-		CMainFrame::WritePrivateProfileLong("Colors", sKeyName, CustomColors[i], sFilename);
+		CMainFrame::WritePrivateProfileLong("Colors", sKeyName, CustomColors[i], files.first_file.c_str());
 	}
 }
 

@@ -1529,31 +1529,22 @@ void CCtrlInstruments::OnInstrumentDuplicate()
 void CCtrlInstruments::OnInstrumentOpen()
 //---------------------------------------
 {
-	CFileDialog dlg(TRUE,
-					NULL,
-					NULL,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT,
-					"All Instruments|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff|"
-					"FastTracker II Instruments (*.xi)|*.xi|"
-					"GF1 Patches (*.pat)|*.pat|"
-					"Impulse Tracker Instruments (*.iti)|*.iti|"
-					"All Files (*.*)|*.*||",
-					this);
+	static int nLastIndex = 0;
 
-	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_INSTRUMENTS);
-	if(pszWdir[0])
-		dlg.m_ofn.lpstrInitialDir = pszWdir;
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
+		"All Instruments|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff|"
+		"FastTracker II Instruments (*.xi)|*.xi|"
+		"GF1 Patches (*.pat)|*.pat|"
+		"Impulse Tracker Instruments (*.iti)|*.iti|"
+		"All Files (*.*)|*.*||",
+		CMainFrame::GetWorkingDirectory(DIR_INSTRUMENTS),
+		true,
+		&nLastIndex);
+	if(files.abort) return;
 
-	const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size.
-	vector<char> filenameBuffer(bufferSize, 0);
-	dlg.GetOFN().lpstrFile = &filenameBuffer[0];
-	dlg.GetOFN().nMaxFile = bufferSize;
+	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS, true);
 
-	if (dlg.DoModal() != IDOK) return;
-
-	POSITION pos = dlg.GetStartPosition();
-	size_t counter = 0;
-	while(pos != NULL)
+	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
 		//If loading multiple instruments, advancing to next instrument and creating
 		//new instrument if necessary.
@@ -1568,12 +1559,10 @@ void CCtrlInstruments::OnInstrumentOpen()
 				OnInstrumentNew();
 		}
 
-		if(!OpenInstrument(dlg.GetNextPathName(pos)))
+		if(!OpenInstrument(files.filenames[counter].c_str()))
 			ErrorBox(IDS_ERR_FILEOPEN, this);
-
-		counter++;
 	}
-	filenameBuffer.clear();
+
 	if (m_pParent) m_pParent->InstrumentChanged(m_nInstrument);
 	SwitchToView();
 }
@@ -1597,43 +1586,29 @@ void CCtrlInstruments::OnInstrumentSave()
 	}
 	SanitizeFilename(szFileName);
 
-// -> CODE#0019
-// -> DESC="correctly load ITI & XI instruments sample note map"
-//	CFileDialog dlg(FALSE, (m_pSndFile->m_nType & MOD_TYPE_IT) ? "iti" : "xi",
-//			szFileName,
-//			OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-//			"FastTracker II Instruments (*.xi)|*.xi|"
-//			"Impulse Tracker Instruments (*.iti)|*.iti||",
-//			this);
-	CFileDialog dlg(FALSE, (m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? "iti" : "xi",
-			szFileName,
-			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-			( m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT) ? "Impulse Tracker Instruments (*.iti)|*.iti|"
-												  "FastTracker II Instruments (*.xi)|*.xi||"
-												: "FastTracker II Instruments (*.xi)|*.xi|"
-												  "Impulse Tracker Instruments (*.iti)|*.iti||" ),
-			this);
-// -! BUG_FIX#0019
-
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, (m_pSndFile->GetType() == MOD_TYPE_XM) ? "xi" : "iti", szFileName,
+		(m_pSndFile->GetType() == MOD_TYPE_XM) ?
+			"FastTracker II Instruments (*.xi)|*.xi|"
+			"Impulse Tracker Instruments (*.iti)|*.iti||" :
+			"Impulse Tracker Instruments (*.iti)|*.iti|"
+			"FastTracker II Instruments (*.xi)|*.xi||",
+		CMainFrame::GetWorkingDirectory(DIR_INSTRUMENTS));
+	if(files.abort) return;
 	
-	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_INSTRUMENTS);
-	if(pszWdir[0])
-		dlg.m_ofn.lpstrInitialDir = pszWdir;
-
-	if (dlg.DoModal() != IDOK) return;
 	BeginWaitCursor();
-	_splitpath(dlg.GetPathName(), drive, path, NULL, ext);
+
+	_splitpath(files.first_file.c_str(), drive, path, NULL, ext);
 	BOOL bOk = FALSE;
 	if (!lstrcmpi(ext, ".iti"))
-		bOk = m_pSndFile->SaveITIInstrument(m_nInstrument, dlg.GetPathName());
+		bOk = m_pSndFile->SaveITIInstrument(m_nInstrument, files.first_file.c_str());
 	else
-		bOk = m_pSndFile->SaveXIInstrument(m_nInstrument, dlg.GetPathName());
+		bOk = m_pSndFile->SaveXIInstrument(m_nInstrument, files.first_file.c_str());
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	int n = strlen(dlg.GetPathName());
+	int n = strlen(files.first_file.c_str());
 	if(n > _MAX_PATH) n = _MAX_PATH;
-	strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument-1],dlg.GetPathName(),n);
+	strncpy(m_pSndFile->m_szInstrumentPath[m_nInstrument-1], files.first_file.c_str(),n);
 	m_pSndFile->instrumentModified[m_nInstrument-1] = FALSE;
 // -! NEW_FEATURE#0023
 
@@ -1643,7 +1618,7 @@ void CCtrlInstruments::OnInstrumentSave()
 		strcpy(szFileName, drive);
 		strcat(szFileName, path);
 		
-		CMainFrame::SetWorkingDirectory(szFileName, DIR_INSTRUMENTS);
+		CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_INSTRUMENTS);
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

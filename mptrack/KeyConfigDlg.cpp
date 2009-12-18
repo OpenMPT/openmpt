@@ -646,37 +646,29 @@ void COptionsKeyboard::OnDestroy()
 
 void COptionsKeyboard::OnLoad()
 { 
-	CFileDialog dlg(TRUE, "mkb", m_sFullPathName,
-					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-					"OpenMPT Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
-	if (CMainFrame::m_szKbdFile[0])
-			dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szKbdFile;
+	std::string filename = m_sFullPathName;
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "mkb", filename,
+		"OpenMPT Key Bindings (*.mkb)|*.mkb||",
+		CMainFrame::m_szKbdFile);
+	if(files.abort)	return;
 
-	if (dlg.DoModal() == IDOK)
-	{
-		m_sFullPathName=dlg.GetPathName();
-		plocalCmdSet->LoadFile(m_sFullPathName);
-		ForceUpdateGUI();
-		TentativeSetToDefaultFile(m_sFullPathName);
-	}
-	
+	m_sFullPathName = files.first_file.c_str();
+	plocalCmdSet->LoadFile(m_sFullPathName);
+	ForceUpdateGUI();
+	TentativeSetToDefaultFile(m_sFullPathName);
 }
 
 void COptionsKeyboard::OnSave()
 {	
-	CFileDialog dlg(FALSE, "mkb", m_sFullPathName,
-					OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-					"OpenMPT Key Bindings (*.mkb)|*.mkb||",	theApp.m_pMainWnd);
-	if (CMainFrame::m_szKbdFile[0])
-			dlg.m_ofn.lpstrInitialDir = CMainFrame::m_szKbdFile;
-	
-	if (dlg.DoModal() == IDOK)
-	{
-		m_sFullPathName=dlg.GetPathName(); 
-		plocalCmdSet->SaveFile(m_sFullPathName, m_bDebugSave.GetCheck());
-		TentativeSetToDefaultFile(m_sFullPathName);
-	}
-	
+	std::string filename = m_sFullPathName;
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mkb", filename,
+		"OpenMPT Key Bindings (*.mkb)|*.mkb||",
+		CMainFrame::m_szKbdFile);
+	if(files.abort)	return;
+
+	m_sFullPathName = files.first_file.c_str();
+	plocalCmdSet->SaveFile(m_sFullPathName, m_bDebugSave.GetCheck());
+	TentativeSetToDefaultFile(m_sFullPathName);
 }
 
 bool COptionsKeyboard::TentativeSetToDefaultFile(CString m_sFullPathName)

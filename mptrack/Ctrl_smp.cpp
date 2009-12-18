@@ -902,38 +902,25 @@ void CCtrlSamples::OnSampleOpen()
 //-------------------------------
 {
 	static int nLastIndex = 0;
-	CFileDialog dlg(TRUE,
-					NULL,
-					NULL,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT,
-					"All Samples|*.wav;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm|"
-					"Wave Files (*.wav)|*.wav|"
-					"XI Samples (*.xi)|*.xi|"
-					"Impulse Tracker Samples (*.its)|*.its|"
-					"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
-					"GF1 Patches (*.pat)|*.pat|"
-					"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.8sv;*.8svx;*.svx|"
-					"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
-					"All Files (*.*)|*.*||",
-					this);
+	
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
+		"All Samples|*.wav;*.pat;*.s3i;*.smp;*.snd;*.raw;*.xi;*.aif;*.aiff;*.its;*.8sv;*.8svx;*.svx;*.pcm|"
+		"Wave Files (*.wav)|*.wav|"
+		"XI Samples (*.xi)|*.xi|"
+		"Impulse Tracker Samples (*.its)|*.its|"
+		"ScreamTracker Samples (*.s3i,*.smp)|*.s3i;*.smp|"
+		"GF1 Patches (*.pat)|*.pat|"
+		"AIFF Files (*.aiff;*.8svx)|*.aif;*.aiff;*.8sv;*.8svx;*.svx|"
+		"Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
+		"All Files (*.*)|*.*||",
+		CMainFrame::GetWorkingDirectory(DIR_SAMPLES),
+		true,
+		&nLastIndex);
+	if(files.abort) return;
 
-	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_SAMPLES);
-	if(pszWdir[0])
-		dlg.m_ofn.lpstrInitialDir = pszWdir;
+	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_SAMPLES, true);
 
-	dlg.m_ofn.nFilterIndex = nLastIndex;
-	const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
-	vector<char> filenameBuffer(bufferSize, 0);
-	dlg.GetOFN().lpstrFile = &filenameBuffer[0];
-	dlg.GetOFN().nMaxFile = bufferSize;
-
-	if (dlg.DoModal() != IDOK) return;
-
-	nLastIndex = dlg.m_ofn.nFilterIndex;
-
-	POSITION pos = dlg.GetStartPosition();
-	size_t counter = 0;
-	while(pos != NULL)
+	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
 		//If loading multiple samples, advancing to next sample and creating
 		//new one if necessary.
@@ -944,16 +931,13 @@ void CCtrlSamples::OnSampleOpen()
 			else
 				m_nSample++;
 
-            if(m_nSample > m_pSndFile->GetNumSamples())
+			if(m_nSample > m_pSndFile->GetNumSamples())
 				OnSampleNew();
 		}
 
-		if(!OpenSample(dlg.GetNextPathName(pos)))
+		if(!OpenSample(files.filenames[counter].c_str()))
 			ErrorBox(IDS_ERR_FILEOPEN, this);
-
-		counter++;
 	}
-	filenameBuffer.clear();
 	SwitchToView();
 }
 
@@ -1000,24 +984,20 @@ void CCtrlSamples::OnSampleSave()
 	}
 	SanitizeFilename(szFileName);
 
-	CFileDialog dlg(FALSE, "wav",
-			szFileName,
-			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-			"Wave File (*.wav)|*.wav|"
-			"RAW Audio (*.raw)|*.raw||",
-			this);
-	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_SAMPLES);
-	if(pszWdir[0])
-		dlg.m_ofn.lpstrInitialDir = pszWdir;
-	if (dlg.DoModal() != IDOK) return;
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", szFileName,
+		"Wave File (*.wav)|*.wav|"
+		"RAW Audio (*.raw)|*.raw||",
+		CMainFrame::GetWorkingDirectory(DIR_SAMPLES));
+	if(files.abort) return;
+
 	BeginWaitCursor();
 
 	TCHAR ext[_MAX_EXT];
-	_splitpath(dlg.GetPathName(), NULL, NULL, NULL, ext);
+	_splitpath(files.first_file.c_str(), NULL, NULL, NULL, ext);
 
 	bool bOk = false;
 	UINT iMinSmp = m_nSample, iMaxSmp = m_nSample;
-	CString sFilename = dlg.GetPathName(), sNumberFormat;
+	CString sFilename = files.first_file.c_str(), sNumberFormat;
 	if(bBatchSave)
 	{
 		iMinSmp = 1;
@@ -1040,7 +1020,7 @@ void CCtrlSamples::OnSampleSave()
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 
-				sFilename = dlg.GetPathName();
+				sFilename = files.first_file.c_str();
 				sFilename.Replace("%sample_number%", sSampleNumber);
 				sFilename.Replace("%sample_filename%", sSampleFilename);
 				sFilename.Replace("%sample_name%", sSampleName);
@@ -1058,7 +1038,7 @@ void CCtrlSamples::OnSampleSave()
 		ErrorBox(IDS_ERR_SAVESMP, this);
 	} else
 	{
-		CMainFrame::SetWorkingDirectory(dlg.GetPathName(), DIR_SAMPLES, true);
+		CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_SAMPLES, true);
 	}
 	SwitchToView();
 }

@@ -1019,13 +1019,13 @@ void CViewGlobals::OnLoadParam()
 	//rewbs.fxpPresets: changed Eric's code to use fxp load/save
 	if(pVstPlugin == NULL) return;
 
-	CFileDialog dlg(TRUE, "fxp", NULL,
-				OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-				"VST FX Program (*.fxp)|*.fxp||",	theApp.m_pMainWnd);
-	if (!(dlg.DoModal() == IDOK))	return;
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
+		"VST FX Program (*.fxp)|*.fxp||",
+		CMainFrame::GetDefaultDirectory(DIR_PLUGINPRESETS));
+	if(files.abort) return;
     
 	//TODO: exception handling
-	if (!(pVstPlugin->LoadProgram(dlg.GetFileName()))) {
+	if (!(pVstPlugin->LoadProgram(files.first_file.c_str()))) {
 		::AfxMessageBox("Error loading preset.Are you sure it is for this plugin?");
 	} else {
 		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
@@ -1045,13 +1045,13 @@ void CViewGlobals::OnSaveParam()
 	if(pVstPlugin == NULL) return;
 
 	//rewbs.fxpPresets: changed Eric's code to use fxp load/save
-	CFileDialog dlg(FALSE, "fxp", NULL,
-				OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-				"VST Program (*.fxp)|*.fxp||",	theApp.m_pMainWnd);
-	if (!(dlg.DoModal() == IDOK))	return;
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
+		"VST Program (*.fxp)|*.fxp||",
+		CMainFrame::GetDefaultDirectory(DIR_PLUGINPRESETS));
+	if(files.abort) return;
 
 	//TODO: exception handling
-	if (!(pVstPlugin->SaveProgram(dlg.GetFileName())))
+	if (!(pVstPlugin->SaveProgram(files.first_file.c_str())))
 		::AfxMessageBox("Error saving preset.");
 	//end rewbs.fxpPresets
 
