@@ -22,12 +22,12 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-const TCHAR* const FileFilterMOD = TEXT("ProTracker Modules (*.mod)|*.mod||");
-const TCHAR* const FileFilterXM = TEXT("FastTracker Modules (*.xm)|*.xm||");
-const TCHAR* const FileFilterS3M = TEXT("ScreamTracker Modules (*.s3m)|*.s3m||");
-const TCHAR* const FileFilterIT = TEXT("Impulse Tracker Modules (*.it)|*.it||");
-const TCHAR* const FileFilterITP = TEXT("Impulse Tracker Projects (*.itp)|*.itp||");
-const TCHAR* const FileFilterMPT = TEXT("OpenMPT Modules (*.mptm)|*.mptm||");
+const std::string FileFilterMOD = _T("ProTracker Modules (*.mod)|*.mod||");
+const std::string FileFilterXM = _T("FastTracker Modules (*.xm)|*.xm||");
+const std::string FileFilterS3M = _T("ScreamTracker Modules (*.s3m)|*.s3m||");
+const std::string FileFilterIT = _T("Impulse Tracker Modules (*.it)|*.it||");
+const std::string FileFilterITP = _T("Impulse Tracker Projects (*.itp)|*.itp||");
+const std::string FileFilterMPT = _T("OpenMPT Modules (*.mptm)|*.mptm||");
 
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc
@@ -489,25 +489,25 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 	CHAR s[_MAX_PATH] = "";
 	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
 	CHAR fname[_MAX_FNAME]="", fext[_MAX_EXT]="";
-	LPCSTR lpszFilter = NULL, lpszDefExt = NULL;
+	std::string extFilter = "", defaultExtension = "";
 	
 	switch(m_SndFile.GetType())
 	{
 	case MOD_TYPE_MOD:
 		MsgBoxHidable(ModCompatibilityExportTip);
-		lpszDefExt = "mod";
-		lpszFilter = FileFilterMOD;
+		defaultExtension = "mod";
+		extFilter = FileFilterMOD;
 		strcpy(fext, ".mod");
 		break;
 	case MOD_TYPE_S3M:
-		lpszDefExt = "s3m";
-		lpszFilter = FileFilterS3M;
+		defaultExtension = "s3m";
+		extFilter = FileFilterS3M;
 		strcpy(fext, ".s3m");
 		break;
 	case MOD_TYPE_XM:
 		MsgBoxHidable(XMCompatibilityExportTip);
-		lpszDefExt = "xm";
-		lpszFilter = FileFilterXM;
+		defaultExtension = "xm";
+		extFilter = FileFilterXM;
 		strcpy(fext, ".xm");
 		break;
 	case MOD_TYPE_IT:
@@ -517,22 +517,22 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 //		lpszFilter = "Impulse Tracker Modules (*.it)|*.it||";
 //		strcpy(fext, ".it");
 		if(m_SndFile.m_dwSongFlags & SONG_ITPROJECT){
-			lpszDefExt = "itp";
-			lpszFilter = FileFilterITP;
+			defaultExtension = "itp";
+			extFilter = FileFilterITP;
 			strcpy(fext, ".itp");
 		}
 		else
 		{
 			MsgBoxHidable(ItCompatibilityExportTip);
-			lpszDefExt = "it";
-			lpszFilter = FileFilterIT;
+			defaultExtension = "it";
+			extFilter = FileFilterIT;
 			strcpy(fext, ".it");
 		}
 // -! NEW_FEATURE#0023
 		break;
 	case MOD_TYPE_MPT:
-			lpszDefExt = "mptm";
-			lpszFilter = FileFilterMPT;
+			defaultExtension = "mptm";
+			extFilter = FileFilterMPT;
 			strcpy(fext, ".mptm");
 		break;
 	default:	
@@ -547,18 +547,15 @@ BOOL CModDoc::DoSave(LPCSTR lpszPathName, BOOL)
 		strcat(s, path);
 		strcat(s, fname);
 		strcat(s, fext);
-		CFileDialog dlg(FALSE, lpszDefExt, s,
-			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-			lpszFilter,
-			theApp.m_pMainWnd);
+		
+		FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, defaultExtension, s,
+			extFilter,
+			CMainFrame::GetWorkingDirectory(DIR_MODS));
+		if(files.abort) return FALSE;
 
-		const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_MODS);
-		if(pszWdir[0])
-			dlg.m_ofn.lpstrInitialDir = pszWdir;
+		CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_MODS, true);
 
-		if (dlg.DoModal() != IDOK) return FALSE;
-		strcpy(s, dlg.GetPathName());
-		CMainFrame::SetWorkingDirectory(s, DIR_MODS, true);
+		strcpy(s, files.first_file.c_str());
 		_splitpath(s, drive, path, fname, fext);
 	} else
 	{
@@ -1415,20 +1412,20 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
 	_splitpath(GetPathName(), NULL, NULL, fname, NULL);
-	CFileDialog dlg(FALSE, "wav", fname,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-					"Wave Files (*.wav)|*.wav||", pMainFrm);
-	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_EXPORT);
 
 	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder);
 	if (wsdlg.DoModal() != IDOK) return;
-	if (dlg.DoModal() != IDOK) return; //rewbs: made filename dialog appear after wav settings dialog
+
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "wav", fname,
+		"Wave Files (*.wav)|*.wav||",
+		CMainFrame::GetWorkingDirectory(DIR_EXPORT));
+	if(files.abort) return;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-	pMainFrm->SetDefaultDirectory(dlg.GetPathName(), DIR_EXPORT, true);
+	CMainFrame::SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
 
 	TCHAR s[_MAX_PATH];
-	strcpy(s, dlg.GetPathName());
+	strcpy(s, files.first_file.c_str());
 
 	// Saving as wave file
 	UINT p = 0, n = 1;
@@ -1508,59 +1505,58 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 void CModDoc::OnFileMP3Convert()
 //------------------------------
 {
+	int nFilterIndex = 0;
 	TCHAR sFName[_MAX_FNAME] = "";
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
 	_splitpath(GetPathName(), NULL, NULL, sFName, NULL);
-	CFileDialog dlg(FALSE, "mp3", sFName,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-					"MPEG Layer III Files (*.mp3)|*.mp3|Layer3 Wave Files (*.wav)|*.wav||", pMainFrm);
-	dlg.m_ofn.nFilterIndex = 0;
-	
-	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_EXPORT);
 
-	if (dlg.DoModal() == IDOK)
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mp3", sFName,
+		"MPEG Layer III Files (*.mp3)|*.mp3|Layer3 Wave Files (*.wav)|*.wav||",
+		CMainFrame::GetWorkingDirectory(DIR_EXPORT),
+		false,
+		&nFilterIndex);
+	if(files.abort) return;
+
+	MPEGLAYER3WAVEFORMAT wfx;
+	HACMDRIVERID hadid;
+
+	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
+	pMainFrm->SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
+
+	TCHAR s[_MAX_PATH], fext[_MAX_EXT];
+	strcpy(s, files.first_file.c_str());
+	_splitpath(s, NULL, NULL, NULL, fext);
+	if (strlen(fext) <= 1)
 	{
-		MPEGLAYER3WAVEFORMAT wfx;
-		HACMDRIVERID hadid;
-
-		// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
-		pMainFrm->SetDefaultDirectory(dlg.GetPathName(), DIR_EXPORT, true);
-
-		TCHAR s[_MAX_PATH], fext[_MAX_EXT];
-		strcpy(s, dlg.GetPathName());
-		_splitpath(s, NULL, NULL, NULL, fext);
-		if (strlen(fext) <= 1)
-		{
-			int l = strlen(s) - 1;
-			if ((l >= 0) && (s[l] == '.')) s[l] = 0;
-			strcpy(fext, (dlg.m_ofn.nFilterIndex == 2) ? ".wav" : ".mp3");
-			strcat(s, fext);
-		}
-		CLayer3Convert wsdlg(&m_SndFile, pMainFrm);
-		if (m_SndFile.m_szNames[0][0]) wsdlg.m_bSaveInfoField = TRUE;
-		if (wsdlg.DoModal() != IDOK) return;
-		wsdlg.GetFormat(&wfx, &hadid);
-		// Saving as mpeg file
-		BOOL bplaying = FALSE;
-		UINT pos = m_SndFile.GetCurrentPos();
-		bplaying = TRUE;
-		pMainFrm->PauseMod();
-		m_SndFile.SetCurrentPos(0);
-
-		m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
-
-		// Saving file
-		CFileTagging *pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_FileTags : NULL;
-		CDoAcmConvert dwcdlg(&m_SndFile, s, &wfx.wfx, hadid, pTag, pMainFrm);
-		dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
-		dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
-		dwcdlg.DoModal();
-		m_SndFile.SetCurrentPos(pos);
-		m_SndFile.GetLength(TRUE);
-		CMainFrame::UpdateAudioParameters(TRUE);
+		int l = strlen(s) - 1;
+		if ((l >= 0) && (s[l] == '.')) s[l] = 0;
+		strcpy(fext, (nFilterIndex == 2) ? ".wav" : ".mp3");
+		strcat(s, fext);
 	}
+	CLayer3Convert wsdlg(&m_SndFile, pMainFrm);
+	if (m_SndFile.m_szNames[0][0]) wsdlg.m_bSaveInfoField = TRUE;
+	if (wsdlg.DoModal() != IDOK) return;
+	wsdlg.GetFormat(&wfx, &hadid);
+	// Saving as mpeg file
+	BOOL bplaying = FALSE;
+	UINT pos = m_SndFile.GetCurrentPos();
+	bplaying = TRUE;
+	pMainFrm->PauseMod();
+	m_SndFile.SetCurrentPos(0);
+
+	m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
+
+	// Saving file
+	CFileTagging *pTag = (wsdlg.m_bSaveInfoField) ? &wsdlg.m_FileTags : NULL;
+	CDoAcmConvert dwcdlg(&m_SndFile, s, &wfx.wfx, hadid, pTag, pMainFrm);
+	dwcdlg.m_dwFileLimit = wsdlg.m_dwFileLimit;
+	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
+	dwcdlg.DoModal();
+	m_SndFile.SetCurrentPos(pos);
+	m_SndFile.GetLength(TRUE);
+	CMainFrame::UpdateAudioParameters(TRUE);
 }
 
 
@@ -1577,19 +1573,17 @@ void CModDoc::OnFileMidiConvert()
 	strcat(s, path);
 	strcat(s, fname);
 	strcat(s, ".mid");
-	CFileDialog dlg(FALSE, "mid", s,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-					"Midi Files (*.mid,*.rmi)|*.mid;*.rmi||", pMainFrm);
-	dlg.m_ofn.nFilterIndex = 0;
-	if (dlg.DoModal() == IDOK)
+
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "mid", s,
+		"Midi Files (*.mid,*.rmi)|*.mid;*.rmi||");
+	if(files.abort) return;
+
+	CModToMidi mididlg(files.first_file.c_str(), &m_SndFile, pMainFrm);
+	if (mididlg.DoModal() == IDOK)
 	{
-		CModToMidi mididlg(dlg.GetPathName(), &m_SndFile, pMainFrm);
-		if (mididlg.DoModal() == IDOK)
-		{
-			BeginWaitCursor();
-			mididlg.DoConvert();
-			EndWaitCursor();
-		}
+		BeginWaitCursor();
+		mididlg.DoConvert();
+		EndWaitCursor();
 	}
 }
 
@@ -1598,9 +1592,9 @@ void CModDoc::OnFileCompatibilitySave()
 //-------------------------------------
 {
 	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
-	CHAR s[_MAX_PATH], fname[_MAX_FNAME]="";
+	CHAR fname[_MAX_FNAME]="";
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CString ext, pattern;
+	std::string ext, pattern, filename;
 	
 	UINT type = m_SndFile.GetType();
 
@@ -1639,35 +1633,30 @@ void CModDoc::OnFileCompatibilitySave()
 	}
 
 	_splitpath(GetPathName(), drive, path, fname, NULL);
-	strcpy(s, drive);
-	strcat(s, path);
-	strcat(s, fname);
-	if (!strstr(fname, "compat")) {
-		strcat(s, ".compat.");
-	} else {
-		strcat(s, ".");
-	}
-	strcat(s, ext);
-	CFileDialog dlg(FALSE, ext, s,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-					pattern, pMainFrm);
-	dlg.m_ofn.lpstrInitialDir = CMainFrame::GetWorkingDirectory(DIR_MODS);
+	filename = drive;
+	filename += path;
+	filename += fname;
+	if (!strstr(fname, "compat"))
+		filename += ".compat.";
+	else
+		filename += ".";
+	filename += ext;
 
-	if (dlg.DoModal() != IDOK){ 
-		return;
-	}
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, ext, filename, pattern, CMainFrame::GetWorkingDirectory(DIR_MODS));
+	if(files.abort) return;
+
 	switch (type)
 	{
 		case MOD_TYPE_MOD:
-			m_SndFile.SaveMod(dlg.GetPathName(), 0, true);
+			m_SndFile.SaveMod(files.first_file.c_str(), 0, true);
 			SetModified(); // Compatibility save may adjust samples so set modified...
 			m_ShowSavedialog = true;	// ...and force save dialog to appear when saving.
 			break;
 		case MOD_TYPE_XM:
-			m_SndFile.SaveXM(dlg.GetPathName(), 0, true);
+			m_SndFile.SaveXM(files.first_file.c_str(), 0, true);
 			break;
 		case MOD_TYPE_IT:
-			m_SndFile.SaveCompatIT(dlg.GetPathName());
+			m_SndFile.SaveCompatIT(files.first_file.c_str());
 			break;
 	}
 }

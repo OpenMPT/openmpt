@@ -1492,24 +1492,21 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 //---------------------------------------------
 {
-	CFileDialog dlg(TRUE,
-					NULL,
-					NULL,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
-					"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls|"
-					"FastTracker II Instruments (*.xi)|*.xi|"
-					"GF1 Patches (*.pat)|*.pat|"
-					"Wave Files (*.wav)|*.wav|"
-					"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"
-					"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
-					"DLS Sound Banks (*.dls)|*.dls|"
-					"All Files (*.*)|*.*||",
-					this);
-	if (dlg.DoModal() != IDOK) return FALSE;
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
+		"All Instruments and Banks|*.xi;*.pat;*.iti;*.wav;*.aif;*.aiff;*.sf2;*.sbk;*.dls|"
+		"FastTracker II Instruments (*.xi)|*.xi|"
+		"GF1 Patches (*.pat)|*.pat|"
+		"Wave Files (*.wav)|*.wav|"
+		"Impulse Tracker Instruments (*.iti)|*.iti;*.its|"
+		"SoundFont 2.0 Banks (*.sf2)|*.sf2;*.sbk|"
+		"DLS Sound Banks (*.dls)|*.dls|"
+		"All Files (*.*)|*.*||");
+	if(files.abort) return FALSE;
+
 	if (dwItem & 0x80)
-		return SetMidiPercussion(dwItem & 0x7F, dlg.GetPathName());
+		return SetMidiPercussion(dwItem & 0x7F, files.first_file.c_str());
 	else
-		return SetMidiInstrument(dwItem, dlg.GetPathName());
+		return SetMidiInstrument(dwItem, files.first_file.c_str());
 }
 
 
@@ -2914,24 +2911,12 @@ void CModTree::OnSetItemPath()
 
 	if(pSndFile && modItemID){
 
-		CHAR pszFileNames[_MAX_PATH];
-		CFileDialog dlg(TRUE, NULL, NULL, 
-						OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST|OFN_FORCESHOWHIDDEN,
-						"All files(*.*)|*.*||",
-						this);
+		FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
+			"All files(*.*)|*.*||");
+		if(files.abort) return;
 
-		pszFileNames[0] = 0;
-		pszFileNames[1] = 0;
-		dlg.m_ofn.lpstrFile = pszFileNames;
-		dlg.m_ofn.nMaxFile = _MAX_PATH;
-
-		if(dlg.DoModal() == IDOK){
-			strcpy(pSndFile->m_szInstrumentPath[modItemID - 1], pszFileNames);
-			OnRefreshTree();
-		}
-
-		dlg.m_ofn.lpstrFile = NULL;
-		dlg.m_ofn.nMaxFile = 0;
+		strcpy(pSndFile->m_szInstrumentPath[modItemID - 1], files.first_file.c_str());
+		OnRefreshTree();
 	}
 }
 
@@ -2948,26 +2933,17 @@ void CModTree::OnSaveItem()
 
 	if(pSndFile && modItemID){
 
-		if(pSndFile->m_szInstrumentPath[modItemID - 1][0] == '\0'){
-			CHAR pszFileNames[_MAX_PATH];
+		if(pSndFile->m_szInstrumentPath[modItemID - 1][0] == '\0')
+		{
+			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, (pSndFile->GetType() == MOD_TYPE_XM) ? "xi" : "iti", "",
+				(pSndFile->GetType() == MOD_TYPE_XM) ?
+				"FastTracker II Instruments (*.xi)|*.xi|"
+				"Impulse Tracker Instruments (*.iti)|*.iti||" :
+				"Impulse Tracker Instruments (*.iti)|*.iti|"
+				"FastTracker II Instruments (*.xi)|*.xi||");
+			if(files.abort) return;
 
-			CFileDialog dlg(FALSE, (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? "iti" : "xi", NULL, 
-							OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-							( pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT) ? "Impulse Tracker Instruments (*.iti)|*.iti|"
-																"FastTracker II Instruments (*.xi)|*.xi||"
-															  : "FastTracker II Instruments (*.xi)|*.xi|"
-																"Impulse Tracker Instruments (*.iti)|*.iti||" ),
-							this);
-
-			pszFileNames[0] = 0;
-			pszFileNames[1] = 0;
-			dlg.m_ofn.lpstrFile = pszFileNames;
-			dlg.m_ofn.nMaxFile = _MAX_PATH;
-
-			if(dlg.DoModal() == IDOK) strcpy(pSndFile->m_szInstrumentPath[modItemID - 1], pszFileNames);
-
-			dlg.m_ofn.lpstrFile = NULL;
-			dlg.m_ofn.nMaxFile = 0;
+			strcpy(pSndFile->m_szInstrumentPath[modItemID - 1], files.first_file.c_str());
 		}
 
 		if(pSndFile->m_szInstrumentPath[modItemID - 1][0] != '\0'){
@@ -3009,18 +2985,12 @@ void CModTree::OnImportMidiLib()
 void CModTree::OnExportMidiLib()
 //------------------------------
 {
-	CHAR szFileName[_MAX_PATH] = "mptrack.ini";
-	CFileDialog dlg(FALSE,
-					"ini",
-					szFileName,
-					OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-					"Text and INI files (*.txt,*.ini)|*.txt;*.ini|"
-					"All Files (*.*)|*.*||",
-					this);
-	if (dlg.DoModal() == IDOK)
-	{
-		CTrackApp::ExportMidiConfig(dlg.GetPathName());
-	}
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "ini", "mptrack.ini",
+		"Text and INI files (*.txt,*.ini)|*.txt;*.ini|"
+		"All Files (*.*)|*.*||");
+	if(files.abort) return;
+
+	CTrackApp::ExportMidiConfig(files.first_file.c_str());
 }
 
 

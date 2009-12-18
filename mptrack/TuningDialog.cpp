@@ -619,24 +619,23 @@ void CTuningDialog::OnBnClickedButtonExport()
 		return;
 	}
 		
-	string filter;
+	std::string filter;
 	if(pT != NULL)
 		filter = string("Tuning files (*") + CTuning::s_FileExtension + string(")|*") + CTuning::s_FileExtension + string("|");
 	if(pTC != NULL)
 		filter += string("Tuning collection files (") + CTuningCollection::s_FileExtension + string(")|*") + CTuningCollection::s_FileExtension + string("|");
 
-	CFileDialog dlg(FALSE, CTuning::s_FileExtension.c_str(),
-			NULL,
-			OFN_HIDEREADONLY| OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN,
-			 filter.c_str(), this);
-	dlg.m_ofn.lpstrInitialDir = theApp.GetTuningsPath();
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, CTuning::s_FileExtension, "",
+		filter,
+		theApp.GetTuningsPath());
+	if(files.abort) return;
+
+	BeginWaitCursor();
 
 	bool failure = true;
 	
-	if (dlg.DoModal() != IDOK) return;
-	BeginWaitCursor();
-	ofstream fout(dlg.GetPathName(), ios::binary);
-	const string ext = "." + dlg.GetFileExt();
+	ofstream fout(files.first_file.c_str(), ios::binary);
+	const string ext = "." + files.extension;
 
 	if(ext == CTuning::s_FileExtension)
 	{
@@ -663,23 +662,18 @@ void CTuningDialog::OnBnClickedButtonImport()
 	string filter = string("Tuning files (*") + CTuning::s_FileExtension + string(", *") + CTuningCollection::s_FileExtension + string(")|*") + 
 					CTuning::s_FileExtension + string(";*") + CTuningCollection::s_FileExtension + string("|");
 
-	CFileDialog dlg(TRUE,
-					NULL,
-					NULL,
-					OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST,
-					filter.c_str(),
-					this);
-	dlg.m_ofn.lpstrInitialDir = theApp.GetTuningsPath();
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
+		filter,
+		theApp.GetTuningsPath());
+	if(files.abort) return;
 
-	if (dlg.DoModal() != IDOK) return;
-
-	const string ext = string(".") + string(dlg.GetFileExt());
+	const string ext = string(".") + files.extension;
 
 	bool failure = true;
 
 	if(ext == CTuning::s_FileExtension)
 	{
-		ifstream fin(dlg.GetPathName(), ios::binary);
+		ifstream fin(files.first_file.c_str(), ios::binary);
 		CTuning* pT = CTuningRTI::DeserializeOLD(fin);
 		if(pT == 0) {fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
 		fin.close();
@@ -701,7 +695,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			//a separate collection - no possibility to 
 			//directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
-			pNewTCol->SetSavefilePath(static_cast<LPCTSTR>(dlg.GetPathName()));
+			pNewTCol->SetSavefilePath(static_cast<LPCTSTR>(files.first_file.c_str()));
 			failure = pNewTCol->Deserialize();
 			if(failure)
 			{

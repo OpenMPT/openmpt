@@ -110,48 +110,35 @@ CAbstractVstEditor::~CAbstractVstEditor()
 VOID CAbstractVstEditor::OnLoadPreset()
 //-------------------------------------
 {
-	if (m_pVstPlugin)
-	{
-		CFileDialog dlg(TRUE, "fxp", NULL,
-			OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-			"VST Program (*.fxp)|*.fxp||",	theApp.m_pMainWnd);
-		const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS);
-		if(pszWdir[0])
-			dlg.m_ofn.lpstrInitialDir = pszWdir;
+	if(!m_pVstPlugin) return;
 
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "fxp", "",
+		"VST Program (*.fxp)|*.fxp||",
+		CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS));
+	if(files.abort) return;
 
-		if (!(dlg.DoModal() == IDOK))	return;
+	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
 
-		CString sFile = dlg.GetPathName();
-		CMainFrame::SetWorkingDirectory(sFile, DIR_PLUGINPRESETS, true);
-
-		//TODO: exception handling to distinguish errors at this level.
-		if (!(m_pVstPlugin->LoadProgram(sFile)))
-			::AfxMessageBox("Error loading preset. Are you sure it is for this plugin?");
-	}
+	//TODO: exception handling to distinguish errors at this level.
+	if (!(m_pVstPlugin->LoadProgram(files.first_file.c_str())))
+		::AfxMessageBox("Error loading preset. Are you sure it is for this plugin?");
 }
 
 VOID CAbstractVstEditor::OnSavePreset()
 //-------------------------------------
 {
-	if (m_pVstPlugin)
-	{
-		CFileDialog dlg(FALSE, "fxp", NULL,
-			OFN_HIDEREADONLY| OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_ENABLESIZING | OFN_NOREADONLYRETURN,
-			"VST Program (*.fxp)|*.fxp||",	theApp.m_pMainWnd);
-		const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS);
-		if(pszWdir[0])
-			dlg.m_ofn.lpstrInitialDir = pszWdir;
-		if (!(dlg.DoModal() == IDOK))	return;
+	if(!m_pVstPlugin) return;
 
-		CString sFile = dlg.GetPathName();
-		CMainFrame::SetWorkingDirectory(sFile, DIR_PLUGINPRESETS, true);
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, "fxp", "",
+		"VST Program (*.fxp)|*.fxp||",
+		CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS));
+	if(files.abort) return;
 
-		//TODO: exception handling
-		if (!(m_pVstPlugin->SaveProgram(sFile)))
-			::AfxMessageBox("Error saving preset.");
-	}
-	return;
+	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINPRESETS, true);
+
+	//TODO: exception handling
+	if (!(m_pVstPlugin->SaveProgram(files.first_file.c_str())))
+		::AfxMessageBox("Error saving preset.");
 }
 
 VOID CAbstractVstEditor::OnRandomizePreset()

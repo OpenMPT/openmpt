@@ -368,7 +368,7 @@ public:
 	CString m_csRegSettings;
 	CString m_csRegWindow;
 	// Globals
-	static UINT m_nLastOptionsPage, m_nFilterIndex;
+	static UINT m_nLastOptionsPage;
 	static BOOL gbMdiMaximize;
 	static bool gbShowHackControls;
 	static LONG glCtrlWindowHeight, glTreeWindowWidth, glTreeSplitRatio;

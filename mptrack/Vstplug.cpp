@@ -1411,54 +1411,34 @@ VOID CSelectPluginDlg::OnAddPlugin()
 //----------------------------------
 {
 	CHAR *pszFileNames;
-	CFileDialog dlg(TRUE, ".dll", NULL, 
-					OFN_FILEMUSTEXIST|OFN_ENABLESIZING |OFN_HIDEREADONLY|OFN_PATHMUSTEXIST|OFN_FORCESHOWHIDDEN|OFN_ALLOWMULTISELECT,
-					"VST Plugins (*.dll)|*.dll||",
-					this);
+
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "dll", "",
+		"VST Plugins (*.dll)|*.dll||",
+		CMainFrame::GetWorkingDirectory(DIR_PLUGINS),
+		true);
+	if(files.abort) return;
+
+	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_PLUGINS, true);
+
+	CVstPluginManager *pManager = theApp.GetPluginManager();
+	bool bOk = false;
 	
-	const LPCTSTR pszWdir = CMainFrame::GetWorkingDirectory(DIR_PLUGINS);
-	if(pszWdir[0])
-		dlg.m_ofn.lpstrInitialDir = pszWdir;
-
-	pszFileNames = new CHAR[MAX_FILEOPEN_BUFSIZE];
-	if (!pszFileNames) return;
-	pszFileNames[0] = 0;
-	pszFileNames[1] = 0;
-	dlg.m_ofn.lpstrFile = pszFileNames;
-	dlg.m_ofn.nMaxFile = MAX_FILEOPEN_BUFSIZE;
-	if (dlg.DoModal() == IDOK)
+	PVSTPLUGINLIB plugLib = NULL;
+	for(size_t counter = 0; counter < files.filenames.size(); counter++)
 	{
-		CVstPluginManager *pManager = theApp.GetPluginManager();
-		pszFileNames[MAX_FILEOPEN_BUFSIZE-1] = 0;
-		POSITION pos = dlg.GetStartPosition();
-		BOOL bOk = FALSE;
-		
-		int n = 0;
-		PVSTPLUGINLIB plugLib = NULL;
-		while (pos != NULL)	{
 
-			CString sFilename = dlg.GetNextPathName(pos);
-			if (!n)	{
-				CMainFrame::SetWorkingDirectory(sFilename, DIR_PLUGINS, true);
-			}
-			n++;
+		CString sFilename = files.filenames[counter].c_str();
 
-			if (pManager) {
-				plugLib = pManager->AddPlugin(sFilename, FALSE);
-				if (plugLib) { 
-					bOk = TRUE;
-				}
-			}
-		}
-		if (bOk) {
-			UpdatePluginsList(plugLib->dwPluginId2);	//force selection to last added plug.
-		} else {
-			MessageBox("At least one selected file was not a valid VST-Plugin", NULL, MB_ICONERROR|MB_OK);
+		if (pManager) {
+			plugLib = pManager->AddPlugin(sFilename, FALSE);
+			if (plugLib) bOk = true;
 		}
 	}
-	dlg.m_ofn.lpstrFile = NULL;
-	dlg.m_ofn.nMaxFile = 0;
-	delete[] pszFileNames;
+	if (bOk) {
+		UpdatePluginsList(plugLib->dwPluginId2);	//force selection to last added plug.
+	} else {
+		MessageBox("At least one selected file was not a valid VST-Plugin", NULL, MB_ICONERROR|MB_OK);
+	}
 }
 
 

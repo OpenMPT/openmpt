@@ -112,6 +112,19 @@ typedef struct REQUEST_CONTEXT {
 } REQUEST_CONTEXT;
 #endif
 
+
+/////////////////////////////////////////////////////////////////////////////
+// File dialog (open/save) results
+struct FileDlgResult
+{
+	std::string workingDirectory;			// working directory. will include filename, so beware.
+	std::string first_file;					// for some convenience, this will keep the first filename of the filenames vector.
+	std::vector <std::string> filenames;	// all selected filenames in one vector.
+	std::string extension;					// extension used. beware of this when multiple files can be selected!
+	bool abort;								// no selection has been made.
+};
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CTrackApp:
 // See mptrack.cpp for the implementation of this class
@@ -174,6 +187,8 @@ public:
 	static BOOL RemoveDLSBank(UINT nBank);
 	static BOOL AddDLSBank(LPCSTR);
 	static BOOL OpenURL(LPCSTR lpszURL);
+
+	static FileDlgResult ShowOpenSaveFileDialog(bool load, std::string defaultExtension, std::string defaultFilename, std::string extFilter, std::string workingDirectory = "", bool allowMultiSelect = false, int *filterIndex = nullptr);
 
 public:
 	CDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
