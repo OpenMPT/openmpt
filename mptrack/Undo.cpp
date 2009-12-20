@@ -35,8 +35,8 @@ void CPatternUndo::ClearUndo()
 //   - pattern: Pattern of which an undo step should be created from.
 //   - x: first channel
 //   - y: first row
-//   - cx: last channel
-//   - cy: last row
+//   - cx: width
+//   - cy: height
 bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UINT cy)
 //------------------------------------------------------------------------------------
 {

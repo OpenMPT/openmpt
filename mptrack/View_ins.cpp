@@ -1039,6 +1039,7 @@ UINT CViewInstrument::EnvInsertPoint()
 					envelope->Ticks[0] = 0;
 					envelope->Values[0] = cDefaultValue;
 					envelope->nNodes = 1;
+					envelope->dwFlags |= ENV_ENABLED;
 				}
 				UINT i = 0;
 				for (i = 0; i < envelope->nNodes; i++) if (nTick <= envelope->Ticks[i]) break;

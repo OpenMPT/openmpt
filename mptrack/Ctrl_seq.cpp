@@ -1047,6 +1047,8 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, TEXT("Create new sequence"));
 			if (pSndFile->Order.GetNumSequences() > 1)
 				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, TEXT("Delete current sequence"));
+
+			::DestroyMenu(menuSequence);
 		}
 	}
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
