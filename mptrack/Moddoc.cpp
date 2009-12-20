@@ -1013,7 +1013,7 @@ BOOL CModDoc::IsNotePlaying(UINT note, UINT nsmp, UINT nins)
 
 
 bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
-//----------------------------------------------
+//-------------------------------------------------------
 {
 	DWORD muteType = (CMainFrame::m_dwPatternSetup&PATTERN_SYNCMUTE)? CHN_SYNCMUTE:CHN_MUTE;
 
@@ -1057,8 +1057,8 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 		}
 	}
 
-	//Mark IT as modified
-	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) {
+	//Mark IT/MPTM/S3M as modified
+	if (m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) {
 		CMainFrame::GetMainFrame()->ThreadSafeSetModified(this);
 	}
 
