@@ -218,7 +218,7 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER)+sizeof(S3MSAMPLESTRUCT)+64)) return false;
+	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER)+64)) return false;
 
 	UINT insnum,patnum,nins,npat;
 	DWORD insfile[128];
@@ -282,16 +282,24 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	m_nChannels = 4;
 	for (UINT ich=0; ich<32; ich++)
 	{
-		ChnSettings[ich].nPan = 128;
 		ChnSettings[ich].nVolume = 64;
 
-		ChnSettings[ich].dwFlags = CHN_MUTE;
-		if (psfh.channels[ich] != 0xFF)
+		if(psfh.channels[ich] == 0xFF)
 		{
-			m_nChannels = ich+1;
-			UINT b = psfh.channels[ich] & 0x0F;
-			ChnSettings[ich].nPan = (b & 8) ? 0xC0 : 0x40;
-			ChnSettings[ich].dwFlags = 0;
+			ChnSettings[ich].nPan = 128;
+			ChnSettings[ich].dwFlags = CHN_MUTE;
+		} else
+		{
+			m_nChannels = ich + 1;
+			ChnSettings[ich].nPan = (psfh.channels[ich] & 8) ? 0xC0 : 0x40;
+			if (psfh.channels[ich] & 0x80)
+			{
+				ChnSettings[ich].dwFlags = CHN_MUTE;
+				/* Detect Adlib channels:
+				   c = channels[ich] ^ 0x80;
+				   if(c >= 16 && c < 32) adlibChannel = true;
+				*/
+			}
 		}
 	}
 	if (m_nChannels < 1) m_nChannels = 1;
@@ -572,7 +580,9 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 		if (i < m_nChannels)
 		{
 			UINT tmp = (i & 0x0F) >> 1;
-			header[0x40+i] = (i & 0x10) | ((i & 1) ? 8+tmp : tmp);
+			tmp = (i & 0x10) | ((i & 1) ? 8 + tmp : tmp);
+			if((ChnSettings[i].dwFlags & CHN_MUTE) != 0) tmp |= 0x80;
+			header[0x40+i] = tmp;
 		} else header[0x40+i] = 0xFF;
 	}
 	fwrite(header, 0x60, 1, f);
