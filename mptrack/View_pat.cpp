@@ -1847,6 +1847,8 @@ void CViewPattern::OnEditFindNext()
 				}
 				if (bReplace)
 				{
+					pModDoc->GetPatternUndo()->PrepareUndo(nPat, n % pSndFile->m_nChannels, n / pSndFile->m_nChannels, 1, 1);
+
 					if ((m_dwReplaceFlags & PATSEARCH_NOTE))
 					{
 						// -1 octave
