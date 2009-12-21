@@ -94,6 +94,17 @@ struct AMCHUNK_SAMPLE
 
 #pragma pack()
 
+static BYTE riffam_efftrans[26] =
+{
+	CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
+	CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
+	CMD_PANNING8, CMD_OFFSET, CMD_VOLUMESLIDE, CMD_POSITIONJUMP,
+	CMD_VOLUME, CMD_PATTERNBREAK, CMD_MODCMDEX, CMD_TEMPO,
+	CMD_GLOBALVOLUME, CMD_GLOBALVOLSLIDE, CMD_KEYOFF, CMD_SETENVPOSITION,
+	CMD_CHANNELVOLUME, CMD_CHANNELVOLSLIDE, CMD_PANNINGSLIDE, CMD_RETRIG,
+	CMD_TREMOR, CMD_XFINEPORTAUPDOWN,
+};
+
 bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStream, DWORD dwMemLength, bool bIsAM)
 //----------------------------------------------------------------------------------------------------------------
 {
@@ -139,45 +150,53 @@ bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStre
 				m->command = lpStream[dwMemPos + 1];
 				m->param = lpStream[dwMemPos];
 				dwMemPos += 2;
-				switch(m->command)
+
+				if(m->command <= 25)
 				{
-				case 0x00:	if (m->param) m->command = CMD_ARPEGGIO; break;
-				case 0x01:	m->command = CMD_PORTAMENTOUP; break;
-				case 0x02:	m->command = CMD_PORTAMENTODOWN; break;
-				case 0x03:	m->command = CMD_TONEPORTAMENTO; break;
-				case 0x04:	m->command = CMD_VIBRATO; break;
-				case 0x05:	m->command = CMD_TONEPORTAVOL; if (m->param & 0xF0) m->param &= 0xF0; break;
-				case 0x06:	m->command = CMD_VIBRATOVOL; if (m->param & 0xF0) m->param &= 0xF0; break;
-				case 0x07:	m->command = CMD_TREMOLO; break;
-				case 0x08:	m->command = CMD_PANNING8;
-							if(m->param <= 0x80) m->param = min(m->param << 1, 0xFF);
-							else if(m->param == 0xA4) {m->command = CMD_S3MCMDEX; m->param = 0x91;}
+					// command translation
+					m->command = riffam_efftrans[m->command];
+					
+					// handling special commands
+					switch(m->command)
+					{
+					case CMD_ARPEGGIO:
+						if(m->param == 0) m->command = CMD_NONE;
+						break;
+					case CMD_TONEPORTAVOL:
+					case CMD_VIBRATOVOL:
+					case CMD_VOLUMESLIDE:
+					case CMD_GLOBALVOLSLIDE:
+					case CMD_PANNINGSLIDE:
+						if (m->param & 0xF0) m->param &= 0xF0;
+						break;
+					case CMD_PANNING8:
+						if(m->param <= 0x80) m->param = min(m->param << 1, 0xFF);
+						else if(m->param == 0xA4) {m->command = CMD_S3MCMDEX; m->param = 0x91;}
+						break;
+					case CMD_PATTERNBREAK:
+						m->param = ((m->param >> 4) * 10) + (m->param & 0x0F);
+						break;
+					case CMD_MODCMDEX:
+						MODExx2S3MSxx(m);
+						break;
+					case CMD_TEMPO:
+						if(m->param <= 0x1F) m->command = CMD_SPEED;
+						break;
+					case CMD_XFINEPORTAUPDOWN:
+						switch(m->param & 0xF0)
+						{
+						case 0x10:
+							m->command = CMD_PORTAMENTOUP;
 							break;
-				case 0x09:	m->command = CMD_OFFSET; break;
-				case 0x0A:	m->command = CMD_VOLUMESLIDE; if (m->param & 0xF0) m->param &= 0xF0; break;
-				case 0x0B:	m->command = CMD_POSITIONJUMP; break;
-				case 0x0C:	m->command = CMD_VOLUME; break;
-				case 0x0D:	m->command = CMD_PATTERNBREAK; m->param = ((m->param >> 4) * 10) + (m->param & 0x0F); break;
-				case 0x0E:	m->command = CMD_MODCMDEX; MODExx2S3MSxx(m); break;
-				case 0x0F:	m->command = (m->param <= 0x1F) ? CMD_SPEED : CMD_TEMPO; break;
-				case 'G' - 55:	m->command = CMD_GLOBALVOLUME; break;
-				case 'H' - 55:	m->command = CMD_GLOBALVOLSLIDE; if (m->param & 0xF0) m->param &= 0xF0; break;
-				case 'K' - 55:	m->command = CMD_KEYOFF; break;
-				case 'L' - 55:	m->command = CMD_SETENVPOSITION; break;
-				case 'M' - 55:	m->command = CMD_CHANNELVOLUME; break;
-				case 'N' - 55:	m->command = CMD_CHANNELVOLSLIDE; break;
-				case 'P' - 55:	m->command = CMD_PANNINGSLIDE; if (m->param & 0xF0) m->param &= 0xF0; break;
-				case 'R' - 55:	m->command = CMD_RETRIG; break;
-				case 'T' - 55:	m->command = CMD_TREMOR; break;
-				case 'X' - 55:	
-							switch(m->param & 0xF0)
-							{
-							case 0x10:	m->command = CMD_PORTAMENTOUP; m->param = (m->param & 0x0F) | 0xE0; break;
-							case 0x20:	m->command = CMD_PORTAMENTODOWN; m->param = (m->param & 0x0F) | 0xE0; break;
-							default:	m->command = CMD_S3MCMDEX; break;
-							}
+						case 0x20:
+							m->command = CMD_PORTAMENTODOWN;
 							break;
-				default:
+						}
+						m->param = (m->param & 0x0F) | 0xE0;
+						break;
+					}
+				} else
+				{
 #ifdef DEBUG
 					{
 						CHAR s[64];
@@ -186,7 +205,6 @@ bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStre
 					}
 #endif
 					m->command = CMD_NONE;
-					break;
 				}
 			}
 

@@ -381,7 +381,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	case kcOrderlistNavigateLast:
 		if((m_pModDoc != nullptr) && (m_pModDoc->GetSoundFile() != nullptr))
 		{
-			SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLast);
+			SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLastSelect);
 			ORDERINDEX nLast = m_pModDoc->GetSoundFile()->Order.GetLengthTailTrimmed();
 			if(nLast > 0) nLast--;
 			SetCurSel(nLast);
