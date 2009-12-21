@@ -1178,7 +1178,6 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			bool bS3MCommands = false, bOk = false;
 			MODTYPE origFormat = MOD_TYPE_IT;
 			UINT len = 0, startLen;
-			MODCOMMAND origModCmd;
 
 			bool doOverflowPaste = (CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && (pasteMode != pm_pasteflood) && (pasteMode != pm_pushforwardpaste);
 			bool doITStyleMix = (pasteMode == pm_mixpaste_it);
@@ -1235,8 +1234,10 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 				// Paste columns
 				while ((p[len] == '|') && (len + 11 < dwMemSize))
 				{
-					origModCmd = m[col]; // ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
-					                     // so that we can refer back to check if there was anything in e.g. the note column before we pasted.
+					// ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
+					// so that we can refer back to check if there was anything in e.g. the note column before we pasted.
+					MODCOMMAND origModCmd = m[col];
+
 					LPSTR s = p+len+1;
 
 					if (col < m_SndFile.m_nChannels)
@@ -1248,6 +1249,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 							{
 								m[col + nPushRow * m_SndFile.m_nChannels] = m[col + (nPushRow - 1) * m_SndFile.m_nChannels];
 							}
+							m[col].Clear();
 						}
 
 						// Note

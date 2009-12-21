@@ -3607,6 +3607,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcEditMixPaste:	OnEditMixPaste(); return wParam;
 		case kcEditMixPasteITStyle:	OnEditMixPasteITStyle(); return wParam;
 		case kcEditPasteFlood:	OnEditPasteFlood(); return wParam;
+		case kcEditPushForwardPaste: OnEditPushForwardPaste(); return wParam;
 		case kcEditSelectAll:	OnEditSelectAll(); return wParam;
 		case kcTogglePluginEditor: TogglePluginEditor((m_dwCursor & 0xFFFF) >> 3); return wParam;
 		case kcToggleFollowSong: SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG); return wParam;
