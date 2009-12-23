@@ -1817,6 +1817,10 @@ void CViewPattern::OnEditFindNext()
 				nFound++;
 				if (bUpdPos)
 				{
+					// turn off "follow song"
+					m_dwStatus &= ~PATSTATUS_FOLLOWSONG;
+					SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
+					// go to place of finding
 					SetCurrentPattern(nPat);
 					SetCurrentRow(n / pSndFile->m_nChannels);
 				}

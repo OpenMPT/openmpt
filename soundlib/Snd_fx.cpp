@@ -3165,8 +3165,8 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 		if(m_dwSongFlags & SONG_FIRSTTICK)
 		{
 			// here are some really stupid things FT2 does
+			if(pChn->nRowVolCmd == VOLCMD_VOLUME) return;
 			if(pChn->nRowInstr > 0 && pChn->nRowNote == NOTE_NONE) nRetrigCount = 1;
-			if(pChn->nRowVolCmd == VOLCMD_VOLUME) nRetrigCount = -1;	// not correct yet
 			if(pChn->nRowNote != NOTE_NONE && pChn->nRowNote <= GetModSpecifications().noteMax) nRetrigCount++;
 		}
 		if (nRetrigCount >= nRetrigSpeed)
