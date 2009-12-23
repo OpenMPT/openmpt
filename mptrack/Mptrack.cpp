@@ -3307,11 +3307,14 @@ FileDlgResult CTrackApp::ShowOpenSaveFileDialog(bool load, std::string defaultEx
 	if(filterIndex != nullptr)
 		dlg.m_ofn.nFilterIndex = (DWORD)(*filterIndex);
 
-	// TODO is this necessary? Apparently not!
-	/*const size_t bufferSize = 2048; //Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
-	vector<char> filenameBuffer(bufferSize, 0);
-	dlg.GetOFN().lpstrFile = &filenameBuffer[0];
-	dlg.GetOFN().nMaxFile = bufferSize;*/
+	vector<TCHAR> filenameBuffer;
+	if (allowMultiSelect)
+	{
+		const size_t bufferSize = 2048; // Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
+		filenameBuffer.resize(bufferSize, 0);
+		dlg.GetOFN().lpstrFile = &filenameBuffer[0];
+		dlg.GetOFN().nMaxFile = bufferSize;
+	}
 
 	// Do it!
 	CMainFrame::GetInputHandler()->Bypass(true);

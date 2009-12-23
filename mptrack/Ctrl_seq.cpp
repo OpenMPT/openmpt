@@ -421,7 +421,8 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		return wParam;
 	case kcChangeLoopStatus:
 		m_pParent->OnModCtrlMsg(CTRLMSG_PAT_LOOP, -1); return wParam;
-	case kcToggleFollowSong: m_pParent->OnFollowSong(); return wParam;
+	case kcToggleFollowSong:
+		m_pParent->OnModCtrlMsg(CTRLMSG_PAT_FOLLOWSONG, 0); return wParam;
 
 	case kcChannelUnmuteAll:
 	case kcUnmuteAllChnOnPatTransition:
@@ -1047,8 +1048,6 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, TEXT("Create new sequence"));
 			if (pSndFile->Order.GetNumSequences() > 1)
 				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, TEXT("Delete current sequence"));
-
-			::DestroyMenu(menuSequence);
 		}
 	}
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
