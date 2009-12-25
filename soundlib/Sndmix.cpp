@@ -1227,18 +1227,17 @@ BOOL CSoundFile::ReadNote()
 					}
 					else if(IsCompatibleMode(TRK_FASTTRACKER2)) // FastTracker 2
 					{
-						// Using MilkyTracker's logic - still not perfect
 						BYTE note = pChn->nNote;
 						int arpPos = 0;
 
 						if (!(m_dwSongFlags & SONG_FIRSTTICK))
 						{
-							arpPos = ((int)m_nTickCount - (int)m_nMusicSpeed) % 3;
-							if(arpPos < 0) arpPos += 3;
+							arpPos = ((int)m_nMusicSpeed - (int)m_nTickCount) % 3;
+							if((m_nMusicSpeed > 18) && (m_nMusicSpeed - m_nTickCount > 16)) arpPos = 2; // swedish tracker logic, I love it
 							switch(arpPos)
 							{
-								case 1:	note += (pChn->nArpeggio & 0x0F); break; // x/y are swapped!
-								case 2:	note += (pChn->nArpeggio >> 4); break;
+								case 1:	note += (pChn->nArpeggio >> 4); break;
+								case 2:	note += (pChn->nArpeggio & 0x0F); break;
 							}
 						}
 

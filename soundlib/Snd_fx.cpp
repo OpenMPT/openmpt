@@ -635,7 +635,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 		note = pIns->NoteMap[note-1];
 	}
 	// Key Off
-	if (note >= 0x80)
+	if (note > NOTE_MAX)
 	{
 		// Key Off (+ Invalid Note for XM - TODO is this correct?)
 		if (note == NOTE_KEYOFF || !(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
@@ -664,7 +664,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 
 	if(bNewTuning)
 	{
-		if(!bPorta || pChn->nNote == 0)
+		if(!bPorta || pChn->nNote == NOTE_NONE)
 			pChn->nPortamentoDest = 0;
 		else
 		{
@@ -1267,6 +1267,12 @@ BOOL CSoundFile::ProcessEffects()
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					pChn->nVolume = 0;
 					note = instr = 0;
+				}
+
+				// XM: Rogue note delays cause retrig
+				if ((note == NOTE_NONE) && IsCompatibleMode(TRK_FASTTRACKER2) && !(m_dwSongFlags & SONG_FIRSTTICK))
+				{
+					note = pChn->nNote - pChn->nTranspose;
 				}
 			}
 			if ((!note) && (instr)) //Case: instrument with no note data. 
