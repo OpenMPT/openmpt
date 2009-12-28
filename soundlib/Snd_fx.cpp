@@ -777,6 +777,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			pChn->nResSwing = pChn->nCutSwing = 0;
 			if (pIns)
 			{
+				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nNNA = pIns->nNNA;
 				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->nVolEnvPosition = 0;
 				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->nPanEnvPosition = 0;
 				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) pChn->nPitchEnvPosition = 0;
