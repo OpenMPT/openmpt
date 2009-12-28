@@ -669,7 +669,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 				pModDoc->RecordParamChange(pVstPlugin->GetSlot(), index);
 			}
 
-			if (pModDoc && CMainFrame::GetInputHandler()->ShiftPressed() && pVstPlugin->GetEditor() && pVstPlugin->GetEditor()->m_hWnd)
+			if (pModDoc && CMainFrame::GetInputHandler()->ShiftPressed() && pVstPlugin->GetEditor() && (pVstPlugin->GetEditor()->m_hWnd == ::GetForegroundWindow()))
 			{
 				CMainFrame::GetInputHandler()->SetModifierMask(0); // Make sure that the dialog will open only once.
 				CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
