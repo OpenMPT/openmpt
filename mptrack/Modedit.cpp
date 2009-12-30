@@ -1179,9 +1179,9 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			MODTYPE origFormat = MOD_TYPE_IT;
 			UINT len = 0, startLen;
 
-			bool doOverflowPaste = (CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && (pasteMode != pm_pasteflood) && (pasteMode != pm_pushforwardpaste);
-			bool doITStyleMix = (pasteMode == pm_mixpaste_it);
-			bool doMixPaste = ((pasteMode == pm_mixpaste) || doITStyleMix);
+			const bool doOverflowPaste = (CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && (pasteMode != pm_pasteflood) && (pasteMode != pm_pushforwardpaste);
+			const bool doITStyleMix = (pasteMode == pm_mixpaste_it);
+			const bool doMixPaste = ((pasteMode == pm_mixpaste) || doITStyleMix);
 
 			ORDERINDEX oCurrentOrder; //jojo.echopaste
 			ROWINDEX rTemp, startRow;
@@ -1234,14 +1234,23 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 				// Paste columns
 				while ((p[len] == '|') && (len + 11 < dwMemSize))
 				{
-					// ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
-					// so that we can refer back to check if there was anything in e.g. the note column before we pasted.
-					MODCOMMAND origModCmd = m[col];
-
 					LPSTR s = p+len+1;
 
-					if (col < m_SndFile.m_nChannels)
+					// Check valid paste condition. Paste will be skipped if
+					// -col is not a valid channelindex or
+					// -doing mix paste and paste destination modcommand is a PCnote or
+					// -doing mix paste and trying to paste PCnote on non-empty modcommand.
+					const bool bSkipPaste =
+						(col >= m_SndFile.GetNumChannels()) ||
+						(doMixPaste && m[col].IsPcNote()) ||
+						(doMixPaste && s[0] == 'P' && !m[col].IsEmpty());
+
+					if (bSkipPaste == false)
 					{
+						// ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
+						// so that we can refer back to check if there was anything in e.g. the note column before we pasted.
+						const MODCOMMAND origModCmd = m[col];
+
 						// push channel data below paste point first.
 						if(pasteMode == pm_pushforwardpaste)
 						{
@@ -1294,7 +1303,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						{
 							if (s[5] != '.')
 							{
-								if(m[col].note == NOTE_PCS || m[col].note == NOTE_PC)
+								if(m[col].IsPcNote())
 								{
 									char val[4];
 									memcpy(val, s+5, 3);
@@ -1317,9 +1326,9 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 							} else m[col].volcmd = m[col].vol = 0;
 						}
 						
-						if(m[col].note == NOTE_PCS || m[col].note == NOTE_PC)
+						if (m[col].IsPcNote())
 						{
-							if(s[8] != '.' && s[8] > ' ')
+							if (s[8] != '.' && s[8] > ' ')
 							{
 								char val[4];
 								memcpy(val, s+8, 3);
@@ -1382,9 +1391,14 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 								}
 							}
 						}
+
+						// convert some commands, if necessary. With mix paste convert only
+						// if the original modcommand was empty as otherwise the unchanged parts
+						// of the old modcommand would falsely be interpreted being of type
+						// origFormat and ConvertCommand could change them.
+						if (origFormat != m_SndFile.m_nType && (doMixPaste == false || origModCmd.IsEmpty()))
+							m_SndFile.ConvertCommand(&(m[col]), origFormat, m_SndFile.m_nType);
 					}
-					// convert some commands, if necessary.
-					if(origFormat != m_SndFile.m_nType) m_SndFile.ConvertCommand(&(m[col]), origFormat, m_SndFile.m_nType);
 
 					len += 12;
 					col++;

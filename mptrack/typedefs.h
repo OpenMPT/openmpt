@@ -2,6 +2,12 @@
 #define TYPEDEFS_H
 
 #define nullptr		0
+#define ARRAYELEMCOUNT(x) (sizeof(x)/sizeof(x[0]))
+
+//Compile time assert. 
+#define STATIC_ASSERT(expr)			C_ASSERT(expr)
+#define static_assert(expr, msg)	C_ASSERT(expr)
+
 
 typedef __int8 int8;
 typedef __int16 int16;

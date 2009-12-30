@@ -3,10 +3,10 @@
 
 /*
  * Loads resource.
- * lpName and lpType: parameters passed to FindResource().
- * pData: Pointer to loaded resource data, nullptr if load not successful.
- * nSize: Size of the data in bytes, zero if load not succesfull.
- * hglob: HGLOBAL returned by LoadResource-function.
+ * [in] lpName and lpType: parameters passed to FindResource().
+ * [out] pData: Pointer to loaded resource data, nullptr if load not successful.
+ * [out] nSize: Size of the data in bytes, zero if load not succesfull.
+ * [out] hglob: HGLOBAL returned by LoadResource-function.
  * Return: pData.
  */
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob)

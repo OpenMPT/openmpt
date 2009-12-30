@@ -1948,7 +1948,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 		end=NMACROS;
 	}
 
-	for (UINT m=0; m<NMACROS; m++)	{
+	for (int m=0; m<NMACROS; m++)  {
 		//SFx
 		s.Format("SF%X", m);
 		m_EditMacro[m].SetWindowText(s);
@@ -1956,7 +1956,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 		//Macro value:
 		CString macroText = &m_MidiCfg.szMidiSFXExt[m*32];
 		m_EditMacroValue[m].SetWindowText(macroText);
-		m_EditMacroValue[m].SetBackColor(m==selectedMacro?RGB(200,200,225) : RGB(245,245,245) );
+		m_EditMacroValue[m].SetBackColor(m == selectedMacro ? RGB(200,200,225) : RGB(245,245,245) );
 
 		//Macro Type:
 		macroType = m_pModDoc->GetMacroType(macroText);
@@ -1977,7 +1977,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro) //-1 for all macros
 			default: s = "Custom";
 		}
 		m_EditMacroType[m].SetWindowText(s);
-		m_EditMacroType[m].SetBackColor(m==selectedMacro?RGB(200,200,225) : RGB(245,245,245) );
+		m_EditMacroType[m].SetBackColor(m == selectedMacro ? RGB(200,200,225) : RGB(245,245,245) );
 
 		//Param details button:
 		if (macroType == sfx_plug)
@@ -2698,7 +2698,7 @@ void CSplitKeyboadSettings::DoDataExchange(CDataExchange* pDX)
 BOOL CSplitKeyboadSettings::OnInitDialog()
 //----------------------------------------
 {
-	if(!m_pSndFile) return FALSE;
+	if(!m_pSndFile || m_pSndFile->GetpModDoc() == nullptr) return FALSE;
 
 	CDialog::OnInitDialog();
 
@@ -2739,7 +2739,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 				continue;
 			}
 
-			CString displayName = m_pSndFile->GetPatternViewInstrumentName(nIns);
+			CString displayName = m_pSndFile->GetpModDoc()->GetPatternViewInstrumentName(nIns);
 			int n = m_CbnSplitInstrument.AddString(displayName);
 			m_CbnSplitInstrument.SetItemData(n, nIns);
 		}
@@ -2876,7 +2876,7 @@ VOID CSampleMapDlg::OnUpdateSamples()
 		}
 		if (bUsed) {
 			CString sampleName;
-			sampleName.Format("%d: %s", i, m_pSndFile->GetSampleName(i));
+			sampleName.Format("%d: %s", i, (LPCTSTR)m_pSndFile->GetSampleName(i));
 			nInsertPos = m_CbnSample.AddString(sampleName);
 			
 			m_CbnSample.SetItemData(nInsertPos, i);

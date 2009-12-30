@@ -118,9 +118,15 @@ enum enmPatternPasteModes
 // Split Keyboard Settings (pattern editor)
 
 #define SPLIT_OCTAVE_RANGE 9
+
+//==========================
 struct SplitKeyboardSettings
+//==========================
 {
-	UINT splitInstrument, splitNote, splitVolume;
+	bool IsSplitActive() {return (octaveLink && (octaveModifier != 0)) || (splitInstrument > 0) || (splitVolume != 0);}
+	MODCOMMAND::NOTE splitNote;
+	MODCOMMAND::INSTR splitInstrument;
+	MODCOMMAND::VOL splitVolume;
 	int octaveModifier;	// determines by how many octaves the notes should be transposed up or down
 	bool octaveLink;	// apply octaveModifier
 };
@@ -290,6 +296,12 @@ public:
 	void SetOldPatternScrollbarsPos( CSize s ){ m_szOldPatternScrollbarsPos = s; };
 
 	void OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder);
+
+	// Returns formatted MODINSTRUMENT name.
+	// [in] bEmptyInsteadOfNoName: In case of unnamed instrument string, "(no name)" is returned unless this 
+	//                             parameter is true is case which an empty name is returned.
+	// [in] bIncludeIndex: True to include instrument index in front of the instrument name, false otherwise.
+	CString GetPatternViewInstrumentName(UINT nInstr, bool bEmptyInsteadOfNoName = false, bool bIncludeIndex = true) const;
 
 // protected members
 protected:

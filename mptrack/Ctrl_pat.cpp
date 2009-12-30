@@ -254,29 +254,47 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		LockControls();
 		if (dwHintMask & (HINT_MODTYPE|HINT_INSNAMES|HINT_SMPNAMES))
 		{
+			static const TCHAR szSplitFormat[] = TEXT("%02u %s %02u: %s/%s");
 			UINT nPos = 0;
 			m_CbnInstrument.SetRedraw(FALSE);
 			m_CbnInstrument.ResetContent();
 			m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(" No Instrument"), 0);
-			if (m_pSndFile->m_nInstruments)	{
-				for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++) {
+			const INSTRUMENTINDEX nSplitIns = m_pModDoc->GetSplitKeyboardSettings()->splitInstrument;
+			const MODCOMMAND::NOTE noteSplit = 1 + m_pModDoc->GetSplitKeyboardSettings()->splitNote;
+			const CString sSplitInsName = m_pModDoc->GetPatternViewInstrumentName(nSplitIns, true, false);
+			if (m_pSndFile->m_nInstruments)
+			{
+				for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++)
+				{
 					if (m_pSndFile->Instruments[i] == NULL) {
 						continue;
 					}
 
-					CString displayName = m_pSndFile->GetPatternViewInstrumentName(i);
-					UINT n = m_CbnInstrument.AddString(displayName);
+					CString sDisplayName;
+					if (m_pModDoc->GetSplitKeyboardSettings()->IsSplitActive())
+					{
+						wsprintf(s, szSplitFormat, nSplitIns, GetNoteStr(noteSplit), i,
+								 (LPCTSTR)sSplitInsName, (LPCTSTR)m_pModDoc->GetPatternViewInstrumentName(i, true, false));
+						sDisplayName = s;
+					}
+					else
+						sDisplayName = m_pModDoc->GetPatternViewInstrumentName(i);
+
+					UINT n = m_CbnInstrument.AddString(sDisplayName);
 					if (n == m_nInstrument) nPos = n;
 					m_CbnInstrument.SetItemData(n, i);
-
 				}
-
 			} else
 			{
 				UINT nmax = m_pSndFile->m_nSamples;
 				while ((nmax > 1) && (m_pSndFile->Samples[nmax].pSample == NULL) && (!m_pSndFile->m_szNames[nmax][0])) nmax--;
-				for (UINT i=1; i<=nmax; i++) if ((m_pSndFile->m_szNames[i][0]) || (m_pSndFile->Samples[i].pSample)) 	{
-					wsprintf(s, "%02d: %s", i, m_pSndFile->m_szNames[i]);
+				for (UINT i=1; i<=nmax; i++) if ((m_pSndFile->m_szNames[i][0]) || (m_pSndFile->Samples[i].pSample))
+				{
+					if (m_pModDoc->GetSplitKeyboardSettings()->IsSplitActive() && nSplitIns < ARRAYELEMCOUNT(m_pSndFile->m_szNames))
+						wsprintf(s, szSplitFormat, nSplitIns, GetNoteStr(noteSplit), i, m_pSndFile->m_szNames[nSplitIns], m_pSndFile->m_szNames[i]);
+					else
+						wsprintf(s, "%02u: %s", i, m_pSndFile->m_szNames[i]);
+
 					UINT n = m_CbnInstrument.AddString(s);
 					if (n == m_nInstrument) nPos = n;
 					m_CbnInstrument.SetItemData(n, i);
@@ -482,7 +500,7 @@ BOOL CCtrlPatterns::SetCurrentInstrument(UINT nIns)
 			if (m_CbnInstrument.GetItemData(i) == nIns)
 			{
 				m_CbnInstrument.SetCurSel(i);
-				m_nInstrument = nIns;
+				m_nInstrument = static_cast<INSTRUMENTINDEX>(nIns);
 				//rewbs.instroVST
 				if (HasValidPlug(m_nInstrument))
 					::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
@@ -678,7 +696,7 @@ void CCtrlPatterns::OnInstrumentChanged()
 		int nmax = (m_pSndFile->m_nInstruments) ? m_pSndFile->m_nInstruments : m_pSndFile->m_nSamples;
 		if ((n >= 0) && (n <= nmax) && (n != (int)m_nInstrument))
 		{
-			m_nInstrument = n;
+			m_nInstrument = static_cast<INSTRUMENTINDEX>(n);
 			if (m_pParent) m_pParent->InstrumentChanged(m_nInstrument);
 		}
 		SwitchToView();

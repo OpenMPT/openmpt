@@ -175,11 +175,11 @@ void CAbstractVstEditor::UpdatePresetField()
 	
 	if(m_pVstPlugin->GetNumPrograms() > 0 && m_pMenu->GetMenuItemCount() < 5)
 	{
-		m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETBACKWARDJUMP, (LPCTSTR)"<<");
-		m_pMenu->AppendMenu(MF_BYPOSITION, ID_PREVIOUSVSTPRESET, (LPCTSTR)"<");
-		m_pMenu->AppendMenu(MF_BYPOSITION, ID_NEXTVSTPRESET, (LPCTSTR)">");
-		m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, (LPCTSTR)">>");
-		m_pMenu->AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, "");
+		m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETBACKWARDJUMP, TEXT("<<"));
+		m_pMenu->AppendMenu(MF_BYPOSITION, ID_PREVIOUSVSTPRESET, TEXT("<"));
+		m_pMenu->AppendMenu(MF_BYPOSITION, ID_NEXTVSTPRESET, TEXT(">"));
+		m_pMenu->AppendMenu(MF_BYPOSITION, ID_VSTPRESETFORWARDJUMP, TEXT(">>"));
+		m_pMenu->AppendMenu(MF_BYPOSITION|MF_DISABLED, 0, TEXT(""));
 	}
 	
 	long index = m_pVstPlugin->GetCurrentProgram();
@@ -470,7 +470,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 			m_pInputMenu->AppendMenu(MF_SEPARATOR);
 		}
 		name.Format("Ins%02d: %s", inputInstruments[nIns], pSndFile->Instruments[inputInstruments[nIns]]->name);
-		if (inputInstruments[nIns]==m_nInstrument)	checked=true;
+		if (inputInstruments[nIns] == (UINT)m_nInstrument)	checked=true;
 		m_pInputMenu->AppendMenu(MF_STRING|(checked?MF_CHECKED:0), ID_SELECTINST+inputInstruments[nIns], name);
 	}
 

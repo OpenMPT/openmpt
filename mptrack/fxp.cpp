@@ -232,7 +232,7 @@ bool Cfxp::ReadLE(CFile &in, float &f)
 	{
 		::AfxMessageBox(e->m_strFileName);
 		char s[256];
-		wsprintf(s, "%lx: %d; %d; %s;", e, e->m_cause, e->m_lOsError,  e->m_strFileName);
+		wsprintf(s, "%lx: %d; %d; %s;", e, e->m_cause, e->m_lOsError,  (LPCTSTR)e->m_strFileName);
 		::AfxMessageBox(s);
 		e->Delete();
 	}
