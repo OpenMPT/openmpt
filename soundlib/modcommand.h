@@ -54,7 +54,10 @@ public:
 	bool IsEmpty() const {return (*this == Empty());}
 
 	// Returns true if instrument column represents plugin index.
-	bool IsInstrPlug() const {return note == NOTE_PC || note == NOTE_PCS;}
+	bool IsInstrPlug() const {return IsPcNote();}
+
+	// Returns true if and only if note is NOTE_PC or NOTE_PCS.
+	bool IsPcNote() const {return note == NOTE_PC || note == NOTE_PCS;}
 
 public:
 	BYTE note;

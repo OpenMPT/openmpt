@@ -674,12 +674,13 @@ void COrderList::UpdateInfoText()
 		s[0] = 0;
 		if(CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY)
 		{
-			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, pSndFile->GetNumPatterns());
+			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, pSndFile->Order.GetLengthFirstEmpty());
 		}
 		else
 		{
+			const ORDERINDEX nLength = pSndFile->Order.GetLengthFirstEmpty();
 			wsprintf(s, "Position %d of %d (%02Xh of %02Xh)",
-			m_nScrollPos, pSndFile->GetNumPatterns(), m_nScrollPos, pSndFile->GetNumPatterns());
+			m_nScrollPos, nLength, m_nScrollPos, nLength);
 		}
 		
 		if (m_nScrollPos < pSndFile->Order.GetLength())

@@ -653,7 +653,6 @@ public:
 	LPCSTR GetTitle() const { return m_szNames[0]; }
 	CString GetSampleName(UINT nSample) const;
 	CString GetInstrumentName(UINT nInstr) const;
-	CString GetPatternViewInstrumentName(UINT nInstr, bool returnEmptyInsteadOfNoName = false) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
     
@@ -746,7 +745,7 @@ public:
 	void S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatibilityExport = false) const;
 	WORD ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool bCompatibilityExport = false) const;
 	
-	static void ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewType); // Convert a complete MODCHANNEL item from one format to another
+	static void ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewType); // Convert a complete MODCOMMAND item from one format to another
 	static void MODExx2S3MSxx(MODCOMMAND *m); // Convert Exx to Sxx
 	static void S3MSxx2MODExx(MODCOMMAND *m); // Convert Sxx to Exx
 

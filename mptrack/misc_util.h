@@ -5,11 +5,6 @@
 #include <string>
 #include <limits>
 
-#define ARRAYELEMCOUNT(x) (sizeof(x)/sizeof(x[0]))
-
-//Compile time assert. 
-#define STATIC_ASSERT(expr) C_ASSERT(expr)
-
 //Convert object(typically number) to string
 template<class T>
 inline std::string Stringify(const T& x)

@@ -786,7 +786,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	if (m_nType)
 	{
 		SetModSpecsPointer(m_pModSpecs, m_nType);
-		Order.resize(GetModSpecifications().ordersMax);
+		const ORDERINDEX nMinLength = (std::min)(ModSequenceSet::s_nCacheSize, GetModSpecifications().ordersMax);
+		if (Order.GetLength() < nMinLength)
+			Order.resize(nMinLength);
 		return TRUE;
 	}
 
@@ -1055,14 +1057,6 @@ void CSoundFile::SetAGC(BOOL b)
 	} else gdwSoundSetup &= ~SNDMIX_AGC;
 }
 
-
-ORDERINDEX CSoundFile::GetNumPatterns() const
-//-------------------------------------
-{
-	ORDERINDEX i = 0;
-	while ((i < Order.size()) && (Order[i] < Order.GetInvalidPatIndex())) i++;
-	return i;
-}
 
 /*
 UINT CSoundFile::GetNumInstruments() const
@@ -1422,12 +1416,18 @@ CString CSoundFile::GetSampleName(UINT nSample) const
 
 
 CString CSoundFile::GetInstrumentName(UINT nInstr) const
-//-----------------------------------------------------------
+//------------------------------------------------------
 {
-	if ((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))	{
-		return "";
-	}
-	return Instruments[nInstr]->name;
+	if ((nInstr >= MAX_INSTRUMENTS) || (!Instruments[nInstr]))
+		return TEXT("");
+
+	const size_t nSize = ARRAYELEMCOUNT(Instruments[nInstr]->name);
+	CString str;
+	LPTSTR p = str.GetBuffer(nSize + 1);
+	ArrayCopy(p, Instruments[nInstr]->name, nSize);
+	p[nSize] = 0;
+	str.ReleaseBuffer();
+	return str;
 }
 
 
@@ -1666,42 +1666,6 @@ bool CSoundFile::MoveChannel(UINT chnFrom, UINT chnTo)
 		CMainFrame::GetMainFrame()->MessageBox("BUG: Channel number changed in MoveChannel()" , "", MB_OK | MB_ICONINFORMATION);
 	}
 	return false;
-}
-
-
-CString CSoundFile::GetPatternViewInstrumentName(UINT nInstr, bool returnEmptyInsteadOfNoName) const
-//-----------------------------------------------------------------
-{
-	//Default: returnEmptyInsteadOfNoName = false;
-	if(nInstr >= MAX_INSTRUMENTS || m_nInstruments == 0 || Instruments[nInstr] == 0) return "";
-
-	CString displayName, instrumentName, pluginName = "";
-					
-	// Use instrument name
-	instrumentName.Format("%s", Instruments[nInstr]->name);
-
-	if (instrumentName == "") {
-		// if there's no instrument name, use name of sample associated with C-5.
- 		//TODO: If there's no sample mapped to that note, we could check the other notes.
-		if (Instruments[nInstr]->Keyboard[60] && Samples[Instruments[nInstr]->Keyboard[60]].pSample) {
-			instrumentName.Format("s: %s", m_szNames[Instruments[nInstr]->Keyboard[60]]); //60 is C-5
-		}
-	}
-
-	//Get plugin name:
-	UINT nPlug=Instruments[nInstr]->nMixPlug;
-	if (nPlug>0 && nPlug<MAX_MIXPLUGINS) {
-		pluginName = m_MixPlugins[nPlug-1].Info.szName;
-	}
-
-	if (pluginName == "") {
-		if(returnEmptyInsteadOfNoName && instrumentName == "") return "";
-		if(instrumentName == "") instrumentName = "(no name)";
-		displayName.Format("%02d: %s", nInstr, instrumentName);
-	} else {
-		displayName.Format("%02d: %s (%s)", nInstr, instrumentName, pluginName);
-	}
-	return displayName;
 }
 
 

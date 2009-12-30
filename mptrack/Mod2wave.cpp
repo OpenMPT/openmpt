@@ -667,7 +667,7 @@ void CDoWaveConvert::OnButton1()
 	ULONGLONG l = ((ULONGLONG)m_pSndFile->GetSongTime()) * m_pWaveFormat->nSamplesPerSec;
 	if (m_nMaxPatterns > 0)
 	{
-		DWORD dwOrds = m_pSndFile->GetNumPatterns();
+		DWORD dwOrds = m_pSndFile->Order.GetLengthFirstEmpty();
 		if ((m_nMaxPatterns < dwOrds) && (dwOrds > 0)) l = (l*m_nMaxPatterns) / dwOrds;
 	}
 	if (l < max) max = l;

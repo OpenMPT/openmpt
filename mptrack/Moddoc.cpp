@@ -22,12 +22,12 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-const std::string FileFilterMOD = _T("ProTracker Modules (*.mod)|*.mod||");
-const std::string FileFilterXM = _T("FastTracker Modules (*.xm)|*.xm||");
-const std::string FileFilterS3M = _T("ScreamTracker Modules (*.s3m)|*.s3m||");
-const std::string FileFilterIT = _T("Impulse Tracker Modules (*.it)|*.it||");
-const std::string FileFilterITP = _T("Impulse Tracker Projects (*.itp)|*.itp||");
-const std::string FileFilterMPT = _T("OpenMPT Modules (*.mptm)|*.mptm||");
+const TCHAR FileFilterMOD[]	= _T("ProTracker Modules (*.mod)|*.mod||");
+const TCHAR FileFilterXM[]	= _T("FastTracker Modules (*.xm)|*.xm||");
+const TCHAR FileFilterS3M[] = _T("ScreamTracker Modules (*.s3m)|*.s3m||");
+const TCHAR FileFilterIT[]	= _T("Impulse Tracker Modules (*.it)|*.it||");
+const TCHAR FileFilterITP[] = _T("Impulse Tracker Projects (*.itp)|*.itp||");
+const TCHAR FileFilterMPT[] = _T("OpenMPT Modules (*.mptm)|*.mptm||");
 
 /////////////////////////////////////////////////////////////////////////////
 // CModDoc
@@ -366,7 +366,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	if (m_SndFile.m_dwLastSavedWithVersion > MptVersion::num) {
 		char s[256];
 		wsprintf(s, "Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%s. Current version: v%s.\r\n", 
-			MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion),
+			(LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion),
 			MptVersion::str);
 		::AfxMessageBox(s);
 	}
@@ -3465,5 +3465,52 @@ void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool bReset)
 	}
 	else if(bReset)
 		pMainFrm->ResetElapsedTime();
+}
+
+
+CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
+											  bool bEmptyInsteadOfNoName /* = false*/,
+											  bool bIncludeIndex /* = true*/) const
+//-----------------------------------------------------------------------------------
+{
+	if(nInstr >= MAX_INSTRUMENTS || m_SndFile.GetNumInstruments() == 0 || m_SndFile.Instruments[nInstr] == nullptr)
+		return TEXT("");
+
+	CString displayName, instrumentName, pluginName;
+					
+	// Get instrument name.
+	instrumentName = m_SndFile.GetInstrumentName(nInstr);
+
+	// If instrument name is empty, use name of the sample mapped to C-5.
+	if (instrumentName.IsEmpty())
+	{
+		const SAMPLEINDEX nSmp = m_SndFile.Instruments[nInstr]->Keyboard[60];
+		if (nSmp < ARRAYELEMCOUNT(m_SndFile.Samples) && m_SndFile.Samples[nSmp].pSample)
+			instrumentName.Format(TEXT("s: %s"), (LPCTSTR)m_SndFile.GetSampleName(nSmp)); //60 is C-5
+	}
+
+	// Get plugin name.
+	const PLUGINDEX nPlug = m_SndFile.Instruments[nInstr]->nMixPlug;
+	if (nPlug > 0 && nPlug < MAX_MIXPLUGINS)
+		pluginName = m_SndFile.m_MixPlugins[nPlug-1].GetName();
+
+	if (pluginName.IsEmpty())
+	{
+		if(bEmptyInsteadOfNoName && instrumentName.IsEmpty())
+			return TEXT("");
+		if(instrumentName.IsEmpty())
+			instrumentName = TEXT("(no name)");
+		if (bIncludeIndex)
+			displayName.Format(TEXT("%02d: %s"), nInstr, (LPCTSTR)instrumentName);
+		else
+			displayName.Format(TEXT("%s"), (LPCTSTR)instrumentName);
+	} else
+	{
+		if (bIncludeIndex)
+			displayName.Format(TEXT("%02d: %s (%s)"), nInstr, (LPCTSTR)instrumentName, (LPCTSTR)pluginName);
+		else
+			displayName.Format(TEXT("%s (%s)"), (LPCTSTR)instrumentName, (LPCTSTR)pluginName);
+	}
+	return displayName;
 }
 

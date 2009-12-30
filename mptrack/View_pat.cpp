@@ -3090,7 +3090,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 												// Need to convert to linear in [0;64] - see below
 	BYTE event = GetFromMIDIMsg_Event(dwMidiData);
 
-	if ((event == 0x9) && !nVol) event = 0x8;	//Convert event to note-off if req'd
+	if ((event == MIDIEVENT_NOTEON) && !nVol) event = MIDIEVENT_NOTEOFF;	//Convert event to note-off if req'd
 
 
 	// Handle MIDI mapping.
@@ -3116,14 +3116,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	switch(event)
 	{
-		case 0x8: // Note Off
+		case MIDIEVENT_NOTEOFF: // Note Off
 			// The following method takes care of:
 			// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
 			// . Entering a note off in pattern if required
 			TempStopNote(nNote, ((CMainFrame::m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) != 0));
 		break;
 
-		case 0x9: // Note On
+		case MIDIEVENT_NOTEON: // Note On
 			nVol = ApplyVolumeRelatedMidiSettings(dwMidiData, midivolume);
 			if(nVol < 0) nVol = -1;
 			else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
@@ -3135,10 +3135,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				
 		break;
 
-		case 0xB: //Controller change
+		case MIDIEVENT_CONTROLLERCHANGE: //Controller change
 			switch(nByte1)
 			{
-				case 0x7: //Volume
+				case MIDICC_Volume_Coarse: //Volume
 					midivolume = nByte2;
 				break;
 			}
@@ -4934,8 +4934,10 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 		HMENU instrumentChangeMenu = ::CreatePopupMenu();
 		AppendMenu(hMenu, MF_POPUP|greyed, (UINT)instrumentChangeMenu, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
 
-		if(pSndFile == NULL)
+		if(pSndFile == nullptr || pSndFile->GetpModDoc() == nullptr)
 			return false;
+
+		CModDoc* const pModDoc = pSndFile->GetpModDoc();
 	
 		if(!greyed)
 		{
@@ -4946,8 +4948,8 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 					if (pSndFile->Instruments[i] == NULL)
 						continue;
 
-					CString instString = pSndFile->GetPatternViewInstrumentName(i, true);
-					if(instString.GetLength() > 0) AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, pSndFile->GetPatternViewInstrumentName(i));
+					CString instString = pModDoc->GetPatternViewInstrumentName(i, true);
+					if(instString.GetLength() > 0) AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+i, pModDoc->GetPatternViewInstrumentName(i));
 					//Adding the entry to the list only if it has some name, since if the name is empty,
 					//it likely is some non-used instrument.
 				}
@@ -5213,7 +5215,8 @@ void CViewPattern::SetSplitKeyboardSettings()
 	if(pSndFile == nullptr) return;
 
 	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pSndFile, pModDoc->GetSplitKeyboardSettings());
-	dlg.DoModal();
+	if (dlg.DoModal() == IDOK)
+		pModDoc->UpdateAllViews(NULL, HINT_INSNAMES|HINT_SMPNAMES);
 }
 
 
