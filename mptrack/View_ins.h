@@ -85,6 +85,7 @@ protected:
 	bool EnvSetLoopEnd(int nPoint);
 	bool EnvSetSustainStart(int nPoint);
 	bool EnvSetSustainEnd(int nPoint);
+	bool EnvToggleReleaseNode(int nPoint);
 
 	// Set envelope status
 	bool EnvToggleEnv(INSTRUMENTENVELOPE *pEnv, CSoundFile *pSndFile, MODINSTRUMENT *pIns, bool bEnable, BYTE cDefaultValue, DWORD dwChanFlag, DWORD dwExtraFlags = 0);
@@ -93,13 +94,28 @@ protected:
 	bool EnvSetPitchEnv(bool bEnable);
 	bool EnvSetFilterEnv(bool bEnable);
 
+	// Keyboard envelope control
+	void EnvKbdSelectPrevPoint();
+	void EnvKbdSelectNextPoint();
+	void EnvKbdMovePointLeft();
+	void EnvKbdMovePointRight();
+	void EnvKbdMovePointUp(BYTE stepsize = 1);
+	void EnvKbdMovePointDown(BYTE stepsize = 1);
+	void EnvKbdInsertPoint();
+	void EnvKbdRemovePoint();
+	void EnvKbdSetLoopStart();
+	void EnvKbdSetLoopEnd();
+	void EnvKbdSetSustainStart();
+	void EnvKbdSetSustainEnd();
+	void EnvKbdToggleReleaseNode();
+
 	////////////////////////
 	// Misc stuff
 	void UpdateScrollSize();
 	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes m_nEnv = ENV_VOLUME);
 	INSTRUMENTENVELOPE *GetEnvelopePtr() const;
-	UINT EnvInsertPoint();
-	bool EnvRemovePoint();
+	UINT EnvInsertPoint(int nTick, int nValue);
+	bool EnvRemovePoint(UINT nPoint);
 	int TickToScreen(int nTick) const;
 	int PointToScreen(int nPoint) const;
 	int ScreenToTick(int x) const;

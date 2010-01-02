@@ -286,6 +286,42 @@ enum {
 };
 
 
+// Sample editor toolbar image list index
+enum
+{
+	SIMAGE_CHECKED = 0,
+	SIMAGE_ZOOMUP,
+	SIMAGE_ZOOMDOWN,
+	SIMAGE_NODRAW,
+	SIMAGE_DRAW,
+	SIMAGE_RESIZE,
+	SIMAGE_GENERATE,
+};
+
+
+// Instrument editor toolbar image list index
+enum
+{
+	IIMAGE_CHECKED = 0,
+	IIMAGE_VOLENV,
+	IIMAGE_PANENV,
+	IIMAGE_PITCHENV,
+	IIMAGE_NOPITCHENV,
+	IIMAGE_LOOP,
+	IIMAGE_SUSTAIN,
+	IIMAGE_CARRY,
+	IIMAGE_NOCARRY,
+	IIMAGE_VOLSWITCH,
+	IIMAGE_PANSWITCH,
+	IIMAGE_PITCHSWITCH,
+	IIMAGE_FILTERSWITCH,
+	IIMAGE_NOPITCHSWITCH,
+	IIMAGE_NOFILTERSWITCH,
+	IIMAGE_SAMPLEMAP,
+	IIMAGE_GRID,
+};
+
+
 /////////////////////////////////////////////////////////////////////////
 // Player position notification
 

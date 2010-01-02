@@ -1005,10 +1005,10 @@ void CViewSample::DrawNcButton(CDC *pDC, UINT nBtn)
 		}
 		switch(cLeftBarButtons[nBtn])
 		{
-		case ID_SAMPLE_ZOOMUP:		nImage = 1; break;
-		case ID_SAMPLE_ZOOMDOWN:	nImage = 2; break;
-		case ID_SAMPLE_DRAW:		nImage = (dwStyle & NCBTNS_DISABLED) ? 18 : 16; break;
-		case ID_SAMPLE_ADDSILENCE:	nImage = 17; break;
+		case ID_SAMPLE_ZOOMUP:		nImage = SIMAGE_ZOOMUP; break;
+		case ID_SAMPLE_ZOOMDOWN:	nImage = SIMAGE_ZOOMDOWN; break;
+		case ID_SAMPLE_DRAW:		nImage = (dwStyle & NCBTNS_DISABLED) ? SIMAGE_NODRAW : SIMAGE_DRAW; break;
+		case ID_SAMPLE_ADDSILENCE:	nImage = SIMAGE_RESIZE; break;
 		}
 		pDC->Draw3dRect(rect.left-1, rect.top-1, SMP_LEFTBAR_CXBTN+2, SMP_LEFTBAR_CYBTN+2, c3, c4);
 		pDC->Draw3dRect(rect.left, rect.top, SMP_LEFTBAR_CXBTN, SMP_LEFTBAR_CYBTN, c1, c2);
@@ -1016,7 +1016,7 @@ void CViewSample::DrawNcButton(CDC *pDC, UINT nBtn)
 		pDC->FillSolidRect(&rect, crFc);
 		rect.left += xofs;
 		rect.top += yofs;
-		if (dwStyle & NCBTNS_CHECKED) m_bmpEnvBar.Draw(pDC, 0, rect.TopLeft(), ILD_NORMAL);
+		if (dwStyle & NCBTNS_CHECKED) m_bmpEnvBar.Draw(pDC, SIMAGE_CHECKED, rect.TopLeft(), ILD_NORMAL);
 		m_bmpEnvBar.Draw(pDC, nImage, rect.TopLeft(), ILD_NORMAL);
 	} else
 	{
