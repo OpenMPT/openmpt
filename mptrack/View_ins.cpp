@@ -13,10 +13,10 @@
 #include "midi.h"
 
 #define ENV_ZOOM				4
-#define ENV_DRAGLOOPSTART		0x100
-#define ENV_DRAGLOOPEND			0x200
-#define ENV_DRAGSUSTAINSTART	0x400
-#define ENV_DRAGSUSTAINEND		0x800
+#define ENV_DRAGLOOPSTART		(MAX_ENVPOINTS + 1)
+#define ENV_DRAGLOOPEND			(MAX_ENVPOINTS + 2)
+#define ENV_DRAGSUSTAINSTART	(MAX_ENVPOINTS + 3)
+#define ENV_DRAGSUSTAINEND		(MAX_ENVPOINTS + 4)
 
 // Non-client toolbar
 #define ENV_LEFTBAR_CY			29
@@ -117,6 +117,7 @@ CViewInstrument::CViewInstrument()
 	m_GridSpeed = -1;
 	m_GridScrollPos = -1;
 	//end rewbs.envRowGrid
+	m_nDragItem = 1;
 
 }
 
@@ -492,6 +493,23 @@ bool CViewInstrument::EnvSetSustainEnd(int nPoint)
 }
 
 
+bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
+//----------------------------------------------------
+{
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return false;
+	if(nPoint < 1 || nPoint > (int)EnvGetLastPoint()) return false;
+
+	if (envelope->nReleaseNode == nPoint)
+	{
+		envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
+	} else
+	{
+		envelope->nReleaseNode = static_cast<BYTE>(nPoint);
+	}
+	return true;
+}
+
 // Enable or disable a flag of the current envelope
 bool CViewInstrument::EnvSetFlag(const DWORD dwFlag, const bool bEnable) const
 //----------------------------------------------------------------------------
@@ -762,7 +780,7 @@ void CViewInstrument::UpdateView(DWORD dwHintMask, CObject *)
 
 //rewbs.envRowGrid
 void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
-//--------------------------------------------------------------------
+//--------------------------------------------------
 {
 	int cachedScrollPos = GetScrollPos(SB_HORZ);
 	bool windowResized = false;
@@ -904,15 +922,23 @@ void CViewInstrument::OnDraw(CDC *pDC)
 			rect.top = y - 3;
 			rect.right = x + 4;
 			rect.bottom = y + 4;
-			if (i) {
+			if (i)
+			{
 				m_dcMemMain.LineTo(x, y);
-			} else {
+			} else
+			{
 				m_dcMemMain.MoveTo(x, y);
 			}
-			if (i == releaseNode) {
+			if (i == releaseNode)
+			{
 				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushHighLightRed));
 				m_dcMemMain.SelectObject(CMainFrame::penEnvelopeHighlight);
-			} else {
+			} else if (i == m_nDragItem - 1)
+			{
+				// currently selected env point
+				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushGray));
+			} else
+			{
 				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushWhite));
 			}
 
@@ -959,11 +985,11 @@ WORD CViewInstrument::EnvGetReleaseNodeTick()
 	return envelope->Ticks[EnvGetReleaseNode()];
 }
 
-bool CViewInstrument::EnvRemovePoint()
-//------------------------------------
+bool CViewInstrument::EnvRemovePoint(UINT nPoint)
+//---------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (m_nDragItem) && (m_nDragItem-1 <= EnvGetLastPoint()))
+	if ((pModDoc) && (nPoint <= EnvGetLastPoint()))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
@@ -972,21 +998,27 @@ bool CViewInstrument::EnvRemovePoint()
 			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
 			if(envelope == nullptr || envelope->nNodes == 0) return false;
 
-			UINT nPoint = m_nDragItem - 1;
-
 			envelope->nNodes--;
-			for (UINT i=nPoint; i<envelope->nNodes; i++)
+			for (UINT i = nPoint; i < envelope->nNodes; i++)
 			{
 				envelope->Ticks[i] = envelope->Ticks[i + 1];
 				envelope->Values[i] = envelope->Values[i + 1];
 			}
-			if (nPoint >= envelope->nNodes) nPoint = envelope->nNodes-1;
+			if (nPoint >= envelope->nNodes) nPoint = envelope->nNodes - 1;
 			if (envelope->nLoopStart > nPoint) envelope->nLoopStart--;
 			if (envelope->nLoopEnd > nPoint) envelope->nLoopEnd--;
 			if (envelope->nSustainStart > nPoint) envelope->nSustainStart--;
 			if (envelope->nSustainEnd > nPoint) envelope->nSustainEnd--;
-			if (envelope->nReleaseNode>nPoint && envelope->nReleaseNode!=ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode--;
+			if (envelope->nReleaseNode>nPoint && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode--;
 			envelope->Ticks[0] = 0;
+
+			if(envelope->nNodes == 1)
+			{
+				// if only one node is left, just disable the envelope completely
+				envelope->nNodes = envelope->nLoopStart = envelope->nLoopEnd = envelope->nSustainStart = envelope->nSustainEnd = 0;
+				envelope->dwFlags = 0;
+				envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
+			}
 
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
@@ -997,8 +1029,8 @@ bool CViewInstrument::EnvRemovePoint()
 }
 
 // Insert point. Returns 0 if error occured, else point ID + 1.
-UINT CViewInstrument::EnvInsertPoint()
-//------------------------------------
+UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
+//---------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
@@ -1007,14 +1039,12 @@ UINT CViewInstrument::EnvInsertPoint()
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 		if (pIns)
 		{
-			int nTick = ScreenToTick(m_ptMenu.x);
-			int nValue = ScreenToValue(m_ptMenu.y);
-			if(nTick < 0) return false;
+			if(nTick < 0) return 0;
 
 			nValue = CLAMP(nValue, 0, 64);
 
 			INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
-			if(envelope == nullptr) return false;
+			if(envelope == nullptr) return 0;
 			BYTE cDefaultValue;
 
 			switch(m_nEnv)
@@ -1029,7 +1059,7 @@ UINT CViewInstrument::EnvInsertPoint()
 				cDefaultValue = (pIns->PitchEnv.dwFlags & ENV_FILTER) ? 64 : 32;
 				break;
 			default:
-				return false;
+				return 0;
 			}
 
 			if (envelope->nNodes < pSndFile->GetModSpecifications().envelopePointsMax)
@@ -1180,18 +1210,18 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		}
 		switch(cLeftBarButtons[nBtn])
 		{
-		case ID_ENVSEL_VOLUME:		nImage = 1; break;
-		case ID_ENVSEL_PANNING:		nImage = 2; break;
-		case ID_ENVSEL_PITCH:		nImage = (dwStyle & NCBTNS_DISABLED) ? 4 : 3; break;
-		case ID_ENVELOPE_SETLOOP:	nImage = 5; break;
-		case ID_ENVELOPE_SUSTAIN:	nImage = 6; break;
-		case ID_ENVELOPE_CARRY:		nImage = (dwStyle & NCBTNS_DISABLED) ? 8 : 7; break;
-		case ID_ENVELOPE_VOLUME:	nImage = 9; break;
-		case ID_ENVELOPE_PANNING:	nImage = 10; break;
-		case ID_ENVELOPE_PITCH:		nImage = (dwStyle & NCBTNS_DISABLED) ? 13 : 11; break;
-		case ID_ENVELOPE_FILTER:	nImage = (dwStyle & NCBTNS_DISABLED) ? 14 : 12; break;
-		case ID_INSTRUMENT_SAMPLEMAP: nImage = 15; break;
-		case ID_ENVELOPE_VIEWGRID:	nImage = 16; break;
+		case ID_ENVSEL_VOLUME:		nImage = IIMAGE_VOLENV; break;
+		case ID_ENVSEL_PANNING:		nImage = IIMAGE_PANENV; break;
+		case ID_ENVSEL_PITCH:		nImage = (dwStyle & NCBTNS_DISABLED) ? IIMAGE_NOPITCHENV : IIMAGE_PITCHENV; break;
+		case ID_ENVELOPE_SETLOOP:	nImage = IIMAGE_LOOP; break;
+		case ID_ENVELOPE_SUSTAIN:	nImage = IIMAGE_SUSTAIN; break;
+		case ID_ENVELOPE_CARRY:		nImage = (dwStyle & NCBTNS_DISABLED) ? IIMAGE_NOCARRY : IIMAGE_CARRY; break;
+		case ID_ENVELOPE_VOLUME:	nImage = IIMAGE_VOLSWITCH; break;
+		case ID_ENVELOPE_PANNING:	nImage = IIMAGE_PANSWITCH; break;
+		case ID_ENVELOPE_PITCH:		nImage = (dwStyle & NCBTNS_DISABLED) ? IIMAGE_NOPITCHSWITCH : IIMAGE_PITCHSWITCH; break;
+		case ID_ENVELOPE_FILTER:	nImage = (dwStyle & NCBTNS_DISABLED) ? IIMAGE_NOFILTERSWITCH : IIMAGE_FILTERSWITCH; break;
+		case ID_INSTRUMENT_SAMPLEMAP: nImage = IIMAGE_SAMPLEMAP; break;
+		case ID_ENVELOPE_VIEWGRID:	nImage = IIMAGE_GRID; break;
 		}
 		pDC->Draw3dRect(rect.left-1, rect.top-1, ENV_LEFTBAR_CXBTN+2, ENV_LEFTBAR_CYBTN+2, c3, c4);
 		pDC->Draw3dRect(rect.left, rect.top, ENV_LEFTBAR_CXBTN, ENV_LEFTBAR_CYBTN, c1, c2);
@@ -1199,7 +1229,7 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		pDC->FillSolidRect(&rect, crFc);
 		rect.left += xofs;
 		rect.top += yofs;
-		if (dwStyle & NCBTNS_CHECKED) m_bmpEnvBar.Draw(pDC, 0, rect.TopLeft(), ILD_NORMAL);
+		if (dwStyle & NCBTNS_CHECKED) m_bmpEnvBar.Draw(pDC, IIMAGE_CHECKED, rect.TopLeft(), ILD_NORMAL);
 		m_bmpEnvBar.Draw(pDC, nImage, rect.TopLeft(), ILD_NORMAL);
 	} else
 	{
@@ -1406,9 +1436,9 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 	{
 		BOOL bChanged = FALSE;
 		if (pt.x >= m_rcClient.right - 2) nTick++;
-		if (m_nDragItem < 0x100)
+		if (m_nDragItem <= MAX_ENVPOINTS)
 		{
-			bChanged = EnvSetValue(m_nDragItem-1, nTick, nVal);
+			bChanged = EnvSetValue(m_nDragItem - 1, nTick, nVal);
 		} else
 		{
 			int nPoint = ScreenToPoint(pt.x, pt.y);
@@ -1517,14 +1547,14 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 		// Look if dragging a point
 		UINT maxpoint = EnvGetLastPoint();
 		m_nDragItem = 0;
-		for (UINT i=0; i<=maxpoint; i++)
+		for (UINT i = 0; i <= maxpoint; i++)
 		{
 			int x = PointToScreen(i);
 			int y = ValueToScreen(EnvGetValue(i));
 			rect.SetRect(x-6, y-6, x+7, y+7);
 			if (rect.PtInRect(pt))
 			{
-				m_nDragItem = i+1;
+				m_nDragItem = i + 1;
 				break;
 			}
 		}
@@ -1552,7 +1582,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			rect.top = m_rcClient.top;
 			rect.bottom = m_rcClient.bottom;
 			rect.right = PointToScreen(EnvGetLoopStart()) + 1;
-			rect.left = rect.right - ENV_ZOOM*2;
+			rect.left = rect.right - ENV_ZOOM * 2;
 			if (rect.PtInRect(pt))
 			{
 				m_nDragItem = ENV_DRAGLOOPSTART;
@@ -1573,8 +1603,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			// Shift-Click: Insert envelope point here
 			if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
 			{
-				m_ptMenu = pt;
-				m_nDragItem = EnvInsertPoint(); // returns point ID + 1 if successful, else 0.
+				m_nDragItem = EnvInsertPoint(ScreenToTick(pt.x), ScreenToValue(pt.y)); // returns point ID + 1 if successful, else 0.
 				if(m_nDragItem > 0)
 				{
 					// Drag point if successful
@@ -1619,13 +1648,13 @@ void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
 			UINT lastpoint = EnvGetLastPoint();
 			m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_INSERTPOINT, (lastpoint < maxpoint) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_REMOVEPOINT, ((m_nDragItem) && (lastpoint > 1)) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (pSndFile->m_nType&(MOD_TYPE_IT|MOD_TYPE_MPT) && m_nEnv==ENV_VOLUME) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_REMOVEPOINT, ((m_nDragItem) && (lastpoint > 0)) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && m_nEnv == ENV_VOLUME) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SETLOOP, (EnvGetLoop()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SUSTAIN, (EnvGetSustain()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_CARRY, (EnvGetCarry()) ? MF_CHECKED : MF_UNCHECKED);
-			pSubMenu->CheckMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (EnvGetReleaseNode()==m_nDragItem-1) ? MF_CHECKED : MF_UNCHECKED);
+			pSubMenu->CheckMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (EnvGetReleaseNode() == m_nDragItem - 1) ? MF_CHECKED : MF_UNCHECKED);
 			m_ptMenu = pt;
 			ClientToScreen(&pt);
 			pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON,pt.x,pt.y,this);
@@ -1637,11 +1666,9 @@ void CViewInstrument::OnMButtonDown(UINT, CPoint pt)
 //--------------------------------------------------
 {
 	// Middle mouse button: Remove envelope point
-	if(EnvGetLastPoint() <= 1) return;
+	if(EnvGetLastPoint() == 0) return;
 	m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
-	if(m_nDragItem == 0) return;
-	m_ptMenu = pt;
-	OnEnvRemovePoint();
+	EnvRemovePoint(m_nDragItem - 1);
 }
 
 
@@ -1727,21 +1754,10 @@ void CViewInstrument::OnEnvCarryChanged()
 void CViewInstrument::OnEnvToggleReleasNode() 
 //---------------------------------------------------
 {
-	UINT node = m_nDragItem-1;
-
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (node>0) && (node <= EnvGetLastPoint()))
+	if(m_nDragItem < 2 || m_nDragItem >= EnvGetLastPoint()) return;
+	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
-		INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
-		if(envelope == nullptr) return;
-
-		if (envelope->nReleaseNode == node) {
-			envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
-		} else { 
-			envelope->nReleaseNode = static_cast<BYTE>(node);
-		}
-
-		pModDoc->SetModified();
+		if(GetDocument() != nullptr) GetDocument()->SetModified();
 		InvalidateRect(NULL, FALSE);
 	}
 }
@@ -1811,13 +1827,17 @@ void CViewInstrument::OnEnvToggleGrid()
 void CViewInstrument::OnEnvRemovePoint()
 //--------------------------------------
 {
-	EnvRemovePoint();
+	if(m_nDragItem > 0)
+	{
+		EnvRemovePoint(m_nDragItem - 1);
+	}
 }
 
 void CViewInstrument::OnEnvInsertPoint()
 //--------------------------------------
 {
-	EnvInsertPoint();
+	
+	EnvInsertPoint(ScreenToTick(m_ptMenu.x), ScreenToValue(m_ptMenu.y));
 }
 
 
@@ -2164,6 +2184,23 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcInstrumentLoad:	SendCtrlMessage(IDC_INSTRUMENT_OPEN); return wParam;
 		case kcInstrumentSave:	SendCtrlMessage(IDC_INSTRUMENT_SAVEAS); return wParam;
 		case kcInstrumentNew:	SendCtrlMessage(IDC_INSTRUMENT_NEW); return wParam;	
+
+		// envelope editor
+		case kcInstrumentEnvelopePointPrev:				EnvKbdSelectPrevPoint(); return wParam;
+		case kcInstrumentEnvelopePointNext:				EnvKbdSelectNextPoint(); return wParam;
+		case kcInstrumentEnvelopePointMoveLeft:			EnvKbdMovePointLeft(); return wParam;
+		case kcInstrumentEnvelopePointMoveRight:		EnvKbdMovePointRight(); return wParam;
+		case kcInstrumentEnvelopePointMoveUp:			EnvKbdMovePointUp(1); return wParam;
+		case kcInstrumentEnvelopePointMoveDown:			EnvKbdMovePointDown(1); return wParam;
+		case kcInstrumentEnvelopePointMoveUp8:			EnvKbdMovePointUp(8); return wParam;
+		case kcInstrumentEnvelopePointMoveDown8:		EnvKbdMovePointDown(8); return wParam;
+		case kcInstrumentEnvelopePointInsert:			EnvKbdInsertPoint(); return wParam;
+		case kcInstrumentEnvelopePointRemove:			EnvKbdRemovePoint(); return wParam;
+		case kcInstrumentEnvelopeSetLoopStart:			EnvKbdSetLoopStart(); return wParam;
+		case kcInstrumentEnvelopeSetLoopEnd:			EnvKbdSetLoopEnd(); return wParam;
+		case kcInstrumentEnvelopeSetSustainLoopStart:	EnvKbdSetSustainStart(); return wParam;
+		case kcInstrumentEnvelopeSetSustainLoopEnd:		EnvKbdSetSustainEnd(); return wParam;
+		case kcInstrumentEnvelopeToggleReleaseNode:		EnvKbdToggleReleaseNode(); return wParam;
 	}
 	if (wParam>=kcInstrumentStartNotes && wParam<=kcInstrumentEndNotes)
 	{
@@ -2201,6 +2238,181 @@ void CViewInstrument::OnEnvelopeScalepoints()
 	}
 
 	
+}
+
+
+////////////////////////////////////////
+//  Envelope Editor - Keyboard actions
+
+void CViewInstrument::EnvKbdSelectPrevPoint()
+//-------------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr) return;
+	if(m_nDragItem <= 1 || m_nDragItem > pEnv->nNodes)
+		m_nDragItem = pEnv->nNodes;
+	else
+		m_nDragItem--;
+	RedrawWindow();
+}
+
+
+void CViewInstrument::EnvKbdSelectNextPoint()
+//-------------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr) return;
+	if(m_nDragItem >= pEnv->nNodes)
+		m_nDragItem = 1;
+	else
+		m_nDragItem++;
+	RedrawWindow();
+}
+
+
+void CViewInstrument::EnvKbdMovePointLeft()
+//-----------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(m_nDragItem == 1 || pEnv->Ticks[m_nDragItem - 1] == pEnv->Ticks[m_nDragItem - 2])
+		return;
+	pEnv->Ticks[m_nDragItem - 1]--;
+	RedrawWindow();
+}
+
+
+void CViewInstrument::EnvKbdMovePointRight()
+//------------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(m_nDragItem == 1 || (m_nDragItem < pEnv->nNodes && pEnv->Ticks[m_nDragItem - 1] == pEnv->Ticks[m_nDragItem]))
+		return;
+	pEnv->Ticks[m_nDragItem - 1]++;
+	RedrawWindow();
+}
+
+
+void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
+//----------------------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv->Values[m_nDragItem - 1] <= 64 - stepsize)
+		pEnv->Values[m_nDragItem - 1] += stepsize;
+	else
+		pEnv->Values[m_nDragItem - 1] = 64;
+	RedrawWindow();
+}
+
+
+void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
+//------------------------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv->Values[m_nDragItem - 1] >= stepsize)
+		pEnv->Values[m_nDragItem - 1] -= stepsize;
+	else 
+		pEnv->Values[m_nDragItem - 1] = 0;
+	RedrawWindow();
+}
+
+void CViewInstrument::EnvKbdInsertPoint()
+//---------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr) return;
+	if(m_nDragItem > pEnv->nNodes) m_nDragItem = pEnv->nNodes;
+	WORD newTick = pEnv->Ticks[pEnv->nNodes - 1] + 4;	// if last point is selected: add point after last point
+	BYTE newVal = pEnv->Values[pEnv->nNodes - 1];
+	// if some other point is selected: interpolate between this and next point (if there's room between them)
+	if(m_nDragItem < pEnv->nNodes && (pEnv->Ticks[m_nDragItem] - pEnv->Ticks[m_nDragItem - 1] > 1))
+	{
+		newTick = (pEnv->Ticks[m_nDragItem - 1] + pEnv->Ticks[m_nDragItem]) / 2;
+		newVal = (pEnv->Values[m_nDragItem - 1] + pEnv->Values[m_nDragItem]) / 2;
+	}
+
+	UINT newPoint = EnvInsertPoint(newTick, newVal);
+	if(newPoint > 0) m_nDragItem = newPoint;
+	RedrawWindow();
+}
+
+
+void CViewInstrument::EnvKbdRemovePoint()
+//---------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || pEnv->nNodes == 0) return;
+	if(m_nDragItem > pEnv->nNodes) m_nDragItem = pEnv->nNodes;
+	EnvRemovePoint(m_nDragItem - 1);
+}
+
+
+void CViewInstrument::EnvKbdSetLoopStart()
+//----------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(!EnvGetLoop())
+		EnvSetLoopStart(0);
+	EnvSetLoopStart(m_nDragItem - 1);
+	RedrawWindow();
+}
+
+
+void CViewInstrument::EnvKbdSetLoopEnd()
+//--------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(!EnvGetLoop())
+	{
+		EnvSetLoop(true);
+		EnvSetLoopStart(0);
+	}
+	EnvSetLoopEnd(m_nDragItem - 1);
+	RedrawWindow();
+}
+
+
+void CViewInstrument::EnvKbdSetSustainStart()
+//-------------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(!EnvGetSustain())
+		EnvSetSustain(true);
+	EnvSetSustainStart(m_nDragItem - 1);
+	RedrawWindow();
+
+}
+
+
+void CViewInstrument::EnvKbdSetSustainEnd()
+//-----------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(!EnvGetSustain())
+	{
+		EnvSetSustain(true);
+		EnvSetSustainStart(0);
+	}
+	EnvSetSustainEnd(m_nDragItem - 1);
+	RedrawWindow();
+
+}
+
+
+void CViewInstrument::EnvKbdToggleReleaseNode()
+//---------------------------------------------
+{
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	EnvToggleReleaseNode(m_nDragItem - 1);
+	RedrawWindow();
 }
 
 

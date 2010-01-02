@@ -2219,7 +2219,7 @@ void CCommandSet::SetupCommands()
 	commands[kcPatternGoto].isDummy = false;
 
 	commands[kcPatternOpenRandomizer].UID = 1767;
-	commands[kcPatternOpenRandomizer].isHidden = false;
+	commands[kcPatternOpenRandomizer].isHidden = true;	// while there's not randomizer yet, let's just disable it for now
 	commands[kcPatternOpenRandomizer].isDummy = false;
 	commands[kcPatternOpenRandomizer].Message = "Open pattern randomizer";
 
@@ -2230,7 +2230,7 @@ void CCommandSet::SetupCommands()
 
 	//rewbs.graph
 	commands[kcViewGraph].UID = 1769;
-	commands[kcViewGraph].isHidden = false;
+	commands[kcViewGraph].isHidden = true;	// while there's no graph yet, let's just disable it for now
 	commands[kcViewGraph].isDummy = false;
 	commands[kcViewGraph].Message = "View Graph";
 	//end rewbs.graph
@@ -2484,6 +2484,81 @@ void CCommandSet::SetupCommands()
 	commands[kcEditPushForwardPaste].isHidden = false;
 	commands[kcEditPushForwardPaste].isDummy = false;
 	commands[kcEditPushForwardPaste].Message = "Push Forward Paste";
+
+	commands[kcInstrumentEnvelopePointMoveLeft].UID = 1821;
+	commands[kcInstrumentEnvelopePointMoveLeft].isHidden = false;
+	commands[kcInstrumentEnvelopePointMoveLeft].isDummy = false;
+	commands[kcInstrumentEnvelopePointMoveLeft].Message = "Move envelope point left";
+
+	commands[kcInstrumentEnvelopePointMoveRight].UID = 1822;
+	commands[kcInstrumentEnvelopePointMoveRight].isHidden = false;
+	commands[kcInstrumentEnvelopePointMoveRight].isDummy = false;
+	commands[kcInstrumentEnvelopePointMoveRight].Message = "Move envelope point right";
+
+	commands[kcInstrumentEnvelopePointMoveUp].UID = 1823;
+	commands[kcInstrumentEnvelopePointMoveUp].isHidden = false;
+	commands[kcInstrumentEnvelopePointMoveUp].isDummy = false;
+	commands[kcInstrumentEnvelopePointMoveUp].Message = "Move envelope point up";
+
+	commands[kcInstrumentEnvelopePointMoveDown].UID = 1824;
+	commands[kcInstrumentEnvelopePointMoveDown].isHidden = false;
+	commands[kcInstrumentEnvelopePointMoveDown].isDummy = false;
+	commands[kcInstrumentEnvelopePointMoveDown].Message = "Move envelope point down";
+
+	commands[kcInstrumentEnvelopePointPrev].UID = 1825;
+	commands[kcInstrumentEnvelopePointPrev].isHidden = false;
+	commands[kcInstrumentEnvelopePointPrev].isDummy = false;
+	commands[kcInstrumentEnvelopePointPrev].Message = "Select previous envelope point";
+
+	commands[kcInstrumentEnvelopePointNext].UID = 1826;
+	commands[kcInstrumentEnvelopePointNext].isHidden = false;
+	commands[kcInstrumentEnvelopePointNext].isDummy = false;
+	commands[kcInstrumentEnvelopePointNext].Message = "Select next envelope point";
+
+	commands[kcInstrumentEnvelopePointInsert].UID = 1827;
+	commands[kcInstrumentEnvelopePointInsert].isHidden = false;
+	commands[kcInstrumentEnvelopePointInsert].isDummy = false;
+	commands[kcInstrumentEnvelopePointInsert].Message = "Insert envelope point";
+
+	commands[kcInstrumentEnvelopePointRemove].UID = 1828;
+	commands[kcInstrumentEnvelopePointRemove].isHidden = false;
+	commands[kcInstrumentEnvelopePointRemove].isDummy = false;
+	commands[kcInstrumentEnvelopePointRemove].Message = "Remove envelope point";
+
+	commands[kcInstrumentEnvelopeSetLoopStart].UID = 1829;
+	commands[kcInstrumentEnvelopeSetLoopStart].isHidden = false;
+	commands[kcInstrumentEnvelopeSetLoopStart].isDummy = false;
+	commands[kcInstrumentEnvelopeSetLoopStart].Message = "Set loop start";
+
+	commands[kcInstrumentEnvelopeSetLoopEnd].UID = 1830;
+	commands[kcInstrumentEnvelopeSetLoopEnd].isHidden = false;
+	commands[kcInstrumentEnvelopeSetLoopEnd].isDummy = false;
+	commands[kcInstrumentEnvelopeSetLoopEnd].Message = "Set loop end";
+
+	commands[kcInstrumentEnvelopeSetSustainLoopStart].UID = 1831;
+	commands[kcInstrumentEnvelopeSetSustainLoopStart].isHidden = false;
+	commands[kcInstrumentEnvelopeSetSustainLoopStart].isDummy = false;
+	commands[kcInstrumentEnvelopeSetSustainLoopStart].Message = "Set sustain loop start";
+
+	commands[kcInstrumentEnvelopeSetSustainLoopEnd].UID = 1832;
+	commands[kcInstrumentEnvelopeSetSustainLoopEnd].isHidden = false;
+	commands[kcInstrumentEnvelopeSetSustainLoopEnd].isDummy = false;
+	commands[kcInstrumentEnvelopeSetSustainLoopEnd].Message = "Set sustain loop end";
+
+	commands[kcInstrumentEnvelopeToggleReleaseNode].UID = 1833;
+	commands[kcInstrumentEnvelopeToggleReleaseNode].isHidden = false;
+	commands[kcInstrumentEnvelopeToggleReleaseNode].isDummy = false;
+	commands[kcInstrumentEnvelopeToggleReleaseNode].Message = "Toggle release node";
+
+	commands[kcInstrumentEnvelopePointMoveUp8].UID = 1834;
+	commands[kcInstrumentEnvelopePointMoveUp8].isHidden = false;
+	commands[kcInstrumentEnvelopePointMoveUp8].isDummy = false;
+	commands[kcInstrumentEnvelopePointMoveUp8].Message = "Move envelope point up (big step)";
+
+	commands[kcInstrumentEnvelopePointMoveDown8].UID = 1835;
+	commands[kcInstrumentEnvelopePointMoveDown8].isHidden = false;
+	commands[kcInstrumentEnvelopePointMoveDown8].isDummy = false;
+	commands[kcInstrumentEnvelopePointMoveDown8].Message = "Move envelope point down (big step)";
 
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{

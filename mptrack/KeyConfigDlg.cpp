@@ -308,7 +308,9 @@ void COptionsKeyboard::DefineCommandCategories()
 	commandCategories.Add(*newCat);
 	delete newCat;
 
-	newCat = new CommandCategory("  Instrument [Bottom]", kCtxViewInstruments);
+	newCat = new CommandCategory("  Instrument Editor", kCtxViewInstruments);
+	for (int c=kcStartInstrumentMisc; c<=kcEndInstrumentMisc; c++)
+		newCat->commands.Add(c);
 	commandCategories.Add(*newCat);
 	delete newCat;
 
