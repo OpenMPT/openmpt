@@ -733,7 +733,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	BYTE xmph[9];
 	FILE *f;
 	int i;
-	BOOL bAddChannel = false; // avoid odd channel count for FT2 compatibility 
+	bool bAddChannel = false; // avoid odd channel count for FT2 compatibility 
 
 	if(bCompatibilityExport) nPacking = false;
 
