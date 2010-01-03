@@ -133,7 +133,7 @@ void CModCleanupDlg::OnOK()
 
 
 void CModCleanupDlg::OnCancel()
-//-------------------------
+//-----------------------------
 {
 	CDialog::OnCancel();
 }
@@ -166,7 +166,7 @@ void CModCleanupDlg::OnPresetCleanupSong()
 }
 
 void CModCleanupDlg::OnPresetCompoCleanup()
-//----------------------------------------
+//-----------------------------------------
 {
 	// patterns
 	CheckDlgButton(IDC_CHK_CLEANUP_PATTERNS, MF_UNCHECKED);
@@ -191,6 +191,7 @@ void CModCleanupDlg::OnPresetCompoCleanup()
 }
 
 BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
+//----------------------------------------------------------------------------
 {
 	UNREFERENCED_PARAMETER(id);
 	UNREFERENCED_PARAMETER(pResult);
@@ -255,7 +256,7 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 		break;
 	// misc
 	case IDC_CHK_SAMPLEPACK:
-		strTipText = "Convert the module to .IT and reset song, sample and instrument variables";
+		strTipText = "Convert the module to .IT and reset song / sample / instrument variables";
 		break;
 	}
 
@@ -279,61 +280,40 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 // Actual cleanup implementations
 
 // Remove unused patterns / rearrange patterns
+// If argument bRemove is true, unused patterns are removed. Else, patterns are only rearranged.
 bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 //-----------------------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
-	if(pSndFile->GetType() == MOD_TYPE_MPT && pSndFile->Order.GetNumSequences() > 1)
-	{   // Multiple sequences are not taken into account in the code below. For now just make
-		// removing unused patterns disabled in this case.
-		AfxMessageBox(IDS_PATTERN_CLEANUP_UNAVAILABLE, MB_ICONINFORMATION);
-		return false;
-	}
+	const SEQUENCEINDEX maxSeqIndex = pSndFile->Order.GetNumSequences();
 	const PATTERNINDEX maxPatIndex = pSndFile->Patterns.Size();
-	const ORDERINDEX maxOrdIndex = pSndFile->Order.size();
 	vector<PATTERNINDEX> nPatMap(maxPatIndex, 0);
 	vector<ROWINDEX> nPatRows(maxPatIndex, 0);
 	vector<MODCOMMAND*> pPatterns(maxPatIndex, nullptr);
 	vector<bool> bPatUsed(maxPatIndex, false);
 
-	bool bSubtunesDetected = false;
-	// detect subtunes (separated by "---")
-	for(SEQUENCEINDEX nSeq = 0; nSeq < pSndFile->Order.GetNumSequences(); nSeq++)
-	{
-		if(pSndFile->Order.GetSequence(nSeq).GetLengthFirstEmpty() != pSndFile->Order.GetSequence(nSeq).GetLengthTailTrimmed())
-			bSubtunesDetected = true;
-	}
-
-	// Flag to tell whether keeping sequence items which are after the first empty('---') order.
-	bool bKeepSubSequences = false;
-
-	if(bSubtunesDetected)
-	{   // There are used sequence items after first '---'; ask user whether to remove those.
-		if (m_wParent->MessageBox(
-			_TEXT("Do you want to remove sequence items which are after the first '---' item?"),
-			_TEXT("Sequence Cleanup"), MB_YESNO) != IDYES
-			)
-			bKeepSubSequences = true;
-	}
-
 	CHAR s[512];
-	bool bEnd = false, bReordered = false;
+	bool bReordered = false;
 	UINT nPatRemoved = 0, nMinToRemove;
 	PATTERNINDEX nPats;
 
 	BeginWaitCursor();
 	PATTERNINDEX maxpat = 0;
-	for (ORDERINDEX nOrd = 0; nOrd < maxOrdIndex; nOrd++)
+	for(SEQUENCEINDEX nSeq = 0; nSeq < maxSeqIndex; nSeq++)
 	{
-		PATTERNINDEX n = pSndFile->Order[nOrd];
-		if (n < maxPatIndex)
+		for (ORDERINDEX nOrd = 0; nOrd < pSndFile->Order.GetSequence(nSeq).GetLength(); nOrd++)
 		{
-			if (n >= maxpat) maxpat = n + 1;
-			if (!bEnd || bKeepSubSequences) bPatUsed[n] = true;
-		} else if (n == pSndFile->Order.GetInvalidPatIndex()) bEnd = true;
+			PATTERNINDEX n = pSndFile->Order.GetSequence(nSeq)[nOrd];
+			if (n < maxPatIndex)
+			{
+				if (n >= maxpat) maxpat = n + 1;
+				bPatUsed[n] = true;
+			}
+		}
 	}
+
 	nMinToRemove = 0;
 	if (!bRemove)
 	{
@@ -371,33 +351,43 @@ NotEmpty:
 		BeginWaitCursor();
 	}
 
-	for (UINT i = 0; i < maxPatIndex; i++) nPatMap[i] = PATTERNINDEX_INVALID;
-	nPats = 0;
-	ORDERINDEX imap = 0;
-	for (imap = 0; imap < maxOrdIndex; imap++)
+	for(PATTERNINDEX i = 0; i < maxPatIndex; i++) nPatMap[i] = PATTERNINDEX_INVALID;
+
+	SEQUENCEINDEX oldSequence = pSndFile->Order.GetCurrentSequenceIndex();	// workaround, as GetSequence doesn't allow writing to sequences ATM
+
+	for(SEQUENCEINDEX nSeq = 0; nSeq < maxSeqIndex; nSeq++)
 	{
-		PATTERNINDEX n = pSndFile->Order[imap];
-		if (n < maxPatIndex)
+		pSndFile->Order.SetSequence(nSeq);
+		nPats = 0;
+		ORDERINDEX imap = 0;
+		for (imap = 0; imap < pSndFile->Order.GetSequence(nSeq).GetLength(); imap++)
 		{
-			if (nPatMap[n] > maxPatIndex) nPatMap[n] = nPats++;
-			pSndFile->Order[imap] = nPatMap[n];
-		} else if (n == pSndFile->Order.GetInvalidPatIndex() && (bKeepSubSequences == false)) break;
-	}
-	// Add unused patterns at the end
-	if ((!bRemove) || (!bWaste))
-	{
-		for (UINT iadd=0; iadd<maxPatIndex; iadd++)
-		{
-			if ((pSndFile->Patterns[iadd]) && (nPatMap[iadd] >= maxPatIndex))
+			PATTERNINDEX n = pSndFile->Order.GetSequence(nSeq)[imap];
+			if (n < maxPatIndex)
 			{
-				nPatMap[iadd] = nPats++;
+				if (nPatMap[n] == PATTERNINDEX_INVALID) nPatMap[n] = nPats++;
+				pSndFile->Order[imap] = nPatMap[n];
 			}
 		}
+		// Add unused patterns at the end
+		if ((!bRemove) || (!bWaste))
+		{
+			for(PATTERNINDEX iadd = 0; iadd < maxPatIndex; iadd++)
+			{
+				if((pSndFile->Patterns[iadd]) && (nPatMap[iadd] >= maxPatIndex))
+				{
+					nPatMap[iadd] = nPats++;
+				}
+			}
+		}
+		while (imap < pSndFile->Order.GetSequence(nSeq).GetLength())
+		{
+			pSndFile->Order[imap++] = pSndFile->Order.GetInvalidPatIndex();
+		}
 	}
-	while (imap < maxOrdIndex)
-	{
-		pSndFile->Order[imap++] = pSndFile->Order.GetInvalidPatIndex();
-	}
+
+	pSndFile->Order.SetSequence(oldSequence);
+
 	// Reorder patterns & Delete unused patterns
 	BEGIN_CRITICAL();
 	{
@@ -432,9 +422,9 @@ NotEmpty:
 					nPatRemoved++;
 				}
 		}
-		for (PATTERNINDEX j = 0; j < maxPatIndex;j++)
+		for (PATTERNINDEX nPat = 0; nPat < maxPatIndex; nPat++)
 		{
-			pSndFile->Patterns[j].SetData(pPatterns[j], nPatRows[j]);
+			pSndFile->Patterns[nPat].SetData(pPatterns[nPat], nPatRows[nPat]);
 		}
 	}
 	END_CRITICAL();
@@ -455,7 +445,7 @@ NotEmpty:
 
 // Remove unused samples
 bool CModCleanupDlg::RemoveUnusedSamples()
-//---------------------------------
+//----------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
@@ -778,7 +768,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 
 // Remove ununsed plugins
 bool CModCleanupDlg::RemoveUnusedPlugins()
-//--------------------------------------
+//----------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
@@ -846,7 +836,7 @@ bool CModCleanupDlg::ResetVariables()
 	m_pModDoc->ChangeModType(MOD_TYPE_IT);
 	pSndFile->m_nMixLevels = mixLevels_original;
 	pSndFile->m_nTempoMode = tempo_mode_classic;
-	pSndFile->m_dwSongFlags = SONG_LINEARSLIDES | SONG_EXFILTERRANGE;
+	pSndFile->m_dwSongFlags = SONG_LINEARSLIDES;
 	
 	// Global vars
 	pSndFile->m_nDefaultTempo = 125;
@@ -919,7 +909,7 @@ bool CModCleanupDlg::RemoveAllOrders()
 
 // Remove all samples
 bool CModCleanupDlg::RemoveAllSamples()
-//------------------------------------
+//-------------------------------------
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
@@ -985,7 +975,7 @@ bool CModCleanupDlg::RemoveAllPlugins()
 
 // Remove all plugins
 bool CModCleanupDlg::MergeSequences()
-//-------------------------------------
+//-----------------------------------
 {
 	return m_pModDoc->MergeSequences();
 }

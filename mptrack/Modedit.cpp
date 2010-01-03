@@ -433,7 +433,7 @@ bool CModDoc::UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv)
 
 // Change the number of channels
 BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg)
-//------------------------------------------------
+//----------------------------------------------------------------------------------
 {
 	const CHANNELINDEX maxChans = m_SndFile.GetModSpecifications().channelsMax;
 
@@ -507,7 +507,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 
 
 BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
-//--------------------------------------------------------
+//---------------------------------------------------------
 //To remove all channels whose index corresponds to true value at m_bChnMask[] array. Code is almost non-modified copy of
 //the code which was in CModDoc::ChangeNumChannels(UINT nNewChannels) - the only differences are the lines before 
 //BeginWaitCursor(), few lines in the end and that nNewChannels is renamed to nRemaningChannels.
@@ -740,7 +740,7 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 
 
 INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
-//-----------------------------------------------------------
+//----------------------------------------------------------------------
 {
 	MODINSTRUMENT *pDup = NULL;
 	INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax - 1;
@@ -845,7 +845,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 
 
 void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample)
-//----------------------------------------------------------------------
+//-------------------------------------------------------------------
 {
 	memset(pIns, 0, sizeof(MODINSTRUMENT));
 	pIns->nFadeOut = 256;
@@ -976,7 +976,7 @@ bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate
 
 
 BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
-//----------------------------------------
+//------------------------------------------------
 {
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
@@ -990,7 +990,7 @@ BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
 
 
 BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
-//----------------------------------------
+//------------------------------------------------
 {
 	if ((nPattern >= m_SndFile.Patterns.Size()) || (!m_SndFile.Patterns[nPattern])) return FALSE;
 	if(m_SndFile.Patterns[nPattern].Shrink())
@@ -1605,7 +1605,7 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 
 
 void CModDoc::CheckUnusedChannels(BOOL mask[MAX_CHANNELS], CHANNELINDEX maxRemoveCount)
-//--------------------------------------------------------
+//-------------------------------------------------------------------------------------
 {
 	// Checking for unused channels
 	for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--) //rewbs.removeChanWindowCleanup
@@ -1632,7 +1632,7 @@ void CModDoc::CheckUnusedChannels(BOOL mask[MAX_CHANNELS], CHANNELINDEX maxRemov
 	}
 }
 
-// Merge multiple sequences
+// Merge multiple sequences into one sequence
 bool CModDoc::MergeSequences()
 //----------------------------
 {
