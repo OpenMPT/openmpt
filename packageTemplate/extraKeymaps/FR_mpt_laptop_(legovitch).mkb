@@ -31,7 +31,6 @@ version:1
 0:1023:0:118:1		//View Samples: F7 (KeyDown)
 0:1024:0:119:1		//View Instruments: F8 (KeyDown)
 0:1025:0:120:1		//View Comments: F9 (KeyDown)
-0:1769:1:121:1		//View Graph: Shift+F10 (KeyDown)
 0:1367:6:87:1		//Toggle Main View: Ctrl+Alt+W (KeyDown)
 0:1368:0:112:1		//Toggle Tree View: F1 (KeyDown)
 0:1369:2:112:1		//View Options: Ctrl+F1 (KeyDown)
@@ -268,6 +267,23 @@ version:1
 8:1790:6:68:1		//Remove DC Offset: Ctrl+Alt+D (KeyDown)
 
 //----( Instrument Context [bottom] (9) )------------
+9:1825:1:9:5		//Select previous envelope point: Shift+TAB (KeyDown|KeyHold)
+9:1825:0:166:5		//Select previous envelope point:  (KeyDown|KeyHold)
+9:1826:0:9:5		//Select next envelope point: TAB (KeyDown|KeyHold)
+9:1826:0:167:5		//Select next envelope point:  (KeyDown|KeyHold)
+9:1821:0:37:5		//Move envelope point left: GAUCHE (KeyDown|KeyHold)
+9:1822:0:39:5		//Move envelope point right: DROITE (KeyDown|KeyHold)
+9:1823:0:38:5		//Move envelope point up: HAUT (KeyDown|KeyHold)
+9:1834:0:33:5		//Move envelope point up (big step): PG.PREC (KeyDown|KeyHold)
+9:1824:0:40:5		//Move envelope point down: BAS (KeyDown|KeyHold)
+9:1835:0:34:5		//Move envelope point down (big step): PG.SUIV (KeyDown|KeyHold)
+9:1827:0:45:5		//Insert envelope point: INS (KeyDown|KeyHold)
+9:1828:0:46:5		//Remove envelope point: SUPPR (KeyDown|KeyHold)
+9:1829:0:36:1		//Set loop start: ORIGINE (KeyDown)
+9:1830:0:35:1		//Set loop end: FIN (KeyDown)
+9:1831:2:36:1		//Set sustain loop start: Ctrl+ORIGINE (KeyDown)
+9:1832:2:35:1		//Set sustain loop end: Ctrl+FIN (KeyDown)
+9:1833:2:82:1		//Toggle release node: Ctrl+R (KeyDown)
 
 //----( Comments Context [bottom] (10) )------------
 

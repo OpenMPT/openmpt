@@ -579,7 +579,9 @@
 #define IDC_SPIN_SPACING                2032
 #define IDC_EDIT_SPACING                2033
 #define IDC_SAMPLE_NAME                 2034
+#define IDC_EDIT_SEQNUM                 2034
 #define IDC_SAMPLE_FILENAME             2035
+#define IDC_SPIN_SEQNUM                 2035
 #define IDC_SAMPLE_NEW                  2036
 #define IDC_SAMPLE_OPEN                 2037
 #define IDC_SAMPLE_SAVEAS               2038
