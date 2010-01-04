@@ -57,6 +57,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_SPACING,			OnSpacingChanged)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		OnPatternNameChanged)
 	ON_EN_CHANGE(IDC_EDIT_SEQUENCE_NAME,	OnSequenceNameChanged)
+	ON_EN_CHANGE(IDC_EDIT_SEQNUM,			OnSequenceNumChanged)
 	ON_EN_KILLFOCUS(IDC_EDIT_ORDERLIST_MARGINS, OnOrderListMarginsChanged)
 	ON_UPDATE_COMMAND_UI(IDC_PATTERN_RECORD,OnUpdateRecord)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
@@ -75,9 +76,11 @@ void CCtrlPatterns::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_SPACING,			m_EditSpacing);
 	DDX_Control(pDX, IDC_EDIT_ORDERLIST_MARGINS,m_EditOrderListMargins);
 	DDX_Control(pDX, IDC_EDIT_PATTERNNAME,		m_EditPatName);
+	DDX_Control(pDX, IDC_EDIT_SEQNUM,			m_EditSequence);
 	DDX_Control(pDX, IDC_SPIN_SPACING,			m_SpinSpacing);
 	DDX_Control(pDX, IDC_SPIN_ORDERLIST_MARGINS,m_SpinOrderListMargins);
 	DDX_Control(pDX, IDC_SPIN_INSTRUMENT,		m_SpinInstrument);
+	DDX_Control(pDX, IDC_SPIN_SEQNUM,			m_SpinSequence);
 	DDX_Control(pDX, IDC_TOOLBAR1,				m_ToolBar);
 	//}}AFX_DATA_MAP
 }
@@ -143,6 +146,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_ToolBar.AddButton(ID_OVERFLOWPASTE, TIMAGE_PATTERN_OVERFLOWPASTE, TBSTYLE_CHECK, ((CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 
 	// Special edit controls -> tab switch to view
+	m_EditSequence.SetParent(this);
 	m_EditSpacing.SetParent(this);
 	m_EditPatName.SetParent(this);
 	m_EditPatName.SetLimitText(MAX_PATTERNNAME);
@@ -171,7 +175,11 @@ BOOL CCtrlPatterns::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT_SPACING, CMainFrame::gnPatternSpacing);
 	SetDlgItemInt(IDC_EDIT_ORDERLIST_MARGINS, m_OrderList.GetMargins());
 	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));		//rewbs.noFollow - set to unchecked
+
+	m_SpinSequence.SetRange(0, m_pSndFile->Order.GetNumSequences() - 1);
+	m_SpinSequence.SetPos(m_pSndFile->Order.GetCurrentSequenceIndex());
 	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_pSndFile->Order.m_sName);
+
 	m_OrderList.SetFocus(); 
 
 	UpdateView(HINT_MODTYPE|HINT_PATNAMES, NULL);
@@ -221,7 +229,14 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 	if (!m_pSndFile) return;
 
 	if (dwHintMask & HINT_MODSEQUENCE)
+	{
 		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, m_pSndFile->Order.m_sName);
+	}
+	if (dwHintMask & (HINT_MODSEQUENCE|HINT_MODTYPE))
+	{
+		m_SpinSequence.SetRange(0, m_pSndFile->Order.GetNumSequences() - 1);
+		m_SpinSequence.SetPos(m_pSndFile->Order.GetCurrentSequenceIndex());
+	}
 
 	//rewbs.instroVST
 	if (dwHintMask & (HINT_MIXPLUGINS|HINT_MODTYPE))
@@ -234,6 +249,8 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		// Enable/disable multisequence controls according the current modtype.
 		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
 		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
+		GetDlgItem(IDC_EDIT_SEQNUM)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
+		GetDlgItem(IDC_SPIN_SEQNUM)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
 
 		// Enable/disable pattern names
 		GetDlgItem(IDC_STATIC_PATTERNNAME)->EnableWindow( (m_pSndFile->GetType() & (MOD_TYPE_MPT|MOD_TYPE_IT|MOD_TYPE_XM)) ? SW_SHOW : SW_HIDE);
@@ -1221,3 +1238,18 @@ BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 	return FALSE;
 }
 
+void CCtrlPatterns::OnSequenceNumChanged()
+//----------------------------------------
+{
+	if ((m_EditSequence.m_hWnd) && (m_EditSequence.GetWindowTextLength() > 0))
+	{
+		SEQUENCEINDEX newSeq = (SEQUENCEINDEX)GetDlgItemInt(IDC_EDIT_SEQNUM);
+
+		if (newSeq >= MAX_SEQUENCES) 
+		{
+			newSeq = MAX_SEQUENCES - 1;
+			SetDlgItemInt(IDC_EDIT_SEQNUM, MAX_SEQUENCES - 1, FALSE);
+		}
+		m_OrderList.SelectSequence(newSeq);
+	}
+}

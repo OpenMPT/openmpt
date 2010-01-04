@@ -1402,11 +1402,6 @@ VOID CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	if (result) *result = 0;
 }
 
-#define MAX_FILEOPEN_BUFSIZE	2048
-//Note: Above value might be the maximum size the buffer can be; 
-//it might be worthwhile to check the CFileDialog documentation
-//if wanting the increase that.
-
 VOID CSelectPluginDlg::OnAddPlugin()
 //----------------------------------
 {

@@ -26,6 +26,7 @@ version:1
 0:1362:2:86:1		//Paste: Ctrl+V (KeyDown)
 0:1363:3:86:1		//Mix Paste: Shift+Ctrl+V (KeyDown)
 0:1793:1:86:1		//Paste Flood: Shift+V (KeyDown)
+0:1820:6:86:1		//Push Forward Paste: Ctrl+Alt+V (KeyDown)
 0:1364:2:53:1		//SelectAll: Ctrl+5 (KeyDown)
 0:1365:2:70:1		//Find: Ctrl+F (KeyDown)
 0:1366:0:114:1		//Find Next: F3 (KeyDown)
@@ -34,6 +35,7 @@ version:1
 0:1023:4:83:1		//View Samples: Alt+S (KeyDown)
 0:1024:4:78:1		//View Instruments: Alt+N (KeyDown)
 0:1025:1:120:1		//View Comments: Shift+F9 (KeyDown)
+0:1025:4:67:1		//View Comments: Alt+C (KeyDown)
 0:1368:2:113:1		//Toggle Tree View: Ctrl+F2 (KeyDown)
 0:1369:2:112:1		//View Options: Ctrl+F1 (KeyDown)
 0:1781:2:114:1		//View MIDI mapping: Ctrl+F3 (KeyDown)
@@ -272,6 +274,21 @@ version:1
 8:1790:2:68:1		//Remove DC Offset: Ctrl+D (KeyDown)
 
 //----( Instrument Context [bottom] (9) )------------
+9:1825:1:9:5		//Select previous envelope point: Shift+TABULATOR (KeyDown|KeyHold)
+9:1826:0:9:5		//Select next envelope point: TABULATOR (KeyDown|KeyHold)
+9:1821:0:37:5		//Move envelope point left: NACH-LINKS (KeyDown|KeyHold)
+9:1822:0:39:5		//Move envelope point right: NACH-RECHTS (KeyDown|KeyHold)
+9:1823:0:38:5		//Move envelope point up: NACH-OBEN (KeyDown|KeyHold)
+9:1834:0:33:5		//Move envelope point up (big step): BILD-NACH-OBEN (KeyDown|KeyHold)
+9:1824:0:40:5		//Move envelope point down: NACH-UNTEN (KeyDown|KeyHold)
+9:1835:0:34:5		//Move envelope point down (big step): BILD-NACH-UNTEN (KeyDown|KeyHold)
+9:1827:0:45:5		//Insert envelope point: EINFG (KeyDown|KeyHold)
+9:1828:0:46:5		//Remove envelope point: ENTF (KeyDown|KeyHold)
+9:1829:0:36:1		//Set loop start: POS1 (KeyDown)
+9:1830:0:35:1		//Set loop end: ENDE (KeyDown)
+9:1831:2:36:1		//Set sustain loop start: Ctrl+POS1 (KeyDown)
+9:1832:2:35:1		//Set sustain loop end: Ctrl+ENDE (KeyDown)
+9:1833:2:82:1		//Toggle release node: Ctrl+R (KeyDown)
 
 //----( Comments Context [bottom] (10) )------------
 

@@ -2310,17 +2310,26 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 
 			case MODITEM_SEQUENCE:
 				{
+					bool isCurSeq = false;
 					CModDoc *pModDoc = GetDocumentFromItem(hItem);
 					CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
-					if(pModDoc && pSndFile && (pModDoc->GetModType() == MOD_TYPE_MPT) && pSndFile->Order.GetSequence((SEQUENCEINDEX)modItemID).GetLength() == 0)
+					if(pModDoc && pSndFile && (pModDoc->GetModType() == MOD_TYPE_MPT))
 					{
-						nDefault = ID_MODTREE_SWITCHTO;
+						if(pSndFile->Order.GetSequence((SEQUENCEINDEX)modItemID).GetLength() == 0)
+						{
+							nDefault = ID_MODTREE_SWITCHTO;
+						}
+						isCurSeq = (pSndFile->Order.GetCurrentSequenceIndex() == (SEQUENCEINDEX)modItemID);
 					}
+
+					if(!isCurSeq)
+					{
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SWITCHTO, "&Switch to Seqeuence");
+					}
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Sequence");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "D&uplicate Sequence");
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Sequence");
 				}
-				AppendMenu(hMenu, MF_STRING, ID_MODTREE_SWITCHTO, "&Switch to Seqeuence");
-				AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Sequence");
-				AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "D&uplicate Sequence");
-				AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Sequence");
 				break;
 
 

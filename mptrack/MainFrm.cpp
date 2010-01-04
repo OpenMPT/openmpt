@@ -237,6 +237,7 @@ HBRUSH CMainFrame::brushWhite = NULL;
 HBRUSH CMainFrame::brushHighLight = NULL;
 HBRUSH CMainFrame::brushHighLightRed = NULL;
 HBRUSH CMainFrame::brushWindow = NULL;
+HBRUSH CMainFrame::brushYellow = NULL;
 HCURSOR CMainFrame::curDragging = NULL;
 HCURSOR CMainFrame::curArrow = NULL;
 HCURSOR CMainFrame::curNoDrop = NULL;
@@ -1755,6 +1756,8 @@ void CMainFrame::UpdateColors()
 		brushHighLight = CreateSolidBrush(GetSysColor(COLOR_HIGHLIGHT));
 		if (brushHighLightRed) DeleteObject(brushHighLightRed);
 		brushHighLightRed = CreateSolidBrush(RGB(0xFF,0x00,0x00));
+		if (brushYellow) DeleteObject(brushYellow);
+		brushYellow = CreateSolidBrush(RGB(0xFF,0xFF,0x00));
 
 		if (brushWindow) DeleteObject(brushWindow);
         brushWindow = CreateSolidBrush(crBkgnd);

@@ -161,8 +161,8 @@ protected:
 	COrderList m_OrderList;
 	CButton m_BtnPrev, m_BtnNext;
 	CComboBox m_CbnInstrument;
-	CPatEdit m_EditSpacing, m_EditPatName, m_EditOrderListMargins;
-	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinOrderListMargins;
+	CPatEdit m_EditSpacing, m_EditPatName, m_EditOrderListMargins, m_EditSequence;
+	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinOrderListMargins, m_SpinSequence;
 	CModControlBar m_ToolBar;
 	INSTRUMENTINDEX m_nInstrument;
 	UINT m_nDetailLevel;
@@ -233,6 +233,7 @@ protected:
 	afx_msg void OnUpdateRecord(CCmdUI *pCmdUI);
 	afx_msg void TogglePluginEditor(); //rewbs.instroVST
 	afx_msg void OnToggleOverflowPaste();
+	afx_msg void OnSequenceNumChanged();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 
 	//}}AFX_MSG
