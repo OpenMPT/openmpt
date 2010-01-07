@@ -153,4 +153,11 @@ namespace soundtouch
     #endif  // INTEGER_SAMPLES
 };
 
+
+// When this #define is active, eliminates a clicking sound when the "rate" or "pitch" 
+// parameter setting crosses from value <1 to >=1 or vice versa during processing. 
+// Default is off as such crossover is untypical case and involves a slight sound 
+// quality compromise.
+//#define PREVENT_CLICK_AT_RATE_CROSSOVER   1
+
 #endif

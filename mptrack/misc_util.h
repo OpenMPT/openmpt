@@ -17,22 +17,18 @@ inline std::string Stringify(const T& x)
 
 //Convert string to number.
 template<class T>
-inline T ConvertStrTo(const char* str)
-//----------------------------------
+inline T ConvertStrTo(LPCSTR psz)
+//-------------------------------
 {
-	//Is implemented like this because the commented code below caused link errors.
 	if(std::numeric_limits<T>::is_integer)
-		return static_cast<T>(atoi(str));
+		return static_cast<T>(atoi(psz));
 	else
-		return static_cast<T>(atof(str));
-	
-	/*
-	std::istringstream i(str);
-	T t;
-	i >> t;
-	return t;
-	*/
+		return static_cast<T>(atof(psz));
 }
+
+template<> inline uint32 ConvertStrTo(LPCSTR psz) {return strtoul(psz, nullptr, 10);}
+template<> inline int64 ConvertStrTo(LPCSTR psz) {return _strtoi64(psz, nullptr, 10);}
+template<> inline uint64 ConvertStrTo(LPCSTR psz) {return _strtoui64(psz, nullptr, 10);}
 
 // Sets last character to null in given char array.
 // Size of the array must be known at compile time.
@@ -43,6 +39,11 @@ inline void SetNullTerminator(char (&buffer)[size])
 	STATIC_ASSERT(size > 0);
 	buffer[size-1] = 0;
 }
+
+
+// Memset given object to zero.
+template <class T>
+inline void MemsetZero(T& a) {memset(&a, 0, sizeof(T));}
 
 
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
@@ -75,6 +76,7 @@ inline void LimitMax(T& val, const C upperLimit)
 
  
 LPCCH LoadResource(LPCTSTR lpName, LPCTSTR lpType, LPCCH& pData, size_t& nSize, HGLOBAL& hglob);
+CString GetErrorMessage(DWORD nErrorCode);
 
 namespace utilImpl
 {

@@ -746,7 +746,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 		{
 			if (pSndFile->m_nInstruments)
 			{
-				wsprintf(s, "%03d:%s", n, (pSndFile->Instruments[n]) ? pSndFile->Instruments[n]->name : "");
+				wsprintf(s, "%03d:%s", n, (pSndFile->Instruments[n]) ? (LPCTSTR)pSndFile->GetInstrumentName(n) : "");
 			} else
 			{
 				wsprintf(s, "%03d:%s", n, pSndFile->m_szNames[n]);
@@ -2876,7 +2876,7 @@ VOID CSampleMapDlg::OnUpdateSamples()
 		}
 		if (bUsed) {
 			CString sampleName;
-			sampleName.Format("%d: %s", i, (LPCTSTR)m_pSndFile->GetSampleName(i));
+			sampleName.Format("%d: %s", i, m_pSndFile->GetSampleName(i));
 			nInsertPos = m_CbnSample.AddString(sampleName);
 			
 			m_CbnSample.SetItemData(nInsertPos, i);

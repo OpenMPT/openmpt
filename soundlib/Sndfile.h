@@ -116,7 +116,7 @@ struct MODINSTRUMENT
 	signed char nPPS; //Pitch to Pan Separator?
 	unsigned char nPPC; //Pitch Centre?
 
-	CHAR name[32];
+	CHAR name[32];		// Note: not guaranteed to be null-terminated.
 	CHAR filename[32];
 
 	BYTE nMixPlug;							//rewbs.instroVSTi
@@ -651,7 +651,7 @@ public:
 	void SetCurrentOrder(ORDERINDEX nOrder);
 	void GetTitle(LPSTR s) const { lstrcpyn(s,m_szNames[0],32); }
 	LPCSTR GetTitle() const { return m_szNames[0]; }
-	CString GetSampleName(UINT nSample) const;
+	LPCTSTR GetSampleName(UINT nSample) const;
 	CString GetInstrumentName(UINT nInstr) const;
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }

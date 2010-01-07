@@ -65,6 +65,7 @@ catch(...)  \
 void TestVersion();
 void TestTypes();
 void TestPCnoteSerialization();
+void TestMisc();
 
 
 
@@ -75,6 +76,7 @@ void DoTests()
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
 	//DO_TEST(TestPCnoteSerialization);
+	DO_TEST(TestMisc);
 
 	Log(TEXT("Tests were run\n"));
 }
@@ -166,6 +168,27 @@ void TestTypes()
 	VERIFY_EQUAL(PATTERNINDEX_MAX, (std::numeric_limits<PATTERNINDEX>::max)());
 	VERIFY_EQUAL(SAMPLEINDEX_MAX, (std::numeric_limits<SAMPLEINDEX>::max)());
 	VERIFY_EQUAL(INSTRUMENTINDEX_MAX, (std::numeric_limits<INSTRUMENTINDEX>::max)());
+}
+
+
+void TestMisc()
+//-------------
+{
+	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586);
+	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), int32_max);
+	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);
+
+	VERIFY_EQUAL(ConvertStrTo<int64>("-9223372036854775808"), int64_min);
+	VERIFY_EQUAL(ConvertStrTo<int64>("-159"), -159);
+	VERIFY_EQUAL(ConvertStrTo<int64>("9223372036854775807"), int64_max);
+
+	VERIFY_EQUAL(ConvertStrTo<uint64>("85059"), 85059);
+	VERIFY_EQUAL(ConvertStrTo<uint64>("9223372036854775807"), int64_max);
+	VERIFY_EQUAL(ConvertStrTo<uint64>("18446744073709551615"), uint64_max);
+
+	VERIFY_EQUAL(ConvertStrTo<float>("-87.0"), -87.0);
+	VERIFY_EQUAL(ConvertStrTo<double>("-0.5e-6"), -0.5e-6);
+	VERIFY_EQUAL(ConvertStrTo<double>("58.65403492763"), 58.65403492763);
 }
 
 

@@ -1404,13 +1404,13 @@ MODTYPE CSoundFile::GetSaveFormats() const
 }
 
 
-CString CSoundFile::GetSampleName(UINT nSample) const
-//--------------------------------------------------------
+LPCTSTR CSoundFile::GetSampleName(UINT nSample) const
+//---------------------------------------------------
 {
 	if (nSample<MAX_SAMPLES) {
 		return m_szNames[nSample];
 	} else {
-		return "";
+		return gszEmpty;
 	}
 }
 
@@ -2875,7 +2875,9 @@ bool CSoundFile::LoadStaticTunings()
 	}
 		
 	// Load local tunings.
-	s_pTuningsSharedLocal->SetSavefilePath(std::string(std::string(theApp.GetTuningsPath()) + "local_tunings" + CTuningCollection::s_FileExtension.c_str()));
+	CString sPath;
+	sPath.Format(TEXT("%slocal_tunings%s"), CMainFrame::GetDefaultDirectory(DIR_TUNING), CTuningCollection::s_FileExtension);
+	s_pTuningsSharedLocal->SetSavefilePath(sPath);
 	s_pTuningsSharedLocal->Deserialize();
 
 	// Enabling adding/removing of tunings for standard collection

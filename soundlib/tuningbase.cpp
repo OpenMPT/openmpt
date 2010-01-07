@@ -44,7 +44,7 @@ TEMPLATEDEC
 const TYPENAME CTUNINGBASE::SERIALIZATION_RETURN_TYPE CTUNINGBASE::SERIALIZATION_FAILURE = true;
 
 TEMPLATEDEC
-const string CTUNINGBASE::s_FileExtension = ".tun";
+const TCHAR CTUNINGBASE::s_FileExtension[5] = TEXT(".tun");
 
 TEMPLATEDEC
 const TYPENAME CTUNINGBASE::EDITMASK CTUNINGBASE::EM_RATIOS = 1; //1b
@@ -290,8 +290,8 @@ bool CTUNINGBASE::CreateGroupGeometric(const vector<RATIOTYPE>& v, const RATIOTY
 	if(MayEdit(EM_RATIOS) &&
 		(MayEdit(EM_TYPE) || GetType() == TT_GROUPGEOMETRIC))
 	{
-		if(vr.first > vr.second) return true;
-		if(ratiostartpos < vr.first || vr.second < ratiostartpos || static_cast<UNOTEINDEXTYPE>(vr.second - ratiostartpos) < static_cast<UNOTEINDEXTYPE>(v.size())) return true;
+		if(vr.first > vr.second || v.size() == 0) return true;
+		if(ratiostartpos < vr.first || vr.second < ratiostartpos || static_cast<UNOTEINDEXTYPE>(vr.second - ratiostartpos) < static_cast<UNOTEINDEXTYPE>(v.size() - 1)) return true;
 		if(!IsStepCountRangeSufficient(GetFineStepCount(), vr)) return true;
 		for(size_t i = 0; i<v.size(); i++) {if(v[i] < 0) return true;}
 		if(ProCreateGroupGeometric(v,r, vr, ratiostartpos))

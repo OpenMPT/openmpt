@@ -50,7 +50,8 @@ public:
 		SERIALIZATION_FAILURE = true
 	};
 
-	static const string s_FileExtension;
+	static const TCHAR s_FileExtension[4];
+	static const size_t s_nMaxTuningCount = 255;
 
 //END PUBLIC STATIC CONSTS
 
@@ -84,7 +85,7 @@ public:
 
 	const string& GetName() const {return m_Name;}
 
-	void SetSavefilePath(const string& str) {m_SavefilePath = str;}
+	void SetSavefilePath(LPCTSTR psz) {m_SavefilePath = psz;}
 	const string& GetSaveFilePath() const {return m_SavefilePath;}
 
 	string GetVersionString() const {return Stringify(s_SerializationVersion);}

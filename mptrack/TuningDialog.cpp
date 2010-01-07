@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "TuningDialog.h"
+#include "MainFrm.h"
 #include <algorithm>
 #include "misc_util.h"
 #include ".\tuningdialog.h"
@@ -627,7 +628,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, CTuning::s_FileExtension, "",
 		filter,
-		theApp.GetTuningsPath());
+		CMainFrame::GetWorkingDirectory(DIR_TUNING));
 	if(files.abort) return;
 
 	BeginWaitCursor();
@@ -655,66 +656,140 @@ void CTuningDialog::OnBnClickedButtonExport()
 		ErrorBox(IDS_ERR_EXPORT_TUNING, this);
 }
 
+
 void CTuningDialog::OnBnClickedButtonImport()
 //-------------------------------------------
 {
-	//TODO: Ability to import ratios from text file.
-	string filter = string("Tuning files (*") + CTuning::s_FileExtension + string(", *") + CTuningCollection::s_FileExtension + string(")|*") + 
-					CTuning::s_FileExtension + string(";*") + CTuningCollection::s_FileExtension + string("|");
+	CString sFilter;
+	sFilter.Format(TEXT("Tuning files (*%s, *%s, *.scl)|*%s;*%s;*.scl|"),
+				   CTuning::s_FileExtension,
+				   CTuningCollection::s_FileExtension,
+				   CTuning::s_FileExtension,
+				   CTuningCollection::s_FileExtension);
 
-	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "", "",
-		filter,
-		theApp.GetTuningsPath());
-	if(files.abort) return;
+	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, TEXT(""), TEXT(""),
+		(LPCTSTR)sFilter,
+		CMainFrame::GetWorkingDirectory(DIR_TUNING),
+		true);
+	if(files.abort)
+		return;
 
-	const string ext = string(".") + files.extension;
+	CMainFrame::SetWorkingDirectory(files.workingDirectory.c_str(), DIR_TUNING, true);
 
-	bool failure = true;
+	CString sLoadReport;
 
-	if(ext == CTuning::s_FileExtension)
+	const size_t nFiles = files.filenames.size();
+	for(size_t counter = 0; counter < nFiles; counter++)
 	{
-		ifstream fin(files.first_file.c_str(), ios::binary);
-		CTuning* pT = CTuningRTI::DeserializeOLD(fin);
-		if(pT == 0) {fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
-		fin.close();
-		if(pT)
-		{
-			failure = false;
-			m_TempTunings.AddTuning(pT);
-			m_pActiveTuning = pT;
+		TCHAR szFileName[_MAX_FNAME], szExt[_MAX_EXT];
+		_tsplitpath(files.filenames[counter].c_str(), nullptr, nullptr, szFileName, szExt);
 
-			AddTreeItem(m_pActiveTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(&m_TempTunings)), NULL);
-			UpdateView();
+		_tcslwr(szExt); // Convert extension to lower case.
+
+		const bool bIsTun = (_tcscmp(szExt, CTuning::s_FileExtension) == 0);
+		const bool bIsScl = (_tcscmp(szExt, TEXT(".scl")) == 0);
+		
+		if (bIsTun || bIsScl)
+		{
+			CTuning* pT = nullptr;
+
+			if (bIsTun)
+			{
+				std::ifstream fin(files.filenames[counter].c_str(), ios::binary);
+				pT = CTuningRTI::DeserializeOLD(fin);
+				if(pT == 0)
+					{fin.clear(); fin.seekg(0); pT = CTuningRTI::Deserialize(fin);}
+				fin.close();
+				if (pT)
+				{
+					if (m_TempTunings.AddTuning(pT) == true)
+					{
+						delete pT; pT = nullptr;
+						if (m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
+						{
+							CString sFormat, sMsg;
+							sFormat.LoadString(IDS_TUNING_IMPORT_LIMIT);
+							sMsg.FormatMessage(sFormat, szFileName, szExt, CTuningCollection::s_nMaxTuningCount);
+							sLoadReport += sMsg;
+						}
+						else // Case: Can't add tuning to tuning collection for unknown reason.
+						{
+							CString sMsg;
+							AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNKNOWN_FAILURE, szFileName, szExt);
+							sLoadReport += sMsg;				
+						}
+					}
+				}
+				else // pT == nullptr
+				{
+					CString sMsg;
+					AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNRECOGNIZED_FILE, szFileName, szExt);
+					sLoadReport += sMsg;
+				}
+			}
+			else // scl import.
+			{
+				EnSclImport a = ImportScl(files.filenames[counter].c_str(), szFileName);
+				if (a != enSclImportOk)
+				{
+					if (a == enSclImportAddTuningFailure && m_TempTunings.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
+					{
+						CString sFormat, sMsg;
+						sFormat.LoadString(IDS_TUNING_IMPORT_LIMIT);
+						sMsg.FormatMessage(sFormat, szFileName, szExt, CTuningCollection::s_nMaxTuningCount);
+						sLoadReport += sMsg;
+					}
+					else
+					{
+						CString sFormat, sMsg;
+						sFormat.LoadString(IDS_TUNING_IMPORT_SCL_FAILURE);
+						sMsg.FormatMessage(sFormat, szFileName, szExt, (LPCTSTR)GetSclImportFailureMsg(a));
+						sLoadReport += sMsg;
+					}
+				}
+				else // scl import successful.
+					pT = &m_TempTunings.GetTuning(m_TempTunings.GetNumTunings() - 1);
+			}
+			
+			if (pT)
+			{
+				m_pActiveTuning = pT;
+				AddTreeItem(m_pActiveTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(&m_TempTunings)), NULL);
+			}
 		}
-	}
-	else
-	{
-		if(ext == CTuningCollection::s_FileExtension)
+		else if (_tcscmp(szExt, CTuningCollection::s_FileExtension) == 0)
 		{
-			//For now only loading tuning collection as 
-			//a separate collection - no possibility to 
-			//directly replace some collection.
+			// For now only loading tuning collection as 
+			// a separate collection - no possibility to 
+			// directly replace some collection.
 			CTuningCollection* pNewTCol = new CTuningCollection;
-			pNewTCol->SetSavefilePath(static_cast<LPCTSTR>(files.first_file.c_str()));
-			failure = pNewTCol->Deserialize();
-			if(failure)
+			pNewTCol->SetSavefilePath(files.filenames[counter].c_str());
+			if (pNewTCol->Deserialize())
 			{
 				delete pNewTCol; pNewTCol = 0;
+				CString sMsg;
+				AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNKNOWN_TC_FAILURE, szFileName, szExt);
+				sLoadReport += sMsg;
 			}
 			else
 			{
 				m_TuningCollections.push_back(pNewTCol);
 				m_DeletableTuningCollections.push_back(pNewTCol);
 				AddTreeItem(pNewTCol, NULL, NULL);
-				UpdateView();
 			}
-
-
+		}
+		else // Case: Unknown extension (should not happen).
+		{
+			CString sMsg;
+			AfxFormatString2(sMsg, IDS_TUNING_IMPORT_UNRECOGNIZED_FILE_EXT, szFileName, szExt);
+			sLoadReport += sMsg;
 		}
 	}
-	if(failure)
-		ErrorBox(IDS_OPERATION_FAIL, this);
+	if (sLoadReport.GetLength() > 0)
+		AfxMessageBox(sLoadReport, MB_ICONINFORMATION);
+	UpdateView();
 }
+
 
 void CTuningDialog::OnEnChangeEditFinetunesteps()
 //-----------------------------------------------
@@ -1322,6 +1397,190 @@ void CTuningTreeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	
 		CTreeCtrl::OnLButtonUp(nFlags, point);	
 	}
+}
+
+
+////////////////////////////////////////////////////////
+//
+// scl import
+//
+////////////////////////////////////////////////////////
+
+typedef double SclFloat;
+
+CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
+//----------------------------------------------------------
+{
+	CString sMsg;
+    switch(id)
+    {
+        case enSclImportFailTooManyNotes:
+			AfxFormatString1(sMsg, IDS_SCL_IMPORT_FAIL_8, Stringify(s_nSclImportMaxNoteCount).c_str());
+			return sMsg;
+            
+        case enSclImportFailTooLargeNumDenomIntegers:
+			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_1); return sMsg;
+			
+        case enSclImportFailZeroDenominator:
+			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_2); return sMsg;
+            
+        case enSclImportFailNegativeRatio:
+			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_3); return sMsg;
+            
+        case enSclImportFailUnableToOpenFile:
+			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_4); return sMsg;
+            
+        case enSclImportLineCountMismatch:
+			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_5); return sMsg;
+
+		case enSclImportTuningCreationFailure:
+			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_6); return sMsg;
+
+		case enSclImportAddTuningFailure:
+			sMsg.LoadString(IDS_SCL_IMPORT_FAIL_7); return sMsg;
+            
+        default:
+            return sMsg;
+    }
+}
+
+
+static void SkipCommentLines(std::istream& iStrm, std::string& str)
+//-----------------------------------------------------------------
+{
+    while(std::getline(iStrm, str))
+    {
+        LPCSTR psz = str.c_str();
+        for(; *psz != 0; psz++)
+        {
+            if (*psz == ' ' || *psz == '\t')
+                continue;
+            else
+            {
+                if (*psz != '!')
+                    return;
+                else // Found comment line: break for loop and get another line.
+                    break;
+            }
+        }
+    }
+}
+
+
+static inline SclFloat CentToRatio(const SclFloat& val)
+//-----------------------------------------------------
+{
+    return pow(2.0, val / 1200.0);
+}
+
+
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(LPCTSTR pszPath, LPCTSTR pszName)
+//-----------------------------------------------------------------------------------
+{
+	CFile file;
+	if (file.Open(pszPath, CFile::modeRead) == 0)
+		return enSclImportFailUnableToOpenFile;
+
+	size_t nSize = static_cast<size_t>(file.GetLength());
+
+    std::vector<char> data(nSize + 1, 0);
+	nSize = file.Read(&data[0], nSize);
+	file.Close();
+
+    std::istrstream iStrm(&data[0], nSize);
+	return ImportScl(iStrm, pszName);
+}
+
+
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, LPCTSTR pszName)
+//---------------------------------------------------------------------------------------
+{
+    std::string str;
+    SkipCommentLines(iStrm, str);
+	// str should now contain comment line.
+    SkipCommentLines(iStrm, str);
+	// str should now contain number of notes.
+	const size_t nNotes = 1 + ConvertStrTo<size_t>(str.c_str());
+    if (nNotes > s_nSclImportMaxNoteCount)
+        return enSclImportFailTooManyNotes;
+
+	std::vector<CTuningRTI::RATIOTYPE> fRatios;
+	fRatios.reserve(nNotes);
+    fRatios.push_back(1);
+
+    char buffer[128];
+	MemsetZero(buffer);
+
+    while (iStrm.getline(buffer, sizeof(buffer)))
+    {
+        LPSTR psz = buffer;
+        LPSTR const pEnd = psz + strlen(buffer);
+
+        // Skip tabs and spaces.
+        while(psz != pEnd && (*psz == ' ' || *psz == '\t'))
+            psz++;
+
+        // Skip empty lines, comment lines and non-text.
+        if (*psz == 0 || *psz == '!' || *psz < 32)
+            continue;
+
+        char* pNonDigit = pEnd;
+
+		// Check type of first non digit. This tells whether to read cent, ratio or plain number.
+		for (pNonDigit = psz; pNonDigit != pEnd; pNonDigit++)
+		{
+			if (isdigit(*pNonDigit) == 0)
+				break;
+		}
+
+        if (*pNonDigit == '.') // Reading cents
+        { 
+            SclFloat fCent = ConvertStrTo<SclFloat>(psz);
+			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>(CentToRatio(fCent)));
+        }
+        else if (*pNonDigit == '/') // Reading ratios
+        { 
+            *pNonDigit = 0; // Replace '/' with null.
+            int64 nNum = ConvertStrTo<int64>(psz);
+            psz = pNonDigit + 1;
+            int64 nDenom = ConvertStrTo<int64>(psz);
+
+            if (nNum > int32_max || nDenom > int32_max)
+                return enSclImportFailTooLargeNumDenomIntegers;
+            if (nDenom == 0)
+                return enSclImportFailZeroDenominator;
+
+            fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>((SclFloat)nNum / (SclFloat)nDenom));
+        }
+        else // Plain numbers.
+			fRatios.push_back(static_cast<CTuningRTI::RATIOTYPE>(ConvertStrTo<int32>(psz)));
+    }
+
+    if (nNotes != fRatios.size())
+        return enSclImportLineCountMismatch;
+
+    for(size_t i = 0; i < fRatios.size(); i++)
+    {
+        if (fRatios[i] < 0)
+            return enSclImportFailNegativeRatio;
+    }
+
+    CTuning* pT = new CTuningRTI;
+	if (pT->CreateGroupGeometric(fRatios, 1, pT->GetValidityRange(), 0) != false)
+	{
+		delete pT;
+		return enSclImportTuningCreationFailure;
+	}
+
+	if (m_TempTunings.AddTuning(pT) != false)
+	{
+		delete pT;
+		return enSclImportAddTuningFailure;
+	}
+
+	pT->SetName(pszName);
+
+    return enSclImportOk;
 }
 
 

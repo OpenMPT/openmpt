@@ -146,7 +146,7 @@ const CModSpecifications modEx =
 	0,									//No instrument envelopes
 	" 0123456789ABCD?FF?E???????????????",	// Supported Effects
 	" ???????????????",					// Supported Volume Column commands
-	false,								// Doesn't have "+++" pattern
+	true,								// Has "+++" pattern
 };
 
 const CModSpecifications xm =
@@ -209,7 +209,7 @@ const CModSpecifications xmEx =
 	12,									//Envelope point count
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\:#",	// Supported Effects
 	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
-	false,								// Doesn't have "+++" pattern
+	true,								// Has "+++" pattern
 };
 
 const CModSpecifications s3m =

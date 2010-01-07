@@ -187,6 +187,19 @@ class CTuningDialog : public CDialog
 
 	friend class CTuningTreeCtrl;
 
+	enum EnSclImport
+	{
+		enSclImportOk,
+		enSclImportFailTooLargeNumDenomIntegers,
+		enSclImportFailZeroDenominator,
+		enSclImportFailNegativeRatio,
+		enSclImportFailUnableToOpenFile,
+		enSclImportLineCountMismatch,
+		enSclImportTuningCreationFailure,
+		enSclImportAddTuningFailure,
+		enSclImportFailTooManyNotes
+	};
+
 public:
 	typedef vector<CTuningCollection*> TUNINGVECTOR;
 
@@ -233,6 +246,10 @@ private:
 	
 	//Checks whether tuning collection can be deleted.
 	bool IsDeletable(const CTuningCollection* const pTC) const;
+
+	// Scl-file import.
+	EnSclImport ImportScl(LPCTSTR pszPath, LPCTSTR pszName);
+	EnSclImport ImportScl(std::istream& iStrm, LPCTSTR pszName);
 	
 
 private:
@@ -297,6 +314,8 @@ private:
 		TT_TUNING
 	};
 
+	static CString GetSclImportFailureMsg(EnSclImport);
+	static const size_t s_nSclImportMaxNoteCount = 64;
 
 	//To indicate whether to apply changes made to 
 	//those edit boxes(they are modified by certain activities 

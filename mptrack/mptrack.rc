@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -142,12 +142,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Deutsch (Deutschland) resources
+#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -162,7 +162,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 267, 254
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "About ModPlug Tracker"
+CAPTION "About OpenMPT"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_BITMAP1,"Static",SS_BLACKRECT | SS_NOTIFY | SS_CENTERIMAGE,5,3,256,81,WS_EX_CLIENTEDGE
@@ -1966,7 +1966,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    AFX_IDS_APP_TITLE       "Modplug Tracker"
+    AFX_IDS_APP_TITLE       "OpenMPT"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
@@ -2012,8 +2012,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_APP_ABOUT            "About ModPlug Tracker\nAbout"
-    ID_APP_EXIT             "Exit ModPlug Tracker\nExit"
+    ID_APP_ABOUT            "About OpenMPT\nAbout"
+    ID_APP_EXIT             "Exit OpenMPT\nExit"
     ID_HELP_INDEX           "Opens Help\nHelp Topics"
     ID_HELP_FINDER          "List Help topics\nHelp Topics"
     ID_HELP_USING           "Display instructions about how to use help\nHelp"
@@ -2286,14 +2286,36 @@ BEGIN
     IDS_CONFIRM_SEQUENCE_DELETE "Delete sequence %1?"
     IDS_PATTERN_CLEANUP_UNAVAILABLE 
                             "Removing unused patterns is not available when using multiple sequences."
+    IDS_SCL_IMPORT_FAIL_1   "Invalid numerator or denominator"
+    IDS_SCL_IMPORT_FAIL_2   "Zero denominator"
+    IDS_SCL_IMPORT_FAIL_3   "Negative ratio"
+    IDS_SCL_IMPORT_FAIL_4   "Unable to open file"
+    IDS_SCL_IMPORT_FAIL_5   "Note count error"
+    IDS_SCL_IMPORT_FAIL_6   "Unknown tuning creation error"
+    IDS_SCL_IMPORT_FAIL_7   "Can't add tuning to tuning collection"
+    IDS_SCL_IMPORT_FAIL_8   "OpenMPT supports importing scl-files with at most %1 notes"
 END
 
-#endif    // Englisch (USA) resources
+STRINGTABLE 
+BEGIN
+    IDS_TUNING_IMPORT_LIMIT "-Failed to load file %1%2: maximum number(=%3!u!) of temporary tunings is already open.\n"
+    IDS_TUNING_IMPORT_UNKNOWN_FAILURE 
+                            "-Unable to import file ""%1%2"": unknown reason.\n"
+    IDS_TUNING_IMPORT_UNRECOGNIZED_FILE_EXT 
+                            "-Unable to load ""%1%2"": unrecognized file extension.\n"
+    IDS_TUNING_IMPORT_UNKNOWN_TC_FAILURE 
+                            "-Unable to import tuning collection ""%1%2"": unrecognized file.\n"
+    IDS_TUNING_IMPORT_SCL_FAILURE "-Unable to import ""%1%2"": %3.\n"
+    IDS_TUNING_IMPORT_UNRECOGNIZED_FILE 
+                            "-Unable to import file ""%1%2"": unrecognized file.\n"
+END
+
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (GB) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2662,7 +2684,7 @@ IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
 //
 
 IDR_BUILTIN_TUNINGS     TUNING                  "res\\built-inTunings.tc"
-#endif    // Englisch (GB) resources
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

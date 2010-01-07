@@ -790,12 +790,13 @@ void CTrackApp::SetupPaths()
 	}
 	
 	// Create tunings dir
-	strcpy(m_szTuningsDirectory, m_szConfigDirectory);
-	strcat(m_szTuningsDirectory, "tunings\\");
+	CString sTuningPath;
+	sTuningPath.Format(TEXT("%stunings\\"), m_szConfigDirectory);
+	CMainFrame::SetDefaultDirectory(sTuningPath, DIR_TUNING);
 
-	if(PathIsDirectory(m_szTuningsDirectory) == 0)
+	if(PathIsDirectory(CMainFrame::GetDefaultDirectory(DIR_TUNING)) == 0)
 	{
-		CreateDirectory(m_szTuningsDirectory, 0);
+		CreateDirectory(CMainFrame::GetDefaultDirectory(DIR_TUNING), 0);
 	}
 
 	if(!bIsAppDir)
