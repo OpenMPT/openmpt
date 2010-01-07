@@ -1,12 +1,3 @@
-/***********************************************
- *
- *  -------------  NOTE  -------------
- * 
- *  This file is modified version of the original SoundTouch file.
- *  Search for "OpenMPT_change" to see the modifications.
- *
-*/
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// General FIR digital filter routines with MMX optimization. 
@@ -20,6 +11,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
+// Last changed  : $Date: 2009-02-25 19:13:51 +0200 (Wed, 25 Feb 2009) $
+// File revision : $Revision: 4 $
+//
+// $Id: FIRFilter.cpp 67 2009-02-25 17:13:51Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -186,10 +181,7 @@ void FIRFilter::setCoefficients(const SAMPLETYPE *coeffs, uint newLength, uint u
     assert(length == newLength);
 
     resultDivFactor = uResultDivFactor;
-	//OpenMPT_change-->
-    //resultDivider = (SAMPLETYPE)::pow(2, resultDivFactor);
-	resultDivider = (1 << resultDivFactor); // == 2^resultDivFactor
-	//<--
+    resultDivider = (SAMPLETYPE)::pow(2.0, (int)resultDivFactor);
 
     delete[] filterCoeffs;
     filterCoeffs = new SAMPLETYPE[length];

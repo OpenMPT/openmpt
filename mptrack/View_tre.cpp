@@ -965,10 +965,10 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 					// path info for ITP instruments
 					BOOL pathOk = pSndFile->m_szInstrumentPath[nIns-1][0] != '\0';
 					BOOL instOk = pSndFile->instrumentModified[nIns-1] == FALSE;
-					wsprintf(s, pathOk ? (instOk ? "%3d: %s" : "%3d: * %s") : "%3d: ? %s", nIns, pSndFile->Instruments[nIns]->name);
+					wsprintf(s, pathOk ? (instOk ? "%3d: %s" : "%3d: * %s") : "%3d: ? %s", nIns, (LPCTSTR)pSndFile->GetInstrumentName(nIns));
 				} else
 				{
-					wsprintf(s, "%3d: %s", nIns, pSndFile->Instruments[nIns]->name);
+					wsprintf(s, "%3d: %s", nIns, (LPCTSTR)pSndFile->GetInstrumentName(nIns));
 				}
 
 				int nImage = IMAGE_INSTRUMENTS;

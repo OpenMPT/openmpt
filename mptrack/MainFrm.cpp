@@ -310,6 +310,8 @@ CMainFrame::CMainFrame()
 
 	for(UINT i = 0; i < NUM_DIRS; i++)
 	{
+		if (i == DIR_TUNING) // Hack: Tuning folder is set already so don't reset it.
+			continue;
 		m_szDefaultDirectory[i][0] = 0;
 		m_szWorkingDirectory[i][0] = 0;
 	}

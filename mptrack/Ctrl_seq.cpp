@@ -1192,6 +1192,7 @@ void COrderList::OnDeleteOrder()
 
 		pSndFile->Order.Remove(selection.nOrdLo, selection.nOrdHi);
 
+		m_pModDoc->SetModified();
 		InvalidateRect(NULL, FALSE);
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
 

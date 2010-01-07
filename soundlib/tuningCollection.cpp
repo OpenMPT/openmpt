@@ -18,7 +18,7 @@ TODOS:
 
 using namespace std;
 
-const string CTuningCollection::s_FileExtension = ".tc";
+const TCHAR CTuningCollection::s_FileExtension[4] = TEXT(".tc");
 
 namespace CTuningS11n
 {
@@ -277,7 +277,7 @@ bool CTuningCollection::Remove(const size_t i)
 bool CTuningCollection::AddTuning(CTuning* const pT)
 //--------------------------------------------------
 {
-	if((m_EditMask & EM_ADD) == 0 || m_Tunings.size() >= 255)
+	if((m_EditMask & EM_ADD) == 0 || m_Tunings.size() >= s_nMaxTuningCount)
 		return true;
 
 	if(pT == NULL)
@@ -292,7 +292,7 @@ bool CTuningCollection::AddTuning(CTuning* const pT)
 bool CTuningCollection::AddTuning(istream& inStrm, const bool ignoreEditmask)
 //-------------------------------------------------
 {
-	if(!ignoreEditmask && (m_EditMask & EM_ADD) == 0 || m_Tunings.size() >= 255)
+	if(!ignoreEditmask && (m_EditMask & EM_ADD) == 0 || m_Tunings.size() >= s_nMaxTuningCount)
 		return true;
 
 	if(!inStrm.good()) return true;

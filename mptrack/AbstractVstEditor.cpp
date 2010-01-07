@@ -469,7 +469,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 		if (nIns==0 && (inputPlugs.GetSize() || inputChannels.GetSize())) { 
 			m_pInputMenu->AppendMenu(MF_SEPARATOR);
 		}
-		name.Format("Ins%02d: %s", inputInstruments[nIns], pSndFile->Instruments[inputInstruments[nIns]]->name);
+		name.Format("Ins%02d: %s", inputInstruments[nIns], (LPCTSTR)pSndFile->GetInstrumentName(inputInstruments[nIns]));
 		if (inputInstruments[nIns] == (UINT)m_nInstrument)	checked=true;
 		m_pInputMenu->AppendMenu(MF_STRING|(checked?MF_CHECKED:0), ID_SELECTINST+inputInstruments[nIns], name);
 	}

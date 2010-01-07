@@ -3486,7 +3486,7 @@ CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
 	{
 		const SAMPLEINDEX nSmp = m_SndFile.Instruments[nInstr]->Keyboard[60];
 		if (nSmp < ARRAYELEMCOUNT(m_SndFile.Samples) && m_SndFile.Samples[nSmp].pSample)
-			instrumentName.Format(TEXT("s: %s"), (LPCTSTR)m_SndFile.GetSampleName(nSmp)); //60 is C-5
+			instrumentName.Format(TEXT("s: %s"), m_SndFile.GetSampleName(nSmp)); //60 is C-5
 	}
 
 	// Get plugin name.

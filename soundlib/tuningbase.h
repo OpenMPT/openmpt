@@ -95,7 +95,7 @@ public:
 	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_SUCCESS;
 	static const SERIALIZATION_RETURN_TYPE SERIALIZATION_FAILURE;
 
-	static const string s_FileExtension;
+	static const TCHAR s_FileExtension[5];
 
 	static const EDITMASK EM_RATIOS;
 	static const EDITMASK EM_NOTENAME;

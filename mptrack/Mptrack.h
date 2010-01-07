@@ -155,7 +155,6 @@ protected:
 	MODMIDICFG m_MidiCfg;
 	TCHAR m_szExePath[_MAX_PATH];
 	TCHAR m_szConfigDirectory[_MAX_PATH];
-	TCHAR m_szTuningsDirectory[_MAX_PATH];
 	TCHAR m_szConfigFileName[_MAX_PATH];
 	TCHAR m_szPluginCacheFileName[_MAX_PATH];
 	TCHAR m_szStringsFileName[_MAX_PATH];
@@ -202,7 +201,6 @@ public:
 	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCSTR GetConfigFileName() const { return m_szConfigFileName; }
 	LPCSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
-	LPCSTR GetTuningsPath() const { return m_szTuningsDirectory; }
 	LPCSTR GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths();
 
@@ -439,6 +437,7 @@ const LPCSTR szHexChar = "0123456789ABCDEF";
 const LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ\\:#??"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
 const LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#??"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
 const LPCSTR gszVolCommands = " vpcdabuhlrgfe:o";	//rewbs.velocity: added last : ; rewbs.volOff added last o
+const TCHAR gszEmpty[] = TEXT("");
 
 // Defined in load_mid.cpp
 extern const LPCSTR szMidiProgramNames[128];
