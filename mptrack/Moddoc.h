@@ -289,6 +289,7 @@ public:
 	BOOL RemoveChannels(BOOL bChnMask[MAX_CHANNELS]);
 
 	bool MergeSequences();
+	bool ConvertSubsongsToMultipleSequences();
 
 	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 // Fix: save pattern scrollbar position when switching to other tab
