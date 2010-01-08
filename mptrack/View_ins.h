@@ -109,6 +109,8 @@ protected:
 	void EnvKbdSetSustainEnd();
 	void EnvKbdToggleReleaseNode();
 
+	bool IsDragItemEnvPoint() const { return (m_nDragItem < 1 || m_nDragItem > EnvGetLastPoint() + 1) ? false : true; }
+
 	////////////////////////
 	// Misc stuff
 	void UpdateScrollSize();
