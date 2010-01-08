@@ -372,7 +372,27 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	ChangeFileExtension(nNewType);
 
 	// Multisequences not suppported by other formats
-	if(!(m_SndFile.m_nType & MOD_TYPE_MPT)) MergeSequences();
+	if(!(m_SndFile.GetType() == MOD_TYPE_MPT)) MergeSequences();
+	// Convert sequence with separator patterns into multiple sequences?
+	if(m_SndFile.GetType() == MOD_TYPE_MPT && m_SndFile.Order.GetNumSequences() == 1)
+	{
+		bool hasSepPatterns = false;
+		for(ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.GetLengthTailTrimmed(); nOrd++)
+		{
+			if(!m_SndFile.Patterns.IsValidIndex(m_SndFile.Order[nOrd]))
+			{
+				hasSepPatterns = true;
+				break;
+			}
+		}
+		if(hasSepPatterns &&
+			::MessageBox(NULL,
+			"The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
+			"Order list conversion", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			ConvertSubsongsToMultipleSequences();
+		}
+	}
 
 	//rewbs.cutomKeys: update effect key commands
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
@@ -1709,3 +1729,70 @@ bool CModDoc::MergeSequences()
 	return true;
 }
 
+
+// Split subsongs (separated by "---" or "+++" patterns) into sequences
+bool CModDoc::ConvertSubsongsToMultipleSequences()
+//------------------------------------------------
+{
+	if(m_SndFile.GetType() != MOD_TYPE_MPT || m_SndFile.Order.GetNumSequences() != 1) return false;
+	bool modified = false;
+
+	m_SndFile.Order.SetSequence(0);
+	for(ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order.GetLengthTailTrimmed(); nOrd++)
+	{
+		// end of subsong?
+		if(!m_SndFile.Patterns.IsValidIndex(m_SndFile.Order[nOrd]))
+		{
+			ORDERINDEX oldLength = m_SndFile.Order.GetLengthTailTrimmed();
+			// remove all separator patterns between current and next subsong first
+			while(nOrd < oldLength && (!m_SndFile.Patterns.IsValidIndex(m_SndFile.Order[nOrd])))
+			{
+				m_SndFile.Order[nOrd] = m_SndFile.Order.GetInvalidPatIndex();
+				nOrd++;
+				modified = true;
+			}
+			if(nOrd >= oldLength) break;
+			ORDERINDEX startOrd = nOrd;
+			modified = true;
+
+			m_SndFile.Order.AddSequence(false);
+			SEQUENCEINDEX newSeq = m_SndFile.Order.GetNumSequences() - 1;
+			m_SndFile.Order.SetSequence(newSeq);
+
+			// resize new seqeuence if necessary
+			if(m_SndFile.Order.GetLength() < oldLength - startOrd)
+			{
+				m_SndFile.Order.resize(oldLength - startOrd);
+			}
+
+			// now, move all following orders to the new sequence
+			while(nOrd < oldLength)
+			{
+				PATTERNINDEX copyPat = m_SndFile.Order.GetSequence(newSeq - 1)[nOrd];
+				m_SndFile.Order[nOrd - startOrd] = copyPat;
+				nOrd++;
+
+				// is this a valid pattern? adjust pattern jump commands, if necessary.
+				if(m_SndFile.Patterns.IsValidPat(copyPat))
+				{
+					MODCOMMAND *m = m_SndFile.Patterns[copyPat];
+					for (UINT len = m_SndFile.PatternSize[copyPat] * m_SndFile.m_nChannels; len; m++, len--)
+					{
+						if(m->command == CMD_POSITIONJUMP && m->param >= startOrd)
+						{
+							m->param -= startOrd;
+						}
+					}
+				}
+			}
+			m_SndFile.Order.SetSequence(newSeq - 1);
+			m_SndFile.Order.Remove(startOrd, oldLength - 1);
+			m_SndFile.Order.SetSequence(newSeq);
+			// start from beginning...
+			nOrd = 0;
+			if(m_SndFile.Order.GetLengthTailTrimmed() == 0 || !m_SndFile.Patterns.IsValidIndex(m_SndFile.Order[nOrd])) break;
+		}
+	}
+	m_SndFile.Order.SetSequence(0);
+	return modified;
+}
