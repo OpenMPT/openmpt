@@ -1436,7 +1436,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 	{
 		BOOL bChanged = FALSE;
 		if (pt.x >= m_rcClient.right - 2) nTick++;
-		if (m_nDragItem <= MAX_ENVPOINTS)
+		if (IsDragItemEnvPoint())
 		{
 			bChanged = EnvSetValue(m_nDragItem - 1, nTick, nVal);
 		} else
@@ -1597,11 +1597,8 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 		{
 			SetCapture();
 			m_dwStatus |= INSSTATUS_DRAGGING;
-			// refrsh active node colour
-			if(GetDocument())
-			{
-				GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
-			}
+			// refresh active node colour
+			InvalidateRect(NULL, FALSE);
 		}
 		else
 		{
@@ -1757,10 +1754,9 @@ void CViewInstrument::OnEnvCarryChanged()
 }
 
 void CViewInstrument::OnEnvToggleReleasNode() 
-//---------------------------------------------------
+//-------------------------------------------
 {
-	if(m_nDragItem < 2 || m_nDragItem >= EnvGetLastPoint()) return;
-	if(EnvToggleReleaseNode(m_nDragItem - 1))
+	if(IsDragItemEnvPoint() && EnvToggleReleaseNode(m_nDragItem - 1))
 	{
 		if(GetDocument() != nullptr) GetDocument()->SetModified();
 		InvalidateRect(NULL, FALSE);
@@ -2258,7 +2254,7 @@ void CViewInstrument::EnvKbdSelectPrevPoint()
 		m_nDragItem = pEnv->nNodes;
 	else
 		m_nDragItem--;
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -2271,7 +2267,7 @@ void CViewInstrument::EnvKbdSelectNextPoint()
 		m_nDragItem = 1;
 	else
 		m_nDragItem++;
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -2279,14 +2275,13 @@ void CViewInstrument::EnvKbdMovePointLeft()
 //-----------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(m_nDragItem == 1 || pEnv->Ticks[m_nDragItem - 1] == pEnv->Ticks[m_nDragItem - 2])
 		return;
 	pEnv->Ticks[m_nDragItem - 1]--;
 
-	CModDoc *pModDoc = GetDocument();	// sanity checks are done in GetEnvelopePtr() already
-	pModDoc->SetModified();
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
+	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -2294,14 +2289,13 @@ void CViewInstrument::EnvKbdMovePointRight()
 //------------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(m_nDragItem == 1 || (m_nDragItem < pEnv->nNodes && pEnv->Ticks[m_nDragItem - 1] == pEnv->Ticks[m_nDragItem]))
 		return;
 	pEnv->Ticks[m_nDragItem - 1]++;
 
-	CModDoc *pModDoc = GetDocument();	// sanity checks are done in GetEnvelopePtr() already
-	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
+	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -2309,15 +2303,14 @@ void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
 //----------------------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(pEnv->Values[m_nDragItem - 1] <= 64 - stepsize)
 		pEnv->Values[m_nDragItem - 1] += stepsize;
 	else
 		pEnv->Values[m_nDragItem - 1] = 64;
 
-	CModDoc *pModDoc = GetDocument();	// sanity checks are done in GetEnvelopePtr() already
-	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
+	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -2325,15 +2318,14 @@ void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
 //------------------------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(pEnv->Values[m_nDragItem - 1] >= stepsize)
 		pEnv->Values[m_nDragItem - 1] -= stepsize;
 	else 
 		pEnv->Values[m_nDragItem - 1] = 0;
 
-	CModDoc *pModDoc = GetDocument();	// sanity checks are done in GetEnvelopePtr() already
-	pModDoc->SetModified();
-	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
+	InvalidateRect(NULL, FALSE);
 }
 
 void CViewInstrument::EnvKbdInsertPoint()
@@ -2341,7 +2333,7 @@ void CViewInstrument::EnvKbdInsertPoint()
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr) return;
-	if(m_nDragItem > pEnv->nNodes) m_nDragItem = pEnv->nNodes;
+	if(!IsDragItemEnvPoint()) m_nDragItem = pEnv->nNodes;
 	WORD newTick = pEnv->Ticks[pEnv->nNodes - 1] + 4;	// if last point is selected: add point after last point
 	BYTE newVal = pEnv->Values[pEnv->nNodes - 1];
 	// if some other point is selected: interpolate between this and next point (if there's room between them)
@@ -2360,7 +2352,7 @@ void CViewInstrument::EnvKbdRemovePoint()
 //---------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || pEnv->nNodes == 0) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint() || pEnv->nNodes == 0) return;
 	if(m_nDragItem > pEnv->nNodes) m_nDragItem = pEnv->nNodes;
 	EnvRemovePoint(m_nDragItem - 1);
 }
@@ -2370,11 +2362,11 @@ void CViewInstrument::EnvKbdSetLoopStart()
 //----------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(!EnvGetLoop())
 		EnvSetLoopStart(0);
 	EnvSetLoopStart(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -2382,14 +2374,14 @@ void CViewInstrument::EnvKbdSetLoopEnd()
 //--------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(!EnvGetLoop())
 	{
 		EnvSetLoop(true);
 		EnvSetLoopStart(0);
 	}
 	EnvSetLoopEnd(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -2397,11 +2389,11 @@ void CViewInstrument::EnvKbdSetSustainStart()
 //-------------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(!EnvGetSustain())
 		EnvSetSustain(true);
 	EnvSetSustainStart(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -2409,14 +2401,14 @@ void CViewInstrument::EnvKbdSetSustainEnd()
 //-----------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(!EnvGetSustain())
 	{
 		EnvSetSustain(true);
 		EnvSetSustainStart(0);
 	}
 	EnvSetSustainEnd(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	InvalidateRect(NULL, FALSE);
 }
 
 
@@ -2424,9 +2416,12 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 //---------------------------------------------
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || m_nDragItem == 0 || m_nDragItem > pEnv->nNodes) return;
-	EnvToggleReleaseNode(m_nDragItem - 1);
-	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
+	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	if(EnvToggleReleaseNode(m_nDragItem - 1))
+	{
+		GetDocument()->SetModified();
+		InvalidateRect(NULL, FALSE);
+	}
 }
 
 

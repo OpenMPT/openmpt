@@ -247,14 +247,16 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
 
 		// Enable/disable multisequence controls according the current modtype.
-		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
-		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
-		GetDlgItem(IDC_EDIT_SEQNUM)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
-		GetDlgItem(IDC_SPIN_SEQNUM)->EnableWindow( (m_pSndFile->GetType() == MOD_TYPE_MPT) ? SW_SHOW : SW_HIDE);
+		BOOL isMultiSeqAvail = (m_pSndFile->GetType() == MOD_TYPE_MPT) ? TRUE : FALSE;
+		GetDlgItem(IDC_STATIC_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
+		GetDlgItem(IDC_EDIT_SEQUENCE_NAME)->EnableWindow(isMultiSeqAvail);
+		GetDlgItem(IDC_EDIT_SEQNUM)->EnableWindow(isMultiSeqAvail);
+		GetDlgItem(IDC_SPIN_SEQNUM)->EnableWindow(isMultiSeqAvail);
 
 		// Enable/disable pattern names
-		GetDlgItem(IDC_STATIC_PATTERNNAME)->EnableWindow( (m_pSndFile->GetType() & (MOD_TYPE_MPT|MOD_TYPE_IT|MOD_TYPE_XM)) ? SW_SHOW : SW_HIDE);
-		GetDlgItem(IDC_EDIT_PATTERNNAME)->EnableWindow( (m_pSndFile->GetType()  & (MOD_TYPE_MPT|MOD_TYPE_IT|MOD_TYPE_XM)) ? SW_SHOW : SW_HIDE);
+		BOOL isPatNameAvail = (m_pSndFile->GetType() & (MOD_TYPE_MPT|MOD_TYPE_IT|MOD_TYPE_XM)) ? TRUE : FALSE;
+		GetDlgItem(IDC_STATIC_PATTERNNAME)->EnableWindow(isPatNameAvail);
+		GetDlgItem(IDC_EDIT_PATTERNNAME)->EnableWindow(isPatNameAvail);
 	}
 	//end rewbs.instroVST
 	if (dwHintMask & HINT_MPTOPTIONS)
@@ -1253,3 +1255,4 @@ void CCtrlPatterns::OnSequenceNumChanged()
 		m_OrderList.SelectSequence(newSeq);
 	}
 }
+
