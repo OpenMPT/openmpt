@@ -2366,7 +2366,7 @@ void CViewInstrument::EnvKbdSetLoopStart()
 	if(!EnvGetLoop())
 		EnvSetLoopStart(0);
 	EnvSetLoopStart(m_nDragItem - 1);
-	InvalidateRect(NULL, FALSE);
+	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
 }
 
 
@@ -2381,7 +2381,7 @@ void CViewInstrument::EnvKbdSetLoopEnd()
 		EnvSetLoopStart(0);
 	}
 	EnvSetLoopEnd(m_nDragItem - 1);
-	InvalidateRect(NULL, FALSE);
+	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
 }
 
 
@@ -2393,7 +2393,7 @@ void CViewInstrument::EnvKbdSetSustainStart()
 	if(!EnvGetSustain())
 		EnvSetSustain(true);
 	EnvSetSustainStart(m_nDragItem - 1);
-	InvalidateRect(NULL, FALSE);
+	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
 }
 
 
@@ -2408,7 +2408,7 @@ void CViewInstrument::EnvKbdSetSustainEnd()
 		EnvSetSustainStart(0);
 	}
 	EnvSetSustainEnd(m_nDragItem - 1);
-	InvalidateRect(NULL, FALSE);
+	GetDocument()->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);	// sanity checks are done in GetEnvelopePtr() already
 }
 
 
@@ -2419,8 +2419,9 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
-		GetDocument()->SetModified();
-		InvalidateRect(NULL, FALSE);
+		CModDoc *pModDoc = GetDocument();	// sanity checks are done in GetEnvelopePtr() already
+		pModDoc->SetModified();
+		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 	}
 }
 
