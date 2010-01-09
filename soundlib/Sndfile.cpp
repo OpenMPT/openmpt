@@ -667,7 +667,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 				pSmp->nLoopEnd = 0;
 			}
 			if (pSmp->nSustainEnd > pSmp->nLength) pSmp->nSustainEnd = pSmp->nLength;
-			if (pSmp->nSustainStart + 3 >= pSmp->nSustainEnd)
+			if (pSmp->nSustainStart >= pSmp->nSustainEnd)
 			{
 				pSmp->nSustainStart = 0;
 				pSmp->nSustainEnd = 0;

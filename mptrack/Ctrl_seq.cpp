@@ -71,11 +71,34 @@ END_MESSAGE_MAP()
 BYTE COrderList::s_nDefaultMargins = 0;
 
 bool COrderList::IsOrderInMargins(int order, int startOrder)
-//-----------------------------------------------------
+//----------------------------------------------------------
 {
 	const BYTE nMargins = GetMargins();
 	return ((startOrder != 0 && order - startOrder < nMargins) || 
 		    order - startOrder >= GetLength() - nMargins);
+}
+
+
+void COrderList::EnsureVisible(ORDERINDEX order)
+//----------------------------------------------
+{
+	// nothing needs to be done
+	if(!IsOrderInMargins(order, m_nXScroll) || order == ORDERINDEX_INVALID) return;
+
+	if(order < m_nXScroll)
+	{
+		if(order < GetMargins())
+			m_nXScroll = 0;
+		else
+			m_nXScroll = order - GetMargins();
+	} else
+	{
+		m_nXScroll = order + 2 * GetMargins() - 1;
+		if(m_nXScroll < GetLength())
+			m_nXScroll = 0;
+		else
+			m_nXScroll -= GetLength();
+	}
 }
 
 
@@ -234,6 +257,7 @@ ORD_SELECTION COrderList::GetCurSel(bool bIgnoreSelection) const
 	LimitMax(result.nOrdHi, m_pModDoc->GetSoundFile()->Order.GetLastIndex());
 	return result;
 }
+
 
 bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bIgnoreCurSel)
 //------------------------------------------------------------------------------------------
@@ -1165,6 +1189,12 @@ void COrderList::OnInsertOrder()
 			m_nScrollPos2nd = min(m_nScrollPos + nInsertCount, pSndFile->Order.GetLastIndex());
 		else
 			m_nScrollPos2nd = ORDERINDEX_INVALID;
+
+		InvalidateSelection();
+		EnsureVisible(m_nScrollPos2nd);
+		// first inserted order has higher priority than the last one
+		EnsureVisible(m_nScrollPos);
+
 		InvalidateRect(NULL, FALSE);
 		m_pModDoc->SetModified();
 		m_pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, this);
@@ -1324,7 +1354,7 @@ LRESULT COrderList::OnDragonDropping(WPARAM bDoDrop, LPARAM lParam)
 
 
 BYTE COrderList::SetMargins(int i)
-//----------------------------------------------
+//--------------------------------
 {
 	m_nOrderlistMargins = static_cast<BYTE>(i);
 	return GetMargins();
