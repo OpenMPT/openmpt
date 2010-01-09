@@ -44,7 +44,6 @@ public:
 	BOOL Init(const CRect&, CCtrlPatterns *pParent, CModDoc *, HFONT hFont);
 	void InvalidateSelection() const;
 	UINT GetCurrentPattern() const;
-	ORD_SELECTION GetCurSel(bool bIgnoreSelection) const;
 	// make the current selection the secondary selection (used for keyboard orderlist navigation)
 	inline void SetCurSelTo2ndSel(bool isSelectionKeyPressed)
 	{	if(isSelectionKeyPressed && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos;
@@ -57,6 +56,10 @@ public:
 	void QueuePattern(CPoint pt);
 
 	ORDERINDEX GetOrderFromPoint(const CRect& rect, const CPoint& pt) const;
+
+	// Get the currently selected pattern(s).
+	// Set bIgnoreSelection to true if only the first selected point is important.
+	ORD_SELECTION GetCurSel(bool bIgnoreSelection) const;
 
 	// Sets target margin value and returns the effective margin value.
 	BYTE SetMargins(int);
@@ -82,6 +85,9 @@ public:
 	// is 'startOrder'. Begin part of the whole sequence
 	// is not interpreted to be in margins regardless of the margin value.
 	bool IsOrderInMargins(int order, int startOrder);
+
+	// Ensure that a given order index is visible in the orderlist view.
+	void EnsureVisible(ORDERINDEX order);
 
 	// Set given sqeuence and update orderlist display.
 	void SelectSequence(const SEQUENCEINDEX nSeq);
