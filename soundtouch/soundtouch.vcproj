@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SOUNDTOUCH_EXPORTS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;DLL_EXPORTS;INTEGER_SAMPLES=1"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -34,7 +34,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="FALSE"
-				OutputFile="$(SolutionDir)$(ConfigurationName)\OpenMPT_SoundTouch.dll"
+				OutputFile="$(SolutionDir)$(ConfigurationName)\OpenMPT_SoundTouch_i16.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
@@ -71,7 +71,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/O2"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SOUNDTOUCH_EXPORTS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;DLL_EXPORTS;INTEGER_SAMPLES=1"
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="0"
@@ -83,7 +83,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/PDBPATH:none"
-				OutputFile="..\mptrack\bin\OpenMPT_SoundTouch.dll"
+				OutputFile="..\mptrack\bin\OpenMPT_SoundTouch_i16.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
@@ -153,6 +153,9 @@
 				RelativePath=".\SoundTouch.cpp">
 			</File>
 			<File
+				RelativePath=".\SoundTouchDLL.cpp">
+			</File>
+			<File
 				RelativePath=".\sse_optimized.cpp">
 			</File>
 			<File
@@ -189,6 +192,9 @@
 			</File>
 			<File
 				RelativePath=".\SoundTouch.h">
+			</File>
+			<File
+				RelativePath=".\SoundTouchDLL.h">
 			</File>
 			<File
 				RelativePath=".\STTypes.h">

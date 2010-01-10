@@ -1,12 +1,3 @@
-/***********************************************
- *
- *  -------------  NOTE  -------------
- * 
- *  This file is modified version of the original SoundTouch file.
- *  Search for "OpenMPT_change" to see the modifications.
- *
-*/
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// Common type definitions for SoundTouch audio processing library.
@@ -16,6 +7,11 @@
 /// SoundTouch WWW: http://www.surina.net/soundtouch
 ///
 ////////////////////////////////////////////////////////////////////////////////
+//
+// Last changed  : $Date: 2009-05-17 14:30:57 +0300 (Sun, 17 May 2009) $
+// File revision : $Revision: 3 $
+//
+// $Id: STTypes.h 70 2009-05-17 11:30:57Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -45,16 +41,6 @@
 
 typedef unsigned int    uint;
 typedef unsigned long   ulong;
-
-// OpenMPT_change-->: Added SOUNDTOUCH_DLLEXPORT definition, Defined INTEGER_SAMPLES definition.
-#ifdef SOUNDTOUCH_EXPORTS
-	#define SOUNDTOUCH_DLLEXPORT __declspec(dllexport)
-#else
-	#define SOUNDTOUCH_DLLEXPORT __declspec(dllimport)
-#endif
-
-#define INTEGER_SAMPLES 1
-// <-- OpenMPT_change
 
 #ifdef __GNUC__
     // In GCC, include soundtouch_config.h made by config scritps

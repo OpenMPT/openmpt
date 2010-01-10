@@ -11,6 +11,7 @@
 #include "mpdlgs.h"
 #include "soundtouch/SoundTouch.h"
 #include "soundtouch/TDStretch.h"
+#include "soundtouch/SoundTouchDLL.h"
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 #include "smbPitchShift.cpp"
 #pragma warning(default:4244) //"conversion from 'type1' to 'type2', possible loss of data"
@@ -1772,6 +1773,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 int CCtrlSamples::TimeStretch(double ratio)
 //-----------------------------------------
 {
+	static HANDLE handleSt = NULL; // Handle to SoundTouch object.
 	if((!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return -1;
 	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
 	if(!pSmp) return -1;
@@ -1792,14 +1794,16 @@ int CCtrlSamples::TimeStretch(double ratio)
 	if(pitch < 0.5f) return 2 + (1<<8);
 	if(pitch > 2.0f) return 2 + (2<<8);
 
-	soundtouch::SoundTouch* pSoundTouch = 0;
-	try
+	if (handleSt != NULL && soundtouch_isEmpty(handleSt) == 0)
+		return 10;
+
+	if (handleSt == NULL)
 	{
-		pSoundTouch = new soundtouch::SoundTouch;
+		handleSt = soundtouch_createInstance();
 	}
-	catch(...)
-	{   // Assuming that thrown exception means that soundtouch library could not be loaded.
-		MessageBox("Failed to load soundtouch library.", 0, MB_ICONERROR);
+	if (handleSt == NULL) 
+	{
+		AfxMessageBox(IDS_SOUNDTOUCH_LOADFAILURE);
 		return -1;
 	}
 
@@ -1833,10 +1837,7 @@ int CCtrlSamples::TimeStretch(double ratio)
 	//const DWORD nNewSampleLength = (DWORD)(0.5 + ratio * (double)pSmp->nLength);
 	PVOID pNewSample = CSoundFile::AllocateSample(nNewSampleLength * nChn * smpsize);
 	if(pNewSample == NULL)
-	{
-		delete pSoundTouch;
 		return 3;
-	}
 
 	// Save process button text (to be used as "progress bar" indicator while processing)
 	CHAR oldText[255];
@@ -1866,16 +1867,15 @@ int CCtrlSamples::TimeStretch(double ratio)
 	{	
 		if(nSampleRate < 300) // Too low samplerate crashes soundtouch.
 		{                     // Limiting it to value 300(quite arbitrarily chosen).
-			delete pSoundTouch;
 			return 5;         
 		}
-		pSoundTouch->setSampleRate(nSampleRate);
-		pSoundTouch->setChannels(nChn);
+		soundtouch_setSampleRate(handleSt, nSampleRate);
+		soundtouch_setChannels(handleSt, nChn);
 		// Given ratio is time stretch ratio, and must be converted to
 		// tempo change ratio: for example time stretch ratio 2 means
 		// tempo change ratio 0.5.
-		pSoundTouch->setTempoChange( (1.0f / ratio - 1.0f) * 100.0f);
-		pSoundTouch->setSetting(SETTING_USE_QUICKSEEK, 0);
+		soundtouch_setTempoChange(handleSt, (1.0f / ratio - 1.0f) * 100.0f);
+		soundtouch_setSetting(handleSt, SETTING_USE_QUICKSEEK, 0);
 
 		// Read settings from GUI.
 		ReadTimeStretchParameters();	
@@ -1887,16 +1887,16 @@ int CCtrlSamples::TimeStretch(double ratio)
 		// Set settings to soundtouch. Zero value means 'use default', and
         // setting value is read back after setting because not all settings are accepted.
 		if(m_nSequenceMs == 0) m_nSequenceMs = DEFAULT_SEQUENCE_MS;
-		pSoundTouch->setSetting(SETTING_SEQUENCE_MS, m_nSequenceMs);
-		m_nSequenceMs = pSoundTouch->getSetting(SETTING_SEQUENCE_MS);
+		soundtouch_setSetting(handleSt, SETTING_SEQUENCE_MS, m_nSequenceMs);
+		m_nSequenceMs = soundtouch_getSetting(handleSt, SETTING_SEQUENCE_MS);
 		
 		if(m_nSeekWindowMs == 0) m_nSeekWindowMs = DEFAULT_SEEKWINDOW_MS;
-		pSoundTouch->setSetting(SETTING_SEEKWINDOW_MS, m_nSeekWindowMs);
-		m_nSeekWindowMs = pSoundTouch->getSetting(SETTING_SEEKWINDOW_MS);
+		soundtouch_setSetting(handleSt, SETTING_SEEKWINDOW_MS, m_nSeekWindowMs);
+		m_nSeekWindowMs = soundtouch_getSetting(handleSt, SETTING_SEEKWINDOW_MS);
 		
 		if(m_nOverlapMs == 0) m_nOverlapMs = DEFAULT_OVERLAP_MS;
-		pSoundTouch->setSetting(SETTING_OVERLAP_MS, m_nOverlapMs);
-		m_nOverlapMs = pSoundTouch->getSetting(SETTING_OVERLAP_MS);
+		soundtouch_setSetting(handleSt, SETTING_OVERLAP_MS, m_nOverlapMs);
+		m_nOverlapMs = soundtouch_getSetting(handleSt, SETTING_OVERLAP_MS);
 		
 		// Update GUI with the actual SoundTouch parameters in effect.
 		UpdateTimeStretchParameterString();
@@ -1926,22 +1926,23 @@ int CCtrlSamples::TimeStretch(double ratio)
 		::GdiFlush();
 
 		// Send sampledata for processing.
-		pSoundTouch->putSamples(reinterpret_cast<int16*>(pSmp->pSample + pos * smpsize * nChn), len);
+		soundtouch_putSamples(handleSt, reinterpret_cast<int16*>(pSmp->pSample + pos * smpsize * nChn), len);
 
 		// Receive some processed samples (it's not guaranteed that there is any available).
-		nLengthCounter += pSoundTouch->receiveSamples(reinterpret_cast<int16*>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
+		nLengthCounter += soundtouch_receiveSamples(handleSt, reinterpret_cast<int16*>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
 
 		// Next buffer chunk
 		pos += len;
 	}
 
 	// The input sample should now be processed. Receive remaining samples.
-	pSoundTouch->flush();
-	while(pSoundTouch->numSamples() > 0 && nNewSampleLength > nLengthCounter)
+	soundtouch_flush(handleSt);
+	while(soundtouch_numSamples(handleSt) > 0 && nNewSampleLength > nLengthCounter)
 	{
-		nLengthCounter += pSoundTouch->receiveSamples(reinterpret_cast<int16*>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
+		nLengthCounter += soundtouch_receiveSamples(handleSt, reinterpret_cast<int16*>(pNewSample) + nChn * nLengthCounter, nNewSampleLength - nLengthCounter);
 	}
-	delete pSoundTouch; pSoundTouch = 0;
+	soundtouch_clear(handleSt);
+	ASSERT(soundtouch_isEmpty(handleSt) != 0);
 
 	ASSERT(nNewSampleLength >= nLengthCounter);
 

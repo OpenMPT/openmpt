@@ -1,12 +1,3 @@
-/***********************************************
- *
- *  -------------  NOTE  -------------
- * 
- *  This file is modified version of the original SoundTouch file.
- *  Search for "OpenMPT_change" to see the modifications.
- *
-*/
-
 //////////////////////////////////////////////////////////////////////////////
 ///
 /// SoundTouch - main class for tempo/pitch/rate adjusting routines. 
@@ -49,6 +40,11 @@
 /// SoundTouch WWW: http://www.surina.net/soundtouch
 ///
 ////////////////////////////////////////////////////////////////////////////////
+//
+// Last changed  : $Date: 2009-12-28 22:10:14 +0200 (Mon, 28 Dec 2009) $
+// File revision : $Revision: 4 $
+//
+// $Id: SoundTouch.h 78 2009-12-28 20:10:14Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -119,8 +115,8 @@ namespace soundtouch
 /// See "STTypes.h" or README for more information.
 #define SETTING_OVERLAP_MS          5
 
-// OpenMPT_change: Added SOUNDTOUCH_DLLEXPORT.
-class SOUNDTOUCH_DLLEXPORT SoundTouch : public FIFOProcessor
+
+class SoundTouch : public FIFOProcessor
 {
 private:
     /// Rate transposer class instance

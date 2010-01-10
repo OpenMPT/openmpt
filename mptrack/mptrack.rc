@@ -231,8 +231,8 @@ BEGIN
     COMBOBOX        IDC_COMBO2,78,18,73,75,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Change Player Options",IDC_PLAYEROPTIONS,18,36,81,14,BS_CENTER
     CONTROL         "Channel mode (one file per channel)",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,54,168,8
-    CONTROL         "Normalize Output",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,66,73,10
-    CONTROL         "High quality resampling",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,102,66,84,10
+    CONTROL         "Normalize Output (experimental)",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,66,119,10
+    CONTROL         "High quality resampling",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,112,36,84,10
     CONTROL         "Slow render (for Kontakt+DFD)",IDC_GIVEPLUGSIDLETIME,
                     "Button",BS_AUTOCHECKBOX | BS_LEFT | BS_MULTILINE | WS_TABSTOP,18,78,133,8
     GROUPBOX        "Limit",IDC_STATIC,6,102,192,90
@@ -2308,6 +2308,7 @@ BEGIN
     IDS_TUNING_IMPORT_SCL_FAILURE "-Unable to import ""%1%2"": %3.\n"
     IDS_TUNING_IMPORT_UNRECOGNIZED_FILE 
                             "-Unable to import file ""%1%2"": unrecognized file.\n"
+    IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_i16.dll."
 END
 
 #endif    // English (U.S.) resources
