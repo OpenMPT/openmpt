@@ -2467,9 +2467,9 @@ void CViewSample::OnAddSilence()
 		// resize - dlg.m_nSamples = new size
 		if(dlg.m_nSamples != pSmp->nLength)
 		{
-			if(dlg.m_nSamples < pSmp->nLength)
-				pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_delete, dlg.m_nSamples, pSmp->nLength - dlg.m_nSamples);
-			else
+			if(dlg.m_nSamples < pSmp->nLength)	// make it shorter!
+				pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_delete, dlg.m_nSamples, pSmp->nLength);
+			else	// make it longer!
 				pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_insert, pSmp->nLength, dlg.m_nSamples);
 			ctrlSmp::ResizeSample(pSndFile->Samples[m_nSample], dlg.m_nSamples, pSndFile);
 		}
