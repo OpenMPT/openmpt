@@ -227,24 +227,29 @@ const BYTE gEffectColors[MAX_EFFECTS] =
 static void ShowChangesDialog()
 //-----------------------------
 {
-	/*
-	const char* const firstOpenMessage = "OpenMPT development build " MPT_VERSION_STR ".\n\n"
-				"Some notable changes since version 1.17.02.48:\n\n"
-				"    [New] Name filter in plugin selection dialog.\n"
-				"    [New] Behavior of vxx command when used with plugin instruments can now be configured in instrument tab.\n"
-				"    [New] MIDI controllers can be used to control plugin parameters(View->MIDI mapping).\n"
-				"    [New] Possibility to use more Impulse Tracker compatible playback with IT-files. Is used\n "
-				"              automatically if loaded IT-file doesn't seem to be Modplug made.\n"
-			    "    [New/Fix] A couple of new sample editing functions and various modifications/fixes in sample tab.\n"
-				"    [Mod] mptm files made with this version will be recognized as IT in 1.17.02.48.\n"
-			    "    [Mod] Automatic update check on startup is no longer available.\n"
-                "    [Fix] Copy/Paste in pattern was partly broken when working with MOD format.\n"
-				"    [Fix] Fixed wrong version in IT files saved with compatibility export.\n"
+	const char* const firstOpenMessage = "OpenMPT build " MPT_VERSION_STR ".\n\n"
+				"Some changes since version 1.17.02.54:\n\n"
+				"    [New] Pattern tab: New paste modes: overflow, push forward and flood.\n"
+				"    [Mod] Pattern tab: Keyboard split is now accessible from keyshortcut or menu.\n"
+				"    [Imp] Pattern tab: Numerous improvements including better effect descriptions in note properties.\n"
+				"    [New] Sequence editor: Can now handle order selections including delete/copy/cut/paste functionality.\n"
+				"    [New] Sequence editor: Can render selected patterns to wave directly from orderlist.\n"
+				"    [New] Envelope editor: Numerous improvements including ability to insert and remove points easily.\n"
+				"    [New] Sample tab: sample undo, sample draw, resize sample, DC offset removal, batch export, better loop...\n"
+				"            ...point handling when deleting selections. Play sample from given position with Ctrl + left mouse button.\n"
+				"    [New] MPTM: New parameter controls for controlling plug params from pattern.\n"
+				"    [New] MPTM: Can have envelope points up to 240 and multiple sequences.\n"
+				"    [New] MIDI mapping: Editing a plug param in its editor while holding shift key will now open MIDI mapping dialog.\n"
+				"    [New] MIDI mapping: Can now record MIDI mapping changes to pattern.\n"
+				"    [Imp] MOD/S3M/XM/IT: Numerous improvements to load, save and playback compatibility.\n"
+				"    [New] Input: Can import RIFF AM, RIFF AMFF, J2B, PSM16, IMF, GDM and SCL files. Improved PSM import.\n"
+				"    [New] Setup: New default directories: plugins and plugin presets, sharable colour schemes\n"
+				"    [New] Cleanup: New option compo cleanup, rearrange samples is back, can merge sequences.\n"
+				"    [Mod] Misc: Program settings are now by default stored in %APPDATA%\\OpenMPT\n"
 				"\n"
-				"    For more detailed list of changes, see history.txt.";
+				"    and many more. See history.txt for more details.";
 			
 	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT " MPT_VERSION_STR, MB_ICONINFORMATION);
-	*/
 }
 
 
@@ -1839,12 +1844,12 @@ http://sourceforge.net/projects/modplug/");
 
 	const char* const pArrCredit = { 
 		"OpenMPT / Modplug Tracker|"
-		"Copyright © 2004-2009 Contributors|"
+		"Copyright © 2004-2010 Contributors|"
 		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
 		"|"
 		"Contributors:|"
-		"Ahti Leppänen (2005-2009)|"
-		"Johannes Schultz (2008-2009)|"
+		"Ahti Leppänen (2005-2010)|"
+		"Johannes Schultz (2008-2010)|"
 		"Robin Fernandes (2004-2007)|"
 		"Sergiy Pylypenko (2007)|"
 		"Eric Chavanon (2004-2005)|"

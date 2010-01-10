@@ -2724,7 +2724,7 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 //	case ID_NETLINK_UT:			pszURL = "http://www.united-trackers.org"; break;
 //	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
 //	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
-//	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
+	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
 	case ID_NETLINK_FORUMS:		pszURL = "http://www.lpchip.com/modplug"; break;
 	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com"; break;
 	case ID_NETLINK_MODARCHIVE: pszURL = "http://modarchive.org/"; break;

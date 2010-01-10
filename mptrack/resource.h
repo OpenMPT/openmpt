@@ -66,6 +66,7 @@
 #define IDS_TUNING_IMPORT_UNKNOWN_TC_FAILURE 227
 #define IDS_TUNING_IMPORT_SCL_FAILURE   228
 #define IDS_TUNING_IMPORT_UNRECOGNIZED_FILE 229
+#define IDS_SOUNDTOUCH_LOADFAILURE      230
 #define IDB_MAINBAR                     300
 #define IDB_IMAGELIST                   301
 #define IDB_PATTERNS                    302

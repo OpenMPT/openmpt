@@ -496,10 +496,12 @@ void ReplaceSample( MODCHANNEL (&Chn)[MAX_CHANNELS],
 		if (Chn[i].pSample == pOldSample)
 		{
 			Chn[i].pSample = pNewSample;
-			Chn[i].pCurrentSample = pNewSample;
+			if (Chn[i].pCurrentSample != nullptr)
+				Chn[i].pCurrentSample = pNewSample;
 			if (Chn[i].nPos > nNewLength)
 				Chn[i].nPos = 0;
-			Chn[i].nLength = nNewLength;
+			if (Chn[i].nLength > 0)
+				Chn[i].nLength = nNewLength;
 			Chn[i].dwFlags |= orFlags;
 			Chn[i].dwFlags &= andFlags;
 		}

@@ -1,12 +1,3 @@
-/***********************************************
- *
- *  -------------  NOTE  -------------
- * 
- *  This file is modified version of the original SoundTouch file.
- *  Search for "OpenMPT_change" to see the modifications.
- *
-*/
-
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// 'FIFOSamplePipe' : An abstract base class for classes that manipulate sound
@@ -26,6 +17,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
+// Last changed  : $Date: 2009-04-13 16:18:48 +0300 (Mon, 13 Apr 2009) $
+// File revision : $Revision: 4 $
+//
+// $Id: FIFOSamplePipe.h 69 2009-04-13 13:18:48Z oparviai $
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -61,8 +56,7 @@ namespace soundtouch
 {
 
 /// Abstract base class for FIFO (first-in-first-out) sample processing classes.
-// OpenMPT_change: Added SOUNDTOUCH_DLLEXPORT.
-class SOUNDTOUCH_DLLEXPORT FIFOSamplePipe
+class FIFOSamplePipe
 {
 public:
     // virtual default destructor
@@ -132,8 +126,7 @@ public:
 /// When samples are input to this class, they're first processed and then put to 
 /// the FIFO pipe that's defined as output of this class. This output pipe can be
 /// either other processing stage or a FIFO sample buffer.
-// OpenMPT_change: Added SOUNDTOUCH_DLLEXPORT.
-class SOUNDTOUCH_DLLEXPORT FIFOProcessor :public FIFOSamplePipe
+class FIFOProcessor :public FIFOSamplePipe
 {
 protected:
     /// Internal pipe where processed samples are put.

@@ -2214,10 +2214,10 @@ void CViewPattern::Interpolate(UINT type)
 				break;
 			case PARAM_COLUMN:
 			case EFFECT_COLUMN:
-				if(srcCmd.note == NOTE_PC || srcCmd.note == NOTE_PCS || destCmd.note == NOTE_PCS || destCmd.note == NOTE_PC)
+				if(srcCmd.IsPcNote() || destCmd.IsPcNote())
 				{
 					doPCinterpolation = true;
-					PCnote = (srcCmd.note == NOTE_PC || srcCmd.note == NOTE_PCS) ? srcCmd.note : destCmd.note;
+					PCnote = (srcCmd.IsPcNote()) ? srcCmd.note : destCmd.note;
 					vsrc = srcCmd.GetValueEffectCol();
 					vdest = destCmd.GetValueEffectCol();
 					PCparam = srcCmd.GetValueVolCol();
@@ -2263,9 +2263,9 @@ void CViewPattern::Interpolate(UINT type)
 				case EFFECT_COLUMN:
 					if(doPCinterpolation)
 					{	// With PC/PCs notes, copy PCs note and plug index to all rows where
-						// effect interpolation is done, if no PC note is there.
+						// effect interpolation is done if no PC note with non-zero instrument is there.
 						const uint16 val = static_cast<uint16>(vsrc + ((vdest - vsrc) * (int)i + verr) / distance);
-						if(pcmd->note != NOTE_PC && pcmd->note != NOTE_PCS)
+						if (pcmd->IsPcNote() == false || pcmd->instr == 0)
 						{
 							pcmd->note = PCnote;
 							pcmd->instr = PCinst;
