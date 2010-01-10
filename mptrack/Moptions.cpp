@@ -422,30 +422,31 @@ void COptionsColors::OnPresetMPT()
 void COptionsColors::OnPresetFT2()
 //--------------------------------
 {
+	// "blue"
 	CustomColors[MODCOLOR_BACKNORMAL] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0xFF, 0xFF, 0x82);
-	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x49, 0x75, 0x82);
-	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0xFF, 0xFF, 0x5F);
-	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x28, 0x28, 0x28);
+	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0xE0, 0xE0, 0x40);
+	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x70, 0x70, 0x70);
+	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0xF0, 0xF0, 0x50);
+	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x40, 0x40, 0xA0);
 	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xFF, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x49, 0x75, 0x82);
-	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0xFF, 0xFF, 0xFF);
-	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x27, 0x41, 0x47);
-	CustomColors[MODCOLOR_NOTE] = RGB(0xFF, 0xFF, 0x82);
-	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0xFF, 0xFF, 0x82);
-	CustomColors[MODCOLOR_VOLUME] = RGB(0xFF, 0xFF, 0x82);
-	CustomColors[MODCOLOR_PANNING] = RGB(0xFF, 0xFF, 0x82);
-	CustomColors[MODCOLOR_PITCH] = RGB(0xFF, 0xFF, 0x82);
-	CustomColors[MODCOLOR_GLOBALS] = RGB(0xFF, 0xFF, 0x82);
-	CustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0xFF, 0x82);
-	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xFF, 0xFF, 0x82);
-	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x4B, 0x7C, 0x89);
-	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0x5F, 0x98, 0xA7);
-	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xEA, 0x1C, 0x78);
-	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x18, 0x28, 0x2C);
-	CustomColors[MODCOLOR_SEPFACE] = RGB(0x49, 0x75, 0x82);
-	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x8A, 0xDB, 0xF3);
-	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x27, 0x41, 0x47);
+	CustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0x00, 0x00);
+	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x50, 0x50, 0x70);
+	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0xE0, 0xE0, 0x40);
+	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x40, 0x40, 0x80);
+	CustomColors[MODCOLOR_NOTE] = RGB(0xE0, 0xE0, 0x40);
+	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0xFF, 0xFF, 0x00);
+	CustomColors[MODCOLOR_VOLUME] = RGB(0x00, 0xFF, 0x00);
+	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0xFF, 0xFF);
+	CustomColors[MODCOLOR_PITCH] = RGB(0xFF, 0xFF, 0x00);
+	CustomColors[MODCOLOR_GLOBALS] = RGB(0xFF, 0x40, 0x40);
+	CustomColors[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
+	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
+	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x2E, 0x2E, 0x5C);
+	CustomColors[MODCOLOR_SEPFACE] = RGB(0x40, 0x40, 0x80);
+	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x99, 0x99, 0xCC);
+	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x2E, 0x2E, 0x5A);
 	OnPreviewChanged();
 }
 
@@ -453,30 +454,31 @@ void COptionsColors::OnPresetFT2()
 void COptionsColors::OnPresetIT()
 //-------------------------------
 {
+	// "green"
 	CustomColors[MODCOLOR_BACKNORMAL] = RGB(0x00, 0x00, 0x00);
-	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0x45, 0x9A, 0x49);
-	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x10, 0x35, 0x00);
-	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0xEB, 0xEB, 0xCB);
-	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x20, 0x55, 0x00);
-	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xEB, 0xEB, 0xCB);
-	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x59, 0x41, 0x3C);
-	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x45, 0x9A, 0x49);
-	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x59, 0x41, 0x3C);
-	CustomColors[MODCOLOR_NOTE] = RGB(0x45, 0x9A, 0x49);
-	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0x38, 0x9E, 0x75);
-	CustomColors[MODCOLOR_VOLUME] = RGB(0xA2, 0xA2, 0xA2);
-	CustomColors[MODCOLOR_PANNING] = RGB(0x18, 0x75, 0x2C);
-	CustomColors[MODCOLOR_PITCH] = RGB(0x45, 0x9A, 0x49);
-	CustomColors[MODCOLOR_GLOBALS] = RGB(0x45, 0x9A, 0x49);
-	CustomColors[MODCOLOR_SAMPLE] = RGB(0x8E, 0x14, 0x55);
-	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xA2, 0xA2, 0xA2);
-	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x25, 0x7D, 0x00);
-	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xEC, 0x99, 0x00);
+	CustomColors[MODCOLOR_TEXTNORMAL] = RGB(0x00, 0xE0, 0x00);
+	CustomColors[MODCOLOR_BACKCURROW] = RGB(0x70, 0x70, 0x70);
+	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0x00, 0xE0, 0x00);
+	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0xE0, 0xE0, 0xE0);
+	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0x00, 0x00, 0x00);
+	CustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0x00, 0x00);
+	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0x80, 0x80, 0x00);
+	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x00, 0xE0, 0x00);
+	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0x40, 0x68, 0x40);
+	CustomColors[MODCOLOR_NOTE] = RGB(0x00, 0xFF, 0x00);
+	CustomColors[MODCOLOR_INSTRUMENT] = RGB(0xFF, 0xFF, 0x00);
+	CustomColors[MODCOLOR_VOLUME] = RGB(0x00, 0xFF, 0x00);
+	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0xFF, 0xFF);
+	CustomColors[MODCOLOR_PITCH] = RGB(0xFF, 0xFF, 0x00);
+	CustomColors[MODCOLOR_GLOBALS] = RGB(0xFF, 0x40, 0x40);
+	CustomColors[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
+	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
-	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0xB6, 0x96, 0x79);
-	CustomColors[MODCOLOR_SEPFACE] = RGB(0xB6, 0x96, 0x79);
-	CustomColors[MODCOLOR_SEPHILITE] = RGB(0xB6, 0x96, 0x79);
-	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x35, 0x27, 0x24);
+	CustomColors[MODCOLOR_SEPSHADOW] = RGB(0x23, 0x38, 0x23);
+	CustomColors[MODCOLOR_SEPFACE] = RGB(0x40, 0x68, 0x40);
+	CustomColors[MODCOLOR_SEPHILITE] = RGB(0x94, 0xBC, 0x94);
+	CustomColors[MODCOLOR_BLENDCOLOR] = RGB(0x00, 0x40, 0x00);
 	OnPreviewChanged();
 }
 
@@ -612,7 +614,7 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{PATTERN_SINGLEEXPAND,	"Single click to expand tree",		"Single-clicking in the left tree view will expand a branch"},
 	{PATTERN_MUTECHNMODE,	"Ignored muted channels",			"Notes will not be played on muted channels (unmuting will only start on a new note)."},
 	{PATTERN_AUTOSPACEBAR,	"Quick cursor paste Auto-Repeat",	"Leaving the space bar pressed will auto-repeat the action"},
-	{PATTERN_NOEXTRALOUD,	"No loud samples",					"Disable loud playback of samples in the sample/instrument editor"},
+	{PATTERN_NOEXTRALOUD,	"No loud samples",					"Disable loud playback of samples in the sample/instrument editor. Sample volume depends on the sample volume slider on the general tab when activated."},
 	{PATTERN_SHOWPREVIOUS,	"Show Prev/Next patterns",			"Displays grayed-out version of the previous/next patterns in the pattern editor. Does not work if \"always center active row\" is disabled."},
 	{PATTERN_CONTSCROLL,	"Continuous scroll",				"Jumps to the next pattern when moving past the end of a pattern"},
 	{PATTERN_KBDNOTEOFF,	"Record note off",					"Record note off when a key is released on the PC keyboard (Only works in instrument mode)."},
