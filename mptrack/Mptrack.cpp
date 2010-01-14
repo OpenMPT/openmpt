@@ -252,6 +252,8 @@ static void ShowChangesDialog()
 }
 
 
+TCHAR CTrackApp::m_szExePath[_MAX_PATH] = TEXT("");
+
 /////////////////////////////////////////////////////////////////////////////
 // MPTRACK Command Line options
 

@@ -16,6 +16,7 @@
 #include "smbPitchShift.cpp"
 #pragma warning(default:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 #include "modsmp_ctrl.h"
+#include <Shlwapi.h>
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -1799,7 +1800,11 @@ int CCtrlSamples::TimeStretch(double ratio)
 
 	if (handleSt == NULL)
 	{
-		handleSt = soundtouch_createInstance();
+		// Check whether the DLL file exists.
+		CString sPath;
+		sPath.Format(TEXT("%s%s"), CTrackApp::GetAppDirPath(), TEXT("OpenMPT_SoundTouch_i16.dll"));
+		if (sPath.GetLength() <= _MAX_PATH && PathFileExists(sPath) == TRUE)
+			handleSt = soundtouch_createInstance();
 	}
 	if (handleSt == NULL) 
 	{
