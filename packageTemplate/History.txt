@@ -76,6 +76,7 @@ Sample tab
   / <Jojo> Removed time stretcher's / pitch shifter's preview function as it's unnecessary now.
   . <Jojo> When going down close to 0 Hz in the sample editor, the sample freq wrapped around to the maximum value.
   . <Jojo> Insert Silence: Loop points were not updated when adding silence at the beginning of the sample
+  . <re>   Actions such as time stretching and undo could trigger sample play.
 
 Instrument tab
   . <Jojo> When playing an instrument and disabling its envelopes at the same time, the toggled envelopes are stopped (prevents filter envelope from turning into a pitch envelope).

@@ -153,7 +153,7 @@ protected:
 	HANDLE m_hAlternateResourceHandle;
 	// Default macro configuration
 	MODMIDICFG m_MidiCfg;
-	TCHAR m_szExePath[_MAX_PATH];
+	static TCHAR m_szExePath[_MAX_PATH];
 	TCHAR m_szConfigDirectory[_MAX_PATH];
 	TCHAR m_szConfigFileName[_MAX_PATH];
 	TCHAR m_szPluginCacheFileName[_MAX_PATH];
@@ -175,6 +175,7 @@ public:
 	static VOID SetAsProject(BOOL n) { m_nProject = n; }
 // -! NEW_FEATURE#0023
 
+	static LPCTSTR GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
 	static UINT GetDefaultDocType() { return m_nDefaultDocType; }
 	static VOID SetDefaultDocType(UINT n) { m_nDefaultDocType = n; }
 	static LPMIDILIBSTRUCT GetMidiLibrary() { return glpMidiLibrary; }
