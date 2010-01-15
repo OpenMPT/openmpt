@@ -209,6 +209,7 @@ protected:
 	afx_msg void OnDuplicateTreeItem();
 	afx_msg void OnInsertTreeItem();
 	afx_msg void OnSwitchToTreeItem();	// hack for sequence items to avoid double-click action
+	afx_msg void OnCloseItem();
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"

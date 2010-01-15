@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_DUPLICATE,	OnDuplicateTreeItem)
 	ON_COMMAND(ID_MODTREE_INSERT,		OnInsertTreeItem)
 	ON_COMMAND(ID_MODTREE_SWITCHTO,		OnSwitchToTreeItem)
+	ON_COMMAND(ID_MODTREE_CLOSE,		OnCloseItem)
 
 	// -> CODE#0023
 // -> DESC="IT project files (.itp)"
@@ -2295,6 +2296,12 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 			SelectItem(hItem);
 			switch(modItemType)
 			{
+			case MODITEM_HDR_SONG:
+				nDefault = ID_MODTREE_EXECUTE;
+				AppendMenu(hMenu, MF_STRING, nDefault, "&View");
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_CLOSE, "&Close");
+				break;
+
 			case MODITEM_COMMENTS:
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, "&View Comments");
@@ -3204,4 +3211,14 @@ bool CModTree::IsItemExpanded(HTREEITEM hItem)
 	tvi.hItem = hItem;
 	GetItem(&tvi);
 	return (tvi.state & TVIS_EXPANDED) != 0 ? true : false;
+}
+
+
+void CModTree::OnCloseItem()
+//--------------------------
+{
+	HTREEITEM hItem = GetSelectedItem();
+	CModDoc *pModDoc = GetDocumentFromItem(hItem);
+	if(pModDoc == nullptr) return;
+	pModDoc->OnCloseDocument();
 }

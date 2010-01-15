@@ -1711,19 +1711,17 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 
 	// Time stretching
 	if(IsDlgButtonChecked(IDC_CHECK3)){
-		//rewbs.timeStretchMods
 		UpdateData(TRUE); //Ensure m_dTimeStretchRatio is up-to-date with textbox content
 		errorcode = TimeStretch(m_dTimeStretchRatio/100.0);
 
 		//Update loop points only if no error occured.
 		if(errorcode == 0)
 		{
-			pSmp->nLoopStart *= m_dTimeStretchRatio/100.0;
-			pSmp->nLoopEnd *= m_dTimeStretchRatio/100.0;
-			pSmp->nSustainStart *= m_dTimeStretchRatio/100.0;
-			pSmp->nSustainEnd *= m_dTimeStretchRatio/100.0;
+			pSmp->nLoopStart = min(pSmp->nLoopStart * (m_dTimeStretchRatio / 100.0), pSmp->nLength);
+			pSmp->nLoopEnd = min(pSmp->nLoopEnd * (m_dTimeStretchRatio/100.0), pSmp->nLength);
+			pSmp->nSustainStart = min(pSmp->nSustainStart * (m_dTimeStretchRatio/100.0), pSmp->nLength);
+			pSmp->nSustainEnd = min(pSmp->nSustainEnd * (m_dTimeStretchRatio/100.0), pSmp->nLength);
 		}
-		//end rewbs.timeStretchMods
 		
 	}
 	// Pitch shifting
