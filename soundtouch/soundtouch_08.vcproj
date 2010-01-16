@@ -277,6 +277,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SoundTouch.h"
 				>
 			</File>
