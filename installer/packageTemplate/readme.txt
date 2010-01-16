@@ -6,21 +6,25 @@
 Migrating from OpenMPT 1.17
 ---------------------------
 
--If you have an existing installation of OpenMPT 1.17 and wish to
- re-use its settings, copy your mptrack.ini and plugin.cache
- to the directory into which you installed OpenMPT.
+If you have an existing installation of OpenMPT 1.17 and wish to re-use its
+settings, copy your mptrack.ini and plugin.cache to %appdata%\OpenMPT (or the
+directory into which you installed OpenMPT if you used portable mode).
 
 
 Uninstallation
 --------------
 
--An uninstaller is provided. It will also uninstall custom settings and tunings, so if you want to keep those, back them up first. Use "open_settings_folder.bat" to find them.
+An uninstaller is provided. It will also uninstall custom settings and tunings,
+so if you want to keep those, back them up first. Use "open_settings_folder.bat"
+to find them.
 
 
 Making OpenMPT portable
 -----------------------
 
-By default, OpenMPT stores its settings in %appdata%\OpenMPT. To avoid this, create a file called "mptrack.ini" in the same directory as mptrack.exe (if it does not exist yet) and add the following lines to this file:
+By default, OpenMPT stores its settings in %appdata%\OpenMPT. To avoid this,
+create a file called "mptrack.ini" in the same directory as mptrack.exe (if it
+does not exist yet) and add the following lines to this file:
 [Paths]
 UseAppDataDirectory=0
 
@@ -39,12 +43,15 @@ See forums at http://modplug.sourceforge.net/.
 
 Release package contents:
 -------------------------
-extraKeymaps(folder): Additional key bindings for the keyboard manager, available in several flavours (including MPT classic, FastTracker and Impulse Tracker) and country-specific layouts.
+extraKeymaps(folder): Additional key bindings for the keyboard manager,
+    available in several flavours (including MPT classic, FastTracker and
+    Impulse Tracker) and country-specific layouts.
 soundtouch(folder): SoundTouch readme and copying.txt
 history.txt: Version history.
 mptrack.exe: Main executable.
 open_settings_folder.bat: Opens settings folder.
-OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time stretching feature.
+OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
+    stretching feature.
 readme.txt: 
 unmo3.dll: Used in MO3-file import.
 
@@ -92,4 +99,9 @@ Copyright (c) 2001-2009 Ian Luck. All rights reserved
 The MO3 software is free for non-commercial use; if anyone tries to
 charge you for it, kick 'em where it hurts!
 
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS SHALL NOT BE HELD LIABLE FOR ANY DAMAGE THAT MAY RESULT FROM THE USE OF THIS SOFTWARE. YOU USE THIS SOFTWARE ENTIRELY AT YOUR OWN RISK. 
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THIS SOFTWARE IS PROVIDED "AS
+IS", WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+PARTICULAR PURPOSE. THE AUTHORS SHALL NOT BE HELD LIABLE FOR ANY DAMAGE THAT MAY
+RESULT FROM THE USE OF THIS SOFTWARE. YOU USE THIS SOFTWARE ENTIRELY AT YOUR OWN
+RISK. 
