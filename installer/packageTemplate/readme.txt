@@ -14,17 +14,17 @@ directory into which you installed OpenMPT if you used portable mode).
 Uninstallation
 --------------
 
-An uninstaller is provided. It will also uninstall custom settings and tunings,
-so if you want to keep those, back them up first. Use "open_settings_folder.bat"
-to find them.
+An uninstaller is provided. It won't delete your personal settings, so you have
+to delete them yourself, if you don't want to keep them. You can use
+"open_settings_folder.bat" to find them (or just go to %appdata%\OpenMPT).  
 
 
 Making OpenMPT portable
 -----------------------
 
 By default, OpenMPT stores its settings in %appdata%\OpenMPT. To avoid this,
-create a file called "mptrack.ini" in the same directory as mptrack.exe (if it
-does not exist yet) and add the following lines to this file:
+create a file called "mptrack.ini" in the same (!) directory as mptrack.exe (if
+it does not exist yet) and add the following lines to this file:
 [Paths]
 UseAppDataDirectory=0
 
