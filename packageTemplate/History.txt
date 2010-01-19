@@ -9,8 +9,8 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling us about the bug
 
-
---------------------
+v1.18 (January 2010, revision 467)
+----------------------------------
 
 General tab
   . <Jojo> Channel name input field was not limited properly.

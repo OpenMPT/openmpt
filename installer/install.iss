@@ -9,9 +9,9 @@ AppVerName=OpenMPT 1.18
 AppVersion=1.18.00.00
 AppName=OpenMPT
 AppPublisher=OpenMPT Devs / Olivier Lapicque
-AppPublisherURL=http://www.openmpt.com/
-AppSupportURL=http://www.openmpt.com/
-AppUpdatesURL=http://www.openmpt.com/
+AppPublisherURL=http://www.modplug.com/
+AppSupportURL=http://www.modplug.com/
+AppUpdatesURL=http://www.modplug.com/
 DefaultDirName={pf}\OpenMPT
 DefaultGroupName=OpenMPT
 AllowNoIcons=yes
@@ -85,16 +85,17 @@ Filename: "{app}\mptrack.exe"; Description: "{cm:LaunchProgram,OpenMPT}"; Flags:
 ; internet shortcut has to be deleted manually
 Type: files; Name: "{app}\ModPlug Central.url";
 ; normal installation
-Type: files; Name: "{userappdata}\OpenMPT\mptrack.ini"; Tasks: not portable
-Type: files; Name: "{userappdata}\OpenMPT\plugin.cache"; Tasks: not portable
-Type: files; Name: "{userappdata}\OpenMPT\tunings\local_tunings.tc"; Tasks: not portable
+;Type: files; Name: "{userappdata}\OpenMPT\mptrack.ini"; Tasks: not portable
+;Type: files; Name: "{userappdata}\OpenMPT\plugin.cache"; Tasks: not portable
+;Type: files; Name: "{userappdata}\OpenMPT\tunings\local_tunings.tc"; Tasks: not portable
 Type: dirifempty; Name: "{userappdata}\OpenMPT\tunings"; Tasks: not portable
 Type: dirifempty; Name: "{userappdata}\OpenMPT"; Tasks: not portable
 ; portable installation
-Type: files; Name: "{app}\mptrack.ini"; Tasks: portable
-Type: files; Name: "{app}\plugin.cache"; Tasks: portable
-Type: files; Name: "{app}\tunings\local_tunings.tc"; Tasks: portable
+;Type: files; Name: "{app}\mptrack.ini"; Tasks: portable
+;Type: files; Name: "{app}\plugin.cache"; Tasks: portable
+;Type: files; Name: "{app}\tunings\local_tunings.tc"; Tasks: portable
 Type: dirifempty; Name: "{app}\tunings"; Tasks: portable
+
 
 
 
