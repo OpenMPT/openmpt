@@ -3227,7 +3227,7 @@ void CSoundFile::S3MSxx2MODExx(MODCOMMAND *m)
 	case 0x40:	m->param = (m->param & 0x0F) | 0x70; break;
 	case 0x50:	
 	case 0x60:	
-	case 0x70:
+	case 0x70:  if(((m->param & 0xF0) == 0x70) && ((m->param & 0x0F) > 0x0A)) { m->command = CMD_NONE; break; }	// no pitch env in XM format
 	case 0x90:
 	case 0xA0:	m->command = CMD_XFINEPORTAUPDOWN; break;
 	case 0xB0:	m->param = (m->param & 0x0F) | 0x60; break;
@@ -3275,8 +3275,8 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		}
 	} // End if(m->command == CMD_PANNING8)
 
-	//////////////////////////
-	// Convert param control
+	/////////////////////////////////////////////////////
+	// Convert param control, extended envelope control
 	if(oldTypeIsMPT)
 	{
 		if(m->note == NOTE_PC || m->note == NOTE_PCS)
@@ -3285,6 +3285,12 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			m->command = (m->note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI; // might be removed later
 			m->volcmd = VOLCMD_NONE;
 			m->note = NOTE_NONE;
+		}
+
+		// adjust extended envelope control commands
+		if((m->command == CMD_S3MCMDEX) && ((m->param & 0xF0) == 0x70) && ((m->param & 0x0F) > 0x0C))
+		{
+			m->param = 0x7C;
 		}
 	} // End if(oldTypeIsMPT)
 

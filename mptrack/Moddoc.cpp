@@ -1834,7 +1834,7 @@ void CModDoc::OnEditComments()
 
 //rewbs.graph
 void CModDoc::OnEditGraph()
-//----------------------------
+//-------------------------
 {
 	if (m_SndFile.m_nType & (MOD_TYPE_XM|MOD_TYPE_IT | MOD_TYPE_MPT)) SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_GRAPH);
 }
@@ -2646,6 +2646,9 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 				case 0x0A:	strcpy(s, "7A: Pan Env On"); break;
 				case 0x0B:	strcpy(s, "7B: Pitch Env Off"); break;
 				case 0x0C:	strcpy(s, "7C: Pitch Env On"); break;
+					// intentional fall-through follows
+				case 0x0D:	if(m_SndFile.GetType() == MOD_TYPE_MPT) { strcpy(s, "7D: Force Pitch Env"); break; }
+				case 0x0E:	if(m_SndFile.GetType() == MOD_TYPE_MPT) { strcpy(s, "7E: Force Filter Env"); break; }
 				default:	wsprintf(s, "%02X: undefined", param); break;
 				}
 			} else

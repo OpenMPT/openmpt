@@ -554,7 +554,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	{
 		if(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) return;
 		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE);
-		pChn->dwFlags = (pChn->dwFlags & (0xFFFFFF00 | CHN_PINGPONGFLAG)) | (pSmp->uFlags & 0xFF);
+		pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 	} else
 	{
 		pChn->dwFlags &= ~(CHN_KEYOFF|CHN_NOTEFADE|CHN_VOLENV|CHN_PANENV|CHN_PITCHENV);
@@ -562,9 +562,9 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 		//IT compatibility tentative fix: Don't change bidi loop direction when 
 		//no sample nor instrument is changed.
 		if(IsCompatibleMode(TRK_IMPULSETRACKER) && pSmp == pChn->pModSample && !bInstrumentChanged)
-			pChn->dwFlags = (pChn->dwFlags & (0xFFFFFF00 | CHN_PINGPONGFLAG)) | (pSmp->uFlags & 0xFF);
+			pChn->dwFlags = (pChn->dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG)) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 		else
-			pChn->dwFlags = (pChn->dwFlags & 0xFFFFFF00) | (pSmp->uFlags & 0xFF);
+			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 
 
 		if (pIns)
@@ -574,7 +574,13 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 			if (pIns->PitchEnv.dwFlags & ENV_ENABLED) pChn->dwFlags |= CHN_PITCHENV;
 			if ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && (pIns->PitchEnv.dwFlags & ENV_FILTER))
 			{
+				pChn->dwFlags |= CHN_FILTERENV;
 				if (!pChn->nCutOff) pChn->nCutOff = 0x7F;
+			} else
+			{
+				// Special case: Reset filter envelope flag manually (because of S7D/S7E effects).
+				// This way, the S7x effects can be applied to several notes, as long as they don't come with an instrument number.
+				pChn->dwFlags &= ~CHN_FILTERENV;
 			}
 			if (pIns->nIFC & 0x80) pChn->nCutOff = pIns->nIFC & 0x7F;
 			if (pIns->nIFR & 0x80) pChn->nResonance = pIns->nIFR & 0x7F;
@@ -709,7 +715,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			pChn->nLength = pSmp->nLength;
 			pChn->nLoopEnd = pSmp->nLength;
 			pChn->nLoopStart = 0;
-			pChn->dwFlags = (pChn->dwFlags & 0xFFFFFF00) | (pSmp->uFlags & 0xFF);
+			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 			if (pChn->dwFlags & CHN_SUSTAINLOOP)
 			{
 				pChn->nLoopStart = pSmp->nSustainStart;
@@ -2192,6 +2198,7 @@ void CSoundFile::ExtraFinePortamentoDown(MODCHANNEL *pChn, UINT param)
 // Implemented for IMF compatibility, can't actually save this in any formats
 // sign should be 1 (up) or -1 (down)
 void CSoundFile::NoteSlide(MODCHANNEL *pChn, UINT param, int sign)
+//----------------------------------------------------------------
 {
 	BYTE x, y;
 	if (m_dwSongFlags & SONG_FIRSTTICK) {
@@ -2593,7 +2600,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 	case 0x50:	if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPanbrelloType = param & 0x07; break;
 	// S6x: Pattern Delay for x frames
 	case 0x60:	m_nFrameDelay = param; break;
-	// S7x: Envelope Control
+	// S7x: Envelope Control / Instrument Control
 	case 0x70:	if(!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 				switch(param)
 				{
@@ -2606,9 +2613,17 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 						{
 							if (bkp->nMasterChn == nChn+1)
 							{
-								if (param == 1) KeyOff(i); else
-								if (param == 2) bkp->dwFlags |= CHN_NOTEFADE; else
-									{ bkp->dwFlags |= CHN_NOTEFADE; bkp->nFadeOutVol = 0; }
+								if (param == 1)
+								{
+									KeyOff(i);
+								} else if (param == 2)
+								{
+									bkp->dwFlags |= CHN_NOTEFADE;
+								} else
+								{
+									bkp->dwFlags |= CHN_NOTEFADE;
+									bkp->nFadeOutVol = 0;
+								}
 							}
 						}
 					}
@@ -2623,6 +2638,20 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 				case 10:	pChn->dwFlags |= CHN_PANENV; break;
 				case 11:	pChn->dwFlags &= ~CHN_PITCHENV; break;
 				case 12:	pChn->dwFlags |= CHN_PITCHENV; break;
+				case 13:	
+				case 14:
+					if(GetType() == MOD_TYPE_MPT)
+					{
+						pChn->dwFlags |= CHN_PITCHENV;
+						if(param == 13)	// pitch env on, filter env off
+						{
+							pChn->dwFlags &= ~CHN_FILTERENV;
+						} else	// filter env on
+						{
+							pChn->dwFlags |= CHN_FILTERENV;
+						}
+					}
+					break;
 				}
 				break;
 	// S8x: Set 4-bit Panning

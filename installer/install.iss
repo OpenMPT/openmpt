@@ -28,7 +28,7 @@ WizardSmallImageFile=install-small.bmp
 ; icons and install mode
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "portable"; Description: "Use program directory to store configuration in (portable mode)"; GroupDescription: "Options:"; Flags: unchecked
+Name: "portable"; Description: "Use program directory to store configuration in"; GroupDescription: "Options:"; Flags: unchecked
 ; file associations - put this below all other [tasks]!
 #include "filetypes.iss"
 
@@ -95,6 +95,7 @@ Type: dirifempty; Name: "{userappdata}\OpenMPT"; Tasks: not portable
 ;Type: files; Name: "{app}\plugin.cache"; Tasks: portable
 ;Type: files; Name: "{app}\tunings\local_tunings.tc"; Tasks: portable
 Type: dirifempty; Name: "{app}\tunings"; Tasks: portable
+
 
 
 

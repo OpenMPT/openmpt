@@ -1300,7 +1300,8 @@ BOOL CSoundFile::ReadNote()
 				}
 				envpitch = CLAMP(envpitch, -256, 256);
 				// Filter Envelope: controls cutoff frequency
-				if (pIns->PitchEnv.dwFlags & ENV_FILTER)
+				//if (pIns->PitchEnv.dwFlags & ENV_FILTER)
+				if (pChn->dwFlags & CHN_FILTERENV)
 				{
 #ifndef NO_FILTER
 					SetupChannelFilter(pChn, (pChn->dwFlags & CHN_FILTER) ? false : true, envpitch);
