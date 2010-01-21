@@ -3,20 +3,30 @@
 ******************
 
 
-Migrating from OpenMPT 1.17
----------------------------
+Installation
+------------
 
-If you have an existing installation of OpenMPT 1.17 and wish to re-use its
-settings, copy your mptrack.ini and plugin.cache to %appdata%\OpenMPT (or the
-directory into which you installed OpenMPT if you used portable mode).
+-If you have an existing installation of OpenMPT and wish to re-use its
+ settings, copy your mptrack.ini and plugin.cache to the directory into which
+ you extract the archive.
+-If not, you're done: just extract the archive and launch mptrack.exe.
 
 
 Uninstallation
 --------------
 
-An uninstaller is provided. It won't delete your personal settings, so you have
-to delete them yourself, if you don't want to keep them. There is a shortcut to
-settings folder in the installation directory.
+-Delete the files extracted from the archive and optionally the OpenMPT
+ setting files, which are by default stored in %appdata%\OpenMPT.
+
+
+Making OpenMPT portable
+-----------------------
+
+By default, OpenMPT stores its settings in %appdata%\OpenMPT. To avoid this,
+create a file called "mptrack.ini" in the same directory as mptrack.exe (if
+it does not exist yet) and add the following lines to this file:
+[Paths]
+UseAppDataDirectory=0
 
 
 Changes
@@ -33,17 +43,16 @@ See forums at http://modplug.sourceforge.net/.
 
 Release package contents:
 -------------------------
-extraKeymaps(folder): Additional key bindings for the keyboard manager,
-    available in several flavours (including MPT classic, FastTracker and
-    Impulse Tracker) and country-specific layouts.
+extraKeymaps(folder):
 soundtouch(folder): SoundTouch readme and copying.txt
 history.txt: Version history.
 mptrack.exe: Main executable.
 open_settings_folder.bat: Opens settings folder.
 OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
-    stretching feature.
+                            stretching feature.
 readme.txt: 
 unmo3.dll: Used in MO3-file import.
+
 
 Misc:
 -----
@@ -90,7 +99,7 @@ The MO3 software is free for non-commercial use; if anyone tries to
 charge you for it, kick 'em where it hurts!
 
 TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THIS SOFTWARE IS PROVIDED "AS
-IS", WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT
+IS", WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT 
 NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
 PARTICULAR PURPOSE. THE AUTHORS SHALL NOT BE HELD LIABLE FOR ANY DAMAGE THAT MAY
 RESULT FROM THE USE OF THIS SOFTWARE. YOU USE THIS SOFTWARE ENTIRELY AT YOUR OWN
