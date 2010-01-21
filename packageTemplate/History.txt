@@ -187,7 +187,7 @@ Colour setup
   . <Jojo> When no INI file was present, channel separators were completely black.
 
 Keymaps
-  + <Jojo> Two new keymaps: French Laptop by Paul Legovitch, Norwegian MPT Classic by Rakib.
+  + <Jojo> Three new keymaps: French Laptop by Paul Legovitch, Norwegian MPT Classic by Rakib, US_mpt_classic_(snu).
   / <Jojo> Updated DE_jojo.mkb
   ^ <Jojo> When loading a keymap file and unrecognized lines are found, only one messagebox is shown.
   / <Jojo> All keymaps have been updated to version 1 and updated to contain the orderlist shortcuts.
@@ -342,6 +342,7 @@ MPTM
   + <Jojo> Allow up to 240 envelope points.
   + <Jojo> IT "Note Fade" command: This existed in IT's player routines already, but there was no way to actually use it in the editor. Triggering an invalid note would cause a note fade, so this is a new note type.
   + <re>   Channel settings(vol&pan) for channels after 64 will now be saved in the file.
+  + <Jojo> MPTM command S7D explicitely enforces pitch envelope, S7E enforces filter envelope.
 
 IT
   + <Jojo> IT "Note Fade" command: This existed in IT's player routines already, but there was no way to actually use it in the editor. Triggering an invalid note would cause a note fade, so this is a new note type.

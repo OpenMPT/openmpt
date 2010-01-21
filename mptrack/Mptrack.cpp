@@ -608,6 +608,9 @@ END_MESSAGE_MAP()
 CTrackApp::CTrackApp()
 //--------------------
 {
+	#if (_MSC_VER >= 1400)
+		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
+	#endif
 	m_pModTemplate = NULL;
 	m_pPluginManager = NULL;
 	m_bInitialized = FALSE;
