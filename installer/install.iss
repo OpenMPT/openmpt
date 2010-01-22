@@ -50,6 +50,10 @@ Source: "..\packageTemplate\SoundTouch\*.*";     DestDir: "{app}\SoundTouch"; Fl
 ; keymaps
 Source: "..\packageTemplate\extraKeymaps\*.*";   DestDir: "{app}\extraKeymaps"; Flags: ignoreversion
 
+; kind of auto-backup - handy!
+Source: "{userappdata}\OpenMPT\mptrack.ini"; DestDir: "{userappdata}\OpenMPT\mptrack.ini.old"; Flags: external skipifsourcedoesntexist; Tasks: not portable
+Source: "{userappdata}\OpenMPT\plugin.cache"; DestDir: "{userappdata}\OpenMPT\plugin.cache.old"; Flags: external skipifsourcedoesntexist; Tasks: not portable
+
 [Dirs]
 ; option dirs for non-portable mode
 Name: "{userappdata}\OpenMPT"; Tasks: not portable
@@ -85,23 +89,40 @@ Filename: "{app}\mptrack.exe"; Description: "{cm:LaunchProgram,OpenMPT}"; Flags:
 ; internet shortcut has to be deleted manually
 Type: files; Name: "{app}\ModPlug Central.url";
 ; normal installation
-;Type: files; Name: "{userappdata}\OpenMPT\mptrack.ini"; Tasks: not portable
-;Type: files; Name: "{userappdata}\OpenMPT\plugin.cache"; Tasks: not portable
-;Type: files; Name: "{userappdata}\OpenMPT\tunings\local_tunings.tc"; Tasks: not portable
+Type: files; Name: "{userappdata}\OpenMPT\mptrack.ini"; Tasks: not portable; Check: DeletePersonalFilesOnUninstall;
+Type: files; Name: "{userappdata}\OpenMPT\plugin.cache"; Tasks: not portable; Check: DeletePersonalFilesOnUninstall;
+Type: files; Name: "{userappdata}\OpenMPT\tunings\local_tunings.tc"; Tasks: not portable; Check: DeletePersonalFilesOnUninstall;
 Type: dirifempty; Name: "{userappdata}\OpenMPT\tunings"; Tasks: not portable
 Type: dirifempty; Name: "{userappdata}\OpenMPT"; Tasks: not portable
 ; portable installation
-;Type: files; Name: "{app}\mptrack.ini"; Tasks: portable
-;Type: files; Name: "{app}\plugin.cache"; Tasks: portable
-;Type: files; Name: "{app}\tunings\local_tunings.tc"; Tasks: portable
-Type: dirifempty; Name: "{app}\tunings"; Tasks: portable
+Type: files; Name: "{app}\mptrack.ini"; Tasks: portable; Check: DeletePersonalFilesOnUninstall;
+Type: files; Name: "{app}\plugin.cache"; Tasks: portable; Check: DeletePersonalFilesOnUninstall;
+Type: files; Name: "{app}\tunings\local_tunings.tc"; Tasks: portable; Check: DeletePersonalFilesOnUninstall;
+Type: dirifempty; Name: "{app}\tunings"; Tasks: portable; Check: DeletePersonalFilesOnUninstall;
 
+; crappy workaround for uninstall stuff
+[Code]
+var
+  deletesettings: Boolean;
 
+function DeletePersonalFilesOnUninstall: Boolean;
+begin
+  Result := deletesettings;
+end;
 
-
-
-
-
-
-
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  case CurUninstallStep of
+    usUninstall:
+      begin
+        if MsgBox('Do you want to keep your personal settings and tunings?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+        begin
+          deletesettings := False;
+        end else
+        begin
+          deletesettings := True;
+        end;
+      end;
+  end;
+end;
 

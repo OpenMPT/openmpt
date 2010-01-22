@@ -14,9 +14,8 @@ directory into which you installed OpenMPT if you used portable mode).
 Uninstallation
 --------------
 
-An uninstaller is provided. It won't delete your personal settings, so you have
-to delete them yourself, if you don't want to keep them. There is a shortcut to
-settings folder in the installation directory.
+An uninstaller is provided. Don't worry, it will ask you if you want to keep
+your personal settings, nothing will automatically be deleted.
 
 
 Changes
