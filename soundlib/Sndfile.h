@@ -628,10 +628,10 @@ public:
 	//it returned the number of channels with volume != 0
 	CHANNELINDEX GetNumChannels() const {return static_cast<CHANNELINDEX>(m_nChannels);}
 
-	BOOL SetMasterVolume(UINT vol, BOOL bAdjustAGC=FALSE);
+	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
 	ORDERINDEX GetNumPatterns() const;
-	INSTRUMENTINDEX GetNumInstruments() const {return m_nInstruments;} 
+	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; } 
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
 	UINT GetCurrentPattern() const { return m_nPattern; }
@@ -671,8 +671,8 @@ public:
 	BOOL IsPaused() const {	return (m_dwSongFlags & SONG_PAUSED) ? TRUE : FALSE; }
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 	void CheckCPUUsage(UINT nCPU);
-	BOOL SetPatternName(UINT nPat, LPCSTR lpszName);
-	BOOL GetPatternName(UINT nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
+	BOOL SetPatternName(PATTERNINDEX nPat, LPCSTR lpszName);
+	BOOL GetPatternName(PATTERNINDEX nPat, LPSTR lpszName, UINT cbSize=MAX_PATTERNNAME) const;
 	CHANNELINDEX ReArrangeChannels(const vector<CHANNELINDEX>& fromToArray);
 	bool MoveChannel(UINT chn_from, UINT chn_to);
 
