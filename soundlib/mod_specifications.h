@@ -42,6 +42,7 @@ struct CModSpecifications
 	char commands[MAX_EFFECTS + 1]; // An array holding all commands this format supports; commands that are not supported are marked with "?"
 	char volcommands[MAX_VOLCMDS + 1]; // dito, but for volume column
 	bool hasIgnoreIndex;	// Does "+++" pattern exist?
+	bool hasRestartPos;
 };
 
 
@@ -81,6 +82,7 @@ const CModSpecifications mptm =
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
 	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
+	true,								// Has restart position (order)
 };
 
 
@@ -115,6 +117,7 @@ const CModSpecifications mod =
 	" 0123456789ABCD?FF?E???????????????",	// Supported Effects
 	" ???????????????",					// Supported Volume Column commands
 	false,								// Doesn't have "+++" pattern
+	true,								// Has restart position (order)
 };
 
 // MOD with MPT extensions.
@@ -147,6 +150,7 @@ const CModSpecifications modEx =
 	" 0123456789ABCD?FF?E???????????????",	// Supported Effects
 	" ???????????????",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
+	true,								// Has restart position (order)
 };
 
 const CModSpecifications xm =
@@ -178,6 +182,7 @@ const CModSpecifications xm =
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\:#",	// Supported Effects
 	" vpcdabuhlrg????",					// Supported Volume Column commands
 	false,								// Doesn't have "+++" pattern
+	true,								// Has restart position (order)
 };
 
 // XM with MPT extensions
@@ -210,6 +215,7 @@ const CModSpecifications xmEx =
 	" 0123456789ABCDRFFTE???GHK?YXPLZ\\:#",	// Supported Effects
 	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
+	true,								// Has restart position (order)
 };
 
 const CModSpecifications s3m =
@@ -241,6 +247,7 @@ const CModSpecifications s3m =
 	" JFEGHLKRXODB?CQATI?SMNVW?U????????",	// Supported Effects
 	" vp?????????????",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
+	false,								// Doesn't have restart position (order)
 };
 
 // S3M with MPT extensions
@@ -273,6 +280,7 @@ const CModSpecifications s3mEx =
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
 	" vp?????????????",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
+	false,								// Doesn't have restart position (order)
 };
 
 const CModSpecifications it =
@@ -304,6 +312,7 @@ const CModSpecifications it =
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z???",	// Supported Effects
 	" vpcdab?h??gfe??",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
+	false,								// Doesn't have restart position (order)
 };
 
 const CModSpecifications itEx =
@@ -335,6 +344,7 @@ const CModSpecifications itEx =
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
 	" vpcdab?h??gfe:o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
+	true,								// Has restart position (order)
 };
 
 } //namespace ModSpecs

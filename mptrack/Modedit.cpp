@@ -344,6 +344,14 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 	}
 
+	// Is the "restart position" value allowed in this format?
+	if(CSoundFile::GetModSpecifications(nNewType).hasRestartPos == false)
+	{
+		m_SndFile.m_nRestartPos = 0;
+		AddToLog("WARNING: Restart position is not support by the new format.\n");
+	}
+
+
 	// Fix channel settings (pan/vol)
 	for(CHANNELINDEX nChn = 0; nChn < m_SndFile.m_nChannels; nChn++)
 	{

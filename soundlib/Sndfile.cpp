@@ -1029,18 +1029,17 @@ BOOL CSoundFile::SetResamplingMode(UINT nMode)
 }
 
 
-BOOL CSoundFile::SetMasterVolume(UINT nVol, BOOL bAdjustAGC)
-//----------------------------------------------------------
+void CSoundFile::SetMasterVolume(UINT nVol, bool adjustAGC)
+//---------------------------------------------------------
 {
 	if (nVol < 1) nVol = 1;
 	if (nVol > 0x200) nVol = 0x200;	// x4 maximum
-	if ((nVol < m_nMasterVolume) && (nVol) && (gdwSoundSetup & SNDMIX_AGC) && (bAdjustAGC))
+	if ((nVol < m_nMasterVolume) && (nVol) && (gdwSoundSetup & SNDMIX_AGC) && (adjustAGC))
 	{
 		gnAGC = gnAGC * m_nMasterVolume / nVol;
 		if (gnAGC > AGC_UNITY) gnAGC = AGC_UNITY;
 	}
 	m_nMasterVolume = nVol;
-	return TRUE;
 }
 
 
@@ -1058,15 +1057,17 @@ void CSoundFile::SetAGC(BOOL b)
 }
 
 
-/*
-UINT CSoundFile::GetNumInstruments() const
-//----------------------------------------
+PATTERNINDEX CSoundFile::GetNumPatterns() const
+//---------------------------------------------
 {
-	UINT n=0;
-	for (UINT i=0; i<MAX_INSTRUMENTS; i++) if (Ins[i].pSample) n++;
-	return n;
+	PATTERNINDEX max = 0;
+	for(PATTERNINDEX i = 0; i < Patterns.Size(); i++)
+	{
+		if(Patterns.IsValidPat(i))
+			max = i;
+	}
+	return max;
 }
-*/
 
 
 UINT CSoundFile::GetMaxPosition() const
@@ -2623,8 +2624,8 @@ void CSoundFile::CheckCPUUsage(UINT nCPU)
 }
 
 
-BOOL CSoundFile::SetPatternName(UINT nPat, LPCSTR lpszName)
-//---------------------------------------------------------
+BOOL CSoundFile::SetPatternName(PATTERNINDEX  nPat, LPCSTR lpszName)
+//------------------------------------------------------------------
 {
 	CHAR szName[MAX_PATTERNNAME] = "";
 	if (nPat >= Patterns.Size()) return FALSE;
@@ -2652,8 +2653,8 @@ BOOL CSoundFile::SetPatternName(UINT nPat, LPCSTR lpszName)
 }
 
 
-BOOL CSoundFile::GetPatternName(UINT nPat, LPSTR lpszName, UINT cbSize) const
-//---------------------------------------------------------------------------
+BOOL CSoundFile::GetPatternName(PATTERNINDEX nPat, LPSTR lpszName, UINT cbSize) const
+//-----------------------------------------------------------------------------------
 {
 	if ((!lpszName) || (!cbSize)) return FALSE;
 	lpszName[0] = 0;

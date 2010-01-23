@@ -217,6 +217,7 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		m_SliderVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_EditVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_SpinVSTiVol.EnableWindow(bIsNotMOD_S3M);
+		m_EditRestartPos.EnableWindow(specs.hasRestartPos ? TRUE : FALSE);
 		
 		//Note: Global volume slider is not disabled for MOD
 		//on purpose(can be used to control play volume)

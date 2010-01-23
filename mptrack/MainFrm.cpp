@@ -1801,7 +1801,7 @@ void CMainFrame::SetPreAmp(UINT n)
 //--------------------------------
 {
 	m_nPreAmp = n;
-	if (m_pSndFile) m_pSndFile->SetMasterVolume(m_nPreAmp, TRUE);
+	if (m_pSndFile) m_pSndFile->SetMasterVolume(m_nPreAmp, true);
 }
 
 
@@ -1864,7 +1864,7 @@ BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 			pSndFile->SetRepeatCount((gbLoopSong) ? -1 : 0);
 		}
 	}
-	m_pSndFile->SetMasterVolume(m_nPreAmp, TRUE);
+	m_pSndFile->SetMasterVolume(m_nPreAmp, true);
 	m_pSndFile->InitPlayer(TRUE);
 	memset(NotifyBuffer, 0, sizeof(NotifyBuffer));
 	m_dwStatus |= MODSTATUS_PLAYING;
@@ -1957,7 +1957,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 		return FALSE;
 	}
 	gsdwTotalSamples = 0;
-	m_pSndFile->SetMasterVolume(m_nPreAmp, TRUE);
+	m_pSndFile->SetMasterVolume(m_nPreAmp, true);
 	m_pSndFile->InitPlayer(TRUE);
 	m_dwStatus |= MODSTATUS_PLAYING;
 	if (gpSoundDevice) gpSoundDevice->Start();
