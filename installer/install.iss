@@ -51,8 +51,8 @@ Source: "..\packageTemplate\SoundTouch\*.*";     DestDir: "{app}\SoundTouch"; Fl
 Source: "..\packageTemplate\extraKeymaps\*.*";   DestDir: "{app}\extraKeymaps"; Flags: ignoreversion
 
 ; kind of auto-backup - handy!
-Source: "{userappdata}\OpenMPT\mptrack.ini"; DestDir: "{userappdata}\OpenMPT\mptrack.ini.old"; Flags: external skipifsourcedoesntexist; Tasks: not portable
-Source: "{userappdata}\OpenMPT\plugin.cache"; DestDir: "{userappdata}\OpenMPT\plugin.cache.old"; Flags: external skipifsourcedoesntexist; Tasks: not portable
+Source: "{userappdata}\OpenMPT\mptrack.ini"; DestDir: "{userappdata}\OpenMPT"; DestName: "mptrack.ini.old"; Flags: external skipifsourcedoesntexist; Tasks: not portable
+Source: "{userappdata}\OpenMPT\plugin.cache"; DestDir: "{userappdata}\OpenMPT"; DestName: "plugin.cache.old"; Flags: external skipifsourcedoesntexist; Tasks: not portable
 
 [Dirs]
 ; option dirs for non-portable mode
@@ -77,7 +77,7 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT"; Filename
 
 [INI]
 ; enable portable mode
-Filename: "{app}\mptrack.ini"; Section: "Paths"; Key: "UseAppDataDirectory"; String: "0"; Flags: uninsdeleteentry createkeyifdoesntexist; Tasks: portable
+Filename: "{app}\mptrack.ini"; Section: "Paths"; Key: "UseAppDataDirectory"; String: "0"; Flags: createkeyifdoesntexist; Tasks: portable
 ; internet shortcut
 Filename: "{app}\ModPlug Central.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://www.lpchip.com/modplug/"; Flags: createkeyifdoesntexist;
 
@@ -89,40 +89,53 @@ Filename: "{app}\mptrack.exe"; Description: "{cm:LaunchProgram,OpenMPT}"; Flags:
 ; internet shortcut has to be deleted manually
 Type: files; Name: "{app}\ModPlug Central.url";
 ; normal installation
-Type: files; Name: "{userappdata}\OpenMPT\mptrack.ini"; Tasks: not portable; Check: DeletePersonalFilesOnUninstall;
-Type: files; Name: "{userappdata}\OpenMPT\plugin.cache"; Tasks: not portable; Check: DeletePersonalFilesOnUninstall;
-Type: files; Name: "{userappdata}\OpenMPT\tunings\local_tunings.tc"; Tasks: not portable; Check: DeletePersonalFilesOnUninstall;
 Type: dirifempty; Name: "{userappdata}\OpenMPT\tunings"; Tasks: not portable
 Type: dirifempty; Name: "{userappdata}\OpenMPT"; Tasks: not portable
 ; portable installation
-Type: files; Name: "{app}\mptrack.ini"; Tasks: portable; Check: DeletePersonalFilesOnUninstall;
-Type: files; Name: "{app}\plugin.cache"; Tasks: portable; Check: DeletePersonalFilesOnUninstall;
-Type: files; Name: "{app}\tunings\local_tunings.tc"; Tasks: portable; Check: DeletePersonalFilesOnUninstall;
-Type: dirifempty; Name: "{app}\tunings"; Tasks: portable; Check: DeletePersonalFilesOnUninstall;
+Type: dirifempty; Name: "{app}\tunings"; Tasks: portable;
 
 ; crappy workaround for uninstall stuff
 [Code]
-var
-  deletesettings: Boolean;
-
-function DeletePersonalFilesOnUninstall: Boolean;
-begin
-  Result := deletesettings;
-end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+    filepath: String;
+
 begin
-  case CurUninstallStep of
+    case CurUninstallStep of
     usUninstall:
-      begin
-        if MsgBox('Do you want to keep your personal settings and tunings?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
         begin
-          deletesettings := False;
-        end else
-        begin
-          deletesettings := True;
+            if MsgBox('Do you want to remove OpenMPT settings files (mptrack.ini, Keybindings.mkb, plugin.cache and local_tunings.tc)?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+            begin
+                if(GetIniInt('Paths', 'UseAppDataDirectory', 1, 0, 0, ExpandConstant('{app}\mptrack.ini')) = 1) then
+                begin
+                    filepath := ExpandConstant('{userappdata}\OpenMPT\mptrack.ini');
+                    if FileExists(filepath) then DeleteFile(filepath);
+
+                    filepath := ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb');
+                    if FileExists(filepath) then DeleteFile(filepath);
+
+                    filepath := ExpandConstant('{userappdata}\OpenMPT\plugin.cache');
+                    if FileExists(filepath) then DeleteFile(filepath);
+
+                    filepath := ExpandConstant('{userappdata}\OpenMPT\tunings\local_tunings.tc');
+                    if FileExists(filepath) then DeleteFile(filepath);
+                end else
+                begin
+                    filepath := ExpandConstant('{app}\mptrack.ini');
+                    if FileExists(filepath) then DeleteFile(filepath);
+
+                    filepath := ExpandConstant('{app}\Keybindings.mkb');
+                    if FileExists(filepath) then DeleteFile(filepath);
+
+                    filepath := ExpandConstant('{app}\plugin.cache');
+                    if FileExists(filepath) then DeleteFile(filepath);
+
+                    filepath := ExpandConstant('{app}\tunings\local_tunings.tc');
+                    if FileExists(filepath) then DeleteFile(filepath);
+                end;
+            end;
         end;
-      end;
-  end;
+    end;
 end;
 
