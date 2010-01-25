@@ -44,7 +44,6 @@ Pattern tab::Pattern editing
   . <Jojo> PC notes are now deleted properly (last column).
   . <Jojo> Copying only the param column of PC notes overwrote the value column when pasting them.
   . <Jojo> Entering Note Fade notes didn't work the "old style" way.
-  . <Jojo> PC note handling was missing in OnClearSelection, so it was possible to delete the effect column only partly.
   
 Pattern tab::GUI
   + <Jojo> Channel rename dialog in channel header context menu.
@@ -144,7 +143,7 @@ IT::Playback compatibility
 
 S3M
   . <Jojo> ST3 compatibility: Only allow waveforms 0 to 3 for S3x / S4x / S5x.
-  . <Jojo> The S3M format actually knows muted channels. This was not taking into account before.
+  . <Jojo> The S3M format actually knows muted channels. This was not taken into account before.
 
 XM::Loading
   ^ <Jojo> Allow to load modules with an empty order list (as they are, in fact, valid XM files).
