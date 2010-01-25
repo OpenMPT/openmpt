@@ -4,7 +4,7 @@
 ; http://sagagames.de/
 
 [Setup]
-AppId=OpenMPT
+AppId={{67903736-E9BB-4664-B148-F62BCAB4FA42}
 AppVerName=OpenMPT 1.18
 AppVersion=1.18.00.00
 AppName=OpenMPT
@@ -29,11 +29,12 @@ WizardSmallImageFile=install-small.bmp
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "portable"; Description: "Use program directory to store configuration in"; GroupDescription: "Options:"; Flags: unchecked
+Name: "vst_scan"; Description: "Scan for previously installed VST plugins"; GroupDescription: "Options:"; Flags: unchecked
 ; file associations - put this below all other [tasks]!
 #include "filetypes.iss"
 
 [Languages]
-Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 ; you may want to change the base paths here
@@ -139,3 +140,4 @@ begin
     end;
 end;
 
+#include "vst_scan.iss"
