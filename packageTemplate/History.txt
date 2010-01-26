@@ -26,7 +26,7 @@ Sequence editor
 
 Pattern tab::Pattern editing
   + <Jojo> New paste mode "push forward paste", which resembles the default paste behaviour of Impulse Tracker. Includes new shortcut.
-  + <Jojo> The "paste flood" command pastes the clipboard content again and again until it hits the bottom of the pattern (overflow paste will be disabled automatically if paste flood is used, for obvious reasons).
+  + <Jojo> New paste mode "paste flood" pastes the clipboard content again and again until it hits the bottom of the pattern (overflow paste will be disabled automatically if paste flood is used, for obvious reasons).
   ^ <Jojo> When using the MPTM format, plugin param changes are written to the pattern as PC Notes (instead of smooth midi macros).
   ^ <Jojo> Assume that the clipboard pattern format is IT (instead of MOD) if no information about the format is available.
   ^ <Jojo> Pattern c&p: convert pasted commands if necessary.
@@ -36,7 +36,6 @@ Pattern tab::Pattern editing
   / <Jojo> It is impossible to enter something into the volume column in MOD format now.
   / <Jojo> When interpolating PC notes, the plugin number and note type won't get overriden if the note type is already PC or PCs.
   . <re>   Pattern c&p: Mix paste should behave better with parameter control notes.
-  . <Jojo> PC note handling was missing in OnClearSelection, so it was possible to delete the "effect column" (parameter value) only partly
   . <Jojo> Amplify acted VERY weird when it was applied on an instrument that's not assigned to any sample. Should be a bit better now.
   . <Jojo> Amplify doesn't use volume column in MOD format anymore.
   . <Jojo> When recording live from the keyboard, SDx shouldn't exceed the song speed anymore.
@@ -73,7 +72,6 @@ Sample tab
   ^ <Jojo> When sample is 8-bit, it will automatically be converted to 16-bit when applying time stretching / pitch shifting.
   ^ <Jojo> Can now enter insanely high values into sample frequency input field (as they are supported by Impulse Tracker), allow only 65536 Hz for S3M files.
   / <Jojo> Removed time stretcher's / pitch shifter's preview function as it's unnecessary now.
-  . <Jojo> When going down close to 0 Hz in the sample editor, the sample freq wrapped around to the maximum value.
   . <Jojo> Insert Silence: Loop points were not updated when adding silence at the beginning of the sample
   . <re>   Actions such as time stretching and undo could trigger sample play.
 
@@ -95,6 +93,7 @@ Comments tab
 Treeview
   + <Jojo> Show sequences in song treeview. Sequences can be inserted, duplicated and deleted by right-clicking the sequence items.
   + <Jojo> Clicking on a mod item (i.e. a filename node) switches to the corresponding window.
+  + <Jojo> Added right-click options for mod items.
   + <Jojo> Display playing samples / instruments (only those that are assigned to a sample) using green triangles. Can be enabled from setup screen.
   + <Jojo> Muted samples and instruments are shown with a different icon.
   ^ <Jojo> Can now dragondrop orders, even between sequences.
@@ -121,7 +120,7 @@ Mod conversion
   ^ <Jojo> Remove sample vibrato and sustain loops for MOD / S3M.
 
 Playback (see also format-specific changes below)
-  ^ <Jojo> Added some more standard playback frequencies (176KHz, 192KHz).
+  ^ <Jojo> Added some more standard playback frequencies (176KHz, 192KHz) to setup.
   . <Jojo> When jumping around in a module, high offset value is also memorized.
 
 IT::Saving
