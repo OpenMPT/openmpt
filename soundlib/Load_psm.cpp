@@ -360,7 +360,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 								
 								default: // How the hell should this happen? I've listened through almost all existing (original) PSM files. :)
 									CString s;
-									s.Format("Please report to the OpenMPT team: Unknown chunk %d found at position %d (in the OPLH chunk of this PSM file)", lpStream[dwSettingsOffset], dwSettingsOffset);
+									s.Format("Report to the OpenMPT team: Unknown chunk %d found at position %d (in the OPLH chunk of this PSM file)", lpStream[dwSettingsOffset], dwSettingsOffset);
 									MessageBox(NULL, s, TEXT("OpenMPT PSM import"), MB_ICONERROR);
 									// anyway, in such cases, we have to quit as we don't know how big the chunk really is.
 									return false;
@@ -1131,6 +1131,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 						break;
 					case 0x2A: // note cut
 						command = CMD_S3MCMDEX;
+						if(param == 0) param = 1;
 						param |= 0xC0;
 						break;
 					case 0x2B: // note delay
