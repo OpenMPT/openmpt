@@ -17,7 +17,8 @@ bool CModSpecifications::HasNote(MODCOMMAND::NOTE note) const
 			return hasNoteFade;
 		else
 			return (memcmp(fileExtension, ModSpecs::mptm.fileExtension, 4) == 0);
-	}
+	} else if(note == NOTE_NONE)
+		return true;
 	return false;
 }
 

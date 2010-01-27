@@ -52,7 +52,7 @@ namespace ModSpecs
 const CModSpecifications mptm =
 {
 	/*
-	TODO: Proper, less arbitrarily chosen, values here.
+	TODO: Proper, less arbitrarily chosen values here.
 	NOTE: If changing limits, see whether:
 			-savefile format and GUI methods can handle new values(might not be a small task :).
 	 */
@@ -78,7 +78,7 @@ const CModSpecifications mptm =
 	1,									//Min Speed
 	255,								//Max Speed
 	true,								//Has song comments
-	240,								//Envelope point count
+	MAX_ENVPOINTS,						//Envelope point count
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
 	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
@@ -171,15 +171,15 @@ const CModSpecifications xm =
 	1,									//Min pattern rows
 	256,								//Max pattern rows
     20,									//Max mod name length
-	31,									//SamplesMax
-	200,								//instrumentMax
+	31,									//SamplesMax (actually 16 per instrument)
+	128,								//instrumentMax
 	mixLevels_original,					//defaultMixLevels
 	0,									//Max MIDI mapping directives
 	1,									//Min Speed
 	31,									//Max Speed
 	false,								//No song comments
 	12,									//Envelope point count
-	" 0123456789ABCDRFFTE???GHK?YXPLZ\\:#",	// Supported Effects
+	" 0123456789ABCDRFFTE???GHK??XPL????",	// Supported Effects
 	" vpcdabuhlrg????",					// Supported Volume Column commands
 	false,								// Doesn't have "+++" pattern
 	true,								// Has restart position (order)

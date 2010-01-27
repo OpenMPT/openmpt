@@ -345,7 +345,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 
 	// Is the "restart position" value allowed in this format?
-	if(CSoundFile::GetModSpecifications(nNewType).hasRestartPos == false)
+	if(m_SndFile.m_nRestartPos > 0 && !CSoundFile::GetModSpecifications(nNewType).hasRestartPos)
 	{
 		m_SndFile.m_nRestartPos = 0;
 		AddToLog("WARNING: Restart position is not support by the new format.\n");
