@@ -1131,7 +1131,17 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 						break;
 					case 0x2A: // note cut
 						command = CMD_S3MCMDEX;
-						if(param == 0) param = 1;
+						if(param == 0)	// in S3M mode, SC0 is ignored, so we convert it to a note cut.
+						{
+							if(row_data->note == NOTE_NONE)
+							{
+								row_data->note = NOTE_NOTECUT;
+								command = CMD_NONE;
+							} else
+							{
+								param = 1;
+							}
+						}
 						param |= 0xC0;
 						break;
 					case 0x2B: // note delay
