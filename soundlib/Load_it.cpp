@@ -2910,10 +2910,15 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
 		if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
 		UINT flags = RS_PCM8S;
+		if (psmp->uFlags & CHN_STEREO)
+		{
+			flags = RS_STPCM8S;
+			itss.flags |= 0x04;
+		}
 		if (psmp->uFlags & CHN_16BIT)
 		{
 			itss.flags |= 0x02;
-			flags = RS_PCM16S;
+			flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
 		}
 		itss.samplepointer = dwPos;
 		if (!(psmp->pSample) || !(psmp->nLength))
