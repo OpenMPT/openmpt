@@ -446,7 +446,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	case kcChangeLoopStatus:
 		m_pParent->OnModCtrlMsg(CTRLMSG_PAT_LOOP, -1); return wParam;
 	case kcToggleFollowSong:
-		m_pParent->OnModCtrlMsg(CTRLMSG_PAT_FOLLOWSONG, 0); return wParam;
+		m_pParent->OnModCtrlMsg(CTRLMSG_PAT_FOLLOWSONG, 1); return wParam;
 
 	case kcChannelUnmuteAll:
 	case kcUnmuteAllChnOnPatTransition:

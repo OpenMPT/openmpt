@@ -451,8 +451,16 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	//rewbs.customKeys
 	case CTRLMSG_PAT_FOLLOWSONG:
-		CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
-		OnFollowSong();
+		// parameters: 0 = turn off, 1 = toggle
+		{
+			UINT state = FALSE;
+			if(lParam == 1)	// toggle
+			{
+				state = !IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG);
+			}
+			CheckDlgButton(IDC_PATTERN_FOLLOWSONG, state);
+			OnFollowSong();
+		}
 		break;
 
 	case CTRLMSG_PAT_LOOP:
