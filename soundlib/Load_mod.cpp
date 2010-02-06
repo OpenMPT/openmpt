@@ -494,9 +494,14 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		if (pSmp->RelativeTone > 0) bTab[24] = 0x07; else
 		bTab[24] = (BYTE)XM2MODFineTune(pSmp->nFineTune);
 		bTab[25] = pSmp->nVolume >> 2;
-		bTab[26] = pSmp->nLoopStart >> 9;
-		bTab[27] = pSmp->nLoopStart >> 1;
-		UINT replen = pSmp->nLoopEnd - pSmp->nLoopStart;
+		UINT repstart = 0, replen = 2;
+		if(pSmp->uFlags & CHN_LOOP)
+		{
+			repstart = pSmp->nLoopStart;
+			replen = pSmp->nLoopEnd - pSmp->nLoopStart;
+		}
+		bTab[26] = repstart >> 9;
+		bTab[27] = repstart >> 1;
 		if(replen < 2) // ensure PT will load it properly
 			replen = 2; 
 		bTab[28] = replen >> 9;
