@@ -846,24 +846,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 					// fix old instrument flags which got broken in OpenMPT 1.17.03.03 due to refactoring (rev 415).
 					if(version == 0x00000101 && fcode == 'dF..')
 					{
-						DWORD dwFlags = Instruments[i]->dwFlags;	// more convenient
-						DWORD dwNewFlags = 0;
-						if(dwFlags & 0x0001) Instruments[i]->VolEnv.dwFlags |= ENV_ENABLED;
-						if(dwFlags & 0x0002) Instruments[i]->VolEnv.dwFlags |= ENV_SUSTAIN;
-						if(dwFlags & 0x0004) Instruments[i]->VolEnv.dwFlags |= ENV_LOOP;
-						if(dwFlags & 0x0008) Instruments[i]->PanEnv.dwFlags |= ENV_ENABLED;
-						if(dwFlags & 0x0010) Instruments[i]->PanEnv.dwFlags |= ENV_SUSTAIN;
-						if(dwFlags & 0x0020) Instruments[i]->PanEnv.dwFlags |= ENV_LOOP;
-						if(dwFlags & 0x0040) Instruments[i]->PitchEnv.dwFlags |= ENV_ENABLED;
-						if(dwFlags & 0x0080) Instruments[i]->PitchEnv.dwFlags |= ENV_SUSTAIN;
-						if(dwFlags & 0x0100) Instruments[i]->VolEnv.dwFlags |= ENV_LOOP;
-						if(dwFlags & 0x0200) dwNewFlags |= INS_SETPANNING;
-						if(dwFlags & 0x0400) Instruments[i]->PitchEnv.dwFlags |= ENV_FILTER;
-						if(dwFlags & 0x0800) Instruments[i]->VolEnv.dwFlags |= ENV_CARRY;
-						if(dwFlags & 0x1000) Instruments[i]->PanEnv.dwFlags |= ENV_CARRY;
-						if(dwFlags & 0x2000) Instruments[i]->PitchEnv.dwFlags |= ENV_CARRY;
-						if(dwFlags & 0x4000) dwNewFlags |= INS_MUTE;
-						Instruments[i]->dwFlags = dwNewFlags;
+						ConvertOldExtendedFlagFormat(Instruments[i]);
 					}
 					break;
 			}
