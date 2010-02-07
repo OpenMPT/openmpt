@@ -207,19 +207,21 @@ void CCtrlGeneral::UpdateView(DWORD dwHint, CObject *pHint)
 		const BOOL bIsNotMOD_S3M = ((bIsNotMOD) && (m_pSndFile->GetType() != MOD_TYPE_S3M));
 		m_EditTempo.EnableWindow(bIsNotMOD);
 		m_SpinTempo.EnableWindow(bIsNotMOD);
+		m_SliderTempo.EnableWindow(bIsNotMOD);
 		m_EditSpeed.EnableWindow(bIsNotMOD);
 		m_SpinSpeed.EnableWindow(bIsNotMOD);
+		m_SliderGlobalVol.EnableWindow(bIsNotMOD);
 		m_EditGlobalVol.EnableWindow(bIsNotMOD);
 		m_SpinGlobalVol.EnableWindow(bIsNotMOD);
 		m_EditSamplePA.EnableWindow(bIsNotMOD);
 		m_SpinSamplePA.EnableWindow(bIsNotMOD);
-		m_SliderSamplePreAmp.EnableWindow(bIsNotMOD);
+		//m_SliderSamplePreAmp.EnableWindow(bIsNotMOD);
 		m_SliderVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_EditVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_SpinVSTiVol.EnableWindow(bIsNotMOD_S3M);
 		m_EditRestartPos.EnableWindow(specs.hasRestartPos ? TRUE : FALSE);
 		
-		//Note: Global volume slider is not disabled for MOD
+		//Note: Sample volume slider is not disabled for MOD
 		//on purpose(can be used to control play volume)
 
 		// MOD Type
@@ -274,8 +276,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			if ((tempo >= m_pSndFile->GetModSpecifications().tempoMin) && (tempo <= m_pSndFile->GetModSpecifications().tempoMax) && (tempo != m_pSndFile->m_nDefaultTempo)) {
 				m_pSndFile->m_nDefaultTempo = tempo;
 				m_pSndFile->m_nMusicTempo = tempo;
-				if(m_pSndFile->GetType() != MOD_TYPE_MOD)
-					m_pModDoc->SetModified();
+				m_pModDoc->SetModified();
 
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
@@ -286,8 +287,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_pSndFile->m_nDefaultGlobalVolume)) {
 				m_pSndFile->m_nGlobalVolume = gv;
 				m_pSndFile->m_nDefaultGlobalVolume = gv;
-				if(m_pSndFile->GetType() != MOD_TYPE_MOD)
-					m_pModDoc->SetModified();
+				m_pModDoc->SetModified();
 
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
@@ -297,7 +297,8 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			int spa = MAX_SLIDER_SAMPLE_VOL - m_SliderSamplePreAmp.GetPos();
 			if ((spa >= 0) && (spa <= MAX_SLIDER_SAMPLE_VOL) && (spa != m_pSndFile->m_nSamplePreAmp)) {
 				m_pSndFile->m_nSamplePreAmp = spa;
-				m_pModDoc->SetModified();
+				if(m_pSndFile->GetType() != MOD_TYPE_MOD)
+					m_pModDoc->SetModified();
 				m_pModDoc->UpdateAllViews(NULL, HINT_MODGENERAL, this);
 			}
 		}
