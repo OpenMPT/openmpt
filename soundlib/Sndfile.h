@@ -1193,5 +1193,8 @@ void ReadExtendedInstrumentProperty(MODINSTRUMENT* pIns, const int32 code, LPCBY
 // Read extended instrument properties from 'pDataStart' to instrument 'pIns'.
 void ReadExtendedInstrumentProperties(MODINSTRUMENT* pIns, const LPCBYTE pDataStart, const size_t nMemLength);
 
+// Convert old instrument flag format, where all flags used to be stored in one single flag. Now, some flags are stored in envelope-specific flag fields.
+void ConvertOldExtendedFlagFormat(MODINSTRUMENT* pIns);
+
 
 #endif

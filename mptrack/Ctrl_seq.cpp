@@ -702,7 +702,7 @@ void COrderList::UpdateInfoText()
 		}
 		else
 		{
-			const ORDERINDEX nLength = pSndFile->Order.GetLengthFirstEmpty();
+			const ORDERINDEX nLength = pSndFile->Order.GetLengthTailTrimmed();
 			wsprintf(s, "Position %d of %d (%02Xh of %02Xh)",
 			m_nScrollPos, nLength, m_nScrollPos, nLength);
 		}
