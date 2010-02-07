@@ -183,6 +183,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	CModControlDlg::OnInitDialog();
 	if (!m_pSndFile) return TRUE;
 	m_bInitialized = FALSE;
+
 	// Zoom Selection
 	m_ComboZoom.AddString("Auto");
 	m_ComboZoom.AddString("1:1");
@@ -212,8 +213,6 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ToolBar2.AddButton(IDC_SAMPLE_INVERT, TIMAGE_SAMPLE_INVERT);
 	m_ToolBar2.AddButton(IDC_SAMPLE_SIGN_UNSIGN, TIMAGE_SAMPLE_UNSIGN);
 	// Setup Controls
-	m_EditName.SetLimitText(32);
-	m_EditFileName.SetLimitText(22);
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 	//rewbs.fix36944
@@ -241,7 +240,7 @@ BOOL CCtrlSamples::OnInitDialog()
 		m_SpinVibRate.SetRange(0, 64);
 	}
 
-	for (UINT i=BASENOTE_MIN; i<BASENOTE_MAX; i++)
+	for (UINT i = BASENOTE_MIN; i < BASENOTE_MAX; i++)
 	{
 		CHAR s[32];
 		wsprintf(s, "%s%d", szNoteNames[i%12], i/12);
@@ -543,6 +542,12 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 	// Updating Ranges
 	if (dwHintMask & HINT_MODTYPE)
 	{
+		const CModSpecifications *specs = &m_pSndFile->GetModSpecifications();
+
+		// Limit text fields
+		m_EditName.SetLimitText(specs->sampleNameLengthMax);
+		m_EditFileName.SetLimitText(specs->sampleFilenameLengthMax);
+
 		BOOL b;
 		// Loop Type
 		m_ComboLoopType.ResetContent();

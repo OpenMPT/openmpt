@@ -30,7 +30,11 @@ struct CModSpecifications
 	TEMPO tempoMax;
 	ROWINDEX patternRowsMin;
 	ROWINDEX patternRowsMax;
-	uint16 modNameLengthMax;	//Meaning 'usable letters', possible null character is not included.
+	uint16 modNameLengthMax;		//Meaning 'usable letters', possible null character is not included.
+	uint16 sampleNameLengthMax;		//Dito
+	uint16 sampleFilenameLengthMax;	//Dito
+	uint16 instrNameLengthMax;		//Dito
+	uint16 instrFilenameLengthMax;	//Dito
 	SAMPLEINDEX samplesMax;
 	INSTRUMENTINDEX instrumentsMax;
 	BYTE defaultMixLevels;
@@ -71,6 +75,10 @@ const CModSpecifications mptm =
 	1,									//Min pattern rows
 	1024,								//Max pattern rows
     25,									//Max mod name length
+	26,									//Max sample name length
+	12,									//Max sample filename length
+	26,									//Max instrument name length
+	12,									//Max instrument filename length
 	4000,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
@@ -100,12 +108,16 @@ const CModSpecifications mod =
 	64,									//Pattern max.
 	128,								//Order max.
 	4,									//Channel min
-	4,									//Channel max
+	32,									//Channel max
 	32,									//Min tempo
 	255,								//Max tempo
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     20,									//Max mod name length
+	22,									//Max sample name length
+	0,									//Max sample filename length
+	0,									//Max instrument name length
+	0,									//Max instrument filename length
 	31,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
@@ -139,6 +151,10 @@ const CModSpecifications modEx =
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     20,									//Max mod name length
+	22,									//Max sample name length
+	0,									//Max sample filename length
+	0,									//Max instrument name length
+	0,									//Max instrument filename length
 	31,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
@@ -171,6 +187,10 @@ const CModSpecifications xm =
 	1,									//Min pattern rows
 	256,								//Max pattern rows
     20,									//Max mod name length
+	22,									//Max sample name length
+	0,									//Max sample filename length
+	22,									//Max instrument name length
+	0,									//Max instrument filename length
 	31,									//SamplesMax (actually 16 per instrument)
 	128,								//instrumentMax
 	mixLevels_original,					//defaultMixLevels
@@ -204,6 +224,10 @@ const CModSpecifications xmEx =
 	1,									//Min pattern rows
 	1024,								//Max pattern rows
     20,									//Max mod name length
+	22,									//Max sample name length
+	0,									//Max sample filename length
+	22,									//Max instrument name length
+	0,									//Max instrument filename length
 	4000,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
@@ -236,6 +260,10 @@ const CModSpecifications s3m =
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     27,									//Max mod name length
+	27,									//Max sample name length
+	12,									//Max sample filename length
+	0,									//Max instrument name length
+	0,									//Max instrument filename length
 	99,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
@@ -269,6 +297,10 @@ const CModSpecifications s3mEx =
 	64,									//Min pattern rows
 	64,									//Max pattern rows
     27,									//Max mod name length
+	27,									//Max sample name length
+	12,									//Max sample filename length
+	0,									//Max instrument name length
+	0,									//Max instrument filename length
 	99,									//SamplesMax
 	0,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
@@ -301,6 +333,10 @@ const CModSpecifications it =
 	1,									//Min pattern rows
 	256,								//Max pattern rows
     25,									//Max mod name length
+	25,									//Max sample name length
+	12,									//Max sample filename length
+	25,									//Max instrument name length
+	12,									//Max instrument filename length
 	99,									//SamplesMax
 	99,									//instrumentMax
 	mixLevels_original,					//defaultMixLevels
@@ -333,6 +369,10 @@ const CModSpecifications itEx =
 	1,									//Min pattern rows
 	1024,								//Max pattern rows
     25,									//Max mod name length
+	25,									//Max sample name length
+	12,									//Max sample filename length
+	25,									//Max instrument name length
+	12,									//Max instrument filename length
 	4000,								//SamplesMax
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels

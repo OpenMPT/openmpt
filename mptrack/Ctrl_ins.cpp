@@ -775,6 +775,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	CModControlDlg::OnInitDialog();
 	m_bInitialized = FALSE;
 	if ((!m_pModDoc) || (!m_pSndFile)) return TRUE;
+
 	m_NoteMap.Init(this);
 	m_ToolBar.Init();
 	m_ToolBar.AddButton(IDC_INSTRUMENT_NEW, TIMAGE_INSTR_NEW);
@@ -783,8 +784,6 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_ToolBar.AddButton(IDC_INSTRUMENT_PLAY, TIMAGE_PREVIEW);
 	m_SpinInstrument.SetRange(0, 0);
 	m_SpinInstrument.EnableWindow(FALSE);
-	m_EditName.SetLimitText(32);
-	m_EditFileName.SetLimitText(20);
 	// NNA
 	m_ComboNNA.AddString("Note Cut");
 	m_ComboNNA.AddString("Continue");
@@ -1030,6 +1029,12 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
 	if (dwHintMask & HINT_MODTYPE)
 	{
+		const CModSpecifications *specs = &m_pSndFile->GetModSpecifications();
+
+		// Limit text fields
+		m_EditName.SetLimitText(specs->instrNameLengthMax);
+		m_EditFileName.SetLimitText(specs->instrFilenameLengthMax);
+
 		BOOL bITandMPT = ((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
 		//rewbs.instroVSTi
 		BOOL bITandXM = (((m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_pSndFile->m_nType == MOD_TYPE_XM))  && (m_pSndFile->m_nInstruments)) ? TRUE : FALSE;
