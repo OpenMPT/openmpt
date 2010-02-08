@@ -1255,7 +1255,11 @@ void CCtrlPatterns::OnSequenceNumChanged()
 	{
 		SEQUENCEINDEX newSeq = (SEQUENCEINDEX)GetDlgItemInt(IDC_EDIT_SEQNUM);
 
-		if (newSeq >= MAX_SEQUENCES) 
+		// avoid reloading the order list and thus setting the document modified
+		if(newSeq == m_pSndFile->Order.GetCurrentSequenceIndex())
+			return;
+		
+		if (newSeq >= MAX_SEQUENCES)
 		{
 			newSeq = MAX_SEQUENCES - 1;
 			SetDlgItemInt(IDC_EDIT_SEQNUM, MAX_SEQUENCES - 1, FALSE);
