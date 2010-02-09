@@ -2678,10 +2678,10 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 							case 0x01: strcpy(s, "ramp down"); break;
 							case 0x02: strcpy(s, "square wave"); break;
 							case 0x03: strcpy(s, "random"); break;
-							case 0x04: strcpy(s, "sine wave (continue)"); break;
-							case 0x05: strcpy(s, "ramp down (continue)"); break;
-							case 0x06: strcpy(s, "square wave (continue)"); break;
-							case 0x07: strcpy(s, "random (continue)"); break;
+							case 0x04: strcpy(s, "sine wave (cont.)"); break;
+							case 0x05: strcpy(s, "ramp down (cont.)"); break;
+							case 0x06: strcpy(s, "square wave (cont.)"); break;
+							case 0x07: strcpy(s, "random (cont.)"); break;
 							default: strcpy(s, "ignore"); break;
 						}
 						break;
@@ -2737,10 +2737,10 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 							case 0x02: case 0x0A: strcpy(s, "square wave"); break;
 							case 0x03: case 0x0B: strcpy(s, "square wave"); break;
 
-							case 0x04: case 0x0C: strcpy(s, "sine wave (continue)"); break;
-							case 0x05: case 0x0D: strcpy(s, "ramp down (continue)"); break;
-							case 0x06: case 0x0E: strcpy(s, "square wave (continue)"); break;
-							case 0x07: case 0x0F: strcpy(s, "square wave (continue)"); break;
+							case 0x04: case 0x0C: strcpy(s, "sine wave (cont.)"); break;
+							case 0x05: case 0x0D: strcpy(s, "ramp down (cont.)"); break;
+							case 0x06: case 0x0E: strcpy(s, "square wave (cont.)"); break;
+							case 0x07: case 0x0F: strcpy(s, "square wave (cont.)"); break;
 						}
 						break;
 					case 0x60: // pattern loop
@@ -3516,4 +3516,3 @@ CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
 	}
 	return displayName;
 }
-
