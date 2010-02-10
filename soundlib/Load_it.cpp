@@ -1880,7 +1880,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	header.sep = 128; // pan separation
 	dwHdrPos = sizeof(header) + header.ordnum;
 	// Channel Pan and Volume
-	memset(header.chnpan, 0xFF, 64);
+	memset(header.chnpan, 0xA0, 64);
 	memset(header.chnvol, 64, 64);
 	for (UINT ich=0; ich</*m_nChannels*/64; ich++) //Header only has room for settings for 64 chans...
 	{
@@ -2286,25 +2286,45 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		memcpy(itss.name, m_szNames[nsmp], 26);
 		itss.id = 0x53504D49;
 		itss.gvl = (BYTE)psmp->nGlobalVol;
-		if (m_nInstruments)
-		{
-			for (UINT iu=1; iu<=m_nInstruments; iu++) if (Instruments[iu])
-			{
-				MODINSTRUMENT *pIns = Instruments[iu];
-				for (UINT ju=0; ju<128; ju++) if (pIns->Keyboard[ju] == nsmp)
-				{
-					itss.flags = 0x01;
-					break;
-				}
-			}
-		} else
+		
+		UINT flags = RS_PCM8S;
+		if(psmp->nLength && psmp->pSample)
 		{
 			itss.flags = 0x01;
+			if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
+			if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
+			if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
+			if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
+#ifndef NO_PACKING
+			if (nPacking)
+			{
+				if ((!(psmp->uFlags & (CHN_16BIT|CHN_STEREO)))
+					&& (CanPackSample(psmp->pSample, psmp->nLength, nPacking)))
+				{
+					flags = RS_ADPCM4;
+					itss.cvt = 0xFF;
+				}
+			} else
+#endif // NO_PACKING
+			{
+				if (psmp->uFlags & CHN_STEREO)
+				{
+					flags = RS_STPCM8S;
+					itss.flags |= 0x04;
+				}
+				if (psmp->uFlags & CHN_16BIT)
+				{
+					itss.flags |= 0x02;
+					flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
+				}
+			}
+			itss.cvt = 0x01;
 		}
-		if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
-		if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
-		if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
-		if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
+		else
+		{
+			itss.flags = 0x00;
+		}
+
 		itss.C5Speed = psmp->nC5Speed;
 		if (!itss.C5Speed) itss.C5Speed = 8363;
 		itss.length = psmp->nLength;
@@ -2319,34 +2339,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		itss.vid = min(psmp->nVibDepth, 32);
 		itss.vir = min(psmp->nVibSweep, 255); //(psmp->nVibSweep < 64) ? psmp->nVibSweep * 4 : 255;
 		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
-		if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
-		UINT flags = RS_PCM8S;
-#ifndef NO_PACKING
-		if (nPacking)
-		{
-			if ((!(psmp->uFlags & (CHN_16BIT|CHN_STEREO)))
-			 && (CanPackSample(psmp->pSample, psmp->nLength, nPacking)))
-			{
-				flags = RS_ADPCM4;
-				itss.cvt = 0xFF;
-			}
-		} else
-#endif // NO_PACKING
-		{
-			if (psmp->uFlags & CHN_STEREO)
-			{
-				flags = RS_STPCM8S;
-				itss.flags |= 0x04;
-			}
-			if (psmp->uFlags & CHN_16BIT)
-			{
-				itss.flags |= 0x02;
-				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
-			}
-		}
+
 		itss.samplepointer = dwPos;
-		if (!(psmp->pSample) || !(psmp->nLength))
-			itss.flags = 0;
 		fseek(f, smppos[nsmp-1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 		fseek(f, dwPos, SEEK_SET);
@@ -2489,7 +2483,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	header.sep = 128; // pan separation
 	dwHdrPos = sizeof(header) + header.ordnum;
 	// Channel Pan and Volume
-	memset(header.chnpan, 0xFF, 64);
+	memset(header.chnpan, 0xA0, 64);
 	memset(header.chnvol, 64, 64);
 	for (UINT ich=0; ich</*m_nChannels*/64; ich++) //Header only has room for settings for 64 chans...
 	{
@@ -2882,25 +2876,34 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		SetNullTerminator(itss.name);
 		itss.id = 0x53504D49;
 		itss.gvl = (BYTE)psmp->nGlobalVol;
-		if (m_nInstruments)
-		{
-			for (UINT iu=1; iu<=m_nInstruments; iu++) if (Instruments[iu])
-			{
-				MODINSTRUMENT *pIns = Instruments[iu];
-				for (UINT ju=0; ju<128; ju++) if (pIns->Keyboard[ju] == nsmp)
-				{
-					itss.flags = 0x01;
-					break;
-				}
-			}
-		} else
+
+		UINT flags = RS_PCM8S;
+		if(psmp->nLength && psmp->pSample)
 		{
 			itss.flags = 0x01;
+			if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
+			if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
+			if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
+			if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
+
+			if (psmp->uFlags & CHN_STEREO)
+			{
+				flags = RS_STPCM8S;
+				itss.flags |= 0x04;
+			}
+			if (psmp->uFlags & CHN_16BIT)
+			{
+				itss.flags |= 0x02;
+				flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
+			}
+
+			itss.cvt = 0x01;
 		}
-		if (psmp->uFlags & CHN_LOOP) itss.flags |= 0x10;
-		if (psmp->uFlags & CHN_SUSTAINLOOP) itss.flags |= 0x20;
-		if (psmp->uFlags & CHN_PINGPONGLOOP) itss.flags |= 0x40;
-		if (psmp->uFlags & CHN_PINGPONGSUSTAIN) itss.flags |= 0x80;
+		else
+		{
+			itss.flags = 0x00;
+		}
+
 		itss.C5Speed = psmp->nC5Speed;
 		if (!itss.C5Speed) itss.C5Speed = 8363;
 		itss.length = psmp->nLength;
@@ -2915,21 +2918,8 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		itss.vid = min(psmp->nVibDepth, 32);
 		itss.vir = min(psmp->nVibSweep, 255);
 		if (psmp->uFlags & CHN_PANNING) itss.dfp |= 0x80;
-		if ((psmp->pSample) && (psmp->nLength)) itss.cvt = 0x01;
-		UINT flags = RS_PCM8S;
-		if (psmp->uFlags & CHN_STEREO)
-		{
-			flags = RS_STPCM8S;
-			itss.flags |= 0x04;
-		}
-		if (psmp->uFlags & CHN_16BIT)
-		{
-			itss.flags |= 0x02;
-			flags = (psmp->uFlags & CHN_STEREO) ? RS_STPCM16S : RS_PCM16S;
-		}
+
 		itss.samplepointer = dwPos;
-		if (!(psmp->pSample) || !(psmp->nLength))
-			itss.flags = 0;
 		fseek(f, smppos[nsmp-1], SEEK_SET);
 		fwrite(&itss, 1, sizeof(ITSAMPLESTRUCT), f);
 		fseek(f, dwPos, SEEK_SET);
