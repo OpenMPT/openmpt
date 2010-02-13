@@ -264,7 +264,7 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ToolBar.UpdateStyle();
 // -> CODE#0007
 // -> DESC="uncheck follow song checkbox by default"
-		CheckDlgButton(IDC_PATTERN_FOLLOWSONG, (CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF) ? MF_UNCHECKED : MF_CHECKED);
+		//CheckDlgButton(IDC_PATTERN_FOLLOWSONG, (CMainFrame::m_dwPatternSetup & PATTERN_FOLLOWSONGOFF) ? MF_UNCHECKED : MF_CHECKED);
 		m_ToolBar.SetState(ID_OVERFLOWPASTE, ((CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 // -! BEHAVIOUR_CHANGE#0007
 	}

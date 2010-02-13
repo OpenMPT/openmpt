@@ -331,7 +331,7 @@ const CModSpecifications it =
 	32,									//Min tempo
 	255,								//Max tempo
 	1,									//Min pattern rows
-	256,								//Max pattern rows
+	200,								//Max pattern rows
     25,									//Max mod name length
 	25,									//Max sample name length
 	12,									//Max sample filename length
