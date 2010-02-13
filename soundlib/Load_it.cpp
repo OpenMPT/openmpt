@@ -1261,18 +1261,18 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				pSmp->nLength = pis->length;
 				if (pSmp->nLength > MAX_SAMPLE_LENGTH) pSmp->nLength = MAX_SAMPLE_LENGTH;
 				UINT flags = (pis->cvt & 1) ? RS_PCM8S : RS_PCM8U;
-				if (pis->flags & 2)
+				if (pis->flags & 2)	// 16-bit
 				{
 					flags += 5;
-					if (pis->flags & 4) flags |= RSF_STEREO;
+					if (pis->flags & 4 && pifh->cwtv >= 0x214) flags |= RSF_STEREO;	// some old version of IT didn't clear the stereo flag when importing samples. Luckily, all other trackers are identifying as IT 2.14+, so let's check for old IT versions.
 					pSmp->uFlags |= CHN_16BIT;
-					// IT 2.14 16-bit packed sample ?
+					// IT 2.14 16-bit packed sample?
 					if (pis->flags & 8) flags = ((pifh->cmwt >= 0x215) && (pis->cvt & 4)) ? RS_IT21516 : RS_IT21416;
-				} else
+				} else	// 8-bit
 				{
-					if (pis->flags & 4) flags |= RSF_STEREO;
+					if (pis->flags & 4 && pifh->cwtv >= 0x214) flags |= RSF_STEREO;	// some old version of IT didn't clear the stereo flag when importing samples. Luckily, all other trackers are identifying as IT 2.14+, so let's check for old IT versions.
 					if (pis->cvt == 0xFF) flags = RS_ADPCM4; else
-					// IT 2.14 8-bit packed sample ?
+					// IT 2.14 8-bit packed sample?
 					if (pis->flags & 8)	flags =	((pifh->cmwt >= 0x215) && (pis->cvt & 4)) ? RS_IT2158 : RS_IT2148;
 				}
 // -> CODE#0027
