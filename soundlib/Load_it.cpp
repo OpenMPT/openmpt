@@ -450,8 +450,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 // Check file ID
 
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
-	if(id != 0x2e697470) return false;	// .itp
-	m_nType = MOD_TYPE_IT;
+	if(id != ITP_FILE_ID) return false;
 	streamPos += sizeof(DWORD);
 
 	memcpy(&id,lpStream+streamPos,sizeof(DWORD));
@@ -460,6 +459,8 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	if(version > ITP_VERSION)
 		return false;
+
+	m_nType = MOD_TYPE_IT;
 
 // Song name
 
@@ -735,6 +736,9 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 		nsmp = id;
 		streamPos += sizeof(DWORD);
+
+		if(nsmp < 1 || nsmp >= MAX_SAMPLES)
+			return false;
 
 		// Sample struct
 		memcpy(&pis,lpStream+streamPos,sizeof(ITSAMPLESTRUCT));
@@ -1554,7 +1558,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 // File ID
 
-	DWORD id = 0x2e697470; // .itp ASCII
+	DWORD id = ITP_FILE_ID;
 	fwrite(&id, 1, sizeof(id), f);
 
 	id = ITP_VERSION;

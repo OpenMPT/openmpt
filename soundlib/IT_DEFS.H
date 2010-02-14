@@ -140,7 +140,8 @@ typedef struct ITSAMPLESTRUCT
 extern BYTE autovibit2xm[8];
 extern BYTE autovibxm2it[8];
 
-#define ITP_VERSION 0x00000102 // v1.02
+#define ITP_VERSION 0x00000102	// v1.02
+#define ITP_FILE_ID 0x2e697470	// .itp ASCII
 
 enum IT_ReaderBitMasks {
 
