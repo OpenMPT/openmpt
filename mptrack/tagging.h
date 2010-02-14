@@ -58,18 +58,18 @@ static LPCSTR gpszGenreNames[NUM_GENRES] =
 
 typedef struct _TAGID3v2HEADER
 {
-	BYTE signature[3];
-	BYTE version[2];
-	BYTE flags;
-	UINT32 size;
+	uint8 signature[3];
+	uint8 version[2];
+	uint8 flags;
+	uint32 size;
 	// Total: 10 bytes
 } TAGID3v2HEADER;
 
 typedef struct _TAGID3v2FRAME
 {
-	UINT32 frameid;
-	UINT32 size;
-	UINT16 flags;
+	uint32 frameid;
+	uint32 size;
+	uint16 flags;
 	// Total: 10 bytes
 } TAGID3v2FRAME;
 
@@ -106,11 +106,11 @@ public:
 
 private:
 	// Convert Integer to Synchsafe Integer (see ID3v2.4 specs)
-	UINT32 intToSynchsafe(UINT32 in);
+	uint32 intToSynchsafe(UINT32 in);
 	// Write a frame
 	void WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE *f);
 	// Size of our tag
-	UINT32 totalID3v2Size;
+	uint32 totalID3v2Size;
 };
 
 #pragma pack()

@@ -132,6 +132,8 @@
 #define IDD_CLEANUP_SONG                521
 #define IDD_CHANNEL_NAME                522
 #define IDD_KEYBOARD_SPLIT              523
+#define IDD_SAMPLE_GENERATOR            524
+#define IDD_SAMPLE_GENERATOR_PRESETS    525
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -930,6 +932,22 @@
 #define IDC_STATIC_CHANNEL_NAME         2410
 #define IDC_EDIT_CHANNEL_NAME           2411
 #define IDC_STATIC_PATTERNNAME          2412
+#define IDC_EDIT_SAMPLE_LENGTH          2413
+#define IDC_EDIT_SAMPLE_FREQ            2414
+#define IDC_EDIT_FORMULA                2415
+#define IDC_EDIT_SAMPLE_LENGTH2         2416
+#define IDC_EDIT_SAMPLE_LENGTH_SEC      2416
+#define IDC_RADIO_SMPCLIP1              2417
+#define IDC_RADIO_SMPCLIP2              2418
+#define IDC_RADIO_SMPCLIP3              2419
+#define IDC_STATIC_SMPSIZE_KB           2420
+#define IDC_BUTTON_SHOW_EXPRESSIONS     2421
+#define IDC_SAMPLEGEN_PRESETS           2422
+#define IDC_BUTTON_SAMPLEGEN_PRESETS    2422
+#define IDC_EDIT_PRESET_NAME            2423
+#define IDC_EDIT_PRESET_EXPR            2424
+#define IDC_LIST_SAMPLEGEN_PRESETS      2425
+#define IDC_CHECK_UNDO                  2426
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1178,7 +1196,10 @@
 #define ID_EDIT_SPLITKEYBOARDSETTINGS   59240
 #define ID_EDIT_PASTESPECIAL            59241
 #define ID_CHANGE_PCNOTE_PARAM          59242
-#define ID_MODTREE_CLOSE				60243
+#define ID_MODTREE_CLOSE                60243
+#define ID_SAMPLE_GENERATOR_MENU        60244
+#define ID_SAMPLE_GENERATOR_PRESET_MENU 60344
+#define ID_SAMPLE_GENERATE              60445
 
 // Next default values for new objects
 // 
@@ -1186,8 +1207,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        526
-#define _APS_NEXT_COMMAND_VALUE         60244
-#define _APS_NEXT_CONTROL_VALUE         2426
+#define _APS_NEXT_COMMAND_VALUE         60446
+#define _APS_NEXT_CONTROL_VALUE         2427
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
