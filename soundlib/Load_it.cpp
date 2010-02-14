@@ -458,6 +458,9 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	version = id;
 	streamPos += sizeof(DWORD);
 
+	if(version > ITP_VERSION)
+		return false;
+
 // Song name
 
 	// name string length
@@ -1554,7 +1557,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	DWORD id = 0x2e697470; // .itp ASCII
 	fwrite(&id, 1, sizeof(id), f);
 
-	id = 0x00000102; // v1.02
+	id = ITP_VERSION;
 	fwrite(&id, 1, sizeof(id), f);
 
 // Song name

@@ -13,6 +13,7 @@
 // CFileTagging - helper class for writing tags
 
 CFileTagging::CFileTagging()
+//--------------------------
 {
 	encoder = "OpenMPT " MPT_VERSION_STR;
 }
@@ -23,10 +24,11 @@ CFileTagging::CFileTagging()
 // Convert Integer to Synchsafe Integer (see ID3v2.4 specs)
 // Basically, it's a BigEndian integer, but the MSB of all bytes is 0.
 // Thus, a 32-bit integer turns into a 28-bit integer.
-UINT32 CFileTagging::intToSynchsafe(UINT32 iIn)
+uint32 CFileTagging::intToSynchsafe(uint32 iIn)
+//---------------------------------------------
 {
 	iIn = LittleEndian(iIn);
-	UINT32 iOut = 0, iSteps = 0;
+	uint32 iOut = 0, iSteps = 0;
 	do {
 		iOut |= (iIn & 0x7F) << iSteps;
 		iSteps += 8;
@@ -36,6 +38,7 @@ UINT32 CFileTagging::intToSynchsafe(UINT32 iIn)
 
 // Write Tags
 void CFileTagging::WriteID3v2Tags(FILE *f)
+//----------------------------------------
 {
 	if(!f) return;
 	
@@ -81,6 +84,7 @@ void CFileTagging::WriteID3v2Tags(FILE *f)
 
 // Write a ID3v2 frame
 void CFileTagging::WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE *f)
+//---------------------------------------------------------------------------------
 {
 	if(!strcmp(cFrameID, "") || sFramecontent.empty() || !f) return;
 
@@ -108,6 +112,7 @@ void CFileTagging::WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE 
 
 // Write RIFF tags
 void CFileTagging::WriteWaveTags(WAVEDATAHEADER *wdh, WAVEFILEHEADER *wfh, FILE *f)
+//---------------------------------------------------------------------------------
 {
 	if(!f || !wdh || !wfh) return;
 	

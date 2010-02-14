@@ -19,57 +19,63 @@
 
 typedef struct _GDMHEADER
 {
-	DWORD ID;						// ID: 'GDMþ'
-	CHAR SongTitle[32];				// Music's title
-	CHAR SongMusician[32];			// Name of music's composer
-	CHAR DOSEOF[3];					// 13, 10, 26
-	DWORD ID2;						// ID: 'GMFS'
-	BYTE FormMajorVer;				// Format major version
-	BYTE FormMinorVer;				// Format minor version
-	UINT16 TrackID;					// Composing Tracker ID code (00 = 2GDM)
-	BYTE TrackMajorVer;				// Tracker's major version
-	BYTE TrackMinorVer;				// Tracker's minor version
-	BYTE PanMap[32];				// 0-Left to 15-Right, 255-N/U
-	BYTE MastVol;					// Range: 0...64
-	BYTE Tempo;						// Initial music tempo (6)
-	BYTE BPM;						// Initial music BPM (125)
-	UINT16 FormOrigin;				// Original format ID:
+	uint32 ID;						// ID: 'GDMþ'
+	char   SongTitle[32];			// Music's title
+	char   SongMusician[32];		// Name of music's composer
+	char   DOSEOF[3];				// 13, 10, 26
+	uint32 ID2;						// ID: 'GMFS'
+	uint8  FormMajorVer;			// Format major version
+	uint8  FormMinorVer;			// Format minor version
+	uint16 TrackID;					// Composing Tracker ID code (00 = 2GDM)
+	uint8  TrackMajorVer;			// Tracker's major version
+	uint8  TrackMinorVer;			// Tracker's minor version
+	uint8  PanMap[32];				// 0-Left to 15-Right, 255-N/U
+	uint8  MastVol;					// Range: 0...64
+	uint8  Tempo;					// Initial music tempo (6)
+	uint8  BPM;						// Initial music BPM (125)
+	uint16 FormOrigin;				// Original format ID:
 		// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
 		// (versions of 2GDM prior to v1.15 won't set this correctly)
 
-	UINT32 OrdOffset;
-	BYTE NOO;						// Number of orders in module - 1
-	UINT32 PatOffset;
-	BYTE NOP;						// Number of patterns in module - 1
-	UINT32 SamHeadOffset;
-	UINT32 SamOffset;
-	BYTE NOS;						// Number of samples in module - 1
-	UINT32 MTOffset;				// Offset of song message
-	UINT32 MTLength;
-	UINT32 SSOffset;				// Offset of scrolly script (huh?)
-	UINT16 SSLength;
-	UINT32 TGOffset;				// Offset of text graphic (huh?)
-	UINT16 TGLength;
+	uint32 OrdOffset;
+	uint8  NOO;						// Number of orders in module - 1
+	uint32 PatOffset;
+	uint8  NOP;						// Number of patterns in module - 1
+	uint32 SamHeadOffset;
+	uint32 SamOffset;
+	uint8  NOS;						// Number of samples in module - 1
+	uint32 MTOffset;				// Offset of song message
+	uint32 MTLength;
+	uint32 SSOffset;				// Offset of scrolly script (huh?)
+	uint16 SSLength;
+	uint32 TGOffset;				// Offset of text graphic (huh?)
+	uint16 TGLength;
 } GDMHEADER, *PGDMHEADER;
 
 typedef struct _GDMSAMPLEHEADER
 {
-	CHAR SamName[32];	// sample's name
-	CHAR FileName[12];	// sample's filename
-	BYTE EmsHandle;		// useless
-	UINT32 Length;		// length in bytes
-	UINT32 LoopBegin;	// loop start in samples
-	UINT32 LoopEnd;		// loop end in samples
-	BYTE Flags;			// misc. flags
-	UINT16 C4Hertz;		// frequency
-	BYTE Volume;		// default volume
-	BYTE Pan;			// default pan
+	char   SamName[32];		// sample's name
+	char   FileName[12];	// sample's filename
+	uint8  EmsHandle;		// useless
+	uint32 Length;			// length in bytes
+	uint32 LoopBegin;		// loop start in samples
+	uint32 LoopEnd;			// loop end in samples
+	uint8  Flags;			// misc. flags
+	uint16 C4Hertz;			// frequency
+	uint8  Volume;			// default volume
+	uint8  Pan;				// default pan
 } GDMSAMPLEHEADER, *PGDMSAMPLEHEADER;
 
 #pragma pack()
 
+#define GDMHeader_Origin_Count 8
+static MODTYPE GDMHeader_Origin[GDMHeader_Origin_Count] =
+{
+	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED
+};
+
 bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------
+//-----------------------------------------------------------------------
 {
 	if ((!lpStream) || (dwMemLength < sizeof(GDMHEADER))) return false;
 
@@ -82,10 +88,12 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// there are no other format versions...
 	if(pHeader->FormMajorVer != 1 || pHeader->FormMinorVer != 0)
-	{
-		::MessageBox(0, TEXT("GDM file seems to be valid, but this format version is currently not supported."), TEXT("OpenMPT GDM import"), MB_ICONERROR);
 		return false;
-	}
+
+	// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
+	m_nType = GDMHeader_Origin[pHeader->FormOrigin % GDMHeader_Origin_Count];
+	if(m_nType == MOD_TYPE_NONE)
+		return false;
 
 	// interesting question: Is TrackID, TrackMajorVer, TrackMinorVer relevant? The only TrackID should be 0 - 2GDM.exe, so the answer would be no.
 
@@ -121,43 +129,10 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nSamplePreAmp = 48; // dito
 	m_nVSTiVolume = 48; // dito
 
-	// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
-
-	switch(LittleEndianW(pHeader->FormOrigin))
-	{
-	case 1:
-		m_nType = MOD_TYPE_MOD;
-		break;
-	case 2:
-		m_nType = MOD_TYPE_MTM;
-		break;
-	case 3:
-		m_nType = MOD_TYPE_S3M;
-		break;
-	case 4:
-		m_nType = MOD_TYPE_669;
-		break;
-	case 5:
-		m_nType = MOD_TYPE_FAR;
-		break;
-	case 6:
-		m_nType = MOD_TYPE_ULT;
-		break;
-	case 7:
-		m_nType = MOD_TYPE_STM;
-		break;
-	case 8:
-		m_nType = MOD_TYPE_MED;
-		break;
-	default:
-		::MessageBox(0, TEXT("GDM file seems to be valid, but the original format is currently not supported.\nThis should not happen."), TEXT("OpenMPT GDM import"), MB_ICONERROR);
-		return false;
-		break;
-	}
-	UINT32 iSampleOffset  = LittleEndian(pHeader->SamOffset),
+	uint32 iSampleOffset  = LittleEndian(pHeader->SamOffset),
 		   iPatternsOffset = LittleEndian(pHeader->PatOffset);
 
-	const UINT32 iOrdOffset = LittleEndian(pHeader->OrdOffset), iSamHeadOffset = LittleEndian(pHeader->SamHeadOffset), 
+	const uint32 iOrdOffset = LittleEndian(pHeader->OrdOffset), iSamHeadOffset = LittleEndian(pHeader->SamHeadOffset), 
 				 iMTOffset = LittleEndian(pHeader->MTOffset), iMTLength = LittleEndian(pHeader->MTLength),
 				 iSSOffset = LittleEndian(pHeader->SSOffset), iSSLength = LittleEndianW(pHeader->SSLength),
 				 iTGOffset = LittleEndian(pHeader->TGOffset), iTGLength = LittleEndianW(pHeader->TGLength);
@@ -243,24 +218,16 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if(pSample->Flags & 0x02) // 16 bit
 		{
 			if(pSample->Flags & 0x20) // stereo
-			{
 				iSampleFormat = RS_PCM16U; // should be RS_STPCM16U but that breaks the sample reader
-			}
 			else
-			{
 				iSampleFormat = RS_PCM16U;
-			}
 		}
 		else // 8 bit
 		{
 			if(pSample->Flags & 0x20) // stereo
-			{
 				iSampleFormat = RS_PCM8U; // should be RS_STPCM8U - dito
-			}
 			else
-			{
 				iSampleFormat = RS_PCM8U;
-			}
 		}
 
 		// according to zilym, LZW support has never been finished, so this is also practically useless. Just ignore the flag.
@@ -283,7 +250,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		
 		if(iPatternsOffset + 2 > dwMemLength) break;
-		UINT16 iPatternLength = LittleEndianW(*(UINT16 *)(lpStream + iPatternsOffset)); // pattern length including the two "length" bytes
+		uint16 iPatternLength = LittleEndianW(*(uint16 *)(lpStream + iPatternsOffset)); // pattern length including the two "length" bytes
 		if(iPatternLength > dwMemLength || iPatternsOffset > dwMemLength - iPatternLength) break;
 
 		if(Patterns.Insert(iPat, 64)) 

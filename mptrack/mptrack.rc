@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// German (Germany) resources
+// Deutsch (Deutschland) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -99,6 +99,49 @@ BEGIN
     LTEXT           "Enabling instrument, volume or octave change will enable the keyboard split feature. These options are applied to the lower section of the keyboard.",IDC_STATIC,6,78,174,24
 END
 
+IDD_SAMPLE_GENERATOR DIALOGEX 0, 0, 304, 191
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Sample Generator"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Mathematical Formula",IDC_STATIC,6,6,294,30
+    EDITTEXT        IDC_EDIT_FORMULA,12,18,270,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "6",IDC_BUTTON_SHOW_EXPRESSIONS,282,18,12,12
+    GROUPBOX        "Sample Parameters",IDC_STATIC,6,42,294,48
+    LTEXT           "Sample Length:",IDC_STATIC,12,56,60,8
+    EDITTEXT        IDC_EDIT_SAMPLE_LENGTH,108,54,42,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Sample Frequency:",IDC_STATIC,12,74,66,8
+    EDITTEXT        IDC_EDIT_SAMPLE_FREQ,108,72,42,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Sample Length in Seconds:",IDC_STATIC,156,56,90,8
+    EDITTEXT        IDC_EDIT_SAMPLE_LENGTH_SEC,252,54,42,12,ES_AUTOHSCROLL
+    LTEXT           "Size: 9999 KB",IDC_STATIC_SMPSIZE_KB,156,72,138,12
+    GROUPBOX        "Clipping Options",IDC_STATIC,6,96,294,66
+    CONTROL         "Normalize - All values are accepted and normalized.",IDC_RADIO_SMPCLIP3,
+                    "Button",BS_AUTORADIOBUTTON,12,114,270,12
+    CONTROL         "Clip - Values in [-1,1] are accepted, other values are clipped.",IDC_RADIO_SMPCLIP1,
+                    "Button",BS_AUTORADIOBUTTON,12,126,270,12
+    CONTROL         "Overflow - Values in [-1,1] are accepted, other values are wrapped around.",IDC_RADIO_SMPCLIP2,
+                    "Button",BS_AUTORADIOBUTTON,12,138,270,12
+    DEFPUSHBUTTON   "OK",IDOK,192,168,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,246,168,50,14
+    PUSHBUTTON      "Presets...",IDC_BUTTON_SAMPLEGEN_PRESETS,6,168,50,14
+END
+
+IDD_SAMPLE_GENERATOR_PRESETS DIALOGEX 0, 0, 316, 101
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Sample Generator Presets"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,258,78,50,14
+    LISTBOX         IDC_LIST_SAMPLEGEN_PRESETS,6,6,108,90,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_PRESET_NAME,120,18,186,12,ES_AUTOHSCROLL
+    LTEXT           "Name:",IDC_STATIC,120,6,186,8
+    EDITTEXT        IDC_EDIT_PRESET_EXPR,120,54,186,12,ES_AUTOHSCROLL
+    LTEXT           "Expression:",IDC_STATIC,120,42,186,8
+    PUSHBUTTON      "Remove",IDC_BUTTON_REMOVE,120,78,50,14
+    PUSHBUTTON      "Add",IDC_BUTTON_ADD,174,78,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -139,15 +182,31 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 130
     END
+
+    IDD_SAMPLE_GENERATOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 297
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 184
+    END
+
+    IDD_SAMPLE_GENERATOR_PRESETS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 94
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // German (Germany) resources
+#endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -467,7 +526,7 @@ BEGIN
 END
 
 IDD_CONTROL_SAMPLES DIALOGEX 0, 0, 544, 106
-STYLE DS_SETFONT | WS_CHILD
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     CONTROL         "Toolbar1",IDC_TOOLBAR1,"ToolbarWindow32",WS_GROUP | 0x4d,4,4,55,17
@@ -2311,12 +2370,12 @@ BEGIN
     IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_i16.dll."
 END
 
-#endif    // English (U.S.) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
+// Englisch (GB) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2685,7 +2744,7 @@ IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
 //
 
 IDR_BUILTIN_TUNINGS     TUNING                  "res\\built-inTunings.tc"
-#endif    // English (U.K.) resources
+#endif    // Englisch (GB) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
