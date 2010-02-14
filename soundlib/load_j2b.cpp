@@ -339,7 +339,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				dwMemPos += sizeof(AMFFCHUNK_INSTRUMENT);
 
 				SAMPLEINDEX nSmp = inschunk->sample + 1;
-				if(nSmp > MAX_SAMPLES)
+				if(nSmp >= MAX_SAMPLES)
 					break;
 				m_nSamples = max(m_nSamples, nSmp);
 
@@ -398,7 +398,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				dwMemPos += dwHeadlen;
 
 				SAMPLEINDEX nSmp = instheadchunk->sample + 1;
-				if(nSmp > MAX_SAMPLES)
+				if(nSmp >= MAX_SAMPLES)
 					break;
 				m_nSamples = max(m_nSamples, nSmp);
 
