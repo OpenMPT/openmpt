@@ -457,9 +457,6 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	version = id;
 	streamPos += sizeof(DWORD);
 
-	if(version > ITP_VERSION)
-		return false;
-
 	m_nType = MOD_TYPE_IT;
 
 // Song name
@@ -850,11 +847,6 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 				default:
 					ptr += sizeof(__int32);			// jump field code
 					ReadExtendedInstrumentProperty(Instruments[i], fcode, ptr, lpStream + dwMemLength);
-					// fix old instrument flags which got broken in OpenMPT 1.17.03.03 due to refactoring (rev 415).
-					if(version == 0x00000101 && fcode == 'dF..')
-					{
-						ConvertOldExtendedFlagFormat(Instruments[i]);
-					}
 					break;
 			}
 		}
@@ -3526,7 +3518,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	fwrite(&size, 1, sizeof(__int16), f);
 	fwrite(&m_dwCreatedWithVersion, 1, size, f);	
 
-	code = 'LSWV';							//write m_dwCreatedWithVersion
+	code = 'LSWV';							//write m_dwLastSavedWithVersion
 	fwrite(&code, 1, sizeof(__int32), f);	
 	size = sizeof(m_dwLastSavedWithVersion);		
 	fwrite(&size, 1, sizeof(__int16), f);

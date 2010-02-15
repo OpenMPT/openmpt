@@ -698,7 +698,7 @@ void COrderList::UpdateInfoText()
 		s[0] = 0;
 		if(CMainFrame::m_dwPatternSetup & PATTERN_HEXDISPLAY)
 		{
-			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, pSndFile->Order.GetLengthFirstEmpty());
+			wsprintf(s, "Position %02Xh of %02Xh", m_nScrollPos, pSndFile->Order.GetLengthTailTrimmed());
 		}
 		else
 		{
@@ -709,7 +709,7 @@ void COrderList::UpdateInfoText()
 		
 		if (m_nScrollPos < pSndFile->Order.GetLength())
 		{
-			UINT nPat = pSndFile->Order[m_nScrollPos];
+			PATTERNINDEX nPat = pSndFile->Order[m_nScrollPos];
 			if ((nPat < pSndFile->Patterns.Size()) && (nPat < pSndFile->m_nPatternNames))
 			{
 				CHAR szpat[40] = "";

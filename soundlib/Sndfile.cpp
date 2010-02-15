@@ -153,7 +153,7 @@ GV..			nGlobalVol;
 IFC.			nIFC;
 IFR.			nIFR;
 K[.				Keyboard[128];
-LSWV	[EXT]	nPlugMixMode
+LSWV	[EXT]	Last Saved With Version
 MB..			wMidiBank;
 MC..			nMidiChannel;
 MDK.			nMidiDrumKey;
@@ -219,6 +219,7 @@ VFLG			VolEnv.dwFlags
 // Convenient macro to help WRITE_HEADER declaration for single type members ONLY (non-array)
 // --------------------------------------------------------------------------------------------
 #define WRITE_MPTHEADER_sized_member(name,type,code) \
+static_assert(sizeof(input->name) >= sizeof(type), "");\
 fcode = #@code;\
 fwrite(& fcode , 1 , sizeof( __int32 ) , file);\
 fsize = sizeof( type );\
@@ -229,11 +230,37 @@ fwrite(&input-> name , 1 , fsize , file);
 // Convenient macro to help WRITE_HEADER declaration for array members ONLY
 // --------------------------------------------------------------------------------------------
 #define WRITE_MPTHEADER_array_member(name,type,code,arraysize) \
+ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
 fcode = #@code;\
 fwrite(& fcode , 1 , sizeof( __int32 ) , file);\
 fsize = sizeof( type ) * arraysize;\
 fwrite(& fsize , 1 , sizeof( __int16 ) , file);\
 fwrite(&input-> name , 1 , fsize , file);
+
+namespace {
+// Create 'dF..' entry.
+DWORD CreateExtensionFlags(const MODINSTRUMENT& ins)
+//--------------------------------------------------
+{
+	DWORD dwFlags = 0;
+	if (ins.VolEnv.dwFlags & ENV_ENABLED)	dwFlags |= dFdd_VOLUME;
+	if (ins.VolEnv.dwFlags & ENV_SUSTAIN)	dwFlags |= dFdd_VOLSUSTAIN;
+	if (ins.VolEnv.dwFlags & ENV_LOOP)		dwFlags |= dFdd_VOLLOOP;
+	if (ins.PanEnv.dwFlags & ENV_ENABLED)	dwFlags |= dFdd_PANNING;
+	if (ins.PanEnv.dwFlags & ENV_SUSTAIN)	dwFlags |= dFdd_PANSUSTAIN;
+	if (ins.PanEnv.dwFlags & ENV_LOOP)		dwFlags |= dFdd_PANLOOP;
+	if (ins.PitchEnv.dwFlags & ENV_ENABLED)	dwFlags |= dFdd_PITCH;
+	if (ins.PitchEnv.dwFlags & ENV_SUSTAIN)	dwFlags |= dFdd_PITCHSUSTAIN;
+	if (ins.PitchEnv.dwFlags & ENV_LOOP)	dwFlags |= dFdd_PITCHLOOP;
+	if (ins.dwFlags & INS_SETPANNING)		dwFlags |= dFdd_SETPANNING;
+	if (ins.PitchEnv.dwFlags & ENV_FILTER)	dwFlags |= dFdd_FILTER;
+	if (ins.VolEnv.dwFlags & ENV_CARRY)		dwFlags |= dFdd_VOLCARRY;
+	if (ins.PanEnv.dwFlags & ENV_CARRY)		dwFlags |= dFdd_PANCARRY;
+	if (ins.PitchEnv.dwFlags & ENV_CARRY)	dwFlags |= dFdd_PITCHCARRY;
+	if (ins.dwFlags & INS_MUTE)				dwFlags |= dFdd_MUTE;
+	return dwFlags;
+}
+} // unnamed namespace.
 
 // Write (in 'file') 'input' MODINSTRUMENT with 'code' & 'size' extra field infos for each member
 void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file)
@@ -241,7 +268,17 @@ void WriteInstrumentHeaderStruct(MODINSTRUMENT * input, FILE * file)
 __int32 fcode;
 __int16 fsize;
 WRITE_MPTHEADER_sized_member(	nFadeOut				, UINT			, FO..							)
-WRITE_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
+
+{ // dwFlags needs to be constructed so write it manually.
+	//WRITE_MPTHEADER_sized_member(	dwFlags					, DWORD			, dF..							)
+	const DWORD dwFlags = CreateExtensionFlags(*input);
+	fcode = 'dF..';
+	fwrite(&fcode, 1, sizeof(int32), file);
+	fsize = sizeof(dwFlags);
+	fwrite(&fsize, 1, sizeof(int16), file);
+	fwrite(&dwFlags, 1, fsize, file);
+}
+
 WRITE_MPTHEADER_sized_member(	nGlobalVol				, UINT			, GV..							)
 WRITE_MPTHEADER_sized_member(	nPan					, UINT			, P...							)
 WRITE_MPTHEADER_sized_member(	VolEnv.nNodes			, UINT			, VE..							)
@@ -272,12 +309,12 @@ WRITE_MPTHEADER_sized_member(	nMidiChannel			, BYTE			, MC..							)
 WRITE_MPTHEADER_sized_member(	nMidiDrumKey			, BYTE			, MDK.							)
 WRITE_MPTHEADER_sized_member(	nPPS					, signed char	, PPS.							)
 WRITE_MPTHEADER_sized_member(	nPPC					, unsigned char	, PPC.							)
-WRITE_MPTHEADER_array_member(	VolEnv.Ticks			, WORD			, VP[.		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	PanEnv.Ticks			, WORD			, PP[.		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	PitchEnv.Ticks			, WORD			, PiP[		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	VolEnv.Values			, BYTE			, VE[.		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	PanEnv.Values			, BYTE			, PE[.		, MAX_ENVPOINTS		)
-WRITE_MPTHEADER_array_member(	PitchEnv.Values			, BYTE			, PiE[		, MAX_ENVPOINTS		)
+WRITE_MPTHEADER_array_member(	VolEnv.Ticks			, WORD			, VP[.		, ((input->VolEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
+WRITE_MPTHEADER_array_member(	PanEnv.Ticks			, WORD			, PP[.		, ((input->PanEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
+WRITE_MPTHEADER_array_member(	PitchEnv.Ticks			, WORD			, PiP[		, ((input->PitchEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
+WRITE_MPTHEADER_array_member(	VolEnv.Values			, BYTE			, VE[.		, ((input->VolEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
+WRITE_MPTHEADER_array_member(	PanEnv.Values			, BYTE			, PE[.		, ((input->PanEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
+WRITE_MPTHEADER_array_member(	PitchEnv.Values			, BYTE			, PiE[		, ((input->PitchEnv.nNodes > 32) ? MAX_ENVPOINTS : 32))
 WRITE_MPTHEADER_array_member(	NoteMap					, BYTE			, NM[.		, 128				)
 WRITE_MPTHEADER_array_member(	Keyboard				, WORD			, K[..		, 128				)
 WRITE_MPTHEADER_array_member(	name					, CHAR			, n[..		, 32				)
@@ -376,9 +413,9 @@ GET_MPTHEADER_sized_member(	nPluginVolumeHandling	, BYTE			, PVOH							)
 GET_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, BYTE			, PERN							)
 GET_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, BYTE		    , AERN							)
 GET_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, BYTE			, VERN							)
-GET_MPTHEADER_sized_member(	PitchEnv.dwFlags     	, BYTE			, PFLG							)
-GET_MPTHEADER_sized_member(	PanEnv.dwFlags     		, BYTE		    , AFLG							)
-GET_MPTHEADER_sized_member(	VolEnv.dwFlags     		, BYTE			, VFLG							)
+GET_MPTHEADER_sized_member(	PitchEnv.dwFlags     	, DWORD			, PFLG							)
+GET_MPTHEADER_sized_member(	PanEnv.dwFlags     		, DWORD		    , AFLG							)
+GET_MPTHEADER_sized_member(	VolEnv.dwFlags     		, DWORD			, VFLG							)
 }
 
 return pointer;
