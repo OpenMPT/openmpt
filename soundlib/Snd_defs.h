@@ -167,9 +167,29 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define ENV_CARRY			0x08	// env carry
 #define ENV_FILTER			0x10	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
 
+
+// Flags of 'dF..' datafield in extended instrument properties.
+#define dFdd_VOLUME 		0x0001
+#define dFdd_VOLSUSTAIN 	0x0002
+#define dFdd_VOLLOOP 		0x0004
+#define dFdd_PANNING 		0x0008
+#define dFdd_PANSUSTAIN 	0x0010
+#define dFdd_PANLOOP 		0x0020
+#define dFdd_PITCH 			0x0040
+#define dFdd_PITCHSUSTAIN 	0x0080
+#define dFdd_PITCHLOOP 		0x0100
+#define dFdd_SETPANNING 	0x0200
+#define dFdd_FILTER 		0x0400
+#define dFdd_VOLCARRY 		0x0800
+#define dFdd_PANCARRY 		0x1000
+#define dFdd_PITCHCARRY 	0x2000
+#define dFdd_MUTE 			0x4000
+
+
 // instrument-specific flags
 #define INS_SETPANNING		0x01	// panning enabled
-#define INS_MUTE			0x02	// instrumentd is muted
+#define INS_MUTE			0x02	// instrument is muted
+
 
 // envelope types in instrument editor
 enum enmEnvelopeTypes

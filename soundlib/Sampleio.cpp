@@ -2021,6 +2021,9 @@ void ReadInstrumentExtensionField(MODINSTRUMENT* pIns, LPCBYTE& ptr, const int32
 	if(fadr && code != 'K[..')	// copy field data in instrument's header
 		memcpy(fadr,ptr,size);  // (except for keyboard mapping)
 	ptr += size;				// jump field
+
+	if (code == 'dF..' && fadr != nullptr) // 'dF..' field requires additional processing.
+		ConvertReadExtendedFlags(pIns);
 }
 
 
@@ -2056,8 +2059,6 @@ void ReadExtendedInstrumentProperties(MODINSTRUMENT* pIns, const LPCBYTE pDataSt
 	// Seek for supported extended settings header
 	if( code == 'MPTX' )
 	{
-		bool newFormat = false; // new flag format (separate flags for envelopes)
-		bool hasFlags = false; // do we really need to convert the flags?
 		pData += sizeof(code); // jump extension header code
 
 		while( (uintptr_t)(pData - pDataStart) <= nMemLength - 4)
@@ -2065,39 +2066,31 @@ void ReadExtendedInstrumentProperties(MODINSTRUMENT* pIns, const LPCBYTE pDataSt
 			memcpy(&code, pData, sizeof(code)); // read field code
 			pData += sizeof(code);				 // jump field code
 			ReadExtendedInstrumentProperty(pIns, code, pData, pEnd);
-			if(code == 'VFLG')
-				newFormat = true;
-			if(code == 'dF..')
-				hasFlags = true;
-		}
-		if(!newFormat && hasFlags)
-		{
-			ConvertOldExtendedFlagFormat(pIns);
 		}
 	}
 }
 
 
-void ConvertOldExtendedFlagFormat(MODINSTRUMENT *pIns)
-//----------------------------------------------------
+void ConvertReadExtendedFlags(MODINSTRUMENT *pIns)
+//------------------------------------------------
 {
-	DWORD dwOldFlags = pIns->dwFlags;
+	const DWORD dwOldFlags = pIns->dwFlags;
 	pIns->dwFlags = pIns->VolEnv.dwFlags = pIns->PanEnv.dwFlags = pIns->PitchEnv.dwFlags = 0;
-	if(dwOldFlags & 0x0001) pIns->VolEnv.dwFlags |= ENV_ENABLED;
-	if(dwOldFlags & 0x0002) pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
-	if(dwOldFlags & 0x0004) pIns->VolEnv.dwFlags |= ENV_LOOP;
-	if(dwOldFlags & 0x0008) pIns->PanEnv.dwFlags |= ENV_ENABLED;
-	if(dwOldFlags & 0x0010) pIns->PanEnv.dwFlags |= ENV_SUSTAIN;
-	if(dwOldFlags & 0x0020) pIns->PanEnv.dwFlags |= ENV_LOOP;
-	if(dwOldFlags & 0x0040) pIns->PitchEnv.dwFlags |= ENV_ENABLED;
-	if(dwOldFlags & 0x0080) pIns->PitchEnv.dwFlags |= ENV_SUSTAIN;
-	if(dwOldFlags & 0x0100) pIns->VolEnv.dwFlags |= ENV_LOOP;
-	if(dwOldFlags & 0x0200) pIns->dwFlags |= INS_SETPANNING;
-	if(dwOldFlags & 0x0400) pIns->PitchEnv.dwFlags |= ENV_FILTER;
-	if(dwOldFlags & 0x0800) pIns->VolEnv.dwFlags |= ENV_CARRY;
-	if(dwOldFlags & 0x1000) pIns->PanEnv.dwFlags |= ENV_CARRY;
-	if(dwOldFlags & 0x2000) pIns->PitchEnv.dwFlags |= ENV_CARRY;
-	if(dwOldFlags & 0x4000) pIns->dwFlags |= INS_MUTE;
+	if(dwOldFlags & dFdd_VOLUME)		pIns->VolEnv.dwFlags |= ENV_ENABLED;
+	if(dwOldFlags & dFdd_VOLSUSTAIN)	pIns->VolEnv.dwFlags |= ENV_SUSTAIN;
+	if(dwOldFlags & dFdd_VOLLOOP)		pIns->VolEnv.dwFlags |= ENV_LOOP;
+	if(dwOldFlags & dFdd_PANNING)		pIns->PanEnv.dwFlags |= ENV_ENABLED;
+	if(dwOldFlags & dFdd_PANSUSTAIN)	pIns->PanEnv.dwFlags |= ENV_SUSTAIN;
+	if(dwOldFlags & dFdd_PANLOOP)		pIns->PanEnv.dwFlags |= ENV_LOOP;
+	if(dwOldFlags & dFdd_PITCH)			pIns->PitchEnv.dwFlags |= ENV_ENABLED;
+	if(dwOldFlags & dFdd_PITCHSUSTAIN)	pIns->PitchEnv.dwFlags |= ENV_SUSTAIN;
+	if(dwOldFlags & dFdd_PITCHLOOP)		pIns->PitchEnv.dwFlags |= ENV_LOOP;
+	if(dwOldFlags & dFdd_SETPANNING)	pIns->dwFlags |= INS_SETPANNING;
+	if(dwOldFlags & dFdd_FILTER)		pIns->PitchEnv.dwFlags |= ENV_FILTER;
+	if(dwOldFlags & dFdd_VOLCARRY)		pIns->VolEnv.dwFlags |= ENV_CARRY;
+	if(dwOldFlags & dFdd_PANCARRY)		pIns->PanEnv.dwFlags |= ENV_CARRY;
+	if(dwOldFlags & dFdd_PITCHCARRY)	pIns->PitchEnv.dwFlags |= ENV_CARRY;
+	if(dwOldFlags & dFdd_MUTE)			pIns->dwFlags |= INS_MUTE;
 }
 
 

@@ -645,6 +645,13 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	Log("VST plugin to host: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n",(int)effect, opcode,index,value,(int)ptr,opt);
 	#endif
 
+	enum HostCanDo
+	{
+		HostDoNotKnow	= 0,
+		HostCanDo		= 1,
+		HostCanNotDo	= -1
+	};
+
 	switch(opcode)
 	{
 	// Called when plugin param is changed via gui
@@ -929,14 +936,14 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		//"asyncProcessing",
 		//"offline",
 		//"supportShell"
-		if (!(strcmp((char*)ptr,"sendVstEvents")==0		||
+		if ((strcmp((char*)ptr,"sendVstEvents")==0		||
 				strcmp((char*)ptr,"sendVstMidiEvent")==0	||
 				strcmp((char*)ptr,"sendVstTimeInfo")==0	||
 				strcmp((char*)ptr,"supplyIdle")==0 || 
 				strcmp((char*)ptr,"sizeWindow")==0))
-			return 1;
+			return HostCanDo;
 		else
-			return -1;
+			return HostCanNotDo;
 	//
 	case audioMasterGetLanguage:		
 		return kVstLangEnglish;
