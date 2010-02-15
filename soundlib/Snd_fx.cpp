@@ -734,8 +734,17 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			pChn->nPos = 0;
 			pChn->nPosLo = 0;
 			// Handle "retrigger" waveform type
-			if (pChn->nVibratoType < 4) pChn->nVibratoPos = ((!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER)) && (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))) ? 0x10 : 0;
-			if(!IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER) && pChn->nTremoloType < 4) pChn->nTremoloPos = 0;
+			if (pChn->nVibratoType < 4)
+			{
+				if(!IsCompatibleMode(TRK_IMPULSETRACKER) && (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS)))
+					pChn->nVibratoPos = 0x10;
+				else
+					pChn->nVibratoPos = 0;
+			}
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->nTremoloType < 4)
+			{
+				pChn->nTremoloPos = 0;
+			}
 		}
 		if (pChn->nPos >= pChn->nLength) pChn->nPos = pChn->nLoopStart;
 	} 
@@ -2592,11 +2601,25 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 				pChn->nFineTune = MOD2XMFineTune(param);
 				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
 				break;
-	// S3x: Set Vibrato WaveForm
-	case 0x30:	if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nVibratoType = param & 0x07; break;
-	// S4x: Set Tremolo WaveForm
-	case 0x40:	if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nTremoloType = param & 0x07; break;
-	// S5x: Set Panbrello WaveForm
+	// S3x: Set Vibrato Waveform
+	case 0x30:	if(GetType() == MOD_TYPE_S3M)
+				{
+					pChn->nVibratoType = param & 0x03;
+				} else
+				{
+					if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nVibratoType = param & 0x07;
+				}
+				break;
+	// S4x: Set Tremolo Waveform
+	case 0x40:	if(GetType() == MOD_TYPE_S3M)
+				{
+					pChn->nTremoloType = param & 0x03;
+				} else
+				{
+					if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nTremoloType = param & 0x07;
+				}
+				break;
+	// S5x: Set Panbrello Waveform
 	case 0x50:	if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPanbrelloType = param & 0x07; break;
 	// S6x: Pattern Delay for x frames
 	case 0x60:	m_nFrameDelay = param; break;
