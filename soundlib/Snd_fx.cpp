@@ -2570,7 +2570,7 @@ void CSoundFile::ExtendedMODCommands(UINT nChn, UINT param)
 	// EDx: Note Delay
 	// EEx: Pattern Delay
 	case 0xF0:	
-		if((m_nType & MOD_TYPE_MOD) != 0) // MOD: Invert Loop
+		if(GetType() == MOD_TYPE_MOD) // MOD: Invert Loop
 		{
 			pChn->nEFxSpeed = param;
 			if(m_dwSongFlags & SONG_FIRSTTICK) InvertLoop(pChn);
@@ -2607,7 +2607,10 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 					pChn->nVibratoType = param & 0x03;
 				} else
 				{
-					if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nVibratoType = param & 0x07;
+					if(IsCompatibleMode(TRK_IMPULSETRACKER))
+						pChn->nVibratoType = (param < 0x04) ? param : 0;
+					else
+						pChn->nVibratoType = param & 0x07;
 				}
 				break;
 	// S4x: Set Tremolo Waveform
@@ -2616,11 +2619,18 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 					pChn->nTremoloType = param & 0x03;
 				} else
 				{
-					if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nTremoloType = param & 0x07;
+					if(IsCompatibleMode(TRK_IMPULSETRACKER))
+						pChn->nTremoloType = (param < 0x04) ? param : 0;
+					else
+						pChn->nTremoloType = param & 0x07;
 				}
 				break;
 	// S5x: Set Panbrello Waveform
-	case 0x50:	if(((param & 0x0F) < 0x04) || !IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPanbrelloType = param & 0x07; break;
+	case 0x50:	if(IsCompatibleMode(TRK_IMPULSETRACKER))
+					pChn->nPanbrelloType = (param < 0x04) ? param : 0;
+				else
+					pChn->nPanbrelloType = param & 0x07;
+				break;
 	// S6x: Pattern Delay for x frames
 	case 0x60:	m_nFrameDelay = param; break;
 	// S7x: Envelope Control / Instrument Control
@@ -3290,7 +3300,11 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 		bool bResetEnv = false;
 		if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 		{
-			if ((pChn->nRowInstr) && (param < 0x100)) { InstrumentChange(pChn, pChn->nRowInstr, FALSE, FALSE); bResetEnv = true; }
+			if ((pChn->nRowInstr) && (param < 0x100))
+			{
+				InstrumentChange(pChn, pChn->nRowInstr, FALSE, FALSE);
+				bResetEnv = true;
+			}
 			if (param < 0x100) bResetEnv = true;
 		}
 		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER) ? true : false, bResetEnv);
