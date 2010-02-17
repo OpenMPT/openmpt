@@ -3777,3 +3777,52 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		m->volcmd = CMD_NONE;
 
 }
+
+
+// "importance" of every FX command. Table is used for importing from formats with multiple effect colums
+// and is approximately the same as in SchismTracker.
+uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd)
+//---------------------------------------------------------
+{
+	switch(cmd)
+	{
+	case CMD_PATTERNBREAK:		return 288;
+	case CMD_POSITIONJUMP:		return 280;
+	case CMD_SPEED:				return 272;
+	case CMD_TEMPO:				return 264;
+	case CMD_GLOBALVOLUME:		return 256;
+	case CMD_GLOBALVOLSLIDE:	return 248;
+	case CMD_CHANNELVOLUME:		return 240;
+	case CMD_CHANNELVOLSLIDE:	return 232;
+	case CMD_TONEPORTAVOL:		return 224;
+	case CMD_TONEPORTAMENTO:	return 216;
+	case CMD_ARPEGGIO:			return 208;
+	case CMD_RETRIG:			return 200;
+	case CMD_TREMOR:			return 192;
+	case CMD_OFFSET:			return 184;
+	case CMD_VOLUME:			return 176;
+	case CMD_VIBRATOVOL:		return 168;
+	case CMD_VOLUMESLIDE:		return 160;
+	case CMD_PORTAMENTODOWN:	return 152;
+	case CMD_PORTAMENTOUP:		return 133;
+	case CMD_NOTESLIDEDOWN:		return 136;
+	case CMD_NOTESLIDEUP:		return 128;
+	case CMD_PANNING8:			return 120;
+	case CMD_PANNINGSLIDE:		return 112;
+	case CMD_SMOOTHMIDI:		return 104;
+	case CMD_MIDI:				return  96;
+	case CMD_MODCMDEX:			return  88;
+	case CMD_S3MCMDEX:			return  80;
+	case CMD_PANBRELLO:			return  72;
+	case CMD_XFINEPORTAUPDOWN:	return  64;
+	case CMD_VIBRATO:			return  56;
+	case CMD_FINEVIBRATO:		return  48;
+	case CMD_TREMOLO:			return  40;
+	case CMD_KEYOFF:			return  32;
+	case CMD_SETENVPOSITION:	return  24;
+	case CMD_VELOCITY:			return  16;
+	case CMD_XPARAM:			return   8;
+	case CMD_NONE:
+	default:					return   0;
+	}
+}

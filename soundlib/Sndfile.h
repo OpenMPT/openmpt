@@ -964,6 +964,11 @@ private:
 	void HandlePatternTransitionEvents();
 	void BuildDefaultInstrument();
 	long GetSampleOffset();
+
+public:
+	// "importance" of every FX command. Table is used for importing from formats with multiple effect colums
+	// and is approximately the same as in SchismTracker.
+	static uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd);
 };
 
 #pragma warning(default : 4324) //structure was padded due to __declspec(align())

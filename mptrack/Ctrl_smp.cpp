@@ -2540,6 +2540,7 @@ void CCtrlSamples::OnLoopTypeChanged()
 	if ((IsLocked()) || (!m_pSndFile)) return;
 	int n = m_ComboLoopType.GetCurSel();
 	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
+	bool wasDisabled = (pSmp->uFlags & CHN_LOOP) == 0;
 	switch(n)
 	{
 	case 0:	// Off
@@ -2552,6 +2553,12 @@ void CCtrlSamples::OnLoopTypeChanged()
 	case 2:	// PingPong
 		pSmp->uFlags |= CHN_LOOP|CHN_PINGPONGLOOP;
 		break;
+	}
+	// set loop points if theren't any
+	if(wasDisabled && ((pSmp->uFlags & CHN_LOOP) != 0) && (pSmp->nLoopStart == pSmp->nLoopEnd) && (pSmp->nLoopStart == 0))
+	{
+		pSmp->nLoopEnd = pSmp->nLength;
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 	}
 	m_pModDoc->AdjustEndOfSample(m_nSample);
 	m_pModDoc->SetModified();
@@ -2608,6 +2615,7 @@ void CCtrlSamples::OnSustainTypeChanged()
 	if ((IsLocked()) || (!m_pSndFile)) return;
 	int n = m_ComboSustainType.GetCurSel();
 	MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
+	bool wasDisabled = (pSmp->uFlags & CHN_SUSTAINLOOP) == 0;
 	switch(n)
 	{
 	case 0:	// Off
@@ -2620,6 +2628,12 @@ void CCtrlSamples::OnSustainTypeChanged()
 	case 2:	// PingPong
 		pSmp->uFlags |= CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN;
 		break;
+	}
+	// set sustain loop points if theren't any
+	if(wasDisabled && ((pSmp->uFlags & CHN_SUSTAINLOOP) != 0) && (pSmp->nSustainStart == pSmp->nSustainEnd) && (pSmp->nSustainStart == 0))
+	{
+		pSmp->nSustainEnd = pSmp->nLength;
+		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 	}
 	m_pModDoc->SetModified();
 }
