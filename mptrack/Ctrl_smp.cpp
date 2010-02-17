@@ -883,11 +883,27 @@ void CCtrlSamples::OnZoomChanged()
 void CCtrlSamples::OnSampleNew()
 //------------------------------
 {
-	LONG smp = m_pModDoc->InsertSample(TRUE);
+	bool bDuplicate = CMainFrame::GetInputHandler()->ShiftPressed();
+
+	SAMPLEINDEX smp = m_pModDoc->InsertSample(true);
 	if (smp != SAMPLEINDEX_INVALID)
 	{
+		SAMPLEINDEX nOldSmp = m_nSample;
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		SetCurrentSample(smp);
+
+		if(bDuplicate && nOldSmp >= 1 && nOldSmp < MAX_SAMPLES)
+		{
+			m_pModDoc->GetSampleUndo()->PrepareUndo(smp, sundo_replace);
+			memcpy(&m_pSndFile->Samples[smp], &m_pSndFile->Samples[nOldSmp], sizeof(MODSAMPLE));
+			strcpy(m_pSndFile->m_szNames[smp], m_pSndFile->m_szNames[nOldSmp]);
+			// clone sample.
+			if((m_pSndFile->Samples[smp].pSample = CSoundFile::AllocateSample(m_pSndFile->Samples[nOldSmp].GetSampleSizeInBytes())) != nullptr)
+			{
+				memcpy(m_pSndFile->Samples[smp].pSample, m_pSndFile->Samples[nOldSmp].pSample, m_pSndFile->Samples[nOldSmp].GetSampleSizeInBytes());
+			}
+		}
+
 		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (smp << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
 		if ((pSndFile->m_nInstruments) && (!m_pModDoc->FindSampleParent(smp)))
