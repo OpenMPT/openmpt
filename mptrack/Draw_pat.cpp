@@ -1463,22 +1463,29 @@ void CViewPattern::UpdateIndicator()
 			{
 				MODCOMMAND *m = &pSndFile->Patterns[m_nPattern][m_nRow*pSndFile->m_nChannels+nChn];
 
-				// Ignore update if using PC or PCs notes because instrument, volcol and effect values
-				// have different meaning.
-				if((m->note != NOTE_PC && m->note != NOTE_PCS) || GetColTypeFromCursor(m_dwCursor) == 0)
+				switch (GetColTypeFromCursor(m_dwCursor))
 				{
-					switch (GetColTypeFromCursor(m_dwCursor))
+				case 0:
+					// display note
+					if(m->note >= NOTE_MIN_SPECIAL)
+						strcpy(s, szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL]);
+					break;
+				case 1:
+					// display instrument
+					if (m->instr)
 					{
-					case 0:
-						// display note
-						if(m->note >= NOTE_MIN_SPECIAL)
-							strcpy(s, szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL]);
-						break;
-					case 1:
-						// display instrument
-						if (m->instr)
+						CHAR sztmp[128] = "";
+						if(m->note == NOTE_PC || m->note == NOTE_PCS)
 						{
-							CHAR sztmp[128] = "";
+							// display plugin name.
+							if(m->instr <= MAX_MIXPLUGINS)
+							{
+								strncpy(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetName(), sizeof(sztmp));
+								SetNullTerminator(sztmp);
+							}
+						} else
+						{
+							// "normal" instrument
 							if (pSndFile->m_nInstruments)
 							{
 								if ((m->instr <= pSndFile->m_nInstruments) && (pSndFile->Instruments[m->instr]))
@@ -1509,19 +1516,37 @@ void CViewPattern::UpdateIndicator()
 									sztmp[32] = 0;
 								}
 							}
-							if (sztmp[0]) wsprintf(s, "%d: %s", m->instr, sztmp);
+
 						}
-						break;
-					case 2:
-					// display volume command
-						if (!pModDoc->GetVolCmdInfo(pModDoc->GetIndexFromVolCmd(m->volcmd), s)) s[0] = 0;
-						break;
-					case 3:
-					case 4:
-					// display effect command
-						if (!pModDoc->GetEffectName(s, m->command, m->param, false, nChn)) s[0] = 0;
-						break;
+						if (sztmp[0]) wsprintf(s, "%d: %s", m->instr, sztmp);
 					}
+					break;
+				case 2:
+					// display volume command
+					if(m->note == NOTE_PC || m->note == NOTE_PCS)
+					{
+						// display plugin param name.
+						if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
+						{
+							CHAR sztmp[128] = "";
+							strncpy(sztmp, pSndFile->m_MixPlugins[m->instr - 1].GetParamName(m->GetValueVolCol()), sizeof(sztmp));
+							SetNullTerminator(sztmp);
+							if (sztmp[0]) wsprintf(s, "%d: %s", m->GetValueVolCol(), sztmp);
+						}
+					} else
+					{
+						// "normal" volume command
+						if (!pModDoc->GetVolCmdInfo(pModDoc->GetIndexFromVolCmd(m->volcmd), s)) s[0] = 0;
+					}
+					break;
+				case 3:
+				case 4:
+					// display effect command
+					if(m->note != NOTE_PC && m->note != NOTE_PCS)
+					{
+						if (!pModDoc->GetEffectName(s, m->command, m->param, false, nChn)) s[0] = 0;
+					}
+					break;
 				}
 			}
 			pMainFrm->SetInfoText(s);
