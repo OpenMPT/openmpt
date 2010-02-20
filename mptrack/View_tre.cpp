@@ -2333,8 +2333,8 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 					{
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_SWITCHTO, "&Switch to Seqeuence");
 					}
-					AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, "&Insert Sequence");
-					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, "D&uplicate Sequence");
+					AppendMenu(hMenu, MF_STRING | (pSndFile->Order.GetNumSequences() < MAX_SEQUENCES ? 0 : MF_GRAYED), ID_MODTREE_INSERT, "&Insert Sequence");
+					AppendMenu(hMenu, MF_STRING | (pSndFile->Order.GetNumSequences() < MAX_SEQUENCES ? 0 : MF_GRAYED), ID_MODTREE_DUPLICATE , "D&uplicate Sequence");
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, "&Delete Sequence");
 				}
 				break;
@@ -2867,6 +2867,7 @@ void CModTree::OnDuplicateTreeItem()
 	{
 		pSndFile->Order.SetSequence((SEQUENCEINDEX)modItemID);
 		pSndFile->Order.AddSequence(true);
+		pModDoc->SetModified();
 		UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE);
 		pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
 	}
@@ -2889,6 +2890,7 @@ void CModTree::OnInsertTreeItem()
 	if (pModDoc && pSndFile && ((modItemType == MODITEM_SEQUENCE) || (modItemType == MODITEM_HDR_ORDERS)))
 	{
 		pSndFile->Order.AddSequence(false);
+		pModDoc->SetModified();
 		UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_SEQNAMES|HINT_MODSEQUENCE);
 		pModDoc->UpdateAllViews(NULL, HINT_SEQNAMES|HINT_MODSEQUENCE);
 	}

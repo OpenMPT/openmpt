@@ -60,7 +60,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_ORDERLIST_COPY,		OnDuplicatePattern)
 	ON_COMMAND(ID_PATTERNCOPY,			OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,			OnPatternPaste)
-	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, OnSelectSequence)
+	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, OnSelectSequence)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,	OnDragonDropping)
 	ON_MESSAGE(WM_HELPHITTEST,			OnHelpHitTest)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,		OnCustomKeyMsg)
@@ -1070,9 +1070,12 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 				AppendMenu(menuSequence, flags, ID_SEQUENCE_ITEM + i, str);
 			}
 			if (pSndFile->Order.GetNumSequences() < MAX_SEQUENCES)
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, TEXT("Create new sequence"));
+			{
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, TEXT("Duplicate current sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, TEXT("Create empty sequence"));
+			}
 			if (pSndFile->Order.GetNumSequences() > 1)
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, TEXT("Delete current sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, TEXT("Delete current sequence"));
 		}
 	}
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, "");
@@ -1366,7 +1369,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 	BEGIN_CRITICAL();
 	CMainFrame::GetMainFrame()->ResetNotificationBuffer();
 	CSoundFile& rSf = *m_pModDoc->GetSoundFile();
-	if (nSeq == MAX_SEQUENCES + 1)
+	if (nSeq == MAX_SEQUENCES + 2)
 	{
 		CString strParam; strParam.Format(TEXT("%u: %s"), rSf.Order.GetCurrentSequenceIndex(), rSf.Order.m_sName);
 		CString str;
@@ -1379,8 +1382,8 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 			return;
 		}
 	}
-	else if (nSeq == MAX_SEQUENCES)
-		rSf.Order.AddSequence();
+	else if (nSeq == MAX_SEQUENCES || nSeq == MAX_SEQUENCES + 1)
+		rSf.Order.AddSequence((nSeq == MAX_SEQUENCES));
 	else if (nSeq < rSf.Order.GetNumSequences())
 		rSf.Order.SetSequence(nSeq);
 	ORDERINDEX nPosCandidate = rSf.Order.GetLengthTailTrimmed() - 1;
