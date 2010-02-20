@@ -2560,6 +2560,11 @@ void CCommandSet::SetupCommands()
 	commands[kcInstrumentEnvelopePointMoveDown8].isDummy = false;
 	commands[kcInstrumentEnvelopePointMoveDown8].Message = "Move envelope point down (big step)";
 
+	commands[kcPatternEditPCNotePlugin].UID = 1836;
+	commands[kcPatternEditPCNotePlugin].isHidden = false;
+	commands[kcPatternEditPCNotePlugin].isDummy = false;
+	commands[kcPatternEditPCNotePlugin].Message = "Edit plugin assigned to PC note";
+
 	#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

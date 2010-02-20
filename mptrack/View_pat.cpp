@@ -114,6 +114,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_CLEAR_SELECTION,				OnClearSelectionFromMenu)
 	ON_COMMAND(ID_SHOWTIMEATROW,				OnShowTimeAtRow)
 	ON_COMMAND(ID_CHANNEL_RENAME,				OnRenameChannel)
+	ON_COMMAND(ID_PATTERN_EDIT_PCNOTE_PLUGIN,	OnTogglePCNotePluginEditor)
 	ON_COMMAND_RANGE(ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT+MAX_INSTRUMENTS, OnSelectInstrument)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,			OnUpdateUndo)
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnSelectPlugin) //rewbs.patPlugName
@@ -1225,7 +1226,8 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildVisFXCtxMenu(hMenu, ih)   | 	//Use bitwise ORs to avoid shortcuts
 				BuildAmplifyCtxMenu(hMenu, ih) |
-				BuildSetInstCtxMenu(hMenu, ih, pSndFile) )
+				BuildSetInstCtxMenu(hMenu, ih, pSndFile) |
+				BuildPCNoteCtxMenu(hMenu, ih, pSndFile) )
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildGrowShrinkCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
@@ -3620,6 +3622,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcDuplicatePattern: SendCtrlMessage(CTRLMSG_PAT_DUPPATTERN); return wParam;
 		case kcSwitchToOrderList: OnSwitchToOrderList();
 		case kcSwitchOverflowPaste:	CMainFrame::m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
+		case kcPatternEditPCNotePlugin: OnTogglePCNotePluginEditor(); return wParam;
 
 	}
 	//Ranges:
@@ -4988,6 +4991,23 @@ bool CViewPattern::BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile* pSndFile)
 }
 
 
+bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
+//-----------------------------------------------------------------------------------------
+{
+	MODCOMMAND *mSelStart = nullptr;
+	if((pSndFile == nullptr) || (!pSndFile->Patterns.IsValidPat(m_nPattern)))
+		return false;
+	mSelStart = pSndFile->Patterns[m_nPattern].GetpModCommand(GetSelectionStartRow(), GetSelectionStartChan());
+	if((mSelStart == nullptr) || (!mSelStart->IsPcNote()))
+		return false;
+	if(mSelStart->instr < 1 || mSelStart->instr > MAX_MIXPLUGINS)
+		return false;
+	
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, "Toggle plugin editor\t" + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
+	return true;
+}
+
+
 UINT CViewPattern::GetSelectionStartRow() {
 //-----------------------------------------
 	return min(GetRowFromCursor(m_dwBeginSel), GetRowFromCursor(m_dwEndSel));
@@ -5231,4 +5251,25 @@ void CViewPattern::ExecutePaste(enmPatternPasteModes pasteMode)
 		InvalidatePattern(FALSE);
 		SetFocus();
 	}
+}
+
+
+void CViewPattern::OnTogglePCNotePluginEditor()
+//---------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return;
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	if((pSndFile == nullptr) || (!pSndFile->Patterns.IsValidPat(m_nPattern)))
+		return;
+
+	MODCOMMAND *mSelStart = nullptr;
+	mSelStart = pSndFile->Patterns[m_nPattern].GetpModCommand(GetSelectionStartRow(), GetSelectionStartChan());
+	if((mSelStart == nullptr) || (!mSelStart->IsPcNote()))
+		return;
+	if(mSelStart->instr < 1 || mSelStart->instr > MAX_MIXPLUGINS)
+		return;
+
+	PLUGINDEX nPlg = (PLUGINDEX)(mSelStart->instr - 1);
+	pModDoc->TogglePluginEditor(nPlg);
 }
