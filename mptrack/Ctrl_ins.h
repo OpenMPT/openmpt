@@ -19,6 +19,9 @@ protected:
 	int m_cxFont, m_cyFont;
 	COLORREF colorText, colorTextSel;
 
+private:
+	void MapTranspose(int nAmount);
+
 public:
 	CNoteMapWnd() { m_nPlayingNote=-1; m_nNote = 5*12; m_pModDoc = NULL; m_nInstrument = 0; m_bIns = FALSE; m_cxFont = m_cyFont = 0; m_hFont = NULL; m_nOldNote = m_nOldIns = 0; m_pParent = NULL; }
 	BOOL SetCurrentInstrument(CModDoc *pModDoc, UINT nIns);
@@ -47,6 +50,8 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnMapCopySample();
 	afx_msg void OnMapCopyNote();
+	afx_msg void OnMapTransposeUp();
+	afx_msg void OnMapTransposeDown();
 	afx_msg void OnMapReset();
 	afx_msg void OnEditSample(UINT nID);
 	afx_msg void OnEditSampleMap();
