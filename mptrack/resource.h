@@ -1200,6 +1200,8 @@
 #define ID_SAMPLE_GENERATOR_MENU        60244
 #define ID_SAMPLE_GENERATOR_PRESET_MENU 60344
 #define ID_SAMPLE_GENERATE              60445
+#define ID_NOTEMAP_TRANS_UP				60446
+#define ID_NOTEMAP_TRANS_DOWN			60447
 
 // Next default values for new objects
 // 
@@ -1207,7 +1209,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        526
-#define _APS_NEXT_COMMAND_VALUE         60446
+#define _APS_NEXT_COMMAND_VALUE         60448
 #define _APS_NEXT_CONTROL_VALUE         2427
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

@@ -10,6 +10,7 @@
 #define NOTE_FADE			0xFD //253, IT's action for illegal notes - DO NOT SAVE AS 253 as this is IT's internal representation of "no note"!
 #define NOTE_PC				0xFC //252, Param Control 'note'. Changes param value on first tick.
 #define NOTE_PCS			0xFB //251, Param Control(Smooth) 'note'. Changes param value during the whole row.
+#define NOTE_MIN			1
 #define NOTE_MAX			120  //Defines maximum notevalue(with index starting from 1) as well as maximum number of notes.
 #define NOTE_MAX_SPECIAL	NOTE_KEYOFF
 #define NOTE_MIN_SPECIAL	NOTE_PCS

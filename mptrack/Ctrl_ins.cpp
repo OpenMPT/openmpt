@@ -25,6 +25,8 @@ BEGIN_MESSAGE_MAP(CNoteMapWnd, CStatic)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
+	ON_COMMAND(ID_NOTEMAP_TRANS_UP,		OnMapTransposeUp)
+	ON_COMMAND(ID_NOTEMAP_TRANS_DOWN,	OnMapTransposeDown)
 	ON_COMMAND(ID_NOTEMAP_COPY_NOTE,	OnMapCopyNote)
 	ON_COMMAND(ID_NOTEMAP_COPY_SMP,		OnMapCopySample)
 	ON_COMMAND(ID_NOTEMAP_RESET,		OnMapReset)
@@ -288,7 +290,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 
 			if (hMenu)
 			{
-				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, "Edit Sample Map");
+				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, "Edit Sample &Map");
 				if (hSubMenu)
 				{
 					BYTE smpused[(MAX_SAMPLES+7)/8];
@@ -309,18 +311,24 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 							AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE+j, s);
 						}
 					}
-					AppendMenu(hMenu, MF_POPUP, (UINT)hSubMenu, "Edit Sample");
+					AppendMenu(hMenu, MF_POPUP, (UINT)hSubMenu, "&Edit Sample");
 					AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 				}
-				wsprintf(s, "Map all notes to sample %d", pIns->Keyboard[m_nNote]);
+				wsprintf(s, "Map all notes to &sample %d", pIns->Keyboard[m_nNote]);
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, s);
-				if(pIns->NoteMap[m_nNote] < NOTE_MIN_SPECIAL)
-					wsprintf(s, "Map all notes to %s", pSndFile->GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
-				else
-					wsprintf(s, "Map all notes to %s", szSpecialNoteNames[pIns->NoteMap[m_nNote] - NOTE_MIN_SPECIAL]);
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, "Reset note mapping");
-				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, "Duplicate Instrument\tShift+New");
+
+				if(pSndFile->GetType() != MOD_TYPE_XM)
+				{
+					if(pIns->NoteMap[m_nNote] < NOTE_MIN_SPECIAL)
+						wsprintf(s, "Map all &notes to %s", pSndFile->GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
+					else
+						wsprintf(s, "Map all &notes to %s", szSpecialNoteNames[pIns->NoteMap[m_nNote] - NOTE_MIN_SPECIAL]);
+					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
+					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, "Transpose map &up");
+					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, "Transpose map &down");
+				}
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, "&Reset note mapping");
+				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, "Duplicate &Instrument\tShift+New");
 				SetMenuDefaultItem(hMenu, ID_INSTRUMENT_SAMPLEMAP, FALSE);
 				ClientToScreen(&pt);
 				::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
@@ -335,55 +343,51 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 void CNoteMapWnd::OnMapCopyNote()
 //-------------------------------
 {
-	if (m_pModDoc)
+	if(m_pModDoc == nullptr) return;
+	CSoundFile *pSndFile;
+	MODINSTRUMENT *pIns;
+	
+	pSndFile = m_pModDoc->GetSoundFile();
+	pIns = pSndFile->Instruments[m_nInstrument];
+	if (pIns)
 	{
-		CSoundFile *pSndFile;
-		MODINSTRUMENT *pIns;
-		
-		pSndFile = m_pModDoc->GetSoundFile();
-		pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
+		bool bModified = false;
+		UINT n = pIns->NoteMap[m_nNote];
+		for (NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++) if (pIns->NoteMap[i] != n)
 		{
-			BOOL bModified = FALSE;
-			UINT n = pIns->NoteMap[m_nNote];
-			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->NoteMap[i] != n)
-			{
-				pIns->NoteMap[i] = n;
-				bModified = TRUE;
-			}
-			if (bModified)
-			{
-				m_pModDoc->SetModified();
-				InvalidateRect(NULL, FALSE);
-			}
+			pIns->NoteMap[i] = n;
+			bModified = true;
+		}
+		if (bModified)
+		{
+			m_pModDoc->SetModified();
+			InvalidateRect(NULL, FALSE);
 		}
 	}
 }
 
 void CNoteMapWnd::OnMapCopySample()
-//-------------------------------------
+//---------------------------------
 {
-	if (m_pModDoc)
+	if(m_pModDoc == nullptr) return;
+	CSoundFile *pSndFile;
+	MODINSTRUMENT *pIns;
+	
+	pSndFile = m_pModDoc->GetSoundFile();
+	pIns = pSndFile->Instruments[m_nInstrument];
+	if (pIns)
 	{
-		CSoundFile *pSndFile;
-		MODINSTRUMENT *pIns;
-		
-		pSndFile = m_pModDoc->GetSoundFile();
-		pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
+		bool bModified = false;
+		UINT n = pIns->Keyboard[m_nNote];
+		for (NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++) if (pIns->Keyboard[i] != n)
 		{
-			BOOL bModified = FALSE;
-			UINT n = pIns->Keyboard[m_nNote];
-			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->Keyboard[i] != n)
-			{
-				pIns->Keyboard[i] = n;
-				bModified = TRUE;
-			}
-			if (bModified)
-			{
-				m_pModDoc->SetModified();
-				InvalidateRect(NULL, FALSE);
-			}
+			pIns->Keyboard[i] = n;
+			bModified = true;
+		}
+		if (bModified)
+		{
+			m_pModDoc->SetModified();
+			InvalidateRect(NULL, FALSE);
 		}
 	}
 }
@@ -392,26 +396,69 @@ void CNoteMapWnd::OnMapCopySample()
 void CNoteMapWnd::OnMapReset()
 //----------------------------
 {
-	if (m_pModDoc)
+	if(m_pModDoc == nullptr) return;
+	CSoundFile *pSndFile;
+	MODINSTRUMENT *pIns;
+	
+	pSndFile = m_pModDoc->GetSoundFile();
+	pIns = pSndFile->Instruments[m_nInstrument];
+	if (pIns)
 	{
-		CSoundFile *pSndFile;
-		MODINSTRUMENT *pIns;
-		
-		pSndFile = m_pModDoc->GetSoundFile();
-		pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns)
+		bool bModified = false;
+		for (NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++) if (pIns->NoteMap[i] != i + 1)
 		{
-			BOOL bModified = FALSE;
-			for (UINT i=0; i<NOTE_MAX; i++) if (pIns->NoteMap[i] != i+1)
+			pIns->NoteMap[i] = i + 1;
+			bModified = true;
+		}
+		if (bModified)
+		{
+			m_pModDoc->SetModified();
+			InvalidateRect(NULL, FALSE);
+		}
+	}
+}
+
+
+void CNoteMapWnd::OnMapTransposeUp()
+//----------------------------------
+{
+	MapTranspose(1);
+}
+
+
+void CNoteMapWnd::OnMapTransposeDown()
+//------------------------------------
+{
+	MapTranspose(-1);
+}
+
+
+void CNoteMapWnd::MapTranspose(int nAmount)
+//-----------------------------------------
+{
+	if(m_pModDoc == nullptr || nAmount == 0) return;
+	CSoundFile *pSndFile;
+	MODINSTRUMENT *pIns;
+
+	pSndFile = m_pModDoc->GetSoundFile();
+	pIns = pSndFile->Instruments[m_nInstrument];
+	if (pIns)
+	{
+		bool bModified = false;
+		for(NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++)
+		{
+			int n = pIns->NoteMap[i];
+			if ((n > NOTE_MIN && nAmount < 0) || (n < NOTE_MAX && nAmount > 0))
 			{
-				pIns->NoteMap[i] = i+1;
-				bModified = TRUE;
+				n = CLAMP(n + nAmount, NOTE_MIN, NOTE_MAX);
+				pIns->NoteMap[i] = (BYTE)n;
+				bModified = true;
 			}
-			if (bModified)
-			{
-				m_pModDoc->SetModified();
-				InvalidateRect(NULL, FALSE);
-			}
+		}
+		if (bModified)
+		{
+			m_pModDoc->SetModified();
+			InvalidateRect(NULL, FALSE);
 		}
 	}
 }
