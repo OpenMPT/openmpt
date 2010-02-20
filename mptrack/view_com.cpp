@@ -486,25 +486,30 @@ VOID CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 		UINT iItem = plvItem->iItem;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		lstrcpyn(s, plvItem->pszText, sizeof(s));
-		for (UINT i=strlen(s); i<sizeof(s); i++) s[i] = 0;
+
+		size_t maxStrLen = (m_nListId == IDC_LIST_SAMPLES) ? pSndFile->GetModSpecifications().sampleNameLengthMax : pSndFile->GetModSpecifications().instrNameLengthMax;
+		
+		for (size_t i = min(maxStrLen, strlen(s)); i < sizeof(s); i++)
+			s[i] = 0;
+
 		if (m_nListId == IDC_LIST_SAMPLES)
 		{
 			if (iItem < pSndFile->m_nSamples)
 			{
-				s[31] = 0;
-				memcpy(pSndFile->m_szNames[iItem+1], s, 32);
+				memcpy(pSndFile->m_szNames[iItem + 1], s, sizeof(pSndFile->m_szNames[iItem + 1]));
+				SetNullTerminator(pSndFile->m_szNames[iItem + 1]);
 				// 05/01/05 : ericus replaced "<< 24" by "<< 20" : 4000 samples -> 12bits [see Moddoc.h]
-				pModDoc->UpdateAllViews(this, ((iItem+1) << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
+				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 			}
 		} else
 		if (m_nListId == IDC_LIST_INSTRUMENTS)
 		{
-			if ((iItem < pSndFile->m_nInstruments) && (pSndFile->Instruments[iItem+1]))
+			if ((iItem < pSndFile->m_nInstruments) && (pSndFile->Instruments[iItem + 1]))
 			{
 				MODINSTRUMENT *pIns = pSndFile->Instruments[iItem+1];
-				s[31] = 0;
-				memcpy(pIns->name, s, 32);
-				pModDoc->UpdateAllViews(this, ((iItem+1) << HINT_SHIFT_INS) | (HINT_INSNAMES|HINT_INSTRUMENT), this);
+				memcpy(pIns->name, s, sizeof(pIns->name));
+				SetNullTerminator(pIns->name);
+				pModDoc->UpdateAllViews(this, ((iItem + 1) << HINT_SHIFT_INS) | (HINT_INSNAMES|HINT_INSTRUMENT), this);
 			}
 		} else
 		{
