@@ -303,6 +303,7 @@ protected:
 	afx_msg void OnRunScript();
 	afx_msg void OnShowTimeAtRow();
 	afx_msg void OnRenameChannel();
+	afx_msg void OnTogglePCNotePluginEditor();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -331,6 +332,7 @@ private:
 	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
 	bool BuildAmplifyCtxMenu(HMENU hMenu, CInputHandler* ih);
 	bool BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile* pSndFile);
+	bool BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile);
 
 	UINT GetSelectionStartRow();
 	UINT GetSelectionEndRow();
