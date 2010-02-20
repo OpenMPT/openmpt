@@ -1259,7 +1259,7 @@ BOOL CSoundFile::ReadNote()
 			}
 
 			// Preserve Amiga freq limits
-			if (m_dwSongFlags & SONG_AMIGALIMITS)
+			if (m_dwSongFlags & (SONG_AMIGALIMITS|SONG_PT1XMODE))
 				period = CLAMP(period, 113 * 4, 856 * 4);
 
 			// Pitch/Filter Envelope

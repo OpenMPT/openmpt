@@ -897,7 +897,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				// drop before or after the selection
 				bool bMoveBack = !(m_nDragOrder < (UINT)m_nDropPos);
 				// don't do anything if drop position is inside the selection
-				if(m_nDropPos >= selection.nOrdLo && m_nDropPos <= selection.nOrdHi || m_nDragOrder == m_nDropPos) return;
+				if((m_nDropPos >= selection.nOrdLo && m_nDropPos <= selection.nOrdHi) || m_nDragOrder == m_nDropPos) return;
 				// drag one order or multiple orders?
 				bool bMultiSelection = (selection.nOrdLo != selection.nOrdHi);
 
@@ -922,7 +922,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 					SetCurSel((bMoveBack && (!bSelection)) ? m_nDropPos - 1 : m_nDropPos);
 				} else
 				{
-					SetCurSel(((m_nDragOrder < (UINT)m_nDropPos) && (!bSelection)) ? m_nDropPos - 1 : m_nDropPos);
+					SetCurSel(((m_nDragOrder < m_nDropPos) && (!bSelection)) ? m_nDropPos - 1 : m_nDropPos);
 				}
 				m_pModDoc->SetModified();
 			}
