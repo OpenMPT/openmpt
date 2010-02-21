@@ -13,27 +13,27 @@
 
 struct IMFCHANNEL {
 	char name[12];	// Channel name (ASCIIZ-String, max 11 chars)
-	BYTE chorus;	// Default chorus
-	BYTE reverb;	// Default reverb
-	BYTE panning;	// Pan positions 00-FF
-	BYTE status;	// Channel status: 0 = enabled, 1 = mute, 2 = disabled (ignore effects!)
+	uint8 chorus;	// Default chorus
+	uint8 reverb;	// Default reverb
+	uint8 panning;	// Pan positions 00-FF
+	uint8 status;	// Channel status: 0 = enabled, 1 = mute, 2 = disabled (ignore effects!)
 };
 
 struct IMFHEADER {
 	char title[32];				// Songname (ASCIIZ-String, max. 31 chars)
-	UINT16 ordnum;				// Number of orders saved
-	UINT16 patnum;				// Number of patterns saved
-	UINT16 insnum;				// Number of instruments saved
-	UINT16 flags;				// Module flags (&1 => linear)
-	BYTE unused1[8];
-	BYTE tempo;					// Default tempo (Axx, 1..255)
-	BYTE bpm;					// Default beats per minute (BPM) (Txx, 32..255)
-	BYTE master;				// Default mastervolume (Vxx, 0..64)
-	BYTE amp;					// Amplification factor (mixing volume, 4..127)
-	BYTE unused2[8];
+	uint16 ordnum;				// Number of orders saved
+	uint16 patnum;				// Number of patterns saved
+	uint16 insnum;				// Number of instruments saved
+	uint16 flags;				// Module flags (&1 => linear)
+	uint8 unused1[8];
+	uint8 tempo;				// Default tempo (Axx, 1..255)
+	uint8 bpm;					// Default beats per minute (BPM) (Txx, 32..255)
+	uint8 master;				// Default mastervolume (Vxx, 0..64)
+	uint8 amp;					// Amplification factor (mixing volume, 4..127)
+	uint8 unused2[8];
 	char im10[4];				// 'IM10'
 	IMFCHANNEL channels[32];	// Channel settings
-	BYTE orderlist[256];		// Order list (0xff = +++; blank out anything beyond ordnum)
+	uint8 orderlist[256];		// Order list (0xff = +++; blank out anything beyond ordnum)
 };
 
 enum {
@@ -43,44 +43,44 @@ enum {
 };
 
 struct IMFENVELOPE {
-	BYTE points;		// Number of envelope points
-	BYTE sustain;		// Envelope sustain point
-	BYTE loop_start;	// Envelope loop start point
-	BYTE loop_end;		// Envelope loop end point
-	BYTE flags;			// Envelope flags
-	BYTE unused[3];
+	uint8 points;		// Number of envelope points
+	uint8 sustain;		// Envelope sustain point
+	uint8 loop_start;	// Envelope loop start point
+	uint8 loop_end;		// Envelope loop end point
+	uint8 flags;		// Envelope flags
+	uint8 unused[3];
 };
 
 struct IMFENVNODES {
-	UINT16 tick;
-	UINT16 value;
+	uint16 tick;
+	uint16 value;
 };
 
 struct IMFINSTRUMENT {
 	char name[32];		// Inst. name (ASCIIZ-String, max. 31 chars)
-	BYTE map[120];		// Multisample settings
-	BYTE unused[8];
+	uint8 map[120];		// Multisample settings
+	uint8 unused[8];
 	IMFENVNODES nodes[3][16];
 	IMFENVELOPE env[3];
-	UINT16 fadeout;		// Fadeout rate (0...0FFFH)
-	UINT16 smpnum;		// Number of samples in instrument
+	uint16 fadeout;		// Fadeout rate (0...0FFFH)
+	uint16 smpnum;		// Number of samples in instrument
 	char ii10[4];		// 'II10'
 };
 
 struct IMFSAMPLE {
 	char filename[13];	// Sample filename (12345678.ABC) */
-	BYTE unused1[3];
-	UINT32 length;		// Length
-	UINT32 loop_start;	// Loop start
-	UINT32 loop_end;	// Loop end
-	UINT32 C5Speed;		// Samplerate
-	BYTE volume;		// Default volume (0...64)
-	BYTE panning;		// Default pan (0...255)
-	BYTE unused2[14];
-	BYTE flags;			// Sample flags
-	BYTE unused3[5];
-	UINT16 ems;			// Reserved for internal usage
-	UINT32 dram;		// Reserved for internal usage
+	uint8 unused1[3];
+	uint32 length;		// Length
+	uint32 loop_start;	// Loop start
+	uint32 loop_end;	// Loop end
+	uint32 C5Speed;		// Samplerate
+	uint8 volume;		// Default volume (0...64)
+	uint8 panning;		// Default pan (0...255)
+	uint8 unused2[14];
+	uint8 flags;		// Sample flags
+	uint8 unused3[5];
+	uint16 ems;			// Reserved for internal usage
+	uint32 dram;		// Reserved for internal usage
 	char is10[4];		// 'IS10'
 };
 #pragma pack()
@@ -139,7 +139,8 @@ static void import_imf_effect(MODCOMMAND *note)
 {
 	BYTE n;
 	// fix some of them
-	switch (note->command) {
+	switch (note->command)
+	{
 	case 0xe: // fine volslide
 		// hackaround to get almost-right behavior for fine slides (i think!)
 		if (note->param == 0)
@@ -170,7 +171,8 @@ static void import_imf_effect(MODCOMMAND *note)
 		break;
 	case 0x21:
 		n = 0;
-		switch (note->param >> 4) {
+		switch (note->param >> 4)
+		{
 		case 0:
 			/* undefined, but since S0x does nothing in IT anyway, we won't care.
 			this is here to allow S00 to pick up the previous value (assuming IMF
@@ -217,7 +219,8 @@ static void import_imf_effect(MODCOMMAND *note)
 		break;
 	}
 	note->command = (note->command < 0x24) ? imf_efftrans[note->command] : CMD_NONE;
-	if (note->command == CMD_VOLUME && note->volcmd == VOLCMD_NONE) {
+	if (note->command == CMD_VOLUME && note->volcmd == VOLCMD_NONE)
+	{
 		note->volcmd = VOLCMD_VOLUME;
 		note->vol = note->param;
 		note->command = CMD_NONE;
@@ -238,8 +241,9 @@ static void load_imf_envelope(INSTRUMENTENVELOPE *env, IMFINSTRUMENT *imfins, in
 	env->nSustainStart = env->nSustainEnd = imfins->env[e].sustain;
 	env->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 
-	for (UINT n = 0; n < env->nNodes; n++) {
-		UINT16 nTick, nValue;
+	for(UINT n = 0; n < env->nNodes; n++)
+	{
+		uint16 nTick, nValue;
 		nTick = LittleEndianW(imfins->nodes[e][n].tick);
 		nValue = LittleEndianW(imfins->nodes[e][n].value) >> shift;
 		env->Ticks[n] = (WORD)max(min, nTick);
@@ -292,7 +296,8 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nInstruments = 0;
 	
 	m_nChannels = 0;
-	for (CHANNELINDEX nChn = 0; nChn < 32; nChn++) {
+	for(CHANNELINDEX nChn = 0; nChn < 32; nChn++)
+	{
 		ChnSettings[nChn].nPan = hdr.channels[nChn].panning * 64 / 255;
 		ChnSettings[nChn].nPan *= 4;
 
@@ -300,7 +305,8 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		SpaceToNullStringFixed(ChnSettings[nChn].szName, 12);
 
 		// TODO: reverb/chorus?
-		switch (hdr.channels[nChn].status) {
+		switch(hdr.channels[nChn].status)
+		{
 		case 0: // enabled; don't worry about it
 			m_nChannels = nChn + 1;
 			break;
@@ -320,11 +326,11 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if(!m_nChannels) return false;
 	
 	Order.resize(hdr.ordnum);
-	for (ORDERINDEX nOrd = 0; nOrd < hdr.ordnum; nOrd++)
+	for(ORDERINDEX nOrd = 0; nOrd < hdr.ordnum; nOrd++)
 		Order[nOrd] = ((hdr.orderlist[nOrd] == 0xff) ? Order.GetIgnoreIndex() : (PATTERNINDEX)hdr.orderlist[nOrd]);
 	
 	// read patterns
-	for (PATTERNINDEX nPat = 0; nPat < hdr.patnum; nPat++)
+	for(PATTERNINDEX nPat = 0; nPat < hdr.patnum; nPat++)
 	{
 		UINT16 length, nrows;
 		BYTE mask, channel;
@@ -347,7 +353,8 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		row_data = Patterns[nPat];
 
 		row = 0;
-		while (row < nrows) {
+		while(row < nrows)
+		{
 			ASSERT_CAN_READ(1);
 			mask = *((BYTE *)(lpStream + dwMemPos));
 			dwMemPos += 1;
@@ -359,67 +366,80 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			channel = mask & 0x1f;
 
-			if (ignore_channels & (1 << channel)) {
+			if(ignore_channels & (1 << channel))
+			{
 				/* should do this better, i.e. not go through the whole process of deciding
 				what to do with the effects since they're just being thrown out */
 				//printf("disabled channel %d contains data\n", channel + 1);
 				note = &junk_note;
-			} else {
+			} else
+			{
 				note = row_data + channel;
 			}
 
-			if (mask & 0x20) {
+			if(mask & 0x20)
+			{
 				// read note/instrument
 				ASSERT_CAN_READ(2);
 				note->note = *((BYTE *)(lpStream + dwMemPos));
 				note->instr = *((BYTE *)(lpStream + dwMemPos + 1));
 				dwMemPos += 2;
 
-				if (note->note == 160) {
+				if (note->note == 160)
+				{
 					note->note = NOTE_KEYOFF; /* ??? */
-				} else if (note->note == 255) {
+				} else if (note->note == 255)
+				{
 					note->note = NOTE_NONE; /* ??? */
-				} else {
+				} else
+				{
 					note->note = (note->note >> 4) * 12 + (note->note & 0xf) + 12 + 1;
-					if (note->note > NOTE_MAX) {
+					if(note->note > NOTE_MAX)
+					{
 						/*printf("%d.%d.%d: funny note 0x%02x\n",
 							nPat, row, channel, fp->data[fp->pos - 1]);*/
 						note->note = NOTE_NONE;
 					}
 				}
 			}
-			if ((mask & 0xc0) == 0xc0) {
-				BYTE e1c, e1d, e2c, e2d;
+			if((mask & 0xc0) == 0xc0)
+			{
+				uint8 e1c, e1d, e2c, e2d;
 
 				// read both effects and figure out what to do with them
 				ASSERT_CAN_READ(4);
-				e1c = *((BYTE *)(lpStream + dwMemPos));
-				e1d = *((BYTE *)(lpStream + dwMemPos + 1));
-				e2c = *((BYTE *)(lpStream + dwMemPos + 2));
-				e2d = *((BYTE *)(lpStream + dwMemPos + 3));
+				e1c = *((uint8 *)(lpStream + dwMemPos));
+				e1d = *((uint8 *)(lpStream + dwMemPos + 1));
+				e2c = *((uint8 *)(lpStream + dwMemPos + 2));
+				e2d = *((uint8 *)(lpStream + dwMemPos + 3));
 				dwMemPos += 4;
 
-				if (e1c == 0xc) {
+				if (e1c == 0xc)
+				{
 					note->vol = min(e1d, 0x40);
 					note->volcmd = VOLCMD_VOLUME;
 					note->command = e2c;
 					note->param = e2d;
-				} else if (e2c == 0xc) {
+				} else if (e2c == 0xc)
+				{
 					note->vol = min(e2d, 0x40);
 					note->volcmd = VOLCMD_VOLUME;
 					note->command = e1c;
 					note->param = e1d;
-				} else if (e1c == 0xa) {
+				} else if (e1c == 0xa)
+				{
 					note->vol = e1d * 64 / 255;
 					note->volcmd = VOLCMD_PANNING;
 					note->command = e2c;
 					note->param = e2d;
-				} else if (e2c == 0xa) {
+				} else if (e2c == 0xa)
+				{
 					note->vol = e2d * 64 / 255;
 					note->volcmd = VOLCMD_PANNING;
 					note->command = e1c;
 					note->param = e1d;
-				} else {
+				} else
+				{
 					/* check if one of the effects is a 'global' effect
 					-- if so, put it in some unused channel instead.
 					otherwise pick the most important effect. */
@@ -427,20 +447,22 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 					note->command = e2c;
 					note->param = e2d;
 				}
-			} else if (mask & 0xc0) {
+			} else if(mask & 0xc0)
+			{
 				// there's one effect, just stick it in the effect column
 				ASSERT_CAN_READ(2);
 				note->command = *((BYTE *)(lpStream + dwMemPos));
 				note->param = *((BYTE *)(lpStream + dwMemPos + 1));
 				dwMemPos += 2;
 			}
-			if (note->command)
+			if(note->command)
 				import_imf_effect(note);
 		}
 	}
 
 	// read instruments
-	for (INSTRUMENTINDEX nIns = 0; nIns < hdr.insnum; nIns++) {
+	for (INSTRUMENTINDEX nIns = 0; nIns < hdr.insnum; nIns++)
+	{
 		IMFINSTRUMENT imfins;
 		MODINSTRUMENT *pIns;
 		ASSERT_CAN_READ(sizeof(IMFINSTRUMENT));
@@ -452,14 +474,16 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		imfins.smpnum = LittleEndianW(imfins.smpnum);
 		imfins.fadeout = LittleEndianW(imfins.fadeout);
 
-		if (memcmp(imfins.ii10, "II10", 4) != 0) {
+		if(memcmp(imfins.ii10, "II10", 4) != 0)
+		{
 			//printf("ii10 says %02x %02x %02x %02x!\n",
 			//	imfins.ii10[0], imfins.ii10[1], imfins.ii10[2], imfins.ii10[3]);
 			return false;
 		}
 		
 		pIns = new MODINSTRUMENT;
-		if (!pIns) continue;
+		if(!pIns)
+			continue;
 		Instruments[nIns + 1] = pIns;
 		memset(pIns, 0, sizeof(MODINSTRUMENT));
 		pIns->nPPC = 5 * 12;
@@ -468,8 +492,10 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		memcpy(pIns->name, imfins.name, 31);
 		SpaceToNullStringFixed(pIns->name, 31);
 
-		if (imfins.smpnum) {
-			for (BYTE cNote = 0; cNote < 120; cNote++) {
+		if(imfins.smpnum)
+		{
+			for(BYTE cNote = 0; cNote < 120; cNote++)
+			{
 				pIns->NoteMap[cNote] = cNote + 1;
 				pIns->Keyboard[cNote] = firstsample + imfins.map[cNote];
 			}
@@ -481,14 +507,16 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		load_imf_envelope(&pIns->VolEnv, &imfins, IMF_ENV_VOL);
 		load_imf_envelope(&pIns->PanEnv, &imfins, IMF_ENV_PAN);
 		load_imf_envelope(&pIns->PitchEnv, &imfins, IMF_ENV_FILTER);
-		if((pIns->PitchEnv.dwFlags & ENV_ENABLED) != 0) pIns->PitchEnv.dwFlags |= ENV_FILTER;
+		if((pIns->PitchEnv.dwFlags & ENV_ENABLED) != 0)
+			pIns->PitchEnv.dwFlags |= ENV_FILTER;
 
 		// hack to get === to stop notes (from modplug's xm loader)
-		if (!(pIns->VolEnv.dwFlags & ENV_ENABLED) && !pIns->nFadeOut)
+		if(!(pIns->VolEnv.dwFlags & ENV_ENABLED) && !pIns->nFadeOut)
 			pIns->nFadeOut = 8192;
 
 		// read this instrument's samples
-		for (SAMPLEINDEX nSmp = 0; nSmp < imfins.smpnum; nSmp++) {
+		for(SAMPLEINDEX nSmp = 0; nSmp < imfins.smpnum; nSmp++)
+		{
 			IMFSAMPLE imfsmp;
 			UINT32 blen;
 			ASSERT_CAN_READ(sizeof(IMFSAMPLE));
@@ -497,7 +525,8 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			dwMemPos += sizeof(IMFSAMPLE);
 			m_nSamples++;
 
-			if (memcmp(imfsmp.is10, "IS10", 4) != 0) {
+			if(memcmp(imfsmp.is10, "IS10", 4) != 0)
+			{
 				//printf("is10 says %02x %02x %02x %02x!\n",
 				//	imfsmp.is10[0], imfsmp.is10[1], imfsmp.is10[2], imfsmp.is10[3]);
 				return false;
@@ -518,7 +547,8 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 				pSample->uFlags |= CHN_LOOP;
 			if (imfsmp.flags & 2)
 				pSample->uFlags |= CHN_PINGPONGLOOP;
-			if (imfsmp.flags & 4) {
+			if (imfsmp.flags & 4)
+			{
 				pSample->uFlags |= CHN_16BIT;
 				pSample->nLength >>= 1;
 				pSample->nLoopStart >>= 1;
