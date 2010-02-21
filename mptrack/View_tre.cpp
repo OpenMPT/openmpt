@@ -845,14 +845,14 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 	// Add Patterns
 	if ((pInfo->hPatterns) && (hintFlagPart != HINT_INSNAMES) && (hintFlagPart != HINT_SMPNAMES))
 	{
-		const DWORD nPat = (lHint >> HINT_SHIFT_PAT);
+		const PATTERNINDEX nPat = (PATTERNINDEX)(lHint >> HINT_SHIFT_PAT);
 		pInfo->tiPatterns.resize(pSndFile->Patterns.Size(), NULL);
-		UINT imin = 0, imax = pSndFile->Patterns.Size()-1;
+		PATTERNINDEX imin = 0, imax = pSndFile->Patterns.Size()-1;
 		if ((hintFlagPart == HINT_PATNAMES) && (nPat < pSndFile->Patterns.Size())) imin = imax = nPat;
 		BOOL bDelPat = FALSE;
 
 		ASSERT(pInfo->tiPatterns.size() == pSndFile->Patterns.Size());
-		for (UINT iPat=imin; iPat <= imax; iPat++)
+		for(PATTERNINDEX iPat = imin; iPat <= imax; iPat++)
 		{
 			if ((bDelPat) && (pInfo->tiPatterns[iPat]))
 			{
@@ -3222,5 +3222,9 @@ void CModTree::OnCloseItem()
 	HTREEITEM hItem = GetSelectedItem();
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
 	if(pModDoc == nullptr) return;
-	pModDoc->OnCloseDocument();
+	// Spam our message to the first available view
+	POSITION pos = pModDoc->GetFirstViewPosition();
+	if(pos == NULL) return;
+	CView* pView = pModDoc->GetNextView(pos);
+	if (pView) pView->PostMessage(WM_COMMAND, ID_FILE_CLOSE);
 }

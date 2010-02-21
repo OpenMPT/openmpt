@@ -317,11 +317,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 		pih = (XMINSTRUMENTHEADER *)(lpStream + dwMemPos);
 		if (dwMemPos + LittleEndian(pih->size) > dwMemLength) return true;
-		if ((Instruments[iIns] = new MODINSTRUMENT) == NULL) continue;
-		memset(Instruments[iIns], 0, sizeof(MODINSTRUMENT));
-		Instruments[iIns]->pTuning = m_defaultInstrument.pTuning;
-		Instruments[iIns]->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-		Instruments[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
+		if ((Instruments[iIns] = new MODINSTRUMENT) == nullptr) continue;
+		memcpy(Instruments[iIns], &m_defaultInstrument, sizeof(MODINSTRUMENT));
 
 		memcpy(Instruments[iIns]->name, pih->name, 22);
 		SpaceToNullStringFixed(Instruments[iIns]->name, 22);
@@ -392,7 +389,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 					n--;
 				}
 #ifndef FASTSOUNDLIB
-				// Damn! more than 200 samples: look for duplicates
+				// Damn! Too many samples: look for duplicates
 				if (!n)
 				{
 					if (!unused_samples)
