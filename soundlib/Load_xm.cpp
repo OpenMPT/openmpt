@@ -319,6 +319,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		if (dwMemPos + LittleEndian(pih->size) > dwMemLength) return true;
 		if ((Instruments[iIns] = new MODINSTRUMENT) == nullptr) continue;
 		memcpy(Instruments[iIns], &m_defaultInstrument, sizeof(MODINSTRUMENT));
+		Instruments[iIns]->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
+		Instruments[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 		memcpy(Instruments[iIns]->name, pih->name, 22);
 		SpaceToNullStringFixed(Instruments[iIns]->name, 22);
