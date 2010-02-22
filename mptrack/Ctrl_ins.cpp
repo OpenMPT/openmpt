@@ -1174,7 +1174,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			} else {
 				m_CbnMidiCh.SetCurSel(0);
 			}
-			if (pIns->nMixPlug < MAX_MIXPLUGINS) {
+			if (pIns->nMixPlug <= MAX_MIXPLUGINS) {
 				m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
 			} else {
 				m_CbnMixPlug.SetCurSel(0);
@@ -2027,7 +2027,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 //---------------------------------------
 {
 	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
-	BYTE nPlug = static_cast<BYTE>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()) & 0xff);
+	PLUGINDEX nPlug = static_cast<PLUGINDEX>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()) & 0xff);	// TODO is the 0xFF necessary?
 
 	if (pIns)
 	{
@@ -2042,7 +2042,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 			m_CbnPluginVolumeHandling.EnableWindow();
 		}
 
-		if (nPlug>=0 && nPlug<MAX_MIXPLUGINS+1)
+		if (nPlug>=0 && nPlug <= MAX_MIXPLUGINS)
 		{
 			if ((!IsLocked()) && pIns->nMixPlug != nPlug) { 
 				m_pModDoc->SetModified();
@@ -2852,5 +2852,5 @@ void CCtrlInstruments::UpdatePluginList()
 		m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(s), nPlug);
 	}
 	MODINSTRUMENT *pIns = m_pSndFile->Instruments[m_nInstrument];
-	if ((pIns) && (pIns->nMixPlug < MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
+	if ((pIns) && (pIns->nMixPlug <= MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
 }
