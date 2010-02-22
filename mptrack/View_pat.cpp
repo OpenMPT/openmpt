@@ -4078,13 +4078,26 @@ void CViewPattern::TempEnterIns(int val)
 		MODCOMMAND *p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, nChn);
 		MODCOMMAND oldcmd = *p;		// This is the command we are about to overwrite
 
-		UINT instr  = p->instr;
+		UINT instr = p->instr, nTotalMax, nTempMax;
+		if(p->IsPcNote())	// this is a plugin index
+		{
+			nTotalMax = MAX_MIXPLUGINS + 1;
+			nTempMax = MAX_MIXPLUGINS + 1;
+		} else if(pSndFile->GetNumInstruments() > 0)	// this is an instrument index
+		{
+			nTotalMax = MAX_INSTRUMENTS;
+			nTempMax = pSndFile->GetNumInstruments();
+		} else
+		{
+			nTotalMax = MAX_SAMPLES;
+			nTempMax = pSndFile->GetNumSamples();
+		}
+
 		instr = ((instr * 10) + val) % 1000;
-		if (instr >= MAX_INSTRUMENTS) instr = instr % 100;
-		if ( ((pSndFile->m_nInstruments==0) && (pSndFile->m_nSamples<100)) ||	// if we're using samples & have less than 100 samples
-			  (pSndFile->m_nInstruments < 100)) {								// or if we're using instruments and have less than 100 instruments
-				instr = instr % 100;											// --> ensure the entered instrument value is less than 100.
-			}
+		if (instr >= nTotalMax) instr = instr % 100;
+		if (nTempMax < 100)			// if we're using samples & have less than 100 samples
+			instr = instr % 100;	// or if we're using instruments and have less than 100 instruments
+									// --> ensure the entered instrument value is less than 100.
 		p->instr = instr;
 
 		if (IsEditingEnabled_bmsg())
@@ -4973,7 +4986,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 			//Add options to remove instrument from selection.
      		AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);
 			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, "Remove instrument");
-			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT+GetCurrentInstrument(), "Set to current instrument");
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + GetCurrentInstrument(), "Set to current instrument");
 		}
 		return true;
 	}
