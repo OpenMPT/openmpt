@@ -550,6 +550,8 @@ enum CommandID
 	kcInstrumentLoad=kcStartInstrumentMisc,
 	kcInstrumentSave,
 	kcInstrumentNew,
+	kcInstrumentEnvelopeZoomIn,
+	kcInstrumentEnvelopeZoomOut,
 	kcInstrumentEnvelopePointPrev,
 	kcInstrumentEnvelopePointNext,
 	kcInstrumentEnvelopePointMoveLeft,

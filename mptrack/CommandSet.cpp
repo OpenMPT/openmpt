@@ -2565,7 +2565,17 @@ void CCommandSet::SetupCommands()
 	commands[kcPatternEditPCNotePlugin].isDummy = false;
 	commands[kcPatternEditPCNotePlugin].Message = "Edit plugin assigned to PC note";
 
-	#ifdef _DEBUG
+	commands[kcInstrumentEnvelopeZoomIn].UID = 1837;
+	commands[kcInstrumentEnvelopeZoomIn].isHidden = false;
+	commands[kcInstrumentEnvelopeZoomIn].isDummy = false;
+	commands[kcInstrumentEnvelopeZoomIn].Message = "Zoom In";
+
+	commands[kcInstrumentEnvelopeZoomOut].UID = 1838;
+	commands[kcInstrumentEnvelopeZoomOut].isHidden = false;
+	commands[kcInstrumentEnvelopeZoomOut].isDummy = false;
+	commands[kcInstrumentEnvelopeZoomOut].Message = "Zoom Out";
+
+#ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs
 			for (int j=i+1; j<kcNumCommands; j++) {
