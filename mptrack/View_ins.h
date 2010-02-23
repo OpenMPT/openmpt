@@ -6,7 +6,7 @@
 #define INSSTATUS_SPLITCURSOR	0x04
 
 // Non-Client toolbar buttons
-#define ENV_LEFTBAR_BUTTONS		17
+#define ENV_LEFTBAR_BUTTONS		19
 
 //==========================================
 class CViewInstrument: public CModScrollView
@@ -34,6 +34,8 @@ protected:
 	CDC m_dcMemMain;
 	CBitmap m_bmpMemMain;
 	CBitmap* oldBitmap;
+
+	float m_fZoom;
 	//rewbs.envRowGrid
 
 public:
@@ -132,6 +134,10 @@ protected:
 	void UpdateNcButtonState();
 	void PlayNote(UINT note);				//rewbs.customKeys
 	void DrawGrid(CDC *memDC, UINT speed);	//rewbs.envRowGrid
+
+	void OnEnvZoomIn() { EnvSetZoom(m_fZoom + 1); };
+	void OnEnvZoomOut() { EnvSetZoom(m_fZoom - 1); };
+	void EnvSetZoom(float fNewZoom);
 
 public:
 	//{{AFX_VIRTUAL(CViewInstrument)

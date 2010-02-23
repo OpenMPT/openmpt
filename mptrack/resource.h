@@ -1203,6 +1203,8 @@
 #define ID_NOTEMAP_TRANS_UP				60446
 #define ID_NOTEMAP_TRANS_DOWN			60447
 #define ID_PATTERN_EDIT_PCNOTE_PLUGIN	60448
+#define ID_ENVELOPE_ZOOM_IN				60449
+#define ID_ENVELOPE_ZOOM_OUT			60450
 
 // Next default values for new objects
 // 
@@ -1210,7 +1212,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        526
-#define _APS_NEXT_COMMAND_VALUE         60449
+#define _APS_NEXT_COMMAND_VALUE         60451
 #define _APS_NEXT_CONTROL_VALUE         2427
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

@@ -12,7 +12,9 @@
 #include ".\view_ins.h"
 #include "midi.h"
 
-#define ENV_ZOOM				4
+#define ENV_ZOOM				4.0f
+#define ENV_MIN_ZOOM			2.0f
+#define ENV_MAX_ZOOM			100.0f
 #define ENV_DRAGLOOPSTART		(MAX_ENVPOINTS + 1)
 #define ENV_DRAGLOOPEND			(MAX_ENVPOINTS + 2)
 #define ENV_DRAGSUSTAINSTART	(MAX_ENVPOINTS + 3)
@@ -45,6 +47,8 @@ const UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
 		ID_SEPARATOR,
 	ID_ENVELOPE_VIEWGRID,			//rewbs.envRowGrid
 		ID_SEPARATOR,
+	ID_ENVELOPE_ZOOM_IN,
+	ID_ENVELOPE_ZOOM_OUT,
 };
 
 
@@ -81,6 +85,8 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_ENVELOPE_PITCH,			OnEnvPitchChanged)
 	ON_COMMAND(ID_ENVELOPE_FILTER,			OnEnvFilterChanged)
 	ON_COMMAND(ID_ENVELOPE_VIEWGRID,		OnEnvToggleGrid) //rewbs.envRowGrid
+	ON_COMMAND(ID_ENVELOPE_ZOOM_IN,			OnEnvZoomIn)
+	ON_COMMAND(ID_ENVELOPE_ZOOM_OUT,		OnEnvZoomOut)
 	ON_COMMAND(ID_ENVSEL_VOLUME,			OnSelectVolumeEnv)
 	ON_COMMAND(ID_ENVSEL_PANNING,			OnSelectPanningEnv)
 	ON_COMMAND(ID_ENVSEL_PITCH,				OnSelectPitchEnv)
@@ -118,7 +124,7 @@ CViewInstrument::CViewInstrument()
 	m_GridScrollPos = -1;
 	//end rewbs.envRowGrid
 	m_nDragItem = 1;
-
+	m_fZoom = ENV_ZOOM;
 }
 
 
@@ -142,9 +148,9 @@ void CViewInstrument::UpdateScrollSize()
 		SIZE sizeTotal, sizePage, sizeLine;
 		UINT ntickmax = EnvGetTick(EnvGetLastPoint());
 		
-		sizeTotal.cx = (ntickmax + 2) * ENV_ZOOM;
+		sizeTotal.cx = (INT)((ntickmax + 2) * m_fZoom);
 		sizeTotal.cy = 1;
-		sizeLine.cx = ENV_ZOOM;
+		sizeLine.cx = (INT)m_fZoom;
 		sizeLine.cy = 2;
 		sizePage.cx = sizeLine.cx * 4;
 		sizePage.cy = sizeLine.cy;
@@ -625,7 +631,7 @@ bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 int CViewInstrument::TickToScreen(int nTick) const
 //------------------------------------------------
 {
-	return ((nTick+1) * ENV_ZOOM) - GetScrollPos(SB_HORZ);
+	return ((int)((nTick + 1) * m_fZoom)) - GetScrollPos(SB_HORZ);
 }
 
 int CViewInstrument::PointToScreen(int nPoint) const
@@ -638,14 +644,14 @@ int CViewInstrument::PointToScreen(int nPoint) const
 int CViewInstrument::ScreenToTick(int x) const
 //--------------------------------------------
 {
-	return (GetScrollPos(SB_HORZ) + x + 1 - ENV_ZOOM) / ENV_ZOOM;
+	return (int)(((float)GetScrollPos(SB_HORZ) + (float)x + 1 - m_fZoom) / m_fZoom);
 }
 
 
 int CViewInstrument::QuickScreenToTick(int x, int cachedScrollPos) const
 //----------------------------------------------------------------------
 {
-	return (cachedScrollPos + x + 1 - ENV_ZOOM) / ENV_ZOOM;
+	return (int)(((float)cachedScrollPos + (float)x + 1 - m_fZoom) / m_fZoom);
 }
 
 int CViewInstrument::ScreenToValue(int y) const
@@ -745,6 +751,8 @@ void CViewInstrument::UpdateNcButtonState()
 		case ID_ENVELOPE_FILTER:	if (!(pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
 									if (EnvGetFilterEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_VIEWGRID:	if (m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_ZOOM_IN:	if (m_fZoom >= ENV_MAX_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
+		case ID_ENVELOPE_ZOOM_OUT:	if (m_fZoom <= ENV_MIN_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
 		}
 		if (m_nBtnMouseOver == i)
 		{
@@ -884,10 +892,10 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	// Drawing Loop Start/End
 	if (EnvGetLoop())
 	{
-		int x1 = PointToScreen(EnvGetLoopStart()) - (ENV_ZOOM/2);
+		int x1 = PointToScreen(EnvGetLoopStart()) - (int)(m_fZoom / 2);
 		m_dcMemMain.MoveTo(x1, 0);
 		m_dcMemMain.LineTo(x1, m_rcClient.bottom);
-		int x2 = PointToScreen(EnvGetLoopEnd()) + (ENV_ZOOM/2);
+		int x2 = PointToScreen(EnvGetLoopEnd()) + (int)(m_fZoom / 2);
 		m_dcMemMain.MoveTo(x2, 0);
 		m_dcMemMain.LineTo(x2, m_rcClient.bottom);
 	}
@@ -897,12 +905,12 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		m_dcMemMain.SelectObject(CMainFrame::penHalfDarkGray);
 		int nspace = m_rcClient.bottom/4;
 		int n1 = EnvGetSustainStart();
-		int x1 = PointToScreen(n1) - (ENV_ZOOM/2);
+		int x1 = PointToScreen(n1) - (int)(m_fZoom / 2);
 		int y1 = ValueToScreen(EnvGetValue(n1));
 		m_dcMemMain.MoveTo(x1, y1 - nspace);
 		m_dcMemMain.LineTo(x1, y1+nspace);
 		int n2 = EnvGetSustainEnd();
-		int x2 = PointToScreen(n2) + (ENV_ZOOM/2);
+		int x2 = PointToScreen(n2) + (int)(m_fZoom / 2);
 		int y2 = ValueToScreen(EnvGetValue(n2));
 		m_dcMemMain.MoveTo(x2, y2-nspace);
 		m_dcMemMain.LineTo(x2, y2+nspace);
@@ -916,7 +924,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		UINT releaseNode = EnvGetReleaseNode();
 		for (UINT i=0; i<=maxpoint; i++)
 		{
-			int x = (EnvGetTick(i) + 1) * ENV_ZOOM - nScrollPos;
+			int x = (int)((EnvGetTick(i) + 1) * m_fZoom) - nScrollPos;
 			int y = ValueToScreen(EnvGetValue(i));
 			rect.left = x - 3;
 			rect.top = y - 3;
@@ -1222,6 +1230,8 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		case ID_ENVELOPE_FILTER:	nImage = (dwStyle & NCBTNS_DISABLED) ? IIMAGE_NOFILTERSWITCH : IIMAGE_FILTERSWITCH; break;
 		case ID_INSTRUMENT_SAMPLEMAP: nImage = IIMAGE_SAMPLEMAP; break;
 		case ID_ENVELOPE_VIEWGRID:	nImage = IIMAGE_GRID; break;
+		case ID_ENVELOPE_ZOOM_IN:	nImage = (dwStyle & NCBTNS_DISABLED) ? IIMAGE_NOZOOMIN : IIMAGE_ZOOMIN; break;
+		case ID_ENVELOPE_ZOOM_OUT:	nImage = (dwStyle & NCBTNS_DISABLED) ? IIMAGE_NOZOOMOUT : IIMAGE_ZOOMOUT; break;
 		}
 		pDC->Draw3dRect(rect.left-1, rect.top-1, ENV_LEFTBAR_CXBTN+2, ENV_LEFTBAR_CYBTN+2, c3, c4);
 		pDC->Draw3dRect(rect.left, rect.top, ENV_LEFTBAR_CXBTN, ENV_LEFTBAR_CYBTN, c1, c2);
@@ -1467,12 +1477,12 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			if (pt.x <= 0)
 			{
 				UpdateScrollSize();
-				OnScrollBy(CSize(pt.x-ENV_ZOOM, 0), TRUE);
+				OnScrollBy(CSize(pt.x - (int)m_fZoom, 0), TRUE);
 			}
 			if (pt.x >= m_rcClient.right-1)
 			{
 				UpdateScrollSize();
-				OnScrollBy(CSize(ENV_ZOOM+pt.x-m_rcClient.right, 0), TRUE);
+				OnScrollBy(CSize((int)m_fZoom + pt.x - m_rcClient.right, 0), TRUE);
 			}
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
@@ -1487,7 +1497,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			rect.top = ValueToScreen(EnvGetValue(EnvGetSustainStart())) - nspace;
 			rect.bottom = rect.top + nspace * 2;
 			rect.right = PointToScreen(EnvGetSustainStart()) + 1;
-			rect.left = rect.right - ENV_ZOOM*2;
+			rect.left = rect.right - (int)(m_fZoom * 2);
 			if (rect.PtInRect(pt))
 			{
 				bSplitCursor = TRUE; // ENV_DRAGSUSTAINSTART;
@@ -1496,7 +1506,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 				rect.top = ValueToScreen(EnvGetValue(EnvGetSustainEnd())) - nspace;
 				rect.bottom = rect.top + nspace * 2;
 				rect.left = PointToScreen(EnvGetSustainEnd()) - 1;
-				rect.right = rect.left + ENV_ZOOM*2;
+				rect.right = rect.left + (int)(m_fZoom *2);
 				if (rect.PtInRect(pt)) bSplitCursor = TRUE; // ENV_DRAGSUSTAINEND;
 			}
 		}
@@ -1505,14 +1515,14 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			rect.top = m_rcClient.top;
 			rect.bottom = m_rcClient.bottom;
 			rect.right = PointToScreen(EnvGetLoopStart()) + 1;
-			rect.left = rect.right - ENV_ZOOM*2;
+			rect.left = rect.right - (int)(m_fZoom * 2);
 			if (rect.PtInRect(pt))
 			{
 				bSplitCursor = TRUE; // ENV_DRAGLOOPSTART;
 			} else
 			{
 				rect.left = PointToScreen(EnvGetLoopEnd()) - 1;
-				rect.right = rect.left + ENV_ZOOM*2;
+				rect.right = rect.left + (int)(m_fZoom * 2);
 				if (rect.PtInRect(pt)) bSplitCursor = TRUE; // ENV_DRAGLOOPEND;
 			}
 		}
@@ -1564,7 +1574,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			rect.top = ValueToScreen(EnvGetValue(EnvGetSustainStart())) - nspace;
 			rect.bottom = rect.top + nspace * 2;
 			rect.right = PointToScreen(EnvGetSustainStart()) + 1;
-			rect.left = rect.right - ENV_ZOOM*2;
+			rect.left = rect.right - (int)(m_fZoom * 2);
 			if (rect.PtInRect(pt))
 			{
 				m_nDragItem = ENV_DRAGSUSTAINSTART;
@@ -1573,7 +1583,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 				rect.top = ValueToScreen(EnvGetValue(EnvGetSustainEnd())) - nspace;
 				rect.bottom = rect.top + nspace * 2;
 				rect.left = PointToScreen(EnvGetSustainEnd()) - 1;
-				rect.right = rect.left + ENV_ZOOM*2;
+				rect.right = rect.left + (int)(m_fZoom * 2);
 				if (rect.PtInRect(pt)) m_nDragItem = ENV_DRAGSUSTAINEND;
 			}
 		}
@@ -1582,14 +1592,14 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			rect.top = m_rcClient.top;
 			rect.bottom = m_rcClient.bottom;
 			rect.right = PointToScreen(EnvGetLoopStart()) + 1;
-			rect.left = rect.right - ENV_ZOOM * 2;
+			rect.left = rect.right - (int)(m_fZoom * 2);
 			if (rect.PtInRect(pt))
 			{
 				m_nDragItem = ENV_DRAGLOOPSTART;
 			} else
 			{
 				rect.left = PointToScreen(EnvGetLoopEnd()) - 1;
-				rect.right = rect.left + ENV_ZOOM*2;
+				rect.right = rect.left + (int)(m_fZoom * 2);
 				if (rect.PtInRect(pt)) m_nDragItem = ENV_DRAGLOOPEND;
 			}
 		}
@@ -1813,7 +1823,7 @@ void CViewInstrument::OnEnvFilterChanged()
 
 //rewbs.envRowGrid
 void CViewInstrument::OnEnvToggleGrid()
-//----------------------------------------
+//-------------------------------------
 {
 	m_bGrid = !m_bGrid;
 	if (m_bGrid)
@@ -1862,7 +1872,7 @@ static DWORD nLastScanCode = 0;
 
 
 void CViewInstrument::PlayNote(UINT note)
-//-----------------------------------------------------------------
+//---------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -2187,6 +2197,8 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		case kcInstrumentNew:	SendCtrlMessage(IDC_INSTRUMENT_NEW); return wParam;	
 
 		// envelope editor
+		case kcInstrumentEnvelopeZoomIn:				OnEnvZoomIn(); return wParam;
+		case kcInstrumentEnvelopeZoomOut:				OnEnvZoomOut(); return wParam;
 		case kcInstrumentEnvelopePointPrev:				EnvKbdSelectPrevPoint(); return wParam;
 		case kcInstrumentEnvelopePointNext:				EnvKbdSelectNextPoint(); return wParam;
 		case kcInstrumentEnvelopePointMoveLeft:			EnvKbdMovePointLeft(); return wParam;
@@ -2239,6 +2251,17 @@ void CViewInstrument::OnEnvelopeScalepoints()
 	}
 
 	
+}
+
+
+void CViewInstrument::EnvSetZoom(float fNewZoom)
+//----------------------------------------------
+{
+	m_fZoom = fNewZoom;
+	Limit(m_fZoom, ENV_MIN_ZOOM, ENV_MAX_ZOOM);
+	InvalidateRect(NULL, FALSE);
+	UpdateScrollSize();
+	UpdateNcButtonState();
 }
 
 
