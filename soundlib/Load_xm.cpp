@@ -302,10 +302,11 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 	memset(samples_used, 0, sizeof(samples_used));
 	unused_samples = 0;
+
 	// Reading instruments
 	for (INSTRUMENTINDEX iIns = 1; iIns <= m_nInstruments; iIns++)
 	{
-		XMINSTRUMENTHEADER *pih;
+		XMINSTRUMENTHEADER pih;
 		BYTE flags[32];
 		DWORD samplesize[32];
 		UINT samplemap[32];
@@ -315,17 +316,18 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		DWORD ihsize = LittleEndian(*((DWORD *)(lpStream + dwMemPos)));
 		if (dwMemPos + ihsize >= dwMemLength) return true;
 
-		pih = (XMINSTRUMENTHEADER *)(lpStream + dwMemPos);
-		if (dwMemPos + LittleEndian(pih->size) > dwMemLength) return true;
+		memset(&pih, 0, sizeof(pih));
+		memcpy(&pih, lpStream + dwMemPos, min(sizeof(pih), ihsize));
+
 		if ((Instruments[iIns] = new MODINSTRUMENT) == nullptr) continue;
 		memcpy(Instruments[iIns], &m_defaultInstrument, sizeof(MODINSTRUMENT));
 		Instruments[iIns]->nPluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
 		Instruments[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
-		memcpy(Instruments[iIns]->name, pih->name, 22);
+		memcpy(Instruments[iIns]->name, pih.name, 22);
 		SpaceToNullStringFixed(Instruments[iIns]->name, 22);
 
-		if ((nsamples = pih->samples) > 0)
+		if ((nsamples = pih.samples) > 0)
 		{
 			/* we have samples, so let's read the rest of this instrument
 			   the header that is being read here is not the sample header, though,
@@ -353,19 +355,23 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			if(xmsh.midichannel != 0 || xmsh.midienabled != 0 || xmsh.midiprogram != 0 || xmsh.mutecomputer != 0 || xmsh.pitchwheelrange != 0)
 				bIsFT2 = true; // definitely not MPT. (or any other tracker)
 
-			dwMemPos += LittleEndian(pih->size);
+			dwMemPos += LittleEndian(pih.size);
 		} else
 		{
-			if (LittleEndian(pih->size)) dwMemPos += LittleEndian(pih->size);
-			else dwMemPos += sizeof(XMINSTRUMENTHEADER);
+			if (LittleEndian(pih.size))
+				dwMemPos += LittleEndian(pih.size);
+			else
+				dwMemPos += sizeof(XMINSTRUMENTHEADER);
 			continue;
 		}
+
 		memset(samplemap, 0, sizeof(samplemap));
 		if (nsamples > 32) return true;
 		UINT newsamples = m_nSamples;
-		for (UINT nmap=0; nmap<nsamples; nmap++)
+
+		for (UINT nmap = 0; nmap < nsamples; nmap++)
 		{
-			UINT n = m_nSamples+nmap+1;
+			UINT n = m_nSamples + nmap + 1;
 			if (n >= MAX_SAMPLES)
 			{
 				n = m_nSamples;
@@ -432,7 +438,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		m_nSamples = newsamples;
 		// Reading Volume Envelope
 		MODINSTRUMENT *pIns = Instruments[iIns];
-		pIns->nMidiProgram = pih->type;
+		pIns->nMidiProgram = pih.type;
 		pIns->nFadeOut = xmsh.volfade;
 		pIns->nPan = 128;
 		pIns->nPPC = 5*12;
@@ -497,11 +503,11 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			if ((dwMemPos + sizeof(xmss) > dwMemLength)
 			 || (dwMemPos + xmsh.shsize > dwMemLength)) return true;
-			memcpy(&xmss, lpStream+dwMemPos, sizeof(xmss));
+			memcpy(&xmss, lpStream + dwMemPos, sizeof(xmss));
 			xmss.samplen = LittleEndian(xmss.samplen);
 			xmss.loopstart = LittleEndian(xmss.loopstart);
 			xmss.looplen = LittleEndian(xmss.looplen);
-			dwMemPos += xmsh.shsize;
+			dwMemPos += sizeof(XMSAMPLESTRUCT);	// was: dwMemPos += xmsh.shsize; (this fixes IFULOVE.XM)
 			flags[ins] = (xmss.type & 0x10) ? RS_PCM16D : RS_PCM8D;
 			if (xmss.type & 0x20) flags[ins] = (xmss.type & 0x10) ? RS_STPCM16D : RS_STPCM8D;
 			samplesize[ins] = xmss.samplen;
@@ -665,6 +671,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	// Check various things to find out whether this has been made with MPT.
 	// Null chars in names -> most likely made with MPT, which disguises as FT2
 	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20) && bProbablyMadeWithModPlug && !bIsFT2) bMadeWithModPlug = true;
+	if (memcmp((LPCSTR)lpStream + 0x26, "FastTracker v2.00   ", 20)) bMadeWithModPlug = false;	// this could happen f.e. with (early?) versions of Sk@le
 	if (!memcmp((LPCSTR)lpStream + 0x26, "FastTracker v 2.00  ", 20))
 	{
 		// Early MPT 1.0 alpha/beta versions
