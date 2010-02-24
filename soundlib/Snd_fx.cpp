@@ -114,6 +114,32 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	nPattern = Order[0];
 	nRow = nNextRow = 0;
 
+	/* Now, some fun code begins: This will determine if a specific row in a pattern (orderlist item)
+	   has been visited before. This way, we can tell when the module starts to loop, i.e. when we have determined
+	   the song length (or found out that a given point of the module cannot be reached).
+	   The concept is actually very simple: Store a boolean value for every row for every possible orderlist item.
+	   To save some memory, I have decided to actually store 8 row flags in one uint8 item, to save some
+	   space.
+	   As the modplug engine already deals with pattern loops sufficiently, there's no problem with (infinite) loops
+	   in this code. However, if you're going to use this idea somewhere else, bare in mind that rows inside pattern loops
+	   should only be evaluated once, or else the algorithm will cancel!
+	*/
+	vector<vector<uint8> > visited_rows;
+	visited_rows.resize(Order.GetLengthTailTrimmed());
+	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
+	{
+		PATTERNINDEX nPat = Order[nOrd];
+		ROWINDEX nSize = 0;
+		if(Patterns.IsValidPat(nPat))
+			nSize = Patterns[nPat].GetNumRows();
+		// as we need one vector unit per 8 rows, we will probably have to add some non-existing rows
+		// (f.e. if a pattern has 7 rows, we actually need another row so it's 8 rows = 1 byte - got it? ;)
+		if(nSize & 7)
+			nSize += 8;
+		nSize >>= 3;
+		visited_rows[nOrd].resize(nSize, 0);
+	}
+
 	for (;;)
 	{
 		UINT nSpeedCount = 0;
@@ -121,7 +147,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		nCurrentPattern = nNextPattern;
 
 		if(nCurrentPattern >= Order.size())
-			goto EndMod;
+			break;
 		
 		// Check if pattern is valid
 		nPattern = Order[nCurrentPattern];
@@ -133,24 +159,40 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			// End of song ?
 			if ((nPattern == Order.GetInvalidPatIndex()) || (nCurrentPattern >= Order.size()))
 			{
-				goto EndMod;
+				nCurrentPattern = m_nRestartPos;
 			} else
 			{
 				nCurrentPattern++;
-				nPattern = (nCurrentPattern < Order.size()) ? Order[nCurrentPattern] : Order.GetInvalidPatIndex();
 			}
+			nPattern = (nCurrentPattern < Order.size()) ? Order[nCurrentPattern] : Order.GetInvalidPatIndex();
 			nNextPattern = nCurrentPattern;
 		}
-		// Weird stuff?
-		if ((nPattern >= Patterns.Size()) || (!Patterns[nPattern])) break;
+		// Skip non-existing patterns
+		if ((nPattern >= Patterns.Size()) || (!Patterns[nPattern]))
+		{
+			nNextPattern = nCurrentPattern + 1;
+			continue;
+		}
 		// Should never happen
-		if (nRow >= PatternSize[nPattern]) nRow = 0;
+		if (nRow >= PatternSize[nPattern])
+			nRow = 0;
 
 		//Check whether target reached.
 		if(nCurrentPattern == endOrder && nRow == endRow)
 		{
 			targetReached = true;
-			goto EndMod;
+			break;
+		}
+
+		// Detect backward loop (or more general: if this row has been visited before)
+		size_t row_slot = nRow >> 3;
+		uint8 row_value = 1 << (nRow & 7);
+		// This should always be true - but who knows what different parts of the program could modify the patterns and orders while this test is running?
+		if(nCurrentPattern < visited_rows.size() && row_slot < visited_rows[nCurrentPattern].size())
+		{
+			if((visited_rows[nCurrentPattern][row_slot] & row_value) != 0)
+				break;	// we visited this row already
+			visited_rows[nCurrentPattern][row_slot] |= row_value;
 		}
 
 		// Update next position
@@ -163,7 +205,8 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		}
 		if (!nRow)
 		{
-			for (UINT ipck=0; ipck<m_nChannels; ipck++) patloop[ipck] = dwElapsedTime;
+			for(UINT ipck = 0; ipck < m_nChannels; ipck++)
+				patloop[ipck] = dwElapsedTime;
 		}
 		if (!bTotal)
 		{
@@ -177,6 +220,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				break;
 			}
 		}
+
 		MODCHANNEL *pChn = Chn;
 		MODCOMMAND *p = Patterns[nPattern] + nRow * m_nChannels;
 		MODCOMMAND *nextRow = NULL;
@@ -208,7 +252,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			case CMD_PATTERNBREAK:
 				patternBreakOnThisRow=true;				
 				//Try to check next row for XPARAM
-				nextRow = NULL;
+				nextRow = nullptr;
 				if (nRow < PatternSize[nPattern]-1) {
 					nextRow = Patterns[nPattern] + (nRow+1) * m_nChannels + nChn;
 				}
@@ -388,13 +432,8 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			case tempo_mode_classic: default:
 				dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
 		}
-		//Detect backwards loop 
-		if (nNextPattern<nCurrentPattern 
-			|| (nNextPattern==nCurrentPattern && nNextRow<=nRow)) {
-			goto EndMod;
-		}
 	}
-EndMod:
+
 	if ((bAdjust) && (!bTotal))
 	{
 		m_nGlobalVolume = nGlbVol;
@@ -2597,7 +2636,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 	case 0x10:	pChn->dwFlags &= ~CHN_GLISSANDO; if (param) pChn->dwFlags |= CHN_GLISSANDO; break;
 	// S2x: Set FineTune
 	case 0x20:	if(!(m_dwSongFlags & SONG_FIRSTTICK)) break;
-				pChn->nC5Speed = S3MFineTuneTable[param & 0x0F];
+				pChn->nC5Speed = S3MFineTuneTable[param];
 				pChn->nFineTune = MOD2XMFineTune(param);
 				if (pChn->nPeriod) pChn->nPeriod = GetPeriodFromNote(pChn->nNote, pChn->nFineTune, pChn->nC5Speed);
 				break;
@@ -2702,7 +2741,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 				}
 				break;
 	// S9x: Sound Control
-	case 0x90:	ExtendedChannelEffect(pChn, param & 0x0F); break;
+	case 0x90:	ExtendedChannelEffect(pChn, param); break;
 	// SAx: Set 64k Offset
 	case 0xA0:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{

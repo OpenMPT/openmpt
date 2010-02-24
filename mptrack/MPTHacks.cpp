@@ -68,7 +68,7 @@ struct FixHackedPatterns
 			}
 		} else if(type == MOD_TYPE_IT)		// modplug IT extensions
 		{
-			if(m.command == CMD_S3MCMDEX && (m.param & 0x90) != 0 && m.param != 0x91)
+			if((m.command == CMD_S3MCMDEX) && ((m.param >> 4) == 0x09) && (m.param != 0x91))
 			{
 				*foundHacks = true;
 				if(autofix)
