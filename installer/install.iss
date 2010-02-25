@@ -21,14 +21,14 @@ Compression=lzma
 SolidCompression=yes
 WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
+CreateUninstallRegKey=not IsTaskSelected('portable')
 ;LicenseFile=license.txt
-;CreateUninstallRegKey=no
 
 [Tasks]
 ; icons and install mode
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "portable"; Description: "Use program directory to store configuration in"; GroupDescription: "Options:"; Flags: unchecked
+Name: "portable"; Description: "Portable mode (use program folder for storing settings, no registry changes)"; GroupDescription: "Options:"; Flags: unchecked
 Name: "vst_scan"; Description: "Scan for previously installed VST plugins"; GroupDescription: "Options:"; Flags: unchecked
 ; file associations - put this below all other [tasks]!
 #include "filetypes.iss"
@@ -141,3 +141,4 @@ begin
 end;
 
 #include "vst_scan.iss"
+
