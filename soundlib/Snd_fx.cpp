@@ -119,10 +119,10 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	   the song length (or found out that a given point of the module cannot be reached).
 	   The concept is actually very simple: Store a boolean value for every row for every possible orderlist item.
 	   To save some memory, I have decided to actually store 8 row flags in one uint8 item, to save some
-	   space.
-	   As the modplug engine already deals with pattern loops sufficiently, there's no problem with (infinite) loops
+	   space. Hence, there's some funky bit-shifting here and there.
+	   As the modplug engine already deals with pattern loops sufficiently, there's no problem with (infinite) pattern loops
 	   in this code. However, if you're going to use this idea somewhere else, bare in mind that rows inside pattern loops
-	   should only be evaluated once, or else the algorithm will cancel!
+	   should only be evaluated once, or else the algorithm will cancel too early!
 	*/
 	vector<vector<uint8> > visited_rows;
 	visited_rows.resize(Order.GetLengthTailTrimmed());
@@ -136,7 +136,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		// (f.e. if a pattern has 7 rows, we actually need another row so it's 8 rows = 1 byte - got it? ;)
 		if(nSize & 7)
 			nSize += 8;
-		nSize >>= 3;
+		nSize >>= 3;	// 2^3 elements per vector unit!
 		visited_rows[nOrd].resize(nSize, 0);
 	}
 
@@ -186,13 +186,13 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 
 		// Detect backward loop (or more general: if this row has been visited before)
 		size_t row_slot = nRow >> 3;
-		uint8 row_value = 1 << (nRow & 7);
+		uint8 row_mask = 1 << (nRow & 7);
 		// This should always be true - but who knows what different parts of the program could modify the patterns and orders while this test is running?
 		if(nCurrentPattern < visited_rows.size() && row_slot < visited_rows[nCurrentPattern].size())
 		{
-			if((visited_rows[nCurrentPattern][row_slot] & row_value) != 0)
-				break;	// we visited this row already
-			visited_rows[nCurrentPattern][row_slot] |= row_value;
+			if((visited_rows[nCurrentPattern][row_slot] & row_mask) != 0)
+				break;	// we visited this row already - this module must be looping.
+			visited_rows[nCurrentPattern][row_slot] |= row_mask;
 		}
 
 		// Update next position
