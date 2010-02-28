@@ -665,12 +665,14 @@ BOOL CSoundFile::ProcessRow()
 						}
 					}
 
+#ifdef MODPLUG_TRACKER
 					if(CMainFrame::GetMainFrame())
 					{
-						// If channel resetting is disabled, we will emulate a pattern break
+						// If channel resetting is disabled in MPT, we will emulate a pattern break
 						if(!(CMainFrame::GetMainFrame()->m_dwPatternSetup & PATTERN_RESETCHANNELS))
 							m_dwSongFlags |= SONG_BREAKTOROW;
 					}
+#endif
 
 					if (!nRestartPosOverride && !(m_dwSongFlags & SONG_BREAKTOROW))
 					{
@@ -1983,9 +1985,11 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 
 	if(GetModFlag(MSF_MIDICC_BUGEMULATION))
 	{
-		if (note) {
-			pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, note, pChn->nVolume, nChn);
-		} else if (volcmd == VOLCMD_VOLUME) {
+		if((note >= NOTE_MIN) && (note <= NOTE_MAX))
+		{
+			pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], pChn->nVolume, nChn);
+		} else if (volcmd == VOLCMD_VOLUME)
+		{
 			pPlugin->MidiCC(pIns->nMidiChannel, MIDICC_Volume_Fine, vol, nChn);
 		}
 		return;
@@ -2007,7 +2011,10 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 			break;
 		}
 
-		pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, note, velocity, nChn);
+		MODCOMMAND::NOTE realNote = note;
+		if((note >= NOTE_MIN) && (note <= NOTE_MAX))
+			realNote = pIns->NoteMap[note - 1];
+		pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, realNote, velocity, nChn);
 	}
 
 	
