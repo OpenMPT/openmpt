@@ -453,18 +453,6 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 
 	return dwElapsedTime / 1000.0;
 
-	/*
-// -> CODE#0022
-// -> DESC="alternative BPM/Speed interpretation method"
-//	return (UINT)((dwElapsedTime+500.0) / 1000.0);
-//	if(CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
-	if 	(m_nTempoMode == tempo_mode_alternative) {
-		return (UINT)((dwElapsedTime + 1000.0) / 1000.0);
-	} else {
-		return (UINT)((dwElapsedTime + 500.0) / 1000.0);
-	}
-// -! NEW_FEATURE#0022
-	*/
 }
 
 
@@ -485,7 +473,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 
 	if ((pIns) && (note) && (note <= 128))
 	{
-		if (pIns->NoteMap[note-1] >= 0xFE) return;
+		if (pIns->NoteMap[note-1] >= NOTE_MIN_SPECIAL) return;
 		UINT n = pIns->Keyboard[note-1];
 		pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : NULL;
 	} else
@@ -1050,7 +1038,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 						//switch off duplicated note played on this plugin 
 						IMixPlugin *pPlugin =  m_MixPlugins[pHeader->nMixPlug-1].pMixPlugin;
 						if (pPlugin && p->nNote)
-							pPlugin->MidiCommand(p->pModInstrument->nMidiChannel, p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nNote+NOTE_KEYOFF, 0, i);
+							pPlugin->MidiCommand(p->pModInstrument->nMidiChannel, p->pModInstrument->nMidiProgram, p->pModInstrument->wMidiBank, p->nNote + NOTE_KEYOFF, 0, i);
 						break;
 					}
 				}
@@ -1264,7 +1252,7 @@ BOOL CSoundFile::ProcessEffects()
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						nStartTick = 1;
 					//ST3 ignores notes with SD0 completely
-					else if(GetType() & MOD_TYPE_S3M)
+					else if(GetType() == MOD_TYPE_S3M)
 						nStartTick = m_nMusicSpeed;
 				}
 
@@ -2249,7 +2237,8 @@ void CSoundFile::NoteSlide(MODCHANNEL *pChn, UINT param, int sign)
 //----------------------------------------------------------------
 {
 	BYTE x, y;
-	if (m_dwSongFlags & SONG_FIRSTTICK) {
+	if (m_dwSongFlags & SONG_FIRSTTICK)
+	{
 		x = param & 0xf0;
 		if (x)
 			pChn->nNoteSlideSpeed = (x >> 4);
@@ -2257,13 +2246,15 @@ void CSoundFile::NoteSlide(MODCHANNEL *pChn, UINT param, int sign)
 		if (y)
 			pChn->nNoteSlideStep = y;
 		pChn->nNoteSlideCounter = pChn->nNoteSlideSpeed;
-	} else {
-			if (--pChn->nNoteSlideCounter == 0) {
-				pChn->nNoteSlideCounter = pChn->nNoteSlideSpeed;
-				// update it
-				pChn->nPeriod = GetPeriodFromNote
-					(sign * pChn->nNoteSlideStep + GetNoteFromPeriod(pChn->nPeriod), 8363, 0);
-			}
+	} else
+	{
+		if (--pChn->nNoteSlideCounter == 0)
+		{
+			pChn->nNoteSlideCounter = pChn->nNoteSlideSpeed;
+			// update it
+			pChn->nPeriod = GetPeriodFromNote
+				(sign * pChn->nNoteSlideStep + GetNoteFromPeriod(pChn->nPeriod), 8363, 0);
+		}
 	}
 }
 
@@ -2289,7 +2280,7 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 		if(param)
 			pChn->nPortamentoSlide = param;
 		else
-			if(pChn->nPortamentoSlide == NULL)
+			if(pChn->nPortamentoSlide == 0)
 				return;
 
 
@@ -3422,7 +3413,7 @@ void CSoundFile::NoteCut(UINT nChn, UINT nTick)
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			nTick = 1;
 		// ST3 doesn't cut notes with SC0
-		else if(m_nType & MOD_TYPE_S3M)
+		else if(m_nType == MOD_TYPE_S3M)
 			return;
 	}
 
@@ -3961,7 +3952,7 @@ void CSoundFile::HandlePatternTransitionEvents()
 
 
 void CSoundFile::PortamentoMPT(MODCHANNEL* pChn, int param)
-//----------------------------------------------------------------
+//---------------------------------------------------------
 {
 	//Behavior: Modifies portamento by param-steps on every tick.
 	//Note that step meaning depends on tuning.
@@ -3972,7 +3963,7 @@ void CSoundFile::PortamentoMPT(MODCHANNEL* pChn, int param)
 
 
 void CSoundFile::PortamentoFineMPT(MODCHANNEL* pChn, int param)
-//-------------------------------------------------------------------
+//-------------------------------------------------------------
 {
 	//Behavior: Divides portamento change between ticks/row. For example
 	//if Ticks/row == 6, and param == +-6, portamento goes up/down by one tuning-dependent

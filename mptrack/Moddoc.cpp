@@ -355,6 +355,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_S3M);
 		break;
 	case MOD_TYPE_PSM:
+	case MOD_TYPE_ULT:
 	default:
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
 	}
@@ -793,7 +794,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 	
 	if ((!pMainFrm) || (!note)) return FALSE;
 	if (nVol > 256) nVol = 256;
-	if (note < 128)
+	if (note <= NOTE_MAX)
 	{
 		BEGIN_CRITICAL();
 		
@@ -923,7 +924,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
    				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-					if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, note, pChn->nVolume, MAX_BASECHANNELS);
+					if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], pChn->nVolume, MAX_BASECHANNELS);
 					//if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, note, pChn->GetVSTVolume(), MAX_BASECHANNELS);
 				}
 			}
@@ -950,13 +951,13 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 
 
 BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewbs.vstiLive: added chan and nins
-//--------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 {
 	BEGIN_CRITICAL();
 
-
 	//rewbs.vstiLive
-	if (nins>0 && nins<=m_SndFile.m_nInstruments) {
+	if((nins > 0) && (nins <= m_SndFile.m_nInstruments) && (note >= NOTE_MIN) && (note <= NOTE_MAX))
+	{
 
 		MODINSTRUMENT *pIns = m_SndFile.Instruments[nins];
 		if (pIns && pIns->nMidiChannel > 0 && pIns->nMidiChannel < 17) // instro sends to a midi chan
@@ -970,7 +971,7 @@ BOOL CModDoc::NoteOff(UINT note, BOOL bFade, UINT nins, UINT nCurrentChn) //rewb
 			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 			{
 				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[nPlugin-1].pMixPlugin;
-				if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, note+NOTE_KEYOFF, 0, MAX_BASECHANNELS);
+				if (pPlugin) pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1] + NOTE_KEYOFF, 0, MAX_BASECHANNELS);
 
 			}
 		}
@@ -1942,19 +1943,7 @@ void CModDoc::OnApproximateBPM()
 			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nRowsPerBeat, bpm); 
 			break;
 	}
-/*
-	if (CMainFrame::m_dwPatternSetup & PATTERN_MODERNSPEED) {
-		Message.Format("Using modern speed interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
-		m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
-	} 
-	else if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
-		Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
-		m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
-	} else {
-		Message.Format("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %d\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
-		m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, CMainFrame::m_nRowSpacing2, bpm); 
-	}
-	*/
+
 	CMainFrame::GetMainFrame()->MessageBox(Message, NULL, MB_OK|MB_ICONINFORMATION);
 }
 
@@ -2667,7 +2656,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 					case 0x30: // vibrato waveform
 					case 0x40: // tremolo waveform
 					case 0x50: // panbrello waveform
-						if(((param & 0x0F) > 0x03) && m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER))
+						if(((param & 0x0F) > 0x03) && m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER))
 						{
 							strcpy(s, "ignore");
 							break;
