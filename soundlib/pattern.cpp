@@ -328,7 +328,7 @@ void WriteData(std::ostream& oStrm, const CPattern& pat)
 			const MODCOMMAND m = *pat.GetpModCommand(r, c);
 			// Writing only commands not writting in IT-pattern writing:
 			// For now this means only NOTE_PC and NOTE_PCS.
-			if(m.note != NOTE_PCS && m.note != NOTE_PC)
+			if(!m.IsPcNote())
 				continue;
 			uint8 diffmask = CreateDiffMask(lastChnMC[c], m);
 			uint8 chval = static_cast<uint8>(c+1);
