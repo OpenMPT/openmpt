@@ -1118,7 +1118,7 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 					ncursor++;
 					if ((ncursor >= colmin) && (ncursor <= colmax))
 					{
-						if(m->note == NOTE_PC || m->note == NOTE_PCS)
+						if(m->IsPcNote())
 						{
 							const uint16 val = m->GetValueVolCol();
 							p[6] = GetDigit<2>(val);
@@ -1143,7 +1143,7 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 					if (((ncursor >= colmin) && (ncursor <= colmax))
 					 || ((ncursor+1 >= colmin) && (ncursor+1 <= colmax)))
 					{
-						if(m->note == NOTE_PC || m->note == NOTE_PCS)
+						if(m->IsPcNote())
 						{
 							const uint16 val = m->GetValueEffectCol();
 							p[9] = GetDigit<2>(val);

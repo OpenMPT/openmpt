@@ -116,6 +116,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_CHANNEL_RENAME,				OnRenameChannel)
 	ON_COMMAND(ID_PATTERN_EDIT_PCNOTE_PLUGIN,	OnTogglePCNotePluginEditor)
 	ON_COMMAND_RANGE(ID_CHANGE_INSTRUMENT, ID_CHANGE_INSTRUMENT+MAX_INSTRUMENTS, OnSelectInstrument)
+	ON_COMMAND_RANGE(ID_CHANGE_PCNOTE_PARAM, ID_CHANGE_PCNOTE_PARAM + MODCOMMAND::maxColumnValue, OnSelectPCNoteParam)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,			OnUpdateUndo)
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, OnSelectPlugin) //rewbs.patPlugName
 
@@ -892,7 +893,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 			switch(i & 7) {
 				case 0:	// Clear note
 					if (rm.note) {
-						if(m->note == NOTE_PCS || m->note == NOTE_PC)
+						if(m->IsPcNote())
 						{  // Clear whole row if clearing PC note
 							m->Clear();
 							invalidateAllCols = true;
@@ -918,7 +919,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 				case 3: // Clear Command
 					if (rm.command) {
 						m->command = 0;
-						if(m->note == NOTE_PC || m->note == NOTE_PCS) m->SetValueEffectCol(0);
+						if(m->IsPcNote()) m->SetValueEffectCol(0);
 					}
 					break;
 				case 4:	// Clear Command Param
@@ -1226,8 +1227,9 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildVisFXCtxMenu(hMenu, ih)   | 	//Use bitwise ORs to avoid shortcuts
 				BuildAmplifyCtxMenu(hMenu, ih) |
-				BuildSetInstCtxMenu(hMenu, ih, pSndFile) |
-				BuildPCNoteCtxMenu(hMenu, ih, pSndFile) )
+				BuildSetInstCtxMenu(hMenu, ih, pSndFile) )
+				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
+			if (BuildPCNoteCtxMenu(hMenu, ih, pSndFile))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
 			if (BuildGrowShrinkCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, "");
@@ -1804,7 +1806,7 @@ void CViewPattern::OnEditFindNext()
 				}
 
 				// Ignore modcommands with PC/PCS notes when searching from volume or effect column.
-				if( (m->note == NOTE_PC || m->note == NOTE_PCS)
+				if( (m->IsPcNote())
 					&&
 					m_dwFindFlags & (PATSEARCH_VOLCMD|PATSEARCH_VOLUME|PATSEARCH_COMMAND|PATSEARCH_PARAM))
 				{
@@ -2153,8 +2155,8 @@ void CViewPattern::OnInterpolateNote()
 
 //static void CArrayUtils<UINT>::Merge(CArray<UINT,UINT>& Dest, CArray<UINT,UINT>& Src);
 
-void CViewPattern::Interpolate(UINT type)
-//---------------------------------------
+void CViewPattern::Interpolate(PatternColumns type)
+//-------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (!pModDoc)
@@ -2451,6 +2453,7 @@ void CViewPattern::OnSetSelInstrument()
 	if (!nIns) return;
 	if ((pModDoc = GetDocument()) == NULL) return;
 	pSndFile = pModDoc->GetSoundFile();
+	if(!pSndFile) return;
 	p = pSndFile->Patterns[m_nPattern];
 	if (!p) return;
 	BeginWaitCursor();
@@ -2984,7 +2987,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		// MPTM: Use PC Notes
 
 		// only overwrite existing PC Notes
-		if(pRow->IsEmpty() || pRow->note == NOTE_PC || pRow->note == NOTE_PCS)
+		if(pRow->IsEmpty() || pRow->IsPcNote())
 		{
 			pRow->Set(NOTE_PCS, plugSlot + 1, paramIndex, static_cast<uint16>(pPlug->GetParameter(paramIndex) * MODCOMMAND::maxColumnValue));
 			InvalidateRow();
@@ -3719,7 +3722,7 @@ void CViewPattern::TempEnterVol(int v)
 		MODCOMMAND* p = pSndFile->Patterns[m_nPattern].GetpModCommand(m_nRow, GetChanFromCursor(m_dwCursor));
 		MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
 
-		if(p->note == NOTE_PC || p->note == NOTE_PCS)
+		if(p->IsPcNote())
 		{
 			ENTER_PCNOTE_VALUE(v, ValueVolCol);
 		}
@@ -3812,7 +3815,7 @@ void CViewPattern::TempEnterFX(int c)
 
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		if(p->note == NOTE_PC || p->note == NOTE_PCS)
+		if(p->IsPcNote())
 		{
 			ENTER_PCNOTE_VALUE(c, ValueEffectCol);
 		}
@@ -3864,7 +3867,7 @@ void CViewPattern::TempEnterFXparam(int v)
 
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
-		if(p->note == NOTE_PC || p->note == NOTE_PCS)
+		if(p->IsPcNote())
 		{
 			ENTER_PCNOTE_VALUE(v, ValueEffectCol);
 		}
@@ -4504,14 +4507,14 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 
 		switch(field)
 		{
-			case 0: if(p->note == NOTE_PC || p->note == NOTE_PCS) p->Clear(); else {p->note = NOTE_NONE; if (ITStyle) p->instr = 0;}  break;		//Note
+			case 0: if(p->IsPcNote()) p->Clear(); else {p->note = NOTE_NONE; if (ITStyle) p->instr = 0;}  break;		//Note
 			case 1:	p->instr = 0; break;				//instr
 			case 2:	p->vol = 0; p->volcmd = 0; break;	//Vol
 			case 3:	p->command = 0;	break;				//Effect
 			case 4:	p->param = 0; break;				//Param
 			default: p->Clear();						//If not specified, delete them all! :)
 		}
-		if((field == 3 || field == 4) && (p->note == NOTE_PC || p->note == NOTE_PCS))
+		if((field == 3 || field == 4) && (p->IsPcNote()))
 			p->SetValueEffectCol(0);
 
 		if(IsEditingEnabled_bmsg())
@@ -4575,13 +4578,43 @@ void CViewPattern::OnSelectInstrument(UINT nID)
 	UINT o_inst = GetCurrentInstrument();
 	UINT n_inst = nID-ID_CHANGE_INSTRUMENT;
 
-	if (n_inst == 0)	{
+	if (n_inst == 0)
+	{
 		RowMask sp = {0,1,0,0,0};    // Setup mask to only clear instrument data in OnClearSelection
 		OnClearSelection(false, sp); // Clears instrument selection from pattern
-	} else	{
+	} else
+	{
 		SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, n_inst);
 		OnSetSelInstrument();
 		SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, o_inst); //Restoring old instrument.
+	}
+}
+
+void CViewPattern::OnSelectPCNoteParam(UINT nID)
+//----------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument(); if (!pModDoc) return;
+	CSoundFile *pSndFile = pModDoc->GetSoundFile(); if (!pSndFile) return;
+
+	UINT paramNdx = nID - ID_CHANGE_PCNOTE_PARAM;
+	bool bModified = false;
+	MODCOMMAND *p;
+	for(ROWINDEX nRow = GetSelectionStartRow(); nRow <= GetSelectionEndRow(); nRow++)
+	{
+		for(CHANNELINDEX nChn = GetSelectionStartChan(); nChn <= GetSelectionEndChan(); nChn++)
+		{
+			p = pSndFile->Patterns[m_nPattern] + nRow * pSndFile->GetNumChannels() + nChn;
+			if(p && p->IsPcNote() && (p->GetValueVolCol() != paramNdx))
+			{
+				bModified = true;
+				p->SetValueVolCol(paramNdx);
+			}
+		}
+	}
+	if (bModified)
+	{
+		pModDoc->SetModified();
+		pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
 	}
 }
 
@@ -4944,8 +4977,21 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFil
 	CArray<UINT, UINT> validChans;
 	DWORD greyed = (ListChansWhereColSelected(INST_COLUMN, validChans)>0)?FALSE:MF_GRAYED;
 
-	if (!greyed || !(CMainFrame::m_dwPatternSetup&PATTERN_OLDCTXMENUSTYLE))
+	if (!greyed || !(CMainFrame::m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
+		bool isPcNote = false;
+		MODCOMMAND *mSelStart = nullptr;
+		if((pSndFile != nullptr) && (pSndFile->Patterns.IsValidPat(m_nPattern)))
+		{
+			mSelStart = pSndFile->Patterns[m_nPattern].GetpModCommand(GetSelectionStartRow(), GetSelectionStartChan());
+			if(mSelStart != nullptr && mSelStart->IsPcNote())
+			{
+				isPcNote = true;
+			}
+		}
+		if(isPcNote)
+			return false;
+
 		// Create the new menu and add it to the existing menu.
 		HMENU instrumentChangeMenu = ::CreatePopupMenu();
 		AppendMenu(hMenu, MF_POPUP|greyed, (UINT)instrumentChangeMenu, "Change Instrument\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
@@ -5004,6 +5050,7 @@ bool CViewPattern::BuildChannelMiscCtxMenu(HMENU hMenu, CSoundFile* pSndFile)
 }
 
 
+// Context menu for Param Control notes
 bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile* pSndFile)
 //-----------------------------------------------------------------------------------------
 {
@@ -5013,10 +5060,46 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler* ih, CSoundFile
 	mSelStart = pSndFile->Patterns[m_nPattern].GetpModCommand(GetSelectionStartRow(), GetSelectionStartChan());
 	if((mSelStart == nullptr) || (!mSelStart->IsPcNote()))
 		return false;
-	if(mSelStart->instr < 1 || mSelStart->instr > MAX_MIXPLUGINS)
-		return false;
 	
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, "Toggle plugin editor\t" + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
+	char s[72];
+
+	// Create sub menu for "change plugin"
+	HMENU pluginChangeMenu = ::CreatePopupMenu();
+	AppendMenu(hMenu, MF_POPUP, (UINT)pluginChangeMenu, "Change Plugin\t" + ih->GetKeyTextFromCommand(kcPatternSetInstrument));
+	for(PLUGINDEX nPlg = 0; nPlg < MAX_MIXPLUGINS; nPlg++)
+	{
+		if(pSndFile->m_MixPlugins[nPlg].pMixPlugin != nullptr)
+		{
+			wsprintf(s, "%02d: %s", nPlg + 1, pSndFile->m_MixPlugins[nPlg].GetName());
+			AppendMenu(pluginChangeMenu, MF_STRING | ((nPlg + 1) == mSelStart->instr) ? MF_CHECKED : 0, ID_CHANGE_INSTRUMENT + nPlg + 1, s);
+		}
+	}
+
+	if(mSelStart->instr >= 1 && mSelStart->instr <= MAX_MIXPLUGINS)
+	{
+		CVstPlugin *plug = (CVstPlugin *)(pSndFile->m_MixPlugins[mSelStart->instr - 1].pMixPlugin);
+
+		if(plug != nullptr)
+		{
+
+			// Create sub menu for "change plugin param"
+			HMENU paramChangeMenu = ::CreatePopupMenu();
+			AppendMenu(hMenu, MF_POPUP, (UINT)paramChangeMenu, "Change Plugin Parameter\t");
+
+			char sname[64];
+			uint16 nThisParam = mSelStart->GetValueVolCol();
+			UINT nParams = plug->GetNumParameters();
+			for (UINT i = 0; i < nParams; i++)
+			{
+				plug->GetParamName(i, sname, sizeof(sname));
+				wsprintf(s, "%02d: %s", i, sname);
+				AppendMenu(paramChangeMenu, MF_STRING | (i == nThisParam) ? MF_CHECKED : 0, ID_CHANGE_PCNOTE_PARAM + i, s);
+			}
+		}				
+
+		AppendMenu(hMenu, MF_STRING, ID_PATTERN_EDIT_PCNOTE_PLUGIN, "Toggle plugin editor\t" + ih->GetKeyTextFromCommand(kcPatternEditPCNotePlugin));
+	}
+
 	return true;
 }
 
@@ -5041,7 +5124,7 @@ UINT CViewPattern::GetSelectionEndChan() {
 	return max(GetChanFromCursor(m_dwBeginSel), GetChanFromCursor(m_dwEndSel));
 }
 
-UINT CViewPattern::ListChansWhereColSelected(UINT colType, CArray<UINT,UINT> &chans) {
+UINT CViewPattern::ListChansWhereColSelected(PatternColumns colType, CArray<UINT,UINT> &chans) {
 //----------------------------------------------------------------------------------
 	chans.RemoveAll();
 	UINT startChan = GetSelectionStartChan();
@@ -5071,7 +5154,7 @@ UINT CViewPattern::GetColTypeFromCursor(DWORD cursor) {return cursor & 0x07;}
 
 
 bool CViewPattern::IsInterpolationPossible(UINT startRow, UINT endRow, 
-										   UINT chan, UINT colType, CSoundFile* pSndFile) {
+										   UINT chan, PatternColumns colType, CSoundFile* pSndFile) {
 //---------------------------------------------------------------------------------------
 	if (startRow == endRow) {
 		return false;
@@ -5082,7 +5165,7 @@ bool CViewPattern::IsInterpolationPossible(UINT startRow, UINT endRow,
 	const MODCOMMAND endRowMC = *pSndFile->Patterns[m_nPattern].GetpModCommand(endRow, chan);
 	UINT startRowCmd, endRowCmd;
 
-	if(colType == EFFECT_COLUMN && (startRowMC.note == NOTE_PC || startRowMC.note == NOTE_PCS || endRowMC.note == NOTE_PC || endRowMC.note == NOTE_PCS))
+	if(colType == EFFECT_COLUMN && (startRowMC.IsPcNote() || endRowMC.IsPcNote()))
 		return true;
 
 	switch (colType) {

@@ -151,17 +151,7 @@ void CPSRatioCalc::CalcRows()
 			rowTime = 2500.0 * (double)m_nSpeed/(double)m_nTempo;
 			break;
 	}
-/*
-	if (CMainFrame::m_dwPatternSetup & PATTERN_MODERNSPEED) {
-		rowTime = 60000.0/(double)m_nTempo / (double)m_nRowsPerBeat;
-	} 
-	else if (CMainFrame::m_dwPatternSetup & PATTERN_ALTERNTIVEBPMSPEED) {
-		rowTime = 60000.0 / (1.65625 * (double)(m_nSpeed * m_nTempo));
-	} 
-	else {
-		rowTime = 2500.0 * (double)m_nSpeed/(double)m_nTempo;
-	}
-*/	
+
 	m_dRowsOrig = (double)m_lMsOrig/rowTime;
 	m_dRowsNew = m_dRowsOrig*(m_dRatio/100);
 

@@ -271,7 +271,7 @@ protected:
 
 public:
 	CPageEditVolume(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITVOLUME) {}
-	void Init(MODCOMMAND &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = (m.note == NOTE_PC || m.note == NOTE_PCS) ? true : false;}
+	void Init(MODCOMMAND &m) { m_nVolCmd = m.volcmd; m_nVolume = m.vol; m_bIsParamControl = (m.IsPcNote()) ? true : false;}
 	void UpdateDialog();
 	void UpdateRanges();
 
@@ -303,7 +303,7 @@ public:
 	CPageEditEffect(CModDoc *pModDoc, CEditCommand *parent):CPageEditCommand(pModDoc, parent, IDD_PAGEEDITEFFECT) {}
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = (m.note == NOTE_PC || m.note == NOTE_PCS) ? true : false; m_nPlugin = m.instr; m_nPluginParam = MODCOMMAND::GetValueVolCol(m.volcmd, m.vol);}
+	void Init(MODCOMMAND &m) { m_nCommand = m.command; m_nParam = m.param; m_pModcommand = &m; m_bIsParamControl = (m.IsPcNote()) ? true : false; m_nPlugin = m.instr; m_nPluginParam = MODCOMMAND::GetValueVolCol(m.volcmd, m.vol);}
 	void XInit(UINT xparam = 0, UINT multiplier = 1) { m_nXParam = xparam; m_nMultiplier = multiplier; }
 // -! NEW_FEATURE#0010
 	void UpdateDialog();

@@ -2144,7 +2144,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			for (UINT ch=0; ch<m_nChannels; ch++, m++)
 			{
 				// Skip mptm-specific notes.
-				if(GetType() == MOD_TYPE_MPT && (m->note == NOTE_PC || m->note == NOTE_PCS))
+				if(GetType() == MOD_TYPE_MPT && (m->IsPcNote()))
 					{bNeedsMptPatSave = true; continue;}
 
 				BYTE b = 0;

@@ -3317,7 +3317,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 	// Convert param control, extended envelope control
 	if(oldTypeIsMPT)
 	{
-		if(m->note == NOTE_PC || m->note == NOTE_PCS)
+		if(m->IsPcNote())
 		{
 			m->param = (BYTE)(min(MODCOMMAND::maxColumnValue, m->GetValueEffectCol()) * 0x7F / MODCOMMAND::maxColumnValue);
 			m->command = (m->note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI; // might be removed later

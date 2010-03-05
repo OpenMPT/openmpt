@@ -33,7 +33,8 @@ class COpenGLEditor;
 // Row Spacing
 #define MAX_SPACING	64
 
-enum {
+enum PatternColumns
+{
 	NOTE_COLUMN=0,
     INST_COLUMN,
 	VOL_COLUMN,
@@ -300,6 +301,7 @@ protected:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg void OnClearSelectionFromMenu();
 	afx_msg void OnSelectInstrument(UINT nid);
+	afx_msg void OnSelectPCNoteParam(UINT nid);
 	afx_msg void OnRunScript();
 	afx_msg void OnShowTimeAtRow();
 	afx_msg void OnRenameChannel();
@@ -338,14 +340,14 @@ private:
 	UINT GetSelectionEndRow();
 	UINT GetSelectionStartChan();
 	UINT GetSelectionEndChan();
-	UINT ListChansWhereColSelected(UINT colType, CArray<UINT,UINT> &chans);
+	UINT ListChansWhereColSelected(PatternColumns colType, CArray<UINT,UINT> &chans);
 
 	static ROWINDEX GetRowFromCursor(DWORD cursor);
 	static CHANNELINDEX GetChanFromCursor(DWORD cursor);
 	static UINT GetColTypeFromCursor(DWORD cursor);
 
-	bool IsInterpolationPossible(UINT startRow, UINT endRow, UINT chan, UINT colType, CSoundFile* pSndFile);
-	void Interpolate(UINT type);
+	bool IsInterpolationPossible(UINT startRow, UINT endRow, UINT chan, PatternColumns colType, CSoundFile* pSndFile);
+	void Interpolate(PatternColumns type);
 
 	// Return true if recording live (i.e. editing while following playback).
 	// rSndFile must be the CSoundFile object of given rModDoc.

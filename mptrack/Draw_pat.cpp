@@ -401,7 +401,7 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const MODCOMMAND mc)
 {
 	PCPATTERNFONT pfnt = GetCurrentPatternFont();
 
-	if(mc.note == NOTE_PCS || mc.note == NOTE_PC)
+	if(mc.IsPcNote())
 	{	//If note is parameter control note, drawing volume command differently.
 		const int val = min(MODCOMMAND::maxColumnValue, mc.GetValueVolCol());
 
@@ -805,7 +805,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				MODCOMMAND *mold = m - ncols;
 				if (m->note == mold->note) dwSpeedUpMask |= 0x01;
 				if ((m->instr == mold->instr) || (m_nDetailLevel < 1)) dwSpeedUpMask |= 0x02;
-				if ( m->note == NOTE_PCS || m->note == NOTE_PC || mold->note == NOTE_PCS || mold->note == NOTE_PC )
+				if ( m->IsPcNote() || mold->IsPcNote() )
 				{   // Handle speedup mask for PC notes.
 					if(m->note == mold->note)
 					{
@@ -893,7 +893,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
 					} else
-					if (m->note != NOTE_PCS && m->note != NOTE_PC && (m->volcmd) && (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+					if ((!m->IsPcNote()) && (m->volcmd) && (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 					{
 						switch(m->volcmd)
 						{
@@ -931,7 +931,7 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 			// Command & param
 			if (m_nDetailLevel > 2)
 			{
-				const bool isPCnote = (m->note == NOTE_PC || m->note == NOTE_PCS);
+				const bool isPCnote = m->IsPcNote();
 				uint16 val = m->GetValueEffectCol();
 				if(val > MODCOMMAND::maxColumnValue) val = MODCOMMAND::maxColumnValue;
 				fx_col = row_col;
@@ -1475,7 +1475,7 @@ void CViewPattern::UpdateIndicator()
 					if (m->instr)
 					{
 						CHAR sztmp[128] = "";
-						if(m->note == NOTE_PC || m->note == NOTE_PCS)
+						if(m->IsPcNote())
 						{
 							// display plugin name.
 							if(m->instr <= MAX_MIXPLUGINS)
@@ -1523,7 +1523,7 @@ void CViewPattern::UpdateIndicator()
 					break;
 				case 2:
 					// display volume command
-					if(m->note == NOTE_PC || m->note == NOTE_PCS)
+					if(m->IsPcNote())
 					{
 						// display plugin param name.
 						if(m->instr > 0 && m->instr <= MAX_MIXPLUGINS)
@@ -1542,7 +1542,7 @@ void CViewPattern::UpdateIndicator()
 				case 3:
 				case 4:
 					// display effect command
-					if(m->note != NOTE_PC && m->note != NOTE_PCS)
+					if(!m->IsPcNote())
 					{
 						if (!pModDoc->GetEffectName(s, m->command, m->param, false, nChn)) s[0] = 0;
 					}
