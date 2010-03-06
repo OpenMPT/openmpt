@@ -1204,6 +1204,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
 			UINT col;
 			bool bS3MCommands = false, bOk = false;
+			bool bPrepareUndo = true;
 			MODTYPE origFormat = MOD_TYPE_IT;
 			UINT len = 0, startLen;
 
@@ -1238,7 +1239,6 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			bS3MCommands = (origFormat & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) != 0 ? true : false;
 			bOk = true;
 
-			GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 			startLen = len;
 			startRow = nrow;
 
@@ -1275,6 +1275,13 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 
 					if (bSkipPaste == false)
 					{
+						// Before changing anything in this pattern, we have to create an undo point.
+						if(bPrepareUndo)
+						{
+							GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+							bPrepareUndo = false;
+						}
+						
 						// ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
 						// so that we can refer back to check if there was anything in e.g. the note column before we pasted.
 						const MODCOMMAND origModCmd = m[col];
@@ -1447,8 +1454,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						nPattern = m_SndFile.Order[oNextOrder];
 						if(m_SndFile.Patterns.IsValidPat(nPattern) == false) goto PasteDone;
 						m = m_SndFile.Patterns[nPattern];
-						GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
 						oCurrentOrder = oNextOrder;
+						bPrepareUndo = true;
 					}
 				}
 			
