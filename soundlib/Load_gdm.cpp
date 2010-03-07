@@ -68,10 +68,10 @@ typedef struct _GDMSAMPLEHEADER
 
 #pragma pack()
 
-#define GDMHeader_Origin_Count 8
+#define GDMHeader_Origin_Count 9
 static MODTYPE GDMHeader_Origin[GDMHeader_Origin_Count] =
 {
-	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED
+	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED
 };
 
 bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
