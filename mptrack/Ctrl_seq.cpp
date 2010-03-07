@@ -401,11 +401,14 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	case kcOrderlistNavigateFirstSelect:
 	case kcOrderlistNavigateFirst:
 		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateFirstSelect); SetCurSel(0); return wParam;
+	case kcEditSelectAll:
+		SetCurSel(0);
+		// fallthroughs intended.
 	case kcOrderlistNavigateLastSelect:
 	case kcOrderlistNavigateLast:
 		if((m_pModDoc != nullptr) && (m_pModDoc->GetSoundFile() != nullptr))
 		{
-			SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLastSelect);
+			SetCurSelTo2ndSel(wParam == kcOrderlistNavigateLastSelect || wParam == kcEditSelectAll);
 			ORDERINDEX nLast = m_pModDoc->GetSoundFile()->Order.GetLengthTailTrimmed();
 			if(nLast > 0) nLast--;
 			SetCurSel(nLast);

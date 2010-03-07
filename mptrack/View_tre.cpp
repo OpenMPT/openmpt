@@ -2768,20 +2768,22 @@ void CModTree::OnMuteTreeItem()
 		{
 			pModDoc->MuteInstrument((INSTRUMENTINDEX)modItemID, (pModDoc->IsInstrumentMuted((INSTRUMENTINDEX)modItemID)) ? false : true);
 			UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_INSNAMES | HINT_INSTRUMENT);
-		}
-
+		} else
 		if ((modItemType == MODITEM_EFFECT))
 		{
-			CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
-			if (pSndFile) {
-				PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[modItemID];
-				if (pPlugin) {
-					CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
-					if (pVstPlugin) pVstPlugin->Bypass();
-				}
-			}
+			CSoundFile *pSndFile = pModDoc ? pModDoc->GetSoundFile() : nullptr;
+			if (pSndFile == nullptr)
+				return;
+			PSNDMIXPLUGIN pPlugin = &pSndFile->m_MixPlugins[modItemID];
+			if(pPlugin == nullptr)
+				return;
+			CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
+			if(pVstPlugin == nullptr)
+				return;
+			pVstPlugin->Bypass();
+			pModDoc->SetModified();
+			//UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_MIXPLUGINS);
 		}
-
 	}
 }
 
