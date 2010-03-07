@@ -65,6 +65,9 @@ typedef struct PTMSAMPLE
 bool CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
+	if(lpStream == nullptr || dwMemLength < sizeof(PTMFILEHEADER))
+		return false;
+
 	PTMFILEHEADER pfh = *(LPPTMFILEHEADER)lpStream;
 	DWORD dwMemPos;
 	UINT nOrders;
@@ -76,12 +79,11 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 	pfh.fileflags = LittleEndianW(pfh.fileflags);
 	pfh.reserved2 = LittleEndianW(pfh.reserved2);
 	pfh.ptmf_id = LittleEndian(pfh.ptmf_id);
-	for (UINT j=0; j<128; j++)
-        {
-	        pfh.patseg[j] = LittleEndianW(pfh.patseg[j]);
+	for (UINT j = 0; j < 128; j++)
+	{
+		pfh.patseg[j] = LittleEndianW(pfh.patseg[j]);
 	}
 
-	if ((!lpStream) || (dwMemLength < 1024)) return false;
 	if ((pfh.ptmf_id != 0x464d5450) || (!pfh.nchannels)
 	 || (pfh.nchannels > 32)
 	 || (pfh.norders > 256) || (!pfh.norders)
@@ -98,12 +100,12 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 	nOrders = (pfh.norders < MAX_ORDERS) ? pfh.norders : MAX_ORDERS-1;
 	Order.ReadAsByte(pfh.orders, nOrders, nOrders);
 
-	for (UINT ipan=0; ipan<m_nChannels; ipan++)
+	for (CHANNELINDEX ipan = 0; ipan < m_nChannels; ipan++)
 	{
 		ChnSettings[ipan].nVolume = 64;
 		ChnSettings[ipan].nPan = ((pfh.chnpan[ipan] & 0x0F) << 4) + 4;
 	}
-	for (UINT ismp=0; ismp<m_nSamples; ismp++, dwMemPos += SIZEOF_PTMSAMPLE)
+	for (SAMPLEINDEX ismp = 0; ismp < m_nSamples; ismp++, dwMemPos += SIZEOF_PTMSAMPLE)
 	{
 		MODSAMPLE *pSmp = &Samples[ismp+1];
 		PTMSAMPLE *psmp = (PTMSAMPLE *)(lpStream+dwMemPos);

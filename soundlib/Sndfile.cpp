@@ -572,7 +572,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		CZipArchive archive(glpszModExtensions);
 		if (CZipArchive::IsArchive((LPBYTE)lpStream, dwMemLength))
 		{
-			if (archive.UnzipArchive((LPBYTE)lpStream, dwMemLength))
+			if (archive.UnzipArchive((LPBYTE)lpStream, dwMemLength) && archive.GetOutputFile())
 			{
 				lpStream = archive.GetOutputFile();
 				dwMemLength = archive.GetOutputFileLength();
@@ -583,7 +583,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		CRarArchive unrar((LPBYTE)lpStream, dwMemLength, glpszModExtensions);
 		if (unrar.IsArchive())
 		{
-			if (unrar.ExtrFile())
+			if (unrar.ExtrFile() && unrar.GetOutputFile())
 			{
 				lpStream = unrar.GetOutputFile();
 				dwMemLength = unrar.GetOutputFileLength();
@@ -594,7 +594,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 		CLhaArchive unlha((LPBYTE)lpStream, dwMemLength, glpszModExtensions);
 		if (unlha.IsArchive())
 		{
-			if (unlha.ExtractFile())
+			if (unlha.ExtractFile() && unlha.GetOutputFile())
 			{
 				lpStream = unlha.GetOutputFile();
 				dwMemLength = unlha.GetOutputFileLength();
