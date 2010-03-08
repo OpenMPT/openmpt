@@ -1878,7 +1878,16 @@ void CViewPattern::OnEditFindNext()
 						if (m_cmdReplace.note == CFindReplaceTab::replaceNotePlusOne)
 						{
 							if (m->note < NOTE_MAX) m->note++;
-						} else m->note = m_cmdReplace.note;
+						} else
+						// Replace with another note
+						{
+							// If we're going to remove a PC Note, wipe out the complete column.
+							if(m->IsPcNote() && !MODCOMMAND::IsPcNote(m_cmdReplace.note))
+							{
+								m->Clear();
+							}
+							m->note = m_cmdReplace.note;
+						}
 					}
 					if ((m_dwReplaceFlags & PATSEARCH_INSTR))
 					{
@@ -4155,7 +4164,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		const bool bIsLiveRecord = IsLiveRecord(*pMainFrm, *pModDoc, *pSndFile);
 		const bool usePlaybackPosition = (bIsLiveRecord && (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY));
 		//Param control 'note'
-		if((note == NOTE_PC || note == NOTE_PCS) && bRecordEnabled)
+		if(MODCOMMAND::IsPcNote(note) && bRecordEnabled)
 		{
 			pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, nChn, nRow, 1, 1);
 			pSndFile->Patterns[m_nPattern].GetpModCommand(nRow, nChn)->note = note;

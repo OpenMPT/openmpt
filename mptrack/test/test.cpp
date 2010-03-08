@@ -189,6 +189,10 @@ void TestMisc()
 	VERIFY_EQUAL(ConvertStrTo<float>("-87.0"), -87.0);
 	VERIFY_EQUAL(ConvertStrTo<double>("-0.5e-6"), -0.5e-6);
 	VERIFY_EQUAL(ConvertStrTo<double>("58.65403492763"), 58.65403492763);
+
+	VERIFY_EQUAL(MODCOMMAND::IsPcNote(NOTE_MAX), false);
+	VERIFY_EQUAL(MODCOMMAND::IsPcNote(NOTE_PC), true);
+	VERIFY_EQUAL(MODCOMMAND::IsPcNote(NOTE_PCS), true);
 }
 
 

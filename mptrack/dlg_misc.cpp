@@ -1317,7 +1317,7 @@ void CPageEditNote::UpdateDialog()
 	{
 		combo->ResetContent();
 
-		if(m_nNote == NOTE_PC || m_nNote == NOTE_PCS)
+		if(MODCOMMAND::IsPcNote(m_nNote))
 		{
 			// control plugin param note
 			combo->SetItemData(combo->AddString("No Effect"), 0);
@@ -1350,7 +1350,7 @@ void CPageEditNote::UpdateDialog()
 void CPageEditNote::OnNoteChanged()
 //---------------------------------
 {
-	bool bWasParamControl = (m_nNote == NOTE_PC || m_nNote == NOTE_PCS) ? true : false;
+	const bool bWasParamControl = MODCOMMAND::IsPcNote(m_nNote);
 
 	CComboBox *combo;
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
@@ -1374,7 +1374,7 @@ void CPageEditNote::OnNoteChanged()
 			}
 		}
 	}
-	bool bIsNowParamControl = (m_nNote == NOTE_PC || m_nNote == NOTE_PCS) ? true : false;
+	const bool bIsNowParamControl = MODCOMMAND::IsPcNote(m_nNote);
 	if(bWasParamControl != bIsNowParamControl)
 		UpdateDialog();
 
