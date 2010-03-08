@@ -86,7 +86,10 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
 //	UINT dwElapsedTime=0, nRow=0, nCurrentPattern=0, nNextPattern=0, nPattern=Order[0];
-	UINT nRow=0, nCurrentPattern=0, nNextPattern=0, nPattern=Order[0];
+	ROWINDEX nRow = 0;
+	ORDERINDEX nCurrentPattern = 0;
+	ORDERINDEX nNextPattern = 0;
+	PATTERNINDEX nPattern = Order[0];
 	DOUBLE dwElapsedTime=0.0;
 // -! NEW_FEATURE#0022
 	UINT nMusicSpeed=m_nDefaultSpeed, nMusicTempo=m_nDefaultTempo, nNextRow=0;
@@ -94,10 +97,10 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	LONG nGlbVol = m_nDefaultGlobalVolume, nOldGlbVolSlide = 0;
 	BYTE samples[MAX_CHANNELS];
 	BYTE instr[MAX_CHANNELS];
-	BYTE notes[MAX_CHANNELS];
+	UINT notes[MAX_CHANNELS];
 	BYTE vols[MAX_CHANNELS];
 	BYTE oldparam[MAX_CHANNELS];
-	BYTE chnvols[MAX_CHANNELS];
+	UINT chnvols[MAX_CHANNELS];
 	DWORD patloop[MAX_CHANNELS];
 	
 	memset(instr, 0, sizeof(instr));
@@ -107,7 +110,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	memset(oldparam, 0, sizeof(oldparam));
 	memset(chnvols, 64, sizeof(chnvols));
 	memset(samples, 0, sizeof(samples));
-	for (UINT icv=0; icv<m_nChannels; icv++) chnvols[icv] = ChnSettings[icv].nVolume;
+	for(CHANNELINDEX icv = 0; icv < m_nChannels; icv++) chnvols[icv] = ChnSettings[icv].nVolume;
 	nMaxRow = m_nNextRow;
 	nMaxPattern = m_nNextPattern;
 	nCurrentPattern = nNextPattern = 0;
@@ -206,7 +209,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		if (!nRow)
 		{
 			for(UINT ipck = 0; ipck < m_nChannels; ipck++)
-				patloop[ipck] = dwElapsedTime;
+				patloop[ipck] = (DWORD)dwElapsedTime;
 		}
 		if (!bTotal)
 		{
@@ -224,8 +227,10 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		MODCHANNEL *pChn = Chn;
 		MODCOMMAND *p = Patterns[nPattern] + nRow * m_nChannels;
 		MODCOMMAND *nextRow = NULL;
-		for (UINT nChn=0; nChn<m_nChannels; p++,pChn++, nChn++) if (*((DWORD *)p))
+		for (CHANNELINDEX nChn = 0; nChn < m_nChannels; p++, pChn++, nChn++) if (*((DWORD *)p))
 		{
+			if((GetType() == MOD_TYPE_S3M) && (ChnSettings[nChn].dwFlags & CHN_MUTE) != 0)	// not even effects are processed on muted S3M channels
+				continue;
 			UINT command = p->command;
 			UINT param = p->param;
 			UINT note = p->note;
@@ -237,7 +242,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			// Position Jump
 			case CMD_POSITIONJUMP:
 				positionJumpOnThisRow=true;
-				nNextPattern = param;
+				nNextPattern = (ORDERINDEX)param;
 				// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 				if (!patternBreakOnThisRow || (GetType() == MOD_TYPE_XM)) {
 					nNextRow = 0;
@@ -283,7 +288,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			case CMD_TEMPO:
 				if ((bAdjust) && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
-					if (param) pChn->nOldTempo = param; else param = pChn->nOldTempo;
+					if (param) pChn->nOldTempo = (BYTE)param; else param = pChn->nOldTempo;
 				}
 				if (param >= 0x20) nMusicTempo = param; else
 				// Tempo Slide
@@ -312,7 +317,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				if ((param & 0xF0) == 0x60)
 				{
 					if (param & 0x0F) dwElapsedTime += (dwElapsedTime - patloop[nChn]) * (param & 0x0F);
-					else patloop[nChn] = dwElapsedTime;
+					else patloop[nChn] = (DWORD)dwElapsedTime;
 				}
 				break;
 			case CMD_XFINEPORTAUPDOWN:
@@ -1162,8 +1167,10 @@ BOOL CSoundFile::ProcessEffects()
 // -> DESC="add extended parameter mechanism to pattern effects"
 	MODCOMMAND* m = nullptr;
 // -! NEW_FEATURE#0010
-	for (UINT nChn=0; nChn<m_nChannels; nChn++, pChn++)
+	for (CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++, pChn++)
 	{
+		if((GetType() == MOD_TYPE_S3M) && (ChnSettings[nChn].dwFlags & CHN_MUTE) != 0)	// not even effects are processed on muted S3M channels
+			continue;
 		UINT instr = pChn->nRowInstr;
 		UINT volcmd = pChn->nRowVolCmd;
 		UINT vol = pChn->nRowVolume;
@@ -1224,7 +1231,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Apart from changing parameters, parameter control notes are intended to be 'invisible'.
 		// To achieve this, clearing the note data so that rest of the process sees the row as empty row.
-		if(pChn->nRowNote == NOTE_PC || pChn->nRowNote == NOTE_PCS)
+		if(MODCOMMAND::IsPcNote(pChn->nRowNote))
 		{
 			pChn->ClearRowCmd();
 			instr = 0;

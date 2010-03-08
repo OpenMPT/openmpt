@@ -1535,7 +1535,7 @@ BOOL CSoundFile::ReadNote()
 							df2 = LinearSlideDownTable[n1+1];
 						}
 						n >>= 2;
-						period = _muldiv(period, df1 + ((df2-df1)*(n&0x3F)>>6), 256);
+						period = _muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) >> 6), 256);
 						nPeriodFrac = period & 0xFF;
 						period >>= 8;
 					} else
@@ -1962,7 +1962,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 		// Previously this function took modcommand directly from pattern. ASSERT is there
 		// to detect possible behaviour change now that the data is accessed from channel.
 		const MODCOMMAND mc = *Patterns[m_nPattern].GetpModCommand(m_nRow, static_cast<CHANNELINDEX>(nChn));
-		ASSERT( mc.note == NOTE_PC || mc.note == NOTE_PCS ||
+		ASSERT( mc.IsPcNote() ||
 			(note == mc.note && instr == mc.instr && volcmd == mc.volcmd && vol == mc.vol));
 	}
 
@@ -2122,4 +2122,3 @@ VOID CSoundFile::ApplyGlobalVolume(int SoundBuffer[], long lTotalSampleCount)
 
 		}
 }
-
