@@ -343,7 +343,7 @@ bool CSampleUndo::Undo(const SAMPLEINDEX nSmp)
 	case sundo_delete:
 		// insert deleted data
 		pNewSample = pSndFile->AllocateSample(pUndo->OldSample.GetSampleSizeInBytes() + 4 * nBytesPerSample);
-		if(pNewSample == nullptr && pUndo->OldSample.nLength > 0) return false;
+		if(pNewSample == nullptr) return false;
 		memcpy(pNewSample, pCurrentSample, pUndo->nChangeStart * nBytesPerSample);
 		memcpy(pNewSample + pUndo->nChangeStart * nBytesPerSample, pUndo->SamplePtr, nChangeLen * nBytesPerSample);
 		memcpy(pNewSample + pUndo->nChangeEnd * nBytesPerSample, pCurrentSample + pUndo->nChangeStart * nBytesPerSample, (pUndo->OldSample.nLength - pUndo->nChangeEnd) * nBytesPerSample);
