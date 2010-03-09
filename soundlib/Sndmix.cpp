@@ -2004,9 +2004,12 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 
 	if(GetModFlag(MSF_MIDICC_BUGEMULATION))
 	{
-		if((note >= NOTE_MIN) && (note <= NOTE_MAX))
+		if(note)
 		{
-			pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], pChn->nVolume, nChn);
+			MODCOMMAND::NOTE realNote = note;
+			if((note >= NOTE_MIN) && (note <= NOTE_MAX))
+				realNote = pIns->NoteMap[note - 1];
+			pPlugin->MidiCommand(pIns->nMidiChannel, pIns->nMidiProgram, pIns->wMidiBank, realNote, pChn->nVolume, nChn);
 		} else if (volcmd == VOLCMD_VOLUME)
 		{
 			pPlugin->MidiCC(pIns->nMidiChannel, MIDICC_Volume_Fine, vol, nChn);
