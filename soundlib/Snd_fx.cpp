@@ -90,7 +90,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	ORDERINDEX nCurrentPattern = 0;
 	ORDERINDEX nNextPattern = 0;
 	PATTERNINDEX nPattern = Order[0];
-	DOUBLE dwElapsedTime=0.0;
+	double dElapsedTime=0.0;
 // -! NEW_FEATURE#0022
 	UINT nMusicSpeed=m_nDefaultSpeed, nMusicTempo=m_nDefaultTempo, nNextRow=0;
 	UINT nMaxRow = 0, nMaxPattern = 0;
@@ -101,7 +101,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	BYTE vols[MAX_CHANNELS];
 	BYTE oldparam[MAX_CHANNELS];
 	UINT chnvols[MAX_CHANNELS];
-	DWORD patloop[MAX_CHANNELS];
+	double patloop[MAX_CHANNELS];
 	
 	memset(instr, 0, sizeof(instr));
 	memset(notes, 0, sizeof(notes));
@@ -209,7 +209,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		if (!nRow)
 		{
 			for(UINT ipck = 0; ipck < m_nChannels; ipck++)
-				patloop[ipck] = (DWORD)dwElapsedTime;
+				patloop[ipck] = dElapsedTime;
 		}
 		if (!bTotal)
 		{
@@ -316,8 +316,8 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				if ((param & 0xF0) == 0xE0) nSpeedCount = (param & 0x0F) * nMusicSpeed; else
 				if ((param & 0xF0) == 0x60)
 				{
-					if (param & 0x0F) dwElapsedTime += (dwElapsedTime - patloop[nChn]) * (param & 0x0F);
-					else patloop[nChn] = (DWORD)dwElapsedTime;
+					if (param & 0x0F) dElapsedTime += (dElapsedTime - patloop[nChn]) * (double)(param & 0x0F);
+					else patloop[nChn] = dElapsedTime;
 				}
 				break;
 			case CMD_XFINEPORTAUPDOWN:
@@ -432,11 +432,11 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		nSpeedCount += nMusicSpeed;
 		switch(m_nTempoMode) {
 			case tempo_mode_alternative: 
-				dwElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
+				dElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
 			case tempo_mode_modern: 
-				dwElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat; break;
+				dElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat; break;
 			case tempo_mode_classic: default:
-				dwElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
+				dElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
 		}
 	}
 
@@ -457,7 +457,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		}
 	}
 
-	return dwElapsedTime / 1000.0;
+	return dElapsedTime / 1000.0;
 
 }
 
