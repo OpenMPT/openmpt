@@ -9,9 +9,9 @@ AppVerName=OpenMPT 1.18
 AppVersion=1.18.00.00
 AppName=OpenMPT
 AppPublisher=OpenMPT Devs / Olivier Lapicque
-AppPublisherURL=http://www.modplug.com/
-AppSupportURL=http://www.modplug.com/
-AppUpdatesURL=http://www.modplug.com/
+AppPublisherURL=http://www.openmpt.com/
+AppSupportURL=http://www.openmpt.com/
+AppUpdatesURL=http://www.openmpt.com/
 DefaultDirName={pf}\OpenMPT
 DefaultGroupName=OpenMPT
 AllowNoIcons=yes
@@ -141,4 +141,5 @@ begin
 end;
 
 #include "vst_scan.iss"
+
 

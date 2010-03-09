@@ -988,15 +988,19 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->dwFlags & CHN_TREMOLO)
 			{
 				UINT trempos = pChn->nTremoloPos;
+				// IT compatibility: Why would want to not execute tremolo at volume 0?
 				if (vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
+					// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
 					const int tremattn = (m_nType & MOD_TYPE_XM || IsCompatibleMode(TRK_IMPULSETRACKER)) ? 5 : 6;
 					switch (pChn->nTremoloType & 0x03)
 					{
 					case 1:
+						// IT compatibility: IT has its own, more precise tables
 						vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[trempos] : ModRampDownTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
 						break;
 					case 2:
+						// IT compatibility: IT has its own, more precise tables
 						vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[trempos] : ModSquareTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
 						break;
 					case 3:
@@ -1007,11 +1011,13 @@ BOOL CSoundFile::ReadNote()
 							vol += (ModRandomTable[trempos] * (int)pChn->nTremoloDepth) >> tremattn;
 						break;
 					default:
+						// IT compatibility: IT has its own, more precise tables
 						vol += ((IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[trempos] : ModSinusTable[trempos]) * (int)pChn->nTremoloDepth) >> tremattn;
 					}
 				}
 				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_STM|MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
+					// IT compatibility: IT has its own, more precise tables
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						pChn->nTremoloPos = (pChn->nTremoloPos + 4 * pChn->nTremoloSpeed) & 0xFF;
 					else
@@ -1022,10 +1028,9 @@ BOOL CSoundFile::ReadNote()
 			// Tremor
 			if(pChn->nCommand == CMD_TREMOR)
 			{
+				// IT compatibility 12. / 13.: Tremor
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
-					// IT compatibility 12. / 13.: Tremor
-		
 					if ((pChn->nTremorCount & 128) && pChn->nLength) {
 						if (pChn->nTremorCount == 128)
 							pChn->nTremorCount = (pChn->nTremorParam >> 4) | 192;
@@ -1157,6 +1162,7 @@ BOOL CSoundFile::ReadNote()
 				{
 					// PPS value is 1/512, i.e. PPS=1 will adjust by 8/512 = 1/64 for each 8 semitones
 					// with PPS = 32 / PPC = C-5, E-6 will pan hard right (and D#6 will not)
+					// IT compatibility: IT has a wider pan range here
 					int pandelta = (int)pChn->nRealPan + (int)((int)(pChn->nNote - pIns->nPPC - 1) * (int)pIns->nPPS) / (int)(IsCompatibleMode(TRK_IMPULSETRACKER) ? 4 : 8);
 					pChn->nRealPan = CLAMP(pandelta, 0, 256);
 				}
@@ -1227,7 +1233,8 @@ BOOL CSoundFile::ReadNote()
 							}
 						}
 					}
-					else if(IsCompatibleMode(TRK_FASTTRACKER2)) // FastTracker 2
+					// FastTracker 2: Swedish tracker logic (TM) arpeggio
+					else if(IsCompatibleMode(TRK_FASTTRACKER2))
 					{
 						BYTE note = pChn->nNote;
 						int arpPos = 0;
@@ -1249,7 +1256,8 @@ BOOL CSoundFile::ReadNote()
 						period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
 
 					}
-					else // Other trackers
+					// Other trackers
+					else
 					{
 						switch(m_nTickCount % 3)
 						{
@@ -1347,9 +1355,11 @@ BOOL CSoundFile::ReadNote()
 				switch (pChn->nVibratoType & 0x03)
 				{
 				case 1:
+					// IT compatibility: IT has its own, more precise tables
 					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[vibpos] : ModRampDownTable[vibpos];
 					break;
 				case 2:
+					// IT compatibility: IT has its own, more precise tables
 					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[vibpos] : ModSquareTable[vibpos];
 					break;
 				case 3:
@@ -1360,6 +1370,7 @@ BOOL CSoundFile::ReadNote()
 						vdelta = ModRandomTable[vibpos];
 					break;
 				default:
+					// IT compatibility: IT has its own, more precise tables
 					vdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[vibpos] : ModSinusTable[vibpos];
 				}
 
@@ -1377,8 +1388,10 @@ BOOL CSoundFile::ReadNote()
 				else //Original behavior
 				{
 					UINT vdepth;
+					// IT compatibility: correct vibrato depth
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 					{
+						// Yes, vibrato goes backwards with old effects enabled!
 						if(m_dwSongFlags & SONG_ITOLDEFFECTS)
 						{
 							vdepth = 5;
@@ -1411,6 +1424,7 @@ BOOL CSoundFile::ReadNote()
 				}
 				if ((m_nTickCount) || ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS))))
 				{
+					// IT compatibility: IT has its own, more precise tables
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						pChn->nVibratoPos = (vibpos + 4 * pChn->nVibratoSpeed) & 0xFF;
 					else
@@ -1421,6 +1435,7 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->dwFlags & CHN_PANBRELLO)
 			{
 				UINT panpos;
+				// IT compatibility: IT has its own, more precise tables
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 					panpos = pChn->nPanbrelloPos & 0xFF;
 				else
@@ -1429,9 +1444,11 @@ BOOL CSoundFile::ReadNote()
 				switch (pChn->nPanbrelloType & 0x03)
 				{
 				case 1:
+					// IT compatibility: IT has its own, more precise tables
 					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITRampDownTable[panpos] : ModRampDownTable[panpos];
 					break;
 				case 2:
+					// IT compatibility: IT has its own, more precise tables
 					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSquareTable[panpos] : ModSquareTable[panpos];
 					break;
 				case 3:
@@ -1442,6 +1459,7 @@ BOOL CSoundFile::ReadNote()
 						pdelta = ModRandomTable[panpos];
 					break;
 				default:
+					// IT compatibility: IT has its own, more precise tables
 					pdelta = IsCompatibleMode(TRK_IMPULSETRACKER) ? ITSinusTable[panpos] : ModSinusTable[panpos];
 				}
 				pChn->nPanbrelloPos += pChn->nPanbrelloSpeed;
@@ -1457,6 +1475,7 @@ BOOL CSoundFile::ReadNote()
 			{
 				MODSAMPLE *pSmp = pChn->pModSample;
 
+				// IT compatibility: No vibrato sweep = No vibrato at all!
 				if (pSmp->nVibSweep == 0 && !IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
