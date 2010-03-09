@@ -301,7 +301,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				}
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
-				if(IsCompatibleMode(TRK_ALLTRACKERS))
+				if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
 					nMusicTempo = CLAMP(nMusicTempo, 32, 255);
 				else
 					nMusicTempo = CLAMP(nMusicTempo, GetModSpecifications().tempoMin, GetModSpecifications().tempoMax);
@@ -321,6 +321,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				}
 				break;
 			case CMD_XFINEPORTAUPDOWN:
+				// ignore high offset in compatible mode
 				if (((param & 0xF0) == 0xA0) && !IsCompatibleMode(TRK_FASTTRACKER2)) pChn->nOldHiOffset = param & 0x0F;
 				break;
 			}
@@ -474,7 +475,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	MODSAMPLE *pSmp = &Samples[instr];
 	UINT note = pChn->nNewNote;
 
-	if(note == 0 && IsCompatibleMode(TRK_IMPULSETRACKER)) return;
+	if(note == NOTE_NONE && IsCompatibleMode(TRK_IMPULSETRACKER)) return;
 
 	if ((pIns) && (note) && (note <= 128))
 	{
@@ -768,11 +769,13 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			// Handle "retrigger" waveform type
 			if (pChn->nVibratoType < 4)
 			{
+				// IT Compatibilty: Slightly different waveform offsets (why does MPT have two different offsets here with IT old effects enabled and disabled?)
 				if(!IsCompatibleMode(TRK_IMPULSETRACKER) && (GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!(m_dwSongFlags & SONG_ITOLDEFFECTS)))
 					pChn->nVibratoPos = 0x10;
 				else
 					pChn->nVibratoPos = 0;
 			}
+			// IT Compatibility: No "retrigger" waveform here
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER) && pChn->nTremoloType < 4)
 			{
 				pChn->nTremoloPos = 0;
@@ -812,9 +815,10 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 		pChn->nLeftVU = pChn->nRightVU = 0xFF;
 		pChn->dwFlags &= ~CHN_FILTER;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
+		//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
 		if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
-			//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
+			// XM compatibility: FT2 also doesn't reset retrigger
 			if(!IsCompatibleMode(TRK_FASTTRACKER2)) pChn->nRetrigCount = 0;
 			pChn->nTremorCount = 0;
 		}
@@ -824,6 +828,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			pChn->nResSwing = pChn->nCutSwing = 0;
 			if (pIns)
 			{
+				// IT compatibility tentative fix: Reset NNA action on every new note, even without instrument number next to note (fixes spx-farspacedance.it, but is this actually 100% correct?)
 				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nNNA = pIns->nNNA;
 				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->nVolEnvPosition = 0;
 				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->nPanEnvPosition = 0;
@@ -833,6 +838,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 					// Volume Swing
 					if (pIns->nVolSwing)
 					{
+						// IT compatibility: MPT has a weird vol swing algorithm....
 						if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						{
 							double d = 2 * (((double) rand()) / RAND_MAX) - 1;
@@ -846,6 +852,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 					// Pan Swing
 					if (pIns->nPanSwing)
 					{
+						// IT compatibility: MPT has a weird pan swing algorithm....
 						if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						{
 							double d = 2 * (((double) rand()) / RAND_MAX) - 1;
@@ -883,7 +890,8 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 		{
 			if (pIns->nIFR & 0x80) { pChn->nResonance = pIns->nIFR & 0x7F; bFlt = true; }
 			if (pIns->nIFC & 0x80) { pChn->nCutOff = pIns->nIFC & 0x7F; bFlt = true; }
-			if (bFlt && (pIns->nFilterMode != FLTMODE_UNCHANGED)) {
+			if (bFlt && (pIns->nFilterMode != FLTMODE_UNCHANGED))
+			{
 				pChn->nFilterMode = pIns->nFilterMode;
 			}
 		} else
@@ -999,22 +1007,22 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 		applyDNAtoPlug = false; //rewbs.VSTiNNA
 		if (((p->nMasterChn == nChn+1) || (p == pChn)) && (p->pModInstrument))
 		{
-			BOOL bOk = FALSE;
+			bool bOk = false;
 			// Duplicate Check Type
 			switch(p->pModInstrument->nDCT)
 			{
 			// Note
 			case DCT_NOTE:
-				if ((note) && (p->nNote == note) && (pHeader == p->pModInstrument)) bOk = TRUE;
+				if ((note) && (p->nNote == note) && (pHeader == p->pModInstrument)) bOk = true;
 				if (pHeader && pHeader->nMixPlug) applyDNAtoPlug = true; //rewbs.VSTiNNA
 				break;
 			// Sample
 			case DCT_SAMPLE:
-				if ((pSample) && (pSample == p->pSample)) bOk = TRUE;
+				if ((pSample) && (pSample == p->pSample)) bOk = true;
 				break;
 			// Instrument
 			case DCT_INSTRUMENT:
-				if (pHeader == p->pModInstrument) bOk = TRUE;
+				if (pHeader == p->pModInstrument) bOk = true;
 				//rewbs.VSTiNNA
 				if (pHeader && pHeader->nMixPlug) applyDNAtoPlug = true;
 				break;
@@ -1023,7 +1031,7 @@ void CSoundFile::CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut)
 				if (pHeader && (pHeader->nMixPlug) && (pHeader->nMixPlug == p->pModInstrument->nMixPlug))
 				{
 					applyDNAtoPlug = true;
-					bOk = TRUE;
+					bOk = true;
 				}
 				//end rewbs.VSTiNNA
 				break;
@@ -1504,6 +1512,7 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_VIBRATOSPEED:
+					// FT2 does not automatically enable vibrato with the "set vibrato speed" command
 					if(IsCompatibleMode(TRK_FASTTRACKER2))
 						pChn->nVibratoSpeed = vol & 0x0F;
 					else
@@ -1523,7 +1532,7 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PORTAUP:
-					//IT compatibility (one of the first - link effect memory)
+					//IT compatibility (one of the first testcases - link effect memory)
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						PortamentoUp(pChn, vol << 2, true);
 					else
@@ -1531,7 +1540,7 @@ BOOL CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PORTADOWN:
-					//IT compatibility (one of the first - link effect memory)
+					//IT compatibility (one of the first testcases - link effect memory)
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						PortamentoDown(pChn, vol << 2, true);
 					else
@@ -1646,7 +1655,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Arpeggio
 		case CMD_ARPEGGIO:
-			// IT compatibility 01. Don't ignore Arpeggio if no note is playing
+			// IT compatibility 01. Don't ignore Arpeggio if no note is playing (also valid for ST3)
 			if ((m_nTickCount) || (((!pChn->nPeriod) || !pChn->nNote) && !IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER))) break;
 			if ((!param) && (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))) break;
 			pChn->nCommand = CMD_ARPEGGIO;
@@ -1661,9 +1670,9 @@ BOOL CSoundFile::ProcessEffects()
 				if (!(param & 0x0F)) param |= pChn->nRetrigParam & 0x0F;
 				param |= 0x100; // increment retrig count on first row
 			}
+			// IT compatibility 15. Retrigger
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
-				// IT compatibility 15. Retrigger
 				if (param)
 					pChn->nRetrigParam = (BYTE)(param & 0xFF);
 
@@ -1694,17 +1703,16 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_TREMOR:
 			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 
+			// IT compatibility 12. / 13. Tremor (using modified DUMB's Tremor logic here because of old effects - http://dumb.sf.net/)
 			if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
-				// IT compatibility 12. / 13. Tremor (using modified DUMB's Tremor logic here because of old effects - http://dumb.sf.net/)
-
-				if (param && !(m_dwSongFlags & SONG_ITOLDEFFECTS)) {
+				if (param && !(m_dwSongFlags & SONG_ITOLDEFFECTS))
+				{
 					// Old effects have different length interpretation (+1 for both on and off)
 					if (param & 0xf0) param -= 0x10;
 					if (param & 0x0f) param -= 0x01;
 				}
 				pChn->nTremorCount |= 128; // set on/off flag
-
 			}
 			else
 			{
@@ -1721,9 +1729,9 @@ BOOL CSoundFile::ProcessEffects()
 			if (!(m_dwSongFlags & SONG_FIRSTTICK)) break;
 			
 			if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+			//IT compatibility 16. Both FT2 and IT ignore out-of-range values
 			if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 			{
-				//IT compatibility 16. Both FT2 and IT ignore out-of-range values
 				if (param <= 128)
 					m_nGlobalVolume = param << 1;
 			}
@@ -1795,9 +1803,9 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Key Off
 		case CMD_KEYOFF:
+			// This is how Key Off is supposed to sound... (in FT2 at least)
 			if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
-				// This is how it's supposed to sound... (in FT2)
 				if (m_nTickCount == param)
 				{
 					// XM: Key-Off + Sample == Note Cut
@@ -1816,9 +1824,9 @@ BOOL CSoundFile::ProcessEffects()
 					KeyOff(nChn);
 				}
 			}
+			// This is how it's NOT supposed to sound...
 			else
 			{
-				// This is how it's NOT supposed to sound...
 				if(m_dwSongFlags & SONG_FIRSTTICK)
 					KeyOff(nChn);
 			}
@@ -1830,7 +1838,7 @@ BOOL CSoundFile::ProcessEffects()
 			{
 			case 0x10: ExtraFinePortamentoUp(pChn, param & 0x0F); break;
 			case 0x20: ExtraFinePortamentoDown(pChn, param & 0x0F); break;
-			// Modplug XM Extensions
+			// Modplug XM Extensions (ignore in compatible mode)
 			case 0x50: 
 			case 0x60: 
 			case 0x70:
@@ -1866,9 +1874,9 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				pChn->nVolEnvPosition = param;
 
+				// XM compatibility: FT2 only sets the position of the Volume envelope
 				if(!IsCompatibleMode(TRK_FASTTRACKER2))
 				{
-					// FT2 only sets the position of the Volume envelope
 					pChn->nPanEnvPosition = param;
 					pChn->nPitchEnvPosition = param;
 					if (pChn->pModInstrument)
@@ -2000,9 +2008,11 @@ BOOL CSoundFile::ProcessEffects()
 			//end rewbs.fix 
 			 && ((nPosJump != (int)m_nCurrentPattern) || (nBreakRow != (int)m_nRow)))
 			{
+				// IT compatibility: don't reset loop count on pattern break
 				if (nPosJump != (int)m_nCurrentPattern && !IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
-					for (UINT i=0; i<m_nChannels; i++) Chn[i].nPatternLoopCount = 0;
+					for (CHANNELINDEX i = 0; i < m_nChannels; i++)
+						Chn[i].nPatternLoopCount = 0;
 				}
 				m_nNextPattern = nPosJump;
 				m_nNextRow = (UINT)nBreakRow;
@@ -2478,6 +2488,7 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 		{
 			if (param & 0x0F) nPanSlide = -(int)((param & 0x0F) << 2);
 			else nPanSlide = (int)((param & 0xF0) >> 2);
+			// XM compatibility: FT2's panning slide is not as deep
 			if(IsCompatibleMode(TRK_FASTTRACKER2))
 				nPanSlide >>= 2;
 		}
@@ -2644,6 +2655,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 					pChn->nVibratoType = param & 0x03;
 				} else
 				{
+					// IT compatibility: Ignore waveform types > 3
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						pChn->nVibratoType = (param < 0x04) ? param : 0;
 					else
@@ -2656,6 +2668,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 					pChn->nTremoloType = param & 0x03;
 				} else
 				{
+					// IT compatibility: Ignore waveform types > 3
 					if(IsCompatibleMode(TRK_IMPULSETRACKER))
 						pChn->nTremoloType = (param < 0x04) ? param : 0;
 					else
@@ -2663,7 +2676,9 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 				}
 				break;
 	// S5x: Set Panbrello Waveform
-	case 0x50:	if(IsCompatibleMode(TRK_IMPULSETRACKER))
+	case 0x50:
+		// IT compatibility: Ignore waveform types > 3
+				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 					pChn->nPanbrelloType = (param < 0x04) ? param : 0;
 				else
 					pChn->nPanbrelloType = param & 0x07;
@@ -2727,6 +2742,7 @@ void CSoundFile::ExtendedS3MCommands(UINT nChn, UINT param)
 	// S8x: Set 4-bit Panning
 	case 0x80:	if(m_dwSongFlags & SONG_FIRSTTICK)
 				{ 
+					// IT Compatibility (and other trackers as well): panning disables surround (unless panning in rear channels is enabled, which is not supported by the original trackers anyway)
 					if(IsCompatibleMode(TRK_ALLTRACKERS))
 					{
 						if (!(m_dwSongFlags & SONG_SURROUNDPAN)) pChn->dwFlags &= ~CHN_SURROUND;
@@ -3215,15 +3231,19 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 			{
 				// IT Compatibility: Offset
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
+				{
 					if(m_dwSongFlags & SONG_ITOLDEFFECTS)
 						pChn->nPos = pChn->nLength; // Old FX: Clip to end of sample
 					else
 						pChn->nPos = 0; // Reset to beginning of sample
+				}
 				else
-					pChn->nPos = pChn->nLoopStart;
-				if ((m_dwSongFlags & SONG_ITOLDEFFECTS) && (pChn->nLength > 4))
 				{
-					pChn->nPos = pChn->nLength - 2;
+					pChn->nPos = pChn->nLoopStart;
+					if ((m_dwSongFlags & SONG_ITOLDEFFECTS) && (pChn->nLength > 4))
+					{
+						pChn->nPos = pChn->nLength - 2;
+					}
 				}
 			} else if(IsCompatibleMode(TRK_FASTTRACKER2))
 			{
@@ -3251,9 +3271,9 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 	int nRetrigCount = pChn->nRetrigCount;
 	bool bDoRetrig = false;
 
+	//IT compatibility 15. Retrigger
 	if(IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
-		//IT compatibility 15. Retrigger
 		if ((m_dwSongFlags & SONG_FIRSTTICK) && pChn->nRowNote)
 		{
 			pChn->nRetrigCount = param & 0xf;
@@ -3264,10 +3284,9 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 			bDoRetrig = true;
 		}
 	}
+	// buggy-like-hell FT2 Rxy retrig!
 	else if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100))
 	{
-		// buggy-like-hell FT2 Rxy retrig!
-
 		if(m_dwSongFlags & SONG_FIRSTTICK)
 		{
 			// here are some really stupid things FT2 does
@@ -3344,12 +3363,14 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 			}
 			if (param < 0x100) bResetEnv = true;
 		}
+		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
 		NoteChange(nChn, nNote, IsCompatibleMode(TRK_IMPULSETRACKER) ? true : false, bResetEnv);
 		if (m_nInstruments) {
 			ProcessMidiOut(nChn, pChn);	//Send retrig to Midi
 		}
 		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (!pChn->nRowNote) && (nOldPeriod)) pChn->nPeriod = nOldPeriod;
 		if (!(m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) nRetrigCount = 0;
+		// IT compatibility: see previous IT compatibility comment =)
 		if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nPos = pChn->nPosLo = 0;
 
 		if (offset)									//rewbs.volOffset: apply offset on retrig
@@ -3363,6 +3384,7 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 	// buggy-like-hell FT2 Rxy retrig!
 	if(IsCompatibleMode(TRK_FASTTRACKER2) && (param & 0x100)) nRetrigCount++;
 
+	// Now we can also store the retrig value for IT...
 	if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		pChn->nRetrigCount = (BYTE)nRetrigCount;
 }
@@ -3548,7 +3570,7 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 
 		// -> CODE#0016
 		// -> DESC="default tempo update"
-			if(IsCompatibleMode(TRK_ALLTRACKERS))
+			if(IsCompatibleMode(TRK_ALLTRACKERS))	// clamp tempo correctly in compatible mode
 				m_nMusicTempo = CLAMP(m_nMusicTempo, 32, 255);
 			else
 				m_nMusicTempo = CLAMP(m_nMusicTempo, specs.tempoMin, specs.tempoMax);
