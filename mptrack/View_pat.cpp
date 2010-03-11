@@ -2999,7 +2999,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		if(pRow->IsEmpty() || pRow->IsPcNote())
 		{
 			pRow->Set(NOTE_PCS, plugSlot + 1, paramIndex, static_cast<uint16>(pPlug->GetParameter(paramIndex) * MODCOMMAND::maxColumnValue));
-			InvalidateRow();
+			InvalidateRow(nRow);
 		}
 	} else
 	{
@@ -3021,7 +3021,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 				if (pRow->command == 0 || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) { //we overwrite existing Zxx and \xx only.
 					pRow->command = (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))?CMD_S3MCMDEX:CMD_MODCMDEX;;
 					pRow->param = 0xF0 + (foundMacro&0x0F);
-					InvalidateRow();
+					InvalidateRow(nRow);
 				}
 
 			}
@@ -3031,7 +3031,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) {
 			pRow->command = CMD_SMOOTHMIDI;
 			pRow->param = pPlug->GetZxxParameter(paramIndex);
-			InvalidateRow();
+			InvalidateRow(nRow);
 		}
 
 	}
