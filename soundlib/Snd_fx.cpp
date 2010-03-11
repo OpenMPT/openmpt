@@ -1177,8 +1177,6 @@ BOOL CSoundFile::ProcessEffects()
 // -! NEW_FEATURE#0010
 	for (CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++, pChn++)
 	{
-		if((GetType() == MOD_TYPE_S3M) && (ChnSettings[nChn].dwFlags & CHN_MUTE) != 0)	// not even effects are processed on muted S3M channels
-			continue;
 		UINT instr = pChn->nRowInstr;
 		UINT volcmd = pChn->nRowVolCmd;
 		UINT vol = pChn->nRowVolume;
@@ -1462,6 +1460,8 @@ BOOL CSoundFile::ProcessEffects()
 		#endif // MODPLUG_TRACKER
 		}
 
+		if((GetType() == MOD_TYPE_S3M) && (ChnSettings[nChn].dwFlags & CHN_MUTE) != 0)	// not even effects are processed on muted S3M channels
+			continue;
 
 		// Volume Column Effect (except volume & panning)
 		/*	A few notes, paraphrased from ITTECH.TXT by Storlek (creator of schismtracker):
