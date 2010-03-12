@@ -314,7 +314,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 				
 		if (dwMemPos + sizeof(DWORD) >= dwMemLength) return true;
 		DWORD ihsize = LittleEndian(*((DWORD *)(lpStream + dwMemPos)));
-		if (dwMemPos + ihsize >= dwMemLength) return true;
+		if (dwMemPos + ihsize > dwMemLength) return true;
 
 		memset(&pih, 0, sizeof(pih));
 		memcpy(&pih, lpStream + dwMemPos, min(sizeof(pih), ihsize));
