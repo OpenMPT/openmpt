@@ -1615,8 +1615,14 @@ VOID CModTree::FillInstrumentLibrary()
 				}
 			}
 		}
+
+		// The path is too long - we can't continue. This can actually only happen with an invalid path
+		if(strlen(szPath) >= ARRAYELEMCOUNT(szPath) - 1)
+			return;
+
 		// Enumerating Directories and samples/instruments
-		if (szPath[strlen(szPath)-1] != '\\') strcat(szPath, "\\");
+		if (szPath[strlen(szPath) - 1] != '\\')
+			strcat(szPath, "\\");
 		strcpy(m_szInstrLibPath, szPath);
 		strcat(szPath, "*.*");
 		memset(&wfd, 0, sizeof(wfd));
@@ -1701,6 +1707,7 @@ VOID CModTree::FillInstrumentLibrary()
 					  || (!lstrcmpi(s, ".wow"))
 					  || (!lstrcmpi(s, ".gdm"))
 					  || (!lstrcmpi(s, ".imf"))
+					  || (!lstrcmpi(s, ".j2b"))
 #ifndef NO_MO3_SUPPORT
 					  || (!lstrcmpi(s, ".mo3"))
 #endif
