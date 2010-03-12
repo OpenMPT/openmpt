@@ -845,6 +845,7 @@ void CTrackApp::SetupPaths()
 	strcpy(m_szPluginCacheFileName, m_szConfigDirectory); // plugin cache
 	strcat(m_szPluginCacheFileName, "plugin.cache");
 
+	m_bPortableMode = bIsAppDir;
 }
 
 BOOL CTrackApp::InitInstance()
