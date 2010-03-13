@@ -2408,7 +2408,10 @@ void CSoundFile::Panbrello(MODCHANNEL *p, UINT param)
 void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param)
 //--------------------------------------------------------
 {
-	if (param) pChn->nOldVolumeSlide = param; else param = pChn->nOldVolumeSlide;
+	if (param)
+		pChn->nOldVolumeSlide = param;
+	else
+		param = pChn->nOldVolumeSlide;
 	LONG newvolume = pChn->nVolume;
 	if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM|MOD_TYPE_AMF))
 	{
@@ -2443,9 +2446,18 @@ void CSoundFile::VolumeSlide(MODCHANNEL *pChn, UINT param)
 	}
 	if ((!(m_dwSongFlags & SONG_FIRSTTICK)) || (m_dwSongFlags & SONG_FASTVOLSLIDES))
 	{
-		if (param & 0x0F) newvolume -= (int)((param & 0x0F) * 4);
-		else newvolume += (int)((param & 0xF0) >> 2);
-		if (m_nType & MOD_TYPE_MOD) pChn->dwFlags |= CHN_FASTVOLRAMP;
+		// IT compatibility: Ignore slide commands with both nibbles set.
+		if (param & 0x0F)
+		{
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0xF0) == 0)
+				newvolume -= (int)((param & 0x0F) * 4);
+		}
+		else
+		{
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0x0F) == 0)
+				newvolume += (int)((param & 0xF0) >> 2);
+		}
+		if (m_nType == MOD_TYPE_MOD) pChn->dwFlags |= CHN_FASTVOLRAMP;
 	}
 	newvolume = CLAMP(newvolume, 0, 256);
 
@@ -2457,7 +2469,10 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 //---------------------------------------------------------
 {
 	LONG nPanSlide = 0;
-	if (param) pChn->nOldPanSlide = param; else param = pChn->nOldPanSlide;
+	if (param)
+		pChn->nOldPanSlide = param;
+	else
+		param = pChn->nOldPanSlide;
 	if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_STM))
 	{
 		if (((param & 0x0F) == 0x0F) && (param & 0xF0))
@@ -2486,8 +2501,17 @@ void CSoundFile::PanningSlide(MODCHANNEL *pChn, UINT param)
 	{
 		if (!(m_dwSongFlags & SONG_FIRSTTICK))
 		{
-			if (param & 0x0F) nPanSlide = -(int)((param & 0x0F) << 2);
-			else nPanSlide = (int)((param & 0xF0) >> 2);
+			// IT compatibility: Ignore slide commands with both nibbles set.
+			if (param & 0x0F)
+			{
+				if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0xF0) == 0)
+					nPanSlide = -(int)((param & 0x0F) << 2);
+			}
+			else
+			{
+				if(!IsCompatibleMode(TRK_IMPULSETRACKER) || (param & 0x0F) == 0)
+					nPanSlide = (int)((param & 0xF0) >> 2);
+			}
 			// XM compatibility: FT2's panning slide is not as deep
 			if(IsCompatibleMode(TRK_FASTTRACKER2))
 				nPanSlide >>= 2;
