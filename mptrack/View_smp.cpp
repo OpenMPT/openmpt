@@ -397,11 +397,8 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 void CViewSample::UpdateView(DWORD dwHintMask, CObject *)
 //-------------------------------------------------------
 {
-	// 05/01/05 : ericus replaced ">> 24" by ">> 20" : 4000 samples -> 12bits [see Moddoc.h]
-	//rewbs: replaced 0xff by 0x0fff for 4000 samples.
 	if ((dwHintMask & (HINT_MPTOPTIONS|HINT_MODTYPE))
 		|| ((dwHintMask & HINT_SAMPLEDATA) && (m_nSample == (dwHintMask >> HINT_SHIFT_SMP))) )
-	 //|| ((dwHintMask & HINT_SAMPLEDATA) && ((m_nSample&0x0fff) == (dwHintMask >> 20))) )
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();
@@ -1613,7 +1610,6 @@ void CViewSample::OnSetLoop()
 				pSmp->uFlags |= CHN_LOOP;
 				pModDoc->SetModified();
 				pModDoc->AdjustEndOfSample(m_nSample);
-				// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 				pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 			}
 		}
@@ -1638,7 +1634,6 @@ void CViewSample::OnSetSustainLoop()
 				pSmp->uFlags |= CHN_SUSTAINLOOP;
 				pModDoc->SetModified();
 				pModDoc->AdjustEndOfSample(m_nSample);
-				// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 				pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 			}
 		}
@@ -1745,7 +1740,6 @@ void CViewSample::OnEditDelete()
 	SetCurSel(0, 0);
 	pModDoc->AdjustEndOfSample(m_nSample);
 	pModDoc->SetModified();
-	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 	pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | dwUpdateFlags, NULL);
 }
 
@@ -1914,7 +1908,6 @@ void CViewSample::OnEditPaste()
 			SetCurSel(0, 0);
 			pModDoc->AdjustEndOfSample(m_nSample);
 			pModDoc->SetModified();
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 		CloseClipboard();
@@ -1961,7 +1954,6 @@ void CViewSample::On8BitConvert()
 			END_CRITICAL();
 			pModDoc->SetModified();
 			pModDoc->AdjustEndOfSample(m_nSample);
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		}
 	}
@@ -2005,7 +1997,7 @@ void CViewSample::OnMonoConvert()
 			END_CRITICAL();
 			pModDoc->SetModified();
 			pModDoc->AdjustEndOfSample(m_nSample);
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+	
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		}
 	}
@@ -2070,7 +2062,6 @@ void CViewSample::OnSampleTrim()
 		pModDoc->SetModified();
 		pModDoc->AdjustEndOfSample(m_nSample);
 		SetCurSel(0, 0);
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 	}
 	EndWaitCursor();
@@ -2274,7 +2265,6 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 	if (bUpdate)
 	{
 		pModDoc->AdjustEndOfSample(m_nSample);
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
 		pModDoc->SetModified();
 	}
@@ -2340,7 +2330,6 @@ void CViewSample::OnSetLoopStart()
 				(resets sound without any reason otherwise) - bug report 1874 */
 				pModDoc->AdjustEndOfSample(m_nSample);
 			}
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2366,7 +2355,6 @@ void CViewSample::OnSetLoopEnd()
 				(resets sound without any reason otherwise) - bug report 1874 */
 				pModDoc->AdjustEndOfSample(m_nSample);
 			}
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2387,7 +2375,6 @@ void CViewSample::OnSetSustainStart()
 			pSmp->nSustainStart = m_dwMenuParam;
 			pModDoc->SetModified();
 			pModDoc->AdjustEndOfSample(m_nSample);
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2408,7 +2395,6 @@ void CViewSample::OnSetSustainEnd()
 			pSmp->nSustainEnd = m_dwMenuParam;
 			pModDoc->SetModified();
 			pModDoc->AdjustEndOfSample(m_nSample);
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
 		}
 	}
@@ -2496,7 +2482,7 @@ void CViewSample::OnAddSilence()
 }
 
 LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
-//-------------------------------------------------------
+//------------------------------------------------------------
 {
 	const DWORD dwMidiData = dwMidiDataParam;
 	static BYTE midivolume = 127;

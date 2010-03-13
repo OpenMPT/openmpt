@@ -53,8 +53,6 @@ int PowerOf2Exponent(const unsigned int v)
 #define	BASENOTE_MIN	(1*12)	// C-1
 #define	BASENOTE_MAX	(9*12)	// C-9
 
-#pragma warning(disable:4244)
-
 BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlSamples)
 	ON_WM_VSCROLL()
@@ -321,12 +319,12 @@ void CCtrlSamples::RecalcLayout()
 }
 
 
-BOOL CCtrlSamples::SetCurrentSample(UINT nSmp, LONG lZoom, BOOL bUpdNum)
-//----------------------------------------------------------------------
+bool CCtrlSamples::SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom, bool bUpdNum)
+//-----------------------------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
-	if (!pModDoc) return FALSE;
+	if (!pModDoc) return false;
 	pSndFile = pModDoc->GetSoundFile();
 	if (pSndFile->m_nSamples < 1) pSndFile->m_nSamples = 1;
 	if ((nSmp < 1) || (nSmp > pSndFile->m_nSamples)) return FALSE;
@@ -335,7 +333,6 @@ BOOL CCtrlSamples::SetCurrentSample(UINT nSmp, LONG lZoom, BOOL bUpdNum)
 	if (m_nSample != nSmp)
 	{
 		m_nSample = nSmp;
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		UpdateView((m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, NULL);
 	}
 	if (bUpdNum)
@@ -349,7 +346,7 @@ BOOL CCtrlSamples::SetCurrentSample(UINT nSmp, LONG lZoom, BOOL bUpdNum)
 		m_ComboZoom.SetCurSel(lZoom);
 	PostViewMessage(VIEWMSG_SETCURRENTSAMPLE, (lZoom << 16) | m_nSample);
 	UnlockControls();
-	return TRUE;
+	return true;
 }
 
 
@@ -392,12 +389,11 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 			}
 		}
 	}
-	SetCurrentSample((lParam > 0) ? lParam : m_nSample);
+	SetCurrentSample((lParam > 0) ? ((SAMPLEINDEX)lParam) : m_nSample);
 
-	m_nFinetuneStep = CMainFrame::GetPrivateProfileLong("Sample Editor", "FinetuneStep", 25, theApp.GetConfigFileName());
+	m_nFinetuneStep = (uint16)GetPrivateProfileInt("Sample Editor", "FinetuneStep", 25, theApp.GetConfigFileName());
 
 	// Initial Update
-	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 	if (!m_bInitialized) UpdateView((m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_MODTYPE, NULL);
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if ((pFrame) && (m_hWndView)) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)pFrame->GetSampleViewState());
@@ -428,7 +424,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_SMP_OPENFILE:
-		if (lParam) return OpenSample((LPCSTR)lParam);
+		if (lParam) return OpenSample((LPCSTR)lParam) ? TRUE : FALSE;
 		break;
 
 	case CTRLMSG_SMP_SONGDROP:
@@ -437,7 +433,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			LPDRAGONDROP pDropInfo = (LPDRAGONDROP)lParam;
 			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
 			if (pDropInfo->pModDoc) pSndFile = pDropInfo->pModDoc->GetSoundFile();
-			if (pSndFile) return OpenSample(pSndFile, pDropInfo->dwDropItem);
+			if (pSndFile) return OpenSample(pSndFile, (SAMPLEINDEX)pDropInfo->dwDropItem) ? TRUE : FALSE;
 		}
 		break;
 
@@ -446,7 +442,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_SETCURRENTINSTRUMENT:
-		SetCurrentSample(lParam, -1, TRUE);
+		SetCurrentSample((SAMPLEINDEX)lParam, -1, TRUE);
 		break;
 
 	//rewbs.customKeys
@@ -535,8 +531,6 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_ToolBar2.UpdateStyle();
 	}
 	if (!(dwHintMask & (HINT_SAMPLEINFO|HINT_MODTYPE))) return;
-	// 05/01/05 : ericus replaced ">> 24" by ">> 20" : 4000 samples -> 12bits [see Moddoc.h]
-	//if (((dwHintMask >> 20) != (m_nSample&0x0fff)) && (!(dwHintMask & HINT_MODTYPE))) return;
 	if (((dwHintMask >> HINT_SHIFT_SMP) != m_nSample) && (!(dwHintMask & HINT_MODTYPE))) return;
 	LockControls();
 	if (!m_bInitialized) dwHintMask |= HINT_MODTYPE;
@@ -691,35 +685,32 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 }
 
 
-BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
+bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 //------------------------------------------------
 {
 	CMappedFile f;
 	CHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
 	LPBYTE lpFile;
 	DWORD len;
-	BOOL bOk;
+	bool bOk = false;
 
 	BeginWaitCursor();
 	if ((!lpszFileName) || (!f.Open(lpszFileName)))
 	{
 		EndWaitCursor();
-		return FALSE;
+		return false;
 	}
 	len = f.GetLength();
 	if (len > CTrackApp::gMemStatus.dwTotalPhys) len = CTrackApp::gMemStatus.dwTotalPhys;
-	bOk = FALSE;
 	lpFile = f.Lock(len);
 	if (!lpFile) goto OpenError;
 	BEGIN_CRITICAL();
 
 	m_pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+	bOk = m_pSndFile->ReadSampleFromFile(m_nSample, lpFile, len);
 
-	if (m_pSndFile->ReadSampleFromFile(m_nSample, lpFile, len))
-	{
-		bOk = TRUE;
-	}
 	END_CRITICAL();
+
 	if (!bOk)
 	{
 		CRawSampleDlg dlg(this);
@@ -772,7 +763,7 @@ BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			}
 			if (m_pSndFile->ReadSample(pSmp, flags, p16, l16))
 			{
-				bOk = TRUE;
+				bOk = true;
 			}
 			END_CRITICAL();
 		} else
@@ -816,18 +807,17 @@ OpenError:
 			pSmp->nPan = 128;
 			pSmp->uFlags |= CHN_PANNING;
 		}
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
 		m_pModDoc->SetModified();
 	}
-	return TRUE;
+	return true;
 }
 
 
-BOOL CCtrlSamples::OpenSample(CSoundFile *pSndFile, UINT nSample)
-//---------------------------------------------------------------
+bool CCtrlSamples::OpenSample(CSoundFile *pSndFile, SAMPLEINDEX nSample)
+//----------------------------------------------------------------------
 {
-	if ((!pSndFile) || (!nSample) || (nSample > pSndFile->m_nSamples)) return FALSE;
+	if ((!pSndFile) || (!nSample) || (nSample > pSndFile->m_nSamples)) return false;
 
 	BeginWaitCursor();
 	BEGIN_CRITICAL();
@@ -841,11 +831,10 @@ BOOL CCtrlSamples::OpenSample(CSoundFile *pSndFile, UINT nSample)
 		pSmp->uFlags |= CHN_PANNING;
 	}
 	END_CRITICAL();
-	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO | HINT_SMPNAMES, NULL);
 	m_pModDoc->SetModified();
 	EndWaitCursor();
-	return TRUE;
+	return true;
 }
 
 
@@ -857,7 +846,7 @@ void CCtrlSamples::OnSampleChanged()
 {
 	if ((!IsLocked()) && (m_pSndFile))
 	{
-		UINT n = GetDlgItemInt(IDC_EDIT_SAMPLE);
+		SAMPLEINDEX n = (SAMPLEINDEX)GetDlgItemInt(IDC_EDIT_SAMPLE);
 		if ((n > 0) && (n <= m_pSndFile->m_nSamples) && (n != m_nSample))
 		{
 			SetCurrentSample(n, -1, FALSE);
@@ -913,7 +902,6 @@ void CCtrlSamples::OnSampleNew()
 			}
 		}
 
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (smp << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
 		if ((pSndFile->m_nInstruments) && (!m_pModDoc->FindSampleParent(smp)))
 		{
@@ -1102,7 +1090,7 @@ void CCtrlSamples::OnNormalize()
 		return;
 
 	//Default case: Normalize current sample
-	UINT iMinSample = m_nSample, iMaxSample = m_nSample;
+	SAMPLEINDEX iMinSample = m_nSample, iMaxSample = m_nSample;
 	//If only one sample is selected, parts of it may be amplified
 	UINT iStart = 0, iEnd = 0;
 
@@ -1124,20 +1112,22 @@ void CCtrlSamples::OnNormalize()
 
 
 	BeginWaitCursor();
-	BOOL bModified = FALSE;
+	bool bModified = false;
 
-	for(UINT iSmp = iMinSample; iSmp <= iMaxSample; iSmp++)
+	for(SAMPLEINDEX iSmp = iMinSample; iSmp <= iMaxSample; iSmp++)
 	{
 		if (m_pSndFile->Samples[iSmp].pSample)
 		{
-			BOOL bOk = FALSE;
+			bool bOk = false;
 			MODSAMPLE *pSmp = &m_pSndFile->Samples[iSmp];
 		
-			if(iMinSample != iMaxSample) {
+			if(iMinSample != iMaxSample)
+			{
 				//if more than one sample is selected, always amplify the whole sample.
 				iStart = 0;
 				iEnd = pSmp->nLength;
-			} else {
+			} else
+			{
 				//one sample: correct the boundaries, if needed
 				if (iEnd > pSmp->nLength) iEnd = pSmp->nLength;
 				if (iStart > iEnd) iStart = iEnd;
@@ -1153,7 +1143,7 @@ void CCtrlSamples::OnNormalize()
 
 			if (pSmp->uFlags & CHN_16BIT)
 			{
-				signed short *p = (signed short *)pSmp->pSample;
+				int16 *p = (int16 *)pSmp->pSample;
 				int max = 1;
 				for (UINT i = iStart; i < iEnd; i++)
 				{
@@ -1165,14 +1155,14 @@ void CCtrlSamples::OnNormalize()
 					max++;
 					for (UINT j = iStart; j < iEnd; j++)
 					{
-						int l = p[j];
-						p[j] = (l << 15) / max;
+						int l = (((int)p[j]) << 15) / max;
+						p[j] = (int16)l;
 					}
-					bModified = bOk = TRUE;
+					bModified = bOk = true;
 				}
 			} else
 			{
-				signed char *p = (signed char *)pSmp->pSample;
+				int8 *p = (int8 *)pSmp->pSample;
 				int max = 1;
 				for (UINT i = iStart; i < iEnd; i++)
 				{
@@ -1184,10 +1174,10 @@ void CCtrlSamples::OnNormalize()
 					max++;
 					for (UINT j = iStart; j < iEnd; j++)
 					{
-						int l = p[j];
-						p[j] = (l << 7) / max;
+						int l = (((int)p[j]) << 7) / max;
+						p[j] = (int8)l;
 					}
-					bModified = bOk = TRUE;
+					bModified = bOk = true;
 				}
 			}
 
@@ -1253,7 +1243,6 @@ void CCtrlSamples::ApplyAmplify(LONG lAmp, bool bFadeIn, bool bFadeOut)
 		}
 	}
 	m_pModDoc->AdjustEndOfSample(m_nSample);
-	// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 	m_pModDoc->SetModified();
 	EndWaitCursor();
@@ -1267,7 +1256,7 @@ void CCtrlSamples::OnRemoveDCOffset()
 	if(!m_pModDoc || !m_pSndFile)
 		return;
 
-	UINT iMinSample = m_nSample, iMaxSample = m_nSample;
+	SAMPLEINDEX iMinSample = m_nSample, iMaxSample = m_nSample;
 
 	//Shift -> Process all samples
 	if(CMainFrame::GetInputHandler()->ShiftPressed())
@@ -1284,11 +1273,11 @@ void CCtrlSamples::OnRemoveDCOffset()
 	UINT iModified = 0;
 	float fReportOffset = 0;
 
-	for(UINT iSmp = iMinSample; iSmp <= iMaxSample; iSmp++)
+	for(SAMPLEINDEX iSmp = iMinSample; iSmp <= iMaxSample; iSmp++)
 	{
 		UINT iStart, iEnd;
 
-		if( m_pSndFile->Samples[iSmp].pSample == nullptr )
+		if(m_pSndFile->Samples[iSmp].pSample == nullptr)
 			continue;
 
 		if (iMinSample != iMaxSample)
@@ -1508,7 +1497,6 @@ void CCtrlSamples::OnUpsample()
 			viewstate.dwEndSel = dwEnd + (dwEnd-dwStart);
 			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
 		}
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		m_pModDoc->SetModified();
 	}
@@ -1643,7 +1631,6 @@ void CCtrlSamples::OnDownsample()
 			viewstate.dwEndSel = dwStart + dwRemove;
 			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
 		}
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		m_pModDoc->SetModified();
 	}
@@ -1712,9 +1699,9 @@ void CCtrlSamples::OnEstimateSampleSize()
 	//Calculate/verify samplerate at C5.
 	long lSampleRate = pSmp->nC5Speed;
 	if(m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-		lSampleRate = (double)CSoundFile::TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
+		lSampleRate = CSoundFile::TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
 	if(lSampleRate <= 0) 
-		lSampleRate = 8363.0;
+		lSampleRate = 8363;
 
 	//Open dialog
 	CPSRatioCalc dlg(pSmp->nLength, lSampleRate, 
@@ -1742,15 +1729,15 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	// Time stretching
 	if(IsDlgButtonChecked(IDC_CHECK3)){
 		UpdateData(TRUE); //Ensure m_dTimeStretchRatio is up-to-date with textbox content
-		errorcode = TimeStretch(m_dTimeStretchRatio/100.0);
+		errorcode = TimeStretch((float)(m_dTimeStretchRatio / 100.0));
 
 		//Update loop points only if no error occured.
 		if(errorcode == 0)
 		{
-			pSmp->nLoopStart = min(pSmp->nLoopStart * (m_dTimeStretchRatio / 100.0), pSmp->nLength);
-			pSmp->nLoopEnd = min(pSmp->nLoopEnd * (m_dTimeStretchRatio/100.0), pSmp->nLength);
-			pSmp->nSustainStart = min(pSmp->nSustainStart * (m_dTimeStretchRatio/100.0), pSmp->nLength);
-			pSmp->nSustainEnd = min(pSmp->nSustainEnd * (m_dTimeStretchRatio/100.0), pSmp->nLength);
+			pSmp->nLoopStart = (UINT)min(pSmp->nLoopStart * (m_dTimeStretchRatio / 100.0), pSmp->nLength);
+			pSmp->nLoopEnd = (UINT)min(pSmp->nLoopEnd * (m_dTimeStretchRatio/100.0), pSmp->nLength);
+			pSmp->nSustainStart = (UINT)min(pSmp->nSustainStart * (m_dTimeStretchRatio/100.0), pSmp->nLength);
+			pSmp->nSustainEnd = (UINT)min(pSmp->nSustainEnd * (m_dTimeStretchRatio/100.0), pSmp->nLength);
 		}
 		
 	}
@@ -1758,8 +1745,8 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	else{
 		// Get selected pitch modifier [-12,+12]
 		CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO4);
-		short pm = combo->GetCurSel() - 12;
-		if(pm == 0) goto error;
+		float pm = float(combo->GetCurSel()) - 12.0f;
+		if(pm == 0.0f) goto error;
 
 		// Compute pitch ratio in range [0.5f ; 2.0f] (1.0f means output == input)
 		// * pitch up -> 1.0f + n / 12.0f -> (12.0f + n) / 12.0f , considering n : pitch modifier > 0
@@ -1799,8 +1786,8 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 }
 
 
-int CCtrlSamples::TimeStretch(double ratio)
-//-----------------------------------------
+int CCtrlSamples::TimeStretch(float ratio)
+//----------------------------------------
 {
 	static HANDLE handleSt = NULL; // Handle to SoundTouch object.
 	if((!m_pSndFile) || (!m_pSndFile->Samples[m_nSample].pSample)) return -1;
@@ -1819,7 +1806,7 @@ int CCtrlSamples::TimeStretch(double ratio)
 	if(ratio <= 0.0 || ratio == 1.0) return -1;
 
 	// Convert to pitch factor
-	float pitch = Round((float)ratio, 4);
+	float pitch = Round(ratio, 4);
 	if(pitch < 0.5f) return 2 + (1<<8);
 	if(pitch > 2.0f) return 2 + (2<<8);
 
@@ -2013,7 +2000,7 @@ int CCtrlSamples::PitchShift(float pitch)
 
 	// Get selected oversampling - quality - (also refered as FFT overlapping) factor
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO5);
-	short ovs = combo->GetCurSel() + 4;
+	long ovs = combo->GetCurSel() + 4;
 
 	// Get selected FFT size (power of 2 ; should not exceed MAX_BUFFER_LENGTH - see smbPitchShift.h)
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO6);
@@ -2054,7 +2041,7 @@ int CCtrlSamples::PitchShift(float pitch)
 	long lSampleRate = pSmp->GetSampleRate(m_pSndFile->GetType());
 
 	// Deduce max sample value (float conversion step)
-	float maxSampleValue = ( 1 << (smpsize * 8 - 1) ) - 1;
+	float maxSampleValue = float(( 1 << (smpsize * 8 - 1) ) - 1);
 
 	// Allocate working buffers
 	float * buffer = new float[MAX_BUFFER_LENGTH + fft];
@@ -2287,7 +2274,6 @@ void CCtrlSamples::OnSilence()
 				}
 			}
 			m_pModDoc->AdjustEndOfSample(m_nSample);
-			// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 			m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, NULL);
 			m_pModDoc->SetModified();
 	}
@@ -2336,7 +2322,6 @@ void CCtrlSamples::OnNameChanged()
 	if (strncmp(s, m_pSndFile->m_szNames[m_nSample], 32))
 	{
 		memcpy(m_pSndFile->m_szNames[m_nSample], s, 32);
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
 		m_pModDoc->SetModified();
@@ -2357,7 +2342,6 @@ void CCtrlSamples::OnFileNameChanged()
 	if (strncmp(s, m_pSndFile->Samples[m_nSample].filename, 22))
 	{
 		memcpy(m_pSndFile->Samples[m_nSample].filename, s, 22);
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, this);
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 	}
@@ -2374,7 +2358,7 @@ void CCtrlSamples::OnVolumeChanged()
 	nVol <<= 2;
 	if (nVol != m_pSndFile->Samples[m_nSample].nVolume)
 	{
-		m_pSndFile->Samples[m_nSample].nVolume = nVol;
+		m_pSndFile->Samples[m_nSample].nVolume = (WORD)nVol;
 		m_pModDoc->SetModified();
 	}
 }
@@ -2389,7 +2373,7 @@ void CCtrlSamples::OnGlobalVolChanged()
 	if (nVol > 64) nVol = 64;
 	if (nVol != m_pSndFile->Samples[m_nSample].nGlobalVol)
 	{
-		m_pSndFile->Samples[m_nSample].nGlobalVol = nVol;
+		m_pSndFile->Samples[m_nSample].nGlobalVol = (WORD)nVol;
 		m_pModDoc->SetModified();
 	}
 }
@@ -2438,7 +2422,7 @@ void CCtrlSamples::OnPanningChanged()
 	//end rewbs.fix36944
 	if (nPan != m_pSndFile->Samples[m_nSample].nPan)
 	{
-		m_pSndFile->Samples[m_nSample].nPan = nPan;
+		m_pSndFile->Samples[m_nSample].nPan = (WORD)nPan;
 		if (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 	}
 }
@@ -2451,7 +2435,7 @@ void CCtrlSamples::OnFineTuneChanged()
 	int n = GetDlgItemInt(IDC_EDIT5);
 	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
-		if ((n > 0) && (n <= (m_pSndFile->m_nType & MOD_TYPE_S3M) ? 65535 : 9999999) && (n != (int)m_pSndFile->Samples[m_nSample].nC5Speed))
+		if ((n > 0) && (n <= (m_pSndFile->GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)m_pSndFile->Samples[m_nSample].nC5Speed))
 		{
 			m_pSndFile->Samples[m_nSample].nC5Speed = n;
 			int transp = CSoundFile::FrequencyToTranspose(n) >> 7;
@@ -2469,8 +2453,9 @@ void CCtrlSamples::OnFineTuneChanged()
 		}
 	} else
 	{
-		if ((n >= -128) && (n <= 127)) {
-			m_pSndFile->Samples[m_nSample].nFineTune = n;
+		if ((n >= -128) && (n <= 127))
+		{
+			m_pSndFile->Samples[m_nSample].nFineTune = (signed char)n;
 			m_pModDoc->SetModified();
 		}
 
@@ -2482,12 +2467,12 @@ void CCtrlSamples::OnBaseNoteChanged()
 //-------------------------------------
 {
 	if (IsLocked()) return;
-	int n = 60 - (m_CbnBaseNote.GetCurSel() + BASENOTE_MIN);
+	int n = (NOTE_MIDDLEC - 1) - (m_CbnBaseNote.GetCurSel() + BASENOTE_MIN);
 	if (m_pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
 		LONG ft = CSoundFile::FrequencyToTranspose(m_pSndFile->Samples[m_nSample].nC5Speed) & 0x7f;
 		n = CSoundFile::TransposeToFrequency(n, ft);
-		if ((n > 0) && (n <= (m_pSndFile->m_nType & MOD_TYPE_S3M) ? 65535 : 9999999) && (n != (int)m_pSndFile->Samples[m_nSample].nC5Speed))
+		if ((n > 0) && (n <= (m_pSndFile->GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)m_pSndFile->Samples[m_nSample].nC5Speed))
 		{
 			CHAR s[32];
 			m_pSndFile->Samples[m_nSample].nC5Speed = n;
@@ -2499,8 +2484,9 @@ void CCtrlSamples::OnBaseNoteChanged()
 		}
 	} else
 	{
-		if ((n >= -128) && (n < 128)) {
-			m_pSndFile->Samples[m_nSample].RelativeTone = n;
+		if ((n >= -128) && (n < 128))
+		{
+			m_pSndFile->Samples[m_nSample].RelativeTone = (signed char)n;
 			m_pModDoc->SetModified();
 		}
 	}
@@ -2525,7 +2511,7 @@ void CCtrlSamples::OnVibDepthChanged()
 	m_SpinVibDepth.GetRange(lmin, lmax);
 	int n = GetDlgItemInt(IDC_EDIT15);
 	if ((n >= lmin) && (n <= lmax)) {
-		m_pSndFile->Samples[m_nSample].nVibDepth = n;
+		m_pSndFile->Samples[m_nSample].nVibDepth = (BYTE)n;
 		m_pModDoc->SetModified();
 	}
 }
@@ -2539,7 +2525,7 @@ void CCtrlSamples::OnVibSweepChanged()
 	m_SpinVibSweep.GetRange(lmin, lmax);
 	int n = GetDlgItemInt(IDC_EDIT14);
 	if ((n >= lmin) && (n <= lmax)) {
-		m_pSndFile->Samples[m_nSample].nVibSweep = n;
+		m_pSndFile->Samples[m_nSample].nVibSweep = (BYTE)n;
 		m_pModDoc->SetModified();
 	}
 }
@@ -2553,7 +2539,7 @@ void CCtrlSamples::OnVibRateChanged()
 	m_SpinVibRate.GetRange(lmin, lmax);
 	int n = GetDlgItemInt(IDC_EDIT16);
 	if ((n >= lmin) && (n <= lmax)) {
-		m_pSndFile->Samples[m_nSample].nVibRate = n;
+		m_pSndFile->Samples[m_nSample].nVibRate = (BYTE)n;
 		m_pModDoc->SetModified();
 	}
 }
@@ -2605,7 +2591,6 @@ void CCtrlSamples::OnLoopStartChanged()
 			  (resets sound without any reason otherwise) - bug report 1874 */
 			m_pModDoc->AdjustEndOfSample(m_nSample);
 		}
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
@@ -2627,7 +2612,6 @@ void CCtrlSamples::OnLoopEndChanged()
 			  (resets sound without any reason otherwise) - bug report 1874 */
 			m_pModDoc->AdjustEndOfSample(m_nSample);
 		}
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
@@ -2674,7 +2658,6 @@ void CCtrlSamples::OnSustainStartChanged()
 	 && ((n < (LONG)pSmp->nSustainEnd) || (!(pSmp->uFlags & CHN_SUSTAINLOOP))))
 	{
 		pSmp->nSustainStart = n;
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
@@ -2691,7 +2674,6 @@ void CCtrlSamples::OnSustainEndChanged()
 	 && ((n > (LONG)pSmp->nSustainStart) || (!(pSmp->uFlags & CHN_SUSTAINLOOP))))
 	{
 		pSmp->nSustainEnd = n;
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
@@ -2702,42 +2684,45 @@ void CCtrlSamples::OnSustainEndChanged()
 #define BIDILOOP_ACCURACY	2	// 5%
 
 
-BOOL MPT_LoopCheck(int sstart0, int sstart1, int send0, int send1)
+bool MPT_LoopCheck(int sstart0, int sstart1, int send0, int send1)
+//----------------------------------------------------------------
 {
 	int dse0 = send0 - sstart0;
-	if ((dse0 < -SMPLOOP_ACCURACY) || (dse0 > SMPLOOP_ACCURACY)) return FALSE;
+	if ((dse0 < -SMPLOOP_ACCURACY) || (dse0 > SMPLOOP_ACCURACY)) return false;
 	int dse1 = send1 - sstart1;
-	if ((dse1 < -SMPLOOP_ACCURACY) || (dse1 > SMPLOOP_ACCURACY)) return FALSE;
+	if ((dse1 < -SMPLOOP_ACCURACY) || (dse1 > SMPLOOP_ACCURACY)) return false;
 	int dstart = sstart1 - sstart0;
 	int dend = send1 - send0;
 	if (!dstart) dstart = dend >> 7;
 	if (!dend) dend = dstart >> 7;
-	if ((dstart ^ dend) < 0) return FALSE;
+	if ((dstart ^ dend) < 0) return false;
 	int delta = dend - dstart;
-	return ((delta > -SMPLOOP_ACCURACY) && (delta < SMPLOOP_ACCURACY)) ? TRUE : FALSE;
+	return ((delta > -SMPLOOP_ACCURACY) && (delta < SMPLOOP_ACCURACY)) ? true : false;
 }
 
 
-BOOL MPT_BidiEndCheck(int spos0, int spos1, int spos2)
+bool MPT_BidiEndCheck(int spos0, int spos1, int spos2)
+//----------------------------------------------------
 {
 	int delta0 = spos1 - spos0;
 	int delta1 = spos2 - spos1;
 	int delta2 = spos2 - spos0;
 	if (!delta0) delta0 = delta1 >> 7;
 	if (!delta1) delta1 = delta0 >> 7;
-	if ((delta1 ^ delta0) < 0) return FALSE;
+	if ((delta1 ^ delta0) < 0) return false;
 	return ((delta0 >= -1) && (delta0 <= 0) && (delta1 >= -1) && (delta1 <= 0) && (delta2 >= -1) && (delta2 <= 0));
 }
 
 
-BOOL MPT_BidiStartCheck(int spos0, int spos1, int spos2)
+bool MPT_BidiStartCheck(int spos0, int spos1, int spos2)
+//------------------------------------------------------
 {
 	int delta1 = spos1 - spos0;
 	int delta0 = spos2 - spos1;
 	int delta2 = spos2 - spos0;
 	if (!delta0) delta0 = delta1 >> 7;
 	if (!delta1) delta1 = delta0 >> 7;
-	if ((delta1 ^ delta0) < 0) return FALSE;
+	if ((delta1 ^ delta0) < 0) return false;
 	return ((delta0 >= -1) && (delta0 <= 0) && (delta1 > -1) && (delta1 <= 0) && (delta2 >= -1) && (delta2 <= 0));
 }
 
@@ -2752,7 +2737,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	MODSAMPLE *pSmp = &m_pSndFile->Samples[nsample];
 	LPSTR pSample = pSmp->pSample;
 	short int pos;
-	BOOL bRedraw = FALSE;
+	bool bRedraw = false;
 	
 	LockControls();
 	if ((!pSmp->nLength) || (!pSample)) goto NoSample;
@@ -2765,7 +2750,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	// Loop Start
 	if ((pos = (short int)m_SpinLoopStart.GetPos()) != 0)
 	{
-		BOOL bOk = FALSE;
+		bool bOk = false;
 		LPSTR p = pSample+pSmp->nLoopStart*pinc;
 		int find0 = (int)pSample[pSmp->nLoopEnd*pinc-pinc];
 		int find1 = (int)pSample[pSmp->nLoopEnd*pinc];
@@ -2802,7 +2787,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			wsprintf(s, "%u", pSmp->nLoopStart);
 			m_EditLoopStart.SetWindowText(s);
 			m_pModDoc->AdjustEndOfSample(m_nSample);
-			bRedraw = TRUE;
+			bRedraw = true;
 		}
 		m_SpinLoopStart.SetPos(0);
 	}
@@ -2810,7 +2795,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	pos = (short int)m_SpinLoopEnd.GetPos();
 	if ((pos) && (pSmp->nLoopEnd))
 	{
-		BOOL bOk = FALSE;
+		bool bOk = false;
 		LPSTR p = pSample+pSmp->nLoopEnd*pinc;
 		int find0 = (int)pSample[pSmp->nLoopStart*pinc];
 		int find1 = (int)pSample[pSmp->nLoopStart*pinc+pinc];
@@ -2846,7 +2831,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 			wsprintf(s, "%u", pSmp->nLoopEnd);
 			m_EditLoopEnd.SetWindowText(s);
 			m_pModDoc->AdjustEndOfSample(m_nSample);
-			bRedraw = TRUE;
+			bRedraw = true;
 		}
 		m_SpinLoopEnd.SetPos(0);
 	}
@@ -2854,7 +2839,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	pos = (short int)m_SpinSustainStart.GetPos();
 	if ((pos) && (pSmp->nSustainEnd))
 	{
-		BOOL bOk = FALSE;
+		bool bOk = false;
 		LPSTR p = pSample+pSmp->nSustainStart*pinc;
 		int find0 = (int)pSample[pSmp->nSustainEnd*pinc-pinc];
 		int find1 = (int)pSample[pSmp->nSustainEnd*pinc];
@@ -2890,7 +2875,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		{
 			wsprintf(s, "%u", pSmp->nSustainStart);
 			m_EditSustainStart.SetWindowText(s);
-			bRedraw = TRUE;
+			bRedraw = true;
 		}
 		m_SpinSustainStart.SetPos(0);
 	}
@@ -2898,7 +2883,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 	pos = (short int)m_SpinSustainEnd.GetPos();
 	if (pos)
 	{
-		BOOL bOk = FALSE;
+		bool bOk = false;
 		LPSTR p = pSample+pSmp->nSustainEnd*pinc;
 		int find0 = (int)pSample[pSmp->nSustainStart*pinc];
 		int find1 = (int)pSample[pSmp->nSustainStart*pinc+pinc];
@@ -2933,7 +2918,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *)
 		{
 			wsprintf(s, "%u", pSmp->nSustainEnd);
 			m_EditSustainEnd.SetWindowText(s);
-			bRedraw = TRUE;
+			bRedraw = true;
 		}
 		m_SpinSustainEnd.SetPos(0);
 	}
@@ -2958,18 +2943,16 @@ NoSample:
 			m_EditFineTune.SetWindowText(s);
 		} else
 		{
-			LONG d = pSmp->nFineTune + pos;
-			if (d < -128) d = -128;
-			if (d > 127) d = 127;
-			pSmp->nFineTune = d;
+			LONG d = CLAMP(pSmp->nFineTune + pos, -128, 127);
+			pSmp->nFineTune = (signed char)d;
 			wsprintf(s, "%d", d);
 			m_EditFineTune.SetWindowText(s);
 		}
 		m_SpinFineTune.SetPos(0);
 	}
 	if ((nCode == SB_ENDSCROLL) || (nCode == SB_THUMBPOSITION)) SwitchToView();
-	if (bRedraw) {
-		// 05/01/05 : ericus replaced "m_nSample << 24" by "m_nSample << 20" : 4000 samples -> 12bits [see Moddoc.h]
+	if (bRedraw)
+	{
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA, this);
 		m_pModDoc->SetModified();
 	}
