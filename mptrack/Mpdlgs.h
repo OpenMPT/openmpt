@@ -134,10 +134,15 @@ class CRawSampleDlg: public CDialog
 //=================================
 {
 public:
-	UINT m_nFormat;
+	static UINT m_nFormat;
+	bool m_bRememberFormat;
 
 public:
-	CRawSampleDlg(CWnd *parent=NULL):CDialog(IDD_LOADRAWSAMPLE, parent) { m_nFormat = 0; }
+	CRawSampleDlg(CWnd *parent = NULL):CDialog(IDD_LOADRAWSAMPLE, parent)
+	{ 
+		//m_nFormat = 0;
+		m_bRememberFormat = false;
+	}
 
 protected:
 	virtual BOOL OnInitDialog();
