@@ -1066,6 +1066,9 @@ BOOL CEQSetupDlg::OnSetActive()
 // CRawSampleDlg
 
 
+UINT CRawSampleDlg::m_nFormat = 0;
+
+
 BOOL CRawSampleDlg::OnInitDialog()
 //--------------------------------
 {
@@ -1082,6 +1085,7 @@ void CRawSampleDlg::OnOK()
 	if (IsDlgButtonChecked(IDC_RADIO2)) m_nFormat |= 1;
 	if (IsDlgButtonChecked(IDC_RADIO4)) m_nFormat |= 2;
 	if (IsDlgButtonChecked(IDC_RADIO6)) m_nFormat |= 4;
+	m_bRememberFormat = IsDlgButtonChecked(IDC_CHK_REMEMBERSETTINGS) ? true : false;
 	CDialog::OnOK();
 }
 
@@ -1092,6 +1096,7 @@ void CRawSampleDlg::UpdateDialog()
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_nFormat & 1) ? IDC_RADIO2 : IDC_RADIO1);
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, (m_nFormat & 2) ? IDC_RADIO4 : IDC_RADIO3);
 	CheckRadioButton(IDC_RADIO5, IDC_RADIO6, (m_nFormat & 4) ? IDC_RADIO6 : IDC_RADIO5);
+	CheckDlgButton(IDC_CHK_REMEMBERSETTINGS, (m_bRememberFormat) ? MF_CHECKED : MF_UNCHECKED);
 }
 
 

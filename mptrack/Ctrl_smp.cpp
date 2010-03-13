@@ -159,6 +159,7 @@ CCtrlSamples::CCtrlSamples() :
 {
 	m_nSample = 1;
 	m_nLockCount = 1;
+	m_nPreviousRawFormat = 0;
 }
 
 
@@ -722,9 +723,17 @@ BOOL CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 	if (!bOk)
 	{
 		CRawSampleDlg dlg(this);
-		EndWaitCursor();
-		if (dlg.DoModal() == IDOK)
+		if(m_nPreviousRawFormat != 0)
 		{
+			dlg.m_nFormat = m_nPreviousRawFormat;
+			dlg.m_bRememberFormat = true;
+		}
+		EndWaitCursor();
+		if ((m_nPreviousRawFormat != 0) || (dlg.DoModal() == IDOK))
+		{
+
+			m_nPreviousRawFormat = ((dlg.m_bRememberFormat)) ? dlg.m_nFormat : 0;
+
 			BeginWaitCursor();
 			UINT flags = 0;
 			MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];

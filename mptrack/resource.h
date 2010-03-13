@@ -948,6 +948,7 @@
 #define IDC_EDIT_PRESET_EXPR            2424
 #define IDC_LIST_SAMPLEGEN_PRESETS      2425
 #define IDC_CHECK_UNDO                  2426
+#define IDC_CHK_REMEMBERSETTINGS        2427
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1200,11 +1201,11 @@
 #define ID_SAMPLE_GENERATOR_MENU        60244
 #define ID_SAMPLE_GENERATOR_PRESET_MENU 60344
 #define ID_SAMPLE_GENERATE              60445
-#define ID_NOTEMAP_TRANS_UP				60446
-#define ID_NOTEMAP_TRANS_DOWN			60447
-#define ID_PATTERN_EDIT_PCNOTE_PLUGIN	60448
-#define ID_ENVELOPE_ZOOM_IN				60449
-#define ID_ENVELOPE_ZOOM_OUT			60450
+#define ID_NOTEMAP_TRANS_UP             60446
+#define ID_NOTEMAP_TRANS_DOWN           60447
+#define ID_PATTERN_EDIT_PCNOTE_PLUGIN   60448
+#define ID_ENVELOPE_ZOOM_IN             60449
+#define ID_ENVELOPE_ZOOM_OUT            60450
 
 // Next default values for new objects
 // 
@@ -1213,7 +1214,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        526
 #define _APS_NEXT_COMMAND_VALUE         60451
-#define _APS_NEXT_CONTROL_VALUE         2427
+#define _APS_NEXT_CONTROL_VALUE         2428
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
