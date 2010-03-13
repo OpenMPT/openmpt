@@ -84,13 +84,10 @@ Root: HKCR; Subkey: ".wow"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 ; important (setup)
 Root: HKCR; Subkey: "OpenMPTFile"; ValueType: string; ValueName: ""; ValueData: "OpenMPT Module"; Flags: uninsdeletekey; Tasks: associate_common or associate_exotic
 Root: HKCR; Subkey: "OpenMPTFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\mpt.ico,0"; Tasks: associate_common or associate_exotic
-Root: HKCR; Subkey: "OpenMPTFile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\mptrack.exe"" ""%1"""; Tasks: associate_common or associate_exotic
+Root: HKCR; Subkey: "OpenMPTFile\shell\Open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\mptrack.exe"" ""%1"""; Tasks: associate_common or associate_exotic
+Root: HKCR; Subkey: "OpenMPTFile\shell\Open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "[Edit(""%1"")]"; Tasks: associate_common or associate_exotic
 
 [Files]
 ; icon file (should be moved into EXE)
 Source: "mpt.ico";            DestDir: "{app}"; Flags: ignoreversion
-
-
-
-
 
