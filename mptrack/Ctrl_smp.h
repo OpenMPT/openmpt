@@ -37,7 +37,7 @@ protected:
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 
 	int PitchShift(float pitch);
-	int TimeStretch(double ratio);
+	int TimeStretch(float ratio);
 	void UpdateTimeStretchParameterString();
 	void ReadTimeStretchParameters();
 
@@ -50,9 +50,9 @@ public:
 	CCtrlSamples();
 	~CCtrlSamples();
 
-	BOOL SetCurrentSample(UINT n, LONG lZoom=-1, BOOL bUpdNum=TRUE);
-	BOOL OpenSample(LPCSTR lpszFileName);
-	BOOL OpenSample(CSoundFile *pSndFile, UINT nSample);
+	bool SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom = -1, bool bUpdNum = true);
+	bool OpenSample(LPCSTR lpszFileName);
+	bool OpenSample(CSoundFile *pSndFile, SAMPLEINDEX nSample);
 	LONG* GetSplitPosRef() {return &CMainFrame::glSampleWindowHeight;} 	//rewbs.varWindowSize
 
 public:
