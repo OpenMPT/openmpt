@@ -3724,7 +3724,6 @@ void CViewPattern::TempEnterVol(int v)
 	{
 
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if(pSndFile->m_nType & MOD_TYPE_MOD) return; // no volume column
 		
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 
@@ -3772,8 +3771,11 @@ void CViewPattern::TempEnterVol(int v)
 			}
 
 			if (vol > max) vol %= 10;
-			p->volcmd = volcmd;
-			p->vol = vol;
+			if(pSndFile->GetModSpecifications().HasVolCommand(volcmd))
+			{
+				p->volcmd = volcmd;
+				p->vol = vol;
+			}
 		}
 
 		if (IsEditingEnabled_bmsg())
@@ -3808,7 +3810,7 @@ void CViewPattern::SetSpacing(int n)
 
 
 void CViewPattern::TempEnterFX(int c)
-//---------------------------------------------------------
+//-----------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -3828,7 +3830,7 @@ void CViewPattern::TempEnterFX(int c)
 		{
 			ENTER_PCNOTE_VALUE(c, ValueEffectCol);
 		}
-		else
+		else if(pSndFile->GetModSpecifications().HasCommand(c))
 		{
 
 			//LPCSTR lpcmd = (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands : gszS3mCommands;
