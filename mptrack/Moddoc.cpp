@@ -338,14 +338,15 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_OKT:
 	case MOD_TYPE_AMS:
 	case MOD_TYPE_MT2:
-		m_SndFile.ChangeModTypeTo(MOD_TYPE_XM);
+		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
+		/*m_SndFile.ChangeModTypeTo(MOD_TYPE_XM);
 		if ((m_SndFile.m_nDefaultTempo == 125) && (m_SndFile.m_nDefaultSpeed == 6) && (!m_SndFile.m_nInstruments))
 		{
 			m_SndFile.m_nType = MOD_TYPE_MOD;
 			for (UINT i=0; i<m_SndFile.Patterns.Size(); i++)
 				if ((m_SndFile.Patterns[i]) && (m_SndFile.PatternSize[i] != 64))
 					m_SndFile.m_nType = MOD_TYPE_XM;
-		}
+		}*/
 		break;
 	case MOD_TYPE_FAR:
 	case MOD_TYPE_PTM:
@@ -654,7 +655,7 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 128;
 		}
 
-		for (CHANNELINDEX nChn=0; nChn < MAX_BASECHANNELS; nChn++)
+		for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 		{
 			m_SndFile.ChnSettings[nChn].dwFlags = 0;
 			m_SndFile.ChnSettings[nChn].nVolume = 64;
@@ -667,7 +668,7 @@ BOOL CModDoc::InitializeMod()
 	if (!m_SndFile.m_nSamples)
 	{
 		strcpy(m_SndFile.m_szNames[1], "untitled");
-		m_SndFile.m_nSamples = 1;
+		m_SndFile.m_nSamples = (GetModType() == MOD_TYPE_MOD) ? 31 : 1;
 
 		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetInit);
 
@@ -2523,6 +2524,10 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		{
 			wsprintf(s, "fine %s%d", sMinusChar.c_str(), param & 0x0F);
 		} else
+		if ((param & 0x0F) != param && (param & 0xF0) != param)	// both nibbles are set.
+		{
+			strcpy(s, "undefined");
+		} else
 		if (param & 0x0F)
 		{
 			wsprintf(s, "%s%d", sMinusChar.c_str(), param & 0x0F);
@@ -2946,6 +2951,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 }
 
 int CModDoc::GetMacroType(CString value)
+//--------------------------------------
 {
 	if (value.Compare("")==0) return sfx_unused;
 	if (value.Compare("F0F000z")==0) return sfx_cutoff;
@@ -2960,6 +2966,7 @@ int CModDoc::GetMacroType(CString value)
 }
 
 int CModDoc::MacroToPlugParam(CString macro)
+//------------------------------------------
 {
 	int code=0;
 	char* param = (char *) (LPCTSTR) macro;
@@ -2975,7 +2982,9 @@ int CModDoc::MacroToPlugParam(CString macro)
 		return (code+128);
 	}
 }
-int CModDoc::MacroToMidiCC(CString macro) {
+int CModDoc::MacroToMidiCC(CString macro)
+//---------------------------------------
+{
 	int code=0;
 	char* param = (char *) (LPCTSTR) macro;
 	param +=2;
@@ -2987,8 +2996,9 @@ int CModDoc::MacroToMidiCC(CString macro) {
 	return code;
 }
 
-int CModDoc::FindMacroForParam(long param) {
-//------------------------------------------
+int CModDoc::FindMacroForParam(long param)
+//----------------------------------------
+{
 	for (int macro=0; macro<16; macro++) {	//what's the named_const for num macros?? :D
 		CString macroString = &(GetSoundFile()->m_MidiCfg.szMidiSFXExt[macro*32]);
 		if (GetMacroType(macroString) == sfx_plug &&  MacroToPlugParam(macroString) == param) {

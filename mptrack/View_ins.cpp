@@ -223,28 +223,12 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 UINT CViewInstrument::EnvGetTick(int nPoint) const
 //------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if ((pIns) && (nPoint >= 0))
-		{
-			switch(m_nEnv)
-			{
-			case ENV_VOLUME:
-				if (nPoint < (int)pIns->VolEnv.nNodes) return pIns->VolEnv.Ticks[nPoint];
-				break;
-			case ENV_PANNING:
-				if (nPoint < (int)pIns->PanEnv.nNodes) return pIns->PanEnv.Ticks[nPoint];
-				break;
-			case ENV_PITCH:
-				if (nPoint < (int)pIns->PitchEnv.nNodes) return pIns->PitchEnv.Ticks[nPoint];
-				break;
-			}
-		}
-	}
-	return 0;
+	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
+	if(envelope == nullptr) return 0;
+	if((nPoint >= 0) && (nPoint < (int)envelope->nNodes))
+		return envelope->Ticks[nPoint];
+	else
+		return 0;
 }
 
 
@@ -253,8 +237,10 @@ UINT CViewInstrument::EnvGetValue(int nPoint) const
 {
 	INSTRUMENTENVELOPE *envelope = GetEnvelopePtr();
 	if(envelope == nullptr) return 0;
-	if(nPoint >= 0 && nPoint < (int)envelope->nNodes) return envelope->Values[nPoint];
-	return 0;
+	if(nPoint >= 0 && nPoint < (int)envelope->nNodes)
+		return envelope->Values[nPoint];
+	else
+		return 0;
 }
 
 
