@@ -298,7 +298,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 						{
 							wsprintf(s, "%d Hz", 
 								pSndFile->GetFreqFromPeriod(
-									pSndFile->GetPeriodFromNote(NOTE_MIDDLEC, pSmp->nFineTune, pSmp->nC5Speed),
+									pSndFile->GetPeriodFromNote(NOTE_MIDDLEC + pSmp->RelativeTone, pSmp->nFineTune, pSmp->nC5Speed),
 									pSmp->nC5Speed));
 						}
 						break;

@@ -124,7 +124,7 @@ typedef struct _MT2GROUP
 #pragma pack()
 
 
-static VOID ConvertMT2Command(CSoundFile *that, MODCOMMAND *m, MT2COMMAND *p)
+static void ConvertMT2Command(CSoundFile *that, MODCOMMAND *m, MT2COMMAND *p)
 //---------------------------------------------------------------------------
 {
 	// Note
@@ -172,6 +172,7 @@ static VOID ConvertMT2Command(CSoundFile *that, MODCOMMAND *m, MT2COMMAND *p)
 			m->command = p->fxparam2;
 			m->param = p->fxparam1;
 			that->ConvertModCommand(m);
+			that->MODExx2S3MSxx(m);
 		} else
 		{
 			// TODO: MT2 Effects
@@ -200,6 +201,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	m_nRestartPos = pfh->wRestart;
 	m_nDefaultSpeed = pfh->bTicksPerLine;
 	m_nDefaultTempo = 125;
+	m_dwSongFlags = SONG_ITCOMPATMODE;
 	if ((pfh->wSamplesPerTick > 100) && (pfh->wSamplesPerTick < 5000))
 	{
 		m_nDefaultTempo = 110250 / pfh->wSamplesPerTick;
@@ -406,9 +408,9 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 			Instruments[iIns] = pIns;
 			if (pIns)
 			{
-				memset(pIns, 0, sizeof(MODINSTRUMENT));
+				memcpy(Instruments[iIns], &m_defaultInstrument, sizeof(MODINSTRUMENT));
 				memcpy(pIns->name, pmi->szName, 32);
-				SpaceToNullStringFixed(pIns->name, 32);
+				SpaceToNullStringFixed(pIns->name, 31);
 				pIns->nGlobalVol = 64;
 				pIns->nPan = 128;
 				for (BYTE i = 0; i < NOTE_MAX; i++)

@@ -158,7 +158,7 @@ protected:
 	TCHAR m_szConfigFileName[_MAX_PATH];
 	TCHAR m_szPluginCacheFileName[_MAX_PATH];
 	TCHAR m_szStringsFileName[_MAX_PATH];
-	bool m_bPortableMode;
+	static bool m_bPortableMode;
 
 	#ifdef UPDATECHECKENABLED
 	// Internet request context
@@ -202,7 +202,7 @@ public:
 	BOOL IsWaveExEnabled() const { return m_bExWaveSupport; }
 	BOOL IsDebug() const { return m_bDebugMode; }
 	LPCSTR GetConfigFileName() const { return m_szConfigFileName; }
-	bool IsPortableMode() const { return m_bPortableMode; }
+	static bool IsPortableMode() { return m_bPortableMode; }
 	LPCSTR GetPluginCacheFileName() const { return m_szPluginCacheFileName; }
 	LPCSTR GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths();

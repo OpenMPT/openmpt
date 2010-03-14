@@ -253,6 +253,7 @@ static void ShowChangesDialog()
 
 
 TCHAR CTrackApp::m_szExePath[_MAX_PATH] = TEXT("");
+bool CTrackApp::m_bPortableMode = false;
 
 /////////////////////////////////////////////////////////////////////////////
 // MPTRACK Command Line options
