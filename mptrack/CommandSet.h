@@ -983,7 +983,10 @@ enum CommandID
 	kcVSTGUIPrevPresetJump,
 	kcVSTGUINextPresetJump,
 	kcVSTGUIRandParams,
-	kcEndVSTGUICommands=kcVSTGUIRandParams,
+	kcVSTGUIToggleRecordParams,
+	kcVSTGUIToggleSendKeysToPlug,
+	kcVSTGUIBypassPlug,
+	kcEndVSTGUICommands=kcVSTGUIBypassPlug,
 
 	kcStartOrderlistCommands,
 		// Orderlist edit

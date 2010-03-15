@@ -2575,6 +2575,21 @@ void CCommandSet::SetupCommands()
 	commands[kcInstrumentEnvelopeZoomOut].isDummy = false;
 	commands[kcInstrumentEnvelopeZoomOut].Message = "Zoom Out";
 
+	commands[kcVSTGUIToggleRecordParams].UID = 1839;
+	commands[kcVSTGUIToggleRecordParams].isHidden = false;
+	commands[kcVSTGUIToggleRecordParams].isDummy = false;
+	commands[kcVSTGUIToggleRecordParams].Message = "Toggle parameter recording";
+
+	commands[kcVSTGUIToggleSendKeysToPlug].UID = 1840;
+	commands[kcVSTGUIToggleSendKeysToPlug].isHidden = false;
+	commands[kcVSTGUIToggleSendKeysToPlug].isDummy = false;
+	commands[kcVSTGUIToggleSendKeysToPlug].Message = "Pass key presses to plugin";
+
+	commands[kcVSTGUIBypassPlug].UID = 1841;
+	commands[kcVSTGUIBypassPlug].isHidden = false;
+	commands[kcVSTGUIBypassPlug].isDummy = false;
+	commands[kcVSTGUIBypassPlug].Message = "Bypass plugin";
+
 #ifdef _DEBUG
 	for (int i=0; i<kcNumCommands; i++)	{
 		if (commands[i].UID != 0) {	// ignore unset UIDs

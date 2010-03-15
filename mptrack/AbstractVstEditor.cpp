@@ -311,13 +311,14 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 	switch(wParam)
 	{
-		case kcVSTGUIPrevPreset:	OnSetPreviousVSTPreset(); return wParam;
-		case kcVSTGUIPrevPresetJump:OnVSTPresetBackwardJump(); return wParam;
-		case kcVSTGUINextPreset:	OnSetNextVSTPreset(); return wParam;
-		case kcVSTGUINextPresetJump:OnVSTPresetForwardJump(); return wParam;
-		case kcVSTGUIRandParams:	OnRandomizePreset() ; return wParam;
-		
-		
+		case kcVSTGUIPrevPreset:			OnSetPreviousVSTPreset(); return wParam;
+		case kcVSTGUIPrevPresetJump:		OnVSTPresetBackwardJump(); return wParam;
+		case kcVSTGUINextPreset:			OnSetNextVSTPreset(); return wParam;
+		case kcVSTGUINextPresetJump:		OnVSTPresetForwardJump(); return wParam;
+		case kcVSTGUIRandParams:			OnRandomizePreset() ; return wParam;
+		case kcVSTGUIToggleRecordParams:	OnRecordAutomation(); return wParam;
+		case kcVSTGUIToggleSendKeysToPlug:	OnPassKeypressesToPlug(); return wParam;
+		case kcVSTGUIBypassPlug:			OnBypassPlug(); return wParam;
 	}
 	if (wParam>=kcVSTGUIStartNotes && wParam<=kcVSTGUIEndNotes)
 	{
@@ -590,21 +591,22 @@ void CAbstractVstEditor::UpdateMacroMenu() {
 void CAbstractVstEditor::UpdateOptionsMenu() {
 //--------------------------------------------
 
-	if (m_pOptionsMenu->m_hMenu) {
+	if (m_pOptionsMenu->m_hMenu)
 		m_pOptionsMenu->DestroyMenu();	
-	}
+
+	CInputHandler* ih = (CMainFrame::GetMainFrame())->GetInputHandler();
 
 	m_pOptionsMenu->CreatePopupMenu();
 	
 	//Bypass
 	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->IsBypassed()?MF_CHECKED:0,
-							   ID_PLUG_BYPASS, "&Bypass");
+							   ID_PLUG_BYPASS, "&Bypass\t" + ih->GetKeyTextFromCommand(kcVSTGUIBypassPlug));
 	//Record Params
 	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bRecordAutomation?MF_CHECKED:0,
-							   ID_PLUG_RECORDAUTOMATION, "Record &Params");
+							   ID_PLUG_RECORDAUTOMATION, "Record &Params\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleRecordParams));
 	//Pass on keypresses
 	m_pOptionsMenu->AppendMenu(MF_STRING | m_pVstPlugin->m_bPassKeypressesToPlug?MF_CHECKED:0,
-							   ID_PLUG_PASSKEYS, "Pass &Keys to Plug");
+							   ID_PLUG_PASSKEYS, "Pass &Keys to Plug\t" + ih->GetKeyTextFromCommand(kcVSTGUIToggleSendKeysToPlug));
 
 
 	m_pMenu->DeleteMenu(3, MF_BYPOSITION);
