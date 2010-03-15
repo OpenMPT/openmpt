@@ -306,7 +306,10 @@ version:1
 13:1764:0:39:1		//Next plugin preset: NACH-RECHTS (KeyDown)
 13:1782:0:38:1		//Plugin preset backward jump: NACH-OBEN (KeyDown)
 13:1783:0:40:1		//Plugin preset forward jump: NACH-UNTEN (KeyDown)
-13:1765:2:82:1		//Randomize plugin parameters: Ctrl+R (KeyDown)
+13:1765:2:80:1		//Randomize plugin parameters: Ctrl+P (KeyDown)
+13:1839:2:82:1		//Toggle parameter recording: Ctrl+R (KeyDown)
+13:1840:2:75:1		//Pass key presses to plugin: Ctrl+K (KeyDown)
+13:1841:2:66:1		//Bypass plugin: Ctrl+B (KeyDown)
 
 //----( General Context [top] (14) )------------
 
