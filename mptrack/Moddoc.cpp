@@ -2288,7 +2288,7 @@ bool CModDoc::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DWORD
 			else nmax = 0xFF;
 			break;
 		case CMD_GLOBALVOLUME:
-			nmax = (nType & MOD_TYPE_IT | MOD_TYPE_MPT) ? 128 : 64;
+			nmax = (nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? 128 : 64;
 			break;
 
 		case CMD_MODCMDEX:

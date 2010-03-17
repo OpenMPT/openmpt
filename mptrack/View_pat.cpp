@@ -4157,6 +4157,14 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		else if( note < pSndFile->GetModSpecifications().noteMin)
 			note = pSndFile->GetModSpecifications().noteMin;
 
+		// Special case: Convert note off commands to C00 for MOD files
+		if((pSndFile->GetType() == MOD_TYPE_MOD) && (note == NOTE_NOTECUT || note == NOTE_FADE || note == NOTE_KEYOFF))
+		{
+			TempEnterFX(CMD_VOLUME);
+			TempEnterFXparam(0);
+			return;
+		}
+
 		// Check whether the module format supports the note.
 		if( pSndFile->GetModSpecifications().HasNote(note) == false )
 			return;
