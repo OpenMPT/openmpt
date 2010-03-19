@@ -2327,7 +2327,7 @@ UINT CModDoc::MapValueToPos(UINT ndx, UINT param)
 	case CMD_GLOBALVOLSLIDE:
 	case CMD_CHANNELVOLSLIDE:
 	case CMD_PANNINGSLIDE:
-		if (m_SndFile.m_nType & MOD_TYPE_S3MITMPT)
+		if (m_SndFile.GetType() & MOD_TYPE_S3MITMPT)
 		{
 			if (!param) pos = 29; else
 			if (((param & 0x0F) == 0x0F) && (param & 0xF0))
@@ -2345,7 +2345,7 @@ UINT CModDoc::MapValueToPos(UINT ndx, UINT param)
 		}
 		break;
 	case CMD_PANNING8:
-		if(m_SndFile.m_nType & MOD_TYPE_S3M)
+		if(m_SndFile.GetType() == MOD_TYPE_S3M)
 		{
 			pos = CLAMP(param, 0, 0x80);
 			if(param == 0xA4)
@@ -2373,7 +2373,7 @@ UINT CModDoc::MapPosToValue(UINT ndx, UINT pos)
 	case CMD_GLOBALVOLSLIDE:
 	case CMD_CHANNELVOLSLIDE:
 	case CMD_PANNINGSLIDE:
-		if (m_SndFile.m_nType & MOD_TYPE_S3MITMPT)
+		if (m_SndFile.GetType() & MOD_TYPE_S3MITMPT)
 		{
 			if (pos < 15) param = 15-pos; else
 			if (pos < 29) param = (29-pos) | 0xF0; else
@@ -2387,7 +2387,7 @@ UINT CModDoc::MapPosToValue(UINT ndx, UINT pos)
 		}
 		break;
 	case CMD_PANNING8:
-		if(m_SndFile.m_nType & MOD_TYPE_S3M)
+		if(m_SndFile.GetType() == MOD_TYPE_S3M)
 			param = (pos <= 0x80) ? pos : 0xA4;
 		break;
 	}
@@ -2398,42 +2398,58 @@ UINT CModDoc::MapPosToValue(UINT ndx, UINT pos)
 bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 //----------------------------------------------------------------
 {
-	CHAR s[64];
+	char s[64];
+	char szContinueOrIgnore[16];
+
 	if (pszName) pszName[0] = 0;
 	if ((!pszName) || (ndx >= MAX_FXINFO) || (!gFXInfo[ndx].pszName)) return false;
 	wsprintf(pszName, "%s: ", gFXInfo[ndx].pszName);
 	s[0] = 0;
+
+	// for effects that don't have effect memory in MOD format.
+	if(m_SndFile.GetType() == MOD_TYPE_MOD)
+		strcpy(szContinueOrIgnore, "ignore");
+	else
+		strcpy(szContinueOrIgnore, "continue");
 
 	std::string sPlusChar = "+", sMinusChar = "-";
 
 	switch(gFXInfo[ndx].dwEffect)
 	{
 	case CMD_ARPEGGIO:
+		if(m_SndFile.GetType() == MOD_TYPE_XM)	// XM also ignores this!
+			strcpy(szContinueOrIgnore, "ignore");
+
 		if (param)
 			wsprintf(s, "note+%d note+%d", param >> 4, param & 0x0F);
 		else
-			strcpy(s, "continue");
+			strcpy(s, szContinueOrIgnore);
 		break;
 
 	case CMD_PORTAMENTOUP:
-		if (param)
-			wsprintf(s, "+%d", param);
-		else
-			strcpy(s, "continue");
-		break;
-
 	case CMD_PORTAMENTODOWN:
-		if (param)
-			wsprintf(s, "-%d", param);
+		if(param)
+		{
+			char sign[2];
+			strcpy(sign, (gFXInfo[ndx].dwEffect == CMD_PORTAMENTOUP) ? "+" : "-");
+			if((m_SndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0))
+				wsprintf(s, "fine %s%d", sign, (param & 0x0F));
+			else if((m_SndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xE0))
+				wsprintf(s, "extra fine %s%d", sign, (param & 0x0F));
+			else
+				wsprintf(s, "%s%d", sign, param);
+		}
 		else
-			strcpy(s, "continue");
+		{
+			strcpy(s, szContinueOrIgnore);
+		}
 		break;
 
 	case CMD_TONEPORTAMENTO:
 		if (param)
 			wsprintf(s, "speed %d", param);
 		else
-			strcpy(s, "continue");
+			strcpy(s, szContinueOrIgnore);
 		break;
 
 	case CMD_VIBRATO:
@@ -2443,7 +2459,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		if (param)
 			wsprintf(s, "speed=%d depth=%d", param >> 4, param & 0x0F);
 		else
-			strcpy(s, "continue");
+			strcpy(s, szContinueOrIgnore);
 		break;
 
 	case CMD_SPEED:
@@ -2500,7 +2516,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 	case CMD_PANNINGSLIDE:
 		if(gFXInfo[ndx].dwEffect == CMD_PANNINGSLIDE)
 		{
-			if(m_SndFile.m_nType & MOD_TYPE_XM)
+			if(m_SndFile.GetType() == MOD_TYPE_XM)
 			{
 				sPlusChar = "-> ";
 				sMinusChar = "<- ";
@@ -2516,11 +2532,11 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		{
 			wsprintf(s, "continue");
 		} else
-		if ((m_SndFile.m_nType & MOD_TYPE_S3MITMPT) && ((param & 0x0F) == 0x0F) && (param & 0xF0))
+		if ((m_SndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0x0F) == 0x0F) && (param & 0xF0))
 		{
 			wsprintf(s, "fine %s%d", sPlusChar.c_str(), param >> 4);
 		} else
-		if ((m_SndFile.m_nType & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0) && (param & 0x0F))
+		if ((m_SndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0) && (param & 0x0F))
 		{
 			wsprintf(s, "fine %s%d", sMinusChar.c_str(), param & 0x0F);
 		} else
@@ -2706,8 +2722,9 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						strcat(s, " rows");
 						break;
 					case 0xF0: // macro
-						if(m_SndFile.m_nType & MOD_TYPE_MOD)
-						wsprintf(s, "SF%X", param & 0x0F); break;
+						if(m_SndFile.GetType() != MOD_TYPE_MOD)
+							wsprintf(s, "SF%X", param & 0x0F);
+						break;
 					default:
 						break;
 					}
@@ -2754,7 +2771,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 						strcat(s, " rows");
 						break;
 					case 0xF0:
-						if(m_SndFile.m_nType & MOD_TYPE_MOD) // invert loop
+						if(m_SndFile.GetType() == MOD_TYPE_MOD) // invert loop
 						{
 							if((param & 0x0F) == 0)
 								strcpy(s, "Stop");

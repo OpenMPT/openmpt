@@ -13,7 +13,7 @@
 #endif
 
 #include "resource.h"       // main symbols
-#include "sndfile.h"
+#include "../soundlib/Sndfile.h"
 #include <windows.h>
 
 #ifdef UPDATECHECKENABLED
