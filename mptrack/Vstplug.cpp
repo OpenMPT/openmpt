@@ -664,8 +664,10 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
             CModDoc* pModDoc = pVstPlugin->GetModDoc();
 			if (pModDoc) {
 				CAbstractVstEditor *pVstEditor = pVstPlugin->GetEditor();
-				if (pVstEditor && pVstEditor->m_hWnd) {	//Check GUI is open
-					CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
+				if (pVstEditor && pVstEditor->m_hWnd)	// Check GUI is open
+				{
+					if(pModDoc->GetSoundFile() && pModDoc->GetSoundFile()->GetModSpecifications().supportsPlugins)
+						CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 				}
 				//Could be used to update general tab in real time, but causes flickers in treeview
 				//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
@@ -980,11 +982,11 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	//---from here VST 2.1 extension opcodes------------------------------------------------------
 	// begin of automation session (when mouse down), parameter index in <index>
 	case audioMasterBeginEdit:
-		Log("VST plugin to host: Get Directory\n");
+		Log("VST plugin to host: Begin Edit\n");
 		break;
     // end of automation session (when mouse up),     parameter index in <index>
 	case audioMasterEndEdit:
-		Log("VST plugin to host: Get Directory\n");
+		Log("VST plugin to host: End Edit\n");
 		break;
 	// open a fileselector window with VstFileSelect* in <ptr>
 	case audioMasterOpenFileSelector:		

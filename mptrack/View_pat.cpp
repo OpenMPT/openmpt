@@ -4365,7 +4365,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 }
 
 void CViewPattern::TempEnterChord(int note)
-//---------------------------------------------
+//-----------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -4650,7 +4650,8 @@ void CViewPattern::OnSelectPlugin(UINT nID)
 		if (newPlug <= MAX_MIXPLUGINS && newPlug != pSndFile->ChnSettings[m_nMenuOnChan-1].nMixPlugin)
 		{
 			pSndFile->ChnSettings[m_nMenuOnChan-1].nMixPlugin = newPlug;
-			pModDoc->SetModified();
+			if(pSndFile->GetModSpecifications().supportsPlugins)
+				pModDoc->SetModified();
 			InvalidateChannelsHeaders();
 		}
 	}

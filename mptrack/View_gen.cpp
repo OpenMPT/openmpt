@@ -403,10 +403,10 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 
 			::EnableWindow(m_sbPan[ichn].m_hWnd, bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
 			::EnableWindow(m_spinPan[ichn], bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1+ichn*2), bIT);
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2+ichn*2), bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));
-			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9+ichn), ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))));
-			m_CbnEffects[ichn].EnableWindow(bEnable);
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1 + ichn*2), bIT);	// channel vol
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2 + ichn*2), bEnable && !(pSndFile->GetType() & (MOD_TYPE_XM|MOD_TYPE_MOD)));	// channel pan
+			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT9 + ichn), ((bEnable) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))));	// channel name
+			m_CbnEffects[ichn].EnableWindow(bEnable & (pSndFile->GetModSpecifications().supportsPlugins ? TRUE : FALSE));
 		}
 		UnlockControls();
 	}
@@ -707,7 +707,8 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					wsprintf(s, "(%d%% wet, %d%% dry)", 100-n, n);
 					SetDlgItemText(IDC_STATIC8, s);
 					pPlugin->fDryRatio = static_cast<float>(n)/100.0f;
-					if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+					if(pSndFile->GetModSpecifications().supportsPlugins)
+						pModDoc->SetModified();
 				}
 			}
 		}
@@ -738,7 +739,8 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 						{
 							pVstPlugin->SetParameter(m_nCurrentParam, fValue);
 							OnParamChanged();
-							if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+							if(pSndFile->GetModSpecifications().supportsPlugins)
+								pModDoc->SetModified();
 						}
 					}
 				}
@@ -765,7 +767,8 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		pSndFile = pModDoc->GetSoundFile();
 		pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
 
-		if(pPlugin->pMixPlugin){
+		if(pPlugin->pMixPlugin)
+		{
 			DWORD gain = nPos;
 			if(gain == 0) gain = 1;
 
@@ -776,7 +779,8 @@ void CViewGlobals::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			sprintf(s,"Gain: x %1.1f",fValue);
 			SetDlgItemText(IDC_STATIC2, s);
 
-			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+			if(pSndFile->GetModSpecifications().supportsPlugins)
+				pModDoc->SetModified();
 		}
 	}
 // -! BEHAVIOUR_CHANGE#0028
@@ -828,7 +832,8 @@ void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
 		 && (pSndFile->ChnSettings[nChn].nMixPlugin != (UINT)nfx))
 		{
 			pSndFile->ChnSettings[nChn].nMixPlugin = (PLUGINDEX)nfx;
-			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+			if(pSndFile->GetModSpecifications().supportsPlugins)
+				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
 	}
@@ -856,7 +861,8 @@ void CViewGlobals::OnPluginNameChanged()
 		if (strcmp(s, pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName))
 		{
 			memcpy(pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.szName, s, 32);
-			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+			if(pSndFile->GetModSpecifications().supportsPlugins)
+				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, HINT_MODCHANNELS | (m_nActiveTab << HINT_SHIFT_CHNTAB));
 		}
 	}
@@ -930,10 +936,8 @@ void CViewGlobals::OnSelectPlugin()
 		CSelectPluginDlg dlg(pModDoc, m_nCurrentPlugin, this); 
 		if (dlg.DoModal() == IDOK)
 		{
-			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
-			{
+			if(pSndFile->GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
-			}
 		}
 		OnPluginChanged();
 		OnParamChanged();
@@ -1004,7 +1008,8 @@ void CViewGlobals::OnProgramChanged()
 		if (m_nCurrentPreset > 0 && m_nCurrentPreset <= nParams){
 			pVstPlugin->SetCurrentProgram(m_nCurrentPreset-1);
 		}
-		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+		if(pSndFile->GetModSpecifications().supportsPlugins)
+			pModDoc->SetModified();
 	}
 }
 
@@ -1025,10 +1030,13 @@ void CViewGlobals::OnLoadParam()
 	if(files.abort) return;
     
 	//TODO: exception handling
-	if (!(pVstPlugin->LoadProgram(files.first_file.c_str()))) {
+	if (!(pVstPlugin->LoadProgram(files.first_file.c_str())))
+	{
 		::AfxMessageBox("Error loading preset.Are you sure it is for this plugin?");
-	} else {
-		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+	} else 
+	{
+		if(pSndFile->GetModSpecifications().supportsPlugins)
+			pModDoc->SetModified();
 	}
 
 	//end rewbs.fxpPresets
@@ -1080,7 +1088,8 @@ VOID CViewGlobals::OnSetParameter()
 			FLOAT fValue = (FLOAT)atof(s);
 			pVstPlugin->SetParameter(m_nCurrentParam, fValue);
             OnParamChanged();
-			if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+			if(pSndFile->GetModSpecifications().supportsPlugins)
+				pModDoc->SetModified();
 		}
 	}
 }
@@ -1102,7 +1111,8 @@ VOID CViewGlobals::OnSetWetDry()
 		//CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 		UINT value = GetDlgItemIntEx(IDC_EDIT15);
 		pPlugin->fDryRatio = (float)value / 100.0f;
-		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+		if(pSndFile->GetModSpecifications().supportsPlugins)
+			pModDoc->SetModified();
 		//OnWetDryChanged();
 	}
 }
@@ -1153,7 +1163,8 @@ VOID CViewGlobals::OnMixModeChanged()
 		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_MASTEREFFECT;
 	}
 	
-	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+	if(pSndFile->GetModSpecifications().supportsPlugins)
+		pModDoc->SetModified();
 }
 
 
@@ -1175,7 +1186,8 @@ VOID CViewGlobals::OnBypassChanged()
 		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
 	}
 
-	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+	if(pSndFile->GetModSpecifications().supportsPlugins)
+		pModDoc->SetModified();
 }
 
 
@@ -1199,7 +1211,8 @@ void CViewGlobals::OnWetDryExpandChanged()
 		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_MIXEXPAND;
 	}
 	
-	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+	if(pSndFile->GetModSpecifications().supportsPlugins)
+		pModDoc->SetModified();
 }
 
 VOID CViewGlobals::OnSpecialMixProcessingChanged()
@@ -1211,7 +1224,8 @@ VOID CViewGlobals::OnSpecialMixProcessingChanged()
 
 	if(!pPlugin) return;
 	pPlugin->Info.dwInputRouting = (pPlugin->Info.dwInputRouting & 0xffff00ff) | (m_CbnSpecialMixProcessing.GetCurSel()<<8);	// update#02 (fix)
-	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+	if(pSndFile->GetModSpecifications().supportsPlugins)
+		pModDoc->SetModified();
 }
 // -! BEHAVIOUR_CHANGE#0028
 
@@ -1234,7 +1248,8 @@ VOID CViewGlobals::OnDryMixChanged()
 		pPlugin->Info.dwInputRouting &= ~MIXPLUG_INPUTF_WETMIX;
 	}
 
-	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+	if(pSndFile->GetModSpecifications().supportsPlugins)
+		pModDoc->SetModified();
 }
 
 
@@ -1263,7 +1278,8 @@ VOID CViewGlobals::OnFxCommands(UINT id)
 	{
 		CVstPlugin *pVstPlugin = (CVstPlugin *)pPlugin->pMixPlugin;
 		pVstPlugin->ExecuteCommand(nIndex);
-		if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+		if(pSndFile->GetModSpecifications().supportsPlugins)
+			pModDoc->SetModified();
 	}
 }
 
@@ -1281,7 +1297,8 @@ VOID CViewGlobals::OnOutputRoutingChanged()
 	pPlugin = &pSndFile->m_MixPlugins[m_nCurrentPlugin];
 	nroute = m_CbnOutput.GetItemData(m_CbnOutput.GetCurSel());
 	pPlugin->Info.dwOutputRouting = nroute;
-	if (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) pModDoc->SetModified();
+	if(pSndFile->GetModSpecifications().supportsPlugins)
+		pModDoc->SetModified();
 }
 
 
@@ -1396,7 +1413,8 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 
 	END_CRITICAL();
 
-	pModDoc->SetModified();
+	if(pSndFile->GetModSpecifications().supportsPlugins)
+		pModDoc->SetModified();
 
 	EndWaitCursor();
 
@@ -1453,7 +1471,8 @@ void CViewGlobals::OnInsertSlot()
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		OnPluginChanged();
 
-		pModDoc->SetModified();
+		if(pSndFile->GetModSpecifications().supportsPlugins)
+			pModDoc->SetModified();
 	}
 
 }
