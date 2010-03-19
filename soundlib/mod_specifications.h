@@ -47,6 +47,7 @@ struct CModSpecifications
 	char volcommands[MAX_VOLCMDS + 1]; // dito, but for volume column
 	bool hasIgnoreIndex;	// Does "+++" pattern exist?
 	bool hasRestartPos;
+	bool supportsPlugins;
 };
 
 
@@ -91,6 +92,7 @@ const CModSpecifications mptm =
 	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
+	true,								// Supports plugins
 };
 
 
@@ -130,6 +132,7 @@ const CModSpecifications mod =
 	" ???????????????",					// Supported Volume Column commands
 	false,								// Doesn't have "+++" pattern
 	true,								// Has restart position (order)
+	false,								// Doesn't support plugins
 };
 
 // MOD with MPT extensions.
@@ -167,6 +170,7 @@ const CModSpecifications modEx =
 	" ???????????????",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
+	false,								// Doesn't support plugins
 };
 
 const CModSpecifications xm =
@@ -203,6 +207,7 @@ const CModSpecifications xm =
 	" vpcdabuhlrg????",					// Supported Volume Column commands
 	false,								// Doesn't have "+++" pattern
 	true,								// Has restart position (order)
+	false,								// Doesn't support plugins
 };
 
 // XM with MPT extensions
@@ -240,6 +245,7 @@ const CModSpecifications xmEx =
 	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
+	true,								// Supports plugins
 };
 
 const CModSpecifications s3m =
@@ -276,6 +282,7 @@ const CModSpecifications s3m =
 	" vp?????????????",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	false,								// Doesn't have restart position (order)
+	false,								// Doesn't support plugins
 };
 
 // S3M with MPT extensions
@@ -313,6 +320,7 @@ const CModSpecifications s3mEx =
 	" vp?????????????",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	false,								// Doesn't have restart position (order)
+	false,								// Doesn't support plugins
 };
 
 const CModSpecifications it =
@@ -349,6 +357,7 @@ const CModSpecifications it =
 	" vpcdab?h??gfe??",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	false,								// Doesn't have restart position (order)
+	false,								// Doesn't support plugins
 };
 
 const CModSpecifications itEx =
@@ -385,6 +394,7 @@ const CModSpecifications itEx =
 	" vpcdab?h??gfe:o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
+	true,								// Supports plugins
 };
 
 } //namespace ModSpecs
