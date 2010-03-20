@@ -353,7 +353,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				break;
 			// Global Volume
 			case CMD_GLOBALVOLUME:
-				if (!(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
+				if (!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) param <<= 1;
 				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2))
 				{
 					//IT compatibility 16. Both FT2 and IT ignore out-of-range values
@@ -381,13 +381,13 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 				{
 					param >>= 4;
-					if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
 					nGlbVol += param << 1;
 				} else
 				if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 				{
 					param = (param & 0x0F) << 1;
-					if (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
+					if (!(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) param <<= 1;
 					nGlbVol -= param;
 				} else
 				if (param & 0xF0)
@@ -3466,7 +3466,7 @@ void CSoundFile::NoteCut(UINT nChn, UINT nTick)
 		if(IsCompatibleMode(TRK_IMPULSETRACKER))
 			nTick = 1;
 		// ST3 doesn't cut notes with SC0
-		else if(m_nType == MOD_TYPE_S3M)
+		else if(GetType() == MOD_TYPE_S3M)
 			return;
 	}
 
@@ -3475,14 +3475,23 @@ void CSoundFile::NoteCut(UINT nChn, UINT nTick)
 		MODCHANNEL *pChn = &Chn[nChn];
 		// if (m_nInstruments) KeyOff(pChn); ?
 		pChn->nVolume = 0;
+		// S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
+		if(IsCompatibleMode(TRK_IMPULSETRACKER|TRK_SCREAMTRACKER))
+		{
+			pChn->nPeriod = 0;
+		}
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
 
 		MODINSTRUMENT *pHeader = pChn->pModInstrument;
-		if (pHeader && pHeader->nMidiChannel>0 && pHeader->nMidiChannel<17) { // instro sends to a midi chan
+		// instro sends to a midi chan
+		if (pHeader && pHeader->nMidiChannel>0 && pHeader->nMidiChannel<17)
+		{
 			UINT nPlug = pHeader->nMixPlug;
-			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS)) {
+			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+			{
 				IMixPlugin *pPlug = (IMixPlugin*)m_MixPlugins[nPlug-1].pMixPlugin;
-				if (pPlug) {
+				if (pPlug)
+				{
 					pPlug->MidiCommand(pHeader->nMidiChannel, pHeader->nMidiProgram, pHeader->wMidiBank, /*pChn->nNote+*/NOTE_KEYOFF, 0, nChn);
 				}
 			}
