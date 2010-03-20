@@ -77,7 +77,9 @@ double CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 //-------------------------------------------
 {
 	bool dummy = false;
-	return GetLength(dummy, bAdjust, bTotal);
+	double result = GetLength(dummy, bAdjust, bTotal);
+	InitializeVisitedRows(true); // forget that we went over the whole module.
+	return result;
 }
 
 double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORDERINDEX endOrder, ROWINDEX endRow)
@@ -117,31 +119,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	nPattern = Order[0];
 	nRow = nNextRow = 0;
 
-	/* Now, some fun code begins: This will determine if a specific row in a pattern (orderlist item)
-	   has been visited before. This way, we can tell when the module starts to loop, i.e. when we have determined
-	   the song length (or found out that a given point of the module cannot be reached).
-	   The concept is actually very simple: Store a boolean value for every row for every possible orderlist item.
-	   To save some memory, I have decided to actually store 8 row flags in one uint8 item, to save some
-	   space. Hence, there's some funky bit-shifting here and there.
-	   As the modplug engine already deals with pattern loops sufficiently, there's no problem with (infinite) pattern loops
-	   in this code. However, if you're going to use this idea somewhere else, bare in mind that rows inside pattern loops
-	   should only be evaluated once, or else the algorithm will cancel too early!
-	*/
-	vector<vector<uint8> > visited_rows;
-	visited_rows.resize(Order.GetLengthTailTrimmed());
-	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
-	{
-		PATTERNINDEX nPat = Order[nOrd];
-		ROWINDEX nSize = 0;
-		if(Patterns.IsValidPat(nPat))
-			nSize = Patterns[nPat].GetNumRows();
-		// as we need one vector unit per 8 rows, we will probably have to add some non-existing rows
-		// (f.e. if a pattern has 7 rows, we actually need another row so it's 8 rows = 1 byte - got it? ;)
-		if(nSize & 7)
-			nSize += 8;
-		nSize >>= 3;	// 2^3 elements per vector unit!
-		visited_rows[nOrd].resize(nSize, 0);
-	}
+	InitializeVisitedRows(true);
 
 	for (;;)
 	{
@@ -187,16 +165,8 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			break;
 		}
 
-		// Detect backward loop (or more general: if this row has been visited before)
-		size_t row_slot = nRow >> 3;
-		uint8 row_mask = 1 << (nRow & 7);
-		// This should always be true - but who knows what different parts of the program could modify the patterns and orders while this test is running?
-		if(nCurrentPattern < visited_rows.size() && row_slot < visited_rows[nCurrentPattern].size())
-		{
-			if((visited_rows[nCurrentPattern][row_slot] & row_mask) != 0)
-				break;	// we visited this row already - this module must be looping.
-			visited_rows[nCurrentPattern][row_slot] |= row_mask;
-		}
+		if(IsRowVisited(nCurrentPattern, nRow, true))
+			break;
 
 		// Update next position
 		nNextRow = nRow + 1;
@@ -3594,7 +3564,7 @@ void CSoundFile::SetTempo(UINT param, bool setAsNonModcommand)
 			m_nMusicTempo = param;
 		}
 		// Tempo Slide
-		else if (param < 0x20 && m_nTickCount) //rewbs.tempoSlideFix: only slide if (T0x or T1x) and tick is not 0
+		else if (param < 0x20 && !(m_dwSongFlags & SONG_FIRSTTICK)) //rewbs.tempoSlideFix: only slide if (T0x or T1x) and tick is not 0
 		{
 			if ((param & 0xF0) == 0x10)
 				m_nMusicTempo += (param & 0x0F); //rewbs.tempoSlideFix: no *2
@@ -3625,7 +3595,7 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 			{
 				//IT compatibility 10. Pattern loops (+ same fix for XM and MOD files)
 				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_PROTRACKER))
-					pChn->nPatternLoop = m_nRow+1;
+					pChn->nPatternLoop = m_nRow + 1;
 
 				return -1;	
 			}
@@ -4042,4 +4012,97 @@ void CSoundFile::PortamentoFineMPT(MODCHANNEL* pChn, int param)
 		pChn->nOldFinePortaUpDown = abs(tickParam);
 
 	pChn->m_CalculateFreq = true;
+}
+
+
+/* Now, some fun code begins: This will determine if a specific row in a pattern (orderlist item)
+   has been visited before. This way, we can tell when the module starts to loop, i.e. when we have determined
+   the song length (or found out that a given point of the module cannot be reached).
+   The concept is actually very simple: Store a boolean value for every row for every possible orderlist item.
+
+   Specific implementations:
+
+   Length detection code:
+   As the modplug engine already deals with pattern loops sufficiently, there's no problem with (infinite) pattern loops
+   in this code.
+   
+   Normal player code:
+   Bare in mind that rows inside pattern loops should only be evaluated once, or else the algorithm will cancel too early!
+   So in that case, the pattern loop rows have to be reset when looping back.
+*/
+
+
+void CSoundFile::InitializeVisitedRows(const bool bReset)
+//-------------------------------------------------------
+{
+	m_bVisitedRows.resize(Order.GetLengthTailTrimmed());
+
+	for(ORDERINDEX nOrd = 0; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
+	{
+		// If we want to reset the vectors completely, we overwrite exisiting items with 0.
+		if(bReset)
+		{
+			for(size_t i = 0; i < m_bVisitedRows[nOrd].size(); i++)
+			{
+				m_bVisitedRows[nOrd][i] = false;
+			}
+		}
+		m_bVisitedRows[nOrd].resize(GetVisitedRowsVectorSize(Order[nOrd]), false);
+	}
+}
+
+
+// (Un)sets a given row as visited.
+void CSoundFile::SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bVisited)
+//---------------------------------------------------------------------------------------------
+{
+	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
+	if(nOrd >= nMaxOrd)
+		return;
+
+	// The module might have been edited in the meantime - so we have to extend this a bit.
+	if(nOrd >= m_bVisitedRows.size() || nRow >= m_bVisitedRows[nOrd].size())
+		InitializeVisitedRows(false);
+
+	m_bVisitedRows[nOrd][nRow] = bVisited;
+}
+
+
+// Returns if a given row has been visited yet.
+// If bAutoSet is true, the queried row will automatically be marked as visited.
+// Use this parameter instead of consecutive IsRowVisited/SetRowVisited calls, as it's faster.
+bool CSoundFile::IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bAutoSet)
+//--------------------------------------------------------------------------------------------
+{
+	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
+	if(nOrd >= nMaxOrd)
+		return false;
+
+	// The row slot for this row has not been assigned yet - Just return false, as this means that the program has not played the row yet.
+	if(nOrd >= m_bVisitedRows.size() || nRow >= m_bVisitedRows[nOrd].size())
+	{
+		if(bAutoSet)
+			SetRowVisited(nOrd, nRow, true);
+		else
+			return false;
+	}
+
+	if(m_bVisitedRows[nOrd][nRow])
+		return true;	// we visited this row already - this module must be looping.
+
+	if(bAutoSet)
+		m_bVisitedRows[nOrd][nRow] = true;
+
+	return false;
+}
+
+
+// Get the needed vector size for pattern nPat.
+size_t CSoundFile::GetVisitedRowsVectorSize(const PATTERNINDEX nPat)
+//------------------------------------------------------------------
+{
+	if(Patterns.IsValidPat(nPat))
+		return (size_t)(Patterns[nPat].GetNumRows());
+	else
+		return 0;
 }

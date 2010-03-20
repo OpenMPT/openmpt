@@ -532,6 +532,9 @@ private: //Misc data
 	uint16 m_ModFlags;
 	const CModSpecifications* m_pModSpecs;
 
+	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
+	vector<vector<bool> > m_bVisitedRows;
+
 
 
 public:	// Static Members
@@ -578,7 +581,8 @@ public:	// for Editing
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
 	long m_lHighResRampingGlobalVolume;
 	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
-	LONG m_nMinPeriod, m_nMaxPeriod, m_nRepeatCount;
+	LONG m_nMinPeriod, m_nMaxPeriod;
+	LONG m_nRepeatCount;	// -1 means repeat infinitely.
 	DWORD m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples;
 	UINT m_nMaxOrderPosition, m_nPatternNames;
 	LPSTR m_lpszSongComments, m_lpszPatternNames;
@@ -964,6 +968,14 @@ private:
 	void HandlePatternTransitionEvents();
 	void BuildDefaultInstrument();
 	long GetSampleOffset();
+
+// A couple of functions for handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
+public:
+	void InitializeVisitedRows(const bool bReset = true);
+private:
+	void SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bVisited = true);
+	bool IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bAutoSet = true);
+	size_t GetVisitedRowsVectorSize(const PATTERNINDEX nPat);
 
 public:
 	// "importance" of every FX command. Table is used for importing from formats with multiple effect colums
