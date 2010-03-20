@@ -821,7 +821,7 @@ public:
 	UINT GetNNAChannel(UINT nChn) const;
 	void CheckNNA(UINT nChn, UINT instr, int note, BOOL bForceCut);
 	void NoteChange(UINT nChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false);
-	void InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta=FALSE,BOOL bUpdVol=TRUE,BOOL bResetEnv=TRUE);
+	void InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true);
 
 	// Channel Effects
 	void KeyOff(UINT nChn);
