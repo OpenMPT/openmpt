@@ -400,7 +400,8 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			}
 		}
 		nSpeedCount += nMusicSpeed;
-		switch(m_nTempoMode) {
+		switch(m_nTempoMode)
+		{
 			case tempo_mode_alternative: 
 				dElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
 			case tempo_mode_modern: 
@@ -435,10 +436,10 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Effects
 
-void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOOL bUpdVol, BOOL bResetEnv)
+void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, bool bUpdVol, bool bResetEnv)
 //--------------------------------------------------------------------------------------------------------
 {
-	BOOL bInstrumentChanged = FALSE;
+	bool bInstrumentChanged = false;
 
 	if (instr >= MAX_INSTRUMENTS) return;
 	MODINSTRUMENT *pIns = Instruments[instr];
@@ -469,8 +470,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 	// bInstrumentChanged is used for IT carry-on env option
 	if (pIns != pChn->pModInstrument)
 	{
-		bInstrumentChanged = TRUE;
-		pChn->pModInstrument = pIns;
+		bInstrumentChanged = true;
+		// we will set the new instrument later.
 	} 
 	else 
 	{	
@@ -482,6 +483,15 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, BOOL bPorta, BOO
 			// but still uses the sample info from the old one (bug?)
 			returnAfterVolumeAdjust = true;
 		}
+	}
+
+	// XM compatibility: new instrument + portamento = forget it!
+	if(bInstrumentChanged && bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
+	{
+		return;
+	} else
+	{
+		pChn->pModInstrument = pIns;
 	}
 	
 	// Update Volume
@@ -1152,7 +1162,7 @@ BOOL CSoundFile::ProcessEffects()
 		UINT vol = pChn->nRowVolume;
 		UINT cmd = pChn->nRowCommand;
 		UINT param = pChn->nRowParam;
-		bool bPorta = ((cmd != CMD_TONEPORTAMENTO) && (cmd != CMD_TONEPORTAVOL) && (volcmd != VOLCMD_TONEPORTAMENTO)) ? FALSE : TRUE;
+		bool bPorta = ((cmd != CMD_TONEPORTAMENTO) && (cmd != CMD_TONEPORTAVOL) && (volcmd != VOLCMD_TONEPORTAMENTO)) ? false : true;
 
 		UINT nStartTick = 0;
 
@@ -1380,13 +1390,13 @@ BOOL CSoundFile::ProcessEffects()
 			if (instr)
 			{
 				MODSAMPLE *psmp = pChn->pModSample;
-				InstrumentChange(pChn, instr, bPorta, TRUE);
+				InstrumentChange(pChn, instr, bPorta, true);
 				pChn->nNewIns = 0;
 				// Special IT case: portamento+note causes sample change -> ignore portamento
 				if ((m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 				 && (psmp != pChn->pModSample) && (note) && (note < 0x80))
 				{
-					bPorta = FALSE;
+					bPorta = false;
 				}
 			}
 			// New Note ?
@@ -1394,7 +1404,7 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				if ((!instr) && (pChn->nNewIns) && (note < 0x80))
 				{
-					InstrumentChange(pChn, pChn->nNewIns, bPorta, FALSE, (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? FALSE : TRUE);
+					InstrumentChange(pChn, pChn->nNewIns, bPorta, false, (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? false : true);
 					pChn->nNewIns = 0;
 				}
 				NoteChange(nChn, note, bPorta, (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? false : true);
@@ -3330,7 +3340,7 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 		{
 			int vol = pChn->nVolume;
 
-			// FT2 compatibility: Retrig + volume will not change volume of retrigged notes
+			// XM compatibility: Retrig + volume will not change volume of retrigged notes
 			if(!IsCompatibleMode(TRK_FASTTRACKER2) || !(pChn->nRowVolCmd == VOLCMD_VOLUME))
 			{
 				if (retrigTable1[dv])
@@ -3352,7 +3362,7 @@ void CSoundFile::RetrigNote(UINT nChn, int param, UINT offset)	//rewbs.VolOffset
 		{
 			if ((pChn->nRowInstr) && (param < 0x100))
 			{
-				InstrumentChange(pChn, pChn->nRowInstr, FALSE, FALSE);
+				InstrumentChange(pChn, pChn->nRowInstr, false, false);
 				bResetEnv = true;
 			}
 			if (param < 0x100) bResetEnv = true;
@@ -3872,7 +3882,8 @@ UINT CSoundFile::GetFreqFromPeriod(UINT period, UINT nC5Speed, int nPeriodFrac) 
 UINT  CSoundFile::GetBestPlugin(UINT nChn, UINT priority, bool respectMutes)
 //-------------------------------------------------------------------------
 {
-	if (nChn > MAX_CHANNELS) {		//Check valid channel number
+	if (nChn > MAX_CHANNELS)		//Check valid channel number
+	{
 		return 0;
 	}
 	
