@@ -1,227 +1,419 @@
 /*
- * This source code is public domain.
+ * Purpose: Load ULT (UltraTracker) modules
+ * Authors: Storlek (Original author - http://schismtracker.org/)
+ *			Johannes Schultz (OpenMPT Port, tweaks)
  *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>
- *
-*/
+ * Thanks to Storlek for allowing me to use this code!
+ */
 
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-
-#define ULT_16BIT   0x04
-#define ULT_LOOP    0x08
-#define ULT_BIDI    0x10
+enum
+{
+	ULT_16BIT = 4,
+	ULT_LOOP  = 8,
+	ULT_PINGPONGLOOP = 16,
+};
 
 #pragma pack(1)
-
-// Raw ULT header struct:
-typedef struct tagULTHEADER
+struct ULT_SAMPLE
 {
-    char id[15];
-    char songtitle[32];
-	BYTE reserved;
-} ULTHEADER;
-
-
-// Raw ULT sampleinfo struct:
-typedef struct tagULTSAMPLE
-{
-	CHAR samplename[32];
-	CHAR dosname[12];
-	LONG loopstart;
-	LONG loopend;
-	LONG sizestart;
-	LONG sizeend;
-	BYTE volume;
-	BYTE flags;
-	WORD finetune;
-} ULTSAMPLE;
-
+	char   name[32];
+	char   filename[12];
+	uint32 loop_start;
+	uint32 loop_end;
+	uint32 size_start;
+	uint32 size_end;
+	uint8  volume;		// 0-255, apparently prior to 1.4 this was logarithmic?
+	uint8  flags;		// above
+	uint16 speed;		// only exists for 1.4+
+	int16  finetune;
+};
+STATIC_ASSERT(sizeof(ULT_SAMPLE) >= 64);
 #pragma pack()
 
+#define ASSERT_CAN_READ(x) \
+	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
+
+/* Unhandled effects:
+5x1 - do not loop sample (x is unused)
+5xC - end loop and finish sample
+9xx - set sample offset to xx * 1024
+    with 9yy: set sample offset to xxyy * 4
+E0x - set vibrato strength (2 is normal)
+F00 - reset speed/tempo to 6/125
+
+Apparently 3xx will CONTINUE to slide until it reaches its destination, or
+until a 300 effect is encountered. I'm not attempting to handle this (yet).
+
+The logarithmic volume scale used in older format versions here, or pretty
+much anywhere for that matter. I don't even think Ultra Tracker tries to
+convert them. */
+
+static const uint8 ult_efftrans[] =
+{
+	CMD_ARPEGGIO,
+	CMD_PORTAMENTOUP,
+	CMD_PORTAMENTODOWN,
+	CMD_TONEPORTAMENTO,
+	CMD_VIBRATO,
+	CMD_NONE,
+	CMD_NONE,
+	CMD_TREMOLO,
+	CMD_NONE,
+	CMD_OFFSET,
+	CMD_VOLUMESLIDE,
+	CMD_PANNING8,
+	CMD_VOLUME,
+	CMD_PATTERNBREAK,
+	CMD_NONE, // extended effects, processed separately
+	CMD_SPEED,
+};
+
+static void TranslateULTCommands(uint8 *pe, uint8 *pp)
+//----------------------------------------------------
+{
+	uint8 e = *pe & 0x0F;
+	uint8 p = *pp;
+
+	*pe = ult_efftrans[e];
+
+	switch (e)
+	{
+	case 0x00:
+		if (!p)
+			*pe = CMD_NONE;
+		break;
+	case 0x03:
+		// 300 apparently stops sliding, which is totally weird
+		if (!p)
+			p = 1; // close enough?
+		break;
+	case 0x05:
+		// play backwards
+		if((p & 0x0F) == 0x02)
+		{
+			*pe = CMD_S3MCMDEX;
+			p = 0x9F;
+		}
+		break;
+	case 0x0A:
+		// blah, this sucks
+		if (p & 0xF0)
+			p &= 0xF0;
+		break;
+	case 0x0B:
+		// mikmod does this wrong, resulting in values 0-225 instead of 0-255
+		p = (p & 0x0F) * 0x11;
+		break;
+	case 0x0C: // volume
+		p >>= 2;
+		break;
+	case 0x0D: // pattern break
+		p = 10 * (p >> 4) + (p & 0x0F);
+	case 0x0E: // special
+		switch (p >> 4)
+		{
+		case 0x01:
+			*pe = CMD_PORTAMENTOUP;
+			p = 0xF0 | (p & 0x0F);
+			break;
+		case 0x02:
+			*pe = CMD_PORTAMENTODOWN;
+			p = 0xF0 | (p & 0x0F);
+			break;
+		case 0x08:
+			*pe = CMD_S3MCMDEX;
+			p = 0x60 | (p & 0x0F);
+			break;
+		case 0x09:
+			*pe = CMD_RETRIG;
+			p &= 0x0F;
+			break;
+		case 0x0A:
+			*pe = CMD_VOLUMESLIDE;
+			p = ((p & 0x0F) << 4) | 0x0F;
+			break;
+		case 0x0B:
+			*pe = CMD_VOLUMESLIDE;
+			p = 0xF0 | (p & 0x0F);
+			break;
+		case 0x0C: case 0x0D:
+			*pe = CMD_S3MCMDEX;
+			break;
+		}
+		break;
+	case 0x0F:
+		if (p > 0x2F)
+			*pe = CMD_TEMPO;
+		break;
+	}
+
+	*pp = p;
+}
+
+static int ReadULTEvent(MODCOMMAND *note, const BYTE *lpStream, DWORD *dwMP, const DWORD dwMemLength)
+//---------------------------------------------------------------------------------------------------
+{
+	DWORD dwMemPos = *dwMP;
+	uint8 b, repeat = 1;
+	uint8 cmd1, cmd2;	// 1 = vol col, 2 = fx col in the original schismtracker code
+	uint8 param1, param2;
+
+	ASSERT_CAN_READ(1)
+	b = lpStream[dwMemPos++];
+	if (b == 0xFC)	// repeat event
+	{
+		ASSERT_CAN_READ(2);
+		repeat = lpStream[dwMemPos++];
+		b = lpStream[dwMemPos++];
+	}
+	ASSERT_CAN_READ(4)
+	note->note = (b > 0 && b < 61) ? b + 36 : NOTE_NONE;
+	note->instr = lpStream[dwMemPos++];
+	b = lpStream[dwMemPos++];
+	cmd1 = b & 0x0F;
+	cmd2 = b >> 4;
+	param1 = lpStream[dwMemPos++];
+	param2 = lpStream[dwMemPos++];
+	TranslateULTCommands(&cmd1, &param1);
+	TranslateULTCommands(&cmd2, &param2);
+
+	// sample offset -- this is even more special than digitrakker's
+	if(cmd1 == CMD_OFFSET && cmd2 == CMD_OFFSET)
+	{
+		uint32 off = ((param1 << 8) | param2) >> 6;
+		cmd1 = CMD_NONE;
+		param1 = (uint8)min(off, 0xFF);
+	} else if(cmd1 == CMD_OFFSET)
+	{
+		uint32 off = param1 * 4;
+		param1 = (uint8)min(off, 0xFF);
+	} else if(cmd2 == CMD_OFFSET)
+	{
+		uint32 off = param2 * 4;
+		param2 = (uint8)min(off, 0xFF);
+	} else if(cmd1 == cmd2)
+	{
+		// don't try to figure out how ultratracker does this, it's quite random
+		cmd2 = CMD_NONE;
+	}
+	if (cmd2 == CMD_VOLUME || (cmd2 == CMD_NONE && cmd1 != CMD_VOLUME))
+	{
+		// swap commands
+		std::swap(cmd1, cmd2);
+		std::swap(param1, param2);
+	}
+
+	// Do that dance.
+	// Maybe I should quit rewriting this everywhere and make a generic version :P
+	int n;
+	for (n = 0; n < 4; n++)
+	{
+		if(CSoundFile::ConvertVolEffect(&cmd1, &param1, (n >> 1) ? true : false))
+		{
+			n = 5;
+			break;
+		}
+		std::swap(cmd1, cmd2);
+		std::swap(param1, param2);
+	}
+	if (n < 5)
+	{
+		if (CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)cmd1) > CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)cmd2))
+		{
+			std::swap(cmd1, cmd2);
+			std::swap(param1, param2);
+		}
+		cmd1 = CMD_NONE;
+	}
+	if (!cmd1)
+		param1 = 0;
+	if (!cmd2)
+		param2 = 0;
+
+	note->volcmd = cmd1;
+	note->vol = param1;
+	note->command = cmd2;
+	note->param = param2;
+	
+	*dwMP = dwMemPos;
+	return repeat;
+}
 
 bool CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	ULTHEADER *pmh = (ULTHEADER *)lpStream;
-	ULTSAMPLE *pus;
-	UINT nos, nop;
 	DWORD dwMemPos = 0;
+	uint8 ult_version;
 
-	// try to read module header
-	if ((!lpStream) || (dwMemLength < 0x100)) return false;
-	if (strncmp(pmh->id,"MAS_UTrack_V00",14)) return false;
-	// Warning! Not supported ULT format, trying anyway
-	// if ((pmh->id[14] < '1') || (pmh->id[14] > '4')) return false;
+	// Tracker ID
+	ASSERT_CAN_READ(15);
+	if (memcmp(lpStream, "MAS_UTrack_V00", 14) != 0)
+		return false;
+	dwMemPos += 14;
+	ult_version = lpStream[dwMemPos++];
+	if (ult_version < '1' || ult_version > '4')
+		return false;
+	ult_version -= '0';
+
+	ASSERT_CAN_READ(32);
+	memcpy(m_szNames[0], lpStream + dwMemPos, 32);
+	SetNullTerminator(m_szNames[0]);
+	dwMemPos += 32;
+
 	m_nType = MOD_TYPE_ULT;
-	m_nDefaultSpeed = 6;
-	m_nDefaultTempo = 125;
-	memcpy(m_szNames[0], pmh->songtitle, 31);
-	SpaceToNullStringFixed(m_szNames[0], 31);
-	// read songtext
-	dwMemPos = sizeof(ULTHEADER);
-	if ((pmh->reserved) && (dwMemPos + pmh->reserved * 32 < dwMemLength))
+	m_dwSongFlags = SONG_ITCOMPATMODE | SONG_ITOLDEFFECTS;	// this will be converted to IT format by MPT.
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
+
+	ASSERT_CAN_READ(1);
+	uint8 nNumLines = (uint8)lpStream[dwMemPos++];
+	ASSERT_CAN_READ((DWORD)(nNumLines * 32));
+	// read "nNumLines" lines, each containing 32 characters.
+	if(m_lpszSongComments != nullptr)
+		delete(m_lpszSongComments);
+	m_lpszSongComments = new char[(nNumLines * 33) + 1];
+	if(m_lpszSongComments)
 	{
-		UINT len = pmh->reserved * 32;
-		m_lpszSongComments = new char[len + 1 + pmh->reserved];
-		if (m_lpszSongComments)
+		for(size_t nLine = 0; nLine < nNumLines; nLine++)
 		{
-			for (UINT l=0; l<pmh->reserved; l++)
-			{
-				memcpy(m_lpszSongComments+l*33, lpStream+dwMemPos+l*32, 32);
-				m_lpszSongComments[l*33+32] = 0x0D;
-			}
-			m_lpszSongComments[len] = 0;
+			memcpy(m_lpszSongComments + nLine * 33, lpStream + dwMemPos + nLine * 32, 32);
+			m_lpszSongComments[nLine * 33 + 32] = 0x0D;
 		}
-		dwMemPos += len;
+		m_lpszSongComments[nNumLines * 33] = 0;
 	}
-	if (dwMemPos >= dwMemLength) return true;
-	nos = lpStream[dwMemPos++];
-	m_nSamples = nos;
-	if (m_nSamples >= MAX_SAMPLES) m_nSamples = MAX_SAMPLES-1;
-	UINT smpsize = 64;
-	if (pmh->id[14] >= '4')	smpsize += 2;
-	if (dwMemPos + nos*smpsize + 256 + 2 > dwMemLength) return true;
-	for (UINT ins=1; ins<=nos; ins++, dwMemPos+=smpsize) if (ins<=m_nSamples)
+	dwMemPos += nNumLines * 32;
+
+	ASSERT_CAN_READ(1);
+	m_nSamples = (SAMPLEINDEX)lpStream[dwMemPos++];
+	if(m_nSamples >= MAX_SAMPLES)
+		return false;
+
+	for(SAMPLEINDEX nSmp = 0; nSmp < m_nSamples; nSmp++)
 	{
-		pus	= (ULTSAMPLE *)(lpStream+dwMemPos);
-		MODSAMPLE *pSmp = &Samples[ins];
-		memcpy(m_szNames[ins], pus->samplename, 31);
-		memcpy(pSmp->filename, pus->dosname, 12);
-		SpaceToNullStringFixed(m_szNames[ins], 31);
-		SpaceToNullStringFixed(pSmp->filename, 12);
-		pSmp->nLoopStart = pus->loopstart;
-		pSmp->nLoopEnd = pus->loopend;
-		pSmp->nLength = pus->sizeend - pus->sizestart;
-		pSmp->nVolume = pus->volume;
-		pSmp->nGlobalVol = 64;
-		pSmp->nC5Speed = 8363;
-		if (pmh->id[14] >= '4')
+		ULT_SAMPLE ultSmp;
+		MODSAMPLE *pSmp = &(Samples[nSmp + 1]);
+		// annoying: v4 added a field before the end of the struct
+		if(ult_version >= 4)
 		{
-			pSmp->nC5Speed = pus->finetune;
+			ASSERT_CAN_READ(sizeof(ULT_SAMPLE));
+			memcpy(&ultSmp, lpStream + dwMemPos, sizeof(ULT_SAMPLE));
+			dwMemPos += sizeof(ULT_SAMPLE);
+
+			ultSmp.speed = LittleEndianW(ultSmp.speed);
+		} else
+		{
+			ASSERT_CAN_READ(sizeof(64));
+			memcpy(&ultSmp, lpStream + dwMemPos, 64);
+			dwMemPos += 64;
+
+			ultSmp.finetune = ultSmp.speed;
+			ultSmp.speed = 8363;
 		}
-		if (pus->flags & ULT_LOOP) pSmp->uFlags |= CHN_LOOP;
-		if (pus->flags & ULT_BIDI) pSmp->uFlags |= CHN_PINGPONGLOOP;
-		if (pus->flags & ULT_16BIT)
+		ultSmp.finetune = LittleEndianW(ultSmp.finetune);
+		ultSmp.loop_start = LittleEndian(ultSmp.loop_start);
+		ultSmp.loop_end = LittleEndian(ultSmp.loop_end);
+		ultSmp.size_start = LittleEndian(ultSmp.size_start);
+		ultSmp.size_end = LittleEndian(ultSmp.size_end);
+
+		memcpy(m_szNames[nSmp + 1], ultSmp.name, 32);
+		SetNullTerminator(m_szNames[nSmp + 1]);
+		memcpy(pSmp->filename, ultSmp.filename, 12);
+		SpaceToNullStringFixed(pSmp->filename, 12);
+
+		if(ultSmp.size_end <= ultSmp.size_start)
+			continue;
+		pSmp->nLength = ultSmp.size_end - ultSmp.size_start;
+		pSmp->nLoopStart = ultSmp.loop_start;
+		pSmp->nLoopEnd = min(ultSmp.loop_end, pSmp->nLength);
+		pSmp->nVolume = ultSmp.volume;
+		pSmp->nGlobalVol = 64;
+
+		/* mikmod does some weird integer math here, but it didn't really work for me */
+		pSmp->nC5Speed = ultSmp.speed;
+		if(ultSmp.finetune)
+		{
+			pSmp->nC5Speed = (UINT)(((double)pSmp->nC5Speed) * pow(2, (((double)ultSmp.finetune) / (12.0 * 32768))));
+		}
+
+		if(ultSmp.flags & ULT_LOOP)
+			pSmp->uFlags |= CHN_LOOP;
+		if(ultSmp.flags & ULT_PINGPONGLOOP)
+			pSmp->uFlags |= CHN_PINGPONGLOOP;
+		if(ultSmp.flags & ULT_16BIT)
 		{
 			pSmp->uFlags |= CHN_16BIT;
 			pSmp->nLoopStart >>= 1;
 			pSmp->nLoopEnd >>= 1;
 		}
 	}
-	Order.ReadAsByte(lpStream+dwMemPos, 256, dwMemLength-dwMemPos);
+
+	// ult just so happens to use 255 for its end mark, so there's no need to fiddle with this
+	Order.ReadAsByte(lpStream + dwMemPos, 256, dwMemLength - dwMemPos);
 	dwMemPos += 256;
-	m_nChannels = lpStream[dwMemPos] + 1;
-	nop = lpStream[dwMemPos+1] + 1;
-	dwMemPos += 2;
-	if (m_nChannels > 32) m_nChannels = 32;
-	// Default channel settings
-	for (UINT nSet=0; nSet<m_nChannels; nSet++)
+
+	ASSERT_CAN_READ(2);
+	m_nChannels = lpStream[dwMemPos++] + 1;
+	PATTERNINDEX nNumPats = lpStream[dwMemPos++] + 1;
+
+	if(m_nChannels > MAX_BASECHANNELS || nNumPats > MAX_PATTERNS)
+		return false;
+
+	if(ult_version >= 3)
 	{
-		ChnSettings[nSet].nVolume = 64;
-		ChnSettings[nSet].nPan = (nSet & 1) ? 0x40 : 0xC0;
-	}
-	// read pan position table for v1.5 and higher
-	if(pmh->id[14]>='3')
-	{
-		if (dwMemPos + m_nChannels > dwMemLength) return true;
-		for(UINT t=0; t<m_nChannels; t++)
+		ASSERT_CAN_READ(m_nChannels);
+		for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
 		{
-			ChnSettings[t].nPan = (lpStream[dwMemPos++] << 4) + 8;
-			if (ChnSettings[t].nPan > 256) ChnSettings[t].nPan = 256;
+			ChnSettings[nChn].nPan = ((lpStream[dwMemPos + nChn] & 0x0F) << 4) + 8;
+		}
+		dwMemPos += m_nChannels;
+	} else
+	{
+		for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+		{
+			ChnSettings[nChn].nPan = (nChn & 1) ? 192 : 64;
 		}
 	}
-	// Allocating Patterns
-	for (UINT nAllocPat=0; nAllocPat<nop; nAllocPat++)
+
+	for(PATTERNINDEX nPat = 0; nPat < nNumPats; nPat++)
 	{
-		if (nAllocPat < MAX_PATTERNS)
-		{
-			Patterns.Insert(nAllocPat, 64);
-		}
+		if(Patterns.Insert(nPat, 64))
+			return false;
 	}
-	// Reading Patterns
-	for (UINT nChn=0; nChn<m_nChannels; nChn++)
+
+	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
 	{
-		for (UINT nPat=0; nPat<nop; nPat++)
+		MODCOMMAND evnote;
+		MODCOMMAND *note;
+		int repeat;
+		evnote.Clear();
+
+		for(PATTERNINDEX nPat = 0; nPat < nNumPats; nPat++)
 		{
-			MODCOMMAND *pat = NULL;
-			
-			if (nPat < MAX_PATTERNS)
+			note = Patterns[nPat] + nChn;
+			ROWINDEX nRow = 0;
+			while(nRow < 64)
 			{
-				pat = Patterns[nPat];
-				if (pat) pat += nChn;
-			}
-			UINT row = 0;
-			while (row < 64)
-			{
-				if (dwMemPos + 6 > dwMemLength) return true;
-				UINT rep = 1;
-				UINT note = lpStream[dwMemPos++];
-				if (note == 0xFC)
+				repeat = ReadULTEvent(&evnote, lpStream, &dwMemPos, dwMemLength);
+				if(repeat + nRow > 64)
+					repeat = 64 - nRow;
+				if(repeat == 0) break;
+				while (repeat--)
 				{
-					rep = lpStream[dwMemPos];
-					note = lpStream[dwMemPos+1];
-					dwMemPos += 2;
-				}
-				UINT instr = lpStream[dwMemPos++];
-				UINT eff = lpStream[dwMemPos++];
-				UINT dat1 = lpStream[dwMemPos++];
-				UINT dat2 = lpStream[dwMemPos++];
-				UINT cmd1 = eff & 0x0F;
-				UINT cmd2 = eff >> 4;
-				if (cmd1 == 0x0C) dat1 >>= 2; else
-				if (cmd1 == 0x0B) { cmd1 = dat1 = 0; }
-				if (cmd2 == 0x0C) dat2 >>= 2; else
-				if (cmd2 == 0x0B) { cmd2 = dat2 = 0; }
-				while ((rep != 0) && (row < 64))
-				{
-					if (pat)
-					{
-						pat->instr = instr;
-						if (note) pat->note = note + 36;
-						if (cmd1 | dat1)
-						{
-							if (cmd1 == 0x0C)
-							{
-								pat->volcmd = VOLCMD_VOLUME;
-								pat->vol = dat1;
-							} else
-							{
-								pat->command = cmd1;
-								pat->param = dat1;
-								ConvertModCommand(pat);
-							}
-						}
-						if (cmd2 == 0x0C)
-						{
-							pat->volcmd = VOLCMD_VOLUME;
-							pat->vol = dat2;
-						} else
-						if ((cmd2 | dat2) && (!pat->command))
-						{
-							pat->command = cmd2;
-							pat->param = dat2;
-							ConvertModCommand(pat);
-						}
-						pat += m_nChannels;
-					}
-					row++;
-					rep--;
+					*note = evnote;
+					note += m_nChannels;
+					nRow++;
 				}
 			}
 		}
 	}
-	// Reading Instruments
-	for (UINT smp=1; smp<=m_nSamples; smp++) if (Samples[smp].nLength)
+
+	for(SAMPLEINDEX nSmp = 0; nSmp < m_nSamples; nSmp++)
 	{
-		if (dwMemPos >= dwMemLength) return true;
-		UINT flags = (Samples[smp].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S;
-		dwMemPos += ReadSample(&Samples[smp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength - dwMemPos);
+		dwMemPos += ReadSample(&Samples[nSmp + 1], (Samples[nSmp + 1].uFlags & CHN_16BIT) ? RS_PCM16S : RS_PCM8S, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 	}
 	return true;
 }
 
+#undef ASSERT_CAN_READ
