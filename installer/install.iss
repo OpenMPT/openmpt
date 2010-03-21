@@ -95,9 +95,65 @@ Type: dirifempty; Name: "{userappdata}\OpenMPT"; Tasks: not portable
 ; portable installation
 Type: dirifempty; Name: "{app}\tunings"; Tasks: portable;
 
-; crappy workaround for uninstall stuff
+#include "vst_scan.iss"
+
 [Code]
 
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+    INIFile: String;
+    keyboardFilepath: String;
+    baseLanguage: Integer;
+
+begin
+    // Get the right INI path.
+    if(IsTaskSelected('portable')) then
+    begin
+        INIFile := ExpandConstant('{app}\mptrack.ini');
+    end else
+    begin
+        INIFile := ExpandConstant('{userappdata}\OpenMPT\mptrack.ini');
+    end;
+
+    case CurStep of
+    ssPostInstall:
+        begin
+            // Find a suitable keyboard layout (might not be very precise sometimes, as it's based on the UI language)
+            // Check http://msdn.microsoft.com/en-us/library/ms776294%28VS.85%29.aspx for the correct language codes.
+            keyboardFilepath := '';
+            baseLanguage := (GetUILanguage and $3FF);
+            case baseLanguage of
+            $07:  // German
+                begin
+                    keyboardFilepath := 'DE_jojo';
+                end;
+            $0c:  // French
+                begin
+                    keyboardFilepath := 'FR_mpt_classic_(vanisherIII)';
+                end;
+            $14:  // Norwegian
+                begin
+                    keyboardFilepath := 'NO_mpt_classic_(rakib)';
+                end;
+            end;
+
+            // Found an alternative keybinding.
+            if(keyboardFilepath <> '') then
+            begin
+                keyboardFilepath := ExpandConstant('{app}\extraKeymaps\' + keyboardFilepath + '.mkb');
+                SetIniString('Paths', 'Key_Config_File', keyboardFilepath, INIFile);
+            end;
+
+            // Scan for pre-installed VST plugins
+            if(IsTaskSelected('vst_scan')) then
+            begin
+                OnVSTScan(INIFile);
+            end;
+        end;
+    end;
+end;
+
+// Crappy workaround for uninstall stuff
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
     filepath: String;
@@ -140,6 +196,6 @@ begin
     end;
 end;
 
-#include "vst_scan.iss"
+
 
 
