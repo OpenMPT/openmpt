@@ -65,6 +65,7 @@ extern DWORD ITReadBits(DWORD &bitbuf, UINT &bitnum, LPBYTE &ibuf, CHAR n);
 extern void ITUnpack8Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLength, BOOL b215);
 extern void ITUnpack16Bit(LPSTR pSample, DWORD dwLen, LPBYTE lpMemFile, DWORD dwMemLength, BOOL b215);
 
+extern BYTE ImpulseTrackerPortaVolCmd[16];
 
 #define MAX_PACK_TABLES		3
 
@@ -3825,4 +3826,138 @@ uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd)
 	case CMD_NONE:
 	default:					return   0;
 	}
+}
+
+// Try to convert a fx column command (*e) into a volume column command.
+// Returns true if successful.
+// Some commands can only be converted by losing some precision.
+// If moving the command into the volume column is more important than accuracy, use bForce = true.
+// (Code translated from SchismTracker and mainly supposed to be used with loaders ported from this tracker)
+bool CSoundFile::ConvertVolEffect(uint8 *e, uint8 *p, bool bForce)
+//----------------------------------------------------------------
+{
+	switch (*e)
+	{
+	case CMD_NONE:
+		return true;
+	case CMD_VOLUME:
+		*e = VOLCMD_VOLUME;
+		*p = min(*p, 64);
+		break;
+	case CMD_PORTAMENTOUP:
+		if (bForce)
+			*p = min(*p, 9);
+		else if (*p > 9)
+			return false;
+		*e = VOLCMD_PORTAUP;
+		break;
+	case CMD_PORTAMENTODOWN:
+		if (bForce)
+			*p = min(*p, 9);
+		else if (*p > 9)
+			return false;
+		*e = VOLCMD_PORTADOWN;
+		break;
+	case CMD_TONEPORTAMENTO:
+		if (*p >= 0xF0)
+		{
+			// hack for people who can't type F twice :)
+			*e = VOLCMD_TONEPORTAMENTO;
+			*p = 0xFF;
+			return true;
+		}
+		for (uint8 n = 0; n < 10; n++)
+		{
+			if (bForce
+				? (*p <= ImpulseTrackerPortaVolCmd[n])
+				: (*p == ImpulseTrackerPortaVolCmd[n]))
+			{
+				*e = VOLCMD_TONEPORTAMENTO;
+				*p = n;
+				return true;
+			}
+		}
+		return false;
+	case CMD_VIBRATO:
+		if (bForce)
+			*p = min(*p, 9);
+		else if (*p > 9)
+			return false;
+		*e = VOLCMD_VIBRATODEPTH;
+		break;
+	case CMD_FINEVIBRATO:
+		if (bForce)
+			*p = 0;
+		else if (*p)
+			return false;
+		*e = VOLCMD_VIBRATODEPTH;
+		break;
+	case CMD_PANNING8:
+		*p = min(64, *p * 64 / 255);
+		*e = VOLCMD_PANNING;
+		break;
+	case CMD_VOLUMESLIDE:
+		if (*p == 0)
+			return false;
+		if ((*p & 0xF) == 0)	// Dx0 / Cx
+		{
+			if (bForce)
+				*p = min(*p >> 4, 9);
+			else if ((*p >> 4) > 9)
+				return false;
+			else
+				*p >>= 4;
+			*e = VOLCMD_VOLSLIDEUP;
+		} else if ((*p & 0xF0) == 0)	// D0x / Dx
+		{
+			if (bForce)
+				*p = min(*p, 9);
+			else if (*p > 9)
+				return false;
+			*e = VOLCMD_VOLSLIDEDOWN;
+		} else if ((*p & 0xF) == 0xF)	// DxF / Ax
+		{
+			if (bForce)
+				*p = min(*p >> 4, 9);
+			else if ((*p >> 4) > 9)
+				return false;
+			else
+				*p >>= 4;
+			*e = VOLCMD_FINEVOLUP;
+		} else if ((*p & 0xf0) == 0xf0)	// DFx / Bx
+		{
+			if (bForce)
+				*p = min(*p, 9);
+			else if ((*p & 0xF) > 9)
+				return false;
+			else
+				*p &= 0xF;
+			*e = VOLCMD_FINEVOLDOWN;
+		} else // ???
+		{
+			return false;
+		}
+		break;
+	case CMD_S3MCMDEX:
+		switch (*p >> 4)
+		{
+		case 8:
+			*e = VOLCMD_PANNING;
+			*p = ((*p & 0xf) << 2) + 2;
+			return true;
+		case 0: case 1: case 2: case 0xF:
+			if (bForce)
+			{
+				*e = *p = 0;
+				return true;
+			}
+			break;
+		default:
+			break;
+		}
+		return false;
+	default:
+		return false;
+	}
+	return true;
 }

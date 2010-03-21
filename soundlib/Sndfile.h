@@ -981,6 +981,8 @@ public:
 	// "importance" of every FX command. Table is used for importing from formats with multiple effect colums
 	// and is approximately the same as in SchismTracker.
 	static uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd);
+	// try to convert a an effect into a volume column effect.
+	static bool ConvertVolEffect(uint8 *e, uint8 *p, bool bForce);
 };
 
 #pragma warning(default : 4324) //structure was padded due to __declspec(align())
