@@ -11,11 +11,10 @@ var
     ProgressValue:  Integer;
     ArrayLen:       LongInt;
     bExitSetup:     Boolean;
-    INIFile: String;
     VSTPluginNumber: Integer;
     OldVSTPluginNumber: Integer;
 
-procedure ProcessDirectory (RootDir: String; Progress: Boolean);
+procedure ProcessDirectory (RootDir: String; Progress: Boolean; INIFile: String);
 var
     NewRoot:        String;
     FilePath:       String;
@@ -32,7 +31,7 @@ begin
                 begin
                     FilePath := NewRoot + FindRec.Name;
                     if FindRec.Attributes AND FILE_ATTRIBUTE_DIRECTORY > 0 then
-                        ProcessDirectory (FilePath, Progress)
+                        ProcessDirectory (FilePath, Progress, INIFile)
                     else
                     begin
                         // Start action -->
@@ -69,48 +68,38 @@ begin
     end;
 end;
 
-procedure CurStepChanged (CurStep: TSetupStep);
+procedure OnVSTScan(INIFile: String);
 var
     Dir:        String;
 begin
-    if ((CurStep = ssInstall) And (IsTaskSelected('vst_scan'))) then
-    begin
+    VSTPluginNumber := GetIniInt('VST Plugins', 'NumPlugins', 0, 0, 0, INIFile);
+    OldVSTPluginNumber := VSTPluginNumber;
 
-        // Get the right INI path.
-        if(IsTaskSelected('portable')) then
-        begin
-            INIFile := ExpandConstant('{app}\mptrack.ini');
-        end else
-        begin
-            INIFile := ExpandConstant('{userappdata}\OpenMPT\mptrack.ini');
-        end;
-        VSTPluginNumber := GetIniInt('VST Plugins', 'NumPlugins', 0, 0, 0, INIFile);
-        OldVSTPluginNumber := VSTPluginNumber;
-    
-        // The folder to scan.
-        Dir := ExpandConstant('{pf}\Steinberg\VstPlugins');
-        RegQueryStringValue(HKEY_LOCAL_MACHINE, 'Software\VST', 'VSTPluginsPath', Dir); // won't touch Dir if registry path does not exist
-        // The progress page.
-        ProgressPage := CreateOutputProgressPage (CustomMessage ('ProgressTitle'),
-            CustomMessage ('ProgressCaption'));
-        ProgressPage.SetText (CustomMessage ('ProgressText'), Dir);
-        ProgressPage.SetProgress(0, 0);
-        ProgressPage.Show;
-        // Make the Cancel button visible during the operation.
-        ;WizardForm.CancelButton.Visible := TRUE;
-        // Scan the folder.
-        ProcessDirectory (Dir, TRUE);
-        // Hide the progress page.
-        try
-        finally
-            ProgressPage.Hide;
-        end;
-    
-        // Update INI key
-    
-        if(VSTPluginNumber <> OldVSTPluginNumber) then
-        begin
-            SetIniInt('VST Plugins', 'NumPlugins', VSTPluginNumber, INIFile);
-        end;
+    // The folder to scan.
+    Dir := ExpandConstant('{pf}\Steinberg\VstPlugins');
+    RegQueryStringValue(HKEY_LOCAL_MACHINE, 'Software\VST', 'VSTPluginsPath', Dir); // won't touch Dir if registry path does not exist
+    // The progress page.
+    ProgressPage := CreateOutputProgressPage (CustomMessage ('ProgressTitle'),
+        CustomMessage ('ProgressCaption'));
+    ProgressPage.SetText (CustomMessage ('ProgressText'), Dir);
+    ProgressPage.SetProgress(0, 0);
+    ProgressPage.Show;
+    // Make the Cancel button visible during the operation.
+    ;WizardForm.CancelButton.Visible := TRUE;
+    // Scan the folder.
+    ProcessDirectory (Dir, TRUE, INIFile);
+    // Hide the progress page.
+    try
+    finally
+        ProgressPage.Hide;
+    end;
+
+    // Update INI key
+
+    if(VSTPluginNumber <> OldVSTPluginNumber) then
+    begin
+        SetIniInt('VST Plugins', 'NumPlugins', VSTPluginNumber, INIFile);
     end;
 end;
+
+
