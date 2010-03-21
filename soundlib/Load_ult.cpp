@@ -42,10 +42,6 @@ STATIC_ASSERT(sizeof(ULT_SAMPLE) >= 64);
 9xx - set sample offset to xx * 1024
     with 9yy: set sample offset to xxyy * 4
 E0x - set vibrato strength (2 is normal)
-F00 - reset speed/tempo to 6/125
-
-Apparently 3xx will CONTINUE to slide until it reaches its destination, or
-until a 300 effect is encountered. I'm not attempting to handle this (yet).
 
 The logarithmic volume scale used in older format versions here, or pretty
 much anywhere for that matter. I don't even think Ultra Tracker tries to
@@ -84,11 +80,6 @@ static void TranslateULTCommands(uint8 *pe, uint8 *pp)
 	case 0x00:
 		if (!p)
 			*pe = CMD_NONE;
-		break;
-	case 0x03:
-		// 300 apparently stops sliding, which is totally weird
-		if (!p)
-			p = 1; // close enough?
 		break;
 	case 0x05:
 		// play backwards
@@ -241,6 +232,76 @@ static int ReadULTEvent(MODCOMMAND *note, const BYTE *lpStream, DWORD *dwMP, con
 	*dwMP = dwMemPos;
 	return repeat;
 }
+
+// Functor for postfixing ULT patterns (this is easier than just remembering everything WHILE we're reading the pattern events)
+struct PostFixUltCommands
+//=======================
+{
+	PostFixUltCommands(CHANNELINDEX numChannels)
+	{
+		this->numChannels = numChannels;
+		curChannel = 0;
+		writeT125 = false;
+		isPortaActive.resize(numChannels, false);
+	}
+
+	void operator()(MODCOMMAND& m)
+	{
+		// Attempt to fix portamentos.
+		// UltraTracker will slide until the destination note is reached or 300 is encountered.
+
+		// Stop porta?
+		if(m.command == CMD_TONEPORTAMENTO && m.param == 0)
+		{
+			isPortaActive[curChannel] = false;
+			m.command = CMD_NONE;
+		}
+		if(m.volcmd == VOLCMD_TONEPORTAMENTO && m.vol == 0)
+		{
+			isPortaActive[curChannel] = false;
+			m.volcmd = VOLCMD_NONE;
+		}
+
+		// Apply porta?
+		if(m.note == NOTE_NONE && isPortaActive[curChannel])
+		{
+			if(m.command == CMD_NONE && m.vol != VOLCMD_TONEPORTAMENTO)
+			{
+				m.command = CMD_TONEPORTAMENTO;
+				m.param = 0;
+			} else if(m.volcmd == VOLCMD_NONE && m.command != CMD_TONEPORTAMENTO)
+			{
+				m.volcmd = VOLCMD_TONEPORTAMENTO;
+				m.vol = 0;
+			}
+		} else	// new note -> stop porta (or initialize again)
+		{
+			isPortaActive[curChannel] = (m.command == CMD_TONEPORTAMENTO || m.volcmd == VOLCMD_TONEPORTAMENTO);
+		}
+
+		// attempt to fix F00 (reset to tempo 125, speed 6)
+		if(writeT125 && m.command == CMD_NONE)
+		{
+			m.command = CMD_TEMPO;
+			m.param = 125;
+		}
+		if(m.command == CMD_SPEED && m.param == 0)
+		{
+			m.param = 6;
+			writeT125 = true;
+		}
+		if(m.command == CMD_TEMPO)	// don't try to fix this anymore if the tempo has already changed.
+		{
+			writeT125 = false;
+		}
+		curChannel = (curChannel + 1) % numChannels;
+	}
+
+	vector<bool> isPortaActive;
+	bool writeT125;
+	CHANNELINDEX numChannels, curChannel;
+};
+
 
 bool CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
@@ -408,6 +469,9 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 			}
 		}
 	}
+
+	// Post-fix some effects.
+	Patterns.ForEachModCommand(PostFixUltCommands(m_nChannels));
 
 	for(SAMPLEINDEX nSmp = 0; nSmp < m_nSamples; nSmp++)
 	{
