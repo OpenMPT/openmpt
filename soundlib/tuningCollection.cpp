@@ -153,10 +153,19 @@ CTuningCollection::SERIALIZATION_RETURN_TYPE CTuningCollection::Deserialize(istr
 		iStrm.seekg(startpos);
 		srlztn::Ssb ssb(iStrm);
 		ssb.BeginRead("TC", s_SerializationVersion);
-		ssb.ReadItem(m_Name, "0", 1, &ReadStr);
-		ssb.ReadItem(m_EditMask, "1");
-		for(size_t i = 2; i < ssb.GetNumEntries(); i++)
-			ssb.ReadItem(*this, "2", 1, &ReadTuning);
+
+		srlztn::Ssb::ReadIterator iter = ssb.GetReadBegin();
+		const srlztn::Ssb::ReadIterator iterEnd = ssb.GetReadEnd();
+		for(iter; iter != iterEnd; iter++)
+		{
+			if (ssb.CompareId(iter, "0") == srlztn::Ssb::IdMatch)
+				ssb.ReadItem(iter, m_Name, &ReadStr);
+			else if (ssb.CompareId(iter, "1") == srlztn::Ssb::IdMatch)
+				ssb.ReadItem(iter, m_EditMask);
+			else if (ssb.CompareId(iter, "2") == srlztn::Ssb::IdMatch)
+				ssb.ReadItem(iter, *this, &ReadTuning);
+		}
+
 		if(ssb.m_Status & srlztn::SNT_FAILURE)
 			return true;
 		else

@@ -381,7 +381,8 @@ CTuningBase* CTuningRTI::Deserialize(istream& iStrm)
 	ssb.ReadItem(pTuning->m_GroupRatio, "RTI3");
 	ssb.ReadItem(pTuning->m_SerHelperRatiotableSize, "RTI4");
 
-	if ((ssb.m_Status & srlztn::SNT_FAILURE) == 0) 
+	// If reader status is ok and m_StepMin is somewhat reasonable, process data.
+	if ((ssb.m_Status & srlztn::SNT_FAILURE) == 0 && pTuning->m_StepMin >= -300 && pTuning->m_StepMin <= 300) 
 	{
 		EDITMASK temp = pTuning->GetEditMask();
 		pTuning->m_EditMask = EM_ALLOWALL; //Allowing all while processing data.
@@ -500,6 +501,11 @@ CTuningRTI* CTuningRTI::DeserializeOLD(istream& inStrm)
 
 	//m_StepMin
 	inStrm.read(reinterpret_cast<char*>(&pT->m_StepMin), sizeof(pT->m_StepMin));
+	if (pT->m_StepMin < -200 || pT->m_StepMin > 200)
+	{
+		delete pT;
+		return nullptr;
+	}
 
 	//m_GroupSize
 	inStrm.read(reinterpret_cast<char*>(&pT->m_GroupSize), sizeof(pT->m_GroupSize));

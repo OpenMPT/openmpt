@@ -233,7 +233,7 @@ const CModSpecifications xmEx =
 	0,									//Max sample filename length
 	22,									//Max instrument name length
 	0,									//Max instrument filename length
-	256 * 16,							//SamplesMax (actually 16 per instrument)
+	4000,								//SamplesMax (actually 16 per instrument(256*16=4096), but limited to MAX_SAMPLES=4000)
 	256,								//instrumentMax
 	mixLevels_117RC3,					//defaultMixLevels
 	200,								//Max MIDI mapping directives

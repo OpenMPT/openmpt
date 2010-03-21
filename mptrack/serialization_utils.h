@@ -127,6 +127,11 @@ public:
 		EntryRead,
 		EntryNotFound
 	};
+	enum IdMatchStatus
+	{
+		IdMatch, IdMismatch
+	};
+	typedef std::vector<ReadEntry>::const_iterator ReadIterator;
 
 	Ssb(InStream* pIstrm, OutStream* pOstrm);
 	Ssb(IoStream& ioStrm);
@@ -142,7 +147,7 @@ public:
 	void BeginWrite(const void* pId, const size_t nIdSize, const uint64& nVersion);
 	void BeginWrite(const LPCSTR pszId, const uint64& nVersion) {BeginWrite(pszId, strlen(pszId), nVersion);}
 	
-	// Read header.
+	// Call this to begin reading: must be called before other read functions.
 	void BeginRead(const void* pId, const size_t nLength, const uint64& nVersion);
 	void BeginRead(const LPCSTR pszId, const uint64& nVersion) {return BeginRead(pszId, strlen(pszId), nVersion);}
 
@@ -170,6 +175,18 @@ public:
 	// After calling BeginRead(), this returns number of entries in the file.
 	NumType GetNumEntries() const {return m_nReadEntrycount;}
 
+	// Returns read iterator to the beginning of entries.
+	// The behaviour of read iterators is undefined if map doesn't
+    // contain entry ids or data begin positions.
+	ReadIterator GetReadBegin();
+
+	// Returns read iterator to the end(one past last) of entries.
+	ReadIterator GetReadEnd();
+
+	// Compares given id with read entry id 
+	IdMatchStatus CompareId(const ReadIterator& iter, LPCSTR pszId) {return CompareId(iter, pszId, strlen(pszId));}
+	IdMatchStatus CompareId(const ReadIterator& iter, const void* pId, const size_t nIdSize);
+
 	// When writing, returns the number of entries written.
 	// When reading, returns the number of entries read not including unrecognized entries.
 	NumType GetCounter() const {return m_nCounter;}
@@ -187,6 +204,12 @@ public:
 	template <class T, class FuncObj>
 	ReadRv ReadItem(T& obj, const void* pId, const size_t nIdSize, FuncObj);
 
+	// Read item using read iterator.
+	template <class T>
+	ReadRv ReadItem(const ReadIterator& iter, T& obj) {return ReadItem(iter, obj, srlztn::ReadItem<T>);}
+	template <class T, class FuncObj>
+	ReadRv ReadItem(const ReadIterator& iter, T& obj, FuncObj func);
+
 	// Write item using default write implementation.
 	template <class T>
 	void WriteItem(const T& obj, const LPCSTR pszId) {WriteItem(obj, pszId, strlen(pszId), &srlztn::WriteItem<T>);}
@@ -203,6 +226,9 @@ public:
 
 	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
 	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
+
+	// Write given string to log if log func is defined.
+	void Log(LPCTSTR psz) {if (m_fpLogFunc) m_fpLogFunc(psz);}
 
 	SsbStatus m_Status;
 	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
@@ -319,6 +345,48 @@ Ssb::ReadRv Ssb::ReadItem(T& obj, const void* pId, const size_t nIdSize, FuncObj
 }
 
 
+template <class T, class FuncObj>
+Ssb::ReadRv Ssb::ReadItem(const ReadIterator& iter, T& obj, FuncObj func)
+//-----------------------------------------------------------------------
+{
+	m_pIstrm->clear();
+	if (iter->rposStart != 0)
+		m_pIstrm->seekg(m_posStart + Postype(iter->rposStart));
+	const Postype pos = m_pIstrm->tellg();
+	func(*m_pIstrm, obj, iter->nSize);
+	return OnReadEntry(&(*iter), &m_Idarray[iter->nIdpos], iter->nIdLength, pos);
+}
+
+
+inline Ssb::IdMatchStatus Ssb::CompareId(const ReadIterator& iter, const void* pId, const size_t nIdSize)
+//-------------------------------------------------------------------------------------------------------
+{
+	if (nIdSize == iter->nIdLength && memcmp(&m_Idarray[iter->nIdpos], pId, iter->nIdLength) == 0)
+		return IdMatch;
+	else
+		return IdMismatch;
+}
+
+
+inline Ssb::ReadIterator Ssb::GetReadBegin()
+//------------------------------------------
+{
+	ASSERT(GetFlag(RwfRMapHasId) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
+	if (GetFlag(RwfRMapCached) == false)
+		CacheMap();
+	return mapData.begin();
+}
+
+
+inline Ssb::ReadIterator Ssb::GetReadEnd()
+//----------------------------------------
+{
+	if (GetFlag(RwfRMapCached) == false)
+		CacheMap();
+	return mapData.end();
+}
+
+
 template<class T>
 inline void Binarywrite(OutStream& oStrm, const T& data)
 //------------------------------------------------------
@@ -364,19 +432,25 @@ template <class T>
 inline void Binaryread(InStream& iStrm, T& data, const Offtype bytecount)
 //-----------------------------------------------------------------------
 {
+	#if _HAS_TR1
+		static_assert(std::tr1::has_trivial_assign<T>::value == true, "");
+	#endif
 	memset(&data, 0, sizeof(data));
-	iStrm.read(reinterpret_cast<char*>(&data), min(bytecount, sizeof(data)));
+	iStrm.read(reinterpret_cast<char*>(&data), (std::min)((size_t)bytecount, sizeof(data)));
 }
 
 
 template <class T>
-inline void ReadItem(InStream& iStrm, T& data, const DataSize /*nSize*/)
-//----------------------------------------------------------------------
+inline void ReadItem(InStream& iStrm, T& data, const DataSize nSize)
+//------------------------------------------------------------------
 {
 	#if _HAS_TR1
-		STATIC_ASSERT(std::tr1::has_trivial_assign<T>::value == true);
+		static_assert(std::tr1::has_trivial_assign<T>::value == true, "");
 	#endif
-	Binaryread(iStrm, data);
+	if (nSize == sizeof(T) || nSize == invalidDatasize)
+		Binaryread(iStrm, data);
+	else
+		Binaryread(iStrm, data, nSize);
 }
 
 // Read specialization for float. If data size is 8, read double and assign it to given float.

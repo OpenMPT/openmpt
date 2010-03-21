@@ -863,8 +863,11 @@ void Ssb::FinishWrite()
 	if (m_fpLogFunc)
 		m_fpLogFunc(tstrWritingMap, uint32(m_posMapStart - m_posStart));
 
-	if(GetFlag(RwfRwHasMap)) //Write map
+	if (GetFlag(RwfRwHasMap)) //Write map
+	{
 		oStrm.write(m_MapStream.str(), m_MapStream.pcount());
+		m_MapStream.freeze(false);
+	}
 
 	const Postype posMapEnd = oStrm.tellp();
 	
