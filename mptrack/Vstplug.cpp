@@ -708,7 +708,8 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	// Returns the unique id of a plug that's currently loading
 	// (not sure what this is actually for - we return *effect's UID, cos Herman Seib does something similar :)
 	//  Let's see what happens...)
-	case audioMasterCurrentId:	return effect->uniqueID;
+	case audioMasterCurrentId:
+		return (effect != nullptr) ? effect->uniqueID : 0;
 	// Call application idle routine (this will call effEditIdle for all open editors too)
 	case audioMasterIdle:
 		OnIdle();

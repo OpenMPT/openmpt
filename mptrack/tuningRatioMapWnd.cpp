@@ -49,8 +49,8 @@ void CTuningRatioMapWnd::OnPaint()
 		const size_t sizeofS = sizeof(s) / sizeof(s[0]);
 		CRect rect;
 
-		NOTEINDEXTYPE nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
-		if(!m_nNote) m_nNote = m_nNoteCentre;
+		NOTEINDEXTYPE nNotes = static_cast<NOTEINDEXTYPE>((rcClient.bottom + m_cyFont - 1) / m_cyFont);
+		//if(!m_nNote) m_nNote = m_nNoteCentre;
 		NOTEINDEXTYPE nPos = m_nNote - (nNotes/2);
 		int ypaint = 0;
 
@@ -132,11 +132,11 @@ void CTuningRatioMapWnd::OnLButtonDown(UINT, CPoint pt)
 		CRect rcClient;
 		GetClientRect(&rcClient);
 		int nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
-		const UINT n = (pt.y / m_cyFont) + m_nNote - (nNotes/2);
-		const NOTEINDEXTYPE note = n - m_nNoteCentre;
+		const int n = (pt.y / m_cyFont) + m_nNote - (nNotes/2);
+		const NOTEINDEXTYPE note = static_cast<NOTEINDEXTYPE>(n - m_nNoteCentre);
 		if(m_pTuning->IsValidNote(note))
 		{
-			m_nNote = n;
+			m_nNote = static_cast<NOTEINDEXTYPE>(n);
 			InvalidateRect(NULL, FALSE);
 			if(m_pParent)
 				m_pParent->UpdateRatioMapEdits(GetShownCentre());

@@ -2,7 +2,15 @@
 #define TYPEDEFS_H
 
 #define nullptr		0
-#define ARRAYELEMCOUNT(x) (sizeof(x)/sizeof(x[0]))
+
+//  CountOf macro computes the number of elements in a statically-allocated array.
+#if _MSC_VER >= 1400
+	#define CountOf(x) _countof(x)
+#else
+	#define CountOf(x) (sizeof(x)/sizeof(x[0]))
+#endif
+
+#define ARRAYELEMCOUNT(x)	CountOf(x)
 
 //Compile time assert. 
 #define STATIC_ASSERT(expr)			C_ASSERT(expr)
