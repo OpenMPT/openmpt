@@ -246,7 +246,8 @@ HCURSOR CMainFrame::curVSplit = NULL;
 LPMODPLUGDIB CMainFrame::bmpPatterns = NULL;
 LPMODPLUGDIB CMainFrame::bmpNotes = NULL;
 LPMODPLUGDIB CMainFrame::bmpVUMeters = NULL;
-LPMODPLUGDIB CMainFrame::bmpVisNode = NULL;  //rewbs.fxVis
+LPMODPLUGDIB CMainFrame::bmpVisNode = NULL;
+LPMODPLUGDIB CMainFrame::bmpVisPcNode = NULL;
 HPEN CMainFrame::gpenVuMeter[NUM_VUMETER_PENS*2];
 COLORREF CMainFrame::rgbCustomColors[MAX_MODCOLORS] = 
 	{
@@ -772,7 +773,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	bmpPatterns = LoadDib(MAKEINTRESOURCE(IDB_PATTERNS));
 	bmpNotes = LoadDib(MAKEINTRESOURCE(IDB_PATTERNVIEW));
 	bmpVUMeters = LoadDib(MAKEINTRESOURCE(IDB_VUMETERS));
-	bmpVisNode = LoadDib(MAKEINTRESOURCE(IDB_VISNODE));		//rewbs.fxVis
+	bmpVisNode = LoadDib(MAKEINTRESOURCE(IDB_VISNODE));
+	bmpVisPcNode = LoadDib(MAKEINTRESOURCE(IDB_VISPCNODE));
 	UpdateColors();
 	// Toolbars
 	EnableDocking(CBRS_ALIGN_ANY);
@@ -848,6 +850,11 @@ BOOL CMainFrame::DestroyWindow()
 	{
 		delete bmpVisNode;
 		bmpVisNode = NULL;
+	}
+	if (bmpVisPcNode)
+	{
+		delete bmpVisPcNode;
+		bmpVisPcNode = NULL;
 	}
 
 	// Kill GDI Objects

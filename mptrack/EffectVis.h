@@ -8,19 +8,21 @@ class CViewPattern;
 //#define FXVSTATUS_NCLBTNDOWN	0x02
 //#define INSSTATUS_SPLITCURSOR	0x04
 
-enum 
-{
-	kAction_Overwrite=0,
-	kAction_Fill,
-	kAction_Preserve
-};
-
 // EffectVis dialog
 class CEffectVis : public CModControlDlg
 {
 	DECLARE_DYNAMIC(CEffectVis)
 
 public:
+	enum 
+	{
+		kAction_OverwriteFX=0,
+		kAction_FillFX,
+		kAction_OverwritePC,
+		kAction_FillPC,
+		kAction_Preserve
+	};
+
 	CEffectVis(CViewPattern *pViewPattern, UINT startRow, UINT endRow, UINT nchn, CModDoc* pModDoc, UINT pat);
 	virtual ~CEffectVis();
 	//{{AFX_VIRTUAL(CEffectVis)
@@ -47,15 +49,13 @@ protected:
 	RECT invalidated;
 	
 	int m_nLastDrawnRow; // for interpolation
+	long m_nLastDrawnY; // for interpolation
 	int m_nRowToErase;
 	int m_nParamToErase;
 
 	UINT m_nOldPlayPos;
+	MODCOMMAND m_templatePCNote;
 
-
-//	int m_nRectWidth, m_nRectHeight;
-//	CRect m_rectDraw;
-//	CRect m_rectOwner;
 	CBrush m_brushBlack;
 
 public:
@@ -71,18 +71,23 @@ public:
 	DWORD m_dwStatus;
 
 	void InvalidateRow(int row);
-	float m_pixelsPerRow, m_pixelsPerParam;
+	float m_pixelsPerRow, m_pixelsPerFXParam, m_pixelsPerPCParam;
 	void UpdateSelection(UINT startRow, UINT endRow, UINT nchn, CModDoc* m_pModDoc, UINT pats);
 	void Update();
 	int RowToScreenX(UINT row);
-	int ParamToScreenY(BYTE param);
-	BYTE GetParam(UINT row);
+	int RowToScreenY(UINT row);
+	int PCParamToScreenY(uint16 param);
+	int FXParamToScreenY(uint16 param);
+	uint16 GetParam(UINT row);
 	BYTE GetCommand(UINT row);
-	void SetParam(UINT row, BYTE param);
+	void SetParamFromY(UINT row, long y);
 	void SetCommand(UINT row, BYTE cmd);
-	BYTE ScreenYToParam(int y);
+	BYTE ScreenYToFXParam(int y);
+	uint16 ScreenYToPCParam(int y);
 	UINT ScreenXToRow(int x);
 	void SetPlayCursor(UINT nPat, UINT nRow);
+	bool IsPcNote(int row);
+	void SetPcNote(int row);
 
 	CSoundFile* m_pSndFile;
 	CModDoc* m_pModDoc;
@@ -90,8 +95,6 @@ public:
 	CRect m_rcFullWin;
 
 	CComboBox m_cmbEffectList, m_cmbActionList;
-	CButton m_btnFillCheck;
-	bool m_bFillCheck;
 	CEdit m_edVisStatus;
 
 	virtual VOID OnOK();
@@ -116,18 +119,13 @@ protected:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnFillBlanksCheck();
 	afx_msg void OnEffectChanged();
 	afx_msg void OnActionChanged();
-//	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
-//	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-//	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-//	afx_msg void OnMButtonDown(UINT nFlags, CPoint point);
 	//{{AFX_MSG(CEffectVis)
 	afx_msg void OnEditUndo();
 	//}}AFX_MSG
 
 private:
 
-	void MakeChange(int currentRow, int newParam);
+	void MakeChange(int currentRow, long newY);
 };

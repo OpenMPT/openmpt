@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -207,12 +207,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Deutsch (Deutschland) resources
+#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -1302,17 +1302,16 @@ BEGIN
     PUSHBUTTON      "Save",IDC_BUTTON2,193,39,36,14
 END
 
-IDD_EFFECTVISUALIZER DIALOGEX 0, 0, 385, 108
-STYLE DS_SETFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+IDD_EFFECTVISUALIZER DIALOGEX 0, 0, 422, 109
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
 CAPTION "Param Editor"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    EDITTEXT        IDC_VISSTATUS,4,91,162,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    CONTROL         "Fill blanks with:",IDC_VISFILLBLANKS,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,188,92,63,10
+    EDITTEXT        IDC_VISSTATUS,4,92,162,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
     COMBOBOX        IDC_VISEFFECTLIST,299,89,76,158,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_VISACTION,221,90,76,158,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "",IDC_RENDERZONE,4,3,377,84,NOT WS_VISIBLE
+    LTEXT           "",IDC_RENDERZONE,4,3,414,84,NOT WS_VISIBLE
 END
 
 IDD_SOUNDBANK_INFO1 DIALOGEX 0, 0, 271, 167
@@ -1722,9 +1721,9 @@ BEGIN
     IDD_EFFECTVISUALIZER, DIALOG
     BEGIN
         LEFTMARGIN, 4
-        RIGHTMARGIN, 381
+        RIGHTMARGIN, 418
         TOPMARGIN, 3
-        BOTTOMMARGIN, 103
+        BOTTOMMARGIN, 104
     END
 
     IDD_SOUNDBANK_INFO1, DIALOG
@@ -1851,6 +1850,7 @@ IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
 IDB_ENVTOOLBAR          BITMAP                  "res\\envbar.bmp"
 IDB_SMPTOOLBAR          BITMAP                  "res\\smptoolb.bmp"
 IDB_VISNODE             BITMAP                  "res\\bitmap1.bmp"
+IDB_VISPCNODE           BITMAP                  "res\\vispcnode.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2378,12 +2378,12 @@ BEGIN
     IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_i16.dll."
 END
 
-#endif    // Englisch (USA) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (GB) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2752,7 +2752,7 @@ IDR_DEFAULT_KEYBINDINGS KEYBINDINGS             "res\\defaultKeybindings.mkb"
 //
 
 IDR_BUILTIN_TUNINGS     TUNING                  "res\\built-inTunings.tc"
-#endif    // Englisch (GB) resources
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
