@@ -193,6 +193,7 @@ public:
 	bool GetEffectInfo(UINT ndx, LPSTR s, bool bXX = false, DWORD *prangeMin=NULL, DWORD *prangeMax=NULL);
 	LONG GetIndexFromEffect(UINT command, UINT param);
 	UINT GetEffectFromIndex(UINT ndx, int &refParam);
+	UINT GetEffectFromIndex(UINT ndx);
 	UINT GetEffectMaskFromIndex(UINT ndx);
 	bool GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param);
 	BOOL IsExtendedEffect(UINT ndx) const;

@@ -103,6 +103,8 @@
 #define IDB_SPLASHTEST                  432
 #define IDB_SPLASHNOFOLDFIN             435
 #define IDR_VSTMENU                     436
+#define IDB_VISNODE1                    436
+#define IDB_VISPCNODE                   436
 #define IDD_DEFAULTPLUGINEDITOR         438
 #define IDD_CHANNELMANAGER              440
 #define IDD_SOUNDBANK_INFO1             441

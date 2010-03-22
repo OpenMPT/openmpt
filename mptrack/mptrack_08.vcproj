@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="mptrack"
 	ProjectGUID="{21D95071-FB97-4E69-B3B1-050D0D4A5021}"
 	RootNamespace="mptrack"
@@ -49,7 +49,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/EHsc"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\unlha,..\unzip,..\unrar,..\soundlib,..\include,..\xsoundlib,..\"
+				AdditionalIncludeDirectories="..\unlha;..\unzip;..\unrar;..\soundlib;..\include;..\xsoundlib;..\"
 				PreprocessorDefinitions="_DEBUG,WIN32,_WINDOWS,ENABLE_EQ,MODPLUG_TRACKER,NO_PACKING,HAVE_DOT_NET,ENABLE_AMD,ENABLE_SSE,ENABLE_AMDNOW,ENABLE_MMX"
 				StringPooling="true"
 				BasicRuntimeChecks="3"
@@ -919,6 +919,14 @@
 			</File>
 			<File
 				RelativePath=".\res\view_pat.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\visnode1.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\vispcnode.bmp"
 				>
 			</File>
 			<File
