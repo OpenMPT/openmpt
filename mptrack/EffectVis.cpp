@@ -767,7 +767,7 @@ BOOL CEffectVis::OnInitDialog()
 //--------------------------------
 {
 	CModControlDlg::OnInitDialog();
-	if (IsPcNote(m_startRow))
+	if (m_pModDoc->GetModType() == MOD_TYPE_MPT && IsPcNote(m_startRow))
 	{
 		// If first selected row is a PC Note, default to PC note overwrite mode
 		// and use it as a template for new PC notes that will be created via the visualiser.
@@ -808,8 +808,11 @@ BOOL CEffectVis::OnInitDialog()
 	m_cmbActionList.ResetContent();
 	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Overwrite with effect:"), kAction_OverwriteFX);
 	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Fill blanks with effect:"), kAction_FillFX);
-	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Overwrite with PC note"), kAction_OverwritePC);
-	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Fill blanks with PC note"), kAction_FillPC);	
+	if (m_pModDoc->GetModType() == MOD_TYPE_MPT)
+	{
+		m_cmbActionList.SetItemData(m_cmbActionList.AddString("Overwrite with PC note"), kAction_OverwritePC);
+		m_cmbActionList.SetItemData(m_cmbActionList.AddString("Fill blanks with PC note"), kAction_FillPC);	
+	}
 	m_cmbActionList.SetItemData(m_cmbActionList.AddString("Never change effect type"), kAction_Preserve);	
 	
 	m_cmbActionList.SetCurSel(m_nAction);
