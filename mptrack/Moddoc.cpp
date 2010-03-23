@@ -337,16 +337,17 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_MED:
 	case MOD_TYPE_OKT:
 	case MOD_TYPE_AMS:
-	case MOD_TYPE_MT2:
-		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
-		/*m_SndFile.ChangeModTypeTo(MOD_TYPE_XM);
+		m_SndFile.ChangeModTypeTo(MOD_TYPE_XM);
 		if ((m_SndFile.m_nDefaultTempo == 125) && (m_SndFile.m_nDefaultSpeed == 6) && (!m_SndFile.m_nInstruments))
 		{
 			m_SndFile.m_nType = MOD_TYPE_MOD;
 			for (UINT i=0; i<m_SndFile.Patterns.Size(); i++)
 				if ((m_SndFile.Patterns[i]) && (m_SndFile.PatternSize[i] != 64))
 					m_SndFile.m_nType = MOD_TYPE_XM;
-		}*/
+		}
+		break;
+	case MOD_TYPE_MT2:
+		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
 		break;
 	case MOD_TYPE_FAR:
 	case MOD_TYPE_PTM:

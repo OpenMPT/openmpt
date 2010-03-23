@@ -189,10 +189,10 @@ bool CInputHandler::InterceptSpecialKeys( UINT nChar , UINT nFlags )
 void CInputHandler::SetupSpecialKeyInterception()
 {
 	m_bInterceptWindowsKeys = m_bInterceptNumLock = m_bInterceptCapsLock = m_bInterceptScrollLock = false;
-	for( int context=0; context<sizeof(keyMap)/sizeof(keyMap[0]); context++ )
-	for( int mod=0; mod<sizeof(keyMap[0])/sizeof(keyMap[0][0]); mod++ )
-	for( int key=0; key<sizeof(keyMap[0][0])/sizeof(keyMap[0][0][0]); key++ )
-	for( int kevent=0; kevent<sizeof(keyMap[0][0][0])/sizeof(keyMap[0][0][0][0]); kevent++ ) {
+	for( int context=0; context < ARRAYELEMCOUNT(keyMap); context++ )
+	for( int mod=0; mod < ARRAYELEMCOUNT(keyMap[0]); mod++ )
+	for( int key=0; key < ARRAYELEMCOUNT(keyMap[0][0]); key++ )
+	for( int kevent=0; kevent < ARRAYELEMCOUNT(keyMap[0][0][0]); kevent++ ) {
 		if( keyMap[context][mod][key][kevent] == kcNull ) continue;
 		if( mod == HOTKEYF_EXT ) m_bInterceptWindowsKeys = true;
 		if( key == VK_NUMLOCK ) m_bInterceptNumLock = true;

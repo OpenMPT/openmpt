@@ -693,8 +693,10 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 		}
 	}
 
-	if ((!bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MT2))) {
-		if (pSmp) {
+	if ((!bPorta) && (m_nType & (MOD_TYPE_XM|MOD_TYPE_MED|MOD_TYPE_MT2)))
+	{
+		if (pSmp)
+		{
 			pChn->nTranspose = pSmp->RelativeTone;
 			pChn->nFineTune = pSmp->nFineTune;
 		}
@@ -702,9 +704,12 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 	// IT Compatibility: Update multisample instruments frequency even if instrument is not specified
 	if(!bPorta && pSmp && IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nC5Speed = pSmp->nC5Speed;
 
-	// XM Compatibility: Ignore notes with portamento if there was no note
-	if(bPorta && (pChn->nPeriod == 0) && IsCompatibleMode(TRK_FASTTRACKER2))
+	// XM Compatibility: Ignore notes with portamento if there was no note playing.
+	if(bPorta && (pChn->pCurrentSample == nullptr) && IsCompatibleMode(TRK_FASTTRACKER2))
+	{
+		pChn->nPeriod = 0;
 		return;
+	}
 
 	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose;
 	note = CLAMP(note, 1, 132);

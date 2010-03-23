@@ -268,9 +268,9 @@ void CEffectVis::DrawGrid()
 	// Draw vertical grid lines
 	for (UINT row=m_startRow; row<=m_endRow; row++)
 	{
-		if (row % CMainFrame::m_nRowSpacing == 0)
+		if (row % m_pSndFile->m_nRowsPerMeasure == 0)
 			CMainFrame::penScratch = CMainFrame::penGrayff;
-		else if (row % CMainFrame::m_nRowSpacing2 == 0)
+		else if (row % m_pSndFile->m_nRowsPerBeat == 0)
 			CMainFrame::penScratch = CMainFrame::penGray99;
 		else
 			CMainFrame::penScratch = CMainFrame::penGray55;

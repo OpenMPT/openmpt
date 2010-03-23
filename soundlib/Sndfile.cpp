@@ -1494,7 +1494,7 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 }
 
 void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
-//-------------------------------------------------------
+//----------------------------------------------------------------
 {
 	if(i >= MAX_CHANNELS) return;
 
@@ -1571,7 +1571,7 @@ void CSoundFile::ResetChannelState(CHANNELINDEX i, BYTE resetMask)
 
 
 CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
-//-------------------------------------------------------------------
+//------------------------------------------------------------------------------
 {
     //newOrder[i] tells which current channel should be placed to i:th position in
     //the new order, or if i is not an index of current channels, then new channel is
@@ -1639,14 +1639,14 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 	{
 		if(newOrder[nChn] < m_nChannels)
 		{
-				ChnSettings[nChn] = settings[newOrder[nChn]];
-				Chn[nChn] = chns[newOrder[nChn]];
-				if(m_pModDoc)
-				{
-					if(recordStates[newOrder[nChn]] == 1) m_pModDoc->Record1Channel(nChn, true);
-					if(recordStates[newOrder[nChn]] == 2) m_pModDoc->Record2Channel(nChn, true);
-				}
-				m_bChannelMuteTogglePending[nChn] = chnMutePendings[newOrder[nChn]];
+			ChnSettings[nChn] = settings[newOrder[nChn]];
+			Chn[nChn] = chns[newOrder[nChn]];
+			if(m_pModDoc)
+			{
+				if(recordStates[newOrder[nChn]] == 1) m_pModDoc->Record1Channel(nChn, true);
+				if(recordStates[newOrder[nChn]] == 2) m_pModDoc->Record2Channel(nChn, true);
+			}
+			m_bChannelMuteTogglePending[nChn] = chnMutePendings[newOrder[nChn]];
 		}
 		else
 		{
@@ -1657,6 +1657,14 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 	SetupMODPanning();
 
 	m_nChannels = nRemainingChannels;
+
+	// Reset removed channels. Most notably, clear the channel name.
+	for(CHANNELINDEX nChn = m_nChannels; nChn < MAX_BASECHANNELS; nChn++)
+	{
+		InitChannel(nChn);
+		Chn[nChn].dwFlags |= CHN_MUTE;
+	}
+
 	END_CRITICAL();
 
 	return static_cast<CHANNELINDEX>(m_nChannels);
