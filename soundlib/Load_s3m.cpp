@@ -68,6 +68,12 @@ typedef struct tagS3MFILEHEADER
 	BYTE channels[32];
 } S3MFILEHEADER;
 
+enum
+{
+	S3I_TYPE_NONE = 0,
+	S3I_TYPE_PCM = 1,
+	S3I_TYPE_ADMEL = 2,
+};
 
 void CSoundFile::S3MConvert(MODCOMMAND *m, BOOL bIT) const
 //--------------------------------------------------------
@@ -227,7 +233,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	DWORD dwMemPos;
 	BYTE insflags[128], inspack[128];
 	S3MFILEHEADER psfh = *(S3MFILEHEADER *)lpStream;
-	bool bKeepMidiMacros = false;
+	bool bKeepMidiMacros = false, bHasAdlibPatches = false;
 
 	psfh.reserved1 = LittleEndianW(psfh.reserved1);
 	psfh.ordnum = LittleEndianW(psfh.ordnum);
@@ -355,7 +361,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		lstrcpy(m_szNames[iSmp], (LPCSTR)&s[0x30]);
 		SpaceToNullStringFixed(m_szNames[iSmp], 28);
 
-		if ((s[0]==1) && (s[0x4E]=='R') && (s[0x4F]=='S'))
+		if ((s[0] == S3I_TYPE_PCM) && (s[0x4E] == 'R') && (s[0x4F] == 'S'))
 		{
 			Samples[iSmp].nLength = CLAMP(LittleEndian(*((LPDWORD)(s + 0x10))), 4, MAX_SAMPLE_LENGTH);
 			Samples[iSmp].nLoopStart = CLAMP(LittleEndian(*((LPDWORD)(s + 0x14))), 0, Samples[iSmp].nLength - 1);
@@ -381,6 +387,9 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
  				Samples[iSmp].nLoopStart = Samples[iSmp].nLoopEnd = 0;
 			Samples[iSmp].nPan = 0x80;
 			//ASSERT(iLooplength == 0 || iLooplength > 4);
+		} else if(s[0] == S3I_TYPE_ADMEL)
+		{
+			bHasAdlibPatches = true;
 		}
 	}
 
@@ -489,7 +498,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	}
 
 	// Reading samples
-	for (UINT iRaw=1; iRaw<=insnum; iRaw++) if ((Samples[iRaw].nLength) && (insfile[iRaw]))
+	for (UINT iRaw = 1; iRaw <= insnum; iRaw++) if ((Samples[iRaw].nLength) && (insfile[iRaw]))
 	{
 		UINT flags = (psfh.version == 1) ? RS_PCM8S : RS_PCM8U;
 		if (insflags[iRaw-1] & 4) flags += 5;
@@ -501,6 +510,13 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
 	if (psfh.flags & 0x10) m_dwSongFlags |= SONG_AMIGALIMITS;
+
+#ifdef MODPLUG_TRACKER
+	if(bHasAdlibPatches)
+	{
+		::MessageBox(0, "This track uses Adlib instruments, which are not supported by OpenMPT.", "OpenMPT S3M Import", MB_OK|MB_ICONEXCLAMATION);
+	}
+#endif
 
 	return true;
 }

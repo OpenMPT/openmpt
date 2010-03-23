@@ -13,8 +13,9 @@
 #include "OpenGLEditor.h"		//rewbs.fxvis
 #include "PatternGotoDialog.h"
 #include "PatternRandomizer.h"
-#include ".\arrayutils.h"
-#include ".\view_pat.h"
+#include "arrayutils.h"
+#include "view_pat.h"
+#include "View_gen.h"
 #include "misc_util.h"
 #include "midi.h"
 #include <cmath>
@@ -1106,8 +1107,10 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 				InvalidateChannelsHeaders();
 			}
 		}
-		else if (!(nFlags&MK_CONTROL))  {
-			pModDoc->MuteChannel(nItemNo, (pSndFile->ChnSettings[nItemNo].dwFlags & CHN_MUTE) ? FALSE : TRUE);
+		else if (!(nFlags&MK_CONTROL))
+		{
+			pModDoc->MuteChannel(nItemNo, (pSndFile->ChnSettings[nItemNo].dwFlags & CHN_MUTE) ? false : true);
+			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((nItemNo / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
 		}
 		break;
 	case DRAGITEM_PATTERNHEADER:
@@ -2482,7 +2485,7 @@ void CViewPattern::OnSetSelInstrument()
 			// If a note or an instr is present on the row, do the change, if required.
 			// Do not set instr if note and instr are both blank.
 			// Do set instr if note is a PC note and instr is blank.
-			if ( ((p->note > 0 && p->note < NOTE_MIN_SPECIAL) || MODCOMMAND::IsPcNote(p->note) || p->instr) && (p->instr!=nIns) ) {
+			if ( ((p->note > 0 && p->note < NOTE_MIN_SPECIAL) || p->IsPcNote() || p->instr) && (p->instr!=nIns) ) {
 				p->instr = nIns;
 				bModified = TRUE;
 			}

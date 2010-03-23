@@ -592,8 +592,8 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 				tmpchn++;
 				if (i >= nRemainingChannels)
 				{
-					m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
 					m_SndFile.InitChannel(i);
+					m_SndFile.Chn[i].dwFlags |= CHN_MUTE;
 				}
 			}
 		}
