@@ -99,6 +99,41 @@ Type: dirifempty; Name: "{app}\tunings"; Tasks: portable;
 
 [Code]
 
+// Copy old config files to the AppData directory, if there are any (and if the files don't exist already)
+procedure CopyConfigsToAppDataDir();
+var
+    adjustIniPath: Boolean;
+    keyFile: String;
+
+begin
+
+    // Not needed if portable mode is enabled.
+    if(IsTaskSelected('portable')) then
+    begin
+        Exit;
+    end;
+
+    // If there was an INI file with portable mode flag set, we have to reset it (or else, the mptrack.ini in %appdata% will never be used!)
+    if(IniKeyExists('Paths', 'UseAppDataDirectory', ExpandConstant('{app}\mptrack.ini'))) then
+    begin
+        DeleteIniEntry('Paths', 'UseAppDataDirectory', ExpandConstant('{app}\mptrack.ini'));
+    end;
+
+    FileCopy(ExpandConstant('{app}\mptrack.ini'), ExpandConstant('{userappdata}\OpenMPT\mptrack.ini'), true);
+    FileCopy(ExpandConstant('{app}\plugin.cache'), ExpandConstant('{userappdata}\OpenMPT\plugin.cache'), true);
+    FileCopy(ExpandConstant('{app}\mpt_intl.ini'), ExpandConstant('{userappdata}\OpenMPT\mpt_intl.ini'), true);
+    adjustIniPath := FileCopy(ExpandConstant('{app}\Keybindings.mkb'), ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb'), true);
+    adjustIniPath := adjustIniPath or FileCopy(ExpandConstant('{app}\default.mkb'), ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb'), true);
+
+    // If the keymappings moved, we might have to update the path in the INI file.
+    keyFile := GetIniString('Paths', 'Key_Config_File', '', ExpandConstant('{userappdata}\OpenMPT\mptrack.ini'));
+    if(((keyFile = ExpandConstant('{app}\Keybindings.mkb')) or (keyFile = ExpandConstant('{app}\default.mkb'))) and (adjustIniPath)) then
+    begin
+        SetIniString('Paths', 'Key_Config_File', ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb'), ExpandConstant('{userappdata}\OpenMPT\mptrack.ini'));
+    end;
+
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
     INIFile: String;
@@ -118,6 +153,9 @@ begin
     case CurStep of
     ssPostInstall:
         begin
+            // Copy old config files from app's directory, if possible and necessary.
+            CopyConfigsToAppDataDir();
+
             // Find a suitable keyboard layout (might not be very precise sometimes, as it's based on the UI language)
             // Check http://msdn.microsoft.com/en-us/library/ms776294%28VS.85%29.aspx for the correct language codes.
             keyboardFilepath := '';
@@ -138,7 +176,7 @@ begin
             end;
 
             // Found an alternative keybinding.
-            if(keyboardFilepath <> '') then
+            if((keyboardFilepath <> '') and (not IniKeyExists('Paths', 'Key_Config_File', INIFile))) then
             begin
                 keyboardFilepath := ExpandConstant('{app}\extraKeymaps\' + keyboardFilepath + '.mkb');
                 SetIniString('Paths', 'Key_Config_File', keyboardFilepath, INIFile);
@@ -195,7 +233,4 @@ begin
         end;
     end;
 end;
-
-
-
 
