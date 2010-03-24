@@ -35,7 +35,7 @@ static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 	const INSTRUMENTINDEX iCount = sf.GetNumInstruments();
 	for(INSTRUMENTINDEX i = 1; i <= iCount; i++)
 	{
-		if(sf.Instruments[i]->pTuning != 0)
+		if(sf.Instruments[i] != nullptr && sf.Instruments[i]->pTuning != 0)
 			return true;
 	}
 	return false;
