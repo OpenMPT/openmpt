@@ -47,14 +47,14 @@ bool CSoundFile::ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWORD dwFileLength)
 //---------------------------------------------------------------------------------------------------
 {
-	LPDWORD psig = (LPDWORD)lpMemFile;
+	uint32 *psig = (uint32 *)lpMemFile;
 	if ((!lpMemFile) || (dwFileLength < 128)) return false;
-	if (((psig[0] == 0x46464952) && (psig[2] == 0x45564157))	// RIFF....WAVE signature
-	 || ((psig[0] == 0x5453494C) && (psig[2] == 0x65766177))	// LIST....wave
-	 || (psig[76/4] == 0x53524353)								// S3I signature
-	 || ((psig[0] == 0x4D524F46) && (psig[2] == 0x46464941))	// AIFF signature
-	 || ((psig[0] == 0x4D524F46) && (psig[2] == 0x58565338))	// 8SVX signature
-	 || (psig[0] == 0x53504D49)									// ITS signature
+	if (((psig[0] == LittleEndian(0x46464952)) && (psig[2] == LittleEndian(0x45564157)))	// RIFF....WAVE signature
+	 || ((psig[0] == LittleEndian(0x5453494C)) && (psig[2] == LittleEndian(0x65766177)))	// LIST....wave
+	 || (psig[76/4] == LittleEndian(0x53524353))											// S3I signature
+	 || ((psig[0] == LittleEndian(0x4D524F46)) && (psig[2] == LittleEndian(0x46464941)))	// AIFF signature
+	 || ((psig[0] == LittleEndian(0x4D524F46)) && (psig[2] == LittleEndian(0x58565338)))	// 8SVX signature
+	 || (psig[0] == LittleEndian(0x53504D49))												// ITS signature
 	)
 	{
 		// Loading Instrument

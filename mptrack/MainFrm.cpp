@@ -1983,7 +1983,7 @@ BOOL CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn)
 	if (CTrackApp::gpDLSBanks[nDLSBank]->ExtractInstrument(&m_WaveFile, 1, nIns, nRgn))
 	{
 		PlaySoundFile(&m_WaveFile);
-		m_WaveFile.SetRepeatCount(0);
+		m_WaveFile.SetRepeatCount(-1);
 	}
 	EndWaitCursor();
 	return TRUE;
@@ -1994,7 +1994,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 //-------------------------------------------------------------
 {
 	CMappedFile f;
-	BOOL bOk = FALSE;
+	bool bOk = false;
 
 	if (lpszFileName)
 	{
@@ -2029,7 +2029,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 	m_WaveFile.Patterns.Insert(1,64);
 	if (m_WaveFile.Patterns[0])
 	{
-		if (!nNote) nNote = 5*12+1;
+		if (!nNote) nNote = NOTE_MIDDLEC;
 		MODCOMMAND *m = m_WaveFile.Patterns[0];
 		m[0].note = (BYTE)nNote;
 		m[0].instr = 1;
@@ -2052,10 +2052,10 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 				if ((m_WaveFile.m_nSamples > 1) || (m_WaveFile.Samples[1].uFlags & CHN_LOOP))
 				{
 					MODCOMMAND *m = m_WaveFile.Patterns[0];
-					m[32*4].note = 0xFF;
-					m[32*4+1].note = 0xFF;
-					m[63*4].note = 0xFE;
-					m[63*4+1].note = 0xFE;
+					m[32*4].note = NOTE_KEYOFF;
+					m[32*4+1].note = NOTE_KEYOFF;
+					m[63*4].note = NOTE_NOTECUT;
+					m[63*4+1].note = NOTE_NOTECUT;
 				} else
 				{
 					MODCOMMAND *m = m_WaveFile.Patterns[1];
@@ -2065,7 +2065,7 @@ BOOL CMainFrame::PlaySoundFile(LPCSTR lpszFileName, UINT nNote)
 						m[63*4].param = 1;
 					}
 				}
-				bOk = PlaySoundFile(&m_WaveFile);
+				bOk = PlaySoundFile(&m_WaveFile) ? true : false;
 			}
 		}
 		f.Close();
@@ -2975,7 +2975,7 @@ void CMainFrame::OnKillFocus(CWnd* pNewWnd)
 //end rewbs.fix3116
 
 void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
-//-----------------------------------------------------
+//---------------------------------------------------------
 {
     static bool firstShow = true;
     if (bShow && !IsWindowVisible() && firstShow)  {
@@ -3008,7 +3008,7 @@ void CMainFrame::OnViewMIDIMapping()
 /////////////////////////////////////////////
 
 void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bool librarynames)
-//---------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 {
 #ifndef NO_VST
 	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
@@ -3027,7 +3027,7 @@ void AddPluginNamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN* plugarray, const bo
 }
 
 void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plug)
-//----------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 {
 	if(plug.pMixPlugin)
 		AddPluginParameternamesToCombobox(CBox, *(CVstPlugin *)plug.pMixPlugin);
@@ -3051,7 +3051,7 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
 // TODO: Let some magic happen to convert between absolute and relative paths. m_csExecutableDirectoryPath might be helpful
 
 void CMainFrame::SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&directories)[NUM_DIRS][_MAX_PATH], bool bStripFilename)
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------
 {
 	TCHAR szPath[_MAX_PATH], szDir[_MAX_DIR];
 
@@ -3079,28 +3079,28 @@ void CMainFrame::SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR
 }
 
 void CMainFrame::SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 {
 	SetDirectory(szFilenameFrom, dir, m_szDefaultDirectory, bStripFilename);
 }
 
 
 void CMainFrame::SetWorkingDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename)
-//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 {
 	SetDirectory(szFilenameFrom, dir, m_szWorkingDirectory, bStripFilename);
 }
 
 
 LPCTSTR CMainFrame::GetDefaultDirectory(Directory dir)
-//----------------------------------------------------------------------------
+//----------------------------------------------------
 {
 	return m_szDefaultDirectory[dir];
 }
 
 
 LPCTSTR CMainFrame::GetWorkingDirectory(Directory dir)
-//----------------------------------------------------------------------------
+//----------------------------------------------------
 {
 	return m_szWorkingDirectory[dir];
 }
