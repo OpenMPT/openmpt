@@ -140,7 +140,10 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			// End of song ?
 			if ((nPattern == Order.GetInvalidPatIndex()) || (nCurrentPattern >= Order.size()))
 			{
-				nCurrentPattern = m_nRestartPos;
+				if(nCurrentPattern == m_nRestartPos)
+					break;
+				else
+					nCurrentPattern = m_nRestartPos;
 			} else
 			{
 				nCurrentPattern++;
@@ -151,6 +154,9 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		// Skip non-existing patterns
 		if ((nPattern >= Patterns.Size()) || (!Patterns[nPattern]))
 		{
+			// If there isn't even a tune, we should probably stop here.
+			if(nCurrentPattern == m_nRestartPos)
+				break;
 			nNextPattern = nCurrentPattern + 1;
 			continue;
 		}

@@ -23,7 +23,7 @@ private:
 	void MapTranspose(int nAmount);
 
 public:
-	CNoteMapWnd() { m_nPlayingNote=-1; m_nNote = 5*12; m_pModDoc = NULL; m_nInstrument = 0; m_bIns = FALSE; m_cxFont = m_cyFont = 0; m_hFont = NULL; m_nOldNote = m_nOldIns = 0; m_pParent = NULL; }
+	CNoteMapWnd() { m_nPlayingNote=-1; m_nNote = NOTE_MIDDLEC - 1; m_pModDoc = NULL; m_nInstrument = 0; m_bIns = FALSE; m_cxFont = m_cyFont = 0; m_hFont = NULL; m_nOldNote = m_nOldIns = 0; m_pParent = NULL; }
 	BOOL SetCurrentInstrument(CModDoc *pModDoc, UINT nIns);
 	BOOL SetCurrentNote(UINT nNote);
 	VOID Init(CCtrlInstruments *pParent) { m_pParent = pParent; }

@@ -416,11 +416,11 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	m_SndFile.m_nDefaultSpeed = CLAMP(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
 
 	bool bTrimmedEnvelopes = false;
-	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.m_nInstruments; i++)
+	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.m_nInstruments; i++) if(m_SndFile.Instruments[i] != nullptr)
 	{
-		bTrimmedEnvelopes |= UpdateEnvelopes(&m_SndFile.Instruments[i]->VolEnv);
-		bTrimmedEnvelopes |= UpdateEnvelopes(&m_SndFile.Instruments[i]->PanEnv);
-		bTrimmedEnvelopes |= UpdateEnvelopes(&m_SndFile.Instruments[i]->PitchEnv);
+		bTrimmedEnvelopes |= UpdateEnvelopes(&(m_SndFile.Instruments[i]->VolEnv));
+		bTrimmedEnvelopes |= UpdateEnvelopes(&(m_SndFile.Instruments[i]->PanEnv));
+		bTrimmedEnvelopes |= UpdateEnvelopes(&(m_SndFile.Instruments[i]->PitchEnv));
 	}
 	if(bTrimmedEnvelopes == true)
 		AddToLog("WARNING: Instrument envelopes have been shortened.\n");
@@ -708,7 +708,7 @@ PATTERNINDEX CModDoc::InsertPattern(ORDERINDEX nOrd, ROWINDEX nRows)
 	for (UINT j=0; j<m_SndFile.Order.size(); j++)
 	{
 		if (m_SndFile.Order[j] == i) break;
-		if (m_SndFile.Order[j] == m_SndFile.Order.GetInvalidPatIndex())
+		if (m_SndFile.Order[j] == m_SndFile.Order.GetInvalidPatIndex() && nOrd == ORDERINDEX_INVALID)
 		{
 			m_SndFile.Order[j] = i;
 			break;
