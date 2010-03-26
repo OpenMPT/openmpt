@@ -96,6 +96,7 @@ enum {
 	DRAGONDROP_PATTERN,		// | Pattern from a song			|      Pattern #    |       NULL        |
 	DRAGONDROP_ORDER,		// | Pattern index in a song		|       Order #     |       NULL        |
 	DRAGONDROP_SONG,		// | Song file (mod/s3m/xm/it)		|		0			|	pszFileName		|
+	DRAGONDROP_SEQUENCE		// | Sequence (a set of orders)		|    Sequence #     |       NULL        |
 };
 
 

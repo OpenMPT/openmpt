@@ -1770,8 +1770,7 @@ bool CModDoc::ConvertSubsongsToMultipleSequences()
 			ORDERINDEX startOrd = nOrd;
 			modified = true;
 
-			m_SndFile.Order.AddSequence(false);
-			SEQUENCEINDEX newSeq = m_SndFile.Order.GetNumSequences() - 1;
+			SEQUENCEINDEX newSeq = m_SndFile.Order.AddSequence(false);
 			m_SndFile.Order.SetSequence(newSeq);
 
 			// resize new seqeuence if necessary

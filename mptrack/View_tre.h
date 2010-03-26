@@ -158,7 +158,7 @@ public:
 	VOID RemoveDocument(CModDoc *pModDoc);
 	VOID UpdateView(UINT nDocNdx, DWORD dwHint);
 	VOID OnUpdate(CModDoc *pModDoc, DWORD dwHint, CObject *pHint);
-	BOOL CanDrop(HTREEITEM hItem, BOOL bDoDrop);
+	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
 	VOID UpdatePlayPos(CModDoc *pModDoc, PMPTNOTIFICATION pNotify);
 	bool IsItemExpanded(HTREEITEM hItem);
 
@@ -188,7 +188,7 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnBeginDrag(HTREEITEM, BOOL bLeft, LRESULT *pResult);
+	afx_msg void OnBeginDrag(HTREEITEM, bool bLeft, LRESULT *pResult);
 	afx_msg void OnBeginLDrag(LPNMHDR, LRESULT *pResult);
 	afx_msg void OnBeginRDrag(LPNMHDR, LRESULT *pResult);
 	afx_msg void OnEndDrag(DWORD dwMask);

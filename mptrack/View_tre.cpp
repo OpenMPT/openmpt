@@ -1940,6 +1940,11 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 		pdropinfo->dwDropType = DRAGONDROP_INSTRUMENT;
 		break;
 
+	case MODITEM_SEQUENCE:
+	case MODITEM_HDR_ORDERS:
+		pdropinfo->dwDropType = DRAGONDROP_SEQUENCE;
+		break;
+
 	case MODITEM_INSLIB_SAMPLE:
 	case MODITEM_INSLIB_INSTRUMENT:
 		if (m_szSongName[0])
@@ -2000,7 +2005,7 @@ BOOL CModTree::GetDropInfo(LPDRAGONDROP pdropinfo, LPSTR pszFullPath)
 }
 
 
-BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
+bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 //---------------------------------------------------
 {
 	const uint64 modItemDrop = GetModItem(hItem);
@@ -2010,14 +2015,18 @@ BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 	const uint32 modItemDragType = GetModItemType(m_qwItemDrag);
 	const uint32 modItemDragID = GetModItemID(m_qwItemDrag);
 
-	PMODTREEDOCINFO pInfo = DocInfo[m_nDocNdx];
-	CModDoc *pModDoc = (pInfo) ? pInfo->pModDoc : NULL;
+	const PMODTREEDOCINFO pInfoDrag = DocInfo[m_nDragDocNdx];
+	const PMODTREEDOCINFO pInfoDrop = DocInfo[m_nDocNdx];
+	CModDoc *pModDoc = (pInfoDrop) ? pInfoDrop->pModDoc : nullptr;
+	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+
 	switch(modItemDropType)
 	{
 	case MODITEM_ORDER:
 	case MODITEM_SEQUENCE:
-		if ((modItemDragType == MODITEM_ORDER) && (pModDoc) && (m_nDocNdx == m_nDragDocNdx))
+		if ((modItemDragType == MODITEM_ORDER) && (pModDoc) && (pSndFile) && (m_nDocNdx == m_nDragDocNdx))
 		{
+			// drop an order somewhere
 			if (bDoDrop)
 			{
 				SEQUENCEINDEX nSeqFrom = (SEQUENCEINDEX)(modItemDragID >> 16), nSeqTo = (SEQUENCEINDEX)(modItemDropID >> 16);
@@ -2026,7 +2035,7 @@ BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 				{
 					// drop on sequence -> attach
 					nSeqTo = (SEQUENCEINDEX)(modItemDropID & 0xFFFF);
-					nOrdTo = pModDoc->GetSoundFile()->Order.GetSequence(nSeqTo).GetLengthTailTrimmed();
+					nOrdTo = pSndFile->Order.GetSequence(nSeqTo).GetLengthTailTrimmed();
 				}
 
 				if (nSeqFrom != nSeqTo || nOrdFrom != nOrdTo)
@@ -2037,9 +2046,36 @@ BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 					}
 				}
 			}
-			return TRUE;
+			return true;
 		}
 		break;
+	case MODITEM_HDR_ORDERS:
+		// Drop your sequences here.
+		// At the moment, only dropping sequences into another module is possible.
+		if((modItemDragType == MODITEM_SEQUENCE || modItemDragType == MODITEM_HDR_ORDERS) && pSndFile && pSndFile->GetType() == MOD_TYPE_MPT && pInfoDrag && pModDoc != pInfoDrag->pModDoc)
+		{
+			if(bDoDrop)
+			{
+				// copy mod sequence over.
+				CModDoc *pDragDoc = pInfoDrag->pModDoc;
+				if(pDragDoc == nullptr) return false;
+				CSoundFile *pDragSndFile = pDragDoc->GetSoundFile();
+				if(pDragSndFile == nullptr) return false;
+				const SEQUENCEINDEX nOrigSeq = (SEQUENCEINDEX)modItemDragID;
+				const ModSequence *pOrigSeq = &(pDragSndFile->Order.GetSequence(nOrigSeq));
+				if(pOrigSeq == nullptr) return false;
+
+				pSndFile->Order.AddSequence(false);
+				pSndFile->Order.resize(pOrigSeq->GetLength(), pSndFile->Order.GetInvalidPatIndex());
+				for(ORDERINDEX nOrd = 0; nOrd < pOrigSeq->GetLengthTailTrimmed(); nOrd++)
+				{
+					pSndFile->Order[nOrd] = pDragSndFile->Order.GetSequence(nOrigSeq)[nOrd];
+				}
+				pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
+				pModDoc->SetModified();
+			}
+			return true;
+		}
 	case MODITEM_SAMPLE:
 		break;
 	case MODITEM_INSTRUMENT:
@@ -2058,11 +2094,11 @@ BOOL CModTree::CanDrop(HTREEITEM hItem, BOOL bDoDrop)
 				else
 					SetMidiPercussion((DWORD)modItemDropID, szFullPath);
 			}
-			return TRUE;
+			return true;
 		}
 		break;
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -2170,12 +2206,12 @@ void CModTree::OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult)
 }
 
 
-void CModTree::OnBeginDrag(HTREEITEM hItem, BOOL bLeft, LRESULT *pResult)
+void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 //-----------------------------------------------------------------------
 {
 	if (!(m_dwStatus & TREESTATUS_DRAGGING))
 	{
-		BOOL bDrag = FALSE;
+		bool bDrag = false;
 		
 		m_hDropWnd = NULL;
 		m_hItemDrag = hItem;
@@ -2191,15 +2227,25 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, BOOL bLeft, LRESULT *pResult)
 		case MODITEM_PATTERN:
 		case MODITEM_SAMPLE:
 		case MODITEM_INSTRUMENT:
+		case MODITEM_SEQUENCE:
 		case MODITEM_MIDIINSTRUMENT:
 		case MODITEM_MIDIPERCUSSION:
 		case MODITEM_INSLIB_SAMPLE:
 		case MODITEM_INSLIB_INSTRUMENT:
 		case MODITEM_INSLIB_SONG:
-			bDrag = TRUE;
+			bDrag = true;
+			break;
+		case MODITEM_HDR_ORDERS:
+			// can we drag an order header? (only in MPTM format and if there's only one sequence)
+			{
+				CModDoc *pModDoc = DocInfo[m_nDragDocNdx]->pModDoc;
+				CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
+				if(pSndFile && pSndFile->GetType() == MOD_TYPE_MPT && pSndFile->Order.GetNumSequences() == 1)
+					bDrag = true;
+			}
 			break;
 		default:
-			if (m_qwItemDrag & 0x8000) bDrag = TRUE;
+			if (m_qwItemDrag & 0x8000) bDrag = true;
 		}
 		if (bDrag)
 		{
@@ -2218,7 +2264,7 @@ void CModTree::OnBeginRDrag(LPNMHDR pnmhdr, LRESULT *pResult)
 	if (pnmhdr)
 	{
 		LPNMTREEVIEW pnmtv = (LPNMTREEVIEW)pnmhdr;
-		OnBeginDrag(pnmtv->itemNew.hItem, FALSE, pResult);
+		OnBeginDrag(pnmtv->itemNew.hItem, false, pResult);
 	}
 }
 
@@ -2229,7 +2275,7 @@ void CModTree::OnBeginLDrag(LPNMHDR pnmhdr, LRESULT *pResult)
 	if (pnmhdr)
 	{
 		LPNMTREEVIEW pnmtv = (LPNMTREEVIEW)pnmhdr;
-		OnBeginDrag(pnmtv->itemNew.hItem, TRUE, pResult);
+		OnBeginDrag(pnmtv->itemNew.hItem, true, pResult);
 	}
 }
 
@@ -2616,7 +2662,7 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 			if (rect.PtInRect(point))
 			{
 				m_hDropWnd = m_hWnd;
-				BOOL bCanDrop = CanDrop( HitTest(point, &flags), FALSE);
+				bool bCanDrop = CanDrop( HitTest(point, &flags), false);
 				SetCursor((bCanDrop) ? CMainFrame::curDragging : CMainFrame::curNoDrop2);
 			} else
 			{

@@ -291,9 +291,11 @@ void ModSequenceSet::SetSequence(SEQUENCEINDEX n)
 }
 
 
-void ModSequenceSet::AddSequence(bool bDuplicate)
-//-----------------------------------------------
+SEQUENCEINDEX ModSequenceSet::AddSequence(bool bDuplicate)
+//--------------------------------------------------------
 {
+	if(GetNumSequences() == MAX_SEQUENCES)
+		return SEQUENCEINDEX_INVALID;
 	m_Sequences.push_back(ModSequence(*m_pSndFile, s_nCacheSize)); 
 	if (bDuplicate)
 	{
@@ -301,6 +303,7 @@ void ModSequenceSet::AddSequence(bool bDuplicate)
 		m_Sequences.back().m_sName = ""; // Don't copy sequence name.
 	}
 	SetSequence(GetNumSequences() - 1);
+	return GetNumSequences() - 1;
 }
 
 

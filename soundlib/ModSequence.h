@@ -133,7 +133,7 @@ public:
 	const ModSequence& GetSequence(SEQUENCEINDEX nSeq);
 	SEQUENCEINDEX GetNumSequences() const {return static_cast<SEQUENCEINDEX>(m_Sequences.size());}
 	void SetSequence(SEQUENCEINDEX);			// Sets working sequence.
-	void AddSequence(bool bDuplicate = true);	// Adds new sequence. If bDuplicate is true, new sequence is a duplicate of the old one.
+	SEQUENCEINDEX AddSequence(bool bDuplicate = true);	// Adds new sequence. If bDuplicate is true, new sequence is a duplicate of the old one. Returns the ID of the new sequence.
 	void RemoveSequence() {RemoveSequence(GetCurrentSequenceIndex());}
 	void RemoveSequence(SEQUENCEINDEX);		// Removes given sequence
 	SEQUENCEINDEX GetCurrentSequenceIndex() const {return m_nCurrentSeq;}
