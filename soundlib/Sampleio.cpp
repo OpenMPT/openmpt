@@ -120,8 +120,8 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
 // -! NEW_FEATURE#0023
 
 	MODINSTRUMENT *pIns = Instruments[nInstr];
-	Instruments[nInstr] = NULL;
-	for (UINT i=0; i<MAX_CHANNELS; i++)
+	Instruments[nInstr] = nullptr;
+	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 	{
 		if (Chn[i].pModInstrument == pIns)
 		{

@@ -285,9 +285,8 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 			{
 				for (UINT i=1; i<=m_pSndFile->m_nInstruments; i++)
 				{
-					if (m_pSndFile->Instruments[i] == NULL) {
+					if (m_pSndFile->Instruments[i] == nullptr)
 						continue;
-					}
 
 					CString sDisplayName;
 					if (m_pModDoc->GetSplitKeyboardSettings()->IsSplitActive())
@@ -1180,7 +1179,7 @@ void CCtrlPatterns::OnToggleOverflowPaste()
 void CCtrlPatterns::TogglePluginEditor()
 //--------------------------------------
 {
-	if ((m_nInstrument) && (m_pModDoc))
+	if(m_nInstrument && m_pModDoc && m_pSndFile && m_pSndFile->Instruments[m_nInstrument])
 	{
 		UINT nPlug = m_pSndFile->Instruments[m_nInstrument]->nMixPlug;
 		if (nPlug) //if not no plugin

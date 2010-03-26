@@ -652,8 +652,13 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 		if (m_pModDoc)
 		{
 			MODINSTRUMENT *pIns = m_pModDoc->GetSoundFile()->Instruments[m_nInstrument];
-			if (m_bIns) m_nOldIns = pIns->Keyboard[m_nNote];
-			else m_nOldNote = pIns->NoteMap[m_nNote];
+			if(pIns)
+			{
+				if (m_bIns)
+					m_nOldIns = pIns->Keyboard[m_nNote];
+				else
+					m_nOldNote = pIns->NoteMap[m_nNote];
+			}
 		}
 		return true;
 	}
@@ -2626,10 +2631,10 @@ void CCtrlInstruments::UpdateTuningComboBox()
 {
 	if (m_pModDoc == 0 || m_pSndFile == 0 
 		|| m_nInstrument > m_pSndFile->GetNumInstruments()
-		|| m_pSndFile->Instruments[m_nInstrument] == NULL) return;
+		|| m_pSndFile->Instruments[m_nInstrument] == nullptr) return;
 
 	MODINSTRUMENT* const pIns = m_pSndFile->Instruments[m_nInstrument];
-	if(pIns->pTuning == NULL)
+	if(pIns->pTuning == nullptr)
 	{
 		m_ComboTuning.SetCurSel(0);
 		return;

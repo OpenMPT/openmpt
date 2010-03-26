@@ -3515,7 +3515,7 @@ CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
 	// If instrument name is empty, use name of the sample mapped to C-5.
 	if (instrumentName.IsEmpty())
 	{
-		const SAMPLEINDEX nSmp = m_SndFile.Instruments[nInstr]->Keyboard[60];
+		const SAMPLEINDEX nSmp = m_SndFile.Instruments[nInstr]->Keyboard[NOTE_MIDDLEC - 1];
 		if (nSmp < ARRAYELEMCOUNT(m_SndFile.Samples) && m_SndFile.Samples[nSmp].pSample)
 			instrumentName.Format(TEXT("s: %s"), m_SndFile.GetSampleName(nSmp)); //60 is C-5
 	}

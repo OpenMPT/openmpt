@@ -512,9 +512,10 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	if(pSndFile == nullptr) return false;
 
 	CHAR s[512];
-	BOOL bIns[MAX_SAMPLES];
-	UINT nExt = 0;
-	UINT nRemoved = 0;
+	vector<bool> bIns;
+	int nExt = 0;
+	int nRemoved = 0;
+	bIns.resize(pSndFile->GetNumSamples(), false);
 
 	BeginWaitCursor();
 	for (SAMPLEINDEX nSmp = pSndFile->m_nSamples; nSmp >= 1; nSmp--) if (pSndFile->Samples[nSmp].pSample)
@@ -530,7 +531,6 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	}
 	if (pSndFile->m_nInstruments)
 	{
-		memset(bIns, 0, sizeof(bIns));
 		for (UINT ipat=0; ipat<pSndFile->Patterns.Size(); ipat++)
 		{
 			MODCOMMAND *p = pSndFile->Patterns[ipat];
@@ -547,7 +547,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 							if (pIns)
 							{
 								UINT n = pIns->Keyboard[p->note-1];
-								if (n < MAX_SAMPLES) bIns[n] = TRUE;
+								if (n <= pSndFile->GetNumSamples()) bIns[n] = true;
 							}
 						} else
 						{
@@ -557,7 +557,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 								if (pIns)
 								{
 									UINT n = pIns->Keyboard[p->note-1];
-									if (n < MAX_SAMPLES) bIns[n] = TRUE;
+									if (n <= pSndFile->GetNumSamples()) bIns[n] = true;
 								}
 							}
 						}
@@ -565,28 +565,29 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 				}
 			}
 		}
-		for (UINT ichk=1; ichk<MAX_SAMPLES; ichk++)
+		for (SAMPLEINDEX ichk = 1; ichk <= pSndFile->GetNumSamples(); ichk++)
 		{
 			if ((!bIns[ichk]) && (pSndFile->Samples[ichk].pSample)) nExt++;
 		}
 	}
 	EndWaitCursor();
-	if (nExt &&  !((pSndFile->m_nType & MOD_TYPE_IT) && (pSndFile->m_dwSongFlags&SONG_ITPROJECT)))
+	if (nExt &&  !((pSndFile->m_nType & MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT)))
 	{	//We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample%s referenced by an instrument,\n"
-			"but not used in the song. Do you want to remove them ?", nExt, (nExt == 1) ? "" : "s");
+			"but not used in the song. Do you want to remove them?", nExt, (nExt == 1) ? "" : "s");
 		if (::MessageBox(NULL, s, "Sample Cleanup", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
-			for (SAMPLEINDEX j = 1; j < MAX_SAMPLES; j++)
+			for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 			{
-				if ((!bIns[j]) && (pSndFile->Samples[j].pSample))
+				if ((!bIns[nSmp]) && (pSndFile->Samples[nSmp].pSample))
 				{
 					BEGIN_CRITICAL();
-					pSndFile->DestroySample(j);
-					if ((j == pSndFile->m_nSamples) && (j > 1)) pSndFile->m_nSamples--;
+					pSndFile->DestroySample(nSmp);
+					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
+					if ((nSmp == pSndFile->m_nSamples) && (nSmp > 1)) pSndFile->m_nSamples--;
 					END_CRITICAL();
 					nRemoved++;
-					m_pModDoc->GetSampleUndo()->ClearUndo(j);
+					m_pModDoc->GetSampleUndo()->ClearUndo(nSmp);
 				}
 			}
 			wsprintf(s, "%d unused sample%s removed\n" ,nRemoved, (nRemoved == 1) ? "" : "s");
@@ -594,7 +595,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 			return true;
 		}
 	}
-	return false;
+	return (nRemoved > 0);
 }
 
 
@@ -615,8 +616,8 @@ bool CModCleanupDlg::OptimizeSamples()
 	if (nLoopOpt == 0) return false;
 
 	CHAR s[512];
-	wsprintf(s, "OpenMPT detected %d sample%s with unused data after the loop end point,\n"
-		"Do you want to optimize it, and remove this unused data?", nLoopOpt, (nLoopOpt == 1) ? "" : "s");
+	wsprintf(s, "%d sample%s unused data after the loop end point,\n"
+		"Do you want to optimize %s and remove this unused data?", nLoopOpt, (nLoopOpt == 1) ? " has" : "s have", (nLoopOpt == 1) ? "it" : "them");
 	if (::MessageBox(NULL, s, "Sample Optimization", MB_YESNO | MB_ICONQUESTION) == IDYES)
 	{
 		for (SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->m_nSamples; nSmp++)
@@ -684,11 +685,13 @@ bool CModCleanupDlg::RearrangeSamples()
 			memset(pSndFile->m_szNames[i], 0, sizeof(pSndFile->m_szNames[i]));
 
 			// Also update instrument mapping (if module is in instrument mode)
-			for(INSTRUMENTINDEX iInstr = 1; iInstr <= pSndFile->m_nInstruments; iInstr++){
-				if(pSndFile->Instruments[iInstr]){
-					MODINSTRUMENT *p = pSndFile->Instruments[iInstr];
+			for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->m_nInstruments; nIns++)
+			{
+				MODINSTRUMENT *pIns = pSndFile->Instruments[nIns];
+				if(pIns)
+				{
 					for(WORD iNote = 0; iNote < 128; iNote++)
-						if(p->Keyboard[iNote] == i) p->Keyboard[iNote] = nSampleMap[i];
+						if(pIns->Keyboard[iNote] == i) pIns->Keyboard[iNote] = nSampleMap[i];
 				}
 			}
 		}
@@ -840,7 +843,8 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 	for (PLUGINDEX nPlug = 0; nPlug < MAX_MIXPLUGINS; nPlug++) {
 
 		//Is the plugin assigned to a channel?
-		for (CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++) {
+		for (CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
+		{
 			if (pSndFile->ChnSettings[nChn].nMixPlugin == nPlug + 1u) {
 				usedmap[nPlug] = true;
 				break;
@@ -848,21 +852,24 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 		}
 
 		//Is the plugin used by an instrument?
-		for (INSTRUMENTINDEX nIns=1; nIns<=pSndFile->GetNumInstruments(); nIns++) {
-			if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == nPlug+1)) {
+		for (INSTRUMENTINDEX nIns=1; nIns<=pSndFile->GetNumInstruments(); nIns++)
+		{
+			if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == nPlug+1))
+			{
 				usedmap[nPlug] = true;
 				break;
 			}
 		}
 
 		//Is the plugin assigned to master?
-		if (pSndFile->m_MixPlugins[nPlug].Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT) {
+		if (pSndFile->m_MixPlugins[nPlug].Info.dwInputRouting & MIXPLUG_INPUTF_MASTEREFFECT)
 			usedmap[nPlug] = true;
-		}
 
 		//all outputs of used plugins count as used
-		if (usedmap[nPlug]!=0) {
-			if (pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80) {
+		if (usedmap[nPlug]!=0)
+		{
+			if (pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80)
+			{
 				int output = pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x7f;
 				usedmap[output] = true;
 			}
@@ -872,7 +879,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 
 	UINT nRemoved = m_pModDoc->RemovePlugs(usedmap);
 
-	return (nRemoved > 0) ? true : false;
+	return (nRemoved > 0);
 }
 
 
@@ -908,7 +915,7 @@ bool CModCleanupDlg::ResetVariables()
 	pSndFile->m_nRestartPos = 0;
 
 	// reset instruments (if there are any)
-	for(INSTRUMENTINDEX i = 1; i <= pSndFile->m_nInstruments; i++)
+	for(INSTRUMENTINDEX i = 1; i <= pSndFile->m_nInstruments; i++) if(pSndFile->Instruments[i])
 	{
 		pSndFile->Instruments[i]->nFadeOut = 256;
 		pSndFile->Instruments[i]->nGlobalVol = 64;
