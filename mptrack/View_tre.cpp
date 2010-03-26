@@ -2052,7 +2052,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	case MODITEM_HDR_ORDERS:
 		// Drop your sequences here.
 		// At the moment, only dropping sequences into another module is possible.
-		if((modItemDragType == MODITEM_SEQUENCE || modItemDragType == MODITEM_HDR_ORDERS) && pSndFile && pSndFile->GetType() == MOD_TYPE_MPT && pInfoDrag && pModDoc != pInfoDrag->pModDoc)
+		if((modItemDragType == MODITEM_SEQUENCE || modItemDragType == MODITEM_HDR_ORDERS) && pSndFile && pInfoDrag && pModDoc != pInfoDrag->pModDoc)
 		{
 			if(bDoDrop)
 			{
@@ -2065,11 +2065,30 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				const ModSequence *pOrigSeq = &(pDragSndFile->Order.GetSequence(nOrigSeq));
 				if(pOrigSeq == nullptr) return false;
 
-				pSndFile->Order.AddSequence(false);
-				pSndFile->Order.resize(pOrigSeq->GetLength(), pSndFile->Order.GetInvalidPatIndex());
-				for(ORDERINDEX nOrd = 0; nOrd < pOrigSeq->GetLengthTailTrimmed(); nOrd++)
+				if(pSndFile->GetType() == MOD_TYPE_MPT)
 				{
-					pSndFile->Order[nOrd] = pDragSndFile->Order.GetSequence(nOrigSeq)[nOrd];
+					pSndFile->Order.AddSequence(false);
+				}
+				else
+				{
+					if(::MessageBox(0, _T("Replace the current orderlist?"), _T("Sequence import"), MB_YESNO|MB_ICONQUESTION) == IDNO)
+						return false;
+				}
+				pSndFile->Order.resize(min(pSndFile->GetModSpecifications().ordersMax, pOrigSeq->GetLength()), pSndFile->Order.GetInvalidPatIndex());
+				for(ORDERINDEX nOrd = 0; nOrd < min(pSndFile->GetModSpecifications().ordersMax,pOrigSeq->GetLengthTailTrimmed()); nOrd++)
+				{
+					PATTERNINDEX nOrigPat = pDragSndFile->Order.GetSequence(nOrigSeq)[nOrd];
+					// translate pattern index
+					if(nOrigPat == pDragSndFile->Order.GetInvalidPatIndex())
+						pSndFile->Order[nOrd] = pSndFile->Order.GetInvalidPatIndex();
+					else if(nOrigPat == pDragSndFile->Order.GetIgnoreIndex() && pSndFile->GetModSpecifications().hasIgnoreIndex)
+						pSndFile->Order[nOrd] = pSndFile->Order.GetIgnoreIndex();
+					else if(nOrigPat == pDragSndFile->Order.GetIgnoreIndex() && !pSndFile->GetModSpecifications().hasIgnoreIndex)
+						pSndFile->Order[nOrd] = pSndFile->Order.GetInvalidPatIndex();
+					else if(nOrigPat >= pSndFile->GetModSpecifications().patternsMax)
+						pSndFile->Order[nOrd] = pSndFile->Order.GetInvalidPatIndex();
+					else
+						pSndFile->Order[nOrd] = nOrigPat;
 				}
 				pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 				pModDoc->SetModified();
@@ -2240,7 +2259,7 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 			{
 				CModDoc *pModDoc = DocInfo[m_nDragDocNdx]->pModDoc;
 				CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
-				if(pSndFile && pSndFile->GetType() == MOD_TYPE_MPT && pSndFile->Order.GetNumSequences() == 1)
+				if(pSndFile && pSndFile->Order.GetNumSequences() == 1)
 					bDrag = true;
 			}
 			break;

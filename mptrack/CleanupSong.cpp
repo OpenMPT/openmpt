@@ -44,6 +44,25 @@ WORD const CModCleanupDlg::m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS] =
 	IDC_CHK_RESET_VARIABLES,
 };
 
+// Options that are mutually exclusive to each other
+ENUM_CLEANUP_OPTIONS const CModCleanupDlg::m_nMutuallyExclusive[CU_MAX_CLEANUP_OPTIONS] =
+{
+	// patterns
+	CU_REMOVE_PATTERNS,		CU_CLEANUP_PATTERNS,	CU_REMOVE_PATTERNS,
+	// orders
+	CU_REMOVE_ORDERS,		CU_MERGE_SEQUENCES,
+	// samples
+	CU_REMOVE_SAMPLES,		CU_CLEANUP_SAMPLES,		CU_REMOVE_SAMPLES,
+	CU_REMOVE_SAMPLES,
+	// instruments
+	CU_REMOVE_INSTRUMENTS,	CU_CLEANUP_INSTRUMENTS,
+	// plugins
+	CU_REMOVE_PLUGINS,		CU_CLEANUP_PLUGINS,
+	// misc
+	CU_NONE,
+
+};
+
 ///////////////////////////////////////////////////////////////////////
 // CModCleanupDlg
 
@@ -51,6 +70,21 @@ BEGIN_MESSAGE_MAP(CModCleanupDlg, CDialog)
 	//{{AFX_MSG_MAP(CModTypeDlg)
 	ON_COMMAND(IDC_BTN_CLEANUP_SONG,			OnPresetCleanupSong)
 	ON_COMMAND(IDC_BTN_COMPO_CLEANUP,			OnPresetCompoCleanup)
+
+	ON_COMMAND(IDC_CHK_CLEANUP_PATTERNS,		OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_REMOVE_PATTERNS,			OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_REARRANGE_PATTERNS,		OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_MERGE_SEQUENCES,			OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_REMOVE_ORDERS,			OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_CLEANUP_SAMPLES,			OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_REMOVE_SAMPLES,			OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_REARRANGE_SAMPLES,		OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_OPTIMIZE_SAMPLES,		OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_CLEANUP_INSTRUMENTS,		OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_REMOVE_INSTRUMENTS,		OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_CLEANUP_PLUGINS,			OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_REMOVE_PLUGINS,			OnVerifyMutualExclusive)
+	ON_COMMAND(IDC_CHK_RESET_VARIABLES,			OnVerifyMutualExclusive)
 
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModCleanupDlg::OnToolTipNotify)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModCleanupDlg::OnToolTipNotify)
@@ -138,6 +172,33 @@ void CModCleanupDlg::OnCancel()
 	CDialog::OnCancel();
 }
 
+
+void CModCleanupDlg::OnVerifyMutualExclusive()
+//--------------------------------------------
+{
+	HWND hFocus = GetFocus()->m_hWnd;
+	for(int i = 0; i < CU_MAX_CLEANUP_OPTIONS; i++)	
+	{
+		// if this item is focussed, we have just (un)checked it.
+		if(hFocus == GetDlgItem(m_nCleanupIDtoDlgID[i])->m_hWnd)
+		{
+			// if we just unchecked it, there's nothing to verify.
+			if(IsDlgButtonChecked(m_nCleanupIDtoDlgID[i]) == FALSE)
+				return;
+
+			// now we can disable all elements that are mutually exclusive.
+			if(m_nMutuallyExclusive[i] != CU_NONE)
+				CheckDlgButton(m_nCleanupIDtoDlgID[m_nMutuallyExclusive[i]], MF_UNCHECKED);
+			// find other elements which are mutually exclusive with the selected element.
+			for(int j = 0; j < CU_MAX_CLEANUP_OPTIONS; j++)	
+			{
+				if(m_nMutuallyExclusive[j] == i)
+					CheckDlgButton(m_nCleanupIDtoDlgID[j], MF_UNCHECKED);
+			}
+			return;
+		}
+	}
+}
 
 
 void CModCleanupDlg::OnPresetCleanupSong()
