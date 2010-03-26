@@ -292,6 +292,8 @@ public:
 	bool MergeSequences();
 	bool ConvertSubsongsToMultipleSequences();
 
+	bool HasMPTHacks(bool autofix = false);
+
 	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 // Fix: save pattern scrollbar position when switching to other tab
 	CSize GetOldPatternScrollbarsPos() const { return m_szOldPatternScrollbarsPos; };
@@ -322,6 +324,7 @@ protected:
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
 	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName);
 	virtual void OnCloseDocument();
+	void SafeFileClose();
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
