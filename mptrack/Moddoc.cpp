@@ -3300,7 +3300,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcApproxRealBPM:	OnApproximateBPM(); break;
 		case kcFileSave:		DoSave(m_strPathName, 0); break;
 		case kcFileSaveAs:		DoSave(NULL, 1); break;
-		case kcFileClose:		OnFileClose(); break;
+		case kcFileClose:		SafeFileClose(); break;
 
 		case kcPlayPatternFromCursor: OnPatternPlay(); break;
 		case kcPlayPatternFromStart: OnPatternRestart(); break;
@@ -3543,4 +3543,12 @@ CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
 			displayName.Format(TEXT("%s (%s)"), (LPCTSTR)instrumentName, (LPCTSTR)pluginName);
 	}
 	return displayName;
+}
+
+void CModDoc::SafeFileClose()
+//--------------------------
+{
+	// Verify that the main window has the focus. This saves us a lot of trouble because active dialogs normally don't check if their pSndFile pointers are still valid.
+	if(GetActiveWindow() == CMainFrame::GetMainFrame()->m_hWnd)
+		OnFileClose();
 }
