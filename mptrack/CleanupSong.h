@@ -31,7 +31,8 @@ enum ENUM_CLEANUP_OPTIONS
 	// misc
 	CU_RESET_VARIABLES,
 
-	CU_MAX_CLEANUP_OPTIONS
+	CU_NONE,
+	CU_MAX_CLEANUP_OPTIONS = CU_NONE
 };
 
 //==================================
@@ -43,6 +44,7 @@ private:
 	CWnd *m_wParent;
 	static bool m_bCheckBoxes[CU_MAX_CLEANUP_OPTIONS]; // Checkbox state
 	static const WORD m_nCleanupIDtoDlgID[CU_MAX_CLEANUP_OPTIONS]; // Checkbox -> Control ID LUT
+	static const ENUM_CLEANUP_OPTIONS m_nMutuallyExclusive[CU_MAX_CLEANUP_OPTIONS]; // Options that are mutually exclusive to each other.
 
 	// Actual cleanup implementations:
 	// Patterns
@@ -80,6 +82,7 @@ protected:
 	//{{AFX_MSG(CModCleanupDlg)
 	afx_msg void OnPresetCleanupSong();
 	afx_msg void OnPresetCompoCleanup();
+	afx_msg void OnVerifyMutualExclusive();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
