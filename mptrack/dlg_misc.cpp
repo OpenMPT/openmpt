@@ -409,7 +409,7 @@ void CModTypeDlg::OnCheckPT1x()
 
 
 BOOL CModTypeDlg::VerifyData() 
-//---------------------------------
+//----------------------------
 {
 
 	int temp_nRPB = GetDlgItemInt(IDC_ROWSPERBEAT);
@@ -2735,9 +2735,8 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 	if (m_pSndFile->m_nInstruments)	{
 		for (INSTRUMENTINDEX nIns = 1; nIns <= m_pSndFile->m_nInstruments; nIns++)
 		{
-			if (m_pSndFile->Instruments[nIns] == nullptr) {
+			if (m_pSndFile->Instruments[nIns] == nullptr)
 				continue;
-			}
 
 			CString displayName = m_pSndFile->GetpModDoc()->GetPatternViewInstrumentName(nIns);
 			int n = m_CbnSplitInstrument.AddString(displayName);

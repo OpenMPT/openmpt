@@ -154,7 +154,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		for (UINT i2=0; i2<m_SndFile.m_nInstruments; i2++) if (m_SndFile.Instruments[i2])
 		{
 			delete m_SndFile.Instruments[i2];
-			m_SndFile.Instruments[i2] = NULL;
+			m_SndFile.Instruments[i2] = nullptr;
 		}
 		m_SndFile.m_nInstruments = 0;
 		END_CRITICAL();
@@ -1387,8 +1387,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 								}
 							}
 							// Effect value
-							if (s[9] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.param==0) || 
-														(doITStyleMix && origModCmd.command==0 && origModCmd.param==0))))
+							if (s[9] > ' ' && (!doMixPaste || ((!doITStyleMix && (origModCmd.command == CMD_NONE || origModCmd.param == 0)) || 
+														(doITStyleMix && origModCmd.command == CMD_NONE && origModCmd.param == 0))))
 							{
 								m[col].param = 0;
 								if (s[9] != '.')

@@ -860,10 +860,10 @@ BOOL CSoundFile::Destroy()
 			pSmp->pSample = nullptr;
 		}
 	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
+	for (i = 0; i < MAX_INSTRUMENTS; i++)
 	{
 		delete Instruments[i];
-		Instruments[i] = NULL;
+		Instruments[i] = nullptr;
 	}
 	for (i=0; i<MAX_MIXPLUGINS; i++)
 	{

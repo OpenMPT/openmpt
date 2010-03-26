@@ -117,6 +117,7 @@ protected:
 	// Misc stuff
 	void UpdateScrollSize();
 	BOOL SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes m_nEnv = ENV_VOLUME);
+	MODINSTRUMENT *GetInstrumentPtr() const;
 	INSTRUMENTENVELOPE *GetEnvelopePtr() const;
 	UINT EnvInsertPoint(int nTick, int nValue);
 	bool EnvRemovePoint(UINT nPoint);

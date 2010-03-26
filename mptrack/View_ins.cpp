@@ -350,13 +350,8 @@ UINT CViewInstrument::EnvGetSustainEnd() const
 bool CViewInstrument::EnvGetVolEnv() const
 //----------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) return (pIns->VolEnv.dwFlags & ENV_ENABLED) ? true : false;
-	}
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	if (pIns) return (pIns->VolEnv.dwFlags & ENV_ENABLED) ? true : false;
 	return false;
 }
 
@@ -364,13 +359,8 @@ bool CViewInstrument::EnvGetVolEnv() const
 bool CViewInstrument::EnvGetPanEnv() const
 //----------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) return (pIns->PanEnv.dwFlags & ENV_ENABLED) ? true : false;
-	}
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	if (pIns) return (pIns->PanEnv.dwFlags & ENV_ENABLED) ? true : false;
 	return false;
 }
 
@@ -378,13 +368,8 @@ bool CViewInstrument::EnvGetPanEnv() const
 bool CViewInstrument::EnvGetPitchEnv() const
 //------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == ENV_ENABLED) ? true : false;
-	}
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == ENV_ENABLED) ? true : false;
 	return false;
 }
 
@@ -392,13 +377,8 @@ bool CViewInstrument::EnvGetPitchEnv() const
 bool CViewInstrument::EnvGetFilterEnv() const
 //-------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
-	{
-		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-		if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == (ENV_ENABLED|ENV_FILTER)) ? true : false;
-	}
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED|ENV_FILTER)) == (ENV_ENABLED|ENV_FILTER)) ? true : false;
 	return false;
 }
 
@@ -559,12 +539,9 @@ bool CViewInstrument::EnvToggleEnv(INSTRUMENTENVELOPE *pEnv, CSoundFile *pSndFil
 bool CViewInstrument::EnvSetVolEnv(bool bEnable)
 //----------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return false;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return false;
-	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
+	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
 	return EnvToggleEnv(&pIns->VolEnv, pSndFile, pIns, bEnable, 64, CHN_VOLENV);
 }
@@ -573,12 +550,9 @@ bool CViewInstrument::EnvSetVolEnv(bool bEnable)
 bool CViewInstrument::EnvSetPanEnv(bool bEnable)
 //----------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return false;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return false;
-	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
+	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
 	return EnvToggleEnv(&pIns->PanEnv, pSndFile, pIns, bEnable, 32, CHN_PANENV);
 }
@@ -587,12 +561,9 @@ bool CViewInstrument::EnvSetPanEnv(bool bEnable)
 bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 //------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return false;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return false;
-	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
+	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
 	pIns->PitchEnv.dwFlags &= ~ENV_FILTER;
 	return EnvToggleEnv(&pIns->PitchEnv, pSndFile, pIns, bEnable, 32, CHN_PITCHENV);
@@ -602,12 +573,9 @@ bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
 bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
 //-------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return false;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return false;
-	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return false;
+	CSoundFile *pSndFile = GetDocument()->GetSoundFile(); // security checks are done in GetInstrumentPtr()
 
 	pIns->PitchEnv.dwFlags &= ~ENV_FILTER;
 	return EnvToggleEnv(&pIns->PitchEnv, pSndFile, pIns, bEnable, 64, CHN_PITCHENV, ENV_FILTER);
@@ -2435,16 +2403,23 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 }
 
 
+// Get a pointer to the currently active instrument.
+MODINSTRUMENT *CViewInstrument::GetInstrumentPtr() const
+//------------------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return nullptr;
+	CSoundFile *pSndFile = pModDoc->GetSoundFile();
+	if(pSndFile == nullptr) return nullptr;
+	return pSndFile->Instruments[m_nInstrument];
+}
+
 // Get a pointer to the currently selected envelope.
 INSTRUMENTENVELOPE *CViewInstrument::GetEnvelopePtr() const
 //---------------------------------------------------------
 {
 	// First do some standard checks...
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return nullptr;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return nullptr;
-	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
 	if(pIns == nullptr) return nullptr;
 			
 	// Now for the real thing.
