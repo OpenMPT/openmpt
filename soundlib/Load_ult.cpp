@@ -395,7 +395,7 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
 		pSmp->nC5Speed = ultSmp.speed;
 		if(ultSmp.finetune)
 		{
-			pSmp->nC5Speed = (UINT)(((double)pSmp->nC5Speed) * pow(2, (((double)ultSmp.finetune) / (12.0 * 32768))));
+			pSmp->nC5Speed = (UINT)(((double)pSmp->nC5Speed) * pow(2.0, (((double)ultSmp.finetune) / (12.0 * 32768))));
 		}
 
 		if(ultSmp.flags & ULT_LOOP)
