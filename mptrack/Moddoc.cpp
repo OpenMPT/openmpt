@@ -2461,7 +2461,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		if (param)
 			wsprintf(s, "speed %d", param);
 		else
-			strcpy(s, szContinueOrIgnore);
+			strcpy(s, "continue");
 		break;
 
 	case CMD_VIBRATO:
@@ -2471,7 +2471,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		if (param)
 			wsprintf(s, "speed=%d depth=%d", param >> 4, param & 0x0F);
 		else
-			strcpy(s, szContinueOrIgnore);
+			strcpy(s, "continue");
 		break;
 
 	case CMD_SPEED:
