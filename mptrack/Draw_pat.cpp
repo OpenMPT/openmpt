@@ -131,6 +131,7 @@ void CViewPattern::UpdateColors()
 	b = hilightcolor(GetBValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKHILIGHT]),
 					GetBValue(CMainFrame::rgbCustomColors[MODCOLOR_BACKNORMAL]));
 	m_Dib.SetColor(MODCOLOR_2NDHIGHLIGHT, RGB(r,g,b));
+	m_Dib.SetColor(MODCOLOR_DODGY_COMMANDS, RGB(255, 0, 0));
 	m_Dib.SetBlendColor(CMainFrame::rgbCustomColors[MODCOLOR_BLENDCOLOR]);
 }
 
@@ -845,6 +846,9 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				if ((CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->note) && (m->note <= NOTE_MAX))
 				{
 					tx_col = MODCOLOR_NOTE;
+					// Highlight notes that are not supported by the Amiga
+					if((pSndFile->m_dwSongFlags & (SONG_PT1XMODE|SONG_AMIGALIMITS)) && (m->note < NOTE_MIDDLEC - 12 || m->note >= NOTE_MIDDLEC + 2 * 12))
+						tx_col = MODCOLOR_DODGY_COMMANDS;
 				}
 				if (col_sel & 0x01)
 				{
