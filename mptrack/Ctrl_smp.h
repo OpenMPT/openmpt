@@ -44,7 +44,9 @@ protected:
 	// Applies amplification to sample. Negative values
 	// can be used to invert phase.
 	void ApplyAmplify(LONG nAmp, bool bFadeIn = false, bool bFadeOut = false);
+
 	SELECTIONPOINTS GetSelectionPoints();
+	void SetSelectionPoints(UINT nStart, UINT nEnd);
 
 public:
 	CCtrlSamples();
