@@ -267,6 +267,11 @@ COLORREF CMainFrame::rgbCustomColors[MAX_MODCOLORS] =
 TCHAR CMainFrame::m_szDefaultDirectory[NUM_DIRS][_MAX_PATH] = {0};
 TCHAR CMainFrame::m_szWorkingDirectory[NUM_DIRS][_MAX_PATH] = {0};
 TCHAR CMainFrame::m_szKbdFile[_MAX_PATH] = "";			//rewbs.customKeys
+// Directory to INI setting translation
+const TCHAR CMainFrame::m_szDirectoryToSettingsName[NUM_DIRS][32] =
+{
+	_T("Songs_Directory"), _T("Samples_Directory"), _T("Instruments_Directory"), _T("Plugins_Directory"), _T("Plugin_Presets_Directory"), _T("Export_Directory"), _T("")
+};
 
 
 CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
@@ -451,19 +456,18 @@ void CMainFrame::LoadIniSettings()
 	m_nSampleUndoMaxBuffer = max(1, m_nSampleUndoMaxBuffer) << 20;
 
 	TCHAR szPath[_MAX_PATH] = "";
-	GetPrivateProfileString("Paths", "Songs_Directory", GetDefaultDirectory(DIR_MODS), szPath, INIBUFFERSIZE, iniFile);
-	SetDefaultDirectory(szPath, DIR_MODS);
-	GetPrivateProfileString("Paths", "Samples_Directory", GetDefaultDirectory(DIR_SAMPLES), szPath, INIBUFFERSIZE, iniFile);
-	SetDefaultDirectory(szPath, DIR_SAMPLES);
-	GetPrivateProfileString("Paths", "Instruments_Directory", GetDefaultDirectory(DIR_INSTRUMENTS), szPath, INIBUFFERSIZE, iniFile);
-	SetDefaultDirectory(szPath, DIR_INSTRUMENTS);
-	GetPrivateProfileString("Paths", "Plugins_Directory", GetDefaultDirectory(DIR_PLUGINS), szPath, INIBUFFERSIZE, iniFile);
-	SetDefaultDirectory(szPath, DIR_PLUGINS);
-	GetPrivateProfileString("Paths", "Plugin_Presets_Directory", GetDefaultDirectory(DIR_PLUGINPRESETS), szPath, INIBUFFERSIZE, iniFile);
-	SetDefaultDirectory(szPath, DIR_PLUGINPRESETS);
-	GetPrivateProfileString("Paths", "Export_Directory", GetDefaultDirectory(DIR_EXPORT), szPath, INIBUFFERSIZE, iniFile);
-	SetDefaultDirectory(szPath, DIR_EXPORT);
+	for(size_t i = 0; i < NUM_DIRS; i++)
+	{
+		if(m_szDirectoryToSettingsName[i][0] == 0)
+			continue;
+
+		GetPrivateProfileString("Paths", m_szDirectoryToSettingsName[i], GetDefaultDirectory(static_cast<Directory>(i)), szPath, INIBUFFERSIZE, iniFile);
+		RelativePathToAbsolute(szPath);
+		SetDefaultDirectory(szPath, static_cast<Directory>(i), false);
+
+	}
 	GetPrivateProfileString("Paths", "Key_Config_File", m_szKbdFile, m_szKbdFile, INIBUFFERSIZE, iniFile);
+	RelativePathToAbsolute(m_szKbdFile);
 
 	CSoundFile::m_nXBassDepth = GetPrivateProfileLong("Effects", "XBassDepth", 0, iniFile);
 	CSoundFile::m_nXBassRange = GetPrivateProfileLong("Effects", "XBassRange", 0, iniFile);
@@ -980,13 +984,28 @@ void CMainFrame::SaveIniSettings()
 	WritePrivateProfileDWord("Pattern Editor", "Record", gbPatternRecord, iniFile);	
 	WritePrivateProfileDWord("Pattern Editor", "AutoChordWaitTime", gnAutoChordWaitTime, iniFile);	
 
-	WritePrivateProfileString("Paths", "Songs_Directory", GetDefaultDirectory(DIR_MODS), iniFile);
-	WritePrivateProfileString("Paths", "Samples_Directory", GetDefaultDirectory(DIR_SAMPLES), iniFile);
-	WritePrivateProfileString("Paths", "Instruments_Directory", GetDefaultDirectory(DIR_INSTRUMENTS), iniFile);
-	WritePrivateProfileString("Paths", "Plugins_Directory", GetDefaultDirectory(DIR_PLUGINS), iniFile);
-	WritePrivateProfileString("Paths", "Plugin_Presets_Directory", GetDefaultDirectory(DIR_PLUGINPRESETS), iniFile);
-	WritePrivateProfileString("Paths", "Export_Directory", GetDefaultDirectory(DIR_EXPORT), iniFile);
-	WritePrivateProfileString("Paths", "Key_Config_File", m_szKbdFile, iniFile);
+	// Write default paths
+	const bool bConvertPaths = theApp.IsPortableMode();
+	TCHAR szPath[_MAX_PATH] = "";
+	for(size_t i = 0; i < NUM_DIRS; i++)
+	{
+		if(m_szDirectoryToSettingsName[i][0] == 0)
+			continue;
+
+		_tcscpy(szPath, GetDefaultDirectory(static_cast<Directory>(i)));
+		if(bConvertPaths)
+		{
+			AbsolutePathToRelative(szPath);
+		}
+		WritePrivateProfileString("Paths", m_szDirectoryToSettingsName[i], szPath, iniFile);
+
+	}
+	_tcscpy(szPath, m_szKbdFile);
+	if(bConvertPaths)
+	{
+		AbsolutePathToRelative(szPath);
+	}
+	WritePrivateProfileString("Paths", "Key_Config_File", szPath, iniFile);
 
 	WritePrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_nXBassDepth, iniFile);
 	WritePrivateProfileLong("Effects", "XBassRange", CSoundFile::m_nXBassRange, iniFile);
@@ -3103,4 +3122,78 @@ LPCTSTR CMainFrame::GetWorkingDirectory(Directory dir)
 //----------------------------------------------------
 {
 	return m_szWorkingDirectory[dir];
+}
+
+
+// Convert an absolute path to a path that's relative to OpenMPT's directory.
+// Paths are relative to the executable path.
+// nLength specifies the maximum number of character that can be written into szPath,
+// including the trailing null char.
+template <size_t nLength>
+void CMainFrame::AbsolutePathToRelative(TCHAR (&szPath)[nLength])
+//---------------------------------------------------------------
+{
+	STATIC_ASSERT(nLength >= 3);
+
+	if(_tcslen(szPath) == 0)
+		return;
+
+	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
+	TCHAR szExePath[nLength], szTempPath[nLength];
+	_tcsncpy(szExePath, theApp.GetAppDirPath(), nStrLength);
+	SetNullTerminator(szExePath);
+
+	// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
+	if(!_tcsncicmp(szExePath, szPath, _tcslen(szExePath)))
+	{
+		_tcscpy(szTempPath, _T(".\\"));	// ".\"
+		_tcsncat(szTempPath, &szPath[_tcslen(szExePath)], nStrLength - 2);	// "Somepath"
+		_tcscpy(szPath, szTempPath);
+	} else
+	// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
+	if(!_tcsncicmp(szExePath, szPath, 1))
+	{
+		_tcsncpy(szTempPath, &szPath[2], nStrLength);	// "\Somepath"
+		_tcscpy(szPath, szTempPath);
+	}
+	SetNullTerminator(szPath);
+}
+
+
+// Convert a relative path to an absolute path.
+// Paths are relative to the executable path.
+// nLength specifies the maximum number of character that can be written into szPath,
+// including the trailing null char.
+template <size_t nLength>
+void CMainFrame::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
+//---------------------------------------------------------------
+{
+	STATIC_ASSERT(nLength >= 3);
+
+	if(_tcslen(szPath) == 0)
+		return;
+
+	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
+	TCHAR szExePath[nLength], szTempPath[nLength];
+	_tcsncpy(szExePath, theApp.GetAppDirPath(), nStrLength);
+	SetNullTerminator(szExePath);
+
+	// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\")
+	if(!_tcsncicmp(szPath, _T("\\"), 1))
+	{
+		_tcsncpy(szTempPath, szExePath, 2);	// "C:"
+		_tcsncat(szTempPath, szPath, nStrLength - 2);	// "\Somepath\"
+		_tcscpy(szPath, szTempPath);
+	} else
+	// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
+	if(!_tcsncicmp(szPath, _T(".\\"), 2))
+	{
+		_tcsncpy(szTempPath, szExePath, nStrLength);	// "C:\OpenMPT\"
+		if(_tcslen(szTempPath) < nStrLength)
+		{
+			_tcsncat(szTempPath, &szPath[2], nStrLength - _tcslen(szTempPath));	//	"Somepath"
+		}
+		_tcscpy(szPath, szTempPath);
+	}
+	SetNullTerminator(szPath);
 }

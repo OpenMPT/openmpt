@@ -37,8 +37,9 @@ void CPatternUndo::ClearUndo()
 //   - y: first row
 //   - cx: width
 //   - cy: height
-bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UINT cy)
-//------------------------------------------------------------------------------------
+//   - linkToPrevious: Don't create a separate undo step, but link this to the previous undo event.
+bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UINT cy, bool linkToPrevious)
+//---------------------------------------------------------------------------------------------------------
 {
 	if(m_pModDoc == nullptr) return false;
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
@@ -73,6 +74,7 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UI
 	sUndo.cx = cx;
 	sUndo.cy = cy;
 	sUndo.pbuffer = pUndoData;
+	sUndo.linkToPrevious = linkToPrevious;
 	pPattern += x + y * pSndFile->m_nChannels;
 	for (UINT iy = 0; iy < cy; iy++)
 	{
@@ -92,6 +94,15 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UI
 PATTERNINDEX CPatternUndo::Undo()
 //-------------------------------
 {
+	return Undo(false);
+}
+
+
+// Restore an undo point. Returns which pattern has been modified.
+// linkedFromPrevious is true if a connected undo even is going to be deleted.
+PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
+//------------------------------------------------------
+{
 	if(m_pModDoc == nullptr) return PATTERNINDEX_INVALID;
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return PATTERNINDEX_INVALID;
@@ -99,6 +110,7 @@ PATTERNINDEX CPatternUndo::Undo()
 	MODCOMMAND *pUndoData, *pPattern;
 	PATTERNINDEX nPattern;
 	ROWINDEX nRows;
+	bool linkToPrevious = false;
 
 	if (CanUndo() == false) return PATTERNINDEX_INVALID;
 
@@ -106,6 +118,9 @@ PATTERNINDEX CPatternUndo::Undo()
 	while(UndoBuffer.back().pattern >= pSndFile->Patterns.Size())
 	{
 		RemoveLastUndoStep();
+		// The command which was connect to this command is no more valid, so don't search for the next command.
+		if(linkedFromPrevious)
+			return PATTERNINDEX_INVALID;
 	}
 
 	// Select most recent undo slot
@@ -128,6 +143,7 @@ PATTERNINDEX CPatternUndo::Undo()
 				CSoundFile::FreePattern(oldPattern);
 			}
 		}
+		linkToPrevious = pUndo->linkToPrevious;
 		pUndoData = pUndo->pbuffer;
 		pPattern = pSndFile->Patterns[nPattern];
 		if (!pSndFile->Patterns[nPattern]) return PATTERNINDEX_INVALID;
@@ -143,7 +159,13 @@ PATTERNINDEX CPatternUndo::Undo()
 	RemoveLastUndoStep();
 
 	if (CanUndo() == false) m_pModDoc->UpdateAllViews(NULL, HINT_UNDO);
-	return nPattern;
+	if(linkToPrevious)
+	{
+		return Undo(true);		
+	} else
+	{
+		return nPattern;
+	}
 }
 
 

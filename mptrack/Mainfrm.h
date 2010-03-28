@@ -616,11 +616,19 @@ public:
 	static LPCTSTR GetWorkingDirectory(Directory dir);
 	static void SetDefaultDirectory(const LPCTSTR szFilenameFrom, Directory dir, bool bStripFilename = false);
 	static LPCTSTR GetDefaultDirectory(Directory dir);
+
+	template <size_t nLength>
+	static void AbsolutePathToRelative(TCHAR (&szPath)[nLength]);
+	template <size_t nLength>
+	static void RelativePathToAbsolute(TCHAR (&szPath)[nLength]);
+
 protected:
 	static void SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&pDirs)[NUM_DIRS][_MAX_PATH], bool bStripFilename);
+
 	// Directory Arrays (default dir + last dir)
 	static TCHAR m_szDefaultDirectory[NUM_DIRS][_MAX_PATH];
 	static TCHAR m_szWorkingDirectory[NUM_DIRS][_MAX_PATH];
+	static const TCHAR m_szDirectoryToSettingsName[NUM_DIRS][32];
 
 
 // Overrides
