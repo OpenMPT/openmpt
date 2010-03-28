@@ -93,6 +93,10 @@ const PATTERNFONT gSmallPatternFont =
 	-3,	1, 9,	// InstrOfs + nInstrHiWidth
 };
 
+// NOTE: See also CViewPattern::DrawNote() when changing stuff here
+// or adding new fonts - The custom tuning note names might require
+// some additions there.
+
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -667,7 +671,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
-	BOOL activeDoc = pMainFrm ? pMainFrm->GetActiveDoc() == GetDocument() : FALSE;
+	bool activeDoc = pMainFrm ? (pMainFrm->GetActiveDoc() == GetDocument()) : false;
 
 	if(activeDoc && CChannelManagerDlg::sharedInstance(FALSE) && CChannelManagerDlg::sharedInstance()->IsDisplayed())
 		CChannelManagerDlg::sharedInstance()->SetDocument((void*)this);
@@ -1045,13 +1049,13 @@ void CViewPattern::DrawDragSel(HDC hdc)
 	CRect rect;
 	POINT ptTopLeft, ptBottomRight;
 	DWORD dwTopLeft, dwBottomRight;
-	BOOL bLeft, bTop, bRight, bBottom;
+	bool bLeft, bTop, bRight, bBottom;
 	int x1, y1, x2, y2, dx, dy, c1, c2;
 	int nChannels, nRows;
 
-	if ((pModDoc = GetDocument()) == NULL) return;
+	if ((pModDoc = GetDocument()) == nullptr) return;
 	pSndFile = pModDoc->GetSoundFile();
-	bLeft = bTop = bRight = bBottom = TRUE;
+	bLeft = bTop = bRight = bBottom = true;
 	x1 = (m_dwBeginSel & 0xFFF8) >> 3;
 	y1 = (m_dwBeginSel) >> 16;
 	x2 = (m_dwEndSel & 0xFFF8) >> 3;
@@ -1066,15 +1070,15 @@ void CViewPattern::DrawDragSel(HDC hdc)
 	y2 += dy;
 	nChannels = pSndFile->m_nChannels;
 	nRows = pSndFile->PatternSize[m_nPattern];
-	if (x1 < GetXScrollPos()) bLeft = FALSE;
-	if (x1 >= nChannels) x1 = nChannels-1;
-	if (x1 < 0) { x1 = 0; c1 = 0; bLeft = FALSE; }
-	if (x2 >= nChannels) { x2 = nChannels-1; c2 = 4; bRight = FALSE; }
+	if (x1 < GetXScrollPos()) bLeft = false;
+	if (x1 >= nChannels) x1 = nChannels - 1;
+	if (x1 < 0) { x1 = 0; c1 = 0; bLeft = false; }
+	if (x2 >= nChannels) { x2 = nChannels-1; c2 = 4; bRight = false; }
 	if (x2 < 0) x2 = 0;
-	if (y1 < GetYScrollPos() - (int)m_nMidRow) bTop = FALSE;
+	if (y1 < GetYScrollPos() - (int)m_nMidRow) bTop = false;
 	if (y1 >= nRows) y1 = nRows-1;
-	if (y1 < 0) { y1 = 0; bTop = FALSE; }
-	if (y2 >= nRows) { y2 = nRows-1; bBottom = FALSE; }
+	if (y1 < 0) { y1 = 0; bTop = false; }
+	if (y2 >= nRows) { y2 = nRows-1; bBottom = false; }
 	if (y2 < 0) y2 = 0;
 	dwTopLeft = (y1<<16)|(x1<<3)|c1;
 	dwBottomRight = ((y2+1)<<16)|(x2<<3)|(c2+1);
@@ -1300,13 +1304,15 @@ void CViewPattern::SetCurSel(DWORD dwBegin, DWORD dwEnd)
 	}
 	// rewbs.fix3417: adding error checking
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc) {
+	if (pModDoc)
+	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if (pSndFile) {
+		if (pSndFile)
+		{
 			y1 = max(y1, 0);
-			y2 = min(y2, (int)pSndFile->PatternSize[m_nPattern]);
+			y2 = min(y2, (int)pSndFile->Patterns[m_nPattern].GetNumRows());
 			x1 = max(x1, 0);
-			x2 = min(x2, pSndFile->m_nChannels*8 - 4);
+			x2 = min(x2, pSndFile->GetNumChannels() * 8 - 4);
 		}
 	}
 	// end rewbs.fix3417

@@ -912,6 +912,9 @@ BOOL CSoundFile::ReadNote()
 	for (UINT nChn=0; nChn<MAX_CHANNELS; nChn++,pChn++)
 	{
 	skipchn:
+
+		MODINSTRUMENT *pIns = pChn->pModInstrument;
+
 		if ((pChn->dwFlags & CHN_NOTEFADE) && (!(pChn->nFadeOutVol|pChn->nRightVol|pChn->nLeftVol)))
 		{
 			pChn->nLength = 0;
@@ -1071,7 +1074,8 @@ BOOL CSoundFile::ReadNote()
 			{
 				MODINSTRUMENT *pIns = pChn->pModInstrument;
 				// Volume Envelope
-				if ((pChn->dwFlags & CHN_VOLENV) && (pIns->VolEnv.nNodes))
+				// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
+				if (((pChn->dwFlags & CHN_VOLENV) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
 				{
 					int envvol = getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);
 					
@@ -1097,7 +1101,8 @@ BOOL CSoundFile::ReadNote()
 					vol = (vol * CLAMP(envvol, 0, 512)) >> 8;
 				}
 				// Panning Envelope
-				if ((pChn->dwFlags & CHN_PANENV) && (pIns->PanEnv.nNodes))
+				// IT Compatibility: S79 does not disable the panning envelope, it just pauses the counter
+				if (((pChn->dwFlags & CHN_PANENV) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
 				{
 					int envpos = pChn->nPanEnvPosition;
 					UINT pt = pIns->PanEnv.nNodes - 1;
@@ -1273,9 +1278,9 @@ BOOL CSoundFile::ReadNote()
 				period = CLAMP(period, 113 * 4, 856 * 4);
 
 			// Pitch/Filter Envelope
-			if ((pChn->pModInstrument) && (pChn->dwFlags & CHN_PITCHENV) && (pChn->pModInstrument->PitchEnv.nNodes))
+			// IT Compatibility: S7B does not disable the pitch envelope, it just pauses the counter
+			if ((pIns) && ((pChn->dwFlags & CHN_PITCHENV) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
 			{
-				MODINSTRUMENT *pIns = pChn->pModInstrument;
 				int envpos = pChn->nPitchEnvPosition;
 				UINT pt = pIns->PitchEnv.nNodes - 1;
 				for (UINT i=0; i<(UINT)(pIns->PitchEnv.nNodes-1); i++)
@@ -1583,7 +1588,7 @@ BOOL CSoundFile::ReadNote()
 			}*/
 			UINT freq = 0;
 
-			if(m_nType != MOD_TYPE_MPT || !pChn->pModInstrument || pChn->pModInstrument->pTuning == NULL)
+			if(m_nType != MOD_TYPE_MPT || !pIns || pIns->pTuning == nullptr)
 			{
 				freq = GetFreqFromPeriod(period, pChn->nC5Speed, nPeriodFrac);
 			}
@@ -1591,7 +1596,7 @@ BOOL CSoundFile::ReadNote()
 			{
 				if(pChn->m_CalculateFreq || (pChn->m_ReCalculateFreqOnFirstTick && m_nTickCount == 0))
 				{
-					pChn->m_Freq = pChn->nC5Speed * vibratoFactor * pChn->pModInstrument->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps);
+					pChn->m_Freq = pChn->nC5Speed * vibratoFactor * pIns->pTuning->GetRatio(pChn->nNote - NOTE_MIDDLEC + arpeggioSteps, pChn->nFineTune+pChn->m_PortamentoFineSteps);
 					if(!pChn->m_CalculateFreq)
 						pChn->m_ReCalculateFreqOnFirstTick = false;
 					else
@@ -1602,8 +1607,8 @@ BOOL CSoundFile::ReadNote()
 			}
 
 			//Applying Pitch/Tempo lock.
-            if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT) && pChn->pModInstrument && pChn->pModInstrument->wPitchToTempoLock)
-				freq *= (float)m_nMusicTempo / (float)pChn->pModInstrument->wPitchToTempoLock;
+            if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT) && pIns && pIns->wPitchToTempoLock)
+				freq *= (float)m_nMusicTempo / (float)pIns->wPitchToTempoLock;
 
 
 			if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (freq < 256))
@@ -1621,9 +1626,8 @@ BOOL CSoundFile::ReadNote()
 		}
 		
 		// Increment envelope position
-		if (pChn->pModInstrument)
+		if (pIns)
 		{
-			MODINSTRUMENT *pIns = pChn->pModInstrument;
 			// Volume Envelope
 			if (pChn->dwFlags & CHN_VOLENV)
 			{
@@ -1852,7 +1856,8 @@ BOOL CSoundFile::ReadNote()
 				if (pChn->nInc >= 0xFE00) pChn->dwFlags |= CHN_NOIDO;
 #endif // FASTSOUNDLIB
 			}
-			if (m_pConfig->getUseGlobalPreAmp()) {
+			if (m_pConfig->getUseGlobalPreAmp())
+			{
 				pChn->nNewRightVol >>= MIXING_ATTENUATION;
 				pChn->nNewLeftVol >>= MIXING_ATTENUATION;
 			}
@@ -1989,9 +1994,9 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 	MODINSTRUMENT *pIns = pChn->pModInstrument;
 	IMixPlugin *pPlugin = NULL;
 
-	if ((instr) && (instr < MAX_INSTRUMENTS)) {
+	if ((instr) && (instr < MAX_INSTRUMENTS))
 		pIns = Instruments[instr];
-	}
+
 	if ((pIns) && (pIns->nMidiChannel >= 1) && (pIns->nMidiChannel <= 16)) {
 		UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
 		if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS)) {
@@ -2060,7 +2065,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 }
 
 int CSoundFile::getVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns)
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 {
 	UINT pt = pIns->VolEnv.nNodes - 1;
 

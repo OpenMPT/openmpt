@@ -123,39 +123,39 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 
 // Channel flags:
 // Bits 0-7:	Sample Flags
-#define CHN_16BIT			0x01
-#define CHN_LOOP			0x02
-#define CHN_PINGPONGLOOP	0x04
-#define CHN_SUSTAINLOOP		0x08
-#define CHN_PINGPONGSUSTAIN	0x10
-#define CHN_PANNING			0x20
-#define CHN_STEREO			0x40
-#define CHN_PINGPONGFLAG	0x80	//When flag is on, sample is processed backwards
+#define CHN_16BIT			0x01		// 16-bit sample
+#define CHN_LOOP			0x02		// looped sample
+#define CHN_PINGPONGLOOP	0x04		// bidi-looped sample
+#define CHN_SUSTAINLOOP		0x08		// sample with sustain loop
+#define CHN_PINGPONGSUSTAIN	0x10		// sample with bidi sustain loop
+#define CHN_PANNING			0x20		// sample with forced panning
+#define CHN_STEREO			0x40		// stereo sample
+#define CHN_PINGPONGFLAG	0x80		// when flag is on, sample is processed backwards
 // Bits 8-31:	Channel Flags
-#define CHN_MUTE			0x100
-#define CHN_KEYOFF			0x200
-#define CHN_NOTEFADE		0x400
-#define CHN_SURROUND		0x800
-#define CHN_NOIDO			0x1000
-#define CHN_HQSRC			0x2000
-#define CHN_FILTER			0x4000
-#define CHN_VOLUMERAMP		0x8000
-#define CHN_VIBRATO			0x10000
-#define CHN_TREMOLO			0x20000
-#define CHN_PANBRELLO		0x40000
-#define CHN_PORTAMENTO		0x80000
-#define CHN_GLISSANDO		0x100000
-#define CHN_VOLENV			0x200000
-#define CHN_PANENV			0x400000
-#define CHN_PITCHENV		0x800000
-#define CHN_FASTVOLRAMP		0x1000000
-#define CHN_EXTRALOUD		0x2000000
-#define CHN_REVERB			0x4000000
-#define CHN_NOREVERB		0x8000000
-#define CHN_SOLO			0x10000000 // -> CODE#0012 -> DESC="midi keyboard split" -! NEW_FEATURE#0012
-#define CHN_NOFX			0x20000000 // -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
-#define CHN_SYNCMUTE		0x40000000
-#define CHN_FILTERENV		0x80000000
+#define CHN_MUTE			0x100		// muted channel
+#define CHN_KEYOFF			0x200		// exit sustain
+#define CHN_NOTEFADE		0x400		// fade note (instrument mode)
+#define CHN_SURROUND		0x800		// use surround channel
+#define CHN_NOIDO			0x1000		// ???
+#define CHN_HQSRC			0x2000		// ???
+#define CHN_FILTER			0x4000		// filtered output
+#define CHN_VOLUMERAMP		0x8000		// ramp volume
+#define CHN_VIBRATO			0x10000		// apply vibrato
+#define CHN_TREMOLO			0x20000		// apply tremolo
+#define CHN_PANBRELLO		0x40000		// apply panbrello
+#define CHN_PORTAMENTO		0x80000		// apply portamento
+#define CHN_GLISSANDO		0x100000	// glissando mode
+#define CHN_VOLENV			0x200000	// volume envelope is active
+#define CHN_PANENV			0x400000	// pan envelope is active
+#define CHN_PITCHENV		0x800000	// pitch envelope is active
+#define CHN_FASTVOLRAMP		0x1000000	// ramp volume very fast
+#define CHN_EXTRALOUD		0x2000000	// force master volume to 0x100
+#define CHN_REVERB			0x4000000	// apply reverb
+#define CHN_NOREVERB		0x8000000	// forbid reverb
+#define CHN_SOLO			0x10000000	// solo channel -> CODE#0012 -> DESC="midi keyboard split" -! NEW_FEATURE#0012
+#define CHN_NOFX			0x20000000	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
+#define CHN_SYNCMUTE		0x40000000	// keep sample sync on mute
+#define CHN_FILTERENV		0x80000000	// force pitch envelope to act as filter envelope
 
 #define CHN_SAMPLEFLAGS		(CHN_16BIT|CHN_LOOP|CHN_PINGPONGLOOP|CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN|CHN_PANNING|CHN_STEREO|CHN_PINGPONGFLAG)
 #define CHN_CHANNELFLAGS	(~CHN_SAMPLEFLAGS)
