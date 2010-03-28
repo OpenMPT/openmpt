@@ -191,6 +191,16 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	}
 
 	EndWaitCursor();
+
+	// Show log messages from loaders.
+	if (GetLog() != nullptr)
+	{
+		CString sTemp;
+		sTemp.Format("File: %s\nLast saved with: %s, current version is %s\n\n%s", lpszPathName, (LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion), MptVersion::str, GetLog());
+		AfxMessageBox(sTemp, MB_ICONINFORMATION);
+		ClearLog();
+	}
+
 	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.m_nChannels)) return FALSE;
 	// Midi Import
 	if (m_SndFile.m_nType == MOD_TYPE_MID)
@@ -366,7 +376,11 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 // -> DESC="channels management dlg"
 	ReinitRecordState();
 // -! NEW_FEATURE#0015
-	if (m_SndFile.m_dwLastSavedWithVersion > MptVersion::num) {
+
+	// Show warning if file was made with more recent version of OpenMPT except for MPTM-files,
+	// which uses CModDocs log-mechanism to show messages.
+	if (m_SndFile.m_dwLastSavedWithVersion > MptVersion::num && m_SndFile.GetType() != MOD_TYPE_MPT)
+	{
 		char s[256];
 		wsprintf(s, "Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%s. Current version: v%s.\r\n", 
 			(LPCTSTR)MptVersion::ToStr(m_SndFile.m_dwLastSavedWithVersion),

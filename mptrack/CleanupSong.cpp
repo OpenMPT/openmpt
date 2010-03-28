@@ -452,8 +452,8 @@ NotEmpty:
 	// Reorder patterns & Delete unused patterns
 	BEGIN_CRITICAL();
 	{
-		UINT npatnames = pSndFile->m_nPatternNames;
-		LPSTR lpszpatnames = pSndFile->m_lpszPatternNames;
+		const UINT npatnames = pSndFile->m_nPatternNames;
+		const LPSTR lpszpatnames = pSndFile->m_lpszPatternNames;
 		pSndFile->m_nPatternNames = 0;
 		pSndFile->m_lpszPatternNames = NULL;
 		for (PATTERNINDEX i = 0; i < maxPatIndex; i++)
@@ -487,6 +487,8 @@ NotEmpty:
 		{
 			pSndFile->Patterns[nPat].SetData(pPatterns[nPat], nPatRows[nPat]);
 		}
+
+		delete[] lpszpatnames;
 	}
 	END_CRITICAL();
 	EndWaitCursor();

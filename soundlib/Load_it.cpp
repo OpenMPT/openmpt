@@ -28,6 +28,25 @@
 #define str_pattern				(GetStrI18N((_TEXT("pattern"))))
 #define str_PatternSetTruncationNote (GetStrI18N((_TEXT("The module contains %u patterns but only %u patterns can be loaded in this OpenMPT version."))))
 #define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
+#define str_LoadingIncompatibleVersion	TEXT("The file informed that it is incompatible with this version of OpenMPT. Loading was terminated.")
+#define str_LoadingMoreRecentVersion	TEXT("The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly.")
+
+const uint16 verMptFileVer = 0x88F;
+const uint16 verMptFileVerLoadLimit = 0x1000; // If cwtv-field is greater or equal to this value,
+											  // the MPTM file will not be loaded.
+
+/*
+MPTM version history for cwtv-field in IT header:
+0x88E(1.17.02.50) -> 0x88F(1.18.01.00): 
+0x88D(1.17.02.49) -> 0x88E(1.17.02.50): Changed ID to that of IT and undone the orderlist change done in
+				       0x88A->0x88B. Now extended orderlist is saved as extension.
+0x88C(1.17.02.48) -> 0x88D(1.17.02.49): Some tuning related changes - that part fails to read on older versions.
+0x88B -> 0x88C: Changed type in which tuning number is printed to file: size_t -> uint16.
+0x88A -> 0x88B: Changed order-to-pattern-index table type from BYTE-array to vector<UINT>.
+*/
+
+
+
 
 static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 //--------------------------------------------------
@@ -939,6 +958,20 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(pifh->cwtv == 0x214 && pifh->cmwt == 0x202)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 		}
+		else // case: type == MOD_TYPE_MPT
+		{
+			if (pifh->cwtv >= verMptFileVerLoadLimit)
+			{
+				if (GetpModDoc())
+					GetpModDoc()->AddToLog(str_LoadingIncompatibleVersion);
+				return false;
+			}	
+			else if (pifh->cwtv > verMptFileVer)
+			{
+				if (GetpModDoc())
+					GetpModDoc()->AddToLog(str_LoadingMoreRecentVersion);
+			}
+		}
 	}
 	
 	if(GetType() == MOD_TYPE_IT) mptStartPos = dwMemLength;
@@ -1500,7 +1533,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(version >= 0x88D)
 			{
 				srlztn::Ssb ssb(iStrm);
-				ssb.BeginRead("mptm", 1);
+				ssb.BeginRead("mptm", MptVersion::num);
 				ssb.ReadItem(GetTuneSpecificTunings(), "0", 1, &ReadTuningCollection);
 				ssb.ReadItem(*this, "1", 1, &ReadTuningMap);
 				ssb.ReadItem(Order, "2", 1, &ReadModSequenceOld);
@@ -1847,17 +1880,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	//VERSION
 	if(GetType() == MOD_TYPE_MPT)
 	{
-		header.cwtv = 0x88E;	// Used in OMPT-hack versioning.
+		header.cwtv = verMptFileVer;	// Used in OMPT-hack versioning.
 		header.cmwt = 0x888;
-		/*
-		Version history:
-		0x88D(v.02.49) -> 0x88E: Changed ID to that of IT and undone the orderlist change done in
-						  0x88A->0x88B. Now extended orderlist is saved as extension.
-		0x88C(v.02.48) -> 0x88D: Some tuning related changes - that part fails to read on older versions.
-		0x88B -> 0x88C: Changed type in which tuning number is printed
-						to file: size_t -> uint16.
-		0x88A -> 0x88B: Changed order-to-pattern-index table type from BYTE-array to vector<UINT>.
-		*/
 	}
 	else //IT
 	{
