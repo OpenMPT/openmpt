@@ -251,12 +251,12 @@ LPMODPLUGDIB CMainFrame::bmpVisPcNode = NULL;
 HPEN CMainFrame::gpenVuMeter[NUM_VUMETER_PENS*2];
 COLORREF CMainFrame::rgbCustomColors[MAX_MODCOLORS] = 
 	{
-		0xFFFFFF, 0x000000, 0xC0C0C0, 0x000000, 0x000000, 0xFFFFFF, 0x0000FF,
-		0x80FFFF, 0x000000, 0xE0E8E0,
+		RGB(0xFF, 0xFF, 0xFF), RGB(0x00, 0x00, 0x00), RGB(0xC0, 0xC0, 0xC0), RGB(0x00, 0x00, 0x00), RGB(0x00, 0x00, 0x00), RGB(0xFF, 0xFF, 0xFF), 0x0000FF,
+		RGB(0xFF, 0xFF, 0x80), RGB(0x00, 0x00, 0x00), RGB(0xE0, 0xE8, 0xE0),
 		// Effect Colors
-		0x800000, 0x808000,	0x008000, 0x808000, 0x008080, 0x000080, 0xFF0000,
+		RGB(0x00, 0x00, 0x80), RGB(0x00, 0x80, 0x80), RGB(0x00, 0x80, 0x00), RGB(0x00, 0x80, 0x80), RGB(0x80, 0x80, 0x00), RGB(0x80, 0x00, 0x00), RGB(0x00, 0x00, 0xFF),
 		// VU-Meters
-		0x00FF00, 0x00FFFF, 0x0000FF,
+		RGB(0x00, 0xC8, 0x00), RGB(0xFF, 0xC8, 0x00), RGB(0xE1, 0x00, 0x00),
 		// Channel separators
 		GetSysColor(COLOR_BTNSHADOW), GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_BTNHIGHLIGHT),
 		// Blend colour
@@ -274,9 +274,9 @@ const TCHAR CMainFrame::m_szDirectoryToSettingsName[NUM_DIRS][32] =
 };
 
 
-CInputHandler *CMainFrame::m_InputHandler = NULL; //rewbs.customKeys
-CAutoSaver *CMainFrame::m_pAutoSaver = NULL; //rewbs.autosave
-CPerformanceCounter *CMainFrame::m_pPerfCounter = NULL;
+CInputHandler *CMainFrame::m_InputHandler = nullptr; //rewbs.customKeys
+CAutoSaver *CMainFrame::m_pAutoSaver = nullptr; //rewbs.autosave
+CPerformanceCounter *CMainFrame::m_pPerfCounter = nullptr;
 
 static UINT indicators[] =
 {
@@ -295,15 +295,15 @@ CMainFrame::CMainFrame()
 //----------------------
 {
 	m_bModTreeHasFocus = false;	//rewbs.customKeys
-	m_pNoteMapHasFocus = NULL;	//rewbs.customKeys
+	m_pNoteMapHasFocus = nullptr;	//rewbs.customKeys
 	m_pOrderlistHasFocus = nullptr;
 	m_bOptionsLocked = false;	//rewbs.customKeys
 
-	m_pJustModifiedDoc = NULL;
-	m_pModPlaying = NULL;
+	m_pJustModifiedDoc = nullptr;
+	m_pModPlaying = nullptr;
 	m_hFollowSong = NULL;
 	m_hWndMidi = NULL;
-	m_pSndFile = NULL;
+	m_pSndFile = nullptr;
 	m_dwStatus = 0;
 	m_dwElapsedTime = 0;
 	m_dwTimeSec = 0;
@@ -360,11 +360,10 @@ CMainFrame::CMainFrame()
 	CString storedVersion = GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
 	//If version number stored in INI is 1.17.02.40 or later, load setting from INI file.
 	//Else load settings from Registry
-	if (storedVersion >= "1.17.02.40") {
+	if (storedVersion >= "1.17.02.40")
 		LoadIniSettings();
-	} else {
+	else
 		LoadRegistrySettings();
-	}
 
 	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
 	m_pPerfCounter= new CPerformanceCounter();
@@ -488,7 +487,9 @@ void CMainFrame::LoadIniSettings()
 	m_pAutoSaver->SetSaveInterval(GetPrivateProfileLong("AutoSave", "IntervalMinutes", 10, iniFile));
 	m_pAutoSaver->SetHistoryDepth(GetPrivateProfileLong("AutoSave", "BackupHistory", 3, iniFile));
 	m_pAutoSaver->SetUseOriginalPath(GetPrivateProfileLong("AutoSave", "UseOriginalPath", true, iniFile) != 0);
-	m_pAutoSaver->SetPath(GetPrivateProfileCString("AutoSave", "Path", "", iniFile));
+	GetPrivateProfileString("AutoSave", "Path", "", szPath, INIBUFFERSIZE, iniFile);
+	RelativePathToAbsolute(szPath);
+	m_pAutoSaver->SetPath(szPath);
 	m_pAutoSaver->SetFilenameTemplate(GetPrivateProfileCString("AutoSave", "FileNameTemplate", "", iniFile));
 }
 
@@ -1024,7 +1025,12 @@ void CMainFrame::SaveIniSettings()
 	WritePrivateProfileLong("AutoSave", "IntervalMinutes", m_pAutoSaver->GetSaveInterval(), iniFile);
 	WritePrivateProfileLong("AutoSave", "BackupHistory", m_pAutoSaver->GetHistoryDepth(), iniFile);
 	WritePrivateProfileLong("AutoSave", "UseOriginalPath", m_pAutoSaver->GetUseOriginalPath(), iniFile);
-	WritePrivateProfileString("AutoSave", "Path", m_pAutoSaver->GetPath(), iniFile);
+	_tcscpy(szPath, m_pAutoSaver->GetPath()); 
+	if(bConvertPaths)
+	{
+		AbsolutePathToRelative(szPath);
+	}
+	WritePrivateProfileString("AutoSave", "Path", szPath, iniFile);
 	WritePrivateProfileString("AutoSave", "FileNameTemplate", m_pAutoSaver->GetFilenameTemplate(), iniFile);
 
 	theApp.SaveChords(Chords);

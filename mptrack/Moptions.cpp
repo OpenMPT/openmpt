@@ -408,9 +408,9 @@ void COptionsColors::OnPresetMPT()
 	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0x80, 0x80);
 	CustomColors[MODCOLOR_PITCH] = RGB(0x80, 0x80, 0x00);
 	CustomColors[MODCOLOR_GLOBALS] = RGB(0x80, 0x00, 0x00);
-	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xFF, 0x00);
-	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xFF, 0x00);
-	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xFF, 0x00, 0x00);
+	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
+	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
 	CustomColors[MODCOLOR_SEPSHADOW] = GetSysColor(COLOR_BTNSHADOW);
 	CustomColors[MODCOLOR_SEPFACE] = GetSysColor(COLOR_BTNFACE);
 	CustomColors[MODCOLOR_SEPHILITE] = GetSysColor(COLOR_BTNHIGHLIGHT);
