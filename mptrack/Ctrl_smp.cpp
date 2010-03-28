@@ -1489,13 +1489,7 @@ void CCtrlSamples::OnUpsample()
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		if (selection.bSelected == true)
 		{
-			SAMPLEVIEWSTATE viewstate;
-			memset(&viewstate, 0, sizeof(viewstate));
-			SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
-
-			viewstate.dwBeginSel = dwStart;
-			viewstate.dwEndSel = dwEnd + (dwEnd-dwStart);
-			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
+			SetSelectionPoints(dwStart, dwEnd + (dwEnd - dwStart));
 		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		m_pModDoc->SetModified();
@@ -1623,13 +1617,7 @@ void CCtrlSamples::OnDownsample()
 		m_pModDoc->AdjustEndOfSample(m_nSample);
 		if (selection.bSelected == true)
 		{
-			SAMPLEVIEWSTATE viewstate;
-			memset(&viewstate, 0, sizeof(viewstate));
-			SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
-
-			viewstate.dwBeginSel = dwStart;
-			viewstate.dwEndSel = dwStart + dwRemove;
-			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
+			SetSelectionPoints(dwStart, dwStart + dwRemove);
 		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 		m_pModDoc->SetModified();
@@ -1727,7 +1715,8 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	if(!pSmp || pSmp->nLength == 0) goto error;
 
 	// Time stretching
-	if(IsDlgButtonChecked(IDC_CHECK3)){
+	if(IsDlgButtonChecked(IDC_CHECK3))
+	{
 		UpdateData(TRUE); //Ensure m_dTimeStretchRatio is up-to-date with textbox content
 		errorcode = TimeStretch((float)(m_dTimeStretchRatio / 100.0));
 
@@ -1742,7 +1731,8 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 		
 	}
 	// Pitch shifting
-	else{
+	else
+	{
 		// Get selected pitch modifier [-12,+12]
 		CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO4);
 		float pm = float(combo->GetCurSel()) - 12.0f;
@@ -1761,27 +1751,29 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	// Error management
 	error:
 
-	if(errorcode > 0){
-		CHAR str[64];
-		switch(errorcode & 0xff){
-			case 1 : wsprintf(str,"Pitch %s...",(errorcode>>8) == 1 ? "< 0.5" : "> 2.0");
+	if(errorcode > 0)
+	{
+		TCHAR str[64];
+		switch(errorcode & 0xff)
+		{
+			case 1 : wsprintf(str, _T("Pitch %s..."), (errorcode >> 8) == 1 ? _T("< 0.5") : _T("> 2.0"));
 				break;
-			case 2 : wsprintf(str,"Stretch ratio is too %s. Must be between 50% and 200%.",(errorcode>>8) == 1 ? "low" : "high");
+			case 2 : wsprintf(str, _T("Stretch ratio is too %s. Must be between 50% and 200%."), (errorcode >> 8) == 1 ? _T("low") : _T("high"));
 				break;
-			case 3 : wsprintf(str,"Not enough memory...");
+			case 3 : wsprintf(str, _T("Not enough memory..."));
 				break;
-			case 5 : wsprintf(str, "Too low sample rate");
+			case 5 : wsprintf(str, _T("Too low sample rate"));
 				break;
-			case 6 : wsprintf(str, "Too short sample");
+			case 6 : wsprintf(str, _T("Too short sample"));
 				break;
-			default: wsprintf(str,"Unknown Error...");
+			default: wsprintf(str, _T("Unknown Error..."));
 				break;
 		}
 		AfxMessageBox(str, MB_ICONERROR);
 	}
 
 	// Update sample view
-	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL); // !!!! see CODE#0006, update#3
+	m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 	m_pModDoc->SetModified();
 }
 
@@ -1828,13 +1820,14 @@ int CCtrlSamples::TimeStretch(float ratio)
 	}
 
 	// Get number of channels & sample size
-	BYTE smpsize = pSmp->GetElementarySampleSize();
-	const UINT nChn = pSmp->GetNumChannels();
+	uint8 smpsize = pSmp->GetElementarySampleSize();
+	const uint8 nChn = pSmp->GetNumChannels();
 
 	// Stretching is implemented only for 16-bit samples.
 	if(smpsize != 2)
 	{
 		// This has to be converted to 16-bit first.
+		SetSelectionPoints(0, 0); // avoid partial upsampling.
 		OnUpsample();
 		smpsize = pSmp->GetElementarySampleSize();
 	}
@@ -2033,6 +2026,7 @@ int CCtrlSamples::PitchShift(float pitch)
 	if(smpsize != 2)
 	{
 		// This has to be converted to 16-bit first.
+		SetSelectionPoints(0, 0); // avoid partial upsampling.
 		OnUpsample();
 		smpsize = pSmp->GetElementarySampleSize();
 	}
@@ -3032,3 +3026,19 @@ SELECTIONPOINTS CCtrlSamples::GetSelectionPoints()
 	return points;
 }
 
+// Set the currently select part of the sample.
+// To reset the selection, use nStart = nEnd = 0.
+void CCtrlSamples::SetSelectionPoints(UINT nStart, UINT nEnd)
+//-----------------------------------------------------------
+{
+	nStart = CLAMP(nStart, 0, m_pSndFile->Samples[m_nSample].nLength);
+	nEnd = CLAMP(nEnd, 0, m_pSndFile->Samples[m_nSample].nLength);
+
+	SAMPLEVIEWSTATE viewstate;
+	memset(&viewstate, 0, sizeof(viewstate));
+	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+
+	viewstate.dwBeginSel = nStart;
+	viewstate.dwEndSel = nEnd;
+	SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
+}

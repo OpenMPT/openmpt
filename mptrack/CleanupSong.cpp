@@ -515,13 +515,14 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	vector<bool> bIns;
 	int nExt = 0;
 	int nRemoved = 0;
-	bIns.resize(pSndFile->GetNumSamples(), false);
+	bIns.resize(pSndFile->GetNumSamples() + 1, false);
 
 	BeginWaitCursor();
 	for (SAMPLEINDEX nSmp = pSndFile->m_nSamples; nSmp >= 1; nSmp--) if (pSndFile->Samples[nSmp].pSample)
 	{
 		if (!pSndFile->IsSampleUsed(nSmp))
 		{
+			m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
 			BEGIN_CRITICAL();
 			pSndFile->DestroySample(nSmp);
 			if ((nSmp == pSndFile->m_nSamples) && (nSmp > 1)) pSndFile->m_nSamples--;
@@ -531,12 +532,12 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	}
 	if (pSndFile->m_nInstruments)
 	{
-		for (UINT ipat=0; ipat<pSndFile->Patterns.Size(); ipat++)
+		for (PATTERNINDEX nPat = 0; nPat < pSndFile->GetNumPatterns(); nPat++)
 		{
-			MODCOMMAND *p = pSndFile->Patterns[ipat];
+			MODCOMMAND *p = pSndFile->Patterns[nPat];
 			if (p)
 			{
-				UINT jmax = pSndFile->PatternSize[ipat] * pSndFile->m_nChannels;
+				UINT jmax = pSndFile->PatternSize[nPat] * pSndFile->m_nChannels;
 				for (UINT j=0; j<jmax; j++, p++)
 				{
 					if ((p->note) && (p->note <= NOTE_MAX))
@@ -581,9 +582,9 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 			{
 				if ((!bIns[nSmp]) && (pSndFile->Samples[nSmp].pSample))
 				{
+					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
 					BEGIN_CRITICAL();
 					pSndFile->DestroySample(nSmp);
-					m_pModDoc->GetSampleUndo()->PrepareUndo(nSmp, sundo_delete);
 					if ((nSmp == pSndFile->m_nSamples) && (nSmp > 1)) pSndFile->m_nSamples--;
 					END_CRITICAL();
 					nRemoved++;
