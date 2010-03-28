@@ -897,34 +897,10 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
 					} else
-					if ((!m->IsPcNote()) && (m->volcmd) && (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+					if ((!m->IsPcNote()) && (m->volcmd) && (m->volcmd < MAX_VOLCMDS) && (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 					{
-						switch(m->volcmd)
-						{
-						case VOLCMD_VOLUME:
-						case VOLCMD_VOLSLIDEUP:
-						case VOLCMD_VOLSLIDEDOWN:
-						case VOLCMD_FINEVOLUP:
-						case VOLCMD_FINEVOLDOWN:
-							tx_col = MODCOLOR_VOLUME;
-							break;
-						case VOLCMD_PANNING:
-						case VOLCMD_PANSLIDELEFT:
-						case VOLCMD_PANSLIDERIGHT:
-							tx_col = MODCOLOR_PANNING;
-							break;
-						case VOLCMD_VIBRATOSPEED:
-						case VOLCMD_VIBRATODEPTH:
-						case VOLCMD_TONEPORTAMENTO:
-						case VOLCMD_PORTAUP:
-						case VOLCMD_PORTADOWN:
-							tx_col = MODCOLOR_PITCH;
-							break;
-						case VOLCMD_VELOCITY:	//rewbs.velocity
-						case VOLCMD_OFFSET:		//rewbs.volOff
-							// default color
-							break;
-						}
+						if(gVolEffectColors[m->volcmd] != 0)
+							tx_col = gVolEffectColors[m->volcmd];
 					}
 					// Drawing Volume
 					m_Dib.SetTextColor(tx_col, bk_col);
@@ -941,21 +917,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 				fx_col = row_col;
 				if (!isPCnote && (m->command) && (m->command < MAX_EFFECTS) && (CMainFrame::m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 				{
-					switch(gEffectColors[m->command])
-					{
-					case MODCOLOR_VOLUME:
-						fx_col = MODCOLOR_VOLUME;
-						break;
-					case MODCOLOR_PANNING:
-						fx_col = MODCOLOR_PANNING;
-						break;
-					case MODCOLOR_PITCH:
-						fx_col = MODCOLOR_PITCH;
-						break;
-					case MODCOLOR_GLOBALS:
-						fx_col = MODCOLOR_GLOBALS;
-						break;
-					}
+					if(gEffectColors[m->command] != 0)
+						fx_col = gEffectColors[m->command];
 				}
 				if (!(dwSpeedUpMask & 0x08))
 				{

@@ -221,7 +221,16 @@ const BYTE gEffectColors[MAX_EFFECTS] =
 	0,					MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_GLOBALS,	
 	MODCOLOR_GLOBALS,	0,					MODCOLOR_PITCH,		MODCOLOR_PANNING,
 	MODCOLOR_PITCH,		MODCOLOR_PANNING,	0,					0,
-	//0,/*rewbs.smoothVST*/ ,0/*rewbs.velocity*/,
+	0,					0,					0,					MODCOLOR_PITCH,
+	MODCOLOR_PITCH,
+};
+
+const BYTE gVolEffectColors[MAX_VOLCMDS] =
+{
+	0,					MODCOLOR_VOLUME,	MODCOLOR_PANNING,	MODCOLOR_VOLUME,
+	MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_VOLUME,	MODCOLOR_PITCH,
+	MODCOLOR_PITCH,		MODCOLOR_PANNING,	MODCOLOR_PANNING,	MODCOLOR_PITCH,
+	MODCOLOR_PITCH,		MODCOLOR_PITCH,		0,					0,
 };
 
 static void ShowChangesDialog()
@@ -447,15 +456,19 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 	CString storedVersion = CMainFrame::GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
 	//If version number stored in INI is 1.17.02.40 or later, load DLS from INI file.
 	//Else load DLS from Registry
-	if (storedVersion >= "1.17.02.40") {
+	if (storedVersion >= "1.17.02.40")
+	{
 		CHAR s[MAX_PATH];
 		UINT numBanks = CMainFrame::GetPrivateProfileLong("DLS Banks", "NumBanks", 0, theApp.GetConfigFileName());
 		for (UINT i=0; i<numBanks; i++) {
-			wsprintf(s, "Bank%d", i+1);
-			CString dlsFileName = CMainFrame::GetPrivateProfileCString("DLS Banks", s, "", theApp.GetConfigFileName());
-			AddDLSBank(dlsFileName);
+			wsprintf(s, _T("Bank%d"), i+1);
+			TCHAR szPath[_MAX_PATH];
+			GetPrivateProfileString("DLS Banks", s, "", szPath, INIBUFFERSIZE, theApp.GetConfigFileName());
+			CMainFrame::RelativePathToAbsolute(szPath);
+			AddDLSBank(szPath);
 		}
-	} else {
+	} else
+	{
 		LoadRegistryDLS();
 	}
 
@@ -520,21 +533,22 @@ void CTrackApp::LoadRegistryDLS()
 BOOL CTrackApp::SaveDefaultDLSBanks()
 //-----------------------------------
 {
-	CHAR s[64];
+	TCHAR s[64];
+	TCHAR szPath[_MAX_PATH];
 	DWORD nBanks = 0;
 	for (UINT i=0; i<MAX_DLS_BANKS; i++) {
 		
-		if (!gpDLSBanks[i]) {
+		if (!gpDLSBanks[i] || !gpDLSBanks[i]->GetFileName() || !gpDLSBanks[i]->GetFileName()[0])
 			continue;
-		}
 		
-		LPCSTR pszBankName = gpDLSBanks[i]->GetFileName();
-		if (!(pszBankName) || !(pszBankName[0])) {
-			continue;
+		_tcsncpy(szPath, gpDLSBanks[i]->GetFileName(), ARRAYELEMCOUNT(szPath) - 1);
+		if(IsPortableMode())
+		{
+			CMainFrame::AbsolutePathToRelative(szPath);
 		}
 
-		wsprintf(s, "Bank%d", nBanks+1);
-		WritePrivateProfileString("DLS Banks", s, pszBankName, theApp.GetConfigFileName());
+		wsprintf(s, _T("Bank%d"), nBanks+1);
+		WritePrivateProfileString("DLS Banks", s, szPath, theApp.GetConfigFileName());
 		nBanks++;
 
 	}
@@ -1496,7 +1510,7 @@ void CTrackApp::RegisterExtensions()
 	GetModuleFileName(AfxGetInstanceHandle(), s, sizeof(s));
 	GetShortPathName(s, exename, sizeof(exename));
 	if (RegCreateKey(HKEY_CLASSES_ROOT,
-					"ModPlugPlayer\\shell\\Edit\\command",
+					"OpenMPTFile\\shell\\Edit\\command",
 					&key) == ERROR_SUCCESS)
 	{
 		strcpy(s, exename);
@@ -1505,7 +1519,7 @@ void CTrackApp::RegisterExtensions()
 		RegCloseKey(key);
 	}
 	if (RegCreateKey(HKEY_CLASSES_ROOT,
-					"ModPlugPlayer\\shell\\Edit\\ddeexec",
+					"OpenMPTFile\\shell\\Edit\\ddeexec",
 					&key) == ERROR_SUCCESS)
 	{
 		strcpy(s, "[Edit(\"%1\")]");
@@ -1876,7 +1890,7 @@ http://sourceforge.net/projects/modplug/");
 		"coda for sample drawing code|"
 		"http://coda.s3m.us/|"
 		"Storlek for all the IT compatibility hints and testcases|"
-		"as well as the IMF loader|"
+		"as well as the IMF and ULT loaders|"
 		"http://schismtracker.org/|"
 		"kode54 for the PSM and J2B loaders|"
 		"http://kode54.foobar2000.org/|"
