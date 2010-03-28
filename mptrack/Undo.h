@@ -21,6 +21,7 @@ struct PATTERNUNDOBUFFER
 	UINT column, row;
 	UINT cx, cy;
 	MODCOMMAND *pbuffer;
+	bool linkToPrevious;
 };
 
 //================
@@ -35,23 +36,26 @@ private:
 
 	// Pattern undo helper functions
 	void DeleteUndoStep(const UINT nStep);
+	PATTERNINDEX Undo(bool linkedFromPrevious);
 
 public:
 
 	// Pattern undo functions
 	void ClearUndo();
-	bool PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UINT cy);
+	bool PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UINT cy, bool linkToPrevious = false);
 	PATTERNINDEX Undo();
 	bool CanUndo();
 	void RemoveLastUndoStep();
 
 	void SetParent(CModDoc *pModDoc) {m_pModDoc = pModDoc;}
 
-	CPatternUndo() {
+	CPatternUndo()
+	{
 		UndoBuffer.clear();
 		m_pModDoc = nullptr;
 	};
-	~CPatternUndo() {
+	~CPatternUndo()
+	{
 		ClearUndo();
 	};
 
@@ -112,11 +116,13 @@ public:
 
 	void SetParent(CModDoc *pModDoc) {m_pModDoc = pModDoc;}
 
-	CSampleUndo() {
+	CSampleUndo()
+	{
 		UndoBuffer.clear();
 		m_pModDoc = nullptr;
 	};
-	~CSampleUndo() {
+	~CSampleUndo()
+	{
 		ClearUndo();
 	};
 

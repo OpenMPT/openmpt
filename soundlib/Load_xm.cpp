@@ -664,8 +664,10 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	// Read mix plugins information
 	if (dwMemPos + 8 < dwMemLength) 
 	{
+		DWORD dwOldPos = dwMemPos;
 		dwMemPos += LoadMixPlugins(lpStream+dwMemPos, dwMemLength-dwMemPos);
-		bMadeWithModPlug = true;
+		if(dwMemPos != dwOldPos)
+			bMadeWithModPlug = true;
 	}
 
 	// Check various things to find out whether this has been made with MPT.

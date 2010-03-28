@@ -1204,7 +1204,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
 			UINT col;
 			bool bS3MCommands = false, bOk = false;
-			bool bPrepareUndo = true;
+			bool bPrepareUndo = true, bFirstUndo = true;
 			MODTYPE origFormat = MOD_TYPE_IT;
 			UINT len = 0, startLen;
 
@@ -1278,8 +1278,9 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						// Before changing anything in this pattern, we have to create an undo point.
 						if(bPrepareUndo)
 						{
-							GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern]);
+							GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern], !bFirstUndo);
 							bPrepareUndo = false;
+							bFirstUndo = false;
 						}
 						
 						// ITSyle mixpaste requires that we keep a copy of the thing we are about to paste on
