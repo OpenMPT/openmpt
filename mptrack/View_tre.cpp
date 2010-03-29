@@ -1346,7 +1346,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, UINT nParam)
 }
 
 
-BOOL CModTree::SetMidiInstrument(UINT nIns, LPCSTR lpszFileName)
+BOOL CModTree::SetMidiInstrument(UINT nIns, LPCTSTR lpszFileName)
 //--------------------------------------------------------------
 {
 	LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
@@ -1354,7 +1354,7 @@ BOOL CModTree::SetMidiInstrument(UINT nIns, LPCSTR lpszFileName)
 	{
 		if (!lpMidiLib->MidiMap[nIns])
 		{
-			if ((lpMidiLib->MidiMap[nIns] = new CHAR[_MAX_PATH]) == NULL) return FALSE;
+			if ((lpMidiLib->MidiMap[nIns] = new TCHAR[_MAX_PATH]) == NULL) return FALSE;
 		}
 		strcpy(lpMidiLib->MidiMap[nIns], lpszFileName);
 		RefreshMidiLibrary();
@@ -1364,7 +1364,7 @@ BOOL CModTree::SetMidiInstrument(UINT nIns, LPCSTR lpszFileName)
 }
 
 
-BOOL CModTree::SetMidiPercussion(UINT nPerc, LPCSTR lpszFileName)
+BOOL CModTree::SetMidiPercussion(UINT nPerc, LPCTSTR lpszFileName)
 //---------------------------------------------------------------
 {
 	LPMIDILIBSTRUCT lpMidiLib = CTrackApp::GetMidiLibrary();
@@ -1373,7 +1373,7 @@ BOOL CModTree::SetMidiPercussion(UINT nPerc, LPCSTR lpszFileName)
 		UINT nIns = nPerc | 0x80;
 		if (!lpMidiLib->MidiMap[nIns])
 		{
-			if ((lpMidiLib->MidiMap[nIns] = new CHAR[_MAX_PATH]) == NULL) return FALSE;
+			if ((lpMidiLib->MidiMap[nIns] = new TCHAR[_MAX_PATH]) == NULL) return FALSE;
 		}
 		strcpy(lpMidiLib->MidiMap[nIns], lpszFileName);
 		RefreshMidiLibrary();
