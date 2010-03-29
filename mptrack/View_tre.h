@@ -144,8 +144,8 @@ public:
 	uint64 GetModItem(HTREEITEM hItem);
 	inline uint32 GetModItemType(const uint64 modItem) {return static_cast<uint32>(modItem & 0xFFFF);};	// return "item type" part of mod item variable ( & 0xFFFF )
 	inline uint32 GetModItemID(const uint64 modItem) {return static_cast<uint32>(modItem >> 16);};		// return "item ID" part of mod item variable ( >> 16 )
-	BOOL SetMidiInstrument(UINT nIns, LPCSTR lpszFileName);
-	BOOL SetMidiPercussion(UINT nPerc, LPCSTR lpszFileName);
+	BOOL SetMidiInstrument(UINT nIns, LPCTSTR lpszFileName);
+	BOOL SetMidiPercussion(UINT nPerc, LPCTSTR lpszFileName);
 	BOOL ExecuteItem(HTREEITEM hItem);
 	BOOL DeleteTreeItem(HTREEITEM hItem);
 	BOOL PlayItem(HTREEITEM hItem, UINT nParam=0);

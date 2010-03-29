@@ -250,7 +250,7 @@ static void ShowChangesDialog()
 		"[New] MIDI mapping: Editing a plug param in its editor while holding shift key will now open MIDI mapping dialog.\n"
 		"[New] MIDI mapping: Can now record MIDI mapping changes to pattern.\n"
 		"[Imp] MOD/S3M/XM/IT: Numerous improvements to load, save and playback compatibility.\n"
-		"[New] Input: Can import J2B (RIFF AM / RIFF AMFF), PSM16, IMF, GDM and SCL files. Improved PSM import.\n"
+		"[New] Input: Can import J2B (RIFF AM / RIFF AMFF), PSM16, IMF, GDM and SCL files. Improved PSM and ULT import.\n"
 		"[New] Setup: New default directories: plugins and plugin presets, sharable colour schemes\n"
 		"[New] Cleanup: New option compo cleanup, rearrange samples is back, can merge sequences.\n"
 		"[Mod] Misc: Program settings are now by default stored in %APPDATA%\\OpenMPT\n"
@@ -272,7 +272,7 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 //================================================
 {
 public:
-	BOOL m_bNoAcm, m_bNoDls, m_bNoMp3, m_bSafeMode, m_bWavEx, m_bNoPlugins, m_bDebug,
+	bool m_bNoAcm, m_bNoDls, m_bNoMp3, m_bSafeMode, m_bWavEx, m_bNoPlugins, m_bDebug,
 		 m_bNoSettingsOnNewVersion;
 
 	CString m_csExtension;
@@ -280,7 +280,7 @@ public:
 public:
 	CMPTCommandLineInfo() { 
 		m_bNoAcm = m_bNoDls = m_bNoMp3 = m_bSafeMode = m_bWavEx = 
-		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = FALSE; 
+		m_bNoPlugins = m_bDebug = m_bNoSettingsOnNewVersion = false; 
 		m_csExtension = "";
 	}
 	virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
@@ -293,13 +293,13 @@ void CMPTCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 	if ((lpszParam) && (bFlag))
 	{
 		if (!lstrcmpi(lpszParam, "nologo")) { m_bShowSplash = FALSE; return; } else
-		if (!lstrcmpi(lpszParam, "nodls")) { m_bNoDls = TRUE; return; } else
-		if (!lstrcmpi(lpszParam, "noacm")) { m_bNoAcm = TRUE; return; } else
-		if (!lstrcmpi(lpszParam, "nomp3")) { m_bNoMp3 = TRUE; return; } else
-		if (!lstrcmpi(lpszParam, "wavex")) { m_bWavEx = TRUE; } else
-		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = TRUE; } else
-		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = TRUE; } else
-		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = TRUE; }
+		if (!lstrcmpi(lpszParam, "nodls")) { m_bNoDls = true; return; } else
+		if (!lstrcmpi(lpszParam, "noacm")) { m_bNoAcm = true; return; } else
+		if (!lstrcmpi(lpszParam, "nomp3")) { m_bNoMp3 = true; return; } else
+		if (!lstrcmpi(lpszParam, "wavex")) { m_bWavEx = true; } else
+		if (!lstrcmpi(lpszParam, "noplugs")) { m_bNoPlugins = true; } else
+		if (!lstrcmpi(lpszParam, "debug")) { m_bDebug = true; } else
+		if (!lstrcmpi(lpszParam, "noSettingsOnNewVersion")) { m_bNoSettingsOnNewVersion = true; }
 	}
 	CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
 }
@@ -313,7 +313,7 @@ LPMIDILIBSTRUCT CTrackApp::glpMidiLibrary = NULL;
 BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 //-------------------------------------------------------------------
 {
-	CHAR szFileName[_MAX_PATH], s[_MAX_PATH], szUltraSndPath[_MAX_PATH];
+	TCHAR szFileName[_MAX_PATH], s[_MAX_PATH], szUltraSndPath[_MAX_PATH];
 	
 	if ((!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
 	if (!glpMidiLibrary)
@@ -356,23 +356,23 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 		}
 		return TRUE;
 	}
-	GetPrivateProfileString("Ultrasound", "PatchDir", "", szUltraSndPath, sizeof(szUltraSndPath), lpszConfigFile);
-	if (!strcmp(szUltraSndPath, ".\\")) szUltraSndPath[0] = 0;
+	GetPrivateProfileString(_T("Ultrasound"), _T("PatchDir"), _T(""), szUltraSndPath, sizeof(szUltraSndPath), lpszConfigFile);
+	if (!strcmp(szUltraSndPath, _T(".\\"))) szUltraSndPath[0] = 0;
 	if (!szUltraSndPath[0]) GetCurrentDirectory(sizeof(szUltraSndPath), szUltraSndPath);
 	for (UINT iMidi=0; iMidi<256; iMidi++)
 	{
 		szFileName[0] = 0;
-		wsprintf(s, (iMidi < 128) ? "Midi%d" : "Perc%d", iMidi & 0x7f);
-		GetPrivateProfileString("Midi Library", s, "", szFileName, sizeof(szFileName), lpszConfigFile);
+		wsprintf(s, (iMidi < 128) ? _T("Midi%d") : _T("Perc%d"), iMidi & 0x7f);
+		GetPrivateProfileString(_T("Midi Library"), s, _T(""), szFileName, sizeof(szFileName), lpszConfigFile);
 		// Check for ULTRASND.INI
 		if (!szFileName[0])
 		{
-			LPCSTR pszSection = (iMidi < 128) ? "Melodic Patches" : "Drum Patches";
-			wsprintf(s, "%d", iMidi & 0x7f);
-			GetPrivateProfileString(pszSection, s, "", szFileName, sizeof(szFileName), lpszConfigFile);
+			LPCSTR pszSection = (iMidi < 128) ? _T("Melodic Patches") : _T("Drum Patches");
+			wsprintf(s, _T("%d"), iMidi & 0x7f);
+			GetPrivateProfileString(pszSection, s, _T(""), szFileName, sizeof(szFileName), lpszConfigFile);
 			if (!szFileName[0])
 			{
-				pszSection = (iMidi < 128) ? "Melodic Bank 0" : "Drum Bank 0";
+				pszSection = (iMidi < 128) ? _T("Melodic Bank 0") : _T("Drum Bank 0");
 				GetPrivateProfileString(pszSection, s, "", szFileName, sizeof(szFileName), lpszConfigFile);
 			}
 			if (szFileName[0])
@@ -382,7 +382,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 				{
 					strcpy(s, szUltraSndPath);
 					int len = strlen(s)-1;
-					if ((len) && (s[len-1] != '\\')) strcat(s, "\\");
+					if ((len) && (s[len-1] != '\\')) strcat(s, _T("\\"));
 				}
 				strncat(s, szFileName, sizeof(s));
 				strncat(s, ".pat", sizeof(s));
@@ -393,17 +393,9 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 		{
 			if (!glpMidiLibrary->MidiMap[iMidi])
 			{
-				if ((glpMidiLibrary->MidiMap[iMidi] = new CHAR[_MAX_PATH]) == NULL) return FALSE;
+				if ((glpMidiLibrary->MidiMap[iMidi] = new TCHAR[_MAX_PATH]) == nullptr) return FALSE;
 			}
-			if ((lpszConfigFile[1] == ':') && (szFileName[1] != ':'))
-			{
-				s[0] = lpszConfigFile[0];
-				s[1] = lpszConfigFile[1];
-				s[2] = 0;
-				strncat(s, szFileName, sizeof(s));
-				s[sizeof(s)-1] = 0;
-				strcpy(szFileName, s);
-			}
+			CMainFrame::RelativePathToAbsolute(szFileName);
 			strcpy(glpMidiLibrary->MidiMap[iMidi], szFileName);
 		}
 	}
@@ -414,25 +406,22 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 //-----------------------------------------------------
 {
-	CHAR szFileName[_MAX_PATH], s[128];
+	TCHAR szFileName[_MAX_PATH], s[128];
 	
 	if ((!glpMidiLibrary) || (!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
 	for (UINT iMidi=0; iMidi<256; iMidi++) if (glpMidiLibrary->MidiMap[iMidi])
 	{
 		if (iMidi < 128)
-			wsprintf(s, "Midi%d", iMidi);
+			wsprintf(s, _T("Midi%d"), iMidi);
 		else
-			wsprintf(s, "Perc%d", iMidi & 0x7F);
-		/*if ((glpMidiLibrary->MidiMap[iMidi][1] == ':') && (lpszConfigFile[1] == ':')
-		 && ((glpMidiLibrary->MidiMap[iMidi][0]|0x20) == (lpszConfigFile[0]|0x20)))
-		{
-			strcpy(szFileName, glpMidiLibrary->MidiMap[iMidi]+2);
-		} else*/
-		{
-			strcpy(szFileName, glpMidiLibrary->MidiMap[iMidi]);
-		}
+			wsprintf(s, _T("Perc%d"), iMidi & 0x7F);
+
+		strcpy(szFileName, glpMidiLibrary->MidiMap[iMidi]);
+
 		if (szFileName[0])
 		{
+			if(IsPortableMode())
+				CMainFrame::AbsolutePathToRelative(szFileName);
 			if (!WritePrivateProfileString("Midi Library", s, szFileName, lpszConfigFile)) break;
 		}
 	}
@@ -962,7 +951,7 @@ BOOL CTrackApp::InitInstance()
 
 	// Parse command line for standard shell commands, DDE, file open
 	CMPTCommandLineInfo cmdInfo;
-	if (GetDSoundVersion() >= 0x0700) cmdInfo.m_bWavEx = TRUE;
+	if (GetDSoundVersion() >= 0x0700) cmdInfo.m_bWavEx = true;
 	ParseCommandLine(cmdInfo);
 
 	// create main MDI Frame window
@@ -993,7 +982,7 @@ BOOL CTrackApp::InitInstance()
 	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();
 
 	// Initialize ACM Support
-	if (GetProfileInt("Settings", "DisableACM", 0)) cmdInfo.m_bNoAcm = TRUE;
+	if (GetProfileInt("Settings", "DisableACM", 0)) cmdInfo.m_bNoAcm = true;
 	if (!cmdInfo.m_bNoMp3) InitializeACM(cmdInfo.m_bNoAcm);
 
 	// Initialize DXPlugins
