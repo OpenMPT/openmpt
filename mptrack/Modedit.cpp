@@ -1602,7 +1602,7 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 			pEnv->nLoopStart = loopBegin;
 			pEnv->nLoopEnd = loopEnd;
 			pEnv->nReleaseNode = releaseNode;
-			pEnv->dwFlags = (pEnv->dwFlags & ~(ENV_LOOP|ENV_SUSTAIN|ENV_CARRY)) | (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0);
+			pEnv->dwFlags = (pEnv->dwFlags & ~(ENV_LOOP|ENV_SUSTAIN|ENV_CARRY)) | (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0) | ENV_ENABLED;
 
 			int oldn = 0;
 			for (UINT i=0; i<nPoints; i++)

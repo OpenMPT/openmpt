@@ -553,8 +553,12 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 			} else {
 				resetEnvelopes(pChn);
 			}
-			pChn->nAutoVibDepth = 0;
-			pChn->nAutoVibPos = 0;
+			// IT Compatibility: Always reset autovibrato settings when there's an instrument number
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+			{
+				pChn->nAutoVibDepth = 0;
+				pChn->nAutoVibPos = 0;
+			}
 		} else if ((pIns) && (!(pIns->VolEnv.dwFlags & ENV_ENABLED)))
 		{
 			resetEnvelopes(pChn);		
@@ -566,6 +570,13 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		pChn->pModSample = nullptr;
 		pChn->nInsVol = 0;
 		return;
+	}
+
+	// IT Compatibility: Always reset autovibrato settings when there's an instrument number
+	if(IsCompatibleMode(TRK_IMPULSETRACKER))
+	{
+		pChn->nAutoVibDepth = 0;
+		pChn->nAutoVibPos = 0;
 	}
 
 	// Tone-Portamento doesn't reset the pingpong direction flag
