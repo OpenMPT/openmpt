@@ -135,7 +135,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 		CHAR s[_MAX_PATH], *pszCmd, *pszData;
 		int len;
 
-		lstrcpyn(s, lpszCommand, sizeof(s));
+		lstrcpyn(s, lpszCommand, CountOf(s));
 		len = strlen(s) - 1;
 		while ((len > 0) && (strchr("(){}[]\'\" ", s[len]))) s[len--] = 0;
 		pszCmd = s;
@@ -356,24 +356,24 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 		}
 		return TRUE;
 	}
-	GetPrivateProfileString(_T("Ultrasound"), _T("PatchDir"), _T(""), szUltraSndPath, sizeof(szUltraSndPath), lpszConfigFile);
+	GetPrivateProfileString(_T("Ultrasound"), _T("PatchDir"), _T(""), szUltraSndPath, CountOf(szUltraSndPath), lpszConfigFile);
 	if (!strcmp(szUltraSndPath, _T(".\\"))) szUltraSndPath[0] = 0;
-	if (!szUltraSndPath[0]) GetCurrentDirectory(sizeof(szUltraSndPath), szUltraSndPath);
+	if (!szUltraSndPath[0]) GetCurrentDirectory(CountOf(szUltraSndPath), szUltraSndPath);
 	for (UINT iMidi=0; iMidi<256; iMidi++)
 	{
 		szFileName[0] = 0;
 		wsprintf(s, (iMidi < 128) ? _T("Midi%d") : _T("Perc%d"), iMidi & 0x7f);
-		GetPrivateProfileString(_T("Midi Library"), s, _T(""), szFileName, sizeof(szFileName), lpszConfigFile);
+		GetPrivateProfileString(_T("Midi Library"), s, _T(""), szFileName, CountOf(szFileName), lpszConfigFile);
 		// Check for ULTRASND.INI
 		if (!szFileName[0])
 		{
 			LPCSTR pszSection = (iMidi < 128) ? _T("Melodic Patches") : _T("Drum Patches");
 			wsprintf(s, _T("%d"), iMidi & 0x7f);
-			GetPrivateProfileString(pszSection, s, _T(""), szFileName, sizeof(szFileName), lpszConfigFile);
+			GetPrivateProfileString(pszSection, s, _T(""), szFileName, CountOf(szFileName), lpszConfigFile);
 			if (!szFileName[0])
 			{
 				pszSection = (iMidi < 128) ? _T("Melodic Bank 0") : _T("Drum Bank 0");
-				GetPrivateProfileString(pszSection, s, "", szFileName, sizeof(szFileName), lpszConfigFile);
+				GetPrivateProfileString(pszSection, s, "", szFileName, CountOf(szFileName), lpszConfigFile);
 			}
 			if (szFileName[0])
 			{
@@ -384,9 +384,9 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 					int len = strlen(s)-1;
 					if ((len) && (s[len-1] != '\\')) strcat(s, _T("\\"));
 				}
-				strncat(s, szFileName, sizeof(s));
-				strncat(s, ".pat", sizeof(s));
-				strcpy(szFileName, s);
+				_tcsncat(s, szFileName, CountOf(s));
+				_tcsncat(s, ".pat", CountOf(s));
+				_tcscpy(szFileName, s);
 			}
 		}
 		if (szFileName[0])
@@ -396,7 +396,7 @@ BOOL CTrackApp::ImportMidiConfig(LPCSTR lpszConfigFile, BOOL bNoWarn)
 				if ((glpMidiLibrary->MidiMap[iMidi] = new TCHAR[_MAX_PATH]) == nullptr) return FALSE;
 			}
 			CMainFrame::RelativePathToAbsolute(szFileName);
-			strcpy(glpMidiLibrary->MidiMap[iMidi], szFileName);
+			_tcscpy(glpMidiLibrary->MidiMap[iMidi], szFileName);
 		}
 	}
 	return FALSE;
@@ -409,7 +409,7 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 	TCHAR szFileName[_MAX_PATH], s[128];
 	
 	if ((!glpMidiLibrary) || (!lpszConfigFile) || (!lpszConfigFile[0])) return FALSE;
-	for (UINT iMidi=0; iMidi<256; iMidi++) if (glpMidiLibrary->MidiMap[iMidi])
+	for(size_t iMidi = 0; iMidi < 256; iMidi++) if (glpMidiLibrary->MidiMap[iMidi])
 	{
 		if (iMidi < 128)
 			wsprintf(s, _T("Midi%d"), iMidi);
@@ -418,7 +418,7 @@ BOOL CTrackApp::ExportMidiConfig(LPCSTR lpszConfigFile)
 
 		strcpy(szFileName, glpMidiLibrary->MidiMap[iMidi]);
 
-		if (szFileName[0])
+		if(szFileName[0])
 		{
 			if(IsPortableMode())
 				CMainFrame::AbsolutePathToRelative(szFileName);
@@ -449,8 +449,9 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 	{
 		CHAR s[MAX_PATH];
 		UINT numBanks = CMainFrame::GetPrivateProfileLong("DLS Banks", "NumBanks", 0, theApp.GetConfigFileName());
-		for (UINT i=0; i<numBanks; i++) {
-			wsprintf(s, _T("Bank%d"), i+1);
+		for(size_t i = 0; i < numBanks; i++)
+		{
+			wsprintf(s, _T("Bank%d"), i + 1);
 			TCHAR szPath[_MAX_PATH];
 			GetPrivateProfileString("DLS Banks", s, "", szPath, INIBUFFERSIZE, theApp.GetConfigFileName());
 			CMainFrame::RelativePathToAbsolute(szPath);
