@@ -4226,22 +4226,36 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}*/
 
 		// -- write vol data
+		int volWrite = -1;
 		if (vol >= 0 && vol <= 64 && !(isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume))	//write valid volume, as long as there's no split volume override.
 		{
-			p->volcmd=VOLCMD_VOLUME;
-			p->vol = vol;
+			volWrite = vol;
 		} else if (isSplit && pModDoc->GetSplitKeyboardSettings()->splitVolume)	//cater for split volume override.
 		{
 			if (pModDoc->GetSplitKeyboardSettings()->splitVolume > 0 && pModDoc->GetSplitKeyboardSettings()->splitVolume <= 64)
 			{
-				p->volcmd=VOLCMD_VOLUME;
-				p->vol = pModDoc->GetSplitKeyboardSettings()->splitVolume;
+				volWrite = pModDoc->GetSplitKeyboardSettings()->splitVolume;
+			}
+		}
+
+		if(volWrite != -1)
+		{
+			if(pSndFile->GetType() == MOD_TYPE_MOD)
+			{
+				p->command = CMD_VOLUME;
+				p->param = (MODCOMMAND::PARAM)volWrite;
+			} else
+			{
+				p->volcmd = VOLCMD_VOLUME;
+				p->vol = (MODCOMMAND::VOL)volWrite;
 			}
 		}
 
 		// -- write sdx if playing live
-		if (usePlaybackPosition && nTick) {	// avoid SD0 which will be mis-interpreted
-			if (p->command == 0) {	//make sure we don't overwrite any existing commands.
+		if (usePlaybackPosition && nTick)	// avoid SD0 which will be mis-interpreted
+		{
+			if (p->command == 0)	//make sure we don't overwrite any existing commands.
+			{
 				p->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 				UINT maxSpeed = 0x0F;
 				if(pSndFile->m_nMusicSpeed > 0) maxSpeed = min(0x0F, pSndFile->m_nMusicSpeed - 1);
@@ -4275,14 +4289,17 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			}
 
 			//Move cursor down only if not recording live.
-			if ( bIsLiveRecord == false )
+			if(bIsLiveRecord == false)
 			{
-				if ((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING)) {
+				if((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
+				{
 
-					if (nRow + m_nSpacing < pSndFile->PatternSize[nPat] || (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)) {
+					if(nRow + m_nSpacing < pSndFile->PatternSize[nPat] || (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL))
+					{
 						SetCurrentRow(nRow + m_nSpacing, (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL) ? true: false);
 						m_bLastNoteEntryBlocked=false;
-					} else {
+					} else
+					{
 						m_bLastNoteEntryBlocked=true;  // if the cursor is block by the end of the pattern here,
 					}								   // we must remember to not step back should the next note form a chord.
 
