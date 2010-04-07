@@ -487,6 +487,9 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		MODSAMPLE *pSmp = &Samples[insmap[iins]];
 		memcpy(bTab, m_szNames[iins],22);
 		inslen[iins] = pSmp->nLength;
+		// if the sample size is odd, we have to add a padding byte, as all sample sizes in MODs are even.
+		if(inslen[iins] & 1)
+			inslen[iins]++;
 		if (inslen[iins] > 0x1fff0) inslen[iins] = 0x1fff0;
 		bTab[22] = inslen[iins] >> 9;
 		bTab[23] = inslen[iins] >> 1;
@@ -509,7 +512,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		fwrite(bTab, 30, 1, f);
 	}
 	// Writing number of patterns
-	UINT nbp=0, norders=128;
+	UINT nbp = 0, norders = 128;
 	for (UINT iord=0; iord<128; iord++)
 	{
 		if (Order[iord] == Order.GetInvalidPatIndex())
@@ -535,7 +538,8 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	// Writing patterns
 	for (UINT ipat=0; ipat<nbp; ipat++) {	//for all patterns
 		BYTE s[64*4];
-		if (Patterns[ipat])	{					//if pattern exists
+		if (Patterns[ipat])					//if pattern exists
+		{
 			MODCOMMAND *m = Patterns[ipat];
 			for (UINT i=0; i<64; i++) {				//for all rows 
 				if (i < PatternSize[ipat]) {			//if row exists
@@ -584,7 +588,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	}
 
 	// Writing instruments
-	for (UINT ismpd=1; ismpd<=31; ismpd++) if (inslen[ismpd])
+	for (UINT ismpd = 1; ismpd <= 31; ismpd++) if (inslen[ismpd])
 	{
 		MODSAMPLE *pSmp = &Samples[insmap[ismpd]];
 		if(bCompatibilityExport == true) // first two bytes have to be 0 due to PT's one-shot loop ("no loop")
@@ -604,6 +608,12 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		}
 #endif
 		WriteSample(f, pSmp, flags, inslen[ismpd]);
+		// write padding byte if the sample size is odd.
+		if((pSmp->nLength & 1) && !nPacking)
+		{
+			int8 padding = 0;
+			fwrite(&padding, 1, 1, f);
+		}
 	}
 	fclose(f);
 	return true;

@@ -742,7 +742,7 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 		}
 	}
 	if (((bLimit) && (i >= 200) && (!m_SndFile.m_nInstruments))
-	 || (i >= m_SndFile.GetModSpecifications().samplesMax))
+	 || (i > m_SndFile.GetModSpecifications().samplesMax))
 	{
 		ErrorBox(IDS_ERR_TOOMANYSMP, CMainFrame::GetMainFrame());
 		return SAMPLEINDEX_INVALID;
