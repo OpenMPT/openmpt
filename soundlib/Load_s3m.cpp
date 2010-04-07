@@ -270,7 +270,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 
 	dwMemPos = 0x60;
 	m_nType = MOD_TYPE_S3M;
-	memset(m_szNames,0,sizeof(m_szNames));
+	memset(m_szNames, 0, sizeof(m_szNames));
 	memcpy(m_szNames[0], psfh.name, 28);
 	SpaceToNullStringFixed(m_szNames[0], 28);
 	// Speed
@@ -326,12 +326,18 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	patnum = npat = psfh.patnum;
 	if (patnum > MAX_PATTERNS) patnum = MAX_PATTERNS;
 	memset(ptr, 0, sizeof(ptr));
-	if (nins+npat)
+
+	// this seems to be corrupted, the table can't really hold that many values.
+	if(nins + npat > 256)
+		return false;
+
+	if (nins + npat)
 	{
-		memcpy(ptr, lpStream+dwMemPos, 2*(nins+npat));
-		dwMemPos += 2*(nins+npat);
-		const UINT nLoopEnd = min(256, nins+npat);
-		for (UINT j = 0; j < nLoopEnd; ++j) {
+		memcpy(ptr, lpStream + dwMemPos, 2 * (nins + npat));
+		dwMemPos += 2 * (nins + npat);
+		const UINT nLoopEnd = min(256, nins + npat);
+		for(UINT j = 0; j < nLoopEnd; ++j)
+		{
 		        ptr[j] = LittleEndianW(ptr[j]);
 		}
 		if (psfh.panning_present == 252)
