@@ -295,7 +295,7 @@ const CModSpecifications s3mEx =
 	true,								//Has notecut.
 	false,								//No noteoff.
 	false,								//No notefade.
-	240,								//Pattern max.
+	99,									//Pattern max.
 	255,								//Order max.
 	1,									//Channel min
 	32,									//Channel max
