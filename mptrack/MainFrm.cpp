@@ -197,7 +197,7 @@ EQPRESET CMainFrame::m_EqSettings = { "", {16,16,16,16,16,16}, { 125, 300, 600, 
 DWORD CMainFrame::m_dwMidiSetup = MIDISETUP_RECORDVELOCITY|MIDISETUP_RECORDNOTEOFF;
 // Pattern Setup
 DWORD CMainFrame::m_dwPatternSetup = PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
-								   | PATTERN_SMALLFONT | PATTERN_CENTERROW | PATTERN_AUTOSPACEBAR
+								   | PATTERN_SMALLFONT | PATTERN_CENTERROW
 								   | PATTERN_DRAGNDROPEDIT | PATTERN_FLATBUTTONS 
 								   | PATTERN_2NDHIGHLIGHT | PATTERN_STDHIGHLIGHT | PATTERN_HILITETIMESIGS
 								   | PATTERN_SHOWPREVIOUS | PATTERN_CONTSCROLL | PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE;
@@ -437,6 +437,8 @@ void CMainFrame::LoadIniSettings()
 		m_dwPatternSetup |= PATTERN_NOTEFADE;
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1,17,03,01))
 		m_dwPatternSetup |= PATTERN_RESETCHANNELS;
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1,18,01,00))
+		m_dwPatternSetup &= ~0x800;	// quick paste autorepeat is now a keymap option
 
 	m_nRowSpacing = GetPrivateProfileDWord("Pattern Editor", "RowSpacing", 16, iniFile);
 	m_nRowSpacing2 = GetPrivateProfileDWord("Pattern Editor", "RowSpacing2", 4, iniFile);
@@ -576,6 +578,7 @@ void CMainFrame::LoadRegistrySettings()
 		RegQueryValueEx(key, "PatternSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwPatternSetup, &dwDWORDSize);
 			m_dwPatternSetup |= PATTERN_NOTEFADE; // Set flag to maintain old behaviour(was changed in 1.17.02.50).
 			m_dwPatternSetup |= PATTERN_RESETCHANNELS; // Set flag to reset channels on loop was changed in 1.17.03.01).
+			m_dwPatternSetup &= ~0x800;	// quick paste autorepeat is now a keymap option
 		RegQueryValueEx(key, "RowSpacing", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowSpacing, &dwDWORDSize);
 		RegQueryValueEx(key, "RowSpacing2", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowSpacing2, &dwDWORDSize);
 		RegQueryValueEx(key, "LoopSong", NULL, &dwREG_DWORD, (LPBYTE)&gbLoopSong, &dwDWORDSize);

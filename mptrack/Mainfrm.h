@@ -174,7 +174,7 @@ enum
 #define PATTERN_FLATBUTTONS			0x100		// flat toolbar buttons
 #define PATTERN_CREATEBACKUP		0x200		// create .bak files when saving
 #define PATTERN_SINGLEEXPAND		0x400		// single click to expand tree
-#define PATTERN_AUTOSPACEBAR		0x800		// space bar repeats previous action
+//#define PATTERN_AUTOSPACEBAR		0x800		// space bar repeats previous action - DOES NOT EXIST ANYMORE, use "on key hold" instead
 #define PATTERN_NOEXTRALOUD			0x1000		// no loud samples in sample editor
 #define PATTERN_DRAGNDROPEDIT		0x2000		// enable drag and drop editing
 #define PATTERN_2NDHIGHLIGHT		0x4000		// activate secondary highlight

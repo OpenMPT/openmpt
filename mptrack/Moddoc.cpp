@@ -2325,6 +2325,11 @@ bool CModDoc::GetEffectInfo(UINT ndx, LPSTR s, bool bXX, DWORD *prangeMin, DWORD
 			// adjust waveform types for IT/S3M
 			if(gFXInfo[ndx].dwParamValue >= 0x30 && gFXInfo[ndx].dwParamValue <= 0x50) nmax = gFXInfo[ndx].dwParamValue | (m_SndFile.IsCompatibleMode(TRK_IMPULSETRACKER | TRK_SCREAMTRACKER) ? 0x03 : 0x07);
 			break;
+		case CMD_PATTERNBREAK:
+			// no big patterns in MOD/S3M files
+			if(nType & (MOD_TYPE_MOD|MOD_TYPE_S3M))
+				nmax = 63;	
+			break;
 		}
 		*prangeMin = nmin;
 		*prangeMax = nmax;
@@ -2503,7 +2508,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 
 	case CMD_PANNING8:
 		wsprintf(s, "%d", param);
-		if(m_SndFile.m_nType & MOD_TYPE_S3M)
+		if(m_SndFile.GetType() == MOD_TYPE_S3M)
 		{
 			if(param == 0xA4)
 				strcpy(s, "Surround");

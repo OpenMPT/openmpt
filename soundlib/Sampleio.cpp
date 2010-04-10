@@ -1680,11 +1680,12 @@ UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	if (pis->C5Speed < 256) pSmp->nC5Speed = 256;
 	pSmp->RelativeTone = 0;
 	pSmp->nFineTune = 0;
-	if (m_nType & MOD_TYPE_XM) FrequencyToTranspose(pSmp);
+	if (GetType() == MOD_TYPE_XM) FrequencyToTranspose(pSmp);
 	pSmp->nVolume = pis->vol << 2;
 	if (pSmp->nVolume > 256) pSmp->nVolume = 256;
 	pSmp->nGlobalVol = pis->gvl;
 	if (pSmp->nGlobalVol > 64) pSmp->nGlobalVol = 64;
+	pSmp->uFlags = 0;
 	if (pis->flags & 0x10) pSmp->uFlags |= CHN_LOOP;
 	if (pis->flags & 0x20) pSmp->uFlags |= CHN_SUSTAINLOOP;
 	if (pis->flags & 0x40) pSmp->uFlags |= CHN_PINGPONGLOOP;
@@ -1700,7 +1701,8 @@ UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 	if (pis->flags & 2)
 	{
 		flags += 5;
-		if (pis->flags & 4) {
+		if (pis->flags & 4)
+		{
 			flags |= RSF_STEREO;
 // -> CODE#0001
 // -> DESC="enable saving stereo ITI"

@@ -167,7 +167,7 @@ begin
                 end;
             $0c:  // French
                 begin
-                    keyboardFilepath := 'FR_mpt_classic_(vanisherIII)';
+                    keyboardFilepath := 'FR_mpt_(legovitch)';
                 end;
             $14:  // Norwegian
                 begin
@@ -233,4 +233,5 @@ begin
         end;
     end;
 end;
+
 
