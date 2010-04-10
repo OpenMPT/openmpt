@@ -973,7 +973,7 @@ BOOL CTrackApp::InitInstance()
 	EnableShellOpen();
 
 	// Register MOD extensions
-	RegisterExtensions();
+	//RegisterExtensions();
 
 	// Load DirectSound (if available)
 	m_bExWaveSupport = cmdInfo.m_bWavEx;

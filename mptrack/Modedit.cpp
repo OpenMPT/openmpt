@@ -232,7 +232,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 
 		// Transpose to Frequency (MOD/XM to S3M/IT/MPT)
-		if (oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
+		if(oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
 		{
 			m_SndFile.Samples[nSmp].nC5Speed = CSoundFile::TransposeToFrequency(m_SndFile.Samples[nSmp].RelativeTone, m_SndFile.Samples[nSmp].nFineTune);
 			m_SndFile.Samples[nSmp].RelativeTone = 0;
@@ -240,14 +240,26 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 
 		// Frequency to Transpose (S3M/IT/MPT to MOD/XM)
-		if (oldTypeIsS3M_IT_MPT && newTypeIsXM)
+		if(oldTypeIsS3M_IT_MPT && newTypeIsXM)
 		{
 			CSoundFile::FrequencyToTranspose(&m_SndFile.Samples[nSmp]);
 			if (!(m_SndFile.Samples[nSmp].uFlags & CHN_PANNING)) m_SndFile.Samples[nSmp].nPan = 128;
 		}
+
+		if(oldTypeIsXM && newTypeIsIT_MPT)
+		{
+			// Autovibrato settings (XM to IT, where sweep 0 means "no vibrato")
+			if(m_SndFile.Samples[nSmp].nVibSweep == 0 && m_SndFile.Samples[nSmp].nVibRate != 0 && m_SndFile.Samples[nSmp].nVibDepth != 0)
+				m_SndFile.Samples[nSmp].nVibSweep = 255;
+		} else if(oldTypeIsIT_MPT && newTypeIsXM)
+		{
+			// Autovibrato settings (IT to XM, where sweep 0 means "no sweep")
+			if(m_SndFile.Samples[nSmp].nVibSweep == 0)
+				m_SndFile.Samples[nSmp].nVibRate = m_SndFile.Samples[nSmp].nVibDepth = 0;
+		}
 	}
 
-	// No Vibrato for MOD/S3M
+	// No Autovibrato for MOD/S3M
 	if(newTypeIsMOD || newTypeIsS3M)
 	{
 		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetVibrato);
@@ -1197,8 +1209,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 
 		if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != NULL))
 		{
-			TEMPO spdmax = m_SndFile.GetModSpecifications().speedMax;
-			DWORD dwMemSize = GlobalSize(hCpy);
+			const TEMPO spdmax = m_SndFile.GetModSpecifications().speedMax;
+			const DWORD dwMemSize = GlobalSize(hCpy);
 			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
 			UINT nrow = dwBeginSel >> 16;
 			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
