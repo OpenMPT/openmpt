@@ -3332,6 +3332,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			m->command = (m->note == NOTE_PC) ? CMD_MIDI : CMD_SMOOTHMIDI; // might be removed later
 			m->volcmd = VOLCMD_NONE;
 			m->note = NOTE_NONE;
+			m->instr = 0;
 		}
 
 		// adjust extended envelope control commands

@@ -1486,7 +1486,26 @@ BOOL CSoundFile::ProcessEffects()
 					TonePortamento(pChn, vol * 16);
 			} else
 			{
-				if (vol) pChn->nOldVolParam = vol; else vol = pChn->nOldVolParam;
+				// XM Compatibility: FT2 ignores some voluem commands with parameter = 0.
+				if(IsCompatibleMode(TRK_FASTTRACKER2) && vol == 0)
+				{
+					switch(volcmd)
+					{
+					case VOLCMD_VOLUME:
+					case VOLCMD_PANNING:
+					case VOLCMD_VIBRATODEPTH:
+					case VOLCMD_TONEPORTAMENTO:
+						break;
+					default:
+						// no memory here.
+						volcmd = VOLCMD_NONE;
+					}
+					
+				} else
+				{
+					if(vol) pChn->nOldVolParam = vol; else vol = pChn->nOldVolParam;
+				}
+
 				switch(volcmd)
 				{
 				case VOLCMD_VOLSLIDEUP:

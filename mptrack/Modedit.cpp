@@ -392,7 +392,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	ChangeFileExtension(nNewType);
 
 	// Multisequences not suppported by other formats
-	if(!(m_SndFile.GetType() == MOD_TYPE_MPT)) MergeSequences();
+	if(m_SndFile.GetType() != MOD_TYPE_MPT) MergeSequences();
 	// Convert sequence with separator patterns into multiple sequences?
 	if(m_SndFile.GetType() == MOD_TYPE_MPT && m_SndFile.Order.GetNumSequences() == 1)
 	{
@@ -1097,7 +1097,7 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 						UINT note = m->note;
 						switch(note)
 						{
-						case 0:		p[1] = p[2] = p[3] = '.'; break;
+						case NOTE_NONE:		p[1] = p[2] = p[3] = '.'; break;
 						case NOTE_KEYOFF:	p[1] = p[2] = p[3] = '='; break;
 						case NOTE_NOTECUT:	p[1] = p[2] = p[3] = '^'; break;
 						case NOTE_FADE:	p[1] = p[2] = p[3] = '~'; break;
@@ -1754,6 +1754,9 @@ bool CModDoc::MergeSequences()
 		}
 		m_SndFile.Order.RemoveSequence(1);
 	}
+	// Remove order name + fill up with empty patterns.
+	m_SndFile.Order.m_sName = "";
+	m_SndFile.Order.resize(min(MAX_ORDERS, m_SndFile.GetModSpecifications().ordersMax));
 	return true;
 }
 

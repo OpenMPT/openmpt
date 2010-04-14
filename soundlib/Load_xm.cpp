@@ -835,8 +835,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			UINT vol = 0;
 			if (p->volcmd)
 			{
-				UINT volcmd = p->volcmd;
-				switch(volcmd)
+				switch(p->volcmd)
 				{
 				case VOLCMD_VOLUME:			vol = 0x10 + p->vol; break;
 				case VOLCMD_VOLSLIDEDOWN:	vol = 0x60 + (p->vol & 0x0F); break;
@@ -849,6 +848,21 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 				case VOLCMD_PANSLIDELEFT:	vol = 0xD0 + (p->vol & 0x0F); break;
 				case VOLCMD_PANSLIDERIGHT:	vol = 0xE0 + (p->vol & 0x0F); break;
 				case VOLCMD_TONEPORTAMENTO:	vol = 0xF0 + (p->vol & 0x0F); break;
+				}
+				// Those values are ignored in FT2. Don't save them, also to avoid possible problems with other trackers (or MPT itself)
+				if(bCompatibilityExport && p->vol == 0)
+				{
+					switch(p->volcmd)
+					{
+					case VOLCMD_VOLUME:
+					case VOLCMD_PANNING:
+					case VOLCMD_VIBRATODEPTH:
+					case VOLCMD_TONEPORTAMENTO:
+						break;
+					default:
+						// no memory here.
+						vol = 0;
+					}
 				}
 			}
 			if ((note) && (p->instr) && (vol > 0x0F) && (command) && (param))
@@ -946,13 +960,16 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 					UINT sample = pIns->Keyboard[j+12];
 
 					// Check to see if sample mapped to this note is already accounted for in this instrument
-					for (k=0; k<xmih.samples; k++)	{
-						if (smptable[k] == sample) {
+					for (k=0; k<xmih.samples; k++)
+					{
+						if (smptable[k] == sample)
+						{
 							break;
 						}
 					}
 				    
-					if (k == xmih.samples) { //we got to the end of the loop: sample unnaccounted for.
+					if (k == xmih.samples) //we got to the end of the loop: sample unnaccounted for.
+					{
 						smptable[xmih.samples++] = sample; //record in instrument's sample table
 					}
 					
