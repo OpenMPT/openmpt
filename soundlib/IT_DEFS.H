@@ -25,7 +25,7 @@ typedef struct tagITFILEHEADER
 	BYTE pwd;		// pitch wheel depth
 	WORD msglength;
 	DWORD msgoffset;
-	DWORD reserved;
+	DWORD reserved;	// ChibiTracker writes "CHBI" here.
 	BYTE chnpan[64];
 	BYTE chnvol[64];
 } ITFILEHEADER;

@@ -393,7 +393,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
  				Samples[iSmp].nLoopStart = Samples[iSmp].nLoopEnd = 0;
 			Samples[iSmp].nPan = 0x80;
 			//ASSERT(iLooplength == 0 || iLooplength > 4);
-		} else if(s[0] == S3I_TYPE_ADMEL)
+		} else if(s[0] >= S3I_TYPE_ADMEL)
 		{
 			bHasAdlibPatches = true;
 		}

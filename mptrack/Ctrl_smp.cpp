@@ -615,11 +615,11 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 		wsprintf(s, "%d-bit %s, len: %d", pSmp->GetElementarySampleSize() * 8, (pSmp->uFlags & CHN_STEREO) ? "stereo" : "mono", pSmp->nLength);
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
-		memcpy(s, m_pSndFile->m_szNames[m_nSample], 32);
+		memcpy(s, m_pSndFile->m_szNames[m_nSample], MAX_SAMPLENAME);
 		s[31] = 0;
 		SetDlgItemText(IDC_SAMPLE_NAME, s);
 		// File Name
-		memcpy(s, pSmp->filename, 22);
+		memcpy(s, pSmp->filename, MAX_SAMPLEFILENAME);
 		s[21] = 0;
 		if (m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) s[0] = 0;
 		SetDlgItemText(IDC_SAMPLE_FILENAME, s);
@@ -791,16 +791,16 @@ OpenError:
 				// MOD/XM
 				strcat(szFullFilename, szExt);
 				szFullFilename[31] = 0;
-				memcpy(m_pSndFile->m_szNames[m_nSample], szFullFilename, 32);
+				memcpy(m_pSndFile->m_szNames[m_nSample], szFullFilename, MAX_SAMPLENAME);
 			} else
 			{
 				// S3M/IT
 				szFullFilename[31] = 0;
-				if (!m_pSndFile->m_szNames[m_nSample][0]) memcpy(m_pSndFile->m_szNames[m_nSample], szFullFilename, 32);
+				if (!m_pSndFile->m_szNames[m_nSample][0]) memcpy(m_pSndFile->m_szNames[m_nSample], szFullFilename, MAX_SAMPLENAME);
 				if (strlen(szFullFilename) < 9) strcat(szFullFilename, szExt);
 			}
 			szFullFilename[21] = 0;
-			memcpy(pSmp->filename, szFullFilename, 22);
+			memcpy(pSmp->filename, szFullFilename, MAX_SAMPLEFILENAME);
 		}
 		if ((m_pSndFile->m_nType & MOD_TYPE_XM) && (!(pSmp->uFlags & CHN_PANNING)))
 		{
@@ -980,11 +980,11 @@ void CCtrlSamples::OnSampleSave()
 		}
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 		{
-			memcpy(szFileName, m_pSndFile->Samples[m_nSample].filename, 22);
+			memcpy(szFileName, m_pSndFile->Samples[m_nSample].filename, MAX_SAMPLEFILENAME);
 			szFileName[22] = 0;
 		} else
 		{
-			memcpy(szFileName, m_pSndFile->m_szNames[m_nSample], 32);
+			memcpy(szFileName, m_pSndFile->m_szNames[m_nSample], MAX_SAMPLENAME);
 			szFileName[32] = 0;		}
 		if (!szFileName[0]) strcpy(szFileName, "untitled");
 	}
@@ -2313,9 +2313,9 @@ void CCtrlSamples::OnNameChanged()
 	m_EditName.GetWindowText(s, sizeof(s));
 	for (UINT i=strlen(s); i<32; i++) s[i] = 0;
 	s[31] = 0;
-	if (strncmp(s, m_pSndFile->m_szNames[m_nSample], 32))
+	if (strncmp(s, m_pSndFile->m_szNames[m_nSample], MAX_SAMPLENAME))
 	{
-		memcpy(m_pSndFile->m_szNames[m_nSample], s, 32);
+		memcpy(m_pSndFile->m_szNames[m_nSample], s, MAX_SAMPLENAME);
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | (HINT_SMPNAMES|HINT_SAMPLEINFO), this);
 		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
 		m_pModDoc->SetModified();
@@ -2333,9 +2333,9 @@ void CCtrlSamples::OnFileNameChanged()
 	m_EditFileName.GetWindowText(s, sizeof(s));
 	s[21] = 0;
 	for (UINT i=strlen(s); i<22; i++) s[i] = 0;
-	if (strncmp(s, m_pSndFile->Samples[m_nSample].filename, 22))
+	if (strncmp(s, m_pSndFile->Samples[m_nSample].filename, MAX_SAMPLEFILENAME))
 	{
-		memcpy(m_pSndFile->Samples[m_nSample].filename, s, 22);
+		memcpy(m_pSndFile->Samples[m_nSample].filename, s, MAX_SAMPLEFILENAME);
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO, this);
 		if (m_pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) m_pModDoc->SetModified();
 	}

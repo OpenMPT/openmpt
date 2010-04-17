@@ -75,6 +75,9 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define MAX_ENVPOINTS		240
 #define MIN_PERIOD			0x0020
 #define MAX_PERIOD			0xFFFF
+// String lengths
+#define MAX_SAMPLENAME		32	// also affects module name!
+#define MAX_SAMPLEFILENAME	22
 #define MAX_PATTERNNAME		32
 #define MAX_CHANNELNAME		20
 #define MAX_INFONAME		80
@@ -136,7 +139,7 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define CHN_KEYOFF			0x200		// exit sustain
 #define CHN_NOTEFADE		0x400		// fade note (instrument mode)
 #define CHN_SURROUND		0x800		// use surround channel
-#define CHN_NOIDO			0x1000		// ???
+#define CHN_NOIDO			0x1000		// Indicates if the channel is near enough to an exact multiple of the base frequency that any interpolation won't be noticeable - or if interpolation was switched off completely. --Storlek
 #define CHN_HQSRC			0x2000		// ???
 #define CHN_FILTER			0x4000		// filtered output
 #define CHN_VOLUMERAMP		0x8000		// ramp volume
@@ -390,5 +393,12 @@ enum PLUGVOLUMEHANDLING
 	INST_FILTERMODE_LOWPASS,
 	INST_NUMFILTERMODES
 };*/
+
+// Vibrato Types
+#define VIB_SINE		0
+#define VIB_SQUARE		1
+#define VIB_RAMP_UP		2
+#define VIB_RAMP_DOWN	3
+#define VIB_RANDOM		4
 
 #endif
