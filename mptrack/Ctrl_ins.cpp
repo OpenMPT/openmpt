@@ -306,7 +306,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 						{
 							wsprintf(s, "%d: ", j);
 							UINT l = strlen(s);
-							memcpy(s+l, pSndFile->m_szNames[j], 32);
+							memcpy(s+l, pSndFile->m_szNames[j], MAX_SAMPLENAME);
 							s[l+32] = 0;
 							AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE+j, s);
 						}

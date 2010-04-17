@@ -947,7 +947,8 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 						{
 							UINT command = m->command & 0x3F;
 							int n =	(pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM)) ? gszModCommands[command] : gszS3mCommands[command];
-							if (n <= ' ') n = '?';
+							ASSERT(n > ' ');
+							//if (n <= ' ') n = '?';
 							DrawLetter(xbmp+x, 0, (char)n, pfnt->nEltWidths[3], pfnt->nCmdOfs);
 						} else
 						{
@@ -1472,7 +1473,7 @@ void CViewPattern::UpdateIndicator()
 										if ((nsmp) && (nsmp <= pSndFile->m_nSamples))
 										{
 											CHAR sztmp2[64] = "";
-											memcpy(sztmp2, pSndFile->m_szNames[nsmp], 32);
+											memcpy(sztmp2, pSndFile->m_szNames[nsmp], MAX_SAMPLENAME);
 											sztmp2[32] = 0;
 											if (sztmp2[0])
 											{
@@ -1485,7 +1486,7 @@ void CViewPattern::UpdateIndicator()
 							{
 								if (m->instr <= pSndFile->m_nSamples)
 								{
-									memcpy(sztmp, pSndFile->m_szNames[m->instr], 32);
+									memcpy(sztmp, pSndFile->m_szNames[m->instr], MAX_SAMPLENAME);
 									sztmp[32] = 0;
 								}
 							}

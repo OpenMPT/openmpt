@@ -1337,7 +1337,7 @@ void CPageEditNote::UpdateDialog()
 					if (pSndFile->Instruments[i])
 						memcpy(s+k, pSndFile->Instruments[i]->name, 32);
 				} else
-					memcpy(s+k, pSndFile->m_szNames[i], 32);
+					memcpy(s+k, pSndFile->m_szNames[i], MAX_SAMPLENAME);
 				s[k+32] = 0;
 				combo->SetItemData(combo->AddString(s), i);
 			}

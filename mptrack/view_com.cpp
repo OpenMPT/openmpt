@@ -247,7 +247,7 @@ void CViewComments::OnUpdate(CView *pSender, LPARAM lHint, CObject *)
 					switch(iCol)
 					{
 					case SMPLIST_SAMPLENAME:
-						lstrcpyn(s, pSndFile->m_szNames[iSmp+1], 32);
+						lstrcpyn(s, pSndFile->m_szNames[iSmp+1], MAX_SAMPLENAME);
 						break;
 					case SMPLIST_SAMPLENO:
 						wsprintf(s, "%02d", iSmp+1);

@@ -41,7 +41,7 @@ struct MODSAMPLE
 	BYTE nVibDepth;
 	BYTE nVibRate;
 	CHAR name[32];
-	CHAR filename[22];
+	CHAR filename[MAX_SAMPLEFILENAME];
 
 	// Return the size of one (elementary) sample in bytes.
 	uint8 GetElementarySampleSize() const {return (uFlags & CHN_16BIT) ? 2 : 1;}
@@ -596,7 +596,7 @@ public:	// for Editing
 	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
 	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
 	MODINSTRUMENT m_defaultInstrument;					// Currently only used to get default values for extented properties. 
-	CHAR m_szNames[MAX_SAMPLES][32];					// Song and sample names
+	CHAR m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Song and sample names
 	MODMIDICFG m_MidiCfg;								// Midi macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 	SNDMIXSONGEQ m_SongEQ;								// Default song EQ preset

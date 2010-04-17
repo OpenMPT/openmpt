@@ -872,7 +872,8 @@ BOOL CSoundFile::ReadNote()
 	{
 		int nchn32 = 0;
 		MODCHANNEL *pChn = Chn;
-		for (UINT nChn=0; nChn<m_nChannels; nChn++,pChn++) {
+		for (UINT nChn=0; nChn<m_nChannels; nChn++,pChn++)
+		{
 			//if(!(pChn->dwFlags & CHN_MUTE))	//removed by rewbs: fix http://www.modplug.com/forum/viewtopic.php?t=3358
 				nchn32++;
 		}
@@ -880,7 +881,8 @@ BOOL CSoundFile::ReadNote()
 		
 		DWORD mastervol;
 
-		if (m_pConfig->getUseGlobalPreAmp()) {
+		if (m_pConfig->getUseGlobalPreAmp())
+		{
 			int realmastervol = m_nMasterVolume;
 			if (realmastervol > 0x80) {
 				//Attenuate global pre-amp depending on num channels
@@ -909,7 +911,7 @@ BOOL CSoundFile::ReadNote()
 	// Update channels data
 	m_nMixChannels = 0;
 	MODCHANNEL *pChn = Chn;
-	for (UINT nChn=0; nChn<MAX_CHANNELS; nChn++,pChn++)
+	for (UINT nChn = 0; nChn < MAX_CHANNELS; nChn++, pChn++)
 	{
 	skipchn:
 
@@ -937,8 +939,9 @@ BOOL CSoundFile::ReadNote()
 					pChn++;
 				}
 			}
-			if (nChn < MAX_CHANNELS) goto skipchn;
-			goto done;
+			if (nChn < MAX_CHANNELS)
+				goto skipchn;	// >:(
+			break;
 		}
 		// Reset channel data
 		pChn->nInc = 0;
@@ -973,13 +976,12 @@ BOOL CSoundFile::ReadNote()
 			{
 				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || GetModFlag(MSF_OLDVOLSWING))
 				{
-					vol = pChn->nVolume + pChn->nVolSwing;
+					vol += pChn->nVolSwing;
 				}
 				else
 				{
 					pChn->nVolume += pChn->nVolSwing;
-					if(pChn->nVolume > 256) pChn->nVolume = 256;
-					if(pChn->nVolume < 0) pChn->nVolume = 0;
+					pChn->nVolume = CLAMP(pChn->nVolume, 0, 256);
 					vol = pChn->nVolume;
 					pChn->nVolSwing = 0;
 				}
@@ -1034,7 +1036,8 @@ BOOL CSoundFile::ReadNote()
 				// IT compatibility 12. / 13.: Tremor
 				if(IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
-					if ((pChn->nTremorCount & 128) && pChn->nLength) {
+					if ((pChn->nTremorCount & 128) && pChn->nLength)
+					{
 						if (pChn->nTremorCount == 128)
 							pChn->nTremorCount = (pChn->nTremorParam >> 4) | 192;
 						else if (pChn->nTremorCount == 192)
@@ -1934,7 +1937,7 @@ BOOL CSoundFile::ReadNote()
 			pChn->nLength = 0;
 		}
 	}
-done:
+
 	// Checking Max Mix Channels reached: ordering by volume
 	if ((m_nMixChannels >= m_nMaxMixChannels) && (!(gdwSoundSetup & SNDMIX_DIRECTTODISK)))
 	{

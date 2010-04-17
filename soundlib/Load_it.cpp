@@ -1030,6 +1030,15 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			memcpy(m_lpszSongComments, lpStream+pifh->msgoffset, pifh->msglength);
 			m_lpszSongComments[pifh->msglength] = 0;
+			// ChibiTracker uses \n instead of \r.
+			if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0214 && LittleEndian(pifh->reserved) == 0x49424843)
+			{
+				for(size_t i = 0; i < pifh->msglength; i++)
+				{
+					if(m_lpszSongComments[i] == '\n')
+						m_lpszSongComments[i] = '\r';
+				}
+			}
 		}
 	}
 	// Reading orders

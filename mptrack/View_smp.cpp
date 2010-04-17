@@ -1421,7 +1421,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			{
 				CHAR s[256];
 				DWORD dwPos = ScreenToSample(pt.x);
-				if (dwPos <= pSmp->nLength) {
+				if (dwPos <= pSmp->nLength)
+				{
 					//Set loop points
 					wsprintf(s, "Set Loop Start to:\t%d", dwPos);
 					::AppendMenu(hMenu, MF_STRING|((dwPos+4<=pSmp->nLoopEnd)?0:MF_GRAYED), 
@@ -1475,7 +1476,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			// if there's no selection, but loop points
 			//::AppendMenu(hMenu, MF_STRING|(m_dwEndSel>m_dwBeginSel)?0:MF_GRAYED, 
 			//	ID_SAMPLE_TRIM, "Trim\t" + ih->GetKeyTextFromCommand(kcSampleTrim));
-			::AppendMenu(hMenu, MF_STRING|(bIsGrayed)?MF_GRAYED:0, ID_SAMPLE_TRIM, sTrimMenuText.c_str());
+			::AppendMenu(hMenu, MF_STRING|(bIsGrayed) ? MF_GRAYED : 0, ID_SAMPLE_TRIM, sTrimMenuText.c_str());
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, "Cut\t" + ih->GetKeyTextFromCommand(kcEditCut));
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, "Copy\t" + ih->GetKeyTextFromCommand(kcEditCopy));
 		}
@@ -1857,8 +1858,8 @@ void CViewSample::OnEditCopy()
 				pxh->xtra_len += 32;
 				if (pSmp->filename[0])
 				{
-					memcpy(pszText+32, pSmp->filename, 22);
-					pxh->xtra_len += 22;
+					memcpy(pszText + 32, pSmp->filename, MAX_SAMPLEFILENAME);
+					pxh->xtra_len += MAX_SAMPLEFILENAME;
 				}
 			}
 			phdr->filesize += sizeof(WAVESMPLHEADER) + pxh->xtra_len + 8;

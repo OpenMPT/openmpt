@@ -17,84 +17,84 @@
 // header for compressed j2b files
 struct J2BHEADER
 {
-	DWORD signature;		// MUSE
-	DWORD deadbeaf;			// 0xDEADBEAF (AM) or 0xDEADBABE (AMFF)
-	DWORD j2blength;		// complete filesize
-	DWORD crc32;			// checksum of the compressed data block
-	DWORD packed_length;	// length of the compressed data block
-	DWORD unpacked_length;	// length of the decompressed module
+	uint32 signature;		// MUSE
+	uint32 deadbeaf;			// 0xDEADBEAF (AM) or 0xDEADBABE (AMFF)
+	uint32 j2blength;		// complete filesize
+	uint32 crc32;			// checksum of the compressed data block
+	uint32 packed_length;	// length of the compressed data block
+	uint32 unpacked_length;	// length of the decompressed module
 };
 
 // am(ff) stuff
 
-struct RIFFCHUNK
+struct AMFF_RIFFCHUNK
 {
-	DWORD signature;	// "RIFF"
-	DWORD chunksize;	// chunk size without header
+	uint32 signature;	// "RIFF"
+	uint32 chunksize;	// chunk size without header
 };
 
 // this header is used for both AM's "INIT" as well as AMFF's "MAIN" chunk
 struct AMFFCHUNK_MAIN
 {
-	char  songname[64];
-	BYTE  flags;
-	BYTE  channels;
-	BYTE  speed;
-	BYTE  tempo;
-	DWORD unknown;
-	BYTE  globalvolume;
+	char   songname[64];
+	uint8  flags;
+	uint8  channels;
+	uint8  speed;
+	uint8  tempo;
+	uint32 unknown;
+	uint8  globalvolume;
 };
 
 struct AMFFCHUNK_INSTRUMENT
 {
-	BYTE unknown;		// 0x00
-	BYTE sample;		// sample number
+	uint8 unknown;		// 0x00
+	uint8 sample;		// sample number
 	char name[28];
 	char stuff[195];	// lots of NULs?
 };
 
 struct AMFFCHUNK_SAMPLE
 {
-	DWORD signature;	// "SAMP"
-	DWORD chunksize;	// header + sample size
-	char  name[28];
-	BYTE  pan;
-	BYTE  volume;
-	WORD  flags;
-	DWORD length;
-	DWORD loopstart;
-	DWORD loopend;
-	DWORD samplerate;
-	DWORD reserved1;
-	DWORD reserved2;
+	uint32 signature;	// "SAMP"
+	uint32 chunksize;	// header + sample size
+	char   name[28];
+	uint8  pan;
+	uint8  volume;
+	uint16 flags;
+	uint32 length;
+	uint32 loopstart;
+	uint32 loopend;
+	uint32 samplerate;
+	uint32 reserved1;
+	uint32 reserved2;
 };
 
 struct AMCHUNK_INSTRUMENT
 {
-	BYTE  unknown;		// 0x00
-	BYTE  sample;		// sample number
+	uint8 unknown;		// 0x00
+	uint8 sample;		// sample number
 	char  name[32];
 };
 
 struct AMCHUNK_SAMPLE
 {
-	DWORD signature;	// "SAMP"
-	DWORD chunksize;	// header + sample size
-	DWORD headsize;		// header size
-	char  name[32];
-	WORD  pan;
-	WORD  volume;
-	WORD  flags;
-	WORD  unkown;
-	DWORD length;
-	DWORD loopstart;
-	DWORD loopend;
-	DWORD samplerate;
+	uint32 signature;	// "SAMP"
+	uint32 chunksize;	// header + sample size
+	uint32 headsize;		// header size
+	char   name[32];
+	uint16 pan;
+	uint16 volume;
+	uint16 flags;
+	uint16 unkown;
+	uint32 length;
+	uint32 loopstart;
+	uint32 loopend;
+	uint32 samplerate;
 };
 
 #pragma pack()
 
-static BYTE riffam_efftrans[26] =
+static uint8 riffam_efftrans[26] =
 {
 	CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
 	CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
@@ -126,7 +126,7 @@ bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStre
 	MODCOMMAND *mrow = Patterns[nPat];
 	MODCOMMAND *m = mrow;
 	ROWINDEX nRow = 0;
-	BYTE flags;
+	uint8 flags;
 
 	while((nRow < nRows) && (dwMemPos < dwMemLength))
 	{
@@ -245,29 +245,29 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	DWORD dwMemPos = 0;
 
-	ASSERT_CAN_READ(sizeof(RIFFCHUNK));
-	RIFFCHUNK *chunkheader = (RIFFCHUNK *)lpStream;
+	ASSERT_CAN_READ(sizeof(AMFF_RIFFCHUNK));
+	AMFF_RIFFCHUNK *chunkheader = (AMFF_RIFFCHUNK *)lpStream;
 
 	if(LittleEndian(chunkheader->signature) != 0x46464952 // "RIFF"
-		|| LittleEndian(chunkheader->chunksize) != dwMemLength - sizeof(RIFFCHUNK)
+		|| LittleEndian(chunkheader->chunksize) != dwMemLength - sizeof(AMFF_RIFFCHUNK)
 		) return false;
 
-	dwMemPos += sizeof(RIFFCHUNK);
+	dwMemPos += sizeof(AMFF_RIFFCHUNK);
 
 	bool bIsAM; // false: AMFF, true: AM
 
 	ASSERT_CAN_READ(4);
-	if(LittleEndian(*(DWORD *)(lpStream + dwMemPos)) == 0x46464D41) bIsAM = false; // "AMFF"
-	else if(LittleEndian(*(DWORD *)(lpStream + dwMemPos)) == 0x20204D41) bIsAM = true; // "AM  "
+	if(LittleEndian(*(uint32 *)(lpStream + dwMemPos)) == 0x46464D41) bIsAM = false; // "AMFF"
+	else if(LittleEndian(*(uint32 *)(lpStream + dwMemPos)) == 0x20204D41) bIsAM = true; // "AM  "
 	else return false;
 	dwMemPos += 4;
 	
 	// go through all chunks now
 	while(dwMemPos < dwMemLength)
 	{
-		ASSERT_CAN_READ(sizeof(RIFFCHUNK));
-		chunkheader = (RIFFCHUNK *)(lpStream + dwMemPos);
-		dwMemPos += sizeof(RIFFCHUNK);
+		ASSERT_CAN_READ(sizeof(AMFF_RIFFCHUNK));
+		chunkheader = (AMFF_RIFFCHUNK *)(lpStream + dwMemPos);
+		dwMemPos += sizeof(AMFF_RIFFCHUNK);
 		ASSERT_CAN_READ(LittleEndian(chunkheader->chunksize));
 
 		DWORD dwChunkEnd = dwMemPos + LittleEndian(chunkheader->chunksize);
@@ -380,17 +380,17 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if(bIsAM)
 			{
 				ASSERT_CAN_READ_CHUNK(4);
-				if(LittleEndian(*(DWORD *)(lpStream + dwMemPos)) != 0x20204941) break; // "AI  "
+				if(LittleEndian(*(uint32 *)(lpStream + dwMemPos)) != 0x20204941) break; // "AI  "
 				dwMemPos += 4;
 
-				ASSERT_CAN_READ_CHUNK(sizeof(RIFFCHUNK));
-				RIFFCHUNK *instchunk = (RIFFCHUNK *)(lpStream + dwMemPos);
-				dwMemPos += sizeof(RIFFCHUNK);
+				ASSERT_CAN_READ_CHUNK(sizeof(AMFF_RIFFCHUNK));
+				AMFF_RIFFCHUNK *instchunk = (AMFF_RIFFCHUNK *)(lpStream + dwMemPos);
+				dwMemPos += sizeof(AMFF_RIFFCHUNK);
 				ASSERT_CAN_READ_CHUNK(LittleEndian(instchunk->chunksize));
 				if(LittleEndian(instchunk->signature) != 0x54534E49) break; // "INST"
 
 				ASSERT_CAN_READ_CHUNK(4);
-				DWORD dwHeadlen = LittleEndian(*(DWORD *)(lpStream + dwMemPos));
+				DWORD dwHeadlen = LittleEndian(*(uint32 *)(lpStream + dwMemPos));
 				dwMemPos +=4 ;
 
 				ASSERT_CAN_READ_CHUNK(sizeof(AMCHUNK_INSTRUMENT));
@@ -405,14 +405,14 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				memcpy(m_szNames[nSmp], instheadchunk->name, 32);
 				SpaceToNullStringFixed(m_szNames[nSmp], 31);
 
-				ASSERT_CAN_READ_CHUNK(sizeof(RIFFCHUNK));
-				instchunk = (RIFFCHUNK *)(lpStream + dwMemPos);
-				dwMemPos += sizeof(RIFFCHUNK);
+				ASSERT_CAN_READ_CHUNK(sizeof(AMFF_RIFFCHUNK));
+				instchunk = (AMFF_RIFFCHUNK *)(lpStream + dwMemPos);
+				dwMemPos += sizeof(AMFF_RIFFCHUNK);
 				ASSERT_CAN_READ_CHUNK(LittleEndian(instchunk->chunksize));
 				if(LittleEndian(instchunk->signature) != 0x46464952) break; // yet another "RIFF"...
 
 				ASSERT_CAN_READ_CHUNK(4);
-				if(LittleEndian(*(DWORD *)(lpStream + dwMemPos)) != 0x20205341) break; // "AS  " (ain't this boring?)
+				if(LittleEndian(*(uint32 *)(lpStream + dwMemPos)) != 0x20205341) break; // "AS  " (ain't this boring?)
 				dwMemPos += 4;
 
 				ASSERT_CAN_READ_CHUNK(sizeof(AMCHUNK_SAMPLE));

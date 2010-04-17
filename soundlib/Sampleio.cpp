@@ -557,15 +557,15 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 		// Name present (clipboard only)
 		UINT xtrabytes = pxh->xtra_len + 8 - sizeof(WAVEEXTRAHEADER);
 		LPSTR pszTextEx = (LPSTR)(pxh+1); 
-		if (xtrabytes >= 32)
+		if (xtrabytes >= MAX_SAMPLENAME)
 		{
-			memcpy(m_szNames[nSample], pszTextEx, 31);
-			pszTextEx += 32;
-			xtrabytes -= 32;
-			if (xtrabytes >= 22)
+			memcpy(m_szNames[nSample], pszTextEx, MAX_SAMPLENAME - 1);
+			pszTextEx += MAX_SAMPLENAME;
+			xtrabytes -= MAX_SAMPLENAME;
+			if (xtrabytes >= MAX_SAMPLEFILENAME)
 			{
-				memcpy(pSmp->filename, pszTextEx, 22);
-				xtrabytes -= 22;
+				memcpy(pSmp->filename, pszTextEx, MAX_SAMPLEFILENAME);
+				xtrabytes -= MAX_SAMPLEFILENAME;
 			}
 		}
 	}

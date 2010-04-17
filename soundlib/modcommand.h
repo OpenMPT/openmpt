@@ -59,17 +59,13 @@ public:
 
 	// Returns true if and only if note is NOTE_PC or NOTE_PCS.
 	bool IsPcNote() const {return note == NOTE_PC || note == NOTE_PCS;}
-	static bool IsPcNote(MODCOMMAND::NOTE note_id) {return note_id == NOTE_PC || note_id == NOTE_PCS;}
+	static bool IsPcNote(NOTE note_id) {return note_id == NOTE_PC || note_id == NOTE_PCS;}
 
 	// Swap volume and effect column (doesn't do any conversion as it's mainly for importing formats with multiple effect columns, so beware!)
 	void SwapEffects()
 	{
-		VOLCMD vcold = volcmd;
-		VOL vold = vol;
-		volcmd = command;
-		vol = param;
-		command = vcold;
-		param = vold;
+		std::swap(volcmd, command);
+		std::swap(vol, param);
 	}
 
 public:
