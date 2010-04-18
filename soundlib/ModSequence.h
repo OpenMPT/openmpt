@@ -19,14 +19,16 @@ public:
 
 	virtual ~ModSequence() {if (m_bDeletableArray) delete[] m_pArray;}
 	ModSequence(const ModSequence&);
-	ModSequence(const CSoundFile& rSf, ORDERINDEX nSize);
-	ModSequence(const CSoundFile& rSf, PATTERNINDEX* pArray, ORDERINDEX nSize, ORDERINDEX nCapacity, bool bDeletableArray);
+	ModSequence(CSoundFile& rSf, ORDERINDEX nSize);
+	ModSequence(CSoundFile& rSf, PATTERNINDEX* pArray, ORDERINDEX nSize, ORDERINDEX nCapacity, bool bDeletableArray);
 
 	// Initialize default sized sequence.
 	void Init();
 
 	PATTERNINDEX& operator[](const size_t i) {ASSERT(i < m_nSize); return m_pArray[i];}
 	const PATTERNINDEX& operator[](const size_t i) const {ASSERT(i < m_nSize); return m_pArray[i];}
+	PATTERNINDEX& At(const size_t i) {return (*this)[i];}
+	const PATTERNINDEX& At(const size_t i) const {return (*this)[i];}
 
 	PATTERNINDEX& Last() {ASSERT(m_nSize > 0); return m_pArray[m_nSize-1];}
 	const PATTERNINDEX& Last() const {ASSERT(m_nSize > 0); return m_pArray[m_nSize-1];}
@@ -52,9 +54,9 @@ public:
 	void resize(ORDERINDEX nNewSize, PATTERNINDEX nFill);
 	
 	// Replaces all occurences of nOld with nNew.
-	void Replace(PATTERNINDEX nOld, PATTERNINDEX nNew) {std::replace(begin(), end(), nOld, nNew);}
+	void Replace(PATTERNINDEX nOld, PATTERNINDEX nNew) {if (nOld != nNew) std::replace(begin(), end(), nOld, nNew);}
 
-	void OnModTypeChanged(const MODTYPE oldtype);
+	void AdjustToNewModType(const MODTYPE oldtype);
 
 	ORDERINDEX size() const {return GetLength();}
 	ORDERINDEX GetLength() const {return m_nSize;}
@@ -106,7 +108,7 @@ protected:
 	PATTERNINDEX m_nInvalidIndex;	// Invalid pat index.
 	PATTERNINDEX m_nIgnoreIndex;	// Ignore pat index.
 	bool m_bDeletableArray;			// True if m_pArray points the deletable(with delete[]) array.
-	const CSoundFile* m_pSndFile;	// Pointer to associated CSoundFile.
+	CSoundFile* m_pSndFile;			// Pointer to associated CSoundFile.
 
 	static const bool NoArrayDelete = false;
 };
@@ -127,10 +129,11 @@ class ModSequenceSet : public ModSequence
 	friend void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t);
 
 public:
-	ModSequenceSet(const CSoundFile& sndFile);
+	ModSequenceSet(CSoundFile& sndFile);
 
 	const ModSequence& GetSequence() {return GetSequence(GetCurrentSequenceIndex());}
-	const ModSequence& GetSequence(SEQUENCEINDEX nSeq);
+	const ModSequence& GetSequence(SEQUENCEINDEX nSeq) const;
+	ModSequence& GetSequence(SEQUENCEINDEX nSeq);
 	SEQUENCEINDEX GetNumSequences() const {return static_cast<SEQUENCEINDEX>(m_Sequences.size());}
 	void SetSequence(SEQUENCEINDEX);			// Sets working sequence.
 	SEQUENCEINDEX AddSequence(bool bDuplicate = true);	// Adds new sequence. If bDuplicate is true, new sequence is a duplicate of the old one. Returns the ID of the new sequence.
@@ -138,7 +141,19 @@ public:
 	void RemoveSequence(SEQUENCEINDEX);		// Removes given sequence
 	SEQUENCEINDEX GetCurrentSequenceIndex() const {return m_nCurrentSeq;}
 
+	void OnModTypeChanged(const MODTYPE oldtype);
+
 	ModSequenceSet& operator=(const ModSequence& seq) {ModSequence::operator=(seq); return *this;}
+
+	// Merges multiple sequences into one and destroys all other sequences.
+	// Returns false if there were no sequences to merge, true otherwise.
+	bool MergeSequences();
+
+	// If there are subsongs (separated by "---" or "+++" patterns) in the module,
+	// asks user whether to convert these into multiple sequences (given that the 
+	// modformat supports multiple sequences).
+	// Returns true if sequences were modified, false otherwise.
+	bool ConvertSubsongsToMultipleSequences();
 
 	static const ORDERINDEX s_nCacheSize = MAX_ORDERS;
 

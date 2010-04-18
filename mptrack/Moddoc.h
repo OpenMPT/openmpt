@@ -289,9 +289,6 @@ public:
 
 	BOOL RemoveChannels(BOOL bChnMask[MAX_CHANNELS]);
 
-	bool MergeSequences();
-	bool ConvertSubsongsToMultipleSequences();
-
 	bool HasMPTHacks(bool autofix = false);
 
 	bool m_bHasValidPath; //becomes true if document is loaded or saved.

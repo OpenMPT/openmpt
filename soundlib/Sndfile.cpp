@@ -3027,9 +3027,11 @@ uint16 CSoundFile::GetModFlagMask(const MODTYPE oldtype, const MODTYPE newtype) 
 }
 
 void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
-//---------------------------------------------------
+//------------------------------------------------------
 {
 	const MODTYPE oldtype = m_nType;
+	if (oldtype == newType)
+		return;
 	m_nType = newType;
 	SetModSpecsPointer(m_pModSpecs, m_nType);
 	SetupMODPanning(); // Setup LRRL panning scheme if needed

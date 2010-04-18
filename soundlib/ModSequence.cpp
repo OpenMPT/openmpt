@@ -1,15 +1,17 @@
 #include "stdafx.h"
 #include "sndfile.h"
 #include "ModSequence.h"
+#include "../mptrack/moddoc.h"
 #include "../mptrack/version.h"
 #include "../mptrack/serialization_utils.h"
+#include <functional>
 
 #define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
 
 #define new DEBUG_NEW
 
 
-ModSequence::ModSequence(const CSoundFile& rSf,
+ModSequence::ModSequence(CSoundFile& rSf,
 						 PATTERNINDEX* pArray,
 						 ORDERINDEX nSize,
 						 ORDERINDEX nCapacity, 
@@ -25,7 +27,7 @@ ModSequence::ModSequence(const CSoundFile& rSf,
 {}
 
 
-ModSequence::ModSequence(const CSoundFile& rSf, ORDERINDEX nSize) : 
+ModSequence::ModSequence(CSoundFile& rSf, ORDERINDEX nSize) : 
 	m_pSndFile(&rSf),
 	m_bDeletableArray(true),
 	m_nInvalidIndex(GetInvalidPatIndex(MOD_TYPE_MPT)),
@@ -62,26 +64,58 @@ bool ModSequence::NeedsExtraDatafield() const
 		return false;
 }
 
+namespace
+{
+	// Functor for detecting non-valid patterns from sequence.
+	struct IsNotValidPat
+	{
+		IsNotValidPat(CSoundFile& sndFile) : rSndFile(sndFile) {}
+		bool operator()(PATTERNINDEX i) {return !rSndFile.Patterns.IsValidPat(i);}
+		CSoundFile& rSndFile;
+	};
+}
 
-void ModSequence::OnModTypeChanged(const MODTYPE oldtype)
-//-------------------------------------------------------
+
+void ModSequence::AdjustToNewModType(const MODTYPE oldtype)
+//---------------------------------------------------------
 {
 	const CModSpecifications specs = m_pSndFile->GetModSpecifications();
+	const MODTYPE newtype = m_pSndFile->GetType();
 
-	m_nInvalidIndex = GetInvalidPatIndex(m_pSndFile->GetType());
-	m_nIgnoreIndex = GetIgnoreIndex(m_pSndFile->GetType());
+	m_nInvalidIndex = GetInvalidPatIndex(newtype);
+	m_nIgnoreIndex = GetIgnoreIndex(newtype);
+
+	// If not supported, remove "+++" separator order items.
+	if (specs.hasIgnoreIndex == false)
+	{
+		if (oldtype != MOD_TYPE_NONE)
+		{
+			iterator i = std::remove_if(begin(), end(), std::bind2nd(std::equal_to<PATTERNINDEX>(), GetIgnoreIndex(oldtype)));
+			std::fill(i, end(), GetInvalidPatIndex());
+		}
+	}
+	else
+		Replace(GetIgnoreIndex(oldtype), GetIgnoreIndex());
 
 	//Resize orderlist if needed.
-	if (specs.ordersMax < GetLength()) 
+	if (specs.ordersMax < GetLength())
 	{
+		// Order list too long? -> remove unnecessary order items first.
+		if (oldtype != MOD_TYPE_NONE && specs.ordersMax < GetLengthTailTrimmed())
+		{
+			iterator iter = std::remove_if(begin(), end(), IsNotValidPat(*m_pSndFile));
+			std::fill(iter, end(), GetInvalidPatIndex());
+			if(GetLengthTailTrimmed() > specs.ordersMax)
+			{
+				if (m_pSndFile->GetpModDoc())
+					m_pSndFile->GetpModDoc()->AddToLog("WARNING: Order list has been trimmed!\n");
+			}
+		}
 		resize(specs.ordersMax);
-		/*resize(max(MAX_ORDERS, specs.ordersMax));
-		std::fill(begin() + specs.ordersMax, end(), GetInvalidPatIndex());*/
 	}
-
-	//Replace items used to denote end of song/skip order.
-	Replace(GetInvalidPatIndex(oldtype),  GetInvalidPatIndex());
-	Replace(GetIgnoreIndex(oldtype),  GetIgnoreIndex());
+		
+	// Replace items used to denote end of song order.
+	Replace(GetInvalidPatIndex(oldtype), GetInvalidPatIndex());
 }
 
 
@@ -235,7 +269,7 @@ ModSequence& ModSequence::operator=(const ModSequence& seq)
 /////////////////////////////////////
 
 
-ModSequenceSet::ModSequenceSet(const CSoundFile& sndFile)
+ModSequenceSet::ModSequenceSet(CSoundFile& sndFile)
 	: ModSequence(sndFile, m_Cache, s_nCacheSize, s_nCacheSize, NoArrayDelete),
 	  m_nCurrentSeq(0)
 //-------------------------------------------------------------------
@@ -244,8 +278,18 @@ ModSequenceSet::ModSequenceSet(const CSoundFile& sndFile)
 }
 
 
-const ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq)
-//----------------------------------------------------------------
+const ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq) const
+//----------------------------------------------------------------------
+{
+	if (nSeq == GetCurrentSequenceIndex())
+		return *this;
+	else
+		return m_Sequences[nSeq];
+}
+
+
+ModSequence& ModSequenceSet::GetSequence(SEQUENCEINDEX nSeq)
+//----------------------------------------------------------
 {
 	if (nSeq == GetCurrentSequenceIndex())
 		return *this;
@@ -319,6 +363,195 @@ void ModSequenceSet::RemoveSequence(SEQUENCEINDEX i)
 		m_nCurrentSeq--;
 	if (bSequenceChanges)
 		CopyStorageToCache();
+}
+
+
+void ModSequenceSet::OnModTypeChanged(const MODTYPE oldtype)
+//----------------------------------------------------------
+{
+	const MODTYPE newtype = m_pSndFile->GetType();
+	const SEQUENCEINDEX nSeqs = GetNumSequences();
+	for(SEQUENCEINDEX n = 0; n < nSeqs; n++)
+	{
+		GetSequence(n).AdjustToNewModType(oldtype);
+	}
+	// Multisequences not suppported by other formats
+	if (oldtype != MOD_TYPE_NONE && newtype != MOD_TYPE_MPT)
+		MergeSequences();
+
+	// Convert sequence with separator patterns into multiple sequences?
+	if (oldtype != MOD_TYPE_NONE && newtype == MOD_TYPE_MPT && GetNumSequences() == 1)
+		ConvertSubsongsToMultipleSequences();
+}
+
+
+bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
+//-------------------------------------------------------
+{
+	// Allow conversion only if there's only one sequence.
+	if (GetNumSequences() != 1 || m_pSndFile->GetType() != MOD_TYPE_MPT)
+		return false;
+
+	bool hasSepPatterns = false;
+	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
+	for(ORDERINDEX nOrd = 0; nOrd < nLengthTt; nOrd++)
+	{
+		if(!m_pSndFile->Patterns.IsValidIndex(At(nOrd)))
+		{
+			hasSepPatterns = true;
+			break;
+		}
+	}
+	bool modified = false;
+
+	if(hasSepPatterns &&
+		::MessageBox(NULL,
+		"The order list contains separator items.\nThe new format supports multiple sequences, do you want to convert those separate tracks into multiple song sequences?",
+		"Order list conversion", MB_YESNO | MB_ICONQUESTION) == IDYES)
+	{
+
+		SetSequence(0);
+		for(ORDERINDEX nOrd = 0; nOrd < GetLengthTailTrimmed(); nOrd++)
+		{
+			// end of subsong?
+			if(!m_pSndFile->Patterns.IsValidIndex(At(nOrd)))
+			{
+				ORDERINDEX oldLength = GetLengthTailTrimmed();
+				// remove all separator patterns between current and next subsong first
+				while(nOrd < oldLength && (!m_pSndFile->Patterns.IsValidIndex(At(nOrd))))
+				{
+					At(nOrd) = GetInvalidPatIndex();
+					nOrd++;
+					modified = true;
+				}
+				if(nOrd >= oldLength) break;
+				ORDERINDEX startOrd = nOrd;
+				modified = true;
+
+				SEQUENCEINDEX newSeq = AddSequence(false);
+				SetSequence(newSeq);
+
+				// resize new seqeuence if necessary
+				if(GetLength() < oldLength - startOrd)
+				{
+					resize(oldLength - startOrd);
+				}
+
+				// now, move all following orders to the new sequence
+				while(nOrd < oldLength)
+				{
+					PATTERNINDEX copyPat = GetSequence(newSeq - 1)[nOrd];
+					At(nOrd - startOrd) = copyPat;
+					nOrd++;
+
+					// is this a valid pattern? adjust pattern jump commands, if necessary.
+					if(m_pSndFile->Patterns.IsValidPat(copyPat))
+					{
+						MODCOMMAND *m = m_pSndFile->Patterns[copyPat];
+						for (UINT len = m_pSndFile->PatternSize[copyPat] * m_pSndFile->m_nChannels; len; m++, len--)
+						{
+							if(m->command == CMD_POSITIONJUMP && m->param >= startOrd)
+							{
+								m->param = static_cast<BYTE>(m->param - startOrd);
+							}
+						}
+					}
+				}
+				SetSequence(newSeq - 1);
+				Remove(startOrd, oldLength - 1);
+				SetSequence(newSeq);
+				// start from beginning...
+				nOrd = 0;
+				if(GetLengthTailTrimmed() == 0 || !m_pSndFile->Patterns.IsValidIndex(At(nOrd))) break;
+			}
+		}
+		SetSequence(0);
+	}
+	return modified;
+}
+
+bool ModSequenceSet::MergeSequences()
+//-----------------------------------
+{
+	if(GetNumSequences() <= 1)
+		return false;
+
+	CHAR s[256];
+	SetSequence(0);
+	resize(GetLengthTailTrimmed());
+	SEQUENCEINDEX removedSequences = 0; // sequence count
+	vector <SEQUENCEINDEX> patternsFixed; // pattern fixed by other sequence already?
+	patternsFixed.resize(m_pSndFile->Patterns.Size(), SEQUENCEINDEX_INVALID);
+	// Set up vector
+	for(ORDERINDEX nOrd = 0; nOrd < GetLengthTailTrimmed(); nOrd++)
+	{
+		PATTERNINDEX nPat = At(nOrd);
+		if(!m_pSndFile->Patterns.IsValidPat(nPat)) continue;
+		patternsFixed[nPat] = 0;
+	}
+
+	while(GetNumSequences() > 1)
+	{
+		removedSequences++;
+		const ORDERINDEX nFirstOrder = GetLengthTailTrimmed() + 1; // +1 for separator item
+		if(nFirstOrder + GetSequence(1).GetLengthTailTrimmed() > m_pSndFile->GetModSpecifications().ordersMax)
+		{
+			wsprintf(s, "WARNING: Cannot merge Sequence %d (too long!)\n", removedSequences);
+			if (m_pSndFile->GetpModDoc())
+				m_pSndFile->GetpModDoc()->AddToLog(s);
+			RemoveSequence(1);
+			continue;
+		}
+		Append(GetInvalidPatIndex()); // Separator item
+		for(ORDERINDEX nOrd = 0; nOrd < GetSequence(1).GetLengthTailTrimmed(); nOrd++)
+		{
+			PATTERNINDEX nPat = GetSequence(1)[nOrd];
+			Append(nPat);
+
+			// Try to fix patterns (Bxx commands)
+			if(!m_pSndFile->Patterns.IsValidPat(nPat)) continue;
+
+			MODCOMMAND *m = m_pSndFile->Patterns[nPat];
+			for (UINT len = 0; len < m_pSndFile->PatternSize[nPat] * m_pSndFile->m_nChannels; m++, len++)
+			{
+				if(m->command == CMD_POSITIONJUMP)
+				{
+					if(patternsFixed[nPat] != SEQUENCEINDEX_INVALID && patternsFixed[nPat] != removedSequences)
+					{
+						// Oops, some other sequence uses this pattern already.
+						const PATTERNINDEX nNewPat = m_pSndFile->Patterns.Insert(m_pSndFile->PatternSize[nPat]);
+						if(nNewPat != SEQUENCEINDEX_INVALID)
+						{
+							// could create new pattern - copy data over and continue from here.
+							At(nFirstOrder + nOrd) = nNewPat;
+							MODCOMMAND *pSrc = m_pSndFile->Patterns[nPat];
+							MODCOMMAND *pDest = m_pSndFile->Patterns[nNewPat];
+							memcpy(pDest, pSrc, m_pSndFile->PatternSize[nPat] * m_pSndFile->m_nChannels * sizeof(MODCOMMAND));
+							m = pDest + len;
+							patternsFixed.resize(max(nNewPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
+							nPat = nNewPat;
+						} else
+						{
+							// cannot create new pattern: notify the user
+							wsprintf(s, "CONFLICT: Pattern break commands in Pattern %d might be broken since it has been used in several sequences!", nPat);
+							if (m_pSndFile->GetpModDoc())
+								m_pSndFile->GetpModDoc()->AddToLog(s);
+						}
+					}
+					m->param  = static_cast<BYTE>(m->param + nFirstOrder);
+					patternsFixed[nPat] = removedSequences;
+				}
+			}
+
+		}
+		RemoveSequence(1);
+	}
+	// Remove order name + fill up with empty patterns.
+	m_sName = "";
+	const ORDERINDEX nMinLength = (std::min)(ModSequenceSet::s_nCacheSize, m_pSndFile->GetModSpecifications().ordersMax);
+	if (GetLength() < nMinLength)
+		resize(nMinLength);
+	return true;
 }
 
 
