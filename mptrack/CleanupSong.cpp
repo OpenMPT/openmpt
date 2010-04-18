@@ -1044,9 +1044,9 @@ bool CModCleanupDlg::RemoveAllPlugins()
 	return true;
 }
 
-// Remove all plugins
+
 bool CModCleanupDlg::MergeSequences()
 //-----------------------------------
 {
-	return m_pModDoc->MergeSequences();
+	return m_pModDoc->GetSoundFile()->Order.MergeSequences();
 }

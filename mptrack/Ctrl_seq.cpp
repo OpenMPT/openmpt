@@ -1374,7 +1374,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 	CSoundFile& rSf = *m_pModDoc->GetSoundFile();
 	if (nSeq == MAX_SEQUENCES + 2)
 	{
-		CString strParam; strParam.Format(TEXT("%u: %s"), rSf.Order.GetCurrentSequenceIndex(), rSf.Order.m_sName);
+		CString strParam; strParam.Format(TEXT("%u: %s"), rSf.Order.GetCurrentSequenceIndex(), (LPCTSTR)rSf.Order.m_sName);
 		CString str;
 		AfxFormatString1(str, IDS_CONFIRM_SEQUENCE_DELETE, strParam);
 		if (AfxMessageBox(str, MB_YESNO | MB_ICONQUESTION) == IDYES)
