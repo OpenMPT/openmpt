@@ -132,13 +132,13 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		
 		// Check if pattern is valid
 		nPattern = Order[nCurrentPattern];
-		bool positionJumpOnThisRow=false;
-		bool patternBreakOnThisRow=false;
+		bool positionJumpOnThisRow = false;
+		bool patternBreakOnThisRow = false;
 
-		while (nPattern >= Patterns.Size())
+		while(nPattern >= Patterns.Size())
 		{
-			// End of song ?
-			if ((nPattern == Order.GetInvalidPatIndex()) || (nCurrentPattern >= Order.size()))
+			// End of song?
+			if((nPattern == Order.GetInvalidPatIndex()) || (nCurrentPattern >= Order.size()))
 			{
 				if(nCurrentPattern == m_nRestartPos)
 					break;
@@ -150,6 +150,8 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			}
 			nPattern = (nCurrentPattern < Order.size()) ? Order[nCurrentPattern] : Order.GetInvalidPatIndex();
 			nNextPattern = nCurrentPattern;
+			if(IsRowVisited(nCurrentPattern, 0, true))
+				break;
 		}
 		// Skip non-existing patterns
 		if ((nPattern >= Patterns.Size()) || (!Patterns[nPattern]))
@@ -220,9 +222,9 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				positionJumpOnThisRow=true;
 				nNextPattern = (ORDERINDEX)param;
 				// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
-				if (!patternBreakOnThisRow || (GetType() == MOD_TYPE_XM)) {
+				if(!patternBreakOnThisRow || (GetType() == MOD_TYPE_XM))
 					nNextRow = 0;
-				}
+
 				if (bAdjust)
 				{
 					pChn->nPatternLoopCount = 0;
@@ -1923,7 +1925,8 @@ BOOL CSoundFile::ProcessEffects()
 				 //occurs also when pattern loop is enabled.
 			}
 			// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
-			if(GetType() == MOD_TYPE_XM) nBreakRow = 0;
+			if(GetType() == MOD_TYPE_XM)
+				nBreakRow = 0;
 			break;
 
 		// Pattern Break
@@ -4156,5 +4159,5 @@ size_t CSoundFile::GetVisitedRowsVectorSize(const PATTERNINDEX nPat)
 	if(Patterns.IsValidPat(nPat))
 		return (size_t)(Patterns[nPat].GetNumRows());
 	else
-		return 0;
+		return 1;	// invalid patterns consist of a "fake" row.
 }
