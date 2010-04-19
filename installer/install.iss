@@ -46,6 +46,12 @@ Source: "..\mptrack\bin\OpenMPT_SoundTouch_i16.dll"; DestDir: "{app}"; Flags: ig
 Source: "..\mptrack\bin\unmo3.dll";                  DestDir: "{app}"; Flags: ignoreversion
 Source: "packageTemplate\readme.txt";                DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packageTemplate\history.txt";            DestDir: "{app}"; Flags: ignoreversion
+
+; release notes
+Source: "..\packageTemplate\ReleaseNotesImages\general\*.*";  DestDir: "{app}\ReleaseNotesImages\general\"; Flags: ignoreversion
+Source: "..\packageTemplate\ReleaseNotesImages\1.18\*.*";     DestDir: "{app}\ReleaseNotesImages\1.18\"; Flags: ignoreversion
+Source: "..\packageTemplate\OMPT_1.18_ReleaseNotes.html";     DestDir: "{app}"; Flags: ignoreversion
+
 ; soundtouch license stuff
 Source: "..\packageTemplate\SoundTouch\*.*";     DestDir: "{app}\SoundTouch"; Flags: ignoreversion
 ; keymaps
@@ -233,5 +239,6 @@ begin
         end;
     end;
 end;
+
 
 
