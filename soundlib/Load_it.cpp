@@ -1475,9 +1475,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 						if(m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54) && interpretModplugmade)
 							m[ch].volcmd = VOLCMD_VIBRATOSPEED;
 					} else
-					// 213-222: Velocity //rewbs.velocity
-					if ((vol >= 213) && (vol <= 222)) { m[ch].volcmd = VOLCMD_VELOCITY; m[ch].vol = vol - 213; } else	//rewbs.velocity
-					// 223-232: Offset //rewbs.VolOffset
+					// 213-222: Unused (was velocity)
+					// 223-232: Offset
 					if ((vol >= 223) && (vol <= 232)) { m[ch].volcmd = VOLCMD_OFFSET; m[ch].vol = vol - 223; } //rewbs.volOff
 					lastvalue[ch].volcmd = m[ch].volcmd;
 					lastvalue[ch].vol = m[ch].vol;
@@ -2205,7 +2204,6 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 					case VOLCMD_TONEPORTAMENTO:	vol = 193 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTADOWN:		vol = 105 + ConvertVolParam(m->vol); break;
 					case VOLCMD_PORTAUP:		vol = 115 + ConvertVolParam(m->vol); break;
-					case VOLCMD_VELOCITY:		vol = 213 + ConvertVolParam(m->vol); break; //rewbs.velocity
 					case VOLCMD_OFFSET:			vol = 223 + ConvertVolParam(m->vol); break; //rewbs.volOff
 					default:					vol = 0xFF;
 					}

@@ -96,7 +96,7 @@ typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 #define VOLCMD_TONEPORTAMENTO	11
 #define VOLCMD_PORTAUP			12
 #define VOLCMD_PORTADOWN		13
-#define VOLCMD_VELOCITY			14 //rewbs.velocity
+#define VOLCMD_DELAYCUT			14 //currently unused
 #define VOLCMD_OFFSET			15 //rewbs.volOff
 #define MAX_VOLCMDS				16
 
@@ -135,7 +135,7 @@ typedef MODCOMMAND MODCOMMAND_ORIGINAL;
 #define CMD_SETENVPOSITION		30
 #define CMD_MIDI				31
 #define CMD_SMOOTHMIDI			32 //rewbs.smoothVST
-#define CMD_VELOCITY			33 //rewbs.velocity
+#define CMD_DELAYCUT			33
 #define CMD_XPARAM				34 // -> CODE#0010 -> DESC="add extended parameter mechanism to pattern effects" -! NEW_FEATURE#0010
 #define CMD_NOTESLIDEUP         35 // IMF Gxy
 #define CMD_NOTESLIDEDOWN       36 // IMF Hxy

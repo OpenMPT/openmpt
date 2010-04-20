@@ -3623,10 +3623,6 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 					m->command = CMD_OFFSET;
 					m->param = m->vol << 3;
 					break;
-				case VOLCMD_VELOCITY:
-					m->command = CMD_VOLUME;
-					m->param = m->vol * 7;
-					break;
 				default:
 					break;
 		}
@@ -3700,10 +3696,6 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 					m->param = m->vol << 3;
 					m->volcmd = CMD_NONE;
 					break;
-				case VOLCMD_VELOCITY:
-					m->volcmd = CMD_VOLUME;
-					m->vol *= 7;
-					break;
 				default:
 					break;
 		}
@@ -3731,10 +3723,6 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 					m->param = m->vol << 3;
 					m->volcmd = CMD_NONE;
 					break;
-				case VOLCMD_VELOCITY:
-					m->volcmd = CMD_VOLUME;
-					m->vol *= 7;
-					break;
 				default:
 					break;
 		}
@@ -3756,7 +3744,6 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 				case VOLCMD_VIBRATODEPTH:
 					// OpenMPT-specific commands
 				case VOLCMD_OFFSET:
-				case VOLCMD_VELOCITY:
 					m->vol = min(m->vol, 9);
 					break;
 				case VOLCMD_PANSLIDELEFT:
@@ -3832,7 +3819,7 @@ uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd)
 	case CMD_TREMOLO:			return  40;
 	case CMD_KEYOFF:			return  32;
 	case CMD_SETENVPOSITION:	return  24;
-	case CMD_VELOCITY:			return  16;
+	case CMD_DELAYCUT:			return  16;
 	case CMD_XPARAM:			return   8;
 	case CMD_NONE:
 	default:					return   0;

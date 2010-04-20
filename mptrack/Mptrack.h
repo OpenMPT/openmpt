@@ -439,9 +439,9 @@ STATIC_ASSERT(NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1 == ARRAYELEMCOUNT(szSpecia
 STATIC_ASSERT(ARRAYELEMCOUNT(szSpecialNoteShortDesc) == ARRAYELEMCOUNT(szSpecialNoteNames)); 
 
 const LPCSTR szHexChar = "0123456789ABCDEF";
-const LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ\\:#??"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
-const LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#??"; //rewbs.smoothVST: added last \ (written as \\); rewbs.velocity: added last :
-const LPCSTR gszVolCommands = " vpcdabuhlrgfe:o";	//rewbs.velocity: added last : ; rewbs.volOff added last o
+const LPCSTR gszModCommands = " 0123456789ABCDRFFTE???GHK?YXPLZ\\:#??"; //rewbs.smoothVST: added last \ (written as \\);
+const LPCSTR gszS3mCommands = " JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#??"; //rewbs.smoothVST: added last \ (written as \\);
+const LPCSTR gszVolCommands = " vpcdabuhlrgfe:o";
 const TCHAR gszEmpty[] = TEXT("");
 
 // Defined in load_mid.cpp

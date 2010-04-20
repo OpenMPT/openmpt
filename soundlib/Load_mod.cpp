@@ -56,7 +56,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 'Y' - 55:	command = CMD_PANBRELLO; break;			//34
 	case 'Z' - 55:	command = CMD_MIDI;	break;				//35
 	case '\\' - 56:	command = CMD_SMOOTHMIDI;	break;		//rewbs.smoothVST: 36
-	case ':' - 21:	command = CMD_VELOCITY;	break;			//rewbs.velocity: 37
+	case ':' - 21:	command = CMD_DELAYCUT;	break;			//37
 	case '#' + 3:	command = CMD_XPARAM;	break;			//rewbs.XMfixes - XParam is 38
 	default:	command = 0;
 	}
@@ -153,11 +153,8 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 		else
 			command = '\\' - 56;
 		break;
-	case CMD_VELOCITY: //rewbs.velocity: 37
-		if(bCompatibilityExport)
+	case CMD_DELAYCUT:
 			command = param = 0;
-		else
-			command = ':' - 21;
 		break;
 	case CMD_XPARAM: //rewbs.XMfixes - XParam is 38
 		if(bCompatibilityExport)

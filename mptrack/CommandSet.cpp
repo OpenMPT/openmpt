@@ -1279,10 +1279,10 @@ void CCommandSet::SetupCommands()
 	commands[kcSetVolumeITPortaDown].isDummy = false;
 	commands[kcSetVolumeITPortaDown].Message = "Vol command - Portamento Down";
 
-	commands[kcSetVolumeITVelocity].UID = 1245;
-	commands[kcSetVolumeITVelocity].isHidden = false;
-	commands[kcSetVolumeITVelocity].isDummy = false;
-	commands[kcSetVolumeITVelocity].Message = "Vol command - Velocity";
+	commands[kcSetVolumeITUnused].UID = 1245;
+	commands[kcSetVolumeITUnused].isHidden = true;
+	commands[kcSetVolumeITUnused].isDummy = false;
+	commands[kcSetVolumeITUnused].Message = "Vol command - Unused";
 
 	commands[kcSetVolumeITOffset].UID = 1246;
 	commands[kcSetVolumeITOffset].isHidden = false;
@@ -1529,10 +1529,10 @@ void CCommandSet::SetupCommands()
 	commands[kcSetFXmacroSlide].isDummy = false;
 	commands[kcSetFXmacroSlide].Message = "FX midi macro slide";
 
-	commands[kcSetFXvelocity].UID = 1295;
-	commands[kcSetFXvelocity].isHidden = false;
-	commands[kcSetFXvelocity].isDummy = false;
-	commands[kcSetFXvelocity].Message = "FX pseudo-velocity (experimental)";
+	commands[kcSetFXdelaycut].UID = 1295;
+	commands[kcSetFXdelaycut].isHidden = false;
+	commands[kcSetFXdelaycut].isDummy = false;
+	commands[kcSetFXdelaycut].Message = "FX combined note delay and note cut";
 
 	commands[kcPatternJumpDownh1Select].UID = 1296;
 	commands[kcPatternJumpDownh1Select].isHidden = true;
