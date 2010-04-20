@@ -226,12 +226,11 @@ version:1
 5:1242:0:71:1		//Vol command - Portamento: G (KeyDown)
 5:1243:0:70:1		//Vol command - Portamento Up: F (KeyDown)
 5:1244:0:69:1		//Vol command - Portamento Down: E (KeyDown)
-5:1245:1:190:1		//Vol command - Velocity: Shift+. (KeyDown)
 5:1246:0:79:1		//Vol command - Offset: O (KeyDown)
 
 //----( Pattern Context [bottom] - FX Col (6) )------------
 6:1294:0:220:1		//FX midi macro slide: ZIRKUMFLEX (KeyDown)
-6:1295:1:190:1		//FX pseudo-velocity (experimental): Shift+. (KeyDown)
+6:1295:0:190:1		//FX combined note delay and note cut: . (KeyDown)
 6:1666:0:191:1		//FX parameter extension command: # (KeyDown)
 
 //----( Pattern Context [bottom] - Param Col (7) )------------

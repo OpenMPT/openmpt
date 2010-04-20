@@ -2863,7 +2863,7 @@ const MPTVOLCMDINFO gVolCmdInfo[MAX_VOLINFO] =
 	{VOLCMD_TONEPORTAMENTO,	MOD_TYPE_XMITMPT,	"g: Tone portamento"},
 	{VOLCMD_PORTAUP,		MOD_TYPE_ITMPT,		"f: Portamento up"},
 	{VOLCMD_PORTADOWN,		MOD_TYPE_ITMPT,		"e: Portamento down"},
-	{VOLCMD_DELAYCUT,		MOD_TYPE_ITMPT,		":: (currently unused)"},
+	{VOLCMD_DELAYCUT,		MOD_TYPE_NONE,		":: (currently unused)"},
 	{VOLCMD_OFFSET,			MOD_TYPE_ITMPT,		"o: Offset"},		//rewbs.volOff
 };
 
