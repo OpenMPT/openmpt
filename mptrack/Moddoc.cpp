@@ -1985,7 +1985,7 @@ typedef struct MPTEFFECTINFO
 #define MOD_TYPE_XMIT	(MOD_TYPE_XM|MOD_TYPE_IT)
 #define MOD_TYPE_XMITMPT (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)
 #define MOD_TYPE_ITMPT (MOD_TYPE_IT|MOD_TYPE_MPT)
-#define MAX_FXINFO		69
+#define MAX_FXINFO		70
 
 
 const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
@@ -2060,6 +2060,7 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	// MPT IT extensions and special effects
 	{CMD_S3MCMDEX,		0xF0,0x90,	0,	MOD_TYPE_S3MITMPT,	"Sound control"},
 	{CMD_S3MCMDEX,		0xF0,0x70,	0,	MOD_TYPE_ITMPT,	"Instr. control"},
+	{CMD_DELAYCUT,		0x00,0x00,	0,	MOD_TYPE_MPT,	"Note delay and cut"},
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMITMPT,	"X param"},
@@ -2840,7 +2841,7 @@ typedef struct MPTVOLCMDINFO
 	LPCSTR pszName;		// ie "Set Volume"
 } MPTVOLCMDINFO;
 
-#define MAX_VOLINFO		15			//rewbs.volOff & rewbs.velocity: increased from 13
+#define MAX_VOLINFO		15
 
 
 const MPTVOLCMDINFO gVolCmdInfo[MAX_VOLINFO] =
@@ -2858,8 +2859,8 @@ const MPTVOLCMDINFO gVolCmdInfo[MAX_VOLINFO] =
 	{VOLCMD_TONEPORTAMENTO,	MOD_TYPE_XMITMPT,	"g: Tone portamento"},
 	{VOLCMD_PORTAUP,		MOD_TYPE_ITMPT,		"f: Portamento up"},
 	{VOLCMD_PORTADOWN,		MOD_TYPE_ITMPT,		"e: Portamento down"},
-	{VOLCMD_VELOCITY,		MOD_TYPE_ITMPT,		":: velocity"},		//rewbs.velocity
-	{VOLCMD_OFFSET,			MOD_TYPE_ITMPT,		"o: offset"},		//rewbs.volOff
+	{VOLCMD_DELAYCUT,		MOD_TYPE_ITMPT,		":: (currently unused)"},
+	{VOLCMD_OFFSET,			MOD_TYPE_ITMPT,		"o: Offset"},		//rewbs.volOff
 };
 
 

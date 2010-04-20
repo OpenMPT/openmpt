@@ -484,7 +484,7 @@ enum CommandID
 	kcSetVolumePortamento,		//g
 	kcSetVolumeITPortaUp,		//f
 	kcSetVolumeITPortaDown,		//e
-	kcSetVolumeITVelocity,		//:
+	kcSetVolumeITUnused,		//:
 	kcSetVolumeITOffset,		//o
 	kcSetVolumeEnd=kcSetVolumeITOffset,		
 
@@ -542,7 +542,7 @@ enum CommandID
 	kcSetFXmacro,		//z,z
 	kcFixedFXend=kcSetFXmacro,
 	kcSetFXmacroSlide,	//?,\ 
-	kcSetFXvelocity,	//?,:
+	kcSetFXdelaycut,	//?,:
 	kcSetFXextension,	//?,#
 	kcSetFXEnd=kcSetFXextension,
 

@@ -89,7 +89,7 @@ const CModSpecifications mptm =
 	true,								//Has song comments
 	MAX_ENVPOINTS,						//Envelope point count
 	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
-	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
+	" vpcdabuhlrgfe?o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
 	true,								// Supports plugins
@@ -241,8 +241,8 @@ const CModSpecifications xmEx =
 	31,									//Max Speed
 	true,								//Has song comments
 	12,									//Envelope point count
-	" 0123456789ABCDRFFTE???GHK?YXPLZ\\:#",	// Supported Effects
-	" vpcdabuhlrgfe:o",					// Supported Volume Column commands
+	" 0123456789ABCDRFFTE???GHK?YXPLZ\\?#",	// Supported Effects
+	" vpcdabuhlrgfe?o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
 	true,								// Supports plugins
@@ -316,7 +316,7 @@ const CModSpecifications s3mEx =
 	255,								//Max Speed
 	false,								//No song comments
 	0,									//No instrument envelopes
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#",	// Supported Effects
 	" vp?????????????",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	false,								// Doesn't have restart position (order)
@@ -390,8 +390,8 @@ const CModSpecifications itEx =
 	255,								//Max Speed
 	true,								//Has song comments
 	25,									//Envelope point count
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\:#",	// Supported Effects
-	" vpcdab?h??gfe:o",					// Supported Volume Column commands
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#",	// Supported Effects
+	" vpcdab?h??gfe?o",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
 	true,								// Supports plugins

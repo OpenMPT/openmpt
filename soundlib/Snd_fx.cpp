@@ -1256,6 +1256,13 @@ BOOL CSoundFile::ProcessEffects()
 		if((m_dwSongFlags & SONG_FIRSTTICK) == 0) InvertLoop(&Chn[nChn]);
 
 		// Process special effects (note delay, pattern delay, pattern loop)
+		if (cmd == CMD_DELAYCUT)
+		{
+			//:xy --> note delay until tick x, note cut at tick x+y
+			nStartTick = (param & 0xF0) >> 4;
+			int cutAtTick = nStartTick + (param & 0x0F);
+			NoteCut(nChn, cutAtTick);
+		} else
 		if ((cmd == CMD_MODCMDEX) || (cmd == CMD_S3MCMDEX))
 		{
 			if ((!param) && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))) param = pChn->nOldCmdEx; else pChn->nOldCmdEx = param;
@@ -1569,12 +1576,6 @@ BOOL CSoundFile::ProcessEffects()
 					else
 						PortamentoDown(pChn, vol << 2, false);
 					break;
-				
-				case VOLCMD_VELOCITY:					//rewbs.velocity	TEMP algorithm (crappy :)
-					pChn->nVolume = vol * 28;			//Max nVolume is 255; max vol is 9; 255/9=28
-					pChn->dwFlags |= CHN_FASTVOLRAMP;
-					if (m_nTickCount == nStartTick) SampleOffset(nChn, 48-(vol << 3), bPorta); //Max vol is 9; 9 << 3 = 48
-					break;
 							
 				case VOLCMD_OFFSET:					//rewbs.volOff
 					if (m_nTickCount == nStartTick) 
@@ -1701,8 +1702,6 @@ BOOL CSoundFile::ProcessEffects()
 
 				if (volcmd == VOLCMD_OFFSET)
 					RetrigNote(nChn, pChn->nRetrigParam, vol << 3);
-				else if (volcmd == VOLCMD_VELOCITY)
-					RetrigNote(nChn, pChn->nRetrigParam, 48 - (vol << 3));
 				else
 					RetrigNote(nChn, pChn->nRetrigParam);
 			}
@@ -1710,15 +1709,11 @@ BOOL CSoundFile::ProcessEffects()
 			{
 				// XM Retrig
 				if (param) pChn->nRetrigParam = (BYTE)(param & 0xFF); else param = pChn->nRetrigParam;
-				//rewbs.volOffset
 				//RetrigNote(nChn, param);
 				if (volcmd == VOLCMD_OFFSET)
 					RetrigNote(nChn, param, vol << 3);
-				else if (volcmd == VOLCMD_VELOCITY)
-					RetrigNote(nChn, param, 48 - (vol << 3));
 				else
 					RetrigNote(nChn, param);
-				//end rewbs.volOffset:
 			}
 			break;
 
@@ -1968,11 +1963,6 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			break;
 		//rewbs.smoothVST end 
-		
-		//rewbs.velocity
-		case CMD_VELOCITY:
-			break;
-		//end rewbs.velocity
 
 		// IMF Commands
 		case CMD_NOTESLIDEUP:

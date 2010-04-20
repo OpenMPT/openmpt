@@ -289,12 +289,10 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcy = pfnt->nAlphaNZ_Y + 14 * COLUMN_HEIGHT;
 		break;
 	//end rewbs.smoothVST
-	//rewbs.velocity
 	case ':':
 		srcx = pfnt->nAlphaNZ_X;
 		srcy = pfnt->nAlphaNZ_Y + 15 * COLUMN_HEIGHT;
 		break;
-	//end rewbs.velocity
 	case ' ':
 		srcx = pfnt->nSpaceX;
 		srcy = pfnt->nSpaceY;

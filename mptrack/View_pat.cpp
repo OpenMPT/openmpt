@@ -3763,7 +3763,6 @@ void CViewPattern::TempEnterVol(int v)
 				case kcSetVolumePortamento:		volcmd = VOLCMD_TONEPORTAMENTO; break;
 				case kcSetVolumeITPortaUp:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTAUP; break;
 				case kcSetVolumeITPortaDown:	if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_PORTADOWN; break;
-				case kcSetVolumeITVelocity:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_VELOCITY; break;	//rewbs.velocity
 				case kcSetVolumeITOffset:		if (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) volcmd = VOLCMD_OFFSET; break;		//rewbs.volOff
 				}
 			//if ((pSndFile->m_nType & MOD_TYPE_MOD) && (volcmd > VOLCMD_PANNING)) volcmd = vol = 0;
@@ -3892,18 +3891,6 @@ void CViewPattern::TempEnterFXparam(int v)
 			p->param = (p->param << 4) | v;
 			if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
 
-	/*
-			if (v >= 0 && v <= 9)
-			{
-				p->param = (p->param << 4) | v;
-				if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
-			}
-			else if (v >= 10 && v <= 15)
-			{
-				p->param = (p->param << 4) | (v + 0x0A);
-				if (p->command == m_cmdOld.command) m_cmdOld.param = p->param;
-			}
-	*/
 			// Check for MOD/XM Speed/Tempo command
 			if ((pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 			 && ((p->command == CMD_SPEED) || (p->command == CMD_TEMPO)))
@@ -3912,15 +3899,15 @@ void CViewPattern::TempEnterFXparam(int v)
 			}
 		}
 
-			DWORD sel = (m_nRow << 16) | m_dwCursor;
-			SetCurSel(sel, sel);
-			sel &= ~7;
-			if(*p != oldcmd)
-			{
-				pModDoc->SetModified();
-				InvalidateArea(sel, sel+5);
-				UpdateIndicator();
-			}
+		DWORD sel = (m_nRow << 16) | m_dwCursor;
+		SetCurSel(sel, sel);
+		sel &= ~7;
+		if(*p != oldcmd)
+		{
+			pModDoc->SetModified();
+			InvalidateArea(sel, sel+5);
+			UpdateIndicator();
+		}
 	}
 }
 

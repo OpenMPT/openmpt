@@ -80,7 +80,7 @@ void CSoundFile::S3MConvert(MODCOMMAND *m, BOOL bIT) const
 {
 	UINT command = m->command;
 	UINT param = m->param;
-	switch (command + 0x40)
+	switch (command | 0x40)
 	{
 	case 'A':	command = CMD_SPEED; break;
 	case 'B':	command = CMD_POSITIONJUMP; break;
@@ -109,11 +109,9 @@ void CSoundFile::S3MConvert(MODCOMMAND *m, BOOL bIT) const
 	case 'Y':	command = CMD_PANBRELLO; break;
 	case 'Z':	command = CMD_MIDI; break;
 	case '\\':	command = CMD_SMOOTHMIDI; break; //rewbs.smoothVST
-	case ':':	command = CMD_VELOCITY; break; //rewbs.velocity
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
+	// Chars under 0x40 don't save properly, so map : to ] and # to [.
+	case ']':	command = CMD_DELAYCUT; break;
 	case '[':	command = CMD_XPARAM; break;
-// -! NEW_FEATURE#0010
 	default:	command = 0;
 	}
 	m->command = command;
@@ -172,12 +170,6 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 		else
 			command = '\\';
 		break;
-	case CMD_VELOCITY:  //rewbs.velocity
-		if(bCompatibilityExport)
-			command = param = 0;
-		else
-			command = ':';
-		break;
 	case CMD_XFINEPORTAUPDOWN:
 		if (param & 0x0F) switch(param & 0xF0)
 		{
@@ -204,15 +196,19 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 		case 0xB0:	if (param & 0x0F) { command = 'D'; param |= 0xF0; } else command=param=0; break;
 		}
 		break;
-// -> CODE#0010
-// -> DESC="add extended parameter mechanism to pattern effects"
+	// Chars under 0x40 don't save properly, so map : to ] and # to [.	
+	case CMD_DELAYCUT: 
+		if(bCompatibilityExport)
+			command = param = 0;
+		else
+			command = ']';
+		break;
 	case CMD_XPARAM:
 		if(bCompatibilityExport)
 			command = param = 0;
 		else
 			command = '[';
 		break;
-// -! NEW_FEATURE#0010
 	default:	command = param = 0;
 	}
 	command &= ~0x40;
