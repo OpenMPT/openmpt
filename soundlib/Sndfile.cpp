@@ -1102,7 +1102,7 @@ PATTERNINDEX CSoundFile::GetNumPatterns() const
 	for(PATTERNINDEX i = 0; i < Patterns.Size(); i++)
 	{
 		if(Patterns.IsValidPat(i))
-			max = i;
+			max = i + 1;
 	}
 	return max;
 }
@@ -2717,6 +2717,51 @@ BOOL CSoundFile::GetPatternName(PATTERNINDEX nPat, LPSTR lpszName, UINT cbSize) 
 
 #ifndef FASTSOUNDLIB
 
+bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample)
+//------------------------------------------------
+{
+	if ((!nSample) || (nSample > m_nSamples)) return false;
+	if (m_nInstruments)
+	{
+		for (UINT i=1; i<=m_nInstruments; i++) if (Instruments[i])
+		{
+			MODINSTRUMENT *pIns = Instruments[i];
+			for (UINT j=0; j<128; j++)
+			{
+				if (pIns->Keyboard[j] == nSample) return true;
+			}
+		}
+	} else
+	{
+		for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
+		{
+			MODCOMMAND *m = Patterns[i];
+			for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
+			{
+				if (m->instr == nSample && !m->IsPcNote()) return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr)
+//-------------------------------------------------------
+{
+	if ((!nInstr) || (nInstr > m_nInstruments) || (!Instruments[nInstr])) return false;
+	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
+	{
+		MODCOMMAND *m = Patterns[i];
+		for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
+		{
+			if (m->instr == nInstr && !m->IsPcNote()) return true;
+		}
+	}
+	return false;
+}
+
+
 UINT CSoundFile::DetectUnusedSamples(BYTE *pbIns)
 //-----------------------------------------------
 {
@@ -3542,6 +3587,7 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			break;
 
 		case CMD_MODCMDEX: // This would turn into "Set Active Macro", so let's better remove it
+		case CMD_S3MCMDEX:
 			if((m->param & 0xF0) == 0xF0) m->command = CMD_NONE;
 			break;
 		}

@@ -1985,28 +1985,29 @@ typedef struct MPTEFFECTINFO
 #define MOD_TYPE_XMIT	(MOD_TYPE_XM|MOD_TYPE_IT)
 #define MOD_TYPE_XMITMPT (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)
 #define MOD_TYPE_ITMPT (MOD_TYPE_IT|MOD_TYPE_MPT)
+#define MOD_TYPE_ALL	0xFFFFFFFF
 #define MAX_FXINFO		70
 
 
 const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 {
-	{CMD_ARPEGGIO,		0,0,		0,	0xFFFFFFFF,		"Arpeggio"},
-	{CMD_PORTAMENTOUP,	0,0,		0,	0xFFFFFFFF,		"Portamento Up"},
-	{CMD_PORTAMENTODOWN,0,0,		0,	0xFFFFFFFF,		"Portamento Down"},
-	{CMD_TONEPORTAMENTO,0,0,		0,	0xFFFFFFFF,		"Tone portamento"},
-	{CMD_VIBRATO,		0,0,		0,	0xFFFFFFFF,		"Vibrato"},
-	{CMD_TONEPORTAVOL,	0,0,		0,	0xFFFFFFFF,		"Volslide+Toneporta"},
-	{CMD_VIBRATOVOL,	0,0,		0,	0xFFFFFFFF,		"VolSlide+Vibrato"},
-	{CMD_TREMOLO,		0,0,		0,	0xFFFFFFFF,		"Tremolo"},
-	{CMD_PANNING8,		0,0,		0,	0xFFFFFFFF,		"Set Panning"},
-	{CMD_OFFSET,		0,0,		0,	0xFFFFFFFF,		"Set Offset"},
-	{CMD_VOLUMESLIDE,	0,0,		0,	0xFFFFFFFF,		"Volume Slide"},
-	{CMD_POSITIONJUMP,	0,0,		0,	0xFFFFFFFF,		"Position Jump"},
+	{CMD_ARPEGGIO,		0,0,		0,	MOD_TYPE_ALL,	"Arpeggio"},
+	{CMD_PORTAMENTOUP,	0,0,		0,	MOD_TYPE_ALL,	"Portamento Up"},
+	{CMD_PORTAMENTODOWN,0,0,		0,	MOD_TYPE_ALL,	"Portamento Down"},
+	{CMD_TONEPORTAMENTO,0,0,		0,	MOD_TYPE_ALL,	"Tone portamento"},
+	{CMD_VIBRATO,		0,0,		0,	MOD_TYPE_ALL,	"Vibrato"},
+	{CMD_TONEPORTAVOL,	0,0,		0,	MOD_TYPE_ALL,	"Volslide+Toneporta"},
+	{CMD_VIBRATOVOL,	0,0,		0,	MOD_TYPE_ALL,	"VolSlide+Vibrato"},
+	{CMD_TREMOLO,		0,0,		0,	MOD_TYPE_ALL,	"Tremolo"},
+	{CMD_PANNING8,		0,0,		0,	MOD_TYPE_ALL,	"Set Panning"},
+	{CMD_OFFSET,		0,0,		0,	MOD_TYPE_ALL,	"Set Offset"},
+	{CMD_VOLUMESLIDE,	0,0,		0,	MOD_TYPE_ALL,	"Volume Slide"},
+	{CMD_POSITIONJUMP,	0,0,		0,	MOD_TYPE_ALL,	"Position Jump"},
 	{CMD_VOLUME,		0,0,		0,	MOD_TYPE_MODXM,	"Set Volume"},
-	{CMD_PATTERNBREAK,	0,0,		0,	0xFFFFFFFF,		"Pattern Break"},
+	{CMD_PATTERNBREAK,	0,0,		0,	MOD_TYPE_ALL,	"Pattern Break"},
 	{CMD_RETRIG,		0,0,		0,	MOD_TYPE_NOMOD,	"Retrigger Note"},
-	{CMD_SPEED,			0,0,		0,	0xFFFFFFFF,		"Set Speed"},
-	{CMD_TEMPO,			0,0,		0,	0xFFFFFFFF,		"Set Tempo"},
+	{CMD_SPEED,			0,0,		0,	MOD_TYPE_ALL,	"Set Speed"},
+	{CMD_TEMPO,			0,0,		0,	MOD_TYPE_ALL,	"Set Tempo"},
 	{CMD_TREMOR,		0,0,		0,	MOD_TYPE_NOMOD,	"Tremor"},
 	{CMD_CHANNELVOLUME,	0,0,		0,	MOD_TYPE_S3MITMPT,	"Set channel volume"},
 	{CMD_CHANNELVOLSLIDE,0,0,		0,	MOD_TYPE_S3MITMPT,	"Channel volslide"},
@@ -2065,8 +2066,8 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 // -> DESC="add extended parameter mechanism to pattern effects"
 	{CMD_XPARAM,		0x00,0x00,	0,	MOD_TYPE_XMITMPT,	"X param"},
 // -! NEW_FEATURE#0010
-	{CMD_NOTESLIDEUP,	0x00,0x00,	0,	0,	"Note Slide Up"}, // .IMF effect
-	{CMD_NOTESLIDEDOWN,	0x00,0x00,	0,	0,	"Note Slide Down"}, // .IMF effect
+	{CMD_NOTESLIDEUP,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Up"}, // .IMF effect
+	{CMD_NOTESLIDEDOWN,	0x00,0x00,	0,	MOD_TYPE_NONE,	"Note Slide Down"}, // .IMF effect
 };
 
 

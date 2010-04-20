@@ -574,7 +574,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 		}
 	}
 	EndWaitCursor();
-	if (nExt &&  !((pSndFile->m_nType & MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT)))
+	if (nExt &&  !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT)))
 	{	//We don't remove an instrument's unused samples in an ITP.
 		wsprintf(s, "OpenMPT detected %d sample%s referenced by an instrument,\n"
 			"but not used in the song. Do you want to remove them?", nExt, (nExt == 1) ? "" : "s");
@@ -730,7 +730,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if(pSndFile == nullptr) return false;
 
-	INSTRUMENTINDEX usedmap[MAX_INSTRUMENTS];
+	vector<bool> usedmap;
 	INSTRUMENTINDEX swapmap[MAX_INSTRUMENTS];
 	INSTRUMENTINDEX swapdest[MAX_INSTRUMENTS];
 	CHAR s[512];
@@ -741,18 +741,21 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 	if (!pSndFile->m_nInstruments) return false;
 
 	char removeSamples = -1;
-	if ( !((pSndFile->m_nType & MOD_TYPE_IT) && (pSndFile->m_dwSongFlags&SONG_ITPROJECT))) { //never remove an instrument's samples in ITP.
-		if(::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing unused instruments", MB_YESNO | MB_ICONQUESTION) == IDYES) {
+	if ( !((pSndFile->GetType() == MOD_TYPE_IT) && (pSndFile->m_dwSongFlags & SONG_ITPROJECT))) //never remove an instrument's samples in ITP.
+	{
+		if(::MessageBox(NULL, "Remove samples associated with an instrument if they are unused?", "Removing unused instruments", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
 			removeSamples = 1;
 		}
-	} else {
+	} else
+	{
 		::MessageBox(NULL, "This is an IT project file, so no samples associated with a used instrument will be removed.", "Removing unused instruments", MB_OK | MB_ICONINFORMATION);
 	}
 
 	BeginWaitCursor();
-	memset(usedmap, 0, sizeof(usedmap));
+	usedmap.resize(pSndFile->GetNumInstruments() + 1, false);
 
-	for(INSTRUMENTINDEX i = pSndFile->m_nInstruments; i >= 1; i--)
+	for(INSTRUMENTINDEX i = pSndFile->GetNumInstruments(); i >= 1; i--)
 	{
 		if (!pSndFile->IsInstrumentUsed(i))
 		{
@@ -762,12 +765,15 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 			//			pSndFile->DestroyInstrument(i);
 			pSndFile->DestroyInstrument(i, removeSamples);
 			// -! BEHAVIOUR_CHANGE#0003
-			if ((i == pSndFile->m_nInstruments) && (i>1)) pSndFile->m_nInstruments--; else bReorg = true;
+			if ((i == pSndFile->GetNumInstruments()) && (i>1))
+				pSndFile->m_nInstruments--;
+			else
+				bReorg = true;
 			END_CRITICAL();
 			nRemoved++;
 		} else
 		{
-			usedmap[i] = 1;
+			usedmap[i] = true;
 		}
 	}
 	EndWaitCursor();
@@ -790,8 +796,8 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 						swapdest[nSwap] = nIndex;
 						pSndFile->Instruments[nIndex] = pSndFile->Instruments[nIns];
 						pSndFile->Instruments[nIns] = nullptr;
-						usedmap[nIndex] = 1;
-						usedmap[nIns] = 0;
+						usedmap[nIndex] = true;
+						usedmap[nIns] = false;
 						nSwap++;
 						nIndex++;
 						break;
@@ -814,7 +820,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 					{
 						for (UINT k=0; k<nSwap; k++)
 						{
-							if (p->instr == swapmap[k]) p->instr = (BYTE)swapdest[k];
+							if (p->instr == swapmap[k]) p->instr = (MODCOMMAND::INSTR)swapdest[k];
 						}
 					}
 					p++;

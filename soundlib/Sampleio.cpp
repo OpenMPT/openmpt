@@ -133,79 +133,34 @@ bool CSoundFile::DestroyInstrument(INSTRUMENTINDEX nInstr, char removeSamples)
 }
 
 
-bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample)
-//------------------------------------------------
-{
-	if ((!nSample) || (nSample > m_nSamples)) return false;
-	if (m_nInstruments)
-	{
-		for (UINT i=1; i<=m_nInstruments; i++) if (Instruments[i])
-		{
-			MODINSTRUMENT *pIns = Instruments[i];
-			for (UINT j=0; j<128; j++)
-			{
-				if (pIns->Keyboard[j] == nSample) return true;
-			}
-		}
-	} else
-	{
-		for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
-		{
-			MODCOMMAND *m = Patterns[i];
-			for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
-			{
-				if (m->instr == nSample) return true;
-			}
-		}
-	}
-	return false;
-}
-
-
-bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr)
-//-------------------------------------------------------
-{
-	if ((!nInstr) || (nInstr > m_nInstruments) || (!Instruments[nInstr])) return false;
-	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
-	{
-		MODCOMMAND *m = Patterns[i];
-		for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
-		{
-			if (m->instr == nInstr) return true;
-		}
-	}
-	return false;
-}
-
-
 // Removing all unused samples
 bool CSoundFile::RemoveInstrumentSamples(INSTRUMENTINDEX nInstr)
 //--------------------------------------------------------------
 {
-	BYTE sampleused[MAX_SAMPLES/8];
-	
-	memset(sampleused, 0, sizeof(sampleused));
+	vector<bool> sampleused;
+	sampleused.resize(GetNumSamples() + 1, false);
+
 	if (Instruments[nInstr])
 	{
 		MODINSTRUMENT *p = Instruments[nInstr];
 		for (UINT r=0; r<128; r++)
 		{
 			UINT n = p->Keyboard[r];
-			if (n < MAX_SAMPLES) sampleused[n>>3] |= (1<<(n&7));
+			if (n <= GetNumSamples()) sampleused[n] = true;
 		}
-		for (SAMPLEINDEX nSmp=1; nSmp<MAX_INSTRUMENTS; nSmp++) if ((Instruments[nSmp]) && (nSmp != nInstr))
+		for (INSTRUMENTINDEX nIns = 1; nIns < MAX_INSTRUMENTS; nIns++) if ((Instruments[nIns]) && (nIns != nInstr))
 		{
-			p = Instruments[nSmp];
+			p = Instruments[nIns];
 			for (UINT r=0; r<128; r++)
 			{
 				UINT n = p->Keyboard[r];
-				if (n < MAX_SAMPLES) sampleused[n>>3] &= ~(1<<(n&7));
+				if (n <= GetNumSamples()) sampleused[n] = false;
 			}
 		}
-		for (SAMPLEINDEX d = 1; d <= m_nSamples; d++) if (sampleused[d>>3] & (1<<(d&7)))
+		for (SAMPLEINDEX nSmp = 1; nSmp <= GetNumSamples(); nSmp++) if (sampleused[nSmp])
 		{
-			DestroySample(d);
-			m_szNames[d][0] = 0;
+			DestroySample(nSmp);
+			m_szNames[nSmp][0] = 0;
 		}
 		return true;
 	}
@@ -226,7 +181,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX nInstr, CSoundFile *pSrc
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
 //	RemoveInstrumentSamples(nInstr);
-	DestroyInstrument(nInstr,1);
+	DestroyInstrument(nInstr, 1);
 // -! BEHAVIOUR_CHANGE#0003
 	if (!Instruments[nInstr]) Instruments[nInstr] = new MODINSTRUMENT;
 	MODINSTRUMENT *pIns = Instruments[nInstr];
