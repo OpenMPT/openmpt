@@ -2618,7 +2618,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 				if(ontime == 0) ontime = 1;
 				if(offtime == 0) offtime = 1;
 			}
-			wsprintf(pszName, "ontime %d, offtime %d", ontime, offtime);
+			wsprintf(s, "ontime %d, offtime %d", ontime, offtime);
 		}
 		else
 		{
@@ -2647,6 +2647,10 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		}
 		break;
 	//end rewbs.smoothVST
+
+	case CMD_DELAYCUT:
+		wsprintf(pszName, "Note delay: %d, cut after %d ticks", (param >> 4), (param & 0x0F));
+		break;
 
 	default:
 		if (gFXInfo[ndx].dwParamMask == 0xF0)

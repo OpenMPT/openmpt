@@ -746,8 +746,8 @@ public:
 	MODTYPE GetBestSaveFormat() const;
 	MODTYPE GetSaveFormats() const;
 	void ConvertModCommand(MODCOMMAND *) const;
-	void S3MConvert(MODCOMMAND *m, BOOL bIT) const;
-	void S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatibilityExport = false) const;
+	void S3MConvert(MODCOMMAND *m, bool bIT) const;
+	void S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatibilityExport = false) const;
 	WORD ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool bCompatibilityExport = false) const;
 	
 	static void ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewType); // Convert a complete MODCOMMAND item from one format to another

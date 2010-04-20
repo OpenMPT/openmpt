@@ -1829,7 +1829,7 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 	case RS_PCM16D:
 	case RS_PCM16S:
 		{
-			short int *p = (short int *)pSample;
+			uint16 *p = (uint16 *)pSample;
 			int s_old = 0, s_ofs;
 			len = nLen * 2;
 			bufcount = 0;
@@ -1845,11 +1845,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 				}
 				if (nFlags == RS_PCM16D)
 				{
-					*((short *)(&buffer[bufcount])) = (short)(s_new - s_old);
+					*((uint16 *)(&buffer[bufcount])) = (uint16)(s_new - s_old);
 					s_old = s_new;
 				} else
 				{
-					*((short *)(&buffer[bufcount])) = (short)(s_new + s_ofs);
+					*((uint16 *)(&buffer[bufcount])) = (uint16)(s_new + s_ofs);
 				}
 				bufcount += 2;
 				if (bufcount >= sizeof(buffer) - 1)
@@ -1870,7 +1870,7 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 			int s_ofs = (nFlags == RS_STPCM8U) ? 0x80 : 0;
 			for (UINT iCh=0; iCh<2; iCh++)
 			{
-				signed char *p = pSample + iCh;
+				int8 *p = ((int8 *)pSample) + iCh;
 				int s_old = 0;
 
 				bufcount = 0;
@@ -1880,11 +1880,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 					p += 2;
 					if (nFlags == RS_STPCM8D)
 					{
-						buffer[bufcount++] = (char)(s_new - s_old);
+						buffer[bufcount++] = (uint8)(s_new - s_old);
 						s_old = s_new;
 					} else
 					{
-						buffer[bufcount++] = (char)(s_new + s_ofs);
+						buffer[bufcount++] = (uint8)(s_new + s_ofs);
 					}
 					if (bufcount >= sizeof(buffer))
 					{
@@ -1906,7 +1906,7 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 			int s_ofs = (nFlags == RS_STPCM16U) ? 0x8000 : 0;
 			for (UINT iCh=0; iCh<2; iCh++)
 			{
-				signed short *p = ((signed short *)pSample) + iCh;
+				int16 *p = ((int16 *)pSample) + iCh;
 				int s_old = 0;
 
 				bufcount = 0;
@@ -1916,11 +1916,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 					p += 2;
 					if (nFlags == RS_STPCM16D)
 					{
-						*((short *)(&buffer[bufcount])) = (short)(s_new - s_old);
+						*((uint16 *)(&buffer[bufcount])) = (uint16)(s_new - s_old);
 						s_old = s_new;
 					} else
 					{
-						*((short *)(&buffer[bufcount])) = (short)(s_new + s_ofs);
+						*((uint16 *)(&buffer[bufcount])) = (uint16)(s_new + s_ofs);
 					}
 					bufcount += 2;
 					if (bufcount >= sizeof(buffer))
@@ -1948,13 +1948,13 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 		len = nLen;
 		bufcount = 0;
 		{
-			signed char *p = pSample;
+			int8 *p = (int8 *)pSample;
 			int sinc = (pSmp->uFlags & CHN_16BIT) ? 2 : 1;
 			int s_old = 0, s_ofs = (nFlags == RS_PCM8U) ? 0x80 : 0;
 			if (pSmp->uFlags & CHN_16BIT) p++;
 			for (UINT j=0; j<len; j++)
 			{
-				int s_new = (signed char)(*p);
+				int s_new = (int8)(*p);
 				p += sinc;
 				if (pSmp->uFlags & CHN_STEREO)
 				{
@@ -1963,11 +1963,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 				}
 				if (nFlags == RS_PCM8D)
 				{
-					buffer[bufcount++] = (char)(s_new - s_old);
+					buffer[bufcount++] = (uint8)(s_new - s_old);
 					s_old = s_new;
 				} else
 				{
-					buffer[bufcount++] = (char)(s_new + s_ofs);
+					buffer[bufcount++] = (uint8)(s_new + s_ofs);
 				}
 				if (bufcount >= sizeof(buffer))
 				{
@@ -3324,8 +3324,8 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		}
 	} // End if(m->command == CMD_PANNING8)
 
-	/////////////////////////////////////////////////////
-	// Convert param control, extended envelope control
+	///////////////////////////////////////////////////////////////////////////////////////
+	// MPTM to anything: Convert param control, extended envelope control, note delay+cut
 	if(oldTypeIsMPT)
 	{
 		if(m->IsPcNote())
@@ -3341,6 +3341,12 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		if((m->command == CMD_S3MCMDEX) && ((m->param & 0xF0) == 0x70) && ((m->param & 0x0F) > 0x0C))
 		{
 			m->param = 0x7C;
+		}
+
+		if(m->command == CMD_DELAYCUT)
+		{
+			m->command = CMD_S3MCMDEX; // when converting to MOD/XM, this will be converted to CMD_MODCMDEX later
+			m->param = 0xD0 | (m->param >> 4); // preserve delay nibble.
 		}
 	} // End if(oldTypeIsMPT)
 
@@ -3810,16 +3816,16 @@ uint16 CSoundFile::GetEffectWeight(MODCOMMAND::COMMAND cmd)
 	case CMD_PANNINGSLIDE:		return 112;
 	case CMD_SMOOTHMIDI:		return 104;
 	case CMD_MIDI:				return  96;
-	case CMD_MODCMDEX:			return  88;
-	case CMD_S3MCMDEX:			return  80;
-	case CMD_PANBRELLO:			return  72;
-	case CMD_XFINEPORTAUPDOWN:	return  64;
-	case CMD_VIBRATO:			return  56;
-	case CMD_FINEVIBRATO:		return  48;
-	case CMD_TREMOLO:			return  40;
-	case CMD_KEYOFF:			return  32;
-	case CMD_SETENVPOSITION:	return  24;
-	case CMD_DELAYCUT:			return  16;
+	case CMD_DELAYCUT:			return  88;
+	case CMD_MODCMDEX:			return  80;
+	case CMD_S3MCMDEX:			return  72;
+	case CMD_PANBRELLO:			return  64;
+	case CMD_XFINEPORTAUPDOWN:	return  56;
+	case CMD_VIBRATO:			return  48;
+	case CMD_FINEVIBRATO:		return  40;
+	case CMD_TREMOLO:			return  32;
+	case CMD_KEYOFF:			return  24;
+	case CMD_SETENVPOSITION:	return  16;
 	case CMD_XPARAM:			return   8;
 	case CMD_NONE:
 	default:					return   0;
