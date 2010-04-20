@@ -856,7 +856,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	// Global Volume
 	m_SpinGlobalVol.SetRange(0, 64);
 	// Panning
-	m_SpinPanning.SetRange(0, 256);
+	m_SpinPanning.SetRange(0, 255);
 	// Midi Program
 	m_SpinMidiPR.SetRange(0, 128);
 	// rewbs.MidiBank

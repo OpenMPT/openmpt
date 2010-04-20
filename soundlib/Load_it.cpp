@@ -1494,7 +1494,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					{
 						m[ch].command = cmd;
 						m[ch].param = param;
-						S3MConvert(&m[ch], TRUE);
+						S3MConvert(&m[ch], true);
 						lastvalue[ch].command = m[ch].command;
 						lastvalue[ch].param = m[ch].param;
 					}
@@ -2211,7 +2211,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				if (vol != 0xFF) b |= 4;
 				if (command)
 				{
-					S3MSaveConvert(&command, &param, TRUE);
+					S3MSaveConvert(&command, &param, true);
 					if (command) b |= 8;
 				}
 				// Packing information

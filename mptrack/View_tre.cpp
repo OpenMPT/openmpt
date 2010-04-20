@@ -761,8 +761,11 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 			{
 				// more than one sequence -> add folder
 				CString sSeqName;
-				sSeqName.Format("%d: %s", nSeq, (LPCTSTR)pSndFile->Order.GetSequence(nSeq).m_sName);
-				if(sSeqName.IsEmpty()) sSeqName.Format("Sequence %d", nSeq);
+				if(pSndFile->Order.GetSequence(nSeq).m_sName.IsEmpty())
+					sSeqName.Format("Sequence %d", nSeq);
+				else
+					sSeqName.Format("%d: %s", nSeq, (LPCTSTR)pSndFile->Order.GetSequence(nSeq).m_sName);
+
 				UINT state = (nSeq == pSndFile->Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;
 
 				if(pInfo->tiSequences[nSeq] == NULL)

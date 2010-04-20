@@ -75,7 +75,7 @@ enum
 	S3I_TYPE_ADMEL = 2,
 };
 
-void CSoundFile::S3MConvert(MODCOMMAND *m, BOOL bIT) const
+void CSoundFile::S3MConvert(MODCOMMAND *m, bool bIT) const
 //--------------------------------------------------------
 {
 	UINT command = m->command;
@@ -119,8 +119,8 @@ void CSoundFile::S3MConvert(MODCOMMAND *m, BOOL bIT) const
 }
 
 
-void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatibilityExport) const
-//---------------------------------------------------------------------------------------
+void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatibilityExport) const
+//------------------------------------------------------------------------------------------------
 {
 	UINT command = *pcmd;
 	UINT param = *pprm;
@@ -198,13 +198,13 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, BOOL bIT, BOOL bCompatib
 		break;
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.	
 	case CMD_DELAYCUT: 
-		if(bCompatibilityExport)
+		if(bCompatibilityExport || !bIT)
 			command = param = 0;
 		else
 			command = ']';
 		break;
 	case CMD_XPARAM:
-		if(bCompatibilityExport)
+		if(bCompatibilityExport || !bIT)
 			command = param = 0;
 		else
 			command = '[';
@@ -457,7 +457,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 						if(j + nInd + 2 >= dwMemLength) break;
 						m->command = src[j++];
 						m->param = src[j++];
-						if (m->command) S3MConvert(m, FALSE);
+						if (m->command) S3MConvert(m, false);
 						if(m->command == CMD_MIDI)
 						{
 							if(m->param > 0x0F)

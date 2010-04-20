@@ -90,6 +90,9 @@
         <li>More <strong>customisable colours</strong>. Now, you can export your favourite colour scheme to a file and share it with your friends!</li>
         <li>Some <strong>new options</strong>, including the ability not to reset the channels when the module is looping and sample playback indicators in the treeview.</li>
         <li><strong>Program settings</strong> are now stored in the Application Data folder by default.</li>
+        <li>More <strong>intelligtent autosave</strong> behaviour, which does not autosave anymore if nothing has changed since the last autosave.
+            A friendly reminder: The autosave and backup options should always be enabled; You will be very glad about them once OpenMPT <i>really</i> crashes
+            or you accidentally overwrite a file.</strong> 
         <li>New and <strong>updated keymaps</strong> with many new shortcuts!</li>
         <li><strong>Redesigned</strong> several dialogs.</li>
     </ul>
@@ -109,6 +112,9 @@
             The instrument column (XX) contains the VST number (can be obtained from the VST list or through the context menu).
             The volume column (YYY) stores the parameter that is going to be automatic, ranging from 0 to 999 (decimal).
             The effect column (ZZZ) stores the parameter value, also ranging from 0 to 999 (decimal).</li> 
+        <li><strong>Note Fade</strong> is a new note type in IT / MPTM modules, based on an unfinished feature in Impulse Tracker.
+            As the name suggests, this note fades out the instrument depending on its fadeout value (without releasing any envelopes).
+            Therefore, it will not work in sample mode.</li>
         <li>In the <strong>orderlist</strong>, multiple orders can now be selected at once (default multiselect shortcut: Shift).
             Order selections can be quickly rendered to a wave file using the context menu.</li>
         <li>New <strong>paste modes</strong>: Overflow paste (which continues the paste in the next pattern if it reaches the bottom of the current pattern),
@@ -143,8 +149,9 @@
         <li>Enhanced <strong>VST compatibility</strong>.</li>
     </ul>
     
+    <h3>There's more...</h3>
     <p>
-    For a detailed description of what has changed, check <a href="history.txt">history.txt</a>.
+        For a detailed description of what has changed, check <a href="history.txt">history.txt</a>.
     </p>
     
     <h2>Known Issues</h2>
@@ -164,8 +171,8 @@
     
     <h2>Contact</h2>
     <p>
-    Helpful bug reports, new ideas and brave volunteers to test early development builds or contribute to the code are more than welcome!
-    You can meet us at the ModPlug Central forums: <a href="http://openmpt.com/forum/">http://openmpt.com/forum/</a>. 
+        Helpful bug reports, new ideas and brave volunteers to test early development builds or contribute to the code are more than welcome!
+        You can meet us at the ModPlug Central forums: <a href="http://openmpt.com/forum/">http://openmpt.com/forum/</a>. 
     </p>
     
   </body>
