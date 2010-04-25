@@ -356,6 +356,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	if (!newTypeIsIT_MPT) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATMODE);
 	if (!newTypeIsS3M) m_SndFile.m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
 	if (!newTypeIsMOD) m_SndFile.m_dwSongFlags &= ~SONG_PT1XMODE;
+	if (newTypeIsS3M || newTypeIsMOD) m_SndFile.m_dwSongFlags &= ~SONG_EXFILTERRANGE;
 	END_CRITICAL();
 	ChangeFileExtension(nNewType);
 

@@ -19,8 +19,6 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
-
 #define DBM_FILE_MAGIC	0x304d4244
 #define DBM_ID_NAME		0x454d414e
 #define DBM_NAMELEN		0x2c000000
@@ -97,12 +95,93 @@ typedef struct DBMSAMPLE
 #pragma pack()
 
 
+static MODCOMMAND::COMMAND dbm_efftrans[23] =
+{
+	CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
+	CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,
+	CMD_PANNING8, CMD_OFFSET, CMD_VOLUMESLIDE, CMD_POSITIONJUMP,
+	CMD_VOLUME, CMD_PATTERNBREAK, CMD_MODCMDEX, CMD_TEMPO,
+	CMD_GLOBALVOLUME, CMD_GLOBALVOLSLIDE, CMD_KEYOFF, CMD_SETENVPOSITION,
+	CMD_CHANNELVOLUME, CMD_CHANNELVOLSLIDE, CMD_PANNINGSLIDE,
+};
+
+
+void ConvertDBMEffect(uint8 *command, uint8 *param)
+//----------------------------------
+{
+	if(*command < ARRAYELEMCOUNT(dbm_efftrans))
+		*command = dbm_efftrans[*command];
+	else
+		*command = CMD_NONE;
+
+	switch (*command)
+	{
+	case CMD_ARPEGGIO:
+		if(*param == 0)
+			*command = CMD_NONE;
+		break;
+	case CMD_VOLUMESLIDE:
+		if(*param & 0xF0)
+			*param &= 0xF0;
+		break;
+	case CMD_MODCMDEX:
+		switch(*param & 0xF0)
+		{
+		case 0x00:	// set filter
+			*command = CMD_NONE;
+			break;
+		case 0x30:	// play backwards
+			*command = CMD_S3MCMDEX;
+			*param = 0x9F;
+			break;
+		case 0x40:	// turn off sound in channel
+			// TODO
+			break;
+		case 0x50:	// turn on/off channel
+			// TODO is this correct?
+			if((*param & 0x0F) <= 0x01)
+			{
+				*command = CMD_CHANNELVOLUME;
+				*param = (*param == 0x50) ? 0x00 : 0x40;
+			}
+			break;
+		case 0x60:	// set loop begin / loop
+			// TODO
+			break;
+		case 0x70:	// set offset
+			// TODO
+			break;
+		case 0xF0:	// turn on/off channel
+			// TODO
+			break;
+		default:
+			// Rest will be converted later from CMD_MODCMDEX to CMD_S3MCMDEX.
+			break;
+		}
+		break;
+	case CMD_TEMPO:
+		if(*param <= 0x1F) *command = CMD_SPEED;
+		break;
+	case CMD_KEYOFF:
+		if (*param == 0)
+		{
+			// TODO key of at tick 0
+		}
+		break;
+	case CMD_OFFSET:
+		// TODO Sample offset slide
+		*command = CMD_NONE;
+		break;
+	}
+}
+
+
 bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
 	const DBMFILEHEADER *pfh = (DBMFILEHEADER *)lpStream;
 	DWORD dwMemPos;
-	UINT nOrders, nSamples, nInstruments, nPatterns;
+	uint16 nOrders, nSamples, nInstruments, nPatterns;
 	
 	if ((!lpStream) || (dwMemLength <= sizeof(DBMFILEHEADER)) || (!pfh->channels)
 	 || (pfh->dbm_id != DBM_FILE_MAGIC) || (!pfh->songs) || (pfh->song_id != DBM_ID_SONG)
@@ -115,9 +194,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 	nSamples = BigEndianW(pfh->samples);
 	nPatterns = BigEndianW(pfh->patterns);
 	m_nType = MOD_TYPE_DBM;
-	m_nChannels = BigEndianW(pfh->channels);
-	if (m_nChannels < 1) m_nChannels = 1;
-	if (m_nChannels > 64) m_nChannels = 64;
+	m_nChannels = CLAMP(BigEndianW(pfh->channels), 1, MAX_BASECHANNELS);	// note: MAX_BASECHANNELS is currently 127, but DBM supports up to 128 channels.
 	memcpy(m_szNames[0], (pfh->songname[0]) ? pfh->songname : pfh->songname2, 32);
 	SpaceToNullStringFixed(m_szNames[0], 31);
 	Order.resize(nOrders, Order.GetInvalidPatIndex());
@@ -129,7 +206,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 	dwMemPos += 2*nOrders;
 	while (dwMemPos + 10 < dwMemLength)
 	{
-		DWORD chunk_id = ((LPDWORD)(lpStream+dwMemPos))[0];
+		DWORD chunk_id = LittleEndian(((LPDWORD)(lpStream+dwMemPos))[0]);
 		DWORD chunk_size = BigEndian(((LPDWORD)(lpStream+dwMemPos))[1]);
 		DWORD chunk_pos;
 		
@@ -141,19 +218,22 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 		if (chunk_id == DBM_ID_INST)
 		{
 			if (nInstruments >= MAX_INSTRUMENTS) nInstruments = MAX_INSTRUMENTS-1;
-			for (UINT iIns=0; iIns<nInstruments; iIns++)
+			for(INSTRUMENTINDEX iIns = 0; iIns < nInstruments; iIns++)
 			{
 				MODSAMPLE *psmp;
 				MODINSTRUMENT *pIns;
 				DBMINSTRUMENT *pih;
-				UINT nsmp;
+				WORD nsmp;
 
 				if (chunk_pos + sizeof(DBMINSTRUMENT) > dwMemPos) break;
-				if ((pIns = new MODINSTRUMENT) == NULL) break;
-				pih = (DBMINSTRUMENT *)(lpStream+chunk_pos);
-				nsmp = BigEndianW(pih->sampleno);
-				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Samples[nsmp] : NULL;
+				if ((pIns = new MODINSTRUMENT) == nullptr) break;
 				memset(pIns, 0, sizeof(MODINSTRUMENT));
+				SetDefaultInstrumentValues(pIns);
+				Instruments[iIns + 1] = pIns;
+
+				pih = (DBMINSTRUMENT *)(lpStream + chunk_pos);
+				nsmp = BigEndianW(pih->sampleno);
+				psmp = ((nsmp) && (nsmp < MAX_SAMPLES)) ? &Samples[nsmp] : nullptr;
 				memcpy(pIns->name, pih->name, 30);
 				SpaceToNullStringFixed(pIns->name, 30);
 				if (psmp)
@@ -161,7 +241,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 					memcpy(m_szNames[nsmp], pih->name, 30);
 					SpaceToNullStringFixed(m_szNames[nsmp], 30);
 				}
-				Instruments[iIns+1] = pIns;
+
 				pIns->nFadeOut = 1024;	// ???
 				pIns->nGlobalVol = 64;
 				pIns->nPan = BigEndianW(pih->panning);
@@ -169,12 +249,12 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 					pIns->dwFlags = INS_SETPANNING;
 				else
 					pIns->nPan = 128;
-				pIns->nPPC = 5*12;
-				SetDefaultInstrumentValues(pIns);
-				for (UINT i=0; i<NOTE_MAX; i++)
+				pIns->nPPC = 5 * 12;
+
+				for (BYTE i = 0; i < NOTE_MAX; i++)
 				{
 					pIns->Keyboard[i] = nsmp;
-					pIns->NoteMap[i] = i+1;
+					pIns->NoteMap[i] = i + 1;
 				}
 				// Sample Info
 				if (psmp)
@@ -185,7 +265,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 					psmp->nGlobalVol = 64;
 					psmp->nC5Speed = BigEndian(pih->finetune);
 					int f2t = FrequencyToTranspose(psmp->nC5Speed);
-					psmp->RelativeTone = f2t >> 7;
+					psmp->RelativeTone = (signed char)(f2t >> 7);
 					psmp->nFineTune = f2t & 0x7F;
 					if ((pih->looplen) && (sflags & 3))
 					{
@@ -197,7 +277,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 					}
 				}
 				chunk_pos += sizeof(DBMINSTRUMENT);
-				m_nInstruments = iIns+1;
+				m_nInstruments = iIns + 1;
 			}
 		} else
 		// Volume Envelopes
@@ -239,7 +319,7 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 		if (chunk_id == DBM_ID_PATT)
 		{
 			if (nPatterns > MAX_PATTERNS) nPatterns = MAX_PATTERNS;
-			for (UINT iPat=0; iPat<nPatterns; iPat++)
+			for(PATTERNINDEX iPat = 0; iPat < nPatterns; iPat++)
 			{
 				DBMPATTERN *pph;
 				DWORD pksize;
@@ -272,47 +352,64 @@ bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
 								{
 									if (b & 0x01)
 									{
-										UINT note = pkdata[i++];
+										uint8 note = pkdata[i++];
 
-										if (note == 0x1F) note = 0xFF; else
+										if (note == 0x1F) note = NOTE_KEYOFF; else
 										if ((note) && (note < 0xFE))
 										{
-											note = ((note >> 4)*12) + (note & 0x0F) + 13;
+											note = ((note >> 4) * 12) + (note & 0x0F) + 13;
 										}
 										m[ch].note = note;
 									}
 									if (b & 0x02) m[ch].instr = pkdata[i++];
 									if (b & 0x3C)
 									{
-										UINT cmd1 = 0xFF, param1 = 0, cmd2 = 0xFF, param2 = 0;
-										if (b & 0x04) cmd1 = (UINT)pkdata[i++];
-										if (b & 0x08) param1 = pkdata[i++];
-										if (b & 0x10) cmd2 = (UINT)pkdata[i++];
-										if (b & 0x20) param2 = pkdata[i++];
-										if (cmd1 == 0x0C)
+										uint8 cmd1 = CMD_NONE, cmd2 = CMD_NONE;
+										uint8 param1 = 0, param2 = 0;
+										if (b & 0x04) cmd2 = pkdata[i++];
+										if (b & 0x08) param2 = pkdata[i++];
+										if (b & 0x10) cmd1 = pkdata[i++];
+										if (b & 0x20) param1 = pkdata[i++];
+										ConvertDBMEffect(&cmd1, &param1);
+										ConvertDBMEffect(&cmd2, &param2);
+
+										// this is the same conversion algorithm as in the ULT loader. maybe this should be merged at some point...
+										if (cmd2 == CMD_VOLUME || (cmd2 == CMD_NONE && cmd1 != CMD_VOLUME))
 										{
-											m[ch].volcmd = VOLCMD_VOLUME;
-											m[ch].vol = param1;
-											cmd1 = 0xFF;
-										} else
-										if (cmd2 == 0x0C)
-										{
-											m[ch].volcmd = VOLCMD_VOLUME;
-											m[ch].vol = param2;
-											cmd2 = 0xFF;
+											std::swap(cmd1, cmd2);
+											std::swap(param1, param2);
 										}
-										if ((cmd1 > 0x13) || ((cmd1 >= 0x10) && (cmd2 < 0x10)))
+
+										int n;
+										for (n = 0; n < 4; n++)
 										{
-											cmd1 = cmd2;
-											param1 = param2;
-											cmd2 = 0xFF;
+											if(CSoundFile::ConvertVolEffect(&cmd1, &param1, (n >> 1) ? true : false))
+											{
+												n = 5;
+												break;
+											}
+											std::swap(cmd1, cmd2);
+											std::swap(param1, param2);
 										}
-										if (cmd1 <= 0x13)
+										if (n < 5)
 										{
-											m[ch].command = cmd1;
-											m[ch].param = param1;
-											ConvertModCommand(&m[ch]);
+											if (CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)cmd1) > CSoundFile::GetEffectWeight((MODCOMMAND::COMMAND)cmd2))
+											{
+												std::swap(cmd1, cmd2);
+												std::swap(param1, param2);
+											}
+											cmd1 = CMD_NONE;
 										}
+										if (!cmd1)
+											param1 = 0;
+										if (!cmd2)
+											param2 = 0;
+
+										m[ch].volcmd = cmd1;
+										m[ch].vol = param1;
+										m[ch].command = cmd2;
+										m[ch].param = param2;
+										MODExx2S3MSxx(&m[ch]);
 									}
 								} else
 								{
