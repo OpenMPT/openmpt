@@ -150,7 +150,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			}
 			nPattern = (nCurrentPattern < Order.size()) ? Order[nCurrentPattern] : Order.GetInvalidPatIndex();
 			nNextPattern = nCurrentPattern;
-			if(IsRowVisited(nCurrentPattern, 0, true))
+			if((!Patterns.IsValidPat(nPattern)) && IsRowVisited(nCurrentPattern, 0, true))
 				break;
 		}
 		// Skip non-existing patterns
@@ -2877,7 +2877,7 @@ inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
 {
 	// EFx implementation for MOD files (PT 1.1A and up: Invert Loop)
 	// This effect trashes samples. Thanks to 8bitbubsy for making this work. :)
-	if((m_nType & MOD_TYPE_MOD) == 0 || pChn->nEFxSpeed == 0) return;
+	if((GetType() == MOD_TYPE_MOD) == 0 || pChn->nEFxSpeed == 0) return;
 
 	// we obviously also need a sample for this
 	MODSAMPLE *pModSample = pChn->pModSample;

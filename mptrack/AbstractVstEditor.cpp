@@ -24,7 +24,7 @@ static void CreateVerifiedProgramName(const char* rawname, const size_t rnSize,
 	else 
 	{
 		size_t k=0;
-		while(k < rnSize-1 && rawname[k] != 0 && rawname[k] < 'A' && k<255) k++;
+		while(k < rnSize-1 && rawname[k] != 0 && rawname[k] <= ' ' && k<255) k++;
 		wsprintf(name, "%02d - %s", p, &rawname[k]);
 	}
 	name[nSize-1] = 0;
