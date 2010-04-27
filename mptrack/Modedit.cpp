@@ -171,8 +171,13 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		MODCOMMAND *m = m_SndFile.Patterns[nPat];
 
 		// This is used for -> MOD/XM conversion
-		BYTE cEffectMemory[MAX_BASECHANNELS][MAX_EFFECTS];
-		memset(&cEffectMemory, 0, sizeof(BYTE) * MAX_BASECHANNELS * MAX_EFFECTS);
+		vector<vector<MODCOMMAND::PARAM> > cEffectMemory;
+		cEffectMemory.resize(m_SndFile.GetNumChannels());
+		for(size_t i = 0; i < m_SndFile.GetNumChannels(); i++)
+		{
+			cEffectMemory[i].resize(MAX_EFFECTS, 0);
+		}
+
 		UINT nChannel = m_SndFile.m_nChannels - 1;
 
 		for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
@@ -187,11 +192,13 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 				switch(m->command)
 				{
 				case CMD_ARPEGGIO:
+				case CMD_S3MCMDEX:
+				case CMD_MODCMDEX:
 					// No effect memory in XM / MOD
 					if(m->param == 0)
-						m->param = cEffectMemory[nChannel][CMD_ARPEGGIO];
+						m->param = cEffectMemory[nChannel][m->command];
 					else
-						cEffectMemory[nChannel][CMD_ARPEGGIO] = m->param;
+						cEffectMemory[nChannel][m->command] = m->param;
 					break;
 				}
 			}

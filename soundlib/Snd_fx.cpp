@@ -2877,7 +2877,7 @@ inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
 {
 	// EFx implementation for MOD files (PT 1.1A and up: Invert Loop)
 	// This effect trashes samples. Thanks to 8bitbubsy for making this work. :)
-	if((GetType() == MOD_TYPE_MOD) == 0 || pChn->nEFxSpeed == 0) return;
+	if(GetType() != MOD_TYPE_MOD || pChn->nEFxSpeed == 0) return;
 
 	// we obviously also need a sample for this
 	MODSAMPLE *pModSample = pChn->pModSample;
