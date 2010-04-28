@@ -998,7 +998,7 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 			DragToSel(m_dwEndSel, TRUE);
 		} else */
 		{
-			if(CMainFrame::GetInputHandler()->ShiftPressed())
+			if(CMainFrame::GetInputHandler()->ShiftPressed() && m_dwStartSel == m_dwEndSel)
 			{
 				// Shift pressed -> set 2nd selection point
 				DragToSel(GetPositionFromPoint(point), TRUE);
@@ -4241,7 +4241,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		// -- write sdx if playing live
 		if (usePlaybackPosition && nTick)	// avoid SD0 which will be mis-interpreted
 		{
-			if (p->command == 0)	//make sure we don't overwrite any existing commands.
+			if (p->command == CMD_NONE)	//make sure we don't overwrite any existing commands.
 			{
 				p->command = (pSndFile->TypeIsS3M_IT_MPT()) ? CMD_S3MCMDEX : CMD_MODCMDEX;
 				UINT maxSpeed = 0x0F;
@@ -4251,9 +4251,8 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}
 
 		// -- old style note cut/off: erase instrument number
-		if (oldStyle && ((p->note == NOTE_NOTECUT) || (p->note == NOTE_KEYOFF) || (p->note == NOTE_FADE))) {
+		if (oldStyle && ((p->note == NOTE_NOTECUT) || (p->note == NOTE_KEYOFF) || (p->note == NOTE_FADE)))
 			p->instr=0;
-		}
 		
 		// -- if recording, handle post note entry behaviour (move cursor etc..)
 		if(bRecordEnabled)

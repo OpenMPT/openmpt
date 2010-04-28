@@ -48,8 +48,18 @@
     h3 { border-left-width: 2em; }
     h4 { border-left-width: 1em; }
     
-    li {list-style-type: none; padding:0 0 1em 0; }
+    li {list-style-type: none; padding: 0 0 1em 0; }
     li:before { content: "» "; }
+    
+    li li { padding: 0; }
+    
+    /* use this for pattern data */
+    pre
+    {
+        font-family: monospace;
+        display: inline;
+        color: #006;
+    }
 
   </style>
   </head>
@@ -92,7 +102,7 @@
         <li><strong>Program settings</strong> are now stored in the Application Data folder by default.</li>
         <li>More <strong>intelligtent autosave</strong> behaviour, which does not autosave anymore if nothing has changed since the last autosave.
             A friendly reminder: The autosave and backup options should always be enabled; You will be very glad about them once OpenMPT <i>really</i> crashes
-            or you accidentally overwrite a file.</strong> 
+            or you accidentally overwrite a file.</li> 
         <li>New and <strong>updated keymaps</strong> with many new shortcuts!</li>
         <li><strong>Redesigned</strong> several dialogs.</li>
     </ul>
@@ -105,22 +115,29 @@
         <li>The upper panel is a lot more <strong>compact</strong> now; The split keyboard settings
             have been moved to a separate dialog which can be called with a keyboard shortcut
             or through the main menu.</li>
-        <li><strong>Parameter Control Notes</strong>: These new pattern events almost completely replace Zxx and \xx commands
+        <li><strong>Parameter Control Notes</strong>: These new pattern events almost completely replace <pre>Zxx</pre> and <pre>\xx</pre> commands
             for VST parameter automation in the MPTM format. They are not bound to a specific channel or macro anymore;
             The pattern event stores all necessary information and can thus be moved around easily in the pattern.
-            The format for those events is: PC(s) XX YYY ZZZ. A PC "note" equals a Zxx effect, a PCs "note" behaves like \xx.
-            The instrument column (XX) contains the VST number (can be obtained from the VST list or through the context menu).
-            The volume column (YYY) stores the parameter that is going to be automated, ranging from 0 to 999 (decimal).
-            The effect column (ZZZ) stores the parameter value, also ranging from 0 to 999 (decimal).</li> 
-        <li><strong>Note Fade</strong> is a new note type in IT / MPTM modules, based on an unfinished feature in Impulse Tracker.
+            The format for those events is <pre>PC(s) XX YYY ZZZ</pre>, the parameters work as follows:
+            <ul>
+                <li>A <pre>PC</pre> "note" entry equals a <pre>Zxx</pre> effect, a <pre>PCs</pre> "note" behaves like <pre>\xx</pre>.</li>
+                <li>The instrument column (<pre>XX</pre>) contains the VST number (can be obtained from the VST list or through the context menu).</li>
+                <li>The volume column (<pre>YYY</pre>) stores the parameter that is going to be automated, ranging from <pre>000</pre> to <pre>999</pre> (decimal).</li>
+                <li>The effect column (<pre>ZZZ</pre>) stores the parameter value, also ranging from <pre>000</pre> to <pre>999</pre> (decimal).</li>
+            </ul>
+            </li> 
+        <li><strong>Note Fade</strong> is a new note type in IT / MPTM modules, based on an unfinished feature in Impulse Tracker, displayed as <pre>~~</pre>.
             As the name suggests, this note fades out the instrument depending on its fadeout value (without releasing any envelopes).
-            Therefore, it will not work in sample mode.</li>
+            Therefore, it will not work in sample mode. Various players and trackers support this command already.</li>
+        <li>New combined effect in the MPTM format: <strong>Note Delay + Cut</strong>. Format is <pre>:xy</pre>, whereas <pre>x</pre> is the delay in
+            ticks and <pre>y</pre> the amount of ticks after which the instrument will be cut off again (or more precise: the instrument will be cut off at tick <pre>x</pre> + <pre>y</pre>).</li>
         <li>In the <strong>orderlist</strong>, multiple orders can now be selected at once (default multiselect shortcut: Shift).
             Order selections can be quickly rendered to a wave file using the context menu.</li>
         <li>New <strong>paste modes</strong>: Overflow paste (which continues the paste in the next pattern if it reaches the bottom of the current pattern),
             paste flood (which keeps pasting the data again and again, until it reaches the bottom of the pattern) and
             push-forward paste (which pushes the already existing pattern data downwards, like in Impulse Tracker).</li>
         <li>Improved MOD editing - now it should be almost impossible to write commands in the patterns that don't belong into MOD files. :-)</li>
+        <li>If no selection has been made, Shift-Clicking a point now draws a <strong>selection</strong>, starting from the previously highlighted pattern command;</li>
     </ul>
     
     <h3>Sample Editor</h3>
