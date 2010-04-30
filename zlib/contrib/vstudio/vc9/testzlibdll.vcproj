@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="9.00"
 	Name="TestZlibDll"
 	ProjectGUID="{C52F9E7B-498A-42BE-8DB4-85A15694366A}"
 	Keyword="Win32Proj"
-	SignManifests="true"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -77,6 +77,8 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/testzlib.pdb"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -98,7 +100,91 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="x86\TestZlibDll$(ConfigurationName)"
+			IntermediateDirectory="x86\TestZlibDll$(ConfigurationName)\Tmp"
+			ConfigurationType="1"
+			InheritedPropertySheets="UpgradeFromVC70.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				OmitFramePointers="true"
+				AdditionalIncludeDirectories="..\..\..;..\..\minizip"
+				PreprocessorDefinitions="WIN32;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;NDEBUG;_CONSOLE"
+				StringPooling="true"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				AssemblerListingLocation="$(IntDir)\"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="x86\ZlibDllRelease\zlibwapi.lib"
+				OutputFile="$(OutDir)/testzlib.exe"
+				LinkIncremental="1"
+				GenerateManifest="false"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				OptimizeForWindows98="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -246,94 +332,6 @@
 				ProgramDatabaseFile="$(OutDir)/testzlib.pdb"
 				SubSystem="1"
 				TargetMachine="5"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="x86\TestZlibDll$(ConfigurationName)"
-			IntermediateDirectory="x86\TestZlibDll$(ConfigurationName)\Tmp"
-			ConfigurationType="1"
-			InheritedPropertySheets="UpgradeFromVC70.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="1"
-				OmitFramePointers="true"
-				AdditionalIncludeDirectories="..\..\..;..\..\minizip"
-				PreprocessorDefinitions="WIN32;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;NDEBUG;_CONSOLE"
-				StringPooling="true"
-				BasicRuntimeChecks="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
-				AssemblerListingLocation="$(IntDir)\"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="x86\ZlibDllRelease\zlibwapi.lib"
-				OutputFile="$(OutDir)/testzlib.exe"
-				LinkIncremental="1"
-				GenerateManifest="false"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				OptimizeForWindows98="1"
-				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"

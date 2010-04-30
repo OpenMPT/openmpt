@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="9,00"
 	Name="zlibvc"
 	ProjectGUID="{8FD826F8-3739-44E6-8CC8-997122E53B8D}"
+	RootNamespace="zlibvc"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -52,7 +54,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32,_CRT_SECURE_NO_DEPRECATE,ZLIB_WINAPI,ASMV,ASMINF"
+				PreprocessorDefinitions="WIN32;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_WINAPI;ASMV;ASMINF"
 				ExceptionHandling="0"
 				RuntimeLibrary="1"
 				BufferSecurityCheck="false"
@@ -79,7 +81,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="..\..\masmx86\gvmat32.obj ..\..\masmx86\inffas32.obj"
+				AdditionalDependencies="..\..\masmx86\match686.obj ..\..\masmx86\inffas32.obj"
 				OutputFile="$(OutDir)\zlibwapi.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -90,6 +92,8 @@
 				GenerateMapFile="true"
 				MapFileName="$(OutDir)/zlibwapi.map"
 				SubSystem="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(OutDir)/zlibwapi.lib"
 			/>
 			<Tool
@@ -109,9 +113,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -150,7 +151,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32,_CRT_SECURE_NO_DEPRECATE,ZLIB_WINAPI,ASMV,ASMINF;WIN64"
+				PreprocessorDefinitions="WIN32;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_WINAPI;ASMV;ASMINF;WIN64"
 				ExceptionHandling="0"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
@@ -209,9 +210,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -248,7 +246,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;WIN64"
+				PreprocessorDefinitions="WIN32;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_WINAPI;WIN64"
 				ExceptionHandling="0"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
@@ -304,9 +302,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -346,7 +341,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32,_CRT_SECURE_NO_DEPRECATE,ZLIB_WINAPI"
+				PreprocessorDefinitions="WIN32;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_WINAPI"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -386,6 +381,8 @@
 				MapFileName="$(OutDir)/zlibwapi.map"
 				SubSystem="2"
 				OptimizeForWindows98="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(OutDir)/zlibwapi.lib"
 			/>
 			<Tool
@@ -405,9 +402,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -447,7 +441,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32,_CRT_SECURE_NO_DEPRECATE,ZLIB_WINAPI;WIN64"
+				PreprocessorDefinitions="WIN32;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_WINAPI;WIN64"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -508,9 +502,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -548,7 +539,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32,_CRT_SECURE_NO_DEPRECATE,ZLIB_WINAPI;WIN64"
+				PreprocessorDefinitions="WIN32;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_WINAPI;WIN64"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -609,9 +600,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -649,10 +637,10 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;ASMV;ASMINF"
+				PreprocessorDefinitions="WIN32;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_WINAPI;ASMV;ASMINF"
 				StringPooling="true"
 				ExceptionHandling="0"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				PrecompiledHeaderFile="$(IntDir)/zlibvc.pch"
@@ -678,7 +666,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="..\..\masmx86\gvmat32.obj ..\..\masmx86\inffas32.obj "
+				AdditionalDependencies="..\..\masmx86\match686.obj ..\..\masmx86\inffas32.obj "
 				OutputFile="$(OutDir)\zlibwapi.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -690,6 +678,8 @@
 				MapFileName="$(OutDir)/zlibwapi.map"
 				SubSystem="2"
 				OptimizeForWindows98="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				ImportLibrary="$(OutDir)/zlibwapi.lib"
 			/>
 			<Tool
@@ -709,9 +699,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -751,7 +738,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;ASMV;ASMINF;WIN64"
+				PreprocessorDefinitions="_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_WINAPI;ASMV;ASMINF;WIN64"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -813,9 +800,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -853,7 +837,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;WIN64"
+				PreprocessorDefinitions="_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ZLIB_WINAPI;WIN64"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -914,9 +898,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -945,67 +926,23 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\masmx86\gvmat32c.c"
+				RelativePath="..\..\..\gzclose.c"
 				>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseWithoutAsm|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseWithoutAsm|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseWithoutAsm|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\gzio.c"
+				RelativePath="..\..\..\gzguts.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\gzlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\gzread.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\gzwrite.c"
 				>
 			</File>
 			<File

@@ -4,7 +4,6 @@
 	Version="9,00"
 	Name="zlibstat"
 	ProjectGUID="{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}"
-	RootNamespace="zlibstat"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -26,7 +25,7 @@
 			OutputDirectory="x86\ZlibStat$(ConfigurationName)"
 			IntermediateDirectory="x86\ZlibStat$(ConfigurationName)\Tmp"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
+			InheritedPropertySheets="UpgradeFromVC70.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
@@ -49,7 +48,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				ExceptionHandling="0"
 				RuntimeLibrary="1"
 				BufferSecurityCheck="false"
@@ -61,153 +60,6 @@
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="1"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				Culture="1036"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				AdditionalOptions="/MACHINE:X86 /NODEFAULTLIB"
-				OutputFile="$(OutDir)\zlibstat.lib"
-				SuppressStartupBanner="true"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="x86\ZlibStat$(ConfigurationName)"
-			IntermediateDirectory="x86\ZlibStat$(ConfigurationName)\Tmp"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;ASMV;ASMINF"
-				StringPooling="true"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile="$(IntDir)/zlibstat.pch"
-				AssemblerListingLocation="$(IntDir)\"
-				ObjectFile="$(IntDir)\"
-				ProgramDataBaseFileName="$(OutDir)\"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				Culture="1036"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				AdditionalOptions="/MACHINE:X86 /NODEFAULTLIB"
-				AdditionalDependencies="..\..\masmx86\gvmat32.obj ..\..\masmx86\inffas32.obj "
-				OutputFile="$(OutDir)\zlibstat.lib"
-				SuppressStartupBanner="true"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="ReleaseWithoutAsm|Win32"
-			OutputDirectory="x86\ZlibStat$(ConfigurationName)"
-			IntermediateDirectory="x86\ZlibStat$(ConfigurationName)\Tmp"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
-				StringPooling="true"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile="$(IntDir)/zlibstat.pch"
-				AssemblerListingLocation="$(IntDir)\"
-				ObjectFile="$(IntDir)\"
-				ProgramDataBaseFileName="$(OutDir)\"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -270,7 +122,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;WIN64"
+				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;WIN64"
 				ExceptionHandling="0"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
@@ -344,7 +196,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;WIN64"
+				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;WIN64"
 				ExceptionHandling="0"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
@@ -370,6 +222,80 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalOptions="/MACHINE:IA64 /NODEFAULTLIB"
+				OutputFile="$(OutDir)\zlibstat.lib"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="x86\ZlibStat$(ConfigurationName)"
+			IntermediateDirectory="x86\ZlibStat$(ConfigurationName)\Tmp"
+			ConfigurationType="4"
+			InheritedPropertySheets="UpgradeFromVC70.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
+				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ASMV;ASMINF"
+				StringPooling="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="true"
+				PrecompiledHeaderFile="$(IntDir)/zlibstat.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				Culture="1036"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				AdditionalOptions="/MACHINE:X86 /NODEFAULTLIB"
+				AdditionalDependencies="..\..\masmx86\match686.obj ..\..\masmx86\inffas32.obj "
 				OutputFile="$(OutDir)\zlibstat.lib"
 				SuppressStartupBanner="true"
 			/>
@@ -418,7 +344,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;ASMV;ASMINF;WIN64"
+				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;ASMV;ASMINF;WIN64"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -493,7 +419,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;WIN64"
+				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;WIN64"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -519,6 +445,79 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalOptions="/MACHINE:IA64 /NODEFAULTLIB"
+				OutputFile="$(OutDir)\zlibstat.lib"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseWithoutAsm|Win32"
+			OutputDirectory="x86\ZlibStat$(ConfigurationName)"
+			IntermediateDirectory="x86\ZlibStat$(ConfigurationName)\Tmp"
+			ConfigurationType="4"
+			InheritedPropertySheets="UpgradeFromVC70.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
+				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="true"
+				PrecompiledHeaderFile="$(IntDir)/zlibstat.pch"
+				AssemblerListingLocation="$(IntDir)\"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				Culture="1036"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				AdditionalOptions="/MACHINE:X86 /NODEFAULTLIB"
 				OutputFile="$(OutDir)\zlibstat.lib"
 				SuppressStartupBanner="true"
 			/>
@@ -567,7 +566,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;WIN64"
+				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;WIN64"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -641,7 +640,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;WIN64"
+				PreprocessorDefinitions="ZLIB_WINAPI;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;WIN64"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -710,56 +709,24 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\masmx86\gvmat32c.c"
+				RelativePath="..\..\..\gzclose.c"
 				>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseWithoutAsm|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseWithoutAsm|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\gzguts.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\gzlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\gzread.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\gzwrite.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\infback.c"
@@ -777,22 +744,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseWithoutAsm|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Itanium"
 					ExcludedFromBuild="true"
 					>
@@ -801,7 +752,23 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Release|Itanium"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseWithoutAsm|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -859,54 +826,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\zutil.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			>
-			<File
-				RelativePath="..\..\..\crc32.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\deflate.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\inffast.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\inffixed.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\inflate.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\inftrees.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\trees.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\zconf.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\zconf.in.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\zlib.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\zutil.h"
 				>
 			</File>
 		</Filter>

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="9,00"
 	Name="testzlib"
 	ProjectGUID="{AA6666AA-E09F-4135-9C0C-4FE50C3C654B}"
 	RootNamespace="testzlib"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -47,7 +48,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\.."
-				PreprocessorDefinitions="ASMV;ASMINF;WIN32;ZLIB_WINAPI;_DEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="ASMV;ASMINF;WIN32;ZLIB_WINAPI;_DEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
@@ -70,13 +71,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\..\masmx86\gvmat32.obj ..\..\masmx86\inffas32.obj"
+				AdditionalDependencies="..\..\masmx86\match686.obj ..\..\masmx86\inffas32.obj"
 				OutputFile="$(OutDir)/testzlib.exe"
 				LinkIncremental="2"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/testzlib.pdb"
 				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -96,9 +99,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -128,7 +128,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\.."
-				PreprocessorDefinitions="ASMV;ASMINF;WIN32;ZLIB_WINAPI;_DEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="ASMV;ASMINF;WIN32;ZLIB_WINAPI;_DEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
@@ -167,9 +167,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -200,7 +197,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\.."
-				PreprocessorDefinitions="ZLIB_WINAPI;_DEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;WIN64"
+				PreprocessorDefinitions="ZLIB_WINAPI;_DEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;WIN64"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
@@ -250,9 +247,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -285,7 +279,7 @@
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="..\..\.."
-				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
@@ -316,6 +310,8 @@
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				OptimizeForWindows98="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -335,9 +331,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -368,7 +361,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\.."
-				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
@@ -407,9 +400,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -443,7 +433,7 @@
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="..\..\.."
-				PreprocessorDefinitions="ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;WIN64"
+				PreprocessorDefinitions="ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;WIN64"
 				StringPooling="true"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
@@ -495,9 +485,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -530,7 +517,7 @@
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="..\..\.."
-				PreprocessorDefinitions="ASMV;ASMINF;WIN32;ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="ASMV;ASMINF;WIN32;ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				StringPooling="true"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
@@ -553,7 +540,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\..\masmx86\gvmat32.obj ..\..\masmx86\inffas32.obj"
+				AdditionalDependencies="..\..\masmx86\match686.obj ..\..\masmx86\inffas32.obj"
 				OutputFile="$(OutDir)/testzlib.exe"
 				LinkIncremental="1"
 				GenerateManifest="false"
@@ -562,6 +549,8 @@
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				OptimizeForWindows98="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -581,9 +570,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -614,9 +600,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\.."
-				PreprocessorDefinitions="ASMV;ASMINF;WIN32;ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="ASMV;ASMINF;WIN32;ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				AssemblerListingLocation="$(IntDir)\"
 			/>
@@ -653,9 +639,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -689,7 +672,7 @@
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="..\..\.."
-				PreprocessorDefinitions="ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;WIN64"
+				PreprocessorDefinitions="ZLIB_WINAPI;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;WIN64"
 				StringPooling="true"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
@@ -741,9 +724,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -770,82 +750,6 @@
 			<File
 				RelativePath="..\..\..\deflate.c"
 				>
-			</File>
-			<File
-				RelativePath="..\..\masmx86\gvmat32c.c"
-				>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseWithoutAsm|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseWithoutAsm|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Itanium"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win64 (AMD64)"
-					ExcludedFromBuild="TRUE"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win64 (AMD64)"
-					ExcludedFromBuild="TRUE"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="ReleaseAsm|Win64 (AMD64)"
-					ExcludedFromBuild="TRUE"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\infback.c"
