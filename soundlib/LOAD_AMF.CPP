@@ -71,9 +71,13 @@ VOID AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels
 		if (cmd < 0x7F) // note+vol
 		{
 			m->note = cmd+1;
-			if (!m->instr) m->instr = lastinstr;
-			m->volcmd = VOLCMD_VOLUME;
-			m->vol = arg;
+			// Does the next line make sense? I can't find any documents on this format, nor do any other players seem to handle this problem (or I'm overlooking something). However, the tunes in Pinball World seem to play a lot better with this, and it kind of looks right.
+			if(arg != 0xFF)
+			{
+				if (!m->instr) m->instr = lastinstr;
+				m->volcmd = VOLCMD_VOLUME;
+				m->vol = arg;
+			}
 		} else
 		if (cmd == 0x7F) // duplicate row
 		{
@@ -109,10 +113,9 @@ VOID AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels
 						else param = (param&0x0F)<<4;
 						break;
 			// 0x04: Porta Up/Down
-			//case 0x04:	if (param & 0x80) { command = CMD_PORTAMENTOUP; param = -(signed char)param; }
-			//				else { command = CMD_PORTAMENTODOWN; } break;
 			case 0x04:      if (param & 0x80) { command = CMD_PORTAMENTOUP; param = (-(signed char)param)&0x7F; }
-                            else { command = CMD_PORTAMENTODOWN; } break;
+                            else { command = CMD_PORTAMENTODOWN; }
+							break;
 			// 0x06: Tone Portamento
 			case 0x06:	command = CMD_TONEPORTAMENTO; break;
 			// 0x07: Tremor
@@ -149,8 +152,8 @@ VOID AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels
 			// 0x15: Set Tempo
 			case 0x15:	command = CMD_TEMPO; break;
 			// 0x17: Panning
-			case 0x17:	param = (param+64)&0x7F;
-						if (m->command) { if (!m->volcmd) { m->volcmd = VOLCMD_PANNING;  m->vol = param/2; } command = 0; }
+			case 0x17:	param = (param + 64) & 0x7F;
+						if (m->command) { if (!m->volcmd) { m->volcmd = VOLCMD_PANNING;  m->vol = param >> 1; } command = 0; }
 						else { command = CMD_PANNING8; }
 						break;
 			// Unknown effects
@@ -293,7 +296,7 @@ bool CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		for (UINT i=0; i<16; i++)
 		{
-			ChnSettings[i].nPan = (lpStream[dwMemPos+i] & 1) ? 0x30 : 0xD0;
+			ChnSettings[i].nPan = (lpStream[dwMemPos + i] & 1) ? 0x40 : 0xC0;
 		}
 		dwMemPos += 16;
 	}
