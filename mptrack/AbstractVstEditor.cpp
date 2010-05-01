@@ -353,8 +353,8 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	return NULL;
 }
 
-#define PRESETS_PER_COLUMN 25
-#define PRESETS_PER_GROUP 100
+#define PRESETS_PER_COLUMN 32
+#define PRESETS_PER_GROUP 128
 
 void CAbstractVstEditor::UpdatePresetMenu()
 {
