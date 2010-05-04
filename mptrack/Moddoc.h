@@ -378,7 +378,7 @@ public:
 	DECLARE_MESSAGE_MAP()
 private:
 
-	void ChangeFileExtension(UINT nNewType);
+	void ChangeFileExtension(MODTYPE nNewType);
 	UINT FindAvailableChannel();
 };
 

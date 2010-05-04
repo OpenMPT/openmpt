@@ -173,13 +173,10 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
 					if (dwMemPos + 2 > dwMemLength) break;
 					m[nChn].command = lpStream[dwMemPos++];
 					m[nChn].param = lpStream[dwMemPos++];
-					if ((m[nChn].command == 0x0E) && ((m[nChn].param & 0xF0) == 0x80))
-					{
-						m[nChn].command = CMD_S3MCMDEX;
-					} else
 					if (m[nChn].command < 0x10)
 					{
 						ConvertModCommand(&m[nChn]);
+						MODExx2S3MSxx(&m[nChn]);
 					} else
 					{
 						switch(m[nChn].command)

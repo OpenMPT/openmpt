@@ -444,7 +444,6 @@ BOOL COptionsPlayer::OnInitDialog()
 	if (CSoundFile::GetSysInfo() & SYSMIX_SLOWCPU)
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), FALSE);
 	else if (dwQuality & QUALITY_EQ) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
-	if (CSoundFile::gdwSoundSetup & SNDMIX_EMULATE_MIX_BUGS) CheckDlgButton(IDC_CHECK7, MF_CHECKED); //rewbs.emulateMixBugs
 
 	// Bass Expansion
 	m_SbXBassDepth.SetRange(0,4);
@@ -594,14 +593,6 @@ void COptionsPlayer::OnOK()
 	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= QUALITY_NOISEREDUCTION;
 	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= QUALITY_REVERB;
 	dwSrcMode = m_CbnResampling.GetCurSel();
-
-	//rewbs.emulateMixBugs
-	if (IsDlgButtonChecked(IDC_CHECK7)) {
-		CSoundFile::gdwSoundSetup |= SNDMIX_EMULATE_MIX_BUGS;
-	} else {
-		CSoundFile::gdwSoundSetup &= ~SNDMIX_EMULATE_MIX_BUGS;
-	}
-	//end rewbs.emulateMixBugs
 
 	// Bass Expansion
 	{

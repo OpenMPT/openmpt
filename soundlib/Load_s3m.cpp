@@ -16,8 +16,6 @@
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-extern WORD S3MFineTuneTable[16];
-
 //////////////////////////////////////////////////////
 // ScreamTracker S3M file support
 
