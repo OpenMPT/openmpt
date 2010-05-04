@@ -3343,6 +3343,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 //end rewbs.customKeys
 
 void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
+//-----------------------------------------------------
 {
 	PSNDMIXPLUGIN pPlugin;
 
@@ -3356,8 +3357,8 @@ void CModDoc::TogglePluginEditor(UINT m_nCurrentPlugin)
 	return;
 }
 
-void CModDoc::ChangeFileExtension(UINT nNewType)
-//----------------------------------------------
+void CModDoc::ChangeFileExtension(MODTYPE nNewType)
+//-------------------------------------------------
 {
 	//Not making path if path is empty(case only(?) for new file)
 	if(GetPathName().GetLength() > 0)
@@ -3409,22 +3410,22 @@ void CModDoc::ChangeFileExtension(UINT nNewType)
 
 
 UINT CModDoc::FindAvailableChannel()
-//-------------------------------------------
+//----------------------------------
 {
 	// Search for available channel
-	for (UINT j=m_SndFile.m_nChannels; j<MAX_CHANNELS; j++)	{
+	for (CHANNELINDEX j = m_SndFile.m_nChannels; j < MAX_CHANNELS; j++)
+	{
 		MODCHANNEL *p = &m_SndFile.Chn[j];
-		if (!p->nLength) {
+		if (!p->nLength)
 			return j;
-		}
 	}
 
 	// Not found: look for one that's stopped
-	for (UINT j=m_SndFile.m_nChannels; j<MAX_CHANNELS; j++)	{
+	for (CHANNELINDEX j = m_SndFile.m_nChannels; j < MAX_CHANNELS; j++)
+	{
 		MODCHANNEL *p = &m_SndFile.Chn[j];
-		if (p->dwFlags & CHN_NOTEFADE) {
+		if (p->dwFlags & CHN_NOTEFADE)
 			return j;
-		}
 	}
 	
 	//Last resort: go for first virutal channel.
@@ -3440,7 +3441,8 @@ void CModDoc::RecordParamChange(int plugSlot, long paramIndex)
 void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 //-------------------------------------------------------
 {
-	if (macroToSet<0 || macroToSet>NMACROS) {
+	if (macroToSet<0 || macroToSet>NMACROS)
+	{
 		return;
 	}
 	

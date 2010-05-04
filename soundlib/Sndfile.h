@@ -635,7 +635,7 @@ public:
 
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
-	ORDERINDEX GetNumPatterns() const;
+	PATTERNINDEX GetNumPatterns() const;
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; } 
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
