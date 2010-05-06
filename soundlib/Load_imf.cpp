@@ -11,7 +11,8 @@
 
 #pragma pack(1)
 
-struct IMFCHANNEL {
+struct IMFCHANNEL
+{
 	char name[12];	// Channel name (ASCIIZ-String, max 11 chars)
 	uint8 chorus;	// Default chorus
 	uint8 reverb;	// Default reverb
@@ -19,7 +20,8 @@ struct IMFCHANNEL {
 	uint8 status;	// Channel status: 0 = enabled, 1 = mute, 2 = disabled (ignore effects!)
 };
 
-struct IMFHEADER {
+struct IMFHEADER
+{
 	char title[32];				// Songname (ASCIIZ-String, max. 31 chars)
 	uint16 ordnum;				// Number of orders saved
 	uint16 patnum;				// Number of patterns saved
@@ -36,13 +38,15 @@ struct IMFHEADER {
 	uint8 orderlist[256];		// Order list (0xff = +++; blank out anything beyond ordnum)
 };
 
-enum {
+enum
+{
 	IMF_ENV_VOL = 0,
 	IMF_ENV_PAN = 1,
 	IMF_ENV_FILTER = 2,
 };
 
-struct IMFENVELOPE {
+struct IMFENVELOPE
+{
 	uint8 points;		// Number of envelope points
 	uint8 sustain;		// Envelope sustain point
 	uint8 loop_start;	// Envelope loop start point
@@ -51,12 +55,14 @@ struct IMFENVELOPE {
 	uint8 unused[3];
 };
 
-struct IMFENVNODES {
+struct IMFENVNODES
+{
 	uint16 tick;
 	uint16 value;
 };
 
-struct IMFINSTRUMENT {
+struct IMFINSTRUMENT
+{
 	char name[32];		// Inst. name (ASCIIZ-String, max. 31 chars)
 	uint8 map[120];		// Multisample settings
 	uint8 unused[8];
@@ -67,7 +73,8 @@ struct IMFINSTRUMENT {
 	char ii10[4];		// 'II10'
 };
 
-struct IMFSAMPLE {
+struct IMFSAMPLE
+{
 	char filename[13];	// Sample filename (12345678.ABC) */
 	uint8 unused1[3];
 	uint32 length;		// Length
@@ -85,7 +92,8 @@ struct IMFSAMPLE {
 };
 #pragma pack()
 
-static BYTE imf_efftrans[] = {
+static BYTE imf_efftrans[] =
+{
 	CMD_NONE,
 	CMD_SPEED,			// 0x01 1xx Set Tempo
 	CMD_TEMPO,			// 0x02 2xx Set BPM
@@ -137,7 +145,7 @@ static BYTE imf_efftrans[] = {
 static void import_imf_effect(MODCOMMAND *note)
 //---------------------------------------------
 {
-	BYTE n;
+	uint8 n;
 	// fix some of them
 	switch (note->command)
 	{
@@ -262,7 +270,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	IMFHEADER hdr;
 	MODSAMPLE *pSample = Samples + 1;
 	WORD firstsample = 1; // first pSample for the current instrument
-	UINT32 ignore_channels = 0; // bit set for each channel that's completely disabled
+	uint32 ignore_channels = 0; // bit set for each channel that's completely disabled
 
 	ASSERT_CAN_READ(sizeof(IMFHEADER));
 	memset(&hdr, 0, sizeof(IMFHEADER));
@@ -324,7 +332,19 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 	}
 	if(!m_nChannels) return false;
-	
+
+	//From mikmod: work around an Orpheus bug
+	if (hdr.channels[0].status == 0)
+	{
+		CHANNELINDEX nChn;
+		for(nChn = 1; nChn < 16; nChn++)
+			if(hdr.channels[nChn].status != 1)
+				break;
+		if (nChn == 16)
+			for(nChn = 1; nChn < 16; nChn++)
+				ChnSettings[nChn].dwFlags &= ~CHN_MUTE;
+	}
+
 	Order.resize(hdr.ordnum);
 	for(ORDERINDEX nOrd = 0; nOrd < hdr.ordnum; nOrd++)
 		Order[nOrd] = ((hdr.orderlist[nOrd] == 0xff) ? Order.GetIgnoreIndex() : (PATTERNINDEX)hdr.orderlist[nOrd]);
@@ -474,12 +494,9 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		imfins.smpnum = LittleEndianW(imfins.smpnum);
 		imfins.fadeout = LittleEndianW(imfins.fadeout);
 
-		if(memcmp(imfins.ii10, "II10", 4) != 0)
-		{
-			//printf("ii10 says %02x %02x %02x %02x!\n",
-			//	imfins.ii10[0], imfins.ii10[1], imfins.ii10[2], imfins.ii10[3]);
-			return false;
-		}
+		// Orpheus does not check this!
+		//if(memcmp(imfins.ii10, "II10", 4) != 0)
+		//	return false;
 		
 		pIns = new MODINSTRUMENT;
 		if(!pIns)
@@ -526,11 +543,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 			m_nSamples++;
 
 			if(memcmp(imfsmp.is10, "IS10", 4) != 0)
-			{
-				//printf("is10 says %02x %02x %02x %02x!\n",
-				//	imfsmp.is10[0], imfsmp.is10[1], imfsmp.is10[2], imfsmp.is10[3]);
 				return false;
-			}
 			
 			memcpy(pSample->filename, imfsmp.filename, 12);
 			SpaceToNullStringFixed(pSample->filename, 12);
