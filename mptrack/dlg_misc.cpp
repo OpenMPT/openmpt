@@ -105,7 +105,12 @@ BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
 	ON_COMMAND(IDC_CHECK_PT1X,	OnCheckPT1x)
 	ON_CBN_SELCHANGE(IDC_COMBO1,UpdateDialog)
 // -! NEW_FEATURE#0023
+
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModTypeDlg::OnToolTipNotify)
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModTypeDlg::OnToolTipNotify)
+
 	//}}AFX_MSG_MAP
+
 END_MESSAGE_MAP()
 
 
@@ -116,8 +121,8 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CModTypeDlg)
 	DDX_Control(pDX, IDC_COMBO1,		m_TypeBox);
 	DDX_Control(pDX, IDC_COMBO2,		m_ChannelsBox);
-	DDX_Control(pDX, IDC_COMBO_TEMPOMODE,		m_TempoModeBox);
-	DDX_Control(pDX, IDC_COMBO_MIXLEVELS,		m_PlugMixBox);
+	DDX_Control(pDX, IDC_COMBO_TEMPOMODE,	m_TempoModeBox);
+	DDX_Control(pDX, IDC_COMBO_MIXLEVELS,	m_PlugMixBox);
 	DDX_Control(pDX, IDC_CHECK1,		m_CheckBox1);
 	DDX_Control(pDX, IDC_CHECK2,		m_CheckBox2);
 	DDX_Control(pDX, IDC_CHECK3,		m_CheckBox3);
@@ -158,18 +163,12 @@ BOOL CModTypeDlg::OnInitDialog()
 	case MOD_TYPE_XM:	m_TypeBox.SetCurSel(2); break;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-//	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(3); break;
 	case MOD_TYPE_IT:	m_TypeBox.SetCurSel(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT ? 4 : 3); break;
-	case MOD_TYPE_MPT:	m_TypeBox.SetCurSel(5); break;
 // -! NEW_FEATURE#0023
+	case MOD_TYPE_MPT:	m_TypeBox.SetCurSel(5); break;
 	default:			m_TypeBox.SetCurSel(0); break;
 	}
 
-// -> CODE#0006
-// -> DESC="misc quantity changes"
-//	for (int i=4; i<=64; i++)
-//	for (int i=4; i<=MAX_BASECHANNELS; i++)
-// -! BEHAVIOUR_CHANGE#0006
 	UpdateChannelCBox();
 	
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString("Classic"), tempo_mode_classic);
@@ -192,8 +191,8 @@ BOOL CModTypeDlg::OnInitDialog()
 	{
 		//case mixLevels_Test:		m_PlugMixBox.SetCurSel(4); break;
 		case mixLevels_original:	m_PlugMixBox.SetCurSel(3); break;
-		case mixLevels_117RC1:	m_PlugMixBox.SetCurSel(2); break;
-		case mixLevels_117RC2:	m_PlugMixBox.SetCurSel(1); break;
+		case mixLevels_117RC1:		m_PlugMixBox.SetCurSel(2); break;
+		case mixLevels_117RC2:		m_PlugMixBox.SetCurSel(1); break;
 		case mixLevels_117RC3:
 		default:					m_PlugMixBox.SetCurSel(0); break;
 	}
@@ -207,6 +206,8 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_EditFlag.SetLimitText(16);
 
 	UpdateDialog();
+
+	EnableToolTips(TRUE);
 	return TRUE;
 }
 
@@ -216,8 +217,8 @@ void CModTypeDlg::UpdateChannelCBox()
 {
 	const MODTYPE type = m_TypeBox.GetItemData(m_TypeBox.GetCurSel());
 	CHANNELINDEX currChanSel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
-	const CHANNELINDEX minChans = m_pSndFile->GetModSpecifications(type).channelsMin;
-	const CHANNELINDEX maxChans = m_pSndFile->GetModSpecifications(type).channelsMax;
+	const CHANNELINDEX minChans = CSoundFile::GetModSpecifications(type).channelsMin;
+	const CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
 	if(m_ChannelsBox.GetCount() < 1 
 		||
 	   m_ChannelsBox.GetItemData(0) != minChans
@@ -408,7 +409,7 @@ void CModTypeDlg::OnCheckPT1x()
 }
 
 
-BOOL CModTypeDlg::VerifyData() 
+bool CModTypeDlg::VerifyData() 
 //----------------------------
 {
 
@@ -418,7 +419,7 @@ BOOL CModTypeDlg::VerifyData()
 	{
 		::AfxMessageBox("Error: Rows per measure must be greater than rows per beat.", MB_OK|MB_ICONEXCLAMATION);
 		GetDlgItem(IDC_ROWSPERMEASURE)->SetFocus();
-		return FALSE;
+		return false;
 	}
 
 	int sel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
@@ -426,7 +427,8 @@ BOOL CModTypeDlg::VerifyData()
 
 	CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
 
-	if (sel > maxChans) {
+	if (sel > maxChans)
+	{
 		CString error;
 		error.Format("Error: Max number of channels for this type is %d", maxChans);
 		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
@@ -436,18 +438,17 @@ BOOL CModTypeDlg::VerifyData()
 	if(maxChans < m_pSndFile->GetNumChannels())
 	{
 		if(MessageBox("New modtype supports less channels than currently used, and reducing channel number is required. Continue?", "", MB_OKCANCEL) != IDOK)
-			return FALSE;
+			return false;
 	}
 
-	return TRUE;
+	return true;
 }
 
 void CModTypeDlg::OnOK()
 //----------------------
 {
-	if (!VerifyData()) {
+	if (!VerifyData())
 		return;
-	}
 
 	int sel = m_TypeBox.GetCurSel();
 	if (sel >= 0)
@@ -455,7 +456,8 @@ void CModTypeDlg::OnOK()
 		m_nType = m_TypeBox.GetItemData(sel);
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-		if(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT && sel != 4){
+		if(m_pSndFile->m_dwSongFlags & SONG_ITPROJECT && sel != 4)
+		{
 			m_pSndFile->m_dwSongFlags &= ~SONG_ITPROJECT;
 			m_pSndFile->m_dwSongFlags &= ~SONG_ITPEMBEDIH;
 		}
@@ -508,6 +510,69 @@ void CModTypeDlg::OnCancel()
 	// Reset mod flags
 	m_pSndFile->m_dwSongFlags = m_dwSongFlags;
 	CDialog::OnCancel();
+}
+
+
+BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
+//-------------------------------------------------------------------------
+{
+	UNREFERENCED_PARAMETER(id);
+	UNREFERENCED_PARAMETER(pResult);
+
+	// need to handle both ANSI and UNICODE versions of the message
+	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
+	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
+	CStringA strTipText = "";
+	UINT_PTR nID = pNMHDR->idFrom;
+	if (pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
+		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
+	{
+		// idFrom is actually the HWND of the tool
+		nID = ::GetDlgCtrlID((HWND)nID);
+	}
+
+	switch(nID)
+	{
+	case IDC_CHECK1:
+		strTipText = "Note slides always slide the same amount, not depending on the sample frequency.";
+		break;
+	case IDC_CHECK2:
+		strTipText = "Old ScreamTracker 3 volume slide behaviour (not recommended).";
+		break;
+	case IDC_CHECK3:
+		strTipText = "Play some effects like in early versions of Impulse Tracker (not recommended).";
+		break;
+	case IDC_CHECK4:
+		strTipText = "Gxx and Exx/Fxx won't share effect memory. Gxx resets instrument envelopes.";
+		break;
+	case IDC_CHECK5:
+		strTipText = "The resonant filter's frequency range is incresed from about 4KHz to 10KHz";
+		break;
+	case IDC_CHECK6:
+		strTipText = "The instrument settings of the external ITI files will be ignored.";
+		break;
+	case IDC_CHECK_PT1X:
+		strTipText = "Ignore pan fx, use on-the-fly sample swapping, enforce Amiga frequency limits.";
+		break;
+	case IDC_COMBO_MIXLEVELS:
+		strTipText = "Mixing method of sample and VST levels.";
+		break;
+	}
+
+	if (pNMHDR->code == TTN_NEEDTEXTA)
+	{
+		//strncpy_s(pTTTA->szText, sizeof(pTTTA->szText), strTipText, 
+		//	strTipText.GetLength() + 1);
+		// 80 chars max?!
+		strncpy(pTTTA->szText, strTipText, min(strTipText.GetLength() + 1, ARRAYELEMCOUNT(pTTTA->szText) - 1));
+	}
+	else
+	{
+		::MultiByteToWideChar(CP_ACP , 0, strTipText, strTipText.GetLength() + 1,
+			pTTTW->szText, sizeof(pTTTW->szText)/(sizeof pTTTW->szText[0]));
+	}
+
+	return TRUE;
 }
 
 
