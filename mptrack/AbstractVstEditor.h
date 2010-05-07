@@ -64,6 +64,7 @@ private:
 	void UpdateOptionsMenu();
 	int GetBestInstrumentCandidate();
 	bool CheckInstrument(int instrument);
+	bool QueryAddInstrumentIfNeeded();
 	int m_nInstrument;
 	int m_nLearnMacro;
 	
@@ -71,6 +72,7 @@ private:
 	void OnSetInputInstrument(UINT nID);
 	afx_msg void OnInitMenu(CMenu* pMenu);
 	void PrepareToLearnMacro(UINT nID);
+
 };
 //end rewbs.defaultPlugGUI
 

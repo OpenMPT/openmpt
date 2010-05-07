@@ -326,9 +326,8 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 			m_nInstrument = GetBestInstrumentCandidate();
 		}
 		
-		if (m_nInstrument<0 && m_pVstPlugin->CanRecieveMidiEvents()) {	//only send warning if plug is able to process notes.
-			AfxMessageBox("You need to assign an instrument to this plugin before you can play notes from here.");
-		} else {
+		if(QueryAddInstrumentIfNeeded())
+		{
 			CModDoc* pModDoc     = m_pVstPlugin->GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
 			pModDoc->PlayNote(wParam-kcVSTGUIStartNotes+1+pMainFrm->GetBaseOctave()*12, m_nInstrument, 0, FALSE);
@@ -337,12 +336,13 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	}
 	if (wParam>=kcVSTGUIStartNoteStops && wParam<=kcVSTGUIEndNoteStops)
 	{
-		if (!CheckInstrument(m_nInstrument)) {
+		if (!CheckInstrument(m_nInstrument))
+		{
 			m_nInstrument = GetBestInstrumentCandidate();
 		}
-		if (m_nInstrument<0 && m_pVstPlugin->CanRecieveMidiEvents()) {	//only send warning if plug is able to process notes.
-			AfxMessageBox("You need to assign an instrument to this plugin before you can play notes from here.");
-		} else {	
+
+		if(QueryAddInstrumentIfNeeded())
+		{
 			CModDoc* pModDoc     = m_pVstPlugin->GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
 			pModDoc->NoteOff(wParam-kcVSTGUIStartNoteStops+1+pMainFrm->GetBaseOctave()*12, FALSE, m_nInstrument);
@@ -351,6 +351,50 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	}
 
 	return NULL;
+}
+
+
+// Weird name! :-P
+// When trying to play a note using this plugin, but no instrument is assigned to it,
+// the user is asked whether a new instrument should be added.
+bool CAbstractVstEditor::QueryAddInstrumentIfNeeded()
+//---------------------------------------------------
+{
+	//only send warning if plug is able to process notes.
+	if(m_nInstrument < 0 && m_pVstPlugin->CanRecieveMidiEvents())
+	{
+		CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
+		if(!pModDoc || !pModDoc->GetSoundFile())
+			return false;
+
+		if(pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
+			AfxMessageBox(_T("You need to assign an instrument to this plugin before you can play notes from here.\nCreate a new instrument and assign this plugin to the instrument?"), MB_YESNO | MB_ICONQUESTION) == IDNO)
+		{
+			return false;
+		} else
+		{
+			// try to set up a new instrument
+			INSTRUMENTINDEX nIns = pModDoc->InsertInstrument(0); 
+			if(nIns == INSTRUMENTINDEX_INVALID)
+				return false;
+
+			MODINSTRUMENT *pIns = pModDoc->GetSoundFile()->Instruments[nIns];
+			m_nInstrument = nIns;
+
+			_snprintf(pIns->name, ARRAYELEMCOUNT(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pModDoc->GetSoundFile()->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szName);
+			_snprintf(pIns->filename, ARRAYELEMCOUNT(pIns->filename) - 1, _T("FX %d"), m_pVstPlugin->GetSlot() + 1);
+			pIns->nMixPlug = m_pVstPlugin->GetSlot() + 1;
+			pIns->nMidiChannel = 1;
+			pIns->wMidiBank = (m_pVstPlugin->GetCurrentProgram() >> 7) + 1;
+			pIns->nMidiProgram = (m_pVstPlugin->GetCurrentProgram() & 0x7F) + 1;
+
+			return true;
+		}
+	} else
+	{
+		return true;
+	}
+	
 }
 
 #define PRESETS_PER_COLUMN 32
