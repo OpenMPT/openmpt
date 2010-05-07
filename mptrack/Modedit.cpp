@@ -732,15 +732,17 @@ SAMPLEINDEX CModDoc::InsertSample(bool bLimit)
 }
 
 
-INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
-//----------------------------------------------------------------------
+// Insert a new instrument assigned to sample nSample or duplicate instrument nDuplicate.
+// If nSample is invalid, an approriate sample slot is selected. 0 means "no sample".
+INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX nDuplicate)
+//----------------------------------------------------------------------------------------
 {
-	MODINSTRUMENT *pDup = NULL;
-	INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax - 1;
+	MODINSTRUMENT *pDup = nullptr;
+	const INSTRUMENTINDEX nInstrumentMax = m_SndFile.GetModSpecifications().instrumentsMax - 1;
 	if ((m_SndFile.m_nType != MOD_TYPE_XM) && !(m_SndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) return INSTRUMENTINDEX_INVALID;
-	if ((lDuplicate > 0) && (lDuplicate <= (LONG)m_SndFile.m_nInstruments))
+	if ((nDuplicate > 0) && (nDuplicate <= m_SndFile.m_nInstruments))
 	{
-		pDup = m_SndFile.Instruments[lDuplicate];
+		pDup = m_SndFile.Instruments[nDuplicate];
 	}
 	if ((!m_SndFile.m_nInstruments) && ((m_SndFile.m_nSamples > 1) || (m_SndFile.Samples[1].pSample)))
 	{
@@ -748,9 +750,9 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 		UINT n = CMainFrame::GetMainFrame()->MessageBox("Convert existing samples to instruments first?", NULL, MB_YESNOCANCEL|MB_ICONQUESTION);
 		if (n == IDYES)
 		{
-			UINT nInstruments = m_SndFile.m_nSamples;
+			SAMPLEINDEX nInstruments = m_SndFile.m_nSamples;
 			if (nInstruments > nInstrumentMax) nInstruments = nInstrumentMax;
-			for (UINT smp=1; smp<=nInstruments; smp++)
+			for (SAMPLEINDEX smp = 1; smp <= nInstruments; smp++)
 			{
 				m_SndFile.Samples[smp].uFlags &= ~CHN_MUTE;
 				if (!m_SndFile.Instruments[smp])
@@ -771,7 +773,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 		if (n != IDNO) return INSTRUMENTINDEX_INVALID;
 	}
 	UINT newins = 0;
-	for (UINT i=1; i<=m_SndFile.m_nInstruments; i++)
+	for (INSTRUMENTINDEX i = 1; i <= m_SndFile.m_nInstruments; i++)
 	{
 		if (!m_SndFile.Instruments[i])
 		{
@@ -791,10 +793,10 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 	MODINSTRUMENT *pIns = new MODINSTRUMENT;
 	if (pIns)
 	{
-		UINT newsmp = 0;
-		if ((lSample > 0) && (lSample < m_SndFile.GetModSpecifications().samplesMax))
+		SAMPLEINDEX newsmp = 0;
+		if (nSample < m_SndFile.GetModSpecifications().samplesMax)
 		{
-			newsmp = lSample;
+			newsmp = nSample;
 		} else
 		if (!pDup)
 		{
@@ -818,7 +820,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(LONG lSample, LONG lDuplicate)
 			*pIns = *pDup;
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-			strcpy(m_SndFile.m_szInstrumentPath[newins-1],m_SndFile.m_szInstrumentPath[lDuplicate-1]);
+			strcpy(m_SndFile.m_szInstrumentPath[newins - 1], m_SndFile.m_szInstrumentPath[nDuplicate - 1]);
 			m_SndFile.instrumentModified[newins-1] = FALSE;
 // -! NEW_FEATURE#0023
 		} else

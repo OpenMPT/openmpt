@@ -2562,7 +2562,15 @@ void CCtrlSamples::OnLoopTypeChanged()
 	// set loop points if theren't any
 	if(wasDisabled && ((pSmp->uFlags & CHN_LOOP) != 0) && (pSmp->nLoopStart == pSmp->nLoopEnd) && (pSmp->nLoopStart == 0))
 	{
-		pSmp->nLoopEnd = pSmp->nLength;
+		SELECTIONPOINTS selection = GetSelectionPoints();
+		if(selection.bSelected)
+		{
+			pSmp->nLoopStart = selection.nStart;
+			pSmp->nLoopEnd = selection.nEnd;
+		} else
+		{
+			pSmp->nLoopEnd = pSmp->nLength;
+		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 	}
 	m_pModDoc->AdjustEndOfSample(m_nSample);
@@ -2635,7 +2643,15 @@ void CCtrlSamples::OnSustainTypeChanged()
 	// set sustain loop points if theren't any
 	if(wasDisabled && ((pSmp->uFlags & CHN_SUSTAINLOOP) != 0) && (pSmp->nSustainStart == pSmp->nSustainEnd) && (pSmp->nSustainStart == 0))
 	{
-		pSmp->nSustainEnd = pSmp->nLength;
+		SELECTIONPOINTS selection = GetSelectionPoints();
+		if(selection.bSelected)
+		{
+			pSmp->nSustainStart = selection.nStart;
+			pSmp->nSustainEnd = selection.nEnd;
+		} else
+		{
+			pSmp->nSustainEnd = pSmp->nLength;
+		}
 		m_pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEDATA | HINT_SAMPLEINFO, NULL);
 	}
 	m_pModDoc->SetModified();
