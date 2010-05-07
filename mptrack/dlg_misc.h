@@ -14,7 +14,8 @@ public:
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x;
 	CEdit m_EditFlag;
 	CSoundFile *m_pSndFile;
-	UINT m_nChannels, m_nType;
+	UINT m_nChannels;
+	MODTYPE m_nType;
 	DWORD m_dwSongFlags;
 
 // -> CODE#0023
@@ -25,8 +26,8 @@ public:
 	CButton m_CheckBoxITCompatiblePlay;
 
 public:
-	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = m_nChannels = 0; }
-	BOOL VerifyData();
+	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = MOD_TYPE_NONE; m_nChannels = 0; }
+	bool VerifyData();
 	void UpdateDialog();
 
 private:
@@ -40,6 +41,9 @@ protected:
 	virtual void OnCancel();
 	
 	//}}AFX_VIRTUAL
+
+	BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
+
 	//{{AFX_MSG(CModTypeDlg)
 	afx_msg void OnCheck1();
 	afx_msg void OnCheck2();
@@ -565,7 +569,7 @@ class CSplitKeyboadSettings: public CDialog
 //=========================================
 {
 protected:
-	CComboBox m_CbnSplitInstrument,m_CbnSplitNote,m_CbnOctaveModifier,m_CbnSplitVolume;
+	CComboBox m_CbnSplitInstrument, m_CbnSplitNote, m_CbnOctaveModifier, m_CbnSplitVolume;
 	CSoundFile *m_pSndFile;
 
 public:
