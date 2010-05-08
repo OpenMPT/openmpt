@@ -1485,26 +1485,28 @@ void CViewGlobals::OnClonePlug()
 }
 
 
+// This is used for retrieving the correct background colour for the
+// frames on the general tab when using WinXP Luna or Vista/Win7 Aero.
 typedef HRESULT (__stdcall * ETDT)(HWND, DWORD);
 
 HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 //-------------------------------------------------------------------
 {
 	static bool bUxInited = false;
-	static ETDT m_ETDT = nullptr;
+	static ETDT hETDT = NULL;
 
 	if(!bUxInited)
 	{
 		HMODULE uxlib = LoadLibrary("uxtheme.dll");
 		if(uxlib)
-			m_ETDT = (ETDT)GetProcAddress(uxlib, "EnableThemeDialogTexture");
+			hETDT = (ETDT)GetProcAddress(uxlib, "EnableThemeDialogTexture");
 		bUxInited = true;
 	}
 	switch(nCtlColor)
 	{
 	case CTLCOLOR_DLG:
-		if(m_ETDT)
-			m_ETDT(*pWnd, ETDT_ENABLETAB);
+		if(hETDT)
+			hETDT(*pWnd, ETDT_ENABLETAB);
 	}
 	return CFormView::OnCtlColor(pDC, pWnd, nCtlColor);
 }
