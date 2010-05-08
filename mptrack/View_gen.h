@@ -68,7 +68,9 @@ public:
 	virtual void UpdateView(DWORD dwHintMask=0, CObject *pObj=NULL);
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
-// -> CODE#0015
+	virtual HBRUSH OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor);
+
+	// -> CODE#0015
 // -> DESC="channels management dlg"
 	virtual void OnDraw(CDC* pDC);
 // -! NEW_FEATURE#0015

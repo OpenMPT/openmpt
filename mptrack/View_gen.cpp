@@ -23,6 +23,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_WM_DESTROY()
+	ON_WM_CTLCOLOR()
 
 // -> CODE#0015
 // -> DESC="channels management dlg"
@@ -1483,3 +1484,27 @@ void CViewGlobals::OnClonePlug()
 	AfxMessageBox("Not yet implemented.");
 }
 
+
+typedef HRESULT (__stdcall * ETDT)(HWND, DWORD);
+
+HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
+//-------------------------------------------------------------------
+{
+	static bool bUxInited = false;
+	static ETDT m_ETDT = nullptr;
+
+	if(!bUxInited)
+	{
+		HMODULE uxlib = LoadLibrary("uxtheme.dll");
+		if(uxlib)
+			m_ETDT = (ETDT)GetProcAddress(uxlib, "EnableThemeDialogTexture");
+		bUxInited = true;
+	}
+	switch(nCtlColor)
+	{
+	case CTLCOLOR_DLG:
+		if(m_ETDT)
+			m_ETDT(*pWnd, ETDT_ENABLETAB);
+	}
+	return CFormView::OnCtlColor(pDC, pWnd, nCtlColor);
+}
