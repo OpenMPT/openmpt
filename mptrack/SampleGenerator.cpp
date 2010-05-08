@@ -596,6 +596,10 @@ void CSmpGenDialog::CreateDefaultPresets()
 	preset.expression = "sin(xp * _pi / 50 * 440 * len / freq)";
 	presets.AddPreset(preset);
 
+	preset.description = "Brown Noise (kind of)";
+	preset.expression = "rnd(1) * 0.1 + smp(x - 1) * 0.9";
+	presets.AddPreset(preset);
+
 	preset.description = "Noisy Saw";
 	preset.expression = "(x mod 800) / 800 - 0.5 + rnd (0.1)";
 	presets.AddPreset(preset);
@@ -618,10 +622,15 @@ void CSmpGenDialog::CreateDefaultPresets()
 
 	preset.description = "Laser";
 	preset.expression = "sin(xp * _pi * 100 /(xp ^ 2)) * 100 / sqrt(xp)";
-
 	presets.AddPreset(preset);
+
+	preset.description = "Noisy Laser Hit";
+	preset.expression = "(sin(sqrt(xp) * 100) + rnd(1) - 0.5) * exp(-xp / 10)";
+	presets.AddPreset(preset);
+
 	preset.description = "Twinkle, Twinkle...";
 	preset.expression = "sin(xp * _pi * 100 / xp) * 100 / sqrt(xp)";
+	presets.AddPreset(preset);
 
 	preset.description = "FM Tom";
 	preset.expression = "sin(xp * _pi * 2 + (xp / 5 - 50) ^ 2) * exp(-xp / 10)";
@@ -630,6 +639,11 @@ void CSmpGenDialog::CreateDefaultPresets()
 	preset.description = "FM Warp";
 	preset.expression = "sin(_pi * xp / 2 * (1 + (1 + sin(_pi * xp / 4 * 50)) / 4)) * exp(-(xp / 8) * .6)";
 	presets.AddPreset(preset);
+
+	preset.description = "Weird Noise";
+	preset.expression = "rnd(1) * 0.1 + smp(x - rnd(xp)) * 0.9";
+	presets.AddPreset(preset);
+
 }
 
 
