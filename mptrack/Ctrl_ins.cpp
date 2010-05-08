@@ -1546,8 +1546,8 @@ void CCtrlInstruments::OnInstrumentNew()
 			OnInstrumentDuplicate();
 			return;
 		}
-		BOOL bFirst = (pSndFile->m_nInstruments) ? FALSE : TRUE;
-		LONG ins = m_pModDoc->InsertInstrument(0);
+		bool bFirst = (pSndFile->GetNumInstruments() == 0);
+		LONG ins = m_pModDoc->InsertInstrument();
 		if (ins != INSTRUMENTINDEX_INVALID)
 		{
 			SetCurrentInstrument(ins);
@@ -1569,7 +1569,7 @@ void CCtrlInstruments::OnInstrumentDuplicate()
 		if ((pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (pSndFile->m_nInstruments > 0))
 		{
 			BOOL bFirst = (pSndFile->m_nInstruments) ? FALSE : TRUE;
-			LONG ins = m_pModDoc->InsertInstrument(0, m_nInstrument);
+			LONG ins = m_pModDoc->InsertInstrument(INSTRUMENTINDEX_INVALID, m_nInstrument);
 			if (ins != INSTRUMENTINDEX_INVALID)
 			{
 				SetCurrentInstrument(ins);

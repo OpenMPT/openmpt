@@ -64,7 +64,7 @@ private:
 	void UpdateOptionsMenu();
 	int GetBestInstrumentCandidate();
 	bool CheckInstrument(int instrument);
-	bool QueryAddInstrumentIfNeeded();
+	bool ValidateCurrentInstrument();
 	int m_nInstrument;
 	int m_nLearnMacro;
 	
