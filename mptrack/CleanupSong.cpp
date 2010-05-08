@@ -330,7 +330,7 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 	else
 	{
 		::MultiByteToWideChar(CP_ACP , 0, strTipText, strTipText.GetLength() + 1,
-			pTTTW->szText, sizeof(pTTTW->szText)/(sizeof pTTTW->szText[0]));
+			pTTTW->szText, ARRAYELEMCOUNT(pTTTW->szText));
 	}
 
 	return TRUE;

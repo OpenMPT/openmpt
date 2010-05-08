@@ -546,7 +546,7 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 		strTipText = "Gxx and Exx/Fxx won't share effect memory. Gxx resets instrument envelopes.";
 		break;
 	case IDC_CHECK5:
-		strTipText = "The resonant filter's frequency range is incresed from about 4KHz to 10KHz";
+		strTipText = "The resonant filter's frequency range is incresed from about 4KHz to 10KHz.";
 		break;
 	case IDC_CHECK6:
 		strTipText = "The instrument settings of the external ITI files will be ignored.";
@@ -569,7 +569,7 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 	else
 	{
 		::MultiByteToWideChar(CP_ACP , 0, strTipText, strTipText.GetLength() + 1,
-			pTTTW->szText, sizeof(pTTTW->szText)/(sizeof pTTTW->szText[0]));
+			pTTTW->szText, ARRAYELEMCOUNT(pTTTW->szText));
 	}
 
 	return TRUE;

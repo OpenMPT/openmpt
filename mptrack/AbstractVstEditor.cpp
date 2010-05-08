@@ -320,32 +320,23 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcVSTGUIToggleSendKeysToPlug:	OnPassKeypressesToPlug(); return wParam;
 		case kcVSTGUIBypassPlug:			OnBypassPlug(); return wParam;
 	}
-	if (wParam>=kcVSTGUIStartNotes && wParam<=kcVSTGUIEndNotes)
+	if (wParam >= kcVSTGUIStartNotes && wParam <= kcVSTGUIEndNotes)
 	{
-		if (!CheckInstrument(m_nInstrument)) {
-			m_nInstrument = GetBestInstrumentCandidate();
-		}
-		
-		if(QueryAddInstrumentIfNeeded())
+		if(ValidateCurrentInstrument())
 		{
 			CModDoc* pModDoc     = m_pVstPlugin->GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
-			pModDoc->PlayNote(wParam-kcVSTGUIStartNotes+1+pMainFrm->GetBaseOctave()*12, m_nInstrument, 0, FALSE);
+			pModDoc->PlayNote(wParam - kcVSTGUIStartNotes + 1 + pMainFrm->GetBaseOctave() * 12, m_nInstrument, 0, FALSE);
 		}
 		return wParam;
 	}
-	if (wParam>=kcVSTGUIStartNoteStops && wParam<=kcVSTGUIEndNoteStops)
+	if (wParam >= kcVSTGUIStartNoteStops && wParam <= kcVSTGUIEndNoteStops)
 	{
-		if (!CheckInstrument(m_nInstrument))
-		{
-			m_nInstrument = GetBestInstrumentCandidate();
-		}
-
-		if(QueryAddInstrumentIfNeeded())
+		if(ValidateCurrentInstrument())
 		{
 			CModDoc* pModDoc     = m_pVstPlugin->GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
-			pModDoc->NoteOff(wParam-kcVSTGUIStartNoteStops+1+pMainFrm->GetBaseOctave()*12, FALSE, m_nInstrument);
+			pModDoc->NoteOff(wParam - kcVSTGUIStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12, FALSE, m_nInstrument);
 		}
 		return wParam;
 	}
@@ -354,17 +345,20 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 }
 
 
-// Weird name! :-P
 // When trying to play a note using this plugin, but no instrument is assigned to it,
 // the user is asked whether a new instrument should be added.
-bool CAbstractVstEditor::QueryAddInstrumentIfNeeded()
-//---------------------------------------------------
+bool CAbstractVstEditor::ValidateCurrentInstrument()
+//--------------------------------------------------
 {
-	//only send warning if plug is able to process notes.
+	if (!CheckInstrument(m_nInstrument))
+		m_nInstrument = GetBestInstrumentCandidate();
+
+	//only show messagebox if plug is able to process notes.
 	if(m_nInstrument < 0 && m_pVstPlugin->CanRecieveMidiEvents())
 	{
 		CModDoc *pModDoc = m_pVstPlugin->GetModDoc();
-		if(!pModDoc || !pModDoc->GetSoundFile())
+		CSoundFile *pSndFile = m_pVstPlugin->GetSoundFile();
+		if(!pModDoc || !pSndFile)
 			return false;
 
 		if(pModDoc->GetSoundFile()->GetModSpecifications().instrumentsMax == 0 ||
@@ -374,19 +368,24 @@ bool CAbstractVstEditor::QueryAddInstrumentIfNeeded()
 		} else
 		{
 			// try to set up a new instrument
+			bool bFirst = (pSndFile->GetNumInstruments() == 0);
 			INSTRUMENTINDEX nIns = pModDoc->InsertInstrument(0); 
 			if(nIns == INSTRUMENTINDEX_INVALID)
 				return false;
 
-			MODINSTRUMENT *pIns = pModDoc->GetSoundFile()->Instruments[nIns];
+			MODINSTRUMENT *pIns = pSndFile->Instruments[nIns];
 			m_nInstrument = nIns;
 
-			_snprintf(pIns->name, ARRAYELEMCOUNT(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pModDoc->GetSoundFile()->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szName);
-			_snprintf(pIns->filename, ARRAYELEMCOUNT(pIns->filename) - 1, _T("FX %d"), m_pVstPlugin->GetSlot() + 1);
-			pIns->nMixPlug = m_pVstPlugin->GetSlot() + 1;
+			_snprintf(pIns->name, ARRAYELEMCOUNT(pIns->name) - 1, _T("%d: %s"), m_pVstPlugin->GetSlot() + 1, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szName);
+			strncpy(pIns->filename, pSndFile->m_MixPlugins[m_pVstPlugin->GetSlot()].Info.szLibraryName, ARRAYELEMCOUNT(pIns->filename) - 1);
+			pIns->nMixPlug = (PLUGINDEX)m_pVstPlugin->GetSlot() + 1;
 			pIns->nMidiChannel = 1;
-			pIns->wMidiBank = (m_pVstPlugin->GetCurrentProgram() >> 7) + 1;
-			pIns->nMidiProgram = (m_pVstPlugin->GetCurrentProgram() & 0x7F) + 1;
+			pIns->wMidiBank = (WORD)((m_pVstPlugin->GetCurrentProgram() >> 7) + 1);
+			pIns->nMidiProgram = (BYTE)((m_pVstPlugin->GetCurrentProgram() & 0x7F) + 1);
+
+			pModDoc->UpdateAllViews(NULL, (nIns << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_INSNAMES | HINT_ENVELOPE | (bFirst ? HINT_MODTYPE : 0));
+			if(pSndFile->GetModSpecifications().supportsPlugins)
+				pModDoc->SetModified();
 
 			return true;
 		}
@@ -558,9 +557,9 @@ void CAbstractVstEditor::UpdateOutputMenu()
 	pInfoMenu->InsertMenu(1, MF_BYPOSITION|MF_POPUP, (UINT)m_pOutputMenu->m_hMenu, "Ou&tputs");
 }
 
-void CAbstractVstEditor::UpdateMacroMenu() {
-//------------------------------------------
-
+void CAbstractVstEditor::UpdateMacroMenu()
+//----------------------------------------
+{
 	CString label, macroName, macroText;
 	char paramName[128];
 	bool greyed;
@@ -697,7 +696,8 @@ int CAbstractVstEditor::GetBestInstrumentCandidate()
 	//Then just take the first instrument that points to this plug..
 	CArray<UINT, UINT> plugInstrumentList;
 	m_pVstPlugin->GetInputInstrumentList(plugInstrumentList);
-	if (plugInstrumentList.GetSize()) {
+	if (plugInstrumentList.GetSize())
+	{
 		return plugInstrumentList[0];
 	}
 
