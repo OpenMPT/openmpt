@@ -119,7 +119,7 @@ struct MODINSTRUMENT
 	CHAR name[32];		// Note: not guaranteed to be null-terminated.
 	CHAR filename[32];
 
-	BYTE nMixPlug;							//rewbs.instroVSTi
+	PLUGINDEX nMixPlug;							//rewbs.instroVSTi
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 	USHORT nVolRamp;

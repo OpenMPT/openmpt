@@ -783,7 +783,8 @@
 #define IDC_GENMACROLABEL               2253
 #define IDC_RENDERZONE                  2254
 #define IDC_PATTERN_LOOP                2255
-#define IDC_EDIT_FACTOR                 2256
+#define IDC_EDIT_FACTORX                2256
+#define IDC_EDIT_FACTORY                2257
 #define IDC_EDIT_ORDERLIST_MARGINS      2258
 #define IDC_STATICRATIOMAP              2259
 #define IDC_SPIN_ORDERLIST_MARGINS      2260

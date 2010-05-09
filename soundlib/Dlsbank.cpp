@@ -1779,14 +1779,14 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 			pIns->VolEnv.Ticks[nPoint] = 0;
 			if (part->wVolAttack)
 			{
-				pIns->VolEnv.Values[nPoint] = (BYTE)(64/(part->wVolAttack/2+2)+8);//	/-----
-				pIns->VolEnv.Ticks[nPoint+1] = part->wVolAttack;				//	|
+				pIns->VolEnv.Values[nPoint] = (BYTE)(ENVELOPE_MAX / (part->wVolAttack / 2 + 2) + 8);   //	/-----
+				pIns->VolEnv.Ticks[nPoint+1] = part->wVolAttack;                                       //	|
 			} else
 			{
-				pIns->VolEnv.Values[nPoint] = 64;							//	|-----
-				pIns->VolEnv.Ticks[nPoint+1] = 1;						//	|
+				pIns->VolEnv.Values[nPoint] = ENVELOPE_MAX;  //	|-----
+				pIns->VolEnv.Ticks[nPoint + 1] = 1;          //	|
 			}
-			pIns->VolEnv.Values[nPoint+1] = 64;
+			pIns->VolEnv.Values[nPoint + 1] = ENVELOPE_MAX;
 			nPoint += 2;
 			// Hold section
 			// -> DLS Level 2
@@ -1870,12 +1870,12 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 				}
 				if (lReleaseTime < 1) lReleaseTime = 1;
 				pIns->VolEnv.Ticks[nPoint] = (WORD)(lStartTime + lReleaseTime);
-				pIns->VolEnv.Values[nPoint] = 0;
+				pIns->VolEnv.Values[nPoint] = ENVELOPE_MIN;
 				nPoint++;
 			} else
 			{
 				pIns->VolEnv.Ticks[nPoint] = (BYTE)(pIns->VolEnv.Ticks[nPoint-1] + 1);
-				pIns->VolEnv.Values[nPoint] = 0;
+				pIns->VolEnv.Values[nPoint] = ENVELOPE_MIN;
 				nPoint++;
 			}
 			pIns->VolEnv.nNodes = (BYTE)nPoint;
@@ -1889,13 +1889,13 @@ BOOL CDLSBank::ExtractInstrument(CSoundFile *pSndFile, UINT nInstr, UINT nIns, U
 		{
 			pIns->VolEnv.dwFlags |= ENV_ENABLED;
 			pIns->VolEnv.Ticks[0] = 0;
-			pIns->VolEnv.Values[0] = 64;
+			pIns->VolEnv.Values[0] = ENVELOPE_MAX;
 			pIns->VolEnv.Ticks[1] = 5;
-			pIns->VolEnv.Values[1] = 64;
+			pIns->VolEnv.Values[1] = ENVELOPE_MAX;
 			pIns->VolEnv.Ticks[2] = 10;
-			pIns->VolEnv.Values[2] = 32;
+			pIns->VolEnv.Values[2] = ENVELOPE_MID;
 			pIns->VolEnv.Ticks[3] = 20;	// 1 second max. for drums
-			pIns->VolEnv.Values[3] = 0;
+			pIns->VolEnv.Values[3] = ENVELOPE_MIN;
 			pIns->VolEnv.nNodes = 4;
 		}
 	}

@@ -255,7 +255,7 @@ static void load_imf_envelope(INSTRUMENTENVELOPE *env, IMFINSTRUMENT *imfins, in
 		nTick = LittleEndianW(imfins->nodes[e][n].tick);
 		nValue = LittleEndianW(imfins->nodes[e][n].value) >> shift;
 		env->Ticks[n] = (WORD)max(min, nTick);
-		env->Values[n] = (BYTE)min(nValue, 64);
+		env->Values[n] = (BYTE)min(nValue, ENVELOPE_MAX);
 		min = nTick + 1;
 	}
 }

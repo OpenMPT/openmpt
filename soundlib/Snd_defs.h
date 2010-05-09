@@ -170,6 +170,11 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define ENV_CARRY			0x08	// env carry
 #define ENV_FILTER			0x10	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
 
+// Envelope value boundaries
+#define ENVELOPE_MIN		0
+#define ENVELOPE_MID		32
+#define ENVELOPE_MAX		64
+
 
 // Flags of 'dF..' datafield in extended instrument properties.
 #define dFdd_VOLUME 		0x0001
@@ -338,7 +343,7 @@ enum enmEnvelopeTypes
 #define SNDMIX_NOBACKWARDJUMPS	0x40000
 #define SNDMIX_MAXDEFAULTPAN	0x80000	 // Used by the MOD loader (currently unused)
 #define SNDMIX_MUTECHNMODE		0x100000 // Notes are not played on muted channels
-#define SNDMIX_EMULATE_MIX_BUGS 0x200000 // rewbs.emulateMixBugs
+
 
 #define MAX_GLOBAL_VOLUME 256
 
