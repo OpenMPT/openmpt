@@ -1298,12 +1298,12 @@ BOOL CSoundFile::ReadNote()
 				int x1, envpitch;
 				if (envpos >= x2)
 				{
-					envpitch = (((int)pIns->PitchEnv.Values[pt]) - 32) * 8;
+					envpitch = (((int)pIns->PitchEnv.Values[pt]) - ENVELOPE_MID) * 8;
 					x1 = x2;
 				} else
 				if (pt)
 				{
-					envpitch = (((int)pIns->PitchEnv.Values[pt-1]) - 32) * 8;
+					envpitch = (((int)pIns->PitchEnv.Values[pt-1]) - ENVELOPE_MID) * 8;
 					x1 = pIns->PitchEnv.Ticks[pt-1];
 				} else
 				{

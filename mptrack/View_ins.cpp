@@ -2189,15 +2189,18 @@ void CViewInstrument::OnEnvelopeScalepoints()
 {
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : NULL;
-	if(pSndFile == NULL)
+	if(pSndFile == nullptr)
 		return;
 
 	if(m_nInstrument >= 1 &&
 	   m_nInstrument <= pSndFile->GetNumInstruments() &&
 	   pSndFile->Instruments[m_nInstrument])
 	{
-		CScaleEnvPointsDlg dialog(this, pSndFile->Instruments[m_nInstrument], m_nEnv);
-		if (dialog.DoModal() == IDOK)
+		// "Center" y value of the envelope. For panning and pitch, this is 32, for volume and filter it is 0 (minimum).
+		int nOffset = ((m_nEnv != ENV_VOLUME) && ((GetEnvelopePtr()->dwFlags & ENV_FILTER) == 0)) ? 32 : 0;
+
+		CScaleEnvPointsDlg dlg(this, GetEnvelopePtr(), nOffset);
+		if(dlg.DoModal())
 		{
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
@@ -2281,10 +2284,10 @@ void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
-	if(pEnv->Values[m_nDragItem - 1] <= 64 - stepsize)
+	if(pEnv->Values[m_nDragItem - 1] <= ENVELOPE_MAX - stepsize)
 		pEnv->Values[m_nDragItem - 1] += stepsize;
 	else
-		pEnv->Values[m_nDragItem - 1] = 64;
+		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MAX;
 
 	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
 	InvalidateRect(NULL, FALSE);
@@ -2296,10 +2299,10 @@ void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
 {
 	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
 	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
-	if(pEnv->Values[m_nDragItem - 1] >= stepsize)
+	if(pEnv->Values[m_nDragItem - 1] >= ENVELOPE_MIN + stepsize)
 		pEnv->Values[m_nDragItem - 1] -= stepsize;
 	else 
-		pEnv->Values[m_nDragItem - 1] = 0;
+		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MIN;
 
 	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
 	InvalidateRect(NULL, FALSE);

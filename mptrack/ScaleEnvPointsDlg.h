@@ -1,33 +1,31 @@
-#pragma once
-#include "sndfile.h"
-#include "afxwin.h"
+/*
+ * ScaleEnvPointsDlg.h
+ * -------------------
+ * Purpose: Header file for envelope scaling dialog.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ */
 
-// CScaleEnvPointsDlg dialog
+#pragma once
 
 //=======================================
 class CScaleEnvPointsDlg : public CDialog
 //=======================================
 {
-	DECLARE_DYNAMIC(CScaleEnvPointsDlg)
-
 public:
-	CScaleEnvPointsDlg(CWnd* pParent, MODINSTRUMENT* pInst, UINT env);   // standard constructor
-	virtual ~CScaleEnvPointsDlg();
 
-// Dialog Data
-	enum { IDD = IDD_SCALE_ENV_POINTS };
-
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	DECLARE_MESSAGE_MAP()
+	CScaleEnvPointsDlg(CWnd* pParent, INSTRUMENTENVELOPE *pEnv, int nCenter) : CDialog(IDD_SCALE_ENV_POINTS, pParent)
+	{
+		m_pEnv = pEnv;
+		m_nCenter = nCenter;
+	}
 
 private:
-	MODINSTRUMENT* m_pInstrument;
-	UINT m_Env; //To tell which envelope to process.
-	CEdit m_EditFactor;
+	INSTRUMENTENVELOPE *m_pEnv; //To tell which envelope to process.
+	static float m_fFactorX, m_fFactorY;
+	int m_nCenter;
+
 protected:
 	virtual void OnOK();
-public:
 	virtual BOOL OnInitDialog();
 };
