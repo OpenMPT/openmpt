@@ -1457,12 +1457,11 @@ void CTrackApp::OnFileOpen()
 #ifndef NO_MO3_SUPPORT
 		";*.mo3"
 #endif
-		")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha"
+		")|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.gz"
 #ifndef NO_MO3_SUPPORT
 		";*.mo3"
 #endif
 		"|"
-		// -! NEW_FEATURE#0023
 		"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15|"
 		"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
 		"FastTracker Modules (*.xm)|*.xm;*.xmz|"
