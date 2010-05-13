@@ -326,6 +326,10 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 			m_nChannels = 4;
 			bFLT8 = false;
 		}
+
+		// chances are very high that we're dealing with a non-MOD file here.
+		if(m_nSamples == 15 && i >= 0x80)
+			return false;
 	}
 
 	if(bFLT8)

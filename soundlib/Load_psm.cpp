@@ -20,6 +20,9 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/moddoc.h"
+#endif // MODPLUG_TRACKER
 
 #pragma pack(1)
 
@@ -32,67 +35,68 @@
 
 struct PSMNEWHEADER
 {
-	DWORD formatID;			// "PSM " (new format)
-	DWORD fileSize;			// Filesize - 12
-	DWORD fileInfoID;		// "FILE" Start of file info
+	uint32 formatID;			// "PSM " (new format)
+	uint32 fileSize;			// Filesize - 12
+	uint32 fileInfoID;			// "FILE" Start of file info
 };
 
 struct PSMSONGHEADER
 {
-	CHAR songType[9];		// Mostly "MAINSONG " (But not in Extreme Pinball!)
-	BYTE compression;		// 1 - uncompressed
-	BYTE numChannels;		// Number of channels, usually 4
+	char  songType[9];		// Mostly "MAINSONG " (But not in Extreme Pinball!)
+	uint8 compression;		// 1 - uncompressed
+	uint8 numChannels;		// Number of channels, usually 4
 
 };
 
 struct PSMOLDSAMPLEHEADER // Regular sample header
 {
-	BYTE flags;
-	CHAR fileName[8];		// Filename of the original module (without extension)
-	DWORD sampleID;			// INS0...INS9 (only last digit of sample ID, i.e. sample 1 and sample 11 are equal)
-	CHAR sampleName[33];
-	CHAR unknown1[6];		// 00 00 00 00 00 FF
-	WORD sampleNumber;
-	DWORD sampleLength;
-	DWORD loopStart;
-	DWORD loopEnd;			// FF FF FF FF = end of sample
-	BYTE unknown3;
-	BYTE defaulPan;			// unused?
-	BYTE defaultVolume;
-	DWORD unknown4;
-	WORD C5Freq;
-	CHAR unknown5[21];		// 00 ... 00
+	uint8  flags;
+	char   fileName[8];		// Filename of the original module (without extension)
+	uint32 sampleID;		// INS0...INS9 (only last digit of sample ID, i.e. sample 1 and sample 11 are equal)
+	char   sampleName[33];
+	uint8  unknown1[6];		// 00 00 00 00 00 FF
+	uint16 sampleNumber;
+	uint32 sampleLength;
+	uint32 loopStart;
+	uint32 loopEnd;			// FF FF FF FF = end of sample
+	uint8  unknown3;
+	uint8  defaulPan;		// unused?
+	uint8  defaultVolume;
+	uint32 unknown4;
+	uint16 C5Freq;
+	uint8  unknown5[21];	// 00 ... 00
 };
 
 struct PSMNEWSAMPLEHEADER // Sinaria sample header (and possibly other games)
 {
-	BYTE flags;
-	CHAR fileName[8];		// Filename of the original module (without extension)
-	CHAR sampleID[8];		// INS0...INS99999
-	CHAR sampleName[33];
-	CHAR unknown1[6];		// 00 00 00 00 00 FF
-	WORD sampleNumber;
-	DWORD sampleLength;
-	DWORD loopStart;
-	DWORD loopEnd;
-	WORD unknown3;
-	BYTE defaultPan;		// unused?
-	BYTE defaultVolume;
-	DWORD unknown4;
-	WORD C5Freq;
-	CHAR unknown5[16];		// 00 ... 00
+	uint8  flags;
+	char   fileName[8];		// Filename of the original module (without extension)
+	char   sampleID[8];		// INS0...INS99999
+	char   sampleName[33];
+	uint8  unknown1[6];		// 00 00 00 00 00 FF
+	uint16 sampleNumber;
+	uint32 sampleLength;
+	uint32 loopStart;
+	uint32 loopEnd;
+	uint16 unknown3;
+	uint8  defaultPan;		// unused?
+	uint8  defaultVolume;
+	uint32 unknown4;
+	uint16 C5Freq;
+	char   unknown5[16];	// 00 ... 00
 };
 #pragma pack()
 
 struct PSMSUBSONG // For internal use (pattern conversion)
 {
-	BYTE channelPanning[MAX_BASECHANNELS], channelVolume[MAX_BASECHANNELS];
-	bool channelSurround[MAX_BASECHANNELS];
-	BYTE defaultTempo, defaultSpeed;
-	CHAR songName[10];
+	uint8 channelPanning[MAX_BASECHANNELS], channelVolume[MAX_BASECHANNELS];
+	bool  channelSurround[MAX_BASECHANNELS];
+	uint8 defaultTempo, defaultSpeed;
+	char  songName[10];
 	ORDERINDEX startOrder, endOrder, restartPos;
 
-	PSMSUBSONG() {
+	PSMSUBSONG()
+	{
 		memset(channelPanning, 128, sizeof(channelPanning));
 		memset(channelVolume, 64, sizeof(channelVolume));
 		memset(channelSurround, false, sizeof(channelSurround));
@@ -144,9 +148,9 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// pattern offset and identifier
 	PATTERNINDEX numPatterns = 0; // used for setting up the orderlist - final pattern count
-	vector<DWORD> patternOffsets; // pattern offsets (sorted as they occour in the file)
-	vector<DWORD> patternIDs; // pattern IDs (sorted as they occour in the file)
-	vector<DWORD> orderOffsets; // combine the upper two vectors to get the offsets for each order item
+	vector<uint32> patternOffsets; // pattern offsets (sorted as they occour in the file)
+	vector<uint32> patternIDs; // pattern IDs (sorted as they occour in the file)
+	vector<uint32> orderOffsets; // combine the upper two vectors to get the offsets for each order item
 	patternOffsets.clear();
 	patternIDs.clear();
 	orderOffsets.clear();
@@ -159,8 +163,8 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		// Skip through the chunks
 		ASSERT_CAN_READ(8);
-		DWORD chunkID = LittleEndian(*(DWORD *)(lpStream + dwMemPos));
-		DWORD chunkSize = LittleEndian(*(DWORD *)(lpStream + dwMemPos + 4));
+		uint32 chunkID = LittleEndian(*(uint32 *)(lpStream + dwMemPos));
+		uint32 chunkSize = LittleEndian(*(uint32 *)(lpStream + dwMemPos + 4));
 		dwMemPos += 8;
 
 		ASSERT_CAN_READ(chunkSize);
@@ -177,7 +181,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			break;
 
 		case 0x444F4250: // "PBOD" - Pattern data of a single pattern
-			if(chunkSize < 8 || chunkSize != LittleEndian(*(DWORD *)(lpStream + dwMemPos))) return false; // same value twice
+			if(chunkSize < 8 || chunkSize != LittleEndian(*(uint32 *)(lpStream + dwMemPos))) return false; // same value twice
 
 			// Pattern ID (something like "P0  " or "P13 ", or "PATT0   " in Sinaria) follows
 			if(memcmp(lpStream + dwMemPos + 4, "P", 1)) return false;
@@ -210,8 +214,8 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				// "Sub sub chunks"
 				while(dwChunkPos + 8 < dwMemPos + chunkSize)
 				{
-					DWORD subChunkID = LittleEndian(*(DWORD *)(lpStream + dwChunkPos));
-					DWORD subChunkSize = LittleEndian(*(DWORD *)(lpStream + dwChunkPos + 4));
+					uint32 subChunkID = LittleEndian(*(uint32 *)(lpStream + dwChunkPos));
+					uint32 subChunkSize = LittleEndian(*(uint32 *)(lpStream + dwChunkPos + 4));
 					dwChunkPos += 8;
 
 					switch(subChunkID)
@@ -220,7 +224,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						if(subChunkSize != 6) break;
 
 						{
-							CHAR cversion[7];
+							char cversion[7];
 							memcpy(cversion, lpStream + dwChunkPos, 6);
 							cversion[6] = 0;
 							int version = atoi(cversion);
@@ -239,7 +243,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 							
 							// Now, the interesting part begins!
 							DWORD dwSettingsOffset = dwChunkPos + 2;
-							WORD nChunkCount = 0, nFirstOrderChunk = (WORD)-1;
+							uint16 nChunkCount = 0, nFirstOrderChunk = uint16_max;
 
 							// "Sub sub sub chunks" (grrrr, silly format)
 							while(dwSettingsOffset - dwChunkPos + 1 < subChunkSize)
@@ -257,7 +261,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 										char patternID[4]; // temporary
 										memcpy(patternID, lpStream + dwSettingsOffset + 2 + (bNewFormat ? 3 : 0), 3);
 										patternID[3] = 0;
-										DWORD nPattern = atoi(patternID);
+										uint32 nPattern = atoi(patternID);
 
 										// seek which pattern has this ID
 										for(uint32 i = 0; i < patternIDs.size(); i++)
@@ -278,13 +282,13 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 										}
 									}
 									// decide whether this is the first order chunk or not (for finding out the correct restart position)
-									if(nFirstOrderChunk == (WORD)-1) nFirstOrderChunk = nChunkCount;
+									if(nFirstOrderChunk == uint16_max) nFirstOrderChunk = nChunkCount;
 									dwSettingsOffset += 5 + (bNewFormat ? 4 : 0);
 									break;
 
 								case 0x04: // Restart position
 									{
-										WORD nRestartChunk = LittleEndian(*(WORD *)(lpStream + dwSettingsOffset + 1));
+										uint16 nRestartChunk = LittleEndian(*(uint16 *)(lpStream + dwSettingsOffset + 1));
 										ORDERINDEX nRestartPosition = 0;
 										if(nRestartChunk >= nFirstOrderChunk) nRestartPosition = (ORDERINDEX)(nRestartChunk - nFirstOrderChunk);
 										subsong.restartPos += nRestartPosition;
@@ -359,9 +363,11 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 									break;
 								
 								default: // How the hell should this happen? I've listened through almost all existing (original) PSM files. :)
+#ifdef MODPLUG_TRACKER
 									CString s;
 									s.Format("Report to the OpenMPT team: Unknown chunk %d found at position %d (in the OPLH chunk of this PSM file)", lpStream[dwSettingsOffset], dwSettingsOffset);
-									MessageBox(NULL, s, TEXT("OpenMPT PSM import"), MB_ICONERROR);
+									if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
+#endif // MODPLUG_TRACKER
 									// anyway, in such cases, we have to quit as we don't know how big the chunk really is.
 									return false;
 									break;
@@ -377,7 +383,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 					case 0x4E415050: // PPAN - Channel panning table (used in Sinaria)
 						if(subChunkSize & 1) return false;
-						for(DWORD i = 0; i < subChunkSize; i += 2)
+						for(uint32 i = 0; i < subChunkSize; i += 2)
 						{
 							CHANNELINDEX nChn = (CHANNELINDEX)(i >> 1);
 							if(nChn >= m_nChannels) break;
@@ -507,16 +513,18 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	for(ORDERINDEX nOrd = 0; nOrd < Order.size(); nOrd++)
 	{
 		if(orderOffsets[nOrd] == nullptr) continue;
-		DWORD dwPatternOffset = orderOffsets[nOrd];
+		uint32 dwPatternOffset = orderOffsets[nOrd];
 		if(dwPatternOffset + 2 > dwMemLength) return false;
-		WORD patternSize = LittleEndianW(*(WORD *)(lpStream + dwPatternOffset));
+		uint16 patternSize = LittleEndianW(*(uint16 *)(lpStream + dwPatternOffset));
 		dwPatternOffset += 2;
 
 		if(Patterns.Insert(nPat, patternSize))
 		{
+#ifdef MODPLUG_TRACKER
 			CString s;
 			s.Format(TEXT("Allocating patterns failed starting from pattern %u"), nPat);
-			MessageBox(NULL, s, TEXT("OpenMPT PSM import"), MB_ICONERROR);
+			if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
+#endif // MODPLUG_TRACKER
 			break;
 		}
 
@@ -527,9 +535,9 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		for(int nRow = 0; nRow < patternSize; nRow++)
 		{
 			if(dwPatternOffset + 2 > dwMemLength) return false;
-			WORD rowSize = LittleEndianW(*(WORD *)(lpStream + dwPatternOffset));
+			uint16 rowSize = LittleEndianW(*(uint16 *)(lpStream + dwPatternOffset));
 			
-			DWORD dwRowOffset = dwPatternOffset + 2;
+			uint32 dwRowOffset = dwPatternOffset + 2;
 
 			while(dwRowOffset < dwPatternOffset + rowSize)
 			{
@@ -579,7 +587,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				{
 					// Effect present - convert
 					if(dwRowOffset + 2 > dwMemLength) return false;
-					BYTE command = lpStream[dwRowOffset], param = lpStream[dwRowOffset + 1];
+					uint8 command = lpStream[dwRowOffset], param = lpStream[dwRowOffset + 1];
 
 					switch(command)
 					{
@@ -812,51 +820,51 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 struct PSM16HEADER
 {
-	DWORD formatID;			// "PSMþ" (PSM16)
-	CHAR  songName[59];		// Song title, padded with nulls
-	BYTE  lineEnd;			// $1A
-	BYTE  songType;			// Song Type bitfield
-	BYTE  formatVersion;	// $10
-	BYTE  patternVersion;   // 0 or 1
-	BYTE  songSpeed;		//
-	BYTE  songTempo;		// 32 ... 255
-	BYTE  masterVolume;		// 0 ... 255
-	WORD  songLength;		// 0 ... 255 (number of patterns to play in the song)
-	WORD  songOrders;		// 0 ... 255 (same as previous value as no subsongs are present)
-	WORD  numPatterns;		// 1 ... 255
-	WORD  numSamples;		// 1 ... 255
-	WORD  numChannelsPlay;	// 0 ... 32 (max. number of channels to play)
-	WORD  numChannelsReal;	// 0 ... 32 (max. number of channels to process)
-	DWORD orderOffset;
-	DWORD panOffset;
-	DWORD patOffset;
-	DWORD smpOffset;
-	DWORD commentsOffset;
-	DWORD patSize;			// Size of all patterns
-	CHAR  filler[40];
+	uint32 formatID;		// "PSMþ" (PSM16)
+	char   songName[59];	// Song title, padded with nulls
+	uint8  lineEnd;			// $1A
+	uint8  songType;		// Song Type bitfield
+	uint8  formatVersion;	// $10
+	uint8  patternVersion;  // 0 or 1
+	uint8  songSpeed;		//
+	uint8  songTempo;		// 32 ... 255
+	uint8  masterVolume;	// 0 ... 255
+	uint16 songLength;		// 0 ... 255 (number of patterns to play in the song)
+	uint16 songOrders;		// 0 ... 255 (same as previous value as no subsongs are present)
+	uint16 numPatterns;		// 1 ... 255
+	uint16 numSamples;		// 1 ... 255
+	uint16 numChannelsPlay;	// 0 ... 32 (max. number of channels to play)
+	uint16 numChannelsReal;	// 0 ... 32 (max. number of channels to process)
+	uint32 orderOffset;
+	uint32 panOffset;
+	uint32 patOffset;
+	uint32 smpOffset;
+	uint32 commentsOffset;
+	uint32 patSize;			// Size of all patterns
+	uint8  filler[40];
 };
 
 struct PSM16SMPHEADER
 {
-	CHAR  filename[13];	// null-terminated
-	CHAR  name[24];		// dito
-	DWORD offset;		// in file
-	DWORD memoffset;	// not used
-	WORD  sampleNumber;	// 1 ... 255
-	BYTE  flags;		// sample flag bitfield
-	DWORD length;		// in bytes
-	DWORD loopStart;	// in samples?
-	DWORD loopEnd;		// in samples?
-	CHAR  finetune;		// 0 ... 15 (useless? also, why is this almost always 70?)
-	BYTE  volume;		// default volume
-	WORD  c2freq;
+	uint8 filename[13];	// null-terminated
+	uint8 name[24];		// dito
+	uint32 offset;		// in file
+	uint32 memoffset;	// not used
+	uint16 sampleNumber;// 1 ... 255
+	uint8  flags;		// sample flag bitfield
+	uint32 length;		// in bytes
+	uint32 loopStart;	// in samples?
+	uint32 loopEnd;		// in samples?
+	int8   finetune;	// 0 ... 15 (useless? also, why is this almost always 70?)
+	uint8  volume;		// default volume
+	uint16 c2freq;
 };
 
 struct PSM16PATHEADER
 {
-	WORD size;		// includes header bytes
-	BYTE numRows;	// 1 ... 64
-	BYTE numChans;	// 1 ... 31
+	uint16 size;		// includes header bytes
+	uint8  numRows;		// 1 ... 64
+	uint8  numChans;	// 1 ... 31
 };
 
 #pragma pack()
@@ -898,7 +906,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read orders
 	dwMemPos = LittleEndian(shdr->orderOffset);
 	ASSERT_CAN_READ((DWORD)LittleEndianW(shdr->songOrders) + 2);
-	if(LittleEndian(shdr->orderOffset) > 4 && LittleEndian(*(DWORD *)(lpStream + dwMemPos - 4)) == 0x44524f50) // PORD
+	if(LittleEndian(shdr->orderOffset) > 4 && LittleEndian(*(uint32 *)(lpStream + dwMemPos - 4)) == 0x44524f50) // PORD
 	{
 		Order.ReadAsByte(lpStream + dwMemPos, LittleEndianW(shdr->songOrders), dwMemLength - dwMemPos);
 	}
@@ -906,7 +914,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read pan positions
 	dwMemPos = LittleEndian(shdr->panOffset);
 	ASSERT_CAN_READ(32);
-	if(LittleEndian(shdr->panOffset) > 4 && LittleEndian(*(DWORD *)(lpStream + dwMemPos - 4)) == 0x4E415050) // PPAN
+	if(LittleEndian(shdr->panOffset) > 4 && LittleEndian(*(uint32 *)(lpStream + dwMemPos - 4)) == 0x4E415050) // PPAN
 	{
 		for(CHANNELINDEX i = 0; i < 32; i++)
 		{
@@ -919,7 +927,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Read samples
 	dwMemPos = LittleEndian(shdr->smpOffset);
 	ASSERT_CAN_READ(0);
-	if(LittleEndian(shdr->smpOffset) > 4 && LittleEndian(*(DWORD *)(lpStream + dwMemPos - 4)) == 0x48415350) // PSAH
+	if(LittleEndian(shdr->smpOffset) > 4 && LittleEndian(*(uint32 *)(lpStream + dwMemPos - 4)) == 0x48415350) // PSAH
 	{
 		SAMPLEINDEX iSmpCount = 0;
 		m_nSamples = LittleEndianW(shdr->numSamples);
@@ -1000,9 +1008,11 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			if(Patterns.Insert(nPat, phdr->numRows))
 			{
+#ifdef MODPLUG_TRACKER
 				CString s;
 				s.Format(TEXT("Allocating patterns failed starting from pattern %u"), nPat);
-				MessageBox(NULL, s, TEXT("OpenMPT PSM16 import"), MB_ICONERROR);
+				if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
+#endif // MODPLUG_TRACKER
 				break;
 			}
 

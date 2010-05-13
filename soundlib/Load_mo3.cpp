@@ -8,8 +8,9 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
-
-
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/moddoc.h"
+#endif // MODPLUG_TRACKER
 
 // decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
 // IN: data/len = MO3 data/len
@@ -29,11 +30,14 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 #ifdef NO_MO3_SUPPORT
 	/* As of August 2009, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
 	so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
-	(avoid messagebox with .MOD files that have a song name starting with "MO3" */
+	(avoid log entry with .MOD files that have a song name starting with "MO3" */
 	if(lpStream[3] > 31) return false;
 
-	AfxMessageBox(GetStrI18N(__TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
+#ifdef MODPLUG_TRACKER
+	if(m_pModDoc != nullptr) m_pModDoc->AddToLog(GetStrI18N(__TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
+#endif // MODPLUG_TRACKER
 	return false;
+
 #else
 	bool b_result = false; // result of trying to load the module, false == fail.
 
@@ -44,7 +48,9 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 	HMODULE unmo3 = LoadLibrary(_TEXT("unmo3.dll"));
 	if(unmo3 == NULL) // Didn't succeed.
 	{
-		AfxMessageBox(GetStrI18N(_TEXT("Loading MO3 file failed because unmo3.dll could not be loaded.")), MB_ICONINFORMATION);
+#ifdef MODPLUG_TRACKER
+		if(m_pModDoc != nullptr) m_pModDoc->AddToLog(GetStrI18N(_TEXT("Loading MO3 file failed because unmo3.dll could not be loaded.")));
+#endif // MODPLUG_TRACKER
 	}
 	else //case: dll loaded succesfully.
 	{

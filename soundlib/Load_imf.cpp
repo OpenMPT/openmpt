@@ -8,6 +8,9 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/moddoc.h"
+#endif // MODPLUG_TRACKER
 
 #pragma pack(1)
 
@@ -365,9 +368,11 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		if(Patterns.Insert(nPat, nrows))
 		{
+#ifdef MODPLUG_TRACKER
 			CString s;
 			s.Format(TEXT("Allocating patterns failed starting from pattern %u"), nPat);
-			MessageBox(NULL, s, TEXT("OpenMPT IMF import"), MB_ICONERROR);
+			if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
+#endif // MODPLUG_TRACKER
 			break;
 		}
 		row_data = Patterns[nPat];

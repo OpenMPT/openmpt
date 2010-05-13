@@ -14,6 +14,9 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/moddoc.h"
+#endif // MODPLUG_TRACKER
 
 #pragma pack(1)
 
@@ -255,9 +258,11 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		if(Patterns.Insert(iPat, 64)) 
 		{
+#ifdef MODPLUG_TRACKER
 			CString s;
 			s.Format(TEXT("Allocating patterns failed starting from pattern %u"), iPat);
-			MessageBox(NULL, s, TEXT("OpenMPT GDM import"), MB_ICONERROR);
+			if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
+#endif // MODPLUG_TRACKER
 			break;
 		}
 
