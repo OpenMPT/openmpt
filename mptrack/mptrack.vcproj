@@ -759,6 +759,9 @@
 				RelativePath=".\EffectVis.h">
 			</File>
 			<File
+				RelativePath="..\soundlib\Endianness.h">
+			</File>
+			<File
 				RelativePath=".\fxp.h">
 			</File>
 			<File

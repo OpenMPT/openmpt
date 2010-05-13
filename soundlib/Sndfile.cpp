@@ -29,6 +29,7 @@
 #ifndef NO_ARCHIVE_SUPPORT
 #define UNRAR_SUPPORT
 #define UNLHA_SUPPORT
+#define UNGZIP_SUPPORT
 #define ZIPPED_MOD_SUPPORT
 LPCSTR glpszModExtensions = "mod|s3m|xm|it|stm|nst|ult|669|wow|mtm|med|far|mdl|ams|dsm|amf|okt|dmf|ptm|psm|mt2|umx|gdm|imf|j2b"
 #ifndef NO_UNMO3_SUPPORT
@@ -51,6 +52,10 @@ LPCSTR glpszModExtensions = "mod|s3m|xm|it|stm|nst|ult|669|wow|mtm|med|far|mdl|a
 
 #ifdef UNLHA_SUPPORT
 #include "../unlha/unlha32.h"
+#endif
+
+#ifdef UNGZIP_SUPPORT
+#include "../ungzip/ungzip.h"
 #endif
 
 #ifdef MMCMP_SUPPORT
@@ -599,6 +604,17 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 			{
 				lpStream = unlha.GetOutputFile();
 				dwMemLength = unlha.GetOutputFileLength();
+			}
+		}
+#endif
+#ifdef UNGZIP_SUPPORT
+		CGzipArchive ungzip((LPBYTE)lpStream, dwMemLength);
+		if (ungzip.IsArchive())
+		{
+			if (ungzip.ExtractFile() && ungzip.GetOutputFile())
+			{
+				lpStream = ungzip.GetOutputFile();
+				dwMemLength = ungzip.GetOutputFileLength();
 			}
 		}
 #endif

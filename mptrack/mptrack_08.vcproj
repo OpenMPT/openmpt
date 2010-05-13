@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="mptrack"
 	ProjectGUID="{21D95071-FB97-4E69-B3B1-050D0D4A5021}"
 	RootNamespace="mptrack"
@@ -1008,6 +1008,10 @@
 			</File>
 			<File
 				RelativePath=".\EffectVis.h"
+				>
+			</File>
+			<File
+				RelativePath="..\soundlib\Endianness.h"
 				>
 			</File>
 			<File
