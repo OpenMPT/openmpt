@@ -9,7 +9,9 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
+#ifndef ZLIB_WINAPI
 #define ZLIB_WINAPI
+#endif // ZLIB_WINAPI
 #include "../zlib/zlib.h"
 
 #pragma pack(1)
@@ -18,7 +20,7 @@
 struct J2BHEADER
 {
 	uint32 signature;		// MUSE
-	uint32 deadbeaf;			// 0xDEADBEAF (AM) or 0xDEADBABE (AMFF)
+	uint32 deadbeaf;		// 0xDEADBEAF (AM) or 0xDEADBABE (AMFF)
 	uint32 j2blength;		// complete filesize
 	uint32 crc32;			// checksum of the compressed data block
 	uint32 packed_length;	// length of the compressed data block
@@ -80,7 +82,7 @@ struct AMCHUNK_SAMPLE
 {
 	uint32 signature;	// "SAMP"
 	uint32 chunksize;	// header + sample size
-	uint32 headsize;		// header size
+	uint32 headsize;	// header size
 	char   name[32];
 	uint16 pan;
 	uint16 volume;
@@ -485,6 +487,8 @@ bool CSoundFile::ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// header is valid, now unpack the RIFF AM file using inflate
 	DWORD destSize = LittleEndian(header->unpacked_length);
 	Bytef *bOutput = new Bytef[destSize];
+	if(bOutput == nullptr)
+		return false;
 	int nRetVal = uncompress(bOutput, &destSize, &lpStream[dwMemPos], LittleEndian(header->packed_length));
 
 	bool bResult = false;

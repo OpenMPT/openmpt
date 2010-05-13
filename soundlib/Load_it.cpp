@@ -1354,9 +1354,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			if(Patterns.Insert(npat, 64)) 
 			{
+#ifdef MODPLUG_TRACKER
 				CString s;
-				s.Format("Allocating patterns failed starting from pattern %u", npat);
-				MessageBox(NULL, s, "", MB_ICONERROR);
+				s.Format(TEXT("Allocating patterns failed starting from pattern %u"), npat);
+				if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
+#endif
 				break;
 			}
 			continue;

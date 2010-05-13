@@ -10,9 +10,11 @@
 
 #include "stdafx.h"
 #include "sndfile.h"
-#include "../mptrack/moddoc.h"
 #include "../mptrack/misc_util.h"
 #include "../mptrack/version.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/moddoc.h"
+#endif // MODPLUG_TRACKER
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -218,9 +220,9 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatib
 bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
 {
-	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER)+64)) return false;
+	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER) + 64)) return false;
 
-	UINT insnum,patnum,nins,npat;
+	UINT insnum, patnum, nins, npat;
 	DWORD insfile[128];
 	WORD ptr[256];
 	BYTE s[1024];
@@ -512,11 +514,11 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 	if (psfh.flags & 0x10) m_dwSongFlags |= SONG_AMIGALIMITS;
 
 #ifdef MODPLUG_TRACKER
-	if(bHasAdlibPatches)
+	if(bHasAdlibPatches && m_pModDoc != nullptr)
 	{
-		::MessageBox(0, "This track uses Adlib instruments, which are not supported by OpenMPT.", "OpenMPT S3M Import", MB_OK|MB_ICONEXCLAMATION);
+		m_pModDoc->AddToLog("This track uses Adlib instruments, which are not supported by OpenMPT.");
 	}
-#endif
+#endif // MODPLUG_TRACKER
 
 	return true;
 }
