@@ -562,7 +562,6 @@ public:
 	VOID SetXInfoText(LPCSTR lpszText); //rewbs.xinfo
 	VOID SetHelpText(LPCSTR lpszText);
 	UINT GetBaseOctave();
-	UINT GetCurrentInstrument();
 	CModDoc *GetActiveDoc();
 	CView *GetActiveView();  	//rewbs.customKeys
 	CImageList *GetImageList() { return &m_ImageList; }

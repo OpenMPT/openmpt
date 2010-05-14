@@ -196,10 +196,14 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 			if(iter == notFoundTunings.end())
 			{
 				notFoundTunings.push_back(str);
-				string erm = string("Tuning ") + str + string(" used by the module was not found.");
-				MessageBox(0, erm.c_str(), 0, MB_ICONINFORMATION);
-				if(csf.GetpModDoc()) //The tuning is changed so the modified flag is set.
-					csf.GetpModDoc()->SetModified();
+#ifdef MODPLUG_TRACKER
+				if(csf.GetpModDoc() != nullptr)
+				{
+					string erm = string("Tuning ") + str + string(" used by the module was not found.");
+					csf.GetpModDoc()->AddToLog(erm.c_str());
+					csf.GetpModDoc()->SetModified(); //The tuning is changed so the modified flag is set.
+				}
+#endif // MODPLUG_TRACKER
 				
 			}
 			csf.Instruments[i]->pTuning = csf.Instruments[i]->s_DefaultTuning;
@@ -767,7 +771,8 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		if(streamPos >= dwMemLength || len > dwMemLength - streamPos) return false;
 
 		// Copy sample struct data
-		if(pis.id == 0x53504D49){
+		if(pis.id == 0x53504D49)
+		{
 			MODSAMPLE *pSmp = &Samples[nsmp];
 			memcpy(pSmp->filename, pis.filename, 12);
 			pSmp->uFlags = 0;
@@ -873,7 +878,8 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	//HACK: if we fail on i <= m_nInstruments above, arrive here without having set fcode as appropriate,
 	//      hence the code duplication.
-	if ( (uintptr_t)(ptr - lpStream) <= dwMemLength - 4 ) {
+	if ( (uintptr_t)(ptr - lpStream) <= dwMemLength - 4 )
+	{
 		fcode = (*((__int32 *)ptr));
 	}
 
@@ -1031,7 +1037,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			memcpy(m_lpszSongComments, lpStream+pifh->msgoffset, pifh->msglength);
 			m_lpszSongComments[pifh->msglength] = 0;
 			// ChibiTracker uses \n instead of \r.
-			if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0214 && LittleEndian(pifh->reserved) == 0x49424843)
+			if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0214 && LittleEndian(pifh->reserved) == IT_CHBI)
 			{
 				for(size_t i = 0; i < pifh->msglength; i++)
 				{
@@ -1053,9 +1059,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	{
 		if(nordsize > GetModSpecifications().ordersMax)
 		{
+#ifdef MODPLUG_TRACKER
 			CString str;
 			str.Format(str_SequenceTruncationNote, nordsize, GetModSpecifications().ordersMax);
-			CMainFrame::GetMainFrame()->MessageBox(str, 0, MB_ICONWARNING);
+			if(GetpModDoc() != nullptr) GetpModDoc()->AddToLog(str);
+#endif // MODPLUG_TRACKER
 			nordsize = GetModSpecifications().ordersMax;
 		}
 
@@ -1090,9 +1098,14 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if(patpossize > GetModSpecifications().patternsMax)
 	{
 		// Hack: Note user here if file contains more patterns than what can be read.
-		CString str;
-		str.Format(str_PatternSetTruncationNote, patpossize, GetModSpecifications().patternsMax);
-		CMainFrame::GetMainFrame()->MessageBox(str, 0, MB_ICONWARNING);
+#ifdef MODPLUG_TRACKER
+		if(GetpModDoc() != nullptr)
+		{
+			CString str;
+			str.Format(str_PatternSetTruncationNote, patpossize, GetModSpecifications().patternsMax);
+			GetpModDoc()->AddToLog(str);
+		}
+#endif // MODPLUG_TRACKER
 		patpossize = GetModSpecifications().patternsMax;
 	}
 
@@ -1357,8 +1370,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 #ifdef MODPLUG_TRACKER
 				CString s;
 				s.Format(TEXT("Allocating patterns failed starting from pattern %u"), npat);
-				if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
-#endif
+				if(GetpModDoc() != nullptr) GetpModDoc()->AddToLog(s);
+#endif // MODPLUG_TRACKER
 				break;
 			}
 			continue;
@@ -1473,7 +1486,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					// 203-212: Vibrato depth
 					if ((vol >= 203) && (vol <= 212)) { 
 						m[ch].volcmd = VOLCMD_VIBRATODEPTH; m[ch].vol = vol - 203;
-						// Old versions of ModPlug seemed to save this as vibrato speed instead so let's fix that
+						// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that
 						if(m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54) && interpretModplugmade)
 							m[ch].volcmd = VOLCMD_VIBRATOSPEED;
 					} else
@@ -1511,24 +1524,15 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		SetModFlag(MSF_OLDVOLSWING, true);
 	}
 
-	static char autodetectITplaymode = -1;
 	if(GetType() == MOD_TYPE_IT)
 	{
-#ifdef MODPLUG_TRACKER
-		if(autodetectITplaymode == -1)
-			autodetectITplaymode = CMainFrame::GetPrivateProfileLong("Misc", "AutodetectITplaystyle", 1, theApp.GetConfigFileName());
-#endif
-
-		if(autodetectITplaymode)
+		// Set appropriate mod flags if the file was not made with MPT.
+		if(!interpretModplugmade)
 		{
-			if(!interpretModplugmade)
-			{
-				SetModFlag(MSF_MIDICC_BUGEMULATION, false);
-				SetModFlag(MSF_OLDVOLSWING, false);
-				SetModFlag(MSF_COMPATIBLE_PLAY, true);
-			}
+			SetModFlag(MSF_MIDICC_BUGEMULATION, false);
+			SetModFlag(MSF_OLDVOLSWING, false);
+			SetModFlag(MSF_COMPATIBLE_PLAY, true);
 		}
-		return true;
 	}
 	else
 	{
@@ -1551,14 +1555,24 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				ssb.ReadItem(Order, FileIdSequences, strlen(FileIdSequences), &ReadModSequences);
 
 				if (ssb.m_Status & srlztn::SNT_FAILURE)
-					AfxMessageBox("Unknown error occured.", MB_ICONERROR);
+				{
+#ifdef MODPLUG_TRACKER
+					if(GetpModDoc() != nullptr) GetpModDoc()->AddToLog(_T("Unknown error occured while deserializing file."));
+#endif // MODPLUG_TRACKER
+				}
 			}
 			else //Loading for older files.
 			{
 				if(GetTuneSpecificTunings().Deserialize(iStrm))
-					MessageBox(0, "Error occured - loading failed while trying to load tune specific tunings.", "", MB_ICONERROR);
+				{
+#ifdef MODPLUG_TRACKER
+					if(GetpModDoc() != nullptr) GetpModDoc()->AddToLog(_T("Error occured - loading failed while trying to load tune specific tunings."));
+#endif // MODPLUG_TRACKER
+				}
 				else
+				{
 					ReadTuningMap(iStrm, *this);
+				}
 			}
 		} //version condition(MPT)
 	}
@@ -2422,7 +2436,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	ssb.FinishWrite();
 
 	if (ssb.m_Status & srlztn::SNT_FAILURE)
-		AfxMessageBox("Error occured in writing.", MB_ICONERROR);
+		AfxMessageBox("Error occured in writing MPTM extensions.", MB_ICONERROR);
 
 	//Last 4 bytes should tell where the hack mpt things begin.
 	if(!fout.good())
