@@ -143,8 +143,10 @@ extern BYTE autovibxm2it[8];
 #define ITP_VERSION 0x00000102	// v1.02
 #define ITP_FILE_ID 0x2e697470	// .itp ASCII
 
-enum IT_ReaderBitMasks {
+#define IT_CHBI 0x49424843		// "CHBI" magic bytes in the IT header to identify ChibiTracker
 
+enum IT_ReaderBitMasks
+{
 	// pattern row parsing, the channel data is read to obtain
 	// number of channels active in the pattern. These bit masks are
 	// to blank out sections of the byte of data being read.

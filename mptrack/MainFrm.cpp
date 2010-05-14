@@ -1825,13 +1825,6 @@ UINT CMainFrame::GetBaseOctave()
 }
 
 
-UINT CMainFrame::GetCurrentInstrument()
-//-------------------------------------
-{
-	return 0;
-}
-
-
 void CMainFrame::SetPreAmp(UINT n)
 //--------------------------------
 {
@@ -2245,7 +2238,7 @@ BOOL CMainFrame::SetupPlayer(DWORD q, DWORD srcmode, BOOL bForceUpdate)
 
 
 BOOL CMainFrame::SetupDirectories(LPCTSTR szModDir, LPCTSTR szSampleDir, LPCTSTR szInstrDir, LPCTSTR szVstDir, LPCTSTR szPresetDir)
-//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
 {
 	// will also set working directory
 	SetDefaultDirectory(szModDir, DIR_MODS);
@@ -2760,8 +2753,8 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 //	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
 //	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
 	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
-	case ID_NETLINK_FORUMS:		pszURL = "http://www.lpchip.com/modplug"; break;
-	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com"; break;
+	case ID_NETLINK_FORUMS:		pszURL = "http://openmpt.com/forum/"; break;
+	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com/"; break;
 	case ID_NETLINK_MODARCHIVE: pszURL = "http://modarchive.org/"; break;
 	case ID_NETLINK_OPENMPTWIKI_GERMAN: pszURL = "http://sagamusix.de/openmpt/Hauptseite"; break;
 	}
