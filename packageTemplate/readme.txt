@@ -38,20 +38,22 @@ See history.txt.
 Questions, comments, bug reports...
 -----------------------------------
 
-See forums at http://modplug.sourceforge.net/.
+See forums at http://openmpt.com/forum/.
 
 
 Release package contents:
 -------------------------
 extraKeymaps(folder):
 soundtouch(folder): SoundTouch readme and copying.txt
+ReleaseNotesImages(folder): Images using in the release notes document.
 history.txt: Version history.
 mptrack.exe: Main executable.
 open_settings_folder.bat: Opens settings folder.
 OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
                             stretching feature.
-readme.txt: 
+readme.txt: this document
 unmo3.dll: Used in MO3-file import.
+OMPT_1.18_ReleaseNotes.html: Release notes for this version.
 
 
 Misc:
