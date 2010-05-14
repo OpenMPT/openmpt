@@ -6,12 +6,12 @@
 [Setup]
 AppId={{67903736-E9BB-4664-B148-F62BCAB4FA42}
 AppVerName=OpenMPT 1.18
-AppVersion=1.18.00.00
+AppVersion=1.18.01.00
 AppName=OpenMPT
 AppPublisher=OpenMPT Devs / Olivier Lapicque
-AppPublisherURL=http://www.openmpt.com/
-AppSupportURL=http://www.openmpt.com/
-AppUpdatesURL=http://www.openmpt.com/
+AppPublisherURL=http://openmpt.com/
+AppSupportURL=http://openmpt.com/forum/
+AppUpdatesURL=http://openmpt.com/
 DefaultDirName={pf}\OpenMPT
 DefaultGroupName=OpenMPT
 AllowNoIcons=yes
@@ -239,6 +239,4 @@ begin
         end;
     end;
 end;
-
-
 

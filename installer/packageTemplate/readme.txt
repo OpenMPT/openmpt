@@ -6,16 +6,16 @@
 Migrating from OpenMPT 1.17
 ---------------------------
 
-If you have an existing installation of OpenMPT 1.17 and wish to re-use its
-settings, copy your mptrack.ini and plugin.cache to %appdata%\OpenMPT (or the
-directory into which you installed OpenMPT if you used portable mode).
+Unless you install OpenMPT in portable mode, all settings are now stored in
+%appdata%\OpenMPT. The installer will automatically try to move all settings
+to the new folder - Migration is done automatically.
 
 
 Uninstallation
 --------------
 
 An uninstaller is provided. Don't worry, it will ask you if you want to keep
-your personal settings, nothing will automatically be deleted.
+your personal settings, none of these will be deleted automatically.
 
 
 Changes
@@ -27,7 +27,7 @@ See history.txt.
 Questions, comments, bug reports...
 -----------------------------------
 
-See forums at http://modplug.sourceforge.net/.
+See forums at http://openmpt.com/forum/.
 
 
 Release package contents:
@@ -36,13 +36,14 @@ extraKeymaps(folder): Additional key bindings for the keyboard manager,
     available in several flavours (including MPT classic, FastTracker and
     Impulse Tracker) and country-specific layouts.
 soundtouch(folder): SoundTouch readme and copying.txt
+ReleaseNotesImages(folder): Images using in the release notes document.
 history.txt: Version history.
 mptrack.exe: Main executable.
-open_settings_folder.bat: Opens settings folder.
 OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time
     stretching feature.
-readme.txt: 
+readme.txt: this document
 unmo3.dll: Used in MO3-file import.
+OMPT_1.18_ReleaseNotes.html: Release notes for this version.
 
 Misc:
 -----
