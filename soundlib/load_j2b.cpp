@@ -1,6 +1,8 @@
 /*
+ * load_j2b.cpp
+ * ------------
  * Purpose: Load RIFF AM and RIFF AMFF modules (Galaxy Sound System).
- * Note:    J2B is a compressed variant of RIFF AM and RIFF AMFF files used in Jazz Jackrabbit 2.
+ * Notes  : J2B is a compressed variant of RIFF AM and RIFF AMFF files used in Jazz Jackrabbit 2.
  *          It seems like no other game used the AM(FF) format.
  * Authors: Johannes Schultz (OpenMPT port)
  *          Chris Moeller (foo_dumb - this is almost a complete port of his code, thanks)
@@ -107,8 +109,8 @@ static uint8 riffam_efftrans[26] =
 	CMD_TREMOR, CMD_XFINEPORTAUPDOWN,
 };
 
-bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStream, DWORD dwMemLength, bool bIsAM)
-//----------------------------------------------------------------------------------------------------------------
+bool Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStream, DWORD dwMemLength, bool bIsAM, CSoundFile *pSndFile)
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	// version false = AMFF, true = AM
 	#define ASSERT_CAN_READ(x) \
@@ -120,12 +122,16 @@ bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStre
 
 	ROWINDEX nRows = lpStream[0] + 1;
 
-	if(Patterns.Insert(nPat, nRows))
+	if(pSndFile == nullptr || pSndFile->Patterns.Insert(nPat, nRows))
 		return false;
 
 	dwMemPos++;
 
-	MODCOMMAND *mrow = Patterns[nPat];
+	const CHANNELINDEX nChannels = pSndFile->GetNumChannels();
+	if(nChannels == 0)
+		return false;
+
+	MODCOMMAND *mrow = pSndFile->Patterns[nPat];
 	MODCOMMAND *m = mrow;
 	ROWINDEX nRow = 0;
 	uint8 flags;
@@ -138,11 +144,11 @@ bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStre
 		if (flags == 0)
 		{
 			nRow++;
-			m = mrow = Patterns[nPat] + nRow * m_nChannels;
+			m = mrow = pSndFile->Patterns[nPat] + nRow * nChannels;
 			continue;
 		}
 
-		m = mrow + min((flags & 0x1F), m_nChannels - 1);
+		m = mrow + min((flags & 0x1F), nChannels - 1);
 
 		if(flags & 0xE0)
 		{
@@ -179,7 +185,7 @@ bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStre
 						m->param = ((m->param >> 4) * 10) + (m->param & 0x0F);
 						break;
 					case CMD_MODCMDEX:
-						MODExx2S3MSxx(m);
+						pSndFile->MODExx2S3MSxx(m);
 						break;
 					case CMD_TEMPO:
 						if(m->param <= 0x1F) m->command = CMD_SPEED;
@@ -205,7 +211,7 @@ bool CSoundFile::Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStre
 						wsprintf(s, "J2B: Unknown command: 0x%X, param 0x%X", m->command, m->param);
 						Log(s);
 					}
-#endif
+#endif // DEBUG
 					m->command = CMD_NONE;
 				}
 			}
@@ -263,6 +269,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	else if(LittleEndian(*(uint32 *)(lpStream + dwMemPos)) == 0x20204D41) bIsAM = true; // "AM  "
 	else return false;
 	dwMemPos += 4;
+	m_nChannels = 0;
 	
 	// go through all chunks now
 	while(dwMemPos < dwMemLength)
@@ -330,7 +337,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		case 0x54544150: // "PATT" - Pattern data for one pattern
 			ASSERT_CAN_READ_CHUNK(5);
-			Convert_RIFF_AM_Pattern(lpStream[dwMemPos], (LPCBYTE)(lpStream + dwMemPos + 5), LittleEndian(*(DWORD *)(lpStream + dwMemPos + 1)), bIsAM);
+			Convert_RIFF_AM_Pattern(lpStream[dwMemPos], (LPCBYTE)(lpStream + dwMemPos + 5), LittleEndian(*(DWORD *)(lpStream + dwMemPos + 1)), bIsAM, this);
 			break;
 
 		case 0x54534E49: // "INST" - Instrument (only in RIFF AMFF)
@@ -365,16 +372,17 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				Samples[nSmp].nLoopEnd = LittleEndian(smpchunk->loopend);
 				Samples[nSmp].nC5Speed = LittleEndian(smpchunk->samplerate);
 
-				if(LittleEndianW(smpchunk->flags) & 0x04)
+				uint16 flags = LittleEndianW(smpchunk->flags);
+				if(flags & 0x04)
 					Samples[nSmp].uFlags |= CHN_16BIT;
-				if(LittleEndianW(smpchunk->flags) & 0x08)
+				if(flags & 0x08)
 					Samples[nSmp].uFlags |= CHN_LOOP;
-				if(LittleEndianW(smpchunk->flags) & 0x10)
+				if(flags & 0x10)
 					Samples[nSmp].uFlags |= CHN_PINGPONGLOOP;
-				if(LittleEndianW(smpchunk->flags) & 0x20)
+				if(flags & 0x20)
 					Samples[nSmp].uFlags |= CHN_PANNING;
 
-				dwMemPos += ReadSample(&Samples[nSmp], (LittleEndianW(smpchunk->flags) & 0x04) ? RS_PCM16S : RS_PCM8S, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+				dwMemPos += ReadSample(&Samples[nSmp], (flags & 0x04) ? RS_PCM16S : RS_PCM8S, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 			}
 			break;
 
@@ -436,24 +444,26 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				Samples[nSmp].nLoopEnd = LittleEndian(smpchunk->loopend);
 				Samples[nSmp].nC5Speed = LittleEndian(smpchunk->samplerate);
 
-				if(LittleEndianW(smpchunk->flags) & 0x04)
+				uint16 flags = LittleEndianW(smpchunk->flags);
+				if(flags & 0x04)
 					Samples[nSmp].uFlags |= CHN_16BIT;
-				if(LittleEndianW(smpchunk->flags) & 0x08)
+				if(flags & 0x08)
 					Samples[nSmp].uFlags |= CHN_LOOP;
-				if(LittleEndianW(smpchunk->flags) & 0x10)
+				if(flags & 0x10)
 					Samples[nSmp].uFlags |= CHN_PINGPONGLOOP;
-				if(LittleEndianW(smpchunk->flags) & 0x20)
+				if(flags & 0x20)
 					Samples[nSmp].uFlags |= CHN_PANNING;
 
 				dwMemPos += LittleEndian(smpchunk->headsize) + 12; // doesn't include the 3 first DWORDs
-				dwMemPos += ReadSample(&Samples[nSmp], (LittleEndianW(smpchunk->flags) & 0x04) ? RS_PCM16S : RS_PCM8S, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+				dwMemPos += ReadSample(&Samples[nSmp], (flags & 0x04) ? RS_PCM16S : RS_PCM8S, (LPCSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
 			}
 			break;
 
 		}
 		dwMemPos = dwChunkEnd;
-		// RIFF AM has a padding byte
-		if(bIsAM && (LittleEndian(chunkheader->chunksize) & 1)) dwMemPos++;
+		// RIFF AM has a padding byte so that all chunks have an even size.
+		if(bIsAM && (LittleEndian(chunkheader->chunksize) & 1))
+			dwMemPos++;
 	}
 
 	return true;
