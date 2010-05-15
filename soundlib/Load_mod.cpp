@@ -56,7 +56,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 'Y' - 55:	command = CMD_PANBRELLO; break;			//34
 	case 'Z' - 55:	command = CMD_MIDI;	break;				//35
 	case '\\' - 56:	command = CMD_SMOOTHMIDI;	break;		//rewbs.smoothVST: 36
-	case ':' - 21:	command = CMD_DELAYCUT;	break;			//37
+	//case ':' - 21:	command = CMD_DELAYCUT;	break;		//37
 	case '#' + 3:	command = CMD_XPARAM;	break;			//rewbs.XMfixes - XParam is 38
 	default:	command = 0;
 	}
@@ -450,7 +450,6 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 
 
 #ifndef MODPLUG_NO_FILESAVE
-#pragma warning(disable:4100)
 
 bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompatibilityExport)
 //-------------------------------------------------------------------------------------------
@@ -581,8 +580,10 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	}										//end for all patterns
 	
 	//Check for unsaved patterns
-	for (UINT ipat=nbp; ipat<MAX_PATTERNS; ipat++) {
-		if (Patterns[ipat])	{
+	for (UINT ipat=nbp; ipat<MAX_PATTERNS; ipat++)
+	{
+		if (Patterns[ipat])
+		{
 			AfxMessageBox("Warning: this track contains at least 1 pattern after the highest pattern number referred to in the sequence.\r\nSuch patterns will not be saved in the .mod format.");
 			break;
 		}
@@ -620,5 +621,4 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	return true;
 }
 
-#pragma warning(default:4100)
 #endif // MODPLUG_NO_FILESAVE

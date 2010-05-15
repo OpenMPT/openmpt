@@ -719,9 +719,6 @@ public:
 	bool ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadMID(LPCBYTE lpStream, DWORD dwMemLength);
 
-	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
-	bool Convert_RIFF_AM_Pattern(PATTERNINDEX nPat, const LPCBYTE lpStream, DWORD dwMemLength, bool bIsAM); // used by ReadAM(...) to convert AM(FF) patterns
-
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
 	UINT WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen=0);
@@ -754,6 +751,7 @@ public:
 	static void ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewType); // Convert a complete MODCOMMAND item from one format to another
 	static void MODExx2S3MSxx(MODCOMMAND *m); // Convert Exx to Sxx
 	static void S3MSxx2MODExx(MODCOMMAND *m); // Convert Sxx to Exx
+	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 
 public:
 	// Real-time sound functions
