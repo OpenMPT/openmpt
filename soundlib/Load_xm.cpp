@@ -245,7 +245,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	BYTE samples_used[(MAX_SAMPLES + 7) / 8]; // for removing unused samples
 	UINT unused_samples; // dito
 
-	bool bMadeWithModPlug = false, bProbablyMadeWithModPlug = false, bIsFT2 = false;
+	bool bMadeWithModPlug = false, bProbablyMadeWithModPlug = false, bProbablyMPT109 = false, bIsFT2 = false;
 	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
@@ -561,6 +561,9 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 			pSmp->nVibRate = xmsh.vibrate;
 			memcpy(pSmp->filename, xmss.name, 22);
 			SpaceToNullStringFixed(pSmp->filename, 21);
+
+			if ((xmss.type & 3) == 3)	// MPT 1.09 and maybe newer / older versions set both flags for bidi loops
+				bProbablyMPT109 = true;
 		}
 #if 0
 		if ((xmsh.reserved2 > nsamples) && (xmsh.reserved2 <= 16))
@@ -683,7 +686,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 	if (!memcmp((LPCSTR)lpStream + 0x26, "OpenMPT ", 8))
 	{
-		//bMadeWithModPlug = true; // Don't set it - it's also used by compatibility export
 		CHAR sVersion[13];
 		memcpy(sVersion, lpStream + 0x26 + 8, 12);
 		sVersion[12] = 0;
@@ -693,7 +695,13 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 	if(bMadeWithModPlug)
 	{
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
-		if(!m_dwLastSavedWithVersion) m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+		if(!m_dwLastSavedWithVersion)
+		{
+			if(bProbablyMPT109)
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
+			else
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+		}
 	}
 
 // -> CODE#0027
@@ -711,6 +719,9 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
 
 	if(bInterpretOpenMPTMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
 		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
+
+	if(bInterpretOpenMPTMade && m_dwLastSavedWithVersion == 0)
+		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 01, 00);	// early versions of OpenMPT had no version indication.
 
 	return true;
 }

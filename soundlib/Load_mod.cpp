@@ -55,7 +55,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 'X' - 55:	command = CMD_XFINEPORTAUPDOWN;	break;
 	case 'Y' - 55:	command = CMD_PANBRELLO; break;			//34
 	case 'Z' - 55:	command = CMD_MIDI;	break;				//35
-	case '\\' - 56:	command = CMD_SMOOTHMIDI;	break;		//rewbs.smoothVST: 36
+	case '\\' - 56:	command = CMD_SMOOTHMIDI;	break;		//rewbs.smoothVST: 36 - note: this is actually displayed as "-" in FT2, but seems to be doing nothing.
 	//case ':' - 21:	command = CMD_DELAYCUT;	break;		//37
 	case '#' + 3:	command = CMD_XPARAM;	break;			//rewbs.XMfixes - XParam is 38
 	default:	command = 0;
