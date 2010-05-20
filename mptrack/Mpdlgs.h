@@ -129,18 +129,32 @@ protected:
 };
 
 
+#define ER_8BIT			0x01
+#define ER_16BIT		0x02
+
+#define ER_SIGNED		0x10
+#define ER_UNSIGNED		0x20
+
+#define ER_MONO			0x0100
+#define ER_STEREO		0x0200
+
 //=================================
 class CRawSampleDlg: public CDialog
 //=================================
 {
-public:
+protected:
 	static UINT m_nFormat;
 	bool m_bRememberFormat;
 
 public:
+	static const UINT GetSampleFormat() { return m_nFormat; }
+	static void SetSampleFormat(UINT nFormat) { m_nFormat = nFormat; }
+	const bool GetRemeberFormat() { return m_bRememberFormat; };
+	void SetRememberFormat(bool bRemember) { m_bRememberFormat = bRemember; };
+
+public:
 	CRawSampleDlg(CWnd *parent = NULL):CDialog(IDD_LOADRAWSAMPLE, parent)
 	{ 
-		//m_nFormat = 0;
 		m_bRememberFormat = false;
 	}
 

@@ -716,14 +716,14 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 		CRawSampleDlg dlg(this);
 		if(m_nPreviousRawFormat != 0)
 		{
-			dlg.m_nFormat = m_nPreviousRawFormat;
-			dlg.m_bRememberFormat = true;
+			dlg.SetSampleFormat(m_nPreviousRawFormat);
+			dlg.SetRememberFormat(true);
 		}
 		EndWaitCursor();
 		if ((m_nPreviousRawFormat != 0) || (dlg.DoModal() == IDOK))
 		{
 
-			m_nPreviousRawFormat = ((dlg.m_bRememberFormat)) ? dlg.m_nFormat : 0;
+			m_nPreviousRawFormat = ((dlg.GetRemeberFormat())) ? dlg.GetSampleFormat() : 0;
 
 			BeginWaitCursor();
 			UINT flags = 0;
@@ -732,25 +732,19 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			m_pSndFile->DestroySample(m_nSample);
 			pSmp->nLength = len;
 			pSmp->uFlags = RS_PCM8S;
-			pSmp->nGlobalVol = 64;
-			pSmp->nVolume = 256;
-			pSmp->nPan = 128;
-			pSmp->filename[0] = 0;
-			if (!pSmp->nC5Speed) pSmp->nC5Speed = 22050;
-			if (dlg.m_nFormat & 1)
+
+			if (dlg.GetSampleFormat() & ER_16BIT)
 			{
 				pSmp->nLength >>= 1;
-				pSmp->uFlags |= CHN_16BIT;
 				flags = RS_PCM16S;
 			}
-			if (!(dlg.m_nFormat & 2))
+			if (dlg.GetSampleFormat() & ER_UNSIGNED)
 			{
 				flags++;
 			}
 			// Interleaved Stereo Sample
-			if (dlg.m_nFormat & 4)
+			if (dlg.GetSampleFormat() & ER_STEREO)
 			{
-				pSmp->uFlags |= CHN_STEREO;
 				pSmp->nLength >>= 1;
 				flags |= 0x40|RSF_STEREO;
 			}
@@ -764,6 +758,15 @@ bool CCtrlSamples::OpenSample(LPCSTR lpszFileName)
 			if (m_pSndFile->ReadSample(pSmp, flags, p16, l16))
 			{
 				bOk = true;
+
+				pSmp->nGlobalVol = 64;
+				pSmp->nVolume = 256;
+				pSmp->nPan = 128;
+				pSmp->filename[0] = 0;
+				if (!pSmp->nC5Speed) pSmp->nC5Speed = 22050;
+			} else
+			{
+				m_pModDoc->GetSampleUndo()->Undo(m_nSample);
 			}
 			END_CRITICAL();
 		} else
