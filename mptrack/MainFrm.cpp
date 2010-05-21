@@ -3176,14 +3176,14 @@ void CMainFrame::RelativePathToAbsolute(TCHAR (&szPath)[nLength])
 		return;
 
 	const size_t nStrLength = nLength - 1;	// "usable" length, i.e. not including the null char.
-	TCHAR szExePath[nLength], szTempPath[nLength];
+	TCHAR szExePath[nLength], szTempPath[nLength] = _T("");
 	_tcsncpy(szExePath, theApp.GetAppDirPath(), nStrLength);
 	SetNullTerminator(szExePath);
 
 	// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\")
 	if(!_tcsncicmp(szPath, _T("\\"), 1))
 	{
-		_tcsncpy(szTempPath, szExePath, 2);	// "C:"
+		_tcsncat(szTempPath, szExePath, 2);	// "C:"
 		_tcsncat(szTempPath, szPath, nStrLength - 2);	// "\Somepath\"
 		_tcscpy(szPath, szTempPath);
 	} else

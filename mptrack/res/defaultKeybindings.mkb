@@ -23,6 +23,7 @@ version:1
 0:1362:1:45:1		//Paste: Shift+INSERT (KeyDown)
 0:1363:3:86:1		//Mix Paste: Shift+Ctrl+V (KeyDown)
 0:1793:1:86:5		//Paste Flood: Shift+V (KeyDown|KeyHold)
+0:1820:6:86:1		//Push Forward Paste: Ctrl+Alt+V (KeyDown)
 0:1364:2:53:1		//SelectAll: Ctrl+5 (KeyDown)
 0:1365:2:70:1		//Find: Ctrl+F (KeyDown)
 0:1366:0:114:1		//Find Next: F3 (KeyDown)
@@ -79,11 +80,13 @@ version:1
 2:1317:4:18:1		//Set row jump on note entry: Alt (KeyDown)
 2:1685:2:9:1		//Switch to order list: Ctrl+TAB (KeyDown)
 2:1806:2:68:1		//Duplicate pattern: Ctrl+D (KeyDown)
+2:1836:2:191:1		//Edit plugin assigned to PC note: Ctrl+/ (KeyDown)
 2:1662:6:80:1		//Toggle channel's plugin editor: Ctrl+Alt+P (KeyDown)
 2:1062:0:93:1		//Show note properties: Application (KeyDown)
 2:1772:5:80:1		//Show pattern properties window: Shift+Alt+P (KeyDown)
 2:1819:2:69:1		//Split Keyboard Settings dialog: Ctrl+E (KeyDown)
-2:1780:2:80:1		//Show playback time at current row: Ctrl+P (KeyDown)
+2:1776:1:122:1		//Toggle loop pattern: Shift+F11 (KeyDown)
+2:1780:2:84:1		//Show playback time at current row: Ctrl+T (KeyDown)
 2:1005:0:121:1		//Mute current channel: F10 (KeyDown)
 2:1006:2:121:1		//Solo current channel: Ctrl+F10 (KeyDown)
 2:1771:6:121:1		//Unmute all channels: Ctrl+Alt+F10 (KeyDown)
@@ -134,7 +137,7 @@ version:1
 3:1083:0:75:1		//Base octave +1 G: K (KeyDown)
 3:1084:0:76:1		//Base octave +1 G#: L (KeyDown)
 3:1085:0:186:1		//Base octave +1 A: ; (KeyDown)
-3:1086:0:222:1		//Base octave +1 A#: ' (KeyDown)
+3:1086:0:222:1		//Base octave +1 A#: # (KeyDown)
 3:1087:0:220:1		//Base octave +1 B: \ (KeyDown)
 3:1088:0:90:1		//Base octave +2 C: Z (KeyDown)
 3:1089:0:88:1		//Base octave +2 C#: X (KeyDown)
@@ -167,11 +170,11 @@ version:1
 3:1221:0:57:1		//Set octave 9: 9 (KeyDown)
 3:1221:0:105:1		//Set octave 9: NUM 9 (KeyDown)
 3:1316:1:16:1		//Chord Modifier: Shift (KeyDown)
-3:1200:0:192:1		//Note Cut: ` (KeyDown)
+3:1200:0:192:1		//Note Cut: ' (KeyDown)
 3:1201:0:187:1		//Note Off: = (KeyDown)
 3:1791:1:187:1		//Note Fade: Shift+= (KeyDown)
-3:1788:0:189:1		//Parameter control(MPTm only): - (KeyDown)
-3:1789:1:189:1		//Parameter control(smooth)(MPTm only): Shift+- (KeyDown)
+3:1788:1:189:1		//Parameter control(MPTm only): Shift+- (KeyDown)
+3:1789:0:189:1		//Parameter control(smooth)(MPTm only): - (KeyDown)
 
 //----( Pattern Context [bottom] - Ins Col (4) )------------
 4:1202:0:96:1		//Set instrument digit 0: NUM 0 (KeyDown)
@@ -229,14 +232,12 @@ version:1
 5:1242:0:71:1		//Vol command - Portamento: G (KeyDown)
 5:1243:0:70:1		//Vol command - Portamento Up: F (KeyDown)
 5:1244:0:69:1		//Vol command - Portamento Down: E (KeyDown)
-5:1245:0:186:1		//Vol command - (unused): ; (KeyDown)
-5:1245:1:186:1		//Vol command - (unused): Shift+; (KeyDown)
 5:1246:0:79:1		//Vol command - Offset: O (KeyDown)
 
 //----( Pattern Context [bottom] - FX Col (6) )------------
 6:1294:0:220:1		//FX midi macro slide: \ (KeyDown)
-6:1295:1:186:1		//FX combined note cute and note delay: Shift+; (KeyDown)
-6:1295:0:186:1		//FX combined note cute and note delay: ; (KeyDown)
+6:1295:1:186:1		//FX combined note delay and note cut: Shift+; (KeyDown)
+6:1295:0:186:1		//FX combined note delay and note cut: ; (KeyDown)
 6:1666:0:191:1		//FX parameter extension command: / (KeyDown)
 
 //----( Pattern Context [bottom] - Param Col (7) )------------
@@ -282,6 +283,8 @@ version:1
 8:1790:2:68:1		//Remove DC Offset: Ctrl+D (KeyDown)
 
 //----( Instrument Context [bottom] (9) )------------
+9:1837:0:107:5		//Zoom In: NUM PLUS (KeyDown|KeyHold)
+9:1838:0:109:5		//Zoom Out: NUM SUB (KeyDown|KeyHold)
 9:1825:1:9:5		//Select previous envelope point: Shift+TAB (KeyDown|KeyHold)
 9:1826:0:9:5		//Select next envelope point: TAB (KeyDown|KeyHold)
 9:1821:0:37:5		//Move envelope point left: LEFT (KeyDown|KeyHold)
@@ -306,11 +309,14 @@ version:1
 //----( Unknown Context (12) )------------
 
 //----( Plugin GUI Context (13) )------------
-13:1763:0:37:5		//Previous plugin preset: LEFT (KeyDown|KeyHold)
-13:1764:0:39:5		//Next plugin preset: RIGHT (KeyDown|KeyHold)
-13:1782:0:38:5		//Plugin preset backward jump: UP (KeyDown|KeyHold)
-13:1783:0:40:5		//Plugin preset forward jump: DOWN (KeyDown|KeyHold)
-13:1765:2:82:1		//Randomize plugin parameters: Ctrl+R (KeyDown)
+13:1763:0:109:5		//Previous plugin preset: NUM SUB (KeyDown|KeyHold)
+13:1764:0:107:5		//Next plugin preset: NUM PLUS (KeyDown|KeyHold)
+13:1782:2:109:5		//Plugin preset backward jump: Ctrl+NUM SUB (KeyDown|KeyHold)
+13:1783:2:107:5		//Plugin preset forward jump: Ctrl+NUM PLUS (KeyDown|KeyHold)
+13:1765:3:68:1		//Randomize plugin parameters: Shift+Ctrl+D (KeyDown)
+13:1839:2:82:1		//Toggle parameter recording: Ctrl+R (KeyDown)
+13:1840:2:75:1		//Pass key presses to plugin: Ctrl+K (KeyDown)
+13:1841:2:66:1		//Bypass plugin: Ctrl+B (KeyDown)
 
 //----( General Context [top] (14) )------------
 

@@ -6,6 +6,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mptrack", "mptrack.vcproj",
 		{71531076-78C7-488D-8FD6-9D841F20AADE} = {71531076-78C7-488D-8FD6-9D841F20AADE}
 		{CF3C2CA5-5D45-4635-BBA4-C1F435E10896} = {CF3C2CA5-5D45-4635-BBA4-C1F435E10896}
 		{3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7} = {3C7281B0-D0E2-48ED-AE4D-A181FC77D8F7}
+		{20BF96C8-0202-4251-80C9-6C62BE845DAE} = {20BF96C8-0202-4251-80C9-6C62BE845DAE}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unlha", "..\unlha\unlha.vcproj", "{71531076-78C7-488D-8FD6-9D841F20AADE}"
@@ -30,6 +31,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoundTouch", "..\soundtouch
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibstat", "..\zlib\contrib\vstudio\vc7\zlibstat.vcproj", "{3F7D3110-B3DD-4DE1-B608-C3F491009625}"
 	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ungzip", "..\ungzip\ungzip.vcproj", "{20BF96C8-0202-4251-80C9-6C62BE845DAE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3F7D3110-B3DD-4DE1-B608-C3F491009625} = {3F7D3110-B3DD-4DE1-B608-C3F491009625}
 	EndProjectSection
 EndProject
 Global
@@ -92,12 +98,20 @@ Global
 		{CF3C2CA5-5D45-4635-BBA4-C1F435E10896}.ReleaseWithoutAsm.Build.0 = Release|Win32
 		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.Debug.ActiveCfg = Debug|Win32
 		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.Debug.Build.0 = Debug|Win32
-		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.Release.ActiveCfg = Release|Win32
-		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.Release.Build.0 = Release|Win32
+		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.Release.ActiveCfg = ReleaseWithoutAsm|Win32
+		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.Release.Build.0 = ReleaseWithoutAsm|Win32
 		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.ReleaseAxp.ActiveCfg = ReleaseAxp|Win32
 		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.ReleaseAxp.Build.0 = ReleaseAxp|Win32
 		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.ReleaseWithoutAsm.ActiveCfg = ReleaseWithoutAsm|Win32
 		{3F7D3110-B3DD-4DE1-B608-C3F491009625}.ReleaseWithoutAsm.Build.0 = ReleaseWithoutAsm|Win32
+		{20BF96C8-0202-4251-80C9-6C62BE845DAE}.Debug.ActiveCfg = Debug|Win32
+		{20BF96C8-0202-4251-80C9-6C62BE845DAE}.Debug.Build.0 = Debug|Win32
+		{20BF96C8-0202-4251-80C9-6C62BE845DAE}.Release.ActiveCfg = Release|Win32
+		{20BF96C8-0202-4251-80C9-6C62BE845DAE}.Release.Build.0 = Release|Win32
+		{20BF96C8-0202-4251-80C9-6C62BE845DAE}.ReleaseAxp.ActiveCfg = Release|Win32
+		{20BF96C8-0202-4251-80C9-6C62BE845DAE}.ReleaseAxp.Build.0 = Release|Win32
+		{20BF96C8-0202-4251-80C9-6C62BE845DAE}.ReleaseWithoutAsm.ActiveCfg = Release|Win32
+		{20BF96C8-0202-4251-80C9-6C62BE845DAE}.ReleaseWithoutAsm.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

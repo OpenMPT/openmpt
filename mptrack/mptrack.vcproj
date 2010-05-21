@@ -698,6 +698,9 @@
 				RelativePath=".\res\view_pat.bmp">
 			</File>
 			<File
+				RelativePath=".\res\vispcnode.bmp">
+			</File>
+			<File
 				RelativePath=".\res\vumeters.bmp">
 			</File>
 		</Filter>
