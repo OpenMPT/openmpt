@@ -9,8 +9,216 @@ OpenMPT - Full Version History
 ?: other
 (tx XYZ): thanks to XYZ for telling us about the bug
 
-v1.18 (January 2010, revision 467)
-----------------------------------
+Changes from revisions [476, 599]
+---------------------------------
+
+General tab
+  [Imp] <Jojo> Disabled tempo slider for MOD files (it was just confusing)
+  [Imp] <Jojo> Disabled global volume slider for MOD files, instead enabled the sample pre-amp slider (so it is also possible to make output louder)
+  [Fix] <Jojo> Moving a plugin in MOD/S3M files doesn't mark them as modified anymore. The channel fx dropdown lists are now also disabled for those module types.
+  [Fix] <Jojo> If necessary (S3M), disable restart position edit control on general tab.
+  [Fix] <coda> The background colour of the tabs in the channel configuration is now also correct when using WinXP Luna or Vista/Win7 Aero.
+  
+Sequence editor
+  [New] <Jojo> "Select All" shortcut also works here now.
+  [Imp] <Jojo> Sequence menu also allows to insert empty sequences now.
+
+Pattern tab::pattern editing
+  [New] <Jojo> Extended context menu for PC Notes
+  [New] <Jojo> Key shortcut + context menu entry for toggling the plugin editor of the PC note that's under the cursor.
+  [Imp] <Jojo> Overflow paste now only uses one undo step.
+  [Imp] <Jojo> Instead of simply ignoring note off/cut/fade when working with .MOD files, it is converted to C00.
+  [Fix] <rewbs> Effect visualizer is now aware of PC notes (bug 3836).
+  [Fix] <rewbs> Context menu command "Change Plugin" for PC notes now works when the PC note has a blank plugin (instrument) field.
+  [Fix] <Jojo> When using MIDI record or split keyboard settings, volume data was writting into the volume column in MOD format.
+  [Fix] <Jojo> When converting PC Notes to MIDI Macros, the instrument index is now also cleaned as well. Noticable for example when pasting PC notes into an IT module.
+  [Fix] <Jojo> Now, plugin slot 100 can also be automated using PC Notes.
+  [Fix] <Jojo> When pasting pattern data that exactly reached the pattern end with overflow paste enabled, a redundant undo point was created.
+  [Fix] <Jojo> Entered (volume) effects are now properly checked (makes a difference f.e. in MOD format where it was previously possible to enter effects like Hxx)
+  [Fix] <Jojo> Mix Paste: When in MPT behaviour mode, empty FX commands were not overwritten properly when there previously was an effect in that field but only the effect number (and not the param value) was reset.
+  [Reg] <Jojo> Creating a selection using the Shift key + Mouse click now only works if there was previously no selection made; This seems reasonable as the old shift-behaviour seems to be widely used.
+  
+Pattern tab::GUI
+  [New] <Jojo> When the PT1x mode or the S3M "Amiga" flag are enabled, dodgy notes (i.e lower than C-4 or higher than B-6) are marked red.
+  [Imp] <Jojo> The status bar shows plugin and parameter names for PC notes now as well.
+  [Imp] <Jojo> Effect vis: Make use of song's own row highlighting variables instead of fixed global ones.
+  [Fix] <Jojo> The status bar ("Position x of y") only the showed order length for the first subtune if subtunes were separated by an "---" order item.
+  [Fix] <Jojo> Changing a channel plugin in MOD/S3M files doesn't mark them as modified anymore.
+  [Fix] <Jojo> When working with multiple sequences, switching to the pattern editor for the first time automatically marked the document as modified.
+
+Pattern tab::Note properties
+  [Imp] <Jojo> Show a nice description for the new :xy effect.
+  [Imp] <Jojo> Don't allow values > 63 for "break to row" commands in MOD/S3M.
+  [Imp] <Jojo> Since the behaviour of sliding commands with both nibbles set varies from tracker to tracker, "undefined" is always shown in the note properties in such cases.
+  [Fix] <Jojo> Vibrato and Tremolo were erroneously marked as commands with no effect memory.
+  [Fix] <Jojo> In the note properties, the Gxx effect for XM files was not limited properly.
+  [Fix] <Jojo> In Note Properties, the waveform display for S  [345]x (and equivalent MOD/XM effeects) was not always fully visible ("continue" addition was cut off)
+  [Fix] <Jojo> Display "fine" / "extra fine" portamento effects properly (S3M/IT/MPTM), display SFx macro properly, display MOD effects with no memory properly.
+
+Pattern tab::Find/replace
+  [Fix] <Jojo> Find/Replace didn't work properly when replacing PC Notes with something that's not a PC Note.
+  [Fix] <Jojo> Instead of turning "Follow Song" off, the Find/Replace dialog toggled it. 
+  
+Sample tab
+  [New] <Jojo> Shift+New = Clone sample slot
+  [New] <Jojo> Option to not ask for RAW import settings again (settings are remembered independently for all modules)
+  [Imp] <Jojo> Remember previous settings in RAW import dialog
+  [Imp] <Jojo> When enabling (sustain) loop and no loop points are set yet, automatically set loop to full sample length.
+  [Imp] <Jojo> Samplename and filename are now properly limited.
+  [Imp] <Jojo> When enabling a sample loop and only parts of the sample are selected
+  [Fix] <Jojo> When applying time stretch / pitch shift to an 8-bit sample and selecting the sample partly lead to partial upsampling, instead of upsampling the whole sample.
+  [Fix] <Jojo> Sample Undo: If no custom value was set, the default value was set ridiculously high (tx Paul Legovitch)
+  [Fix] <Jojo> Sample Undo: Fixed another possible problem when undoing actions with very little memory left.
+  [Fix] <Jojo> It was not possible to create the last sample slot (i.e. pressing "new sample" with a MOD file that had 30 samples would result in an error, although MOD supports 31 samples).
+  [Fix] <Jojo> When loading an extremely short raw file (f.e. 1 byte) twice, it crashed OpenMPT.
+  
+Instrument tab
+  [New] <Jojo> Envelope zooming. Might still look very weird (especially the first tick and around loop points). Includes two new keyboard shortcuts.
+  [New] <Jojo> Transpose Up/Down for sample map.
+  [New] <Jojo> VST/Instrument handling: The IT instrument note mapping is now also applied to VST instruments (before, it was just available for samples). This way, VST instruments can be transposed easily.
+  [Imp] <Jojo> When pasting an envelope, it's now also automatically enabled.
+  [Imp] <Jojo> Instrumentname and filename are now properly limited.
+  [Imp] <Jojo> "Scale envelope points" is now always available for scaling the values of the points (y axis).
+  [Fix] <Jojo> The panning spin button ranged from 0 to 256, however when saving to .IT, 256 was wrapping over to 0. Panning is now limited from 0 to 255.
+  [Fix] <Jojo> It was impossible to assign plugin slot 100 to an instrument.
+
+Comments tab
+  [Fix] <Jojo> Correct C-5 frequency is now also shown if the module is an XM file.
+  [Fix] <Jojo> When editing sample / instrument names, they are limited properly now.
+
+Treeview
+  [New] <Jojo> Sequences can now be copied to other modules by simply dragging the sequence header into the the other module's sequence header. Does only work between two different modules, not within the same module.
+  [Imp] <Jojo> Display sequence index next to sequence names.
+  [Imp] <Jojo> Improved order dragging; It is now also possible to drag an order into a non-MPT module. In that case, the old orderlist will be replaced.
+  [Imp] <Jojo> J2B files were not shown in treeview.
+  [Fix] <Jojo> If a sequence had no name, its name was not formatted properly.
+  [Fix] <Jojo> Soundfont samples were not playing correctly anymore. Note that soundfont samples in the MIDI library still don't work. 
+  [Fix] <Jojo> A crash could occour if the instrument library path was too long (f.e. because of malicious strings in the   [Paths] section of the INI file)
+  [Fix] <Jojo> "Bypass" action for VSTs didn't set the document as modified.
+  [Fix] <Jojo> Right-Click on module -> Close didn't ask for confirmation when the document was modified.
+  [Fix] <Jojo> Insert/Duplicate sequence actions didn't set the document modified. Grey out those two actions if no additional sequences can be added.
+
+VST
+  [New] <Jojo> VST/Instrument handling: The IT instrument note mapping is now also applied to VST instruments (before, it was just available for samples). This way, VST instruments can be transposed easily.
+  [Imp] <Jojo> VST Editor: Instead of just saying the user that the plugin has to be assigned to an instrument to play notes, they are queried now whether they want to automatically add an instrument.
+  [Imp] <Jojo> VST Editor: Added shortcuts for "toggle bypass", "pass keys to plug" and "record params to pattern"
+  [Mod] <Jojo> VST Editor: Changed number of patches per sub menu from 100 to 128. Now, one sub menu equals ones MIDI bank (more logical)
+  [Fix] <Jojo> VST Editor: Preset names starting with ' ' >= char > 'A' were cropped (i.e. "123ABC" was displayed as "ABC")
+  [Fix] <re>   Some VSTs that previously wouldn't load might now load fine.
+  [Fix] <re>   Returned host CanDo-values were wrong (since pre RC1 era).
+  
+Mod conversion
+  [Imp] <Jojo> Convert the :xy effect to a simple note delay effect when converting to anything that's not MPTM.
+  [Imp] <Jojo> Don't show warning about restart position if it is actually not set (only applies to S3M format)
+  [Fix] <Jojo> When converting from MOD to S3M or IT, the Invert Loop effect was not removed.
+  [Fix] <Jojo> When converting from MPTM to another format, the first sequence name is removed and the sequence is now sized properly when merging multiple sequences.
+  [Fix] <Jojo> When converting between XM and IT, the sample autovibrato "sweep" factor is now fixed a bit.
+  [Fix] <Jojo> When removing instruments from the treeview and converting the module to a different format which also supports instruments, OpenMPT crashed due to a null pointer exception.
+  [Fix] <Jojo> When converting from MOD to S3M or IT, the Invert Loop effect was not removed.
+  [Fix] <Jojo> When converting to MOD/S3M, the extended filter range flag was not deactivated.
+  [Fix] <Jojo> S00 (IT/S3M) does not equal E00 (MOD/XM), as Exx doesn't have effect memory. Trying to convert S00 to the last used value now.
+  [Fix] <Jojo> If necessary (S3M), reset restart position attribute when converting
+  [Fix] <re>   Merging multiple sequences didn't properly convert '---'/'+++' orders.
+  
+IT
+  [Imp] <Jojo> IT Saver: Compatibility export saves stereo samples again, as other tracker like Schism also support this.
+  [Fix] <Jojo> IT Saver: Set unused channels' panning positions to 0xA0 like IT does (appears to fix a problem in IT's GUI)
+  [Fix] <Jojo> IT Saver: Fixed IT sample flags which could potentionally cause IT to screw up on loading/saving MPT-made modules with samples that are not used by an instrument.
+  [Fix] <Jojo> IT Loader: ChibiTracker uses \n instead of \r in the IT comment text, which was not handled properly.
+  [Fix] <Jojo> (fix from SchismTracker) IT Loader: Ignore stereo sample flag when loading old IT files (older than IT 2.14) since IT id not reset this flag when importing stereo samples back then.
+  [Fix] <Jojo> ITI/ITS Loader: Sample flags were not reset when a sample slot was overwritten when loading ITI or ITS files. That way, it was possible that f.e. the bidi loop flag was not disabled when loading a new sample that had a normal loop.
+  [Fix] <Jojo> S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
+  [Fix] <Jojo> IT Compatibility: Always reset autovibrato settings when there's an instrument number (fix from SchismTracker)
+  [Fix] <Jojo> IT Compatibility: S77 / S79/ S7B are supposed to pause the envelope, not disable it.
+  [Fix] <Jojo> IT compatibility: ignore slide commands with both nibbles set (f.e. D55, PA1, ...)
+  [Fix] <Jojo> IT Compatibility: Default Vibrato/Tremolo/Panbrello values to sine if out of range (e.g. S35)
+
+IT/MPTM/ITP, Instrument extension handling:
+  [Fix] <Jojo> ITP Loader: Instruments flags in ITP files with embedded instrument headers were loaded wrong since revision 415.
+  [Fix] <re>   Fixes to instrument envelope flag handling (broken in 1.18.00.00).
+  
+XM
+  [Imp] <Jojo> XM Loader: Improved detection of an old version of MPT.
+  [Fix] <Jojo> XM Loader: Some XMs not made with ModPlug were recognized as files made with MPT.
+  [Fix] <Jojo> XM Loader: The last XM instrument was not always loaded.
+  [Fix] <Jojo> XM Loader: Early versions of Skale Tracker (R.I.P.) apparently did stupid things to XM instrument headers, so mpt failed to load such modules. Tested the fix with a few hundred XMs and apparently only one XM (IFULOVE.XM) that I have has a header size that is different from the struct size - and that's the one that caused problems.
+  [Fix] <Jojo> XM Compatibility: Volume column doesn't have an effect memory, most effects with param = 0 are useless. Those are ignored in compatibility mode playback and also when exporting the file in compatibility mode.
+  [Fix] <Jojo> XM Compatibility: Improved handling of the situation when a 3xx effect was used, but previously no note was playing.
+  [Fix] <Jojo> XM compatibility: New instrument + tone portamento = ignore new instrument (fixes partytime.xm by cancer)
+  
+MOD
+  [Imp] <Jojo> Module creation: When creating a new .MOD, it has 31 samples by default.
+  [Imp] <Jojo> Playback: When PT1x flag is activated, Amiga note range limits are automatically taken into account.
+  [Fix] <Jojo> MOD Saving: Samples were shifted badly if the sample size was odd. (wow, this is an OLD bug!)
+  [Fix] <Jojo> Mod Saving: If a mod had loop points set, but loop disabled, they were still saved in the .MOD file, resulting in the loop being enabled automatically.
+  [Fix] <Jojo> MOD Loader: Very short loops (4-8 bytes long) are not ignored anymore. This fixes "Crew Generation" by Necros.
+  
+S3M
+  [Fix] <Jojo> S3M Loader: Slightly improved the AdLib instrument detection.
+  [Imp] <Jojo> S3M Loader: Display a message if an S3M file contains Adlib instruments (rare).
+  [Imp] <Jojo> S3M Compatibility: At least process samples on muted channels so that sync can be maintained.
+  [Fix] <Jojo> S3M Playback: In ST3, muted channels are completely ignored, not even effects are interpreted. Let's try this in MPT, too.
+  [Fix] <Jojo> S3M compatibility: Slightly better handling of vibrato/tremolo waveform types (although the ST3 help screen says that continuous vibrato/tremolo is possible, it does actually not work.)
+  [Reg] <Jojo> Cannot create S3M files with more than 100 patterns anymore, because...
+  [Fix] <Jojo> ... it was possible to create S3M files where the 256 parapointers were not enough.
+  [Fix] <Jojo> S3M/IT compatibility: Note Cut really cuts notes and does not just mute them (so that following volume commands could restore the sample)
+  
+Other modules:
+  [Imp] <Jojo> MT2 Loader: Make use of the "lines per beat" header field.
+  [Fix] <Jojo> Slightly better MT2 (MadTracker) handling: Release node is not set anymore for each and every instrument envelope. MT2 files are now loaded as IT files by default (instead of XM) because of their extended instrument properties (NNAs, filters, etc) - I wonder what this breaks, but I don't bother because MT2 support was already 100% broken before this. :) Some MT example tunes sound a bit better now at least.
+  [Imp] <Jojo> PSM Loader: Better handling of SC0 effect
+  [Fix] <Jojo> GDM Loader: It would have actually helped to convert the format origin table correctly... Origin formats other than MOD are now loading correctly again.
+  [Fix] <Jojo> PTM Loader: Fixed an unhandled null pointer exception that occured when loading some unsupported RAR files.
+  [Fix] <Jojo> PSM16 Loader: Fix for note cut on tick 0 (warbot tune from Silverball)
+  [Fix] <Jojo> Threw out the old ULT loader in favor of Storlek's loader from SchismTracker (used with permission from the author himself). This is a lot more accurate than MPT's old loader.
+  [Fix] <Jojo> DBM Loader: Various fixes to increase import precision and an endianness fix
+  [Fix] <Jojo> AMF DSM Loader: Made some changes to the pattern reader, which elimiante the strange "vC7" commands in the pattern. I have found no hints on whether my fix is correct or not, apart from the fact that those AMF files that I have play a lot better now. And it makes kind of sense...
+  [Fix] <Jojo> IMF Loader: Some fixes copied from Schism (copied from MikMod)
+
+MPTM
+  [New] <rewbs> Added combined note delay & note cut command for .mptm only (":xy" means delay until tick x and play for y ticks).
+  [New] <Jojo> MPTM command S7D explicitely enforces pitch envelope, S7E enforces filter envelope.
+
+Module cleanup
+  [Imp] <Jojo> In the cleanup dialog, mutually exclusive items are now automatically unchecked, to avoid confusion.
+  [Imp] <Jojo> Cleanup Dialog: Made it look a bit nicer.
+  [Fix] <Jojo> Because of an error in GetNumPatterns(), the last pattern was checked when looking for unused samples which sometimes resulted in deleted samples (although they were actually used).
+  [Fix] <re>   Fixed a memory leak in pattern name handling.
+
+Misc
+  [New] <Jojo> INI Settings: When portable mode is enabled, the most common paths in mptrack.ini are now translated to relative paths (if possible). plugin path is not translated to relative paths (yet).
+  [New] <Jojo> Modules in gzip archives (single-file .gz archives) can now be imported, just to satisfy my laziness when downloading gzipped modules from Amiga Music Preservation. :-P
+  [Imp] <Jojo> Mod Loaders: Instead of creating messageboxes in various places, errors are now written to the log.
+  [Imp] <Jojo> Binary files are now less often falsely recognized as early MOD files (15 samples without header): If the orderlist contains orderlist items > 128, loading is cancelled.
+  [Imp] <Jojo> Song Properties: Tooltips are shown for various controls.
+  [Mod] <Jojo> Options: Removed the "space bar repeats previous action" option, as it did not work anymore since the new keyhandler is used; in fact, this option can be achieved instead by using the "on key hold" for the "quick paste" key shortcut.
+  [Mod] <rewbs> Removed old "velocity" volume command, which was experimental and unused.
+  [Mod] <Jojo> Replaced default VU-meter colours for the MPT scheme by more pleasant colours that were already used for the other themes.
+  [Mod] <Jojo> Updated internet links (ModPlug Central Forums link is now a permalink)
+  [Fix] <Jojo> Length Calculation: If the first pattern was empty, OpenMPT was caught in an infinite loop.
+  [Fix] <Jojo> MPTM Saving: A missing null pointer check crashed OpenMPT when trying to access a deleted instrument slot.
+  [Fix] <Jojo> Multi window edit: When (un)muting a channel from the general tab in window 1, it was instantly shown in the pattern editor of window 2, but not vice versa.
+  [Fix] <Jojo> Channel Manager: When removing channels using the channel manager, their names were not cleared properly.
+  [Fix] <Jojo> Song Length Detection: *Much* more accurate song length detection!
+  [Fix] <Jojo/re> Instrument IO: Flags from old ITI/XI files should also be loaded correctly now (broken in 1.18.00.00)
+  [Fix] <Jojo> Plugin Editor: Changing a plugin parameter in MOD/S3M files doesn't mark them as modified anymore.
+  [Reg] <Jojo> Removed AutodetectITplaystyle option, since the tracker detection works reliably enough now. Tracker detection can not be ignored anymore now.
+
+Installer/release package
+  [New] <Jojo> Try to find out what keymap file suits the user best.
+  [New] <Jojo> Scan for previously installed VST Plugins
+  [Imp] <Jojo> Use DDE commands to open files.
+  [Imp] <Jojo> Copy config files from app's directory to appdata if necessary and possible.
+  [Imp] <Jojo> User is asked if they want to keep personal settings.
+  [Imp] <Jojo> With the new version of InnoSetup, a "real" portable setup can now finally be created.
+  [Mod] <Jojo> Added OpenMPT 1.18 release notes document for package template
+  [Mod] <Jojo> Updated DE_jojo.mkb
+  [Mod] <Jojo> Updated Paul Legovitch's keymap (now also suitable for desktop keyboards); use this as the default "french" keymap in the installer.
+  [Mod] <re>   Updated default keybindings. 
+  
+  
+v1.18.00.00 (January 2010, revision 475)
+----------------------------------------
 
 General tab
   . <Jojo> Channel name input field was not limited properly.
