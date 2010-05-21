@@ -135,7 +135,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalOptions="..\..\masmx86\gvmat32.obj ..\..\masmx86\inffas32.obj /NODEFAULTLIB "
+				AdditionalOptions="/NODEFAULTLIB "
 				OutputFile=".\zlibstat\zlibstat.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -173,7 +173,7 @@
 				PreprocessorDefinitions="WIN32;ZLIB_WINAPI"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
-				RuntimeLibrary="4"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				PrecompiledHeaderFile=".\zlibstat/zlibstat.pch"
 				AssemblerListingLocation=".\zlibstatWithoutAsm/"
@@ -226,9 +226,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\deflate.c">
-			</File>
-			<File
-				RelativePath="..\..\masmx86\gvmat32c.c">
 			</File>
 			<File
 				RelativePath="..\..\..\infback.c">
