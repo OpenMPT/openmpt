@@ -9,7 +9,7 @@ OpenMPT - Full Version History
 [Var]: other
 (tx XYZ): thanks to XYZ for telling us about the bug
 
-Changes from revisions [476, 604]
+Changes from revisions [476, 605]
 ---------------------------------
 
 General tab
@@ -100,6 +100,7 @@ VST
   [Imp] <Jojo> VST Editor: Added shortcuts for "toggle bypass", "pass keys to plug" and "record params to pattern"
   [Mod] <Jojo> VST Editor: Changed number of patches per sub menu from 100 to 128. Now, one sub menu equals ones MIDI bank (more logical)
   [Fix] <Jojo> VST Editor: Preset names starting with ' ' >= char > 'A' were cropped (i.e. "123ABC" was displayed as "ABC")
+  [Fix] <Jojo> Even if an instrument was muted, a VSTi assigned to this instrument was still playing in the pattern.
   [Fix] <re>   Some VSTs that previously wouldn't load might now load fine.
   [Fix] <re>   Returned host CanDo-values were wrong (since pre RC1 era).
   
