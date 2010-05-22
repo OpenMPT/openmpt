@@ -2000,15 +2000,24 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 	if ((instr) && (instr < MAX_INSTRUMENTS))
 		pIns = Instruments[instr];
 
-	if ((pIns) && (pIns->nMidiChannel >= 1) && (pIns->nMidiChannel <= 16)) {
-		UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
-		if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS)) {
-			pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
+	if (pIns)
+	{
+		// Check instrument plugins
+		if ((pIns->nMidiChannel >= 1) && (pIns->nMidiChannel <= 16))
+		{
+			UINT nPlugin = GetBestPlugin(nChn, PRIORITISE_INSTRUMENT, RESPECT_MUTES);
+			if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
+			{
+				pPlugin = m_MixPlugins[nPlugin-1].pMixPlugin;
+			}
 		}
+
+		// Muted instrument?
+		if (pIns && (pIns->dwFlags & INS_MUTE)) return;
 	}
 
-	//Do couldn't find a valid plugin
-	if (pPlugin == NULL) return;
+	// Do couldn't find a valid plugin
+	if (pPlugin == nullptr) return;
 
 	if(GetModFlag(MSF_MIDICC_BUGEMULATION))
 	{
