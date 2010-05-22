@@ -1451,17 +1451,27 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	TCHAR sFilenameAdd[_MAX_PATH] = _T("");
 
 	int nRenderPasses = 1;
-	DWORD flags[MAX_BASECHANNELS];
+	// Channel mode
+	bool unusedChannels[MAX_BASECHANNELS];
+	vector<DWORD> channelFlags;
+	// Instrument mode
 	vector<bool> instrMuteState;
 
-	// Channel mode : save song in multiple wav files (one for each enabled channels)
+	// Channel mode: save song in multiple wav files (one for each enabled channels)
 	if(wsdlg.m_bChannelMode)
 	{
-		nRenderPasses = m_SndFile.m_nChannels;
-		for(int i = 0; i < nRenderPasses ; i++)
+		// Don't save empty channels
+		memset(unusedChannels, false, sizeof(unusedChannels));
+		CheckUnusedChannels(unusedChannels);
+
+		nRenderPasses = m_SndFile.GetNumChannels();
+		channelFlags.resize(nRenderPasses, 0);
+		for(CHANNELINDEX i = 0; i < m_SndFile.GetNumChannels(); i++)
 		{
 			// Save channels' flags
-			flags[i] = m_SndFile.ChnSettings[i].dwFlags;
+			channelFlags[i] = m_SndFile.ChnSettings[i].dwFlags;
+			// Ignore muted channels
+			if(channelFlags[i] & CHN_MUTE) unusedChannels[i] = true;
 			// Mute each channel
 			m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
 		}
@@ -1472,7 +1482,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		if(m_SndFile.GetNumInstruments() == 0)
 		{
 			nRenderPasses = m_SndFile.GetNumSamples();
-			instrMuteState.resize(nRenderPasses);
+			instrMuteState.resize(nRenderPasses, false);
 			for(SAMPLEINDEX i = 0; i < m_SndFile.GetNumSamples(); i++)
 			{
 				instrMuteState[i] = IsSampleMuted(i + 1);
@@ -1481,7 +1491,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		} else
 		{
 			nRenderPasses = m_SndFile.GetNumInstruments();
-			instrMuteState.resize(nRenderPasses);
+			instrMuteState.resize(nRenderPasses, false);
 			for(INSTRUMENTINDEX i = 0; i < m_SndFile.GetNumInstruments(); i++)
 			{
 				instrMuteState[i] = IsInstrumentMuted(i + 1);
@@ -1509,6 +1519,9 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 			// Re-mute previously processed channel
 			if(i > 0) m_SndFile.ChnSettings[i - 1].dwFlags |= CHN_MUTE;
 
+			// Was this channel actually muted? Don't process it then.
+			if(unusedChannels[i] == true)
+				continue;
 			// Add channel number & name (if available) to path string
 			if(strlen(m_SndFile.ChnSettings[i].szName) > 0)
 				wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.ChnSettings[i].szName);
@@ -1557,29 +1570,24 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 			_tcscpy(sFilenameAdd, _T(""));
 		}
 
-		// Render song (or current channel if channel mode and channel not initially disabled)
-		if(!(wsdlg.m_bChannelMode || wsdlg.m_bInstrumentMode) || !(flags[i] & CHN_MUTE))
+		// Render song (or current channel, or current sample/instrument)
+		m_SndFile.SetCurrentPos(0);
+		m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
+		if (wsdlg.m_bSelectPlay)
 		{
-			// rewbs.fix3239
-			m_SndFile.SetCurrentPos(0);
-			m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
-			if (wsdlg.m_bSelectPlay)
-			{
-				m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
-				m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
-				m_SndFile.GetLength(TRUE, FALSE);
-				m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
-			}
-			//end rewbs.fix3239
-			if( dwcdlg.DoModal() != IDOK ) break;	// UPDATE#03
+			m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
+			m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
+			m_SndFile.GetLength(TRUE, FALSE);
+			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
 		}
+		if(dwcdlg.DoModal() != IDOK) break;
 	}
 
 	// Restore channels' flags
 	if(wsdlg.m_bChannelMode)
 	{
 		for(int i = 0 ; i < nRenderPasses ; i++)
-			m_SndFile.ChnSettings[i].dwFlags = flags[i];
+			m_SndFile.ChnSettings[i].dwFlags = channelFlags[i];
 	}
 	// Restore instruments' / samples' flags
 	if(wsdlg.m_bInstrumentMode)

@@ -287,7 +287,7 @@ public:
 	void LearnMacro(int macro, long param);
 	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool bReset = false);
 
-	BOOL RemoveChannels(BOOL bChnMask[MAX_CHANNELS]);
+	bool RemoveChannels(bool bChnMask[MAX_BASECHANNELS]);
 
 	bool HasMPTHacks(bool autofix = false);
 
@@ -311,7 +311,7 @@ protected:
 	BOOL InitializeMod();
 	void* GetChildFrame(); //rewbs.customKeys
 
-	void CheckUnusedChannels(BOOL mask[MAX_CHANNELS], CHANNELINDEX maxRemoveCount);
+	void CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
