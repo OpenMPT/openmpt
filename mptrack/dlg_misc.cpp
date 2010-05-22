@@ -674,7 +674,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 void CRemoveChannelsDlg::OnOK()
 //-----------------------------
 {
-	memset(m_bChnMask, 0, sizeof(m_bChnMask));
+	memset(m_bChnMask, false, sizeof(m_bChnMask));
 	int nCount = m_RemChansList.GetSelCount();
 	CArray<int,int> aryListBoxSel;
 	aryListBoxSel.SetSize(nCount);
@@ -682,7 +682,7 @@ void CRemoveChannelsDlg::OnOK()
 
 	for (int n=0; n<nCount; n++)
 	{
-		m_bChnMask[aryListBoxSel[n]]++;
+		m_bChnMask[aryListBoxSel[n]] = true;
 	}
 	if ((static_cast<UINT>(nCount) == m_nRemove && nCount > 0)  || (m_nRemove == 0 && (m_pSndFile->GetNumChannels() >= nCount + m_pSndFile->GetModSpecifications().channelsMin)))
 		CDialog::OnOK();

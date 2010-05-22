@@ -72,11 +72,14 @@ bool CAutoSaver::DoSave(DWORD curTime)
 
 			while (posDocument) { //for all open documents
 				pModDoc = (CModDoc*)(pDocTemplate->GetNextDoc(posDocument));
-				if (pModDoc && pModDoc->ModifiedSinceLastAutosave()) {
-					if (SaveSingleFile(pModDoc)) {
+				if (pModDoc && pModDoc->ModifiedSinceLastAutosave() && pModDoc->GetSoundFile())
+				{
+					if (SaveSingleFile(pModDoc))
+					{
 						CleanUpBackups(pModDoc);
-					} else {
-						m_bEnabled=false;
+					} else
+					{
+						m_bEnabled = false;
 						AfxMessageBox("Warning: Autosave failed and has been disabled. Please:\n- Review your autosave paths\n- Check available diskspace & filesystem access rights\n- If you are using the ITP format, ensure all instruments exist as independant .iti files");
 						success = false;
 					}

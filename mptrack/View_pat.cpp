@@ -2529,8 +2529,8 @@ void CViewPattern::OnRemoveChannel()
 	str.Format("Remove channel %d?\nNote: Affects all patterns and no undo", nChn+1);
 	if(CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_YESNO | MB_ICONQUESTION) == IDYES)
 	{
-		BOOL chnMask[MAX_CHANNELS];
-		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; chnMask[i] = FALSE, i++) {}
+		bool chnMask[MAX_BASECHANNELS];
+		for(CHANNELINDEX i = 0; i < MAX_BASECHANNELS; i++) {chnMask[i] = false;}
 		chnMask[nChn] = TRUE;
 		pModDoc->RemoveChannels(chnMask);
 		SetCurrentPattern(m_nPattern); //Updating the screen.

@@ -9,7 +9,7 @@ OpenMPT - Full Version History
 [Var]: other
 (tx XYZ): thanks to XYZ for telling us about the bug
 
-Changes from revisions [476, 602]
+Changes from revisions [476, 604]
 ---------------------------------
 
 General tab
@@ -176,6 +176,7 @@ Misc
   [New] <Jojo> INI Settings: When portable mode is enabled, the most common paths in mptrack.ini are now translated to relative paths (if possible). Plugin paths are not translated to relative paths (yet).
   [New] <Jojo> Modules in gzip archives (single-file .gz archives) can now be imported, just to satisfy my laziness when downloading gzipped modules from Amiga Music Preservation. :-P
   [New] <Jojo> Wave export can now also render by instrument (i.e. one wave file per instrument).
+  [Imp] <Jojo> The wave export "render by channel" mode ignores empty channels now.
   [Imp] <Jojo> Mod Loaders: Instead of creating messageboxes in various places, errors are now written to the log and one messagebox is shown for each file.
   [Imp] <Jojo> Binary files are now less often falsely recognized as early MOD files (15 samples without header): If the orderlist contains orderlist items > 128, loading is cancelled.
   [Imp] <Jojo> Song Properties: Tooltips are shown for various controls.

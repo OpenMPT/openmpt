@@ -499,7 +499,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 }
 
 
-BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
+bool CModDoc::RemoveChannels(bool m_bChnMask[MAX_BASECHANNELS])
 //---------------------------------------------------------
 //To remove all channels whose index corresponds to true value at m_bChnMask[] array. Code is almost non-modified copy of
 //the code which was in CModDoc::ChangeNumChannels(UINT nNewChannels) - the only differences are the lines before 
@@ -518,7 +518,7 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 			if(nRemainingChannels == m_SndFile.m_nChannels) str.Format("No channels chosen to be removed.");
 			else str.Format("No removal done - channel number is already at minimum.");
 			CMainFrame::GetMainFrame()->MessageBox(str , "Remove channel", MB_OK | MB_ICONINFORMATION);
-			return FALSE;
+			return false;
 		}
 
 		BeginWaitCursor();
@@ -531,7 +531,7 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 			{
 				END_CRITICAL();
 				AddToLog("ERROR: Not enough memory to resize patterns!\nPattern Data is corrupted!");
-				return TRUE;
+				return true;
 			}
 			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
 			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
@@ -568,7 +568,7 @@ BOOL CModDoc::RemoveChannels(BOOL m_bChnMask[MAX_CHANNELS])
 		SetModified();
 		GetPatternUndo()->ClearUndo();
 		UpdateAllViews(NULL, HINT_MODTYPE);
-		return FALSE;
+		return false;
 }
 
 
@@ -1607,22 +1607,23 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 }
 
 
-void CModDoc::CheckUnusedChannels(BOOL mask[MAX_CHANNELS], CHANNELINDEX maxRemoveCount)
+void CModDoc::CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxRemoveCount)
 //-------------------------------------------------------------------------------------
 {
 	// Checking for unused channels
-	for (int iRst=m_SndFile.m_nChannels-1; iRst>=0; iRst--) //rewbs.removeChanWindowCleanup
+	const int nChannels = m_SndFile.GetNumChannels();
+	for(int iRst = nChannels - 1; iRst >= 0; iRst--)
 	{
-		mask[iRst] = TRUE;
-		for (UINT ipat=0; ipat<m_SndFile.Patterns.Size(); ipat++) if (m_SndFile.Patterns[ipat])
+		mask[iRst] = true;
+		for (PATTERNINDEX ipat = 0; ipat < m_SndFile.Patterns.Size(); ipat++) if (m_SndFile.Patterns.IsValidPat(ipat))
 		{
 			MODCOMMAND *p = m_SndFile.Patterns[ipat] + iRst;
 			UINT len = m_SndFile.PatternSize[ipat];
-			for (UINT idata=0; idata<len; idata++, p+=m_SndFile.m_nChannels)
+			for (UINT idata = 0; idata < len; idata++, p += m_SndFile.m_nChannels)
 			{
-				if (*((LPDWORD)p))
+				if (!p->IsEmpty())
 				{
-					mask[iRst] = FALSE;
+					mask[iRst] = false;
 					break;
 				}
 			}
