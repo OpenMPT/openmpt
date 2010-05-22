@@ -10,6 +10,7 @@
 extern UINT nMixingRates[NUMMIXRATE];
 extern LPCSTR gszChnCfgNames[3];
 
+// this converts a buffer of 32-bit integer sample data to 32 bit floating point
 static void __cdecl M2W_32ToFloat(void *pBuffer, long nCount)
 {
 //	const float _ki2f = 1.0f / (FLOAT)(ULONG)(0x80000000); //olivier 
@@ -50,6 +51,8 @@ loopdone:
 BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 	ON_COMMAND(IDC_CHECK1,			OnCheck1)
 	ON_COMMAND(IDC_CHECK2,			OnCheck2)
+	ON_COMMAND(IDC_CHECK4,			OnCheckChannelMode)
+	ON_COMMAND(IDC_CHECK6,			OnCheckInstrMode)
 	ON_COMMAND(IDC_RADIO1,			UpdateDialog)
 	ON_COMMAND(IDC_RADIO2,			UpdateDialog)
 	ON_COMMAND(IDC_PLAYEROPTIONS,   OnPlayerOptions) //rewbs.resamplerConf
@@ -104,11 +107,7 @@ BOOL CWaveConvert::OnInitDialog()
 	CHAR s[128];
 
 	CDialog::OnInitDialog();
-	if (m_bSelectPlay) {
-		CheckDlgButton(IDC_RADIO2, MF_CHECKED);
-	} else {
-		CheckDlgButton(IDC_RADIO1, MF_CHECKED);
-	}
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, m_bSelectPlay ? IDC_RADIO2 : IDC_RADIO1);
 
 	CheckDlgButton(IDC_CHECK3, MF_CHECKED);		// HQ resampling
 	CheckDlgButton(IDC_CHECK5, MF_UNCHECKED);	// rewbs.NoNormalize
@@ -116,6 +115,7 @@ BOOL CWaveConvert::OnInitDialog()
 // -> CODE#0024
 // -> DESC="wav export update"
 	CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
+	CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
 // -! NEW_FEATURE#0024
 
 	SetDlgItemInt(IDC_EDIT3, m_nMinOrder);
@@ -230,6 +230,22 @@ void CWaveConvert::OnCheck2()
 }
 
 
+// Channel render is mutually exclusive with instrument render
+void CWaveConvert::OnCheckChannelMode()
+//-------------------------------------
+{
+	CheckDlgButton(IDC_CHECK6, MF_UNCHECKED);
+}
+
+
+// Channel render is mutually exclusive with instrument render
+void CWaveConvert::OnCheckInstrMode()
+//-----------------------------------
+{
+	CheckDlgButton(IDC_CHECK4, MF_UNCHECKED);
+}
+
+
 void CWaveConvert::OnOK()
 //-----------------------
 {
@@ -242,9 +258,11 @@ void CWaveConvert::OnOK()
 	//m_bHighQuality = IsDlgButtonChecked(IDC_CHECK3) ? true : false; //rewbs.resamplerConf - we don't want this anymore.
 	m_bNormalize = IsDlgButtonChecked(IDC_CHECK5) ? true : false;
 	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) ? true : false;
-	if (m_bGivePlugsIdleTime) {
+	if (m_bGivePlugsIdleTime)
+	{
 		if (MessageBox("You only need slow render if you are experiencing dropped notes with a Kontakt based sampler with Direct-From-Disk enabled.\nIt will make rendering *very* slow.\n\nAre you sure you want to enable slow render?",
-			"Really enable slow render?", MB_YESNO) == IDNO ) {
+			"Really enable slow render?", MB_YESNO) == IDNO )
+		{
 			CheckDlgButton(IDC_GIVEPLUGSIDLETIME, BST_UNCHECKED);
 			return;
 		}
@@ -252,8 +270,9 @@ void CWaveConvert::OnOK()
 
 // -> CODE#0024
 // -> DESC="wav export update"
-	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) ? TRUE : FALSE;
+	m_bChannelMode = IsDlgButtonChecked(IDC_CHECK4) ? true : false;
 // -! NEW_FEATURE#0024
+	m_bInstrumentMode= IsDlgButtonChecked(IDC_CHECK6) ? true : false;
 
 	// WaveFormatEx
 	DWORD dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
@@ -542,7 +561,7 @@ void CLayer3Convert::OnOK()
 	{
 		m_FileTags.comments = m_pSndFile->m_lpszSongComments;
 		// convert \r to \n, remove bad characters
-		for(UINT i = 0; i < m_FileTags.comments.length(); i++)
+		for(size_t i = 0; i < m_FileTags.comments.length(); i++)
 		{
 			if(m_FileTags.comments.substr(i, 1) == "\r")
 				m_FileTags.comments.replace(i, 1, "\n");
@@ -550,7 +569,7 @@ void CLayer3Convert::OnOK()
 				m_FileTags.comments.replace(i, 1, " ");
 		}
 
-		/*UINT spos;
+		/*size_t spos;
 		while((spos = m_FileTags.comments.find("\r")) != string::npos)
 		{
 			m_FileTags.comments.replace(spos, 1, "\n");
@@ -700,7 +719,8 @@ void CDoWaveConvert::OnButton1()
 			}
 	}*/
 
-		if (m_bGivePlugsIdleTime) {
+		if (m_bGivePlugsIdleTime)
+		{
 			Sleep(20);
 		}
 
@@ -992,6 +1012,7 @@ void CDoAcmConvert::OnButton1()
 	pos = 0;
 	pcmBufSize = WAVECONVERTBUFSIZE;
 	bFinished = FALSE;
+
 	// Writing File
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (n=0; ; n++)
