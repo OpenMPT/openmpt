@@ -1424,7 +1424,7 @@ void CModDoc::OnFileWaveConvert()
 void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 //-------------------------------------------------------------------------
 {
-	TCHAR fname[_MAX_FNAME]="";
+	TCHAR fname[_MAX_FNAME] = _T("");
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
@@ -1441,60 +1441,128 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
 	CMainFrame::SetDefaultDirectory(files.workingDirectory.c_str(), DIR_EXPORT, true);
 
-	TCHAR s[_MAX_PATH];
-	strcpy(s, files.first_file.c_str());
+	TCHAR sFilename[_MAX_PATH];
+	strcpy(sFilename, files.first_file.c_str());
 
 	// Saving as wave file
-	UINT p = 0, n = 1;
+
+	// Keep position of the caracter just before ".wav" in path string
+	size_t p = strlen(sFilename) - 4;
+	TCHAR sFilenameAdd[_MAX_PATH] = _T("");
+
+	int nRenderPasses = 1;
 	DWORD flags[MAX_BASECHANNELS];
-	CHAR channel[MAX_CHANNELNAME+10];
+	vector<bool> instrMuteState;
 
 	// Channel mode : save song in multiple wav files (one for each enabled channels)
-	if(wsdlg.m_bChannelMode){
-		n = m_SndFile.m_nChannels;
-		for(UINT i = 0 ; i < n ; i++){
+	if(wsdlg.m_bChannelMode)
+	{
+		nRenderPasses = m_SndFile.m_nChannels;
+		for(int i = 0; i < nRenderPasses ; i++)
+		{
 			// Save channels' flags
 			flags[i] = m_SndFile.ChnSettings[i].dwFlags;
 			// Mute each channel
 			m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
 		}
-		// Keep position of the caracter just before ".wav" in path string
-		p = strlen(s) - 4;
+	}
+	// Instrument mode: Same as channel mode, but renders per instrument (or sample)
+	if(wsdlg.m_bInstrumentMode)
+	{
+		// render by instrument (or sample)
+		if(m_SndFile.GetNumInstruments() == 0)
+		{
+			nRenderPasses = m_SndFile.GetNumSamples();
+			instrMuteState.resize(nRenderPasses);
+			for(SAMPLEINDEX i = 0; i < m_SndFile.GetNumSamples(); i++)
+			{
+				instrMuteState[i] = IsSampleMuted(i + 1);
+				MuteSample(i + 1, true);
+			}
+		} else
+		{
+			nRenderPasses = m_SndFile.GetNumInstruments();
+			instrMuteState.resize(nRenderPasses);
+			for(INSTRUMENTINDEX i = 0; i < m_SndFile.GetNumInstruments(); i++)
+			{
+				instrMuteState[i] = IsInstrumentMuted(i + 1);
+				MuteInstrument(i + 1, true);
+			}
+		}
 	}
 
-	CDoWaveConvert dwcdlg(&m_SndFile, s, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
+	CDoWaveConvert dwcdlg(&m_SndFile, sFilename, &wsdlg.WaveFormat.Format, wsdlg.m_bNormalize, pMainFrm);
 	dwcdlg.m_dwFileLimit = static_cast<DWORD>(wsdlg.m_dwFileLimit);
 	dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 	dwcdlg.m_nMaxPatterns = (wsdlg.m_bSelectPlay) ? wsdlg.m_nMaxOrder - wsdlg.m_nMinOrder + 1 : 0;
 	//if(wsdlg.m_bHighQuality) CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE);
 
-	BOOL bplaying = FALSE;
 	UINT pos = m_SndFile.GetCurrentPos();
-	bplaying = TRUE;
 	pMainFrm->PauseMod();
 
-	for(UINT i = 0 ; i < n ; i++){
+	for(int i = 0 ; i < nRenderPasses ; i++)
+	{
 
 		// Channel mode
-		if(wsdlg.m_bChannelMode){
+		if(wsdlg.m_bChannelMode)
+		{
 			// Add channel number & name (if available) to path string
-			if(m_SndFile.ChnSettings[i].szName[0] >= 0x20)
-				wsprintf(channel, "-%03d_%s.wav", i+1,m_SndFile.ChnSettings[i].szName);
+			if(strlen(m_SndFile.ChnSettings[i].szName) > 0)
+				wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.ChnSettings[i].szName);
 			else
-				wsprintf(channel, "-%03d.wav", i+1);
-			s[p] = '\0';
-			strcat(s,channel);
+				wsprintf(sFilenameAdd, "-%03d.wav", i + 1);
+			// Re-mute previously processed channel
+			if(i > 0) m_SndFile.ChnSettings[i - 1].dwFlags |= CHN_MUTE;
 			// Unmute channel to process
 			m_SndFile.ChnSettings[i].dwFlags &= ~CHN_MUTE;
 		}
+		// Instrument mode
+		if(wsdlg.m_bInstrumentMode)
+		{
+			if(m_SndFile.GetNumInstruments() == 0)
+			{
+				if(m_SndFile.Samples[i + 1].pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)))
+					continue;
+				// Add sample number & name (if available) to path string
+				if(strlen(m_SndFile.m_szNames[i + 1]) > 0)
+					wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.m_szNames[i + 1]);
+				else
+					wsprintf(sFilenameAdd, "-%03d.wav", i + 1);
+				// Re-mute previously processed sample
+				if(i > 0) MuteSample((SAMPLEINDEX)i, true);
+				// Unmute sample to process
+				MuteSample((SAMPLEINDEX)(i + 1), false);
+			} else
+			{
+				if(m_SndFile.Instruments[i + 1] == nullptr || !m_SndFile.IsInstrumentUsed((INSTRUMENTINDEX)(i + 1)))
+					continue;
+				if(strlen(m_SndFile.Instruments[i + 1]->name) > 0)
+					wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.Instruments[i + 1]->name);
+				else
+					wsprintf(sFilenameAdd, "-%03d.wav", i + 1);
+				// Re-mute previously processed instrument
+				if(i > 0) MuteInstrument((INSTRUMENTINDEX)i, true);
+				// Unmute instrument to process
+				MuteInstrument((INSTRUMENTINDEX)(i + 1), false);
+			}
+		}
+		if(_tcslen(sFilenameAdd) > 0)
+		{
+			SanitizeFilename(sFilenameAdd);
+			sFilename[p] = 0;
+			_tcscat(sFilename, sFilenameAdd);
+			_tcscpy(sFilenameAdd, _T(""));
+		}
 
 		// Render song (or current channel if channel mode and channel not initially disabled)
-		if(!wsdlg.m_bChannelMode || !(flags[i] & CHN_MUTE)){
+		if(!(wsdlg.m_bChannelMode || wsdlg.m_bInstrumentMode) || !(flags[i] & CHN_MUTE))
+		{
 			// rewbs.fix3239
 			m_SndFile.SetCurrentPos(0);
 			m_SndFile.m_dwSongFlags &= ~SONG_PATTERNLOOP;
-			if (wsdlg.m_bSelectPlay) {
+			if (wsdlg.m_bSelectPlay)
+			{
 				m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
 				m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
 				m_SndFile.GetLength(TRUE, FALSE);
@@ -1503,14 +1571,30 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 			//end rewbs.fix3239
 			if( dwcdlg.DoModal() != IDOK ) break;	// UPDATE#03
 		}
-
-		// Re-mute processed channel
-		if(wsdlg.m_bChannelMode) m_SndFile.ChnSettings[i].dwFlags |= CHN_MUTE;
 	}
 
 	// Restore channels' flags
-	if(wsdlg.m_bChannelMode){
-		for(UINT i = 0 ; i < n ; i++) m_SndFile.ChnSettings[i].dwFlags = flags[i];
+	if(wsdlg.m_bChannelMode)
+	{
+		for(int i = 0 ; i < nRenderPasses ; i++)
+			m_SndFile.ChnSettings[i].dwFlags = flags[i];
+	}
+	// Restore instruments' / samples' flags
+	if(wsdlg.m_bInstrumentMode)
+	{
+		if(m_SndFile.GetNumInstruments() == 0)
+		{
+			for(SAMPLEINDEX i = 0; i < m_SndFile.GetNumSamples(); i++)
+			{
+				MuteSample(i + 1, instrMuteState[i]);
+			}
+		} else
+		{
+			for(INSTRUMENTINDEX i = 0; i < m_SndFile.GetNumInstruments(); i++)
+			{
+				MuteInstrument(i + 1, instrMuteState[i]);
+			}
+		}
 	}
 
 	m_SndFile.SetCurrentPos(pos);
@@ -1626,11 +1710,10 @@ void CModDoc::OnFileCompatibilitySave()
 			ext = ModSpecs::mod.fileExtension;
 			pattern = FileFilterMOD;
 			if( AfxMessageBox(GetStrI18N(TEXT(
-				"Compared to regular MOD save, compatibility export makes "
-				"small adjustments to the save file in order to make the file compatible with "
-				"ProTracker and other Amiga-based trackers. Note that this feature is not complete and the "
-				"file is not guaranteed to be free of MPT-specific features.\n\n "
-				"Important: beginning of some samples may be adjusted in the process. Proceed?")), MB_ICONINFORMATION|MB_YESNO) != IDYES
+				"Compared to regular MOD save, compatibility export adjust the beginning of oneshot samples "
+				"in order to make the file compatible with ProTracker and other Amiga-based trackers. "
+				"Note that this feature does not remove effects \"invented\" by other PC-based trackers (f.e. panning commands)."
+				"\n\n Proceed?")), MB_ICONINFORMATION|MB_YESNO) != IDYES
 				)
 				return;
 			break;

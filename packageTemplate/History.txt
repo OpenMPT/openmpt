@@ -9,12 +9,13 @@ OpenMPT - Full Version History
 [Var]: other
 (tx XYZ): thanks to XYZ for telling us about the bug
 
-Changes from revisions [476, 599]
+Changes from revisions [476, 602]
 ---------------------------------
 
 General tab
   [Imp] <Jojo> Disabled tempo slider for MOD files (it was just confusing)
   [Imp] <Jojo> Disabled global volume slider for MOD files, instead enabled the sample pre-amp slider (so it is also possible to make output louder)
+  [Imp] <Jojo> The "output to" dropdown list also shows the actual plugin name (instead of just the library name) now.
   [Fix] <Jojo> Moving a plugin in MOD/S3M files doesn't mark them as modified anymore. The channel fx dropdown lists are now also disabled for those module types.
   [Fix] <Jojo> The restart position edit control is disabled for S3M files.
   [Fix] <coda> The background colour of the tabs in the channel configuration is now also correct when using WinXP Luna or Vista/Win7 Aero.
@@ -174,6 +175,7 @@ Module cleanup
 Misc
   [New] <Jojo> INI Settings: When portable mode is enabled, the most common paths in mptrack.ini are now translated to relative paths (if possible). Plugin paths are not translated to relative paths (yet).
   [New] <Jojo> Modules in gzip archives (single-file .gz archives) can now be imported, just to satisfy my laziness when downloading gzipped modules from Amiga Music Preservation. :-P
+  [New] <Jojo> Wave export can now also render by instrument (i.e. one wave file per instrument).
   [Imp] <Jojo> Mod Loaders: Instead of creating messageboxes in various places, errors are now written to the log and one messagebox is shown for each file.
   [Imp] <Jojo> Binary files are now less often falsely recognized as early MOD files (15 samples without header): If the orderlist contains orderlist items > 128, loading is cancelled.
   [Imp] <Jojo> Song Properties: Tooltips are shown for various controls.
@@ -187,6 +189,7 @@ Misc
   [Fix] <Jojo> Song Length Detection: *Much* more accurate song length detection!
   [Fix] <Jojo/re> Instrument IO: Flags from old ITI/XI files should also be loaded correctly now (broken in 1.18.00.00)
   [Fix] <Jojo> Plugin Editor: Changing a plugin parameter in MOD/S3M files doesn't mark them as modified anymore.
+  [Fix] <Jojo> When using the "close file" shortcut several times in a row so that multiple messageboxes popped up, it was possible to crash OpenMPT.
   [Reg] <Jojo> Removed AutodetectITplaystyle option, since the tracker detection works reliably enough now. Tracker detection can not be ignored anymore now.
 
 Installer/release package

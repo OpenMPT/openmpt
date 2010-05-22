@@ -19,7 +19,13 @@
     a:visited { color: #909; text-decoration: none; }
     a:hover { text-decoration: underline; }
     
-    div img, h1
+    .screenshots
+    {
+        float:right;
+        text-align:right;
+    }
+
+    .screenshots img, h1
     {
         border: 1px solid #ccc;
         padding: 3px;
@@ -78,7 +84,8 @@
     <h2>What's new?</h2>
     
     <h3>General</h3>
-    <div style="float:right;">
+    <div class="screenshots">
+        <a href="ReleaseNotesImages/1.18/cleanup.png"><img src="ReleaseNotesImages/1.18/cleanup.png" width="183" height="84" alt="Cleanup dialog" title="Cleanup dialog (click to view big screenshot)" /></a><br />
         <img src="ReleaseNotesImages/1.18/treeview.png" width="183" height="338" alt="Improved treeview" title="Improved treeview" />
     </div>
     <ul>
@@ -104,11 +111,21 @@
             A friendly reminder: The autosave and backup options should always be enabled; You will be very glad about them once OpenMPT <i>really</i> crashes
             or you accidentally overwrite a file.</li> 
         <li>New and <strong>updated keymaps</strong> with many new shortcuts!</li>
+        <li>The new <strong>cleanup dialog</strong> replaces the cleanup menu and offers more options. For example, the <strong>rearrange samples</strong> function is available again.</li>
         <li><strong>Redesigned</strong> several dialogs.</li>
+    </ul>
+    
+    <h3>Treeview</h3>
+    <ul>
+        <li>It is very simple to <strong>switch to another module</strong> now: Simply click the module name!</li>
+        <li><strong>Closing a module</strong> is almost as simple: Right-click the module name and select the appropriate context menu entry.</li>
+        <li>Sample and instrument <strong>playback indicators</strong>.</li>
+        <li><strong>Improved icons</strong>: Mute status is now displayed.</li>
+        <li><strong>Sequence control</strong> including copying a sequence to another module.</li> 
     </ul>
 
     <h3>Pattern Editor</h3>
-    <div style="float:right;">
+    <div class="screenshots">
         <img src="ReleaseNotesImages/1.18/orderlist.png" width="348" height="167" alt="New orderlist" title="New orderlist" />
     </div>
     <ul>

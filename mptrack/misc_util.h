@@ -112,7 +112,7 @@ template <size_t size>
 inline void SanitizeFilename(char (&buffer)[size])
 {
 	STATIC_ASSERT(size > 0);
-	for(int i = 0; i < size; i++)
+	for(size_t i = 0; i < size; i++)
 	{
 		if(	buffer[i] == '\\' ||
 			buffer[i] == '\"' ||
@@ -123,7 +123,7 @@ inline void SanitizeFilename(char (&buffer)[size])
 			buffer[i] == '>'  ||
 			buffer[i] == '*')
 		{
-			for(int j = i + 1; j < size; j++)
+			for(size_t j = i + 1; j < size; j++)
 			{
 				buffer[j - 1] = buffer[j];
 			}

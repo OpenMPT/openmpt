@@ -20,8 +20,9 @@ public:
 
 // -> CODE#0024
 // -> DESC="wav export update"
-	BOOL m_bChannelMode;
+	bool m_bChannelMode;		// Render by channel
 // -! NEW_FEATURE#0024
+	 bool m_bInstrumentMode;	// Render by instrument
 
 public:
 	CWaveConvert(CWnd *parent, ORDERINDEX nMinOrder = ORDERINDEX_INVALID, ORDERINDEX nMaxOrder = ORDERINDEX_INVALID);
@@ -33,6 +34,8 @@ public:
 	virtual void OnOK();
 	afx_msg void OnCheck1();
 	afx_msg void OnCheck2();
+	afx_msg void OnCheckChannelMode();
+	afx_msg void OnCheckInstrMode();
 	afx_msg void OnFormatChanged();
 	afx_msg void OnPlayerOptions(); //rewbs.resamplerConf
 	DECLARE_MESSAGE_MAP()

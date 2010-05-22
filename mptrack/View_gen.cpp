@@ -538,12 +538,19 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 		m_CbnOutput.SetRedraw(FALSE);
 		m_CbnOutput.ResetContent();
 		m_CbnOutput.SetItemData(m_CbnOutput.AddString("Default"), 0);
-		for (UINT iOut=m_nCurrentPlugin+1; iOut<MAX_MIXPLUGINS; iOut++)
+		for (PLUGINDEX iOut = m_nCurrentPlugin + 1; iOut < MAX_MIXPLUGINS; iOut++)
 		{
 			PSNDMIXPLUGIN p = &pSndFile->m_MixPlugins[iOut];
-			if (p->Info.szLibraryName[0])
+			if (p->Info.dwPluginId1)
 			{
-				wsprintf(s, "FX%d: %s", iOut+1, p->Info.szLibraryName);
+				if(!strcmp(p->Info.szLibraryName, p->Info.szName) || strlen(p->Info.szName) == 0)
+				{
+					wsprintf(s, "FX%d: %s", iOut + 1, p->Info.szLibraryName);
+				} else
+				{
+					wsprintf(s, "FX%d: %s (%s)", iOut + 1, p->Info.szLibraryName, p->Info.szName);
+				}
+
 				int n = m_CbnOutput.AddString(s);
 				m_CbnOutput.SetItemData(n, 0x80|iOut);
 				if ((pSndFile->m_MixPlugins[m_nCurrentPlugin].Info.dwOutputRouting & 0x80)

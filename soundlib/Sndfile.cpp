@@ -1845,7 +1845,7 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 	case RS_PCM16D:
 	case RS_PCM16S:
 		{
-			uint16 *p = (uint16 *)pSample;
+			int16 *p = (int16 *)pSample;
 			int s_old = 0, s_ofs;
 			len = nLen * 2;
 			bufcount = 0;
@@ -1861,11 +1861,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 				}
 				if (nFlags == RS_PCM16D)
 				{
-					*((uint16 *)(&buffer[bufcount])) = (uint16)(s_new - s_old);
+					*((int16 *)(&buffer[bufcount])) = (int16)(s_new - s_old);
 					s_old = s_new;
 				} else
 				{
-					*((uint16 *)(&buffer[bufcount])) = (uint16)(s_new + s_ofs);
+					*((int16 *)(&buffer[bufcount])) = (int16)(s_new + s_ofs);
 				}
 				bufcount += 2;
 				if (bufcount >= sizeof(buffer) - 1)
@@ -1896,11 +1896,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 					p += 2;
 					if (nFlags == RS_STPCM8D)
 					{
-						buffer[bufcount++] = (uint8)(s_new - s_old);
+						buffer[bufcount++] = (int8)(s_new - s_old);
 						s_old = s_new;
 					} else
 					{
-						buffer[bufcount++] = (uint8)(s_new + s_ofs);
+						buffer[bufcount++] = (int8)(s_new + s_ofs);
 					}
 					if (bufcount >= sizeof(buffer))
 					{
@@ -1932,11 +1932,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 					p += 2;
 					if (nFlags == RS_STPCM16D)
 					{
-						*((uint16 *)(&buffer[bufcount])) = (uint16)(s_new - s_old);
+						*((int16 *)(&buffer[bufcount])) = (int16)(s_new - s_old);
 						s_old = s_new;
 					} else
 					{
-						*((uint16 *)(&buffer[bufcount])) = (uint16)(s_new + s_ofs);
+						*((int16 *)(&buffer[bufcount])) = (int16)(s_new + s_ofs);
 					}
 					bufcount += 2;
 					if (bufcount >= sizeof(buffer))
@@ -1979,11 +1979,11 @@ UINT CSoundFile::WriteSample(FILE *f, MODSAMPLE *pSmp, UINT nFlags, UINT nMaxLen
 				}
 				if (nFlags == RS_PCM8D)
 				{
-					buffer[bufcount++] = (uint8)(s_new - s_old);
+					buffer[bufcount++] = (int8)(s_new - s_old);
 					s_old = s_new;
 				} else
 				{
-					buffer[bufcount++] = (uint8)(s_new + s_ofs);
+					buffer[bufcount++] = (int8)(s_new + s_ofs);
 				}
 				if (bufcount >= sizeof(buffer))
 				{

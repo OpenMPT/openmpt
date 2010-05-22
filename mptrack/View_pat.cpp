@@ -1404,14 +1404,16 @@ void CViewPattern::OnMuteChannel(BOOL current)
 	if (pModDoc)
 	{
 		UINT nChn = current ? (m_dwCursor&0xFFFF)>>3 : (m_nMenuParam&0xFFFF)>>3;
-		pModDoc->SoloChannel(nChn, FALSE); //rewbs.merge: recover old solo/mute behaviour
+		pModDoc->SoloChannel(nChn, false); //rewbs.merge: recover old solo/mute behaviour
 		pModDoc->MuteChannel(nChn, !pModDoc->IsChannelMuted(nChn));
 
 		//If we just unmuted a channel, make sure none are still considered "solo".
-		if (!pModDoc->IsChannelMuted(nChn)) {
-			UINT nNumChn = pModDoc->GetNumChannels();
-			for (UINT i=0; i<nNumChn; i++){
-				pModDoc->SoloChannel(i, FALSE);
+		if(!pModDoc->IsChannelMuted(nChn))
+		{
+			const CHANNELINDEX nNumChn = pModDoc->GetNumChannels();
+			for(CHANNELINDEX i = 0; i < nNumChn; i++)
+			{
+				pModDoc->SoloChannel(i, false);
 			}
 		}
 
@@ -1436,7 +1438,7 @@ void CViewPattern::OnSoloChannel(BOOL current)
 		return;
 	}
 
-	UINT nNumChn = pModDoc->GetNumChannels();
+	const CHANNELINDEX nNumChn = pModDoc->GetNumChannels();
 	UINT nChn = current ? (m_dwCursor&0xFFFF)>>3 : (m_nMenuParam&0xFFFF)>>3;
 	if (nChn >= nNumChn)	{
 		return;
@@ -1455,7 +1457,8 @@ void CViewPattern::OnSoloChannel(BOOL current)
 			return;
 		} 
 	} 
-	for (UINT i=0; i<nNumChn; i++)	{
+	for(CHANNELINDEX i = 0; i < nNumChn; i++)
+	{
 		pModDoc->MuteChannel(i, !(i == nChn)); //mute all chans except nChn, unmute nChn
 		pModDoc->SoloChannel(i, (i == nChn));  //unsolo all chans except nChn, solo nChn
 	}
@@ -1506,11 +1509,11 @@ void CViewPattern::OnUnmuteAll()
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		UINT nChns = pModDoc->GetNumChannels();
-		for (UINT i=0; i<nChns; i++)
+		const CHANNELINDEX nChns = pModDoc->GetNumChannels();
+		for(CHANNELINDEX i = 0; i < nChns; i++)
 		{
-			pModDoc->MuteChannel(i, FALSE);
-			pModDoc->SoloChannel(i, FALSE); //rewbs.merge: binary solo/mute behaviour 
+			pModDoc->MuteChannel(i, false);
+			pModDoc->SoloChannel(i, false); //rewbs.merge: binary solo/mute behaviour 
 		}
 		InvalidateChannelsHeaders();
 	}
