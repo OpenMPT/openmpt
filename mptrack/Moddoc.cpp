@@ -1469,7 +1469,6 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	// Instrument mode: Same as channel mode, but renders per instrument (or sample)
 	if(wsdlg.m_bInstrumentMode)
 	{
-		// render by instrument (or sample)
 		if(m_SndFile.GetNumInstruments() == 0)
 		{
 			nRenderPasses = m_SndFile.GetNumSamples();
@@ -1507,13 +1506,14 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		// Channel mode
 		if(wsdlg.m_bChannelMode)
 		{
+			// Re-mute previously processed channel
+			if(i > 0) m_SndFile.ChnSettings[i - 1].dwFlags |= CHN_MUTE;
+
 			// Add channel number & name (if available) to path string
 			if(strlen(m_SndFile.ChnSettings[i].szName) > 0)
 				wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.ChnSettings[i].szName);
 			else
 				wsprintf(sFilenameAdd, "-%03d.wav", i + 1);
-			// Re-mute previously processed channel
-			if(i > 0) m_SndFile.ChnSettings[i - 1].dwFlags |= CHN_MUTE;
 			// Unmute channel to process
 			m_SndFile.ChnSettings[i].dwFlags &= ~CHN_MUTE;
 		}
@@ -1522,6 +1522,9 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		{
 			if(m_SndFile.GetNumInstruments() == 0)
 			{
+				// Re-mute previously processed sample
+				if(i > 0) MuteSample((SAMPLEINDEX)i, true);
+
 				if(m_SndFile.Samples[i + 1].pSample == nullptr || !m_SndFile.IsSampleUsed((SAMPLEINDEX)(i + 1)))
 					continue;
 				// Add sample number & name (if available) to path string
@@ -1529,20 +1532,19 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 					wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.m_szNames[i + 1]);
 				else
 					wsprintf(sFilenameAdd, "-%03d.wav", i + 1);
-				// Re-mute previously processed sample
-				if(i > 0) MuteSample((SAMPLEINDEX)i, true);
 				// Unmute sample to process
 				MuteSample((SAMPLEINDEX)(i + 1), false);
 			} else
 			{
+				// Re-mute previously processed instrument
+				if(i > 0) MuteInstrument((INSTRUMENTINDEX)i, true);
+
 				if(m_SndFile.Instruments[i + 1] == nullptr || !m_SndFile.IsInstrumentUsed((INSTRUMENTINDEX)(i + 1)))
 					continue;
 				if(strlen(m_SndFile.Instruments[i + 1]->name) > 0)
 					wsprintf(sFilenameAdd, "-%03d_%s.wav", i + 1, m_SndFile.Instruments[i + 1]->name);
 				else
 					wsprintf(sFilenameAdd, "-%03d.wav", i + 1);
-				// Re-mute previously processed instrument
-				if(i > 0) MuteInstrument((INSTRUMENTINDEX)i, true);
 				// Unmute instrument to process
 				MuteInstrument((INSTRUMENTINDEX)(i + 1), false);
 			}
