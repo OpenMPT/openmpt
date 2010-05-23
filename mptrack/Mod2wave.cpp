@@ -700,6 +700,8 @@ void CDoWaveConvert::OnButton1()
 	UINT nBytesPerSample = (CSoundFile::gnBitsPerSample * CSoundFile::gnChannels) / 8;
 	// For calculating the remaining time
 	DWORD dwStartTime = timeGetTime();
+	// For giving away some processing time every now and then
+	DWORD dwSleepTime = dwStartTime;
 
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
 	for (UINT n=0; ; n++)
@@ -763,14 +765,22 @@ void CDoWaveConvert::OnButton1()
 		{
 			DWORD l = (DWORD)(ullSamples / CSoundFile::gdwMixingFreq);
 
+			const DWORD dwCurrentTime = timeGetTime();
 			DWORD timeRemaining = 0; // estimated remainig time
 			if((ullSamples > 0) && (ullSamples < max))
 			{
-				timeRemaining = static_cast<DWORD>(((timeGetTime() - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
+				timeRemaining = static_cast<DWORD>(((dwCurrentTime - dwStartTime) * (max - ullSamples) / ullSamples) / 1000);
 			}
 
 			wsprintf(s, "Writing file... (%uKB, %umn%02us, %umn%02us remaining)", datahdr.length >> 10, l / 60, l % 60, timeRemaining / 60, timeRemaining % 60);
 			SetDlgItemText(IDC_TEXT1, s);
+
+			// Give windows some time to redraw the window, if necessary (else, the infamous "OpenMPT does not respond" will pop up)
+			if ((!m_bGivePlugsIdleTime) && (dwCurrentTime > dwSleepTime + 1000))
+			{
+				Sleep(1);
+				dwSleepTime = dwCurrentTime;
+			}
 		}
 		if ((progress != NULL) && ((DWORD)(ullSamples >> 14) != pos))
 		{
@@ -782,6 +792,7 @@ void CDoWaveConvert::OnButton1()
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
 		}
+
 		if (m_bAbort)
 		{
 			ok = IDCANCEL;
@@ -977,6 +988,7 @@ void CDoAcmConvert::OnButton1()
 	}
 	static DWORD oldsndcfg = CSoundFile::gdwSoundSetup;
 	oldrepeat = m_pSndFile->GetRepeatCount();
+	const DWORD dwSongTime = m_pSndFile->GetSongTime();
 	CSoundFile::gdwMixingFreq = wfxSrc.nSamplesPerSec;
 	CSoundFile::gnBitsPerSample = 16;
 //	CSoundFile::SetResamplingMode(SRCMODE_POLYPHASE); //rewbs.resamplerConf - we don't want this anymore.
@@ -998,7 +1010,7 @@ void CDoAcmConvert::OnButton1()
 
 	// calculate maximum samples
 	uint64 max = ullMaxSamples;
-	uint64 l = m_pSndFile->GetSongTime() * wfxSrc.nSamplesPerSec;
+	uint64 l = dwSongTime * wfxSrc.nSamplesPerSec;
 	if (l < max) max = l;
 	if (progress != NULL)
 	{

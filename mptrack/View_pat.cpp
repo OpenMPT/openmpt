@@ -163,10 +163,9 @@ void CViewPattern::OnInitialUpdate()
 	m_nPlayRow = 0;
 	m_nMidRow = 0;
 	m_nDragItem = 0;
-	m_bDragging = FALSE;
-	m_bInItemRect = FALSE;
-	m_bRecord = TRUE;
-	m_bContinueSearch = FALSE;
+	m_bDragging = false;
+	m_bInItemRect = false;
+	m_bContinueSearch = false;
 	m_dwBeginSel = m_dwEndSel = m_dwCursor = m_dwStartSel = m_dwDragPos = 0;
 	//m_dwStatus = 0;
 	m_dwStatus = PATSTATUS_PLUGNAMESINHEADERS;
@@ -193,7 +192,7 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 {
 	CSoundFile *pSndFile;
 	CModDoc *pModDoc = GetDocument();
-	BOOL bUpdateScroll;
+	bool bUpdateScroll = false;
 	pSndFile = pModDoc ? pModDoc->GetSoundFile() : NULL;
 	
 	if ( (!pModDoc) || (!pSndFile) || (npat >= pSndFile->Patterns.Size()) ) return FALSE;
@@ -203,18 +202,18 @@ BOOL CViewPattern::SetCurrentPattern(UINT npat, int nrow)
 	while ((npat > 0) && (!pSndFile->Patterns[npat])) npat--;
 	if (!pSndFile->Patterns[npat])
 	{
-		pSndFile->Patterns.Insert(npat, 64);
+		// Changed behaviour here. Previously, an empty pattern was inserted and the user most likely didn't notice that. Now, we just return an error.
+		//pSndFile->Patterns.Insert(npat, 64);
+		return FALSE;
 	}
 	
-
-	bUpdateScroll = FALSE;
 	m_nPattern = npat;
-	if ((nrow >= 0) && (nrow != (int)m_nRow) && (nrow < (int)pSndFile->PatternSize[m_nPattern]))
+	if ((nrow >= 0) && (nrow != (int)m_nRow) && (nrow < (int)pSndFile->Patterns[m_nPattern].GetNumRows()))
 	{
 		m_nRow = nrow;
-		bUpdateScroll = TRUE;
+		bUpdateScroll = true;
 	}
-	if (m_nRow >= pSndFile->PatternSize[m_nPattern]) m_nRow = 0;
+	if (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows()) m_nRow = 0;
 	int sel = m_dwCursor | (m_nRow << 16);
 	SetCurSel(sel, sel);
 	UpdateSizes();
@@ -363,7 +362,7 @@ BOOL CViewPattern::SetCurrentColumn(UINT ncol)
 	{
 		ncol += (((ncol & 0x07) - m_nDetailLevel) << 3) - (m_nDetailLevel+1);
 	}
-	if ((ncol >> 3) >= pSndFile->m_nChannels) return FALSE;
+	if ((ncol >> 3) >= pSndFile->GetNumChannels()) return FALSE;
 	m_dwCursor = ncol;
 	int sel = m_dwCursor | (m_nRow << 16);
 	int sel0 = sel;
@@ -461,7 +460,7 @@ DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 	CModDoc *pModDoc = GetDocument();
 	CSoundFile *pSndFile;
 	CRect rcClient, rect, plugRect; 	//rewbs.patPlugNames
-	UINT n, nmax;
+	UINT n;
 	int xofs, yofs;
 
 	if (!pModDoc) return 0;
@@ -471,7 +470,7 @@ DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 	rect.SetRect(m_szHeader.cx, 0, m_szHeader.cx + GetColumnWidth() - 2, m_szHeader.cy);
 	plugRect.SetRect(m_szHeader.cx, m_szHeader.cy-PLUGNAME_HEIGHT, m_szHeader.cx + GetColumnWidth() - 2, m_szHeader.cy);	//rewbs.patPlugNames
 	pSndFile = pModDoc->GetSoundFile();
-	nmax = pSndFile->m_nChannels;
+	const UINT nmax = pSndFile->GetNumChannels();
 	// Checking channel headers
 	//rewbs.patPlugNames
 	if (m_dwStatus & PATSTATUS_PLUGNAMESINHEADERS)
@@ -980,11 +979,13 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	if (/*(m_bDragging) ||*/ (!pModDoc)) return;
 	SetFocus();
 	m_nDragItem = GetDragItem(point, &m_rcDragItem);
-	m_bDragging = TRUE;
-	m_bInItemRect = TRUE;
+	m_bDragging = true;
+	m_bInItemRect = true;
 	SetCapture();
-	if ((point.x >= m_szHeader.cx) && (point.y <= m_szHeader.cy)) {
-		if (nFlags & MK_CONTROL) {
+	if ((point.x >= m_szHeader.cx) && (point.y <= m_szHeader.cy))
+	{
+		if (nFlags & MK_CONTROL)
+		{
 			TogglePendingMute((GetPositionFromPoint(point)&0xFFFF)>>3);
 		}
 	}
@@ -1059,10 +1060,10 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 //-------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	BOOL bItemSelected = m_bInItemRect;
+	const bool bItemSelected = m_bInItemRect;
 	if (/*(!m_bDragging) ||*/ (!pModDoc)) return;
-	m_bDragging = FALSE;
-	m_bInItemRect = FALSE;
+	m_bDragging = false;
+	m_bInItemRect = false;
 	ReleaseCapture();
 	m_dwStatus &= ~PATSTATUS_MOUSEDRAGSEL;
 	// Drag & Drop Editing
@@ -1109,7 +1110,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 		}
 		else if (!(nFlags&MK_CONTROL))
 		{
-			pModDoc->MuteChannel(nItemNo, (pSndFile->ChnSettings[nItemNo].dwFlags & CHN_MUTE) ? false : true);
+			pModDoc->MuteChannel(nItemNo, !pModDoc->IsChannelMuted(nItemNo));
 			pModDoc->UpdateAllViews(this, HINT_MODCHANNELS | ((nItemNo / CHANNELS_IN_TAB) << HINT_SHIFT_CHNTAB));
 		}
 		break;
@@ -1163,15 +1164,16 @@ void CViewPattern::OnRButtonDown(UINT, CPoint pt)
 		m_dwStatus &= ~(PATSTATUS_DRAGNDROPEDIT|PATSTATUS_MOUSEDRAGSEL);
 		if (m_bDragging)
 		{
-			m_bDragging = FALSE;
-			m_bInItemRect = FALSE;
+			m_bDragging = false;
+			m_bInItemRect = false;
 			ReleaseCapture();
 		}
 		SetCursor(CMainFrame::curArrow);
 		return;
 	}
 
-	if ((hMenu = ::CreatePopupMenu()) == NULL) {
+	if ((hMenu = ::CreatePopupMenu()) == NULL)
+	{
 		return;
 	}
 
@@ -1398,7 +1400,7 @@ void CViewPattern::OnMuteFromClick()
 }
 
 void CViewPattern::OnMuteChannel(BOOL current)
-//--------------------------------
+//--------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
@@ -1693,7 +1695,7 @@ void CViewPattern::OnEditFind()
 			m_cmdReplace.param = pageReplace.m_nParam;
 			m_dwReplaceFlags = pageReplace.m_dwFlags;
 			m_cInstrRelChange = pageReplace.cInstrRelChange;
-			m_bContinueSearch = FALSE;
+			m_bContinueSearch = false;
 			OnEditFindNext();
 		}
 	}
@@ -1932,7 +1934,7 @@ void CViewPattern::OnEditFindNext()
 	}
 EndSearch:
 	if (m_dwReplaceFlags & PATSEARCH_REPLACEALL) InvalidatePattern();
-	m_bContinueSearch = TRUE;
+	m_bContinueSearch = true;
 	EndWaitCursor();
 	// Display search results
 	//m_dwReplaceFlags &= ~PATSEARCH_REPLACEALL;

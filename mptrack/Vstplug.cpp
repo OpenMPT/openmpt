@@ -185,7 +185,7 @@ VOID CVstPluginManager::EnumerateDirectXDMOs()
 
 
 PVSTPLUGINLIB CVstPluginManager::AddPlugin(LPCSTR pszDllPath, BOOL bCache, const bool checkFileExistence, CString* const errStr)
-//-----------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------
 {
 	if(checkFileExistence && (PathFileExists(pszDllPath) == FALSE))
 	{
@@ -444,7 +444,7 @@ BOOL CVstPluginManager::RemovePlugin(PVSTPLUGINLIB pFactory)
 
 
 BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pSndFile)
-//---------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------
 {
 	UINT nMatch=0;
 	PVSTPLUGINLIB pFound = NULL;
@@ -457,15 +457,15 @@ BOOL CVstPluginManager::CreateMixPlugin(PSNDMIXPLUGIN pMixPlugin, CSoundFile* pS
 		{
 			if (pMixPlugin)
 			{
-				BOOL b1=FALSE, b2=FALSE;
+				bool b1 = false, b2 = false;
 				if ((p->dwPluginId1 == pMixPlugin->Info.dwPluginId1)
 				 && (p->dwPluginId2 == pMixPlugin->Info.dwPluginId2))
 				{
-					b1 = TRUE;
+					b1 = true;
 				}
 				if (!_strnicmp(p->szLibraryName, pMixPlugin->Info.szLibraryName, 64))
 				{
-					b2 = TRUE;
+					b2 = true;
 				}
 				if ((b1) && (b2))
 				{
@@ -645,7 +645,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	Log("VST plugin to host: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n",(int)effect, opcode,index,value,(int)ptr,opt);
 	#endif
 
-	enum HostCanDo
+	enum enmHostCanDo
 	{
 		HostDoNotKnow	= 0,
 		HostCanDo		= 1,
@@ -991,7 +991,51 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		break;
 	// open a fileselector window with VstFileSelect* in <ptr>
 	case audioMasterOpenFileSelector:		
-		Log("VST plugin to host: Get Directory\n");
+		{
+			/*
+			VstFileSelect *pFileSel = (VstFileSelect *)ptr;
+			ASSERT(false);
+
+			if(pFileSel->command != kVstDirectorySelect)
+			{
+				std::string extensions;
+				for(size_t i = 0; i < pFileSel->nbFileTypes; i++)
+				{
+					VstFileType *pType = &(pFileSel->fileTypes[i]);
+					extensions += pType->name;
+					extensions += "|";
+#if (defined(WIN32) || defined(WINDOWS))
+					extensions += "*.";
+					extensions += pType->dosType;
+#elif defined(MAC)
+					extensions += "*";
+					extensions += pType->macType;
+#elif defined(UNIX)
+					extensions += "*.";
+					extensions += pType->unixType;
+#else
+					#error Platform-specific code missing
+#endif
+					extensions += "|";
+				}
+
+				FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(
+					pFileSel->command == kVstFileSave ? false : true,
+					"", "", extensions, pFileSel->initialPath,
+					pFileSel->command == kVstMultipleFilesLoad
+				);
+				if(files.abort)
+					return 0;
+				// todo: retrieve filenames etc.
+				//strcpy(pFileSel->returnPath, files.first_file.c_str());
+				//pFileSel->sizeReturnPath = files.first_file.length();
+				return 1;
+
+			} else */
+			{
+				Log("VST plugin to host: Get Directory\n");
+			}
+		}
 		break;
 	
 	//---from here VST 2.2 extension opcodes------------------------------------------------------
@@ -1130,6 +1174,7 @@ static _PROBLEMATIC_PLUG gProblemPlugs[NUM_PROBLEMPLUGS] =
 };
 
 bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug) 
+//---------------------------------------------------
 {
 	CString s;
 	for (int p=0; p<NUM_PROBLEMPLUGS; p++)
@@ -1837,7 +1882,7 @@ bool CVstPlugin::RandomizeParams(long minParam, long maxParam)
 }
 
 bool CVstPlugin::SaveProgram(CString fileName)
-//------------------------------------
+//--------------------------------------------
 {
 	if (!(m_pEffect))
 		return false;

@@ -1748,7 +1748,8 @@ UINT CSoundFile::GetResamplingFlag(const MODCHANNEL *pChannel)
 	}
 	
 	//didn't manage to get flag from instrument header, use channel flags.
-	if (pChannel->dwFlags & CHN_HQSRC)	{
+	if (pChannel->dwFlags & CHN_HQSRC)
+	{
 		if (gdwSoundSetup & SNDMIX_SPLINESRCMODE)		return MIXNDX_HQSRC;
 		if (gdwSoundSetup & SNDMIX_POLYPHASESRCMODE)	return MIXNDX_KAISERSRC;
 		if (gdwSoundSetup & SNDMIX_FIRFILTERSRCMODE)	return MIXNDX_FIRFILTERSRC;				
@@ -1762,7 +1763,7 @@ UINT CSoundFile::GetResamplingFlag(const MODCHANNEL *pChannel)
 
 extern int gbInitPlugins;
 
-VOID CSoundFile::ProcessPlugins(UINT nCount)
+void CSoundFile::ProcessPlugins(UINT nCount)
 //------------------------------------------
 {
 	// Setup float inputs
@@ -1782,7 +1783,8 @@ VOID CSoundFile::ProcessPlugins(UINT nCount)
 			}*/
 
 			//We should only ever reach this point if the song is playing.
-			if (!pPlugin->pMixPlugin->IsSongPlaying()) {
+			if (!pPlugin->pMixPlugin->IsSongPlaying())
+			{
 				//Plugin doesn't know it is in a song that is playing;
 				//we must have added it during playback. Initialise it!
 				pPlugin->pMixPlugin->NotifySongPlaying(true);
