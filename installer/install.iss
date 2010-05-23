@@ -17,11 +17,12 @@ DefaultGroupName=OpenMPT
 AllowNoIcons=yes
 OutputDir=.\
 OutputBaseFilename=OpenMPT Setup
-Compression=lzma
+Compression=lzma2
 SolidCompression=yes
 WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
 CreateUninstallRegKey=not IsTaskSelected('portable')
+DisableWelcomePage=yes
 ;LicenseFile=license.txt
 
 [Tasks]
@@ -38,6 +39,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 ; you may want to change the base paths here
+
+; note: packageTemplate\ contains files specific for the "install package".
+; for files that are common with the "zip package", use ..\packageTemplate\
 
 ; preserve file type order for best solid compression results (first binary, then text)
 ; home folder
@@ -86,7 +90,7 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT"; Filename
 ; enable portable mode
 Filename: "{app}\mptrack.ini"; Section: "Paths"; Key: "UseAppDataDirectory"; String: "0"; Flags: createkeyifdoesntexist; Tasks: portable
 ; internet shortcut
-Filename: "{app}\ModPlug Central.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://www.lpchip.com/modplug/"; Flags: createkeyifdoesntexist;
+Filename: "{app}\ModPlug Central.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://openmpt.com/forum/"; Flags: createkeyifdoesntexist;
 
 [Run]
 ; duh
@@ -239,4 +243,6 @@ begin
         end;
     end;
 end;
+
+
 
