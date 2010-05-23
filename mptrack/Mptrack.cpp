@@ -236,28 +236,6 @@ const BYTE gVolEffectColors[MAX_VOLCMDS] =
 static void ShowChangesDialog()
 //-----------------------------
 {
-	const char* const firstOpenMessage = "OpenMPT build " MPT_VERSION_STR ".\n\n"
-		"Some changes since version 1.17.02.54:\n\n"
-		"[New] Pattern tab: New paste modes: overflow, push forward and flood.\n"
-		"[Mod] Pattern tab: Keyboard split is now accessible from key shortcut or menu.\n"
-		"[Imp] Pattern tab: Numerous improvements including better effect descriptions in note properties.\n"
-		"[New] Sequence editor: Can now handle order selections including delete/copy/cut/paste functionality.\n"
-		"[New] Sequence editor: Can render selected patterns to wave directly from orderlist.\n"
-		"[New] Envelope editor: Numerous improvements including ability to insert and remove points easily and editing envelopes with the keyboard.\n"
-		"[New] Sample tab: sample undo, sample draw, resize sample, DC offset removal, batch export, better loop point handling when deleting selections. Play sample from given position with Ctrl + left mouse button.\n"
-		"[New] MPTM: New parameter controls for controlling plug params from pattern.\n"
-		"[New] MPTM: Can have envelope points up to 240 and multiple sequences.\n"
-		"[New] MIDI mapping: Editing a plug param in its editor while holding shift key will now open MIDI mapping dialog.\n"
-		"[New] MIDI mapping: Can now record MIDI mapping changes to pattern.\n"
-		"[Imp] MOD/S3M/XM/IT: Numerous improvements to load, save and playback compatibility.\n"
-		"[New] Input: Can import J2B (RIFF AM / RIFF AMFF), PSM16, IMF, GDM and SCL files. Improved PSM and ULT import.\n"
-		"[New] Setup: New default directories: plugins and plugin presets, sharable colour schemes\n"
-		"[New] Cleanup: New option compo cleanup, rearrange samples is back, can merge sequences.\n"
-		"[Mod] Misc: Program settings are now by default stored in %APPDATA%\\OpenMPT\n"
-		"\n"
-		"and many more. See history.txt for more details.";
-			
-	CMainFrame::GetMainFrame()->MessageBox(firstOpenMessage, "OpenMPT " MPT_VERSION_STR, MB_ICONINFORMATION);
 }
 
 
