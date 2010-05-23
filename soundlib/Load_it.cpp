@@ -31,13 +31,14 @@
 #define str_LoadingIncompatibleVersion	TEXT("The file informed that it is incompatible with this version of OpenMPT. Loading was terminated.")
 #define str_LoadingMoreRecentVersion	TEXT("The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly.")
 
-const uint16 verMptFileVer = 0x88F;
+const uint16 verMptFileVer = 0x890;
 const uint16 verMptFileVerLoadLimit = 0x1000; // If cwtv-field is greater or equal to this value,
 											  // the MPTM file will not be loaded.
 
 /*
 MPTM version history for cwtv-field in IT header:
-0x88E(1.17.02.50) -> 0x88F(1.18.01.00): 
+0x88F(1.18.01.00) -> 0x890(1.18.02.00): Removed volume command velocity :xy, added delay-cut command :xy. 
+0x88E(1.17.02.50) -> 0x88F(1.18.01.00): Numerous changes
 0x88D(1.17.02.49) -> 0x88E(1.17.02.50): Changed ID to that of IT and undone the orderlist change done in
 				       0x88A->0x88B. Now extended orderlist is saved as extension.
 0x88C(1.17.02.48) -> 0x88D(1.17.02.49): Some tuning related changes - that part fails to read on older versions.
