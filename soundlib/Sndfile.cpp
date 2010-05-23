@@ -768,13 +768,14 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	}
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
-	// Load plugins only when m_pModDoc != 0.  (can be == 0 for example when examining module samples in treeview.
 
+	// plugin loader
 	string sNotFound;
 	bool bSearchIDs[MAX_MIXPLUGINS];
 	memset(bSearchIDs, false, MAX_MIXPLUGINS * sizeof(bool));
 	UINT iShowNotFound = 0;
 
+	// Load plugins only when m_pModDoc != 0.  (can be == 0 for example when examining module samples in treeview.
 	if (gpMixPluginCreateProc && GetpModDoc())
 	{
 		for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
@@ -1237,9 +1238,8 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 
 
 void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
-//-----------------------------------------------
+//-------------------------------------------------
 {
-	//while ((nPos < Order.size()) && (Order[nPos] == 0xFE)) nPos++;
 	while ((nOrder < Order.size()) && (Order[nOrder] == Order.GetIgnoreIndex())) nOrder++;
 	if ((nOrder >= Order.size()) || (Order[nOrder] >= Patterns.Size())) return;
 	for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
@@ -1259,6 +1259,12 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		}
 		Chn[j].nTremorCount = 0;
 	}
+
+#ifndef NO_VST
+	// Stop hanging notes from VST instruments as well
+	StopAllVsti();
+#endif // NO_VST
+
 	if (!nOrder)
 	{
 		SetCurrentPos(0);
@@ -1320,28 +1326,32 @@ void CSoundFile::ResumePlugins()
 void CSoundFile::StopAllVsti()
 //----------------------------
 {
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++) {
+	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	{
 		if (!m_MixPlugins[iPlug].pMixPlugin)	
 			continue;  //most common branch
 		
 		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState) {
+		if (m_MixPlugins[iPlug].pMixState)
+		{
 			pPlugin->HardAllNotesOff();
 		}
 	}
-	m_lTotalSampleCount=GetSampleOffset();
+	m_lTotalSampleCount = GetSampleOffset();
 }
 
 
 void CSoundFile::RecalculateGainForAllPlugs()
 //------------------------------------------
 {
-	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++) {
+	for (UINT iPlug=0; iPlug<MAX_MIXPLUGINS; iPlug++)
+	{
 		if (!m_MixPlugins[iPlug].pMixPlugin)	
 			continue;  //most common branch
 		
 		IMixPlugin *pPlugin = m_MixPlugins[iPlug].pMixPlugin;
-		if (m_MixPlugins[iPlug].pMixState) {
+		if (m_MixPlugins[iPlug].pMixState)
+		{
 			pPlugin->RecalculateGain();
 		}
 	}

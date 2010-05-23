@@ -9,7 +9,7 @@ OpenMPT - Full Version History
 [Var]: other
 (tx XYZ): thanks to XYZ for telling us about the bug
 
-Changes from revisions [476, 605]
+Changes from revisions [476, 606]
 ---------------------------------
 
 General tab
@@ -23,6 +23,7 @@ General tab
 Sequence editor
   [New] <Jojo> "Select All" shortcut also works here now.
   [Imp] <Jojo> Sequence menu also allows to insert empty sequences now.
+  [Fix] <Jojo> Jumping between patterns also stops VSTi notes now.
 
 Pattern tab::pattern editing
   [New] <Jojo> Extended context menu for PC Notes
@@ -36,6 +37,7 @@ Pattern tab::pattern editing
   [Fix] <Jojo> When pasting pattern data that exactly reached the pattern end with overflow paste enabled, a redundant undo point was created.
   [Fix] <Jojo> Entered (volume) effects are now properly validated (makes a difference f.e. in MOD format where it was previously possible to enter effects like Hxx)
   [Fix] <Jojo> Mix Paste: When in MPT behaviour mode, empty FX commands were not overwritten properly when there previously was an effect in that field but only the effect number (and not the param value) was reset.
+  [Fix] <Jojo> When deleting all patterns via the treeview and then switching to the pattern editor, pattern 0 is not created automatically anymore, to avoid confusion.
   [Reg] <Jojo> Creating a selection using the Shift key + Mouse click now only works if there was previously no selection made; This seems reasonable as the old shift-behaviour seems to be widely used.
   
 Pattern tab::GUI
@@ -173,10 +175,13 @@ Module cleanup
   [Fix] <Jojo> Because of an error in pattern count retrival, the last pattern was not checked when looking for unused samples which sometimes resulted in deleted samples (although they were actually used).
   [Fix] <re>   Fixed a memory leak in pattern name handling.
 
+Wave Export
+  [New] <Jojo> It is now also possible to render by instrument (i.e. one wave file per instrument).
+  [Imp] <Jojo> When switching to another task and switching back to OpenMPT, it is now less likely that the infamous "OpenMPT does not respond" dialog from Windows occours. 
+
 Misc
   [New] <Jojo> INI Settings: When portable mode is enabled, the most common paths in mptrack.ini are now translated to relative paths (if possible). Plugin paths are not translated to relative paths (yet).
   [New] <Jojo> Modules in gzip archives (single-file .gz archives) can now be imported, just to satisfy my laziness when downloading gzipped modules from Amiga Music Preservation. :-P
-  [New] <Jojo> Wave export can now also render by instrument (i.e. one wave file per instrument).
   [Imp] <Jojo> The wave export "render by channel" mode ignores empty channels now.
   [Imp] <Jojo> Mod Loaders: Instead of creating messageboxes in various places, errors are now written to the log and one messagebox is shown for each file.
   [Imp] <Jojo> Binary files are now less often falsely recognized as early MOD files (15 samples without header): If the orderlist contains orderlist items > 128, loading is cancelled.

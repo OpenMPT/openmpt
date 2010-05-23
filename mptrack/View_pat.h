@@ -88,7 +88,7 @@ protected:
 
 	int m_nXScroll, m_nYScroll;
 	DWORD m_nDragItem, m_nMenuParam, m_nDetailLevel;
-	BOOL m_bDragging, m_bInItemRect, m_bRecord, m_bContinueSearch, m_bWholePatternFitsOnScreen;
+	bool m_bDragging, m_bInItemRect, m_bContinueSearch, m_bWholePatternFitsOnScreen;
 	RECT m_rcDragItem;
 	DWORD m_dwStatus, m_dwCursor;
 	DWORD m_dwBeginSel, m_dwEndSel, m_dwStartSel, m_dwDragPos;

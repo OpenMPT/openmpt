@@ -755,11 +755,11 @@ public:
 
 public:
 	// Real-time sound functions
-	VOID SuspendPlugins(); //rewbs.VSTCompliance
-	VOID ResumePlugins();  //rewbs.VSTCompliance
-	VOID StopAllVsti();    //rewbs.VSTCompliance
-	VOID RecalculateGainForAllPlugs();
-	VOID ResetChannels();
+	void SuspendPlugins(); //rewbs.VSTCompliance
+	void ResumePlugins();  //rewbs.VSTCompliance
+	void StopAllVsti();    //rewbs.VSTCompliance
+	void RecalculateGainForAllPlugs();
+	void ResetChannels();
 	UINT Read(LPVOID lpBuffer, UINT cbBuffer);
 	UINT ReadMix(LPVOID lpBuffer, UINT cbBuffer, CSoundFile *, DWORD *, LPBYTE ps=NULL);
 	UINT CreateStereoMix(int count);
@@ -767,8 +767,8 @@ public:
 	BOOL FadeSong(UINT msec);
 	BOOL GlobalFadeSong(UINT msec);
 	UINT GetTotalTickCount() const { return m_nTotalCount; }
-	VOID ResetTotalTickCount() { m_nTotalCount = 0;}
-	VOID ProcessPlugins(UINT nCount);
+	void ResetTotalTickCount() { m_nTotalCount = 0;}
+	void ProcessPlugins(UINT nCount);
 
 public:
 	// Mixer Config
