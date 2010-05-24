@@ -52,7 +52,8 @@ public:
 	void Clear() {memset(this, 0, sizeof(MODCOMMAND));}
 
 	// Returns true if modcommand is empty, false otherwise.
-	bool IsEmpty() const {return (*this == Empty());}
+	bool IsEmpty() const {return (this->note == 0 && this->instr == 0 && this->volcmd == 0 && this->command == 0);}
+	//bool IsEmpty() const {return (*this == Empty());}
 
 	// Returns true if instrument column represents plugin index.
 	bool IsInstrPlug() const {return IsPcNote();}
