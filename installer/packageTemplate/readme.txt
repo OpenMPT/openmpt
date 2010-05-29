@@ -37,6 +37,8 @@ extraKeymaps(folder): Additional key bindings for the keyboard manager,
     Impulse Tracker) and country-specific layouts.
 soundtouch(folder): SoundTouch readme and copying.txt
 ReleaseNotesImages(folder): Images using in the release notes document.
+ExampleSongs(folder): A set of module files which should give an impression of
+    what can be done in OpenMPT with only a few kilobytes.
 history.txt: Version history.
 mptrack.exe: Main executable.
 OpenMPT_SoundTouch_i16.dll: Slightly customized SoundTouch library used in time

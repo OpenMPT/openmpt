@@ -46,6 +46,8 @@ Release package contents:
 extraKeymaps(folder):
 soundtouch(folder): SoundTouch readme and copying.txt
 ReleaseNotesImages(folder): Images using in the release notes document.
+ExampleSongs(folder): A set of module files which should give an impression of
+    what can be done in OpenMPT with only a few kilobytes.
 history.txt: Version history.
 mptrack.exe: Main executable.
 open_settings_folder.bat: Opens settings folder.

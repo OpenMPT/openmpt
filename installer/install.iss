@@ -6,7 +6,7 @@
 [Setup]
 AppId={{67903736-E9BB-4664-B148-F62BCAB4FA42}
 AppVerName=OpenMPT 1.18
-AppVersion=1.18.01.00
+AppVersion=1.18.02.00
 AppName=OpenMPT
 AppPublisher=OpenMPT Devs / Olivier Lapicque
 AppPublisherURL=http://openmpt.com/
@@ -22,8 +22,9 @@ SolidCompression=yes
 WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
 CreateUninstallRegKey=not IsTaskSelected('portable')
-DisableWelcomePage=yes
 ;LicenseFile=license.txt
+;The following setting is recommended by the Aero wizard guidelines.
+DisableWelcomePage=yes
 
 [Tasks]
 ; icons and install mode
@@ -38,8 +39,6 @@ Name: "vst_scan"; Description: "Scan for previously installed VST plugins"; Grou
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-; you may want to change the base paths here
-
 ; note: packageTemplate\ contains files specific for the "install package".
 ; for files that are common with the "zip package", use ..\packageTemplate\
 
@@ -48,6 +47,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Source: "..\mptrack\bin\mptrack.exe";                DestDir: "{app}"; Flags: ignoreversion
 Source: "..\mptrack\bin\OpenMPT_SoundTouch_i16.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\mptrack\bin\unmo3.dll";                  DestDir: "{app}"; Flags: ignoreversion
+
+Source: "..\packageTemplate\ExampleSongs\*.*";       DestDir: "{app}\ExampleSongs\"; Flags: ignoreversion
+
 Source: "packageTemplate\readme.txt";                DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packageTemplate\history.txt";            DestDir: "{app}"; Flags: ignoreversion
 
@@ -94,7 +96,7 @@ Filename: "{app}\ModPlug Central.url"; Section: "InternetShortcut"; Key: "URL"; 
 
 [Run]
 ; duh
-Filename: "{app}\mptrack.exe"; Description: "{cm:LaunchProgram,OpenMPT}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\mptrack.exe"; Parameters: """{app}\ExampleSongs\xaimus - digital sentience.it"""; Description: "{cm:LaunchProgram,OpenMPT}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
@@ -243,6 +245,10 @@ begin
         end;
     end;
 end;
+
+
+
+
 
 
 
