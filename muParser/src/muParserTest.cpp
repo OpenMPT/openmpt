@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -232,7 +232,7 @@ namespace mu
       int  iStat= 0,
            iErr = 0;
 
-     mu::console() << "testing name restriction enforcement...";
+      mu::console() << "testing name restriction enforcement...";
     
       Parser p;
 
@@ -734,7 +734,7 @@ namespace mu
     int ParserTester::TestExpression()
     {
       int iStat = 0;
-      mu::console() << _T("testing sample formulas...");
+      mu::console() << _T("testing expression samples...");
 
       // operator precedencs
       iStat += EqnTest( _T("1+2-3*4/5^6"), 2.99923, true);
@@ -849,7 +849,13 @@ namespace mu
       iStat += ThrowTest( _T("3=4"), ecUNEXPECTED_OPERATOR);
       iStat += ThrowTest( _T("sin(8)=4"), ecUNEXPECTED_OPERATOR);
       iStat += ThrowTest( _T("\"test\"=a"), ecUNEXPECTED_OPERATOR);
-      iStat += ThrowTest( _T("sin=9"), ecUNEXPECTED_OPERATOR);
+
+      // <ibg 20090529>
+      // this is now legal, for reference see:
+      // https://sourceforge.net/forum/message.php?msg_id=7411373
+      //      iStat += ThrowTest( _T("sin=9"), ecUNEXPECTED_OPERATOR);    
+      // </ibg>
+
       iStat += ThrowTest( _T("(8)=5"), ecUNEXPECTED_OPERATOR);
       iStat += ThrowTest( _T("(a)=5"), ecUNEXPECTED_OPERATOR);
       iStat += ThrowTest( _T("a=\"tttt\""), ecOPRT_TYPE_CONFLICT);
@@ -969,13 +975,14 @@ namespace mu
 
       try
       {
-        Parser *p1, p2, p3;   // three parser objects
-                              // they will be used for testing copy and assihnment operators
+        std::auto_ptr<Parser> p1;
+        Parser  p2, p3;   // three parser objects
+                          // they will be used for testing copy and assihnment operators
         // p1 is a pointer since i'm going to delete it in order to test if
         // parsers after copy construction still refer to members of it.
         // !! If this is the case this function will crash !!
       
-        p1 = new mu::Parser(); 
+        p1.reset(new mu::Parser()); 
         // Add constants
         p1->DefineConst( _T("pi"), (value_type)PARSER_CONST_PI);
         p1->DefineConst( _T("e"), (value_type)PARSER_CONST_E);
@@ -1041,13 +1048,12 @@ namespace mu
         {
           // Test copy constructor
           std::vector<mu::Parser> vParser;
-          vParser.push_back(*p1);
+          vParser.push_back(*(p1.get()));
           mu::Parser p2 = vParser[0];   // take parser from vector
         
           // destroy the originals from p2
           vParser.clear();              // delete the vector
-          delete p1;                    // delete the original
-          p1 = 0;
+          p1.reset(0);
 
           fVal[2] = p2.Eval();
 

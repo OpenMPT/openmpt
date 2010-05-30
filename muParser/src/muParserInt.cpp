@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -87,27 +87,27 @@ value_type ParserInt::Sum(const value_type* a_afArg, int a_iArgc)
 //---------------------------------------------------------------------------
 value_type ParserInt::Min(const value_type* a_afArg, int a_iArgc)
 { 
-    if (!a_iArgc)	
-        throw ParserError( _T("too few arguments for function min.") );
+  if (!a_iArgc)	
+    throw ParserError( _T("too few arguments for function min.") );
 
-    value_type fRes=a_afArg[0];
-    for (int i=0; i<a_iArgc; ++i) 
-      fRes = std::min(fRes, a_afArg[i]);
+  value_type fRes=a_afArg[0];
+  for (int i=0; i<a_iArgc; ++i) 
+    fRes = std::min(fRes, a_afArg[i]);
 
-    return fRes;
+  return fRes;
 }
 
 //---------------------------------------------------------------------------
 value_type ParserInt::Max(const value_type* a_afArg, int a_iArgc)
 { 
-    if (!a_iArgc)	
-        throw ParserError(_T("too few arguments for function min."));
+  if (!a_iArgc)	
+    throw ParserError(_T("too few arguments for function min."));
 
-    value_type fRes=a_afArg[0];
-    for (int i=0; i<a_iArgc; ++i) 
-      fRes = std::max(fRes, a_afArg[i]);
+  value_type fRes=a_afArg[0];
+  for (int i=0; i<a_iArgc; ++i) 
+    fRes = std::max(fRes, a_afArg[i]);
 
-    return fRes;
+  return fRes;
 }
 
 //---------------------------------------------------------------------------
@@ -123,12 +123,12 @@ int ParserInt::IsVal(const char_type *a_szExpr, int *a_iPos, value_type *a_fVal)
   int iVal(0);
 
   stream >> iVal;
-  int iEnd = stream.tellg();   // Position after reading
+  stringstream_type::pos_type iEnd = stream.tellg();   // Position after reading
 
-  if (iEnd==-1)
+  if (iEnd==(stringstream_type::pos_type)-1)
     return 0;
 
-  *a_iPos += iEnd;
+  *a_iPos += (int)iEnd;
   *a_fVal = (value_type)iVal;
   return 1;
 }
@@ -150,7 +150,7 @@ int ParserInt::IsHexVal(const char_type *a_szExpr, int *a_iPos, value_type *a_fV
   if (nPos==(stringstream_type::pos_type)0)
     return 1;
 
-  *a_iPos += 1 + nPos;
+  *a_iPos += (int)(1 + nPos);
   *a_fVal = iVal;
   return true;
 }

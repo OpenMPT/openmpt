@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -72,7 +72,7 @@ namespace mu
     m_vErrMsg[ecEMPTY_EXPRESSION]    = _T("Expression is empty.");
     m_vErrMsg[ecINVALID_VAR_PTR]     = _T("Invalid pointer to variable.");
     m_vErrMsg[ecUNEXPECTED_OPERATOR] = _T("Unexpected operator \"$TOK$\" found at position $POS$");
-    m_vErrMsg[ecUNEXPECTED_EOF]      = _T("Unexpected end of formula at position $POS$");
+    m_vErrMsg[ecUNEXPECTED_EOF]      = _T("Unexpected end of expression at position $POS$");
     m_vErrMsg[ecUNEXPECTED_ARG_SEP]  = _T("Unexpected argument separator at position $POS$");
     m_vErrMsg[ecUNEXPECTED_PARENS]   = _T("Unexpected parenthesis \"$TOK$\" at position $POS$");
     m_vErrMsg[ecUNEXPECTED_FUN]      = _T("Unexpected function \"$TOK$\" at position $POS$");
@@ -80,8 +80,8 @@ namespace mu
     m_vErrMsg[ecUNEXPECTED_VAR]      = _T("Unexpected variable \"$TOK$\" found at position $POS$");
     m_vErrMsg[ecUNEXPECTED_ARG]      = _T("Function arguments used without a function (position: $POS$)");
     m_vErrMsg[ecMISSING_PARENS]      = _T("Missing parenthesis");
-    m_vErrMsg[ecTOO_MANY_PARAMS]     = _T("Too many parameters for function \"$TOK$\" at formula position $POS$");
-    m_vErrMsg[ecTOO_FEW_PARAMS]      = _T("Too few parameters for function \"$TOK$\" at formula position $POS$");
+    m_vErrMsg[ecTOO_MANY_PARAMS]     = _T("Too many parameters for function \"$TOK$\" at expression position $POS$");
+    m_vErrMsg[ecTOO_FEW_PARAMS]      = _T("Too few parameters for function \"$TOK$\" at expression position $POS$");
     m_vErrMsg[ecDIV_BY_ZERO]         = _T("Divide by zero");
     m_vErrMsg[ecDOMAIN_ERROR]        = _T("Domain error");
     m_vErrMsg[ecNAME_CONFLICT]       = _T("Name conflict");

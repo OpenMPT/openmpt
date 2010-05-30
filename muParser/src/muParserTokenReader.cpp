@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -345,21 +345,21 @@ namespace mu
       if ( string_type(pOprtDef[i]) == string_type(szFormula + m_iPos, szFormula + m_iPos + len) )
       {
         switch(i)
-	      {
+        {
         case cmAND:
         case cmOR:
         case cmXOR:
         case cmLT:
-		    case cmGT:
-		    case cmLE:
-		    case cmGE:
-		    case cmNEQ:  
-		    case cmEQ:
-		    case cmADD:
-		    case cmSUB:
-		    case cmMUL:
-		    case cmDIV:
-		    case cmPOW:
+        case cmGT:
+        case cmLE:
+        case cmGE:
+        case cmNEQ:  
+        case cmEQ:
+        case cmADD:
+        case cmSUB:
+        case cmMUL:
+        case cmDIV:
+        case cmPOW:
         case cmASSIGN:
               //if (len!=sTok.length())
               //  continue;
@@ -408,7 +408,7 @@ namespace mu
       	
 		    default:      // The operator is listed in c_DefaultOprt, but not here. This is a bad thing...
               Error(ecINTERNAL_ERROR);
-	      } // switch operator id
+        } // switch operator id
 
         m_iPos += (int)len;
         a_Tok.Set( (ECmdCode)i, pOprtDef[i] );
@@ -513,7 +513,12 @@ namespace mu
 
     funmap_type::const_iterator item = m_pFunDef->find(strTok);
     if (item==m_pFunDef->end())
-        return false;
+      return false;
+
+    // Check if the next sign is an opening bracket
+    const char_type *szFormula = m_strFormula.c_str();
+    if (szFormula[iEnd]!='(')
+      return false;
 
     a_Tok.Set(item->second, strTok);
 
@@ -683,6 +688,8 @@ namespace mu
 
     if (m_iSynFlags & noVAR)
       Error(ecUNEXPECTED_VAR, m_iPos, strTok);
+
+    m_pParser->OnDetectVar(&m_strFormula, m_iPos, iEnd);
 
     m_iPos = iEnd;
     a_Tok.SetVar(item->second, strTok);
