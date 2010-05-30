@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -48,7 +48,7 @@ namespace mu
       When defining custom binary operators with #AddOprt(...) make sure not to choose 
       names conflicting with these definitions. 
   */
-  char_type* ParserBase::c_DefaultOprt[] = 
+  const char_type* ParserBase::c_DefaultOprt[] = 
   { 
     _T("<="), _T(">="),  _T("!="), 
     _T("=="), _T("<"),   _T(">"), 
@@ -82,11 +82,17 @@ namespace mu
     ,m_sNameChars()
     ,m_sOprtChars()
     ,m_sInfixOprtChars()
+    ,m_vStackBuffer()
   {
     InitTokenReader();
   }
 
   //---------------------------------------------------------------------------
+  /** \brief Copy constructor. 
+
+    Tha parser can be safely copy constructed but the bytecode is reset during
+    copy construction.
+  */
   ParserBase::ParserBase(const ParserBase &a_Parser)
     :m_pParseFormula(&ParserBase::ParseString)
     ,m_pCmdCode(0)
@@ -193,12 +199,36 @@ namespace mu
   }
 
   //---------------------------------------------------------------------------
+  void ParserBase::OnDetectVar(string_type * /*pExpr*/, int & /*nStart*/, int & /*nEnd*/)
+  {}
+
+  //---------------------------------------------------------------------------
+  /** \brief Returns the version of muparser. 
+  
+    Format is as follows: "MAJOR.MINOR (OPTIONAL TEXT)"
+  */
+  string_type ParserBase::GetVersion() const
+  {
+    return MUP_VERSION;
+  }
+
+  //---------------------------------------------------------------------------
+  /** \brief Add a value parsing function. 
+      
+      When parsing an expression muParser tries to detect values in the expression
+      string using different valident callbacks. Thuis it's possible to parse
+      for hex values, binary values and floating point values. 
+  */
   void ParserBase::AddValIdent(identfun_type a_pCallback)
   {
     m_pTokenReader->AddValIdent(a_pCallback);
   }
 
   //---------------------------------------------------------------------------
+  /** \brief Set a function that can create variable pointer for unknown expression variables. 
+      \param a_pFactory A pointer to the variable factory.
+      \param pUserData A user defined context pointer.
+  */
   void ParserBase::SetVarFactory(facfun_type a_pFactory, void *pUserData)
   {
     m_pTokenReader->SetVarCreator(a_pFactory, pUserData);  
@@ -447,8 +477,8 @@ namespace mu
     if (m_ConstDef.find(a_sName)!=m_ConstDef.end())
       Error(ecNAME_CONFLICT);
 
-    if (m_FunDef.find(a_sName)!=m_FunDef.end())
-      Error(ecNAME_CONFLICT);
+//    if (m_FunDef.find(a_sName)!=m_FunDef.end())
+//      Error(ecNAME_CONFLICT);
 
     CheckName(a_sName, ValidNameChars());
     m_VarDef[a_sName] = a_pVar;
@@ -471,8 +501,7 @@ namespace mu
 
   //---------------------------------------------------------------------------
   /** \brief Get operator priority.
-
-  \throw ParserException if a_Oprt is no operator code
+      \throw ParserException if a_Oprt is no operator code
   */
   int ParserBase::GetOprtPri(const token_type &a_Tok) const
   {
@@ -480,7 +509,7 @@ namespace mu
     {
     // built in operators
     case cmEND:      return -5;
-	  case cmARG_SEP:    return -4;
+	  case cmARG_SEP:  return -4;
     case cmBO :	
     case cmBC :      return -2;
     case cmASSIGN:   return -1;               
@@ -781,6 +810,10 @@ namespace mu
   }
 
   //---------------------------------------------------------------------------
+  /** \brief Apply a binary operator. 
+      \param a_stOpt The operator stack
+      \param a_stVal The value stack
+  */
   void ParserBase::ApplyBinOprt( ParserStack<token_type> &a_stOpt,
                                  ParserStack<token_type> &a_stVal) const
   {
@@ -886,7 +919,8 @@ namespace mu
     #pragma warning( disable : 4312 )
   #endif
 
-    value_type Stack[99];
+    value_type *Stack = &m_vStackBuffer[0];
+//    value_type Stack[99];
     ECmdCode iCode;
     bytecode_type idx(0);
     int i(0);
@@ -897,10 +931,12 @@ namespace mu
     iCode = (ECmdCode)m_pCmdCode[i+1];
     i += 2;
 
-  #ifdef _DEBUG
-    if (idx>=99)
+#ifdef _DEBUG
+    // Die Formelendkennung ist Wert 26 dreimal hintereinander geschrieben
+    // Ich muss für den Test das Formelende filtern.
+    if (idx>=(int)m_vStackBuffer.size() && iCode!=cmEND)
       throw exception_type(ecGENERIC, _T(""), m_pTokenReader->GetFormula(), -1);
-  #endif
+#endif
 
     switch (iCode)
     {
@@ -1228,6 +1264,7 @@ namespace mu
       m_pParseFormula = (m_pCmdCode[1]==cmVAL && checkEnd<m_vByteCode.GetBufSize() && m_pCmdCode[checkEnd]==cmEND) ? 
                               &ParserBase::ParseValue :
                               &ParserBase::ParseCmdCode;
+      m_vStackBuffer.resize(m_vByteCode.GetMaxStackSize());
     }
 
     return fVal;

@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -53,6 +53,8 @@ namespace mu
     using ParserBase::SetExpr;
 
     complex_type Eval();
+    static complex_type UnpackToComplex(double val);
+    static double PackToDouble(const complex_type &val);
 
   private:
 
@@ -70,9 +72,6 @@ namespace mu
     static value_type  Sqrt(value_type);
 
     static int IsVal(const char_type* a_szExpr, int *a_iPos, value_type *a_iVal);
-
-    static complex_type UnpackToComplex(double val);
-    static double PackToDouble(const complex_type &val);
 
     virtual void InitOprt();
     virtual void InitCharSets();

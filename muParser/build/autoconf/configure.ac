@@ -1,12 +1,12 @@
 # ======================================================================================
 # Author: Francesco Montorsi
-# RCS-ID: $Id: configure.ac 65 2006-12-03 10:39:22Z frm $
+# RCS-ID: $Id: configure.ac 269 2010-01-18 18:30:28Z ibg $
 # ======================================================================================
 
 
 # NOTE:
 #  the version of the project must be updated also in docs/Doxyfile !
-AC_INIT([muParser], [1.27], [frm@users.sourceforge.net])
+AC_INIT([muParser], [1.32], [frm@users.sourceforge.net])
 
 AC_PREREQ([2.57])
 AC_CONFIG_AUX_DIR([build/autoconf])

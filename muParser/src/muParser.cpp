@@ -6,7 +6,7 @@
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
 
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -46,8 +46,8 @@ using namespace std;
 /** \brief Namespace for mathematical applications. */
 namespace mu
 {
-  std::locale Parser::s_locale = std::locale("C");
-  
+  std::locale Parser::s_locale;
+
   //---------------------------------------------------------------------------
   // Trigonometric function
   value_type Parser::Sin(value_type v)   { return sin(v);  }
@@ -154,13 +154,13 @@ namespace mu
   */
   value_type Parser::Max(const value_type *a_afArg, int a_iArgc)
   { 
-      if (!a_iArgc)	
-          throw exception_type(_T("too few arguments for function min."));
+    if (!a_iArgc)	
+      throw exception_type(_T("too few arguments for function min."));
 
-      value_type fRes=a_afArg[0];
-      for (int i=0; i<a_iArgc; ++i) fRes = std::max(fRes, a_afArg[i]);
+    value_type fRes=a_afArg[0];
+    for (int i=0; i<a_iArgc; ++i) fRes = std::max(fRes, a_afArg[i]);
 
-      return fRes;
+    return fRes;
   }
 
 
@@ -175,30 +175,16 @@ namespace mu
   {
     value_type fVal(0);
 
-  // 20080309 commented the fix since it is not local aware
-  //
-  //// thanks to CodeProject member sailorickm for writing this fix:
-  //// http://www.codeproject.com/cpp/FastMathParser.asp?msg=1354598#xx1354598xx
-  //// i cant test it myself, if you see problems please contact me.
-  ////
-  //// - 20080309 ibg; support for locales wont work with this fix
-  //#if defined (__hpux) || (defined __GNUC__ && (__GNUC__ == 3 && (__GNUC_MINOR__ < 3 )))
-  //  int iEnd = 0;
-  //  int nAssigned = sscanf(a_szExpr, "%lf%n", &fVal, &iEnd);
-  //  if (nAssigned == 0)
-  //  iEnd = -1;
-  //#else
     stringstream_type stream(a_szExpr);
     stream.seekg(0);        // todo:  check if this really is necessary
     stream.imbue(Parser::s_locale);
     stream >> fVal;
-    int iEnd = stream.tellg(); // Position after reading
-  //#endif
+    stringstream_type::pos_type iEnd = stream.tellg(); // Position after reading
 
-    if (iEnd==-1)
+    if (iEnd==(stringstream_type::pos_type)-1)
       return 0;
 
-    *a_iPos += iEnd;
+    *a_iPos += (int)iEnd;
     *a_fVal = fVal;
     return 1;
   }
@@ -212,6 +198,15 @@ namespace mu
   Parser::Parser()
     :ParserBase()
   {
+    // For some reason locale initialization in the dll fails when done in the static
+    // constructor. I have to do it here
+    static bool bInitLocale = true;
+    if (bInitLocale)
+    {
+      Parser::s_locale = std::locale(std::locale::classic(), new change_dec_sep<char_type>('.'));
+      bInitLocale = false;
+    }
+
     AddValIdent(IsVal);
 
     InitCharSets();
@@ -314,6 +309,18 @@ namespace mu
   }
 
   //---------------------------------------------------------------------------
+  /** \brief Resets the locale. 
+
+    The default locale used "." as decimal separator, no thousands separator and
+    "," as function argument separator.
+  */
+  void Parser::ResetLocale()
+  {
+    s_locale = std::locale(std::locale("C"), new change_dec_sep<char_type>('.'));
+    SetArgSep(',');
+  }
+
+  //---------------------------------------------------------------------------
   /** \brief Initialize operators. 
   
     By default only the unary minus operator is added.
@@ -323,6 +330,30 @@ namespace mu
     DefineInfixOprt(_T("-"), UnaryMinus);
   }
 
+  //---------------------------------------------------------------------------
+  void Parser::OnDetectVar(string_type * /*pExpr*/, int & /*nStart*/, int & /*nEnd*/)
+  {
+    // this is just sample code to illustrate modifying variable names on the fly.
+    // I'm not sure anyone really needs such a feature...
+    /*
+
+
+    string sVar(pExpr->begin()+nStart, pExpr->begin()+nEnd);
+    string sRepl = std::string("_") + sVar + "_";
+  
+    int nOrigVarEnd = nEnd;
+    cout << "variable detected!\n";
+    cout << "  Expr: " << *pExpr << "\n";
+    cout << "  Start: " << nStart << "\n";
+    cout << "  End: " << nEnd << "\n";
+    cout << "  Var: \"" << sVar << "\"\n";
+    cout << "  Repl: \"" << sRepl << "\"\n";
+    nEnd = nStart + sRepl.length();
+    cout << "  End: " << nEnd << "\n";
+    pExpr->replace(pExpr->begin()+nStart, pExpr->begin()+nOrigVarEnd, sRepl);
+    cout << "  New expr: " << *pExpr << "\n";
+    */
+  }
 
   //---------------------------------------------------------------------------
   /** \brief Numerically differentiate with regard to a variable. 
@@ -342,16 +373,22 @@ namespace mu
                           value_type  a_fEpsilon) const
   {
     value_type fRes(0), 
-               fBuf(*a_Var), 
-               f[4] = {0,0,0,0};
+               fBuf(*a_Var),
+               f[4] = {0,0,0,0},
+               fEpsilon(a_fEpsilon);
 
-    *a_Var = a_fPos+2 * a_fEpsilon;  f[0] = Eval();
-    *a_Var = a_fPos+1 * a_fEpsilon;  f[1] = Eval();
-    *a_Var = a_fPos-1 * a_fEpsilon;  f[2] = Eval();
-    *a_Var = a_fPos-2 * a_fEpsilon;  f[3] = Eval();
+    // Backwards compatible calculation of epsilon inc case the user doesnt provide
+    // his own epsilon
+    if (fEpsilon==0)
+      fEpsilon = (a_fPos==0) ? (value_type)1e-10 : 1e-7 * a_fPos;
+
+    *a_Var = a_fPos+2 * fEpsilon;  f[0] = Eval();
+    *a_Var = a_fPos+1 * fEpsilon;  f[1] = Eval();
+    *a_Var = a_fPos-1 * fEpsilon;  f[2] = Eval();
+    *a_Var = a_fPos-2 * fEpsilon;  f[3] = Eval();
     *a_Var = fBuf; // restore variable
 
-    fRes = (-f[0] + 8*f[1] - 8*f[2] + f[3]) / (12*a_fEpsilon);
+    fRes = (-f[0] + 8*f[1] - 8*f[2] + f[3]) / (12*fEpsilon);
     return fRes;
   }
 } // namespace mu

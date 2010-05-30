@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2004-2009 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -74,6 +74,9 @@ private:
     /** \brief Position in the Calculation array. */
     unsigned m_iStackPos;
 
+    /** \brief Maximum size needed for the stack. */
+    std::size_t m_iMaxStackSize;
+
     /** \brief Core type of the bytecode. */
     storage_type m_vBase;
 
@@ -102,8 +105,8 @@ private:
     void StorePtr(void *a_pAddr);
 
 public:
+
     ParserByteCode();
-   ~ParserByteCode();
     ParserByteCode(const ParserByteCode &a_ByteCode);
     ParserByteCode& operator=(const ParserByteCode &a_ByteCode);
     void Assign(const ParserByteCode &a_ByteCode);
@@ -117,7 +120,7 @@ public:
 
     void Finalize();
     void clear();
-
+    std::size_t GetMaxStackSize() const;
     std::size_t GetBufSize() const;
 
     const map_type* GetRawData() const;

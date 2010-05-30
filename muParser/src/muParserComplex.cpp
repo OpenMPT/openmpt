@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2007 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -24,6 +24,7 @@
 */
 
 #include "muParserComplex.h"
+#include "muParserFixes.h"
 
 #include <cmath>
 #include <complex>
@@ -116,7 +117,12 @@ namespace mu
     float real, imag;
     int stat, len;
 
+#if defined (_UNICODE)
+    stat = swscanf(buf.c_str(), _T("{%f,%f}%n"), &real, &imag, &len);
+#else
     stat = sscanf(buf.c_str(), "{%f,%f}%n", &real, &imag, &len);
+#endif
+
     if (stat!=2)
       return 0;
 

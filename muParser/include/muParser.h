@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -45,8 +45,8 @@ namespace mu
     Can be used as a reference implementation for subclassing the parser.
 
     <small>
-    (C) 2004-2008 Ingo Berg<br>
-    ingo_berg(at)gmx.de
+    (C) 2010 Ingo Berg<br>
+    muparser(at)gmx.de
     </small>
   */
   class Parser : public ParserBase
@@ -59,13 +59,15 @@ namespace mu
     virtual void InitFun();
     virtual void InitConst();
     virtual void InitOprt();
+    virtual void OnDetectVar(string_type *pExpr, int &nStart, int &nEnd);
 
     void SetDecSep(char_type cDecSep);
-    void SetThousandsSep(char_type cThousandsSep);
-    
+    void SetThousandsSep(char_type cThousandsSep = 0);
+    void ResetLocale();
+
     value_type Diff(value_type *a_Var, 
                     value_type a_fPos, 
-                    value_type a_fEpsilon = 0.00074) const;
+                    value_type a_fEpsilon = 0) const;
 
   private:
 

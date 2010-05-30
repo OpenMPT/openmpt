@@ -5,7 +5,7 @@
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
   |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
         \/                       \/            \/      \/        
-  Copyright (C) 2004-2008 Ingo Berg
+  Copyright (C) 2010 Ingo Berg
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this 
   software and associated documentation files (the "Software"), to deal in the Software
@@ -46,6 +46,7 @@ namespace mu
   /** Bytecode default constructor. */
   ParserByteCode::ParserByteCode()
     :m_iStackPos(0)
+    ,m_iMaxStackSize(0)
     ,m_vBase()
     ,mc_iSizeVal( std::max( (int)sizeof(value_type)  / (int)sizeof(map_type), 1 ) )
     ,mc_iSizePtr( std::max( (int)sizeof(value_type*) / (int)sizeof(map_type), 1 ) )
@@ -53,11 +54,6 @@ namespace mu
   {
     m_vBase.reserve(1000);
   }
-
-  //---------------------------------------------------------------------------
-  /** \brief Destructor (trivial).*/
-  ParserByteCode::~ParserByteCode()
-  {}
 
   //---------------------------------------------------------------------------
   /** \brief Copy constructor. 
@@ -91,9 +87,9 @@ namespace mu
   */
   void ParserByteCode::StorePtr(void *a_pAddr)
   {
-    #if defined(_MSC_VER)
-      #pragma warning( disable : 4311 )
-    #endif
+#if defined(_MSC_VER)
+    #pragma warning( disable : 4311 )
+#endif
 
     // demo code for packing / unpacking pointers into bytecode
 //    void *ptr(NULL);
@@ -114,9 +110,9 @@ namespace mu
     for (int i=0; i<mc_iSizePtr; ++i)
       m_vBase.push_back( *( reinterpret_cast<map_type*>(&a_pAddr) + i ) );
 
-    #if defined(_MSC_VER)
-      #pragma warning( default : 4311 )
-    #endif
+#if defined(_MSC_VER)
+    #pragma warning( default : 4311 )
+#endif
   }
 
   //---------------------------------------------------------------------------
@@ -131,6 +127,7 @@ namespace mu
 
     m_iStackPos = a_ByteCode.m_iStackPos;
     m_vBase = a_ByteCode.m_vBase;
+    m_iMaxStackSize = a_ByteCode.m_iMaxStackSize;
   }
 
   //---------------------------------------------------------------------------
@@ -142,6 +139,8 @@ namespace mu
   {
     m_vBase.push_back( ++m_iStackPos );
     m_vBase.push_back( cmVAR );
+
+    m_iMaxStackSize = std::max(m_iMaxStackSize, (size_t)m_iStackPos);
 
     StorePtr(a_pVar);
 
@@ -171,6 +170,7 @@ namespace mu
   {
     m_vBase.push_back( ++m_iStackPos );
     m_vBase.push_back( cmVAL );
+    m_iMaxStackSize = std::max(m_iMaxStackSize, (size_t)m_iStackPos);
 
     for (int i=0; i<mc_iSizeVal; ++i)
       m_vBase.push_back( *(reinterpret_cast<map_type*>(&a_fVal) + i) );
@@ -227,6 +227,7 @@ namespace mu
     {
       m_iStackPos = m_iStackPos + a_iArgc + 1; 
     }
+    m_iMaxStackSize = std::max(m_iMaxStackSize, (size_t)m_iStackPos);
 
     m_vBase.push_back(m_iStackPos);
     m_vBase.push_back(cmFUNC);
@@ -250,6 +251,8 @@ namespace mu
     m_vBase.push_back(cmFUNC_STR);
 	  m_vBase.push_back(a_iArgc);
     m_vBase.push_back(a_iIdx);
+
+    m_iMaxStackSize = std::max(m_iMaxStackSize, (size_t)m_iStackPos);
 
     StorePtr(a_pFun);
   }
@@ -277,6 +280,13 @@ namespace mu
     return &m_vBase[0];
   }
 
+
+  //---------------------------------------------------------------------------
+  std::size_t ParserByteCode::GetMaxStackSize() const
+  {
+    return m_iMaxStackSize+1;
+  }
+
   //---------------------------------------------------------------------------
   std::size_t ParserByteCode::GetBufSize() const
   {
@@ -296,6 +306,7 @@ namespace mu
   {
     m_vBase.clear();
     m_iStackPos = 0;
+    m_iMaxStackSize = 0;
   }
 
   //---------------------------------------------------------------------------
