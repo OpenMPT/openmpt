@@ -53,7 +53,7 @@ void getXParam(BYTE command, UINT nPat, UINT nRow, UINT nChannel, CSoundFile *pS
 
 		// Find extension resolution (8 to 24 bits)
 		UINT n = 1;
-		while(n < 4 && nCmdRow+n < pSndFile->PatternSize[nPat]){
+		while(n < 4 && nCmdRow+n < pSndFile->Patterns[nPat].GetNumRows()){
 			i = (nCmdRow+n) * pSndFile->m_nChannels + nChannel;
 			if(pSndFile->Patterns[nPat][i].command != CMD_XPARAM) break;
 			n++;
@@ -1032,7 +1032,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 	if ((pSndFile) && (m_nPattern < pSndFile->Patterns.Size()) && (combo))
 	{
 		CHAR s[256];
-		UINT nrows = pSndFile->PatternSize[m_nPattern];
+		UINT nrows = pSndFile->Patterns[m_nPattern].GetNumRows();
 
 // -> CODE#0008
 // -> DESC="#define to set pattern size"
@@ -1048,9 +1048,9 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		combo->SetCurSel(nrows - specs.patternRowsMin);
 		wsprintf(s, "Pattern #%d:\x0d\x0a %d row%s (%dK)",
 			m_nPattern,
-			pSndFile->PatternSize[m_nPattern],
-			(pSndFile->PatternSize[m_nPattern] == 1) ? "" : "s",
-			(pSndFile->PatternSize[m_nPattern] * pSndFile->m_nChannels * sizeof(MODCOMMAND))/1024);
+			pSndFile->Patterns[m_nPattern].GetNumRows(),
+			(pSndFile->Patterns[m_nPattern].GetNumRows() == 1) ? "" : "s",
+			(pSndFile->Patterns[m_nPattern].GetNumRows() * pSndFile->m_nChannels * sizeof(MODCOMMAND))/1024);
 		SetDlgItemText(IDC_TEXT1, s);
 	}
 	return TRUE;
@@ -1193,7 +1193,7 @@ BOOL CEditCommand::ShowEditWindow(UINT nPat, DWORD dwCursor)
 	UINT nChannel = (dwCursor & 0xFFFF) >> 3;
 
 	if ((nPat >= pSndFile->Patterns.Size()) || (!m_pModDoc)
-	 || (nRow >= pSndFile->PatternSize[nPat]) || (nChannel >= pSndFile->m_nChannels)
+	 || (nRow >= pSndFile->Patterns[nPat].GetNumRows()) || (nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[nPat])) return FALSE;
 	m_Command = pSndFile->Patterns[nPat][nRow * pSndFile->m_nChannels + nChannel];
 	m_nRow = nRow;
@@ -1237,7 +1237,7 @@ void CEditCommand::UpdateNote(UINT note, UINT instr)
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
-	 || (m_nRow >= pSndFile->PatternSize[m_nPattern])
+	 || (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
 	MODCOMMAND *m = pSndFile->Patterns[m_nPattern]+m_nRow*pSndFile->m_nChannels+m_nChannel;
@@ -1261,7 +1261,7 @@ void CEditCommand::UpdateVolume(UINT volcmd, UINT vol)
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
-	 || (m_nRow >= pSndFile->PatternSize[m_nPattern])
+	 || (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
 	MODCOMMAND *m = pSndFile->Patterns[m_nPattern]+m_nRow*pSndFile->m_nChannels+m_nChannel;
@@ -1284,7 +1284,7 @@ void CEditCommand::UpdateEffect(UINT command, UINT param)
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	if ((m_nPattern >= pSndFile->Patterns.Size()) || (!m_pModDoc)
-	 || (m_nRow >= pSndFile->PatternSize[m_nPattern])
+	 || (m_nRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
 	 || (m_nChannel >= pSndFile->m_nChannels)
 	 || (!pSndFile->Patterns[m_nPattern])) return;
 	MODCOMMAND *m = pSndFile->Patterns[m_nPattern]+m_nRow*pSndFile->m_nChannels+m_nChannel;

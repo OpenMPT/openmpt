@@ -829,9 +829,9 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 
 		memset(&xmph, 0, sizeof(xmph));
 		xmph[0] = 9;
-		xmph[5] = (BYTE)(PatternSize[i] & 0xFF);
-		xmph[6] = (BYTE)(PatternSize[i] >> 8);
-		for (UINT j = m_nChannels * PatternSize[i]; j > 0; j--, p++)
+		xmph[5] = (BYTE)(Patterns[i].GetNumRows() & 0xFF);
+		xmph[6] = (BYTE)(Patterns[i].GetNumRows() >> 8);
+		for (UINT j = m_nChannels * Patterns[i].GetNumRows(); j > 0; j--, p++)
 		{
 			// Don't write more than 32 channels
 			if(bCompatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
@@ -916,8 +916,8 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	{
 		memset(&xmph, 0, sizeof(xmph));
 		xmph[0] = 9;
-		xmph[5] = (BYTE)(PatternSize[i] & 0xFF);
-		xmph[6] = (BYTE)(PatternSize[i] >> 8);
+		xmph[5] = (BYTE)(Patterns[i].GetNumRows() & 0xFF);
+		xmph[6] = (BYTE)(Patterns[i].GetNumRows() >> 8);
 		fwrite(xmph, 1, 9, f);
 	}
 	// Writing instruments

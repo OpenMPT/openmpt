@@ -446,16 +446,6 @@ typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); 
 
 class CSoundFile;
 
-//======================
-class CPatternSizesMimic
-//======================
-{
-public:
-	const ROWINDEX operator[](const int i) const;
-	CPatternSizesMimic(const CSoundFile& csf) : m_rSndFile(csf) {}
-private:
-	const CSoundFile& m_rSndFile;
-};
 
 //Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
 //If changing these, ChangeModTypeTo() might need modification.
@@ -592,7 +582,6 @@ public:	// for Editing
 	MODCHANNEL Chn[MAX_CHANNELS];						// Channels
 	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS];	// Channels settings
 	CPatternContainer Patterns;							// Patterns
-	CPatternSizesMimic PatternSize;						// Mimics old PatternsSize-array(is read-only).
 	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x.
 	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
 	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers

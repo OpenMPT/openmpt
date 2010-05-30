@@ -533,11 +533,11 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
 	{
 		for (UINT ipat=0; ipat<npatterns; ipat++)
 		{
-			if ((Patterns[ipat] = AllocatePattern(PatternSize[ipat], m_nChannels)) == NULL) break;
+			if ((Patterns[ipat] = AllocatePattern(Patterns[ipat].GetNumRows(), m_nChannels)) == NULL) break;
 			for (UINT chn=0; chn<m_nChannels; chn++) if ((patterntracks[ipat*32+chn]) && (patterntracks[ipat*32+chn] <= ntracks))
 			{
 				MODCOMMAND *m = Patterns[ipat] + chn;
-				UnpackMDLTrack(m, m_nChannels, PatternSize[ipat], patterntracks[ipat*32+chn], lpStream+dwTrackPos);
+				UnpackMDLTrack(m, m_nChannels, Patterns[ipat].GetNumRows(), patterntracks[ipat*32+chn], lpStream+dwTrackPos);
 			}
 		}
 	}

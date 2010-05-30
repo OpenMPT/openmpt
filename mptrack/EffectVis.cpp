@@ -599,16 +599,16 @@ void CEffectVis::UpdateSelection(UINT startRow, UINT endRow, UINT nchn, CModDoc*
 
 	//Check pattern, start row and channel exist
 	MODCOMMAND *pcmd = m_pSndFile->Patterns[m_nPattern];
-	if (!pcmd ||  (m_startRow >= m_pSndFile->PatternSize[m_nPattern]) || (m_nChan >= m_pSndFile->m_nChannels))
+	if (!pcmd ||  (m_startRow >= m_pSndFile->Patterns[m_nPattern].GetNumRows()) || (m_nChan >= m_pSndFile->m_nChannels))
 	{
 		DoClose();
 		return;
 	}
 
 	//Check end exists
-	if ( (m_endRow >= m_pSndFile->PatternSize[m_nPattern]) )
+	if ( (m_endRow >= m_pSndFile->Patterns[m_nPattern].GetNumRows()) )
 	{
-		m_endRow =  m_pSndFile->PatternSize[m_nPattern]-1;
+		m_endRow =  m_pSndFile->Patterns[m_nPattern].GetNumRows()-1;
 		//ensure we still have some rows to process
 		if (m_endRow <= m_startRow)
 		{

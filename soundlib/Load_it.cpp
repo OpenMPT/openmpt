@@ -700,7 +700,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		// Free pattern if not empty
 		if(Patterns[npat]) { FreePattern(Patterns[npat]); Patterns[npat] = NULL; }
 
-		// PatternSize[npat]
+		// Patterns[npat].GetNumRows()
 		ASSERT_CAN_READ(4);
 		memcpy(&id,lpStream+streamPos,sizeof(DWORD));
 		if(id > MAX_PATTERN_ROWS) return false;
@@ -708,16 +708,16 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		streamPos += sizeof(DWORD);
 
 		// Try to allocate & read only sized patterns
-		if(PatternSize[npat]){
+		if(Patterns[npat].GetNumRows()){
 
 			// Allocate pattern
-			if(Patterns.Insert(npat, PatternSize[npat])){
-				streamPos += m_nChannels * PatternSize[npat] * n;
+			if(Patterns.Insert(npat, Patterns[npat].GetNumRows())){
+				streamPos += m_nChannels * Patterns[npat].GetNumRows() * n;
 				continue;
 			}
 
 			// Pattern data
-			long datasize = m_nChannels * PatternSize[npat] * n;
+			long datasize = m_nChannels * Patterns[npat].GetNumRows() * n;
 			//if (streamPos+datasize<=dwMemLength) {
 			if(Patterns[npat].ReadITPdata(lpStream, streamPos, datasize, dwMemLength))
 			{
@@ -1728,11 +1728,11 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 	// patterns data content
 	for(UINT npat=0; npat<MAX_PATTERNS; npat++){
 		// pattern size (number of rows)
-		id = Patterns[npat] ? PatternSize[npat] : 0;
+		id = Patterns[npat] ? Patterns[npat].GetNumRows() : 0;
 		fwrite(&id, 1, sizeof(id), f);
 		// pattern data
-		if(Patterns[npat] && PatternSize[npat]) Patterns[npat].WriteITPdata(f);
-			//fwrite(Patterns[npat], 1, m_nChannels * PatternSize[npat] * sizeof(MODCOMMAND_ORIGINAL), f);
+		if(Patterns[npat] && Patterns[npat].GetNumRows()) Patterns[npat].WriteITPdata(f);
+			//fwrite(Patterns[npat], 1, m_nChannels * Patterns[npat].GetNumRows() * sizeof(MODCOMMAND_ORIGINAL), f);
 	}
 
 // Song lonely (instrument-less) samples
@@ -2161,15 +2161,15 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		if (!Patterns[npat]) continue;
 		patpos[npat] = dwPos;
 		patinfo[0] = 0;
-		patinfo[1] = PatternSize[npat];
+		patinfo[1] = Patterns[npat].GetNumRows();
 		patinfo[2] = 0;
 		patinfo[3] = 0;
 
 		// Check for empty pattern
-		if (PatternSize[npat] == 64)
+		if (Patterns[npat].GetNumRows() == 64)
 		{
 			MODCOMMAND *pzc = Patterns[npat];
-			UINT nz = PatternSize[npat] * m_nChannels;
+			UINT nz = Patterns[npat].GetNumRows() * m_nChannels;
 			UINT iz = 0;
 			for (iz=0; iz<nz; iz++)
 			{
@@ -2187,7 +2187,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		memset(chnmask, 0xFF, sizeof(chnmask));
 		memset(lastvalue, 0, sizeof(lastvalue));
 		MODCOMMAND *m = Patterns[npat];
-		for (UINT row=0; row<PatternSize[npat]; row++)
+		for (UINT row=0; row<Patterns[npat].GetNumRows(); row++)
 		{
 			UINT len = 0;
 			for (UINT ch=0; ch<m_nChannels; ch++, m++)
@@ -2760,14 +2760,14 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		if (!Patterns[npat]) continue;
 		patpos[npat] = dwPos;
 		patinfo[0] = 0;
-		patinfo[1] = PatternSize[npat];
+		patinfo[1] = Patterns[npat].GetNumRows();
 		patinfo[2] = 0;
 		patinfo[3] = 0;
 		// Check for empty pattern
-		if (PatternSize[npat] == 64)
+		if (Patterns[npat].GetNumRows() == 64)
 		{
 			MODCOMMAND *pzc = Patterns[npat];
-			UINT nz = PatternSize[npat] * nChannels;
+			UINT nz = Patterns[npat].GetNumRows() * nChannels;
 			UINT iz = 0;
 			for (iz=0; iz<nz; iz++)
 			{
@@ -2785,7 +2785,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		memset(chnmask, 0xFF, sizeof(chnmask));
 		memset(lastvalue, 0, sizeof(lastvalue));
 		MODCOMMAND *m = Patterns[npat];
-		for (UINT row=0; row<PatternSize[npat]; row++)
+		for (UINT row=0; row<Patterns[npat].GetNumRows(); row++)
 		{
 			len = 0;
 			for (UINT ch = 0; ch < m_nChannels; ch++, m++)

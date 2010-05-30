@@ -448,7 +448,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 					if(m_pSndFile->Patterns.IsValidPat(copyPat))
 					{
 						MODCOMMAND *m = m_pSndFile->Patterns[copyPat];
-						for (UINT len = m_pSndFile->PatternSize[copyPat] * m_pSndFile->m_nChannels; len; m++, len--)
+						for (UINT len = m_pSndFile->Patterns[copyPat].GetNumRows() * m_pSndFile->m_nChannels; len; m++, len--)
 						{
 							if(m->command == CMD_POSITIONJUMP && m->param >= startOrd)
 							{
@@ -512,21 +512,21 @@ bool ModSequenceSet::MergeSequences()
 			if(!m_pSndFile->Patterns.IsValidPat(nPat)) continue;
 
 			MODCOMMAND *m = m_pSndFile->Patterns[nPat];
-			for (UINT len = 0; len < m_pSndFile->PatternSize[nPat] * m_pSndFile->m_nChannels; m++, len++)
+			for (UINT len = 0; len < m_pSndFile->Patterns[nPat].GetNumRows() * m_pSndFile->m_nChannels; m++, len++)
 			{
 				if(m->command == CMD_POSITIONJUMP)
 				{
 					if(patternsFixed[nPat] != SEQUENCEINDEX_INVALID && patternsFixed[nPat] != removedSequences)
 					{
 						// Oops, some other sequence uses this pattern already.
-						const PATTERNINDEX nNewPat = m_pSndFile->Patterns.Insert(m_pSndFile->PatternSize[nPat]);
+						const PATTERNINDEX nNewPat = m_pSndFile->Patterns.Insert(m_pSndFile->Patterns[nPat].GetNumRows());
 						if(nNewPat != SEQUENCEINDEX_INVALID)
 						{
 							// could create new pattern - copy data over and continue from here.
 							At(nFirstOrder + nOrd) = nNewPat;
 							MODCOMMAND *pSrc = m_pSndFile->Patterns[nPat];
 							MODCOMMAND *pDest = m_pSndFile->Patterns[nNewPat];
-							memcpy(pDest, pSrc, m_pSndFile->PatternSize[nPat] * m_pSndFile->m_nChannels * sizeof(MODCOMMAND));
+							memcpy(pDest, pSrc, m_pSndFile->Patterns[nPat].GetNumRows() * m_pSndFile->m_nChannels * sizeof(MODCOMMAND));
 							m = pDest + len;
 							patternsFixed.resize(max(nNewPat + 1, (PATTERNINDEX)patternsFixed.size()), SEQUENCEINDEX_INVALID);
 							nPat = nNewPat;

@@ -389,7 +389,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	for (PATTERNINDEX nPat = maxpat; nPat < maxPatIndex; nPat++) if ((pSndFile->Patterns[nPat]) && (nPat >= nMinToRemove))
 	{
 		MODCOMMAND *m = pSndFile->Patterns[nPat];
-		UINT ncmd = pSndFile->m_nChannels * pSndFile->PatternSize[nPat];
+		UINT ncmd = pSndFile->m_nChannels * pSndFile->Patterns[nPat].GetNumRows();
 		for (UINT i=0; i<ncmd; i++)
 		{
 			if ((m[i].note) || (m[i].instr) || (m[i].volcmd) || (m[i].command)) goto NotEmpty;
@@ -474,7 +474,7 @@ NotEmpty:
 					pSndFile->m_lpszPatternNames = lpszoldpatnames;
 					if (s[0]) pSndFile->SetPatternName(k, s);
 				}
-				nPatRows[k] = pSndFile->PatternSize[i];
+				nPatRows[k] = pSndFile->Patterns[i].GetNumRows();
 				pPatterns[k] = pSndFile->Patterns[i];
 			} else
 				if (pSndFile->Patterns[i])
@@ -539,7 +539,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 			MODCOMMAND *p = pSndFile->Patterns[nPat];
 			if (p)
 			{
-				UINT jmax = pSndFile->PatternSize[nPat] * pSndFile->m_nChannels;
+				UINT jmax = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->m_nChannels;
 				for (UINT j=0; j<jmax; j++, p++)
 				{
 					if ((p->note) && (p->note <= NOTE_MAX))
@@ -706,7 +706,7 @@ bool CModCleanupDlg::RearrangeSamples()
 		for (PATTERNINDEX nPat = 0; nPat < pSndFile->Patterns.Size(); nPat++) if (pSndFile->Patterns[nPat])
 		{
 			MODCOMMAND *m = pSndFile->Patterns[nPat];
-			for(UINT len = pSndFile->PatternSize[nPat] * pSndFile->m_nChannels; len; m++, len--)
+			for(UINT len = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->m_nChannels; len; m++, len--)
 			{
 				if(m->instr <= pSndFile->m_nSamples) m->instr = (BYTE)nSampleMap[m->instr];
 			}
@@ -813,7 +813,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 			for (PATTERNINDEX iPat = 0; iPat < pSndFile->Patterns.Size(); iPat++) if (pSndFile->Patterns[iPat])
 			{
 				MODCOMMAND *p = pSndFile->Patterns[iPat];
-				UINT nLen = pSndFile->m_nChannels * pSndFile->PatternSize[iPat];
+				UINT nLen = pSndFile->m_nChannels * pSndFile->Patterns[iPat].GetNumRows();
 				while (nLen--)
 				{
 					if (p->instr)

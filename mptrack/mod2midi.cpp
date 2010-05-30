@@ -424,7 +424,7 @@ BOOL CModToMidi::DoConvert()
 	{
 		int pattern_break = -1;
 		UINT nPat = m_pSndFile->Order[nOrder];
-		if ((nPat >= m_pSndFile->Patterns.Size()) || (nPat == m_pSndFile->Order.GetIgnoreIndex()) || (!m_pSndFile->Patterns[nPat]) || (nRow >= m_pSndFile->PatternSize[nPat]))
+		if ((nPat >= m_pSndFile->Patterns.Size()) || (nPat == m_pSndFile->Order.GetIgnoreIndex()) || (!m_pSndFile->Patterns[nPat]) || (nRow >= m_pSndFile->Patterns[nPat].GetNumRows()))
 		{
 			nOrder++;
 			nRow = 0;
@@ -527,7 +527,7 @@ BOOL CModToMidi::DoConvert()
 		} else
 		{
 			nRow++;
-			if (nRow >= m_pSndFile->PatternSize[nPat])
+			if (nRow >= m_pSndFile->Patterns[nPat].GetNumRows())
 			{
 				nRow = 0;
 				nOrder++;

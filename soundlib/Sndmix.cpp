@@ -750,9 +750,9 @@ BOOL CSoundFile::ProcessRow()
 		// Weird stuff?
 		if ((m_nPattern >= Patterns.Size()) || (!Patterns[m_nPattern])) return FALSE;
 		// Should never happen
-		if (m_nRow >= PatternSize[m_nPattern]) m_nRow = 0;
+		if (m_nRow >= Patterns[m_nPattern].GetNumRows()) m_nRow = 0;
 		m_nNextRow = m_nRow + 1;
-		if (m_nNextRow >= PatternSize[m_nPattern])
+		if (m_nNextRow >= Patterns[m_nPattern].GetNumRows())
 		{
 			if (!(m_dwSongFlags & SONG_PATTERNLOOP)) m_nNextPattern = m_nCurrentPattern + 1;
 			m_nNextRow = 0;
@@ -1978,7 +1978,7 @@ VOID CSoundFile::ProcessMidiOut(UINT nChn, MODCHANNEL *pChn)	//rewbs.VSTdelay: a
 	// For now there is no difference between mute and sync mute with VSTis.
 	if (pChn->dwFlags & (CHN_MUTE|CHN_SYNCMUTE)) return;
 	if ((!m_nInstruments) || (m_nPattern >= Patterns.Size())
-		 || (m_nRow >= PatternSize[m_nPattern]) || (!Patterns[m_nPattern])) return;
+		 || (m_nRow >= Patterns[m_nPattern].GetNumRows()) || (!Patterns[m_nPattern])) return;
 
 	const MODCOMMAND::NOTE note = pChn->nRowNote;
 	const MODCOMMAND::INSTR instr = pChn->nRowInstr;

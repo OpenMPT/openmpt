@@ -488,7 +488,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		for(PATTERNINDEX nPat = 0; nPat < Patterns.Size(); nPat++) if(Patterns[nPat])
 		{
 			MODCOMMAND *m = Patterns[nPat];
-			for(UINT len = PatternSize[nPat] * m_nChannels; len; m++, len--)
+			for(UINT len = Patterns[nPat].GetNumRows() * m_nChannels; len; m++, len--)
 			{
 				if(m->command == CMD_MIDI)
 				{
@@ -642,7 +642,7 @@ bool CSoundFile::SaveS3M(LPCSTR lpszFileName, UINT nPacking)
 		{
 			len = 2;
 			MODCOMMAND *p = Patterns[i];
-			for (UINT row=0; row<64; row++) if (row < PatternSize[i])
+			for (UINT row=0; row<64; row++) if (row < Patterns[i].GetNumRows())
 			{
 				for (UINT j=0; j<m_nChannels; j++)
 				{

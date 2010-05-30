@@ -107,7 +107,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	// Check if conversion to 64 rows is necessary
 	for (UINT ipat=0; ipat<m_SndFile.Patterns.Size(); ipat++)
 	{
-		if ((m_SndFile.Patterns[ipat]) && (m_SndFile.PatternSize[ipat] != 64)) b64++;
+		if ((m_SndFile.Patterns[ipat]) && (m_SndFile.Patterns[ipat].GetNumRows() != 64)) b64++;
 	}
 	if (((m_SndFile.m_nInstruments) || (b64)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
 	{
@@ -126,12 +126,12 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		// Resizing all patterns to 64 rows
 		UINT nPatCvt = 0;
 		UINT i = 0;
-		for (i=0; i<m_SndFile.Patterns.Size(); i++) if ((m_SndFile.Patterns[i]) && (m_SndFile.PatternSize[i] != 64))
+		for (i=0; i<m_SndFile.Patterns.Size(); i++) if ((m_SndFile.Patterns[i]) && (m_SndFile.Patterns[i].GetNumRows() != 64))
 		{
-			if(m_SndFile.PatternSize[i] < 64)
+			if(m_SndFile.Patterns[i].GetNumRows() < 64)
 			{
 				// try to save short patterns by inserting a pattern break.
-				m_SndFile.TryWriteEffect(i, m_SndFile.PatternSize[i] - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, true);
+				m_SndFile.TryWriteEffect(i, m_SndFile.Patterns[i].GetNumRows() - 1, CMD_PATTERNBREAK, 0, false, CHANNELINDEX_INVALID, false, true);
 			}
 			m_SndFile.Patterns[i].Resize(64, false);
 			if (b64 < 5)
@@ -180,7 +180,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 
 		UINT nChannel = m_SndFile.m_nChannels - 1;
 
-		for (UINT len = m_SndFile.PatternSize[nPat] * m_SndFile.m_nChannels; len; m++, len--)
+		for (UINT len = m_SndFile.Patterns[nPat].GetNumRows() * m_SndFile.m_nChannels; len; m++, len--)
 		{
 			nChannel = (nChannel + 1) % m_SndFile.m_nChannels; // 0...Channels - 1
 
@@ -466,14 +466,14 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 		for (UINT i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
 		{
 			MODCOMMAND *p = m_SndFile.Patterns[i];
-			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.PatternSize[i], nNewChannels);
+			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.Patterns[i].GetNumRows(), nNewChannels);
 			if (!newp)
 			{
 				END_CRITICAL();
 				AddToLog("ERROR: Not enough memory to create new channels!\nPattern Data is corrupted!\n");
 				return FALSE;
 			}
-			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
+			for (UINT j=0; j<m_SndFile.Patterns[i].GetNumRows(); j++)
 			{
 				memcpy(&newp[j*nNewChannels], &p[j*m_SndFile.m_nChannels], m_SndFile.m_nChannels*sizeof(MODCOMMAND));
 			}
@@ -526,7 +526,7 @@ bool CModDoc::RemoveChannels(bool m_bChnMask[MAX_BASECHANNELS])
 		for (i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
 		{
 			MODCOMMAND *p = m_SndFile.Patterns[i];
-			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.PatternSize[i], nRemainingChannels);
+			MODCOMMAND *newp = CSoundFile::AllocatePattern(m_SndFile.Patterns[i].GetNumRows(), nRemainingChannels);
 			if (!newp)
 			{
 				END_CRITICAL();
@@ -534,7 +534,7 @@ bool CModDoc::RemoveChannels(bool m_bChnMask[MAX_BASECHANNELS])
 				return true;
 			}
 			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
-			for (UINT j=0; j<m_SndFile.PatternSize[i]; j++)
+			for (UINT j=0; j<m_SndFile.Patterns[i].GetNumRows(); j++)
 			{
 				for (UINT k=0; k<m_SndFile.m_nChannels; k++, tmpsrc++)
 				{
@@ -579,7 +579,7 @@ BOOL CModDoc::ConvertInstrumentsToSamples()
 	for (UINT i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
 	{
 		MODCOMMAND *p = m_SndFile.Patterns[i];
-		for (UINT j=m_SndFile.m_nChannels*m_SndFile.PatternSize[i]; j; j--, p++) if (p->instr)
+		for (UINT j=m_SndFile.m_nChannels*m_SndFile.Patterns[i].GetNumRows(); j; j--, p++) if (p->instr)
 		{
 			UINT instr = p->instr;
 			UINT note = p->note;
@@ -1039,7 +1039,7 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 			for (UINT row=0; row<nrows; row++)
 			{
 				MODCOMMAND *m = m_SndFile.Patterns[nPattern];
-				if ((row + (dwBeginSel >> 16)) >= m_SndFile.PatternSize[nPattern]) break;
+				if ((row + (dwBeginSel >> 16)) >= m_SndFile.Patterns[nPattern].GetNumRows()) break;
 				m += (row+(dwBeginSel >> 16))*m_SndFile.m_nChannels;
 				m += (colmin >> 3);
 				for (UINT col=0; col<ncols; col++, m++, p+=12)
@@ -1184,7 +1184,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			PATTERNINDEX pTemp;
 			GetEditPosition(rTemp, pTemp, oCurrentOrder);
 
-			if ((nrow >= m_SndFile.PatternSize[nPattern]) || (ncol >= m_SndFile.m_nChannels)) goto PasteDone;
+			if ((nrow >= m_SndFile.Patterns[nPattern].GetNumRows()) || (ncol >= m_SndFile.m_nChannels)) goto PasteDone;
 			m += nrow * m_SndFile.m_nChannels;
 			
 			// Search for signature
@@ -1209,7 +1209,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 			startLen = len;
 			startRow = nrow;
 
-			while ((nrow < m_SndFile.PatternSize[nPattern]))
+			while ((nrow < m_SndFile.Patterns[nPattern].GetNumRows()))
 			{
 				// Search for column separator or end of paste data
 				while ((len + 11 >= dwMemSize) || p[len] != '|')
@@ -1245,7 +1245,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						// Before changing anything in this pattern, we have to create an undo point.
 						if(bPrepareUndo)
 						{
-							GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.PatternSize[nPattern], !bFirstUndo);
+							GetPatternUndo()->PrepareUndo(nPattern, 0, 0, m_SndFile.m_nChannels, m_SndFile.Patterns[nPattern].GetNumRows(), !bFirstUndo);
 							bPrepareUndo = false;
 							bFirstUndo = false;
 						}
@@ -1257,7 +1257,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						// push channel data below paste point first.
 						if(pasteMode == pm_pushforwardpaste)
 						{
-							for(ROWINDEX nPushRow = m_SndFile.PatternSize[nPattern] - 1 - nrow; nPushRow > 0; nPushRow--)
+							for(ROWINDEX nPushRow = m_SndFile.Patterns[nPattern].GetNumRows() - 1 - nrow; nPushRow > 0; nPushRow--)
 							{
 								m[col + nPushRow * m_SndFile.m_nChannels] = m[col + (nPushRow - 1) * m_SndFile.m_nChannels];
 							}
@@ -1414,7 +1414,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 				// If Paste Flood is enabled, this won't be called due to obvious reasons.
 				if(doOverflowPaste)
 				{
-					while(nrow >= m_SndFile.PatternSize[nPattern])
+					while(nrow >= m_SndFile.Patterns[nPattern].GetNumRows())
 					{
 						nrow = 0;
 						ORDERINDEX oNextOrder = m_SndFile.Order.GetNextOrderIgnoringSkips(oCurrentOrder);
@@ -1618,7 +1618,7 @@ void CModDoc::CheckUnusedChannels(bool mask[MAX_BASECHANNELS], CHANNELINDEX maxR
 		for (PATTERNINDEX ipat = 0; ipat < m_SndFile.Patterns.Size(); ipat++) if (m_SndFile.Patterns.IsValidPat(ipat))
 		{
 			MODCOMMAND *p = m_SndFile.Patterns[ipat] + iRst;
-			UINT len = m_SndFile.PatternSize[ipat];
+			UINT len = m_SndFile.Patterns[ipat].GetNumRows();
 			for (UINT idata = 0; idata < len; idata++, p += m_SndFile.m_nChannels)
 			{
 				if (!p->IsEmpty())

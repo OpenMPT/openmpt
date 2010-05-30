@@ -156,7 +156,7 @@ bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
 		if (!m) return true;
 		const BYTE *p = lpStream + dwMemPos;
 		UINT row = 0, i = 0;
-		while ((row < PatternSize[iPat]) && (i+2 < len))
+		while ((row < Patterns[iPat].GetNumRows()) && (i+2 < len))
 		{
 			BYTE b0 = p[i++];
 			BYTE b1 = p[i++];

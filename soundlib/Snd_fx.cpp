@@ -163,7 +163,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			continue;
 		}
 		// Should never happen
-		if (nRow >= PatternSize[nPattern])
+		if (nRow >= Patterns[nPattern].GetNumRows())
 			nRow = 0;
 
 		//Check whether target reached.
@@ -179,7 +179,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		// Update next position
 		nNextRow = nRow + 1;
 
-		if (nNextRow >= PatternSize[nPattern])
+		if (nNextRow >= Patterns[nPattern].GetNumRows())
 		{
 			nNextPattern = nCurrentPattern + 1;
 			nNextRow = 0;
@@ -236,7 +236,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				patternBreakOnThisRow=true;				
 				//Try to check next row for XPARAM
 				nextRow = nullptr;
-				if (nRow < PatternSize[nPattern]-1) {
+				if (nRow < Patterns[nPattern].GetNumRows()-1) {
 					nextRow = Patterns[nPattern] + (nRow+1) * m_nChannels + nChn;
 				}
 				if (nextRow && nextRow->command == CMD_XPARAM) {
@@ -1652,7 +1652,7 @@ BOOL CSoundFile::ProcessEffects()
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
 				m = NULL;
-				if (m_nRow < PatternSize[m_nPattern]-1) {
+				if (m_nRow < Patterns[m_nPattern].GetNumRows()-1) {
 					m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
 				}
 				if (m && m->command == CMD_XPARAM) { 
@@ -1927,7 +1927,7 @@ BOOL CSoundFile::ProcessEffects()
 		// Pattern Break
 		case CMD_PATTERNBREAK:
 			m = NULL;
-			if (m_nRow < PatternSize[m_nPattern]-1) {
+			if (m_nRow < Patterns[m_nPattern].GetNumRows()-1) {
 			  m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
 			}
 			if (m && m->command == CMD_XPARAM) {
@@ -3239,12 +3239,12 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 			MODCOMMAND *m;
 			m = NULL;
 
-			if(m_nRow < PatternSize[m_nPattern]-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
+			if(m_nRow < Patterns[m_nPattern].GetNumRows()-1) m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
 
 			if(m && m->command == CMD_XPARAM){
 				UINT tmp = m->param;
 				m = NULL;
-				if(m_nRow < PatternSize[m_nPattern]-2) m = Patterns[m_nPattern] + (m_nRow+2) * m_nChannels  + nChn;
+				if(m_nRow < Patterns[m_nPattern].GetNumRows()-2) m = Patterns[m_nPattern] + (m_nRow+2) * m_nChannels  + nChn;
 
 				if(m && m->command == CMD_XPARAM) param = (param<<16) + (tmp<<8) + m->param;
 				else param = (param<<8) + tmp;
@@ -3711,7 +3711,7 @@ DWORD CSoundFile::IsSongFinished(UINT nStartOrder, UINT nStartRow) const
 			const MODPATTERN& p = Patterns[nPat];
 			if (p)
 			{
-				UINT len = PatternSize[nPat] * m_nChannels;
+				UINT len = Patterns[nPat].GetNumRows() * m_nChannels;
 				UINT pos = (nOrd == nStartOrder) ? nStartRow : 0;
 				pos *= m_nChannels;
 				while (pos < len)
@@ -3742,14 +3742,14 @@ BOOL CSoundFile::IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJum
 	// Treat only case with jumps in the same pattern
 	if (nJumpOrder > nStartOrder) return TRUE;
 
-	if ((nJumpOrder < nStartOrder) || (nJumpRow >= PatternSize[nStartOrder])
+	if ((nJumpOrder < nStartOrder) || (nJumpRow >= Patterns[nStartOrder].GetNumRows())
 	 || (!(Patterns[nStartOrder])) || (nStartRow >= MAX_PATTERN_ROWS) || (nJumpRow >= MAX_PATTERN_ROWS)) return FALSE;
 	
 	// See if the pattern is being played backward
 	BYTE row_hist[MAX_PATTERN_ROWS];
 
 	memset(row_hist, 0, sizeof(row_hist));
-	UINT nRows = PatternSize[nStartOrder], row = nJumpRow;
+	UINT nRows = Patterns[nStartOrder].GetNumRows(), row = nJumpRow;
 
 	if (nRows > MAX_PATTERN_ROWS) nRows = MAX_PATTERN_ROWS;
 	row_hist[nStartRow] = TRUE;
