@@ -542,7 +542,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 		{
 			MODCOMMAND *m = Patterns[ipat];
 			for (UINT i=0; i<64; i++) {				//for all rows 
-				if (i < PatternSize[ipat]) {			//if row exists
+				if (i < Patterns[ipat].GetNumRows()) {			//if row exists
 					LPBYTE p=s;
 					for (UINT c=0; c<m_nChannels; c++,p+=4,m++)
 					{

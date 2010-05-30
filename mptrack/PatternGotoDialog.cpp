@@ -76,7 +76,7 @@ void CPatternGotoDialog::OnOK()
 	}
 
 	//Does pattern have enough rows?
-	if (validated && m_pSndFile->PatternSize[m_nPattern] <= m_nRow) {
+	if (validated && m_pSndFile->Patterns[m_nPattern].GetNumRows() <= m_nRow) {
 		validated=false;
 	}
 	

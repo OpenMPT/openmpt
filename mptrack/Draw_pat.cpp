@@ -460,7 +460,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	yofs = GetYScrollPos();
 	pSndFile = pModDoc->GetSoundFile();
 	nColumnWidth = m_szCell.cx;
-	nrows = (pSndFile->Patterns[m_nPattern]) ? pSndFile->PatternSize[m_nPattern] : 0;
+	nrows = (pSndFile->Patterns[m_nPattern]) ? pSndFile->Patterns[m_nPattern].GetNumRows() : 0;
 	ncols = pSndFile->GetNumChannels();
 	xpaint = m_szHeader.cx;
 	ypaint = rcClient.top;
@@ -582,7 +582,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			}
 			if ((bPrevPatFound) && (nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat]))
 			{
-				UINT nPrevRows = pSndFile->PatternSize[nPrevPat];
+				UINT nPrevRows = pSndFile->Patterns[nPrevPat].GetNumRows();
 				UINT n = (nSkip < nPrevRows) ? nSkip : nPrevRows;
 
 				ypaint += (nSkip-n)*m_szCell.cy;
@@ -630,7 +630,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			}
 			if ((bNextPatFound) && (nNextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nNextPat]))
 			{
-				UINT nNextRows = pSndFile->PatternSize[nNextPat];
+				UINT nNextRows = pSndFile->Patterns[nNextPat].GetNumRows();
 				UINT n = ((UINT)nVisRows < nNextRows) ? nVisRows : nNextRows;
 
 				m_Dib.SetBlendMode(0x80);
@@ -1068,7 +1068,7 @@ void CViewPattern::DrawDragSel(HDC hdc)
 	y1 += dy;
 	y2 += dy;
 	nChannels = pSndFile->m_nChannels;
-	nRows = pSndFile->PatternSize[m_nPattern];
+	nRows = pSndFile->Patterns[m_nPattern].GetNumRows();
 	if (x1 < GetXScrollPos()) bLeft = false;
 	if (x1 >= nChannels) x1 = nChannels - 1;
 	if (x1 < 0) { x1 = 0; c1 = 0; bLeft = false; }
@@ -1149,7 +1149,7 @@ void CViewPattern::UpdateScrollSize()
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		SIZE sizeTotal, sizePage, sizeLine;
 		sizeTotal.cx = m_szHeader.cx + pSndFile->m_nChannels * m_szCell.cx;
-		sizeTotal.cy = m_szHeader.cy + pSndFile->PatternSize[m_nPattern] * m_szCell.cy;
+		sizeTotal.cy = m_szHeader.cy + pSndFile->Patterns[m_nPattern].GetNumRows() * m_szCell.cy;
 		sizeLine.cx = m_szCell.cx;
 		sizeLine.cy = m_szCell.cy;
 		sizePage.cx = sizeLine.cx * 2;
@@ -1375,7 +1375,7 @@ void CViewPattern::InvalidateRow(int n)
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		int yofs = GetYScrollPos() - m_nMidRow;
 		if (n == -1) n = m_nRow;
-		if ((n < yofs) || (n >= (int)pSndFile->PatternSize[m_nPattern])) return;
+		if ((n < yofs) || (n >= (int)pSndFile->Patterns[m_nPattern].GetNumRows())) return;
 		CRect rect;
 		GetClientRect(&rect);
 		rect.left = m_szHeader.cx;
@@ -1431,7 +1431,7 @@ void CViewPattern::UpdateIndicator()
 			s[0] = 0;
 			if ((!(m_dwStatus & (PATSTATUS_KEYDRAGSEL/*|PATSTATUS_MOUSEDRAGSEL*/))) //rewbs.xinfo: update indicator even when dragging
 			 && (m_dwBeginSel == m_dwEndSel) && (pSndFile->Patterns[m_nPattern])
-			 && (m_nRow < pSndFile->PatternSize[m_nPattern]) && (nChn < pSndFile->m_nChannels))
+			 && (m_nRow < pSndFile->Patterns[m_nPattern].GetNumRows()) && (nChn < pSndFile->m_nChannels))
 			{
 				MODCOMMAND *m = &pSndFile->Patterns[m_nPattern][m_nRow*pSndFile->m_nChannels+nChn];
 

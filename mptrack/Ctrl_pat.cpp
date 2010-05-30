@@ -783,7 +783,7 @@ void CCtrlPatterns::OnPatternNew()
 		ROWINDEX rows = 64;
 		if ((pat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[pat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
-			rows = pSndFile->PatternSize[pat];
+			rows = pSndFile->Patterns[pat].GetNumRows();
 			rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
 		}
 		PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nCurOrd + 1, rows);
@@ -824,7 +824,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 			ROWINDEX rows = 64;
 			if (nCurPat < pSndFile->Patterns.Size() && pReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
 			{
-				rows = pSndFile->PatternSize[nCurPat];
+				rows = pSndFile->Patterns[nCurPat].GetNumRows();
 				rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
 
 				PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nInsertWhere + i, rows);
@@ -832,8 +832,8 @@ void CCtrlPatterns::OnPatternDuplicate()
 				{
 					MODCOMMAND *pSrc = pSndFile->Patterns[nCurPat];
 					MODCOMMAND *pDest = pSndFile->Patterns[nNewPat];
-					UINT n = pSndFile->PatternSize[nCurPat];
-					if (pSndFile->PatternSize[nNewPat] < n) n = pSndFile->PatternSize[nNewPat];
+					UINT n = pSndFile->Patterns[nCurPat].GetNumRows();
+					if (pSndFile->Patterns[nNewPat].GetNumRows() < n) n = pSndFile->Patterns[nNewPat].GetNumRows();
 					n *= pSndFile->m_nChannels;
 					if (n) memcpy(pDest, pSrc, n * sizeof(MODCOMMAND));
 					bSuccess = true;

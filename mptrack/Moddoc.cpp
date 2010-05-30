@@ -352,7 +352,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		{
 			m_SndFile.m_nType = MOD_TYPE_MOD;
 			for (UINT i=0; i<m_SndFile.Patterns.Size(); i++)
-				if ((m_SndFile.Patterns[i]) && (m_SndFile.PatternSize[i] != 64))
+				if ((m_SndFile.Patterns[i]) && (m_SndFile.Patterns[i].GetNumRows() != 64))
 					m_SndFile.m_nType = MOD_TYPE_XM;
 		}
 		break;
@@ -1295,7 +1295,7 @@ bool CModDoc::IsInstrumentMuted(INSTRUMENTINDEX nInstr) const
 UINT CModDoc::GetPatternSize(PATTERNINDEX nPat) const
 //---------------------------------------------------
 {
-	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat])) return m_SndFile.PatternSize[nPat];
+	if ((nPat < m_SndFile.Patterns.Size()) && (m_SndFile.Patterns[nPat])) return m_SndFile.Patterns[nPat].GetNumRows();
 	return 0;
 }
 
@@ -3079,7 +3079,7 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	if (pat >= m_SndFile.Patterns.Size()) {
 		pat=0;
 	}
-	if (row >= pSndFile->PatternSize[pat]) {
+	if (row >= pSndFile->Patterns[pat].GetNumRows()) {
 		row=0;
 	}
 	//end rewbs.fix3185

@@ -50,7 +50,7 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UI
 	UINT nRows;
 
 	if (!pSndFile->Patterns.IsValidPat(pattern)) return false;
-	nRows = pSndFile->PatternSize[pattern];
+	nRows = pSndFile->Patterns[pattern].GetNumRows();
 	pPattern = pSndFile->Patterns[pattern];
 	if ((y >= nRows) || (cx < 1) || (cy < 1) || (x >= pSndFile->m_nChannels)) return false;
 	if (y + cy >= nRows) cy = nRows - y;
@@ -68,7 +68,7 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UI
 	}
 
 	sUndo.pattern = pattern;
-	sUndo.patternsize = pSndFile->PatternSize[pattern];
+	sUndo.patternsize = pSndFile->Patterns[pattern].GetNumRows();
 	sUndo.column = x;
 	sUndo.row = y;
 	sUndo.cx = cx;
@@ -130,7 +130,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 	nRows = pUndo->patternsize;
 	if(pUndo->column + pUndo->cx <= pSndFile->m_nChannels)
 	{
-		if((!pSndFile->Patterns[nPattern]) || (pSndFile->PatternSize[nPattern] < nRows))
+		if((!pSndFile->Patterns[nPattern]) || (pSndFile->Patterns[nPattern].GetNumRows() < nRows))
 		{
 			MODCOMMAND *newPattern = CSoundFile::AllocatePattern(nRows, pSndFile->m_nChannels);
 			MODCOMMAND *oldPattern = pSndFile->Patterns[nPattern];

@@ -628,7 +628,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 		// Allocate current pattern if not allocated yet
 		if (!Patterns[pat])
 		{
-			Patterns[pat] = AllocatePattern(PatternSize[pat], m_nChannels);
+			Patterns[pat] = AllocatePattern(Patterns[pat].GetNumRows(), m_nChannels);
 			if (!Patterns[pat]) break;
 		}
 		dwGlobalFlags |= MIDIGLOBAL_SONGENDED;
@@ -1199,7 +1199,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 				}
 			}
 
-			if ((++row) >= PatternSize[pat])
+			if ((++row) >= Patterns[pat].GetNumRows())
 			{
 				pat++;
 				if (pat >= MAX_PATTERNS-1) break;

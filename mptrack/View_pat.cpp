@@ -254,7 +254,7 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap, BOOL bUpdateHorizontalScr
 	if (!pModDoc) return FALSE;
 	pSndFile = pModDoc->GetSoundFile();
 
-	if ((bWrap) && (pSndFile->PatternSize[m_nPattern]))
+	if ((bWrap) && (pSndFile->Patterns[m_nPattern].GetNumRows()))
 	{
 		if ((int)row < (int)0)
 		{
@@ -269,26 +269,26 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap, BOOL bUpdateHorizontalScr
 				{
 					const ORDERINDEX prevOrd = pSndFile->Order.GetPreviousOrderIgnoringSkips(nCurOrder);
 					const PATTERNINDEX nPrevPat = pSndFile->Order[prevOrd];
-					if ((nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nPrevPat]))
+					if ((nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat].GetNumRows()))
 					{
 						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, prevOrd);
 						if (SetCurrentPattern(nPrevPat))
-							return SetCurrentRow(pSndFile->PatternSize[nPrevPat] + (int)row);
+							return SetCurrentRow(pSndFile->Patterns[nPrevPat].GetNumRows() + (int)row);
 					}
 				}
 				row = 0;
 			} else
 			if (CMainFrame::m_dwPatternSetup & PATTERN_WRAP)
 			{
-				if ((int)row < (int)0) row += pSndFile->PatternSize[m_nPattern];
-				row %= pSndFile->PatternSize[m_nPattern];
+				if ((int)row < (int)0) row += pSndFile->Patterns[m_nPattern].GetNumRows();
+				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
 			}
 		} else //row >= 0
-		if (row >= pSndFile->PatternSize[m_nPattern])
+		if (row >= pSndFile->Patterns[m_nPattern].GetNumRows())
 		{
 			if (m_dwStatus & (PATSTATUS_KEYDRAGSEL|PATSTATUS_MOUSEDRAGSEL))
 			{
-				row = pSndFile->PatternSize[m_nPattern]-1;
+				row = pSndFile->Patterns[m_nPattern].GetNumRows()-1;
 			} else
 			if (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
@@ -297,19 +297,19 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap, BOOL bUpdateHorizontalScr
 				{
 					const ORDERINDEX nextOrder = pSndFile->Order.GetNextOrderIgnoringSkips(nCurOrder);
 					const PATTERNINDEX nextPat = pSndFile->Order[nextOrder];
-					if ((nextPat < pSndFile->Patterns.Size()) && (pSndFile->PatternSize[nextPat]))
+					if ((nextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nextPat].GetNumRows()))
 					{
-						const ROWINDEX newRow = row - pSndFile->PatternSize[m_nPattern];
+						const ROWINDEX newRow = row - pSndFile->Patterns[m_nPattern].GetNumRows();
 						SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nextOrder);
 						if (SetCurrentPattern(nextPat))
 							return SetCurrentRow(newRow);
 					}
 				}
-				row = pSndFile->PatternSize[m_nPattern]-1;
+				row = pSndFile->Patterns[m_nPattern].GetNumRows()-1;
 			} else
 			if (CMainFrame::m_dwPatternSetup & PATTERN_WRAP)
 			{
-				row %= pSndFile->PatternSize[m_nPattern];
+				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
 			}
 		}
 	}
@@ -317,11 +317,11 @@ BOOL CViewPattern::SetCurrentRow(UINT row, BOOL bWrap, BOOL bUpdateHorizontalScr
 	//rewbs.fix3168
 	if ( (static_cast<int>(row)<0) && !(CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL))
 		row = 0;
-	if (row >= pSndFile->PatternSize[m_nPattern] && !(CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL))
-		row = pSndFile->PatternSize[m_nPattern]-1;
+	if (row >= pSndFile->Patterns[m_nPattern].GetNumRows() && !(CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL))
+		row = pSndFile->Patterns[m_nPattern].GetNumRows()-1;
 	//end rewbs.fix3168
 
-	if ((row >= pSndFile->PatternSize[m_nPattern]) || (!m_szCell.cy)) return FALSE;
+	if ((row >= pSndFile->Patterns[m_nPattern].GetNumRows()) || (!m_szCell.cy)) return FALSE;
 	// Fix: If cursor isn't on screen move both scrollbars to make it visible
 	InvalidateRow();
 	m_nRow = row;
@@ -526,7 +526,7 @@ BOOL CViewPattern::DragToSel(DWORD dwPos, BOOL bScroll, BOOL bNoMove)
 	if (!bScroll) return TRUE;
 	// Scroll to row
 	row = dwPos >> 16;
-	if (row < (int)pSndFile->PatternSize[m_nPattern])
+	if (row < (int)pSndFile->Patterns[m_nPattern].GetNumRows())
 	{
 		row += m_nMidRow;
 		rect.top += m_szHeader.cy;
@@ -760,7 +760,7 @@ void CViewPattern::OnGrowSelection()
 
 	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwBeginSel : m_dwEndSel;
 	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16)) ? m_dwEndSel : m_dwBeginSel;
-	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->PatternSize[m_nPattern]);
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->Patterns[m_nPattern].GetNumRows());
 
 	int finalDest = (startSel>>16)+((endSel>>16)-(startSel>>16))*2;
 	for (int row=finalDest; row>(int)(startSel >> 16); row-=2)
@@ -769,7 +769,7 @@ void CViewPattern::OnGrowSelection()
 		for (UINT i=(startSel & 0xFFFF); i<=(endSel & 0xFFFF); i++) if ((i & 7) < 5)
 		{
 			UINT chn = i >> 3;
-			if ((chn >= pSndFile->m_nChannels) || (row >= pSndFile->PatternSize[m_nPattern])) continue;
+			if ((chn >= pSndFile->m_nChannels) || (row >= pSndFile->Patterns[m_nPattern].GetNumRows())) continue;
 			MODCOMMAND *dest = &p[row * pSndFile->m_nChannels + chn];
 			MODCOMMAND *src  = &p[(row-offset/2) * pSndFile->m_nChannels + chn];
 			MODCOMMAND *blank= &p[(row-1) * pSndFile->m_nChannels + chn];
@@ -788,7 +788,7 @@ void CViewPattern::OnGrowSelection()
 	}
 
 	m_dwBeginSel = startSel;
-	m_dwEndSel   = (min(finalDest,pSndFile->PatternSize[m_nPattern]-1)<<16) | (endSel&0xFFFF);
+	m_dwEndSel   = (min(finalDest,pSndFile->Patterns[m_nPattern].GetNumRows()-1)<<16) | (endSel&0xFFFF);
 
 	InvalidatePattern(FALSE);
 	pModDoc->SetModified();
@@ -810,7 +810,7 @@ void CViewPattern::OnShrinkSelection()
 
 	DWORD startSel = ((m_dwBeginSel>>16)<(m_dwEndSel>>16))?m_dwBeginSel:m_dwEndSel;
 	DWORD endSel   = ((m_dwBeginSel>>16)<(m_dwEndSel>>16))?m_dwEndSel:m_dwBeginSel;
-	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->PatternSize[m_nPattern]);
+	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0, 0, pSndFile->m_nChannels, pSndFile->Patterns[m_nPattern].GetNumRows());
 
 	int finalDest = (startSel>>16)+((endSel>>16)-(startSel>>16))/2;
 
@@ -822,8 +822,8 @@ void CViewPattern::OnShrinkSelection()
 		for (UINT i=(startSel & 0xFFFF); i<=(endSel & 0xFFFF); i++) if ((i & 7) < 5)
 		{
 			UINT chn = i >> 3;
-			if ((chn >= pSndFile->m_nChannels) || (srcRow >= pSndFile->PatternSize[m_nPattern])
-											   || (row    >= pSndFile->PatternSize[m_nPattern])) continue;
+			if ((chn >= pSndFile->m_nChannels) || (srcRow >= pSndFile->Patterns[m_nPattern].GetNumRows())
+											   || (row    >= pSndFile->Patterns[m_nPattern].GetNumRows())) continue;
 			MODCOMMAND *dest = &p[row    * pSndFile->m_nChannels + chn];
 			MODCOMMAND *src  = &p[srcRow * pSndFile->m_nChannels + chn];
 			//memcpy(dest/*+(i%5)*/, src/*+(i%5)*/, /*sizeof(MODCOMMAND) - (i-chn)*/ sizeof(BYTE));
@@ -849,7 +849,7 @@ void CViewPattern::OnShrinkSelection()
 		}
 	}
 	m_dwBeginSel = startSel;
-	m_dwEndSel   = (min(finalDest,pSndFile->PatternSize[m_nPattern]-1)<<16) | (endSel& 0xFFFF);
+	m_dwEndSel   = (min(finalDest,pSndFile->Patterns[m_nPattern].GetNumRows()-1)<<16) | (endSel& 0xFFFF);
 
 	InvalidatePattern(FALSE);
 	pModDoc->SetModified();
@@ -888,7 +888,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 		for (UINT i=(m_dwBeginSel & 0xFFFF); i<=(m_dwEndSel & 0xFFFF); i++) if ((i & 7) < 5) { // for all selected cols
 
 			UINT chn = i >> 3;
-			if ((chn >= pSndFile->m_nChannels) || (row >= pSndFile->PatternSize[m_nPattern])) continue;
+			if ((chn >= pSndFile->m_nChannels) || (row >= pSndFile->Patterns[m_nPattern].GetNumRows())) continue;
 			MODCOMMAND *m = &p[row * pSndFile->m_nChannels + chn];
 			switch(i & 7) {
 				case 0:	// Clear note
@@ -1297,7 +1297,7 @@ void CViewPattern::OnMouseMove(UINT, CPoint point)
 		if ((pModDoc) && (m_nPattern < pModDoc->GetSoundFile()->Patterns.Size()))
 		{
 			UINT row = dwPos >> 16;
-			UINT max = pModDoc->GetSoundFile()->PatternSize[m_nPattern];
+			UINT max = pModDoc->GetSoundFile()->Patterns[m_nPattern].GetNumRows();
 			if ((row) && (row >= max)) row = max-1;
 			dwPos &= 0xFFFF;
 			dwPos |= (row << 16);
@@ -1337,7 +1337,7 @@ void CViewPattern::OnEditSelectAll()
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		SetCurSel(0, ((pSndFile->PatternSize[m_nPattern]-1) << 16)
+		SetCurSel(0, ((pSndFile->Patterns[m_nPattern].GetNumRows()-1) << 16)
 		 | ((pSndFile->m_nChannels - 1) << 3)
 		 | (4));
 	}
@@ -1352,7 +1352,7 @@ void CViewPattern::OnEditSelectColumn()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		SetCurSel(m_nMenuParam & 0xFFF8,
-		 ((pSndFile->PatternSize[m_nPattern]-1) << 16)
+		 ((pSndFile->Patterns[m_nPattern].GetNumRows()-1) << 16)
 		 | ((m_nMenuParam & 0xFFF8)+4));
 	}
 }
@@ -1366,7 +1366,7 @@ void CViewPattern::OnSelectCurrentColumn()
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		DWORD dwBeginSel = m_dwCursor & 0xFFF8;
-		DWORD dwEndSel = ((pSndFile->PatternSize[m_nPattern]-1) << 16) | ((m_dwCursor & 0xFFF8)+4);
+		DWORD dwEndSel = ((pSndFile->Patterns[m_nPattern].GetNumRows()-1) << 16) | ((m_dwCursor & 0xFFF8)+4);
 		// If column is already selected, select the current pattern
 		if ((dwBeginSel == m_dwBeginSel) && (dwEndSel == m_dwEndSel))
 		{
@@ -1533,7 +1533,7 @@ void CViewPattern::DeleteRows(UINT colmin, UINT colmax, UINT nrows)
 	pSndFile = pModDoc->GetSoundFile();
 	if (!pSndFile->Patterns[m_nPattern]) return;
 	row = m_dwBeginSel >> 16;
-	maxrow = pSndFile->PatternSize[m_nPattern];
+	maxrow = pSndFile->Patterns[m_nPattern].GetNumRows();
 	if (colmax >= pSndFile->m_nChannels) colmax = pSndFile->m_nChannels-1;
 	if (colmin > colmax) return;
 	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0,0, pSndFile->m_nChannels, maxrow);
@@ -1599,7 +1599,7 @@ void CViewPattern::InsertRows(UINT colmin, UINT colmax) //rewbs.customKeys: adde
 	pSndFile = pModDoc->GetSoundFile();
 	if (!pSndFile->Patterns[m_nPattern]) return;
 	row = m_dwBeginSel >> 16;
-	maxrow = pSndFile->PatternSize[m_nPattern];
+	maxrow = pSndFile->Patterns[m_nPattern].GetNumRows();
 	if (colmax >= pSndFile->m_nChannels) colmax = pSndFile->m_nChannels-1;
 	if (colmin > colmax) return;
 	pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, 0,0, pSndFile->m_nChannels, maxrow);
@@ -1639,7 +1639,7 @@ void CViewPattern::OnInsertRows()
 	pSndFile = pModDoc->GetSoundFile();
 	if (!pSndFile->Patterns[m_nPattern]) return;
 	row = m_nRow;
-	maxrow = pSndFile->PatternSize[m_nPattern];
+	maxrow = pSndFile->Patterns[m_nPattern].GetNumRows();
 	colmin = (m_dwBeginSel & 0xFFFF) >> 3;
 	colmax = (m_dwEndSel & 0xFFFF) >> 3;
 
@@ -1780,7 +1780,7 @@ void CViewPattern::OnEditFindNext()
 	for (UINT nPat=nPatStart; nPat<nPatEnd; nPat++)
 	{
 		LPMODCOMMAND m = pSndFile->Patterns[nPat];
-		DWORD len = pSndFile->m_nChannels * pSndFile->PatternSize[nPat];
+		DWORD len = pSndFile->m_nChannels * pSndFile->Patterns[nPat].GetNumRows();
 		if ((!m) || (!len)) continue;
 		UINT n = 0;
 		if ((m_bContinueSearch) && (nPat == nPatStart) && (nPat == m_nPattern))
@@ -1995,7 +1995,7 @@ void CViewPattern::OnPatternStep()
 	if ((pMainFrm) && (pModDoc))
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if ((!pSndFile->PatternSize[m_nPattern]) || (!pSndFile->Patterns[m_nPattern])) return;
+		if ((!pSndFile->Patterns[m_nPattern].GetNumRows()) || (!pSndFile->Patterns[m_nPattern])) return;
 		// Cut instrument/sample
 		BEGIN_CRITICAL();
 		for (UINT i=pSndFile->m_nChannels; i<MAX_CHANNELS; i++)
@@ -2015,7 +2015,7 @@ void CViewPattern::OnPatternStep()
 		if (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)
 			SetCurrentRow(GetCurrentRow()+1, TRUE);
 		else
-			SetCurrentRow((GetCurrentRow()+1) % pSndFile->PatternSize[m_nPattern], FALSE);
+			SetCurrentRow((GetCurrentRow()+1) % pSndFile->Patterns[m_nPattern].GetNumRows(), FALSE);
 		SetFocus();
 	}
 }
@@ -2029,7 +2029,7 @@ void CViewPattern::OnCursorCopy()
 	if (pModDoc)
 	{
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
-		if ((!pSndFile->PatternSize[m_nPattern]) || (!pSndFile->Patterns[m_nPattern])) return;
+		if ((!pSndFile->Patterns[m_nPattern].GetNumRows()) || (!pSndFile->Patterns[m_nPattern])) return;
 		MODCOMMAND *m = pSndFile->Patterns[m_nPattern] + m_nRow * pSndFile->m_nChannels + ((m_dwCursor & 0xFFFF) >> 3);
 		switch(m_dwCursor & 7)
 		{
@@ -2332,7 +2332,7 @@ BOOL CViewPattern::TransposeSelection(int transp)
 		MODCOMMAND *pcmd = pSndFile->Patterns[m_nPattern];
 
 		if ((!pcmd) || (col0 > col1) || (col1 >= pSndFile->m_nChannels)
-		 || (row0 > row1) || (row1 >= pSndFile->PatternSize[m_nPattern])) return FALSE;
+		 || (row0 > row1) || (row1 >= pSndFile->Patterns[m_nPattern].GetNumRows())) return FALSE;
 		PrepareUndo(m_dwBeginSel, m_dwEndSel);
 		for (UINT row=row0; row <= row1; row++)
 		{
@@ -2369,7 +2369,7 @@ void CViewPattern::OnDropSelection()
 	if ((pModDoc = GetDocument()) == NULL || !(IsEditingEnabled_bmsg())) return;
 	pSndFile = pModDoc->GetSoundFile();
 	nChannels = pSndFile->m_nChannels;
-	nRows = pSndFile->PatternSize[m_nPattern];
+	nRows = pSndFile->Patterns[m_nPattern].GetNumRows();
 	pOldPattern = pSndFile->Patterns[m_nPattern];
 	if ((nChannels < 1) || (nRows < 1) || (!pOldPattern)) return;
 	dx = (int)((m_dwDragPos & 0xFFF8) >> 3) - (int)((m_dwStartSel & 0xFFF8) >> 3);
@@ -2736,8 +2736,8 @@ void CViewPattern::OnPatternAmplify()
 			ROWINDEX firstRow = (m_dwBeginSel >> 16), lastRow = (m_dwEndSel >> 16);
 			firstChannel = CLAMP(firstChannel, 0, pSndFile->m_nChannels - 1);
 			lastChannel = CLAMP(lastChannel, 0, pSndFile->m_nChannels - 1);
-			firstRow = CLAMP(firstRow, 0, pSndFile->PatternSize[m_nPattern] - 1);
-			lastRow = CLAMP(lastRow, 0, pSndFile->PatternSize[m_nPattern] - 1);
+			firstRow = CLAMP(firstRow, 0, pSndFile->Patterns[m_nPattern].GetNumRows() - 1);
+			lastRow = CLAMP(lastRow, 0, pSndFile->Patterns[m_nPattern].GetNumRows() - 1);
 
 			for (CHANNELINDEX nChn = firstChannel; nChn <= lastChannel; nChn++)
 			{
@@ -2939,7 +2939,7 @@ LRESULT CViewPattern::OnPlayerNotify(MPTNOTIFICATION *pnotify)
 					if (nOrd < pSndFile->Order.size()) SendCtrlMessage(CTRLMSG_SETCURRENTORDER, nOrd);
 					updateOrderList = false;
 				}
-				if (nRow != m_nRow)	SetCurrentRow((nRow < pSndFile->PatternSize[nPat]) ? nRow : 0, FALSE, FALSE);
+				if (nRow != m_nRow)	SetCurrentRow((nRow < pSndFile->Patterns[nPat].GetNumRows()) ? nRow : 0, FALSE, FALSE);
 			}
 			SetPlayCursor(0xFFFF, 0);
 		} else
@@ -3385,7 +3385,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			if (pModDoc)
 			{
 				CSoundFile *pSndFile = pModDoc->GetSoundFile();
-				pModDoc->CopyPattern(m_nPattern, 0, ((pSndFile->PatternSize[m_nPattern]-1)<<16)|(pSndFile->m_nChannels<<3));
+				pModDoc->CopyPattern(m_nPattern, 0, ((pSndFile->Patterns[m_nPattern].GetNumRows()-1)<<16)|(pSndFile->m_nChannels<<3));
 			}
 		}
 		break;
@@ -4285,7 +4285,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 				if((m_nSpacing > 0) && (m_nSpacing <= MAX_SPACING))
 				{
 
-					if(nRow + m_nSpacing < pSndFile->PatternSize[nPat] || (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL))
+					if(nRow + m_nSpacing < pSndFile->Patterns[nPat].GetNumRows() || (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL))
 					{
 						SetCurrentRow(nRow + m_nSpacing, (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL) ? true: false);
 						m_bLastNoteEntryBlocked=false;

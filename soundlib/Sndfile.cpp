@@ -432,12 +432,6 @@ return pointer;
 
 CTuning* MODINSTRUMENT::s_DefaultTuning = 0;
 
-const ROWINDEX CPatternSizesMimic::operator [](const int i) const
-//-----------------------------------------------------------
-{
-	return m_rSndFile.Patterns[i].GetNumRows();
-}
-
 
 //////////////////////////////////////////////////////////
 // CSoundFile
@@ -448,7 +442,7 @@ uint8 CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 
 CSoundFile::CSoundFile() :
-	PatternSize(*this), Patterns(*this),
+	Patterns(*this),
 	Order(*this),
 	m_PlaybackEventer(*this),
 	m_pModSpecs(&ModSpecs::itEx),
@@ -567,7 +561,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	memset(m_MixPlugins, 0, sizeof(m_MixPlugins));
 	memset(&m_SongEQ, 0, sizeof(m_SongEQ));
 	ResetMidiCfg();
-	//for (UINT npt=0; npt<Patterns.Size(); npt++) PatternSize[npt] = 64;
+	//for (UINT npt=0; npt<Patterns.Size(); npt++) Patterns[npt].GetNumRows() = 64;
 	for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{
 		InitChannel(nChn);
@@ -1133,7 +1127,7 @@ UINT CSoundFile::GetMaxPosition() const
 
 	while ((i < Order.size()) && (Order[i] != Order.GetInvalidPatIndex()))
 	{
-		if (Order[i] < Patterns.Size()) max += PatternSize[Order[i]];
+		if (Order[i] < Patterns.Size()) max += Patterns[Order[i]].GetNumRows();
 		i++;
 	}
 	return max;
@@ -1146,7 +1140,7 @@ UINT CSoundFile::GetCurrentPos() const
 	UINT pos = 0;
 
 	for (UINT i=0; i<m_nCurrentPattern; i++) if (Order[i] < Patterns.Size())
-		pos += PatternSize[Order[i]];
+		pos += Patterns[Order[i]].GetNumRows();
 	return pos + m_nRow; 
 }
 
@@ -1192,14 +1186,14 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 		if (ord == Order.GetInvalidPatIndex()) break;
 		if (ord < Patterns.Size())
 		{
-			if (nPos < (UINT)PatternSize[ord]) break;
-			nPos -= PatternSize[ord];
+			if (nPos < (UINT)Patterns[ord].GetNumRows()) break;
+			nPos -= Patterns[ord].GetNumRows();
 		}
 	}
 	// Buggy position ?
 	if ((nPattern >= Order.size())
 	 || (Order[nPattern] >= Patterns.Size())
-	 || (nPos >= PatternSize[Order[nPattern]]))
+	 || (nPos >= Patterns[Order[nPattern]].GetNumRows()))
 	{
 		nPos = 0;
 		nPattern = 0;
@@ -1208,7 +1202,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	if ((nRow) && (Order[nPattern] < Patterns.Size()))
 	{
 		MODCOMMAND *p = Patterns[Order[nPattern]];
-		if ((p) && (nRow < PatternSize[Order[nPattern]]))
+		if ((p) && (nRow < Patterns[Order[nPattern]].GetNumRows()))
 		{
 			BOOL bOk = FALSE;
 			while ((!bOk) && (nRow > 0))
@@ -1380,7 +1374,7 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 		m_dwSongFlags &= ~SONG_PATTERNLOOP;
 	} else
 	{
-		if ((nRow < 0) || (nRow >= (int)PatternSize[nPat])) nRow = 0;
+		if ((nRow < 0) || (nRow >= (int)Patterns[nPat].GetNumRows())) nRow = 0;
 		m_nPattern = nPat;
 		m_nRow = m_nNextRow = nRow;
 		m_nTickCount = m_nMusicSpeed;
@@ -1396,7 +1390,7 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 //----------------------------------------------------------------
 {
 	if ((nPat < 0) || (nPat >= Patterns.Size()) || (!Patterns[nPat])) nPat = 0;
-	if ((nRow < 0) || (nRow >= (int)PatternSize[nPat])) nRow = 0;
+	if ((nRow < 0) || (nRow >= (int)Patterns[nPat].GetNumRows())) nRow = 0;
 	m_nPattern = nPat;
 	m_nRow = m_nNextRow = nRow;
 	m_nTickCount = m_nMusicSpeed;
@@ -1620,7 +1614,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 		if (Patterns[nPat])
 		{
 			MODCOMMAND *p = Patterns[nPat];
-			MODCOMMAND *newp = CSoundFile::AllocatePattern(PatternSize[nPat], nRemainingChannels);
+			MODCOMMAND *newp = CSoundFile::AllocatePattern(Patterns[nPat].GetNumRows(), nRemainingChannels);
 			if (!newp)
 			{
 				END_CRITICAL();
@@ -1628,7 +1622,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
 				return 0;
 			}
 			MODCOMMAND *tmpsrc = p, *tmpdest = newp;
-			for (ROWINDEX nRow = 0; nRow<PatternSize[nPat]; nRow++) //Scrolling rows
+			for (ROWINDEX nRow = 0; nRow<Patterns[nPat].GetNumRows(); nRow++) //Scrolling rows
 			{
 				for (CHANNELINDEX nChn = 0; nChn < nRemainingChannels; nChn++, tmpdest++) //Scrolling channels.
 				{
@@ -2762,7 +2756,7 @@ bool CSoundFile::IsSampleUsed(SAMPLEINDEX nSample)
 		for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 		{
 			MODCOMMAND *m = Patterns[i];
-			for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
+			for (UINT j=m_nChannels*Patterns[i].GetNumRows(); j; m++, j--)
 			{
 				if (m->instr == nSample && !m->IsPcNote()) return true;
 			}
@@ -2779,7 +2773,7 @@ bool CSoundFile::IsInstrumentUsed(INSTRUMENTINDEX nInstr)
 	for (UINT i=0; i<Patterns.Size(); i++) if (Patterns[i])
 	{
 		MODCOMMAND *m = Patterns[i];
-		for (UINT j=m_nChannels*PatternSize[i]; j; m++, j--)
+		for (UINT j=m_nChannels*Patterns[i].GetNumRows(); j; m++, j--)
 		{
 			if (m->instr == nInstr && !m->IsPcNote()) return true;
 		}
@@ -2802,7 +2796,7 @@ UINT CSoundFile::DetectUnusedSamples(BYTE *pbIns)
 			MODCOMMAND *p = Patterns[ipat];
 			if (p)
 			{
-				UINT jmax = PatternSize[ipat] * m_nChannels;
+				UINT jmax = Patterns[ipat].GetNumRows() * m_nChannels;
 				for (UINT j=0; j<jmax; j++, p++)
 				{
 					if ((p->note) && (p->note <= NOTE_MAX))

@@ -385,7 +385,7 @@ bool CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 	// Create the patterns from the list of tracks
 	for (UINT iPat=0; iPat<pfh->numorders; iPat++)
 	{
-		MODCOMMAND *p = AllocatePattern(PatternSize[iPat], m_nChannels);
+		MODCOMMAND *p = AllocatePattern(Patterns[iPat].GetNumRows(), m_nChannels);
 		if (!p) break;
 		Patterns[iPat] = p;
 		for (UINT iChn=0; iChn<m_nChannels; iChn++)
@@ -399,7 +399,7 @@ bool CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
 					realtrk--;
 					if ((realtrk < realtrackcnt) && (pTrackData[realtrk]))
 					{
-						AMF_Unpack(p+iChn, pTrackData[realtrk], PatternSize[iPat], m_nChannels);
+						AMF_Unpack(p+iChn, pTrackData[realtrk], Patterns[iPat].GetNumRows(), m_nChannels);
 					}
 				}
 			}
