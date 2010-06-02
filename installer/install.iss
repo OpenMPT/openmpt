@@ -3,10 +3,16 @@
 ; http://sagamusix.de/
 ; http://sagagames.de/
 
+; ISPP is needed for automated version retrieval.
+; To download and install ISPP, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
+#include "Builtins.iss"
+#define GetAppVersion StringChange(GetFileProductVersion("..\mptrack\bin\mptrack.exe"), ",", ".")
+#define GetAppVersionShort Copy(GetAppVersion, 1, 4)
+
 [Setup]
 AppId={{67903736-E9BB-4664-B148-F62BCAB4FA42}
-AppVerName=OpenMPT 1.18
-AppVersion=1.18.02.00
+AppVerName=OpenMPT {#GetAppVersionShort}
+AppVersion={#GetAppVersion}
 AppName=OpenMPT
 AppPublisher=OpenMPT Devs / Olivier Lapicque
 AppPublisherURL=http://openmpt.com/
@@ -16,7 +22,7 @@ DefaultDirName={pf}\OpenMPT
 DefaultGroupName=OpenMPT
 AllowNoIcons=yes
 OutputDir=.\
-OutputBaseFilename=OpenMPT Setup
+OutputBaseFilename=OpenMPT-{#GetAppVersion}-Setup
 Compression=lzma2
 SolidCompression=yes
 WizardImageFile=install-big.bmp
@@ -245,6 +251,11 @@ begin
         end;
     end;
 end;
+
+
+
+
+
 
 
 
