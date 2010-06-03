@@ -5,7 +5,6 @@
 
 ; ISPP is needed for automated version retrieval.
 ; To download and install ISPP, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
-#include "Builtins.iss"
 #define GetAppVersion StringChange(GetFileProductVersion("..\mptrack\bin\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
 
@@ -251,15 +250,3 @@ begin
         end;
     end;
 end;
-
-
-
-
-
-
-
-
-
-
-
-
