@@ -130,11 +130,10 @@ IT
   [Fix] <Jojo> IT Compatibility: Default Vibrato/Tremolo/Panbrello waveform values to sine waveform if out of range (e.g. S35)
 
 IT/MPTM/ITP, Instrument extension handling:
-  [Fix] <Jojo> ITP Loader: Instruments flags in ITP files with embedded instrument headers were loaded wrong since revision 415.
   [Fix] <re>   Fixes to instrument envelope flag handling (broken in 1.18.00.00).
   
 XM
-  [Imp] <Jojo> XM Loader: Improved detection of an old version of MPT.
+  [Imp] <Jojo> XM Loader: Improved detection of an old version of MPT (1.09?).
   [Fix] <Jojo> XM Loader: Some XMs not made with ModPlug were recognized as files made with MPT.
   [Fix] <Jojo> XM Loader: The last XM instrument was not always loaded.
   [Fix] <Jojo> XM Loader: Early versions of Skale Tracker (R.I.P.) apparently did stupid things to XM instrument headers, so mpt failed to load such modules. Tested the fix with a few hundred XMs and apparently only one XM (IFULOVE.XM) that I have has a header size that is different from the struct size - and that's the one that caused problems.
@@ -169,6 +168,7 @@ Other modules:
 MPTM
   [New] <rewbs> Added combined note delay & note cut command for MPTM only (":xy" means delay until tick x and play for y ticks).
   [New] <Jojo> MPTM command S7D explicitely enforces pitch envelope, S7E enforces filter envelope.
+  [Fix] <Jojo> MPTM Saving: A missing null pointer check crashed OpenMPT when trying to access a deleted instrument slot.
 
 Module cleanup
   [Imp] <Jojo> In the cleanup dialog, mutually exclusive items are now automatically unchecked, to avoid confusion.
@@ -178,12 +178,12 @@ Module cleanup
 
 Wave Export
   [New] <Jojo> It is now also possible to render by instrument (i.e. one wave file per instrument).
+  [Imp] <Jojo> The "render by channel" mode ignores empty channels now.
   [Imp] <Jojo> When switching to another task and switching back to OpenMPT, it is now less likely that the infamous "OpenMPT does not respond" dialog from Windows occours. 
 
 Misc
   [New] <Jojo> INI Settings: When portable mode is enabled, the most common paths in mptrack.ini are now translated to relative paths (if possible). Plugin paths are not translated to relative paths (yet).
   [New] <Jojo> Modules in gzip archives (single-file .gz archives) can now be imported, just to satisfy my laziness when downloading gzipped modules from Amiga Music Preservation. :-P
-  [Imp] <Jojo> The wave export "render by channel" mode ignores empty channels now.
   [Imp] <Jojo> Mod Loaders: Instead of creating messageboxes in various places, errors are now written to the log and one messagebox is shown for each file.
   [Imp] <Jojo> Binary files are now less often falsely recognized as early MOD files (15 samples without header): If the orderlist contains orderlist items > 128, loading is cancelled.
   [Imp] <Jojo> Song Properties: Tooltips are shown for various controls.
@@ -191,7 +191,6 @@ Misc
   [Reg] <rewbs> Removed old "velocity" volume command, which was experimental and unused.
   [Mod] <Jojo> Replaced default VU-meter colours for the MPT scheme by more pleasant colours that were already used for the other themes.
   [Mod] <Jojo> Updated internet links (ModPlug Central Forums link is now a permalink)
-  [Fix] <Jojo> MPTM Saving: A missing null pointer check crashed OpenMPT when trying to access a deleted instrument slot.
   [Fix] <Jojo> Multi window edit: When (un)muting a channel from the general tab in window 1, it was instantly shown in the pattern editor of window 2, but not vice versa.
   [Fix] <Jojo> Channel Manager: When removing channels using the channel manager, their names were not cleared properly.
   [Fix] <Jojo> Song Length Detection: *Much* more accurate song length detection!
