@@ -785,11 +785,12 @@ void CCtrlPatterns::OnPatternNew()
 		{
 			rows = pSndFile->Patterns[pat].GetNumRows();
 			rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
+			nCurOrd++;	// only if the current oder is already occupied, create a new pattern at the next position.
 		}
-		PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nCurOrd + 1, rows);
+		PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nCurOrd, rows);
 		if ((nNewPat != PATTERNINDEX_INVALID) && (nNewPat < pSndFile->Patterns.Size()))
 		{
-			m_OrderList.SetCurSel(nCurOrd + 1);
+			m_OrderList.SetCurSel(nCurOrd);
 			m_OrderList.InvalidateRect(NULL, FALSE);
 			SetCurrentPattern(nNewPat);
 			m_pModDoc->SetModified();
@@ -879,12 +880,8 @@ void CCtrlPatterns::OnPatternStop()
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm) pMainFrm->PauseMod(m_pModDoc);
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-		for (UINT i=0; i<MAX_CHANNELS; i++)
-		{
-			pSndFile->Chn[i].nLength = 0;
-			pSndFile->Chn[i].nROfs = 0;
-			pSndFile->Chn[i].nLOfs = 0;
-		}
+		if(pSndFile)
+			pSndFile->ResetChannels();
 	}
 	SwitchToView();
 }

@@ -1098,7 +1098,6 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	if ((!bItemSelected) || (!m_nDragItem)) return;
 	InvalidateRect(&m_rcDragItem, FALSE);
 	DWORD nItemNo = m_nDragItem & 0xFFFF;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	switch(m_nDragItem & DRAGITEM_MASK)
 	{
 	case DRAGITEM_CHNHEADER:
@@ -1282,7 +1281,7 @@ void CViewPattern::OnMouseMove(UINT, CPoint point)
 	if (m_nDragItem)
 	{
 		DWORD nItem = GetDragItem(point, NULL);
-		BOOL b = (nItem == m_nDragItem) ? TRUE : FALSE;
+		bool b = (nItem == m_nDragItem) ? true : false;
 		if (b != m_bInItemRect)
 		{
 			m_bInItemRect = b;
@@ -1441,20 +1440,25 @@ void CViewPattern::OnSoloChannel(BOOL current)
 	}
 
 	const CHANNELINDEX nNumChn = pModDoc->GetNumChannels();
-	UINT nChn = current ? (m_dwCursor&0xFFFF)>>3 : (m_nMenuParam&0xFFFF)>>3;
-	if (nChn >= nNumChn)	{
+	const CHANNELINDEX nChn = current ? (m_dwCursor&0xFFFF)>>3 : (m_nMenuParam&0xFFFF)>>3;
+	if (nChn >= nNumChn)
+	{
 		return;
 	}
 
-	if (pModDoc->IsChannelSolo(nChn)) {
+	if (pModDoc->IsChannelSolo(nChn))
+	{
 		bool nChnIsOnlyUnMutedChan=true;
-		for (UINT i=0; i<nNumChn; i++){	//check status of all other chans
-			if (i!=nChn && !pModDoc->IsChannelMuted(i)) {
+		for (CHANNELINDEX i = 0; i < nNumChn; i++)	//check status of all other chans
+		{
+			if (i != nChn && !pModDoc->IsChannelMuted(i))
+			{
 				nChnIsOnlyUnMutedChan=false;	//found a channel that isn't muted!
 				break;					
 			}
 		}
-		if (nChnIsOnlyUnMutedChan) { //this is the only playable channel and it is already soloed ->  uunMute all
+		if (nChnIsOnlyUnMutedChan)	// this is the only playable channel and it is already soloed ->  uunMute all
+		{
 			OnUnmuteAll();
 			return;
 		} 
@@ -2183,31 +2187,32 @@ void CViewPattern::Interpolate(PatternColumns type)
 	bool changed = false;
 	CArray<UINT,UINT> validChans;
 
-	if (type==EFFECT_COLUMN || type==PARAM_COLUMN) {
+	if (type==EFFECT_COLUMN || type==PARAM_COLUMN)
+	{
 		CArray<UINT,UINT> moreValidChans;
         ListChansWhereColSelected(EFFECT_COLUMN, validChans);
 		ListChansWhereColSelected(PARAM_COLUMN, moreValidChans);
 		//CArrayUtils<UINT>::Merge(validChans, moreValidChans); //Causes unresolved external, not sure why yet.
 		validChans.Append(moreValidChans);						//for now we'll just interpolate the same data several times. :)
-	} else {
+	} else
+	{
 		ListChansWhereColSelected(type, validChans);
 	}
 	
 	int nValidChans = validChans.GetCount();
 
 	//for all channels where type is selected
-	for (int chnIdx=0; chnIdx<nValidChans; chnIdx++) {
+	for (int chnIdx=0; chnIdx<nValidChans; chnIdx++)
+	{
 		UINT nchn = validChans[chnIdx];
 		UINT row0 = GetSelectionStartRow();
 		UINT row1 = GetSelectionEndRow();
 		
-		if (!IsInterpolationPossible(row0, row1, nchn, type, pSndFile)) { 
+		if (!IsInterpolationPossible(row0, row1, nchn, type, pSndFile))
 			continue; //skip chans where interpolation isn't possible
-		}
 
-		if (!changed) { //ensure we save undo buffer only before any channels are interpolated
+		if (!changed) //ensure we save undo buffer only before any channels are interpolated
 			PrepareUndo(m_dwBeginSel, m_dwEndSel);
-		}
 
 		bool doPCinterpolation = false;
 
@@ -2220,7 +2225,8 @@ void CViewPattern::Interpolate(PatternColumns type)
 		MODCOMMAND::NOTE PCnote = 0;
 		uint16 PCinst = 0, PCparam = 0;
 
-		switch(type) {
+		switch(type)
+		{
 			case NOTE_COLUMN:
 				vsrc = srcCmd.note;
 				vdest = destCmd.note;
@@ -2232,6 +2238,14 @@ void CViewPattern::Interpolate(PatternColumns type)
 				vdest = destCmd.vol;
 				vcmd = srcCmd.volcmd;
 				verr = (distance * 63) / 128;
+				if(srcCmd.volcmd == VOLCMD_NONE)
+				{
+					vsrc = vdest;
+					vcmd = destCmd.volcmd;
+				} else if(destCmd.volcmd == VOLCMD_NONE)
+				{
+					vdest = vsrc;
+				}
 				break;
 			case PARAM_COLUMN:
 			case EFFECT_COLUMN:
@@ -2252,6 +2266,14 @@ void CViewPattern::Interpolate(PatternColumns type)
 					vsrc = srcCmd.param;
 					vdest = destCmd.param;
 					vcmd = srcCmd.command;
+					if(srcCmd.command == CMD_NONE)
+					{
+						vsrc = vdest;
+						vcmd = destCmd.command;
+					} else if(destCmd.command == CMD_NONE)
+					{
+						vdest = vsrc;
+					}
 				}
 				verr = (distance * 63) / 128;
 				break;
@@ -3128,6 +3150,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		const bool bLiveRecord = IsLiveRecord(*pModDoc, *pSndFile);
 		ModCommandPos editpos = GetEditPos(*pSndFile, bLiveRecord);
 		MODCOMMAND* p = GetModCommand(*pSndFile, editpos);
+		pModDoc->GetPatternUndo()->PrepareUndo(editpos.nPat, editpos.nChn, editpos.nRow, editpos.nChn, editpos.nRow);
 		p->Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * MODCOMMAND::maxColumnValue)/127));
 		if(bLiveRecord == false)
 			InvalidateRow(editpos.nRow);
@@ -5185,12 +5208,12 @@ UINT CViewPattern::GetColTypeFromCursor(DWORD cursor) {return cursor & 0x07;}
 //---------------------------------------------------
 
 
-bool CViewPattern::IsInterpolationPossible(UINT startRow, UINT endRow, 
-										   UINT chan, PatternColumns colType, CSoundFile* pSndFile) {
-//---------------------------------------------------------------------------------------
-	if (startRow == endRow) {
+bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan,
+										   PatternColumns colType, CSoundFile* pSndFile)
+//--------------------------------------------------------------------------------------
+{
+	if (startRow == endRow)
 		return false;
-	}
 
 	bool result = false;
 	const MODCOMMAND startRowMC = *pSndFile->Patterns[m_nPattern].GetpModCommand(startRow, chan);
@@ -5200,21 +5223,22 @@ bool CViewPattern::IsInterpolationPossible(UINT startRow, UINT endRow,
 	if(colType == EFFECT_COLUMN && (startRowMC.IsPcNote() || endRowMC.IsPcNote()))
 		return true;
 
-	switch (colType) {
+	switch (colType)
+	{
 		case NOTE_COLUMN:
 			startRowCmd = startRowMC.note;
 			endRowCmd = endRowMC.note;
-			result = (startRowCmd>0 && endRowCmd>0);
+			result = (startRowCmd >= NOTE_MIN && endRowCmd >= NOTE_MIN);
 			break;
 		case EFFECT_COLUMN:
 			startRowCmd = startRowMC.command;
 			endRowCmd = endRowMC.command;
-			result = (startRowCmd == endRowCmd) && (startRowCmd>0 && endRowCmd>0);
+			result = (startRowCmd == endRowCmd && startRowCmd != CMD_NONE) || (startRowCmd != CMD_NONE && endRowCmd == CMD_NONE) || (startRowCmd == CMD_NONE && endRowCmd != CMD_NONE);
 			break;
 		case VOL_COLUMN:
 			startRowCmd = startRowMC.volcmd;
 			endRowCmd = endRowMC.volcmd;
-			result = (startRowCmd == endRowCmd) && (startRowCmd>0 && endRowCmd>0);
+			result = (startRowCmd == endRowCmd && startRowCmd != VOLCMD_NONE) || (startRowCmd != VOLCMD_NONE && endRowCmd == VOLCMD_NONE) || (startRowCmd == VOLCMD_NONE && endRowCmd != VOLCMD_NONE);
 			break;
 		default:
 			result = false;

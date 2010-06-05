@@ -210,6 +210,8 @@ static UINT BASED_CODE MainButtons[] =
 //	ID_CONTEXT_HELP,
 		ID_SEPARATOR,	//rewbs.reportBug
 	ID_REPORT_BUG,		//rewbs.reportBug
+		ID_SEPARATOR,
+	ID_PANIC,
 };
 
 
@@ -227,7 +229,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	if (!CToolBar::Create(parent, dwStyle)) return FALSE;
 	if (!LoadBitmap(IDB_MAINBAR)) return FALSE;
-	if (!SetButtons(MainButtons, sizeof(MainButtons)/sizeof(UINT))) return FALSE;
+	if (!SetButtons(MainButtons, ARRAYELEMCOUNT(MainButtons))) return FALSE;
 
 	nCurrentSpeed = 6;
 	nCurrentTempo = 125;

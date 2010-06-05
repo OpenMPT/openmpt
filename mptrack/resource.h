@@ -1208,6 +1208,7 @@
 #define ID_PATTERN_EDIT_PCNOTE_PLUGIN   60448
 #define ID_ENVELOPE_ZOOM_IN             60449
 #define ID_ENVELOPE_ZOOM_OUT            60450
+#define ID_PANIC						60451
 
 // Next default values for new objects
 // 
@@ -1215,7 +1216,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        526
-#define _APS_NEXT_COMMAND_VALUE         60451
+#define _APS_NEXT_COMMAND_VALUE         60452
 #define _APS_NEXT_CONTROL_VALUE         2428
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

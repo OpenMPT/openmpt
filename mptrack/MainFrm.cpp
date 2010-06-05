@@ -89,6 +89,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_ADD_SOUNDBANK,			OnAddDlsBank)
 	ON_COMMAND(ID_IMPORT_MIDILIB,			OnImportMidiLib)
 	ON_COMMAND(ID_MIDI_RECORD,				OnMidiRecord)
+	ON_COMMAND(ID_PANIC,					OnPanic)
 	ON_COMMAND(ID_PLAYER_PAUSE,				OnPlayerPause)
 	ON_COMMAND_EX(IDD_TREEVIEW,				OnBarCheck)
 	ON_COMMAND_EX(ID_NETLINK_OPENMPTWIKI,	OnInternetLink)
@@ -2698,6 +2699,18 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 	}
 	m_dwStatus &= ~MODSTATUS_BUSY;
 	return 0;
+}
+
+
+void CMainFrame::OnPanic()
+//------------------------
+{
+	// Panic button. At the moment, it just resets all VSTi and sample notes.
+	if(m_pModPlaying && m_pModPlaying->GetSoundFile())
+	{
+		m_pModPlaying->GetSoundFile()->StopAllVsti();
+		m_pModPlaying->GetSoundFile()->ResetChannels();
+	}
 }
 
 

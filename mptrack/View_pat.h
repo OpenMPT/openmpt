@@ -346,7 +346,7 @@ private:
 	static CHANNELINDEX GetChanFromCursor(DWORD cursor);
 	static UINT GetColTypeFromCursor(DWORD cursor);
 
-	bool IsInterpolationPossible(UINT startRow, UINT endRow, UINT chan, PatternColumns colType, CSoundFile* pSndFile);
+	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternColumns colType, CSoundFile* pSndFile);
 	void Interpolate(PatternColumns type);
 
 	// Return true if recording live (i.e. editing while following playback).

@@ -382,7 +382,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			insfile[iSmp] += ((DWORD)(BYTE)s[0x0D]) << 20;
 			if (insfile[iSmp] > dwMemLength) insfile[iSmp] &= 0xFFFF;
 
-			if(Samples[iSmp].nLoopEnd <= 4)
+			if(Samples[iSmp].nLoopEnd < 2)
 				Samples[iSmp].nLoopStart = Samples[iSmp].nLoopEnd = 0;
 
 			if ((Samples[iSmp].nLoopStart >= Samples[iSmp].nLoopEnd) || (Samples[iSmp].nLoopEnd - Samples[iSmp].nLoopStart < 1))
