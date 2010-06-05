@@ -388,26 +388,32 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	}
 	for (PATTERNINDEX nPat = maxpat; nPat < maxPatIndex; nPat++) if ((pSndFile->Patterns[nPat]) && (nPat >= nMinToRemove))
 	{
-		MODCOMMAND *m = pSndFile->Patterns[nPat];
-		UINT ncmd = pSndFile->m_nChannels * pSndFile->Patterns[nPat].GetNumRows();
-		for (UINT i=0; i<ncmd; i++)
+		const MODCOMMAND *m = pSndFile->Patterns[nPat];
+		bool bEmptyPat = true;
+		size_t ncmd = pSndFile->m_nChannels * pSndFile->Patterns[nPat].GetNumRows();
+		for (size_t i = 0; i < ncmd; i++)
 		{
-			if ((m[i].note) || (m[i].instr) || (m[i].volcmd) || (m[i].command)) goto NotEmpty;
+			if(m[i].IsEmpty())
+			{
+				bEmptyPat = false;
+				break;
+			}
 		}
-		pSndFile->Patterns.Remove(nPat);
-		nPatRemoved++;
-NotEmpty:
-		;
+		if(bEmptyPat)
+		{
+			pSndFile->Patterns.Remove(nPat);
+			nPatRemoved++;
+		}
 	}
-	UINT bWaste = 0;
+	UINT nWaste = 0;
 	for (UINT ichk=0; ichk < maxPatIndex; ichk++)
 	{
-		if ((pSndFile->Patterns[ichk]) && (!bPatUsed[ichk])) bWaste++;
+		if ((pSndFile->Patterns[ichk]) && (!bPatUsed[ichk])) nWaste++;
 	}
-	if ((bRemove) && (bWaste))
+	if ((bRemove) && (nWaste))
 	{
 		EndWaitCursor();
-		wsprintf(s, "%d pattern%s present in file, but not used in the song\nDo you want to reorder the sequence list and remove these patterns?", bWaste, (bWaste == 1) ? "" : "s");
+		wsprintf(s, "%d pattern%s present in file, but not used in the song\nDo you want to reorder the sequence list and remove these patterns?", nWaste, (nWaste == 1) ? "" : "s");
 		if (m_wParent->MessageBox(s, "Pattern Cleanup", MB_YESNO) != IDYES) return false;
 		BeginWaitCursor();
 	}
@@ -431,7 +437,7 @@ NotEmpty:
 			}
 		}
 		// Add unused patterns at the end
-		if ((!bRemove) || (!bWaste))
+		if ((!bRemove) || (!nWaste))
 		{
 			for(PATTERNINDEX iadd = 0; iadd < maxPatIndex; iadd++)
 			{
@@ -539,7 +545,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 			MODCOMMAND *p = pSndFile->Patterns[nPat];
 			if (p)
 			{
-				UINT jmax = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->m_nChannels;
+				UINT jmax = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->GetNumChannels();
 				for (UINT j=0; j<jmax; j++, p++)
 				{
 					if ((p->note) && (p->note <= NOTE_MAX))
@@ -706,7 +712,7 @@ bool CModCleanupDlg::RearrangeSamples()
 		for (PATTERNINDEX nPat = 0; nPat < pSndFile->Patterns.Size(); nPat++) if (pSndFile->Patterns[nPat])
 		{
 			MODCOMMAND *m = pSndFile->Patterns[nPat];
-			for(UINT len = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->m_nChannels; len; m++, len--)
+			for(UINT len = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->GetNumChannels(); len; m++, len--)
 			{
 				if(m->instr <= pSndFile->m_nSamples) m->instr = (BYTE)nSampleMap[m->instr];
 			}

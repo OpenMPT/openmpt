@@ -49,7 +49,7 @@ PMIXPLUGINCREATEPROC CSoundFile::gpMixPluginCreateProc = NULL;
 LONG gnDryROfsVol = 0;
 LONG gnDryLOfsVol = 0;
 int gbInitPlugins = 0;
-int gbInitTables = 0;
+bool gbInitTables = 0;
 
 typedef DWORD (MPPASMCALL * LPCONVERTPROC)(LPVOID, int *, DWORD);
 
@@ -218,7 +218,7 @@ BOOL CSoundFile::InitPlayer(BOOL bReset)
 	if (!gbInitTables)
 	{
 		SndMixInitializeTables();
-		gbInitTables = 1;
+		gbInitTables = true;
 	}
 #endif
 	if (m_nMaxMixChannels > MAX_CHANNELS) m_nMaxMixChannels = MAX_CHANNELS;
@@ -681,11 +681,13 @@ BOOL CSoundFile::ProcessRow()
 						m_nMusicSpeed = m_nDefaultSpeed;
 						m_nMusicTempo = m_nDefaultTempo;
 						m_nGlobalVolume = m_nDefaultGlobalVolume;
-						for (UINT i=0; i<MAX_CHANNELS; i++)	{
+						for (UINT i=0; i<MAX_CHANNELS; i++)
+						{
 							Chn[i].dwFlags |= CHN_NOTEFADE | CHN_KEYOFF;
 							Chn[i].nFadeOutVol = 0;
 
-							if (i < m_nChannels) {
+							if (i < m_nChannels)
+							{
 								Chn[i].nGlobalVol = ChnSettings[i].nVolume;
 								Chn[i].nVolume = ChnSettings[i].nVolume;
 								Chn[i].nPan = ChnSettings[i].nPan;
@@ -696,7 +698,8 @@ BOOL CSoundFile::ProcessRow()
 								Chn[i].nOldHiOffset = 0;
 								Chn[i].nPortamentoDest = 0;
 
-								if (!Chn[i].nLength) {
+								if (!Chn[i].nLength)
+								{
 									Chn[i].dwFlags = ChnSettings[i].dwFlags;
 									Chn[i].nLoopStart = 0;
 									Chn[i].nLoopEnd = 0;
@@ -715,7 +718,8 @@ BOOL CSoundFile::ProcessRow()
 					m_nCurrentPattern = nRestartPosOverride;
 					m_dwSongFlags &= ~SONG_BREAKTOROW;
 					//If restart pos points to +++, move along
-					while (Order[m_nCurrentPattern] == Order.GetIgnoreIndex()) {
+					while (Order[m_nCurrentPattern] == Order.GetIgnoreIndex())
+					{
 						m_nCurrentPattern++;
 					}
 					//Check for end of song or bad pattern
@@ -726,19 +730,18 @@ BOOL CSoundFile::ProcessRow()
 						return FALSE;
 					}
 
-				} else {
+				} else
+				{
 					m_nCurrentPattern++;
 				}
 
-				if (m_nCurrentPattern < Order.size()) {
+				if (m_nCurrentPattern < Order.size())
 					m_nPattern = Order[m_nCurrentPattern];
-				} else {
+				else
 					m_nPattern = Order.GetInvalidPatIndex();
-				}
 
-				if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern])) {
+				if ((m_nPattern < Patterns.Size()) && (!Patterns[m_nPattern]))
 					m_nPattern = Order.GetIgnoreIndex();
-				}
 			}
 			m_nNextPattern = m_nCurrentPattern;
 
@@ -1184,7 +1187,8 @@ BOOL CSoundFile::ReadNote()
 				}
 			}
 			// vol is 14-bits
-			if (vol) {
+			if (vol)
+			{
 				// IMPORTANT: pChn->nRealVolume is 14 bits !!!
 				// -> _muldiv( 14+8, 6+6, 18); => RealVolume: 14-bit result (22+12-20)
 				
@@ -1192,11 +1196,14 @@ BOOL CSoundFile::ReadNote()
 
 				//Don't let global volume affect level of sample if
 				//global volume is going to be applied to master output anyway.
-				if (pChn->dwFlags&CHN_SYNCMUTE) {
+				if (pChn->dwFlags & CHN_SYNCMUTE)
+				{
 					pChn->nRealVolume = 0;
-				} else if (m_pConfig->getGlobalVolumeAppliesToMaster()) {
+				} else if (m_pConfig->getGlobalVolumeAppliesToMaster())
+				{
 					pChn->nRealVolume = _muldiv(vol*MAX_GLOBAL_VOLUME, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
-				} else {
+				} else
+				{
 					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
 				}
 			}
@@ -1901,7 +1908,7 @@ BOOL CSoundFile::ReadNote()
 						if (nRampLength < (LONG)gnVolumeRampSamples) nRampLength = gnVolumeRampSamples;
 					}
 				}
-#endif
+#endif // FASTSOUNDLIB
 				pChn->nRightRamp = nRightDelta / nRampLength;
 				pChn->nLeftRamp = nLeftDelta / nRampLength;
 				pChn->nRightVol = pChn->nNewRightVol - ((pChn->nRightRamp * nRampLength) >> VOLUMERAMPPRECISION);
@@ -1931,7 +1938,7 @@ BOOL CSoundFile::ReadNote()
 			// Note change but no sample
 			if (pChn->nLeftVU > 128) pChn->nLeftVU = 0;
 			if (pChn->nRightVU > 128) pChn->nRightVU = 0;
-#endif
+#endif // ENABLE_STEREOVU
 			if (pChn->nVUMeter > 0xFF) pChn->nVUMeter = 0;
 			pChn->nLeftVol = pChn->nRightVol = 0;
 			pChn->nLength = 0;

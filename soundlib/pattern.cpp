@@ -116,7 +116,6 @@ bool CPattern::Expand()
 //---------------------
 {
 	MODCOMMAND *newPattern, *oldPattern;
-	UINT nRows, nChns;
 
 	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
 	if(sndFile.m_pModDoc == NULL) return true;
@@ -126,21 +125,21 @@ bool CPattern::Expand()
 	if ((!m_ModCommands) || (m_Rows > sndFile.GetModSpecifications().patternRowsMax / 2)) return true;
 
 	rModDoc.BeginWaitCursor();
-	nRows = m_Rows;
-	nChns = sndFile.m_nChannels;
-	newPattern = CSoundFile::AllocatePattern(nRows*2, nChns);
+	const ROWINDEX nRows = m_Rows;
+	const CHANNELINDEX nChns = sndFile.m_nChannels;
+	newPattern = CSoundFile::AllocatePattern(nRows * 2, nChns);
 	if (!newPattern) return true;
 
-	const UINT nPattern = m_rPatternContainer.GetIndex(this);
-	rModDoc.GetPatternUndo()->PrepareUndo(nPattern, 0,0, nChns, nRows);
+	const PATTERNINDEX nPattern = m_rPatternContainer.GetIndex(this);
+	rModDoc.GetPatternUndo()->PrepareUndo(nPattern, 0, 0, nChns, nRows);
 	oldPattern = m_ModCommands;
-	for (UINT y=0; y<nRows; y++)
+	for (ROWINDEX y = 0; y < nRows; y++)
 	{
-		memcpy(newPattern+y*2*nChns, oldPattern+y*nChns, nChns*sizeof(MODCOMMAND));
+		memcpy(newPattern + y * 2 * nChns, oldPattern + y * nChns, nChns * sizeof(MODCOMMAND));
 	}
 	m_ModCommands = newPattern;
 	m_Rows = nRows * 2;
-	CSoundFile::FreePattern(oldPattern); oldPattern= NULL;
+	CSoundFile::FreePattern(oldPattern); oldPattern = nullptr;
 	rModDoc.SetModified();
 	rModDoc.UpdateAllViews(NULL, HINT_PATTERNDATA | (nPattern << HINT_SHIFT_PAT), NULL);
 	rModDoc.EndWaitCursor();
@@ -150,8 +149,6 @@ bool CPattern::Expand()
 bool CPattern::Shrink()
 //---------------------
 {
-	UINT nRows, nChns;
-
 	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
 	if(sndFile.m_pModDoc == NULL) return true;
 
@@ -160,16 +157,16 @@ bool CPattern::Shrink()
 	if (!m_ModCommands || m_Rows < sndFile.GetModSpecifications().patternRowsMin * 2) return true;
 
 	rModDoc.BeginWaitCursor();
-	nRows = m_Rows;
-	nChns = sndFile.m_nChannels;
-	const UINT nPattern = m_rPatternContainer.GetIndex(this);
-	rModDoc.GetPatternUndo()->PrepareUndo(nPattern, 0,0, nChns, nRows);
+	ROWINDEX nRows = m_Rows;
+	const CHANNELINDEX nChns = sndFile.m_nChannels;
+	const PATTERNINDEX nPattern = m_rPatternContainer.GetIndex(this);
+	rModDoc.GetPatternUndo()->PrepareUndo(nPattern, 0, 0, nChns, nRows);
 	nRows /= 2;
-	for (UINT y=0; y<nRows; y++)
+	for (ROWINDEX y = 0; y < nRows; y++)
 	{
 		MODCOMMAND *psrc = sndFile.Patterns[nPattern] + (y * 2 * nChns);
 		MODCOMMAND *pdest = sndFile.Patterns[nPattern] + (y * nChns);
-		for (UINT x=0; x<nChns; x++)
+		for (CHANNELINDEX x = 0; x < nChns; x++)
 		{
 			pdest[x] = psrc[x];
 			if ((!pdest[x].note) && (!pdest[x].instr))

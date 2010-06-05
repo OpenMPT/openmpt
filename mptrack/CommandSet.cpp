@@ -1812,12 +1812,12 @@ void CCommandSet::SetupCommands()
 	commands[kcFileSaveAs].isDummy = false;
 
 	commands[kcFileSaveAsWave].UID = 1351;
-	commands[kcFileSaveAsWave].Message = "File/Save as Wave";
+	commands[kcFileSaveAsWave].Message = "File/Export as Wave";
 	commands[kcFileSaveAsWave].isHidden = false;
 	commands[kcFileSaveAsWave].isDummy = false;
 
 	commands[kcFileSaveAsMP3].UID = 1352;
-	commands[kcFileSaveAsMP3].Message = "File/Save as MP3";
+	commands[kcFileSaveAsMP3].Message = "File/Export as MP3";
 	commands[kcFileSaveAsMP3].isHidden = false;
 	commands[kcFileSaveAsMP3].isDummy = false;
 

@@ -33,13 +33,13 @@ void CPatternUndo::ClearUndo()
 // Create undo point.
 //   Parameter list:
 //   - pattern: Pattern of which an undo step should be created from.
-//   - x: first channel
-//   - y: first row
-//   - cx: width
-//   - cy: height
-//   - linkToPrevious: Don't create a separate undo step, but link this to the previous undo event.
-bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UINT cy, bool linkToPrevious)
-//---------------------------------------------------------------------------------------------------------
+//   - firstChn: first channel, 0-based.
+//   - firstRow: first row, 0-based.
+//   - numChns: width
+//   - numRows: height
+//   - linkToPrevious: Don't create a separate undo step, but link this to the previous undo event. Useful for commands that modify several patterns at once.
+bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, bool linkToPrevious)
+//---------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(m_pModDoc == nullptr) return false;
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
@@ -47,16 +47,16 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UI
 
 	PATTERNUNDOBUFFER sUndo;
 	MODCOMMAND *pUndoData, *pPattern;
-	UINT nRows;
+	ROWINDEX nRows;
 
 	if (!pSndFile->Patterns.IsValidPat(pattern)) return false;
 	nRows = pSndFile->Patterns[pattern].GetNumRows();
 	pPattern = pSndFile->Patterns[pattern];
-	if ((y >= nRows) || (cx < 1) || (cy < 1) || (x >= pSndFile->m_nChannels)) return false;
-	if (y + cy >= nRows) cy = nRows - y;
-	if (x + cx >= pSndFile->m_nChannels) cx = pSndFile->m_nChannels - x;
+	if ((firstRow >= nRows) || (numChns < 1) || (numRows < 1) || (firstChn >= pSndFile->m_nChannels)) return false;
+	if (firstRow + numRows >= nRows) numRows = nRows - firstRow;
+	if (firstChn + numChns >= pSndFile->m_nChannels) numChns = pSndFile->m_nChannels - firstChn;
 
-	pUndoData = new MODCOMMAND[cx * cy];
+	pUndoData = new MODCOMMAND[numChns * numRows];
 	if (!pUndoData) return false;
 
 	const bool bUpdate = !CanUndo(); // update undo status?
@@ -69,17 +69,17 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UI
 
 	sUndo.pattern = pattern;
 	sUndo.patternsize = pSndFile->Patterns[pattern].GetNumRows();
-	sUndo.column = x;
-	sUndo.row = y;
-	sUndo.cx = cx;
-	sUndo.cy = cy;
+	sUndo.firstChannel = firstChn;
+	sUndo.firstRow = firstRow;
+	sUndo.numChannels = numChns;
+	sUndo.numRows = numRows;
 	sUndo.pbuffer = pUndoData;
 	sUndo.linkToPrevious = linkToPrevious;
-	pPattern += x + y * pSndFile->m_nChannels;
-	for (UINT iy = 0; iy < cy; iy++)
+	pPattern += firstChn + firstRow * pSndFile->m_nChannels;
+	for(ROWINDEX iy = 0; iy < numRows; iy++)
 	{
-		memcpy(pUndoData, pPattern, cx * sizeof(MODCOMMAND));
-		pUndoData += cx;
+		memcpy(pUndoData, pPattern, numChns * sizeof(MODCOMMAND));
+		pUndoData += numChns;
 		pPattern += pSndFile->m_nChannels;
 	}
 
@@ -99,7 +99,7 @@ PATTERNINDEX CPatternUndo::Undo()
 
 
 // Restore an undo point. Returns which pattern has been modified.
-// linkedFromPrevious is true if a connected undo even is going to be deleted.
+// linkedFromPrevious is true if a connected undo event is going to be deleted (can only be called internally).
 PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 //------------------------------------------------------
 {
@@ -128,7 +128,7 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 
 	nPattern = pUndo->pattern;
 	nRows = pUndo->patternsize;
-	if(pUndo->column + pUndo->cx <= pSndFile->m_nChannels)
+	if(pUndo->firstChannel + pUndo->numChannels <= pSndFile->m_nChannels)
 	{
 		if((!pSndFile->Patterns[nPattern]) || (pSndFile->Patterns[nPattern].GetNumRows() < nRows))
 		{
@@ -147,12 +147,12 @@ PATTERNINDEX CPatternUndo::Undo(bool linkedFromPrevious)
 		pUndoData = pUndo->pbuffer;
 		pPattern = pSndFile->Patterns[nPattern];
 		if (!pSndFile->Patterns[nPattern]) return PATTERNINDEX_INVALID;
-		pPattern += pUndo->column + (pUndo->row * pSndFile->m_nChannels);
-		for(UINT iy = 0; iy < pUndo->cy; iy++)
+		pPattern += pUndo->firstChannel + (pUndo->firstRow * pSndFile->m_nChannels);
+		for(ROWINDEX iy = 0; iy < pUndo->numRows; iy++)
 		{
-			memcpy(pPattern, pUndoData, pUndo->cx * sizeof(MODCOMMAND));
+			memcpy(pPattern, pUndoData, pUndo->numChannels * sizeof(MODCOMMAND));
 			pPattern += pSndFile->m_nChannels;
-			pUndoData += pUndo->cx;
+			pUndoData += pUndo->numChannels;
 		}
 	}		
 
