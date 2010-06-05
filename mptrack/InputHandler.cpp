@@ -420,8 +420,8 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_FILE_CLOSE:			s="&Close\t"; c=kcFileClose; break;
 		case ID_FILE_SAVE:			s="&Save\t"; c=kcFileSave; break;
 		case ID_FILE_SAVE_AS:		s="Save &As...\t"; c=kcFileSaveAs; break;
-		case ID_FILE_SAVEASWAVE:	s="Save as &Wave...\t"; c=kcFileSaveAsWave; break;
-		case ID_FILE_SAVEASMP3:		s="Save as M&P3...\t"; c=kcFileSaveAsMP3; break;
+		case ID_FILE_SAVEASWAVE:	s="Export as &Wave...\t"; c=kcFileSaveAsWave; break;
+		case ID_FILE_SAVEASMP3:		s="Export as M&P3...\t"; c=kcFileSaveAsMP3; break;
 		case ID_FILE_SAVEMIDI:		s="Export as M&IDI...\t"; c=kcFileSaveMidi; break;
 		case ID_FILE_SAVECOMPAT:	s="Compatibility &Export...\t"; c=kcFileExportCompat; break;
 		case ID_IMPORT_MIDILIB:		s="Import &MIDI Library...\t"; c=kcFileImportMidiLib; break;

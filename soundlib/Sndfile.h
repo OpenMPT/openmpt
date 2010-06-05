@@ -478,7 +478,7 @@ public: //Misc
 	// Is compatible mode for a specific tracker turned on?
 	// Hint 1: No need to poll for MOD_TYPE_MPT, as it will automatically be linked with MOD_TYPE_IT when using TRK_IMPULSETRACKER
 	// Hint 2: Always returns true for MOD / S3M format (if that is the format of the current file)
-	bool IsCompatibleMode(MODTYPE type)
+	bool IsCompatibleMode(MODTYPE type) const
 	{
 		if(GetType() & type & (MOD_TYPE_MOD | MOD_TYPE_S3M))
 			return true; // S3M and MOD format don't have compatibility flags, so we will always return true
@@ -1154,10 +1154,10 @@ int _muldivr(long a, long b, long c);
 
 typedef struct MODFORMATINFO
 {
-	DWORD dwFormatId;		// MOD_TYPE_XXXX
-	LPCSTR lpszFormatName;	// "ProTracker"
-	LPCSTR lpszExtension;	// ".xxx"
-	DWORD dwPadding;
+	MODTYPE mtFormatId;		// MOD_TYPE_XXXX
+	LPCSTR  lpszFormatName;	// "ProTracker"
+	LPCSTR  lpszExtension;	// ".xxx"
+	DWORD   dwPadding;
 } MODFORMATINFO;
 
 extern MODFORMATINFO gModFormatInfo[MAX_MODTYPE];

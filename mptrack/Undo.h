@@ -18,8 +18,8 @@ struct PATTERNUNDOBUFFER
 {
 	PATTERNINDEX pattern;
 	ROWINDEX patternsize;
-	UINT column, row;
-	UINT cx, cy;
+	CHANNELINDEX firstChannel, numChannels;
+	ROWINDEX firstRow, numRows;
 	MODCOMMAND *pbuffer;
 	bool linkToPrevious;
 };
@@ -42,7 +42,7 @@ public:
 
 	// Pattern undo functions
 	void ClearUndo();
-	bool PrepareUndo(PATTERNINDEX pattern, UINT x, UINT y, UINT cx, UINT cy, bool linkToPrevious = false);
+	bool PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, bool linkToPrevious = false);
 	PATTERNINDEX Undo();
 	bool CanUndo();
 	void RemoveLastUndoStep();
@@ -69,7 +69,7 @@ public:
 // We will differentiate between different types of undo actions so that we don't have to copy the whole sample everytime.
 enum sampleUndoTypes
 {
-	sundo_none = 0,	// no changes to sample itself, e.g. loop point update
+	sundo_none,		// no changes to sample itself, e.g. loop point update
 	sundo_update,	// silence, amplify, normalize, dc offset - update complete sample section
 	sundo_delete,	// delete part of the sample
 	sundo_invert,	// invert sample phase, apply again to undo

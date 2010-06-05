@@ -216,7 +216,7 @@
 				BufferSecurityCheck="true"
 				RuntimeTypeInfo="true"
 				ObjectFile="obj\vc_static_dbg\muParser\"
-				ProgramDataBaseFileName="..\..\lib\muparserd.pdb"
+				ProgramDataBaseFileName="..\..\lib\muparser.pdb"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -235,7 +235,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\..\lib\muparserd.lib"
+				OutputFile="..\..\lib\muparser.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool

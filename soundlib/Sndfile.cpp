@@ -1149,11 +1149,11 @@ double  CSoundFile::GetCurrentBPM() const
 {
 	double bpm;
 
-	if (m_nTempoMode == tempo_mode_modern) {		// With modern mode, we trust that true bpm 
-		bpm = static_cast<double>(m_nMusicTempo);	// is  be close enough to what user chose.
-	}												// This avoids oscillation due to tick-to-tick corrections.
-
-	else {												//with other modes, we calculate it:
+	if (m_nTempoMode == tempo_mode_modern)			// With modern mode, we trust that true bpm
+	{												// is close enough to what user chose.
+		bpm = static_cast<double>(m_nMusicTempo);	// This avoids oscillation due to tick-to-tick corrections.
+	} else
+	{															//with other modes, we calculate it:
 		double ticksPerBeat = m_nMusicSpeed*m_nRowsPerBeat;		//ticks/beat = ticks/row  * rows/beat
 		double samplesPerBeat = m_nSamplesPerTick*ticksPerBeat;	//samps/beat = samps/tick * ticks/beat
 		bpm =  gdwMixingFreq/samplesPerBeat*60;					//beats/sec  = samps/sec  / samps/beat
@@ -1204,7 +1204,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 		MODCOMMAND *p = Patterns[Order[nPattern]];
 		if ((p) && (nRow < Patterns[Order[nPattern]].GetNumRows()))
 		{
-			BOOL bOk = FALSE;
+			bool bOk = false;
 			while ((!bOk) && (nRow > 0))
 			{
 				UINT n = nRow * m_nChannels;
@@ -1212,7 +1212,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 				{
 					if (p[n].note)
 					{
-						bOk = TRUE;
+						bOk = true;
 						break;
 					}
 				}
@@ -1360,7 +1360,7 @@ void CSoundFile::ResetChannels()
 	m_nBufferCount = 0;
 	for (UINT i=0; i<MAX_CHANNELS; i++)
 	{
-		Chn[i].nROfs = Chn[i].nLOfs = 0;
+		Chn[i].nROfs = Chn[i].nLOfs = Chn[i].nLength = 0;
 	}
 }
 

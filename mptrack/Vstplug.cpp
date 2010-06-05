@@ -2828,72 +2828,12 @@ void CVstPlugin::SetZxxParameter(UINT nParam, UINT nValue)
 
 //rewbs.smoothVST
 UINT CVstPlugin::GetZxxParameter(UINT nParam)
-//--------------------------------------------------------
+//-------------------------------------------
 {
 	return (UINT) (GetParameter(nParam) * 127.0f+0.5f);
 }
 //end rewbs.smoothVST
 
-
-//rewbs.VSTCompliance: not keeping Eric's preset load/save
-// code as he is not using the standard fxp format.
-/*
-// -> CODE#0002
-// -> DESC="VST plugins presets"
-BOOL CVstPlugin::SavePreset(LPCSTR lpszFileName)
-{
-	FILE *f;
-	UINT nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
-
-	if((!lpszFileName) || (!nParams) || ((f = fopen(lpszFileName, "wb")) == NULL)) return FALSE;
-
-	CHAR name[256];
-	if(!GetDefaultEffectName(&name[0])) wsprintf(&name[0],"unknown");
-
-	DWORD nLen = strlen(name) + 1;
-	fwrite(&nLen, 1, sizeof(DWORD), f);		// name string length
-	fwrite(&name[0], 1, nLen, f);			// name string
-	nLen = nParams;
-	fwrite(&nLen, 1, sizeof(DWORD), f);		// number of params
-
-	for(UINT i=0; i<nParams; i++){
-		FLOAT p = GetParameter(i);
-		fwrite(&p, 1, sizeof(FLOAT), f);	// i'th param
-	}
-
-	fclose(f);
-	return TRUE;
-}
-
-BOOL CVstPlugin::LoadPreset(LPCSTR lpszFileName)
-{
-	FILE *f;
-	UINT nParams = (m_pEffect->numParams > 0) ? m_pEffect->numParams : 0;
-
-	if((!lpszFileName) || ((f = fopen(lpszFileName, "r")) == NULL)) return FALSE;
-
-	FLOAT p;
-	DWORD nLen;
-	CHAR name[256];
-	CHAR ename[256];
-
-	fread(&nLen, 1, sizeof(DWORD), f);	// name string length 
-	fread(&name[0], 1, nLen, f);		// name string
-	fread(&nLen, 1, sizeof(DWORD), f);	// number of params
-
-	if(!GetDefaultEffectName(&ename[0])) wsprintf(&ename[0],"unknown");
-	if(strcmp(name,ename) != 0 || nLen != nParams) { fclose(f); return FALSE; }
-
-	for(UINT i=0; i<nParams; i++){
-		fread(&p, 1, sizeof(FLOAT), f);	// i'th param
-		SetParameter(i, p);
-	}
-
-	fclose(f);
-	return TRUE;
-}
-// -! NEW_FEATURE#0002
-*/
 
 void CVstPlugin::SaveAllParameters()
 //----------------------------------
@@ -3097,15 +3037,13 @@ CAbstractVstEditor* CVstPlugin::GetEditor()
 bool CVstPlugin::Bypass(bool bypass)
 //-----------------------------------
 {
-	if (bypass) {
+	if (bypass)
 		m_pMixStruct->Info.dwInputRouting |= MIXPLUG_INPUTF_BYPASS;
-	} else {
-		m_pMixStruct->Info.dwInputRouting &=~ MIXPLUG_INPUTF_BYPASS;
-	}
+	else
+		m_pMixStruct->Info.dwInputRouting &= ~MIXPLUG_INPUTF_BYPASS;
 	
-	if (m_pModDoc) {
+	if (m_pModDoc)
 		m_pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);
-	}
 
 	return bypass;
 }

@@ -34,15 +34,15 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 	if(lpStream[3] > 31) return false;
 
 #ifdef MODPLUG_TRACKER
-	if(m_pModDoc != nullptr) m_pModDoc->AddToLog(GetStrI18N(__TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
+	if(m_pModDoc != nullptr) m_pModDoc->AddToLog(GetStrI18N(_TEXT("The file appears to be a MO3 file, but this OpenMPT build does not support loading MO3 files.")));
 #endif // MODPLUG_TRACKER
 	return false;
 
 #else
-	bool b_result = false; // result of trying to load the module, false == fail.
+	bool bResult = false; // result of trying to load the module, false == fail.
 
 	int iLen = static_cast<int>(dwMemLength);
-	void ** mo3Stream = (void **)&lpStream;
+	void **mo3Stream = (void **)&lpStream;
 
 	// try to load unmo3.dll dynamically.
 	HMODULE unmo3 = LoadLibrary(_TEXT("unmo3.dll"));
@@ -54,24 +54,26 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 	else //case: dll loaded succesfully.
 	{
-		UNMO3_DECODE UNMO3_Decode = (UNMO3_DECODE)GetProcAddress(unmo3, "UNMO3_Decode");
-		UNMO3_FREE UNMO3_Free = (UNMO3_FREE)GetProcAddress(unmo3, "UNMO3_Free");
+		UNMO3_DECODE UNMO3_Decode = (UNMO3_DECODE)GetProcAddress(unmo3, _TEXT("UNMO3_Decode"));
+		UNMO3_FREE UNMO3_Free = (UNMO3_FREE)GetProcAddress(unmo3, _TEXT("UNMO3_Free"));
 
-		if(UNMO3_Decode != NULL && UNMO3_Free != NULL) {
-			if(UNMO3_Decode(mo3Stream, &iLen) == 0) {
+		if(UNMO3_Decode != NULL && UNMO3_Free != NULL)
+		{
+			if(UNMO3_Decode(mo3Stream, &iLen) == 0)
+			{
 				/* if decoding was successful, mo3Stream and iLen will keep the new
 				   pointers now. */
 				
 				if(iLen > 0)
 				{
-					b_result = true;
+					bResult = true;
 					if ((!ReadXM((const BYTE *)*mo3Stream, (DWORD)iLen))
 					&& (!ReadIT((const BYTE *)*mo3Stream, (DWORD)iLen))
 					&& (!ReadS3M((const BYTE *)*mo3Stream, (DWORD)iLen))
 					#ifndef FASTSOUNDLIB
 					&& (!ReadMTM((const BYTE *)*mo3Stream, (DWORD)iLen))
-					#endif
-					&& (!ReadMod((const BYTE *)*mo3Stream, (DWORD)iLen))) b_result = false;
+					#endif // FASTSOUNDLIB
+					&& (!ReadMod((const BYTE *)*mo3Stream, (DWORD)iLen))) bResult = false;
 				}
 				
 				UNMO3_Free(*mo3Stream);
@@ -79,8 +81,6 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 		FreeLibrary(unmo3);
 	}
-	return b_result;
+	return bResult;
 #endif // NO_MO3_SUPPORT
 }
-
-

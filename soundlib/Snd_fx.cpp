@@ -1868,7 +1868,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Set Channel Global Volume
 		case CMD_CHANNELVOLUME:
-			if (m_nTickCount) break;
+			if ((m_dwSongFlags & SONG_FIRSTTICK) == 0) break;
 			if (param <= 64)
 			{
 				pChn->nGlobalVol = param;
@@ -1913,7 +1913,8 @@ BOOL CSoundFile::ProcessEffects()
 		// Position Jump
 		case CMD_POSITIONJUMP:
 			nPosJump = param;
-			if((m_dwSongFlags & SONG_PATTERNLOOP && m_nSeqOverride == 0)) {
+			if((m_dwSongFlags & SONG_PATTERNLOOP && m_nSeqOverride == 0))
+			{
 				 m_nSeqOverride = param + 1;
 				 //Releasing pattern loop after position jump could cause 
 				 //instant jumps - modifying behavior so that now position jumps
@@ -1927,16 +1928,20 @@ BOOL CSoundFile::ProcessEffects()
 		// Pattern Break
 		case CMD_PATTERNBREAK:
 			m = NULL;
-			if (m_nRow < Patterns[m_nPattern].GetNumRows()-1) {
+			if (m_nRow < Patterns[m_nPattern].GetNumRows()-1)
+			{
 			  m = Patterns[m_nPattern] + (m_nRow+1) * m_nChannels + nChn;
 			}
-			if (m && m->command == CMD_XPARAM) {
+			if (m && m->command == CMD_XPARAM)
+			{
 				nBreakRow = (param<<8) + m->param;
-			} else {
+			} else
+			{
 				nBreakRow = param;
 			}
 			
-			if((m_dwSongFlags & SONG_PATTERNLOOP)) {
+			if((m_dwSongFlags & SONG_PATTERNLOOP))
+			{
 				//If song is set to loop and a pattern break occurs we should stay on the same pattern.
 				//Use nPosJump to force playback to "jump to this pattern" rather than move to next, as by default.
 				//rewbs.to
@@ -1944,25 +1949,22 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			break;
 
-		// Midi Controller
+		// Midi Controller (on first tick only)
 		case CMD_MIDI:
 			if(!(m_dwSongFlags & SONG_FIRSTTICK)) break;
-			if (param < 0x80){
+			if (param < 0x80)
 				ProcessMidiMacro(nChn, &m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro << 5], param);
-			} else {
+			else
 				ProcessMidiMacro(nChn, &m_MidiCfg.szMidiZXXExt[(param & 0x7F) << 5], 0);
-			}
 			break;
 
-		//rewbs.smoothVST: Smooth Macro slide
+		// Midi Controller (smooth, i.e. on every tick)
 		case CMD_SMOOTHMIDI:
-			if (param < 0x80) {
+			if (param < 0x80)
 				ProcessSmoothMidiMacro(nChn, &m_MidiCfg.szMidiSFXExt[pChn->nActiveMacro << 5], param);
-			} else	{
+			else
 				ProcessSmoothMidiMacro(nChn, &m_MidiCfg.szMidiZXXExt[(param & 0x7F) << 5], 0);
-			}
 			break;
-		//rewbs.smoothVST end 
 
 		// IMF Commands
 		case CMD_NOTESLIDEUP:
@@ -2040,7 +2042,8 @@ BOOL CSoundFile::ProcessEffects()
 void CSoundFile::resetEnvelopes(MODCHANNEL* pChn, int envToReset)
 //---------------------------------------------------------------
 {
-	switch (envToReset) {
+	switch (envToReset)
+	{
 		case ENV_RESET_ALL:
 			pChn->nVolEnvPosition = 0;
 			pChn->nPanEnvPosition = 0;
