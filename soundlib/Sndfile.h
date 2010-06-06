@@ -223,7 +223,8 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nCutOff, nResonance;
 	int nRetrigCount, nRetrigParam;
 	BYTE nTremorCount, nTremorParam;
-	BYTE nPatternLoop, nPatternLoopCount;
+	ROWINDEX nPatternLoop;
+	BYTE nPatternLoopCount;
 	BYTE nRowNote, nRowInstr;
 	BYTE nRowVolCmd, nRowVolume;
 	BYTE nRowCommand, nRowParam;
