@@ -625,7 +625,7 @@ UINT CSoundFile::ReadMix(LPVOID lpDestBuffer, UINT cbBuffer, CSoundFile *pSndFil
 BOOL CSoundFile::ProcessRow()
 //---------------------------
 {
-	if (++m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay+1) + m_nFrameDelay)
+	if (++m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay)
 	{
 		HandlePatternTransitionEvents();
 		m_nPatternDelay = 0;
@@ -758,8 +758,16 @@ BOOL CSoundFile::ProcessRow()
 		if (m_nNextRow >= Patterns[m_nPattern].GetNumRows())
 		{
 			if (!(m_dwSongFlags & SONG_PATTERNLOOP)) m_nNextPattern = m_nCurrentPattern + 1;
+			m_bPatternTransitionOccurred = true;
 			m_nNextRow = 0;
-			m_bPatternTransitionOccurred=true;
+
+			// FT2 idiosyncrasy: When E60 is used on a pattern row x, the following pattern also starts from row x
+			// instead of the beginning of the pattern, unless there was a Dxx or Cxx effect.
+			if(IsCompatibleMode(TRK_FASTTRACKER2))
+			{
+				m_nNextRow = m_nNextPatStartRow;
+				m_nNextPatStartRow = 0;
+			}
 		}
 		// Reset channel values
 		MODCHANNEL *pChn = Chn;
@@ -786,14 +794,16 @@ BOOL CSoundFile::ProcessRow()
 	m_dwSongFlags |= SONG_FIRSTTICK;
 
 	//End of row? stop pattern step (aka "play row").
-	if (m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay+1) + m_nFrameDelay - 1) {
-		#ifdef MODPLUG_TRACKER
-		if (m_dwSongFlags & SONG_STEP) {
+#ifdef MODPLUG_TRACKER
+	if (m_nTickCount >= m_nMusicSpeed * (m_nPatternDelay + 1) + m_nFrameDelay - 1)
+	{
+		if (m_dwSongFlags & SONG_STEP)
+		{
 			m_dwSongFlags &= ~SONG_STEP;
 			m_dwSongFlags |= SONG_PAUSED;
 		}
-		#endif // MODPLUG_TRACKER
 	}
+#endif // MODPLUG_TRACKER
 
 	if (m_nTickCount)
 	{

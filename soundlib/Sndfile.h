@@ -566,6 +566,7 @@ public:	// for Editing
 	BYTE m_nMixLevels;
     UINT m_nMusicSpeed, m_nMusicTempo;
 	ROWINDEX m_nNextRow, m_nRow;
+	ROWINDEX m_nNextPatStartRow; // for FT2's E60 bug
 	PATTERNINDEX m_nPattern;
 	ORDERINDEX m_nCurrentPattern, m_nNextPattern, m_nRestartPos, m_nSeqOverride;
 	//NOTE: m_nCurrentPattern and m_nNextPattern refer to order index - not pattern index.

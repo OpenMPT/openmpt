@@ -236,16 +236,20 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				patternBreakOnThisRow=true;				
 				//Try to check next row for XPARAM
 				nextRow = nullptr;
-				if (nRow < Patterns[nPattern].GetNumRows()-1) {
+				if (nRow < Patterns[nPattern].GetNumRows() - 1)
+				{
 					nextRow = Patterns[nPattern] + (nRow+1) * m_nChannels + nChn;
 				}
-				if (nextRow && nextRow->command == CMD_XPARAM) {
+				if (nextRow && nextRow->command == CMD_XPARAM)
+				{
 					nNextRow = (param<<8) + nextRow->param;
-				} else {
+				} else
+				{
 					nNextRow = param;
 				}
 						
-				if (!positionJumpOnThisRow) {
+				if (!positionJumpOnThisRow)
+				{
 					nNextPattern = nCurrentPattern + 1;
 				}
 				if (bAdjust)
@@ -1912,6 +1916,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Position Jump
 		case CMD_POSITIONJUMP:
+			m_nNextPatStartRow = 0; // FT2 E60 bug
 			nPosJump = param;
 			if((m_dwSongFlags & SONG_PATTERNLOOP && m_nSeqOverride == 0))
 			{
@@ -1927,6 +1932,7 @@ BOOL CSoundFile::ProcessEffects()
 
 		// Pattern Break
 		case CMD_PATTERNBREAK:
+			m_nNextPatStartRow = 0; // FT2 E60 bug
 			m = NULL;
 			if (m_nRow < Patterns[m_nPattern].GetNumRows()-1)
 			{
@@ -1990,7 +1996,7 @@ BOOL CSoundFile::ProcessEffects()
 		// Pattern Break / Position Jump only if no loop running
 		if ((nBreakRow >= 0) || (nPosJump >= 0))
 		{
-			BOOL bNoLoop = FALSE;
+			bool bNoLoop = false;
 			if (nPosJump < 0) nPosJump = m_nCurrentPattern+1;
 			if (nBreakRow < 0) nBreakRow = 0;
 
@@ -2011,7 +2017,7 @@ BOOL CSoundFile::ProcessEffects()
 						if (gdwSoundSetup & SNDMIX_NOBACKWARDJUMPS)
 					#endif
 						// Backward jump disabled
-						bNoLoop = TRUE;
+						bNoLoop = true;
 					}
 				}
 			}
@@ -2032,7 +2038,7 @@ BOOL CSoundFile::ProcessEffects()
 				}
 				m_nNextPattern = nPosJump;
 				m_nNextRow = (UINT)nBreakRow;
-				m_bPatternTransitionOccurred=true;
+				m_bPatternTransitionOccurred = true;
 			}
 		} //Ends condition (nBreakRow >= 0) || (nPosJump >= 0)
 	}
@@ -3640,8 +3646,8 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 			pChn->nPatternLoopCount--;
 			if(!pChn->nPatternLoopCount)
 			{
-				//IT compatibility 10. Pattern loops (+ same fix for XM and MOD files)
-				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_FASTTRACKER2 | TRK_PROTRACKER))
+				//IT compatibility 10. Pattern loops (+ same fix for MOD files)
+				if(IsCompatibleMode(TRK_IMPULSETRACKER | TRK_PROTRACKER))
 					pChn->nPatternLoop = m_nRow + 1;
 
 				return -1;	
@@ -3661,6 +3667,7 @@ int CSoundFile::PatternLoop(MODCHANNEL *pChn, UINT param)
 			}
 			pChn->nPatternLoopCount = param;
 		}
+		m_nNextPatStartRow = pChn->nPatternLoop; // Nasty FT2 E60 bug emulation!
 		return pChn->nPatternLoop;
 	} else
 	{
@@ -3990,12 +3997,12 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 	return nPlugin;
 }
 
-UINT CSoundFile::GetBestMidiChan(MODCHANNEL *pChn) {
-//--------------------------------------------------
-	if (pChn && pChn->pModInstrument) {
-		if (pChn->pModInstrument->nMidiChannel) {
-			return (pChn->pModInstrument->nMidiChannel-1)&0x0F;
-		}
+UINT CSoundFile::GetBestMidiChan(MODCHANNEL *pChn)
+//------------------------------------------------
+{
+	if (pChn && pChn->pModInstrument && pChn->pModInstrument->nMidiChannel)
+	{
+		return (pChn->pModInstrument->nMidiChannel - 1) & 0x0F;
 	}
 	return 0;
 }
@@ -4003,11 +4010,13 @@ UINT CSoundFile::GetBestMidiChan(MODCHANNEL *pChn) {
 void CSoundFile::HandlePatternTransitionEvents()
 //----------------------------------------------
 {
-	if (m_bPatternTransitionOccurred) {
+	if (m_bPatternTransitionOccurred)
+	{
 		// MPT sequence override
 		if ((m_nSeqOverride > 0) && (m_nSeqOverride <= Order.size()))
 		{
-			if (m_dwSongFlags & SONG_PATTERNLOOP) {
+			if (m_dwSongFlags & SONG_PATTERNLOOP)
+			{
 				m_nPattern = Order[m_nSeqOverride-1];
 			}
 			m_nNextPattern = m_nSeqOverride - 1;
@@ -4015,7 +4024,8 @@ void CSoundFile::HandlePatternTransitionEvents()
 		}
 
 		// Channel mutes
-		for (UINT chan=0; chan<m_nChannels; chan++) {
+		for (UINT chan=0; chan<m_nChannels; chan++)
+		{
 			if (m_bChannelMuteTogglePending[chan])
 			{
 				if(m_pModDoc)
@@ -4023,8 +4033,6 @@ void CSoundFile::HandlePatternTransitionEvents()
 				m_bChannelMuteTogglePending[chan]=false;
 			}
 		}
-		
-		
 
 		m_bPatternTransitionOccurred=false;
 	}
