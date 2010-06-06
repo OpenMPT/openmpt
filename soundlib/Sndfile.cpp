@@ -539,6 +539,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nPattern = 0;
 	m_nCurrentPattern = 0;
 	m_nNextPattern = 0;
+	m_nNextPatStartRow = 0;
 	m_nSeqOverride = 0;
 	m_nRestartPos = 0;
 	m_nMinPeriod = 16;
@@ -1226,6 +1227,7 @@ void CSoundFile::SetCurrentPos(UINT nPos)
 	m_nBufferCount = 0;
 	m_nPatternDelay = 0;
 	m_nFrameDelay = 0;
+	m_nNextPatStartRow = 0;
 	//m_nSeqOverride = 0;
 }
 
@@ -1272,6 +1274,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_nTotalCount = 0;
 		m_nPatternDelay = 0;
 		m_nFrameDelay = 0;
+		m_nNextPatStartRow = 0;
 	}
 	//m_dwSongFlags &= ~(SONG_PATTERNLOOP|SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
 	m_dwSongFlags &= ~(SONG_CPUVERYHIGH|SONG_FADINGSONG|SONG_ENDREACHED|SONG_GLOBALFADE);
@@ -1381,6 +1384,7 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 		m_nPatternDelay = 0;
 		m_nFrameDelay = 0;
 		m_nBufferCount = 0;
+		m_nNextPatStartRow = 0;
 		m_dwSongFlags |= SONG_PATTERNLOOP;
 	//	m_nSeqOverride = 0;
 	}
@@ -1397,6 +1401,7 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	m_nPatternDelay = 0;
 	m_nFrameDelay = 0;
 	m_nBufferCount = 0;
+	m_nNextPatStartRow = 0;
 	m_dwSongFlags &= ~SONG_PATTERNLOOP;
 	//m_nSeqOverride = 0;
 }
