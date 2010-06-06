@@ -16,6 +16,8 @@
 #include "modsmp_ctrl.h"
 #include "CleanupSong.h"
 
+extern WORD S3MFineTuneTable[16];
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -2118,7 +2120,7 @@ const MPTEFFECTINFO gFXInfo[MAX_FXINFO] =
 	{CMD_MODCMDEX,		0xF0,0x20,	0,	MOD_TYPE_MODXM,	"Fine porta down"},
 	{CMD_MODCMDEX,		0xF0,0x30,	0,	MOD_TYPE_MODXM,	"Glissando Control"},
 	{CMD_MODCMDEX,		0xF0,0x40,	0,	MOD_TYPE_MODXM,	"Vibrato waveform"},
-	{CMD_MODCMDEX,		0xF0,0x50,	0,	MOD_TYPE_MOD,	"Set finetune"},
+	{CMD_MODCMDEX,		0xF0,0x50,	0,	MOD_TYPE_MODXM,	"Set finetune"},
 	{CMD_MODCMDEX,		0xF0,0x60,	0,	MOD_TYPE_MODXM,	"Pattern loop"},
 	{CMD_MODCMDEX,		0xF0,0x70,	0,	MOD_TYPE_MODXM,	"Tremolo waveform"},
 	{CMD_MODCMDEX,		0xF0,0x80,	0,	MOD_TYPE_MODXM,	"Set panning"},
@@ -2803,7 +2805,10 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 							strcpy(s, "smooth");
 						else
 							strcpy(s, "semitones");
-						break;					
+						break;
+					case 0x20: // set finetune
+						wsprintf(s, "%dHz", S3MFineTuneTable[param & 0x0F]);
+						break;
 					case 0x30: // vibrato waveform
 					case 0x40: // tremolo waveform
 					case 0x50: // panbrello waveform
@@ -2882,6 +2887,13 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 							case 0x05: case 0x0D: strcpy(s, "ramp down (cont.)"); break;
 							case 0x06: case 0x0E: strcpy(s, "square wave (cont.)"); break;
 							case 0x07: case 0x0F: strcpy(s, "square wave (cont.)"); break;
+						}
+						break;
+					case 0x50: // set finetune
+						{
+							int8 nFinetune = (param & 0x0F) << 4;
+							if(m_SndFile.GetType() & MOD_TYPE_XM) nFinetune += 128;
+							wsprintf(s, "%d", nFinetune);
 						}
 						break;
 					case 0x60: // pattern loop
