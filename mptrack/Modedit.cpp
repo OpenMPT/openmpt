@@ -1399,7 +1399,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 						// if the original modcommand was empty as otherwise the unchanged parts
 						// of the old modcommand would falsely be interpreted being of type
 						// origFormat and ConvertCommand could change them.
-						if (origFormat != m_SndFile.m_nType && (doMixPaste == false || origModCmd.IsEmpty()))
+						if (origFormat != m_SndFile.m_nType && (doMixPaste == false || origModCmd.IsEmpty(false)))
 							m_SndFile.ConvertCommand(&(m[col]), origFormat, m_SndFile.m_nType);
 					}
 
