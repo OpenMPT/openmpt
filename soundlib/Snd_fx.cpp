@@ -89,29 +89,30 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 // -> DESC="alternative BPM/Speed interpretation method"
 //	UINT dwElapsedTime=0, nRow=0, nCurrentPattern=0, nNextPattern=0, nPattern=Order[0];
 	ROWINDEX nRow = 0;
+	ROWINDEX nNextPatStartRow = 0; // FT2 E60 bug
 	ORDERINDEX nCurrentPattern = 0;
 	ORDERINDEX nNextPattern = 0;
 	PATTERNINDEX nPattern = Order[0];
 	double dElapsedTime=0.0;
 // -! NEW_FEATURE#0022
-	UINT nMusicSpeed=m_nDefaultSpeed, nMusicTempo=m_nDefaultTempo, nNextRow=0;
+	UINT nMusicSpeed = m_nDefaultSpeed, nMusicTempo = m_nDefaultTempo, nNextRow = 0;
 	UINT nMaxRow = 0, nMaxPattern = 0;
 	LONG nGlbVol = m_nDefaultGlobalVolume, nOldGlbVolSlide = 0;
-	BYTE samples[MAX_CHANNELS];
-	BYTE instr[MAX_CHANNELS];
-	UINT notes[MAX_CHANNELS];
-	BYTE vols[MAX_CHANNELS];
-	BYTE oldparam[MAX_CHANNELS];
-	UINT chnvols[MAX_CHANNELS];
-	double patloop[MAX_CHANNELS];
+	vector<BYTE> instr;
+	vector<UINT> notes;
+	vector<BYTE> vols;
+	vector<BYTE> oldparam;
+	vector<UINT> chnvols;
+	vector<double> patloop;
+	vector<ROWINDEX> patloopstart;
 	
-	memset(instr, 0, sizeof(instr));
-	memset(notes, 0, sizeof(notes));
-	memset(vols, 0xFF, sizeof(vols));
-	memset(patloop, 0, sizeof(patloop));
-	memset(oldparam, 0, sizeof(oldparam));
-	memset(chnvols, 64, sizeof(chnvols));
-	memset(samples, 0, sizeof(samples));
+	notes.resize(m_nChannels, 0);
+	instr.resize(m_nChannels, 0);
+	vols.resize(m_nChannels, 0xFF);
+	oldparam.resize(m_nChannels, 0);
+	chnvols.resize(m_nChannels, 64);
+	patloop.resize(m_nChannels, 0);
+	patloopstart.resize(m_nChannels, 0);
 	for(CHANNELINDEX icv = 0; icv < m_nChannels; icv++) chnvols[icv] = ChnSettings[icv].nVolume;
 	nMaxRow = m_nNextRow;
 	nMaxPattern = m_nNextPattern;
@@ -183,6 +184,8 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 		{
 			nNextPattern = nCurrentPattern + 1;
 			nNextRow = 0;
+			if(IsCompatibleMode(TRK_FASTTRACKER2)) nNextRow = nNextPatStartRow;  // FT2 E60 bug
+			nNextPatStartRow = 0;
 		}
 		if (!nRow)
 		{
@@ -221,6 +224,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			case CMD_POSITIONJUMP:
 				positionJumpOnThisRow=true;
 				nNextPattern = (ORDERINDEX)param;
+				nNextPatStartRow = 0;  // FT2 E60 bug
 				// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 				if(!patternBreakOnThisRow || (GetType() == MOD_TYPE_XM))
 					nNextRow = 0;
@@ -233,9 +237,10 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				break;
 			// Pattern Break
 			case CMD_PATTERNBREAK:
-				patternBreakOnThisRow=true;				
+				patternBreakOnThisRow = true;
 				//Try to check next row for XPARAM
 				nextRow = nullptr;
+				nNextPatStartRow = 0;  // FT2 E60 bug
 				if (nRow < Patterns[nPattern].GetNumRows() - 1)
 				{
 					nextRow = Patterns[nPattern] + (nRow+1) * m_nChannels + nChn;
@@ -268,7 +273,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				break;
 			// Set Tempo
 			case CMD_TEMPO:
-				if ((bAdjust) && (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT | MOD_TYPE_MPT)))
+				if ((bAdjust) && (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
 					if (param) pChn->nOldTempo = (BYTE)param; else param = pChn->nOldTempo;
 				}
@@ -276,10 +281,10 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				// Tempo Slide
 				if ((param & 0xF0) == 0x10)
 				{
-					nMusicTempo += (param & 0x0F)  * (nMusicSpeed-1);  //rewbs.tempoSlideFix
+					nMusicTempo += (param & 0x0F)  * (nMusicSpeed - 1);  //rewbs.tempoSlideFix
 				} else
 				{
-					nMusicTempo -= (param & 0x0F) * (nMusicSpeed-1); //rewbs.tempoSlideFix
+					nMusicTempo -= (param & 0x0F) * (nMusicSpeed - 1); //rewbs.tempoSlideFix
 				}
 // -> CODE#0010
 // -> DESC="add extended parameter mechanism to pattern effects"
@@ -298,8 +303,15 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				if ((param & 0xF0) == 0xE0) nSpeedCount = (param & 0x0F) * nMusicSpeed; else
 				if ((param & 0xF0) == 0x60)
 				{
-					if (param & 0x0F) dElapsedTime += (dElapsedTime - patloop[nChn]) * (double)(param & 0x0F);
-					else patloop[nChn] = dElapsedTime;
+					if (param & 0x0F)
+					{
+						dElapsedTime += (dElapsedTime - patloop[nChn]) * (double)(param & 0x0F);
+						nNextPatStartRow = patloopstart[nChn]; // FT2 E60 bug
+					} else
+					{
+						patloop[nChn] = dElapsedTime;
+						patloopstart[nChn] = nRow;
+					}
 				}
 				break;
 			case CMD_XFINEPORTAUPDOWN:
