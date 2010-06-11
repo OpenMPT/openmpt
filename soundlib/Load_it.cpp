@@ -2048,12 +2048,20 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			memcpy(iti.name, pIns->name, 26);
 			iti.mbank = pIns->wMidiBank;
 			iti.mpr = pIns->nMidiProgram;
-			iti.mch = pIns->nMidiChannel;
+			if(pIns->nMidiChannel || pIns->nMixPlug == 0)
+			{
+				// default. prefer midi channel over mixplug to keep the semantics intact.
+				iti.mch = pIns->nMidiChannel;
+			} else
+			{
+				// keep compatibility with MPT 1.16's instrument format if possible, as XMPlay/BASS also uses this.
+				iti.mch = pIns->nMixPlug + 128;
+			}
 			iti.nna = pIns->nNNA;
 			//if (pIns->nDCT<DCT_PLUGIN) iti.dct = pIns->nDCT; else iti.dct =0;	
 			iti.dct = pIns->nDCT; //rewbs.instroVSTi: will other apps barf if they get an unknown DCT?
 			iti.dca = pIns->nDNA;
-			iti.fadeout = min(pIns->nFadeOut >> 5 , 256);
+			iti.fadeout = min(pIns->nFadeOut >> 5, 256);
 			iti.pps = pIns->nPPS;
 			iti.ppc = pIns->nPPC;
 			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
