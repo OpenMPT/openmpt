@@ -396,7 +396,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 	const ORDERINDEX nLengthTt = GetLengthTailTrimmed();
 	for(ORDERINDEX nOrd = 0; nOrd < nLengthTt; nOrd++)
 	{
-		if(!m_pSndFile->Patterns.IsValidIndex(At(nOrd)))
+		if(!m_pSndFile->Patterns.IsValidPat(At(nOrd)) && At(nOrd) != GetIgnoreIndex())
 		{
 			hasSepPatterns = true;
 			break;
@@ -414,7 +414,7 @@ bool ModSequenceSet::ConvertSubsongsToMultipleSequences()
 		for(ORDERINDEX nOrd = 0; nOrd < GetLengthTailTrimmed(); nOrd++)
 		{
 			// end of subsong?
-			if(!m_pSndFile->Patterns.IsValidIndex(At(nOrd)))
+			if(!m_pSndFile->Patterns.IsValidPat(At(nOrd)) && At(nOrd) != GetIgnoreIndex())
 			{
 				ORDERINDEX oldLength = GetLengthTailTrimmed();
 				// remove all separator patterns between current and next subsong first

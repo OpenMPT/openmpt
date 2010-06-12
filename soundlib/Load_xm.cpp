@@ -826,6 +826,8 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	{
 		MODCOMMAND *p = Patterns[i];
 		UINT len = 0;
+		// Empty patterns are always loaded as 64-row patterns in FT2, regardless of their real size...
+		bool emptyPatNeedsFixing = (Patterns[i].GetNumRows() != 64);
 
 		memset(&xmph, 0, sizeof(xmph));
 		xmph[0] = 9;
@@ -876,6 +878,19 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 					}
 				}
 			}
+
+			// no need to fix non-empty patterns
+			if(!p->IsEmpty())
+				emptyPatNeedsFixing = false;
+
+			// apparently, completely empty patterns are loaded as empty 64-row patterns in FT2, regardless of their original size.
+			// We have to avoid this, so we add a "break to row 0" command in the last row.
+			if(j == 1 && emptyPatNeedsFixing)
+			{
+				command = 0x0D;
+				param = 0;
+			}
+
 			if ((note) && (p->instr) && (vol > 0x0F) && (command) && (param))
 			{
 				s[len++] = note;
