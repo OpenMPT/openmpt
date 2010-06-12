@@ -2722,6 +2722,10 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		}
 		break;
 
+	case CMD_SETENVPOSITION:
+		wsprintf(s, "Tick %d", param);
+		break;
+
 	case CMD_MIDI:
 		if (param < 0x80)
 		{
@@ -2788,7 +2792,7 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 				case 0x0A:	strcpy(s, "7A: Pan Env On"); break;
 				case 0x0B:	strcpy(s, "7B: Pitch Env Off"); break;
 				case 0x0C:	strcpy(s, "7C: Pitch Env On"); break;
-					// intentional fall-through follows
+					// intentional fall-through for non-MPT modules follows
 				case 0x0D:	if(m_SndFile.GetType() == MOD_TYPE_MPT) { strcpy(s, "7D: Force Pitch Env"); break; }
 				case 0x0E:	if(m_SndFile.GetType() == MOD_TYPE_MPT) { strcpy(s, "7E: Force Filter Env"); break; }
 				default:	wsprintf(s, "%02X: undefined", param); break;
