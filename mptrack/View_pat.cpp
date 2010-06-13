@@ -890,45 +890,58 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 			UINT chn = i >> 3;
 			if ((chn >= pSndFile->m_nChannels) || (row >= pSndFile->Patterns[m_nPattern].GetNumRows())) continue;
 			MODCOMMAND *m = &p[row * pSndFile->m_nChannels + chn];
-			switch(i & 7) {
-				case 0:	// Clear note
-					if (rm.note) {
-						if(m->IsPcNote())
-						{  // Clear whole row if clearing PC note
-							m->Clear();
-							invalidateAllCols = true;
-						}
-						else
+			switch(i & 7)
+			{
+			case NOTE_COLUMN:	// Clear note
+				if (rm.note)
+				{
+					if(m->IsPcNote())
+					{  // Clear whole row if clearing PC note
+						m->Clear();
+						invalidateAllCols = true;
+					}
+					else
+					{
+						m->note = NOTE_NONE;
+						if (ITStyle) m->instr = 0;
+					}
+				}
+				break;
+			case INST_COLUMN: // Clear instrument
+				if (rm.instrument)
+					m->instr = 0;
+				break;
+			case VOL_COLUMN:	// Clear volume
+				if (rm.volume)
+					m->volcmd = m->vol = 0;
+				break;
+			case EFFECT_COLUMN: // Clear Command
+				if (rm.command)
+				{
+					m->command = 0;
+					if(m->IsPcNote())
+					{
+						m->SetValueEffectCol(0);
+						invalidateAllCols = true;
+					}
+				}
+				break;
+			case PARAM_COLUMN:	// Clear Command Param
+				if (rm.parameter)
+				{
+					m->param = 0;
+					if(m->IsPcNote())
+					{
+						m->SetValueEffectCol(0);
+						// first column => update effect column char
+						if(i == (m_dwBeginSel & 0xFFFF))
 						{
-							m->note = NOTE_NONE;
-							if (ITStyle) m->instr = 0;
+							m_dwBeginSel--;
 						}
-
 					}
-					break;
-				case 1: // Clear instrument
-					if (rm.instrument) {
-						m->instr = 0;
-					}
-					break;
-				case 2:	// Clear volume
-					if (rm.volume) {
-						m->volcmd = m->vol = 0;
-					}
-					break;
-				case 3: // Clear Command
-					if (rm.command) {
-						m->command = 0;
-						if(m->IsPcNote()) m->SetValueEffectCol(0);
-					}
-					break;
-				case 4:	// Clear Command Param
-					if (rm.parameter) {
-						m->param = 0;
-					}
-					break;
+				}
+				break;
 			} //end switch
-
 		} //end selected columns
 	} //end selected rows
 
@@ -1548,12 +1561,10 @@ void CViewPattern::DeleteRows(UINT colmin, UINT colmax, UINT nrows)
 		{
 			if (r + nrows >= maxrow)
 			{
-				m->note = m->instr = 0;
-				m->volcmd = m->vol = 0;
-				m->command = m->param = 0;
+				m->Clear();
 			} else
 			{
-				*m = *(m+pSndFile->m_nChannels*nrows);
+				*m = *(m + pSndFile->m_nChannels * nrows);
 			}
 		}
 	}
@@ -1616,12 +1627,10 @@ void CViewPattern::InsertRows(UINT colmin, UINT colmax) //rewbs.customKeys: adde
 		{
 			if (r <= row)
 			{
-				m->note = m->instr = 0;
-				m->volcmd = m->vol = 0;
-				m->command = m->param = 0;
+				m->Clear();
 			} else
 			{
-				*m = *(m-pSndFile->m_nChannels);
+				*m = *(m - pSndFile->m_nChannels);
 			}
 		}
 	}
@@ -4539,7 +4548,7 @@ void CViewPattern::TempEnterChord(int note)
 
 
 void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
-//--------------------------------------------------
+//-----------------------------------------------------------------
 {
  	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -4547,7 +4556,7 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 	if ((pModDoc) && (pMainFrm))
 	{
         //if we have a selection we want to do something different
-		if (m_dwBeginSel!=m_dwEndSel)
+		if (m_dwBeginSel != m_dwEndSel)
 		{
 			OnClearSelection(ITStyle);
 			return;
@@ -4561,12 +4570,12 @@ void CViewPattern::OnClearField(int field, bool step, bool ITStyle)
 
 		switch(field)
 		{
-			case 0: if(p->IsPcNote()) p->Clear(); else {p->note = NOTE_NONE; if (ITStyle) p->instr = 0;}  break;		//Note
-			case 1:	p->instr = 0; break;				//instr
-			case 2:	p->vol = 0; p->volcmd = 0; break;	//Vol
-			case 3:	p->command = 0;	break;				//Effect
-			case 4:	p->param = 0; break;				//Param
-			default: p->Clear();						//If not specified, delete them all! :)
+			case NOTE_COLUMN:	if(p->IsPcNote()) p->Clear(); else {p->note = NOTE_NONE; if (ITStyle) p->instr = 0;}  break;		//Note
+			case INST_COLUMN:	p->instr = 0; break;				//instr
+			case VOL_COLUMN:	p->vol = 0; p->volcmd = 0; break;	//Vol
+			case EFFECT_COLUMN:	p->command = 0;	break;				//Effect
+			case PARAM_COLUMN:	p->param = 0; break;				//Param
+			default:			p->Clear();							//If not specified, delete them all! :)
 		}
 		if((field == 3 || field == 4) && (p->IsPcNote()))
 			p->SetValueEffectCol(0);
