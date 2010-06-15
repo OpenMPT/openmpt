@@ -1504,7 +1504,7 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 	ChnSettings[nChn].nVolume = 64;
 	ChnSettings[nChn].dwFlags = 0;
 	ChnSettings[nChn].nMixPlugin = 0;
-	ChnSettings[nChn].szName[0] = 0;
+	strcpy(ChnSettings[nChn].szName, "");
 
 	ResetChannelState(nChn, CHNRESET_TOTAL);
 
@@ -3332,6 +3332,8 @@ void CSoundFile::MODExx2S3MSxx(MODCOMMAND *m)
 	case 0x90:	m->command = CMD_RETRIG; m->param = 0x80 | (m->param & 0x0F); break;
 	case 0xA0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param = (m->param << 4) | 0x0F; } else m->command = 0; break;
 	case 0xB0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param |= 0xF0; } else m->command = 0; break;
+	case 0xC0:  if (m->param == 0xC0) { m->command = CMD_NONE; m->note = NOTE_NOTECUT; }	// this does different things in IT and ST3
+	case 0xD0:  if (m->param == 0xD0) { m->command = CMD_NONE; }	// dito
 		// rest are the same
 	}
 }
@@ -3493,10 +3495,18 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 	// Convert S3M / IT / MPTM to MOD / XM
 	else if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
 	{
-		// convert note cut/off/fade
-		if(m->note == NOTE_NOTECUT || m->note == NOTE_FADE)
+		if(m->note == NOTE_NOTECUT)
+		{
+			// convert note cut to EC0
+			m->note = NOTE_NONE;
+			m->command = CMD_MODCMDEX;
+			m->param = 0xC0;
+		} else if(m->note == NOTE_FADE)
+		{
+			// convert note fade to note off
 			m->note = NOTE_KEYOFF;
-
+		}
+			
 		switch(m->command)
 		{
 		case CMD_S3MCMDEX:
