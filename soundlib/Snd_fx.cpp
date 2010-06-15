@@ -740,7 +740,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 	if(!bPorta && pSmp && IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nC5Speed = pSmp->nC5Speed;
 
 	// XM Compatibility: Ignore notes with portamento if there was no note playing.
-	if(bPorta && (pChn->pCurrentSample == nullptr) && IsCompatibleMode(TRK_FASTTRACKER2))
+	if(bPorta && (pChn->nInc == 0) && IsCompatibleMode(TRK_FASTTRACKER2))
 	{
 		pChn->nPeriod = 0;
 		return;
@@ -3540,7 +3540,7 @@ void CSoundFile::KeyOff(UINT nChn)
 //--------------------------------
 {
 	MODCHANNEL *pChn = &Chn[nChn];
-	BOOL bKeyOn = (pChn->dwFlags & CHN_KEYOFF) ? FALSE : TRUE;
+	const bool bKeyOn = (pChn->dwFlags & CHN_KEYOFF) ? false : true;
 	pChn->dwFlags |= CHN_KEYOFF;
 	//if ((!pChn->pModInstrument) || (!(pChn->dwFlags & CHN_VOLENV)))
 	if ((pChn->pModInstrument) && (!(pChn->dwFlags & CHN_VOLENV)))
@@ -3550,34 +3550,35 @@ void CSoundFile::KeyOff(UINT nChn)
 	if (!pChn->nLength) return;
 	if ((pChn->dwFlags & CHN_SUSTAINLOOP) && (pChn->pModSample) && (bKeyOn))
 	{
-		MODSAMPLE *psmp = pChn->pModSample;
-		if (psmp->uFlags & CHN_LOOP)
+		const MODSAMPLE *pSmp = pChn->pModSample;
+		if (pSmp->uFlags & CHN_LOOP)
 		{
-			if (psmp->uFlags & CHN_PINGPONGLOOP)
+			if (pSmp->uFlags & CHN_PINGPONGLOOP)
 				pChn->dwFlags |= CHN_PINGPONGLOOP;
 			else
 				pChn->dwFlags &= ~(CHN_PINGPONGLOOP|CHN_PINGPONGFLAG);
 			pChn->dwFlags |= CHN_LOOP;
-			pChn->nLength = psmp->nLength;
-			pChn->nLoopStart = psmp->nLoopStart;
-			pChn->nLoopEnd = psmp->nLoopEnd;
+			pChn->nLength = pSmp->nLength;
+			pChn->nLoopStart = pSmp->nLoopStart;
+			pChn->nLoopEnd = pSmp->nLoopEnd;
 			if (pChn->nLength > pChn->nLoopEnd) pChn->nLength = pChn->nLoopEnd;
 		} else
 		{
 			pChn->dwFlags &= ~(CHN_LOOP|CHN_PINGPONGLOOP|CHN_PINGPONGFLAG);
-			pChn->nLength = psmp->nLength;
+			pChn->nLength = pSmp->nLength;
 		}
 	}
 	if (pChn->pModInstrument)
 	{
 		MODINSTRUMENT *pIns = pChn->pModInstrument;
-		if (((pIns->VolEnv.dwFlags & ENV_LOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut)) {
+		if (((pIns->VolEnv.dwFlags & ENV_LOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut))
+		{			
 			pChn->dwFlags |= CHN_NOTEFADE;
 		}
 	
-		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET) {
-			pChn->nVolEnvValueAtReleaseJump=getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);
-			pChn->nVolEnvPosition= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
+		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
+		{
+			pChn->nVolEnvValueAtReleaseJump = getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);			pChn->nVolEnvPosition= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
 		}
 
 	}
