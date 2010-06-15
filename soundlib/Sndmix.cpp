@@ -930,7 +930,10 @@ BOOL CSoundFile::ReadNote()
 
 		MODINSTRUMENT *pIns = pChn->pModInstrument;
 
-		if ((pChn->dwFlags & CHN_NOTEFADE) && (!(pChn->nFadeOutVol|pChn->nRightVol|pChn->nLeftVol)))
+		// XM Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.
+		// This occours for example in the bassline (channel 11) of jt_burn.xm. I hope this won't break anything else...
+		// I also suppose this could decrease mixing performance a bit, but hey, which CPU can't handle 32 muted channels these days... :-)
+		if ((pChn->dwFlags & CHN_NOTEFADE) && (!(pChn->nFadeOutVol|pChn->nRightVol|pChn->nLeftVol)) && (!IsCompatibleMode(TRK_FASTTRACKER2)))
 		{
 			pChn->nLength = 0;
 			pChn->nROfs = pChn->nLOfs = 0;
@@ -1672,7 +1675,7 @@ BOOL CSoundFile::ReadNote()
 				// Volume Sustain ?
 				if ((pIns->VolEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
-					if (pChn->nVolEnvPosition == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd]+1)
+					if (pChn->nVolEnvPosition == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd] + 1)
 						pChn->nVolEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
 				} else
 				// End of Envelope ?
