@@ -1391,13 +1391,13 @@ void CPageEditNote::UpdateDialog()
 		{
 			// instrument / sample
 			combo->SetItemData(combo->AddString("No Instrument"), 0);
-			UINT max = max(pSndFile->m_nInstruments, pSndFile->m_nSamples); // instrument / sample mode
-			for (UINT i = 1; i <= max; i++)
+			const UINT nmax = pSndFile->GetNumInstruments() ? pSndFile->GetNumInstruments() : pSndFile->GetNumSamples();
+			for (UINT i = 1; i <= nmax; i++)
 			{
 				wsprintf(s, "%02d: ", i);
 				int k = strlen(s);
 				// instrument / sample
-				if (pSndFile->m_nInstruments)
+				if (pSndFile->GetNumInstruments())
 				{
 					if (pSndFile->Instruments[i])
 						memcpy(s+k, pSndFile->Instruments[i]->name, 32);
