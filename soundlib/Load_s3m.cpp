@@ -388,7 +388,11 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			if ((Samples[iSmp].nLoopStart >= Samples[iSmp].nLoopEnd) || (Samples[iSmp].nLoopEnd - Samples[iSmp].nLoopStart < 1))
  				Samples[iSmp].nLoopStart = Samples[iSmp].nLoopEnd = 0;
 			Samples[iSmp].nPan = 0x80;
-			//ASSERT(iLooplength == 0 || iLooplength > 4);
+
+			// attempt to fix samples which are not supposed to have loops (for example in S3M files made with PSM2S3M)
+			if(Samples[iSmp].nLoopEnd <= 4 && Samples[iSmp].nLength > 8)
+				Samples[iSmp].uFlags &= ~CHN_LOOP;
+
 		} else if(s[0] >= S3I_TYPE_ADMEL)
 		{
 			bHasAdlibPatches = true;
