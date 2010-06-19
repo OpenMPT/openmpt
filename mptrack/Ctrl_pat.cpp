@@ -324,11 +324,10 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		if (dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
 		{
 			UINT nPat;
-			if (dwHintMask&HINT_PATNAMES) {
+			if (dwHintMask&HINT_PATNAMES)
 				nPat = (dwHintMask >> HINT_SHIFT_PAT);
-			} else {
+			else
 				nPat = SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
-			}
 			m_pSndFile->GetPatternName(nPat, s, sizeof(s));
 			m_EditPatName.SetWindowText(s);
 			BOOL bXMIT = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
@@ -781,11 +780,11 @@ void CCtrlPatterns::OnPatternNew()
 		ORDERINDEX nCurOrd = m_OrderList.GetCurSel(true).nOrdLo;
 		PATTERNINDEX pat = pSndFile->Order[nCurOrd];
 		ROWINDEX rows = 64;
-		if ((pat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[pat]) && (pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)))
+		if(pSndFile->Patterns.IsValidPat(pat))
 		{
+			nCurOrd++;	// only if the current oder is already occupied, create a new pattern at the next position.
 			rows = pSndFile->Patterns[pat].GetNumRows();
 			rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
-			nCurOrd++;	// only if the current oder is already occupied, create a new pattern at the next position.
 		}
 		PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nCurOrd, rows);
 		if ((nNewPat != PATTERNINDEX_INVALID) && (nNewPat < pSndFile->Patterns.Size()))

@@ -601,7 +601,7 @@ void CSmpGenDialog::CreateDefaultPresets()
 	presets.AddPreset(preset);
 
 	preset.description = "Noisy Saw";
-	preset.expression = "(x mod 800) / 800 - 0.5 + rnd (0.1)";
+	preset.expression = "(x mod 800) / 800 - 0.5 + rnd(0.1)";
 	presets.AddPreset(preset);
 
 	preset.description = "PWM Filter";

@@ -58,7 +58,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case '\\' - 56:	command = CMD_SMOOTHMIDI;	break;		//rewbs.smoothVST: 36 - note: this is actually displayed as "-" in FT2, but seems to be doing nothing.
 	//case ':' - 21:	command = CMD_DELAYCUT;	break;		//37
 	case '#' + 3:	command = CMD_XPARAM;	break;			//rewbs.XMfixes - XParam is 38
-	default:	command = 0;
+	default:		command = CMD_NONE;
 	}
 	m->command = command;
 	m->param = param;
@@ -68,7 +68,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool bCompatibilityExport) const
 //---------------------------------------------------------------------------------------------------------
 {
-	UINT command = m->command & 0x3F, param = m->param;
+	UINT command = m->command, param = m->param;
 
 	switch(command)
 	{
@@ -77,16 +77,16 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 	case CMD_PORTAMENTOUP:
 		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM|MOD_TYPE_MPT))
 		{
-			if ((param & 0xF0) == 0xE0) { command=0x0E; param=((param & 0x0F) >> 2)|0x10; break; }
-			else if ((param & 0xF0) == 0xF0) { command=0x0E; param &= 0x0F; param|=0x10; break; }
+			if ((param & 0xF0) == 0xE0) { command = 0x0E; param = ((param & 0x0F) >> 2) | 0x10; break; }
+			else if ((param & 0xF0) == 0xF0) { command = 0x0E; param &= 0x0F; param |= 0x10; break; }
 		}
 		command = 0x01;
 		break;
 	case CMD_PORTAMENTODOWN:
 		if (m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM|MOD_TYPE_MPT))
 		{
-			if ((param & 0xF0) == 0xE0) { command=0x0E; param=((param & 0x0F) >> 2)|0x20; break; }
-			else if ((param & 0xF0) == 0xF0) { command=0x0E; param &= 0x0F; param|=0x20; break; }
+			if ((param & 0xF0) == 0xE0) { command = 0x0E; param= ((param & 0x0F) >> 2) | 0x20; break; }
+			else if ((param & 0xF0) == 0xF0) { command = 0x0E; param &= 0x0F; param |= 0x20; break; }
 		}
 		command = 0x02;
 		break;
@@ -103,7 +103,7 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 			{
 				param = min(param << 1, 0xFF);
 			}
-			else if(param == 0xA4)
+			else if(param == 0xA4)	// surround
 			{
 				if(bCompatibilityExport || !bXM)
 				{
@@ -135,12 +135,17 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 	case CMD_RETRIG:			command = 'R' - 55; break;
 	case CMD_TREMOR:			command = 'T' - 55; break;
 	case CMD_XFINEPORTAUPDOWN:
-		if(bCompatibilityExport && (param & 0xF0) > 2)
+		if(bCompatibilityExport && (param & 0xF0) > 2)	// X1x and X2x are legit, everything above are MPT extensions, which don't belong here.
 			command = param = 0;
 		else
 			command = 'X' - 55;
 		break;
-	case CMD_PANBRELLO:			command = 'Y' - 55; break;
+	case CMD_PANBRELLO:
+		if(bCompatibilityExport)
+			command = param = 0;
+		else
+			command = 'Y' - 55;
+		break;
 	case CMD_MIDI:				
 		if(bCompatibilityExport)
 			command = param = 0;
@@ -152,9 +157,6 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 			command = param = 0;
 		else
 			command = '\\' - 56;
-		break;
-	case CMD_DELAYCUT:
-			command = param = 0;
 		break;
 	case CMD_XPARAM: //rewbs.XMfixes - XParam is 38
 		if(bCompatibilityExport)
@@ -183,8 +185,14 @@ WORD CSoundFile::ModSaveCommand(const MODCOMMAND *m, const bool bXM, const bool 
 		default:	command = 0x0E; break;
 		}
 		break;
-	default:		command = param = 0;
+	default:
+		command = param = 0;
 	}
+
+	// don't even think about saving XM effects in MODs...
+	if(command > 0x0F && !bXM)
+		command = param = 0;
+
 	return (WORD)((command << 8) | (param));
 }
 

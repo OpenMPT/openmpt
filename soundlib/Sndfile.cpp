@@ -3794,10 +3794,16 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 		}
 	} // End if (newTypeIsS3M)
 
-	//////////////////////////////////////////////////
-	// Convert anything to XM - adjust volume column
+	////////////////////////////////////////////////////////////////////////
+	// Convert anything to XM - adjust volume column, breaking EDx command
 	if (newTypeIsXM)
 	{
+		// remove EDx if no note is next to it, or it will retrigger the note in FT2 mode
+		if(m->command == CMD_MODCMDEX && (m->param & 0xF0) == 0xD0 && m->note == NOTE_NONE)
+		{
+			m->command = m->param = 0;
+		}
+
 		if(!m->command) switch(m->volcmd)
 		{
 			case VOLCMD_PORTADOWN:

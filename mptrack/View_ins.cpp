@@ -1387,15 +1387,23 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 	if (nVal < 0) nVal = 0;
 	if (nVal > 64) nVal = 64;
 	if (nTick < 0) nTick = 0;
-	if (nTick <= EnvGetReleaseNodeTick() + 1 || EnvGetReleaseNode() == ENV_RELEASE_NODE_UNSET) {
-		int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && (pIns->PitchEnv.dwFlags & ENV_FILTER))) ? nVal - 32 : nVal;
-		wsprintf(s, "Tick %d, [%d]", nTick, displayVal);
-	} else {
+	if (nTick <= EnvGetReleaseNodeTick() + 1 || EnvGetReleaseNode() == ENV_RELEASE_NODE_UNSET)
+	{
+		// ticks before release node (or no release node)
+		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && (pIns->PitchEnv.dwFlags & ENV_FILTER))) ? nVal - 32 : nVal;
+		if(m_nEnv != ENV_PANNING)
+			wsprintf(s, "Tick %d, [%d]", nTick, displayVal);
+		else	// panning envelope: display right/center/left chars
+			wsprintf(s, "Tick %d, [%d %c]", nTick, abs(displayVal), displayVal > 0 ? 'R' : (displayVal < 0 ? 'L' : 'C'));
+	} else
+	{
+		// ticks after release node
 		int displayVal = (nVal - EnvGetReleaseNodeValue()) * 2;
 		displayVal = (m_nEnv != ENV_VOLUME) ? displayVal - 32 : displayVal;
 		wsprintf(s, "Tick %d, [Rel%c%d]",  nTick, displayVal > 0 ? '+' : '-', abs(displayVal));
 	}
 	UpdateIndicator(s);
+
 	if ((m_dwStatus & INSSTATUS_DRAGGING) && (m_nDragItem))
 	{
 		BOOL bChanged = FALSE;
