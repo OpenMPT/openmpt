@@ -777,12 +777,12 @@ void CViewPattern::OnGrowSelection()
 			//Log("dst: %d; src: %d; blk: %d\n", row, (row-offset/2), (row-1));
 			switch(i & 7)
 			{
-				case 0:	dest->note    = src->note;    blank->note=0;   break;
-				case 1: dest->instr   = src->instr;   blank->instr=0;  break;
-				case 2:	dest->vol     = src->vol;     blank->vol=0;   
-					    dest->volcmd  = src->volcmd;  blank->volcmd=0; break;
-				case 3:	dest->command = src->command; blank->command=0;break;
-				case 4:	dest->param   = src->param;   blank->param=0;  break;
+				case NOTE_COLUMN:	dest->note    = src->note;    blank->note = 0;    break;
+				case INST_COLUMN:	dest->instr   = src->instr;   blank->instr = 0;   break;
+				case VOL_COLUMN:	dest->vol     = src->vol;     blank->vol = 0;   
+									dest->volcmd  = src->volcmd;  blank->volcmd = 0;  break;
+				case EFFECT_COLUMN:	dest->command = src->command; blank->command = 0; break;
+				case PARAM_COLUMN:	dest->param   = src->param;   blank->param = 0;   break;
 			}
 		}
 	}
@@ -830,12 +830,12 @@ void CViewPattern::OnShrinkSelection()
 			Log("dst: %d; src: %d\n", row, srcRow);
 			switch(i & 7)
 			{
-				case 0:	dest->note    = src->note;    break;
-				case 1: dest->instr   = src->instr;   break;
-				case 2:	dest->vol     = src->vol;      
-					    dest->volcmd  = src->volcmd;  break;
-				case 3:	dest->command = src->command; break;
-				case 4:	dest->param   = src->param;   break;
+				case NOTE_COLUMN:	dest->note    = src->note;    break;
+				case INST_COLUMN:	dest->instr   = src->instr;   break;
+				case VOL_COLUMN:	dest->vol     = src->vol;      
+									dest->volcmd  = src->volcmd;  break;
+				case EFFECT_COLUMN:	dest->command = src->command; break;
+				case PARAM_COLUMN:	dest->param   = src->param;   break;
 			}
 		}
 	}
@@ -2046,18 +2046,18 @@ void CViewPattern::OnCursorCopy()
 		MODCOMMAND *m = pSndFile->Patterns[m_nPattern] + m_nRow * pSndFile->m_nChannels + ((m_dwCursor & 0xFFFF) >> 3);
 		switch(m_dwCursor & 7)
 		{
-		case 0:
-		case 1:
+		case NOTE_COLUMN:
+		case INST_COLUMN:
 			m_cmdOld.note = m->note;
 			m_cmdOld.instr = m->instr;
 			SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, m_cmdOld.instr);
 			break;
-		case 2:
+		case VOL_COLUMN:
 			m_cmdOld.volcmd = m->volcmd;
 			m_cmdOld.vol = m->vol;
 			break;
-		case 3:
-		case 4:
+		case EFFECT_COLUMN:
+		case PARAM_COLUMN:
 			m_cmdOld.command = m->command;
 			m_cmdOld.param = m->param;
 			break;
@@ -2082,11 +2082,11 @@ void CViewPattern::OnCursorPaste()
 
 		switch(nCursor)
 		{
-			case 0:	p->note = m_cmdOld.note;									//Note
-			case 1:	p->instr = m_cmdOld.instr; break;							//Octave
-			case 2:	p->vol = m_cmdOld.vol; p->volcmd = m_cmdOld.volcmd; break;	//Vol
-			case 3:																//Effect
-			case 4:	p->command = m_cmdOld.command; p->param = m_cmdOld.param; break;
+			case NOTE_COLUMN:	p->note = m_cmdOld.note;
+			case INST_COLUMN:	p->instr = m_cmdOld.instr; break;
+			case VOL_COLUMN:	p->vol = m_cmdOld.vol; p->volcmd = m_cmdOld.volcmd; break;
+			case EFFECT_COLUMN:
+			case PARAM_COLUMN:	p->command = m_cmdOld.command; p->param = m_cmdOld.param; break;
 		}
 		pModDoc->SetModified();
 
@@ -4424,7 +4424,7 @@ void CViewPattern::TempEnterChord(int note)
 		// Simply backup the whole row.
 		pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, nChn, m_nRow, pSndFile->GetNumChannels(), 1);
 
-		PatternRow prowbase = pSndFile->Patterns[m_nPattern].GetRow(m_nRow);
+		const PatternRow prowbase = pSndFile->Patterns[m_nPattern].GetRow(m_nRow);
 		MODCOMMAND* p = &prowbase[nChn];
 
 		const MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite

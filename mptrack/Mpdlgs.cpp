@@ -9,7 +9,7 @@
 #include "snddev.h"
 #include ".\mpdlgs.h"
 
-#define str_preampChangeNote GetStrI18N(_TEXT("Note: Pre-Amp setting affects sample volume only. Changing this setting may cause undesired effects on volume balance between sample based instruments and plugin instrument."))
+#define str_preampChangeNote GetStrI18N(_TEXT("Note: Pre-Amp setting affects sample volume only. Changing this setting may cause undesired effects on volume balance between sample based instruments and plugin instruments."))
 
 //#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
@@ -353,13 +353,7 @@ void COptionsSoundcard::OnOK()
 		m_CbnBufferLength.GetWindowText(s, sizeof(s));
 		m_nBufferLength = atoi(s);
 		//Check given value.
-		if(m_nBufferLength < SNDDEV_MINBUFFERLEN)
-			m_nBufferLength = SNDDEV_MINBUFFERLEN;
-		else
-		{
-			if(m_nBufferLength > SNDDEV_MAXBUFFERLEN)
-				m_nBufferLength = SNDDEV_MAXBUFFERLEN;
-		}
+		m_nBufferLength = CLAMP(m_nBufferLength, SNDDEV_MINBUFFERLEN, SNDDEV_MAXBUFFERLEN);
 		wsprintf(s, "%d ms", m_nBufferLength);
 		m_CbnBufferLength.SetWindowText(s);
 	}

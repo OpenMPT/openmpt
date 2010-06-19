@@ -10,8 +10,8 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug
 
 
-v1.18.02.00 (May 2010)
-----------------------
+v1.18.02.00 (May 2010, revision 610)
+------------------------------------
 
 General tab
   [Imp] <Jojo> Disabled tempo slider for MOD files (it was just confusing)

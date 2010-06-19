@@ -3572,13 +3572,14 @@ void CSoundFile::KeyOff(UINT nChn)
 	{
 		MODINSTRUMENT *pIns = pChn->pModInstrument;
 		if (((pIns->VolEnv.dwFlags & ENV_LOOP) || (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) && (pIns->nFadeOut))
-		{			
+		{
 			pChn->dwFlags |= CHN_NOTEFADE;
 		}
 	
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		{
-			pChn->nVolEnvValueAtReleaseJump = getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);			pChn->nVolEnvPosition= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
+			pChn->nVolEnvValueAtReleaseJump = getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);
+			pChn->nVolEnvPosition= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
 		}
 
 	}
