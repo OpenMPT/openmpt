@@ -344,12 +344,12 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	{
 		if(newTypeIsMOD_XM || newTypeIsS3M)
 		{
-			m_SndFile.ChnSettings->nVolume = 64;
-			m_SndFile.ChnSettings->dwFlags &= ~CHN_SURROUND;
+			m_SndFile.ChnSettings[nChn].nVolume = 64;
+			m_SndFile.ChnSettings[nChn].dwFlags &= ~CHN_SURROUND;
 		}
 		if(newTypeIsXM)
 		{
-			m_SndFile.ChnSettings->nPan = 128;
+			m_SndFile.ChnSettings[nChn].nPan = 128;
 		}
 	}
 
@@ -369,11 +369,10 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 
 	//rewbs.cutomKeys: update effect key commands
 	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
-	if	(newTypeIsMOD_XM) {
+	if	(newTypeIsMOD_XM)
 		ih->SetXMEffects();
-	} else {
+	else
 		ih->SetITEffects();
-	}
 	//end rewbs.cutomKeys
 
 	// Check mod specifications
@@ -555,6 +554,8 @@ bool CModDoc::RemoveChannels(bool m_bChnMask[MAX_BASECHANNELS])
 					m_SndFile.Chn[tmpchn] = m_SndFile.Chn[i];
 				}
 				tmpchn++;
+			} else
+			{
 				if (i >= nRemainingChannels)
 				{
 					m_SndFile.InitChannel(i);
