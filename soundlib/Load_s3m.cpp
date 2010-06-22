@@ -367,7 +367,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 		{
 			Samples[iSmp].nLength = CLAMP(LittleEndian(*((LPDWORD)(s + 0x10))), 4, MAX_SAMPLE_LENGTH);
 			Samples[iSmp].nLoopStart = CLAMP(LittleEndian(*((LPDWORD)(s + 0x14))), 0, Samples[iSmp].nLength - 1);
-			Samples[iSmp].nLoopEnd = CLAMP(LittleEndian(*((LPDWORD)(s+0x18))), 4, Samples[iSmp].nLength);
+			Samples[iSmp].nLoopEnd = CLAMP(LittleEndian(*((LPDWORD)(s+0x18))), 0, Samples[iSmp].nLength);
 			Samples[iSmp].nVolume = CLAMP(s[0x1C], 0, 64) << 2;
 			Samples[iSmp].nGlobalVol = 64;
 			if (s[0x1F] & 1) Samples[iSmp].uFlags |= CHN_LOOP;
@@ -388,10 +388,6 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
 			if ((Samples[iSmp].nLoopStart >= Samples[iSmp].nLoopEnd) || (Samples[iSmp].nLoopEnd - Samples[iSmp].nLoopStart < 1))
  				Samples[iSmp].nLoopStart = Samples[iSmp].nLoopEnd = 0;
 			Samples[iSmp].nPan = 0x80;
-
-			// attempt to fix samples which are not supposed to have loops (for example in S3M files made with PSM2S3M)
-			if(Samples[iSmp].nLoopEnd <= 4 && Samples[iSmp].nLength > 8)
-				Samples[iSmp].uFlags &= ~CHN_LOOP;
 
 		} else if(s[0] >= S3I_TYPE_ADMEL)
 		{
