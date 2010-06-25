@@ -843,11 +843,13 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 void CModDoc::InitializeInstrument(MODINSTRUMENT *pIns, UINT nsample)
 //-------------------------------------------------------------------
 {
+	if(pIns == nullptr)
+		return;
 	memset(pIns, 0, sizeof(MODINSTRUMENT));
 	pIns->nFadeOut = 256;
 	pIns->nGlobalVol = 64;
 	pIns->nPan = 128;
-	pIns->nPPC = 5*12;
+	pIns->nPPC = NOTE_MIDDLEC - 1;
 	m_SndFile.SetDefaultInstrumentValues(pIns);
 	for (UINT n=0; n<128; n++)
 	{
