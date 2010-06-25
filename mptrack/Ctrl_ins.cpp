@@ -100,6 +100,15 @@ BOOL CNoteMapWnd::SetCurrentInstrument(CModDoc *pModDoc, UINT nIns)
 	{
 		m_pModDoc = pModDoc;
 		if (nIns < MAX_INSTRUMENTS) m_nInstrument = nIns;
+
+		// create missing instrument if needed
+		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+		if(m_nInstrument > 0 && pSndFile && m_nInstrument <= pSndFile->GetNumInstruments() && pSndFile->Instruments[m_nInstrument] == nullptr)
+		{
+			pSndFile->Instruments[m_nInstrument] = new MODINSTRUMENT;
+			m_pModDoc->InitializeInstrument(pSndFile->Instruments[m_nInstrument]);
+		}
+
 		InvalidateRect(NULL, FALSE);
 	}
 	return TRUE;
@@ -352,7 +361,7 @@ void CNoteMapWnd::OnMapCopyNote()
 	if (pIns)
 	{
 		bool bModified = false;
-		UINT n = pIns->NoteMap[m_nNote];
+		BYTE n = pIns->NoteMap[m_nNote];
 		for (NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++) if (pIns->NoteMap[i] != n)
 		{
 			pIns->NoteMap[i] = n;
@@ -378,7 +387,7 @@ void CNoteMapWnd::OnMapCopySample()
 	if (pIns)
 	{
 		bool bModified = false;
-		UINT n = pIns->Keyboard[m_nNote];
+		WORD n = pIns->Keyboard[m_nNote];
 		for (NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++) if (pIns->Keyboard[i] != n)
 		{
 			pIns->Keyboard[i] = n;

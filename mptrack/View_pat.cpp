@@ -2357,10 +2357,12 @@ BOOL CViewPattern::TransposeSelection(int transp)
 	CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
-		UINT row0 = m_dwBeginSel >> 16, row1 = m_dwEndSel >> 16;
-		UINT col0 = ((m_dwBeginSel & 0xFFFF)+7) >> 3, col1 = (m_dwEndSel & 0xFFFF) >> 3;
+		const UINT row0 = m_dwBeginSel >> 16, row1 = m_dwEndSel >> 16;
+		const UINT col0 = ((m_dwBeginSel & 0xFFFF)+7) >> 3, col1 = (m_dwEndSel & 0xFFFF) >> 3;
 		CSoundFile *pSndFile = pModDoc->GetSoundFile();
 		MODCOMMAND *pcmd = pSndFile->Patterns[m_nPattern];
+		const MODCOMMAND::NOTE noteMin = pSndFile->GetModSpecifications().noteMin;
+		const MODCOMMAND::NOTE noteMax = pSndFile->GetModSpecifications().noteMax;
 
 		if ((!pcmd) || (col0 > col1) || (col1 >= pSndFile->m_nChannels)
 		 || (row0 > row1) || (row1 >= pSndFile->Patterns[m_nPattern].GetNumRows())) return FALSE;
@@ -2371,11 +2373,11 @@ BOOL CViewPattern::TransposeSelection(int transp)
 			for (UINT col=col0; col<=col1; col++)
 			{
 				int note = m[col].note;
-				if ((note) && (note <= NOTE_MAX))
+				if ((note >= NOTE_MIN) && (note <= NOTE_MAX))
 				{
 					note += transp;
-					if (note < 1) note = 1;
-					if (note > NOTE_MAX) note = NOTE_MAX;
+					if (note < noteMin) note = noteMin;
+					if (note > noteMax) note = noteMax;
 					m[col].note = (BYTE)note;
 				}
 			}
