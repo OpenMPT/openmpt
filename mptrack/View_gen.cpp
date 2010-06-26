@@ -84,6 +84,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 // -> CODE#0002
 // -> DESC="VST plugins presets"
 	ON_CBN_SELCHANGE(IDC_COMBO8, OnProgramChanged)
+	ON_CBN_SETFOCUS(IDC_COMBO8, OnFillProgramCombo)
 // -! NEW_FEATURE#0002
 
 // -> CODE#0028
@@ -482,30 +483,18 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 
 // -> CODE#0002
 // -> DESC="VST plugins presets"
-			CHAR s2[128];
-			//UINT k = 0, nProg = min(pVstPlugin->GetNumPrograms(), 256);  //Limit number of progs to 256 because of insane plugs like synth1
-			UINT k = 0, nProg = pVstPlugin->GetNumPrograms(); 
+			// For now, only display the "current" preset.
+			// This prevents the program from hanging when switching between plugin slots or
+			// switching to the general tab and the first plugin in the list has a lot of presets.
+			// Some plugins like Synth1 have so many presets that this *does* indeed make a difference,
+			// even on fairly modern CPUs. The rest of the presets are just added when the combo box
+			// gets the focus, i.e. just when they're needed.
 			m_CbnPreset.SetRedraw(FALSE);
 			m_CbnPreset.ResetContent();
-			wsprintf(s2, "current");
-			m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), 0);
-			for (i=0; i<nProg; i++)
-			{
-				k = 0;
-				pVstPlugin->GetProgramNameIndexed(i, 0, sname);
-
-				if(sname[0] < 32)
-					wsprintf(s2, "%02X - Program %d",i,i);
-				else{
-					while(k < sizeof(sname)-1 && sname[k] != 0 && sname[k] < 'a' && sname[k] < 'z' && sname[k] < 'A' && sname[k] < 'Z') k++;
-					wsprintf(s2, "%02X - %s",i,&sname[k]);
-				}
-
-				m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), i+1);
-			}
-			m_nCurrentPreset = 0;
+			m_CbnPreset.SetItemData(m_CbnPreset.AddString(_T("current")), 0);
 			m_CbnPreset.SetRedraw(TRUE);
 			m_CbnPreset.SetCurSel(0);
+
 			m_sbValue.EnableWindow(TRUE);
 			m_sbDryRatio.EnableWindow(TRUE);
 			::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT14), TRUE);
@@ -519,7 +508,7 @@ void CViewGlobals::UpdateView(DWORD dwHintMask, CObject *)
 			m_nCurrentParam = 0;
 // -> CODE#0002
 // -> DESC="VST plugins presets"
-			CHAR s2[32];
+			CHAR s2[16];
 			m_CbnPreset.SetRedraw(FALSE);
 			m_CbnPreset.ResetContent();
 			wsprintf(s2, "none");
@@ -1485,10 +1474,56 @@ void CViewGlobals::OnInsertSlot()
 
 }
 
+
 void CViewGlobals::OnClonePlug()
 //------------------------------
 {
 	AfxMessageBox("Not yet implemented.");
+}
+
+
+// The preset box is only filled when it gets the focus (done here).
+void CViewGlobals::OnFillProgramCombo()
+//-------------------------------------
+{
+	// no need to fill it again.
+	if(m_CbnPreset.GetCount() > 1)
+		return;
+
+	if(GetDocument() ==  nullptr) return;
+	CSoundFile *pSndFile = GetDocument()->GetSoundFile();
+	if(pSndFile == nullptr) return;
+	if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
+	PSNDMIXPLUGIN pPlugin = &(pSndFile->m_MixPlugins[m_nCurrentPlugin]);
+	CVstPlugin *pVstPlugin = (pPlugin->pMixPlugin) ? (CVstPlugin *)pPlugin->pMixPlugin : nullptr;
+	if(pVstPlugin == nullptr) return;
+
+	CHAR sname[64];
+	CHAR s2[128];
+	UINT nProg = pVstPlugin->GetNumPrograms(); 
+	m_CbnPreset.SetRedraw(FALSE);
+	m_CbnPreset.ResetContent();
+	wsprintf(s2, _T("current"));
+	m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), 0);
+	for (UINT i = 0; i < nProg; i++)
+	{
+		pVstPlugin->GetProgramNameIndexed(i, 0, sname);
+
+		if(sname[0] < ' ')
+		{
+			wsprintf(s2, "%02X - Program %d", i, i);
+		} else
+		{
+			size_t k = 0;
+			while(k < ARRAYELEMCOUNT(sname) - 1 && sname[k] <= ' ') k++;
+			wsprintf(s2, "%02X - %s",i,&sname[k]);
+		}
+
+		m_CbnPreset.SetItemData(m_CbnPreset.AddString(s2), i+1);
+	}
+	m_nCurrentPreset = 0;
+	m_CbnPreset.SetRedraw(TRUE);
+	m_CbnPreset.SetCurSel(0);
 }
 
 
