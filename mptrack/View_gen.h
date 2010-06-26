@@ -115,6 +115,7 @@ protected:
 	afx_msg void OnParamChanged();
 // -> CODE#0002
 // -> DESC="VST plugins presets"
+	afx_msg void OnFillProgramCombo();
 	afx_msg void OnProgramChanged();
 	afx_msg void OnLoadParam();
 	afx_msg void OnSaveParam();
