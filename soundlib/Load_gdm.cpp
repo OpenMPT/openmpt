@@ -71,8 +71,7 @@ typedef struct _GDMSAMPLEHEADER
 
 #pragma pack()
 
-#define GDMHeader_Origin_Count 9
-static MODTYPE GDMHeader_Origin[GDMHeader_Origin_Count] =
+static MODTYPE GDMHeader_Origin[] =
 {
 	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED
 };
@@ -94,7 +93,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		return false;
 
 	// 1-MOD, 2-MTM, 3-S3M, 4-669, 5-FAR, 6-ULT, 7-STM, 8-MED
-	m_nType = GDMHeader_Origin[pHeader->FormOrigin % GDMHeader_Origin_Count];
+	m_nType = GDMHeader_Origin[pHeader->FormOrigin % ARRAYELEMCOUNT(GDMHeader_Origin)];
 	if(m_nType == MOD_TYPE_NONE)
 		return false;
 
@@ -175,7 +174,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		Samples[iSmp].nLoopEnd = min(LittleEndian(pSample->LoopEnd) - 1, Samples[iSmp].nLength); // dito
 		FrequencyToTranspose(&Samples[iSmp]); // set transpose + finetune for mod files
 
-		// fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.mod)
+		// fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
 		if(m_nType == MOD_TYPE_MOD)
 		{
 			while(Samples[iSmp].RelativeTone != 0)

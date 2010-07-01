@@ -467,6 +467,8 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	else return false;
 	dwMemPos += 4;
 	m_nChannels = 0;
+	m_nSamples = 0;
+	m_nInstruments = 0;
 	
 	// go through all chunks now
 	while(dwMemPos < dwMemLength)

@@ -1822,7 +1822,7 @@ void CCommandSet::SetupCommands()
 	commands[kcFileSaveAsMP3].isDummy = false;
 
 	commands[kcFileSaveMidi].UID = 1353;
-	commands[kcFileSaveMidi].Message = "File/Export to Midi";
+	commands[kcFileSaveMidi].Message = "File/Export as MIDI";
 	commands[kcFileSaveMidi].isHidden = false;
 	commands[kcFileSaveMidi].isDummy = false;
 
@@ -2266,7 +2266,7 @@ void CCommandSet::SetupCommands()
 	commands[kcChangeLoopStatus].Message = "Toggle loop pattern";
 
 	commands[kcFileExportCompat].UID = 1777;
-	commands[kcFileExportCompat].Message = "File/Export to standard IT/XM";
+	commands[kcFileExportCompat].Message = "File/Export to standard IT/XM/S3M";
 	commands[kcFileExportCompat].isHidden = false;
 	commands[kcFileExportCompat].isDummy = false;
 

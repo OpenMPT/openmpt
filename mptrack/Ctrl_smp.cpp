@@ -2956,7 +2956,7 @@ NoSample:
 			m_EditFineTune.SetWindowText(s);
 		} else
 		{
-			LONG d = CLAMP(pSmp->nFineTune + pos, -128, 127);
+			LONG d = CLAMP(pSmp->nFineTune + pos * ((m_pSndFile->GetType() & MOD_TYPE_MOD) ? 16 : 1), -128, 127);
 			pSmp->nFineTune = (signed char)d;
 			wsprintf(s, "%d", d);
 			m_EditFineTune.SetWindowText(s);

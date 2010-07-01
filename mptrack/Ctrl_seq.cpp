@@ -316,7 +316,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				pSndFile->m_nCurrentPattern = m_nScrollPos;
 				pSndFile->SetCurrentOrder(m_nScrollPos);
 				pSndFile->m_dwSongFlags |= dwPaused;
-				if (!(dwPaused & SONG_PATTERNLOOP)) pSndFile->GetLength(TRUE);
+				if (!(dwPaused & SONG_PATTERNLOOP)) pSndFile->GetLength(TRUE);	// update channel parameters
 				if (bIsPlaying) pMainFrm->ResetNotificationBuffer();
 				END_CRITICAL();
 			}
