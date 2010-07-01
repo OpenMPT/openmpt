@@ -1293,7 +1293,7 @@ BOOL CSoundFile::ProcessEffects()
 						nStartTick = 1;
 					//ST3 ignores notes with SD0 completely
 					else if(GetType() == MOD_TYPE_S3M)
-						nStartTick = m_nMusicSpeed;
+						nStartTick = UINT_MAX;
 				}
 
 				//IT compatibility 08. Handling of out-of-range delay command.

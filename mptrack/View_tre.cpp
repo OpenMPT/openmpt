@@ -1411,8 +1411,6 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 		break;
 
 	case MODITEM_ORDER:
-		wsprintf(s, _T("Delete order %d?"), modItemID & 0xFFFF);
-		if(MessageBox(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
 		if ((pModDoc) && (pModDoc->RemoveOrder((SEQUENCEINDEX)(modItemID >> 16), (ORDERINDEX)(modItemID & 0xFFFF))))
 		{
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
