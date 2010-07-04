@@ -99,8 +99,8 @@ struct MODINSTRUMENT
 	INSTRUMENTENVELOPE PanEnv;
 	INSTRUMENTENVELOPE PitchEnv;
 
-	BYTE NoteMap[128];
-	WORD Keyboard[128];
+	BYTE NoteMap[128];	// Note mapping, f.e. C-5 => D-5
+	WORD Keyboard[128];	// Sample mapping, f.e. C-5 => Sample 1
 
 	BYTE nNNA;
 	BYTE nDCT;
@@ -495,7 +495,7 @@ public:
 	static CTuningCollection& GetLocalTunings() {return *s_pTuningsSharedLocal;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
-	std::string GetNoteName(const int16&, const int inst = -1) const;
+	std::string GetNoteName(const int16&, const INSTRUMENTINDEX inst = INSTRUMENTINDEX_INVALID) const;
 private:
 	CTuningCollection* m_pTuningsTuneSpecific;
 	static CTuningCollection* s_pTuningsSharedBuiltIn;
@@ -724,13 +724,13 @@ public:
 	void SaveExtendedInstrumentProperties(MODINSTRUMENT *instruments[], UINT nInstruments, FILE* f);
 	void SaveExtendedSongProperties(FILE* f);
 	void LoadExtendedSongProperties(const MODTYPE modtype, LPCBYTE ptr, const LPCBYTE startpos, const size_t seachlimit, bool* pInterpretMptMade = nullptr);
+#endif // MODPLUG_NO_FILESAVE
 
 	// Reads extended instrument properties(XM/IT/MPTM). 
 	// If no errors occur and song extension tag is found, returns pointer to the beginning
 	// of the tag, else returns NULL.
 	LPCBYTE LoadExtendedInstrumentProperties(const LPCBYTE pStart, const LPCBYTE pEnd, bool* pInterpretMptMade = nullptr);
 
-#endif // MODPLUG_NO_FILESAVE
 	// MOD Convert function
 	MODTYPE GetBestSaveFormat() const;
 	MODTYPE GetSaveFormats() const;

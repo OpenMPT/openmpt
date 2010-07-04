@@ -1340,34 +1340,44 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	if ((m_dwStatus & SMPSTATUS_MOUSEDRAG) || (!pModDoc)) return;
 	pSndFile = pModDoc->GetSoundFile();
 	len = pSndFile->Samples[m_nSample].nLength;
-	if (len)
+	if (!len)
+		return;
+
+	m_dwStatus |= SMPSTATUS_MOUSEDRAG;
+	SetFocus();
+	SetCapture();
+	bool oldsel = (m_dwBeginSel != m_dwEndSel) ? true : false;
+
+	// shift + click = update selection
+	if(CMainFrame::GetInputHandler()->ShiftPressed())
 	{
-		m_dwStatus |= SMPSTATUS_MOUSEDRAG;
-		SetFocus();
-		SetCapture();
-		BOOL oldsel = (m_dwBeginSel != m_dwEndSel) ? TRUE : FALSE;
+		oldsel = true;
+		m_dwEndDrag = ScreenToSample(point.x);
+		SetCurSel(m_dwBeginDrag, m_dwEndDrag);
+	} else
+	{
 		m_dwBeginDrag = ScreenToSample(point.x);
 		if (m_dwBeginDrag >= len) m_dwBeginDrag = len-1;
 		m_dwEndDrag = m_dwBeginDrag;
-		if (oldsel) SetCurSel(m_dwBeginDrag, m_dwEndDrag);
-		// set initial point for sample drawing
-		if (m_bDrawingEnabled)
-		{
-			pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
-			if(pSndFile->Samples[m_nSample].GetElementarySampleSize() == 2)
-				SetInitialDrawPoint<int16, uint16>(pSndFile->Samples[m_nSample].pSample, point);
-			else if(pSndFile->Samples[m_nSample].GetElementarySampleSize() == 1)
-				SetInitialDrawPoint<int8, uint8>(pSndFile->Samples[m_nSample].pSample, point);
+	}
+	if (oldsel) SetCurSel(m_dwBeginDrag, m_dwEndDrag);
+	// set initial point for sample drawing
+	if (m_bDrawingEnabled)
+	{
+		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
+		if(pSndFile->Samples[m_nSample].GetElementarySampleSize() == 2)
+			SetInitialDrawPoint<int16, uint16>(pSndFile->Samples[m_nSample].pSample, point);
+		else if(pSndFile->Samples[m_nSample].GetElementarySampleSize() == 1)
+			SetInitialDrawPoint<int8, uint8>(pSndFile->Samples[m_nSample].pSample, point);
 
-			InvalidateSample();
-			pModDoc->SetModified();
-		}
-		else
-		{
-			// ctrl + click = play from cursor pos
-			if(CMainFrame::GetInputHandler()->CtrlPressed())
-				PlayNote(NOTE_MIDDLEC, ScreenToSample(point.x));
-		}
+		InvalidateSample();
+		pModDoc->SetModified();
+	}
+	else
+	{
+		// ctrl + click = play from cursor pos
+		if(CMainFrame::GetInputHandler()->CtrlPressed())
+			PlayNote(NOTE_MIDDLEC, ScreenToSample(point.x));
 	}
 }
 
@@ -1822,6 +1832,7 @@ void CViewSample::OnEditCopy()
 			if (pSmp->uFlags & (CHN_LOOP|CHN_SUSTAINLOOP))
 			{
 				WAVESAMPLERINFO *psmpl = (WAVESAMPLERINFO *)psh;
+				MemsetZero(psmpl->wsiLoops);
 				if (pSmp->uFlags & CHN_SUSTAINLOOP)
 				{
 					psmpl->wsiHdr.dwSampleLoops = 2;
