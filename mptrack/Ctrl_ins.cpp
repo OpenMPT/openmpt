@@ -183,13 +183,14 @@ void CNoteMapWnd::OnPaint()
 			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->NoteMap[nPos]))
 			{
 				UINT n = pIns->NoteMap[nPos];
-				if (n == NOTE_KEYOFF) strcpy(s, "==="); else
-				if (n == NOTE_NOTECUT) strcpy(s, "^^^"); else
-				if (n <= NOTE_MAX)
+				if(n < NOTE_MIN_SPECIAL)
 				{
 					string temp = pSndFile->GetNoteName(n, m_nInstrument);
 					temp.resize(4);
 					wsprintf(s, "%s", temp.c_str());
+				} else
+				{
+					strcpy(s, szSpecialNoteNames[pIns->NoteMap[n] - NOTE_MIN_SPECIAL]);
 				}
 			}
 			FillRect(hdc, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
@@ -658,7 +659,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	case VK_TAB:
 		return true;
 	case VK_RETURN:
-		if (m_pModDoc)
+		if (m_pModDoc && m_pModDoc->GetSoundFile())
 		{
 			MODINSTRUMENT *pIns = m_pModDoc->GetSoundFile()->Instruments[m_nInstrument];
 			if(pIns)
@@ -680,20 +681,24 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	return false;
 }
 
+
 void CNoteMapWnd::PlayNote(int note)
+//----------------------------------
 {
-	if (m_nPlayingNote >=0) return; //no polyphony in notemap window
+	if(m_nPlayingNote >= 0) return; //no polyphony in notemap window
 	m_pModDoc->PlayNote(note, m_nInstrument, 0, FALSE);
-	m_nPlayingNote=note;
+	m_nPlayingNote = note;
 }
 
+
 void CNoteMapWnd::StopNote(int note = -1)
+//----------------------------------
 {
-	if (note<0) note = m_nPlayingNote;
-	if (note<0) return;
+	if(note < 0) note = m_nPlayingNote;
+	if(note < 0) return;
 
 	m_pModDoc->NoteOff(note, TRUE, m_nInstrument);
-	m_nPlayingNote=-1;
+	m_nPlayingNote = -1;
 }
 
 //end rewbs.customKeys
@@ -872,7 +877,8 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_SpinMidiBK.SetRange(0, 128);
 	// Midi Channel
 	//rewbs.instroVSTi: we no longer combine midi chan and FX in same cbbox
-	for (UINT ich=0; ich<17; ich++)	{
+	for (UINT ich=0; ich<17; ich++)
+	{
 		UINT n = 0;
 		s[0] = 0;
 		if (!ich) { strcpy(s, "None"); n=0; } 
@@ -1115,7 +1121,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 
 		m_SpinFadeOut.EnableWindow(bITandXM);
 		if(m_pSndFile->m_nType & MOD_TYPE_XM)
-			m_SpinFadeOut.SetRange(0, 4095);
+			m_SpinFadeOut.SetRange(0, 32767);
 		else
 			m_SpinFadeOut.SetRange(0, 8192);
 
@@ -1768,9 +1774,9 @@ void CCtrlInstruments::OnFadeOutVolChanged()
 	if ((!IsLocked()) && (pIns))
 	{
 		int nVol = GetDlgItemInt(IDC_EDIT7);
-		if (nVol < 0) nVol = 0;
-		if (nVol > 16384) nVol = 16384;
-		if (nVol != (int)pIns->nFadeOut)
+		nVol = CLAMP(nVol, 0, 32767);
+		
+		if(nVol != (int)pIns->nFadeOut)
 		{
 			pIns->nFadeOut = nVol;
 			m_pModDoc->SetModified();

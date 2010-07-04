@@ -956,7 +956,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 			{
 				memcpy(xmih.name, pIns->name, 22);
 				xmih.type = pIns->nMidiProgram;
-				xmsh.volfade = LittleEndianW(min(pIns->nFadeOut, 0xFFF)); // FFF is maximum in FT2
+				xmsh.volfade = LittleEndianW(min(pIns->nFadeOut, 0x7FFF)); // FFF is maximum in the FT2 GUI, but it can also accept other values. MilkyTracker just allows 0...4095 and 32767 ("cut")
 				xmsh.vnum = (BYTE)pIns->VolEnv.nNodes;
 				xmsh.pnum = (BYTE)pIns->PanEnv.nNodes;
 				if (xmsh.vnum > 12) xmsh.vnum = 12;
