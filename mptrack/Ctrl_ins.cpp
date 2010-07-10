@@ -870,7 +870,7 @@ BOOL CCtrlInstruments::OnInitDialog()
 	// Global Volume
 	m_SpinGlobalVol.SetRange(0, 64);
 	// Panning
-	m_SpinPanning.SetRange(0, 255);
+	m_SpinPanning.SetRange(0, (m_pModDoc->GetModType() & MOD_TYPE_IT) ? 64 : 256);
 	// Midi Program
 	m_SpinMidiPR.SetRange(0, 128);
 	// rewbs.MidiBank
@@ -1172,7 +1172,7 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			// Global Volume
 			SetDlgItemInt(IDC_EDIT8, pIns->nGlobalVol);
 			// Panning
-			SetDlgItemInt(IDC_EDIT9, pIns->nPan);
+			SetDlgItemInt(IDC_EDIT9, (m_pModDoc->GetModType() & MOD_TYPE_IT) ? (pIns->nPan / 4) : pIns->nPan);
 			m_CheckPanning.SetCheck((pIns->dwFlags & INS_SETPANNING) ? TRUE : FALSE);
 			// Midi
 			if (pIns->nMidiProgram>0 && pIns->nMidiProgram<=128)
@@ -1838,14 +1838,14 @@ void CCtrlInstruments::OnSetPanningChanged()
 			}
 			if(smpPanningInUse)
 			{
-				if(MessageBox("Some of the samples used in the instrument have \"Set Pan\" enabled. "
+				if(MessageBox(_T("Some of the samples used in the instrument have \"Set Pan\" enabled. "
 						"When instrument is played with such sample, sample pan setting overrides instrument pan. "
 						"Do you wish to disable panning from those samples so that instrument pan setting is effective "
-						"for the whole instrument?",
-						"",
+						"for the whole instrument?"),
+						_T(""),
 						MB_YESNO) == IDYES)
 				{
-					for(BYTE i = 0; i<ARRAYELEMCOUNT(pIns->Keyboard); i++)
+					for(BYTE i = 0; i < ARRAYELEMCOUNT(pIns->Keyboard); i++)
 					{
 						const SAMPLEINDEX smp = pIns->Keyboard[i];
 						if(smp <= m_pSndFile->GetNumSamples())
@@ -1874,6 +1874,8 @@ void CCtrlInstruments::OnPanningChanged()
 	if ((!IsLocked()) && (pIns))
 	{
 		int nPan = GetDlgItemInt(IDC_EDIT9);
+		if(m_pModDoc->GetModType() & MOD_TYPE_IT)	// IT panning ranges from 0 to 64
+			nPan *= 4;
 		if (nPan < 0) nPan = 0;
 		if (nPan > 256) nPan = 256;
 		if (nPan != (int)pIns->nPan)
@@ -1882,7 +1884,7 @@ void CCtrlInstruments::OnPanningChanged()
 			if (m_pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) m_pModDoc->SetModified();
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-			m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+			m_pSndFile->instrumentModified[m_nInstrument - 1] = true;
 			m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
 // -! NEW_FEATURE#0023
 		}
@@ -1903,7 +1905,7 @@ void CCtrlInstruments::OnNNAChanged()
 		
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-		m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
+		m_pSndFile->instrumentModified[m_nInstrument - 1] = true;
 		m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
 // -! NEW_FEATURE#0023
 		

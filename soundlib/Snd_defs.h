@@ -16,6 +16,7 @@ typedef const BYTE * LPCBYTE;
 
 typedef uint32 ROWINDEX;
 	const ROWINDEX ROWINDEX_MAX = uint32_max;
+	const ROWINDEX ROWINDEX_INVALID = ROWINDEX_MAX;
 typedef uint16 CHANNELINDEX;
 	const CHANNELINDEX CHANNELINDEX_MAX	= uint16_max;
 	const CHANNELINDEX CHANNELINDEX_INVALID	= CHANNELINDEX_MAX;
@@ -358,14 +359,18 @@ enum {
 	NUM_SRC_MODES
 };
 
-enum {
+// Envelope reset choices
+enum enmResetEnv
+{
 	ENV_RESET_ALL,
 	ENV_RESET_VOL,
 	ENV_RESET_PAN,
 	ENV_RESET_PITCH,
-	ENV_RELEASE_NODE_UNSET=0xFF,
-	NOT_YET_RELEASED=-1
 };
+// Release node defines
+#define ENV_RELEASE_NODE_UNSET	0xFF
+#define NOT_YET_RELEASED		(-1)
+
 
 enum {
 	CHANNEL_ONLY		  = 0,

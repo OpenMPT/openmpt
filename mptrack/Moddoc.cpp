@@ -452,10 +452,10 @@ BOOL CModDoc::SaveModified()
 {
 	if((m_SndFile.m_nType & MOD_TYPE_IT) && m_SndFile.m_dwSongFlags & SONG_ITPROJECT && !(m_SndFile.m_dwSongFlags & SONG_ITPEMBEDIH)){
 
-		BOOL unsavedInstrument = FALSE;
+		bool unsavedInstrument = false;
 
 		for(UINT i = 0 ; i < m_SndFile.m_nInstruments ; i++){
-			if(m_SndFile.instrumentModified[i]) { unsavedInstrument = TRUE; break; }
+			if(m_SndFile.instrumentModified[i]) { unsavedInstrument = true; break; }
 		}
 
 		if(unsavedInstrument && ::MessageBox(NULL,"Do you want to save modified instruments ?",NULL,MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES){
@@ -463,8 +463,8 @@ BOOL CModDoc::SaveModified()
 			for(INSTRUMENTINDEX i = 0 ; i < m_SndFile.m_nInstruments ; i++){
 				if(m_SndFile.m_szInstrumentPath[i][0] != '\0'){
 					int size = strlen(m_SndFile.m_szInstrumentPath[i]);
-					BOOL iti = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-3],"iti") == 0;
-					BOOL xi  = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-2],"xi") == 0;
+					bool iti = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-3],"iti") == 0;
+					bool xi  = _stricmp(&m_SndFile.m_szInstrumentPath[i][size-2],"xi") == 0;
 
 					if(iti || (!iti && !xi  && m_SndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 						m_SndFile.SaveITIInstrument(i+1, m_SndFile.m_szInstrumentPath[i]);

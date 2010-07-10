@@ -217,7 +217,7 @@ bool Convert_RIFF_AM_Pattern(const PATTERNINDEX nPat, const LPCBYTE lpStream, co
 
 	ASSERT_CAN_READ(1);
 
-	ROWINDEX nRows = lpStream[0] + 1;
+	ROWINDEX nRows = CLAMP(lpStream[0] + 1, 1, MAX_PATTERN_ROWS);
 
 	if(pSndFile == nullptr || pSndFile->Patterns.Insert(nPat, nRows))
 		return false;
@@ -610,7 +610,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					Samples[nSmp].nPan = smpchunk->pan << 2;
 					Samples[nSmp].nVolume = smpchunk->volume << 2;
 					Samples[nSmp].nGlobalVol = 64;
-					Samples[nSmp].nLength = LittleEndian(smpchunk->length);
+					Samples[nSmp].nLength = min(LittleEndian(smpchunk->length), MAX_SAMPLE_LENGTH);
 					Samples[nSmp].nLoopStart = LittleEndian(smpchunk->loopstart);
 					Samples[nSmp].nLoopEnd = LittleEndian(smpchunk->loopend);
 					Samples[nSmp].nC5Speed = LittleEndian(smpchunk->samplerate);
@@ -731,7 +731,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					Samples[nSmp].nPan = LittleEndianW(smpchunk->pan) * 256 / 32767;
 					Samples[nSmp].nVolume = LittleEndianW(smpchunk->volume) * 256 / 32767;
 					Samples[nSmp].nGlobalVol = 64;
-					Samples[nSmp].nLength = LittleEndian(smpchunk->length);
+					Samples[nSmp].nLength = min(LittleEndian(smpchunk->length), MAX_SAMPLE_LENGTH);
 					Samples[nSmp].nLoopStart = LittleEndian(smpchunk->loopstart);
 					Samples[nSmp].nLoopEnd = LittleEndian(smpchunk->loopend);
 					Samples[nSmp].nC5Speed = LittleEndian(smpchunk->samplerate);

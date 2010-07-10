@@ -2057,8 +2057,8 @@ BOOL CSoundFile::ProcessEffects()
 	return TRUE;
 }
 
-void CSoundFile::resetEnvelopes(MODCHANNEL* pChn, int envToReset)
-//---------------------------------------------------------------
+void CSoundFile::resetEnvelopes(MODCHANNEL* pChn, enmResetEnv envToReset)
+//-----------------------------------------------------------------------
 {
 	switch (envToReset)
 	{
@@ -4153,8 +4153,7 @@ bool CSoundFile::IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const 
 	{
 		if(bAutoSet)
 			SetRowVisited(nOrd, nRow, true);
-		else
-			return false;
+		return false;
 	}
 
 	if(m_bVisitedRows[nOrd][nRow])

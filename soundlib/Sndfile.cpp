@@ -481,9 +481,10 @@ CSoundFile::CSoundFile() :
 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
-	for(UINT i = 0 ; i < MAX_INSTRUMENTS ; i++){
+	for(UINT i = 0; i < MAX_INSTRUMENTS; i++)
+	{
 		m_szInstrumentPath[i][0] = '\0';
-		instrumentModified[i] = FALSE;
+		instrumentModified[i] = false;
 	}
 // -! NEW_FEATURE#0023
 
@@ -3137,7 +3138,7 @@ double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row)
 const CModSpecifications& CSoundFile::GetModSpecifications(const MODTYPE type)
 //----------------------------------------------------------------------------
 {
-	const CModSpecifications* p = 0;
+	const CModSpecifications* p = nullptr;
 	SetModSpecsPointer(p, type);
 	return *p;
 }

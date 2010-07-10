@@ -2065,7 +2065,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			iti.pps = pIns->nPPS;
 			iti.ppc = pIns->nPPC;
 			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
-			iti.dfp = (BYTE)pIns->nPan >> 2;
+			iti.dfp = (BYTE)(pIns->nPan >> 2);
 			if (!(pIns->dwFlags & INS_SETPANNING)) iti.dfp |= 0x80;
 			iti.rv = pIns->nVolSwing;
 			iti.rp = pIns->nPanSwing;
@@ -2664,7 +2664,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 			iti.pps = pIns->nPPS;
 			iti.ppc = pIns->nPPC;
 			iti.gbv = (BYTE)(pIns->nGlobalVol << 1);
-			iti.dfp = (BYTE)pIns->nPan >> 2;
+			iti.dfp = (BYTE)(pIns->nPan >> 2);
 			if (!(pIns->dwFlags & INS_SETPANNING)) iti.dfp |= 0x80;
 			iti.rv = pIns->nVolSwing;
 			iti.rp = pIns->nPanSwing;
