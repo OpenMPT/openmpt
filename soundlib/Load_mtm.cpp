@@ -4,13 +4,12 @@
  * Copied to OpenMPT from libmodplug.
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
- * 
+ *                  OpenMPT Devs
+ *
 */
 
 #include "stdafx.h"
 #include "sndfile.h"
-
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
 //////////////////////////////////////////////////////////
 // MTM file support (import only)
@@ -19,29 +18,30 @@
 
 typedef struct tagMTMSAMPLE
 {
-    char samplename[22];
-	DWORD length;
-	DWORD reppos;
-	DWORD repend;
-	CHAR finetune;
-	BYTE volume;
-	BYTE attribute;
+    char   samplename[22];
+	uint32 length;
+	uint32 reppos;
+	uint32 repend;
+	int8   finetune;
+	uint8  volume;
+	uint8  attribute;
 } MTMSAMPLE;
 
 
 typedef struct tagMTMHEADER
 {
-	char id[4];			// MTM file marker + version
-	char songname[20];  // ASCIIZ songname
-	WORD numtracks;		// number of tracks saved
-	BYTE lastpattern;	// last pattern number saved
-	BYTE lastorder;		// last order number to play (songlength-1)
-	WORD commentsize;	// length of comment field
-	BYTE numsamples;	// number of samples saved
-	BYTE attribute;		// attribute byte (unused)
-	BYTE beatspertrack;
-	BYTE numchannels;	// number of channels used
-	BYTE panpos[32];	// voice pan positions
+	char   id[3];			// MTM file marker
+	uint8  version;			// Tracker version
+	char   songname[20];	// ASCIIZ songname
+	uint16 numtracks;		// number of tracks saved
+	uint8  lastpattern;		// last pattern number saved
+	uint8  lastorder;		// last order number to play (songlength-1)
+	uint16 commentsize;		// length of comment field
+	uint8  numsamples;		// number of samples saved
+	uint8  attribute;		// attribute byte (unused)
+	uint8  beatspertrack;	// numbers of rows in every pattern
+	uint8  numchannels;		// number of channels used
+	uint8  panpos[32];		// channel pan positions
 } MTMHEADER;
 
 
@@ -51,11 +51,12 @@ typedef struct tagMTMHEADER
 bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 //-----------------------------------------------------------
 {
-	MTMHEADER *pmh = (MTMHEADER *)lpStream;
 	DWORD dwMemPos = 66;
 
 	if ((!lpStream) || (dwMemLength < 0x100)) return false;
-	if ((strncmp(pmh->id, "MTM", 3)) || (pmh->numchannels > 32)
+
+	MTMHEADER *pmh = (MTMHEADER *)lpStream;
+	if ((memcmp(pmh->id, "MTM", 3)) || (pmh->numchannels > 32)
 	 || (pmh->numsamples >= MAX_SAMPLES) || (!pmh->numsamples)
 	 || (!pmh->numtracks) || (!pmh->numchannels)
 	 || (!pmh->lastpattern) || (pmh->lastpattern > MAX_PATTERNS)) return false;
@@ -75,8 +76,8 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 		SpaceToNullStringFixed(m_szNames[i], 22);
 		Samples[i].nVolume = pms->volume << 2;
 		Samples[i].nGlobalVol = 64;
-		DWORD len = pms->length;
-		if ((len > 4) && (len <= MAX_SAMPLE_LENGTH))
+		UINT len = pms->length;
+		if ((len > 2) && (len <= MAX_SAMPLE_LENGTH))
 		{
 			Samples[i].nLength = len;
 			Samples[i].nLoopStart = pms->reppos;
@@ -97,31 +98,32 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 		dwMemPos += 37;
 	}
 	// Setting Channel Pan Position
-	for (UINT ich=0; ich<m_nChannels; ich++)
+	for (CHANNELINDEX ich = 0; ich < m_nChannels; ich++)
 	{
 		ChnSettings[ich].nPan = ((pmh->panpos[ich] & 0x0F) << 4) + 8;
 		ChnSettings[ich].nVolume = 64;
 	}
 	// Reading pattern order
-	Order.ReadAsByte(lpStream+dwMemPos, pmh->lastorder+1, dwMemLength-dwMemPos);
+	Order.ReadAsByte(lpStream + dwMemPos, pmh->lastorder + 1, dwMemLength - dwMemPos);
 	dwMemPos += 128;
 	// Reading Patterns
+	ROWINDEX nPatRows = CLAMP(pmh->beatspertrack, 1, MAX_PATTERN_ROWS);
 	LPCBYTE pTracks = lpStream + dwMemPos;
 	dwMemPos += 192 * pmh->numtracks;
 	LPWORD pSeq = (LPWORD)(lpStream + dwMemPos);
-	for (UINT pat=0; pat<=pmh->lastpattern; pat++)
+	for (PATTERNINDEX pat = 0; pat <= pmh->lastpattern; pat++)
 	{
-		if(Patterns.Insert(pat, 64)) break;
+		if(Patterns.Insert(pat, nPatRows)) break;
 		for (UINT n=0; n<32; n++) if ((pSeq[n]) && (pSeq[n] <= pmh->numtracks) && (n < m_nChannels))
 		{
 			LPCBYTE p = pTracks + 192 * (pSeq[n]-1);
 			MODCOMMAND *m = Patterns[pat] + n;
-			for (UINT i=0; i<64; i++, m+=m_nChannels, p+=3)
+			for (UINT i = 0; i < nPatRows; i++, m += m_nChannels, p += 3)
 			{
 				if (p[0] & 0xFC) m->note = (p[0] >> 2) + 37;
 				m->instr = ((p[0] & 0x03) << 4) | (p[1] >> 4);
-				UINT cmd = p[1] & 0x0F;
-				UINT param = p[2];
+				uint8 cmd = p[1] & 0x0F;
+				uint8 param = p[2];
 				if (cmd == 0x0A)
 				{
 					if (param & 0xF0) param &= 0xF0; else param &= 0x0F;
@@ -133,7 +135,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 		}
 		pSeq += 32;
 	}
-	dwMemPos += 64*(pmh->lastpattern+1);
+	dwMemPos += 64 * (pmh->lastpattern + 1);
 	if ((pmh->commentsize) && (dwMemPos + pmh->commentsize < dwMemLength))
 	{
 		UINT n = pmh->commentsize;
@@ -146,7 +148,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 			{
 				if (!m_lpszSongComments[i])
 				{
-					m_lpszSongComments[i] = ((i+1) % 40) ? 0x20 : 0x0D;
+					m_lpszSongComments[i] = ((i + 1) % 40) ? 0x20 : 0x0D;
 				}
 			}
 		}

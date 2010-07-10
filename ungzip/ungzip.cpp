@@ -30,8 +30,8 @@ CGzipArchive::~CGzipArchive()
 }
 
 
-bool CGzipArchive::IsArchive()
-//----------------------------
+bool CGzipArchive::IsArchive() const
+//----------------------------------
 {
 	if(m_lpStream == nullptr || m_dwStreamLen <= (sizeof(GZheader) + sizeof(GZtrailer)))
 		return false;

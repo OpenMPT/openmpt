@@ -26,22 +26,21 @@ typedef CTuningBase CTuning;
 // Sample Struct
 struct MODSAMPLE
 {
-	UINT nLength,nLoopStart,nLoopEnd;
-		//nLength <-> Number of 'frames'?
-	UINT nSustainStart, nSustainEnd;
-	LPSTR pSample;
-	UINT nC5Speed;
-	WORD nPan;
-	WORD nVolume;
-	WORD nGlobalVol;
-	WORD uFlags;
-	signed char RelativeTone;
-	signed char nFineTune;
-	BYTE nVibType;
-	BYTE nVibSweep;
-	BYTE nVibDepth;
-	BYTE nVibRate;
-	CHAR name[32];
+	UINT nLength, nLoopStart, nLoopEnd;	// In samples, not bytes
+	UINT nSustainStart, nSustainEnd;	// Dito
+	LPSTR pSample;						// Pointer to sample data
+	UINT nC5Speed;						// Frequency of middle c, in Hz (for IT/S3M/MPTM)
+	WORD nPan;							// Default sample panning (if pan flag is set)
+	WORD nVolume;						// Default volume
+	WORD nGlobalVol;					// Global volume (sample volume is multiplied by this)
+	WORD uFlags;						// Sample flags
+	signed char RelativeTone;			// Relative note to middle c (for MOD/XM)
+	signed char nFineTune;				// Finetune period (for MOD/XM)
+	BYTE nVibType;						// Auto vibrato type
+	BYTE nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
+	BYTE nVibDepth;						// Auto vibrato depth
+	BYTE nVibRate;						// Auto vibrato rate (speed)
+	//CHAR name[32];					// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, would this slow down the mixer (cache misses)?
 	CHAR filename[MAX_SAMPLEFILENAME];
 
 	// Return the size of one (elementary) sample in bytes.
@@ -90,53 +89,53 @@ struct INSTRUMENTENVELOPE
 // Instrument Struct
 struct MODINSTRUMENT
 {
-	UINT nFadeOut;
-	DWORD dwFlags;
-	UINT nGlobalVol;
-	UINT nPan;
+	UINT nFadeOut;				// Instrument fadeout speed
+	DWORD dwFlags;				// Instrument flags
+	UINT nGlobalVol;			// Global volume (all sample volumes are multiplied with this)
+	UINT nPan;					// Default pan (overrides sample panning), if the appropriate flag is set
 
-	INSTRUMENTENVELOPE VolEnv;
-	INSTRUMENTENVELOPE PanEnv;
-	INSTRUMENTENVELOPE PitchEnv;
+	INSTRUMENTENVELOPE VolEnv;		// Volume envelope data
+	INSTRUMENTENVELOPE PanEnv;		// Panning envelope data
+	INSTRUMENTENVELOPE PitchEnv;	// Pitch / filter envelope data
 
 	BYTE NoteMap[128];	// Note mapping, f.e. C-5 => D-5
 	WORD Keyboard[128];	// Sample mapping, f.e. C-5 => Sample 1
 
-	BYTE nNNA;
-	BYTE nDCT;
-	BYTE nDNA;
-	BYTE nPanSwing;
-	BYTE nVolSwing;
-	BYTE nIFC;
-	BYTE nIFR;
+	BYTE nNNA;			// New note action
+	BYTE nDCT;			// Duplicate check type	(i.e. which condition will trigger the duplicate note action)
+	BYTE nDNA;			// Duplicate note action
+	BYTE nPanSwing;		// Random panning factor
+	BYTE nVolSwing;		// Random volume factor
+	BYTE nIFC;			// Default filter cutoff
+	BYTE nIFR;			// Default filter resonance
 
-	WORD wMidiBank;
-	BYTE nMidiProgram;
-	BYTE nMidiChannel;
-	BYTE nMidiDrumKey;
-	signed char nPPS; //Pitch to Pan Separator?
-	unsigned char nPPC; //Pitch Centre?
+	WORD wMidiBank;		// MIDI bank
+	BYTE nMidiProgram;	// MIDI program
+	BYTE nMidiChannel;	// MIDI channel
+	BYTE nMidiDrumKey;	// Drum set note mapping (currently only used by the .MID loader)
+	signed char nPPS;	//Pitch/Pan separation (i.e. how wide the panning spreads)
+	unsigned char nPPC;	//Pitch/Pan centre
 
 	CHAR name[32];		// Note: not guaranteed to be null-terminated.
 	CHAR filename[32];
 
-	PLUGINDEX nMixPlug;							//rewbs.instroVSTi
+	PLUGINDEX nMixPlug;				// Plugin assigned to this instrument
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
-	USHORT nVolRamp;
+	USHORT nVolRamp;				// Default sample ramping
 // -! NEW_FEATURE#0027
-	UINT nResampling;
-	BYTE nCutSwing;
-	BYTE nResSwing;
-	BYTE nFilterMode;
-	WORD wPitchToTempoLock;
-	BYTE nPluginVelocityHandling;
-	BYTE nPluginVolumeHandling;
+	UINT nResampling;				// Resampling mode
+	BYTE nCutSwing;					// Random cutoff factor
+	BYTE nResSwing;					// Random resonance factor
+	BYTE nFilterMode;				// Default filter mode
+	WORD wPitchToTempoLock;			// BPM at which the samples assigned to this instrument loop correctly
+	BYTE nPluginVelocityHandling;	// How to deal with plugin velocity
+	BYTE nPluginVolumeHandling;		// How to deal with plugin volume
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // WHEN adding new members here, ALSO update Sndfile.cpp (instructions near the top of this file)!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	CTuning* pTuning;
+	CTuning* pTuning;				// sample tuning assigned to this instrument
 	static CTuning* s_DefaultTuning;
 
 	void SetTuning(CTuning* pT)
@@ -575,7 +574,7 @@ public:	// for Editing
 		 m_nGlobalVolumeDestination, m_nSamplePreAmp, m_nVSTiVolume;
 	long m_lHighResRampingGlobalVolume;
 	UINT m_nFreqFactor, m_nTempoFactor, m_nOldGlbVolSlide;
-	LONG m_nMinPeriod, m_nMaxPeriod;
+	LONG m_nMinPeriod, m_nMaxPeriod;	// min period = highest possible frequency, max period = lowest possible frequency
 	LONG m_nRepeatCount;	// -1 means repeat infinitely.
 	DWORD m_nGlobalFadeSamples, m_nGlobalFadeMaxSamples;
 	UINT m_nMaxOrderPosition, m_nPatternNames;
@@ -592,7 +591,7 @@ public:	// for Editing
 	MODMIDICFG m_MidiCfg;								// Midi macro config table
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 	SNDMIXSONGEQ m_SongEQ;								// Default song EQ preset
-	CHAR CompressionTable[16];
+	CHAR CompressionTable[16];							// ADPCM compression LUT
 	bool m_bChannelMuteTogglePending[MAX_BASECHANNELS];
 
 	CSoundFilePlayConfig* m_pConfig;
@@ -620,11 +619,6 @@ public:
 	inline bool TypeIsMOD_S3M() const {return (m_nType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) != 0;}
 	CModDoc* GetpModDoc() {return m_pModDoc;}
 
-
-	//Return the number of channels in the pattern. In 1.17.02.45
-	//it returned the number of channels with volume != 0
-	CHANNELINDEX GetNumChannels() const {return static_cast<CHANNELINDEX>(m_nChannels);}
-
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
 	PATTERNINDEX GetNumPatterns() const;
@@ -636,6 +630,7 @@ public:
 	UINT GetSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;
+	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
 
 	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr);
 	const CModSpecifications& GetModSpecifications() const {return *m_pModSpecs;}

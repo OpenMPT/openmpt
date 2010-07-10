@@ -347,7 +347,6 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_MOD);
 		break;
 	case MOD_TYPE_MED:
-	case MOD_TYPE_OKT:
 	case MOD_TYPE_AMS:
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_XM);
 		if ((m_SndFile.m_nDefaultTempo == 125) && (m_SndFile.m_nDefaultSpeed == 6) && (!m_SndFile.m_nInstruments))
@@ -358,9 +357,6 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 					m_SndFile.m_nType = MOD_TYPE_XM;
 		}
 		break;
-	case MOD_TYPE_MT2:
-		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
-		break;
 	case MOD_TYPE_FAR:
 	case MOD_TYPE_PTM:
 	case MOD_TYPE_STM:
@@ -370,6 +366,8 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		break;
 	case MOD_TYPE_PSM:
 	case MOD_TYPE_ULT:
+	case MOD_TYPE_OKT:
+	case MOD_TYPE_MT2:
 	default:
 		m_SndFile.ChangeModTypeTo(MOD_TYPE_IT);
 	}
