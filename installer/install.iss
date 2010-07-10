@@ -4,7 +4,12 @@
 ; http://sagagames.de/
 
 ; ISPP is needed for automated version retrieval.
-; To download and install ISPP, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
+; Furthermore, the ISTool IDE with its downloader extension is required for "unmo3-free" packages which don't contain unmo3.dll, but download it from a server.
+; To download and install ISPP and ISTool, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
+
+; Use this for sourceforge.net packages (ISTool required):
+;#define DOWNLOAD_MO3
+
 #define GetAppVersion StringChange(GetFileProductVersion("..\mptrack\bin\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
 
@@ -33,15 +38,18 @@ DisableWelcomePage=yes
 
 [Tasks]
 ; icons and install mode
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "portable"; Description: "Portable mode (use program folder for storing settings, no registry changes)"; GroupDescription: "Options:"; Flags: unchecked
-Name: "vst_scan"; Description: "Scan for previously installed VST plugins"; GroupDescription: "Options:"; Flags: unchecked
+Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
+Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
+#ifdef DOWNLOAD_MO3
+Name: downloadmo3; Description: Download unmo3 (library needed for reading MO3 files, recommended); GroupDescription: Options:
+#endif
+Name: portable; Description: Portable mode (use program folder for storing settings, no registry changes); GroupDescription: Options:; Flags: unchecked
+Name: vst_scan; Description: Scan for previously installed VST plugins; GroupDescription: Options:; Flags: unchecked
 ; file associations - put this below all other [tasks]!
 #include "filetypes.iss"
 
 [Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: english; MessagesFile: compiler:Default.isl
 
 [Files]
 ; note: packageTemplate\ contains files specific for the "install package".
@@ -49,68 +57,73 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 ; preserve file type order for best solid compression results (first binary, then text)
 ; home folder
-Source: "..\mptrack\bin\mptrack.exe";                DestDir: "{app}"; Flags: ignoreversion
-Source: "..\mptrack\bin\OpenMPT_SoundTouch_i16.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\mptrack\bin\unmo3.dll";                  DestDir: "{app}"; Flags: ignoreversion
+Source: ..\mptrack\bin\mptrack.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\mptrack\bin\OpenMPT_SoundTouch_i16.dll; DestDir: {app}; Flags: ignoreversion
+#ifndef DOWNLOAD_MO3
+Source: ..\mptrack\bin\unmo3.dll; DestDir: {app}; Flags: ignoreversion
+#endif
 
-Source: "..\packageTemplate\ExampleSongs\*.*";       DestDir: "{app}\ExampleSongs\"; Flags: ignoreversion
+Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension
 
-Source: "packageTemplate\readme.txt";                DestDir: "{app}"; Flags: ignoreversion
-Source: "..\packageTemplate\history.txt";            DestDir: "{app}"; Flags: ignoreversion
+Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
+Source: ..\packageTemplate\history.txt; DestDir: {app}; Flags: ignoreversion
 
 ; release notes
-Source: "..\packageTemplate\ReleaseNotesImages\general\*.*";  DestDir: "{app}\ReleaseNotesImages\general\"; Flags: ignoreversion
-Source: "..\packageTemplate\ReleaseNotesImages\1.18\*.*";     DestDir: "{app}\ReleaseNotesImages\1.18\"; Flags: ignoreversion
-Source: "..\packageTemplate\OMPT_1.18_ReleaseNotes.html";     DestDir: "{app}"; Flags: ignoreversion
+Source: ..\packageTemplate\ReleaseNotesImages\general\*.*; DestDir: {app}\ReleaseNotesImages\general\; Flags: ignoreversion sortfilesbyextension
+Source: ..\packageTemplate\ReleaseNotesImages\1.18\*.*; DestDir: {app}\ReleaseNotesImages\1.18\; Flags: ignoreversion sortfilesbyextension
+Source: ..\packageTemplate\OMPT_1.18_ReleaseNotes.html; DestDir: {app}; Flags: ignoreversion
 
 ; soundtouch license stuff
-Source: "..\packageTemplate\SoundTouch\*.*";     DestDir: "{app}\SoundTouch"; Flags: ignoreversion
+Source: ..\packageTemplate\SoundTouch\*.*; DestDir: {app}\SoundTouch; Flags: ignoreversion sortfilesbyextension
 ; keymaps
-Source: "..\packageTemplate\extraKeymaps\*.*";   DestDir: "{app}\extraKeymaps"; Flags: ignoreversion
+Source: ..\packageTemplate\extraKeymaps\*.*; DestDir: {app}\extraKeymaps; Flags: ignoreversion sortfilesbyextension
 
 ; kind of auto-backup - handy!
-Source: "{userappdata}\OpenMPT\mptrack.ini"; DestDir: "{userappdata}\OpenMPT"; DestName: "mptrack.ini.old"; Flags: external skipifsourcedoesntexist; Tasks: not portable
-Source: "{userappdata}\OpenMPT\plugin.cache"; DestDir: "{userappdata}\OpenMPT"; DestName: "plugin.cache.old"; Flags: external skipifsourcedoesntexist; Tasks: not portable
+Source: {userappdata}\OpenMPT\mptrack.ini; DestDir: {userappdata}\OpenMPT; DestName: mptrack.ini.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
+Source: {userappdata}\OpenMPT\plugin.cache; DestDir: {userappdata}\OpenMPT; DestName: plugin.cache.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
 
 [Dirs]
 ; option dirs for non-portable mode
-Name: "{userappdata}\OpenMPT"; Tasks: not portable
-Name: "{userappdata}\OpenMPT\tunings"; Tasks: not portable
+Name: {userappdata}\OpenMPT; Tasks: not portable
+Name: {userappdata}\OpenMPT\tunings; Tasks: not portable
 ; dirst for portable mode
-Name: "{app}\tunings"; Tasks: portable
+Name: {app}\tunings; Tasks: portable
 
 [Icons]
 ; start menu
-Name: "{group}\{cm:LaunchProgram,OpenMPT}";           Filename: "{app}\mptrack.exe"
-Name: "{group}\{cm:UninstallProgram,OpenMPT}";        Filename: "{uninstallexe}"
-Name: "{group}\ModPlug Central";                      Filename: "{app}\ModPlug Central.url"
-Name: "{group}\Configuration files";                  Filename: "{userappdata}\OpenMPT\"; Tasks: not portable
+Name: {group}\{cm:LaunchProgram,OpenMPT}; Filename: {app}\mptrack.exe
+Name: {group}\{cm:UninstallProgram,OpenMPT}; Filename: {uninstallexe}
+Name: {group}\ModPlug Central; Filename: {app}\ModPlug Central.url
+Name: {group}\Configuration files; Filename: {userappdata}\OpenMPT\; Tasks: not portable
 
 ; app's directory (for ease of use)
-Name: "{app}\Configuration files";                    Filename: "{userappdata}\OpenMPT\"; Tasks: not portable
+Name: {app}\Configuration files; Filename: {userappdata}\OpenMPT\; Tasks: not portable
 
 ; desktop, quick launch
-Name: "{userdesktop}\OpenMPT";                        Filename: "{app}\mptrack.exe"; Tasks: desktopicon
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT"; Filename: "{app}\mptrack.exe"; Tasks: quicklaunchicon
+Name: {userdesktop}\OpenMPT; Filename: {app}\mptrack.exe; Tasks: desktopicon
+Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT; Filename: {app}\mptrack.exe; Tasks: quicklaunchicon
 
 [INI]
 ; enable portable mode
-Filename: "{app}\mptrack.ini"; Section: "Paths"; Key: "UseAppDataDirectory"; String: "0"; Flags: createkeyifdoesntexist; Tasks: portable
+Filename: {app}\mptrack.ini; Section: Paths; Key: UseAppDataDirectory; String: 0; Flags: createkeyifdoesntexist; Tasks: portable
 ; internet shortcut
-Filename: "{app}\ModPlug Central.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://openmpt.com/forum/"; Flags: createkeyifdoesntexist;
+Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String: http://openmpt.com/forum/; Flags: createkeyifdoesntexist
 
 [Run]
 ; duh
-Filename: "{app}\mptrack.exe"; Parameters: """{app}\ExampleSongs\xaimus - digital sentience.it"""; Description: "{cm:LaunchProgram,OpenMPT}"; Flags: nowait postinstall skipifsilent
+Filename: {app}\mptrack.exe; Parameters: """{app}\ExampleSongs\xaimus - digital sentience.it"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
-Type: files; Name: "{app}\ModPlug Central.url";
+Type: files; Name: {app}\ModPlug Central.url
 ; normal installation
-Type: dirifempty; Name: "{userappdata}\OpenMPT\tunings"; Tasks: not portable
-Type: dirifempty; Name: "{userappdata}\OpenMPT"; Tasks: not portable
+Type: dirifempty; Name: {userappdata}\OpenMPT\tunings; Tasks: not portable
+Type: dirifempty; Name: {userappdata}\OpenMPT; Tasks: not portable
 ; portable installation
-Type: dirifempty; Name: "{app}\tunings"; Tasks: portable;
+Type: dirifempty; Name: {app}\tunings; Tasks: portable
+#ifdef DOWNLOAD_MO3
+Type: files; Name: {app}\unmo3.dll; Tasks: downloadmo3
+#endif
 
 #include "vst_scan.iss"
 
@@ -170,6 +183,22 @@ begin
     case CurStep of
     ssPostInstall:
         begin
+
+#ifdef DOWNLOAD_MO3
+			// Verify checksum of downloaded file, and if it is OK, copy it to the app directory.
+            if(IsTaskSelected('downloadmo3') And FileExists(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'))) then
+            begin
+				if(GetSHA1OfFile(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp')) <> '2e17f7bb6d19ce326851333b918070c5357cacd1') then
+				begin
+					MsgBox('Warning: unmo3.dll has been downloaded, but its checksum is wrong! This means that either the downloaded file is corrupted or that a newer version of unmo3.dll is available. The file has thus not been installed. Please obtain unmo3.dll from http://openmpt.com/ and verify its checksum.', mbCriticalError, MB_OK)
+				end else
+				begin
+					FileCopy(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'), ExpandConstant('{app}\unmo3.dll'), true);
+				end;
+				DeleteFile(ExpandConstant('{tmp}\openmpt-unmo3.dll.tmp'));
+			end;
+#endif
+
             // Copy old config files from app's directory, if possible and necessary.
             CopyConfigsToAppDataDir();
 
@@ -250,3 +279,12 @@ begin
         end;
     end;
 end;
+#ifdef DOWNLOAD_MO3
+// Function generated by ISTool.
+function NextButtonClick(CurPage: Integer): Boolean;
+begin
+	Result := istool_download(CurPage);
+end;
+[_ISToolDownload]
+Source: http://openmpt.com/download/unmo3.dll; DestDir: {tmp}; DestName: openmpt-unmo3.dll.tmp; Tasks: downloadmo3
+#endif
