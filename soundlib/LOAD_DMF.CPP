@@ -86,8 +86,8 @@ extern void Log(LPCSTR s, ...);
 #endif
 
 
-bool CSoundFile::ReadDMF(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	const DMFHEADER *pfh = (DMFHEADER *)lpStream;
 	DMFINFO *psi;

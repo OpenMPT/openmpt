@@ -474,8 +474,8 @@ static void MedConvert(MODCOMMAND *p, const MMD0SONGHEADER *pmsh)
 }
 
 
-bool CSoundFile::ReadMed(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadMed(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	const MEDMODULEHEADER *pmmh;
 	const MMD0SONGHEADER *pmsh;

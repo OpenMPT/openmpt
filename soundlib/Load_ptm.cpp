@@ -62,8 +62,8 @@ typedef struct PTMSAMPLE
 #pragma pack()
 
 
-bool CSoundFile::ReadPTM(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	if(lpStream == nullptr || dwMemLength < sizeof(PTMFILEHEADER))
 		return false;

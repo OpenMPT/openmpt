@@ -59,8 +59,8 @@ typedef struct tagSTMHEADER
 
 
 
-bool CSoundFile::ReadSTM(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	STMHEADER *phdr = (STMHEADER *)lpStream;
 	DWORD dwMemPos = 0;

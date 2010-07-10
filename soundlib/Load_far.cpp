@@ -58,8 +58,8 @@ typedef struct FARSAMPLE
 #pragma pack()
 
 
-bool CSoundFile::ReadFAR(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	if(dwMemLength < sizeof(FARHEADER1))
 		return false;
