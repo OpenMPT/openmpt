@@ -1125,6 +1125,9 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		else
 			m_SpinFadeOut.SetRange(0, 8192);
 
+		// Panning ranges
+		m_SpinPanning.SetRange(0, (m_pModDoc->GetModType() & MOD_TYPE_IT) ? 64 : 256);
+
 		m_NoteMap.EnableWindow(bITandXM);
 		m_CbnResampling.EnableWindow(bITandXM);
 		
