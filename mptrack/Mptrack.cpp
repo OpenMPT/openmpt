@@ -1857,7 +1857,7 @@ http://sourceforge.net/projects/modplug/");
 		"coda for sample drawing code|"
 		"http://coda.s3m.us/|"
 		"Storlek for all the IT compatibility hints and testcases|"
-		"as well as the IMF and ULT loaders|"
+		"as well as the IMF, OKT and ULT loaders|"
 		"http://schismtracker.org/|"
 		"kode54 for the PSM and J2B loaders|"
 		"http://kode54.foobar2000.org/|"
