@@ -287,7 +287,7 @@ void ITEnvToMPT(const ITENVELOPE *itEnv, INSTRUMENTENVELOPE *mptEnv, const BYTE 
 
 //BOOL CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers)
 long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) //rewbs.modularInstData
-//--------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 {	
 	// Envelope point count. Limited to 25 in IT format.
 	const int iEnvMax = (m_nType & MOD_TYPE_MPT) ? MAX_ENVPOINTS : 25;
@@ -457,7 +457,7 @@ long CSoundFile::ITInstrToMPT(const void *p, MODINSTRUMENT *pIns, UINT trkvers) 
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------------
+//-----------------------------------------------------------------------
 {
 	UINT i,n,nsmp;
 	DWORD id,len,size;

@@ -107,7 +107,7 @@ static MODCOMMAND::COMMAND dbm_efftrans[23] =
 
 
 void ConvertDBMEffect(uint8 *command, uint8 *param)
-//----------------------------------
+//-------------------------------------------------
 {
 	if(*command < ARRAYELEMCOUNT(dbm_efftrans))
 		*command = dbm_efftrans[*command];
@@ -176,8 +176,8 @@ void ConvertDBMEffect(uint8 *command, uint8 *param)
 }
 
 
-bool CSoundFile::ReadDBM(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadDBM(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	const DBMFILEHEADER *pfh = (DBMFILEHEADER *)lpStream;
 	DWORD dwMemPos;

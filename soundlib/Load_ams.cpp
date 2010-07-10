@@ -45,8 +45,8 @@ typedef struct AMSSAMPLEHEADER
 
 
 
-bool CSoundFile::ReadAMS(LPCBYTE lpStream, DWORD dwMemLength)
-//-----------------------------------------------------------
+bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
+//-----------------------------------------------------------------------
 {
 	BYTE pkinf[MAX_SAMPLES];
 	AMSFILEHEADER *pfh = (AMSFILEHEADER *)lpStream;

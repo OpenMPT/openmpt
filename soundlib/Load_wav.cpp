@@ -17,8 +17,8 @@
 /////////////////////////////////////////////////////////////
 // WAV file support
 
-bool CSoundFile::ReadWav(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadWav(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	DWORD dwMemPos = 0;
 	WAVEFILEHEADER *phdr = (WAVEFILEHEADER *)lpStream;

@@ -171,8 +171,8 @@ void AMF_Unpack(MODCOMMAND *pPat, const BYTE *pTrack, UINT nRows, UINT nChannels
 
 
 
-bool CSoundFile::ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength)
-//-----------------------------------------------------------
+bool CSoundFile::ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength)
+//-----------------------------------------------------------------------
 {
 	const AMFFILEHEADER *pfh = (AMFFILEHEADER *)lpStream;
 	DWORD dwMemPos;

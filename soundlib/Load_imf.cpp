@@ -239,11 +239,11 @@ static void import_imf_effect(MODCOMMAND *note)
 	}
 }
 
-static void load_imf_envelope(INSTRUMENTENVELOPE *env, IMFINSTRUMENT *imfins, int e)
-//----------------------------------------------------------------------------------
+static void load_imf_envelope(INSTRUMENTENVELOPE *env, const IMFINSTRUMENT *imfins, const int e)
+//----------------------------------------------------------------------------------------------
 {
 	UINT min = 0; // minimum tick value for next node
-	int shift = (e == IMF_ENV_VOL) ? 0 : 2;
+	const int shift = (e == IMF_ENV_VOL) ? 0 : 2;
 
 	env->dwFlags = ((imfins->env[e].flags & 1) ? ENV_ENABLED : 0) | ((imfins->env[e].flags & 2) ? ENV_SUSTAIN : 0) | ((imfins->env[e].flags & 4) ? ENV_LOOP : 0);
 	env->nNodes = CLAMP(imfins->env[e].points, 2, 25);

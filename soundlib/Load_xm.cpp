@@ -235,8 +235,8 @@ DWORD ReadXMPatterns(const BYTE *lpStream, DWORD dwMemLength, DWORD dwMemPos, XM
 	return dwMemPos;
 }
 
-bool CSoundFile::ReadXM(const BYTE *lpStream, DWORD dwMemLength)
-//--------------------------------------------------------------
+bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
+//--------------------------------------------------------------------
 {
 	XMFILEHEADER xmheader;
 	XMSAMPLEHEADER xmsh;

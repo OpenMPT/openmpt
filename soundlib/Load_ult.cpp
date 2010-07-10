@@ -303,8 +303,8 @@ struct PostFixUltCommands
 };
 
 
-bool CSoundFile::ReadUlt(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	DWORD dwMemPos = 0;
 	uint8 ult_version;

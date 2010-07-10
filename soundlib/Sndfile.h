@@ -660,7 +660,7 @@ public:
 
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
-	BOOL IsPaused() const {	return (m_dwSongFlags & SONG_PAUSED) ? TRUE : FALSE; }
+	bool IsPaused() const {	return (m_dwSongFlags & SONG_PAUSED) ? true : false; }
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 	void CheckCPUUsage(UINT nCPU);
 	BOOL SetPatternName(PATTERNINDEX nPat, LPCSTR lpszName);
@@ -672,38 +672,38 @@ public:
 	void ResetChannelState(CHANNELINDEX chn, BYTE resetStyle);
 
 	// Module Loaders
-	bool ReadXM(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadS3M(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadMod(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadMed(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadMTM(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadSTM(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadIT(LPCBYTE lpStream, const DWORD dwMemLength);
-	//bool ReadMPT(LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
-	bool Read669(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadUlt(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadWav(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadDSM(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadFAR(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadAMS(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadMDL(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadOKT(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadDMF(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadPTM(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadDBM(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadAMF(LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadMT2(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadPSM(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadPSM16(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadUMX(LPCBYTE lpStream, DWORD dwMemLength);
-	bool ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadXM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadS3M(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMod(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMed(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMTM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadSTM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength);
+	//bool ReadMPT(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadITProject(const LPCBYTE lpStream, const DWORD dwMemLength); // -> CODE#0023 -> DESC="IT project files (.itp)" -! NEW_FEATURE#0023
+	bool Read669(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadUlt(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadWav(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadFAR(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadAMS2(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMDL(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadOKT(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadDMF(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadPTM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadDBM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadAMF(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMT2(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadUMX(const LPCBYTE lpStream, const DWORD dwMemLength);
+	bool ReadMO3(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength);
 	bool ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength);
-	bool ReadMID(LPCBYTE lpStream, DWORD dwMemLength);
+	bool ReadMID(const LPCBYTE lpStream, DWORD dwMemLength);
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE

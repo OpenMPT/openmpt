@@ -226,8 +226,8 @@ void UnpackMDLTrack(MODCOMMAND *pat, UINT nChannels, UINT nRows, UINT nTrack, co
 
 
 
-bool CSoundFile::ReadMDL(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	DWORD dwMemPos, dwPos, blocklen, dwTrackPos;
 	const MDLSONGHEADER *pmsh = (const MDLSONGHEADER *)lpStream;

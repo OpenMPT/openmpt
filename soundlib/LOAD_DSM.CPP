@@ -85,8 +85,8 @@ typedef struct DSMPATT
 #pragma pack()
 
 
-bool CSoundFile::ReadDSM(LPCBYTE lpStream, DWORD dwMemLength)
-//-----------------------------------------------------------
+bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
+//-----------------------------------------------------------------------
 {
 	DSMFILEHEADER *pfh = (DSMFILEHEADER *)lpStream;
 	DSMSONG *psong;

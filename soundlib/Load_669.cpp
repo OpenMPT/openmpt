@@ -39,8 +39,8 @@ typedef struct tagSAMPLE669
 } SAMPLE669;
 
 
-bool CSoundFile::Read669(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	BOOL b669Ext;
 	const FILEHEADER669 *pfh = (const FILEHEADER669 *)lpStream;

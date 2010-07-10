@@ -217,8 +217,8 @@ void CSoundFile::S3MSaveConvert(UINT *pcmd, UINT *pprm, bool bIT, bool bCompatib
 }
 
 
-bool CSoundFile::ReadS3M(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
 {
 	if ((!lpStream) || (dwMemLength <= sizeof(S3MFILEHEADER) + 64)) return false;
 
