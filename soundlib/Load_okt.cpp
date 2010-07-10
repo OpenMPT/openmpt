@@ -1,12 +1,10 @@
 /*
- * This source code is public domain.
+ * Purpose: Load OKT (Oktalyzer) modules
+ * Authors: Storlek (Original author - http://schismtracker.org/)
+ *			Johannes Schultz (OpenMPT Port, tweaks)
  *
- * Copied to OpenMPT from libmodplug.
- *
- * Authors: Olivier Lapicque <olivierl@jps.net>,
- *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
- *
-*/
+ * Thanks to Storlek for allowing me to use this code!
+ */
 
 //////////////////////////////////////////////
 // Oktalyzer (OKT) module loader            //
@@ -14,189 +12,432 @@
 #include "stdafx.h"
 #include "sndfile.h"
 
-#pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
+// IFF chunk names
+#define OKTCHUNKID_CMOD 0x434D4F44
+#define OKTCHUNKID_SAMP 0x53414D50
+#define OKTCHUNKID_SPEE 0x53504545
+#define OKTCHUNKID_SLEN 0x534C454E
+#define OKTCHUNKID_PLEN 0x504C454E
+#define OKTCHUNKID_PATT 0x50415454
+#define OKTCHUNKID_PBOD 0x50424F44
+#define OKTCHUNKID_SBOD 0x53424F44
 
-typedef struct OKTFILEHEADER
+#pragma pack(1)
+
+struct OKT_IFFCHUNK
 {
-	DWORD okta;		// "OKTA"
-	DWORD song;		// "SONG"
-	DWORD cmod;		// "CMOD"
-	DWORD fixed8;
-	BYTE chnsetup[8];
-	DWORD samp;		// "SAMP"
-	DWORD samplen;
-} OKTFILEHEADER;
+	uint32 signature;	// IFF chunk name
+	uint32 chunksize;	// chunk size without header
+};
 
-
-typedef struct OKTSAMPLE
+struct OKT_SAMPLE
 {
-	CHAR name[20];
-	DWORD length;
-	WORD loopstart;
-	WORD looplen;
-	BYTE pad1;
-	BYTE volume;
-	BYTE pad2;
-	BYTE pad3;
-} OKTSAMPLE;
+	char   name[20];
+	uint32 length;		// length in bytes
+	uint16 loopstart;	// *2 for real value
+	uint16 looplen;		// dito
+	uint16 volume;		// default volume
+	uint16 type;		// 7-/8-bit sample
+};
+
+STATIC_ASSERT(sizeof(OKT_SAMPLE) == 32);
+
+#pragma pack()
 
 
-bool CSoundFile::ReadOKT(const BYTE *lpStream, DWORD dwMemLength)
-//---------------------------------------------------------------
+// just for keeping track of offsets and stuff...
+struct OKT_SAMPLEINFO
 {
-	OKTFILEHEADER *pfh = (OKTFILEHEADER *)lpStream;
-	DWORD dwMemPos = sizeof(OKTFILEHEADER);
-	UINT nsamples = 0, npatterns = 0, norders = 0;
+	DWORD start;	// start position of the IFF block
+	DWORD length;	// length of the IFF block
+};
 
-	if ((!lpStream) || (dwMemLength < 1024)) return false;
-	if ((pfh->okta != 0x41544B4F) || (pfh->song != 0x474E4F53)
-	 || (pfh->cmod != 0x444F4D43) || (pfh->chnsetup[0]) || (pfh->chnsetup[2])
-	 || (pfh->chnsetup[4]) || (pfh->chnsetup[6]) || (pfh->fixed8 != 0x08000000)
-	 || (pfh->samp != 0x504D4153)) return false;
-	m_nType = MOD_TYPE_OKT;
-	m_nChannels = 4 + pfh->chnsetup[1] + pfh->chnsetup[3] + pfh->chnsetup[5] + pfh->chnsetup[7];
-	if (m_nChannels > MAX_CHANNELS) m_nChannels = MAX_CHANNELS;
-	nsamples = BigEndian(pfh->samplen) >> 5;
-	m_nSamples = nsamples;
-	if (m_nSamples >= MAX_SAMPLES) m_nSamples = MAX_SAMPLES-1;
-	// Reading samples
-	for (UINT smp=1; smp <= nsamples; smp++)
+
+// Parse the sample header block
+void Read_OKT_Samples(const BYTE *lpStream, const DWORD dwMemLength, vector<bool> &sample7bit, CSoundFile *pSndFile)
+//------------------------------------------------------------------------------------------------------------------
+{
+	pSndFile->m_nSamples = min((SAMPLEINDEX)(dwMemLength / 32), MAX_SAMPLES - 1);	// typically 36
+	sample7bit.resize(pSndFile->GetNumSamples());
+
+	for(SAMPLEINDEX nSmp = 1; nSmp <= pSndFile->GetNumSamples(); nSmp++)
 	{
-		if (dwMemPos >= dwMemLength) return true;
-		if (smp < MAX_SAMPLES)
+		MODSAMPLE *pSmp = &pSndFile->Samples[nSmp];
+		OKT_SAMPLE oktsmp;
+		memcpy(&oktsmp, lpStream + (nSmp - 1) * 32, sizeof(OKT_SAMPLE));
+
+		oktsmp.length = min(BigEndian(oktsmp.length), MAX_SAMPLE_LENGTH);
+		oktsmp.loopstart = BigEndianW(oktsmp.loopstart) * 2;
+		oktsmp.looplen = BigEndianW(oktsmp.looplen) * 2;
+		oktsmp.volume = BigEndianW(oktsmp.volume);
+		oktsmp.type = BigEndianW(oktsmp.type);
+
+		MemsetZero(*pSmp);
+		strncpy(pSndFile->m_szNames[nSmp], oktsmp.name, 20);
+		SpaceToNullStringFixed(pSndFile->m_szNames[nSmp], 20);
+
+		pSmp->nC5Speed = 8287;
+		pSmp->nGlobalVol = 64;
+		pSmp->nVolume = min(oktsmp.volume, 64) * 4;
+		pSmp->nLength = oktsmp.length & ~1;	// round down
+		// parse loops
+		if (oktsmp.looplen > 2 && ((UINT)oktsmp.loopstart) + ((UINT)oktsmp.looplen) <= pSmp->nLength)
 		{
-			OKTSAMPLE *psmp = (OKTSAMPLE *)(lpStream + dwMemPos);
-			MODSAMPLE *pSmp = &Samples[smp];
-
-			memcpy(m_szNames[smp], psmp->name, 20);
-			SpaceToNullStringFixed(m_szNames[smp], 20);
-			pSmp->uFlags = 0;
-			pSmp->nLength = BigEndian(psmp->length) & ~1;
-			pSmp->nLoopStart = BigEndianW(psmp->loopstart);
-			pSmp->nLoopEnd = pSmp->nLoopStart + BigEndianW(psmp->looplen);
-			if (pSmp->nLoopStart + 2 < pSmp->nLoopEnd) pSmp->uFlags |= CHN_LOOP;
-			pSmp->nGlobalVol = 64;
-			pSmp->nVolume = psmp->volume << 2;
-			pSmp->nC5Speed = 8363;
+			pSmp->nSustainStart = oktsmp.loopstart;
+			pSmp->nSustainEnd = oktsmp.loopstart + oktsmp.looplen;
+			if (pSmp->nSustainStart < pSmp->nLength && pSmp->nSustainEnd <= pSmp->nLength)
+				pSmp->uFlags |= CHN_SUSTAINLOOP;
+			else
+				pSmp->nSustainStart = pSmp->nSustainEnd = 0;
 		}
-		dwMemPos += sizeof(OKTSAMPLE);
+		sample7bit[nSmp - 1] = (oktsmp.type == 0 || oktsmp.type == 2) ? true : false;
 	}
-	// SPEE
-	if (dwMemPos >= dwMemLength) return true;
-	if (*((DWORD *)(lpStream + dwMemPos)) == 0x45455053)
-	{
-		m_nDefaultSpeed = lpStream[dwMemPos+9];
-		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
-	}
-	// SLEN
-	if (dwMemPos >= dwMemLength) return true;
-	if (*((DWORD *)(lpStream + dwMemPos)) == 0x4E454C53)
-	{
-		npatterns = lpStream[dwMemPos+9];
-		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
-	}
-	// PLEN
-	if (dwMemPos >= dwMemLength) return true;
-	if (*((DWORD *)(lpStream + dwMemPos)) == 0x4E454C50)
-	{
-		norders = lpStream[dwMemPos+9];
-		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
-	}
-	// PATT
-	if (dwMemPos >= dwMemLength) return true;
-	if (*((DWORD *)(lpStream + dwMemPos)) == 0x54544150)
-	{
-		UINT orderlen = norders;
-		if (orderlen >= MAX_ORDERS) orderlen = MAX_ORDERS-1;
-		Order.resize(orderlen);
-		for (UINT i=0; i<orderlen; i++) Order[i] = lpStream[dwMemPos+10+i];
-		for (UINT j=orderlen; j>1; j--) { if (Order[j-1]) break; Order[j-1] = 0xFF; }
-		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
-	}
-	// PBOD
-	UINT npat = 0;
-	while ((dwMemPos < dwMemLength-10) && (*((DWORD *)(lpStream + dwMemPos)) == 0x444F4250))
-	{
-		DWORD dwPos = dwMemPos + 10;
-		UINT rows = lpStream[dwMemPos+9];
-		if (!rows) rows = 64;
-		if (npat < MAX_PATTERNS)
-		{
-			if(Patterns.Insert(npat, rows))
-				return true;
-			MODCOMMAND *m = Patterns[npat];
-			UINT imax = m_nChannels*rows;
-			for (UINT i=0; i<imax; i++, m++, dwPos+=4)
-			{
-				if (dwPos+4 > dwMemLength) break;
-				const BYTE *p = lpStream+dwPos;
-				UINT note = p[0];
-				if (note)
-				{
-					m->note = note + 48;
-					m->instr = p[1] + 1;
-				}
-				UINT command = p[2];
-				UINT param = p[3];
-				m->param = param;
-				switch(command)
-				{
-				// 0: no effect
-				case 0:
-					break;
-				// 1: Portamento Up
-				case 1:
-				case 17:
-				case 30:
-					if (param) m->command = CMD_PORTAMENTOUP;
-					break;
-				// 2: Portamento Down
-				case 2:
-				case 13:
-				case 21:
-					if (param) m->command = CMD_PORTAMENTODOWN;
-					break;
-				// 10: Arpeggio
-				case 10:
-				case 11:
-				case 12:
-					m->command = CMD_ARPEGGIO;
-					break;
-				// 15: Filter
-				case 15:
-					m->command = CMD_MODCMDEX;
-					m->param = param & 0x0F;
-					break;
-				// 25: Position Jump
-				case 25:
-					m->command = CMD_POSITIONJUMP;
-					break;
-				// 28: Set Speed
-				case 28:
-					m->command = CMD_SPEED;
-					break;
-				// 31: Volume Control
-				case 31:
-					if (param <= 0x40) m->command = CMD_VOLUME; else
-					if (param <= 0x50) { m->command = CMD_VOLUMESLIDE; m->param &= 0x0F; if (!m->param) m->param = 0x0F; } else
-					if (param <= 0x60) { m->command = CMD_VOLUMESLIDE; m->param = (param & 0x0F) << 4; if (!m->param) m->param = 0xF0; } else
-					if (param <= 0x70) { m->command = CMD_MODCMDEX; m->param = 0xB0 | (param & 0x0F); if (!(param & 0x0F)) m->param = 0xBF; } else
-					if (param <= 0x80) { m->command = CMD_MODCMDEX; m->param = 0xA0 | (param & 0x0F); if (!(param & 0x0F)) m->param = 0xAF; }
-					break;
-				}
-			}
-		}
-		npat++;
-		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
-	}
-	// SBOD
-	UINT nsmp = 1;
-	while ((dwMemPos < dwMemLength - 10) && (*((DWORD *)(lpStream + dwMemPos)) == 0x444F4253))
-	{
-		if (nsmp < MAX_SAMPLES) ReadSample(&Samples[nsmp], RS_PCM8S, (LPSTR)(lpStream+dwMemPos+8), dwMemLength-dwMemPos-8);
-		dwMemPos += BigEndian(*((DWORD *)(lpStream + dwMemPos + 4))) + 8;
-		nsmp++;
-	}
-	return true;
 }
 
+
+// Parse a pattern block
+void Read_OKT_Pattern(const BYTE *lpStream, const DWORD dwMemLength, const PATTERNINDEX nPat, CSoundFile *pSndFile)
+//-----------------------------------------------------------------------------------------------------------------
+{
+	#define ASSERT_CAN_READ(x) \
+	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return;
+
+	DWORD dwMemPos = 0;
+
+	ASSERT_CAN_READ(2);
+	ROWINDEX nRows = CLAMP(BigEndianW(*(uint16 *)(lpStream + dwMemPos)), 1, MAX_PATTERN_ROWS);
+	dwMemPos += 2;
+
+	if(pSndFile->Patterns.Insert(nPat, nRows))
+		return;
+
+	const CHANNELINDEX nChns = pSndFile->GetNumChannels();
+	MODCOMMAND *mrow = pSndFile->Patterns[nPat], *m;
+
+	for(ROWINDEX nRow = 0; nRow < nRows; nRow++, mrow += nChns)
+	{
+		m = mrow;
+		for(CHANNELINDEX nChn = 0; nChn < nChns; nChn++, m++)
+		{
+			ASSERT_CAN_READ(4);
+			m->note = lpStream[dwMemPos++];
+			m->instr = lpStream[dwMemPos++];
+			int8 fxcmd = lpStream[dwMemPos++];
+			m->param = lpStream[dwMemPos++];
+
+			if(m->note > 0 && m->note <= 36)
+			{
+				m->note += 48;
+				m->instr++;
+			} else
+			{
+				m->instr = 0;
+			}
+
+			switch(fxcmd)
+			{
+			case 0:	// Nothing
+				m->param = 0;
+				break;
+
+			case 1: // 1 Portamento Down (Period)
+				m->command = CMD_PORTAMENTODOWN;
+				m->param &= 0x0F;
+				break;
+			case 2: // 2 Portamento Up (Period)
+				m->command = CMD_PORTAMENTOUP;
+				m->param &= 0x0F;
+				break;
+
+#if 0
+			/* these aren't like Jxx: "down" means to *subtract* the offset from the note.
+			For now I'm going to leave these unimplemented. */
+			case 10: // A Arpeggio 1 (down, orig, up)
+			case 11: // B Arpeggio 2 (orig, up, orig, down)
+				if (note->param)
+					note->command = CMD_ARPEGGIO;
+                    break;
+#endif
+			// This one is close enough to "standard" arpeggio -- I think!
+			case 12: // C Arpeggio 3 (up, up, orig)
+				if (m->param)
+					m->command = CMD_ARPEGGIO;
+				break;
+
+			case 13: // D Slide Down (Notes)
+				if (m->param)
+				{
+					m->command = CMD_NOTESLIDEDOWN;
+					m->param = 0x10 | min(0x0F, m->param);
+				}
+				break;
+			case 30: // U Slide Up (Notes)
+				if (m->param)
+				{
+					m->command = CMD_NOTESLIDEUP;
+					m->param = 0x10 | min(0x0F, m->param);
+				}
+				break;
+			/* We don't have fine note slide, but this is supposed to happen once
+			per row. Sliding every 5 (non-note) ticks kind of works (at least at
+			speed 6), but implementing fine slides would of course be better. */
+			case 21: // L Slide Down Once (Notes)
+				if (m->param)
+				{
+					m->command = CMD_NOTESLIDEDOWN;
+					m->param = 0x50 | min(0x0F, m->param);
+				}
+				break;
+			case 17: // H Slide Up Once (Notes)
+				if (m->param)
+				{
+					m->command = CMD_NOTESLIDEUP;
+					m->param = 0x50 | min(0x0F, m->param);
+				}
+				break;
+
+			case 15: // F Set Filter <>00:ON
+				// Not implemented, but let's import it anyway...
+				m->command = CMD_MODCMDEX;
+				m->param = !!m->param;
+				break;
+
+			case 25: // P Pos Jump
+				m->command = CMD_POSITIONJUMP;
+				break;
+
+			case 27: // R Release sample (apparently not listed in the help!)
+				m->Clear();
+				m->note = NOTE_KEYOFF;
+				break;
+
+			case 28: // S Speed
+				m->command = CMD_SPEED; // or tempo?
+				break;
+
+			case 31: // V Volume
+				m->command = CMD_VOLUMESLIDE;
+				switch (m->param >> 4)
+				{
+				case 4:
+					if (m->param != 0x40)
+					{
+						m->param &= 0x0F; // D0x
+						break;
+					}
+					// 0x40 is set volume -- fall through
+				case 0: case 1: case 2: case 3:
+					m->volcmd = VOLCMD_VOLUME;
+					m->vol = m->param;
+					m->command = CMD_NONE;
+					m->param = 0;
+					break;
+				case 5:
+					m->param = (m->param & 0x0F) << 4; // Dx0
+					break;
+				case 6:
+					m->param = 0xF0 | min(m->param & 0x0F, 0x0E); // DFx
+					break;
+				case 7:
+					m->param = (min(m->param & 0x0F, 0x0E) << 4) | 0x0F; // DxF
+					break;
+				default:
+					// Junk.
+					m->command = m->param = 0;
+					break;
+				}
+				break;
+
+#if 0
+			case 24: // O Old Volume (???)
+				m->command = CMD_VOLUMESLIDE;
+				m->param = 0;
+				break;
+#endif
+
+			default:
+				m->command = m->param = 0;
+				//ASSERT(false);
+				break;
+			}
+		}
+	}
+
+	#undef ASSERT_CAN_READ
+}
+
+
+bool CSoundFile::ReadOKT(const BYTE *lpStream, const DWORD dwMemLength)
+//---------------------------------------------------------------------
+{
+	#define ASSERT_CAN_READ(x) \
+	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
+
+	DWORD dwMemPos = 0;
+
+	ASSERT_CAN_READ(8);
+	if (memcmp(lpStream, "OKTASONG", 8) != 0)
+		return false;
+	dwMemPos += 8;
+
+	OKT_IFFCHUNK iffHead;
+	// prepare some arrays to store offsets etc.
+	vector<DWORD> patternOffsets;
+	vector<bool> sample7bit;	// 7-/8-bit sample
+	vector<OKT_SAMPLEINFO> samplePos;
+	PATTERNINDEX nPatterns = 0;
+	ORDERINDEX nOrders = 0;
+
+	MemsetZero(m_szNames);
+	m_nChannels = 0;
+	m_nSamples = 0;
+
+	// Go through IFF chunks...
+	while(dwMemPos < dwMemLength)
+	{
+		ASSERT_CAN_READ(sizeof(OKT_IFFCHUNK));
+		memcpy(&iffHead, lpStream + dwMemPos, sizeof(OKT_IFFCHUNK));
+		iffHead.signature = BigEndian(iffHead.signature);
+		iffHead.chunksize = BigEndian(iffHead.chunksize);
+		dwMemPos += sizeof(OKT_IFFCHUNK);
+
+		switch(iffHead.signature)
+		{
+		case OKTCHUNKID_CMOD:
+			// read that weird channel setup table
+			if(m_nChannels > 0)
+				break;
+			ASSERT_CAN_READ(8);
+			for(CHANNELINDEX nChn = 0; nChn < 4; nChn++)
+			{
+				if(lpStream[dwMemPos + nChn * 2] || lpStream[dwMemPos + nChn * 2 + 1])
+				{
+					ChnSettings[m_nChannels++].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
+				}
+				ChnSettings[m_nChannels++].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
+			}
+			break;
+
+		case OKTCHUNKID_SAMP:
+			// convert sample headers
+			if(m_nSamples > 0)
+				break;
+			ASSERT_CAN_READ(iffHead.chunksize);
+			Read_OKT_Samples(lpStream + dwMemPos, iffHead.chunksize, sample7bit, this);
+			break;
+
+		case OKTCHUNKID_SPEE:
+			// read default speed
+			{
+				ASSERT_CAN_READ(2);
+				uint16 defspeed = BigEndianW(*((uint16 *)(lpStream + dwMemPos)));
+				m_nDefaultSpeed = CLAMP(defspeed, 1, 255);
+			}
+			break;
+
+		case OKTCHUNKID_SLEN:
+			// number of patterns, we don't need this.
+			break;
+
+		case OKTCHUNKID_PLEN:
+			// read number of valid orders
+			ASSERT_CAN_READ(2);
+			nOrders = BigEndianW(*((uint16 *)(lpStream + dwMemPos)));
+			break;
+
+		case OKTCHUNKID_PATT:
+			// read the orderlist
+			ASSERT_CAN_READ(iffHead.chunksize);
+			Order.ReadAsByte(lpStream + dwMemPos, min(iffHead.chunksize, MAX_ORDERS), iffHead.chunksize);
+			break;
+
+		case OKTCHUNKID_PBOD:
+			// don't read patterns for now, as the number of channels might be unknown at this point.
+			if(nPatterns < MAX_PATTERNS)
+			{
+				if(iffHead.chunksize > 0)
+					patternOffsets.push_back(dwMemPos);
+				nPatterns++;
+			}
+			break;
+
+		case OKTCHUNKID_SBOD:
+			// sample data - same as with patterns, as we need to know the sample format / length
+			if(samplePos.size() < MAX_SAMPLES - 1)
+			{
+				ASSERT_CAN_READ(iffHead.chunksize);
+				if(iffHead.chunksize)
+				{
+					OKT_SAMPLEINFO sinfo;
+					sinfo.start = dwMemPos;
+					sinfo.length = iffHead.chunksize;
+					samplePos.push_back(sinfo);
+				}
+			}
+			break;
+		}
+
+		dwMemPos += iffHead.chunksize;
+	}
+
+	// If there wasn't even a CMOD chunk, we can't really load this.
+	if(m_nChannels == 0)
+		return false;
+
+	m_nDefaultTempo = 125;
+	m_nDefaultGlobalVolume = 256;
+	m_nSamplePreAmp = m_nVSTiVolume = 48;
+	m_nType = MOD_TYPE_OKT;
+	m_nMinPeriod = 0x71 << 2;
+	m_nMaxPeriod = 0x358 << 2;
+
+	// Fix orderlist
+	for(ORDERINDEX nOrd = nOrders; nOrd < Order.GetLengthTailTrimmed(); nOrd++)
+	{
+		Order[nOrd] = Order.GetInvalidPatIndex();
+	}
+
+	// Read patterns
+	for(PATTERNINDEX nPat = 0; nPat < nPatterns; nPat++)
+	{
+		if(patternOffsets[nPat] > 0)
+			Read_OKT_Pattern(lpStream + patternOffsets[nPat], dwMemLength - patternOffsets[nPat], nPat, this);
+		else
+			Patterns.Insert(nPat, 64);	// invent empty pattern
+	}
+
+	// Read samples
+	size_t nFileSmp = 0;
+	for(SAMPLEINDEX nSmp = 1; nSmp < m_nSamples; nSmp++)
+	{
+		if(nFileSmp >= samplePos.size())
+			break;
+
+		MODSAMPLE *pSmp = &Samples[nSmp];
+		if(pSmp->nLength == 0)
+			continue;
+
+		// weird stuff?
+		if(pSmp->nLength != samplePos[nFileSmp].length)
+		{
+			pSmp->nLength = min(pSmp->nLength, samplePos[nFileSmp].length);
+		}
+
+		ReadSample(pSmp, RS_PCM8S, (LPCSTR)(lpStream + samplePos[nFileSmp].start), dwMemLength - samplePos[nFileSmp].start);
+
+		// 7-bit to 8-bit hack
+		if(sample7bit[nSmp - 1] && pSmp->pSample)
+		{
+			for(size_t i = 0; i < pSmp->nLength; i++)
+				pSmp->pSample[i] = CLAMP(pSmp->pSample[i] * 2, -128, 127);
+		}
+
+		nFileSmp++;
+	}
+
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
+
+	return true;
+
+	#undef ASSERT_CAN_READ
+}
