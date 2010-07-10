@@ -428,7 +428,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	}
 
 	// Reading samples
-	DWORD dwErrCheck = 0;
+	bool bSamplesPresent = false;
 	for (UINT ismp = 1; ismp <= m_nSamples; ismp++) if (Samples[ismp].nLength)
 	{
 		LPSTR p = (LPSTR)(lpStream + dwMemPos);
@@ -446,13 +446,13 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 		if (dwSize)
 		{
 			dwMemPos += dwSize;
-			dwErrCheck++;
+			bSamplesPresent = true;
 		}
 	}
 #ifdef MODPLUG_TRACKER
 	return true;
 #else
-	return (dwErrCheck) ? true : false;
+	return bSamplesPresent;
 #endif
 }
 

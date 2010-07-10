@@ -949,7 +949,7 @@ public:
 
 public:
 	int getVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns);
-    void resetEnvelopes(MODCHANNEL* pChn, int envToReset = ENV_RESET_ALL);
+    void resetEnvelopes(MODCHANNEL* pChn, enmResetEnv envToReset = ENV_RESET_ALL);
 	void SetDefaultInstrumentValues(MODINSTRUMENT *pIns);
 private:
 	UINT  __cdecl GetChannelPlugin(UINT nChan, bool respectMutes);

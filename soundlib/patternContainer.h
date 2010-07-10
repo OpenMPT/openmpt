@@ -35,7 +35,7 @@ public:
 	void ClearPatterns() {m_Patterns.assign(m_Patterns.size(), MODPATTERN(*this));}
 	
 	//Insert (default)pattern to given position. If pattern already exists at that position,
-	//ignoring request.
+	//ignoring request. Returns true on failure, false otherwise.
 	bool Insert(const PATTERNINDEX index, const ROWINDEX rows);
 	
 	//Insert pattern to position with the lowest index, and return that index, PATTERNINDEX_INVALID

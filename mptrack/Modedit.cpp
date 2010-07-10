@@ -822,7 +822,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX nSample, INSTRUMENTINDEX n
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 			strcpy(m_SndFile.m_szInstrumentPath[newins - 1], m_SndFile.m_szInstrumentPath[nDuplicate - 1]);
-			m_SndFile.instrumentModified[newins-1] = FALSE;
+			m_SndFile.instrumentModified[newins - 1] = false;
 // -! NEW_FEATURE#0023
 		} else
 		{

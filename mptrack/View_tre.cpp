@@ -968,8 +968,8 @@ VOID CModTree::UpdateView(UINT nDocNdx, DWORD lHint)
 				if((pSndFile->m_dwSongFlags & SONG_ITPROJECT) != 0)
 				{
 					// path info for ITP instruments
-					BOOL pathOk = pSndFile->m_szInstrumentPath[nIns-1][0] != '\0';
-					BOOL instOk = pSndFile->instrumentModified[nIns-1] == FALSE;
+					bool pathOk = pSndFile->m_szInstrumentPath[nIns-1][0] != '\0';
+					bool instOk = pSndFile->instrumentModified[nIns-1] == false;
 					wsprintf(s, pathOk ? (instOk ? "%3d: %s" : "%3d: * %s") : "%3d: ? %s", nIns, (LPCTSTR)pSndFile->GetInstrumentName(nIns));
 				} else
 				{
@@ -3058,7 +3058,7 @@ void CModTree::OnSaveItem()
 			if(xi  || (!xi  && !iti && pSndFile->m_nType == MOD_TYPE_XM))
 				pSndFile->SaveXIInstrument((INSTRUMENTINDEX)modItemID, pSndFile->m_szInstrumentPath[modItemID - 1]);
 
-			pSndFile->instrumentModified[modItemID - 1] = FALSE;
+			pSndFile->instrumentModified[modItemID - 1] = false;
 		}
 
 		if(pModDoc) pModDoc->UpdateAllViews(NULL, HINT_MODTYPE);

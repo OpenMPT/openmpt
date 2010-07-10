@@ -17,7 +17,7 @@
 #define SMPGEN_MAXLENGTH MAX_SAMPLE_LENGTH
 // sample frequency
 #define SMPGEN_MINFREQ 1
-#define SMPGEN_MAXFREQ 96000
+#define SMPGEN_MAXFREQ 96000 // MAX_SAMPLE_RATE
 // 16-bit sample quality - when changing this, also change CSampleGenerator::sampling_type and 16-bit flags in SampleGenerator.cpp!
 #define SMPGEN_MIXBYTES 2
 
@@ -53,13 +53,13 @@ protected:
 	// Rendering callback functions
 	// functions
 	static mu::value_type ClipCallback(mu::value_type val, mu::value_type min, mu::value_type max) { return CLAMP(val, min, max); };
-	static mu::value_type PWMCallback(mu::value_type pos, mu::value_type duty, mu::value_type width) { if((int)width == 0) return 0; else return (((int)pos % (int)width) < ((duty / 100) * width)) ? 1 : -1; };
-	static mu::value_type RndCallback(mu::value_type v) { return v*std::rand()/(mu::value_type)(RAND_MAX+1.0); }
+	static mu::value_type PWMCallback(mu::value_type pos, mu::value_type duty, mu::value_type width) { if(width == 0) return 0; else return (fmod(pos, width) < ((duty / 100) * width)) ? 1 : -1; };
+	static mu::value_type RndCallback(mu::value_type v) { return v*std::rand()/(mu::value_type)(RAND_MAX+1.0); };
 	static mu::value_type SampleDataCallback(mu::value_type v);
 	static mu::value_type TriangleCallback(mu::value_type pos, mu::value_type width) { if((int)width == 0) return 0; else return abs(((int)pos % (int)(width)) - width / 2) / (width / 4) - 1; };
 
 	// binary operators
-	static mu::value_type ModuloCallback(mu::value_type x, mu::value_type y) { if((int)y == 0) return 0; else return ((int)x) % ((int)y); };
+	static mu::value_type ModuloCallback(mu::value_type x, mu::value_type y) { if(y == 0) return 0; else return fmod(x , y); };
 
 	void ShowError(mu::Parser::exception_type *e);
 
@@ -136,10 +136,10 @@ protected:
 
 public:
 
-	int GetFrequency() { return sample_frequency; };
-	int GetLength() { return sample_length; };
-	smpgen_clip_methods GetClipping() { return sample_clipping; }
-	mu::string_type GetExpression() { return expression; };
+	const int GetFrequency() { return sample_frequency; };
+	const int GetLength() { return sample_length; };
+	const smpgen_clip_methods GetClipping() { return sample_clipping; }
+	const mu::string_type GetExpression() { return expression; };
 	bool CanApply() { return apply; };
 	
 	CSmpGenDialog(int freq, int len, smpgen_clip_methods clipping, mu::string_type expr):CDialog(IDD_SAMPLE_GENERATOR, CMainFrame::GetMainFrame())
