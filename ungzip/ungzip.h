@@ -56,7 +56,7 @@ public:
 
 	LPBYTE GetOutputFile() const { return m_pOutputFile; }
 	DWORD GetOutputFileLength() const { return m_dwOutputLen; }
-	bool IsArchive();
+	bool IsArchive() const;
 	bool ExtractFile();
 
 	CGzipArchive(LPBYTE lpStream, DWORD dwMemLength);
