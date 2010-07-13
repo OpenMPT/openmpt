@@ -367,6 +367,9 @@
 				RelativePath="..\soundlib\mod_specifications.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\modcommand.cpp">
+			</File>
+			<File
 				RelativePath=".\Moddoc.cpp">
 			</File>
 			<File
