@@ -507,22 +507,13 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	streamPos += sizeof(DWORD);
 	if(id > uint16_max) return false;
 
-	// allocate comment string
-	if(m_lpszSongComments) delete[] m_lpszSongComments;
-	if (id < dwMemLength && id > 0)
+	// allocate and copy comment string
+	ASSERT_CAN_READ(id);
+	if(id > 0)
 	{
-		m_lpszSongComments = new char[id];
+		ReadMessage(lpStream + streamPos, id - 1, leCR);
 	}
-	else
-		m_lpszSongComments = NULL;
-
-	// m_lpszSongComments
-	if (m_lpszSongComments && id)
-	{
-		ASSERT_CAN_READ(id);
-		memcpy(&m_lpszSongComments[0],lpStream+streamPos,id);
-		streamPos += id;
-	}
+	streamPos += id;
 
 // Song global config
 	ASSERT_CAN_READ(5*4);
@@ -1032,21 +1023,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Reading Song Message
 	if ((pifh->special & 0x01) && (pifh->msglength) && (pifh->msglength <= dwMemLength) && (pifh->msgoffset < dwMemLength - pifh->msglength))
 	{
-		m_lpszSongComments = new char[pifh->msglength+1];
-		if (m_lpszSongComments)
-		{
-			memcpy(m_lpszSongComments, lpStream+pifh->msgoffset, pifh->msglength);
-			m_lpszSongComments[pifh->msglength] = 0;
-			// ChibiTracker uses \n instead of \r.
-			if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0214 && LittleEndian(pifh->reserved) == IT_CHBI)
-			{
-				for(size_t i = 0; i < pifh->msglength; i++)
-				{
-					if(m_lpszSongComments[i] == '\n')
-						m_lpszSongComments[i] = '\r';
-				}
-			}
-		}
+		// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
+		// if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0214 && LittleEndian(pifh->reserved) == IT_CHBI) --> Chibi detected.
+		// But we'll just use autodetection here:
+		ReadMessage(lpStream + pifh->msgoffset, pifh->msglength, leAutodetect);
 	}
 	// Reading orders
 	UINT nordsize = pifh->ordnum;

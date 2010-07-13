@@ -607,12 +607,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		dwMemPos += 8;
 		if ((dwMemPos + len <= dwMemLength) && (len < 16384))
 		{
-			m_lpszSongComments = new char[len+1];
-			if (m_lpszSongComments)
-			{
-				memcpy(m_lpszSongComments, lpStream+dwMemPos, len);
-				m_lpszSongComments[len] = 0;
-			}
+			ReadMessage(lpStream + dwMemPos, len, leCR);
 			dwMemPos += len;
 		}
 		bMadeWithModPlug = true;

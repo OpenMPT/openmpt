@@ -119,21 +119,9 @@ bool CSoundFile::ReadDMF(const BYTE *lpStream, const DWORD dwMemLength)
 			psi = (DMFINFO *)(lpStream+dwMemPos);
 			if (id == 0x47534d43) dwMemPos++;
 			if ((psi->infosize > dwMemLength) || (psi->infosize + dwMemPos + 8 > dwMemLength)) goto dmfexit;
-			if ((psi->infosize >= 8) && (!m_lpszSongComments))
+			if (psi->infosize >= 8)
 			{
-			    m_lpszSongComments = new char[psi->infosize];
-				if (m_lpszSongComments)
-				{
-					for (UINT i=0; i<psi->infosize-1; i++)
-					{
-						CHAR c = lpStream[dwMemPos+8+i];
-						if ((i % 40) == 39)
-							m_lpszSongComments[i] = 0x0d;
-						else
-							m_lpszSongComments[i] = (c < ' ') ? ' ' : c;
-					}
-					m_lpszSongComments[psi->infosize-1] = 0;
-				}
+				ReadFixedLineLengthMessage(lpStream + dwMemPos + 8, psi->infosize - 1, 40, 0);
 			}
 			dwMemPos += psi->infosize + 8 - 1;
 			break;

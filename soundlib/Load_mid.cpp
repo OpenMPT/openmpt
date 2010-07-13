@@ -732,12 +732,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 							} else
 							if ((!m_lpszSongComments) && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F))
 							{
-								m_lpszSongComments = new char [len+1];
-								if (m_lpszSongComments)
-								{
-									memcpy(m_lpszSongComments, ptrk->ptracks, len);
-									m_lpszSongComments[len] = 0;
-								}
+								ReadMessage(ptrk->ptracks, len, leAutodetect);
 							}
 							break;
 						// FF.02 [text]: Song Copyright
@@ -745,12 +740,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 							if (!len) break;
 							if ((!m_lpszSongComments) && (ptrk->ptracks[0]) && (ptrk->ptracks[0] < 0x7F) && (len > 7))
 							{
-								m_lpszSongComments = new char [len+1];
-								if (m_lpszSongComments)
-								{
-									memcpy(m_lpszSongComments, ptrk->ptracks, len);
-									m_lpszSongComments[len] = 0;
-								}
+								ReadMessage(ptrk->ptracks, len, leAutodetect);
 							}
 							break;
 						// FF.03: Sequence Name

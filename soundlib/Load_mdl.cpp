@@ -300,15 +300,9 @@ bool CSoundFile::ReadMDL(const BYTE *lpStream, const DWORD dwMemLength)
 		#ifdef MDL_LOG
 			Log("song message: %d bytes\n", blocklen);
 		#endif
-			if (blocklen)
+			if(blocklen)
 			{
-				if (m_lpszSongComments) delete[] m_lpszSongComments;
-				m_lpszSongComments = new char[blocklen];
-				if (m_lpszSongComments)
-				{
-					memcpy(m_lpszSongComments, lpStream+dwMemPos, blocklen);
-					m_lpszSongComments[blocklen-1] = 0;
-				}
+				ReadMessage(lpStream + dwMemPos, blocklen - 1, leCR);
 			}
 			break;
 		// PA: Pattern Data

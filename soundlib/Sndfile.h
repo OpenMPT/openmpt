@@ -443,6 +443,16 @@ typedef VOID (__cdecl * LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); 
 #include "PlaybackEventer.h"
 
 
+// Line ending types (for reading song messages from module files)
+enum enmLineEndings
+{
+	leCR,			// Carriage Return (0x0D, \r)
+	leLF,			// Line Feed (0x0A \n)
+	leCRLF,			// Carriage Return, Line Feed (0x0D0A, \r\n)
+	leMixed,		// It is not defined whether Carriage Return or Line Feed is the actual line ending. Both are accepted.
+	leAutodetect,	// Detect suitable line ending
+};
+
 
 class CSoundFile;
 
@@ -627,8 +637,6 @@ public:
 	UINT GetCurrentPos() const;
 	UINT GetCurrentPattern() const { return m_nPattern; }
 	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(m_nCurrentPattern); }
-	UINT GetSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
-	UINT GetRawSongComments(LPSTR s, UINT cbsize, UINT linesize=32);
 	UINT GetMaxPosition() const;
 	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
 
@@ -851,8 +859,8 @@ private:
 	void GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide);
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
 	BOOL IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const;
-public:
 
+public:
 	// Write pattern effect functions
 	bool TryWriteEffect(PATTERNINDEX nPat, ROWINDEX nRow, BYTE nEffect, BYTE nParam, bool bIsVolumeEffect, CHANNELINDEX nChn = CHANNELINDEX_INVALID, bool bAllowMultipleEffects = true, bool bAllowNextRow = false, bool bRetry = true);
 	
@@ -937,10 +945,39 @@ public:
 	static LPSTR AllocateSample(UINT nbytes);
 	static void FreeSample(LPVOID p);
 	static UINT Normalize24BitBuffer(LPBYTE pbuffer, UINT cbsizebytes, DWORD lmax24, DWORD dwByteInc);
-	UINT GetBestPlugin(UINT nChn, UINT priority, bool respectMutes);
 //private:
 	static MODCOMMAND *AllocatePattern(UINT rows, UINT nchns);
 	static void FreePattern(LPVOID pat);
+
+	// Song message helper functions
+public:
+	// Allocate memory for song message.
+	// [in]  length: text length in characters, without possible trailing null terminator.
+	// [out] returns true on success.
+	bool AllocateMessage(size_t length);
+
+	// Free previously allocated song message memory.
+	void FreeMessage();
+
+protected:
+	// Read song message from a mapped file.
+	// [in]  data: pointer to the data in memory that is going to be read
+	// [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
+	// [in]  lineEnding: line ending formatting of the text in memory.
+	// [out] returns true on success.
+	bool ReadMessage(const BYTE *data, const size_t length, enmLineEndings lineEnding);
+
+	// Read comments with fixed line length from a mapped file.
+	// [in]  data: pointer to the data in memory that is going to be read
+	// [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
+	// [in]  lineLength: The fixed length of a line.
+	// [in]  lineEndingLength: The padding space between two fikxed lines. (there could for example be a null char after every line)
+	// [out] returns true on success.
+	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength);
+
+	// Currently unused (and the code doesn't look very nice :)
+	UINT GetSongMessage(LPSTR s, UINT cbsize, UINT linesize=32);
+	UINT GetRawSongMessage(LPSTR s, UINT cbsize, UINT linesize=32);
 
 public:
 	int getVolEnvValueFromPosition(int position, MODINSTRUMENT* pIns);
@@ -954,6 +991,9 @@ private:
 	void HandlePatternTransitionEvents();
 	void BuildDefaultInstrument();
 	long GetSampleOffset();
+
+public:
+	UINT GetBestPlugin(UINT nChn, UINT priority, bool respectMutes);
 
 // A couple of functions for handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 public:

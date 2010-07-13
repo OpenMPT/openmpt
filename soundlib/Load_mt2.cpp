@@ -252,16 +252,11 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 		{
 		// MSG
 		case 0x0047534D:
-			if ((dwLen > 3) && (!m_lpszSongComments))
+			if (dwLen > 3)
 			{
 				DWORD nTxtLen = dwLen;
 				if (nTxtLen > 32000) nTxtLen = 32000;
-				m_lpszSongComments = new char[nTxtLen];
-				if (m_lpszSongComments)
-				{
-					memcpy(m_lpszSongComments, lpStream+dwMemPos+1, nTxtLen-1);
-					m_lpszSongComments[nTxtLen-1] = 0;
-				}
+				ReadMessage(lpStream + dwMemPos + 1, nTxtLen - 1, leCRLF);
 			}
 			break;
 		// SUM -> author name (or "Unregistered")

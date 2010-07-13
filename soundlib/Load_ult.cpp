@@ -332,18 +332,7 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 	uint8 nNumLines = (uint8)lpStream[dwMemPos++];
 	ASSERT_CAN_READ((DWORD)(nNumLines * 32));
 	// read "nNumLines" lines, each containing 32 characters.
-	if(m_lpszSongComments != nullptr)
-		delete(m_lpszSongComments);
-	m_lpszSongComments = new char[(nNumLines * 33) + 1];
-	if(m_lpszSongComments)
-	{
-		for(size_t nLine = 0; nLine < nNumLines; nLine++)
-		{
-			memcpy(m_lpszSongComments + nLine * 33, lpStream + dwMemPos + nLine * 32, 32);
-			m_lpszSongComments[nLine * 33 + 32] = 0x0D;
-		}
-		m_lpszSongComments[nNumLines * 33] = 0;
-	}
+	ReadFixedLineLengthMessage(lpStream + dwMemPos, nNumLines * 32, 32, 0);
 	dwMemPos += nNumLines * 32;
 
 	ASSERT_CAN_READ(1);

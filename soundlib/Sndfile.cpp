@@ -859,8 +859,7 @@ BOOL CSoundFile::Destroy()
 	delete[] m_lpszPatternNames;
 	m_lpszPatternNames = NULL;
 
-	delete[] m_lpszSongComments;
-	m_lpszSongComments = NULL;
+	FreeMessage();
 
 	for (i=1; i<MAX_SAMPLES; i++)
 	{
@@ -952,76 +951,6 @@ void CSoundFile::ResetMidiCfg()
 	lstrcpy(&m_MidiCfg.szMidiGlb[MIDIOUT_PROGRAM*32], "Cc p");
 	lstrcpy(&m_MidiCfg.szMidiSFXExt[0], "F0F000z");
 	for (int iz=0; iz<16; iz++) wsprintf(&m_MidiCfg.szMidiZXXExt[iz*32], "F0F001%02X", iz*8);
-}
-
-
-UINT CSoundFile::GetSongComments(LPSTR s, UINT len, UINT linesize)
-//----------------------------------------------------------------
-{
-	LPCSTR p = m_lpszSongComments;
-	if (!p) return 0;
-	UINT i = 2, ln=0;
-	if ((len) && (s)) s[0] = '\x0D';
-	if ((len > 1) && (s)) s[1] = '\x0A';
-	while ((*p)	&& (i+2 < len))
-	{
-		BYTE c = (BYTE)*p++;
-		if ((c == 0x0D) || ((c == ' ') && (ln >= linesize)))
-			{ if (s) { s[i++] = '\x0D'; s[i++] = '\x0A'; } else i+= 2; ln=0; }
-		else
-		if (c >= 0x20) { if (s) s[i++] = c; else i++; ln++; }
-	}
-	if (s) s[i] = 0;
-	return i;
-}
-
-
-UINT CSoundFile::GetRawSongComments(LPSTR s, UINT len, UINT linesize)
-//-------------------------------------------------------------------
-{
-	LPCSTR p = m_lpszSongComments;
-	if (!p) return 0;
-	UINT i = 0, ln=0;
-	while ((*p)	&& (i < len-1))
-	{
-		BYTE c = (BYTE)*p++;
-		if ((c == 0x0D)	|| (c == 0x0A))
-		{
-			if (ln) 
-			{
-				while (ln < linesize) { if (s) s[i] = ' '; i++; ln++; }
-				ln = 0;
-			}
-		} else
-		if ((c == ' ') && (!ln))
-		{
-			UINT k=0;
-			while ((p[k]) && (p[k] >= ' '))	k++;
-			if (k <= linesize)
-			{
-				if (s) s[i] = ' ';
-				i++;
-				ln++;
-			}
-		} else
-		{
-			if (s) s[i] = c;
-			i++;
-			ln++;
-			if (ln == linesize) ln = 0;
-		}
-	}
-	if (ln)
-	{
-		while ((ln < linesize) && (i < len))
-		{
-			if (s) s[i] = ' ';
-			i++;
-			ln++;
-		}
-	}
-	if (s) s[i] = 0;
-	return i;
 }
 
 

@@ -8,7 +8,7 @@
 */
 
 //////////////////////////////////////////////
-// AMS module loader                        //
+// AMS (Extreme's Tracker) module loader    //
 //////////////////////////////////////////////
 #include "stdafx.h"
 #include "sndfile.h"
@@ -53,7 +53,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 	DWORD dwMemPos;
 	UINT tmp, tmp2;
 	
-	if ((!lpStream) || (dwMemLength < 1024)) return false;
+	if ((!lpStream) || (dwMemLength < 126)) return false;
 	if ((pfh->verhi != 0x01) || (strncmp(pfh->szHeader, "Extreme", 7))
 	 || (!pfh->patterns) || (!pfh->orders) || (!pfh->samples) || (pfh->samples > MAX_SAMPLES)
 	 || (pfh->patterns > MAX_PATTERNS) || (pfh->orders > MAX_ORDERS))
@@ -61,12 +61,12 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		return ReadAMS2(lpStream, dwMemLength);
 	}
 	dwMemPos = sizeof(AMSFILEHEADER) + pfh->extra;
-	if (dwMemPos + pfh->samples * sizeof(AMSSAMPLEHEADER) + 256 >= dwMemLength) return false;
+	if (dwMemPos + pfh->samples * sizeof(AMSSAMPLEHEADER) >= dwMemLength) return false;
 	m_nType = MOD_TYPE_AMS;
 	m_nInstruments = 0;
 	m_nChannels = (pfh->chncfg & 0x1F) + 1;
 	m_nSamples = pfh->samples;
-	for (UINT nSmp=1; nSmp<=m_nSamples; nSmp++, dwMemPos += sizeof(AMSSAMPLEHEADER))
+	for (UINT nSmp=1; nSmp <= m_nSamples; nSmp++, dwMemPos += sizeof(AMSSAMPLEHEADER))
 	{
 		AMSSAMPLEHEADER *psh = (AMSSAMPLEHEADER *)(lpStream + dwMemPos);
 		MODSAMPLE *pSmp = &Samples[nSmp];
@@ -83,14 +83,17 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if ((pSmp->nLoopEnd <= pSmp->nLength) && (pSmp->nLoopStart+4 <= pSmp->nLoopEnd)) pSmp->uFlags |= CHN_LOOP;
 		pkinf[nSmp] = psh->infobyte;
 	}
+
 	// Read Song Name
+	if (dwMemPos + 1 >= dwMemLength) return true;
 	tmp = lpStream[dwMemPos++];
 	if (dwMemPos + tmp + 1 >= dwMemLength) return true;
 	tmp2 = (tmp < 32) ? tmp : 31;
-	if (tmp2) memcpy(m_szNames[0], lpStream+dwMemPos, tmp2);
+	if (tmp2) memcpy(m_szNames[0], lpStream + dwMemPos, tmp2);
 	SpaceToNullStringFixed(m_szNames[0], tmp2);
 	m_szNames[0][tmp2] = 0;
 	dwMemPos += tmp;
+
 	// Read sample names
 	for (UINT sNam=1; sNam<=m_nSamples; sNam++)
 	{
@@ -101,6 +104,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		SpaceToNullStringFixed(m_szNames[sNam], tmp2);
 		dwMemPos += tmp;
 	}
+
 	// Read Channel names
 	for (UINT cNam=0; cNam<m_nChannels; cNam++)
 	{
@@ -113,6 +117,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 		dwMemPos += chnnamlen;
 	}
+
 	// Read Pattern Names
 	m_lpszPatternNames = new char[pfh->patterns * 32];
 	if (!m_lpszPatternNames) return true;
@@ -126,24 +131,44 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if (tmp2) memcpy(m_lpszPatternNames+pNam*32, lpStream+dwMemPos, tmp2);
 		dwMemPos += tmp;
 	}
+
 	// Read Song Comments
 	tmp = *((WORD *)(lpStream+dwMemPos));
 	dwMemPos += 2;
 	if (dwMemPos + tmp >= dwMemLength) return true;
-	if (tmp)
+	if (tmp && AllocateMessage(tmp))
 	{
-		m_lpszSongComments = new char[tmp+1];
-		if (!m_lpszSongComments) return true;
-		memset(m_lpszSongComments, 0, tmp+1);
-		memcpy(m_lpszSongComments, lpStream + dwMemPos, tmp);
-		dwMemPos += tmp;
+		// Translate that weird text format...
+		for(size_t i = 0; i < tmp; i++)
+		{
+			switch(lpStream[dwMemPos + i])
+			{
+			case 0x00:
+			case 0x81: m_lpszSongComments[i] = ' '; break;
+			case 0x14: m_lpszSongComments[i] = 'ö'; break;
+			case 0x19: m_lpszSongComments[i] = 'Ö'; break;
+			case 0x04: m_lpszSongComments[i] = 'ä'; break;
+			case 0x0E: m_lpszSongComments[i] = 'Ä'; break;
+			case 0x06: m_lpszSongComments[i] = 'å'; break;
+			case 0x0F: m_lpszSongComments[i] = 'Å'; break;
+			default:
+				if(lpStream[dwMemPos + i] > 0x81)
+					m_lpszSongComments[i] = '\r';
+				else
+					m_lpszSongComments[i] = lpStream[dwMemPos + i];
+				break;
+			}
+		}
 	}
+	dwMemPos += tmp;
+
 	// Read Order List
 	Order.resize(pfh->orders, Order.GetInvalidPatIndex());
 	for (UINT iOrd=0; iOrd < pfh->orders; iOrd++, dwMemPos += 2)
 	{
 		Order[iOrd] = (PATTERNINDEX)*((WORD *)(lpStream + dwMemPos));
 	}
+
 	// Read Patterns
 	for (UINT iPat=0; iPat<pfh->patterns; iPat++)
 	{
@@ -244,6 +269,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 		dwMemPos += len;
 	}
+
 	// Read Samples
 	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Samples[iSmp].nLength)
 	{
@@ -256,7 +282,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 
 /////////////////////////////////////////////////////////////////////
-// AMS 2.2 loader
+// AMS (Velvet Studio) 2.2 loader
 
 #pragma pack(1)
 
@@ -441,12 +467,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		UINT composernamelen = lpStream[dwMemPos];
 		if (composernamelen)
 		{
-			m_lpszSongComments = new char[composernamelen+1];
-			if (m_lpszSongComments)
-			{
-				memcpy(m_lpszSongComments, lpStream+dwMemPos+1, composernamelen);
-				m_lpszSongComments[composernamelen] = 0;
-			}
+			ReadMessage(lpStream + dwMemPos + 1, composernamelen, leCR);
 		}
 		dwMemPos += composernamelen + 1;
 		// channel names
