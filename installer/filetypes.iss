@@ -19,9 +19,9 @@ Name: "associate_common\mptm"; Description: "OpenMPT (MPTM)";
 Name: "associate_common\compressed"; Description: "Above when compressed (MDR, MDZ, S3Z, XMZ, ITZ, MPTMZ)";
 ; less common
 Name: "associate_exotic";     Description: "Associate OpenMPT with less common module files"; GroupDescription: "File associations:";
-Name: "associate_exotic\669"; Description: "Composer 669 (669)";
+Name: "associate_exotic\669"; Description: "Composer 669 / UNIS 669 (669)";
 Name: "associate_exotic\amf"; Description: "ASYLUM Music Format / Advanced Music Format (AMF)";
-Name: "associate_exotic\ams"; Description: "Extreme Tracker (AMS)";
+Name: "associate_exotic\ams"; Description: "Extreme's Tracker / Velvet Studio (AMS)";
 Name: "associate_exotic\dbm"; Description: "DigiBooster (DBM)";
 Name: "associate_exotic\dmf"; Description: "X-Tracker (DMF)";
 Name: "associate_exotic\dsm"; Description: "DSIK (DSM)";
