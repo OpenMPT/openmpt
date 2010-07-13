@@ -92,10 +92,10 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 		Samples[nSmp].nGlobalVol = 64;
 		Samples[nSmp].nPan = 128;
 	}
+
 	// Song Message
-	m_lpszSongComments = new char[109];
-	memcpy(m_lpszSongComments, pfh->songmessage, 108);
-	m_lpszSongComments[108] = 0;
+	ReadFixedLineLengthMessage((BYTE *)(&pfh->songmessage), 108, 36, 0);
+
 	// Reading Orders
 	Order.ReadAsByte(pfh->orders, 128, 128);
 	m_nRestartPos = pfh->restartpos;
@@ -106,6 +106,7 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 		ChnSettings[npan].nPan = (npan & 1) ? 0x30 : 0xD0;
 		ChnSettings[npan].nVolume = 64;
 	}
+
 	// Reading Patterns
 	dwMemPos = 0x1F1 + pfh->samples * 25;
 	for (UINT npat=0; npat<pfh->patterns; npat++)
@@ -179,6 +180,7 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 		}
 		dwMemPos += 0x600;
 	}
+
 	// Reading Samples
 	for (UINT n=1; n<=m_nSamples; n++)
 	{

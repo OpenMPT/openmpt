@@ -272,7 +272,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		for(UINT iRow = 0; iRow < 64; iRow++)
 		{
-			do // zero byte = next row
+			while(true) // zero byte = next row
 			{
 				if(iPatternPos + 1 > dwMemLength) break;
 
@@ -307,7 +307,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					m->command = CMD_NONE;
 					m->volcmd = CMD_NONE;
 
-					do
+					while(true)
 					{
 						if(iPatternPos + 2 > dwMemLength) break;
 						BYTE bEffect = lpStream[iPatternPos++];
@@ -493,25 +493,20 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						}
 
 						if(!(bEffect & 0x20)) break; // no other effect follows
-					} while(1);
+					}
 
 				}
 				
-			} while(1);
+			}
 		}
 
 		iPatternsOffset += iPatternLength;
 	}
 
 	// read song comments	
-	if(iMTLength)
+	if(iMTLength > 0)
 	{
-		m_lpszSongComments = new char[iMTLength + 1];
-		if (m_lpszSongComments)
-		{
-			memset(m_lpszSongComments, 0, iMTLength + 1);
-			memcpy(m_lpszSongComments, lpStream + iMTOffset, iMTLength);
-		}
+		ReadMessage(lpStream + iMTOffset, iMTLength, leAutodetect);
 	}
 	
 	return true;

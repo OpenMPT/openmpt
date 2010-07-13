@@ -346,6 +346,9 @@
 				RelativePath=".\MainFrm.cpp">
 			</File>
 			<File
+				RelativePath="..\soundlib\Message.cpp">
+			</File>
+			<File
 				RelativePath=".\MIDIMappingDialog.cpp">
 			</File>
 			<File
@@ -392,6 +395,9 @@
 			</File>
 			<File
 				RelativePath=".\mpt_midi.cpp">
+			</File>
+			<File
+				RelativePath=".\MPTHacks.cpp">
 			</File>
 			<File
 				RelativePath=".\mptrack.cpp">

@@ -102,11 +102,7 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 	{
 		UINT szLen = pmh1->stlen;
 		if (szLen > dwMemLength - dwMemPos) szLen = dwMemLength - dwMemPos;
-		if ((m_lpszSongComments = new char[szLen + 1]) != NULL)
-		{
-			memcpy(m_lpszSongComments, lpStream+dwMemPos, szLen);
-			m_lpszSongComments[szLen] = 0;
-		}
+		ReadFixedLineLengthMessage(lpStream + dwMemPos, szLen, 132, 0);	// 132 characters per line... wow. :)
 		dwMemPos += pmh1->stlen;
 	}
 	// Reading orders
