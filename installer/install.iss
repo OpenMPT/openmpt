@@ -39,7 +39,7 @@ DisableWelcomePage=yes
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 #ifdef DOWNLOAD_MO3
-Name: downloadmo3; Description: Download unmo3 (library needed for reading MO3 files, recommended); GroupDescription: Options:
+Name: downloadmo3; Description: Download unmo3 (library needed for reading MO3 files, recommended); Check: not IsUNMO3Installed; GroupDescription: Options:
 #endif
 Name: portable; Description: Portable mode (use program folder for storing settings, no registry changes); GroupDescription: Options:; Flags: unchecked
 Name: vst_scan; Description: Scan for previously installed VST plugins; GroupDescription: Options:; Flags: unchecked
