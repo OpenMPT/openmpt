@@ -1363,14 +1363,11 @@ UINT CViewInstrument::OnNcHitTest(CPoint point)
 void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 //------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return;
-	CSoundFile *pSndFile = pModDoc->GetSoundFile();
-	if(pSndFile == nullptr) return;
-	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-	if (pIns == nullptr) return;
+	MODINSTRUMENT *pIns = GetInstrumentPtr();
+	INSTRUMENTENVELOPE *pEnv = GetEnvelopePtr();
+	if (pIns == nullptr || pEnv == nullptr) return;
 
-	BOOL bSplitCursor = FALSE;
+	bool bSplitCursor = false;
 	CHAR s[256];
 
 	if ((m_nBtnMouseOver < ENV_LEFTBAR_BUTTONS) || (m_dwStatus & INSSTATUS_NCLBTNDOWN))
@@ -1381,11 +1378,9 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm) pMainFrm->SetHelpText("");
 	}
-	if (!pModDoc) return;
 	int nTick = ScreenToTick(pt.x);
 	int nVal = ScreenToValue(pt.y);
-	if (nVal < 0) nVal = 0;
-	if (nVal > 64) nVal = 64;
+	nVal = CLAMP(nVal, ENVELOPE_MIN, ENVELOPE_MAX);
 	if (nTick < 0) nTick = 0;
 	if (nTick <= EnvGetReleaseNodeTick() + 1 || EnvGetReleaseNode() == ENV_RELEASE_NODE_UNSET)
 	{
@@ -1406,11 +1401,22 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 
 	if ((m_dwStatus & INSSTATUS_DRAGGING) && (m_nDragItem))
 	{
-		BOOL bChanged = FALSE;
+		bool bChanged = false;
 		if (pt.x >= m_rcClient.right - 2) nTick++;
 		if (IsDragItemEnvPoint())
 		{
+			int nRelTick = pEnv->Ticks[m_nDragItem - 1];
 			bChanged = EnvSetValue(m_nDragItem - 1, nTick, nVal);
+
+			// Ctrl pressed -> move tail of envelope
+			if(m_nDragItem > 1 && CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed())
+			{
+				nRelTick = pEnv->Ticks[m_nDragItem - 1] - nRelTick;
+				for(size_t i = m_nDragItem; i < pEnv->nNodes; i++)
+				{
+					pEnv->Ticks[i] = (WORD)(max(0, (int)pEnv->Ticks[i] + nRelTick));
+				}
+			}
 		} else
 		{
 			int nPoint = ScreenToPoint(pt.x, pt.y);
@@ -1418,19 +1424,19 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			{
 			case ENV_DRAGLOOPSTART:
 				bChanged = EnvSetLoopStart(nPoint);
-				bSplitCursor = TRUE;
+				bSplitCursor = true;
 				break;
 			case ENV_DRAGLOOPEND:
 				bChanged = EnvSetLoopEnd(nPoint);
-				bSplitCursor = TRUE;
+				bSplitCursor = true;
 				break;
 			case ENV_DRAGSUSTAINSTART:
 				bChanged = EnvSetSustainStart(nPoint);
-				bSplitCursor = TRUE;
+				bSplitCursor = true;
 				break;
 			case ENV_DRAGSUSTAINEND:
 				bChanged = EnvSetSustainEnd(nPoint);
-				bSplitCursor = TRUE;
+				bSplitCursor = true;
 				break;
 			}
 		}
@@ -1446,8 +1452,12 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 				UpdateScrollSize();
 				OnScrollBy(CSize((int)m_fZoom + pt.x - m_rcClient.right, 0), TRUE);
 			}
-			pModDoc->SetModified();
-			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+			CModDoc *pModDoc = GetDocument();
+			if(pModDoc)
+			{
+				pModDoc->SetModified();
+				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
+			}
 			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
 		}
 	} else
@@ -1462,14 +1472,14 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			rect.left = rect.right - (int)(m_fZoom * 2);
 			if (rect.PtInRect(pt))
 			{
-				bSplitCursor = TRUE; // ENV_DRAGSUSTAINSTART;
+				bSplitCursor = true; // ENV_DRAGSUSTAINSTART;
 			} else
 			{
 				rect.top = ValueToScreen(EnvGetValue(EnvGetSustainEnd())) - nspace;
 				rect.bottom = rect.top + nspace * 2;
 				rect.left = PointToScreen(EnvGetSustainEnd()) - 1;
 				rect.right = rect.left + (int)(m_fZoom *2);
-				if (rect.PtInRect(pt)) bSplitCursor = TRUE; // ENV_DRAGSUSTAINEND;
+				if (rect.PtInRect(pt)) bSplitCursor = true; // ENV_DRAGSUSTAINEND;
 			}
 		}
 		if (EnvGetLoop())
@@ -1480,12 +1490,12 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			rect.left = rect.right - (int)(m_fZoom * 2);
 			if (rect.PtInRect(pt))
 			{
-				bSplitCursor = TRUE; // ENV_DRAGLOOPSTART;
+				bSplitCursor = true; // ENV_DRAGLOOPSTART;
 			} else
 			{
 				rect.left = PointToScreen(EnvGetLoopEnd()) - 1;
 				rect.right = rect.left + (int)(m_fZoom * 2);
-				if (rect.PtInRect(pt)) bSplitCursor = TRUE; // ENV_DRAGLOOPEND;
+				if (rect.PtInRect(pt)) bSplitCursor = true; // ENV_DRAGLOOPEND;
 			}
 		}
 	}
