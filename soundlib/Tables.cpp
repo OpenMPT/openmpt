@@ -25,7 +25,7 @@
 ///////////////////////////////////////////////////////////////////////
 #ifndef FASTSOUNDLIB
 
-MODFORMATINFO gModFormatInfo[MAX_MODTYPE] =
+MODFORMATINFO gModFormatInfo[] =
 {
 	{ MOD_TYPE_MOD,	"ProTracker", ".mod",			0 },
 	{ MOD_TYPE_S3M,	"ScreamTracker III", ".s3m",	0 },
@@ -42,15 +42,17 @@ MODFORMATINFO gModFormatInfo[MAX_MODTYPE] =
 	{ MOD_TYPE_PTM, "PolyTracker", ".ptm",			0 },
 	{ MOD_TYPE_WAV,	"Wave", ".wav",					0 },
 	{ MOD_TYPE_MID, "Midi", ".mid",					0 },
-	{ MOD_TYPE_AMS, "Extreme Tracker", ".ams",		0 },
+	{ MOD_TYPE_AMS, "Extreme's Tracker", ".ams",	0 },
 	{ MOD_TYPE_AMF|MOD_TYPE_AMF0,"Asylum / DSMI", ".amf", 0 },
 	{ MOD_TYPE_DSM, "DSIK Format", ".dsm",			0 },
 	{ MOD_TYPE_DMF, "X-Tracker", ".dmf",			0 },
 	{ MOD_TYPE_DBM, "DigiBooster Pro", ".dbm",		0 },
-	{ MOD_TYPE_PSM, "Protracker Studio", ".psm",	0 },
+	{ MOD_TYPE_PSM, "Epic Megagames MASI", ".psm",	0 },
 	{ MOD_TYPE_UMX, "Unreal Music", ".umx",			0 },
 	{ MOD_TYPE_MT2, "MadTracker 2", ".mt2",			0 },
-	{ MOD_TYPE_MPT, "OpenMPT", ".mptm",		0 },
+	{ MOD_TYPE_MPT, "OpenMPT", ".mptm",				0 },
+	{ MOD_TYPE_J2B, "Galaxy Sound System", ".j2b",	0 },
+	{ MOD_TYPE_IMF, "Imago Orpheus", ".imf",		0 },
 };
 
 #endif

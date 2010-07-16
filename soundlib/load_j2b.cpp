@@ -502,7 +502,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				m_nDefaultTempo = mainchunk->tempo;
 				m_nDefaultGlobalVolume = mainchunk->globalvolume << 1;
 				m_nSamplePreAmp = m_nVSTiVolume = 48;
-				m_nType = MOD_TYPE_IT;
+				m_nType = MOD_TYPE_J2B;
 				ASSERT(LittleEndian(mainchunk->unknown) == 0xFF0001C5 || LittleEndian(mainchunk->unknown) == 0x35800716);
 
 				// It seems like there's no way to differentiate between
