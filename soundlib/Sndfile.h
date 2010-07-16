@@ -964,16 +964,18 @@ protected:
 	// [in]  data: pointer to the data in memory that is going to be read
 	// [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 	// [in]  lineEnding: line ending formatting of the text in memory.
+	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
-	bool ReadMessage(const BYTE *data, const size_t length, enmLineEndings lineEnding);
+	bool ReadMessage(const BYTE *data, const size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &) = nullptr);
 
 	// Read comments with fixed line length from a mapped file.
 	// [in]  data: pointer to the data in memory that is going to be read
 	// [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 	// [in]  lineLength: The fixed length of a line.
 	// [in]  lineEndingLength: The padding space between two fikxed lines. (there could for example be a null char after every line)
+	// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 	// [out] returns true on success.
-	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength);
+	bool ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &) = nullptr);
 
 	// Currently unused (and the code doesn't look very nice :)
 	UINT GetSongMessage(LPSTR s, UINT cbsize, UINT linesize=32);

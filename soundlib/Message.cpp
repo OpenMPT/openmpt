@@ -51,21 +51,30 @@ void CSoundFile::FreeMessage()
 // [in]  data: pointer to the data in memory that is going to be read
 // [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 // [in]  lineEnding: line ending formatting of the text in memory.
+// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 // [out] returns true on success.
-bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndings lineEnding)
-//--------------------------------------------------------------------------------------------
+bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndings lineEnding, void (*pTextConverter)(char &))
+//----------------------------------------------------------------------------------------------------------------------------
 {
+	char c;
+
 	// Simple line-ending detection algorithm. VERY simple.
 	if(lineEnding == leAutodetect)
 	{
+		char cprev = 0;
 		size_t nCR = 0, nLF = 0, nCRLF = 0;
 		// find CRs, LFs and CRLFs
 		for(size_t i = 0; i < length; i++)
-		{			
-			if(data[i] == '\r') nCR++;
-			else if(data[i] == '\n') nLF++;
+		{
+			c = data[i];
+			if(pTextConverter != nullptr)
+				pTextConverter(c);
 
-			if(i && data[i - 1] == '\r' && data[i] == '\n') nCRLF++;
+			if(c == '\r') nCR++;
+			else if(c == '\n') nLF++;
+
+			if(i && cprev == '\r' && c == '\n') nCRLF++;
+			cprev = c;
 		}
 		// evaluate findings
 		if(nCR == nLF && nCR == nCRLF)
@@ -82,7 +91,11 @@ bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndin
 	// calculate the final amount of characters to be allocated.
 	for(size_t i = 0; i < length; i++)
 	{
-		switch(data[i])
+		c = data[i];
+		if(pTextConverter != nullptr)
+			pTextConverter(c);
+
+		switch(c)
 		{
 		case '\r':
 			if(lineEnding != leLF) final_length++;
@@ -102,7 +115,11 @@ bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndin
 	size_t cpos = 0;
 	for(size_t i = 0; i < length; i++, cpos++)
 	{
-		switch(data[i])
+		c = data[i];
+		if(pTextConverter != nullptr)
+			pTextConverter(c);
+
+		switch(c)
 		{
 		case '\r':
 			if(lineEnding != leLF)
@@ -121,7 +138,7 @@ bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndin
 			m_lpszSongComments[cpos] = ' ';
 			break;
 		default:
-			m_lpszSongComments[cpos] = data[i];
+			m_lpszSongComments[cpos] = c;
 			break;
 		}
 	}
@@ -135,9 +152,10 @@ bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndin
 // [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 // [in]  lineLength: The fixed length of a line.
 // [in]  lineEndingLength: The padding space between two fikxed lines. (there could for example be a null char after every line)
+// [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 // [out] returns true on success.
-bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength)
-//----------------------------------------------------------------------------------------------------------------------------------------
+bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &))
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	if(lineLength == 0)
 		return false;
@@ -155,6 +173,9 @@ bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t lengt
 		// fix weird chars
 		for(size_t lpos = 0; lpos < lineLength; lpos++)
 		{
+			// Pre-process text
+			if(pTextConverter != nullptr) pTextConverter(m_lpszSongComments[cpos + lpos]);
+
 			switch(m_lpszSongComments[cpos + lpos])
 			{
 			case '\0':

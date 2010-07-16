@@ -5,6 +5,12 @@
  *
  * Authors: Olivier Lapicque <olivierl@jps.net>
  *			OpenMPT dev(s)	(miscellaneous modifications)
+ * Notes  : Extreme was renamed to Velvet Development at some point,
+ *          and thus they also renamed their tracker from
+ *          "Extreme's Tracker" to "Velvet Studio".
+ *          While the two programs look rather similiar, the structure of both
+ *          programs' "AMS" format is significantly different - Velvet Studio is a
+ *          rather advanced tracker in comparison to Extreme's Tracker.
 */
 
 //////////////////////////////////////////////
@@ -43,6 +49,27 @@ typedef struct AMSSAMPLEHEADER
 
 #pragma pack()
 
+
+// Callback function for reading text
+void Convert_AMS_Text_Chars(char &c)
+//----------------------------------
+{
+	switch((unsigned char)c)
+	{
+	case 0x00:
+	case 0x81: c = ' '; break;
+	case 0x14: c = 'ö'; break;
+	case 0x19: c = 'Ö'; break;
+	case 0x04: c = 'ä'; break;
+	case 0x0E: c = 'Ä'; break;
+	case 0x06: c = 'å'; break;
+	case 0x0F: c = 'Å'; break;
+	default:
+		if((unsigned char)c > 0x81)
+			c = '\r';
+		break;
+	}
+}
 
 
 bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
@@ -136,29 +163,9 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 	tmp = *((WORD *)(lpStream+dwMemPos));
 	dwMemPos += 2;
 	if (dwMemPos + tmp >= dwMemLength) return true;
-	if (tmp && AllocateMessage(tmp))
+	if (tmp)
 	{
-		// Translate that weird text format...
-		for(size_t i = 0; i < tmp; i++)
-		{
-			switch(lpStream[dwMemPos + i])
-			{
-			case 0x00:
-			case 0x81: m_lpszSongComments[i] = ' '; break;
-			case 0x14: m_lpszSongComments[i] = 'ö'; break;
-			case 0x19: m_lpszSongComments[i] = 'Ö'; break;
-			case 0x04: m_lpszSongComments[i] = 'ä'; break;
-			case 0x0E: m_lpszSongComments[i] = 'Ä'; break;
-			case 0x06: m_lpszSongComments[i] = 'å'; break;
-			case 0x0F: m_lpszSongComments[i] = 'Å'; break;
-			default:
-				if(lpStream[dwMemPos + i] > 0x81)
-					m_lpszSongComments[i] = '\r';
-				else
-					m_lpszSongComments[i] = lpStream[dwMemPos + i];
-				break;
-			}
-		}
+		ReadMessage(lpStream + dwMemPos, tmp, leCR, &Convert_AMS_Text_Chars);
 	}
 	dwMemPos += tmp;
 
@@ -352,11 +359,11 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 	BYTE packedsamples[MAX_SAMPLES];
 
 	if ((pfh->dwHdr1 != 0x68534D41) || (pfh->wHdr2 != 0x7264)
-	 || (pfh->b1A != 0x1A) || (pfh->titlelen > 30)) return FALSE;
+	 || (pfh->b1A != 0x1A) || (pfh->titlelen > 30)) return false;
 	dwMemPos = pfh->titlelen + 8;
 	psh = (AMS2SONGHEADER *)(lpStream + dwMemPos);
 	if (((psh->version & 0xFF00) != 0x0200) || (!psh->instruments)
-	 || (psh->instruments > MAX_INSTRUMENTS) || (!psh->patterns) || (!psh->orders)) return FALSE;
+	 || (psh->instruments > MAX_INSTRUMENTS) || (!psh->patterns) || (!psh->orders)) return false;
 	dwMemPos += sizeof(AMS2SONGHEADER);
 	if (pfh->titlelen)
 	{
@@ -461,7 +468,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 			dwMemPos += sizeof(AMS2SAMPLE);
 		}
 	}
-	if (dwMemPos + 256 >= dwMemLength) return TRUE;
+	if (dwMemPos + 256 >= dwMemLength) return true;
 	// Comments
 	{
 		UINT composernamelen = lpStream[dwMemPos];
@@ -480,16 +487,16 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 				SpaceToNullStringFixed(ChnSettings[i].szName, chnnamlen);
 			}
 			dwMemPos += chnnamlen + 1;
-			if (dwMemPos + chnnamlen + 256 >= dwMemLength) return TRUE;
+			if (dwMemPos + chnnamlen + 256 >= dwMemLength) return true;
 		}
 		// packed comments (ignored)
 		UINT songtextlen = *((LPDWORD)(lpStream+dwMemPos));
 		dwMemPos += songtextlen;
-		if (dwMemPos + 256 >= dwMemLength) return TRUE;
+		if (dwMemPos + 256 >= dwMemLength) return true;
 	}
 	// Order List
 	{
-		if ((dwMemPos + 2 * psh->orders) >= dwMemLength) return TRUE;
+		if ((dwMemPos + 2 * psh->orders) >= dwMemLength) return true;
 		Order.resize(psh->orders, Order.GetInvalidPatIndex());
 		for (UINT iOrd = 0; iOrd < psh->orders; iOrd++)
 		{
@@ -500,7 +507,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 	// Pattern Data
 	for (UINT ipat=0; ipat<psh->patterns; ipat++)
 	{
-		if (dwMemPos+8 >= dwMemLength) return TRUE;
+		if (dwMemPos+8 >= dwMemLength) return true;
 		UINT packedlen = *((LPDWORD)(lpStream+dwMemPos));
 		UINT numrows = 1 + (UINT)(lpStream[dwMemPos+4]);
 		//UINT patchn = 1 + (UINT)(lpStream[dwMemPos+5] & 0x1F);
@@ -516,7 +523,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 				SpaceToNullStringFixed(s, patnamlen);
 				SetPatternName(ipat, s);
 			}
-			if(Patterns.Insert(ipat, numrows)) return TRUE;
+			if(Patterns.Insert(ipat, numrows)) return true;
 			// Unpack Pattern Data
 			LPCBYTE psrc = lpStream + dwMemPos;
 			UINT pos = 3 + patnamlen;
@@ -570,7 +577,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 	// Read Samples
 	for (UINT iSmp=1; iSmp<=m_nSamples; iSmp++) if (Samples[iSmp].nLength)
 	{
-		if (dwMemPos >= dwMemLength - 9) return TRUE;
+		if (dwMemPos >= dwMemLength - 9) return true;
 		UINT flags;
 		if (packedsamples[iSmp] & 0x03)
 		{
@@ -581,7 +588,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		}
 		dwMemPos += ReadSample(&Samples[iSmp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
 	}
-	return TRUE;
+	return true;
 }
 
 
