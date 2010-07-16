@@ -152,7 +152,7 @@ void CCtrlComments::OnCommentsChanged()
 	CHAR s[256], *oldcomments = NULL;
 	
 	if ((m_nLockCount) || (!m_pSndFile)
-	 || (m_pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_S3M))) return;
+		|| !m_pSndFile->GetModSpecifications().hasComments) return;
 	if ((!m_bInitialized) || (!m_EditComments.m_hWnd) || (!m_EditComments.GetModify())) return;
 	if (m_pSndFile->m_lpszSongComments)
 	{
@@ -164,7 +164,7 @@ void CCtrlComments::OnCommentsChanged()
 
 
 		UINT n = m_EditComments.GetLineCount();
-		LPSTR p = new char[n*LINE_LENGTH+1];
+		LPSTR p = new char[n * LINE_LENGTH + 1];
 		p[0] = 0;
 		if (!p) return;
 		for (UINT i=0; i<n; i++)
@@ -189,9 +189,9 @@ void CCtrlComments::OnCommentsChanged()
 			delete[] p;
 		if (oldcomments)
 		{
-			BOOL bSame = FALSE;
+			bool bSame = false;
 			if ((m_pSndFile->m_lpszSongComments)
-			 && (!strcmp(m_pSndFile->m_lpszSongComments, oldcomments))) bSame = TRUE;
+			 && (!strcmp(m_pSndFile->m_lpszSongComments, oldcomments))) bSame = true;
 			delete[] oldcomments;
 			if (bSame) return;
 		} else

@@ -197,15 +197,15 @@ enum
 
 
 // Midi Setup
-#define MIDISETUP_RECORDVELOCITY			0x01
-#define MIDISETUP_TRANSPOSEKEYBOARD			0x02
-#define MIDISETUP_MIDITOPLUG				0x04
-#define MIDISETUP_MIDIVOL_TO_NOTEVOL		0x08
-#define MIDISETUP_RECORDNOTEOFF				0x10
-#define MIDISETUP_RESPONDTOPLAYCONTROLMSGS	0x20
-#define MIDISETUP_AMPLIFYVELOCITY			0x40
-#define MIDISETUP_MIDIMACROCONTROL			0x80
-#define MIDISETUP_PLAYPATTERNONMIDIIN       0x100
+#define MIDISETUP_RECORDVELOCITY			0x01	// Record MIDI velocity
+#define MIDISETUP_TRANSPOSEKEYBOARD			0x02	// Apply transpose value to MIDI Notes
+#define MIDISETUP_MIDITOPLUG				0x04	// Pass MIDI messages to plugins
+#define MIDISETUP_MIDIVOL_TO_NOTEVOL		0x08	// Combine MIDI volume to note velocity
+#define MIDISETUP_RECORDNOTEOFF				0x10	// Record MIDI Note Off to pattern
+#define MIDISETUP_RESPONDTOPLAYCONTROLMSGS	0x20	// Respond to Restart/Continue/Stop MIDI commands
+#define MIDISETUP_AMPLIFYVELOCITY			0x40	// Amplify velocity of recorded notes
+#define MIDISETUP_MIDIMACROCONTROL			0x80	// Record MIDI controller changes a MIDI macro changes in pattern
+#define MIDISETUP_PLAYPATTERNONMIDIIN       0x100	// Play pattern if MIDI Note is received and playback is paused
 
 
 
