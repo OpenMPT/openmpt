@@ -874,6 +874,7 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penEnvelope);
 	DeleteGDIObject(penEnvelopeHighlight);
 	DeleteGDIObject(m_hFixedFont);
+	DeleteGDIObject(m_hLargeFixedFont);
 	DeleteGDIObject(penScratch);
 	DeleteGDIObject(penGray00);
 	DeleteGDIObject(penGray33);
@@ -3082,8 +3083,6 @@ void AddPluginParameternamesToCombobox(CComboBox& CBox, CVstPlugin& plug)
 
 
 // retrieve / set default directory from given string and store it our setup variables
-// TODO: Let some magic happen to convert between absolute and relative paths. m_csExecutableDirectoryPath might be helpful
-
 void CMainFrame::SetDirectory(const LPCTSTR szFilenameFrom, Directory dir, TCHAR (&directories)[NUM_DIRS][_MAX_PATH], bool bStripFilename)
 //----------------------------------------------------------------------------------------------------------------------------------------
 {

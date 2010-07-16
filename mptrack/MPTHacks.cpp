@@ -90,7 +90,7 @@ bool CModDoc::HasMPTHacks(bool autofix)
 {
 	const CModSpecifications *originalSpecs = &m_SndFile.GetModSpecifications();
 	// retrieve original (not hacked) specs.
-	switch(m_SndFile.GetType())
+	switch(m_SndFile.GetBestSaveFormat())
 	{
 	case MOD_TYPE_MOD:
 		originalSpecs = &ModSpecs::mod;
