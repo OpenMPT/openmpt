@@ -7,7 +7,7 @@
  * gave me a few clues. :)
  *
  * What's playing?
- *  - Epic Pinball - Perfect! (I don't have an old version with the PSM16 tunes to compare, though - some of them differ from the new PSM tunes)
+ *  - Epic Pinball - Perfect! (menu and order song are pitched up a bit in the PSM16 format for unknown reasons, but that shouldn't bother anyone)
  *  - Extreme Pinball - Perfect! (subtunes included!)
  *  - Jazz Jackrabbit - Perfect!
  *  - One Must Fall! - Perfect! (it helped a lot to have the original MTM files...)
@@ -31,7 +31,22 @@
 //  New PSM support starts here. PSM16 structs are below.
 //
 
+// 32-Bit PSM header identifiers
+#define PSM16HEAD_PSM_ 0xFE4D5350
+#define PSMHEAD_PSM_   0x204D5350
+#define PSMHEAD_FILE   0x454C4946
 
+// 32-Bit chunk identifiers
+#define PSMCHUNKID_TITL 0x4C544954
+#define PSMCHUNKID_SDFT 0x54464453
+#define PSMCHUNKID_PBOD 0x444F4250
+#define PSMCHUNKID_SONG 0x474E4F53
+#define PSMCHUNKID_DATE 0x45544144
+#define PSMCHUNKID_OPLH 0x484C504F
+#define PSMCHUNKID_PPAN 0x4E415050
+#define PSMCHUNKID_PATT 0x54544150
+#define PSMCHUNKID_DSAM 0x4D415344
+#define PSMCHUNKID_DSMP 0x504D5344
 
 struct PSMNEWHEADER
 {
@@ -126,17 +141,18 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	ASSERT_CAN_READ(sizeof(PSMNEWHEADER));
 	PSMNEWHEADER *shdr = (PSMNEWHEADER *)lpStream;
 
-	if(LittleEndian(shdr->formatID) == 0xFE4D5350) // "PSMþ" - PSM16 format
+	if(LittleEndian(shdr->formatID) == PSM16HEAD_PSM_) // "PSMþ" - PSM16 format
 		return ReadPSM16(lpStream, dwMemLength);
 
 	// Check header
-	if(LittleEndian(shdr->formatID) != 0x204D5350 // "PSM "
+	if(LittleEndian(shdr->formatID) != PSMHEAD_PSM_ // "PSM "
 		|| LittleEndian(shdr->fileSize) != dwMemLength - 12
-		|| LittleEndian(shdr->fileInfoID) != 0x454C4946 // "FILE"
+		|| LittleEndian(shdr->fileInfoID) != PSMHEAD_FILE // "FILE"
 		) return false;
 
 	// Yep, this seems to be a valid file.
 	m_nType = MOD_TYPE_PSM;
+	m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATMODE;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nChannels = 0;
 
@@ -171,16 +187,16 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		switch(chunkID)
 		{
-		case 0x4C544954: // "TITL" - Song Title
+		case PSMCHUNKID_TITL: // "TITL" - Song Title
 			memcpy(m_szNames[0], lpStream + dwMemPos, (chunkSize < 31) ? chunkSize : 31);
 			SpaceToNullStringFixed(m_szNames[0], 31);
 			break;
 
-		case 0x54464453: // "SDFT" - Format info (song data starts here)
+		case PSMCHUNKID_SDFT: // "SDFT" - Format info (song data starts here)
 			if(chunkSize != 8 || memcmp(lpStream + dwMemPos, "MAINSONG", 8)) return false;
 			break;
 
-		case 0x444F4250: // "PBOD" - Pattern data of a single pattern
+		case PSMCHUNKID_PBOD: // "PBOD" - Pattern data of a single pattern
 			if(chunkSize < 8 || chunkSize != LittleEndian(*(uint32 *)(lpStream + dwMemPos))) return false; // same value twice
 
 			// Pattern ID (something like "P0  " or "P13 ", or "PATT0   " in Sinaria) follows
@@ -197,7 +213,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 			// Convert later as we have to know how many channels there are.
 			break;
 
-		case 0x474E4F53: // "SONG" - Subsong information (channel count etc)
+		case PSMCHUNKID_SONG: // "SONG" - Subsong information (channel count etc)
 			{
 				if(chunkSize < sizeof(PSMSONGHEADER)) return false;
 				PSMSONGHEADER *pSong = (PSMSONGHEADER *)(lpStream + dwMemPos);
@@ -220,7 +236,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 					switch(subChunkID)
 					{
-					case 0x45544144: // "DATE" - Conversion date (YYMMDD)
+					case PSMCHUNKID_DATE: // "DATE" - Conversion date (YYMMDD)
 						if(subChunkSize != 6) break;
 
 						{
@@ -235,11 +251,11 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						}
 						break;
 
-					case 0x484C504F: // "OPLH" - Order list, channel + module settings
+					case PSMCHUNKID_OPLH: // "OPLH" - Order list, channel + module settings
 						{
 							if(subChunkSize < 9) return false;
 							// First two bytes = Number of chunks that follow
-							//WORD nTotalChunks = LittleEndian(*(WORD *)(lpStream + dwChunkPos));
+							//uint16 nTotalChunks = LittleEndian(*(uint16 *)(lpStream + dwChunkPos));
 							
 							// Now, the interesting part begins!
 							DWORD dwSettingsOffset = dwChunkPos + 2;
@@ -292,7 +308,6 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 										ORDERINDEX nRestartPosition = 0;
 										if(nRestartChunk >= nFirstOrderChunk) nRestartPosition = (ORDERINDEX)(nRestartChunk - nFirstOrderChunk);
 										subsong.restartPos += nRestartPosition;
-										m_nRestartPos = subsong.restartPos;
 									}
 									dwSettingsOffset += 3;
 									break;
@@ -363,11 +378,6 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 									break;
 								
 								default: // How the hell should this happen? I've listened through almost all existing (original) PSM files. :)
-#ifdef MODPLUG_TRACKER
-									CString s;
-									s.Format("Report to the OpenMPT team: Unknown chunk %d found at position %d (in the OPLH chunk of this PSM file)", lpStream[dwSettingsOffset], dwSettingsOffset);
-									if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
-#endif // MODPLUG_TRACKER
 									// anyway, in such cases, we have to quit as we don't know how big the chunk really is.
 									return false;
 									break;
@@ -381,7 +391,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						}
 						break;
 
-					case 0x4E415050: // PPAN - Channel panning table (used in Sinaria)
+					case PSMCHUNKID_PPAN: // PPAN - Channel panning table (used in Sinaria)
 						if(subChunkSize & 1) return false;
 						for(uint32 i = 0; i < subChunkSize; i += 2)
 						{
@@ -407,11 +417,11 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 						}
 						break;
 					
-					case 0x54544150: // PATT - Pattern list
+					case PSMCHUNKID_PATT: // PATT - Pattern list
 						// We don't really need this.
 						break;
 
-					case 0x4D415344: // DSAM - Sample list
+					case PSMCHUNKID_DSAM: // DSAM - Sample list
 						// We don't need this either.
 						break;
 
@@ -429,7 +439,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 			break;
 
-		case 0x504D5344: // DSMP - Samples
+		case PSMCHUNKID_DSMP: // DSMP - Samples
 			if(!bNewFormat)
 			{
 				// original header
@@ -792,14 +802,13 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
 				MODCOMMAND *row_data;
 				row_data = Patterns[endPattern];
-				for(uint32 nCell = 0; nCell < m_nChannels * Patterns[endPattern].GetNumRows(); nCell++)
+				for(uint32 nCell = 0; nCell < m_nChannels * Patterns[endPattern].GetNumRows(); nCell++, row_data++)
 				{
 					if(row_data->command == CMD_PATTERNBREAK || row_data->command == CMD_POSITIONJUMP)
 					{
 						lastRow = nCell / m_nChannels;
 						break;
 					}
-					row_data++;
 				}
 				TryWriteEffect(endPattern, lastRow, CMD_POSITIONJUMP, (BYTE)subsongs[i].restartPos, false, CHANNELINDEX_INVALID, false, true);
 			}
@@ -882,7 +891,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	PSM16HEADER *shdr = (PSM16HEADER *)lpStream;
 
 	// Check header
-	if((LittleEndian(shdr->formatID) != 0xFE4D5350) // "PSMþ"
+	if((LittleEndian(shdr->formatID) != PSM16HEAD_PSM_) // "PSMþ"
 		|| (shdr->lineEnd != 0x1A)
 		|| (shdr->formatVersion != 0x10 && shdr->formatVersion != 0x01) // why is this sometimes 0x01?
 		|| (shdr->patternVersion != 0) // 255ch pattern version not supported (did anyone use this?)
