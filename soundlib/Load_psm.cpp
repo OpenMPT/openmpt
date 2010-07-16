@@ -136,7 +136,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		) return false;
 
 	// Yep, this seems to be a valid file.
-	m_nType = MOD_TYPE_IT;
+	m_nType = MOD_TYPE_PSM;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nChannels = 0;
 
@@ -920,7 +920,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 			ChnSettings[i].nPan = lpStream[dwMemPos + i] << 4;
 			ChnSettings[i].nVolume = 64;
-			ChnSettings[i].dwFlags = (i >= shdr->numChannelsPlay) ? CHN_MUTE : 0;
+			ChnSettings[i].dwFlags = 0; // (i >= shdr->numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
 		}
 	}
 

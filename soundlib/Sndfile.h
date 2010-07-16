@@ -1199,7 +1199,7 @@ typedef struct MODFORMATINFO
 	DWORD   dwPadding;
 } MODFORMATINFO;
 
-extern MODFORMATINFO gModFormatInfo[MAX_MODTYPE];
+extern MODFORMATINFO gModFormatInfo[];
 
 #endif
 

@@ -288,7 +288,7 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if (memcmp(hdr.im10, "IM10", 4) != 0)
 		return false;
 
-	ChangeModTypeTo(MOD_TYPE_IT);
+	m_nType = MOD_TYPE_IMF;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	// song name

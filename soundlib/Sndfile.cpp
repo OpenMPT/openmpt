@@ -3013,13 +3013,13 @@ uint16 CSoundFile::GetModFlagMask(const MODTYPE oldtype, const MODTYPE newtype) 
 
 	// XM <-> IT/MPT conversion.
 	if(combined == (MOD_TYPE_IT|MOD_TYPE_XM) || combined == (MOD_TYPE_MPT|MOD_TYPE_XM))
-		return (1 << MSF_COMPATIBLE_PLAY) + (1 << MSF_MIDICC_BUGEMULATION);
+		return (1 << MSF_COMPATIBLE_PLAY) | (1 << MSF_MIDICC_BUGEMULATION);
 
 	// IT <-> MPT conversion.
 	if(combined == (MOD_TYPE_IT|MOD_TYPE_MPT))
 		return uint16_max;
 
-	return 0;
+	return (1 << MSF_COMPATIBLE_PLAY);
 }
 
 void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
