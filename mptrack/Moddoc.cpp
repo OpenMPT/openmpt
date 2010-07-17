@@ -424,6 +424,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
         return bOk;
 	}
 	BeginWaitCursor();
+	ClearLog();
 	switch(nType)
 	{
 	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(lpszPathName, dwPacking); break;
@@ -436,6 +437,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	if (bOk)
 	{
 		if (nType == m_SndFile.m_nType) SetPathName(lpszPathName);
+		ShowLog();
 	} else
 	{
 		if(nType == MOD_TYPE_IT && m_SndFile.m_dwSongFlags & SONG_ITPROJECT) ::MessageBox(NULL,"ITP projects need to have a path set for each instrument...",NULL,MB_ICONERROR | MB_OK);
@@ -1757,6 +1759,7 @@ void CModDoc::OnFileCompatibilitySave()
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(false, ext, filename, pattern, CMainFrame::GetWorkingDirectory(DIR_MODS));
 	if(files.abort) return;
 
+	ClearLog();
 	switch (type)
 	{
 		case MOD_TYPE_MOD:
@@ -1771,6 +1774,7 @@ void CModDoc::OnFileCompatibilitySave()
 			m_SndFile.SaveCompatIT(files.first_file.c_str());
 			break;
 	}
+	ShowLog();
 }
 
 
