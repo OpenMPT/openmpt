@@ -379,15 +379,17 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	m_SndFile.m_nDefaultTempo = CLAMP(m_SndFile.m_nDefaultTempo, specs.tempoMin, specs.tempoMax);
 	m_SndFile.m_nDefaultSpeed = CLAMP(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
 
-	bool bTrimmedEnvelopes = false;
+	uint8 trimmedEnvelopes = 0;
 	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.m_nInstruments; i++) if(m_SndFile.Instruments[i] != nullptr)
 	{
-		bTrimmedEnvelopes |= UpdateEnvelopes(&(m_SndFile.Instruments[i]->VolEnv));
-		bTrimmedEnvelopes |= UpdateEnvelopes(&(m_SndFile.Instruments[i]->PanEnv));
-		bTrimmedEnvelopes |= UpdateEnvelopes(&(m_SndFile.Instruments[i]->PitchEnv));
+		trimmedEnvelopes |= UpdateEnvelopes(&(m_SndFile.Instruments[i]->VolEnv));
+		trimmedEnvelopes |= UpdateEnvelopes(&(m_SndFile.Instruments[i]->PanEnv));
+		trimmedEnvelopes |= UpdateEnvelopes(&(m_SndFile.Instruments[i]->PitchEnv));
 	}
-	if(bTrimmedEnvelopes == true)
+	if(trimmedEnvelopes & 1)
 		AddToLog("WARNING: Instrument envelopes have been shortened.\n");
+	if(trimmedEnvelopes & 2)
+		AddToLog("WARNING: Instrument envelope release nodes are not supported by the new format.\n");
 
 	SetModified();
 	GetPatternUndo()->ClearUndo();
@@ -397,25 +399,36 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	return TRUE;
 }
 
-bool CModDoc::UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv)
-//-------------------------------------------------------
+// Trim envelopes and remove release nodes.
+// If bit 0 of the return value is set, the envelope has been shortened.
+// If bit 1 of the return value is set, the envelope's release node has been removed.
+uint8 CModDoc::UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv)
+//--------------------------------------------------------
 {
 	// shorten instrument envelope if necessary (for mod conversion)
 	const UINT iEnvMax = m_SndFile.GetModSpecifications().envelopePointsMax;
-	bool bResult = false;
+	uint8 result = 0;
 
-	#define TRIMENV(i) if(i > iEnvMax) {i = iEnvMax; bResult = true;}
+	#define TRIMENV(i) if(i > iEnvMax) { i = iEnvMax; result |= 1; }
 
 	TRIMENV(mptEnv->nNodes);
 	TRIMENV(mptEnv->nLoopStart);
 	TRIMENV(mptEnv->nLoopEnd);
 	TRIMENV(mptEnv->nSustainStart);
 	TRIMENV(mptEnv->nSustainEnd);
-	if(mptEnv->nReleaseNode != ENV_RELEASE_NODE_UNSET) TRIMENV(mptEnv->nReleaseNode);
+	if(mptEnv->nReleaseNode != ENV_RELEASE_NODE_UNSET)
+	{
+		TRIMENV(mptEnv->nReleaseNode);
+		if(!m_SndFile.GetModSpecifications().hasReleaseNode)
+		{
+			mptEnv->nReleaseNode = ENV_RELEASE_NODE_UNSET;
+			result |= 2;
+		}
+	}
 
 	#undef TRIMENV
 
-	return bResult;
+	return result;
 }
 
 

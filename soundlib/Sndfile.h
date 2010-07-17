@@ -557,7 +557,7 @@ public:	// Static Members
 
 public:	// for Editing
 	CModDoc* m_pModDoc;
-	UINT m_nType;
+	MODTYPE m_nType;
 	CHANNELINDEX m_nChannels;
 	SAMPLEINDEX m_nSamples;
 	INSTRUMENTINDEX m_nInstruments;
