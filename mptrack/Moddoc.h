@@ -51,7 +51,7 @@ STATIC_ASSERT( (HINT_MASK_ITEM | HINT_MASK_FLAGS) == -1 );
 STATIC_ASSERT( (HINT_MASK_ITEM & HINT_MASK_FLAGS) == 0 );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// NOTE : be carefull when adding new flags !!!
+// NOTE : be careful when adding new flags !!!
 // -------------------------------------------------------------------------------------------------------------------------
 // those flags are passed through a 32bits parameter which can also contain instrument/sample/pattern row... number :
 // HINT_SAMPLEINFO & HINT_SAMPLEDATA & HINT_SMPNAMES : can be used with a sample number 12bit coded (passed as bit 20 to 31)
@@ -172,7 +172,7 @@ public:
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 	void SendMessageToActiveViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
-	UINT GetModType() const { return m_SndFile.m_nType; }
+	MODTYPE GetModType() const { return m_SndFile.m_nType; }
 	INSTRUMENTINDEX GetNumInstruments() const { return m_SndFile.m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_SndFile.m_nSamples; }
 	BOOL AddToLog(LPCSTR lpszLog);
@@ -334,7 +334,7 @@ protected:
 	//}}AFX_VIRTUAL
 
 	// for mod conversion
-	bool UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv);
+	uint8 UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv);
 
 
 // Implementation

@@ -472,6 +472,17 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 	if(envelope == nullptr) return false;
 	if(nPoint < 1 || nPoint > (int)EnvGetLastPoint()) return false;
 
+	// Don't allow release nodes in IT/XM. GetDocument()/... nullptr check is done in GetEnvelopePtr, so no need to check twice.
+	if(!GetDocument()->GetSoundFile()->GetModSpecifications().hasReleaseNode)
+	{
+		if(envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET)
+		{
+			envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
+			return true;
+		}
+		return false;
+	}
+
 	if (envelope->nReleaseNode == nPoint)
 	{
 		envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
@@ -1619,22 +1630,26 @@ void CViewInstrument::OnLButtonUp(UINT, CPoint)
 void CViewInstrument::OnRButtonDown(UINT, CPoint pt)
 //--------------------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
+	const CModDoc *pModDoc = GetDocument();
+	if(!pModDoc) return;
+	const CSoundFile *pSndFile = GetDocument()->GetSoundFile();
+	if(!pSndFile) return;
+
 	CMenu Menu;
 	if (m_dwStatus & INSSTATUS_DRAGGING) return;
 	if ((pModDoc) && (Menu.LoadMenu(IDR_ENVELOPES)))
 	{
 		CMenu* pSubMenu = Menu.GetSubMenu(0);
-		if (pSubMenu!=NULL)
+		if (pSubMenu != NULL)
 		{
-			CSoundFile *pSndFile = pModDoc->GetSoundFile();
-			UINT maxpoint = (pSndFile->m_nType == MOD_TYPE_XM) ? 11 : 24;
-			UINT lastpoint = EnvGetLastPoint();
 			m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
+			const UINT maxpoint = (pSndFile->m_nType == MOD_TYPE_XM) ? 11 : 24;
+			const UINT lastpoint = EnvGetLastPoint();
+			const bool forceRelease = !pSndFile->GetModSpecifications().hasReleaseNode && (EnvGetReleaseNode() != ENV_RELEASE_NODE_UNSET);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_INSERTPOINT, (lastpoint < maxpoint) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_REMOVEPOINT, ((m_nDragItem) && (lastpoint > 0)) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (pSndFile->GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT) && m_nEnv == ENV_VOLUME) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, ((pSndFile->GetModSpecifications().hasReleaseNode && m_nEnv == ENV_VOLUME) || forceRelease) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SETLOOP, (EnvGetLoop()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SUSTAIN, (EnvGetSustain()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_CARRY, (EnvGetCarry()) ? MF_CHECKED : MF_UNCHECKED);
