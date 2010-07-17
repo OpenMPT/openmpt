@@ -453,11 +453,15 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	return true;
 #else
 	return bSamplesPresent;
-#endif
+#endif	// MODPLUG_TRACKER
 }
 
 
 #ifndef MODPLUG_NO_FILESAVE
+
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/moddoc.h"
+#endif	// MODPLUG_TRACKER
 
 bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompatibilityExport)
 //-------------------------------------------------------------------------------------------
@@ -588,14 +592,19 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	}										//end for all patterns
 	
 	//Check for unsaved patterns
-	for (UINT ipat=nbp; ipat<MAX_PATTERNS; ipat++)
+#ifdef MODPLUG_TRACKER
+	if(GetpModDoc() != nullptr)
 	{
-		if (Patterns[ipat])
+		for(UINT ipat = nbp; ipat < MAX_PATTERNS; ipat++)
 		{
-			AfxMessageBox("Warning: this track contains at least 1 pattern after the highest pattern number referred to in the sequence.\r\nSuch patterns will not be saved in the .mod format.");
-			break;
+			if(Patterns[ipat])
+			{
+				GetpModDoc()->AddToLog(_T("Warning: This track contains at least one pattern after the highest pattern number referred to in the sequence. Such patterns are not saved in the .mod format.\n"));
+				break;
+			}
 		}
 	}
+#endif
 
 	// Writing instruments
 	for (UINT ismpd = 1; ismpd <= 31; ismpd++) if (inslen[ismpd])

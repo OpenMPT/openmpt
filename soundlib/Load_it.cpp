@@ -2502,8 +2502,18 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	header.smpnum = m_nSamples;
 
 	MptVersion::VersionNum vVersion = MptVersion::num;
-	header.cwtv = 0x5000 | (WORD)((vVersion >> 16) & 0x0FFF); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
-	header.cmwt = 0x0214;	// Common compatible tracker :)
+	header.cwtv = LittleEndianW(0x5000 | (WORD)((vVersion >> 16) & 0x0FFF)); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
+	header.cmwt = LittleEndianW(0x0214);	// Common compatible tracker :)
+	// hack from schism tracker:
+	for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
+	{
+		if(Instruments[nIns] && Instruments[nIns]->PitchEnv.dwFlags & ENV_FILTER)
+		{
+			header.cmwt = LittleEndianW(0x0217);
+			break;
+		}
+	}
+
 	header.flags = 0x0001;
 	header.special = 0x0006;
 	if (m_nInstruments) header.flags |= 0x04;
