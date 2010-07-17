@@ -1501,6 +1501,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
 	{
+		SetModFlag(MSF_COMPATIBLE_PLAY, false);
 		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 		SetModFlag(MSF_OLDVOLSWING, true);
 	}
