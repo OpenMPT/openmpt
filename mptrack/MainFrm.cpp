@@ -2749,7 +2749,7 @@ void CMainFrame::OnOctaveChanged()
 void CMainFrame::OnReportBug()
 //----------------------------
 {
-	CTrackApp::OpenURL("http://www.lpchip.com/modplug/");
+	CTrackApp::OpenURL("http://openmpt.com/bugreport/");
 	return;
 }
 //end rewbs.reportBug

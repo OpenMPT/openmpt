@@ -1825,7 +1825,7 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_heContact.SetWindowText(
 "Contact / Discussion:\r\n\
-http://modplug.sourceforge.net/forum\r\n\
+http://openmpt.com/forum/\r\n\
 \r\nUpdates:\r\n\
 http://sourceforge.net/projects/modplug/");
 
