@@ -504,7 +504,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPSTR pszText)
 		case IDC_EDIT5:
 		case IDC_SPIN5:
 		case IDC_COMBO_BASENOTE:
-			if ((m_pSndFile) && (m_pSndFile->m_nType & MOD_TYPE_XM) && (m_nSample))
+			if ((m_pSndFile) && (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_MOD)) && (m_nSample))
 			{
 				MODSAMPLE *pSmp = &m_pSndFile->Samples[m_nSample];
 				UINT nFreqHz = CSoundFile::TransposeToFrequency(pSmp->RelativeTone, pSmp->nFineTune);
@@ -645,7 +645,10 @@ void CCtrlSamples::UpdateView(DWORD dwHintMask, CObject *pObj)
 			transp = CSoundFile::FrequencyToTranspose(pSmp->nC5Speed) >> 7;
 		} else
 		{
-			SetDlgItemInt(IDC_EDIT5, (int)pSmp->nFineTune);
+			int ftune = ((int)pSmp->nFineTune);
+			// MOD finetune range -8 to 7 translates to -128 to 112
+			if(m_pSndFile->m_nType & MOD_TYPE_MOD) ftune >>= 4;
+			SetDlgItemInt(IDC_EDIT5, ftune);
 			transp = (int)pSmp->RelativeTone;
 		}
 		int basenote = 60 - transp;
@@ -2450,6 +2453,8 @@ void CCtrlSamples::OnFineTuneChanged()
 		}
 	} else
 	{
+		if(m_pSndFile->m_nType & MOD_TYPE_MOD)
+			n = MOD2XMFineTune(n);
 		if ((n >= -128) && (n <= 127))
 		{
 			m_pSndFile->Samples[m_nSample].nFineTune = (signed char)n;
@@ -2956,11 +2961,21 @@ NoSample:
 			m_EditFineTune.SetWindowText(s);
 		} else
 		{
-			LONG d = CLAMP(pSmp->nFineTune + pos * ((m_pSndFile->GetType() & MOD_TYPE_MOD) ? 16 : 1), -128, 127);
-			pSmp->nFineTune = (signed char)d;
-			wsprintf(s, "%d", d);
-			m_EditFineTune.SetWindowText(s);
+			int ftune = (int)pSmp->nFineTune;
+			// MOD finetune range -8 to 7 translates to -128 to 112
+			if(m_pSndFile->GetType() & MOD_TYPE_MOD)
+			{
+				ftune = CLAMP((ftune >> 4) + pos, -8, 7);
+				pSmp->nFineTune = MOD2XMFineTune((signed char)ftune);
+			}
+			else
+			{
+				ftune = CLAMP(ftune + pos, -128, 127);
+				pSmp->nFineTune = (signed char)ftune;
+			}
+			SetDlgItemInt(IDC_EDIT5, ftune, TRUE);
 		}
+		bRedraw = true;
 		m_SpinFineTune.SetPos(0);
 	}
 	if ((nCode == SB_ENDSCROLL) || (nCode == SB_THUMBPOSITION)) SwitchToView();
