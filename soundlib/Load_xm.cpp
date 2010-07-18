@@ -766,7 +766,7 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	xmheader.restartpos = LittleEndianW(m_nRestartPos);
 
 	xmheader.channels = (m_nChannels + 1) & 0xFFFE; // avoid odd channel count for FT2 compatibility
-	if(m_nChannels & 1) bAddChannel = true;
+	if((m_nChannels & 1) && m_nChannels < MAX_BASECHANNELS) bAddChannel = true;
 	if(bCompatibilityExport && xmheader.channels > 32)
 		xmheader.channels = 32;
 	if(xmheader.channels > MAX_BASECHANNELS) xmheader.channels = MAX_BASECHANNELS;
