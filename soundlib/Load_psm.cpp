@@ -529,14 +529,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		dwPatternOffset += 2;
 
 		if(Patterns.Insert(nPat, patternSize))
-		{
-#ifdef MODPLUG_TRACKER
-			CString s;
-			s.Format(TEXT("Allocating patterns failed starting from pattern %u"), nPat);
-			if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
-#endif // MODPLUG_TRACKER
 			break;
-		}
 
 		// Read pattern.
 		MODCOMMAND *row_data;
@@ -1016,14 +1009,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 			dwMemPos += sizeof(PSM16PATHEADER);
 
 			if(Patterns.Insert(nPat, phdr->numRows))
-			{
-#ifdef MODPLUG_TRACKER
-				CString s;
-				s.Format(TEXT("Allocating patterns failed starting from pattern %u"), nPat);
-				if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
-#endif // MODPLUG_TRACKER
 				break;
-			}
 
 			MODCOMMAND *row_data;
 			ROWINDEX iRow = 0;

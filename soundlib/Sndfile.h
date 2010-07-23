@@ -622,12 +622,12 @@ public:
 	BOOL Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength=0);
 	BOOL Destroy();
 	MODTYPE GetType() const { return m_nType; }
-	inline bool TypeIsIT_MPT() const {return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;}
-	inline bool TypeIsIT_MPT_XM() const {return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0;}
-	inline bool TypeIsS3M_IT_MPT() const {return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0;}
-	inline bool TypeIsXM_MOD() const {return (m_nType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0;}
-	inline bool TypeIsMOD_S3M() const {return (m_nType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) != 0;}
-	CModDoc* GetpModDoc() {return m_pModDoc;}
+	inline bool TypeIsIT_MPT() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
+	inline bool TypeIsIT_MPT_XM() const { return (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) != 0; }
+	inline bool TypeIsS3M_IT_MPT() const { return (m_nType & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0; }
+	inline bool TypeIsXM_MOD() const { return (m_nType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0; }
+	inline bool TypeIsMOD_S3M() const { return (m_nType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) != 0; }
+	CModDoc* GetpModDoc() const { return m_pModDoc; }
 
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }

@@ -16,7 +16,6 @@
 
 #pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
 
-#define str_MBtitle				(GetStrI18N((_TEXT("Saving XM"))))
 #define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
 #define str_pattern				(GetStrI18N((_TEXT("pattern"))))
 
@@ -723,6 +722,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 
 
 #ifndef MODPLUG_NO_FILESAVE
+#include "../mptrack/Moddoc.h"	// for logging errors
 
 bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatibilityExport)
 //------------------------------------------------------------------------------------------
@@ -731,10 +731,10 @@ bool CSoundFile::SaveXM(LPCSTR lpszFileName, UINT nPacking, const bool bCompatib
 	if(len > s.size() - x) /*Buffer running out? Make it larger.*/ \
 		s.resize(s.size() + 10*1024, 0); \
 	\
-	if(len > uint16_max - (UINT)x) /*Reaching the limits of file format?*/ \
+	if((len > uint16_max - (UINT)x) && GetpModDoc()) /*Reaching the limits of file format?*/ \
 	{ \
-		CString str; str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, i); \
-		MessageBox(0, str, str_MBtitle, MB_ICONWARNING); \
+ 		CString str; str.Format("%s (%s %u)\n", str_tooMuchPatternData, str_pattern, i); \
+		GetpModDoc()->AddToLog(str); \
 		break; \
 	}
 

@@ -23,13 +23,12 @@
 #include <list>
 #include "../mptrack/version.h"
 
-#define str_MBtitle				(GetStrI18N((_TEXT("Saving IT"))))
 #define str_tooMuchPatternData	(GetStrI18N((_TEXT("Warning: File format limit was reached. Some pattern data may not get written to file."))))
 #define str_pattern				(GetStrI18N((_TEXT("pattern"))))
-#define str_PatternSetTruncationNote (GetStrI18N((_TEXT("The module contains %u patterns but only %u patterns can be loaded in this OpenMPT version."))))
-#define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u."))))
-#define str_LoadingIncompatibleVersion	TEXT("The file informed that it is incompatible with this version of OpenMPT. Loading was terminated.")
-#define str_LoadingMoreRecentVersion	TEXT("The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly.")
+#define str_PatternSetTruncationNote (GetStrI18N((_TEXT("The module contains %u patterns but only %u patterns can be loaded in this OpenMPT version.\n"))))
+#define str_SequenceTruncationNote (GetStrI18N((_TEXT("Module has sequence of length %u; it will be truncated to maximum supported length, %u.\n"))))
+#define str_LoadingIncompatibleVersion	TEXT("The file informed that it is incompatible with this version of OpenMPT. Loading was terminated.\n")
+#define str_LoadingMoreRecentVersion	TEXT("The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly.\n")
 
 const uint16 verMptFileVer = 0x890;
 const uint16 verMptFileVerLoadLimit = 0x1000; // If cwtv-field is greater or equal to this value,
@@ -113,7 +112,10 @@ void WriteTuningMap(ostream& oStrm, const CSoundFile& sf)
 			TNTS_MAP_ITER iter = tNameToShort_Map.find(sf.Instruments[i]->pTuning);
 			if(iter == tNameToShort_Map.end()) //Should never happen
 			{
-				MessageBox(0, "Error: 210807_1", 0, MB_ICONERROR);
+#ifdef MODPLUG_TRACKER
+				if(sf.GetpModDoc())
+					sf.GetpModDoc()->AddToLog(_T("Error: 210807_1\n"));
+#endif // MODPLUG_TRACKER
 				return;
 			}
 			srlztn::Binarywrite(oStrm, iter->second);
@@ -200,7 +202,7 @@ void ReadTuningMap(istream& iStrm, CSoundFile& csf, const size_t = 0)
 #ifdef MODPLUG_TRACKER
 				if(csf.GetpModDoc() != nullptr)
 				{
-					string erm = string("Tuning ") + str + string(" used by the module was not found.");
+					string erm = string("Tuning ") + str + string(" used by the module was not found.\n");
 					csf.GetpModDoc()->AddToLog(erm.c_str());
 					csf.GetpModDoc()->SetModified(); //The tuning is changed so the modified flag is set.
 				}
@@ -885,6 +887,7 @@ mpts:
 
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 2, 50))
 	{
+		SetModFlag(MSF_COMPATIBLE_PLAY, false);
 		SetModFlag(MSF_MIDICC_BUGEMULATION, true);
 		SetModFlag(MSF_OLDVOLSWING, true);
 	}
@@ -1350,7 +1353,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			{
 #ifdef MODPLUG_TRACKER
 				CString s;
-				s.Format(TEXT("Allocating patterns failed starting from pattern %u"), npat);
+				s.Format(TEXT("Allocating patterns failed starting from pattern %u\n"), npat);
 				if(GetpModDoc() != nullptr) GetpModDoc()->AddToLog(s);
 #endif // MODPLUG_TRACKER
 				break;
@@ -1539,7 +1542,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if (ssb.m_Status & srlztn::SNT_FAILURE)
 				{
 #ifdef MODPLUG_TRACKER
-					if(GetpModDoc() != nullptr) GetpModDoc()->AddToLog(_T("Unknown error occured while deserializing file."));
+					if(GetpModDoc() != nullptr) GetpModDoc()->AddToLog(_T("Unknown error occured while deserializing file.\n"));
 #endif // MODPLUG_TRACKER
 				}
 			}
@@ -1548,7 +1551,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				if(GetTuneSpecificTunings().Deserialize(iStrm))
 				{
 #ifdef MODPLUG_TRACKER
-					if(GetpModDoc() != nullptr) GetpModDoc()->AddToLog(_T("Error occured - loading failed while trying to load tune specific tunings."));
+					if(GetpModDoc() != nullptr) GetpModDoc()->AddToLog(_T("Error occured - loading failed while trying to load tune specific tunings.\n"));
 #endif // MODPLUG_TRACKER
 				}
 				else
@@ -2298,8 +2301,14 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			buf[len++] = 0;
 			if(patinfo[0] > uint16_max - len)
 			{
-				CString str; str.Format("%s (%s %u)", str_tooMuchPatternData, str_pattern, npat);
-				MessageBox(0, str, str_MBtitle, MB_ICONWARNING);
+#ifdef MODPLUG_TRACKER
+				if(GetpModDoc())
+				{
+					CString str;
+					str.Format("%s (%s %u)\n", str_tooMuchPatternData, str_pattern, npat);
+					GetpModDoc()->AddToLog(str);
+				}
+#endif // MODPLUG_TRACKER
 				break;
 			}
 			else
@@ -2426,7 +2435,12 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	ssb.FinishWrite();
 
 	if (ssb.m_Status & srlztn::SNT_FAILURE)
-		AfxMessageBox("Error occured in writing MPTM extensions.", MB_ICONERROR);
+	{
+#ifdef MODPLUG_TRACKER
+		if(GetpModDoc())
+			GetpModDoc()->AddToLog("Error occured in writing MPTM extensions.\n");
+#endif // MODPLUG_TRACKER
+	}
 
 	//Last 4 bytes should tell where the hack mpt things begin.
 	if(!fout.good())
@@ -3611,7 +3625,12 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 	{
 		const size_t objectsize = GetMIDIMapper().GetSerializationSize();
 		if(objectsize > size_t(int16_max))
-			MessageBox(NULL, "Datafield overflow with MIDI to plugparam mappings; data won't be written.", NULL, MB_ICONERROR);
+		{
+#ifdef MODPLUG_TRACKER
+			if(GetpModDoc())
+				GetpModDoc()->AddToLog("Datafield overflow with MIDI to plugparam mappings; data won't be written.\n");
+#endif // MODPLUG_TRACKER
+		}
 		else
 		{
 			code = 'MIMA';
@@ -3700,6 +3719,8 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
 	if(pInterpretMptMade != NULL)
 		*pInterpretMptMade = true;
 
+	// HACK: Reset mod flags to default values here, as they are not always written.
+	m_ModFlags = 0;
 
 	// Case macros. 
 	#define CASE(id, data)	\
