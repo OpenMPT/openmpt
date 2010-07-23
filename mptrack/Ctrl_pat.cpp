@@ -323,11 +323,11 @@ void CCtrlPatterns::UpdateView(DWORD dwHintMask, CObject *pObj)
 		}
 		if (dwHintMask & (HINT_MODTYPE|HINT_PATNAMES))
 		{
-			UINT nPat;
-			if (dwHintMask&HINT_PATNAMES)
-				nPat = (dwHintMask >> HINT_SHIFT_PAT);
+			PATTERNINDEX nPat;
+			if (dwHintMask & HINT_PATNAMES)
+				nPat = (PATTERNINDEX)(dwHintMask >> HINT_SHIFT_PAT);
 			else
-				nPat = SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
+				nPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
 			m_pSndFile->GetPatternName(nPat, s, sizeof(s));
 			m_EditPatName.SetWindowText(s);
 			BOOL bXMIT = (m_pSndFile->m_nType & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
@@ -436,6 +436,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_SETRECORD:
 		if (lParam >= 0) m_bRecord = (BOOL)(lParam); else m_bRecord = !m_bRecord;
 		m_ToolBar.SetState(IDC_PATTERN_RECORD, ((m_bRecord) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
+		CMainFrame::gbPatternRecord = m_bRecord;
 		SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		break;
 
@@ -927,7 +928,7 @@ void CCtrlPatterns::OnPatternRecord()
 {
 	UINT nState = m_ToolBar.GetState(IDC_PATTERN_RECORD);
 	m_bRecord = ((nState & TBSTATE_CHECKED) != 0);
-	CMainFrame::gbPatternRecord=m_bRecord;
+	CMainFrame::gbPatternRecord = m_bRecord;
 	SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 	SwitchToView();
 }
