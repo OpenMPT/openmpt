@@ -1683,8 +1683,8 @@ void CViewSample::OnEditDelete()
 	if ((m_dwBeginSel >= m_dwEndSel)
 	 || (m_dwEndSel - m_dwBeginSel + 4 >= len))
 	{
-		if (MessageBox("Remove this sample ?", "Remove Sample", MB_YESNOCANCEL | MB_ICONQUESTION) != IDYES) return;
-		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_delete, 0, pSmp->nLength);
+		if (MessageBox("Remove this sample?", "Remove Sample", MB_YESNOCANCEL | MB_ICONQUESTION) != IDYES) return;
+		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 		BEGIN_CRITICAL();
 		pSndFile->DestroySample(m_nSample);
 		END_CRITICAL();
@@ -2081,12 +2081,12 @@ void CViewSample::OnSampleTrim()
 
 
 void CViewSample::OnChar(UINT /*nChar*/, UINT, UINT /*nFlags*/)
-//-----------------------------------------------------
+//-------------------------------------------------------------
 {
 }
 
 void CViewSample::PlayNote(UINT note, const uint32 nStartPos)
-//------------------------------------------------------------
+//-----------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -2567,7 +2567,7 @@ BOOL CViewSample::PreTranslateMessage(MSG *pMsg)
 }
 
 LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
-//---------------------------------------------------------------
+//-------------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
@@ -2608,12 +2608,12 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
 
 	}
-	if (wParam>=kcSampStartNotes && wParam<=kcSampEndNotes)
+	if (wParam >= kcSampStartNotes && wParam <= kcSampEndNotes)
 	{
-		PlayNote(wParam-kcSampStartNotes+1+pMainFrm->GetBaseOctave()*12);
+		PlayNote(wParam - kcSampStartNotes + 1 + pMainFrm->GetBaseOctave() * 12);
 		return wParam;
 	}
-	if (wParam>=kcSampStartNoteStops && wParam<=kcSampEndNoteStops)
+	if (wParam >= kcSampStartNoteStops && wParam <= kcSampEndNoteStops)
 	{
 		m_dwStatus &= ~SMPSTATUS_KEYDOWN;
 		return wParam;
