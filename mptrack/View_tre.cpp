@@ -1403,14 +1403,15 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 	case MODITEM_SEQUENCE:
 		if (pModDoc && pSndFile)
 		{
-			wsprintf(s, _T("Delete sequence %d?"), modItemID & 0xFFFF);
+			wsprintf(s, _T("Remove sequence %d?"), modItemID);
 			if(MessageBox(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
-			pSndFile->Order.RemoveSequence((SEQUENCEINDEX)(modItemID & 0xFFFF));
+			pSndFile->Order.RemoveSequence((SEQUENCEINDEX)(modItemID));
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
 		}
 		break;
 
 	case MODITEM_ORDER:
+		// might be slightly annoying to ask for confirmation here, and it's rather easy to restore the orderlist anyway.
 		if ((pModDoc) && (pModDoc->RemoveOrder((SEQUENCEINDEX)(modItemID >> 16), (ORDERINDEX)(modItemID & 0xFFFF))))
 		{
 			pModDoc->UpdateAllViews(NULL, HINT_MODSEQUENCE, NULL);
@@ -1418,27 +1419,28 @@ BOOL CModTree::DeleteTreeItem(HTREEITEM hItem)
 		break;
 
 	case MODITEM_PATTERN:
-		wsprintf(s, _T("Delete pattern %d?"), modItemID & 0xFFFF);
-		if(MessageBox(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
-		if ((pModDoc) && (pModDoc->RemovePattern((PATTERNINDEX)modItemID)))
+		wsprintf(s, _T("Remove pattern %d?"), modItemID);
+		if (pModDoc == nullptr || MessageBox(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
+		if (pModDoc->RemovePattern((PATTERNINDEX)modItemID))
 		{
 			pModDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_PAT) | HINT_PATTERNDATA|HINT_PATNAMES);
 		}
 		break;
 
 	case MODITEM_SAMPLE:
-		wsprintf(s, _T("Delete sample %d?"), modItemID & 0xFFFF);
-		if(MessageBox(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
-		if ((pModDoc) && (pModDoc->RemoveSample((SAMPLEINDEX)modItemID)))
+		wsprintf(s, _T("Remove sample %d?"), modItemID);
+		if (pModDoc == nullptr || MessageBox(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
+		pModDoc->GetSampleUndo()->PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace);
+		if (pModDoc->RemoveSample((SAMPLEINDEX)modItemID))
 		{
 			pModDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_SMP) | HINT_SMPNAMES|HINT_SAMPLEDATA|HINT_SAMPLEINFO);
 		}
 		break;
 
 	case MODITEM_INSTRUMENT:
-		wsprintf(s, _T("Delete instrument %d?"), modItemID & 0xFFFF);
-		if(MessageBox(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
-		if ((pModDoc) && (pModDoc->RemoveInstrument((INSTRUMENTINDEX)modItemID)))
+		wsprintf(s, _T("Remove instrument %d?"), modItemID);
+		if (pModDoc == nullptr || MessageBox(s, _T("Confirmation"), MB_YESNO | MB_DEFBUTTON2) == IDNO) break;
+		if (pModDoc->RemoveInstrument((INSTRUMENTINDEX)modItemID))
 		{
 			pModDoc->UpdateAllViews(NULL, (UINT(modItemID) << HINT_SHIFT_INS) | HINT_MODTYPE|HINT_ENVELOPE|HINT_INSTRUMENT);
 		}
