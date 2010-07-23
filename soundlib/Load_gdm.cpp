@@ -256,14 +256,7 @@ bool CSoundFile::ReadGDM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if(iPatternLength > dwMemLength || iPatternsOffset > dwMemLength - iPatternLength) break;
 
 		if(Patterns.Insert(iPat, 64)) 
-		{
-#ifdef MODPLUG_TRACKER
-			CString s;
-			s.Format(TEXT("Allocating patterns failed starting from pattern %u"), iPat);
-			if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
-#endif // MODPLUG_TRACKER
 			break;
-		}
 
 		// position in THIS pattern
 		DWORD iPatternPos = iPatternsOffset + 2;

@@ -367,14 +367,8 @@ bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 		dwMemPos += 4;
 
 		if(Patterns.Insert(nPat, nrows))
-		{
-#ifdef MODPLUG_TRACKER
-			CString s;
-			s.Format(TEXT("Allocating patterns failed starting from pattern %u"), nPat);
-			if(m_pModDoc != nullptr) m_pModDoc->AddToLog(s);
-#endif // MODPLUG_TRACKER
 			break;
-		}
+
 		row_data = Patterns[nPat];
 
 		row = 0;
