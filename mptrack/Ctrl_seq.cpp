@@ -1068,7 +1068,10 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			for(SEQUENCEINDEX i = 0; i < numSequences; i++)
 			{
 				CString str;
-				str.Format(TEXT("%u: %s"), i, (LPCTSTR)pSndFile->Order.GetSequence(i).m_sName);
+				if(pSndFile->Order.GetSequence(i).m_sName.IsEmpty())
+					str.Format(TEXT("Sequence %u"), i);
+				else
+					str.Format(TEXT("%u: %s"), i, (LPCTSTR)pSndFile->Order.GetSequence(i).m_sName);
 				const UINT flags = (pSndFile->Order.GetCurrentSequenceIndex() == i) ? MF_STRING|MF_CHECKED : MF_STRING;
 				AppendMenu(menuSequence, flags, ID_SEQUENCE_ITEM + i, str);
 			}
