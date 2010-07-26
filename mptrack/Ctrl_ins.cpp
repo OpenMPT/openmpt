@@ -727,7 +727,6 @@ BEGIN_MESSAGE_MAP(CCtrlInstruments, CModControlDlg)
 	ON_COMMAND(IDC_CHECK1,				OnSetPanningChanged)
 	ON_COMMAND(IDC_CHECK2,				OnEnableCutOff)
 	ON_COMMAND(IDC_CHECK3,				OnEnableResonance)
-//	ON_COMMAND(IDC_CHECK4,				OnToggleHighpass)
 	ON_COMMAND(IDC_INSVIEWPLG,			TogglePluginEditor)		//rewbs.instroVSTi
 	ON_EN_CHANGE(IDC_EDIT_INSTRUMENT,	OnInstrumentChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		OnNameChanged)
@@ -792,7 +791,6 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK1,				m_CheckPanning);
 	DDX_Control(pDX, IDC_CHECK2,				m_CheckCutOff);
 	DDX_Control(pDX, IDC_CHECK3,				m_CheckResonance);
-	DDX_Control(pDX, IDC_CHECK4,				m_CheckHighpass);
 	DDX_Control(pDX, IDC_SLIDER1,				m_SliderVolSwing);
 	DDX_Control(pDX, IDC_SLIDER2,				m_SliderPanSwing);
 	DDX_Control(pDX, IDC_SLIDER3,				m_SliderCutOff);
@@ -1149,7 +1147,6 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 		m_EditPPS.EnableWindow(bITandMPT);
 		m_CheckCutOff.EnableWindow(bITandMPT);
 		m_CheckResonance.EnableWindow(bITandMPT);
-		m_CheckHighpass.EnableWindow(bITandMPT);
 		m_SliderCutOff.EnableWindow(bITandMPT);
 		m_SliderResonance.EnableWindow(bITandMPT);
 		m_SpinInstrument.SetRange(1, m_pSndFile->m_nInstruments);
@@ -1231,7 +1228,6 @@ void CCtrlInstruments::UpdateView(DWORD dwHintMask, CObject *pObj)
 			{
 				m_CheckCutOff.SetCheck((pIns->nIFC & 0x80) ? TRUE : FALSE);
 				m_CheckResonance.SetCheck((pIns->nIFR & 0x80) ? TRUE : FALSE);
-				//m_CheckHighpass.SetCheck(pIns->nFilterMode);
 				m_SliderVolSwing.SetPos(pIns->nVolSwing);
 				m_SliderPanSwing.SetPos(pIns->nPanSwing);
 				m_SliderResSwing.SetPos(pIns->nResSwing);
@@ -2308,39 +2304,6 @@ void CCtrlInstruments::OnFilterModeChanged()
 	}
 }
 
-/*
-void CCtrlInstruments::OnToggleHighpass()
-//----------------------------------------
-{
-	BOOL bHighpass = IsDlgButtonChecked(IDC_CHECK4);
-
-	if (!m_pModDoc) {
-		return;
-	}
-
-	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
-	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-
-	if (pIns)	{
-		if (bHighpass) {
-			pIns->nFilterMode = FLTMODE_HIGHPASS;
-		} else {
-			pIns->nFilterMode = 0;
-		}
-
-		for (UINT i=0; i<MAX_CHANNELS; i++)	{
-			if (pSndFile->Chn[i].pModInstrument == pIns) {
-				pSndFile->Chn[i].nFilterMode = pIns->nFilterMode;
-			}
-		}
-	}
-	m_pSndFile->instrumentModified[m_nInstrument-1] = TRUE;
-	m_pModDoc->UpdateAllViews(NULL, HINT_INSNAMES, this);
-	m_pModDoc->SetModified();
-	SwitchToView();
-
-}
-*/
 
 void CCtrlInstruments::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 //----------------------------------------------------------------------

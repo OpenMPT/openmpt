@@ -72,7 +72,7 @@ protected:
 	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS, m_SpinMidiBK;
 	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnMixPlug, m_CbnResampling, m_CbnFilterMode, m_CbnPluginVelocityHandling, m_CbnPluginVolumeHandling;
 	CEdit m_EditName, m_EditFileName, m_EditGlobalVol, m_EditPanning, m_EditPPS;
-	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance, m_CheckHighpass;
+	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance;
 	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutSwing, m_SliderResSwing, 
 		        m_SliderCutOff, m_SliderResonance;
 	CNoteMapWnd m_NoteMap;
@@ -163,7 +163,6 @@ protected:
 
 	afx_msg void OnEnableCutOff();
 	afx_msg void OnEnableResonance();
-	//afx_msg void OnToggleHighpass();
 	afx_msg void OnEditSampleMap();
 	afx_msg void TogglePluginEditor();  //rewbs.instroVSTi
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys

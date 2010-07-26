@@ -230,8 +230,15 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			} else
 				if (m->param >= 0xE0)
 				{
-					m->command = CMD_MODCMDEX;
-					m->param = (((m->param & 0x0F)+3) >> 2) | 0x10;
+					if(newTypeIsXM)
+					{
+						m->command = CMD_XFINEPORTAUPDOWN;
+						m->param = 0x10 | (m->param & 0x0F);
+					} else
+					{
+						m->command = CMD_MODCMDEX;
+						m->param = (((m->param & 0x0F) + 3) >> 2) | 0x10;
+					}
 				} else m->command = CMD_PORTAMENTOUP;
 			break;
 		case CMD_PORTAMENTODOWN:
@@ -242,8 +249,15 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			} else
 				if (m->param >= 0xE0)
 				{
-					m->command = CMD_MODCMDEX;
-					m->param = (((m->param & 0x0F)+3) >> 2) | 0x20;
+					if(newTypeIsXM)
+					{
+						m->command = CMD_XFINEPORTAUPDOWN;
+						m->param = 0x20 | (m->param & 0x0F);
+					} else
+					{
+						m->command = CMD_MODCMDEX;
+						m->param = (((m->param & 0x0F) + 3) >> 2) | 0x20;
+					}
 				} else m->command = CMD_PORTAMENTODOWN;
 			break;
 		case CMD_SPEED:
