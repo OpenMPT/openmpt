@@ -107,6 +107,7 @@ CViewSample::CViewSample()
 	memset(m_dwNotifyPos, 0, sizeof(m_dwNotifyPos));
 	memset(m_NcButtonState, 0, sizeof(m_NcButtonState));
 	m_bmpEnvBar.Create(IDB_SMPTOOLBAR, 20, 0, RGB(192,192,192));
+	m_lastDrawPoint.SetPoint(-1, -1);
 }
 
 
@@ -1310,6 +1311,17 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 		{
 			if(m_dwEndDrag < len)
 			{
+				// Shift = draw horizontal lines
+				if(CMainFrame::GetInputHandler()->ShiftPressed())
+				{
+					if(m_lastDrawPoint.y != -1)
+						point.y = m_lastDrawPoint.y;
+					m_lastDrawPoint = point;
+				} else
+				{
+					m_lastDrawPoint.SetPoint(-1, -1);
+				}
+
 				if(pSndFile->Samples[m_nSample].GetElementarySampleSize() == 2)
 					SetSampleData<int16, uint16>(pSndFile->Samples[m_nSample].pSample, point, old);
 				else if(pSndFile->Samples[m_nSample].GetElementarySampleSize() == 1)
@@ -1364,6 +1376,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	// set initial point for sample drawing
 	if (m_bDrawingEnabled)
 	{
+		m_lastDrawPoint = point;
 		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 		if(pSndFile->Samples[m_nSample].GetElementarySampleSize() == 2)
 			SetInitialDrawPoint<int16, uint16>(pSndFile->Samples[m_nSample].pSample, point);
@@ -1390,6 +1403,7 @@ void CViewSample::OnLButtonUp(UINT, CPoint)
 		m_dwStatus &= ~SMPSTATUS_MOUSEDRAG;
 		ReleaseCapture();
 	}
+	m_lastDrawPoint.SetPoint(-1, -1);
 }
 
 

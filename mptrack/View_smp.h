@@ -21,7 +21,9 @@ protected:
 	DWORD m_dwMenuParam;
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	DWORD m_dwNotifyPos[MAX_CHANNELS];
-	bool m_bDrawingEnabled;
+
+	bool m_bDrawingEnabled;	// sample drawing mode enabled?
+	CPoint m_lastDrawPoint;	// for drawing horizontal lines
 
 public:
 	CViewSample();
