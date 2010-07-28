@@ -125,7 +125,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcCopySelectOff, 1053, kcHidden, kcNoDummy, _T("Copy deselect key"));
 	DefineKeyCommand(kcNextPattern, 1054, kcVisible, kcNoDummy, _T("Next pattern"));
 	DefineKeyCommand(kcPrevPattern, 1055, kcVisible, kcNoDummy, _T("Previous pattern"));
-	//DefineKeyCommand(kcPrevPattern, 1056, kcVisible, kcNoDummy, _T("Wipe selection"));
+	//DefineKeyCommand(kcClearSelection, 1056, kcVisible, kcNoDummy, _T("Wipe selection"));
 	DefineKeyCommand(kcClearRow, 1057, kcVisible, kcNoDummy, _T("Clear row"));
 	DefineKeyCommand(kcClearField, 1058, kcVisible, kcNoDummy, _T("Clear field"));
 	DefineKeyCommand(kcClearRowStep, 1059, kcVisible, kcNoDummy, _T("Clear row and step"));
@@ -588,6 +588,17 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcVSTGUIToggleRecordParams, 1839, kcVisible, kcNoDummy, _T("Toggle parameter recording"));
 	DefineKeyCommand(kcVSTGUIToggleSendKeysToPlug, 1840, kcVisible, kcNoDummy, _T("Pass key presses to plugin"));
 	DefineKeyCommand(kcVSTGUIBypassPlug, 1841, kcVisible, kcNoDummy, _T("Bypass plugin"));
+	DefineKeyCommand(kcInsNoteMapTransposeDown, 1842, kcVisible, kcNoDummy, _T("Transpose -1 (note map)"));
+	DefineKeyCommand(kcInsNoteMapTransposeUp, 1843, kcVisible, kcNoDummy, _T("Transpose +1 (note map)"));
+	DefineKeyCommand(kcInsNoteMapTransposeOctDown, 1844, kcVisible, kcNoDummy, _T("Transpose -12 (note map)"));
+	DefineKeyCommand(kcInsNoteMapTransposeOctUp, 1845, kcVisible, kcNoDummy, _T("Transpose +12 (note map)"));
+	DefineKeyCommand(kcInsNoteMapCopyCurrentNote, 1846, kcVisible, kcNoDummy, _T("Map all notes to selected note"));
+	DefineKeyCommand(kcInsNoteMapCopyCurrentSample, 1847, kcVisible, kcNoDummy, _T("Map all notes to selected sample"));
+	DefineKeyCommand(kcInsNoteMapReset, 1848, kcVisible, kcNoDummy, _T("Reset note mapping"));
+	DefineKeyCommand(kcInsNoteMapEditSample, 1849, kcVisible, kcNoDummy, _T("Edit current sample"));
+	DefineKeyCommand(kcInsNoteMapEditSampleMap, 1850, kcVisible, kcNoDummy, _T("Edit sample map"));
+	DefineKeyCommand(kcInstrumentCtrlDuplicate, 1851, kcVisible, kcNoDummy, _T("Duplicate instrument"));
+	// Add new key commands here.
 
 #ifdef _DEBUG
 	for(size_t i = 0; i < kcNumCommands; i++)

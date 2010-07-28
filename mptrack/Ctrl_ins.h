@@ -13,7 +13,8 @@ class CNoteMapWnd: public CStatic
 protected:
 	CModDoc *m_pModDoc;
 	CCtrlInstruments *m_pParent;
-	UINT m_nInstrument, m_nNote, m_bIns, m_nOldNote, m_nOldIns;
+	UINT m_nInstrument, m_nNote, m_nOldNote, m_nOldIns;
+	bool m_bIns;
 	int m_nPlayingNote;
 	HFONT m_hFont;
 	int m_cxFont, m_cyFont;
@@ -23,7 +24,18 @@ private:
 	void MapTranspose(int nAmount);
 
 public:
-	CNoteMapWnd() { m_nPlayingNote=-1; m_nNote = NOTE_MIDDLEC - 1; m_pModDoc = NULL; m_nInstrument = 0; m_bIns = FALSE; m_cxFont = m_cyFont = 0; m_hFont = NULL; m_nOldNote = m_nOldIns = 0; m_pParent = NULL; }
+	CNoteMapWnd()
+	{
+		m_nPlayingNote = -1;
+		m_nNote = NOTE_MIDDLEC - 1;
+		m_pModDoc = nullptr;
+		m_nInstrument = 0;
+		m_bIns = false;
+		m_cxFont = m_cyFont = 0;
+		m_hFont = NULL;
+		m_nOldNote = m_nOldIns = 0;
+		m_pParent = NULL;
+	}
 	BOOL SetCurrentInstrument(CModDoc *pModDoc, UINT nIns);
 	BOOL SetCurrentNote(UINT nNote);
 	VOID Init(CCtrlInstruments *pParent) { m_pParent = pParent; }

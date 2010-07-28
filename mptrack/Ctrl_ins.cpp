@@ -61,6 +61,12 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 			
 			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
 				return true; // Mapped to a command, no need to pass message on.
+
+			// a bit of a hack...
+			ctx = (InputTargetContext)(kCtxCtrlInstruments);
+
+			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+				return true; // Mapped to a command, no need to pass message on.
 		}
 	}
 	
@@ -154,7 +160,7 @@ void CNoteMapWnd::OnPaint()
 	dc.IntersectClipRect(&rcClient);
 	if ((m_pModDoc) && (m_cxFont > 0) && (m_cyFont > 0))
 	{
-		BOOL bFocus = (::GetFocus() == m_hWnd) ? TRUE : FALSE;
+		bool bFocus = (::GetFocus() == m_hWnd);
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 		CHAR s[64];
@@ -165,7 +171,7 @@ void CNoteMapWnd::OnPaint()
 		int ypaint = 0;
 		for (int ynote=0; ynote<nNotes; ynote++, ypaint+=m_cyFont, nPos++)
 		{
-			BOOL bHighLight;
+			bool bHighLight;
 
 			// Note
 			s[0] = 0;
@@ -176,7 +182,7 @@ void CNoteMapWnd::OnPaint()
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
 			DrawButtonRect(hdc, &rect, s, FALSE, FALSE);
 			// Mapped Note
-			bHighLight = ((bFocus) && (nPos == (int)m_nNote) /*&& (!m_bIns)*/) ? TRUE : FALSE;
+			bHighLight = ((bFocus) && (nPos == (int)m_nNote) /*&& (!m_bIns)*/);
 			rect.left = rect.right;
 			rect.right = m_cxFont*2-1;
 			strcpy(s, "...");
@@ -203,7 +209,7 @@ void CNoteMapWnd::OnPaint()
 			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
 			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 			// Sample
-			bHighLight = ((bFocus) && (nPos == (int)m_nNote) /*&& (m_bIns)*/) ? TRUE : FALSE;
+			bHighLight = ((bFocus) && (nPos == (int)m_nNote) /*&& (m_bIns)*/);
 			rect.left = rcClient.left + m_cxFont*2+3;
 			rect.right = rcClient.right;
 			strcpy(s, " ..");
@@ -254,15 +260,18 @@ void CNoteMapWnd::OnKillFocus(CWnd *pNewWnd)
 void CNoteMapWnd::OnLButtonDown(UINT, CPoint pt)
 //----------------------------------------------
 {
-	if ((pt.x >= m_cxFont) && (pt.x < m_cxFont*2) && (m_bIns)) {
-		m_bIns = FALSE;
+	if ((pt.x >= m_cxFont) && (pt.x < m_cxFont*2) && (m_bIns))
+	{
+		m_bIns = false;
 		InvalidateRect(NULL, FALSE);
 	}
-	if ((pt.x > m_cxFont*2) && (pt.x <= m_cxFont*3) && (!m_bIns)) {
-		m_bIns = TRUE;
+	if ((pt.x > m_cxFont*2) && (pt.x <= m_cxFont*3) && (!m_bIns))
+	{
+		m_bIns = true;
 		InvalidateRect(NULL, FALSE);
 	}
-	if ((pt.x >= 0) && (m_cyFont)) {
+	if ((pt.x >= 0) && (m_cyFont))
+	{
 		CRect rcClient;
 		GetClientRect(&rcClient);
 		int nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
@@ -290,9 +299,11 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 		CHAR s[64];
 		CSoundFile *pSndFile;
 		MODINSTRUMENT *pIns;
+		CInputHandler* ih = CMainFrame::GetInputHandler();
 		
 		pSndFile = m_pModDoc->GetSoundFile();
 		pIns = pSndFile->Instruments[m_nInstrument];
+
 		if (pIns)
 		{
 			HMENU hMenu = ::CreatePopupMenu();
@@ -300,7 +311,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 
 			if (hMenu)
 			{
-				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, "Edit Sample &Map");
+				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_SAMPLEMAP, "Edit Sample &Map\t" + ih->GetKeyTextFromCommand(kcInsNoteMapEditSampleMap));
 				if (hSubMenu)
 				{
 					BYTE smpused[(MAX_SAMPLES+7)/8];
@@ -321,24 +332,24 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 							AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE+j, s);
 						}
 					}
-					AppendMenu(hMenu, MF_POPUP, (UINT)hSubMenu, "&Edit Sample");
+					AppendMenu(hMenu, MF_POPUP, (UINT)hSubMenu, "&Edit Sample\t" + ih->GetKeyTextFromCommand(kcInsNoteMapEditSample));
 					AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 				}
-				wsprintf(s, "Map all notes to &sample %d", pIns->Keyboard[m_nNote]);
+				wsprintf(s, "Map all notes to &sample %d\t" + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample), pIns->Keyboard[m_nNote]);
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, s);
 
 				if(pSndFile->GetType() != MOD_TYPE_XM)
 				{
 					if(pIns->NoteMap[m_nNote] < NOTE_MIN_SPECIAL)
-						wsprintf(s, "Map all &notes to %s", pSndFile->GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
+						wsprintf(s, "Map all &notes to %s\t" + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote), pSndFile->GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument).c_str());
 					else
-						wsprintf(s, "Map all &notes to %s", szSpecialNoteNames[pIns->NoteMap[m_nNote] - NOTE_MIN_SPECIAL]);
+						wsprintf(s, "Map all &notes to %s\t" + ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote), szSpecialNoteNames[pIns->NoteMap[m_nNote] - NOTE_MIN_SPECIAL]);
 					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, s);
-					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, "Transpose map &up");
-					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, "Transpose map &down");
+					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, "Transpose map &up\t" + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp));
+					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, "Transpose map &down\t" + ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown));
 				}
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, "&Reset note mapping");
-				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, "Duplicate &Instrument\tShift+New");
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, "&Reset note mapping\t" + ih->GetKeyTextFromCommand(kcInsNoteMapReset));
+				AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, "Duplicate &Instrument\t" + ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate));
 				SetMenuDefaultItem(hMenu, ID_INSTRUMENT_SAMPLEMAP, FALSE);
 				ClientToScreen(&pt);
 				::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
@@ -411,6 +422,7 @@ void CNoteMapWnd::OnMapReset()
 	MODINSTRUMENT *pIns;
 	
 	pSndFile = m_pModDoc->GetSoundFile();
+	if(pSndFile == nullptr) return;
 	pIns = pSndFile->Instruments[m_nInstrument];
 	if (pIns)
 	{
@@ -503,10 +515,14 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		return NULL;
 	
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
+	MODINSTRUMENT *pIns = nullptr;
+	if(pSndFile)
+	{
+		pIns = pSndFile->Instruments[m_nInstrument];
+	}
 
-	//Handle notes
-
-	
+	// Handle notes
 
 	if (wParam>=kcInsNoteMapStartNotes && wParam<=kcInsNoteMapEndNotes)
 	{
@@ -524,6 +540,26 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		StopNote(m_nPlayingNote);
 		return wParam;
 	}
+
+	// Other shortcuts
+
+	switch(wParam)
+	{
+	case kcInsNoteMapTransposeDown:		MapTranspose(-1); return wParam;
+	case kcInsNoteMapTransposeUp:		MapTranspose(1); return wParam;
+	case kcInsNoteMapTransposeOctDown:	MapTranspose(-12); return wParam;
+	case kcInsNoteMapTransposeOctUp:	MapTranspose(12); return wParam;
+
+	case kcInsNoteMapCopyCurrentSample:	OnMapCopySample(); return wParam;
+	case kcInsNoteMapCopyCurrentNote:	OnMapCopyNote(); return wParam;
+	case kcInsNoteMapReset:				OnMapReset(); return wParam;
+
+	case kcInsNoteMapEditSample:		if(pIns) OnEditSample(pIns->Keyboard[m_nNote] + ID_NOTEMAP_EDITSAMPLE); return wParam;
+	case kcInsNoteMapEditSampleMap:		OnEditSampleMap(); return wParam;
+
+	// Parent shortcuts (also displayed in context menu of this control)
+	case kcInstrumentCtrlDuplicate:		OnInstrumentDuplicate(); return wParam;
+	}
 	
 	return NULL;
 }
@@ -538,11 +574,11 @@ void CNoteMapWnd::EnterNote(UINT note)
 		if (!m_bIns && (pSndFile->m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			UINT n = pIns->NoteMap[m_nNote];
-			BOOL bOk = FALSE;
+			bool bOk = false;
 			if ((note > 0) && (note <= NOTE_MAX))
 			{	
 				n = note;
-				bOk = TRUE;
+				bOk = true;
 			} 
 			if (n != pIns->NoteMap[m_nNote])
 			{
@@ -565,26 +601,30 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 {
 	CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 	MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
-	if ((pIns) && (m_nNote < NOTE_MAX))	{
+	if ((pIns) && (m_nNote < NOTE_MAX))
+	{
 
-		if ((m_bIns) && (((c >= '0') && (c <= '9')) || (c == ' '))) {	//in sample # column
-		
+		if ((m_bIns) && (((c >= '0') && (c <= '9')) || (c == ' ')))	//in sample # column
+		{
 			UINT n = m_nOldIns;
-			if (c != ' ') {
-				n = (10*pIns->Keyboard[m_nNote] + (c - '0')) % 10000;
+			if (c != ' ')
+			{
+				n = (10 * pIns->Keyboard[m_nNote] + (c - '0')) % 10000;
 				if ((n >= MAX_SAMPLES) || ((pSndFile->m_nSamples < 1000) && (n >= 1000))) n = (n % 1000);
 				if ((n >= MAX_SAMPLES) || ((pSndFile->m_nSamples < 100) && (n >= 100))) n = (n % 100); else
 				if ((n > 31) && (pSndFile->m_nSamples < 32) && (n % 10)) n = (n % 10);
 			}
 
-			if (n != pIns->Keyboard[m_nNote]) {
+			if (n != pIns->Keyboard[m_nNote])
+			{
 				pIns->Keyboard[m_nNote] = n;
 				m_pModDoc->SetModified();
 				InvalidateRect(NULL, FALSE);
 				PlayNote(m_nNote+1);
 			}
 
-			if (c == ' ') {
+			if (c == ' ')
+			{
 				if (m_nNote < NOTE_MAX - 1) m_nNote++;
 				InvalidateRect(NULL, FALSE);
 				PlayNote(m_nNote);
@@ -592,27 +632,30 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			return true;
 		}
 
-		else if ((!m_bIns) && (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))) { //in note column
-
+		else if ((!m_bIns) && (pSndFile->m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))	//in note column
+		{
 			UINT n = pIns->NoteMap[m_nNote];
 
-			if ((c >= '0') && (c <= '9')) {
-				if (n) {
+			if ((c >= '0') && (c <= '9'))
+			{
+				if (n)
 					n = ((n-1) % 12) + (c-'0')*12 + 1;
-				} else {
+				else
 					n = (m_nNote % 12) + (c-'0')*12 + 1;
-				}
-			} else if (c == ' ') {
+			} else if (c == ' ')
+			{
 				n = (m_nOldNote) ? m_nOldNote : m_nNote+1;
 			}
 
-			if (n != pIns->NoteMap[m_nNote]) {
+			if (n != pIns->NoteMap[m_nNote])
+			{
 				pIns->NoteMap[m_nNote] = n;
 				m_pModDoc->SetModified();
 				InvalidateRect(NULL, FALSE);
 			}
 			
-			if (c == ' ') {
+			if (c == ' ')
+			{
 				SetCurrentNote(m_nNote+1);
 			}
 
@@ -627,7 +670,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 bool CNoteMapWnd::HandleNav(WPARAM k)
 //------------------------------------
 {
-	BOOL bRedraw = FALSE;
+	bool bRedraw = false;
 
 	//HACK: handle numpad (convert numpad number key to normal number key)
 	if ((k >= VK_NUMPAD0) && (k <= VK_NUMPAD9)) return HandleChar(k-VK_NUMPAD0+'0');
@@ -635,26 +678,26 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	switch(k)
 	{
 	case VK_RIGHT:
-		if (!m_bIns) { m_bIns = TRUE; bRedraw = TRUE; } else
-		if (m_nNote < NOTE_MAX - 1) { m_nNote++; m_bIns = FALSE; bRedraw = TRUE; }
+		if (!m_bIns) { m_bIns = true; bRedraw = true; } else
+		if (m_nNote < NOTE_MAX - 1) { m_nNote++; m_bIns = false; bRedraw = true; }
 		break;
 	case VK_LEFT:
-		if (m_bIns) { m_bIns = FALSE; bRedraw = TRUE; } else
-		if (m_nNote) { m_nNote--; m_bIns = TRUE; bRedraw = TRUE; }
+		if (m_bIns) { m_bIns = false; bRedraw = true; } else
+		if (m_nNote) { m_nNote--; m_bIns = true; bRedraw = true; }
 		break;
 	case VK_UP:
-		if (m_nNote > 0) { m_nNote--; bRedraw = TRUE; }
+		if (m_nNote > 0) { m_nNote--; bRedraw = true; }
 		break;
 	case VK_DOWN:
-		if (m_nNote < NOTE_MAX - 1) { m_nNote++; bRedraw = TRUE; }
+		if (m_nNote < NOTE_MAX - 1) { m_nNote++; bRedraw = true; }
 		break;
 	case VK_PRIOR:
-		if (m_nNote > 3) { m_nNote-=3; bRedraw = TRUE; } else
-		if (m_nNote > 0) { m_nNote = 0; bRedraw = TRUE; }
+		if (m_nNote > 3) { m_nNote -= 3; bRedraw = true; } else
+		if (m_nNote > 0) { m_nNote = 0; bRedraw = true; }
 		break;
 	case VK_NEXT:
-		if (m_nNote+3 < NOTE_MAX) { m_nNote+=3; bRedraw = TRUE; } else
-		if (m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = TRUE; }
+		if (m_nNote+3 < NOTE_MAX) { m_nNote += 3; bRedraw = true; } else
+		if (m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = true; }
 		break;
 	case VK_TAB:
 		return true;
@@ -2528,6 +2571,8 @@ LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcInstrumentCtrlLoad: OnInstrumentOpen(); return wParam;
 		case kcInstrumentCtrlSave: OnInstrumentSave(); return wParam;
 		case kcInstrumentCtrlNew:  OnInstrumentNew();  return wParam;
+
+		case kcInstrumentCtrlDuplicate:	OnInstrumentDuplicate(); return wParam;
 	}
 	
 	return 0;

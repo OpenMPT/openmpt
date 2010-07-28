@@ -304,11 +304,13 @@ void COptionsKeyboard::DefineCommandCategories()
 	commandCategories.Add(*newCat);
 	delete newCat;
 
-	newCat = new CommandCategory("  Instrument [Top]", kCtxCtrlInstruments);
+	newCat = new CommandCategory("  Instrument Editor", kCtxCtrlInstruments);
+	for (int c=kcStartInstrumentCtrlMisc; c<=kcEndInstrumentCtrlMisc; c++)
+		newCat->commands.Add(c);
 	commandCategories.Add(*newCat);
 	delete newCat;
 
-	newCat = new CommandCategory("  Instrument Editor", kCtxViewInstruments);
+	newCat = new CommandCategory("    Envelope Editor", kCtxViewInstruments);
 	for (int c=kcStartInstrumentMisc; c<=kcEndInstrumentMisc; c++)
 		newCat->commands.Add(c);
 	commandCategories.Add(*newCat);
@@ -355,7 +357,7 @@ void COptionsKeyboard::OnKeyboardChanged()
 
 // Fills command list and automatically selects first command.
 void COptionsKeyboard::OnCategorySelChanged()
-//----------------------------------------
+//-------------------------------------------
 {
 	CommandID nCmd  = (CommandID)m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel() );
 	int nCat = m_cmbCategory.GetItemData( m_cmbCategory.GetCurSel() );
@@ -385,7 +387,7 @@ void COptionsKeyboard::OnCategorySelChanged()
 
 // Fills  key choice list and automatically selects first key choice
 void COptionsKeyboard::OnCommandKeySelChanged()
-//----------------------------------------
+//---------------------------------------------
 {
 	CommandID nCmd  = (CommandID)m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel() );
 	CString str;

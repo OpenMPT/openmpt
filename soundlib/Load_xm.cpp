@@ -245,8 +245,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	UINT unused_samples; // dito
 
 	bool bMadeWithModPlug = false, bProbablyMadeWithModPlug = false, bProbablyMPT109 = false, bIsFT2 = false;
-	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
-	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	m_nChannels = 0;
 	if ((!lpStream) || (dwMemLength < 0xAA)) return false; // the smallest XM I know is 174 Bytes
@@ -291,6 +289,9 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	Order.ReadAsByte(lpStream + 80, xmheader.orders, dwMemLength - 80);
 
 	dwMemPos = xmheader.size + 60;
+
+	// set this here already because XMs compressed with BoobieSqueezer will exit the function early
+	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	if(xmheader.xmversion >= 0x0104)
 	{
