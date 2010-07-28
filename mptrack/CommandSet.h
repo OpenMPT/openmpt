@@ -1072,11 +1072,12 @@ struct CommandStruct
 	CArray <KeyCombination,KeyCombination> kcList;
 	//KeyCombination kcList[10];
 	
-	bool operator=(const CommandStruct &other) {
-		UID=other.UID;
-		Message=other.Message;
-		isDummy=other.isDummy;
-		isHidden=other.isHidden;
+	bool operator = (const CommandStruct &other)
+	{
+		UID = other.UID;
+		Message = other.Message;
+		isDummy = other.isDummy;
+		isHidden = other.isHidden;
 		kcList.Copy(other.kcList);
 		return true;
 	}
@@ -1110,10 +1111,24 @@ enum RuleID
 	kNumRules
 };
 
+// For defining key commands
+enum enmKcVisibility
+{
+	kcVisible,
+	kcHidden
+};
+
+enum enmKcDummy
+{
+	kcNoDummy,
+	kcDummy
+};
+
 class CCommandSet
 {
 protected:
 	//util
+	inline void DefineKeyCommand(CommandID kc, UINT uid, enmKcVisibility visible, enmKcDummy dummy, CString message);
 	void SetupCommands();
 	void SetupContextHierarchy();
 	bool IsDummyCommand(CommandID cmd);
@@ -1131,7 +1146,7 @@ protected:
 	//CArray<CArray<bool,bool>, CArray<bool,bool> > m_isParentContext;
 	bool m_isParentContext[kCtxMaxInputContexts][kCtxMaxInputContexts];
 	bool enforceRule[kNumRules];
-	
+
 public:
 	static bool s_bShowErrorOnUnknownKeybinding;
 
