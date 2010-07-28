@@ -49,2559 +49,563 @@ CCommandSet::~CCommandSet(void)
 	//commands.RemoveAll();
 }
 
+
 //-------------------------------------------------------
 // Setup
 //-------------------------------------------------------
+
+// Helper function for setting up commands
+inline void CCommandSet::DefineKeyCommand(CommandID kc, UINT uid, enmKcVisibility visibility, enmKcDummy dummy, CString message)
+//------------------------------------------------------------------------------------------------------------------------------
+{
+	commands[kc].UID = uid;
+	commands[kc].isHidden = (visibility == kcHidden) ? true : false;
+	commands[kc].isDummy = (dummy == kcDummy) ? true : false;
+	commands[kc].Message = message;
+}
+
 //Get command descriptions etc.. loaded up.
 void CCommandSet::SetupCommands()
+//-------------------------------
 {	//TODO: make this hideous list a bit nicer, with a constructor or somthing.
 	//NOTE: isHidden implies automatically set, since the user will not be able to see it.
 
-	commands[kcPatternRecord].UID = 1001;
-	commands[kcPatternRecord].isHidden = false;
-	commands[kcPatternRecord].isDummy = false;
-	commands[kcPatternRecord].Message = "Enable recording";
-
-	commands[kcPatternPlayRow].UID = 1002;
-	commands[kcPatternPlayRow].isHidden = false;
-	commands[kcPatternPlayRow].isDummy = false;
-	commands[kcPatternPlayRow].Message = "Play row";
-
-	commands[kcCursorCopy].UID = 1003;
-	commands[kcCursorCopy].isHidden = false;
-	commands[kcCursorCopy].isDummy = false;
-	commands[kcCursorCopy].Message = "Quick copy";
-
-	commands[kcCursorPaste].UID = 1004;
-	commands[kcCursorPaste].isHidden = false;
-	commands[kcCursorPaste].isDummy = false;
-	commands[kcCursorPaste].Message = "Quick paste";
-
-	commands[kcChannelMute].UID = 1005;
-	commands[kcChannelMute].isHidden = false;
-	commands[kcChannelMute].isDummy = false;
-	commands[kcChannelMute].Message = "Mute current channel";
-
-	commands[kcChannelSolo].UID = 1006;
-	commands[kcChannelSolo].isHidden = false;
-	commands[kcChannelSolo].isDummy = false;
-	commands[kcChannelSolo].Message = "Solo current channel";
-
-	commands[kcTransposeUp].UID = 1007;
-	commands[kcTransposeUp].isHidden = false;
-	commands[kcTransposeUp].isDummy = false;
-	commands[kcTransposeUp].Message = "Transpose +1";
-
-	commands[kcTransposeDown].UID = 1008;
-	commands[kcTransposeDown].isHidden = false;
-	commands[kcTransposeDown].isDummy = false;
-	commands[kcTransposeDown].Message = "Transpose -1";
-
-	commands[kcTransposeOctUp].UID = 1009;
-	commands[kcTransposeOctUp].isHidden = false;
-	commands[kcTransposeOctUp].isDummy = false;
-	commands[kcTransposeOctUp].Message = "Transpose +12";
-
-	commands[kcTransposeOctDown].UID = 1010;
-	commands[kcTransposeOctDown].isHidden = false;
-	commands[kcTransposeOctDown].isDummy = false;
-	commands[kcTransposeOctDown].Message = "Transpose -12";
-
-	commands[kcSelectColumn].UID = 1011;
-	commands[kcSelectColumn].isHidden = false;
-	commands[kcSelectColumn].isDummy = false;
-	commands[kcSelectColumn].Message = "Select channel / Select all";
-
-	commands[kcPatternAmplify].UID = 1012;
-	commands[kcPatternAmplify].isHidden = false;
-	commands[kcPatternAmplify].isDummy = false;
-	commands[kcPatternAmplify].Message = "Amplify selection";
-
-	commands[kcPatternSetInstrument].UID = 1013;
-	commands[kcPatternSetInstrument].isHidden = false;
-	commands[kcPatternSetInstrument].isDummy = false;
-	commands[kcPatternSetInstrument].Message = "Apply current instrument";
-
-	commands[kcPatternInterpolateVol].UID = 1014;
-	commands[kcPatternInterpolateVol].isHidden = false;
-	commands[kcPatternInterpolateVol].isDummy = false;
-	commands[kcPatternInterpolateVol].Message = "Interpolate volume";
-
-	commands[kcPatternInterpolateEffect].UID = 1015;
-	commands[kcPatternInterpolateEffect].isHidden = false;
-	commands[kcPatternInterpolateEffect].isDummy = false;
-	commands[kcPatternInterpolateEffect].Message = "Interpolate effect";
-
-	commands[kcPatternVisualizeEffect].UID = 1016;
-	commands[kcPatternVisualizeEffect].isHidden = false;
-	commands[kcPatternVisualizeEffect].isDummy = false;
-	commands[kcPatternVisualizeEffect].Message = "Open effect visualizer";
-
-	commands[kcPatternJumpDownh1].UID = 1017;
-	commands[kcPatternJumpDownh1].isHidden = false;
-	commands[kcPatternJumpDownh1].isDummy = false;
-	commands[kcPatternJumpDownh1].Message = "Jump down by measure";
-
-	commands[kcPatternJumpUph1].UID = 1018;
-	commands[kcPatternJumpUph1].isHidden = false;
-	commands[kcPatternJumpUph1].isDummy = false;
-	commands[kcPatternJumpUph1].Message = "Jump up by measure";
-
-	commands[kcPatternSnapDownh1].UID = 1019;
-	commands[kcPatternSnapDownh1].isHidden = false;
-	commands[kcPatternSnapDownh1].isDummy = false;
-	commands[kcPatternSnapDownh1].Message = "Snap down to measure";
-
-	commands[kcPatternSnapUph1].UID = 1020;
-	commands[kcPatternSnapUph1].isHidden = false;
-	commands[kcPatternSnapUph1].isDummy = false;
-	commands[kcPatternSnapUph1].Message = "Snap up to measure";
-
-	commands[kcViewGeneral].UID = 1021;
-	commands[kcViewGeneral].isHidden = false;
-	commands[kcViewGeneral].isDummy = false;
-	commands[kcViewGeneral].Message = "View General";
-
-	commands[kcViewPattern].UID = 1022;
-	commands[kcViewPattern].isHidden = false;
-	commands[kcViewPattern].isDummy = false;
-	commands[kcViewPattern].Message = "View Pattern";
-
-	commands[kcViewSamples].UID = 1023;
-	commands[kcViewSamples].isHidden = false;
-	commands[kcViewSamples].isDummy = false;
-	commands[kcViewSamples].Message = "View Samples";
-
-	commands[kcViewInstruments].UID = 1024;
-	commands[kcViewInstruments].isHidden = false;
-	commands[kcViewInstruments].isDummy = false;
-	commands[kcViewInstruments].Message = "View Instruments";
-
-	commands[kcViewComments].UID = 1025;
-	commands[kcViewComments].isHidden = false;
-	commands[kcViewComments].isDummy = false;
-	commands[kcViewComments].Message = "View Comments";
-
-	commands[kcPlayPatternFromCursor].UID = 1026;
-	commands[kcPlayPatternFromCursor].isHidden = false;
-	commands[kcPlayPatternFromCursor].isDummy = false;
-	commands[kcPlayPatternFromCursor].Message = "Play pattern from cursor";
-
-	commands[kcPlayPatternFromStart].UID = 1027;
-	commands[kcPlayPatternFromStart].isHidden = false;
-	commands[kcPlayPatternFromStart].isDummy = false;
-	commands[kcPlayPatternFromStart].Message = "Play pattern from start";
-
-	commands[kcPlaySongFromCursor].UID = 1028;
-	commands[kcPlaySongFromCursor].isHidden = false;
-	commands[kcPlaySongFromCursor].isDummy = false;
-	commands[kcPlaySongFromCursor].Message = "Play song from cursor";
-
-	commands[kcPlaySongFromStart].UID = 1029;
-	commands[kcPlaySongFromStart].isHidden = false;
-	commands[kcPlaySongFromStart].isDummy = false;
-	commands[kcPlaySongFromStart].Message = "Play song from start";
-
-	commands[kcPlayPauseSong].UID = 1030;
-	commands[kcPlayPauseSong].isHidden = false;
-	commands[kcPlayPauseSong].isDummy = false;
-	commands[kcPlayPauseSong].Message = "Play song/Pause song";
-
-	commands[kcPauseSong].UID = 1031;
-	commands[kcPauseSong].isHidden = false;
-	commands[kcPauseSong].isDummy = false;
-	commands[kcPauseSong].Message = "Pause song";
-
-	commands[kcPrevInstrument].UID = 1032;
-	commands[kcPrevInstrument].isHidden = false;
-	commands[kcPrevInstrument].isDummy = false;
-	commands[kcPrevInstrument].Message = "Previous instrument";
-
-	commands[kcNextInstrument].UID = 1033;
-	commands[kcNextInstrument].isHidden = false;
-	commands[kcNextInstrument].isDummy = false;
-	commands[kcNextInstrument].Message = "Next instrument";
-
-	commands[kcPrevOrder].UID = 1034;
-	commands[kcPrevOrder].isHidden = false;
-	commands[kcPrevOrder].isDummy = false;
-	commands[kcPrevOrder].Message = "Previous order";
-
-	commands[kcNextOrder].UID = 1035;
-	commands[kcNextOrder].isHidden = false;
-	commands[kcNextOrder].isDummy = false;
-	commands[kcNextOrder].Message = "Next order";
-
-	commands[kcPrevOctave].UID = 1036;
-	commands[kcPrevOctave].isHidden = false;
-	commands[kcPrevOctave].isDummy = false;
-	commands[kcPrevOctave].Message = "Previous octave";
-
-	commands[kcNextOctave].UID = 1037;
-	commands[kcNextOctave].isHidden = false;
-	commands[kcNextOctave].isDummy = false;
-	commands[kcNextOctave].Message = "Next octave";
-
-	commands[kcNavigateDown].UID = 1038;
-	commands[kcNavigateDown].isHidden = false;
-	commands[kcNavigateDown].isDummy = false;
-	commands[kcNavigateDown].Message = "Navigate down by 1 row";
-
-	commands[kcNavigateUp].UID = 1039;
-	commands[kcNavigateUp].isHidden = false;
-	commands[kcNavigateUp].isDummy = false;
-	commands[kcNavigateUp].Message = "Navigate up by 1 row";
-
-	commands[kcNavigateLeft].UID = 1040;
-	commands[kcNavigateLeft].isHidden = false;
-	commands[kcNavigateLeft].isDummy = false;
-	commands[kcNavigateLeft].Message = "Navigate left";
-
-	commands[kcNavigateRight].UID = 1041;
-	commands[kcNavigateRight].isHidden = false;
-	commands[kcNavigateRight].isDummy = false;
-	commands[kcNavigateRight].Message = "Navigate right";
-
-	commands[kcNavigateNextChan].UID = 1042;
-	commands[kcNavigateNextChan].isHidden = false;
-	commands[kcNavigateNextChan].isDummy = false;
-	commands[kcNavigateNextChan].Message = "Navigate to next channel";
-
-	commands[kcNavigatePrevChan].UID = 1043;
-	commands[kcNavigatePrevChan].isHidden = false;
-	commands[kcNavigatePrevChan].isDummy = false;
-	commands[kcNavigatePrevChan].Message = "Navigate to previous channel";
-
-	commands[kcHomeHorizontal].UID = 1044;
-	commands[kcHomeHorizontal].isHidden = false;
-	commands[kcHomeHorizontal].isDummy = false;
-	commands[kcHomeHorizontal].Message = "Go to first channel";
-
-	commands[kcHomeVertical].UID = 1045;
-	commands[kcHomeVertical].isHidden = false;
-	commands[kcHomeVertical].isDummy = false;
-	commands[kcHomeVertical].Message = "Go to first row";
-
-	commands[kcHomeAbsolute].UID = 1046;
-	commands[kcHomeAbsolute].isHidden = false;
-	commands[kcHomeAbsolute].isDummy = false;
-	commands[kcHomeAbsolute].Message = "Go to first row of first channel";
-
-	commands[kcEndHorizontal].UID = 1047;
-	commands[kcEndHorizontal].isHidden = false;
-	commands[kcEndHorizontal].isDummy = false;
-	commands[kcEndHorizontal].Message = "Go to last channel";
-
-	commands[kcEndVertical].UID = 1048;
-	commands[kcEndVertical].isHidden = false;
-	commands[kcEndVertical].isDummy = false;
-	commands[kcEndVertical].Message = "Go to last row";
-
-	commands[kcEndAbsolute].UID = 1049;
-	commands[kcEndAbsolute].isHidden = false;
-	commands[kcEndAbsolute].isDummy = false;
-	commands[kcEndAbsolute].Message = "Go to last row of last channel";
-
-	commands[kcSelect].UID = 1050;
-	commands[kcSelect].isHidden = false;
-	commands[kcSelect].isDummy = false;
-	commands[kcSelect].Message = "Selection key";
-
-	commands[kcCopySelect].UID = 1051;
-	commands[kcCopySelect].isHidden = false;
-	commands[kcCopySelect].isDummy = false;
-	commands[kcCopySelect].Message = "Copy select key";
-
-	commands[kcSelectOff].UID = 1052;
-	commands[kcSelectOff].isHidden = true;
-	commands[kcSelectOff].isDummy = false;
-	commands[kcSelectOff].Message = "Deselect";
-
-	commands[kcCopySelectOff].UID = 1053;
-	commands[kcCopySelectOff].isHidden = true;
-	commands[kcCopySelectOff].isDummy = false;
-	commands[kcCopySelectOff].Message = "Copy deselect key";
-
-	commands[kcNextPattern].UID = 1054;
-	commands[kcNextPattern].isHidden = false;
-	commands[kcNextPattern].isDummy = false;
-	commands[kcNextPattern].Message = "Next pattern";
-
-	commands[kcPrevPattern].UID = 1055;
-	commands[kcPrevPattern].isHidden = false;
-	commands[kcPrevPattern].isDummy = false;
-	commands[kcPrevPattern].Message = "Previous pattern";
-
-/*	commands[kcClearSelection].UID = 1056;
-	commands[kcClearSelection].isHidden = false;
-	commands[kcClearSelection].isDummy = false;
-	commands[kcClearSelection].Message = "Wipe selection";*/
-
-	commands[kcClearRow].UID = 1057;
-	commands[kcClearRow].isHidden = false;
-	commands[kcClearRow].isDummy = false;
-	commands[kcClearRow].Message = "Clear row";
-
-	commands[kcClearField].UID = 1058;
-	commands[kcClearField].isHidden = false;
-	commands[kcClearField].isDummy = false;
-	commands[kcClearField].Message = "Clear field";
-
-	commands[kcClearRowStep].UID = 1059;
-	commands[kcClearRowStep].isHidden = false;
-	commands[kcClearRowStep].isDummy = false;
-	commands[kcClearRowStep].Message = "Clear row and step";
-
-	commands[kcClearFieldStep].UID = 1060;
-	commands[kcClearFieldStep].isHidden = false;
-	commands[kcClearFieldStep].isDummy = false;
-	commands[kcClearFieldStep].Message = "Clear field and step";
-
-	commands[kcDeleteRows].UID = 1061;
-	commands[kcDeleteRows].isHidden = false;
-	commands[kcDeleteRows].isDummy = false;
-	commands[kcDeleteRows].Message = "Delete rows";
-
-	commands[kcShowNoteProperties].UID = 1062;
-	commands[kcShowNoteProperties].isHidden = false;
-	commands[kcShowNoteProperties].isDummy = false;
-	commands[kcShowNoteProperties].Message = "Show note properties";
-
-	commands[kcShowEditMenu].UID = 1063;
-	commands[kcShowEditMenu].isHidden = false;
-	commands[kcShowEditMenu].isDummy = false;
-	commands[kcShowEditMenu].Message = "Show context (right-click) menu";
-
-	commands[kcVPNoteC_0].UID = 1064;
-	commands[kcVPNoteC_0].isHidden = false;
-	commands[kcVPNoteC_0].isDummy = false;
-	commands[kcVPNoteC_0].Message = "Base octave C";
-
-	commands[kcVPNoteCS0].UID = 1065;
-	commands[kcVPNoteCS0].isHidden = false;
-	commands[kcVPNoteCS0].isDummy = false;
-	commands[kcVPNoteCS0].Message = "Base octave C#";
-
-	commands[kcVPNoteD_0].UID = 1066;
-	commands[kcVPNoteD_0].isHidden = false;
-	commands[kcVPNoteD_0].isDummy = false;
-	commands[kcVPNoteD_0].Message = "Base octave D";
-
-	commands[kcVPNoteDS0].UID = 1067;
-	commands[kcVPNoteDS0].isHidden = false;
-	commands[kcVPNoteDS0].isDummy = false;
-	commands[kcVPNoteDS0].Message = "Base octave D#";
-
-	commands[kcVPNoteE_0].UID = 1068;
-	commands[kcVPNoteE_0].isHidden = false;
-	commands[kcVPNoteE_0].isDummy = false;
-	commands[kcVPNoteE_0].Message = "Base octave E";
-
-	commands[kcVPNoteF_0].UID = 1069;
-	commands[kcVPNoteF_0].isHidden = false;
-	commands[kcVPNoteF_0].isDummy = false;
-	commands[kcVPNoteF_0].Message = "Base octave F";
-
-	commands[kcVPNoteFS0].UID = 1070;
-	commands[kcVPNoteFS0].isHidden = false;
-	commands[kcVPNoteFS0].isDummy = false;
-	commands[kcVPNoteFS0].Message = "Base octave F#";
-
-	commands[kcVPNoteG_0].UID = 1071;
-	commands[kcVPNoteG_0].isHidden = false;
-	commands[kcVPNoteG_0].isDummy = false;
-	commands[kcVPNoteG_0].Message = "Base octave G";
-
-	commands[kcVPNoteGS0].UID = 1072;
-	commands[kcVPNoteGS0].isHidden = false;
-	commands[kcVPNoteGS0].isDummy = false;
-	commands[kcVPNoteGS0].Message = "Base octave G#";
-
-	commands[kcVPNoteA_1].UID = 1073;
-	commands[kcVPNoteA_1].isHidden = false;
-	commands[kcVPNoteA_1].isDummy = false;
-	commands[kcVPNoteA_1].Message = "Base octave A";
-
-	commands[kcVPNoteAS1].UID = 1074;
-	commands[kcVPNoteAS1].isHidden = false;
-	commands[kcVPNoteAS1].isDummy = false;
-	commands[kcVPNoteAS1].Message = "Base octave A#";
-
-	commands[kcVPNoteB_1].UID = 1075;
-	commands[kcVPNoteB_1].isHidden = false;
-	commands[kcVPNoteB_1].isDummy = false;
-	commands[kcVPNoteB_1].Message = "Base octave B";
-
-	commands[kcVPNoteC_1].UID = 1076;
-	commands[kcVPNoteC_1].isHidden = false;
-	commands[kcVPNoteC_1].isDummy = false;
-	commands[kcVPNoteC_1].Message = "Base octave +1 C";
-
-	commands[kcVPNoteCS1].UID = 1077;
-	commands[kcVPNoteCS1].isHidden = false;
-	commands[kcVPNoteCS1].isDummy = false;
-	commands[kcVPNoteCS1].Message = "Base octave +1 C#";
-
-	commands[kcVPNoteD_1].UID = 1078;
-	commands[kcVPNoteD_1].isHidden = false;
-	commands[kcVPNoteD_1].isDummy = false;
-	commands[kcVPNoteD_1].Message = "Base octave +1 D";
-
-	commands[kcVPNoteDS1].UID = 1079;
-	commands[kcVPNoteDS1].isHidden = false;
-	commands[kcVPNoteDS1].isDummy = false;
-	commands[kcVPNoteDS1].Message = "Base octave +1 D#";
-
-	commands[kcVPNoteE_1].UID = 1080;
-	commands[kcVPNoteE_1].isHidden = false;
-	commands[kcVPNoteE_1].isDummy = false;
-	commands[kcVPNoteE_1].Message = "Base octave +1 E";
-
-	commands[kcVPNoteF_1].UID = 1081;
-	commands[kcVPNoteF_1].isHidden = false;
-	commands[kcVPNoteF_1].isDummy = false;
-	commands[kcVPNoteF_1].Message = "Base octave +1 F";
-
-	commands[kcVPNoteFS1].UID = 1082;
-	commands[kcVPNoteFS1].isHidden = false;
-	commands[kcVPNoteFS1].isDummy = false;
-	commands[kcVPNoteFS1].Message = "Base octave +1 F#";
-
-	commands[kcVPNoteG_1].UID = 1083;
-	commands[kcVPNoteG_1].isHidden = false;
-	commands[kcVPNoteG_1].isDummy = false;
-	commands[kcVPNoteG_1].Message = "Base octave +1 G";
-
-	commands[kcVPNoteGS1].UID = 1084;
-	commands[kcVPNoteGS1].isHidden = false;
-	commands[kcVPNoteGS1].isDummy = false;
-	commands[kcVPNoteGS1].Message = "Base octave +1 G#";
-
-	commands[kcVPNoteA_2].UID = 1085;
-	commands[kcVPNoteA_2].isHidden = false;
-	commands[kcVPNoteA_2].isDummy = false;
-	commands[kcVPNoteA_2].Message = "Base octave +1 A";
-
-	commands[kcVPNoteAS2].UID = 1086;
-	commands[kcVPNoteAS2].isHidden = false;
-	commands[kcVPNoteAS2].isDummy = false;
-	commands[kcVPNoteAS2].Message = "Base octave +1 A#";
-
-	commands[kcVPNoteB_2].UID = 1087;
-	commands[kcVPNoteB_2].isHidden = false;
-	commands[kcVPNoteB_2].isDummy = false;
-	commands[kcVPNoteB_2].Message = "Base octave +1 B";
-
-	commands[kcVPNoteC_2].UID = 1088;
-	commands[kcVPNoteC_2].isHidden = false;
-	commands[kcVPNoteC_2].isDummy = false;
-	commands[kcVPNoteC_2].Message = "Base octave +2 C";
-
-	commands[kcVPNoteCS2].UID = 1089;
-	commands[kcVPNoteCS2].isHidden = false;
-	commands[kcVPNoteCS2].isDummy = false;
-	commands[kcVPNoteCS2].Message = "Base octave +2 C#";
-
-	commands[kcVPNoteD_2].UID = 1090;
-	commands[kcVPNoteD_2].isHidden = false;
-	commands[kcVPNoteD_2].isDummy = false;
-	commands[kcVPNoteD_2].Message = "Base octave +2 D";
-
-	commands[kcVPNoteDS2].UID = 1091;
-	commands[kcVPNoteDS2].isHidden = false;
-	commands[kcVPNoteDS2].isDummy = false;
-	commands[kcVPNoteDS2].Message = "Base octave +2 D#";
-
-	commands[kcVPNoteE_2].UID = 1092;
-	commands[kcVPNoteE_2].isHidden = false;
-	commands[kcVPNoteE_2].isDummy = false;
-	commands[kcVPNoteE_2].Message = "Base octave +2 E";
-
-	commands[kcVPNoteF_2].UID = 1093;
-	commands[kcVPNoteF_2].isHidden = false;
-	commands[kcVPNoteF_2].isDummy = false;
-	commands[kcVPNoteF_2].Message = "Base octave +2 F";
-
-	commands[kcVPNoteFS2].UID = 1094;
-	commands[kcVPNoteFS2].isHidden = false;
-	commands[kcVPNoteFS2].isDummy = false;
-	commands[kcVPNoteFS2].Message = "Base octave +2 F#";
-
-	commands[kcVPNoteG_2].UID = 1095;
-	commands[kcVPNoteG_2].isHidden = false;
-	commands[kcVPNoteG_2].isDummy = false;
-	commands[kcVPNoteG_2].Message = "Base octave +2 G";
-
-	commands[kcVPNoteGS2].UID = 1096;
-	commands[kcVPNoteGS2].isHidden = false;
-	commands[kcVPNoteGS2].isDummy = false;
-	commands[kcVPNoteGS2].Message = "Base octave +2 G#";
-
-	commands[kcVPNoteA_3].UID = 1097;
-	commands[kcVPNoteA_3].isHidden = false;
-	commands[kcVPNoteA_3].isDummy = false;
-	commands[kcVPNoteA_3].Message = "Base octave +2 A";
-
-	commands[kcVPNoteStopC_0].UID = 1098;
-	commands[kcVPNoteStopC_0].isHidden = true;
-	commands[kcVPNoteStopC_0].isDummy = false;
-	commands[kcVPNoteStopC_0].Message = "Stop base octave C";
-
-	commands[kcVPNoteStopCS0].UID = 1099;
-	commands[kcVPNoteStopCS0].isHidden = true;
-	commands[kcVPNoteStopCS0].isDummy = false;
-	commands[kcVPNoteStopCS0].Message = "Stop base octave C#";
-
-	commands[kcVPNoteStopD_0].UID = 1100;
-	commands[kcVPNoteStopD_0].isHidden = true;
-	commands[kcVPNoteStopD_0].isDummy = false;
-	commands[kcVPNoteStopD_0].Message = "Stop base octave D";
-
-	commands[kcVPNoteStopDS0].UID = 1101;
-	commands[kcVPNoteStopDS0].isHidden = true;
-	commands[kcVPNoteStopDS0].isDummy = false;
-	commands[kcVPNoteStopDS0].Message = "Stop base octave D#";
-
-	commands[kcVPNoteStopE_0].UID = 1102;
-	commands[kcVPNoteStopE_0].isHidden = true;
-	commands[kcVPNoteStopE_0].isDummy = false;
-	commands[kcVPNoteStopE_0].Message = "Stop base octave E";
-
-	commands[kcVPNoteStopF_0].UID = 1103;
-	commands[kcVPNoteStopF_0].isHidden = true;
-	commands[kcVPNoteStopF_0].isDummy = false;
-	commands[kcVPNoteStopF_0].Message = "Stop base octave F";
-
-	commands[kcVPNoteStopFS0].UID = 1104;
-	commands[kcVPNoteStopFS0].isHidden = true;
-	commands[kcVPNoteStopFS0].isDummy = false;
-	commands[kcVPNoteStopFS0].Message = "Stop base octave F#";
-
-	commands[kcVPNoteStopG_0].UID = 1105;
-	commands[kcVPNoteStopG_0].isHidden = true;
-	commands[kcVPNoteStopG_0].isDummy = false;
-	commands[kcVPNoteStopG_0].Message = "Stop base octave G";
-
-	commands[kcVPNoteStopGS0].UID = 1106;
-	commands[kcVPNoteStopGS0].isHidden = true;
-	commands[kcVPNoteStopGS0].isDummy = false;
-	commands[kcVPNoteStopGS0].Message = "Stop base octave G#";
-
-	commands[kcVPNoteStopA_1].UID = 1107;
-	commands[kcVPNoteStopA_1].isHidden = true;
-	commands[kcVPNoteStopA_1].isDummy = false;
-	commands[kcVPNoteStopA_1].Message = "Stop base octave +1 A";
-
-	commands[kcVPNoteStopAS1].UID = 1108;
-	commands[kcVPNoteStopAS1].isHidden = true;
-	commands[kcVPNoteStopAS1].isDummy = false;
-	commands[kcVPNoteStopAS1].Message = "Stop base octave +1 A#";
-
-	commands[kcVPNoteStopB_1].UID = 1109;
-	commands[kcVPNoteStopB_1].isHidden = true;
-	commands[kcVPNoteStopB_1].isDummy = false;
-	commands[kcVPNoteStopB_1].Message = "Stop base octave +1 B";
-
-	commands[kcVPNoteStopC_1].UID = 1110;
-	commands[kcVPNoteStopC_1].isHidden = true;
-	commands[kcVPNoteStopC_1].isDummy = false;
-	commands[kcVPNoteStopC_1].Message = "Stop base octave +1 C";
-
-	commands[kcVPNoteStopCS1].UID = 1111;
-	commands[kcVPNoteStopCS1].isHidden = true;
-	commands[kcVPNoteStopCS1].isDummy = false;
-	commands[kcVPNoteStopCS1].Message = "Stop base octave +1 C#";
-
-	commands[kcVPNoteStopD_1].UID = 1112;
-	commands[kcVPNoteStopD_1].isHidden = true;
-	commands[kcVPNoteStopD_1].isDummy = false;
-	commands[kcVPNoteStopD_1].Message = "Stop base octave +1 D";
-
-	commands[kcVPNoteStopDS1].UID = 1113;
-	commands[kcVPNoteStopDS1].isHidden = true;
-	commands[kcVPNoteStopDS1].isDummy = false;
-	commands[kcVPNoteStopDS1].Message = "Stop base octave +1 D#";
-
-	commands[kcVPNoteStopE_1].UID = 1114;
-	commands[kcVPNoteStopE_1].isHidden = true;
-	commands[kcVPNoteStopE_1].isDummy = false;
-	commands[kcVPNoteStopE_1].Message = "Stop base octave +1 E";
-
-	commands[kcVPNoteStopF_1].UID = 1115;
-	commands[kcVPNoteStopF_1].isHidden = true;
-	commands[kcVPNoteStopF_1].isDummy = false;
-	commands[kcVPNoteStopF_1].Message = "Stop base octave +1 F";
-
-	commands[kcVPNoteStopFS1].UID = 1116;
-	commands[kcVPNoteStopFS1].isHidden = true;
-	commands[kcVPNoteStopFS1].isDummy = false;
-	commands[kcVPNoteStopFS1].Message = "Stop base octave +1 F#";
-
-	commands[kcVPNoteStopG_1].UID = 1117;
-	commands[kcVPNoteStopG_1].isHidden = true;
-	commands[kcVPNoteStopG_1].isDummy = false;
-	commands[kcVPNoteStopG_1].Message = "Stop base octave +1 G";
-
-	commands[kcVPNoteStopGS1].UID = 1118;
-	commands[kcVPNoteStopGS1].isHidden = true;
-	commands[kcVPNoteStopGS1].isDummy = false;
-	commands[kcVPNoteStopGS1].Message = "Stop base octave +1 G#";
-
-	commands[kcVPNoteStopA_2].UID = 1119;
-	commands[kcVPNoteStopA_2].isHidden = true;
-	commands[kcVPNoteStopA_2].isDummy = false;
-	commands[kcVPNoteStopA_2].Message = "Stop base octave +2 A";
-
-	commands[kcVPNoteStopAS2].UID = 1120;
-	commands[kcVPNoteStopAS2].isHidden = true;
-	commands[kcVPNoteStopAS2].isDummy = false;
-	commands[kcVPNoteStopAS2].Message = "Stop base octave +2 A#";
-
-	commands[kcVPNoteStopB_2].UID = 1121;
-	commands[kcVPNoteStopB_2].isHidden = true;
-	commands[kcVPNoteStopB_2].isDummy = false;
-	commands[kcVPNoteStopB_2].Message = "Stop base octave +2 B";
-
-	commands[kcVPNoteStopC_2].UID = 1122;
-	commands[kcVPNoteStopC_2].isHidden = true;
-	commands[kcVPNoteStopC_2].isDummy = false;
-	commands[kcVPNoteStopC_2].Message = "Stop base octave +2 C";
-
-	commands[kcVPNoteStopCS2].UID = 1123;
-	commands[kcVPNoteStopCS2].isHidden = true;
-	commands[kcVPNoteStopCS2].isDummy = false;
-	commands[kcVPNoteStopCS2].Message = "Stop base octave +2 C#";
-
-	commands[kcVPNoteStopD_2].UID = 1124;
-	commands[kcVPNoteStopD_2].isHidden = true;
-	commands[kcVPNoteStopD_2].isDummy = false;
-	commands[kcVPNoteStopD_2].Message = "Stop base octave +2 D";
-
-	commands[kcVPNoteStopDS2].UID = 1125;
-	commands[kcVPNoteStopDS2].isHidden = true;
-	commands[kcVPNoteStopDS2].isDummy = false;
-	commands[kcVPNoteStopDS2].Message = "Stop base octave +2 D#";
-
-	commands[kcVPNoteStopE_2].UID = 1126;
-	commands[kcVPNoteStopE_2].isHidden = true;
-	commands[kcVPNoteStopE_2].isDummy = false;
-	commands[kcVPNoteStopE_2].Message = "Stop base octave +2 E";
-
-	commands[kcVPNoteStopF_2].UID = 1127;
-	commands[kcVPNoteStopF_2].isHidden = true;
-	commands[kcVPNoteStopF_2].isDummy = false;
-	commands[kcVPNoteStopF_2].Message = "Stop base octave +2 F";
-
-	commands[kcVPNoteStopFS2].UID = 1128;
-	commands[kcVPNoteStopFS2].isHidden = true;
-	commands[kcVPNoteStopFS2].isDummy = false;
-	commands[kcVPNoteStopFS2].Message = "Stop base octave +2 F#";
-
-	commands[kcVPNoteStopG_2].UID = 1129;
-	commands[kcVPNoteStopG_2].isHidden = true;
-	commands[kcVPNoteStopG_2].isDummy = false;
-	commands[kcVPNoteStopG_2].Message = "Stop base octave +2 G";
-
-	commands[kcVPNoteStopGS2].UID = 1130;
-	commands[kcVPNoteStopGS2].isHidden = true;
-	commands[kcVPNoteStopGS2].isDummy = false;
-	commands[kcVPNoteStopGS2].Message = "Stop base octave +2 G#";
-
-	commands[kcVPNoteStopA_3].UID = 1131;
-	commands[kcVPNoteStopA_3].isHidden = true;
-	commands[kcVPNoteStopA_3].isDummy = false;
-	commands[kcVPNoteStopA_3].Message = "Stop base octave +3 A";
-
-
-	commands[kcVPChordC_0].UID = 1132;
-	commands[kcVPChordC_0].isHidden = true;
-	commands[kcVPChordC_0].isDummy = false;
-	commands[kcVPChordC_0].Message = "base octave chord C";
-
-	commands[kcVPChordCS0].UID = 1133;
-	commands[kcVPChordCS0].isHidden = true;
-	commands[kcVPChordCS0].isDummy = false;
-	commands[kcVPChordCS0].Message = "base octave chord C#";
-
-	commands[kcVPChordD_0].UID = 1134;
-	commands[kcVPChordD_0].isHidden = true;
-	commands[kcVPChordD_0].isDummy = false;
-	commands[kcVPChordD_0].Message = "base octave chord D";
-
-	commands[kcVPChordDS0].UID = 1135;
-	commands[kcVPChordDS0].isHidden = true;
-	commands[kcVPChordDS0].isDummy = false;
-	commands[kcVPChordDS0].Message = "base octave chord D#";
-
-	commands[kcVPChordE_0].UID = 1136;
-	commands[kcVPChordE_0].isHidden = true;
-	commands[kcVPChordE_0].isDummy = false;
-	commands[kcVPChordE_0].Message = "base octave chord E";
-
-	commands[kcVPChordF_0].UID = 1137;
-	commands[kcVPChordF_0].isHidden = true;
-	commands[kcVPChordF_0].isDummy = false;
-	commands[kcVPChordF_0].Message = "base octave chord F";
-
-	commands[kcVPChordFS0].UID = 1138;
-	commands[kcVPChordFS0].isHidden = true;
-	commands[kcVPChordFS0].isDummy = false;
-	commands[kcVPChordFS0].Message = "base octave chord F#";
-
-	commands[kcVPChordG_0].UID = 1139;
-	commands[kcVPChordG_0].isHidden = true;
-	commands[kcVPChordG_0].isDummy = false;
-	commands[kcVPChordG_0].Message = "base octave chord G";
-
-	commands[kcVPChordGS0].UID = 1140;
-	commands[kcVPChordGS0].isHidden = true;
-	commands[kcVPChordGS0].isDummy = false;
-	commands[kcVPChordGS0].Message = "base octave chord G#";
-
-	commands[kcVPChordA_1].UID = 1141;
-	commands[kcVPChordA_1].isHidden = true;
-	commands[kcVPChordA_1].isDummy = false;
-	commands[kcVPChordA_1].Message = "base octave +1 chord A";
-
-	commands[kcVPChordAS1].UID = 1142;
-	commands[kcVPChordAS1].isHidden = true;
-	commands[kcVPChordAS1].isDummy = false;
-	commands[kcVPChordAS1].Message = "base octave +1 chord A#";
-
-	commands[kcVPChordB_1].UID = 1143;
-	commands[kcVPChordB_1].isHidden = true;
-	commands[kcVPChordB_1].isDummy = false;
-	commands[kcVPChordB_1].Message = "base octave +1 chord B";
-
-	commands[kcVPChordC_1].UID = 1144;
-	commands[kcVPChordC_1].isHidden = true;
-	commands[kcVPChordC_1].isDummy = false;
-	commands[kcVPChordC_1].Message = "base octave +1 chord C";
-
-	commands[kcVPChordCS1].UID = 1145;
-	commands[kcVPChordCS1].isHidden = true;
-	commands[kcVPChordCS1].isDummy = false;
-	commands[kcVPChordCS1].Message = "base octave +1 chord C#";
-
-	commands[kcVPChordD_1].UID = 1146;
-	commands[kcVPChordD_1].isHidden = true;
-	commands[kcVPChordD_1].isDummy = false;
-	commands[kcVPChordD_1].Message = "base octave +1 chord D";
-
-	commands[kcVPChordDS1].UID = 1147;
-	commands[kcVPChordDS1].isHidden = true;
-	commands[kcVPChordDS1].isDummy = false;
-	commands[kcVPChordDS1].Message = "base octave +1 chord D#";
-
-	commands[kcVPChordE_1].UID = 1148;
-	commands[kcVPChordE_1].isHidden = true;
-	commands[kcVPChordE_1].isDummy = false;
-	commands[kcVPChordE_1].Message = "base octave +1 chord E";
-
-	commands[kcVPChordF_1].UID = 1149;
-	commands[kcVPChordF_1].isHidden = true;
-	commands[kcVPChordF_1].isDummy = false;
-	commands[kcVPChordF_1].Message = "base octave +1 chord F";
-
-	commands[kcVPChordFS1].UID = 1150;
-	commands[kcVPChordFS1].isHidden = true;
-	commands[kcVPChordFS1].isDummy = false;
-	commands[kcVPChordFS1].Message = "base octave +1 chord F#";
-
-	commands[kcVPChordG_1].UID = 1151;
-	commands[kcVPChordG_1].isHidden = true;
-	commands[kcVPChordG_1].isDummy = false;
-	commands[kcVPChordG_1].Message = "base octave +1 chord G";
-
-	commands[kcVPChordGS1].UID = 1152;
-	commands[kcVPChordGS1].isHidden = true;
-	commands[kcVPChordGS1].isDummy = false;
-	commands[kcVPChordGS1].Message = "base octave +1 chord G#";
-
-	commands[kcVPChordA_2].UID = 1153;
-	commands[kcVPChordA_2].isHidden = true;
-	commands[kcVPChordA_2].isDummy = false;
-	commands[kcVPChordA_2].Message = "base octave +2 chord A";
-
-	commands[kcVPChordAS2].UID = 1154;
-	commands[kcVPChordAS2].isHidden = true;
-	commands[kcVPChordAS2].isDummy = false;
-	commands[kcVPChordAS2].Message = "base octave +2 chord A#";
-
-	commands[kcVPChordB_2].UID = 1155;
-	commands[kcVPChordB_2].isHidden = true;
-	commands[kcVPChordB_2].isDummy = false;
-	commands[kcVPChordB_2].Message = "base octave +2 chord B";
-
-	commands[kcVPChordC_2].UID = 1156;
-	commands[kcVPChordC_2].isHidden = true;
-	commands[kcVPChordC_2].isDummy = false;
-	commands[kcVPChordC_2].Message = "base octave +2 chord C";
-
-	commands[kcVPChordCS2].UID = 1157;
-	commands[kcVPChordCS2].isHidden = true;
-	commands[kcVPChordCS2].isDummy = false;
-	commands[kcVPChordCS2].Message = "base octave +2 chord C#";
-
-	commands[kcVPChordD_2].UID = 1158;
-	commands[kcVPChordD_2].isHidden = true;
-	commands[kcVPChordD_2].isDummy = false;
-	commands[kcVPChordD_2].Message = "base octave +2 chord D";
-
-	commands[kcVPChordDS2].UID = 1159;
-	commands[kcVPChordDS2].isHidden = true;
-	commands[kcVPChordDS2].isDummy = false;
-	commands[kcVPChordDS2].Message = "base octave +2 chord D#";
-
-	commands[kcVPChordE_2].UID = 1160;
-	commands[kcVPChordE_2].isHidden = true;
-	commands[kcVPChordE_2].isDummy = false;
-	commands[kcVPChordE_2].Message = "base octave +2 chord E";
-
-	commands[kcVPChordF_2].UID = 1161;
-	commands[kcVPChordF_2].isHidden = true;
-	commands[kcVPChordF_2].isDummy = false;
-	commands[kcVPChordF_2].Message = "base octave +2 chord F";
-
-	commands[kcVPChordFS2].UID = 1162;
-	commands[kcVPChordFS2].isHidden = true;
-	commands[kcVPChordFS2].isDummy = false;
-	commands[kcVPChordFS2].Message = "base octave +2 chord F#";
-
-	commands[kcVPChordG_2].UID = 1163;
-	commands[kcVPChordG_2].isHidden = true;
-	commands[kcVPChordG_2].isDummy = false;
-	commands[kcVPChordG_2].Message = "base octave +2 chord G";
-
-	commands[kcVPChordGS2].UID = 1164;
-	commands[kcVPChordGS2].isHidden = true;
-	commands[kcVPChordGS2].isDummy = false;
-	commands[kcVPChordGS2].Message = "base octave +2 chord G#";
-
-	commands[kcVPChordA_3].UID = 1165;
-	commands[kcVPChordA_3].isHidden = true;
-	commands[kcVPChordA_3].isDummy = false;
-	commands[kcVPChordA_3].Message = "base octave chord +3 A";
-
-
-	commands[kcVPChordStopC_0].UID = 1166;
-	commands[kcVPChordStopC_0].isHidden = true;
-	commands[kcVPChordStopC_0].isDummy = false;
-	commands[kcVPChordStopC_0].Message = "Stop base octave chord C";
-
-	commands[kcVPChordStopCS0].UID = 1167;
-	commands[kcVPChordStopCS0].isHidden = true;
-	commands[kcVPChordStopCS0].isDummy = false;
-	commands[kcVPChordStopCS0].Message = "Stop base octave chord C#";
-
-	commands[kcVPChordStopD_0].UID = 1168;
-	commands[kcVPChordStopD_0].isHidden = true;
-	commands[kcVPChordStopD_0].isDummy = false;
-	commands[kcVPChordStopD_0].Message = "Stop base octave chord D";
-
-	commands[kcVPChordStopDS0].UID = 1169;
-	commands[kcVPChordStopDS0].isHidden = true;
-	commands[kcVPChordStopDS0].isDummy = false;
-	commands[kcVPChordStopDS0].Message = "Stop base octave chord D#";
-
-	commands[kcVPChordStopE_0].UID = 1170;
-	commands[kcVPChordStopE_0].isHidden = true;
-	commands[kcVPChordStopE_0].isDummy = false;
-	commands[kcVPChordStopE_0].Message = "Stop base octave chord E";
-
-	commands[kcVPChordStopF_0].UID = 1171;
-	commands[kcVPChordStopF_0].isHidden = true;
-	commands[kcVPChordStopF_0].isDummy = false;
-	commands[kcVPChordStopF_0].Message = "Stop base octave chord F";
-
-	commands[kcVPChordStopFS0].UID = 1172;
-	commands[kcVPChordStopFS0].isHidden = true;
-	commands[kcVPChordStopFS0].isDummy = false;
-	commands[kcVPChordStopFS0].Message = "Stop base octave chord F#";
-
-	commands[kcVPChordStopG_0].UID = 1173;
-	commands[kcVPChordStopG_0].isHidden = true;
-	commands[kcVPChordStopG_0].isDummy = false;
-	commands[kcVPChordStopG_0].Message = "Stop base octave chord G";
-
-	commands[kcVPChordStopGS0].UID = 1174;
-	commands[kcVPChordStopGS0].isHidden = true;
-	commands[kcVPChordStopGS0].isDummy = false;
-	commands[kcVPChordStopGS0].Message = "Stop base octave chord G#";
-
-	commands[kcVPChordStopA_1].UID = 1175;
-	commands[kcVPChordStopA_1].isHidden = true;
-	commands[kcVPChordStopA_1].isDummy = false;
-	commands[kcVPChordStopA_1].Message = "Stop base octave +1 chord A";
-
-	commands[kcVPChordStopAS1].UID = 1176;
-	commands[kcVPChordStopAS1].isHidden = true;
-	commands[kcVPChordStopAS1].isDummy = false;
-	commands[kcVPChordStopAS1].Message = "Stop base octave +1 chord A#";
-
-	commands[kcVPChordStopB_1].UID = 1177;
-	commands[kcVPChordStopB_1].isHidden = true;
-	commands[kcVPChordStopB_1].isDummy = false;
-	commands[kcVPChordStopB_1].Message = "Stop base octave +1 chord B";
-
-	commands[kcVPChordStopC_1].UID = 1178;
-	commands[kcVPChordStopC_1].isHidden = true;
-	commands[kcVPChordStopC_1].isDummy = false;
-	commands[kcVPChordStopC_1].Message = "Stop base octave +1 chord C";
-
-	commands[kcVPChordStopCS1].UID = 1179;
-	commands[kcVPChordStopCS1].isHidden = true;
-	commands[kcVPChordStopCS1].isDummy = false;
-	commands[kcVPChordStopCS1].Message = "Stop base octave +1 chord C#";
-
-	commands[kcVPChordStopD_1].UID = 1180;
-	commands[kcVPChordStopD_1].isHidden = true;
-	commands[kcVPChordStopD_1].isDummy = false;
-	commands[kcVPChordStopD_1].Message = "Stop base octave +1 chord D";
-
-	commands[kcVPChordStopDS1].UID = 1181;
-	commands[kcVPChordStopDS1].isHidden = true;
-	commands[kcVPChordStopDS1].isDummy = false;
-	commands[kcVPChordStopDS1].Message = "Stop base octave +1 chord D#";
-
-	commands[kcVPChordStopE_1].UID = 1182;
-	commands[kcVPChordStopE_1].isHidden = true;
-	commands[kcVPChordStopE_1].isDummy = false;
-	commands[kcVPChordStopE_1].Message = "Stop base octave +1 chord E";
-
-	commands[kcVPChordStopF_1].UID = 1183;
-	commands[kcVPChordStopF_1].isHidden = true;
-	commands[kcVPChordStopF_1].isDummy = false;
-	commands[kcVPChordStopF_1].Message = "Stop base octave +1 chord F";
-
-	commands[kcVPChordStopFS1].UID = 1184;
-	commands[kcVPChordStopFS1].isHidden = true;
-	commands[kcVPChordStopFS1].isDummy = false;
-	commands[kcVPChordStopFS1].Message = "Stop base octave +1 chord F#";
-
-	commands[kcVPChordStopG_1].UID = 1185;
-	commands[kcVPChordStopG_1].isHidden = true;
-	commands[kcVPChordStopG_1].isDummy = false;
-	commands[kcVPChordStopG_1].Message = "Stop base octave +1 chord G";
-
-	commands[kcVPChordStopGS1].UID = 1186;
-	commands[kcVPChordStopGS1].isHidden = true;
-	commands[kcVPChordStopGS1].isDummy = false;
-	commands[kcVPChordStopGS1].Message = "Stop base octave +1 chord G#";
-
-	commands[kcVPChordStopA_2].UID = 1187;
-	commands[kcVPChordStopA_2].isHidden = true;
-	commands[kcVPChordStopA_2].isDummy = false;
-	commands[kcVPChordStopA_2].Message = "Stop base octave +2 chord A";
-
-	commands[kcVPChordStopAS2].UID = 1188;
-	commands[kcVPChordStopAS2].isHidden = true;
-	commands[kcVPChordStopAS2].isDummy = false;
-	commands[kcVPChordStopAS2].Message = "Stop base octave +2 chord A#";
-
-	commands[kcVPChordStopB_2].UID = 1189;
-	commands[kcVPChordStopB_2].isHidden = true;
-	commands[kcVPChordStopB_2].isDummy = false;
-	commands[kcVPChordStopB_2].Message = "Stop base octave +2 chord B";
-
-	commands[kcVPChordStopC_2].UID = 1190;
-	commands[kcVPChordStopC_2].isHidden = true;
-	commands[kcVPChordStopC_2].isDummy = false;
-	commands[kcVPChordStopC_2].Message = "Stop base octave +2 chord C";
-
-	commands[kcVPChordStopCS2].UID = 1191;
-	commands[kcVPChordStopCS2].isHidden = true;
-	commands[kcVPChordStopCS2].isDummy = false;
-	commands[kcVPChordStopCS2].Message = "Stop base octave +2 chord C#";
-
-	commands[kcVPChordStopD_2].UID = 1192;
-	commands[kcVPChordStopD_2].isHidden = true;
-	commands[kcVPChordStopD_2].isDummy = false;
-	commands[kcVPChordStopD_2].Message = "Stop base octave +2 chord D";
-
-	commands[kcVPChordStopDS2].UID = 1193;
-	commands[kcVPChordStopDS2].isHidden = true;
-	commands[kcVPChordStopDS2].isDummy = false;
-	commands[kcVPChordStopDS2].Message = "Stop base octave +2 chord D#";
-
-	commands[kcVPChordStopE_2].UID = 1194;
-	commands[kcVPChordStopE_2].isHidden = true;
-	commands[kcVPChordStopE_2].isDummy = false;
-	commands[kcVPChordStopE_2].Message = "Stop base octave +2 chord E";
-
-	commands[kcVPChordStopF_2].UID = 1195;
-	commands[kcVPChordStopF_2].isHidden = true;
-	commands[kcVPChordStopF_2].isDummy = false;
-	commands[kcVPChordStopF_2].Message = "Stop base octave +2 chord F";
-
-	commands[kcVPChordStopFS2].UID = 1196;
-	commands[kcVPChordStopFS2].isHidden = true;
-	commands[kcVPChordStopFS2].isDummy = false;
-	commands[kcVPChordStopFS2].Message = "Stop base octave +2 chord F#";
-
-	commands[kcVPChordStopG_2].UID = 1197;
-	commands[kcVPChordStopG_2].isHidden = true;
-	commands[kcVPChordStopG_2].isDummy = false;
-	commands[kcVPChordStopG_2].Message = "Stop base octave +2 chord G";
-
-	commands[kcVPChordStopGS2].UID = 1198;
-	commands[kcVPChordStopGS2].isHidden = true;
-	commands[kcVPChordStopGS2].isDummy = false;
-	commands[kcVPChordStopGS2].Message = "Stop base octave +2 chord G#";
-
-	commands[kcVPChordStopA_3].UID = 1199;
-	commands[kcVPChordStopA_3].isHidden = true;
-	commands[kcVPChordStopA_3].isDummy = false;
-	commands[kcVPChordStopA_3].Message = "Stop base octave +3 chord  A";
-
-	commands[kcNoteCut].UID = 1200;
-	commands[kcNoteCut].isHidden = false;
-	commands[kcNoteCut].isDummy = false;
-	commands[kcNoteCut].Message = "Note Cut";
-
-	commands[kcNoteOff].UID = 1201;
-	commands[kcNoteOff].isHidden = false;
-	commands[kcNoteOff].isDummy = false;
-	commands[kcNoteOff].Message = "Note Off";
-
-	commands[kcSetIns0].UID = 1202;
-	commands[kcSetIns0].isHidden = false;
-	commands[kcSetIns0].isDummy = false;
-	commands[kcSetIns0].Message = "Set instrument digit 0";
-
-	commands[kcSetIns1].UID = 1203;
-	commands[kcSetIns1].isHidden = false;
-	commands[kcSetIns1].isDummy = false;
-	commands[kcSetIns1].Message = "Set instrument digit 1";
-
-	commands[kcSetIns2].UID = 1204;
-	commands[kcSetIns2].isHidden = false;
-	commands[kcSetIns2].isDummy = false;
-	commands[kcSetIns2].Message = "Set instrument digit 2";
-
-	commands[kcSetIns3].UID = 1205;
-	commands[kcSetIns3].isHidden = false;
-	commands[kcSetIns3].isDummy = false;
-	commands[kcSetIns3].Message = "Set instrument digit 3";
-
-	commands[kcSetIns4].UID = 1206;
-	commands[kcSetIns4].isHidden = false;
-	commands[kcSetIns4].isDummy = false;
-	commands[kcSetIns4].Message = "Set instrument digit 4";
-
-	commands[kcSetIns5].UID = 1207;
-	commands[kcSetIns5].isHidden = false;
-	commands[kcSetIns5].isDummy = false;
-	commands[kcSetIns5].Message = "Set instrument digit 5";
-
-	commands[kcSetIns6].UID = 1208;
-	commands[kcSetIns6].isHidden = false;
-	commands[kcSetIns6].isDummy = false;
-	commands[kcSetIns6].Message = "Set instrument digit 6";
-
-	commands[kcSetIns7].UID = 1209;
-	commands[kcSetIns7].isHidden = false;
-	commands[kcSetIns7].isDummy = false;
-	commands[kcSetIns7].Message = "Set instrument digit 7";
-
-	commands[kcSetIns8].UID = 1210;
-	commands[kcSetIns8].isHidden = false;
-	commands[kcSetIns8].isDummy = false;
-	commands[kcSetIns8].Message = "Set instrument digit 8";
-
-	commands[kcSetIns9].UID = 1211;
-	commands[kcSetIns9].isHidden = false;
-	commands[kcSetIns9].isDummy = false;
-	commands[kcSetIns9].Message = "Set instrument digit 9";
-
-	commands[kcSetOctave0].UID = 1212;
-	commands[kcSetOctave0].isHidden = false;
-	commands[kcSetOctave0].isDummy = false;
-	commands[kcSetOctave0].Message = "Set octave 0";
-
-	commands[kcSetOctave1].UID = 1213;
-	commands[kcSetOctave1].isHidden = false;
-	commands[kcSetOctave1].isDummy = false;
-	commands[kcSetOctave1].Message = "Set octave 1";
-
-	commands[kcSetOctave2].UID = 1214;
-	commands[kcSetOctave2].isHidden = false;
-	commands[kcSetOctave2].isDummy = false;
-	commands[kcSetOctave2].Message = "Set octave 2";
-
-	commands[kcSetOctave3].UID = 1215;
-	commands[kcSetOctave3].isHidden = false;
-	commands[kcSetOctave3].isDummy = false;
-	commands[kcSetOctave3].Message = "Set octave 3";
-
-	commands[kcSetOctave4].UID = 1216;
-	commands[kcSetOctave4].isHidden = false;
-	commands[kcSetOctave4].isDummy = false;
-	commands[kcSetOctave4].Message = "Set octave 4";
-
-	commands[kcSetOctave5].UID = 1217;
-	commands[kcSetOctave5].isHidden = false;
-	commands[kcSetOctave5].isDummy = false;
-	commands[kcSetOctave5].Message = "Set octave 5";
-
-	commands[kcSetOctave6].UID = 1218;
-	commands[kcSetOctave6].isHidden = false;
-	commands[kcSetOctave6].isDummy = false;
-	commands[kcSetOctave6].Message = "Set octave 6";
-
-	commands[kcSetOctave7].UID = 1219;
-	commands[kcSetOctave7].isHidden = false;
-	commands[kcSetOctave7].isDummy = false;
-	commands[kcSetOctave7].Message = "Set octave 7";
-
-	commands[kcSetOctave8].UID = 1220;
-	commands[kcSetOctave8].isHidden = false;
-	commands[kcSetOctave8].isDummy = false;
-	commands[kcSetOctave8].Message = "Set octave 8";
-
-	commands[kcSetOctave9].UID = 1221;
-	commands[kcSetOctave9].isHidden = false;
-	commands[kcSetOctave9].isDummy = false;
-	commands[kcSetOctave9].Message = "Set octave 9";
-
-	commands[kcSetVolume0].UID = 1222;
-	commands[kcSetVolume0].isHidden = false;
-	commands[kcSetVolume0].isDummy = false;
-	commands[kcSetVolume0].Message = "Set volume digit 0";
-
-	commands[kcSetVolume1].UID = 1223;
-	commands[kcSetVolume1].isHidden = false;
-	commands[kcSetVolume1].isDummy = false;
-	commands[kcSetVolume1].Message = "Set volume digit 1";
-
-	commands[kcSetVolume2].UID = 1224;
-	commands[kcSetVolume2].isHidden = false;
-	commands[kcSetVolume2].isDummy = false;
-	commands[kcSetVolume2].Message = "Set volume digit 2";
-
-	commands[kcSetVolume3].UID = 1225;
-	commands[kcSetVolume3].isHidden = false;
-	commands[kcSetVolume3].isDummy = false;
-	commands[kcSetVolume3].Message = "Set volume digit 3";
-
-	commands[kcSetVolume4].UID = 1226;
-	commands[kcSetVolume4].isHidden = false;
-	commands[kcSetVolume4].isDummy = false;
-	commands[kcSetVolume4].Message = "Set volume digit 4";
-
-	commands[kcSetVolume5].UID = 1227;
-	commands[kcSetVolume5].isHidden = false;
-	commands[kcSetVolume5].isDummy = false;
-	commands[kcSetVolume5].Message = "Set volume digit 5";
-
-	commands[kcSetVolume6].UID = 1228;
-	commands[kcSetVolume6].isHidden = false;
-	commands[kcSetVolume6].isDummy = false;
-	commands[kcSetVolume6].Message = "Set volume digit 6";
-
-	commands[kcSetVolume7].UID = 1229;
-	commands[kcSetVolume7].isHidden = false;
-	commands[kcSetVolume7].isDummy = false;
-	commands[kcSetVolume7].Message = "Set volume digit 7";
-
-	commands[kcSetVolume8].UID = 1230;
-	commands[kcSetVolume8].isHidden = false;
-	commands[kcSetVolume8].isDummy = false;
-	commands[kcSetVolume8].Message = "Set volume digit 8";
-
-	commands[kcSetVolume9].UID = 1231;
-	commands[kcSetVolume9].isHidden = false;
-	commands[kcSetVolume9].isDummy = false;
-	commands[kcSetVolume9].Message = "Set volume digit 9";
-
-	commands[kcSetVolumeVol].UID = 1232;
-	commands[kcSetVolumeVol].isHidden = false;
-	commands[kcSetVolumeVol].isDummy = false;
-	commands[kcSetVolumeVol].Message = "Vol command - volume";
-
-	commands[kcSetVolumePan].UID = 1233;
-	commands[kcSetVolumePan].isHidden = false;
-	commands[kcSetVolumePan].isDummy = false;
-	commands[kcSetVolumePan].Message = "Vol command - pan";
-
-	commands[kcSetVolumeVolSlideUp].UID = 1234;
-	commands[kcSetVolumeVolSlideUp].isHidden = false;
-	commands[kcSetVolumeVolSlideUp].isDummy = false;
-	commands[kcSetVolumeVolSlideUp].Message = "Vol command - vol slide up";
-
-	commands[kcSetVolumeVolSlideDown].UID = 1235;
-	commands[kcSetVolumeVolSlideDown].isHidden = false;
-	commands[kcSetVolumeVolSlideDown].isDummy = false;
-	commands[kcSetVolumeVolSlideDown].Message = "Vol command - vol slide down";
-
-	commands[kcSetVolumeFineVolUp].UID = 1236;
-	commands[kcSetVolumeFineVolUp].isHidden = false;
-	commands[kcSetVolumeFineVolUp].isDummy = false;
-	commands[kcSetVolumeFineVolUp].Message = "Vol command - vol fine slide up";
-
-	commands[kcSetVolumeFineVolDown].UID = 1237;
-	commands[kcSetVolumeFineVolDown].isHidden = false;
-	commands[kcSetVolumeFineVolDown].isDummy = false;
-	commands[kcSetVolumeFineVolDown].Message = "Vol command - vol fine slide down";
-
-	commands[kcSetVolumeVibratoSpd].UID = 1238;
-	commands[kcSetVolumeVibratoSpd].isHidden = false;
-	commands[kcSetVolumeVibratoSpd].isDummy = false;
-	commands[kcSetVolumeVibratoSpd].Message = "Vol command - vibrato speed";
-
-	commands[kcSetVolumeVibrato].UID = 1239;
-	commands[kcSetVolumeVibrato].isHidden = false;
-	commands[kcSetVolumeVibrato].isDummy = false;
-	commands[kcSetVolumeVibrato].Message = "Vol command - vibrato";
-
-	commands[kcSetVolumeXMPanLeft].UID = 1240;
-	commands[kcSetVolumeXMPanLeft].isHidden = false;
-	commands[kcSetVolumeXMPanLeft].isDummy = false;
-	commands[kcSetVolumeXMPanLeft].Message = "Vol command - XM pan left";
-
-	commands[kcSetVolumeXMPanRight].UID = 1241;
-	commands[kcSetVolumeXMPanRight].isHidden = false;
-	commands[kcSetVolumeXMPanRight].isDummy = false;
-	commands[kcSetVolumeXMPanRight].Message = "Vol command - XM pan right";
-
-	commands[kcSetVolumePortamento].UID = 1242;
-	commands[kcSetVolumePortamento].isHidden = false;
-	commands[kcSetVolumePortamento].isDummy = false;
-	commands[kcSetVolumePortamento].Message = "Vol command - Portamento";
-
-	commands[kcSetVolumeITPortaUp].UID = 1243;
-	commands[kcSetVolumeITPortaUp].isHidden = false;
-	commands[kcSetVolumeITPortaUp].isDummy = false;
-	commands[kcSetVolumeITPortaUp].Message = "Vol command - Portamento Up";
-
-	commands[kcSetVolumeITPortaDown].UID = 1244;
-	commands[kcSetVolumeITPortaDown].isHidden = false;
-	commands[kcSetVolumeITPortaDown].isDummy = false;
-	commands[kcSetVolumeITPortaDown].Message = "Vol command - Portamento Down";
-
-	commands[kcSetVolumeITUnused].UID = 1245;
-	commands[kcSetVolumeITUnused].isHidden = true;
-	commands[kcSetVolumeITUnused].isDummy = false;
-	commands[kcSetVolumeITUnused].Message = "Vol command - Unused";
-
-	commands[kcSetVolumeITOffset].UID = 1246;
-	commands[kcSetVolumeITOffset].isHidden = false;
-	commands[kcSetVolumeITOffset].isDummy = false;
-	commands[kcSetVolumeITOffset].Message = "Vol command - Offset";
-
-	commands[kcSetFXParam0].UID = 1247;
-	commands[kcSetFXParam0].isHidden = false;
-	commands[kcSetFXParam0].isDummy = false;
-	commands[kcSetFXParam0].Message = "FX Param digit 0";
-
-	commands[kcSetFXParam1].UID = 1248;
-	commands[kcSetFXParam1].isHidden = false;
-	commands[kcSetFXParam1].isDummy = false;
-	commands[kcSetFXParam1].Message = "FX Param digit 1";
-
-	commands[kcSetFXParam2].UID = 1249;
-	commands[kcSetFXParam2].isHidden = false;
-	commands[kcSetFXParam2].isDummy = false;
-	commands[kcSetFXParam2].Message = "FX Param digit 2";
-
-	commands[kcSetFXParam3].UID = 1250;
-	commands[kcSetFXParam3].isHidden = false;
-	commands[kcSetFXParam3].isDummy = false;
-	commands[kcSetFXParam3].Message = "FX Param digit 3";
-
-	commands[kcSetFXParam4].UID = 1251;
-	commands[kcSetFXParam4].isHidden = false;
-	commands[kcSetFXParam4].isDummy = false;
-	commands[kcSetFXParam4].Message = "FX Param digit 4";
-
-	commands[kcSetFXParam5].UID = 1252;
-	commands[kcSetFXParam5].isHidden = false;
-	commands[kcSetFXParam5].isDummy = false;
-	commands[kcSetFXParam5].Message = "FX Param digit 5";
-
-	commands[kcSetFXParam6].UID = 1253;
-	commands[kcSetFXParam6].isHidden = false;
-	commands[kcSetFXParam6].isDummy = false;
-	commands[kcSetFXParam6].Message = "FX Param digit 6";
-
-	commands[kcSetFXParam7].UID = 1254;
-	commands[kcSetFXParam7].isHidden = false;
-	commands[kcSetFXParam7].isDummy = false;
-	commands[kcSetFXParam7].Message = "FX Param digit 7";
-
-	commands[kcSetFXParam8].UID = 1255;
-	commands[kcSetFXParam8].isHidden = false;
-	commands[kcSetFXParam8].isDummy = false;
-	commands[kcSetFXParam8].Message = "FX Param digit 8";
-
-	commands[kcSetFXParam9].UID = 1256;
-	commands[kcSetFXParam9].isHidden = false;
-	commands[kcSetFXParam9].isDummy = false;
-	commands[kcSetFXParam9].Message = "FX Param digit 9";
-
-	commands[kcSetFXParamA].UID = 1257;
-	commands[kcSetFXParamA].isHidden = false;
-	commands[kcSetFXParamA].isDummy = false;
-	commands[kcSetFXParamA].Message = "FX Param digit A";
-
-	commands[kcSetFXParamB].UID = 1258;
-	commands[kcSetFXParamB].isHidden = false;
-	commands[kcSetFXParamB].isDummy = false;
-	commands[kcSetFXParamB].Message = "FX Param digit B";
-
-	commands[kcSetFXParamC].UID = 1259;
-	commands[kcSetFXParamC].isHidden = false;
-	commands[kcSetFXParamC].isDummy = false;
-	commands[kcSetFXParamC].Message = "FX Param digit C";
-
-	commands[kcSetFXParamD].UID = 1260;
-	commands[kcSetFXParamD].isHidden = false;
-	commands[kcSetFXParamD].isDummy = false;
-	commands[kcSetFXParamD].Message = "FX Param digit D";
-
-	commands[kcSetFXParamE].UID = 1261;
-	commands[kcSetFXParamE].isHidden = false;
-	commands[kcSetFXParamE].isDummy = false;
-	commands[kcSetFXParamE].Message = "FX Param digit E";
-
-	commands[kcSetFXParamF].UID = 1262;
-	commands[kcSetFXParamF].isHidden = false;
-	commands[kcSetFXParamF].isDummy = false;
-	commands[kcSetFXParamF].Message = "FX Param digit F";
-
-	commands[kcSetFXarp].UID = 1263;
-	commands[kcSetFXarp].isHidden = true;
-	commands[kcSetFXarp].isDummy = false;
-	commands[kcSetFXarp].Message = "FX arpeggio";
-
-	commands[kcSetFXportUp].UID = 1264;
-	commands[kcSetFXportUp].isHidden = true;
-	commands[kcSetFXportUp].isDummy = false;
-	commands[kcSetFXportUp].Message = "FX portamentao Up";
-
-	commands[kcSetFXportDown].UID = 1265;
-	commands[kcSetFXportDown].isHidden = true;
-	commands[kcSetFXportDown].isDummy = false;
-	commands[kcSetFXportDown].Message = "FX portamentao Down";
-
-	commands[kcSetFXport].UID = 1266;
-	commands[kcSetFXport].isHidden = true;
-	commands[kcSetFXport].isDummy = false;
-	commands[kcSetFXport].Message = "FX portamentao";
-
-	commands[kcSetFXvibrato].UID = 1267;
-	commands[kcSetFXvibrato].isHidden = true;
-	commands[kcSetFXvibrato].isDummy = false;
-	commands[kcSetFXvibrato].Message = "FX vibrato";
-
-	commands[kcSetFXportSlide].UID = 1268;
-	commands[kcSetFXportSlide].isHidden = true;
-	commands[kcSetFXportSlide].isDummy = false;
-	commands[kcSetFXportSlide].Message = "FX portamento slide";
-
-	commands[kcSetFXvibSlide].UID = 1269;
-	commands[kcSetFXvibSlide].isHidden = true;
-	commands[kcSetFXvibSlide].isDummy = false;
-	commands[kcSetFXvibSlide].Message = "FX vibrato slide";
-
-	commands[kcSetFXtremolo].UID = 1270;
-	commands[kcSetFXtremolo].isHidden = true;
-	commands[kcSetFXtremolo].isDummy = false;
-	commands[kcSetFXtremolo].Message = "FX tremolo";
-
-	commands[kcSetFXpan].UID = 1271;
-	commands[kcSetFXpan].isHidden = true;
-	commands[kcSetFXpan].isDummy = false;
-	commands[kcSetFXpan].Message = "FX pan";
-
-	commands[kcSetFXoffset].UID = 1272;
-	commands[kcSetFXoffset].isHidden = true;
-	commands[kcSetFXoffset].isDummy = false;
-	commands[kcSetFXoffset].Message = "FX offset";
-
-	commands[kcSetFXvolSlide].UID = 1273;
-	commands[kcSetFXvolSlide].isHidden = true;
-	commands[kcSetFXvolSlide].isDummy = false;
-	commands[kcSetFXvolSlide].Message = "FX Volume slide";
-
-	commands[kcSetFXgotoOrd].UID = 1274;
-	commands[kcSetFXgotoOrd].isHidden = true;
-	commands[kcSetFXgotoOrd].isDummy = false;
-	commands[kcSetFXgotoOrd].Message = "FX go to order";
-
-	commands[kcSetFXsetVol].UID = 1275;
-	commands[kcSetFXsetVol].isHidden = true;
-	commands[kcSetFXsetVol].isDummy = false;
-	commands[kcSetFXsetVol].Message = "FX set volume";
-
-	commands[kcSetFXgotoRow].UID = 1276;
-	commands[kcSetFXgotoRow].isHidden = true;
-	commands[kcSetFXgotoRow].isDummy = false;
-	commands[kcSetFXgotoRow].Message = "FX go to row";
-
-	commands[kcSetFXretrig].UID = 1277;
-	commands[kcSetFXretrig].isHidden = true;
-	commands[kcSetFXretrig].isDummy = false;
-	commands[kcSetFXretrig].Message = "FX retrigger";
-
-	commands[kcSetFXspeed].UID = 1278;
-	commands[kcSetFXspeed].isHidden = true;
-	commands[kcSetFXspeed].isDummy = false;
-	commands[kcSetFXspeed].Message = "FX set speed";
-
-	commands[kcSetFXtempo].UID = 1279;
-	commands[kcSetFXtempo].isHidden = true;
-	commands[kcSetFXtempo].isDummy = false;
-	commands[kcSetFXtempo].Message = "FX set tempo";
-
-	commands[kcSetFXtremor].UID = 1280;
-	commands[kcSetFXtremor].isHidden = true;
-	commands[kcSetFXtremor].isDummy = false;
-	commands[kcSetFXtremor].Message = "FX tremor";
-
-	commands[kcSetFXextendedMOD].UID = 1281;
-	commands[kcSetFXextendedMOD].isHidden = true;
-	commands[kcSetFXextendedMOD].isDummy = false;
-	commands[kcSetFXextendedMOD].Message = "FX extended MOD cmds";
-
-	commands[kcSetFXextendedS3M].UID = 1282;
-	commands[kcSetFXextendedS3M].isHidden = true;
-	commands[kcSetFXextendedS3M].isDummy = false;
-	commands[kcSetFXextendedS3M].Message = "FX extended S3M cmds";
-
-	commands[kcSetFXchannelVol].UID = 1283;
-	commands[kcSetFXchannelVol].isHidden = true;
-	commands[kcSetFXchannelVol].isDummy = false;
-	commands[kcSetFXchannelVol].Message = "FX set channel vol";
-
-	commands[kcSetFXchannelVols].UID = 1284;
-	commands[kcSetFXchannelVols].isHidden = true;
-	commands[kcSetFXchannelVols].isDummy = false;
-	commands[kcSetFXchannelVols].Message = "FX channel vol slide";
-
-	commands[kcSetFXglobalVol].UID = 1285;
-	commands[kcSetFXglobalVol].isHidden = true;
-	commands[kcSetFXglobalVol].isDummy = false;
-	commands[kcSetFXglobalVol].Message = "FX set global volume";
-
-	commands[kcSetFXglobalVols].UID = 1286;
-	commands[kcSetFXglobalVols].isHidden = true;
-	commands[kcSetFXglobalVols].isDummy = false;
-	commands[kcSetFXglobalVols].Message = "FX global volume slide";
-
-	commands[kcSetFXkeyoff].UID = 1287;
-	commands[kcSetFXkeyoff].isHidden = true;
-	commands[kcSetFXkeyoff].isDummy = false;
-	commands[kcSetFXkeyoff].Message = "FX Some XM Command :D";
-
-	commands[kcSetFXfineVib].UID = 1288;
-	commands[kcSetFXfineVib].isHidden = true;
-	commands[kcSetFXfineVib].isDummy = false;
-	commands[kcSetFXfineVib].Message = "FX fine vibrato";
-
-	commands[kcSetFXpanbrello].UID = 1289;
-	commands[kcSetFXpanbrello].isHidden = true;
-	commands[kcSetFXpanbrello].isDummy = false;
-	commands[kcSetFXpanbrello].Message = "FX set panbrello";
-
-	commands[kcSetFXextendedXM].UID = 1290;
-	commands[kcSetFXextendedXM].isHidden = true;
-	commands[kcSetFXextendedXM].isDummy = false;
-	commands[kcSetFXextendedXM].Message = "FX extended XM effects ";
-
-	commands[kcSetFXpanSlide].UID = 1291;
-	commands[kcSetFXpanSlide].isHidden = true;
-	commands[kcSetFXpanSlide].isDummy = false;
-	commands[kcSetFXpanSlide].Message = "FX pan slide";
-
-	commands[kcSetFXsetEnvPos].UID = 1292;
-	commands[kcSetFXsetEnvPos].isHidden = true;
-	commands[kcSetFXsetEnvPos].isDummy = false;
-	commands[kcSetFXsetEnvPos].Message = "FX set envelope position (XM only)";
-
-	commands[kcSetFXmacro].UID = 1293;
-	commands[kcSetFXmacro].isHidden = true;
-	commands[kcSetFXmacro].isDummy = false;
-	commands[kcSetFXmacro].Message = "FX midi macro";
-
-	commands[kcSetFXmacroSlide].UID = 1294;
-	commands[kcSetFXmacroSlide].isHidden = false;
-	commands[kcSetFXmacroSlide].isDummy = false;
-	commands[kcSetFXmacroSlide].Message = "FX midi macro slide";
-
-	commands[kcSetFXdelaycut].UID = 1295;
-	commands[kcSetFXdelaycut].isHidden = false;
-	commands[kcSetFXdelaycut].isDummy = false;
-	commands[kcSetFXdelaycut].Message = "FX combined note delay and note cut";
-
-	commands[kcPatternJumpDownh1Select].UID = 1296;
-	commands[kcPatternJumpDownh1Select].isHidden = true;
-	commands[kcPatternJumpDownh1Select].isDummy = false;
-	commands[kcPatternJumpDownh1Select].Message = "kcPatternJumpDownh1Select";
-
-	commands[kcPatternJumpUph1Select].UID = 1297;
-	commands[kcPatternJumpUph1Select].isHidden = true;
-	commands[kcPatternJumpUph1Select].isDummy = false;
-	commands[kcPatternJumpUph1Select].Message = "kcPatternJumpUph1Select";
-
-	commands[kcPatternSnapDownh1Select].UID = 1298;
-	commands[kcPatternSnapDownh1Select].isHidden = true;
-	commands[kcPatternSnapDownh1Select].isDummy = false;
-	commands[kcPatternSnapDownh1Select].Message = "kcPatternSnapDownh1Select";
-
-	commands[kcPatternSnapUph1Select].UID = 1299;
-	commands[kcPatternSnapUph1Select].isHidden = true;
-	commands[kcPatternSnapUph1Select].isDummy = false;
-	commands[kcPatternSnapUph1Select].Message = "kcPatternSnapUph1Select";
-
-	commands[kcNavigateDownSelect].UID = 1300;
-	commands[kcNavigateDownSelect].isHidden = true;
-	commands[kcNavigateDownSelect].isDummy = false;
-	commands[kcNavigateDownSelect].Message = "kcNavigateDownSelect";
-
-	commands[kcNavigateUpSelect].UID = 1301;
-	commands[kcNavigateUpSelect].isHidden = true;
-	commands[kcNavigateUpSelect].isDummy = false;
-	commands[kcNavigateUpSelect].Message = "kcNavigateUpSelect";
-
-	commands[kcNavigateLeftSelect].UID = 1302;
-	commands[kcNavigateLeftSelect].isHidden = true;
-	commands[kcNavigateLeftSelect].isDummy = false;
-	commands[kcNavigateLeftSelect].Message = "kcNavigateLeftSelect";
-
-	commands[kcNavigateRightSelect].UID = 1303;
-	commands[kcNavigateRightSelect].isHidden = true;
-	commands[kcNavigateRightSelect].isDummy = false;
-	commands[kcNavigateRightSelect].Message = "kcNavigateRightSelect";
-
-	commands[kcNavigateNextChanSelect].UID = 1304;
-	commands[kcNavigateNextChanSelect].isHidden = true;
-	commands[kcNavigateNextChanSelect].isDummy = false;
-	commands[kcNavigateNextChanSelect].Message = "kcNavigateNextChanSelect";
-
-	commands[kcNavigatePrevChanSelect].UID = 1305;
-	commands[kcNavigatePrevChanSelect].isHidden = true;
-	commands[kcNavigatePrevChanSelect].isDummy = false;
-	commands[kcNavigatePrevChanSelect].Message = "kcNavigatePrevChanSelect";
-
-	commands[kcHomeHorizontalSelect].UID = 1306;
-	commands[kcHomeHorizontalSelect].isHidden = true;
-	commands[kcHomeHorizontalSelect].isDummy = false;
-	commands[kcHomeHorizontalSelect].Message = "kcHomeHorizontalSelect";
-
-	commands[kcHomeVerticalSelect].UID = 1307;
-	commands[kcHomeVerticalSelect].isHidden = true;
-	commands[kcHomeVerticalSelect].isDummy = false;
-	commands[kcHomeVerticalSelect].Message = "kcHomeVerticalSelect";
-
-	commands[kcHomeAbsoluteSelect].UID = 1308;
-	commands[kcHomeAbsoluteSelect].isHidden = true;
-	commands[kcHomeAbsoluteSelect].isDummy = false;
-	commands[kcHomeAbsoluteSelect].Message = "kcHomeAbsoluteSelect";
-
-	commands[kcEndHorizontalSelect].UID = 1309;
-	commands[kcEndHorizontalSelect].isHidden = true;
-	commands[kcEndHorizontalSelect].isDummy = false;
-	commands[kcEndHorizontalSelect].Message = "kcEndHorizontalSelect";
-
-	commands[kcEndVerticalSelect].UID = 1310;
-	commands[kcEndVerticalSelect].isHidden = true;
-	commands[kcEndVerticalSelect].isDummy = false;
-	commands[kcEndVerticalSelect].Message = "kcEndVerticalSelect";
-
-	commands[kcEndAbsoluteSelect].UID = 1311;
-	commands[kcEndAbsoluteSelect].isHidden = true;
-	commands[kcEndAbsoluteSelect].isDummy = false;
-	commands[kcEndAbsoluteSelect].Message = "kcEndAbsoluteSelect";
-
-	commands[kcSelectWithNav].UID = 1312;
-	commands[kcSelectWithNav].isHidden = true;
-	commands[kcSelectWithNav].isDummy = false;
-	commands[kcSelectWithNav].Message = "kcSelectWithNav";
-
-	commands[kcSelectOffWithNav].UID = 1313;
-	commands[kcSelectOffWithNav].isHidden = true;
-	commands[kcSelectOffWithNav].isDummy = false;
-	commands[kcSelectOffWithNav].Message = "kcSelectOffWithNav";
-
-	commands[kcCopySelectWithNav].UID = 1314;
-	commands[kcCopySelectWithNav].isHidden = true;
-	commands[kcCopySelectWithNav].isDummy = false;
-	commands[kcCopySelectWithNav].Message = "kcCopySelectWithNav";
-
-	commands[kcCopySelectOffWithNav].UID = 1315;
-	commands[kcCopySelectOffWithNav].isHidden = true;
-	commands[kcCopySelectOffWithNav].isDummy = false;
-	commands[kcCopySelectOffWithNav].Message = "kcCopySelectOffWithNav";
-
-	commands[kcChordModifier].UID = 1316;
-	commands[kcChordModifier].isHidden = false;
-	commands[kcChordModifier].isDummy = true;
-	commands[kcChordModifier].Message = "Chord Modifier";
-
-	commands[kcSetSpacing].UID = 1317;
-	commands[kcSetSpacing].isHidden = false;
-	commands[kcSetSpacing].isDummy = true;
-	commands[kcSetSpacing].Message = "Set row jump on note entry";
-
-	commands[kcSetSpacing0].UID = 1318;
-	commands[kcSetSpacing0].isHidden = true;
-	commands[kcSetSpacing0].isDummy = false;
-	commands[kcSetSpacing0].Message = "";
-
-	commands[kcSetSpacing1].UID = 1319;
-	commands[kcSetSpacing1].isHidden = true;
-	commands[kcSetSpacing1].isDummy = false;
-	commands[kcSetSpacing1].Message = "";
-
-	commands[kcSetSpacing2].UID = 1320;
-	commands[kcSetSpacing2].isHidden = true;
-	commands[kcSetSpacing2].isDummy = false;
-	commands[kcSetSpacing2].Message = "";
-
-	commands[kcSetSpacing3].UID = 1321;
-	commands[kcSetSpacing3].isHidden = true;
-	commands[kcSetSpacing3].isDummy = false;
-	commands[kcSetSpacing3].Message = "";
-
-	commands[kcSetSpacing4].UID = 1322;
-	commands[kcSetSpacing4].isHidden = true;
-	commands[kcSetSpacing4].isDummy = false;
-	commands[kcSetSpacing4].Message = "";
-
-	commands[kcSetSpacing5].UID = 1323;
-	commands[kcSetSpacing5].isHidden = true;
-	commands[kcSetSpacing5].isDummy = false;
-	commands[kcSetSpacing5].Message = "";
-
-	commands[kcSetSpacing6].UID = 1324;
-	commands[kcSetSpacing6].isHidden = true;
-	commands[kcSetSpacing6].isDummy = false;
-	commands[kcSetSpacing6].Message = "";
-
-	commands[kcSetSpacing7].UID = 1325;
-	commands[kcSetSpacing7].isHidden = true;
-	commands[kcSetSpacing7].isDummy = false;
-	commands[kcSetSpacing7].Message = "";
-
-	commands[kcSetSpacing8].UID = 1326;
-	commands[kcSetSpacing8].isHidden = true;
-	commands[kcSetSpacing8].isDummy = false;
-	commands[kcSetSpacing8].Message = "";
-
-	commands[kcSetSpacing9].UID = 1327;
-	commands[kcSetSpacing9].isHidden = true;
-	commands[kcSetSpacing9].isDummy = false;
-	commands[kcSetSpacing9].Message = "";
-
-	commands[kcCopySelectWithSelect].UID = 1328;
-	commands[kcCopySelectWithSelect].isHidden = true;
-	commands[kcCopySelectWithSelect].isDummy = false;
-	commands[kcCopySelectWithSelect].Message = "kcCopySelectWithSelect";
-
-	commands[kcCopySelectOffWithSelect].UID = 1329;
-	commands[kcCopySelectOffWithSelect].isHidden = true;
-	commands[kcCopySelectOffWithSelect].isDummy = false;
-	commands[kcCopySelectOffWithSelect].Message = "kcCopySelectOffWithSelect";
-
-	commands[kcSelectWithCopySelect].UID = 1330;
-	commands[kcSelectWithCopySelect].isHidden = true;
-	commands[kcSelectWithCopySelect].isDummy = false;
-	commands[kcSelectWithCopySelect].Message = "kcSelectWithCopySelect";
-
-	commands[kcSelectOffWithCopySelect].UID = 1331;
-	commands[kcSelectOffWithCopySelect].isHidden = true;
-	commands[kcSelectOffWithCopySelect].isDummy = false;
-	commands[kcSelectOffWithCopySelect].Message = "kcSelectOffWithCopySelect";
-
-/*	commands[kcCopy].UID = 1332;
-	commands[kcCopy].isHidden = false;
-	commands[kcCopy].isDummy = false;
-	commands[kcCopy].Message = "Copy pattern data";
-
-	commands[kcCut].UID = 1333;
-	commands[kcCut].isHidden = false;
-	commands[kcCut].isDummy = false;
-	commands[kcCut].Message = "Cut pattern data";
-
-	commands[kcPaste].UID = 1334;
-	commands[kcPaste].isHidden = false;
-	commands[kcPaste].isDummy = false;
-    commands[kcPaste].Message = "Paste pattern data";
-	
-    commands[kcMixPaste].UID = 1335;
-	commands[kcMixPaste].isHidden = false;
-	commands[kcMixPaste].isDummy = false;
-	commands[kcMixPaste].Message = "Mix-paste pattern data";
-
-	commands[kcSelectAll].UID = 1336;
-	commands[kcSelectAll].isHidden = false;
-	commands[kcSelectAll].isDummy = false;
-	commands[kcSelectAll].Message = "Select all pattern data";
-
-	commands[kcSelectCol].UID = 1337;
-	commands[kcSelectCol].isHidden = true;
-	commands[kcSelectCol].isDummy = false;
-	commands[kcSelectCol].Message = "Select channel / select all";
-*/
-
-	commands[kcPatternJumpDownh2].UID = 1338;
-	commands[kcPatternJumpDownh2].isHidden = false;
-	commands[kcPatternJumpDownh2].isDummy = false;
-	commands[kcPatternJumpDownh2].Message = "Jump down by beat";
-
-	commands[kcPatternJumpUph2].UID = 1339;
-	commands[kcPatternJumpUph2].isHidden = false;
-	commands[kcPatternJumpUph2].isDummy = false;
-	commands[kcPatternJumpUph2].Message = "Jump up by beat";
-
-	commands[kcPatternSnapDownh2].UID = 1340;
-	commands[kcPatternSnapDownh2].isHidden = false;
-	commands[kcPatternSnapDownh2].isDummy = false;
-	commands[kcPatternSnapDownh2].Message = "Snap down to beat";
-
-	commands[kcPatternSnapUph2].UID = 1341;
-	commands[kcPatternSnapUph2].isHidden = false;
-	commands[kcPatternSnapUph2].isDummy = false;
-	commands[kcPatternSnapUph2].Message = "Snap up to beat";
-
-
-	commands[kcPatternJumpDownh2Select].UID = 1342;
-	commands[kcPatternJumpDownh2Select].isHidden = true;
-	commands[kcPatternJumpDownh2Select].isDummy = false;
-	commands[kcPatternJumpDownh2Select].Message = "kcPatternJumpDownh2Select";
-
-	commands[kcPatternJumpUph2Select].UID = 1343;
-	commands[kcPatternJumpUph2Select].isHidden = true;
-	commands[kcPatternJumpUph2Select].isDummy = false;
-	commands[kcPatternJumpUph2Select].Message = "kcPatternJumpUph2Select";
-
-	commands[kcPatternSnapDownh2Select].UID = 1344;
-	commands[kcPatternSnapDownh2Select].isHidden = true;
-	commands[kcPatternSnapDownh2Select].isDummy = false;
-	commands[kcPatternSnapDownh2Select].Message = "kcPatternSnapDownh2Select";
-
-	commands[kcPatternSnapUph2Select].UID = 1345;
-	commands[kcPatternSnapUph2Select].isHidden = true;
-	commands[kcPatternSnapUph2Select].isDummy = false;
-	commands[kcPatternSnapUph2Select].Message = "kcPatternSnapUph2Select";
-
-	commands[kcFileOpen].UID = 1346;
-	commands[kcFileOpen].isHidden = false;
-	commands[kcFileOpen].isDummy = false;
-	commands[kcFileOpen].Message = "File/Open";
-
-	commands[kcFileNew].UID = 1347;
-	commands[kcFileNew].Message = "File/New";
-	commands[kcFileNew].isHidden = false;
-	commands[kcFileNew].isDummy = false;
-
-	commands[kcFileClose].UID = 1348;
-	commands[kcFileClose].Message = "File/Close";
-	commands[kcFileClose].isHidden = false;
-	commands[kcFileClose].isDummy = false;
-
-	commands[kcFileSave].UID = 1349;
-	commands[kcFileSave].Message = "File/Save";
-	commands[kcFileSave].isHidden = false;
-	commands[kcFileSave].isDummy = false;
-
-	commands[kcFileSaveAs].UID = 1350;
-	commands[kcFileSaveAs].Message = "File/Save As";
-	commands[kcFileSaveAs].isHidden = false;
-	commands[kcFileSaveAs].isDummy = false;
-
-	commands[kcFileSaveAsWave].UID = 1351;
-	commands[kcFileSaveAsWave].Message = "File/Export as Wave";
-	commands[kcFileSaveAsWave].isHidden = false;
-	commands[kcFileSaveAsWave].isDummy = false;
-
-	commands[kcFileSaveAsMP3].UID = 1352;
-	commands[kcFileSaveAsMP3].Message = "File/Export as MP3";
-	commands[kcFileSaveAsMP3].isHidden = false;
-	commands[kcFileSaveAsMP3].isDummy = false;
-
-	commands[kcFileSaveMidi].UID = 1353;
-	commands[kcFileSaveMidi].Message = "File/Export as MIDI";
-	commands[kcFileSaveMidi].isHidden = false;
-	commands[kcFileSaveMidi].isDummy = false;
-
-	commands[kcFileImportMidiLib].UID = 1354;
-	commands[kcFileImportMidiLib].Message = "File/Import Midi Lib";
-	commands[kcFileImportMidiLib].isHidden = false;
-	commands[kcFileImportMidiLib].isDummy = false;
-
-	commands[kcFileAddSoundBank].UID = 1355;
-	commands[kcFileAddSoundBank].Message = "File/Add Sound Bank";
-	commands[kcFileAddSoundBank].isHidden = false;
-	commands[kcFileAddSoundBank].isDummy = false;
-
-
-	commands[kcStopSong].UID = 1356;
-	commands[kcStopSong].Message = "Stop Song";
-	commands[kcStopSong].isHidden = false;
-	commands[kcStopSong].isDummy = false;
-
-	commands[kcMidiRecord].UID = 1357;
-	commands[kcMidiRecord].Message = "Toggle Midi Record";
-	commands[kcMidiRecord].isHidden = false;
-	commands[kcMidiRecord].isDummy = false;
-
-	commands[kcEstimateSongLength].UID = 1358;
-	commands[kcEstimateSongLength].Message = "Estimate Song Length";
-	commands[kcEstimateSongLength].isHidden = false;
-	commands[kcEstimateSongLength].isDummy = false;
-
-
-	commands[kcEditUndo].UID = 1359;
-	commands[kcEditUndo].Message = "Undo";
-	commands[kcEditUndo].isHidden = false;
-	commands[kcEditUndo].isDummy = false;
-
-	commands[kcEditCut].UID = 1360;
-	commands[kcEditCut].Message = "Cut";
-	commands[kcEditCut].isHidden = false;
-	commands[kcEditCut].isDummy = false;
-
-	commands[kcEditCopy].UID = 1361;
-	commands[kcEditCopy].Message = "Copy";
-	commands[kcEditCopy].isHidden = false;
-	commands[kcEditCopy].isDummy = false;
-
-	commands[kcEditPaste].UID = 1362;
-	commands[kcEditPaste].Message = "Paste";
-	commands[kcEditPaste].isHidden = false;
-	commands[kcEditPaste].isDummy = false;
-
-	commands[kcEditMixPaste].UID = 1363;
-	commands[kcEditMixPaste].Message = "Mix Paste";
-	commands[kcEditMixPaste].isHidden = false;
-	commands[kcEditMixPaste].isDummy = false;
-
-	commands[kcEditSelectAll].UID = 1364;
-	commands[kcEditSelectAll].Message = "SelectAll";
-	commands[kcEditSelectAll].isHidden = false;
-	commands[kcEditSelectAll].isDummy = false;
-
-	commands[kcEditFind].UID = 1365;
-	commands[kcEditFind].Message = "Find";
-	commands[kcEditFind].isHidden = false;
-	commands[kcEditFind].isDummy = false;
-
-	commands[kcEditFindNext].UID = 1366;
-	commands[kcEditFindNext].Message = "Find Next";
-	commands[kcEditFindNext].isHidden = false;
-	commands[kcEditFindNext].isDummy = false;
-
-
-	commands[kcViewMain].UID = 1367;
-	commands[kcViewMain].Message = "Toggle Main View";
-	commands[kcViewMain].isHidden = false;
-	commands[kcViewMain].isDummy = false;
-
-	commands[kcViewTree].UID = 1368;
-	commands[kcViewTree].Message = "Toggle Tree View";
-	commands[kcViewTree].isHidden = false;
-	commands[kcViewTree].isDummy = false;
-
-	commands[kcViewOptions].UID = 1369;
-	commands[kcViewOptions].Message = "View Options";
-	commands[kcViewOptions].isHidden = false;
-	commands[kcViewOptions].isDummy = false;
-
-	commands[kcHelp].UID = 1370;
-	commands[kcHelp].Message = "Help (to do)";
-	commands[kcHelp].isHidden = false;
-	commands[kcHelp].isDummy = false;
-
-/*
-	commands[kcWindowNew].UID = 1370;
-	commands[kcWindowNew].Message = "New Window";
-	commands[kcWindowNew].isHidden = false;
-	commands[kcWindowNew].isDummy = false;
-
-	commands[kcWindowCascade].UID = 1371;
-	commands[kcWindowCascade].Message = "Cascade Windows";
-	commands[kcWindowCascade].isHidden = false;
-	commands[kcWindowCascade].isDummy = false;
-
-	commands[kcWindowTileHorz].UID = 1372;
-	commands[kcWindowTileHorz].Message = "Tile Windows Horizontally";
-	commands[kcWindowTileHorz].isHidden = false;
-	commands[kcWindowTileHorz].isDummy = false;
-
-	commands[kcWindowTileVert].UID = 1373;
-	commands[kcWindowTileVert].Message = "Tile Windows Vertically";
-	commands[kcWindowTileVert].isHidden = false;
-	commands[kcWindowTileVert].isDummy = false;
-*/
-	commands[kcEstimateSongLength].UID = 1374;
-	commands[kcEstimateSongLength].Message = "Estimate Song Length";
-	commands[kcEstimateSongLength].isHidden = false;
-	commands[kcEstimateSongLength].isDummy = false;
-
-	commands[kcStopSong].UID = 1375;
-	commands[kcStopSong].Message = "Stop Song";
-	commands[kcStopSong].isHidden = false;
-	commands[kcStopSong].isDummy = false;
-
-	commands[kcMidiRecord].UID = 1376;
-	commands[kcMidiRecord].Message = "Toggle Midi Record";
-	commands[kcMidiRecord].isHidden = false;
-	commands[kcMidiRecord].isDummy = false;
-
-	commands[kcDeleteAllRows].UID = 1377;
-	commands[kcDeleteAllRows].Message = "Delete all rows";
-	commands[kcDeleteAllRows].isHidden = false;
-	commands[kcDeleteAllRows].isDummy = false;
-
-	commands[kcInsertRow].UID = 1378;
-	commands[kcInsertRow].Message = "Insert Row";
-	commands[kcInsertRow].isHidden = false;
-	commands[kcInsertRow].isDummy = false;
-
-	commands[kcInsertAllRows].UID = 1379;
-	commands[kcInsertAllRows].Message = "Insert All Rows";
-	commands[kcInsertAllRows].isHidden = false;
-	commands[kcInsertAllRows].isDummy = false;
-
-	commands[kcSampleTrim].UID = 1380;
-	commands[kcSampleTrim].Message = "Trim sample around loop points";
-	commands[kcSampleTrim].isHidden = false;
-	commands[kcSampleTrim].isDummy = false;
-
-	commands[kcSampleReverse].UID = 1381;
-	commands[kcSampleReverse].Message = "Reverse sample";
-	commands[kcSampleReverse].isHidden = false;
-	commands[kcSampleReverse].isDummy = false;
-
-	commands[kcSampleDelete].UID = 1382;
-	commands[kcSampleDelete].Message = "Delete sample selection";
-	commands[kcSampleDelete].isHidden = false;
-	commands[kcSampleDelete].isDummy = false;
-
-	commands[kcSampleSilence].UID = 1383;
-	commands[kcSampleSilence].Message = "Silence sample selection";
-	commands[kcSampleSilence].isHidden = false;
-	commands[kcSampleSilence].isDummy = false;
-
-	commands[kcSampleNormalize].UID = 1384;
-	commands[kcSampleNormalize].Message = "Normalise Sample";
-	commands[kcSampleNormalize].isHidden = false;
-	commands[kcSampleNormalize].isDummy = false;
-
-	commands[kcSampleAmplify].UID = 1385;
-	commands[kcSampleAmplify].Message = "Amplify Sample";
-	commands[kcSampleAmplify].isHidden = false;
-	commands[kcSampleAmplify].isDummy = false;
-
-	commands[kcSampleZoomUp].UID = 1386;
-	commands[kcSampleZoomUp].Message = "Zoom Out";
-	commands[kcSampleZoomUp].isHidden = false;
-	commands[kcSampleZoomUp].isDummy = false;
-
-	commands[kcSampleZoomDown].UID = 1387;
-	commands[kcSampleZoomDown].Message = "Zoom In";
-	commands[kcSampleZoomDown].isHidden = false;
-	commands[kcSampleZoomDown].isDummy = false;
-
+	DefineKeyCommand(kcPatternRecord, 1001, kcVisible, kcNoDummy, _T("Enable recording"));
+	DefineKeyCommand(kcPatternPlayRow, 1002, kcVisible, kcNoDummy, _T("Play row"));
+	DefineKeyCommand(kcCursorCopy, 1003, kcVisible, kcNoDummy, _T("Quick copy"));
+	DefineKeyCommand(kcCursorPaste, 1004, kcVisible, kcNoDummy, _T("Quick paste"));
+	DefineKeyCommand(kcChannelMute, 1005, kcVisible, kcNoDummy, _T("Mute current channel"));
+	DefineKeyCommand(kcChannelSolo, 1006, kcVisible, kcNoDummy, _T("Solo current channel"));
+	DefineKeyCommand(kcTransposeUp, 1007, kcVisible, kcNoDummy, _T("Transpose +1"));
+	DefineKeyCommand(kcTransposeDown, 1008, kcVisible, kcNoDummy, _T("Transpose -1"));
+	DefineKeyCommand(kcTransposeOctUp, 1009, kcVisible, kcNoDummy, _T("Transpose +12"));
+	DefineKeyCommand(kcTransposeOctDown, 1010, kcVisible, kcNoDummy, _T("Transpose -12"));
+	DefineKeyCommand(kcSelectColumn, 1011, kcVisible, kcNoDummy, _T("Select channel / Select all"));
+	DefineKeyCommand(kcPatternAmplify, 1012, kcVisible, kcNoDummy, _T("Amplify selection"));
+	DefineKeyCommand(kcPatternSetInstrument, 1013, kcVisible, kcNoDummy, _T("Apply current instrument"));
+	DefineKeyCommand(kcPatternInterpolateVol, 1014, kcVisible, kcNoDummy, _T("Interpolate volume"));
+	DefineKeyCommand(kcPatternInterpolateEffect, 1015, kcVisible, kcNoDummy, _T("Interpolate effect"));
+	DefineKeyCommand(kcPatternVisualizeEffect, 1016, kcVisible, kcNoDummy, _T("Open effect visualizer"));
+	DefineKeyCommand(kcPatternJumpDownh1, 1017, kcVisible, kcNoDummy, _T("Jump down by measure"));
+	DefineKeyCommand(kcPatternJumpUph1, 1018, kcVisible, kcNoDummy, _T("Jump up by measure"));
+	DefineKeyCommand(kcPatternSnapDownh1, 1019, kcVisible, kcNoDummy, _T("Snap down to measure"));
+	DefineKeyCommand(kcPatternSnapUph1, 1020, kcVisible, kcNoDummy, _T("Snap up to measure"));
+	DefineKeyCommand(kcViewGeneral, 1021, kcVisible, kcNoDummy, _T("View General"));
+	DefineKeyCommand(kcViewPattern, 1022, kcVisible, kcNoDummy, _T("View Pattern"));
+	DefineKeyCommand(kcViewSamples, 1023, kcVisible, kcNoDummy, _T("View Samples"));
+	DefineKeyCommand(kcViewInstruments, 1024, kcVisible, kcNoDummy, _T("View Instruments"));
+	DefineKeyCommand(kcViewComments, 1025, kcVisible, kcNoDummy, _T("View Comments"));
+	DefineKeyCommand(kcPlayPatternFromCursor, 1026, kcVisible, kcNoDummy, _T("Play pattern from cursor"));
+	DefineKeyCommand(kcPlayPatternFromStart, 1027, kcVisible, kcNoDummy, _T("Play pattern from start"));
+	DefineKeyCommand(kcPlaySongFromCursor, 1028, kcVisible, kcNoDummy, _T("Play song from cursor"));
+	DefineKeyCommand(kcPlaySongFromStart, 1029, kcVisible, kcNoDummy, _T("Play song from start"));
+	DefineKeyCommand(kcPlayPauseSong, 1030, kcVisible, kcNoDummy, _T("Play song/Pause song"));
+	DefineKeyCommand(kcPauseSong, 1031, kcVisible, kcNoDummy, _T("Pause song"));
+	DefineKeyCommand(kcPrevInstrument, 1032, kcVisible, kcNoDummy, _T("Previous instrument"));
+	DefineKeyCommand(kcNextInstrument, 1033, kcVisible, kcNoDummy, _T("Next instrument"));
+	DefineKeyCommand(kcPrevOrder, 1034, kcVisible, kcNoDummy, _T("Previous order"));
+	DefineKeyCommand(kcNextOrder, 1035, kcVisible, kcNoDummy, _T("Next order"));
+	DefineKeyCommand(kcPrevOctave, 1036, kcVisible, kcNoDummy, _T("Previous octave"));
+	DefineKeyCommand(kcNextOctave, 1037, kcVisible, kcNoDummy, _T("Next octave"));
+	DefineKeyCommand(kcNavigateDown, 1038, kcVisible, kcNoDummy, _T("Navigate down by 1 row"));
+	DefineKeyCommand(kcNavigateUp, 1039, kcVisible, kcNoDummy, _T("Navigate up by 1 row"));
+	DefineKeyCommand(kcNavigateLeft, 1040, kcVisible, kcNoDummy, _T("Navigate left"));
+	DefineKeyCommand(kcNavigateRight, 1041, kcVisible, kcNoDummy, _T("Navigate right"));
+	DefineKeyCommand(kcNavigateNextChan, 1042, kcVisible, kcNoDummy, _T("Navigate to next channel"));
+	DefineKeyCommand(kcNavigatePrevChan, 1043, kcVisible, kcNoDummy, _T("Navigate to previous channel"));
+	DefineKeyCommand(kcHomeHorizontal, 1044, kcVisible, kcNoDummy, _T("Go to first channel"));
+	DefineKeyCommand(kcHomeVertical, 1045, kcVisible, kcNoDummy, _T("Go to first row"));
+	DefineKeyCommand(kcHomeAbsolute, 1046, kcVisible, kcNoDummy, _T("Go to first row of first channel"));
+	DefineKeyCommand(kcEndHorizontal, 1047, kcVisible, kcNoDummy, _T("Go to last channel"));
+	DefineKeyCommand(kcEndVertical, 1048, kcVisible, kcNoDummy, _T("Go to last row"));
+	DefineKeyCommand(kcEndAbsolute, 1049, kcVisible, kcNoDummy, _T("Go to last row of last channel"));
+	DefineKeyCommand(kcSelect, 1050, kcVisible, kcNoDummy, _T("Selection key"));
+	DefineKeyCommand(kcCopySelect, 1051, kcVisible, kcNoDummy, _T("Copy select key"));
+	DefineKeyCommand(kcSelectOff, 1052, kcHidden, kcNoDummy, _T("Deselect"));
+	DefineKeyCommand(kcCopySelectOff, 1053, kcHidden, kcNoDummy, _T("Copy deselect key"));
+	DefineKeyCommand(kcNextPattern, 1054, kcVisible, kcNoDummy, _T("Next pattern"));
+	DefineKeyCommand(kcPrevPattern, 1055, kcVisible, kcNoDummy, _T("Previous pattern"));
+	//DefineKeyCommand(kcPrevPattern, 1056, kcVisible, kcNoDummy, _T("Wipe selection"));
+	DefineKeyCommand(kcClearRow, 1057, kcVisible, kcNoDummy, _T("Clear row"));
+	DefineKeyCommand(kcClearField, 1058, kcVisible, kcNoDummy, _T("Clear field"));
+	DefineKeyCommand(kcClearRowStep, 1059, kcVisible, kcNoDummy, _T("Clear row and step"));
+	DefineKeyCommand(kcClearFieldStep, 1060, kcVisible, kcNoDummy, _T("Clear field and step"));
+	DefineKeyCommand(kcDeleteRows, 1061, kcVisible, kcNoDummy, _T("Delete rows"));
+	DefineKeyCommand(kcShowNoteProperties, 1062, kcVisible, kcNoDummy, _T("Show note properties"));
+	DefineKeyCommand(kcShowEditMenu, 1063, kcVisible, kcNoDummy, _T("Show context (right-click) menu"));
+	DefineKeyCommand(kcVPNoteC_0, 1064, kcVisible, kcNoDummy, _T("Base octave C"));
+	DefineKeyCommand(kcVPNoteCS0, 1065, kcVisible, kcNoDummy, _T("Base octave C#"));
+	DefineKeyCommand(kcVPNoteD_0, 1066, kcVisible, kcNoDummy, _T("Base octave D"));
+	DefineKeyCommand(kcVPNoteDS0, 1067, kcVisible, kcNoDummy, _T("Base octave D#"));
+	DefineKeyCommand(kcVPNoteE_0, 1068, kcVisible, kcNoDummy, _T("Base octave E"));
+	DefineKeyCommand(kcVPNoteF_0, 1069, kcVisible, kcNoDummy, _T("Base octave F"));
+	DefineKeyCommand(kcVPNoteFS0, 1070, kcVisible, kcNoDummy, _T("Base octave F#"));
+	DefineKeyCommand(kcVPNoteG_0, 1071, kcVisible, kcNoDummy, _T("Base octave G"));
+	DefineKeyCommand(kcVPNoteGS0, 1072, kcVisible, kcNoDummy, _T("Base octave G#"));
+	DefineKeyCommand(kcVPNoteA_1, 1073, kcVisible, kcNoDummy, _T("Base octave A"));
+	DefineKeyCommand(kcVPNoteAS1, 1074, kcVisible, kcNoDummy, _T("Base octave A#"));
+	DefineKeyCommand(kcVPNoteB_1, 1075, kcVisible, kcNoDummy, _T("Base octave B"));
+	DefineKeyCommand(kcVPNoteC_1, 1076, kcVisible, kcNoDummy, _T("Base octave +1 C"));
+	DefineKeyCommand(kcVPNoteCS1, 1077, kcVisible, kcNoDummy, _T("Base octave +1 C#"));
+	DefineKeyCommand(kcVPNoteD_1, 1078, kcVisible, kcNoDummy, _T("Base octave +1 D"));
+	DefineKeyCommand(kcVPNoteDS1, 1079, kcVisible, kcNoDummy, _T("Base octave +1 D#"));
+	DefineKeyCommand(kcVPNoteE_1, 1080, kcVisible, kcNoDummy, _T("Base octave +1 E"));
+	DefineKeyCommand(kcVPNoteF_1, 1081, kcVisible, kcNoDummy, _T("Base octave +1 F"));
+	DefineKeyCommand(kcVPNoteFS1, 1082, kcVisible, kcNoDummy, _T("Base octave +1 F#"));
+	DefineKeyCommand(kcVPNoteG_1, 1083, kcVisible, kcNoDummy, _T("Base octave +1 G"));
+	DefineKeyCommand(kcVPNoteGS1, 1084, kcVisible, kcNoDummy, _T("Base octave +1 G#"));
+	DefineKeyCommand(kcVPNoteA_2, 1085, kcVisible, kcNoDummy, _T("Base octave +1 A"));
+	DefineKeyCommand(kcVPNoteAS2, 1086, kcVisible, kcNoDummy, _T("Base octave +1 A#"));
+	DefineKeyCommand(kcVPNoteB_2, 1087, kcVisible, kcNoDummy, _T("Base octave +1 B"));
+	DefineKeyCommand(kcVPNoteC_2, 1088, kcVisible, kcNoDummy, _T("Base octave +2 C"));
+	DefineKeyCommand(kcVPNoteCS2, 1089, kcVisible, kcNoDummy, _T("Base octave +2 C#"));
+	DefineKeyCommand(kcVPNoteD_2, 1090, kcVisible, kcNoDummy, _T("Base octave +2 D"));
+	DefineKeyCommand(kcVPNoteDS2, 1091, kcVisible, kcNoDummy, _T("Base octave +2 D#"));
+	DefineKeyCommand(kcVPNoteE_2, 1092, kcVisible, kcNoDummy, _T("Base octave +2 E"));
+	DefineKeyCommand(kcVPNoteF_2, 1093, kcVisible, kcNoDummy, _T("Base octave +2 F"));
+	DefineKeyCommand(kcVPNoteFS2, 1094, kcVisible, kcNoDummy, _T("Base octave +2 F#"));
+	DefineKeyCommand(kcVPNoteG_2, 1095, kcVisible, kcNoDummy, _T("Base octave +2 G"));
+	DefineKeyCommand(kcVPNoteGS2, 1096, kcVisible, kcNoDummy, _T("Base octave +2 G#"));
+	DefineKeyCommand(kcVPNoteA_3, 1097, kcVisible, kcNoDummy, _T("Base octave +2 A"));
+	DefineKeyCommand(kcVPNoteStopC_0, 1098, kcHidden, kcNoDummy, _T("Stop base octave C"));
+	DefineKeyCommand(kcVPNoteStopCS0, 1099, kcHidden, kcNoDummy, _T("Stop base octave C#"));
+	DefineKeyCommand(kcVPNoteStopD_0, 1100, kcHidden, kcNoDummy, _T("Stop base octave D"));
+	DefineKeyCommand(kcVPNoteStopDS0, 1101, kcHidden, kcNoDummy, _T("Stop base octave D#"));
+	DefineKeyCommand(kcVPNoteStopE_0, 1102, kcHidden, kcNoDummy, _T("Stop base octave E"));
+	DefineKeyCommand(kcVPNoteStopF_0, 1103, kcHidden, kcNoDummy, _T("Stop base octave F"));
+	DefineKeyCommand(kcVPNoteStopFS0, 1104, kcHidden, kcNoDummy, _T("Stop base octave F#"));
+	DefineKeyCommand(kcVPNoteStopG_0, 1105, kcHidden, kcNoDummy, _T("Stop base octave G"));
+	DefineKeyCommand(kcVPNoteStopGS0, 1106, kcHidden, kcNoDummy, _T("Stop base octave G#"));
+	DefineKeyCommand(kcVPNoteStopA_1, 1107, kcHidden, kcNoDummy, _T("Stop base octave +1 A"));
+	DefineKeyCommand(kcVPNoteStopAS1, 1108, kcHidden, kcNoDummy, _T("Stop base octave +1 A#"));
+	DefineKeyCommand(kcVPNoteStopB_1, 1109, kcHidden, kcNoDummy, _T("Stop base octave +1 B"));
+	DefineKeyCommand(kcVPNoteStopC_1, 1110, kcHidden, kcNoDummy, _T("Stop base octave +1 C"));
+	DefineKeyCommand(kcVPNoteStopCS1, 1111, kcHidden, kcNoDummy, _T("Stop base octave +1 C#"));
+	DefineKeyCommand(kcVPNoteStopD_1, 1112, kcHidden, kcNoDummy, _T("Stop base octave +1 D"));
+	DefineKeyCommand(kcVPNoteStopDS1, 1113, kcHidden, kcNoDummy, _T("Stop base octave +1 D#"));
+	DefineKeyCommand(kcVPNoteStopE_1, 1114, kcHidden, kcNoDummy, _T("Stop base octave +1 E"));
+	DefineKeyCommand(kcVPNoteStopF_1, 1115, kcHidden, kcNoDummy, _T("Stop base octave +1 F"));
+	DefineKeyCommand(kcVPNoteStopFS1, 1116, kcHidden, kcNoDummy, _T("Stop base octave +1 F#"));
+	DefineKeyCommand(kcVPNoteStopG_1, 1117, kcHidden, kcNoDummy, _T("Stop base octave +1 G"));
+	DefineKeyCommand(kcVPNoteStopGS1, 1118, kcHidden, kcNoDummy, _T("Stop base octave +1 G#"));
+	DefineKeyCommand(kcVPNoteStopA_2, 1119, kcHidden, kcNoDummy, _T("Stop base octave +2 A"));
+	DefineKeyCommand(kcVPNoteStopAS2, 1120, kcHidden, kcNoDummy, _T("Stop base octave +2 A#"));
+	DefineKeyCommand(kcVPNoteStopB_2, 1121, kcHidden, kcNoDummy, _T("Stop base octave +2 B"));
+	DefineKeyCommand(kcVPNoteStopC_2, 1122, kcHidden, kcNoDummy, _T("Stop base octave +2 C"));
+	DefineKeyCommand(kcVPNoteStopCS2, 1123, kcHidden, kcNoDummy, _T("Stop base octave +2 C#"));
+	DefineKeyCommand(kcVPNoteStopD_2, 1124, kcHidden, kcNoDummy, _T("Stop base octave +2 D"));
+	DefineKeyCommand(kcVPNoteStopDS2, 1125, kcHidden, kcNoDummy, _T("Stop base octave +2 D#"));
+	DefineKeyCommand(kcVPNoteStopE_2, 1126, kcHidden, kcNoDummy, _T("Stop base octave +2 E"));
+	DefineKeyCommand(kcVPNoteStopF_2, 1127, kcHidden, kcNoDummy, _T("Stop base octave +2 F"));
+	DefineKeyCommand(kcVPNoteStopFS2, 1128, kcHidden, kcNoDummy, _T("Stop base octave +2 F#"));
+	DefineKeyCommand(kcVPNoteStopG_2, 1129, kcHidden, kcNoDummy, _T("Stop base octave +2 G"));
+	DefineKeyCommand(kcVPNoteStopGS2, 1130, kcHidden, kcNoDummy, _T("Stop base octave +2 G#"));
+	DefineKeyCommand(kcVPNoteStopA_3, 1131, kcHidden, kcNoDummy, _T("Stop base octave +3 A"));
+	DefineKeyCommand(kcVPChordC_0, 1132, kcHidden, kcNoDummy, _T("base octave chord C"));
+	DefineKeyCommand(kcVPChordCS0, 1133, kcHidden, kcNoDummy, _T("base octave chord C#"));
+	DefineKeyCommand(kcVPChordD_0, 1134, kcHidden, kcNoDummy, _T("base octave chord D"));
+	DefineKeyCommand(kcVPChordDS0, 1135, kcHidden, kcNoDummy, _T("base octave chord D#"));
+	DefineKeyCommand(kcVPChordE_0, 1136, kcHidden, kcNoDummy, _T("base octave chord E"));
+	DefineKeyCommand(kcVPChordF_0, 1137, kcHidden, kcNoDummy, _T("base octave chord F"));
+	DefineKeyCommand(kcVPChordFS0, 1138, kcHidden, kcNoDummy, _T("base octave chord F#"));
+	DefineKeyCommand(kcVPChordG_0, 1139, kcHidden, kcNoDummy, _T("base octave chord G"));
+	DefineKeyCommand(kcVPChordGS0, 1140, kcHidden, kcNoDummy, _T("base octave chord G#"));
+	DefineKeyCommand(kcVPChordA_1, 1141, kcHidden, kcNoDummy, _T("base octave +1 chord A"));
+	DefineKeyCommand(kcVPChordAS1, 1142, kcHidden, kcNoDummy, _T("base octave +1 chord A#"));
+	DefineKeyCommand(kcVPChordB_1, 1143, kcHidden, kcNoDummy, _T("base octave +1 chord B"));
+	DefineKeyCommand(kcVPChordC_1, 1144, kcHidden, kcNoDummy, _T("base octave +1 chord C"));
+	DefineKeyCommand(kcVPChordCS1, 1145, kcHidden, kcNoDummy, _T("base octave +1 chord C#"));
+	DefineKeyCommand(kcVPChordD_1, 1146, kcHidden, kcNoDummy, _T("base octave +1 chord D"));
+	DefineKeyCommand(kcVPChordDS1, 1147, kcHidden, kcNoDummy, _T("base octave +1 chord D#"));
+	DefineKeyCommand(kcVPChordE_1, 1148, kcHidden, kcNoDummy, _T("base octave +1 chord E"));
+	DefineKeyCommand(kcVPChordF_1, 1149, kcHidden, kcNoDummy, _T("base octave +1 chord F"));
+	DefineKeyCommand(kcVPChordFS1, 1150, kcHidden, kcNoDummy, _T("base octave +1 chord F#"));
+	DefineKeyCommand(kcVPChordG_1, 1151, kcHidden, kcNoDummy, _T("base octave +1 chord G"));
+	DefineKeyCommand(kcVPChordGS1, 1152, kcHidden, kcNoDummy, _T("base octave +1 chord G#"));
+	DefineKeyCommand(kcVPChordA_2, 1153, kcHidden, kcNoDummy, _T("base octave +2 chord A"));
+	DefineKeyCommand(kcVPChordAS2, 1154, kcHidden, kcNoDummy, _T("base octave +2 chord A#"));
+	DefineKeyCommand(kcVPChordB_2, 1155, kcHidden, kcNoDummy, _T("base octave +2 chord B"));
+	DefineKeyCommand(kcVPChordC_2, 1156, kcHidden, kcNoDummy, _T("base octave +2 chord C"));
+	DefineKeyCommand(kcVPChordCS2, 1157, kcHidden, kcNoDummy, _T("base octave +2 chord C#"));
+	DefineKeyCommand(kcVPChordD_2, 1158, kcHidden, kcNoDummy, _T("base octave +2 chord D"));
+	DefineKeyCommand(kcVPChordDS2, 1159, kcHidden, kcNoDummy, _T("base octave +2 chord D#"));
+	DefineKeyCommand(kcVPChordE_2, 1160, kcHidden, kcNoDummy, _T("base octave +2 chord E"));
+	DefineKeyCommand(kcVPChordF_2, 1161, kcHidden, kcNoDummy, _T("base octave +2 chord F"));
+	DefineKeyCommand(kcVPChordFS2, 1162, kcHidden, kcNoDummy, _T("base octave +2 chord F#"));
+	DefineKeyCommand(kcVPChordG_2, 1163, kcHidden, kcNoDummy, _T("base octave +2 chord G"));
+	DefineKeyCommand(kcVPChordGS2, 1164, kcHidden, kcNoDummy, _T("base octave +2 chord G#"));
+	DefineKeyCommand(kcVPChordA_3, 1165, kcHidden, kcNoDummy, _T("base octave chord +3 A"));
+	DefineKeyCommand(kcVPChordStopC_0, 1166, kcHidden, kcNoDummy, _T("Stop base octave chord C"));
+	DefineKeyCommand(kcVPChordStopCS0, 1167, kcHidden, kcNoDummy, _T("Stop base octave chord C#"));
+	DefineKeyCommand(kcVPChordStopD_0, 1168, kcHidden, kcNoDummy, _T("Stop base octave chord D"));
+	DefineKeyCommand(kcVPChordStopDS0, 1169, kcHidden, kcNoDummy, _T("Stop base octave chord D#"));
+	DefineKeyCommand(kcVPChordStopE_0, 1170, kcHidden, kcNoDummy, _T("Stop base octave chord E"));
+	DefineKeyCommand(kcVPChordStopF_0, 1171, kcHidden, kcNoDummy, _T("Stop base octave chord F"));
+	DefineKeyCommand(kcVPChordStopFS0, 1172, kcHidden, kcNoDummy, _T("Stop base octave chord F#"));
+	DefineKeyCommand(kcVPChordStopG_0, 1173, kcHidden, kcNoDummy, _T("Stop base octave chord G"));
+	DefineKeyCommand(kcVPChordStopGS0, 1174, kcHidden, kcNoDummy, _T("Stop base octave chord G#"));
+	DefineKeyCommand(kcVPChordStopA_1, 1175, kcHidden, kcNoDummy, _T("Stop base octave +1 chord A"));
+	DefineKeyCommand(kcVPChordStopAS1, 1176, kcHidden, kcNoDummy, _T("Stop base octave +1 chord A#"));
+	DefineKeyCommand(kcVPChordStopB_1, 1177, kcHidden, kcNoDummy, _T("Stop base octave +1 chord B"));
+	DefineKeyCommand(kcVPChordStopC_1, 1178, kcHidden, kcNoDummy, _T("Stop base octave +1 chord C"));
+	DefineKeyCommand(kcVPChordStopCS1, 1179, kcHidden, kcNoDummy, _T("Stop base octave +1 chord C#"));
+	DefineKeyCommand(kcVPChordStopD_1, 1180, kcHidden, kcNoDummy, _T("Stop base octave +1 chord D"));
+	DefineKeyCommand(kcVPChordStopDS1, 1181, kcHidden, kcNoDummy, _T("Stop base octave +1 chord D#"));
+	DefineKeyCommand(kcVPChordStopE_1, 1182, kcHidden, kcNoDummy, _T("Stop base octave +1 chord E"));
+	DefineKeyCommand(kcVPChordStopF_1, 1183, kcHidden, kcNoDummy, _T("Stop base octave +1 chord F"));
+	DefineKeyCommand(kcVPChordStopFS1, 1184, kcHidden, kcNoDummy, _T("Stop base octave +1 chord F#"));
+	DefineKeyCommand(kcVPChordStopG_1, 1185, kcHidden, kcNoDummy, _T("Stop base octave +1 chord G"));
+	DefineKeyCommand(kcVPChordStopGS1, 1186, kcHidden, kcNoDummy, _T("Stop base octave +1 chord G#"));
+	DefineKeyCommand(kcVPChordStopA_2, 1187, kcHidden, kcNoDummy, _T("Stop base octave +2 chord A"));
+	DefineKeyCommand(kcVPChordStopAS2, 1188, kcHidden, kcNoDummy, _T("Stop base octave +2 chord A#"));
+	DefineKeyCommand(kcVPChordStopB_2, 1189, kcHidden, kcNoDummy, _T("Stop base octave +2 chord B"));
+	DefineKeyCommand(kcVPChordStopC_2, 1190, kcHidden, kcNoDummy, _T("Stop base octave +2 chord C"));
+	DefineKeyCommand(kcVPChordStopCS2, 1191, kcHidden, kcNoDummy, _T("Stop base octave +2 chord C#"));
+	DefineKeyCommand(kcVPChordStopD_2, 1192, kcHidden, kcNoDummy, _T("Stop base octave +2 chord D"));
+	DefineKeyCommand(kcVPChordStopDS2, 1193, kcHidden, kcNoDummy, _T("Stop base octave +2 chord D#"));
+	DefineKeyCommand(kcVPChordStopE_2, 1194, kcHidden, kcNoDummy, _T("Stop base octave +2 chord E"));
+	DefineKeyCommand(kcVPChordStopF_2, 1195, kcHidden, kcNoDummy, _T("Stop base octave +2 chord F"));
+	DefineKeyCommand(kcVPChordStopFS2, 1196, kcHidden, kcNoDummy, _T("Stop base octave +2 chord F#"));
+	DefineKeyCommand(kcVPChordStopG_2, 1197, kcHidden, kcNoDummy, _T("Stop base octave +2 chord G"));
+	DefineKeyCommand(kcVPChordStopGS2, 1198, kcHidden, kcNoDummy, _T("Stop base octave +2 chord G#"));
+	DefineKeyCommand(kcVPChordStopA_3, 1199, kcHidden, kcNoDummy, _T("Stop base octave +3 chord  A"));
+	DefineKeyCommand(kcNoteCut, 1200, kcVisible, kcNoDummy, _T("Note Cut"));
+	DefineKeyCommand(kcNoteOff, 1201, kcVisible, kcNoDummy, _T("Note Off"));
+	DefineKeyCommand(kcSetIns0, 1202, kcVisible, kcNoDummy, _T("Set instrument digit 0"));
+	DefineKeyCommand(kcSetIns1, 1203, kcVisible, kcNoDummy, _T("Set instrument digit 1"));
+	DefineKeyCommand(kcSetIns2, 1204, kcVisible, kcNoDummy, _T("Set instrument digit 2"));
+	DefineKeyCommand(kcSetIns3, 1205, kcVisible, kcNoDummy, _T("Set instrument digit 3"));
+	DefineKeyCommand(kcSetIns4, 1206, kcVisible, kcNoDummy, _T("Set instrument digit 4"));
+	DefineKeyCommand(kcSetIns5, 1207, kcVisible, kcNoDummy, _T("Set instrument digit 5"));
+	DefineKeyCommand(kcSetIns6, 1208, kcVisible, kcNoDummy, _T("Set instrument digit 6"));
+	DefineKeyCommand(kcSetIns7, 1209, kcVisible, kcNoDummy, _T("Set instrument digit 7"));
+	DefineKeyCommand(kcSetIns8, 1210, kcVisible, kcNoDummy, _T("Set instrument digit 8"));
+	DefineKeyCommand(kcSetIns9, 1211, kcVisible, kcNoDummy, _T("Set instrument digit 9"));
+	DefineKeyCommand(kcSetOctave0, 1212, kcVisible, kcNoDummy, _T("Set octave 0"));
+	DefineKeyCommand(kcSetOctave1, 1213, kcVisible, kcNoDummy, _T("Set octave 1"));
+	DefineKeyCommand(kcSetOctave2, 1214, kcVisible, kcNoDummy, _T("Set octave 2"));
+	DefineKeyCommand(kcSetOctave3, 1215, kcVisible, kcNoDummy, _T("Set octave 3"));
+	DefineKeyCommand(kcSetOctave4, 1216, kcVisible, kcNoDummy, _T("Set octave 4"));
+	DefineKeyCommand(kcSetOctave5, 1217, kcVisible, kcNoDummy, _T("Set octave 5"));
+	DefineKeyCommand(kcSetOctave6, 1218, kcVisible, kcNoDummy, _T("Set octave 6"));
+	DefineKeyCommand(kcSetOctave7, 1219, kcVisible, kcNoDummy, _T("Set octave 7"));
+	DefineKeyCommand(kcSetOctave8, 1220, kcVisible, kcNoDummy, _T("Set octave 8"));
+	DefineKeyCommand(kcSetOctave9, 1221, kcVisible, kcNoDummy, _T("Set octave 9"));
+	DefineKeyCommand(kcSetVolume0, 1222, kcVisible, kcNoDummy, _T("Set volume digit 0"));
+	DefineKeyCommand(kcSetVolume1, 1223, kcVisible, kcNoDummy, _T("Set volume digit 1"));
+	DefineKeyCommand(kcSetVolume2, 1224, kcVisible, kcNoDummy, _T("Set volume digit 2"));
+	DefineKeyCommand(kcSetVolume3, 1225, kcVisible, kcNoDummy, _T("Set volume digit 3"));
+	DefineKeyCommand(kcSetVolume4, 1226, kcVisible, kcNoDummy, _T("Set volume digit 4"));
+	DefineKeyCommand(kcSetVolume5, 1227, kcVisible, kcNoDummy, _T("Set volume digit 5"));
+	DefineKeyCommand(kcSetVolume6, 1228, kcVisible, kcNoDummy, _T("Set volume digit 6"));
+	DefineKeyCommand(kcSetVolume7, 1229, kcVisible, kcNoDummy, _T("Set volume digit 7"));
+	DefineKeyCommand(kcSetVolume8, 1230, kcVisible, kcNoDummy, _T("Set volume digit 8"));
+	DefineKeyCommand(kcSetVolume9, 1231, kcVisible, kcNoDummy, _T("Set volume digit 9"));
+	DefineKeyCommand(kcSetVolumeVol, 1232, kcVisible, kcNoDummy, _T("Vol command - volume"));
+	DefineKeyCommand(kcSetVolumePan, 1233, kcVisible, kcNoDummy, _T("Vol command - pan"));
+	DefineKeyCommand(kcSetVolumeVolSlideUp, 1234, kcVisible, kcNoDummy, _T("Vol command - vol slide up"));
+	DefineKeyCommand(kcSetVolumeVolSlideDown, 1235, kcVisible, kcNoDummy, _T("Vol command - vol slide down"));
+	DefineKeyCommand(kcSetVolumeFineVolUp, 1236, kcVisible, kcNoDummy, _T("Vol command - vol fine slide up"));
+	DefineKeyCommand(kcSetVolumeFineVolDown, 1237, kcVisible, kcNoDummy, _T("Vol command - vol fine slide down"));
+	DefineKeyCommand(kcSetVolumeVibratoSpd, 1238, kcVisible, kcNoDummy, _T("Vol command - vibrato speed"));
+	DefineKeyCommand(kcSetVolumeVibrato, 1239, kcVisible, kcNoDummy, _T("Vol command - vibrato"));
+	DefineKeyCommand(kcSetVolumeXMPanLeft, 1240, kcVisible, kcNoDummy, _T("Vol command - XM pan left"));
+	DefineKeyCommand(kcSetVolumeXMPanRight, 1241, kcVisible, kcNoDummy, _T("Vol command - XM pan right"));
+	DefineKeyCommand(kcSetVolumePortamento, 1242, kcVisible, kcNoDummy, _T("Vol command - Portamento"));
+	DefineKeyCommand(kcSetVolumeITPortaUp, 1243, kcVisible, kcNoDummy, _T("Vol command - Portamento Up"));
+	DefineKeyCommand(kcSetVolumeITPortaDown, 1244, kcVisible, kcNoDummy, _T("Vol command - Portamento Down"));
+	DefineKeyCommand(kcSetVolumeITUnused, 1245, kcHidden, kcNoDummy, _T("Vol command - Unused"));
+	DefineKeyCommand(kcSetVolumeITOffset, 1246, kcVisible, kcNoDummy, _T("Vol command - Offset"));
+	DefineKeyCommand(kcSetFXParam0, 1247, kcVisible, kcNoDummy, _T("FX Param digit 0"));
+	DefineKeyCommand(kcSetFXParam1, 1248, kcVisible, kcNoDummy, _T("FX Param digit 1"));
+	DefineKeyCommand(kcSetFXParam2, 1249, kcVisible, kcNoDummy, _T("FX Param digit 2"));
+	DefineKeyCommand(kcSetFXParam3, 1250, kcVisible, kcNoDummy, _T("FX Param digit 3"));
+	DefineKeyCommand(kcSetFXParam4, 1251, kcVisible, kcNoDummy, _T("FX Param digit 4"));
+	DefineKeyCommand(kcSetFXParam5, 1252, kcVisible, kcNoDummy, _T("FX Param digit 5"));
+	DefineKeyCommand(kcSetFXParam6, 1253, kcVisible, kcNoDummy, _T("FX Param digit 6"));
+	DefineKeyCommand(kcSetFXParam7, 1254, kcVisible, kcNoDummy, _T("FX Param digit 7"));
+	DefineKeyCommand(kcSetFXParam8, 1255, kcVisible, kcNoDummy, _T("FX Param digit 8"));
+	DefineKeyCommand(kcSetFXParam9, 1256, kcVisible, kcNoDummy, _T("FX Param digit 9"));
+	DefineKeyCommand(kcSetFXParamA, 1257, kcVisible, kcNoDummy, _T("FX Param digit A"));
+	DefineKeyCommand(kcSetFXParamB, 1258, kcVisible, kcNoDummy, _T("FX Param digit B"));
+	DefineKeyCommand(kcSetFXParamC, 1259, kcVisible, kcNoDummy, _T("FX Param digit C"));
+	DefineKeyCommand(kcSetFXParamD, 1260, kcVisible, kcNoDummy, _T("FX Param digit D"));
+	DefineKeyCommand(kcSetFXParamE, 1261, kcVisible, kcNoDummy, _T("FX Param digit E"));
+	DefineKeyCommand(kcSetFXParamF, 1262, kcVisible, kcNoDummy, _T("FX Param digit F"));
+	DefineKeyCommand(kcSetFXarp, 1263, kcHidden, kcNoDummy, _T("FX arpeggio"));
+	DefineKeyCommand(kcSetFXportUp, 1264, kcHidden, kcNoDummy, _T("FX portamentao Up"));
+	DefineKeyCommand(kcSetFXportDown, 1265, kcHidden, kcNoDummy, _T("FX portamentao Down"));
+	DefineKeyCommand(kcSetFXport, 1266, kcHidden, kcNoDummy, _T("FX portamentao"));
+	DefineKeyCommand(kcSetFXvibrato, 1267, kcHidden, kcNoDummy, _T("FX vibrato"));
+	DefineKeyCommand(kcSetFXportSlide, 1268, kcHidden, kcNoDummy, _T("FX portamento slide"));
+	DefineKeyCommand(kcSetFXvibSlide, 1269, kcHidden, kcNoDummy, _T("FX vibrato slide"));
+	DefineKeyCommand(kcSetFXtremolo, 1270, kcHidden, kcNoDummy, _T("FX tremolo"));
+	DefineKeyCommand(kcSetFXpan, 1271, kcHidden, kcNoDummy, _T("FX pan"));
+	DefineKeyCommand(kcSetFXoffset, 1272, kcHidden, kcNoDummy, _T("FX offset"));
+	DefineKeyCommand(kcSetFXvolSlide, 1273, kcHidden, kcNoDummy, _T("FX Volume slide"));
+	DefineKeyCommand(kcSetFXgotoOrd, 1274, kcHidden, kcNoDummy, _T("FX go to order"));
+	DefineKeyCommand(kcSetFXsetVol, 1275, kcHidden, kcNoDummy, _T("FX set volume"));
+	DefineKeyCommand(kcSetFXgotoRow, 1276, kcHidden, kcNoDummy, _T("FX go to row"));
+	DefineKeyCommand(kcSetFXretrig, 1277, kcHidden, kcNoDummy, _T("FX retrigger"));
+	DefineKeyCommand(kcSetFXspeed, 1278, kcHidden, kcNoDummy, _T("FX set speed"));
+	DefineKeyCommand(kcSetFXtempo, 1279, kcHidden, kcNoDummy, _T("FX set tempo"));
+	DefineKeyCommand(kcSetFXtremor, 1280, kcHidden, kcNoDummy, _T("FX tremor"));
+	DefineKeyCommand(kcSetFXextendedMOD, 1281, kcHidden, kcNoDummy, _T("FX extended MOD cmds"));
+	DefineKeyCommand(kcSetFXextendedS3M, 1282, kcHidden, kcNoDummy, _T("FX extended S3M cmds"));
+	DefineKeyCommand(kcSetFXchannelVol, 1283, kcHidden, kcNoDummy, _T("FX set channel vol"));
+	DefineKeyCommand(kcSetFXchannelVols, 1284, kcHidden, kcNoDummy, _T("FX channel vol slide"));
+	DefineKeyCommand(kcSetFXglobalVol, 1285, kcHidden, kcNoDummy, _T("FX set global volume"));
+	DefineKeyCommand(kcSetFXglobalVols, 1286, kcHidden, kcNoDummy, _T("FX global volume slide"));
+	DefineKeyCommand(kcSetFXkeyoff, 1287, kcHidden, kcNoDummy, _T("FX Some XM Command :D"));
+	DefineKeyCommand(kcSetFXfineVib, 1288, kcHidden, kcNoDummy, _T("FX fine vibrato"));
+	DefineKeyCommand(kcSetFXpanbrello, 1289, kcHidden, kcNoDummy, _T("FX set panbrello"));
+	DefineKeyCommand(kcSetFXextendedXM, 1290, kcHidden, kcNoDummy, _T("FX extended XM effects "));
+	DefineKeyCommand(kcSetFXpanSlide, 1291, kcHidden, kcNoDummy, _T("FX pan slide"));
+	DefineKeyCommand(kcSetFXsetEnvPos, 1292, kcHidden, kcNoDummy, _T("FX set envelope position (XM only)"));
+	DefineKeyCommand(kcSetFXmacro, 1293, kcHidden, kcNoDummy, _T("FX midi macro"));
+	DefineKeyCommand(kcSetFXmacroSlide, 1294, kcVisible, kcNoDummy, _T("FX midi macro slide"));
+	DefineKeyCommand(kcSetFXdelaycut, 1295, kcVisible, kcNoDummy, _T("FX combined note delay and note cut"));
+	DefineKeyCommand(kcPatternJumpDownh1Select, 1296, kcHidden, kcNoDummy, _T("kcPatternJumpDownh1Select"));
+	DefineKeyCommand(kcPatternJumpUph1Select, 1297, kcHidden, kcNoDummy, _T("kcPatternJumpUph1Select"));
+	DefineKeyCommand(kcPatternSnapDownh1Select, 1298, kcHidden, kcNoDummy, _T("kcPatternSnapDownh1Select"));
+	DefineKeyCommand(kcPatternSnapUph1Select, 1299, kcHidden, kcNoDummy, _T("kcPatternSnapUph1Select"));
+	DefineKeyCommand(kcNavigateDownSelect, 1300, kcHidden, kcNoDummy, _T("kcNavigateDownSelect"));
+	DefineKeyCommand(kcNavigateUpSelect, 1301, kcHidden, kcNoDummy, _T("kcNavigateUpSelect"));
+	DefineKeyCommand(kcNavigateLeftSelect, 1302, kcHidden, kcNoDummy, _T("kcNavigateLeftSelect"));
+	DefineKeyCommand(kcNavigateRightSelect, 1303, kcHidden, kcNoDummy, _T("kcNavigateRightSelect"));
+	DefineKeyCommand(kcNavigateNextChanSelect, 1304, kcHidden, kcNoDummy, _T("kcNavigateNextChanSelect"));
+	DefineKeyCommand(kcNavigatePrevChanSelect, 1305, kcHidden, kcNoDummy, _T("kcNavigatePrevChanSelect"));
+	DefineKeyCommand(kcHomeHorizontalSelect, 1306, kcHidden, kcNoDummy, _T("kcHomeHorizontalSelect"));
+	DefineKeyCommand(kcHomeVerticalSelect, 1307, kcHidden, kcNoDummy, _T("kcHomeVerticalSelect"));
+	DefineKeyCommand(kcHomeAbsoluteSelect, 1308, kcHidden, kcNoDummy, _T("kcHomeAbsoluteSelect"));
+	DefineKeyCommand(kcEndHorizontalSelect, 1309, kcHidden, kcNoDummy, _T("kcEndHorizontalSelect"));
+	DefineKeyCommand(kcEndVerticalSelect, 1310, kcHidden, kcNoDummy, _T("kcEndVerticalSelect"));
+	DefineKeyCommand(kcEndAbsoluteSelect, 1311, kcHidden, kcNoDummy, _T("kcEndAbsoluteSelect"));
+	DefineKeyCommand(kcSelectWithNav, 1312, kcHidden, kcNoDummy, _T("kcSelectWithNav"));
+	DefineKeyCommand(kcSelectOffWithNav, 1313, kcHidden, kcNoDummy, _T("kcSelectOffWithNav"));
+	DefineKeyCommand(kcCopySelectWithNav, 1314, kcHidden, kcNoDummy, _T("kcCopySelectWithNav"));
+	DefineKeyCommand(kcCopySelectOffWithNav, 1315, kcHidden, kcNoDummy, _T("kcCopySelectOffWithNav"));
+	DefineKeyCommand(kcChordModifier, 1316, kcVisible, kcDummy, _T("Chord Modifier"));
+	DefineKeyCommand(kcSetSpacing, 1317, kcVisible, kcDummy, _T("Set row jump on note entry"));
+	DefineKeyCommand(kcSetSpacing0, 1318, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcSetSpacing1, 1319, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcSetSpacing2, 1320, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcSetSpacing3, 1321, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcSetSpacing4, 1322, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcSetSpacing5, 1323, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcSetSpacing6, 1324, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcSetSpacing7, 1325, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcSetSpacing8, 1326, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcSetSpacing9, 1327, kcHidden, kcNoDummy, _T(""));
+	DefineKeyCommand(kcCopySelectWithSelect, 1328, kcHidden, kcNoDummy, _T("kcCopySelectWithSelect"));
+	DefineKeyCommand(kcCopySelectOffWithSelect, 1329, kcHidden, kcNoDummy, _T("kcCopySelectOffWithSelect"));
+	DefineKeyCommand(kcSelectWithCopySelect, 1330, kcHidden, kcNoDummy, _T("kcSelectWithCopySelect"));
+	DefineKeyCommand(kcSelectOffWithCopySelect, 1331, kcHidden, kcNoDummy, _T("kcSelectOffWithCopySelect"));
+	/*
+	DefineKeyCommand(kcCopy, 1332, kcVisible, kcNoDummy, _T("Copy pattern data"));
+	DefineKeyCommand(kcCut, 1333, kcVisible, kcNoDummy, _T("Cut pattern data"));
+	DefineKeyCommand(kcPaste, 1334, kcVisible, kcNoDummy, _T("Paste pattern data"));
+	DefineKeyCommand(kcMixPaste, 1335, kcVisible, kcNoDummy, _T("Mix-paste pattern data"));
+	DefineKeyCommand(kcSelectAll, 1336, kcVisible, kcNoDummy, _T("Select all pattern data"));
+	DefineKeyCommand(kcSelectCol, 1337, kcHidden, kcNoDummy, _T("Select channel / select all"));
+	*/
+	DefineKeyCommand(kcPatternJumpDownh2, 1338, kcVisible, kcNoDummy, _T("Jump down by beat"));
+	DefineKeyCommand(kcPatternJumpUph2, 1339, kcVisible, kcNoDummy, _T("Jump up by beat"));
+	DefineKeyCommand(kcPatternSnapDownh2, 1340, kcVisible, kcNoDummy, _T("Snap down to beat"));
+	DefineKeyCommand(kcPatternSnapUph2, 1341, kcVisible, kcNoDummy, _T("Snap up to beat"));
+	DefineKeyCommand(kcPatternJumpDownh2Select, 1342, kcHidden, kcNoDummy, _T("kcPatternJumpDownh2Select"));
+	DefineKeyCommand(kcPatternJumpUph2Select, 1343, kcHidden, kcNoDummy, _T("kcPatternJumpUph2Select"));
+	DefineKeyCommand(kcPatternSnapDownh2Select, 1344, kcHidden, kcNoDummy, _T("kcPatternSnapDownh2Select"));
+	DefineKeyCommand(kcPatternSnapUph2Select, 1345, kcHidden, kcNoDummy, _T("kcPatternSnapUph2Select"));
+	DefineKeyCommand(kcFileOpen, 1346, kcVisible, kcNoDummy, _T("File/Open"));
+	DefineKeyCommand(kcFileNew, 1347, kcVisible, kcNoDummy, _T("File/New"));
+	DefineKeyCommand(kcFileClose, 1348, kcVisible, kcNoDummy, _T("File/Close"));
+	DefineKeyCommand(kcFileSave, 1349, kcVisible, kcNoDummy, _T("File/Save"));
+	DefineKeyCommand(kcFileSaveAs, 1350, kcVisible, kcNoDummy, _T("File/Save As"));
+	DefineKeyCommand(kcFileSaveAsWave, 1351, kcVisible, kcNoDummy, _T("File/Export as Wave"));
+	DefineKeyCommand(kcFileSaveAsMP3, 1352, kcVisible, kcNoDummy, _T("File/Export as MP3"));
+	DefineKeyCommand(kcFileSaveMidi, 1353, kcVisible, kcNoDummy, _T("File/Export as MIDI"));
+	DefineKeyCommand(kcFileImportMidiLib, 1354, kcVisible, kcNoDummy, _T("File/Import Midi Lib"));
+	DefineKeyCommand(kcFileAddSoundBank, 1355, kcVisible, kcNoDummy, _T("File/Add Sound Bank"));
+	DefineKeyCommand(kcStopSong, 1356, kcVisible, kcNoDummy, _T("Stop Song"));
+	DefineKeyCommand(kcMidiRecord, 1357, kcVisible, kcNoDummy, _T("Toggle Midi Record"));
+	DefineKeyCommand(kcEstimateSongLength, 1358, kcVisible, kcNoDummy, _T("Estimate Song Length"));
+	DefineKeyCommand(kcEditUndo, 1359, kcVisible, kcNoDummy, _T("Undo"));
+	DefineKeyCommand(kcEditCut, 1360, kcVisible, kcNoDummy, _T("Cut"));
+	DefineKeyCommand(kcEditCopy, 1361, kcVisible, kcNoDummy, _T("Copy"));
+	DefineKeyCommand(kcEditPaste, 1362, kcVisible, kcNoDummy, _T("Paste"));
+	DefineKeyCommand(kcEditMixPaste, 1363, kcVisible, kcNoDummy, _T("Mix Paste"));
+	DefineKeyCommand(kcEditSelectAll, 1364, kcVisible, kcNoDummy, _T("SelectAll"));
+	DefineKeyCommand(kcEditFind, 1365, kcVisible, kcNoDummy, _T("Find"));
+	DefineKeyCommand(kcEditFindNext, 1366, kcVisible, kcNoDummy, _T("Find Next"));
+	DefineKeyCommand(kcViewMain, 1367, kcVisible, kcNoDummy, _T("Toggle Main View"));
+	DefineKeyCommand(kcViewTree, 1368, kcVisible, kcNoDummy, _T("Toggle Tree View"));
+	DefineKeyCommand(kcViewOptions, 1369, kcVisible, kcNoDummy, _T("View Options"));
+	DefineKeyCommand(kcHelp, 1370, kcVisible, kcNoDummy, _T("Help (to do)"));
+	/*
+	DefineKeyCommand(kcWindowNew, 1370, kcVisible, kcNoDummy, _T("New Window"));
+	DefineKeyCommand(kcWindowCascade, 1371, kcVisible, kcNoDummy, _T("Cascade Windows"));
+	DefineKeyCommand(kcWindowTileHorz, 1372, kcVisible, kcNoDummy, _T("Tile Windows Horizontally"));
+	DefineKeyCommand(kcWindowTileVert, 1373, kcVisible, kcNoDummy, _T("Tile Windows Vertically"));
+	*/
+	DefineKeyCommand(kcEstimateSongLength, 1374, kcVisible, kcNoDummy, _T("Estimate Song Length"));
+	DefineKeyCommand(kcStopSong, 1375, kcVisible, kcNoDummy, _T("Stop Song"));
+	DefineKeyCommand(kcMidiRecord, 1376, kcVisible, kcNoDummy, _T("Toggle Midi Record"));
+	DefineKeyCommand(kcDeleteAllRows, 1377, kcVisible, kcNoDummy, _T("Delete all rows"));
+	DefineKeyCommand(kcInsertRow, 1378, kcVisible, kcNoDummy, _T("Insert Row"));
+	DefineKeyCommand(kcInsertAllRows, 1379, kcVisible, kcNoDummy, _T("Insert All Rows"));
+	DefineKeyCommand(kcSampleTrim, 1380, kcVisible, kcNoDummy, _T("Trim sample around loop points"));
+	DefineKeyCommand(kcSampleReverse, 1381, kcVisible, kcNoDummy, _T("Reverse sample"));
+	DefineKeyCommand(kcSampleDelete, 1382, kcVisible, kcNoDummy, _T("Delete sample selection"));
+	DefineKeyCommand(kcSampleSilence, 1383, kcVisible, kcNoDummy, _T("Silence sample selection"));
+	DefineKeyCommand(kcSampleNormalize, 1384, kcVisible, kcNoDummy, _T("Normalise Sample"));
+	DefineKeyCommand(kcSampleAmplify, 1385, kcVisible, kcNoDummy, _T("Amplify Sample"));
+	DefineKeyCommand(kcSampleZoomUp, 1386, kcVisible, kcNoDummy, _T("Zoom Out"));
+	DefineKeyCommand(kcSampleZoomDown, 1387, kcVisible, kcNoDummy, _T("Zoom In"));
 	//time saving HACK:
-	for (int j=kcSampStartNotes; j<=kcInsNoteMapEndNoteStops; j++)
+	for(size_t j = kcSampStartNotes; j <= kcInsNoteMapEndNoteStops; j++)
 	{
-		commands[j].UID = 1388+j-kcSampStartNotes;
-		commands[j].Message = "Auto Note in some context";
-		commands[j].isHidden = true;
-		commands[j].isDummy = false;
+		DefineKeyCommand((CommandID)j, 1388 + j - kcSampStartNotes, kcHidden, kcNoDummy, _T("Auto Note in some context"));
 	}
 	//end hack
-
-	commands[kcPatternGrowSelection].UID = 1660;
-	commands[kcPatternGrowSelection].Message = "Grow selection";
-	commands[kcPatternGrowSelection].isHidden = false;
-	commands[kcPatternGrowSelection].isDummy = false;
-
-	commands[kcPatternShrinkSelection].UID = 1661;
-	commands[kcPatternShrinkSelection].Message = "Shrink selection";
-	commands[kcPatternShrinkSelection].isHidden = false;
-	commands[kcPatternShrinkSelection].isDummy = false;
-
-	commands[kcTogglePluginEditor].UID = 1662;
-	commands[kcTogglePluginEditor].isHidden = false;
-	commands[kcTogglePluginEditor].isDummy = false;
-	commands[kcTogglePluginEditor].Message = "Toggle channel's plugin editor";
-
-	commands[kcToggleFollowSong].UID = 1663;
-	commands[kcToggleFollowSong].isHidden = false;
-	commands[kcToggleFollowSong].isDummy = false;
-	commands[kcToggleFollowSong].Message = "Toggle follow song";
-
-	commands[kcClearFieldITStyle].UID = 1664;
-	commands[kcClearFieldITStyle].isHidden = false;
-	commands[kcClearFieldITStyle].isDummy = false;
-	commands[kcClearFieldITStyle].Message = "Clear field (IT Style)";
-
-	commands[kcClearFieldStepITStyle].UID = 1665;
-	commands[kcClearFieldStepITStyle].isHidden = false;
-	commands[kcClearFieldStepITStyle].isDummy = false;
-	commands[kcClearFieldStepITStyle].Message = "Clear field and step (IT Style)";
-
-	commands[kcSetFXextension].UID = 1666;
-	commands[kcSetFXextension].isHidden = false;
-	commands[kcSetFXextension].isDummy = false;
-	commands[kcSetFXextension].Message = "FX parameter extension command";
-	
-
-	commands[kcNoteCutOld].UID = 1667;
-	commands[kcNoteCutOld].isHidden = false;
-	commands[kcNoteCutOld].isDummy = false;
-	commands[kcNoteCutOld].Message = "Note Cut (don't remember instrument)";
-
-	commands[kcNoteOffOld].UID = 1668;
-	commands[kcNoteOffOld].isHidden = false;
-	commands[kcNoteOffOld].isDummy = false;
-	commands[kcNoteOffOld].Message = "Note Off (don't remember instrument)";
-
-	commands[kcViewAddPlugin].UID = 1669;
-	commands[kcViewAddPlugin].Message = "View Plugin Manager";
-	commands[kcViewAddPlugin].isHidden = false;
-	commands[kcViewAddPlugin].isDummy = false;
-
-	commands[kcViewChannelManager].UID = 1670;
-	commands[kcViewChannelManager].Message = "View Channel Manager";
-	commands[kcViewChannelManager].isHidden = false;
-	commands[kcViewChannelManager].isDummy = false;
-
-	commands[kcCopyAndLoseSelection].UID = 1671;
-	commands[kcCopyAndLoseSelection].Message = "Copy and lose selection";
-	commands[kcCopyAndLoseSelection].isHidden = false;
-	commands[kcCopyAndLoseSelection].isDummy = false;
-	
-	commands[kcNewPattern].UID = 1672;
-	commands[kcNewPattern].isHidden = false;
-	commands[kcNewPattern].isDummy = false;
-	commands[kcNewPattern].Message = "Insert new pattern";
-
-	commands[kcSampleLoad].UID = 1673;
-	commands[kcSampleLoad].isHidden = false;
-	commands[kcSampleLoad].isDummy = false;
-	commands[kcSampleLoad].Message = "Load a Sample";
-
-	commands[kcSampleSave].UID = 1674;
-	commands[kcSampleSave].isHidden = false;
-	commands[kcSampleSave].isDummy = false;
-	commands[kcSampleSave].Message = "Save Sample";
-
-	commands[kcSampleNew].UID = 1675;
-	commands[kcSampleNew].isHidden = false;
-	commands[kcSampleNew].isDummy = false;
-	commands[kcSampleNew].Message = "New Sample";
-
-
-	commands[kcSampleCtrlLoad].UID = 1676;
-	commands[kcSampleCtrlLoad].isHidden = true;
-	commands[kcSampleCtrlLoad].isDummy = false;
-	commands[kcSampleCtrlLoad].Message = "Load a Sample";
-
-	commands[kcSampleCtrlSave].UID = 1677;
-	commands[kcSampleCtrlSave].isHidden = true;
-	commands[kcSampleCtrlSave].isDummy = false;
-	commands[kcSampleCtrlSave].Message = "Save Sample";
-
-	commands[kcSampleCtrlNew].UID = 1678;
-	commands[kcSampleCtrlNew].isHidden = true;
-	commands[kcSampleCtrlNew].isDummy = false;
-	commands[kcSampleCtrlNew].Message = "New Sample";
-
-	commands[kcInstrumentLoad].UID = 1679;
-	commands[kcInstrumentLoad].isHidden = true;
-	commands[kcInstrumentLoad].isDummy = false;
-	commands[kcInstrumentLoad].Message = "Load an instrument";
-
-	commands[kcInstrumentSave].UID = 1680;
-	commands[kcInstrumentSave].isHidden = true;
-	commands[kcInstrumentSave].isDummy = false;
-	commands[kcInstrumentSave].Message = "Save instrument";
-
-	commands[kcInstrumentNew].UID = 1681;
-	commands[kcInstrumentNew].isHidden = true;
-	commands[kcInstrumentNew].isDummy = false;
-	commands[kcInstrumentNew].Message = "New instrument";
-
-	commands[kcInstrumentCtrlLoad].UID = 1682;
-	commands[kcInstrumentCtrlLoad].isHidden = true;
-	commands[kcInstrumentCtrlLoad].isDummy = false;
-	commands[kcInstrumentCtrlLoad].Message = "Load an instrument";
-
-	commands[kcInstrumentCtrlSave].UID = 1683;
-	commands[kcInstrumentCtrlSave].isHidden = true;
-	commands[kcInstrumentCtrlSave].isDummy = false;
-	commands[kcInstrumentCtrlSave].Message = "Save instrument";
-
-	commands[kcInstrumentCtrlNew].UID = 1684;
-	commands[kcInstrumentCtrlNew].isHidden = true;
-	commands[kcInstrumentCtrlNew].isDummy = false;
-	commands[kcInstrumentCtrlNew].Message = "New instrument";
-
-	commands[kcSwitchToOrderList].UID = 1685;
-	commands[kcSwitchToOrderList].isHidden = false;
-	commands[kcSwitchToOrderList].isDummy = false;
-	commands[kcSwitchToOrderList].Message = "Switch to order list";
-
-	commands[kcEditMixPasteITStyle].UID = 1686;
-	commands[kcEditMixPasteITStyle].Message = "Mix Paste (old IT Style)";
-	commands[kcEditMixPasteITStyle].isHidden = false;
-	commands[kcEditMixPasteITStyle].isDummy = false;
-
-	commands[kcApproxRealBPM].UID = 1687;
-	commands[kcApproxRealBPM].Message = "Show approx. real BPM";
-	commands[kcApproxRealBPM].isHidden = false;
-	commands[kcApproxRealBPM].isDummy = false;
-
-	commands[kcNavigateDownBySpacingSelect].UID = 1689;
-	commands[kcNavigateDownBySpacingSelect].isHidden = true;
-	commands[kcNavigateDownBySpacingSelect].isDummy = false;
-	commands[kcNavigateDownBySpacingSelect].Message = "kcNavigateDownBySpacingSelect";
-
-	commands[kcNavigateUpBySpacingSelect].UID = 1690;
-	commands[kcNavigateUpBySpacingSelect].isHidden = true;
-	commands[kcNavigateUpBySpacingSelect].isDummy = false;
-	commands[kcNavigateUpBySpacingSelect].Message = "kcNavigateUpBySpacingSelect";
-
-	commands[kcNavigateDownBySpacing].UID = 1691;
-	commands[kcNavigateDownBySpacing].isHidden = false;
-	commands[kcNavigateDownBySpacing].isDummy = false;
-	commands[kcNavigateDownBySpacing].Message = "Navigate down by spacing";
-
-	commands[kcNavigateUpBySpacing].UID = 1692;
-	commands[kcNavigateUpBySpacing].isHidden = false;
-	commands[kcNavigateUpBySpacing].isDummy = false;
-	commands[kcNavigateUpBySpacing].Message = "Navigate up by spacing";
-
-	commands[kcPrevDocument].UID = 1693;
-	commands[kcPrevDocument].Message = "Previous Document";
-	commands[kcPrevDocument].isHidden = false;
-	commands[kcPrevDocument].isDummy = false;
-	
-	commands[kcNextDocument].UID = 1694;
-	commands[kcNextDocument].Message = "Next Document";
-	commands[kcNextDocument].isHidden = false;
-	commands[kcNextDocument].isDummy = false;
-
-
+	DefineKeyCommand(kcPatternGrowSelection, 1660, kcVisible, kcNoDummy, _T("Grow selection"));
+	DefineKeyCommand(kcPatternShrinkSelection, 1661, kcVisible, kcNoDummy, _T("Shrink selection"));
+	DefineKeyCommand(kcTogglePluginEditor, 1662, kcVisible, kcNoDummy, _T("Toggle channel's plugin editor"));
+	DefineKeyCommand(kcToggleFollowSong, 1663, kcVisible, kcNoDummy, _T("Toggle follow song"));
+	DefineKeyCommand(kcClearFieldITStyle, 1664, kcVisible, kcNoDummy, _T("Clear field (IT Style)"));
+	DefineKeyCommand(kcClearFieldStepITStyle, 1665, kcVisible, kcNoDummy, _T("Clear field and step (IT Style)"));
+	DefineKeyCommand(kcSetFXextension, 1666, kcVisible, kcNoDummy, _T("FX parameter extension command"));
+	DefineKeyCommand(kcNoteCutOld, 1667, kcVisible, kcNoDummy, _T("Note Cut (don't remember instrument)"));
+	DefineKeyCommand(kcNoteOffOld, 1668, kcVisible, kcNoDummy, _T("Note Off (don't remember instrument)"));
+	DefineKeyCommand(kcViewAddPlugin, 1669, kcVisible, kcNoDummy, _T("View Plugin Manager"));
+	DefineKeyCommand(kcViewChannelManager, 1670, kcVisible, kcNoDummy, _T("View Channel Manager"));
+	DefineKeyCommand(kcCopyAndLoseSelection, 1671, kcVisible, kcNoDummy, _T("Copy and lose selection"));
+	DefineKeyCommand(kcNewPattern, 1672, kcVisible, kcNoDummy, _T("Insert new pattern"));
+	DefineKeyCommand(kcSampleLoad, 1673, kcVisible, kcNoDummy, _T("Load a Sample"));
+	DefineKeyCommand(kcSampleSave, 1674, kcVisible, kcNoDummy, _T("Save Sample"));
+	DefineKeyCommand(kcSampleNew, 1675, kcVisible, kcNoDummy, _T("New Sample"));
+	DefineKeyCommand(kcSampleCtrlLoad, 1676, kcHidden, kcNoDummy, _T("Load a Sample"));
+	DefineKeyCommand(kcSampleCtrlSave, 1677, kcHidden, kcNoDummy, _T("Save Sample"));
+	DefineKeyCommand(kcSampleCtrlNew, 1678, kcHidden, kcNoDummy, _T("New Sample"));
+	DefineKeyCommand(kcInstrumentLoad, 1679, kcHidden, kcNoDummy, _T("Load an instrument"));
+	DefineKeyCommand(kcInstrumentSave, 1680, kcHidden, kcNoDummy, _T("Save instrument"));
+	DefineKeyCommand(kcInstrumentNew, 1681, kcHidden, kcNoDummy, _T("New instrument"));
+	DefineKeyCommand(kcInstrumentCtrlLoad, 1682, kcHidden, kcNoDummy, _T("Load an instrument"));
+	DefineKeyCommand(kcInstrumentCtrlSave, 1683, kcHidden, kcNoDummy, _T("Save instrument"));
+	DefineKeyCommand(kcInstrumentCtrlNew, 1684, kcHidden, kcNoDummy, _T("New instrument"));
+	DefineKeyCommand(kcSwitchToOrderList, 1685, kcVisible, kcNoDummy, _T("Switch to order list"));
+	DefineKeyCommand(kcEditMixPasteITStyle, 1686, kcVisible, kcNoDummy, _T("Mix Paste (old IT Style)"));
+	DefineKeyCommand(kcApproxRealBPM, 1687, kcVisible, kcNoDummy, _T("Show approx. real BPM"));
+	DefineKeyCommand(kcNavigateDownBySpacingSelect, 1689, kcHidden, kcNoDummy, _T("kcNavigateDownBySpacingSelect"));
+	DefineKeyCommand(kcNavigateUpBySpacingSelect, 1690, kcHidden, kcNoDummy, _T("kcNavigateUpBySpacingSelect"));
+	DefineKeyCommand(kcNavigateDownBySpacing, 1691, kcVisible, kcNoDummy, _T("Navigate down by spacing"));
+	DefineKeyCommand(kcNavigateUpBySpacing, 1692, kcVisible, kcNoDummy, _T("Navigate up by spacing"));
+	DefineKeyCommand(kcPrevDocument, 1693, kcVisible, kcNoDummy, _T("Previous Document"));
+	DefineKeyCommand(kcNextDocument, 1694, kcVisible, kcNoDummy, _T("Next Document"));
 	//time saving HACK:
-	for (int j=kcVSTGUIStartNotes; j<=kcVSTGUINoteStopA_3; j++)
+	for(size_t j = kcVSTGUIStartNotes; j <= kcVSTGUINoteStopA_3; j++)
 	{
-		commands[j].UID = 1695+j-kcVSTGUIStartNotes;
-		commands[j].Message = "Auto Note in some context";
-		commands[j].isHidden = true;
-		commands[j].isDummy = false;
+		DefineKeyCommand((CommandID)j, 1695 + j - kcVSTGUIStartNotes, kcHidden, kcNoDummy, _T("Auto Note in some context"));
 	}
 	//end hack
-
-	commands[kcVSTGUIPrevPreset].UID = 1763;
-	commands[kcVSTGUIPrevPreset].Message = "Previous plugin preset";
-	commands[kcVSTGUIPrevPreset].isHidden = false;
-	commands[kcVSTGUIPrevPreset].isDummy = false;
-
-	commands[kcVSTGUINextPreset].UID = 1764;
-	commands[kcVSTGUINextPreset].Message = "Next plugin preset";
-	commands[kcVSTGUINextPreset].isHidden = false;
-	commands[kcVSTGUINextPreset].isDummy = false;
-
-	commands[kcVSTGUIRandParams].UID = 1765;
-	commands[kcVSTGUIRandParams].Message = "Randomize plugin parameters";
-	commands[kcVSTGUIRandParams].isHidden = false;
-	commands[kcVSTGUIRandParams].isDummy = false;
-
-	commands[kcPatternGoto].UID = 1766;
-	commands[kcPatternGoto].Message = "Go to row/channel/...";
-	commands[kcPatternGoto].isHidden = false;
-	commands[kcPatternGoto].isDummy = false;
-
-	commands[kcPatternOpenRandomizer].UID = 1767;
-	commands[kcPatternOpenRandomizer].isHidden = true;	// while there's not randomizer yet, let's just disable it for now
-	commands[kcPatternOpenRandomizer].isDummy = false;
-	commands[kcPatternOpenRandomizer].Message = "Open pattern randomizer";
-
-	commands[kcPatternInterpolateNote].UID = 1768;
-	commands[kcPatternInterpolateNote].isHidden = false;
-	commands[kcPatternInterpolateNote].isDummy = false;
-	commands[kcPatternInterpolateNote].Message = "Interpolate note";
-
+	DefineKeyCommand(kcVSTGUIPrevPreset, 1763, kcVisible, kcNoDummy, _T("Previous plugin preset"));
+	DefineKeyCommand(kcVSTGUINextPreset, 1764, kcVisible, kcNoDummy, _T("Next plugin preset"));
+	DefineKeyCommand(kcVSTGUIRandParams, 1765, kcVisible, kcNoDummy, _T("Randomize plugin parameters"));
+	DefineKeyCommand(kcPatternGoto, 1766, kcVisible, kcNoDummy, _T("Go to row/channel/..."));
+	DefineKeyCommand(kcPatternOpenRandomizer, 1767, kcHidden, kcNoDummy, _T("Go to row/channel/...")); // while there's not randomizer yet, let's just disable it for now
+	DefineKeyCommand(kcPatternInterpolateNote, 1768, kcVisible, kcNoDummy, _T("Interpolate note"));
 	//rewbs.graph
-	commands[kcViewGraph].UID = 1769;
-	commands[kcViewGraph].isHidden = true;	// while there's no graph yet, let's just disable it for now
-	commands[kcViewGraph].isDummy = false;
-	commands[kcViewGraph].Message = "View Graph";
+	DefineKeyCommand(kcViewGraph, 1769, kcHidden, kcNoDummy, _T("View Graph"));  // while there's no graph yet, let's just disable it for now
 	//end rewbs.graph
-
-	commands[kcToggleChanMuteOnPatTransition].UID = 1770;
-	commands[kcToggleChanMuteOnPatTransition].isHidden = false;
-	commands[kcToggleChanMuteOnPatTransition].isDummy = false;
-	commands[kcToggleChanMuteOnPatTransition].Message = "(Un)mute chan on pat transition";
-
-	commands[kcChannelUnmuteAll].UID = 1771;
-	commands[kcChannelUnmuteAll].isHidden = false;
-	commands[kcChannelUnmuteAll].isDummy = false;
-	commands[kcChannelUnmuteAll].Message = "Unmute all channels";
-
-	commands[kcShowPatternProperties].UID = 1772;
-	commands[kcShowPatternProperties].isHidden = false;
-	commands[kcShowPatternProperties].isDummy = false;
-	commands[kcShowPatternProperties].Message = "Show pattern properties window";
-
-	commands[kcShowMacroConfig].UID = 1773;
-	commands[kcShowMacroConfig].isHidden = false;
-	commands[kcShowMacroConfig].isDummy = false;
-	commands[kcShowMacroConfig].Message = "Show macro configuration";
-
-	commands[kcViewSongProperties].UID = 1775;
-	commands[kcViewSongProperties].isHidden = false;
-	commands[kcViewSongProperties].isDummy = false;
-	commands[kcViewSongProperties].Message = "Show song properties window";
-	
-	commands[kcChangeLoopStatus].UID = 1776;
-	commands[kcChangeLoopStatus].isHidden = false;
-	commands[kcChangeLoopStatus].isDummy = false;
-	commands[kcChangeLoopStatus].Message = "Toggle loop pattern";
-
-	commands[kcFileExportCompat].UID = 1777;
-	commands[kcFileExportCompat].Message = "File/Export to standard IT/XM/S3M";
-	commands[kcFileExportCompat].isHidden = false;
-	commands[kcFileExportCompat].isDummy = false;
-
-	commands[kcUnmuteAllChnOnPatTransition].UID = 1778;
-	commands[kcUnmuteAllChnOnPatTransition].isHidden = false;
-	commands[kcUnmuteAllChnOnPatTransition].isDummy = false;
-	commands[kcUnmuteAllChnOnPatTransition].Message = "Unmute all channels on pattern transition";
-
-	commands[kcSoloChnOnPatTransition].UID = 1779;
-	commands[kcSoloChnOnPatTransition].isHidden = false;
-	commands[kcSoloChnOnPatTransition].isDummy = false;
-	commands[kcSoloChnOnPatTransition].Message = "Solo channel on pattern transition";
-
-	commands[kcTimeAtRow].UID = 1780;
-	commands[kcTimeAtRow].isHidden = false;
-	commands[kcTimeAtRow].isDummy = false;
-	commands[kcTimeAtRow].Message = "Show playback time at current row";
-
-	commands[kcViewMIDImapping].UID = 1781;
-	commands[kcViewMIDImapping].isHidden = false;
-	commands[kcViewMIDImapping].isDummy = false;
-	commands[kcViewMIDImapping].Message = "View MIDI mapping";
-
-	commands[kcVSTGUIPrevPresetJump].UID = 1782;
-	commands[kcVSTGUIPrevPresetJump].isHidden = false;
-	commands[kcVSTGUIPrevPresetJump].isDummy = false;
-	commands[kcVSTGUIPrevPresetJump].Message = "Plugin preset backward jump";
-
-	commands[kcVSTGUINextPresetJump].UID = 1783;
-	commands[kcVSTGUINextPresetJump].isHidden = false;
-	commands[kcVSTGUINextPresetJump].isDummy = false;
-	commands[kcVSTGUINextPresetJump].Message = "Plugin preset forward jump";
-
-	commands[kcSampleInvert].UID = 1784;
-	commands[kcSampleInvert].Message = "Invert sample phase";
-	commands[kcSampleInvert].isHidden = false;
-	commands[kcSampleInvert].isDummy = false;
-
-	commands[kcSampleSignUnsign].UID = 1785;
-	commands[kcSampleSignUnsign].Message = "Signed/Unsigned conversion";
-	commands[kcSampleSignUnsign].isHidden = false;
-	commands[kcSampleSignUnsign].isDummy = false;
-
-	commands[kcChannelReset].UID = 1786;
-	commands[kcChannelReset].isHidden = false;
-	commands[kcChannelReset].isDummy = false;
-	commands[kcChannelReset].Message = "Reset channel";
-
-	commands[kcSwitchOverflowPaste].UID = 1787;
-	commands[kcSwitchOverflowPaste].Message = "Toggle overflow paste";
-	commands[kcSwitchOverflowPaste].isHidden = false;
-	commands[kcSwitchOverflowPaste].isDummy = false;
-
-	commands[kcNotePC].UID = 1788;
-	commands[kcNotePC].isHidden = false;
-	commands[kcNotePC].isDummy = false;
-	commands[kcNotePC].Message = "Parameter control(MPTm only)";
-
-	commands[kcNotePCS].UID = 1789;
-	commands[kcNotePCS].isHidden = false;
-	commands[kcNotePCS].isDummy = false;
-	commands[kcNotePCS].Message = "Parameter control(smooth)(MPTm only)";
-
-	commands[kcSampleRemoveDCOffset].UID = 1790;
-	commands[kcSampleRemoveDCOffset].Message = "Remove DC Offset";
-	commands[kcSampleRemoveDCOffset].isHidden = false;
-	commands[kcSampleRemoveDCOffset].isDummy = false;
-
-	commands[kcNoteFade].UID = 1791;
-	commands[kcNoteFade].Message = "Note Fade";
-	commands[kcNoteFade].isHidden = false;
-	commands[kcNoteFade].isDummy = false;
-
-	commands[kcNoteFadeOld].UID = 1792;
-	commands[kcNoteFadeOld].Message = "Note Fade (don't remember instrument)";
-	commands[kcNoteFadeOld].isHidden = false;
-	commands[kcNoteFadeOld].isDummy = false;
-
-	commands[kcEditPasteFlood].UID = 1793;
-	commands[kcEditPasteFlood].Message = "Paste Flood";
-	commands[kcEditPasteFlood].isHidden = false;
-	commands[kcEditPasteFlood].isDummy = false;
-
-	commands[kcOrderlistNavigateLeft].UID = 1794;
-	commands[kcOrderlistNavigateLeft].Message = "Previous Order";
-	commands[kcOrderlistNavigateLeft].isHidden = false;
-	commands[kcOrderlistNavigateLeft].isDummy = false;
-
-	commands[kcOrderlistNavigateRight].UID = 1795;
-	commands[kcOrderlistNavigateRight].Message = "Next Order";
-	commands[kcOrderlistNavigateRight].isHidden = false;
-	commands[kcOrderlistNavigateRight].isDummy = false;
-
-	commands[kcOrderlistNavigateFirst].UID = 1796;
-	commands[kcOrderlistNavigateFirst].Message = "First Order";
-	commands[kcOrderlistNavigateFirst].isHidden = false;
-	commands[kcOrderlistNavigateFirst].isDummy = false;
-
-	commands[kcOrderlistNavigateLast].UID = 1797;
-	commands[kcOrderlistNavigateLast].Message = "Last Order";
-	commands[kcOrderlistNavigateLast].isHidden = false;
-	commands[kcOrderlistNavigateLast].isDummy = false;
-
-	commands[kcOrderlistNavigateLeftSelect].UID = 1798;
-	commands[kcOrderlistNavigateLeftSelect].Message = "kcOrderlistNavigateLeftSelect";
-	commands[kcOrderlistNavigateLeftSelect].isHidden = true;
-	commands[kcOrderlistNavigateLeftSelect].isDummy = false;
-
-	commands[kcOrderlistNavigateRightSelect].UID = 1799;
-	commands[kcOrderlistNavigateRightSelect].Message = "kcOrderlistNavigateRightSelect";
-	commands[kcOrderlistNavigateRightSelect].isHidden = true;
-	commands[kcOrderlistNavigateRightSelect].isDummy = false;
-
-	commands[kcOrderlistNavigateFirstSelect].UID = 1800;
-	commands[kcOrderlistNavigateFirstSelect].Message = "kcOrderlistNavigateFirstSelect";
-	commands[kcOrderlistNavigateFirstSelect].isHidden = true;
-	commands[kcOrderlistNavigateFirstSelect].isDummy = false;
-
-	commands[kcOrderlistNavigateLastSelect].UID = 1801;
-	commands[kcOrderlistNavigateLastSelect].Message = "kcOrderlistNavigateLastSelect";
-	commands[kcOrderlistNavigateLastSelect].isHidden = true;
-	commands[kcOrderlistNavigateLastSelect].isDummy = false;
-
-	commands[kcOrderlistEditDelete].UID = 1802;
-	commands[kcOrderlistEditDelete].Message = "Delete Order";
-	commands[kcOrderlistEditDelete].isHidden = false;
-	commands[kcOrderlistEditDelete].isDummy = false;
-
-	commands[kcOrderlistEditInsert].UID = 1803;
-	commands[kcOrderlistEditInsert].Message = "Insert Order";
-	commands[kcOrderlistEditInsert].isHidden = false;
-	commands[kcOrderlistEditInsert].isDummy = false;
-
-	commands[kcOrderlistEditPattern].UID = 1804;
-	commands[kcOrderlistEditPattern].Message = "Edit Pattern";
-	commands[kcOrderlistEditPattern].isHidden = false;
-	commands[kcOrderlistEditPattern].isDummy = false;
-
-	commands[kcOrderlistSwitchToPatternView].UID = 1805;
-	commands[kcOrderlistSwitchToPatternView].Message = "Switch to pattern editor";
-	commands[kcOrderlistSwitchToPatternView].isHidden = false;
-	commands[kcOrderlistSwitchToPatternView].isDummy = false;
-
-	commands[kcDuplicatePattern].UID = 1806;
-	commands[kcDuplicatePattern].Message = "Duplicate pattern";
-	commands[kcDuplicatePattern].isHidden = false;
-	commands[kcDuplicatePattern].isDummy = false;
-
-	commands[kcOrderlistPat0].UID = 1807;
-	commands[kcOrderlistPat0].isHidden = false;
-	commands[kcOrderlistPat0].isDummy = false;
-	commands[kcOrderlistPat0].Message = "Pattern index digit 0";
-
-	commands[kcOrderlistPat1].UID = 1808;
-	commands[kcOrderlistPat1].isHidden = false;
-	commands[kcOrderlistPat1].isDummy = false;
-	commands[kcOrderlistPat1].Message = "Pattern index digit 1";
-
-	commands[kcOrderlistPat2].UID = 1809;
-	commands[kcOrderlistPat2].isHidden = false;
-	commands[kcOrderlistPat2].isDummy = false;
-	commands[kcOrderlistPat2].Message = "Pattern index digit 2";
-
-	commands[kcOrderlistPat3].UID = 1810;
-	commands[kcOrderlistPat3].isHidden = false;
-	commands[kcOrderlistPat3].isDummy = false;
-	commands[kcOrderlistPat3].Message = "Pattern index digit 3";
-
-	commands[kcOrderlistPat4].UID = 1811;
-	commands[kcOrderlistPat4].isHidden = false;
-	commands[kcOrderlistPat4].isDummy = false;
-	commands[kcOrderlistPat4].Message = "Pattern index digit 4";
-
-	commands[kcOrderlistPat5].UID = 1812;
-	commands[kcOrderlistPat5].isHidden = false;
-	commands[kcOrderlistPat5].isDummy = false;
-	commands[kcOrderlistPat5].Message = "Pattern index digit 5";
-
-	commands[kcOrderlistPat6].UID = 1813;
-	commands[kcOrderlistPat6].isHidden = false;
-	commands[kcOrderlistPat6].isDummy = false;
-	commands[kcOrderlistPat6].Message = "Pattern index digit 6";
-
-	commands[kcOrderlistPat7].UID = 1814;
-	commands[kcOrderlistPat7].isHidden = false;
-	commands[kcOrderlistPat7].isDummy = false;
-	commands[kcOrderlistPat7].Message = "Pattern index digit 7";
-
-	commands[kcOrderlistPat8].UID = 1815;
-	commands[kcOrderlistPat8].isHidden = false;
-	commands[kcOrderlistPat8].isDummy = false;
-	commands[kcOrderlistPat8].Message = "Pattern index digit 8";
-
-	commands[kcOrderlistPat9].UID = 1816;
-	commands[kcOrderlistPat9].isHidden = false;
-	commands[kcOrderlistPat9].isDummy = false;
-	commands[kcOrderlistPat9].Message = "Pattern index digit 9";
-
-	commands[kcOrderlistPatPlus].UID = 1817;
-	commands[kcOrderlistPatPlus].isHidden = false;
-	commands[kcOrderlistPatPlus].isDummy = false;
-	commands[kcOrderlistPatPlus].Message = "Increase pattern index ";
-
-	commands[kcOrderlistPatMinus].UID = 1818;
-	commands[kcOrderlistPatMinus].isHidden = false;
-	commands[kcOrderlistPatMinus].isDummy = false;
-	commands[kcOrderlistPatMinus].Message = "Decrease pattern index";
-
-	commands[kcShowSplitKeyboardSettings].UID = 1819;
-	commands[kcShowSplitKeyboardSettings].isHidden = false;
-	commands[kcShowSplitKeyboardSettings].isDummy = false;
-	commands[kcShowSplitKeyboardSettings].Message = "Split Keyboard Settings dialog";
-
-	commands[kcEditPushForwardPaste].UID = 1820;
-	commands[kcEditPushForwardPaste].isHidden = false;
-	commands[kcEditPushForwardPaste].isDummy = false;
-	commands[kcEditPushForwardPaste].Message = "Push Forward Paste";
-
-	commands[kcInstrumentEnvelopePointMoveLeft].UID = 1821;
-	commands[kcInstrumentEnvelopePointMoveLeft].isHidden = false;
-	commands[kcInstrumentEnvelopePointMoveLeft].isDummy = false;
-	commands[kcInstrumentEnvelopePointMoveLeft].Message = "Move envelope point left";
-
-	commands[kcInstrumentEnvelopePointMoveRight].UID = 1822;
-	commands[kcInstrumentEnvelopePointMoveRight].isHidden = false;
-	commands[kcInstrumentEnvelopePointMoveRight].isDummy = false;
-	commands[kcInstrumentEnvelopePointMoveRight].Message = "Move envelope point right";
-
-	commands[kcInstrumentEnvelopePointMoveUp].UID = 1823;
-	commands[kcInstrumentEnvelopePointMoveUp].isHidden = false;
-	commands[kcInstrumentEnvelopePointMoveUp].isDummy = false;
-	commands[kcInstrumentEnvelopePointMoveUp].Message = "Move envelope point up";
-
-	commands[kcInstrumentEnvelopePointMoveDown].UID = 1824;
-	commands[kcInstrumentEnvelopePointMoveDown].isHidden = false;
-	commands[kcInstrumentEnvelopePointMoveDown].isDummy = false;
-	commands[kcInstrumentEnvelopePointMoveDown].Message = "Move envelope point down";
-
-	commands[kcInstrumentEnvelopePointPrev].UID = 1825;
-	commands[kcInstrumentEnvelopePointPrev].isHidden = false;
-	commands[kcInstrumentEnvelopePointPrev].isDummy = false;
-	commands[kcInstrumentEnvelopePointPrev].Message = "Select previous envelope point";
-
-	commands[kcInstrumentEnvelopePointNext].UID = 1826;
-	commands[kcInstrumentEnvelopePointNext].isHidden = false;
-	commands[kcInstrumentEnvelopePointNext].isDummy = false;
-	commands[kcInstrumentEnvelopePointNext].Message = "Select next envelope point";
-
-	commands[kcInstrumentEnvelopePointInsert].UID = 1827;
-	commands[kcInstrumentEnvelopePointInsert].isHidden = false;
-	commands[kcInstrumentEnvelopePointInsert].isDummy = false;
-	commands[kcInstrumentEnvelopePointInsert].Message = "Insert envelope point";
-
-	commands[kcInstrumentEnvelopePointRemove].UID = 1828;
-	commands[kcInstrumentEnvelopePointRemove].isHidden = false;
-	commands[kcInstrumentEnvelopePointRemove].isDummy = false;
-	commands[kcInstrumentEnvelopePointRemove].Message = "Remove envelope point";
-
-	commands[kcInstrumentEnvelopeSetLoopStart].UID = 1829;
-	commands[kcInstrumentEnvelopeSetLoopStart].isHidden = false;
-	commands[kcInstrumentEnvelopeSetLoopStart].isDummy = false;
-	commands[kcInstrumentEnvelopeSetLoopStart].Message = "Set loop start";
-
-	commands[kcInstrumentEnvelopeSetLoopEnd].UID = 1830;
-	commands[kcInstrumentEnvelopeSetLoopEnd].isHidden = false;
-	commands[kcInstrumentEnvelopeSetLoopEnd].isDummy = false;
-	commands[kcInstrumentEnvelopeSetLoopEnd].Message = "Set loop end";
-
-	commands[kcInstrumentEnvelopeSetSustainLoopStart].UID = 1831;
-	commands[kcInstrumentEnvelopeSetSustainLoopStart].isHidden = false;
-	commands[kcInstrumentEnvelopeSetSustainLoopStart].isDummy = false;
-	commands[kcInstrumentEnvelopeSetSustainLoopStart].Message = "Set sustain loop start";
-
-	commands[kcInstrumentEnvelopeSetSustainLoopEnd].UID = 1832;
-	commands[kcInstrumentEnvelopeSetSustainLoopEnd].isHidden = false;
-	commands[kcInstrumentEnvelopeSetSustainLoopEnd].isDummy = false;
-	commands[kcInstrumentEnvelopeSetSustainLoopEnd].Message = "Set sustain loop end";
-
-	commands[kcInstrumentEnvelopeToggleReleaseNode].UID = 1833;
-	commands[kcInstrumentEnvelopeToggleReleaseNode].isHidden = false;
-	commands[kcInstrumentEnvelopeToggleReleaseNode].isDummy = false;
-	commands[kcInstrumentEnvelopeToggleReleaseNode].Message = "Toggle release node";
-
-	commands[kcInstrumentEnvelopePointMoveUp8].UID = 1834;
-	commands[kcInstrumentEnvelopePointMoveUp8].isHidden = false;
-	commands[kcInstrumentEnvelopePointMoveUp8].isDummy = false;
-	commands[kcInstrumentEnvelopePointMoveUp8].Message = "Move envelope point up (big step)";
-
-	commands[kcInstrumentEnvelopePointMoveDown8].UID = 1835;
-	commands[kcInstrumentEnvelopePointMoveDown8].isHidden = false;
-	commands[kcInstrumentEnvelopePointMoveDown8].isDummy = false;
-	commands[kcInstrumentEnvelopePointMoveDown8].Message = "Move envelope point down (big step)";
-
-	commands[kcPatternEditPCNotePlugin].UID = 1836;
-	commands[kcPatternEditPCNotePlugin].isHidden = false;
-	commands[kcPatternEditPCNotePlugin].isDummy = false;
-	commands[kcPatternEditPCNotePlugin].Message = "Edit plugin assigned to PC note";
-
-	commands[kcInstrumentEnvelopeZoomIn].UID = 1837;
-	commands[kcInstrumentEnvelopeZoomIn].isHidden = false;
-	commands[kcInstrumentEnvelopeZoomIn].isDummy = false;
-	commands[kcInstrumentEnvelopeZoomIn].Message = "Zoom In";
-
-	commands[kcInstrumentEnvelopeZoomOut].UID = 1838;
-	commands[kcInstrumentEnvelopeZoomOut].isHidden = false;
-	commands[kcInstrumentEnvelopeZoomOut].isDummy = false;
-	commands[kcInstrumentEnvelopeZoomOut].Message = "Zoom Out";
-
-	commands[kcVSTGUIToggleRecordParams].UID = 1839;
-	commands[kcVSTGUIToggleRecordParams].isHidden = false;
-	commands[kcVSTGUIToggleRecordParams].isDummy = false;
-	commands[kcVSTGUIToggleRecordParams].Message = "Toggle parameter recording";
-
-	commands[kcVSTGUIToggleSendKeysToPlug].UID = 1840;
-	commands[kcVSTGUIToggleSendKeysToPlug].isHidden = false;
-	commands[kcVSTGUIToggleSendKeysToPlug].isDummy = false;
-	commands[kcVSTGUIToggleSendKeysToPlug].Message = "Pass key presses to plugin";
-
-	commands[kcVSTGUIBypassPlug].UID = 1841;
-	commands[kcVSTGUIBypassPlug].isHidden = false;
-	commands[kcVSTGUIBypassPlug].isDummy = false;
-	commands[kcVSTGUIBypassPlug].Message = "Bypass plugin";
+	DefineKeyCommand(kcToggleChanMuteOnPatTransition, 1770, kcVisible, kcNoDummy, _T("(Un)mute chan on pat transition"));
+	DefineKeyCommand(kcChannelUnmuteAll, 1771, kcVisible, kcNoDummy, _T("Unmute all channels"));
+	DefineKeyCommand(kcShowPatternProperties, 1772, kcVisible, kcNoDummy, _T("Show pattern properties window"));
+	DefineKeyCommand(kcShowMacroConfig, 1773, kcVisible, kcNoDummy, _T("Show macro configuration"));
+	DefineKeyCommand(kcViewSongProperties, 1775, kcVisible, kcNoDummy, _T("Show song properties window"));
+	DefineKeyCommand(kcChangeLoopStatus, 1776, kcVisible, kcNoDummy, _T("Toggle loop pattern"));
+	DefineKeyCommand(kcFileExportCompat, 1777, kcVisible, kcNoDummy, _T("File/Export to standard IT/XM/S3M"));
+	DefineKeyCommand(kcUnmuteAllChnOnPatTransition, 1778, kcVisible, kcNoDummy, _T("Unmute all channels on pattern transition"));
+	DefineKeyCommand(kcSoloChnOnPatTransition, 1779, kcVisible, kcNoDummy, _T("Solo channel on pattern transition"));
+	DefineKeyCommand(kcTimeAtRow, 1780, kcVisible, kcNoDummy, _T("Show playback time at current row"));
+	DefineKeyCommand(kcViewMIDImapping, 1781, kcVisible, kcNoDummy, _T("View MIDI mapping"));
+	DefineKeyCommand(kcVSTGUIPrevPresetJump, 1782, kcVisible, kcNoDummy, _T("Plugin preset backward jump"));
+	DefineKeyCommand(kcVSTGUINextPresetJump, 1783, kcVisible, kcNoDummy, _T("Plugin preset forward jump"));
+	DefineKeyCommand(kcSampleInvert, 1784, kcVisible, kcNoDummy, _T("Invert sample phase"));
+	DefineKeyCommand(kcSampleSignUnsign, 1785, kcVisible, kcNoDummy, _T("Signed/Unsigned conversion"));
+	DefineKeyCommand(kcChannelReset, 1786, kcVisible, kcNoDummy, _T("Reset channel"));
+	DefineKeyCommand(kcSwitchOverflowPaste, 1787, kcVisible, kcNoDummy, _T("Toggle overflow paste"));
+	DefineKeyCommand(kcNotePC, 1788, kcVisible, kcNoDummy, _T("Parameter control(MPTm only)"));
+	DefineKeyCommand(kcNotePCS, 1789, kcVisible, kcNoDummy, _T("Parameter control(smooth)(MPTm only)"));
+	DefineKeyCommand(kcSampleRemoveDCOffset, 1790, kcVisible, kcNoDummy, _T("Remove DC Offset"));
+	DefineKeyCommand(kcNoteFade, 1791, kcVisible, kcNoDummy, _T("Note Fade"));
+	DefineKeyCommand(kcNoteFadeOld, 1792, kcVisible, kcNoDummy, _T("Note Fade (don't remember instrument)"));
+	DefineKeyCommand(kcEditPasteFlood, 1793, kcVisible, kcNoDummy, _T("Paste Flood"));
+	DefineKeyCommand(kcOrderlistNavigateLeft, 1794, kcVisible, kcNoDummy, _T("Previous Order"));
+	DefineKeyCommand(kcOrderlistNavigateRight, 1795, kcVisible, kcNoDummy, _T("Next Order"));
+	DefineKeyCommand(kcOrderlistNavigateFirst, 1796, kcVisible, kcNoDummy, _T("First Order"));
+	DefineKeyCommand(kcOrderlistNavigateLast, 1797, kcVisible, kcNoDummy, _T("Last Order"));
+	DefineKeyCommand(kcOrderlistNavigateLeftSelect, 1798, kcHidden, kcNoDummy, _T("kcOrderlistNavigateLeftSelect"));
+	DefineKeyCommand(kcOrderlistNavigateRightSelect, 1799, kcHidden, kcNoDummy, _T("kcOrderlistNavigateRightSelect"));
+	DefineKeyCommand(kcOrderlistNavigateFirstSelect, 1800, kcHidden, kcNoDummy, _T("kcOrderlistNavigateFirstSelect"));
+	DefineKeyCommand(kcOrderlistNavigateLastSelect, 1801, kcHidden, kcNoDummy, _T("kcOrderlistNavigateLastSelect"));
+	DefineKeyCommand(kcOrderlistEditDelete, 1802, kcVisible, kcNoDummy, _T("Delete Order"));
+	DefineKeyCommand(kcOrderlistEditInsert, 1803, kcVisible, kcNoDummy, _T("Insert Order"));
+	DefineKeyCommand(kcOrderlistEditPattern, 1804, kcVisible, kcNoDummy, _T("Edit Pattern"));
+	DefineKeyCommand(kcOrderlistSwitchToPatternView, 1805, kcVisible, kcNoDummy, _T("Switch to pattern editor"));
+	DefineKeyCommand(kcDuplicatePattern, 1806, kcVisible, kcNoDummy, _T("Duplicate pattern"));
+	DefineKeyCommand(kcOrderlistPat0, 1807, kcVisible, kcNoDummy, _T("Pattern index digit 0"));
+	DefineKeyCommand(kcOrderlistPat1, 1808, kcVisible, kcNoDummy, _T("Pattern index digit 1"));
+	DefineKeyCommand(kcOrderlistPat2, 1809, kcVisible, kcNoDummy, _T("Pattern index digit 2"));
+	DefineKeyCommand(kcOrderlistPat3, 1810, kcVisible, kcNoDummy, _T("Pattern index digit 3"));
+	DefineKeyCommand(kcOrderlistPat4, 1811, kcVisible, kcNoDummy, _T("Pattern index digit 4"));
+	DefineKeyCommand(kcOrderlistPat5, 1812, kcVisible, kcNoDummy, _T("Pattern index digit 5"));
+	DefineKeyCommand(kcOrderlistPat6, 1813, kcVisible, kcNoDummy, _T("Pattern index digit 6"));
+	DefineKeyCommand(kcOrderlistPat7, 1814, kcVisible, kcNoDummy, _T("Pattern index digit 7"));
+	DefineKeyCommand(kcOrderlistPat8, 1815, kcVisible, kcNoDummy, _T("Pattern index digit 8"));
+	DefineKeyCommand(kcOrderlistPat9, 1816, kcVisible, kcNoDummy, _T("Pattern index digit 9"));
+	DefineKeyCommand(kcOrderlistPatPlus, 1817, kcVisible, kcNoDummy, _T("Increase pattern index "));
+	DefineKeyCommand(kcOrderlistPatMinus, 1818, kcVisible, kcNoDummy, _T("Decrease pattern index"));
+	DefineKeyCommand(kcShowSplitKeyboardSettings, 1819, kcVisible, kcNoDummy, _T("Split Keyboard Settings dialog"));
+	DefineKeyCommand(kcEditPushForwardPaste, 1820, kcVisible, kcNoDummy, _T("Push Forward Paste"));
+	DefineKeyCommand(kcInstrumentEnvelopePointMoveLeft, 1821, kcVisible, kcNoDummy, _T("Move envelope point left"));
+	DefineKeyCommand(kcInstrumentEnvelopePointMoveRight, 1822, kcVisible, kcNoDummy, _T("Move envelope point right"));
+	DefineKeyCommand(kcInstrumentEnvelopePointMoveUp, 1823, kcVisible, kcNoDummy, _T("Move envelope point up"));
+	DefineKeyCommand(kcInstrumentEnvelopePointMoveDown, 1824, kcVisible, kcNoDummy, _T("Move envelope point down"));
+	DefineKeyCommand(kcInstrumentEnvelopePointPrev, 1825, kcVisible, kcNoDummy, _T("Select previous envelope point"));
+	DefineKeyCommand(kcInstrumentEnvelopePointNext, 1826, kcVisible, kcNoDummy, _T("Select next envelope point"));
+	DefineKeyCommand(kcInstrumentEnvelopePointInsert, 1827, kcVisible, kcNoDummy, _T("Insert envelope point"));
+	DefineKeyCommand(kcInstrumentEnvelopePointRemove, 1828, kcVisible, kcNoDummy, _T("Remove envelope point"));
+	DefineKeyCommand(kcInstrumentEnvelopeSetLoopStart, 1829, kcVisible, kcNoDummy, _T("Set loop start"));
+	DefineKeyCommand(kcInstrumentEnvelopeSetLoopEnd, 1830, kcVisible, kcNoDummy, _T("Set loop end"));
+	DefineKeyCommand(kcInstrumentEnvelopeSetSustainLoopStart, 1831, kcVisible, kcNoDummy, _T("Set sustain loop start"));
+	DefineKeyCommand(kcInstrumentEnvelopeSetSustainLoopEnd, 1832, kcVisible, kcNoDummy, _T("Set sustain loop end"));
+	DefineKeyCommand(kcInstrumentEnvelopeToggleReleaseNode, 1833, kcVisible, kcNoDummy, _T("Toggle release node"));
+	DefineKeyCommand(kcInstrumentEnvelopePointMoveUp8, 1834, kcVisible, kcNoDummy, _T("Move envelope point up (big step)"));
+	DefineKeyCommand(kcInstrumentEnvelopePointMoveDown8, 1835, kcVisible, kcNoDummy, _T("Move envelope point down (big step)"));
+	DefineKeyCommand(kcPatternEditPCNotePlugin, 1836, kcVisible, kcNoDummy, _T("Edit plugin assigned to PC note"));
+	DefineKeyCommand(kcInstrumentEnvelopeZoomIn, 1837, kcVisible, kcNoDummy, _T("Zoom In"));
+	DefineKeyCommand(kcInstrumentEnvelopeZoomOut, 1838, kcVisible, kcNoDummy, _T("Zoom Out"));
+	DefineKeyCommand(kcVSTGUIToggleRecordParams, 1839, kcVisible, kcNoDummy, _T("Toggle parameter recording"));
+	DefineKeyCommand(kcVSTGUIToggleSendKeysToPlug, 1840, kcVisible, kcNoDummy, _T("Pass key presses to plugin"));
+	DefineKeyCommand(kcVSTGUIBypassPlug, 1841, kcVisible, kcNoDummy, _T("Bypass plugin"));
 
 #ifdef _DEBUG
-	for (int i=0; i<kcNumCommands; i++)	{
-		if (commands[i].UID != 0) {	// ignore unset UIDs
-			for (int j=i+1; j<kcNumCommands; j++) {
-				if (commands[i].UID == commands[j].UID) {
+	for(size_t i = 0; i < kcNumCommands; i++)
+	{
+		if(commands[i].UID != 0)	// ignore unset UIDs
+		{
+			for(size_t j = i + 1; j < kcNumCommands; j++)
+			{
+				if(commands[i].UID == commands[j].UID)
+				{
 					Log("Duplicate command UID: %d\n", commands[i].UID);
 					ASSERT(false);
 				}
 			}
 		}
 	}
-	#endif //_DEBUG
+#endif //_DEBUG
+
 }
 //-----------------------------------------
 
@@ -3407,7 +1411,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 	fprintf(outStream, "//-Format is:                                                          -\n"); 	
 	fprintf(outStream, "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n"); 
 	fprintf(outStream, "//----------------------------------------------------------------------\n"); 
-	fprintf(outStream, "version:%d\n", KEYMAP_VERSION);
+	fprintf(outStream, "version:%u\n", KEYMAP_VERSION);
 
 	for (int ctx=0; ctx<kCtxMaxInputContexts; ctx++)
 	{
