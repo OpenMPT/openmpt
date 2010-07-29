@@ -335,7 +335,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	if(m_SndFile.m_nRestartPos > 0 && !CSoundFile::GetModSpecifications(nNewType).hasRestartPos)
 	{
 		m_SndFile.m_nRestartPos = 0;
-		AddToLog("WARNING: Restart position is not support by the new format.\n");
+		AddToLog("WARNING: Restart position is not supported by the new format.\n");
 	}
 
 

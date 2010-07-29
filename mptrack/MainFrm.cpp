@@ -2709,8 +2709,10 @@ void CMainFrame::OnPanic()
 	// Panic button. At the moment, it just resets all VSTi and sample notes.
 	if(m_pModPlaying && m_pModPlaying->GetSoundFile())
 	{
-		m_pModPlaying->GetSoundFile()->StopAllVsti();
+		BEGIN_CRITICAL();
 		m_pModPlaying->GetSoundFile()->ResetChannels();
+		m_pModPlaying->GetSoundFile()->StopAllVsti();
+		END_CRITICAL();
 	}
 }
 
