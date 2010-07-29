@@ -503,7 +503,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcPrevDocument, 1693, kcVisible, kcNoDummy, _T("Previous Document"));
 	DefineKeyCommand(kcNextDocument, 1694, kcVisible, kcNoDummy, _T("Next Document"));
 	//time saving HACK:
-	for(size_t j = kcVSTGUIStartNotes; j <= kcVSTGUINoteStopA_3; j++)
+	for(size_t j = kcVSTGUIStartNotes; j <= kcVSTGUIEndNoteStops; j++)
 	{
 		DefineKeyCommand((CommandID)j, 1695 + j - kcVSTGUIStartNotes, kcHidden, kcNoDummy, _T("Auto Note in some context"));
 	}

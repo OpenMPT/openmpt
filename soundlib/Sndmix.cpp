@@ -883,14 +883,15 @@ BOOL CSoundFile::ReadNote()
 	// Master Volume + Pre-Amplification / Attenuation setup
 	DWORD nMasterVol;
 	{
-		int nchn32 = 0;
+		/*int nchn32 = 0;
 		MODCHANNEL *pChn = Chn;
 		for (UINT nChn=0; nChn<m_nChannels; nChn++,pChn++)
 		{
 			//if(!(pChn->dwFlags & CHN_MUTE))	//removed by rewbs: fix http://www.modplug.com/forum/viewtopic.php?t=3358
 				nchn32++;
 		}
-		nchn32 = CLAMP(nchn32, 1, 31);
+		nchn32 = CLAMP(nchn32, 1, 31);*/
+		int nchn32 = CLAMP(m_nChannels, 1, 31);
 		
 		DWORD mastervol;
 
@@ -970,8 +971,7 @@ BOOL CSoundFile::ReadNote()
 		else
 		{
 			pChn->nPan += pChn->nPanSwing;
-			if(pChn->nPan > 256) pChn->nPan = 256;
-			if(pChn->nPan < 0) pChn->nPan = 0;
+			pChn->nPan = CLAMP(pChn->nPan, 0, 256);
 			pChn->nPanSwing = 0;
 			pChn->nRealPan = pChn->nPan;
 		}
@@ -1009,7 +1009,7 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->dwFlags & CHN_TREMOLO)
 			{
 				UINT trempos = pChn->nTremoloPos;
-				// IT compatibility: Why would want to not execute tremolo at volume 0?
+				// IT compatibility: Why would you not want to execute tremolo at volume 0?
 				if (vol > 0 || IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					// IT compatibility: We don't need a different attenuation here because of the different tables we're going to use
@@ -1103,18 +1103,18 @@ BOOL CSoundFile::ReadNote()
 					// and release envelope beginning.
 					if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
 						&& pChn->nVolEnvPosition>=pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
-						&& pChn->nVolEnvValueAtReleaseJump != NOT_YET_RELEASED) {
+						&& pChn->nVolEnvValueAtReleaseJump != NOT_YET_RELEASED)
+					{
 						int envValueAtReleaseJump = pChn->nVolEnvValueAtReleaseJump;
 						int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] << 2;
 
 						//If we have just hit the release node, force the current env value
 						//to be that of the release node. This works around the case where 
 						// we have another node at the same position as the release node.
-						if (pChn->nVolEnvPosition==pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]) {
-							envvol=envValueAtReleaseNode;
-						}
+						if (pChn->nVolEnvPosition == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
+							envvol = envValueAtReleaseNode;
 
-						int relativeVolumeChange = (envvol-envValueAtReleaseNode)*2;
+						int relativeVolumeChange = (envvol - envValueAtReleaseNode) * 2;
 						envvol = envValueAtReleaseJump + relativeVolumeChange;
 					}
 					vol = (vol * CLAMP(envvol, 0, 512)) >> 8;
