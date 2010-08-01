@@ -1361,7 +1361,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	bool oldsel = (m_dwBeginSel != m_dwEndSel) ? true : false;
 
 	// shift + click = update selection
-	if(CMainFrame::GetInputHandler()->ShiftPressed())
+	if(!m_bDrawingEnabled && CMainFrame::GetInputHandler()->ShiftPressed())
 	{
 		oldsel = true;
 		m_dwEndDrag = ScreenToSample(point.x);

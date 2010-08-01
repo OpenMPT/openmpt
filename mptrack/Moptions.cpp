@@ -399,6 +399,7 @@ void COptionsColors::OnPresetMPT()
 	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0x00, 0x00, 0x00);
 	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x00, 0x00, 0x00);
 	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xFF, 0xFF, 0xFF);
+	CustomColors[MODCOLOR_SAMPLE] = RGB(0xFF, 0x00, 0x00);
 	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0xFF, 0xFF, 0x80);
 	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x00, 0x00, 0x00);
 	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0xE0, 0xE8, 0xE0);
@@ -408,6 +409,7 @@ void COptionsColors::OnPresetMPT()
 	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0x80, 0x80);
 	CustomColors[MODCOLOR_PITCH] = RGB(0x80, 0x80, 0x00);
 	CustomColors[MODCOLOR_GLOBALS] = RGB(0x80, 0x00, 0x00);
+	CustomColors[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
 	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_HI] = RGB(0xE1, 0x00, 0x00);
@@ -492,6 +494,7 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_TEXTCURROW] = RGB(0x00, 0x00, 0x00);
 	CustomColors[MODCOLOR_BACKSELECTED] = RGB(0x00, 0x00, 0x00);
 	CustomColors[MODCOLOR_TEXTSELECTED] = RGB(0xDD, 0xD7, 0xCC);
+	CustomColors[MODCOLOR_SAMPLE] = RGB(0x00, 0xFF, 0x00);
 	CustomColors[MODCOLOR_BACKPLAYCURSOR] = RGB(0xA9, 0x99, 0x7A);
 	CustomColors[MODCOLOR_TEXTPLAYCURSOR] = RGB(0x00, 0x00, 0x00);
 	CustomColors[MODCOLOR_BACKHILIGHT] = RGB(0xCE, 0xC5, 0xB5);
@@ -501,7 +504,6 @@ void COptionsColors::OnPresetBuzz()
 	CustomColors[MODCOLOR_PANNING] = RGB(0x00, 0x68, 0x68);
 	CustomColors[MODCOLOR_PITCH] = RGB(0x62, 0x62, 0x00);
 	CustomColors[MODCOLOR_GLOBALS] = RGB(0x66, 0x00, 0x00);
-	CustomColors[MODCOLOR_SAMPLE] = RGB(0x00, 0xFF, 0x00);
 	CustomColors[MODCOLOR_ENVELOPES] = RGB(0xFF, 0x00, 0x00);
 	CustomColors[MODCOLOR_VUMETER_LO] = RGB(0x00, 0xC8, 0x00);
 	CustomColors[MODCOLOR_VUMETER_MED] = RGB(0xFF, 0xC8, 0x00);

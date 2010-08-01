@@ -131,9 +131,8 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 // -> CODE#0023
 // -> DESC="IT project files (.itp)"
 	DDX_Control(pDX, IDC_CHECK6,		m_CheckBox6);
-	DDX_Control(pDX, IDC_CHECK_PT1X,	m_CheckBoxPT1x);
-	DDX_Control(pDX, IDC_EDIT_FLAGS,	m_EditFlag);
 // -! NEW_FEATURE#0023
+	DDX_Control(pDX, IDC_CHECK_PT1X,	m_CheckBoxPT1x);
 	//}}AFX_DATA_MAP
 }
 
@@ -203,8 +202,6 @@ BOOL CModTypeDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT_CREATEDWITH, MptVersion::ToStr(m_pSndFile->m_dwCreatedWithVersion));
 	SetDlgItemText(IDC_EDIT_SAVEDWITH, MptVersion::ToStr(m_pSndFile->m_dwLastSavedWithVersion));
 
-	m_EditFlag.SetLimitText(16);
-
 	UpdateDialog();
 
 	EnableToolTips(TRUE);
@@ -273,38 +270,23 @@ void CModTypeDlg::UpdateDialog()
 
 	const bool XMorITorMPT = ((m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) != 0);
 	const bool ITorMPT = ((m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) & (MOD_TYPE_IT | MOD_TYPE_MPT)) != 0);
-	const bool XM = m_TypeBox.GetItemData(m_TypeBox.GetCurSel()) == MOD_TYPE_XM;
 
-	// Misc Flags box
-	CWnd* p = GetDlgItem(IDC_EDIT_FLAGS);
-	if(p) p->ShowWindow(XMorITorMPT);
-	p = GetDlgItem(IDC_FLAG_EXPLANATIONS);
-	if(p)
+	// Misc Flags
+	if(ITorMPT)
 	{
-		p->ShowWindow(XMorITorMPT);
-		if(ITorMPT)
-            p->SetWindowText("1. Enable more IT compatible playback.\n"
-							 "2. Use old random variation behavior for instruments.\n"
-							 "3. Enable plugin volume command bug emulation.");
-		else if(XM) p->SetWindowText("1. Enable more FT2 compatible playback.\n"
-									 "2. Unused\n"
-									 "3. Plugin volume command bug"); 
+		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Impulse Tracker compatible playback"));
+	} else
+	{
+		GetDlgItem(IDC_CHK_COMPATPLAY)->SetWindowText(_T("More Fasttracker 2 compatible playback"));
 	}
 
-	GetDlgItem(IDC_FLAGEDITTITLE)->ShowWindow(XMorITorMPT);
-	GetDlgItem(IDC_FRAME_MPTEXT)->ShowWindow(XMorITorMPT);
-	if(XMorITorMPT)
-	{
-		char str[17] = "0000000000000000";
-		const uint16 f = m_pSndFile->GetModFlags();
-		BYTE lastTrue = 0, i;
-		for(i = 0; i<16; i++)
-		{
-			if((f & (1 << i)) != 0) {str[i] = '1'; lastTrue = i;}
-		}
-		str[max(3, lastTrue+1)] = 0;
-		SetDlgItemText(IDC_EDIT_FLAGS, str);
-	}
+	GetDlgItem(IDC_CHK_COMPATPLAY)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_CHK_MIDICCBUG)->ShowWindow(XMorITorMPT);
+	GetDlgItem(IDC_CHK_OLDRANDOM)->ShowWindow(ITorMPT);
+
+	CheckDlgButton(IDC_CHK_COMPATPLAY, m_pSndFile->GetModFlag(MSF_COMPATIBLE_PLAY));
+	CheckDlgButton(IDC_CHK_MIDICCBUG, m_pSndFile->GetModFlag(MSF_MIDICC_BUGEMULATION));
+	CheckDlgButton(IDC_CHK_OLDRANDOM, m_pSndFile->GetModFlag(MSF_OLDVOLSWING));
 
 	// Mixmode Box
 	GetDlgItem(IDC_TEXT_MIXMODE)->ShowWindow(XMorITorMPT);
@@ -485,14 +467,10 @@ void CModTypeDlg::OnOK()
 
 	if(m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
 	{
-		uint16 val = 0;
-		char str[18]; memset(str, 0, 18);
-		GetDlgItemText(IDC_EDIT_FLAGS, str, 17);
-		for(size_t i = 0; i<strlen(str); i++)
-		{
-			if(str[i] != '0') val |= (1 << i);
-		}
-		m_pSndFile->SetModFlags(val);
+		m_pSndFile->SetModFlags(0);
+		if(IsDlgButtonChecked(IDC_CHK_COMPATPLAY)) m_pSndFile->SetModFlag(MSF_COMPATIBLE_PLAY, true);
+		if(IsDlgButtonChecked(IDC_CHK_MIDICCBUG)) m_pSndFile->SetModFlag(MSF_MIDICC_BUGEMULATION, true);
+		if(IsDlgButtonChecked(IDC_CHK_OLDRANDOM)) m_pSndFile->SetModFlag(MSF_OLDVOLSWING, true);
 	}
 
 	m_pSndFile->m_nRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
@@ -556,6 +534,15 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 		break;
 	case IDC_COMBO_MIXLEVELS:
 		strTipText = "Mixing method of sample and VST levels.";
+		break;
+	case IDC_CHK_COMPATPLAY:
+		strTipText = "Play commands as the original tracker would play them (recommended)";
+		break;
+	case IDC_CHK_MIDICCBUG:
+		strTipText = "Emulate an old bug which sent wrong volume messages to VSTis (not recommended)";
+		break;
+	case IDC_CHK_OLDRANDOM:
+		strTipText = "Use old (buggy) random volume / panning variation algorithm (not recommended)";
 		break;
 	}
 
