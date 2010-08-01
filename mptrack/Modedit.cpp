@@ -1609,7 +1609,8 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 			if(dwPos < dwMemSize)
 			{
 				BYTE r = static_cast<BYTE>(atoi(p + dwPos));
-				if(r == 0 || r >= nPoints) r = ENV_RELEASE_NODE_UNSET;
+				if(r == 0 || r >= nPoints || !m_SndFile.GetModSpecifications().hasReleaseNode)
+					r = ENV_RELEASE_NODE_UNSET;
 				pEnv->nReleaseNode = r;
 			}
 		}

@@ -12,7 +12,6 @@ class CModTypeDlg: public CDialog
 public:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x;
-	CEdit m_EditFlag;
 	CSoundFile *m_pSndFile;
 	UINT m_nChannels;
 	MODTYPE m_nType;
@@ -22,8 +21,6 @@ public:
 // -> DESC="IT project files (.itp)"
 	CButton m_CheckBox6;
 // -! NEW_FEATURE#0023
-
-	CButton m_CheckBoxITCompatiblePlay;
 
 public:
 	CModTypeDlg(CSoundFile *pSndFile, CWnd *parent):CDialog(IDD_MODDOC_MODTYPE, parent) { m_pSndFile = pSndFile; m_nType = MOD_TYPE_NONE; m_nChannels = 0; }

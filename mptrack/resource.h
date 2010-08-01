@@ -841,9 +841,9 @@
 #define IDC_BUTTON_REMOVE               2318
 #define IDC_CHECK_MIDILEARN             2319
 #define IDC_MIDIPLAYCONTROL             2320
-#define IDC_FLAG_EXPLANATIONS           2321
-#define IDC_FLAGEDITTITLE               2322
-#define IDC_EDIT_FLAGS                  2323
+#define IDC_CHK_COMPATPLAY              2321
+#define IDC_CHK_MIDICCBUG               2322
+#define IDC_CHK_OLDRANDOM               2323
 #define IDC_CHECKCAPTURE                2324
 #define IDC_SPINMOVEMAPPING             2325
 #define IDC_BUTTON_HALF                 2326
@@ -1208,7 +1208,7 @@
 #define ID_PATTERN_EDIT_PCNOTE_PLUGIN   60448
 #define ID_ENVELOPE_ZOOM_IN             60449
 #define ID_ENVELOPE_ZOOM_OUT            60450
-#define ID_PANIC						60451
+#define ID_PANIC                        60451
 
 // Next default values for new objects
 // 

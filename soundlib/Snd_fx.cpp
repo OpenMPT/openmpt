@@ -2902,7 +2902,7 @@ inline void CSoundFile::InvertLoop(MODCHANNEL *pChn)
 
 	// we obviously also need a sample for this
 	MODSAMPLE *pModSample = pChn->pModSample;
-	if(pModSample == nullptr || pModSample->pSample == nullptr || !(pModSample->uFlags & CHN_LOOP)) return;
+	if(pModSample == nullptr || pModSample->pSample == nullptr || !(pModSample->uFlags & CHN_LOOP) || (pModSample->uFlags & CHN_16BIT)) return;
 
 	pChn->nEFxDelay += ModEFxTable[pChn->nEFxSpeed & 0x0F];
 	if((pChn->nEFxDelay & 0x80) == 0) return; // only applied if the "delay" reaches 128
