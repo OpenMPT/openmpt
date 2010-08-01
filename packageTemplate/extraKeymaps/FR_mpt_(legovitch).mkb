@@ -23,6 +23,7 @@ version:1
 0:1362:1:45:1		//Paste: Shift+INS (KeyDown)
 0:1363:6:86:1		//Mix Paste: Ctrl+Alt+V (KeyDown)
 0:1793:7:86:1		//Paste Flood: Shift+Ctrl+Alt+V (KeyDown)
+0:1820:5:86:1		//Push Forward Paste: Shift+Alt+V (KeyDown)
 0:1364:2:53:1		//SelectAll: Ctrl+( (KeyDown)
 0:1365:2:70:1		//Find: Ctrl+F (KeyDown)
 0:1366:6:70:1		//Find Next: Ctrl+Alt+F (KeyDown)
@@ -212,6 +213,7 @@ version:1
 5:1229:0:55:1		//Set volume digit 7: è (KeyDown)
 5:1229:0:103:1		//Set volume digit 7: 7 (PAVE NUM.) (KeyDown)
 5:1230:0:56:1		//Set volume digit 8: _ (KeyDown)
+5:1230:0:104:1		//Set volume digit 8: 8 (PAVE NUM.) (KeyDown)
 5:1231:0:57:1		//Set volume digit 9: ç (KeyDown)
 5:1231:0:105:1		//Set volume digit 9: 9 (PAVE NUM.) (KeyDown)
 5:1232:0:86:1		//Vol command - volume: V (KeyDown)
@@ -227,12 +229,11 @@ version:1
 5:1242:0:71:1		//Vol command - Portamento: G (KeyDown)
 5:1243:0:70:1		//Vol command - Portamento Up: F (KeyDown)
 5:1244:0:69:1		//Vol command - Portamento Down: E (KeyDown)
-5:1245:1:186:1		//Vol command - Velocity: Shift+$ (KeyDown)
 5:1246:0:79:1		//Vol command - Offset: O (KeyDown)
 
 //----( Pattern Context [bottom] - FX Col (6) )------------
 6:1294:0:220:1		//FX midi macro slide: * (KeyDown)
-6:1295:1:186:1		//FX pseudo-velocity (experimental): Shift+$ (KeyDown)
+6:1295:0:191:1		//FX combined note delay and note cut: : (KeyDown)
 6:1666:6:51:1		//FX parameter extension command: Ctrl+Alt+" (KeyDown)
 
 //----( Pattern Context [bottom] - Param Col (7) )------------
@@ -310,6 +311,8 @@ version:1
 13:1783:2:34:1		//Plugin preset forward jump: Ctrl+PG.SUIV (KeyDown)
 13:1765:6:82:1		//Randomize plugin parameters: Ctrl+Alt+R (KeyDown)
 13:1839:6:80:1		//Toggle parameter recording: Ctrl+Alt+P (KeyDown)
+13:1840:6:75:1		//Pass key presses to plugin: Ctrl+Alt+K (KeyDown)
+13:1841:6:66:1		//Bypass plugin: Ctrl+Alt+B (KeyDown)
 
 //----( General Context [top] (14) )------------
 
@@ -318,6 +321,13 @@ version:1
 //----( Sample Context [top] (16) )------------
 
 //----( Instrument Context [top] (17) )------------
+17:1851:2:68:1		//Duplicate instrument: Ctrl+D (KeyDown)
+17:1850:2:69:1		//Edit sample map: Ctrl+E (KeyDown)
+17:1849:6:69:1		//Edit current sample: Ctrl+Alt+E (KeyDown)
+17:1843:2:65:1		//Transpose +1 (note map): Ctrl+A (KeyDown)
+17:1842:2:81:1		//Transpose -1 (note map): Ctrl+Q (KeyDown)
+17:1845:6:65:1		//Transpose +12 (note map): Ctrl+Alt+A (KeyDown)
+17:1844:6:81:1		//Transpose -12 (note map): Ctrl+Alt+Q (KeyDown)
 
 //----( Comments Context [top] (18) )------------
 
