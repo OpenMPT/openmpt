@@ -151,7 +151,7 @@ bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndin
 // [in]  data: pointer to the data in memory that is going to be read
 // [in]  length: number of characters that should be read, not including a possible trailing null terminator (it is automatically appended).
 // [in]  lineLength: The fixed length of a line.
-// [in]  lineEndingLength: The padding space between two fikxed lines. (there could for example be a null char after every line)
+// [in]  lineEndingLength: The padding space between two fixed lines. (there could for example be a null char after every line)
 // [in]  pTextConverter: Pointer to a callback function which can be used to pre-process the read characters, if necessary (nullptr otherwise).
 // [out] returns true on success.
 bool CSoundFile::ReadFixedLineLengthMessage(const BYTE *data, const size_t length, const size_t lineLength, const size_t lineEndingLength, void (*pTextConverter)(char &))

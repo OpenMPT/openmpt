@@ -380,7 +380,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 
 			insfile[iSmp] = ((DWORD)LittleEndianW(*((LPWORD)(s+0x0E)))) << 4;
 			insfile[iSmp] += ((DWORD)(BYTE)s[0x0D]) << 20;
-			if (insfile[iSmp] > dwMemLength) insfile[iSmp] &= 0xFFFF;
+			if (insfile[iSmp] > dwMemLength) insfile[iSmp] &= 0xFFFF;	// wtf? whose idea was this?
 
 			if(Samples[iSmp].nLoopEnd < 2)
 				Samples[iSmp].nLoopStart = Samples[iSmp].nLoopEnd = 0;

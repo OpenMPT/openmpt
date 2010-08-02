@@ -218,8 +218,8 @@ public:
 	
 // operations
 public:
-	BOOL ChangeModType(MODTYPE wType);
-	BOOL ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg = true);
+	bool ChangeModType(MODTYPE wType);
+	bool ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg = true);
 
 	BOOL ConvertInstrumentsToSamples();
 	UINT RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS]);

@@ -19,8 +19,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define str_mptm_conversion_warning		GetStrI18N(_TEXT("Conversion from mptm to any other moduletype may makes certain features unavailable and is not guaranteed to work properly. Do the conversion anyway?"))
-
 const size_t Pow10Table[10] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
 
 // Return D'th digit(character) of given value.
@@ -37,7 +35,7 @@ inline TCHAR GetDigit(const size_t val)
 //////////////////////////////////////////////////////////////////////
 // Module type conversion
 
-BOOL CModDoc::ChangeModType(MODTYPE nNewType)
+bool CModDoc::ChangeModType(MODTYPE nNewType)
 //-------------------------------------------
 {
 	CHAR s[256];
@@ -50,10 +48,11 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		// This is because ITP is a HACK and doesn't genuinely change m_nType,
 		// but uses flages instead.
 		ChangeFileExtension(nNewType);
-		return TRUE;
+		return true;
 	}
 
-	if(nNewType == nOldType) return TRUE;
+	if(nNewType == nOldType)
+		return true;
 
 	const bool oldTypeIsMOD = (nOldType == MOD_TYPE_MOD), oldTypeIsXM = (nOldType == MOD_TYPE_XM),
 				oldTypeIsS3M = (nOldType == MOD_TYPE_S3M), oldTypeIsIT = (nOldType == MOD_TYPE_IT),
@@ -70,39 +69,37 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 
 	const CModSpecifications& specs = m_SndFile.GetModSpecifications(nNewType);
 
-	if(oldTypeIsMPT)
-	{
-		if(::MessageBox(NULL, str_mptm_conversion_warning, 0, MB_YESNO) != IDYES)
-			return FALSE;
+	/*
+	Incomplete list of MPTm-only features and extensions in the old formats:
 
-		/*
-		Incomplete list of MPTm-only features and extensions in the old formats:
+	Features only available for MPTm:
+	-User definable tunings.
+	-Extended pattern range
+	-Extended sequence
+	-Multiple sequences ("songs")
+	-Pattern-specific time signatures
+	-Pattern effects :xy, S7D, S7E
+	-Long instrument envelopes
+	-Envelope release node (this was previously also usable in the IT format, but is deprecated in that format)
 
-		Features only available for MPTm:
-		-User definable tunings.
-		-Extended pattern range
-		-Extended sequence
-		-Multiple sequences
-
-		Extended features in IT/XM/S3M/MOD(not all listed below are available in all of those formats):
-		-plugs
-		-Extended ranges for
-			-sample count
-			-instrument count
-			-pattern count
-			-sequence size
-			-Row count
-			-channel count
-			-tempo limits
-		-Extended sample/instrument properties.
-		-MIDI mapping directives
-		-Versioninfo
-		-channel names
-		-pattern names
-		-Alternative tempomodes
-		-For more info, see e.g. SaveExtendedSongProperties(), SaveExtendedInstrumentProperties()
-		*/
-	}
+	Extended features in IT/XM/S3M/MOD(not all listed below are available in all of those formats):
+	-plugs
+	-Extended ranges for
+		-sample count
+		-instrument count
+		-pattern count
+		-sequence size
+		-Row count
+		-channel count
+		-tempo limits
+	-Extended sample/instrument properties.
+	-MIDI mapping directives
+	-Versioninfo
+	-channel names
+	-pattern names
+	-Alternative tempomodes
+	-For more info, see e.g. SaveExtendedSongProperties(), SaveExtendedInstrumentProperties()
+	*/
 
 	// Check if conversion to 64 rows is necessary
 	for (UINT ipat=0; ipat<m_SndFile.Patterns.Size(); ipat++)
@@ -114,7 +111,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		if (::MessageBox(NULL,
 				"This operation will convert all instruments to samples,\n"
 				"and resize all patterns to 64 rows.\n"
-				"Do you want to continue?", "Warning", MB_YESNO | MB_ICONQUESTION) != IDYES) return FALSE;
+				"Do you want to continue?", "Warning", MB_YESNO | MB_ICONQUESTION) != IDYES) return false;
 		BeginWaitCursor();
 		BEGIN_CRITICAL();
 		// Converting instruments to samples
@@ -278,7 +275,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	if (oldTypeIsIT_MPT && newTypeIsXM)
 	{
 		bool bBrokenNoteMap = false, bBrokenSustainLoop = false;
-		for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.m_nInstruments; nIns++)
+		for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
 		{
 			MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
 			if (pIns)
@@ -312,6 +309,24 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 		if (bBrokenNoteMap) AddToLog("WARNING: Note Mapping will be lost when saving as XM.\n");
 		if (bBrokenSustainLoop) AddToLog("WARNING: Sustain loops were converted to sustain points.\n");
+	}
+
+	// Instrument tunings
+	if(oldTypeIsMPT)
+	{
+		bool bFirstWarn = true;
+		for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
+		{
+			if(m_SndFile.Instruments[nIns] != nullptr && m_SndFile.Instruments[nIns]->pTuning != nullptr)
+			{
+				m_SndFile.Instruments[nIns]->SetTuning(nullptr);
+				if(bFirstWarn)
+				{
+					AddToLog("WARNING: Instrument tunings will be lost!\n");
+					bFirstWarn = false;
+				}
+			}
+		}
 	}
 
 	if(newTypeIsMOD)
@@ -396,7 +411,7 @@ BOOL CModDoc::ChangeModType(MODTYPE nNewType)
 	GetSampleUndo()->ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODGENERAL);
 	EndWaitCursor();
-	return TRUE;
+	return true;
 }
 
 // Trim envelopes and remove release nodes.
@@ -437,7 +452,7 @@ uint8 CModDoc::UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv)
 
 
 // Change the number of channels
-BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg)
+bool CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg)
 //----------------------------------------------------------------------------------
 {
 	const CHANNELINDEX maxChans = m_SndFile.GetModSpecifications().channelsMax;
@@ -446,10 +461,10 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 		CString error;
 		error.Format("Error: Max number of channels for this file type is %d", maxChans);
 		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
-		return FALSE;
+		return false;
 	}
 
-	if (nNewChannels == m_SndFile.m_nChannels) return FALSE;
+	if (nNewChannels == m_SndFile.m_nChannels) return false;
 	if (nNewChannels < m_SndFile.m_nChannels)
 	{
 		UINT nChnToRemove = 0;
@@ -466,7 +481,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 		
 		CRemoveChannelsDlg rem(&m_SndFile, nChnToRemove, showCancelInRemoveDlg);
 		CheckUnusedChannels(rem.m_bChnMask, nFound);
-		if (rem.DoModal() != IDOK) return FALSE;
+		if (rem.DoModal() != IDOK) return false;
 
 		// Removing selected channels
 		RemoveChannels(rem.m_bChnMask);
@@ -483,7 +498,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 			{
 				END_CRITICAL();
 				AddToLog("ERROR: Not enough memory to create new channels!\nPattern Data is corrupted!\n");
-				return FALSE;
+				return false;
 			}
 			for (UINT j=0; j<m_SndFile.Patterns[i].GetNumRows(); j++)
 			{
@@ -507,7 +522,7 @@ BOOL CModDoc::ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemove
 	SetModified();
 	GetPatternUndo()->ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE);
-	return TRUE;
+	return true;
 }
 
 
