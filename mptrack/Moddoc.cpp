@@ -460,7 +460,7 @@ BOOL CModDoc::SaveModified()
 			if(m_SndFile.instrumentModified[i]) { unsavedInstrument = true; break; }
 		}
 
-		if(unsavedInstrument && ::MessageBox(NULL,"Do you want to save modified instruments ?",NULL,MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES){
+		if(unsavedInstrument && ::MessageBox(NULL,"Do you want to save modified instruments?",NULL,MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES){
 
 			for(INSTRUMENTINDEX i = 0 ; i < m_SndFile.m_nInstruments ; i++){
 				if(m_SndFile.m_szInstrumentPath[i][0] != '\0'){
@@ -2042,7 +2042,8 @@ void CModDoc::OnApproximateBPM()
 	double bpm = CMainFrame::GetMainFrame()->GetApproxBPM();
 
 
-	switch(m_SndFile.m_nTempoMode) {
+	switch(m_SndFile.m_nTempoMode)
+	{
 		case tempo_mode_alternative: 
 			Message.Format("Using alternative tempo interpretation.\n\nAssuming:\n. %d ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.20g BPM",
 			m_SndFile.m_nMusicTempo, m_SndFile.m_nMusicSpeed, m_SndFile.m_nRowsPerBeat, bpm); 

@@ -139,7 +139,7 @@ bool CSoundFile::ReadAMS(const LPCBYTE lpStream, const DWORD dwMemLength)
 		BYTE chnnamlen = lpStream[dwMemPos++];
 		if ((chnnamlen) && (chnnamlen < MAX_CHANNELNAME))
 		{
-			memcpy(ChnSettings[cNam].szName, lpStream + dwMemPos + 1, chnnamlen);
+			memcpy(ChnSettings[cNam].szName, lpStream + dwMemPos, chnnamlen);
 			SpaceToNullStringFixed(ChnSettings[cNam].szName, chnnamlen);
 		}
 		dwMemPos += chnnamlen;
