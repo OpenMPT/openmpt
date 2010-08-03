@@ -389,6 +389,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\soundlib\Load_itp.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\soundlib\load_j2b.cpp"
 				>
 			</File>
