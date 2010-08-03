@@ -1027,13 +1027,13 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 
 
 // Clipboard format:
-// Hdr: "ModPlug Tracker S3M\n"
+// Hdr: "ModPlug Tracker S3M\r\n"
 // Full:  '|C#401v64A06'
 // Reset: '|...........'
 // Empty: '|           '
 // End of row: '\n'
 
-static LPCSTR lpszClipboardPatternHdr = "ModPlug Tracker %3s\x0D\x0A";
+static LPCSTR lpszClipboardPatternHdr = "ModPlug Tracker %3s\r\n";
 
 bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSel)
 //--------------------------------------------------------------------------------
@@ -1168,8 +1168,8 @@ bool CModDoc::CopyPattern(PATTERNINDEX nPattern, DWORD dwBeginSel, DWORD dwEndSe
 						p[9] = p[10] = p[11] = ' ';
 					}
 				}
-				*p++ = 0x0D;
-				*p++ = 0x0A;
+				*p++ = '\r';
+				*p++ = '\n';
 			}
 			*p = 0;
 		}
@@ -1197,70 +1197,69 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 		{
 			const TEMPO spdmax = m_SndFile.GetModSpecifications().speedMax;
 			const DWORD dwMemSize = GlobalSize(hCpy);
+			CHANNELINDEX ncol = (dwBeginSel & 0xFFFF) >> 3, col;
+			const ROWINDEX startRow = (ROWINDEX)(dwBeginSel >> 16);
+			ROWINDEX nrow = startRow;
+			bool bOk = false;
+			bool bPrepareUndo = true;	// prepare pattern for undo next time
+			bool bFirstUndo = true;		// for chaining undos (see overflow paste)
+			MODTYPE origFormat = MOD_TYPE_IT;	// paste format
+			size_t pos, startPos = 0;
 			MODCOMMAND *m = m_SndFile.Patterns[nPattern];
-			UINT nrow = dwBeginSel >> 16;
-			UINT ncol = (dwBeginSel & 0xFFFF) >> 3;
-			UINT col;
-			bool bS3MCommands = false, bOk = false;
-			bool bPrepareUndo = true, bFirstUndo = true;
-			MODTYPE origFormat = MOD_TYPE_IT;
-			UINT len = 0, startLen;
 
 			const bool doOverflowPaste = (CMainFrame::m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && (pasteMode != pm_pasteflood) && (pasteMode != pm_pushforwardpaste);
 			const bool doITStyleMix = (pasteMode == pm_mixpaste_it);
 			const bool doMixPaste = ((pasteMode == pm_mixpaste) || doITStyleMix);
 
 			ORDERINDEX oCurrentOrder; //jojo.echopaste
-			ROWINDEX rTemp, startRow;
+			ROWINDEX rTemp;
 			PATTERNINDEX pTemp;
 			GetEditPosition(rTemp, pTemp, oCurrentOrder);
 
-			if ((nrow >= m_SndFile.Patterns[nPattern].GetNumRows()) || (ncol >= m_SndFile.m_nChannels)) goto PasteDone;
+			if ((nrow >= m_SndFile.Patterns[nPattern].GetNumRows()) || (ncol >= m_SndFile.GetNumChannels())) goto PasteDone;
 			m += nrow * m_SndFile.m_nChannels;
-			
+
 			// Search for signature
-			for (;;)
+			for (pos = startPos; p[pos] != 0 && pos < dwMemSize; pos++)
 			{
-				if (len + 11 >= dwMemSize) goto PasteDone;
-				char c = p[len++];
-				if (!c) goto PasteDone;
-				if ((c == 0x0D) && (len > 3))
+				CHAR szFormat[4];	// adjust this if the "%3s" part in the format string changes.
+				if(sscanf(p + pos, lpszClipboardPatternHdr, szFormat) > 0)
 				{
-					if(p[len - 3] == 'I') origFormat = MOD_TYPE_IT;
-					if(p[len - 3] == 'P') origFormat = MOD_TYPE_MPT;
-					if(p[len - 4] == 'S') origFormat = MOD_TYPE_S3M;
-					if(p[len - 3] == 'X') origFormat = MOD_TYPE_XM;
-					if(p[len - 3] == 'O') origFormat = MOD_TYPE_MOD;
+					if(!strcmp(szFormat, "S3M")) origFormat = MOD_TYPE_S3M;
+					if(!strcmp(szFormat, "XM")) origFormat = MOD_TYPE_XM;
+					if(!strcmp(szFormat, "IT")) origFormat = MOD_TYPE_IT;
+					if(!strcmp(szFormat, "MPT")) origFormat = MOD_TYPE_MPT;
+					if(!strcmp(szFormat, "MOD")) origFormat = MOD_TYPE_MOD;
+					startPos = pos;	// start reading patterns from here
 					break;
 				}
 			}
-			bS3MCommands = (origFormat & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) != 0 ? true : false;
-			bOk = true;
 
-			startLen = len;
-			startRow = nrow;
+			const bool bS3MCommands = (origFormat & (MOD_TYPE_IT|MOD_TYPE_MPT|MOD_TYPE_S3M)) != 0 ? true : false;
+			pos = startPos;
 
 			while ((nrow < m_SndFile.Patterns[nPattern].GetNumRows()))
 			{
 				// Search for column separator or end of paste data
-				while ((len + 11 >= dwMemSize) || p[len] != '|')
+				while ((pos + 11 >= dwMemSize) || p[pos] != '|')
 				{
-					if (len + 11 >= dwMemSize || !p[len])
+					if (pos + 11 >= dwMemSize || !p[pos])
 					{
 						if((pasteMode == pm_pasteflood) && (nrow != startRow)) // prevent infinite loop with malformed clipboard data
-							len = startLen; // paste from beginning
+							pos = startPos; // paste from beginning
 						else
 							goto PasteDone;
 					} else
 					{
-						len++;
+						pos++;
 					}
 				}
+				bOk = true;
 				col = ncol;
 				// Paste columns
-				while ((p[len] == '|') && (len + 11 < dwMemSize))
+				while ((p[pos] == '|') && (pos + 11 < dwMemSize))
 				{
-					LPSTR s = p+len+1;
+					LPSTR s = p+pos+1;
 
 					// Check valid paste condition. Paste will be skipped if
 					// -col is not a valid channelindex or
@@ -1434,7 +1433,7 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 							m_SndFile.ConvertCommand(&(m[col]), origFormat, m_SndFile.m_nType);
 					}
 
-					len += 12;
+					pos += 12;
 					col++;
 				}
 				// Next row
@@ -1477,8 +1476,8 @@ bool CModDoc::PastePattern(PATTERNINDEX nPattern, DWORD dwBeginSel, enmPatternPa
 /////////////////////////////////////////////////////////////////////////////////////////
 // Copy/Paste envelope
 
-static LPCSTR pszEnvHdr = "Modplug Tracker Envelope\x0D\x0A";
-static LPCSTR pszEnvFmt = "%d,%d,%d,%d,%d,%d,%d,%d\x0D\x0A";
+static LPCSTR pszEnvHdr = "Modplug Tracker Envelope\r\n";
+static LPCSTR pszEnvFmt = "%d,%d,%d,%d,%d,%d,%d,%d\r\n";
 
 bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 //----------------------------------------------------------
@@ -1492,6 +1491,7 @@ bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return false;
 	BeginWaitCursor();
 	pIns = m_SndFile.Instruments[nIns];
+	if(pIns == nullptr) return false;
 	
 	INSTRUMENTENVELOPE *pEnv = nullptr;
 
@@ -1513,12 +1513,12 @@ bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 	for (UINT i = 0; i < pEnv->nNodes; i++)
 	{
 		if (strlen(s) >= sizeof(s)-32) break;
-		wsprintf(s+strlen(s), "%d,%d\x0D\x0A", pEnv->Ticks[i], pEnv->Values[i]);
+		wsprintf(s+strlen(s), "%d,%d\r\n", pEnv->Ticks[i], pEnv->Values[i]);
 	}
 
 	//Writing release node
 	if(strlen(s) < sizeof(s) - 32)
-		wsprintf(s+strlen(s), "%u\x0D\x0A", pEnv->nReleaseNode);
+		wsprintf(s+strlen(s), "%u\r\n", pEnv->nReleaseNode);
 
 	dwMemSize = strlen(s)+1;
 	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
@@ -1554,28 +1554,13 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 		MODINSTRUMENT *pIns = m_SndFile.Instruments[nIns];
 		INSTRUMENTENVELOPE *pEnv = nullptr;
 
-		UINT susBegin=0, susEnd=0, loopBegin=0, loopEnd=0, bSus=0, bLoop=0, bCarry=0, nPoints=0, releaseNode = ENV_RELEASE_NODE_UNSET;
+		UINT susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
 		DWORD dwMemSize = GlobalSize(hCpy), dwPos = strlen(pszEnvHdr);
-		if ((dwMemSize > dwPos) && (!_strnicmp(p, pszEnvHdr, dwPos-2)))
+		if ((dwMemSize > dwPos) && (!_strnicmp(p, pszEnvHdr, dwPos - 2)))
 		{
-			for (UINT h=0; h<8; h++)
-			{
-				while ((dwPos < dwMemSize) && ((p[dwPos] < '0') || (p[dwPos] > '9'))) dwPos++;
-				if (dwPos >= dwMemSize) break;
-				int n = atoi(p+dwPos);
-				switch(h)
-				{
-				case 0:		nPoints = n; break;
-				case 1:		susBegin = n; break;
-				case 2:		susEnd = n; break;
-				case 3:		loopBegin = n; break;
-				case 4:		loopEnd = n; break;
-				case 5:		bSus = n; break;
-				case 6:		bLoop = n; break;
-				case 7:		bCarry = n; break;
-				}
-				while ((dwPos < dwMemSize) && ((p[dwPos] >= '0') && (p[dwPos] <= '9'))) dwPos++;
-			}
+			sscanf(p + dwPos, pszEnvFmt, &nPoints, &susBegin, &susEnd, &loopBegin, &loopEnd, &bSus, &bLoop, &bCarry);
+			while ((dwPos < dwMemSize) && (p[dwPos] != '\r') && (p[dwPos] != '\n')) dwPos++;
+
 			nPoints = min(nPoints, m_SndFile.GetModSpecifications().envelopePointsMax);
 			if (susEnd >= nPoints) susEnd = 0;
 			if (susBegin > susEnd) susBegin = susEnd;
@@ -1612,11 +1597,11 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 				while ((dwPos < dwMemSize) && ((p[dwPos] < '0') || (p[dwPos] > '9'))) dwPos++;
 				if (dwPos >= dwMemSize) break;
 				int n2 = atoi(p+dwPos);
-				if ((n1 < oldn) || (n1 > 0x3FFF)) n1 = oldn+1;
+				if ((n1 < oldn) || (n1 > ENVELOPE_MAX_LENGTH)) n1 = oldn + 1;
 				pEnv->Ticks[i] = (WORD)n1;
 				pEnv->Values[i] = (BYTE)n2;
 				oldn = n1;
-				while ((dwPos < dwMemSize) && (p[dwPos] != 0x0D)) dwPos++;
+				while ((dwPos < dwMemSize) && (p[dwPos] != '\r') && (p[dwPos] != '\n')) dwPos++;
 				if (dwPos >= dwMemSize) break;
 			}
 
