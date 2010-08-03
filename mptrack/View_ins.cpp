@@ -260,7 +260,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int nTick, int nValue)
 		{
 			int mintick = (nPoint) ? envelope->Ticks[nPoint-1] : 0;
 			int maxtick = envelope->Ticks[nPoint+1];
-			if (nPoint + 1 == (int)envelope->nNodes) maxtick = 16383;
+			if (nPoint + 1 == (int)envelope->nNodes) maxtick = ENVELOPE_MAX_LENGTH;
 			if (nTick < mintick) nTick = mintick;
 			if (nTick > maxtick) nTick = maxtick;
 			if (nTick != envelope->Ticks[nPoint])
@@ -767,7 +767,8 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 	}
 
 
-	if (windowResized || m_bGridForceRedraw || (cachedScrollPos != m_GridScrollPos) || (speed != (UINT)m_GridSpeed)) {
+	if (windowResized || m_bGridForceRedraw || (cachedScrollPos != m_GridScrollPos) || (speed != (UINT)m_GridSpeed))
+	{
 
 		m_GridSpeed = speed;
 		m_GridScrollPos = cachedScrollPos;

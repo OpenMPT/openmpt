@@ -172,9 +172,10 @@ const SEQUENCEINDEX MAX_SEQUENCES = 50;
 #define ENV_FILTER			0x10	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
 
 // Envelope value boundaries
-#define ENVELOPE_MIN		0
-#define ENVELOPE_MID		32
-#define ENVELOPE_MAX		64
+#define ENVELOPE_MIN		0		// vertical min value of a point
+#define ENVELOPE_MID		32		// vertical middle line
+#define ENVELOPE_MAX		64		// vertical max value of a point
+#define ENVELOPE_MAX_LENGTH 0x3FFF	// max envelope length in ticks. note: this value seems to be conservatively low...
 
 
 // Flags of 'dF..' datafield in extended instrument properties.
