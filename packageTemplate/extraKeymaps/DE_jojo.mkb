@@ -54,10 +54,14 @@ version:1
 //----( General Context [bottom] (1) )------------
 
 //----( Pattern Context [bottom] (2) )------------
+2:1017:4:34:5		//Jump down by measure: Alt+BILD-NACH-UNTEN (KeyDown|KeyHold)
+2:1018:4:33:5		//Jump up by measure: Alt+BILD-NACH-OBEN (KeyDown|KeyHold)
 2:1338:0:34:5		//Jump down by beat: BILD-NACH-UNTEN (KeyDown|KeyHold)
 2:1339:0:33:5		//Jump up by beat: BILD-NACH-OBEN (KeyDown|KeyHold)
-2:1340:6:34:5		//Snap down to beat: Ctrl+Alt+BILD-NACH-UNTEN (KeyDown|KeyHold)
-2:1341:6:33:5		//Snap up to beat: Ctrl+Alt+BILD-NACH-OBEN (KeyDown|KeyHold)
+2:1019:6:34:5		//Snap down to measure: Ctrl+Alt+BILD-NACH-UNTEN (KeyDown|KeyHold)
+2:1020:6:33:5		//Snap up to measure: Ctrl+Alt+BILD-NACH-OBEN (KeyDown|KeyHold)
+2:1340:2:34:5		//Snap down to beat: Ctrl+BILD-NACH-UNTEN (KeyDown|KeyHold)
+2:1341:2:33:5		//Snap up to beat: Ctrl+BILD-NACH-OBEN (KeyDown|KeyHold)
 2:1038:0:40:5		//Navigate down by 1 row: NACH-UNTEN (KeyDown|KeyHold)
 2:1039:0:38:5		//Navigate up by 1 row: NACH-OBEN (KeyDown|KeyHold)
 2:1040:0:37:5		//Navigate left: NACH-LINKS (KeyDown|KeyHold)
