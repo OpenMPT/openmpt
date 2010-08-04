@@ -89,7 +89,7 @@ Other modules
    [Imp] <Jojo> PSM Loader: Small improvements.
    [Fix] <Jojo> MTM Loader: The "beats per track" (means lines per pattern) setting is now taken into account.
    [Fix] <Jojo> PSM16 Loader: Since the control channels were muted, tempo commands were ignored, effectively slowing down some PSM16 tracks.
-   [Fix] <Jojo> MPTM Saver: When deleting patterns using the treeview, it was possible that Parameter Control Notes were not saved properly anymore. 
+   [Fix] <re>   MPTM Saver: When deleting patterns using the treeview, it was possible that Parameter Control Notes were not saved properly anymore. 
 
 Misc
    [New] <Jojo> Experimental "panic" button on the main toolbar. At the moment, it just kills all VSTi and sample voices.
