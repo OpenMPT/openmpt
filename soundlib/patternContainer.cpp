@@ -110,9 +110,9 @@ void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)
 	for(uint16 i = 0; i < nPatterns; i++) if (patc[i])
 	{
 		ssb.WriteItem(patc[i], &i, sizeof(i), &WriteModPattern);
-		nCount++;
+		nCount = i + 1;
 	}
-	ssb.WriteItem<uint16>(nCount, "num");
+	ssb.WriteItem<uint16>(nCount, "num"); // Index of last pattern + 1.
 	ssb.FinishWrite();
 }
 
