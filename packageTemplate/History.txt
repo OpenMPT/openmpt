@@ -10,7 +10,7 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug
 
 
-v1.18.03.00 (August 2010, revision 666)
+v1.18.03.00 (August 2010, revision 673)
 ---------------------------------------
 General tab
    [Imp] <Jojo> To prevent OpenMPT from hanging while switching between plugins (or switching to the general tab), the preset box is only filled when it gets the focus. This makes working with Synth1 a lot easier, since it has an insane amount of presets... :)
@@ -89,6 +89,7 @@ Other modules
    [Imp] <Jojo> PSM Loader: Small improvements.
    [Fix] <Jojo> MTM Loader: The "beats per track" (means lines per pattern) setting is now taken into account.
    [Fix] <Jojo> PSM16 Loader: Since the control channels were muted, tempo commands were ignored, effectively slowing down some PSM16 tracks.
+   [Fix] <Jojo> MPTM Saver: When deleting patterns using the treeview, it was possible that Parameter Control Notes were not saved properly anymore. 
 
 Misc
    [New] <Jojo> Experimental "panic" button on the main toolbar. At the moment, it just kills all VSTi and sample voices.
