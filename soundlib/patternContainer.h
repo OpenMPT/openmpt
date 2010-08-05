@@ -66,6 +66,9 @@ public:
 
 	// Return true if IsValidIndex() is true and the corresponding pattern has allocated modcommand array, false otherwise.
 	bool IsValidPat(const PATTERNINDEX iPat) const {return IsValidIndex(iPat) && (*this)[iPat];}
+
+	// Returns true if the pattern is empty, i.e. there are no notes/effects in this pattern
+	bool IsPatternEmpty(const PATTERNINDEX nPat) const;
 	
 	void ResizeArray(const PATTERNINDEX newSize);
 
