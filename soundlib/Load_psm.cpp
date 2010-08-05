@@ -19,7 +19,7 @@
  */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
@@ -132,9 +132,6 @@ inline BYTE convert_psm_porta(BYTE param, bool bNewFormat)
 bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------------------
 {
-	#define ASSERT_CAN_READ(x) \
-	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
-
 	DWORD dwMemPos = 0;
 	bool bNewFormat = false; // The game "Sinaria" uses a slightly modified PSM structure
 
@@ -809,8 +806,6 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	return true;
-
-	#undef ASSERT_CAN_READ
 }
 
 ////////////////////////////////
@@ -875,9 +870,6 @@ struct PSM16PATHEADER
 bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------------------
 {
-	#define ASSERT_CAN_READ(x) \
-		if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
-
 	DWORD dwMemPos = 0;
 
 	ASSERT_CAN_READ(sizeof(PSM16HEADER));
@@ -1210,7 +1202,4 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	return true;
-
-	#undef ASSERT_CAN_READ
-
 }

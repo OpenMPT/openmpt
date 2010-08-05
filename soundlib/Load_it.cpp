@@ -8,8 +8,8 @@
 */
 
 #include "stdafx.h"
-#include "sndfile.h"
-#include "it_defs.h"
+#include "Loaders.h"
+#include "IT_DEFS.H"
 #include "tuningcollection.h"
 #include "../mptrack/moddoc.h"
 #include "../mptrack/serialization_utils.h"

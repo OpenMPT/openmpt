@@ -9,8 +9,7 @@
 */
 
 #include "stdafx.h"
-#include "sndfile.h"
-#include "../mptrack/misc_util.h"
+#include "Loaders.h"
 #include "../mptrack/version.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"

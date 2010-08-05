@@ -10,7 +10,7 @@
 // DigiTracker (MDL) module loader          //
 //////////////////////////////////////////////
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 //#define MDL_LOG
 

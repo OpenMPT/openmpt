@@ -9,7 +9,7 @@
 */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 //////////////////////////////////////////////////////////
 // MTM file support (import only)

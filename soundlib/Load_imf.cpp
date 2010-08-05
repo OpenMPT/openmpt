@@ -7,7 +7,7 @@
  */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER
@@ -266,9 +266,6 @@ static void load_imf_envelope(INSTRUMENTENVELOPE *env, const IMFINSTRUMENT *imfi
 bool CSoundFile::ReadIMF(const LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------------------
 {
-	#define ASSERT_CAN_READ(x) \
-	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
-
 	DWORD dwMemPos = 0;
 	IMFHEADER hdr;
 	MODSAMPLE *pSample = Samples + 1;

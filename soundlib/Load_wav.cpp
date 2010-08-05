@@ -8,7 +8,7 @@
 */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 #ifndef WAVE_FORMAT_EXTENSIBLE
 #define WAVE_FORMAT_EXTENSIBLE	0xFFFE

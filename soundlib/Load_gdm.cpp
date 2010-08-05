@@ -13,7 +13,7 @@
  */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
 #endif // MODPLUG_TRACKER

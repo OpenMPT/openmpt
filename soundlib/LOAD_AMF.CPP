@@ -17,7 +17,7 @@
 //
 ///////////////////////////////////////////////////
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 //#define AMFLOG
 
