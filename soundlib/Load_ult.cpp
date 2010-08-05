@@ -7,7 +7,7 @@
  */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 enum
 {
@@ -32,9 +32,6 @@ struct ULT_SAMPLE
 };
 STATIC_ASSERT(sizeof(ULT_SAMPLE) >= 64);
 #pragma pack()
-
-#define ASSERT_CAN_READ(x) \
-	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
 
 /* Unhandled effects:
 5x1 - do not loop sample (x is unused)
@@ -147,20 +144,22 @@ static void TranslateULTCommands(uint8 *pe, uint8 *pp)
 static int ReadULTEvent(MODCOMMAND *note, const BYTE *lpStream, DWORD *dwMP, const DWORD dwMemLength)
 //---------------------------------------------------------------------------------------------------
 {
+	#define ASSERT_CAN_READ_ULTENV(x) ASSERT_CAN_READ_PROTOTYPE(dwMemPos, dwMemLength, x, return 0);
+
 	DWORD dwMemPos = *dwMP;
 	uint8 b, repeat = 1;
 	uint8 cmd1, cmd2;	// 1 = vol col, 2 = fx col in the original schismtracker code
 	uint8 param1, param2;
 
-	ASSERT_CAN_READ(1)
+	ASSERT_CAN_READ_ULTENV(1)
 	b = lpStream[dwMemPos++];
 	if (b == 0xFC)	// repeat event
 	{
-		ASSERT_CAN_READ(2);
+		ASSERT_CAN_READ_ULTENV(2);
 		repeat = lpStream[dwMemPos++];
 		b = lpStream[dwMemPos++];
 	}
-	ASSERT_CAN_READ(4)
+	ASSERT_CAN_READ_ULTENV(4)
 	note->note = (b > 0 && b < 61) ? b + 36 : NOTE_NONE;
 	note->instr = lpStream[dwMemPos++];
 	b = lpStream[dwMemPos++];
@@ -231,6 +230,8 @@ static int ReadULTEvent(MODCOMMAND *note, const BYTE *lpStream, DWORD *dwMP, con
 	
 	*dwMP = dwMemPos;
 	return repeat;
+
+	#undef ASSERT_CAN_READ_ULTENV
 }
 
 // Functor for postfixing ULT patterns (this is easier than just remembering everything WHILE we're reading the pattern events)
@@ -468,5 +469,3 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 	return true;
 }
-
-#undef ASSERT_CAN_READ

@@ -11,7 +11,7 @@
 // DSIK Internal Format (DSM) module loader //
 //////////////////////////////////////////////
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 #pragma pack(1)
 

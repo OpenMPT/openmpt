@@ -7,7 +7,7 @@
 */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 #define MODMAGIC_OFFSET	(20+31*30+130)
 

@@ -795,6 +795,9 @@
 				RelativePath=".\KeyConfigDlg.h">
 			</File>
 			<File
+				RelativePath="..\soundlib\Loaders.h">
+			</File>
+			<File
 				RelativePath=".\mainbar.h">
 			</File>
 			<File

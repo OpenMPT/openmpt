@@ -10,7 +10,7 @@
 // Oktalyzer (OKT) module loader            //
 //////////////////////////////////////////////
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 // IFF chunk names
 #define OKTCHUNKID_CMOD 0x434D4F44
@@ -99,12 +99,11 @@ void Read_OKT_Samples(const BYTE *lpStream, const DWORD dwMemLength, vector<bool
 void Read_OKT_Pattern(const BYTE *lpStream, const DWORD dwMemLength, const PATTERNINDEX nPat, CSoundFile *pSndFile)
 //-----------------------------------------------------------------------------------------------------------------
 {
-	#define ASSERT_CAN_READ(x) \
-	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return;
+	#define ASSERT_CAN_READ_OKTPAT(x) ASSERT_CAN_READ_PROTOTYPE(dwMemPos, dwMemLength, x, return);
 
 	DWORD dwMemPos = 0;
 
-	ASSERT_CAN_READ(2);
+	ASSERT_CAN_READ_OKTPAT(2);
 	ROWINDEX nRows = CLAMP(BigEndianW(*(uint16 *)(lpStream + dwMemPos)), 1, MAX_PATTERN_ROWS);
 	dwMemPos += 2;
 
@@ -119,7 +118,7 @@ void Read_OKT_Pattern(const BYTE *lpStream, const DWORD dwMemLength, const PATTE
 		m = mrow;
 		for(CHANNELINDEX nChn = 0; nChn < nChns; nChn++, m++)
 		{
-			ASSERT_CAN_READ(4);
+			ASSERT_CAN_READ_OKTPAT(4);
 			m->note = lpStream[dwMemPos++];
 			m->instr = lpStream[dwMemPos++];
 			int8 fxcmd = lpStream[dwMemPos++];
@@ -263,16 +262,13 @@ void Read_OKT_Pattern(const BYTE *lpStream, const DWORD dwMemLength, const PATTE
 		}
 	}
 
-	#undef ASSERT_CAN_READ
+	#undef ASSERT_CAN_READ_OKTPAT
 }
 
 
 bool CSoundFile::ReadOKT(const BYTE *lpStream, const DWORD dwMemLength)
 //---------------------------------------------------------------------
 {
-	#define ASSERT_CAN_READ(x) \
-	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
-
 	DWORD dwMemPos = 0;
 
 	ASSERT_CAN_READ(8);
@@ -438,6 +434,4 @@ bool CSoundFile::ReadOKT(const BYTE *lpStream, const DWORD dwMemLength)
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	return true;
-
-	#undef ASSERT_CAN_READ
 }

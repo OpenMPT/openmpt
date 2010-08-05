@@ -8,7 +8,7 @@
 */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 //#define MED_LOG
 

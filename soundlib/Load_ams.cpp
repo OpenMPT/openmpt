@@ -17,7 +17,7 @@
 // AMS (Extreme's Tracker) module loader    //
 //////////////////////////////////////////////
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 

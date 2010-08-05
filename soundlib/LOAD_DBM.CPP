@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 
 #define DBM_FILE_MAGIC	0x304d4244
 #define DBM_ID_NAME		0x454d414e

@@ -11,7 +11,7 @@
  */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 #ifndef ZLIB_WINAPI
 #define ZLIB_WINAPI
 #endif // ZLIB_WINAPI
@@ -210,9 +210,7 @@ bool Convert_RIFF_AM_Pattern(const PATTERNINDEX nPat, const LPCBYTE lpStream, co
 //--------------------------------------------------------------------------------------------------------------------------------------------
 {
 	// version false = AMFF, true = AM
-	#define ASSERT_CAN_READ(x) \
-	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
-
+	
 	DWORD dwMemPos = 0;
 
 	ASSERT_CAN_READ(1);
@@ -346,7 +344,6 @@ bool Convert_RIFF_AM_Pattern(const PATTERNINDEX nPat, const LPCBYTE lpStream, co
 
 	return true;
 
-	#undef ASSERT_CAN_READ
 }
 
 
@@ -443,10 +440,7 @@ void Convert_RIFF_AM_Envelope(const AMINST_ENVELOPE *pAMEnv, INSTRUMENTENVELOPE 
 bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 //----------------------------------------------------------------------
 {
-	#define ASSERT_CAN_READ(x) \
-	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
-	#define ASSERT_CAN_READ_CHUNK(x) \
-	if( dwMemPos > dwChunkEnd || x > dwChunkEnd - dwMemPos ) break;
+	#define ASSERT_CAN_READ_CHUNK(x) ASSERT_CAN_READ_PROTOTYPE(dwMemPos, dwChunkEnd, x, break);
 
 	DWORD dwMemPos = 0;
 
@@ -773,16 +767,12 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	return true;
 
-	#undef ASSERT_CAN_READ
 	#undef ASSERT_CAN_READ_CHUNK
 }
 
 bool CSoundFile::ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength)
 //-----------------------------------------------------------------------
 {
-	#define ASSERT_CAN_READ(x) \
-	if( dwMemPos > dwMemLength || x > dwMemLength - dwMemPos ) return false;
-
 	DWORD dwMemPos = 0;
 
 	ASSERT_CAN_READ(sizeof(J2BHEADER));
@@ -816,6 +806,4 @@ bool CSoundFile::ReadJ2B(const LPCBYTE lpStream, const DWORD dwMemLength)
 	delete[] bOutput;
 
 	return bResult;
-
-	#undef ASSERT_CAN_READ
 }

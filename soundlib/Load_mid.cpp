@@ -11,7 +11,7 @@
 // MIDI loader                              //
 //////////////////////////////////////////////
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 #include "dlsbank.h"
 
 #pragma warning(disable:4244)

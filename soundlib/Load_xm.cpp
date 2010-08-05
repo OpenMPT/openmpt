@@ -7,7 +7,7 @@
 */
 
 #include "stdafx.h"
-#include "sndfile.h"
+#include "Loaders.h"
 #include "../mptrack/version.h"
 #include "../mptrack/misc_util.h"
 
