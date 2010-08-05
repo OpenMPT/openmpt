@@ -6,7 +6,7 @@
 #include "../mptrack/version.h"
 
 PATTERNINDEX CPatternContainer::Insert(const ROWINDEX rows)
-//---------------------------------------------
+//---------------------------------------------------------
 {
 	PATTERNINDEX i = 0;
 	for(i = 0; i<m_Patterns.size(); i++)
@@ -19,7 +19,7 @@ PATTERNINDEX CPatternContainer::Insert(const ROWINDEX rows)
 
 
 bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
-//---------------------------------------------------------------
+//---------------------------------------------------------------------------
 {
 	const CModSpecifications& specs = m_rSndFile.GetModSpecifications();
 	if(index >= specs.patternsMax || index > m_Patterns.size() || rows > specs.patternRowsMax)
@@ -46,8 +46,9 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 	return false;
 }
 
+
 bool CPatternContainer::Remove(const PATTERNINDEX ipat)
-//----------------------------------------------
+//-----------------------------------------------------
 {
 	if(ipat >= m_Patterns.size())
 		return true;
@@ -55,8 +56,25 @@ bool CPatternContainer::Remove(const PATTERNINDEX ipat)
 	return false;
 }
 
+
+bool CPatternContainer::IsPatternEmpty(const PATTERNINDEX nPat) const
+//-------------------------------------------------------------------
+{
+	if(!IsValidPat(nPat))
+		return false;
+	
+	MODCOMMAND *m = m_Patterns[nPat].m_ModCommands;
+	for(size_t i = m_Patterns[nPat].GetNumChannels() * m_Patterns[nPat].GetNumRows(); i > 0; i--, m++)
+	{
+		if(!m->IsEmpty(true))
+			return false;
+	}
+	return true;
+}
+
+
 PATTERNINDEX CPatternContainer::GetIndex(const MODPATTERN* const pPat) const
-//------------------------------------------------------------------
+//--------------------------------------------------------------------------
 {
 	const PATTERNINDEX endI = static_cast<PATTERNINDEX>(m_Patterns.size());
 	for(PATTERNINDEX i = 0; i<endI; i++)
@@ -80,11 +98,13 @@ void CPatternContainer::ResizeArray(const PATTERNINDEX newSize)
 
 
 void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
-//----------------------------------------------------------
+//-----------------------------------------------------------------
 {
 	const CModSpecifications specs = m_rSndFile.GetModSpecifications();
-	if(specs.patternsMax < Size()) ResizeArray(max(MAX_PATTERNS, specs.patternsMax));
-	else if(Size() < MAX_PATTERNS) ResizeArray(MAX_PATTERNS);
+	if(specs.patternsMax < Size())
+		ResizeArray(max(MAX_PATTERNS, specs.patternsMax));
+	else if(Size() < MAX_PATTERNS)
+		ResizeArray(MAX_PATTERNS);
 }
 
 
