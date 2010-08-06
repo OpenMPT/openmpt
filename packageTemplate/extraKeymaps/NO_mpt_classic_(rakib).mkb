@@ -9,7 +9,7 @@ version:1
 0:1346:2:79:1		//File/Open: Ctrl+O (KeyDown)
 0:1349:2:83:1		//File/Save: Ctrl+S (KeyDown)
 0:1350:3:83:1		//File/Save As: Shift+Ctrl+S (KeyDown)
-0:1351:3:87:1		//File/Save as Wave: Shift+Ctrl+W (KeyDown)
+0:1351:3:87:1		//File/Export as Wave: Shift+Ctrl+W (KeyDown)
 0:1693:3:9:1		//Previous Document: Shift+Ctrl+TAB (KeyDown)
 0:1030:0:116:1		//Play song/Pause song: F5 (KeyDown)
 0:1031:0:119:1		//Pause song: F8 (KeyDown)
@@ -160,9 +160,9 @@ version:1
 3:1221:0:57:1		//Set octave 9: 9 (KeyDown)
 3:1221:0:105:1		//Set octave 9: NUM 9 (KeyDown)
 3:1316:1:16:1		//Chord Modifier: Shift+SKIFT (KeyDown)
-3:1200:0:219:1		//Note Cut: \ (KeyDown)
-3:1201:0:187:1		//Note Off: + (KeyDown)
-3:1791:1:219:1		//Note Fade: Shift+\ (KeyDown)
+3:1667:0:187:1		//Note Cut (don't remember instrument): + (KeyDown)
+3:1668:0:219:1		//Note Off (don't remember instrument): \ (KeyDown)
+3:1792:1:219:1		//Note Fade (don't remember instrument): Shift+\ (KeyDown)
 
 //----( Pattern Context [bottom] - Ins Col (4) )------------
 4:1202:0:96:1		//Set instrument digit 0: NUM 0 (KeyDown)
@@ -218,12 +218,11 @@ version:1
 5:1242:0:71:1		//Vol command - Portamento: G (KeyDown)
 5:1243:0:70:1		//Vol command - Portamento Up: F (KeyDown)
 5:1244:0:69:1		//Vol command - Portamento Down: E (KeyDown)
-5:1245:1:186:1		//Vol command - Velocity: Shift+TØDLER (KeyDown)
 5:1246:0:79:1		//Vol command - Offset: O (KeyDown)
 
 //----( Pattern Context [bottom] - FX Col (6) )------------
 6:1294:0:220:1		//FX midi macro slide: | (KeyDown)
-6:1295:1:186:1		//FX pseudo-velocity (experimental): Shift+TØDLER (KeyDown)
+6:1295:1:186:1		//FX combined note delay and note cut: Shift+TØDLER (KeyDown)
 
 //----( Pattern Context [bottom] - Param Col (7) )------------
 7:1247:0:48:1		//FX Param digit 0: 0 (KeyDown)
@@ -254,6 +253,9 @@ version:1
 7:1262:0:70:1		//FX Param digit F: F (KeyDown)
 
 //----( Sample Context [bottom] (8) )------------
+8:1673:3:79:1		//Load a Sample: Shift+Ctrl+O (KeyDown)
+8:1674:3:83:1		//Save Sample: Shift+Ctrl+S (KeyDown)
+8:1675:3:78:1		//New Sample: Shift+Ctrl+N (KeyDown)
 8:1380:2:84:1		//Trim sample around loop points: Ctrl+T (KeyDown)
 8:1383:0:8:1		//Silence sample selection: TILBAKE (KeyDown)
 8:1385:3:65:1		//Amplify Sample: Shift+Ctrl+A (KeyDown)
@@ -302,6 +304,16 @@ version:1
 //----( Sample Context [top] (16) )------------
 
 //----( Instrument Context [top] (17) )------------
+17:1851:2:68:1		//Duplicate instrument: Ctrl+D (KeyDown)
+17:1850:3:69:1		//Edit sample map: Shift+Ctrl+E (KeyDown)
+17:1849:2:69:1		//Edit current sample: Ctrl+E (KeyDown)
+17:1846:3:77:1		//Map all notes to selected note: Shift+Ctrl+M (KeyDown)
+17:1847:2:77:1		//Map all notes to selected sample: Ctrl+M (KeyDown)
+17:1848:2:82:1		//Reset note mapping: Ctrl+R (KeyDown)
+17:1843:2:81:1		//Transpose +1 (note map): Ctrl+Q (KeyDown)
+17:1842:2:65:1		//Transpose -1 (note map): Ctrl+A (KeyDown)
+17:1845:3:81:1		//Transpose +12 (note map): Shift+Ctrl+Q (KeyDown)
+17:1844:3:65:1		//Transpose -12 (note map): Shift+Ctrl+A (KeyDown)
 
 //----( Comments Context [top] (18) )------------
 
