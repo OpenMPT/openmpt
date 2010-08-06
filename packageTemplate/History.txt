@@ -97,7 +97,7 @@ Misc
    [Mod] <Jojo> In the mod type dialog, the "misc flags" can now be toggled using check buttons instead of an edit field.
    [Mod] <Jojo> Various file loaders / savers: A new logging mechanism is used to display only one message box with errors and warnings instead of many message boxes.
    [Mod] <Jojo> Updated DE_jojo.mkb to include new shortcuts, remapped a few others (for IT-style).
-   [Mod] <Jojo> Updated FR_mpt_(legovitch).mkb.
+   [Mod] <Jojo> Updated FR_mpt_(legovitch).mkb and NO_mpt_classic_(rakib).mkb (tx Paul Legovitch, Rakib).
    [Fix] <Jojo> Colour Setup: Some colours in the MPT default colour scheme were not set up properly when switching between presets.
 
 
