@@ -1676,7 +1676,7 @@ void CModDoc::OnFileMP3Convert()
 
 
 void CModDoc::OnFileMidiConvert()
-//-------------------------------------
+//-------------------------------
 {
 	CHAR path[_MAX_PATH]="", drive[_MAX_DRIVE]="";
 	CHAR s[_MAX_PATH], fname[_MAX_FNAME]="";
@@ -3526,21 +3526,20 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 UINT CModDoc::FindAvailableChannel()
 //----------------------------------
 {
+	CHANNELINDEX nStoppedChannel = CHANNELINDEX_INVALID;
 	// Search for available channel
 	for (CHANNELINDEX j = m_SndFile.m_nChannels; j < MAX_CHANNELS; j++)
 	{
 		MODCHANNEL *p = &m_SndFile.Chn[j];
 		if (!p->nLength)
 			return j;
+		else if(p->dwFlags & CHN_NOTEFADE)
+			nStoppedChannel = j;
 	}
 
-	// Not found: look for one that's stopped
-	for (CHANNELINDEX j = m_SndFile.m_nChannels; j < MAX_CHANNELS; j++)
-	{
-		MODCHANNEL *p = &m_SndFile.Chn[j];
-		if (p->dwFlags & CHN_NOTEFADE)
-			return j;
-	}
+	// Nothing found: return one that's stopped
+	if(nStoppedChannel != CHANNELINDEX_INVALID)
+		return nStoppedChannel;
 	
 	//Last resort: go for first virutal channel.
 	return m_SndFile.m_nChannels;
@@ -3588,7 +3587,7 @@ void CModDoc::LearnMacro(int macroToSet, long paramToUse)
 
 	CString message;
 	message.Format("Param %d can now be controlled with macro %X", paramToUse, macroToSet);
-	::MessageBox(NULL,message, "Macro assigned for this param",MB_ICONINFORMATION | MB_OK);
+	::MessageBox(NULL, message, "Macro assigned for this param",MB_ICONINFORMATION | MB_OK);
 	
 	return;
 }
@@ -3599,20 +3598,20 @@ void CModDoc::SongProperties()
 	CModTypeDlg dlg(GetSoundFile(), CMainFrame::GetMainFrame());
 	if (dlg.DoModal() == IDOK)
 	{	
-		BOOL bShowLog = FALSE;
+		bool bShowLog = false;
 		ClearLog();
 		if(dlg.m_nType)
 		{
 			if (!ChangeModType(dlg.m_nType)) return;
-			bShowLog = TRUE;
+			bShowLog = true;
 		}
 		
 		UINT nNewChannels = CLAMP(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
 
-		if (nNewChannels != GetSoundFile()->m_nChannels)
+		if (nNewChannels != GetSoundFile()->GetNumChannels())
 		{
 			const bool showCancelInRemoveDlg = m_SndFile.GetModSpecifications().channelsMax >= m_SndFile.GetNumChannels();
-			if(ChangeNumChannels(nNewChannels, showCancelInRemoveDlg)) bShowLog = TRUE;
+			if(ChangeNumChannels(nNewChannels, showCancelInRemoveDlg)) bShowLog = true;
 		}
 
 		if (bShowLog) ShowLog("Conversion Status", CMainFrame::GetMainFrame());
