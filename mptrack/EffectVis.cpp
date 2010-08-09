@@ -266,11 +266,17 @@ void CEffectVis::DrawGrid()
 {
 	// Lots of room for optimisation here.
 	// Draw vertical grid lines
+	ROWINDEX nBeat = m_pSndFile->m_nDefaultRowsPerBeat, nMeasure = m_pSndFile->m_nDefaultRowsPerMeasure;
+	if(m_pSndFile->Patterns[m_nPattern].GetOverrideSignature())
+	{
+		nBeat = m_pSndFile->Patterns[m_nPattern].GetRowsPerBeat();
+		nMeasure = m_pSndFile->Patterns[m_nPattern].GetRowsPerMeasure();
+	}
 	for (UINT row=m_startRow; row<=m_endRow; row++)
 	{
-		if (row % m_pSndFile->m_nRowsPerMeasure == 0)
+		if (row % nMeasure == 0)
 			CMainFrame::penScratch = CMainFrame::penGrayff;
-		else if (row % m_pSndFile->m_nRowsPerBeat == 0)
+		else if (row % nBeat == 0)
 			CMainFrame::penScratch = CMainFrame::penGray99;
 		else
 			CMainFrame::penScratch = CMainFrame::penGray55;

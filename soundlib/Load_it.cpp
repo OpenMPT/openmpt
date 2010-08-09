@@ -25,13 +25,14 @@
 #define str_LoadingIncompatibleVersion	TEXT("The file informed that it is incompatible with this version of OpenMPT. Loading was terminated.\n")
 #define str_LoadingMoreRecentVersion	TEXT("The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly.\n")
 
-const uint16 verMptFileVer = 0x890;
+const uint16 verMptFileVer = 0x891;
 const uint16 verMptFileVerLoadLimit = 0x1000; // If cwtv-field is greater or equal to this value,
 											  // the MPTM file will not be loaded.
 
 /*
 MPTM version history for cwtv-field in IT header:
-0x88F(1.18.01.00) -> 0x890(1.18.02.00): Removed volume command velocity :xy, added delay-cut command :xy. 
+0x890(1.18.02.00) -> 0x891(1.19.00.00): Pattern-specific time signatures
+0x88F(1.18.01.00) -> 0x890(1.18.02.00): Removed volume command velocity :xy, added delay-cut command :xy.
 0x88E(1.17.02.50) -> 0x88F(1.18.01.00): Numerous changes
 0x88D(1.17.02.49) -> 0x88E(1.17.02.50): Changed ID to that of IT and undone the orderlist change done in
 				       0x88A->0x88B. Now extended orderlist is saved as extension.
@@ -531,13 +532,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	if(pifh->cwtv >= 0x213 && !(interpretModplugmade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 01)))
 	{
-		m_nRowsPerBeat = pifh->highlight_minor;
-		m_nRowsPerMeasure = pifh->highlight_major;
-		if(m_nRowsPerBeat + m_nRowsPerMeasure == 0)
+		// MPT 1.09, 1.07 and most likely other old MPT versions leave this blank
+		if(pifh->highlight_minor + pifh->highlight_major != 0)
 		{
-			// MPT 1.09, 1.07 and most likely other old MPT versions leave this blank
-			m_nRowsPerBeat = 4;
-			m_nRowsPerMeasure = 16;
+			m_nDefaultRowsPerBeat = pifh->highlight_minor;
+			m_nDefaultRowsPerMeasure = pifh->highlight_major;
 		}
 	}
 
@@ -1159,8 +1158,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	header.id = 0x4D504D49;
 	lstrcpyn(header.songname, m_szNames[0], 26);
 
-	header.highlight_minor = (BYTE)(m_nRowsPerBeat & 0xFF);
-	header.highlight_major = (BYTE)(m_nRowsPerMeasure & 0xFF);
+	header.highlight_minor = (BYTE)(m_nDefaultRowsPerBeat & 0xFF);
+	header.highlight_major = (BYTE)(m_nDefaultRowsPerMeasure & 0xFF);
 
 	if(GetType() == MOD_TYPE_MPT)
 	{
@@ -1456,6 +1455,9 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		patinfo[1] = Patterns[npat].GetNumRows();
 		patinfo[2] = 0;
 		patinfo[3] = 0;
+
+		if(Patterns[npat].GetOverrideSignature())
+			bNeedsMptPatSave = true;
 
 		// Check for empty pattern
 		if (Patterns[npat].GetNumRows() == 64)
@@ -1800,8 +1802,8 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	header.id = 0x4D504D49;
 	lstrcpyn(header.songname, m_szNames[0], 26);
 
-	header.highlight_minor = (BYTE)(m_nRowsPerBeat & 0xFF);
-	header.highlight_major = (BYTE)(m_nRowsPerMeasure & 0xFF);
+	header.highlight_minor = (BYTE)(m_nDefaultRowsPerBeat & 0xFF);
+	header.highlight_major = (BYTE)(m_nDefaultRowsPerMeasure & 0xFF);
 
 	// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
 	// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
@@ -2828,15 +2830,15 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f)
 
 	code = 'RPB.';							//write m_nRowsPerBeat
 	fwrite(&code, 1, sizeof(__int32), f);	
-	size = sizeof(m_nRowsPerBeat);			
+	size = sizeof(m_nDefaultRowsPerBeat);
 	fwrite(&size, 1, sizeof(__int16), f);
-	fwrite(&m_nRowsPerBeat, 1, size, f);	
+	fwrite(&m_nDefaultRowsPerBeat, 1, size, f);
 
 	code = 'RPM.';							//write m_nRowsPerMeasure
 	fwrite(&code, 1, sizeof(__int32), f);	
-	size = sizeof(m_nRowsPerMeasure);		
+	size = sizeof(m_nDefaultRowsPerMeasure);
 	fwrite(&size, 1, sizeof(__int16), f);
-	fwrite(&m_nRowsPerMeasure, 1, size, f);
+	fwrite(&m_nDefaultRowsPerMeasure, 1, size, f);
 
 	code = 'C...';							//write m_nChannels 
 	fwrite(&code, 1, sizeof(__int32), f);	
@@ -3045,8 +3047,8 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
 		switch (code)					// interpret field code
 		{
 			CASE('DT..', m_nDefaultTempo);
-			CASE('RPB.', m_nRowsPerBeat);
-			CASE('RPM.', m_nRowsPerMeasure);
+			CASE('RPB.', m_nDefaultRowsPerBeat);
+			CASE('RPM.', m_nDefaultRowsPerMeasure);
 			CASE_NOTXM('C...', m_nChannels);
 			CASE('TM..', m_nTempoMode);
 			CASE('PMM.', m_nMixLevels);

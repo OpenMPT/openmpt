@@ -746,18 +746,28 @@ void CViewPattern::DrawPatternData(HDC hdc,	CSoundFile *pSndFile, UINT nPattern,
 		bRowSel = ((row >= (m_dwBeginSel >> 16)) && (row <= (m_dwEndSel >> 16))) ? TRUE : FALSE;
 		row_col = MODCOLOR_TEXTNORMAL;
 		row_bkcol = MODCOLOR_BACKNORMAL;
-		if ((CMainFrame::m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
-		 && (CMainFrame::m_nRowSpacing2) && (CMainFrame::m_nRowSpacing2 < nrows))
+
+		// time signature highlighting
+		ROWINDEX nBeat = pSndFile->m_nDefaultRowsPerBeat, nMeasure = pSndFile->m_nDefaultRowsPerMeasure;
+		if(pSndFile->Patterns[nPattern].GetOverrideSignature())
 		{
-			if (!(row % CMainFrame::m_nRowSpacing2))
+			nBeat = pSndFile->Patterns[nPattern].GetRowsPerBeat();
+			nMeasure = pSndFile->Patterns[nPattern].GetRowsPerMeasure();
+		}
+		// secondary highlight (beats)
+		if ((CMainFrame::m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
+		 && (nBeat) && (nBeat < nrows))
+		{
+			if (!(row % nBeat))
 			{
 				row_bkcol = MODCOLOR_2NDHIGHLIGHT;
 			}
 		}
+		// primary highlight (measures)
 		if ((CMainFrame::m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
-		 && (CMainFrame::m_nRowSpacing) && (CMainFrame::m_nRowSpacing < nrows))
+		 && (nMeasure) && (nMeasure < nrows))
 		{
-			if (!(row % CMainFrame::m_nRowSpacing))
+			if (!(row % nMeasure))
 			{
 				row_bkcol = MODCOLOR_BACKHILIGHT;
 			}

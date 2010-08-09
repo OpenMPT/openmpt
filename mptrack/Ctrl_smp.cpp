@@ -911,7 +911,7 @@ void CCtrlSamples::OnSampleNew()
 		m_pModDoc->UpdateAllViews(NULL, (smp << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA | HINT_SMPNAMES);
 		if ((pSndFile->m_nInstruments) && (!m_pModDoc->FindSampleParent(smp)))
 		{
-			if (MessageBox("This sample is not used by any instrument. Do you want to create a new instrument using this sample ?",
+			if (MessageBox("This sample is not used by any instrument. Do you want to create a new instrument using this sample?",
 					NULL, MB_YESNO|MB_ICONQUESTION) == IDYES)
 			{
 				UINT nins = m_pModDoc->InsertInstrument(smp);
@@ -1700,7 +1700,7 @@ void CCtrlSamples::OnEstimateSampleSize()
 	//Open dialog
 	CPSRatioCalc dlg(pSmp->nLength, lSampleRate, 
 					 m_pSndFile->m_nMusicSpeed,  m_pSndFile->m_nMusicTempo, 
-					 m_pSndFile->m_nRowsPerBeat, m_pSndFile->m_nTempoMode,
+					 m_pSndFile->m_nDefaultRowsPerBeat, m_pSndFile->m_nTempoMode,
 					 m_dTimeStretchRatio, this);
 	if (dlg.DoModal() != IDOK) return;
 	

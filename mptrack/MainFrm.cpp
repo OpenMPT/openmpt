@@ -200,10 +200,10 @@ DWORD CMainFrame::m_dwMidiSetup = MIDISETUP_RECORDVELOCITY|MIDISETUP_RECORDNOTEO
 DWORD CMainFrame::m_dwPatternSetup = PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
 								   | PATTERN_SMALLFONT | PATTERN_CENTERROW
 								   | PATTERN_DRAGNDROPEDIT | PATTERN_FLATBUTTONS 
-								   | PATTERN_2NDHIGHLIGHT | PATTERN_STDHIGHLIGHT | PATTERN_HILITETIMESIGS
+								   | PATTERN_2NDHIGHLIGHT | PATTERN_STDHIGHLIGHT /*| PATTERN_HILITETIMESIGS*/
 								   | PATTERN_SHOWPREVIOUS | PATTERN_CONTSCROLL | PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE;
-DWORD CMainFrame::m_nRowSpacing = 16;
-DWORD CMainFrame::m_nRowSpacing2 = 4;
+DWORD CMainFrame::m_nRowSpacing = 16;	// primary highlight (measures)
+DWORD CMainFrame::m_nRowSpacing2 = 4;	// secondary highlight (beats)
 UINT CMainFrame::m_nSampleUndoMaxBuffer = 0;	// Real sample buffer undo size will be set later.
 
 // GDI
@@ -438,8 +438,8 @@ void CMainFrame::LoadIniSettings()
 		m_dwPatternSetup |= PATTERN_NOTEFADE;
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1,17,03,01))
 		m_dwPatternSetup |= PATTERN_RESETCHANNELS;
-	if(vIniVersion < MAKE_VERSION_NUMERIC(1,18,01,00))
-		m_dwPatternSetup &= ~0x800;	// quick paste autorepeat is now a keymap option
+	if(vIniVersion < MAKE_VERSION_NUMERIC(1,19,00,00))
+		m_dwPatternSetup &= ~(0x800|0x200000|0x400000);	// various deprecated old options
 
 	m_nRowSpacing = GetPrivateProfileDWord("Pattern Editor", "RowSpacing", 16, iniFile);
 	m_nRowSpacing2 = GetPrivateProfileDWord("Pattern Editor", "RowSpacing2", 4, iniFile);
@@ -902,8 +902,6 @@ void CMainFrame::OnClose()
 //------------------------
 {
 	CChildFrame *pMDIActive = (CChildFrame *)MDIGetActive();
-	CRect rect;
-	//HKEY key;
 
 	BeginWaitCursor();
 	if (m_dwStatus & MODSTATUS_PLAYING) PauseMod();
@@ -925,6 +923,7 @@ void CMainFrame::OnClose()
 }
 
 void CMainFrame::SaveIniSettings()
+//--------------------------------
 {
 	CString iniFile = theApp.GetConfigFileName();
 
@@ -2974,29 +2973,6 @@ bool CMainFrame::UpdateEffectKeys(void)
 	return false;
 }
 //end rewbs.customKeys
-
-bool CMainFrame::UpdateHighlights()
-//---------------------------------
-{
-	if (!(CMainFrame::m_dwPatternSetup & PATTERN_HILITETIMESIGS))
-		return false;
-
-	CModDoc* pModDoc = GetActiveDoc();
-	if (pModDoc)
-	{
-		CSoundFile* pSndFile = pModDoc->GetSoundFile();
-		if (pSndFile)
-		{
-			if (CMainFrame::m_dwPatternSetup&PATTERN_HILITETIMESIGS) {
-				CMainFrame::m_nRowSpacing  = pSndFile->m_nRowsPerMeasure;
-				CMainFrame::m_nRowSpacing2 = pSndFile->m_nRowsPerBeat;
-			}
-			return true;
-		}
-	}
-	
-	return false;
-}
 
 
 //rewbs.fix3116

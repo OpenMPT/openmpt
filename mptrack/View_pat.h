@@ -130,6 +130,7 @@ public:
 	void UpdateIndicator();
 	void UpdateXInfoText(); //rewbs.xinfo
 	void UpdateColors();
+
 	int GetXScrollPos() const { return m_nXScroll; }
 	int GetYScrollPos() const { return m_nYScroll; }
 	int GetColumnWidth() const { return m_szCell.cx; }
@@ -142,6 +143,9 @@ public:
 	POINT GetPointFromPosition(DWORD dwPos);
 	DWORD GetPositionFromPoint(POINT pt);
 	DWORD GetDragItem(CPoint point, LPRECT lpRect);
+	ROWINDEX GetRowsPerBeat() const;
+	ROWINDEX GetRowsPerMeasure() const;
+
 	void InvalidatePattern(BOOL bHdr=FALSE);
 	void InvalidateRow(int n=-1);
 	void InvalidateArea(DWORD dwBegin, DWORD dwEnd);

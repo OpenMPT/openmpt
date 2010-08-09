@@ -665,14 +665,13 @@ BOOL CSoundFile::ProcessRow()
 						}
 					}
 
+					// If channel resetting is disabled in MPT, we will emulate a pattern break (and we always do it if we're not in MPT)
 #ifdef MODPLUG_TRACKER
-					if(CMainFrame::GetMainFrame())
+					if(CMainFrame::GetMainFrame() && !(CMainFrame::GetMainFrame()->m_dwPatternSetup & PATTERN_RESETCHANNELS))
+#endif // MODPLUG_TRACKER
 					{
-						// If channel resetting is disabled in MPT, we will emulate a pattern break
-						if(!(CMainFrame::GetMainFrame()->m_dwPatternSetup & PATTERN_RESETCHANNELS))
-							m_dwSongFlags |= SONG_BREAKTOROW;
+						m_dwSongFlags |= SONG_BREAKTOROW;
 					}
-#endif
 
 					if (!nRestartPosOverride && !(m_dwSongFlags & SONG_BREAKTOROW))
 					{
@@ -745,9 +744,9 @@ BOOL CSoundFile::ProcessRow()
 			}
 			m_nNextPattern = m_nCurrentPattern;
 
-	#ifdef MODPLUG_TRACKER
-		if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition)) return FALSE;
-	#endif // MODPLUG_TRACKER
+#ifdef MODPLUG_TRACKER
+			if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition)) return FALSE;
+#endif // MODPLUG_TRACKER
 		}
 
 		// Weird stuff?
@@ -788,6 +787,9 @@ BOOL CSoundFile::ProcessRow()
 			pChn->m_nPlugParamValueStep = 0;
 		}
 
+		// Now that we know which pattern we're on, we can update time signatures (global or pattern-specific)
+		UpdateTimeSignature();
+
 	}
 	// Should we process tick0 effects?
 	if (!m_nMusicSpeed) m_nMusicSpeed = 1;
@@ -813,6 +815,7 @@ BOOL CSoundFile::ProcessRow()
 			if (!(m_nTickCount % m_nMusicSpeed)) m_dwSongFlags |= SONG_FIRSTTICK;
 		}
 	}
+
 	// Update Effects
 	return ProcessEffects();
 }
@@ -841,27 +844,31 @@ BOOL CSoundFile::ReadNote()
 	m_nTotalCount++;
 	if (!m_nMusicTempo) return FALSE;
 
-	switch(m_nTempoMode) {
+	switch(m_nTempoMode)
+	{
 
 		case tempo_mode_alternative: 
 			m_nBufferCount = gdwMixingFreq / m_nMusicTempo;
 			break;
 
-		case tempo_mode_modern: {
-			double accurateBufferCount = (double)gdwMixingFreq * (60.0/(double)m_nMusicTempo / ((double)m_nMusicSpeed * (double)m_nRowsPerBeat));
-			m_nBufferCount = static_cast<int>(accurateBufferCount);
-			m_dBufferDiff += accurateBufferCount-m_nBufferCount;
-			//tick-to-tick tempo correction:
-			if (m_dBufferDiff>=1) { 
-				m_nBufferCount++;
-				m_dBufferDiff--;
-			} else if (m_dBufferDiff<=-1) { 
-				m_nBufferCount--;
-				m_dBufferDiff++;
+		case tempo_mode_modern:
+			{
+				double accurateBufferCount = (double)gdwMixingFreq * (60.0 / (double)m_nMusicTempo / ((double)m_nMusicSpeed * (double)m_nCurrentRowsPerBeat));
+				m_nBufferCount = static_cast<int>(accurateBufferCount);
+				m_dBufferDiff += accurateBufferCount-m_nBufferCount;
+				//tick-to-tick tempo correction:
+				if (m_dBufferDiff >= 1)
+				{ 
+					m_nBufferCount++;
+					m_dBufferDiff--;
+				} else if (m_dBufferDiff <= -1)
+				{ 
+					m_nBufferCount--;
+					m_dBufferDiff++;
+				}
+				ASSERT(abs(m_dBufferDiff) < 1);
+				break;
 			}
-			ASSERT(abs(m_dBufferDiff)<1);
-			break;
-		}
 
 		case tempo_mode_classic:
 		default:

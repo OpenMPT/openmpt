@@ -10,6 +10,7 @@
 CSoundFile& CPattern::GetSoundFile() {return m_rPatternContainer.GetSoundFile();}
 const CSoundFile& CPattern::GetSoundFile() const {return m_rPatternContainer.GetSoundFile();}
 
+
 CHANNELINDEX CPattern::GetNumChannels() const
 //-------------------------------------------
 {
@@ -17,12 +18,25 @@ CHANNELINDEX CPattern::GetNumChannels() const
 }
 
 
+bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure)
+//------------------------------------------------------------------------------------
+{
+	if(rowsPerBeat < GetSoundFile().GetModSpecifications().patternRowsMin || rowsPerBeat > GetSoundFile().GetModSpecifications().patternRowsMax
+		|| rowsPerMeasure < rowsPerBeat || rowsPerMeasure > GetSoundFile().GetModSpecifications().patternRowsMax
+		/*|| rowsPerBeat > m_Rows || rowsPerMeasure > m_Rows*/)
+		return false;
+	m_RowsPerBeat = rowsPerBeat;
+	m_RowsPerMeasure = rowsPerMeasure;
+	return true;
+}
+
+
 bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning)
 //-------------------------------------------------------------------------------
 {
-	if(m_ModCommands == NULL)
+	if(m_ModCommands == nullptr)
 	{
-		//For Mimicing old behavior of setting patternsize before even having the
+		//For mimicing old behavior of setting patternsize before even having the
 		//actual pattern allocated.
 		m_Rows = newRowCount; 
 		return false;
@@ -31,7 +45,7 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 
 	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
 	const CModSpecifications& specs = sndFile.GetModSpecifications();
-	if(sndFile.m_pModDoc == NULL) return true;
+	if(sndFile.m_pModDoc == nullptr) return true;
 	CModDoc& rModDoc = *sndFile.m_pModDoc;
 	if(newRowCount > specs.patternRowsMax || newRowCount < specs.patternRowsMin)
 		return true;
@@ -51,30 +65,32 @@ bool CPattern::Resize(const ROWINDEX newRowCount, const bool showDataLossWarning
 		}
 	} else
 	{
-		BOOL bOk = TRUE;
+		bool bOk = true;
 		MODCOMMAND *p = m_ModCommands;
 		UINT ndif = (m_Rows - newRowCount) * sndFile.m_nChannels;
 		UINT npos = newRowCount * sndFile.m_nChannels;
+#ifdef MODPLUG_TRACKER
 		if(showDataLossWarning)
 		{
 			for (UINT i=0; i<ndif; i++)
 			{
 				if (*((DWORD *)(p+i+npos)))
 				{
-					bOk = FALSE;
+					bOk = false;
 					break;
 				}
 			}
-			if (!bOk && showDataLossWarning)
+			if (!bOk)
 			{
 				END_CRITICAL();
 				rModDoc.EndWaitCursor();
 				if (CMainFrame::GetMainFrame()->MessageBox("Data at the end of the pattern will be lost.\nDo you want to continue?",
-									"Shrink Pattern", MB_YESNO|MB_ICONQUESTION) == IDYES) bOk = TRUE;
+									"Shrink Pattern", MB_YESNO|MB_ICONQUESTION) == IDYES) bOk = true;
 				rModDoc.BeginWaitCursor();
 				BEGIN_CRITICAL();
 			}
 		}
+#endif // MODPLUG_TRACKER
 		if (bOk)
 		{
 			MODCOMMAND *pnew = CSoundFile::AllocatePattern(newRowCount, sndFile.m_nChannels);
@@ -106,9 +122,9 @@ void CPattern::Deallocate()
 //-------------------------
 {
 	BEGIN_CRITICAL();
-	m_Rows = 0;
+	m_Rows = m_RowsPerBeat = m_RowsPerMeasure = 0;
 	CSoundFile::FreePattern(m_ModCommands);
-	m_ModCommands = NULL;
+	m_ModCommands = nullptr;
 	END_CRITICAL();
 }
 
@@ -118,7 +134,7 @@ bool CPattern::Expand()
 	MODCOMMAND *newPattern, *oldPattern;
 
 	CSoundFile& sndFile = m_rPatternContainer.GetSoundFile();
-	if(sndFile.m_pModDoc == NULL) return true;
+	if(sndFile.m_pModDoc == nullptr) return true;
 
 	CModDoc& rModDoc = *sndFile.m_pModDoc;
 
@@ -216,7 +232,7 @@ bool CPattern::ReadITPdata(const BYTE* const lpStream, DWORD& streamPos, const D
 		return true;
 
 	const DWORD startPos = streamPos;
-	ROWINDEX counter = 0;
+	size_t counter = 0;
 	while(streamPos - startPos + sizeof(MODCOMMAND_ORIGINAL) <= datasize)
 	{
 		MODCOMMAND_ORIGINAL temp;
@@ -270,6 +286,12 @@ void WriteModPattern(std::ostream& oStrm, const CPattern& pat)
 	srlztn::Ssb ssb(oStrm);
 	ssb.BeginWrite(FileIdPattern, MptVersion::num);
 	ssb.WriteItem(pat, "data", strlen("data"), &WriteData);
+	// pattern time signature
+	if(pat.GetOverrideSignature())
+	{
+		ssb.WriteItem<uint32>(pat.GetRowsPerBeat(), "RPB.");
+		ssb.WriteItem<uint32>(pat.GetRowsPerMeasure(), "RPM.");
+	}
 	ssb.FinishWrite();
 }
 
@@ -282,6 +304,11 @@ void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 	if ((ssb.m_Status & srlztn::SNT_FAILURE) != 0)
 		return;
 	ssb.ReadItem(pat, "data", strlen("data"), &ReadData);
+	// pattern time signature
+	uint32 nRPB = 0, nRPM = 0;
+	ssb.ReadItem<uint32>(nRPB, "RPB.");
+	ssb.ReadItem<uint32>(nRPM, "RPM.");
+	pat.SetSignature(nRPB, nRPM);
 }
 
 

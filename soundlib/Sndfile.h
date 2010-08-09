@@ -568,10 +568,10 @@ public:	// for Editing
 	double m_dBufferDiff;
 	UINT m_nTickCount, m_nTotalCount, m_nPatternDelay, m_nFrameDelay;
 	ULONG m_lTotalSampleCount;	// rewbs.VSTTimeInfo
-	UINT m_nSamplesPerTick;	// rewbs.betterBPM
-	UINT m_nRowsPerBeat;	// rewbs.betterBPM
-	UINT m_nRowsPerMeasure;	// rewbs.betterBPM
-	BYTE m_nTempoMode;		// rewbs.betterBPM
+	UINT m_nSamplesPerTick;		// rewbs.betterBPM
+	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module // rewbs.betterBPM
+	ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
+	BYTE m_nTempoMode;			// rewbs.betterBPM
 	BYTE m_nMixLevels;
     UINT m_nMusicSpeed, m_nMusicTempo;
 	ROWINDEX m_nNextRow, m_nRow;
@@ -593,7 +593,7 @@ public:	// for Editing
 	MODCHANNEL Chn[MAX_CHANNELS];						// Channels
 	MODCHANNELSETTINGS ChnSettings[MAX_BASECHANNELS];	// Channels settings
 	CPatternContainer Patterns;							// Patterns
-	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x.
+	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x of the current sequence.
 	MODSAMPLE Samples[MAX_SAMPLES];						// Sample Headers
 	MODINSTRUMENT *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
 	MODINSTRUMENT m_defaultInstrument;					// Currently only used to get default values for extented properties. 
@@ -635,7 +635,7 @@ public:
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; } 
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
 	UINT GetCurrentPos() const;
-	UINT GetCurrentPattern() const { return m_nPattern; }
+	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }
 	ORDERINDEX GetCurrentOrder() const { return static_cast<ORDERINDEX>(m_nCurrentPattern); }
 	UINT GetMaxPosition() const;
 	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
@@ -859,6 +859,7 @@ private:
 	void GlobalVolSlide(UINT param, UINT * nOldGlobalVolSlide);
 	DWORD IsSongFinished(UINT nOrder, UINT nRow) const;
 	BOOL IsValidBackwardJump(UINT nStartOrder, UINT nStartRow, UINT nJumpOrder, UINT nJumpRow) const;
+	void UpdateTimeSignature();
 
 public:
 	// Write pattern effect functions

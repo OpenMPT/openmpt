@@ -39,16 +39,17 @@ struct CModSpecifications
 	INSTRUMENTINDEX instrumentsMax;
 	BYTE defaultMixLevels;
 	BYTE MIDIMappingDirectivesMax;
-	UINT speedMin;			// Minimum ticks per frame
-	UINT speedMax;			// Maximum ticks per frame
-	bool hasComments;		// True if format has a comments field
-	UINT envelopePointsMax;	// Maximum number of points of each envelope
-	bool hasReleaseNode;	// Envelope release node
+	UINT speedMin;					// Minimum ticks per frame
+	UINT speedMax;					// Maximum ticks per frame
+	bool hasComments;				// True if format has a comments field
+	UINT envelopePointsMax;			// Maximum number of points of each envelope
+	bool hasReleaseNode;			// Envelope release node
 	char commands[MAX_EFFECTS + 1]; // An array holding all commands this format supports; commands that are not supported are marked with "?"
 	char volcommands[MAX_VOLCMDS + 1]; // dito, but for volume column
-	bool hasIgnoreIndex;	// Does "+++" pattern exist?
+	bool hasIgnoreIndex;			// Does "+++" pattern exist?
 	bool hasRestartPos;
 	bool supportsPlugins;
+	bool hasPatternSignatures;		// Can patterns have a custom time signature?
 };
 
 
@@ -95,6 +96,7 @@ const CModSpecifications mptm =
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
 	true,								// Supports plugins
+	true,								// Custom pattern time signatures
 };
 
 
@@ -136,6 +138,7 @@ const CModSpecifications mod =
 	false,								// Doesn't have "+++" pattern
 	true,								// Has restart position (order)
 	false,								// Doesn't support plugins
+	false,								// No custom pattern time signatures
 };
 
 // MOD with MPT extensions.
@@ -175,6 +178,7 @@ const CModSpecifications modEx =
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
 	false,								// Doesn't support plugins
+	false,								// No custom pattern time signatures
 };
 
 const CModSpecifications xm =
@@ -213,6 +217,7 @@ const CModSpecifications xm =
 	false,								// Doesn't have "+++" pattern
 	true,								// Has restart position (order)
 	false,								// Doesn't support plugins
+	false,								// No custom pattern time signatures
 };
 
 // XM with MPT extensions
@@ -252,6 +257,7 @@ const CModSpecifications xmEx =
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
 	true,								// Supports plugins
+	false,								// No custom pattern time signatures
 };
 
 const CModSpecifications s3m =
@@ -290,6 +296,7 @@ const CModSpecifications s3m =
 	true,								// Has "+++" pattern
 	false,								// Doesn't have restart position (order)
 	false,								// Doesn't support plugins
+	false,								// No custom pattern time signatures
 };
 
 // S3M with MPT extensions
@@ -329,6 +336,7 @@ const CModSpecifications s3mEx =
 	true,								// Has "+++" pattern
 	false,								// Doesn't have restart position (order)
 	false,								// Doesn't support plugins
+	false,								// No custom pattern time signatures
 };
 
 const CModSpecifications it =
@@ -367,6 +375,7 @@ const CModSpecifications it =
 	true,								// Has "+++" pattern
 	false,								// Doesn't have restart position (order)
 	false,								// Doesn't support plugins
+	false,								// No custom pattern time signatures
 };
 
 const CModSpecifications itEx =
@@ -405,6 +414,7 @@ const CModSpecifications itEx =
 	true,								// Has "+++" pattern
 	true,								// Has restart position (order)
 	true,								// Supports plugins
+	false,								// No custom pattern time signatures
 };
 
 } // namespace ModSpecs

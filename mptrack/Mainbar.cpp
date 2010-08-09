@@ -441,7 +441,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			wsprintf(s, "%d", nCurrentTempo);
 			m_EditTempo.SetWindowText(s);
 		}
-		int nRowsPerBeat = pSndFile->m_nRowsPerBeat;
+		int nRowsPerBeat = pSndFile->m_nCurrentRowsPerBeat;
 		if (nRowsPerBeat != nCurrentRowsPerBeat)
 		{	
 			if (nCurrentRowsPerBeat < 0) m_SpinRowsPerBeat.EnableWindow(TRUE);
@@ -489,7 +489,6 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 	if ((nCurrentSpeed < 0) || (nCurrentTempo < 0)) return;
 	if ((pMainFrm = CMainFrame::GetMainFrame()) != NULL)
 	{
-		CModDoc *pModDoc = pMainFrm->GetModPlaying();
 		CSoundFile *pSndFile = pMainFrm->GetSoundFilePlaying();
 		if (pSndFile)
 		{
@@ -520,15 +519,13 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 				{
 					if (nCurrentRowsPerBeat > 1)
 					{
-						pSndFile->m_nRowsPerBeat = nCurrentRowsPerBeat - 1;
-						pModDoc->SetModified(true);
+						SetRowsPerBeat(nCurrentRowsPerBeat - 1);
 					}
 				} else
 				{
-					if (nCurrentRowsPerBeat < 64)
+					if (nCurrentRowsPerBeat < pSndFile->m_nCurrentRowsPerMeasure)
 					{
-						pSndFile->m_nRowsPerBeat = nCurrentRowsPerBeat + 1;
-						pModDoc->SetModified(true);
+						SetRowsPerBeat(nCurrentRowsPerBeat + 1);
 					}
 				}
 				m_SpinRowsPerBeat.SetPos(0);
@@ -536,13 +533,44 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 				//update pattern editor
 				
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm) {
-					pMainFrm->UpdateHighlights();
+				if (pMainFrm)
+				{
 					pMainFrm->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
 				}
 			}
 
 			SetCurrentSong(pSndFile);
+		}
+	}
+}
+
+
+void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
+//-------------------------------------------------
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	if(pMainFrm == nullptr)
+		return;
+	CModDoc *pModDoc = pMainFrm->GetModPlaying();
+	CSoundFile *pSndFile = pMainFrm->GetSoundFilePlaying();
+	if(pModDoc == nullptr || pSndFile == nullptr)
+		return;
+
+	pSndFile->m_nCurrentRowsPerBeat = nNewRPB;
+	PATTERNINDEX nPat = pSndFile->GetCurrentPattern();
+	if(pSndFile->Patterns[nPat].GetOverrideSignature())
+	{
+		if(nNewRPB <= pSndFile->Patterns[nPat].GetRowsPerMeasure())
+		{
+			pSndFile->Patterns[nPat].SetSignature(nNewRPB, pSndFile->Patterns[nPat].GetRowsPerMeasure());
+			pModDoc->SetModified();
+		}
+	} else
+	{
+		if(nNewRPB <= pSndFile->m_nDefaultRowsPerMeasure)
+		{
+			pSndFile->m_nDefaultRowsPerBeat = nNewRPB;
+			pModDoc->SetModified();
 		}
 	}
 }

@@ -47,6 +47,9 @@ public:
 	CMainToolBar() {}
 	virtual ~CMainToolBar() {}
 
+protected:
+	void SetRowsPerBeat(ROWINDEX nNewRPB);
+
 public:
 	//{{AFX_VIRTUAL(CMainToolBar)
 	virtual BOOL SetHorizontal();

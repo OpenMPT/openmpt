@@ -780,20 +780,28 @@ void CViewInstrument::DrawGrid(CDC *pDC, UINT speed)
 		m_pbmpOldGrid = m_dcGrid.SelectObject(&m_bmpGrid);
 
 		//do draw
-		int width=m_rcClient.right-m_rcClient.left;
-		int nPrevTick=-1;
+		CSoundFile *pSndFile;
+		int width = m_rcClient.right - m_rcClient.left;
+		int nPrevTick = -1;
 		int nTick, nRow;
-		for (int x=3; x<width; x++)
+		int nRowsPerBeat = 1, nRowsPerMeasure = 1;
+		if(GetDocument() != nullptr && (pSndFile = GetDocument()->GetSoundFile()) != nullptr)
+		{
+			nRowsPerBeat = pSndFile->m_nDefaultRowsPerBeat;
+			nRowsPerMeasure = pSndFile->m_nDefaultRowsPerMeasure;
+		}
+
+		for (int x = 3; x < width; x++)
 		{
 			nTick = QuickScreenToTick(x, cachedScrollPos);
 			if (nTick != nPrevTick && !(nTick%speed))
 			{
-				nPrevTick=nTick;
-				nRow=nTick/speed;
+				nPrevTick = nTick;
+				nRow = nTick / speed;
 
-				if (nRow % max(1, CMainFrame::m_nRowSpacing) == 0)
+				if (nRow % max(1, nRowsPerMeasure) == 0)
 					m_dcGrid.SelectObject(CMainFrame::penGray80);
-				else if (nRow % max(1, CMainFrame::m_nRowSpacing2) == 0)
+				else if (nRow % max(1, nRowsPerBeat) == 0)
 					m_dcGrid.SelectObject(CMainFrame::penGray55);
 				else
 					m_dcGrid.SelectObject(CMainFrame::penGray33);
