@@ -598,6 +598,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInsNoteMapEditSample, 1849, kcVisible, kcNoDummy, _T("Edit current sample"));
 	DefineKeyCommand(kcInsNoteMapEditSampleMap, 1850, kcVisible, kcNoDummy, _T("Edit sample map"));
 	DefineKeyCommand(kcInstrumentCtrlDuplicate, 1851, kcVisible, kcNoDummy, _T("Duplicate instrument"));
+	DefineKeyCommand(kcPanic, 1852, kcVisible, kcNoDummy, _T("Panic"));
 	// Add new key commands here.
 
 #ifdef _DEBUG

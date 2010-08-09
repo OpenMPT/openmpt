@@ -3447,6 +3447,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPlaySongFromStart: OnPlayerPlayFromStart(); break;
 		case kcPlayPauseSong: OnPlayerPlay(); break;
 		case kcStopSong: OnPlayerStop(); break;
+		case kcPanic: OnPanic(); break;
 //		case kcPauseSong: OnPlayerPause(); break;
 			
 
@@ -3690,9 +3691,20 @@ CString CModDoc::GetPatternViewInstrumentName(UINT nInstr,
 }
 
 void CModDoc::SafeFileClose()
-//--------------------------
+//---------------------------
 {
 	// Verify that the main window has the focus. This saves us a lot of trouble because active dialogs normally don't check if their pSndFile pointers are still valid.
 	if(GetActiveWindow() == CMainFrame::GetMainFrame()->m_hWnd)
 		OnFileClose();
+}
+
+
+// "Panic button". At the moment, it just resets all VSTi and sample notes.
+void CModDoc::OnPanic()
+//---------------------
+{
+	BEGIN_CRITICAL();
+	m_SndFile.ResetChannels();
+	m_SndFile.StopAllVsti();
+	END_CRITICAL();
 }

@@ -356,6 +356,7 @@ public:
 	afx_msg void OnPlayerStop();
 	afx_msg void OnPlayerPause();
 	afx_msg void OnPlayerPlayFromStart();
+	afx_msg void OnPanic();
 	afx_msg void OnEditGlobals();
 	afx_msg void OnEditPatterns();
 	afx_msg void OnEditSamples();
