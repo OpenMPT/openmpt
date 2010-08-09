@@ -74,6 +74,7 @@ enum CommandID
 	kcPlaySongFromCursor,
 	kcPlayPatternFromStart,
 	kcPlayPatternFromCursor,
+	kcPanic,
 	kcEstimateSongLength,
 	kcApproxRealBPM,
 	kcMidiRecord,

@@ -2705,14 +2705,9 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 void CMainFrame::OnPanic()
 //------------------------
 {
-	// Panic button. At the moment, it just resets all VSTi and sample notes.
-	if(m_pModPlaying && m_pModPlaying->GetSoundFile())
-	{
-		BEGIN_CRITICAL();
-		m_pModPlaying->GetSoundFile()->ResetChannels();
-		m_pModPlaying->GetSoundFile()->StopAllVsti();
-		END_CRITICAL();
-	}
+	// "Panic button." At the moment, it just resets all VSTi and sample notes.
+	if(m_pModPlaying)
+		m_pModPlaying->OnPanic();
 }
 
 
