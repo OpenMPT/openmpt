@@ -17,6 +17,7 @@
 #include "wavConverter.h"
 #include "tuningcollection.h"
 #include <vector>
+#include <list>
 #include <algorithm>
 
 #define str_SampleAllocationError	(GetStrI18N(_TEXT("Sample allocation error")))
@@ -766,9 +767,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	// plugin loader
 	string sNotFound;
-	bool bSearchIDs[MAX_MIXPLUGINS];
-	memset(bSearchIDs, false, MAX_MIXPLUGINS * sizeof(bool));
-	UINT iShowNotFound = 0;
+	std::list<PLUGINDEX> notFoundIDs;
 
 	// Load plugins only when m_pModDoc != 0.  (can be == 0 for example when examining module samples in treeview.
 	if (gpMixPluginCreateProc && GetpModDoc())
@@ -788,19 +787,20 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 				{
 					// plugin not found - add to list
 					bool bFound = false;
-					for(PLUGINDEX iPlugFind = 0; iPlugFind < iPlug; iPlugFind++)
-						if(m_MixPlugins[iPlugFind].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2)
+					for(std::list<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
+					{
+						if(m_MixPlugins[*i].Info.dwPluginId2 == m_MixPlugins[iPlug].Info.dwPluginId2)
 						{
 							bFound = true;
 							break;
 						}
+					}
 
 					if(bFound == false)
 					{
 						sNotFound = sNotFound + m_MixPlugins[iPlug].Info.szLibraryName + "\n";
-						bSearchIDs[iPlug] = true; // set this flag so we will find the needed plugins later when calling KVRAudio
+						notFoundIDs.push_back(iPlug); // add this to the list of missing IDs so we will find the needed plugins later when calling KVRAudio
 					}
-					iShowNotFound++;
 				}
 			}
 		}
@@ -808,9 +808,9 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	// Display a nice message so the user sees what plugins are missing
 	// TODO: Use IDD_MODLOADING_WARNINGS dialog (NON-MODAL!) to display all warnings that are encountered when loading a module.
-	if(iShowNotFound)
+	if(!notFoundIDs.empty())
 	{
-		if(iShowNotFound == 1)
+		if(notFoundIDs.size() == 1)
 		{
 			sNotFound = "The following plugin has not been found:\n\n" + sNotFound + "\nDo you want to search for it on KVRAudio?";
 		}
@@ -820,13 +820,12 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 						"\nWARNING: A browser window / tab is opened for every plugin. If you do not want that, you can visit http://www.kvraudio.com/search.php";
 		}
 		if (::MessageBox(0, sNotFound.c_str(), "OpenMPT - Plugins missing", MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION) == IDYES)
-			for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
-				if (bSearchIDs[iPlug] == true)
-				{
-					CString sUrl;
-					sUrl.Format("http://www.kvraudio.com/search.php?q=%s&lq=db", m_MixPlugins[iPlug].Info.szLibraryName);
-					CTrackApp::OpenURL(sUrl);
-				}
+			for(std::list<PLUGINDEX>::iterator i = notFoundIDs.begin(); i != notFoundIDs.end(); ++i)
+			{
+				CString sUrl;
+				sUrl.Format("http://www.kvraudio.com/search.php?q=%s&lq=db", m_MixPlugins[*i].Info.szLibraryName);
+				CTrackApp::OpenURL(sUrl);
+			}
 	}
 
 	// Set up mix levels
