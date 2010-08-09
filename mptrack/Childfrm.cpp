@@ -432,7 +432,6 @@ void CChildFrame::OnSetFocus(CWnd* pOldWnd)
 	if (pMainFrm)
 	{
 		pMainFrm->UpdateEffectKeys();
-		pMainFrm->UpdateHighlights();
 	}
 }
 //end rewbs.customKeysAutoEffects

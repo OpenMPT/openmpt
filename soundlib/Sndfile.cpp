@@ -463,8 +463,8 @@ CSoundFile::CSoundFile() :
 	m_nRepeatCount = 0;
 	m_nSeqOverride = 0;
 	m_bPatternTransitionOccurred = false;
-	m_nRowsPerBeat = 4;
-	m_nRowsPerMeasure = 16;
+	m_nDefaultRowsPerBeat = m_nCurrentRowsPerBeat = (CMainFrame::m_nRowSpacing2) ? CMainFrame::m_nRowSpacing2 : 4;
+	m_nDefaultRowsPerMeasure = m_nCurrentRowsPerMeasure = (CMainFrame::m_nRowSpacing >= m_nDefaultRowsPerBeat) ? CMainFrame::m_nRowSpacing : m_nDefaultRowsPerBeat * 4;
 	m_nTempoMode = tempo_mode_classic;
 	m_bIsRendering = false;
 	m_nMaxSample = 0;
@@ -752,11 +752,12 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nNextRow = 0;
 	m_nRow = 0;
 
-	switch(m_nTempoMode) {
+	switch(m_nTempoMode)
+	{
 		case tempo_mode_alternative: 
 			m_nSamplesPerTick = gdwMixingFreq / m_nMusicTempo; break;
 		case tempo_mode_modern: 
-			m_nSamplesPerTick = gdwMixingFreq * (60/m_nMusicTempo / (m_nMusicSpeed * m_nRowsPerBeat)); break;
+			m_nSamplesPerTick = gdwMixingFreq * (60/m_nMusicTempo / (m_nMusicSpeed * m_nCurrentRowsPerBeat)); break;
 		case tempo_mode_classic: default:
 			m_nSamplesPerTick = (gdwMixingFreq * 5 * m_nTempoFactor) / (m_nMusicTempo << 8);
 	}
@@ -1082,11 +1083,11 @@ double  CSoundFile::GetCurrentBPM() const
 	{												// is close enough to what user chose.
 		bpm = static_cast<double>(m_nMusicTempo);	// This avoids oscillation due to tick-to-tick corrections.
 	} else
-	{															//with other modes, we calculate it:
-		double ticksPerBeat = m_nMusicSpeed*m_nRowsPerBeat;		//ticks/beat = ticks/row  * rows/beat
-		double samplesPerBeat = m_nSamplesPerTick*ticksPerBeat;	//samps/beat = samps/tick * ticks/beat
-		bpm =  gdwMixingFreq/samplesPerBeat*60;					//beats/sec  = samps/sec  / samps/beat
-	}															//beats/min  =  beats/sec * 60
+	{																	//with other modes, we calculate it:
+		double ticksPerBeat = m_nMusicSpeed * m_nCurrentRowsPerBeat;	//ticks/beat = ticks/row  * rows/beat
+		double samplesPerBeat = m_nSamplesPerTick * ticksPerBeat;		//samps/beat = samps/tick * ticks/beat
+		bpm =  gdwMixingFreq/samplesPerBeat * 60;						//beats/sec  = samps/sec  / samps/beat
+	}																	//beats/min  =  beats/sec * 60
 	
 	return bpm;
 }

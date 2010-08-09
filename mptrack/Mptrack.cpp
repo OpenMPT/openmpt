@@ -1824,10 +1824,10 @@ BOOL CAboutDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT3, CString("OpenMPT ") + MptVersion::str + " (development build)");
 
 	m_heContact.SetWindowText(
-"Contact / Discussion:\r\n\
-http://openmpt.com/forum/\r\n\
-\r\nUpdates:\r\n\
-http://sourceforge.net/projects/modplug/");
+		"Contact / Discussion:\r\n"
+		"http://openmpt.com/forum/\r\n"
+		"\r\nUpdates:\r\n"
+		"http://sourceforge.net/projects/modplug/");
 
 	const char* const pArrCredit = { 
 		"OpenMPT / Modplug Tracker|"
@@ -1869,7 +1869,7 @@ http://sourceforge.net/projects/modplug/");
 		"LPChip, Ganja, Diamond, Nofold, Goor00, Georg|"
 		"Skilletaudio, Squirrel Havoc, Snu, Anboi|"
 		"Sam Zen, BooT-SectoR-ViruZ, 33, Waxhead|"
-		"KrazyKatz, Bvanoudtshoorn|"
+		"KrazyKatz, Bvanoudtshoorn, Skaven|"
 		"|||||||"
 		"VST PlugIn Technology by Steinberg Media Technologies GmbH|"
 		"ASIO Technology by Steinberg Media Technologies GmbH|"

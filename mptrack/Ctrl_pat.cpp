@@ -779,17 +779,23 @@ void CCtrlPatterns::OnPatternNew()
 	{
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		ORDERINDEX nCurOrd = m_OrderList.GetCurSel(true).nOrdLo;
-		PATTERNINDEX pat = pSndFile->Order[nCurOrd];
+		PATTERNINDEX nCurPat = pSndFile->Order[nCurOrd];
 		ROWINDEX rows = 64;
-		if(pSndFile->Patterns.IsValidPat(pat))
+		if(pSndFile->Patterns.IsValidPat(nCurPat))
 		{
 			nCurOrd++;	// only if the current oder is already occupied, create a new pattern at the next position.
-			rows = pSndFile->Patterns[pat].GetNumRows();
+			rows = pSndFile->Patterns[nCurPat].GetNumRows();
 			rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
 		}
 		PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nCurOrd, rows);
 		if ((nNewPat != PATTERNINDEX_INVALID) && (nNewPat < pSndFile->Patterns.Size()))
 		{
+			// update time signature
+			if(pSndFile->Patterns.IsValidIndex(nCurPat) && pSndFile->Patterns[nCurPat].GetOverrideSignature())
+			{
+				pSndFile->Patterns[nNewPat].SetSignature(pSndFile->Patterns[nCurPat].GetRowsPerBeat(), pSndFile->Patterns[nCurPat].GetRowsPerMeasure());
+			}
+			// move to new pattern
 			m_OrderList.SetCurSel(nCurOrd);
 			m_OrderList.InvalidateRect(NULL, FALSE);
 			SetCurrentPattern(nNewPat);
@@ -823,7 +829,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 		{
 			PATTERNINDEX nCurPat = pSndFile->Order[selection.nOrdLo + i];
 			ROWINDEX rows = 64;
-			if (nCurPat < pSndFile->Patterns.Size() && pReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
+			if (pSndFile->Patterns.IsValidIndex(nCurPat) && pReplaceIndex[nCurPat] == PATTERNINDEX_INVALID)
 			{
 				rows = pSndFile->Patterns[nCurPat].GetNumRows();
 				rows = CLAMP(rows, pSndFile->GetModSpecifications().patternRowsMin, pSndFile->GetModSpecifications().patternRowsMax);
@@ -831,6 +837,12 @@ void CCtrlPatterns::OnPatternDuplicate()
 				PATTERNINDEX nNewPat = m_pModDoc->InsertPattern(nInsertWhere + i, rows);
 				if ((nNewPat != PATTERNINDEX_INVALID) && (nNewPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nCurPat] != nullptr))
 				{
+					// update time signature
+					if(pSndFile->Patterns[nCurPat].GetOverrideSignature())
+					{
+						pSndFile->Patterns[nNewPat].SetSignature(pSndFile->Patterns[nCurPat].GetRowsPerBeat(), pSndFile->Patterns[nCurPat].GetRowsPerMeasure());
+					}
+					// copy pattern data
 					MODCOMMAND *pSrc = pSndFile->Patterns[nCurPat];
 					MODCOMMAND *pDest = pSndFile->Patterns[nNewPat];
 					UINT n = pSndFile->Patterns[nCurPat].GetNumRows();

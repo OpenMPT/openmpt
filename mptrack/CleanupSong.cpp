@@ -355,6 +355,8 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	// Those vectors are needed for copying the old pattern properties to the new pattern number
 	vector<MODCOMMAND*> pPatterns(maxPatIndex, nullptr);	// original pattern data
 	vector<ROWINDEX> nPatRows(maxPatIndex, 0);				// original pattern sizes
+	vector<ROWINDEX> nPatRowsPerBeat(maxPatIndex, 0);		// original pattern highlight
+	vector<ROWINDEX> nPatRowsPerMeasure(maxPatIndex, 0);	// original pattern highlight
 
 	CHAR s[512];
 	bool bReordered = false;
@@ -480,6 +482,11 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 				}
 				nPatRows[k] = pSndFile->Patterns[i].GetNumRows();
 				pPatterns[k] = pSndFile->Patterns[i];
+				if(pSndFile->Patterns[i].GetOverrideSignature())
+				{
+					nPatRowsPerBeat[k] = pSndFile->Patterns[i].GetRowsPerBeat();
+					nPatRowsPerMeasure[k] = pSndFile->Patterns[i].GetRowsPerMeasure();
+				}
 			} else
 				if (pSndFile->Patterns[i])
 				{
@@ -490,6 +497,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 		for (PATTERNINDEX nPat = 0; nPat < maxPatIndex; nPat++)
 		{
 			pSndFile->Patterns[nPat].SetData(pPatterns[nPat], nPatRows[nPat]);
+			pSndFile->Patterns[nPat].SetSignature(nPatRowsPerBeat[nPat], nPatRowsPerMeasure[nPat]);
 		}
 
 		delete[] lpszpatnames;

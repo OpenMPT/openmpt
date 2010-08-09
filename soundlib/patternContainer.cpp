@@ -40,6 +40,7 @@ bool CPatternContainer::Insert(const PATTERNINDEX index, const ROWINDEX rows)
 
 	m_Patterns[index] = CSoundFile::AllocatePattern(rows, m_rSndFile.m_nChannels);
 	m_Patterns[index].m_Rows = rows;
+	m_Patterns[index].RemoveSignature();
 
 	if(!m_Patterns[index]) return true;
 
@@ -105,6 +106,15 @@ void CPatternContainer::OnModTypeChanged(const MODTYPE /*oldtype*/)
 		ResizeArray(max(MAX_PATTERNS, specs.patternsMax));
 	else if(Size() < MAX_PATTERNS)
 		ResizeArray(MAX_PATTERNS);
+
+	// remove pattern time signatures
+	if(!specs.hasPatternSignatures)
+	{
+		for(PATTERNINDEX nPat = 0; nPat < m_Patterns.size(); nPat++)
+		{
+			m_Patterns[nPat].RemoveSignature();
+		}
+	}
 }
 
 

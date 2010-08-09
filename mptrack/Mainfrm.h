@@ -25,7 +25,6 @@ class CPerformanceCounter;
 #define MIN_AUDIO_BUFFERSIZE		1024
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
 #define MAINFRAME_TITLE				"Open Modplug Tracker"
-#define INFORMAL_VERSION			"1.17RC3_"
 #define INIBUFFERSIZE				MAX_PATH
 
 enum {
@@ -185,7 +184,7 @@ enum
 #define PATTERN_FOLLOWSONGOFF		0x80000		// follow song off by default
 #define PATTERN_MIDIRECORD			0x100000	// MIDI Record on by default
 //#define	PATTERN_ALTERNTIVEBPMSPEED	0x200000	// deprecated
-#define PATTERN_HILITETIMESIGS		0x400000	// highlight on song signature
+//#define PATTERN_HILITETIMESIGS		0x400000	// highlight on song signature, deprecated (now always enabled)
 #define PATTERN_OLDCTXMENUSTYLE		0x800000	// mpt 1.16 pattern context menu style
 #define PATTERN_SYNCMUTE			0x1000000	// maintain sample sync on mute
 #define PATTERN_AUTODELAY			0x2000000	// automatically insert delay commands in pattern when entering notes
@@ -430,7 +429,8 @@ public:
 	// Pattern Setup
 	static UINT gnPatternSpacing;
 	static BOOL gbPatternVUMeters, gbPatternPluginNames, gbPatternRecord;
-	static DWORD m_dwPatternSetup, m_dwMidiSetup, m_nRowSpacing, m_nRowSpacing2, m_nKeyboardCfg, gnHotKeyMask;
+	static DWORD m_dwPatternSetup, m_dwMidiSetup, m_nKeyboardCfg, gnHotKeyMask;
+	static DWORD m_nRowSpacing, m_nRowSpacing2;	// primary (measures) and secondary (beats) highlight
 	static bool m_bHideUnavailableCtxMenuItems;
 	// Sample Editor Setup
 	static UINT m_nSampleUndoMaxBuffer;
@@ -697,7 +697,6 @@ protected:
 public:
 	afx_msg void OnInitMenu(CMenu* pMenu);
 	bool UpdateEffectKeys(void); 
-	bool UpdateHighlights(void);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 

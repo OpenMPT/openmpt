@@ -778,8 +778,8 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 			}
 			if ((value & kVstTimeSigValid) && pSndFile) {
 				timeInfo.flags |= 	kVstTimeSigValid;
-				timeInfo.timeSigNumerator = pSndFile->m_nRowsPerBeat;
-				timeInfo.timeSigDenominator = pSndFile->m_nRowsPerMeasure;
+				timeInfo.timeSigNumerator = pSndFile->m_nCurrentRowsPerBeat;
+				timeInfo.timeSigDenominator = pSndFile->m_nCurrentRowsPerMeasure;
 			}
 		}
 		return (long)&timeInfo;
@@ -1460,8 +1460,6 @@ VOID CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 VOID CSelectPluginDlg::OnAddPlugin()
 //----------------------------------
 {
-	CHAR *pszFileNames;
-
 	FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(true, "dll", "",
 		"VST Plugins (*.dll)|*.dll||",
 		CMainFrame::GetWorkingDirectory(DIR_PLUGINS),

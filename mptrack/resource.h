@@ -951,6 +951,8 @@
 #define IDC_LIST_SAMPLEGEN_PRESETS      2425
 #define IDC_CHECK_UNDO                  2426
 #define IDC_CHK_REMEMBERSETTINGS        2427
+#define IDC_EDIT_ROWSPERBEAT            2428
+#define IDC_EDIT_ROWSPERMEASURE         2429
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1217,7 +1219,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        526
 #define _APS_NEXT_COMMAND_VALUE         60452
-#define _APS_NEXT_CONTROL_VALUE         2428
+#define _APS_NEXT_CONTROL_VALUE         2430
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

@@ -1142,7 +1142,7 @@ void CViewPattern::OnPatternProperties()
 //--------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
+	if (pModDoc && pModDoc->GetSoundFile() && pModDoc->GetSoundFile()->Patterns.IsValidPat(m_nPattern))
 	{
 		CPatternPropertiesDlg dlg(pModDoc, m_nPattern, this);
 		if (dlg.DoModal())
@@ -2583,7 +2583,8 @@ void CViewPattern::OnAddChannelFront()
 
 	BeginWaitCursor();
 	//First adding channel as the last channel...
-	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1)) {
+	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels + 1))
+	{
 		pSndFile->InitChannel(pSndFile->m_nChannels-1);
 		//...and then moving it to right position.
 		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
@@ -2607,7 +2608,8 @@ void CViewPattern::OnAddChannelAfter()
 	if (pModDoc == 0 || (pSndFile = pModDoc->GetSoundFile()) == 0) return;
 
 	BeginWaitCursor();
-	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels+1)) {
+	if (pModDoc->ChangeNumChannels(pSndFile->m_nChannels + 1))
+	{
 		pSndFile->InitChannel(pSndFile->m_nChannels-1);
 		pSndFile->MoveChannel(pSndFile->m_nChannels-1, nChn);
 
@@ -3476,6 +3478,7 @@ void CViewPattern::CursorJump(DWORD distance, bool direction, bool snap)
 
 }
 
+
 LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 //----------------------------------------------------------------
 {
@@ -3523,22 +3526,22 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		// Pattern navigation:
 		case kcPatternJumpUph1Select:
-		case kcPatternJumpUph1:			CursorJump(CMainFrame::m_nRowSpacing, true, false); return wParam;
+		case kcPatternJumpUph1:			CursorJump(GetRowsPerMeasure(), true, false); return wParam;
 		case kcPatternJumpDownh1Select:
-		case kcPatternJumpDownh1:		CursorJump(CMainFrame::m_nRowSpacing, false, false);  return wParam;
+		case kcPatternJumpDownh1:		CursorJump(GetRowsPerMeasure(), false, false);  return wParam;
 		case kcPatternJumpUph2Select:
-		case kcPatternJumpUph2:			CursorJump(CMainFrame::m_nRowSpacing2, true, false);  return wParam;
+		case kcPatternJumpUph2:			CursorJump(GetRowsPerBeat(), true, false);  return wParam;
 		case kcPatternJumpDownh2Select:
-		case kcPatternJumpDownh2:		CursorJump(CMainFrame::m_nRowSpacing2, false, false);  return wParam;
+		case kcPatternJumpDownh2:		CursorJump(GetRowsPerBeat(), false, false);  return wParam;
 
 		case kcPatternSnapUph1Select:
-		case kcPatternSnapUph1:			CursorJump(CMainFrame::m_nRowSpacing, true, true); return wParam;
+		case kcPatternSnapUph1:			CursorJump(GetRowsPerMeasure(), true, true); return wParam;
 		case kcPatternSnapDownh1Select:
-		case kcPatternSnapDownh1:		CursorJump(CMainFrame::m_nRowSpacing, false, true);  return wParam;
+		case kcPatternSnapDownh1:		CursorJump(GetRowsPerMeasure(), false, true);  return wParam;
 		case kcPatternSnapUph2Select:
-		case kcPatternSnapUph2:			CursorJump(CMainFrame::m_nRowSpacing2, true, true);  return wParam;
+		case kcPatternSnapUph2:			CursorJump(GetRowsPerBeat(), true, true);  return wParam;
 		case kcPatternSnapDownh2Select:
-		case kcPatternSnapDownh2:		CursorJump(CMainFrame::m_nRowSpacing2, false, true);  return wParam;
+		case kcPatternSnapDownh2:		CursorJump(GetRowsPerBeat(), false, true);  return wParam;
 
 		case kcNavigateDownSelect:
 		case kcNavigateDown:	SetCurrentRow(m_nRow+1, TRUE); return wParam;
@@ -4085,7 +4088,7 @@ void CViewPattern::TempStopNote(int note, bool fromMidi, const bool bChordMode)
 
 
 void CViewPattern::TempEnterOctave(int val)
-//---------------------------------------------
+//-----------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -5435,4 +5438,30 @@ void CViewPattern::OnTogglePCNotePluginEditor()
 
 	PLUGINDEX nPlg = (PLUGINDEX)(mSelStart->instr - 1);
 	pModDoc->TogglePluginEditor(nPlg);
+}
+
+
+ROWINDEX CViewPattern::GetRowsPerBeat() const
+//-------------------------------------------
+{
+	CSoundFile *pSndFile;
+	if(GetDocument() == nullptr || (pSndFile = GetDocument()->GetSoundFile()) == nullptr)
+		return 0;
+	if(!pSndFile->Patterns[m_nPattern].GetOverrideSignature())
+		return pSndFile->m_nDefaultRowsPerBeat;
+	else
+		return pSndFile->Patterns[m_nPattern].GetRowsPerBeat();
+}
+
+
+ROWINDEX CViewPattern::GetRowsPerMeasure() const
+//----------------------------------------------
+{
+	CSoundFile *pSndFile;
+	if(GetDocument() == nullptr || (pSndFile = GetDocument()->GetSoundFile()) == nullptr)
+		return 0;
+	if(!pSndFile->Patterns[m_nPattern].GetOverrideSignature())
+		return pSndFile->m_nDefaultRowsPerMeasure;
+	else
+		return pSndFile->Patterns[m_nPattern].GetRowsPerMeasure();
 }

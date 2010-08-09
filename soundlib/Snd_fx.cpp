@@ -429,7 +429,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			case tempo_mode_alternative: 
 				dElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
 			case tempo_mode_modern: 
-				dElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nRowsPerBeat; break;
+				dElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nCurrentRowsPerBeat; break;
 			case tempo_mode_classic: default:
 				dElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
 		}
@@ -1873,12 +1873,13 @@ BOOL CSoundFile::ProcessEffects()
 			case 0x10: ExtraFinePortamentoUp(pChn, param & 0x0F); break;
 			case 0x20: ExtraFinePortamentoDown(pChn, param & 0x0F); break;
 			// Modplug XM Extensions (ignore in compatible mode)
-			case 0x50: 
+			case 0x50:
 			case 0x60: 
 			case 0x70:
-			case 0x90: 
-			case 0xA0: if(!IsCompatibleMode(TRK_FASTTRACKER2)) ExtendedS3MCommands(nChn, param);
-						break;
+			case 0x90:
+			case 0xA0:
+				if(!IsCompatibleMode(TRK_FASTTRACKER2)) ExtendedS3MCommands(nChn, param);
+				break;
 			}
 			break;
 
@@ -2056,6 +2057,7 @@ BOOL CSoundFile::ProcessEffects()
 	}
 	return TRUE;
 }
+
 
 void CSoundFile::resetEnvelopes(MODCHANNEL* pChn, enmResetEnv envToReset)
 //-----------------------------------------------------------------------
@@ -3971,6 +3973,7 @@ UINT  CSoundFile::GetBestPlugin(UINT nChn, UINT priority, bool respectMutes)
 	return nPlugin; // 0 Means no plugin found.
 }
 
+
 UINT __cdecl CSoundFile::GetChannelPlugin(UINT nChn, bool respectMutes)
 //--------------------------------------------------------------
 {
@@ -3993,6 +3996,7 @@ UINT __cdecl CSoundFile::GetChannelPlugin(UINT nChn, bool respectMutes)
 	return nPlugin;
 }
 
+
 UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 //-----------------------------------------------------------------------
 {
@@ -4011,6 +4015,7 @@ UINT CSoundFile::GetActiveInstrumentPlugin(UINT nChn, bool respectMutes)
 	return nPlugin;
 }
 
+
 UINT CSoundFile::GetBestMidiChan(MODCHANNEL *pChn)
 //------------------------------------------------
 {
@@ -4021,34 +4026,51 @@ UINT CSoundFile::GetBestMidiChan(MODCHANNEL *pChn)
 	return 0;
 }
 
+
 void CSoundFile::HandlePatternTransitionEvents()
 //----------------------------------------------
 {
-	if (m_bPatternTransitionOccurred)
+	if (!m_bPatternTransitionOccurred)
+		return;
+
+	// MPT sequence override
+	if ((m_nSeqOverride > 0) && (m_nSeqOverride <= Order.size()))
 	{
-		// MPT sequence override
-		if ((m_nSeqOverride > 0) && (m_nSeqOverride <= Order.size()))
+		if (m_dwSongFlags & SONG_PATTERNLOOP)
 		{
-			if (m_dwSongFlags & SONG_PATTERNLOOP)
-			{
-				m_nPattern = Order[m_nSeqOverride-1];
-			}
-			m_nNextPattern = m_nSeqOverride - 1;
-			m_nSeqOverride = 0;
+			m_nPattern = Order[m_nSeqOverride - 1];
 		}
+		m_nNextPattern = m_nSeqOverride - 1;
+		m_nSeqOverride = 0;
+	}
 
-		// Channel mutes
-		for (UINT chan=0; chan<m_nChannels; chan++)
+	// Channel mutes
+	for (CHANNELINDEX chan=0; chan<m_nChannels; chan++)
+	{
+		if (m_bChannelMuteTogglePending[chan])
 		{
-			if (m_bChannelMuteTogglePending[chan])
-			{
-				if(m_pModDoc)
-					m_pModDoc->MuteChannel(chan, !m_pModDoc->IsChannelMuted(chan));
-				m_bChannelMuteTogglePending[chan]=false;
-			}
+			if(m_pModDoc)
+				m_pModDoc->MuteChannel(chan, !m_pModDoc->IsChannelMuted(chan));
+			m_bChannelMuteTogglePending[chan] = false;
 		}
+	}
 
-		m_bPatternTransitionOccurred=false;
+	m_bPatternTransitionOccurred = false;
+}
+
+
+// Update time signatures (global or pattern-specific). Don't forget to call this when changing the RPB/RPM settings anywhere!
+void CSoundFile::UpdateTimeSignature()
+//------------------------------------
+{
+	if(!Patterns.IsValidIndex(m_nPattern) || !Patterns[m_nPattern].GetOverrideSignature())
+	{
+		m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
+		m_nCurrentRowsPerMeasure = m_nDefaultRowsPerMeasure;
+	} else
+	{
+		m_nCurrentRowsPerBeat = Patterns[m_nPattern].GetRowsPerBeat();
+		m_nCurrentRowsPerMeasure = Patterns[m_nPattern].GetRowsPerMeasure();
 	}
 }
 

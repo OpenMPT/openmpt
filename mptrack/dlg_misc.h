@@ -213,6 +213,7 @@ protected:
 	virtual void OnOK();
 	afx_msg void OnHalfRowNumber();
 	afx_msg void OnDoubleRowNumber();
+	afx_msg void OnOverrideSignature();
 	DECLARE_MESSAGE_MAP()
 };
 

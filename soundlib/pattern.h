@@ -21,30 +21,35 @@ class CPattern
 public:
 //BEGIN: OPERATORS
 	//To mimic MODCOMMAND*
-	operator MODCOMMAND*() {return m_ModCommands;}
-	operator const MODCOMMAND*() const {return m_ModCommands;}
-	CPattern& operator=(MODCOMMAND* const p) {m_ModCommands = p; return *this;}
+	operator MODCOMMAND*() { return m_ModCommands; }
+	operator const MODCOMMAND*() const { return m_ModCommands; }
+	CPattern& operator=(MODCOMMAND* const p) { m_ModCommands = p; return *this; }
 	CPattern& operator=(const CPattern& pat)
 	{
 		m_ModCommands = pat.m_ModCommands;
 		m_Rows = pat.m_Rows;
+		m_RowsPerBeat = pat.m_RowsPerBeat;
+		m_RowsPerMeasure = pat.m_RowsPerMeasure;
 		return *this;
 	}
 //END: OPERATORS
 
 //BEGIN: INTERFACE METHODS
 public:
-	MODCOMMAND* GetpModCommand(const ROWINDEX r, const CHANNELINDEX c) {return &m_ModCommands[r*GetNumChannels()+c];}
-	const MODCOMMAND* GetpModCommand(const ROWINDEX r, const CHANNELINDEX c) const {return &m_ModCommands[r*GetNumChannels()+c];}
+	MODCOMMAND* GetpModCommand(const ROWINDEX r, const CHANNELINDEX c) { return &m_ModCommands[r * GetNumChannels() + c]; }
+	const MODCOMMAND* GetpModCommand(const ROWINDEX r, const CHANNELINDEX c) const { return &m_ModCommands[r * GetNumChannels() + c]; }
 	
-	ROWINDEX GetNumRows() const {return m_Rows;}
+	ROWINDEX GetNumRows() const { return m_Rows; }
+	ROWINDEX GetRowsPerBeat() const { return m_RowsPerBeat; }			// pattern-specific rows per beat
+	ROWINDEX GetRowsPerMeasure() const { return m_RowsPerMeasure; }		// pattern-specific rows per measure
+	bool GetOverrideSignature() const { return (m_RowsPerBeat + m_RowsPerMeasure > 0); }	// override song time signature?
 
 	// Return true if modcommand can be accessed from given row, false otherwise.
-	bool IsValidRow(const ROWINDEX iRow) const {return (iRow < GetNumRows());}
+	bool IsValidRow(const ROWINDEX iRow) const { return (iRow < GetNumRows()); }
 
 	// Return PatternRow object which has operator[] defined so that MODCOMMAND
 	// at (iRow, iChn) can be accessed with GetRow(iRow)[iChn].
-	PatternRow GetRow(const ROWINDEX iRow) {return GetpModCommand(iRow, 0);}
+	PatternRow GetRow(const ROWINDEX iRow) { return GetpModCommand(iRow, 0); }
 
 	CHANNELINDEX GetNumChannels() const;
 
@@ -60,10 +65,16 @@ public:
 	CSoundFile& GetSoundFile();
 	const CSoundFile& GetSoundFile() const;
 
-	bool SetData(MODCOMMAND* p, const ROWINDEX rows) {m_ModCommands = p; m_Rows = rows; return false;}
+	bool SetData(MODCOMMAND* p, const ROWINDEX rows) { m_ModCommands = p; m_Rows = rows; return false; }
 
+	// Set pattern signature (rows per beat, rows per measure). Returns true on success.
+	bool SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure);
+	void RemoveSignature() { m_RowsPerBeat = m_RowsPerMeasure = 0; }
+
+	// Double number of rows
 	bool Expand();
 
+	// Halve number of rows
 	bool Shrink();
 
 	bool WriteITPdata(FILE* f) const;
@@ -80,26 +91,28 @@ public:
 	typedef MODCOMMAND* iterator;
 	typedef const MODCOMMAND *const_iterator;
 
-	iterator Begin() {return m_ModCommands;}
-	const_iterator Begin() const {return m_ModCommands;}
+	iterator Begin() { return m_ModCommands; }
+	const_iterator Begin() const { return m_ModCommands; }
 
-	iterator End() {return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr;}
-	const_iterator End() const {return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr;}
+	iterator End() { return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr; }
+	const_iterator End() const { return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr; }
 
-	CPattern(CPatternContainer& patCont) : m_ModCommands(0), m_Rows(64), m_rPatternContainer(patCont) {}
+	CPattern(CPatternContainer& patCont) : m_ModCommands(0), m_Rows(64), m_rPatternContainer(patCont), m_RowsPerBeat(0), m_RowsPerMeasure(0) {};
 
-private:
-	MODCOMMAND& GetModCommand(ROWINDEX i) {return m_ModCommands[i];}
+protected:
+	MODCOMMAND& GetModCommand(size_t i) { return m_ModCommands[i]; }
 	//Returns modcommand from (floor[i/channelCount], i%channelCount) 
 
-	MODCOMMAND& GetModCommand(ROWINDEX r, CHANNELINDEX c) {return m_ModCommands[r*GetNumChannels()+c];}
-	const MODCOMMAND& GetModCommand(ROWINDEX r, CHANNELINDEX c) const {return m_ModCommands[r*GetNumChannels()+c];}
+	MODCOMMAND& GetModCommand(ROWINDEX r, CHANNELINDEX c) { return m_ModCommands[r*GetNumChannels()+c]; }
+	const MODCOMMAND& GetModCommand(ROWINDEX r, CHANNELINDEX c) const { return m_ModCommands[r*GetNumChannels()+c]; }
 
 
 //BEGIN: DATA
-private:
+protected:
 	MODCOMMAND* m_ModCommands;
 	ROWINDEX m_Rows;
+	ROWINDEX m_RowsPerBeat;		// patterns-specific time signature. if != 0, this is implicitely set.
+	ROWINDEX m_RowsPerMeasure;	// dito
 	CPatternContainer& m_rPatternContainer;
 //END: DATA
 };

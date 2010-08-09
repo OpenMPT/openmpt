@@ -128,7 +128,7 @@ bool CModDoc::HasMPTHacks(bool autofix)
 	{
 		AddToLog("Found too many patterns\n");
 		foundHacks = true;
-		// REQUIRES AUTOFIX
+		// REQUIRES (INTELLIGENT) AUTOFIX
 	}
 
 	// Check for too big/small patterns
@@ -142,7 +142,7 @@ bool CModDoc::HasMPTHacks(bool autofix)
 				foundHacks = foundHere = true;
 				break;
 			}
-			// REQUIRES AUTOFIX
+			// REQUIRES (INTELLIGENT) AUTOFIX
 		}
 	}
 	if(foundHere)
@@ -156,7 +156,7 @@ bool CModDoc::HasMPTHacks(bool autofix)
 
 	// Check for pattern names
 	foundHere = false;
-	for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++)
+	for(PATTERNINDEX i = 0; i < m_SndFile.GetNumPatterns(); i++)
 	{
 		if(m_SndFile.Patterns.IsValidPat(i))
 		{
@@ -181,7 +181,7 @@ bool CModDoc::HasMPTHacks(bool autofix)
 	{
 		AddToLog("Found incompatible channel count\n");
 		foundHacks = true;
-		// REQUIRES AUTOFIX
+		// REQUIRES (INTELLIGENT) AUTOFIX
 	}
 
 	// Check for channel names
@@ -205,7 +205,7 @@ bool CModDoc::HasMPTHacks(bool autofix)
 	{
 		AddToLog("Found too many samples\n");
 		foundHacks = true;
-		// REQUIRES AUTOFIX
+		// REQUIRES (INTELLIGENT) AUTOFIX
 	}
 
 	// Check for too many instruments
@@ -213,7 +213,7 @@ bool CModDoc::HasMPTHacks(bool autofix)
 	{
 		AddToLog("Found too many instruments\n");
 		foundHacks = true;
-		// REQUIRES AUTOFIX
+		// REQUIRES (INTELLIGENT) AUTOFIX
 	}
 
 	// Check for instrument extensions
@@ -255,7 +255,7 @@ bool CModDoc::HasMPTHacks(bool autofix)
 	{
 		AddToLog("Found too many orders\n");
 		foundHacks = true;
-		// REQUIRES AUTOFIX
+		// REQUIRES (INTELLIGENT) AUTOFIX
 	}
 
 	// Check for invalid default tempo
@@ -277,14 +277,35 @@ bool CModDoc::HasMPTHacks(bool autofix)
 	}
 
 	// Check for invalid rows per beat / measure values
-	if(m_SndFile.m_nRowsPerBeat >= originalSpecs->patternRowsMax || m_SndFile.m_nRowsPerMeasure >= originalSpecs->patternRowsMax)
+	if(m_SndFile.m_nDefaultRowsPerBeat >= originalSpecs->patternRowsMax || m_SndFile.m_nDefaultRowsPerMeasure >= originalSpecs->patternRowsMax)
 	{
 		AddToLog("Found incompatible rows per beat / measure\n");
 		foundHacks = true;
 		if(autofix)
 		{
-			m_SndFile.m_nRowsPerBeat = CLAMP(m_SndFile.m_nRowsPerBeat, 1, (originalSpecs->patternRowsMax - 1));
-			m_SndFile.m_nRowsPerMeasure = CLAMP(m_SndFile.m_nRowsPerMeasure, m_SndFile.m_nRowsPerBeat, (originalSpecs->patternRowsMax - 1));
+			m_SndFile.m_nDefaultRowsPerBeat = CLAMP(m_SndFile.m_nDefaultRowsPerBeat, 1, (originalSpecs->patternRowsMax - 1));
+			m_SndFile.m_nDefaultRowsPerMeasure = CLAMP(m_SndFile.m_nDefaultRowsPerMeasure, m_SndFile.m_nDefaultRowsPerBeat, (originalSpecs->patternRowsMax - 1));
+		}
+	}
+
+	// Find pattern-specific time signatures
+	if(!originalSpecs->hasPatternSignatures)
+	{
+		foundHere = false;
+		for(PATTERNINDEX i = 0; i < m_SndFile.GetNumPatterns(); i++)
+		{
+			if(m_SndFile.Patterns[i].GetOverrideSignature())
+			{
+				if(!foundHere)
+					AddToLog("Found pattern-specific time signatures\n");
+
+				if(autofix)
+					m_SndFile.Patterns[i].RemoveSignature();
+
+				foundHacks = foundHere = true;
+				if(!autofix)
+					break;
+			}
 		}
 	}
 
@@ -316,7 +337,7 @@ bool CModDoc::HasMPTHacks(bool autofix)
 	}
 
 	// Player flags
-	if(!m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY))
+	if((m_SndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.GetModFlag(MSF_COMPATIBLE_PLAY))
 	{
 		AddToLog("Compatible play is deactivated\n");
 		foundHacks = true;

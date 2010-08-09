@@ -58,7 +58,6 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_CHECK2,				OnPreviewChanged)
 	ON_COMMAND(IDC_CHECK3,				OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,				OnPreviewChanged)
-	ON_COMMAND(IDC_CHECK5,				OnHiliteTimeSigsChanged)
 END_MESSAGE_MAP()
 
 
@@ -98,11 +97,6 @@ BOOL COptionsColors::OnInitDialog()
 	SetDlgItemInt(IDC_PRIMARYHILITE, CMainFrame::m_nRowSpacing);
 	SetDlgItemInt(IDC_SECONDARYHILITE, CMainFrame::m_nRowSpacing2);
 	
-	if (CMainFrame::m_dwPatternSetup & PATTERN_HILITETIMESIGS) CheckDlgButton(IDC_CHECK5, MF_CHECKED);
-	GetDlgItem(IDC_PRIMARYHILITE)->EnableWindow(!IsDlgButtonChecked(IDC_CHECK5));
-	GetDlgItem(IDC_SECONDARYHILITE)->EnableWindow(!IsDlgButtonChecked(IDC_CHECK5));
-
-
 	OnColorSelChanged();
 	return TRUE;
 }
@@ -114,9 +108,9 @@ BOOL COptionsColors::OnKillActive()
 	int temp_nRowSpacing = GetDlgItemInt(IDC_PRIMARYHILITE);
 	int temp_nRowSpacing2 = GetDlgItemInt(IDC_SECONDARYHILITE);
 
-	if ((temp_nRowSpacing2 >= temp_nRowSpacing))
+	if ((temp_nRowSpacing2 > temp_nRowSpacing))
 	{
-		::AfxMessageBox("Error: Primary highlight must be greater than secondary highlight.", MB_OK|MB_ICONEXCLAMATION);
+		::AfxMessageBox("Error: Primary highlight must be greater than or equal secondary highlight.", MB_OK|MB_ICONEXCLAMATION);
 		::SetFocus(::GetDlgItem(m_hWnd, IDC_PRIMARYHILITE));
 		return 0;
 	}
@@ -127,12 +121,11 @@ BOOL COptionsColors::OnKillActive()
 void COptionsColors::OnOK()
 //-------------------------
 {
-	CMainFrame::m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT|PATTERN_SMALLFONT|PATTERN_HILITETIMESIGS);
+	CMainFrame::m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT|PATTERN_SMALLFONT);
 	if (IsDlgButtonChecked(IDC_CHECK1)) CMainFrame::m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
 	if (IsDlgButtonChecked(IDC_CHECK2)) CMainFrame::m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
 	if (IsDlgButtonChecked(IDC_CHECK3)) CMainFrame::m_dwPatternSetup |= PATTERN_SMALLFONT;
 	if (IsDlgButtonChecked(IDC_CHECK4)) CMainFrame::m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
-	if (IsDlgButtonChecked(IDC_CHECK5)) CMainFrame::m_dwPatternSetup |= PATTERN_HILITETIMESIGS;
 
 	CMainFrame::m_nRowSpacing = GetDlgItemInt(IDC_PRIMARYHILITE);
 	CMainFrame::m_nRowSpacing2 = GetDlgItemInt(IDC_SECONDARYHILITE);
@@ -333,19 +326,6 @@ void COptionsColors::OnSettingsChanged()
 //--------------------------------------
 {
 	SetModified(TRUE); 
-}
-
-void COptionsColors::OnHiliteTimeSigsChanged()
-//--------------------------------------
-{
-	bool enabling = !IsDlgButtonChecked(IDC_CHECK5);
-	if (enabling) {
-		SetDlgItemInt(IDC_PRIMARYHILITE, CMainFrame::m_nRowSpacing);
-		SetDlgItemInt(IDC_SECONDARYHILITE, CMainFrame::m_nRowSpacing2);
-	}
-	GetDlgItem(IDC_PRIMARYHILITE)->EnableWindow(enabling);
-	GetDlgItem(IDC_SECONDARYHILITE)->EnableWindow(enabling);
-	OnSettingsChanged();
 }
 
 void COptionsColors::OnUpdateDialog()
