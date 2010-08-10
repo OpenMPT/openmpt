@@ -11,6 +11,10 @@
 #define GetAppVersion StringChange(GetFileProductVersion("..\mptrack\bin\mptrack.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
 
+#ifndef BaseNameAddition
+#define BaseNameAddition
+#endif
+
 [Setup]
 AppId={{67903736-E9BB-4664-B148-F62BCAB4FA42}
 AppVerName=OpenMPT {#GetAppVersionShort}
@@ -24,7 +28,7 @@ DefaultDirName={pf}\OpenMPT
 DefaultGroupName=OpenMPT
 AllowNoIcons=yes
 OutputDir=.\
-OutputBaseFilename=OpenMPT-{#GetAppVersion}-Setup
+OutputBaseFilename=OpenMPT-{#GetAppVersion}-Setup{#BaseNameAddition}
 Compression=lzma2
 SolidCompression=yes
 WizardImageFile=install-big.bmp
