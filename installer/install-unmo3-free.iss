@@ -10,7 +10,7 @@
 ; To download and install ISPP and ISTool, get the Inno Setup QuickStart Pack from http://www.jrsoftware.org/isdl.php#qsp
 
 #define DOWNLOAD_MO3
-
+#define BaseNameAddition "_sf"
 #include "install.iss"
 
 [_ISToolDownload]
