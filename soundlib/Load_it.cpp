@@ -502,15 +502,28 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		if(GetType() == MOD_TYPE_IT)
 		{
-			if(pifh->cmwt == 0x888 || pifh->cwtv == 0x888 || 
-			(pifh->cwtv == 0x217 && pifh->cmwt == 0x200) ||
-			(pifh->cwtv == 0x214 && pifh->cmwt == 0x202)) interpretModplugmade = true;
-			//TODO: Check whether above interpretation is reasonable especially for 
-			//values 0x217 and 0x200 which are the values used in 1.16. 
-			if(pifh->cwtv == 0x217 && pifh->cmwt == 0x200)
+			// Which tracker was used to made this?
+			if(pifh->cmwt == 0x888 || pifh->cwtv == 0x888)
+			{
+				// OpenMPT
+				interpretModplugmade = true;
+			} else if(pifh->cwtv == 0x217 && pifh->cmwt == 0x200 && pifh->reserved == 0)
+			{
+				// Modplug Tracker 1.16
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-			if(pifh->cwtv == 0x214 && pifh->cmwt == 0x202)
+				interpretModplugmade = true;
+			} else if(pifh->cwtv == 0x214 && pifh->cmwt == 0x202 && pifh->reserved == 0)
+			{
+				// Modplug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
+				interpretModplugmade = true;
+			}
+			else if(pifh->cwtv == 0x214 && pifh->cmwt == 0x200 && pifh->reserved == 0)
+			{
+				// Modplug Tracker 1.00a5, instruments 560 bytes apart
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, 00);
+				interpretModplugmade = true;
+			}
 		}
 		else // case: type == MOD_TYPE_MPT
 		{
@@ -530,9 +543,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	
 	if(GetType() == MOD_TYPE_IT) mptStartPos = dwMemLength;
 
-	if(pifh->cwtv >= 0x213 && !(interpretModplugmade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 03, 01)))
+	// Read row highlights
+	if(pifh->cwtv >= 0x0213)
 	{
-		// MPT 1.09, 1.07 and most likely other old MPT versions leave this blank
+		// MPT 1.09, 1.07 and most likely other old MPT versions as well as some other programs (converters) leave this blank
 		if(pifh->highlight_minor + pifh->highlight_major != 0)
 		{
 			m_nDefaultRowsPerBeat = pifh->highlight_minor;
