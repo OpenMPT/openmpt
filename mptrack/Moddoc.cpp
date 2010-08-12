@@ -93,7 +93,7 @@ void CModDoc::Dump(CDumpContext& dc) const
 CModDoc::CModDoc()
 //----------------
 {
-	m_bHasValidPath=false;
+	m_bHasValidPath = false;
 	m_bPaused = TRUE;
 	m_lpszLog = NULL;
 	m_hWndFollow = NULL;
@@ -425,6 +425,7 @@ BOOL CModDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	}
 	BeginWaitCursor();
 	ClearLog();
+	FixNullStrings();
 	switch(nType)
 	{
 	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(lpszPathName, dwPacking); break;
@@ -1760,6 +1761,7 @@ void CModDoc::OnFileCompatibilitySave()
 	if(files.abort) return;
 
 	ClearLog();
+	FixNullStrings();
 	switch (type)
 	{
 		case MOD_TYPE_MOD:
@@ -3707,4 +3709,43 @@ void CModDoc::OnPanic()
 	m_SndFile.ResetChannels();
 	m_SndFile.StopAllVsti();
 	END_CRITICAL();
+}
+
+
+// Before saving, make sure that every char after the terminating null char is also null.
+// Else, garbage might end up in various text strings that wasn't supposed to be there.
+void CModDoc::FixNullStrings()
+//----------------------------
+{
+	// Song title
+	FixNullString(m_SndFile.m_szNames[0]);
+
+	// Sample names + filenames
+	for(SAMPLEINDEX nSmp = 1; nSmp < m_SndFile.GetNumSamples(); nSmp++)
+	{
+		FixNullString(m_SndFile.m_szNames[nSmp]);
+		FixNullString(m_SndFile.Samples[nSmp].filename);
+	}
+
+	// Instrument names
+	for(INSTRUMENTINDEX nIns = 1; nIns < m_SndFile.GetNumInstruments(); nIns++)
+	{
+		if(m_SndFile.Instruments[nIns] != nullptr)
+		{		
+			FixNullString(m_SndFile.Instruments[nIns]->name);
+			FixNullString(m_SndFile.Instruments[nIns]->filename);
+		}
+	}
+
+	// Channel names
+	for(CHANNELINDEX nChn = 0; nChn < m_SndFile.GetNumChannels(); nChn++)
+	{
+		FixNullString(m_SndFile.ChnSettings[nChn].szName);
+	}
+
+	// Pattern names
+	// Halp, this is currently not possible. Is it even needed?
+	
+	// Sequence names.
+	// Not needed?
 }

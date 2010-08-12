@@ -291,6 +291,8 @@ public:
 
 	bool HasMPTHacks(bool autofix = false);
 
+	void FixNullStrings();
+
 	bool m_bHasValidPath; //becomes true if document is loaded or saved.
 // Fix: save pattern scrollbar position when switching to other tab
 	CSize GetOldPatternScrollbarsPos() const { return m_szOldPatternScrollbarsPos; };

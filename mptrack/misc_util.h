@@ -103,13 +103,16 @@ namespace utilImpl
 // If the source and destination arrays overlap, behaviour is undefined.
 template <class T>
 void ArrayCopy(T* pDst, const T* pSrc, const size_t n)
+//----------------------------------------------------
 {
 	utilImpl::ArrayCopyImpl<std::tr1::has_trivial_assign<T>::value>::Do(pDst, pSrc, n);
 }
 
+
 // Sanitize a filename (remove special chars)
 template <size_t size>
 inline void SanitizeFilename(char (&buffer)[size])
+//------------------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	for(size_t i = 0; i < size; i++)
@@ -132,9 +135,11 @@ inline void SanitizeFilename(char (&buffer)[size])
 	}
 }
 
+
 // Convert a 0-terminated string to a space-padded string
 template <size_t size>
 void NullToSpaceString(char (&buffer)[size])
+//------------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	size_t pos = size;
@@ -143,9 +148,12 @@ void NullToSpaceString(char (&buffer)[size])
 			buffer[pos] = 32;
 	buffer[size - 1] = 0;
 }
+
+
 // Convert a space-padded string to a 0-terminated string
 template <size_t size>
 void SpaceToNullString(char (&buffer)[size])
+//------------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	// First, remove any Nulls
@@ -160,6 +168,24 @@ void SpaceToNullString(char (&buffer)[size])
 	}
 	buffer[size - 1] = 0;
 }
+
+
+// Remove any chars after the first null char
+template <size_t size>
+void FixNullString(char (&buffer)[size])
+//--------------------------------------
+{
+	STATIC_ASSERT(size > 0);
+	bool overwrite = false;
+	for(size_t pos = 0; pos < size; pos++)
+	{
+		if(overwrite)
+			buffer[pos] = 0;
+		else if(buffer[pos] == 0)
+			overwrite = true;
+	}
+}
+
 
 // Convert a space-padded string to a 0-terminated string.
 // Additional parameter to specifify the max length of the final string,
@@ -178,4 +204,5 @@ void SpaceToNullStringFixed(char (&buffer)[size], const size_t length)
 		buffer[pos] = 0;
 	}
 }
+
 #endif
