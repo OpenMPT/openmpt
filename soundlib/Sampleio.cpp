@@ -54,7 +54,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile
 	 || (psig[76/4] == LittleEndian(0x53524353))											// S3I signature
 	 || ((psig[0] == LittleEndian(0x4D524F46)) && (psig[2] == LittleEndian(0x46464941)))	// AIFF signature
 	 || ((psig[0] == LittleEndian(0x4D524F46)) && (psig[2] == LittleEndian(0x58565338)))	// 8SVX signature
-	 || (psig[0] == LittleEndian(0x53504D49))												// ITS signature
+	 || (psig[0] == LittleEndian(LittleEndian(IT_IMPS)))									// ITS signature
 	)
 	{
 		// Loading Instrument
@@ -1615,9 +1615,9 @@ UINT CSoundFile::ReadITSSample(SAMPLEINDEX nSample, LPBYTE lpMemFile, DWORD dwFi
 // -> CODE#0027
 // -> DESC="per-instrument volume ramping setup (refered as attack)"
 //	if ((!lpMemFile) || (dwFileLength < sizeof(ITSAMPLESTRUCT))
-//	 || (pis->id != 0x53504D49) || (((DWORD)pis->samplepointer) >= dwFileLength + dwOffset)) return FALSE;
+//	 || (pis->id != LittleEndian(IT_IMPS)) || (((DWORD)pis->samplepointer) >= dwFileLength + dwOffset)) return FALSE;
 	if ((!lpMemFile) || (dwFileLength < sizeof(ITSAMPLESTRUCT))
-	 || (pis->id != 0x53504D49) || (((DWORD)pis->samplepointer) >= dwFileLength + dwOffset)) return 0;
+	 || (pis->id != LittleEndian(IT_IMPS)) || (((DWORD)pis->samplepointer) >= dwFileLength + dwOffset)) return 0;
 // -! NEW_FEATURE#0027
 	DestroySample(nSample);
 	dwMemPos = pis->samplepointer - dwOffset;
@@ -1692,7 +1692,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, LPBYTE lpMemFile, DWO
 	UINT nsmp, nsamples;
 
 	if ((!lpMemFile) || (dwFileLength < sizeof(ITINSTRUMENT))
-	 || (pinstr->id != 0x49504D49)) return false;
+	 || (pinstr->id != LittleEndian(IT_IMPI))) return false;
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 // -> CODE#0003
 // -> DESC="remove instrument's samples"
@@ -1787,7 +1787,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 	memset(smpcount, 0, sizeof(smpcount));
 	memset(smptable, 0, sizeof(smptable));
 	memset(smpmap, 0, sizeof(smpmap));
-	iti->id = 0x49504D49;	// "IMPI"
+	iti->id = LittleEndian(IT_IMPI);	// "IMPI"
 	memcpy(iti->filename, pIns->filename, 12);
 	memcpy(iti->name, pIns->name, 26);
 	SetNullTerminator(iti->name);
@@ -1882,7 +1882,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, LPCSTR lpszFileName)
 		UINT nsmp = smptable[j];
 		memset(&itss, 0, sizeof(itss));
 		MODSAMPLE *psmp = &Samples[nsmp];
-		itss.id = 0x53504D49;
+		itss.id = LittleEndian(IT_IMPS);
 		memcpy(itss.filename, psmp->filename, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
 		itss.gvl = (BYTE)psmp->nGlobalVol;
@@ -2157,8 +2157,4 @@ bool CSoundFile::Read8SVXSample(UINT nSample, LPBYTE lpMemFile, DWORD dwFileLeng
 	}
 	return true;
 }
-
-
-
-
 
