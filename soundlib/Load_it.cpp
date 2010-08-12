@@ -30,7 +30,7 @@ const uint16 verMptFileVerLoadLimit = 0x1000; // If cwtv-field is greater or equ
 											  // the MPTM file will not be loaded.
 
 /*
-MPTM version history for cwtv-field in IT header:
+MPTM version history for cwtv-field in "IT" header (only for MPTM files!):
 0x890(1.18.02.00) -> 0x891(1.19.00.00): Pattern-specific time signatures
 0x88F(1.18.01.00) -> 0x890(1.18.02.00): Removed volume command velocity :xy, added delay-cut command :xy.
 0x88E(1.17.02.50) -> 0x88F(1.18.01.00): Numerous changes
@@ -473,7 +473,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	bool hasModplugExtensions = false;
 
 	if ((!lpStream) || (dwMemLength < 0xC0)) return false;
-	if ((pifh->id != 0x4D504D49 && pifh->id != 0x2e6D7074) || (pifh->insnum > 0xFF)
+	if ((pifh->id != LittleEndian(IT_IMPM) && pifh->id != LittleEndian(IT_MPTM)) || (pifh->insnum > 0xFF)
 	 || (pifh->smpnum >= MAX_SAMPLES) || (!pifh->ordnum)) return false;
 	if (dwMemPos + pifh->ordnum + pifh->insnum*4
 	 + pifh->smpnum*4 + pifh->patnum*4 > dwMemLength) return false;
@@ -484,7 +484,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if(mptStartPos >= dwMemLength || mptStartPos < 0x100)
 		mptStartPos = dwMemLength;
 
-	if(pifh->id == 0x2e6D7074)
+	if(pifh->id == LittleEndian(IT_MPTM))
 	{
 		ChangeModTypeTo(MOD_TYPE_MPT);
 	}
@@ -503,22 +503,29 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		if(GetType() == MOD_TYPE_IT)
 		{
 			// Which tracker was used to made this?
-			if(pifh->cmwt == 0x888 || pifh->cwtv == 0x888)
+			if((pifh->cwtv & 0xF000) == 0x5000)
 			{
-				// OpenMPT
+				// OpenMPT Version number (Major.Minor)
+				// This will only be interpreted as "made with modplug" (i.e. disable compatible playback etc) if the "reserved" field is set to "OMPT" - else, compatibility was used.
+				m_dwLastSavedWithVersion = (pifh->cwtv & 0x0FFF) << 16;
+				if(pifh->reserved == LittleEndian(IT_OMPT))
+					interpretModplugmade = true;
+			} else if(pifh->cmwt == 0x888 || pifh->cwtv == 0x888)
+			{
+				// OpenMPT 1.17 and 1.18 (raped IT format)
 				interpretModplugmade = true;
-			} else if(pifh->cwtv == 0x217 && pifh->cmwt == 0x200 && pifh->reserved == 0)
+			} else if(pifh->cwtv == 0x0217 && pifh->cmwt == 0x0200 && pifh->reserved == 0)
 			{
-				// Modplug Tracker 1.16
+				// Modplug Tracker 1.16 (semi-raped IT format)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
 				interpretModplugmade = true;
-			} else if(pifh->cwtv == 0x214 && pifh->cmwt == 0x202 && pifh->reserved == 0)
+			} else if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0202 && pifh->reserved == 0)
 			{
 				// Modplug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
 				interpretModplugmade = true;
 			}
-			else if(pifh->cwtv == 0x214 && pifh->cmwt == 0x200 && pifh->reserved == 0)
+			else if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0200 && pifh->reserved == 0)
 			{
 				// Modplug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, 00);
@@ -554,12 +561,6 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 	}
 
-	if((pifh->cwtv & 0xF000) == 0x5000) // OpenMPT Version number (Major.Minor) - we won't interpret this as "made with modplug" as this is used by compatibility export
-	{
-		m_dwLastSavedWithVersion = (pifh->cwtv & 0x0FFF) << 16;
-		//interpretModplugmade = true;
-	}
-
 	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;
 	if (pifh->flags & 0x10) m_dwSongFlags |= SONG_ITOLDEFFECTS;
 	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATMODE;
@@ -592,7 +593,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if ((pifh->special & 0x01) && (pifh->msglength) && (pifh->msglength <= dwMemLength) && (pifh->msgoffset < dwMemLength - pifh->msglength))
 	{
 		// Generally, IT files should use CR for line endings. However, ChibiTracker uses LF. One could do...
-		// if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0214 && LittleEndian(pifh->reserved) == IT_CHBI) --> Chibi detected.
+		// if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0214 && pifh->reserved == LittleEndian(IT_CHBI)) --> Chibi detected.
 		// But we'll just use autodetection here:
 		ReadMessage(lpStream + pifh->msgoffset, pifh->msglength, leAutodetect);
 	}
@@ -827,7 +828,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	for (UINT nsmp=0; nsmp<pifh->smpnum; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSAMPLESTRUCT)))
 	{
 		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
-		if (pis->id == 0x53504D49)
+		if (pis->id == LittleEndian(IT_IMPS))
 		{
 			MODSAMPLE *pSmp = &Samples[nsmp+1];
 			memcpy(pSmp->filename, pis->filename, 12);
@@ -1169,7 +1170,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	memset(&header, 0, sizeof(header));
 	dwPatNamLen = 0;
 	dwChnNamLen = 0;
-	header.id = 0x4D504D49;
+	header.id = LittleEndian(IT_IMPM);
 	lstrcpyn(header.songname, m_szNames[0], 26);
 
 	header.highlight_minor = (BYTE)(m_nDefaultRowsPerBeat & 0xFF);
@@ -1190,12 +1191,11 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		if(header.ordnum < 2) header.ordnum = 2;
 	}
 
-
 	header.insnum = m_nInstruments;
 	header.smpnum = m_nSamples;
 	header.patnum = (GetType() == MOD_TYPE_MPT) ? Patterns.Size() : MAX_PATTERNS;
 	if(Patterns.Size() < header.patnum) Patterns.ResizeArray(header.patnum);
-	while ((header.patnum > 0) && (!Patterns[header.patnum-1])) header.patnum--;
+	while ((header.patnum > 0) && (!Patterns[header.patnum - 1])) header.patnum--;
 
 	patpos.resize(header.patnum, 0);
 
@@ -1207,8 +1207,20 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	}
 	else //IT
 	{
-		header.cwtv = 0x888;	//
-		header.cmwt = 0x888;	// Might come up as "Impulse Tracker 8" file in XMPlay. :)
+		MptVersion::VersionNum vVersion = MptVersion::num;
+		header.cwtv = LittleEndianW(0x5000 | (WORD)((vVersion >> 16) & 0x0FFF)); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
+		header.cmwt = LittleEndianW(0x0214);	// Common compatible tracker :)
+		// hack from schism tracker:
+		for(INSTRUMENTINDEX nIns = 1; nIns <= GetNumInstruments(); nIns++)
+		{
+			if(Instruments[nIns] && Instruments[nIns]->PitchEnv.dwFlags & ENV_FILTER)
+			{
+				header.cmwt = LittleEndianW(0x0217);
+				break;
+			}
+		}
+		// This way, we indicate that the file will most likely contain OpenMPT hacks. Compatibility export puts 0 here.
+		header.reserved = LittleEndian(IT_OMPT);
 	}
 
 	header.flags = 0x0001;
@@ -1334,7 +1346,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		BYTE keyboardex[NOTE_MAX];
 
 		memset(&iti, 0, sizeof(iti));
-		iti.id = 0x49504D49;	// "IMPI"
+		iti.id = LittleEndian(IT_IMPI);	// "IMPI"
 		//iti.trkvers = 0x211;
 		iti.trkvers = 0x220;	//rewbs.itVersion
 		if (Instruments[nins])
@@ -1645,7 +1657,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		memset(&itss, 0, sizeof(itss));
 		memcpy(itss.filename, psmp->filename, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
-		itss.id = 0x53504D49;
+		itss.id = LittleEndian(IT_IMPS);
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 		
 		UINT flags = RS_PCM8S;
@@ -1813,7 +1825,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	memset(&header, 0, sizeof(header));
 	dwPatNamLen = 0;
 	dwChnNamLen = 0;
-	header.id = 0x4D504D49;
+	header.id = LittleEndian(IT_IMPM);
 	lstrcpyn(header.songname, m_szNames[0], 26);
 
 	header.highlight_minor = (BYTE)(m_nDefaultRowsPerBeat & 0xFF);
@@ -1966,7 +1978,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		BYTE keyboardex[NOTE_MAX];
 
 		memset(&iti, 0, sizeof(iti));
-		iti.id = 0x49504D49;	// "IMPI"
+		iti.id = LittleEndian(IT_IMPI);	// "IMPI"
 		iti.trkvers = 0x0214;
 		if (Instruments[nins])
 		{
@@ -2250,7 +2262,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		memcpy(itss.filename, psmp->filename, 12);
 		memcpy(itss.name, m_szNames[nsmp], 26);
 		SetNullTerminator(itss.name);
-		itss.id = 0x53504D49;
+		itss.id = LittleEndian(IT_IMPS);
 		itss.gvl = (BYTE)psmp->nGlobalVol;
 
 		UINT flags = RS_PCM8S;
@@ -3119,5 +3131,4 @@ void CSoundFile::LoadExtendedSongProperties(const MODTYPE modtype,
 	#undef CASE
 	#undef CASE_NOTXM
 }
-
 

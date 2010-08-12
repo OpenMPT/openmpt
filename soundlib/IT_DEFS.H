@@ -13,19 +13,19 @@ typedef struct tagITFILEHEADER
 	WORD insnum;
 	WORD smpnum;
 	WORD patnum;
-	WORD cwtv;
-	WORD cmwt;
+	WORD cwtv;			// "made with" tracker
+	WORD cmwt;			// "compatible with" tracker
 	WORD flags;
 	WORD special;
 	BYTE globalvol;
-	BYTE mv;
+	BYTE mv;			// master volume
 	BYTE speed;
 	BYTE tempo;
-	BYTE sep;		// panning separation (0...128)
-	BYTE pwd;		// pitch wheel depth
+	BYTE sep;			// panning separation (0...128)
+	BYTE pwd;			// pitch wheel depth
 	WORD msglength;
 	DWORD msgoffset;
-	DWORD reserved;	// ChibiTracker writes "CHBI" here.
+	DWORD reserved;		// ChibiTracker writes "CHBI" here. OpenMPT writes "OMPT" here in some cases, see Load_it.cpp
 	BYTE chnpan[64];
 	BYTE chnvol[64];
 } ITFILEHEADER;
@@ -140,6 +140,14 @@ typedef struct ITSAMPLESTRUCT
 extern BYTE autovibit2xm[8];
 extern BYTE autovibxm2it[8];
 
+// Impulse Tracker identifcators
+#define IT_IMPM 0x4D504D49		// "IMPM" IT header magic bytes 
+#define IT_IMPS 0x53504D49		// "IMPS" IT sample header magic bytes
+#define IT_IMPI	0x49504D49		// "IMPI" IT instrument header magic bytes
+
+// Identificators by other trackers
+#define IT_MPTM	0x2E6D7074		// "tpm." old MPTM header magic bytes
+#define IT_OMPT 0x54504D4F		// "OMPT" magic bytes for non-standard OpenMPT IT files
 #define IT_CHBI 0x49424843		// "CHBI" magic bytes in the IT header to identify ChibiTracker
 
 enum IT_ReaderBitMasks

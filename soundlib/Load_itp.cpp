@@ -325,7 +325,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 		if(dwMemPos >= dwMemLength || len > dwMemLength - dwMemPos) return false;
 
 		// Copy sample struct data
-		if(pis.id == 0x53504D49)
+		if(pis.id == LittleEndian(IT_IMPS))
 		{
 			MODSAMPLE *pSmp = &Samples[nsmp];
 			memcpy(pSmp->filename, pis.filename, 12);
@@ -648,7 +648,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 			memcpy(itss.filename, psmp->filename, 12);
 			memcpy(itss.name, m_szNames[nsmp], 26);
 
-			itss.id = 0x53504D49;
+			itss.id = LittleEndian(IT_IMPS);
 			itss.gvl = (BYTE)psmp->nGlobalVol;
 			itss.flags = 0x00;
 
@@ -720,3 +720,4 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 }
 
 #endif
+
