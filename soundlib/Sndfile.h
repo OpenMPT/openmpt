@@ -160,6 +160,15 @@ extern BYTE * GetInstrumentHeaderFieldPointer(MODINSTRUMENT * input, __int32 fco
 // --------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------
 
+
+// Envelope playback info for each MODCHANNEL
+struct  MODCHANNEL_ENVINFO
+{
+	DWORD nEnvPosition;
+	LONG nEnvValueAtReleaseJump;
+};
+
+
 #pragma warning(disable : 4324) //structure was padded due to __declspec(align())
 
 // Channel Struct
@@ -191,10 +200,9 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nRealVolume, nRealPan;
 	LONG nVolume, nPan, nFadeOutVol;
 	LONG nPeriod, nC5Speed, nPortamentoDest;
-	MODINSTRUMENT *pModInstrument;
-	MODSAMPLE *pModSample;
-	DWORD nVolEnvPosition, nPanEnvPosition, nPitchEnvPosition;
-	LONG nVolEnvValueAtReleaseJump, nPanEnvValueAtReleaseJump, nPitchEnvValueAtReleaseJump;
+	MODINSTRUMENT *pModInstrument;					// Currently assigned instrument slot
+	MODCHANNEL_ENVINFO VolEnv, PanEnv, PitchEnv;	// Envelope playback info
+	MODSAMPLE *pModSample;							// Currently assigned sample slot
 	DWORD nMasterChn, nVUMeter;
 	LONG nGlobalVol, nInsVol;
 	LONG nFineTune, nTranspose;
@@ -205,6 +213,8 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	LONG nRestorePanOnNewNote; //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from panswing.
 	UINT nOldGlobalVolSlide;
 	DWORD nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
+	int nRetrigCount, nRetrigParam;
+	ROWINDEX nPatternLoop;
 	// 8-bit members
 	BYTE nRestoreResonanceOnNewNote; //Like above
 	BYTE nRestoreCutoffOnNewNote; //Like above
@@ -220,9 +230,7 @@ typedef struct __declspec(align(32)) _MODCHANNEL
 	BYTE nOldCmdEx, nOldVolParam, nOldTempo;
 	BYTE nOldOffset, nOldHiOffset;
 	BYTE nCutOff, nResonance;
-	int nRetrigCount, nRetrigParam;
 	BYTE nTremorCount, nTremorParam;
-	ROWINDEX nPatternLoop;
 	BYTE nPatternLoopCount;
 	BYTE nRowNote, nRowInstr;
 	BYTE nRowVolCmd, nRowVolume;

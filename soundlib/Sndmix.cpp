@@ -1103,22 +1103,22 @@ BOOL CSoundFile::ReadNote()
 				// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
 				if (((pChn->dwFlags & CHN_VOLENV) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
 				{
-					int envvol = getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);
+					int envvol = getVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
 					
 					// if we are in the release portion of the envelope,
 					// rescale envelope factor so that it is proportional to the release point
 					// and release envelope beginning.
 					if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
-						&& pChn->nVolEnvPosition>=pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
-						&& pChn->nVolEnvValueAtReleaseJump != NOT_YET_RELEASED)
+						&& pChn->VolEnv.nEnvPosition>=pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode]
+						&& pChn->VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
 					{
-						int envValueAtReleaseJump = pChn->nVolEnvValueAtReleaseJump;
+						int envValueAtReleaseJump = pChn->VolEnv.nEnvValueAtReleaseJump;
 						int envValueAtReleaseNode = pIns->VolEnv.Values[pIns->VolEnv.nReleaseNode] << 2;
 
 						//If we have just hit the release node, force the current env value
 						//to be that of the release node. This works around the case where 
 						// we have another node at the same position as the release node.
-						if (pChn->nVolEnvPosition == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
+						if (pChn->VolEnv.nEnvPosition == pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode])
 							envvol = envValueAtReleaseNode;
 
 						int relativeVolumeChange = (envvol - envValueAtReleaseNode) * 2;
@@ -1130,7 +1130,7 @@ BOOL CSoundFile::ReadNote()
 				// IT Compatibility: S79 does not disable the panning envelope, it just pauses the counter
 				if (((pChn->dwFlags & CHN_PANENV) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
 				{
-					int envpos = pChn->nPanEnvPosition;
+					int envpos = pChn->PanEnv.nEnvPosition;
 					UINT pt = pIns->PanEnv.nNodes - 1;
 					for (UINT i=0; i<(UINT)(pIns->PanEnv.nNodes-1); i++)
 					{
@@ -1311,7 +1311,7 @@ BOOL CSoundFile::ReadNote()
 			// IT Compatibility: S7B does not disable the pitch envelope, it just pauses the counter
 			if ((pIns) && ((pChn->dwFlags & CHN_PITCHENV) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
 			{
-				int envpos = pChn->nPitchEnvPosition;
+				int envpos = pChn->PitchEnv.nEnvPosition;
 				UINT pt = pIns->PitchEnv.nNodes - 1;
 				for (UINT i=0; i<(UINT)(pIns->PitchEnv.nNodes-1); i++)
 				{
@@ -1662,15 +1662,15 @@ BOOL CSoundFile::ReadNote()
 			if (pChn->dwFlags & CHN_VOLENV)
 			{
 				// Increase position
-				pChn->nVolEnvPosition++;
+				pChn->VolEnv.nEnvPosition++;
 				// Volume Loop ?
 				if (pIns->VolEnv.dwFlags & ENV_LOOP)
 				{
 					UINT volloopend = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopEnd];
 					if (m_nType != MOD_TYPE_XM) volloopend++;
-					if (pChn->nVolEnvPosition == volloopend)
+					if (pChn->VolEnv.nEnvPosition == volloopend)
 					{
-						pChn->nVolEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopStart];
+						pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nLoopStart];
 						if ((pIns->VolEnv.nLoopEnd == pIns->VolEnv.nLoopStart) && (!pIns->VolEnv.Values[pIns->VolEnv.nLoopStart])
 						 && ((!(m_nType & MOD_TYPE_XM)) || (pIns->VolEnv.nLoopEnd+1 == (int)pIns->VolEnv.nNodes)))
 						{
@@ -1682,14 +1682,14 @@ BOOL CSoundFile::ReadNote()
 				// Volume Sustain ?
 				if ((pIns->VolEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
-					if (pChn->nVolEnvPosition == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd] + 1)
-						pChn->nVolEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
+					if (pChn->VolEnv.nEnvPosition == (UINT)pIns->VolEnv.Ticks[pIns->VolEnv.nSustainEnd] + 1)
+						pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nSustainStart];
 				} else
 				// End of Envelope ?
-				if (pChn->nVolEnvPosition > pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1])
+				if (pChn->VolEnv.nEnvPosition > pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1])
 				{
 					if ((m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (pChn->dwFlags & CHN_KEYOFF)) pChn->dwFlags |= CHN_NOTEFADE;
-					pChn->nVolEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1];
+					pChn->VolEnv.nEnvPosition = pIns->VolEnv.Ticks[pIns->VolEnv.nNodes - 1];
 					if ((!pIns->VolEnv.Values[pIns->VolEnv.nNodes-1]) && ((nChn >= m_nChannels) || (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))))
 					{
 						pChn->dwFlags |= CHN_NOTEFADE;
@@ -1701,49 +1701,49 @@ BOOL CSoundFile::ReadNote()
 			// Panning Envelope
 			if (pChn->dwFlags & CHN_PANENV)
 			{
-				pChn->nPanEnvPosition++;
+				pChn->PanEnv.nEnvPosition++;
 				if (pIns->PanEnv.dwFlags & ENV_LOOP)
 				{
 					UINT panloopend = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopEnd];
 					if (m_nType != MOD_TYPE_XM) panloopend++;
-					if (pChn->nPanEnvPosition == panloopend)
-						pChn->nPanEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopStart];
+					if (pChn->PanEnv.nEnvPosition == panloopend)
+						pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nLoopStart];
 				}
 				// Panning Sustain ?
-				if ((pIns->PanEnv.dwFlags & ENV_SUSTAIN) && (pChn->nPanEnvPosition == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd]+1)
+				if ((pIns->PanEnv.dwFlags & ENV_SUSTAIN) && (pChn->PanEnv.nEnvPosition == (UINT)pIns->PanEnv.Ticks[pIns->PanEnv.nSustainEnd]+1)
 				 && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
 					// Panning sustained
-					pChn->nPanEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nSustainStart];
+					pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nSustainStart];
 				} else
 				{
-					if (pChn->nPanEnvPosition > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1])
-						pChn->nPanEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1];
+					if (pChn->PanEnv.nEnvPosition > pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1])
+						pChn->PanEnv.nEnvPosition = pIns->PanEnv.Ticks[pIns->PanEnv.nNodes - 1];
 				}
 			}
 			// Pitch Envelope
 			if (pChn->dwFlags & CHN_PITCHENV)
 			{
 				// Increase position
-				pChn->nPitchEnvPosition++;
+				pChn->PitchEnv.nEnvPosition++;
 				// Pitch Loop ?
 				if (pIns->PitchEnv.dwFlags & ENV_LOOP)
 				{
 					UINT pitchloopend = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopEnd];
 					//IT compatibility 24. Short envelope loops
 					if (IsCompatibleMode(TRK_IMPULSETRACKER)) pitchloopend++;
-					if (pChn->nPitchEnvPosition >= pitchloopend)
-						pChn->nPitchEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
+					if (pChn->PitchEnv.nEnvPosition >= pitchloopend)
+						pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nLoopStart];
 				}
 				// Pitch Sustain ?
 				if ((pIns->PitchEnv.dwFlags & ENV_SUSTAIN) && (!(pChn->dwFlags & CHN_KEYOFF)))
 				{
-					if (pChn->nPitchEnvPosition == (UINT)pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainEnd]+1)
-						pChn->nPitchEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainStart];
+					if (pChn->PitchEnv.nEnvPosition == (UINT)pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainEnd]+1)
+						pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nSustainStart];
 				} else
 				{
-					if (pChn->nPitchEnvPosition > pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1])
-						pChn->nPitchEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1];
+					if (pChn->PitchEnv.nEnvPosition > pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1])
+						pChn->PitchEnv.nEnvPosition = pIns->PitchEnv.Ticks[pIns->PitchEnv.nNodes - 1];
 				}
 			}
 		}

@@ -850,9 +850,9 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			{
 				// IT compatibility tentative fix: Reset NNA action on every new note, even without instrument number next to note (fixes spx-farspacedance.it, but is this actually 100% correct?)
 				if(IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nNNA = pIns->nNNA;
-				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->nVolEnvPosition = 0;
-				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->nPanEnvPosition = 0;
-				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) pChn->nPitchEnvPosition = 0;
+				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) pChn->VolEnv.nEnvPosition = 0;
+				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) pChn->PanEnv.nEnvPosition = 0;
+				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) pChn->PitchEnv.nEnvPosition = 0;
 				if (m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))
 				{
 					// Volume Swing
@@ -957,9 +957,9 @@ UINT CSoundFile::GetNNAChannel(UINT nChn) const
 		else
 			v <<= 16;
 		if (pj->dwFlags & CHN_LOOP) v >>= 1;
-		if ((v < vol) || ((v == vol) && (pj->nVolEnvPosition > envpos)))
+		if ((v < vol) || ((v == vol) && (pj->VolEnv.nEnvPosition > envpos)))
 		{
-			envpos = pj->nVolEnvPosition;
+			envpos = pj->VolEnv.nEnvPosition;
 			vol = v;
 			result = j;
 		}
@@ -1907,13 +1907,13 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_SETENVPOSITION:
 			if(m_dwSongFlags & SONG_FIRSTTICK)
 			{
-				pChn->nVolEnvPosition = param;
+				pChn->VolEnv.nEnvPosition = param;
 
 				// XM compatibility: FT2 only sets the position of the Volume envelope
 				if(!IsCompatibleMode(TRK_FASTTRACKER2))
 				{
-					pChn->nPanEnvPosition = param;
-					pChn->nPitchEnvPosition = param;
+					pChn->PanEnv.nEnvPosition = param;
+					pChn->PitchEnv.nEnvPosition = param;
 					if (pChn->pModInstrument)
 					{
 						MODINSTRUMENT *pIns = pChn->pModInstrument;
@@ -2065,24 +2065,24 @@ void CSoundFile::resetEnvelopes(MODCHANNEL* pChn, enmResetEnv envToReset)
 	switch (envToReset)
 	{
 		case ENV_RESET_ALL:
-			pChn->nVolEnvPosition = 0;
-			pChn->nPanEnvPosition = 0;
-			pChn->nPitchEnvPosition = 0;
-			pChn->nVolEnvValueAtReleaseJump = NOT_YET_RELEASED;
-			pChn->nPitchEnvValueAtReleaseJump = NOT_YET_RELEASED;
-			pChn->nPanEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			pChn->VolEnv.nEnvPosition = 0;
+			pChn->PanEnv.nEnvPosition = 0;
+			pChn->PitchEnv.nEnvPosition = 0;
+			pChn->VolEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			pChn->PitchEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			pChn->PanEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
 			break;
 		case ENV_RESET_VOL:
-			pChn->nVolEnvPosition = 0;
-			pChn->nVolEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			pChn->VolEnv.nEnvPosition = 0;
+			pChn->VolEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
 			break;
 		case ENV_RESET_PAN:
-			pChn->nPanEnvPosition = 0;
-			pChn->nPanEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			pChn->PanEnv.nEnvPosition = 0;
+			pChn->PanEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
 			break;
 		case ENV_RESET_PITCH:
-			pChn->nPitchEnvPosition = 0;
-			pChn->nPitchEnvValueAtReleaseJump = NOT_YET_RELEASED;
+			pChn->PitchEnv.nEnvPosition = 0;
+			pChn->PitchEnv.nEnvValueAtReleaseJump = NOT_YET_RELEASED;
 			break;				
 	}
 }
@@ -3580,8 +3580,8 @@ void CSoundFile::KeyOff(UINT nChn)
 	
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		{
-			pChn->nVolEnvValueAtReleaseJump = getVolEnvValueFromPosition(pChn->nVolEnvPosition, pIns);
-			pChn->nVolEnvPosition= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
+			pChn->VolEnv.nEnvValueAtReleaseJump = getVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
+			pChn->VolEnv.nEnvPosition= pIns->VolEnv.Ticks[pIns->VolEnv.nReleaseNode];
 		}
 
 	}
