@@ -392,7 +392,7 @@ void CMainFrame::LoadIniSettings()
 	glTreeWindowWidth = GetPrivateProfileLong("Display", "MDITreeWidth", 160, iniFile);
 	glTreeSplitRatio = GetPrivateProfileLong("Display", "MDITreeRatio", 128, iniFile);
 	glGeneralWindowHeight = GetPrivateProfileLong("Display", "MDIGeneralHeight", 178, iniFile);
-	glPatternWindowHeight = GetPrivateProfileLong("Display", "MDIPatternHeight", 232, iniFile);
+	glPatternWindowHeight = GetPrivateProfileLong("Display", "MDIPatternHeight", 152, iniFile);
 	glSampleWindowHeight = GetPrivateProfileLong("Display", "MDISampleHeight", 188, iniFile);
 	glInstrumentWindowHeight = GetPrivateProfileLong("Display", "MDIInstrumentHeight", 300, iniFile);
 	glCommentsWindowHeight = GetPrivateProfileLong("Display", "MDICommentsHeight", 288, iniFile);
@@ -405,7 +405,8 @@ void CMainFrame::LoadIniSettings()
 	gnMsgBoxVisiblityFlags = GetPrivateProfileDWord("Display", "MsgBoxVisibilityFlags", uint32_max, iniFile);
 
 	CHAR s[16];
-	for (int ncol = 0; ncol < MAX_MODCOLORS; ncol++) {
+	for (int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
+	{
 		wsprintf(s, "Color%02d", ncol);
 		rgbCustomColors[ncol] = GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
 	}
@@ -1620,14 +1621,14 @@ BOOL CMainFrame::DoNotification(DWORD dwSamplesRead, DWORD dwLatency)
 					{
 						if (m_dwNotifyType & MPTNOTIFY_PITCHENV)
 						{
-							if (pChn->dwFlags & CHN_PITCHENV) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->nPitchEnvPosition);
+							if (pChn->dwFlags & CHN_PITCHENV) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->PitchEnv.nEnvPosition);
 						} else
 						if (m_dwNotifyType & MPTNOTIFY_PANENV)
 						{
-							if (pChn->dwFlags & CHN_PANENV) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->nPanEnvPosition);
+							if (pChn->dwFlags & CHN_PANENV) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->PanEnv.nEnvPosition);
 						} else
 						{
-							if (pChn->dwFlags & CHN_VOLENV) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->nVolEnvPosition);
+							if (pChn->dwFlags & CHN_VOLENV) p->dwPos[k] = MPTNOTIFY_POSVALID | (DWORD)(pChn->VolEnv.nEnvPosition);
 						}
 					}
 				}
