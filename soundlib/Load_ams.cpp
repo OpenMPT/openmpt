@@ -352,6 +352,7 @@ typedef struct AMS2SAMPLE
 bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 //------------------------------------------------------------
 {
+	return false;
 	const AMS2FILEHEADER *pfh = (AMS2FILEHEADER *)lpStream;
 	AMS2SONGHEADER *psh;
 	DWORD dwMemPos;
