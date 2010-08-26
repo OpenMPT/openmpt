@@ -112,7 +112,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_ComboResampling.AddString("Cubic spline");
 	//rewbs.resamplerConf
 	m_ComboResampling.AddString("Polyphase");
-	m_ComboResampling.AddString("XMMS-Modplug");	
+	m_ComboResampling.AddString("XMMS-ModPlug");	
 	//end rewbs.resamplerConf
 	m_bEditsLocked=false;
 	UpdateView(HINT_MODGENERAL|HINT_MODTYPE|HINT_MODSEQUENCE|HINT_MPTSETUP, NULL);

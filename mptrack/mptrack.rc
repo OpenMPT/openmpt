@@ -1967,7 +1967,7 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Internet"
         BEGIN
-            MENUITEM "Modplug Central &Forums",     ID_NETLINK_FORUMS
+            MENUITEM "ModPlug Central &Forums",     ID_NETLINK_FORUMS
             MENUITEM "OpenMPT Wiki",                ID_NETLINK_OPENMPTWIKI
             MENUITEM "OpenMPT Wiki (German)",       ID_NETLINK_OPENMPTWIKI_GERMAN
             MENUITEM "MPT-FR",                      ID_NETLINK_MPTFR
@@ -2305,7 +2305,7 @@ BEGIN
     ID_PATTERN_EXPAND       "Expand pattern\nExpand Pattern"
     ID_PATTERN_SHRINK       "Shrink Pattern\nShrink Pattern"
     ID_HELP_SEARCH          "Displays the help index\nHelp Index"
-    ID_NETLINK_MODPLUG      "Go to Modplug Central"
+    ID_NETLINK_MODPLUG      "Go to ModPlug Central"
     ID_NETLINK_UT           "Go to United Trackers"
     ID_NETLINK_OSMUSIC      "Go to OSMusic.net"
     ID_NETLINK_HANDBOOK     "Go to the Tracker's Handbook"
@@ -2320,7 +2320,7 @@ STRINGTABLE
 BEGIN
     ID_SAMPLE_TRIM          "Delete everything except the current selection\nTrim Sample"
     ID_FILE_SAVEMIDI        "Export the current song to a standard MIDI file"
-    ID_NETLINK_FORUMS       "Go to the Modplug Central Music Forums"
+    ID_NETLINK_FORUMS       "Go to the ModPlug Central Music Forums"
     ID_INSTRUMENT_SAMPLEMAP "Edit the sample map"
     ID_NETLINK_PLUGINS      "Go to KVR Audio to download plugins"
     ID_PATTERNDETAIL_LO     "Low pattern detail level\nLow pattern detail level"

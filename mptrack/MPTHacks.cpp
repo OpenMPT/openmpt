@@ -58,7 +58,7 @@ struct FixHackedPatterns
 				m.volcmd = VOLCMD_NONE;
 		}
 
-		if(type == MOD_TYPE_XM)		// modplug XM extensions
+		if(type == MOD_TYPE_XM)		// ModPlug XM extensions
 		{
 			if(m.command == CMD_XFINEPORTAUPDOWN && m.param >= 0x30)
 			{
@@ -66,7 +66,7 @@ struct FixHackedPatterns
 				if(autofix)
 					m.command = CMD_NONE;
 			}
-		} else if(type == MOD_TYPE_IT)		// modplug IT extensions
+		} else if(type == MOD_TYPE_IT)		// ModPlug IT extensions
 		{
 			if((m.command == CMD_S3MCMDEX) && ((m.param >> 4) == 0x09) && (m.param != 0x91))
 			{
