@@ -426,7 +426,7 @@ BOOL COptionsPlayer::OnInitDialog()
 		m_CbnResampling.AddString("Cubic spline");
 		//rewbs.resamplerConf
 		m_CbnResampling.AddString("Polyphase");
-		m_CbnResampling.AddString("XMMS-Modplug");
+		m_CbnResampling.AddString("XMMS-ModPlug");
 		//end rewbs.resamplerConf
 		m_CbnResampling.SetCurSel(CMainFrame::m_nSrcMode);
 	}

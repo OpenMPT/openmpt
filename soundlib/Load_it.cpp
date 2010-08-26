@@ -469,8 +469,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	MODCOMMAND lastvalue[MAX_BASECHANNELS];
 // -! BEHAVIOUR_CHANGE#0006
 
-	bool interpretModplugmade = false;
-	bool hasModplugExtensions = false;
+	bool interpretModPlugMade = false;
+	bool hasModPlugExtensions = false;
 
 	if ((!lpStream) || (dwMemLength < 0xC0)) return false;
 	if ((pifh->id != LittleEndian(IT_IMPM) && pifh->id != LittleEndian(IT_MPTM)) || (pifh->insnum > 0xFF)
@@ -509,27 +509,27 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				// This will only be interpreted as "made with modplug" (i.e. disable compatible playback etc) if the "reserved" field is set to "OMPT" - else, compatibility was used.
 				m_dwLastSavedWithVersion = (pifh->cwtv & 0x0FFF) << 16;
 				if(pifh->reserved == LittleEndian(IT_OMPT))
-					interpretModplugmade = true;
+					interpretModPlugMade = true;
 			} else if(pifh->cmwt == 0x888 || pifh->cwtv == 0x888)
 			{
 				// OpenMPT 1.17 and 1.18 (raped IT format)
-				interpretModplugmade = true;
+				interpretModPlugMade = true;
 			} else if(pifh->cwtv == 0x0217 && pifh->cmwt == 0x0200 && pifh->reserved == 0)
 			{
-				// Modplug Tracker 1.16 (semi-raped IT format)
+				// ModPlug Tracker 1.16 (semi-raped IT format)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-				interpretModplugmade = true;
+				interpretModPlugMade = true;
 			} else if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0202 && pifh->reserved == 0)
 			{
-				// Modplug Tracker b3.3 - 1.09, instruments 557 bytes apart
+				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
-				interpretModplugmade = true;
+				interpretModPlugMade = true;
 			}
 			else if(pifh->cwtv == 0x0214 && pifh->cmwt == 0x0200 && pifh->reserved == 0)
 			{
-				// Modplug Tracker 1.00a5, instruments 560 bytes apart
+				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, 00);
-				interpretModplugmade = true;
+				interpretModPlugMade = true;
 			}
 		}
 		else // case: type == MOD_TYPE_MPT
@@ -744,8 +744,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		if(rows <= ModSpecs::itEx.patternRowsMax && rows > ModSpecs::it.patternRowsMax)
 		{
-			interpretModplugmade = true;
-			hasModplugExtensions = true;
+			interpretModPlugMade = true;
+			hasModPlugExtensions = true;
 		}
 
 		if ((rows < GetModSpecifications().patternRowsMin) || (rows > GetModSpecifications().patternRowsMax)) 
@@ -902,8 +902,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Load instrument and song extensions.
 	if(mptStartPos >= dwMemPos)
 	{
-		LPCBYTE ptr = LoadExtendedInstrumentProperties(lpStream + dwMemPos, lpStream + mptStartPos, &interpretModplugmade);
-		LoadExtendedSongProperties(GetType(), ptr, lpStream, mptStartPos, &interpretModplugmade);
+		LPCBYTE ptr = LoadExtendedInstrumentProperties(lpStream + dwMemPos, lpStream + mptStartPos, &interpretModPlugMade);
+		LoadExtendedSongProperties(GetType(), ptr, lpStream, mptStartPos, &interpretModPlugMade);
 	}
 		
 // -! NEW_FEATURE#0027
@@ -1037,7 +1037,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					if ((vol >= 203) && (vol <= 212)) { 
 						m[ch].volcmd = VOLCMD_VIBRATODEPTH; m[ch].vol = vol - 203;
 						// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that
-						if(m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54) && interpretModplugmade)
+						if(m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54) && interpretModPlugMade)
 							m[ch].volcmd = VOLCMD_VIBRATOSPEED;
 					} else
 					// 213-222: Unused (was velocity)
@@ -1078,7 +1078,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if(GetType() == MOD_TYPE_IT)
 	{
 		// Set appropriate mod flags if the file was not made with MPT.
-		if(!interpretModplugmade)
+		if(!interpretModPlugMade)
 		{
 			SetModFlag(MSF_MIDICC_BUGEMULATION, false);
 			SetModFlag(MSF_OLDVOLSWING, false);

@@ -1872,7 +1872,7 @@ BOOL CSoundFile::ProcessEffects()
 			{
 			case 0x10: ExtraFinePortamentoUp(pChn, param & 0x0F); break;
 			case 0x20: ExtraFinePortamentoDown(pChn, param & 0x0F); break;
-			// Modplug XM Extensions (ignore in compatible mode)
+			// ModPlug XM Extensions (ignore in compatible mode)
 			case 0x50:
 			case 0x60: 
 			case 0x70:
@@ -2014,7 +2014,7 @@ BOOL CSoundFile::ProcessEffects()
 			if (nBreakRow < 0) nBreakRow = 0;
 
 			if(nBreakRow >= 0) m_dwSongFlags |= SONG_BREAKTOROW;
-			// Modplug Tracker & ModPlugin allow backward jumps
+			// ModPlug Tracker & ModPlugin allow backward jumps
 		#ifndef FASTSOUNDLIB
 			if ((nPosJump < (int)m_nCurrentPattern)
 			 || ((nPosJump == (int)m_nCurrentPattern) && (nBreakRow <= (int)m_nRow)))
@@ -2851,7 +2851,7 @@ void CSoundFile::ExtendedChannelEffect(MODCHANNEL *pChn, UINT param)
 	// S91: Surround On
 	case 0x01:	pChn->dwFlags |= CHN_SURROUND; pChn->nPan = 128; break;
 	////////////////////////////////////////////////////////////
-	// Modplug Extensions
+	// ModPlug Extensions
 	// S98: Reverb Off
 	case 0x08:
 		pChn->dwFlags &= ~CHN_REVERB;
@@ -3595,7 +3595,7 @@ void CSoundFile::KeyOff(UINT nChn)
 void CSoundFile::SetSpeed(UINT param)
 //-----------------------------------
 {
-	// Modplug Tracker and Mod-Plugin don't do this check
+	// ModPlug Tracker and Mod-Plugin don't do this check
 #ifndef MODPLUG_TRACKER
 #ifndef FASTSOUNDLIB
 	// Big Hack!!!
@@ -4115,7 +4115,7 @@ void CSoundFile::PortamentoFineMPT(MODCHANNEL* pChn, int param)
    Specific implementations:
 
    Length detection code:
-   As the modplug engine already deals with pattern loops sufficiently, there's no problem with (infinite) pattern loops
+   As the ModPlug engine already deals with pattern loops sufficiently, there's no problem with (infinite) pattern loops
    in this code.
    
    Normal player code:

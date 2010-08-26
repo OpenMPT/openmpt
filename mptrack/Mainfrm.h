@@ -24,7 +24,7 @@ class CPerformanceCounter;
 #define NUM_AUDIO_BUFFERS			3
 #define MIN_AUDIO_BUFFERSIZE		1024
 #define MAX_AUDIO_BUFFERSIZE		32768	// 32K buffers max
-#define MAINFRAME_TITLE				"Open Modplug Tracker"
+#define MAINFRAME_TITLE				"Open ModPlug Tracker"
 #define INIBUFFERSIZE				MAX_PATH
 
 enum {

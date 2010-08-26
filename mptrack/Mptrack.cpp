@@ -1830,7 +1830,7 @@ BOOL CAboutDlg::OnInitDialog()
 		"http://sourceforge.net/projects/modplug/");
 
 	const char* const pArrCredit = { 
-		"OpenMPT / Modplug Tracker|"
+		"OpenMPT / ModPlug Tracker|"
 		"Copyright © 2004-2010 Contributors|"
 		"Copyright © 1997-2003 Olivier Lapicque (olivier@modplug.com)|"
 		"|"
@@ -1844,7 +1844,7 @@ BOOL CAboutDlg::OnInitDialog()
 		"Olivier Lapicque (1997-2003)|"
 		"|"
 		"Thanks to:||"
-		"Konstanty for the XMMS-Modplug resampling implementation |"
+		"Konstanty for the XMMS-ModPlug resampling implementation |"
 		"http://modplug-xmms.sourceforge.net/|"
 		"Stephan M. Bernsee for pitch shifting source code|"
 		"http://www.dspdimension.com|"
@@ -1863,7 +1863,7 @@ BOOL CAboutDlg::OnInitDialog()
 		"http://kode54.foobar2000.org/|"
 		"Pel K. Txnder for the scrolling credits control :)|"
 		"http://tinyurl.com/4yze8|"
-		"|The people at Modplug forums for crucial contribution|"
+		"|The people at ModPlug forums for crucial contribution|"
 		"in the form of ideas, testing and support; thanks|"
 		"particularly to:|"
 		"LPChip, Ganja, Diamond, Nofold, Goor00, Georg|"
