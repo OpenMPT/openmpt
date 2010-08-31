@@ -224,6 +224,17 @@ bool IsMagic(LPCSTR s1, LPCSTR s2)
 	return ((*(DWORD *)s1) == (*(DWORD *)s2)) ? true : false;
 }
 
+// Functor for fixing VBlank MODs
+struct FixVBlankMODs
+//==================
+{
+	void operator()(MODCOMMAND& m)
+	{
+		if(m.command == CMD_TEMPO)
+			m.command = CMD_SPEED;
+	}
+};
+
 
 bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 //---------------------------------------------------------------
@@ -380,6 +391,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 
 	const CHANNELINDEX nMaxChn = (bFLT8) ? 4 : m_nChannels; // 4 channels per pattern in FLT8 format.
 	if(bFLT8) nbp++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
+	bool bHasTempoCommands = false;	// for detecting VBlank MODs
 
 	// Reading patterns
 	for (PATTERNINDEX ipat = 0; ipat < nbp; ipat++)
@@ -421,6 +433,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 					m->param = A3;
 					if ((m->command) || (m->param)) ConvertModCommand(m);
 
+					if (m->command == CMD_TEMPO && m->param < 100) bHasTempoCommands = true;
 				}
 			}
 		}
@@ -449,6 +462,21 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 			bSamplesPresent = true;
 		}
 	}
+
+	// Fix VBlank MODs. Arbitrary threshold: 10 minutes.
+	// Basically, this just converts all tempo commands into speed commands
+	// for MODs which are supposed to have VBlank timing (instead of CIA timing).
+	// There is no perfect way to do this, since both MOD types look the same,
+	// but the most reliable way is to simply check for extremely long songs
+	// (as this would indicate that f.e. a F30 command was really meant to set
+	// the ticks per row to 48, and not the tempo to 48 BPM).
+	// In the pattern loader above, a second condition is used: Only tempo commands
+	// below 100 BPM are taken into account.
+	if(bHasTempoCommands && GetSongTime() >= 10 * 60)
+	{
+		Patterns.ForEachModCommand(FixVBlankMODs());
+	}
+
 #ifdef MODPLUG_TRACKER
 	return true;
 #else
