@@ -149,7 +149,7 @@ bool CSoundFile::ReadPSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// Yep, this seems to be a valid file.
 	m_nType = MOD_TYPE_PSM;
-	m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATMODE;
+	m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 	m_nChannels = 0;
 

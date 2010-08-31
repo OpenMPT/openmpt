@@ -247,7 +247,7 @@ void CModTypeDlg::UpdateDialog()
 	m_CheckBox1.SetCheck((m_pSndFile->m_dwSongFlags & SONG_LINEARSLIDES) ? MF_CHECKED : 0);
 	m_CheckBox2.SetCheck((m_pSndFile->m_dwSongFlags & SONG_FASTVOLSLIDES) ? MF_CHECKED : 0);
 	m_CheckBox3.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITOLDEFFECTS) ? MF_CHECKED : 0);
-	m_CheckBox4.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITCOMPATMODE) ? MF_CHECKED : 0);
+	m_CheckBox4.SetCheck((m_pSndFile->m_dwSongFlags & SONG_ITCOMPATGXX) ? MF_CHECKED : 0);
 	m_CheckBox5.SetCheck((m_pSndFile->m_dwSongFlags & SONG_EXFILTERRANGE) ? MF_CHECKED : 0);
 	m_CheckBoxPT1x.SetCheck((m_pSndFile->m_dwSongFlags & SONG_PT1XMODE) ? MF_CHECKED : 0);
 
@@ -356,9 +356,9 @@ void CModTypeDlg::OnCheck4()
 //--------------------------
 {
 	if (m_CheckBox4.GetCheck())
-		m_pSndFile->m_dwSongFlags |= SONG_ITCOMPATMODE;
+		m_pSndFile->m_dwSongFlags |= SONG_ITCOMPATGXX;
 	else
-		m_pSndFile->m_dwSongFlags &= ~SONG_ITCOMPATMODE;
+		m_pSndFile->m_dwSongFlags &= ~SONG_ITCOMPATGXX;
 }
 
 

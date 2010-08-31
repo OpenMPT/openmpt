@@ -488,7 +488,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 				memcpy(m_szNames[0], mainchunk->songname, 32);
 				SpaceToNullStringFixed(m_szNames[0], 31);
-				m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATMODE;
+				m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 				if(!(mainchunk->flags & 0x01)) m_dwSongFlags |= SONG_LINEARSLIDES;
 				if(mainchunk->channels < 1) return false;
 				m_nChannels = min(mainchunk->channels, MAX_BASECHANNELS);

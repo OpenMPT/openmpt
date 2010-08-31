@@ -269,7 +269,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetVibrato);
 	}
 
-	if (oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATMODE;
+	if (oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATGXX;
 
 	// Convert IT/MPT to XM (instruments)
 	if (oldTypeIsIT_MPT && newTypeIsXM)
@@ -388,7 +388,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		AddToLog("WARNING: Linear Frequency Slides not supported by the new format.\n");
 		m_SndFile.m_dwSongFlags &= ~SONG_LINEARSLIDES;
 	}
-	if (!newTypeIsIT_MPT) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATMODE);
+	if (!newTypeIsIT_MPT) m_SndFile.m_dwSongFlags &= ~(SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX);
 	if (!newTypeIsS3M) m_SndFile.m_dwSongFlags &= ~SONG_FASTVOLSLIDES;
 	if (!newTypeIsMOD) m_SndFile.m_dwSongFlags &= ~SONG_PT1XMODE;
 	if (newTypeIsS3M || newTypeIsMOD) m_SndFile.m_dwSongFlags &= ~SONG_EXFILTERRANGE;

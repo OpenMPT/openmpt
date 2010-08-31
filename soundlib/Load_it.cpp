@@ -563,7 +563,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;
 	if (pifh->flags & 0x10) m_dwSongFlags |= SONG_ITOLDEFFECTS;
-	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATMODE;
+	if (pifh->flags & 0x20) m_dwSongFlags |= SONG_ITCOMPATGXX;
 	if ((pifh->flags & 0x80) || (pifh->special & 0x08)) m_dwSongFlags |= SONG_EMBEDMIDICFG;
 	if (pifh->flags & 0x1000) m_dwSongFlags |= SONG_EXFILTERRANGE;
 
@@ -1228,7 +1228,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (m_nInstruments) header.flags |= 0x04;
 	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
-	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
+	if (m_dwSongFlags & SONG_ITCOMPATGXX) header.flags |= 0x20;
 	if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
 	header.mv = CLAMP(m_nSamplePreAmp, 0, 128);
@@ -1862,7 +1862,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	if (m_nInstruments) header.flags |= 0x04;
 	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
-	if (m_dwSongFlags & SONG_ITCOMPATMODE) header.flags |= 0x20;
+	if (m_dwSongFlags & SONG_ITCOMPATGXX) header.flags |= 0x20;
 	//if (m_dwSongFlags & SONG_EXFILTERRANGE) header.flags |= 0x1000;
 	header.globalvol = m_nDefaultGlobalVolume >> 1;
 	header.mv = CLAMP(m_nSamplePreAmp, 0, 128);
