@@ -10,6 +10,7 @@
 #include "Loaders.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/moddoc.h"
+#include "../mptrack/Mptrack.h"
 #endif // MODPLUG_TRACKER
 
 // decode a MO3 file (returns the same "exit codes" as UNMO3.EXE, eg. 0=success)
@@ -28,7 +29,7 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 		return false;
 
 #ifdef NO_MO3_SUPPORT
-	/* As of August 2009, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
+	/* As of August 2010, the format revision is 5; Versions > 31 are unlikely to exist in the next few years,
 	so we will just ignore those if there's no UNMO3 library to tell us if the file is valid or not
 	(avoid log entry with .MOD files that have a song name starting with "MO3" */
 	if(lpStream[3] > 31) return false;
@@ -45,7 +46,14 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 	void **mo3Stream = (void **)&lpStream;
 
 	// try to load unmo3.dll dynamically.
+#ifdef MODPLUG_TRACKER
+	CHAR szPath[MAX_PATH];
+	strcpy(szPath, theApp.GetAppDirPath());
+	_tcsncat(szPath, _TEXT("unmo3.dll"), MAX_PATH - strlen(szPath));
+	HMODULE unmo3 = LoadLibrary(szPath);
+#else
 	HMODULE unmo3 = LoadLibrary(_TEXT("unmo3.dll"));
+#endif // MODPLUG_TRACKER
 	if(unmo3 == NULL) // Didn't succeed.
 	{
 #ifdef MODPLUG_TRACKER
