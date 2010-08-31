@@ -557,7 +557,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	// Reset envelopes
 	if (bResetEnv)
 	{
-		if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITCOMPATMODE)
+		if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT))) || (m_dwSongFlags & SONG_ITCOMPATGXX)
 		 || (!pChn->nLength) || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		 //IT compatibility tentative fix: Reset envelopes when instrument changes.
 		 || (IsCompatibleMode(TRK_IMPULSETRACKER) && bInstrumentChanged))
@@ -808,7 +808,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 
 	if ((!bPorta) || (!(m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 	 || ((pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
-	 || ((m_dwSongFlags & SONG_ITCOMPATMODE) && (pChn->nRowInstr)))
+	 || ((m_dwSongFlags & SONG_ITCOMPATGXX) && (pChn->nRowInstr)))
 	{
 		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		{
@@ -818,7 +818,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			pChn->dwFlags &= ~CHN_NOTEFADE;
 			pChn->nFadeOutVol = 65536;
 		}
-		if ((!bPorta) || (!(m_dwSongFlags & SONG_ITCOMPATMODE)) || (pChn->nRowInstr))
+		if ((!bPorta) || (!(m_dwSongFlags & SONG_ITCOMPATGXX)) || (pChn->nRowInstr))
 		{
 			if ((!(m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))) || (pChn->nRowInstr))
 			{
@@ -2319,7 +2319,7 @@ void CSoundFile::TonePortamento(MODCHANNEL *pChn, UINT param)
 	pChn->dwFlags |= CHN_PORTAMENTO;
 
 	//IT compatibility 03
-	if(!(m_dwSongFlags & SONG_ITCOMPATMODE) && IsCompatibleMode(TRK_IMPULSETRACKER))
+	if(!(m_dwSongFlags & SONG_ITCOMPATGXX) && IsCompatibleMode(TRK_IMPULSETRACKER))
 	{
 		if(param == 0) param = pChn->nOldPortaUpDown;
 		pChn->nOldPortaUpDown = param;

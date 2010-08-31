@@ -201,7 +201,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 	m_nRestartPos = pfh->wRestart;
 	m_nDefaultSpeed = pfh->bTicksPerLine;
 	m_nDefaultTempo = 125;
-	m_dwSongFlags = SONG_ITCOMPATMODE;
+	m_dwSongFlags = SONG_ITCOMPATGXX;
 	m_nDefaultRowsPerBeat = pfh->bLinesPerBeat;
 	m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4;
 	if ((pfh->wSamplesPerTick > 100) && (pfh->wSamplesPerTick < 5000))

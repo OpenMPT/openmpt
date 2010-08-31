@@ -326,7 +326,7 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 	dwMemPos += 32;
 
 	m_nType = MOD_TYPE_ULT;
-	m_dwSongFlags = SONG_ITCOMPATMODE | SONG_ITOLDEFFECTS;	// this will be converted to IT format by MPT.
+	m_dwSongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;	// this will be converted to IT format by MPT.
 	SetModFlag(MSF_COMPATIBLE_PLAY, true);
 
 	ASSERT_CAN_READ(1);
