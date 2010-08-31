@@ -568,7 +568,8 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 				if (!(pIns->VolEnv.dwFlags & ENV_CARRY)) resetEnvelopes(pChn, ENV_RESET_VOL);
 				if (!(pIns->PanEnv.dwFlags & ENV_CARRY)) resetEnvelopes(pChn, ENV_RESET_PAN);
 				if (!(pIns->PitchEnv.dwFlags & ENV_CARRY)) resetEnvelopes(pChn, ENV_RESET_PITCH);
-			} else {
+			} else
+			{
 				resetEnvelopes(pChn);
 			}
 			// IT Compatibility: Always reset autovibrato settings when there's an instrument number
@@ -579,7 +580,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 			}
 		} else if ((pIns) && (!(pIns->VolEnv.dwFlags & ENV_ENABLED)))
 		{
-			resetEnvelopes(pChn);		
+			resetEnvelopes(pChn, IsCompatibleMode(TRK_IMPULSETRACKER) ? ENV_RESET_VOL : ENV_RESET_ALL);
 		}
 	}
 	// Invalid sample ?
