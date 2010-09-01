@@ -95,18 +95,8 @@ bool CSoundFile::ReadMessage(const BYTE *data, const size_t length, enmLineEndin
 		if(pTextConverter != nullptr)
 			pTextConverter(c);
 
-		switch(c)
-		{
-		case '\r':
-			if(lineEnding != leLF) final_length++;
-			break;
-		case '\n':
-			if(lineEnding != leCR && lineEnding != leCRLF) final_length++;
-			break;
-		default:
+		if(c != '\n' || lineEnding != leCRLF)
 			final_length++;
-			break;
-		}
 	}
 
 	if(!AllocateMessage(final_length))
@@ -198,13 +188,13 @@ UINT CSoundFile::GetSongMessage(LPSTR s, UINT len, UINT linesize)
 	LPCSTR p = m_lpszSongComments;
 	if (!p) return 0;
 	UINT i = 2, ln=0;
-	if ((len) && (s)) s[0] = '\x0D';
-	if ((len > 1) && (s)) s[1] = '\x0A';
+	if ((len) && (s)) s[0] = '\r';
+	if ((len > 1) && (s)) s[1] = '\n';
 	while ((*p)	&& (i+2 < len))
 	{
 		BYTE c = (BYTE)*p++;
 		if ((c == 0x0D) || ((c == ' ') && (ln >= linesize)))
-		{ if (s) { s[i++] = '\x0D'; s[i++] = '\x0A'; } else i+= 2; ln=0; }
+		{ if (s) { s[i++] = '\r'; s[i++] = '\n'; } else i+= 2; ln=0; }
 		else
 			if (c >= 0x20) { if (s) s[i++] = c; else i++; ln++; }
 	}
