@@ -49,7 +49,7 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 #ifdef MODPLUG_TRACKER
 	CHAR szPath[MAX_PATH];
 	strcpy(szPath, theApp.GetAppDirPath());
-	_tcsncat(szPath, _TEXT("unmo3.dll"), MAX_PATH - strlen(szPath));
+	_tcsncat(szPath, _TEXT("unmo3.dll"), MAX_PATH - (_tcslen(szPath) + 1));
 	HMODULE unmo3 = LoadLibrary(szPath);
 #else
 	HMODULE unmo3 = LoadLibrary(_TEXT("unmo3.dll"));
