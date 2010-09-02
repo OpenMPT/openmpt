@@ -108,7 +108,7 @@ bool CSoundFile::ReadDSM(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nDefaultSpeed = psong->speed;
 	m_nDefaultTempo = psong->bpm;
 	m_nDefaultGlobalVolume = psong->globalvol << 2;
-	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > 256)) m_nDefaultGlobalVolume = 256;
+	if ((!m_nDefaultGlobalVolume) || (m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME)) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nSamplePreAmp = psong->mastervol & 0x7F;
 	Order.ReadAsByte(psong->orders, psong->numord, sizeof(psong->orders));
 

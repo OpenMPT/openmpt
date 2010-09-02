@@ -506,7 +506,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			if((pifh->cwtv & 0xF000) == 0x5000)
 			{
 				// OpenMPT Version number (Major.Minor)
-				// This will only be interpreted as "made with modplug" (i.e. disable compatible playback etc) if the "reserved" field is set to "OMPT" - else, compatibility was used.
+				// This will only be interpreted as "made with ModPlug" (i.e. disable compatible playback etc) if the "reserved" field is set to "OMPT" - else, compatibility was used.
 				m_dwLastSavedWithVersion = (pifh->cwtv & 0x0FFF) << 16;
 				if(pifh->reserved == LittleEndian(IT_OMPT))
 					interpretModPlugMade = true;
@@ -572,7 +572,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// Global Volume
 	m_nDefaultGlobalVolume = pifh->globalvol << 1;
-	if (m_nDefaultGlobalVolume > 256) m_nDefaultGlobalVolume = 256;
+	if (m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if (pifh->speed) m_nDefaultSpeed = pifh->speed;
 	m_nDefaultTempo = max(32, pifh->tempo); // tempo 31 is possible. due to conflicts with the rest of the engine, let's just clamp it to 32.
 	m_nSamplePreAmp = min(pifh->mv, 128);

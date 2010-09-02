@@ -85,7 +85,7 @@ bool CSoundFile::ReadFAR(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nSamplePreAmp = 0x20;
 	m_nDefaultSpeed = pmh1->speed;
 	m_nDefaultTempo = 80;
-	m_nDefaultGlobalVolume = 256;
+	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 
 	memcpy(m_szNames[0], pmh1->songname, 31);
 	SpaceToNullStringFixed(m_szNames[0], 31);

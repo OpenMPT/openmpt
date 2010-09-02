@@ -299,7 +299,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 		PATTERNINDEX n = pSndFile->Order[m_nScrollPos];
 		if ((n < pSndFile->Patterns.Size()) && (pSndFile->Patterns[n]) && !bShiftClick)
 		{
-			BOOL bIsPlaying = (pMainFrm->GetModPlaying() == m_pModDoc);
+			bool bIsPlaying = (pMainFrm->GetModPlaying() == m_pModDoc);
 			if ((bIsPlaying) && (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP))
 			{
 				BEGIN_CRITICAL();
@@ -522,8 +522,8 @@ void COrderList::EnterPatternNum(int enterNum)
 }
 
 
-static const char szClipboardOrdersHdr[] = "OpenMPT %3s\x0D\x0A";
-static const char szClipboardOrdCountFieldHdr[]	= "OrdNum: %u\x0D\x0A";
+static const char szClipboardOrdersHdr[] = "OpenMPT %3s\r\n";
+static const char szClipboardOrdCountFieldHdr[]	= "OrdNum: %u\r\n";
 static const char szClipboardOrdersFieldHdr[]	= "OrdLst: ";
 
 
@@ -554,7 +554,7 @@ void COrderList::OnEditPaste()
 
 			if (dwMemSize > sizeof(szClipboardOrdersHdr) &&
 				memcmp(p, "OpenMPT ", 8) == 0 &&
-				memcmp(p + 11, "\x0D\x0A", 2) == 0)
+				memcmp(p + 11, "\r\n", 2) == 0)
 			{
 				char buf[8];
 				p += sizeof(szClipboardOrdersHdr) - 1;

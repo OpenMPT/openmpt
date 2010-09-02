@@ -174,11 +174,11 @@ void CCtrlComments::OnCommentsChanged()
 			if (ln > LINE_LENGTH-1) ln = LINE_LENGTH-1;
 			s[ln] = 0;
 			while ((ln > 0) && (((BYTE)s[ln-1]) <= ' ')) s[--ln] = 0;
-			if (i+1 < n) strcat(s, "\x0D");
+			if (i+1 < n) strcat(s, "\r");
 			strcat(p, s);
 		}
 		UINT len = strlen(p);
-		while ((len > 0) && ((p[len-1] == ' ') || (p[len-1] == '\x0D')))
+		while ((len > 0) && ((p[len-1] == ' ') || (p[len-1] == '\r')))
 		{
 			len--;
 			p[len] = 0;

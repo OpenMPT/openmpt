@@ -334,7 +334,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// Not supported in MOD format
 		m_SndFile.m_nDefaultSpeed = 6;
 		m_SndFile.m_nDefaultTempo = 125;
-		m_SndFile.m_nDefaultGlobalVolume = 256;
+		m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 		m_SndFile.m_nSamplePreAmp = 48;
 		m_SndFile.m_nVSTiVolume = 48;
 		AddToLog("WARNING: Default speed, tempo and global volume will be lost.\n");

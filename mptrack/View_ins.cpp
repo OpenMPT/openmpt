@@ -2460,6 +2460,7 @@ MODINSTRUMENT *CViewInstrument::GetInstrumentPtr() const
 }
 
 // Get a pointer to the currently selected envelope.
+// This function also implicitely validates the moddoc and soundfile pointers.
 INSTRUMENTENVELOPE *CViewInstrument::GetEnvelopePtr() const
 //---------------------------------------------------------
 {

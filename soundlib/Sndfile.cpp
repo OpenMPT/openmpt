@@ -527,8 +527,8 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nInstruments = 0;
 	m_nFreqFactor = m_nTempoFactor = 128;
 	m_nMasterVolume = 128;
-	m_nDefaultGlobalVolume = 256;
-	m_nGlobalVolume = 256;
+	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+	m_nGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nOldGlbVolSlide = 0;
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo = 125;

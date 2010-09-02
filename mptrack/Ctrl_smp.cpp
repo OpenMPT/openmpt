@@ -1776,6 +1776,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 				break;
 		}
 		AfxMessageBox(str, MB_ICONERROR);
+		return;
 	}
 
 	// Update sample view

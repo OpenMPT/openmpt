@@ -1734,8 +1734,8 @@ BOOL CPaletteBitmap::Animate()
 	Phi = t;
 	spdx = 70000 + Sinus(Phi) * 10000 / 256;
 	spdy = 0;
-	//spdx =(Cosinus(Phi)+Sinus(Phi<<2))*(Dist<<9)/sizex;
-	//spdy =(Sinus(Phi)+Cosinus(Phi>>2))*(Dist<<9)/sizey;
+	spdx =(Cosinus(Phi)+Sinus(Phi<<2))*(Dist<<9)/sizex;
+	spdy =(Sinus(Phi)+Cosinus(Phi>>2))*(Dist<<9)/sizey;
 	srcx = 0x800000 - ((spdx * sizex) >> 1) + (spdy * sizey);	
 	srcy = 0x800000 - ((spdy * sizex) >> 1) + (spdx * sizey);	
 	for (UINT y=sizey; y; y--)
