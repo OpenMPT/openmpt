@@ -381,7 +381,7 @@ bool CSoundFile::ReadOKT(const BYTE *lpStream, const DWORD dwMemLength)
 		return false;
 
 	m_nDefaultTempo = 125;
-	m_nDefaultGlobalVolume = 256;
+	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nSamplePreAmp = m_nVSTiVolume = 48;
 	m_nType = MOD_TYPE_OKT;
 	m_nMinPeriod = 0x71 << 2;

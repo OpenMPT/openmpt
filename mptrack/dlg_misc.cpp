@@ -181,11 +181,11 @@ BOOL CModTypeDlg::OnInitDialog()
 		default:						m_TempoModeBox.SetCurSel(0); break;
 	}
 
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),   mixLevels_117RC3);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),   mixLevels_117RC2);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),   mixLevels_117RC1);
-	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original"),		  mixLevels_original);
-	//m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),   mixLevels_Test);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC3"),		mixLevels_117RC3);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),		mixLevels_117RC2);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),		mixLevels_117RC1);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
+	//m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),				mixLevels_Test);
 	switch(m_pSndFile->m_nMixLevels)
 	{
 		//case mixLevels_Test:		m_PlugMixBox.SetCurSel(4); break;
@@ -419,7 +419,7 @@ bool CModTypeDlg::VerifyData()
 
 	if(maxChans < m_pSndFile->GetNumChannels())
 	{
-		if(MessageBox("New modtype supports less channels than currently used, and reducing channel number is required. Continue?", "", MB_OKCANCEL) != IDOK)
+		if(MessageBox("New module type supports less channels than currently used, and reducing channel number is required. Continue?", "", MB_OKCANCEL) != IDOK)
 			return false;
 	}
 

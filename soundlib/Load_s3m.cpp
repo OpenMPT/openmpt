@@ -276,8 +276,8 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nDefaultTempo = CLAMP(m_nDefaultTempo, 32, 255);
 	// Global Volume
 	m_nDefaultGlobalVolume = psfh.globalvol << 2;
-	if(!m_nDefaultGlobalVolume && psfh.cwtv < 0x1320) m_nDefaultGlobalVolume = 256; // not very reliable, but it fixes a few tunes
-	if(m_nDefaultGlobalVolume > 256) m_nDefaultGlobalVolume = 256;
+	if(!m_nDefaultGlobalVolume && psfh.cwtv < 0x1320) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME; // not very reliable, but it fixes a few tunes
+	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nSamplePreAmp = CLAMP(psfh.mastervol & 0x7F, 0x10, 0x7F); // Bit 8 = Stereo (we always use stereo)
 	// Channels
 	m_nChannels = 4;

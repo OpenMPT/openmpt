@@ -574,7 +574,8 @@ public:	// for Editing
 	bool m_bIsRendering;
 	UINT m_nMixChannels, m_nMixStat, m_nBufferCount;
 	double m_dBufferDiff;
-	UINT m_nTickCount, m_nTotalCount, m_nPatternDelay, m_nFrameDelay;
+	UINT m_nTickCount, m_nTotalCount;
+	UINT m_nPatternDelay, m_nFrameDelay;	// m_nPatternDelay = pattern delay, m_nFrameDelay = fine pattern delay
 	ULONG m_lTotalSampleCount;	// rewbs.VSTTimeInfo
 	UINT m_nSamplesPerTick;		// rewbs.betterBPM
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module // rewbs.betterBPM

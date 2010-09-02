@@ -666,12 +666,12 @@ BOOL CModDoc::InitializeMod()
 
 		if(m_SndFile.m_nMixLevels == mixLevels_original)
 		{
-			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = 256;
+			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
 		}
 		else
 		{
-			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = 128;
+			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME / 2;
 			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 128;
 		}
 
@@ -938,7 +938,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 				 
 				UINT nPlugin = 0;
 				if (pChn->pModInstrument) 
-					nPlugin = pChn->pModInstrument->nMixPlug;  					// first try intrument VST
+					nPlugin = pChn->pModInstrument->nMixPlug;  					// first try instrument VST
 				if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS) && (nCurrentChn >=0))
 					nPlugin = m_SndFile.ChnSettings[nCurrentChn].nMixPlugin; // Then try Channel VST
 				
@@ -1451,7 +1451,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 	// Saving as wave file
 
-	// Keep position of the caracter just before ".wav" in path string
+	// Keep position of the character just before ".wav" in path string
 	size_t p = strlen(sFilename) - 4;
 	TCHAR sFilenameAdd[_MAX_PATH] = _T("");
 
@@ -3194,7 +3194,10 @@ int CModDoc::GetZxxType(const CHAR (&szMidiZXXExt)[128 * 32])
 		for(int j = 0; j < 128; j++)
 		{
 			if(strncmp(&szPatterns[j * 32], &szMidiZXXExt[j * 32], 32))
+			{
 				bFound = false;
+				break;
+			}
 		}
 		if(bFound) return i;
 	}

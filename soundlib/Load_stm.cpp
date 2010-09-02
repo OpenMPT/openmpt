@@ -82,7 +82,7 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
 	if (m_nDefaultSpeed < 1) m_nDefaultSpeed = 1;
 	m_nDefaultTempo = 125;
 	m_nDefaultGlobalVolume = phdr->globalvol << 2;
-	if (m_nDefaultGlobalVolume > 256) m_nDefaultGlobalVolume = 256;
+	if (m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	Order.ReadAsByte(phdr->patorder, 128, 128);
 	// Setting up channels
 	for (UINT nSet=0; nSet<4; nSet++)

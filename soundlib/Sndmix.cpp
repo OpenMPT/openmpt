@@ -1799,7 +1799,8 @@ BOOL CSoundFile::ReadNote()
 #define		kChnMasterVol	nMasterVol
 #endif // MODPLUG_TRACKER
 			// Adjusting volumes
-			if (gnChannels >= 2) {
+			if (gnChannels >= 2)
+			{
 				int pan = ((int)pChn->nRealPan) - 128;
 				pan *= (int)m_nStereoSeparation;
 				pan /= 128;
@@ -1810,27 +1811,34 @@ BOOL CSoundFile::ReadNote()
 #endif
 
 				LONG realvol;
-				if (m_pConfig->getUseGlobalPreAmp()) {
+				if (m_pConfig->getUseGlobalPreAmp())
+				{
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 7;
-				} else {
+				} else
+				{
 					//Extra attenuation required here if we're bypassing pre-amp.
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				}
 				
-				if (m_pConfig->getForceSoftPanning() || gdwSoundSetup & SNDMIX_SOFTPANNING) {
-					if (pan < 128) {
+				if (m_pConfig->getForceSoftPanning() || (gdwSoundSetup & SNDMIX_SOFTPANNING))
+				{
+					if (pan < 128)
+					{
 						pChn->nNewLeftVol = (realvol * pan) >> 8;
 						pChn->nNewRightVol = (realvol * 128) >> 8;
-					} else {
+					} else
+					{
 						pChn->nNewLeftVol = (realvol * 128) >> 8;
 						pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
 					}
-				} else {
+				} else
+				{
 					pChn->nNewLeftVol = (realvol * pan) >> 8;
 					pChn->nNewRightVol = (realvol * (256 - pan)) >> 8;
 				}
 
-			} else {
+			} else
+			{
 				pChn->nNewRightVol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				pChn->nNewLeftVol = pChn->nNewRightVol;
 			}

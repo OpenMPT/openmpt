@@ -889,7 +889,7 @@ bool CSoundFile::ReadPSM16(const LPCBYTE lpStream, const DWORD dwMemLength)
 	m_nType = MOD_TYPE_S3M;
 	m_nChannels = min(max(shdr->numChannelsPlay, shdr->numChannelsReal), MAX_BASECHANNELS);
 	m_nMasterVolume = shdr->masterVolume;
-	m_nDefaultGlobalVolume = 256;
+	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_nDefaultSpeed = shdr->songSpeed;
 	m_nDefaultTempo = shdr->songTempo;
 

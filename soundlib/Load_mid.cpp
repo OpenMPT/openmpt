@@ -556,7 +556,7 @@ bool CSoundFile::ReadMID(const BYTE *lpStream, DWORD dwMemLength)
 	tempo = ConvertMidiTempo(nTempoUsec, &nTickMultiplier);
 	m_nDefaultTempo = tempo;
 	m_nDefaultSpeed = gnMidiImportSpeed;
-	m_nDefaultGlobalVolume = 256;
+	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	midimastervol = m_nDefaultGlobalVolume;
 	
 #ifdef MIDI_LOG

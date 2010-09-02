@@ -930,7 +930,7 @@ bool CModCleanupDlg::ResetVariables()
 	// Global vars
 	pSndFile->m_nDefaultTempo = 125;
 	pSndFile->m_nDefaultSpeed = 6;
-	pSndFile->m_nDefaultGlobalVolume = 256;
+	pSndFile->m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	pSndFile->m_nSamplePreAmp = 48;
 	pSndFile->m_nVSTiVolume = 48;
 	pSndFile->m_nRestartPos = 0;
