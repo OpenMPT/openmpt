@@ -317,21 +317,21 @@ enum enmEnvelopeTypes
 #define SONG_PT1XMODE		0x200000	// ProTracker 1.x playback mode
 
 // Global Options (Renderer)
-#define SNDMIX_REVERSESTEREO	0x0001
-#define SNDMIX_NOISEREDUCTION	0x0002
-#define SNDMIX_AGC				0x0004
-#define SNDMIX_NORESAMPLING		0x0008
+#define SNDMIX_REVERSESTEREO	0x0001	// swap L/R audio channels
+#define SNDMIX_NOISEREDUCTION	0x0002	// reduce hiss (do not use, it's just a simple low-pass filter)
+#define SNDMIX_AGC				0x0004	// automatic gain control
+#define SNDMIX_NORESAMPLING		0x0008	// force no resampling
 //      SNDMIX_NOLINEARSRCMODE is the default
 //#define SNDMIX_HQRESAMPLER		0x0010	 //rewbs.resamplerConf: renamed SNDMIX_HQRESAMPLER to SNDMIX_SPLINESRCMODE
-#define SNDMIX_SPLINESRCMODE	0x0010
-#define SNDMIX_MEGABASS			0x0020
-#define SNDMIX_SURROUND			0x0040
-#define SNDMIX_REVERB			0x0080
-#define SNDMIX_EQ				0x0100
-#define SNDMIX_SOFTPANNING		0x0200
-//#define SNDMIX_ULTRAHQSRCMODE	0x0400 	 //rewbs.resamplerConf: renamed SNDMIX_ULTRAHQSRCMODE to SNDMIX_POLYPHASESRCMODE
-#define SNDMIX_POLYPHASESRCMODE	0x0400
-#define SNDMIX_FIRFILTERSRCMODE	0x0800   //rewbs: added SNDMIX_FIRFILTERSRCMODE
+#define SNDMIX_SPLINESRCMODE	0x0010	// cubic resampling (?)
+#define SNDMIX_MEGABASS			0x0020	// bass expansion
+#define SNDMIX_SURROUND			0x0040	// surround mix
+#define SNDMIX_REVERB			0x0080	// apply reverb
+#define SNDMIX_EQ				0x0100	// apply EQ
+#define SNDMIX_SOFTPANNING		0x0200	// soft panning mode (this is forced with mixmode RC3 and later)
+//#define SNDMIX_ULTRAHQSRCMODE	0x0400 	//rewbs.resamplerConf: renamed SNDMIX_ULTRAHQSRCMODE to SNDMIX_POLYPHASESRCMODE
+#define SNDMIX_POLYPHASESRCMODE	0x0400	// polyphase resampling
+#define SNDMIX_FIRFILTERSRCMODE	0x0800  //rewbs: added SNDMIX_FIRFILTERSRCMODE
 
 //rewbs.resamplerConf: for stuff that applies to cubic spline, polyphase and FIR
 #define SNDMIX_HQRESAMPLER (SNDMIX_SPLINESRCMODE|SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE)
@@ -340,11 +340,13 @@ enum enmEnvelopeTypes
 #define SNDMIX_ULTRAHQSRCMODE (SNDMIX_POLYPHASESRCMODE|SNDMIX_FIRFILTERSRCMODE)
 
 // Misc Flags (can safely be turned on or off)
-#define SNDMIX_DIRECTTODISK		0x10000
-#define SNDMIX_ENABLEMMX		0x20000
-#define SNDMIX_NOBACKWARDJUMPS	0x40000
-#define SNDMIX_MAXDEFAULTPAN	0x80000	 // Used by the MOD loader (currently unused)
-#define SNDMIX_MUTECHNMODE		0x100000 // Notes are not played on muted channels
+#define SNDMIX_DIRECTTODISK		0x10000		// WAV writer mode
+#define SNDMIX_ENABLEMMX		0x20000		// use MMX-accelerated code
+#define SNDMIX_NOBACKWARDJUMPS	0x40000		// stop when jumping back in the order (currently unused as it seems)
+#define SNDMIX_MAXDEFAULTPAN	0x80000		// Used by the MOD loader (currently unused)
+#define SNDMIX_MUTECHNMODE		0x100000	// Notes are not played on muted channels
+#define SNDMIX_SMARTRAMP		0x200000	// Don't apply ramping to sample beginning, but only when it ends
+#define SNDMIX_ITBIDIMODE		0x400000	// Process bidi loops like Impulse Tracker (see Fastmix.cpp for explanation)
 
 
 #define MAX_GLOBAL_VOLUME 256
