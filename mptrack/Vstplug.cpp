@@ -778,8 +778,13 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 			}
 			if ((value & kVstTimeSigValid) && pSndFile) {
 				timeInfo.flags |= 	kVstTimeSigValid;
-				timeInfo.timeSigNumerator = pSndFile->m_nCurrentRowsPerBeat;
-				timeInfo.timeSigDenominator = pSndFile->m_nCurrentRowsPerMeasure;
+				//timeInfo.timeSigNumerator = pSndFile->m_nCurrentRowsPerBeat;
+				//timeInfo.timeSigDenominator = pSndFile->m_nCurrentRowsPerMeasure;
+
+				// Time signature. numerator = rows per beats / rows pear measure (should sound somewhat logical to you).
+				// the denominator is a bit more tricky, since it cannot be set explicitely. so we just assume quarters for now.
+				timeInfo.timeSigNumerator = pSndFile->m_nCurrentRowsPerMeasure / max(pSndFile->m_nCurrentRowsPerBeat, 1);
+				timeInfo.timeSigDenominator = 4; //gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
 		}
 		return (long)&timeInfo;
