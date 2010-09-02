@@ -1540,16 +1540,24 @@ HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
 
 	if(!bUxInited)
 	{
-		HMODULE uxlib = LoadLibrary(_T("uxtheme.dll"));
+		// retrieve path for uxtheme.dll...
+		TCHAR szPath[MAX_PATH];
+		SHGetSpecialFolderPath(0, szPath, CSIDL_SYSTEM, FALSE);
+		strncat(szPath, _TEXT("\\uxtheme.dll"), MAX_PATH - (_tcslen(szPath) + 1));
+
+		// ...and try to load it
+		HMODULE uxlib = LoadLibrary(szPath);
 		if(uxlib)
 			hETDT = (ETDT)GetProcAddress(uxlib, "EnableThemeDialogTexture");
 		bUxInited = true;
 	}
+
 	switch(nCtlColor)
 	{
 	case CTLCOLOR_DLG:
 		if(hETDT)
 			hETDT(*pWnd, ETDT_ENABLETAB);
 	}
+
 	return CFormView::OnCtlColor(pDC, pWnd, nCtlColor);
 }
