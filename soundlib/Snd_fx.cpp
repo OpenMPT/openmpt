@@ -243,11 +243,11 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 				nNextPatStartRow = 0;  // FT2 E60 bug
 				if (nRow < Patterns[nPattern].GetNumRows() - 1)
 				{
-					nextRow = Patterns[nPattern] + (nRow+1) * m_nChannels + nChn;
+					nextRow = Patterns[nPattern] + (nRow + 1) * m_nChannels + nChn;
 				}
 				if (nextRow && nextRow->command == CMD_XPARAM)
 				{
-					nNextRow = (param<<8) + nextRow->param;
+					nNextRow = (param << 8) + nextRow->param;
 				} else
 				{
 					nNextRow = param;
@@ -266,9 +266,10 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			// Set Speed
 			case CMD_SPEED:
 				if (!param) break;
-				if ((param <= 0x20) || (m_nType != MOD_TYPE_MOD))
+				// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
+				if ((param <= GetModSpecifications().speedMax) || (m_nType & MOD_TYPE_MOD))
 				{
-					if (param < 128) nMusicSpeed = param;
+					nMusicSpeed = param;
 				}
 				break;
 			// Set Tempo
@@ -3610,7 +3611,8 @@ void CSoundFile::SetSpeed(UINT param)
 #endif // FASTSOUNDLIB
 #endif // MODPLUG_TRACKER
 	//if ((m_nType & MOD_TYPE_S3M) && (param > 0x80)) param -= 0x80;
-	if ((param) && (param <= GetModSpecifications().speedMax)) m_nMusicSpeed = param;
+	// Allow high speed values here for VBlank MODs. (Maybe it would be better to have a "VBlank MOD" flag somewhere? Is it worth the effort?)
+	if ((param) && (param <= GetModSpecifications().speedMax || (m_nType & MOD_TYPE_MOD))) m_nMusicSpeed = param;
 }
 
 
