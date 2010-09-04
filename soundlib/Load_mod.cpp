@@ -40,7 +40,7 @@ void CSoundFile::ConvertModCommand(MODCOMMAND *m) const
 	case 0x0C:	command = CMD_VOLUME; break;
 	case 0x0D:	command = CMD_PATTERNBREAK; param = ((param >> 4) * 10) + (param & 0x0F); break;
 	case 0x0E:	command = CMD_MODCMDEX; break;
-	case 0x0F:	command = (param <= (UINT)((m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2)) ? 0x1F : 0x20)) ? CMD_SPEED : CMD_TEMPO;
+	case 0x0F:	command = (param <= ((m_nType & (MOD_TYPE_MOD)) ? 0x20 : 0x1F)) ? CMD_SPEED : CMD_TEMPO;
 				if ((param == 0xFF) && (m_nSamples == 15) && (m_nType & MOD_TYPE_MOD)) command = 0; break; //<rewbs> what the hell is this?! :) //<jojo> it's the "stop tune" command! :-P
 	// Extension for XM extended effects
 	case 'G' - 55:	command = CMD_GLOBALVOLUME; break;		//16
@@ -262,7 +262,11 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	if ((s[0]=='T') && (s[1]=='D') && (s[2]=='Z') && (s[3]>='4') && (s[3]<='9')) m_nChannels = s[3] - '0'; else
 	if (IsMagic(s,"16CN")) m_nChannels = 16; else
 	if (IsMagic(s,"32CN")) m_nChannels = 32; else m_nSamples = 15;
+	// Startrekker 8 channel mod (needs special treatment, see below)
 	bool bFLT8 = IsMagic(s, "FLT8") ? true : false;
+	// Only apply VBlank tests to M.K. (ProTracker) modules.
+	const bool bMdKd = IsMagic(s, "M.K.") ? true : false;
+
 	// Load Samples
 	nErr = 0;
 	dwTotalSampleLen = 0;
@@ -471,8 +475,10 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	// (as this would indicate that f.e. a F30 command was really meant to set
 	// the ticks per row to 48, and not the tempo to 48 BPM).
 	// In the pattern loader above, a second condition is used: Only tempo commands
-	// below 100 BPM are taken into account.
-	if(bHasTempoCommands && GetSongTime() >= 10 * 60)
+	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
+	// modules are checked.
+	// The same check is also applied to original NoiseTracker 15 sample mods.
+	if((bMdKd && bHasTempoCommands && GetSongTime() >= 10 * 60) || m_nSamples == 15)
 	{
 		Patterns.ForEachModCommand(FixVBlankMODs());
 	}

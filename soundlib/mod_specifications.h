@@ -129,7 +129,7 @@ const CModSpecifications mod =
 	mixLevels_original,					// defaultMixLevels
 	0,									// Max MIDI mapping directives
 	1,									// Min Speed
-	31,									// Max Speed
+	32,									// Max Speed
 	false,								// No song comments
 	0,									// No instrument envelopes
 	false,								// No envelope release node
@@ -169,7 +169,7 @@ const CModSpecifications modEx =
 	mixLevels_original,					// defaultMixLevels
 	0,									// Max MIDI mapping directives
 	1,									// Min Speed
-	31,									// Max Speed
+	32,									// Max Speed
 	false,								// No song comments
 	0,									// No instrument envelopes
 	false,								// No envelope release node
