@@ -477,7 +477,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	// In the pattern loader above, a second condition is used: Only tempo commands
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
 	// modules are checked.
-	// The same check is also applied to original NoiseTracker 15 sample mods.
+	// The same check is also applied to original Ultimate Soundtracker 15 sample mods.
 	if((bMdKd && bHasTempoCommands && GetSongTime() >= 10 * 60) || m_nSamples == 15)
 	{
 		Patterns.ForEachModCommand(FixVBlankMODs());

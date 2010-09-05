@@ -361,7 +361,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	CHAR s[512];
 	bool bReordered = false;
 	size_t nPatRemoved = 0;
-	PATTERNINDEX nPats, nMinToRemove = 0;
+	PATTERNINDEX nMinToRemove = 0;
 
 	BeginWaitCursor();
 	// First, find all used patterns in all sequences.
@@ -422,10 +422,10 @@ bool CModCleanupDlg::RemoveUnusedPatterns(bool bRemove)
 	SEQUENCEINDEX oldSequence = pSndFile->Order.GetCurrentSequenceIndex();	// workaround, as GetSequence doesn't allow writing to sequences ATM
 
 	// Re-order pattern numbers based on sequence
+	PATTERNINDEX nPats = 0;	// last used index
 	for(SEQUENCEINDEX nSeq = 0; nSeq < maxSeqIndex; nSeq++)
 	{
 		pSndFile->Order.SetSequence(nSeq);
-		nPats = 0;
 		ORDERINDEX imap = 0;
 		for (imap = 0; imap < pSndFile->Order.GetSequence(nSeq).GetLength(); imap++)
 		{
