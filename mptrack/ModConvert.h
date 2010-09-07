@@ -13,6 +13,7 @@ enum enmWarnings
 {
 	wInstrumentsToSamples = 0,
 	wResizedPatterns,
+	wSampleBidiLoops,
 	wSampleSustainLoops,
 	wSampleAutoVibrato,
 	wMODSampleFrequency,

@@ -2,7 +2,35 @@
  * ModConvert.cpp
  * --------------
  * Purpose: Code for converting between various module formats.
- * Notes  : (currently none)
+ * Notes  : Incomplete list of MPTm-only features and extensions in the old formats:
+ *          Features only available for MPTm:
+ *           - User definable tunings.
+ *           - Extended pattern range
+ *           - Extended sequence
+ *           - Multiple sequences ("songs")
+ *           - Pattern-specific time signatures
+ *           - Pattern effects :xy, S7D, S7E
+ *           - Long instrument envelopes
+ *           - Envelope release node (this was previously also usable in the IT format, but is now deprecated in that format)
+ *
+ *          Extended features in IT/XM/S3M/MOD(not all listed below are available in all of those formats):
+ *           - Plugins
+ *           - Extended ranges for
+ *              - Sample count
+ *              - Instrument count
+ *              - Pattern count
+ *              - Sequence size
+ *              - Row count
+ *              - Channel count
+ *              - Tempo limits
+ *           - Extended sample/instrument properties.
+ *           - MIDI mapping directives
+ *           - Version info
+ *           - Channel names
+ *           - Pattern names
+ *           - Alternative tempomodes
+ *           - For more info, see e.g. SaveExtendedSongProperties(), SaveExtendedInstrumentProperties()
+ *
  * Authors: OpenMPT Devs
  *
  */
@@ -30,7 +58,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	{
 		// Even if m_nType doesn't change, we might need to change extension in itp<->it case.
 		// This is because ITP is a HACK and doesn't genuinely change m_nType,
-		// but uses flages instead.
+		// but uses flags instead.
 		ChangeFileExtension(nNewType);
 		return true;
 	}
@@ -53,42 +81,11 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	const CModSpecifications& specs = m_SndFile.GetModSpecifications(nNewType);
 
-	/*
-	Incomplete list of MPTm-only features and extensions in the old formats:
-
-	Features only available for MPTm:
-	-User definable tunings.
-	-Extended pattern range
-	-Extended sequence
-	-Multiple sequences ("songs")
-	-Pattern-specific time signatures
-	-Pattern effects :xy, S7D, S7E
-	-Long instrument envelopes
-	-Envelope release node (this was previously also usable in the IT format, but is deprecated in that format)
-
-	Extended features in IT/XM/S3M/MOD(not all listed below are available in all of those formats):
-	-plugs
-	-Extended ranges for
-		-sample count
-		-instrument count
-		-pattern count
-		-sequence size
-		-Row count
-		-channel count
-		-tempo limits
-	-Extended sample/instrument properties.
-	-MIDI mapping directives
-	-Versioninfo
-	-channel names
-	-pattern names
-	-Alternative tempomodes
-	-For more info, see e.g. SaveExtendedSongProperties(), SaveExtendedInstrumentProperties()
-	*/
-
 	// Check if conversion to 64 rows is necessary
-	for(PATTERNINDEX ipat=0; ipat<m_SndFile.Patterns.Size(); ipat++)
+	for(PATTERNINDEX nPat = 0; nPat < m_SndFile.Patterns.Size(); nPat++)
 	{
-		if ((m_SndFile.Patterns[ipat]) && (m_SndFile.Patterns[ipat].GetNumRows() != 64)) nResizedPatterns++;
+		if ((m_SndFile.Patterns[nPat]) && (m_SndFile.Patterns[nPat].GetNumRows() != 64))
+			nResizedPatterns++;
 	}
 
 	if(((m_SndFile.m_nInstruments) || (nResizedPatterns)) && (nNewType & (MOD_TYPE_MOD|MOD_TYPE_S3M)))
@@ -206,14 +203,32 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Do some sample conversion
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.m_nSamples; nSmp++)
 	{
-		// No Sustain loops for MOD/S3M
+		// No Bidi / Sustain loops / Autovibrato for MOD/S3M
 		if(newTypeIsMOD || newTypeIsS3M)
 		{
+			// Bidi loops
+			if((m_SndFile.Samples[nSmp].uFlags & CHN_PINGPONGLOOP) != 0)
+			{
+				m_SndFile.Samples[nSmp].uFlags &= ~CHN_PINGPONGLOOP;
+				CHANGEMODTYPE_WARNING(wSampleBidiLoops);
+			}
+
+			// Sustain loops
 			if(m_SndFile.Samples[nSmp].nSustainStart || m_SndFile.Samples[nSmp].nSustainEnd)
 			{
+				// We can at least try to convert sustain loops to normal loops
+				if(m_SndFile.Samples[nSmp].nLoopEnd == 0)
+				{
+					m_SndFile.Samples[nSmp].nSustainStart = m_SndFile.Samples[nSmp].nLoopStart;
+					m_SndFile.Samples[nSmp].nSustainEnd = m_SndFile.Samples[nSmp].nLoopEnd;
+					m_SndFile.Samples[nSmp].uFlags |= CHN_LOOP;
+				}
 				m_SndFile.Samples[nSmp].nSustainStart = m_SndFile.Samples[nSmp].nSustainEnd = 0;
+				m_SndFile.Samples[nSmp].uFlags &= ~(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
 				CHANGEMODTYPE_WARNING(wSampleSustainLoops);
 			}
+
+			// Autovibrato
 			if(m_SndFile.Samples[nSmp].nVibDepth || m_SndFile.Samples[nSmp].nVibRate || m_SndFile.Samples[nSmp].nVibSweep)
 			{
 				m_SndFile.Samples[nSmp].nVibDepth = m_SndFile.Samples[nSmp].nVibRate = m_SndFile.Samples[nSmp].nVibSweep = m_SndFile.Samples[nSmp].nVibType = 0;
@@ -381,14 +396,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	END_CRITICAL();
 	ChangeFileExtension(nNewType);
 
-	//rewbs.cutomKeys: update effect key commands
-	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
-	if	(newTypeIsMOD_XM)
-		ih->SetXMEffects();
-	else
-		ih->SetITEffects();
-	//end rewbs.cutomKeys
-
 	// Check mod specifications
 	m_SndFile.m_nDefaultTempo = CLAMP(m_SndFile.m_nDefaultTempo, specs.tempoMin, specs.tempoMax);
 	m_SndFile.m_nDefaultSpeed = CLAMP(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
@@ -404,6 +411,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wInstrumentsToSamples, "All instruments have been converted to samples.\n");
 	wsprintf(s, "%d patterns have been resized to 64 rows\n", nResizedPatterns);
 	CHANGEMODTYPE_CHECK(wResizedPatterns, s);
+	CHANGEMODTYPE_CHECK(wSampleBidiLoops, "Sample bidi loops are not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wSampleSustainLoops, "New format doesn't support sample sustain loops.\n");
 	CHANGEMODTYPE_CHECK(wSampleAutoVibrato, "New format doesn't support sample autovibrato.\n");
 	CHANGEMODTYPE_CHECK(wMODSampleFrequency, "Sample C-5 frequencies will be lost.\n");
@@ -425,6 +433,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	GetSampleUndo()->ClearUndo();
 	UpdateAllViews(NULL, HINT_MODTYPE | HINT_MODGENERAL);
 	EndWaitCursor();
+
+	//rewbs.customKeys: update effect key commands
+	CInputHandler *ih = CMainFrame::GetMainFrame()->GetInputHandler();
+	if	(newTypeIsMOD_XM)
+		ih->SetXMEffects();
+	else
+		ih->SetITEffects();
+	//end rewbs.customKeys
+
 	return true;
 }
 
