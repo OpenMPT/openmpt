@@ -221,7 +221,7 @@ public:
 	bool ChangeModType(MODTYPE wType);
 	bool ChangeNumChannels(UINT nNewChannels, const bool showCancelInRemoveDlg = true);
 
-	BOOL ConvertInstrumentsToSamples();
+	bool ConvertInstrumentsToSamples();
 	UINT RemovePlugs(const bool (&keepMask)[MAX_MIXPLUGINS]);
 
 	PATTERNINDEX InsertPattern(ORDERINDEX nOrd = ORDERINDEX_INVALID, ROWINDEX nRows = 64);

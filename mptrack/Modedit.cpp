@@ -182,29 +182,49 @@ bool CModDoc::RemoveChannels(bool m_bChnMask[MAX_BASECHANNELS])
 }
 
 
-BOOL CModDoc::ConvertInstrumentsToSamples()
-//-----------------------------------------
+// Functor for converting instrument numbers to sample numbers in the patterns
+struct ConvertInstrumentsToSamplesInPatterns
+//==========================================
 {
-	if (!m_SndFile.m_nInstruments) return FALSE;
-	for (UINT i=0; i<m_SndFile.Patterns.Size(); i++) if (m_SndFile.Patterns[i])
+	ConvertInstrumentsToSamplesInPatterns(CSoundFile *pSndFile)
 	{
-		MODCOMMAND *p = m_SndFile.Patterns[i];
-		for (UINT j=m_SndFile.m_nChannels*m_SndFile.Patterns[i].GetNumRows(); j; j--, p++) if (p->instr)
+		this->pSndFile = pSndFile;
+	}
+
+	void operator()(MODCOMMAND& m)
+	{
+		if(m.instr)
 		{
-			UINT instr = p->instr;
-			UINT note = p->note;
-			UINT newins = 0;
-			if ((note) && (note < 128)) note--; else note = 5*12;
-			if ((instr < MAX_INSTRUMENTS) && (m_SndFile.Instruments[instr]))
+			MODCOMMAND::INSTR instr = m.instr, newinstr = 0;
+			MODCOMMAND::NOTE note = m.note, newnote = note;
+			if((note) && (note <= NOTE_MAX))
+				note--;
+			else
+				note = NOTE_MIDDLEC - 1;
+
+			if((instr < MAX_INSTRUMENTS) && (pSndFile->Instruments[instr]))
 			{
-				MODINSTRUMENT *pIns = m_SndFile.Instruments[instr];
-				newins = pIns->Keyboard[note];
-				if (newins >= MAX_SAMPLES) newins = 0;
+				const MODINSTRUMENT *pIns = pSndFile->Instruments[instr];
+				newinstr = pIns->Keyboard[note];
+				newnote = pIns->NoteMap[note];
+				if(newinstr >= MAX_SAMPLES) newinstr = 0;
 			}
-			p->instr = newins;
+			m.instr = newinstr;
+			m.note = newnote;
 		}
 	}
-	return TRUE;
+
+	CSoundFile *pSndFile;
+};
+
+
+bool CModDoc::ConvertInstrumentsToSamples()
+//-----------------------------------------
+{
+	if (!m_SndFile.GetNumInstruments())
+		return false;
+	m_SndFile.Patterns.ForEachModCommand(ConvertInstrumentsToSamplesInPatterns(&m_SndFile));
+	return true;
 }
 
 
