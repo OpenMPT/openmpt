@@ -336,7 +336,7 @@ protected:
 	//}}AFX_VIRTUAL
 
 	// for mod conversion
-	uint8 UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv);
+	void UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv, uint64 &nWarnings);
 
 
 // Implementation
