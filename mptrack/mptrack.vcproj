@@ -376,6 +376,9 @@
 				RelativePath="..\soundlib\modcommand.cpp">
 			</File>
 			<File
+				RelativePath=".\ModConvert.cpp">
+			</File>
+			<File
 				RelativePath=".\Moddoc.cpp">
 			</File>
 			<File
@@ -823,6 +826,9 @@
 			</File>
 			<File
 				RelativePath="..\soundlib\modcommand.h">
+			</File>
+			<File
+				RelativePath=".\ModConvert.h">
 			</File>
 			<File
 				RelativePath=".\moddoc.h">
