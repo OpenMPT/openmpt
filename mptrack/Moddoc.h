@@ -123,7 +123,7 @@ enum enmPatternPasteModes
 struct SplitKeyboardSettings
 //==========================
 {
-	bool IsSplitActive() {return (octaveLink && (octaveModifier != 0)) || (splitInstrument > 0) || (splitVolume != 0);}
+	bool IsSplitActive() const { return (octaveLink && (octaveModifier != 0)) || (splitInstrument > 0) || (splitVolume != 0); }
 	MODCOMMAND::NOTE splitNote;
 	MODCOMMAND::INSTR splitInstrument;
 	MODCOMMAND::VOL splitVolume;
@@ -168,7 +168,7 @@ public:
 	CSoundFile *GetSoundFile() { return &m_SndFile; }
 	void SetPause(BOOL bPause) { m_bPaused = bPause; }
 	void SetModified(BOOL bModified=TRUE) { SetModifiedFlag(bModified); bModifiedAutosave = (bModified != FALSE); }
-	BOOL ModifiedSinceLastAutosave() { bool bRetval = bModifiedAutosave; bModifiedAutosave = false; return bRetval; } // return "IsModified" value and reset it until the next SetModified() (as this is only used for polling)
+	bool ModifiedSinceLastAutosave() { bool bRetval = bModifiedAutosave; bModifiedAutosave = false; return bRetval; } // return "IsModified" value and reset it until the next SetModified() (as this is only used for polling)
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 	void SendMessageToActiveViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
@@ -334,9 +334,6 @@ protected:
 	virtual void DeleteContents();
 	virtual void SetModifiedFlag(BOOL bModified=TRUE);
 	//}}AFX_VIRTUAL
-
-	// for mod conversion
-	void UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv, uint64 &nWarnings);
 
 
 // Implementation

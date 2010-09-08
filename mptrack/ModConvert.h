@@ -7,6 +7,9 @@
  *
  */
 
+#ifndef MODCONVERT_H
+#define MODCONVERT_H
+#pragma once
 
 // Warning types
 enum enmWarnings
@@ -29,4 +32,7 @@ enum enmWarnings
 	wLinearSlides,
 	wTrimmedEnvelopes,
 	wReleaseNode,
+	wNumWarnings
 };
+
+#endif // MODCONVERT_H
