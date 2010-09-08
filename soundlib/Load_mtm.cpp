@@ -94,6 +94,7 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 				Samples[i].nLoopEnd >>= 1;
 			}
 			Samples[i].nPan = 128;
+			Samples[i].nC5Speed = TransposeToFrequency(0, Samples[i].nFineTune);
 		}
 		dwMemPos += 37;
 	}
@@ -130,7 +131,11 @@ bool CSoundFile::ReadMTM(LPCBYTE lpStream, DWORD dwMemLength)
 				}
 				m->command = cmd;
 				m->param = param;
-				if ((cmd) || (param)) ConvertModCommand(m);
+				if ((cmd) || (param))
+				{
+					ConvertModCommand(m);
+					ConvertCommand(m, MOD_TYPE_MOD, MOD_TYPE_S3M);
+				}
 			}
 		}
 		pSeq += 32;
