@@ -13,7 +13,7 @@
  *           - Long instrument envelopes
  *           - Envelope release node (this was previously also usable in the IT format, but is now deprecated in that format)
  *
- *          Extended features in IT/XM/S3M/MOD(not all listed below are available in all of those formats):
+ *          Extended features in IT/XM/S3M/MOD (not all listed below are available in all of those formats):
  *           - Plugins
  *           - Extended ranges for
  *              - Sample count
@@ -42,14 +42,43 @@
 #include "ModConvert.h"
 
 
-#define CHANGEMODTYPE_WARNING(x)	nWarnings |= (1 << x);
-#define CHANGEMODTYPE_CHECK(x, s)	if((nWarnings & (1 << x)) != 0) AddToLog(_T(s));
+#define CHANGEMODTYPE_WARNING(x)	warnings.set(x);
+#define CHANGEMODTYPE_CHECK(x, s)	if(warnings[x]) AddToLog(_T(s));
+
+
+// Trim envelopes and remove release nodes.
+void UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv, CSoundFile *pSndFile, std::bitset<wNumWarnings> &warnings)
+//---------------------------------------------------------------------------------------------------------
+{
+	// shorten instrument envelope if necessary (for mod conversion)
+	const UINT iEnvMax = pSndFile->GetModSpecifications().envelopePointsMax;
+
+	#define TRIMENV(nPat) if(nPat > iEnvMax) { nPat = iEnvMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
+
+	TRIMENV(mptEnv->nNodes);
+	TRIMENV(mptEnv->nLoopStart);
+	TRIMENV(mptEnv->nLoopEnd);
+	TRIMENV(mptEnv->nSustainStart);
+	TRIMENV(mptEnv->nSustainEnd);
+	if(mptEnv->nReleaseNode != ENV_RELEASE_NODE_UNSET)
+	{
+		TRIMENV(mptEnv->nReleaseNode);
+		if(!pSndFile->GetModSpecifications().hasReleaseNode)
+		{
+			mptEnv->nReleaseNode = ENV_RELEASE_NODE_UNSET;
+			CHANGEMODTYPE_WARNING(wReleaseNode);
+		}
+	}
+
+	#undef TRIMENV
+}
 
 
 bool CModDoc::ChangeModType(MODTYPE nNewType)
 //-------------------------------------------
 {
-	uint64 nWarnings = 0;
+	std::bitset<wNumWarnings> warnings;
+	warnings.reset();
 	PATTERNINDEX nResizedPatterns = 0;
 
 	const MODTYPE nOldType = m_SndFile.GetType();
@@ -402,9 +431,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.m_nInstruments; i++) if(m_SndFile.Instruments[i] != nullptr)
 	{
-		UpdateEnvelopes(&(m_SndFile.Instruments[i]->VolEnv), nWarnings);
-		UpdateEnvelopes(&(m_SndFile.Instruments[i]->PanEnv), nWarnings);
-		UpdateEnvelopes(&(m_SndFile.Instruments[i]->PitchEnv), nWarnings);
+		UpdateEnvelopes(&(m_SndFile.Instruments[i]->VolEnv), &m_SndFile, warnings);
+		UpdateEnvelopes(&(m_SndFile.Instruments[i]->PanEnv), &m_SndFile, warnings);
+		UpdateEnvelopes(&(m_SndFile.Instruments[i]->PitchEnv), &m_SndFile, warnings);
 	}
 		
 	CHAR s[64];
@@ -419,7 +448,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wInstrumentSustainLoops, "Sustain loops were converted to sustain points.\n");
 	CHANGEMODTYPE_CHECK(wInstrumentTuning, "Instrument tunings will be lost.\n");
 	CHANGEMODTYPE_CHECK(wMODGlobalVars, "Default speed, tempo and global volume will be lost.\n");
-	CHANGEMODTYPE_CHECK(wMOD31Samples, "Samples above 31 will be lost when saving as MOD.\n");
+	CHANGEMODTYPE_CHECK(wMOD31Samples, "Samples above 31 will be lost when saving as MOD. Consider rearranging samples if there are unused slots available.\n");
 	CHANGEMODTYPE_CHECK(wRestartPos, "Restart position is not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wChannelVolSurround, "Channel volume and surround are not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wChannelPanning, "Channel panning is not supported by the new format.\n");
@@ -443,33 +472,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	//end rewbs.customKeys
 
 	return true;
-}
-
-// Trim envelopes and remove release nodes.
-void CModDoc::UpdateEnvelopes(INSTRUMENTENVELOPE *mptEnv, uint64 &nWarnings)
-//--------------------------------------------------------------------------
-{
-	// shorten instrument envelope if necessary (for mod conversion)
-	const UINT iEnvMax = m_SndFile.GetModSpecifications().envelopePointsMax;
-
-	#define TRIMENV(nPat) if(nPat > iEnvMax) { nPat = iEnvMax; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
-
-	TRIMENV(mptEnv->nNodes);
-	TRIMENV(mptEnv->nLoopStart);
-	TRIMENV(mptEnv->nLoopEnd);
-	TRIMENV(mptEnv->nSustainStart);
-	TRIMENV(mptEnv->nSustainEnd);
-	if(mptEnv->nReleaseNode != ENV_RELEASE_NODE_UNSET)
-	{
-		TRIMENV(mptEnv->nReleaseNode);
-		if(!m_SndFile.GetModSpecifications().hasReleaseNode)
-		{
-			mptEnv->nReleaseNode = ENV_RELEASE_NODE_UNSET;
-			CHANGEMODTYPE_WARNING(wReleaseNode);
-		}
-	}
-
-	#undef TRIMENV
 }
 
 
