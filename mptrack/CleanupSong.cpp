@@ -667,18 +667,21 @@ bool CModCleanupDlg::RearrangeSamples()
 		return false;
 
 	SAMPLEINDEX nRemap = 0; // remap count
-	SAMPLEINDEX nSampleMap[MAX_SAMPLES + 1]; // map old => new
-	for(SAMPLEINDEX i = 0; i <= MAX_SAMPLES; i++)
+	std::vector<SAMPLEINDEX> nSampleMap(pSndFile->GetNumSamples() + 1);
+	for(SAMPLEINDEX i = 0; i <= pSndFile->GetNumSamples(); i++)
+	{
 		nSampleMap[i] = i;
+	}
 
 	// First, find out which sample slots are unused and create the new sample map
-	for(SAMPLEINDEX i = 1 ; i <= pSndFile->m_nSamples; i++) {
+	for(SAMPLEINDEX i = 1; i <= pSndFile->GetNumSamples(); i++)
+	{
 		if(!pSndFile->Samples[i].pSample)
 		{
 			// Move all following samples
 			nRemap++;
 			nSampleMap[i] = 0;
-			for(UINT j = i + 1; j <= pSndFile->m_nSamples; j++)
+			for(UINT j = i + 1; j <= pSndFile->GetNumSamples(); j++)
 				nSampleMap[j]--;
 		}
 	}
@@ -687,7 +690,7 @@ bool CModCleanupDlg::RearrangeSamples()
 		return false;
 
 	// Now, move everything around
-	for(SAMPLEINDEX i = 1; i <= pSndFile->m_nSamples; i++)
+	for(SAMPLEINDEX i = 1; i <= pSndFile->GetNumSamples(); i++)
 	{
 		if(nSampleMap[i] != i)
 		{
@@ -700,12 +703,12 @@ bool CModCleanupDlg::RearrangeSamples()
 			memset(pSndFile->m_szNames[i], 0, sizeof(pSndFile->m_szNames[i]));
 
 			// Also update instrument mapping (if module is in instrument mode)
-			for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->m_nInstruments; nIns++)
+			for(INSTRUMENTINDEX nIns = 1; nIns <= pSndFile->GetNumInstruments(); nIns++)
 			{
 				MODINSTRUMENT *pIns = pSndFile->Instruments[nIns];
 				if(pIns)
 				{
-					for(WORD iNote = 0; iNote < 128; iNote++)
+					for(size_t iNote = 0; iNote < 128; iNote++)
 						if(pIns->Keyboard[iNote] == i) pIns->Keyboard[iNote] = nSampleMap[i];
 				}
 			}
@@ -713,14 +716,14 @@ bool CModCleanupDlg::RearrangeSamples()
 	}
 
 	// Go through the patterns and remap samples (if module is in sample mode)
-	if(!pSndFile->m_nInstruments)
+	if(!pSndFile->GetNumInstruments())
 	{
 		for (PATTERNINDEX nPat = 0; nPat < pSndFile->Patterns.Size(); nPat++) if (pSndFile->Patterns[nPat])
 		{
 			MODCOMMAND *m = pSndFile->Patterns[nPat];
 			for(UINT len = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->GetNumChannels(); len; m++, len--)
 			{
-				if(m->instr <= pSndFile->m_nSamples) m->instr = (BYTE)nSampleMap[m->instr];
+				if(m->instr <= pSndFile->GetNumSamples()) m->instr = (BYTE)nSampleMap[m->instr];
 			}
 		}
 	}
@@ -866,7 +869,8 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 		//Is the plugin assigned to a channel?
 		for (CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
 		{
-			if (pSndFile->ChnSettings[nChn].nMixPlugin == nPlug + 1u) {
+			if (pSndFile->ChnSettings[nChn].nMixPlugin == nPlug + 1)
+			{
 				usedmap[nPlug] = true;
 				break;
 			}
@@ -875,7 +879,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 		//Is the plugin used by an instrument?
 		for (INSTRUMENTINDEX nIns=1; nIns<=pSndFile->GetNumInstruments(); nIns++)
 		{
-			if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == nPlug+1))
+			if (pSndFile->Instruments[nIns] && (pSndFile->Instruments[nIns]->nMixPlug == nPlug + 1))
 			{
 				usedmap[nPlug] = true;
 				break;
@@ -887,7 +891,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 			usedmap[nPlug] = true;
 
 		//all outputs of used plugins count as used
-		if (usedmap[nPlug]!=0)
+		if (usedmap[nPlug] != false)
 		{
 			if (pSndFile->m_MixPlugins[nPlug].Info.dwOutputRouting & 0x80)
 			{
@@ -936,7 +940,7 @@ bool CModCleanupDlg::ResetVariables()
 	pSndFile->m_nRestartPos = 0;
 
 	// reset instruments (if there are any)
-	for(INSTRUMENTINDEX i = 1; i <= pSndFile->m_nInstruments; i++) if(pSndFile->Instruments[i])
+	for(INSTRUMENTINDEX i = 1; i <= pSndFile->GetNumInstruments(); i++) if(pSndFile->Instruments[i])
 	{
 		pSndFile->Instruments[i]->nFadeOut = 256;
 		pSndFile->Instruments[i]->nGlobalVol = 64;
@@ -1057,7 +1061,8 @@ bool CModCleanupDlg::RemoveAllInstruments(bool bConfirm)
 bool CModCleanupDlg::RemoveAllPlugins()
 //-------------------------------------
 {
-	bool keepMask[MAX_MIXPLUGINS]; memset(keepMask, false, sizeof(keepMask));
+	bool keepMask[MAX_MIXPLUGINS];
+	memset(keepMask, false, sizeof(keepMask));
 	m_pModDoc->RemovePlugs(keepMask);
 	return true;
 }
