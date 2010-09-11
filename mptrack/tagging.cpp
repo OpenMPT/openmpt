@@ -94,6 +94,11 @@ void CFileTagging::WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE 
 		// For language IDs, see http://en.wikipedia.org/wiki/ISO-639-2
 		sFramecontent = "eng" + (ID3v2_TEXTENDING + sFramecontent);
 	}
+	if(!strcmp(cFrameID, "WXXX"))
+	{
+		// User-defined URL field (we have no description for the URL, so we leave it out)
+		sFramecontent = ID3v2_TEXTENDING + sFramecontent;
+	}
 	sFramecontent = ID3v2_CHARSET + sFramecontent;
 
 	TAGID3v2FRAME tFrame;
