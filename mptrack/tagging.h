@@ -78,8 +78,8 @@ typedef struct _TAGID3v2FRAME
 
 // charset... choose text ending accordingly.
 // $00 = ISO-8859-1. Terminated with $00.
-// $01 = UTF-16. Terminated with $00 00.
-// $02 = UTF-16BE. Terminated with $00 00.
+// $01 = UTF-16 with BOM. Terminated with $00 00.
+// $02 = UTF-16BE without BOM. Terminated with $00 00.
 // $03 = UTF-8. Terminated with $00.
 #ifdef UNICODE
 #define ID3v2_CHARSET '\3'
