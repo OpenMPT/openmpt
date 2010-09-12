@@ -86,15 +86,15 @@ void CFileTagging::WriteID3v2Tags(FILE *f)
 void CFileTagging::WriteID3v2Frame(char cFrameID[4], string sFramecontent, FILE *f)
 //---------------------------------------------------------------------------------
 {
-	if(!strcmp(cFrameID, "") || sFramecontent.empty() || !f) return;
+	if(!cFrameID[0] || sFramecontent.empty() || !f) return;
 
-	if(!strcmp(cFrameID, "COMM"))
+	if(!memcmp(cFrameID, "COMM", 4))
 	{
 		// English language for comments - no description following (hence the text ending nullchar(s))
 		// For language IDs, see http://en.wikipedia.org/wiki/ISO-639-2
 		sFramecontent = "eng" + (ID3v2_TEXTENDING + sFramecontent);
 	}
-	if(!strcmp(cFrameID, "WXXX"))
+	if(!memcmp(cFrameID, "WXXX", 4))
 	{
 		// User-defined URL field (we have no description for the URL, so we leave it out)
 		sFramecontent = ID3v2_TEXTENDING + sFramecontent;
