@@ -2311,16 +2311,17 @@ void CCtrlInstruments::OnFilterModeChanged()
 	if ((!IsLocked()) && (pIns))
 	{
 		int instFiltermode = m_CbnFilterMode.GetItemData(m_CbnFilterMode.GetCurSel());
-		if (!m_pModDoc) {
+		if (!m_pModDoc)
 			return;
-		}
 
 		CSoundFile *pSndFile = m_pModDoc->GetSoundFile();
 		MODINSTRUMENT *pIns = pSndFile->Instruments[m_nInstrument];
 
-		if (pIns)	{
+		if (pIns)
+		{
 			
 			pIns->nFilterMode = instFiltermode;
+			m_pModDoc->SetModified();
 
 			// Translate from mode as stored in instrument to mode as understood by player. 
 			// (The reason for the translation is that the player treats 0 as lowpass,
@@ -2334,11 +2335,12 @@ void CCtrlInstruments::OnFilterModeChanged()
 			}*/
 
             //Update channel settings where this instrument is active, if required.
-			if (instFiltermode != FLTMODE_UNCHANGED) {
-				for (UINT i=0; i<MAX_CHANNELS; i++)	{
-					if (pSndFile->Chn[i].pModInstrument == pIns) {
+			if(instFiltermode != FLTMODE_UNCHANGED)
+			{
+				for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+				{
+					if (pSndFile->Chn[i].pModInstrument == pIns)
 						pSndFile->Chn[i].nFilterMode = instFiltermode;
-					}
 				}
 			}
 

@@ -27,9 +27,9 @@ CFileTagging::CFileTagging()
 uint32 CFileTagging::intToSynchsafe(uint32 iIn)
 //---------------------------------------------
 {
-	iIn = LittleEndian(iIn);
 	uint32 iOut = 0, iSteps = 0;
-	do {
+	do
+	{
 		iOut |= (iIn & 0x7F) << iSteps;
 		iSteps += 8;
 	} while(iIn >>= 7);
