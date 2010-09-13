@@ -411,7 +411,8 @@ void CMainFrame::LoadIniSettings()
 		rgbCustomColors[ncol] = GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
 	}
 
-	m_nWaveDevice = GetPrivateProfileLong("Sound Settings", "WaveDevice", (SNDDEV_DSOUND<<8), iniFile);
+	LONG defaultDevice = EnumerateSoundDevices(SNDDEV_ASIO, 0, nullptr, 0) ? SNDDEV_ASIO : SNDDEV_DSOUND;
+	m_nWaveDevice = GetPrivateProfileLong("Sound Settings", "WaveDevice", (defaultDevice << 8), iniFile);
 	m_dwSoundSetup = GetPrivateProfileDWord("Sound Settings", "SoundSetup", SOUNDSETUP_SECONDARY, iniFile);
 	m_dwQuality = GetPrivateProfileDWord("Sound Settings", "Quality", 0, iniFile);
 	m_nSrcMode = GetPrivateProfileDWord("Sound Settings", "SrcMode", SRCMODE_POLYPHASE, iniFile);
