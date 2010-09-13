@@ -1743,12 +1743,12 @@ void CViewSample::OnEditDelete()
 			pSmp->nLoopStart = m_dwBeginSel;
 			pSmp->nLoopEnd -= m_dwEndSel - m_dwBeginSel;
 		}
-		else if(m_dwBeginSel > pSmp->nLoopStart && m_dwEndSel < pSmp->nLoopEnd)
+		else if(m_dwBeginSel >= pSmp->nLoopStart && m_dwEndSel < pSmp->nLoopEnd)
 		{
 			// cut part is in the loop
 			pSmp->nLoopEnd -= m_dwEndSel - m_dwBeginSel;
 		}
-		else if(m_dwBeginSel > pSmp->nLoopStart && m_dwBeginSel < pSmp->nLoopEnd && m_dwEndSel > pSmp->nLoopEnd)
+		else if(m_dwBeginSel >= pSmp->nLoopStart && m_dwBeginSel < pSmp->nLoopEnd && m_dwEndSel > pSmp->nLoopEnd)
 		{
 			// cut part is partly before loop end
 			pSmp->nLoopEnd = m_dwBeginSel;
