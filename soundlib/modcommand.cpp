@@ -274,6 +274,13 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			// remove fine slides
 			if((m->param > 0xF0) || ((m->param & 0x0F) == 0x0F && m->param != 0x0F))
 				m->command = CMD_NONE;
+		case CMD_RETRIG:
+			// Retrig: Q0y doesn't change volume in IT/S3M, but R0y in XM takes the last x parameter
+			if(m->param != 0 && (m->param & 0xF0) == 0)
+			{
+				m->param |= 0x80;
+			}
+			break;
 		default:
 			break;
 		}
