@@ -2620,8 +2620,14 @@ bool CModDoc::GetEffectNameEx(LPSTR pszName, UINT ndx, UINT param)
 		break;
 
 	case CMD_RETRIG:
-		switch(param >> 4) {
-			case  0: strcpy(s, "continue"); break;
+		switch(param >> 4)
+		{
+			case  0:
+					if(m_SndFile.GetType() & MOD_TYPE_XM)
+						strcpy(s, "continue");
+					else
+						strcpy(s, "vol *1");
+					break;
 			case  1: strcpy(s, "vol -1"); break;
 			case  2: strcpy(s, "vol -2"); break;
 			case  3: strcpy(s, "vol -4"); break;
