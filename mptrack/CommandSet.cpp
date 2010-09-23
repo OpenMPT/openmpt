@@ -599,6 +599,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInsNoteMapEditSampleMap, 1850, kcVisible, kcNoDummy, _T("Edit sample map"));
 	DefineKeyCommand(kcInstrumentCtrlDuplicate, 1851, kcVisible, kcNoDummy, _T("Duplicate instrument"));
 	DefineKeyCommand(kcPanic, 1852, kcVisible, kcNoDummy, _T("Panic"));
+	DefineKeyCommand(kcOrderlistPatIgnore, 1853, kcVisible, kcNoDummy, _T("Ignore (+++) Index"));
+	DefineKeyCommand(kcOrderlistPatInvalid, 1854, kcVisible, kcNoDummy, _T("Invalid (---) Index"));
 	// Add new key commands here.
 
 #ifdef _DEBUG

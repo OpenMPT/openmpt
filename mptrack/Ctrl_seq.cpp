@@ -441,6 +441,10 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		EnterPatternNum(10); return wParam;
 	case kcOrderlistPatPlus:
 		EnterPatternNum(11); return wParam;
+	case kcOrderlistPatIgnore:
+		EnterPatternNum(12); return wParam;
+	case kcOrderlistPatInvalid:
+		EnterPatternNum(13); return wParam;
 
 	// kCtxViewPatternsNote messages
 	case kcSwitchToOrderList:
@@ -487,6 +491,16 @@ void COrderList::EnterPatternNum(int enterNum)
 		if ((nCurNdx >= 1000) && (nCurNdx > nMaxNdx)) nCurNdx %= 1000;
 		if ((nCurNdx >= 100) && (nCurNdx > nMaxNdx)) nCurNdx %= 100;
 		if ((nCurNdx >= 10) && (nCurNdx > nMaxNdx)) nCurNdx %= 10;
+	} else if (enterNum == 10) // decrease pattern index
+	{
+		const PATTERNINDEX nFirstInvalid = pSndFile->GetModSpecifications().hasIgnoreIndex ? pSndFile->Order.GetIgnoreIndex() : pSndFile->Order.GetInvalidPatIndex();
+		if (nCurNdx == 0)
+			nCurNdx = pSndFile->Order.GetInvalidPatIndex();
+		else
+		{
+			nCurNdx--;
+			if ((nCurNdx > nMaxNdx) && (nCurNdx < nFirstInvalid)) nCurNdx = nMaxNdx;
+		}
 	} else if (enterNum == 11) // increase pattern index
 	{
 		if(nCurNdx >= pSndFile->Order.GetInvalidPatIndex())
@@ -500,16 +514,15 @@ void COrderList::EnterPatternNum(int enterNum)
 			if(nCurNdx > nMaxNdx && nCurNdx < nFirstInvalid)
 				nCurNdx = nFirstInvalid;
 		}
-	} else if (enterNum == 10) // decrease pattern index
+	} else if (enterNum == 12) // ignore index (+++)
 	{
-		const PATTERNINDEX nFirstInvalid = pSndFile->GetModSpecifications().hasIgnoreIndex ? pSndFile->Order.GetIgnoreIndex() : pSndFile->Order.GetInvalidPatIndex();
-		if (nCurNdx == 0)
-			nCurNdx = pSndFile->Order.GetInvalidPatIndex();
-		else
+		if (pSndFile->GetModSpecifications().hasIgnoreIndex)
 		{
-			nCurNdx--;
-			if ((nCurNdx > nMaxNdx) && (nCurNdx < nFirstInvalid)) nCurNdx = nMaxNdx;
+			nCurNdx = pSndFile->Order.GetIgnoreIndex();
 		}
+	} else if (enterNum == 13) // invalid index (---)
+	{
+		nCurNdx = pSndFile->Order.GetInvalidPatIndex();
 	}
 	// apply
 	if (nCurNdx != pSndFile->Order[m_nScrollPos])
