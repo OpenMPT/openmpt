@@ -1035,7 +1035,9 @@ enum CommandID
 	kcOrderlistPat9,
 	kcOrderlistPatPlus,
 	kcOrderlistPatMinus,
-	kcEndOrderlistNum=kcOrderlistPatMinus,
+	kcOrderlistPatIgnore,
+	kcOrderlistPatInvalid,
+	kcEndOrderlistNum=kcOrderlistPatInvalid,
 	kcEndOrderlistCommands=kcEndOrderlistNum,
 
 	kcNumCommands,
