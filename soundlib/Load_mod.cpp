@@ -627,10 +627,8 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 
 	fwrite(ord, 128, 1, f);
 	// Writing signature
-	if (m_nChannels == 4 && nbp < 64)
+	if (m_nChannels == 4)
 		lstrcpy((LPSTR)&bTab, "M.K.");
-	else if (m_nChannels == 4 && nbp >= 64)
-		lstrcpy((LPSTR)&bTab, "M!K!");
 	else
 		wsprintf((LPSTR)&bTab, "%luCHN", m_nChannels);
 	fwrite(bTab, 4, 1, f);
