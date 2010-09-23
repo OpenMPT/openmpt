@@ -224,15 +224,38 @@ bool IsMagic(LPCSTR s1, LPCSTR s2)
 	return ((*(DWORD *)s1) == (*(DWORD *)s2)) ? true : false;
 }
 
-// Functor for fixing VBlank MODs
-struct FixVBlankMODs
-//==================
+// Functor for fixing VBlank MODs and MODs with 7-bit panning
+struct FixMODPatterns
+//===================
 {
+	FixMODPatterns(bool bVBlank, bool bPanning)
+	{
+		this->bVBlank = bVBlank;
+		this->bPanning = bPanning;
+	}
+
 	void operator()(MODCOMMAND& m)
 	{
-		if(m.command == CMD_TEMPO)
+		// Fix VBlank MODs
+		if(m.command == CMD_TEMPO && this->bVBlank)
+		{
 			m.command = CMD_SPEED;
+		}
+		// Fix MODs with 7-bit + surround panning
+		if(m.command == CMD_PANNING8 && this->bPanning)
+		{
+			if(m.param == 0xA4)
+			{
+				m.command = CMD_S3MCMDEX;
+				m.param = 0x91;
+			} else
+			{
+				m.param = min(m.param * 2, 0xFF);
+			}
+		}
 	}
+
+	bool bVBlank, bPanning;
 };
 
 
@@ -396,6 +419,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	const CHANNELINDEX nMaxChn = (bFLT8) ? 4 : m_nChannels; // 4 channels per pattern in FLT8 format.
 	if(bFLT8) nbp++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
 	bool bHasTempoCommands = false;	// for detecting VBlank MODs
+	bool bHasExtendedPanning = false;	// for detecting 800-8FF panning
 
 	// Reading patterns
 	for (PATTERNINDEX ipat = 0; ipat < nbp; ipat++)
@@ -419,7 +443,11 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 				m = Patterns[ipat];
 			}
 
+			size_t instrWithoutNoteCount = 0;	// For detecting PT1x mode
+			vector<MODCOMMAND::INSTR> lastInstrument(m_nChannels, 0);
+
 			const BYTE *p = lpStream + dwMemPos;
+
 			for(ROWINDEX nRow = 0; nRow < 64; nRow++)
 			{
 				if(bFLT8)
@@ -437,8 +465,27 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 					m->param = A3;
 					if ((m->command) || (m->param)) ConvertModCommand(m);
 
-					if (m->command == CMD_TEMPO && m->param < 100) bHasTempoCommands = true;
+					if (m->command == CMD_TEMPO && m->param < 100)
+						bHasTempoCommands = true;
+					if (m->command == CMD_PANNING8 && m->param > 0x80 && m->param != 0xA4)
+						bHasExtendedPanning = true;
+					if (m->note == NOTE_NONE && m->instr > 0 && !bFLT8)
+					{
+						if(lastInstrument[nChn] > 0 && lastInstrument[nChn] != m->instr)
+						{
+							instrWithoutNoteCount++;
+						}
+					}
+					if (m->instr != 0)
+					{
+						lastInstrument[nChn] = m->instr;
+					}
 				}
+			}
+			// Arbitrary thershold for going into PT1x mode: 16 "sample swaps" in one pattern.
+			if(instrWithoutNoteCount > 16)
+			{
+				m_dwSongFlags |= SONG_PT1XMODE;
 			}
 		}
 		dwMemPos += nMaxChn * 256;
@@ -478,9 +525,10 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
 	// modules are checked.
 	// The same check is also applied to original Ultimate Soundtracker 15 sample mods.
-	if((bMdKd && bHasTempoCommands && GetSongTime() >= 10 * 60) || m_nSamples == 15)
+	const bool bVBlank = ((bMdKd && bHasTempoCommands && GetSongTime() >= 10 * 60) || m_nSamples == 15) ? true : false;
+	if(bVBlank || !bHasExtendedPanning)
 	{
-		Patterns.ForEachModCommand(FixVBlankMODs());
+		Patterns.ForEachModCommand(FixMODPatterns(bVBlank, !bHasExtendedPanning));
 	}
 
 #ifdef MODPLUG_TRACKER
