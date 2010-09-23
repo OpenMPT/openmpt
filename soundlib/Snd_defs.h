@@ -316,6 +316,9 @@ enum enmEnvelopeTypes
 #define SONG_POSJUMP		0x100000	// Position jump encountered (internal flag, do not touch)
 #define SONG_PT1XMODE		0x200000	// ProTracker 1.x playback mode
 
+#define SONG_FILE_FLAGS	(SONG_EMBEDMIDICFG|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_ITPROJECT|SONG_ITPEMBEDIH|SONG_PT1XMODE)
+#define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
+
 // Global Options (Renderer)
 #define SNDMIX_REVERSESTEREO	0x0001	// swap L/R audio channels
 #define SNDMIX_NOISEREDUCTION	0x0002	// reduce hiss (do not use, it's just a simple low-pass filter)

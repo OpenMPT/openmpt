@@ -82,7 +82,7 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 
 	// m_dwSongFlags
 	memcpy(&id,lpStream+dwMemPos,sizeof(DWORD));
-	m_dwSongFlags = id;
+	m_dwSongFlags = (id & SONG_FILE_FLAGS);
 	dwMemPos += sizeof(DWORD);
 
 	if(!(m_dwSongFlags & SONG_ITPROJECT)) return false;
@@ -505,7 +505,7 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 	// Song global config
 
-	id = m_dwSongFlags;
+	id = (m_dwSongFlags & SONG_FILE_FLAGS);
 	fwrite(&id, 1, sizeof(id), f);
 	id = m_nDefaultGlobalVolume;
 	fwrite(&id, 1, sizeof(id), f);
