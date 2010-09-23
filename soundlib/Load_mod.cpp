@@ -419,7 +419,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	const CHANNELINDEX nMaxChn = (bFLT8) ? 4 : m_nChannels; // 4 channels per pattern in FLT8 format.
 	if(bFLT8) nbp++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
 	bool bHasTempoCommands = false;	// for detecting VBlank MODs
-	bool bHasExtendedPanning = false;	// for detecting 800-8FF panning
+	bool bLeftPanning = false, bExtendedPanning = false;	// for detecting 800-880 panning
 
 	// Reading patterns
 	for (PATTERNINDEX ipat = 0; ipat < nbp; ipat++)
@@ -467,8 +467,10 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 
 					if (m->command == CMD_TEMPO && m->param < 100)
 						bHasTempoCommands = true;
+					if (m->command == CMD_PANNING8 && m->param < 0x80)
+						bLeftPanning = true;
 					if (m->command == CMD_PANNING8 && m->param > 0x80 && m->param != 0xA4)
-						bHasExtendedPanning = true;
+						bExtendedPanning = true;
 					if (m->note == NOTE_NONE && m->instr > 0 && !bFLT8)
 					{
 						if(lastInstrument[nChn] > 0 && lastInstrument[nChn] != m->instr)
@@ -526,9 +528,10 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	// modules are checked.
 	// The same check is also applied to original Ultimate Soundtracker 15 sample mods.
 	const bool bVBlank = ((bMdKd && bHasTempoCommands && GetSongTime() >= 10 * 60) || m_nSamples == 15) ? true : false;
-	if(bVBlank || !bHasExtendedPanning)
+	const bool b7BitPanning = bLeftPanning && !bExtendedPanning;
+	if(bVBlank || b7BitPanning)
 	{
-		Patterns.ForEachModCommand(FixMODPatterns(bVBlank, !bHasExtendedPanning));
+		Patterns.ForEachModCommand(FixMODPatterns(bVBlank, b7BitPanning));
 	}
 
 #ifdef MODPLUG_TRACKER
@@ -624,8 +627,10 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 
 	fwrite(ord, 128, 1, f);
 	// Writing signature
-	if (m_nChannels == 4)
+	if (m_nChannels == 4 && nbp < 64)
 		lstrcpy((LPSTR)&bTab, "M.K.");
+	else if (m_nChannels == 4 && nbp >= 64)
+		lstrcpy((LPSTR)&bTab, "M!K!");
 	else
 		wsprintf((LPSTR)&bTab, "%luCHN", m_nChannels);
 	fwrite(bTab, 4, 1, f);
