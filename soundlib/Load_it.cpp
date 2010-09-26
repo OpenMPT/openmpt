@@ -668,12 +668,44 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	
 	
 	dwMemPos += pifh->patnum * 4;
-	// Reading IT Extra Info
-	if (dwMemPos + 2 < dwMemLength)
+	// Reading IT Edit History Info
+	if (dwMemPos + 2 < dwMemLength && (pifh->special & 0x02))
 	{
-		UINT nflt = *((WORD *)(lpStream + dwMemPos));
+		size_t nflt = LittleEndianW(*((uint16*)(lpStream + dwMemPos)));
 		dwMemPos += 2;
-		if (nflt * 8 < dwMemLength - dwMemPos) dwMemPos += nflt * 8;
+
+		GetpModDoc()->GetFileHistory()->clear();
+		if (nflt * 8 <= dwMemLength - dwMemPos)
+		{
+			for(size_t n = 0; n < nflt; n++)
+			{
+#ifdef MODPLUG_TRACKER
+				ITHISTORYSTRUCT it_history = *((ITHISTORYSTRUCT *)(lpStream + dwMemPos));
+				it_history.fatdate = LittleEndianW(it_history.fatdate);
+				it_history.fattime = LittleEndianW(it_history.fattime);
+				it_history.runtime = LittleEndian(it_history.runtime);
+
+				FileHistory mpt_history;
+				mpt_history.load_date.tm_year = ((it_history.fatdate >> 9) & 0x7F) + 80;
+				mpt_history.load_date.tm_mon = ((it_history.fatdate >> 5) & 0x0F) - 1;
+				mpt_history.load_date.tm_mday = it_history.fatdate & 0x1F;
+				mpt_history.load_date.tm_hour = (it_history.fattime >> 11) & 0x1F;
+				mpt_history.load_date.tm_min = (it_history.fattime >> 5) & 0x3F;
+				mpt_history.load_date.tm_sec = (it_history.fattime & 0x1F) * 2;
+				mpt_history.open_time = (uint64)((float)(it_history.runtime) / 18.2f);
+				GetpModDoc()->GetFileHistory()->push_back(mpt_history);
+
+#ifdef DEBUG
+				const uint32 seconds = (uint32)(((float)it_history.runtime) / 18.2f);
+				CHAR stime[128];
+				wsprintf(stime, "IT Edit History: Loaded %04u-%02u-%02u %02u:%02u:%02u, open in the editor for %u:%02u:%02u (%u ticks)\n", ((it_history.fatdate >> 9) & 0x7F) + 1980, (it_history.fatdate >> 5) & 0x0F, it_history.fatdate & 0x1F, (it_history.fattime >> 11) & 0x1F, (it_history.fattime >> 5) & 0x3F, (it_history.fattime & 0x1F) * 2, seconds / 3600, (seconds / 60) % 60, seconds % 60, it_history.runtime);
+				Log(stime);
+#endif // DEBUG
+
+#endif // MODPLUG_TRACKER
+				dwMemPos += 8;
+			}
+		}
 	}
 	// Reading Midi Output & Macros
 	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
@@ -1034,7 +1066,8 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 					// 193-202: Portamento To
 					if ((vol >= 193) && (vol <= 202)) { m[ch].volcmd = VOLCMD_TONEPORTAMENTO; m[ch].vol = vol - 193; } else
 					// 203-212: Vibrato depth
-					if ((vol >= 203) && (vol <= 212)) { 
+					if ((vol >= 203) && (vol <= 212))
+					{ 
 						m[ch].volcmd = VOLCMD_VIBRATODEPTH; m[ch].vol = vol - 203;
 						// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that
 						if(m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54) && interpretModPlugMade)
@@ -1133,12 +1166,45 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 //end plastiq: code readability improvements
 
 #ifndef MODPLUG_NO_FILESAVE
-//#define SAVEITTIMESTAMP
+
+// Save edit history
+void SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
+//---------------------------------------------------------
+{
+	const size_t num = pSndFile->GetpModDoc()->GetFileHistory()->size();
+	uint16 fnum = min(num, uint16_max);
+	fnum = LittleEndianW(fnum);
+	fwrite(&fnum, 2, 1, f);
+
+	const size_t start = (num > uint16_max) ? num - uint16_max : 0;
+	for(size_t n = start; n < num; n++)
+	{
+		const FileHistory *mpt_history = &(pSndFile->GetpModDoc()->GetFileHistory()->at(n));
+		ITHISTORYSTRUCT it_history;
+		// Create FAT file dates
+		it_history.fatdate = mpt_history->load_date.tm_mday | ((mpt_history->load_date.tm_mon + 1) << 5) | ((mpt_history->load_date.tm_year - 80) << 9);
+		it_history.fattime = (mpt_history->load_date.tm_sec / 2) | (mpt_history->load_date.tm_min << 5) | (mpt_history->load_date.tm_hour << 11);
+		if(n == num - 1)
+		{
+			// The current timestamp has to be converted first.
+			it_history.runtime = time(nullptr) - mpt_history->open_time;
+		} else
+		{
+			// Previous timestamps are left alone
+			it_history.runtime = mpt_history->open_time;
+		}
+		it_history.fatdate = LittleEndianW(it_history.fatdate);
+		it_history.fattime = LittleEndianW(it_history.fattime);
+		it_history.runtime = LittleEndian(it_history.runtime * 18);
+		fwrite(&it_history, 1, sizeof(it_history), f);
+	}
+}
+
 #pragma warning(disable:4100)
 
 
 bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
-//-------------------------------------------------------------
+//---------------------------------------------------------
 {
 	DWORD dwPatNamLen, dwChnNamLen;
 	ITFILEHEADER header;
@@ -1148,7 +1214,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	DWORD inspos[MAX_INSTRUMENTS];
 	vector<DWORD> patpos;
 	DWORD smppos[MAX_SAMPLES];
-	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2;
+	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2 + min(GetpModDoc()->GetFileHistory()->size(), uint16_max) * 8;
 	WORD patinfo[4];
 // -> CODE#0006
 // -> DESC="misc quantity changes"
@@ -1224,7 +1290,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	}
 
 	header.flags = 0x0001;
-	header.special = 0x0006;
+	header.special = 0x02 | 0x04;	// 0x02: embed file edit history
 	if (m_nInstruments) header.flags |= 0x04;
 	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
@@ -1255,9 +1321,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 		}
 	}
 	if (dwChnNamLen) dwExtra += dwChnNamLen + 8;
-#ifdef SAVEITTIMESTAMP
-	dwExtra += 8; // Time Stamp
-#endif
+
 	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
 	{
 		header.flags |= 0x80;
@@ -1288,23 +1352,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
 	if (header.patnum) fwrite(&patpos[0], 4, header.patnum, f);
 	// Writing editor history information
-	{
-#ifdef SAVEITTIMESTAMP
-		SYSTEMTIME systime;
-		FILETIME filetime;
-		WORD timestamp[4];
-		WORD nInfoEx = 1;
-		memset(timestamp, 0, sizeof(timestamp));
-		fwrite(&nInfoEx, 1, 2, f);
-		GetSystemTime(&systime);
-		SystemTimeToFileTime(&systime, &filetime);
-		FileTimeToDosDateTime(&filetime, &timestamp[0], &timestamp[1]);
-		fwrite(timestamp, 1, 8, f);
-#else
-		WORD nInfoEx = 0;
-		fwrite(&nInfoEx, 1, 2, f);
-#endif
-	}
+	SaveITEditHistory(this, f);
 	// Writing midi cfg
 	if (header.flags & 0x80)
 	{
@@ -1805,7 +1853,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	DWORD inspos[MAX_INSTRUMENTS];
 	DWORD patpos[MAX_PATTERNS];
 	DWORD smppos[MAX_SAMPLES];
-	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2;
+	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2 + min(GetpModDoc()->GetFileHistory()->size(), uint16_max) * 8;
 	WORD patinfo[4];
 // -> CODE#0006
 // -> DESC="misc quantity changes"
@@ -1858,7 +1906,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	}
 
 	header.flags = 0x0001;
-	header.special = 0x0006;
+	header.special = 0x02 | 0x04;	// 0x02: embed file edit history
 	if (m_nInstruments) header.flags |= 0x04;
 	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
@@ -1886,10 +1934,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 */
 	}
 //	if (dwChnNamLen) dwExtra += dwChnNamLen + 8;
-/*#ifdef SAVEITTIMESTAMP
-	dwExtra += 8; // Time Stamp
-#endif
-*/
+
 	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
 	{
 		header.flags |= 0x80;
@@ -1920,23 +1965,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
 	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
 	// Writing editor history information
-	{
-/*#ifdef SAVEITTIMESTAMP
-		SYSTEMTIME systime;
-		FILETIME filetime;
-		WORD timestamp[4];
-		WORD nInfoEx = 1;
-		memset(timestamp, 0, sizeof(timestamp));
-		fwrite(&nInfoEx, 1, 2, f);
-		GetSystemTime(&systime);
-		SystemTimeToFileTime(&systime, &filetime);
-		FileTimeToDosDateTime(&filetime, &timestamp[0], &timestamp[1]);
-		fwrite(timestamp, 1, 8, f);
-#else
-*/		WORD nInfoEx = 0;
-		fwrite(&nInfoEx, 1, 2, f);
-//#endif
-	}
+	SaveITEditHistory(this, f);
 	// Writing midi cfg
 	if (header.flags & 0x80)
 	{

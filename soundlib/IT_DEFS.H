@@ -111,7 +111,7 @@ typedef struct _ITINSTRUMENTEX
 
 
 // IT Sample Format
-typedef struct ITSAMPLESTRUCT
+typedef struct tagITSAMPLESTRUCT
 {
 	DWORD id;		// 0x53504D49
 	CHAR filename[12];
@@ -134,6 +134,15 @@ typedef struct ITSAMPLESTRUCT
 	BYTE vir;
 	BYTE vit;
 } ITSAMPLESTRUCT;
+
+
+// IT Header extension: Save history
+typedef struct tagITHISTORYSTRUCT
+{
+	uint16 fatdate;	// DOS/FAT date when the file was opened / created in the editor. For details, read http://msdn.microsoft.com/en-us/library/ms724247(VS.85).aspx
+	uint16 fattime;	// DOS/FAT time when the file was opened / created in the editor.
+	uint32 runtime;	// The time how long the file was open in the editor, in 1/18.2th seconds. (= ticks of the DOS timer)
+} ITHISTORYSTRUCT;
 
 #pragma pack()
 

@@ -12,6 +12,7 @@
 #include "sndfile.h"
 #include "misc_util.h"
 #include "Undo.h"
+#include <time.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,6 +116,19 @@ enum enmPatternPasteModes
 
 
 /////////////////////////////////////////////////////////////////////////
+// File edit history
+struct FileHistory
+{
+	// Date when the file was loaded in the the tracker or created.
+	tm load_date;
+	// Time the file was open in the editor (in seconds).
+	// For previous editing sessions, this stores the absolute time in seconds the editor was open.
+	// For the current editing session, this stores the time when editing was started (using the result of time()).
+	// To get the desired value in this case, use time(nullptr) - open_time.
+	time_t open_time;
+};
+
+/////////////////////////////////////////////////////////////////////////
 // Split Keyboard Settings (pattern editor)
 
 #define SPLIT_OCTAVE_RANGE 9
@@ -157,6 +171,7 @@ protected:
 	CPatternUndo m_PatternUndo;
 	CSampleUndo m_SampleUndo;
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
+	vector<FileHistory> m_FileHistory;	// File edit history
 
 protected: // create from serialization only
 	CModDoc();
@@ -215,6 +230,7 @@ public:
 	CPatternUndo *GetPatternUndo() { return &m_PatternUndo; }
 	CSampleUndo *GetSampleUndo() { return &m_SampleUndo; }
 	SplitKeyboardSettings *GetSplitKeyboardSettings() { return &m_SplitKeyboardSettings; }
+	vector<FileHistory> *GetFileHistory() { return &m_FileHistory; }
 	
 // operations
 public:
