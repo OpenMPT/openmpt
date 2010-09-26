@@ -3096,6 +3096,86 @@ VOID CSampleMapDlg::OnOK()
 	CDialog::OnCancel();
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// Edit history dialog
+
+BEGIN_MESSAGE_MAP(CEditHistoryDlg, CDialog)
+	ON_COMMAND(IDC_BTN_CLEAR,	OnClearHistory)
+END_MESSAGE_MAP()
+
+
+BOOL CEditHistoryDlg::OnInitDialog()
+//----------------------------------
+{
+	CDialog::OnInitDialog();
+
+	if(m_pModDoc == nullptr)
+		return TRUE;
+
+	CString s;
+	time_t total_time = 0;
+	const size_t num = m_pModDoc->GetFileHistory()->size();
+	for(size_t n = 0; n < num; n++)
+	{
+		CString temp;
+		FileHistory *hist = &(m_pModDoc->GetFileHistory()->at(n));
+		time_t duration = hist->open_time;
+		// Current item
+		if(n == num - 1)
+		{
+			duration = difftime(time(nullptr), duration);
+		}
+		total_time += duration;
+		TCHAR szDate[32];
+		_tcsftime(szDate, sizeof(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->load_date);
+
+		temp.Format(_T("Loaded %s, open in the editor for %lluh %02llum %02llus\r\n"),
+			szDate, duration / 3600, (duration / 60) % 60, duration % 60);
+		s += temp;
+	}
+	SetDlgItemText(IDC_EDIT_HISTORY, s);
+
+	s.Format(_T("Total edit time: %lluh %02llum %02llus"), total_time / 3600, (total_time / 60) % 60, total_time % 60);
+	SetDlgItemText(IDC_TOTAL_EDIT_TIME, s);
+
+	s.Format(_T("Edit history for %s"), m_pModDoc->GetTitle());
+	SetWindowText(s);
+
+	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetFileHistory()->size() > 1) ? TRUE : FALSE);
+
+	return TRUE;
+
+}
+
+
+void CEditHistoryDlg::OnClearHistory()
+//------------------------------------
+{
+	if(m_pModDoc == nullptr)
+		return;
+
+	if(m_pModDoc->GetFileHistory()->size() > 1)
+	{
+		while(m_pModDoc->GetFileHistory()->size() > 1)
+		{
+			m_pModDoc->GetFileHistory()->erase(m_pModDoc->GetFileHistory()->begin());
+		}
+		m_pModDoc->SetModified();
+	}
+
+	OnInitDialog();
+}
+
+
+void CEditHistoryDlg::OnOK()
+//--------------------------
+{
+	CDialog::OnOK();
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // Messagebox with 'don't show again'-option.
 

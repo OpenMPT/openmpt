@@ -2832,6 +2832,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewAddPlugin: OnPluginManager(); break;
 		case kcViewChannelManager: OnChannelManager(); break;
 		case kcViewMIDImapping: OnViewMIDIMapping(); break;
+		case kcViewEditHistory:	OnViewEditHistory(); break;
 		case kcNextDocument:	MDINext(); break;
 		case kcPrevDocument:	MDIPrev(); break;
 
@@ -3002,7 +3003,7 @@ void CMainFrame::OnViewMIDIMapping()
 //----------------------------------
 {
 	CModDoc* pModDoc = GetActiveDoc();
-	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : 0;
+	CSoundFile* pSndFile = (pModDoc) ? pModDoc->GetSoundFile() : nullptr;
 	if(!pSndFile) return;
 
 	const HWND oldMIDIRecondWnd = GetMidiRecordWnd();
@@ -3011,6 +3012,16 @@ void CMainFrame::OnViewMIDIMapping()
 	SetMidiRecordWnd(oldMIDIRecondWnd);
 }
 
+
+void CMainFrame::OnViewEditHistory()
+//----------------------------------
+{
+	CModDoc* pModDoc = GetActiveDoc();
+	if(pModDoc != nullptr)
+	{
+		pModDoc->OnViewEditHistory();
+	}
+}
 
 
 /////////////////////////////////////////////

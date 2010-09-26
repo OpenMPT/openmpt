@@ -770,6 +770,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	{
 		FileHistory history;
+		MemsetZero(history);
 		time_t systime;
 		time(&systime);
 		localtime_s(&history.load_date, &systime);

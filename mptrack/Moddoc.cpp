@@ -52,6 +52,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_VIEW_INSTRUMENTS,		OnEditInstruments)
 	ON_COMMAND(ID_VIEW_COMMENTS,		OnEditComments)
 	ON_COMMAND(ID_VIEW_GRAPH,			OnEditGraph) //rewbs.graph
+	ON_COMMAND(ID_VIEW_EDITHISTORY,		OnViewEditHistory)
 	ON_COMMAND(ID_INSERT_PATTERN,		OnInsertPattern)
 	ON_COMMAND(ID_INSERT_SAMPLE,		OnInsertSample)
 	ON_COMMAND(ID_INSERT_INSTRUMENT,	OnInsertInstrument)
@@ -67,6 +68,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_COMMENTS,			OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		OnUpdateHasMIDIMappings)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVEASMP3,			OnUpdateMP3Encode)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_EDITHISTORY,		OnUpdateITMPTOnly)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -106,6 +108,8 @@ CModDoc::CModDoc()
 	m_SplitKeyboardSettings.splitVolume = 0;
 	m_SplitKeyboardSettings.octaveModifier = 0;
 	m_SplitKeyboardSettings.octaveLink = false;
+
+	m_FileHistory.clear();
 
 #ifdef _DEBUG
 	MODCHANNEL *p = m_SndFile.Chn;
@@ -1986,6 +1990,14 @@ void CModDoc::OnUpdateXMITMPTOnly(CCmdUI *p)
 }
 
 
+void CModDoc::OnUpdateITMPTOnly(CCmdUI *p)
+//---------------------------------------
+{
+	if (p)
+		p->Enable((m_SndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE);
+}
+
+
 void CModDoc::OnUpdateMP3Encode(CCmdUI *p)
 //----------------------------------------
 {
@@ -3419,15 +3431,25 @@ void CModDoc::OnPatternPlayNoLoop()
 		// set playback timer in the status bar
 		SetElapsedTime(nOrd, nRow, true);
 		
-		if (pModPlaying != this)	{
+		if (pModPlaying != this)
+		{
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
 		}
 	}
 	//SwitchToView();
 }
 
+
+void CModDoc::OnViewEditHistory()
+//-------------------------------
+{
+	CEditHistoryDlg dlg(CMainFrame::GetMainFrame(), this);
+	dlg.DoModal();
+}
+
+
 LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
-//------------------------------------------------------------
+//---------------------------------------------------------------
 {
 	if (wParam == kcNull)
 		return NULL;
