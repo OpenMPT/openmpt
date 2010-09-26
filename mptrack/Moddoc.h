@@ -124,7 +124,7 @@ struct FileHistory
 	// Time the file was open in the editor (in seconds).
 	// For previous editing sessions, this stores the absolute time in seconds the editor was open.
 	// For the current editing session, this stores the time when editing was started (using the result of time()).
-	// To get the desired value in this case, use time(nullptr) - open_time.
+	// To get the desired value in this case, use difftime(time(nullptr), open_time).
 	time_t open_time;
 };
 
@@ -385,11 +385,13 @@ public:
 	afx_msg void OnEstimateSongLength();
 	afx_msg void OnApproximateBPM();
 	afx_msg void OnUpdateXMITMPTOnly(CCmdUI *p);
+	afx_msg void OnUpdateITMPTOnly(CCmdUI *p);
 	afx_msg void OnUpdateHasMIDIMappings(CCmdUI *p);
 	afx_msg void OnUpdateMP3Encode(CCmdUI *pCmdUI);
 	afx_msg void OnPatternRestart(); //rewbs.customKeys
 	afx_msg void OnPatternPlay(); //rewbs.customKeys
 	afx_msg void OnPatternPlayNoLoop(); //rewbs.customKeys
+	afx_msg void OnViewEditHistory();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

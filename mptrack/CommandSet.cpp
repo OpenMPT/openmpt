@@ -601,6 +601,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcPanic, 1852, kcVisible, kcNoDummy, _T("Panic"));
 	DefineKeyCommand(kcOrderlistPatIgnore, 1853, kcVisible, kcNoDummy, _T("Ignore (+++) Index"));
 	DefineKeyCommand(kcOrderlistPatInvalid, 1854, kcVisible, kcNoDummy, _T("Invalid (---) Index"));
+	DefineKeyCommand(kcViewEditHistory, 1855, kcVisible, kcNoDummy, _T("View Edit History"));
 	// Add new key commands here.
 
 #ifdef _DEBUG

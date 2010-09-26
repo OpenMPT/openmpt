@@ -686,13 +686,14 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				it_history.runtime = LittleEndian(it_history.runtime);
 
 				FileHistory mpt_history;
+				MemsetZero(mpt_history);
 				mpt_history.load_date.tm_year = ((it_history.fatdate >> 9) & 0x7F) + 80;
 				mpt_history.load_date.tm_mon = ((it_history.fatdate >> 5) & 0x0F) - 1;
 				mpt_history.load_date.tm_mday = it_history.fatdate & 0x1F;
 				mpt_history.load_date.tm_hour = (it_history.fattime >> 11) & 0x1F;
 				mpt_history.load_date.tm_min = (it_history.fattime >> 5) & 0x3F;
 				mpt_history.load_date.tm_sec = (it_history.fattime & 0x1F) * 2;
-				mpt_history.open_time = (uint64)((float)(it_history.runtime) / 18.2f);
+				mpt_history.open_time = (time_t)((float)(it_history.runtime) / 18.2f);
 				GetpModDoc()->GetFileHistory()->push_back(mpt_history);
 
 #ifdef DEBUG
@@ -1187,15 +1188,15 @@ void SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 		if(n == num - 1)
 		{
 			// The current timestamp has to be converted first.
-			it_history.runtime = time(nullptr) - mpt_history->open_time;
+			it_history.runtime = difftime(time(nullptr), mpt_history->open_time) * 18;
 		} else
 		{
 			// Previous timestamps are left alone
-			it_history.runtime = mpt_history->open_time;
+			it_history.runtime = mpt_history->open_time * 18;
 		}
 		it_history.fatdate = LittleEndianW(it_history.fatdate);
 		it_history.fattime = LittleEndianW(it_history.fattime);
-		it_history.runtime = LittleEndian(it_history.runtime * 18);
+		it_history.runtime = LittleEndian(it_history.runtime);
 		fwrite(&it_history, 1, sizeof(it_history), f);
 	}
 }
@@ -1351,7 +1352,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
 	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
 	if (header.patnum) fwrite(&patpos[0], 4, header.patnum, f);
-	// Writing editor history information
+	// Writing edit history information
 	SaveITEditHistory(this, f);
 	// Writing midi cfg
 	if (header.flags & 0x80)
@@ -1964,7 +1965,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	if (header.insnum) fwrite(inspos, 4, header.insnum, f);
 	if (header.smpnum) fwrite(smppos, 4, header.smpnum, f);
 	if (header.patnum) fwrite(patpos, 4, header.patnum, f);
-	// Writing editor history information
+	// Writing edit history information
 	SaveITEditHistory(this, f);
 	// Writing midi cfg
 	if (header.flags & 0x80)

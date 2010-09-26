@@ -149,6 +149,18 @@ BEGIN
 END
 
 
+IDD_EDITHISTORY DIALOGEX 0, 0, 316, 185
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Module edit history"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,258,162,50,14
+    PUSHBUTTON      "Clear",IDC_BTN_CLEAR,6,162,50,14
+    EDITTEXT        IDC_EDIT_HISTORY,6,6,300,150,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_VSCROLL
+    LTEXT           "",IDC_TOTAL_EDIT_TIME,60,165,192,15
+END
+
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // DESIGNINFO
@@ -203,6 +215,14 @@ BEGIN
         RIGHTMARGIN, 309
         TOPMARGIN, 7
         BOTTOMMARGIN, 94
+    END
+
+    IDD_EDITHISTORY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 178
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -1947,7 +1967,8 @@ BEGIN
         MENUITEM "Add &Plugin...",              ID_PLUGIN_SETUP
         MENUITEM "Channel &Manager...",         ID_CHANNEL_MANAGER
         MENUITEM "Song Properties...",          ID_VIEW_SONGPROPERTIES
-        MENUITEM "MIDI mapping...",             ID_VIEW_MIDIMAPPING
+        MENUITEM "&MIDI Mapping...",            ID_VIEW_MIDIMAPPING
+        MENUITEM "Edit &History...",            ID_VIEW_EDITHISTORY
     END
     POPUP "&Window"
     BEGIN
@@ -2391,6 +2412,23 @@ END
 STRINGTABLE 
 BEGIN
     ID_PANIC                "Kill all VSTi and sample voices\nStop all hanging VSTi and sample voices"
+    ID_VIEW_EDITHISTORY     "View the edit history of this module"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_MIDIMAPPING     "Configure the MIDI Mapping"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_CHANNEL_MANAGER      "Add, remove, mute and manage channels"
+    ID_PLUGIN_SETUP         "Register plugins and add them to the current module"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_SONGPROPERTIES  "Edit global song properties or convert the module to another format"
 END
 
 #endif    // Englisch (USA) resources

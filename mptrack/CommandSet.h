@@ -114,6 +114,7 @@ enum CommandID
 	kcViewAddPlugin,
 	kcViewSongProperties,
 	kcViewMIDImapping,
+	kcViewEditHistory,
 	kcHelp,
 	kcEndView=kcHelp,
 

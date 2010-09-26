@@ -463,7 +463,8 @@ CString CInputHandler::GetMenuText(UINT id)
 		case ID_PLUGIN_SETUP:		s="Pl&ugin Manager...\t"; c=kcViewAddPlugin; break;
 		case ID_CHANNEL_MANAGER:	s="Ch&annel Manager...\t"; c=kcViewChannelManager; break;
 		case ID_VIEW_SONGPROPERTIES:s="Song P&roperties...\t"; c=kcViewSongProperties; break; //rewbs.graph
-		case ID_VIEW_MIDIMAPPING:	s="&MIDI mapping...\t"; c = kcViewMIDImapping; break;
+		case ID_VIEW_MIDIMAPPING:	s="&MIDI Mapping...\t"; c = kcViewMIDImapping; break;
+		case ID_VIEW_EDITHISTORY:	s="Edit &History...\t"; c = kcViewEditHistory; break;
 
 		/*	
 		case ID_WINDOW_NEW:			s="&New Window\t"; c=kcWindowNew; break;

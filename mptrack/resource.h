@@ -135,6 +135,7 @@
 #define IDD_KEYBOARD_SPLIT              523
 #define IDD_SAMPLE_GENERATOR            524
 #define IDD_SAMPLE_GENERATOR_PRESETS    525
+#define IDD_EDITHISTORY                 526
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -953,6 +954,9 @@
 #define IDC_CHK_REMEMBERSETTINGS        2427
 #define IDC_EDIT_ROWSPERBEAT            2428
 #define IDC_EDIT_ROWSPERMEASURE         2429
+#define IDC_BTN_CLEAR                   2430
+#define IDC_TOTAL_EDIT_TIME             2431
+#define IDC_EDIT_HISTORY                2432
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1211,15 +1215,16 @@
 #define ID_ENVELOPE_ZOOM_IN             60449
 #define ID_ENVELOPE_ZOOM_OUT            60450
 #define ID_PANIC                        60451
+#define ID_VIEW_EDITHISTORY             60452
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        526
-#define _APS_NEXT_COMMAND_VALUE         60452
-#define _APS_NEXT_CONTROL_VALUE         2430
+#define _APS_NEXT_RESOURCE_VALUE        527
+#define _APS_NEXT_COMMAND_VALUE         60453
+#define _APS_NEXT_CONTROL_VALUE         2433
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

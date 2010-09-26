@@ -624,6 +624,29 @@ protected:
 
 
 /////////////////////////////////////////////////////////////////////////
+// Edit history dialog
+
+//===================================
+class CEditHistoryDlg: public CDialog
+//===================================
+{
+
+protected:
+	CModDoc *m_pModDoc;
+
+public:
+	CEditHistoryDlg(CWnd *parent, CModDoc *pModDoc) : CDialog(IDD_EDITHISTORY, parent) { m_pModDoc = pModDoc; }
+	UINT ShowLog(LPCSTR pszLog, LPCSTR lpszTitle=NULL);
+
+protected:
+	virtual BOOL OnInitDialog();
+	virtual VOID OnOK();
+	afx_msg void OnClearHistory();
+	DECLARE_MESSAGE_MAP()
+};
+
+
+/////////////////////////////////////////////////////////////////////////
 // Messagebox with 'don't show again'-option.
 
 // Enums for message entries. See dlg_misc.cpp for the array of entries.
