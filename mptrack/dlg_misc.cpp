@@ -3114,34 +3114,38 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		return TRUE;
 
 	CString s;
-	time_t total_time = 0;
+	uint64 totalTime = 0;
 	const size_t num = m_pModDoc->GetFileHistory()->size();
+	
 	for(size_t n = 0; n < num; n++)
 	{
 		CString temp;
 		FileHistory *hist = &(m_pModDoc->GetFileHistory()->at(n));
-		time_t duration = hist->open_time;
-		// Current item
-		if(n == num - 1)
-		{
-			duration = difftime(time(nullptr), duration);
-		}
-		total_time += duration;
-		TCHAR szDate[32];
-		_tcsftime(szDate, sizeof(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->load_date);
+		totalTime += hist->openTime;
 
-		temp.Format(_T("Loaded %s, open in the editor for %lluh %02llum %02llus\r\n"),
+		// Date
+		TCHAR szDate[32];
+		_tcsftime(szDate, sizeof(szDate), _T("%d %b %Y, %H:%M:%S"), &hist->loadDate);
+		// Time + stuff
+		uint32 duration = (uint32)((double)(hist->openTime) / HISTORY_TIMER_PRECISION);
+		temp.Format(_T("Loaded %s, open in the editor for %luh %02lum %02lus\r\n"),
 			szDate, duration / 3600, (duration / 60) % 60, duration % 60);
 		s += temp;
 	}
+	if(num == 0)
+	{
+		s = _T("No information available about the previous edit history of this module.");
+	}
 	SetDlgItemText(IDC_EDIT_HISTORY, s);
 
-	s.Format(_T("Total edit time: %lluh %02llum %02llus"), total_time / 3600, (total_time / 60) % 60, total_time % 60);
+	// Total edit time
+	totalTime = (uint64)((double)(totalTime) / HISTORY_TIMER_PRECISION);
+	s.Format(_T("Total edit time: %lluh %02llum %02llus"), totalTime / 3600, (totalTime / 60) % 60, totalTime % 60);
 	SetDlgItemText(IDC_TOTAL_EDIT_TIME, s);
-
+	// Window title
 	s.Format(_T("Edit history for %s"), m_pModDoc->GetTitle());
 	SetWindowText(s);
-
+	// Enable or disable Clear button
 	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetFileHistory()->empty()) ? FALSE : TRUE);
 
 	return TRUE;

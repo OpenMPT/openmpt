@@ -636,6 +636,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	inspossize <<= 2;
 	memcpy(inspos, lpStream+dwMemPos, inspossize);
 	dwMemPos += pifh->insnum * 4;
+
 	// Reading Samples Offsets
 	memset(smppos, 0, sizeof(smppos));
 	UINT smppossize = pifh->smpnum;
@@ -643,6 +644,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	smppossize <<= 2;
 	memcpy(smppos, lpStream+dwMemPos, smppossize);
 	dwMemPos += pifh->smpnum * 4;
+
 	// Reading Patterns Offsets
 	UINT patpossize = pifh->patnum;
 	if(patpossize > GetModSpecifications().patternsMax)
@@ -665,41 +667,46 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		return false;
 	if(patpossize > 0)
 		memcpy(&patpos[0], lpStream+dwMemPos, patpossize);
-	
-	
 	dwMemPos += pifh->patnum * 4;
+
 	// Reading IT Edit History Info
-	if (dwMemPos + 2 < dwMemLength && (pifh->special & 0x02))
+	// This is only supposed to be present if bit 1 of the special flags is set.
+	// However, old versions of Schism and probably other trackers always set this
+	// even if they don't write the edit history count. So we have to filter this out...
+	// (for now we will just ignore those Schism versions, as Schism seems to be the only tracker that did this)
+	const bool oldSchism = ((pifh->cwtv & 0xF000) == 0x1000 && pifh->cwtv < 0x1050) ? true : false;
+	if (dwMemPos + 2 < dwMemLength && (pifh->special & 0x02) && !oldSchism)
 	{
 		size_t nflt = LittleEndianW(*((uint16*)(lpStream + dwMemPos)));
 		dwMemPos += 2;
 
-		GetpModDoc()->GetFileHistory()->clear();
 		if (nflt * 8 <= dwMemLength - dwMemPos)
 		{
+			GetpModDoc()->GetFileHistory()->clear();
 			for(size_t n = 0; n < nflt; n++)
 			{
 #ifdef MODPLUG_TRACKER
-				ITHISTORYSTRUCT it_history = *((ITHISTORYSTRUCT *)(lpStream + dwMemPos));
-				it_history.fatdate = LittleEndianW(it_history.fatdate);
-				it_history.fattime = LittleEndianW(it_history.fattime);
-				it_history.runtime = LittleEndian(it_history.runtime);
+				ITHISTORYSTRUCT itHistory = *((ITHISTORYSTRUCT *)(lpStream + dwMemPos));
+				itHistory.fatdate = LittleEndianW(itHistory.fatdate);
+				itHistory.fattime = LittleEndianW(itHistory.fattime);
+				itHistory.runtime = LittleEndian(itHistory.runtime);
 
-				FileHistory mpt_history;
-				MemsetZero(mpt_history);
-				mpt_history.load_date.tm_year = ((it_history.fatdate >> 9) & 0x7F) + 80;
-				mpt_history.load_date.tm_mon = CLAMP((it_history.fatdate >> 5) & 0x0F, 1, 12) - 1;
-				mpt_history.load_date.tm_mday = CLAMP(it_history.fatdate & 0x1F, 1, 12);
-				mpt_history.load_date.tm_hour = CLAMP((it_history.fattime >> 11) & 0x1F, 0, 23);
-				mpt_history.load_date.tm_min = CLAMP((it_history.fattime >> 5) & 0x3F, 0, 59);
-				mpt_history.load_date.tm_sec = CLAMP((it_history.fattime & 0x1F) * 2, 0, 59);
-				mpt_history.open_time = (time_t)((float)(it_history.runtime) / 18.2f);
-				GetpModDoc()->GetFileHistory()->push_back(mpt_history);
+				FileHistory mptHistory;
+				MemsetZero(mptHistory);
+				// Decode FAT date and time
+				mptHistory.loadDate.tm_year = ((itHistory.fatdate >> 9) & 0x7F) + 80;
+				mptHistory.loadDate.tm_mon = CLAMP((itHistory.fatdate >> 5) & 0x0F, 1, 12) - 1;
+				mptHistory.loadDate.tm_mday = CLAMP(itHistory.fatdate & 0x1F, 1, 31);
+				mptHistory.loadDate.tm_hour = CLAMP((itHistory.fattime >> 11) & 0x1F, 0, 23);
+				mptHistory.loadDate.tm_min = CLAMP((itHistory.fattime >> 5) & 0x3F, 0, 59);
+				mptHistory.loadDate.tm_sec = CLAMP((itHistory.fattime & 0x1F) * 2, 0, 59);
+				mptHistory.openTime = itHistory.runtime * (HISTORY_TIMER_PRECISION / 18.2f);
+				GetpModDoc()->GetFileHistory()->push_back(mptHistory);
 
 #ifdef DEBUG
-				const uint32 seconds = (uint32)(((float)it_history.runtime) / 18.2f);
+				const uint32 seconds = (uint32)(((double)itHistory.runtime) / 18.2f);
 				CHAR stime[128];
-				wsprintf(stime, "IT Edit History: Loaded %04u-%02u-%02u %02u:%02u:%02u, open in the editor for %u:%02u:%02u (%u ticks)\n", ((it_history.fatdate >> 9) & 0x7F) + 1980, (it_history.fatdate >> 5) & 0x0F, it_history.fatdate & 0x1F, (it_history.fattime >> 11) & 0x1F, (it_history.fattime >> 5) & 0x3F, (it_history.fattime & 0x1F) * 2, seconds / 3600, (seconds / 60) % 60, seconds % 60, it_history.runtime);
+				wsprintf(stime, "IT Edit History: Loaded %04u-%02u-%02u %02u:%02u:%02u, open for %u:%02u:%02u (%u ticks)\n", ((itHistory.fatdate >> 9) & 0x7F) + 1980, (itHistory.fatdate >> 5) & 0x0F, itHistory.fatdate & 0x1F, (itHistory.fattime >> 11) & 0x1F, (itHistory.fattime >> 5) & 0x3F, (itHistory.fattime & 0x1F) * 2, seconds / 3600, (seconds / 60) % 60, seconds % 60, itHistory.runtime);
 				Log(stime);
 #endif // DEBUG
 
@@ -708,7 +715,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			}
 		}
 	}
-	// Reading Midi Output & Macros
+	// Reading MIDI Output & Macros
 	if (m_dwSongFlags & SONG_EMBEDMIDICFG)
 	{
 		if (dwMemPos + sizeof(MODMIDICFG) < dwMemLength)
@@ -1168,37 +1175,64 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-// Save edit history
-void SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
-//---------------------------------------------------------
+// Save edit history. Pass a null pointer for *f to retrieve the number of bytes that would be written.
+DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
+//----------------------------------------------------------
 {
-	const size_t num = pSndFile->GetpModDoc()->GetFileHistory()->size();
-	uint16 fnum = min(num, uint16_max);
+#ifdef MODPLUG_TRACKER
+	CModDoc *pModDoc = pSndFile->GetpModDoc();
+	const size_t num = (pModDoc != nullptr) ? pModDoc->GetFileHistory()->size() + 1 : 0;	// + 1 for this session
+#else
+	const size_t num = 0;
+#endif // MODPLUG_TRACKER
+
+	uint16 fnum = min(num, uint16_max);	// Number of entries that are actually going to be written
+	const size_t bytes_written = 2 + fnum * 8;	// Number of bytes that are actually going to be written
+	
+	if(f == nullptr)
+		return bytes_written;
+
+	// Write number of history entries
 	fnum = LittleEndianW(fnum);
 	fwrite(&fnum, 2, 1, f);
 
+#ifdef MODPLUG_TRACKER
+	// Write history data
 	const size_t start = (num > uint16_max) ? num - uint16_max : 0;
 	for(size_t n = start; n < num; n++)
 	{
-		const FileHistory *mpt_history = &(pSndFile->GetpModDoc()->GetFileHistory()->at(n));
-		ITHISTORYSTRUCT it_history;
-		// Create FAT file dates
-		it_history.fatdate = mpt_history->load_date.tm_mday | ((mpt_history->load_date.tm_mon + 1) << 5) | ((mpt_history->load_date.tm_year - 80) << 9);
-		it_history.fattime = (mpt_history->load_date.tm_sec / 2) | (mpt_history->load_date.tm_min << 5) | (mpt_history->load_date.tm_hour << 11);
-		if(n == num - 1)
+		tm loadDate;
+		uint32 openTime;
+
+		if(n < num - 1)
 		{
-			// The current timestamp has to be converted first.
-			it_history.runtime = difftime(time(nullptr), mpt_history->open_time) * 18;
+			// Previous timestamps
+			const FileHistory *mptHistory = &(pModDoc->GetFileHistory()->at(n));
+			loadDate = mptHistory->loadDate;
+			openTime = mptHistory->openTime * (18.2f / HISTORY_TIMER_PRECISION);
 		} else
 		{
-			// Previous timestamps are left alone
-			it_history.runtime = mpt_history->open_time * 18;
+			// Current ("new") timestamp
+			const time_t creationTime = pModDoc->GetCreationTime();
+			localtime_s(&loadDate, &creationTime);
+			openTime = (uint32)((double)difftime(time(nullptr), creationTime) * 18.2f);
 		}
-		it_history.fatdate = LittleEndianW(it_history.fatdate);
-		it_history.fattime = LittleEndianW(it_history.fattime);
-		it_history.runtime = LittleEndian(it_history.runtime);
-		fwrite(&it_history, 1, sizeof(it_history), f);
+
+		ITHISTORYSTRUCT itHistory;
+		// Create FAT file dates
+		itHistory.fatdate = loadDate.tm_mday | ((loadDate.tm_mon + 1) << 5) | ((loadDate.tm_year - 80) << 9);
+		itHistory.fattime = (loadDate.tm_sec / 2) | (loadDate.tm_min << 5) | (loadDate.tm_hour << 11);
+		itHistory.runtime = openTime;
+
+		itHistory.fatdate = LittleEndianW(itHistory.fatdate);
+		itHistory.fattime = LittleEndianW(itHistory.fattime);
+		itHistory.runtime = LittleEndian(itHistory.runtime);
+
+		fwrite(&itHistory, 1, sizeof(itHistory), f);
 	}
+#endif // MODPLUG_TRACKER
+
+	return bytes_written;
 }
 
 #pragma warning(disable:4100)
@@ -1215,7 +1249,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	DWORD inspos[MAX_INSTRUMENTS];
 	vector<DWORD> patpos;
 	DWORD smppos[MAX_SAMPLES];
-	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2 + min(GetpModDoc()->GetFileHistory()->size(), uint16_max) * 8;
+	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 0;
 	WORD patinfo[4];
 // -> CODE#0006
 // -> DESC="misc quantity changes"
@@ -1339,6 +1373,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	}
 	// Mix Plugins
 	dwExtra += SaveMixPlugins(NULL, TRUE);
+	dwExtra += SaveITEditHistory(this, nullptr);	// Just calculate the size of this extra block for now.
 	// Comments
 	if (m_lpszSongComments)
 	{
@@ -1854,7 +1889,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	DWORD inspos[MAX_INSTRUMENTS];
 	DWORD patpos[MAX_PATTERNS];
 	DWORD smppos[MAX_SAMPLES];
-	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 2 + min(GetpModDoc()->GetFileHistory()->size(), uint16_max) * 8;
+	DWORD dwPos = 0, dwHdrPos = 0, dwExtra = 0;
 	WORD patinfo[4];
 // -> CODE#0006
 // -> DESC="misc quantity changes"
@@ -1952,6 +1987,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	}
 */	// Mix Plugins
 	//dwExtra += SaveMixPlugins(NULL, TRUE);
+	dwExtra += SaveITEditHistory(this, nullptr);	// Just calculate the size of this extra block for now.
 	// Comments
 	if (m_lpszSongComments)
 	{
