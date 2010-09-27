@@ -766,19 +766,6 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 
 	if ((m_nRestartPos >= Order.size()) || (Order[m_nRestartPos] >= Patterns.Size())) m_nRestartPos = 0;
 
-#ifdef MODPLUG_TRACKER
-	// Set the creation date of this file (or the load time if we're loading an existing file)
-	{
-		FileHistory history;
-		MemsetZero(history);
-		time_t systime;
-		time(&systime);
-		localtime_s(&history.load_date, &systime);
-		history.open_time = systime;	// Editing is starting right NOW!
-		pModDoc->GetFileHistory()->push_back(history);
-	}
-#endif // MODPLUG_TRACKER
-
 	// plugin loader
 	string sNotFound;
 	std::list<PLUGINDEX> notFoundIDs;

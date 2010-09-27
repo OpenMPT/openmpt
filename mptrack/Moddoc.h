@@ -117,15 +117,17 @@ enum enmPatternPasteModes
 
 /////////////////////////////////////////////////////////////////////////
 // File edit history
+
+#define HISTORY_TIMER_PRECISION	18.2f
+
+//================
 struct FileHistory
+//================
 {
 	// Date when the file was loaded in the the tracker or created.
-	tm load_date;
-	// Time the file was open in the editor (in seconds).
-	// For previous editing sessions, this stores the absolute time in seconds the editor was open.
-	// For the current editing session, this stores the time when editing was started (using the result of time()).
-	// To get the desired value in this case, use difftime(time(nullptr), open_time).
-	time_t open_time;
+	tm loadDate;
+	// Time the file was open in the editor, in 1/18.2th seconds (frequency of a standard DOS timer, to keep compatibility with Impulse Tracker easy).
+	uint32 openTime;
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -172,6 +174,7 @@ protected:
 	CSampleUndo m_SampleUndo;
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
 	vector<FileHistory> m_FileHistory;	// File edit history
+	time_t m_creationTime;
 
 protected: // create from serialization only
 	CModDoc();
@@ -230,7 +233,9 @@ public:
 	CPatternUndo *GetPatternUndo() { return &m_PatternUndo; }
 	CSampleUndo *GetSampleUndo() { return &m_SampleUndo; }
 	SplitKeyboardSettings *GetSplitKeyboardSettings() { return &m_SplitKeyboardSettings; }
+
 	vector<FileHistory> *GetFileHistory() { return &m_FileHistory; }
+	time_t GetCreationTime() const { return m_creationTime; }
 	
 // operations
 public:
