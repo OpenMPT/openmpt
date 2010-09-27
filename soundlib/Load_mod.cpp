@@ -617,7 +617,7 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 			norders = iord;
 			break;
 		}
-		if ((Order[iord] < 0x80) && (nbp<=Order[iord])) nbp = Order[iord]+1;
+		if ((Order[iord] < 0x80) && (nbp <= Order[iord])) nbp = Order[iord] + 1;
 	}
 	bTab[0] = norders;
 	bTab[1] = m_nRestartPos;
@@ -628,9 +628,15 @@ bool CSoundFile::SaveMod(LPCSTR lpszFileName, UINT nPacking, const bool bCompati
 	fwrite(ord, 128, 1, f);
 	// Writing signature
 	if (m_nChannels == 4)
-		lstrcpy((LPSTR)&bTab, "M.K.");
-	else
-		wsprintf((LPSTR)&bTab, "%luCHN", m_nChannels);
+	{
+		if(nbp < 64)
+			lstrcpy((LPSTR)&bTab, "M.K.");
+		else	// more than 64 patterns
+			lstrcpy((LPSTR)&bTab, "M!K!");
+	} else
+	{
+		sprintf((LPSTR)&bTab, "%luCHN", m_nChannels);
+	}
 	fwrite(bTab, 4, 1, f);
 	// Writing patterns
 	for (UINT ipat=0; ipat<nbp; ipat++) {	//for all patterns
