@@ -111,7 +111,7 @@ const CModSpecifications mod =
 	false,								// No notecut.
 	false,								// No noteoff.
 	false,								// No notefade.
-	64,									// Pattern max.
+	128,								// Pattern max.
 	128,								// Order max.
 	4,									// Channel min
 	32,									// Channel max
@@ -151,7 +151,7 @@ const CModSpecifications modEx =
 	false,								// No notecut.
 	false,								// No noteoff.
 	false,								// No notefade.
-	64,									// Pattern max.
+	128,								// Pattern max.
 	128,								// Order max.
 	4,									// Channel min
 	32,									// Channel max
