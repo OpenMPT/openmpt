@@ -3142,7 +3142,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 	s.Format(_T("Edit history for %s"), m_pModDoc->GetTitle());
 	SetWindowText(s);
 
-	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetFileHistory()->size() > 1) ? TRUE : FALSE);
+	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetFileHistory()->empty()) ? FALSE : TRUE);
 
 	return TRUE;
 
@@ -3152,19 +3152,12 @@ BOOL CEditHistoryDlg::OnInitDialog()
 void CEditHistoryDlg::OnClearHistory()
 //------------------------------------
 {
-	if(m_pModDoc == nullptr)
-		return;
-
-	if(m_pModDoc->GetFileHistory()->size() > 1)
+	if(m_pModDoc != nullptr && !m_pModDoc->GetFileHistory()->empty())
 	{
-		while(m_pModDoc->GetFileHistory()->size() > 1)
-		{
-			m_pModDoc->GetFileHistory()->erase(m_pModDoc->GetFileHistory()->begin());
-		}
+		m_pModDoc->GetFileHistory()->clear();
 		m_pModDoc->SetModified();
+		OnInitDialog();
 	}
-
-	OnInitDialog();
 }
 
 
