@@ -814,17 +814,17 @@ bool CSoundFile::ConvertVolEffect(uint8 *e, uint8 *p, bool bForce)
 		*p = min(*p, 64);
 		break;
 	case CMD_PORTAMENTOUP:
-		if (bForce)
-			*p = min(*p, 9);
-		else if (*p > 9)
+		// if not force, reject when dividing causes loss of data in LSB, or if the final value is too
+		// large to fit. (volume column Ex/Fx are four times stronger than effect column)
+		if (!bForce && ((*p & 3) || *p > 9 * 4 + 3))
 			return false;
+		*p = min(*p / 4, 9);
 		*e = VOLCMD_PORTAUP;
 		break;
 	case CMD_PORTAMENTODOWN:
-		if (bForce)
-			*p = min(*p, 9);
-		else if (*p > 9)
+		if (!bForce && ((*p & 3) || *p > 9 * 4 + 3))
 			return false;
+		*p = min(*p / 4, 9);
 		*e = VOLCMD_PORTADOWN;
 		break;
 	case CMD_TONEPORTAMENTO:
