@@ -688,11 +688,11 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 				FileHistory mpt_history;
 				MemsetZero(mpt_history);
 				mpt_history.load_date.tm_year = ((it_history.fatdate >> 9) & 0x7F) + 80;
-				mpt_history.load_date.tm_mon = ((it_history.fatdate >> 5) & 0x0F) - 1;
-				mpt_history.load_date.tm_mday = it_history.fatdate & 0x1F;
-				mpt_history.load_date.tm_hour = (it_history.fattime >> 11) & 0x1F;
-				mpt_history.load_date.tm_min = (it_history.fattime >> 5) & 0x3F;
-				mpt_history.load_date.tm_sec = (it_history.fattime & 0x1F) * 2;
+				mpt_history.load_date.tm_mon = CLAMP((it_history.fatdate >> 5) & 0x0F, 1, 12) - 1;
+				mpt_history.load_date.tm_mday = CLAMP(it_history.fatdate & 0x1F, 1, 12);
+				mpt_history.load_date.tm_hour = CLAMP((it_history.fattime >> 11) & 0x1F, 0, 23);
+				mpt_history.load_date.tm_min = CLAMP((it_history.fattime >> 5) & 0x3F, 0, 59);
+				mpt_history.load_date.tm_sec = CLAMP((it_history.fattime & 0x1F) * 2, 0, 59);
 				mpt_history.open_time = (time_t)((float)(it_history.runtime) / 18.2f);
 				GetpModDoc()->GetFileHistory()->push_back(mpt_history);
 
@@ -1391,7 +1391,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	// Writing instruments
 	for (UINT nins=1; nins<=header.insnum; nins++)
 	{
-		BOOL bKbdEx = FALSE;
+		bool bKbdEx = false;	// extended sample map (for samples > 255)
 		BYTE keyboardex[NOTE_MAX];
 
 		memset(&iti, 0, sizeof(iti));
@@ -1440,7 +1440,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 				}
 				iti.keyboard[i*2] = pIns->NoteMap[i] - 1;
 				iti.keyboard[i*2+1] = smp;
-				if (smp > 0xff) bKbdEx = TRUE;
+				if (smp > 0xff) bKbdEx = true;
 				keyboardex[i] = (smp>>8);
 			} else keyboardex[i] = 0;
 			// Writing Volume envelope
@@ -2004,7 +2004,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	// Writing instruments
 	for (UINT nins=1; nins<=header.insnum; nins++)
 	{
-		BOOL bKbdEx = FALSE;
+		bool bKbdEx = false;	// extended sample map (for samples > 255)
 		BYTE keyboardex[NOTE_MAX];
 
 		memset(&iti, 0, sizeof(iti));
@@ -2044,7 +2044,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 				}
 				iti.keyboard[i*2] = pIns->NoteMap[i] - 1;
 				iti.keyboard[i*2+1] = smp;
-				if (smp > 0xff) bKbdEx = TRUE;
+				//if (smp > 0xFF) bKbdEx = true;	// no extended sample map in compat mode
 				keyboardex[i] = (smp>>8);
 			} else keyboardex[i] = 0;
 			// Writing Volume envelope
