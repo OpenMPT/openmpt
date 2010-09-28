@@ -513,7 +513,9 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			} else if(pifh->cmwt == 0x888 || pifh->cwtv == 0x888)
 			{
 				// OpenMPT 1.17 and 1.18 (raped IT format)
+				// Exact version number will be determined later.
 				interpretModPlugMade = true;
+				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
 			} else if(pifh->cwtv == 0x0217 && pifh->cmwt == 0x0200 && pifh->reserved == 0)
 			{
 				// ModPlug Tracker 1.16 (semi-raped IT format)
@@ -551,14 +553,22 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	if(GetType() == MOD_TYPE_IT) mptStartPos = dwMemLength;
 
 	// Read row highlights
-	if(pifh->cwtv >= 0x0213)
+	if((pifh->special & 0x04))
 	{
-		// MPT 1.09, 1.07 and most likely other old MPT versions as well as some other programs (converters) leave this blank
-		if(pifh->highlight_minor + pifh->highlight_major != 0)
+		// MPT 1.09, 1.07 and most likely other old MPT versions leave this blank (0/0), but have the "special" flag set.
+		// Newer versions of MPT and OpenMPT 1.17 *always* write 4/16 here.
+		// Thus, we will just ignore those old versions.
+		if(m_dwLastSavedWithVersion == 0 || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02))
 		{
 			m_nDefaultRowsPerBeat = pifh->highlight_minor;
 			m_nDefaultRowsPerMeasure = pifh->highlight_major;
 		}
+#ifdef DEBUG
+		if((pifh->highlight_minor & pifh->highlight_major) == 0)
+		{
+			Log("IT Header: Row highlight is 0");
+		}
+#endif
 	}
 
 	if (pifh->flags & 0x08) m_dwSongFlags |= SONG_LINEARSLIDES;
@@ -1274,8 +1284,8 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	header.id = LittleEndian(IT_IMPM);
 	lstrcpyn(header.songname, m_szNames[0], 26);
 
-	header.highlight_minor = (BYTE)(m_nDefaultRowsPerBeat & 0xFF);
-	header.highlight_major = (BYTE)(m_nDefaultRowsPerMeasure & 0xFF);
+	header.highlight_minor = (BYTE)min(m_nDefaultRowsPerBeat, 0xFF);
+	header.highlight_major = (BYTE)min(m_nDefaultRowsPerMeasure, 0xFF);
 
 	if(GetType() == MOD_TYPE_MPT)
 	{
@@ -1325,7 +1335,7 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 	}
 
 	header.flags = 0x0001;
-	header.special = 0x02 | 0x04;	// 0x02: embed file edit history
+	header.special = 0x02 | 0x04 ;	// 0x02: embed file edit history, 0x04: store row highlight in the header
 	if (m_nInstruments) header.flags |= 0x04;
 	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
@@ -1912,8 +1922,8 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	header.id = LittleEndian(IT_IMPM);
 	lstrcpyn(header.songname, m_szNames[0], 26);
 
-	header.highlight_minor = (BYTE)(m_nDefaultRowsPerBeat & 0xFF);
-	header.highlight_major = (BYTE)(m_nDefaultRowsPerMeasure & 0xFF);
+	header.highlight_minor = (BYTE)min(m_nDefaultRowsPerBeat, 0xFF);
+	header.highlight_major = (BYTE)min(m_nDefaultRowsPerMeasure, 0xFF);
 
 	// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
 	// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
@@ -1942,7 +1952,7 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 	}
 
 	header.flags = 0x0001;
-	header.special = 0x02 | 0x04;	// 0x02: embed file edit history
+	header.special = 0x02 | 0x04 ;	// 0x02: embed file edit history, 0x04: store row highlight in the header
 	if (m_nInstruments) header.flags |= 0x04;
 	if (m_dwSongFlags & SONG_LINEARSLIDES) header.flags |= 0x08;
 	if (m_dwSongFlags & SONG_ITOLDEFFECTS) header.flags |= 0x10;
