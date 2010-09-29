@@ -1109,6 +1109,12 @@ bool CModDoc::CopyEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 		break;
 	}
 
+	// We don't want to copy empty envelopes
+	if(pEnv->nNodes == 0)
+	{
+		return false;
+	}
+
 	strcpy(s, pszEnvHdr);
 	wsprintf(s + strlen(s), pszEnvFmt, pEnv->nNodes, pEnv->nSustainStart, pEnv->nSustainEnd, pEnv->nLoopStart, pEnv->nLoopEnd, (pEnv->dwFlags & ENV_SUSTAIN) ? 1 : 0, (pEnv->dwFlags & ENV_LOOP) ? 1 : 0, (pEnv->dwFlags & ENV_CARRY) ? 1 : 0);
 	for (UINT i = 0; i < pEnv->nNodes; i++)
@@ -1186,7 +1192,7 @@ bool CModDoc::PasteEnvelope(UINT nIns, enmEnvelopeTypes nEnv)
 			pEnv->nLoopStart = loopBegin;
 			pEnv->nLoopEnd = loopEnd;
 			pEnv->nReleaseNode = releaseNode;
-			pEnv->dwFlags = (pEnv->dwFlags & ~(ENV_LOOP|ENV_SUSTAIN|ENV_CARRY)) | (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0) | ENV_ENABLED;
+			pEnv->dwFlags = (pEnv->dwFlags & ~(ENV_LOOP|ENV_SUSTAIN|ENV_CARRY)) | (bLoop ? ENV_LOOP : 0) | (bSus ? ENV_SUSTAIN : 0) | (bCarry ? ENV_CARRY: 0) | (nPoints > 0 ? ENV_ENABLED : 0);
 
 			int oldn = 0;
 			for (UINT i=0; i<nPoints; i++)
