@@ -2,6 +2,7 @@
 // ID3v2.4 / etc. tagging class (for mp3 / wav / etc. support)
 
 #include <string>
+#include "Wav.h"
 
 using std::string;
 

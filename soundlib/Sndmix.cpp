@@ -312,7 +312,18 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 				m_nBufferCount = lRead;
 			} else
 #endif
-			if (!ReadNote())
+			if (ReadNote())
+			{
+				// Save pattern cue points for WAV rendering here (if we reached a new pattern, that is.)
+				if(m_bIsRendering && (m_PatternCuePoints.empty() || m_nCurrentPattern != m_PatternCuePoints.back().order))
+				{
+					PatternCuePoint cue;
+					cue.offset = lMax - lRead;
+					cue.order = m_nCurrentPattern;
+					cue.processed = false;
+					m_PatternCuePoints.push_back(cue);
+				}
+			} else 
 			{
 #ifdef MODPLUG_TRACKER
 				if ((m_nMaxOrderPosition) && (m_nCurrentPattern >= m_nMaxOrderPosition))

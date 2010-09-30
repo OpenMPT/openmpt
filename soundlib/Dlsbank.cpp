@@ -16,6 +16,8 @@
 #include "sndfile.h"
 #include "../mptrack/mptrack.h"
 #include "dlsbank.h"
+#include "Wav.h"
+
 
 //#define DLSBANK_LOG
 //#define DLSINSTR_LOG

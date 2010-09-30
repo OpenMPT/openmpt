@@ -13,6 +13,8 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "dlsbank.h"
+#include "Wav.h"
+
 
 #pragma warning(disable:4244)
 //#define MIDI_LOG

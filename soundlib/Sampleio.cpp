@@ -11,6 +11,7 @@
 #include "sndfile.h"
 #include "it_defs.h"
 #include "wavConverter.h"
+#include "Wav.h"
 
 #pragma warning(disable:4244)
 
