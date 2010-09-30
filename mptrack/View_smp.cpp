@@ -11,6 +11,7 @@
 #include "midi.h"
 #include "dlg_misc.h"
 #include "modsmp_ctrl.h"
+#include "Wav.h"
 
 #define new DEBUG_NEW
 

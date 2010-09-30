@@ -942,6 +942,9 @@
 				RelativePath=".\vstplug.h">
 			</File>
 			<File
+				RelativePath="..\soundlib\Wav.h">
+			</File>
+			<File
 				RelativePath="..\soundlib\wavConverter.h">
 			</File>
 			<File
