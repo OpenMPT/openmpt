@@ -475,7 +475,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 
 	if ((pIns) && (note) && (note <= 128))
 	{
-		if(bPorta && pIns == pChn->pModInstrument && pChn->pModSample->pSample != nullptr && IsCompatibleMode(TRK_IMPULSETRACKER))
+		if(bPorta && pIns == pChn->pModInstrument && (pChn->pModSample != nullptr && pChn->pModSample->pSample != nullptr) && IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
 #ifdef DEBUG
 			{
