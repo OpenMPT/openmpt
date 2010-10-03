@@ -409,6 +409,12 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 	}
 
+	// Check whether the new format supports embedding the edit history in the file.
+	if(oldTypeIsIT_MPT && !newTypeIsIT_MPT && GetFileHistory()->size() > 0)
+	{
+		CHANGEMODTYPE_WARNING(wEditHistory);
+	}
+
 	BEGIN_CRITICAL();
 	m_SndFile.ChangeModTypeTo(nNewType);
 	if(!newTypeIsXM_IT_MPT && (m_SndFile.m_dwSongFlags & SONG_LINEARSLIDES))
@@ -456,6 +462,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wLinearSlides, "Linear Frequency Slides not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wTrimmedEnvelopes, "Instrument envelopes have been shortened.\n");
 	CHANGEMODTYPE_CHECK(wReleaseNode, "Instrument envelope release nodes are not supported by the new format.\n");
+	CHANGEMODTYPE_CHECK(wEditHistory, "Edit history will not be saved in the new format.\n");
 
 	SetModified();
 	GetPatternUndo()->ClearUndo();

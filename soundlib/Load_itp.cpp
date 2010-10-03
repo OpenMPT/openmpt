@@ -43,6 +43,12 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	version = id;
 	dwMemPos += sizeof(DWORD);
 
+	// max supported version
+	if(version > ITP_VERSION)
+	{
+		return false;
+	}
+
 	m_nType = MOD_TYPE_IT;
 
 	// Song name
@@ -402,7 +408,8 @@ bool CSoundFile::ReadITProject(LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 
 	// Embed instruments' header [v1.01]
-	if(version >= 0x00000101 && m_dwSongFlags & SONG_ITPEMBEDIH && fcode == 'EBIH'){
+	if(version >= 0x00000101 && m_dwSongFlags & SONG_ITPEMBEDIH && fcode == 'EBIH')
+	{
 		// jump embeded instrument header tag
 		ptr += sizeof(__int32);
 
@@ -698,13 +705,15 @@ bool CSoundFile::SaveITProject(LPCSTR lpszFileName)
 
 	// Embed instruments' header [v1.01]
 
-	if(m_dwSongFlags & SONG_ITPEMBEDIH){
+	if(m_dwSongFlags & SONG_ITPEMBEDIH)
+	{
 		// embeded instrument header tag
 		__int32 code = 'EBIH';
 		fwrite(&code, 1, sizeof(__int32), f);
 
 		// instruments' header
-		for(i=0; i<m_nInstruments; i++){
+		for(i=0; i<m_nInstruments; i++)
+		{
 			if(Instruments[i+1]) WriteInstrumentHeaderStruct(Instruments[i+1], f);
 			// write separator tag
 			code = 'SEP@';

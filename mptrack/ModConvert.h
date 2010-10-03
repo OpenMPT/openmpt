@@ -32,6 +32,7 @@ enum enmWarnings
 	wLinearSlides,
 	wTrimmedEnvelopes,
 	wReleaseNode,
+	wEditHistory,
 	wNumWarnings
 };
 
