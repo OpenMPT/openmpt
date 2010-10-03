@@ -320,7 +320,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 					PatternCuePoint cue;
 					cue.offset = lMax - lRead;
 					cue.order = m_nCurrentPattern;
-					cue.processed = false;
+					cue.processed = false;	// We don't know the base offset in the file here. It has to be added in the main conversion loop.
 					m_PatternCuePoints.push_back(cue);
 				}
 			} else 

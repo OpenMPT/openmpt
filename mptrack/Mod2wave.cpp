@@ -708,12 +708,12 @@ void CDoWaveConvert::OnButton1()
 	DWORD dwSleepTime = dwStartTime;
 
 	CMainFrame::GetMainFrame()->InitRenderer(m_pSndFile);	//rewbs.VSTTimeInfo
-	for (UINT n=0; ; n++)
+	for (UINT n = 0; ; n++)
 	{
 		UINT lRead = m_pSndFile->Read(buffer, sizeof(buffer));
 
 		// Process cue points (add base offset), if there are any to process.
-		vector<PatternCuePoint>::reverse_iterator iter = m_pSndFile->m_PatternCuePoints.rbegin();
+		vector<PatternCuePoint>::reverse_iterator iter;
 		for(iter = m_pSndFile->m_PatternCuePoints.rbegin(); iter != m_pSndFile->m_PatternCuePoints.rend(); ++iter)
 		{
 			if(iter->processed)
@@ -857,6 +857,7 @@ void CDoWaveConvert::OnButton1()
 	DWORD cuePointLength = 0;
 	if(m_pSndFile->m_PatternCuePoints.size() > 0)
 	{
+		// Cue point header
 		WAVCUEHEADER cuehdr;
 		cuehdr.cue_id = LittleEndian(IFFID_cue);
 		cuehdr.cue_num = m_pSndFile->m_PatternCuePoints.size();
@@ -867,7 +868,7 @@ void CDoWaveConvert::OnButton1()
 		fwrite(&cuehdr, 1, sizeof(WAVCUEHEADER), f);
 
 		// Write all cue points
-		vector<PatternCuePoint>::iterator iter;
+		vector<PatternCuePoint>::const_iterator iter;
 		DWORD num = 0;
 		for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); ++iter)
 		{
@@ -875,11 +876,12 @@ void CDoWaveConvert::OnButton1()
 			cuepoint.cp_id = LittleEndian(num++);
 			cuepoint.cp_pos = LittleEndian((DWORD)iter->offset);
 			cuepoint.cp_chunkid = LittleEndian(IFFID_data);
-			cuepoint.cp_chunkstart = 0;			// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
-			cuepoint.cp_blockstart = 0;
+			cuepoint.cp_chunkstart = 0;		// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
+			cuepoint.cp_blockstart = 0;		// dito
 			cuepoint.cp_offset = LittleEndian((DWORD)iter->offset);
 			fwrite(&cuepoint, 1, sizeof(WAVCUEPOINT), f);
 		}
+		m_pSndFile->m_PatternCuePoints.clear();
 	}
 
 	header.filesize = (sizeof(WAVEFILEHEADER) - 8) + (8 + fmthdr.length) + (8 + datahdr.length) + (cuePointLength);
