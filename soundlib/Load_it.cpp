@@ -457,9 +457,9 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	ITFILEHEADER *pifh = (ITFILEHEADER *)lpStream;
 
 	DWORD dwMemPos = sizeof(ITFILEHEADER);
-	DWORD inspos[MAX_INSTRUMENTS];
-	DWORD smppos[MAX_SAMPLES];
-	vector<DWORD> patpos; patpos.resize(Patterns.Size(), 0);
+	vector<DWORD> inspos;
+	vector<DWORD> smppos;
+	vector<DWORD> patpos;
 // Using eric's code here to take care of NNAs etc..
 // -> CODE#0006
 // -> DESC="misc quantity changes"
@@ -639,58 +639,88 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		}
 	}
 
-	// Reading Instrument Offsets
-	memset(inspos, 0, sizeof(inspos));
-	UINT inspossize = pifh->insnum;
-	if (inspossize > MAX_INSTRUMENTS) inspossize = MAX_INSTRUMENTS;
-	inspossize <<= 2;
-	memcpy(inspos, lpStream+dwMemPos, inspossize);
-	dwMemPos += pifh->insnum * 4;
+	// Find the first parapointer.
+	// This is used for finding out whether the edit history is actually stored in the file or not,
+	// as some early versions of Schism Tracker set the history flag, but didn't save anything.
+	// We will consider the history invalid if it ends after the first parapointer.
+	DWORD minptr = dwMemLength;
 
-	// Reading Samples Offsets
-	memset(smppos, 0, sizeof(smppos));
-	UINT smppossize = pifh->smpnum;
-	if (smppossize > MAX_SAMPLES) smppossize = MAX_SAMPLES;
-	smppossize <<= 2;
-	memcpy(smppos, lpStream+dwMemPos, smppossize);
-	dwMemPos += pifh->smpnum * 4;
+	// Reading Instrument Offsets
+	inspos.resize(pifh->insnum);
+	for(size_t n = 0; n < pifh->insnum; n++)
+	{
+		if(4 > dwMemLength - dwMemPos)
+			return false;
+		DWORD insptr = LittleEndian(*(DWORD *)(lpStream + dwMemPos));
+		inspos[n] = insptr;
+		if(insptr > 0)
+		{
+			minptr = min(minptr, insptr);
+		}
+		dwMemPos += 4;
+	}
+
+	// Reading Sample Offsets
+	smppos.resize(pifh->smpnum);
+	for(size_t n = 0; n < pifh->smpnum; n++)
+	{
+		if(4 > dwMemLength - dwMemPos)
+			return false;
+		DWORD smpptr = LittleEndian(*(DWORD *)(lpStream + dwMemPos));
+		smppos[n] = smpptr;
+		if(smpptr > 0)
+		{
+			minptr = min(minptr, smpptr);
+		}
+		dwMemPos += 4;
+	}
+
+	// Reading Pattern Offsets
+	patpos.resize(pifh->patnum);
+	for(size_t n = 0; n < pifh->patnum; n++)
+	{
+		if(4 > dwMemLength - dwMemPos)
+			return false;
+		DWORD patptr = LittleEndian(*(DWORD *)(lpStream + dwMemPos));
+		patpos[n] = patptr;
+		if(patptr > 0)
+		{
+			minptr = min(minptr, patptr);
+		}
+		dwMemPos += 4;
+	}
 
 	// Reading Patterns Offsets
-	UINT patpossize = pifh->patnum;
-	if(patpossize > GetModSpecifications().patternsMax)
+	if(patpos.size() > GetModSpecifications().patternsMax)
 	{
 		// Hack: Note user here if file contains more patterns than what can be read.
 #ifdef MODPLUG_TRACKER
 		if(GetpModDoc() != nullptr)
 		{
 			CString str;
-			str.Format(str_PatternSetTruncationNote, patpossize, GetModSpecifications().patternsMax);
+			str.Format(str_PatternSetTruncationNote, patpos.size(), GetModSpecifications().patternsMax);
 			GetpModDoc()->AddToLog(str);
 		}
 #endif // MODPLUG_TRACKER
-		patpossize = GetModSpecifications().patternsMax;
 	}
 
-	patpos.resize(patpossize);
-	patpossize *= 4; // <-> patpossize *= sizeof(DWORD);
-	if(patpossize > dwMemLength - dwMemPos)
-		return false;
-	if(patpossize > 0)
-		memcpy(&patpos[0], lpStream+dwMemPos, patpossize);
-	dwMemPos += pifh->patnum * 4;
+	if(pifh->special & 0x01)
+	{
+		minptr = min(minptr, pifh->msgoffset);
+	}
 
 	// Reading IT Edit History Info
 	// This is only supposed to be present if bit 1 of the special flags is set.
-	// However, old versions of Schism and probably other trackers always set this
+	// However, old versions of Schism and probably other trackers always set this bit
 	// even if they don't write the edit history count. So we have to filter this out...
-	// (for now we will just ignore those Schism versions, as Schism seems to be the only tracker that did this)
-	const bool oldSchism = ((pifh->cwtv & 0xF000) == 0x1000 && pifh->cwtv < 0x1050) ? true : false;
-	if (dwMemPos + 2 < dwMemLength && (pifh->special & 0x02) && !oldSchism)
+	// This is done by looking at the parapointers. If the history data end after
+	// the first parapointer, we assume that it's actually no history data.
+	if (dwMemPos + 2 < dwMemLength && (pifh->special & 0x02))
 	{
 		size_t nflt = LittleEndianW(*((uint16*)(lpStream + dwMemPos)));
 		dwMemPos += 2;
 
-		if (nflt * 8 <= dwMemLength - dwMemPos)
+		if (nflt * 8 <= dwMemLength - dwMemPos && dwMemPos + nflt * 8 <= minptr)
 		{
 			GetpModDoc()->GetFileHistory()->clear();
 			for(size_t n = 0; n < nflt; n++)
@@ -723,6 +753,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 #endif // MODPLUG_TRACKER
 				dwMemPos += 8;
 			}
+		} else
+		{
+			// Oops, we were not supposed to read this.
+			dwMemPos -= 2;
 		}
 	}
 	// Reading MIDI Output & Macros
@@ -870,12 +904,12 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// In order to properly compute the position, in file, of eventual extended settings
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
 	// setting will follow this sample in the file
-	UINT lastSampleOffset = smppos[pifh->smpnum - 1] + sizeof(ITSAMPLESTRUCT);
+	UINT lastSampleOffset = smppos[min(0, pifh->smpnum - 1)] + sizeof(ITSAMPLESTRUCT);
 // -! NEW_FEATURE#0027
 
 	// Reading Samples
-	m_nSamples = CLAMP(pifh->smpnum, 1, MAX_SAMPLES - 1);
-	for (UINT nsmp=0; nsmp<pifh->smpnum; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSAMPLESTRUCT)))
+	m_nSamples = min(pifh->smpnum, MAX_SAMPLES - 1);
+	for (UINT nsmp = 0; nsmp < m_nSamples; nsmp++) if ((smppos[nsmp]) && (smppos[nsmp] <= dwMemLength - sizeof(ITSAMPLESTRUCT)))
 	{
 		ITSAMPLESTRUCT *pis = (ITSAMPLESTRUCT *)(lpStream+smppos[nsmp]);
 		if (pis->id == LittleEndian(IT_IMPS))
@@ -939,6 +973,7 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 		memcpy(m_szNames[nsmp + 1], pis->name, 26);
 		SpaceToNullStringFixed(m_szNames[nsmp + 1], 26);
 	}
+	m_nSamples = max(1, m_nSamples);
 
 	m_nMinPeriod = 8;
 	m_nMaxPeriod = 0xF000;
