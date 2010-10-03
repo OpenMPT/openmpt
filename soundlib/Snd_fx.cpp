@@ -475,9 +475,38 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 
 	if ((pIns) && (note) && (note <= 128))
 	{
-		if (pIns->NoteMap[note-1] >= NOTE_MIN_SPECIAL) return;
-		UINT n = pIns->Keyboard[note-1];
-		pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : NULL;
+		if(bPorta && pIns == pChn->pModInstrument && pChn->pModSample->pSample != nullptr && IsCompatibleMode(TRK_IMPULSETRACKER))
+		{
+#ifdef DEBUG
+			{
+				// Check if original behaviour would have been used here
+				if (pIns->NoteMap[note-1] >= NOTE_MIN_SPECIAL)
+				{
+					ASSERT(false);
+					return;
+				}
+				UINT n = pIns->Keyboard[note-1];
+				pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
+				if(pSmp != pChn->pModSample)
+				{
+					ASSERT(false);
+				}
+			}
+#endif // DEBUG
+			// Impulse Tracker doesn't seem to look up the sample for new notes when in instrument mode and it encounters a situation like this:
+			// G-6 01 ... ... <-- G-6 is bound to sample 01
+			// F-6 01 ... GFF <-- F-6 is bound to sample 02, but sample 01 will be played
+			// This behaviour is not used if sample 01 has no actual sample data (hence the "pChn->pModSample->pSample != nullptr")
+			// and it is also ignored when the instrument number changes. This fixes f.e. the guitars in "Ultima Ratio" by Nebularia
+			// and some slides in spx-shuttledeparture.it.
+			pSmp = pChn->pModSample;
+		} else
+		{
+			// Original behaviour
+			if (pIns->NoteMap[note-1] >= NOTE_MIN_SPECIAL) return;
+			UINT n = pIns->Keyboard[note-1];
+			pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
+		}
 	} else
 	if (m_nInstruments)
 	{
@@ -656,7 +685,6 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	}
 
 	
-	
 	pChn->pSample = pSmp->pSample;
 	pChn->nTranspose = pSmp->RelativeTone;
 
@@ -738,7 +766,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 			pChn->nFineTune = pSmp->nFineTune;
 		}
 	}
-	// IT Compatibility: Update multisample instruments frequency even if instrument is not specified
+	// IT Compatibility: Update multisample instruments frequency even if instrument is not specified (fixes the guitars in spx-shuttledeparture.it)
 	if(!bPorta && pSmp && IsCompatibleMode(TRK_IMPULSETRACKER)) pChn->nC5Speed = pSmp->nC5Speed;
 
 	// XM Compatibility: Ignore notes with portamento if there was no note playing.
