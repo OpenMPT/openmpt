@@ -377,9 +377,7 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 			if (c5Speed < 1024) c5Speed = 1024;
 			Samples[iSmp].nC5Speed = c5Speed;
 
-			insfile[iSmp] = ((DWORD)LittleEndianW(*((LPWORD)(s+0x0E)))) << 4;
-			insfile[iSmp] += ((DWORD)(BYTE)s[0x0D]) << 20;
-			if (insfile[iSmp] > dwMemLength) insfile[iSmp] &= 0xFFFF;	// wtf? whose idea was this?
+			insfile[iSmp - 1] = (s[0x0E] << 4) | (s[0x0F] << 12) | (s[0x0D] << 20);
 
 			if(Samples[iSmp].nLoopEnd < 2)
 				Samples[iSmp].nLoopStart = Samples[iSmp].nLoopEnd = 0;
@@ -499,23 +497,29 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	}
 
 	// Reading samples
-	for (UINT iRaw = 1; iRaw <= insnum; iRaw++) if ((Samples[iRaw].nLength) && (insfile[iRaw]))
+	for (UINT iRaw = 1; iRaw <= insnum; iRaw++) if ((Samples[iRaw].nLength) && (insfile[iRaw - 1]))
 	{
 		UINT flags = (psfh.version == 1) ? RS_PCM8S : RS_PCM8U;
 		if (insflags[iRaw-1] & 4) flags += 5;
 		if (insflags[iRaw-1] & 2) flags |= RSF_STEREO;
 		if (inspack[iRaw-1] == 4) flags = RS_ADPCM4;
-		dwMemPos = insfile[iRaw];
-		dwMemPos += ReadSample(&Samples[iRaw], flags, (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+		if(insfile[iRaw - 1] < dwMemLength)
+		{
+			dwMemPos = insfile[iRaw - 1];
+		}
+		if(dwMemPos < dwMemLength)
+		{
+			dwMemPos += ReadSample(&Samples[iRaw], flags, (LPSTR)(lpStream + dwMemPos), dwMemLength - dwMemPos);
+		}
 	}
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
 	if (psfh.flags & 0x10) m_dwSongFlags |= SONG_AMIGALIMITS;
 
 #ifdef MODPLUG_TRACKER
-	if(bHasAdlibPatches && m_pModDoc != nullptr)
+	if(bHasAdlibPatches && GetpModDoc() != nullptr)
 	{
-		m_pModDoc->AddToLog("This track uses Adlib instruments, which are not supported by OpenMPT.");
+		GetpModDoc()->AddToLog("This track uses Adlib instruments, which are not supported by OpenMPT.");
 	}
 #endif // MODPLUG_TRACKER
 
