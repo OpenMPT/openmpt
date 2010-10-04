@@ -27,7 +27,7 @@ void CSoundFile::MODExx2S3MSxx(MODCOMMAND *m)
 	case 0x50:	m->param = (m->param & 0x0F) | 0x20; break;
 	case 0x60:	m->param = (m->param & 0x0F) | 0xB0; break;
 	case 0x70:	m->param = (m->param & 0x03) | 0x40; break;
-	case 0x90:	m->command = CMD_RETRIG; m->param = 0x80 | (m->param & 0x0F); break;
+	case 0x90:	m->command = CMD_RETRIG; m->param = (m->param & 0x0F); break;
 	case 0xA0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param = (m->param << 4) | 0x0F; } else m->command = 0; break;
 	case 0xB0:	if (m->param & 0x0F) { m->command = CMD_VOLUMESLIDE; m->param |= 0xF0; } else m->command = 0; break;
 	case 0xC0:  if (m->param == 0xC0) { m->command = CMD_NONE; m->note = NOTE_NOTECUT; }	// this does different things in IT and ST3
