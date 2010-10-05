@@ -1,6 +1,14 @@
 #ifndef _SNDDEVX_H_
 #define _SNDDEVX_H_
 
+#include <mmsystem.h>
+#include <dsound.h>
+
+#ifndef NO_ASIO
+#include <iasiodrv.h>
+#define ASIO_LOG
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////
 //
 // MMSYSTEM WaveOut device
@@ -123,9 +131,14 @@ public:
 	UINT GetCurrentLatency() { return m_nAsioBufferLen; }
 	void SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer);
 
+	UINT GetCurrentSampleRate(UINT nDevice);
 
 public:
 	static BOOL EnumerateDevices(UINT nIndex, LPSTR pszDescription, UINT cbSize);
+
+protected:
+	void OpenDevice(UINT nDevice);
+	void CloseDevice();
 
 protected:
 	static CASIODevice *gpCurrentAsio;

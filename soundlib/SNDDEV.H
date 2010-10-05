@@ -73,6 +73,7 @@ public:
 	virtual BOOL IsOpen() = 0;
 	virtual UINT GetCurrentLatency() = 0;
 	virtual void SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwUser=0) = 0;
+	virtual UINT GetCurrentSampleRate(UINT nDevice) { return 0; }
 };
 
 

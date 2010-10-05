@@ -137,7 +137,6 @@ UINT CMainFrame::m_nLastOptionsPage = 0;
 BOOL CMainFrame::gbMdiMaximize = FALSE;
 bool CMainFrame::gbShowHackControls = false;
 //rewbs.varWindowSize
-LONG CMainFrame::glCtrlWindowHeight = 188; //obsolete, for backwards compat only
 LONG CMainFrame::glGeneralWindowHeight = 178;
 LONG CMainFrame::glPatternWindowHeight = 152;
 LONG CMainFrame::glSampleWindowHeight = 188;
@@ -319,15 +318,15 @@ CMainFrame::CMainFrame()
 	{
 		if (i == DIR_TUNING) // Hack: Tuning folder is set already so don't reset it.
 			continue;
-		m_szDefaultDirectory[i][0] = 0;
-		m_szWorkingDirectory[i][0] = 0;
+		MemsetZero(m_szDefaultDirectory[i]);
+		MemsetZero(m_szWorkingDirectory[i]);
 	}
 
 	m_dTotalCPU=0;
-	memset(gpenVuMeter, 0, sizeof(gpenVuMeter));
+	MemsetZero(gpenVuMeter);
 	
 	// Default chords
-	memset(Chords, 0, sizeof(Chords));
+	MemsetZero(Chords);
 	for (UINT ichord=0; ichord<3*12; ichord++)
 	{
 		Chords[ichord].key = (BYTE)ichord;
@@ -359,12 +358,12 @@ CMainFrame::CMainFrame()
 	m_csRegWindow.Format("%s%s", m_csRegKey, MAINFRAME_REGEXT_WINDOW);
 
 	CString storedVersion = GetPrivateProfileCString("Version", "Version", "", theApp.GetConfigFileName());
-	//If version number stored in INI is 1.17.02.40 or later, load setting from INI file.
-	//Else load settings from Registry
-	if (storedVersion >= "1.17.02.40")
+	// If version number stored in INI is 1.17.02.40 or later, always load setting from INI file.
+	// If it isn't, try loading from Registry first, then from the INI file.
+	if (storedVersion >= "1.17.02.40" || !LoadRegistrySettings())
+	{
 		LoadIniSettings();
-	else
-		LoadRegistrySettings();
+	}
 
 	m_InputHandler = new CInputHandler(this); 	//rewbs.customKeys
 	m_pPerfCounter= new CPerformanceCounter();
@@ -411,17 +410,40 @@ void CMainFrame::LoadIniSettings()
 		rgbCustomColors[ncol] = GetPrivateProfileDWord("Display", s, rgbCustomColors[ncol], iniFile);
 	}
 
-	LONG defaultDevice = EnumerateSoundDevices(SNDDEV_ASIO, 0, nullptr, 0) ? SNDDEV_ASIO : SNDDEV_DSOUND;
-	m_nWaveDevice = GetPrivateProfileLong("Sound Settings", "WaveDevice", (defaultDevice << 8), iniFile);
+	DWORD defaultDevice = SNDDEV_DSOUND << 8; // first DirectSound device
+#ifndef NO_ASIO
+	// If there's an ASIO device available, prefer it over DirectSound
+	if(EnumerateSoundDevices(SNDDEV_ASIO, 0, nullptr, 0))
+	{
+		defaultDevice = SNDDEV_ASIO << 8;
+	}
+#endif // NO_ASIO
+	m_nWaveDevice = GetPrivateProfileLong("Sound Settings", "WaveDevice", defaultDevice, iniFile);
 	m_dwSoundSetup = GetPrivateProfileDWord("Sound Settings", "SoundSetup", SOUNDSETUP_SECONDARY, iniFile);
 	m_dwQuality = GetPrivateProfileDWord("Sound Settings", "Quality", 0, iniFile);
 	m_nSrcMode = GetPrivateProfileDWord("Sound Settings", "SrcMode", SRCMODE_POLYPHASE, iniFile);
-	m_dwRate = GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 44100, iniFile);
+	m_dwRate = GetPrivateProfileDWord("Sound Settings", "Mixing_Rate", 0, iniFile);
 	m_nBitsPerSample = GetPrivateProfileDWord("Sound Settings", "BitsPerSample", 16, iniFile);
 	m_nChannels = GetPrivateProfileDWord("Sound Settings", "ChannelMode", 2, iniFile);
-	m_nBufferLength = GetPrivateProfileDWord("Sound Settings", "BufferLength", 75, iniFile);
+	m_nBufferLength = GetPrivateProfileDWord("Sound Settings", "BufferLength", 50, iniFile);
 		if(m_nBufferLength < SNDDEV_MINBUFFERLEN) m_nBufferLength = SNDDEV_MINBUFFERLEN;
 		if(m_nBufferLength > SNDDEV_MAXBUFFERLEN) m_nBufferLength = SNDDEV_MAXBUFFERLEN;
+	if(m_dwRate == 0)
+	{
+		m_dwRate = 44100;
+#ifndef NO_ASIO
+		// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
+		if((m_nWaveDevice >> 8) == SNDDEV_ASIO)
+		{
+			ISoundDevice *dummy;
+			if(CreateSoundDevice(SNDDEV_ASIO, &dummy))
+			{
+				m_dwRate = dummy->GetCurrentSampleRate(m_nWaveDevice & 0xFF);
+				delete dummy;
+			}
+		}
+#endif // NO_ASIO
+	}
 
 	m_nPreAmp = GetPrivateProfileDWord("Sound Settings", "PreAmp", 128, iniFile);
 	CSoundFile::m_nStereoSeparation = GetPrivateProfileLong("Sound Settings", "StereoSeparation", 128, iniFile);
@@ -498,7 +520,7 @@ void CMainFrame::LoadIniSettings()
 	m_pAutoSaver->SetFilenameTemplate(GetPrivateProfileCString("AutoSave", "FileNameTemplate", "", iniFile));
 }
 
-void CMainFrame::LoadRegistrySettings()
+bool CMainFrame::LoadRegistrySettings()
 //-------------------------------------
 {
 
@@ -523,7 +545,6 @@ void CMainFrame::LoadRegistrySettings()
 		if (d) theApp.m_nCmdShow = SW_SHOWMAXIMIZED;
 		RegQueryValueEx(key, "MDIMaximize", NULL, &dwREG_DWORD, (LPBYTE)&gbMdiMaximize, &dwDWORDSize);
 		RegQueryValueEx(key, "MDITreeWidth", NULL, &dwREG_DWORD, (LPBYTE)&glTreeWindowWidth, &dwDWORDSize);
-		RegQueryValueEx(key, "MDICtrlHeight", NULL, &dwREG_DWORD, (LPBYTE)&glCtrlWindowHeight, &dwDWORDSize); //obsolete, for backwards compat only
 		RegQueryValueEx(key, "MDIGeneralHeight", NULL, &dwREG_DWORD, (LPBYTE)&glGeneralWindowHeight, &dwDWORDSize);
 		RegQueryValueEx(key, "MDIPatternHeight", NULL, &dwREG_DWORD, (LPBYTE)&glPatternWindowHeight, &dwDWORDSize);
 		RegQueryValueEx(key, "MDISampleHeight", NULL, &dwREG_DWORD,  (LPBYTE)&glSampleWindowHeight, &dwDWORDSize);
@@ -579,7 +600,7 @@ void CMainFrame::LoadRegistrySettings()
 		RegQueryValueEx(key, "MidiSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwMidiSetup, &dwDWORDSize);
 		RegQueryValueEx(key, "MidiDevice", NULL, &dwREG_DWORD, (LPBYTE)&m_nMidiDevice, &dwDWORDSize);
 		RegQueryValueEx(key, "PatternSetup", NULL, &dwREG_DWORD, (LPBYTE)&m_dwPatternSetup, &dwDWORDSize);
-			m_dwPatternSetup |= PATTERN_NOTEFADE; // Set flag to maintain old behaviour(was changed in 1.17.02.50).
+			m_dwPatternSetup |= PATTERN_NOTEFADE; // Set flag to maintain old behaviour (was changed in 1.17.02.50).
 			m_dwPatternSetup |= PATTERN_RESETCHANNELS; // Set flag to reset channels on loop was changed in 1.17.03.01).
 			m_dwPatternSetup &= ~0x800;	// quick paste autorepeat is now a keymap option
 		RegQueryValueEx(key, "RowSpacing", NULL, &dwREG_DWORD, (LPBYTE)&m_nRowSpacing, &dwDWORDSize);
@@ -643,6 +664,9 @@ void CMainFrame::LoadRegistrySettings()
 		//end rewbs.autoSave
 
 		RegCloseKey(key);
+	} else
+	{
+		return false;
 	}
 
 	if (RegOpenKeyEx(HKEY_CURRENT_USER,	m_csRegSettings, 0, KEY_READ, &key) == ERROR_SUCCESS)
@@ -659,6 +683,8 @@ void CMainFrame::LoadRegistrySettings()
 	gnPatternSpacing = theApp.GetProfileInt("Pattern Editor", "Spacing", 0);
 	gbPatternVUMeters = theApp.GetProfileInt("Pattern Editor", "VU-Meters", 0);
 	gbPatternPluginNames = theApp.GetProfileInt("Pattern Editor", "Plugin-Names", 1);
+
+	return true;
 }
 
 
