@@ -1,11 +1,4 @@
 #include "stdafx.h"
-#include <mmsystem.h>
-#include <dsound.h>
-
-#ifndef NO_ASIO
-#include <iasiodrv.h>
-#define ASIO_LOG
-#endif
 
 #include "snddev.h"
 #include "snddevx.h"
@@ -652,18 +645,13 @@ CASIODevice::~CASIODevice()
 	{
 		gpCurrentAsio = NULL;
 	}
-	if (m_pAsioDrv)
-	{
-		m_pAsioDrv->Release();
-		m_pAsioDrv = NULL;
-	}
+	CloseDevice();
 }
 
 
 BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 //-------------------------------------------------------
 {
-	CLSID clsid;
 	BOOL bOk = FALSE;
 
 	if (m_pAsioDrv) Close();
@@ -678,17 +666,8 @@ BOOL CASIODevice::Open(UINT nDevice, LPWAVEFORMATEX pwfx)
 	Log("CASIODevice::Open(%d:\"%s\"): %d-bit, %d channels, %dHz\n",
 		nDevice, gAsioDrivers[nDevice].name, pwfx->wBitsPerSample, pwfx->nChannels, pwfx->nSamplesPerSec);
 #endif
-	clsid = gAsioDrivers[nDevice].clsid;
-	if (CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (VOID **)&m_pAsioDrv) == S_OK)
-	{
-		m_pAsioDrv->init((void *)m_hWnd);
-	} else
-	{
-	#ifdef ASIO_LOG
-		Log("  CoCreateInstance failed!\n");
-	#endif
-		m_pAsioDrv = NULL;
-	}
+	OpenDevice(nDevice);
+
 	if (m_pAsioDrv)
 	{
 		long nInputChannels = 0, nOutputChannels = 0;
@@ -812,11 +791,7 @@ abort:
 	#ifdef ASIO_LOG
 		Log("Error opening ASIO device!\n");
 	#endif
-		if (m_pAsioDrv)
-		{
-			m_pAsioDrv->Release();
-			m_pAsioDrv = NULL;
-		}
+		CloseDevice();
 	}
 	return bOk;
 }
@@ -856,12 +831,7 @@ BOOL CASIODevice::Close()
 		} catch(...) {
 			CASIODevice::ReportASIOException("ASIO crash in disposeBuffers()\n");
 		}
-		try {
-			m_pAsioDrv->Release();
-		} catch(...) {
-			CASIODevice::ReportASIOException("ASIO crash in Release()\n");
-		}
-		m_pAsioDrv = NULL;
+		CloseDevice();
 	}
 	if (gpCurrentAsio == this)
 	{
@@ -885,7 +855,48 @@ VOID CASIODevice::Reset()
 	}
 }
 
+
+void CASIODevice::OpenDevice(UINT nDevice)
+//----------------------------------------
+{
+	if (m_pAsioDrv)
+	{
+		return;
+	}
+
+	CLSID clsid = gAsioDrivers[nDevice].clsid;
+	if (CoCreateInstance(clsid,0,CLSCTX_INPROC_SERVER, clsid, (VOID **)&m_pAsioDrv) == S_OK)
+	{
+		m_pAsioDrv->init((void *)m_hWnd);
+	} else
+	{
+#ifdef ASIO_LOG
+		Log("  CoCreateInstance failed!\n");
+#endif
+		m_pAsioDrv = NULL;
+	}
+}
+
+
+void CASIODevice::CloseDevice()
+//-----------------------------
+{
+	if (m_pAsioDrv)
+	{
+		try
+		{
+			m_pAsioDrv->Release();
+		} catch(...)
+		{
+			CASIODevice::ReportASIOException("ASIO crash in Release()\n");
+		}
+		m_pAsioDrv = NULL;
+	}
+}
+
+
 void CASIODevice::SilenceAudioBuffer(ISoundSource *pSource, ULONG nMaxLatency, DWORD dwBuffer)
+//--------------------------------------------------------------------------------------------
 {
 	for (UINT ich=0; ich<m_nChannels; ich++){
 		memset(m_BufferInfo[ich].buffers[dwBuffer], 0, m_nAsioBufferLen);
@@ -1276,7 +1287,7 @@ cvtloop:
 }
 
 BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
-//-------------------------------------------------------
+//------------------------------------------------------
 {
 	CHAR cBuf[1024];
 	va_list va;
@@ -1288,6 +1299,36 @@ BOOL CASIODevice::ReportASIOException(LPCSTR format,...)
 	
 	return TRUE;
 }
+
+
+// If the device is open, this returns the current sample rate. If it's not open, it returns some sample rate supported by the device.
+UINT CASIODevice::GetCurrentSampleRate(UINT nDevice)
+//--------------------------------------------------
+{
+	const bool wasOpen = (m_pAsioDrv != NULL);
+	if(!wasOpen)
+	{
+		OpenDevice(nDevice);
+		if(m_pAsioDrv == NULL)
+		{
+			return 0;
+		}
+	}
+
+	ASIOSampleRate samplerate;
+	if(m_pAsioDrv->getSampleRate(&samplerate) != ASE_OK)
+	{
+		samplerate = 0;
+	}
+
+	if(!wasOpen)
+	{
+		CloseDevice();
+	}
+
+	return (UINT)samplerate;
+}
+
 
 #endif // NO_ASIO
 

@@ -40,7 +40,7 @@ struct MODSAMPLE
 	BYTE nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
 	BYTE nVibDepth;						// Auto vibrato depth
 	BYTE nVibRate;						// Auto vibrato rate (speed)
-	//CHAR name[32];					// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, would this slow down the mixer (cache misses)?
+	//CHAR name[MAX_SAMPLENAME];		// Maybe it would be nicer to have sample names here, but that would require some refactoring. Also, would this slow down the mixer (cache misses)?
 	CHAR filename[MAX_SAMPLEFILENAME];
 
 	// Return the size of one (elementary) sample in bytes.
@@ -106,8 +106,8 @@ struct MODINSTRUMENT
 	BYTE nDNA;			// Duplicate note action
 	BYTE nPanSwing;		// Random panning factor
 	BYTE nVolSwing;		// Random volume factor
-	BYTE nIFC;			// Default filter cutoff
-	BYTE nIFR;			// Default filter resonance
+	BYTE nIFC;			// Default filter cutoff (00...7F). Used if the high bit is set
+	BYTE nIFR;			// Default filter resonance (00...7F). Used if the high bit is set
 
 	WORD wMidiBank;		// MIDI bank
 	BYTE nMidiProgram;	// MIDI program

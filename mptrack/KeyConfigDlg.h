@@ -1,15 +1,8 @@
 #include "stdafx.h"
 #include "mptrack.h"
 #include "MainFrm.h"
-#include "snddev.h"
-#include "moddoc.h"
-#include "childfrm.h"
-#include "dlsbank.h"
 #include "mpdlgs.h"
 #include "moptions.h"
-#include "vstplug.h"
-#include "moptions.h"
-//#include "KeyConfigDlg.h"
 
 // Might promote to class so we can add rules 
 // (eg automatically do note off stuff, generate chord keybindings from notes based just on modifier.
