@@ -108,7 +108,11 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
 		if ((pIns->nLength < 4) || (!pIns->nVolume)) pIns->nLength = 0;
 		pIns->nLoopStart = LittleEndianW(pStm->loopbeg);
 		pIns->nLoopEnd = LittleEndianW(pStm->loopend);
-		if ((pIns->nLoopEnd > pIns->nLoopStart) && (pIns->nLoopEnd != 0xFFFF)) pIns->uFlags |= CHN_LOOP;
+		if ((pIns->nLoopEnd > pIns->nLoopStart) && (pIns->nLoopEnd != 0xFFFF))
+		{
+			pIns->uFlags |= CHN_LOOP;
+			pIns->nLoopEnd = min(pIns->nLoopEnd, pIns->nLength);
+		}
 	}
 	dwMemPos = sizeof(STMHEADER);
 	for (UINT nOrd = 0; nOrd < 128; nOrd++) if (Order[nOrd] >= 99) Order[nOrd] = Order.GetInvalidPatIndex();

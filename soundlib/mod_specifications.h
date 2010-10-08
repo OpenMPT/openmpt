@@ -265,7 +265,7 @@ const CModSpecifications s3m =
 	// TODO: Set correct values.
 	"s3m",								// File extension
 	13,									// Minimum note index
-	120,								// Maximum note index
+	108,								// Maximum note index
 	true,								// Has notecut.
 	false,								// No noteoff.
 	false,								// No notefade.
@@ -305,7 +305,7 @@ const CModSpecifications s3mEx =
 	// TODO: Set correct values.
 	"s3m",								// File extension
 	13,									// Minimum note index
-	NOTE_MAX,							// Maximum note index
+	108,								// Maximum note index
 	true,								// Has notecut.
 	false,								// No noteoff.
 	false,								// No notefade.
