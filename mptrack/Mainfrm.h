@@ -423,7 +423,7 @@ public:
 	
 	// Audio Setup
 	static DWORD m_dwSoundSetup, m_dwRate, m_dwQuality, m_nSrcMode, m_nBitsPerSample, m_nPreAmp, gbLoopSong, m_nChannels;
-	static LONG m_nWaveDevice; // lower 8 bits: device number (for this type). higher 8 bits: device type 
+	static LONG m_nWaveDevice; // use the SNDDEV_GET_NUMBER and SNDDEV_GET_TYPE macros to decode
 	static LONG m_nMidiDevice;
 	static DWORD m_nBufferLength;
 	static EQPRESET m_EqSettings;
