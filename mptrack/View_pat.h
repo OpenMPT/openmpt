@@ -375,7 +375,9 @@ private:
 
 	//Like IsEditingEnabled(), but shows some notification when editing is not enabled.
 	bool IsEditingEnabled_bmsg();
-	
+
+	// Play one pattern row and stop ("step mode")
+	void PatternStep(bool autoStep);
 
 public:
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);

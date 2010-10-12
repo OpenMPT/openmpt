@@ -2002,6 +2002,13 @@ EndSearch:
 void CViewPattern::OnPatternStep()
 //--------------------------------
 {
+	PatternStep(true);
+}
+
+
+void CViewPattern::PatternStep(bool autoStep)
+//---------------------------------------------
+{
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
 
@@ -2025,10 +2032,13 @@ void CViewPattern::OnPatternStep()
 			pMainFrm->PlayMod(pModDoc, m_hWnd, MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);
 		}
 		CMainFrame::EnableLowLatencyMode();
-		if (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)
-			SetCurrentRow(GetCurrentRow()+1, TRUE);
-		else
-			SetCurrentRow((GetCurrentRow()+1) % pSndFile->Patterns[m_nPattern].GetNumRows(), FALSE);
+		if(autoStep)
+		{
+			if (CMainFrame::m_dwPatternSetup & PATTERN_CONTSCROLL)
+				SetCurrentRow(GetCurrentRow() + 1, TRUE);
+			else
+				SetCurrentRow((GetCurrentRow() + 1) % pSndFile->Patterns[m_nPattern].GetNumRows(), FALSE);
+		}
 		SetFocus();
 	}
 }
@@ -4109,7 +4119,7 @@ void CViewPattern::TempEnterOctave(int val)
 }
 
 void CViewPattern::TempEnterIns(int val)
-//---------------------------------------------
+//--------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -4205,7 +4215,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
 		UINT nPlayIns = 0;
 		const bool bIsLiveRecord = IsLiveRecord(*pMainFrm, *pModDoc, *pSndFile);
-		const bool usePlaybackPosition = (bIsLiveRecord && (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY));
+		const bool usePlaybackPosition = (bIsLiveRecord && (CMainFrame::m_dwPatternSetup & PATTERN_AUTODELAY) && !(pSndFile->m_dwSongFlags & SONG_STEP));
 		//Param control 'note'
 		if(MODCOMMAND::IsPcNote(note) && bRecordEnabled)
 		{
@@ -4370,38 +4380,48 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		}
 
 		// -- play note
-		if ((CMainFrame::m_dwPatternSetup & PATTERN_PLAYNEWNOTE) || (bRecordEnabled == false))
+		if ((CMainFrame::m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || (bRecordEnabled == false))
 		{
-			if (p->instr) nPlayIns = p->instr;
-
-			else if ((!p->instr) && (p->note < 128))
+			if ((CMainFrame::m_dwPatternSetup & PATTERN_PLAYEDITROW) && !bIsLiveRecord)
 			{
-				MODCOMMAND *search = p;
-				UINT srow = nRow;
-				while (srow > 0)
+				// play the whole row
+				PatternStep(false);
+			} else
+			{
+				// just play the newly inserted note...
+				if (p->instr)
 				{
-					srow--;
-					search -= pSndFile->m_nChannels;
-					if (search->instr)
+					// ...using the already specified instrument
+					nPlayIns = p->instr;
+				} else if ((!p->instr) && (p->note <= NOTE_MAX))
+				{
+					// ...or one that can be found on a previous row of this pattern.
+					MODCOMMAND *search = p;
+					UINT srow = nRow;
+					while (srow-- > 0)
 					{
-						nPlayIns = search->instr;
-						m_nFoundInstrument = nPlayIns;  //used to figure out which instrument to stop on key release.
-						break;
+						search -= pSndFile->m_nChannels;
+						if (search->instr)
+						{
+							nPlayIns = search->instr;
+							m_nFoundInstrument = nPlayIns;  //used to figure out which instrument to stop on key release.
+							break;
+						}
 					}
 				}
-			}
-			BOOL bNotPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying())) ? FALSE : TRUE;
-			//pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, -1, 0, 0, nChn);	//rewbs.vstiLive - added extra args
-			pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, 4*vol, 0, 0, nChn);	//rewbs.vstiLive - added extra args
-/*			for (UINT kplchrd=0; kplchrd<nPlayChord; kplchrd++)
-			{
-				if (chordplaylist[kplchrd])
+				BOOL bNotPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying())) ? FALSE : TRUE;
+				//pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, -1, 0, 0, nChn);	//rewbs.vstiLive - added extra args
+				pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, 4*vol, 0, 0, nChn);	//rewbs.vstiLive - added extra args
+/*				for (UINT kplchrd=0; kplchrd<nPlayChord; kplchrd++)
 				{
-					pModDoc->PlayNote(chordplaylist[kplchrd], nPlayIns, 0, FALSE, -1, 0, 0, nChn);	//rewbs.vstiLive - 	- added extra args
-					m_dwStatus |= PATSTATUS_CHORDPLAYING;
+					if (chordplaylist[kplchrd])
+					{
+						pModDoc->PlayNote(chordplaylist[kplchrd], nPlayIns, 0, FALSE, -1, 0, 0, nChn);	//rewbs.vstiLive - 	- added extra args
+						m_dwStatus |= PATSTATUS_CHORDPLAYING;
+					}
 				}
-			}
 */
+			}
 		}
 
 		//-- if not recording, restore old command.
@@ -4433,6 +4453,7 @@ void CViewPattern::TempEnterChord(int note)
 		MODCOMMAND* p = &prowbase[nChn];
 
 		const MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
+		const bool bIsLiveRecord = IsLiveRecord(*pMainFrm, *pModDoc, *pSndFile);
 
 		// -- establish note data
 		//const bool isSplit = HandleSplit(p, note);
@@ -4517,34 +4538,45 @@ void CViewPattern::TempEnterChord(int note)
 		}
 
 		// -- play note
-		if ((CMainFrame::m_dwPatternSetup & PATTERN_PLAYNEWNOTE) || (!(IsEditingEnabled())))
+		if ((CMainFrame::m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || (!(IsEditingEnabled())))
 		{
-			if (p->instr) nPlayIns = p->instr;
-
-			else if ((!p->instr) && (p->note < 128))
+			if ((CMainFrame::m_dwPatternSetup & PATTERN_PLAYEDITROW) && !bIsLiveRecord)
 			{
-				MODCOMMAND *search = p;
-				UINT srow = m_nRow;
-				while (srow > 0)
+				// play the whole row
+				PatternStep(false);
+			} else
+			{
+				// just play the newly inserted notes...
+				if (p->instr)
 				{
-					srow--;
-					search -= pSndFile->m_nChannels;
-					if (search->instr)
+					// ...using the already specified instrument
+					nPlayIns = p->instr;
+				} else if ((!p->instr) && (p->note < 128))
+				{
+					// ...or one that can be found on a previous row of this pattern.
+					MODCOMMAND *search = p;
+					UINT srow = m_nRow;
+					while (srow > 0)
 					{
-						nPlayIns = search->instr;
-						m_nFoundInstrument = nPlayIns;  //used to figure out which instrument to stop on key release.
-						break;
+						srow--;
+						search -= pSndFile->m_nChannels;
+						if (search->instr)
+						{
+							nPlayIns = search->instr;
+							m_nFoundInstrument = nPlayIns;  //used to figure out which instrument to stop on key release.
+							break;
+						}
 					}
 				}
-			}
-			BOOL bNotPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying())) ? FALSE : TRUE;
-			pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, -1, 0, 0, nChn);	//rewbs.vstiLive - added extra args
-			for (UINT kplchrd=0; kplchrd<nPlayChord; kplchrd++)
-			{
-				if (chordplaylist[kplchrd])
+				BOOL bNotPlaying = ((pMainFrm->GetModPlaying() == pModDoc) && (pMainFrm->IsPlaying())) ? FALSE : TRUE;
+				pModDoc->PlayNote(p->note, nPlayIns, 0, bNotPlaying, -1, 0, 0, nChn);	//rewbs.vstiLive - added extra args
+				for (UINT kplchrd=0; kplchrd<nPlayChord; kplchrd++)
 				{
-					pModDoc->PlayNote(chordplaylist[kplchrd], nPlayIns, 0, FALSE, -1, 0, 0, nChn);	//rewbs.vstiLive - 	- added extra args
-					m_dwStatus |= PATSTATUS_CHORDPLAYING;
+					if (chordplaylist[kplchrd])
+					{
+						pModDoc->PlayNote(chordplaylist[kplchrd], nPlayIns, 0, FALSE, -1, 0, 0, nChn);	//rewbs.vstiLive - 	- added extra args
+						m_dwStatus |= PATSTATUS_CHORDPLAYING;
+					}
 				}
 			}
 		} // end play note
