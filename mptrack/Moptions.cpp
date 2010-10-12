@@ -556,6 +556,7 @@ typedef struct OPTGENDESC
 
 enum {
 	OPTGEN_PLAYNEWNOTES=0,
+	OPTGEN_PLAYEDITROW,
 	OPTGEN_CENTERROW,
 	OPTGEN_LARGECOMMENTSFONT,
 	OPTGEN_HEXROWDISP,
@@ -586,6 +587,7 @@ enum {
 static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 {
 	{PATTERN_PLAYNEWNOTE,	"Play new notes while recording",	"When this option is enabled, notes entered in the pattern editor will always be played (If not checked, notes won't be played in record mode)."},
+	{PATTERN_PLAYEDITROW,	"Play whole row while recording",	"When this option is enabled, all notes on the current row are played when entering notes in the pattern editor."},
 	{PATTERN_CENTERROW,		"Always center active row",			"Turn on this option to have the active row always centered in the pattern editor (requires \"Always center active row\")."},
 	{PATTERN_LARGECOMMENTS,	"Use large font for comments",		"With this option enabled, the song message editor will use a larger font."},
 	{PATTERN_HEXDISPLAY,	"Display rows in hex",				"With this option enabled, row numbers and sequence numbers will be displayed in hexadecimal."},
