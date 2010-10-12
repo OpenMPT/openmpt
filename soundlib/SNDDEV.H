@@ -22,12 +22,18 @@ public:
 //
 
 // Sound Device Types
-enum {
-	SNDDEV_WAVEOUT=0,
+enum
+{
+	SNDDEV_WAVEOUT = 0,
 	SNDDEV_DSOUND,
 	SNDDEV_ASIO,
 	SNDDEV_NUM_DEVTYPES
 };
+
+#define SNDDEV_DEVICE_MASK			0xFF	// Mask for getting the device number
+#define SNDDEV_DEVICE_SHIFT			8		// Shift amount for getting the device type
+#define SNDDEV_GET_NUMBER(x)		(x & SNDDEV_DEVICE_MASK)	// Use this for getting the device number
+#define SNDDEV_GET_TYPE(x)			(x >> SNDDEV_DEVICE_SHIFT)	// ...and this for getting the device type
 
 #define SNDDEV_MINBUFFERS			2
 #define SNDDEV_MAXBUFFERS			16

@@ -187,7 +187,7 @@ DWORD CMainFrame::m_nSrcMode = SRCMODE_LINEAR;
 DWORD CMainFrame::m_nBitsPerSample = 16;
 DWORD CMainFrame::m_nPreAmp = 128;
 DWORD CMainFrame::gbLoopSong = TRUE;
-LONG CMainFrame::m_nWaveDevice = (SNDDEV_DSOUND<<8);
+LONG CMainFrame::m_nWaveDevice = (SNDDEV_DSOUND << SNDDEV_DEVICE_SHIFT);
 LONG CMainFrame::m_nMidiDevice = 0;
 DWORD CMainFrame::m_nBufferLength = 75;
 LONG CMainFrame::gnLVuMeter = 0;
@@ -433,12 +433,12 @@ void CMainFrame::LoadIniSettings()
 		m_dwRate = 44100;
 #ifndef NO_ASIO
 		// If no mixing rate is specified and we're using ASIO, get a mixing rate supported by the device.
-		if((m_nWaveDevice >> 8) == SNDDEV_ASIO)
+		if(SNDDEV_GET_TYPE(m_nWaveDevice) == SNDDEV_ASIO)
 		{
 			ISoundDevice *dummy;
 			if(CreateSoundDevice(SNDDEV_ASIO, &dummy))
 			{
-				m_dwRate = dummy->GetCurrentSampleRate(m_nWaveDevice & 0xFF);
+				m_dwRate = dummy->GetCurrentSampleRate(SNDDEV_GET_NUMBER(m_nWaveDevice));
 				delete dummy;
 			}
 		}
@@ -691,8 +691,6 @@ bool CMainFrame::LoadRegistrySettings()
 VOID CMainFrame::Initialize()
 //---------------------------
 {
-	CHAR s[256];
-
 	//Adding version number to the frame title
 	CString title = GetTitle();
 	title += CString(" ") + MptVersion::str;
@@ -711,12 +709,12 @@ VOID CMainFrame::Initialize()
 	// Load Chords
 	theApp.LoadChords(Chords);
 	// Check for valid sound device
-	if (!EnumerateSoundDevices(m_nWaveDevice>>8, m_nWaveDevice&0xff, s, sizeof(s)))
+	if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(m_nWaveDevice), SNDDEV_GET_NUMBER(m_nWaveDevice), nullptr, 0))
 	{
-		m_nWaveDevice = (SNDDEV_DSOUND<<8);
-		if (!EnumerateSoundDevices(m_nWaveDevice>>8, m_nWaveDevice&0xff, s, sizeof(s)))
+		m_nWaveDevice = (SNDDEV_DSOUND << SNDDEV_DEVICE_SHIFT);
+		if (!EnumerateSoundDevices(SNDDEV_GET_TYPE(m_nWaveDevice), SNDDEV_GET_NUMBER(m_nWaveDevice), nullptr, 0))
 		{
-			m_nWaveDevice = (SNDDEV_WAVEOUT<<8);
+			m_nWaveDevice = (SNDDEV_WAVEOUT << SNDDEV_DEVICE_SHIFT);
 		}
 	}
 	// Default directory location
@@ -1480,8 +1478,8 @@ LONG CMainFrame::audioTryOpeningDevice(UINT channels, UINT bits, UINT samplesper
 	m_pSndFile->SetWaveConfig(samplespersec, bits, channels, (m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) ? TRUE : FALSE);
 	// Maybe we failed because someone is playing sound already.
 	// Shut any sound off, and try once more before giving up.
-	UINT nDevType = m_nWaveDevice>>8;
-	UINT nDevNo = m_nWaveDevice&0xff;
+	UINT nDevType = SNDDEV_GET_TYPE(m_nWaveDevice);
+	UINT nDevNo = SNDDEV_GET_NUMBER(m_nWaveDevice);
 	UINT fulOptions = (m_dwSoundSetup & SOUNDSETUP_SECONDARY) ? SNDDEV_OPTIONS_SECONDARY : 0;
 	if ((gpSoundDevice) && (gpSoundDevice->GetDeviceType() != nDevType))
 	{
