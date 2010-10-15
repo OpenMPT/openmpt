@@ -31,7 +31,7 @@ class COpenGLEditor;
 #define PATSTATUS_PATTERNLOOP			0x4000
 
 // Row Spacing
-#define MAX_SPACING	64
+#define MAX_SPACING		64 // MAX_PATTERN_ROWS
 
 enum PatternColumns
 {
