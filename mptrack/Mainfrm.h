@@ -162,9 +162,11 @@ enum
 #define NUM_VUMETER_PENS		32
 
 // Pattern Setup (contains also non-pattern related settings)
+// Feel free to replace the deprecated flags by new flags, but be sure to
+// update CMainFrame::LoadIniSettings() as well.
 #define PATTERN_PLAYNEWNOTE			0x01		// play new notes while recording
 #define PATTERN_LARGECOMMENTS		0x02		// use large font in comments
-#define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight
+#define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight (measures)
 #define PATTERN_SMALLFONT			0x08		// use small font in pattern editor
 #define PATTERN_CENTERROW			0x10		// always center active row
 #define PATTERN_WRAP				0x20		// wrap around cursor in editor
@@ -176,7 +178,7 @@ enum
 #define PATTERN_PLAYEDITROW			0x800		// play all notes on the current row while entering notes
 #define PATTERN_NOEXTRALOUD			0x1000		// no loud samples in sample editor
 #define PATTERN_DRAGNDROPEDIT		0x2000		// enable drag and drop editing
-#define PATTERN_2NDHIGHLIGHT		0x4000		// activate secondary highlight
+#define PATTERN_2NDHIGHLIGHT		0x4000		// activate secondary highlight (beats)
 #define PATTERN_MUTECHNMODE			0x8000		// ignore muted channels
 #define PATTERN_SHOWPREVIOUS		0x10000		// show prev/next patterns
 #define PATTERN_CONTSCROLL			0x20000		// continous pattern scrolling

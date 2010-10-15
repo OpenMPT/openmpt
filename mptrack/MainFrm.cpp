@@ -1878,17 +1878,14 @@ BOOL CMainFrame::ResetNotificationBuffer(HWND hwnd)
 BOOL CMainFrame::PlayMod(CModDoc *pModDoc, HWND hPat, DWORD dwNotifyType)
 //-----------------------------------------------------------------------
 {
-	BOOL bPaused, bPatLoop, bResetAGC;
 	if (!pModDoc) return FALSE;
 	CSoundFile *pSndFile = pModDoc->GetSoundFile();
 	if ((!pSndFile) || (!pSndFile->GetType())) return FALSE;
-	bPaused = (pSndFile->m_dwSongFlags & SONG_PAUSED) ? TRUE : FALSE;
-	bPatLoop = (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP) ? TRUE : FALSE;
+	const bool bPaused = pSndFile->IsPaused();
+	const bool bPatLoop = (pSndFile->m_dwSongFlags & SONG_PATTERNLOOP) ? true : false;
 	pSndFile->ResetChannels();
-	bResetAGC = FALSE;
-	if (((m_pSndFile) && (pSndFile != m_pSndFile)) || (!m_dwElapsedTime)) bResetAGC = TRUE;
 	if ((m_pSndFile) || (m_dwStatus & MODSTATUS_PLAYING)) PauseMod();
-	if (bResetAGC) CSoundFile::ResetAGC();
+	if (((m_pSndFile) && (pSndFile != m_pSndFile)) || (!m_dwElapsedTime)) CSoundFile::ResetAGC();
 	m_pSndFile = pSndFile;
 	m_pModPlaying = pModDoc;
 	m_hFollowSong = hPat;
