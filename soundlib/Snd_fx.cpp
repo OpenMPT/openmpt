@@ -83,7 +83,7 @@ double CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
 }
 
 double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORDERINDEX endOrder, ROWINDEX endRow)
-//----------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------
 {
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
@@ -503,7 +503,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		} else
 		{
 			// Original behaviour
-			if (pIns->NoteMap[note-1] >= NOTE_MIN_SPECIAL) return;
+			if(pIns->NoteMap[note-1] > NOTE_MAX) return;
 			UINT n = pIns->Keyboard[note-1];
 			pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
 		}
@@ -539,10 +539,12 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		}
 	}
 
-	// XM compatibility: new instrument + portamento = forget it!
+	// XM compatibility: new instrument + portamento = ignore new instrument number, but reload old instrument settings (the world of XM is upside down...)
 	if(bInstrumentChanged && bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
 	{
-		return;
+		pIns = pChn->pModInstrument;
+		pSmp = pChn->pModSample;
+		bInstrumentChanged = false;
 	} else
 	{
 		pChn->pModInstrument = pIns;
@@ -4180,7 +4182,7 @@ void CSoundFile::SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const
 //---------------------------------------------------------------------------------------------
 {
 	const ORDERINDEX nMaxOrd = Order.GetLengthTailTrimmed();
-	if(nOrd >= nMaxOrd)
+	if(nOrd >= nMaxOrd || nRow > Patterns[Order[nOrd]].GetNumRows())
 		return;
 
 	// The module might have been edited in the meantime - so we have to extend this a bit.
