@@ -1368,12 +1368,16 @@ BOOL CSoundFile::ProcessEffects()
 		{
 			UINT note = pChn->nRowNote;
 			if (instr) pChn->nNewIns = instr;
+			bool retrigEnv = (!note) && (instr);
+			
+			// Now it's time for some FT2 crap...
 			if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2))
 			{
 				// XM: FT2 ignores a note next to a K00 effect, and a fade-out seems to be done when no volume envelope is present (not exactly the Kxx behaviour)
 				if(cmd == CMD_KEYOFF && param == 0 && IsCompatibleMode(TRK_FASTTRACKER2))
 				{
 					note = instr = 0;
+					retrigEnv = false;
 				}
 
 				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number or volume effect is present!)
@@ -1382,14 +1386,24 @@ BOOL CSoundFile::ProcessEffects()
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					pChn->nVolume = 0;
 					note = instr = 0;
-				}
-
-				// XM: Rogue note delays cause retrig
-				if ((note == NOTE_NONE || instr == 0) && IsCompatibleMode(TRK_FASTTRACKER2) && !(m_dwSongFlags & SONG_FIRSTTICK))
+					retrigEnv = false;
+				} else if(IsCompatibleMode(TRK_FASTTRACKER2) && !(m_dwSongFlags & SONG_FIRSTTICK))
 				{
-					note = pChn->nNote - pChn->nTranspose;
-					// Stupid HACK to retrieve the last used instrument *number*
-					if(instr == 0)
+					// XM Compatibility: Some special hacks for rogue note delays... (EDx with x > 0)
+					// Apparently anything that is next to a note delay behaves totally unpredictable in FT2. Swedish tracker logic. :)
+
+					// If there's a note delay but no note, retrig the last note.
+					if(note == NOTE_NONE)
+					{
+						note = pChn->nNote - pChn->nTranspose;
+					} else if(note >= NOTE_MIN_SPECIAL)
+					{
+						// Gah! Note Off + Note Delay will cause envelopes to *retrigger*! How stupid is that?
+						retrigEnv = true;
+					}
+					// Stupid HACK to retrieve the last used instrument *number* for rouge note delays in XM
+					// This is only applied if the instrument column is empty and if there is either no note or a "normal" note (e.g. no note off)
+					if(instr == 0 && note <= NOTE_MAX)
 					{
 						for(INSTRUMENTINDEX nIns = 1; nIns <= m_nInstruments; nIns++)
 						{
@@ -1402,7 +1416,7 @@ BOOL CSoundFile::ProcessEffects()
 					}
 				}
 			}
-			if ((!note) && (instr)) //Case: instrument with no note data. 
+			if (retrigEnv) //Case: instrument with no note data. 
 			{
 				//IT compatibility: Instrument with no note.
 				if(IsCompatibleMode(TRK_IMPULSETRACKER) || (m_dwSongFlags & SONG_PT1XMODE))
