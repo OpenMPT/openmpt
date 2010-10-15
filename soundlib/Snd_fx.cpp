@@ -1385,9 +1385,21 @@ BOOL CSoundFile::ProcessEffects()
 				}
 
 				// XM: Rogue note delays cause retrig
-				if ((note == NOTE_NONE) && IsCompatibleMode(TRK_FASTTRACKER2) && !(m_dwSongFlags & SONG_FIRSTTICK))
+				if ((note == NOTE_NONE || instr == 0) && IsCompatibleMode(TRK_FASTTRACKER2) && !(m_dwSongFlags & SONG_FIRSTTICK))
 				{
 					note = pChn->nNote - pChn->nTranspose;
+					// Stupid HACK to retrieve the last used instrument *number*
+					if(instr == 0)
+					{
+						for(INSTRUMENTINDEX nIns = 1; nIns <= m_nInstruments; nIns++)
+						{
+							if(Instruments[nIns] == pChn->pModInstrument)
+							{
+								instr = nIns;
+								break;
+							}
+						}
+					}
 				}
 			}
 			if ((!note) && (instr)) //Case: instrument with no note data. 
