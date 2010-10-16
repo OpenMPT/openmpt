@@ -3139,12 +3139,17 @@ BOOL CEditHistoryDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT_HISTORY, s);
 
 	// Total edit time
-	totalTime = (uint64)((double)(totalTime) / HISTORY_TIMER_PRECISION);
-	s.Format(_T("Total edit time: %lluh %02llum %02llus"), totalTime / 3600, (totalTime / 60) % 60, totalTime % 60);
-	SetDlgItemText(IDC_TOTAL_EDIT_TIME, s);
-	// Window title
-	s.Format(_T("Edit history for %s"), m_pModDoc->GetTitle());
-	SetWindowText(s);
+	s = "";
+	if(totalTime)
+	{
+		totalTime = (uint64)((double)(totalTime) / HISTORY_TIMER_PRECISION);
+
+		s.Format(_T("Total edit time: %lluh %02llum %02llus (%u session%s)"), totalTime / 3600, (totalTime / 60) % 60, totalTime % 60, num, (num != 1) ? _T("s") : _T(""));
+		SetDlgItemText(IDC_TOTAL_EDIT_TIME, s);
+		// Window title
+		s.Format(_T("Edit history for %s"), m_pModDoc->GetTitle());
+		SetWindowText(s);
+	}
 	// Enable or disable Clear button
 	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow((m_pModDoc->GetFileHistory()->empty()) ? FALSE : TRUE);
 
