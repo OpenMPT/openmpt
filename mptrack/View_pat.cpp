@@ -4319,12 +4319,6 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 		if (oldStyle && ((p->note == NOTE_NOTECUT) || (p->note == NOTE_KEYOFF) || (p->note == NOTE_FADE)))
 			p->instr=0;
 		
-		//-- if not recording, restore old command.
-		if (bRecordEnabled == false)
-		{
-			*p = oldcmd;
-		}
-
 		// -- play note
 		if ((CMainFrame::m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || (!bRecordEnabled))
 		{
@@ -4370,6 +4364,12 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 			}
 		}
 
+		//-- if not recording, restore old command.
+		if (bRecordEnabled == false)
+		{
+			*p = oldcmd;
+		}
+
 		// -- if recording, handle post note entry behaviour (move cursor etc..)
 		if(bRecordEnabled)
 		{
@@ -4411,7 +4411,7 @@ void CViewPattern::TempEnterNote(int note, bool oldStyle, int vol)
 
 			BYTE* activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
 			if (p->note <= NOTE_MAX)
-				activeNoteMap[p->note]=nChn;
+				activeNoteMap[p->note] = nChn;
 
 			//Move to next channel if required
 			if (recordGroup)
@@ -4466,7 +4466,12 @@ void CViewPattern::TempEnterChord(int note)
 		const PatternRow prowbase = pSndFile->Patterns[m_nPattern].GetRow(m_nRow);
 		MODCOMMAND* p = &prowbase[nChn];
 
-		const MODCOMMAND oldcmd = *p; // This is the command we are about to overwrite
+		// Save old row contents		
+		vector<MODCOMMAND> oldrow(pSndFile->GetNumChannels());
+		for(CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
+		{
+			oldrow[nChn] = prowbase[nChn];
+		}
 
 		const bool bIsLiveRecord = IsLiveRecord(*pMainFrm, *pModDoc, *pSndFile);
 		const bool bRecordEnabled = IsEditingEnabled();
@@ -4479,9 +4484,10 @@ void CViewPattern::TempEnterChord(int note)
 		UINT baseoctave = pMainFrm->GetBaseOctave();
 		UINT nchord = note - baseoctave * 12 - 1;
 		UINT nNote;
-		if (nchord < 3*12)
+		bool modified = false;
+		if (nchord < 3 * 12)
 		{
-			UINT nchordnote = pChords[nchord].key + baseoctave*12 + 1;
+			UINT nchordnote = pChords[nchord].key + baseoctave * 12 + 1;
 			// Rev. 244, commented the isSplit conditions below, can't see the point in it.
             //if (isSplit)
 			//	nchordnote = pChords[nchord].key + baseoctave*(p->note%12) + 1;
@@ -4512,38 +4518,26 @@ void CViewPattern::TempEnterChord(int note)
 						{
 							prowbase[nchordch].note = n;
 							if (p->instr) prowbase[nchordch].instr = p->instr;
+							if(prowbase[nchordch] != oldrow[nchordch])
+							{
+								modified = true;
+							}
+
 							nchno++;
 							if (CMainFrame::m_dwPatternSetup & PATTERN_PLAYNEWNOTE)
 							{
-								if ((n) && (n<=NOTE_MAX)) chordplaylist[nPlayChord++] = n;
+								if ((n) && (n <= NOTE_MAX)) chordplaylist[nPlayChord++] = n;
 							}
 						}
 					} else
 					{
 						nchno++;
-						if ((n) && (n<=NOTE_MAX)) chordplaylist[nPlayChord++] = n;
+						if ((n) && (n <= NOTE_MAX)) chordplaylist[nPlayChord++] = n;
 					}
 				}
 			}
 		}
 
-		// -- write notedata
-		if(bRecordEnabled)
-		{
-			DWORD sel = (m_nRow << 16) | m_dwCursor;
-			SetCurSel(sel, sel);
-			sel &= ~7;
-			if(*p != oldcmd)
-			{
-				pModDoc->SetModified();
-				InvalidateRow();
-				UpdateIndicator();
-			}
-		} else
-		{
-			// recording disabled
-			*p = oldcmd;
-		}
 
 		// -- play note
 		if ((CMainFrame::m_dwPatternSetup & (PATTERN_PLAYNEWNOTE|PATTERN_PLAYEDITROW)) || (!bRecordEnabled))
@@ -4559,7 +4553,7 @@ void CViewPattern::TempEnterChord(int note)
 				{
 					// ...using the already specified instrument
 					nPlayIns = p->instr;
-				} else if ((!p->instr) && (p->note < 128))
+				} else if ((!p->instr) && (p->note <= NOTE_MAX))
 				{
 					// ...or one that can be found on a previous row of this pattern.
 					MODCOMMAND *search = p;
@@ -4587,6 +4581,28 @@ void CViewPattern::TempEnterChord(int note)
 				}
 			}
 		} // end play note
+
+
+		// -- write notedata
+		if(bRecordEnabled)
+		{
+			DWORD sel = (m_nRow << 16) | m_dwCursor;
+			SetCurSel(sel, sel);
+			sel &= ~7;
+			if(modified)
+			{
+				pModDoc->SetModified();
+				InvalidateRow();
+				UpdateIndicator();
+			}
+		} else
+		{
+			// recording disabled
+			for(CHANNELINDEX nChn = 0; nChn < pSndFile->GetNumChannels(); nChn++)
+			{
+				prowbase[nChn] = oldrow[nChn];
+			}
+		}
 
 		// Set new cursor position (row spacing) - only when not recording live
 		if (bRecordEnabled && !bIsLiveRecord)
