@@ -327,6 +327,8 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		memcpy(Instruments[iIns]->name, pih.name, 22);
 		SpaceToNullStringFixed(Instruments[iIns]->name, 22);
 
+		memset(&xmsh, 0, sizeof(XMSAMPLEHEADER));
+
 		if ((nsamples = pih.samples) > 0)
 		{
 			/* we have samples, so let's read the rest of this instrument
@@ -336,7 +338,6 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			if (dwMemPos + ihsize >= dwMemLength)
 				return true;
 
-			memset(&xmsh, 0, sizeof(XMSAMPLEHEADER));
 			memcpy(&xmsh,
 				lpStream + dwMemPos + sizeof(XMINSTRUMENTHEADER),
 				min(ihsize - sizeof(XMINSTRUMENTHEADER), sizeof(XMSAMPLEHEADER)));
@@ -355,15 +356,11 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			if(xmsh.midichannel != 0 || xmsh.midienabled != 0 || xmsh.midiprogram != 0 || xmsh.mutecomputer != 0 || xmsh.pitchwheelrange != 0)
 				bIsFT2 = true; // definitely not MPT. (or any other tracker)
 
-			dwMemPos += LittleEndian(pih.size);
-		} else
-		{
-			if (LittleEndian(pih.size))
-				dwMemPos += LittleEndian(pih.size);
-			else
-				dwMemPos += sizeof(XMINSTRUMENTHEADER);
-			continue;
 		}
+		if (LittleEndian(pih.size))
+			dwMemPos += LittleEndian(pih.size);
+		else
+			dwMemPos += sizeof(XMINSTRUMENTHEADER);
 
 		memset(samplemap, 0, sizeof(samplemap));
 		if (nsamples > 32) return true;

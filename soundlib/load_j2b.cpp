@@ -478,7 +478,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 		{
 		case AMCHUNKID_MAIN: // "MAIN" - Song info (AMFF)
 		case AMCHUNKID_INIT: // "INIT" - Song info (AM)
-			if((LittleEndian(chunkheader->signature) == 0x4E49414D && !bIsAM) || (LittleEndian(chunkheader->signature) == 0x54494E49 && bIsAM))
+			if((LittleEndian(chunkheader->signature) == AMCHUNKID_MAIN && !bIsAM) || (LittleEndian(chunkheader->signature) == AMCHUNKID_INIT && bIsAM))
 			{
 				ASSERT_CAN_READ_CHUNK(sizeof(AMFFCHUNK_MAIN));
 				AMFFCHUNK_MAIN *mainchunk = (AMFFCHUNK_MAIN *)(lpStream + dwMemPos);
