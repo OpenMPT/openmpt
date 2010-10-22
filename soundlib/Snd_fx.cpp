@@ -73,17 +73,26 @@ void CSoundFile::GenerateSamplePosMap() {
 }
 */
 
-double CSoundFile::GetLength(BOOL bAdjust, BOOL bTotal)
-//-------------------------------------------
+double CSoundFile::GetLength(bool bAdjust, ORDERINDEX endOrder, ROWINDEX endRow)
+//------------------------------------------------------------------------------
 {
 	bool dummy = false;
-	double result = GetLength(dummy, bAdjust, bTotal);
-	InitializeVisitedRows(true); // forget that we went over the whole module.
+	double result = GetLength(dummy, bAdjust, endOrder, endRow);
+	if(!bAdjust)
+	{
+		InitializeVisitedRows(true); // forget that we went over the whole module.
+	}
 	return result;
 }
 
-double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORDERINDEX endOrder, ROWINDEX endRow)
-//----------------------------------------------------------------------------------------------------------------
+
+// Get mod length in various cases. Parameters:
+// &targetReached: Will be set to true if the specified order/row combination has been reached while going through the module.
+// bAdjust: If enabled, the mod parameters (such as global volume, speed, tempo, etc...) will be memorized (if the target has been reached) when leaving the function (i.e. they won't be reset to the previous values)
+// endOrder: Order which should be reached (ORDERINDEX_INVALID means whole song)
+// endRow: Row in that order that should be reached
+double CSoundFile::GetLength(bool& targetReached, bool bAdjust, ORDERINDEX endOrder, ROWINDEX endRow)
+//---------------------------------------------------------------------------------------------------
 {
 // -> CODE#0022
 // -> DESC="alternative BPM/Speed interpretation method"
@@ -96,7 +105,6 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	double dElapsedTime=0.0;
 // -! NEW_FEATURE#0022
 	UINT nMusicSpeed = m_nDefaultSpeed, nMusicTempo = m_nDefaultTempo, nNextRow = 0;
-	UINT nMaxRow = 0, nMaxPattern = 0;
 	LONG nGlbVol = m_nDefaultGlobalVolume, nOldGlbVolSlide = 0;
 	vector<BYTE> instr;
 	vector<UINT> notes;
@@ -114,8 +122,6 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 	patloop.resize(m_nChannels, 0);
 	patloopstart.resize(m_nChannels, 0);
 	for(CHANNELINDEX icv = 0; icv < m_nChannels; icv++) chnvols[icv] = ChnSettings[icv].nVolume;
-	nMaxRow = m_nNextRow;
-	nMaxPattern = m_nNextPattern;
 	nCurrentPattern = nNextPattern = 0;
 	nPattern = Order[0];
 	nRow = nNextRow = 0;
@@ -192,18 +198,6 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			for(UINT ipck = 0; ipck < m_nChannels; ipck++)
 				patloop[ipck] = dElapsedTime;
 		}
-		if (!bTotal)
-		{
-			if ((nCurrentPattern > nMaxPattern) || ((nCurrentPattern == nMaxPattern) && (nRow >= nMaxRow)))
-			{
-				if (bAdjust)
-				{
-					m_nMusicSpeed = nMusicSpeed;
-					m_nMusicTempo = nMusicTempo;
-				}
-				break;
-			}
-		}
 
 		MODCHANNEL *pChn = Chn;
 		MODCOMMAND *p = Patterns[nPattern] + nRow * m_nChannels;
@@ -222,7 +216,7 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			{
 			// Position Jump
 			case CMD_POSITIONJUMP:
-				positionJumpOnThisRow=true;
+				positionJumpOnThisRow = true;
 				nNextPattern = (ORDERINDEX)param;
 				nNextPatStartRow = 0;  // FT2 E60 bug
 				// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
@@ -430,17 +424,20 @@ double CSoundFile::GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal, ORD
 			case tempo_mode_alternative: 
 				dElapsedTime +=  60000.0 / (1.65625 * (double)(nMusicSpeed * nMusicTempo)); break;
 			case tempo_mode_modern: 
-				dElapsedTime += 60000.0/(double)nMusicTempo / (double)m_nCurrentRowsPerBeat; break;
+				dElapsedTime += 60000.0 / (double)nMusicTempo / (double)m_nCurrentRowsPerBeat; break;
 			case tempo_mode_classic: default:
 				dElapsedTime += (2500.0 * (double)nSpeedCount) / (double)nMusicTempo;
 		}
 	}
 
-	if ((bAdjust) && (!bTotal))
+	// Store final variables
+	if (bAdjust && (targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID))
 	{
 		m_nGlobalVolume = nGlbVol;
 		m_nOldGlbVolSlide = nOldGlbVolSlide;
-		for (UINT n=0; n<m_nChannels; n++)
+		m_nMusicSpeed = nMusicSpeed;
+		m_nMusicTempo = nMusicTempo;
+		for (CHANNELINDEX n = 0; n < m_nChannels; n++)
 		{
 			Chn[n].nGlobalVol = chnvols[n];
 			if (notes[n]) Chn[n].nNewNote = notes[n];

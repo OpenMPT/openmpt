@@ -3052,11 +3052,12 @@ bool CSoundFile::SetTitle(const char* titleCandidate, size_t strSize)
 	return false;
 }
 
-double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row)
-//----------------------------------------------------------------
+
+double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool resetVars)
+//--------------------------------------------------------------------------------
 {
 	bool targetReached = false;
-	const double t = GetLength(targetReached, FALSE, TRUE, ord, row);
+	const double t = GetLength(targetReached, !resetVars, ord, row);
 	if(targetReached) return t;
 	else return -1; //Given position not found from play sequence.
 }

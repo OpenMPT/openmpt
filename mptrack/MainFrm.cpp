@@ -465,7 +465,7 @@ void CMainFrame::LoadIniSettings()
 	if(vIniVersion < MAKE_VERSION_NUMERIC(1,19,00,07))
 		m_dwPatternSetup &= ~0x800;					// this was previously deprecated and is now used for something else
 	if(vIniVersion < MPT_VERSION_NUMERIC) 
-		m_dwPatternSetup &= ~(0x200000|0x400000);	// various deprecated old options
+		m_dwPatternSetup &= ~(0x200000|0x400000|0x10000000);	// various deprecated old options
 
 	m_nRowSpacing = GetPrivateProfileDWord("Pattern Editor", "RowSpacing", 16, iniFile);
 	m_nRowSpacing2 = GetPrivateProfileDWord("Pattern Editor", "RowSpacing2", 4, iniFile);

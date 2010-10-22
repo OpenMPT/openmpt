@@ -192,7 +192,7 @@ enum
 #define PATTERN_AUTODELAY			0x2000000	// automatically insert delay commands in pattern when entering notes
 #define PATTERN_NOTEFADE			0x4000000	// alt. note fade behaviour when entering notes
 #define PATTERN_OVERFLOWPASTE		0x8000000	// continue paste in the next pattern instead of cutting off
-#define PATTERN_POSITIONAWARETIMER	0x10000000	// try to set the timer in the statusbar when jumping around in modules
+//#define PATTERN_POSITIONAWARETIMER	0x10000000	// try to set the timer in the statusbar when jumping around in modules (deprecated, it generated too much load in the code due to some bugs, hence it was made optional. those bugs are now resolved, so there's no point in keeping this flag.)
 #define PATTERN_RESETCHANNELS		0x20000000	// reset channels when looping
 #define PATTERN_LIVEUPDATETREE		0x40000000	// update active sample / instr icons in treeview
 

@@ -554,7 +554,8 @@ typedef struct OPTGENDESC
 	LPCSTR pszListName, pszDescription;
 } OPTGENDESC;
 
-enum {
+enum
+{
 	OPTGEN_PLAYNEWNOTES=0,
 	OPTGEN_PLAYEDITROW,
 	OPTGEN_CENTERROW,
@@ -606,10 +607,9 @@ static OPTGENDESC gOptGenDesc[OPTGEN_MAXOPTIONS] =
 	{PATTERN_OLDCTXMENUSTYLE, "Old style pattern context menu", "Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."}, 
 	{PATTERN_SYNCMUTE,		"Maintain sample sync on mute",		"Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
 	{PATTERN_AUTODELAY,		"Automatic delay commands",			"Automatically insert appropriate note-delay commands when recording notes during live playback."},
-	{PATTERN_NOTEFADE,		"Note fade on key up",				"Enable to fade/stop notes on key up in pattern tab." },
+	{PATTERN_NOTEFADE,		"Note fade on key up",				"Enable to fade / stop notes on key up in pattern tab." },
 	{PATTERN_OVERFLOWPASTE,	"Overflow paste mode",				"Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
-	{PATTERN_POSITIONAWARETIMER, "Position aware timer",		"If enabled, timer will show the playback position time if possible instead of running timer."},
-	{PATTERN_RESETCHANNELS,	"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands)"},
+	{PATTERN_RESETCHANNELS,	"Reset channels on loop",			"If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands) and is recommended to be enabled."},
 	{PATTERN_LIVEUPDATETREE,"Update sample status in tree",		"If enabled, active samples and instruments will be indicated by a different icon in the treeview."}
 };
 

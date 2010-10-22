@@ -316,12 +316,15 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool bEdit, bool bShiftClick, bool bI
 				pSndFile->m_nCurrentPattern = m_nScrollPos;
 				pSndFile->SetCurrentOrder(m_nScrollPos);
 				pSndFile->m_dwSongFlags |= dwPaused;
-				if (!(dwPaused & SONG_PATTERNLOOP)) pSndFile->GetLength(TRUE);	// update channel parameters
+				//if (!(dwPaused & SONG_PATTERNLOOP))	// why?
+				{
+					// update channel parameters and play time
+					m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
+				}
 				if (bIsPlaying) pMainFrm->ResetNotificationBuffer();
 				END_CRITICAL();
 			}
 			m_pParent->SetCurrentPattern(n);
-			m_pModDoc->SetElapsedTime(m_nScrollPos, 0);
 		}
 	}
 	UpdateInfoText();
@@ -672,8 +675,8 @@ void COrderList::OnEditCopy()
 				p += str.size();
 				*p++ = ' ';
 			}
-			*p++ = 0x0D;
-			*p++ = 0x0A;
+			*p++ = '\r';
+			*p++ = '\n';
 			*p = 0;
 		}
 		GlobalUnlock(hCpy);

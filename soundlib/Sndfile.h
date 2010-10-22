@@ -494,8 +494,9 @@ public:
 public: //Misc
 	void ChangeModTypeTo(const MODTYPE& newType);
 	
-	//Returns value in seconds. If given position won't be played at all, returns -1.
-	double GetPlaybackTimeAt(ORDERINDEX, ROWINDEX);
+	// Returns value in seconds. If given position won't be played at all, returns -1.
+	// If resetVars is true, the state of various playback variables will be retained.
+	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool resetVars);
 
 	uint16 GetModFlags() const {return m_ModFlags;}
 	void SetModFlags(const uint16 v) {m_ModFlags = v;}
@@ -676,15 +677,15 @@ public:
 	UINT GetMusicSpeed() const { return m_nMusicSpeed; }
 	UINT GetMusicTempo() const { return m_nMusicTempo; }
     
-	double GetLength(BOOL bAdjust, BOOL bTotal=FALSE);
+	double GetLength(bool bAdjust, ORDERINDEX ord = ORDERINDEX_MAX, ROWINDEX row = ROWINDEX_MAX);
 private:
 	//Get modlength in various cases: total length, length to 
 	//specific order&row etc. Return value is in seconds.
-	double GetLength(bool& targetReached, BOOL bAdjust, BOOL bTotal=FALSE, ORDERINDEX ord = ORDERINDEX_MAX, ROWINDEX row = ROWINDEX_MAX);
+	double GetLength(bool& targetReached, bool bAdjust, ORDERINDEX ord, ROWINDEX row);
 
 public:
 	//Returns song length in seconds.
-	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(FALSE, TRUE)+1.0 : GetLength(FALSE, TRUE)+0.5); }
+	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(false) + 1.0 : GetLength(false) + 0.5); }
 
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
