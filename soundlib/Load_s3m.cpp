@@ -270,10 +270,11 @@ bool CSoundFile::ReadS3M(const BYTE *lpStream, const DWORD dwMemLength)
 	SpaceToNullStringFixed(m_szNames[0], 28);
 	// Speed
 	m_nDefaultSpeed = psfh.speed;
-	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
+	if (!m_nDefaultSpeed || m_nDefaultSpeed == 255) m_nDefaultSpeed = 6;
 	// Tempo
 	m_nDefaultTempo = psfh.tempo;
-	m_nDefaultTempo = CLAMP(m_nDefaultTempo, 32, 255);
+	//m_nDefaultTempo = CLAMP(m_nDefaultTempo, 32, 255);
+	if(m_nDefaultTempo < 33) m_nDefaultTempo = 125;
 	// Global Volume
 	m_nDefaultGlobalVolume = psfh.globalvol << 2;
 	if(!m_nDefaultGlobalVolume && psfh.cwtv < 0x1320) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME; // not very reliable, but it fixes a few tunes
