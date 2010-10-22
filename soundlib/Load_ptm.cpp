@@ -177,6 +177,15 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 					{
 						ConvertModCommand(&m[nChn]);
 						MODExx2S3MSxx(&m[nChn]);
+						// Note cut does just mute the sample, not cut it. We have to fix that, if possible.
+						if(m[nChn].command == CMD_S3MCMDEX && (m[nChn].param & 0xF0) == 0xC0 && m[nChn].volcmd == VOLCMD_NONE)
+						{
+							// SCx => v00 + SDx
+							// This is a pretty dumb solution because many (?) PTM files make usage of the volume column + note cut at the same time.
+							m[nChn].param = 0xD0 | (m[nChn].param & 0x0F);
+							m[nChn].volcmd = VOLCMD_VOLUME;
+							m[nChn].vol = 0;
+						}
 					} else
 					{
 						switch(m[nChn].command)
