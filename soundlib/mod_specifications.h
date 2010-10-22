@@ -331,7 +331,7 @@ const CModSpecifications s3mEx =
 	false,								// No song comments
 	0,									// No instrument envelopes
 	false,								// No envelope release node
-	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\?#",	// Supported Effects
+	" JFEGHLKRXODB?CQATI?SMNVW?UY?P?Z\\??",	// Supported Effects
 	" vp?????????????",					// Supported Volume Column commands
 	true,								// Has "+++" pattern
 	false,								// Doesn't have restart position (order)
