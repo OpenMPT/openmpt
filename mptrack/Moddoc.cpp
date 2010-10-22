@@ -1587,8 +1587,8 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 		if (wsdlg.m_bSelectPlay)
 		{
 			m_SndFile.SetCurrentOrder(wsdlg.m_nMinOrder);
+			m_SndFile.GetLength(true, wsdlg.m_nMinOrder, 0);
 			m_SndFile.m_nCurrentPattern = wsdlg.m_nMinOrder;
-			m_SndFile.GetLength(TRUE, FALSE);
 			m_SndFile.m_nMaxOrderPosition = wsdlg.m_nMaxOrder + 1;
 		}
 		if(dwcdlg.DoModal() != IDOK) break;
@@ -1597,8 +1597,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	// Restore channels' flags
 	if(wsdlg.m_bChannelMode)
 	{
-		for(int i = 0 ; i < nRenderPasses ; i++)
+		for(CHANNELINDEX i = 0; i < m_SndFile.GetNumChannels(); i++)
+		{
 			m_SndFile.ChnSettings[i].dwFlags = channelFlags[i];
+		}
 	}
 	// Restore instruments' / samples' flags
 	if(wsdlg.m_bInstrumentMode)
@@ -1619,7 +1621,6 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	}
 
 	m_SndFile.SetCurrentPos(pos);
-	m_SndFile.GetLength(TRUE);
 	CMainFrame::UpdateAudioParameters(TRUE);
 }
 
@@ -1677,7 +1678,6 @@ void CModDoc::OnFileMP3Convert()
 	dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 	dwcdlg.DoModal();
 	m_SndFile.SetCurrentPos(pos);
-	m_SndFile.GetLength(TRUE);
 	CMainFrame::UpdateAudioParameters(TRUE);
 }
 
@@ -3318,7 +3318,7 @@ void CModDoc::OnPatternRestart()
 		END_CRITICAL();
 		
 		// set playback timer in the status bar
-		SetElapsedTime(nOrd, nRow, true);
+		SetElapsedTime(nOrd, nRow);
 
 		if (pModPlaying != this)
 		{
@@ -3373,7 +3373,7 @@ void CModDoc::OnPatternPlay()
 		END_CRITICAL();
 
 		// set playback timer in the status bar
-		SetElapsedTime(nOrd, nRow, true);
+		SetElapsedTime(nOrd, nRow);
 
 		if (pModPlaying != this) {
 			pMainFrm->PlayMod(this, followSonghWnd, m_dwNotifyType|MPTNOTIFY_POSITION|MPTNOTIFY_VUMETERS);  //rewbs.fix2977
@@ -3431,7 +3431,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		END_CRITICAL();
 
 		// set playback timer in the status bar
-		SetElapsedTime(nOrd, nRow, true);
+		SetElapsedTime(nOrd, nRow);
 		
 		if (pModPlaying != this)
 		{
@@ -3660,22 +3660,17 @@ void CModDoc::SongProperties()
 }
 
 
-// Sets playback timer to playback time at given position. If 'bReset' is true,
-// timer is reset if playback position timer is not enabled.
-void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool bReset)
-//-----------------------------------------------------------------------
+// Sets playback timer to playback time at given position.
+// At the same time, the playback parameters (global volume, channel volume and stuff like that) are calculated for this position.
+void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow)
+//----------------------------------------------------------
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm == NULL)
 		return;
 
-	if(CMainFrame::m_dwPatternSetup & PATTERN_POSITIONAWARETIMER)
-	{
-		double dPatternPlaytime = max(0, m_SndFile.GetPlaybackTimeAt(nOrd, nRow));
-		pMainFrm->SetElapsedTime((DWORD) (dPatternPlaytime * 1000));
-	}
-	else if(bReset)
-		pMainFrm->ResetElapsedTime();
+	const double dPatternPlaytime = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, false);
+	pMainFrm->SetElapsedTime((DWORD) (max(0, dPatternPlaytime) * 1000));
 }
 
 

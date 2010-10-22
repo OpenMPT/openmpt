@@ -306,7 +306,7 @@ public:
 	void TogglePluginEditor(UINT m_nCurrentPlugin);		   //rewbs.patPlugNames
 	void RecordParamChange(int slot, long param);
 	void LearnMacro(int macro, long param);
-	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool bReset = false);
+	void SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow);
 
 	bool RemoveChannels(bool bChnMask[MAX_BASECHANNELS]);
 
