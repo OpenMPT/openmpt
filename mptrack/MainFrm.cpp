@@ -2782,16 +2782,16 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 
 	switch(nID)
 	{
-//	case ID_NETLINK_MODPLUG:	pszURL = "http://www.modplug.com"; break;
-	case ID_NETLINK_OPENMPTWIKI:pszURL = "http://openmpt.xwiki.com/"; break;
+	case ID_NETLINK_MODPLUG:	pszURL = "http://openmpt.org/"; break;
+	case ID_NETLINK_OPENMPTWIKI:pszURL = "http://wiki.openmpt.org/"; break;
 //	case ID_NETLINK_UT:			pszURL = "http://www.united-trackers.org"; break;
 //	case ID_NETLINK_OSMUSIC:	pszURL = "http://www.osmusic.net/"; break;
 //	case ID_NETLINK_HANDBOOK:	pszURL = "http://www.modplug.com/mods/handbook/handbook.htm"; break;
 	case ID_NETLINK_MPTFR:		pszURL = "http://mpt.new.fr/"; break;
-	case ID_NETLINK_FORUMS:		pszURL = "http://openmpt.com/forum/"; break;
+	case ID_NETLINK_FORUMS:		pszURL = "http://forum.openmpt.org/"; break;
 	case ID_NETLINK_PLUGINS:	pszURL = "http://www.kvraudio.com/"; break;
 	case ID_NETLINK_MODARCHIVE: pszURL = "http://modarchive.org/"; break;
-	case ID_NETLINK_OPENMPTWIKI_GERMAN: pszURL = "http://sagamusix.de/openmpt/Hauptseite"; break;
+	case ID_NETLINK_OPENMPTWIKI_GERMAN: pszURL = "http://wikide.openmpt.org/Hauptseite"; break;
 	}
 	if (pszURL) return CTrackApp::OpenURL(pszURL);
 	return FALSE;
