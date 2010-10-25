@@ -128,6 +128,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_WM_RBUTTONUP()
 END_MESSAGE_MAP()
 
+static_assert(MODCOMMAND::maxColumnValue <= 999, "Command range for ID_CHANGE_PCNOTE_PARAM is designed for 999");
 
 CViewPattern::CViewPattern()
 //--------------------------

@@ -32,7 +32,8 @@ const uint16 verMptFileVerLoadLimit = 0x1000; // If cwtv-field is greater or equ
 /*
 MPTM version history for cwtv-field in "IT" header (only for MPTM files!):
 0x890(1.18.02.00) -> 0x891(1.19.00.00): Pattern-specific time signatures
-0x88F(1.18.01.00) -> 0x890(1.18.02.00): Removed volume command velocity :xy, added delay-cut command :xy.
+										Fixed behaviour of Pattern Loop command for rows > 255 (r617)
+0x88F(1.18.01.00) -> 0x890(1.18.02.00): Removed volume command velocity :xy, added delay-cut command :xy. 
 0x88E(1.17.02.50) -> 0x88F(1.18.01.00): Numerous changes
 0x88D(1.17.02.49) -> 0x88E(1.17.02.50): Changed ID to that of IT and undone the orderlist change done in
 				       0x88A->0x88B. Now extended orderlist is saved as extension.

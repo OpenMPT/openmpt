@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "serialization_utils.h"
 #include <algorithm>
+#include <iterator> // for back_inserter
 
 namespace srlztn
 {
@@ -752,7 +753,7 @@ void Ssb::CacheMap()
 			if(nIdsize == IdSizeVariable) //Variablesize ID
 				ReadAdaptive12(iStrm, nIdsize);
 			const size_t nOldEnd = m_Idarray.size();
-			if(nIdsize > 0)
+			if (nIdsize > 0 && (Util::MaxValueOfType(nOldEnd) - nOldEnd >= nIdsize))
 			{
 				m_Idarray.resize(nOldEnd + nIdsize);
 				iStrm.read(&m_Idarray[nOldEnd], nIdsize);

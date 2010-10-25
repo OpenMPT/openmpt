@@ -4,6 +4,9 @@
 #include <sstream>
 #include <string>
 #include <limits>
+#if _HAS_TR1
+	#include <type_traits>
+#endif
 
 //Convert object(typically number) to string
 template<class T>
@@ -20,6 +23,9 @@ template<class T>
 inline T ConvertStrTo(LPCSTR psz)
 //-------------------------------
 {
+	#if _HAS_TR1
+		static_assert(std::tr1::is_const<T>::value == false && std::tr1::is_volatile<T>::value == false, "Const and volatile types are not handled correctly.");
+	#endif
 	if(std::numeric_limits<T>::is_integer)
 		return static_cast<T>(atoi(psz));
 	else
@@ -43,7 +49,13 @@ inline void SetNullTerminator(char (&buffer)[size])
 
 // Memset given object to zero.
 template <class T>
-inline void MemsetZero(T& a) {memset(&a, 0, sizeof(T));}
+inline void MemsetZero(T& a)
+{
+	#if _HAS_TR1
+		static_assert(std::tr1::is_pointer<T>::value == false, "Won't memset pointers.");
+	#endif
+	memset(&a, 0, sizeof(T));
+}
 
 
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
@@ -204,5 +216,14 @@ void SpaceToNullStringFixed(char (&buffer)[size], const size_t length)
 		buffer[pos] = 0;
 	}
 }
+
+namespace Util
+{
+	// Like std::max, but avoids conflict with max-macro.
+	template <class T> inline const T& Max(const T& a, const T& b) {return (std::max)(a, b);}
+
+	// Returns maximum value of given integer type.
+	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only interger types are allowed."); return (std::numeric_limits<T>::max)();}
+};
 
 #endif

@@ -58,6 +58,12 @@ public:
 	template<class T, class uT>
 	T GetSampleValueFromPoint(const CPoint& point);
 
+	// Returns auto-zoom level compared to other zoom levels.
+	// If auto-zoom gives bigger zoom than zoom level N but smaller than zoom level N-1,
+	// return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
+	// if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
+	UINT GetAutoZoomLevel(const MODSAMPLE& smp);
+
 public:
 	//{{AFX_VIRTUAL(CViewSample)
 	virtual void OnDraw(CDC *);
@@ -119,6 +125,7 @@ protected:
 	afx_msg void OnAddSilence();
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

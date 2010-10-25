@@ -66,6 +66,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
 	ON_WM_DROPFILES()
+	ON_WM_MOUSEWHEEL()
 	ON_COMMAND(ID_EDIT_UNDO,				OnEditUndo)
 	ON_COMMAND(ID_EDIT_SELECT_ALL,			OnEditSelectAll)
 	ON_COMMAND(ID_EDIT_CUT,					OnEditCut)
@@ -2635,4 +2636,70 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	}
 
 	return NULL;
+}
+
+
+// Returns auto-zoom level compared to other zoom levels.
+// If auto-zoom gives bigger zoom than zoom level N but smaller than zoom level N-1,
+// return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
+// if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
+UINT CViewSample::GetAutoZoomLevel(const MODSAMPLE& smp)
+//-----------------------------------------------------
+{
+	m_rcClient.NormalizeRect();
+	if (m_rcClient.Width() == 0 || smp.nLength <= 0)
+		return MAX_ZOOM + 1;
+
+	// When m_nZoom > 0, 2^(m_nZoom - 1) = samplesPerPixel  [1]
+	// With auto-zoom setting the whole sample is fitted to screen:
+	// ViewScreenWidthInPixels * samplesPerPixel = sampleLength (approximately)  [2].
+	// Solve samplesPerPixel from [2], then "m_nZoom" from [1].
+	float zoom = static_cast<float>(smp.nLength) / static_cast<float>(m_rcClient.Width());
+	zoom = 1 + (log10(zoom) / log10(2.0f));
+	return static_cast<UINT>(Util::Max(zoom + 1, MIN_ZOOM + 1.0f));
+}
+
+
+BOOL CViewSample::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+//------------------------------------------------------------------
+{
+	// Ctrl + mouse wheel: zoom control.
+	// One scroll direction zooms in and the other zooms out.
+	// This behaviour is different from what would happen if simply scrolling
+	// the zoom levels in the zoom combobox.
+	if (nFlags == MK_CONTROL)
+	{
+		CSoundFile* const pSndFile = (GetDocument()) ? GetDocument()->GetSoundFile() : nullptr;
+		if (pSndFile != nullptr)
+		{
+			// zoomOrder: Biggest to smallest zoom order.
+			UINT zoomOrder[MAX_ZOOM + 1];
+			for(size_t i = 1; i < CountOf(zoomOrder); ++i)
+				zoomOrder[i-1] = i; // [0]=1, [1]=2, ...
+			zoomOrder[CountOf(zoomOrder) - 1] = 0;
+			UINT* const pZoomOrderEnd = zoomOrder + CountOf(zoomOrder);
+			const UINT nAutoZoomLevel = GetAutoZoomLevel(pSndFile->Samples[m_nSample]);
+
+			// If auto-zoom is not the smallest zoom, move auto-zoom index(=zero)
+			// to the right position in the zoom order.
+			if (nAutoZoomLevel < MAX_ZOOM + 1) 
+			{
+				UINT* p = std::find(zoomOrder, pZoomOrderEnd, nAutoZoomLevel);
+				if (p != pZoomOrderEnd)
+				{
+					memmove(p + 1, p, sizeof(zoomOrder[0]) * (pZoomOrderEnd - (p+1)));
+					*p = 0;
+				}
+				else
+					ASSERT(false);
+			}
+			const ptrdiff_t nPos = std::find(zoomOrder, pZoomOrderEnd, m_nZoom) - zoomOrder;
+			if (zDelta > 0 && nPos > 0)
+				SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoomOrder[nPos - 1]);
+			else if (zDelta < 0 && nPos + 1 < CountOf(zoomOrder))
+				SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoomOrder[nPos + 1]);
+		}
+	}
+
+	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
 }
