@@ -1373,6 +1373,7 @@ BOOL SndDevInitialize()
 {
 	if (ghDSoundDLL) return TRUE;
 	if ((ghDSoundDLL = LoadLibrary("dsound.dll")) == NULL) return FALSE;
+	static_assert(sizeof(TCHAR) == 1, "Check DirectSoundEnumerateA below");
 	if ((gpDSoundEnumerate = (LPDSOUNDENUMERATE)GetProcAddress(ghDSoundDLL, "DirectSoundEnumerateA")) == NULL) return FALSE;
 	if ((gpDSoundCreate = (LPDSOUNDCREATE)GetProcAddress(ghDSoundDLL, "DirectSoundCreate")) == NULL) return FALSE;
 	RtlZeroMemory(glpDSoundGUID, sizeof(glpDSoundGUID));

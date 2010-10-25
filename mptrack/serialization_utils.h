@@ -318,7 +318,7 @@ public:
 	static int32 s_DefaultWriteLogMask;
 	static fpLogFunc_t s_DefaultLogFunc;
 	static const char s_EntryID[3];
-	static const uint32 s_DefaultFlags = (1 << RwfWMapStartPosEntry) +
+	static const int32 s_DefaultFlags = (1 << RwfWMapStartPosEntry) +
 										 (1 << RwfWMapSizeEntry) + (1 << RwfWVersionNum) +
 										 (1 << RwfRPartialIdMatch);
 };

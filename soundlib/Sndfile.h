@@ -652,6 +652,8 @@ public:
 
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }
+
+	// Returns 1 + index of last valid pattern, zero if no such pattern exists.
 	PATTERNINDEX GetNumPatterns() const;
 	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; } 
 	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }

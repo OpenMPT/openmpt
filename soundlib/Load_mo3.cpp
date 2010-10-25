@@ -62,8 +62,8 @@ bool CSoundFile::ReadMO3(LPCBYTE lpStream, const DWORD dwMemLength)
 	}
 	else //case: dll loaded succesfully.
 	{
-		UNMO3_DECODE UNMO3_Decode = (UNMO3_DECODE)GetProcAddress(unmo3, _TEXT("UNMO3_Decode"));
-		UNMO3_FREE UNMO3_Free = (UNMO3_FREE)GetProcAddress(unmo3, _TEXT("UNMO3_Free"));
+		UNMO3_DECODE UNMO3_Decode = (UNMO3_DECODE)GetProcAddress(unmo3, "UNMO3_Decode");
+		UNMO3_FREE UNMO3_Free = (UNMO3_FREE)GetProcAddress(unmo3, "UNMO3_Free");
 
 		if(UNMO3_Decode != NULL && UNMO3_Free != NULL)
 		{

@@ -98,6 +98,7 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_ENVELOPE_TOGGLERELEASENODE, OnEnvToggleReleasNode)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_ENVELOPE_SCALEPOINTS, OnEnvelopeScalepoints)
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 
@@ -2485,4 +2486,19 @@ INSTRUMENTENVELOPE *CViewInstrument::GetEnvelopePtr() const
 	}
 
 	return envelope;
+}
+
+
+BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+//----------------------------------------------------------------------
+{
+	// Ctrl + mouse wheel: envelope zoom.
+	if (nFlags == MK_CONTROL)
+	{ 
+		// Speed up zoom scrolling by some factor (might need some tuning).
+		const float speedUpFactor = Util::Max(1.0f, m_fZoom * 7.0f / ENV_MAX_ZOOM);
+		EnvSetZoom(m_fZoom + speedUpFactor * (zDelta / WHEEL_DELTA));
+	}
+
+	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
 }
