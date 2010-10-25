@@ -3334,12 +3334,22 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 			}
 // -! NEW_FEATURE#0010
 
-	if ((pChn->nRowNote) && (pChn->nRowNote < 0x80))
+	if ((pChn->nRowNote >= NOTE_MIN) && (pChn->nRowNote <= NOTE_MAX))
 	{
-		if (bPorta)
+		/* if (bPorta)
 			pChn->nPos = param;
 		else
-			pChn->nPos += param;
+			pChn->nPos += param; */
+		// The code above doesn't make sense at all. If there's a note and no porta, how on earth could nPos be something else than 0?
+		// Anyway, keeping a debug assert here, just in case...
+		ASSERT(bPorta || pChn->nPos == 0);
+
+		// XM compatibility: Portamento + Offset = Ignore offset
+		if(bPorta && IsCompatibleMode(TRK_FASTTRACKER2))
+		{
+			return;
+		}
+
 		if (pChn->nPos >= pChn->nLength)
 		{
 			// Offset beyond sample size
