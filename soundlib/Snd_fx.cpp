@@ -3349,6 +3349,7 @@ void CSoundFile::SampleOffset(UINT nChn, UINT param, bool bPorta)
 		{
 			return;
 		}
+		pChn->nPos = param;
 
 		if (pChn->nPos >= pChn->nLength)
 		{
