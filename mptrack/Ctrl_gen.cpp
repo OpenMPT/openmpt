@@ -96,7 +96,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	if(m_pSndFile->GetType() & MOD_TYPE_S3M)
 	{
 		m_SpinTempo.SetRange(33, 255);
-		m_SpinSpeed.SetRange(1, 25);
+		m_SpinSpeed.SetRange(1, 255);
 	} else
 	{
 		m_SpinTempo.SetRange((short)specs.tempoMin, (short)specs.tempoMax);
