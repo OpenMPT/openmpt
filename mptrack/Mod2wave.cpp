@@ -870,10 +870,10 @@ void CDoWaveConvert::OnButton1()
 		// Write all cue points
 		vector<PatternCuePoint>::const_iterator iter;
 		DWORD num = 0;
-		for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); ++iter)
+		for(iter = m_pSndFile->m_PatternCuePoints.begin(); iter != m_pSndFile->m_PatternCuePoints.end(); ++iter, num++)
 		{
 			WAVCUEPOINT cuepoint;
-			cuepoint.cp_id = LittleEndian(num++);
+			cuepoint.cp_id = LittleEndian(num);
 			cuepoint.cp_pos = LittleEndian((DWORD)iter->offset);
 			cuepoint.cp_chunkid = LittleEndian(IFFID_data);
 			cuepoint.cp_chunkstart = 0;		// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
