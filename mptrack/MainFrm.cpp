@@ -2142,6 +2142,7 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample
 		m_WaveFile.m_nInstruments = 0;
 		m_WaveFile.m_nSamples = 1;
 	}
+	m_WaveFile.Order.resize(3);
 	m_WaveFile.Order[0] = 0;
 	m_WaveFile.Order[1] = 1;
 	m_WaveFile.Order[2] = m_WaveFile.Order.GetInvalidPatIndex();
@@ -2156,10 +2157,10 @@ BOOL CMainFrame::PlaySoundFile(CSoundFile *pSong, UINT nInstrument, UINT nSample
 		m[1].note = (BYTE)nNote;
 		m[1].instr = 1;
 		m = m_WaveFile.Patterns[1];
-		m[32*4].note = 0xFF;
-		m[32*4+1].note = 0xFF;
-		m[63*4].note = 0xFE;
-		m[63*4+1].note = 0xFE;
+		m[32*4].note = NOTE_FADE;
+		m[32*4+1].note = NOTE_FADE;
+		m[63*4].note = NOTE_KEYOFF;
+		m[63*4+1].note = NOTE_KEYOFF;
 	}
 	if ((nInstrument) && (nInstrument <= pSong->m_nInstruments))
 	{
