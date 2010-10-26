@@ -723,36 +723,42 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 
 		if (nflt * 8 <= dwMemLength - dwMemPos && dwMemPos + nflt * 8 <= minptr)
 		{
-			GetpModDoc()->GetFileHistory()->clear();
-			for(size_t n = 0; n < nflt; n++)
-			{
 #ifdef MODPLUG_TRACKER
-				ITHISTORYSTRUCT itHistory = *((ITHISTORYSTRUCT *)(lpStream + dwMemPos));
-				itHistory.fatdate = LittleEndianW(itHistory.fatdate);
-				itHistory.fattime = LittleEndianW(itHistory.fattime);
-				itHistory.runtime = LittleEndian(itHistory.runtime);
+			if(GetpModDoc() != nullptr)
+			{
+				GetpModDoc()->GetFileHistory()->clear();
+				for(size_t n = 0; n < nflt; n++)
+				{
+					ITHISTORYSTRUCT itHistory = *((ITHISTORYSTRUCT *)(lpStream + dwMemPos));
+					itHistory.fatdate = LittleEndianW(itHistory.fatdate);
+					itHistory.fattime = LittleEndianW(itHistory.fattime);
+					itHistory.runtime = LittleEndian(itHistory.runtime);
 
-				FileHistory mptHistory;
-				MemsetZero(mptHistory);
-				// Decode FAT date and time
-				mptHistory.loadDate.tm_year = ((itHistory.fatdate >> 9) & 0x7F) + 80;
-				mptHistory.loadDate.tm_mon = CLAMP((itHistory.fatdate >> 5) & 0x0F, 1, 12) - 1;
-				mptHistory.loadDate.tm_mday = CLAMP(itHistory.fatdate & 0x1F, 1, 31);
-				mptHistory.loadDate.tm_hour = CLAMP((itHistory.fattime >> 11) & 0x1F, 0, 23);
-				mptHistory.loadDate.tm_min = CLAMP((itHistory.fattime >> 5) & 0x3F, 0, 59);
-				mptHistory.loadDate.tm_sec = CLAMP((itHistory.fattime & 0x1F) * 2, 0, 59);
-				mptHistory.openTime = itHistory.runtime * (HISTORY_TIMER_PRECISION / 18.2f);
-				GetpModDoc()->GetFileHistory()->push_back(mptHistory);
+					FileHistory mptHistory;
+					MemsetZero(mptHistory);
+					// Decode FAT date and time
+					mptHistory.loadDate.tm_year = ((itHistory.fatdate >> 9) & 0x7F) + 80;
+					mptHistory.loadDate.tm_mon = CLAMP((itHistory.fatdate >> 5) & 0x0F, 1, 12) - 1;
+					mptHistory.loadDate.tm_mday = CLAMP(itHistory.fatdate & 0x1F, 1, 31);
+					mptHistory.loadDate.tm_hour = CLAMP((itHistory.fattime >> 11) & 0x1F, 0, 23);
+					mptHistory.loadDate.tm_min = CLAMP((itHistory.fattime >> 5) & 0x3F, 0, 59);
+					mptHistory.loadDate.tm_sec = CLAMP((itHistory.fattime & 0x1F) * 2, 0, 59);
+					mptHistory.openTime = itHistory.runtime * (HISTORY_TIMER_PRECISION / 18.2f);
+					GetpModDoc()->GetFileHistory()->push_back(mptHistory);
 
 #ifdef DEBUG
-				const uint32 seconds = (uint32)(((double)itHistory.runtime) / 18.2f);
-				CHAR stime[128];
-				wsprintf(stime, "IT Edit History: Loaded %04u-%02u-%02u %02u:%02u:%02u, open for %u:%02u:%02u (%u ticks)\n", ((itHistory.fatdate >> 9) & 0x7F) + 1980, (itHistory.fatdate >> 5) & 0x0F, itHistory.fatdate & 0x1F, (itHistory.fattime >> 11) & 0x1F, (itHistory.fattime >> 5) & 0x3F, (itHistory.fattime & 0x1F) * 2, seconds / 3600, (seconds / 60) % 60, seconds % 60, itHistory.runtime);
-				Log(stime);
+					const uint32 seconds = (uint32)(((double)itHistory.runtime) / 18.2f);
+					CHAR stime[128];
+					wsprintf(stime, "IT Edit History: Loaded %04u-%02u-%02u %02u:%02u:%02u, open for %u:%02u:%02u (%u ticks)\n", ((itHistory.fatdate >> 9) & 0x7F) + 1980, (itHistory.fatdate >> 5) & 0x0F, itHistory.fatdate & 0x1F, (itHistory.fattime >> 11) & 0x1F, (itHistory.fattime >> 5) & 0x3F, (itHistory.fattime & 0x1F) * 2, seconds / 3600, (seconds / 60) % 60, seconds % 60, itHistory.runtime);
+					Log(stime);
 #endif // DEBUG
 
+					dwMemPos += 8;
+				}
+			} else
 #endif // MODPLUG_TRACKER
-				dwMemPos += 8;
+			{
+				dwMemPos += nflt * 8;
 			}
 		} else
 		{

@@ -386,7 +386,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				CHANGEMODTYPE_WARNING(wChannelVolSurround);
 			}
 		}
-		if(newTypeIsXM)
+		if(newTypeIsXM && !oldTypeIsMOD_XM)
 		{
 			if(m_SndFile.ChnSettings[nChn].nPan != 128)
 			{
