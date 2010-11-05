@@ -1831,7 +1831,8 @@ BOOL CSoundFile::ReadNote()
 					realvol = (pChn->nRealVolume * kChnMasterVol) >> 8;
 				}
 				
-				if (m_pConfig->getForceSoftPanning() || (gdwSoundSetup & SNDMIX_SOFTPANNING))
+				const forcePanningMode panningMode = m_pConfig->getForcePanningMode(); 				
+				if (panningMode == forceSoftPanning || (panningMode == dontForcePanningMode && (gdwSoundSetup & SNDMIX_SOFTPANNING)))
 				{
 					if (pan < 128)
 					{
@@ -1905,11 +1906,15 @@ BOOL CSoundFile::ReadNote()
 				if (pChn->nInc >= 0xFE00) pChn->dwFlags |= CHN_NOIDO;
 #endif // FASTSOUNDLIB
 			}
-			if (m_pConfig->getUseGlobalPreAmp())
+
+			/*if (m_pConfig->getUseGlobalPreAmp())
 			{
 				pChn->nNewRightVol >>= MIXING_ATTENUATION;
 				pChn->nNewLeftVol >>= MIXING_ATTENUATION;
-			}
+			}*/
+			const int extraAttenuation = m_pConfig->getExtraSampleAttenuation();
+			pChn->nNewRightVol >>= extraAttenuation;
+			pChn->nNewLeftVol >>= extraAttenuation;
 
 			pChn->nRightRamp = pChn->nLeftRamp = 0;
 			// Dolby Pro-Logic Surround

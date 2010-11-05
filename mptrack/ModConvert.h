@@ -33,6 +33,7 @@ enum enmWarnings
 	wTrimmedEnvelopes,
 	wReleaseNode,
 	wEditHistory,
+	wMixmode,
 	wNumWarnings
 };
 

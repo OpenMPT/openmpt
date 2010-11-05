@@ -63,7 +63,7 @@ const CModSpecifications mptm =
 	NOTE: If changing limits, see whether:
 			-savefile format and GUI methods can handle new values(might not be a small task :).
 	 */
-	"MPTm",								// File extension
+	"mptm",								// File extension
 	1,									// Minimum note index
 	NOTE_MAX,							// Maximum note index
 	true,								// Has notecut.
@@ -126,7 +126,7 @@ const CModSpecifications mod =
 	0,									// Max instrument filename length
 	31,									// SamplesMax
 	0,									// instrumentMax
-	mixLevels_original,					// defaultMixLevels
+	mixLevels_compatible,				// defaultMixLevels
 	0,									// Max MIDI mapping directives
 	1,									// Min Speed
 	32,									// Max Speed
@@ -166,7 +166,7 @@ const CModSpecifications modEx =
 	0,									// Max instrument filename length
 	31,									// SamplesMax
 	0,									// instrumentMax
-	mixLevels_original,					// defaultMixLevels
+	mixLevels_compatible,				// defaultMixLevels
 	0,									// Max MIDI mapping directives
 	1,									// Min Speed
 	32,									// Max Speed
@@ -205,7 +205,7 @@ const CModSpecifications xm =
 	0,									// Max instrument filename length
 	128 * 16,							// SamplesMax (actually 16 per instrument)
 	128,								// instrumentMax
-	mixLevels_original,					// defaultMixLevels
+	mixLevels_compatible,				// defaultMixLevels
 	0,									// Max MIDI mapping directives
 	1,									// Min Speed
 	31,									// Max Speed
@@ -245,7 +245,7 @@ const CModSpecifications xmEx =
 	0,									// Max instrument filename length
 	4000,								// SamplesMax (actually 16 per instrument(256*16=4096), but limited to MAX_SAMPLES=4000)
 	256,								// instrumentMax
-	mixLevels_117RC3,					// defaultMixLevels
+	mixLevels_compatible,				// defaultMixLevels
 	200,								// Max MIDI mapping directives
 	1,									// Min Speed
 	31,									// Max Speed
@@ -284,7 +284,7 @@ const CModSpecifications s3m =
 	0,									// Max instrument filename length
 	99,									// SamplesMax
 	0,									// instrumentMax
-	mixLevels_original,					// defaultMixLevels
+	mixLevels_compatible,				// defaultMixLevels
 	0,									// Max MIDI mapping directives
 	1,									// Min Speed
 	255,								// Max Speed
@@ -324,7 +324,7 @@ const CModSpecifications s3mEx =
 	0,									// Max instrument filename length
 	99,									// SamplesMax
 	0,									// instrumentMax
-	mixLevels_original,					// defaultMixLevels
+	mixLevels_compatible,				// defaultMixLevels
 	0,									// Max MIDI mapping directives
 	1,									// Min Speed
 	255,								// Max Speed
@@ -363,7 +363,7 @@ const CModSpecifications it =
 	12,									// Max instrument filename length
 	99,									// SamplesMax
 	99,									// instrumentMax
-	mixLevels_original,					// defaultMixLevels
+	mixLevels_compatible,				// defaultMixLevels
 	0,									// Max MIDI mapping directives
 	1,									// Min Speed
 	255,								// Max Speed
@@ -402,7 +402,7 @@ const CModSpecifications itEx =
 	12,									// Max instrument filename length
 	4000,								// SamplesMax
 	256,								// instrumentMax
-	mixLevels_117RC3,					// defaultMixLevels
+	mixLevels_compatible,				// defaultMixLevels
 	200,								// Max MIDI mapping directives
 	1,									// Min Speed
 	255,								// Max Speed

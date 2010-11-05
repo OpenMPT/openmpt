@@ -354,6 +354,14 @@ bool CModDoc::HasMPTHacks(bool autofix)
 			m_SndFile.m_nRestartPos = 0;
 	}
 
+	if(m_SndFile.m_nMixLevels != mixLevels_compatible)
+	{
+		AddToLog("Found incorrect mix levels\n");
+		foundHacks = true;
+		if(autofix)
+			m_SndFile.m_nMixLevels = mixLevels_compatible;
+	}
+
 	if(autofix && foundHacks)
 		SetModified();
 	

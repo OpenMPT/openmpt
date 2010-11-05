@@ -670,7 +670,8 @@ BOOL CModDoc::InitializeMod()
 		m_SndFile.m_nMusicTempo = m_SndFile.m_nDefaultTempo = 125;
 		m_SndFile.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
 
-		if(m_SndFile.m_nMixLevels == mixLevels_original)
+		// Set up levels
+		if(m_SndFile.m_nMixLevels == mixLevels_original || m_SndFile.m_nMixLevels == mixLevels_compatible)
 		{
 			m_SndFile.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 			m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
