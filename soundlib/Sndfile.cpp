@@ -550,7 +550,7 @@ BOOL CSoundFile::Create(LPCBYTE lpStream, CModDoc *pModDoc, DWORD dwMemLength)
 	m_nMaxOrderPosition = 0;
 	m_lpszPatternNames = NULL;
 	m_lpszSongComments = nullptr;
-	m_nMixLevels = mixLevels_original;	// Will be overridden if appropriate.
+	m_nMixLevels = mixLevels_compatible;	// Will be overridden if appropriate.
 	memset(Samples, 0, sizeof(Samples));
 	memset(ChnMix, 0, sizeof(ChnMix));
 	memset(Chn, 0, sizeof(Chn));

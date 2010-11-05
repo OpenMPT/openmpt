@@ -927,7 +927,7 @@ bool CModCleanupDlg::ResetVariables()
 
 	// convert to IT...
 	m_pModDoc->ChangeModType(MOD_TYPE_IT);
-	pSndFile->m_nMixLevels = mixLevels_original;
+	pSndFile->m_nMixLevels = mixLevels_compatible;
 	pSndFile->m_nTempoMode = tempo_mode_classic;
 	pSndFile->m_dwSongFlags = SONG_LINEARSLIDES;
 	

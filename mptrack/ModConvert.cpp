@@ -428,6 +428,17 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	if(newTypeIsS3M || newTypeIsMOD) m_SndFile.m_dwSongFlags &= ~SONG_EXFILTERRANGE;
 	if(oldTypeIsXM && newTypeIsIT_MPT) m_SndFile.m_dwSongFlags |= SONG_ITCOMPATGXX;
 
+	// Adjust mix levels
+	if(newTypeIsMOD || newTypeIsS3M)
+	{
+		m_SndFile.m_nMixLevels = mixLevels_compatible;
+		m_SndFile.m_pConfig->SetMixLevels(mixLevels_compatible);
+	}
+	if(oldTypeIsMPT && m_SndFile.m_nMixLevels != mixLevels_compatible)
+	{
+		CHANGEMODTYPE_WARNING(wMixmode);
+	}
+
 	END_CRITICAL();
 	ChangeFileExtension(nNewType);
 
@@ -463,6 +474,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CHANGEMODTYPE_CHECK(wTrimmedEnvelopes, "Instrument envelopes have been shortened.\n");
 	CHANGEMODTYPE_CHECK(wReleaseNode, "Instrument envelope release nodes are not supported by the new format.\n");
 	CHANGEMODTYPE_CHECK(wEditHistory, "Edit history will not be saved in the new format.\n");
+	CHANGEMODTYPE_CHECK(wMixmode, "Consider setting the mix levels to \"Compatible\" in the song properties when working with legacy formats.\n");
 
 	SetModified();
 	GetPatternUndo()->ClearUndo();

@@ -185,11 +185,11 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC2"),		mixLevels_117RC2);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("OpenMPT 1.17RC1"),		mixLevels_117RC1);
 	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Original (MPT 1.16)"),	mixLevels_original);
-	//m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),				mixLevels_Test);
+	m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Compatible"),			mixLevels_compatible);	//m_PlugMixBox.SetItemData(m_PlugMixBox.AddString("Test"),				mixLevels_Test);
 	switch(m_pSndFile->m_nMixLevels)
 	{
-		//case mixLevels_Test:		m_PlugMixBox.SetCurSel(4); break;
-		case mixLevels_original:	m_PlugMixBox.SetCurSel(3); break;
+		//case mixLevels_Test:		m_PlugMixBox.SetCurSel(5); break;
+		case mixLevels_compatible:	m_PlugMixBox.SetCurSel(4); break;		case mixLevels_original:	m_PlugMixBox.SetCurSel(3); break;
 		case mixLevels_117RC1:		m_PlugMixBox.SetCurSel(2); break;
 		case mixLevels_117RC2:		m_PlugMixBox.SetCurSel(1); break;
 		case mixLevels_117RC3:

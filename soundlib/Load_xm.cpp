@@ -686,6 +686,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 
 	if(bMadeWithModPlug)
 	{
+		m_nMixLevels = mixLevels_original;
 		SetModFlag(MSF_COMPATIBLE_PLAY, false);
 		if(!m_dwLastSavedWithVersion)
 		{

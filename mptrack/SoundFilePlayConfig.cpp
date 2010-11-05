@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Sndfile.h"
 #include ".\soundfileplayconfig.h"
 
 CSoundFilePlayConfig::CSoundFilePlayConfig(void) {
@@ -8,9 +9,11 @@ CSoundFilePlayConfig::CSoundFilePlayConfig(void) {
 CSoundFilePlayConfig::~CSoundFilePlayConfig(void) {
 }
 
-void CSoundFilePlayConfig::SetMixLevels(int mixLevelType) {
+void CSoundFilePlayConfig::SetMixLevels(int mixLevelType)
+{
 	switch (mixLevelType)
 	{
+
 		// Olivier's version gives us floats in [-0.5; 0.5] and slightly saturates VSTis. 
 		case mixLevels_original:		
 			setVSTiAttenuation(NO_ATTENUATION);
@@ -18,11 +21,12 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType) {
 			setFloatToInt(static_cast<float>(1<<28));
 			setGlobalVolumeAppliesToMaster(false);
 			setUseGlobalPreAmp(true);
-			setForceSoftPanning(false);
+			setForcePanningMode(dontForcePanningMode);
 			setDisplayDBValues(false);
 			setNormalSamplePreAmp(128.0);
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
+			setExtraSampleAttenuation(MIXING_ATTENUATION);
 			break;
 
 		// Ericus' version gives us floats in [-0.06;0.06] and requires attenuation to
@@ -33,11 +37,12 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType) {
 			setFloatToInt(static_cast<float>(0x07FFFFFFF));
 			setGlobalVolumeAppliesToMaster(false);
 			setUseGlobalPreAmp(true);
-			setForceSoftPanning(false);
+			setForcePanningMode(dontForcePanningMode);
 			setDisplayDBValues(false);
 			setNormalSamplePreAmp(128.0);
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
+			setExtraSampleAttenuation(MIXING_ATTENUATION);
 			break;
 
 		// 117RC2 gives us floats in [-1.0; 1.0] and hopefully plays VSTis at 
@@ -49,11 +54,12 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType) {
 			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
 			setGlobalVolumeAppliesToMaster(true);
 			setUseGlobalPreAmp(true);
-			setForceSoftPanning(false);
+			setForcePanningMode(dontForcePanningMode);
 			setDisplayDBValues(false);
 			setNormalSamplePreAmp(128.0);
 			setNormalVSTiVol(100.0);
 			setNormalGlobalVol(128.0);
+			setExtraSampleAttenuation(MIXING_ATTENUATION);
 			break;
 
 		// 117RC3 ignores the horrible global, system-specific pre-amp, 
@@ -66,11 +72,29 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType) {
 			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
 			setGlobalVolumeAppliesToMaster(true);
 			setUseGlobalPreAmp(false);
-			setForceSoftPanning(true);
+			setForcePanningMode(forceSoftPanning);
 			setDisplayDBValues(true);
 			setNormalSamplePreAmp(128.0);
 			setNormalVSTiVol(128.0);
 			setNormalGlobalVol(256.0);
+			setExtraSampleAttenuation(0);
+			break;
+
+		// A mixmode that is intended to be compatible to legacy trackers (IT/FT2/etc).
+		// This is basically derived from mixmode 1.17 RC3, with panning mode and volume levels changed.
+		// Sample attenuation is the same as in Schism Tracker (more attenuation than with RC3, thus VSTi attenuation is also higher).
+		case mixLevels_compatible:
+			setVSTiAttenuation(4.0f);
+			setIntToFloat(1.0f/static_cast<float>(MIXING_CLIPMAX));
+			setFloatToInt(static_cast<float>(MIXING_CLIPMAX));
+			setGlobalVolumeAppliesToMaster(true);
+			setUseGlobalPreAmp(false);
+			setForcePanningMode(forceNoSoftPanning);
+			setDisplayDBValues(true);
+			setNormalSamplePreAmp(48.0);
+			setNormalVSTiVol(48.0);
+			setNormalGlobalVol(256.0);
+			setExtraSampleAttenuation(1);
 			break;
 
 		// FOR TEST PURPOSES ONLY:
@@ -86,6 +110,7 @@ void CSoundFilePlayConfig::SetMixLevels(int mixLevelType) {
 			setNormalSamplePreAmp(128.0);
 			setNormalVSTiVol(128.0);
 			setNormalGlobalVol(256.0);
+			setExtraAttenuation(0);
 			break;
 		*/
 
@@ -153,11 +178,11 @@ void CSoundFilePlayConfig::setUseGlobalPreAmp(bool inUseGlobalPreAmp) {
 }
 
 
-bool CSoundFilePlayConfig::getForceSoftPanning() {
+forcePanningMode CSoundFilePlayConfig::getForcePanningMode() {
 	return m_forceSoftPanning;
 }
 
-void CSoundFilePlayConfig::setForceSoftPanning(bool inForceSoftPanning) {
+void CSoundFilePlayConfig::setForcePanningMode(forcePanningMode inForceSoftPanning) {
 	m_forceSoftPanning=inForceSoftPanning;
 }
 
@@ -193,5 +218,14 @@ double CSoundFilePlayConfig::getNormalGlobalVol() {
 	return m_normalGlobalVol;
 }
 
+void CSoundFilePlayConfig::setExtraSampleAttenuation(int attn)
+{
+	m_extraAttenuation = attn;
+}
+
+int CSoundFilePlayConfig::getExtraSampleAttenuation()
+{
+	return m_extraAttenuation;
+}
 
 

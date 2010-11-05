@@ -998,6 +998,10 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 	// Load instrument and song extensions.
 	if(mptStartPos >= dwMemPos)
 	{
+		if(interpretModPlugMade)
+		{
+			m_nMixLevels = mixLevels_original;
+		}
 		LPCBYTE ptr = LoadExtendedInstrumentProperties(lpStream + dwMemPos, lpStream + mptStartPos, &interpretModPlugMade);
 		LoadExtendedSongProperties(GetType(), ptr, lpStream, mptStartPos, &interpretModPlugMade);
 	}

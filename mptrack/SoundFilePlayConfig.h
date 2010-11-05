@@ -13,11 +13,19 @@ enum {
 };
 
 enum {
-	mixLevels_original = 0,
-	mixLevels_117RC1   = 1,
-	mixLevels_117RC2   = 2,
-	mixLevels_117RC3   = 3,
-	mixLevels_Test   = 4,
+	mixLevels_original		= 0,
+	mixLevels_117RC1		= 1,
+	mixLevels_117RC2		= 2,
+	mixLevels_117RC3		= 3,
+	mixLevels_compatible	= 4,
+	mixLevels_Test			= 5,
+};
+
+enum forcePanningMode
+{
+	dontForcePanningMode,
+	forceSoftPanning,
+	forceNoSoftPanning,
 };
 
 // Class used to store settings for a song file.
@@ -49,11 +57,15 @@ public:
 	void setUseGlobalPreAmp(bool);
 	bool getUseGlobalPreAmp();
 
-	void setForceSoftPanning(bool);
-	bool getForceSoftPanning();
+	void setForcePanningMode(forcePanningMode);
+	forcePanningMode getForcePanningMode();
 
 	void setDisplayDBValues(bool);
 	bool getDisplayDBValues();
+
+	// Extra sample attenuation in bits
+	void setExtraSampleAttenuation(int);
+	int getExtraSampleAttenuation();
 
 	//Values at which volumes are unchanged
 	double getNormalSamplePreAmp();
@@ -79,8 +91,10 @@ private:
 
 	bool m_globalVolumeAppliesToMaster;
 	bool m_ignorePreAmp;
-	bool m_forceSoftPanning;
+	forcePanningMode m_forceSoftPanning;
 	bool m_displayDBValues;
+
+	int m_extraAttenuation;
 
 	DWORD m_LastSavedWithVersion;
 	DWORD m_CreatedWithVersion;
