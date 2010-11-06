@@ -431,22 +431,32 @@ double CSoundFile::GetLength(bool& targetReached, bool bAdjust, ORDERINDEX endOr
 	}
 
 	// Store final variables
-	if (bAdjust && (targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID))
+	if (bAdjust)
 	{
-		m_nGlobalVolume = nGlbVol;
-		m_nOldGlbVolSlide = nOldGlbVolSlide;
-		m_nMusicSpeed = nMusicSpeed;
-		m_nMusicTempo = nMusicTempo;
-		for (CHANNELINDEX n = 0; n < m_nChannels; n++)
+		if (targetReached || endOrder == ORDERINDEX_INVALID || endRow == ROWINDEX_INVALID)
 		{
-			Chn[n].nGlobalVol = chnvols[n];
-			if (notes[n]) Chn[n].nNewNote = notes[n];
-			if (instr[n]) Chn[n].nNewIns = instr[n];
-			if (vols[n] != 0xFF)
+			// Target found, or there is no target (i.e. play whole song)...
+			m_nGlobalVolume = nGlbVol;
+			m_nOldGlbVolSlide = nOldGlbVolSlide;
+			m_nMusicSpeed = nMusicSpeed;
+			m_nMusicTempo = nMusicTempo;
+			for (CHANNELINDEX n = 0; n < m_nChannels; n++)
 			{
-				if (vols[n] > 64) vols[n] = 64;
-				Chn[n].nVolume = vols[n] << 2;
+				Chn[n].nGlobalVol = chnvols[n];
+				if (notes[n]) Chn[n].nNewNote = notes[n];
+				if (instr[n]) Chn[n].nNewIns = instr[n];
+				if (vols[n] != 0xFF)
+				{
+					if (vols[n] > 64) vols[n] = 64;
+					Chn[n].nVolume = vols[n] << 2;
+				}
 			}
+		} else
+		{
+			// Target not found (f.e. when jumping to a hidden sub song), reset global variables...
+			m_nMusicSpeed = m_nDefaultSpeed;
+			m_nMusicTempo = m_nDefaultTempo;
+			m_nGlobalVolume = m_nDefaultGlobalVolume;
 		}
 	}
 
