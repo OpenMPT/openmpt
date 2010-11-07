@@ -3271,8 +3271,8 @@ LRESULT CTrackApp::ProcessWndProcException(CException* e, const MSG* pMsg)
  * - allowMultiSelect: allow the user to select multiple files? (will be ignored if load == false)
  * - filterIndex: pointer to a variable holding the index of the last extension filter used.
  */
-FileDlgResult CTrackApp::ShowOpenSaveFileDialog(bool load, std::string defaultExtension, std::string defaultFilename, std::string extFilter, std::string workingDirectory, bool allowMultiSelect, int *filterIndex)
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+FileDlgResult CTrackApp::ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory, const bool allowMultiSelect, int *filterIndex)
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	FileDlgResult result;
 	result.workingDirectory = workingDirectory;
@@ -3282,16 +3282,13 @@ FileDlgResult CTrackApp::ShowOpenSaveFileDialog(bool load, std::string defaultEx
 	result.abort = true;
 
 	// we can't save multiple files.
-	if(!load)
-	{
-		allowMultiSelect = false;
-	}
+	const bool multiSelect = allowMultiSelect && load;
 
 	// First, set up the dialog...
 	CFileDialog dlg(load ? TRUE : FALSE,
 		defaultExtension.empty() ? NULL : defaultExtension.c_str(),
 		defaultFilename.empty() ? NULL : defaultFilename.c_str(),
-		load ? (OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | (allowMultiSelect ? OFN_ALLOWMULTISELECT : 0))
+		load ? (OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | (multiSelect ? OFN_ALLOWMULTISELECT : 0))
 		     : (OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOREADONLYRETURN),
 		extFilter.empty() ? NULL : extFilter.c_str(),
 		theApp.m_pMainWnd);
@@ -3301,7 +3298,7 @@ FileDlgResult CTrackApp::ShowOpenSaveFileDialog(bool load, std::string defaultEx
 		dlg.m_ofn.nFilterIndex = (DWORD)(*filterIndex);
 
 	vector<TCHAR> filenameBuffer;
-	if (allowMultiSelect)
+	if(multiSelect)
 	{
 		const size_t bufferSize = 2048; // Note: This is possibly the maximum buffer size in MFC 7(this note was written November 2006).
 		filenameBuffer.resize(bufferSize, 0);
@@ -3322,7 +3319,7 @@ FileDlgResult CTrackApp::ShowOpenSaveFileDialog(bool load, std::string defaultEx
 	if(filterIndex != nullptr)
 		*filterIndex = dlg.m_ofn.nFilterIndex;
 
-	if(allowMultiSelect)
+	if(multiSelect)
 	{
 		// multiple files might have been selected
 		POSITION pos = dlg.GetStartPosition();

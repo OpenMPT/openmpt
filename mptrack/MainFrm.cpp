@@ -2771,7 +2771,7 @@ void CMainFrame::OnOctaveChanged()
 void CMainFrame::OnReportBug()
 //----------------------------
 {
-	CTrackApp::OpenURL("http://openmpt.com/bugreport/");
+	CTrackApp::OpenURL("http://bugs.openmpt.org/");
 	return;
 }
 //end rewbs.reportBug

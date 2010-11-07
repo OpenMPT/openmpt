@@ -190,7 +190,7 @@ public:
 	static BOOL AddDLSBank(LPCSTR);
 	static BOOL OpenURL(LPCSTR lpszURL);
 
-	static FileDlgResult ShowOpenSaveFileDialog(bool load, std::string defaultExtension, std::string defaultFilename, std::string extFilter, std::string workingDirectory = "", bool allowMultiSelect = false, int *filterIndex = nullptr);
+	static FileDlgResult ShowOpenSaveFileDialog(const bool load, const std::string defaultExtension, const std::string defaultFilename, const std::string extFilter, const std::string workingDirectory = "", const bool allowMultiSelect = false, int *filterIndex = nullptr);
 
 public:
 	CDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
