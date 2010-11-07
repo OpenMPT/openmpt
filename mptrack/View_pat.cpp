@@ -1723,35 +1723,36 @@ void CViewPattern::OnEditGoto()
 		return;
 
 
-	if (!m_pGotoWnd) {
+	if (!m_pGotoWnd)
+	{
 		m_pGotoWnd = new CPatternGotoDialog(this);
 		//if (m_pGotoWnd) m_pGotoWnd->SetParent(this/*, GetDocument()*/);
 	}
-	if (m_pGotoWnd)	{
+	if (m_pGotoWnd)
+	{
 		CSoundFile* pSndFile = pModDoc->GetSoundFile();
 		UINT nCurrentOrder = SendCtrlMessage(CTRLMSG_GETCURRENTORDER);
 		UINT nCurrentChannel = ((m_dwCursor & 0xFFFF) >> 3) + 1;
 
 		m_pGotoWnd->UpdatePos(m_nRow, nCurrentChannel, m_nPattern, nCurrentOrder, pSndFile);
 
-		if (m_pGotoWnd->DoModal() == IDOK) {
+		if (m_pGotoWnd->DoModal() == IDOK)
+		{
 			//Position should be valididated.
 
-			if (m_pGotoWnd->m_nPattern != m_nPattern) {
+			if (m_pGotoWnd->m_nPattern != m_nPattern)
 				SetCurrentPattern(m_pGotoWnd->m_nPattern);
-			}
 
-			if (m_pGotoWnd->m_nOrder != nCurrentOrder) {
+			if (m_pGotoWnd->m_nOrder != nCurrentOrder)
 				SendCtrlMessage(CTRLMSG_SETCURRENTORDER,  m_pGotoWnd->m_nOrder);
-			}
 
-			if (m_pGotoWnd->m_nChannel != nCurrentChannel) {
+			if (m_pGotoWnd->m_nChannel != nCurrentChannel)
 				SetCurrentColumn((m_pGotoWnd->m_nChannel-1) << 3);
-			}
 
-			if (m_pGotoWnd->m_nRow != m_nRow) {
+			if (m_pGotoWnd->m_nRow != m_nRow)
 				SetCurrentRow(m_pGotoWnd->m_nRow);
-			}
+
+			pModDoc->SetElapsedTime(m_pGotoWnd->m_nOrder, m_pGotoWnd->m_nRow);
 		}
 	}
 	return;
