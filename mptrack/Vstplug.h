@@ -246,9 +246,13 @@ protected:
 
 protected:
 	long VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
+	long VstFileSelector(const bool destructor, VstFileSelect *pFileSel);
 	static long VSTCALLBACK MasterCallBack(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN, CSoundFile*);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
+
+protected:
+	char *m_szHostBuffer;	// host's buffer for file select dialog
 
 public:
 	static char s_szHostProductString[64];
