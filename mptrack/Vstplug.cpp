@@ -82,6 +82,7 @@ CVstPluginManager::CVstPluginManager()
 //------------------------------------
 {
 	m_pVstHead = NULL;
+	m_szHostBuffer = nullptr;
 	//m_bNeedIdle = FALSE; //rewbs.VSTCompliance - now member of plugin class
 	CSoundFile::gpMixPluginCreateProc = CreateMixPluginProc;
 	EnumerateDirectXDMOs();
@@ -92,6 +93,11 @@ CVstPluginManager::~CVstPluginManager()
 //-------------------------------------
 {
 	CSoundFile::gpMixPluginCreateProc = NULL;
+	if(m_szHostBuffer != nullptr)
+	{
+		delete[] m_szHostBuffer;
+		m_szHostBuffer = nullptr;
+	}
 	while (m_pVstHead)
 	{
 		PVSTPLUGINLIB p = m_pVstHead;
@@ -946,11 +952,13 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		//"asyncProcessing",
 		//"offline",
 		//"supportShell"
-		if ((strcmp((char*)ptr,"sendVstEvents")==0		||
-				strcmp((char*)ptr,"sendVstMidiEvent")==0	||
-				strcmp((char*)ptr,"sendVstTimeInfo")==0	||
-				strcmp((char*)ptr,"supplyIdle")==0 || 
-				strcmp((char*)ptr,"sizeWindow")==0))
+		if ((strcmp((char*)ptr,"sendVstEvents") == 0 ||
+				strcmp((char*)ptr,"sendVstMidiEvent") == 0 ||
+				strcmp((char*)ptr,"sendVstTimeInfo") == 0 ||
+				strcmp((char*)ptr,"supplyIdle") == 0 || 
+				strcmp((char*)ptr,"sizeWindow") == 0 ||
+				strcmp((char*)ptr,"openFileSelector") == 0
+			))
 			return HostCanDo;
 		else
 			return HostCanNotDo;
@@ -997,59 +1005,12 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		Log("VST plugin to host: End Edit\n");
 		break;
 	// open a fileselector window with VstFileSelect* in <ptr>
-	case audioMasterOpenFileSelector:		
-		{
-			/*
-			VstFileSelect *pFileSel = (VstFileSelect *)ptr;
-			ASSERT(false);
-
-			if(pFileSel->command != kVstDirectorySelect)
-			{
-				std::string extensions;
-				for(size_t i = 0; i < pFileSel->nbFileTypes; i++)
-				{
-					VstFileType *pType = &(pFileSel->fileTypes[i]);
-					extensions += pType->name;
-					extensions += "|";
-#if (defined(WIN32) || defined(WINDOWS))
-					extensions += "*.";
-					extensions += pType->dosType;
-#elif defined(MAC)
-					extensions += "*";
-					extensions += pType->macType;
-#elif defined(UNIX)
-					extensions += "*.";
-					extensions += pType->unixType;
-#else
-					#error Platform-specific code missing
-#endif
-					extensions += "|";
-				}
-
-				FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(
-					pFileSel->command == kVstFileSave ? false : true,
-					"", "", extensions, pFileSel->initialPath,
-					pFileSel->command == kVstMultipleFilesLoad
-				);
-				if(files.abort)
-					return 0;
-				// todo: retrieve filenames etc.
-				//strcpy(pFileSel->returnPath, files.first_file.c_str());
-				//pFileSel->sizeReturnPath = files.first_file.length();
-				return 1;
-
-			} else */
-			{
-				Log("VST plugin to host: Get Directory\n");
-			}
-		}
-		break;
-	
+	case audioMasterOpenFileSelector:
 	//---from here VST 2.2 extension opcodes------------------------------------------------------
 	// close a fileselector operation with VstFileSelect* in <ptr>: Must be always called after an open !
 	case audioMasterCloseFileSelector:
-		Log("VST plugin to host: Close File Selector\n");
-		break;
+		return VstFileSelector(opcode == audioMasterCloseFileSelector, (VstFileSelect *)ptr);
+	
 	// open an editor for audio (defined by XML text in ptr)
 	case audioMasterEditFile:				
 		Log("VST plugin to host: Edit File\n");
@@ -1073,8 +1034,109 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 //end rewbs. VSTCompliance:
 
 
+// Helper function for file selection dialog stuff.
+long CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelect *pFileSel)
+//-------------------------------------------------------------------------------------
+{
+	if(!destructor)
+	{
+		if(pFileSel == nullptr)
+		{
+			return 0;
+		}
+
+		if(pFileSel->command != kVstDirectorySelect)
+		{
+			std::string extensions, workingDir;
+			for(size_t i = 0; i < pFileSel->nbFileTypes; i++)
+			{
+				VstFileType *pType = &(pFileSel->fileTypes[i]);
+				extensions += pType->name;
+				extensions += "|";
+#if (defined(WIN32) || defined(WINDOWS))
+				extensions += "*.";
+				extensions += pType->dosType;
+#elif defined(MAC)
+				extensions += "*";
+				extensions += pType->macType;
+#elif defined(UNIX)
+				extensions += "*.";
+				extensions += pType->unixType;
+#else
+#error Platform-specific code missing
+#endif
+				extensions += "|";
+			}
+
+			if(pFileSel->initialPath != nullptr)
+			{
+				workingDir = pFileSel->initialPath;
+			} else
+			{
+				// Plugins are probably looking for presets...?
+				workingDir = ""; //CMainFrame::GetWorkingDirectory(DIR_PLUGINPRESETS);
+			}
+
+			FileDlgResult files = CTrackApp::ShowOpenSaveFileDialog(
+				(pFileSel->command == kVstFileSave ? false : true),
+				"", "", extensions, workingDir,
+				(pFileSel->command == kVstMultipleFilesLoad ? true : false)
+				);
+
+			pFileSel->nbReturnPath = 0;
+
+			if(files.abort)
+			{
+				return 0;
+			}
+
+			if(pFileSel->command == kVstMultipleFilesLoad)
+			{
+				// TODO: multiple paths
+				Log("VST plugin to host: Multiple files\n");
+				return 0;
+			} else
+			{
+				if(pFileSel->returnPath == nullptr)
+				{
+					// Provide some memory for the return path.
+					if(m_szHostBuffer != nullptr)
+					{
+						delete[] m_szHostBuffer;
+					}
+					pFileSel->sizeReturnPath = _MAX_PATH;
+					m_szHostBuffer = new char[_MAX_PATH];
+					if(m_szHostBuffer == nullptr)
+					{
+						return 0;
+					}
+					pFileSel->returnPath = m_szHostBuffer;
+				}
+				strncpy(pFileSel->returnPath, files.first_file.c_str(), pFileSel->sizeReturnPath - 1);
+				pFileSel->nbReturnPath = 1;
+			}
+			return 1;
+
+		} else
+		{
+			Log("VST plugin to host: Get Directory\n");
+			return 0;
+		}
+	} else
+	{
+		Log("VST plugin to host: Close File Selector\n");
+		if(m_szHostBuffer != nullptr)
+		{
+			delete[] m_szHostBuffer;
+			m_szHostBuffer = nullptr;
+		}
+		return 1;
+	}
+}
+
+
 void CVstPluginManager::ReportPlugException(LPCSTR format,...)
-//-----------------------------------------------------------
+//------------------------------------------------------------
 {
 	CHAR cBuf[1024];
 	va_list va;
