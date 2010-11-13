@@ -275,7 +275,7 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 	// Check Mod Magic
 	memcpy(s, pMagic->Magic, 4);
 	if ((IsMagic(s, "M.K.")) || (IsMagic(s, "M!K!"))
-	 || (IsMagic(s, "M&K!")) || (IsMagic(s, "N.T."))) m_nChannels = 4; else
+	 || (IsMagic(s, "M&K!")) || (IsMagic(s, "N.T.")) || (IsMagic(s, "FEST"))) m_nChannels = 4; else
 	if ((IsMagic(s, "CD81")) || (IsMagic(s, "OKTA"))) m_nChannels = 8; else
 	if ((s[0]=='F') && (s[1]=='L') && (s[2]=='T') && (s[3]>='4') && (s[3]<='9')) m_nChannels = s[3] - '0'; else
 	if ((s[0]>='4') && (s[0]<='9') && (s[1]=='C') && (s[2]=='H') && (s[3]=='N')) m_nChannels = s[0] - '0'; else
@@ -330,6 +330,11 @@ bool CSoundFile::ReadMod(const BYTE *lpStream, DWORD dwMemLength)
 			 || (psmp->nLoopEnd - psmp->nLoopStart < 4))
 			{
 				psmp->nLoopStart = 0;
+				psmp->nLoopEnd = 0;
+			}
+			// Fix for most likely broken sample loops. This fixes super_sufm_-_new_life.mod which has a long sample which is looped from 0 to 4.
+			if(psmp->nLoopEnd <= 8 && psmp->nLoopStart == 0 && psmp->nLength > psmp->nLoopEnd)
+			{
 				psmp->nLoopEnd = 0;
 			}
 			if (psmp->nLoopEnd > psmp->nLoopStart)
