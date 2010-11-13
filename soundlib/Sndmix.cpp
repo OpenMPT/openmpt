@@ -1112,6 +1112,7 @@ BOOL CSoundFile::ReadNote()
 				MODINSTRUMENT *pIns = pChn->pModInstrument;
 				// Volume Envelope
 				// IT Compatibility: S77 does not disable the volume envelope, it just pauses the counter
+				// Problem: This pauses on the wrong tick at the moment...
 				if (((pChn->dwFlags & CHN_VOLENV) || ((pIns->VolEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->VolEnv.nNodes))
 				{
 					int envvol = getVolEnvValueFromPosition(pChn->VolEnv.nEnvPosition, pIns);
@@ -1139,6 +1140,7 @@ BOOL CSoundFile::ReadNote()
 				}
 				// Panning Envelope
 				// IT Compatibility: S79 does not disable the panning envelope, it just pauses the counter
+				// Problem: This pauses on the wrong tick at the moment...
 				if (((pChn->dwFlags & CHN_PANENV) || ((pIns->PanEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pIns->PanEnv.nNodes))
 				{
 					int envpos = pChn->PanEnv.nEnvPosition;
@@ -1232,7 +1234,7 @@ BOOL CSoundFile::ReadNote()
 					pChn->nRealVolume = 0;
 				} else if (m_pConfig->getGlobalVolumeAppliesToMaster())
 				{
-					pChn->nRealVolume = _muldiv(vol*MAX_GLOBAL_VOLUME, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
+					pChn->nRealVolume = _muldiv(vol * MAX_GLOBAL_VOLUME, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
 				} else
 				{
 					pChn->nRealVolume = _muldiv(vol * m_nGlobalVolume, pChn->nGlobalVol * pChn->nInsVol, 1 << 20);
@@ -1320,6 +1322,7 @@ BOOL CSoundFile::ReadNote()
 
 			// Pitch/Filter Envelope
 			// IT Compatibility: S7B does not disable the pitch envelope, it just pauses the counter
+			// Problem: This pauses on the wrong tick at the moment...
 			if ((pIns) && ((pChn->dwFlags & CHN_PITCHENV) || ((pIns->PitchEnv.dwFlags & ENV_ENABLED) && IsCompatibleMode(TRK_IMPULSETRACKER))) && (pChn->pModInstrument->PitchEnv.nNodes))
 			{
 				int envpos = pChn->PitchEnv.nEnvPosition;
@@ -1520,94 +1523,160 @@ BOOL CSoundFile::ReadNote()
 			if ((pChn->pModSample) && (pChn->pModSample->nVibDepth))
 			{
 				MODSAMPLE *pSmp = pChn->pModSample;
+				const bool alternativeTuning = pChn->pModInstrument && pChn->pModInstrument->pTuning;
 
-				// IT compatibility: No vibrato sweep = No vibrato at all!
-				if (pSmp->nVibSweep == 0 && !IsCompatibleMode(TRK_IMPULSETRACKER))
+				// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
+				if(IsCompatibleMode(TRK_IMPULSETRACKER) && !alternativeTuning)
 				{
-					pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
+					// Schism's autovibrato code
+
+					/*
+					X86 Assembler from ITTECH.TXT:
+					1) Mov AX, [SomeVariableNameRelatingToVibrato]
+					2) Add AL, Rate
+					3) AdC AH, 0
+					4) AH contains the depth of the vibrato as a fine-linear slide.
+					5) Mov [SomeVariableNameRelatingToVibrato], AX  ; For the next cycle.
+					*/
+					const int vibpos = pChn->nAutoVibPos & 0xFF;
+					int adepth = pChn->nAutoVibDepth; // (1)
+					adepth += pSmp->nVibSweep & 0xFF; // (2 & 3)
+					adepth = min(adepth, (int)(pSmp->nVibDepth << 8));
+					pChn->nAutoVibDepth = adepth; // (5)
+					adepth >>= 8; // (4)
+
+					pChn->nAutoVibPos += pSmp->nVibRate;
+
+					int vdelta;
+					switch(pSmp->nVibType)
+					{
+					case VIB_RANDOM:
+						vdelta = (rand() & 0x7F) - 0x40;
+						break;
+					case VIB_RAMP_DOWN:
+						vdelta = ITRampDownTable[vibpos];
+						break;
+					case VIB_RAMP_UP:
+						vdelta = -ITRampDownTable[vibpos];
+						break;
+					case VIB_SQUARE:
+						vdelta = ITSquareTable[vibpos];
+						break;
+					case VIB_SINE:
+					default:
+						vdelta = ITSinusTable[vibpos];
+						break;
+					}
+
+					vdelta = (vdelta * adepth) >> 6;
+					int l = abs(vdelta);
+					if(vdelta < 0)
+					{
+						vdelta = _muldiv(period, LinearSlideDownTable[l >> 2], 0x10000) - period;
+						if (l & 0x03)
+						{
+							vdelta += _muldiv(period, FineLinearSlideDownTable[l & 0x03], 0x10000) - period;
+						}
+					} else
+					{
+						vdelta = _muldiv(period, LinearSlideUpTable[l >> 2], 0x10000) - period;
+						if (l & 0x03)
+						{
+							vdelta += _muldiv(period, FineLinearSlideUpTable[l & 0x03], 0x10000) - period;
+						}
+					}
+					period -= vdelta;
+					
 				} else
 				{
-					if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+					// MPT's autovibrato code
+					if (pSmp->nVibSweep == 0)
 					{
-						if(IsCompatibleMode(TRK_IMPULSETRACKER))
-						{
-							// TODO
-							pChn->nAutoVibDepth += pSmp->nVibSweep << 3;
-						} else
-						{
-							/* Note: changed bitshift from 3 to 1 as the variable is not divided by 4 in the IT loader anymore
-							   - so we divide sweep by 4 here. */
-							pChn->nAutoVibDepth += pSmp->nVibSweep << 1;
-						}
-					} else
-					if (!(pChn->dwFlags & CHN_KEYOFF))
-					{
-						pChn->nAutoVibDepth += (pSmp->nVibDepth << 8) /	pSmp->nVibSweep;
-					}
-					if ((pChn->nAutoVibDepth >> 8) > pSmp->nVibDepth)
 						pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
-				}
-				pChn->nAutoVibPos += pSmp->nVibRate;
-				int val;
-				switch(pSmp->nVibType)
-				{
-				case 4:	// Random
-					val = ModRandomTable[pChn->nAutoVibPos & 0x3F];
-					pChn->nAutoVibPos++;
-					break;
-				case 3:	// Ramp Down
-					val = ((0x40 - (pChn->nAutoVibPos >> 1)) & 0x7F) - 0x40;
-					break;
-				case 2:	// Ramp Up
-					val = ((0x40 + (pChn->nAutoVibPos >> 1)) & 0x7f) - 0x40;
-					break;
-				case 1:	// Square
-					val = (pChn->nAutoVibPos & 128) ? +64 : -64;
-					break;
-				default:	// Sine
-					val = ft2VibratoTable[pChn->nAutoVibPos & 255];
-				}
-				int n =	((val * pChn->nAutoVibDepth) >> 8);
-
-				if(pChn->pModInstrument && pChn->pModInstrument->pTuning)
-				{
-					//Vib sweep is not taken into account here.
-					vibratoFactor += 0.05F * pSmp->nVibDepth * val / 4096.0F; //4096 == 64^2
-					//See vibrato for explanation.
-					pChn->m_CalculateFreq = true;
-					/*
-					Finestep vibrato:
-					const float autoVibDepth = pSmp->nVibDepth * val / 4096.0F; //4096 == 64^2
-					vibratoFineSteps += static_cast<CTuning::FINESTEPTYPE>(pChn->pModInstrument->pTuning->GetFineStepCount() *  autoVibDepth);
-					pChn->m_CalculateFreq = true;
-					*/
-				}
-				else //Original behavior
-				{
-					if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
-					{
-						int df1, df2;
-						if (n < 0)
-						{
-							n = -n;
-							UINT n1 = n >> 8;
-							df1 = LinearSlideUpTable[n1];
-							df2 = LinearSlideUpTable[n1+1];
-						} else
-						{
-							UINT n1 = n >> 8;
-							df1 = LinearSlideDownTable[n1];
-							df2 = LinearSlideDownTable[n1+1];
-						}
-						n >>= 2;
-						period = _muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) >> 6), 256);
-						nPeriodFrac = period & 0xFF;
-						period >>= 8;
 					} else
 					{
-						period += (n >> 6);
+						// Calculate current autovibrato depth using vibsweep
+						if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+						{
+							// Note: changed bitshift from 3 to 1 as the variable is not divided by 4 in the IT loader anymore
+							// - so we divide sweep by 4 here.
+							pChn->nAutoVibDepth += pSmp->nVibSweep << 1;
+						} else
+						{
+							if (!(pChn->dwFlags & CHN_KEYOFF))
+							{
+								pChn->nAutoVibDepth += (pSmp->nVibDepth << 8) /	pSmp->nVibSweep;
+							}
+						}
+						if ((pChn->nAutoVibDepth >> 8) > pSmp->nVibDepth)
+							pChn->nAutoVibDepth = pSmp->nVibDepth << 8;
 					}
-				} //Original MPT behavior
+					const int vibpos = pChn->nAutoVibPos & 0xFF;
+					pChn->nAutoVibPos += pSmp->nVibRate;
+					int vdelta;
+					switch(pSmp->nVibType)
+					{
+					case VIB_RANDOM:
+						vdelta = ModRandomTable[pChn->nAutoVibPos & 0x3F];
+						pChn->nAutoVibPos++;
+						break;
+					case VIB_RAMP_DOWN:
+						vdelta = ((0x40 - (pChn->nAutoVibPos >> 1)) & 0x7F) - 0x40;
+						break;
+					case VIB_RAMP_UP:
+						vdelta = ((0x40 + (pChn->nAutoVibPos >> 1)) & 0x7f) - 0x40;
+						break;
+					case VIB_SQUARE:
+						vdelta = (pChn->nAutoVibPos & 128) ? +64 : -64;
+						break;
+					case VIB_SINE:
+					default:
+						vdelta = ft2VibratoTable[pChn->nAutoVibPos & 0xFF];
+					}
+					int n;
+					n =	((vdelta * pChn->nAutoVibDepth) >> 8);
+
+					if(alternativeTuning)
+					{
+						//Vib sweep is not taken into account here.
+						vibratoFactor += 0.05F * pSmp->nVibDepth * vdelta / 4096.0F; //4096 == 64^2
+						//See vibrato for explanation.
+						pChn->m_CalculateFreq = true;
+						/*
+						Finestep vibrato:
+						const float autoVibDepth = pSmp->nVibDepth * val / 4096.0F; //4096 == 64^2
+						vibratoFineSteps += static_cast<CTuning::FINESTEPTYPE>(pChn->pModInstrument->pTuning->GetFineStepCount() *  autoVibDepth);
+						pChn->m_CalculateFreq = true;
+						*/
+					}
+					else //Original behavior
+					{
+						if (m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT))
+						{
+							int df1, df2;
+							if (n < 0)
+							{
+								n = -n;
+								UINT n1 = n >> 8;
+								df1 = LinearSlideUpTable[n1];
+								df2 = LinearSlideUpTable[n1+1];
+							} else
+							{
+								UINT n1 = n >> 8;
+								df1 = LinearSlideDownTable[n1];
+								df2 = LinearSlideDownTable[n1+1];
+							}
+							n >>= 2;
+							period = _muldiv(period, df1 + ((df2 - df1) * (n & 0x3F) >> 6), 256);
+							nPeriodFrac = period & 0xFF;
+							period >>= 8;
+						} else
+						{
+							period += (n >> 6);
+						}
+					} //Original MPT behavior
+				}
+
 			} //End: AutoVibrato
 			// Final Period
 			if (period <= m_nMinPeriod)
