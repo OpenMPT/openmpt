@@ -1996,7 +1996,7 @@ BOOL CSoundFile::ProcessEffects()
 		case CMD_POSITIONJUMP:
 			m_nNextPatStartRow = 0; // FT2 E60 bug
 			nPosJump = param;
-			if((m_dwSongFlags & SONG_PATTERNLOOP && m_nSeqOverride == 0))
+			if((m_dwSongFlags & SONG_PATTERNLOOP) && m_nSeqOverride == 0)
 			{
 				 m_nSeqOverride = param + 1;
 				 //Releasing pattern loop after position jump could cause 
@@ -2104,15 +2104,18 @@ BOOL CSoundFile::ProcessEffects()
 			//if (((!bNoLoop) && (nPosJump < MAX_ORDERS))
 			if (nPosJump>=Order.size()) 
 				nPosJump = 0;
-			if ((!bNoLoop)
-			//end rewbs.fix 
-			 && ((nPosJump != (int)m_nCurrentPattern) || (nBreakRow != (int)m_nRow)))
+
+			// This checks whether we're jumping to the same row we're already on.
+			// Sounds pretty stupid and pointless to me. And noone else does this, either.
+			//if((nPosJump != (int)m_nCurrentPattern) || (nBreakRow != (int)m_nRow))
 			{
 				// IT compatibility: don't reset loop count on pattern break
 				if (nPosJump != (int)m_nCurrentPattern && !IsCompatibleMode(TRK_IMPULSETRACKER))
 				{
 					for (CHANNELINDEX i = 0; i < m_nChannels; i++)
+					{
 						Chn[i].nPatternLoopCount = 0;
+					}
 				}
 				m_nNextPattern = nPosJump;
 				m_nNextRow = (UINT)nBreakRow;

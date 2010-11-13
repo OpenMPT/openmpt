@@ -775,6 +775,13 @@ bool CSoundFile::ReadIT(const LPCBYTE lpStream, const DWORD dwMemLength)
 			dwMemPos += sizeof(MODMIDICFG);
 		}
 	}
+	// Ignore MIDI data. Fixes some files like denonde.it that were made with old versions of Impulse Tracker (which didn't support Zxx filters) and have Zxx effects in the patterns.
+	if (pifh->cwtv < 0x0214)
+	{
+		MemsetZero(m_MidiCfg);
+		m_dwSongFlags |= SONG_EMBEDMIDICFG;
+	}
+
 	// Read pattern names: "PNAM"
 	if ((dwMemPos + 8 < dwMemLength) && (*((DWORD *)(lpStream+dwMemPos)) == 0x4d414e50))
 	{
