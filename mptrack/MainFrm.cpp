@@ -945,6 +945,10 @@ void CMainFrame::OnClose()
 	}
 	// Save Settings
 	SaveIniSettings();
+	if(m_InputHandler && m_InputHandler->activeCommandSet)
+	{
+		m_InputHandler->activeCommandSet->SaveFile(m_szKbdFile, false);
+	}
 
 	EndWaitCursor();
 	CMDIFrameWnd::OnClose();
@@ -1033,12 +1037,8 @@ void CMainFrame::SaveIniSettings()
 		WritePrivateProfileString("Paths", m_szDirectoryToSettingsName[i], szPath, iniFile);
 
 	}
-	_tcscpy(szPath, m_szKbdFile);
-	if(bConvertPaths)
-	{
-		AbsolutePathToRelative(szPath);
-	}
-	WritePrivateProfileString("Paths", "Key_Config_File", szPath, iniFile);
+	// Obsolete, since we always write to Keybindings.mkb now. Older versions of OpenMPT 1.18+ will look for this file if this entry is missing, so this is kind of backwards compatible.
+	WritePrivateProfileString("Paths", "Key_Config_File", NULL, iniFile);
 
 	WritePrivateProfileLong("Effects", "XBassDepth", CSoundFile::m_nXBassDepth, iniFile);
 	WritePrivateProfileLong("Effects", "XBassRange", CSoundFile::m_nXBassRange, iniFile);

@@ -61,6 +61,8 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		if (bSuccess == false)
 			AfxMessageBox(IDS_UNABLE_TO_LOAD_KEYBINDINGS, MB_ICONERROR);
 	}
+	// We will only overwrite the default Keybindings.mkb file from now on.
+	_tcscpy(CMainFrame::m_szKbdFile, sDefaultPath);
 
 	//Get Keymap 
 	activeCommandSet->GenKeyMap(keyMap);
@@ -73,8 +75,6 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	m_bBypass = false;
 	modifierMask=0;
 	m_bNoAltMenu = true;
-	m_bAutoSave = true;
-
 
 }
 CInputHandler::~CInputHandler(void)
