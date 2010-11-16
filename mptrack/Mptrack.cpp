@@ -662,6 +662,9 @@ void Terminate_AppThread()
 }
 
 #ifdef WIN32	// Legacy stuff
+// Move a config file called sFileName from the App's directory (or one of its sub directories specified by sSubDir) to
+// %APPDATA%. If specified, it will be renamed to sNewFileName. Existing files are never overwritten.
+// Returns true on success.
 bool CTrackApp::MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PATH], TCHAR sNewFileName[_MAX_PATH])
 //-----------------------------------------------------------------------------------------------------------------
 {
@@ -682,8 +685,7 @@ bool CTrackApp::MoveConfigFile(TCHAR sFileName[_MAX_PATH], TCHAR sSubDir[_MAX_PA
 
 	if(PathFileExists(sNewPath) == 0 && PathFileExists(sOldPath) != 0)
 	{
-		MoveFile(sOldPath, sNewPath);
-		return true;
+		return (MoveFile(sOldPath, sNewPath) != 0);
 	}
 	return false;
 }
@@ -728,56 +730,16 @@ void CTrackApp::SetupPaths()
 		strcat(m_szConfigDirectory, "\\OpenMPT\\");
 
 		// Path doesn't exist yet, so it has to be created
-		bool justCreated = false;
 		if(PathIsDirectory(m_szConfigDirectory) == 0)
 		{
 			CreateDirectory(m_szConfigDirectory, 0);
-			justCreated = true;
 		}
 
 		#ifdef WIN32	// Legacy stuff
-
-		bool movedKeyboardFiles = false;
-		// Move files if necessary.
-		movedKeyboardFiles = MoveConfigFile("default.mkb", "", "Keybindings.mkb");
-		movedKeyboardFiles |= MoveConfigFile("Keybindings.mkb");
-
-		// Check the old ini settings
-		if(justCreated && movedKeyboardFiles)
-		{
-			TCHAR szOldPath[_MAX_PATH], szTestPath[_MAX_PATH];
-
-			GetPrivateProfileString("Paths", "Key_Config_File", szOldPath, szOldPath, INIBUFFERSIZE, m_szConfigFileName);
-			_strlwr(szOldPath); // compare all in lower case
-
-			bool overwritePath = false;
-			strcpy(szTestPath, m_szExePath);
-			strcat(szTestPath, "default.mkb");
-			_strlwr(szTestPath);
-			overwritePath = (strcmp(szTestPath, szOldPath) == 0);
-
-			if(overwritePath == false)
-			{
-				strcpy(szTestPath, m_szExePath);
-				strcat(szTestPath, "Keybindings.mkb");
-				_strlwr(szTestPath);
-				overwritePath = (strcmp(szTestPath, szOldPath) == 0);
-			}
-
-			if(overwritePath)
-			{
-				// if old INI entry points to a file that's going to be moved, change it.
-				strcpy(szTestPath, m_szConfigDirectory);
-				strcat(szTestPath, "Keybindings.mkb");
-				WritePrivateProfileString("Paths", "Key_Config_File", szTestPath, m_szConfigFileName);
-			}
-
-		}
-		// Move some more files
+		// Move the config files if they're still in the old place.
 		MoveConfigFile("mptrack.ini");
 		MoveConfigFile("plugin.cache");
 		MoveConfigFile("mpt_intl.ini");
-
 		#endif	// WIN32 Legacy Stuff
 	}
 	

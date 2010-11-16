@@ -116,10 +116,8 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_CHECKKEYDOWN,	m_bKeyDown);
 	DDX_Control(pDX, IDC_CHECKKEYHOLD,	m_bKeyHold);
 	DDX_Control(pDX, IDC_CHECKKEYUP,	m_bKeyUp);
-	DDX_Control(pDX, IDC_KEYMAPFILE,	m_eKeyFile);
 	
 	DDX_Control(pDX, IDC_DEBUGSAVE,		m_bDebugSave);
-	DDX_Control(pDX, IDC_AUTOSAVE,		m_bAutoSave);
 }
 
 
@@ -160,8 +158,6 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_eReport.FmtLines(TRUE);
 	m_eReport.SetWindowText("Log:\r\n");
 
-	m_bAutoSave.SetCheck(CMainFrame::GetInputHandler()->m_bAutoSave);
-	
 	CString s;
 	s.Format("%d", CMainFrame::gnAutoChordWaitTime);
 	m_eChordWaitTime.SetWindowText(s);
@@ -341,7 +337,6 @@ void COptionsKeyboard::DefineCommandCategories()
 void COptionsKeyboard::UpdateDialog()
 //-----------------------------------
 {
-	m_eKeyFile.SetWindowText(CMainFrame::m_szKbdFile);
 	OnCategorySelChanged();		// Fills command list and automatically selects first command.
 	OnCommandKeySelChanged();	// Fills command key choice list for that command and automatically selects first choice.
 }
@@ -623,20 +618,11 @@ void COptionsKeyboard::OnSetKeyChoice()
 void COptionsKeyboard::OnOK()
 //---------------------------
 {
-	CString cs;
-	m_eKeyFile.GetWindowText(cs);
-	strcpy(CMainFrame::m_szKbdFile, cs);
 	CMainFrame::GetInputHandler()->SetNewCommandSet(plocalCmdSet);
 
+	CString cs;
 	m_eChordWaitTime.GetWindowText(cs);
 	CMainFrame::gnAutoChordWaitTime = atoi(cs);
-
-	if (m_bAutoSave.GetCheck())
-		plocalCmdSet->SaveFile(CMainFrame::m_szKbdFile, m_bDebugSave.GetCheck());
-
-	CMainFrame::GetInputHandler()->m_bAutoSave = m_bAutoSave.GetCheck();
-
-
 
 	CPropertyPage::OnOK();
 }
@@ -659,7 +645,7 @@ void COptionsKeyboard::OnLoad()
 	m_sFullPathName = files.first_file.c_str();
 	plocalCmdSet->LoadFile(m_sFullPathName);
 	ForceUpdateGUI();
-	TentativeSetToDefaultFile(m_sFullPathName);
+	//TentativeSetToDefaultFile(m_sFullPathName);
 }
 
 void COptionsKeyboard::OnSave()
@@ -672,7 +658,7 @@ void COptionsKeyboard::OnSave()
 
 	m_sFullPathName = files.first_file.c_str();
 	plocalCmdSet->SaveFile(m_sFullPathName, m_bDebugSave.GetCheck());
-	TentativeSetToDefaultFile(m_sFullPathName);
+	//TentativeSetToDefaultFile(m_sFullPathName);
 }
 
 bool COptionsKeyboard::TentativeSetToDefaultFile(CString m_sFullPathName)

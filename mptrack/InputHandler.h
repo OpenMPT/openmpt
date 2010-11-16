@@ -87,7 +87,6 @@ public:
 	void UpdateMainMenu();
 	void SetNewCommandSet(CCommandSet * newSet);
 	bool noAltMenu();
-	bool m_bAutoSave;
 	bool SetXMEffects(void);
 	bool SetITEffects(void);
 };

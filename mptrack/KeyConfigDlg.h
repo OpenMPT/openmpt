@@ -89,7 +89,7 @@ protected:
 	CButton m_bKeyDown, m_bKeyHold, m_bKeyUp;
 	CButton m_bnReset;
 	CCustEdit m_eCustHotKey;
-	CEdit m_eReport, m_eKeyFile, m_eChordWaitTime;
+	CEdit m_eReport, m_eChordWaitTime;
 	UINT m_nKeyboardCfg;
 	int m_nCurHotKey, m_nCurCategory, m_nCurKeyChoice;
 	CString m_sFullPathName;
@@ -99,7 +99,6 @@ protected:
 	bool m_bChoiceModified;
 
 	CButton m_bDebugSave;
-	CButton m_bAutoSave;
 
 	void ForceUpdateGUI();
 	bool TentativeSetToDefaultFile(CString);
