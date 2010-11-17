@@ -10,10 +10,11 @@ OpenMPT - Full Version History
 (tx XYZ): thanks to XYZ for telling us about the bug
 
 
-v1.19.xx.xx (October 2010, revision 748) not release yet
---------------------------------------------------------
+v1.19.01.00 (October 2010, revision 757)
+----------------------------------------
 Pattern tab
    [New] <Jojo> Experimental feature: Play the whole pattern row when entering notes and chords into the pattern editor. This can be enabled from the setup screen.
+   [Mod] <Jojo> Using the Goto Dialog should now update channel parameters and set the elapsed time. (http://bugs.openmpt.org/view.php?id=28)
    [Fix] <Jojo> Cursor paste was possible even when editing was disabled.
    [Fix] <Jojo> When entering chords into the pattern editor, the module was only marked as modified if the base note of the chord was changed.
    [Fix] <Jojo> When jumping to an order which is normally not played, the song variables are now reset (previously, if the main song had f.e. a global volume fade out at the end, this was retained when switching to an unplayed order, effectively muting all sub songs).
@@ -23,9 +24,11 @@ Pattern tab::Note properties
    [Fix] <Jojo> The meaning of Q0x was displayed wrong for S3M / IT.
 
 Sample tab
+   [Imp] <re>   Ctrl + Mouse Wheel can now be used for zooming into the sample data.
    [Fix] <Jojo> When cutting samples with a loop, the loop end point was not always moved correctly if the cut start was in the loop.
 
 Instrument tab
+   [Imp] <re>   Ctrl + Mouse Wheel can now be used for zooming into the envelopes.
    [Mod] <Jojo> Copying and pasting envelopes with no points isn't possible anymore. (Who wants to do that anyway?)
    [Fix] <Jojo> Changing the filter mode didn't mark the file as modified.
 
@@ -37,12 +40,17 @@ Mod Conversion
    [Fix] <Jojo> Q0y means "no volume change" in S3M / IT, but R0y means "continue volume change" in FT2, and converting from IT / S3M to XM didn't consider this. Q0y is now converted to R8y, and E9y is now converted to Q0y (instead of Q8y).
 
 Playback
+   [New] <Jojo> New mix mode: Compatible. This is used for MOD / S3M / XM / IT by default and has more appropriate mixing levels for those formats (same levels as Schism Tracker) than mix mode RC3. Please use compatible mixing levels when working with legacy formats from now on.
    [Imp] <Jojo> Improved the algorithm for finding a free channel for note playback in the editor (does not affect normal module playback).
+   [Fix] <Jojo> Pattern jumps to the same row + pattern as the jump command are not ignored anymore. (http://forum.openmpt.org/index.php?topic=1810.0)
+
 
 IT
    [New] <Jojo> Edit history information can now be read from IT files and saved to IT / MPTM files. This is based on an undocumented feature in Impulse Tracker. Use View -> Edit History for viewing or deleting this information. 
    [Imp] <Jojo> ITs made with Modplug Tracker 1.00a5 are now also detected as such.
-   [Mod] <Jojo> Sane values are used again for the "cwtv" and "cmwt" header fields when saving IT files; in fact the same values as in compatibility export are used. To be able to distinguish between raped and compatiblity-exported IT files, "OMPT" is written in the "reserved" header field. As a consequence, IT files made with OpenMPT can now be loaded in Impulse Tracker again. 
+   [Mod] <Jojo> Sane values are used again for the "cwtv" and "cmwt" header fields when saving IT files; in fact the same values as in compatibility export are used. To be able to distinguish between raped and compatibility-exported IT files, "OMPT" is written in the "reserved" header field. As a consequence, IT files made with OpenMPT can now be loaded in Impulse Tracker again.
+   [Mod] <Jojo> IT Loader: MIDI macros are now cleared when loading IT files made with old Impulse Tracker versions (< 2.14), so that Zxx commands won't break the songs anymore (fixes denonde.it, fix from Schism Tracker). 
+   [Fix] <Jojo> Sample autovibrato is now hopefully a bit closer to Impulse Tracker in compatible mode...
    [Fix] <Jojo> The envelope handling was altered slightly to work more like in Schism Tracker. This fixes a combination of Envelope Carry + Portamento as it can be found in "electric bunny" by Alpha C.
    [Fix] <Jojo> Various fixes to playback of multi-sample instruments. "Ultima Ratio" by Nebularia and "Shuttle Departure" by Sphenx sound better now.
    [Fix] <Jojo> The extended sample map is not saved anymore in the instrument headers when using compatibility export.    
@@ -52,8 +60,9 @@ MPTM
    [New] <Jojo> Edit history information (read the "IT" section above for an explanation)
 
 XM
-   [Fix] <Jojo> XM Compatiblity: Various mind-boggling combinations of EDx, notes and instrument numbers should work correctly now.
-   [Fix] <Jojo> XM Compatiblity: When there's a instrument number next to a 3xx effect which differs from the previous instrument number, it resets the instrument properties of the previous instrument now.
+   [Fix] <Jojo> XM Compatibility: Various mind-boggling combinations of EDx, notes and instrument numbers should work correctly now.
+   [Fix] <Jojo> XM Compatibility: When there's a instrument number next to a 3xx effect which differs from the previous instrument number, it resets the instrument properties of the previous instrument now.
+   [Fix] <Jojo> XM Compatibility: Portamento combined with an Offset command results in the offset command being ignored.
    [Fix] <Jojo> XM Loader: Fixed handling of instruments with no samples, so that instruments assigned to VST plugins work correctly.
 
 MOD
@@ -64,6 +73,7 @@ MOD::Loading
    [New] <Jojo> Added a heuristic detection for VBlank MODs. Most MODs use the CIA timer instead of VBlank timing, but some don't.
    [New] <Jojo> Added a heuristic detection for PT 1.x playback mode: If there is pattern data that looks like it needs on-the-fly sample swapping, PT 1.x mode is enabled.
    [New] <Jojo> Added a heuristic detection for MODs with 7-bit panning, which is then automatically converted to 8-bit panning.
+   [Fix] <Jojo> Tentative fix for MODs with short loops at the sample start that were most likely not intended.
 
 S3M
    [Mod] <Jojo> Changed some code in the S3M loader that should only affect really broken S3M files which every player handles different anyway (at least my broken version of aa-polym.s3m sounds better now)
@@ -87,6 +97,7 @@ Misc
    [New] <Jojo> WAV Export: Sample-exact cue points are now written at each pattern transition.
    [Imp] <Jojo> New keyboard shortcuts: Panic, View Edit History, Set Invalid / Ignore (--- / +++) Pattern (in the orderlist)
    [Imp] <Jojo> Some improvements were made to the Registry / INI reading: If there were no Registry settings because MPT 1.16 was previously not installed, the INI file is now also read as it might contain some lines created by the installer.
+   [Mod] <Jojo> Changes to keymap file handling: The active keymap is now always saved to Keybindings.mkb (in either %APPDATA%\OpenMPT or the executable's directory). Any other keymaps are now only overwritten when using the "Save keys as" function.
    [Mod] <Jojo> On first run, the default ASIO driver is now chosen instead of DirectSound (if there is one).
    [Mod] <Jojo> The "Original" mix mode now also has a version number (1.16) to reflect what the "original" thing is.
    [Mod] <Jojo> Updated genre list in the MP3 export dialog.
@@ -623,7 +634,7 @@ Pattern tab
    [Mod] <Jojo> Entering note with row spacing enabled can now move cursor to next pattern if continuous scroll is enabled.
    [Fix] <Jojo> Inserting a new pattern won't resize it to 32 rows anymore if the current pattern has less than 32 rows.
    [Fix] <Jojo> Show "offset" and "velocity" volume commands in default color instead of "pitch" color.
-   [Fix] <Jojo> Fixed weird combination of context menu shortcut and "always center active row" being disabled (http://lpchip.com/modplug/viewtopic.php?t=3203).
+   [Fix] <Jojo> Fixed weird combination of context menu shortcut and "always center active row" being disabled (http://forum.openmpt.org/index.php?topic=3203.0).
    [Fix] <Jojo> Keyboard split note was off by one.
    [Fix] <Jojo> Set max. row spacing / skipping value to 64, visibly clamp values > 64 to 64 in the edit box.
 
@@ -880,7 +891,7 @@ General
    [Fix] <jojo> Song Cleanup: Sample cleanup should no longer remove data after sustain loop end point. (rev. 248)
    [Fix] <jojo> Misc: When adding channels from song properties, new channels are now initialized properly (bug 1814). (rev. 236)
    [Fix] <jojo> BPM approximation showed wrong rows per beat in some cases (bug 2532) (rev. 231)
-   [Fix] <jojo> Disabled special handling of '&'-character when drawing texts to various components where the special handling should not take place. (http://lpchip.com/modplug/viewtopic.php?t=1962) (rev. 229)
+   [Fix] <jojo> Disabled special handling of '&'-character when drawing texts to various components where the special handling should not take place. (http://forum.openmpt.org/index.php?topic=1962.0) (rev. 229)
    [Fix] <re> File opening: Added a couple of return value checks to reduce the change of crash when opening lots of files (bug 2546) (rev. 239)
 
    [Mod] <jojo> Menu: Goto dialog can now be opened from Edit-menu. (rev. 246)
@@ -903,7 +914,7 @@ Pattern tab
    [Fix] <re> Undo fixes (didn't properly handle playback positions/multichannel record, set redundant undo points)(rev 243)
    [Fix] <re> Param record in plugs GUI wrote commands even when pattern record was off. (rev 243)
    [Fix] <re> Fixed chord detection when row spacing was enabled. (rev 243)
-   [Fix] <re> Fix to displaying wrong pattern name when using more than 255 patterns (http://lpchip.com/modplug/viewtopic.php?t=2344) (rev. 212)
+   [Fix] <re> Fix to displaying wrong pattern name when using more than 255 patterns (http://forum.openmpt.org/index.php?topic=2344.0) (rev. 212)
    [Fix] <re> Accidental moving when selecting order in margins shouldn't happen anymore. (rev 225)
    [Fix] <re> Fix to possible crash when using undo after pattern resize (bug introduced in rev. 168)
 
@@ -976,7 +987,7 @@ Misc
 v1.17.02.52 (14 Apr 2008, revision 210)
 ---------------------------------------
    [Fix] <re> Shouldn't need winhttp anymore (at least now that updatecheck is disabled). Dependency caused problems in Win98.
-   [Fix] <re> Fix to faulty plug file existence check (introduced in 1.17.02.51)(http://lpchip.com/modplug/viewtopic.php?t=2255)
+   [Fix] <re> Fix to faulty plug file existence check (introduced in 1.17.02.51)(http://forum.openmpt.org/index.php?topic=2255.0)
    [Fix] <re> Sound card-options buffer length value validation.
    [Fix] <re> In .51, muted channels were ignored completely in MIDI export. Now pattern effects are processed in muted channels.
    [Fix] <re> IT style-playback fix
@@ -987,30 +998,30 @@ v1.17.02.51 (29 Mar 2008, revision 208) internal test build
    [Fix] <re> Fix to crash when loading VST with long(>32) param name.
    [Fix] <ma & re> Fix to possible memory corruption problem on handling VST with more than 30 outputs.
          - VST with more than 32 outputs might still be handled poorly.
-   [Fix] <re> Fix to possible crash when browsing modules in treeview(http://lpchip.com/modplug/viewtopic.php?t=2222).
+   [Fix] <re> Fix to possible crash when browsing modules in treeview(http://forum.openmpt.org/index.php?topic=2222.0).
    [Fix] <re> Fix to severe memory leak in the same section as above.
    [Fix] <re> Fix to mptm not showing in tree view file browser.
-   [Fix] <re> Fix to MIDI drum export (http://lpchip.com/modplug/viewtopic.php?t=2024)
+   [Fix] <re> Fix to MIDI drum export (http://forum.openmpt.org/index.php?topic=2024.0)
    [Fix] <re> Fix to possible crash on MIDI export if exporting module with more than 64 channels.
-   [Mod] <re> MIDI export won't anymore export muted channels(http://lpchip.com/modplug/viewtopic.php?t=2017)
-   [Fix] <re> When converting MOD->S3M/IT/MPTM, finetune setting was ignored (http://lpchip.com/modplug/viewtopic.php?t=1706)
-   [Fix] <re> IT compatibility: Fix to not resetting envelopes on new instrument (http://lpchip.com/modplug/viewtopic.php?t=1869)
-   [Fix] <re> IT compatibility: Fix to bidi loop resetting (http://lpchip.com/modplug/viewtopic.php?t=788)
-   [Fix] <re> IT compatibility: Fix to note trigger after note cut(http://lpchip.com/modplug/viewtopic.php?t=2080)
-   [Fix] <re> Mixmode tool tip in general tab was in some cases shown on unrelated controls (http://lpchip.com/modplug/viewtopic.php?t=2176)
-   [Fix] <re> Pitch/tempo lock was lost on first instrument when opening instrument tab for the first time. (http://lpchip.com/modplug/viewtopic.php?t=1823)
-   [Fix] <re> Verifying buffer length-setting read from INI-file to prevent the impression that it can be set < 10 (http://lpchip.com/modplug/viewtopic.php?t=992)
-   [Fix] <re> Pattern effectdata paste was broken for MOD (probably since .46) (http://lpchip.com/modplug/viewtopic.php?t=1938)
-   [Mod] <re> When loading plug information at startup, checking whether the plug files exist. (http://lpchip.com/modplug/viewtopic.php?t=1367)
-   [Fix] <re> Continuous pattern navigation fixes(http://lpchip.com/modplug/viewtopic.php?t=1960, http://lpchip.com/modplug/viewtopic.php?t=1959)
-   [Fix] <re> Keyboard split related fix (http://lpchip.com/modplug/viewtopic.php?t=1887)
-   [Fix] <re> Releasenode information should now be included when copying instrument envelopes (http://lpchip.com/modplug/viewtopic.php?t=1780)
+   [Mod] <re> MIDI export won't anymore export muted channels(http://forum.openmpt.org/index.php?topic=2017.0)
+   [Fix] <re> When converting MOD->S3M/IT/MPTM, finetune setting was ignored (http://forum.openmpt.org/index.php?topic=1706.0)
+   [Fix] <re> IT compatibility: Fix to not resetting envelopes on new instrument (http://forum.openmpt.org/index.php?topic=1869.0)
+   [Fix] <re> IT compatibility: Fix to bidi loop resetting (http://forum.openmpt.org/index.php?topic=788.0)
+   [Fix] <re> IT compatibility: Fix to note trigger after note cut(http://forum.openmpt.org/index.php?topic=2080.0)
+   [Fix] <re> Mixmode tool tip in general tab was in some cases shown on unrelated controls (http://forum.openmpt.org/index.php?topic=2176.0)
+   [Fix] <re> Pitch/tempo lock was lost on first instrument when opening instrument tab for the first time. (http://forum.openmpt.org/index.php?topic=1823.0)
+   [Fix] <re> Verifying buffer length-setting read from INI-file to prevent the impression that it can be set < 10 (http://forum.openmpt.org/index.php?topic=992.0)
+   [Fix] <re> Pattern effectdata paste was broken for MOD (probably since .46) (http://forum.openmpt.org/index.php?topic=1938.0)
+   [Mod] <re> When loading plug information at startup, checking whether the plug files exist. (http://forum.openmpt.org/index.php?topic=1367.0)
+   [Fix] <re> Continuous pattern navigation fixes(http://forum.openmpt.org/index.php?topic=1960.0, http://forum.openmpt.org/index.php?topic=1959.0)
+   [Fix] <re> Keyboard split related fix (http://forum.openmpt.org/index.php?topic=1887.0)
+   [Fix] <re> Releasenode information should now be included when copying instrument envelopes (http://forum.openmpt.org/index.php?topic=1780.0)
    [Fix] <ma> Potential memory corruption bug when loading VSTs
 
-   [Reg] <re> Removed buggy rearrange samples (http://lpchip.com/modplug/viewtopic.php?t=2148)
+   [Reg] <re> Removed buggy rearrange samples (http://forum.openmpt.org/index.php?topic=2148.0)
    [Fix] <re> Fixed MIDI mapping not checking MIDI event, which could cause events like pitch bend to trigger some mapping item.
-   [Fix] <re> Extended song/instrument properties were not always loaded correctly for IT (bug introduced in 1.17.02.50)(http://lpchip.com/modplug/viewtopic.php?p=16335)
-   [Fix] <re> Fix for faulty tabs when switching between modtypes with and without instrumenttab. (http://lpchip.com/modplug/viewtopic.php?t=1614)
+   [Fix] <re> Extended song/instrument properties were not always loaded correctly for IT (bug introduced in 1.17.02.50)(http://forum.openmpt.org/index.php?topic=2154.0)
+   [Fix] <re> Fix for faulty tabs when switching between modtypes with and without instrumenttab. (http://forum.openmpt.org/index.php?topic=1614.0)
    [Fix] <re> Fix for possible crash on save/load when using more than 64 channels with MPTM.
    [Mod] <re> Modified flag is not set when sliding tempo/global volume slider for MOD file.
    [Mod] <re> When setting instrument pan, checking whether instrument samples have set pan enabled and optionally disabling them.
@@ -1036,16 +1047,16 @@ v1.17.02.50 (26 Jan 2008, revision 198) internal test build
    [Fix] <re> Default VST editor preset field name validation in the menubar.
 
    [New] <re> Added ability to edit various flags in song properties.
-   [Fix] <re> Fix for pattern duplicate for small patterns (http://lpchip.com/modplug/viewtopic.php?t=1747)
+   [Fix] <re> Fix for pattern duplicate for small patterns (http://forum.openmpt.org/index.php?topic=1747.0)
    [Fix] <re> Fixed song properties-menu entry in mainframe(was greyed and didn't show keyshortcut)
-   [Fix] <re> Fixed crash with certain toolbar related ini-settings (http://lpchip.com/modplug/viewtopic.php?t=2033)
+   [Fix] <re> Fixed crash with certain toolbar related ini-settings (http://forum.openmpt.org/index.php?topic=2033.0)
    [Fix] <re> Further fixes to prevent unnotified overwriting of file.
    [Mod] <re> .bak-files won't now be shown with "All modules" filter when loading modules.
-   [Fix] <re> Show row playtime didn't on certain cases work on first pattern row (http://lpchip.com/modplug/viewtopic.php?t=2044)
-   [Fix] <re> Fix to faulty play with certain instruments without notes in IT compatible playmode (http://lpchip.com/modplug/viewtopic.php?t=2080)
-   [Fix] <re> Pattern number box didn't open pattern properties when using MPTm. (http://lpchip.com/modplug/viewtopic.php?t=2073)
+   [Fix] <re> Show row playtime didn't on certain cases work on first pattern row (http://forum.openmpt.org/index.php?topic=2044.0)
+   [Fix] <re> Fix to faulty play with certain instruments without notes in IT compatible playmode (http://forum.openmpt.org/index.php?topic=2080.0)
+   [Fix] <re> Pattern number box didn't open pattern properties when using MPTm. (http://forum.openmpt.org/index.php?topic=2073.0)
    [Fix] <re> Fixed wrong MIDI CC names in macro editor.
-   [Fix/Mod] <re> Setting volume to 0(v00) in pattern didn't necessarily set volume to 0 when using volume random variation for instrument. All other random variation behaviors are changed as well; now the 'swing' is applied directly to channel values instead of using swing addition, and by default the swing effect is reset on new note. (http://lpchip.com/modplug/viewtopic.php?t=2074)
+   [Fix/Mod] <re> Setting volume to 0(v00) in pattern didn't necessarily set volume to 0 when using volume random variation for instrument. All other random variation behaviors are changed as well; now the 'swing' is applied directly to channel values instead of using swing addition, and by default the swing effect is reset on new note. (http://forum.openmpt.org/index.php?topic=2074.0)
 
    [Mod] <re> MPTm made with this version will be recognized as IT in earlier versions.
    [Mod] <re> Various validity checks for read data in ITP loading.
@@ -1056,19 +1067,19 @@ v1.17.02.49 (17 Nov 2007, revision 194) internal test build
    [New] <re> Improved VST preset navigation in VST window. Known problem: doesn't update if preset is changed from VSTs own preset navigation.
    [New] <re> Improvements in IT compatibility playmode. When loading ITs, if file doesn't seem modplug made, then automatically setting IT compatibility playmode. The playmode setting can be toggled in song properties dialog, and the autodetection with an ini setting.
    [New] <re> 'key binding not understood'-messages can be disabled with an ini setting.
-   [Fix] <re> Fixed wrong file version in IT compatibility save. (http://lpchip.com/modplug/viewtopic.php?t=1723)
-   [Fix] <re> Fixed possible unnotified overwriting of file occurring for example when dealing with a new file. (http://lpchip.com/modplug/viewtopic.php?t=1813)
-   [Fix] <re> Fixed broken note preview for certain type of instruments in instrument tab. (http://lpchip.com/modplug/viewtopic.php?t=1996)
-   [Fix] <re> Fixed possible crash on channel mode wav export when a channel has a long name. (http://lpchip.com/modplug/viewtopic.php?t=2005)
-   [Fix] <re> Fixed pattern position indicator jump when clicking VST-box in channel header. (http://lpchip.com/modplug/viewtopic.php?t=2014)
+   [Fix] <re> Fixed wrong file version in IT compatibility save. (http://forum.openmpt.org/index.php?topic=1723.0)
+   [Fix] <re> Fixed possible unnotified overwriting of file occurring for example when dealing with a new file. (http://forum.openmpt.org/index.php?topic=1813.0)
+   [Fix] <re> Fixed broken note preview for certain type of instruments in instrument tab. (http://forum.openmpt.org/index.php?topic=1996.0)
+   [Fix] <re> Fixed possible crash on channel mode wav export when a channel has a long name. (http://forum.openmpt.org/index.php?topic=2005.0)
+   [Fix] <re> Fixed pattern position indicator jump when clicking VST-box in channel header. (http://forum.openmpt.org/index.php?topic=2014.0)
    [Mod] <re> Custom tuning related
          - file format changes
          - changed interpretation of finesteps: now zero finesteps means that finesteps are equal to notesteps, previously zero finesteps disabled portamentos etc)
          - Pitch slide between notes with portamentos is now specialised also for other tuning types than just geometric(changes behavior). Previously behavior was 'geometric' for all types.
 
-   [Fix] <rewbs> Fix pattern search, which could search for the wrong param. Also enable typing of desired param value rather than only selecting from listbox. (http://lpchip.com/modplug/viewtopic.php?t=1799)
-   [Fix] <rewbs> Delay-load winhttp.dll and don't die if it can't be found, e.g. on win98. (http://lpchip.com/modplug/viewtopic.php?t=1778)
-   [Fix] <rewbs> Fix a couple of pixels on D# in the pattern editor small font bitmap. (http://lpchip.com/modplug/viewtopic.php?t=1781)
+   [Fix] <rewbs> Fix pattern search, which could search for the wrong param. Also enable typing of desired param value rather than only selecting from listbox. (http://forum.openmpt.org/index.php?topic=1799.0)
+   [Fix] <rewbs> Delay-load winhttp.dll and don't die if it can't be found, e.g. on win98. (http://forum.openmpt.org/index.php?topic=1778.0)
+   [Fix] <rewbs> Fix a couple of pixels on D# in the pattern editor small font bitmap. (http://forum.openmpt.org/index.php?topic=1781.0)
    [New] <rewbs> Add name filter to plugin selection dialog. Useful when you have hundreds of plugins.
    [New] <Pelya> Allow Window key as a modifier in the keyboard configuration. Disables start menu pop-up when pressing the Win key if and only if it used in the active keyboard configuration.
    [New] <Pelya> Disables NumLock/CapsLock/ScrollLock lamps on keyboard if and only if they are used in the active keyboard configuration. The lamps will blink anyway - can't help it until we start using DirectInput.
@@ -1076,15 +1087,15 @@ v1.17.02.49 (17 Nov 2007, revision 194) internal test build
 
 v1.17.02.48
 -----------
-   [Fix] <re> Fix song cleanup issue (http://lpchip.com/modplug/viewtopic.php?t=1711)
-   [Fix] <re> Pitch/Tempo lock fix (broken in .46 and .47) (http://lpchip.com/modplug/viewtopic.php?t=1646)
-   [Mod] <re> Pattern manager channel reordering behviour changes / fixes. (http://lpchip.com/modplug/viewtopic.php?t=1148)
-   [Fix] <pelya> Fix bad horizontal scrolling in pattern editor when positioning the cursor with the mouse. (http://lpchip.com/modplug/viewtopic.php?t=1650)
-   [Fix] <rewbs> Fix odd "play row" behaviour when using 1 tick-per-row (http://lpchip.com/modplug/viewtopic.php?t=1038).
-   [Fix] <rewbs> Fix pop due to ramping when song starts with a pattern command that sets a low global volume. (http://lpchip.com/modplug/viewtopic.php?t=523)
-   [Fix] <rewbs> Fix occasional colour issues with orderlist (http://lpchip.com/modplug/viewtopic.php?t=867)
+   [Fix] <re> Fix song cleanup issue (http://forum.openmpt.org/index.php?topic=1711.0)
+   [Fix] <re> Pitch/Tempo lock fix (broken in .46 and .47) (http://forum.openmpt.org/index.php?topic=1646.0)
+   [Mod] <re> Pattern manager channel reordering behviour changes / fixes. (http://forum.openmpt.org/index.php?topic=1148.0)
+   [Fix] <pelya> Fix bad horizontal scrolling in pattern editor when positioning the cursor with the mouse. (http://forum.openmpt.org/index.php?topic=1650.0)
+   [Fix] <rewbs> Fix odd "play row" behaviour when using 1 tick-per-row (http://forum.openmpt.org/index.php?topic=1038.0).
+   [Fix] <rewbs> Fix pop due to ramping when song starts with a pattern command that sets a low global volume. (http://forum.openmpt.org/index.php?topic=523.0)
+   [Fix] <rewbs> Fix occasional colour issues with orderlist (http://forum.openmpt.org/index.php?topic=867.0)
    [Fix] <rewbs> Fix impossible horizontal scrolling in pattern editor when playing with follow song on
-   [Fix] <rewbs> Grey out "Trim" option in sample editor context menu if there's no selection. (http://lpchip.com/modplug/viewtopic.php?t=908)
+   [Fix] <rewbs> Grey out "Trim" option in sample editor context menu if there's no selection. (http://forum.openmpt.org/index.php?topic=908.0)
 
 
 v1.17.02.47
@@ -1172,11 +1183,11 @@ v1.17.02.43
 v1.17.02.42
 -----------
    [New] <rewbs> "Compatibility export" in file menu: save as 'plain' IT, without all of OpenMPT's crap. IT only for now (not XM).
-   [Fix] <rewbs> Set instrument in pattern editor should work when no note is specified (tx Torvus - http://lpchip.com/modplug/viewtopic.php?t=470)
-   [Fix] <rewbs> Restart position saved in IT (tx LPChip - http://lpchip.com/modplug/viewtopic.php?t=473)
-   [Fix] <rewbs> Loop song now works even if restart pos falls on +++ (tx LPChip - http://lpchip.com/modplug/viewtopic.php?t=463)
-   [Fix] <rewbs> Last used tempo is applied even when playback is triggered from instrument panel. (tx LPChip - http://lpchip.com/modplug/viewtopic.php?t=480)
-   [Mod] <rewbs> User now gets a warning when loading MDA Degrade (tx fisk0 - http://lpchip.com/modplug/viewtopic.php?t=467)
+   [Fix] <rewbs> Set instrument in pattern editor should work when no note is specified (tx Torvus - http://forum.openmpt.org/index.php?topic=470.0)
+   [Fix] <rewbs> Restart position saved in IT (tx LPChip - http://forum.openmpt.org/index.php?topic=473.0)
+   [Fix] <rewbs> Loop song now works even if restart pos falls on +++ (tx LPChip - http://forum.openmpt.org/index.php?topic=463.0)
+   [Fix] <rewbs> Last used tempo is applied even when playback is triggered from instrument panel. (tx LPChip - http://forum.openmpt.org/index.php?topic=480.0)
+   [Mod] <rewbs> User now gets a warning when loading MDA Degrade (tx fisk0 - http://forum.openmpt.org/index.php?topic=467.0)
 
 
 v1.17.02.41

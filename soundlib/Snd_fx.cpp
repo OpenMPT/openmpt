@@ -219,7 +219,7 @@ double CSoundFile::GetLength(bool& targetReached, bool bAdjust, ORDERINDEX endOr
 				positionJumpOnThisRow = true;
 				nNextPattern = (ORDERINDEX)param;
 				nNextPatStartRow = 0;  // FT2 E60 bug
-				// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
+				// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 				if(!patternBreakOnThisRow || (GetType() == MOD_TYPE_XM))
 					nNextRow = 0;
 
@@ -2003,7 +2003,7 @@ BOOL CSoundFile::ProcessEffects()
 				 //instant jumps - modifying behavior so that now position jumps
 				 //occurs also when pattern loop is enabled.
 			}
-			// see http://lpchip.com/modplug/viewtopic.php?t=2769 - FastTracker resets Dxx if Bxx is called _after_ Dxx
+			// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 			if(GetType() == MOD_TYPE_XM)
 				nBreakRow = 0;
 			break;
