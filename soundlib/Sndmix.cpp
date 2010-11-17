@@ -424,7 +424,7 @@ UINT CSoundFile::Read(LPVOID lpDestBuffer, UINT cbBuffer)
 		lRead -= lCount;
 		m_nBufferCount -= lCount;
 		m_lTotalSampleCount += lCount;		// increase sample count for VSTTimeInfo.
-		// Turn on ramping after first read (fix http://lpchip.com/modplug/viewtopic.php?t=523 )
+		// Turn on ramping after first read (fix http://forum.openmpt.org/index.php?topic=523.0 )
 		gnVolumeRampSamples = CMainFrame::glVolumeRampSamples;
 	}
 MixDone:
