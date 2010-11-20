@@ -221,7 +221,7 @@ Pattern tab::pattern editing
    [New] <Jojo> Key shortcut + context menu entry for toggling the plugin editor of the PC note that's under the cursor.
    [Imp] <Jojo> Overflow paste now only uses one undo step.
    [Imp] <Jojo> Instead of simply ignoring note off/cut/fade when working with .MOD files, it is converted to C00.
-   [Fix] <rewbs> Effect visualizer is now aware of PC notes (bug 3836).
+   [Fix] <rewbs> Effect visualizer is now aware of PC notes (http://forum.openmpt.org/index.php?topic=3836.0).
    [Fix] <Jojo> When using MIDI record or split keyboard settings, volume data was written into the volume column in MOD format.
    [Fix] <Jojo> When converting PC Notes to MIDI Macros, the instrument index is now also cleaned as well. Noticeable for example when pasting PC notes into an IT module.
    [Fix] <Jojo> Now, plugin slot 100 can also be automated using PC Notes.
@@ -886,31 +886,31 @@ v1.17.02.54 (June 2009, revision 274)
 v1.17.02.53 (May 2009, revision 259)
 ------------------------------------
 General
-   [New] <jojo> Can now import MO3 files using external library. (rev. 248)
+   [New] <Jojo> Can now import MO3 files using external library. (rev. 248)
 
-   [Fix] <jojo> Song Cleanup: Sample cleanup should no longer remove data after sustain loop end point. (rev. 248)
-   [Fix] <jojo> Misc: When adding channels from song properties, new channels are now initialized properly (bug 1814). (rev. 236)
-   [Fix] <jojo> BPM approximation showed wrong rows per beat in some cases (bug 2532) (rev. 231)
-   [Fix] <jojo> Disabled special handling of '&'-character when drawing texts to various components where the special handling should not take place. (http://forum.openmpt.org/index.php?topic=1962.0) (rev. 229)
-   [Fix] <re> File opening: Added a couple of return value checks to reduce the change of crash when opening lots of files (bug 2546) (rev. 239)
+   [Fix] <Jojo> Song Cleanup: Sample cleanup should no longer remove data after sustain loop end point. (rev. 248)
+   [Fix] <Jojo> Misc: When adding channels from song properties, new channels are now initialized properly (http://forum.openmpt.org/index.php?topic=1814.0). (rev. 236)
+   [Fix] <Jojo> BPM approximation showed wrong rows per beat in some cases (http://forum.openmpt.org/index.php?topic=2532.0) (rev. 231)
+   [Fix] <Jojo> Disabled special handling of '&'-character when drawing texts to various components where the special handling should not take place. (http://forum.openmpt.org/index.php?topic=1962.0) (rev. 229)
+   [Fix] <re> File opening: Added a couple of return value checks to reduce the change of crash when opening lots of files (http://forum.openmpt.org/index.php?topic=2546.0) (rev. 239)
 
-   [Mod] <jojo> Menu: Goto dialog can now be opened from Edit-menu. (rev. 246)
+   [Mod] <Jojo> Menu: Goto dialog can now be opened from Edit-menu. (rev. 246)
    [Mod] <re> Pattern cleanup: Clearing sequence after first '---' item is now optional. (rev. 239)
    [Mod] <re> When passing MIDI to plug, documents will now be set modified since MIDI data may change parameters. (rev. 243)
 
 General tab
-   [Mod] <jojo> General tab: VST volume slider is now disabled for S3M. (rev. 246)
-   [Mod] <jojo> General tab: Initial channel volume controls are now enabled only for IT and MPTM. (rev. 246)
+   [Mod] <Jojo> General tab: VST volume slider is now disabled for S3M. (rev. 246)
+   [Mod] <Jojo> General tab: Initial channel volume controls are now enabled only for IT and MPTM. (rev. 246)
 
 Pattern tab
-   [New] <jojo> Added descriptions of SBx, S3x, S4x and S5x command parameters to note properties dialog. (rev. 251)
-   [New] <jojo> Descriptions to retrigger note command parameters in note properties dialog. (rev. 248)
-   [New] <jojo> Ability to start playback with incoming MIDI note (see setup->MIDI) (rev. 246)
-   [New] <jojo> Duplicate channel (see channel header context menu). (246)
+   [New] <Jojo> Added descriptions of SBx, S3x, S4x and S5x command parameters to note properties dialog. (rev. 251)
+   [New] <Jojo> Descriptions to retrigger note command parameters in note properties dialog. (rev. 248)
+   [New] <Jojo> Ability to start playback with incoming MIDI note (see setup->MIDI) (rev. 246)
+   [New] <Jojo> Duplicate channel (see channel header context menu). (246)
    [New] <re> MIDI controllers can now be used to input smooth MIDI macro commands to pattern (setup->MIDI). (rev. 240)
 
    [Fix] <re> Undo should now work with chords. (rev. 244)
-   [Fix] <re> When playing with MIDI keyboard, plugins got a constant note velocity, not the actual velocity (bug 2754) (rev. 239)
+   [Fix] <re> When playing with MIDI keyboard, plugins got a constant note velocity, not the actual velocity (http://forum.openmpt.org/index.php?topic=2754.0) (rev. 239)
    [Fix] <re> Undo fixes (didn't properly handle playback positions/multichannel record, set redundant undo points)(rev 243)
    [Fix] <re> Param record in plugs GUI wrote commands even when pattern record was off. (rev 243)
    [Fix] <re> Fixed chord detection when row spacing was enabled. (rev 243)
@@ -918,35 +918,35 @@ Pattern tab
    [Fix] <re> Accidental moving when selecting order in margins shouldn't happen anymore. (rev 225)
    [Fix] <re> Fix to possible crash when using undo after pattern resize (bug introduced in rev. 168)
 
-   [Mod] <jojo> When applying "change instrument", an instrument number won't be added to note off/cut anymore if the note doesn't already have an instrument. (rev. 248)
+   [Mod] <Jojo> When applying "change instrument", an instrument number won't be added to note off/cut anymore if the note doesn't already have an instrument. (rev. 248)
    [Mod] <re> Default orderlist margin value can now be controlled with "DefaultSequenceMargins" ini-settings under "Pattern Editor" context. (rev 225)
-   [Mod] <jojo & re> Sequence view: Sequence scrolling won't no longer be cut on first '---' item on IT/MPTM/XM. (rev. 237)
-   [Fix] <re> Pattern: The keyboard split 'feature' when entering chords is removed (bug 2790). (rev. 244)
+   [Mod] <Jojo & re> Sequence view: Sequence scrolling won't no longer be cut on first '---' item on IT/MPTM/XM. (rev. 237)
+   [Fix] <re> Pattern: The keyboard split 'feature' when entering chords is removed (http://forum.openmpt.org/index.php?topic=2790.0). (rev. 244)
 
 Sample tab
-   [New] <jojo> Can now normalize sample selections. (rev. 254)
-   [New] <jojo> Can now optionally normalize all samples instead of just one (click normalize with shift down) (rev. 249)
-   [New] <jojo & re> Status bar now displays offset value at given sample point. (rev. 232)
-   [New] <jojo & re> Sample amplify now accepts negative values(inverts sample phase) (request 2219) (rev. 234)
-   [New] <jojo & re> Signed/unsigned sample conversion. (rev. 235)
+   [New] <Jojo> Can now normalize sample selections. (rev. 254)
+   [New] <Jojo> Can now optionally normalize all samples instead of just one (click normalize with shift down) (rev. 249)
+   [New] <Jojo & re> Status bar now displays offset value at given sample point. (rev. 232)
+   [New] <Jojo & re> Sample amplify now accepts negative values(inverts sample phase) (request 2219) (rev. 234)
+   [New] <Jojo & re> Signed/unsigned sample conversion. (rev. 235)
    [New] <re> Added button for phase invert to toolbar. (rev. 235)
-   [New] <jojo> Ability to save sample as raw. (rev. 236)
+   [New] <Jojo> Ability to save sample as raw. (rev. 236)
 
    [Fix] <re> Fix to zoom-related crash when loading samples in sample tab. Occurs usually with lengthy samples. (rev. 211)
-   [Fix] <jojo> Playing sample selection didn't work properly in all cases (bug 1700). (rev. 231)
-   [Fix] <jojo> Setting loop points could affect playing of sample even if loop was disabled (bug 1874) (rev. 231)
+   [Fix] <Jojo> Playing sample selection didn't work properly in all cases (http://forum.openmpt.org/index.php?topic=1700.0). (rev. 231)
+   [Fix] <Jojo> Setting loop points could affect playing of sample even if loop was disabled (http://forum.openmpt.org/index.php?topic=1874.0) (rev. 231)
 
-   [Mod] <jojo> Notes from MIDI should now be played like notes from keyboard. (rev. 246)
-   [Mod] <jojo> Play sample button now stops previous note even if mod is playing (bug 1366) (rev. 231)
-   [Mod] <jojo> Sustain loop will now be enabled when setting it to sample selection. (rev. 231)
-   [Mod] <jojo> Sample editing: If possible, use loop points as trim limits if there's no selection chosen. (rev. 230)
+   [Mod] <Jojo> Notes from MIDI should now be played like notes from keyboard. (rev. 246)
+   [Mod] <Jojo> Play sample button now stops previous note even if mod is playing (http://forum.openmpt.org/index.php?topic=1366.0) (rev. 231)
+   [Mod] <Jojo> Sustain loop will now be enabled when setting it to sample selection. (rev. 231)
+   [Mod] <Jojo> Sample editing: If possible, use loop points as trim limits if there's no selection chosen. (rev. 230)
    [Mod] <re> Time stretching is now implemented with SoundTouch library. (rev. 228)
    [Mod] <re> Disabled pitchshifting/time stretching of 8-bit samples(didn't seem to work). (rev. 228)
 
 Instrument tab
-   [Fix] <jojo> Envelope view: Middle line will now be drawn in panning and pitch/filter envelopes even if row guidelines are enabled. (rev. 254)
+   [Fix] <Jojo> Envelope view: Middle line will now be drawn in panning and pitch/filter envelopes even if row guidelines are enabled. (rev. 254)
 
-   [Mod] <jojo> Instrument tab: Sample map can now map "No sample". (rev. 236)
+   [Mod] <Jojo> Instrument tab: Sample map can now map "No sample". (rev. 236)
    [Mod] <re> Changed default instrument plug volume command handling from Dry/Wet to none. Also added ini-setting with which one can set the default value used for new instruments. Ini setting is "DefaultPlugVolumeHandling" in [Misc], possible values are 0,1,2. (rev. 238)
 
 MPTM
@@ -960,23 +960,23 @@ MPTM Instrument tuning
    [Mod] <re> Notes should now be drawn more clearly when using custom tunings. (rev. 217)
 
 IT
-   [Fix] <jojo & re> Macro config should now be loaded correctly also when loading IT files not made with MPT. (rev. 257)
-   [Fix] <jojo & re> Playback fix to vibrato with ramp down waveform in IT compatibility play. (rev. 257)
+   [Fix] <Jojo & re> Macro config should now be loaded correctly also when loading IT files not made with MPT. (rev. 257)
+   [Fix] <Jojo & re> Playback fix to vibrato with ramp down waveform in IT compatibility play. (rev. 257)
    [Fix] <re> When file was saved with compatibility export, the last order was not shown in Impulse Tracker. (rev. 257)
 
 XM
-   [Fix] <jojo> Fix to handling a special case of Bxx and Dxx (bug 2769) (rev 241)
+   [Fix] <Jojo> Dxx effects that are to the left of a Bxx effect are now ignored. (http://forum.openmpt.org/index.php?topic=2769.0) (rev 241)
 
 S3M
    [Fix] <re> S3M saving: Sequence of length 241-255 should now be cut to length 240 instead of 16. (rev. 239)
-   [Mod] <re> When loading S3M files which contain Zxx effects, user is now asked how to process them. (bug 2166) (rev. 233)
    [Mod] <re> S3M saving: Saved sequence is no longer cut on first '---' item. (rev. 239)
+   [Mod] <re> When loading S3M files which contain Zxx effects, user is now asked how to process them. (http://forum.openmpt.org/index.php?topic=2166.0) (rev. 233)
 
 MOD
-   [Fix] <jojo & re> Fixes to MOD saving: it should now be possible to create ProTracker compatible MOD files with compatibility export. (rev. 256)
+   [Fix] <Jojo & re> Fixes to MOD saving: it should now be possible to create ProTracker compatible MOD files with compatibility export. (rev. 256)
 
 Package template
-   [Mod] <jojo> PackageTemplate: Update to DE_jojo-keymap
+   [Mod] <Jojo> PackageTemplate: Update to DE_jojo.mkb keymap
 
 Misc
    [Fix] <from libmodplug> Fix to faulty portamento handling on loading AMF.
@@ -987,15 +987,15 @@ Misc
 v1.17.02.52 (14 Apr 2008, revision 210)
 ---------------------------------------
    [Fix] <re> Shouldn't need winhttp anymore (at least now that updatecheck is disabled). Dependency caused problems in Win98.
-   [Fix] <re> Fix to faulty plug file existence check (introduced in 1.17.02.51)(http://forum.openmpt.org/index.php?topic=2255.0)
+   [Fix] <re> Fix to faulty plug file existence check (introduced in 1.17.02.51) (http://forum.openmpt.org/index.php?topic=2255.0)
    [Fix] <re> Sound card-options buffer length value validation.
-   [Fix] <re> In .51, muted channels were ignored completely in MIDI export. Now pattern effects are processed in muted channels.
+   [Fix] <re> In 1.17.02.51, muted channels were ignored completely in MIDI export. Now pattern effects are processed in muted channels.
    [Fix] <re> IT style-playback fix
 
 
 v1.17.02.51 (29 Mar 2008, revision 208) internal test build
 -----------------------------------------------------------
-   [Fix] <re> Fix to crash when loading VST with long(>32) param name.
+   [Fix] <re> Fix to crash when loading VST with long(> 32 characters) param name.
    [Fix] <ma & re> Fix to possible memory corruption problem on handling VST with more than 30 outputs.
          - VST with more than 32 outputs might still be handled poorly.
    [Fix] <re> Fix to possible crash when browsing modules in treeview(http://forum.openmpt.org/index.php?topic=2222.0).

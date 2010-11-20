@@ -156,7 +156,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 
 	m_eCustHotKey.SetParent(m_hWnd, IDC_CUSTHOTKEY, this);
 	m_eReport.FmtLines(TRUE);
-	m_eReport.SetWindowText("Log:\r\n");
+	m_eReport.SetWindowText("");
 
 	CString s;
 	s.Format("%d", CMainFrame::gnAutoChordWaitTime);
