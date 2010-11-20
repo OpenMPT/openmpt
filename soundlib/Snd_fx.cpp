@@ -611,7 +611,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 			{
 				resetEnvelopes(pChn);
 			}
-			// IT Compatibility: Always reset autovibrato settings when there's an instrument number
+			// IT Compatibility: Autovibrato reset
 			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 			{
 				pChn->nAutoVibDepth = 0;
@@ -628,13 +628,6 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 		pChn->pModSample = nullptr;
 		pChn->nInsVol = 0;
 		return;
-	}
-
-	// IT Compatibility: Always reset autovibrato settings when there's an instrument number
-	if(IsCompatibleMode(TRK_IMPULSETRACKER))
-	{
-		pChn->nAutoVibDepth = 0;
-		pChn->nAutoVibPos = 0;
 	}
 
 	// Tone-Portamento doesn't reset the pingpong direction flag
@@ -681,6 +674,13 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 	pChn->nLoopStart = pSmp->nLoopStart;
 	pChn->nLoopEnd = pSmp->nLoopEnd;
 
+	// IT Compatibility: Autovibrato reset
+	if(IsCompatibleMode(TRK_IMPULSETRACKER))
+	{
+		pChn->nAutoVibDepth = 0;
+		pChn->nAutoVibPos = 0;
+	}
+
 	if(bNewTuning)
 	{
 		pChn->nC5Speed = pSmp->nC5Speed;
@@ -714,7 +714,7 @@ void CSoundFile::InstrumentChange(MODCHANNEL *pChn, UINT instr, bool bPorta, boo
 void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bool bManual)
 //-----------------------------------------------------------------------------------------
 {
-	if (note < 1) return;
+	if (note < NOTE_MIN) return;
 	MODCHANNEL * const pChn = &Chn[nChn];
 	MODSAMPLE *pSmp = pChn->pModSample;
 	MODINSTRUMENT *pIns = pChn->pModInstrument;
@@ -786,7 +786,7 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 	}
 
 	if (m_nType & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED)) note += pChn->nTranspose;
-	note = CLAMP(note, 1, 132);
+	note = CLAMP(note, NOTE_MIN, NOTE_MAX);
 	pChn->nNote = note;
 	pChn->m_CalculateFreq = true;
 
@@ -852,8 +852,12 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 		if ((m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)) && (pChn->dwFlags & CHN_NOTEFADE) && (!pChn->nFadeOutVol))
 		{
 			resetEnvelopes(pChn);
-			pChn->nAutoVibDepth = 0;
-			pChn->nAutoVibPos = 0;
+			// IT Compatibility: Autovibrato reset
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+			{
+				pChn->nAutoVibDepth = 0;
+				pChn->nAutoVibPos = 0;
+			}
 			pChn->dwFlags &= ~CHN_NOTEFADE;
 			pChn->nFadeOutVol = 65536;
 		}
@@ -874,6 +878,13 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 		pChn->nLeftVU = pChn->nRightVU = 0xFF;
 		pChn->dwFlags &= ~CHN_FILTER;
 		pChn->dwFlags |= CHN_FASTVOLRAMP;
+		// IT Compatibility: Autovibrato reset
+		if(bResetEnv && IsCompatibleMode(TRK_IMPULSETRACKER))
+		{
+			pChn->nAutoVibDepth = 0;
+			pChn->nAutoVibPos = 0;
+			pChn->nVibratoPos = 0;
+		}
 		//IT compatibility 15. Retrigger will not be reset (Tremor doesn't store anything here, so we just don't reset this as well)
 		if(!IsCompatibleMode(TRK_IMPULSETRACKER))
 		{
@@ -939,8 +950,12 @@ void CSoundFile::NoteChange(UINT nChn, int note, bool bPorta, bool bResetEnv, bo
 					}
 				}
 			}
-			pChn->nAutoVibDepth = 0;
-			pChn->nAutoVibPos = 0;
+			// IT Compatibility: Autovibrato reset
+			if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+			{
+				pChn->nAutoVibDepth = 0;
+				pChn->nAutoVibPos = 0;
+			}
 		}
 		pChn->nLeftVol = pChn->nRightVol = 0;
 		bool bFlt = (m_dwSongFlags & SONG_MPTFILTERMODE) ? false : true;
@@ -1447,8 +1462,12 @@ BOOL CSoundFile::ProcessEffects()
 					{
 						pChn->dwFlags |= CHN_FASTVOLRAMP;
 						resetEnvelopes(pChn);	
-						pChn->nAutoVibDepth = 0;
-						pChn->nAutoVibPos = 0;
+						// IT Compatibility: Autovibrato reset
+						if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+						{
+							pChn->nAutoVibDepth = 0;
+							pChn->nAutoVibPos = 0;
+						}
 						pChn->dwFlags &= ~CHN_NOTEFADE;
 						pChn->nFadeOutVol = 65536;
 					}
@@ -1524,8 +1543,12 @@ BOOL CSoundFile::ProcessEffects()
 				{
 					pChn->dwFlags |= CHN_FASTVOLRAMP;
 					resetEnvelopes(pChn);
-					pChn->nAutoVibDepth = 0;
-					pChn->nAutoVibPos = 0;
+					// IT Compatibility: Autovibrato reset
+					if(!IsCompatibleMode(TRK_IMPULSETRACKER))
+					{
+						pChn->nAutoVibDepth = 0;
+						pChn->nAutoVibPos = 0;
+					}
 				}
 			}
 			// Tick-0 only volume commands
@@ -2005,7 +2028,9 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			// see http://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
 			if(GetType() == MOD_TYPE_XM)
+			{
 				nBreakRow = 0;
+			}
 			break;
 
 		// Pattern Break
@@ -2018,7 +2043,7 @@ BOOL CSoundFile::ProcessEffects()
 			}
 			if (m && m->command == CMD_XPARAM)
 			{
-				nBreakRow = (param<<8) + m->param;
+				nBreakRow = (param << 8) + m->param;
 			} else
 			{
 				nBreakRow = param;
@@ -2118,7 +2143,7 @@ BOOL CSoundFile::ProcessEffects()
 					}
 				}
 				m_nNextPattern = nPosJump;
-				m_nNextRow = (UINT)nBreakRow;
+				m_nNextRow = nBreakRow;
 				m_bPatternTransitionOccurred = true;
 			}
 		} //Ends condition (nBreakRow >= 0) || (nPosJump >= 0)
