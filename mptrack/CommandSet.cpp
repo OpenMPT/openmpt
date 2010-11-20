@@ -1504,7 +1504,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 				if(fileVersion > KEYMAP_VERSION)
 				{
 					CString err;
-					err.Format("Key binding file has version %d. Your version of OpenMPT only supports loading files up to version %d.", szFilename, fileVersion, KEYMAP_VERSION);
+					err.Format("File version is %d, but your version of OpenMPT only supports loading files up to version %d.", fileVersion, KEYMAP_VERSION);
 					errText += err + "\n";
 					Log(err);
 				}
@@ -1543,15 +1543,17 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 			if(!ignoreLine)
 			{
 				//Error checking (TODO):
-				if (cmd<0 || cmd>=kcNumCommands || spos==-1)
+				if (cmd < 0 || cmd >= kcNumCommands || spos == -1)
 				{
 					errorCount++;
 					CString err;
-					if (errorCount<10) {
-						err.Format("Line %d was not understood.", l, szFilename);
+					if (errorCount < 10)
+					{
+						err.Format("Line %d was not understood.", l);
 						errText += err + "\n";
 						Log(err);
-					} else if (errorCount==10) {
+					} else if (errorCount == 10)
+					{
 						err = "Too many errors detected, not reporting any more.";
 						errText += err + "\n";
 						Log(err);
@@ -1571,8 +1573,8 @@ bool CCommandSet::LoadFile(std::istream& iStrm, LPCTSTR szFilename)
 	{
 		CString err;
 		err.Format("The following problems have been encountered while trying to load the key binding file %s:\n", szFilename);
-		errText = err + errText;
-		::MessageBox(NULL, errText, "", MB_ICONEXCLAMATION|MB_OK);
+		err += errText;
+		::MessageBox(NULL, err, "", MB_ICONEXCLAMATION|MB_OK);
 	}
 
 	if(fileVersion < KEYMAP_VERSION) UpgradeKeymap(pTempCS, fileVersion);

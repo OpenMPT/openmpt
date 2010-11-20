@@ -9,7 +9,7 @@
 
 #include "Sndfile.h"
 
-// Execute "action" if "request" bytes cannot be read from stream
+// Execute "action" if "request_bytes" bytes cannot be read from stream at position "position"
 #define ASSERT_CAN_READ_PROTOTYPE(position, length, request_bytes, action) \
 	if( position > length || request_bytes > length - position) action;
 
