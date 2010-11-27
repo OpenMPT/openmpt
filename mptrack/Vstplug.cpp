@@ -82,7 +82,6 @@ CVstPluginManager::CVstPluginManager()
 //------------------------------------
 {
 	m_pVstHead = NULL;
-	m_szHostBuffer = nullptr;
 	//m_bNeedIdle = FALSE; //rewbs.VSTCompliance - now member of plugin class
 	CSoundFile::gpMixPluginCreateProc = CreateMixPluginProc;
 	EnumerateDirectXDMOs();
@@ -93,11 +92,6 @@ CVstPluginManager::~CVstPluginManager()
 //-------------------------------------
 {
 	CSoundFile::gpMixPluginCreateProc = NULL;
-	if(m_szHostBuffer != nullptr)
-	{
-		delete[] m_szHostBuffer;
-		m_szHostBuffer = nullptr;
-	}
 	while (m_pVstHead)
 	{
 		PVSTPLUGINLIB p = m_pVstHead;
@@ -1009,7 +1003,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	//---from here VST 2.2 extension opcodes------------------------------------------------------
 	// close a fileselector operation with VstFileSelect* in <ptr>: Must be always called after an open !
 	case audioMasterCloseFileSelector:
-		return VstFileSelector(opcode == audioMasterCloseFileSelector, (VstFileSelect *)ptr);
+		return VstFileSelector(opcode == audioMasterCloseFileSelector, (VstFileSelect *)ptr, effect);
 	
 	// open an editor for audio (defined by XML text in ptr)
 	case audioMasterEditFile:				
@@ -1035,18 +1029,21 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 
 
 // Helper function for file selection dialog stuff.
-long CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelect *pFileSel)
-//-------------------------------------------------------------------------------------
+long CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelect *pFileSel, const AEffect *effect)
+//------------------------------------------------------------------------------------------------------------
 {
+	if(pFileSel == nullptr)
+	{
+		return 0;
+	}
+
 	if(!destructor)
 	{
-		if(pFileSel == nullptr)
-		{
-			return 0;
-		}
+		pFileSel->nbReturnPath = 0;
 
 		if(pFileSel->command != kVstDirectorySelect)
 		{
+			// Plugin wants to load or save a file.
 			std::string extensions, workingDir;
 			for(size_t i = 0; i < pFileSel->nbFileTypes; i++)
 			{
@@ -1083,8 +1080,6 @@ long CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelect *pF
 				(pFileSel->command == kVstMultipleFilesLoad ? true : false)
 				);
 
-			pFileSel->nbReturnPath = 0;
-
 			if(files.abort)
 			{
 				return 0;
@@ -1092,43 +1087,114 @@ long CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelect *pF
 
 			if(pFileSel->command == kVstMultipleFilesLoad)
 			{
-				// TODO: multiple paths
-				Log("VST plugin to host: Multiple files\n");
-				return 0;
+				// Multiple paths
+				pFileSel->nbReturnPath = files.filenames.size();
+				pFileSel->returnMultiplePaths = new char *[pFileSel->nbReturnPath];
+				for(size_t i = 0; i < files.filenames.size(); i++)
+				{
+					char *fname = new char[files.filenames[i].length() + 1];
+					strcpy(fname, files.filenames[i].c_str());
+					pFileSel->returnMultiplePaths[i] = fname;
+				}
+				return 1;
 			} else
 			{
-				if(pFileSel->returnPath == nullptr)
+				// Single path
+				if(pFileSel->returnPath == nullptr || pFileSel->sizeReturnPath == 0)
 				{
+					
 					// Provide some memory for the return path.
-					if(m_szHostBuffer != nullptr)
-					{
-						delete[] m_szHostBuffer;
-					}
-					pFileSel->sizeReturnPath = _MAX_PATH;
-					m_szHostBuffer = new char[_MAX_PATH];
-					if(m_szHostBuffer == nullptr)
+					pFileSel->sizeReturnPath = files.first_file.length();
+					pFileSel->returnPath = new char[pFileSel->sizeReturnPath + 1];
+					if(pFileSel->returnPath == nullptr)
 					{
 						return 0;
 					}
-					pFileSel->returnPath = m_szHostBuffer;
+					pFileSel->returnPath[pFileSel->sizeReturnPath] = '\0';
+					pFileSel->reserved = 1;
+				} else
+				{
+					pFileSel->reserved = 0;
 				}
-				strncpy(pFileSel->returnPath, files.first_file.c_str(), pFileSel->sizeReturnPath - 1);
+				strncpy(pFileSel->returnPath, files.first_file.c_str(), pFileSel->sizeReturnPath);
 				pFileSel->nbReturnPath = 1;
 			}
 			return 1;
 
 		} else
 		{
-			Log("VST plugin to host: Get Directory\n");
-			return 0;
+			// Plugin wants a directory
+
+			char szInitPath[_MAX_PATH];
+			MemsetZero(szInitPath);
+			if(pFileSel->initialPath)
+			{
+				strncpy(szInitPath, pFileSel->initialPath, _MAX_PATH - 1);
+			}
+
+			char szBuffer[_MAX_PATH];
+			MemsetZero(szBuffer);
+
+			BROWSEINFO bi;
+			MemsetZero(bi);
+			bi.hwndOwner = CMainFrame::GetMainFrame()->m_hWnd;
+			bi.lpszTitle = pFileSel->title;
+			bi.pszDisplayName = szInitPath;
+			bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
+			LPITEMIDLIST pid = SHBrowseForFolder(&bi);
+			if(pid != NULL && SHGetPathFromIDList(pid, szBuffer))
+			{
+				if(!memcmp(&(effect->uniqueID), "rTSV", 4) && pFileSel->returnPath != nullptr && pFileSel->sizeReturnPath == 0)
+				{
+					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.
+					// They report a path size of 0, but when using an own buffer, they will crash.
+					// So we'll just assume that reViSiT can handle long enough (_MAX_PATH) paths here.
+					pFileSel->sizeReturnPath = strlen(szBuffer);
+					pFileSel->returnPath[pFileSel->sizeReturnPath] = '\0';
+				}
+				if(pFileSel->returnPath == nullptr || pFileSel->sizeReturnPath == 0)
+				{
+					// Provide some memory for the return path.
+					pFileSel->sizeReturnPath = strlen(szBuffer);
+					pFileSel->returnPath = new char[pFileSel->sizeReturnPath + 1];
+					if(pFileSel->returnPath == nullptr)
+					{
+						return 0;
+					}
+					pFileSel->returnPath[pFileSel->sizeReturnPath] = '\0';
+					pFileSel->reserved = 1;
+				} else
+				{
+					pFileSel->reserved = 0;
+				}
+				strncpy(pFileSel->returnPath, szBuffer, pFileSel->sizeReturnPath);
+				pFileSel->nbReturnPath = 1;
+				return 1;
+			} else
+			{
+				return 0;
+			}
 		}
 	} else
 	{
-		Log("VST plugin to host: Close File Selector\n");
-		if(m_szHostBuffer != nullptr)
+		// Close file selector - delete allocated strings.
+		if(pFileSel->command == kVstMultipleFilesLoad && pFileSel->returnMultiplePaths != nullptr)
 		{
-			delete[] m_szHostBuffer;
-			m_szHostBuffer = nullptr;
+			for(size_t i = 0; i < pFileSel->nbReturnPath; i++)
+			{
+				if(pFileSel->returnMultiplePaths[i] != nullptr)
+				{
+					delete[] pFileSel->returnMultiplePaths[i];
+				}
+			}
+			delete[] pFileSel->returnMultiplePaths; 
+		} else
+		{
+			if(pFileSel->reserved == 1 && pFileSel->returnPath != nullptr)
+			{
+				delete[] pFileSel->returnPath;
+				pFileSel->returnPath = nullptr;
+			}
 		}
 		return 1;
 	}
