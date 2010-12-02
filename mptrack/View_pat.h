@@ -14,21 +14,21 @@ class COpenGLEditor;
 #define DRAGITEM_PATTERNHEADER	0x020000
 #define DRAGITEM_PLUGNAME		0x040000	//rewbs.patPlugName
 
-#define PATSTATUS_MOUSEDRAGSEL			0x01
-#define PATSTATUS_KEYDRAGSEL			0x02
-#define PATSTATUS_FOCUS					0x04
-#define PATSTATUS_FOLLOWSONG			0x08
-#define PATSTATUS_RECORD				0x10
-#define PATSTATUS_DRAGHSCROLL			0x20
-#define PATSTATUS_DRAGVSCROLL			0x40
-#define PATSTATUS_VUMETERS				0x80
-#define PATSTATUS_CHORDPLAYING			0x100
-#define PATSTATUS_DRAGNDROPEDIT			0x200
-#define PATSTATUS_DRAGNDROPPING			0x400
-#define PATSTATUS_MIDISPACINGPENDING	0x800
-#define PATSTATUS_CTRLDRAGSEL			0x1000
-#define PATSTATUS_PLUGNAMESINHEADERS	0x2000 //rewbs.patPlugName
-#define PATSTATUS_PATTERNLOOP			0x4000
+#define PATSTATUS_MOUSEDRAGSEL			0x01	// Creating a selection using the mouse
+#define PATSTATUS_KEYDRAGSEL			0x02	// Creating a selection using shortcuts
+#define PATSTATUS_FOCUS					0x04	// Is the pattern editor focussed
+#define PATSTATUS_FOLLOWSONG			0x08	// Does the cursor follow playback
+#define PATSTATUS_RECORD				0x10	// Recording enabled
+#define PATSTATUS_DRAGHSCROLL			0x20	// Some weird dragging stuff (?)
+#define PATSTATUS_DRAGVSCROLL			0x40	// Some weird dragging stuff (?)
+#define PATSTATUS_VUMETERS				0x80	// Display channel VU meters?
+#define PATSTATUS_CHORDPLAYING			0x100	// Is a chord playing? (pretty much unused)
+#define PATSTATUS_DRAGNDROPEDIT			0x200	// Drag & Drop editing (?)
+#define PATSTATUS_DRAGNDROPPING			0x400	// Dragging a selection around
+#define PATSTATUS_MIDISPACINGPENDING	0x800	// Unused (?)
+#define PATSTATUS_CTRLDRAGSEL			0x1000	// Creating a selection using Ctrl
+#define PATSTATUS_PLUGNAMESINHEADERS	0x2000	// Show plugin names in channel headers //rewbs.patPlugName
+#define PATSTATUS_SELECTROW				0x4000	// Selecting a whole pattern row by clicking the row numbers
 
 // Row Spacing
 #define MAX_SPACING		64 // MAX_PATTERN_ROWS

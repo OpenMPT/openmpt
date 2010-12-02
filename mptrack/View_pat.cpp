@@ -987,10 +987,10 @@ void CViewPattern::OnEditCopy()
 
 
 void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
-//--------------------------------------------------
+//---------------------------------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
-	if (/*(m_bDragging) ||*/ (!pModDoc)) return;
+	if (/*(m_bDragging) ||*/ (pModDoc == nullptr) || (pModDoc->GetSoundFile() == nullptr)) return;
 	SetFocus();
 	m_nDragItem = GetDragItem(point, &m_rcDragItem);
 	m_bDragging = true;
@@ -1049,7 +1049,20 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 				}
 			}
 		}
+	} else if ((point.x < m_szHeader.cx) && (point.y > m_szHeader.cy))
+	{
+		// Mark row number => mark whole row (start)
+		InvalidateSelection();
+		DWORD dwPoint = GetPositionFromPoint(point);
+		if((dwPoint >> 16) < pModDoc->GetSoundFile()->Patterns[m_nPattern].GetNumRows())
+		{
+			m_dwBeginSel = m_dwStartSel = dwPoint;
+			m_dwEndSel = m_dwBeginSel | 0xFFFF;
+			SetCurSel(m_dwStartSel, m_dwEndSel);
+			m_dwStatus |= PATSTATUS_SELECTROW;
+		}
 	}
+
 	if (m_nDragItem)
 	{
 		InvalidateRect(&m_rcDragItem, FALSE);
@@ -1079,7 +1092,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	m_bDragging = false;
 	m_bInItemRect = false;
 	ReleaseCapture();
-	m_dwStatus &= ~PATSTATUS_MOUSEDRAGSEL;
+	m_dwStatus &= ~(PATSTATUS_MOUSEDRAGSEL|PATSTATUS_SELECTROW);
 	// Drag & Drop Editing
 	if (m_dwStatus & PATSTATUS_DRAGNDROPEDIT)
 	{
@@ -1303,7 +1316,13 @@ void CViewPattern::OnMouseMove(UINT, CPoint point)
 			UpdateWindow();
 		}
 	}
-	if (m_dwStatus & PATSTATUS_MOUSEDRAGSEL)
+	if ((m_dwStatus & PATSTATUS_SELECTROW) /*&& (point.x < m_szHeader.cx)*/ && (point.y > m_szHeader.cy))
+	{
+		// Mark row number => mark whole row (continue)
+		InvalidateSelection();
+		m_dwEndSel = GetPositionFromPoint(point) | 0xFFFF;
+		SetCurSel(m_dwStartSel, m_dwEndSel);
+	} else if (m_dwStatus & PATSTATUS_MOUSEDRAGSEL)
 	{
 		CModDoc *pModDoc = GetDocument();
 		DWORD dwPos = GetPositionFromPoint(point);
