@@ -136,7 +136,8 @@ void CSoundFile::ConvertCommand(MODCOMMAND *m, MODTYPE nOldType, MODTYPE nNewTyp
 			MODExx2S3MSxx(m);
 			break;
 		case CMD_VOLUME:
-			if (!m->volcmd)
+			// Effect column volume command overrides the volume column in XM.
+			if (m->volcmd == VOLCMD_NONE || m->volcmd == VOLCMD_VOLUME)
 			{
 				m->volcmd = VOLCMD_VOLUME;
 				m->vol = m->param;
