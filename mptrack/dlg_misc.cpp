@@ -759,9 +759,18 @@ BOOL CFindReplaceTab::OnInitDialog()
 	} else
 	{
 		if (m_dwFlags & PATSEARCH_CHANNEL) CheckDlgButton(IDC_CHECK7, MF_CHECKED);
-		CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_dwFlags & PATSEARCH_FULLSEARCH) ? IDC_RADIO2 : IDC_RADIO1);
-		SetDlgItemInt(IDC_EDIT1, m_nMinChannel+1);
-		SetDlgItemInt(IDC_EDIT2, m_nMaxChannel+1);
+		int nButton = IDC_RADIO1;
+		if((m_dwFlags & PATSEARCH_FULLSEARCH))
+		{
+			nButton = IDC_RADIO2;
+		} else if(/*(m_dwFlags & PATSEARCH_PATSELECTION) &&*/ m_bPatSel)
+		{
+			nButton = IDC_RADIO3;
+		}
+		CheckRadioButton(IDC_RADIO1, IDC_RADIO3, nButton);
+		GetDlgItem(IDC_RADIO3)->EnableWindow(m_bPatSel ? TRUE : FALSE);
+		SetDlgItemInt(IDC_EDIT1, m_nMinChannel + 1);
+		SetDlgItemInt(IDC_EDIT2, m_nMaxChannel + 1);
 	}
 	// Note
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
@@ -941,6 +950,7 @@ void CFindReplaceTab::OnOK()
 	{
 		if (IsDlgButtonChecked(IDC_CHECK7)) m_dwFlags |= PATSEARCH_CHANNEL;
 		if (IsDlgButtonChecked(IDC_RADIO2)) m_dwFlags |= PATSEARCH_FULLSEARCH;
+		if (IsDlgButtonChecked(IDC_RADIO3)) m_dwFlags |= PATSEARCH_PATSELECTION;
 	}
 	// Note
 	if ((combo = (CComboBox *)GetDlgItem(IDC_COMBO1)) != NULL)
