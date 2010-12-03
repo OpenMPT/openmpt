@@ -63,6 +63,15 @@ struct ModCommandPos
 	CHANNELINDEX nChn;
 };
 
+// Find/Replace data
+struct FindReplaceStruct
+{
+	MODCOMMAND cmdFind, cmdReplace;
+	DWORD dwFindFlags, dwReplaceFlags;
+	CHANNELINDEX nFindMinChn, nFindMaxChn;
+	signed char cInstrRelChange; // relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
+};
+
 
 //////////////////////////////////////////////////////////////////
 // Pattern editing class
@@ -72,13 +81,6 @@ struct ModCommandPos
 class CViewPattern: public CModScrollView
 //=======================================
 {
-public:
-	// Find/Replace
-	static MODCOMMAND m_cmdFind, m_cmdReplace, m_cmdOld;
-	static DWORD m_dwFindFlags, m_dwReplaceFlags;
-	static UINT m_nFindMinChn, m_nFindMaxChn;
-	signed char m_cInstrRelChange; // relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
-
 protected:
 	CFastBitmap m_Dib;
 	CEditCommand *m_pEditWnd;
@@ -101,6 +103,9 @@ protected:
 	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
 	UINT m_nLastPlayedChannel; //rewbs.customkeys
 	bool m_bLastNoteEntryBlocked;
+
+	static MODCOMMAND m_cmdOld;				// Quick cursor copy/paste data
+	static FindReplaceStruct m_findReplace;	// Find/replace data
 
 // -> CODE#0012
 // -> DESC="midi keyboard split"

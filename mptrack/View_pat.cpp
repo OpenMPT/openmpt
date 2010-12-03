@@ -24,15 +24,15 @@
 
 #pragma warning(disable:4244) //"conversion from 'type1' to 'type2', possible loss of data"
 
-MODCOMMAND CViewPattern::m_cmdOld = {0,0,0,0,0,0};
-MODCOMMAND CViewPattern::m_cmdFind = {0,0,0,0,0,0};
-MODCOMMAND CViewPattern::m_cmdReplace = {0,0,0,0,0,0};
-DWORD CViewPattern::m_dwFindFlags = PATSEARCH_FULLSEARCH;
-DWORD CViewPattern::m_dwReplaceFlags = PATSEARCH_REPLACEALL;
-UINT CViewPattern::m_nFindMinChn = 0;
-UINT CViewPattern::m_nFindMaxChn = 0;
-signed char cInstrRelChange = 0;
+FindReplaceStruct CViewPattern::m_findReplace =
+{
+	{0,0,0,0,0,0}, {0,0,0,0,0,0},
+	PATSEARCH_FULLSEARCH, PATSEARCH_REPLACEALL,
+	0, 0,
+	0,
+};
 
+MODCOMMAND CViewPattern::m_cmdOld = {0,0,0,0,0,0};
 
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
 
@@ -1690,44 +1690,50 @@ void CViewPattern::OnEditFind()
 		CFindReplaceTab pageReplace(IDD_EDIT_REPLACE, TRUE, pModDoc);
 		CPropertySheet dlg("Find/Replace");
 
-		pageFind.m_nNote = m_cmdFind.note;
-		pageFind.m_nInstr = m_cmdFind.instr;
-		pageFind.m_nVolCmd = m_cmdFind.volcmd;
-		pageFind.m_nVol = m_cmdFind.vol;
-		pageFind.m_nCommand = m_cmdFind.command;
-		pageFind.m_nParam = m_cmdFind.param;
-		pageFind.m_dwFlags = m_dwFindFlags;
-		pageFind.m_nMinChannel = m_nFindMinChn;
-		pageFind.m_nMaxChannel = m_nFindMaxChn;
-		pageReplace.m_nNote = m_cmdReplace.note;
-		pageReplace.m_nInstr = m_cmdReplace.instr;
-		pageReplace.m_nVolCmd = m_cmdReplace.volcmd;
-		pageReplace.m_nVol = m_cmdReplace.vol;
-		pageReplace.m_nCommand = m_cmdReplace.command;
-		pageReplace.m_nParam = m_cmdReplace.param;
-		pageReplace.m_dwFlags = m_dwReplaceFlags;
-		pageReplace.cInstrRelChange = m_cInstrRelChange;
+		pageFind.m_nNote = m_findReplace.cmdFind.note;
+		pageFind.m_nInstr = m_findReplace.cmdFind.instr;
+		pageFind.m_nVolCmd = m_findReplace.cmdFind.volcmd;
+		pageFind.m_nVol = m_findReplace.cmdFind.vol;
+		pageFind.m_nCommand = m_findReplace.cmdFind.command;
+		pageFind.m_nParam = m_findReplace.cmdFind.param;
+		pageFind.m_dwFlags = m_findReplace.dwFindFlags;
+		pageFind.m_nMinChannel = m_findReplace.nFindMinChn;
+		pageFind.m_nMaxChannel = m_findReplace.nFindMaxChn;
+		pageFind.m_bPatSel = (m_dwBeginSel != m_dwEndSel) ? true : false;
+		pageReplace.m_nNote = m_findReplace.cmdReplace.note;
+		pageReplace.m_nInstr = m_findReplace.cmdReplace.instr;
+		pageReplace.m_nVolCmd = m_findReplace.cmdReplace.volcmd;
+		pageReplace.m_nVol = m_findReplace.cmdReplace.vol;
+		pageReplace.m_nCommand = m_findReplace.cmdReplace.command;
+		pageReplace.m_nParam = m_findReplace.cmdReplace.param;
+		pageReplace.m_dwFlags = m_findReplace.dwReplaceFlags;
+		pageReplace.cInstrRelChange = m_findReplace.cInstrRelChange;
+		if(m_dwBeginSel != m_dwEndSel)
+		{
+			pageFind.m_dwFlags |= PATSEARCH_PATSELECTION;
+			pageFind.m_dwFlags &= ~PATSEARCH_FULLSEARCH;
+		}
 		dlg.AddPage(&pageFind);
 		dlg.AddPage(&pageReplace);
 		if (dlg.DoModal() == IDOK)
 		{
-			m_cmdFind.note = pageFind.m_nNote;
-			m_cmdFind.instr = pageFind.m_nInstr;
-			m_cmdFind.volcmd = pageFind.m_nVolCmd;
-			m_cmdFind.vol = pageFind.m_nVol;
-			m_cmdFind.command = pageFind.m_nCommand;
-			m_cmdFind.param = pageFind.m_nParam;
-			m_nFindMinChn = pageFind.m_nMinChannel;
-			m_nFindMaxChn = pageFind.m_nMaxChannel;
-			m_dwFindFlags = pageFind.m_dwFlags;
-			m_cmdReplace.note = pageReplace.m_nNote;
-			m_cmdReplace.instr = pageReplace.m_nInstr;
-			m_cmdReplace.volcmd = pageReplace.m_nVolCmd;
-			m_cmdReplace.vol = pageReplace.m_nVol;
-			m_cmdReplace.command = pageReplace.m_nCommand;
-			m_cmdReplace.param = pageReplace.m_nParam;
-			m_dwReplaceFlags = pageReplace.m_dwFlags;
-			m_cInstrRelChange = pageReplace.cInstrRelChange;
+			m_findReplace.cmdFind.note = pageFind.m_nNote;
+			m_findReplace.cmdFind.instr = pageFind.m_nInstr;
+			m_findReplace.cmdFind.volcmd = pageFind.m_nVolCmd;
+			m_findReplace.cmdFind.vol = pageFind.m_nVol;
+			m_findReplace.cmdFind.command = pageFind.m_nCommand;
+			m_findReplace.cmdFind.param = pageFind.m_nParam;
+			m_findReplace.nFindMinChn = pageFind.m_nMinChannel;
+			m_findReplace.nFindMaxChn = pageFind.m_nMaxChannel;
+			m_findReplace.dwFindFlags = pageFind.m_dwFlags;
+			m_findReplace.cmdReplace.note = pageReplace.m_nNote;
+			m_findReplace.cmdReplace.instr = pageReplace.m_nInstr;
+			m_findReplace.cmdReplace.volcmd = pageReplace.m_nVolCmd;
+			m_findReplace.cmdReplace.vol = pageReplace.m_nVol;
+			m_findReplace.cmdReplace.command = pageReplace.m_nCommand;
+			m_findReplace.cmdReplace.param = pageReplace.m_nParam;
+			m_findReplace.dwReplaceFlags = pageReplace.m_dwFlags;
+			m_findReplace.cInstrRelChange = pageReplace.cInstrRelChange;
 			m_bContinueSearch = false;
 			OnEditFindNext();
 		}
@@ -1787,7 +1793,7 @@ void CViewPattern::OnEditFindNext()
 	BOOL bEffectEx;
 
 	if (!pModDoc) return;
-	if (!(m_dwFindFlags & ~PATSEARCH_FULLSEARCH))
+	if (!(m_findReplace.dwFindFlags & ~PATSEARCH_FULLSEARCH))
 	{
 		PostMessage(WM_COMMAND, ID_EDIT_FIND);
 		return;
@@ -1796,19 +1802,23 @@ void CViewPattern::OnEditFindNext()
 	pSndFile = pModDoc->GetSoundFile();
 	nPatStart = m_nPattern;
 	nPatEnd = m_nPattern+1;
-	if (m_dwFindFlags & PATSEARCH_FULLSEARCH)
+	if (m_findReplace.dwFindFlags & PATSEARCH_FULLSEARCH)
 	{
 		nPatStart = 0;
 		nPatEnd = pSndFile->Patterns.Size();
+	} else if(m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
+	{
+		nPatStart = m_nPattern;
+		nPatEnd = nPatStart + 1;
 	}
 	if (m_bContinueSearch)
 	{
 		nPatStart = m_nPattern;
 	}
 	bEffectEx = FALSE;
-	if (m_dwFindFlags & PATSEARCH_COMMAND)
+	if (m_findReplace.dwFindFlags & PATSEARCH_COMMAND)
 	{
-		UINT fxndx = pModDoc->GetIndexFromEffect(m_cmdFind.command, m_cmdFind.param);
+		UINT fxndx = pModDoc->GetIndexFromEffect(m_findReplace.cmdFind.command, m_findReplace.cmdFind.param);
 		bEffectEx = pModDoc->IsExtendedEffect(fxndx);
 	}
 	for (UINT nPat=nPatStart; nPat<nPatEnd; nPat++)
@@ -1824,42 +1834,51 @@ void CViewPattern::OnEditFindNext()
 		}
 		for (; n<len; n++, m++)
 		{
-			BOOL bFound = TRUE, bReplace = TRUE;
+			bool bFound = true, bReplace = true;
 
-			if (m_dwFindFlags & PATSEARCH_CHANNEL)
+			if (m_findReplace.dwFindFlags & PATSEARCH_CHANNEL)
 			{
-				UINT ch = n % pSndFile->m_nChannels;
-				if ((ch < m_nFindMinChn) || (ch > m_nFindMaxChn)) bFound = FALSE;
+				// limit to given channels
+				const CHANNELINDEX ch = n % pSndFile->m_nChannels;
+				if ((ch < m_findReplace.nFindMinChn) || (ch > m_findReplace.nFindMaxChn)) bFound = false;
 			}
-			if (((m_dwFindFlags & PATSEARCH_NOTE) && ((m->note != m_cmdFind.note) && ((m_cmdFind.note != CFindReplaceTab::findAny) || (!m->note) || (m->note & 0x80))))
-			 || ((m_dwFindFlags & PATSEARCH_INSTR) && (m->instr != m_cmdFind.instr))
-			 || ((m_dwFindFlags & PATSEARCH_VOLCMD) && (m->volcmd != m_cmdFind.volcmd))
-			 || ((m_dwFindFlags & PATSEARCH_VOLUME) && (m->vol != m_cmdFind.vol))
-			 || ((m_dwFindFlags & PATSEARCH_COMMAND) && (m->command != m_cmdFind.command))
-			 || ((m_dwFindFlags & PATSEARCH_PARAM) && (m->param != m_cmdFind.param)))
+			if (m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
 			{
-				bFound = FALSE;
+				// limit to pattern selection
+				const CHANNELINDEX ch = n % pSndFile->m_nChannels;
+				const ROWINDEX row = n / pSndFile->m_nChannels;
+				if ((ch < GetSelectionStartChan()) || (ch > GetSelectionEndChan())) bFound = false;
+				if ((row < GetSelectionStartRow()) || (row > GetSelectionEndRow())) bFound = false;
+			}
+			if (((m_findReplace.dwFindFlags & PATSEARCH_NOTE) && ((m->note != m_findReplace.cmdFind.note) && ((m_findReplace.cmdFind.note != CFindReplaceTab::findAny) || (!m->note) || (m->note & 0x80))))
+			 || ((m_findReplace.dwFindFlags & PATSEARCH_INSTR) && (m->instr != m_findReplace.cmdFind.instr))
+			 || ((m_findReplace.dwFindFlags & PATSEARCH_VOLCMD) && (m->volcmd != m_findReplace.cmdFind.volcmd))
+			 || ((m_findReplace.dwFindFlags & PATSEARCH_VOLUME) && (m->vol != m_findReplace.cmdFind.vol))
+			 || ((m_findReplace.dwFindFlags & PATSEARCH_COMMAND) && (m->command != m_findReplace.cmdFind.command))
+			 || ((m_findReplace.dwFindFlags & PATSEARCH_PARAM) && (m->param != m_findReplace.cmdFind.param)))
+			{
+				bFound = false;
 			} 
 			else
 			{
-				if (((m_dwFindFlags & (PATSEARCH_COMMAND|PATSEARCH_PARAM)) == PATSEARCH_COMMAND) && (bEffectEx))
+				if (((m_findReplace.dwFindFlags & (PATSEARCH_COMMAND|PATSEARCH_PARAM)) == PATSEARCH_COMMAND) && (bEffectEx))
 				{
-					if ((m->param & 0xF0) != (m_cmdFind.param & 0xF0)) bFound = FALSE;
+					if ((m->param & 0xF0) != (m_findReplace.cmdFind.param & 0xF0)) bFound = false;
 				}
 
 				// Ignore modcommands with PC/PCS notes when searching from volume or effect column.
 				if( (m->IsPcNote())
 					&&
-					m_dwFindFlags & (PATSEARCH_VOLCMD|PATSEARCH_VOLUME|PATSEARCH_COMMAND|PATSEARCH_PARAM))
+					m_findReplace.dwFindFlags & (PATSEARCH_VOLCMD|PATSEARCH_VOLUME|PATSEARCH_COMMAND|PATSEARCH_PARAM))
 				{
-					bFound = FALSE;
+					bFound = false;
 				}
 			}
 			// Found!
 			if (bFound)
 			{
-				BOOL bUpdPos = TRUE;
-				if ((m_dwReplaceFlags & (PATSEARCH_REPLACEALL|PATSEARCH_REPLACE)) == (PATSEARCH_REPLACEALL|PATSEARCH_REPLACE)) bUpdPos = FALSE;
+				bool bUpdPos = true;
+				if ((m_findReplace.dwReplaceFlags & (PATSEARCH_REPLACEALL|PATSEARCH_REPLACE)) == (PATSEARCH_REPLACEALL|PATSEARCH_REPLACE)) bUpdPos = false;
 				nFound++;
 				if (bUpdPos)
 				{
@@ -1871,16 +1890,16 @@ void CViewPattern::OnEditFindNext()
 					SetCurrentRow(n / pSndFile->m_nChannels);
 				}
 				UINT ncurs = (n % pSndFile->m_nChannels) << 3;
-				if (!(m_dwFindFlags & PATSEARCH_NOTE))
+				if (!(m_findReplace.dwFindFlags & PATSEARCH_NOTE))
 				{
 					ncurs++;
-					if (!(m_dwFindFlags & PATSEARCH_INSTR))
+					if (!(m_findReplace.dwFindFlags & PATSEARCH_INSTR))
 					{
 						ncurs++;
-						if (!(m_dwFindFlags & (PATSEARCH_VOLCMD|PATSEARCH_VOLUME)))
+						if (!(m_findReplace.dwFindFlags & (PATSEARCH_VOLCMD|PATSEARCH_VOLUME)))
 						{
 							ncurs++;
-							if (!(m_dwFindFlags & PATSEARCH_COMMAND)) ncurs++;
+							if (!(m_findReplace.dwFindFlags & PATSEARCH_COMMAND)) ncurs++;
 						}
 					}
 				}
@@ -1888,77 +1907,77 @@ void CViewPattern::OnEditFindNext()
 				{
 					SetCurrentColumn(ncurs);
 				}
-				if (!(m_dwReplaceFlags & PATSEARCH_REPLACE)) goto EndSearch;
-				if (!(m_dwReplaceFlags & PATSEARCH_REPLACEALL))
+				if (!(m_findReplace.dwReplaceFlags & PATSEARCH_REPLACE)) goto EndSearch;
+				if (!(m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL))
 				{
 					UINT ans = MessageBox("Replace this occurrence?", "Replace", MB_YESNOCANCEL);
-					if (ans == IDYES) bReplace = TRUE; else
-					if (ans == IDNO) bReplace = FALSE; else goto EndSearch;
+					if (ans == IDYES) bReplace = true; else
+					if (ans == IDNO) bReplace = false; else goto EndSearch;
 				}
 				if (bReplace)
 				{
 					pModDoc->GetPatternUndo()->PrepareUndo(nPat, n % pSndFile->m_nChannels, n / pSndFile->m_nChannels, 1, 1);
 
-					if ((m_dwReplaceFlags & PATSEARCH_NOTE))
+					if ((m_findReplace.dwReplaceFlags & PATSEARCH_NOTE))
 					{
 						// -1 octave
-						if (m_cmdReplace.note == CFindReplaceTab::replaceNoteMinusOctave)
+						if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNoteMinusOctave)
 						{
 							if (m->note > 12) m->note -= 12;
 						} else
 						// +1 octave
-						if (m_cmdReplace.note == CFindReplaceTab::replaceNotePlusOctave)
+						if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNotePlusOctave)
 						{
 							if (m->note <= NOTE_MAX - 12) m->note += 12;
 						} else
 						// Note--
-						if (m_cmdReplace.note == CFindReplaceTab::replaceNoteMinusOne)
+						if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNoteMinusOne)
 						{
 							if (m->note > 1) m->note--;
 						} else
 						// Note++
-						if (m_cmdReplace.note == CFindReplaceTab::replaceNotePlusOne)
+						if (m_findReplace.cmdReplace.note == CFindReplaceTab::replaceNotePlusOne)
 						{
 							if (m->note < NOTE_MAX) m->note++;
 						} else
 						// Replace with another note
 						{
-							// If we're going to remove a PC Note, wipe out the complete column.
-							if(m->IsPcNote() && !MODCOMMAND::IsPcNote(m_cmdReplace.note))
+							// If we're going to remove a PC Note or replace a normal note by a PC note, wipe out the complete column.
+							if(m->IsPcNote() != MODCOMMAND::IsPcNote(m_findReplace.cmdReplace.note))
 							{
 								m->Clear();
 							}
-							m->note = m_cmdReplace.note;
+							m->note = m_findReplace.cmdReplace.note;
 						}
 					}
-					if ((m_dwReplaceFlags & PATSEARCH_INSTR))
+					if ((m_findReplace.dwReplaceFlags & PATSEARCH_INSTR))
 					{
 						// Instr--
-						if (m_cInstrRelChange == -1 && m->instr > 1)
+						if (m_findReplace.cInstrRelChange == -1 && m->instr > 1)
 							m->instr--;
 						// Instr++
-						else if (m_cInstrRelChange == 1 && m->instr > 0 && m->instr < (MAX_INSTRUMENTS - 1))
+						else if (m_findReplace.cInstrRelChange == 1 && m->instr > 0 && m->instr < (MAX_INSTRUMENTS - 1))
 							m->instr++;
-						else m->instr = m_cmdReplace.instr;
+						else m->instr = m_findReplace.cmdReplace.instr;
 					}
-					if ((m_dwReplaceFlags & PATSEARCH_VOLCMD))
+					if ((m_findReplace.dwReplaceFlags & PATSEARCH_VOLCMD))
 					{
-						m->volcmd = m_cmdReplace.volcmd;
+						m->volcmd = m_findReplace.cmdReplace.volcmd;
 					}
-					if ((m_dwReplaceFlags & PATSEARCH_VOLUME))
+					if ((m_findReplace.dwReplaceFlags & PATSEARCH_VOLUME))
 					{
-						m->vol = m_cmdReplace.vol;
+						m->vol = m_findReplace.cmdReplace.vol;
 					}
-					if ((m_dwReplaceFlags & PATSEARCH_COMMAND))
+					if ((m_findReplace.dwReplaceFlags & PATSEARCH_COMMAND))
 					{
-						m->command = m_cmdReplace.command;
+						m->command = m_findReplace.cmdReplace.command;
 					}
-					if ((m_dwReplaceFlags & PATSEARCH_PARAM))
+					if ((m_findReplace.dwReplaceFlags & PATSEARCH_PARAM))
 					{
-						if ((bEffectEx) && (!(m_dwReplaceFlags & PATSEARCH_COMMAND)))
-							m->param = (BYTE)((m->param & 0xF0) | (m_cmdReplace.param & 0x0F));
+						if ((bEffectEx) && (!(m_findReplace.dwReplaceFlags & PATSEARCH_COMMAND)))
+							m->param = (BYTE)((m->param & 0xF0) | (m_findReplace.cmdReplace.param & 0x0F));
 						else
-							m->param = m_cmdReplace.param;
+							m->param = m_findReplace.cmdReplace.param;
 					}
 					pModDoc->SetModified();
 					if (bUpdPos) InvalidateRow();
@@ -1967,52 +1986,52 @@ void CViewPattern::OnEditFindNext()
 		}
 	}
 EndSearch:
-	if (m_dwReplaceFlags & PATSEARCH_REPLACEALL) InvalidatePattern();
+	if (m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL) InvalidatePattern();
 	m_bContinueSearch = true;
 	EndWaitCursor();
 	// Display search results
-	//m_dwReplaceFlags &= ~PATSEARCH_REPLACEALL;
+	//m_findReplace.dwReplaceFlags &= ~PATSEARCH_REPLACEALL;
 	if (!nFound)
 	{
-		if (m_dwFindFlags & PATSEARCH_NOTE)
+		if (m_findReplace.dwFindFlags & PATSEARCH_NOTE)
 		{
-			wsprintf(szFind, "%s", GetNoteStr(m_cmdFind.note));
+			wsprintf(szFind, "%s", GetNoteStr(m_findReplace.cmdFind.note));
 		} else strcpy(szFind, "???");
 		strcat(szFind, " ");
-		if (m_dwFindFlags & PATSEARCH_INSTR)
+		if (m_findReplace.dwFindFlags & PATSEARCH_INSTR)
 		{
-			if (m_cmdFind.instr)
-				wsprintf(&szFind[strlen(szFind)], "%03d", m_cmdFind.instr);
+			if (m_findReplace.cmdFind.instr)
+				wsprintf(&szFind[strlen(szFind)], "%03d", m_findReplace.cmdFind.instr);
 			else
 				strcat(szFind, " ..");
 		} else strcat(szFind, " ??");
 		strcat(szFind, " ");
-		if (m_dwFindFlags & PATSEARCH_VOLCMD)
+		if (m_findReplace.dwFindFlags & PATSEARCH_VOLCMD)
 		{
-			if (m_cmdFind.volcmd)
-				wsprintf(&szFind[strlen(szFind)], "%c", gszVolCommands[m_cmdFind.volcmd]);
+			if (m_findReplace.cmdFind.volcmd)
+				wsprintf(&szFind[strlen(szFind)], "%c", gszVolCommands[m_findReplace.cmdFind.volcmd]);
 			else
 				strcat(szFind, ".");
 		} else strcat(szFind, "?");
-		if (m_dwFindFlags & PATSEARCH_VOLUME)
+		if (m_findReplace.dwFindFlags & PATSEARCH_VOLUME)
 		{
-			wsprintf(&szFind[strlen(szFind)], "%02d", m_cmdFind.vol);
+			wsprintf(&szFind[strlen(szFind)], "%02d", m_findReplace.cmdFind.vol);
 		} else strcat(szFind, "??");
 		strcat(szFind, " ");
-		if (m_dwFindFlags & PATSEARCH_COMMAND)
+		if (m_findReplace.dwFindFlags & PATSEARCH_COMMAND)
 		{
-			if (m_cmdFind.command)
+			if (m_findReplace.cmdFind.command)
 			{
 				if (pSndFile->m_nType & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
-					wsprintf(&szFind[strlen(szFind)], "%c", gszS3mCommands[m_cmdFind.command]);
+					wsprintf(&szFind[strlen(szFind)], "%c", gszS3mCommands[m_findReplace.cmdFind.command]);
 				else
-					wsprintf(&szFind[strlen(szFind)], "%c", gszModCommands[m_cmdFind.command]);
+					wsprintf(&szFind[strlen(szFind)], "%c", gszModCommands[m_findReplace.cmdFind.command]);
 			} else
 				strcat(szFind, ".");
 		} else strcat(szFind, "?");
-		if (m_dwFindFlags & PATSEARCH_PARAM)
+		if (m_findReplace.dwFindFlags & PATSEARCH_PARAM)
 		{
-			wsprintf(&szFind[strlen(szFind)], "%02X", m_cmdFind.param);
+			wsprintf(&szFind[strlen(szFind)], "%02X", m_findReplace.cmdFind.param);
 		} else strcat(szFind, "??");
 		wsprintf(s, "Cannot find \"%s\"", szFind);
 		MessageBox(s, "Find/Replace", MB_OK | MB_ICONINFORMATION);
