@@ -30,6 +30,7 @@ FindReplaceStruct CViewPattern::m_findReplace =
 	PATSEARCH_FULLSEARCH, PATSEARCH_REPLACEALL,
 	0, 0,
 	0,
+	0, 0,
 };
 
 MODCOMMAND CViewPattern::m_cmdOld = {0,0,0,0,0,0};
@@ -1734,6 +1735,8 @@ void CViewPattern::OnEditFind()
 			m_findReplace.cmdReplace.param = pageReplace.m_nParam;
 			m_findReplace.dwReplaceFlags = pageReplace.m_dwFlags;
 			m_findReplace.cInstrRelChange = pageReplace.cInstrRelChange;
+			m_findReplace.dwBeginSel = m_dwBeginSel;
+			m_findReplace.dwEndSel = m_dwEndSel;
 			m_bContinueSearch = false;
 			OnEditFindNext();
 		}
@@ -1847,8 +1850,9 @@ void CViewPattern::OnEditFindNext()
 				// limit to pattern selection
 				const CHANNELINDEX ch = n % pSndFile->m_nChannels;
 				const ROWINDEX row = n / pSndFile->m_nChannels;
-				if ((ch < GetSelectionStartChan()) || (ch > GetSelectionEndChan())) bFound = false;
-				if ((row < GetSelectionStartRow()) || (row > GetSelectionEndRow())) bFound = false;
+				
+				if ((ch < GetChanFromCursor(m_findReplace.dwBeginSel)) || (ch > GetChanFromCursor(m_findReplace.dwEndSel))) bFound = false;
+				if ((row < GetRowFromCursor(m_findReplace.dwBeginSel)) || (row > GetRowFromCursor(m_findReplace.dwEndSel))) bFound = false;
 			}
 			if (((m_findReplace.dwFindFlags & PATSEARCH_NOTE) && ((m->note != m_findReplace.cmdFind.note) && ((m_findReplace.cmdFind.note != CFindReplaceTab::findAny) || (!m->note) || (m->note & 0x80))))
 			 || ((m_findReplace.dwFindFlags & PATSEARCH_INSTR) && (m->instr != m_findReplace.cmdFind.instr))
@@ -1880,6 +1884,7 @@ void CViewPattern::OnEditFindNext()
 				bool bUpdPos = true;
 				if ((m_findReplace.dwReplaceFlags & (PATSEARCH_REPLACEALL|PATSEARCH_REPLACE)) == (PATSEARCH_REPLACEALL|PATSEARCH_REPLACE)) bUpdPos = false;
 				nFound++;
+
 				if (bUpdPos)
 				{
 					// turn off "follow song"
@@ -1889,6 +1894,7 @@ void CViewPattern::OnEditFindNext()
 					SetCurrentPattern(nPat);
 					SetCurrentRow(n / pSndFile->m_nChannels);
 				}
+
 				UINT ncurs = (n % pSndFile->m_nChannels) << 3;
 				if (!(m_findReplace.dwFindFlags & PATSEARCH_NOTE))
 				{
@@ -1916,7 +1922,9 @@ void CViewPattern::OnEditFindNext()
 				}
 				if (bReplace)
 				{
-					pModDoc->GetPatternUndo()->PrepareUndo(nPat, n % pSndFile->m_nChannels, n / pSndFile->m_nChannels, 1, 1);
+					// Just create one logic undo step when auto-replacing all occurences.
+					const bool linkUndoBuffer = (nFound > 1) && (m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL) != 0;
+					pModDoc->GetPatternUndo()->PrepareUndo(nPat, n % pSndFile->m_nChannels, n / pSndFile->m_nChannels, 1, 1, linkUndoBuffer);
 
 					if ((m_findReplace.dwReplaceFlags & PATSEARCH_NOTE))
 					{
@@ -1986,7 +1994,16 @@ void CViewPattern::OnEditFindNext()
 		}
 	}
 EndSearch:
-	if (m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL) InvalidatePattern();
+	if( m_findReplace.dwFindFlags & PATSEARCH_PATSELECTION)
+	{
+		// Restore original selection
+		m_dwBeginSel = m_findReplace.dwBeginSel;
+		m_dwEndSel = m_findReplace.dwEndSel;
+		InvalidatePattern();
+	} else if (m_findReplace.dwReplaceFlags & PATSEARCH_REPLACEALL)
+	{
+		InvalidatePattern();
+	}
 	m_bContinueSearch = true;
 	EndWaitCursor();
 	// Display search results
