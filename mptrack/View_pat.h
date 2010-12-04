@@ -66,10 +66,11 @@ struct ModCommandPos
 // Find/Replace data
 struct FindReplaceStruct
 {
-	MODCOMMAND cmdFind, cmdReplace;
-	DWORD dwFindFlags, dwReplaceFlags;
-	CHANNELINDEX nFindMinChn, nFindMaxChn;
-	signed char cInstrRelChange; // relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
+	MODCOMMAND cmdFind, cmdReplace;			// Find/replace notes/instruments/effects
+	DWORD dwFindFlags, dwReplaceFlags;		// PATSEARCH_XXX flags
+	CHANNELINDEX nFindMinChn, nFindMaxChn;	// Find in these channels (if PATSEARCH_CHANNEL is set)
+	signed char cInstrRelChange;			// relative instrument change (quick'n'dirty fix, this should be implemented in a less cryptic way)
+	DWORD dwBeginSel, dwEndSel;				// Find in this selection (if PATSEARCH_PATSEL is set)
 };
 
 

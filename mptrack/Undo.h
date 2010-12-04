@@ -9,7 +9,7 @@
 
 #pragma once
 
-#define MAX_UNDO_LEVEL 100	// 100 undo steps for each undo type!
+#define MAX_UNDO_LEVEL 1000	// 1000 undo steps for each undo type!
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Pattern Undo
