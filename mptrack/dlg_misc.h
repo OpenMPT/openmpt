@@ -188,13 +188,34 @@ public:
 	// Make sure there's unused notes between NOTE_MAX and NOTE_MIN_SPECIAL.
 	STATIC_ASSERT(NOTE_MIN_SPECIAL - 4 > NOTE_MAX);
 
+protected:
+	void ChangeEffect();
+
 public:
 	CFindReplaceTab(UINT nIDD, BOOL bReplaceTab, CModDoc *pModDoc):CPropertyPage(nIDD) { m_bReplace = bReplaceTab; m_pModDoc = pModDoc; }
 
 protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
-	afx_msg void OnEffectChanged();
+
+	// When a combobox is focussed, check the corresponding checkbox.
+	void CheckOnChange(int nIDButton) { CheckDlgButton(nIDButton, BST_CHECKED); CheckReplace(nIDButton); };
+	afx_msg void OnNoteChanged()	{ CheckOnChange(IDC_CHECK1); };
+	afx_msg void OnInstrChanged()	{ CheckOnChange(IDC_CHECK2); };
+	afx_msg void OnVolCmdChanged()	{ CheckOnChange(IDC_CHECK3); };
+	afx_msg void OnVolumeChanged()	{ CheckOnChange(IDC_CHECK4); };
+	afx_msg void OnEffectChanged()	{ CheckOnChange(IDC_CHECK5); ChangeEffect(); };
+	afx_msg void OnParamChanged()	{ CheckOnChange(IDC_CHECK6); };
+	// When a checkbox is checked, also check "Replace By".
+	afx_msg void OnCheckNote()		{ CheckReplace(IDC_CHECK1); };
+	afx_msg void OnCheckInstr()		{ CheckReplace(IDC_CHECK2); };
+	afx_msg void OnCheckVolCmd()	{ CheckReplace(IDC_CHECK3); };
+	afx_msg void OnCheckVolume()	{ CheckReplace(IDC_CHECK4); };
+	afx_msg void OnCheckEffect()	{ CheckReplace(IDC_CHECK5); };
+	afx_msg void OnCheckParam()		{ CheckReplace(IDC_CHECK6); };
+	// Check "Replace By"
+	afx_msg void CheckReplace(int nIDButton)	{ if(m_bReplace && IsDlgButtonChecked(nIDButton)) CheckDlgButton(IDC_CHECK7, BST_CHECKED); };
+
 	afx_msg void OnCheckChannelSearch();
 	DECLARE_MESSAGE_MAP()
 };
@@ -392,9 +413,9 @@ enum enmAddSilenceOptions
 	addsilence_resize,				// Resize sample
 };
 
-//===========================
+//==================================
 class CAddSilenceDlg: public CDialog
-//===========================
+//==================================
 {
 protected:
 	enmAddSilenceOptions GetEditMode();
