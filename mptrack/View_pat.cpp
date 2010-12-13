@@ -512,6 +512,11 @@ DWORD CViewPattern::GetDragItem(CPoint point, LPRECT lpRect)
 }
 
 
+// Drag a selection to position dwPos.
+// If bScroll is true, the point dwPos is scrolled into the view if needed.
+// If bNoMode if specified, the original selection points are not altered.
+// Note that scrolling will only be executed if dwPos contains legal coordinates.
+// This can be useful when selecting a whole row and specifying 0xFFFF as the end channel.
 BOOL CViewPattern::DragToSel(DWORD dwPos, BOOL bScroll, BOOL bNoMove)
 //-------------------------------------------------------------------
 {
@@ -1322,7 +1327,7 @@ void CViewPattern::OnMouseMove(UINT, CPoint point)
 		// Mark row number => mark whole row (continue)
 		InvalidateSelection();
 		m_dwEndSel = GetPositionFromPoint(point) | 0xFFFF;
-		SetCurSel(m_dwStartSel, m_dwEndSel);
+		DragToSel(m_dwEndSel, TRUE, FALSE);
 	} else if (m_dwStatus & PATSTATUS_MOUSEDRAGSEL)
 	{
 		CModDoc *pModDoc = GetDocument();

@@ -1637,22 +1637,12 @@ bool CSoundFile::SaveIT(LPCSTR lpszFileName, UINT nPacking)
 			bNeedsMptPatSave = true;
 
 		// Check for empty pattern
-		if (Patterns[npat].GetNumRows() == 64)
+		if (Patterns[npat].GetNumRows() == 64 && Patterns.IsPatternEmpty(npat))
 		{
-			MODCOMMAND *pzc = Patterns[npat];
-			UINT nz = Patterns[npat].GetNumRows() * m_nChannels;
-			UINT iz = 0;
-			for (iz=0; iz<nz; iz++)
-			{
-				if ((pzc[iz].note) || (pzc[iz].instr)
-				 || (pzc[iz].volcmd) || (pzc[iz].command)) break;
-			}
-			if (iz == nz)
-			{
-				patpos[npat] = 0;
-				continue;
-			}
+			patpos[npat] = 0;
+			continue;
 		}
+
 		fwrite(patinfo, 8, 1, f);
 		dwPos += 8;
 		memset(chnmask, 0xFF, sizeof(chnmask));
@@ -2237,23 +2227,14 @@ bool CSoundFile::SaveCompatIT(LPCSTR lpszFileName)
 		patinfo[1] = Patterns[npat].GetNumRows();
 		patinfo[2] = 0;
 		patinfo[3] = 0;
+
 		// Check for empty pattern
-		if (Patterns[npat].GetNumRows() == 64)
+		if (Patterns[npat].GetNumRows() == 64 && Patterns.IsPatternEmpty(npat))
 		{
-			MODCOMMAND *pzc = Patterns[npat];
-			UINT nz = Patterns[npat].GetNumRows() * nChannels;
-			UINT iz = 0;
-			for (iz=0; iz<nz; iz++)
-			{
-				if ((pzc[iz].note) || (pzc[iz].instr)
-				 || (pzc[iz].volcmd) || (pzc[iz].command)) break;
-			}
-			if (iz == nz)
-			{
-				patpos[npat] = 0;
-				continue;
-			}
+			patpos[npat] = 0;
+			continue;
 		}
+
 		fwrite(patinfo, 8, 1, f);
 		dwPos += 8;
 		memset(chnmask, 0xFF, sizeof(chnmask));
