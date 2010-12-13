@@ -53,7 +53,7 @@ public:
 
 	// Returns true if modcommand is empty, false otherwise.
 	// If ignoreEffectValues is true (default), effect values are ignored are ignored if there is no effect command present.
-	bool IsEmpty(bool ignoreEffectValues = true) const
+	bool IsEmpty(const bool ignoreEffectValues = true) const
 	{
 		if(ignoreEffectValues)
 			return (this->note == 0 && this->instr == 0 && this->volcmd == 0 && this->command == 0);
@@ -66,7 +66,7 @@ public:
 
 	// Returns true if and only if note is NOTE_PC or NOTE_PCS.
 	bool IsPcNote() const { return note == NOTE_PC || note == NOTE_PCS; }
-	static bool IsPcNote(NOTE note_id) { return note_id == NOTE_PC || note_id == NOTE_PCS; }
+	static bool IsPcNote(const NOTE note_id) { return note_id == NOTE_PC || note_id == NOTE_PCS; }
 
 	// Swap volume and effect column (doesn't do any conversion as it's mainly for importing formats with multiple effect columns, so beware!)
 	void SwapEffects()

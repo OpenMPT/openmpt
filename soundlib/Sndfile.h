@@ -470,8 +470,9 @@ struct PatternCuePoint
 	ORDERINDEX	order;			// which order is this?
 };
 
-
-class CSoundFile;
+// Data type for the visited rows routines.
+typedef vector<bool> VisitedRowsBaseType;
+typedef vector<VisitedRowsBaseType> VisitedRowsType;
 
 
 //Note: These are bit indeces. MSF <-> Mod(Specific)Flag.
@@ -553,7 +554,7 @@ private: //Misc data
 	const CModSpecifications* m_pModSpecs;
 
 	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
-	vector<vector<bool> > m_bVisitedRows;
+	VisitedRowsType m_bVisitedRows;
 
 
 
@@ -689,6 +690,7 @@ public:
 	//Returns song length in seconds.
 	DWORD GetSongTime() { return static_cast<DWORD>((m_nTempoMode == tempo_mode_alternative) ? GetLength(false) + 1.0 : GetLength(false) + 0.5); }
 
+	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
 	bool IsPaused() const {	return (m_dwSongFlags & (SONG_PAUSED|SONG_STEP)) ? true : false; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
@@ -1023,10 +1025,10 @@ public:
 
 // A couple of functions for handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
 public:
-	void InitializeVisitedRows(const bool bReset = true);
+	void InitializeVisitedRows(const bool bReset = true, VisitedRowsType *pRowVector = nullptr);
 private:
-	void SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bVisited = true);
-	bool IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bAutoSet = true);
+	void SetRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bVisited = true, VisitedRowsType *pRowVector = nullptr);
+	bool IsRowVisited(const ORDERINDEX nOrd, const ROWINDEX nRow, const bool bAutoSet = true, VisitedRowsType *pRowVector = nullptr);
 	size_t GetVisitedRowsVectorSize(const PATTERNINDEX nPat);
 
 public:
