@@ -113,7 +113,16 @@ BOOL COptionsSoundcard::OnInitDialog()
 	if (m_dwSoundSetup & SOUNDSETUP_SOFTPANNING) CheckDlgButton(IDC_CHECK2, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_ENABLEMMX) CheckDlgButton(IDC_CHECK3, MF_CHECKED);
 	if (m_dwSoundSetup & SOUNDSETUP_SECONDARY) CheckDlgButton(IDC_CHECK4, MF_CHECKED);
+	// Multimedia extensions
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), (CSoundFile::GetSysInfo() & SYSMIX_ENABLEMMX) ? TRUE : FALSE);
+	if(CSoundFile::GetSysInfo() & SYSMIX_SSE)
+	{
+		SetDlgItemText(IDC_CHECK3, _T("Enable SSE acceleration"));
+	} else if (CSoundFile::GetSysInfo() & SYSMIX_3DNOW)
+	{
+		SetDlgItemText(IDC_CHECK3, _T("Enable 3DNow! acceleration"));
+	}
+
 	// Sampling Rate
 	{
 		UINT n = 1;

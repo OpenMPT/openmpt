@@ -37,7 +37,7 @@ extern short int gDownsample2x[];
 #define PROCSUPPORT_3DNOW	0x08
 #define PROCSUPPORT_SSE		0x10
 
-
+// Byte offsets into the MODCHANNEL structure
 #define CHNOFS_PCURRENTSAMPLE	0
 #define CHNOFS_NPOS				4
 #define CHNOFS_NPOSLO			8
