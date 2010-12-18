@@ -1728,7 +1728,7 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, PVSTPLUGINLIB pFactory, PSNDMIXPLUGIN p
 
 
 void CVstPlugin::Initialize(CSoundFile* pSndFile)
-//-------------------------------------------
+//-----------------------------------------------
 {
 	if (!m_pEvList)
 	{
@@ -1759,7 +1759,38 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	m_bIsVst2 = (CVstPlugin::Dispatch(effGetVstVersion, 0,0, NULL, 0) >= 2) ? TRUE : FALSE;
     if (m_bIsVst2)
 	{
-		// Dummy pin properies collection. 
+		// Set VST speaker in/out setup to Stereo. Required for some plugins (possibly all VST 2.4+ plugins?)
+		// All this might get more interesting when adding sidechaining support...
+		VstSpeakerArrangement sa;
+		MemsetZero(sa);
+		sa.numChannels = 2;
+		sa.type = kSpeakerArrStereo;
+		for(int i = 0; i < ARRAYELEMCOUNT(sa.speakers); i++)
+		{
+			sa.speakers[i].azimuth = 0;
+			sa.speakers[i].elevation = 0;
+			sa.speakers[i].radius = 0;
+			sa.speakers[i].reserved = 0.0f;
+			// For now, only left and right speaker are used.
+			switch(i)
+			{
+			case 0:
+				sa.speakers[i].type = kSpeakerL;
+				strcpy(sa.speakers[i].name, "Left");
+				break;
+			case 1:
+				sa.speakers[i].type = kSpeakerR;
+				strcpy(sa.speakers[i].name, "Right");
+				break;
+			default:
+				sa.speakers[i].type = kSpeakerUndefined;
+				break;
+			}
+		} 
+		// For now, input setup = output setup.
+		Dispatch(effSetSpeakerArrangement, 0, (LONG_PTR)(&sa), &sa, 0.0f);
+
+		// Dummy pin properties collection. 
 		// We don't use them but some plugs might do inits in here.
 		VstPinProperties tempPinProperties;
 		Dispatch(effGetInputProperties, 0, 0, &tempPinProperties, 0);
