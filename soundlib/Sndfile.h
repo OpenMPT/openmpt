@@ -175,6 +175,7 @@ struct  MODCHANNEL_ENVINFO
 typedef struct __declspec(align(32)) _MODCHANNEL
 {
 	// First 32-bytes: Most used mixing information: don't change it
+	// These fields are accessed directly by the MMX mixing code (look out for CHNOFS_PCURRENTSAMPLE), so the order is crucial
 	LPSTR pCurrentSample;		
 	DWORD nPos;
 	DWORD nPosLo;	// actually 16-bit

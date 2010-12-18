@@ -903,7 +903,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm) //Default RowMask:
 				if (rm.note)
 				{
 					if(m->IsPcNote())
-					{  // Clear whole row if clearing PC note
+					{  // Clear whole cell if clearing PC note
 						m->Clear();
 						invalidateAllCols = true;
 					}
@@ -3707,14 +3707,14 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 								return wParam; }
 		case kcSelectWithCopySelect:
 		case kcSelectWithNav:
-		case kcSelect:			if (!(m_dwStatus & PATSTATUS_DRAGNDROPEDIT)) m_dwStartSel = (m_nRow << 16) | m_dwCursor;
+		case kcSelect:			if (!(m_dwStatus & (PATSTATUS_DRAGNDROPEDIT|PATSTATUS_SELECTROW))) m_dwStartSel = (m_nRow << 16) | m_dwCursor;
 									m_dwStatus |= PATSTATUS_KEYDRAGSEL;	return wParam;
 		case kcSelectOffWithCopySelect:
 		case kcSelectOffWithNav:
 		case kcSelectOff:		m_dwStatus &= ~PATSTATUS_KEYDRAGSEL; return wParam;
 		case kcCopySelectWithSelect:
 		case kcCopySelectWithNav:
-		case kcCopySelect:		if (!(m_dwStatus & PATSTATUS_DRAGNDROPEDIT)) m_dwStartSel = (m_nRow << 16) | m_dwCursor;
+		case kcCopySelect:		if (!(m_dwStatus & (PATSTATUS_DRAGNDROPEDIT|PATSTATUS_SELECTROW))) m_dwStartSel = (m_nRow << 16) | m_dwCursor;
 									m_dwStatus |= PATSTATUS_CTRLDRAGSEL; return wParam;
 		case kcCopySelectOffWithSelect:
 		case kcCopySelectOffWithNav:
@@ -4930,8 +4930,8 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler* ih, UINT nCh
 	AppendMenu(hMenu, (pSndFile->ChnSettings[nChn].dwFlags & CHN_MUTE) ? 
 					   (MF_STRING|MF_CHECKED) : MF_STRING, ID_PATTERN_MUTE, 
 					   "Mute Channel\t" + ih->GetKeyTextFromCommand(kcChannelMute));
-	BOOL bSolo = false, bUnmuteAll = false;
-	BOOL bSoloPending = false, bUnmuteAllPending = false; // doesn't work perfectly yet
+	bool bSolo = false, bUnmuteAll = false;
+	bool bSoloPending = false, bUnmuteAllPending = false; // doesn't work perfectly yet
 
 	for (CHANNELINDEX i = 0; i < pSndFile->m_nChannels; i++) {
 		if (i != nChn)
