@@ -31,7 +31,7 @@
 // trimming will be done. This is the minimum value for
 // selection difference, so the minimum length of result
 // of trimming is nTrimLengthMin + 1.
-const uint8 nTrimLengthMin = 16;
+#define MIN_TRIM_LENGTH			16
 
 const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] = 
 {
@@ -40,6 +40,9 @@ const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] =
 		ID_SEPARATOR,
 	ID_SAMPLE_DRAW,
 	ID_SAMPLE_ADDSILENCE,
+		ID_SEPARATOR,
+	ID_SAMPLE_GRID,
+		ID_SEPARATOR,
 };
 
 
@@ -88,6 +91,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_ZOOMDOWN,			OnZoomDown)
 	ON_COMMAND(ID_SAMPLE_DRAW,				OnDrawingToggle)
 	ON_COMMAND(ID_SAMPLE_ADDSILENCE,		OnAddSilence)
+	ON_COMMAND(ID_SAMPLE_GRID,				OnChangeGridSize)
 	ON_MESSAGE(WM_MOD_MIDIMSG,				OnMidiMsg)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
@@ -100,6 +104,7 @@ END_MESSAGE_MAP()
 CViewSample::CViewSample()
 //------------------------
 {
+	m_nGridSegments = 0;
 	m_nSample = 1;
 	m_nZoom = 0;
 	m_nScrollPos = 0;
@@ -225,12 +230,23 @@ BOOL CViewSample::SetZoom(UINT nZoom)
 void CViewSample::SetCurSel(DWORD nBegin, DWORD nEnd)
 //---------------------------------------------------
 {
+	CSoundFile *pSndFile = (GetDocument()) ? GetDocument()->GetSoundFile() : nullptr;
+	if(pSndFile == nullptr)
+		return;
+
+	// Snap to grid
+	if(m_nGridSegments > 0)
+	{
+		const float sampsPerSegment = (float)(pSndFile->Samples[m_nSample].nLength / m_nGridSegments);
+		nBegin = (DWORD)(floor((float)(nBegin / sampsPerSegment) + 0.5f) * sampsPerSegment);
+		nEnd = (DWORD)(floor((float)(nEnd / sampsPerSegment) + 0.5f) * sampsPerSegment);
+	}
+
 	if (nBegin > nEnd)
 	{
-		DWORD tmp = nBegin;
-		nBegin = nEnd;
-		nEnd = tmp;
+		std::swap(nBegin, nEnd);
 	}
+
 	if ((nBegin != m_dwBeginSel) || (nEnd != m_dwEndSel))
 	{
 		RECT rect;
@@ -272,23 +288,18 @@ void CViewSample::SetCurSel(DWORD nBegin, DWORD nEnd)
 			s[0] = 0;
 			if (m_dwEndSel > m_dwBeginSel)
 			{
-				CModDoc *pModDoc = GetDocument();
 				wsprintf(s, "[%d,%d]", m_dwBeginSel, m_dwEndSel);
-				if (pModDoc)
+				LONG lSampleRate = pSndFile->Samples[m_nSample].nC5Speed;
+				if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
 				{
-					CSoundFile *pSndFile = pModDoc->GetSoundFile();
-					LONG lSampleRate = pSndFile->Samples[m_nSample].nC5Speed;
-					if (pSndFile->m_nType & (MOD_TYPE_MOD|MOD_TYPE_XM))
-					{
-						lSampleRate = CSoundFile::TransposeToFrequency(pSndFile->Samples[m_nSample].RelativeTone, pSndFile->Samples[m_nSample].nFineTune);
-					}
-					if (!lSampleRate) lSampleRate = 8363;
-					ULONG msec = ((ULONG)(m_dwEndSel - m_dwBeginSel) * 1000) / lSampleRate;
-					if (msec < 1000)
-						wsprintf(s+strlen(s), " (%lums)", msec);
-					else
-						wsprintf(s+strlen(s), " (%lu.%lus)", msec/1000, (msec/100) % 10);
+					lSampleRate = CSoundFile::TransposeToFrequency(pSndFile->Samples[m_nSample].RelativeTone, pSndFile->Samples[m_nSample].nFineTune);
 				}
+				if (!lSampleRate) lSampleRate = 8363;
+				ULONG msec = ((ULONG)(m_dwEndSel - m_dwBeginSel) * 1000) / lSampleRate;
+				if (msec < 1000)
+					wsprintf(s+strlen(s), " (%lums)", msec);
+				else
+					wsprintf(s+strlen(s), " (%lu.%lus)", msec/1000, (msec/100) % 10);
 			}
 			pMainFrm->SetInfoText(s);
 		}
@@ -1009,6 +1020,7 @@ void CViewSample::DrawNcButton(CDC *pDC, UINT nBtn)
 		case ID_SAMPLE_ZOOMDOWN:	nImage = SIMAGE_ZOOMDOWN; break;
 		case ID_SAMPLE_DRAW:		nImage = (dwStyle & NCBTNS_DISABLED) ? SIMAGE_NODRAW : SIMAGE_DRAW; break;
 		case ID_SAMPLE_ADDSILENCE:	nImage = SIMAGE_RESIZE; break;
+		case ID_SAMPLE_GRID:		nImage = SIMAGE_GRID; break;
 		}
 		pDC->Draw3dRect(rect.left-1, rect.top-1, SMP_LEFTBAR_CXBTN+2, SMP_LEFTBAR_CYBTN+2, c3, c4);
 		pDC->Draw3dRect(rect.left, rect.top, SMP_LEFTBAR_CXBTN, SMP_LEFTBAR_CYBTN, c1, c2);
@@ -1481,7 +1493,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			// "Trim" menu item is responding differently if there's no selection,
 			// but a loop present: "trim around loop point"! (jojo in topic 2258)
 			std::string sTrimMenuText = "Trim";
-			bool bIsGrayed = ( (m_dwEndSel<=m_dwBeginSel) || (m_dwEndSel - m_dwBeginSel < nTrimLengthMin)
+			bool bIsGrayed = ( (m_dwEndSel<=m_dwBeginSel) || (m_dwEndSel - m_dwBeginSel < MIN_TRIM_LENGTH)
 								|| (m_dwEndSel - m_dwBeginSel == pSmp->nLength)
 							  );
 
@@ -1491,7 +1503,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				sTrimMenuText += " around loop points";
 				// Check whether trim menu item can be enabled (loop not too short or long for trimming).
 				if( (pSmp->nLoopEnd <= pSmp->nLength) &&
-					(pSmp->nLoopEnd - pSmp->nLoopStart >= nTrimLengthMin) &&
+					(pSmp->nLoopEnd - pSmp->nLoopStart >= MIN_TRIM_LENGTH) &&
 					(pSmp->nLoopEnd - pSmp->nLoopStart < pSmp->nLength) )
 					bIsGrayed = false;
 			}
@@ -2055,7 +2067,7 @@ void CViewSample::OnSampleTrim()
 	UINT nStart = m_dwBeginSel;
 	UINT nEnd = m_dwEndSel - m_dwBeginSel;
 
-	if ((pSmp->pSample) && (nStart+nEnd <= pSmp->nLength) && (nEnd >= nTrimLengthMin))
+	if ((pSmp->pSample) && (nStart+nEnd <= pSmp->nLength) && (nEnd >= MIN_TRIM_LENGTH))
 	{
 		pModDoc->GetSampleUndo()->PrepareUndo(m_nSample, sundo_replace);
 		BEGIN_CRITICAL();
@@ -2355,7 +2367,7 @@ void CViewSample::OnSetLoopStart()
 			if(pSmp->uFlags & CHN_LOOP)
 			{
 				/* only update sample buffer if the loop is actually enabled
-				(resets sound without any reason otherwise) - bug report 1874 */
+				(resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0 */
 				pModDoc->AdjustEndOfSample(m_nSample);
 			}
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
@@ -2380,7 +2392,7 @@ void CViewSample::OnSetLoopEnd()
 			if(pSmp->uFlags & CHN_LOOP)
 			{
 				/* only update sample buffer if the loop is actually enabled
-				(resets sound without any reason otherwise) - bug report 1874 */
+				(resets sound without any reason otherwise) - http://forum.openmpt.org/index.php?topic=1874.0 */
 				pModDoc->AdjustEndOfSample(m_nSample);
 			}
 			pModDoc->UpdateAllViews(NULL, (m_nSample << HINT_SHIFT_SMP) | HINT_SAMPLEINFO | HINT_SAMPLEDATA, NULL);
@@ -2702,4 +2714,16 @@ BOOL CViewSample::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	}
 
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+
+void CViewSample::OnChangeGridSize()
+//----------------------------------
+{
+	CSampleGridDlg dlg(this, m_nGridSegments, GetDocument()->GetSoundFile()->Samples[m_nSample].nLength);
+	if(dlg.DoModal() == IDOK)
+	{
+		m_nGridSegments = dlg.m_nSegments;
+		InvalidateSample();
+	}
 }

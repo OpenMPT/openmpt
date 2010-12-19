@@ -5,7 +5,7 @@
 #define SMPSTATUS_KEYDOWN		0x02
 #define SMPSTATUS_NCLBTNDOWN	0x04
 
-#define SMP_LEFTBAR_BUTTONS		5
+#define SMP_LEFTBAR_BUTTONS		8
 
 //======================================
 class CViewSample: public CModScrollView
@@ -21,6 +21,7 @@ protected:
 	DWORD m_dwMenuParam;
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	DWORD m_dwNotifyPos[MAX_CHANNELS];
+	int m_nGridSegments;
 
 	bool m_bDrawingEnabled;	// sample drawing mode enabled?
 	CPoint m_lastDrawPoint;	// for drawing horizontal lines
@@ -123,6 +124,7 @@ protected:
 	afx_msg void OnZoomDown();
 	afx_msg void OnDrawingToggle();
 	afx_msg void OnAddSilence();
+	afx_msg void OnChangeGridSize();
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);

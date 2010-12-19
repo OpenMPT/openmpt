@@ -447,6 +447,27 @@ public:
 };
 
 
+//==================================
+class CSampleGridDlg: public CDialog
+//==================================
+{
+public:
+	int m_nSegments, m_nMaxSegments;
+
+protected:
+	CEdit m_EditSegments;
+	CSpinButtonCtrl m_SpinSegments;
+
+public:
+	CSampleGridDlg(CWnd *parent, int nSegments, int nMaxSegments) : CDialog(IDD_SAMPLE_GRID_SIZE, parent) { m_nSegments = nSegments; m_nMaxSegments = nMaxSegments; };
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+};
+
+
 
 ////////////////////////////////////////////////////////////////////////
 // Sound Banks
