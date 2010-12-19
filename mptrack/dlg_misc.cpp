@@ -526,7 +526,7 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult)
 		strTipText = "Gxx and Exx/Fxx won't share effect memory. Gxx resets instrument envelopes.";
 		break;
 	case IDC_CHECK5:
-		strTipText = "The resonant filter's frequency range is incresed from about 4KHz to 10KHz.";
+		strTipText = "The resonant filter's frequency range is increased from about 4KHz to 10KHz.";
 		break;
 	case IDC_CHECK6:
 		strTipText = "The instrument settings of the external ITI files will be ignored.";
@@ -1871,6 +1871,39 @@ enmAddSilenceOptions CAddSilenceDlg::GetEditMode()
 	else if(IsDlgButtonChecked(IDC_RADIO_RESIZETO)) return addsilence_resize;
 	return addsilence_at_end;
 }
+
+
+void CSampleGridDlg::DoDataExchange(CDataExchange* pDX)
+//-----------------------------------------------------
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CSampleGridDlg)
+	DDX_Control(pDX, IDC_EDIT1,			m_EditSegments);
+	DDX_Control(pDX, IDC_SPIN1,			m_SpinSegments);
+	//}}AFX_DATA_MAP
+}
+
+
+BOOL CSampleGridDlg::OnInitDialog()
+//---------------------------------
+{
+	CDialog::OnInitDialog();
+	m_SpinSegments.SetRange32(0, m_nMaxSegments);
+	m_SpinSegments.SetPos(m_nSegments);
+	SetDlgItemInt(IDC_EDIT1, m_nSegments, FALSE);
+	GetDlgItem(IDC_EDIT1)->SetFocus();
+	return TRUE;
+}
+
+
+void CSampleGridDlg::OnOK()
+//-------------------------
+{
+	m_nSegments = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
+	CDialog::OnOK();
+}
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
