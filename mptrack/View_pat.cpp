@@ -2566,47 +2566,7 @@ void CViewPattern::OnDropSelection()
 void CViewPattern::OnSetSelInstrument()
 //-------------------------------------
 {
-	CModDoc *pModDoc;
-	CSoundFile *pSndFile;
-	BYTE nIns = static_cast<BYTE>(GetCurrentInstrument());
-	MODCOMMAND *p;
-	BOOL bModified;
-
-	if (!nIns) return;
-	if ((pModDoc = GetDocument()) == NULL) return;
-	pSndFile = pModDoc->GetSoundFile();
-	if(!pSndFile) return;
-	p = pSndFile->Patterns[m_nPattern];
-	if (!p) return;
-	BeginWaitCursor();
-	PrepareUndo(m_dwBeginSel, m_dwEndSel);
-	bModified = FALSE;
-
-	//rewbs: re-written to work regardless of selection
-	UINT startRow  = GetSelectionStartRow();
-	UINT endRow    = GetSelectionEndRow();
-	UINT startChan = GetSelectionStartChan();
-	UINT endChan   = GetSelectionEndChan();
-
-	for (UINT r=startRow; r<endRow+1; r++) {
-		for (UINT c=startChan; c<endChan+1; c++) {
-
-			p = pSndFile->Patterns[m_nPattern] + r * pSndFile->m_nChannels + c;
-			// If a note or an instr is present on the row, do the change, if required.
-			// Do not set instr if note and instr are both blank.
-			// Do set instr if note is a PC note and instr is blank.
-			if ( ((p->note > 0 && p->note < NOTE_MIN_SPECIAL) || p->IsPcNote() || p->instr) && (p->instr!=nIns) ) {
-				p->instr = nIns;
-				bModified = TRUE;
-			}
-		}
-	}
-
-	if (bModified)	{
-		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
-	}
-	EndWaitCursor();
+	SetSelectionInstrument(GetCurrentInstrument());
 }
 
 void CViewPattern::OnRemoveChannelDialog()
@@ -4794,18 +4754,15 @@ void CViewPattern::TogglePluginEditor(int chan)
 void CViewPattern::OnSelectInstrument(UINT nID)
 //---------------------------------------------
 {
-	UINT o_inst = GetCurrentInstrument();
-	UINT n_inst = nID-ID_CHANGE_INSTRUMENT;
+	const UINT newIns = nID - ID_CHANGE_INSTRUMENT;
 
-	if (n_inst == 0)
+	if (newIns == 0)
 	{
 		RowMask sp = {0,1,0,0,0};    // Setup mask to only clear instrument data in OnClearSelection
 		OnClearSelection(false, sp); // Clears instrument selection from pattern
 	} else
 	{
-		SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, n_inst);
-		OnSetSelInstrument();
-		SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, o_inst); //Restoring old instrument.
+		SetSelectionInstrument(newIns);
 	}
 }
 
@@ -5619,4 +5576,52 @@ ROWINDEX CViewPattern::GetRowsPerMeasure() const
 		return pSndFile->m_nDefaultRowsPerMeasure;
 	else
 		return pSndFile->Patterns[m_nPattern].GetRowsPerMeasure();
+}
+
+
+void CViewPattern::SetSelectionInstrument(const INSTRUMENTINDEX nIns)
+//-------------------------------------------------------------------
+{
+	CModDoc *pModDoc;
+	CSoundFile *pSndFile;
+	MODCOMMAND *p;
+	bool bModified = false;
+
+	if (!nIns) return;
+	if ((pModDoc = GetDocument()) == nullptr) return;
+	pSndFile = pModDoc->GetSoundFile();
+	if(!pSndFile) return;
+	p = pSndFile->Patterns[m_nPattern];
+	if (!p) return;
+	BeginWaitCursor();
+	PrepareUndo(m_dwBeginSel, m_dwEndSel);
+
+	//rewbs: re-written to work regardless of selection
+	UINT startRow  = GetSelectionStartRow();
+	UINT endRow    = GetSelectionEndRow();
+	UINT startChan = GetSelectionStartChan();
+	UINT endChan   = GetSelectionEndChan();
+
+	for (UINT r=startRow; r<endRow+1; r++)
+	{
+		p = pSndFile->Patterns[m_nPattern] + r * pSndFile->m_nChannels + startChan;
+		for (UINT c = startChan; c < endChan + 1; c++, p++)
+		{
+			// If a note or an instr is present on the row, do the change, if required.
+			// Do not set instr if note and instr are both blank.
+			// Do set instr if note is a PC note and instr is blank.
+			if ( ((p->note > 0 && p->note < NOTE_MIN_SPECIAL) || p->IsPcNote() || p->instr) && (p->instr!=nIns) )
+			{
+				p->instr = nIns;
+				bModified = true;
+			}
+		}
+	}
+
+	if (bModified)
+	{
+		pModDoc->SetModified();
+		pModDoc->UpdateAllViews(NULL, HINT_PATTERNDATA | (m_nPattern << HINT_SHIFT_PAT), NULL);
+	}
+	EndWaitCursor();
 }

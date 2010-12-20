@@ -206,6 +206,7 @@ public:
 	void SetSpacing(int n);
 	void OnClearField(int, bool, bool=false);
 	void InsertRows(UINT colmin, UINT colmax);
+	void SetSelectionInstrument(const INSTRUMENTINDEX nIns);
 	//end rewbs.customKeys
 
 	void TogglePluginEditor(int chan); //rewbs.patPlugName
