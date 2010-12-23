@@ -1187,6 +1187,7 @@ CEditCommand::CEditCommand()
 	m_pageNote = NULL;
 	m_pageVolume = NULL;
 	m_pageEffect = NULL;
+	m_bModified = false;
 }
 
 
@@ -1301,6 +1302,11 @@ void CEditCommand::UpdateNote(UINT note, UINT instr)
 	MODCOMMAND *m = pSndFile->Patterns[m_nPattern]+m_nRow*pSndFile->m_nChannels+m_nChannel;
 	if ((m->note != note) || (m->instr != instr))
 	{
+		if(!m_bModified)	// let's create just one undo step.
+		{
+			m_pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
+			m_bModified = true;
+		}
 		m->note = note;
 		m->instr = instr;
 		m_Command = *m;
@@ -1325,6 +1331,11 @@ void CEditCommand::UpdateVolume(UINT volcmd, UINT vol)
 	MODCOMMAND *m = pSndFile->Patterns[m_nPattern]+m_nRow*pSndFile->m_nChannels+m_nChannel;
 	if ((m->volcmd != volcmd) || (m->vol != vol))
 	{
+		if(!m_bModified)	// let's create just one undo step.
+		{
+			m_pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
+			m_bModified = true;
+		}
 		m->volcmd = volcmd;
 		m->vol = vol;
 		m_pModDoc->SetModified();
@@ -1359,6 +1370,11 @@ void CEditCommand::UpdateEffect(UINT command, UINT param)
 
 	if ((m->command != command) || (m->param != param))
 	{
+		if(!m_bModified)	// let's create just one undo step.
+		{
+			m_pModDoc->GetPatternUndo()->PrepareUndo(m_nPattern, m_nChannel, m_nRow, 1, 1);
+			m_bModified = true;
+		}
 		m->command = command;
 		m->param = param;
 		m_pModDoc->SetModified();
@@ -1386,7 +1402,7 @@ BOOL CPageEditCommand::OnInitDialog()
 //-----------------------------------
 {
 	CPropertyPage::OnInitDialog();
-	m_bInitialized = TRUE;
+	m_bInitialized = true;
 	UpdateDialog();
 	return TRUE;
 }

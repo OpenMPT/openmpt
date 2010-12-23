@@ -255,10 +255,10 @@ class CPageEditCommand: public CPropertyPage
 protected:
 	CModDoc *m_pModDoc;
 	CEditCommand *m_pParent;
-	BOOL m_bInitialized;
+	bool m_bInitialized;
 
 public:
-	CPageEditCommand(CModDoc *pModDoc, CEditCommand *parent, UINT id):CPropertyPage(id) { m_pModDoc = pModDoc; m_pParent = parent; m_bInitialized = FALSE; }
+	CPageEditCommand(CModDoc *pModDoc, CEditCommand *parent, UINT id):CPropertyPage(id) { m_pModDoc = pModDoc; m_pParent = parent; m_bInitialized = false; }
 	virtual ~CPageEditCommand() {}
 	virtual BOOL OnInitDialog();
 	virtual void Init(MODCOMMAND&)=0;
@@ -358,6 +358,7 @@ protected:
 	HWND m_hWndView;
 	UINT m_nPattern, m_nRow, m_nChannel;
 	MODCOMMAND m_Command;
+	bool m_bModified;
 
 public:
 	CEditCommand();
