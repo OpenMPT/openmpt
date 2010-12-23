@@ -11,31 +11,21 @@
 #ifndef NO_VST
 
 COwnerVstEditor::COwnerVstEditor(CVstPlugin *pPlugin) : CAbstractVstEditor(pPlugin)
-//-----------------------------------------
+//---------------------------------------------------------------------------------
 {
 
 }
 
 
 COwnerVstEditor::~COwnerVstEditor()
-//-----------------------
+//---------------------------------
 {
 
 }
 
-#pragma pack(push, 1)
-typedef struct _ERect
-{
-	short top;
-	short left;
-	short bottom;
-	short right;
-} ERect, *PERect;
-#pragma pack(pop)
-
 
 BOOL COwnerVstEditor::OpenEditor(CWnd *parent)
-//---------------------------------------
+//--------------------------------------------
 {
 	Create(IDD_PLUGINEDITOR, parent);
 	SetupMenu();
@@ -81,21 +71,21 @@ BOOL COwnerVstEditor::OpenEditor(CWnd *parent)
 
 
 VOID COwnerVstEditor::OnClose()
-//------------------------
+//-----------------------------
 {
 	DoClose();
 }
 
 
 VOID COwnerVstEditor::OnOK()
-//---------------------
+//--------------------------
 {
 	OnClose();
 }
 
 
 VOID COwnerVstEditor::OnCancel()
-//-------------------------
+//------------------------------
 {
 	OnClose();
 }
@@ -103,7 +93,7 @@ VOID COwnerVstEditor::OnCancel()
 
 
 VOID COwnerVstEditor::DoClose()
-//------------------------
+//-----------------------------
 {
 #ifdef VST_LOG
 	Log("CVstEditor::DoClose()\n");

@@ -2,7 +2,9 @@
 #define _VST_PLUGIN_MANAGER_H_
 
 #ifndef NO_VST
+	#define VST_FORCE_DEPRECATED 0
 	#include <aeffectx.h>			// VST
+	#include <vstfxstore.h>
 #endif
 
 #define kBuzzMagic	'Buzz'
@@ -66,7 +68,7 @@ protected:
 	PVSTPLUGINLIB m_pFactory;
 	PSNDMIXPLUGIN m_pMixStruct;
 	AEffect *m_pEffect;
-	void (*m_pProcessFP)(AEffect*, float**, float**, long); //Function pointer to AEffect processReplacing if supported, else process.
+	void (*m_pProcessFP)(AEffect*, float**, float**, VstInt32); //Function pointer to AEffect processReplacing if supported, else process.
 	CAbstractVstEditor *m_pEditor;		//rewbs.defaultPlugGUI
 	UINT m_nSampleRate;
 	BOOL m_bIsVst2;
@@ -110,10 +112,10 @@ public:
 	long GetProgramNameIndexed(long index, long category, char *text);	//rewbs.VSTpresets
 	bool LoadProgram(CString fileName);
 	bool SaveProgram(CString fileName);
-	long GetUID();			//rewbs.VSTpresets
-	long GetVersion();		//rewbs.VSTpresets
-	bool GetParams(float* param, long min, long max); 	//rewbs.VSTpresets
-	bool RandomizeParams(long minParam=0, long maxParam=0); 	//rewbs.VSTpresets
+	VstInt32 GetUID();			//rewbs.VSTpresets
+	VstInt32 GetVersion();		//rewbs.VSTpresets
+	bool GetParams(float* param, VstInt32 min, VstInt32 max); 	//rewbs.VSTpresets
+	bool RandomizeParams(VstInt32 minParam = 0, VstInt32 maxParam = 0); 	//rewbs.VSTpresets
 	bool isModified() {return m_bModified;}
 	inline CModDoc* GetModDoc() {return m_pModDoc;}
 	inline CSoundFile* GetSoundFile() {return m_pSndFile;}
@@ -135,7 +137,7 @@ public:
 	VOID GetParamName(UINT nIndex, LPSTR pszName, UINT cbSize);
 	VOID GetParamLabel(UINT nIndex, LPSTR pszLabel);
 	VOID GetParamDisplay(UINT nIndex, LPSTR pszDisplay);
-	long Dispatch(long opCode, long index, long value, void *ptr, float opt);
+	VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	VOID ToggleEditor();
 	VOID GetPluginType(LPSTR pszType);
 	BOOL GetDefaultEffectName(LPSTR pszName);
@@ -245,16 +247,16 @@ protected:
 	VOID EnumerateDirectXDMOs();
 
 protected:
-	long VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
-	long VstFileSelector(const bool destructor, VstFileSelect *pFileSel, const AEffect *effect);
-	static long VSTCALLBACK MasterCallBack(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
+	VstIntPtr VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	VstIntPtr VstFileSelector(const bool destructor, VstFileSelect *pFileSel, const AEffect *effect);
+	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
 	static BOOL __cdecl CreateMixPluginProc(PSNDMIXPLUGIN, CSoundFile*);
 	VstTimeInfo timeInfo;	//rewbs.VSTcompliance
 
 public:
 	static char s_szHostProductString[64];
 	static char s_szHostVendorString[64];
-	static long s_nHostVendorVersion;
+	static VstIntPtr s_nHostVendorVersion;
 
 #else // NO_VST
 public:

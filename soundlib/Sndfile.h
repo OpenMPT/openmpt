@@ -19,6 +19,15 @@
 #include "Snd_defs.h"
 #include "Endianness.h"
 
+// For VstInt32 and stuff - a stupid workaround for IMixPlugin.
+#ifndef NO_VST
+#define VST_FORCE_DEPRECATED 0
+#include <aeffect.h>			// VST
+#else
+typedef int32 VstInt32;
+typedef int32 VstIntPtr;
+#endif
+
 class CTuningBase;
 typedef CTuningBase CTuning;
 
@@ -288,7 +297,7 @@ struct MODCHANNELSETTINGS
 // Mix Plugins
 #define MIXPLUG_MIXREADY			0x01	// Set when cleared
 
-typedef long PlugParamIndex;
+typedef VstInt32 PlugParamIndex;
 typedef float PlugParamValue;
 
 class IMixPlugin
@@ -313,7 +322,7 @@ public:
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
 	virtual UINT GetZxxParameter(UINT nParam) = 0; //rewbs.smoothVST 
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
-	virtual long Dispatch(long opCode, long index, long value, void *ptr, float opt) =0; //rewbs.VSTCompliance
+	virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt) =0; //rewbs.VSTCompliance
 	virtual void NotifySongPlaying(bool)=0;	//rewbs.VSTCompliance
 	virtual bool IsSongPlaying()=0;
 	virtual bool IsResumed()=0;

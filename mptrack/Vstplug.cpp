@@ -26,7 +26,7 @@
 
 char CVstPluginManager::s_szHostProductString[64] = "OpenMPT";
 char CVstPluginManager::s_szHostVendorString[64] = "OpenMPT project";
-long CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
+VstIntPtr CVstPluginManager::s_nHostVendorVersion = MptVersion::num;
 
 //#define VST_LOG
 //#define ENABLE_BUZZ
@@ -54,8 +54,8 @@ UINT32 CalculateCRC32fromFilename(const char * s)
 }
 #endif
 
-long VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect,	long opcode, long index, long value, void *ptr, float opt)
-//----------------------------------------------------------------------------------------------------------------------------
+VstIntPtr VSTCALLBACK CVstPluginManager::MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+//----------------------------------------------------------------------------------------------------------------------------------------------
 {
 	CVstPluginManager *that = theApp.GetPluginManager();
 	if (that)
@@ -640,8 +640,8 @@ VOID CVstPluginManager::OnIdle()
 }
 
 //rewbs.VSTCompliance: Added support for lots of opcodes
-long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, long value, void *ptr, float /*opt*/)
-//-------------------------------------------------------------------------------------------------------------
+VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float /*opt*/)
+//-----------------------------------------------------------------------------------------------------------------------------------
 {
 	#ifdef VST_LOG
 	Log("VST plugin to host: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n",(int)effect, opcode,index,value,(int)ptr,opt);
@@ -706,7 +706,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		}
 		return 0; 
 	// Called when plugin asks for VST version supported by host
-	case audioMasterVersion:	return 2300;
+	case audioMasterVersion:	return kVstVersion;
 	// Returns the unique id of a plug that's currently loading
 	// (not sure what this is actually for - we return *effect's UID, cos Herman Seib does something similar :)
 	//  Let's see what happens...)
@@ -789,7 +789,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 				timeInfo.timeSigDenominator = 4; //gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
 		}
-		return (long)&timeInfo;
+		return (VstIntPtr)&timeInfo;
 	}
 	// VstEvents* in <ptr>
 	// We don't support plugs that send VSTEvents to the host
@@ -861,7 +861,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		break;
 	case audioMasterGetOutputLatency:
 		{
-			long latency = CMainFrame::GetMainFrame()->m_nBufferLength*(CMainFrame::GetMainFrame()->GetSampleRate()/1000L);
+			VstIntPtr latency = CMainFrame::GetMainFrame()->m_nBufferLength * (CMainFrame::GetMainFrame()->GetSampleRate()/1000L);
 			return latency;
 		}
 	// input pin in <value> (-1: first to come), returns cEffect*
@@ -946,12 +946,15 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		//"asyncProcessing",
 		//"offline",
 		//"supportShell"
+		//"editFile"
+		//"startStopProcess"
 		if ((strcmp((char*)ptr,"sendVstEvents") == 0 ||
 				strcmp((char*)ptr,"sendVstMidiEvent") == 0 ||
 				strcmp((char*)ptr,"sendVstTimeInfo") == 0 ||
 				strcmp((char*)ptr,"supplyIdle") == 0 || 
 				strcmp((char*)ptr,"sizeWindow") == 0 ||
-				strcmp((char*)ptr,"openFileSelector") == 0
+				strcmp((char*)ptr,"openFileSelector") == 0 ||
+				strcmp((char*)ptr,"closeFileSelector") == 0
 			))
 			return HostCanDo;
 		else
@@ -990,6 +993,7 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 		return 0;
 
 	//---from here VST 2.1 extension opcodes------------------------------------------------------
+
 	// begin of automation session (when mouse down), parameter index in <index>
 	case audioMasterBeginEdit:
 		Log("VST plugin to host: Begin Edit\n");
@@ -1001,26 +1005,36 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 	// open a fileselector window with VstFileSelect* in <ptr>
 	case audioMasterOpenFileSelector:
 	//---from here VST 2.2 extension opcodes------------------------------------------------------
+
 	// close a fileselector operation with VstFileSelect* in <ptr>: Must be always called after an open !
 	case audioMasterCloseFileSelector:
 		return VstFileSelector(opcode == audioMasterCloseFileSelector, (VstFileSelect *)ptr, effect);
 	
-	// open an editor for audio (defined by XML text in ptr)
+	// open an editor for audio (defined by XML text in ptr) - DEPRECATED
 	case audioMasterEditFile:				
 		Log("VST plugin to host: Edit File\n");
 		break;
 	// get the native path of currently loading bank or project
-	// (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec))
+	// (called from writeChunk) void* in <ptr> (char[2048], or sizeof(FSSpec)) - DEPRECATED
 	case audioMasterGetChunkFile:			
 		Log("VST plugin to host: Get Chunk File\n");
 		break;
 										
 	//---from here VST 2.3 extension opcodes------------------------------------------------------
-	// result a VstSpeakerArrangement in ret
+
+	// result a VstSpeakerArrangement in ret - DEPRECATED
 	case audioMasterGetInputSpeakerArrangement:	
 		Log("VST plugin to host: Get Input Speaker Arrangement\n");
 		break;
+
+	//---from here VST 2.4 extension opcodes------------------------------------------------------
+
+	// Floating point processing precision
+	case effSetProcessPrecision:
+		return kVstProcessPrecision32;
+
 	}
+
 	// Unknown codes:
 
 	return 0;
@@ -1029,8 +1043,8 @@ long CVstPluginManager::VstCallback(AEffect *effect, long opcode, long index, lo
 
 
 // Helper function for file selection dialog stuff.
-long CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelect *pFileSel, const AEffect *effect)
-//------------------------------------------------------------------------------------------------------------
+VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelect *pFileSel, const AEffect *effect)
+//-----------------------------------------------------------------------------------------------------------------
 {
 	if(pFileSel == nullptr)
 	{
@@ -1304,8 +1318,8 @@ typedef struct _PROBLEMATIC_PLUG
 #define NUM_PROBLEMPLUGS 3
 static _PROBLEMATIC_PLUG gProblemPlugs[NUM_PROBLEMPLUGS] =
 {
-	{'VstP', 'Ni4S', 1, "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5.  *"},
-	{'VstP', 'mdaC', 1, "MDA Degrade", "*  This plugin can cause OpenMPT to behave erratically.\r\nYou should try SoundHack's Decimate, ConcreteFX's Lowbit or Subtek's LoFi Plus instead.  *"},
+	{kEffectMagic, CCONST('N', 'i', '4', 'S'), 1, "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5.  *"},
+	{kEffectMagic, CCONST('m', 'd', 'a', 'C'), 1, "MDA Degrade", "*  This plugin can cause OpenMPT to behave erratically.\r\nYou should try SoundHack's Decimate, ConcreteFX's Lowbit or Subtek's LoFi Plus instead.  *"},
 };
 
 bool CSelectPluginDlg::VerifyPlug(PVSTPLUGINLIB plug) 
@@ -1368,7 +1382,7 @@ VOID CSelectPluginDlg::OnOK()
 			switch(m_pPlugin->Info.dwPluginId2)
 			{
 			// Enable drymix by default for these known plugins
-			case 'Scop':
+			case CCONST('S', 'c', 'o', 'p'):
 				m_pPlugin->Info.dwInputRouting |= MIXPLUG_INPUTF_WETMIX;
 				break;
 			}
@@ -1748,7 +1762,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	//Assuming 32bit address space...
-    m_pEffect->resvd1=(long)this;
+    m_pEffect->resvd1=(VstIntPtr)this;
 	//rewbs.plugDocAware
 	m_pSndFile = pSndFile;
 	m_pModDoc = pSndFile->GetpModDoc();
@@ -1767,20 +1781,20 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 		sa.type = kSpeakerArrStereo;
 		for(int i = 0; i < ARRAYELEMCOUNT(sa.speakers); i++)
 		{
-			sa.speakers[i].azimuth = 0;
-			sa.speakers[i].elevation = 0;
-			sa.speakers[i].radius = 0;
+			sa.speakers[i].azimuth = 0.0f;
+			sa.speakers[i].elevation = 0.0f;
+			sa.speakers[i].radius = 0.0f;
 			sa.speakers[i].reserved = 0.0f;
 			// For now, only left and right speaker are used.
 			switch(i)
 			{
 			case 0:
 				sa.speakers[i].type = kSpeakerL;
-				strcpy(sa.speakers[i].name, "Left");
+				vst_strncpy(sa.speakers[i].name, "Left", kVstMaxNameLen - 1);
 				break;
 			case 1:
 				sa.speakers[i].type = kSpeakerR;
-				strcpy(sa.speakers[i].name, "Right");
+				vst_strncpy(sa.speakers[i].name, "Right", kVstMaxNameLen - 1);
 				break;
 			default:
 				sa.speakers[i].type = kSpeakerUndefined;
@@ -1788,7 +1802,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 			}
 		} 
 		// For now, input setup = output setup.
-		Dispatch(effSetSpeakerArrangement, 0, (LONG_PTR)(&sa), &sa, 0.0f);
+		Dispatch(effSetSpeakerArrangement, 0, (VstIntPtr)(&sa), &sa, 0.0f);
 
 		// Dummy pin properties collection. 
 		// We don't use them but some plugs might do inits in here.
@@ -1989,16 +2003,16 @@ long CVstPlugin::GetNumParameters()
 }
 
 //rewbs.VSTpresets
-long CVstPlugin::GetUID()
-//-----------------------
+VstInt32 CVstPlugin::GetUID()
+//---------------------------
 {
 	if (!(m_pEffect))
 		return 0;
 	return m_pEffect->uniqueID;
 }
 
-long CVstPlugin::GetVersion()
-//-----------------------
+VstInt32 CVstPlugin::GetVersion()
+//-------------------------------
 {
 	if (!(m_pEffect))
 		return 0;
@@ -2006,8 +2020,8 @@ long CVstPlugin::GetVersion()
 	return m_pEffect->version;
 }
 
-bool CVstPlugin::GetParams(float *param, long min, long max)
-//----------------------------------------------------------
+bool CVstPlugin::GetParams(float *param, VstInt32 min, VstInt32 max)
+//------------------------------------------------------------------
 {
 	if (!(m_pEffect))
 		return false;
@@ -2015,15 +2029,15 @@ bool CVstPlugin::GetParams(float *param, long min, long max)
 	if (max>m_pEffect->numParams)
 		max = m_pEffect->numParams;
 
-	for (long p=min; p<max; p++)
+	for (VstInt32 p = min; p < max; p++)
 		param[p-min]=GetParameter(p);
 
 	return true;	
 
 }
 
-bool CVstPlugin::RandomizeParams(long minParam, long maxParam)
-//------------------------------------------------------------
+bool CVstPlugin::RandomizeParams(VstInt32 minParam, VstInt32 maxParam)
+//--------------------------------------------------------------------
 {
 	if (!(m_pEffect))
 		return false;
@@ -2039,7 +2053,7 @@ bool CVstPlugin::RandomizeParams(long minParam, long maxParam)
 		maxParam=m_pEffect->numParams;
 	}
 
-	for (long p=minParam; p<maxParam; p++)
+	for (VstInt32 p = minParam; p < maxParam; p++)
 		SetParameter(p, (rand() / float(RAND_MAX)));
 
 	return true;	
@@ -2095,14 +2109,14 @@ bool CVstPlugin::LoadProgram(CString fileName)
 	if (m_pEffect->uniqueID != fxp.fxID)
 		return false;
 
-	if (fxp.fxMagic == 'FxCk') //Load preset based fxp 
+	if (fxp.fxMagic == fMagic) //Load preset based fxp 
 	{
 		if (m_pEffect->numParams != fxp.numParams)
 			return false;
 		for (int p=0; p<fxp.numParams; p++)
 			SetParameter(p, fxp.params[p]);
 	}
-	else if (fxp.fxMagic == 'FPCh')
+	else if (fxp.fxMagic == chunkPresetMagic)
 	{			
 		Dispatch(effSetChunk, 1, fxp.chunkSize, (BYTE*)fxp.chunk, 0);
 	}
@@ -2111,8 +2125,8 @@ bool CVstPlugin::LoadProgram(CString fileName)
 }
 //end rewbs.VSTpresets
 
-long CVstPlugin::Dispatch(long opCode, long index, long value, void *ptr, float opt)
-//----------------------------------------------------------------------------------
+VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+//----------------------------------------------------------------------------------------------------
 {
 	long lresult = 0;
 
@@ -3009,7 +3023,7 @@ void CVstPlugin::SaveAllParameters()
 
 		if ((m_pEffect->flags & effFlagsProgramChunks)
 		 && (Dispatch(effIdentify, 0,0, NULL, 0) == 'NvEf')
-		 && (m_pEffect->uniqueID != 'Sytr')) //special case: imageline sytrus pretends to support chunks but gives us garbage.
+		 && (m_pEffect->uniqueID != CCONST('S', 'y', 't', 'r'))) //special case: imageline sytrus pretends to support chunks but gives us garbage.
 		{
 			PVOID p = NULL;
 			LONG nByteSize = 0; 
@@ -3417,16 +3431,16 @@ public:
 	CBuzz2Vst(CMachineInterface *, const CMachineInfo *);
 	~CBuzz2Vst();
 	AEffect *GetEffect() { return &m_Effect; }
-	long Dispatcher(long opCode, long index, long value, void *ptr, float opt);
-	void SetParameter(long index, float parameter);
-	float GetParameter(long index);
+	VstIntPtr Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	void SetParameter(VstInt32 index, float parameter);
+	float GetParameter(VstInt32 index);
 	void Process(float **inputs, float **outputs, long sampleframes);
 
 public:
-	static long VSTCALLBACK BuzzDispatcher(AEffect *effect, long opCode, long index, long value, void *ptr, float opt);
-	static void VSTCALLBACK BuzzSetParameter(AEffect *effect, long index, float parameter);
-	static float VSTCALLBACK BuzzGetParameter(AEffect *effect, long index);
-	static void VSTCALLBACK BuzzProcess(AEffect *effect, float **inputs, float **outputs, long sampleframes);
+	static VstIntPtr VSTCALLBACK BuzzDispatcher(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	static void VSTCALLBACK BuzzSetParameter(AEffect *effect, VstInt32 index, float parameter);
+	static float VSTCALLBACK BuzzGetParameter(AEffect *effect, VstInt32 index);
+	static void VSTCALLBACK BuzzProcess(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleframes);
 
 	// CMICallbacks interface
 public:
@@ -3569,8 +3583,8 @@ CBuzz2Vst::~CBuzz2Vst()
 }
 
 
-long CBuzz2Vst::BuzzDispatcher(AEffect *effect, long opCode, long index, long value, void *ptr, float opt)
-//--------------------------------------------------------------------------------------------------------
+VstIntPtr CBuzz2Vst::BuzzDispatcher(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+//--------------------------------------------------------------------------------------------------------------------------
 {
 	CBuzz2Vst *pBuzz2Vst = (CBuzz2Vst *)effect->object;
 	if (pBuzz2Vst) return pBuzz2Vst->Dispatcher(opCode, index, value, ptr, opt);
@@ -3578,16 +3592,16 @@ long CBuzz2Vst::BuzzDispatcher(AEffect *effect, long opCode, long index, long va
 }
 
 
-void CBuzz2Vst::BuzzSetParameter(AEffect *effect, long index, float parameter)
-//----------------------------------------------------------------------------
+void CBuzz2Vst::BuzzSetParameter(AEffect *effect, VstInt32 index, float parameter)
+//--------------------------------------------------------------------------------
 {
 	CBuzz2Vst *pBuzz2Vst = (CBuzz2Vst *)effect->object;
 	if (pBuzz2Vst) pBuzz2Vst->SetParameter(index, parameter);
 }
 
 
-float CBuzz2Vst::BuzzGetParameter(AEffect *effect, long index)
-//------------------------------------------------------------
+float CBuzz2Vst::BuzzGetParameter(AEffect *effect, VstInt32 index)
+//----------------------------------------------------------------
 {
 	CBuzz2Vst *pBuzz2Vst = (CBuzz2Vst *)effect->object;
 	if (pBuzz2Vst) return pBuzz2Vst->GetParameter(index);
@@ -3595,16 +3609,16 @@ float CBuzz2Vst::BuzzGetParameter(AEffect *effect, long index)
 }
 
 
-void CBuzz2Vst::BuzzProcess(AEffect *effect, float **inputs, float **outputs, long sampleframes)
-//----------------------------------------------------------------------------------------------
+void CBuzz2Vst::BuzzProcess(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleframes)
+//--------------------------------------------------------------------------------------------------
 {
 	CBuzz2Vst *pBuzz2Vst = (CBuzz2Vst *)effect->object;
 	if (pBuzz2Vst) pBuzz2Vst->Process(inputs, outputs, sampleframes);
 }
 
 
-long CBuzz2Vst::Dispatcher(long opCode, long index, long value, void *ptr, float opt)
-//-----------------------------------------------------------------------------------
+VstIntPtr CBuzz2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+//-----------------------------------------------------------------------------------------------------
 {
 	if (!m_pMachineInterface) return 0;
 	switch(opCode)
@@ -3702,15 +3716,15 @@ long CBuzz2Vst::Dispatcher(long opCode, long index, long value, void *ptr, float
 }
 
 
-void CBuzz2Vst::SetParameter(long index, float parameter)
-//-------------------------------------------------------
+void CBuzz2Vst::SetParameter(VstInt32 index, float parameter)
+//-----------------------------------------------------------
 {
 	
 }
 
 
-float CBuzz2Vst::GetParameter(long index)
-//---------------------------------------
+float CBuzz2Vst::GetParameter(VstInt32 index)
+//-------------------------------------------
 {
 	if (index < m_pMachineInfo->numGlobalParameters)
 	{
@@ -3805,16 +3819,16 @@ public:
 	CDmo2Vst(IMediaObject *pMO, IMediaObjectInPlace *pMOIP, DWORD uid);
 	~CDmo2Vst();
 	AEffect *GetEffect() { return &m_Effect; }
-	long Dispatcher(long opCode, long index, long value, void *ptr, float opt);
-	void SetParameter(long index, float parameter);
-	float GetParameter(long index);
+	VstIntPtr Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	void SetParameter(VstInt32 index, float parameter);
+	float GetParameter(VstInt32 index);
 	void Process(float **inputs, float **outputs, long sampleframes);
 
 public:
-	static long VSTCALLBACK DmoDispatcher(AEffect *effect, long opCode, long index, long value, void *ptr, float opt);
-	static void VSTCALLBACK DmoSetParameter(AEffect *effect, long index, float parameter);
-	static float VSTCALLBACK DmoGetParameter(AEffect *effect, long index);
-	static void VSTCALLBACK DmoProcess(AEffect *effect, float **inputs, float **outputs, long sampleframes);
+	static VstIntPtr VSTCALLBACK DmoDispatcher(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	static void VSTCALLBACK DmoSetParameter(AEffect *effect, VstInt32 index, float parameter);
+	static float VSTCALLBACK DmoGetParameter(AEffect *effect, VstInt32 index);
+	static void VSTCALLBACK DmoProcess(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleframes);
 };
 
 
@@ -3882,8 +3896,8 @@ CDmo2Vst::~CDmo2Vst()
 }
 
 
-long CDmo2Vst::DmoDispatcher(AEffect *effect, long opCode, long index, long value, void *ptr, float opt)
-//------------------------------------------------------------------------------------------------------
+VstIntPtr CDmo2Vst::DmoDispatcher(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+//------------------------------------------------------------------------------------------------------------------------
 {
 	if (effect)
 	{
@@ -3894,8 +3908,8 @@ long CDmo2Vst::DmoDispatcher(AEffect *effect, long opCode, long index, long valu
 }
 
 
-void CDmo2Vst::DmoSetParameter(AEffect *effect, long index, float parameter)
-//--------------------------------------------------------------------------
+void CDmo2Vst::DmoSetParameter(AEffect *effect, VstInt32 index, float parameter)
+//------------------------------------------------------------------------------
 {
 	if (effect)
 	{
@@ -3905,7 +3919,7 @@ void CDmo2Vst::DmoSetParameter(AEffect *effect, long index, float parameter)
 }
 
 
-float CDmo2Vst::DmoGetParameter(AEffect *effect, long index)
+float CDmo2Vst::DmoGetParameter(AEffect *effect, VstInt32 index)
 //----------------------------------------------------------
 {
 	if (effect)
@@ -3917,8 +3931,8 @@ float CDmo2Vst::DmoGetParameter(AEffect *effect, long index)
 }
 
 
-void CDmo2Vst::DmoProcess(AEffect *effect, float **inputs, float **outputs, long sampleframes)
-//--------------------------------------------------------------------------------------------
+void CDmo2Vst::DmoProcess(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleframes)
+//------------------------------------------------------------------------------------------------
 {
 	if (effect)
 	{
@@ -3928,8 +3942,8 @@ void CDmo2Vst::DmoProcess(AEffect *effect, float **inputs, float **outputs, long
 }
 
 
-long CDmo2Vst::Dispatcher(long opCode, long index, long value, void *ptr, float opt)
-//----------------------------------------------------------------------------------
+VstIntPtr CDmo2Vst::Dispatcher(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+//----------------------------------------------------------------------------------------------------
 {
 	switch(opCode)
 	{
@@ -4035,8 +4049,8 @@ long CDmo2Vst::Dispatcher(long opCode, long index, long value, void *ptr, float 
 }
 
 
-void CDmo2Vst::SetParameter(long index, float fValue)
-//---------------------------------------------------
+void CDmo2Vst::SetParameter(VstInt32 index, float fValue)
+//-------------------------------------------------------
 {
 	MP_PARAMINFO mpi;
 
@@ -4065,8 +4079,8 @@ void CDmo2Vst::SetParameter(long index, float fValue)
 }
 
 
-float CDmo2Vst::GetParameter(long index)
-//--------------------------------------
+float CDmo2Vst::GetParameter(VstInt32 index)
+//------------------------------------------
 {
 	if ((index < m_Effect.numParams) && (m_pParamInfo) && (m_pMediaParams))
 	{
