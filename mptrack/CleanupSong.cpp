@@ -554,7 +554,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 				UINT jmax = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->GetNumChannels();
 				for (UINT j=0; j<jmax; j++, p++)
 				{
-					if ((p->note) && (p->note <= NOTE_MAX))
+					if ((p->note) && (p->note <= NOTE_MAX) && (!p->IsPcNote()))
 					{
 						if ((p->instr) && (p->instr < MAX_INSTRUMENTS))
 						{
@@ -723,7 +723,7 @@ bool CModCleanupDlg::RearrangeSamples()
 			MODCOMMAND *m = pSndFile->Patterns[nPat];
 			for(UINT len = pSndFile->Patterns[nPat].GetNumRows() * pSndFile->GetNumChannels(); len; m++, len--)
 			{
-				if(m->instr <= pSndFile->GetNumSamples()) m->instr = (BYTE)nSampleMap[m->instr];
+				if(!m->IsPcNote() &&  m->instr <= pSndFile->GetNumSamples()) m->instr = (BYTE)nSampleMap[m->instr];
 			}
 		}
 	}
@@ -831,7 +831,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 				UINT nLen = pSndFile->m_nChannels * pSndFile->Patterns[iPat].GetNumRows();
 				while (nLen--)
 				{
-					if (p->instr)
+					if (p->instr && !p->IsPcNote())
 					{
 						for (UINT k=0; k<nSwap; k++)
 						{
