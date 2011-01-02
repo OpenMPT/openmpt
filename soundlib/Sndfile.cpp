@@ -439,13 +439,14 @@ CTuningCollection* CSoundFile::s_pTuningsSharedBuiltIn(0);
 CTuningCollection* CSoundFile::s_pTuningsSharedLocal(0);
 uint8 CSoundFile::s_DefaultPlugVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
-
+#pragma warning(disable : 4355) // "'this' : used in base member initializer list"
 CSoundFile::CSoundFile() :
 	Patterns(*this),
 	Order(*this),
 	m_PlaybackEventer(*this),
 	m_pModSpecs(&ModSpecs::itEx),
 	m_MIDIMapper(*this)
+#pragma warning(default : 4355) // "'this' : used in base member initializer list"
 //----------------------
 {
 	m_nType = MOD_TYPE_NONE;
@@ -1532,7 +1533,7 @@ CHANNELINDEX CSoundFile::ReArrangeChannels(const vector<CHANNELINDEX>& newOrder)
     //added to position i. If index of some current channel is missing from the
     //newOrder-vector, then the channel gets removed.
 	
-	CHANNELINDEX nRemainingChannels = newOrder.size();	
+	const CHANNELINDEX nRemainingChannels = static_cast<CHANNELINDEX>(newOrder.size());
 
 	if(nRemainingChannels > GetModSpecifications().channelsMax || nRemainingChannels < GetModSpecifications().channelsMin) 	
 	{
@@ -2587,10 +2588,9 @@ void CSoundFile::FrequencyToTranspose(MODSAMPLE *psmp)
 		transp++;
 		ftune -= 128;
 	}
-	if (transp > 127) transp = 127;
-	if (transp < -127) transp = -127;
-	psmp->RelativeTone = transp;
-	psmp->nFineTune = ftune;
+	Limit(transp, -127, 127);
+	psmp->RelativeTone = static_cast<int8>(transp);
+	psmp->nFineTune = static_cast<int8>(ftune);
 }
 
 

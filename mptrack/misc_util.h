@@ -53,6 +53,7 @@ inline void MemsetZero(T& a)
 {
 	#if _HAS_TR1
 		static_assert(std::tr1::is_pointer<T>::value == false, "Won't memset pointers.");
+		static_assert(std::tr1::is_pod<T>::value == true, "Won't memset non-pods.");
 	#endif
 	memset(&a, 0, sizeof(T));
 }
@@ -224,6 +225,9 @@ namespace Util
 
 	// Returns maximum value of given integer type.
 	template <class T> inline T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only interger types are allowed."); return (std::numeric_limits<T>::max)();}
+
+	// Returns string containing date and time ended with newline.
+	std::basic_string<TCHAR> GetDateTimeStr();
 };
 
 #endif

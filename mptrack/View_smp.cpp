@@ -135,7 +135,7 @@ void CViewSample::OnInitialUpdate()
 }
 
 
-void CViewSample::UpdateScrollSize()
+void CViewSample::UpdateScrollSize(const UINT nZoomOld)
 //----------------------------------
 {
 	CModDoc *pModDoc = GetDocument();
@@ -182,7 +182,19 @@ void CViewSample::UpdateScrollSize()
 		sizePage.cx = sizeLine.cx * 4;
 		sizePage.cy = sizeLine.cy;
 		SetScrollSizes(MM_TEXT, m_sizeTotal, sizePage, sizeLine);
-		m_nScrollPos = GetScrollPos(SB_HORZ) << m_nScrollFactor;
+
+		if (nZoomOld != m_nZoom) // After zoom change, keep the view position.
+		{
+			const UINT nOldPos = ScrollPosToSamplePos(nZoomOld);
+			const float fPosFraction = (dwLen > 0) ? static_cast<float>(nOldPos) / dwLen : 0;
+			m_nScrollPos = 0;
+			m_nScrollPos = SampleToScreen(nOldPos);
+			SetScrollPos(SB_HORZ, static_cast<int>(fPosFraction * GetScrollLimit(SB_HORZ)));
+		}
+		else
+		{
+			m_nScrollPos = GetScrollPos(SB_HORZ) << m_nScrollFactor;
+		}
 	}
 }
 
@@ -220,8 +232,9 @@ BOOL CViewSample::SetZoom(UINT nZoom)
 	if (nZoom > MAX_ZOOM) 
 		return FALSE;
 
+	const UINT nZoomOld = m_nZoom;
 	m_nZoom = nZoom;
-	UpdateScrollSize();
+	UpdateScrollSize(nZoomOld);
 	InvalidateRect(NULL, FALSE);
 	return TRUE;
 }
@@ -749,7 +762,8 @@ void CViewSample::OnDraw(CDC *pDC)
 	CSoundFile *pSndFile;
 	HGDIOBJ oldpen;
 	HDC hdc;
-	UINT nSmpScrollPos = (m_nZoom) ? (m_nScrollPos << (m_nZoom - 1)) : 0;
+	
+	UINT nSmpScrollPos = ScrollPosToSamplePos();
 	
 	if ((!pModDoc) || (!pDC)) return;
 	hdc = pDC->m_hDC;

@@ -147,6 +147,11 @@ struct SplitKeyboardSettings
 	bool octaveLink;	// apply octaveModifier
 };
 
+enum LogEventType
+{
+	LogEventUnexpectedError
+};
+
 
 //=============================
 class CModDoc: public CDocument
@@ -154,6 +159,7 @@ class CModDoc: public CDocument
 {
 protected:
 	LPSTR m_lpszLog;
+	std::basic_ostringstream<TCHAR> m_logEvents; // Log for general progress and error events.
 	CSoundFile m_SndFile;
 
 	BOOL m_bPaused;
@@ -197,6 +203,10 @@ public:
 	LPCSTR GetLog() const { return m_lpszLog; }
 	BOOL ClearLog();
 	UINT ShowLog(LPCSTR lpszTitle=NULL, CWnd *parent=NULL);
+
+	// Logging for general progress and error events.
+	void AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR pszFormat, ...);
+
 	void ViewPattern(UINT nPat, UINT nOrd);
 	void ViewSample(UINT nSmp);
 	void ViewInstrument(UINT nIns);

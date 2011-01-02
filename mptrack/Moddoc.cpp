@@ -760,6 +760,19 @@ void CModDoc::ViewInstrument(UINT nIns)
 	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_INSTRUMENTS, nIns);
 }
 
+void CModDoc::AddLogEvent(LogEventType eventType, LPCTSTR pszFuncName, LPCTSTR pszFormat, ...)
+{
+	CString strMsg;
+	va_list args;
+    va_start(args, pszFormat);
+	strMsg.FormatV(pszFormat, args);
+    va_end(args);
+
+	m_logEvents << Util::GetDateTimeStr()
+				<< _T("Event type: ") << eventType << std::endl
+				<< _T("Function: ") << pszFuncName << std::endl
+				<< _T("Message: ") << strMsg << std::endl << std::endl;
+}
 
 BOOL CModDoc::AddToLog(LPCSTR lpszLog)
 //------------------------------------

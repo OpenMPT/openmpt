@@ -1269,6 +1269,7 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 	for(size_t n = start; n < num; n++)
 	{
 		tm loadDate;
+		MemsetZero(loadDate);
 		uint32 openTime;
 
 		if(n < num - 1)
@@ -1281,7 +1282,14 @@ DWORD SaveITEditHistory(const CSoundFile *pSndFile, FILE *f)
 		{
 			// Current ("new") timestamp
 			const time_t creationTime = pModDoc->GetCreationTime();
-			localtime_s(&loadDate, &creationTime);
+			//localtime_s(&loadDate, &creationTime);
+			const tm* const p = localtime(&creationTime);
+			if (p != nullptr)
+				loadDate = *p;
+			else if (pSndFile->GetModDocPtr() != nullptr)
+				pSndFile->GetModDocPtr()->AddLogEvent(LogEventUnexpectedError,
+													  __FUNCTION__,
+													  _T("localtime() returned nullptr."));
 			openTime = (uint32)((double)difftime(time(nullptr), creationTime) * 18.2f);
 		}
 
