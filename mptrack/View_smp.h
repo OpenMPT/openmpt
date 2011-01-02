@@ -31,7 +31,8 @@ public:
 	DECLARE_SERIAL(CViewSample)
 
 public:
-	void UpdateScrollSize();
+	void UpdateScrollSize() {UpdateScrollSize(m_nZoom);}
+	void UpdateScrollSize(const UINT nZoomOld);
 	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
 	BOOL SetZoom(UINT nZoom);
 	LONG SampleToScreen(LONG n) const;
@@ -64,6 +65,9 @@ public:
 	// return value is N. If zoom is bigger than the biggest zoom, returns MIN_ZOOM + 1 and
 	// if smaller than the smallest zoom, returns value >= MAX_ZOOM + 1.
 	UINT GetAutoZoomLevel(const MODSAMPLE& smp);
+
+	UINT ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
+	UINT ScrollPosToSamplePos(UINT nZoom) const {return (nZoom > 0) ? (m_nScrollPos << (nZoom - 1)) : 0;}
 
 public:
 	//{{AFX_VIRTUAL(CViewSample)

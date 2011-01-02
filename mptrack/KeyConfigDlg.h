@@ -33,7 +33,7 @@ public:
 		commands.Copy(copy.commands);
 		separators.Copy(copy.separators);
 	}
-	bool separatorAt(UINT c)
+	bool separatorAt(int c)
 	{
 		for (int p=0; p<separators.GetSize(); p++)
 		{

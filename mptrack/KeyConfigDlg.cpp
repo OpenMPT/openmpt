@@ -36,7 +36,7 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 }
 
 
-void CCustEdit::SetKey(UINT inMod, CString c)
+void CCustEdit::SetKey(UINT /*inMod*/, CString /*c*/)
 {
 /*
 	mod = inMod;
@@ -354,7 +354,7 @@ void COptionsKeyboard::OnKeyboardChanged()
 void COptionsKeyboard::OnCategorySelChanged()
 //-------------------------------------------
 {
-	CommandID nCmd  = (CommandID)m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel() );
+	//CommandID nCmd  = (CommandID)m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel() );
 	int nCat = m_cmbCategory.GetItemData( m_cmbCategory.GetCurSel() );
 
 	//Fill Command list
@@ -372,7 +372,7 @@ void COptionsKeyboard::OnCategorySelChanged()
 					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString(plocalCmdSet->GetCommandText(com)), com);
 				
 				if (commandCategories[nCat].separatorAt(com))
-					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString("------------------------------------------------------"), -1);
+					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString("------------------------------------------------------"), DWORD_PTR(-1));
 			}
 		}
 		m_lbnCommandKeys.SetCurSel(0);
@@ -657,7 +657,7 @@ void COptionsKeyboard::OnSave()
 	if(files.abort)	return;
 
 	m_sFullPathName = files.first_file.c_str();
-	plocalCmdSet->SaveFile(m_sFullPathName, m_bDebugSave.GetCheck());
+	plocalCmdSet->SaveFile(m_sFullPathName, m_bDebugSave.GetCheck() != BST_UNCHECKED);
 	//TentativeSetToDefaultFile(m_sFullPathName);
 }
 

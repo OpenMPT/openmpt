@@ -81,7 +81,7 @@ protected:
 protected:
 	void setup_get(char *p) { get_ptr = p; }
 	int get_byte() { return (*get_ptr++ & 0xff); }
-	unsigned short get_word() {	int b0, b1;	b0 = get_byte(); b1 = get_byte(); return (b1 << 8) + b0; }
+	unsigned short get_word() {	int b0, b1;	b0 = get_byte(); b1 = get_byte(); return static_cast<unsigned short>((b1 << 8) + b0); }
 	long get_longword() { long b0, b1, b2, b3; b0 = get_byte(); b1 = get_byte(); b2 = get_byte(); b3 = get_byte(); return (b3 << 24) + (b2 << 16) + (b1 << 8) + b0; }
 	BOOL get_header(DWORD &fp, LzHeader *hdr);
 	VOID make_crctable();

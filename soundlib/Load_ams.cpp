@@ -349,10 +349,11 @@ typedef struct AMS2SAMPLE
 #pragma pack()
 
 
-bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
+bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
 //------------------------------------------------------------
 {
 	return false;
+#if 0
 	const AMS2FILEHEADER *pfh = (AMS2FILEHEADER *)lpStream;
 	AMS2SONGHEADER *psh;
 	DWORD dwMemPos;
@@ -590,6 +591,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE lpStream, DWORD dwMemLength)
 		dwMemPos += ReadSample(&Samples[iSmp], flags, (LPSTR)(lpStream+dwMemPos), dwMemLength-dwMemPos);
 	}
 	return true;
+#endif
 }
 
 

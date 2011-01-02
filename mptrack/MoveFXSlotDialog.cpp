@@ -39,7 +39,7 @@ END_MESSAGE_MAP()
 void CMoveFXSlotDialog::OnOK()
 //----------------------------
 {
-	m_nToSlot = m_CbnEmptySlots.GetItemData(m_CbnEmptySlots.GetCurSel());
+	m_nToSlot = static_cast<PLUGINDEX>(m_CbnEmptySlots.GetItemData(m_CbnEmptySlots.GetCurSel()));
 	CDialog::OnOK();
 }
 

@@ -25,7 +25,7 @@
 #include <aeffect.h>			// VST
 #else
 typedef int32 VstInt32;
-typedef int32 VstIntPtr;
+typedef intptr_t VstIntPtr;
 #endif
 
 class CTuningBase;
@@ -660,6 +660,7 @@ public:
 	inline bool TypeIsXM_MOD() const { return (m_nType & (MOD_TYPE_XM | MOD_TYPE_MOD)) != 0; }
 	inline bool TypeIsMOD_S3M() const { return (m_nType & (MOD_TYPE_MOD | MOD_TYPE_S3M)) != 0; }
 	CModDoc* GetpModDoc() const { return m_pModDoc; }
+	CModDoc* GetModDocPtr() const { return m_pModDoc; }
 
 	void SetMasterVolume(UINT vol, bool adjustAGC = false);
 	UINT GetMasterVolume() const { return m_nMasterVolume; }

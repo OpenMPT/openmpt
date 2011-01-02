@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "misc_util.h"
+#include <ctime>
 
 /*
  * Loads resource.
@@ -49,5 +50,13 @@ CString GetErrorMessage(DWORD nErrorCode)
 	sMsg.ReleaseBuffer();
 
 	return sMsg;
+}
+
+
+std::basic_string<TCHAR> Util::GetDateTimeStr()
+{
+	time_t t;
+	std::time(&t);
+	return _tctime(&t);
 }
 
