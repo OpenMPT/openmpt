@@ -113,15 +113,13 @@ public:
 	virtual ~CCtrlInstruments();
 
 public:
+	void SetInstrumentModified(const bool modified = true);
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
 	BOOL OpenInstrument(LPCSTR lpszFileName);
 	BOOL OpenInstrument(CSoundFile *pSndFile, UINT nInstr);
 	BOOL EditSample(UINT nSample);
 	VOID UpdateFilterText();
 	LONG* GetSplitPosRef() {return &CMainFrame::glInstrumentWindowHeight;} 	//rewbs.varWindowSize
-
-protected:
-	void CCtrlInstruments::SetInstrumentModified(const bool modified);
 
 public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)

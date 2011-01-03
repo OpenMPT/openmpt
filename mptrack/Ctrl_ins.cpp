@@ -381,7 +381,7 @@ void CNoteMapWnd::OnMapCopyNote()
 		}
 		if (bModified)
 		{
-			m_pModDoc->SetModified();
+			m_pParent->SetInstrumentModified();
 			InvalidateRect(NULL, FALSE);
 		}
 	}
@@ -407,7 +407,7 @@ void CNoteMapWnd::OnMapCopySample()
 		}
 		if (bModified)
 		{
-			m_pModDoc->SetModified();
+			m_pParent->SetInstrumentModified();
 			InvalidateRect(NULL, FALSE);
 		}
 	}
@@ -434,7 +434,7 @@ void CNoteMapWnd::OnMapReset()
 		}
 		if (bModified)
 		{
-			m_pModDoc->SetModified();
+			m_pParent->SetInstrumentModified();
 			InvalidateRect(NULL, FALSE);
 		}
 	}
@@ -479,7 +479,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 		}
 		if (bModified)
 		{
-			m_pModDoc->SetModified();
+			m_pParent->SetInstrumentModified();
 			InvalidateRect(NULL, FALSE);
 		}
 	}
@@ -583,7 +583,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 			if (n != pIns->NoteMap[m_nNote])
 			{
 				pIns->NoteMap[m_nNote] = n;
-				m_pModDoc->SetModified();
+				m_pParent->SetInstrumentModified();
 				InvalidateRect(NULL, FALSE);
 			}
 			if (bOk) 
@@ -618,7 +618,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			if (n != pIns->Keyboard[m_nNote])
 			{
 				pIns->Keyboard[m_nNote] = n;
-				m_pModDoc->SetModified();
+				m_pParent->SetInstrumentModified();
 				InvalidateRect(NULL, FALSE);
 				PlayNote(m_nNote+1);
 			}
@@ -650,7 +650,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			if (n != pIns->NoteMap[m_nNote])
 			{
 				pIns->NoteMap[m_nNote] = n;
-				m_pModDoc->SetModified();
+				m_pParent->SetInstrumentModified();
 				InvalidateRect(NULL, FALSE);
 			}
 			
@@ -998,6 +998,7 @@ void CCtrlInstruments::SetInstrumentModified(const bool modified)
 		m_pModDoc->SetModified();
 	}
 }
+
 
 BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 //------------------------------------------------------------------

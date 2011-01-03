@@ -160,6 +160,21 @@ void CViewInstrument::UpdateScrollSize()
 }
 
 
+// Set instrument (and moddoc) as modified.
+void CViewInstrument::SetInstrumentModified()
+//-------------------------------------------
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr) return;
+// -> CODE#0023
+// -> DESC="IT project files (.itp)"
+	pModDoc->m_bsInstrumentModified.set(m_nInstrument - 1, true);
+	pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSNAMES, this);
+// -! NEW_FEATURE#0023
+	pModDoc->SetModified();
+}
+
+
 BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, enmEnvelopeTypes nEnv)
 //-------------------------------------------------------------------------------------
 {
@@ -1003,7 +1018,7 @@ bool CViewInstrument::EnvRemovePoint(UINT nPoint)
 				envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
 
-			pModDoc->SetModified();
+			SetInstrumentModified();
 			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 			return true;
 		}
@@ -1070,7 +1085,7 @@ UINT CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 				if (envelope->nSustainEnd >= i) envelope->nSustainEnd++;
 				if (envelope->nReleaseNode >= i && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode++;
 
-				pModDoc->SetModified();
+				SetInstrumentModified();
 				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 				return i + 1;
 			}
@@ -1476,7 +1491,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			CModDoc *pModDoc = GetDocument();
 			if(pModDoc)
 			{
-				pModDoc->SetModified();
+				SetInstrumentModified();
 				pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 			}
 			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
@@ -1729,7 +1744,7 @@ void CViewInstrument::OnEnvLoopChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetLoop(!EnvGetLoop())))
 	{
-		pModDoc->SetModified();
+		SetInstrumentModified();
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		UpdateNcButtonState();
 	}
@@ -1742,7 +1757,7 @@ void CViewInstrument::OnEnvSustainChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetSustain(!EnvGetSustain())))
 	{
-		pModDoc->SetModified();
+		SetInstrumentModified();
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		UpdateNcButtonState();
 	}
@@ -1755,7 +1770,7 @@ void CViewInstrument::OnEnvCarryChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((pModDoc) && (EnvSetCarry(!EnvGetCarry())))
 	{
-		pModDoc->SetModified();
+		SetInstrumentModified();
 		UpdateNcButtonState();
 	}
 }
@@ -1765,7 +1780,7 @@ void CViewInstrument::OnEnvToggleReleasNode()
 {
 	if(IsDragItemEnvPoint() && EnvToggleReleaseNode(m_nDragItem - 1))
 	{
-		if(GetDocument() != nullptr) GetDocument()->SetModified();
+		SetInstrumentModified();
 		InvalidateRect(NULL, FALSE);
 	}
 }
@@ -1774,10 +1789,9 @@ void CViewInstrument::OnEnvToggleReleasNode()
 void CViewInstrument::OnEnvVolChanged()
 //-------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (EnvSetVolEnv(!EnvGetVolEnv())))
+	if (EnvSetVolEnv(!EnvGetVolEnv()))
 	{
-		pModDoc->SetModified();
+		SetInstrumentModified();
 		UpdateNcButtonState();
 	}
 }
@@ -1786,10 +1800,9 @@ void CViewInstrument::OnEnvVolChanged()
 void CViewInstrument::OnEnvPanChanged()
 //-------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (EnvSetPanEnv(!EnvGetPanEnv())))
+	if (EnvSetPanEnv(!EnvGetPanEnv()))
 	{
-		pModDoc->SetModified();
+		SetInstrumentModified();
 		UpdateNcButtonState();
 	}
 }
@@ -1798,10 +1811,9 @@ void CViewInstrument::OnEnvPanChanged()
 void CViewInstrument::OnEnvPitchChanged()
 //---------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (EnvSetPitchEnv(!EnvGetPitchEnv())))
+	if (EnvSetPitchEnv(!EnvGetPitchEnv()))
 	{
-		pModDoc->SetModified();
+		SetInstrumentModified();
 		UpdateNcButtonState();
 	}
 }
@@ -1810,10 +1822,9 @@ void CViewInstrument::OnEnvPitchChanged()
 void CViewInstrument::OnEnvFilterChanged()
 //----------------------------------------
 {
-	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (EnvSetFilterEnv(!EnvGetFilterEnv())))
+	if (EnvSetFilterEnv(!EnvGetFilterEnv()))
 	{
-		pModDoc->SetModified();
+		SetInstrumentModified();
 		UpdateNcButtonState();
 	}
 }
@@ -2061,8 +2072,8 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, LPDRAGONDROP lpDropInfo)
 	}
 	if (bUpdate)
 	{
+		SetInstrumentModified();
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES, NULL);
-		pModDoc->SetModified();
 	}
 	CMDIChildWnd *pMDIFrame = (CMDIChildWnd *)GetParentFrame();
 	if (pMDIFrame)
@@ -2245,7 +2256,7 @@ void CViewInstrument::OnEnvelopeScalepoints()
 		CScaleEnvPointsDlg dlg(this, GetEnvelopePtr(), nOffset);
 		if(dlg.DoModal())
 		{
-			pModDoc->SetModified();
+			SetInstrumentModified();
 			pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 		}
 	}
@@ -2303,7 +2314,7 @@ void CViewInstrument::EnvKbdMovePointLeft()
 		return;
 	pEnv->Ticks[m_nDragItem - 1]--;
 
-	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
+	SetInstrumentModified();
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -2317,7 +2328,7 @@ void CViewInstrument::EnvKbdMovePointRight()
 		return;
 	pEnv->Ticks[m_nDragItem - 1]++;
 
-	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
+	SetInstrumentModified();
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -2332,7 +2343,7 @@ void CViewInstrument::EnvKbdMovePointUp(BYTE stepsize)
 	else
 		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MAX;
 
-	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
+	SetInstrumentModified();
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -2347,7 +2358,7 @@ void CViewInstrument::EnvKbdMovePointDown(BYTE stepsize)
 	else 
 		pEnv->Values[m_nDragItem - 1] = ENVELOPE_MIN;
 
-	GetDocument()->SetModified();	// sanity checks are done in GetEnvelopePtr() already
+	SetInstrumentModified();
 	InvalidateRect(NULL, FALSE);
 }
 
@@ -2443,7 +2454,7 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
 		CModDoc *pModDoc = GetDocument();	// sanity checks are done in GetEnvelopePtr() already
-		pModDoc->SetModified();
+		SetInstrumentModified();
 		pModDoc->UpdateAllViews(NULL, (m_nInstrument << HINT_SHIFT_INS) | HINT_ENVELOPE, NULL);
 	}
 }
