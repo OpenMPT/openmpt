@@ -91,7 +91,7 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 	 || (!pfh.npatterns) || (pfh.npatterns > 128)
 	 || (SIZEOF_PTMFILEHEADER+pfh.nsamples*SIZEOF_PTMSAMPLE >= (int)dwMemLength)) return false;
 	memcpy(m_szNames[0], pfh.songname, 28);
-	SpaceToNullStringFixed(m_szNames[0], 28);
+	SpaceToNullStringFixed<28>(m_szNames[0]);
 
 	m_nType = MOD_TYPE_PTM;
 	m_nChannels = pfh.nchannels;
@@ -112,8 +112,8 @@ bool CSoundFile::ReadPTM(const BYTE *lpStream, const DWORD dwMemLength)
 
 		lstrcpyn(m_szNames[ismp+1], psmp->samplename, 28);
 		memcpy(pSmp->filename, psmp->filename, 12);
-		SpaceToNullStringFixed(m_szNames[ismp + 1], 28);
-		SpaceToNullStringFixed(pSmp->filename, 12);
+		SpaceToNullStringFixed<28>(m_szNames[ismp + 1]);
+		SpaceToNullStringFixed<12>(pSmp->filename);
 
 		pSmp->nGlobalVol = 64;
 		pSmp->nPan = 128;

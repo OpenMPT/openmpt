@@ -371,7 +371,7 @@ bool CSoundFile::ReadUlt(const BYTE *lpStream, const DWORD dwMemLength)
 		memcpy(m_szNames[nSmp + 1], ultSmp.name, 32);
 		SetNullTerminator(m_szNames[nSmp + 1]);
 		memcpy(pSmp->filename, ultSmp.filename, 12);
-		SpaceToNullStringFixed(pSmp->filename, 12);
+		SpaceToNullStringFixed<12>(pSmp->filename);
 
 		if(ultSmp.size_end <= ultSmp.size_start)
 			continue;

@@ -70,7 +70,7 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
 	 || ((_strnicmp(phdr->trackername, "!SCREAM!", 8))
 	  && (_strnicmp(phdr->trackername, "BMOD2STM", 8)))) return false;
 	memcpy(m_szNames[0], phdr->songname, 20);
-	SpaceToNullStringFixed(m_szNames[0], 20);
+	SpaceToNullStringFixed<20>(m_szNames[0]);
 	// Read STM header
 	m_nType = MOD_TYPE_STM;
 	m_nSamples = 31;
@@ -98,8 +98,8 @@ bool CSoundFile::ReadSTM(const BYTE *lpStream, const DWORD dwMemLength)
 		STMSAMPLE *pStm = &phdr->sample[nIns];  // STM sample data
 		memcpy(pIns->filename, pStm->filename, 13);
 		memcpy(m_szNames[nIns+1], pStm->filename, 12);
-		SpaceToNullStringFixed(pIns->filename, 12);
-		SpaceToNullStringFixed(m_szNames[nIns + 1], 12);
+		SpaceToNullStringFixed<12>(pIns->filename);
+		SpaceToNullStringFixed<12>(m_szNames[nIns + 1]);
 		pIns->nC5Speed = LittleEndianW(pStm->c2spd);
 		pIns->nGlobalVol = 64;
 		pIns->nVolume = pStm->volume << 2;

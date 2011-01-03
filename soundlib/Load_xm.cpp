@@ -254,7 +254,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 	// look for null-terminated song name - that's most likely a tune made with modplug
 	for(int i = 0; i < 20; i++)
 		if(lpStream[17 + i] == 0) bProbablyMadeWithModPlug = true;
-	SpaceToNullStringFixed(m_szNames[0], 20);
+	SpaceToNullStringFixed<20>(m_szNames[0]);
 
 	// load and convert header
 	memcpy(&xmheader, lpStream + 58, sizeof(XMFILEHEADER));
@@ -325,7 +325,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 		Instruments[iIns]->nPluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 		memcpy(Instruments[iIns]->name, pih.name, 22);
-		SpaceToNullStringFixed(Instruments[iIns]->name, 22);
+		SpaceToNullStringFixed<22>(Instruments[iIns]->name);
 
 		memset(&xmsh, 0, sizeof(XMSAMPLEHEADER));
 
@@ -528,7 +528,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			if (!xmss.looplen) xmss.type &= ~3;
 			UINT imapsmp = samplemap[ins];
 			memcpy(m_szNames[imapsmp], xmss.name, 22);
-			SpaceToNullStringFixed(m_szNames[imapsmp], 22);
+			SpaceToNullStringFixed<22>(m_szNames[imapsmp]);
 			MODSAMPLE *pSmp = &Samples[imapsmp];
 			pSmp->nLength = (xmss.samplen > MAX_SAMPLE_LENGTH) ? MAX_SAMPLE_LENGTH : xmss.samplen;
 			pSmp->nLoopStart = xmss.loopstart;
@@ -557,7 +557,7 @@ bool CSoundFile::ReadXM(const BYTE *lpStream, const DWORD dwMemLength)
 			pSmp->nVibDepth = xmsh.vibdepth;
 			pSmp->nVibRate = xmsh.vibrate;
 			memcpy(pSmp->filename, xmss.name, 22);
-			SpaceToNullStringFixed(pSmp->filename, 21);
+			SpaceToNullStringFixed<21>(pSmp->filename);
 
 			if ((xmss.type & 3) == 3)	// MPT 1.09 and maybe newer / older versions set both flags for bidi loops
 				bProbablyMPT109 = true;

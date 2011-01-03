@@ -189,23 +189,45 @@ void FixNullString(char (&buffer)[size])
 //--------------------------------------
 {
 	STATIC_ASSERT(size > 0);
-	bool overwrite = false;
-	for(size_t pos = 0; pos < size; pos++)
+	size_t pos = 0;
+	// Find the first null char.
+	while(buffer[pos] != '\0' && pos < size)
 	{
-		if(overwrite)
-			buffer[pos] = 0;
-		else if(buffer[pos] == 0)
-			overwrite = true;
+		pos++;
+	}
+	// Remove everything after the null char.
+	while(pos < size)
+	{
+		buffer[pos++] = '\0';
 	}
 }
 
 
-// Convert a space-padded string to a 0-terminated string.
-// Additional parameter to specifify the max length of the final string,
+// Convert a space-padded string to a 0-terminated string. STATIC VERSION! (use this if the maximum string length is known)
+// Additional template parameter to specifify the max length of the final string,
+// not including null char (useful for e.g. mod loaders)
+template <size_t length, size_t size>
+void SpaceToNullStringFixed(char (&buffer)[size])
+//------------------------------------------------
+{
+	STATIC_ASSERT(size > 0);
+	STATIC_ASSERT(length < size);
+	// Remove Nulls in string
+	SpaceToNullString(buffer);
+	// Overwrite trailing chars
+	for(size_t pos = length; pos < size; pos++)
+	{
+		buffer[pos] = 0;
+	}
+}
+
+
+// Convert a space-padded string to a 0-terminated string. DYNAMIC VERSION!
+// Additional function parameter to specifify the max length of the final string,
 // not including null char (useful for e.g. mod loaders)
 template <size_t size>
-void SpaceToNullStringFixed(char (&buffer)[size], const size_t length)
-//--------------------------------------------------------------------
+void SpaceToNullStringFixed(char (&buffer)[size], size_t length)
+//--------------------------------------------------------------
 {
 	STATIC_ASSERT(size > 0);
 	ASSERT(length < size);
