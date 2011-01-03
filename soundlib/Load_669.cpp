@@ -70,7 +70,7 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 	m_nChannels = 8;
 
 	memcpy(m_szNames[0], pfh->songmessage, 16);
-	SpaceToNullStringFixed(m_szNames[0], 16);
+	SpaceToNullStringFixed<16>(m_szNames[0]);
 
 	m_nSamples = pfh->samples;
 	for (SAMPLEINDEX nSmp = 1; nSmp <= m_nSamples; nSmp++, psmp++)
@@ -87,7 +87,7 @@ bool CSoundFile::Read669(const BYTE *lpStream, const DWORD dwMemLength)
 		Samples[nSmp].nLoopEnd = loopend;
 		if (loopend) Samples[nSmp].uFlags |= CHN_LOOP;
 		memcpy(m_szNames[nSmp], psmp->filename, 13);
-		SpaceToNullStringFixed(m_szNames[nSmp], 13);
+		SpaceToNullStringFixed<13>(m_szNames[nSmp]);
 		Samples[nSmp].nVolume = 256;
 		Samples[nSmp].nGlobalVol = 64;
 		Samples[nSmp].nPan = 128;

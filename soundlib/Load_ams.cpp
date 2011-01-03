@@ -599,6 +599,7 @@ bool CSoundFile::ReadAMS2(LPCBYTE /*lpStream*/, DWORD /*dwMemLength*/)
 // AMS Sample unpacking
 
 void AMSUnpack(const char *psrc, UINT inputlen, char *pdest, UINT dmax, char packcharacter)
+//-----------------------------------------------------------------------------------------
 {
 	UINT tmplen = dmax;
 	signed char *amstmp = new signed char[tmplen];

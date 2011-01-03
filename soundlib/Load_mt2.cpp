@@ -214,7 +214,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 		Order[iOrd] = (PATTERNINDEX)pfh->Orders[iOrd];
 	}
 	memcpy(m_szNames[0], pfh->szSongName, 32);
-	SpaceToNullStringFixed(m_szNames[0], 31);
+	SpaceToNullStringFixed<31>(m_szNames[0]);
 
 	dwMemPos = sizeof(MT2FILEHEADER);
 	nDrumDataLen = *(WORD *)(lpStream + dwMemPos);
@@ -407,7 +407,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 			{
 				memcpy(Instruments[iIns], &m_defaultInstrument, sizeof(MODINSTRUMENT));
 				memcpy(pIns->name, pmi->szName, 32);
-				SpaceToNullStringFixed(pIns->name, 31);
+				SpaceToNullStringFixed<31>(pIns->name);
 				pIns->nGlobalVol = 64;
 				pIns->nPan = 128;
 				for (BYTE i = 0; i < NOTE_MAX; i++)
@@ -520,7 +520,7 @@ bool CSoundFile::ReadMT2(LPCBYTE lpStream, DWORD dwMemLength)
 		if (iSmp < MAX_SAMPLES)
 		{
 			memcpy(m_szNames[iSmp], pms->szName, 31);
-			SpaceToNullStringFixed(m_szNames[iSmp], 31);
+			SpaceToNullStringFixed<31>(m_szNames[iSmp]);
 		}
 		if (pms->dwDataLen > 0)
 		{

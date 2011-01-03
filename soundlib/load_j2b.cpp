@@ -487,7 +487,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				ASSERT_CAN_READ_CHUNK(mainchunk->channels);
 
 				memcpy(m_szNames[0], mainchunk->songname, 32);
-				SpaceToNullStringFixed(m_szNames[0], 31);
+				SpaceToNullStringFixed<31>(m_szNames[0]);
 				m_dwSongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 				if(!(mainchunk->flags & 0x01)) m_dwSongFlags |= SONG_LINEARSLIDES;
 				if(mainchunk->channels < 1) return false;
@@ -558,7 +558,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				m_nInstruments = max(m_nInstruments, nIns);
 
 				memcpy(pIns->name, instheader->name, 28);
-				SpaceToNullStringFixed(pIns->name, 28);
+				SpaceToNullStringFixed<28>(pIns->name);
 
 				for(BYTE i = 0; i < 128; i++)
 				{
@@ -599,7 +599,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					if(smpchunk->signature != AMCHUNKID_SAMP) break; // SAMP
 
 					memcpy(m_szNames[nSmp], smpchunk->name, 28);
-					SpaceToNullStringFixed(m_szNames[nSmp], 28);
+					SpaceToNullStringFixed<28>(m_szNames[nSmp]);
 
 					Samples[nSmp].nPan = smpchunk->pan << 2;
 					Samples[nSmp].nVolume = smpchunk->volume << 2;
@@ -669,7 +669,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 				m_nInstruments = max(m_nInstruments, nIns);
 
 				memcpy(pIns->name, instheader->name, 32);
-				SpaceToNullStringFixed(pIns->name, 31);
+				SpaceToNullStringFixed<31>(pIns->name);
 
 				for(BYTE i = 0; i < 128; i++)
 				{
@@ -717,7 +717,7 @@ bool CSoundFile::ReadAM(const LPCBYTE lpStream, const DWORD dwMemLength)
 					MemsetZero(Samples[nSmp]);
 
 					memcpy(m_szNames[nSmp], smpchunk->name, 32);
-					SpaceToNullStringFixed(m_szNames[nSmp], 31);
+					SpaceToNullStringFixed<31>(m_szNames[nSmp]);
 
 					if(LittleEndianW(smpchunk->pan) > 0x7FFF || LittleEndianW(smpchunk->volume) > 0x7FFF)
 						break;
