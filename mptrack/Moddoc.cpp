@@ -113,6 +113,8 @@ CModDoc::CModDoc()
 	time(&m_creationTime);
 	m_FileHistory.clear();
 
+	m_bsInstrumentModified.reset();
+
 #ifdef _DEBUG
 	MODCHANNEL *p = m_SndFile.Chn;
 	if (((DWORD)p) & 7) Log("MODCHANNEL is not aligned (0x%08X)\n", p);
@@ -463,8 +465,13 @@ BOOL CModDoc::SaveModified()
 
 		bool unsavedInstrument = false;
 
-		for(UINT i = 0 ; i < m_SndFile.m_nInstruments ; i++){
-			if(m_SndFile.instrumentModified[i]) { unsavedInstrument = true; break; }
+		for(INSTRUMENTINDEX i = 0 ; i < m_SndFile.GetNumInstruments() ; i++)
+		{
+			if(m_bsInstrumentModified[i])
+			{
+				unsavedInstrument = true;
+				break; 
+			}
 		}
 
 		if(unsavedInstrument && ::MessageBox(NULL,"Do you want to save modified instruments?",NULL,MB_ICONQUESTION | MB_YESNO | MB_APPLMODAL) == IDYES){
@@ -905,7 +912,7 @@ UINT CModDoc::PlayNote(UINT note, UINT nins, UINT nsmp, BOOL bpause, LONG nVol, 
 		if (nVol >= 0) pChn->nVolume = nVol;
 		
 		// handle sample looping.
-		// Fix: Bug report 1700.
+		// Changed line to fix http://forum.openmpt.org/index.php?topic=1700.0
 		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pChn->nLength)) 	{
 		if ((loopstart + 16 < loopend) && (loopstart >= 0) && (pChn->pModSample != nullptr))
 		{
@@ -3332,7 +3339,7 @@ void CModDoc::OnPatternRestart()
 		END_CRITICAL();
 		
 		// set playback timer in the status bar
-		SetElapsedTime(nOrd, nRow);
+		SetElapsedTime(nOrd, 0);
 
 		if (pModPlaying != this)
 		{
