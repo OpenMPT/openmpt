@@ -671,7 +671,8 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 					if(pModDoc->GetSoundFile() && pModDoc->GetSoundFile()->GetModSpecifications().supportsPlugins)
 						CMainFrame::GetMainFrame()->ThreadSafeSetModified(pModDoc);
 				}
-				//Could be used to update general tab in real time, but causes flickers in treeview
+				// Could be used to update general tab in real time, but causes flickers in treeview
+				// Better idea: add an update hint just for plugin params?
 				//pModDoc->UpdateAllViews(NULL, HINT_MIXPLUGINS, NULL);   
 			}
 
@@ -789,7 +790,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 				timeInfo.timeSigDenominator = 4; //gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
 		}
-		return (VstIntPtr)&timeInfo;
+		return ToVstPtr(&timeInfo);
 	}
 	// VstEvents* in <ptr>
 	// We don't support plugs that send VSTEvents to the host
@@ -891,7 +892,7 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		// Not entirely sure what this means. We can write automation TO the plug. 
 		// Is that "read" in this context?
 		//Log("VST plugin to host: Get Automation State\n");
-		return 2;
+		return kVstAutomationRead;
 
 	case audioMasterOfflineStart:				
 		Log("VST plugin to host: Offlinestart\n");
@@ -972,8 +973,8 @@ VstIntPtr CVstPluginManager::VstCallback(AEffect *effect, VstInt32 opcode, VstIn
 		break;
 	// get plug directory, FSSpec on MAC, else char*
 	case audioMasterGetDirectory:
-		Log("VST plugin to host: Get Directory\n");
-		break;
+		//Log("VST plugin to host: Get Directory\n");
+		return ToVstPtr(CMainFrame::GetDefaultDirectory(DIR_PLUGINS));
 	// something has changed, update 'multi-fx' display
 	case audioMasterUpdateDisplay:
 		if (effect && effect->resvd1)
@@ -1064,13 +1065,13 @@ VstIntPtr CVstPluginManager::VstFileSelector(const bool destructor, VstFileSelec
 				VstFileType *pType = &(pFileSel->fileTypes[i]);
 				extensions += pType->name;
 				extensions += "|";
-#if (defined(WIN32) || defined(WINDOWS))
+#if (defined(WIN32) || (defined(WINDOWS) && WINDOWS == 1))
 				extensions += "*.";
 				extensions += pType->dosType;
-#elif defined(MAC)
+#elif defined(MAC) && MAC == 1
 				extensions += "*";
 				extensions += pType->macType;
-#elif defined(UNIX)
+#elif defined(UNIX) && UNIX == 1
 				extensions += "*.";
 				extensions += pType->unixType;
 #else
@@ -1315,7 +1316,7 @@ typedef struct _PROBLEMATIC_PLUG
 } _PROBLEMATIC_PLUG, *PPROBLEMATIC_PLUG;
 
 //TODO: Check whether the list is still valid.
-#define NUM_PROBLEMPLUGS 3
+#define NUM_PROBLEMPLUGS 2
 static _PROBLEMATIC_PLUG gProblemPlugs[NUM_PROBLEMPLUGS] =
 {
 	{kEffectMagic, CCONST('N', 'i', '4', 'S'), 1, "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5.  *"},
@@ -1762,7 +1763,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	//rewbs.VSTcompliance
 	//Store a pointer so we can get the CVstPlugin object from the basic VST effect object.
 	//Assuming 32bit address space...
-    m_pEffect->resvd1=(VstIntPtr)this;
+    m_pEffect->resvd1=ToVstPtr(this);
 	//rewbs.plugDocAware
 	m_pSndFile = pSndFile;
 	m_pModDoc = pSndFile->GetpModDoc();
@@ -1770,7 +1771,8 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 	//end rewbs.plugDocAware
 
 	Dispatch(effOpen, 0, 0, NULL, 0);
-	m_bIsVst2 = (CVstPlugin::Dispatch(effGetVstVersion, 0,0, NULL, 0) >= 2) ? TRUE : FALSE;
+	// VST 2.0 plugins return 2 here, VST 2.4 plugins return 2400... Great!
+	m_bIsVst2 = (CVstPlugin::Dispatch(effGetVstVersion, 0,0, NULL, 0) >= 2) ? true : false;
     if (m_bIsVst2)
 	{
 		// Set VST speaker in/out setup to Stereo. Required for some plugins (possibly all VST 2.4+ plugins?)
@@ -1802,7 +1804,7 @@ void CVstPlugin::Initialize(CSoundFile* pSndFile)
 			}
 		} 
 		// For now, input setup = output setup.
-		Dispatch(effSetSpeakerArrangement, 0, (VstIntPtr)(&sa), &sa, 0.0f);
+		Dispatch(effSetSpeakerArrangement, 0, ToVstPtr(&sa), &sa, 0.0f);
 
 		// Dummy pin properties collection. 
 		// We don't use them but some plugs might do inits in here.
@@ -2302,18 +2304,20 @@ void CVstPlugin::Resume()
 }
 
 void CVstPlugin::Suspend() 
+//------------------------
 {
 	try {
 		Dispatch(effStopProcess, 0, 0, NULL, 0.0f);
 		Dispatch(effMainsChanged, 0, 0, NULL, 0.0f); // calls plugin's suspend
 		m_bPlugResumed=false;
 	} catch (...) {
-		CVstPluginManager::ReportPlugException("Exception in Resume() (Plugin=%s)\n", m_pFactory->szLibraryName);
+		CVstPluginManager::ReportPlugException("Exception in Suspend() (Plugin=%s)\n", m_pFactory->szLibraryName);
 	}
 }
 
 
 void CVstPlugin::ProcessVSTEvents()
+//---------------------------------
 {
 	// Process VST events
 	if ((m_pEffect) && (m_pEffect->dispatcher) && (m_pEvList) && (m_pEvList->numEvents > 0))
@@ -2351,8 +2355,9 @@ void CVstPlugin::RecalculateGain()
 }
 
 
-void CVstPlugin::SetDryRatio(UINT param) {
-//----------------------------------------
+void CVstPlugin::SetDryRatio(UINT param)
+//--------------------------------------
+{
 	param = min(param, 127);
 	m_pMixStruct->fDryRatio = 1.0-(static_cast<float>(param)/127.0f);
 }
